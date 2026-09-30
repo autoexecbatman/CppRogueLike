@@ -168,3 +168,81 @@ TEST_F(TurnUndeadTest, OneRollIsReadAgainstEveryType)
 	ASSERT_EQ(report.resisted.size(), 1u);
 	EXPECT_EQ(report.resisted.front(), &spectre);
 }
+
+// The book caps a successful turn at 2d6 undead however many are present.
+TEST_F(TurnUndeadTest, TheTwoDSixCapLimitsHowManyAreAffected)
+{
+	constexpr int skeletons = 4;
+	for (int placed = 0; placed < skeletons; ++placed)
+	{
+		add_undead(1, Vector2D{ 6, 4 + placed });
+	}
+	force_next_roll(10); // the d20
+	force_next_roll(2); // 2d6: only two of the four may be affected
+
+	const TurnUndeadReport report = turn_undead(*player, ctx);
+
+	EXPECT_EQ(report.destroyed.size(), 2u) << "the 2d6 cap did not bind";
+	EXPECT_EQ(report.resisted.size(), 2u) << "the undead past the cap were not left alone";
+}
+
+// "If the undead are a mixed group, the lowest Hit Dice creatures are turned
+// first." The wight is placed first, so only the sort can put the skeleton ahead
+// of it.
+TEST_F(TurnUndeadTest, TheWeakestAreAffectedFirstWhenTheCapBinds)
+{
+	Creature& wight = add_undead(5, Vector2D{ 6, 5 });
+	Creature& skeleton = add_undead(1, Vector2D{ 4, 5 });
+	force_next_roll(20); // clears every target number in play
+	force_next_roll(1); // 2d6: one undead only
+
+	const TurnUndeadReport report = turn_undead(*player, ctx);
+
+	ASSERT_EQ(report.destroyed.size(), 1u);
+	EXPECT_EQ(report.destroyed.front(), &skeleton) << "the tougher undead was taken first";
+	ASSERT_EQ(report.resisted.size(), 1u);
+	EXPECT_EQ(report.resisted.front(), &wight);
+}
+
+// The far edge of the priest's reach is inside it. Without this the range check
+// is only ever tested from beyond, where an off-by-one reads as correct.
+TEST_F(TurnUndeadTest, UndeadAtTheEdgeOfRangeIsAffected)
+{
+	Creature& skeleton = add_undead(1, Vector2D{ 5 + TURN_UNDEAD_RANGE, 5 });
+	force_next_roll(20);
+	force_next_roll(6);
+
+	const TurnUndeadReport report = turn_undead(*player, ctx);
+
+	ASSERT_EQ(report.destroyed.size(), 1u);
+	EXPECT_EQ(report.destroyed.front(), &skeleton) << "the edge of the range was treated as outside it";
+}
+
+// A body on the floor is not turned again, and does not spend one of the 2d6.
+TEST_F(TurnUndeadTest, AlreadyDeadUndeadAreSkipped)
+{
+	Creature& corpse = add_undead(1, Vector2D{ 6, 5 });
+	corpse.set_hp(0);
+	Creature& standing = add_undead(1, Vector2D{ 4, 5 });
+	force_next_roll(20);
+	force_next_roll(1); // 2d6: one undead only, which the corpse would spend
+
+	const TurnUndeadReport report = turn_undead(*player, ctx);
+
+	ASSERT_EQ(report.destroyed.size(), 1u);
+	EXPECT_EQ(report.destroyed.front(), &standing) << "a corpse was counted against the cap";
+}
+
+// "If the number rolled is equal to or greater than that listed, the attempt is
+// successful." A wight needs a 4 at level 7, and a 4 is enough.
+TEST_F(TurnUndeadTest, ARollEqualToTheNumberNeededSucceeds)
+{
+	Creature& wight = add_undead(5, Vector2D{ 6, 5 });
+	force_next_roll(4); // exactly the number the table lists
+	force_next_roll(6);
+
+	const TurnUndeadReport report = turn_undead(*player, ctx);
+
+	ASSERT_EQ(report.turned.size(), 1u) << "meeting the number was read as falling short";
+	EXPECT_EQ(report.turned.front(), &wight);
+}

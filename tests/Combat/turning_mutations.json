@@ -1,0 +1,89 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=TurningTableTest.*:TurnUndeadTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/TurningTable.h",
+      "original": "\t1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, TURNING_MAX_PRIEST_LEVEL\n",
+      "mutated": "\t1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, TURNING_MAX_PRIEST_LEVEL\n",
+      "catches": "a column heading read one level early, which is the defect this table was rewritten for"
+    },
+    {
+      "file": "src/TurningTable.h",
+      "original": "\t\tif (TURNING_COLUMN_FIRST_LEVEL[candidate] <= priestLevel)\n",
+      "mutated": "\t\tif (TURNING_COLUMN_FIRST_LEVEL[candidate] < priestLevel)\n",
+      "catches": "a priest reading the column below the one their level heads"
+    },
+    {
+      "file": "src/TurningTable.h",
+      "original": "\t/*  5 HD */ { 20, 19, 16, 13, 10, 7, 4, -2, -2, -3, -3, -3 },\n",
+      "mutated": "\t/*  5 HD */ { 19, 19, 16, 13, 10, 7, 4, -2, -2, -3, -3, -3 },\n",
+      "catches": "a single mistranscribed cell of the printed page"
+    },
+    {
+      "file": "src/TurningTable.h",
+      "original": "\t\treturn TurningResult{ TurningOutcome::ALWAYS_TURNED, 0 };\n",
+      "mutated": "\t\treturn TurningResult{ TurningOutcome::DESTROYED, 0 };\n",
+      "catches": "the book's \"T\" destroying the undead instead of driving it off"
+    },
+    {
+      "file": "src/TurningTable.h",
+      "original": "\tif (priestLevel < 1)\n",
+      "mutated": "\tif (priestLevel < 0)\n",
+      "catches": "a level 0 character turning undead"
+    },
+    {
+      "file": "src/TurnUndead.cpp",
+      "original": "\t\t{ return left->get_hit_dice() < right->get_hit_dice(); });\n",
+      "mutated": "\t\t{ return left->get_hit_dice() > right->get_hit_dice(); });\n",
+      "catches": "the toughest undead taken first, where the book turns the weakest"
+    },
+    {
+      "file": "src/TurnUndead.cpp",
+      "original": "\t\t--affectedRemaining;\n",
+      "mutated": "",
+      "catches": "a turn affecting every undead present, ignoring the 2d6 cap"
+    },
+    {
+      "file": "src/TurnUndead.cpp",
+      "original": "\t\tif (priest.get_tile_distance(creature->position) > TURN_UNDEAD_RANGE)\n",
+      "mutated": "\t\tif (priest.get_tile_distance(creature->position) >= TURN_UNDEAD_RANGE)\n",
+      "catches": "the far edge of the priest's reach treated as out of reach"
+    },
+    {
+      "file": "src/TurnUndead.cpp",
+      "original": "\t\tif (!creature->is_undead() || creature->is_dead())\n",
+      "mutated": "\t\tif (!creature->is_undead())\n",
+      "catches": "a corpse spending one of the 2d6 a standing undead needed"
+    },
+    {
+      "file": "src/TurnUndead.cpp",
+      "original": "\t\t\t|| (result.outcome == TurningOutcome::ROLL_REQUIRED && report.roll < result.rollNeeded))\n",
+      "mutated": "\t\t\t|| (result.outcome == TurningOutcome::ROLL_REQUIRED && report.roll <= result.rollNeeded))\n",
+      "catches": "a roll that equals the number needed read as falling short"
+    },
+    {
+      "file": "src/TurnUndead.cpp",
+      "original": "\t\tundead->add_state(ActorState::IS_FLEEING);\n",
+      "mutated": "",
+      "catches": "a turned undead standing its ground"
+    },
+    {
+      "file": "src/TurnUndead.cpp",
+      "original": "\treport.attempted = true;\n",
+      "mutated": "",
+      "catches": "a cleric's attempt reported as never made"
+    },
+    {
+      "file": "src/TurnUndead.cpp",
+      "original": "\t\t\tundead->take_damage_and_check_death(undead->get_hp(), ctx, DamageType::MAGIC);\n",
+      "mutated": "\t\t\tundead->take_damage_and_check_death(1, ctx, DamageType::MAGIC);\n",
+      "catches": "a \"D\" result grazing the undead rather than destroying it"
+    }
+  ]
+}

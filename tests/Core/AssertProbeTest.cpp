@@ -26,11 +26,11 @@
 //   cmake --build build --config Debug --target test_exe
 //   cd build/bin/Debug && ./test_exe.exe --gtest_filter=AssertProbeDeathTest.*
 //
-//   [==========] Running 11 tests from 1 test suite.
+//   [==========] Running 15 tests from 1 test suite.
 //   [ RUN      ] AssertProbeDeathTest.WearingNothingAborts
 //   [       OK ] AssertProbeDeathTest.WearingNothingAborts (69 ms)
 //   ...
-//   [  PASSED  ] 11 tests.
+//   [  PASSED  ] 15 tests.
 //
 // A green run here says every probe died with the right message. It does not
 // say the probes have teeth - for that, tests/assert_probes.ps1 deletes each
@@ -41,6 +41,7 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include "src/Creature.h"
 #include "src/Player.h"
@@ -58,6 +59,7 @@
 #include "src/MonsterCreator.h"
 #include "src/ShopkeeperFactory.h"
 #include "src/SpellSystem.h"
+#include "src/TurnUndead.h"
 #include "tests/mocks/MockGameContext.h"
 
 // GoogleTest runs any suite whose name ends in DeathTest before the others, so
@@ -255,4 +257,22 @@ TEST_F(AssertProbeDeathTest, RegeneratingWithMoreFireAndAcidThanDamageAborts)
 	pool.set_unregenerable_damage(5);
 
 	EXPECT_DEATH([[maybe_unused]] const int healed = pool.regenerate(1), "more fire and acid damage than damage");
+}
+
+// Turning walks the whole creature list looking for undead, and the list owns
+// every entry it holds. A null there is a container that stopped owning its
+// contents, which the walk would find by dereferencing it.
+TEST_F(AssertProbeDeathTest, TurningWithANullInTheCreatureListAborts)
+{
+	// Only a cleric reaches the walk; anything else is refused before it.
+	std::unique_ptr<Player> priest = std::make_unique<Player>(Vector2D{ 1, 1 });
+	priest->playerClassState = Player::PlayerClassState::CLERIC;
+	ctx.playerOwner = &priest;
+
+	std::vector<std::unique_ptr<Creature>> creatures{};
+	creatures.push_back(nullptr);
+	ctx.creatures = &creatures;
+
+	EXPECT_DEATH([[maybe_unused]] const TurnUndeadReport report = turn_undead(*priest, ctx),
+		"turn_undead: creatures list holds a null entry");
 }

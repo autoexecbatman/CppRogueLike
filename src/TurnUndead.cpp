@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 
 #include "Creature.h"
 #include "Player.h"
@@ -42,7 +43,7 @@ TurnUndeadReport turn_undead(Creature& priest, GameContext& ctx)
 	std::vector<Creature*> candidates{};
 	for (const auto& creature : *ctx.creatures)
 	{
-		assert(creature && "creatures list holds a null entry");
+		assert(creature && "turn_undead: creatures list holds a null entry");
 
 		if (!creature->is_undead() || creature->is_dead())
 		{
