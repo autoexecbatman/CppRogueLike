@@ -11,26 +11,27 @@
 #include <nlohmann/json_fwd.hpp>
 
 #include "Actor.h"
-#include "InventoryOperations.h"
-#include "Player.h"
+#include "BodyPlanRegistry.h"
 #include "Colors.h"
-#include "GameContext.h"
-#include "Paths.h"
-#include "Gui.h"
-#include "DungeonRoom.h"
-#include "Map.h"
-#include "Renderer.h"
-#include "DataManager.h"
-#include "HungerSystem.h"
-#include "LevelManager.h"
-#include "MenuManager.h"
-#include "MessageSystem.h"
-#include "Vector2D.h"
 #include "ContentRegistry.h"
 #include "ContentRegistryIO.h"
+#include "DataManager.h"
+#include "DungeonRoom.h"
+#include "GameContext.h"
 #include "GameStateManager.h"
+#include "Gui.h"
+#include "HungerSystem.h"
+#include "InventoryOperations.h"
+#include "LevelManager.h"
+#include "Map.h"
+#include "MenuManager.h"
+#include "MessageSystem.h"
+#include "Paths.h"
+#include "Player.h"
+#include "Renderer.h"
 #include "TileConfig.h"
-#include "BodyPlanRegistry.h"
+#include "UniqueId.h"
+#include "Vector2D.h"
 
 using json = nlohmann::json;
 using namespace InventoryOperations;
@@ -212,6 +213,9 @@ void GameStateManager::save_game(GameContext& ctx)
 		ctx.levelManager->save_to_json(j);
 		j["time"] = ctx.gameState->get_time();
 
+		// Last, because every save above may still have been issuing ids.
+		UniqueId::save(j);
+
 		file << j.dump(4);
 	}
 
@@ -254,6 +258,10 @@ bool GameStateManager::load_game(GameContext& ctx)
 	}
 
 	load_creatures(j, *ctx.creatures);
+
+	// After every actor is built, because building one issues an id that its own
+	// saved id then overwrites - so the counter has to be put back afterwards.
+	UniqueId::load(j);
 	load_inventory(*ctx.floorInventory, j);
 
 	if (j.contains("gui"))

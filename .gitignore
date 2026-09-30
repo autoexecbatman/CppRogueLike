@@ -430,3 +430,8 @@ CMakeSettings.json
 # The Telegram assistant's mailbox for this project. Notes it leaves about
 # the game land here; they are working notes, not part of the source.
 /relay/
+
+# Deferred fixes, one file per issue, opened when work is found and not done in
+# the task that found it. Working notes for whoever picks the repository up next,
+# not part of the source.
+/issues/

@@ -3,6 +3,8 @@
 #include <atomic>
 #include <cstdint>
 
+#include <nlohmann/json_fwd.hpp>
+
 // - Unique ID system for game objects
 namespace UniqueId
 {
@@ -34,4 +36,22 @@ public:
 
 // Invalid/null ID constant
 constexpr IdType INVALID_ID = 0;
+
+// Writes the counter into a save, and reads it back out.
+//
+// A load builds every actor before overwriting its id from the file, so it burns one
+// id per surviving actor and throws them away. That leaves the counter below the ids
+// the save restored, because anything destroyed during play issued an id that no
+// longer belongs to anybody. Without this the next object created after a load takes
+// an id some live actor already holds.
+//
+// Example:
+//
+//   nlohmann::json saved;
+//   UniqueId::save(saved);              // stores where the counter stands
+//   // ... process restarts, counter is back at 1 ...
+//   UniqueId::load(saved);              // resumes from the stored value
+//   UniqueId::Generator::generate();    // -> higher than any id the save holds
+void save(nlohmann::json& j);
+void load(const nlohmann::json& j);
 } // namespace UniqueId

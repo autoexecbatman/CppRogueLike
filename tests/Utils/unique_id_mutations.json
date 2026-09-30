@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=UniqueIdTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/UniqueId.cpp",
+      "original": "\tj[\"nextUniqueId\"] = Generator::peek_next_id();\n",
+      "mutated": "",
+      "catches": "a save that does not carry the counter, so a load resumes below the ids it restored"
+    },
+    {
+      "file": "src/UniqueId.cpp",
+      "original": "\tGenerator::set_next_id(std::max(stored, Generator::peek_next_id()));\n",
+      "mutated": "\tGenerator::set_next_id(stored);\n",
+      "catches": "an older save sending the counter back over ids already in use"
+    },
+    {
+      "file": "src/UniqueId.cpp",
+      "original": "\tif (!j.contains(\"nextUniqueId\"))\n",
+      "mutated": "\tif (j.contains(\"nextUniqueId\"))\n",
+      "catches": "the stored counter ignored on every save that has one"
+    },
+    {
+      "file": "src/UniqueId.h",
+      "original": "\t\treturn nextId.fetch_add(1, std::memory_order_relaxed);\n",
+      "mutated": "\t\treturn nextId.fetch_add(0, std::memory_order_relaxed);\n",
+      "catches": "every object sharing one id, which is identity collapsing entirely"
+    },
+    {
+      "file": "src/UniqueId.h",
+      "original": "\t\tnextId.store(id, std::memory_order_release);\n",
+      "mutated": "",
+      "catches": "a counter that cannot be set, so no save can ever resume it"
+    }
+  ]
+}
