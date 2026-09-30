@@ -10,39 +10,39 @@
 #include <variant>
 
 #include "Actor.h"
-#include "PlayerAttacker.h"
+#include "Ai.h"
+#include "BuffSystem.h"
+#include "BuffType.h"
+#include "Colors.h"
+#include "CombatProgressionTables.h"
+#include "DisplayManager.h"
 #include "EquipmentSlot.h"
 #include "ExperienceReward.h"
-#include "HealthPool.h"
-#include "InventoryOperations.h"
-#include "Pickable.h"
-#include "Ai.h"
-#include "Colors.h"
-#include "GameContext.h"
-#include "CombatProgressionTables.h"
+#include "FloatingTextSystem.h"
 #include "GameBalance.h"
-#include "ItemCreator.h"
+#include "GameContext.h"
+#include "GameStateManager.h"
+#include "HealthPool.h"
+#include "HungerSystem.h"
+#include "InventoryOperations.h"
 #include "ItemClassification.h"
+#include "ItemCreator.h"
 #include "ItemIdentification.h"
 #include "Map.h"
 #include "MenuThiefSkills.h"
-#include "Web.h"
+#include "MessageSystem.h"
+#include "NotificationMenu.h"
 #include "Persistent.h"
+#include "Pickable.h"
+#include "Player.h"
+#include "PlayerAttacker.h"
 #include "RandomDice.h"
 #include "Renderer.h"
-#include "BuffSystem.h"
-#include "FloatingTextSystem.h"
-#include "BuffType.h"
-#include "DisplayManager.h"
-#include "GameStateManager.h"
-#include "HungerSystem.h"
-#include "MessageSystem.h"
 #include "RenderingManager.h"
-#include "NotificationMenu.h"
 #include "SpellSystem.h"
 #include "Vector2D.h"
-#include "Player.h"
 #include "WeaponDamageRegistry.h"
+#include "Web.h"
 
 // XP table helpers — pure functions, no state
 namespace
@@ -51,10 +51,14 @@ template <std::size_t N>
 constexpr int calculate_xp_for_level(int level, const std::array<int, N>& xpTable, int linearProgression) noexcept
 {
 	if (level <= 0)
+	{
 		return xpTable[0];
+	}
 
 	if (level < static_cast<int>(xpTable.size()))
+	{
 		return xpTable[level];
+	}
 
 	const int maxLevel = static_cast<int>(xpTable.size()) - 1;
 	return xpTable[maxLevel] + (level - maxLevel) * linearProgression;
@@ -91,7 +95,7 @@ constexpr int calculate_wizard_xp(int level) noexcept
 	};
 	return calculate_xp_for_level(level, wizard_xp, 125000);
 }
-} // namespace (xp helpers)
+} // namespace
 
 Player::Player(Vector2D position)
 	: Creature(position, ActorData{ TileRef{}, "Player", ColorPairId::WHITE_BLACK })
@@ -132,7 +136,6 @@ std::string_view Player::sprite_tile_key() const noexcept
 	{
 		return "TILE_PLAYER";
 	}
-
 	}
 
 	return "TILE_PLAYER";
@@ -356,7 +359,6 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 	{
 		break;
 	}
-
 	}
 }
 std::array<int, ABILITY_COUNT> racial_ability_modifiers(Player::PlayerRaceState race)
@@ -467,7 +469,6 @@ void Player::calculate_thaco()
 	{
 		break;
 	}
-
 	}
 }
 
@@ -656,9 +657,11 @@ void Player::animate_resting(GameContext& ctx)
 	const bool big = (get_max_hp() - get_hp()) < 5;
 	const std::string symbol = big ? "Z" : "z";
 	ctx.floatingText->spawn_text(
-		Vector2D{ position.x, position.y - 1 },   // a row above the sleeper
+		Vector2D{ position.x, position.y - 1 }, // a row above the sleeper
 		symbol,
-		200, 230, 200,
+		200,
+		230,
+		200,
 		1.2f);
 	ctx.renderingManager->render(ctx);
 }
@@ -865,7 +868,6 @@ int Player::get_next_level_xp() const
 	{
 		return 2000 * currentLevel;
 	}
-
 	}
 }
 

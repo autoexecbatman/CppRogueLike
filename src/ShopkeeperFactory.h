@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include "Vector2D.h"
 #include "ShopKeeper.h"
+#include "Vector2D.h"
 
 // Forward declarations
 class Creature;

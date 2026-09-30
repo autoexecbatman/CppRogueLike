@@ -58,14 +58,12 @@ struct ArmorColumnEntry
 // Every armour the book gives a column to, by the key items.json holds it under.
 // Elven chain has no record yet; anything heavier than chain mail has no column,
 // which is also armour the book does not let a thief wear.
-constexpr std::array<ArmorColumnEntry, 6> ARMOR_COLUMN_BY_KEY{ {
-	{ "leather_armor", ThiefArmor::LEATHER },
+constexpr std::array<ArmorColumnEntry, 6> ARMOR_COLUMN_BY_KEY{ { { "leather_armor", ThiefArmor::LEATHER },
 	{ "padded_armor", ThiefArmor::PADDED_OR_ELVEN_CHAIN },
 	{ "studded_leather", ThiefArmor::HIDE_OR_STUDDED_LEATHER },
 	{ "hide_armor", ThiefArmor::HIDE_OR_STUDDED_LEATHER },
 	{ "chain_mail", ThiefArmor::CHAIN_OR_RING_MAIL },
-	{ "ring_mail", ThiefArmor::CHAIN_OR_RING_MAIL }
-} };
+	{ "ring_mail", ThiefArmor::CHAIN_OR_RING_MAIL } } };
 
 // The five with a Dexterity column are the first five of the enum, which is what
 // lets one index answer for both. Reordering the enum has to move the table too.
@@ -193,11 +191,7 @@ int thief_skill_score(
 	int pointsSpent)
 {
 	// The base, then the three tables, then what the player bought.
-	const int total = thief_skill_base(skill)
-		+ racialAdjustment
-		+ thief_skill_dexterity_adjustment(skill, dexterity)
-		+ thief_skill_armor_adjustment(skill, armor)
-		+ pointsSpent;
+	const int total = thief_skill_base(skill) + racialAdjustment + thief_skill_dexterity_adjustment(skill, dexterity) + thief_skill_armor_adjustment(skill, armor) + pointsSpent;
 
 	// A skill the adjustments push below zero is one the thief does not yet have.
 	return std::clamp(total, 0, THIEF_SKILL_MAXIMUM);
@@ -219,12 +213,7 @@ ThiefSkillAllocation::ThiefSkillAllocation(
 	std::array<int, THIEF_SKILL_COUNT> raceAdjustment,
 	int characterDexterity,
 	ThiefArmor wornArmor)
-	: alreadySpent{ pointsAlreadySpent }
-	, racialAdjustment{ raceAdjustment }
-	, dexterity{ characterDexterity }
-	, armor{ wornArmor }
-	, remaining{ grant.points }
-	, perSkillLimit{ grant.perSkillLimit }
+	: alreadySpent{ pointsAlreadySpent }, racialAdjustment{ raceAdjustment }, dexterity{ characterDexterity }, armor{ wornArmor }, remaining{ grant.points }, perSkillLimit{ grant.perSkillLimit }
 {
 	assert(grant.points >= 0 && "ThiefSkillAllocation: a grant cannot be negative");
 	assert(grant.perSkillLimit >= 0 && "ThiefSkillAllocation: a per-skill limit cannot be negative");

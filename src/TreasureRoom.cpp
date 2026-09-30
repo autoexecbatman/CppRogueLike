@@ -13,85 +13,91 @@
 #include <vector>
 
 #include "Creature.h"
-#include "InventoryOperations.h"
+#include "DungeonNames.h"
+#include "DungeonRoom.h"
 #include "GameContext.h"
+#include "InventoryOperations.h"
 #include "ItemCreator.h"
 #include "ItemFactory.h"
+#include "LevelManager.h"
+#include "Map.h"
+#include "MessageSystem.h"
 #include "MonsterCreator.h"
 #include "MonsterRegistry.h"
 #include "RandomDice.h"
-#include "LevelManager.h"
-#include "MessageSystem.h"
-#include "Vector2D.h"
-#include "DungeonNames.h"
-#include "DungeonRoom.h"
-#include "Map.h"
 #include "TileType.h"
 #include "TreasureRoom.h"
+#include "Vector2D.h"
 
 namespace
 {
-	// Whether `target` can be reached from `start` without crossing a locked
-	// door or a wall. A jailer must spawn on the corridor side of the door it
-	// guards, so a spawn that fails this is in a pocket of its own.
-	bool is_reachable_without_locked_doors(
-		Vector2D start,
-		Vector2D target,
-		const Map& map)
+// Whether `target` can be reached from `start` without crossing a locked
+// door or a wall. A jailer must spawn on the corridor side of the door it
+// guards, so a spawn that fails this is in a pocket of its own.
+bool is_reachable_without_locked_doors(
+	Vector2D start,
+	Vector2D target,
+	const Map& map)
+{
+	if (start == target)
 	{
-		if (start == target)
+		return true;
+	}
+
+	// Use a flat visited array sized to the known map extents.
+	const int width = map.get_width();
+	const int height = map.get_height();
+	std::vector<bool> visited(static_cast<size_t>(width) * height, false);
+
+	auto mark = [&](Vector2D pos)
+	{
+		visited[static_cast<size_t>(pos.y) * width + pos.x] = true;
+	};
+	auto was_visited = [&](Vector2D pos) -> bool
+	{
+		return visited[static_cast<size_t>(pos.y) * width + pos.x];
+	};
+	auto can_traverse = [&](Vector2D pos) -> bool
+	{
+		if (!map.is_in_bounds(pos))
+		{
+			return false;
+		}
+		if (map.is_door_locked(pos))
+		{
+			return false;
+		}
+		return map.get_tile_type(pos) != TileType::WALL;
+	};
+
+	std::queue<Vector2D> frontier;
+	frontier.push(start);
+	mark(start);
+
+	while (!frontier.empty())
+	{
+		const Vector2D current = frontier.front();
+		frontier.pop();
+
+		if (current == target)
 		{
 			return true;
 		}
 
-		// Use a flat visited array sized to the known map extents.
-		const int width = map.get_width();
-		const int height = map.get_height();
-		std::vector<bool> visited(static_cast<size_t>(width) * height, false);
-
-		auto mark = [&](Vector2D pos)
+		for (Vector2D dir : { DIR_N, DIR_S, DIR_E, DIR_W, DIR_NE, DIR_NW, DIR_SE, DIR_SW })
 		{
-			visited[static_cast<size_t>(pos.y) * width + pos.x] = true;
-		};
-		auto was_visited = [&](Vector2D pos) -> bool
-		{
-			return visited[static_cast<size_t>(pos.y) * width + pos.x];
-		};
-		auto can_traverse = [&](Vector2D pos) -> bool
-		{
-			if (!map.is_in_bounds(pos)) return false;
-			if (map.is_door_locked(pos)) return false;
-			return map.get_tile_type(pos) != TileType::WALL;
-		};
-
-		std::queue<Vector2D> frontier;
-		frontier.push(start);
-		mark(start);
-
-		while (!frontier.empty())
-		{
-			const Vector2D current = frontier.front();
-			frontier.pop();
-
-			if (current == target)
+			const Vector2D next = current + dir;
+			if (!was_visited(next) && can_traverse(next))
 			{
-				return true;
-			}
-
-			for (Vector2D dir : { DIR_N, DIR_S, DIR_E, DIR_W, DIR_NE, DIR_NW, DIR_SE, DIR_SW })
-			{
-				const Vector2D next = current + dir;
-				if (!was_visited(next) && can_traverse(next))
-				{
-					mark(next);
-					frontier.push(next);
-				}
+				mark(next);
+				frontier.push(next);
 			}
 		}
-
-		return false;
 	}
+
+	return false;
 }
+} // namespace
 
 int TreasureRoom::count_entrances(const Map& map, const DungeonRoom& room)
 {
@@ -307,7 +313,7 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 
 	assert(
 		(ctx.stairs == nullptr ||
-		is_reachable_without_locked_doors(best->spawnPos, ctx.stairs->position, *ctx.map)) &&
+			is_reachable_without_locked_doors(best->spawnPos, ctx.stairs->position, *ctx.map)) &&
 		"TreasureRoom::setup_guard: reachability filter passed but assert disagrees");
 
 	auto jailer = MonsterCreator::create_from_params(
@@ -400,7 +406,6 @@ void TreasureRoom::create(
 		guardianCount = ctx.dice->roll(2, 3);
 		break;
 	}
-
 	}
 
 	for (int i = 0; i < guardianCount; i++)
@@ -477,9 +482,7 @@ bool TreasureRoom::maybe_create(int dungeonLevel, RandomDice& generationRng, Gam
 		return count_entrances(*ctx.map, room) == 1;
 	};
 
-	auto singleEntranceIndices = std::views::iota(1, static_cast<int>(ctx.rooms->size())) 
-		| std::views::filter(is_valid_treasure_room) 
-		| std::ranges::to<std::vector>();
+	auto singleEntranceIndices = std::views::iota(1, static_cast<int>(ctx.rooms->size())) | std::views::filter(is_valid_treasure_room) | std::ranges::to<std::vector>();
 
 	if (singleEntranceIndices.empty())
 	{

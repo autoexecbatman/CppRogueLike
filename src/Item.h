@@ -2,13 +2,13 @@
 #include <optional>
 #include <string>
 
+#include "Actor.h"
 #include "ItemClassification.h"
+#include "ItemEnhancements.h"
 #include "ItemIdentification.h"
 #include "Persistent.h"
-#include "ItemEnhancements.h"
-#include "Vector2D.h"
-#include "Actor.h"
 #include "Pickable.h"
+#include "Vector2D.h"
 
 class Item : public Actor
 {

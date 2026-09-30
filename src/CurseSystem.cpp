@@ -3,12 +3,12 @@
 
 #include <format>
 
-#include "Item.h"
-#include "Player.h"
 #include "DamageInfo.h"
 #include "GameContext.h"
+#include "Item.h"
 #include "ItemIdentification.h"
 #include "MessageSystem.h"
+#include "Player.h"
 
 // Emits "weakens your aim" notification for cursed weapons.
 void CurseSystem::apply_weapon_curse(const Item& item, GameContext& ctx)
@@ -67,31 +67,31 @@ void CurseSystem::apply_hp_drain(int damage, Player& player, GameContext& ctx)
 // Called once per NEW_TURN from GameLoopCoordinator::update().
 void CurseSystem::apply_curses(Player& player, GameContext& ctx)
 {
-    for (const auto& equipped : player.equippedItems)
-    {
-        if (!equipped.item)
-        {
-            continue;
-        }
+	for (const auto& equipped : player.equippedItems)
+	{
+		if (!equipped.item)
+		{
+			continue;
+		}
 
-        const Item& item = *equipped.item;
+		const Item& item = *equipped.item;
 
-        if (item.get_enhancement().blessing != BlessingStatus::CURSED)
-        {
-            continue;
-        }
+		if (item.get_enhancement().blessing != BlessingStatus::CURSED)
+		{
+			continue;
+		}
 
-        if (item.is_weapon())
-        {
-            apply_weapon_curse(item, ctx);
-        }
-        else if (item.is_armor())
-        {
-            apply_armor_curse(item, ctx);
-        }
-        else if (item.is_amulet())
-        {
-            apply_hp_drain(1, player, ctx);
-        }
-    }
+		if (item.is_weapon())
+		{
+			apply_weapon_curse(item, ctx);
+		}
+		else if (item.is_armor())
+		{
+			apply_armor_curse(item, ctx);
+		}
+		else if (item.is_amulet())
+		{
+			apply_hp_drain(1, player, ctx);
+		}
+	}
 }

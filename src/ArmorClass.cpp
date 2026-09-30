@@ -2,16 +2,16 @@
 #include <cassert>
 #include <format>
 
-#include "Creature.h"
-#include "EquipmentSlot.h"
-#include "Pickable.h"
-#include "DexterityAttributes.h"
-#include "Colors.h"
-#include "GameContext.h"
-#include "BuffSystem.h"
-#include "DataManager.h"
-#include "MessageSystem.h"
 #include "ArmorClass.h"
+#include "BuffSystem.h"
+#include "Colors.h"
+#include "Creature.h"
+#include "DataManager.h"
+#include "DexterityAttributes.h"
+#include "EquipmentSlot.h"
+#include "GameContext.h"
+#include "MessageSystem.h"
+#include "Pickable.h"
 
 ArmorClass::ArmorClass(int baseAC)
 	: armorClass(baseAC),

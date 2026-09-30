@@ -108,8 +108,7 @@ private:
 	// low half. Columns wrap at 65536, which no map approaches.
 	[[nodiscard]] static uint32_t make_key(Vector2D worldPosition) noexcept
 	{
-		return (static_cast<uint32_t>(worldPosition.y) << 16)
-			| static_cast<uint32_t>(worldPosition.x & 0xFFFF);
+		return (static_cast<uint32_t>(worldPosition.y) << 16) | static_cast<uint32_t>(worldPosition.x & 0xFFFF);
 	}
 
 	[[nodiscard]] std::unordered_map<uint32_t, TileRef>& current_map();

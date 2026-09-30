@@ -11,17 +11,17 @@
 
 class TileConfig;
 
-inline constexpr int SPRITE_SIZE = 16;       // DawnLike native sprite pixel size
-inline constexpr int DISPLAY_TILE_SIZE = 64;  // Default rendered tile size in pixels
+inline constexpr int SPRITE_SIZE = 16; // DawnLike native sprite pixel size
+inline constexpr int DISPLAY_TILE_SIZE = 64; // Default rendered tile size in pixels
 // The HUD's outer geometry, here rather than in Gui.cpp because two modules need
 // it: the renderer reserves room for the HUD, and the Gui fills it.
 //
 // Its rows run on a pitch of their own rather than on the map's tile grid. A tile
 // is as tall as the zoom makes it and a row of text is not, so a pitch measured in
 // tiles puts most of a row on nothing at one zoom and overlaps at the next.
-inline constexpr int UI_TEXT_ROW_PITCH = 32;   // Pixels between the tops of two rows of UI text
-inline constexpr int GUI_TEXT_TOP_INSET = 6;   // Gap below the frame's top edge before the first row
-inline constexpr int GUI_TEXT_ROWS = 6;        // Text rows the HUD lays out
+inline constexpr int UI_TEXT_ROW_PITCH = 32; // Pixels between the tops of two rows of UI text
+inline constexpr int GUI_TEXT_TOP_INSET = 6; // Gap below the frame's top edge before the first row
+inline constexpr int GUI_TEXT_ROWS = 6; // Text rows the HUD lays out
 
 // Top of one text row inside a panel whose frame begins at panelTopY. Row 0 sits
 // directly below the frame's top edge, which is one tile tall.
@@ -366,5 +366,4 @@ public:
 	[[nodiscard]] bool sheet_is_loaded(TileSheet sheet) const;
 	[[nodiscard]] std::string_view get_sheet_name(TileSheet sheet) const;
 	[[nodiscard]] int get_loaded_sheet_count() const;
-
 };

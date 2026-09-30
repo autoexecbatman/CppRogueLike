@@ -62,8 +62,7 @@ InventoryResult<bool> add_item_to_inventory(
 	CreatureInventory& inventory,
 	std::unique_ptr<Item> item,
 	const Creature& owner,
-	const DataManager& dataManager
-)
+	const DataManager& dataManager)
 {
 	if (!item)
 	{
@@ -91,10 +90,16 @@ InventoryResult<bool> add_item_to_inventory(
 
 InventoryResult<std::unique_ptr<Item>> remove_item(FloorInventory& inventory, const Item& item)
 {
-	[[maybe_unused]] auto is_null = [](const auto& stored) { return !stored; };
+	[[maybe_unused]] auto is_null = [](const auto& stored)
+	{
+		return !stored;
+	};
 	assert(std::ranges::none_of(inventory.items, is_null));
 
-	auto matches_item = [&item](const auto& stored) { return stored.get() == &item; };
+	auto matches_item = [&item](const auto& stored)
+	{
+		return stored.get() == &item;
+	};
 	auto matches = inventory.items | std::views::filter(matches_item);
 
 	if (std::ranges::empty(matches))
@@ -111,10 +116,16 @@ InventoryResult<std::unique_ptr<Item>> remove_item(FloorInventory& inventory, co
 
 InventoryResult<std::unique_ptr<Item>> remove_item(CreatureInventory& inventory, const Item& item)
 {
-	[[maybe_unused]] auto is_null = [](const auto& stored) { return !stored; };
+	[[maybe_unused]] auto is_null = [](const auto& stored)
+	{
+		return !stored;
+	};
 	assert(std::ranges::none_of(inventory.items, is_null));
 
-	auto matches_item = [&item](const auto& stored) { return stored.get() == &item; };
+	auto matches_item = [&item](const auto& stored)
+	{
+		return stored.get() == &item;
+	};
 	auto matches = inventory.items | std::views::filter(matches_item);
 
 	if (std::ranges::empty(matches))
@@ -163,10 +174,16 @@ InventoryResult<std::unique_ptr<Item>> remove_item_at(CreatureInventory& invento
 
 InventoryResult<std::unique_ptr<Item>> remove_item_by_id(CreatureInventory& inventory, uint64_t uniqueId)
 {
-	[[maybe_unused]] auto is_null = [](const auto& item) { return !item; };
+	[[maybe_unused]] auto is_null = [](const auto& item)
+	{
+		return !item;
+	};
 	assert(std::ranges::none_of(inventory.items, is_null));
 
-	auto matches_id = [uniqueId](const auto& item) { return item->uniqueId == uniqueId; };
+	auto matches_id = [uniqueId](const auto& item)
+	{
+		return item->uniqueId == uniqueId;
+	};
 	auto matches = inventory.items | std::views::filter(matches_id);
 
 	if (std::ranges::empty(matches))
@@ -224,8 +241,7 @@ bool is_overloaded(const Creature& owner, const DataManager& dataManager) noexce
 bool is_within_weight_limit(
 	const Item& item,
 	const Creature& owner,
-	const DataManager& dataManager
-) noexcept
+	const DataManager& dataManager) noexcept
 {
 	return get_total_weight(owner) + item.enhancement.weight <= get_max_weight(owner, dataManager);
 }
@@ -234,7 +250,10 @@ bool is_within_weight_limit(
 
 Item* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept
 {
-	[[maybe_unused]] auto is_null = [](const auto& item) { return !item; };
+	[[maybe_unused]] auto is_null = [](const auto& item)
+	{
+		return !item;
+	};
 	assert(std::ranges::none_of(inventory.items, is_null));
 
 	auto it = std::ranges::find_if(inventory.items,
@@ -248,7 +267,10 @@ Item* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept
 
 const Item* find_item_by_id(const CreatureInventory& inventory, uint64_t uniqueId) noexcept
 {
-	[[maybe_unused]] auto is_null = [](const auto& item) { return !item; };
+	[[maybe_unused]] auto is_null = [](const auto& item)
+	{
+		return !item;
+	};
 	assert(std::ranges::none_of(inventory.items, is_null));
 
 	auto it = std::ranges::find_if(inventory.items,

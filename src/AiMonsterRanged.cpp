@@ -4,18 +4,18 @@
 #include <functional>
 
 #include "Actor.h"
-#include "Attacker.h"
-#include "Creature.h"
+#include "AiMonster.h"
+#include "AiMonsterRanged.h"
+#include "AnimationSystem.h"
 #include "AttackKind.h"
+#include "Attacker.h"
 #include "BuffSystem.h"
+#include "Creature.h"
 #include "GameContext.h"
 #include "Map.h"
 #include "Persistent.h"
-#include "AnimationSystem.h"
 #include "TileConfig.h"
 #include "Vector2D.h"
-#include "AiMonster.h"
-#include "AiMonsterRanged.h"
 
 void AiMonsterRanged::update(Creature& owner, GameContext& ctx)
 {
@@ -108,7 +108,9 @@ void AiMonsterRanged::animate_arrow(Vector2D from, Vector2D to, GameContext& ctx
 		from,
 		to,
 		boltTile,
-		210, 180, 100,
+		210,
+		180,
+		100,
 		550.0f,
 		0.0f,
 		std::move(onArrive));

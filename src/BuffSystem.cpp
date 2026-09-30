@@ -5,9 +5,9 @@
 #include <unordered_set>
 #include <vector>
 
-#include "Creature.h"
 #include "BuffSystem.h"
 #include "BuffType.h"
+#include "Creature.h"
 #include "SavingThrow.h"
 
 // OCP: Data-driven buff state mapping - add new buffs here without modifying methods

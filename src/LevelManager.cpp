@@ -3,12 +3,12 @@
 
 #include <nlohmann/json.hpp>
 
-#include "Player.h"
 #include "Colors.h"
 #include "GameContext.h"
+#include "LevelManager.h"
 #include "Map.h"
 #include "MessageSystem.h"
-#include "LevelManager.h"
+#include "Player.h"
 
 void LevelManager::advance_to_next_level(GameContext& ctx)
 {

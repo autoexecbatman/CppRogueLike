@@ -8,71 +8,71 @@
 #include <memory>
 #include <optional>
 #include <queue>
-#include <set>
 #include <ranges>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include <raylib.h>
 
-#include "Creature.h"
-#include "InventoryOperations.h"
 #include "Colors.h"
-#include "GameContext.h"
-#include "ItemCreator.h"
-#include "ItemFactory.h"
-#include "MonsterCreator.h"
-#include "MonsterFactory.h"
-#include "Persistent.h"
-#include "RandomDice.h"
-#include "Renderer.h"
-#include "EncounterPlanner.h"
-#include "LevelManager.h"
-#include "MessageSystem.h"
-#include "TileConfig.h"
+#include "Creature.h"
 #include "DecorEditor.h"
-#include "PrefabLibrary.h"
-#include "Vector2D.h"
 #include "Decoration.h"
 #include "DungeonGenerator.h"
 #include "DungeonRoom.h"
+#include "EncounterPlanner.h"
 #include "FovMap.h"
+#include "GameContext.h"
+#include "InventoryOperations.h"
+#include "ItemCreator.h"
+#include "ItemFactory.h"
+#include "LevelManager.h"
 #include "Map.h"
-#include "TreasureRoom.h"
-#include "Trap.h"
+#include "MessageSystem.h"
+#include "MonsterCreator.h"
+#include "MonsterFactory.h"
+#include "Persistent.h"
+#include "PrefabLibrary.h"
+#include "RandomDice.h"
+#include "Renderer.h"
 #include "SpellTile.h"
+#include "TileConfig.h"
+#include "Trap.h"
+#include "TreasureRoom.h"
+#include "Vector2D.h"
 
 namespace
 {
-	struct FovProperties
-	{
-		bool walkable{};
-		bool transparent{};
-	};
+struct FovProperties
+{
+	bool walkable{};
+	bool transparent{};
+};
 
-	// Single source of truth for how each tile type maps onto the FOV grid.
-	// Used by both set_tile (runtime mutations) and Map::load (FOV rebuild).
-	FovProperties fov_properties_for(TileType type) noexcept
+// Single source of truth for how each tile type maps onto the FOV grid.
+// Used by both set_tile (runtime mutations) and Map::load (FOV rebuild).
+FovProperties fov_properties_for(TileType type) noexcept
+{
+	switch (type)
 	{
-		switch (type)
-		{
-		case TileType::FLOOR:
-		case TileType::CORRIDOR:
-		case TileType::OPEN_DOOR:
-		case TileType::WATER:
-		{
-			return { true, true };
-		}
-		case TileType::WALL:
-		case TileType::CLOSED_DOOR:
-		default:
-		{
-			return { false, false };
-		}
-		}
+	case TileType::FLOOR:
+	case TileType::CORRIDOR:
+	case TileType::OPEN_DOOR:
+	case TileType::WATER:
+	{
+		return { true, true };
+	}
+	case TileType::WALL:
+	case TileType::CLOSED_DOOR:
+	default:
+	{
+		return { false, false };
+	}
 	}
 }
+} // namespace
 
 //====
 Map::Map(int mapWidth, int mapHeight)
@@ -114,7 +114,7 @@ void Map::init_tiles()
 // for enabling loading the map from the file.
 void Map::init(GameContext& ctx)
 {
-	init_tiles();  // resets tiles + fovMap to all-walls
+	init_tiles(); // resets tiles + fovMap to all-walls
 	if (ctx.messageSystem)
 	{
 		ctx.messageSystem->log("Map::init: " + std::to_string(mapWidth) + "x" + std::to_string(mapHeight) + " tile grid reset");
@@ -676,7 +676,6 @@ void Map::render(const GameContext& ctx) const
 			{
 				continue;
 			}
-
 			}
 
 			ctx.renderer->draw_tile(Vector2D{ col, row }, tileRef, tint);
@@ -1176,7 +1175,7 @@ void Map::spawn_traps(const DungeonRoom& room, GameContext& ctx)
 	// ~30% of rooms get 0-2 random traps (was 10%)
 	if (ctx.dice->d10() > 3)
 	{
-		return;  // Room has no traps
+		return; // Room has no traps
 	}
 
 	// Room gets 1-2 random traps
@@ -1210,7 +1209,7 @@ void Map::spawn_traps(const DungeonRoom& room, GameContext& ctx)
 
 		if (!foundSpot)
 		{
-			continue;  // Couldn't find a valid spot for this trap
+			continue; // Couldn't find a valid spot for this trap
 		}
 
 		// Create trap (randomly choose type)
@@ -1419,8 +1418,7 @@ void Map::spawn_items(const DungeonRoom& room, GameContext& ctx)
 		constexpr int MAX_ITEM_TRIES = 20;
 		int itemTries = 0;
 		while (itemTries < MAX_ITEM_TRIES &&
-			(!can_walk(itemPos, ctx) || is_water(itemPos) || is_stairs(itemPos, ctx)
-				|| find_decoration_at(itemPos, ctx) != nullptr))
+			(!can_walk(itemPos, ctx) || is_water(itemPos) || is_stairs(itemPos, ctx) || find_decoration_at(itemPos, ctx) != nullptr))
 		{
 			itemPos.x = ctx.dice->roll(room.col, room.col_end());
 			itemPos.y = ctx.dice->roll(room.row, room.row_end());
@@ -1795,7 +1793,9 @@ bool Map::has_los(Vector2D from, Vector2D to) const noexcept
 bool Map::is_door(Vector2D pos) const noexcept
 {
 	if (!is_in_bounds(pos))
+	{
 		return false;
+	}
 
 	TileType tileType = get_tile_type(pos);
 	return tileType == TileType::CLOSED_DOOR || tileType == TileType::OPEN_DOOR;
@@ -1804,7 +1804,9 @@ bool Map::is_door(Vector2D pos) const noexcept
 bool Map::is_open_door(Vector2D pos) const noexcept
 {
 	if (pos.y < 0 || pos.y >= mapHeight || pos.x < 0 || pos.x >= mapWidth)
+	{
 		return false;
+	}
 	return get_tile_type(pos) == TileType::OPEN_DOOR;
 }
 
@@ -1868,7 +1870,8 @@ bool Map::close_door(Vector2D pos, GameContext& ctx)
 	// Check if there's a floor item on the door tile
 	if (ctx.floorInventory)
 	{
-		assert(std::ranges::none_of(ctx.floorInventory->items, [](const auto& i) { return !i; }));
+		assert(std::ranges::none_of(ctx.floorInventory->items, [](const auto& i)
+			{ return !i; }));
 		auto has_item_at_pos = [&pos](const std::unique_ptr<Item>& item)
 		{
 			return item->position == pos;
@@ -2077,11 +2080,6 @@ void Map::place_amulet(GameContext& ctx)
 		}
 	}
 }
-
-
-
-
-
 
 void Map::post_process_doors()
 {

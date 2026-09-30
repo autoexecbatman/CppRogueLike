@@ -5,13 +5,13 @@
 #include <raylib.h>
 
 #include "Colors.h"
+#include "ContextMenu.h"
 #include "GameContext.h"
 #include "Gui.h"
 #include "InputSystem.h"
 #include "Renderer.h"
 #include "RenderingManager.h"
 #include "Vector2D.h"
-#include "ContextMenu.h"
 
 ContextMenu::ContextMenu(
 	std::vector<std::string> options,
@@ -19,8 +19,7 @@ ContextMenu::ContextMenu(
 	int anchor_row,
 	std::function<void(int, GameContext&)> callback,
 	GameContext& ctx)
-	: menuOptions(std::move(options))
-	, onSelect(std::move(callback))
+	: menuOptions(std::move(options)), onSelect(std::move(callback))
 {
 	assert(ctx.renderer && "ContextMenu: renderer required before construction");
 	const int tileSize = ctx.renderer->get_tile_size();

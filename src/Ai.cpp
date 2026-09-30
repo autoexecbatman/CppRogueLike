@@ -1,15 +1,15 @@
 #include <memory>
 #include <stdexcept>
 
-#include "Persistent.h"
 #include "Ai.h"
+#include "AiGiantSpider.h"
 #include "AiMimic.h"
 #include "AiMonster.h"
 #include "AiMonsterConfused.h"
 #include "AiShopkeeper.h"
 #include "AiSpider.h"
-#include "AiGiantSpider.h"
 #include "AiWebSpinner.h"
+#include "Persistent.h"
 
 //==AI==
 std::unique_ptr<Ai> Ai::create(const json& j)

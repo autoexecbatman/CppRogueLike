@@ -8,17 +8,17 @@
 #include <ranges>
 #include <string>
 
+#include "Creature.h"
 #include "DamageInfo.h"
 #include "DiceExpr.h"
-#include "Player.h"
-#include "ThiefSkills.h"
-#include "Trap.h"
 #include "GameContext.h"
-#include "RandomDice.h"
-#include "Creature.h"
 #include "Map.h"
-#include "TileConfig.h"
 #include "MessageSystem.h"
+#include "Player.h"
+#include "RandomDice.h"
+#include "ThiefSkills.h"
+#include "TileConfig.h"
+#include "Trap.h"
 
 // The lowest d100 roll that sets a trap off on the thief working on it: the book
 // gives the accident a band of its own, 96 to 100, rather than making every
@@ -79,7 +79,7 @@ bool Trap::attempt_detect(Creature& creature, GameContext& ctx)
 {
 	if (state != TrapState::HIDDEN)
 	{
-		return false;  // Already detected, disarmed, or triggered
+		return false; // Already detected, disarmed, or triggered
 	}
 
 	// Roll 1d20 + DEX modifier vs detection DC
@@ -90,7 +90,7 @@ bool Trap::attempt_detect(Creature& creature, GameContext& ctx)
 	if (checkResult >= detectionDC)
 	{
 		state = TrapState::DETECTED;
-		remove_state(ActorState::IS_INVISIBLE);  // Trap is now visible
+		remove_state(ActorState::IS_INVISIBLE); // Trap is now visible
 		if (ctx.messageSystem)
 		{
 			ctx.messageSystem->message(ColorPairId::YELLOW_BLACK, "You notice a hidden trap!", MessageCompletion::FINISHED);

@@ -5,12 +5,12 @@
 #include <optional>
 #include <vector>
 
-#include "TileType.h"
-#include "Persistent.h"
-#include "RandomDice.h"
 #include "Decoration.h"
 #include "DungeonRoom.h"
 #include "FovMap.h"
+#include "Persistent.h"
+#include "RandomDice.h"
+#include "TileType.h"
 
 // Forward declaration
 struct GameContext;
@@ -55,7 +55,7 @@ struct Tile
 	TileType type{};
 	bool explored{};
 	double cost{};
-	DoorState doorState { DoorState::OPEN };
+	DoorState doorState{ DoorState::OPEN };
 
 	// overload the greater than operator
 	bool operator>(const Tile& other) const { return cost > other.cost; }

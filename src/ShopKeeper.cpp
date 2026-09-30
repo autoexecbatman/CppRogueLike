@@ -5,19 +5,19 @@
 #include <utility>
 #include <vector>
 
+#include "Colors.h"
+#include "GameContext.h"
 #include "InventoryData.h"
 #include "InventoryOperations.h"
 #include "Item.h"
-#include "Player.h"
-#include "Colors.h"
-#include "GameContext.h"
 #include "ItemCreator.h" // SINGLE SOURCE OF TRUTH
-#include "Persistent.h"
-#include "RandomDice.h"
 #include "LevelManager.h"
 #include "MessageSystem.h"
-#include "Vector2D.h"
+#include "Persistent.h"
+#include "Player.h"
+#include "RandomDice.h"
 #include "ShopKeeper.h"
+#include "Vector2D.h"
 
 using namespace InventoryOperations;
 

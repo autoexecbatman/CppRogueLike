@@ -9,10 +9,10 @@
 
 #include <nlohmann/json.hpp>
 
-#include "Vector2D.h"
 #include "Actor.h"
 #include "InventoryData.h"
 #include "Item.h"
+#include "Vector2D.h"
 
 // Forward declarations
 class Creature;
@@ -41,8 +41,7 @@ InventoryResult<bool> add_item_to_inventory(
 	CreatureInventory& inventory,
 	std::unique_ptr<Item> item,
 	const Creature& owner,
-	const DataManager& dataManager
-);
+	const DataManager& dataManager);
 
 // Remove from floor
 InventoryResult<std::unique_ptr<Item>> remove_item(FloorInventory& inventory, const Item& item);
@@ -88,8 +87,7 @@ bool is_overloaded(const Creature& owner, const DataManager& dataManager) noexce
 bool is_within_weight_limit(
 	const Item& item,
 	const Creature& owner,
-	const DataManager& dataManager
-) noexcept;
+	const DataManager& dataManager) noexcept;
 
 // id-based search — creature backpack only
 Item* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept;
@@ -163,7 +161,10 @@ const Item* get_item_at(const T& inventory, size_t index) noexcept
 template <AnyInventory T>
 const Item* find_item_by_name(const T& inventory, std::string_view name) noexcept
 {
-	[[maybe_unused]] auto is_null = [](const auto& item) { return !item; };
+	[[maybe_unused]] auto is_null = [](const auto& item)
+	{
+		return !item;
+	};
 	assert(std::ranges::none_of(inventory.items, is_null));
 
 	auto it = std::ranges::find_if(inventory.items,
@@ -261,7 +262,8 @@ std::string get_inventory_debug_info(const T& inventory)
 template <AnyInventory T>
 void optimize_inventory_storage(T& inventory)
 {
-	std::erase_if(inventory.items, [](const auto& item) { return !item; });
+	std::erase_if(inventory.items, [](const auto& item)
+		{ return !item; });
 
 	if (inventory.items.size() * 4 < inventory.items.capacity())
 	{

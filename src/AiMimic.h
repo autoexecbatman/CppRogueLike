@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "Creature.h"
 #include "AiMonster.h"
+#include "Creature.h"
 #include "Persistent.h"
 
 class ContentRegistry;

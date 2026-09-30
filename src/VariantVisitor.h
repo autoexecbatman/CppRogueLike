@@ -14,7 +14,7 @@
 template <typename... Handlers>
 struct VariantVisitor : Handlers...
 {
-    using Handlers::operator()...;
+	using Handlers::operator()...;
 };
 
 template <typename... Handlers>

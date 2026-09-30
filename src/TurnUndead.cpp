@@ -2,10 +2,10 @@
 #include <cassert>
 
 #include "Creature.h"
-#include "Player.h"
-#include "GameContext.h"
-#include "RandomDice.h"
 #include "DamageInfo.h"
+#include "GameContext.h"
+#include "Player.h"
+#include "RandomDice.h"
 #include "TurnUndead.h"
 #include "TurningTable.h"
 
@@ -70,8 +70,7 @@ TurnUndeadReport turn_undead(Creature& priest, GameContext& ctx)
 
 		// Beyond this priest's power, or the roll fell short: no effect, and it
 		// does not consume one of the 2d6.
-		if (result.outcome == TurningOutcome::BEYOND_POWER
-			|| (result.outcome == TurningOutcome::ROLL_REQUIRED && report.roll < result.rollNeeded))
+		if (result.outcome == TurningOutcome::BEYOND_POWER || (result.outcome == TurningOutcome::ROLL_REQUIRED && report.roll < result.rollNeeded))
 		{
 			report.resisted.push_back(undead);
 			continue;

@@ -11,23 +11,22 @@
 #include <vector>
 
 #include "Actor.h"
-#include "EquipmentSlot.h"
-#include "InventoryOperations.h"
-#include "Pickable.h"
-#include "Player.h"
+#include "CloseButtonArea.h"
 #include "Colors.h"
 #include "DamageInfo.h"
-#include "WeaponDamageRegistry.h"
 #include "DataManager.h"
 #include "Encumbrance.h"
+#include "EquipmentSlot.h"
 #include "GameContext.h"
-#include "ItemClassification.h"
 #include "InputSystem.h"
-#include "Renderer.h"
-#include "MessageSystem.h"
-#include "CloseButtonArea.h"
+#include "InventoryOperations.h"
 #include "InventoryUI.h"
-
+#include "ItemClassification.h"
+#include "MessageSystem.h"
+#include "Pickable.h"
+#include "Player.h"
+#include "Renderer.h"
+#include "WeaponDamageRegistry.h"
 
 // Where one text row sits, and where a glyph sits inside it. Drawing and mouse
 // hit-testing both go through these, so a click always lands on the row the
@@ -694,7 +693,9 @@ std::string InventoryUI::format_weapon_info(const Item& item) const
 std::string InventoryUI::format_armor_info(const Item& item) const
 {
 	if (!item.behavior)
+	{
 		return "";
+	}
 	int acBonus = get_item_ac_bonus(*item.behavior);
 	if (acBonus != 0)
 	{
@@ -706,7 +707,9 @@ std::string InventoryUI::format_armor_info(const Item& item) const
 std::string InventoryUI::format_stat_bonus_info(const Item& item) const
 {
 	if (!item.behavior)
+	{
 		return "";
+	}
 
 	// Extract stat bonuses from whichever stat-boost type is active
 	int str_b = 0, dex_b = 0, con_b = 0, int_b = 0, wis_b = 0, cha_b = 0;
@@ -731,7 +734,9 @@ std::string InventoryUI::format_stat_bonus_info(const Item& item) const
 	has_stats = std::visit(extract_stats, *item.behavior);
 
 	if (!has_stats)
+	{
 		return "";
+	}
 
 	std::string result;
 	auto append_stat = [&result](const char* name, int val)
@@ -739,7 +744,9 @@ std::string InventoryUI::format_stat_bonus_info(const Item& item) const
 		if (val != 0)
 		{
 			if (!result.empty())
+			{
 				result += " ";
+			}
 			result += std::format("{} {:+d}", name, val);
 		}
 	};
@@ -887,8 +894,7 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 		else
 		{
 			int entryIdx = (mouseRow - FIRST_CONTENT_ROW) + scrollOffset;
-			if (entryIdx >= 0 && entryIdx < static_cast<int>(listEntries.size())
-				&& listEntries[entryIdx].kind == BackpackEntry::Kind::ITEM)
+			if (entryIdx >= 0 && entryIdx < static_cast<int>(listEntries.size()) && listEntries[entryIdx].kind == BackpackEntry::Kind::ITEM)
 			{
 				listCursor = entryIdx;
 			}
@@ -968,8 +974,7 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 
 		// Click outside the panel = close. The panel is the screen, so this is a
 		// pixel test rather than a tile one.
-		if (mousePixelX < 0 || mousePixelX >= ctx.renderer->get_screen_width()
-			|| mousePixelY < 0 || mousePixelY >= ctx.renderer->get_screen_height())
+		if (mousePixelX < 0 || mousePixelX >= ctx.renderer->get_screen_width() || mousePixelY < 0 || mousePixelY >= ctx.renderer->get_screen_height())
 		{
 			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Inventory closed.", MessageCompletion::FINISHED);
 			return false;
@@ -1171,7 +1176,9 @@ void InventoryUI::handle_enter_item(Player& player, GameContext& ctx)
 
 	Item* selectedItem = entry.item;
 	if (!selectedItem->behavior)
+	{
 		return;
+	}
 
 	bool itemUsed = use_item(*selectedItem->behavior, *selectedItem, player, ctx);
 

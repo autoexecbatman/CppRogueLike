@@ -1,32 +1,32 @@
 #pragma once
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
-#include <optional>
 
 #include "AbilityAllocation.h"
+#include "Actor.h"
 #include "Ai.h"
+#include "Alignment.h"
 #include "ArmorClass.h"
+#include "Attacker.h"
+#include "BuffType.h"
 #include "ConstitutionTracker.h"
+#include "CreatureClass.h"
 #include "DamageInfo.h"
 #include "DamageResolver.h"
-#include "ExperienceReward.h"
-#include "HealthPool.h"
-#include "GameContext.h"
-#include "Alignment.h"
-#include "CreatureClass.h"
-#include "Persistent.h"
-#include "Renderer.h"
-#include "BuffType.h"
-#include "ShopKeeper.h"
-#include "Vector2D.h"
-#include "Actor.h"
-#include "Attacker.h"
 #include "EquipmentSlot.h"
+#include "ExperienceReward.h"
+#include "GameContext.h"
+#include "HealthPool.h"
 #include "InventoryData.h"
 #include "Item.h"
 #include "MagicalItemEffects.h"
+#include "Persistent.h"
+#include "Renderer.h"
+#include "ShopKeeper.h"
+#include "Vector2D.h"
 
 class DataManager;
 class Web;
@@ -423,7 +423,6 @@ private:
 	void release_from_web();
 
 public:
-
 	// Armor Class accessors
 	[[nodiscard]] int get_armor_class() const noexcept { return armorClass->get_armor_class(); }
 	[[nodiscard]] int get_base_armor_class() const noexcept { return armorClass->get_base_armor_class(); }

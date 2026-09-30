@@ -73,9 +73,13 @@ bool can_equip_to_right_hand(ItemClass itemClass)
 bool can_equip_to_left_hand(ItemClass itemClass)
 {
 	if (is_shield(itemClass))
+	{
 		return true;
+	}
 	if (!is_weapon(itemClass))
+	{
 		return false;
+	}
 
 	return !is_two_handed_weapon(itemClass);
 }

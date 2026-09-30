@@ -8,10 +8,10 @@
 
 #include <nlohmann/json.hpp>
 
-#include "Paths.h"
-#include "Renderer.h"
 #include "ContentRegistry.h"
 #include "ContentRegistryIO.h"
+#include "Paths.h"
+#include "Renderer.h"
 
 namespace ContentRegistryIO
 {
@@ -52,14 +52,16 @@ void save(const ContentRegistry& reg, std::string_view path)
 	{
 		return nlohmann::json{
 			{ "sheet", static_cast<int>(t.sheet) },
-			{ "col",   t.col },
-			{ "row",   t.row }
+			{ "col", t.col },
+			{ "row", t.row }
 		};
 	};
 
 	nlohmann::json items_obj = nlohmann::json::object();
 	for (const auto& [key, tile] : reg.all_tiles())
+	{
 		items_obj[key] = encode_tile(tile);
+	}
 
 	nlohmann::json root;
 	root["items"] = items_obj;

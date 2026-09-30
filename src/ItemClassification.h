@@ -5,8 +5,8 @@
 
 #include <format>
 #include <stdexcept>
-#include <string_view>
 #include <string>
+#include <string_view>
 
 #include "Weapons.h" // For WeaponSize enum
 
@@ -340,7 +340,6 @@ inline std::string_view encode_item_class(ItemClass itemClass)
 	{
 		return "quest_item";
 	}
-
 	}
 
 	return "unknown";

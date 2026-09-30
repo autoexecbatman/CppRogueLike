@@ -15,8 +15,8 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tctx.messageSystem->message(ColorPairId::RED_BLACK, std::format(\"Nothing happens with the {}.\", owner.get_name()), MessageCompletion::FINISHED);\n\t\treturn false;\n\t}\n\n\t}\n\n\treturn consume_item(owner, wearer);\n",
-      "mutated": "\t\tctx.messageSystem->message(ColorPairId::RED_BLACK, std::format(\"Nothing happens with the {}.\", owner.get_name()), MessageCompletion::FINISHED);\n\t\treturn false;\n\t}\n\n\t}\n\n\treturn true;\n",
+      "original": "\t\tctx.messageSystem->message(ColorPairId::RED_BLACK, std::format(\"Nothing happens with the {}.\", owner.get_name()), MessageCompletion::FINISHED);\n\t\treturn false;\n\t}\n\t}\n\n\treturn consume_item(owner, wearer);\n",
+      "mutated": "\t\tctx.messageSystem->message(ColorPairId::RED_BLACK, std::format(\"Nothing happens with the {}.\", owner.get_name()), MessageCompletion::FINISHED);\n\t\treturn false;\n\t}\n\t}\n\n\treturn true;\n",
       "catches": "a draught drunk and still in the pack, so one potion heals forever"
     },
     {

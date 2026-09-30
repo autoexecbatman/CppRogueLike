@@ -27,8 +27,8 @@
     },
     {
       "file": "src/DamageInfo.h",
-      "original": "\t\t, displayRoll(to_text(dice))",
-      "mutated": "\t\t, displayRoll(\"1d2\")",
+      "original": ", displayRoll(to_text(dice))",
+      "mutated": ", displayRoll(\"1d2\")",
       "catches": "the display no longer naming the dice it was built from"
     }
   ]

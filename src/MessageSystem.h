@@ -66,5 +66,4 @@ private:
 
 	// Debug state
 	bool debugMode{ true };
-
 };

@@ -21,7 +21,7 @@
     },
     {
       "file": "src/ItemClassification.cpp",
-      "original": "\tif (!is_weapon(itemClass))\n\t\treturn false;\n",
+      "original": "\tif (!is_weapon(itemClass))\n\t{\n\t\treturn false;\n\t}\n",
       "mutated": "",
       "catches": "a potion or a ring accepted into the off-hand"
     },

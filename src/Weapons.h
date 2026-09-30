@@ -119,7 +119,6 @@ inline std::string_view encode_hand_requirement(HandRequirement handRequirement)
 	{
 		return "off_hand_only";
 	}
-
 	}
 
 	return "one_handed";
@@ -172,7 +171,6 @@ inline std::string_view encode_weapon_size(WeaponSize weaponSize)
 	{
 		return "giant";
 	}
-
 	}
 
 	return "medium";

@@ -1,6 +1,6 @@
+#include "InputHandler.h"
 #include "InputSystem.h"
 #include "Vector2D.h"
-#include "InputHandler.h"
 
 void InputHandler::key_store() noexcept
 {
@@ -126,7 +126,6 @@ void InputHandler::key_listen(InputSystem& input) noexcept
 		animationTick = true;
 		return;
 	}
-
 	}
 
 	animationTick = false;

@@ -7,19 +7,19 @@
 
 #include <raylib.h>
 
-#include "GameContext.h"
-#include "Paths.h"
-#include "ItemRegistry.h"
-#include "ItemClassification.h"
-#include "MagicalItemEffects.h"
-#include "Weapons.h"
-#include "Menu.h"
-#include "Renderer.h"
 #include "BuffType.h"
 #include "ContentRegistry.h"
 #include "ContentRegistryIO.h"
-#include "TargetMode.h"
+#include "GameContext.h"
+#include "ItemClassification.h"
 #include "ItemEditor.h"
+#include "ItemRegistry.h"
+#include "MagicalItemEffects.h"
+#include "Menu.h"
+#include "Paths.h"
+#include "Renderer.h"
+#include "TargetMode.h"
+#include "Weapons.h"
 
 constexpr int LIST_WIDTH = 220;
 constexpr int HEADER_HEIGHT = 48;
@@ -74,14 +74,17 @@ std::string_view consumable_effect_str(ConsumableEffect e)
 {
 	switch (e)
 	{
-	case ConsumableEffect::NONE:     return "none";
-	case ConsumableEffect::HEAL:     return "heal";
-	case ConsumableEffect::ADD_BUFF: return "add_buff";
-	case ConsumableEffect::FAIL:     return "fail";
+	case ConsumableEffect::NONE:
+		return "none";
+	case ConsumableEffect::HEAL:
+		return "heal";
+	case ConsumableEffect::ADD_BUFF:
+		return "add_buff";
+	case ConsumableEffect::FAIL:
+		return "fail";
 	}
 	return "none";
 }
-
 
 } // namespace
 
@@ -129,7 +132,9 @@ void ItemEditor::tick(GameContext& ctx)
 void ItemEditor::load_working(const ItemRegistry& items)
 {
 	if (m_keys.empty())
+	{
 		return;
+	}
 
 	const std::string& key = current_key();
 	const ItemParams& p = items.get_params(key);
@@ -146,7 +151,9 @@ void ItemEditor::load_working(const ItemRegistry& items)
 void ItemEditor::commit_working(ItemRegistry& items)
 {
 	if (m_keys.empty())
+	{
 		return;
+	}
 	const std::string& key = current_key();
 	items.set_name_category(key, m_working_name, m_working_category);
 	items.set_params(key, m_working);
@@ -265,7 +272,9 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 			commit_working(items);
 			--m_list_cursor;
 			if (m_list_cursor < m_list_scroll)
+			{
 				m_list_scroll = m_list_cursor;
+			}
 			load_working(items);
 		}
 		else if (IsKeyPressed(KEY_DOWN) && m_list_cursor < total - 1)
@@ -274,7 +283,9 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 			++m_list_cursor;
 			int vis_list = body_h / 30;
 			if (m_list_cursor >= m_list_scroll + vis_list)
+			{
 				m_list_scroll = m_list_cursor - vis_list + 1;
+			}
 			load_working(items);
 		}
 		else if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_RIGHT))
@@ -326,13 +337,17 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 	{
 		--m_field_cursor;
 		if (m_field_cursor < m_field_scroll)
+		{
 			m_field_scroll = m_field_cursor;
+		}
 	}
 	else if (IsKeyPressed(KEY_DOWN) && m_field_cursor < field_max)
 	{
 		++m_field_cursor;
 		if (m_field_cursor >= m_field_scroll + visible_fields)
+		{
 			m_field_scroll = m_field_cursor - visible_fields + 1;
+		}
 	}
 
 	FieldId fid = current_field();
@@ -377,12 +392,16 @@ void ItemEditor::handle_edit_string()
 	while (ch != 0)
 	{
 		if (ch >= 32 && ch < 127)
+		{
 			m_edit_buf += static_cast<char>(ch);
+		}
 		ch = GetCharPressed();
 	}
 
 	if (IsKeyPressed(KEY_BACKSPACE) && !m_edit_buf.empty())
+	{
 		m_edit_buf.pop_back();
+	}
 
 	if (IsKeyPressed(KEY_ENTER))
 	{
@@ -391,7 +410,9 @@ void ItemEditor::handle_edit_string()
 	}
 
 	if (IsKeyPressed(KEY_ESCAPE))
+	{
 		m_mode = Mode::NORMAL;
+	}
 }
 
 void ItemEditor::handle_picker(const Renderer& r)
@@ -404,18 +425,26 @@ void ItemEditor::handle_picker(const Renderer& r)
 		{
 			m_picker_sheet = (m_picker_sheet + dir + total_sheets) % total_sheets;
 			if (r.sheet_is_loaded(static_cast<TileSheet>(m_picker_sheet)))
+			{
 				break;
+			}
 		}
 		m_picker_scroll = 0;
 	};
 
 	if (!r.sheet_is_loaded(static_cast<TileSheet>(m_picker_sheet)))
+	{
 		advance_sheet(1);
+	}
 
 	if (IsKeyPressed(KEY_LEFT))
+	{
 		advance_sheet(-1);
+	}
 	if (IsKeyPressed(KEY_RIGHT))
+	{
 		advance_sheet(1);
+	}
 	if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_F2))
 	{
 		m_mode = Mode::NORMAL;
@@ -471,9 +500,13 @@ void ItemEditor::render(const GameContext& ctx) const
 	render_list(r, *ctx.itemRegistry);
 
 	if (m_mode == Mode::TILE_PICKER)
+	{
 		render_picker(r);
+	}
 	else
+	{
 		render_fields(r);
+	}
 
 	render_hint(r);
 }
@@ -513,8 +546,7 @@ void ItemEditor::render_list(const Renderer& r, const ItemRegistry& items) const
 		}
 
 		bool is_sel = (i == m_list_cursor);
-		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH
-			&& mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
+		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH && mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
 		if (is_sel && m_focus == 0)
@@ -585,12 +617,13 @@ void ItemEditor::render_fields(const Renderer& r) const
 	{
 		int itemY = panelY + (i - scroll) * FIELD_HEIGHT;
 		if (itemY + FIELD_HEIGHT > panelY + fieldsHeight)
+		{
 			break;
+		}
 
 		FieldId fid = static_cast<FieldId>(i);
 		bool is_sel = (i == m_field_cursor);
-		bool hovered = mouse.x >= panelX && mouse.x < screenWidth
-			&& mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
+		bool hovered = mouse.x >= panelX && mouse.x < screenWidth && mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
 		if (is_sel && m_focus == 1)
@@ -618,7 +651,7 @@ void ItemEditor::render_fields(const Renderer& r) const
 
 		if (fid == FieldId::TILE)
 		{
-					r.draw_tile_screen_sized(Vector2D{ screenWidth - LIST_TILE_SIZE - 12, itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2 }, m_working_tile, LIST_TILE_SIZE);
+			r.draw_tile_screen_sized(Vector2D{ screenWidth - LIST_TILE_SIZE - 12, itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2 }, m_working_tile, LIST_TILE_SIZE);
 			if (is_sel)
 			{
 				DrawRectangleLines(
@@ -680,7 +713,9 @@ void ItemEditor::render_picker(const Renderer& r) const
 	{
 		int py = grid_y + (row - m_picker_scroll) * (pickerTileSize + 2);
 		if (py >= grid_y + grid_h)
+		{
 			break;
+		}
 
 		for (int col = 0; col < sheet_cols; ++col)
 		{
@@ -688,18 +723,23 @@ void ItemEditor::render_picker(const Renderer& r) const
 			TileRef tid{ static_cast<TileSheet>(m_picker_sheet), col, row };
 
 			bool is_cur = (tid == m_working_tile);
-			bool hovered = mouse.x >= px && mouse.x < px + pickerTileSize
-				&& mouse.y >= py && mouse.y < py + pickerTileSize;
+			bool hovered = mouse.x >= px && mouse.x < px + pickerTileSize && mouse.y >= py && mouse.y < py + pickerTileSize;
 
 			if (is_cur)
+			{
 				DrawRectangle(px, py, pickerTileSize, pickerTileSize, Color{ 0, 60, 0, 220 });
+			}
 			else if (hovered)
+			{
 				DrawRectangle(px, py, pickerTileSize, pickerTileSize, Color{ 20, 40, 20, 160 });
+			}
 
 			r.draw_tile_screen_sized(Vector2D{ px, py }, tid, pickerTileSize);
 
 			if (is_cur)
+			{
 				DrawRectangleLines(px, py, pickerTileSize, pickerTileSize, Color{ 0, 255, 100, 255 });
+			}
 		}
 	}
 
@@ -749,7 +789,9 @@ void ItemEditor::render_hint(const Renderer& r) const
 const std::string& ItemEditor::current_key() const
 {
 	if (m_keys.empty())
+	{
 		throw std::out_of_range("ItemEditor::current_key -- key list is empty");
+	}
 	return m_keys[m_list_cursor];
 }
 
@@ -762,50 +804,86 @@ std::string ItemEditor::field_label(FieldId f) const
 {
 	switch (f)
 	{
-	case FieldId::NAME:             return "Name";
-	case FieldId::CATEGORY:         return "Category";
-	case FieldId::ITEM_CLASS:       return "Item Class";
-	case FieldId::PICKABLE_TYPE:    return "Pickable Type";
-	case FieldId::COLOR:            return "Color";
-	case FieldId::VALUE:            return "Value";
-	case FieldId::BASE_WEIGHT:      return "Spawn Weight";
-	case FieldId::WEIGHT:           return "Carry Weight";
-	case FieldId::LEVEL_MIN:        return "Level Min";
-	case FieldId::LEVEL_MAX:        return "Level Max";
-	case FieldId::LEVEL_SCALING:    return "Level Scaling";
-	case FieldId::CONSUMABLE_EFFECT: return "Consumable Effect";
-	case FieldId::CONSUMABLE_BUFF:  return "Consumable Buff";
-	case FieldId::CONSUMABLE_AMT:   return "Consumable Amount";
-	case FieldId::DURATION:         return "Duration";
-	case FieldId::TARGET_MODE:      return "Target Mode";
-	case FieldId::SCROLL_ANIM:      return "Scroll Animation";
-	case FieldId::RANGE:            return "Range";
-	case FieldId::DAMAGE:           return "Damage";
-	case FieldId::CONFUSE_TURNS:    return "Confuse Turns";
-	case FieldId::RANGED:           return "Ranged";
-	case FieldId::HAND_REQUIREMENT: return "Hand Requirement";
-	case FieldId::WEAPON_SIZE:      return "Weapon Size";
+	case FieldId::NAME:
+		return "Name";
+	case FieldId::CATEGORY:
+		return "Category";
+	case FieldId::ITEM_CLASS:
+		return "Item Class";
+	case FieldId::PICKABLE_TYPE:
+		return "Pickable Type";
+	case FieldId::COLOR:
+		return "Color";
+	case FieldId::VALUE:
+		return "Value";
+	case FieldId::BASE_WEIGHT:
+		return "Spawn Weight";
+	case FieldId::WEIGHT:
+		return "Carry Weight";
+	case FieldId::LEVEL_MIN:
+		return "Level Min";
+	case FieldId::LEVEL_MAX:
+		return "Level Max";
+	case FieldId::LEVEL_SCALING:
+		return "Level Scaling";
+	case FieldId::CONSUMABLE_EFFECT:
+		return "Consumable Effect";
+	case FieldId::CONSUMABLE_BUFF:
+		return "Consumable Buff";
+	case FieldId::CONSUMABLE_AMT:
+		return "Consumable Amount";
+	case FieldId::DURATION:
+		return "Duration";
+	case FieldId::TARGET_MODE:
+		return "Target Mode";
+	case FieldId::SCROLL_ANIM:
+		return "Scroll Animation";
+	case FieldId::RANGE:
+		return "Range";
+	case FieldId::DAMAGE:
+		return "Damage";
+	case FieldId::CONFUSE_TURNS:
+		return "Confuse Turns";
+	case FieldId::RANGED:
+		return "Ranged";
+	case FieldId::HAND_REQUIREMENT:
+		return "Hand Requirement";
+	case FieldId::WEAPON_SIZE:
+		return "Weapon Size";
 	case FieldId::STRENGTH_RATING:
 	{
 		return "Made For STR";
 	}
-	case FieldId::AC_BONUS:         return "AC Bonus";
-	case FieldId::EFFECT:           return "Effect";
-	case FieldId::EFFECT_BONUS:     return "Effect Bonus";
-	case FieldId::STR_BONUS:        return "STR Bonus";
-	case FieldId::DEX_BONUS:        return "DEX Bonus";
-	case FieldId::CON_BONUS:        return "CON Bonus";
-	case FieldId::INT_BONUS:        return "INT Bonus";
-	case FieldId::WIS_BONUS:        return "WIS Bonus";
-	case FieldId::CHA_BONUS:        return "CHA Bonus";
-	case FieldId::IS_SET_MODE:      return "Is Set Mode";
+	case FieldId::AC_BONUS:
+		return "AC Bonus";
+	case FieldId::EFFECT:
+		return "Effect";
+	case FieldId::EFFECT_BONUS:
+		return "Effect Bonus";
+	case FieldId::STR_BONUS:
+		return "STR Bonus";
+	case FieldId::DEX_BONUS:
+		return "DEX Bonus";
+	case FieldId::CON_BONUS:
+		return "CON Bonus";
+	case FieldId::INT_BONUS:
+		return "INT Bonus";
+	case FieldId::WIS_BONUS:
+		return "WIS Bonus";
+	case FieldId::CHA_BONUS:
+		return "CHA Bonus";
+	case FieldId::IS_SET_MODE:
+		return "Is Set Mode";
 	case FieldId::EXCEPTIONAL_STRENGTH:
 	{
 		return "Exceptional STR";
 	}
-	case FieldId::NUTRITION:        return "Nutrition Value";
-	case FieldId::TILE:             return "Tile";
-	default:                        return "???";
+	case FieldId::NUTRITION:
+		return "Nutrition Value";
+	case FieldId::TILE:
+		return "Tile";
+	default:
+		return "???";
 	}
 }
 
@@ -814,50 +892,86 @@ std::string ItemEditor::field_value(FieldId f) const
 	const ItemParams& p = m_working;
 	switch (f)
 	{
-	case FieldId::NAME:             return m_working_name;
-	case FieldId::CATEGORY:         return m_working_category;
-	case FieldId::ITEM_CLASS:       return std::string{ encode_item_class(p.itemClass) };
-	case FieldId::PICKABLE_TYPE:    return std::string{ encode_pickable_type(p.pickableType) };
-	case FieldId::COLOR:            return std::string{ color_pair_name(p.color) };
-	case FieldId::VALUE:            return std::format("{}", p.value);
-	case FieldId::BASE_WEIGHT:      return std::format("{}", p.baseWeight);
-	case FieldId::WEIGHT:           return std::format("{}", p.weight);
-	case FieldId::LEVEL_MIN:        return std::format("{}", p.levelMin);
-	case FieldId::LEVEL_MAX:        return std::format("{}", p.levelMax);
-	case FieldId::LEVEL_SCALING:    return std::format("{:.2f}", p.levelScaling);
-	case FieldId::CONSUMABLE_EFFECT: return std::string{ consumable_effect_str(p.consumableEffect) };
-	case FieldId::CONSUMABLE_BUFF:  return std::string{ encode_buff_type(p.consumableBuffType) };
-	case FieldId::CONSUMABLE_AMT:   return std::format("{}", p.consumableAmount);
-	case FieldId::DURATION:         return std::format("{}", p.duration);
-	case FieldId::TARGET_MODE:      return std::string{ encode_target_mode(p.targetMode) };
-	case FieldId::SCROLL_ANIM:      return std::string{ encode_scroll_animation(p.scrollAnimation) };
-	case FieldId::RANGE:            return std::format("{}", p.range);
-	case FieldId::DAMAGE:           return std::format("{}", p.damage);
-	case FieldId::CONFUSE_TURNS:    return std::format("{}", p.confuseTurns);
-	case FieldId::RANGED:           return p.ranged ? "yes" : "no";
-	case FieldId::HAND_REQUIREMENT: return std::string{ encode_hand_requirement(p.handRequirement) };
-	case FieldId::WEAPON_SIZE:      return std::string{ encode_weapon_size(p.weaponSize) };
+	case FieldId::NAME:
+		return m_working_name;
+	case FieldId::CATEGORY:
+		return m_working_category;
+	case FieldId::ITEM_CLASS:
+		return std::string{ encode_item_class(p.itemClass) };
+	case FieldId::PICKABLE_TYPE:
+		return std::string{ encode_pickable_type(p.pickableType) };
+	case FieldId::COLOR:
+		return std::string{ color_pair_name(p.color) };
+	case FieldId::VALUE:
+		return std::format("{}", p.value);
+	case FieldId::BASE_WEIGHT:
+		return std::format("{}", p.baseWeight);
+	case FieldId::WEIGHT:
+		return std::format("{}", p.weight);
+	case FieldId::LEVEL_MIN:
+		return std::format("{}", p.levelMin);
+	case FieldId::LEVEL_MAX:
+		return std::format("{}", p.levelMax);
+	case FieldId::LEVEL_SCALING:
+		return std::format("{:.2f}", p.levelScaling);
+	case FieldId::CONSUMABLE_EFFECT:
+		return std::string{ consumable_effect_str(p.consumableEffect) };
+	case FieldId::CONSUMABLE_BUFF:
+		return std::string{ encode_buff_type(p.consumableBuffType) };
+	case FieldId::CONSUMABLE_AMT:
+		return std::format("{}", p.consumableAmount);
+	case FieldId::DURATION:
+		return std::format("{}", p.duration);
+	case FieldId::TARGET_MODE:
+		return std::string{ encode_target_mode(p.targetMode) };
+	case FieldId::SCROLL_ANIM:
+		return std::string{ encode_scroll_animation(p.scrollAnimation) };
+	case FieldId::RANGE:
+		return std::format("{}", p.range);
+	case FieldId::DAMAGE:
+		return std::format("{}", p.damage);
+	case FieldId::CONFUSE_TURNS:
+		return std::format("{}", p.confuseTurns);
+	case FieldId::RANGED:
+		return p.ranged ? "yes" : "no";
+	case FieldId::HAND_REQUIREMENT:
+		return std::string{ encode_hand_requirement(p.handRequirement) };
+	case FieldId::WEAPON_SIZE:
+		return std::string{ encode_weapon_size(p.weaponSize) };
 	case FieldId::STRENGTH_RATING:
 	{
 		return std::format("{}", p.strengthRating);
 	}
-	case FieldId::AC_BONUS:         return std::format("{}", p.acBonus);
-	case FieldId::EFFECT:           return std::string{ encode_magical_effect(p.effect) };
-	case FieldId::EFFECT_BONUS:     return std::format("{}", p.effectBonus);
-	case FieldId::STR_BONUS:        return std::format("{}", p.strBonus);
-	case FieldId::DEX_BONUS:        return std::format("{}", p.dexBonus);
-	case FieldId::CON_BONUS:        return std::format("{}", p.conBonus);
-	case FieldId::INT_BONUS:        return std::format("{}", p.intBonus);
-	case FieldId::WIS_BONUS:        return std::format("{}", p.wisBonus);
-	case FieldId::CHA_BONUS:        return std::format("{}", p.chaBonus);
-	case FieldId::IS_SET_MODE:      return p.isSetMode ? "yes" : "no";
+	case FieldId::AC_BONUS:
+		return std::format("{}", p.acBonus);
+	case FieldId::EFFECT:
+		return std::string{ encode_magical_effect(p.effect) };
+	case FieldId::EFFECT_BONUS:
+		return std::format("{}", p.effectBonus);
+	case FieldId::STR_BONUS:
+		return std::format("{}", p.strBonus);
+	case FieldId::DEX_BONUS:
+		return std::format("{}", p.dexBonus);
+	case FieldId::CON_BONUS:
+		return std::format("{}", p.conBonus);
+	case FieldId::INT_BONUS:
+		return std::format("{}", p.intBonus);
+	case FieldId::WIS_BONUS:
+		return std::format("{}", p.wisBonus);
+	case FieldId::CHA_BONUS:
+		return std::format("{}", p.chaBonus);
+	case FieldId::IS_SET_MODE:
+		return p.isSetMode ? "yes" : "no";
 	case FieldId::EXCEPTIONAL_STRENGTH:
 	{
 		return std::format("{}", p.exceptionalStrength);
 	}
-	case FieldId::NUTRITION:        return std::format("{}", p.nutritionValue);
-	case FieldId::TILE:             return "(tile)";
-	default:                        return "";
+	case FieldId::NUTRITION:
+		return std::format("{}", p.nutritionValue);
+	case FieldId::TILE:
+		return "(tile)";
+	default:
+		return "";
 	}
 }
 
@@ -868,18 +982,7 @@ bool ItemEditor::field_is_string(FieldId f) const
 
 bool ItemEditor::field_is_toggle(FieldId f) const
 {
-	return f == FieldId::ITEM_CLASS
-		|| f == FieldId::PICKABLE_TYPE
-		|| f == FieldId::CONSUMABLE_EFFECT
-		|| f == FieldId::CONSUMABLE_BUFF
-		|| f == FieldId::TARGET_MODE
-		|| f == FieldId::SCROLL_ANIM
-		|| f == FieldId::RANGED
-		|| f == FieldId::HAND_REQUIREMENT
-		|| f == FieldId::WEAPON_SIZE
-		|| f == FieldId::EFFECT
-		|| f == FieldId::COLOR
-		|| f == FieldId::IS_SET_MODE;
+	return f == FieldId::ITEM_CLASS || f == FieldId::PICKABLE_TYPE || f == FieldId::CONSUMABLE_EFFECT || f == FieldId::CONSUMABLE_BUFF || f == FieldId::TARGET_MODE || f == FieldId::SCROLL_ANIM || f == FieldId::RANGED || f == FieldId::HAND_REQUIREMENT || f == FieldId::WEAPON_SIZE || f == FieldId::EFFECT || f == FieldId::COLOR || f == FieldId::IS_SET_MODE;
 }
 
 void ItemEditor::field_adjust(FieldId f, int delta)
@@ -1021,9 +1124,14 @@ void ItemEditor::field_set_string(FieldId f, std::string val)
 {
 	switch (f)
 	{
-	case FieldId::NAME:     m_working_name = std::move(val); break;
-	case FieldId::CATEGORY: m_working_category = std::move(val); break;
-	default: break;
+	case FieldId::NAME:
+		m_working_name = std::move(val);
+		break;
+	case FieldId::CATEGORY:
+		m_working_category = std::move(val);
+		break;
+	default:
+		break;
 	}
 }
 

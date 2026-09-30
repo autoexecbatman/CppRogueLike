@@ -3,24 +3,24 @@
 #include <string>
 
 #include "Actor.h"
-#include "Creature.h"
-#include "InventoryOperations.h"
 #include "Colors.h"
+#include "Creature.h"
 #include "GameContext.h"
-#include "Renderer.h"
-#include "MessageSystem.h"
-#include "ShopKeeper.h"
+#include "InventoryOperations.h"
 #include "MenuBuy.h"
+#include "MessageSystem.h"
+#include "Renderer.h"
+#include "ShopKeeper.h"
 
 namespace
 {
-	// The shop a trading creature owns. Every way into the trade menu requires one.
-	ShopKeeper& shop_of(Creature& owner)
-	{
-		assert(owner.shop && "MenuBuy opened on a creature with no shop");
-		return *owner.shop;
-	}
+// The shop a trading creature owns. Every way into the trade menu requires one.
+ShopKeeper& shop_of(Creature& owner)
+{
+	assert(owner.shop && "MenuBuy opened on a creature with no shop");
+	return *owner.shop;
 }
+} // namespace
 
 void MenuBuy::populate_items()
 {
@@ -32,7 +32,8 @@ void MenuBuy::populate_items()
 		return;
 	}
 
-	assert(std::ranges::none_of(shopkeeper.get_shop_inventory().items, [](const auto& item) { return !item; }));
+	assert(std::ranges::none_of(shopkeeper.get_shop_inventory().items, [](const auto& item)
+		{ return !item; }));
 	for (const auto& item : shopkeeper.get_shop_inventory().items)
 	{
 		std::string itemName = item->actorData.name;
@@ -66,7 +67,9 @@ MenuBuy::MenuBuy(GameContext& ctx, Creature& buyer, Creature& owner)
 void MenuBuy::menu_print_state(size_t state)
 {
 	if (state >= menuItems.size())
+	{
 		return;
+	}
 
 	if (currentState == state)
 	{

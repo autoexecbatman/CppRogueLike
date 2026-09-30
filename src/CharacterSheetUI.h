@@ -26,15 +26,15 @@ namespace CharacterSheetText
 class CharacterSheetUI : public BaseMenu
 {
 public:
-    CharacterSheetUI(const Player& player);
-    ~CharacterSheetUI() = default;
-    CharacterSheetUI(const CharacterSheetUI&) = delete;
-    CharacterSheetUI& operator=(const CharacterSheetUI&) = delete;
-    CharacterSheetUI(CharacterSheetUI&&) = delete;
-    CharacterSheetUI& operator=(CharacterSheetUI&&) = delete;
+	CharacterSheetUI(const Player& player);
+	~CharacterSheetUI() = default;
+	CharacterSheetUI(const CharacterSheetUI&) = delete;
+	CharacterSheetUI& operator=(const CharacterSheetUI&) = delete;
+	CharacterSheetUI(CharacterSheetUI&&) = delete;
+	CharacterSheetUI& operator=(CharacterSheetUI&&) = delete;
 
-    void menu(GameContext& ctx) override;
+	void menu(GameContext& ctx) override;
 
 private:
-    const Player& player_ref;
+	const Player& player_ref;
 };

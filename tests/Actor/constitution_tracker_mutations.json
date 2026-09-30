@@ -15,7 +15,7 @@
     },
     {
       "file": "src/ConstitutionTracker.cpp",
-      "original": "    set_last_constitution(currentConstitution);\n",
+      "original": "\tset_last_constitution(currentConstitution);\n",
       "mutated": "",
       "catches": "the score never recorded, so every tick applies the bonus again"
     },

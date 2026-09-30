@@ -1,34 +1,34 @@
-#include <vector>
 #include <algorithm>
 #include <cassert>
 #include <format>
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "Actor.h"
-#include "ArmorClass.h"
-#include "Creature.h"
-#include "DexterityAttributes.h"
-#include "Colors.h"
-#include "DamageInfo.h"
-#include "GameContext.h"
-#include "MenuTrade.h"
-#include "Persistent.h"
 #include "AnimationSystem.h"
+#include "ArmorClass.h"
+#include "AttackStrength.h"
+#include "Attacker.h"
 #include "BuffSystem.h"
 #include "BuffType.h"
-#include "DataManager.h"
-#include "LevelUpSystem.h"
-#include "MessageSystem.h"
-#include "StrengthAttributes.h"
-#include "Attacker.h"
-#include "AttackStrength.h"
+#include "Colors.h"
+#include "Creature.h"
+#include "DamageInfo.h"
 #include "DamageResolver.h"
+#include "DataManager.h"
+#include "DexterityAttributes.h"
 #include "DiceExpr.h"
 #include "EquipmentSlot.h"
+#include "GameContext.h"
 #include "Item.h"
+#include "LevelUpSystem.h"
+#include "MenuTrade.h"
+#include "MessageSystem.h"
+#include "Persistent.h"
 #include "Pickable.h"
+#include "StrengthAttributes.h"
 
 // OCP: Data-driven buff break messaging - player notifications when buffs end from attacking
 static const std::unordered_map<BuffType, std::string_view> BUFF_BREAK_MESSAGES = {

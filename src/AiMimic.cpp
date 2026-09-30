@@ -8,19 +8,19 @@
 #include <vector>
 
 #include "Actor.h"
-#include "Creature.h"
-#include "InventoryOperations.h"
-#include "Colors.h"
-#include "DamageInfo.h"
-#include "GameContext.h"
-#include "ItemCreator.h"
-#include "MonsterRegistry.h"
-#include "ItemClassification.h"
-#include "Persistent.h"
-#include "ContentRegistry.h"
-#include "MessageSystem.h"
 #include "AiMimic.h"
 #include "AiMonster.h"
+#include "Colors.h"
+#include "ContentRegistry.h"
+#include "Creature.h"
+#include "DamageInfo.h"
+#include "GameContext.h"
+#include "InventoryOperations.h"
+#include "ItemClassification.h"
+#include "ItemCreator.h"
+#include "MessageSystem.h"
+#include "MonsterRegistry.h"
+#include "Persistent.h"
 
 // Configuration constants (NOT serialized — same for all mimics)
 constexpr int DISGUISE_CHANGE_RATE = 200;

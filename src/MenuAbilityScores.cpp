@@ -8,10 +8,10 @@
 #include "Colors.h"
 #include "GameContext.h"
 #include "InputSystem.h"
+#include "MenuAbilityScores.h"
 #include "MenuName.h"
 #include "RandomDice.h"
 #include "Renderer.h"
-#include "MenuAbilityScores.h"
 
 namespace
 {

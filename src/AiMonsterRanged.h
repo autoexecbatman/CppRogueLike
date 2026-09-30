@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Actor.h"
+#include "AiMonster.h"
 #include "GameContext.h"
 #include "Persistent.h"
-#include "AiMonster.h"
 
 // Forward declarations
 struct Vector2D;

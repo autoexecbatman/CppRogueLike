@@ -5,8 +5,8 @@
 
 #include <nlohmann/json.hpp>
 
-#include "Paths.h"
 #include "BodyPlanRegistry.h"
+#include "Paths.h"
 
 void BodyPlanRegistry::load(std::string_view path)
 {

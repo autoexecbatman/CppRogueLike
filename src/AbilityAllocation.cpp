@@ -3,8 +3,8 @@
 #include <cassert>
 #include <numeric>
 
-#include "RandomDice.h"
 #include "AbilityAllocation.h"
+#include "RandomDice.h"
 
 std::string_view ability_name(Ability ability)
 {

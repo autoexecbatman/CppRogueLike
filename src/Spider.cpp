@@ -17,7 +17,6 @@
 #include <memory>
 
 #include "Actor.h"
-#include "MonsterAttacker.h"
 #include "AiGiantSpider.h"
 #include "AiSpider.h"
 #include "AiWebSpinner.h"
@@ -27,11 +26,11 @@
 #include "ExperienceReward.h"
 #include "GameContext.h"
 #include "LevelUpSystem.h"
+#include "MonsterAttacker.h"
 #include "MonsterRegistry.h"
 #include "RandomDice.h"
-#include "Vector2D.h"
 #include "Spider.h"
-
+#include "Vector2D.h"
 
 // Base Spider constructor
 Spider::Spider(Vector2D position, GameContext& ctx, SpiderType type)

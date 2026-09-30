@@ -33,8 +33,8 @@
     },
     {
       "file": "src/GameBalance.h",
-      "original": "            inline constexpr int STARTING_CUSHION = 20;",
-      "mutated": "            inline constexpr int STARTING_CUSHION = 21;",
+      "original": "inline constexpr int STARTING_CUSHION = 20;",
+      "mutated": "inline constexpr int STARTING_CUSHION = 21;",
       "catches": "a cushion other than the owner's 20"
     }
   ]

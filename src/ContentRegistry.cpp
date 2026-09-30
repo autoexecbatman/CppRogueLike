@@ -1,8 +1,8 @@
 // file: ContentRegistry.cpp
 #include <string>
 
-#include "Renderer.h"
 #include "ContentRegistry.h"
+#include "Renderer.h"
 
 TileRef ContentRegistry::get_tile(std::string_view key) const
 {

@@ -20,27 +20,27 @@ struct GameContext;
 
 class ListMenu : public BaseMenu
 {
-    std::string title{};
-    std::vector<MenuEntry> entries{};
-    size_t cursorIndex{ 0 };
-    std::function<void(GameContext&)> onEscape{};  // null = just close
-    std::function<void(GameContext&)> onFrame{};   // null = no-op; called each frame before input
+	std::string title{};
+	std::vector<MenuEntry> entries{};
+	size_t cursorIndex{ 0 };
+	std::function<void(GameContext&)> onEscape{}; // null = just close
+	std::function<void(GameContext&)> onFrame{}; // null = no-op; called each frame before input
 
-    void draw_entries();
+	void draw_entries();
 
 public:
-    ListMenu(
-        std::string title,
-        std::vector<MenuEntry> entries,
-        std::function<void(GameContext&)> onEscape,
-        std::function<void(GameContext&)> onFrame,
-        GameContext& ctx);
-    ListMenu(const ListMenu&) = delete;
-    ListMenu& operator=(const ListMenu&) = delete;
-    ListMenu(ListMenu&&) = delete;
-    ListMenu& operator=(ListMenu&&) = delete;
+	ListMenu(
+		std::string title,
+		std::vector<MenuEntry> entries,
+		std::function<void(GameContext&)> onEscape,
+		std::function<void(GameContext&)> onFrame,
+		GameContext& ctx);
+	ListMenu(const ListMenu&) = delete;
+	ListMenu& operator=(const ListMenu&) = delete;
+	ListMenu(ListMenu&&) = delete;
+	ListMenu& operator=(ListMenu&&) = delete;
 
-    void draw();
-    void on_key(GameContext& ctx) override;
-    void menu(GameContext& ctx) override;
+	void draw();
+	void on_key(GameContext& ctx) override;
+	void menu(GameContext& ctx) override;
 };

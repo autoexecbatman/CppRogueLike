@@ -1,12 +1,12 @@
 // file: AnimationBarrierMenu.cpp
 #include <cassert>
 
+#include "AnimationBarrierMenu.h"
+#include "AnimationSystem.h"
 #include "GameContext.h"
 #include "Gui.h"
 #include "Renderer.h"
-#include "AnimationSystem.h"
 #include "RenderingManager.h"
-#include "AnimationBarrierMenu.h"
 
 AnimationBarrierMenu::AnimationBarrierMenu(GameContext& ctx)
 {

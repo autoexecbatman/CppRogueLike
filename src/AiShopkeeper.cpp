@@ -1,14 +1,13 @@
 #include <cassert>
 #include <memory>
 
-#include "Creature.h"
-#include "GameContext.h"
-#include "MenuTrade.h"
-#include "Persistent.h"
-#include "MenuManager.h"
 #include "Ai.h"
 #include "AiShopkeeper.h"
-
+#include "Creature.h"
+#include "GameContext.h"
+#include "MenuManager.h"
+#include "MenuTrade.h"
+#include "Persistent.h"
 
 void AiShopkeeper::update(Creature& owner, GameContext& ctx)
 {

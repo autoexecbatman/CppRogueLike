@@ -17,9 +17,9 @@
 //   Del             -- delete selected prefab from library
 //   Esc             -- exit Room Editor, return to menu
 
+#include <optional>
 #include <string>
 #include <vector>
-#include <optional>
 
 #include "Renderer.h"
 
@@ -128,5 +128,4 @@ public:
 	void tick(GameContext& ctx);
 
 	[[nodiscard]] bool is_active() const { return active; }
-
 };

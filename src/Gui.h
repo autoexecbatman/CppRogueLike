@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 
-#include "Persistent.h"
 #include "LogMessage.h"
+#include "Persistent.h"
 
 struct GameContext;
 

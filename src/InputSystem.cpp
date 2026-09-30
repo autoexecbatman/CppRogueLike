@@ -1,8 +1,8 @@
 // file: InputSystem.cpp
 #include <raylib.h>
 
-#include "Vector2D.h"
 #include "InputSystem.h"
+#include "Vector2D.h"
 
 constexpr double REPEAT_DELAY = 0.30; // seconds before repeat begins
 constexpr double REPEAT_INTERVAL = 0.10; // seconds between repeat fires
@@ -84,26 +84,22 @@ void InputSystem::poll()
 	// platform. IsKeyPressed (prev/curr state transition) works correctly
 	// because PollInputEvents() is called explicitly in end_frame() before
 	// SwapScreenBuffer(), keeping prev/curr in sync.
-	auto isPressed = [](int k) { return IsKeyPressed(k); };
+	auto isPressed = [](int k)
+	{
+		return IsKeyPressed(k);
+	};
 #else
 	// On native, prefer the GLFW queue -- it is not subject to prev/curr
 	// timing issues and handles rapid key-press/release within one frame.
 	int queued = GetKeyPressed();
-	auto isPressed = [queued](int k) { return queued == k; };
+	auto isPressed = [queued](int k)
+	{
+		return queued == k;
+	};
 #endif
 	int newKey = 0;
 	for (int k : {
-		KEY_ENTER, KEY_ESCAPE, KEY_TAB, KEY_SPACE, KEY_BACKSPACE,
-		KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT,
-		KEY_KP_1, KEY_KP_2, KEY_KP_3, KEY_KP_4, KEY_KP_5,
-		KEY_KP_6, KEY_KP_7, KEY_KP_8, KEY_KP_9, KEY_KP_MULTIPLY,
-		KEY_W, KEY_A, KEY_S, KEY_D, KEY_Q, KEY_E, KEY_Z, KEY_C,
-		KEY_H, KEY_T, KEY_B, KEY_P, KEY_L, KEY_I, KEY_O, KEY_K,
-		KEY_R, KEY_U, KEY_X, KEY_M, KEY_N,
-		KEY_ONE, KEY_TWO, KEY_THREE, KEY_FOUR, KEY_FIVE,
-		KEY_SIX, KEY_SEVEN, KEY_EIGHT, KEY_NINE, KEY_ZERO,
-		KEY_F2, KEY_F3, KEY_EQUAL, KEY_MINUS, KEY_COMMA, KEY_PERIOD,
-		KEY_SLASH, KEY_SEMICOLON, KEY_APOSTROPHE, KEY_GRAVE })
+			 KEY_ENTER, KEY_ESCAPE, KEY_TAB, KEY_SPACE, KEY_BACKSPACE, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_KP_1, KEY_KP_2, KEY_KP_3, KEY_KP_4, KEY_KP_5, KEY_KP_6, KEY_KP_7, KEY_KP_8, KEY_KP_9, KEY_KP_MULTIPLY, KEY_W, KEY_A, KEY_S, KEY_D, KEY_Q, KEY_E, KEY_Z, KEY_C, KEY_H, KEY_T, KEY_B, KEY_P, KEY_L, KEY_I, KEY_O, KEY_K, KEY_R, KEY_U, KEY_X, KEY_M, KEY_N, KEY_ONE, KEY_TWO, KEY_THREE, KEY_FOUR, KEY_FIVE, KEY_SIX, KEY_SEVEN, KEY_EIGHT, KEY_NINE, KEY_ZERO, KEY_F2, KEY_F3, KEY_EQUAL, KEY_MINUS, KEY_COMMA, KEY_PERIOD, KEY_SLASH, KEY_SEMICOLON, KEY_APOSTROPHE, KEY_GRAVE })
 	{
 		if (isPressed(k))
 		{
@@ -453,7 +449,6 @@ void InputSystem::poll()
 	{
 		break;
 	}
-
 	}
 
 	// Shift+symbol keys and char_input for text fields.
@@ -465,25 +460,82 @@ void InputSystem::poll()
 	{
 		ch = shift ? (newKey - KEY_A + 'A') : (newKey - KEY_A + 'a');
 	}
-	else if (newKey == KEY_ONE)   { ch = shift ? '!' : '1'; }
-	else if (newKey == KEY_TWO)   { ch = shift ? '@' : '2'; }
-	else if (newKey == KEY_THREE) { ch = shift ? '#' : '3'; }
-	else if (newKey == KEY_FOUR)  { ch = shift ? '$' : '4'; }
-	else if (newKey == KEY_FIVE)  { ch = shift ? '%' : '5'; }
-	else if (newKey == KEY_SIX)   { ch = shift ? '^' : '6'; }
-	else if (newKey == KEY_SEVEN) { ch = shift ? '&' : '7'; }
-	else if (newKey == KEY_EIGHT) { ch = shift ? '*' : '8'; }
-	else if (newKey == KEY_NINE)  { ch = shift ? '(' : '9'; }
-	else if (newKey == KEY_ZERO)  { ch = shift ? ')' : '0'; }
-	else if (newKey == KEY_EQUAL) { ch = shift ? '+' : '='; }
-	else if (newKey == KEY_MINUS) { ch = shift ? '_' : '-'; }
-	else if (newKey == KEY_COMMA) { ch = shift ? '<' : ','; }
-	else if (newKey == KEY_PERIOD) { ch = shift ? '>' : '.'; }
-	else if (newKey == KEY_SLASH) { ch = shift ? '?' : '/'; }
-	else if (newKey == KEY_SEMICOLON) { ch = shift ? ':' : ';'; }
-	else if (newKey == KEY_APOSTROPHE) { ch = shift ? '"' : '\''; }
-	else if (newKey == KEY_GRAVE) { ch = shift ? '~' : '`'; }
-	else if (newKey == KEY_SPACE) { ch = ' '; }
+	else if (newKey == KEY_ONE)
+	{
+		ch = shift ? '!' : '1';
+	}
+	else if (newKey == KEY_TWO)
+	{
+		ch = shift ? '@' : '2';
+	}
+	else if (newKey == KEY_THREE)
+	{
+		ch = shift ? '#' : '3';
+	}
+	else if (newKey == KEY_FOUR)
+	{
+		ch = shift ? '$' : '4';
+	}
+	else if (newKey == KEY_FIVE)
+	{
+		ch = shift ? '%' : '5';
+	}
+	else if (newKey == KEY_SIX)
+	{
+		ch = shift ? '^' : '6';
+	}
+	else if (newKey == KEY_SEVEN)
+	{
+		ch = shift ? '&' : '7';
+	}
+	else if (newKey == KEY_EIGHT)
+	{
+		ch = shift ? '*' : '8';
+	}
+	else if (newKey == KEY_NINE)
+	{
+		ch = shift ? '(' : '9';
+	}
+	else if (newKey == KEY_ZERO)
+	{
+		ch = shift ? ')' : '0';
+	}
+	else if (newKey == KEY_EQUAL)
+	{
+		ch = shift ? '+' : '=';
+	}
+	else if (newKey == KEY_MINUS)
+	{
+		ch = shift ? '_' : '-';
+	}
+	else if (newKey == KEY_COMMA)
+	{
+		ch = shift ? '<' : ',';
+	}
+	else if (newKey == KEY_PERIOD)
+	{
+		ch = shift ? '>' : '.';
+	}
+	else if (newKey == KEY_SLASH)
+	{
+		ch = shift ? '?' : '/';
+	}
+	else if (newKey == KEY_SEMICOLON)
+	{
+		ch = shift ? ':' : ';';
+	}
+	else if (newKey == KEY_APOSTROPHE)
+	{
+		ch = shift ? '"' : '\'';
+	}
+	else if (newKey == KEY_GRAVE)
+	{
+		ch = shift ? '~' : '`';
+	}
+	else if (newKey == KEY_SPACE)
+	{
+		ch = ' ';
+	}
 #else
 	int ch = GetCharPressed();
 #endif
@@ -521,7 +573,6 @@ void InputSystem::poll()
 		{
 			break;
 		}
-
 		}
 	}
 }

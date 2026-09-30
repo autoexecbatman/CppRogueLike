@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include "Renderer.h" // TileRef, held by value below
 #include "TileFeature.h"
 #include "Vector2D.h"
-#include "Renderer.h" // TileRef, held by value below
 
 class Player;
 class RandomDice;
@@ -20,10 +20,10 @@ enum class TrapType
 
 enum class TrapState
 {
-	HIDDEN,     // Player hasn't detected it yet
-	DETECTED,   // Player knows it's here (via DEX check or explicit detection)
-	TRIGGERED,  // Trap has been sprung (may destroy or reset)
-	DISARMED    // Trap has been disarmed, is inert
+	HIDDEN, // Player hasn't detected it yet
+	DETECTED, // Player knows it's here (via DEX check or explicit detection)
+	TRIGGERED, // Trap has been sprung (may destroy or reset)
+	DISARMED // Trap has been disarmed, is inert
 };
 
 // Trap class - represents environmental hazards (pit, dart, arrow)

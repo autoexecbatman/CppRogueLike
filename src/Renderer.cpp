@@ -13,8 +13,8 @@
 #include <rlgl.h>
 #endif
 
-#include "TileConfig.h"
 #include "Renderer.h"
+#include "TileConfig.h"
 
 // Rendered tile sizes the player can step through. 64 matches the native cell
 // size of the regenerated sheets, so their art draws unscaled.

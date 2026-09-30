@@ -4,22 +4,22 @@
 #include <memory>
 
 #include "Actor.h"
-#include "Creature.h"
-#include "MonsterAttacker.h"
 #include "AiShopkeeper.h"
+#include "BodyPlanRegistry.h"
 #include "Colors.h"
+#include "Creature.h"
 #include "DamageInfo.h"
 #include "ExperienceReward.h"
-#include "HealthPool.h"
 #include "GameContext.h"
+#include "HealthPool.h"
+#include "ItemCreator.h"
+#include "MessageSystem.h"
+#include "MonsterAttacker.h"
 #include "MonsterRegistry.h"
 #include "RandomDice.h"
-#include "MessageSystem.h"
-#include "Vector2D.h"
 #include "ShopKeeper.h"
 #include "ShopkeeperFactory.h"
-#include "BodyPlanRegistry.h"
-#include "ItemCreator.h"
+#include "Vector2D.h"
 
 std::unique_ptr<Creature> ShopkeeperFactory::create_shopkeeper(Vector2D position, int dungeonLevel, GameContext& ctx)
 {
@@ -89,11 +89,17 @@ ShopType ShopkeeperFactory::select_shop_type_for_level(int dungeonLevel, GameCon
 	{
 		int roll = ctx.dice->d100();
 		if (roll <= 25)
+		{
 			return ShopType::WEAPON_SHOP;
+		}
 		if (roll <= 50)
+		{
 			return ShopType::ARMOR_SHOP;
+		}
 		if (roll <= 75)
+		{
 			return ShopType::POTION_SHOP;
+		}
 		return ShopType::GENERAL_STORE;
 	}
 	else
@@ -101,13 +107,21 @@ ShopType ShopkeeperFactory::select_shop_type_for_level(int dungeonLevel, GameCon
 		// Higher levels get full variety including scroll shops
 		int roll = ctx.dice->d100();
 		if (roll <= 20)
+		{
 			return ShopType::WEAPON_SHOP;
+		}
 		if (roll <= 40)
+		{
 			return ShopType::ARMOR_SHOP;
+		}
 		if (roll <= 60)
+		{
 			return ShopType::POTION_SHOP;
+		}
 		if (roll <= 80)
+		{
 			return ShopType::SCROLL_SHOP;
+		}
 		return ShopType::ADVENTURING_GEAR;
 	}
 }

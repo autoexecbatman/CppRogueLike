@@ -3,11 +3,11 @@
 #include <cassert>
 #include <format>
 
-#include "HealthPool.h"
-#include "DamageResolver.h"
-#include "DamageInfo.h"
 #include "Creature.h"
+#include "DamageInfo.h"
+#include "DamageResolver.h"
 #include "GameContext.h"
+#include "HealthPool.h"
 
 HealthPool::HealthPool(int hpMax)
 	: hpBase(hpMax),

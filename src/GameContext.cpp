@@ -22,8 +22,8 @@
 
 #include <cassert>
 
-#include "Player.h"
 #include "GameContext.h"
+#include "Player.h"
 
 // The player as a creature, or null before one exists.
 //
@@ -66,7 +66,6 @@ Creature* GameContext::player() const
 //       && "GameContext: no player in context"
 Player& GameContext::player_concrete() const
 {
-	assert(playerOwner != nullptr && playerOwner->get() != nullptr
-		&& "GameContext: no player in context");
+	assert(playerOwner != nullptr && playerOwner->get() != nullptr && "GameContext: no player in context");
 	return **playerOwner;
 }

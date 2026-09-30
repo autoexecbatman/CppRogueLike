@@ -6,15 +6,15 @@
 
 #include "Actor.h"
 #include "Creature.h"
-#include "TileFeature.h"
-#include "Gui.h"
-#include "GameContext.h"
 #include "Decoration.h"
+#include "GameContext.h"
+#include "Gui.h"
 #include "Map.h"
 #include "Minimap.h"
 #include "Renderer.h"
 #include "RenderingManager.h"
 #include "SpellTile.h"
+#include "TileFeature.h"
 #include "Trap.h"
 
 void RenderingManager::render(GameContext& ctx) const

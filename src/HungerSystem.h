@@ -101,5 +101,4 @@ public:
 	// Save/Load methods for game persistence
 	void save(nlohmann::json& j) const;
 	void load(const nlohmann::json& j);
-
 };

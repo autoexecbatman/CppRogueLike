@@ -6,17 +6,17 @@
 #include <vector>
 
 #include "Attacker.h"
-#include "Player.h"
+#include "BalanceViewer.h"
+#include "CharacterSheetUI.h"
 #include "Controls.h"
+#include "DisplayManager.h"
 #include "GameContext.h"
 #include "LevelManager.h"
 #include "LevelUpSystem.h"
-#include "NotificationMenu.h"
-#include "BalanceViewer.h"
-#include "CharacterSheetUI.h"
 #include "LevelUpUI.h"
 #include "MenuThiefSkills.h"
-#include "DisplayManager.h"
+#include "NotificationMenu.h"
+#include "Player.h"
 
 void DisplayManager::display_help(GameContext& ctx) const
 {

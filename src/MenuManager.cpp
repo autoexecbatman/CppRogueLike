@@ -1,10 +1,10 @@
 #include <deque>
 #include <memory>
 
-#include "GameContext.h"
 #include "BaseMenu.h"
-#include "RenderingManager.h"
+#include "GameContext.h"
 #include "MenuManager.h"
+#include "RenderingManager.h"
 
 void MenuManager::handle_menus(std::deque<std::unique_ptr<BaseMenu>>& menus, GameContext& ctx)
 {

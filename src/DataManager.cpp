@@ -16,13 +16,13 @@
 #include "CharismaAttributes.h"
 #include "ConstitutionAttributes.h"
 #include "CreatureClass.h"
+#include "DataManager.h"
 #include "DexterityAttributes.h"
 #include "IntelligenceAttributes.h"
-#include "StrengthAttributes.h"
-#include "WisdomAttributes.h"
-#include "Weapons.h"
-#include "DataManager.h"
 #include "MessageSystem.h"
+#include "StrengthAttributes.h"
+#include "Weapons.h"
+#include "WisdomAttributes.h"
 
 namespace
 {

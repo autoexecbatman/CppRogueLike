@@ -4,12 +4,12 @@
 
 #include "Colors.h"
 #include "GameContext.h"
-#include "InputSystem.h"
-#include "Renderer.h"
 #include "GameStateManager.h"
+#include "InputSystem.h"
 #include "MenuManager.h"
-#include "RenderingManager.h"
 #include "MenuName.h"
+#include "Renderer.h"
+#include "RenderingManager.h"
 
 // The box is sized to the viewport. A fixed 32 tiles is 2048 pixels on a 1280
 // pixel screen, which put startX at -6 tiles: the hint line was drawn from -320

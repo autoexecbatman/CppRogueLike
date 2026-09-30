@@ -87,5 +87,4 @@ public:
 	// the move is committed. Implementors roll their own saving throws here, so
 	// the call changes state and must not be made twice for one entry.
 	virtual EntryResult on_creature_enter(Creature& creature, GameContext& ctx) = 0;
-
 };

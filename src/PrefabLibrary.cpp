@@ -10,12 +10,12 @@
 
 #include <nlohmann/json.hpp>
 
-#include "DungeonRoom.h"
-#include "Paths.h"
-#include "Map.h"
-#include "Renderer.h"
 #include "DecorEditor.h"
+#include "DungeonRoom.h"
+#include "Map.h"
+#include "Paths.h"
 #include "PrefabLibrary.h"
+#include "Renderer.h"
 
 namespace
 {
@@ -137,7 +137,9 @@ void PrefabLibrary::load_tile_labels(std::string_view path)
 	// rooms with no prefab in them, silently.
 	std::ifstream in(Paths::resolve(path));
 	if (!in.is_open())
+	{
 		return;
+	}
 
 	json j;
 	try

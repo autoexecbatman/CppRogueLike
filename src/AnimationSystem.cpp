@@ -7,10 +7,10 @@
 
 #include <raylib.h>
 
-#include "Renderer.h"
-#include "Vector2D.h"
 #include "AnimationSystem.h"
+#include "Renderer.h"
 #include "TileConfig.h"
+#include "Vector2D.h"
 
 float AnimationSystem::random_range(float lo, float hi)
 {
@@ -112,7 +112,9 @@ void AnimationSystem::spawn_lightning_path(
 	unsigned char blue)
 {
 	if (path.empty())
+	{
 		return;
+	}
 
 	float now = static_cast<float>(GetTime());
 
@@ -219,7 +221,9 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 	for (auto& e : entries)
 	{
 		if (is_expired(e))
+		{
 			continue;
+		}
 
 		// Integrate velocity
 		e.px_x += e.vel_x * dt;
@@ -230,7 +234,7 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 		if (e.turbulence > 0.0f)
 		{
 			e.vel_x += -e.vel_y * e.turbulence * dt;
-			e.vel_y +=  e.vel_x * e.turbulence * dt;
+			e.vel_y += e.vel_x * e.turbulence * dt;
 		}
 		// Dampen velocity (drag)
 		e.vel_x *= (1.0f - dt * 4.0f);
@@ -263,10 +267,13 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 			lerp_channel(e.r, e.r_end, t),
 			lerp_channel(e.g, e.g_end, t),
 			lerp_channel(e.b, e.b_end, t),
-			alpha };
+			alpha
+		};
 
 		if (e.additive)
+		{
 			BeginBlendMode(BLEND_ADDITIVE);
+		}
 
 		switch (e.shape)
 		{
@@ -291,7 +298,9 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 		}
 
 		if (e.additive)
+		{
 			EndBlendMode();
+		}
 	}
 
 	std::erase_if(entries, is_expired);
@@ -409,8 +418,12 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 			.turbulence = 0.0f,
 			.radius = random_range(4.0f, 8.0f),
 			.tile = {},
-			.r = 255, .g = 230, .b = 140,
-			.r_end = 255, .g_end = 80, .b_end = 0,
+			.r = 255,
+			.g = 230,
+			.b = 140,
+			.r_end = 255,
+			.g_end = 80,
+			.b_end = 0,
 			.spawn_time = now,
 			.duration = random_range(0.06f, 0.14f),
 			.shape = ParticleShape::CIRCLE,
@@ -433,8 +446,8 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 
 		// Color: inner = yellow-white, outer = orange-red
 		unsigned char spawnG = static_cast<unsigned char>(180.0f * (1.0f - distRatio * 0.55f));
-		unsigned char spawnB = static_cast<unsigned char>(40.0f  * (1.0f - distRatio));
-		unsigned char endG   = static_cast<unsigned char>(15.0f  * (1.0f - distRatio * 0.7f));
+		unsigned char spawnB = static_cast<unsigned char>(40.0f * (1.0f - distRatio));
+		unsigned char endG = static_cast<unsigned char>(15.0f * (1.0f - distRatio * 0.7f));
 
 		// Outer circles drift outward slightly; inner circles barely move
 		float driftSpeed = distRatio * 35.0f;
@@ -447,8 +460,12 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 			.turbulence = 0.0f,
 			.radius = random_range(3.5f, 7.0f) * (1.0f - distRatio * 0.4f),
 			.tile = {},
-			.r = 255, .g = spawnG, .b = spawnB,
-			.r_end = 200, .g_end = endG, .b_end = 0,
+			.r = 255,
+			.g = spawnG,
+			.b = spawnB,
+			.r_end = 200,
+			.g_end = endG,
+			.b_end = 0,
 			.spawn_time = spawnAt,
 			.duration = random_range(0.35f, 0.75f),
 			.shape = ParticleShape::CIRCLE,
@@ -470,8 +487,12 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 			.turbulence = 0.0f,
 			.radius = 1.0f,
 			.tile = {},
-			.r = 255, .g = 180, .b = 60,
-			.r_end = 180, .g_end = 20, .b_end = 0,
+			.r = 255,
+			.g = 180,
+			.b = 60,
+			.r_end = 180,
+			.g_end = 20,
+			.b_end = 0,
 			.spawn_time = now,
 			.duration = random_range(0.20f, 0.45f),
 			.shape = ParticleShape::PIXEL,
@@ -493,8 +514,12 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 			.turbulence = 0.0f,
 			.radius = 1.0f,
 			.tile = {},
-			.r = 220, .g = 80, .b = 10,
-			.r_end = 80, .g_end = 10, .b_end = 0,
+			.r = 220,
+			.g = 80,
+			.b = 10,
+			.r_end = 80,
+			.g_end = 10,
+			.b_end = 0,
 			.spawn_time = now + random_range(0.15f, 0.55f),
 			.duration = random_range(0.7f, 1.4f),
 			.shape = ParticleShape::PIXEL,

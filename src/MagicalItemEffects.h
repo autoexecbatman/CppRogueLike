@@ -143,9 +143,8 @@ inline std::string_view encode_magical_effect(MagicalEffect magicalEffect)
 	{
 		return "protection";
 	}
-
 	}
-	
+
 	return "none";
 }
 

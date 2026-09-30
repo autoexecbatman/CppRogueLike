@@ -9,23 +9,23 @@
 #include <vector>
 
 #include "Actor.h"
-#include "Creature.h"
-#include "Colors.h"
+#include "Ai.h"
+#include "AiMonster.h"
+#include "AiSpider.h"
 #include "AttackKind.h"
+#include "AttackResult.h"
 #include "BuffSystem.h"
+#include "Colors.h"
+#include "Creature.h"
 #include "DamageInfo.h"
 #include "DataManager.h"
-#include "SavingThrow.h"
 #include "DexterityAttributes.h"
 #include "GameContext.h"
 #include "Map.h"
-#include "Persistent.h"
 #include "MessageSystem.h"
+#include "Persistent.h"
+#include "SavingThrow.h"
 #include "Vector2D.h"
-#include "Ai.h"
-#include "AiMonster.h"
-#include "AttackResult.h"
-#include "AiSpider.h"
 
 // Spider AI constants
 namespace
@@ -423,8 +423,8 @@ bool AiSpider::is_good_ambush_spot(Vector2D position, GameContext& ctx)
 
 	struct AmbushMetrics
 	{
-		int wallCount{0};
-		bool hasCorner{false};
+		int wallCount{ 0 };
+		bool hasCorner{ false };
 	};
 
 	auto is_wall_tile = [&](Vector2D adj) -> bool

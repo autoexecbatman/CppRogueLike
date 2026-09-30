@@ -15,8 +15,8 @@
     },
     {
       "file": "src/Paths.h",
-      "original": "inline constexpr std::string_view LOG      = \"clog.txt\";\n",
-      "mutated": "inline constexpr std::string_view LOG      = \"clog?.txt\";\n",
+      "original": "inline constexpr std::string_view LOG = \"clog.txt\";\n",
+      "mutated": "inline constexpr std::string_view LOG = \"clog?.txt\";\n",
       "catches": "a reserved character reaching any other path constant"
     },
     {

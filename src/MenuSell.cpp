@@ -7,15 +7,15 @@
 #include <string>
 #include <utility>
 
+#include "BaseMenu.h"
+#include "Colors.h"
 #include "Creature.h"
+#include "GameContext.h"
 #include "InventoryOperations.h"
 #include "Item.h"
-#include "Colors.h"
-#include "GameContext.h"
-#include "Renderer.h"
-#include "MessageSystem.h"
-#include "BaseMenu.h"
 #include "MenuSell.h"
+#include "MessageSystem.h"
+#include "Renderer.h"
 
 void MenuSell::populate_items(std::span<std::unique_ptr<Item>> item)
 {
@@ -83,9 +83,7 @@ void MenuSell::handle_sell(Creature& shopkeeper, Creature& seller, GameContext& 
 	assert(item && "MenuSell: the pack holds a null item");
 
 	// The shop decides and reports; this menu only keeps its cursor inside the pack.
-	if (shopkeeper.shop->process_player_sale(ctx, *item, seller, shopkeeper)
-		&& currentState >= InventoryOperations::get_item_count(seller.inventoryData)
-		&& !InventoryOperations::is_inventory_empty(seller.inventoryData))
+	if (shopkeeper.shop->process_player_sale(ctx, *item, seller, shopkeeper) && currentState >= InventoryOperations::get_item_count(seller.inventoryData) && !InventoryOperations::is_inventory_empty(seller.inventoryData))
 	{
 		currentState = InventoryOperations::get_item_count(seller.inventoryData) - 1;
 	}

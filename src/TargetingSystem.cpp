@@ -7,24 +7,24 @@
 #include <raylib.h>
 
 #include "Actor.h"
-#include "EquipmentSlot.h"
-#include "Player.h"
-#include "Colors.h"
+#include "AnimationSystem.h"
 #include "AttackKind.h"
+#include "BuffSystem.h"
+#include "Colors.h"
+#include "Creature.h"
+#include "CreatureManager.h"
+#include "EquipmentSlot.h"
 #include "GameContext.h"
 #include "ItemClassification.h"
 #include "Map.h"
-#include "Renderer.h"
-#include "AnimationSystem.h"
-#include "BuffSystem.h"
-#include "Creature.h"
-#include "CreatureManager.h"
 #include "MessageSystem.h"
+#include "Player.h"
+#include "Renderer.h"
 #include "RenderingManager.h"
-#include "TileConfig.h"
 #include "TargetingMenu.h"
-#include "Vector2D.h"
 #include "TargetingSystem.h"
+#include "TileConfig.h"
+#include "Vector2D.h"
 
 void TargetingSystem::draw_los(GameContext& ctx, Vector2D targetCursor) const
 {
@@ -197,7 +197,9 @@ void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
 				innerCtx.player()->position,
 				targetPos,
 				boltTile,
-				210, 180, 100,
+				210,
+				180,
+				100,
 				550.0f,
 				0.0f,
 				std::move(onArrive));
@@ -255,7 +257,6 @@ int TargetingSystem::get_weapon_range(const Item* weapon)
 	{
 		return 4;
 	}
-
 	}
 }
 

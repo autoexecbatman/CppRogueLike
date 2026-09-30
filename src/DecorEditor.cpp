@@ -13,9 +13,9 @@
 #include <nlohmann/json_fwd.hpp>
 #include <raylib.h>
 
+#include "DecorEditor.h"
 #include "Paths.h"
 #include "Renderer.h"
-#include "DecorEditor.h"
 
 using json = nlohmann::json;
 
@@ -287,7 +287,8 @@ void DecorEditor::update_and_render(const Renderer& renderer)
 	::Vector2 mouse_pos = GetMousePosition();
 	const Vector2D worldPosition{
 		(static_cast<int>(mouse_pos.x) + cam_x) / tile_size,
-		(static_cast<int>(mouse_pos.y) + cam_y) / tile_size };
+		(static_cast<int>(mouse_pos.y) + cam_y) / tile_size
+	};
 
 	draw_cursor(renderer, worldPosition);
 	draw_palette_strip(renderer);
@@ -352,7 +353,7 @@ void DecorEditor::draw_palette_strip(const Renderer& renderer) const
 			DrawRectangle(px, py, tile_size, tile_size, Color{ 255, 255, 0, 80 });
 		}
 
-		renderer.draw_tile_screen(Vector2D{ px, py }, palette[idx].tile);	
+		renderer.draw_tile_screen(Vector2D{ px, py }, palette[idx].tile);
 
 		if (is_current)
 		{

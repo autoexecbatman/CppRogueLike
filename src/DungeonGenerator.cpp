@@ -5,14 +5,14 @@
 #include <ranges>
 #include <vector>
 
-#include "Item.h"
-#include "GameContext.h"
-#include "RandomDice.h"
-#include "PrefabLibrary.h"
-#include "Vector2D.h"
 #include "DungeonGenerator.h"
 #include "DungeonRoom.h"
+#include "GameContext.h"
+#include "Item.h"
 #include "Map.h"
+#include "PrefabLibrary.h"
+#include "RandomDice.h"
+#include "Vector2D.h"
 
 // Cell dimensions: each grid cell is large enough to hold the largest room
 // plus a guaranteed corridor gap on every side so rooms never share a wall.
@@ -43,13 +43,12 @@ RoomShape pick_room_shape(int width, int height, RandomDice& rng)
 		int minHeight;
 	};
 
-	constexpr std::array<ShapeEntry, 5> table
-	{
-		ShapeEntry{ RoomShape::RECT,      40, 0,  0 },
-		ShapeEntry{ RoomShape::CHAMFERED, 25, 6,  6 },
-		ShapeEntry{ RoomShape::L_SHAPE,   20, 9,  7 },
-		ShapeEntry{ RoomShape::PILLARED,  10, 8,  6 },
-		ShapeEntry{ RoomShape::CROSS,      5, 10, 7 },
+	constexpr std::array<ShapeEntry, 5> table{
+		ShapeEntry{ RoomShape::RECT, 40, 0, 0 },
+		ShapeEntry{ RoomShape::CHAMFERED, 25, 6, 6 },
+		ShapeEntry{ RoomShape::L_SHAPE, 20, 9, 7 },
+		ShapeEntry{ RoomShape::PILLARED, 10, 8, 6 },
+		ShapeEntry{ RoomShape::CROSS, 5, 10, 7 },
 	};
 
 	// Build eligible entries for this room size.

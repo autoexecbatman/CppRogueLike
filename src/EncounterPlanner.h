@@ -11,8 +11,8 @@ struct GameContext;
 // key matches a MonsterCreator registry key. xpCost is the budget weight.
 struct MonsterCandidate
 {
-    std::string key;
-    int xpCost;
+	std::string key;
+	int xpCost;
 };
 
 class RandomDice;
@@ -26,10 +26,10 @@ int encounter_budget(RoomType type, int dungeonLevel);
 // or the cap runs out. Never spends more than the budget and never returns more than
 // the cap.
 std::vector<std::string> select_encounter(
-    const std::vector<MonsterCandidate>& candidates,
-    int budget,
-    int cap,
-    RandomDice& rng);
+	const std::vector<MonsterCandidate>& candidates,
+	int budget,
+	int cap,
+	RandomDice& rng);
 
 // Plan and spawn an encounter for the given room.
 // Budget is derived from room type and dungeon level.

@@ -63,8 +63,8 @@
     },
     {
       "file": "src/TurnUndead.cpp",
-      "original": "\t\t\t|| (result.outcome == TurningOutcome::ROLL_REQUIRED && report.roll < result.rollNeeded))\n",
-      "mutated": "\t\t\t|| (result.outcome == TurningOutcome::ROLL_REQUIRED && report.roll <= result.rollNeeded))\n",
+      "original": "|| (result.outcome == TurningOutcome::ROLL_REQUIRED && report.roll < result.rollNeeded))\n",
+      "mutated": "|| (result.outcome == TurningOutcome::ROLL_REQUIRED && report.roll <= result.rollNeeded))\n",
       "catches": "a roll that equals the number needed read as falling short"
     },
     {

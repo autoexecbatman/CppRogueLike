@@ -141,5 +141,4 @@ public:
 	void tick(GameContext& ctx);
 
 	[[nodiscard]] bool is_active() const { return m_active; }
-
 };

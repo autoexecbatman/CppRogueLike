@@ -9,20 +9,20 @@
   "mutations": [
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    owner.set_hp_base(owner.get_hp_base() + hitDiceRoll);\n",
+      "original": "\towner.set_hp_base(owner.get_hp_base() + hitDiceRoll);\n",
       "mutated": "",
       "catches": "base left behind by a level-up, so every hit point gained reads as Constitution on the sheet"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    owner.set_hp_base(owner.get_hp_base() + hitDiceRoll);\n",
-      "mutated": "    owner.set_hp_base(owner.get_hp_base() + totalHPGain);\n",
+      "original": "\towner.set_hp_base(owner.get_hp_base() + hitDiceRoll);\n",
+      "mutated": "\towner.set_hp_base(owner.get_hp_base() + totalHPGain);\n",
       "catches": "base taking the adjustment too, so the sheet reports no Constitution at any score"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    owner.set_max_hp(owner.get_max_hp() + totalHPGain);\n",
-      "mutated": "    owner.set_max_hp(owner.get_max_hp() + hitDiceRoll);\n",
+      "original": "\towner.set_max_hp(owner.get_max_hp() + totalHPGain);\n",
+      "mutated": "\towner.set_max_hp(owner.get_max_hp() + hitDiceRoll);\n",
       "catches": "the adjustment never reaching the maximum, so a high Constitution grants nothing"
     },
     {

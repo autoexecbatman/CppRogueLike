@@ -1,7 +1,7 @@
-#include <optional>
 #include <algorithm>
 #include <cassert>
 #include <format>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -11,32 +11,32 @@
 #include "SavingThrow.h"
 #include "VariantVisitor.h"
 
-#include "Creature.h"
-#include "Player.h"
-#include "Colors.h"
-#include "GameContext.h"
-#include "MagicalItemEffects.h"
-#include "Weapons.h"
-#include "Map.h"
-#include "Persistent.h"
+#include "Actor.h"
 #include "BuffSystem.h"
 #include "BuffType.h"
+#include "Colors.h"
+#include "Creature.h"
 #include "CreatureManager.h"
+#include "EquipmentSlot.h"
 #include "FloatingTextSystem.h"
+#include "GameContext.h"
 #include "HungerSystem.h"
+#include "InventoryData.h"
+#include "InventoryOperations.h"
+#include "MagicalItemEffects.h"
+#include "Map.h"
 #include "MessageSystem.h"
+#include "Persistent.h"
+#include "Pickable.h"
+#include "Player.h"
 #include "SpawnUtils.h"
 #include "SpellAnimations.h"
 #include "SpellSystem.h"
+#include "TargetMode.h"
 #include "TargetingMenu.h"
 #include "TargetingSystem.h"
-#include "TargetMode.h"
 #include "Vector2D.h"
-#include "Actor.h"
-#include "EquipmentSlot.h"
-#include "InventoryData.h"
-#include "InventoryOperations.h"
-#include "Pickable.h"
+#include "Weapons.h"
 
 // ========== Internal helpers ==========
 
@@ -262,7 +262,6 @@ bool use(Consumable& consumable, Item& owner, Creature& wearer, GameContext& ctx
 		ctx.messageSystem->message(ColorPairId::RED_BLACK, std::format("Nothing happens with the {}.", owner.get_name()), MessageCompletion::FINISHED);
 		return false;
 	}
-
 	}
 
 	return consume_item(owner, wearer);
@@ -502,8 +501,8 @@ bool use(Armor& armor, Item& item, Creature& wearer, GameContext& ctx)
 		ctx.messageSystem->message(
 			ColorPairId::WHITE_BLACK,
 			was_equipped ? "You remove the " + item.actorData.name + "."
-			             : "You put on the " + item.actorData.name + ".",
-			             MessageCompletion::FINISHED);
+						 : "You put on the " + item.actorData.name + ".",
+			MessageCompletion::FINISHED);
 	}
 
 	return success;
@@ -578,7 +577,10 @@ bool use(IdentifyScroll& identifyScroll, Item& owner, Creature& wearer, GameCont
 				ctx.floatingText->spawn_text(
 					wearer.position,
 					std::string(item->get_name()) + " identified!",
-					0, 255, 255, 2.0f);
+					0,
+					255,
+					255,
+					2.0f);
 			}
 		}
 	}
@@ -587,7 +589,7 @@ bool use(IdentifyScroll& identifyScroll, Item& owner, Creature& wearer, GameCont
 		identifiedCount > 0
 			? std::format("You use the {}. {} items identified!", owner.get_name(), identifiedCount)
 			: std::format("You use the {}. All items were already identified.", owner.get_name()),
-			MessageCompletion::FINISHED);
+		MessageCompletion::FINISHED);
 	return consume_item(owner, wearer);
 }
 
@@ -621,11 +623,16 @@ int get_item_ac_bonus(const ItemBehavior& behavior) noexcept
 {
 	return std::visit(
 		VariantVisitor{
-			[](const Armor& a) -> int { return a.armorClass; },
-			[](const Shield&) -> int { return -1; }, // +1 AC in AD&D terms
-			[](const MagicalHelm& mh) -> int { return MagicalEffectUtils::get_ac_bonus(mh.effect, mh.bonus); },
-			[](const MagicalRing& mr) -> int { return MagicalEffectUtils::get_protection_bonus(mr.effect); },
-			[](const auto&) -> int { return 0; },
+			[](const Armor& a) -> int
+			{ return a.armorClass; },
+			[](const Shield&) -> int
+			{ return -1; }, // +1 AC in AD&D terms
+			[](const MagicalHelm& mh) -> int
+			{ return MagicalEffectUtils::get_ac_bonus(mh.effect, mh.bonus); },
+			[](const MagicalRing& mr) -> int
+			{ return MagicalEffectUtils::get_protection_bonus(mr.effect); },
+			[](const auto&) -> int
+			{ return 0; },
 		},
 		behavior);
 }
@@ -662,9 +669,12 @@ int get_item_resistance_strength(const ItemBehavior& behavior, DamageType damage
 	};
 	return std::visit(
 		VariantVisitor{
-			[&percent_if](const MagicalRing& ring) -> int { return percent_if(ring.effect, ring.bonus); },
-			[&percent_if](const MagicalHelm& helm) -> int { return percent_if(helm.effect, helm.bonus); },
-			[](const auto&) -> int { return 0; },
+			[&percent_if](const MagicalRing& ring) -> int
+			{ return percent_if(ring.effect, ring.bonus); },
+			[&percent_if](const MagicalHelm& helm) -> int
+			{ return percent_if(helm.effect, helm.bonus); },
+			[](const auto&) -> int
+			{ return 0; },
 		},
 		behavior);
 }
@@ -692,7 +702,8 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 				output["weaponSize"] = encode_weapon_size(b.weaponSize);
 				output["strengthRating"] = b.strengthRating;
 			},
-			[&output](const Shield&) { output["type"] = encode_pickable_type(PickableType::SHIELD); },
+			[&output](const Shield&)
+			{ output["type"] = encode_pickable_type(PickableType::SHIELD); },
 			[&output](const TargetedScroll& b)
 			{
 				output["type"] = encode_pickable_type(PickableType::TARGETED_SCROLL);
@@ -704,8 +715,10 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 				output["buffType"] = encode_buff_type(b.buffType);
 				output["buffDuration"] = b.buffDuration;
 			},
-			[&output](const Teleporter&) { output["type"] = encode_pickable_type(PickableType::TELEPORTER); },
-			[&output](const IdentifyScroll&) { output["type"] = encode_pickable_type(PickableType::IDENTIFY_SCROLL); },
+			[&output](const Teleporter&)
+			{ output["type"] = encode_pickable_type(PickableType::TELEPORTER); },
+			[&output](const IdentifyScroll&)
+			{ output["type"] = encode_pickable_type(PickableType::IDENTIFY_SCROLL); },
 			[&output](const Gold& b)
 			{
 				output["type"] = encode_pickable_type(PickableType::GOLD_COIN);
@@ -738,11 +751,16 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 				output["effect"] = encode_magical_effect(b.effect);
 				output["bonus"] = b.bonus;
 			},
-			[&output](const JewelryAmulet& b) { save_stat_boost(b, PickableType::JEWELRY_AMULET, output); },
-			[&output](const Gauntlets& b) { save_stat_boost(b, PickableType::GAUNTLETS, output); },
-			[&output](const Girdle& b) { save_stat_boost(b, PickableType::GIRDLE, output); },
-			[&output](const Amulet&) { output["type"] = encode_pickable_type(PickableType::QUEST_ITEM); },
-			[&output](const DungeonKey&) { output["type"] = encode_pickable_type(PickableType::DUNGEON_KEY); },
+			[&output](const JewelryAmulet& b)
+			{ save_stat_boost(b, PickableType::JEWELRY_AMULET, output); },
+			[&output](const Gauntlets& b)
+			{ save_stat_boost(b, PickableType::GAUNTLETS, output); },
+			[&output](const Girdle& b)
+			{ save_stat_boost(b, PickableType::GIRDLE, output); },
+			[&output](const Amulet&)
+			{ output["type"] = encode_pickable_type(PickableType::QUEST_ITEM); },
+			[&output](const DungeonKey&)
+			{ output["type"] = encode_pickable_type(PickableType::DUNGEON_KEY); },
 		},
 		behavior);
 }

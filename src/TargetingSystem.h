@@ -3,8 +3,8 @@
 #include <vector>
 
 #include "Actor.h"
-#include "Vector2D.h"
 #include "TargetMode.h"
+#include "Vector2D.h"
 
 struct GameContext;
 

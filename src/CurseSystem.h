@@ -29,5 +29,4 @@ public:
 	// does: a cursed amulet costs one a turn today, and the drain that kills is a
 	// different case from the drain that does not.
 	void apply_hp_drain(int damage, Player& player, GameContext& ctx);
-
 };

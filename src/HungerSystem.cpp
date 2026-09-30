@@ -6,13 +6,13 @@
 
 #include <nlohmann/json.hpp>
 
-#include "Player.h"
 #include "Colors.h"
 #include "DamageInfo.h"
 #include "GameContext.h"
-#include "RandomDice.h"
-#include "MessageSystem.h"
 #include "HungerSystem.h"
+#include "MessageSystem.h"
+#include "Player.h"
+#include "RandomDice.h"
 
 using json = nlohmann::json;
 
@@ -238,7 +238,6 @@ void HungerSystem::apply_hunger_effects(GameContext& ctx)
 		ctx.player()->take_damage_and_check_death(1, ctx, DamageType::PHYSICAL);
 		break;
 	}
-
 	}
 }
 

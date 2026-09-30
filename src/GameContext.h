@@ -110,7 +110,6 @@ public:
 
 	WindowState get_window_state() const noexcept { return windowState; }
 	void set_window_state(WindowState s) noexcept { windowState = s; }
-
 };
 
 // Data collected by character creation menus before Player is constructed.
@@ -198,7 +197,7 @@ struct GameContext
 	CurseSystem* curseSystem{ nullptr };
 	ContentRegistry* contentRegistry{ nullptr };
 	Minimap* minimap{ nullptr };
-	Dijkstra* pathfinder{ nullptr };  // Persistent pathfinding object (reused across turns)
+	Dijkstra* pathfinder{ nullptr }; // Persistent pathfinding object (reused across turns)
 	DecorEditor* decorEditor{ nullptr };
 	PrefabLibrary* prefabLibrary{ nullptr };
 #ifndef __EMSCRIPTEN__

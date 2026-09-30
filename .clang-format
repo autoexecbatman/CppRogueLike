@@ -30,3 +30,6 @@ ColumnLimit: 0
 Cpp11BracedListStyle: false
 SpaceBeforeCpp11BracedList: false
 SpacesInContainerLiterals: true
+# Braces on every if/for/while body. This does NOT brace a case body -
+# no clang-format option does; see issues/0097.
+InsertBraces: true

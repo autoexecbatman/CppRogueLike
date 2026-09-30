@@ -1,16 +1,16 @@
 #include <string>
 
-#include "Creature.h"
-#include "Item.h"
-#include "Player.h"
 #include "Colors.h"
+#include "Creature.h"
 #include "DamageInfo.h"
-#include "WeaponDamageRegistry.h"
 #include "GameContext.h"
-#include "ItemIdentification.h"
+#include "Item.h"
 #include "ItemEnhancements.h"
+#include "ItemIdentification.h"
 #include "MessageSystem.h"
+#include "Player.h"
 #include "PlayerAttacker.h"
+#include "WeaponDamageRegistry.h"
 
 PlayerAttacker::PlayerAttacker(Player& owner)
 	: Attacker(DamageInfo{}), owner(owner) {}
@@ -59,9 +59,7 @@ AttackResult PlayerAttacker::attack(Creature& target, AttackKind kind, GameConte
 		const std::string mainName = mainWeapon ? mainWeapon->actorData.name : "unarmed";
 
 		const AttackResult mainHand = perform_single_attack(
-			owner, target, mainDamage,
-			dualWieldInfo.mainHandPenalty + weapon_hit_modifier(EquipmentSlot::RIGHT_HAND),
-			mainName, kind, ctx);
+			owner, target, mainDamage, dualWieldInfo.mainHandPenalty + weapon_hit_modifier(EquipmentSlot::RIGHT_HAND), mainName, kind, ctx);
 
 		// The off hand swings only while the target is still up, so a main hand that
 		// killed outright reports for both.
@@ -70,9 +68,7 @@ AttackResult PlayerAttacker::attack(Creature& target, AttackKind kind, GameConte
 		{
 			const DamageInfo offDamage = compute_weapon_damage(EquipmentSlot::LEFT_HAND);
 			offHand = perform_single_attack(
-				owner, target, offDamage,
-				dualWieldInfo.offHandPenalty + weapon_hit_modifier(EquipmentSlot::LEFT_HAND),
-				"off hand", kind, ctx);
+				owner, target, offDamage, dualWieldInfo.offHandPenalty + weapon_hit_modifier(EquipmentSlot::LEFT_HAND), "off hand", kind, ctx);
 		}
 		const bool eitherLanded = mainHand == AttackResult::LANDED || offHand == AttackResult::LANDED;
 		return eitherLanded ? AttackResult::LANDED : mainHand;

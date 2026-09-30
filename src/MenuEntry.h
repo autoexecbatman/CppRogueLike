@@ -12,7 +12,7 @@ struct GameContext;
 
 struct MenuEntry
 {
-    std::string label{};
-    char hotkey{ 0 };
-    std::optional<std::function<void(GameContext&)>> command{};
+	std::string label{};
+	char hotkey{ 0 };
+	std::optional<std::function<void(GameContext&)>> command{};
 };

@@ -3,125 +3,125 @@
 #include <vector>
 
 #include "Actor.h"
+#include "Ai.h"
+#include "AiMonster.h"
+#include "AttackKind.h"
 #include "Attacker.h"
 #include "BuffSystem.h"
 #include "Creature.h"
-#include "AttackKind.h"
 #include "GameContext.h"
 #include "Map.h"
 #include "Persistent.h"
 #include "Vector2D.h"
-#include "Ai.h"
-#include "AiMonster.h"
 
 namespace
 {
-	const std::vector<Vector2D> NEIGHBORS = {
-		DIR_N, DIR_S, DIR_W, DIR_E, DIR_NW, DIR_NE, DIR_SW, DIR_SE
+const std::vector<Vector2D> NEIGHBORS = {
+	DIR_N, DIR_S, DIR_W, DIR_E, DIR_NW, DIR_NE, DIR_SW, DIR_SE
+};
+
+// AD&D 2e: Move away from player using inverted Dijkstra gradient.
+void flee(Creature& owner, GameContext& ctx)
+{
+	auto is_occupied = [&ctx](const Vector2D& pos)
+	{
+		return ctx.map->get_actor(pos, ctx) != nullptr;
 	};
 
-	// AD&D 2e: Move away from player using inverted Dijkstra gradient.
-	void flee(Creature& owner, GameContext& ctx)
+	const int currentCost = ctx.map->get_dijkstra_cost(owner.position);
+
+	// Disconnected tile (unreachable from player) — costs are meaningless, hold position.
+	if (currentCost == std::numeric_limits<int>::max())
 	{
-		auto is_occupied = [&ctx](const Vector2D& pos)
-		{
-			return ctx.map->get_actor(pos, ctx) != nullptr;
-		};
+		return;
+	}
 
-		const int currentCost = ctx.map->get_dijkstra_cost(owner.position);
+	std::optional<Vector2D> bestStep;
+	int bestCost = currentCost; // only accept tiles strictly further than current position
 
-		// Disconnected tile (unreachable from player) — costs are meaningless, hold position.
-		if (currentCost == std::numeric_limits<int>::max())
+	for (const Vector2D& delta : NEIGHBORS)
+	{
+		Vector2D candidate{ owner.position.x + delta.x, owner.position.y + delta.y };
+		if (!ctx.map->is_in_bounds(candidate))
 		{
-			return;
+			continue;
 		}
-
-		std::optional<Vector2D> bestStep;
-		int bestCost = currentCost; // only accept tiles strictly further than current position
-
-		for (const Vector2D& delta : NEIGHBORS)
+		if (!ctx.map->can_walk(candidate, ctx))
 		{
-			Vector2D candidate{ owner.position.x + delta.x, owner.position.y + delta.y };
-			if (!ctx.map->is_in_bounds(candidate))
-			{
-				continue;
-			}
-			if (!ctx.map->can_walk(candidate, ctx))
-			{
-				continue;
-			}
-			int candidateCost = ctx.map->get_dijkstra_cost(candidate);
-			if (candidateCost > bestCost && !is_occupied(candidate))
-			{
-				bestCost = candidateCost;
-				bestStep = candidate;
-			}
+			continue;
 		}
-
-		if (bestStep)
+		int candidateCost = ctx.map->get_dijkstra_cost(candidate);
+		if (candidateCost > bestCost && !is_occupied(candidate))
 		{
-			owner.position = *bestStep;
-		}
-		else
-		{
-			// At escape apex — no tile further from player is available.
-			// AD&D 2e: fight back only if the threat is adjacent; otherwise hold ground.
-			if (owner.get_tile_distance(ctx.player()->position) <= 1)
-			{
-				owner.remove_state(ActorState::IS_FLEEING);
-				owner.attacker->attack(*ctx.player(), AttackKind::MELEE, ctx);
-			}
-			// else: hold position, keep IS_FLEEING — player has not cornered us yet
+			bestCost = candidateCost;
+			bestStep = candidate;
 		}
 	}
 
-	// AD&D 2e: Roll 2d10 against morale score; set IS_FLEEING on failure.
-	void check_morale(Creature& owner, GameContext& ctx)
+	if (bestStep)
 	{
-		if (owner.has_state(ActorState::IS_FLEEING))
+		owner.position = *bestStep;
+	}
+	else
+	{
+		// At escape apex — no tile further from player is available.
+		// AD&D 2e: fight back only if the threat is adjacent; otherwise hold ground.
+		if (owner.get_tile_distance(ctx.player()->position) <= 1)
 		{
-			return;
+			owner.remove_state(ActorState::IS_FLEEING);
+			owner.attacker->attack(*ctx.player(), AttackKind::MELEE, ctx);
 		}
+		// else: hold position, keep IS_FLEEING — player has not cornered us yet
+	}
+}
 
-		const int hp = owner.get_hp();
-		const int hpMax = owner.get_max_hp();
-
-		if (hp * 2 > hpMax)
-		{
-			return;
-		}
-
-		const int moraleRoll = ctx.dice->roll(1, 10) + ctx.dice->roll(1, 10);
-		if (moraleRoll > owner.get_morale())
-		{
-			owner.add_state(ActorState::IS_FLEEING);
-		}
+// AD&D 2e: Roll 2d10 against morale score; set IS_FLEEING on failure.
+void check_morale(Creature& owner, GameContext& ctx)
+{
+	if (owner.has_state(ActorState::IS_FLEEING))
+	{
+		return;
 	}
 
-	// One step of random drift. No-ops when the chosen tile is blocked or occupied.
-	void random_wander(Creature& owner, GameContext& ctx)
+	const int hp = owner.get_hp();
+	const int hpMax = owner.get_max_hp();
+
+	if (hp * 2 > hpMax)
 	{
-		int dx = ctx.dice->roll(-1, 1);
-		int dy = ctx.dice->roll(-1, 1);
-		if (dx == 0 && dy == 0)
-		{
-			return;
-		}
-		Vector2D newPos = owner.position + Vector2D{ dx, dy };
-		if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
-		{
-			owner.position = newPos;
-		}
+		return;
 	}
-	// Returns true when this creature must skip its turn entirely.
-	bool cannot_act(Creature& owner)
+
+	const int moraleRoll = ctx.dice->roll(1, 10) + ctx.dice->roll(1, 10);
+	if (moraleRoll > owner.get_morale())
 	{
-		if (owner.ai == nullptr || owner.is_dead())
-		{
-			return true;
-		}
-		return owner.has_state(ActorState::IS_SLEEPING) || owner.has_state(ActorState::IS_HELD);
+		owner.add_state(ActorState::IS_FLEEING);
 	}
+}
+
+// One step of random drift. No-ops when the chosen tile is blocked or occupied.
+void random_wander(Creature& owner, GameContext& ctx)
+{
+	int dx = ctx.dice->roll(-1, 1);
+	int dy = ctx.dice->roll(-1, 1);
+	if (dx == 0 && dy == 0)
+	{
+		return;
+	}
+	Vector2D newPos = owner.position + Vector2D{ dx, dy };
+	if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
+	{
+		owner.position = newPos;
+	}
+}
+// Returns true when this creature must skip its turn entirely.
+bool cannot_act(Creature& owner)
+{
+	if (owner.ai == nullptr || owner.is_dead())
+	{
+		return true;
+	}
+	return owner.has_state(ActorState::IS_SLEEPING) || owner.has_state(ActorState::IS_HELD);
+}
 } // namespace
 
 void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
@@ -143,8 +143,7 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 
 	auto is_blocked = [&ctx](const Vector2D& pos)
 	{
-		return ctx.map->get_actor(pos, ctx) != nullptr
-			|| ctx.map->find_decoration_at(pos, ctx) != nullptr;
+		return ctx.map->get_actor(pos, ctx) != nullptr || ctx.map->find_decoration_at(pos, ctx) != nullptr;
 	};
 
 	std::optional<Vector2D> bestStep;
@@ -233,13 +232,11 @@ void AiMonster::update(Creature& owner, GameContext& ctx)
 
 void AiMonster::load(const json& j)
 {
-
 }
 
 void AiMonster::save(json& j)
 {
 	j["type"] = encode_ai_type(get_ai_type());
-
 }
 
 // file: AiMonster.cpp

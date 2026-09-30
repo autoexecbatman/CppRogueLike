@@ -9,7 +9,7 @@
 
 namespace Paths
 {
-inline constexpr std::string_view LOG      = "clog.txt";
+inline constexpr std::string_view LOG = "clog.txt";
 inline constexpr std::string_view SAVE_FILE = "saves/game.sav";
 
 inline constexpr std::string_view DAWNLIKE_DIR = "DawnLike";
@@ -22,9 +22,9 @@ inline constexpr std::string_view DAWNLIKE_FONT = "DawnLike/GUI/SDS_8x8.ttf";
 inline constexpr std::string_view PREFABS = "data/prefabs.json";
 inline constexpr std::string_view CONTENT_TILES = "data/content/tiles.json";
 inline constexpr std::string_view MONSTERS = "data/content/monsters.json";
-inline constexpr std::string_view SPELLS   = "data/content/spells.json";
+inline constexpr std::string_view SPELLS = "data/content/spells.json";
 inline constexpr std::string_view BODY_PLANS = "data/content/body_plans.json";
-inline constexpr std::string_view ITEMS          = "data/content/items.json";
+inline constexpr std::string_view ITEMS = "data/content/items.json";
 inline constexpr std::string_view ENHANCED_RULES = "data/content/enhanced_rules.json";
 inline constexpr std::string_view TILE_CONFIG = "data/tiles/tile_config.json";
 
@@ -38,10 +38,14 @@ inline std::filesystem::path resolve(std::string_view relative)
 	for (int i = 0; i < 8; ++i)
 	{
 		if (fs::is_directory(dir / "data"))
+		{
 			return dir / relative;
+		}
 		auto parent = dir.parent_path();
 		if (parent == dir)
+		{
 			break;
+		}
 		dir = parent;
 	}
 	return fs::current_path() / relative;

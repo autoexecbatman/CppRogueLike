@@ -174,7 +174,6 @@ const std::string& Item::get_name() const noexcept
 			// Don't append uncursed to keep name clean
 			break;
 		}
-
 		}
 	}
 

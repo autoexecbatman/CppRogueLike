@@ -120,5 +120,4 @@ public:
 	[[nodiscard]] Vector2D get_mouse_world_tile(int camX, int camY, int tileSize) const;
 	[[nodiscard]] bool has_player_action() const { return currentKey != GameKey::NONE; }
 	[[nodiscard]] bool window_resized() const { return resized; }
-
 };

@@ -5,13 +5,13 @@
 
 #include <raylib.h>
 
-#include "Paths.h"
-#include "ItemRegistry.h"
-#include "MonsterRegistry.h"
-#include "Renderer.h"
+#include "ContentEditor.h"
 #include "ContentRegistry.h"
 #include "ContentRegistryIO.h"
-#include "ContentEditor.h"
+#include "ItemRegistry.h"
+#include "MonsterRegistry.h"
+#include "Paths.h"
+#include "Renderer.h"
 
 // ---------------------------------------------------------------------------
 // Static monster table

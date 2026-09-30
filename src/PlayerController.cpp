@@ -11,46 +11,46 @@
 #include <vector>
 
 #include "Actor.h"
-#include "Creature.h"
-#include "InventoryOperations.h"
-#include "Item.h"
-#include "Pickable.h"
-#include "Player.h"
-#include "ThiefSkills.h"
-#include "Colors.h"
 #include "AttackKind.h"
+#include "Colors.h"
+#include "ContextMenu.h"
 #include "Controls.h"
+#include "Creature.h"
+#include "CreatureManager.h"
+#include "DecorEditor.h"
+#include "Decoration.h"
+#include "Dijkstra.h"
+#include "DisplayManager.h"
 #include "GameContext.h"
+#include "InputHandler.h"
+#include "InputSystem.h"
+#include "InventoryOperations.h"
+#include "InventoryUI.h"
+#include "Item.h"
+#include "ItemClassification.h"
 #include "ItemCreator.h"
 #include "ItemFactory.h"
-#include "ItemClassification.h"
-#include "Decoration.h"
-#include "Map.h"
-#include "ContextMenu.h"
-#include "Menu.h"
-#include "Trap.h"
-#include "Persistent.h"
-#include "InputSystem.h"
-#include "Renderer.h"
-#include "CreatureManager.h"
-#include "DisplayManager.h"
-#include "InputHandler.h"
 #include "LevelManager.h"
-#include "ShopkeeperFactory.h"
-#include "MessageSystem.h"
-#include "SpellSystem.h"
-#include "TargetingSystem.h"
-#include "DecorEditor.h"
-#include "InventoryUI.h"
-#include "Dijkstra.h"
-#include "Vector2D.h"
-#include "PlayerController.h"
-#include "TurnUndead.h"
-#include "TileConfig.h"
-#include "MenuTrade.h"
 #include "ListMenu.h"
+#include "Map.h"
+#include "Menu.h"
 #include "MenuEntry.h"
+#include "MenuTrade.h"
+#include "MessageSystem.h"
+#include "Persistent.h"
+#include "Pickable.h"
+#include "Player.h"
+#include "PlayerController.h"
+#include "Renderer.h"
+#include "ShopkeeperFactory.h"
+#include "SpellSystem.h"
 #include "SpellTile.h"
+#include "TargetingSystem.h"
+#include "ThiefSkills.h"
+#include "TileConfig.h"
+#include "Trap.h"
+#include "TurnUndead.h"
+#include "Vector2D.h"
 
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
@@ -216,7 +216,9 @@ void PlayerController::move(Vector2D target)
 void PlayerController::pick_item(GameContext& ctx)
 {
 	if (ctx.floorInventory->items.empty())
+	{
 		return;
+	}
 
 	// Find the first item at the player's position
 	Item* item = nullptr;
@@ -274,8 +276,7 @@ void PlayerController::pick_item(GameContext& ctx)
 		playerOwner.inventoryData,
 		std::move(*removeResult),
 		playerOwner,
-		*ctx.dataManager
-	);
+		*ctx.dataManager);
 
 	if (addResult.has_value())
 	{
@@ -327,12 +328,16 @@ Item* PlayerController::chose_from_inventory(int ascii, GameContext& ctx)
 void PlayerController::look_on_floor(Vector2D target, GameContext& ctx)
 {
 	if (ctx.floorInventory->items.empty())
+	{
 		return;
+	}
 
 	for (const auto& i : ctx.floorInventory->items)
 	{
 		if (i && i->position == target)
+		{
 			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "There's a " + i->actorData.name + " here", MessageCompletion::FINISHED);
+		}
 	}
 }
 
@@ -368,14 +373,18 @@ bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 			{
 				decor->isBroken = true;
 				if (ctx.decorEditor)
+				{
 					ctx.decorEditor->erase(decor->position);
+				}
 
 				ctx.messageSystem->message(
 					ColorPairId::WHITE_BLACK,
 					std::format("The {} shatters!", decor->name),
 					MessageCompletion::FINISHED);
 				if (!decor->lootTableKey.empty())
+				{
 					ctx.map->add_item(decor->position, ctx);
+				}
 			}
 			else
 			{
@@ -574,7 +583,9 @@ void PlayerController::strike(Creature& target, GameContext& ctx)
 bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext& ctx)
 {
 	if (ctx.map->get_actor(targetPosition, ctx) != nullptr)
+	{
 		return false;
+	}
 
 	TileType targetTileType = ctx.map->get_tile_type(targetPosition);
 
@@ -649,7 +660,6 @@ bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext&
 		{
 			break;
 		}
-
 		}
 		return false;
 	}
@@ -658,11 +668,15 @@ bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext&
 bool PlayerController::resolve_mouse_world_tile(GameContext& ctx, Vector2D& out_world_tile) const
 {
 	if (!ctx.renderer || !ctx.inputSystem)
+	{
 		return false;
+	}
 
 	int tileSize = ctx.renderer->get_tile_size();
 	if (tileSize <= 0)
+	{
 		return false;
+	}
 
 	out_world_tile = ctx.inputSystem->get_mouse_world_tile(
 		ctx.renderer->get_camera_x(),
@@ -693,10 +707,12 @@ bool PlayerController::is_mouse_pending_cancelled(GameContext& ctx) const
 Vector2D PlayerController::find_door_approach(Vector2D doorTile, const GameContext& ctx) const
 {
 	if (!ctx.map)
+	{
 		throw std::logic_error("PlayerController::find_door_approach -- ctx.map is null");
+	}
 
 	const std::array<Vector2D, 4> dirs{
-		Vector2D{0, -1}, Vector2D{0, 1}, Vector2D{-1, 0}, Vector2D{1, 0}
+		Vector2D{ 0, -1 }, Vector2D{ 0, 1 }, Vector2D{ -1, 0 }, Vector2D{ 1, 0 }
 	};
 	Vector2D best{ -1, -1 };
 	int bestDist = INT_MAX;
@@ -704,10 +720,11 @@ Vector2D PlayerController::find_door_approach(Vector2D doorTile, const GameConte
 	{
 		Vector2D adj{ doorTile.x + d.x, doorTile.y + d.y };
 		if (!ctx.map->can_walk(adj, ctx))
+		{
 			continue;
+		}
 
-		int dist = std::abs(adj.x - ctx.player()->position.x)
-			+ std::abs(adj.y - ctx.player()->position.y);
+		int dist = std::abs(adj.x - ctx.player()->position.x) + std::abs(adj.y - ctx.player()->position.y);
 		if (dist < bestDist)
 		{
 			bestDist = dist;
@@ -830,12 +847,18 @@ bool PlayerController::execute_arrival(GameContext& ctx)
 	case MouseMode::WALK_TO_DOOR:
 	{
 		if (mouseDoorTarget.x == -1)
+		{
 			throw std::logic_error("PlayerController::execute_arrival -- WALK_TO_DOOR reached without a valid mouseDoorTarget");
+		}
 
 		if (mouseDoorAction == PendingDoorAction::OPEN)
+		{
 			ctx.map->open_door(mouseDoorTarget, ctx);
+		}
 		else
+		{
 			ctx.map->close_door(mouseDoorTarget, ctx);
+		}
 
 		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		return true;
@@ -853,14 +876,15 @@ bool PlayerController::execute_arrival(GameContext& ctx)
 
 	default:
 		return false;
-
 	}
 }
 
 bool PlayerController::handle_mouse_path(GameContext& ctx)
 {
 	if (mouseMode == MouseMode::IDLE)
+	{
 		return false;
+	}
 
 	if (is_mouse_pending_cancelled(ctx))
 	{
@@ -870,7 +894,9 @@ bool PlayerController::handle_mouse_path(GameContext& ctx)
 	}
 
 	while (!ctx.mousePathOverlay->empty() && ctx.mousePathOverlay->front() == playerOwner.position)
+	{
 		ctx.mousePathOverlay->erase(ctx.mousePathOverlay->begin());
+	}
 
 	if (ctx.mousePathOverlay->empty())
 	{
@@ -887,7 +913,9 @@ bool PlayerController::handle_mouse_path(GameContext& ctx)
 	flush_fov(ctx);
 
 	if (playerOwner.position == next)
+	{
 		ctx.mousePathOverlay->erase(ctx.mousePathOverlay->begin());
+	}
 
 	if (playerOwner.position == prevPos)
 	{
@@ -902,7 +930,9 @@ bool PlayerController::handle_mouse_path(GameContext& ctx)
 	}
 
 	if (ctx.gameState->get_game_status() != GameStatus::STARTUP)
+	{
 		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+	}
 
 	return true;
 }
@@ -911,7 +941,9 @@ void PlayerController::handle_left_click(GameContext& ctx)
 {
 	Vector2D world_tile;
 	if (!resolve_mouse_world_tile(ctx, world_tile))
+	{
 		return;
+	}
 
 	if (world_tile == playerOwner.position)
 	{
@@ -948,7 +980,8 @@ void PlayerController::handle_left_click(GameContext& ctx)
 	}
 	else
 	{
-		assert(std::ranges::none_of(ctx.floorInventory->items, [](const auto& i) { return !i; }));
+		assert(std::ranges::none_of(ctx.floorInventory->items, [](const auto& i)
+			{ return !i; }));
 		for (const auto& item : ctx.floorInventory->items)
 		{
 			if (item->position == world_tile)
@@ -965,7 +998,9 @@ void PlayerController::handle_right_click(GameContext& ctx)
 {
 	Vector2D world_tile;
 	if (!resolve_mouse_world_tile(ctx, world_tile))
+	{
 		return;
+	}
 
 	int tileSize = ctx.renderer->get_tile_size();
 	int anchor_col = world_tile.x - ctx.renderer->get_camera_x() / tileSize;
@@ -977,39 +1012,34 @@ void PlayerController::handle_right_click(GameContext& ctx)
 
 	if (isPlayerTile)
 	{
-		actions.push_back({
-			"Open Inventory",
-			[this](GameContext& c) { display_inventory(c); }
-		});
-		actions.push_back({
-			"Character Sheet",
-			[this](GameContext& c) { c.displayManager->display_character_sheet(playerOwner, c); }
-		});
-		actions.push_back({
-			"Rest",
+		actions.push_back({ "Open Inventory",
+			[this](GameContext& c)
+			{ display_inventory(c); } });
+		actions.push_back({ "Character Sheet",
+			[this](GameContext& c)
+			{ c.displayManager->display_character_sheet(playerOwner, c); } });
+		actions.push_back({ "Rest",
 			[this](GameContext& c)
 			{
 				playerOwner.rest(c);
-			}
-		});
+			} });
 		if (!playerOwner.memorizedSpells.empty())
 		{
-			actions.push_back({
-				"Cast Spell",
-				[this](GameContext& c) { SpellSystem::show_casting_menu(playerOwner, c); }
-			});
+			actions.push_back({ "Cast Spell",
+				[this](GameContext& c)
+				{ SpellSystem::show_casting_menu(playerOwner, c); } });
 		}
 	}
 
 	// Floor item at tile
-	assert(std::ranges::none_of(ctx.floorInventory->items, [](const auto& i) { return !i; }));
+	assert(std::ranges::none_of(ctx.floorInventory->items, [](const auto& i)
+		{ return !i; }));
 	for (auto& item : ctx.floorInventory->items)
 	{
 		if (item->position == world_tile)
 		{
 			std::string itemName = item->actorData.name.substr(0, 16);
-			actions.push_back({
-				"Pick up " + itemName,
+			actions.push_back({ "Pick up " + itemName,
 				[this, world_tile](GameContext& c)
 				{
 					begin_path_walk(
@@ -1018,8 +1048,7 @@ void PlayerController::handle_right_click(GameContext& ctx)
 						MouseMode::WALK_TO_PICKUP,
 						PendingDoorAction::NONE,
 						c);
-				}
-			});
+				} });
 			break;
 		}
 	}
@@ -1032,8 +1061,7 @@ void PlayerController::handle_right_click(GameContext& ctx)
 		PendingDoorAction doorAction = doorIsOpen ? PendingDoorAction::CLOSE : PendingDoorAction::OPEN;
 		std::string doorLabel = doorIsOpen ? "Close door" : "Open door";
 
-		actions.push_back({
-			doorLabel,
+		actions.push_back({ doorLabel,
 			[this, world_tile, doorAction](GameContext& c)
 			{
 				int dx = std::abs(c.player()->position.x - world_tile.x);
@@ -1058,15 +1086,13 @@ void PlayerController::handle_right_click(GameContext& ctx)
 						begin_path_walk(adj, world_tile, MouseMode::WALK_TO_DOOR, doorAction, c);
 					}
 				}
-			}
-		});
+			} });
 	}
 
 	// Stairs at tile
 	if (ctx.stairs && ctx.stairs->position == world_tile)
 	{
-		actions.push_back({
-			"Descend stairs",
+		actions.push_back({ "Descend stairs",
 			[this, world_tile](GameContext& c)
 			{
 				begin_path_walk(
@@ -1075,8 +1101,7 @@ void PlayerController::handle_right_click(GameContext& ctx)
 					MouseMode::WALK_TO_STAIRS,
 					PendingDoorAction::NONE,
 					c);
-			}
-		});
+			} });
 	}
 
 	// Monster at tile (non-player)
@@ -1088,24 +1113,21 @@ void PlayerController::handle_right_click(GameContext& ctx)
 		if (dx <= 1 && dy <= 1)
 		{
 			std::string monName = creature->actorData.name.substr(0, 16);
-			actions.push_back({
-				"Attack " + monName,
+			actions.push_back({ "Attack " + monName,
 				[this, world_tile](GameContext& c)
 				{
 					Vector2D target = world_tile;
 					look_to_attack(target, c);
 					flush_fov(c);
 					c.gameState->set_game_status(GameStatus::NEW_TURN);
-				}
-			});
+				} });
 		}
 	}
 
 	// Walk here -- any non-player walkable tile with no creature
 	if (!isPlayerTile && ctx.map->can_walk(world_tile, ctx) && creature == nullptr)
 	{
-		actions.push_back({
-			"Walk here",
+		actions.push_back({ "Walk here",
 			[this, world_tile](GameContext& c)
 			{
 				begin_path_walk(
@@ -1114,8 +1136,7 @@ void PlayerController::handle_right_click(GameContext& ctx)
 					MouseMode::WALK,
 					PendingDoorAction::NONE,
 					c);
-			}
-		});
+			} });
 	}
 
 	// Nothing actionable -- skip the menu entirely
@@ -1267,7 +1288,7 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "DEBUG: Spells added -- press Shift+C to cast.", MessageCompletion::FINISHED);
 
 		// Spawn a shopkeeper on the first walkable adjacent tile
-		const std::array<Vector2D, 4> cardinals{ Vector2D{0, -1}, Vector2D{0, 1}, Vector2D{-1, 0}, Vector2D{1, 0} };
+		const std::array<Vector2D, 4> cardinals{ Vector2D{ 0, -1 }, Vector2D{ 0, 1 }, Vector2D{ -1, 0 }, Vector2D{ 1, 0 } };
 		for (const auto& offset : cardinals)
 		{
 			Vector2D spawnPos = playerOwner.position + offset;
@@ -1346,14 +1367,15 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 
 	default:
 		break;
-
 	}
 }
 
 bool PlayerController::resolve_pending_door(GameContext& ctx)
 {
 	if (pendingDoorAction == PendingDoorAction::NONE)
+	{
 		return false;
+	}
 
 	int dirKey = ctx.inputHandler->get_current_key();
 	if (dirKey == 27)
@@ -1363,7 +1385,9 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 		return true;
 	}
 	if (dirKey == -1)
+	{
 		return true;
+	}
 
 	Vector2D doorPos = handle_direction_input(dirKey, ctx);
 	if (doorPos.x == 0 && doorPos.y == 0)
@@ -1496,7 +1520,9 @@ Vector2D PlayerController::handle_direction_input(int dirKey, GameContext& ctx)
 	}
 	const Vector2D targetPos = playerOwner.position + moves.at(controlKey);
 	if (!ctx.map->is_in_bounds(targetPos))
+	{
 		return { 0, 0 };
+	}
 
 	return targetPos;
 }

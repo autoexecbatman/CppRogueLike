@@ -3,8 +3,8 @@
 #include <string_view>
 #include <unordered_map>
 
-#include "ItemEnhancements.h"
 #include "DamageInfo.h"
+#include "ItemEnhancements.h"
 #include "WeaponDamageRegistry.h"
 
 const std::unordered_map<std::string, DamageInfo> WeaponDamageRegistry::weaponDamageMap =

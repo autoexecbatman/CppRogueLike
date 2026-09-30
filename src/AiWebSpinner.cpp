@@ -3,20 +3,20 @@
 #include <memory>
 #include <vector>
 
+#include "AiWebSpinner.h"
+#include "BuffSystem.h"
+#include "Colors.h"
 #include "ConstitutionAttributes.h"
 #include "Creature.h"
-#include "Colors.h"
-#include "BuffSystem.h"
 #include "DamageInfo.h"
 #include "DataManager.h"
-#include "SavingThrow.h"
 #include "GameContext.h"
 #include "Map.h"
-#include "Web.h"
 #include "MessageSystem.h"
-#include "Vector2D.h"
-#include "AiWebSpinner.h"
+#include "SavingThrow.h"
 #include "SpellTile.h"
+#include "Vector2D.h"
+#include "Web.h"
 
 constexpr int WEB_COOLDOWN = 8;
 constexpr int WEB_MIN_SIZE = 3;

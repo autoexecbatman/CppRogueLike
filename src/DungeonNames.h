@@ -11,4 +11,4 @@ namespace DungeonNames
 // Returns a unique boss name in "[FirstName] [Epithet]" format.
 // 15 first names x 15 epithets = 225 distinct combinations.
 std::string generate_warden_name(RandomDice& rng);
-}
+} // namespace DungeonNames

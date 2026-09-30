@@ -9,8 +9,8 @@
 #include "DexterityAttributes.h"
 #include "IntelligenceAttributes.h"
 #include "StrengthAttributes.h"
-#include "WisdomAttributes.h"
 #include "Weapons.h"
+#include "WisdomAttributes.h"
 
 class MessageSystem;
 

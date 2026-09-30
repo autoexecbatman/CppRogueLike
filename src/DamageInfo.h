@@ -185,11 +185,7 @@ struct DamageInfo
 	//   DamageInfo{ DiceExpr{ 2, 4, 0 }, DamageType::FIRE }.displayRoll;   // -> "2d4"
 	//   DamageInfo{ DiceExpr{ 2, 4, 0 }, DamageType::FIRE }.maxDamage;     // -> 8
 	DamageInfo(const DiceExpr& rolled, DamageType type)
-		: dice(rolled)
-		, minDamage(dice.min_total())
-		, maxDamage(dice.max_total())
-		, displayRoll(to_text(dice))
-		, damageType(type)
+		: dice(rolled), minDamage(dice.min_total()), maxDamage(dice.max_total()), displayRoll(to_text(dice)), damageType(type)
 	{
 	}
 

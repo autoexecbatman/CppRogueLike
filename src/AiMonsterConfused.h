@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include "Persistent.h"
 #include "Ai.h"
+#include "Persistent.h"
 
 class Creature;
 struct GameContext;

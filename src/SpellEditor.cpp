@@ -8,11 +8,11 @@
 #include <raylib.h>
 
 #include "GameContext.h"
-#include "Paths.h"
 #include "Menu.h"
+#include "Paths.h"
 #include "Renderer.h"
-#include "SpellRegistry.h"
 #include "SpellEditor.h"
+#include "SpellRegistry.h"
 
 namespace
 {
@@ -81,7 +81,9 @@ SpellEffectType effect_type_next(SpellEffectType e)
 	int v = static_cast<int>(e) + 1;
 	constexpr int LAST = static_cast<int>(SpellEffectType::NONE);
 	if (v > LAST)
+	{
 		v = 0;
+	}
 	return static_cast<SpellEffectType>(v);
 }
 
@@ -90,7 +92,9 @@ SpellEffectType effect_type_prev(SpellEffectType e)
 	int v = static_cast<int>(e) - 1;
 	constexpr int LAST = static_cast<int>(SpellEffectType::NONE);
 	if (v < 0)
+	{
 		v = LAST;
+	}
 	return static_cast<SpellEffectType>(v);
 }
 
@@ -425,8 +429,7 @@ void SpellEditor::render_list(const Renderer& renderer, const SpellRegistry& spe
 		}
 
 		bool is_sel = (i == listCursor);
-		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH
-			&& mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
+		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH && mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
 		if (is_sel && focus == 0)
@@ -492,8 +495,7 @@ void SpellEditor::render_fields(const Renderer& r) const
 
 		FieldId fid = static_cast<FieldId>(i);
 		bool is_sel = (i == fieldCursor);
-		bool hovered = mouse.x >= panelX && mouse.x < screenWidth
-			&& mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
+		bool hovered = mouse.x >= panelX && mouse.x < screenWidth && mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
 		if (is_sel && focus == 1)
@@ -573,7 +575,9 @@ void SpellEditor::render_hint(const Renderer& r) const
 const std::string& SpellEditor::current_key() const
 {
 	if (keys.empty())
+	{
 		throw std::out_of_range("SpellEditor::current_key -- key list is empty");
+	}
 	return keys[listCursor];
 }
 
@@ -598,8 +602,10 @@ std::string SpellEditor::field_label(FieldId f) const
 	{
 		return "Class";
 	}
-	case FieldId::EFFECT_TYPE: return "Effect";
-	case FieldId::DESCRIPTION: return "Description";
+	case FieldId::EFFECT_TYPE:
+		return "Effect";
+	case FieldId::DESCRIPTION:
+		return "Description";
 	default:
 	{
 		return "???";

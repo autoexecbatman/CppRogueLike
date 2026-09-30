@@ -49,7 +49,6 @@ enum class Controls
 	TURN_UNDEAD = 'U',
 };
 
-
 // What the help screen shows. Every command below is keyed by a character, and the
 // enum value above is that character, so the key shown is read from the binding
 // rather than typed out a second time. The list that used to live in DisplayManager

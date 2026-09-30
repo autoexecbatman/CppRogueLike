@@ -6,14 +6,14 @@
 
 #include <raylib.h>
 
-#include "Item.h"
 #include "GameContext.h"
-#include "Paths.h"
+#include "Item.h"
 #include "Menu.h"
-#include "Renderer.h" // includes RaylibIncludes.h -> raylib.h + undefs
-#include "TileConfig.h"
+#include "Paths.h"
 #include "PrefabLibrary.h"
+#include "Renderer.h" // includes RaylibIncludes.h -> raylib.h + undefs
 #include "RoomEditor.h"
+#include "TileConfig.h"
 
 // Sheets available in the picker, in Tab-cycle order.
 static constexpr TileSheet PICKER_SHEETS[] = {
@@ -28,12 +28,12 @@ static constexpr std::string_view PICKER_SHEET_NAMES[] = {
 
 namespace
 {
-	// Layout (all in tiles; pixels = value * tile_size)
-	constexpr int LEFT_W_TILES = 11;
-	constexpr int RIGHT_W_TILES = 13;
-	constexpr int TOP_H_TILES = 1;
-	constexpr int BOT_H_TILES = 1;
-}
+// Layout (all in tiles; pixels = value * tile_size)
+constexpr int LEFT_W_TILES = 11;
+constexpr int RIGHT_W_TILES = 13;
+constexpr int TOP_H_TILES = 1;
+constexpr int BOT_H_TILES = 1;
+} // namespace
 
 // ---------------------------------------------------------------------------
 // Lifecycle
@@ -118,12 +118,12 @@ void RoomEditor::do_save(const std::string& name)
 		for (int col = 0; col < canvasWidth; ++col)
 		{
 			char decorChar = (row < static_cast<int>(decorCanvas.size()) &&
-						 col < static_cast<int>(decorCanvas[row].size()))
+								 col < static_cast<int>(decorCanvas[row].size()))
 				? decorCanvas[row][col]
 				: ' ';
 
 			char baseChar = (row < static_cast<int>(canvas.size()) &&
-						 col < static_cast<int>(canvas[row].size()))
+								col < static_cast<int>(canvas[row].size()))
 				? canvas[row][col]
 				: '.';
 
@@ -968,7 +968,7 @@ void RoomEditor::render_canvas(const Renderer& renderer) const
 			// Decor layer -- additively blended so black sprite pixels
 			// are transparent and the base tile shows through underneath.
 			char decorSym = (row < static_cast<int>(decorCanvas.size()) &&
-								 col < static_cast<int>(decorCanvas[row].size()))
+								col < static_cast<int>(decorCanvas[row].size()))
 				? decorCanvas[row][col]
 				: ' ';
 

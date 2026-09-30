@@ -39,8 +39,8 @@
     },
     {
       "file": "src/GameBalance.h",
-      "original": "        inline constexpr int ROUNDS_PER_TURN = 10;",
-      "mutated": "        inline constexpr int ROUNDS_PER_TURN = 6;",
+      "original": "inline constexpr int ROUNDS_PER_TURN = 10;",
+      "mutated": "inline constexpr int ROUNDS_PER_TURN = 6;",
       "catches": "a turn other than the book's ten rounds"
     },
     {

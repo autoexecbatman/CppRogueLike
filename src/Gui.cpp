@@ -8,17 +8,17 @@
 #include <raylib.h>
 
 #include "Actor.h"
-#include "Creature.h"
 #include "Colors.h"
+#include "Creature.h"
 #include "GameContext.h"
-#include "Persistent.h"
-#include "Renderer.h"
-#include "HungerSystem.h"
-#include "MessageSystem.h"
-#include "TileConfig.h"
 #include "Gui.h"
+#include "HungerSystem.h"
 #include "LogMessage.h"
+#include "MessageSystem.h"
+#include "Persistent.h"
 #include "Player.h"
+#include "Renderer.h"
+#include "TileConfig.h"
 
 // Maximum log messages shown in the HUD
 constexpr int LOG_MAX_MESSAGES = 5;

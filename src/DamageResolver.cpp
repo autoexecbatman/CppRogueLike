@@ -2,12 +2,12 @@
 #include <format>
 #include <unordered_map>
 
-#include "DamageResolver.h"
-#include "DamageInfo.h"
-#include "Creature.h"
-#include "GameContext.h"
 #include "BuffSystem.h"
 #include "BuffType.h"
+#include "Creature.h"
+#include "DamageInfo.h"
+#include "DamageResolver.h"
+#include "GameContext.h"
 #include "MessageSystem.h"
 
 namespace
@@ -21,7 +21,6 @@ const std::unordered_map<DamageType, BuffType> damageResistanceBuffs = {
 	{ DamageType::LIGHTNING, BuffType::LIGHTNING_RESISTANCE },
 	{ DamageType::POISON, BuffType::POISON_RESISTANCE },
 };
-
 
 // Per ring of resistance strength, from the two Dungeon Master's Guide
 // entries: fire is -2 a die and +4 on the save, cold is -1 and +2.

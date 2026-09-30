@@ -9,44 +9,44 @@
   "mutations": [
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    return level <= LevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
-      "mutated": "    return level < LevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
+      "original": "\treturn level <= LevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
+      "mutated": "\treturn level < LevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
       "catches": "the adjustment ending a level before the last rolled die"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    return level <= LevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
-      "mutated": "    return level <= LevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel + 1;",
+      "original": "\treturn level <= LevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
+      "mutated": "\treturn level <= LevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel + 1;",
       "catches": "the adjustment running a level past the last rolled die"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    if (creatureClass == CreatureClass::MONSTER)\n    {\n        return true;\n    }\n",
+      "original": "\tif (creatureClass == CreatureClass::MONSTER)\n\t{\n\t\treturn true;\n\t}\n",
       "mutated": "",
       "catches": "a monster's hit dice read as a character's levels, so the ones past the ninth take nothing"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    for (int eachLevel = 1; eachLevel <= level; ++eachLevel)",
-      "mutated": "    for (int eachLevel = 1; eachLevel < level; ++eachLevel)",
+      "original": "\tfor (int eachLevel = 1; eachLevel <= level; ++eachLevel)",
+      "mutated": "\tfor (int eachLevel = 1; eachLevel < level; ++eachLevel)",
       "catches": "the count missing the current level"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    for (int eachLevel = 1; eachLevel <= level; ++eachLevel)",
-      "mutated": "    for (int eachLevel = 0; eachLevel <= level; ++eachLevel)",
+      "original": "\tfor (int eachLevel = 1; eachLevel <= level; ++eachLevel)",
+      "mutated": "\tfor (int eachLevel = 0; eachLevel <= level; ++eachLevel)",
       "catches": "the count including a level 0 no creature has"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    const bool stillRollsDice = LevelUpSystem::takes_constitution_adjustment_at(owner.get_creature_class(), newLevel);",
-      "mutated": "    const bool stillRollsDice = LevelUpSystem::takes_constitution_adjustment_at(owner.get_creature_class(), newLevel - 1);",
+      "original": "\tconst bool stillRollsDice = LevelUpSystem::takes_constitution_adjustment_at(owner.get_creature_class(), newLevel);",
+      "mutated": "\tconst bool stillRollsDice = LevelUpSystem::takes_constitution_adjustment_at(owner.get_creature_class(), newLevel - 1);",
       "catches": "level-up asking about the level it is leaving"
     },
     {
       "file": "src/ConstitutionTracker.cpp",
-      "original": "    const int hpDifference = (newBonus - oldBonus) * levels;",
-      "mutated": "    const int hpDifference = (newBonus - oldBonus);",
+      "original": "\tconst int hpDifference = (newBonus - oldBonus) * levels;",
+      "mutated": "\tconst int hpDifference = (newBonus - oldBonus);",
       "catches": "a change of score worth one die however many the creature has"
     },
     {

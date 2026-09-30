@@ -1,15 +1,15 @@
 #include <memory>
 #include <utility>
 
-#include "Creature.h"
+#include "Ai.h"
+#include "AiMonsterConfused.h"
 #include "AttackKind.h"
+#include "Creature.h"
 #include "GameContext.h"
 #include "Map.h"
 #include "Persistent.h"
 #include "RandomDice.h"
 #include "Vector2D.h"
-#include "Ai.h"
-#include "AiMonsterConfused.h"
 
 constexpr int MIN_DIRECTION = -1;
 constexpr int MAX_DIRECTION = 1;

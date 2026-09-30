@@ -5,12 +5,12 @@
 #include <vector>
 
 #include "Creature.h"
+#include "CreatureManager.h"
 #include "GameContext.h"
 #include "Map.h"
 #include "RandomDice.h"
-#include "Vector2D.h"
-#include "CreatureManager.h"
 #include "SpawnUtils.h"
+#include "Vector2D.h"
 
 void CreatureManager::update_creatures(std::span<std::unique_ptr<Creature>> creatures, GameContext& ctx)
 {

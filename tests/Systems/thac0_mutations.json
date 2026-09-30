@@ -21,20 +21,20 @@
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "        return combatTables.get_rogue(level);",
-      "mutated": "        return combatTables.get_fighter(level);",
+      "original": "\t\treturn combatTables.get_rogue(level);",
+      "mutated": "\t\treturn combatTables.get_fighter(level);",
       "catches": "a rogue reading the warrior table, which moves every level instead of every second"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "        return combatTables.get_wizard(level);",
-      "mutated": "        return combatTables.get_cleric(level);",
+      "original": "\t\treturn combatTables.get_wizard(level);",
+      "mutated": "\t\treturn combatTables.get_cleric(level);",
       "catches": "a wizard reading the priest table, which drops two points where the wizard drops one"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    case CreatureClass::FIGHTER:\n    case CreatureClass::MONSTER:\n    {\n        return combatTables.get_fighter(level);\n    }",
-      "mutated": "    case CreatureClass::FIGHTER:\n    {\n        return combatTables.get_fighter(level);\n    }\n\n    case CreatureClass::MONSTER:\n    {\n        return combatTables.get_cleric(level);\n    }",
+      "original": "\tcase CreatureClass::FIGHTER:\n\tcase CreatureClass::MONSTER:\n\t{\n\t\treturn combatTables.get_fighter(level);\n\t}",
+      "mutated": "\tcase CreatureClass::FIGHTER:\n\t{\n        return combatTables.get_fighter(level);\n    }\n\n    case CreatureClass::MONSTER:\n    {\n        return combatTables.get_cleric(level);\n\t}",
       "catches": "a monster falling off the warrior table it is meant to share"
     }
   ]

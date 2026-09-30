@@ -63,7 +63,7 @@ public:
 	TileRef resolve_decor(char symbol) const;
 	bool is_decoration(char symbol) const;
 	std::string symbol_label(char symbol) const;
-	
+
 	// Ordered palette of all known symbols (for Room Editor UI).
 	const std::vector<PaletteEntry>& ordered_palette() const { return paletteOrder; }
 

@@ -17,22 +17,22 @@ struct GameContext;
 
 class NotificationMenu : public BaseMenu
 {
-    std::string title{};
-    std::vector<std::string> lines{};
-    std::function<void(GameContext&)> onClose{};
+	std::string title{};
+	std::vector<std::string> lines{};
+	std::function<void(GameContext&)> onClose{};
 
-    void draw();
+	void draw();
 
 public:
-    NotificationMenu(
-        std::string title,
-        std::vector<std::string> lines,
-        GameContext& ctx);
-    NotificationMenu(const NotificationMenu&) = delete;
-    NotificationMenu& operator=(const NotificationMenu&) = delete;
-    NotificationMenu(NotificationMenu&&) = delete;
-    NotificationMenu& operator=(NotificationMenu&&) = delete;
+	NotificationMenu(
+		std::string title,
+		std::vector<std::string> lines,
+		GameContext& ctx);
+	NotificationMenu(const NotificationMenu&) = delete;
+	NotificationMenu& operator=(const NotificationMenu&) = delete;
+	NotificationMenu(NotificationMenu&&) = delete;
+	NotificationMenu& operator=(NotificationMenu&&) = delete;
 
-    void set_on_close(std::function<void(GameContext&)> callback);
-    void menu(GameContext& ctx) override;
+	void set_on_close(std::function<void(GameContext&)> callback);
+	void menu(GameContext& ctx) override;
 };

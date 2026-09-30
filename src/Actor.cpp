@@ -5,6 +5,7 @@
 
 #include <raylib.h>
 
+#include "Actor.h"
 #include "Ai.h"
 #include "GameContext.h"
 #include "Map.h"
@@ -12,7 +13,6 @@
 #include "Renderer.h"
 #include "UniqueId.h"
 #include "Vector2D.h"
-#include "Actor.h"
 
 Actor::Actor(Vector2D position, ActorData data)
 	: position(position),

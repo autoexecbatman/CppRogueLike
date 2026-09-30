@@ -6,6 +6,6 @@
 // else. Only the caller knows which one it started, so it says so.
 enum class AttackKind
 {
-	MELEE,  // Struck at touching range with whatever is in hand
+	MELEE, // Struck at touching range with whatever is in hand
 	RANGED, // Loosed from the missile slot at a target further off
 };

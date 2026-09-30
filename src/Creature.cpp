@@ -10,35 +10,35 @@
 #include <variant>
 #include <vector>
 
-#include "InventoryOperations.h"
+#include "Actor.h"
 #include "Ai.h"
 #include "AiMonsterConfused.h"
-#include "Colors.h"
-#include "ConstitutionAttributes.h"
-#include "DataManager.h"
-#include "GameBalance.h"
-#include "Map.h"
-#include "Web.h"
-#include "DamageInfo.h"
-#include "GameContext.h"
 #include "AnimationSystem.h"
-#include "Persistent.h"
+#include "Attacker.h"
 #include "BuffSystem.h"
 #include "BuffType.h"
+#include "Colors.h"
+#include "ConstitutionAttributes.h"
+#include "Creature.h"
+#include "DamageInfo.h"
+#include "DataManager.h"
+#include "EquipmentSlot.h"
 #include "FloatingTextSystem.h"
+#include "GameBalance.h"
+#include "GameContext.h"
+#include "InventoryData.h"
+#include "InventoryOperations.h"
+#include "Item.h"
+#include "Map.h"
 #include "MessageSystem.h"
+#include "MonsterAttacker.h"
+#include "Persistent.h"
+#include "Pickable.h"
+#include "Player.h"
 #include "ShopKeeper.h"
 #include "TileConfig.h"
-#include "Actor.h"
-#include "Attacker.h"
-#include "MonsterAttacker.h"
-#include "EquipmentSlot.h"
-#include "InventoryData.h"
-#include "Item.h"
-#include "Creature.h"
 #include "WeaponDamageRegistry.h"
-#include "Player.h"
-#include "Pickable.h"
+#include "Web.h"
 
 // Puts an item into a slot this creature's body provides.
 //
@@ -944,7 +944,6 @@ bool Creature::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 		// Other slots (CLOAK, BRACERS, BOOTS, MISSILES) - no items defined yet
 		break;
 	}
-
 	}
 
 	return true;
@@ -1074,10 +1073,16 @@ void Creature::apply_confusion(int nbTurns)
 
 void Creature::drop(Item& item, GameContext& ctx)
 {
-	[[maybe_unused]] auto is_null = [](const auto& invItem) { return !invItem; };
+	[[maybe_unused]] auto is_null = [](const auto& invItem)
+	{
+		return !invItem;
+	};
 	assert(std::ranges::none_of(inventoryData.items, is_null));
 
-	auto matches_item = [&item](const auto& invItem) { return invItem.get() == &item; };
+	auto matches_item = [&item](const auto& invItem)
+	{
+		return invItem.get() == &item;
+	};
 	auto matches = inventoryData.items | std::views::filter(matches_item);
 
 	if (std::ranges::empty(matches))
@@ -1110,7 +1115,9 @@ bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCo
 	if (!item)
 	{
 		if (ctx.messageSystem->is_debug_mode())
+		{
 			ctx.messageSystem->log("DEBUG: equip_item failed - null item");
+		}
 		return false;
 	}
 

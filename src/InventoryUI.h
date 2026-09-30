@@ -6,9 +6,9 @@
 #include <string_view>
 #include <vector>
 
+#include "BaseMenu.h"
 #include "EquipmentSlot.h"
 #include "ItemClassification.h"
-#include "BaseMenu.h"
 
 class Creature;
 class Item;
@@ -158,5 +158,4 @@ private:
 
 	void draw_frame(GameContext& ctx);
 	void draw_highlight_row(int row, GameContext& ctx);
-
 };

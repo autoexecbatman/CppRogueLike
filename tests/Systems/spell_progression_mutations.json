@@ -75,20 +75,20 @@
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    if (reachNow <= SpellSystem::highest_spell_level(casterClass, newLevel - 1, wisdom, *ctx->dataManager))",
-      "mutated": "    if (reachNow < SpellSystem::highest_spell_level(casterClass, newLevel - 1, wisdom, *ctx->dataManager))",
+      "original": "\tif (reachNow <= SpellSystem::highest_spell_level(casterClass, newLevel - 1, wisdom, *ctx->dataManager))",
+      "mutated": "\tif (reachNow < SpellSystem::highest_spell_level(casterClass, newLevel - 1, wisdom, *ctx->dataManager))",
       "catches": "a level that opened nothing announcing a spell level all the same"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    announce_new_spell_level(CasterClass::CLERIC, owner, newLevel, ctx);",
+      "original": "\tannounce_new_spell_level(CasterClass::CLERIC, owner, newLevel, ctx);",
       "mutated": "",
       "catches": "the cleric never told a new spell level is open"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    announce_new_spell_level(CasterClass::WIZARD, owner, newLevel, ctx);",
-      "mutated": "    ctx->messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \"Your arcane knowledge deepens!\");\n    ctx->messageSystem->finalize_message();",
+      "original": "\tannounce_new_spell_level(CasterClass::WIZARD, owner, newLevel, ctx);",
+      "mutated": "\tctx->messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \"Your arcane knowledge deepens!\");\n    ctx->messageSystem->finalize_message();",
       "catches": "the empty claim back in place of the announcement that means something"
     }
   ]

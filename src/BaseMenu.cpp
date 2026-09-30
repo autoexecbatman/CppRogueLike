@@ -4,13 +4,13 @@
 
 #include <raylib.h>
 
+#include "BaseMenu.h"
 #include "Colors.h"
 #include "GameContext.h"
 #include "InputSystem.h"
+#include "Item.h"
 #include "Renderer.h"
 #include "TileConfig.h"
-#include "BaseMenu.h"
-#include "Item.h"
 
 void BaseMenu::menu_new(
 	size_t width,

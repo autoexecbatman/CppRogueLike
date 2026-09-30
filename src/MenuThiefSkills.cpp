@@ -7,9 +7,9 @@
 #include "Colors.h"
 #include "GameContext.h"
 #include "InputSystem.h"
+#include "MenuThiefSkills.h"
 #include "Player.h"
 #include "Renderer.h"
-#include "MenuThiefSkills.h"
 
 namespace
 {

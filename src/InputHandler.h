@@ -35,5 +35,4 @@ public:
 
 	bool was_resized() const noexcept { return screenResized; }
 	void clear_resize() noexcept { screenResized = false; }
-
 };

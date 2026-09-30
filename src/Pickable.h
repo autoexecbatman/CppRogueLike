@@ -9,14 +9,14 @@
 
 #include <variant>
 
-#include "MagicalItemEffects.h"
-#include "Weapons.h"
-#include "Persistent.h"
 #include "BuffType.h"
-#include "TargetMode.h"
 #include "DamageInfo.h"
 #include "EquipmentSlot.h"
+#include "MagicalItemEffects.h"
+#include "Persistent.h"
+#include "TargetMode.h"
 #include "Vector2D.h"
+#include "Weapons.h"
 
 class Item;
 class Creature;
@@ -495,7 +495,6 @@ inline std::string_view encode_pickable_type(PickableType pickableType)
 	{
 		return "dungeon_key";
 	}
-
 	}
 
 	return "weapon";

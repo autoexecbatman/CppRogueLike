@@ -9,9 +9,9 @@
 #endif
 #include <raylib.h>
 
-#include "Paths.h"
 #include "Game.h"
 #include "Menu.h"
+#include "Paths.h"
 
 #ifdef __EMSCRIPTEN__
 struct LoopData
@@ -48,29 +48,39 @@ int main()
 		std::cerr << "Warning: Could not open debug file: " << e.what() << std::endl;
 	}
 
-	std::clog << "STARTUP: Opened debug log\n" << std::flush;
+	std::clog << "STARTUP: Opened debug log\n"
+			  << std::flush;
 
-	std::clog << "STARTUP: Creating Game\n" << std::flush;
+	std::clog << "STARTUP: Creating Game\n"
+			  << std::flush;
 	// Game owns everything including Renderer and InputSystem
 	auto game = std::make_unique<Game>();
-	std::clog << "STARTUP: Loading tile config\n" << std::flush;
+	std::clog << "STARTUP: Loading tile config\n"
+			  << std::flush;
 	game->tileConfig.load(Paths::TILE_CONFIG);
-	std::clog << "STARTUP: Loading body plans\n" << std::flush;
+	std::clog << "STARTUP: Loading body plans\n"
+			  << std::flush;
 	game->bodyPlanRegistry.load(Paths::BODY_PLANS);
-	std::clog << "STARTUP: Loading spells\n" << std::flush;
+	std::clog << "STARTUP: Loading spells\n"
+			  << std::flush;
 	game->spellRegistry.load(Paths::SPELLS);
-	std::clog << "STARTUP: Loading monsters\n" << std::flush;
+	std::clog << "STARTUP: Loading monsters\n"
+			  << std::flush;
 	game->monsterRegistry.load(Paths::MONSTERS);
-	std::clog << "STARTUP: Loading items\n" << std::flush;
+	std::clog << "STARTUP: Loading items\n"
+			  << std::flush;
 	game->itemRegistry.load(Paths::ITEMS);
 	game->itemRegistry.load_enhanced_rules(Paths::ENHANCED_RULES);
-	std::clog << "STARTUP: Initializing world\n" << std::flush;
+	std::clog << "STARTUP: Initializing world\n"
+			  << std::flush;
 	game->init_world();
 
-	std::clog << "STARTUP: Initializing renderer\n" << std::flush;
+	std::clog << "STARTUP: Initializing renderer\n"
+			  << std::flush;
 	// Initialize raylib window (fullscreen, auto-detect resolution)
 	game->renderer.init();
-	std::clog << "STARTUP: Loading Dawnlike tileset\n" << std::flush;
+	std::clog << "STARTUP: Loading Dawnlike tileset\n"
+			  << std::flush;
 	game->renderer.load_dawnlike(Paths::DAWNLIKE_DIR);
 
 	// This size is the text's width: the advance is whatever is asked for here, so

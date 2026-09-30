@@ -11,8 +11,8 @@
 #include "AbilityAllocation.h"
 #include "Creature.h"
 #include "EquipmentSlot.h"
-#include "PlayerController.h"
 #include "Persistent.h"
+#include "PlayerController.h"
 #include "ThiefSkills.h"
 #include "Vector2D.h"
 

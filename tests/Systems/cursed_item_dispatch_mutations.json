@@ -9,8 +9,8 @@
   "mutations": [
     {
       "file": "src/CurseSystem.cpp",
-      "original": "        if (item.get_enhancement().blessing != BlessingStatus::CURSED)\n",
-      "mutated": "        if (item.get_enhancement().blessing == BlessingStatus::CURSED)\n",
+      "original": "\t\tif (item.get_enhancement().blessing != BlessingStatus::CURSED)\n",
+      "mutated": "\t\tif (item.get_enhancement().blessing == BlessingStatus::CURSED)\n",
       "catches": "blessed and plain gear punished while cursed gear goes quiet"
     },
     {
@@ -21,14 +21,14 @@
     },
     {
       "file": "src/CurseSystem.cpp",
-      "original": "        else if (item.is_armor())\n",
-      "mutated": "        else if (item.is_weapon())\n",
+      "original": "\t\telse if (item.is_armor())\n",
+      "mutated": "\t\telse if (item.is_weapon())\n",
       "catches": "cursed armour falling through every branch and reporting nothing"
     },
     {
       "file": "src/CurseSystem.cpp",
-      "original": "        else if (item.is_amulet())\n",
-      "mutated": "        else if (item.is_ring())\n",
+      "original": "\t\telse if (item.is_amulet())\n",
+      "mutated": "\t\telse if (item.is_ring())\n",
       "catches": "the drain moving to a slot the game does not put amulets in"
     }
   ]

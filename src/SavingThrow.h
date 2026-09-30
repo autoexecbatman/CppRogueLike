@@ -42,31 +42,31 @@ enum class SavingThrow
 
 namespace SavingThrows
 {
-	// The number this creature must roll on a d20 to make the save, from
-	// Table 60. Monsters save on the warrior rows, as they attack on the
-	// warrior table. A level below the table's first row takes its first row.
-	//
-	// Example:
-	//   target(CreatureClass::FIGHTER, 1, SavingThrow::SPELL);   // -> 17
-	//   target(CreatureClass::WIZARD, 1, SavingThrow::SPELL);    // -> 12
-	[[nodiscard]] int target(CreatureClass creatureClass, int level, SavingThrow category);
+// The number this creature must roll on a d20 to make the save, from
+// Table 60. Monsters save on the warrior rows, as they attack on the
+// warrior table. A level below the table's first row takes its first row.
+//
+// Example:
+//   target(CreatureClass::FIGHTER, 1, SavingThrow::SPELL);   // -> 17
+//   target(CreatureClass::WIZARD, 1, SavingThrow::SPELL);    // -> 12
+[[nodiscard]] int target(CreatureClass creatureClass, int level, SavingThrow category);
 
-	// Whether reaching this level moves the class onto a better row of the
-	// table. Derived from the rows rather than from a list of levels, so it
-	// cannot drift from them.
-	//
-	// Example:
-	//   improves_at(CreatureClass::WIZARD, 6);    // -> true, the 6-10 row begins
-	//   improves_at(CreatureClass::WIZARD, 7);    // -> false, the same row
-	[[nodiscard]] bool improves_at(CreatureClass creatureClass, int level);
+// Whether reaching this level moves the class onto a better row of the
+// table. Derived from the rows rather than from a list of levels, so it
+// cannot drift from them.
+//
+// Example:
+//   improves_at(CreatureClass::WIZARD, 6);    // -> true, the 6-10 row begins
+//   improves_at(CreatureClass::WIZARD, 7);    // -> false, the same row
+[[nodiscard]] bool improves_at(CreatureClass creatureClass, int level);
 
-	// Rolls a d20 for the creature and reports whether it saved. The modifier
-	// is what the effect grants the saver - a ring of fire resistance is +4
-	// against magical fire - and is added to the roll, as the book adds it "to
-	// the die roll".
-	//
-	// Example, a 1st-level fighter resisting a spell, needing 17:
-	//   is_made(fighter, SavingThrow::SPELL, 0, ctx);   // -> true on a 17 or better
-	//   is_made(fighter, SavingThrow::SPELL, 4, ctx);   // -> true on a 13 or better
-	[[nodiscard]] bool is_made(const Creature& saver, SavingThrow category, int modifier, GameContext& ctx);
-}
+// Rolls a d20 for the creature and reports whether it saved. The modifier
+// is what the effect grants the saver - a ring of fire resistance is +4
+// against magical fire - and is added to the roll, as the book adds it "to
+// the die roll".
+//
+// Example, a 1st-level fighter resisting a spell, needing 17:
+//   is_made(fighter, SavingThrow::SPELL, 0, ctx);   // -> true on a 17 or better
+//   is_made(fighter, SavingThrow::SPELL, 4, ctx);   // -> true on a 13 or better
+[[nodiscard]] bool is_made(const Creature& saver, SavingThrow category, int modifier, GameContext& ctx);
+} // namespace SavingThrows

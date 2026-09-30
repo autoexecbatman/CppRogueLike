@@ -9,14 +9,14 @@
   "mutations": [
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    const int adjustment = dataManager.constitution_hit_point_adjustment(constitution, creatureClass);",
-      "mutated": "    const int adjustment = dataManager.constitution_for(constitution).HPAdj;",
+      "original": "\tconst int adjustment = dataManager.constitution_hit_point_adjustment(constitution, creatureClass);",
+      "mutated": "\tconst int adjustment = dataManager.constitution_for(constitution).HPAdj;",
       "catches": "the warrior column read for every class again"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    const int adjustment = dataManager.constitution_hit_point_adjustment(constitution, creatureClass);",
-      "mutated": "    const int adjustment = dataManager.constitution_hit_point_adjustment(constitution, CreatureClass::WIZARD);",
+      "original": "\tconst int adjustment = dataManager.constitution_hit_point_adjustment(constitution, creatureClass);",
+      "mutated": "\tconst int adjustment = dataManager.constitution_hit_point_adjustment(constitution, CreatureClass::WIZARD);",
       "catches": "the die asking for a class other than its owner's"
     },
     {
@@ -39,8 +39,8 @@
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    return LevelUpSystem::HitDieValue{ dieValue, adjustment, std::max(1, dieValue + adjustment) };",
-      "mutated": "    return LevelUpSystem::HitDieValue{ dieValue, adjustment, dieValue + adjustment };",
+      "original": "\treturn LevelUpSystem::HitDieValue{ dieValue, adjustment, std::max(1, dieValue + adjustment) };",
+      "mutated": "\treturn LevelUpSystem::HitDieValue{ dieValue, adjustment, dieValue + adjustment };",
       "catches": "a hit die yielding less than 1"
     }
   ]

@@ -21,7 +21,6 @@ public:
 
 	EntryResult on_creature_enter(Creature& creature, GameContext& ctx) override;
 
-
 	// Destroy this web
 	void destroy();
 

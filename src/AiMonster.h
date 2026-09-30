@@ -1,12 +1,11 @@
 #pragma once
 
-#include "Persistent.h"
 #include "Ai.h"
+#include "Persistent.h"
 
 class Creature;
 struct GameContext;
 struct Vector2D;
-
 
 class AiMonster : public Ai
 {
@@ -15,7 +14,6 @@ private:
 	void decide_action(Creature& owner, GameContext& ctx);
 
 protected:
-
 	virtual void move_or_attack(Creature& owner, Vector2D position, GameContext& ctx);
 
 public:

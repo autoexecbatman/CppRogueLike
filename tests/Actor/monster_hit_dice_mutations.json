@@ -27,8 +27,8 @@
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    int total = hitDice.bonus;",
-      "mutated": "    int total = 0;",
+      "original": "\tint total = hitDice.bonus;",
+      "mutated": "\tint total = 0;",
       "catches": "the flat bonus written into a hit dice expression dropped"
     },
     {

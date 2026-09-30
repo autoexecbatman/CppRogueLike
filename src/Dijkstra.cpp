@@ -5,8 +5,8 @@
 #include <vector>
 
 #include "Attacker.h"
-#include "Map.h"
 #include "Dijkstra.h"
+#include "Map.h"
 #include "Vector2D.h"
 
 Dijkstra::Dijkstra(int width, int height)

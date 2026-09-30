@@ -85,7 +85,6 @@ inline std::string_view encode_scroll_animation(ScrollAnimation scrollAnimation)
 	{
 		return "explosion";
 	}
-
 	}
 
 	return "none";
@@ -133,7 +132,6 @@ inline std::string_view encode_target_mode(TargetMode targetMode)
 	{
 		return "fov_buff";
 	}
-
 	}
 
 	return "auto_nearest";

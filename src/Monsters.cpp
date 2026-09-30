@@ -3,7 +3,6 @@
 #include <memory>
 
 #include "Actor.h"
-#include "MonsterAttacker.h"
 #include "AiMimic.h"
 #include "Colors.h"
 #include "DamageInfo.h"
@@ -11,10 +10,11 @@
 #include "ExperienceReward.h"
 #include "GameContext.h"
 #include "LevelUpSystem.h"
+#include "MonsterAttacker.h"
 #include "MonsterRegistry.h"
+#include "Monsters.h"
 #include "RandomDice.h"
 #include "Vector2D.h"
-#include "Monsters.h"
 
 Mimic::Mimic(Vector2D position, GameContext& ctx)
 	: Creature(position, ActorData{ ctx.monsterRegistry->get_tile(MonsterId::MIMIC), "mimic", ColorPairId::RED_YELLOW })
@@ -25,11 +25,11 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 	// Mimic: AD&D 2e -- strong pseudopod, average dex, tough, low animal INT,
 	// decent predator WIS, very low CHA (horrifying when revealed).
 	set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6() + 2); // 3d6+2 avg 12
-	set_dexterity(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());    // 3d6    avg 10
+	set_dexterity(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()); // 3d6    avg 10
 	set_constitution(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()); // 3d6    avg 10
-	set_intelligence(ctx.dice->d4() + 2);                               // 1d4+2  avg  4
-	set_wisdom(ctx.dice->d6() + ctx.dice->d6() + 1);                    // 2d6+1  avg  8
-	set_charisma(ctx.dice->d4());                                        // 1d4    avg  2
+	set_intelligence(ctx.dice->d4() + 2); // 1d4+2  avg  4
+	set_wisdom(ctx.dice->d6() + ctx.dice->d6() + 1); // 2d6+1  avg  8
+	set_charisma(ctx.dice->d4()); // 1d4    avg  2
 
 	set_natural_attack("Pseudopod");
 

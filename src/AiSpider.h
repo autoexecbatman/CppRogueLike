@@ -2,8 +2,8 @@
 
 #include <optional>
 
-#include "Persistent.h"
 #include "AiMonster.h"
+#include "Persistent.h"
 
 // Forward declarations
 class Creature;

@@ -2,13 +2,13 @@
 #include <functional>
 #include <vector>
 
+#include "AnimationBarrierMenu.h"
+#include "AnimationSystem.h"
 #include "GameContext.h"
 #include "Map.h"
-#include "AnimationBarrierMenu.h"
 #include "Renderer.h"
-#include "Vector2D.h"
-#include "AnimationSystem.h"
 #include "SpellAnimations.h"
+#include "Vector2D.h"
 
 namespace SpellAnimations
 {
@@ -16,7 +16,9 @@ namespace SpellAnimations
 void animate_lightning(Vector2D from, Vector2D to, GameContext& ctx)
 {
 	if (!ctx.animSystem || !ctx.renderer)
+	{
 		return;
+	}
 
 	auto path = Map::bresenham_line(from, to);
 	ctx.animSystem->spawn_lightning_path(path, 180, 220, 255);
@@ -27,7 +29,9 @@ void animate_lightning(Vector2D from, Vector2D to, GameContext& ctx)
 void animate_explosion(Vector2D center, int radius, GameContext& ctx)
 {
 	if (!ctx.animSystem || !ctx.renderer)
+	{
 		return;
+	}
 
 	ctx.animSystem->spawn_fireball_explosion(center, radius);
 	ctx.renderer->add_trauma(0.5f);
@@ -45,7 +49,9 @@ void animate_explosion(Vector2D center, int radius, GameContext& ctx)
 void animate_creature_hit(Vector2D position, GameContext& ctx)
 {
 	if (!ctx.animSystem)
+	{
 		return;
+	}
 
 	ctx.animSystem->spawn_blood_burst(position, 4);
 }
@@ -71,7 +77,9 @@ void animate_magic_missile(Vector2D from, Vector2D to, GameContext& ctx)
 		from,
 		to,
 		missileTile,
-		200, 220, 255,
+		200,
+		220,
+		255,
 		400.0f,
 		2.5f,
 		std::move(onArrive));

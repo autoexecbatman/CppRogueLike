@@ -6,8 +6,8 @@
 
 #include <raylib.h>
 
-#include "Renderer.h"
 #include "FloatingTextSystem.h"
+#include "Renderer.h"
 
 // Shows a damage number rising off a tile.
 //

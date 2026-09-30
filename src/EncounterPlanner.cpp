@@ -1,30 +1,30 @@
 // file: EncounterPlanner.cpp
-#include <cassert>
 #include <algorithm>
+#include <cassert>
 #include <string>
 #include <vector>
 
 #include "Creature.h"
+#include "DungeonRoom.h"
+#include "EncounterPlanner.h"
 #include "GameContext.h"
+#include "LevelManager.h"
 #include "MonsterCreator.h"
 #include "MonsterRegistry.h"
-#include "DungeonRoom.h"
 #include "RandomDice.h"
-#include "EncounterPlanner.h"
 #include "SpawnUtils.h"
-#include "LevelManager.h"
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 namespace
 {
-	constexpr int BASE_XP_PER_LEVEL = 120;
-	constexpr int MAX_ENCOUNTER_MONSTERS = 10;
+constexpr int BASE_XP_PER_LEVEL = 120;
+constexpr int MAX_ENCOUNTER_MONSTERS = 10;
 
-	constexpr float STANDARD_MULTIPLIER = 1.0f;
-	constexpr float DANGER_MULTIPLIER = 2.5f;
-	constexpr float TREASURE_MULTIPLIER = 1.5f;
+constexpr float STANDARD_MULTIPLIER = 1.0f;
+constexpr float DANGER_MULTIPLIER = 2.5f;
+constexpr float TREASURE_MULTIPLIER = 1.5f;
 } // namespace
 
 // ---------------------------------------------------------------------------
@@ -55,7 +55,6 @@ int encounter_budget(RoomType type, int dungeonLevel)
 	{
 		return static_cast<int>(dungeonLevel * BASE_XP_PER_LEVEL * TREASURE_MULTIPLIER);
 	}
-
 	}
 
 	return 0;

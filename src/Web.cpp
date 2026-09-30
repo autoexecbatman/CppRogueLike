@@ -1,8 +1,8 @@
 #include <algorithm>
 
 #include "Actor.h"
-#include "Creature.h"
 #include "Colors.h"
+#include "Creature.h"
 #include "GameContext.h"
 #include "MagicalItemEffects.h"
 #include "MessageSystem.h"

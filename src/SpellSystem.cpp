@@ -9,31 +9,31 @@
 #include <vector>
 
 #include "Actor.h"
-#include "EquipmentSlot.h"
-#include "Pickable.h"
-#include "Player.h"
+#include "AnimationSystem.h"
+#include "BuffSystem.h"
+#include "BuffType.h"
 #include "Colors.h"
+#include "CreatureManager.h"
 #include "DamageInfo.h"
 #include "DamageResolver.h"
+#include "DataManager.h"
+#include "EquipmentSlot.h"
 #include "GameContext.h"
 #include "MagicalItemEffects.h"
 #include "Map.h"
 #include "MenuSpellCast.h"
-#include "Vector2D.h"
-#include "SavingThrow.h"
-#include "AnimationSystem.h"
-#include "BuffSystem.h"
-#include "BuffType.h"
-#include "CreatureManager.h"
 #include "MessageSystem.h"
+#include "Pickable.h"
+#include "Player.h"
+#include "RandomDice.h"
+#include "SavingThrow.h"
 #include "SpawnUtils.h"
 #include "SpellAnimations.h"
 #include "SpellRegistry.h"
-#include "DataManager.h"
-#include "RandomDice.h"
 #include "SpellSystem.h"
 #include "TargetingMenu.h"
 #include "TileConfig.h"
+#include "Vector2D.h"
 
 namespace
 {
@@ -85,7 +85,6 @@ CasterClass to_caster_class(Player::PlayerClassState state)
 	{
 		return CasterClass::NONE;
 	}
-
 	}
 }
 } // namespace
@@ -354,7 +353,6 @@ void SpellSystem::dispatch_effect(
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Spell not implemented yet.", MessageCompletion::FINISHED);
 		break;
 	}
-
 	}
 
 	if (result)
@@ -458,7 +456,8 @@ bool SpellSystem::cast_protection_from_evil(Creature& caster, GameContext& ctx)
 	ctx.messageSystem->append_message_part(
 		ColorPairId::WHITE_BLACK,
 		std::format("Evil creatures strike at {} against you for {} turns.",
-			PROTECTION_FROM_EVIL_PENALTY, duration));
+			PROTECTION_FROM_EVIL_PENALTY,
+			duration));
 	ctx.messageSystem->finalize_message();
 	return true;
 }
@@ -490,9 +489,9 @@ void SpellSystem::cast_silence(
 	int range = 5 + casterLevel;
 
 	auto onTarget = [duration, onSuccess = std::move(onSuccess)](
-		bool confirmed,
-		Vector2D targetPos,
-		GameContext& innerCtx) mutable
+						bool confirmed,
+						Vector2D targetPos,
+						GameContext& innerCtx) mutable
 	{
 		if (!confirmed)
 		{
@@ -543,9 +542,9 @@ void SpellSystem::cast_web(
 	int duration = 2 * casterLevel;
 
 	auto onTarget = [radius, duration, onSuccess = std::move(onSuccess)](
-		bool confirmed,
-		Vector2D center,
-		GameContext& innerCtx) mutable
+						bool confirmed,
+						Vector2D center,
+						GameContext& innerCtx) mutable
 	{
 		if (!confirmed)
 		{
@@ -654,9 +653,9 @@ void SpellSystem::cast_fireball(
 	int radius = 2;
 
 	auto onTarget = [casterLevel, radius, onSuccess = std::move(onSuccess)](
-		bool confirmed,
-		Vector2D center,
-		GameContext& innerCtx) mutable
+						bool confirmed,
+						Vector2D center,
+						GameContext& innerCtx) mutable
 	{
 		if (!confirmed)
 		{

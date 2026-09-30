@@ -8,37 +8,37 @@
 #include <raylib.h>
 
 #include "Actor.h"
-#include "Creature.h"
-#include "Colors.h"
-#include "GameContext.h"
-#include "Paths.h"
-#include "Gui.h"
-#include "Map.h"
-#include "Minimap.h"
-#include "DeathMenu.h"
-#include "NotificationMenu.h"
-#include "InputSystem.h"
-#include "Renderer.h"
-#include "InputHandler.h"
-#include "MenuManager.h"
-#include "MessageSystem.h"
-#include "RenderingManager.h"
-#include "ContentEditor.h"
-#include "DecorEditor.h"
-#include "Vector2D.h"
 #include "AnimationSystem.h"
+#include "Colors.h"
+#include "ContentEditor.h"
+#include "Creature.h"
 #include "CreatureManager.h"
 #include "CurseSystem.h"
 #include "DataManager.h"
+#include "DeathMenu.h"
+#include "DecorEditor.h"
 #include "FloatingTextSystem.h"
-#include "HungerSystem.h"
-#include "LevelManager.h"
+#include "GameContext.h"
 #include "GameLoopCoordinator.h"
-#include "TileFeature.h"
-#include "TileConfig.h"
+#include "Gui.h"
+#include "HungerSystem.h"
+#include "InputHandler.h"
+#include "InputSystem.h"
+#include "LevelManager.h"
+#include "Map.h"
+#include "MenuManager.h"
+#include "MessageSystem.h"
+#include "Minimap.h"
+#include "NotificationMenu.h"
+#include "Paths.h"
 #include "Player.h"
+#include "Renderer.h"
+#include "RenderingManager.h"
 #include "SpellTile.h"
+#include "TileConfig.h"
+#include "TileFeature.h"
 #include "Trap.h"
+#include "Vector2D.h"
 
 // One pass of the game loop. The game is already initialised by the time this
 // runs: MenuName calls init_new_game once the blueprint is complete, and
@@ -339,7 +339,8 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 			hg = 180;
 			hb = 0; // amber
 		}
-		assert(std::ranges::none_of(ctx.floorInventory->items, [](const auto& i) { return !i; }));
+		assert(std::ranges::none_of(ctx.floorInventory->items, [](const auto& i)
+			{ return !i; }));
 		for (const auto& item : ctx.floorInventory->items)
 		{
 			if (item->position == world_tile)
@@ -470,13 +471,10 @@ void GameLoopCoordinator::update(GameContext& ctx)
 				"You have retrieved the Amulet of Yendor",
 				"and escaped the dungeon alive.",
 				"",
-				"Your legend will be remembered."
-			},
+				"Your legend will be remembered." },
 			ctx);
 		victoryMenu->set_on_close([](GameContext& c)
-		{
-			c.gameState->set_run(false);
-		});
+			{ c.gameState->set_run(false); });
 		ctx.menus->push_back(std::move(victoryMenu));
 		ctx.gameState->set_game_status(GameStatus::IDLE);
 	}
@@ -527,7 +525,10 @@ void GameLoopCoordinator::update(GameContext& ctx)
 	{
 		// Both floor containers are swept the same way: a feature may destroy
 		// itself from inside on_creature_enter, so it stays owned until here.
-		const auto is_spent = [](const auto& feature) { return feature->is_destroyed(); };
+		const auto is_spent = [](const auto& feature)
+		{
+			return feature->is_destroyed();
+		};
 		std::erase_if(*ctx.traps, is_spent);
 		std::erase_if(*ctx.spellTiles, is_spent);
 

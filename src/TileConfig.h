@@ -4,9 +4,9 @@
 #include <string>
 #include <unordered_map>
 
+#include "Renderer.h"
 #include "TileDefinition.h"
 #include "TileType.h"
-#include "Renderer.h"
 
 // ---------------------------------------------------------------------------
 // Autotile groups (3x3 blocks, origin = top-left corner of the group)
@@ -36,55 +36,57 @@ struct WallAutotileGroup
 // ---------------------------------------------------------------------------
 namespace Autotile
 {
-	constexpr TileRef resolve(AutotileGroup group, bool north, bool east, bool south, bool west)
-	{
-		int col_offset = (!west && east) ? 0 : (west && !east) ? 2 : 1;
-		int row_offset = (!north && south) ? 0 : (north && !south) ? 2 : 1;
-		return TileRef{ group.sheet, group.origin_col + col_offset, group.origin_row + row_offset };
-	}
+constexpr TileRef resolve(AutotileGroup group, bool north, bool east, bool south, bool west)
+{
+	int col_offset = (!west && east) ? 0 : (west && !east) ? 2
+														   : 1;
+	int row_offset = (!north && south) ? 0 : (north && !south) ? 2
+															   : 1;
+	return TileRef{ group.sheet, group.origin_col + col_offset, group.origin_row + row_offset };
+}
 
-	constexpr TileRef resolve_mask(AutotileGroup group, int mask)
-	{
-		return resolve(
-			group,
-			(mask & 8) != 0,
-			(mask & 4) != 0,
-			(mask & 2) != 0,
-			(mask & 1) != 0);
-	}
+constexpr TileRef resolve_mask(AutotileGroup group, int mask)
+{
+	return resolve(
+		group,
+		(mask & 8) != 0,
+		(mask & 4) != 0,
+		(mask & 2) != 0,
+		(mask & 1) != 0);
+}
 
-	// Wall autotile (6-column DawnLike format)
-	inline constexpr TileOffset WALL_TABLE[16] = {
-		{ 3, 0 }, //  0: ....  Isolated pillar
-		{ 1, 0 }, //  1: ...W  Horizontal (endcap fallback)
-		{ 0, 1 }, //  2: ..S.  Vertical (endcap fallback)
-		{ 2, 0 }, //  3: ..SW  Corner TR
-		{ 1, 0 }, //  4: .E..  Horizontal (endcap fallback)
-		{ 1, 0 }, //  5: .E.W  Horizontal
-		{ 0, 0 }, //  6: .ES.  Corner TL
-		{ 4, 0 }, //  7: .ESW  T-junction top
-		{ 0, 1 }, //  8: N...  Vertical (endcap fallback)
-		{ 2, 2 }, //  9: N..W  Corner BR
-		{ 0, 1 }, // 10: N.S.  Vertical
-		{ 5, 1 }, // 11: N.SW  T-junction right
-		{ 0, 2 }, // 12: NE..  Corner BL
-		{ 4, 2 }, // 13: NE.W  T-junction bottom
-		{ 3, 1 }, // 14: NES.  T-junction left
-		{ 4, 1 }, // 15: NESW  Center (fully surrounded)
-	};
+// Wall autotile (6-column DawnLike format)
+inline constexpr TileOffset WALL_TABLE[16] = {
+	{ 3, 0 }, //  0: ....  Isolated pillar
+	{ 1, 0 }, //  1: ...W  Horizontal (endcap fallback)
+	{ 0, 1 }, //  2: ..S.  Vertical (endcap fallback)
+	{ 2, 0 }, //  3: ..SW  Corner TR
+	{ 1, 0 }, //  4: .E..  Horizontal (endcap fallback)
+	{ 1, 0 }, //  5: .E.W  Horizontal
+	{ 0, 0 }, //  6: .ES.  Corner TL
+	{ 4, 0 }, //  7: .ESW  T-junction top
+	{ 0, 1 }, //  8: N...  Vertical (endcap fallback)
+	{ 2, 2 }, //  9: N..W  Corner BR
+	{ 0, 1 }, // 10: N.S.  Vertical
+	{ 5, 1 }, // 11: N.SW  T-junction right
+	{ 0, 2 }, // 12: NE..  Corner BL
+	{ 4, 2 }, // 13: NE.W  T-junction bottom
+	{ 3, 1 }, // 14: NES.  T-junction left
+	{ 4, 1 }, // 15: NESW  Center (fully surrounded)
+};
 
-	constexpr TileRef wall_resolve(WallAutotileGroup group, bool north, bool east, bool south, bool west)
-	{
-		int mask = (north ? 8 : 0) | (east ? 4 : 0) | (south ? 2 : 0) | (west ? 1 : 0);
-		auto offset = WALL_TABLE[mask];
-		return TileRef{ group.sheet, group.origin_col + offset.col, group.origin_row + offset.row };
-	}
+constexpr TileRef wall_resolve(WallAutotileGroup group, bool north, bool east, bool south, bool west)
+{
+	int mask = (north ? 8 : 0) | (east ? 4 : 0) | (south ? 2 : 0) | (west ? 1 : 0);
+	auto offset = WALL_TABLE[mask];
+	return TileRef{ group.sheet, group.origin_col + offset.col, group.origin_row + offset.row };
+}
 
-	constexpr TileRef wall_resolve_mask(WallAutotileGroup group, int mask)
-	{
-		auto offset = WALL_TABLE[mask & 0xF];
-		return TileRef{ group.sheet, group.origin_col + offset.col, group.origin_row + offset.row };
-	}
+constexpr TileRef wall_resolve_mask(WallAutotileGroup group, int mask)
+{
+	auto offset = WALL_TABLE[mask & 0xF];
+	return TileRef{ group.sheet, group.origin_col + offset.col, group.origin_row + offset.row };
+}
 } // namespace Autotile
 
 // ---------------------------------------------------------------------------
