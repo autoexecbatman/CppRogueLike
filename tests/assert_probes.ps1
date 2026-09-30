@@ -120,6 +120,11 @@ $probes = @(
         test   = "AssertProbeDeathTest.SleepingWithANullInTheCreatureListAborts"
         file   = "src/SpellSystem.cpp"
         anchor = 'assert(creature && "cast_sleep: creatures list holds a null entry");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.LoadingAPlayerRecordMissingItsHealthPoolAborts"
+        file   = "src/Player.cpp"
+        anchor = 'assert(healthPool && armorClass && experienceReward && attacker && controller && "Player::load finished with a player the game cannot run");'
     }
 )
 

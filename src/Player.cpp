@@ -1,4 +1,32 @@
+// file: Player.cpp
+//
+// The character the person is playing: what only the player has, and what the
+// player does differently from every other creature.
+//
+// Player derives from Creature and overrides the handful of behaviours where
+// being the player changes the answer - dying ends the run rather than dropping
+// loot, and loading rebuilds the two components a creature's record never
+// carries. Everything a monster also has lives on Creature; reach it through
+// ctx.player() for those, and ctx.player_concrete() for what is here.
+//
+// Usage:
+//
+//   auto player = std::make_unique<Player>(Vector2D{ 1, 1 });   // an empty shell
+//   player->on_new_game_start(ctx);                             // rolls race, class, scores
+//
+//   json record;
+//   player->save(record);                                       // the whole character
+//   player->load(record);                                       // and back, components included
+//
+//   player->die(ctx);                                           // sets DEFEAT; the loop does the rest
+//
+// The one thing to know before editing load(): Creature::load builds the health
+// pool, the armour class and the experience reward only when the record carries
+// them, which is right for a monster and wrong here. The assertion closing
+// Player::load is what keeps that from loading quietly.
+
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
 #include <format>
 #include <memory>
@@ -758,6 +786,16 @@ Player::DualWieldInfo Player::get_dual_wield_info() const noexcept
 	return info;
 }
 
+// Writes the whole character into j: the creature half through Creature::save, then
+// the fields only a player has, then every equipped item with the slot it sits in.
+// Every field written here is required on load - there are no save fallbacks.
+//
+// Example:
+//
+//   json record;
+//   player->save(record);
+//   record["killCount"];              // -> 7
+//   record["equippedItems"].size();   // -> 2
 void Player::save(json& j)
 {
 	Creature::save(j); // Call base class save
@@ -786,6 +824,26 @@ void Player::save(json& j)
 	j["equippedItems"] = equippedJson;
 }
 
+// Rebuilds the character from j, and refuses a record that is missing anything.
+//
+// Two components are always replaced rather than read: Creature::load builds a
+// MonsterAttacker from the attacker record, which is wrong for a player, and
+// PlayerController is not in the Ai hierarchy so nothing else would construct it.
+// Three more - the health pool, the armour class and the experience reward - are
+// built by Creature::load only when the record carries them, so the assertion at the
+// end is what stops a truncated record producing a player the game cannot run.
+//
+// Throws nlohmann::json::out_of_range if any required field is absent.
+//
+// Example:
+//
+//   json record;
+//   saved->save(record);
+//   loaded->load(record);
+//   loaded->get_max_hp();     // -> 30, the value that was saved
+//
+//   record.erase("killCount");
+//   loaded->load(record);     // throws: no field this saver writes is optional
 void Player::load(const json& j)
 {
 	Creature::load(j); // Call base class load
@@ -815,6 +873,12 @@ void Player::load(const json& j)
 		item->load(itemEntry.at("item"));
 		equippedItems.emplace_back(std::move(item), slot);
 	}
+
+	// Closes the null window this function opens. Creature::load builds the pool, the
+	// armour class and the reward only when the record carries them, which is right for
+	// a monster and wrong for the player: the HUD reads all three on the first frame.
+	// Without this, a record missing one loads and the crash lands somewhere unrelated.
+	assert(healthPool && armorClass && experienceReward && attacker && controller && "Player::load finished with a player the game cannot run");
 }
 
 void Player::update(GameContext& ctx)

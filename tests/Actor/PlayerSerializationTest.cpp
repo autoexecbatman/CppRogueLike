@@ -242,3 +242,24 @@ TEST_F(PlayerSerializationTest, APlayerRecordMissingAFieldItsSaverAlwaysWritesIs
 			<< "a player record without \"" << key << "\" loaded quietly";
 	}
 }
+
+// Creature::load builds the health pool, the armour class and the experience reward
+// only when the record carries them, because a monster loaded into a fresh object has
+// none to fill in. The player is not that case: the HUD reads all three on the first
+// frame after a load. Components_Preserved above checks the two Player::load always
+// builds; these are the three it does not, and they were unpinned until 2026-09-30.
+TEST_F(PlayerSerializationTest, EveryComponentTheGameReadsSurvivesARoundTrip)
+{
+	auto original = create_test_player();
+	json record;
+	original->save(record);
+
+	auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
+	loaded->load(record);
+
+	EXPECT_NE(loaded->healthPool, nullptr) << "loaded without a health pool; the HUD reads hp on the first frame";
+	EXPECT_NE(loaded->armorClass, nullptr) << "loaded without an armour class; every attack against the player reads it";
+	EXPECT_NE(loaded->experienceReward, nullptr) << "loaded without an experience reward; the next kill writes to it";
+	EXPECT_NE(loaded->attacker, nullptr) << "loaded without an attacker";
+	EXPECT_NE(loaded->controller, nullptr) << "loaded without a controller";
+}

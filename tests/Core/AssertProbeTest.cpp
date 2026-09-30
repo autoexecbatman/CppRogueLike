@@ -49,6 +49,7 @@
 #include "src/HealthPool.h"
 #include "src/Item.h"
 #include "src/Colors.h"
+#include "src/ArmorClass.h"
 #include "src/ExperienceReward.h"
 #include "src/Paths.h"
 #include "src/AttackKind.h"
@@ -289,4 +290,24 @@ TEST_F(AssertProbeDeathTest, SleepingWithANullInTheCreatureListAborts)
 
 	EXPECT_DEATH(SpellSystem::cast_spell_by_key("sleep", *caster, SpellSource::MEMORIZED, ignoreCompletion, ctx),
 		"cast_sleep: creatures list holds a null entry");
+}
+
+// Creature::load builds the pool, the armour class and the reward only when the
+// record carries them. That is right for a monster and wrong for the player, so
+// Player::load closes the window. The probe reopens it by deleting one field from
+// a record that was otherwise written by save().
+TEST_F(AssertProbeDeathTest, LoadingAPlayerRecordMissingItsHealthPoolAborts)
+{
+	std::unique_ptr<Player> saved = std::make_unique<Player>(Vector2D{ 1, 1 });
+	saved->healthPool = std::make_unique<HealthPool>(20);
+	saved->armorClass = std::make_unique<ArmorClass>(10);
+	saved->experienceReward = std::make_unique<ExperienceReward>(0);
+
+	json record;
+	saved->save(record);
+	record.erase("healthPool");
+
+	Player loaded{ Vector2D{ 1, 1 } };
+
+	EXPECT_DEATH(loaded.load(record), "Player::load finished with a player the game cannot run");
 }

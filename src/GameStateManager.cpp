@@ -71,17 +71,28 @@ void load_rooms(const json& j, std::vector<DungeonRoom>& rooms)
 	}
 }
 
+// Writes every creature on the level into j["creatures"], in the order the vector holds
+// them. The vector owns its entries, so a null one is a fault rather than an empty slot -
+// skipping it would drop a creature from the save without saying so.
+//
+// Example:
+//
+//   json level;
+//   save_creatures(creatures, level);   // creatures: vector<unique_ptr<Creature>>, 3 alive
+//   level["creatures"].size();          // -> 3
+//
+//   save_creatures({}, level);          // an empty level is legal
+//   level["creatures"].size();          // -> 0
 void save_creatures(const std::vector<std::unique_ptr<Creature>>& creatures, json& j)
 {
 	j["creatures"] = json::array();
 	for (const auto& creature : creatures)
 	{
-		if (creature)
-		{
-			json creatureJson;
-			creature->save(creatureJson);
-			j["creatures"].push_back(creatureJson);
-		}
+		assert(creature && "save_creatures: creatures list holds a null entry");
+
+		json creatureJson;
+		creature->save(creatureJson);
+		j["creatures"].push_back(creatureJson);
 	}
 }
 

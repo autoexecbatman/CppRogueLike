@@ -36,6 +36,18 @@
       "original": "\tload_inventory(shopInventory, j.at(\"shop_inventory\"));",
       "mutated": "\tif (j.contains(\"shop_inventory\")) { load_inventory(shopInventory, j.at(\"shop_inventory\")); }",
       "catches": "a shop whose shelves are missing loading as an empty shop"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tif (j.contains(\"healthPool\"))\n",
+      "mutated": "\tif (false)\n",
+      "catches": "a saved player loading with no health pool, which the HUD reads on the first frame"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tif (j.contains(\"armorClass\"))\n",
+      "mutated": "\tif (false)\n",
+      "catches": "a saved player loading with no armour class, which every attack against it reads"
     }
   ]
 }
