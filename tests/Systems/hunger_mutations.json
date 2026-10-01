@@ -4,7 +4,7 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=HungerSystemTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=HungerSystemTest.*:HungerDamageTest.*"
   ],
   "mutations": [
     {
@@ -54,6 +54,24 @@
       "original": "\t\tj[\"lastNotifiedState\"] = static_cast<int>(*lastNotifiedState);\n",
       "mutated": "",
       "catches": "a load that re-announces a state the player was already told"
+    },
+    {
+      "file": "src/HungerSystem.cpp",
+      "original": "\t\t\tctx.player()->take_damage_and_check_death(1, ctx, DamageType::PHYSICAL);\n",
+      "mutated": "\t\t\tctx.player()->take_damage_and_check_death(0, ctx, DamageType::PHYSICAL);\n",
+      "catches": "starving costing nothing on the turn its roll calls for a point"
+    },
+    {
+      "file": "src/HungerSystem.cpp",
+      "original": "\t\tif (ctx.dice->d20() == 1)\n",
+      "mutated": "\t\tif (ctx.dice->d20() != 1)\n",
+      "catches": "the starvation roll inverted, so it damages on nineteen turns in twenty and spares the twentieth"
+    },
+    {
+      "file": "src/HungerSystem.cpp",
+      "original": "\t\tctx.player()->take_damage_and_check_death(1, ctx, DamageType::PHYSICAL);\n\t\tbreak;\n",
+      "mutated": "\t\tbreak;\n",
+      "catches": "dying stopping short of killing, so starvation never finishes"
     }
   ]
 }

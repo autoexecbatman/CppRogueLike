@@ -23,9 +23,14 @@
 
 #include <nlohmann/json.hpp>
 
+#include "src/ArmorClass.h"
+#include "src/ExperienceReward.h"
 #include "src/GameContext.h"
+#include "src/HealthPool.h"
 #include "src/HungerSystem.h"
+#include "src/Player.h"
 #include "tests/mocks/MockGameContext.h"
+#include <memory>
 
 class HungerSystemTest : public ::testing::Test
 {
@@ -228,4 +233,104 @@ TEST_F(HungerSystemTest, AThresholdCrossedRightAfterLoadingIsStillAnnounced)
 	ASSERT_EQ(loaded.get_hunger_state(), HungerState::STARVING);
 	EXPECT_EQ(mock.messages.get_stored_message_count(), before + 1)
 		<< "the load lost what was announced, so the first crossing after it went unsaid";
+}
+
+// What hunger actually costs the player, which until 2026-10-01 nothing tested.
+//
+// apply_hunger_effects is the only place hunger reaches the player, and the only
+// thing it does to them is damage: one point on one turn in twenty while STARVING,
+// and one point every turn while DYING. The states above those two produce a line of
+// text and nothing else, which is what the enum now says and used to deny - it
+// promised bonuses for being well fed and penalties for being hungry, and neither is
+// implemented. These tests pin what is there, deliberately without pinning what is
+// not: a test asserting WELL_FED does nothing would make that permanent.
+class HungerDamageTest : public ::testing::Test
+{
+protected:
+	void SetUp() override
+	{
+		ctx = mock.to_game_context();
+		ctx.hungerSystem = &hunger;
+		ctx.playerOwner = &player;
+
+		player->healthPool = std::make_unique<HealthPool>(20);
+		player->armorClass = std::make_unique<ArmorClass>(10);
+		player->experienceReward = std::make_unique<ExperienceReward>(0);
+	}
+
+	void force_next_roll(int value)
+	{
+		mock.dice.set_next_roll(value);
+	}
+
+	// Drives the counter into a state without going through increase_hunger, which
+	// would announce every threshold it crossed on the way.
+	void starve_to(int hungerValue)
+	{
+		hunger.increase_hunger(ctx, hungerValue);
+	}
+
+	MockGameContext mock{};
+	GameContext ctx{};
+	HungerSystem hunger{};
+	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 5, 5 }) };
+};
+
+// The first thing hunger costs: one point, on the roll that calls for it.
+//
+// Starving rolls twice and the order matters: a d6 for the flavour line, then the
+// d20 that decides the damage. The scripted queue falls through to real dice once it
+// empties, so forcing only one value leaves the d20 random and the test tells you
+// nothing - both of these were written that way first and one of them passed anyway.
+TEST_F(HungerDamageTest, StarvingTakesAPointOnTheTurnTheRollCallsForIt)
+{
+	starve_to(850);
+	ASSERT_EQ(hunger.get_hunger_state(), HungerState::STARVING) << "the fixture did not reach STARVING";
+	const int before = player->get_hp();
+	force_next_roll(6); // the d6: no flavour line
+	force_next_roll(1); // the d20: the point of damage
+
+	hunger.apply_hunger_effects(ctx);
+
+	EXPECT_EQ(player->get_hp(), before - 1) << "starving did not cost the point it rolls for";
+}
+
+// And costs nothing on the turns it does not.
+TEST_F(HungerDamageTest, StarvingCostsNothingOnATurnTheRollSpares)
+{
+	starve_to(850);
+	ASSERT_EQ(hunger.get_hunger_state(), HungerState::STARVING) << "the fixture did not reach STARVING";
+	const int before = player->get_hp();
+	force_next_roll(6); // the d6: no flavour line
+	force_next_roll(2); // the d20: spared
+
+	hunger.apply_hunger_effects(ctx);
+
+	EXPECT_EQ(player->get_hp(), before) << "starving took damage on a turn its roll spared";
+}
+
+// Dying has no roll to survive.
+TEST_F(HungerDamageTest, DyingTakesAPointEveryTurn)
+{
+	starve_to(1000);
+	ASSERT_EQ(hunger.get_hunger_state(), HungerState::DYING) << "the fixture did not reach DYING";
+	const int before = player->get_hp();
+
+	hunger.apply_hunger_effects(ctx);
+	hunger.apply_hunger_effects(ctx);
+
+	EXPECT_EQ(player->get_hp(), before - 2) << "dying skipped a turn, so it has a roll it should not have";
+}
+
+// The states above STARVING reach the player's text and never their hit points.
+TEST_F(HungerDamageTest, BeingMerelyHungryCostsNoHitPoints)
+{
+	starve_to(650);
+	ASSERT_EQ(hunger.get_hunger_state(), HungerState::HUNGRY) << "the fixture did not reach HUNGRY";
+	const int before = player->get_hp();
+	force_next_roll(1);
+
+	hunger.apply_hunger_effects(ctx);
+
+	EXPECT_EQ(player->get_hp(), before) << "hunger short of starvation took hit points";
 }

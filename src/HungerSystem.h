@@ -8,14 +8,20 @@
 
 struct GameContext;
 
-// Hunger states in ascending order of hunger
+// Hunger states in ascending order of hunger.
+//
+// The comments say what each state does, which is less than the names suggest: only
+// the last two reach the player at all, and they do it with damage. Bonuses for being
+// well fed and penalties short of damage are not implemented, and the enum used to
+// promise both - see the issues directory for the design question of whether they
+// should be.
 enum class HungerState
 {
-	WELL_FED, // Recently ate, receive bonuses
-	SATIATED, // Normal state, no effects
-	HUNGRY, // Beginning to get hungry, minor penalties
-	STARVING, // Very hungry, major penalties
-	DYING // About to die from starvation
+	WELL_FED, // Says so once; no bonus
+	SATIATED, // Nothing
+	HUNGRY, // A flavour line on one turn in ten; no penalty
+	STARVING, // A flavour line on one turn in six, and 1 damage on one in twenty
+	DYING // A line and 1 damage every turn
 };
 
 class HungerSystem
@@ -87,7 +93,6 @@ public:
 	[[nodiscard]] float get_fullness_ratio() const;
 
 	// Returns numerical hunger display (e.g., "150/1000")
-	std::string get_hunger_numerical_string() const;
 
 	// Returns color code for hunger UI display
 	ColorPairId get_hunger_color() const;

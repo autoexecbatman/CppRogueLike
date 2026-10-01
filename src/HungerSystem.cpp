@@ -120,11 +120,6 @@ float HungerSystem::get_fullness_ratio() const
 	return std::clamp(1.0f - static_cast<float>(hungerValue) / static_cast<float>(hungerMax), 0.0f, 1.0f);
 }
 
-std::string HungerSystem::get_hunger_numerical_string() const
-{
-	return std::format("{}/{}", hungerValue, hungerMax);
-}
-
 ColorPairId HungerSystem::get_hunger_color() const
 {
 	switch (get_hunger_state())
@@ -142,12 +137,12 @@ ColorPairId HungerSystem::get_hunger_color() const
 
 	case HungerState::HUNGRY:
 	{
-		return ColorPairId::GREEN_BLACK; // Yellow
+		return ColorPairId::GREEN_BLACK;
 	}
 
 	case HungerState::STARVING:
 	{
-		return ColorPairId::RED_BLACK; // Orange/Brown
+		return ColorPairId::RED_BLACK;
 	}
 
 	case HungerState::DYING:
@@ -174,10 +169,6 @@ void HungerSystem::apply_hunger_effects(GameContext& ctx)
 	// player is a wiring fault rather than a state the game passes through.
 	assert(ctx.player() && "apply_hunger_effects ran without a player");
 
-	// Reset any previous hunger effects first
-	// This is assuming the player's base stats are stored somewhere and can be restored
-
-	// Apply effects based on hunger state
 	switch (get_hunger_state())
 	{
 
@@ -188,20 +179,19 @@ void HungerSystem::apply_hunger_effects(GameContext& ctx)
 
 	case HungerState::WELL_FED:
 	{
-		// Bonuses for being well fed
+		// Said once per spell of being well fed, and reset when the state is left.
 		if (!wellFedMessageShown)
 		{
 			ctx.messageSystem->append_message_part(get_hunger_color(), "You feel strong and energetic!");
 			ctx.messageSystem->finalize_message();
 			wellFedMessageShown = true;
 		}
-		// Potentially give bonus to strength or regen
 		break;
 	}
 
 	case HungerState::HUNGRY:
 	{
-		// Minor penalties
+		// Flavour only. Hunger costs the player nothing until STARVING.
 		if (ctx.dice->d10() == 1)
 		{ // 10% chance each turn
 			ctx.messageSystem->append_message_part(get_hunger_color(), "Your stomach growls.");
@@ -212,14 +202,13 @@ void HungerSystem::apply_hunger_effects(GameContext& ctx)
 
 	case HungerState::STARVING:
 	{
-		// More severe penalties
+		// Still flavour; the damage below is the first thing hunger actually costs.
 		if (ctx.dice->d6() == 1)
 		{ // ~17% chance each turn
 			ctx.messageSystem->append_message_part(get_hunger_color(), "You are weakened by hunger.");
 			ctx.messageSystem->finalize_message();
-			// Reduce player's strength temporarily
 		}
-		// Take small damage occasionally
+		// One point on one turn in twenty, so starving is survivable for a while.
 		if (ctx.dice->d20() == 1)
 		{ // 5% chance each turn
 			ctx.player()->take_damage_and_check_death(1, ctx, DamageType::PHYSICAL);
@@ -231,10 +220,9 @@ void HungerSystem::apply_hunger_effects(GameContext& ctx)
 
 	case HungerState::DYING:
 	{
-		// Severe penalties, player is about to die
 		ctx.messageSystem->append_message_part(get_hunger_color(), "You are dying from starvation!");
 		ctx.messageSystem->finalize_message();
-		// Take damage every turn
+		// Every turn now, with no roll to survive.
 		ctx.player()->take_damage_and_check_death(1, ctx, DamageType::PHYSICAL);
 		break;
 	}
