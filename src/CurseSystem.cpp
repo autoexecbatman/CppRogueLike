@@ -69,11 +69,6 @@ void CurseSystem::apply_curses(Player& player, GameContext& ctx)
 {
 	for (const auto& equipped : player.equippedItems)
 	{
-		if (!equipped.item)
-		{
-			continue;
-		}
-
 		const Item& item = *equipped.item;
 
 		if (item.get_enhancement().blessing != BlessingStatus::CURSED)

@@ -1,0 +1,47 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=PlayerRestTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\tif (get_tile_distance(creature->position) <= REST_DANGER_RADIUS)\n",
+      "mutated": "\t\tif (get_tile_distance(creature->position) < REST_DANGER_RADIUS)\n",
+      "catches": "a hostile standing exactly at the edge of the danger zone counted as outside it"
+    },
+    {
+      "file": "src/Player.h",
+      "original": "inline constexpr int REST_DANGER_RADIUS = 5;\n",
+      "mutated": "inline constexpr int REST_DANGER_RADIUS = 6;\n",
+      "catches": "the danger zone growing by a tile, so resting is refused where it should be allowed"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\tif (creature->is_dead())\n\t\t{\n\t\t\tcontinue;\n\t\t}\n",
+      "mutated": "\t\tif (false)\n\t\t{\n\t\t\tcontinue;\n\t\t}\n",
+      "catches": "a corpse lying nearby counted as a living threat"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\tif (creature->get_attitude() != Attitude::HOSTILE)\n",
+      "mutated": "\t\tif (creature->get_attitude() == Attitude::HOSTILE)\n",
+      "catches": "the attitude test inverted, so a shopkeeper blocks the rest and an orc does not"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tif (get_hp() >= get_max_hp())\n",
+      "mutated": "\tif (get_hp() > get_max_hp())\n",
+      "catches": "a player at exactly full health resting anyway, spending the turn for nothing"
+    },
+    {
+      "file": "src/Actor.cpp",
+      "original": "\treturn position.chebyshev_distance_to(tilePosition);\n",
+      "mutated": "\treturn std::abs(position.x - tilePosition.x) + std::abs(position.y - tilePosition.y);\n",
+      "catches": "the danger zone measured as a diamond rather than a square, so a diagonal hostile reads as further away than it is"
+    }
+  ]
+}

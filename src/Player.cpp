@@ -577,6 +577,23 @@ void Player::render(const GameContext& ctx) const noexcept
 	Creature::render(ctx);
 }
 
+// Heals the player a fifth of their maximum, at the cost of a turn's worth of hunger,
+// and reports whether any of that happened.
+//
+// It refuses three ways, each with a message: at full health there is nothing to
+// heal; with a living hostile creature within REST_DANGER_RADIUS tiles it is not safe
+// to stop; and starving or dying, the body has nothing to mend with. Only a hostile
+// blocks it, which is what lets a player rest in a shop with the shopkeeper beside
+// them. The healing is floored at one point, so a character whose maximum is under
+// five still gains something.
+//
+// Example (the refusals are what PlayerRestTest runs):
+//   player.rest(ctx);  // at full health
+//                      // -> false, "You're already at full health."
+//   player.rest(ctx);  // hurt, with a living orc five tiles away
+//                      // -> false, "You can't rest with enemies nearby!"
+//   player.rest(ctx);  // hurt, nothing hostile nearby
+//                      // -> true, healed by a fifth of the maximum
 bool Player::rest(GameContext& ctx)
 {
 	// Check if player is already at full health
@@ -586,33 +603,35 @@ bool Player::rest(GameContext& ctx)
 		return false;
 	}
 
-	// Check if enemies are nearby (within a radius of 5 tiles)
-	// Exclude shopkeepers and other neutral NPCs
+	// Anything hostile and alive this close stops the rest. Shopkeepers and other
+	// neutral creatures do not, which is what lets a player rest inside a shop.
 	for (const auto& creature : *ctx.creatures)
 	{
-		if (creature && !creature->is_dead())
+		assert(creature && "Player::rest: creatures list holds a null entry");
+
+		if (creature->is_dead())
 		{
-			// Skip the player themselves
-			if (creature.get() == this)
-			{
-				continue;
-			}
+			continue;
+		}
 
-			// Skip non-hostile creatures (shopkeepers, etc.)
-			if (creature->get_attitude() != Attitude::HOSTILE)
-			{
-				continue;
-			}
+		// Skip the player themselves
+		if (creature.get() == this)
+		{
+			continue;
+		}
 
-			// Calculate distance to creature
-			int distance = get_tile_distance(creature->position);
+		// Skip non-hostile creatures (shopkeepers, etc.)
+		if (creature->get_attitude() != Attitude::HOSTILE)
+		{
+			continue;
+		}
 
-			// If hostile enemy is within 5 tiles, can't rest
-			if (distance <= 5)
-			{
-				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You can't rest with enemies nearby!", MessageCompletion::FINISHED);
-				return false;
-			}
+		// Chebyshev, so the danger zone is a square: a creature on the diagonal is
+		// as near as one straight ahead.
+		if (get_tile_distance(creature->position) <= REST_DANGER_RADIUS)
+		{
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You can't rest with enemies nearby!", MessageCompletion::FINISHED);
+			return false;
 		}
 	}
 

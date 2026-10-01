@@ -40,11 +40,16 @@
 #include "WeaponDamageRegistry.h"
 #include "Web.h"
 
-// Puts an item into a slot this creature's body provides.
-//
-// Example:
-//   orc.wear(ItemCreator::create("long_sword", pos, ctx), EquipmentSlot::RIGHT_HAND);
-//   orc.get_attack_name(); // -> "long sword"
+// An entry exists because something put an item in a slot, so one holding nothing is
+// a slot that lost what it was carrying. Asserted here, at the single site every
+// entry passes through - wear, equip_item, the put-back in unequip_item and the load
+// path all reach it - rather than at each of the readers that dereference it.
+EquippedItem::EquippedItem(std::unique_ptr<Item> worn, EquipmentSlot wornIn)
+	: item(std::move(worn)), slot(wornIn)
+{
+	assert(item && "an equipment slot is built around the item in it");
+}
+
 // Equipment comparison predicates for DRY compliance
 namespace
 {
@@ -760,6 +765,14 @@ bool Creature::has_slot(EquipmentSlot slot) const noexcept
 	return std::ranges::find(bodyPlan, slot) != bodyPlan.end();
 }
 
+// Puts an item into a slot this creature's body provides. The creature owns it from
+// here until it is taken off; a body without the slot refuses, because an item put
+// where no lookup reaches is an item the wearer has lost.
+//
+// Example:
+//   orc.wear(ItemCreator::create("long_sword", pos, ctx), EquipmentSlot::RIGHT_HAND);
+//   orc.get_attack_name();  // -> "long sword"
+//   wolf.wear(sword, EquipmentSlot::RIGHT_HAND);  // -> asserts: no such slot
 void Creature::wear(std::unique_ptr<Item> item, EquipmentSlot slot)
 {
 	assert(item && "Creature::wear called with no item");
@@ -968,7 +981,7 @@ bool Creature::wears_item_with(MagicalEffect effect) const noexcept
 {
 	const auto grants_the_effect = [effect](const EquippedItem& equipped)
 	{
-		if (!equipped.item || !equipped.item->behavior)
+		if (!equipped.item->behavior)
 		{
 			return false;
 		}

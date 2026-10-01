@@ -43,25 +43,25 @@
 #include <string_view>
 #include <vector>
 
-#include "src/Creature.h"
-#include "src/Player.h"
-#include "src/EquipmentSlot.h"
-#include "src/HealthPool.h"
-#include "src/Item.h"
-#include "src/Colors.h"
 #include "src/ArmorClass.h"
-#include "src/ExperienceReward.h"
-#include "src/Pickable.h"
-#include "src/Decoration.h"
-#include "src/Map.h"
-#include "src/Paths.h"
 #include "src/AttackKind.h"
+#include "src/Colors.h"
+#include "src/Creature.h"
 #include "src/DamageInfo.h"
+#include "src/Decoration.h"
+#include "src/EquipmentSlot.h"
+#include "src/ExperienceReward.h"
+#include "src/HealthPool.h"
 #include "src/InventoryData.h"
 #include "src/InventoryOperations.h"
+#include "src/Item.h"
 #include "src/ItemCreator.h"
+#include "src/Map.h"
 #include "src/MonsterAttacker.h"
 #include "src/MonsterCreator.h"
+#include "src/Paths.h"
+#include "src/Pickable.h"
+#include "src/Player.h"
 #include "src/ShopkeeperFactory.h"
 #include "src/SpellSystem.h"
 #include "src/TurnUndead.h"
@@ -287,7 +287,8 @@ TEST_F(AssertProbeDeathTest, SleepingWithANullInTheCreatureListAborts)
 {
 	// An orc casts on no Wisdom table, so the spell reaches its effect without a fizzle roll.
 	std::unique_ptr<Creature> caster = make_creature();
-	const auto ignoreCompletion = [](GameContext&) {};
+	const auto ignoreCompletion = [](GameContext&) {
+	};
 
 	std::vector<std::unique_ptr<Creature>> creatures{};
 	creatures.push_back(nullptr);
@@ -339,7 +340,8 @@ TEST_F(AssertProbeDeathTest, CastingMagicMissileWithANullInTheCreatureListAborts
 	creatures.push_back(nullptr);
 	ctx.creatures = &creatures;
 
-	const auto ignoreCompletion = [](GameContext&) {};
+	const auto ignoreCompletion = [](GameContext&) {
+	};
 
 	EXPECT_DEATH(SpellSystem::cast_spell_by_key("magic_missile", *caster, SpellSource::MEMORIZED, ignoreCompletion, ctx),
 		"cast_magic_missile: creatures list holds a null entry");
@@ -354,7 +356,8 @@ TEST_F(AssertProbeDeathTest, CastingHoldPersonWithANullInTheCreatureListAborts)
 	creatures.push_back(nullptr);
 	ctx.creatures = &creatures;
 
-	const auto ignoreCompletion = [](GameContext&) {};
+	const auto ignoreCompletion = [](GameContext&) {
+	};
 
 	EXPECT_DEATH(SpellSystem::cast_spell_by_key("hold_person", *caster, SpellSource::MEMORIZED, ignoreCompletion, ctx),
 		"cast_hold_person: creatures list holds a null entry");
@@ -403,4 +406,34 @@ TEST_F(AssertProbeDeathTest, FindingADecorationWithANullInTheListAborts)
 
 	EXPECT_DEATH([[maybe_unused]] const Decoration* found = map.find_decoration_at(Vector2D{ 1, 1 }, ctx),
 		"find_decoration_at: the decoration list holds a null entry");
+}
+
+// An equipment entry owns the item in it. The entry exists because something put an
+// item in a slot, so an entry with nothing in it is a slot that lost what it was
+// holding - and ten readers across five files reach through this pointer, which is
+// why the invariant is established here rather than re-checked at each of them.
+TEST_F(AssertProbeDeathTest, AnEquipmentEntryBuiltWithNoItemAborts)
+{
+	// Parenthesised whole: the brace list holds a comma, and EXPECT_DEATH is a macro.
+	EXPECT_DEATH((EquippedItem{ nullptr, EquipmentSlot::RIGHT_HAND }),
+		"an equipment slot is built around the item in it");
+}
+
+// Resting scans the creature list for a nearby enemy. The list owns its entries, so
+// a null is a fault - and the old condition folded it into the is-it-dead test, so a
+// null read as a corpse and the scan walked past it. A player would then rest beside
+// whatever that entry should have been.
+TEST_F(AssertProbeDeathTest, RestingWithANullInTheCreatureListAborts)
+{
+	auto player = std::make_unique<Player>(Vector2D{ 0, 0 });
+	player->healthPool = std::make_unique<HealthPool>(20);
+	// Resting refuses outright at full health, so the scan is only reached hurt.
+	player->healthPool->set_hp(5);
+
+	std::vector<std::unique_ptr<Creature>> creatures{};
+	creatures.push_back(nullptr);
+	ctx.creatures = &creatures;
+
+	EXPECT_DEATH([[maybe_unused]] const bool rested = player->rest(ctx),
+		"Player::rest: creatures list holds a null entry");
 }

@@ -1,6 +1,25 @@
+// file: MenuSell.cpp
+//
+// The screen a player sells from, inside a shop.
+//
+// One line per item in the player's pack, each showing what the shopkeeper would pay
+// for it. Enter sells whatever the cursor is on, Escape leaves. The menu owns no part
+// of the transaction: handle_sell keeps the cursor inside the pack and hands the item
+// to the shop, which decides the price, moves the gold and says what happened.
+//
+// Like every menu here it is frame-based - menu() does one frame of work and returns,
+// because a blocking loop hangs the browser under Emscripten. Push it onto ctx.menus
+// and MenuManager ticks it.
+//
+// Usage:
+//
+//   ctx.menus->push_back(std::make_unique<MenuSell>(shopkeeper, player, ctx));
+//
+// The shopkeeper has to carry a shop component and the renderer has to exist before
+// construction; both are asserted, because every way into this menu goes through a
+// shop that already opened.
+
 #include <cassert>
-#include <cstdlib>
-#include <iostream>
 #include <memory>
 #include <raylib.h>
 #include <span>
@@ -17,39 +36,50 @@
 #include "MessageSystem.h"
 #include "Renderer.h"
 
-void MenuSell::populate_items(std::span<std::unique_ptr<Item>> item)
+// Builds the one line per item that this menu displays, each carrying the name and
+// what the shop would pay for it.
+//
+// An empty pack is a legal thing to open the sell menu with: it produces the single
+// line "No items to sell" rather than no lines, so the menu has something to draw and
+// the cursor has somewhere to sit. The prices come from the shopkeeper, which is why
+// the constructor refuses a creature with no shop. It clears first, so the caller may
+// run it every frame.
+//
+// Example:
+//   populate_items(player.inventoryData.items);  // the player is carrying two items
+//                                                // menuItems now holds two lines, each the
+//                                                // item's name padded out to column 28 and
+//                                                // then the shop's price in gold
+//
+//   populate_items({});                          // menuItems holds one line,
+//                                                // "No items to sell"
+void MenuSell::populate_items(std::span<std::unique_ptr<Item>> items)
 {
 	menuItems.clear();
 
-	// Handle empty inventory case
-	if (item.empty())
+	// An empty pack still needs a line, or the menu draws nothing and the cursor has
+	// no row to sit on.
+	if (items.empty())
 	{
 		menuItems.push_back("No items to sell");
 		return;
 	}
 
-	for (const auto& item : item)
+	for (const auto& item : items)
 	{
-		if (item)
-		{
-			// Display item name with right-aligned sell price
-			std::string itemName = item->actorData.name;
+		assert(item && "populate_items: the pack holds a null where an item should be");
 
-			const int sellPrice = shopkeeper.shop->get_sell_price(*item);
-			std::string goldText = "(" + std::to_string(sellPrice) + "g)";
+		std::string itemName = item->actorData.name;
 
-			// Pad to align gold values (assuming max name length ~20)
-			size_t totalWidth = 28;
-			size_t padding = totalWidth > (itemName.length() + goldText.length()) ? totalWidth - itemName.length() - goldText.length() : 1;
+		const int sellPrice = shopkeeper.shop->get_sell_price(*item);
+		std::string goldText = "(" + std::to_string(sellPrice) + "g)";
 
-			std::string itemDisplay = itemName + std::string(padding, ' ') + goldText;
-			menuItems.push_back(itemDisplay);
-		}
-		else
-		{
-			std::cerr << "MenuSell Item is null." << std::endl;
-			std::exit(EXIT_FAILURE);
-		}
+		// The gold figures line up by padding the name out to a fixed column. A name
+		// long enough to reach it keeps one space, so the two never run together.
+		const size_t totalWidth = 28;
+		const size_t padding = totalWidth > (itemName.length() + goldText.length()) ? totalWidth - itemName.length() - goldText.length() : 1;
+
+		menuItems.push_back(itemName + std::string(padding, ' ') + goldText);
 	}
 }
 
@@ -127,9 +157,9 @@ void MenuSell::draw_content()
 	}
 
 	// Draw all menu items efficiently
-	for (size_t i{ 0 }; i < menuItems.size(); ++i)
+	for (size_t row{ 0 }; row < menuItems.size(); ++row)
 	{
-		menu_print_state(i);
+		menu_print_state(row);
 	}
 }
 

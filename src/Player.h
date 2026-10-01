@@ -20,6 +20,10 @@ class Item;
 struct GameContext;
 struct PlayerBlueprint;
 
+// How close a living hostile creature may be before resting is refused. Chebyshev
+// distance, so it is an 11-by-11 square around the player rather than a circle.
+inline constexpr int REST_DANGER_RADIUS = 5;
+
 class Player : public Creature
 {
 public:

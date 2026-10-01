@@ -1,3 +1,32 @@
+// file: InventoryUI.cpp
+//
+// The inventory screen: what the player is wearing, what they are carrying, and what
+// of it can be used right now.
+//
+// Three tabs sharing one window. Equipment draws the body's slots and what sits in
+// each; Backpack lists everything carried that is not worn, grouped under category
+// headers; Usables is the same list with anything unusable dropped. Tab and Shift-Tab
+// move between them, the cursor keys move inside one, Enter acts on the row, and a
+// detail bar along the bottom describes whatever the cursor is on.
+//
+// The list is rebuilt from the player every frame rather than kept in step with them,
+// so nothing here can fall out of date with the pack it is drawing. That is what makes
+// dropping and equipping from inside the menu safe: the next frame's list is built
+// from what the action left behind.
+//
+// Usage:
+//
+//   // opens on the Equipment tab
+//   ctx.menus->push_back(std::make_unique<InventoryUI>(player, InventoryScreen::EQUIPMENT, ctx));
+//
+//   // opening to fill one slot - the list is filtered to what fits it
+//   ctx.menus->push_back(std::make_unique<InventoryUI>(player, InventoryScreen::BACKPACK, ctx));
+//
+// Like every menu here it is frame-based: menu() does one frame of work and returns,
+// because a blocking loop hangs the browser under Emscripten. It reads input through
+// ctx.inputSystem->poll(), so a raw IsMouseButtonPressed in this file would see the
+// transition already consumed.
+
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
@@ -196,6 +225,20 @@ void InventoryUI::menu(GameContext& ctx)
 // Data Building
 // ============================================================
 
+// Rebuilds the flat list the Backpack and Usables screens scroll through, in category
+// order, from whatever the player is carrying right now.
+//
+// What it leaves out: anything worn, because the Equipment screen shows those; and,
+// on the Usables screen, anything that cannot be used. While a slot filter is on -
+// set when the player picks a slot to fill - it also drops whatever does not fit that
+// slot. Call it after anything that changes the pack or the screen; it clears the list
+// first, so calling it twice is the same as calling it once.
+//
+// Example:
+//   rebuild_item_list(player, ctx);   // the player holds a potion, a sword, worn mail
+//                                     // listEntries now holds the potion and the sword,
+//                                     // each under its category header; the mail is worn,
+//                                     // so it is not in the list at all
 void InventoryUI::rebuild_item_list(const Player& player, GameContext& ctx)
 {
 	listEntries.clear();
@@ -203,14 +246,14 @@ void InventoryUI::rebuild_item_list(const Player& player, GameContext& ctx)
 	std::vector<Item*> items;
 	for (const auto& item : player.inventoryData.items)
 	{
-		if (!item)
-		{
-			continue;
-		}
+		assert(item && "rebuild_item_list: the pack holds a null where an item should be");
 
-		auto is_equipped = [&item](const EquippedItem& eq)
+		// An item the player is wearing belongs to the Equipment screen, so the
+		// backpack list does not repeat it. Identity is the unique id, because the
+		// pack and the slots can hold two of the same kind.
+		const auto is_equipped = [&item](const EquippedItem& equipped)
 		{
-			return eq.item && eq.item->uniqueId == item->uniqueId;
+			return equipped.item->uniqueId == item->uniqueId;
 		};
 		if (std::ranges::any_of(player.equippedItems, is_equipped))
 		{

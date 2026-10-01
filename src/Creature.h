@@ -33,13 +33,16 @@ class Web;
 
 // One item sitting in one slot on a creature. The creature owns it while it is
 // worn; unequipping hands it back to the inventory.
+//
+// The entry owns the item, so item is never null once an entry exists. That is
+// asserted in the constructor rather than at each reader, because ten readers
+// across five files reach through it and they do not all get to decide.
 struct EquippedItem
 {
 	std::unique_ptr<Item> item;
 	EquipmentSlot slot;
 
-	EquippedItem(std::unique_ptr<Item> worn, EquipmentSlot wornIn)
-		: item(std::move(worn)), slot(wornIn) {}
+	EquippedItem(std::unique_ptr<Item> worn, EquipmentSlot wornIn);
 };
 
 // Finds the entry sitting in one slot. Used by every equipment query.

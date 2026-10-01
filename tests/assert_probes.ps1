@@ -155,6 +155,16 @@ $probes = @(
         test   = "AssertProbeDeathTest.FindingADecorationWithANullInTheListAborts"
         file   = "src/Map.cpp"
         anchor = 'assert(decoration && "find_decoration_at: the decoration list holds a null entry");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.AnEquipmentEntryBuiltWithNoItemAborts"
+        file   = "src/Creature.cpp"
+        anchor = 'assert(item && "an equipment slot is built around the item in it");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.RestingWithANullInTheCreatureListAborts"
+        file   = "src/Player.cpp"
+        anchor = 'assert(creature && "Player::rest: creatures list holds a null entry");'
     }
 )
 

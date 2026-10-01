@@ -17,7 +17,7 @@ class MenuSell : public BaseMenu
 	Creature& shopkeeper;
 	std::vector<std::string> menuItems;
 
-	void populate_items(std::span<std::unique_ptr<Item>> item);
+	void populate_items(std::span<std::unique_ptr<Item>> items);
 	void menu_print_state(size_t state);
 	std::string menu_get_string(size_t state) { return menuItems.at(state); }
 	void handle_sell(Creature& shopkeeper, Creature& seller, GameContext& ctx);
