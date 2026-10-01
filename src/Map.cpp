@@ -966,6 +966,12 @@ void Map::set_tile(Vector2D pos, TileType newType, double cost)
 
 void Map::apply_room_shape(const DungeonRoom& room)
 {
+	// The contract says this runs after dig(), and dig() carves the whole bounding
+	// box, so the centre is floor by then. Called before it, every wall_back below
+	// writes a wall onto a wall and the shape silently does nothing.
+	assert(!is_wall(Vector2D{ room.col + room.width / 2, room.row + room.height / 2 })
+		&& "apply_room_shape: the room has not been dug yet, so shaping it does nothing");
+
 	auto wall_back = [&](int x, int y)
 	{
 		set_tile(Vector2D{ x, y }, TileType::WALL, 0);

@@ -212,6 +212,11 @@ bool Weapon::validate_dual_wield(const Item* mainHand, const Item* offHand) cons
 
 EquipmentSlot Weapon::get_preferred_slot(const Creature* wearer) const
 {
+	// Reached below for what is already in each hand. The two early returns mean a
+	// null wearer answers correctly for a ranged or two-handed weapon and reaches
+	// through the null for anything else, which is the intermittent kind of fault.
+	assert(wearer && "get_preferred_slot: asked which hand a weapon prefers, with nobody to wear it");
+
 	if (ranged)
 	{
 		return EquipmentSlot::MISSILE_WEAPON;

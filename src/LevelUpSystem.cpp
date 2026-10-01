@@ -1,4 +1,5 @@
 // LevelUpSystem.cpp - Handles combat improvements on level up according to AD&D 2e rules
+#include <cassert>
 #include <algorithm>
 #include <format>
 #include <string>
@@ -204,6 +205,11 @@ void apply_rogue_improvements(int newLevel, GameContext* ctx)
 // cannot disagree.
 void announce_new_spell_level(CasterClass casterClass, const Creature& owner, int newLevel, GameContext* ctx)
 {
+	// The only raw GameContext pointer in the level-up path; every other function
+	// here takes a reference. Both the table and the message are read through it on
+	// the next two lines.
+	assert(ctx && ctx->dataManager && "announce_new_spell_level: no context to read the progression table from");
+
 	const int wisdom = owner.get_wisdom();
 	const int reachNow = SpellSystem::highest_spell_level(casterClass, newLevel, wisdom, *ctx->dataManager);
 	if (reachNow <= SpellSystem::highest_spell_level(casterClass, newLevel - 1, wisdom, *ctx->dataManager))
