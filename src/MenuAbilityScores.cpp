@@ -132,7 +132,7 @@ void MenuAbilityScores::draw_allocation_screen()
 	int row = FIRST_ABILITY_ROW;
 	for (const Ability ability : ALL_ABILITY)
 	{
-		const const ColorPairId colorPair = (ability == cursor) ? ColorPairId::YELLOW_BLACK : ColorPairId::WHITE_BLACK;
+		const ColorPairId colorPair = (ability == cursor) ? ColorPairId::YELLOW_BLACK : ColorPairId::WHITE_BLACK;
 		draw_row(row, row_for(ability), colorPair);
 		++row;
 	}

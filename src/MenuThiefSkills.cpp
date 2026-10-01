@@ -141,7 +141,7 @@ void MenuThiefSkills::draw_allocation_screen()
 	int row = FIRST_SKILL_ROW;
 	for (const ThiefSkill skill : ALL_THIEF_SKILL)
 	{
-		const const ColorPairId colorPair = (skill == cursor) ? ColorPairId::YELLOW_BLACK : ColorPairId::WHITE_BLACK;
+		const ColorPairId colorPair = (skill == cursor) ? ColorPairId::YELLOW_BLACK : ColorPairId::WHITE_BLACK;
 		draw_row(row, row_for(skill), colorPair);
 		++row;
 	}
