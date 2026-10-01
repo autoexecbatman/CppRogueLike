@@ -54,6 +54,8 @@
 #include "src/Paths.h"
 #include "src/AttackKind.h"
 #include "src/DamageInfo.h"
+#include "src/InventoryData.h"
+#include "src/InventoryOperations.h"
 #include "src/ItemCreator.h"
 #include "src/MonsterAttacker.h"
 #include "src/MonsterCreator.h"
@@ -353,4 +355,19 @@ TEST_F(AssertProbeDeathTest, CastingHoldPersonWithANullInTheCreatureListAborts)
 
 	EXPECT_DEATH(SpellSystem::cast_spell_by_key("hold_person", *caster, SpellSource::MEMORIZED, ignoreCompletion, ctx),
 		"cast_hold_person: creatures list holds a null entry");
+}
+
+// An inventory owns what it holds, so a null in it is a fault. Skipping one on the
+// way out would write a record shorter than the inventory, and the next load would
+// hand back fewer items without saying so - the loader already refuses to lose items
+// that way, and the saver now matches it.
+TEST_F(AssertProbeDeathTest, SavingAnInventoryHoldingANullAborts)
+{
+	CreatureInventory pack{ 10 };
+	pack.items.push_back(nullptr);
+
+	nlohmann::json record;
+
+	EXPECT_DEATH(InventoryOperations::save_inventory(pack, record),
+		"save_inventory: inventory holds a null where an item should be");
 }

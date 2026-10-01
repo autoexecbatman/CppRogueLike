@@ -228,6 +228,21 @@ void load_inventory(T& inventory, const nlohmann::json& j)
 	}
 }
 
+// Writes the capacity and one record per item, in the order the inventory holds them.
+// An inventory owns everything in it, so a null entry is a fault rather than an empty
+// slot: skipping one would write a record shorter than the inventory and the next load
+// would hand back fewer items with nothing said. load_inventory already refuses to lose
+// items that way, and this is the same rule facing the other direction.
+//
+// Example:
+//
+//   nlohmann::json record;
+//   save_inventory(pack, record);        // pack: 3 items, capacity 50
+//   record["inventory"].size();          // -> 3
+//   record["capacity"];                  // -> 50
+//
+//   save_inventory(emptyPack, record);   // an empty inventory is legal
+//   record["inventory"].size();          // -> 0
 template <AnyInventory T>
 void save_inventory(const T& inventory, nlohmann::json& j)
 {
@@ -236,12 +251,11 @@ void save_inventory(const T& inventory, nlohmann::json& j)
 
 	for (const auto& item : inventory.items)
 	{
-		if (item)
-		{
-			nlohmann::json itemJson;
-			item->save(itemJson);
-			j["inventory"].push_back(itemJson);
-		}
+		assert(item && "save_inventory: inventory holds a null where an item should be");
+
+		nlohmann::json itemJson;
+		item->save(itemJson);
+		j["inventory"].push_back(itemJson);
 	}
 }
 

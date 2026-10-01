@@ -4,7 +4,7 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=SaveFieldNamesTest.*:PlayerSerializationTest.*:ShopKeeperSerializationTest.*:CreatureSerializationTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=SaveFieldNamesTest.*:PlayerSerializationTest.*:ShopKeeperSerializationTest.*:CreatureSerializationTest.*:InventoryPersistenceTest.*"
   ],
   "mutations": [
     {
@@ -48,6 +48,18 @@
       "original": "\tif (j.contains(\"armorClass\"))\n",
       "mutated": "\tif (false)\n",
       "catches": "a saved player loading with no armour class, which every attack against it reads"
+    },
+    {
+      "file": "src/InventoryOperations.h",
+      "original": "\t\tj[\"inventory\"].push_back(itemJson);\n",
+      "mutated": "",
+      "catches": "an item written to a record and then left out of it, so a save loses the lot"
+    },
+    {
+      "file": "src/InventoryOperations.h",
+      "original": "\tj[\"capacity\"] = inventory.capacity;\n",
+      "mutated": "\tj[\"capacity\"] = 0;\n",
+      "catches": "an inventory's capacity lost on the way out, so it reloads holding nothing"
     }
   ]
 }

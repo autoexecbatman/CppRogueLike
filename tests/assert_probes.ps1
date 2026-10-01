@@ -140,6 +140,11 @@ $probes = @(
         test   = "AssertProbeDeathTest.CastingHoldPersonWithANullInTheCreatureListAborts"
         file   = "src/SpellSystem.cpp"
         anchor = 'assert(creature && "cast_hold_person: creatures list holds a null entry");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.SavingAnInventoryHoldingANullAborts"
+        file   = "src/InventoryOperations.h"
+        anchor = 'assert(item && "save_inventory: inventory holds a null where an item should be");'
     }
 )
 
