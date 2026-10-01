@@ -1,4 +1,4 @@
-// file: Combat/SavingThrow.cpp
+// file: SavingThrow.cpp
 #include <algorithm>
 #include <array>
 #include <limits>

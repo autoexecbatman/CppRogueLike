@@ -1,6 +1,6 @@
 #pragma once
 
-// file: Map/TreasureRoom.h
+// file: TreasureRoom.h
 //
 // A locked room with treasure in it and a jailer outside holding the key.
 // What goes into a room is a different question from what shape the room is,

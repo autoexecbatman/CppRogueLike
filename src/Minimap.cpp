@@ -1,4 +1,4 @@
-// file: Map/Minimap.cpp
+// file: Minimap.cpp
 #include <algorithm>
 
 #include <raylib.h>

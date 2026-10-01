@@ -1,6 +1,6 @@
 #pragma once
 
-// file: Random/DiceExpr.h
+// file: DiceExpr.h
 //
 // A dice expression as the game's data writes it: a count of dice, their sides
 // and a flat bonus, "3d12+5". This is the fact a damage roll is made of, and

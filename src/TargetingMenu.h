@@ -1,4 +1,4 @@
-// file: Systems/TargetingMenu.h
+// file: TargetingMenu.h
 // Frame-based targeting cursor menu: one frame of work per call, so it never
 // blocks the browser under Emscripten.
 // Push onto ctx.menus; fires onComplete(confirmed, position, ctx) when user confirms or cancels.

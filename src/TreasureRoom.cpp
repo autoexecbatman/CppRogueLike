@@ -1,4 +1,4 @@
-// file: Map/TreasureRoom.cpp
+// file: TreasureRoom.cpp
 #include <algorithm>
 #include <cassert>
 #include <cmath>

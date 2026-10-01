@@ -20,7 +20,7 @@ MenuSpellCast::MenuSpellCast(Player& player, GameContext& ctx)
 
 	if (availableSpells.empty())
 	{
-		// No spells available — menu() will close immediately on first frame.
+		// No spells available, so menu() closes on its first frame.
 		return;
 	}
 

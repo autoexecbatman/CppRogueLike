@@ -1,4 +1,4 @@
-// file: Config/GameBalance.h
+// file: GameBalance.h
 // Centralized game balance constants - Single source of truth for all magic numbers
 #ifndef GAME_BALANCE_H
 #define GAME_BALANCE_H

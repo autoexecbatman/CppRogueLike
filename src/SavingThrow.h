@@ -1,6 +1,6 @@
 #pragma once
 
-// file: Combat/SavingThrow.h
+// file: SavingThrow.h
 //
 // Saving throws, AD&D 2nd edition Player's Handbook Table 60. A target is a
 // pure function of the creature's class group, its level and the category of

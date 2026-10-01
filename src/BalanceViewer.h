@@ -1,4 +1,4 @@
-// file: Tools/BalanceViewer.h
+// file: BalanceViewer.h
 // Developer overlay: shows monster and item spawn distributions for the current dungeon level.
 #pragma once
 

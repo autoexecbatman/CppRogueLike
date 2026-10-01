@@ -1,5 +1,5 @@
 #pragma once
-// file: Map/Decoration.h
+// file: Decoration.h
 //
 // Static, authored dungeon decoration (barrel, crate, altar, etc.).
 // Lives in a global vector; never crosses room boundaries at runtime.

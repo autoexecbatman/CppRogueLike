@@ -1,4 +1,4 @@
-// file: Systems/GameLoopCoordinator.cpp
+// file: GameLoopCoordinator.cpp
 #include <cassert>
 #include <cmath>
 #include <format>
