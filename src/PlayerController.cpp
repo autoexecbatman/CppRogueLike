@@ -1281,13 +1281,28 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 	case Controls::TEST_COMMAND:
 	{
 		ItemFactory::spawn_all_enhanced_items_debug(playerOwner.position, ctx);
-		[[maybe_unused]] const auto debugSpawnBowResult = InventoryOperations::add_item_to_inventory(
+		// Weight-gated, so an overloaded player is refused. That is a runtime outcome
+		// rather than a wiring fault, which is why it is reported rather than asserted:
+		// a debug command that kills the process because the player is carrying too
+		// much is not a usable debug command.
+		const auto debugSpawnBowResult = InventoryOperations::add_item_to_inventory(
 			playerOwner.inventoryData,
 			ItemCreator::create("long_bow", playerOwner.position, ctx),
 			playerOwner,
 			*ctx.dataManager);
-		assert(debugSpawnBowResult.has_value());
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "DEBUG: Long bow added to inventory.", MessageCompletion::FINISHED);
+		if (debugSpawnBowResult.has_value())
+		{
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "DEBUG: Long bow added to inventory.", MessageCompletion::FINISHED);
+		}
+		else
+		{
+			// The reason comes from the error the add already produced, so the message
+			// cannot drift from what actually refused it.
+			const std::string refusal = (debugSpawnBowResult.error() == InventoryError::FULL)
+				? "the pack is full"
+				: "it is too heavy to carry";
+			ctx.messageSystem->message(ColorPairId::WHITE_RED, "DEBUG: the long bow was refused - " + refusal + ".", MessageCompletion::FINISHED);
+		}
 
 		playerOwner.memorizedSpells.push_back("magic_missile");
 		playerOwner.memorizedSpells.push_back("magic_missile");
@@ -1296,8 +1311,11 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 		playerOwner.memorizedSpells.push_back("teleport");
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "DEBUG: Spells added -- press Shift+C to cast.", MessageCompletion::FINISHED);
 
-		// Spawn a shopkeeper on the first walkable adjacent tile
+		// Spawn a shopkeeper on the first walkable adjacent tile. All four can be wall -
+		// in a corridor end, or a one-tile alcove - and saying nothing then leaves the
+		// key looking broken, which is the same fault the bow above had.
 		const std::array<Vector2D, 4> cardinals{ Vector2D{ 0, -1 }, Vector2D{ 0, 1 }, Vector2D{ -1, 0 }, Vector2D{ 1, 0 } };
+		bool shopkeeperSpawned = false;
 		for (const auto& offset : cardinals)
 		{
 			Vector2D spawnPos = playerOwner.position + offset;
@@ -1305,8 +1323,13 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 			{
 				ctx.creatures->push_back(ShopkeeperFactory::create_shopkeeper(spawnPos, ctx.levelManager->get_dungeon_level(), ctx));
 				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "DEBUG: Shopkeeper spawned.", MessageCompletion::FINISHED);
+				shopkeeperSpawned = true;
 				break;
 			}
+		}
+		if (!shopkeeperSpawned)
+		{
+			ctx.messageSystem->message(ColorPairId::WHITE_RED, "DEBUG: no walkable tile beside the player to spawn a shopkeeper on.", MessageCompletion::FINISHED);
 		}
 		break;
 	}
