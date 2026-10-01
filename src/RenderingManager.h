@@ -46,6 +46,13 @@ private:
 		}
 	}
 
+	// Draws every unbroken decoration that is currently in view. Broken ones are skipped
+	// rather than drawn as wreckage, and the span is taken rather than read from the
+	// context so a caller can draw a subset. Does nothing at all without a renderer or a
+	// map, since both are needed to decide what is visible.
+	//
+	// Example:
+	//   render_decorations(*ctx.decorations, ctx);   // draws what the player can see
 	void render_decorations(std::span<const std::unique_ptr<Decoration>> decorations, const GameContext& ctx) const;
 	void apply_lighting(const GameContext& ctx) const;
 	void render_mouse_path_overlay(const GameContext& ctx) const;

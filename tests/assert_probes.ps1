@@ -150,6 +150,11 @@ $probes = @(
         test   = "AssertProbeDeathTest.IdentifyingAPackHoldingANullAborts"
         file   = "src/Pickable.cpp"
         anchor = 'assert(item && "identify scroll: the pack holds a null where an item should be");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.FindingADecorationWithANullInTheListAborts"
+        file   = "src/Map.cpp"
+        anchor = 'assert(decoration && "find_decoration_at: the decoration list holds a null entry");'
     }
 )
 

@@ -151,6 +151,15 @@ public:
 	bool is_door_locked(Vector2D pos) const noexcept;
 	void open_all_room_doors(Vector2D doorPos, GameContext& ctx);
 	void place_amulet(GameContext& ctx);
+	// The first unbroken decoration standing on a tile, or null. A broken one stays in
+	// the list until the game loop sweeps it, so it is skipped here rather than reported -
+	// "nothing there" and "only wreckage there" are the same answer to this question. A
+	// level built without a decoration list answers null rather than reaching through it.
+	//
+	// Example, a barrel on the tile:
+	//   find_decoration_at(tile, ctx);   // -> the barrel
+	//   barrel->isBroken = true;
+	//   find_decoration_at(tile, ctx);   // -> nullptr
 	Decoration* find_decoration_at(Vector2D pos, const GameContext& ctx) const noexcept;
 	bool is_door(Vector2D pos) const noexcept;
 	bool is_open_door(Vector2D pos) const noexcept;

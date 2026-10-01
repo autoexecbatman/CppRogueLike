@@ -1,0 +1,29 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=DecorationLookupTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\tif (!decoration->isBroken && decoration->position == pos)\n",
+      "mutated": "\t\tif (decoration->position == pos)\n",
+      "catches": "a broken barrel reported as still standing on its tile"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\t\treturn decoration.get();\n",
+      "mutated": "\t\t\treturn nullptr;\n",
+      "catches": "a decoration found and then reported as absent"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\tif (!ctx.decorations)\n",
+      "mutated": "\tif (false)\n",
+      "catches": "a level with no decoration list reaching through the null instead of answering no"
+    }
+  ]
+}

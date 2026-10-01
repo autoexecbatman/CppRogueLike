@@ -171,7 +171,9 @@ void RenderingManager::render_decorations(
 	}
 	for (const auto& decor : decorations)
 	{
-		if (!decor || decor->isBroken)
+		assert(decor && "render_decorations: the decoration list holds a null entry");
+
+		if (decor->isBroken)
 		{
 			continue;
 		}

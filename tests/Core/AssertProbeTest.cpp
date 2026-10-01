@@ -52,6 +52,8 @@
 #include "src/ArmorClass.h"
 #include "src/ExperienceReward.h"
 #include "src/Pickable.h"
+#include "src/Decoration.h"
+#include "src/Map.h"
 #include "src/Paths.h"
 #include "src/AttackKind.h"
 #include "src/DamageInfo.h"
@@ -386,4 +388,19 @@ TEST_F(AssertProbeDeathTest, IdentifyingAPackHoldingANullAborts)
 
 	EXPECT_DEATH([[maybe_unused]] const bool spent = use(behavior, *scrollItem, *wearer, ctx),
 		"identify scroll: the pack holds a null where an item should be");
+}
+
+// The decoration list owns its entries, so a null in it is a fault. The old condition
+// folded that into the is-it-broken test, so a null read as a broken barrel and the
+// search walked past it.
+TEST_F(AssertProbeDeathTest, FindingADecorationWithANullInTheListAborts)
+{
+	Map map{ 20, 20 };
+
+	std::vector<std::unique_ptr<Decoration>> decorations{};
+	decorations.push_back(nullptr);
+	ctx.decorations = &decorations;
+
+	EXPECT_DEATH([[maybe_unused]] const Decoration* found = map.find_decoration_at(Vector2D{ 1, 1 }, ctx),
+		"find_decoration_at: the decoration list holds a null entry");
 }

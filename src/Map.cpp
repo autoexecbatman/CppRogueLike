@@ -351,11 +351,13 @@ Decoration* Map::find_decoration_at(Vector2D pos, const GameContext& ctx) const 
 		return nullptr;
 	}
 
-	for (auto& d : *ctx.decorations)
+	for (auto& decoration : *ctx.decorations)
 	{
-		if (d && !d->isBroken && d->position == pos)
+		assert(decoration && "find_decoration_at: the decoration list holds a null entry");
+
+		if (!decoration->isBroken && decoration->position == pos)
 		{
-			return d.get();
+			return decoration.get();
 		}
 	}
 
