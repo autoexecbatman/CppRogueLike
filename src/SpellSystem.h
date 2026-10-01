@@ -137,16 +137,48 @@ private:
 	static bool cast_bless(Creature& caster, GameContext& ctx);
 	static bool cast_sanctuary(Creature& caster, GameContext& ctx);
 	static bool cast_protection_from_evil(Creature& caster, GameContext& ctx);
+	// Fires one missile per two caster levels, five at most, at the living
+	// creatures in the caster's field of view, nearest first. A target whose
+	// Sanctuary turns the caster away is skipped and the missile goes to the next.
+	// Refuses with a message and returns false when nothing is in sight.
+	//
+	// Example, caster level 3, one goblin in view:
+	//   cast_magic_missile(caster, ctx);   // -> true, 2 missiles, both to the goblin
+	//   cast_magic_missile(caster, ctx);   // -> false when no target is in view
 	static bool cast_magic_missile(Creature& caster, GameContext& ctx);
 	static bool cast_shield(Creature& caster, GameContext& ctx);
 	static bool cast_sleep(Creature& caster, GameContext& ctx);
 	static bool cast_invisibility(Creature& caster, GameContext& ctx);
 	static bool cast_teleport(Creature& caster, GameContext& ctx);
 	static bool cast_knock(Creature& caster, GameContext& ctx);
+	// Paralyzes up to 1d4 humanoids in the caster's field of view for two rounds
+	// per caster level. Each target saves versus spells, d20 at 15 or better, and a
+	// save negates for that target only. The 1d4 is the cap on targets attempted,
+	// not on targets held, so a roll of four against four saves holds nobody.
+	//
+	// Example, caster level 3, two orcs in view, 1d4 rolling 2, saves of 3 and 18:
+	//   cast_hold_person(caster, ctx);   // -> true, the first orc held for 6 rounds
 	static bool cast_hold_person(Creature& caster, GameContext& ctx);
 
 	// Targeted spell implementations — async via TargetingMenu; onSuccess fires on confirm
+	// Opens a targeting cursor with a range of 5 plus the caster's level, and on
+	// confirmation silences the one living creature standing on the chosen tile for
+	// two rounds per caster level, preventing it from casting. Returns immediately:
+	// the work happens when the menu resolves, and onSuccess fires only then. A
+	// cancelled cursor says so and calls nothing.
+	//
+	// Example, caster level 3:
+	//   cast_silence(caster, on_spell_spent, ctx);   // cursor opens, range 8
+	//                                                // on confirm: 6 rounds, on cancel: nothing
 	static void cast_silence(Creature& caster, std::function<void(GameContext&)> onSuccess, GameContext& ctx);
+	// Opens a targeting cursor with a range of five times the caster's level, and on
+	// confirmation entangles every living creature within two tiles of the chosen
+	// centre for two rounds per caster level. Each saves versus paralyzation, d20 at
+	// 10 or better, to escape. Returns immediately, as cast_silence does.
+	//
+	// Example, caster level 3, two goblins within the radius:
+	//   cast_web(caster, on_spell_spent, ctx);   // cursor opens, range 15, radius 2
+	//                                            // on confirm: each goblin rolls to escape
 	static void cast_web(Creature& caster, std::function<void(GameContext&)> onSuccess, GameContext& ctx);
 	static void cast_fireball(Creature& caster, std::function<void(GameContext&)> onSuccess, GameContext& ctx);
 };

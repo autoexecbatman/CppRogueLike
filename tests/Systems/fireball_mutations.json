@@ -42,6 +42,12 @@
       "original": "constexpr int FIRE_PER_DIE = 2;",
       "mutated": "constexpr int FIRE_PER_DIE = 1;",
       "catches": "fire reduced by one a die instead of two"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\tassert(creature && \"burst_fireball: creatures list holds a null entry\");\n\n\t\tif (creature->is_dead())\n",
+      "mutated": "\t\tassert(creature && \"burst_fireball: creatures list holds a null entry\");\n\n\t\tif (!creature->is_dead())\n",
+      "catches": "the burst passing over the living and burning only the dead"
     }
   ]
 }

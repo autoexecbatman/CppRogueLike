@@ -125,6 +125,21 @@ $probes = @(
         test   = "AssertProbeDeathTest.LoadingAPlayerRecordMissingItsHealthPoolAborts"
         file   = "src/Player.cpp"
         anchor = 'assert(healthPool && armorClass && experienceReward && attacker && controller && "Player::load finished with a player the game cannot run");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.BurstingAFireballWithANullInTheCreatureListAborts"
+        file   = "src/SpellSystem.cpp"
+        anchor = 'assert(creature && "burst_fireball: creatures list holds a null entry");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.CastingMagicMissileWithANullInTheCreatureListAborts"
+        file   = "src/SpellSystem.cpp"
+        anchor = 'assert(creature && "cast_magic_missile: creatures list holds a null entry");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.CastingHoldPersonWithANullInTheCreatureListAborts"
+        file   = "src/SpellSystem.cpp"
+        anchor = 'assert(creature && "cast_hold_person: creatures list holds a null entry");'
     }
 )
 

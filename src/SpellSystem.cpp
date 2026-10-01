@@ -1,3 +1,30 @@
+// file: SpellSystem.cpp
+//
+// Every spell the game can cast, and the two shapes a spell comes in.
+//
+// An instant spell does its work and returns whether it happened -
+// cast_magic_missile, cast_hold_person, cast_sleep. A targeted spell opens a
+// TargetingMenu and returns immediately, doing its work in a callback when the
+// player confirms a tile - cast_silence, cast_web, cast_fireball. Nothing here
+// blocks; a menu that waited would hang the browser under Emscripten.
+//
+// Almost nothing calls these directly. cast_spell_by_key is the entry point: it
+// looks the key up in the registry, checks the source, and dispatches.
+//
+// Usage:
+//
+//   const auto on_spent = [](GameContext&) {};                  // runs on success
+//   SpellSystem::cast_spell_by_key("magic_missile", caster, SpellSource::MEMORIZED, on_spent, ctx);
+//   SpellSystem::cast_spell_by_key("web", caster, SpellSource::SCROLL, on_spent, ctx);
+//                                                               // cursor opens; on_spent fires on confirm
+//
+//   SpellSystem::burst_fireball(center, 3, 2, ctx);             // -> { 3, 18, 1 }
+//                                                               // public so a test skips the cursor
+//
+// Every loop over ctx.creatures here asserts the entry is non-null before touching
+// it. The list owns what it holds, so a null is a fault rather than a case to skip,
+// and folding that into the is-it-dead test is what hid it until 2026-10-01.
+
 #include <algorithm>
 #include <cassert>
 #include <format>
@@ -502,7 +529,9 @@ void SpellSystem::cast_silence(
 		Creature* target = nullptr;
 		for (const auto& creature : *innerCtx.creatures)
 		{
-			if (creature && creature->position == targetPos && !creature->is_dead())
+			assert(creature && "cast_silence: creatures list holds a null entry");
+
+			if (creature->position == targetPos && !creature->is_dead())
 			{
 				target = creature.get();
 				break;
@@ -555,7 +584,9 @@ void SpellSystem::cast_web(
 		int affected = 0;
 		for (const auto& creature : *innerCtx.creatures)
 		{
-			if (!creature || creature->is_dead())
+			assert(creature && "cast_web: creatures list holds a null entry");
+
+			if (creature->is_dead())
 			{
 				continue;
 			}
@@ -609,7 +640,9 @@ SpellSystem::FireballBurst SpellSystem::burst_fireball(Vector2D center, int cast
 
 	for (const auto& creature : *ctx.creatures)
 	{
-		if (!creature || creature->is_dead())
+		assert(creature && "burst_fireball: creatures list holds a null entry");
+
+		if (creature->is_dead())
 		{
 			continue;
 		}
@@ -693,7 +726,9 @@ bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 	std::vector<Creature*> targets;
 	for (const auto& creature : *ctx.creatures)
 	{
-		if (creature && !creature->is_dead())
+		assert(creature && "cast_magic_missile: creatures list holds a null entry");
+
+		if (!creature->is_dead())
 		{
 			if (ctx.map->is_in_fov(creature->position))
 			{
@@ -854,7 +889,9 @@ bool SpellSystem::cast_hold_person(Creature& caster, GameContext& ctx)
 		{
 			break;
 		}
-		if (!creature || creature->is_dead())
+		assert(creature && "cast_hold_person: creatures list holds a null entry");
+
+		if (creature->is_dead())
 		{
 			continue;
 		}

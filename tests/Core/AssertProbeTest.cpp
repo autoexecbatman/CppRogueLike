@@ -311,3 +311,46 @@ TEST_F(AssertProbeDeathTest, LoadingAPlayerRecordMissingItsHealthPoolAborts)
 
 	EXPECT_DEATH(loaded.load(record), "Player::load finished with a player the game cannot run");
 }
+
+// Fireball walks every creature on the level to find what the burst touches. The
+// list owns its entries, so a null is a fault; the old condition folded that into
+// the is-it-dead test and skipped past it.
+TEST_F(AssertProbeDeathTest, BurstingAFireballWithANullInTheCreatureListAborts)
+{
+	std::vector<std::unique_ptr<Creature>> creatures{};
+	creatures.push_back(nullptr);
+	ctx.creatures = &creatures;
+
+	EXPECT_DEATH([[maybe_unused]] const auto burst = SpellSystem::burst_fireball(Vector2D{ 5, 5 }, 3, 2, ctx),
+		"burst_fireball: creatures list holds a null entry");
+}
+
+// Magic missile gathers its targets from the whole list before it fires any.
+TEST_F(AssertProbeDeathTest, CastingMagicMissileWithANullInTheCreatureListAborts)
+{
+	std::unique_ptr<Creature> caster = make_creature();
+
+	std::vector<std::unique_ptr<Creature>> creatures{};
+	creatures.push_back(nullptr);
+	ctx.creatures = &creatures;
+
+	const auto ignoreCompletion = [](GameContext&) {};
+
+	EXPECT_DEATH(SpellSystem::cast_spell_by_key("magic_missile", *caster, SpellSource::MEMORIZED, ignoreCompletion, ctx),
+		"cast_magic_missile: creatures list holds a null entry");
+}
+
+// Hold person walks the list up to its 1d4 cap, so the null is reached before the cap.
+TEST_F(AssertProbeDeathTest, CastingHoldPersonWithANullInTheCreatureListAborts)
+{
+	std::unique_ptr<Creature> caster = make_creature();
+
+	std::vector<std::unique_ptr<Creature>> creatures{};
+	creatures.push_back(nullptr);
+	ctx.creatures = &creatures;
+
+	const auto ignoreCompletion = [](GameContext&) {};
+
+	EXPECT_DEATH(SpellSystem::cast_spell_by_key("hold_person", *caster, SpellSource::MEMORIZED, ignoreCompletion, ctx),
+		"cast_hold_person: creatures list holds a null entry");
+}
