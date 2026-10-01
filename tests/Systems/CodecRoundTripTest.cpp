@@ -16,19 +16,23 @@
 
 #include <gtest/gtest.h>
 
+#include "src/EquipmentSlot.h"
+#include <algorithm>
 #include <array>
+#include <string_view>
+#include <vector>
 
-#include "src/Pickable.h"
-#include "src/ItemClassification.h"
-#include "src/MagicalItemEffects.h"
-#include "src/Weapons.h"
 #include "src/Ai.h"
 #include "src/Alignment.h"
-#include "src/Colors.h"
 #include "src/BuffType.h"
+#include "src/Colors.h"
 #include "src/CreatureClass.h"
 #include "src/DamageInfo.h"
+#include "src/ItemClassification.h"
+#include "src/MagicalItemEffects.h"
+#include "src/Pickable.h"
 #include "src/TargetMode.h"
+#include "src/Weapons.h"
 
 namespace
 {
@@ -138,8 +142,7 @@ TEST(CodecRoundTripTest, ConsumableEffectSurvivesEncoding)
 // depend on the order of an enum nobody reads when editing it.
 TEST(CodecRoundTripTest, AiTypeSurvivesEncoding)
 {
-	constexpr std::array kinds = { AiType::MONSTER, AiType::CONFUSED_MONSTER, AiType::SHOPKEEPER,
-		AiType::MIMIC, AiType::SPIDER, AiType::WEB_SPINNER, AiType::GIANT_SPIDER };
+	constexpr std::array kinds = { AiType::MONSTER, AiType::CONFUSED_MONSTER, AiType::SHOPKEEPER, AiType::MIMIC, AiType::SPIDER, AiType::WEB_SPINNER, AiType::GIANT_SPIDER };
 
 	for (const auto kind : kinds)
 	{
@@ -168,8 +171,7 @@ TEST(CodecRoundTripTest, AlignmentSurvivesEncoding)
 // is not a player character carries, so a save that loses it loses the most common value.
 TEST(CodecRoundTripTest, CreatureClassSurvivesEncoding)
 {
-	constexpr std::array classes = { CreatureClass::FIGHTER, CreatureClass::ROGUE,
-		CreatureClass::CLERIC, CreatureClass::WIZARD, CreatureClass::MONSTER };
+	constexpr std::array classes = { CreatureClass::FIGHTER, CreatureClass::ROGUE, CreatureClass::CLERIC, CreatureClass::WIZARD, CreatureClass::MONSTER };
 
 	for (const auto creatureClass : classes)
 	{
@@ -181,8 +183,7 @@ TEST(CodecRoundTripTest, CreatureClassSurvivesEncoding)
 // the only table, so this round trip also pins the label the resolver's log prints.
 TEST(CodecRoundTripTest, DamageTypeSurvivesEncoding)
 {
-	constexpr std::array types = { DamageType::PHYSICAL, DamageType::FIRE, DamageType::COLD,
-		DamageType::LIGHTNING, DamageType::POISON, DamageType::ACID, DamageType::MAGIC };
+	constexpr std::array types = { DamageType::PHYSICAL, DamageType::FIRE, DamageType::COLD, DamageType::LIGHTNING, DamageType::POISON, DamageType::ACID, DamageType::MAGIC };
 
 	for (const auto type : types)
 	{
@@ -217,4 +218,46 @@ TEST(CodecRoundTripTest, UnknownStringsThrow)
 	EXPECT_THROW((void)parse_magical_effect("not_an_effect"), std::runtime_error);
 	EXPECT_THROW((void)parse_ai_type("not_an_ai"), std::runtime_error);
 	EXPECT_THROW((void)parse_consumable_effect("not_an_effect"), std::runtime_error);
+}
+
+// Added 2026-10-01, after docs/pair_symmetry.py reported equipment_slot as the one
+// encode/parse pair in src/ that no test reached. The other two it named cannot be
+// reached at all: parse_equipment and encode_equipment sit in MonsterRegistry.cpp's
+// anonymous namespace, and encode_tile is a lambda inside a function.
+TEST(CodecRoundTripTest, EveryEquipmentSlotRoundTrips)
+{
+	for (int index = 0; index <= static_cast<int>(EquipmentSlot::NONE); ++index)
+	{
+		const EquipmentSlot slot = static_cast<EquipmentSlot>(index);
+
+		EXPECT_EQ(parse_equipment_slot(encode_equipment_slot(slot)), slot)
+			<< "slot " << index << " did not survive a round trip through its JSON spelling";
+	}
+}
+
+// The property the round trip above cannot see. parse_equipment_slot is implemented
+// by scanning for the slot whose encoding matches, so two slots sharing a spelling
+// would make the second parse back as the first - every creature wearing it would
+// load with the item in the wrong place, and the round trip would still pass for the
+// first of the two.
+TEST(CodecRoundTripTest, NoTwoEquipmentSlotsShareASpelling)
+{
+	std::vector<std::string_view> spellings;
+	for (int index = 0; index <= static_cast<int>(EquipmentSlot::NONE); ++index)
+	{
+		spellings.push_back(encode_equipment_slot(static_cast<EquipmentSlot>(index)));
+	}
+	const size_t written = spellings.size();
+
+	std::ranges::sort(spellings);
+	const auto duplicates = std::ranges::unique(spellings);
+	spellings.erase(duplicates.begin(), duplicates.end());
+
+	EXPECT_EQ(spellings.size(), written) << "two equipment slots encode to the same string";
+}
+
+// A misspelled slot in a data file fails at load rather than going nowhere.
+TEST(CodecRoundTripTest, AnUnknownEquipmentSlotThrows)
+{
+	EXPECT_THROW((void)parse_equipment_slot("third_hand"), std::runtime_error);
 }

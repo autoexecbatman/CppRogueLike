@@ -1,0 +1,23 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=CodecRoundTripTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/EquipmentSlot.h",
+      "original": "\t\treturn \"neck\";\n",
+      "mutated": "\t\treturn \"head\";\n",
+      "catches": "two slots sharing a spelling, so anything worn at the neck loads onto the head and the round trip still passes for head"
+    },
+    {
+      "file": "src/EquipmentSlot.h",
+      "original": "\tthrow std::runtime_error(std::format(\"unknown equipment slot '{}'\", name));\n",
+      "mutated": "\treturn EquipmentSlot::NONE;\n",
+      "catches": "a misspelled slot in a data file going nowhere instead of failing at load"
+    }
+  ]
+}

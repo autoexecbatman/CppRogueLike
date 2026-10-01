@@ -1,5 +1,6 @@
 // file: CurseSystem.cpp
 #include "CurseSystem.h"
+#include <cassert>
 
 #include <format>
 
@@ -13,10 +14,8 @@
 // Emits "weakens your aim" notification for cursed weapons.
 void CurseSystem::apply_weapon_curse(const Item& item, GameContext& ctx)
 {
-	if (!ctx.messageSystem)
-	{
-		return;
-	}
+	assert(ctx.messageSystem && "apply_weapon_curse: no message system to tell the wearer with");
+
 	ctx.messageSystem->message(
 		ColorPairId::MAGENTA_BLACK,
 		std::format("Your {} weakens your aim!", item.actorData.name),
@@ -26,10 +25,8 @@ void CurseSystem::apply_weapon_curse(const Item& item, GameContext& ctx)
 // Emits "deteriorates" notification for cursed armor.
 void CurseSystem::apply_armor_curse(const Item& item, GameContext& ctx)
 {
-	if (!ctx.messageSystem)
-	{
-		return;
-	}
+	assert(ctx.messageSystem && "apply_armor_curse: no message system to tell the wearer with");
+
 	ctx.messageSystem->message(
 		ColorPairId::MAGENTA_BLACK,
 		std::format("Your {} deteriorates under the curse!", item.actorData.name),
