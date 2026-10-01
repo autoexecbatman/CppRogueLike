@@ -64,6 +64,7 @@
 #include "src/Player.h"
 #include "src/ShopkeeperFactory.h"
 #include "src/SpellSystem.h"
+#include "src/TargetingSystem.h"
 #include "src/TurnUndead.h"
 #include "tests/mocks/MockGameContext.h"
 
@@ -436,4 +437,23 @@ TEST_F(AssertProbeDeathTest, RestingWithANullInTheCreatureListAborts)
 
 	EXPECT_DEATH([[maybe_unused]] const bool rested = player->rest(ctx),
 		"Player::rest: creatures list holds a null entry");
+}
+
+// Targeting walks the creature list to find the nearest living thing in range. The
+// list owns its entries, so a null is a fault. This is the one of the nine messages
+// renamed for issues/0009 that can be probed at all: target_auto_nearest is private,
+// and acquire_nearest is a public dispatcher that does nothing but call it. The other
+// eight sit behind a renderer or a private controller path the mock cannot build.
+TEST_F(AssertProbeDeathTest, AcquiringATargetWithANullInTheCreatureListAborts)
+{
+	std::unique_ptr<Creature> attacker = make_creature();
+
+	std::vector<std::unique_ptr<Creature>> creatures{};
+	creatures.push_back(nullptr);
+	ctx.creatures = &creatures;
+
+	const TargetingSystem targeting{};
+
+	EXPECT_DEATH([[maybe_unused]] const TargetResult result = targeting.acquire_nearest(ctx, *attacker, 10),
+		"target_auto_nearest: creatures list holds a null entry");
 }

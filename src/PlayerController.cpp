@@ -604,7 +604,7 @@ bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext&
 		{
 			for (const auto& feature : features)
 			{
-				assert(feature && "a floor container holds a null entry");
+				assert(feature && "look_to_move: a floor container holds a null entry");
 
 				if (blocked || feature->is_destroyed() || feature->position != targetPosition)
 				{
@@ -1457,7 +1457,7 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 		{
 			for (auto& trap : *ctx.traps)
 			{
-				assert(trap && "traps holds a null entry");
+				assert(trap && "resolve_pending_door: traps list holds a null entry");
 				if (trap->is_destroyed() || trap->position != doorPos)
 				{
 					continue;

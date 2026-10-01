@@ -267,7 +267,7 @@ TargetResult TargetingSystem::target_auto_nearest(GameContext& ctx, const Creatu
 	std::vector<Creature*> candidates;
 	for (const auto& creature : *ctx.creatures)
 	{
-		assert(creature && "a creature list holds a null entry");
+		assert(creature && "target_auto_nearest: creatures list holds a null entry");
 		const int distance = creature->get_tile_distance(attacker.position);
 		if (!creature->is_dead() && (distance <= range || range == 0))
 		{

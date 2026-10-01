@@ -729,7 +729,7 @@ Player::HideAttempt Player::attempt_hide(GameContext& ctx)
 	// which is what awareness holds - not whether he happens to be able to see it.
 	const auto is_watching = [](const std::unique_ptr<Creature>& creature)
 	{
-		assert(creature && "creatures holds a null entry");
+		assert(creature && "attempt_hide: creatures list holds a null entry");
 		return !creature->is_dead() && creature->is_aware();
 	};
 	if (std::ranges::any_of(*ctx.creatures, is_watching))

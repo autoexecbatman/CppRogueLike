@@ -165,6 +165,11 @@ $probes = @(
         test   = "AssertProbeDeathTest.RestingWithANullInTheCreatureListAborts"
         file   = "src/Player.cpp"
         anchor = 'assert(creature && "Player::rest: creatures list holds a null entry");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.AcquiringATargetWithANullInTheCreatureListAborts"
+        file   = "src/TargetingSystem.cpp"
+        anchor = 'assert(creature && "target_auto_nearest: creatures list holds a null entry");'
     }
 )
 

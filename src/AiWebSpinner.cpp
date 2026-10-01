@@ -138,7 +138,7 @@ bool AiWebSpinner::should_create_web(Creature& owner, GameContext& ctx)
 	int webCount = 0;
 	for (const auto& spellTile : *ctx.spellTiles)
 	{
-		assert(spellTile && "spellTiles holds a null entry");
+		assert(spellTile && "should_create_web: spellTiles holds a null entry");
 		if (!spellTile->is_destroyed())
 		{
 			webCount++;
@@ -249,7 +249,7 @@ bool AiWebSpinner::is_valid_web_position(Vector2D pos, GameContext& ctx)
 	// Check if there's already a spell tile at this position
 	for (const auto& spellTile : *ctx.spellTiles)
 	{
-		assert(spellTile && "spellTiles holds a null entry");
+		assert(spellTile && "is_valid_web_position: spellTiles holds a null entry");
 		if (!spellTile->is_destroyed() && spellTile->position == pos)
 		{
 			return false;

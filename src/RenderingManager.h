@@ -38,7 +38,7 @@ private:
 	{
 		for (const auto& feature : features)
 		{
-			assert(feature && "a floor container holds a null entry");
+			assert(feature && "render_tile_features: a floor container holds a null entry");
 			if (!feature->is_destroyed())
 			{
 				feature->render(ctx);

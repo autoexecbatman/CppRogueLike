@@ -1479,7 +1479,7 @@ int Creature::get_exceptional_strength() const noexcept
 	};
 	for (const EquippedItem& worn : equippedItems)
 	{
-		assert(worn.item && "an equipment slot holds a null item");
+		assert(worn.item && "get_exceptional_strength: an equipment slot holds a null item");
 		if (worn.item->behavior)
 		{
 			std::visit(from_setting_item, *worn.item->behavior);
@@ -1494,7 +1494,7 @@ const Gauntlets* Creature::get_gauntlets_beside_girdle() const noexcept
 	const Gauntlets* strengthGauntlets = nullptr;
 	for (const EquippedItem& worn : equippedItems)
 	{
-		assert(worn.item && "an equipment slot holds a null item");
+		assert(worn.item && "get_gauntlets_beside_girdle: an equipment slot holds a null item");
 		wearsGiantStrength = wearsGiantStrength || is_giant_strength_girdle(*worn.item);
 		if (const Gauntlets* gauntlets = strength_setting_gauntlets(*worn.item))
 		{
@@ -1549,7 +1549,7 @@ int Creature::calculate_effective_stat(int base_value, BuffType type) const noex
 	bool wearsGiantStrength = false;
 	for (const EquippedItem& worn : equippedItems)
 	{
-		assert(worn.item && "an equipment slot holds a null item");
+		assert(worn.item && "calculate_effective_stat: an equipment slot holds a null item");
 		const WornAbilityEffect effect = worn_ability_effect(*worn.item, type);
 		highestSet = std::max(highestSet, effect.setTo);
 		count_addition(effect.add);
