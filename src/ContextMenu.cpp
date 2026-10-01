@@ -121,11 +121,14 @@ void ContextMenu::menu(GameContext& ctx)
 	{
 		int sel = -1;
 		int tileSize = renderer ? renderer->get_tile_size() : 16;
-		Vector2D mousePos = inputSystem->get_mouse_tile(tileSize);
-		int relRow = static_cast<int>(mousePos.y) - static_cast<int>(menuStartY);
-		if (relRow >= 2 && relRow < 2 + static_cast<int>(menuOptions.size()))
+		// The options are drawn by menu_print, a text-row pitch apart, with the
+		// title on the frame's top edge rather than in a row of its own. So the
+		// option under the pointer is the text row under it, with no offset.
+		::Vector2 rawMouse = GetMousePosition();
+		int relRow = panel_text_row_at_y(static_cast<int>(menuStartY) * tileSize, tileSize, static_cast<int>(rawMouse.y));
+		if (relRow >= 0 && relRow < static_cast<int>(menuOptions.size()))
 		{
-			sel = relRow - 2;
+			sel = relRow;
 		}
 		run = false;
 		if (onSelect)

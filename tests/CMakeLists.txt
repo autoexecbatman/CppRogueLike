@@ -23,6 +23,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/AssertProbeTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/PathsTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Utils/UniqueIdTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Utils/PanelRowGeometryTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/GameContextWiringTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Utils/Vector2DTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Random/DiceExprTest.cpp

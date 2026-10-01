@@ -1007,8 +1007,13 @@ void PlayerController::handle_right_click(GameContext& ctx)
 	}
 
 	int tileSize = ctx.renderer->get_tile_size();
-	int anchor_col = world_tile.x - ctx.renderer->get_camera_x() / tileSize;
-	int anchor_row = world_tile.y - ctx.renderer->get_camera_y() / tileSize;
+	// Where that world tile actually sits on screen. The camera is a pixel value and
+	// is not tile-aligned - set_camera_center subtracts half a viewport, which lands
+	// on a half tile whenever the viewport is an odd number of columns wide. So the
+	// screen column is the drawn position divided down, the same formula the tile
+	// rendering uses; subtracting a separately-divided camera is off by one there.
+	int anchor_col = (world_tile.x * tileSize - ctx.renderer->get_camera_x()) / tileSize;
+	int anchor_row = (world_tile.y * tileSize - ctx.renderer->get_camera_y()) / tileSize;
 
 	std::vector<ContextAction> actions;
 

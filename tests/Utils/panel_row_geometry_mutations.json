@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=PanelRowGeometryTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Renderer.h",
+      "original": "\treturn offsetFromFirstRow / UI_TEXT_ROW_PITCH;\n",
+      "mutated": "\treturn offsetFromFirstRow / tileSize;\n",
+      "catches": "the hit test back on the tile grid, which is the defect this replaced - the row drifts further from the pointer the further down the panel it goes"
+    },
+    {
+      "file": "src/Renderer.h",
+      "original": "\tconst int offsetFromFirstRow = screenY - panelTopY - tileSize;\n",
+      "mutated": "\tconst int offsetFromFirstRow = screenY - panelTopY;\n",
+      "catches": "the frame's top edge counted as a text row, so every row reports one too high"
+    },
+    {
+      "file": "src/Renderer.h",
+      "original": "\t\treturn (offsetFromFirstRow - (UI_TEXT_ROW_PITCH - 1)) / UI_TEXT_ROW_PITCH;\n",
+      "mutated": "\t\treturn offsetFromFirstRow / UI_TEXT_ROW_PITCH;\n",
+      "catches": "truncation instead of floor, so a pixel just above the first row reads as being inside it"
+    },
+    {
+      "file": "src/Renderer.h",
+      "original": "\treturn panelTopY + tileSize + row * UI_TEXT_ROW_PITCH;\n",
+      "mutated": "\treturn panelTopY + tileSize + row * tileSize;\n",
+      "catches": "rows laid out on the tile grid, which walks off the bottom of the screen at a large zoom"
+    }
+  ]
+}

@@ -40,6 +40,35 @@ inline constexpr int GUI_TEXT_ROWS = 6; // Text rows the HUD lays out
 	return panelTopY + tileSize + row * UI_TEXT_ROW_PITCH;
 }
 
+// The row a screen y falls in: the inverse of panel_text_row_y, and what every
+// mouse hit test in a panel or menu asks.
+//
+// It answers negative above the first row rather than clamping, so a caller can
+// tell "the pointer is on the frame" from "the pointer is on the first entry".
+// Division is floored for that reason - truncation rounds toward zero and would
+// report row 0 for a pixel sitting above row 0.
+//
+// Use this rather than dividing the pointer's y by the tile size. Rows are a pitch
+// apart and a tile is not, so a hit test on the tile grid drifts further from the
+// row under the pointer the further down the panel it goes, by a factor that
+// changes with every zoom.
+//
+// Example, at a 64-pixel tile and a panel at the top of the screen:
+//
+//   panel_text_row_y(0, 64, 3);        // -> 160, the top of row 3
+//   panel_text_row_at_y(0, 64, 160);   // -> 3
+//   panel_text_row_at_y(0, 64, 191);   // -> 3,  still inside row 3
+//   panel_text_row_at_y(0, 64, 63);    // -> -1, on the frame, not in a row
+[[nodiscard]] inline constexpr int panel_text_row_at_y(int panelTopY, int tileSize, int screenY)
+{
+	const int offsetFromFirstRow = screenY - panelTopY - tileSize;
+	if (offsetFromFirstRow < 0)
+	{
+		return (offsetFromFirstRow - (UI_TEXT_ROW_PITCH - 1)) / UI_TEXT_ROW_PITCH;
+	}
+	return offsetFromFirstRow / UI_TEXT_ROW_PITCH;
+}
+
 // How many text rows fit between a panel's top and bottom frame edges. Callers
 // that can overflow ask this rather than assuming their content fits.
 //

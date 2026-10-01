@@ -130,7 +130,7 @@ void ListMenu::menu(GameContext& ctx)
 	{
 		int tileSize = renderer->get_tile_size();
 		::Vector2 rawMouse = GetMousePosition();
-		int relRow = static_cast<int>(rawMouse.y) / tileSize - static_cast<int>(menuStartY) - 1;
+		int relRow = panel_text_row_at_y(static_cast<int>(menuStartY) * tileSize, tileSize, static_cast<int>(rawMouse.y));
 		if (relRow >= 0 && relRow < static_cast<int>(entries.size()))
 		{
 			cursorIndex = static_cast<size_t>(relRow);
@@ -149,7 +149,7 @@ void ListMenu::menu(GameContext& ctx)
 		{
 			int tileSize = renderer->get_tile_size();
 			::Vector2 rawMouse = GetMousePosition();
-			int relRow = static_cast<int>(rawMouse.y) / tileSize - static_cast<int>(menuStartY) - 1;
+			int relRow = panel_text_row_at_y(static_cast<int>(menuStartY) * tileSize, tileSize, static_cast<int>(rawMouse.y));
 			if (relRow >= 0 && relRow < static_cast<int>(entries.size()))
 			{
 				menu_set_run_false();

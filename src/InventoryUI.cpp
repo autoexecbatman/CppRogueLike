@@ -70,11 +70,11 @@ static int row_text_y(int tileSize, int fontSize, int row)
 	return row_top_y(tileSize, row) + (UI_TEXT_ROW_PITCH - fontSize) / 2;
 }
 
-// The row a screen y falls in. Negative above the first row, which the callers
-// test for rather than clamping.
+// The row a screen y falls in, for a panel filling the screen. Negative above the
+// first row, which the callers test for rather than clamping.
 static int row_at_y(int tileSize, int screenY)
 {
-	return (screenY - tileSize) / UI_TEXT_ROW_PITCH;
+	return panel_text_row_at_y(0, tileSize, screenY);
 }
 
 // First row of the detail bar, measured back from the bottom of the screen. The
