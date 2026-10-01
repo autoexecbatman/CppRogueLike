@@ -145,6 +145,11 @@ $probes = @(
         test   = "AssertProbeDeathTest.SavingAnInventoryHoldingANullAborts"
         file   = "src/InventoryOperations.h"
         anchor = 'assert(item && "save_inventory: inventory holds a null where an item should be");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.IdentifyingAPackHoldingANullAborts"
+        file   = "src/Pickable.cpp"
+        anchor = 'assert(item && "identify scroll: the pack holds a null where an item should be");'
     }
 )
 

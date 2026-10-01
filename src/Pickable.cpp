@@ -1,3 +1,25 @@
+// file: Pickable.cpp
+//
+// What every kind of item does when it is used.
+//
+// An item's behaviour is a std::variant - ItemBehavior in Pickable.h - and this file
+// holds one `use` overload per alternative in it: a potion, a scroll, a weapon, a
+// corpse, gold. Nothing switches on a type tag; the variant visitor picks the overload,
+// so adding a behaviour means adding an alternative and an overload and the compiler
+// finds every place that must handle it.
+//
+// Each overload returns whether the item was spent. That is what tells the caller to
+// remove it from the pack, so a use that failed must return false or the item vanishes
+// for nothing.
+//
+// Usage:
+//
+//   std::visit([&](auto& behavior) { return use(behavior, item, wearer, ctx); },
+//              item.behavior);        // -> true when the item was consumed
+//
+// Items reach the pack already identified or not, and several overloads read that:
+// an unidentified potion announces itself by what it does rather than by its name.
+
 #include <algorithm>
 #include <cassert>
 #include <format>
@@ -563,11 +585,20 @@ bool use(Teleporter& teleporter, Item& owner, Creature& wearer, GameContext& ctx
 	return consume_item(owner, wearer);
 }
 
+// Identifies every item in the wearer's pack that is not already fully identified, and
+// says how many that was. The scroll is consumed either way: reading it is the cost, and
+// a pack that was already identified still burns it.
+//
+// Example, a pack holding two unknown potions and one known sword:
+//   use(scroll, scrollItem, player, ctx);   // -> true, "2 items identified!"
+//   use(scroll, scrollItem, player, ctx);   // -> true, "All items were already identified."
 bool use(IdentifyScroll& identifyScroll, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	int identifiedCount = 0;
 	for (auto& item : wearer.inventoryData.items)
 	{
+		assert(item && "identify scroll: the pack holds a null where an item should be");
+
 		if (!item->is_fully_identified())
 		{
 			item->identify_all();

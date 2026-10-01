@@ -1,0 +1,29 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=IdentifyScrollTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tif (!item->is_fully_identified())\n",
+      "mutated": "\t\tif (false)\n",
+      "catches": "a scroll that reads the pack and identifies nothing in it"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\t\titem->identify_all();\n",
+      "mutated": "\t\t\titem->identify_type();\n",
+      "catches": "an item left part-identified, its enhancement and curse still unknown"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tidentifiedCount > 0\n",
+      "mutated": "\t\tidentifiedCount >= 0\n",
+      "catches": "a pack that was already known told that items were identified anyway"
+    }
+  ]
+}

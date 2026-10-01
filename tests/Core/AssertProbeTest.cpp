@@ -51,6 +51,7 @@
 #include "src/Colors.h"
 #include "src/ArmorClass.h"
 #include "src/ExperienceReward.h"
+#include "src/Pickable.h"
 #include "src/Paths.h"
 #include "src/AttackKind.h"
 #include "src/DamageInfo.h"
@@ -370,4 +371,19 @@ TEST_F(AssertProbeDeathTest, SavingAnInventoryHoldingANullAborts)
 
 	EXPECT_DEATH(InventoryOperations::save_inventory(pack, record),
 		"save_inventory: inventory holds a null where an item should be");
+}
+
+// The identify scroll walks the whole pack. The pack owns what it holds, so a null
+// there is a fault - and this one had no check of any kind, so it dereferenced
+// straight through.
+TEST_F(AssertProbeDeathTest, IdentifyingAPackHoldingANullAborts)
+{
+	std::unique_ptr<Creature> wearer = make_creature();
+	wearer->inventoryData.items.push_back(nullptr);
+
+	std::unique_ptr<Item> scrollItem = make_item("identify scroll");
+	IdentifyScroll behavior{};
+
+	EXPECT_DEATH([[maybe_unused]] const bool spent = use(behavior, *scrollItem, *wearer, ctx),
+		"identify scroll: the pack holds a null where an item should be");
 }
