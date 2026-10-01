@@ -224,7 +224,9 @@ void PlayerController::pick_item(GameContext& ctx)
 	Item* item = nullptr;
 	for (auto& floorItem : ctx.floorInventory->items)
 	{
-		if (floorItem && floorItem->position == playerOwner.position)
+		assert(floorItem && "pick_item: the floor holds a null where an item should be");
+
+		if (floorItem->position == playerOwner.position)
 		{
 			item = floorItem.get();
 			break;
@@ -332,11 +334,13 @@ void PlayerController::look_on_floor(Vector2D target, GameContext& ctx)
 		return;
 	}
 
-	for (const auto& i : ctx.floorInventory->items)
+	for (const auto& floorItem : ctx.floorInventory->items)
 	{
-		if (i && i->position == target)
+		assert(floorItem && "look_on_floor: the floor holds a null where an item should be");
+
+		if (floorItem->position == target)
 		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "There's a " + i->actorData.name + " here", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "There's a " + floorItem->actorData.name + " here", MessageCompletion::FINISHED);
 		}
 	}
 }
@@ -980,10 +984,10 @@ void PlayerController::handle_left_click(GameContext& ctx)
 	}
 	else
 	{
-		assert(std::ranges::none_of(ctx.floorInventory->items, [](const auto& i)
-			{ return !i; }));
 		for (const auto& item : ctx.floorInventory->items)
 		{
+			assert(item && "handle_left_click: the floor holds a null where an item should be");
+
 			if (item->position == world_tile)
 			{
 				mode = MouseMode::WALK_TO_PICKUP;
@@ -1032,10 +1036,10 @@ void PlayerController::handle_right_click(GameContext& ctx)
 	}
 
 	// Floor item at tile
-	assert(std::ranges::none_of(ctx.floorInventory->items, [](const auto& i)
-		{ return !i; }));
 	for (auto& item : ctx.floorInventory->items)
 	{
+		assert(item && "handle_right_click: the floor holds a null where an item should be");
+
 		if (item->position == world_tile)
 		{
 			std::string itemName = item->actorData.name.substr(0, 16);
