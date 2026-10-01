@@ -27,7 +27,7 @@
     },
     {
       "file": "src/GameLoopCoordinator.cpp",
-      "original": "\tif (ctx.player())\n\t{\n\t\tfeel_the_round(*ctx.player());\n\t}",
+      "original": "\tfeel_the_round(*ctx.player());",
       "mutated": "",
       "catches": "the round reaching every creature and skipping the player, who is not in that list"
     },

@@ -424,6 +424,14 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 
 void GameLoopCoordinator::apply_round_upkeep(GameContext& ctx)
 {
+	// Stated once, here, rather than re-decided at each use below. A round only runs
+	// under NEW_TURN, after update_creatures, whose monster AI needs a player - a null
+	// one would have broken louder and earlier. Each of these is a value member of
+	// Game, so none of them is absent in a running game.
+	assert(ctx.player() && "apply_round_upkeep: a round ran with no player");
+	assert(ctx.hungerSystem && "apply_round_upkeep: a round ran with no hunger system");
+	assert(ctx.curseSystem && "apply_round_upkeep: a round ran with no curse system");
+
 	// The round being played; time counts the rounds already finished.
 	const int thisRound = ctx.gameState->get_time() + 1;
 
@@ -439,23 +447,17 @@ void GameLoopCoordinator::apply_round_upkeep(GameContext& ctx)
 
 	for (const auto& creature : *ctx.creatures)
 	{
-		assert(creature && "the creature list owns every entry it holds");
+		assert(creature && "apply_round_upkeep: the creature list holds a null entry");
 		feel_the_round(*creature);
 	}
 
 	// The player is not in that list, so the round has to reach them on its own.
-	if (ctx.player())
-	{
-		feel_the_round(*ctx.player());
-	}
+	feel_the_round(*ctx.player());
 
 	ctx.hungerSystem->increase_hunger(ctx, 1);
 	ctx.hungerSystem->apply_hunger_effects(ctx);
 
-	if (ctx.player() && ctx.curseSystem)
-	{
-		ctx.curseSystem->apply_curses(ctx.player_concrete(), ctx);
-	}
+	ctx.curseSystem->apply_curses(ctx.player_concrete(), ctx);
 
 	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
 
