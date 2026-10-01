@@ -27,8 +27,8 @@
     },
     {
       "file": "src/DataManager.cpp",
-      "original": "\t\ts.maxCarried = item.at(\"maxCarried\").get<int>();",
-      "mutated": "\t\ts.maxCarried = item.at(\"MaxPress\").get<int>();",
+      "original": "\ts.maxCarried = item.at(\"maxCarried\").get<int>();",
+      "mutated": "\ts.maxCarried = item.at(\"MaxPress\").get<int>();",
       "catches": "the loader reading the wrong column out of the same row"
     }
   ]

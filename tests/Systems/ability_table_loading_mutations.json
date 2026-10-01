@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=AbilityTableLoadingTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/DataManager.cpp",
+      "original": "\td.DefensiveAdj = item.at(\"DefensiveAdj\").get<int>();\n",
+      "mutated": "\td.DefensiveAdj = item.value(\"DefensiveAdj\", 0);\n",
+      "catches": "a Dexterity row silently defaulting its defensive adjustment, which is the defect this replaced"
+    },
+    {
+      "file": "src/DataManager.cpp",
+      "original": "\tc.HPAdj = item.at(\"HPAdj\").get<int>();\n",
+      "mutated": "\tc.HPAdj = item.value(\"HPAdj\", 0);\n",
+      "catches": "a Constitution row silently defaulting its hit point adjustment"
+    },
+    {
+      "file": "src/DataManager.cpp",
+      "original": "\tw.ChanceOfSpellFailure = item.at(\"ChanceOfSpellFailure\").get<int>();\n",
+      "mutated": "\tw.ChanceOfSpellFailure = item.value(\"ChanceOfSpellFailure\", 0);\n",
+      "catches": "a Wisdom row defaulting its spell failure chance to zero, which is the best possible roll"
+    },
+    {
+      "file": "src/DataManager.cpp",
+      "original": "\ti.ChanceToLearnSpell = item.at(\"ChanceToLearnSpell\").get<int>();\n",
+      "mutated": "\ti.ChanceToLearnSpell = item.at(\"MaxNumberOfSpells\").get<int>();\n",
+      "catches": "the Intelligence parser reading the wrong column out of the same row"
+    },
+    {
+      "file": "src/DataManager.cpp",
+      "original": "\tif (item.contains(\"ExceptionalFrom\"))\n",
+      "mutated": "\tif (true)\n",
+      "catches": "the percentile band treated as required, so a plain Strength score's row is refused"
+    }
+  ]
+}

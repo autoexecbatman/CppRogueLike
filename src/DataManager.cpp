@@ -1,4 +1,32 @@
-// file: Systems/DataManager.cpp
+// file: DataManager.cpp
+//
+// The AD&D 2nd Edition ability tables, loaded from JSON and looked up by score.
+//
+// Six printed tables live in src/json - strength, dexterity, constitution, charisma,
+// intelligence and wisdom - and this is what turns them into something the game can
+// ask questions of. Everything that depends on an ability score comes through here:
+// armour class and surprise from Dexterity, hit points and system shock from
+// Constitution, hit and damage bonuses and carrying capacity from Strength, spell
+// learning from Intelligence, spell failure and bonus spells from Wisdom, henchmen
+// and loyalty from Charisma.
+//
+// Usage:
+//
+//   DataManager dataManager;
+//   dataManager.load_all_data(messageSystem);        // reads all six files
+//
+//   dataManager.dexterity_for(17).DefensiveAdj;      // -> -3
+//   dataManager.strength_for(18, 76).dmgAdj;         // -> 4, the 18/76-90 band
+//   dataManager.constitution_for(17).HPAdj;          // -> 3
+//
+// A score outside a table's printed range is clamped to its nearest row rather than
+// refused, because ability scores reach past the tables through magic - see
+// feedback_index_range_before_at in the memory store for what a bare .at() cost here.
+//
+// Every column a table prints is required. The row parsers below throw on a missing
+// one rather than substituting a zero, because the parser is the only schema this
+// data has and a silently defaulted column is a wrong game rule with nothing printed.
+// Strength's percentile band is the one genuine option: only the 18/xx rows carry it.
 #include <algorithm>
 #include <cassert>
 #include <filesystem>
@@ -77,6 +105,101 @@ std::string find_data_file(const std::string& filename)
 	return "./" + filename; // Fallback to original behavior
 }
 } // namespace
+
+// One row of each printed table, parsed. Lifted out of the loaders so a row can be
+// read without a file: the loaders own finding and opening the file, these own what
+// a row means. Unchanged from the loop bodies they replace.
+
+StrengthAttributes strength_row_from(const nlohmann::json& item)
+{
+	StrengthAttributes s;
+	s.Str = item.at("Str").get<int>();
+	s.hitProb = item.at("Hit").get<int>();
+	s.dmgAdj = item.at("Dmg").get<int>();
+	s.wgtAllow = item.at("Wgt").get<int>();
+	s.maxPress = item.at("MaxPress").get<int>();
+	s.maxCarried = item.at("maxCarried").get<int>();
+	s.openDoors = item.at("OpenDoors").get<int>();
+	s.BB_LG = item.at("BB_LG").get<double>();
+	s.notes = item.at("Notes").get<std::string>();
+
+	// An 18/xx band carries its percentile range; a plain score's row carries none.
+	if (item.contains("ExceptionalFrom"))
+	{
+		s.exceptionalFrom = item.at("ExceptionalFrom").get<int>();
+		s.exceptionalTo = item.at("ExceptionalTo").get<int>();
+	}
+
+	// Table 47's bands, null on the scores the table does not print. The key is
+	// required on every row, so a row that simply forgot it fails loudly.
+	const nlohmann::json& bands = item.at("encumbrance");
+	if (!bands.is_null())
+	{
+		s.encumbrance = EncumbranceBands{
+			bands.at("unencumberedTo").get<int>(),
+			bands.at("lightTo").get<int>(),
+			bands.at("moderateTo").get<int>(),
+			bands.at("heavyTo").get<int>()
+		};
+	}
+	return s;
+}
+
+DexterityAttributes dexterity_row_from(const nlohmann::json& item)
+{
+	DexterityAttributes d;
+	d.Dex = item.at("Dex").get<int>();
+	d.ReactionAdj = item.at("ReactionAdj").get<int>();
+	d.MissileAttackAdj = item.at("MissileAttackAdj").get<int>();
+	d.DefensiveAdj = item.at("DefensiveAdj").get<int>();
+	return d;
+}
+
+ConstitutionAttributes constitution_row_from(const nlohmann::json& item)
+{
+	ConstitutionAttributes c;
+	c.Con = item.at("Con").get<int>();
+	c.HPAdj = item.at("HPAdj").get<int>();
+	c.hitDieMinimum = item.at("hitDieMinimum").get<int>();
+	c.SystemShock = item.at("SystemShock").get<int>();
+	c.ResurrectionSurvival = item.at("ResurrectionSurvival").get<int>();
+	c.PoisonSave = item.at("PoisonSave").get<int>();
+	c.Regeneration = item.at("Regeneration").get<int>();
+	return c;
+}
+
+CharismaAttributes charisma_row_from(const nlohmann::json& item)
+{
+	CharismaAttributes c;
+	c.Cha = item.at("Cha").get<int>();
+	c.MaxHencmen = item.at("MaxHencmen").get<int>();
+	c.Loyalty = item.at("Loyalty").get<int>();
+	c.ReactionAdj = item.at("ReactionAdj").get<int>();
+	return c;
+}
+
+IntelligenceAttributes intelligence_row_from(const nlohmann::json& item)
+{
+	IntelligenceAttributes i;
+	i.Int = item.at("Int").get<int>();
+	i.NumberOfLanguages = item.at("NumberOfLanguages").get<int>();
+	i.SpellLevel = item.at("SpellLevel").get<int>();
+	i.ChanceToLearnSpell = item.at("ChanceToLearnSpell").get<int>();
+	i.MaxNumberOfSpells = item.at("MaxNumberOfSpells").get<int>();
+	i.IllusionImmunity = item.at("IllusionImmunity").get<int>();
+	return i;
+}
+
+WisdomAttributes wisdom_row_from(const nlohmann::json& item)
+{
+	WisdomAttributes w;
+	w.Wis = item.at("Wis").get<int>();
+	w.MagicalDefenseAdj = item.at("MagicalDefenseAdj").get<int>();
+	w.bonusSpells = item.at("bonusSpells").get<std::vector<int>>();
+	w.ChanceOfSpellFailure = item.at("ChanceOfSpellFailure").get<int>();
+	w.SpellImmunity = item.at("SpellImmunity").get<int>();
+	return w;
+}
 
 void DataManager::load_all_data(MessageSystem& message_system)
 {
@@ -252,37 +375,7 @@ std::vector<StrengthAttributes> DataManager::load_strength(const std::string& fi
 	std::vector<StrengthAttributes> data;
 	for (const auto& item : j)
 	{
-		StrengthAttributes s;
-		s.Str = item.value("Str", 0);
-		s.hitProb = item.value("Hit", 0);
-		s.dmgAdj = item.value("Dmg", 0);
-		s.wgtAllow = item.value("Wgt", 0);
-		s.maxPress = item.value("MaxPress", 0);
-		s.maxCarried = item.at("maxCarried").get<int>();
-		s.openDoors = item.value("OpenDoors", 0);
-		s.BB_LG = item.value("BB_LG", 0.0);
-		s.notes = item.value("Notes", "");
-
-		// An 18/xx band carries its percentile range; a plain score's row carries none.
-		if (item.contains("ExceptionalFrom"))
-		{
-			s.exceptionalFrom = item.at("ExceptionalFrom").get<int>();
-			s.exceptionalTo = item.at("ExceptionalTo").get<int>();
-		}
-
-		// Table 47's bands, null on the scores the table does not print. The key is
-		// required on every row, so a row that simply forgot it fails loudly.
-		const nlohmann::json& bands = item.at("encumbrance");
-		if (!bands.is_null())
-		{
-			s.encumbrance = EncumbranceBands{
-				bands.at("unencumberedTo").get<int>(),
-				bands.at("lightTo").get<int>(),
-				bands.at("moderateTo").get<int>(),
-				bands.at("heavyTo").get<int>()
-			};
-		}
-		data.push_back(s);
+		data.push_back(strength_row_from(item));
 	}
 
 	message_system.log(std::format("DataManager: Loaded {} strength attributes", data.size()));
@@ -304,12 +397,7 @@ std::vector<DexterityAttributes> DataManager::load_dexterity(const std::string& 
 	std::vector<DexterityAttributes> data;
 	for (const auto& item : j)
 	{
-		DexterityAttributes d;
-		d.Dex = item.value("Dex", 0);
-		d.ReactionAdj = item.value("ReactionAdj", 0);
-		d.MissileAttackAdj = item.value("MissileAttackAdj", 0);
-		d.DefensiveAdj = item.value("DefensiveAdj", 0);
-		data.push_back(d);
+		data.push_back(dexterity_row_from(item));
 	}
 
 	message_system.log(std::format("DataManager: Loaded {} dexterity attributes", data.size()));
@@ -331,15 +419,7 @@ std::vector<ConstitutionAttributes> DataManager::load_constitution(const std::st
 	std::vector<ConstitutionAttributes> data;
 	for (const auto& item : j)
 	{
-		ConstitutionAttributes c;
-		c.Con = item.value("Con", 0);
-		c.HPAdj = item.value("HPAdj", 0);
-		c.hitDieMinimum = item.at("hitDieMinimum").get<int>();
-		c.SystemShock = item.value("SystemShock", 0);
-		c.ResurrectionSurvival = item.value("ResurrectionSurvival", 0);
-		c.PoisonSave = item.value("PoisonSave", 0);
-		c.Regeneration = item.value("Regeneration", 0);
-		data.push_back(c);
+		data.push_back(constitution_row_from(item));
 	}
 
 	message_system.log(std::format("DataManager: Loaded {} constitution attributes", data.size()));
@@ -361,12 +441,7 @@ std::vector<CharismaAttributes> DataManager::load_charisma(const std::string& fi
 	std::vector<CharismaAttributes> data;
 	for (const auto& item : j)
 	{
-		CharismaAttributes c;
-		c.Cha = item.value("Cha", 0);
-		c.MaxHencmen = item.value("MaxHencmen", 0);
-		c.Loyalty = item.value("Loyalty", 0);
-		c.ReactionAdj = item.value("ReactionAdj", 0);
-		data.push_back(c);
+		data.push_back(charisma_row_from(item));
 	}
 
 	message_system.log(std::format("DataManager: Loaded {} charisma attributes", data.size()));
@@ -388,14 +463,7 @@ std::vector<IntelligenceAttributes> DataManager::load_intelligence(const std::st
 	std::vector<IntelligenceAttributes> data;
 	for (const auto& item : j)
 	{
-		IntelligenceAttributes i;
-		i.Int = item.value("Int", 0);
-		i.NumberOfLanguages = item.value("NumberOfLanguages", 0);
-		i.SpellLevel = item.value("SpellLevel", 0);
-		i.ChanceToLearnSpell = item.value("ChanceToLearnSpell", 0);
-		i.MaxNumberOfSpells = item.value("MaxNumberOfSpells", 0);
-		i.IllusionImmunity = item.value("IllusionImmunity", 0);
-		data.push_back(i);
+		data.push_back(intelligence_row_from(item));
 	}
 
 	message_system.log(std::format("DataManager: Loaded {} intelligence attributes", data.size()));
@@ -417,13 +485,7 @@ std::vector<WisdomAttributes> DataManager::load_wisdom(const std::string& filena
 	std::vector<WisdomAttributes> data;
 	for (const auto& item : j)
 	{
-		WisdomAttributes w;
-		w.Wis = item.value("Wis", 0);
-		w.MagicalDefenseAdj = item.value("MagicalDefenseAdj", 0);
-		w.bonusSpells = item.at("bonusSpells").get<std::vector<int>>();
-		w.ChanceOfSpellFailure = item.value("ChanceOfSpellFailure", 0);
-		w.SpellImmunity = item.value("SpellImmunity", 0);
-		data.push_back(w);
+		data.push_back(wisdom_row_from(item));
 	}
 
 	message_system.log(std::format("DataManager: Loaded {} wisdom attributes", data.size()));

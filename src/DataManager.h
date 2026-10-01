@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+#include <nlohmann/json_fwd.hpp>
+
 #include "CharismaAttributes.h"
 #include "ConstitutionAttributes.h"
 #include "CreatureClass.h"
@@ -13,6 +15,23 @@
 #include "WisdomAttributes.h"
 
 class MessageSystem;
+
+// One row of a printed ability table, parsed from its JSON object. The loaders own
+// finding and opening the file; these own what a row means, so a row can be read
+// without one. Every column each table prints is required - a row missing one is a
+// broken table rather than a row with a zero in it, and these say so by throwing.
+//
+// Example:
+//
+//   const json row = { {"Dex",17}, {"ReactionAdj",2}, {"MissileAttackAdj",2}, {"DefensiveAdj",-3} };
+//   dexterity_row_from(row).DefensiveAdj;   // -> -3
+//   dexterity_row_from(json{ {"Dex",17} }); // -> throws: no key "ReactionAdj"
+[[nodiscard]] StrengthAttributes strength_row_from(const nlohmann::json& item);
+[[nodiscard]] DexterityAttributes dexterity_row_from(const nlohmann::json& item);
+[[nodiscard]] ConstitutionAttributes constitution_row_from(const nlohmann::json& item);
+[[nodiscard]] CharismaAttributes charisma_row_from(const nlohmann::json& item);
+[[nodiscard]] IntelligenceAttributes intelligence_row_from(const nlohmann::json& item);
+[[nodiscard]] WisdomAttributes wisdom_row_from(const nlohmann::json& item);
 
 class DataManager
 {

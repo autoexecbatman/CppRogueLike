@@ -39,14 +39,14 @@
     },
     {
       "file": "src/DataManager.cpp",
-      "original": "\t\t\t\tbands.at(\"lightTo\").get<int>(),",
-      "mutated": "\t\t\t\tbands.at(\"moderateTo\").get<int>(),",
+      "original": "\t\t\tbands.at(\"lightTo\").get<int>(),",
+      "mutated": "\t\t\tbands.at(\"moderateTo\").get<int>(),",
       "catches": "the loader reading one column of Table 47 into another"
     },
     {
       "file": "src/DataManager.cpp",
-      "original": "\t\tif (!bands.is_null())",
-      "mutated": "\t\tif (bands.is_null())",
+      "original": "\tif (!bands.is_null())",
+      "mutated": "\tif (bands.is_null())",
       "catches": "the rows the book prints and the rows it does not swapped"
     },
     {

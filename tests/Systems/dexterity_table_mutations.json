@@ -27,8 +27,8 @@
     },
     {
       "file": "src/DataManager.cpp",
-      "original": "\t\treturn table.back();",
-      "mutated": "\t\treturn Row{};",
+      "original": "\treturn table.back();",
+      "mutated": "\treturn Row{};",
       "catches": "a score past the table reading as no adjustment"
     },
     {
