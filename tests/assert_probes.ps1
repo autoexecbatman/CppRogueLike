@@ -173,6 +173,43 @@ $probes = @(
     }
 )
 
+function Get-BytesHash($bytes)
+{
+    $sha = [Security.Cryptography.SHA256]::Create()
+    try { return [BitConverter]::ToString($sha.ComputeHash($bytes)) }
+    finally { $sha.Dispose() }
+}
+
+# Writes bytes, retrying a locked file a few times before giving up, and confirms what
+# landed by hash rather than by length - a same-length corruption passed the old check.
+# The lock this exists for is transient: an editor, an indexer, antivirus. A lock held
+# by a second session running a sweep in this checkout is not transient and no retry
+# fixes it, so the attempts are few and the failure is still loud.
+function Set-FileBytes($path, $bytes)
+{
+    $wanted = Get-BytesHash $bytes
+    foreach ($attempt in 1..5)
+    {
+        try
+        {
+            [IO.File]::WriteAllBytes($path, $bytes)
+            if ((Get-BytesHash ([IO.File]::ReadAllBytes($path))) -eq $wanted)
+            {
+                return $true
+            }
+        }
+        catch
+        {
+            if ($attempt -eq 1)
+            {
+                Write-Host "  waiting on a lock: $path"
+            }
+        }
+        Start-Sleep -Milliseconds 400
+    }
+    return $false
+}
+
 function Get-RecoveryPath($sourcePath)
 {
     return "$sourcePath.assert_probe_recovery"
@@ -249,7 +286,11 @@ foreach ($probe in $probes)
     $kept = $lines | Where-Object { $_.Trim() -ne $probe.anchor }
     $recovery = Get-RecoveryPath $sourcePath
     [IO.File]::WriteAllBytes($recovery, $originalBytes)
-    [IO.File]::WriteAllBytes($sourcePath, [Text.Encoding]::UTF8.GetBytes(($kept -join "`n")))
+    if (-not (Set-FileBytes $sourcePath ([Text.Encoding]::UTF8.GetBytes(($kept -join "`n")))))
+    {
+        Write-Host "COULD NOT DELETE THE ASSERTION in $($probe.file) - recovery copy is at $recovery. Stopping."
+        exit 1
+    }
 
     $build = Invoke-Build
     if ($build.ok)
@@ -259,8 +300,7 @@ foreach ($probe in $probes)
 
     # Restored before the verdict is printed, so an unreadable verdict still
     # leaves the tree intact.
-    [IO.File]::WriteAllBytes($sourcePath, $originalBytes)
-    if ([IO.File]::ReadAllBytes($sourcePath).Length -ne $originalBytes.Length)
+    if (-not (Set-FileBytes $sourcePath $originalBytes))
     {
         Write-Host "RESTORE FAILED for $($probe.file) - recovery copy is at $recovery. Stopping."
         exit 1
