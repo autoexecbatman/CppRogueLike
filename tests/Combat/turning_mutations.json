@@ -84,6 +84,18 @@
       "original": "\t\t\tundead->take_damage_and_check_death(undead->get_hp(), ctx, DamageType::MAGIC);\n",
       "mutated": "\t\t\tundead->take_damage_and_check_death(1, ctx, DamageType::MAGIC);\n",
       "catches": "a \"D\" result grazing the undead rather than destroying it"
+    },
+    {
+      "file": "src/TurnUndead.cpp",
+      "original": "\t\tif (priest.get_tile_distance(creature->position) > TURN_UNDEAD_RANGE)\n",
+      "mutated": "\t\tif (priest.get_tile_distance(creature->position) >= TURN_UNDEAD_RANGE)\n",
+      "catches": "an undead at the far edge of the reach counted as outside it"
+    },
+    {
+      "file": "src/TurnUndead.h",
+      "original": "inline constexpr int TURN_UNDEAD_RANGE = 4;\n",
+      "mutated": "inline constexpr int TURN_UNDEAD_RANGE = 5;\n",
+      "catches": "the reach growing by a tile, which every test written against the constant moves with and cannot see"
     }
   ]
 }

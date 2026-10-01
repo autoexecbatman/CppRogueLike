@@ -7,8 +7,10 @@
 
 #include "src/Colors.h"
 #include "src/Creature.h"
-#include "src/Player.h"
 #include "src/ExperienceReward.h"
+#include "src/Map.h"
+#include "src/Player.h"
+#include "src/TileType.h"
 #include "src/TurnUndead.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
@@ -245,4 +247,63 @@ TEST_F(TurnUndeadTest, ARollEqualToTheNumberNeededSucceeds)
 
 	ASSERT_EQ(report.turned.size(), 1u) << "meeting the number was read as falling short";
 	EXPECT_EQ(report.turned.front(), &wight);
+}
+
+// The reach is a square, not a circle. get_tile_distance is Chebyshev, so an undead
+// at the far corner is as near as one straight ahead - a test that only ever places
+// undead on an axis cannot tell the two apart.
+TEST_F(TurnUndeadTest, AnUndeadOnTheDiagonalIsReachedAtTheSameRange)
+{
+	Creature& skeleton = add_undead(1, Vector2D{ 5 + TURN_UNDEAD_RANGE, 5 + TURN_UNDEAD_RANGE });
+	force_next_roll(20);
+	force_next_roll(6);
+
+	const TurnUndeadReport report = turn_undead(*player, ctx);
+
+	ASSERT_EQ(report.destroyed.size(), 1u) << "the reach was measured as a circle rather than a square";
+	EXPECT_EQ(report.destroyed.front(), &skeleton);
+}
+
+// Four tiles, stated as a number. Every other range test here places its undead
+// relative to TURN_UNDEAD_RANGE and so moves with it, which means none of them can
+// see the constant itself change - the same blind spot a mutation sweep found in
+// PlayerRestTest on 2026-10-01.
+TEST_F(TurnUndeadTest, AnUndeadFiveTilesAwayIsOutOfReach)
+{
+	add_undead(1, Vector2D{ 10, 5 });
+	force_next_roll(20);
+	force_next_roll(6);
+
+	const TurnUndeadReport report = turn_undead(*player, ctx);
+
+	EXPECT_TRUE(report.destroyed.empty()) << "an undead five tiles away was reached";
+	EXPECT_TRUE(report.turned.empty());
+}
+
+// The deviation, pinned. The book gives turning no reach at all and bounds only the
+// aftermath, so this game's radius is its own rule - and that radius is distance
+// alone, with nothing consulting the map. This test exists so that adding line of
+// sight is a decision somebody makes rather than a drift nobody notices: it fails
+// the moment a wall starts blocking a turn.
+TEST_F(TurnUndeadTest, AWallBetweenPriestAndUndeadDoesNotStopTheTurning)
+{
+	Map map{ 20, 20 };
+	// The constructor leaves the tile grid empty; init_tiles fills it before any
+	// set_tile, or the subscript is out of range.
+	map.init_tiles();
+	for (int col = 1; col < 19; ++col)
+	{
+		map.set_tile(Vector2D{ col, 5 }, TileType::FLOOR, 1.0);
+	}
+	map.set_tile(Vector2D{ 6, 5 }, TileType::WALL, 0.0);
+	ctx.map = &map;
+
+	Creature& skeleton = add_undead(1, Vector2D{ 7, 5 });
+	force_next_roll(20);
+	force_next_roll(6);
+
+	const TurnUndeadReport report = turn_undead(*player, ctx);
+
+	ASSERT_EQ(report.destroyed.size(), 1u) << "a wall stopped a turn, which is a rule change rather than a repair";
+	EXPECT_EQ(report.destroyed.front(), &skeleton);
 }

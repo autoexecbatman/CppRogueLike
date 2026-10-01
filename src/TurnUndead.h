@@ -43,13 +43,27 @@ struct TurnUndeadReport
 inline constexpr int TURN_UNDEAD_DICE_COUNT = 2;
 inline constexpr int TURN_UNDEAD_DICE_SIDES = 6;
 
-// How far a priest's presence reaches. The book leaves this to line of sight;
-// this game bounds it by the player's own field of view radius.
+// How far a priest's presence reaches, in tiles.
+//
+// The book states no reach at all, which was checked across the whole 2e archive
+// rather than assumed: the only spatial rules it gives are about the aftermath -
+// free-willed undead flee "until out of his sight", and the turning breaks if they
+// are forced closer than ten feet (PDF pages 209 and 726). A roguelike needs a bound
+// or an attempt reaches every undead on the level, so this radius is **this game's
+// rule, not the book's**, and it is a stated deviation.
+//
+// Chebyshev distance, so the reach is a square: an undead on the diagonal is as near
+// as one straight ahead.
 inline constexpr int TURN_UNDEAD_RANGE = 4;
 
-// Attempts to turn every undead the priest can see, resolving one 1d20 for the
-// whole attempt and reading it per creature. Mutates: turned creatures gain
-// IS_FLEEING, destroyed creatures are killed.
+// Attempts to turn every living undead within TURN_UNDEAD_RANGE of the priest,
+// resolving one 1d20 for the whole attempt and reading it per creature. Mutates:
+// turned creatures gain IS_FLEEING, destroyed creatures are killed.
+//
+// Reach is distance alone. **A wall between priest and undead does not stop it** -
+// nothing here consults the map or the field of view, which TurnUndeadTest pins so
+// that adding line of sight has to be a decision rather than a drift. The weakest
+// undead are taken first, because the book's 2d6 cap bites from the bottom.
 //
 // Returns what happened rather than a bare success flag: an attempt can turn
 // some undead, destroy others and fail against the rest, all on one roll.
