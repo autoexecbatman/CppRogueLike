@@ -460,7 +460,7 @@ bool SpellSystem::cast_cure_light_wounds(Creature& caster, GameContext& ctx)
 
 bool SpellSystem::cast_bless(Creature& caster, GameContext& ctx)
 {
-	ctx.buffSystem->add_buff(caster, BuffType::BLESS, 0, 6, false); // Spell: ADD effect
+	ctx.buffSystem->add_buff(caster, BuffType::BLESS, 0, 6, false, ctx.gameState->get_time()); // Spell: ADD effect
 	ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Bless! ");
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "+1 to hit for 6 turns.");
 	ctx.messageSystem->finalize_message();
@@ -477,7 +477,7 @@ bool SpellSystem::cast_protection_from_evil(Creature& caster, GameContext& ctx)
 {
 	const int duration = 2 * caster.get_creature_level();
 
-	ctx.buffSystem->add_buff(caster, BuffType::PROTECTION_FROM_EVIL, PROTECTION_FROM_EVIL_PENALTY, duration, false);
+	ctx.buffSystem->add_buff(caster, BuffType::PROTECTION_FROM_EVIL, PROTECTION_FROM_EVIL_PENALTY, duration, false, ctx.gameState->get_time());
 
 	ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Protection From Evil! ");
 	ctx.messageSystem->append_message_part(
@@ -495,7 +495,7 @@ bool SpellSystem::cast_sanctuary(Creature& caster, GameContext& ctx)
 	const int casterLevel = caster.get_creature_level();
 	const int duration = 2 + casterLevel;
 
-	ctx.buffSystem->add_buff(caster, BuffType::SANCTUARY, 0, duration, false);
+	ctx.buffSystem->add_buff(caster, BuffType::SANCTUARY, 0, duration, false, ctx.gameState->get_time());
 
 	ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Sanctuary! ");
 	ctx.messageSystem->append_message_part(
@@ -544,7 +544,7 @@ void SpellSystem::cast_silence(
 			return;
 		}
 
-		innerCtx.buffSystem->add_buff(*target, BuffType::SILENCE, 0, duration, false);
+		innerCtx.buffSystem->add_buff(*target, BuffType::SILENCE, 0, duration, false, innerCtx.gameState->get_time());
 		SpellAnimations::animate_creature_hit(target->position, innerCtx);
 
 		innerCtx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Silence! ");
@@ -598,7 +598,7 @@ void SpellSystem::cast_web(
 			// AD&D 2e: a save versus paralyzation avoids the entanglement.
 			if (!SavingThrows::is_made(*creature, SavingThrow::PARALYZATION_POISON_DEATH, 0, innerCtx))
 			{
-				innerCtx.buffSystem->add_buff(*creature, BuffType::WEBBED, 0, duration, false);
+				innerCtx.buffSystem->add_buff(*creature, BuffType::WEBBED, 0, duration, false, innerCtx.gameState->get_time());
 				SpellAnimations::animate_creature_hit(creature->position, innerCtx);
 				++affected;
 			}
@@ -792,7 +792,7 @@ bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 
 bool SpellSystem::cast_shield(Creature& caster, GameContext& ctx)
 {
-	ctx.buffSystem->add_buff(caster, BuffType::SHIELD, 4, 5, false); // Spell: ADD +4 AC
+	ctx.buffSystem->add_buff(caster, BuffType::SHIELD, 4, 5, false, ctx.gameState->get_time()); // Spell: ADD +4 AC
 	ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Shield! ");
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "+4 AC for 5 turns.");
 	ctx.messageSystem->finalize_message();
@@ -854,7 +854,7 @@ bool SpellSystem::cast_sleep(Creature& caster, GameContext& ctx)
 			break;
 		}
 
-		ctx.buffSystem->add_buff(*creature, BuffType::SLEEP, 0, duration, false);
+		ctx.buffSystem->add_buff(*creature, BuffType::SLEEP, 0, duration, false, ctx.gameState->get_time());
 		hdBudget -= hitDice;
 		++affected;
 	}
@@ -909,7 +909,7 @@ bool SpellSystem::cast_hold_person(Creature& caster, GameContext& ctx)
 
 		if (!SavingThrows::is_made(*creature, SavingThrow::SPELL, 0, ctx))
 		{
-			ctx.buffSystem->add_buff(*creature, BuffType::HOLD_PERSON, 0, duration, false);
+			ctx.buffSystem->add_buff(*creature, BuffType::HOLD_PERSON, 0, duration, false, ctx.gameState->get_time());
 			++affected;
 		}
 	}
@@ -931,7 +931,7 @@ bool SpellSystem::cast_hold_person(Creature& caster, GameContext& ctx)
 
 bool SpellSystem::cast_invisibility(Creature& caster, GameContext& ctx)
 {
-	ctx.buffSystem->add_buff(caster, BuffType::INVISIBILITY, 0, 20, false); // Spell: ADD effect
+	ctx.buffSystem->add_buff(caster, BuffType::INVISIBILITY, 0, 20, false, ctx.gameState->get_time()); // Spell: ADD effect
 	ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Invisibility! ");
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "You fade from view for 20 turns.");
 	ctx.messageSystem->finalize_message();

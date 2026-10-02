@@ -9,15 +9,15 @@
   "mutations": [
     {
       "file": "src/TurnSchedule.h",
-      "original": "\treturn baseCost * NORMAL_SPEED / speed;",
-      "mutated": "\treturn baseCost * speed / NORMAL_SPEED;",
-      "catches": "the scaling inverted, so a faster creature pays more time and acts less often - this is the mutant that gives the monotonic case teeth, since it passed against a stub returning zero"
+      "original": "\treturn baseCost * actionDelay / TIME_UNITS_PER_ROUND;",
+      "mutated": "\treturn baseCost * TIME_UNITS_PER_ROUND / actionDelay;",
+      "catches": "the pricing inverted, so a quicker creature pays more time and acts less often - the mutant the direction case exists for, since a percentage read the other way round"
     },
     {
       "file": "src/TurnSchedule.h",
-      "original": "\treturn baseCost * NORMAL_SPEED / speed;",
+      "original": "\treturn baseCost * actionDelay / TIME_UNITS_PER_ROUND;",
       "mutated": "\treturn baseCost;",
-      "catches": "speed ignored entirely, so every creature acts at the same rate and the system does nothing"
+      "catches": "the creature's own delay ignored, so every creature acts at the same rate and pace does nothing"
     },
     {
       "file": "src/TurnSchedule.h",
@@ -39,21 +39,21 @@
     },
     {
       "file": "src/TurnSchedule.h",
-      "original": "inline constexpr int NORMAL_SPEED = 100;",
-      "mutated": "inline constexpr int NORMAL_SPEED = 50;",
-      "catches": "a normal creature no longer paying an action's stated cost, so every base cost in the game means something else"
+      "original": "\treturn baseCost * actionDelay / TIME_UNITS_PER_ROUND;",
+      "mutated": "\treturn baseCost * actionDelay / (TIME_UNITS_PER_ROUND * 2);",
+      "catches": "every action priced at half of what it costs, so the clock runs at twice the rate of the round it is divided into"
     },
     {
       "file": "src/Creature.h",
-      "original": "\tint speed{ NORMAL_SPEED };",
-      "mutated": "\tint speed{ 0 };",
-      "catches": "a creature created unable to ever act, which a default nobody sets would hide until the scheduler ran"
+      "original": "\tint actionDelay{ TIME_UNITS_PER_ROUND };",
+      "mutated": "\tint actionDelay{ TIME_UNITS_PER_ROUND * 2 };",
+      "catches": "every creature built at half pace, which a default nobody sets would hide until the scheduler ran"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tspeed = j.at(\"speed\").get<int>();",
-      "mutated": "\tspeed = NORMAL_SPEED;",
-      "catches": "a loaded game flattening every creature's speed to normal, so a saved quickling comes back ordinary"
+      "original": "\tactionDelay = j.at(\"actionDelay\").get<int>();",
+      "mutated": "\tactionDelay = TIME_UNITS_PER_ROUND;",
+      "catches": "a loaded game flattening every creature's pace, so a saved quickling comes back ordinary"
     },
     {
       "file": "src/Creature.cpp",
@@ -72,6 +72,30 @@
       "original": "\tconst int remaining = clockLimit - nextActionTime;\n\tif (remaining <= 0)\n\t{\n\t\treturn 0;\n\t}\n",
       "mutated": "\tconst int remaining = clockLimit - nextActionTime;\n",
       "catches": "a deeply overshot being coming back a negative number of actions, which the ceiling arithmetic does on its own against a cheap cost"
+    },
+    {
+      "file": "src/TurnSchedule.h",
+      "original": "\treturn currentTime + durationRounds * TIME_UNITS_PER_ROUND;",
+      "mutated": "\treturn currentTime + durationRounds;",
+      "catches": "a duration printed in rounds read as time units, so three rounds last three hundredths of one"
+    },
+    {
+      "file": "src/TurnSchedule.h",
+      "original": "\treturn currentTime + durationRounds * TIME_UNITS_PER_ROUND;",
+      "mutated": "\treturn durationRounds * TIME_UNITS_PER_ROUND;",
+      "catches": "a duration measured from the start of the game rather than from when it was granted"
+    },
+    {
+      "file": "src/TurnSchedule.h",
+      "original": "\tconst int remaining = expiryTime - currentTime;\n\tif (remaining <= 0)\n\t{\n\t\treturn 0;\n\t}\n\n\treturn (remaining + TIME_UNITS_PER_ROUND - 1) / TIME_UNITS_PER_ROUND;",
+      "mutated": "\tconst int remaining = expiryTime - currentTime;\n\n\treturn (remaining + TIME_UNITS_PER_ROUND - 1) / TIME_UNITS_PER_ROUND;",
+      "catches": "a duration well past its end counted as a negative number of rounds left"
+    },
+    {
+      "file": "src/TurnSchedule.h",
+      "original": "\treturn (remaining + TIME_UNITS_PER_ROUND - 1) / TIME_UNITS_PER_ROUND;",
+      "mutated": "\treturn remaining / TIME_UNITS_PER_ROUND;",
+      "catches": "a buff with part of a round left reporting none, which reads as expired"
     }
   ]
 }

@@ -25,6 +25,7 @@
 #include "MessageSystem.h"
 #include "Persistent.h"
 #include "SavingThrow.h"
+#include "TurnSchedule.h"
 #include "Vector2D.h"
 
 // Spider AI constants
@@ -69,10 +70,8 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 	// Handle ambush behavior - this was missing in the previous fix
 	if (isAmbushing)
 	{
-		ambushCounter--;
-
 		// If player spots us while ambushing, or ambush time is up, stop ambushing
-		if (ctx.map->is_in_fov(owner.position) || ambushCounter <= 0)
+		if (ctx.map->is_in_fov(owner.position) || ctx.gameState->get_time() >= ambushEndTime)
 		{
 			isAmbushing = false;
 
@@ -115,7 +114,7 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 				// Move to ambush position
 				owner.position = *ambushPos;
 				isAmbushing = true;
-				ambushCounter = AMBUSH_DURATION;
+				ambushEndTime = expiry_time(ctx.gameState->get_time(), AMBUSH_DURATION);
 
 				ctx.messageSystem->log(std::format("Spider setting ambush at {},{}", ambushPos->x, ambushPos->y));
 
@@ -484,9 +483,9 @@ void AiSpider::load(const json& j)
 	AiMonster::load(j);
 
 	// Load AiSpider specific data
-	if (j.contains("ambushCounter"))
+	if (j.contains("ambushEndTime"))
 	{
-		ambushCounter = j.at("ambushCounter").get<int>();
+		ambushEndTime = j.at("ambushEndTime").get<int>();
 	}
 
 	if (j.contains("isAmbushing"))
@@ -500,6 +499,6 @@ void AiSpider::save(json& j)
 	AiMonster::save(j);
 	j["type"] = encode_ai_type(get_ai_type());
 
-	j["ambushCounter"] = ambushCounter;
+	j["ambushEndTime"] = ambushEndTime;
 	j["isAmbushing"] = isAmbushing;
 }

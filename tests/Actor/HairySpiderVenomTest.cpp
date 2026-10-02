@@ -50,6 +50,7 @@
 #include "src/MonsterAttacker.h"
 #include "src/Player.h"
 #include "src/SavingThrow.h"
+#include "src/TurnSchedule.h"
 
 class HairySpiderVenomTest : public ::testing::Test
 {
@@ -121,13 +122,16 @@ protected:
 		spider.ai->update(spider, ctx);
 	}
 
-	// Rounds pass for the player alone, which is what carries the onset and the wearing off.
+	// Rounds pass for the player alone, which is what carries the onset and the wearing
+	// off. The clock moves with them: a duration is a reading on it, so asking the buff
+	// system twice at one reading is asking the same question twice.
 	void rounds_pass(int count)
 	{
 		for (int round = 0; round < count; ++round)
 		{
+			ctx.gameState->advance_clock(TIME_UNITS_PER_ROUND);
 			player->tick_poison(ctx);
-			ctx.buffSystem->update_creature_buffs(*player);
+			ctx.buffSystem->update_creature_buffs(*player, ctx.gameState->get_time());
 		}
 	}
 
@@ -205,8 +209,8 @@ TEST_F(HairySpiderVenomTest, TheVenomLastsOneDFourPlusOneRounds)
 	rounds_pass(1);
 	ASSERT_TRUE(ctx.buffSystem->has_buff(*player, BuffType::HAIRY_SPIDER_VENOM));
 
-	EXPECT_EQ(ctx.buffSystem->get_buff_turns(*player, BuffType::HAIRY_SPIDER_VENOM) + 1, 2 + 1)
-		<< "1d4 of two, plus one, less the round it landed in";
+	EXPECT_EQ(ctx.buffSystem->get_buff_turns(*player, BuffType::HAIRY_SPIDER_VENOM, ctx.gameState->get_time()), 2 + 1)
+		<< "1d4 of two, plus one, and the round it lands in is not spent landing";
 }
 
 // And it does run out, taking its point with it.

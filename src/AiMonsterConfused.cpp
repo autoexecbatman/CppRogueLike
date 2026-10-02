@@ -15,8 +15,8 @@ constexpr int MIN_DIRECTION = -1;
 constexpr int MAX_DIRECTION = 1;
 
 //==ConfusedMonsterAi==
-AiMonsterConfused::AiMonsterConfused(int nbTurns, std::unique_ptr<Ai> oldAi) noexcept
-	: nbTurns{ nbTurns }, oldAi{ std::move(oldAi) } {}
+AiMonsterConfused::AiMonsterConfused(int confusionEndTime, std::unique_ptr<Ai> oldAi) noexcept
+	: confusionEndTime{ confusionEndTime }, oldAi{ std::move(oldAi) } {}
 
 void AiMonsterConfused::update(Creature& owner, GameContext& ctx)
 {
@@ -29,9 +29,9 @@ void AiMonsterConfused::update(Creature& owner, GameContext& ctx)
 		attempt_move(owner, destination, ctx);
 	}
 
-	// Decrement turns and check if confusion ended
-	--nbTurns;
-	if (nbTurns <= 0)
+	// The spell is over when the clock says so. Asked rather than counted, so a creature
+	// that acts twice in a round is confused for the rounds the spell named.
+	if (ctx.gameState->get_time() >= confusionEndTime)
 	{
 		restore_original_ai(owner);
 	}
@@ -72,7 +72,7 @@ void AiMonsterConfused::restore_original_ai(Creature& owner)
 
 void AiMonsterConfused::load(const json& j)
 {
-	nbTurns = j.at("nbTurns").get<int>();
+	confusionEndTime = j.at("confusionEndTime").get<int>();
 
 	// Create the oldAi if it exists in the JSON
 	if (j.contains("oldAi"))
@@ -84,7 +84,7 @@ void AiMonsterConfused::load(const json& j)
 void AiMonsterConfused::save(json& j)
 {
 	j["type"] = encode_ai_type(get_ai_type());
-	j["nbTurns"] = nbTurns;
+	j["confusionEndTime"] = confusionEndTime;
 
 	// Save the oldAi if it exists
 	if (oldAi != nullptr)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Colors.h"
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -34,8 +35,14 @@ private:
 	bool isDisguised{ true };
 	int confusionDuration{ 3 };
 	int itemsConsumed{ 0 };
-	int disguiseChangeCounter{ 0 };
-	int consumptionCooldown{ 0 };
+	// The clock reading the next disguise change is due at. Empty until the mimic takes
+	// its first turn: MonsterCreator already dressed it, so the rate runs from a turn it
+	// actually took rather than from a clock reading it never saw.
+	std::optional<int> disguiseChangeTime{};
+
+	// The clock reading the mimic may next swallow something at. Set when it reveals
+	// itself, which is the first moment it can eat at all.
+	int consumptionReadyTime{ 0 };
 	int revealDistance{ 1 };
 	std::vector<Disguise> possibleDisguises; // empty on load; rebuilt lazily on first update
 

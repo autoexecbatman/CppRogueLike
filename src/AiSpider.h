@@ -26,7 +26,9 @@ public:
 	void set_web_laid(bool status) { webLaid = status; }
 
 protected:
-	int ambushCounter{ 0 }; // Counter for ambush behavior
+	// The clock reading the ambush ends at. Read only while isAmbushing, and always set
+	// when an ambush begins, so there is no reading it before it means anything.
+	int ambushEndTime{ 0 };
 	bool isAmbushing{ false }; // Is this spider currently in ambush mode?
 	bool webLaid{ false }; // Tracks if this spider has created a web
 

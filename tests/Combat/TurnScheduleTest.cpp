@@ -1,10 +1,11 @@
 // file: TurnScheduleTest.cpp
 // The arithmetic of a time-unit turn order: what an action costs a being of a given
-// speed, and which round a point on the clock falls in.
+// pace, and which round a point on the clock falls in.
 //
-// Every expected number is derived from the two definitions in TurnSchedule.h - a
-// round is TIME_UNITS_PER_ROUND long, and a being of NORMAL_SPEED pays an action's
-// base cost unscaled - rather than from running the code.
+// Every expected number is derived from the one definition in TurnSchedule.h - a round
+// is TIME_UNITS_PER_ROUND long, and a being whose action delay is that long pays an
+// action's base cost unscaled - rather than from running the code. A being's pace is a
+// delay in time units, so a bigger number is slower.
 //
 // Run it:
 //
@@ -18,44 +19,44 @@
 // A normal being pays what the action says and nothing is scaled away.
 TEST(TurnScheduleTest, ANormalSpeedPaysTheBaseCostUnchanged)
 {
-	EXPECT_EQ(scaled_cost(TIME_UNITS_PER_ROUND, NORMAL_SPEED), TIME_UNITS_PER_ROUND);
-	EXPECT_EQ(scaled_cost(60, NORMAL_SPEED), 60);
-	EXPECT_EQ(scaled_cost(1, NORMAL_SPEED), 1);
+	EXPECT_EQ(scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND), TIME_UNITS_PER_ROUND);
+	EXPECT_EQ(scaled_cost(60, TIME_UNITS_PER_ROUND), 60);
+	EXPECT_EQ(scaled_cost(1, TIME_UNITS_PER_ROUND), 1);
 }
 
-// Twice the speed is half the time for the same action, which is what makes a
-// quickling act twice while a normal creature acts once.
-TEST(TurnScheduleTest, TwiceTheSpeedHalvesWhatAnActionCosts)
+// Half the delay is half the time for the same action, which is what makes a quickling
+// act twice while an ordinary creature acts once.
+TEST(TurnScheduleTest, HalfTheDelayHalvesWhatAnActionCosts)
 {
-	EXPECT_EQ(scaled_cost(TIME_UNITS_PER_ROUND, NORMAL_SPEED * 2), TIME_UNITS_PER_ROUND / 2);
-	EXPECT_EQ(scaled_cost(120, 200), 60);
+	EXPECT_EQ(scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND / 2), TIME_UNITS_PER_ROUND / 2);
+	EXPECT_EQ(scaled_cost(120, 60), 60);
 }
 
-// Half the speed is twice the time, so a snail skips what a normal creature does not.
-// The same expression covers both directions, which is why this order was chosen.
-TEST(TurnScheduleTest, HalfTheSpeedDoublesWhatAnActionCosts)
+// Twice the delay is twice the time, so a snail skips what an ordinary creature does
+// not. The same expression covers both directions, which is why this order was chosen.
+TEST(TurnScheduleTest, TwiceTheDelayDoublesWhatAnActionCosts)
 {
-	EXPECT_EQ(scaled_cost(TIME_UNITS_PER_ROUND, NORMAL_SPEED / 2), TIME_UNITS_PER_ROUND * 2);
-	EXPECT_EQ(scaled_cost(120, 50), 240);
+	EXPECT_EQ(scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND * 2), TIME_UNITS_PER_ROUND * 2);
+	EXPECT_EQ(scaled_cost(120, 240), 240);
 }
 
 // A base cost is not tied to a round: a move may cost more or less than an action.
 TEST(TurnScheduleTest, ABaseCostOtherThanARoundScalesTheSameWay)
 {
-	EXPECT_EQ(scaled_cost(180, NORMAL_SPEED), 180);
-	EXPECT_EQ(scaled_cost(180, 300), 60);
-	EXPECT_EQ(scaled_cost(80, NORMAL_SPEED), 80);
+	EXPECT_EQ(scaled_cost(180, TIME_UNITS_PER_ROUND), 180);
+	EXPECT_EQ(scaled_cost(180, TIME_UNITS_PER_ROUND / 3), 60);
+	EXPECT_EQ(scaled_cost(80, TIME_UNITS_PER_ROUND), 80);
 }
 
-// Speed is monotonic: no increase in speed may ever raise what an action costs.
-// Checked across a span rather than at one point, since one point cannot show it.
-TEST(TurnScheduleTest, MoreSpeedNeverCostsMoreTime)
+// Pace is monotonic: no increase in delay may ever lower what an action costs. Checked
+// across a span rather than at one point, since one point cannot show it.
+TEST(TurnScheduleTest, MoreDelayNeverCostsLessTime)
 {
 	int previous = scaled_cost(TIME_UNITS_PER_ROUND, 1);
-	for (int speed = 2; speed <= 400; ++speed)
+	for (int actionDelay = 2; actionDelay <= 400; ++actionDelay)
 	{
-		const int cost = scaled_cost(TIME_UNITS_PER_ROUND, speed);
-		EXPECT_LE(cost, previous) << "speed " << speed << " cost more than speed " << speed - 1;
+		const int cost = scaled_cost(TIME_UNITS_PER_ROUND, actionDelay);
+		EXPECT_GE(cost, previous) << "delay " << actionDelay << " cost less than delay " << actionDelay - 1;
 		previous = cost;
 	}
 }
@@ -125,10 +126,10 @@ TEST(TurnScheduleTest, AnOrdinaryBeingActsOncePerRound)
 // it chooses what to spend each on - the schedule does not care which.
 TEST(TurnScheduleTest, AFasterBeingActsSeveralTimesInOneRound)
 {
-	const int halfARound = scaled_cost(TIME_UNITS_PER_ROUND, NORMAL_SPEED * 2);
+	const int halfARound = scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND / 2);
 	EXPECT_EQ(actions_before(0, halfARound, TIME_UNITS_PER_ROUND), 2);
 
-	const int quarterOfARound = scaled_cost(TIME_UNITS_PER_ROUND, NORMAL_SPEED * 4);
+	const int quarterOfARound = scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND / 4);
 	EXPECT_EQ(actions_before(0, quarterOfARound, TIME_UNITS_PER_ROUND), 4);
 }
 
@@ -136,7 +137,7 @@ TEST(TurnScheduleTest, AFasterBeingActsSeveralTimesInOneRound)
 // after - which is a skipped turn with nothing anywhere saying "skip".
 TEST(TurnScheduleTest, ASlowerBeingSkipsTheWindowItHasOvershot)
 {
-	const int twoRounds = scaled_cost(TIME_UNITS_PER_ROUND, NORMAL_SPEED / 2);
+	const int twoRounds = scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND * 2);
 	ASSERT_EQ(twoRounds, TIME_UNITS_PER_ROUND * 2);
 
 	// It is standing at the start, so it acts once in the first round.
@@ -168,4 +169,77 @@ TEST(TurnScheduleTest, ActionsInASpanFollowTheCostDividingIt)
 		EXPECT_EQ(actions_before(0, TIME_UNITS_PER_ROUND, limit), rounds) << rounds << " rounds, normal";
 		EXPECT_EQ(actions_before(0, TIME_UNITS_PER_ROUND / 2, limit), rounds * 2) << rounds << " rounds, double";
 	}
+}
+
+// A duration printed in rounds becomes the clock reading it ends at, so it is a fact
+// about the clock rather than a count anything has to maintain.
+TEST(TurnScheduleTest, ADurationBecomesTheReadingItEndsAt)
+{
+	EXPECT_EQ(expiry_time(0, 3), TIME_UNITS_PER_ROUND * 3);
+	EXPECT_EQ(expiry_time(TIME_UNITS_PER_ROUND * 5, 3), TIME_UNITS_PER_ROUND * 8)
+		<< "a duration granted five rounds in ends three rounds after that";
+}
+
+// A duration of no rounds is over at the reading it was granted, which is what a spell
+// with nothing left should be rather than one that lasts a round by accident.
+TEST(TurnScheduleTest, ADurationOfNoRoundsIsAlreadyOver)
+{
+	const int granted = TIME_UNITS_PER_ROUND * 4;
+
+	EXPECT_EQ(expiry_time(granted, 0), granted);
+	EXPECT_EQ(rounds_remaining(granted, expiry_time(granted, 0)), 0);
+}
+
+// What a duration has left, counted in the rounds the book prints it in.
+TEST(TurnScheduleTest, RoundsRemainingCountsDownAsTheClockRuns)
+{
+	const int expiry = expiry_time(0, 3);
+
+	EXPECT_EQ(rounds_remaining(0, expiry), 3);
+	EXPECT_EQ(rounds_remaining(TIME_UNITS_PER_ROUND, expiry), 2);
+	EXPECT_EQ(rounds_remaining(TIME_UNITS_PER_ROUND * 2, expiry), 1);
+	EXPECT_EQ(rounds_remaining(TIME_UNITS_PER_ROUND * 3, expiry), 0);
+}
+
+// The invariant that makes the count safe to print: zero means over, and nothing else
+// does. A buff with part of a round left has to report one, because a reader that sees
+// zero reads it as expired - which is what the count meant before it was a reading.
+TEST(TurnScheduleTest, RoundsRemainingReadsZeroOnlyOnceTheDurationIsOver)
+{
+	const int expiry = expiry_time(0, 3);
+
+	for (int currentTime = 0; currentTime < expiry; ++currentTime)
+	{
+		ASSERT_GT(rounds_remaining(currentTime, expiry), 0) << "still in force at " << currentTime;
+	}
+
+	EXPECT_EQ(rounds_remaining(expiry, expiry), 0);
+
+	// Two rounds past, not one. Without the guard the ceiling arithmetic returns a
+	// negative count, and one round past is the last overshoot it still truncates to
+	// zero - so a case measured there cannot see the guard at all.
+	EXPECT_EQ(rounds_remaining(expiry + TIME_UNITS_PER_ROUND * 2, expiry), 0) << "and stays zero past it";
+}
+
+// Half a round left is still a round the creature has, which is the case a duration
+// measured in whole rounds cannot see and a fast creature produces constantly.
+TEST(TurnScheduleTest, APartialRoundLeftStillReadsAsOne)
+{
+	EXPECT_EQ(rounds_remaining(TIME_UNITS_PER_ROUND / 2, TIME_UNITS_PER_ROUND), 1);
+	EXPECT_EQ(rounds_remaining(TIME_UNITS_PER_ROUND - 1, TIME_UNITS_PER_ROUND), 1);
+}
+
+// A delay of one round costs one round, and a bigger delay costs more. That is what
+// measuring pace in time units costs - as a percentage, a bigger number meant faster -
+// so the direction gets a case of its own rather than living in the names of the
+// creatures that use it elsewhere.
+TEST(TurnScheduleTest, ABiggerDelayCostsMoreTime)
+{
+	const int ordinary = scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND);
+	const int halfPace = scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND * 2);
+	const int doublePace = scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND / 2);
+
+	EXPECT_EQ(ordinary, TIME_UNITS_PER_ROUND) << "a delay of one round did not cost one round";
+	EXPECT_GT(halfPace, ordinary) << "twice the delay did not take longer";
+	EXPECT_LT(doublePace, ordinary) << "half the delay did not act sooner";
 }

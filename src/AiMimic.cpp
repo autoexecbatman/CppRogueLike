@@ -21,6 +21,7 @@
 #include "MessageSystem.h"
 #include "MonsterRegistry.h"
 #include "Persistent.h"
+#include "TurnSchedule.h"
 
 // Configuration constants (NOT serialized — same for all mimics)
 constexpr int DISGUISE_CHANGE_RATE = 200;
@@ -103,12 +104,18 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 
 	if (isDisguised)
 	{
-		disguiseChangeCounter++;
+		const int currentTime = ctx.gameState->get_time();
 
-		if (disguiseChangeCounter >= DISGUISE_CHANGE_RATE)
+		// A mimic taking its first turn books a change a full rate away and keeps the
+		// appearance it was built with until then.
+		if (!disguiseChangeTime.has_value())
+		{
+			disguiseChangeTime = expiry_time(currentTime, DISGUISE_CHANGE_RATE);
+		}
+		else if (currentTime >= *disguiseChangeTime)
 		{
 			change_disguise(owner, ctx);
-			disguiseChangeCounter = 0;
+			disguiseChangeTime = expiry_time(currentTime, DISGUISE_CHANGE_RATE);
 			ctx.messageSystem->log("Mimic changed disguise");
 		}
 
@@ -132,12 +139,11 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 		return false;
 	}
 
-	++consumptionCooldown;
-	if (consumptionCooldown < CONSUMPTION_COOLDOWN_TURNS)
+	if (ctx.gameState->get_time() < consumptionReadyTime)
 	{
 		return false;
 	}
-	consumptionCooldown = 0;
+	consumptionReadyTime = expiry_time(ctx.gameState->get_time(), CONSUMPTION_COOLDOWN_TURNS);
 
 	if (ctx.floorInventory->items.empty())
 	{
@@ -316,6 +322,11 @@ void AiMimic::check_revealing(Creature& owner, GameContext& ctx)
 	if (distanceToPlayer <= revealDistance)
 	{
 		isDisguised = false;
+
+		// The first meal is a cooldown away from the reveal, which is the first moment a
+		// mimic can eat at all.
+		consumptionReadyTime = expiry_time(ctx.gameState->get_time(), CONSUMPTION_COOLDOWN_TURNS);
+
 		owner.actorData.tile = ctx.monsterRegistry->get_tile(MonsterId::MIMIC);
 		owner.actorData.name = "mimic";
 		owner.actorData.color = ColorPairId::RED_YELLOW;
@@ -331,7 +342,7 @@ void AiMimic::check_revealing(Creature& owner, GameContext& ctx)
 			ctx.messageSystem->finalize_message();
 
 			ctx.player()->add_state(ActorState::IS_CONFUSED);
-			ctx.player()->apply_confusion(confusionDuration);
+			ctx.player()->apply_confusion(confusionDuration, ctx.gameState->get_time());
 			ctx.messageSystem->log("Applied confusion to player for " + std::to_string(confusionDuration) + " turns");
 		}
 		else
@@ -371,14 +382,14 @@ void AiMimic::load(const json& j)
 {
 	AiMonster::load(j);
 
-	if (j.contains("disguiseChangeCounter"))
+	if (j.contains("disguiseChangeTime"))
 	{
-		disguiseChangeCounter = j.at("disguiseChangeCounter").get<int>();
+		disguiseChangeTime = j.at("disguiseChangeTime").get<int>();
 	}
 
-	if (j.contains("consumptionCooldown"))
+	if (j.contains("consumptionReadyTime"))
 	{
-		consumptionCooldown = j.at("consumptionCooldown").get<int>();
+		consumptionReadyTime = j.at("consumptionReadyTime").get<int>();
 	}
 
 	if (j.contains("isDisguised"))
@@ -409,8 +420,13 @@ void AiMimic::save(json& j)
 	// Override the MONSTER type written by AiMonster::save — we are MIMIC.
 	j["type"] = encode_ai_type(get_ai_type());
 
-	j["disguiseChangeCounter"] = disguiseChangeCounter;
-	j["consumptionCooldown"] = consumptionCooldown;
+	// A mimic with no change booked yet saves nothing for it, so the load path leaves the
+	// optional empty and the next turn books one.
+	if (disguiseChangeTime.has_value())
+	{
+		j["disguiseChangeTime"] = *disguiseChangeTime;
+	}
+	j["consumptionReadyTime"] = consumptionReadyTime;
 	j["isDisguised"] = isDisguised;
 	j["revealDistance"] = revealDistance;
 	j["confusionDuration"] = confusionDuration;

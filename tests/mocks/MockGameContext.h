@@ -1,16 +1,17 @@
 #pragma once
-#include "src/InventoryData.h"
-#include "src/GameContext.h"
-#include "src/Paths.h"
-#include "src/RandomDice.h"
+#include "src/BodyPlanRegistry.h"
+#include "src/BuffSystem.h"
 #include "src/ContentRegistry.h"
 #include "src/CreatureManager.h"
 #include "src/DataManager.h"
-#include "src/MessageSystem.h"
-#include "src/BodyPlanRegistry.h"
-#include "src/SpellRegistry.h"
-#include "src/MonsterRegistry.h"
+#include "src/GameContext.h"
+#include "src/InventoryData.h"
 #include "src/ItemRegistry.h"
+#include "src/MessageSystem.h"
+#include "src/MonsterRegistry.h"
+#include "src/Paths.h"
+#include "src/RandomDice.h"
+#include "src/SpellRegistry.h"
 #include "src/TileConfig.h"
 
 struct MockGameContext
@@ -22,6 +23,10 @@ struct MockGameContext
 	ContentRegistry content_registry{};
 	FloorInventory inventory{ 100 };
 	GameState game_state{};
+
+	// Stateless, and every creature update reaches through it: Creature::update
+	// asks it to retire whatever the clock has passed before the creature acts.
+	BuffSystem buffs{};
 	TileConfig tile_config{};
 	BodyPlanRegistry body_plans{};
 	SpellRegistry spellRegistry{};
@@ -64,6 +69,7 @@ struct MockGameContext
 			.dice = &dice,
 			.creatureManager = &creature_mgr,
 			.dataManager = &data_manager,
+			.buffSystem = &buffs,
 			.contentRegistry = &content_registry,
 			.tileConfig = &tile_config,
 			.bodyPlanRegistry = &body_plans,

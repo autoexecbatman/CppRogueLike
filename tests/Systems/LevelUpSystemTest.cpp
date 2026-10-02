@@ -157,7 +157,7 @@ TEST_F(LevelUpSystemTest, AStrengthBuffIsNotKeptByALevel)
     player->set_creature_class(CreatureClass::FIGHTER);
     player->set_hit_die(10);
     player->set_strength(15);
-    ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, 19, 10, true);
+    ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, 19, 10, true, ctx.gameState->get_time());
 
     LevelUpSystem::apply_level_up_benefits(*player, 4, &ctx);
     ctx.buffSystem->remove_buff(*player, BuffType::STRENGTH);

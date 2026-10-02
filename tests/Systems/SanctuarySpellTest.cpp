@@ -67,7 +67,7 @@ protected:
 
 		goblin = &add_creature("goblin", 4);
 		orc = &add_creature("orc", 6);
-		buffs.add_buff(*goblin, BuffType::SANCTUARY, 0, 10, false);
+		buffs.add_buff(*goblin, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
 	}
 
 	Creature& add_creature(const char* name, int column)
@@ -208,12 +208,12 @@ TEST_F(SanctuarySpellTest, AConfusionScrollAimedAtAWardedCreatureIsKept)
 TEST_F(SanctuarySpellTest, SanctuaryLastsTwoRoundsPlusOnePerLevel)
 {
 	cast("sanctuary");
-	EXPECT_EQ(buffs.get_buff_turns(*caster, BuffType::SANCTUARY), 3) << "1st level: 2 + 1";
+	EXPECT_EQ(buffs.get_buff_turns(*caster, BuffType::SANCTUARY, ctx.gameState->get_time()), 3) << "1st level: 2 + 1";
 
 	buffs.remove_buff(*caster, BuffType::SANCTUARY);
 	caster->set_creature_level(5);
 	cast("sanctuary");
-	EXPECT_EQ(buffs.get_buff_turns(*caster, BuffType::SANCTUARY), 7) << "5th level: 2 + 5";
+	EXPECT_EQ(buffs.get_buff_turns(*caster, BuffType::SANCTUARY, ctx.gameState->get_time()), 7) << "5th level: 2 + 5";
 }
 
 // Aimed at the unwarded orc, it is read, and the orc is confused.

@@ -9,6 +9,7 @@
 #include "BuffType.h"
 #include "Creature.h"
 #include "SavingThrow.h"
+#include "TurnSchedule.h"
 
 // OCP: Data-driven buff state mapping - add new buffs here without modifying methods
 static const std::unordered_map<BuffType, ActorState> buff_state_effects = {
@@ -43,8 +44,11 @@ static const std::unordered_map<BuffType, int> buff_hit_modifiers = {
 	// Future extensions: {BuffType::PRAYER, 1}, {BuffType::CURSE, -1}, etc.
 };
 
-void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int duration, bool is_set_effect) noexcept
+void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int durationRounds, bool isSetEffect, int currentTime) noexcept
 {
+	// When this casting runs out, worked once and stored, so nothing counts it down.
+	const int expiry = expiry_time(currentTime, durationRounds);
+
 	// Find if buff already exists
 	auto matches_type = [type](const Buff& b)
 	{
@@ -62,13 +66,13 @@ void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int dura
 		if (value > it->value)
 		{
 			it->value = value; // Better buff, update value
-			it->turnsRemaining = duration; // Reset duration
-			it->isSetEffect = is_set_effect; // Update effect type
+			it->expiryTime = expiry; // The new casting's ending replaces the old one
+			it->isSetEffect = isSetEffect; // Update effect type
 		}
 		else
 		{
-			// Weaker or equal buff, just extend duration
-			it->turnsRemaining = std::max(it->turnsRemaining, duration);
+			// Weaker or equal buff, so it can only make the one already running last longer
+			it->expiryTime = std::max(it->expiryTime, expiry);
 		}
 	}
 	else
@@ -77,8 +81,8 @@ void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int dura
 		Buff newBuff{};
 		newBuff.type = type;
 		newBuff.value = value;
-		newBuff.turnsRemaining = duration;
-		newBuff.isSetEffect = is_set_effect;
+		newBuff.expiryTime = expiry;
+		newBuff.isSetEffect = isSetEffect;
 
 		// Apply state effects (data-driven, OCP compliant)
 		if (buff_state_effects.contains(type))
@@ -106,24 +110,21 @@ void BuffSystem::remove_buff(Creature& creature, BuffType type) noexcept
 	std::erase_if(creature.activeBuffs, matches_type);
 }
 
-void BuffSystem::update_creature_buffs(Creature& creature) noexcept
+void BuffSystem::update_creature_buffs(Creature& creature, int currentTime) noexcept
 {
-	// Decrement all buff timers using ranges
-	auto decrement_timer = [](Buff& b)
+	// A buff the clock has reached or passed is over. Asked rather than counted, so the
+	// answer is the same however many times a creature is driven in one round.
+	auto is_expired = [currentTime](const Buff& b)
 	{
-		if (b.turnsRemaining > 0)
-		{
-			--b.turnsRemaining;
-		}
+		return currentTime >= b.expiryTime;
 	};
-	std::ranges::for_each(creature.activeBuffs, decrement_timer);
 
 	// Clear states for all expiring buffs (data-driven, OCP compliant)
 	for (const auto& [buffType, state] : buff_state_effects)
 	{
-		auto is_expiring_buff = [buffType](const Buff& b)
+		auto is_expiring_buff = [buffType, &is_expired](const Buff& b)
 		{
-			return b.type == buffType && b.turnsRemaining == 0;
+			return b.type == buffType && is_expired(b);
 		};
 		auto expiring = creature.activeBuffs | std::views::filter(is_expiring_buff);
 
@@ -134,19 +135,15 @@ void BuffSystem::update_creature_buffs(Creature& creature) noexcept
 	}
 
 	// Remove expired buffs using std::erase_if (ranges-friendly)
-	auto is_expired = [](const Buff& b)
-	{
-		return b.turnsRemaining == 0;
-	};
 	std::erase_if(creature.activeBuffs, is_expired);
 }
 
-void BuffSystem::restore_loaded_buff_states(Creature& creature) noexcept
+void BuffSystem::restore_loaded_buff_states(Creature& creature, int currentTime) noexcept
 {
 	// Restore state effects for all active buffs (idempotent - called after deserialization)
 	for (const auto& buff : creature.activeBuffs)
 	{
-		if (buff.turnsRemaining > 0)
+		if (currentTime < buff.expiryTime)
 		{
 			if (buff_state_effects.contains(buff.type))
 			{
@@ -166,14 +163,14 @@ int BuffSystem::get_buff_value(const Creature& creature, BuffType type) const no
 	return it != creature.activeBuffs.end() ? it->value : 0;
 }
 
-int BuffSystem::get_buff_turns(const Creature& creature, BuffType type) const noexcept
+int BuffSystem::get_buff_turns(const Creature& creature, BuffType type, int currentTime) const noexcept
 {
 	auto matches_type = [type](const Buff& b)
 	{
 		return b.type == type;
 	};
 	auto it = std::ranges::find_if(creature.activeBuffs, matches_type);
-	return it != creature.activeBuffs.end() ? it->turnsRemaining : 0;
+	return it != creature.activeBuffs.end() ? rounds_remaining(currentTime, it->expiryTime) : 0;
 }
 
 bool BuffSystem::has_buff(const Creature& creature, BuffType type) const noexcept

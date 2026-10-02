@@ -7,7 +7,7 @@
 // the action cost, and then opens the turn.
 //
 // What is checked here is that the charge is additive, that it is scaled by the
-// player's own speed, and that the turn still opens - because every one of those
+// player's own action delay, and that the turn still opens - because every one of those
 // call sites depends on the last of those and nothing else.
 //
 // The clock is the player's own place on it: the game advances when the player acts
@@ -75,22 +75,22 @@ TEST_F(PlayerActionCostTest, ACheaperActionTakesLessOfTheClock)
 	EXPECT_EQ(ctx.gameState->get_time(), TIME_UNITS_PER_ROUND / 2);
 }
 
-// The player's speed scales what it is charged, so a hasted player arrives at its
-// next action sooner having done the same thing.
-TEST_F(PlayerActionCostTest, ThePlayersSpeedScalesWhatAnActionCosts)
+// The player's own action delay prices what it is charged, so a hasted player arrives at
+// its next action sooner having done the same thing.
+TEST_F(PlayerActionCostTest, ThePlayersActionDelayPricesWhatAnActionCosts)
 {
-	player->set_speed(NORMAL_SPEED * 2);
+	player->set_action_delay(TIME_UNITS_PER_ROUND / 2);
 
 	spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 
 	EXPECT_EQ(ctx.gameState->get_time(), TIME_UNITS_PER_ROUND / 2)
-		<< "twice the speed should charge half the time";
+		<< "half the delay should charge half the time";
 }
 
-// And a slowed player pays more, from the same expression and no second branch.
+// And a slower player pays more, from the same expression and no second branch.
 TEST_F(PlayerActionCostTest, ASlowedPlayerPaysMoreForTheSameAction)
 {
-	player->set_speed(NORMAL_SPEED / 2);
+	player->set_action_delay(TIME_UNITS_PER_ROUND * 2);
 
 	spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 

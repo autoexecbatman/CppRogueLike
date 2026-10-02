@@ -14,7 +14,6 @@
 #include "BuffType.h"
 #include "ConstitutionTracker.h"
 #include "CreatureClass.h"
-#include "TurnSchedule.h"
 #include "DamageInfo.h"
 #include "DamageResolver.h"
 #include "EquipmentSlot.h"
@@ -27,6 +26,7 @@
 #include "Persistent.h"
 #include "Renderer.h"
 #include "ShopKeeper.h"
+#include "TurnSchedule.h"
 #include "Vector2D.h"
 
 class DataManager;
@@ -152,10 +152,10 @@ private:
 	int hitDie{ 8 };
 	float attacksPerRound{ 1.0f };
 
-	// How often this creature acts, as a percentage of normal: 150 acts half again as
-	// often as 100. It scales what every action costs, which is why it is not a
-	// movement rate - something that only walks faster carries a cheaper move instead.
-	int speed{ NORMAL_SPEED };
+	// The time one ordinary action takes this creature, in time units, so a bigger
+	// number is slower. It prices every action, which is why it is not a movement rate -
+	// something that only walks faster carries a cheaper move instead.
+	int actionDelay{ TIME_UNITS_PER_ROUND };
 
 	// The point on the shared clock at which this creature acts next. A creature is
 	// due when the clock reaches it, so the earliest is always the one to go.
@@ -283,33 +283,27 @@ public:
 	void set_hit_die(int hd) noexcept { hitDie = hd; }
 	void set_attacks_per_round(float apr) noexcept { attacksPerRound = apr; }
 
-	// How often this creature acts, as a percentage of normal. Scales every action's
-	// cost, so it reaches movement, attacks and everything else alike.
-	[[nodiscard]] int get_speed() const noexcept { return speed; }
-	void set_speed(int percentageOfNormal) noexcept { speed = percentageOfNormal; }
+	// The time one ordinary action takes this creature, in time units; a bigger number
+	// is slower. It prices every action, so it reaches movement, attacks and the rest
+	// alike, and it is what one ordinary action costs with no conversion.
+	[[nodiscard]] int get_action_delay() const noexcept { return actionDelay; }
+	void set_action_delay(int timeUnits) noexcept { actionDelay = timeUnits; }
 
 	// The point on the shared clock at which this creature acts next.
 	[[nodiscard]] int get_next_action_time() const noexcept { return nextActionTime; }
 	void set_next_action_time(int timeUnits) noexcept { nextActionTime = timeUnits; }
 
-	// What one ordinary action costs this creature, in time units. A whole round for
-	// a creature of normal speed, and less for a faster one.
-	[[nodiscard]] int ordinary_action_cost() const noexcept
-	{
-		return scaled_cost(TIME_UNITS_PER_ROUND, speed);
-	}
-
 	// How many actions this creature is due before the clock reaches that point.
 	// Zero when it has already overshot, which is a skipped turn and needs nothing
 	// anywhere to say so.
 	//
-	// Example, a creature of normal speed standing at the start of a round, and one
-	// twice as fast beside it:
+	// Example, an ordinary creature standing at the start of a round, and one whose
+	// action delay is half as long beside it:
 	//   ordinary.scheduled_actions_before(TIME_UNITS_PER_ROUND);   // -> 1
 	//   quickling.scheduled_actions_before(TIME_UNITS_PER_ROUND);  // -> 2
 	[[nodiscard]] int scheduled_actions_before(int clockLimit) const noexcept
 	{
-		return actions_before(nextActionTime, ordinary_action_cost(), clockLimit);
+		return actions_before(nextActionTime, actionDelay, clockLimit);
 	}
 	int get_morale() const noexcept { return morale; }
 	void set_morale(int value) noexcept { morale = value; }
@@ -321,7 +315,9 @@ public:
 	int get_corpse_weight() const noexcept { return corpseWeight; }
 	void set_corpse_weight(int value) noexcept { corpseWeight = value; }
 
-	virtual void apply_confusion(int nbTurns);
+	// Replaces the creature's mind with a confused one until the clock reaches the end of
+	// the duration. The caller passes the clock because the creature does not hold one.
+	virtual void apply_confusion(int durationRounds, int currentTime);
 
 	void drop(Item& item, GameContext& ctx);
 

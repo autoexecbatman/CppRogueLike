@@ -1,0 +1,65 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=DurationScheduleTest.*:HairySpiderVenomTest.*:SanctuarySpellTest.*:SleepSpellTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\t\treturn currentTime >= b.expiryTime;",
+      "mutated": "\t\treturn currentTime > b.expiryTime;",
+      "catches": "a buff living one reading past the time it ends at, so every duration is a round long"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\t\treturn currentTime >= b.expiryTime;",
+      "mutated": "\t\treturn currentTime > b.expiryTime + TIME_UNITS_PER_ROUND;",
+      "catches": "a buff outstaying its duration by a whole round"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\tconst int expiry = expiry_time(currentTime, durationRounds);",
+      "mutated": "\tconst int expiry = expiry_time(0, durationRounds);",
+      "catches": "a spell cast mid-game expiring relative to the start of it, so it lands already over"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\t\t\tit->expiryTime = std::max(it->expiryTime, expiry);",
+      "mutated": "\t\t\tit->expiryTime = expiry;",
+      "catches": "a weaker second casting cutting short a longer one already running"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\treturn it != creature.activeBuffs.end() ? rounds_remaining(currentTime, it->expiryTime) : 0;",
+      "mutated": "\treturn it != creature.activeBuffs.end() ? it->expiryTime : 0;",
+      "catches": "the raw clock reading reported where rounds left belong"
+    },
+    {
+      "file": "src/AiMonsterConfused.cpp",
+      "original": "\tif (ctx.gameState->get_time() >= confusionEndTime)",
+      "mutated": "\tif (ctx.gameState->get_time() > confusionEndTime)",
+      "catches": "confusion holding past the round it was cast to end in"
+    },
+    {
+      "file": "src/AiMonsterConfused.cpp",
+      "original": "\tif (ctx.gameState->get_time() >= confusionEndTime)",
+      "mutated": "\tif (ctx.gameState->get_time() >= confusionEndTime / 2)",
+      "catches": "a confusion that clears in half the rounds the scroll named"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tai = std::make_unique<AiMonsterConfused>(expiry_time(currentTime, durationRounds), std::move(ai));",
+      "mutated": "\tai = std::make_unique<AiMonsterConfused>(expiry_time(currentTime, durationRounds * 2), std::move(ai));",
+      "catches": "a confusion lasting twice the rounds it was given"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tconst int currentTime = ctx.gameState->get_time();\n\tctx.buffSystem->restore_loaded_buff_states(*this, currentTime);\n\tctx.buffSystem->update_creature_buffs(*this, currentTime);",
+      "mutated": "\tconst int currentTime = ctx.gameState->get_time();\n\tctx.buffSystem->restore_loaded_buff_states(*this, currentTime);",
+      "catches": "nothing retiring a buff the clock has passed, so every buff is permanent"
+    }
+  ]
+}

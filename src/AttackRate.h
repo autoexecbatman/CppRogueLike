@@ -29,9 +29,9 @@
 // Floors at one time unit, because an attack that cost nothing would repeat forever.
 //
 // Example, the three rates Table 58 gives a character:
-//   attack_cost(1.0f);   // -> 100
-//   attack_cost(1.5f);   // -> 66
-//   attack_cost(2.0f);   // -> 50
+//   attack_cost(1.0f);   // -> 120
+//   attack_cost(1.5f);   // -> 80
+//   attack_cost(2.0f);   // -> 60
 [[nodiscard]] constexpr int attack_cost(float attacksPerRound)
 {
 	assert(attacksPerRound > 0.0f && "attack_cost: a creature that never attacks has no attack to cost");

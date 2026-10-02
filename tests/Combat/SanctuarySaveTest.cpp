@@ -26,11 +26,11 @@
 
 #include <nlohmann/json.hpp>
 
-#include "src/Colors.h"
 #include "src/ArmorClass.h"
 #include "src/AttackKind.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/DamageInfo.h"
 #include "src/ExperienceReward.h"
@@ -86,7 +86,7 @@ protected:
 
 	void cast_sanctuary(Creature& warded)
 	{
-		ctx.buffSystem->add_buff(warded, BuffType::SANCTUARY, 0, 10, false);
+		ctx.buffSystem->add_buff(warded, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
 	}
 
 	bool turned_away_from_player(const Creature& attacker)
@@ -206,7 +206,7 @@ TEST_F(SanctuarySaveTest, AnotherBuffLeavesTheSanctuaryRecordAlone)
 	script({ 1, 20 });
 	ASSERT_TRUE(turned_away_from_player(goblin));
 
-	ctx.buffSystem->add_buff(*player, BuffType::BLESS, 1, 10, false);
+	ctx.buffSystem->add_buff(*player, BuffType::BLESS, 1, 10, false, ctx.gameState->get_time());
 
 	EXPECT_TRUE(turned_away_from_player(goblin)) << "a bless wiped the sanctuary's record";
 }

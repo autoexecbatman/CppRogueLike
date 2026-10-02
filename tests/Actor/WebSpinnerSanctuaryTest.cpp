@@ -19,12 +19,12 @@
 #include <initializer_list>
 #include <memory>
 
-#include "src/Colors.h"
 #include "src/Actor.h"
 #include "src/AiWebSpinner.h"
 #include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/DamageInfo.h"
 #include "src/ExperienceReward.h"
@@ -110,7 +110,7 @@ protected:
 TEST_F(WebSpinnerSanctuaryTest, SanctuaryHoldsOffASpinnerThatFailsToSave)
 {
 	ASSERT_GT(SavingThrows::target(spinner.get_creature_class(), spinner.get_creature_level(), SavingThrow::SPELL), 12);
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false);
+	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
 	script({ 12, 20, 4, 100 });
 
 	EXPECT_EQ(hp_lost_to_one_turn(), 0) << "sanctuary held and the spinner bit anyway";
@@ -120,7 +120,7 @@ TEST_F(WebSpinnerSanctuaryTest, SanctuaryHoldsOffASpinnerThatFailsToSave)
 // Without the save, the attack would take the 20 and the die the next 20.
 TEST_F(WebSpinnerSanctuaryTest, ASpinnerThatSavesBitesAsUsual)
 {
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false);
+	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
 	script({ 20, 20, 4, 100 });
 
 	EXPECT_EQ(hp_lost_to_one_turn(), 4) << "1d4 at four after a made save";
@@ -132,7 +132,7 @@ TEST_F(WebSpinnerSanctuaryTest, ASpinnerThatSavesBitesAsUsual)
 TEST_F(WebSpinnerSanctuaryTest, NoVenomFromASpinnerTurnedAway)
 {
 	spinner.ai = std::make_unique<AiWebSpinner>();
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false);
+	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
 	script({ 12, 20, 3 });
 
 	EXPECT_EQ(hp_lost_to_one_turn(), 0) << "venom landed through a failed save";

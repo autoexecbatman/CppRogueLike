@@ -26,16 +26,16 @@
       "catches": "a creature never advancing on the clock, so it stays due and acts every window for the rest of the game"
     },
     {
-      "file": "src/Creature.h",
-      "original": "\t\treturn scaled_cost(TIME_UNITS_PER_ROUND, speed);",
-      "mutated": "\t\treturn TIME_UNITS_PER_ROUND;",
-      "catches": "a creature's own speed ignored when pricing its action, so no monster is ever faster or slower than any other"
+      "file": "src/CreatureManager.cpp",
+      "original": "\t\tconst int cost = creature->get_action_delay();",
+      "mutated": "\t\tconst int cost = TIME_UNITS_PER_ROUND;",
+      "catches": "the creature's own pace ignored when booking its next action, so a quickling acts twice and then waits a full round"
     },
     {
       "file": "src/Creature.h",
-      "original": "\t\treturn actions_before(nextActionTime, ordinary_action_cost(), clockLimit);",
-      "mutated": "\t\treturn actions_before(0, ordinary_action_cost(), clockLimit);",
-      "catches": "where the creature stands ignored, so the snail never overshoots and never skips"
+      "original": "\t\treturn actions_before(nextActionTime, actionDelay, clockLimit);",
+      "mutated": "\t\treturn actions_before(0, actionDelay, clockLimit);",
+      "catches": "where the creature stands on the clock ignored, so it is owed every action since the game began"
     }
   ]
 }

@@ -25,10 +25,10 @@
 
 #include <nlohmann/json.hpp>
 
-#include "src/Colors.h"
 #include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
@@ -168,7 +168,7 @@ TEST_F(StatBoostEquipmentTest, TwoSettingItemsComeOffInEitherOrder)
 // A buff that ends while gauntlets are worn does not leave its value behind in the score.
 TEST_F(StatBoostEquipmentTest, ABuffIsNotAbsorbedByEquipment)
 {
-	ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, 19, 10, true);
+	ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, 19, 10, true, ctx.gameState->get_time());
 	put_on_adding_gauntlets(2);
 	ASSERT_EQ(player->get_strength(), 21) << "the buff's 19, plus 2";
 
@@ -183,7 +183,7 @@ TEST_F(StatBoostEquipmentTest, AGirdleTakesNoBonusFromABuff)
 {
 	put_on("girdle_of_hill_giant_strength");
 
-	ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, 1, 10, false);
+	ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, 1, 10, false, ctx.gameState->get_time());
 
 	EXPECT_EQ(player->get_strength(), 19) << "a buff's +1 was added to the girdle's 19";
 }
@@ -203,7 +203,7 @@ TEST_F(StatBoostEquipmentTest, APenaltyStillLowersAGirdlesStrength)
 {
 	put_on("girdle_of_hill_giant_strength");
 
-	ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, -1, 10, false);
+	ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, -1, 10, false, ctx.gameState->get_time());
 
 	EXPECT_EQ(player->get_strength(), 18);
 }
@@ -213,7 +213,7 @@ TEST_F(StatBoostEquipmentTest, AGirdleLeavesOtherAbilitiesTheirBonuses)
 {
 	put_on("girdle_of_hill_giant_strength");
 
-	ctx.buffSystem->add_buff(*player, BuffType::DEXTERITY, 1, 10, false);
+	ctx.buffSystem->add_buff(*player, BuffType::DEXTERITY, 1, 10, false, ctx.gameState->get_time());
 
 	EXPECT_EQ(player->get_dexterity(), 11);
 }

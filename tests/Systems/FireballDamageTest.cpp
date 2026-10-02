@@ -12,15 +12,15 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Colors.h"
-#include "src/Creature.h"
-#include "src/Player.h"
-#include "src/EquipmentSlot.h"
-#include "src/ExperienceReward.h"
-#include "src/Paths.h"
-#include "src/ItemCreator.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
+#include "src/Colors.h"
+#include "src/Creature.h"
+#include "src/EquipmentSlot.h"
+#include "src/ExperienceReward.h"
+#include "src/ItemCreator.h"
+#include "src/Paths.h"
+#include "src/Player.h"
 #include "src/SpellSystem.h"
 #include "tests/mocks/MockGameContext.h"
 
@@ -90,7 +90,7 @@ TEST_F(FireballDamageTest, APotionOfFireResistanceTakesTwoOffEveryDie)
 {
 	Creature& resistant = add_creature(3);
 	Creature& exposed = add_creature(4);
-	buffs.add_buff(resistant, BuffType::FIRE_RESISTANCE, 1, 10, false);
+	buffs.add_buff(resistant, BuffType::FIRE_RESISTANCE, 1, 10, false, ctx.gameState->get_time());
 	force_max_dice_then_saves({ 1, 1 });
 
 	const auto burst = burst_at(Vector2D{ 3, 5 });

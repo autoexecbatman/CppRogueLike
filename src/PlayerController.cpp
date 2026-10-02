@@ -12,6 +12,7 @@
 
 #include "Actor.h"
 #include "AttackKind.h"
+#include "AttackRate.h"
 #include "Colors.h"
 #include "ContextMenu.h"
 #include "Controls.h"
@@ -40,7 +41,6 @@
 #include "Persistent.h"
 #include "Pickable.h"
 #include "Player.h"
-#include "AttackRate.h"
 #include "PlayerController.h"
 #include "PlayerTurn.h"
 #include "Renderer.h"
@@ -131,11 +131,9 @@ void PlayerController::update(GameContext& ctx)
 	Vector2D moveVector{ 0, 0 };
 
 	// Handle confused state -- randomly move or act
-	if (playerOwner.has_state(ActorState::IS_CONFUSED) && confusionTurns > 0)
+	if (playerOwner.has_state(ActorState::IS_CONFUSED))
 	{
-		confusionTurns--;
-
-		if (confusionTurns == 0)
+		if (!is_confused(ctx.gameState->get_time()))
 		{
 			playerOwner.remove_state(ActorState::IS_CONFUSED);
 			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Your mind clears.", MessageCompletion::FINISHED);

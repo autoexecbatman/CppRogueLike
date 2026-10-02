@@ -15,6 +15,7 @@
 #include "MessageSystem.h"
 #include "SavingThrow.h"
 #include "SpellTile.h"
+#include "TurnSchedule.h"
 #include "Vector2D.h"
 #include "Web.h"
 
@@ -26,12 +27,6 @@ constexpr int WEB_STRENGTH = 3;
 
 void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 {
-	// Update cooldowns
-	if (webCooldown > 0)
-	{
-		webCooldown--;
-	}
-
 	// DIRECT ATTACK CODE - Check if player is adjacent
 	int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
 	if (distanceToPlayer <= 1 && ctx.map->is_in_fov(owner.position))
@@ -44,11 +39,11 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 	}
 
 	// Web spinning logic - only if not attacking
-	if (webCooldown == 0 && should_create_web(owner, ctx))
+	if (ctx.gameState->get_time() >= webReadyTime && should_create_web(owner, ctx))
 	{
 		if (try_create_web(owner, ctx))
 		{
-			webCooldown = WEB_COOLDOWN;
+			webReadyTime = expiry_time(ctx.gameState->get_time(), WEB_COOLDOWN);
 
 			// Show message about web spinning
 			ctx.messageSystem->message(owner.actorData.color, owner.actorData.name, MessageCompletion::CONTINUED);
@@ -482,9 +477,9 @@ void AiWebSpinner::load(const json& j)
 	AiSpider::load(j);
 
 	// Load AiWebSpinner specific data
-	if (j.contains("webCooldown"))
+	if (j.contains("webReadyTime"))
 	{
-		webCooldown = j.at("webCooldown").get<int>();
+		webReadyTime = j.at("webReadyTime").get<int>();
 	}
 }
 
@@ -492,5 +487,5 @@ void AiWebSpinner::save(json& j)
 {
 	AiSpider::save(j);
 
-	j["webCooldown"] = webCooldown;
+	j["webReadyTime"] = webReadyTime;
 }

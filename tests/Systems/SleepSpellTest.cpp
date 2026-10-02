@@ -11,11 +11,11 @@
 
 #include <gtest/gtest.h>
 
+#include "src/BuffSystem.h"
 #include "src/Creature.h"
-#include "src/Player.h"
 #include "src/ExperienceReward.h"
 #include "src/Map.h"
-#include "src/BuffSystem.h"
+#include "src/Player.h"
 #include "src/SpellSystem.h"
 #include "tests/mocks/MockGameContext.h"
 
@@ -144,7 +144,7 @@ TEST_F(SleepSpellTest, DurationScalesWithCasterLevel)
 	cast_sleep();
 
 	ASSERT_TRUE(goblin.has_state(ActorState::IS_SLEEPING));
-	EXPECT_EQ(buffs.get_buff_turns(goblin, BuffType::SLEEP), 15) << "3rd level caster: 5 rounds per level";
+	EXPECT_EQ(buffs.get_buff_turns(goblin, BuffType::SLEEP, ctx.gameState->get_time()), 15) << "3rd level caster: 5 rounds per level";
 }
 
 // A higher-level caster puts them under for longer.
@@ -157,5 +157,5 @@ TEST_F(SleepSpellTest, HigherLevelCasterSleepsThemLonger)
 	cast_sleep();
 
 	ASSERT_TRUE(goblin.has_state(ActorState::IS_SLEEPING));
-	EXPECT_EQ(buffs.get_buff_turns(goblin, BuffType::SLEEP), 35);
+	EXPECT_EQ(buffs.get_buff_turns(goblin, BuffType::SLEEP, ctx.gameState->get_time()), 35);
 }

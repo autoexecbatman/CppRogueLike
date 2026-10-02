@@ -14,18 +14,18 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Creature.h"
-#include "src/EquipmentSlot.h"
-#include "src/Item.h"
-#include "src/Player.h"
-#include "src/DamageInfo.h"
-#include "src/DamageResolver.h"
-#include "src/ExperienceReward.h"
-#include "src/GameContext.h"
-#include "src/Paths.h"
-#include "src/ItemCreator.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
+#include "src/Creature.h"
+#include "src/DamageInfo.h"
+#include "src/DamageResolver.h"
+#include "src/EquipmentSlot.h"
+#include "src/ExperienceReward.h"
+#include "src/GameContext.h"
+#include "src/Item.h"
+#include "src/ItemCreator.h"
+#include "src/Paths.h"
+#include "src/Player.h"
 #include "tests/mocks/MockGameContext.h"
 
 class WornResistanceTest : public ::testing::Test
@@ -111,7 +111,7 @@ TEST_F(WornResistanceTest, TheHelmOfBrillianceIsTwoRings)
 TEST_F(WornResistanceTest, ARingAndAPotionAreOneRing)
 {
 	wear("ring_of_fire_resistance", EquipmentSlot::RIGHT_RING);
-	buffs.add_buff(*player, BuffType::FIRE_RESISTANCE, 1, 10, false);
+	buffs.add_buff(*player, BuffType::FIRE_RESISTANCE, 1, 10, false, ctx.gameState->get_time());
 
 	EXPECT_EQ(fire_strength(), 1);
 }
@@ -120,7 +120,7 @@ TEST_F(WornResistanceTest, ARingAndAPotionAreOneRing)
 TEST_F(WornResistanceTest, TheHelmCannotBeAugmented)
 {
 	wear("helm_of_brilliance", EquipmentSlot::HEAD);
-	buffs.add_buff(*player, BuffType::FIRE_RESISTANCE, 1, 10, false);
+	buffs.add_buff(*player, BuffType::FIRE_RESISTANCE, 1, 10, false, ctx.gameState->get_time());
 
 	EXPECT_EQ(fire_strength(), 2);
 }

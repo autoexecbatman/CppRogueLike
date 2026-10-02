@@ -14,7 +14,7 @@ void spend_player_action(GameContext& ctx, int baseCost)
 	// The clock is the player's own place on it: the game advances when the player
 	// acts and at no other time, so keeping a second number for the player would be
 	// two answers to one question. Every other creature is measured against this.
-	ctx.gameState->advance_clock(scaled_cost(baseCost, ctx.player()->get_speed()));
+	ctx.gameState->advance_clock(scaled_cost(baseCost, ctx.player()->get_action_delay()));
 
 	ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 }

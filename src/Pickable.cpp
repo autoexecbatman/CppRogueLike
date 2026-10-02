@@ -271,7 +271,7 @@ bool use(Consumable& consumable, Item& owner, Creature& wearer, GameContext& ctx
 
 	case ConsumableEffect::ADD_BUFF:
 	{
-		ctx.buffSystem->add_buff(wearer, consumable.buffType, consumable.amount, consumable.duration, consumable.isSetEffect);
+		ctx.buffSystem->add_buff(wearer, consumable.buffType, consumable.amount, consumable.duration, consumable.isSetEffect, ctx.gameState->get_time());
 		ctx.messageSystem->message(
 			ColorPairId::CYAN_BLACK,
 			std::format("You feel the effect of the {} for {} turns.", owner.get_name(), consumable.duration),
@@ -356,7 +356,7 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 			// A scroll's effect is a spell: the target saves against it or takes it.
 			if (!SavingThrows::is_made(*creature, SavingThrow::SPELL, 0, ctx))
 			{
-				ctx.buffSystem->add_buff(*creature, targetScroll.buffType, 0, targetScroll.buffDuration, false);
+				ctx.buffSystem->add_buff(*creature, targetScroll.buffType, 0, targetScroll.buffDuration, false, ctx.gameState->get_time());
 				++affected;
 			}
 		}
@@ -469,7 +469,7 @@ ScrollReading read_confusion_at(const Creature& reader, Vector2D tile, int turns
 
 	if (target)
 	{
-		target->apply_confusion(turns);
+		target->apply_confusion(turns, ctx.gameState->get_time());
 		ctx.messageSystem->message(
 			ColorPairId::WHITE_BLACK,
 			std::format("The eyes of the {} look vacant, as he starts to stumble around!", target->actorData.name),

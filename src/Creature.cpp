@@ -37,6 +37,7 @@
 #include "Player.h"
 #include "ShopKeeper.h"
 #include "TileConfig.h"
+#include "TurnSchedule.h"
 #include "WeaponDamageRegistry.h"
 #include "Web.h"
 
@@ -212,7 +213,7 @@ void Creature::load(const json& j)
 	creatureClass = parse_creature_class(j.at("creatureClass").get<std::string>());
 	hitDie = j.at("hitDie").get<int>();
 	attacksPerRound = j.at("attacksPerRound").get<float>();
-	speed = j.at("speed").get<int>();
+	actionDelay = j.at("actionDelay").get<int>();
 	nextActionTime = j.at("nextActionTime").get<int>();
 	damageResistance = j.at("dr").get<int>();
 	thaco = j.at("thaco").get<int>();
@@ -286,7 +287,7 @@ void Creature::load(const json& j)
 			Buff buff{};
 			buff.type = parse_buff_type(buffJson.at("type").get<std::string>());
 			buff.value = buffJson.at("value").get<int>();
-			buff.turnsRemaining = buffJson.at("turnsRemaining").get<int>();
+			buff.expiryTime = buffJson.at("expiryTime").get<int>();
 			buff.isSetEffect = buffJson.at("isSetEffect").get<bool>();
 			for (const auto& saveJson : buffJson.at("opponentSaves"))
 			{
@@ -322,7 +323,7 @@ void Creature::save(json& j)
 	j["creatureClass"] = encode_creature_class(creatureClass);
 	j["hitDie"] = hitDie;
 	j["attacksPerRound"] = attacksPerRound;
-	j["speed"] = speed;
+	j["actionDelay"] = actionDelay;
 	j["nextActionTime"] = nextActionTime;
 	j["dr"] = damageResistance;
 	j["thaco"] = thaco;
@@ -404,7 +405,7 @@ void Creature::save(json& j)
 		json buffJson;
 		buffJson["type"] = encode_buff_type(buff.type);
 		buffJson["value"] = buff.value;
-		buffJson["turnsRemaining"] = buff.turnsRemaining;
+		buffJson["expiryTime"] = buff.expiryTime;
 		buffJson["isSetEffect"] = buff.isSetEffect;
 		json savesJson = json::array();
 		for (const OpponentSave& save : buff.opponentSaves)
@@ -424,8 +425,14 @@ void Creature::update_creature_state(GameContext& ctx)
 		invisibleTile = ctx.tileConfig->get("TILE_INVISIBLE");
 	}
 
-	ctx.buffSystem->restore_loaded_buff_states(*this);
-	ctx.buffSystem->update_creature_buffs(*this);
+	assert(ctx.buffSystem && "update_creature_state: a creature was updated with no buff system");
+	assert(ctx.gameState && "update_creature_state: a creature was updated with no clock to read its buffs against");
+
+	// Both read the clock rather than counting, so running them once per action costs
+	// nothing: a creature acting twice in a round reaches the same answer twice.
+	const int currentTime = ctx.gameState->get_time();
+	ctx.buffSystem->restore_loaded_buff_states(*this, currentTime);
+	ctx.buffSystem->update_creature_buffs(*this, currentTime);
 
 	update_armor_class(ctx);
 	update_constitution_bonus(ctx);
@@ -650,7 +657,7 @@ void Creature::tick_poison(GameContext& ctx)
 	// A poison that debilitates leaves its condition behind; one that wounds does not.
 	if (effect != BuffType::NONE)
 	{
-		ctx.buffSystem->add_buff(*this, effect, effectValue, effectRounds, false);
+		ctx.buffSystem->add_buff(*this, effect, effectValue, effectRounds, false, ctx.gameState->get_time());
 
 		// The onset is a round after the bite, so it is announced when it arrives.
 		ctx.messageSystem->message(actorData.color, actorData.name, MessageCompletion::CONTINUED);
@@ -1083,9 +1090,9 @@ void Creature::release_from_web()
 	webStrength = 0;
 }
 
-void Creature::apply_confusion(int nbTurns)
+void Creature::apply_confusion(int durationRounds, int currentTime)
 {
-	ai = std::make_unique<AiMonsterConfused>(nbTurns, std::move(ai));
+	ai = std::make_unique<AiMonsterConfused>(expiry_time(currentTime, durationRounds), std::move(ai));
 }
 
 void Creature::drop(Item& item, GameContext& ctx)

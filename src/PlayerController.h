@@ -5,6 +5,7 @@
 
 #include "GameContext.h"
 #include "Persistent.h"
+#include "TurnSchedule.h"
 
 class Player;
 class Item;
@@ -37,7 +38,9 @@ private:
 
 	bool shouldComputeFOV{ false };
 	bool isWaiting{ false };
-	int confusionTurns{ 0 };
+	// The clock reading the confusion ends at. A count of rounds would fall once per
+	// action, so a hasted player would shake the spell off in half the rounds it named.
+	int confusionEndTime{ 0 };
 	PendingDoorAction pendingDoorAction{ PendingDoorAction::NONE };
 	MouseMode mouseMode{ MouseMode::IDLE };
 	PendingDoorAction mouseDoorAction{ PendingDoorAction::NONE };
@@ -114,6 +117,6 @@ public:
 	void save(json& savedState) override;
 	void display_inventory(GameContext& ctx);
 
-	void apply_confusion(int duration) { confusionTurns = duration; }
-	bool is_confused() const { return confusionTurns > 0; }
+	void apply_confusion(int durationRounds, int currentTime) { confusionEndTime = expiry_time(currentTime, durationRounds); }
+	[[nodiscard]] bool is_confused(int currentTime) const { return currentTime < confusionEndTime; }
 };

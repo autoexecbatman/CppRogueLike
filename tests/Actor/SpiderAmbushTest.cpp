@@ -26,12 +26,12 @@
 #include <string>
 #include <string_view>
 
-#include "src/Colors.h"
 #include "src/Actor.h"
 #include "src/AiSpider.h"
 #include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/DamageInfo.h"
 #include "src/ExperienceReward.h"
@@ -241,7 +241,7 @@ TEST_F(SpiderAmbushTest, AnAmbushRollsAgainstArmourClass)
 TEST_F(SpiderAmbushTest, SanctuaryHoldsOffASpiderThatFailsToSave)
 {
 	ASSERT_GT(SavingThrows::target(spider.get_creature_class(), spider.get_creature_level(), SavingThrow::SPELL), 12);
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false);
+	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
 	script({ 12, 20, 4, 100, 10 });
 
 	EXPECT_EQ(hp_lost_to_the_ambush(), 0) << "sanctuary held and the spider struck anyway";
@@ -252,7 +252,7 @@ TEST_F(SpiderAmbushTest, SanctuaryHoldsOffASpiderThatFailsToSave)
 // it failed, so the 1 behind it is what a surprise roll would read, and a 1 surprises.
 TEST_F(SpiderAmbushTest, ASpiderTurnedAwayTakesNoSurpriseRound)
 {
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false);
+	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
 	script({ 12, 1, 20, 4, 100 });
 
 	spider.ai->update(spider, ctx);

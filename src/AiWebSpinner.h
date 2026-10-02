@@ -23,7 +23,9 @@ public:
 	void save(json& j) override;
 
 private:
-	int webCooldown{ 0 }; // Cooldown timer for creating webs
+	// The clock reading the next web is allowed at. Zero lets a fresh spinner spin at
+	// once, which is what a cooldown starting at zero already meant.
+	int webReadyTime{ 0 };
 
 	// Try to create a web at the current position
 	bool try_create_web(Creature& owner, GameContext& ctx);

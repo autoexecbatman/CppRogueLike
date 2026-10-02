@@ -6,8 +6,8 @@
 // sites across eight files each set the game status to NEW_TURN by hand, which said
 // "a turn was used" and could say nothing about how much of one.
 //
-// An action advances the player's place on the shared clock by what it cost, scaled
-// by the player's own speed, and then opens the turn so the creatures and the round
+// An action advances the player's place on the shared clock by what it cost, priced
+// against the player's own action delay, and then opens the turn so the creatures and the round
 // upkeep follow. Routing every site through here is what makes an action's cost a
 // thing the game can vary: a quick step and a full swing are the same event to a
 // status enum and different numbers on a clock.
@@ -28,8 +28,8 @@
 struct GameContext;
 
 // Records that the player spent an action of this base cost, in time units, and opens
-// the turn. TIME_UNITS_PER_ROUND is one ordinary action; the player's speed scales
-// what is actually charged.
+// the turn. TIME_UNITS_PER_ROUND is one ordinary action; the player's own action delay
+// prices what is actually charged.
 //
 // Refuses nothing and returns nothing: by the time a caller reaches here the action
 // has happened, and this is the bookkeeping. It asserts a player and a game state,

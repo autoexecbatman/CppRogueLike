@@ -57,7 +57,7 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tctx.buffSystem->add_buff(*this, effect, effectValue, effectRounds, false);\n",
+      "original": "\t\tctx.buffSystem->add_buff(*this, effect, effectValue, effectRounds, false, ctx.gameState->get_time());\n",
       "mutated": "",
       "catches": "a dose that carries a condition landing as nothing at all"
     },

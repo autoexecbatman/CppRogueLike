@@ -158,7 +158,7 @@ public:
 	void on_kill_reward(int xp, GameContext& ctx);
 
 	void update(GameContext& ctx) override;
-	void apply_confusion(int duration) override;
+	void apply_confusion(int durationRounds, int currentTime) override;
 
 	[[nodiscard]] int get_next_level_xp() const;
 	void levelup_update(GameContext& ctx);

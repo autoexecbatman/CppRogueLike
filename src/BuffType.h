@@ -206,7 +206,12 @@ struct Buff
 {
 	BuffType type{ BuffType::INVISIBILITY };
 	int value{ 0 }; // Bonus amount (0 for binary buffs like invisibility)
-	int turnsRemaining{ 0 };
+
+	// The clock reading this casting runs out at, in time units, rather than a count of
+	// rounds left. A creature acts once per action and a count would fall by one each
+	// time, so a hasted creature would run its own Haste out in half the rounds it
+	// bought. Set through expiry_time in TurnSchedule.h; nothing decrements it.
+	int expiryTime{ 0 };
 	bool isSetEffect{ false }; // AD&D 2e: true = SET stat to value (potions), false = ADD value (spells/items)
 	// Note: Modifier stack pattern - no originalStat needed, effective values calculated on the fly
 

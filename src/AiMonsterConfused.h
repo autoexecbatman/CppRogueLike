@@ -12,7 +12,10 @@ struct Vector2D;
 class AiMonsterConfused : public Ai
 {
 public:
-	AiMonsterConfused(int nbTurns, std::unique_ptr<Ai> oldAi) noexcept;
+	// Takes the clock reading the confusion ends at rather than a count of rounds: the
+	// creature's own update runs once per action, so a count would fall twice as fast
+	// for a creature twice as quick. Creature::apply_confusion works the reading out.
+	AiMonsterConfused(int confusionEndTime, std::unique_ptr<Ai> oldAi) noexcept;
 	~AiMonsterConfused() override = default;
 
 	AiMonsterConfused(const AiMonsterConfused&) = delete;
@@ -27,7 +30,7 @@ public:
 	void save(json& j) override;
 
 private:
-	int nbTurns;
+	int confusionEndTime{ 0 };
 	std::unique_ptr<Ai> oldAi;
 
 	[[nodiscard]] Vector2D get_random_direction(GameContext& ctx) const;

@@ -748,7 +748,7 @@ Player::HideAttempt Player::attempt_hide(GameContext& ctx)
 	if (ctx.dice->d100() <= skill.value())
 	{
 		const int hideDuration = 10 + get_creature_level() * 2;
-		ctx.buffSystem->add_buff(*this, BuffType::INVISIBILITY, 0, hideDuration, false);
+		ctx.buffSystem->add_buff(*this, BuffType::INVISIBILITY, 0, hideDuration, false, ctx.gameState->get_time());
 	}
 	ctx.messageSystem->message(ColorPairId::CYAN_BLACK, "You melt into the shadows...", MessageCompletion::FINISHED);
 	return HideAttempt::ATTEMPTED;
@@ -908,10 +908,10 @@ void Player::update(GameContext& ctx)
 	controller->update(ctx);
 }
 
-void Player::apply_confusion(int duration)
+void Player::apply_confusion(int durationRounds, int currentTime)
 {
 	assert(controller && "Player::apply_confusion called with null controller");
-	controller->apply_confusion(duration);
+	controller->apply_confusion(durationRounds, currentTime);
 }
 
 int Player::get_next_level_xp() const

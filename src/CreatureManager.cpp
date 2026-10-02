@@ -38,7 +38,7 @@ void CreatureManager::update_creatures(std::span<std::unique_ptr<Creature>> crea
 	{
 		assert(creature && "update_creatures: the creature list holds a null entry");
 
-		const int cost = creature->ordinary_action_cost();
+		const int cost = creature->get_action_delay();
 		const int due = creature->scheduled_actions_before(clockLimit);
 
 		for (int action = 0; action < due; ++action)

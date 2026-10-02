@@ -11,15 +11,29 @@ class Creature;
 class BuffSystem
 {
 public:
-	// Buff lifecycle management
-	void add_buff(Creature& creature, BuffType type, int value, int duration, bool is_set_effect) noexcept;
+	// Grants a buff for a duration the book prints in rounds, read from `currentTime` on
+	// GameState's clock. A second casting of the same type keeps the better value and
+	// the later ending, and gives every opponent a fresh save against it.
+	//
+	// Example, blessing a cleric for three rounds at the start of the game:
+	//   add_buff(cleric, BuffType::BLESS, 0, 3, false, 0);
+	//   get_buff_turns(cleric, BuffType::BLESS, 0);     // -> 3
+	//   get_buff_turns(cleric, BuffType::BLESS, 240);   // -> 1, two rounds in
+	void add_buff(Creature& creature, BuffType type, int value, int durationRounds, bool isSetEffect, int currentTime) noexcept;
 	void remove_buff(Creature& creature, BuffType type) noexcept;
-	void update_creature_buffs(Creature& creature) noexcept;
-	void restore_loaded_buff_states(Creature& creature) noexcept;
+
+	// Retires whatever the clock has passed, clearing the states those buffs imposed.
+	// Called at the top of every creature's update, which is once per action: it reads
+	// the clock rather than counting, so being called twice in a round costs nothing.
+	void update_creature_buffs(Creature& creature, int currentTime) noexcept;
+	void restore_loaded_buff_states(Creature& creature, int currentTime) noexcept;
 
 	// Query methods
 	int get_buff_value(const Creature& creature, BuffType type) const noexcept;
-	int get_buff_turns(const Creature& creature, BuffType type) const noexcept;
+
+	// Whole rounds the buff has left at `currentTime`, rounded up so that a buff still
+	// in force never reports zero. A creature without the buff reads zero as well.
+	int get_buff_turns(const Creature& creature, BuffType type, int currentTime) const noexcept;
 	bool has_buff(const Creature& creature, BuffType type) const noexcept;
 
 	// Combat calculations - data-driven, OCP compliant

@@ -1,7 +1,7 @@
 // file: CreatureScheduleTest.cpp
 // Where a creature stands in the turn order, and what arriving on a level does to it.
 //
-// The owner's requirement for the speed system was that it work in both directions:
+// The owner's requirement for the pace system was that it work in both directions:
 // "a player moves, the snail skips, and the quickling moves and attacks multiple
 // times." Both come out of one expression here, and nothing in the code branches on
 // whether a creature is fast or slow.
@@ -20,36 +20,15 @@
 #include <memory>
 #include <vector>
 
-#include "src/ArmorClass.h"
 #include "src/Ai.h"
+#include "src/ArmorClass.h"
 #include "src/Creature.h"
 #include "src/CreatureManager.h"
 #include "src/ExperienceReward.h"
 #include "src/HealthPool.h"
 #include "src/TurnSchedule.h"
+#include "tests/mocks/CountingAi.h"
 #include "tests/mocks/MockGameContext.h"
-
-// A mind that does nothing but count how many times it was asked to act. The
-// schedule's whole claim is about how often a creature is driven, so what it does
-// when driven is not the subject - and a real Ai would need a map, a Dijkstra field
-// and a player to walk towards.
-class CountingAi : public Ai
-{
-public:
-	int updates{ 0 };
-
-	void update(Creature& owner, GameContext& ctx) override
-	{
-		(void)owner;
-		(void)ctx;
-		++updates;
-	}
-
-	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::MONSTER; }
-
-	void load(const json& j) override { (void)j; }
-	void save(json& j) override { (void)j; }
-};
 
 class CreatureScheduleTest : public ::testing::Test
 {
@@ -61,7 +40,7 @@ protected:
 		ctx.creatureManager = &manager;
 	}
 
-	std::unique_ptr<Creature> built(int speed)
+	std::unique_ptr<Creature> built(int actionDelay)
 	{
 		auto creature = std::make_unique<Creature>(
 			Vector2D{ 5, 5 },
@@ -69,7 +48,7 @@ protected:
 		creature->experienceReward = std::make_unique<ExperienceReward>(0);
 		creature->armorClass = std::make_unique<ArmorClass>(10);
 		creature->healthPool = std::make_unique<HealthPool>(10);
-		creature->set_speed(speed);
+		creature->set_action_delay(actionDelay);
 		return creature;
 	}
 
@@ -79,33 +58,34 @@ protected:
 	std::vector<std::unique_ptr<Creature>> creatures{};
 };
 
-// An ordinary creature's action takes a whole round, and a faster one's takes less
-// of the clock for the same action.
-TEST_F(CreatureScheduleTest, AnActionCostsLessOfTheClockAtHigherSpeed)
+// A creature's ordinary action costs exactly its action delay, with nothing converted
+// on the way. That is the whole of what collapsing the percentage bought: the stored
+// number is the cost, so there is no second answer to the same question.
+TEST_F(CreatureScheduleTest, AnOrdinaryActionCostsTheCreaturesOwnDelay)
 {
-	EXPECT_EQ(built(NORMAL_SPEED)->ordinary_action_cost(), TIME_UNITS_PER_ROUND);
-	EXPECT_EQ(built(NORMAL_SPEED * 2)->ordinary_action_cost(), TIME_UNITS_PER_ROUND / 2);
-	EXPECT_EQ(built(NORMAL_SPEED / 2)->ordinary_action_cost(), TIME_UNITS_PER_ROUND * 2);
+	EXPECT_EQ(built(TIME_UNITS_PER_ROUND)->get_action_delay(), TIME_UNITS_PER_ROUND);
+	EXPECT_EQ(built(TIME_UNITS_PER_ROUND / 2)->get_action_delay(), TIME_UNITS_PER_ROUND / 2);
+	EXPECT_EQ(built(TIME_UNITS_PER_ROUND * 2)->get_action_delay(), TIME_UNITS_PER_ROUND * 2);
 }
 
 // One action per round, which is every creature in the game until something sets a
-// speed, and is why the suite stayed green when the schedule was wired in.
+// delay of its own, and is why the suite stayed green when the schedule was wired in.
 TEST_F(CreatureScheduleTest, AnOrdinaryCreatureIsDueOneActionPerRound)
 {
-	const auto ordinary = built(NORMAL_SPEED);
+	const auto ordinary = built(TIME_UNITS_PER_ROUND);
 
 	EXPECT_EQ(ordinary->scheduled_actions_before(TIME_UNITS_PER_ROUND), 1);
 	EXPECT_EQ(ordinary->scheduled_actions_before(TIME_UNITS_PER_ROUND * 3), 3);
 }
 
-// The quickling, by name. Twice the speed is two actions in the window the player's
-// one action opens, and it spends them however its Ai decides.
+// The quickling, by name. Half the delay is two actions in the window the player's one
+// action opens, and it spends them however its Ai decides.
 TEST_F(CreatureScheduleTest, AQuicklingIsDueSeveralActionsInOneRound)
 {
-	const auto quickling = built(NORMAL_SPEED * 2);
+	const auto quickling = built(TIME_UNITS_PER_ROUND / 2);
 	EXPECT_EQ(quickling->scheduled_actions_before(TIME_UNITS_PER_ROUND), 2);
 
-	const auto blur = built(NORMAL_SPEED * 4);
+	const auto blur = built(TIME_UNITS_PER_ROUND / 4);
 	EXPECT_EQ(blur->scheduled_actions_before(TIME_UNITS_PER_ROUND), 4);
 }
 
@@ -113,12 +93,12 @@ TEST_F(CreatureScheduleTest, AQuicklingIsDueSeveralActionsInOneRound)
 // a skipped turn with nothing in the code saying "skip".
 TEST_F(CreatureScheduleTest, ASnailSkipsTheWindowItHasOvershot)
 {
-	auto snail = built(NORMAL_SPEED / 2);
+	auto snail = built(TIME_UNITS_PER_ROUND * 2);
 
 	EXPECT_EQ(snail->scheduled_actions_before(TIME_UNITS_PER_ROUND), 1);
 
 	// It acted, which puts it two rounds out.
-	snail->set_next_action_time(snail->ordinary_action_cost());
+	snail->set_next_action_time(snail->get_action_delay());
 
 	EXPECT_EQ(snail->scheduled_actions_before(TIME_UNITS_PER_ROUND * 2), 0) << "the snail acted twice";
 	EXPECT_EQ(snail->scheduled_actions_before(TIME_UNITS_PER_ROUND * 3), 1);
@@ -130,7 +110,7 @@ TEST_F(CreatureScheduleTest, AnArrivalStandsWhereTheClockStands)
 {
 	ctx.gameState->set_time(TIME_UNITS_PER_ROUND * 7);
 
-	manager.add_creature(built(NORMAL_SPEED), ctx);
+	manager.add_creature(built(TIME_UNITS_PER_ROUND), ctx);
 
 	ASSERT_EQ(creatures.size(), 1u);
 	EXPECT_EQ(creatures.front()->get_next_action_time(), TIME_UNITS_PER_ROUND * 7);
@@ -145,11 +125,11 @@ TEST_F(CreatureScheduleTest, AnArrivalIsNotOwedEveryActionSinceTheGameBegan)
 {
 	ctx.gameState->set_time(TIME_UNITS_PER_ROUND * 400);
 
-	manager.add_creature(built(NORMAL_SPEED), ctx);
+	manager.add_creature(built(TIME_UNITS_PER_ROUND), ctx);
 	const int placed = creatures.front()->scheduled_actions_before(ctx.gameState->get_time());
 
 	// What it would have been without the placement, for the contrast to be visible.
-	auto unplaced = built(NORMAL_SPEED);
+	auto unplaced = built(TIME_UNITS_PER_ROUND);
 	const int backlog = unplaced->scheduled_actions_before(ctx.gameState->get_time());
 
 	EXPECT_EQ(placed, 0);
@@ -161,9 +141,9 @@ TEST_F(CreatureScheduleTest, AnArrivalIsNotOwedEveryActionSinceTheGameBegan)
 // acts once, the quickling twice, the snail once and then not at all.
 TEST_F(CreatureScheduleTest, OneRoundDrivesEachCreatureAsOftenAsItsSpeedAllows)
 {
-	auto ordinary = built(NORMAL_SPEED);
-	auto quickling = built(NORMAL_SPEED * 2);
-	auto snail = built(NORMAL_SPEED / 2);
+	auto ordinary = built(TIME_UNITS_PER_ROUND);
+	auto quickling = built(TIME_UNITS_PER_ROUND / 2);
+	auto snail = built(TIME_UNITS_PER_ROUND * 2);
 
 	auto* ordinaryMind = new CountingAi{};
 	auto* quicklingMind = new CountingAi{};
@@ -197,7 +177,7 @@ TEST_F(CreatureScheduleTest, OneRoundDrivesEachCreatureAsOftenAsItsSpeedAllows)
 // window cannot show: a creature that drifts by one action a round looks right once.
 TEST_F(CreatureScheduleTest, TheCountsDoNotDriftOverTenRounds)
 {
-	auto quickling = built(NORMAL_SPEED * 2);
+	auto quickling = built(TIME_UNITS_PER_ROUND / 2);
 	auto* mind = new CountingAi{};
 	quickling->ai.reset(mind);
 	creatures.push_back(std::move(quickling));
