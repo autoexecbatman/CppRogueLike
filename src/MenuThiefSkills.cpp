@@ -30,15 +30,9 @@ constexpr int STATUS_ROW = 9;
 constexpr int FIRST_HINT_ROW = 10;
 } // namespace
 
-void push_thief_skill_allocation(Player& character, int level, GameContext& ctx)
+ThiefSkillAllocation thief_skill_allocation_for(const Player& character, int level)
 {
-	// Only the one class the book gives thief skills to has anything to spend.
-	if (character.get_creature_class() != CreatureClass::ROGUE)
-	{
-		return;
-	}
-
-	ThiefSkillAllocation allocation{
+	return ThiefSkillAllocation{
 		character.thiefSkillPoints,
 		thief_skill_grant_at_level(level),
 		thief_skill_racial_adjustments(character.playerRaceState),
@@ -47,6 +41,18 @@ void push_thief_skill_allocation(Player& character, int level, GameContext& ctx)
 		// so the points are judged unarmoured rather than being stranded.
 		character.thief_armor().value_or(ThiefArmor::NONE)
 	};
+}
+
+void push_thief_skill_allocation(Player& character, int level, GameContext& ctx)
+{
+	// Only the one class the book gives thief skills to has anything to spend.
+	if (character.get_creature_class() != CreatureClass::ROGUE)
+	{
+		return;
+	}
+
+	// Read now, so the screen shows what the character is wearing at this moment.
+	ThiefSkillAllocation allocation = thief_skill_allocation_for(character, level);
 
 	// Reached through the context's own handle rather than captured, so a screen
 	// still open when the player is replaced writes to whoever the player is then.

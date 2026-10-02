@@ -32,6 +32,22 @@
 struct GameContext;
 class Player;
 
+// The numbers this level's screen would be given, read off the character as it
+// stands at the moment of the call: what earlier levels spent, what this level
+// grants, Table 27's column for the race, the Dexterity it is carrying and the
+// armour on its body. Armour Table 29 prints no column for is judged unarmoured,
+// so the points are not stranded.
+//
+// It reads and pushes nothing, which is what lets the numbers be checked without a
+// screen. Reading live state is also what makes the call order matter: run before
+// the character is dressed it answers for a naked one.
+//
+// Example, the dwarf rogue with Dexterity 17 that ThiefSkillAllocationTest builds:
+//   thief_skill_allocation_for(rogue, 1).score(ThiefSkill::MOVE_SILENTLY);  // -> 25
+// The same character once its kit has put leather on it:
+//   thief_skill_allocation_for(rogue, 1).score(ThiefSkill::MOVE_SILENTLY);  // -> 15
+[[nodiscard]] ThiefSkillAllocation thief_skill_allocation_for(const Player& character, int level);
+
 // Opens the screen a thief spends this level's discretionary points on, reading
 // the race, the Dexterity and the armour off the character rather than predicting
 // them - Table 29's numbers depend on what is on its body, so this runs after the

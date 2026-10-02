@@ -1,0 +1,47 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=ThiefSkillAllocationTest.*:ThiefSkillCharacterTest.*:ThiefSkillsTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/MenuThiefSkills.cpp",
+      "original": "\t\tcharacter.thief_armor().value_or(ThiefArmor::NONE)",
+      "mutated": "\t\tThiefArmor::NONE",
+      "catches": "the screen handed a naked character's numbers however the character is dressed, which is the ordering defect this reader exists to make visible"
+    },
+    {
+      "file": "src/MenuThiefSkills.cpp",
+      "original": "\t\tcharacter.thief_armor().value_or(ThiefArmor::NONE)",
+      "mutated": "\t\tcharacter.thief_armor().value_or(ThiefArmor::CHAIN_OR_RING_MAIL)",
+      "catches": "armour off Table 29's end stranding the points under the heaviest column instead of being judged unarmoured"
+    },
+    {
+      "file": "src/MenuThiefSkills.cpp",
+      "original": "\t\tcharacter.get_dexterity(),",
+      "mutated": "\t\t10,",
+      "catches": "Table 28's row taken from a fixed Dexterity rather than the one the character is carrying"
+    },
+    {
+      "file": "src/MenuThiefSkills.cpp",
+      "original": "\t\tthief_skill_racial_adjustments(character.playerRaceState),",
+      "mutated": "\t\tthief_skill_racial_adjustments(Player::PlayerRaceState::HUMAN),",
+      "catches": "Table 27's column read for the wrong race, so a dwarf loses its lock and trap bonuses"
+    },
+    {
+      "file": "src/MenuThiefSkills.cpp",
+      "original": "\t\tthief_skill_grant_at_level(level),",
+      "mutated": "\t\tthief_skill_grant_at_level(1),",
+      "catches": "every level handing out a first level's sixty points"
+    },
+    {
+      "file": "src/MenuThiefSkills.cpp",
+      "original": "\tif (character.get_creature_class() != CreatureClass::ROGUE)\n\t{\n\t\treturn;\n\t}\n",
+      "mutated": "",
+      "catches": "the screen opening for a class the book gives no thief skills to"
+    }
+  ]
+}

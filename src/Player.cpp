@@ -70,7 +70,7 @@
 #include "WeaponDamageRegistry.h"
 #include "Web.h"
 
-// XP table helpers — pure functions, no state
+// XP table helpers - pure functions, no state
 namespace
 {
 template <std::size_t N>
@@ -275,7 +275,9 @@ void Player::die(GameContext& ctx)
 void Player::on_new_game_start(GameContext& ctx)
 {
 	racial_ability_adjustments(ctx);
-	// After the racial adjustments, which can take a halfling's 18 away or give it.
+	// The roll reads the Strength the character ends up with, so it comes after the
+	// race is paid. The halfling is the only race that moves Strength, and the roll
+	// turns that race down by name, so both guards cover the one case.
 	roll_exceptional_strength(ctx);
 	equip_class_starting_gear(ctx);
 	// After the gear, because Table 29 reads the armour the thief is standing in
