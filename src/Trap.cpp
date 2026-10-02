@@ -221,11 +221,9 @@ EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 		}
 	}
 
-	// Trap blocks movement on first trigger (only if creature still alive)
-	if (creature.get_hp() > 0)
-	{
-		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
-	}
+	// The step is refused, and the step is also what paid for the turn: both paths
+	// that reach a feature charge the player themselves, so charging again here
+	// would take two rounds off the clock for one pace.
 	return EntryResult::BLOCKED;
 }
 

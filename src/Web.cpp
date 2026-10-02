@@ -49,8 +49,8 @@ EntryResult Web::on_creature_enter(Creature& creature, GameContext& ctx)
 
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You're caught in a sticky web!", MessageCompletion::FINISHED);
 
-		// Player loses their turn
-		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+		// The step is refused and the step already paid for the turn; charging here
+		// as well would cost two rounds for one pace.
 		return EntryResult::BLOCKED;
 	}
 	else

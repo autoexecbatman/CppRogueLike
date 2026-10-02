@@ -6,6 +6,7 @@
 #include <utility>
 #include <vector>
 
+#include "CreatureManager.h"
 #include "GameContext.h"
 #include "LevelManager.h"
 #include "MessageSystem.h"
@@ -53,7 +54,7 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 				.levelScaling = params.levelScaling,
 				.createFunc = [id](Vector2D pos, GameContext& ctx)
 				{
-					ctx.creatures->push_back(MonsterCreator::create(pos, id, ctx));
+					ctx.creatureManager->add_creature(MonsterCreator::create(pos, id, ctx), ctx);
 				},
 			});
 	}
@@ -75,8 +76,9 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 				.levelScaling = params.levelScaling,
 				.createFunc = [key](Vector2D pos, GameContext& ctx)
 				{
-					ctx.creatures->push_back(
-						MonsterCreator::create_from_params(pos, ctx.monsterRegistry->get_params(key), ctx));
+					ctx.creatureManager->add_creature(
+						MonsterCreator::create_from_params(pos, ctx.monsterRegistry->get_params(key), ctx),
+						ctx);
 				},
 			});
 	}
@@ -91,7 +93,7 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 			.levelScaling = -0.3f,
 			.createFunc = [](Vector2D pos, GameContext& ctx)
 			{
-				ctx.creatures->push_back(std::make_unique<SmallSpider>(pos, ctx));
+				ctx.creatureManager->add_creature(std::make_unique<SmallSpider>(pos, ctx), ctx);
 			},
 		});
 
@@ -104,7 +106,7 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 			.levelScaling = 0.0f,
 			.createFunc = [](Vector2D pos, GameContext& ctx)
 			{
-				ctx.creatures->push_back(std::make_unique<GiantSpider>(pos, ctx));
+				ctx.creatureManager->add_creature(std::make_unique<GiantSpider>(pos, ctx), ctx);
 			},
 		});
 
@@ -117,7 +119,7 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 			.levelScaling = 0.2f,
 			.createFunc = [](Vector2D pos, GameContext& ctx)
 			{
-				ctx.creatures->push_back(std::make_unique<WebSpinner>(pos, ctx));
+				ctx.creatureManager->add_creature(std::make_unique<WebSpinner>(pos, ctx), ctx);
 			},
 		});
 
@@ -131,7 +133,7 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 			.levelScaling = 0.5f,
 			.createFunc = [](Vector2D pos, GameContext& ctx)
 			{
-				ctx.creatures->push_back(std::make_unique<Mimic>(pos, ctx));
+				ctx.creatureManager->add_creature(std::make_unique<Mimic>(pos, ctx), ctx);
 			},
 		});
 
@@ -148,12 +150,12 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 				const int dungeonLevel = ctx.levelManager->get_dungeon_level();
 				if (ShopkeeperFactory::should_spawn_shopkeeper(dungeonLevel, ctx))
 				{
-					ctx.creatures->push_back(ShopkeeperFactory::create_shopkeeper(pos, dungeonLevel, ctx));
+					ctx.creatureManager->add_creature(ShopkeeperFactory::create_shopkeeper(pos, dungeonLevel, ctx), ctx);
 					ctx.messageSystem->log("Shopkeeper spawned at level " + std::to_string(dungeonLevel));
 				}
 				else
 				{
-					ctx.creatures->push_back(MonsterCreator::create(pos, MonsterId::GOBLIN, ctx));
+					ctx.creatureManager->add_creature(MonsterCreator::create(pos, MonsterId::GOBLIN, ctx), ctx);
 					ctx.messageSystem->log("Shopkeeper spawn failed, spawned Goblin instead");
 				}
 			},

@@ -31,6 +31,9 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/DamageInfoTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/WeaponDamageRegistryTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/AttackKindTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Combat/AttackRateTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Combat/TurnScheduleTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Combat/PlayerActionCostTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/AttackStrengthTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/AttackerTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/WornResistanceTest.cpp
@@ -92,6 +95,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CodecRoundTripTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EnumCycleTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/MutationPlanTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CreatureScheduleTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/RoundUpkeepTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ItemWeightTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellCodecRoundTripTest.cpp
@@ -180,6 +184,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/AiMonster.cpp
     ${PARENT_SOURCE_DIR}/AiMonsterConfused.cpp
     ${PARENT_SOURCE_DIR}/PlayerController.cpp
+    ${PARENT_SOURCE_DIR}/PlayerTurn.cpp
     ${PARENT_SOURCE_DIR}/AiShopkeeper.cpp
     ${PARENT_SOURCE_DIR}/AiMimic.cpp
     ${PARENT_SOURCE_DIR}/AiMonsterRanged.cpp

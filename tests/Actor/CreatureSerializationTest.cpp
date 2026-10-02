@@ -359,3 +359,31 @@ TEST_F(CreatureSerializationTest, DisplayColourSurvivesTheTrip)
 
     EXPECT_EQ(loaded->actorData.color, ColorPairId::BROWN_BLACK);
 }
+
+// A creature's place in the turn order survives a save. Both halves have to: the
+// speed decides what its actions cost, and the next action time is where it stands
+// on the clock, so a save that kept only one would reorder the level on load.
+TEST_F(CreatureSerializationTest, SpeedAndNextActionTimeArePreserved) {
+    auto original = create_test_creature();
+    original->set_speed(150);
+    original->set_next_action_time(437);
+
+    json j;
+    original->save(j);
+
+    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+    loaded->load(j);
+
+    EXPECT_EQ(loaded->get_speed(), 150);
+    EXPECT_EQ(loaded->get_next_action_time(), 437);
+}
+
+// A creature nobody has given a speed to acts at the normal rate, and stands at the
+// start of the clock. Those defaults are what makes every creature in the game today
+// behave exactly as it did before a speed existed.
+TEST_F(CreatureSerializationTest, ACreatureWithNoSpeedSetActsAtTheNormalRate) {
+    auto fresh = create_test_creature();
+
+    EXPECT_EQ(fresh->get_speed(), NORMAL_SPEED);
+    EXPECT_EQ(fresh->get_next_action_time(), 0);
+}

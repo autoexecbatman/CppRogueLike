@@ -32,6 +32,7 @@
 #include "src/ExperienceReward.h"
 #include "src/GameContext.h"
 #include "src/GameLoopCoordinator.h"
+#include "src/TurnSchedule.h"
 #include "src/HealthPool.h"
 #include "src/HungerSystem.h"
 #include "src/Item.h"
@@ -85,10 +86,14 @@ protected:
 		return *creatures.back();
 	}
 
+	// A round of upkeep follows a round of time passing. The clock is what decides
+	// whether a round is owed, so a fixture that called the upkeep without letting
+	// time pass would ask it to feed a round that had not happened.
 	void run_rounds(int count)
 	{
 		for (int round = 0; round < count; ++round)
 		{
+			ctx.gameState->advance_clock(TIME_UNITS_PER_ROUND);
 			coordinator.apply_round_upkeep(ctx);
 		}
 	}
@@ -180,5 +185,12 @@ TEST_F(RoundUpkeepTest, HungerRisesAndTheClockMoves)
 	run_rounds(3);
 
 	EXPECT_GT(hungerSystem.get_hunger_value(), hungerBefore) << "three rounds cost no hunger";
-	EXPECT_EQ(ctx.gameState->get_time(), timeBefore + 3) << "the clock did not move";
+
+	// The clock counts time units, so three rounds is three rounds' worth of them.
+	EXPECT_EQ(ctx.gameState->get_time(), timeBefore + TIME_UNITS_PER_ROUND * 3) << "the clock did not move";
+
+	// And three rounds of upkeep were fed, which is the fact the hunger above rests
+	// on: a round that passed without being fed would leave the clock right and the
+	// body untouched.
+	EXPECT_EQ(ctx.gameState->get_rounds_run(), 3) << "a round passed without being fed";
 }

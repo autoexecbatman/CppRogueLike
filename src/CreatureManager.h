@@ -21,6 +21,18 @@ public:
 	void update_creatures(std::span<std::unique_ptr<Creature>> creatures, GameContext& ctx);
 	void cleanup_dead_creatures(std::vector<std::unique_ptr<Creature>>& creatures);
 
+	// Puts a creature on the level and on the clock, at the moment it arrives. The
+	// one way a creature enters play: pushing onto ctx.creatures directly leaves it
+	// standing at time zero, and the schedule would then owe it every action since
+	// the game began.
+	//
+	// The save loader is the exception and builds its vector itself, because a
+	// loaded creature already carries the place it had.
+	//
+	// Example:
+	//   ctx.creatureManager->add_creature(MonsterCreator::create(pos, id, ctx), ctx);
+	void add_creature(std::unique_ptr<Creature> creature, GameContext& ctx);
+
 	// Spawning
 	void spawn_creatures(GameContext& ctx);
 

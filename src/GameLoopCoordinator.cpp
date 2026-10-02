@@ -21,6 +21,7 @@
 #include "FloatingTextSystem.h"
 #include "GameContext.h"
 #include "GameLoopCoordinator.h"
+#include "TurnSchedule.h"
 #include "GameStateManager.h"
 #include "Gui.h"
 #include "HungerSystem.h"
@@ -432,8 +433,17 @@ void GameLoopCoordinator::apply_round_upkeep(GameContext& ctx)
 	assert(ctx.hungerSystem && "apply_round_upkeep: a round ran with no hunger system");
 	assert(ctx.curseSystem && "apply_round_upkeep: a round ran with no curse system");
 
-	// The round being played; time counts the rounds already finished.
-	const int thisRound = ctx.gameState->get_time() + 1;
+	// Rounds whose upkeep is owed. The clock counts time units, so one action may
+	// finish no round at all or several, and a round is fed once either way - which
+	// is what stops a creature that acts twice in a round feeling it twice.
+	const int roundsFinished = rounds_completed_at(ctx.gameState->get_time());
+	if (ctx.gameState->get_rounds_run() >= roundsFinished)
+	{
+		ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
+		return;
+	}
+
+	const int thisRound = ctx.gameState->get_rounds_run() + 1;
 
 	// One place for what a round does to a body, so the player and the creatures cannot
 	// drift apart - they were two copies of these four calls.
@@ -461,7 +471,7 @@ void GameLoopCoordinator::apply_round_upkeep(GameContext& ctx)
 
 	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
 
-	ctx.gameState->increment_time();
+	ctx.gameState->set_rounds_run(thisRound);
 }
 
 void GameLoopCoordinator::update(GameContext& ctx)
@@ -514,6 +524,10 @@ void GameLoopCoordinator::update(GameContext& ctx)
 		}
 		else
 		{
+			// Opens the first turn of a new game. Set directly rather than through
+			// spend_player_action, which is the only other writer: nobody has spent
+			// anything here, and charging the player for starting would put them a
+			// round behind every creature on the level.
 			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		}
 

@@ -62,6 +62,7 @@
 #include "Pickable.h"
 #include "Player.h"
 #include "PlayerAttacker.h"
+#include "PlayerTurn.h"
 #include "RandomDice.h"
 #include "Renderer.h"
 #include "RenderingManager.h"
@@ -687,7 +688,7 @@ bool Player::rest(GameContext& ctx)
 	}
 
 	// Resting takes time
-	ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+	spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 	return true;
 }
 
@@ -826,7 +827,6 @@ void Player::save(json& j)
 	j["playerClassState"] = static_cast<int>(playerClassState);
 	j["playerClass"] = playerClass;
 	j["playerRace"] = playerRace;
-	j["roundCounter"] = roundCounter;
 	j["killCount"] = killCount;
 	j["memorizedSpells"] = memorizedSpells;
 	j["thiefSkillPoints"] = thiefSkillPoints;
@@ -879,7 +879,6 @@ void Player::load(const json& j)
 	playerClassState = static_cast<PlayerClassState>(j.at("playerClassState").get<int>());
 	playerClass = j.at("playerClass").get<std::string>();
 	playerRace = j.at("playerRace").get<std::string>();
-	roundCounter = j.at("roundCounter").get<int>();
 	killCount = j.at("killCount").get<int>();
 	memorizedSpells = j.at("memorizedSpells").get<std::vector<std::string>>();
 	thiefSkillPoints = j.at("thiefSkillPoints").get<std::array<int, THIEF_SKILL_COUNT>>();

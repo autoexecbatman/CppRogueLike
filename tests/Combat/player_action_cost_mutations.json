@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=PlayerActionCostTest.*:TurnScheduleTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/PlayerTurn.cpp",
+      "original": "\tctx.gameState->advance_clock(scaled_cost(baseCost, ctx.player()->get_speed()));",
+      "mutated": "\tctx.gameState->set_time(scaled_cost(baseCost, ctx.player()->get_speed()));",
+      "catches": "the clock set rather than advanced, so it never passes one action's worth however many are spent"
+    },
+    {
+      "file": "src/PlayerTurn.cpp",
+      "original": "\tctx.gameState->advance_clock(scaled_cost(baseCost, ctx.player()->get_speed()));",
+      "mutated": "\tctx.gameState->advance_clock(baseCost);",
+      "catches": "the player's own speed ignored, so haste and slow reach every creature except the one holding them"
+    },
+    {
+      "file": "src/PlayerTurn.cpp",
+      "original": "\tctx.gameState->advance_clock(scaled_cost(baseCost, ctx.player()->get_speed()));",
+      "mutated": "\tctx.gameState->advance_clock(scaled_cost(TIME_UNITS_PER_ROUND, ctx.player()->get_speed()));",
+      "catches": "every action charged as a whole round, which is the state this funnel exists to leave behind"
+    },
+    {
+      "file": "src/PlayerTurn.cpp",
+      "original": "\tctx.gameState->set_game_status(GameStatus::NEW_TURN);",
+      "mutated": "",
+      "catches": "the turn never opening, so the creatures and the round upkeep never run - what all the call sites were originally written to do"
+    }
+  ]
+}

@@ -19,6 +19,7 @@
 #include "Map.h"
 #include "MessageSystem.h"
 #include "Player.h"
+#include "PlayerTurn.h"
 #include "Renderer.h"
 #include "RenderingManager.h"
 #include "TargetingMenu.h"
@@ -209,7 +210,7 @@ void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
 		assert(innerCtx.creatureManager && "ranged attack fired with no creature manager");
 		innerCtx.player()->attacker->attack(*target, AttackKind::RANGED, innerCtx);
 		innerCtx.creatureManager->cleanup_dead_creatures(*innerCtx.creatures);
-		innerCtx.gameState->set_game_status(GameStatus::NEW_TURN);
+		spend_player_action(innerCtx, TIME_UNITS_PER_ROUND);
 	};
 
 	ctx.menus->push_back(std::make_unique<TargetingMenu>(weaponRange, 0, std::move(onTarget), ctx));

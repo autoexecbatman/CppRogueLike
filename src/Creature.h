@@ -14,6 +14,7 @@
 #include "BuffType.h"
 #include "ConstitutionTracker.h"
 #include "CreatureClass.h"
+#include "TurnSchedule.h"
 #include "DamageInfo.h"
 #include "DamageResolver.h"
 #include "EquipmentSlot.h"
@@ -150,6 +151,15 @@ private:
 	CreatureClass creatureClass{ CreatureClass::MONSTER };
 	int hitDie{ 8 };
 	float attacksPerRound{ 1.0f };
+
+	// How often this creature acts, as a percentage of normal: 150 acts half again as
+	// often as 100. It scales what every action costs, which is why it is not a
+	// movement rate - something that only walks faster carries a cheaper move instead.
+	int speed{ NORMAL_SPEED };
+
+	// The point on the shared clock at which this creature acts next. A creature is
+	// due when the clock reaches it, so the earliest is always the one to go.
+	int nextActionTime{ 0 };
 	int morale{ 10 };
 	int damageResistance{ 0 };
 	int thaco{ 20 };
@@ -272,6 +282,35 @@ public:
 	void set_creature_class(CreatureClass cc) noexcept { creatureClass = cc; }
 	void set_hit_die(int hd) noexcept { hitDie = hd; }
 	void set_attacks_per_round(float apr) noexcept { attacksPerRound = apr; }
+
+	// How often this creature acts, as a percentage of normal. Scales every action's
+	// cost, so it reaches movement, attacks and everything else alike.
+	[[nodiscard]] int get_speed() const noexcept { return speed; }
+	void set_speed(int percentageOfNormal) noexcept { speed = percentageOfNormal; }
+
+	// The point on the shared clock at which this creature acts next.
+	[[nodiscard]] int get_next_action_time() const noexcept { return nextActionTime; }
+	void set_next_action_time(int timeUnits) noexcept { nextActionTime = timeUnits; }
+
+	// What one ordinary action costs this creature, in time units. A whole round for
+	// a creature of normal speed, and less for a faster one.
+	[[nodiscard]] int ordinary_action_cost() const noexcept
+	{
+		return scaled_cost(TIME_UNITS_PER_ROUND, speed);
+	}
+
+	// How many actions this creature is due before the clock reaches that point.
+	// Zero when it has already overshot, which is a skipped turn and needs nothing
+	// anywhere to say so.
+	//
+	// Example, a creature of normal speed standing at the start of a round, and one
+	// twice as fast beside it:
+	//   ordinary.scheduled_actions_before(TIME_UNITS_PER_ROUND);   // -> 1
+	//   quickling.scheduled_actions_before(TIME_UNITS_PER_ROUND);  // -> 2
+	[[nodiscard]] int scheduled_actions_before(int clockLimit) const noexcept
+	{
+		return actions_before(nextActionTime, ordinary_action_cost(), clockLimit);
+	}
 	int get_morale() const noexcept { return morale; }
 	void set_morale(int value) noexcept { morale = value; }
 

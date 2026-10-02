@@ -39,9 +39,9 @@
     },
     {
       "file": "src/GameLoopCoordinator.cpp",
-      "original": "\tctx.gameState->increment_time();",
+      "original": "\tctx.gameState->set_rounds_run(thisRound);",
       "mutated": "",
-      "catches": "the clock standing still, which freezes every rule that reads the round number"
+      "catches": "the round never marked as fed, so the same round's upkeep runs again on every action for the rest of the game"
     }
   ]
 }

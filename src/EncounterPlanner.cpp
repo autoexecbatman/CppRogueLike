@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Creature.h"
+#include "CreatureManager.h"
 #include "DungeonRoom.h"
 #include "EncounterPlanner.h"
 #include "GameContext.h"
@@ -186,7 +187,8 @@ void plan_encounter(const DungeonRoom& room, GameContext& ctx)
 		{
 			break; // no more walkable positions
 		}
-		ctx.creatures->push_back(
-			MonsterCreator::create_from_params(*pos, ctx.monsterRegistry->get_params(key), ctx));
+		ctx.creatureManager->add_creature(
+			MonsterCreator::create_from_params(*pos, ctx.monsterRegistry->get_params(key), ctx),
+			ctx);
 	}
 }

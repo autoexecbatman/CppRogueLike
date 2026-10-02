@@ -87,7 +87,14 @@ private:
 	bool run{ true };
 	bool shouldSave{ true };
 	bool isLoadedGame{ false };
+	// The clock, in time units. A round is TIME_UNITS_PER_ROUND of them, so the round
+	// number is read off this rather than counted beside it.
 	int time{ 0 };
+
+	// How many rounds have had their upkeep run. Not derivable from the clock: the
+	// clock says what time it is and this says what has already happened.
+	int roundsRun{ 0 };
+
 	GameStatus gameStatus{ GameStatus::STARTUP };
 	WindowState windowState{ WindowState::GAME };
 
@@ -101,9 +108,16 @@ public:
 	bool get_is_loaded_game() const noexcept { return isLoadedGame; }
 	void set_is_loaded_game(bool v) noexcept { isLoadedGame = v; }
 
+	// The clock in time units. Advanced only by an action being spent, which is
+	// spend_player_action and nothing else.
 	int get_time() const noexcept { return time; }
 	void set_time(int v) noexcept { time = v; }
-	void increment_time() noexcept { ++time; }
+	void advance_clock(int timeUnits) noexcept { time += timeUnits; }
+
+	// Rounds whose upkeep has run. apply_round_upkeep raises it to the round the
+	// clock has reached, so an action spanning several rounds feeds all of them.
+	int get_rounds_run() const noexcept { return roundsRun; }
+	void set_rounds_run(int v) noexcept { roundsRun = v; }
 
 	GameStatus get_game_status() const noexcept { return gameStatus; }
 	void set_game_status(GameStatus s) noexcept { gameStatus = s; }

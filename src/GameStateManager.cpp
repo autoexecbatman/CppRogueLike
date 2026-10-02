@@ -223,6 +223,7 @@ void GameStateManager::save_game(GameContext& ctx)
 
 		ctx.levelManager->save_to_json(j);
 		j["time"] = ctx.gameState->get_time();
+		j["roundsRun"] = ctx.gameState->get_rounds_run();
 
 		// Last, because every save above may still have been issuing ids.
 		UniqueId::save(j);
@@ -286,6 +287,11 @@ bool GameStateManager::load_game(GameContext& ctx)
 	}
 
 	ctx.levelManager->load_from_json(j);
+
+	if (j.contains("roundsRun"))
+	{
+		ctx.gameState->set_rounds_run(j["roundsRun"]);
+	}
 
 	if (j.contains("time"))
 	{

@@ -113,6 +113,7 @@ public:
 	void load(const json& savedState) override;
 	void save(json& savedState) override;
 	void display_inventory(GameContext& ctx);
+
 	void apply_confusion(int duration) { confusionTurns = duration; }
 	bool is_confused() const { return confusionTurns > 0; }
 };

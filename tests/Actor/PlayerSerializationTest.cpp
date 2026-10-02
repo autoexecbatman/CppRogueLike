@@ -37,7 +37,6 @@ protected:
         player->playerClass = "Fighter";
         player->playerRace = "Human";
         player->set_attacks_per_round(1.5f);
-        player->roundCounter = 3;
 
         // Set up components
         player->experienceReward = std::make_unique<ExperienceReward>(0);
@@ -95,7 +94,6 @@ TEST_F(PlayerSerializationTest, CombatStats_Preserved) {
     loaded->load(j);
 
     EXPECT_FLOAT_EQ(loaded->get_attacks_per_round(), 1.5f);
-    EXPECT_EQ(loaded->roundCounter, 3);
 }
 
 TEST_F(PlayerSerializationTest, WebStatus_Preserved) {

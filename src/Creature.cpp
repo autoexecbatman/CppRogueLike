@@ -212,6 +212,8 @@ void Creature::load(const json& j)
 	creatureClass = parse_creature_class(j.at("creatureClass").get<std::string>());
 	hitDie = j.at("hitDie").get<int>();
 	attacksPerRound = j.at("attacksPerRound").get<float>();
+	speed = j.at("speed").get<int>();
+	nextActionTime = j.at("nextActionTime").get<int>();
 	damageResistance = j.at("dr").get<int>();
 	thaco = j.at("thaco").get<int>();
 	// Written only while a dose is working, so a record without one carries none.
@@ -320,6 +322,8 @@ void Creature::save(json& j)
 	j["creatureClass"] = encode_creature_class(creatureClass);
 	j["hitDie"] = hitDie;
 	j["attacksPerRound"] = attacksPerRound;
+	j["speed"] = speed;
+	j["nextActionTime"] = nextActionTime;
 	j["dr"] = damageResistance;
 	j["thaco"] = thaco;
 	if (pendingPoison.has_value())

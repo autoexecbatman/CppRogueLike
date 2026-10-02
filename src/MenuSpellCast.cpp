@@ -10,6 +10,7 @@
 #include "MenuSpellCast.h"
 #include "MessageSystem.h"
 #include "Player.h"
+#include "PlayerTurn.h"
 #include "SpellRegistry.h"
 #include "SpellSystem.h"
 
@@ -128,7 +129,7 @@ void MenuSpellCast::handle_selection(GameContext& ctx)
 		{
 			std::erase(playerRef.memorizedSpells, key);
 		}
-		innerCtx.gameState->set_game_status(GameStatus::NEW_TURN);
+		spend_player_action(innerCtx, TIME_UNITS_PER_ROUND);
 	};
 
 	const SpellSource source = isMemorized ? SpellSource::MEMORIZED : SpellSource::ITEM;

@@ -40,7 +40,9 @@
 #include "Persistent.h"
 #include "Pickable.h"
 #include "Player.h"
+#include "AttackRate.h"
 #include "PlayerController.h"
+#include "PlayerTurn.h"
 #include "Renderer.h"
 #include "ShopkeeperFactory.h"
 #include "SpellSystem.h"
@@ -109,7 +111,7 @@ void PlayerController::update(GameContext& ctx)
 		case WebEscape::STILL_STUCK:
 		{
 			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You're still stuck in the web.", MessageCompletion::FINISHED);
-			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+			spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 			return;
 		}
 		}
@@ -148,7 +150,7 @@ void PlayerController::update(GameContext& ctx)
 				moveVector = allDirections[ctx.dice->roll(0, 7)];
 
 				ctx.messageSystem->message(ColorPairId::WHITE_GREEN, "You stumble around in confusion!", MessageCompletion::FINISHED);
-				ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+				spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 			}
 			else
 			{
@@ -158,7 +160,6 @@ void PlayerController::update(GameContext& ctx)
 				if (moves.contains(key))
 				{
 					moveVector = moves.at(key);
-					ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 				}
 				else
 				{
@@ -173,7 +174,6 @@ void PlayerController::update(GameContext& ctx)
 		if (moves.contains(key))
 		{
 			moveVector = moves.at(key);
-			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		}
 		else
 		{
@@ -359,6 +359,7 @@ bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 			if (needs_attack_confirmation(c->get_attitude()))
 			{
 				resolve_peaceful_bump(*c, ctx);
+				spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 				return false;
 			}
 
@@ -446,7 +447,7 @@ void PlayerController::swap_places_with(Creature& target, GameContext& ctx)
 	target.position = playerOwner.position;
 	move(targetPosition);
 
-	ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+	spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 }
 
 // Channels the player's deity against nearby undead and narrates the result.
@@ -496,7 +497,7 @@ void PlayerController::attempt_turn_undead(GameContext& ctx)
 	}
 
 	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
-	ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+	spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 }
 
 // Asks before striking a creature that has not threatened the player, and
@@ -552,35 +553,13 @@ void PlayerController::confirm_attack_on_peaceful(Creature& target, GameContext&
 //   strike(goblin, ctx); // one swing, or two at 2.0 attacks per round
 void PlayerController::strike(Creature& target, GameContext& ctx)
 {
-	playerOwner.roundCounter++;
+	assert(playerOwner.attacker && "strike: the player swung with no attacker");
 
-	int attacksThisRound = 1;
-
-	if (playerOwner.get_attacks_per_round() >= 2.0f)
-	{
-		attacksThisRound = 2;
-	}
-	else if (playerOwner.get_attacks_per_round() >= 1.5f)
-	{
-		// A 1.5 rate alternates: two swings on odd rounds, one on even.
-		attacksThisRound = (playerOwner.roundCounter % 2 == 1) ? 2 : 1;
-	}
-
-	for (int attackIndex = 0; attackIndex < attacksThisRound; ++attackIndex)
-	{
-		if (target.is_dead())
-		{
-			break;
-		}
-
-		if (attackIndex > 0)
-		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Follow-up attack: ", MessageCompletion::FINISHED);
-		}
-
-		playerOwner.attacker->attack(target, AttackKind::MELEE, ctx);
-	}
-
+	// One swing, priced by the rate. A character who attacks faster than once a round
+	// pays less of the clock for each swing and so comes round again sooner, which is
+	// what Table 58's three-attacks-in-two-rounds is.
+	playerOwner.attacker->attack(target, AttackKind::MELEE, ctx);
+	spend_player_action(ctx, attack_cost(playerOwner.get_attacks_per_round()));
 	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
 }
 
@@ -624,6 +603,7 @@ bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext&
 		{
 			move(targetPosition);
 			ctx.map->describe_tile(targetTileType, ctx);
+			spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 			shouldComputeFOV = true;
 			return true;
 		}
@@ -653,7 +633,7 @@ bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext&
 			if (!ctx.map->is_door_locked(targetPosition))
 			{
 				ctx.map->open_door(targetPosition, ctx);
-				ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+				spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 				break;
 			}
 			resolve_locked_door(targetPosition, ctx);
@@ -758,7 +738,7 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 		assert(consumeUnlockResult.has_value());
 		ctx.map->open_all_room_doors(doorPos, ctx);
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You use the key. The lock turns.", MessageCompletion::FINISHED);
-		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+		spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 		return true;
 	}
 
@@ -778,7 +758,7 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 		{
 			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You fail to pick the lock.", MessageCompletion::FINISHED);
 		}
-		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+		spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 		return true;
 	}
 
@@ -797,7 +777,7 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 		{
 			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You slam into the door but it holds.", MessageCompletion::FINISHED);
 		}
-		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+		spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 		return true;
 	}
 
@@ -844,7 +824,7 @@ bool PlayerController::execute_arrival(GameContext& ctx)
 	case MouseMode::WALK_TO_PICKUP:
 	{
 		pick_item(ctx);
-		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+		spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 		return true;
 	}
 
@@ -864,7 +844,7 @@ bool PlayerController::execute_arrival(GameContext& ctx)
 			ctx.map->close_door(mouseDoorTarget, ctx);
 		}
 
-		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+		spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 		return true;
 	}
 
@@ -935,7 +915,7 @@ bool PlayerController::handle_mouse_path(GameContext& ctx)
 
 	if (ctx.gameState->get_game_status() != GameStatus::STARTUP)
 	{
-		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+		spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 	}
 
 	return true;
@@ -959,7 +939,7 @@ void PlayerController::handle_left_click(GameContext& ctx)
 		else
 		{
 			pick_item(ctx);
-			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+			spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 		}
 		return;
 	}
@@ -972,7 +952,7 @@ void PlayerController::handle_left_click(GameContext& ctx)
 		{
 			look_to_attack(world_tile, ctx);
 			flush_fov(ctx);
-			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+			spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 		}
 		return;
 	}
@@ -1085,7 +1065,7 @@ void PlayerController::handle_right_click(GameContext& ctx)
 					{
 						c.map->close_door(world_tile, c);
 					}
-					c.gameState->set_game_status(GameStatus::NEW_TURN);
+					spend_player_action(c, TIME_UNITS_PER_ROUND);
 				}
 				else
 				{
@@ -1128,7 +1108,7 @@ void PlayerController::handle_right_click(GameContext& ctx)
 					Vector2D target = world_tile;
 					look_to_attack(target, c);
 					flush_fov(c);
-					c.gameState->set_game_status(GameStatus::NEW_TURN);
+					spend_player_action(c, TIME_UNITS_PER_ROUND);
 				} });
 		}
 	}
@@ -1182,7 +1162,7 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 
 	case Controls::WAIT:
 	{
-		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+		spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 		isWaiting = true;
 		break;
 	}
@@ -1202,7 +1182,7 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 	case Controls::PICK:
 	{
 		pick_item(ctx);
-		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+		spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 		break;
 	}
 
@@ -1321,7 +1301,7 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 			Vector2D spawnPos = playerOwner.position + offset;
 			if (ctx.map->can_walk(spawnPos, ctx))
 			{
-				ctx.creatures->push_back(ShopkeeperFactory::create_shopkeeper(spawnPos, ctx.levelManager->get_dungeon_level(), ctx));
+				ctx.creatureManager->add_creature(ShopkeeperFactory::create_shopkeeper(spawnPos, ctx.levelManager->get_dungeon_level(), ctx), ctx);
 				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "DEBUG: Shopkeeper spawned.", MessageCompletion::FINISHED);
 				shopkeeperSpawned = true;
 				break;
@@ -1380,7 +1360,7 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 		// know which it was, and a free turn would tell him.
 		if (playerOwner.attempt_hide(ctx) == Player::HideAttempt::ATTEMPTED)
 		{
-			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+			spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 		}
 		break;
 	}
@@ -1443,7 +1423,7 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 			if (ctx.map->open_door(doorPos, ctx))
 			{
 				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You open the door.", MessageCompletion::FINISHED);
-				ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+				spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 			}
 			else
 			{
@@ -1460,7 +1440,7 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 		if (ctx.map->close_door(doorPos, ctx))
 		{
 			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You close the door.", MessageCompletion::FINISHED);
-			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+			spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 		}
 		else if (ctx.map->get_actor(doorPos, ctx) != nullptr)
 		{
@@ -1520,19 +1500,19 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 		{
 			// The attempt is spent until the next level, so the turn is spent too.
 			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "This trap is beyond you.", MessageCompletion::FINISHED);
-			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+			spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 			break;
 		}
 		case DisarmResult::DISARMED:
 		{
 			ctx.messageSystem->message(ColorPairId::GREEN_BLACK, "You successfully disarm the trap.", MessageCompletion::FINISHED);
-			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+			spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 			break;
 		}
 		case DisarmResult::TRIGGERED:
 		{
 			ctx.messageSystem->message(ColorPairId::RED_BLACK, "You trigger the trap while attempting to disarm it!", MessageCompletion::FINISHED);
-			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+			spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 			break;
 		}
 		}

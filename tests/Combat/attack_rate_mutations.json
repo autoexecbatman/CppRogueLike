@@ -1,0 +1,30 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=AttackRateTest.*:AttackChargeTest.*:LevelUpSystemTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/AttackRate.h",
+      "original": "\tconst int cost = static_cast<int>(static_cast<float>(TIME_UNITS_PER_ROUND) / attacksPerRound);",
+      "mutated": "\tconst int cost = static_cast<int>(static_cast<float>(TIME_UNITS_PER_ROUND) * attacksPerRound);",
+      "catches": "the rate multiplying rather than dividing, so a faster attacker pays more and 13th level halves a fighter's output"
+    },
+    {
+      "file": "src/AttackRate.h",
+      "original": "\tconst int cost = static_cast<int>(static_cast<float>(TIME_UNITS_PER_ROUND) / attacksPerRound);",
+      "mutated": "\tconst int cost = TIME_UNITS_PER_ROUND;",
+      "catches": "every rate costing a whole round, so Table 58 buys nothing at any level"
+    },
+    {
+      "file": "src/AttackRate.h",
+      "original": "\treturn cost >= 1 ? cost : 1;",
+      "mutated": "\treturn cost;",
+      "catches": "an attack costing nothing at a very high rate, which would swing forever without the clock moving"
+    }
+  ],
+  "unreachable_note": "Two mutants were removed on 2026-10-02 because nothing can reach them: spend_player_action(ctx, attack_cost(...)) inside PlayerController::strike, replaced by a whole-round constant and by nothing at all. strike is private and reaching it needs a living creature with an Ai plus a message system and creature manager the mock does not build. Re-add both when issues/0151 makes a menu and a controller constructible in a test."
+}

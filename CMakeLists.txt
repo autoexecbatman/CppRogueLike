@@ -152,6 +152,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/AiMonsterConfused.cpp
     ${PROJECT_SOURCE_DIR}/AiMonsterConfused.h
     ${PROJECT_SOURCE_DIR}/PlayerController.cpp
+    ${PROJECT_SOURCE_DIR}/PlayerTurn.cpp
+    ${PROJECT_SOURCE_DIR}/PlayerTurn.h
     ${PROJECT_SOURCE_DIR}/PlayerController.h
     ${PROJECT_SOURCE_DIR}/AiShopkeeper.cpp
     ${PROJECT_SOURCE_DIR}/AiShopkeeper.h
@@ -374,6 +376,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/WeaponDamageRegistry.cpp
     ${PROJECT_SOURCE_DIR}/WeaponDamageRegistry.h
     ${PROJECT_SOURCE_DIR}/AttackKind.h
+    ${PROJECT_SOURCE_DIR}/AttackRate.h
+    ${PROJECT_SOURCE_DIR}/TurnSchedule.h
     ${PROJECT_SOURCE_DIR}/DamageInfo.h
     ${PROJECT_SOURCE_DIR}/ArmorClass.cpp
     ${PROJECT_SOURCE_DIR}/ArmorClass.h

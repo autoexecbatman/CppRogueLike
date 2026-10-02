@@ -1,0 +1,77 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=TurnScheduleTest.*:CreatureSerializationTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/TurnSchedule.h",
+      "original": "\treturn baseCost * NORMAL_SPEED / speed;",
+      "mutated": "\treturn baseCost * speed / NORMAL_SPEED;",
+      "catches": "the scaling inverted, so a faster creature pays more time and acts less often - this is the mutant that gives the monotonic case teeth, since it passed against a stub returning zero"
+    },
+    {
+      "file": "src/TurnSchedule.h",
+      "original": "\treturn baseCost * NORMAL_SPEED / speed;",
+      "mutated": "\treturn baseCost;",
+      "catches": "speed ignored entirely, so every creature acts at the same rate and the system does nothing"
+    },
+    {
+      "file": "src/TurnSchedule.h",
+      "original": "\treturn timeUnits / TIME_UNITS_PER_ROUND + 1;",
+      "mutated": "\treturn timeUnits / TIME_UNITS_PER_ROUND;",
+      "catches": "the first round of a game reading as round 0, which shifts every rule keyed on the round's parity"
+    },
+    {
+      "file": "src/TurnSchedule.h",
+      "original": "\treturn timeUnits / TIME_UNITS_PER_ROUND + 1;",
+      "mutated": "\treturn timeUnits * TIME_UNITS_PER_ROUND + 1;",
+      "catches": "the clock read as rounds rather than divided into them"
+    },
+    {
+      "file": "src/TurnSchedule.h",
+      "original": "inline constexpr int TIME_UNITS_PER_ROUND = 120;",
+      "mutated": "inline constexpr int TIME_UNITS_PER_ROUND = 100;",
+      "catches": "a round of 100, where Table 58's three-halves rate floors to a cost of 66 and pays four attacks in two rounds instead of three"
+    },
+    {
+      "file": "src/TurnSchedule.h",
+      "original": "inline constexpr int NORMAL_SPEED = 100;",
+      "mutated": "inline constexpr int NORMAL_SPEED = 50;",
+      "catches": "a normal creature no longer paying an action's stated cost, so every base cost in the game means something else"
+    },
+    {
+      "file": "src/Creature.h",
+      "original": "\tint speed{ NORMAL_SPEED };",
+      "mutated": "\tint speed{ 0 };",
+      "catches": "a creature created unable to ever act, which a default nobody sets would hide until the scheduler ran"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tspeed = j.at(\"speed\").get<int>();",
+      "mutated": "\tspeed = NORMAL_SPEED;",
+      "catches": "a loaded game flattening every creature's speed to normal, so a saved quickling comes back ordinary"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tnextActionTime = j.at(\"nextActionTime\").get<int>();",
+      "mutated": "\tnextActionTime = 0;",
+      "catches": "a loaded level reordered, with every creature due at once regardless of where it stood"
+    },
+    {
+      "file": "src/TurnSchedule.h",
+      "original": "\treturn timeUnits / TIME_UNITS_PER_ROUND;\n}",
+      "mutated": "\treturn timeUnits / TIME_UNITS_PER_ROUND + 1;\n}",
+      "catches": "a round counted as finished while it is still being played, so every upkeep runs a round early"
+    },
+    {
+      "file": "src/TurnSchedule.h",
+      "original": "\tconst int remaining = clockLimit - nextActionTime;\n\tif (remaining <= 0)\n\t{\n\t\treturn 0;\n\t}\n",
+      "mutated": "\tconst int remaining = clockLimit - nextActionTime;\n",
+      "catches": "a deeply overshot being coming back a negative number of actions, which the ceiling arithmetic does on its own against a cheap cost"
+    }
+  ]
+}

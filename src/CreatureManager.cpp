@@ -6,18 +6,53 @@
 
 #include "Creature.h"
 #include "CreatureManager.h"
+#include "TurnSchedule.h"
 #include "GameContext.h"
 #include "Map.h"
 #include "RandomDice.h"
 #include "SpawnUtils.h"
 #include "Vector2D.h"
 
+void CreatureManager::add_creature(std::unique_ptr<Creature> creature, GameContext& ctx)
+{
+	assert(creature && "add_creature: nothing to add");
+	assert(ctx.creatures && "add_creature: a creature arrived with no level to arrive on");
+	assert(ctx.gameState && "add_creature: a creature arrived with no clock to stand on");
+
+	// Arriving now means standing where the clock stands: due at this moment, which
+	// is what every creature already on the level is.
+	creature->set_next_action_time(ctx.gameState->get_time());
+	ctx.creatures->push_back(std::move(creature));
+}
+
 void CreatureManager::update_creatures(std::span<std::unique_ptr<Creature>> creatures, GameContext& ctx)
 {
+	assert(ctx.gameState && "update_creatures: the creatures acted with no clock");
+
+	// How far this window reaches. The clock is where the player now stands, so each
+	// creature takes the actions it is due before the player comes round again: one
+	// for an ordinary creature, several for a faster one, none for one that overshot.
+	const int clockLimit = ctx.gameState->get_time();
+
 	for (const auto& creature : creatures)
 	{
-		assert(creature);
-		creature->update(ctx);
+		assert(creature && "update_creatures: the creature list holds a null entry");
+
+		const int cost = creature->ordinary_action_cost();
+		const int due = creature->scheduled_actions_before(clockLimit);
+
+		for (int action = 0; action < due; ++action)
+		{
+			creature->update(ctx);
+			creature->set_next_action_time(creature->get_next_action_time() + cost);
+
+			// A creature killed by what it just did takes no further action, and the
+			// sweep after this loop removes it.
+			if (creature->is_dead())
+			{
+				break;
+			}
+		}
 	}
 }
 
@@ -31,8 +66,10 @@ void CreatureManager::cleanup_dead_creatures(std::vector<std::unique_ptr<Creatur
 
 void CreatureManager::spawn_creatures(GameContext& ctx)
 {
-	// INCREASED SPAWN RATE - add a new monster every spawn_rate turns (default 2)
-	if (ctx.gameState->get_time() % spawnRate == 0)
+	// One new monster every spawnRate rounds. Read off the clock as rounds rather
+	// than as time units: the clock advances by a hundred or so per action, so a
+	// remainder taken on it directly would be zero almost every turn.
+	if (rounds_completed_at(ctx.gameState->get_time()) % spawnRate == 0)
 	{
 		if (can_spawn_creature(*ctx.creatures, maxCreatures))
 		{

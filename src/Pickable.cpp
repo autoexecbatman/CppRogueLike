@@ -30,6 +30,7 @@
 #include <variant>
 
 #include "DamageInfo.h"
+#include "PlayerTurn.h"
 #include "SavingThrow.h"
 #include "VariantVisitor.h"
 
@@ -439,13 +440,13 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 			// A scroll the reader could not bring themselves to read costs the turn, not the scroll.
 			if (read_confusion_at(wearer, targetPos, confuseTurns, innerCtx) == ScrollReading::KEPT)
 			{
-				innerCtx.gameState->set_game_status(GameStatus::NEW_TURN);
+				spend_player_action(innerCtx, TIME_UNITS_PER_ROUND);
 				return;
 			}
 		}
 
 		consume_item(owner, wearer);
-		innerCtx.gameState->set_game_status(GameStatus::NEW_TURN);
+		spend_player_action(innerCtx, TIME_UNITS_PER_ROUND);
 	};
 
 	ctx.menus->push_back(std::make_unique<TargetingMenu>(scrollRange, aoeRadius, std::move(onTarget), ctx));

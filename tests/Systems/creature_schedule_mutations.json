@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=CreatureScheduleTest.*:RoundUpkeepTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/CreatureManager.cpp",
+      "original": "\tcreature->set_next_action_time(ctx.gameState->get_time());",
+      "mutated": "\tcreature->set_next_action_time(0);",
+      "catches": "an arrival left standing at time zero, owed every action since the game began - a dungeon generated hours in would empty into the player's face"
+    },
+    {
+      "file": "src/CreatureManager.cpp",
+      "original": "\t\tconst int due = creature->scheduled_actions_before(clockLimit);",
+      "mutated": "\t\tconst int due = 1;",
+      "catches": "every creature acting exactly once however fast it is, which is the turn order the schedule replaced"
+    },
+    {
+      "file": "src/CreatureManager.cpp",
+      "original": "\t\t\tcreature->set_next_action_time(creature->get_next_action_time() + cost);",
+      "mutated": "\t\t\tcreature->set_next_action_time(creature->get_next_action_time());",
+      "catches": "a creature never advancing on the clock, so it stays due and acts every window for the rest of the game"
+    },
+    {
+      "file": "src/Creature.h",
+      "original": "\t\treturn scaled_cost(TIME_UNITS_PER_ROUND, speed);",
+      "mutated": "\t\treturn TIME_UNITS_PER_ROUND;",
+      "catches": "a creature's own speed ignored when pricing its action, so no monster is ever faster or slower than any other"
+    },
+    {
+      "file": "src/Creature.h",
+      "original": "\t\treturn actions_before(nextActionTime, ordinary_action_cost(), clockLimit);",
+      "mutated": "\t\treturn actions_before(0, ordinary_action_cost(), clockLimit);",
+      "catches": "where the creature stands ignored, so the snail never overshoots and never skips"
+    }
+  ]
+}

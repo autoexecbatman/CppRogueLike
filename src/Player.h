@@ -49,7 +49,6 @@ public:
 
 	std::string playerClass{ "None" };
 	std::string playerRace{ "None" };
-	int roundCounter{ 0 }; // Tracks rounds for alternating attack patterns
 	int killCount{ 0 }; // Tracks kill count for log.
 
 	std::vector<std::string> memorizedSpells;

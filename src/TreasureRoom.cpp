@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "Creature.h"
+#include "CreatureManager.h"
 #include "DungeonNames.h"
 #include "DungeonRoom.h"
 #include "GameContext.h"
@@ -325,7 +326,7 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 	[[maybe_unused]] const auto giveKeyToJailerResult = InventoryOperations::add_item_to_inventory(jailer->inventoryData, std::move(key), *jailer, *ctx.dataManager);
 	assert(giveKeyToJailerResult.has_value());
 
-	ctx.creatures->push_back(std::move(jailer));
+	ctx.creatureManager->add_creature(std::move(jailer), ctx);
 }
 
 void TreasureRoom::create(
@@ -379,8 +380,9 @@ void TreasureRoom::create(
 		{
 			MonsterParams wardenParams = ctx.monsterRegistry->get_params("dungeon_warden");
 			wardenParams.name = DungeonNames::generate_warden_name(generationRng);
-			ctx.creatures->push_back(
-				MonsterCreator::create_from_params(*wardenPos, wardenParams, ctx));
+			ctx.creatureManager->add_creature(
+				MonsterCreator::create_from_params(*wardenPos, wardenParams, ctx),
+				ctx);
 		}
 	}
 

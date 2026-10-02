@@ -54,6 +54,7 @@
 #include "MessageSystem.h"
 #include "Pickable.h"
 #include "Player.h"
+#include "PlayerTurn.h"
 #include "Renderer.h"
 #include "WeaponDamageRegistry.h"
 
@@ -1228,7 +1229,7 @@ void InventoryUI::handle_enter_item(Player& player, GameContext& ctx)
 
 	if (itemUsed)
 	{
-		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+		spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 
 		if (filterMode)
 		{
