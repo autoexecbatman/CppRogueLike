@@ -3,6 +3,7 @@
 #include <cassert>
 #include <format>
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "Colors.h"
@@ -65,7 +66,19 @@ int MenuAbilityScores::interior_width() const
 	return (static_cast<int>(menuWidth) - 2) * renderer->get_tile_size();
 }
 
-std::string MenuAbilityScores::row_for(Ability ability) const
+std::optional<std::size_t> die_index_for_character(int charInput)
+{
+	// '1' names the first die. Anything below it, including the zero the input system
+	// reports for no key at all, lands negative and names nothing.
+	const int dieNumber = charInput - FIRST_DIE_CHARACTER;
+	if (dieNumber < 0 || dieNumber >= METHOD_SIX_DICE)
+	{
+		return std::nullopt;
+	}
+	return static_cast<std::size_t>(dieNumber);
+}
+
+std::string ability_row_line(const AbilityAllocation& allocation, Ability ability, Ability cursor)
 {
 	const int allocated = allocation.allocated(ability);
 	const int modifier = allocation.score(ability) - allocated;
@@ -85,7 +98,7 @@ std::string MenuAbilityScores::row_for(Ability ability) const
 		allocation.score(ability));
 }
 
-std::string MenuAbilityScores::pool_line() const
+std::string dice_pool_line(const AbilityAllocation& allocation)
 {
 	if (allocation.pool().empty())
 	{
@@ -100,7 +113,7 @@ std::string MenuAbilityScores::pool_line() const
 	return line;
 }
 
-std::string MenuAbilityScores::status_line() const
+std::string allocation_status_line(const AbilityAllocation& allocation)
 {
 	const std::optional<ClassMinimum> shortfall = allocation.unmet_minimum();
 	if (!shortfall.has_value())
@@ -133,14 +146,14 @@ void MenuAbilityScores::draw_allocation_screen()
 	for (const Ability ability : ALL_ABILITY)
 	{
 		const ColorPairId colorPair = (ability == cursor) ? ColorPairId::YELLOW_BLACK : ColorPairId::WHITE_BLACK;
-		draw_row(row, row_for(ability), colorPair);
+		draw_row(row, ability_row_line(allocation, ability, cursor), colorPair);
 		++row;
 	}
 
-	draw_row(POOL_ROW, pool_line(), ColorPairId::WHITE_BLACK);
+	draw_row(POOL_ROW, dice_pool_line(allocation), ColorPairId::WHITE_BLACK);
 
 	const bool ready = !allocation.unmet_minimum().has_value();
-	draw_row(STATUS_ROW, status_line(), ready ? ColorPairId::GREEN_BLACK : ColorPairId::RED_BLACK);
+	draw_row(STATUS_ROW, allocation_status_line(allocation), ready ? ColorPairId::GREEN_BLACK : ColorPairId::RED_BLACK);
 	draw_row(FIRST_HINT_ROW, "[up/down] choose an ability   [1-7] spend that die", ColorPairId::CYAN_BLACK);
 	draw_row(FIRST_HINT_ROW + 1, "[backspace] take a die back   [Enter] done", ColorPairId::CYAN_BLACK);
 
@@ -156,13 +169,12 @@ void MenuAbilityScores::menu(GameContext& ctx)
 	const GameKey gameKey = inputSystem->get_key();
 
 	// A digit names a die of the pool, which is the only thing a number means here.
-	const int dieNumber = charInput - FIRST_DIE_CHARACTER;
-	if (dieNumber >= 0 && dieNumber < METHOD_SIX_DICE)
+	const std::optional<std::size_t> dieIndex = die_index_for_character(charInput);
+	if (dieIndex.has_value())
 	{
-		const std::size_t dieIndex = static_cast<std::size_t>(dieNumber);
-		if (allocation.can_spend(cursor, dieIndex))
+		if (allocation.can_spend(cursor, *dieIndex))
 		{
-			allocation.spend(cursor, dieIndex);
+			allocation.spend(cursor, *dieIndex);
 		}
 	}
 	else

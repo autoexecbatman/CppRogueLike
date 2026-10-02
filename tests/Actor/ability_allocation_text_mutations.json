@@ -1,0 +1,65 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=AbilityAllocationTextTest.*:AbilityAllocationTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/MenuAbilityScores.cpp",
+      "original": "\tif (dieNumber < 0 || dieNumber >= METHOD_SIX_DICE)",
+      "mutated": "\tif (dieNumber < 0 || dieNumber > METHOD_SIX_DICE)",
+      "catches": "an eighth digit naming a die the method never rolled"
+    },
+    {
+      "file": "src/MenuAbilityScores.cpp",
+      "original": "\tconst int dieNumber = charInput - FIRST_DIE_CHARACTER;",
+      "mutated": "\tconst int dieNumber = charInput - FIRST_DIE_CHARACTER + 1;",
+      "catches": "every digit spending the die after the one it names, and '0' becoming the first die"
+    },
+    {
+      "file": "src/MenuAbilityScores.cpp",
+      "original": "constexpr int FIRST_DIE_CHARACTER = '1';",
+      "mutated": "constexpr int FIRST_DIE_CHARACTER = '0';",
+      "catches": "the digits shifted by one against the hint line that offers 1 to 7"
+    },
+    {
+      "file": "src/MenuAbilityScores.cpp",
+      "original": "\tconst std::string marker = (ability == cursor) ? \">\" : \" \";",
+      "mutated": "\tconst std::string marker = (ability == cursor) ? \">\" : \"\";",
+      "catches": "the unselected rows losing a column, so the whole table shifts under the cursor"
+    },
+    {
+      "file": "src/MenuAbilityScores.cpp",
+      "original": "\tif (modifier == 0)\n\t{\n\t\treturn std::format(\"{} {:<13}{:>3}\", marker, ability_name(ability), allocated);\n\t}\n",
+      "mutated": "",
+      "catches": "a human reading +0 = 8 on all six lines instead of staying quiet"
+    },
+    {
+      "file": "src/MenuAbilityScores.cpp",
+      "original": "\t\tline += std::format(\" {}){}\", index + 1, allocation.pool().at(index));",
+      "mutated": "\t\tline += std::format(\" {}){}\", index, allocation.pool().at(index));",
+      "catches": "the pool numbered from zero while the digit that spends it counts from one"
+    },
+    {
+      "file": "src/MenuAbilityScores.cpp",
+      "original": "\tif (allocation.pool().empty())\n\t{\n\t\treturn \"Dice: none left\";\n\t}\n",
+      "mutated": "",
+      "catches": "a finished allocation printing a bare label that reads as a drawing fault"
+    },
+    {
+      "file": "src/MenuAbilityScores.cpp",
+      "original": "\treturn std::format(\"Needs {} {}\", ability_name(shortfall->ability), shortfall->score);",
+      "mutated": "\treturn \"Ready.\";",
+      "catches": "a screen that cannot be accepted telling the player it can"
+    },
+    {
+      "file": "src/MenuAbilityScores.cpp",
+      "original": "\tconst int modifier = allocation.score(ability) - allocated;",
+      "mutated": "\tconst int modifier = allocated - allocation.score(ability);",
+      "catches": "the race's sign inverted, so a halfling reads +1 Strength"
+    }
+  ]
+}

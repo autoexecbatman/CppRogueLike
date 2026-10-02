@@ -112,6 +112,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CarryCapacityTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CarryWeightTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/AbilityAllocationTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/AbilityAllocationTextTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ThiefSkillAllocationTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ThiefSkillsTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ThiefSkillCharacterTest.cpp
