@@ -135,15 +135,18 @@ TEST_F(EncumbranceBandTest, ExceptionalStrengthReadsItsOwnBands)
 	EXPECT_EQ(encumbrance_band(240, exceptional), EncumbranceBand::UNENCUMBERED);
 }
 
-// Table 47 starts at Strength 2 and stops at 18/00. A score outside that has no band,
-// which is the book's silence rather than a band the game invented.
-TEST_F(EncumbranceBandTest, AScoreTheTableDoesNotPrintHasNoBand)
+// Table 47's band columns start at Strength 2 and stop at 18/00. A score outside that
+// has no graded band, which is the book's silence rather than a band the game
+// invented. Two pounds is under every one of these rows' maxima, the lowest being
+// Strength 1's three - a heavier probe would be Overloaded, which is a different
+// question and the one the test below asks.
+TEST_F(EncumbranceBandTest, AScoreTheTableDoesNotPrintHasNoGradedBand)
 {
 	for (const int score : { 1, 19, 20, 21, 22, 23, 24, 25 })
 	{
 		const StrengthAttributes row = mock.data_manager.strength_for(score, 0);
 		EXPECT_FALSE(row.encumbrance.has_value()) << "Strength " << score;
-		EXPECT_FALSE(encumbrance_band(10, row).has_value()) << "Strength " << score;
+		EXPECT_FALSE(encumbrance_band(2, row).has_value()) << "Strength " << score;
 	}
 }
 
@@ -169,5 +172,36 @@ TEST_F(EncumbranceBandTest, EveryRowsBoundariesRiseToItsMaximum)
 		EXPECT_LT(row.encumbrance->lightTo, row.encumbrance->moderateTo) << expected.strength;
 		EXPECT_LT(row.encumbrance->moderateTo, row.encumbrance->heavyTo) << expected.strength;
 		EXPECT_LT(row.encumbrance->heavyTo, row.maxCarried) << expected.strength;
+	}
+}
+
+// The Max. Carried Weight column is printed on every row of Table 47, including the
+// rows that carry no bands, so a load past it is Overloaded at any Strength. Only the
+// five graded bands depend on the columns the book leaves blank.
+TEST_F(EncumbranceBandTest, ARowWithNoBandsStillNamesALoadPastItsMaximum)
+{
+	const StrengthAttributes weakest = mock.data_manager.strength_for(1, 0);
+	EXPECT_EQ(weakest.maxCarried, 3);
+	EXPECT_EQ(encumbrance_band(4, weakest), EncumbranceBand::OVERLOADED);
+
+	const StrengthAttributes hillGiant = mock.data_manager.strength_for(19, 0);
+	EXPECT_EQ(hillGiant.maxCarried, 640);
+	EXPECT_EQ(encumbrance_band(641, hillGiant), EncumbranceBand::OVERLOADED);
+
+	const StrengthAttributes titan = mock.data_manager.strength_for(25, 0);
+	EXPECT_EQ(titan.maxCarried, 1750);
+	EXPECT_EQ(encumbrance_band(1751, titan), EncumbranceBand::OVERLOADED);
+}
+
+// is_overloaded reads the same Max. Carried Weight column, so the word the panel
+// prints and the rule that refuses to pick anything up cannot disagree about a score
+// Table 47 prints no bands for.
+TEST_F(EncumbranceBandTest, TheBandAgreesWithTheCarryingRuleOnEveryScore)
+{
+	for (const int score : { 1, 2, 10, 18, 19, 25 })
+	{
+		const StrengthAttributes row = mock.data_manager.strength_for(score, 0);
+		EXPECT_EQ(encumbrance_band(row.maxCarried + 1, row), EncumbranceBand::OVERLOADED) << "Strength " << score;
+		EXPECT_NE(encumbrance_band(row.maxCarried, row), EncumbranceBand::OVERLOADED) << "Strength " << score;
 	}
 }

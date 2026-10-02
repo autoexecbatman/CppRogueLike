@@ -36,16 +36,18 @@ std::string_view encumbrance_band_name(EncumbranceBand band)
 
 std::optional<EncumbranceBand> encumbrance_band(int carriedPounds, const StrengthAttributes& row)
 {
-	if (!row.encumbrance.has_value())
-	{
-		return std::nullopt;
-	}
-
-	// Past the Max. Carried Weight the character cannot move at all, which is the one
-	// state the table does not name and the only one with a rule attached to it.
+	// Past the Max. Carried Weight the character cannot move at all. The table prints
+	// that column on every row, so this answers at a Strength whose bands are blank.
 	if (carriedPounds > row.maxCarried)
 	{
 		return EncumbranceBand::OVERLOADED;
+	}
+
+	// The five graded bands are columns the book leaves blank outside Strength 2 to
+	// 18/00, so a load this row can carry has no name.
+	if (!row.encumbrance.has_value())
+	{
+		return std::nullopt;
 	}
 
 	// Each boundary is the last pound its band holds.

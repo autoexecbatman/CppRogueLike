@@ -15,6 +15,12 @@
     },
     {
       "file": "src/Encumbrance.cpp",
+      "original": "\tif (carriedPounds > row.maxCarried)\n\t{\n\t\treturn EncumbranceBand::OVERLOADED;\n\t}\n\n\t// The five graded bands are columns the book leaves blank outside Strength 2 to\n\t// 18/00, so a load this row can carry has no name.\n\tif (!row.encumbrance.has_value())\n\t{\n\t\treturn std::nullopt;\n\t}\n",
+      "mutated": "\tif (!row.encumbrance.has_value())\n\t{\n\t\treturn std::nullopt;\n\t}\n\n\t// The five graded bands are columns the book leaves blank outside Strength 2 to\n\t// 18/00, so a load this row can carry has no name.\n\tif (carriedPounds > row.maxCarried)\n\t{\n\t\treturn EncumbranceBand::OVERLOADED;\n\t}\n",
+      "catches": "the two guards back in their old order, so a girdled character past its maximum reads as no band at all while the banner beside it says Overloaded"
+    },
+    {
+      "file": "src/Encumbrance.cpp",
       "original": "\tif (carriedPounds > row.maxCarried)\n\t{\n\t\treturn EncumbranceBand::OVERLOADED;\n\t}\n",
       "mutated": "",
       "catches": "a load past the maximum reported as merely Severe"

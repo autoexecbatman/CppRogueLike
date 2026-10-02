@@ -129,8 +129,9 @@ void InventoryUI::draw_frame(GameContext& ctx)
 		playerRef.get_exceptional_strength());
 	const std::optional<EncumbranceBand> band = encumbrance_band(currentWeight, strengthRow);
 
-	// A score Table 47 does not print has no band, so the line shows the load alone
-	// rather than a word the book never wrote.
+	// Where Table 47 prints no bands the line shows the load alone, rather than a word
+	// the book never wrote. Over the maximum it still reads Overloaded: that comes from
+	// a column every row has, and is what render_tab_bar's banner reports.
 	const auto colour_for = [](EncumbranceBand named)
 	{
 		switch (named)

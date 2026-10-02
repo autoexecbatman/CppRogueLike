@@ -27,12 +27,12 @@ template <typename T>
 concept AnyInventory = std::same_as<T, FloorInventory> || std::same_as<T, CreatureInventory>;
 
 // ===== CORE OPERATIONS =====
-// Non-template — defined in InventoryOperations.cpp
+// Non-template - defined in InventoryOperations.cpp
 
 // Add to floor. No weight check. Use for loot spawns, drops, and corpses.
 InventoryResult<bool> add_item(FloorInventory& inventory, std::unique_ptr<Item> item);
 
-// Add to creature backpack. Capacity check only — no weight gate.
+// Add to creature backpack. Capacity check only - no weight gate.
 // Use for initialization (starting gear, load). Weight gate lives in add_item_to_inventory.
 InventoryResult<bool> add_item(CreatureInventory& inventory, std::unique_ptr<Item> item);
 
@@ -75,6 +75,17 @@ int get_total_weight(const Creature& owner) noexcept;
 //   get_max_weight(strengthTenCarrier, dataManager);   // -> 110
 //   get_max_weight(hillGiantGirdled, dataManager);     // -> 640, at Strength 19
 int get_max_weight(const Creature& owner, const DataManager& dataManager) noexcept;
+
+// Whether the owner is carrying more than its Max. Carried Weight, worn gear
+// included. Being over it stops the owner picking anything else up; this game has no
+// movement rate for Table 48 to reduce, so that is the whole of what it costs. The
+// same column answers encumbrance_band's OVERLOADED, so the panel's word and this
+// cannot disagree at a Strength whose graded bands are blank.
+//
+// Example, the calls CarryWeightTest.WhatIsWornCountsAgainstTheLimit makes:
+//   carrier.wear(weighing(limit + 1), EquipmentSlot::BODY);  // worn, not packed
+//   is_overloaded(carrier, dataManager);                     // -> true
+//   is_within_weight_limit(*weighing(1), carrier, dataManager);  // -> false, nothing more fits
 bool is_overloaded(const Creature& owner, const DataManager& dataManager) noexcept;
 
 // Whether this item can go into the pack without taking what the owner carries past
@@ -89,7 +100,7 @@ bool is_within_weight_limit(
 	const Creature& owner,
 	const DataManager& dataManager) noexcept;
 
-// id-based search — creature backpack only
+// id-based search - creature backpack only
 Item* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept;
 const Item* find_item_by_id(const CreatureInventory& inventory, uint64_t uniqueId) noexcept;
 
