@@ -66,6 +66,7 @@
 #include "src/SpellSystem.h"
 #include "src/TargetingSystem.h"
 #include "src/TurnUndead.h"
+#include "src/WeaponDamageRegistry.h"
 #include "tests/mocks/MockGameContext.h"
 
 // GoogleTest runs any suite whose name ends in DeathTest before the others, so
@@ -117,6 +118,17 @@ TEST_F(AssertProbeDeathTest, WearingNothingAborts)
 	creature->set_body_plan({ EquipmentSlot::RIGHT_HAND });
 
 	EXPECT_DEATH(creature->wear(nullptr, EquipmentSlot::RIGHT_HAND), "wear called with no item");
+}
+
+// Every caller of the weapon damage table guards on is_weapon() first, and a test
+// walks the data and fails on any weapon missing from the table, so a key that is
+// not in it cannot arrive from a correctly wired game. The unarmed damage it falls
+// back to is what a Release build should still draw rather than crash on; the
+// assertion is what stops a Debug build from drawing a longsword as a fist and
+// saying nothing.
+TEST_F(AssertProbeDeathTest, AskingTheWeaponTableForSomethingThatIsNotAWeaponAborts)
+{
+	EXPECT_DEATH(WeaponDamageRegistry::get_damage_info("health_potion"), "no damage of its own");
 }
 
 // A body plan is the set of slots a creature has at all. Wearing into one it

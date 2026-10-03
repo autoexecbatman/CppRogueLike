@@ -42,6 +42,11 @@ $exe = Join-Path $root "build/bin/Debug/test_exe.exe"
 # vacuous deletion would report the probe as falsified while changing nothing.
 $probes = @(
     @{
+        test   = "AssertProbeDeathTest.AskingTheWeaponTableForSomethingThatIsNotAWeaponAborts"
+        file   = "src/WeaponDamageRegistry.cpp"
+        anchor = 'assert(found != weaponDamageMap.end() && "get_damage_info: asked for a key the weapon table has no damage of its own for");'
+    },
+    @{
         test   = "AssertProbeDeathTest.WearingNothingAborts"
         file   = "src/Creature.cpp"
         anchor = 'assert(item && "Creature::wear called with no item");'

@@ -51,7 +51,10 @@ protected:
         item->actorData.name = "Test Item +" + std::to_string(bonus) + " STR";
         item->actorData.tile = TileRef{};
         item->enhancement.strengthBonus = bonus;
-        item->itemClass = ItemClass::SWORD;
+		// A key the damage table has a row for: a weapon built without one looks armed
+		// and does a fist's damage, which no case here would notice.
+		item->itemKey = "long_sword";
+		item->itemClass = ItemClass::SWORD;
         item->behavior = Weapon{};
         return item;
     }
@@ -62,7 +65,10 @@ protected:
         item->actorData.name = "Test Item +" + std::to_string(bonus) + " DEX";
         item->actorData.tile = TileRef{};
         item->enhancement.dexterityBonus = bonus;
-        item->itemClass = ItemClass::SWORD;
+		// A key the damage table has a row for: a weapon built without one looks armed
+		// and does a fist's damage, which no case here would notice.
+		item->itemKey = "long_sword";
+		item->itemClass = ItemClass::SWORD;
         item->behavior = Weapon{};
         return item;
     }
@@ -74,7 +80,10 @@ protected:
         item->actorData.tile = TileRef{};
         item->enhancement.strengthBonus = str_bonus;
         item->enhancement.dexterityBonus = dex_bonus;
-        item->itemClass = ItemClass::SWORD;
+		// A key the damage table has a row for: a weapon built without one looks armed
+		// and does a fist's damage, which no case here would notice.
+		item->itemKey = "long_sword";
+		item->itemClass = ItemClass::SWORD;
         item->behavior = Weapon{};
         return item;
     }

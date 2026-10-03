@@ -69,9 +69,14 @@ protected:
 
 	// A weapon built here rather than loaded, so the test states the two facts it
 	// depends on - the name it expects back, and the slot the name belongs to.
-	std::unique_ptr<Item> make_weapon(const std::string& name, ItemClass itemClass)
+	// The key is what the damage table is keyed by and the name is what the message
+	// prints, and they are not the same string. Built without a key, the weapon looked
+	// armed and did a fist's damage - which these cases could not see, because they read
+	// the name out of the message and never the damage.
+	std::unique_ptr<Item> make_weapon(const std::string& itemKey, const std::string& name, ItemClass itemClass)
 	{
 		auto weapon = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK });
+		weapon->itemKey = itemKey;
 		weapon->itemClass = itemClass;
 		weapon->behavior = Weapon{};
 		return weapon;
@@ -79,8 +84,8 @@ protected:
 
 	void arm_with_sword_and_bow()
 	{
-		player->equip_item(make_weapon("long sword", ItemClass::SWORD), EquipmentSlot::RIGHT_HAND, ctx);
-		player->equip_item(make_weapon("long bow", ItemClass::BOW), EquipmentSlot::MISSILE_WEAPON, ctx);
+		player->equip_item(make_weapon("long_sword", "long sword", ItemClass::SWORD), EquipmentSlot::RIGHT_HAND, ctx);
+		player->equip_item(make_weapon("long_bow", "long bow", ItemClass::BOW), EquipmentSlot::MISSILE_WEAPON, ctx);
 	}
 
 	// Every part of every finalized attack message, joined. The weapon an attack

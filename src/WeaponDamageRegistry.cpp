@@ -1,4 +1,5 @@
 // WeaponDamageRegistry.cpp
+#include <cassert>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -45,11 +46,21 @@ std::unordered_map<std::string, DamageInfo> WeaponDamageRegistry::create_weapon_
 
 DamageInfo WeaponDamageRegistry::get_damage_info(std::string_view weaponKey) noexcept
 {
-	if (weaponDamageMap.contains(std::string{ weaponKey }))
+	const auto found = weaponDamageMap.find(std::string{ weaponKey });
+
+	// Every caller asks is_weapon() first and a test walks the data for a weapon this
+	// table has no row for, so a key that is not here means the two disagree rather
+	// than that the player is holding something odd.
+	assert(found != weaponDamageMap.end() && "get_damage_info: asked for a key the weapon table has no damage of its own for");
+
+	// What a Release build draws rather than crashing on a path the character sheet
+	// and the inventory both call to paint themselves.
+	if (found == weaponDamageMap.end())
 	{
-		return weaponDamageMap.at(std::string{ weaponKey });
+		return get_unarmed_damage_info();
 	}
-	return get_unarmed_damage_info();
+
+	return found->second;
 }
 
 DamageInfo WeaponDamageRegistry::get_enhanced_damage_info(std::string_view weaponKey, const ItemEnhancement* enhancement) noexcept

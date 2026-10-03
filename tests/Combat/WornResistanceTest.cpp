@@ -57,6 +57,9 @@ protected:
 		auto item = std::make_unique<Item>(Vector2D{}, ActorData{});
 		item->actorData.name = "sword of fire resistance";
 		item->actorData.tile = TileRef{};
+		// A key the damage table has a row for: a weapon built without one looks armed
+		// and does a fist's damage, which no case here would notice.
+		item->itemKey = "long_sword";
 		item->itemClass = ItemClass::SWORD;
 		item->behavior = Weapon{};
 		item->enhancement.fireResistance = 50;
