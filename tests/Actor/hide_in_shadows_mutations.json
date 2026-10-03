@@ -21,20 +21,20 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": "\t\treturn !creature->is_dead() && creature->is_aware();",
+      "original": "\t\treturn !creature->is_dead() && creature->is_aware(currentTime);",
       "mutated": "\t\treturn !creature->is_dead();",
       "catches": "any creature at all counting as a watcher, noticed or not"
     },
     {
       "file": "src/Player.cpp",
-      "original": "\t\treturn !creature->is_dead() && creature->is_aware();",
+      "original": "\t\treturn !creature->is_dead() && creature->is_aware(currentTime);",
       "mutated": "\t\treturn !creature->is_dead() && ctx.map->is_in_fov(creature->position);",
       "catches": "the old question - whether the thief can see it - back in place of the book's"
     },
     {
       "file": "src/Player.cpp",
-      "original": "\t\treturn !creature->is_dead() && creature->is_aware();",
-      "mutated": "\t\treturn creature->is_aware();",
+      "original": "\t\treturn !creature->is_dead() && creature->is_aware(currentTime);",
+      "mutated": "\t\treturn creature->is_aware(currentTime);",
       "catches": "a dead guard still watching"
     },
     {

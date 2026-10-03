@@ -79,8 +79,10 @@ enum class Attitude
 	return attitude >= Attitude::PEACEFUL;
 }
 
-// Turns a creature keeps tracking the player after losing sight of them.
-inline constexpr int AWARENESS_TURNS = 3;
+// Rounds a creature keeps tracking the player after losing sight of them. Rounds
+// rather than turns: a creature that acts twice in a round does not forget twice as
+// fast, which is what measuring this as a count of its own turns used to mean.
+inline constexpr int AWARENESS_ROUNDS = 3;
 
 // Poison working in a creature: what it will cost, and how many rounds until it does.
 // Table 51 gives every poison an onset (Dungeon Master's Guide, PDF page 737), so the
@@ -110,7 +112,7 @@ private:
 	Attitude attitude{ Attitude::HOSTILE }; // how this creature feels about the player
 	Ethics ethics{ Ethics::NEUTRAL }; // law/chaos axis; true neutral until data says otherwise
 	Morality morality{ Morality::NEUTRAL }; // good/evil axis
-	int awarenessTurns{ 0 }; // turns of memory left after last seeing the player
+	int awareUntilTime{ 0 }; // the clock reading this creature stops remembering the player at
 	bool undead{ false }; // whether a priest may attempt to turn this creature
 	bool displaceable{ true }; // whether the player may swap places with it
 	int webStuckTurns{ 0 }; // turns remaining before the web lets go
@@ -417,16 +419,18 @@ public:
 	//   skeleton.get_hit_dice(); // -> 1
 	[[nodiscard]] int get_hit_dice() const noexcept { return creatureLevel; }
 
-	[[nodiscard]] bool is_aware() const noexcept { return awarenessTurns > 0; }
+	// Whether this creature still remembers the player at `currentTime`. A memory the
+	// clock has passed is gone, so nothing has to run it down.
+	[[nodiscard]] bool is_aware(int currentTime) const noexcept { return currentTime < awareUntilTime; }
 
-	// Refreshes awareness for this turn. Seeing the player resets the memory to
-	// full; losing sight lets it decay one turn at a time, so a creature keeps
-	// hunting briefly rather than forgetting the moment it loses line of sight.
-	// An invisible player is never seen.
+	// Refreshes the memory when the player is in sight, booking it AWARENESS_ROUNDS
+	// ahead of the clock. Losing sight does nothing at all: the memory ends when the
+	// clock reaches it, so a creature keeps hunting briefly rather than forgetting the
+	// moment it loses line of sight. An invisible player is never seen.
 	//
-	// Example:
-	//   creature.update_awareness(ctx); // player in view -> is_aware() == true
-	//   creature.update_awareness(ctx); // out of view    -> still true, decaying
+	// Example, with the clock at the start of the game:
+	//   creature.update_awareness(ctx);   // player in view -> is_aware(0) == true
+	//   creature.is_aware(360);           // -> false, three rounds later
 	void update_awareness(const GameContext& ctx);
 
 	[[nodiscard]] Ethics get_ethics() const noexcept { return ethics; }

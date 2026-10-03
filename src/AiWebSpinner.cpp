@@ -58,7 +58,7 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 
 	// Lost track of the player through a failed Sanctuary save, and so with nothing to
 	// walk toward, it drifts like any spider with no quarry (PHB page 436).
-	if (owner.is_aware() && !ctx.buffSystem->ignores_warded_creature(owner, *ctx.player()))
+	if (owner.is_aware(ctx.gameState->get_time()) && !ctx.buffSystem->ignores_warded_creature(owner, *ctx.player()))
 	{
 		move_toward_player(owner, ctx);
 	}

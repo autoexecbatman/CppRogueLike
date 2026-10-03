@@ -199,7 +199,7 @@ void AiMonster::decide_action(Creature& owner, GameContext& ctx)
 	// Reading the record costs no save - one is owed only to an opponent already swinging.
 	const bool hasLostTrackOfPlayer = ctx.buffSystem->ignores_warded_creature(owner, *ctx.player());
 
-	if (owner.is_aware() && !ctx.player()->is_invisible() && !hasLostTrackOfPlayer)
+	if (owner.is_aware(ctx.gameState->get_time()) && !ctx.player()->is_invisible() && !hasLostTrackOfPlayer)
 	{
 		move_or_attack(owner, ctx.player()->position, ctx);
 	}

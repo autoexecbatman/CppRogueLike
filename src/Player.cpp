@@ -730,10 +730,11 @@ Player::HideAttempt Player::attempt_hide(GameContext& ctx)
 	// "A thief can never become hidden while a guard is watching him, no matter what
 	// his dice roll is." What settles it is whether anything is looking for him,
 	// which is what awareness holds - not whether he happens to be able to see it.
-	const auto is_watching = [](const std::unique_ptr<Creature>& creature)
+	const int currentTime = ctx.gameState->get_time();
+	const auto is_watching = [currentTime](const std::unique_ptr<Creature>& creature)
 	{
 		assert(creature && "attempt_hide: creatures list holds a null entry");
-		return !creature->is_dead() && creature->is_aware();
+		return !creature->is_dead() && creature->is_aware(currentTime);
 	};
 	if (std::ranges::any_of(*ctx.creatures, is_watching))
 	{

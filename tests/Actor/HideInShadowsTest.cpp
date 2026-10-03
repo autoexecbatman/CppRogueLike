@@ -172,7 +172,7 @@ TEST_F(HideInShadowsTest, AWatchingCreatureRefusesTheAttemptWithoutARoll)
 	buy_hide_in_shadows(40);
 	Creature& guard = add_monster_at(Vector2D{ 4, 5 });
 	everyone_looks();
-	ASSERT_TRUE(guard.is_aware()) << "the guard is standing two tiles away in an open corridor";
+	ASSERT_TRUE(guard.is_aware(ctx.gameState->get_time())) << "the guard is standing two tiles away in an open corridor";
 
 	mock.dice.set_next_roll(1);
 	EXPECT_EQ(thief->attempt_hide(ctx), Player::HideAttempt::WATCHED);
@@ -186,13 +186,13 @@ TEST_F(HideInShadowsTest, AHunterThatHasLostSightIsStillWatching)
 	buy_hide_in_shadows(40);
 	Creature& guard = add_monster_at(Vector2D{ 4, 5 });
 	everyone_looks();
-	ASSERT_TRUE(guard.is_aware());
+	ASSERT_TRUE(guard.is_aware(ctx.gameState->get_time()));
 
 	// The thief backs away down the corridor; the guard keeps its memory a while.
 	thief->position = Vector2D{ 18, 5 };
 	map.compute_fov(ctx);
 	ASSERT_FALSE(map.is_in_fov(guard.position)) << "the thief cannot see the guard any more";
-	ASSERT_TRUE(guard.is_aware()) << "and the guard has not forgotten him";
+	ASSERT_TRUE(guard.is_aware(ctx.gameState->get_time())) << "and the guard has not forgotten him";
 
 	mock.dice.set_next_roll(1);
 	EXPECT_EQ(thief->attempt_hide(ctx), Player::HideAttempt::WATCHED);
@@ -206,7 +206,7 @@ TEST_F(HideInShadowsTest, ACreatureThatHasNotNoticedTheThiefIsNoBarrier)
 	const Creature& unnoticing = add_monster_at(Vector2D{ 4, 5 });
 	map.compute_fov(ctx);
 	ASSERT_TRUE(map.is_in_fov(unnoticing.position)) << "the thief can see it plainly";
-	ASSERT_FALSE(unnoticing.is_aware()) << "and it has not noticed him";
+	ASSERT_FALSE(unnoticing.is_aware(ctx.gameState->get_time())) << "and it has not noticed him";
 
 	mock.dice.set_next_roll(1);
 	EXPECT_EQ(thief->attempt_hide(ctx), Player::HideAttempt::ATTEMPTED);
@@ -219,7 +219,7 @@ TEST_F(HideInShadowsTest, ADeadCreatureDoesNotWatch)
 	buy_hide_in_shadows(40);
 	Creature& guard = add_monster_at(Vector2D{ 4, 5 });
 	everyone_looks();
-	ASSERT_TRUE(guard.is_aware());
+	ASSERT_TRUE(guard.is_aware(ctx.gameState->get_time()));
 	guard.set_hp(0);
 	ASSERT_TRUE(guard.is_dead());
 

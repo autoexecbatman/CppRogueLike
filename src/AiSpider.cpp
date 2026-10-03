@@ -150,7 +150,7 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 	owner.update_awareness(ctx);
 
 	// Movement logic
-	if (owner.is_aware())
+	if (owner.is_aware(ctx.gameState->get_time()))
 	{
 		// Move toward player
 		move_toward_player(owner, ctx);

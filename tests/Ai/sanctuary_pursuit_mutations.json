@@ -9,20 +9,20 @@
   "mutations": [
     {
       "file": "src/AiMonster.cpp",
-      "original": "\tif (owner.is_aware() && !ctx.player()->is_invisible() && !hasLostTrackOfPlayer)",
-      "mutated": "\tif (owner.is_aware() && !ctx.player()->is_invisible())",
+      "original": "\tif (owner.is_aware(ctx.gameState->get_time()) && !ctx.player()->is_invisible() && !hasLostTrackOfPlayer)",
+      "mutated": "\tif (owner.is_aware(ctx.gameState->get_time()) && !ctx.player()->is_invisible())",
       "catches": "a monster hunting a creature it has lost track of, as it did before"
     },
     {
       "file": "src/AiMonsterRanged.cpp",
-      "original": "\tif (owner.is_aware() && !ctx.buffSystem->ignores_warded_creature(owner, *ctx.player()))",
-      "mutated": "\tif (owner.is_aware())",
+      "original": "\tif (owner.is_aware(ctx.gameState->get_time()) && !ctx.buffSystem->ignores_warded_creature(owner, *ctx.player()))",
+      "mutated": "\tif (owner.is_aware(ctx.gameState->get_time()))",
       "catches": "an archer loosing arrows at a creature it has lost track of"
     },
     {
       "file": "src/AiWebSpinner.cpp",
-      "original": "\tif (owner.is_aware() && !ctx.buffSystem->ignores_warded_creature(owner, *ctx.player()))",
-      "mutated": "\tif (owner.is_aware())",
+      "original": "\tif (owner.is_aware(ctx.gameState->get_time()) && !ctx.buffSystem->ignores_warded_creature(owner, *ctx.player()))",
+      "mutated": "\tif (owner.is_aware(ctx.gameState->get_time()))",
       "catches": "a web spinner walking toward a creature it has lost track of"
     },
     {

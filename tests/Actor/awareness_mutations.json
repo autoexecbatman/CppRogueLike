@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=AwarenessTest.*:HideInShadowsTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tawareUntilTime = expiry_time(ctx.gameState->get_time(), AWARENESS_ROUNDS);",
+      "mutated": "\t\tawareUntilTime = ctx.gameState->get_time();",
+      "catches": "a memory that ends the instant it is formed, so nothing ever hunts a player out of sight"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tawareUntilTime = expiry_time(ctx.gameState->get_time(), AWARENESS_ROUNDS);",
+      "mutated": "\t\tawareUntilTime = expiry_time(0, AWARENESS_ROUNDS);",
+      "catches": "a memory measured from the start of the game, so a creature deep in a run forgets the moment it looks"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tif (ctx.map->is_in_fov(position) && !ctx.player()->is_invisible())",
+      "mutated": "\tif (ctx.map->is_in_fov(position))",
+      "catches": "an invisible player seen in plain line of sight, which is the rule this replaced"
+    },
+    {
+      "file": "src/Creature.h",
+      "original": "\t[[nodiscard]] bool is_aware(int currentTime) const noexcept { return currentTime < awareUntilTime; }",
+      "mutated": "\t[[nodiscard]] bool is_aware(int currentTime) const noexcept { return currentTime <= awareUntilTime; }",
+      "catches": "a memory lasting one reading past the round it was booked to end in"
+    },
+    {
+      "file": "src/Creature.h",
+      "original": "inline constexpr int AWARENESS_ROUNDS = 3;",
+      "mutated": "inline constexpr int AWARENESS_ROUNDS = 6;",
+      "catches": "a memory twice as long as the one the four Ai classes were written against"
+    }
+  ]
+}

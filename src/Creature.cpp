@@ -207,7 +207,7 @@ void Creature::load(const json& j)
 	ethics = parse_ethics(j.at("ethics").get<std::string>());
 	morality = parse_morality(j.at("morality").get<std::string>());
 	undead = j.at("undead").get<bool>();
-	awarenessTurns = j.at("awarenessTurns").get<int>();
+	awareUntilTime = j.at("awareUntilTime").get<int>();
 	webStuckTurns = j.at("webStuckTurns").get<int>();
 	webStrength = j.at("webStrength").get<int>();
 	creatureClass = parse_creature_class(j.at("creatureClass").get<std::string>());
@@ -317,7 +317,7 @@ void Creature::save(json& j)
 	j["ethics"] = encode_ethics(ethics);
 	j["morality"] = encode_morality(morality);
 	j["undead"] = undead;
-	j["awarenessTurns"] = awarenessTurns;
+	j["awareUntilTime"] = awareUntilTime;
 	j["webStuckTurns"] = webStuckTurns;
 	j["webStrength"] = webStrength;
 	j["creatureClass"] = encode_creature_class(creatureClass);
@@ -753,16 +753,12 @@ void Creature::update(GameContext& ctx)
 
 void Creature::update_awareness(const GameContext& ctx)
 {
+	assert(ctx.gameState && "update_awareness: a creature looked for the player with no clock to remember by");
+
 	// An invisible player is not seen even in plain line of sight.
 	if (ctx.map->is_in_fov(position) && !ctx.player()->is_invisible())
 	{
-		awarenessTurns = AWARENESS_TURNS;
-		return;
-	}
-
-	if (awarenessTurns > 0)
-	{
-		--awarenessTurns;
+		awareUntilTime = expiry_time(ctx.gameState->get_time(), AWARENESS_ROUNDS);
 	}
 }
 
