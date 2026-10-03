@@ -43,6 +43,32 @@ std::string strength_text(const Player& player)
 	return std::format("18/{:02d}", exceptional % 100);
 }
 
+} // namespace
+
+namespace
+{
+// Defined with the other private helpers below.
+std::string strength_text(const Player& player);
+} // namespace
+
+namespace CharacterSheetText
+{
+
+std::string strength_line(const Player& player, const DataManager& dataManager)
+{
+	// What Strength gives a swing, as the attack itself reads it - weaponless melee,
+	// so the row is Table 1's and nothing a weapon does is folded in.
+	const AttackStrength::Adjustment swing =
+		AttackStrength::adjustment(dataManager, player, AttackKind::MELEE, nullptr);
+
+	return std::format("STR: {:>2}  ({:+d} hit, {:+d} dmg)", strength_text(player), swing.hit, swing.damage);
+}
+
+} // namespace CharacterSheetText
+
+namespace
+{
+
 void display_basic_info(const Player& player, GameContext& ctx, int& row)
 {
 	int tileSize = ctx.renderer->get_tile_size();
@@ -79,15 +105,6 @@ void display_attributes(const Player& player, GameContext& ctx, int& row)
 	int tileSize = ctx.renderer->get_tile_size();
 	int x = tileSize;
 
-	// What Strength gives a swing, as the attack itself reads it.
-	const AttackStrength::Adjustment swing = AttackStrength::adjustment(
-		*ctx.dataManager,
-		player,
-		AttackKind::MELEE,
-		nullptr);
-	const int strHitMod = swing.hit;
-	const int strDmgMod = swing.damage;
-
 	const DexterityAttributes dexterityRow = ctx.dataManager->dexterity_for(player.get_dexterity());
 	const int missileAdj = dexterityRow.MissileAttackAdj;
 	const int defensiveAdj = dexterityRow.DefensiveAdj;
@@ -96,7 +113,7 @@ void display_attributes(const Player& player, GameContext& ctx, int& row)
 	row++;
 
 	ctx.renderer->draw_text(
-		Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("STR: {:>2}  ({:+d} hit, {:+d} dmg)", strength_text(player), strHitMod, strDmgMod), ColorPairId::WHITE_BLACK);
+		Vector2D{ x, panel_text_row_y(0, tileSize, row) }, CharacterSheetText::strength_line(player, *ctx.dataManager), ColorPairId::WHITE_BLACK);
 	row++;
 
 	ctx.renderer->draw_text(

@@ -12,6 +12,17 @@ struct GameContext;
 namespace CharacterSheetText
 {
 
+// The attribute panel's Strength line: the score as the book writes it, and what a
+// melee swing takes from it. Exceptional Strength prints as 18/76, and a percentile of
+// 100 as 18/00 (Player's Handbook, Table 1). The hit and damage come from
+// AttackStrength::adjustment for a weaponless melee swing, so the sheet and the attack
+// cannot disagree.
+//
+// Example:
+//   strength_line(fighter, dataManager);   // Str 18/76 -> "STR: 18/76  (+2 hit, +4 dmg)"
+//   strength_line(wizard, dataManager);    // Str 9     -> "STR:  9  (+0 hit, +0 dmg)"
+[[nodiscard]] std::string strength_line(const Player& player, const DataManager& dataManager);
+
 // The attribute panel's Constitution line: the score and the hit points it adds to
 // each level's die. Once the creature's next level no longer takes that adjustment
 // (Player's Handbook, PDF page 32), the line names the last level that did.

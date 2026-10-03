@@ -1,0 +1,54 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=StrengthLineTest.*:CharacterSheetTextTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/CharacterSheetUI.cpp",
+      "original": "\t\tAttackStrength::adjustment(dataManager, player, AttackKind::MELEE, nullptr);",
+      "mutated": "\t\tAttackStrength::Adjustment{ 0, 0 };",
+      "catches": "the sheet no longer reading Table 1 at all, so every score prints as +0 and +0"
+    },
+    {
+      "file": "src/CharacterSheetUI.cpp",
+      "original": "\treturn std::format(\"STR: {:>2}  ({:+d} hit, {:+d} dmg)\", strength_text(player), swing.hit, swing.damage);",
+      "mutated": "\treturn std::format(\"STR: {:>2}  ({:+d} hit, {:+d} dmg)\", strength_text(player), swing.damage, swing.hit);",
+      "catches": "hit and damage printed in each other's place, which agree at most scores and not at 18/00"
+    },
+    {
+      "file": "src/CharacterSheetUI.cpp",
+      "original": "\treturn std::format(\"STR: {:>2}  ({:+d} hit, {:+d} dmg)\", strength_text(player), swing.hit, swing.damage);",
+      "mutated": "\treturn std::format(\"STR: {}  ({:+d} hit, {:+d} dmg)\", strength_text(player), swing.hit, swing.damage);",
+      "catches": "the column padding dropped, so a single-digit score shifts the bracket out of line with every other row"
+    },
+    {
+      "file": "src/CharacterSheetUI.cpp",
+      "original": "\treturn std::format(\"STR: {:>2}  ({:+d} hit, {:+d} dmg)\", strength_text(player), swing.hit, swing.damage);",
+      "mutated": "\treturn std::format(\"STR: {:>2}  ({} hit, {} dmg)\", strength_text(player), swing.hit, swing.damage);",
+      "catches": "the sign dropped, so a bonus of 1 and a penalty of 1 both print as 1"
+    },
+    {
+      "file": "src/CharacterSheetUI.cpp",
+      "original": "\t\treturn std::format(\"{}\", player.get_strength());",
+      "mutated": "\t\treturn std::format(\"18/{:02d}\", player.get_exceptional_strength() % 100);",
+      "catches": "an ordinary score printed as an exceptional one"
+    },
+    {
+      "file": "src/CharacterSheetUI.cpp",
+      "original": "\treturn std::format(\"18/{:02d}\", exceptional % 100);",
+      "mutated": "\treturn std::format(\"18/{:02d}\", exceptional);",
+      "catches": "a percentile of 100 printed as 18/100 rather than the 18/00 the book writes"
+    },
+    {
+      "file": "src/CharacterSheetUI.cpp",
+      "original": "\tif (player.get_strength() != 18 || exceptional < 1)",
+      "mutated": "\tif (player.get_strength() != 18)",
+      "catches": "a plain 18 printed as 18/00, since its percentile is zero"
+    }
+  ],
+  "equivalent_note": "AttackKind::MELEE changed to RANGED was tried here and survived, and it is equivalent rather than untested: AttackStrength::adjustment opens with 'if (kind == AttackKind::MELEE || missileWeapon == nullptr)', so a null weapon short-circuits the kind and both arms return the same row. No input distinguishes them at this call site. Derived by reading the source, not machine-checked. The argument is worth keeping as a statement of intent - the sheet prints a swing - but nothing can test that it says MELEE, and a mutant claiming otherwise is a false finding."
+}
