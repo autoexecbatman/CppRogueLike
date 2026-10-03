@@ -27,6 +27,7 @@
 #include <memory>
 
 #include "src/GameContext.h"
+#include "src/GameStateManager.h"
 #include "src/HealthPool.h"
 #include "src/Player.h"
 #include "src/ThiefSkills.h"
@@ -118,6 +119,61 @@ TEST_F(TrapDisarmTest, AnOrdinaryFailureLeavesTheTrapArmedAndTheThiefUnhurt)
 	EXPECT_EQ(pit->attempt_disarm(*thief, ctx), DisarmResult::BEYOND_SKILL);
 	EXPECT_EQ(pit->get_state(), TrapState::DETECTED) << "the trap is still there, still armed";
 	EXPECT_EQ(thief->get_hp(), before) << "an ordinary failure costs nothing";
+}
+
+// The save-scum the rule was open to. "He can try disarming the trap again when he
+// advances to the next experience level" is kept on the trap, and nothing about a trap
+// reached the save file, so reloading handed the attempt back. The trap carries the
+// level across the save now, and a second try at the same level is still refused.
+TEST_F(TrapDisarmTest, AnAttemptIsNotHandedBackByReloading)
+{
+	buy_find_remove_traps(20);
+	auto pit = found_trap();
+
+	mock.dice.set_next_roll(90);
+	ASSERT_EQ(pit->attempt_disarm(*thief, ctx), DisarmResult::BEYOND_SKILL) << "the attempt for this level is spent";
+
+	std::vector<std::unique_ptr<Trap>> level;
+	level.push_back(std::move(pit));
+	json saved;
+	save_traps(level, saved);
+	load_traps(saved, level, mock.tile_config);
+
+	ASSERT_EQ(level.size(), 1u);
+
+	// A sure success is queued behind the guard: a trap that remembered the attempt
+	// refuses before rolling and never reaches it, while one that forgot rolls the 1
+	// and defuses. Leaving the die unscripted does not work - an unremembered attempt
+	// then rolls at random and fails against a skill of 20 most of the time, which is
+	// BEYOND_SKILL again and indistinguishable from the guard holding.
+	mock.dice.set_next_roll(1);
+
+	EXPECT_EQ(level.front()->attempt_disarm(*thief, ctx), DisarmResult::BEYOND_SKILL)
+		<< "reloading gave the thief its attempt back";
+}
+
+// A defused trap keeps its sprung face across a save. The tile follows from the state
+// rather than being stored, so the load path has to re-derive it - and a trap drawn
+// armed is one the player will walk around for no reason.
+TEST_F(TrapDisarmTest, ADefusedTrapStillLooksDefusedAfterReloading)
+{
+	buy_find_remove_traps(20);
+	auto pit = found_pit();
+
+	mock.dice.set_next_roll(1);
+	ASSERT_EQ(pit->attempt_disarm(*thief, ctx), DisarmResult::DISARMED);
+	const TileRef sprung = pit->actorData.tile;
+	ASSERT_FALSE(sprung == mock.tile_config.get("TILE_TRAP_PIT_ARMED")) << "a defused pit does not show the armed face";
+
+	std::vector<std::unique_ptr<Trap>> level;
+	level.push_back(std::move(pit));
+	json saved;
+	save_traps(level, saved);
+	load_traps(saved, level, mock.tile_config);
+
+	ASSERT_EQ(level.size(), 1u);
+	EXPECT_EQ(level.front()->get_state(), TrapState::DISARMED);
+	EXPECT_TRUE(level.front()->actorData.tile == sprung) << "the defused pit came back drawn as armed";
 }
 
 // "If the dice roll is 96-100, the thief accidentally triggers the trap and suffers

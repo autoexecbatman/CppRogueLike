@@ -4,7 +4,7 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=TrapDisarmTest.*:TrapDamageTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=TrapDisarmTest.*:TrapSerializationTest.*:TrapDamageTest.*"
   ],
   "mutations": [
     {
@@ -60,6 +60,42 @@
       "original": "\t\tstate = TrapState::DISARMED;",
       "mutated": "\t\tstate = TrapState::DETECTED;",
       "catches": "a successful removal leaving the trap armed"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\tj[\"disarmAttemptedAtLevel\"] = disarmAttemptedAtLevel;",
+      "mutated": "\tj[\"disarmAttemptedAtLevel\"] = 0;",
+      "catches": "a save that forgets the attempt, handing it back on reload - the save-scum this closed"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\tdisarmAttemptedAtLevel = j.at(\"disarmAttemptedAtLevel\").get<int>();",
+      "mutated": "\tdisarmAttemptedAtLevel = 0;",
+      "catches": "a load that drops the attempt, which reads as a fresh trap to the same thief"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\tstate = static_cast<TrapState>(j.at(\"state\").get<int>());",
+      "mutated": "\tstate = TrapState::HIDDEN;",
+      "catches": "every trap hidden again on load, so a level the player has cleared is unknown"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\tconst bool spent = (state == TrapState::TRIGGERED || state == TrapState::DISARMED);",
+      "mutated": "\tconst bool spent = (state == TrapState::TRIGGERED);",
+      "catches": "a defused trap drawn as though it were still armed"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\tif (state == TrapState::HIDDEN)\n\t{\n\t\tadd_state(ActorState::IS_INVISIBLE);\n\t}\n\telse\n\t{\n\t\tremove_state(ActorState::IS_INVISIBLE);\n\t}",
+      "mutated": "\tremove_state(ActorState::IS_INVISIBLE);",
+      "catches": "every hidden trap drawn on the map after a load, which gives the level away"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\ttraps.clear();",
+      "mutated": "\t;",
+      "catches": "a load during play leaving the abandoned level's traps on the new map"
     }
   ]
 }

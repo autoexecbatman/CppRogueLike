@@ -30,6 +30,7 @@
 #include "Player.h"
 #include "Renderer.h"
 #include "TileConfig.h"
+#include "Trap.h"
 #include "UniqueId.h"
 #include "Vector2D.h"
 
@@ -110,6 +111,40 @@ void load_creatures(const json& j, std::vector<std::unique_ptr<Creature>>& creat
 }
 
 } // namespace
+
+void save_traps(const std::vector<std::unique_ptr<Trap>>& traps, json& j)
+{
+	j["traps"] = json::array();
+	for (const auto& trap : traps)
+	{
+		assert(trap && "save_traps: the trap list holds a null entry");
+		json trapJson;
+		trap->save(trapJson);
+		j["traps"].push_back(trapJson);
+	}
+}
+
+void load_traps(const json& j, std::vector<std::unique_ptr<Trap>>& traps, const TileConfig& tileConfig)
+{
+	// Replace rather than append: a load during play would otherwise leave the
+	// abandoned level's traps on the new map, at the tiles they had there.
+	traps.clear();
+
+	if (!j.contains("traps") || !j["traps"].is_array())
+	{
+		return;
+	}
+
+	for (const auto& trapJson : j["traps"])
+	{
+		// Built through the same constructor the generator uses, so the type decides
+		// the dice, the name and both tiles exactly as it did the first time.
+		const auto type = static_cast<TrapType>(trapJson.at("type").get<int>());
+		auto trap = std::make_unique<Trap>(Vector2D{ 0, 0 }, type, tileConfig);
+		trap->load(trapJson);
+		traps.push_back(std::move(trap));
+	}
+}
 
 void GameStateManager::init_new_game(GameContext& ctx)
 {
@@ -202,6 +237,9 @@ void GameStateManager::save_game(GameContext& ctx)
 		ctx.map->save(j);
 		save_rooms(*ctx.rooms, j);
 
+		assert(ctx.traps && "save_game: the level was saved with no trap container");
+		save_traps(*ctx.traps, j);
+
 		json playerJson;
 		ctx.player()->save(playerJson);
 		j["player"] = playerJson;
@@ -258,6 +296,10 @@ bool GameStateManager::load_game(GameContext& ctx)
 
 	ctx.map->load(j);
 	load_rooms(j, *ctx.rooms);
+
+	assert(ctx.traps && "load_game: a level was loaded with no trap container");
+	assert(ctx.tileConfig && "load_game: a trap cannot be rebuilt without the tile table");
+	load_traps(j, *ctx.traps, *ctx.tileConfig);
 
 	if (j.contains("player"))
 	{

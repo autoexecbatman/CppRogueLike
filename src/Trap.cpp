@@ -260,3 +260,43 @@ void Trap::destroy()
 {
 	mark_destroyed();
 }
+
+void Trap::save(json& j)
+{
+	Actor::save(j); // Call base class save
+
+	j["type"] = static_cast<int>(type);
+	j["state"] = static_cast<int>(state);
+	j["disarmAttemptedAtLevel"] = disarmAttemptedAtLevel;
+}
+
+void Trap::load(const json& j)
+{
+	Actor::load(j); // Call base class load
+
+	state = static_cast<TrapState>(j.at("state").get<int>());
+	disarmAttemptedAtLevel = j.at("disarmAttemptedAtLevel").get<int>();
+
+	// The type is set by the constructor the caller used, so the damage dice, the name
+	// and both tiles are already right. The base has just restored a saved tile and a
+	// saved invisibility over the top of them, and the state is what decides those - so
+	// they are worked out again here rather than trusted from the record.
+	apply_state_appearance();
+}
+
+void Trap::apply_state_appearance()
+{
+	// Hidden is the only state that draws nothing; sprung and defused show the second
+	// face. Derived rather than saved, so the picture cannot disagree with the state.
+	const bool spent = (state == TrapState::TRIGGERED || state == TrapState::DISARMED);
+	actorData.tile = spent ? sprungTile : armedTile;
+
+	if (state == TrapState::HIDDEN)
+	{
+		add_state(ActorState::IS_INVISIBLE);
+	}
+	else
+	{
+		remove_state(ActorState::IS_INVISIBLE);
+	}
+}

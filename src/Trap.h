@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "Persistent.h" // json
 #include "Renderer.h" // TileRef, held by value below
 #include "TileFeature.h"
 #include "Vector2D.h"
@@ -67,6 +68,15 @@ public:
 	// Destroy this trap (called after trigger or successful disarm)
 	void destroy();
 
+	// Writes what cannot be rebuilt from the type: where it is, which kind it is, what
+	// state it is in, and the experience level its last disarm attempt was made at.
+	void save(json& j) override;
+
+	// Restores those four and nothing else. The damage dice, the name, both tiles and
+	// the colour come from the constructor, so a save can never disagree with the type
+	// table; visibility follows from the state rather than being stored.
+	void load(const json& j) override;
+
 private:
 	TrapType type{ TrapType::PIT };
 	TrapState state{ TrapState::HIDDEN };
@@ -86,6 +96,10 @@ private:
 	// book gives a thief one attempt per level on a given trap, so the trap is what
 	// remembers it: a character who fails here may still try the next trap along.
 	int disarmAttemptedAtLevel{ 0 };
+
+	// Puts the tile and the visibility back in step with the state. Called on load,
+	// where the constructor has just set both as though the trap were fresh.
+	void apply_state_appearance();
 
 	// The detection roll a hidden trap gets as a creature steps onto it: 1d20 plus
 	// the dexterity modifier against detectionDC, success leaving it DETECTED.
