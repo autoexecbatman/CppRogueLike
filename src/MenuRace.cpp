@@ -1,5 +1,7 @@
 // file: MenuRace.cpp
+#include <array>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "GameContext.h"
@@ -9,96 +11,61 @@
 #include "Player.h"
 #include "RandomDice.h"
 
+namespace
+{
+// Which key picks a race. The key is the menu's own business; a race's name and its
+// ability adjustments are the race's, and both are read from it rather than written
+// here. Half-Elf takes no key, 'h' being the human's and 'e' the elf's.
+struct RaceChoice
+{
+	Player::PlayerRaceState race;
+	char hotkey;
+};
+
+constexpr std::array<RaceChoice, 6> RACE_CHOICES{
+	RaceChoice{ Player::PlayerRaceState::HUMAN, 'h' },
+	RaceChoice{ Player::PlayerRaceState::DWARF, 'd' },
+	RaceChoice{ Player::PlayerRaceState::ELF, 'e' },
+	RaceChoice{ Player::PlayerRaceState::GNOME, 'g' },
+	RaceChoice{ Player::PlayerRaceState::HALFELF, 0 },
+	RaceChoice{ Player::PlayerRaceState::HALFLING, 'l' }
+};
+} // namespace
+
 std::unique_ptr<BaseMenu> make_race_menu(GameContext& ctx)
 {
 	std::vector<MenuEntry> entries;
 
-	auto humanCommand = [](GameContext& ctx)
+	// Writing the race is one operation whichever entry asks for it, so the name and
+	// the modifiers cannot be set from different races by one of them.
+	auto choose_race = [](Player::PlayerRaceState race, GameContext& chosenCtx)
 	{
-		ctx.playerBlueprint->playerRace = "Human";
-		ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::HUMAN);
-		ctx.menus->push_back(make_class_menu(ctx));
+		chosenCtx.playerBlueprint->playerRace = std::string{ race_display_name(race) };
+		chosenCtx.playerBlueprint->racialModifier = racial_ability_modifiers(race);
+		chosenCtx.menus->push_back(make_class_menu(chosenCtx));
 	};
-	entries.push_back({ "Human", 'h', humanCommand });
 
-	auto dwarfCommand = [](GameContext& ctx)
+	for (const RaceChoice& choice : RACE_CHOICES)
 	{
-		ctx.playerBlueprint->playerRace = "Dwarf";
-		ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::DWARF);
-		ctx.menus->push_back(make_class_menu(ctx));
-	};
-	entries.push_back({ "Dwarf", 'd', dwarfCommand });
-
-	auto elfCommand = [](GameContext& ctx)
-	{
-		ctx.playerBlueprint->playerRace = "Elf";
-		ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::ELF);
-		ctx.menus->push_back(make_class_menu(ctx));
-	};
-	entries.push_back({ "Elf", 'e', elfCommand });
-
-	auto gnomeCommand = [](GameContext& ctx)
-	{
-		ctx.playerBlueprint->playerRace = "Gnome";
-		ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::GNOME);
-		ctx.menus->push_back(make_class_menu(ctx));
-	};
-	entries.push_back({ "Gnome", 'g', gnomeCommand });
-
-	auto halfElfCommand = [](GameContext& ctx)
-	{
-		ctx.playerBlueprint->playerRace = "Half-Elf";
-		ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::HALFELF);
-		ctx.menus->push_back(make_class_menu(ctx));
-	};
-	entries.push_back({ "Half-Elf", 0, halfElfCommand });
-
-	auto halflingCommand = [](GameContext& ctx)
-	{
-		ctx.playerBlueprint->playerRace = "Halfling";
-		ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::HALFLING);
-		ctx.menus->push_back(make_class_menu(ctx));
-	};
-	entries.push_back({ "Halfling", 'l', halflingCommand });
-
-	auto randomCommand = [](GameContext& ctx)
-	{
-		switch (ctx.dice->d6())
+		auto raceCommand = [choose_race, race = choice.race](GameContext& commandCtx)
 		{
-		case 1:
-			ctx.playerBlueprint->playerRace = "Human";
-			ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::HUMAN);
-			break;
-		case 2:
-			ctx.playerBlueprint->playerRace = "Dwarf";
-			ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::DWARF);
-			break;
-		case 3:
-			ctx.playerBlueprint->playerRace = "Elf";
-			ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::ELF);
-			break;
-		case 4:
-			ctx.playerBlueprint->playerRace = "Gnome";
-			ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::GNOME);
-			break;
-		case 5:
-			ctx.playerBlueprint->playerRace = "Half-Elf";
-			ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::HALFELF);
-			break;
-		case 6:
-			ctx.playerBlueprint->playerRace = "Halfling";
-			ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::HALFLING);
-			break;
-		default:
-			break;
-		}
-		ctx.menus->push_back(make_class_menu(ctx));
+			choose_race(race, commandCtx);
+		};
+		entries.push_back({ std::string{ race_display_name(choice.race) }, choice.hotkey, raceCommand });
+	}
+
+	// A d6 over the six the menu offers, so a race added to the list is rollable by
+	// being on it.
+	auto randomCommand = [choose_race](GameContext& randomCtx)
+	{
+		const size_t rolled = static_cast<size_t>(randomCtx.dice->d6() - 1);
+		choose_race(ALL_PLAYER_RACE.at(rolled), randomCtx);
 	};
 	entries.push_back({ "Random", 'r', randomCommand });
 
-	auto backCommand = [](GameContext& ctx)
+	auto backCommand = [](GameContext& backCtx)
 	{
-		ctx.menus->back()->back = true;
+		backCtx.menus->back()->back = true;
 	};
 	entries.push_back({ "Back", 'b', backCommand });
 

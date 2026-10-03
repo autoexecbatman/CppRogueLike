@@ -1,0 +1,47 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=RaceDisplayNameTest.*:PlayerSerializationTest.*:ThiefSkillCharacterTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\treturn \"Half-Elf\";",
+      "mutated": "\t\treturn \"Half Elf\";",
+      "catches": "the hyphen dropped, which is the typo class this was built for"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\treturn \"Gnome\";",
+      "mutated": "\t\treturn \"Dwarf\";",
+      "catches": "two races answering to one name, so a choice resolves to the other one"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\treturn \"Elf\";",
+      "mutated": "\t\treturn \"\";",
+      "catches": "a race the menu offers with no name to offer"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\treturn race_display_name(race) == displayName;",
+      "mutated": "\t\treturn race_display_name(race).starts_with(displayName);",
+      "catches": "a loose match, where a prefix of a name resolves to a race and the empty string resolves to the first one"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tconst auto found = std::ranges::find_if(ALL_PLAYER_RACE, is_named);",
+      "mutated": "\tconst auto found = ALL_PLAYER_RACE.begin();",
+      "catches": "every name reading back as the first race, so five of the six are lost"
+    },
+    {
+      "file": "src/Player.h",
+      "original": "\tPlayer::PlayerRaceState::HALFELF,",
+      "mutated": "",
+      "catches": "a race left off the list, which is how a race added to the enum goes unoffered and unparsed"
+    }
+  ]
+}

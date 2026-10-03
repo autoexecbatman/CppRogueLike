@@ -174,6 +174,39 @@ public:
 	DualWieldInfo get_dual_wield_info() const noexcept;
 };
 
+// The six a character can be, in the order the race menu offers them. NONE is not
+// among them: it is the state a Player has before a race is chosen, not a choice.
+inline constexpr std::array<Player::PlayerRaceState, 6> ALL_PLAYER_RACE{
+	Player::PlayerRaceState::HUMAN,
+	Player::PlayerRaceState::DWARF,
+	Player::PlayerRaceState::ELF,
+	Player::PlayerRaceState::GNOME,
+	Player::PlayerRaceState::HALFELF,
+	Player::PlayerRaceState::HALFLING
+};
+
+// What a race is called on screen. **This is the only place a race's name is
+// written** - the menu that offers it, the character sheet and the death screen all
+// read it from here, so no two of them can disagree. NONE answers "None", which is
+// what an unchosen race prints.
+//
+// Example:
+//   race_display_name(Player::PlayerRaceState::HALFELF);   // -> "Half-Elf"
+//   race_display_name(Player::PlayerRaceState::NONE);      // -> "None"
+[[nodiscard]] std::string_view race_display_name(Player::PlayerRaceState race);
+
+// The inverse, for the one caller that has a name and needs the race: the Player
+// constructor, reading a blueprint the menus filled in. Total over the enum, NONE
+// included, because a blueprint that never reached the race menu carries NONE's name
+// and still has to build a character. Empty only for a name no race answers to, which
+// is a wiring fault rather than something a player can choose.
+//
+// Example:
+//   race_state_from_display_name("Half-Elf");   // -> PlayerRaceState::HALFELF
+//   race_state_from_display_name("None");       // -> PlayerRaceState::NONE, the unchosen state
+//   race_state_from_display_name("Half Elf");   // -> empty, the hyphen matters
+[[nodiscard]] std::optional<Player::PlayerRaceState> race_state_from_display_name(std::string_view displayName);
+
 // What a race does to the six scores, in ALL_ABILITY order. AD&D 2e racial ability
 // adjustments; a human and a half-elf take none. One table, read both by the
 // allocation screen, which shows what a score will become, and by

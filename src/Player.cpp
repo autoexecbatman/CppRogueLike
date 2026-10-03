@@ -205,30 +205,17 @@ Player::Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext&
 
 	auto applyRaceData = [this](std::string_view name)
 	{
-		if (name == "Human")
+		const std::optional<PlayerRaceState> named = race_state_from_display_name(name);
+		// The race menu writes this name from race_display_name, so a name no race
+		// answers to is a wiring fault rather than a choice a player can make. Left
+		// unasserted it was silent: playerRaceState stayed NONE and every racial
+		// adjustment paid nothing.
+		assert(named.has_value() && "Player: built from a blueprint whose race name names no race");
+		if (!named.has_value())
 		{
-			playerRaceState = PlayerRaceState::HUMAN;
+			return;
 		}
-		else if (name == "Dwarf")
-		{
-			playerRaceState = PlayerRaceState::DWARF;
-		}
-		else if (name == "Elf")
-		{
-			playerRaceState = PlayerRaceState::ELF;
-		}
-		else if (name == "Gnome")
-		{
-			playerRaceState = PlayerRaceState::GNOME;
-		}
-		else if (name == "Half-Elf")
-		{
-			playerRaceState = PlayerRaceState::HALFELF;
-		}
-		else if (name == "Halfling")
-		{
-			playerRaceState = PlayerRaceState::HALFLING;
-		}
+		playerRaceState = *named;
 	};
 
 	applyClassData(blueprint.playerClass);
@@ -385,6 +372,69 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 	}
 	}
 }
+
+std::string_view race_display_name(Player::PlayerRaceState race)
+{
+	switch (race)
+	{
+	case Player::PlayerRaceState::HUMAN:
+	{
+		return "Human";
+	}
+	case Player::PlayerRaceState::ELF:
+	{
+		return "Elf";
+	}
+	case Player::PlayerRaceState::DWARF:
+	{
+		return "Dwarf";
+	}
+	case Player::PlayerRaceState::HALFLING:
+	{
+		return "Halfling";
+	}
+	case Player::PlayerRaceState::GNOME:
+	{
+		return "Gnome";
+	}
+	case Player::PlayerRaceState::HALFELF:
+	{
+		return "Half-Elf";
+	}
+	case Player::PlayerRaceState::NONE:
+	{
+		return "None";
+	}
+	}
+
+	return "None";
+}
+
+std::optional<Player::PlayerRaceState> race_state_from_display_name(std::string_view displayName)
+{
+	// The unchosen state is the one enumerator the choices list leaves out, and a
+	// blueprint that has not reached the race menu carries its name, so it is
+	// answered before the choices are searched.
+	if (displayName == race_display_name(Player::PlayerRaceState::NONE))
+	{
+		return Player::PlayerRaceState::NONE;
+	}
+
+	// Searched against the names rather than switched on them a second time, so the
+	// round trip holds by construction: there is one table and this reads it backwards.
+	auto is_named = [displayName](Player::PlayerRaceState race)
+	{
+		return race_display_name(race) == displayName;
+	};
+
+	const auto found = std::ranges::find_if(ALL_PLAYER_RACE, is_named);
+	if (found == ALL_PLAYER_RACE.end())
+	{
+		return std::nullopt;
+	}
+	return *found;
+}
+
 std::array<int, ABILITY_COUNT> racial_ability_modifiers(Player::PlayerRaceState race)
 {
 	switch (race)
