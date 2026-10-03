@@ -36,6 +36,30 @@
       "original": "\tdungeon_level = levelData.at(\"dungeonLevel\").get<int>();",
       "mutated": "\tdungeon_level = levelData.value(\"dungeonLevel\", 1);",
       "catches": "a save missing its dungeon level loading as a character on level one"
+    },
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\tsavedState[\"confusionEndTime\"] = confusionEndTime;",
+      "mutated": "\tsavedState[\"confusionEndTime\"] = 0;",
+      "catches": "a save that drops the confusion, so reloading frees a confused player on the next action"
+    },
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\tconfusionEndTime = savedState.at(\"confusionEndTime\").get<int>();",
+      "mutated": "\tconfusionEndTime = 0;",
+      "catches": "a load that drops the confusion, which reads to the next action as the spell having run out"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tj[\"controller\"] = controllerJson;",
+      "mutated": "\tj[\"controller\"] = json::object();",
+      "catches": "the controller's section written empty, so the load finds no reading to restore"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tcontroller->load(j.at(\"controller\"));",
+      "mutated": "\t;",
+      "catches": "a player loaded without its controller ever being told what the record said"
     }
   ]
 }

@@ -3,6 +3,7 @@
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
 #include "src/PlayerController.h"
+#include "src/TurnSchedule.h"
 #include "src/ExperienceReward.h"
 #include "src/ItemCreator.h"
 #include "tests/mocks/MockGameContext.h"
@@ -260,4 +261,48 @@ TEST_F(PlayerSerializationTest, EveryComponentTheGameReadsSurvivesARoundTrip)
 	EXPECT_NE(loaded->experienceReward, nullptr) << "loaded without an experience reward; the next kill writes to it";
 	EXPECT_NE(loaded->attacker, nullptr) << "loaded without an attacker";
 	EXPECT_NE(loaded->controller, nullptr) << "loaded without a controller";
+}
+
+// A confusion is a duration on the shared clock, and nothing carried it across a save.
+// PlayerController::save and load were empty bodies that nothing called, so the timer
+// came back zero while IS_CONFUSED came back set - and the next action read that as the
+// spell having run out and printed "Your mind clears." The player was freed early.
+TEST_F(PlayerSerializationTest, AConfusionSurvivesTheSave)
+{
+	auto original = create_test_player();
+	original->apply_confusion(3, 0);
+
+	json saved;
+	original->save(saved);
+
+	auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
+	loaded->load(saved);
+
+	// The controller is private, so the round trip is read back out the way it went in:
+	// saving the restored player again must produce the same reading. A load that
+	// dropped it would write a zero here.
+	json resaved;
+	loaded->save(resaved);
+
+	ASSERT_TRUE(saved.contains("controller")) << "the controller reached no part of the save";
+	EXPECT_EQ(resaved.at("controller"), saved.at("controller"))
+		<< "the confusion did not survive the round trip";
+}
+
+// The same thing at the unit it belongs to, where the remaining rounds can be read
+// rather than compared as bytes.
+TEST_F(PlayerSerializationTest, TheControllerCarriesTheConfusionsEndTime)
+{
+	auto owner = create_test_player();
+	PlayerController original{ *owner };
+	original.apply_confusion(3, 0);
+
+	json saved;
+	original.save(saved);
+
+	PlayerController restored{ *owner };
+	restored.load(saved);
+
+	EXPECT_TRUE(restored.is_confused(TIME_UNITS_PER_ROUND * 2)) << "two rounds in, the spell has a round to run";
+	EXPECT_FALSE(restored.is_confused(TIME_UNITS_PER_ROUND * 3)) << "and it ends on the third";
 }

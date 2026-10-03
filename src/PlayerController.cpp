@@ -196,14 +196,19 @@ void PlayerController::update(GameContext& ctx)
 	}
 }
 
-// The controller holds only input state, which is rebuilt each frame. Player
-// data belongs to Player and is written there.
+// Almost all of the controller is frame state - the field-of-view flag, the waiting
+// flag, the pending door action and the whole mouse path - and is either rebuilt each
+// frame or is mid-interaction state that cannot exist at the moment a game is saved.
+// The confusion is the exception: it is a reading on the shared clock, and a spell
+// still running when the player saves is still running when they come back.
 void PlayerController::load(const json& savedState)
 {
+	confusionEndTime = savedState.at("confusionEndTime").get<int>();
 }
 
 void PlayerController::save(json& savedState)
 {
+	savedState["confusionEndTime"] = confusionEndTime;
 }
 
 void PlayerController::move(Vector2D target)

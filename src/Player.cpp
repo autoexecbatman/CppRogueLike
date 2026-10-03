@@ -823,6 +823,13 @@ void Player::save(json& j)
 {
 	Creature::save(j); // Call base class save
 
+	// The controller owns the confusion timer, so it writes its own section rather
+	// than the player reaching in for one field.
+	assert(controller && "Player::save called with null controller");
+	json controllerJson;
+	controller->save(controllerJson);
+	j["controller"] = controllerJson;
+
 	// Player-specific fields
 	j["playerRaceState"] = static_cast<int>(playerRaceState);
 	j["playerClassState"] = static_cast<int>(playerClassState);
@@ -874,6 +881,11 @@ void Player::load(const json& j)
 	attacker = std::make_unique<PlayerAttacker>(*this);
 	// PlayerController is not in the Ai hierarchy -- construct directly.
 	controller = std::make_unique<PlayerController>(*this);
+
+	// After construction, because the fresh controller would otherwise overwrite what
+	// the record says. Required rather than tolerated: a save without this section is
+	// a save this build did not write, and the parser is the only schema there is.
+	controller->load(j.at("controller"));
 
 	// Player-specific fields
 	playerRaceState = static_cast<PlayerRaceState>(j.at("playerRaceState").get<int>());
