@@ -84,3 +84,15 @@ TEST_F(TreasureGoldTest, ATreasurePileIsTheSameItemAsAFloorPile)
 	EXPECT_EQ(gold->itemClass, mock.itemRegistry.get_params("gold_coin").itemClass);
 	EXPECT_EQ(gold->actorData.name, std::string(mock.itemRegistry.get_params("gold_coin").name));
 }
+
+// A pile weighs what its coins weigh, at the owner's thousand to the pound. The
+// record's own weight is a constant and cannot answer for a pile, so this is the one
+// item whose weight is a function of what it holds.
+TEST_F(TreasureGoldTest, APileWeighsWhatItsCoinsWeigh)
+{
+	const auto light = ItemCreator::create_with_gold_amount(Vector2D{ 10, 10 }, 999, ctx);
+	EXPECT_EQ(light->enhancement.weight, 0) << "a purse under a thousand is pocket change";
+
+	const auto heavy = ItemCreator::create_with_gold_amount(Vector2D{ 10, 10 }, 7500, ctx);
+	EXPECT_EQ(heavy->enhancement.weight, 7) << "the part-thousand must not round up";
+}

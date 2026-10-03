@@ -155,3 +155,57 @@ TEST_F(CarryWeightTest, TheClothingAllowanceCountsAgainstTheLimit)
 	EXPECT_TRUE(InventoryOperations::is_within_weight_limit(*weighing(limit - 5), carrier, *ctx.dataManager));
 	EXPECT_FALSE(InventoryOperations::is_within_weight_limit(*weighing(limit - 4), carrier, *ctx.dataManager));
 }
+
+// A thousand coins weigh one pound - the owner's ruling, 2026-10-03. The archive
+// prints no coins-per-pound figure anywhere, so this is a stated exception and not a
+// rule read off a table. A monster carries it here so the clothing allowance is not
+// in the sum.
+TEST_F(CarryWeightTest, AThousandCoinsWeighOnePound)
+{
+	carrier.set_creature_class(CreatureClass::MONSTER);
+
+	carrier.set_gold(999);
+	EXPECT_EQ(InventoryOperations::get_total_weight(carrier), 0) << "a purse under a thousand is pocket change";
+
+	carrier.set_gold(1000);
+	EXPECT_EQ(InventoryOperations::get_total_weight(carrier), 1);
+
+	carrier.set_gold(2999);
+	EXPECT_EQ(InventoryOperations::get_total_weight(carrier), 2) << "the part-thousand must not round up";
+}
+
+// The purse is carried, so it takes room from the pack like any other load. At
+// Strength 10 the limit is 110 pounds and ten thousand coins spend ten of them.
+TEST_F(CarryWeightTest, APurseTakesRoomFromThePack)
+{
+	carrier.set_creature_class(CreatureClass::MONSTER);
+	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
+	carrier.set_gold(10000);
+
+	EXPECT_TRUE(InventoryOperations::is_within_weight_limit(*weighing(limit - 10), carrier, *ctx.dataManager));
+	EXPECT_FALSE(InventoryOperations::is_within_weight_limit(*weighing(limit - 9), carrier, *ctx.dataManager))
+		<< "ten pounds of coin left the whole limit free";
+}
+
+// Coin alone can overload a carrier, which is the whole point of giving it a weight:
+// a hoard is something to make a decision about rather than a number on a panel.
+TEST_F(CarryWeightTest, EnoughCoinOverloadsACarrierOnItsOwn)
+{
+	carrier.set_creature_class(CreatureClass::MONSTER);
+	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
+	carrier.set_gold((limit + 1) * 1000);
+
+	EXPECT_TRUE(InventoryOperations::is_overloaded(carrier, *ctx.dataManager))
+		<< "a purse heavier than its carrier can lift weighed nothing";
+}
+
+// The purse joins the pack, the body and the clothing allowance in one total.
+TEST_F(CarryWeightTest, ThePurseIsPartOfACharactersOneLoad)
+{
+	carrier.set_creature_class(CreatureClass::ROGUE);
+	carrier.set_gold(3000);
+	ASSERT_TRUE(InventoryOperations::add_item(carrier.inventoryData, weighing(10)).has_value());
+
+	// Five pounds of clothing, ten in the pack, three of coin.
+	EXPECT_EQ(InventoryOperations::get_total_weight(carrier), 18);
+}

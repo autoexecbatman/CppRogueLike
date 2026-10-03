@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=CarryWeightTest.*:TreasureGoldTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/InventoryOperations.cpp",
+      "original": "constexpr int COINS_PER_POUND = 1000;",
+      "mutated": "constexpr int COINS_PER_POUND = 100;",
+      "catches": "a rate ten times heavier than the one the owner set"
+    },
+    {
+      "file": "src/InventoryOperations.cpp",
+      "original": "\treturn goldPieces / COINS_PER_POUND;",
+      "mutated": "\treturn (goldPieces + COINS_PER_POUND - 1) / COINS_PER_POUND;",
+      "catches": "the part-thousand rounded up, so a single coin weighs a pound"
+    },
+    {
+      "file": "src/InventoryOperations.cpp",
+      "original": "\ttotal += coin_weight(owner.get_gold());",
+      "mutated": "",
+      "catches": "the purse left out of the load, which is the defect this was built for"
+    },
+    {
+      "file": "src/InventoryOperations.cpp",
+      "original": "\ttotal += coin_weight(owner.get_gold());",
+      "mutated": "\tif (owner.get_creature_class() != CreatureClass::MONSTER) { total += coin_weight(owner.get_gold()); }",
+      "catches": "a monster's hoard weighing nothing, where the clothing allowance is the only thing a class decides"
+    },
+    {
+      "file": "src/ItemCreator.cpp",
+      "original": "\titem->enhancement.weight = InventoryOperations::coin_weight(goldAmount);",
+      "mutated": "\titem->enhancement.weight = params.weight;",
+      "catches": "a pile answering with the record's constant, which is the zero this issue opened on"
+    }
+  ]
+}

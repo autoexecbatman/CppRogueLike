@@ -204,7 +204,16 @@ namespace
 {
 // What the book allows for the clothes a character stands up in.
 constexpr int CLOTHING_POUNDS = 5;
+
+// The owner's rate, the archive printing none. See coin_weight's contract.
+constexpr int COINS_PER_POUND = 1000;
 } // namespace
+
+int coin_weight(int goldPieces) noexcept
+{
+	assert(goldPieces >= 0 && "coin_weight: a purse cannot hold less than nothing");
+	return goldPieces / COINS_PER_POUND;
+}
 
 int get_total_weight(const Creature& owner) noexcept
 {
@@ -224,6 +233,10 @@ int get_total_weight(const Creature& owner) noexcept
 		assert(equipped.item && "an equipment slot owns the item in it");
 		total += equipped.item->enhancement.weight;
 	}
+
+	// The purse is carried too. Gold never enters the pack - a pile picked up goes
+	// straight to the counter - so this is the only place its weight can be felt.
+	total += coin_weight(owner.get_gold());
 	return total;
 }
 
