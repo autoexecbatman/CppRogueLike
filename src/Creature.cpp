@@ -22,6 +22,7 @@
 #include "Creature.h"
 #include "DamageInfo.h"
 #include "DataManager.h"
+#include "Drowning.h"
 #include "EquipmentSlot.h"
 #include "FloatingTextSystem.h"
 #include "GameBalance.h"
@@ -208,6 +209,14 @@ void Creature::load(const json& j)
 	morality = parse_morality(j.at("morality").get<std::string>());
 	undead = j.at("undead").get<bool>();
 	awareUntilTime = j.at("awareUntilTime").get<int>();
+
+	// Absent when the creature is not holding a breath, which is the usual case, so the
+	// key is written only when there is one and read only when it is there.
+	airUntilTime.reset();
+	if (j.contains("airUntilTime"))
+	{
+		airUntilTime = j.at("airUntilTime").get<int>();
+	}
 	webStuckTurns = j.at("webStuckTurns").get<int>();
 	webStrength = j.at("webStrength").get<int>();
 	creatureClass = parse_creature_class(j.at("creatureClass").get<std::string>());
@@ -318,6 +327,10 @@ void Creature::save(json& j)
 	j["morality"] = encode_morality(morality);
 	j["undead"] = undead;
 	j["awareUntilTime"] = awareUntilTime;
+	if (airUntilTime.has_value())
+	{
+		j["airUntilTime"] = *airUntilTime;
+	}
 	j["webStuckTurns"] = webStuckTurns;
 	j["webStrength"] = webStrength;
 	j["creatureClass"] = encode_creature_class(creatureClass);
@@ -1012,13 +1025,81 @@ bool Creature::wears_item_with(MagicalEffect effect) const noexcept
 // A creature's own state, or the one worn source the game has for one: the gauntlets
 // of swimming and climbing, whose wearer "can swim as fast as a triton" (Dungeon
 // Master Guide, PDF page 964) and so crosses the water this game models swimming as.
+// A creature that lives in water breathes it; one that is only visiting does not. The
+// gauntlets of swimming carry a wearer across water and say nothing about air, which is
+// the gap the helm of underwater action fills.
+bool Creature::needs_air_underwater() const noexcept
+{
+	if (has_state(ActorState::CAN_SWIM))
+	{
+		return false;
+	}
+	return !wears_item_with(MagicalEffect::UNDERWATER_ACTION);
+}
+
+void Creature::tick_breath(GameContext& ctx)
+{
+	assert(ctx.map && "tick_breath: a round ran with no map to stand on");
+	assert(ctx.gameState && "tick_breath: a round ran with no clock to hold a breath against");
+	assert(ctx.dice && "tick_breath: a round ran with no dice to check against");
+
+	// Dry ground, or a creature that breathes water, or one wearing the helm: there is
+	// no breath being held, and any that was is over the moment it surfaces.
+	if (!ctx.map->is_water(position) || !needs_air_underwater())
+	{
+		airUntilTime.reset();
+		return;
+	}
+
+	const int currentTime = ctx.gameState->get_time();
+
+	// The round it is first found in water is the gulp of air.
+	if (!airUntilTime.has_value())
+	{
+		airUntilTime = expiry_time(currentTime, breath_rounds(get_constitution()));
+		return;
+	}
+
+	if (currentTime < *airUntilTime)
+	{
+		return;
+	}
+
+	// Past the allowance. The penalty comes off the clock rather than a second counter:
+	// how far past it is already says how many checks have been made.
+	const int roundsPast = rounds_completed_at(currentTime - *airUntilTime);
+	const int target = get_constitution() + breath_check_penalty(roundsPast);
+
+	if (ctx.dice->d20() <= target)
+	{
+		return;
+	}
+
+	ctx.messageSystem->append_message_part(actorData.color, std::format("{}", actorData.name));
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " cannot hold out any longer and drowns!\n");
+	ctx.messageSystem->finalize_message();
+
+	// Drowning is not damage that might leave a creature standing. die() carries out
+	// what death does - the reward, the corpse, the message - and reads the health pool
+	// rather than emptying it, so the pool is emptied first.
+	set_hp(0);
+	die(ctx);
+}
+
 bool Creature::has_bypass(ActorState state) const noexcept
 {
 	if (has_state(state))
 	{
 		return true;
 	}
-	return state == ActorState::CAN_SWIM && wears_item_with(MagicalEffect::SWIMMING);
+	if (state != ActorState::CAN_SWIM)
+	{
+		return false;
+	}
+
+	// Either item carries a wearer across water: the gauntlets of swimming, and the
+	// helm of underwater action, which also keeps the air on once they are in.
+	return wears_item_with(MagicalEffect::SWIMMING) || wears_item_with(MagicalEffect::UNDERWATER_ACTION);
 }
 
 bool Creature::wears_ring_of(MagicalEffect effect) const noexcept

@@ -113,6 +113,11 @@ private:
 	Ethics ethics{ Ethics::NEUTRAL }; // law/chaos axis; true neutral until data says otherwise
 	Morality morality{ Morality::NEUTRAL }; // good/evil axis
 	int awareUntilTime{ 0 }; // the clock reading this creature stops remembering the player at
+
+	// The clock reading this creature runs out of air at, empty when it is not holding
+	// its breath. Set on the round it is found in water and cleared when it surfaces,
+	// so nothing has to notice the move itself.
+	std::optional<int> airUntilTime{};
 	bool undead{ false }; // whether a priest may attempt to turn this creature
 	bool displaceable{ true }; // whether the player may swap places with it
 	int webStuckTurns{ 0 }; // turns remaining before the web lets go
@@ -418,6 +423,22 @@ public:
 	// Example:
 	//   skeleton.get_hit_dice(); // -> 1
 	[[nodiscard]] int get_hit_dice() const noexcept { return creatureLevel; }
+
+	// The reading this creature runs out of air at, if it is holding its breath.
+	[[nodiscard]] std::optional<int> get_air_until_time() const noexcept { return airUntilTime; }
+	void set_air_until_time(std::optional<int> reading) noexcept { airUntilTime = reading; }
+
+	// Whether this creature has to breathe at all while in water. A creature that lives
+	// there does not, and nor does one wearing a helm of underwater action, which keeps
+	// a globe of air about its head (Dungeon Master Guide, PDF page 970).
+	[[nodiscard]] bool needs_air_underwater() const noexcept;
+
+	// One round of holding a breath. A creature found in water takes a gulp of air that
+	// lasts breath_rounds of its Constitution; past that it rolls a Constitution check
+	// each round, worsening by two each time, and drowns on a failure (Player's
+	// Handbook, PDF pages 239 and 240). Surfacing clears it, so nothing has to watch
+	// the move - standing somewhere dry on any round is enough.
+	void tick_breath(GameContext& ctx);
 
 	// Whether this creature still remembers the player at `currentTime`. A memory the
 	// clock has passed is gone, so nothing has to run it down.

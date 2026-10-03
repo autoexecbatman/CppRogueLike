@@ -92,7 +92,6 @@ private:
 	void spawn_player(const DungeonRoom& room, GameContext& ctx);
 	void generate_rooms(GameContext& ctx);
 	bool is_floor(Vector2D pos) const noexcept { return get_tile_type(pos) == TileType::FLOOR; }
-	bool is_water(Vector2D pos) const noexcept;
 	void set_explored(Vector2D pos); // set the tile as explored
 	void post_process_doors();
 
@@ -110,6 +109,10 @@ public:
 	void init(GameContext& ctx);
 	bool is_in_fov(Vector2D pos) const noexcept;
 	TileType get_tile_type(Vector2D pos) const noexcept;
+
+	// Whether that tile is water. Public because drowning asks it from outside: a
+	// creature's round has to know whether it is standing in the stuff.
+	bool is_water(Vector2D pos) const noexcept;
 	// Tells the player about the tile they are on, where it is worth remarking on.
 	void describe_tile(TileType tileType, GameContext& ctx);
 	bool is_collision(Creature& owner, TileType tileType, Vector2D pos, GameContext& ctx);

@@ -453,6 +453,7 @@ void GameLoopCoordinator::apply_round_upkeep(GameContext& ctx)
 		creature.regenerate_from_constitution(thisRound, *ctx.dataManager);
 		creature.regenerate_from_ring(thisRound);
 		creature.tick_poison(ctx);
+		creature.tick_breath(ctx);
 	};
 
 	for (const auto& creature : *ctx.creatures)

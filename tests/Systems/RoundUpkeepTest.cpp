@@ -36,6 +36,7 @@
 #include "src/HealthPool.h"
 #include "src/HungerSystem.h"
 #include "src/Item.h"
+#include "src/Map.h"
 #include "src/Player.h"
 #include "tests/mocks/MockGameContext.h"
 
@@ -69,6 +70,11 @@ protected:
 		ctx.hungerSystem = &hungerSystem;
 		ctx.curseSystem = &curseSystem;
 		ctx.gameLoopCoordinator = &coordinator;
+
+		// A round reaches every body on the level, and a body has to be standing
+		// somewhere: holding a breath asks the map whether that somewhere is water.
+		ctx.map = &map;
+		map.init_tiles();
 	}
 
 	// Given a class, because regenerate_from_constitution returns early for MONSTER.
@@ -101,6 +107,7 @@ protected:
 	MockGameContext mock{};
 	GameContext ctx{};
 	GameLoopCoordinator coordinator{};
+	Map map{ 20, 20 };
 	HungerSystem hungerSystem{};
 	CurseSystem curseSystem{};
 	std::unique_ptr<Player> player{};

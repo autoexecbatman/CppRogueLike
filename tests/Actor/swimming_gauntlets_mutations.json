@@ -4,7 +4,7 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=SwimmingGauntletsTest.*:StatBoostEquipmentTest.*:MapTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=SwimmingGauntletsTest.*:DrowningInWaterTest.*:StatBoostEquipmentTest.*:MapTest.*"
   ],
   "mutations": [
     {
@@ -15,9 +15,9 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\treturn state == ActorState::CAN_SWIM && wears_item_with(MagicalEffect::SWIMMING);",
-      "mutated": "\treturn wears_item_with(MagicalEffect::SWIMMING);",
-      "catches": "the gauntlets opening every tile a state guards, not only water"
+      "original": "\tif (state != ActorState::CAN_SWIM)\n\t{\n\t\treturn false;\n\t}",
+      "mutated": "\tif (false)\n\t{\n\t\treturn false;\n\t}",
+      "catches": "a worn source opening every tile a state guards, not only water"
     },
     {
       "file": "src/Creature.cpp",
@@ -42,6 +42,12 @@
       "original": "\treturn !(definition.hasBypassState && owner.has_bypass(definition.bypassState));",
       "mutated": "\treturn !(definition.hasBypassState && owner.has_state(definition.bypassState));",
       "catches": "the map reading a creature's own flags and never what it wears"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\treturn wears_item_with(MagicalEffect::SWIMMING) || wears_item_with(MagicalEffect::UNDERWATER_ACTION);",
+      "mutated": "\treturn wears_item_with(MagicalEffect::SWIMMING);",
+      "catches": "the helm of underwater action no longer carrying its wearer into the water"
     }
   ]
 }

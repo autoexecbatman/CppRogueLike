@@ -1,0 +1,71 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=DrowningTest.*:DrowningInWaterTest.*:RoundUpkeepTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Drowning.h",
+      "original": "\tconst int third = (constitution + 2) / 3;",
+      "mutated": "\tconst int third = constitution / 3;",
+      "catches": "the third truncated instead of rounded up, so a Constitution of 14 buys four rounds where the book gives five"
+    },
+    {
+      "file": "src/Drowning.h",
+      "original": "\treturn std::max(1, third);",
+      "mutated": "\treturn third;",
+      "catches": "the floor gone, so a feeble creature gets no breath at all where the book grants one round regardless"
+    },
+    {
+      "file": "src/Drowning.h",
+      "original": "\treturn -2 * std::max(0, roundsPastAllowance);",
+      "mutated": "\treturn -2;",
+      "catches": "a flat penalty rather than a cumulative one, so holding out longer costs nothing more"
+    },
+    {
+      "file": "src/Drowning.h",
+      "original": "\treturn -2 * std::max(0, roundsPastAllowance);",
+      "mutated": "\treturn -2 * std::max(1, roundsPastAllowance);",
+      "catches": "the first check penalised, where the book says it has no modifiers"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tairUntilTime = expiry_time(currentTime, breath_rounds(get_constitution()));",
+      "mutated": "\t\tairUntilTime = expiry_time(currentTime, breath_rounds(get_constitution()) * 2);",
+      "catches": "twice the air the Constitution buys"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tif (ctx.dice->d20() <= target)",
+      "mutated": "\tif (ctx.dice->d20() < target)",
+      "catches": "a roll equal to the Constitution failing, where a check is made on or under the score"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tconst int roundsPast = rounds_completed_at(currentTime - *airUntilTime);",
+      "mutated": "\tconst int roundsPast = 0;",
+      "catches": "every check unmodified however long the creature holds out, so the penalty never accumulates"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tif (has_state(ActorState::CAN_SWIM))\n\t{\n\t\treturn false;\n\t}",
+      "mutated": "\tif (false)\n\t{\n\t\treturn false;\n\t}",
+      "catches": "a creature that lives in water drowning in its own element"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\treturn !wears_item_with(MagicalEffect::UNDERWATER_ACTION);",
+      "mutated": "\treturn true;",
+      "catches": "the helm of underwater action doing nothing, which is the defect this was built for"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tairUntilTime.reset();\n\t\treturn;",
+      "mutated": "\t\treturn;",
+      "catches": "a breath that is never let go, so surfacing and diving again continues the old one"
+    }
+  ]
+}
