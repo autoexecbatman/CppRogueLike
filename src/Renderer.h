@@ -361,14 +361,19 @@ public:
 	// comes back unchanged, trailing space included, because that space separates it
 	// from whatever is drawn beside it.
 	//
-	// Example, read off the HUD's log panel at 1280x896, where the panel measures
-	// 575 pixels between its divider and the frame's right rule:
+	// Example at a width of 300 pixels. A round number on purpose: a real panel's width
+	// quoted here is wrong as soon as that panel moves.
 	//
-	//   fit_text_to_width("You are now Well Fed.", 575);
+	//   fit_text_to_width("You are now Well Fed.", 300);
 	//   // -> "You are now Well Fed."          // fits, so it is returned whole
 	//
-	//   fit_text_to_width("mail, long sword, shield, long bow, fireball scroll.", 575);
+	//   fit_text_to_width("mail, long sword, shield, long bow, fireball scroll.", 300);
 	//   // -> "mail, long sword, shield, long" // cut at a space, never mid-word
+	//
+	// How many characters that is depends on the font loaded in main.cpp, so the cut
+	// above is illustrative rather than measured. The log panel wraps rather than
+	// truncating - see draw_log_part in Gui.cpp - so a long message there runs onto
+	// the next row instead of losing its tail.
 	//
 	// The cut lands on a space, so a caller that needs the tail of a string rather
 	// than its head - an input field showing what was just typed - wants to limit
