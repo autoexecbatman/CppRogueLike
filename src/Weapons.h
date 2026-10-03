@@ -95,7 +95,6 @@ struct Weapons
 	bool is_two_handed() const noexcept { return handRequirement == HandRequirement::TWO_HANDED; }
 	bool can_use_one_handed() const noexcept { return handRequirement == HandRequirement::ONE_HANDED; }
 	bool can_use_two_handed() const noexcept { return handRequirement == HandRequirement::TWO_HANDED; }
-	std::string get_damage_roll(bool twoHanded = false) const noexcept;
 
 	// NOTE: Complex dual-wield logic removed - was never integrated with combat
 };

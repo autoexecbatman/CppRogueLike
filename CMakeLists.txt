@@ -141,7 +141,6 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Stairs.h
 
     # Persistent
-    ${PROJECT_SOURCE_DIR}/Persistent.cpp
     ${PROJECT_SOURCE_DIR}/Persistent.h
 
     # Ai - Updated paths
@@ -257,7 +256,6 @@ set(SOURCE_FILES # Add Source Files Here !
     # Items - Updated paths
     ${PROJECT_SOURCE_DIR}/ItemClassification.cpp
     ${PROJECT_SOURCE_DIR}/ItemClassification.h
-    ${PROJECT_SOURCE_DIR}/Weapons.cpp
     ${PROJECT_SOURCE_DIR}/Weapons.h
     ${PROJECT_SOURCE_DIR}/MagicalItemEffects.cpp
     ${PROJECT_SOURCE_DIR}/MagicalItemEffects.h

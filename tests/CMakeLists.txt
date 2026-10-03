@@ -177,8 +177,6 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Creature.cpp
     ${PARENT_SOURCE_DIR}/Item.cpp
 
-    # Persistent
-    ${PARENT_SOURCE_DIR}/Persistent.cpp
 
     # Ai
     ${PARENT_SOURCE_DIR}/Ai.cpp
@@ -229,7 +227,6 @@ set(PARENT_SOURCES
 
     # Items
     ${PARENT_SOURCE_DIR}/ItemClassification.cpp
-    ${PARENT_SOURCE_DIR}/Weapons.cpp
     ${PARENT_SOURCE_DIR}/MagicalItemEffects.cpp
 
     # Systems
