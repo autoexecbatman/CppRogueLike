@@ -111,6 +111,11 @@ void save_stat_boost(const T& statBoost, PickableType type, json& output)
 	output["chaBonus"] = statBoost.chaBonus;
 	output["isSetMode"] = statBoost.isSetMode;
 	output["exceptionalStrength"] = statBoost.exceptionalStrength;
+	// Creature::wears_item_with reads this field off any behaviour that has one, so a
+	// record without it comes back as an ordinary stat boost: the gauntlets of
+	// swimming stopped crossing water once they had been through a save.
+	output["effect"] = encode_magical_effect(statBoost.effect);
+	output["bonus"] = statBoost.bonus;
 }
 
 template <typename T>
@@ -124,6 +129,8 @@ void load_stat_boost(T& statBoost, const json& source)
 	statBoost.chaBonus = source.at("chaBonus").get<int>();
 	statBoost.isSetMode = source.at("isSetMode").get<bool>();
 	statBoost.exceptionalStrength = source.at("exceptionalStrength").get<int>();
+	statBoost.effect = parse_magical_effect(source.at("effect").get<std::string>());
+	statBoost.bonus = source.at("bonus").get<int>();
 }
 
 // Shared use() for stat-boost equipment (Gauntlets, Girdle, JewelryAmulet): puts the item

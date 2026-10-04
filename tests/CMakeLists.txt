@@ -92,6 +92,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/WebTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/TrapDamageTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/TrapSerializationTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Objects/WornEffectPersistenceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/BuffTypeEncodingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CodecRoundTripTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EnumCycleTest.cpp

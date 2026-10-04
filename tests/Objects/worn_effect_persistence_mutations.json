@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=WornEffectPersistenceTest.*:InventoryPersistenceTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\toutput[\"effect\"] = encode_magical_effect(statBoost.effect);",
+      "mutated": "\toutput[\"effect\"] = encode_magical_effect(MagicalEffect::NONE);",
+      "catches": "a worn effect written out as nothing, which is the defect: the gauntlets of swimming come back plain"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\toutput[\"bonus\"] = statBoost.bonus;",
+      "mutated": "\toutput[\"bonus\"] = 0;",
+      "catches": "a protection of +1 saved as +0, the effect surviving while its size does not"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\tstatBoost.effect = parse_magical_effect(source.at(\"effect\").get<std::string>());",
+      "mutated": "\tstatBoost.effect = MagicalEffect::NONE;",
+      "catches": "the field written and then thrown away on the way back in"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\tstatBoost.bonus = source.at(\"bonus\").get<int>();",
+      "mutated": "\tstatBoost.bonus = 0;",
+      "catches": "the bonus read back as zero however it was saved"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\t\t\toutput[\"type\"] = encode_pickable_type(PickableType::MAGICAL_HELM);\n\t\t\t\toutput[\"effect\"] = encode_magical_effect(b.effect);",
+      "mutated": "\t\t\t\toutput[\"type\"] = encode_pickable_type(PickableType::MAGICAL_HELM);",
+      "catches": "the helm losing what it already kept, so a fix to the other three cannot break the two that were right"
+    }
+  ]
+}
