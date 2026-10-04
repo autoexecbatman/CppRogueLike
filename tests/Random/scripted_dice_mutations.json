@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=AssertProbeDeathTest.ScriptingARoll*:SpiderAmbushTest.*:SanctuaryPursuitTest.*:ShopStockLevelTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/RandomDice.h",
+      "original": "\t\t\t\treturn max;",
+      "mutated": "\t\t\t\treturn min;",
+      "catches": "HIGHEST answering with the bottom of the die, so a save a test means to fail is made"
+    },
+    {
+      "file": "src/RandomDice.h",
+      "original": "\t\t\tassert(value >= min && value <= max && \"a scripted roll is outside the range the die was asked for\");",
+      "mutated": "",
+      "catches": "the guard gone, which is the defect: a test scripts a roll no die could make and passes"
+    },
+    {
+      "file": "src/RandomDice.h",
+      "original": "\t\t\tassert(value >= min && value <= max && \"a scripted roll is outside the range the die was asked for\");",
+      "mutated": "\t\t\tassert(value >= min && \"a scripted roll is outside the range the die was asked for\");",
+      "catches": "only the bottom of the range checked, so a 5 on a d4 still passes"
+    },
+    {
+      "file": "src/RandomDice.h",
+      "original": "\t\t\tif (value == HIGHEST)",
+      "mutated": "\t\t\tif (value == HIGHEST - 1)",
+      "catches": "the named top of the die no longer recognised, so it reaches the range check and aborts"
+    },
+    {
+      "file": "src/RandomDice.h",
+      "original": "\t\t\tassert(value >= min && value <= max && \"a scripted roll is outside the range the die was asked for\");",
+      "mutated": "\t\t\tassert(value <= max && \"a scripted roll is outside the range the die was asked for\");",
+      "catches": "only the top of the range checked, so a zero on a d20 still passes"
+    }
+  ]
+}

@@ -459,7 +459,7 @@ void PlayerController::swap_places_with(Creature& target, GameContext& ctx)
 // spends the turn only when an attempt was actually made.
 void PlayerController::attempt_turn_undead(GameContext& ctx)
 {
-	const TurnUndeadReport report = turn_undead(playerOwner, ctx);
+	const Turning::TurnUndeadReport report = Turning::turn_undead(playerOwner, ctx);
 
 	if (!report.attempted)
 	{

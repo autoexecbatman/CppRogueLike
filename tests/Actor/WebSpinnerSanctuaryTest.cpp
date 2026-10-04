@@ -33,6 +33,7 @@
 #include "src/Map.h"
 #include "src/MonsterAttacker.h"
 #include "src/Player.h"
+#include "src/RandomDice.h"
 #include "src/SavingThrow.h"
 
 class WebSpinnerSanctuaryTest : public ::testing::Test
@@ -111,7 +112,9 @@ TEST_F(WebSpinnerSanctuaryTest, SanctuaryHoldsOffASpinnerThatFailsToSave)
 {
 	ASSERT_GT(SavingThrows::target(spinner.get_creature_class(), spinner.get_creature_level(), SavingThrow::SPELL), 12);
 	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
-	script({ 12, 20, 4, 100 });
+	// The save, the attack, the bite's 1d4, then the player's own save against the
+	// venom, which the highest roll makes - so no venom lands either way.
+	script({ 12, 20, 4, RandomDice::HIGHEST });
 
 	EXPECT_EQ(hp_lost_to_one_turn(), 0) << "sanctuary held and the spinner bit anyway";
 }
@@ -121,7 +124,7 @@ TEST_F(WebSpinnerSanctuaryTest, SanctuaryHoldsOffASpinnerThatFailsToSave)
 TEST_F(WebSpinnerSanctuaryTest, ASpinnerThatSavesBitesAsUsual)
 {
 	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
-	script({ 20, 20, 4, 100 });
+	script({ 20, 20, 4, RandomDice::HIGHEST }); // the last is the player's venom save, made
 
 	EXPECT_EQ(hp_lost_to_one_turn(), 4) << "1d4 at four after a made save";
 }
@@ -141,7 +144,7 @@ TEST_F(WebSpinnerSanctuaryTest, NoVenomFromASpinnerTurnedAway)
 // No sanctuary, no save: the first roll is the attack.
 TEST_F(WebSpinnerSanctuaryTest, AnUnwardedPlayerIsBittenWithoutASave)
 {
-	script({ 20, 4, 100 });
+	script({ 20, 4, RandomDice::HIGHEST }); // the attack, the 1d4, then the venom save, made
 
 	EXPECT_EQ(hp_lost_to_one_turn(), 4) << "a save was rolled against a player without sanctuary";
 }

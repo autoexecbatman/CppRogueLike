@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+#include <limits>
 #include <random>
 #include <vector>
 
@@ -27,6 +29,15 @@ public:
 
 	// Damage strings such as "1d8+2" are rolled by DamageInfo::roll_damage.
 
+#ifdef TESTING_MODE
+	// Queue this in place of a number to mean "whatever this die's highest is". A test
+	// that wants a saving throw to fail does not always want to name the die it is
+	// rolled on, and an out-of-range number meaning that cannot be told apart from
+	// scripting a roll the die could never make. There is no LOWEST: nothing needed
+	// one, and an unused name is a second thing to keep right.
+	static constexpr int HIGHEST = std::numeric_limits<int>::max();
+#endif
+
 	int roll(int min, int max)
 	{
 #ifdef TESTING_MODE
@@ -35,6 +46,16 @@ public:
 		{
 			int value = m_fixed_rolls.front();
 			m_fixed_rolls.erase(m_fixed_rolls.begin());
+			if (value == HIGHEST)
+			{
+				return max;
+			}
+			// A queued value is the roll a test means a die to make, so it has to be one
+			// that die can make. Scripting a 5 on a d4 asserts something about a
+			// character no dice could produce, and it cannot be checked where the queue
+			// is filled: what will be rolled against it is not known until something
+			// rolls. Queue HIGHEST to mean the top of the range by name.
+			assert(value >= min && value <= max && "a scripted roll is outside the range the die was asked for");
 			return value;
 		}
 #endif

@@ -5,13 +5,18 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
+
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/ExperienceReward.h"
 #include "src/Map.h"
 #include "src/Player.h"
+#include "src/RandomDice.h"
 #include "src/TileType.h"
 #include "src/TurnUndead.h"
+
+using namespace Turning;
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
@@ -57,9 +62,14 @@ protected:
 		return *creatures.back();
 	}
 
-	void force_next_roll(int value)
+	// The attempt reads a d20, then two d6 for how many undead are affected. Each die
+	// is named, because a sum of two dice is not one roll: scripting the cap as a single
+	// value is how a cap of 1, which 2d6 cannot produce, got into two tests here.
+	void script_attempt(int d20Roll, int firstDie, int secondDie)
 	{
-		mock.dice.set_next_roll(value);
+		mock.dice.set_next_roll(d20Roll);
+		mock.dice.set_next_roll(firstDie);
+		mock.dice.set_next_roll(secondDie);
 	}
 
 	MockGameContext mock{};
@@ -85,8 +95,7 @@ TEST_F(TurnUndeadTest, NonClericCannotAttempt)
 TEST_F(TurnUndeadTest, StrongPriestDestroysWeakUndead)
 {
 	Creature& skeleton = add_undead(1, Vector2D{ 6, 5 });
-	force_next_roll(10); // the d20; irrelevant against a D result
-	force_next_roll(6); // 2d6 affected
+	script_attempt(10, 3, 3); // the d20, then 2d6 of 6
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
@@ -100,8 +109,7 @@ TEST_F(TurnUndeadTest, StrongPriestDestroysWeakUndead)
 TEST_F(TurnUndeadTest, SuccessfulRollSetsTheUndeadFleeing)
 {
 	Creature& wight = add_undead(5, Vector2D{ 6, 5 });
-	force_next_roll(12);
-	force_next_roll(6);
+	script_attempt(12, 3, 3); // the d20, then 2d6 of 6
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
@@ -115,8 +123,7 @@ TEST_F(TurnUndeadTest, SuccessfulRollSetsTheUndeadFleeing)
 TEST_F(TurnUndeadTest, FailedRollLeavesTheUndeadUnmoved)
 {
 	Creature& spectre = add_undead(8, Vector2D{ 6, 5 });
-	force_next_roll(12);
-	force_next_roll(6);
+	script_attempt(12, 3, 3); // the d20, then 2d6 of 6
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
@@ -129,8 +136,7 @@ TEST_F(TurnUndeadTest, FailedRollLeavesTheUndeadUnmoved)
 TEST_F(TurnUndeadTest, LivingCreaturesAreIgnored)
 {
 	Creature& goblin = add_living(Vector2D{ 6, 5 });
-	force_next_roll(20);
-	force_next_roll(6);
+	script_attempt(20, 3, 3); // the d20, then 2d6 of 6
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
@@ -144,8 +150,7 @@ TEST_F(TurnUndeadTest, LivingCreaturesAreIgnored)
 TEST_F(TurnUndeadTest, UndeadOutOfRangeIsUnaffected)
 {
 	Creature& distant = add_undead(1, Vector2D{ 5 + TURN_UNDEAD_RANGE + 1, 5 });
-	force_next_roll(20);
-	force_next_roll(6);
+	script_attempt(20, 3, 3); // the d20, then 2d6 of 6
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
@@ -159,8 +164,7 @@ TEST_F(TurnUndeadTest, OneRollIsReadAgainstEveryType)
 {
 	Creature& wight = add_undead(5, Vector2D{ 6, 5 }); // needs 4
 	Creature& spectre = add_undead(8, Vector2D{ 4, 5 }); // needs 16
-	force_next_roll(12);
-	force_next_roll(6);
+	script_attempt(12, 3, 3); // the d20, then 2d6 of 6
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
@@ -179,8 +183,7 @@ TEST_F(TurnUndeadTest, TheTwoDSixCapLimitsHowManyAreAffected)
 	{
 		add_undead(1, Vector2D{ 6, 4 + placed });
 	}
-	force_next_roll(10); // the d20
-	force_next_roll(2); // 2d6: only two of the four may be affected
+	script_attempt(10, 1, 1); // the d20, then 2d6 of 2
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
@@ -189,19 +192,21 @@ TEST_F(TurnUndeadTest, TheTwoDSixCapLimitsHowManyAreAffected)
 }
 
 // "If the undead are a mixed group, the lowest Hit Dice creatures are turned
-// first." The wight is placed first, so only the sort can put the skeleton ahead
-// of it.
+// first." The wight is placed first, so only the sort can put the skeletons ahead
+// of it. Three undead and a cap of two, because the lowest 2d6 can roll is two and a
+// cap cannot bind on a group no larger than itself.
 TEST_F(TurnUndeadTest, TheWeakestAreAffectedFirstWhenTheCapBinds)
 {
 	Creature& wight = add_undead(5, Vector2D{ 6, 5 });
-	Creature& skeleton = add_undead(1, Vector2D{ 4, 5 });
-	force_next_roll(20); // clears every target number in play
-	force_next_roll(1); // 2d6: one undead only
+	Creature& firstSkeleton = add_undead(1, Vector2D{ 4, 5 });
+	Creature& secondSkeleton = add_undead(1, Vector2D{ 4, 6 });
+	script_attempt(20, 1, 1); // the d20 clears every target number, then 2d6 of two
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
-	ASSERT_EQ(report.destroyed.size(), 1u);
-	EXPECT_EQ(report.destroyed.front(), &skeleton) << "the tougher undead was taken first";
+	ASSERT_EQ(report.destroyed.size(), 2u);
+	EXPECT_EQ(report.destroyed.at(0), &firstSkeleton) << "the tougher undead was taken first";
+	EXPECT_EQ(report.destroyed.at(1), &secondSkeleton) << "the tougher undead was taken first";
 	ASSERT_EQ(report.resisted.size(), 1u);
 	EXPECT_EQ(report.resisted.front(), &wight);
 }
@@ -211,8 +216,7 @@ TEST_F(TurnUndeadTest, TheWeakestAreAffectedFirstWhenTheCapBinds)
 TEST_F(TurnUndeadTest, UndeadAtTheEdgeOfRangeIsAffected)
 {
 	Creature& skeleton = add_undead(1, Vector2D{ 5 + TURN_UNDEAD_RANGE, 5 });
-	force_next_roll(20);
-	force_next_roll(6);
+	script_attempt(20, 3, 3); // the d20, then 2d6 of 6
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
@@ -220,19 +224,22 @@ TEST_F(TurnUndeadTest, UndeadAtTheEdgeOfRangeIsAffected)
 	EXPECT_EQ(report.destroyed.front(), &skeleton) << "the edge of the range was treated as outside it";
 }
 
-// A body on the floor is not turned again, and does not spend one of the 2d6.
+// A body on the floor is not turned again, and does not spend one of the 2d6. Two
+// standing undead against a cap of two: if the corpse took a slot, only one of them
+// would fall. The lowest 2d6 can roll is two, so the cap cannot be made smaller.
 TEST_F(TurnUndeadTest, AlreadyDeadUndeadAreSkipped)
 {
 	Creature& corpse = add_undead(1, Vector2D{ 6, 5 });
 	corpse.set_hp(0);
-	Creature& standing = add_undead(1, Vector2D{ 4, 5 });
-	force_next_roll(20);
-	force_next_roll(1); // 2d6: one undead only, which the corpse would spend
+	Creature& firstStanding = add_undead(1, Vector2D{ 4, 5 });
+	Creature& secondStanding = add_undead(1, Vector2D{ 4, 6 });
+	script_attempt(20, 1, 1); // the d20, then 2d6 of two
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
-	ASSERT_EQ(report.destroyed.size(), 1u);
-	EXPECT_EQ(report.destroyed.front(), &standing) << "a corpse was counted against the cap";
+	ASSERT_EQ(report.destroyed.size(), 2u) << "a corpse was counted against the cap";
+	EXPECT_EQ(report.destroyed.at(0), &firstStanding);
+	EXPECT_EQ(report.destroyed.at(1), &secondStanding);
 }
 
 // "If the number rolled is equal to or greater than that listed, the attempt is
@@ -240,8 +247,7 @@ TEST_F(TurnUndeadTest, AlreadyDeadUndeadAreSkipped)
 TEST_F(TurnUndeadTest, ARollEqualToTheNumberNeededSucceeds)
 {
 	Creature& wight = add_undead(5, Vector2D{ 6, 5 });
-	force_next_roll(4); // exactly the number the table lists
-	force_next_roll(6);
+	script_attempt(4, 3, 3); // the d20, then 2d6 of 6
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
@@ -255,8 +261,7 @@ TEST_F(TurnUndeadTest, ARollEqualToTheNumberNeededSucceeds)
 TEST_F(TurnUndeadTest, AnUndeadOnTheDiagonalIsReachedAtTheSameRange)
 {
 	Creature& skeleton = add_undead(1, Vector2D{ 5 + TURN_UNDEAD_RANGE, 5 + TURN_UNDEAD_RANGE });
-	force_next_roll(20);
-	force_next_roll(6);
+	script_attempt(20, 3, 3); // the d20, then 2d6 of 6
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
@@ -271,8 +276,7 @@ TEST_F(TurnUndeadTest, AnUndeadOnTheDiagonalIsReachedAtTheSameRange)
 TEST_F(TurnUndeadTest, AnUndeadFiveTilesAwayIsOutOfReach)
 {
 	add_undead(1, Vector2D{ 10, 5 });
-	force_next_roll(20);
-	force_next_roll(6);
+	script_attempt(20, 3, 3); // the d20, then 2d6 of 6
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
@@ -299,11 +303,83 @@ TEST_F(TurnUndeadTest, AWallBetweenPriestAndUndeadDoesNotStopTheTurning)
 	ctx.map = &map;
 
 	Creature& skeleton = add_undead(1, Vector2D{ 7, 5 });
-	force_next_roll(20);
-	force_next_roll(6);
+	script_attempt(20, 3, 3); // the d20, then 2d6 of 6
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
 	ASSERT_EQ(report.destroyed.size(), 1u) << "a wall stopped a turn, which is a rule change rather than a repair";
 	EXPECT_EQ(report.destroyed.front(), &skeleton);
+}
+
+// "2d6 undead are affected" - two six-sided dice, so the cap runs from 2 to 12 and
+// sits on 7 more often than on either end. The call read TURN_UNDEAD_DICE_COUNT as a
+// minimum and TURN_UNDEAD_DICE_SIDES as a maximum, which is a flat 2 to 6: a priest
+// could never affect a seventh undead, and every count between 2 and 6 was equally
+// likely. Twelve skeletons stand here so the cap is the only thing that can bind.
+TEST_F(TurnUndeadTest, TheCapReachesTwelveBecauseItIsTwoDice)
+{
+	// Three columns beside the priest at {5,5}, every tile of them inside
+	// TURN_UNDEAD_RANGE, so the reach cannot be what limits the count.
+	constexpr int skeletons = 12;
+	for (int placed = 0; placed < skeletons; ++placed)
+	{
+		add_undead(1, Vector2D{ 6 + placed / 4, 4 + placed % 4 });
+	}
+	script_attempt(20, 6, 6); // the d20, then 2d6 of twelve
+
+	const TurnUndeadReport report = turn_undead(*player, ctx);
+
+	EXPECT_EQ(report.destroyed.size(), 12u) << "two sixes affected fewer than twelve undead";
+}
+
+// The other end of the same rule: two ones are two, never one, so a cap of one is a
+// number the dice cannot produce.
+TEST_F(TurnUndeadTest, TheCapStartsAtTwoBecauseItIsTwoDice)
+{
+	constexpr int skeletons = 5;
+	for (int placed = 0; placed < skeletons; ++placed)
+	{
+		add_undead(1, Vector2D{ 6, 4 + placed });
+	}
+	script_attempt(20, 1, 1); // the d20, then 2d6 of two
+
+	const TurnUndeadReport report = turn_undead(*player, ctx);
+
+	EXPECT_EQ(report.destroyed.size(), 2u) << "two ones did not affect exactly two undead";
+}
+
+// The dice the book prints, asserted in absolute terms. Every case above scripts the
+// dice by value, and a scripted value is returned whatever range was asked for
+// (issues/0072), so no test that scripts can see the die's size change underneath it.
+// "2d6 undead are affected" is the whole source for both numbers.
+TEST(TurnUndeadDiceTest, TheCapIsTwoSixSidedDice)
+{
+	EXPECT_EQ(TURN_UNDEAD_DICE_COUNT, 2) << "the book affects 2d6 undead, not another count";
+	EXPECT_EQ(TURN_UNDEAD_DICE_SIDES, 6) << "the book affects 2d6 undead, not another die";
+}
+
+// What the two dice can actually produce, drawn rather than scripted, because the
+// range a die is asked for is the one thing a scripted roll cannot show. Two summed
+// d6 reach both 2 and 12; the defect this replaced passed the count where the minimum
+// belongs, which gives a flat 2 to 6 - so a 12 never appears. Rolling the count and
+// the size as a range instead puts each die at 2 to 6, where a 2 never appears.
+//
+// 2,000 draws: the chance of missing an end of a 2d6 by luck is (35/36)^2000, which is
+// 3.4e-25. That is the whole of the statistics here - an observed extreme either
+// occurs or the range cannot produce it.
+TEST(TurnUndeadDiceTest, TwoDiceReachBothEndsOfTheirRange)
+{
+	RandomDice dice{};
+	int lowest = TURN_UNDEAD_DICE_COUNT * TURN_UNDEAD_DICE_SIDES;
+	int highest = 0;
+
+	for (int draw = 0; draw < 2000; ++draw)
+	{
+		const int cap = roll_turning_cap(dice);
+		lowest = std::min(lowest, cap);
+		highest = std::max(highest, cap);
+	}
+
+	EXPECT_EQ(lowest, 2) << "the lowest two dice can show is two";
+	EXPECT_EQ(highest, 12) << "the highest two dice can show is twelve";
 }

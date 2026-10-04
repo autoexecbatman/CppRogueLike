@@ -79,19 +79,11 @@ void animate_heal(const Vector2D& pos, GameContext& ctx)
 		60,
 		0.5f);
 }
-} // namespace
-
-namespace
-{
 // AD&D 2e: 1 missile at level 1, +1 every 2 levels, max 5
 int calculate_num_missiles(int casterLevel)
 {
 	return std::min(5, 1 + (casterLevel - 1) / 2);
 }
-} // namespace
-
-namespace
-{
 // Helper to convert PlayerClassState to CasterClass
 CasterClass to_caster_class(Player::PlayerClassState state)
 {
@@ -114,10 +106,6 @@ CasterClass to_caster_class(Player::PlayerClassState state)
 	}
 	}
 }
-} // namespace
-
-namespace
-{
 // Table 24's sixth and seventh columns are footnoted: a priest reaches them only at
 // these Wisdom scores. The rows are counted from one, so the fifth column is five
 // rows and the sixth is six.
@@ -139,6 +127,23 @@ const std::vector<int>& row_for_level(const std::vector<std::vector<int>>& table
 	return table.at(row);
 }
 } // namespace
+
+namespace Spells
+{
+
+int roll_sleep_hit_dice_budget(RandomDice& dice)
+{
+	// Each die on its own. roll() takes a range, so passing the count as its minimum
+	// gave a flat 2 to 4 rather than 2d4.
+	int total = 0;
+	for (int die = 0; die < SLEEP_HIT_DICE_COUNT; ++die)
+	{
+		total += dice.roll(1, SLEEP_HIT_DICE_SIDES);
+	}
+	return total;
+}
+
+} // namespace Spells
 
 std::vector<int> SpellSystem::progression_slots(CasterClass classState, int level)
 {
@@ -810,7 +815,7 @@ bool SpellSystem::cast_sleep(Creature& caster, GameContext& ctx)
 	constexpr int SLEEP_MAX_HIT_DICE = 4;
 	constexpr int SLEEP_ROUNDS_PER_LEVEL = 5;
 
-	int hdBudget = ctx.dice->roll(2, 4);
+	int hdBudget = Spells::roll_sleep_hit_dice_budget(*ctx.dice);
 	const int duration = SLEEP_ROUNDS_PER_LEVEL * caster.get_creature_level();
 
 	// Gather the eligible first: the budget is spent weakest-first, which the

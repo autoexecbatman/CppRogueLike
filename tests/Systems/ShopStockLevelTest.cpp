@@ -13,11 +13,12 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Item.h"
 #include "src/GameContext.h"
-#include "src/Paths.h"
+#include "src/Item.h"
 #include "src/ItemCreator.h"
 #include "src/LevelManager.h"
+#include "src/Paths.h"
+#include "src/RandomDice.h"
 #include "src/ShopKeeper.h"
 #include "tests/mocks/MockGameContext.h"
 
@@ -37,7 +38,10 @@ protected:
 		mock.dice.set_next_roll(3);
 		for (int item = 0; item < 3; ++item)
 		{
-			mock.dice.set_next_roll(10000);
+			// The weighted draw's range is the running weight total, which differs per
+			// item, so the draw asks for the top of it by name rather than guessing a
+			// number above every total.
+			mock.dice.set_next_roll(RandomDice::HIGHEST);
 			mock.dice.set_next_roll(100);
 		}
 	}

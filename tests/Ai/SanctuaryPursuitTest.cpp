@@ -37,8 +37,10 @@
 #include "src/Map.h"
 #include "src/MessageSystem.h"
 #include "src/MonsterAttacker.h"
+#include "src/Paths.h"
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
+#include "src/RandomDice.h"
 
 namespace
 {
@@ -59,6 +61,10 @@ protected:
 	void SetUp() override
 	{
 		game.dataManager.load_all_data(game.messageSystem);
+		// The web spinner's own update can lay a web, which needs TILE_WEB. Without
+		// this the spinner case passed only because an out-of-range scripted roll
+		// stopped the web being built at all.
+		game.tileConfig.load(Paths::TILE_CONFIG);
 
 		player->experienceReward = std::make_unique<ExperienceReward>(0);
 		player->healthPool = std::make_unique<HealthPool>(STARTING_HP);
@@ -104,6 +110,23 @@ protected:
 		game.dice.clear_fixed_rolls();
 	}
 
+	// Queues "top of the die" rolls to cover the idle rounds that follow. Idling rolls
+	// a d20 and acts only on a 1, so the top of the die never starts one.
+	//
+	// The count has to cover every roll the rounds make, not the rounds themselves:
+	// when the queue runs dry RandomDice falls back to real dice, and the test then
+	// depends on them. Measured 2026-10-04, the web spinner's four rounds asked for 58
+	// rolls against 22 queued, and the 36 real ones decided whether it span a web - the
+	// one flake in an otherwise green suite. The counts below are measured with room
+	// over the top, and a run that reaches the end of the queue is a run to re-measure.
+	void script_idle_rolls(int count)
+	{
+		for (int queued = 0; queued < count; ++queued)
+		{
+			game.dice.set_next_roll(RandomDice::HIGHEST);
+		}
+	}
+
 	void script(std::initializer_list<int> rolls)
 	{
 		for (const int roll : rolls)
@@ -115,9 +138,13 @@ protected:
 	// Rolls the goblin's save against the casting by having it attack once, and reports
 	// what the record now says. 12 fails the save here; the queued rolls behind it would
 	// land a hit if the save were skipped.
-	void make_the_goblin_fail_its_save()
+	// The save it fails, and whatever else the refused swing reads. That is not the
+	// same sequence for every creature: the goblin reads two more d20s, while the web
+	// spinner reads a d100 for whether it spins a web and then a pattern. So the caller
+	// scripts its own rolls instead of sharing values that land on different dice.
+	void fail_the_save_with(std::initializer_list<int> rolls)
 	{
-		script({ 12, 20, 4 });
+		script(rolls);
 		goblin.attacker->attack(*player, AttackKind::MELEE, ctx);
 		ASSERT_EQ(player->get_hp(), STARTING_HP) << "the save was skipped and the blow landed";
 	}
@@ -138,12 +165,13 @@ protected:
 TEST_F(SanctuaryPursuitTest, AMonsterThatFailedItsSaveStopsClosingIn)
 {
 	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
-	make_the_goblin_fail_its_save();
+	fail_the_save_with({ 12, 20, 4 });
 	const int distanceBefore = goblin_distance_to_player();
 
-	// Whatever the monster does instead of hunting reads dice: a zero is not the 1 that
-	// starts a wander, and a zero step is no step, so nothing here moves it by accident.
-	script({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+	// Whatever the monster does instead of hunting reads dice. Idling rolls a d20 and
+	// acts only on a 1, so the top of the die is never that 1 - which a zero also was
+	// not, except a zero is a roll no d20 can make.
+	script_idle_rolls(120);
 	for (int round = 0; round < 4; ++round)
 	{
 		goblin.ai->update(goblin, ctx);
@@ -162,6 +190,7 @@ TEST_F(SanctuaryPursuitTest, AMonsterThatMadeItsSaveKeepsHunting)
 	goblin.attacker->attack(*player, AttackKind::MELEE, ctx);
 	const int distanceBefore = goblin_distance_to_player();
 
+	script_idle_rolls(120);
 	for (int round = 0; round < 4; ++round)
 	{
 		goblin.ai->update(goblin, ctx);
@@ -178,6 +207,7 @@ TEST_F(SanctuaryPursuitTest, AMonsterThatNeverAttackedIsNotTurnedAway)
 	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
 	const int distanceBefore = goblin_distance_to_player();
 
+	script_idle_rolls(120);
 	for (int round = 0; round < 4; ++round)
 	{
 		goblin.ai->update(goblin, ctx);
@@ -194,10 +224,10 @@ TEST_F(SanctuaryPursuitTest, AMonsterThatLostTrackStopsAnnouncingItEveryRound)
 	// "cannot bring itself to attack" whenever a turned-away swing is made. Once it stops
 	// hunting there is no swing to turn away, so the line stops too.
 	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
-	make_the_goblin_fail_its_save();
+	fail_the_save_with({ 12, 20, 4 });
 	const size_t messagesAfterTheOneRefusal = game.messageSystem.get_stored_message_count();
 
-	script({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+	script_idle_rolls(120);
 	for (int round = 0; round < 4; ++round)
 	{
 		goblin.ai->update(goblin, ctx);
@@ -213,10 +243,10 @@ TEST_F(SanctuaryPursuitTest, ARangedMonsterThatLostTrackStopsShootingToo)
 	// At this distance it shoots rather than closes, so the shot is what must stop.
 	goblin.ai = std::make_unique<AiMonsterRanged>();
 	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
-	make_the_goblin_fail_its_save();
+	fail_the_save_with({ 12, 20, 4 });
 	const size_t messagesAfterTheOneRefusal = game.messageSystem.get_stored_message_count();
 
-	script({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+	script_idle_rolls(120);
 	for (int round = 0; round < 4; ++round)
 	{
 		goblin.ai->update(goblin, ctx);
@@ -232,10 +262,12 @@ TEST_F(SanctuaryPursuitTest, AWebSpinnerThatLostTrackStopsClosingIn)
 	// nothing here depends on venom - only on whether it still walks toward the player.
 	goblin.ai = std::make_unique<AiWebSpinner>();
 	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
-	make_the_goblin_fail_its_save();
+	// The spinner's second roll is the d100 for whether it spins a web, and spinning
+	// needs a tile this fixture does not load. The top of the die is over the chance.
+	fail_the_save_with({ 12, RandomDice::HIGHEST });
 	const int distanceBefore = goblin_distance_to_player();
 
-	script({ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+	script_idle_rolls(120);
 	for (int round = 0; round < 4; ++round)
 	{
 		goblin.ai->update(goblin, ctx);

@@ -4,7 +4,7 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=TurningTableTest.*:TurnUndeadTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=TurningTableTest.*:TurnUndeadTest.*:TurnUndeadDiceTest.*"
   ],
   "mutations": [
     {
@@ -96,6 +96,24 @@
       "original": "inline constexpr int TURN_UNDEAD_RANGE = 4;\n",
       "mutated": "inline constexpr int TURN_UNDEAD_RANGE = 5;\n",
       "catches": "the reach growing by a tile, which every test written against the constant moves with and cannot see"
+    },
+    {
+      "file": "src/TurnUndead.cpp",
+      "original": "\t\ttotal += dice.roll(1, TURN_UNDEAD_DICE_SIDES);",
+      "mutated": "\t\ttotal += dice.roll(TURN_UNDEAD_DICE_COUNT, TURN_UNDEAD_DICE_SIDES);",
+      "catches": "the count passed where a minimum belongs, which is the defect: a flat 2 to 6 that can never reach a seventh undead"
+    },
+    {
+      "file": "src/TurnUndead.cpp",
+      "original": "\tfor (int die = 0; die < TURN_UNDEAD_DICE_COUNT; ++die)",
+      "mutated": "\tfor (int die = 0; die < 1; ++die)",
+      "catches": "one die instead of two, so the cap runs 1 to 6 and the book's lowest result of two is beatable"
+    },
+    {
+      "file": "src/TurnUndead.h",
+      "original": "inline constexpr int TURN_UNDEAD_DICE_SIDES = 6;",
+      "mutated": "inline constexpr int TURN_UNDEAD_DICE_SIDES = 8;",
+      "catches": "2d8 where the book prints 2d6"
     }
   ]
 }

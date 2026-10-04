@@ -62,10 +62,13 @@
 #include "src/Paths.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
+#include "src/RandomDice.h"
 #include "src/ShopkeeperFactory.h"
 #include "src/SpellSystem.h"
 #include "src/TargetingSystem.h"
 #include "src/TurnUndead.h"
+
+using namespace Turning;
 #include "src/WeaponDamageRegistry.h"
 #include "tests/mocks/MockGameContext.h"
 
@@ -468,4 +471,28 @@ TEST_F(AssertProbeDeathTest, AcquiringATargetWithANullInTheCreatureListAborts)
 
 	EXPECT_DEATH([[maybe_unused]] const TargetResult result = targeting.acquire_nearest(ctx, *attacker, 10),
 		"target_auto_nearest: creatures list holds a null entry");
+}
+
+// A scripted die returned whatever was queued, whatever range was asked for, so a
+// test could script a 5 on a d4 and pass on a character no die could roll. The queue
+// cannot be checked where it is filled, because the range a value will be drawn
+// against is not known until something rolls, so the assertion is at consumption.
+// RandomDice::HIGHEST and LOWEST are how a test names an end of the range instead.
+TEST_F(AssertProbeDeathTest, ScriptingARollThatTheDieCannotMakeAborts)
+{
+	RandomDice dice{};
+	dice.set_next_roll(5);
+
+	EXPECT_DEATH(dice.roll(1, 4), "outside the range");
+}
+
+// The other end of the same guard. Scripting a zero against a d20 was how a test said
+// "fail every check" before RandomDice::HIGHEST existed to say it by name, and a guard
+// that only checked the top of the range would still let it through.
+TEST_F(AssertProbeDeathTest, ScriptingARollBelowWhatTheDieCanMakeAborts)
+{
+	RandomDice dice{};
+	dice.set_next_roll(0);
+
+	EXPECT_DEATH(dice.roll(1, 20), "outside the range");
 }

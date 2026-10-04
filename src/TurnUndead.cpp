@@ -25,6 +25,21 @@ bool can_turn_undead(const Creature& creature)
 }
 } // namespace
 
+namespace Turning
+{
+
+int roll_turning_cap(RandomDice& dice)
+{
+	// Each die on its own. roll() takes a range, so passing the count as its minimum
+	// gave a flat 2 to 6 rather than 2d6.
+	int total = 0;
+	for (int die = 0; die < TURN_UNDEAD_DICE_COUNT; ++die)
+	{
+		total += dice.roll(1, TURN_UNDEAD_DICE_SIDES);
+	}
+	return total;
+}
+
 TurnUndeadReport turn_undead(Creature& priest, GameContext& ctx)
 {
 	TurnUndeadReport report{};
@@ -62,7 +77,7 @@ TurnUndeadReport turn_undead(Creature& priest, GameContext& ctx)
 		[](const Creature* left, const Creature* right)
 		{ return left->get_hit_dice() < right->get_hit_dice(); });
 
-	int affectedRemaining = ctx.dice->roll(TURN_UNDEAD_DICE_COUNT, TURN_UNDEAD_DICE_SIDES);
+	int affectedRemaining = roll_turning_cap(*ctx.dice);
 
 	for (Creature* undead : candidates)
 	{
@@ -98,3 +113,5 @@ TurnUndeadReport turn_undead(Creature& priest, GameContext& ctx)
 
 	return report;
 }
+
+} // namespace Turning

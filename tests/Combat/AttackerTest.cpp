@@ -1,18 +1,20 @@
 #include <gtest/gtest.h>
 #include <memory>
 
-#include "src/Colors.h"
 #include "src/Actor.h"
-#include "src/Attacker.h"
-#include "src/MonsterAttacker.h"
-#include "src/PlayerAttacker.h"
-#include "src/Player.h"
 #include "src/AttackKind.h"
 #include "src/AttackResult.h"
+#include "src/Attacker.h"
+#include "src/Colors.h"
 #include "src/DamageInfo.h"
+#include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
-#include "src/Paths.h"
 #include "src/Game.h"
+#include "src/ItemCreator.h"
+#include "src/MonsterAttacker.h"
+#include "src/Paths.h"
+#include "src/Player.h"
+#include "src/PlayerAttacker.h"
 
 // ============================================================================
 // ATTACKER TESTS
@@ -55,7 +57,7 @@ protected:
 		monster->set_thaco(19);
 		monster->armorClass = std::make_unique<ArmorClass>(6);
 		monster->healthPool = std::make_unique<HealthPool>(10);
-			monster->attacker = std::make_unique<MonsterAttacker>(*monster, DamageInfo{ "1d6", DamageType::PHYSICAL });
+		monster->attacker = std::make_unique<MonsterAttacker>(*monster, DamageInfo{ "1d6", DamageType::PHYSICAL });
 		monster->set_strength(8);
 		monster->set_dexterity(10);
 		monster->set_natural_attack("claws");
@@ -64,6 +66,14 @@ protected:
 		// The context borrows the handle that owns the player, so the fixture
 		// must point it at one it owns for the lifetime of the test.
 		ctx.playerOwner = &player;
+
+		// Every damage value these cases script is 3 to 6, which is what a weapon
+		// rolls. The fixture armed nobody, so each one landed on an unarmed 1d2 and
+		// passed only because a scripted roll was returned whatever range was asked
+		// for. A plain long sword is 1d8, so the same numbers are now rolls the die
+		// can make and the damage dealt is unchanged.
+		game.itemRegistry.load(Paths::ITEMS);
+		player->equip_item(ItemCreator::create("long_sword", player->position, ctx), EquipmentSlot::RIGHT_HAND, ctx);
 
 		game.dice.set_test_mode(true);
 	}

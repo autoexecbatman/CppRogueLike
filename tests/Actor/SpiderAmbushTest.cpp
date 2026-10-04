@@ -41,6 +41,7 @@
 #include "src/Map.h"
 #include "src/MonsterAttacker.h"
 #include "src/Player.h"
+#include "src/RandomDice.h"
 #include "src/SavingThrow.h"
 
 class SpiderAmbushTest : public ::testing::Test
@@ -93,7 +94,9 @@ protected:
 		game.dice.clear_fixed_rolls();
 	}
 
-	// Queues rolls in the order the game asks for them.
+	// Queues rolls in the order the game asks for them: per bite an attack roll, the
+	// bite's 1d4, and then the player's own save against the venom - which the top of
+	// the die makes, so no venom lands and the bite's damage is all that is measured.
 	void script(std::initializer_list<int> rolls)
 	{
 		for (const int roll : rolls)
@@ -137,7 +140,7 @@ protected:
 // second bite, taken with or without that roll, finds a hit among the rolls after it.
 TEST_F(SpiderAmbushTest, AnAmbushThePlayerIsReadyForIsOneBite)
 {
-	script({ 20, 4, 100, 10, 20, 4, 100 });
+	script({ 20, 4, RandomDice::HIGHEST, 10, 20, 4, RandomDice::HIGHEST });
 
 	EXPECT_EQ(hp_lost_to_the_ambush(), 4) << "1d4 at four, once";
 }
@@ -145,7 +148,7 @@ TEST_F(SpiderAmbushTest, AnAmbushThePlayerIsReadyForIsOneBite)
 // Surprised on a 1: the first bite lands four and the surprise bite three.
 TEST_F(SpiderAmbushTest, ASurprisedPlayerTakesASecondBite)
 {
-	script({ 20, 4, 100, 1, 20, 3, 100 });
+	script({ 20, 4, RandomDice::HIGHEST, 1, 20, 3, RandomDice::HIGHEST });
 
 	EXPECT_EQ(hp_lost_to_the_ambush(), 7) << "four, then three in the surprise round";
 }
@@ -153,7 +156,7 @@ TEST_F(SpiderAmbushTest, ASurprisedPlayerTakesASecondBite)
 // THAC0 20 against armour class 10 needs a 10. The surprise bite's 9 hits only at +1.
 TEST_F(SpiderAmbushTest, TheSurpriseBiteIsPlusOneToHit)
 {
-	script({ 20, 4, 100, 1, 9, 3, 100 });
+	script({ 20, 4, RandomDice::HIGHEST, 1, 9, 3, RandomDice::HIGHEST });
 
 	EXPECT_EQ(hp_lost_to_the_ambush(), 7) << "a 9 hits a surprised defender";
 }
@@ -166,7 +169,7 @@ TEST_F(SpiderAmbushTest, ASurprisedPlayerLosesTheDexterityBonusToArmourClass)
 	player->set_dexterity(18);
 	player->update_armor_class(ctx);
 	ASSERT_EQ(player->get_armor_class(), 6);
-	script({ 20, 4, 100, 1, 9, 3, 100 });
+	script({ 20, 4, RandomDice::HIGHEST, 1, 9, 3, RandomDice::HIGHEST });
 
 	EXPECT_EQ(hp_lost_to_the_ambush(), 7) << "the surprise bite met the Dexterity bonus";
 }
@@ -179,7 +182,7 @@ TEST_F(SpiderAmbushTest, LowDexterityIsSurprisedMoreAndKeepsItsPenalty)
 	player->set_dexterity(5);
 	player->update_armor_class(ctx);
 	ASSERT_EQ(player->get_armor_class(), 12);
-	script({ 20, 4, 100, 4, 8, 3, 100 });
+	script({ 20, 4, RandomDice::HIGHEST, 4, 8, 3, RandomDice::HIGHEST });
 
 	EXPECT_EQ(hp_lost_to_the_ambush(), 7) << "surprised on a 4, bitten at armour class 12";
 }
@@ -189,7 +192,7 @@ TEST_F(SpiderAmbushTest, LowDexterityIsSurprisedMoreAndKeepsItsPenalty)
 TEST_F(SpiderAmbushTest, APlayerPastTheTableIsReadWithItsLastRow)
 {
 	player->set_dexterity(26);
-	script({ 20, 4, 100, 1, 20, 3, 100 });
+	script({ 20, 4, RandomDice::HIGHEST, 1, 20, 3, RandomDice::HIGHEST });
 
 	int lost = 0;
 	EXPECT_NO_THROW(lost = hp_lost_to_the_ambush()) << "the surprise roll fell off the Dexterity table";
@@ -200,7 +203,7 @@ TEST_F(SpiderAmbushTest, APlayerPastTheTableIsReadWithItsLastRow)
 TEST_F(SpiderAmbushTest, HighDexterityCanSpareThePlayerTheSurprise)
 {
 	player->set_dexterity(17);
-	script({ 20, 4, 100, 2, 20, 3, 100 });
+	script({ 20, 4, RandomDice::HIGHEST, 2, 20, 3, RandomDice::HIGHEST });
 
 	EXPECT_EQ(hp_lost_to_the_ambush(), 4) << "a 2 with +2 is not surprised";
 }
@@ -210,7 +213,7 @@ TEST_F(SpiderAmbushTest, HighDexterityCanSpareThePlayerTheSurprise)
 TEST_F(SpiderAmbushTest, AnOrdinaryBiteBringsNoSurpriseRoll)
 {
 	spider.ai->load(json{ { "isAmbushing", false }, { "ambushCounter", 0 }, { "poisonChance", 0 } });
-	script({ 20, 4, 100, 1, 20, 3, 100 });
+	script({ 20, 4, RandomDice::HIGHEST, 1, 20, 3, RandomDice::HIGHEST });
 
 	EXPECT_EQ(hp_lost_to_the_ambush(), 4) << "surprised by a spider that was never hidden";
 }
@@ -218,7 +221,7 @@ TEST_F(SpiderAmbushTest, AnOrdinaryBiteBringsNoSurpriseRoll)
 // Surprise lasts its round; the player is not left surprised for whatever acts next.
 TEST_F(SpiderAmbushTest, TheSurpriseEndsWithItsRound)
 {
-	script({ 20, 4, 100, 1, 20, 3, 100 });
+	script({ 20, 4, RandomDice::HIGHEST, 1, 20, 3, RandomDice::HIGHEST });
 
 	spider.ai->update(spider, ctx);
 
@@ -230,7 +233,7 @@ TEST_F(SpiderAmbushTest, TheSurpriseEndsWithItsRound)
 TEST_F(SpiderAmbushTest, AnAmbushRollsAgainstArmourClass)
 {
 	player->armorClass = std::make_unique<ArmorClass>(-10);
-	script({ 20, 4, 100, 1, 20, 4, 100 });
+	script({ 20, 4, RandomDice::HIGHEST, 1, 20, 4, RandomDice::HIGHEST });
 
 	EXPECT_EQ(hp_lost_to_the_ambush(), 0) << "the bite cannot hit this armour class";
 }
@@ -242,7 +245,7 @@ TEST_F(SpiderAmbushTest, SanctuaryHoldsOffASpiderThatFailsToSave)
 {
 	ASSERT_GT(SavingThrows::target(spider.get_creature_class(), spider.get_creature_level(), SavingThrow::SPELL), 12);
 	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
-	script({ 12, 20, 4, 100, 10 });
+	script({ 12, 20, 4, RandomDice::HIGHEST, 10 });
 
 	EXPECT_EQ(hp_lost_to_the_ambush(), 0) << "sanctuary held and the spider struck anyway";
 }
@@ -253,7 +256,7 @@ TEST_F(SpiderAmbushTest, SanctuaryHoldsOffASpiderThatFailsToSave)
 TEST_F(SpiderAmbushTest, ASpiderTurnedAwayTakesNoSurpriseRound)
 {
 	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
-	script({ 12, 1, 20, 4, 100 });
+	script({ 12, 1, 20, 4, RandomDice::HIGHEST });
 
 	spider.ai->update(spider, ctx);
 

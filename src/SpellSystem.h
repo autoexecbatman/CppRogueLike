@@ -22,7 +22,29 @@ enum class SpellSource
 // Forward declarations
 class Player;
 class Creature;
+class RandomDice;
 struct GameContext;
+
+// The rules a spell is made of, as free functions rather than members of SpellSystem:
+// they need nothing the class holds, and a test can reach a rule without building a
+// caster and a context around it.
+namespace Spells
+{
+
+// Sleep affects 2d4 Hit Dice of monsters (Player's Handbook, PDF page 279).
+inline constexpr int SLEEP_HIT_DICE_COUNT = 2;
+inline constexpr int SLEEP_HIT_DICE_SIDES = 4;
+
+// How many Hit Dice of monsters one casting of sleep affects. Each die is rolled on
+// its own and the results summed, so the budget runs from 2 to 8 and sits on 5 more
+// often than on either end. Rolling the count and the size as a range instead gives a
+// flat 2 to 4, which can never reach a fifth Hit Die.
+//
+// Example, with two fours on the dice:
+//   Spells::roll_sleep_hit_dice_budget(dice);   // -> 8, the most one casting can reach
+[[nodiscard]] int roll_sleep_hit_dice_budget(RandomDice& dice);
+
+} // namespace Spells
 
 class SpellSystem
 {

@@ -18,7 +18,7 @@
 //
 //   if (creature.get_creature_class() == CreatureClass::CLERIC)  // priests only
 //   {
-//       turn_undead(creature, ctx);
+//       Turning::turn_undead(creature, ctx);
 //   }
 
 enum class CreatureClass

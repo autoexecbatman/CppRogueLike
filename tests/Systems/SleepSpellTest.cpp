@@ -11,11 +11,14 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
+
 #include "src/BuffSystem.h"
 #include "src/Creature.h"
 #include "src/ExperienceReward.h"
 #include "src/Map.h"
 #include "src/Player.h"
+#include "src/RandomDice.h"
 #include "src/SpellSystem.h"
 #include "tests/mocks/MockGameContext.h"
 
@@ -58,9 +61,13 @@ protected:
 		return *creatures.back();
 	}
 
-	void force_next_roll(int value)
+	// Sleep reads 2d4 for its Hit Dice budget. Both dice are named, because a sum of
+	// two dice is not one roll: scripting it as one is how an 8 was queued against a
+	// die that could only answer 2 to 4.
+	void script_budget(int firstDie, int secondDie)
 	{
-		mock.dice.set_next_roll(value);
+		mock.dice.set_next_roll(firstDie);
+		mock.dice.set_next_roll(secondDie);
 	}
 
 	// The public path the game uses; cast_sleep itself is private.
@@ -81,7 +88,7 @@ protected:
 TEST_F(SleepSpellTest, UndeadAreNeverAffected)
 {
 	Creature& skeleton = add_creature(1, 4, true);
-	force_next_roll(8); // the largest 2d4 can give
+	script_budget(4, 4); // the largest 2d4 can give, as the two dice it is
 
 	cast_sleep();
 
@@ -92,7 +99,7 @@ TEST_F(SleepSpellTest, UndeadAreNeverAffected)
 TEST_F(SleepSpellTest, CreaturesAboveFourHitDiceAreUnaffected)
 {
 	Creature& ogre = add_creature(5, 4, false);
-	force_next_roll(8);
+	script_budget(4, 4);
 
 	cast_sleep();
 
@@ -103,7 +110,7 @@ TEST_F(SleepSpellTest, CreaturesAboveFourHitDiceAreUnaffected)
 TEST_F(SleepSpellTest, FourHitDiceIsStillAffected)
 {
 	Creature& gnoll = add_creature(4, 4, false);
-	force_next_roll(8);
+	script_budget(4, 4);
 
 	cast_sleep();
 
@@ -115,7 +122,7 @@ TEST_F(SleepSpellTest, WeakestAreAffectedFirst)
 {
 	Creature& strong = add_creature(4, 4, false);
 	Creature& weak = add_creature(1, 6, false);
-	force_next_roll(2); // covers the 1 HD creature and nothing else
+	script_budget(1, 1); // a budget of two: the 1 HD creature and nothing else
 
 	cast_sleep();
 
@@ -127,7 +134,7 @@ TEST_F(SleepSpellTest, WeakestAreAffectedFirst)
 TEST_F(SleepSpellTest, PartialEffectsAreIgnored)
 {
 	Creature& gnoll = add_creature(3, 4, false);
-	force_next_roll(2); // less than its Hit Dice
+	script_budget(1, 1); // a budget of two, less than its Hit Dice
 
 	cast_sleep();
 
@@ -139,7 +146,7 @@ TEST_F(SleepSpellTest, PartialEffectsAreIgnored)
 TEST_F(SleepSpellTest, DurationScalesWithCasterLevel)
 {
 	Creature& goblin = add_creature(1, 4, false);
-	force_next_roll(4);
+	script_budget(2, 2); // a budget of four
 
 	cast_sleep();
 
@@ -152,10 +159,43 @@ TEST_F(SleepSpellTest, HigherLevelCasterSleepsThemLonger)
 {
 	caster->set_creature_level(7);
 	Creature& goblin = add_creature(1, 4, false);
-	force_next_roll(4);
+	script_budget(2, 2); // a budget of four
 
 	cast_sleep();
 
 	ASSERT_TRUE(goblin.has_state(ActorState::IS_SLEEPING));
 	EXPECT_EQ(buffs.get_buff_turns(goblin, BuffType::SLEEP, ctx.gameState->get_time()), 35);
+}
+
+// The dice the book prints, in absolute terms. Every case above scripts its dice, and
+// a scripted value is returned whatever range was asked for (issues/0072), so no
+// scripting test can see the die's size move. "2d4 Hit Dice of monsters" is the source
+// for both numbers.
+TEST(SleepSpellDiceTest, TheBudgetIsTwoFourSidedDice)
+{
+	EXPECT_EQ(Spells::SLEEP_HIT_DICE_COUNT, 2) << "the book affects 2d4 Hit Dice, not another count";
+	EXPECT_EQ(Spells::SLEEP_HIT_DICE_SIDES, 4) << "the book affects 2d4 Hit Dice, not another die";
+}
+
+// What the two dice can produce, drawn rather than scripted, because the range a die
+// is asked for is the one thing a scripted roll cannot show. The defect this replaced
+// passed the count where the minimum belongs, giving a flat 2 to 4 - so a fifth Hit
+// Die was unreachable and the spell was half the book's at the top end.
+//
+// 2,000 draws: missing an end of a 2d4 by luck is (15/16)^2000, which is 8.8e-57.
+TEST(SleepSpellDiceTest, TwoDiceReachBothEndsOfTheirRange)
+{
+	RandomDice dice{};
+	int lowest = Spells::SLEEP_HIT_DICE_COUNT * Spells::SLEEP_HIT_DICE_SIDES;
+	int highest = 0;
+
+	for (int draw = 0; draw < 2000; ++draw)
+	{
+		const int budget = Spells::roll_sleep_hit_dice_budget(dice);
+		lowest = std::min(lowest, budget);
+		highest = std::max(highest, budget);
+	}
+
+	EXPECT_EQ(lowest, 2) << "the lowest two four-sided dice can show is two";
+	EXPECT_EQ(highest, 8) << "the highest two four-sided dice can show is eight";
 }

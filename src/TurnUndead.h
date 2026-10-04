@@ -2,6 +2,15 @@
 
 #include <vector>
 
+class RandomDice;
+class Creature;
+struct GameContext;
+
+// Everything this header declares lives here rather than in the global namespace,
+// which is the rule for a free function crossing translation units.
+namespace Turning
+{
+
 // file: TurnUndead.h
 //
 // AD&D 2e turning: a priest channels their deity's power to drive off or destroy
@@ -25,9 +34,6 @@
 //   report.turned;      // -> creatures now fleeing
 //   report.destroyed;   // -> creatures reduced to nothing
 
-class Creature;
-struct GameContext;
-
 // What one turning attempt did. Named creatures rather than counts, so the
 // caller can say which undead fled without re-deriving it.
 struct TurnUndeadReport
@@ -42,6 +48,15 @@ struct TurnUndeadReport
 // The book affects 2d6 undead per successful turn.
 inline constexpr int TURN_UNDEAD_DICE_COUNT = 2;
 inline constexpr int TURN_UNDEAD_DICE_SIDES = 6;
+
+// How many undead one successful turn affects. Each die is rolled on its own and the
+// results summed, so the answer runs from 2 to 12 and sits on 7 more often than on
+// either end. Rolling the count and the size as a range instead gives a flat 2 to 6,
+// where a seventh undead is unreachable.
+//
+// Example, with two sixes on the dice:
+//   roll_turning_cap(dice);   // -> 12, the most a priest can affect at once
+[[nodiscard]] int roll_turning_cap(RandomDice& dice);
 
 // How far a priest's presence reaches, in tiles.
 //
@@ -68,3 +83,5 @@ inline constexpr int TURN_UNDEAD_RANGE = 4;
 // Returns what happened rather than a bare success flag: an attempt can turn
 // some undead, destroy others and fail against the rest, all on one roll.
 [[nodiscard]] TurnUndeadReport turn_undead(Creature& priest, GameContext& ctx);
+
+} // namespace Turning
