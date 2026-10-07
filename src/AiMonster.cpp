@@ -180,40 +180,76 @@ void AiMonster::update_tracking(Creature& owner, const GameContext& ctx)
 	owner.update_awareness(ctx);
 }
 
-// AD&D 2e behavior dispatch: flee always wins, then pursue, then wander.
+// One creature's turn, chosen from three behaviours: flee, hunt, or drift.
+//
+// Flee outranks everything, so a routed creature is never held up behind the wander
+// dice. Hunting needs all three of awareness, a player who is not invisible, and no
+// failed save against Sanctuary; losing any one of them drops the turn to the dice.
+//
+// Awareness is memory of sight: update_awareness books AWARENESS_ROUNDS whenever the
+// creature stands in the player's field of view. The second branch is therefore the
+// out-of-sight case, and it still paths at the player's exact position on a d6 of 1,
+// with no line of sight tested.
+//
+// The nested dice resolved, so no reader has to work them out again:
+//
+//   unseen, inside 15 tiles    hunt 1/6     drift 1/12    hold 3/4
+//   no quarry at all           hunt never   drift 1/20    hold 19/20
+//
+// That 1/6 compounds. An unseen creature has closed in at least once with probability
+// 0.42 after three turns, 0.60 after five, and 0.84 after ten.
+//
+// Example, a goblin around a corner at (10,2) with the player at (4,5), outside the
+// player's field of view and with its awareness expired:
+//
+//   in_player_fov=0 is_aware=0 distance=6
+//   d6=1        -> pos=(9,2)  distance=5    // paths at a player it cannot see
+//   d6=2,d10=1  -> pos=(9,2)  distance=5    // drifts, direction straight off the dice
+//   d6=2,d10=2  -> pos=(10,2) distance=6    // stands still
+//
+// Both moving branches reach (9,2) because that dead end offers one legal step. The
+// first picks it off the Dijkstra gradient and the second off a die.
 void AiMonster::decide_action(Creature& owner, GameContext& ctx)
 {
-	// A fleeing creature flees every turn — never gated behind wander dice.
+	// Routed creatures run before any die is read.
 	if (owner.has_state(ActorState::IS_FLEEING))
 	{
 		flee(owner, ctx);
 		return;
 	}
 
+	// Chebyshev tiles. Only the second branch reads it.
 	int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
 
 	// A failed save against Sanctuary means this creature "loses track of and totally
-	// ignores the warded creature for the duration of the spell" (PHB page 436). Losing
-	// track is not being unable to land a blow: it stops hunting them entirely, so the
-	// player is no target at all and what is left is whatever it does with no quarry.
-	// Reading the record costs no save - one is owed only to an opponent already swinging.
+	// ignores the warded creature for the duration of the spell" (PHB page 436): the
+	// player stops being a target at all, and the turn becomes whatever this creature
+	// does with no quarry. Reading the record costs no save, because a save is owed
+	// only to an opponent already swinging.
 	const bool hasLostTrackOfPlayer = ctx.buffSystem->ignores_warded_creature(owner, *ctx.player());
 
+	// Perceived: hunt, with no die in the way.
 	if (owner.is_aware(ctx.gameState->get_time()) && !ctx.player()->is_invisible() && !hasLostTrackOfPlayer)
 	{
 		move_or_attack(owner, ctx.player()->position, ctx);
 	}
+	// Unperceived and inside 15 tiles: 1/6 of turns hunt anyway, aimed at the player's
+	// exact position, through walls and around corners alike.
 	else if (distanceToPlayer <= 15 && !ctx.player()->is_invisible() && !hasLostTrackOfPlayer)
 	{
 		if (ctx.dice->d6() == 1)
 		{
 			move_or_attack(owner, ctx.player()->position, ctx);
 		}
+		// The d6 missed: a tenth of the remainder drifts, which is 1/12 of all turns,
+		// and the other 3/4 hold position.
 		else if (ctx.dice->d10() == 1)
 		{
 			random_wander(owner, ctx);
 		}
 	}
+	// No quarry at all, whether too far, hidden, or warded away: drift on 1/20, and
+	// hold position on the other 19/20.
 	else if (ctx.dice->d20() == 1)
 	{
 		random_wander(owner, ctx);

@@ -75,6 +75,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/DoorLockingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/PathfindingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/FovMapTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Map/TorchSightTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/EncounterPlannerTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/TreasureRoomTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/WaterMovementTest.cpp
@@ -277,6 +278,7 @@ set(PARENT_SOURCES
     # Factories
     ${PARENT_SOURCE_DIR}/MonsterFactory.cpp
     ${PARENT_SOURCE_DIR}/TurnUndead.cpp
+    ${PARENT_SOURCE_DIR}/Vision.cpp
     ${PARENT_SOURCE_DIR}/MonsterCreator.cpp
     ${PARENT_SOURCE_DIR}/MonsterRegistry.cpp
     ${PARENT_SOURCE_DIR}/ItemFactory.cpp

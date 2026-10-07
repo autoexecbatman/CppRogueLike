@@ -261,6 +261,22 @@ bool is_within_weight_limit(
 
 // ===== SEARCH OPERATIONS =====
 
+bool is_carrying(const CreatureInventory& inventory, std::string_view itemKey) noexcept
+{
+	[[maybe_unused]] auto is_null = [](const auto& item)
+	{
+		return !item;
+	};
+	assert(std::ranges::none_of(inventory.items, is_null));
+
+	auto has_key = [itemKey](const auto& item)
+	{
+		return item->itemKey == itemKey;
+	};
+
+	return std::ranges::any_of(inventory.items, has_key);
+}
+
 Item* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept
 {
 	[[maybe_unused]] auto is_null = [](const auto& item)

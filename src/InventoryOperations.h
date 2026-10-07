@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <string_view>
 
 #include <nlohmann/json.hpp>
 
@@ -116,6 +117,15 @@ bool is_within_weight_limit(
 	const Item& item,
 	const Creature& owner,
 	const DataManager& dataManager) noexcept;
+
+// Whether the pack holds an item registered under this key. The key is the one in
+// data/content/items.json, so a caller names what it is looking for the same way the
+// data does rather than by display name, which is localised and can repeat.
+//
+// Example:
+//   is_carrying(emptyPack, "torch");        // -> false
+//   is_carrying(packHoldingATorch, "torch"); // -> true
+[[nodiscard]] bool is_carrying(const CreatureInventory& inventory, std::string_view itemKey) noexcept;
 
 // id-based search - creature backpack only
 Item* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept;

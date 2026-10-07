@@ -42,6 +42,7 @@
 #include "Trap.h"
 #include "TreasureRoom.h"
 #include "Vector2D.h"
+#include "Vision.h"
 
 namespace
 {
@@ -408,7 +409,7 @@ void Map::compute_fov(GameContext& ctx)
 		ctx.player()->position.y >= 0 && ctx.player()->position.y < mapHeight &&
 		"Map::compute_fov: player position out of map bounds");
 
-	fovMap->compute_fov(ctx.player()->position.x, ctx.player()->position.y, FOV_RADIUS);
+	fovMap->compute_fov(ctx.player()->position.x, ctx.player()->position.y, Vision::sight_radius(*ctx.player()));
 	rebuild_dijkstra_map({ ctx.player()->position }, ctx);
 }
 
@@ -1848,7 +1849,7 @@ bool Map::open_door(Vector2D pos, GameContext& ctx)
 
 	fovMap->set_properties(pos.x, pos.y, true, true);
 
-	if (ctx.player() && ctx.player()->get_tile_distance(pos) <= FOV_RADIUS)
+	if (ctx.player() && ctx.player()->get_tile_distance(pos) <= Vision::sight_radius(*ctx.player()))
 	{
 		compute_fov(ctx);
 	}
@@ -1903,7 +1904,7 @@ bool Map::close_door(Vector2D pos, GameContext& ctx)
 	// Make the tile non-walkable and non-transparent
 	fovMap->set_properties(pos.x, pos.y, false, false);
 
-	if (ctx.player() && ctx.player()->get_tile_distance(pos) <= FOV_RADIUS)
+	if (ctx.player() && ctx.player()->get_tile_distance(pos) <= Vision::sight_radius(*ctx.player()))
 	{
 		compute_fov(ctx);
 	}

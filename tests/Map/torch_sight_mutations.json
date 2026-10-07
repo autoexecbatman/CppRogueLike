@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=TorchSightTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Vision.h",
+      "original": "inline constexpr int TORCH_SIGHT_RADIUS = 6;",
+      "mutated": "inline constexpr int TORCH_SIGHT_RADIUS = 4;",
+      "catches": "a torch worth nothing, lighting exactly as far as carrying none"
+    },
+    {
+      "file": "src/Vision.h",
+      "original": "inline constexpr std::string_view TORCH_ITEM_KEY = \"torch\";",
+      "mutated": "inline constexpr std::string_view TORCH_ITEM_KEY = \"candle\";",
+      "catches": "the radius keyed to an item that is not in the pack, so no torch is ever found"
+    },
+    {
+      "file": "src/Vision.cpp",
+      "original": "\t\t? TORCH_SIGHT_RADIUS\n\t\t: FOV_RADIUS;",
+      "mutated": "\t\t? FOV_RADIUS\n\t\t: FOV_RADIUS;",
+      "catches": "the torch branch answering the base radius, which is the defect this fixed"
+    },
+    {
+      "file": "src/InventoryOperations.cpp",
+      "original": "\treturn std::ranges::any_of(inventory.items, has_key);",
+      "mutated": "\treturn std::ranges::none_of(inventory.items, has_key);",
+      "catches": "the predicate inverted, so a pack holding a torch reports none"
+    },
+    {
+      "file": "src/InventoryOperations.cpp",
+      "original": "\t\treturn item->itemKey == itemKey;",
+      "mutated": "\t\treturn item->itemKey != itemKey;",
+      "catches": "any item but a torch counting as one, which a stone in the pack proves"
+    }
+  ]
+}
