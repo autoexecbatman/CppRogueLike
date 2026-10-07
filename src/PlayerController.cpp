@@ -40,6 +40,7 @@
 #include "MessageSystem.h"
 #include "Persistent.h"
 #include "Pickable.h"
+#include "Pickup.h"
 #include "Player.h"
 #include "PlayerController.h"
 #include "PlayerTurn.h"
@@ -216,81 +217,11 @@ void PlayerController::move(Vector2D target)
 	playerOwner.position = target;
 }
 
+// The player asks for whatever is underfoot. Pickup owns what that means, including
+// the menu a heap needs, so the controller only names the actor doing it.
 void PlayerController::pick_item(GameContext& ctx)
 {
-	if (ctx.floorInventory->items.empty())
-	{
-		return;
-	}
-
-	// Find the first item at the player's position
-	Item* item = nullptr;
-	for (auto& floorItem : ctx.floorInventory->items)
-	{
-		assert(floorItem && "pick_item: the floor holds a null where an item should be");
-
-		if (floorItem->position == playerOwner.position)
-		{
-			item = floorItem.get();
-			break;
-		}
-	}
-
-	if (!item)
-	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "There's nothing here to pick up.", MessageCompletion::FINISHED);
-		return;
-	}
-
-	if (item->itemClass == ItemClass::GOLD_COIN)
-	{
-		Gold& goldBehavior = std::get<Gold>(*item->behavior);
-		playerOwner.adjust_gold(goldBehavior.amount);
-		ctx.messageSystem->message(ColorPairId::YELLOW_BLACK, "You picked up " + std::to_string(goldBehavior.amount) + " gold.", MessageCompletion::FINISHED);
-		[[maybe_unused]] const auto takeGoldResult = InventoryOperations::remove_item(*ctx.floorInventory, *item);
-		assert(takeGoldResult.has_value());
-		return;
-	}
-
-	// Pre-check slot capacity before touching ownership
-	if (InventoryOperations::is_inventory_full(playerOwner.inventoryData))
-	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Your inventory is full!", MessageCompletion::FINISHED);
-		return;
-	}
-
-	// Pre-check weight before touching ownership — prevents item destruction on rejection
-	if (!InventoryOperations::is_within_weight_limit(*item, playerOwner, *ctx.dataManager))
-	{
-		ctx.messageSystem->message(ColorPairId::RED_BLACK, "Too heavy to carry.", MessageCompletion::FINISHED);
-		return;
-	}
-
-	const std::string itemName = item->actorData.name;
-
-	// Remove from floor: ownership transfers to removeResult
-	auto removeResult = InventoryOperations::remove_item(*ctx.floorInventory, *item);
-	if (!removeResult.has_value())
-	{
-		ctx.messageSystem->log("ERROR: pick_item -- remove_item failed unexpectedly");
-		return;
-	}
-
-	// Pre-checks passed; add cannot fail on capacity or weight
-	auto addResult = InventoryOperations::add_item_to_inventory(
-		playerOwner.inventoryData,
-		std::move(*removeResult),
-		playerOwner,
-		*ctx.dataManager);
-
-	if (addResult.has_value())
-	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You picked up the " + itemName + ".", MessageCompletion::FINISHED);
-	}
-	else
-	{
-		ctx.messageSystem->log("ERROR: pick_item -- add failed after pre-checks; item lost");
-	}
+	Pickup::from_floor(playerOwner, ctx);
 }
 
 void PlayerController::drop_item(GameContext& ctx)

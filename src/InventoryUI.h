@@ -121,7 +121,9 @@ private:
 
 	// Data building
 	void rebuild_item_list(const Player& player, GameContext& ctx);
-	bool item_fits_slot(const Item& item, EquipmentSlot slot) const;
+	// Whether this item may go in this slot. A worn item names its slot in the data and
+	// that answer is the only one; the kinds that name none are sorted by what they are.
+	bool item_fits_slot(const Item& item, EquipmentSlot slot, const GameContext& ctx) const;
 	bool is_usable_category(ItemCategory cat) const;
 
 	// Rendering (all use Renderer via GameContext)

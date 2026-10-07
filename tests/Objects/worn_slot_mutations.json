@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=WornSlotTest.*:SwimmingGauntletsTest.*:StatBoostEquipmentTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Pickable.cpp",
+      "original": "bool use(Gauntlets& gauntlets, Item& owner, Creature& wearer, GameContext& ctx)\n{\n\treturn use_stat_boost(worn_slot(owner, ctx), owner, wearer, ctx);",
+      "mutated": "bool use(Gauntlets& gauntlets, Item& owner, Creature& wearer, GameContext& ctx)\n{\n\treturn use_stat_boost(EquipmentSlot::GAUNTLETS, owner, wearer, ctx);",
+      "catches": "the behaviour deciding the slot again, which is the defect: every cloak and every pair of boots back on the hands"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\tconst EquipmentSlot slot = ctx.itemRegistry->get_params(item.itemKey).equipmentSlot;",
+      "mutated": "\tconst EquipmentSlot slot = EquipmentSlot::GAUNTLETS;",
+      "catches": "the data ignored and one slot answered for everything worn"
+    },
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "\tparams.equipmentSlot = parse_equipment_slot(required_field(record, key, \"equipmentSlot\").get<std::string>());",
+      "mutated": "\tparams.equipmentSlot = EquipmentSlot::NONE;",
+      "catches": "the field read off the data and thrown away, so no item names a slot at all"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "bool use(Girdle& girdle, Item& owner, Creature& wearer, GameContext& ctx)\n{\n\treturn use_stat_boost(worn_slot(owner, ctx), owner, wearer, ctx);",
+      "mutated": "bool use(Girdle& girdle, Item& owner, Creature& wearer, GameContext& ctx)\n{\n\treturn use_stat_boost(EquipmentSlot::CLOAK, owner, wearer, ctx);",
+      "catches": "a girdle worn as a cloak, the same class of error one behaviour further along"
+    }
+  ]
+}

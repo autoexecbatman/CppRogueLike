@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=FloorStackPickupTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Pickup.cpp",
+      "original": "\tif (standing.size() == 1)",
+      "mutated": "\tif (standing.size() >= 1)",
+      "catches": "a heap picked through one arbitrary item at a time without ever asking, which is the defect this fixed"
+    },
+    {
+      "file": "src/Pickup.cpp",
+      "original": "\t\ttake_floor_item(taker, *standing.front(), ctx);\n\t\treturn;",
+      "mutated": "\t\treturn;",
+      "catches": "a lone item on the floor that cannot be picked up at all"
+    },
+    {
+      "file": "src/InventoryOperations.cpp",
+      "original": "\t\tif (item->position == position)",
+      "mutated": "\t\tif (item->position != position)",
+      "catches": "the tile query answering with everything except what is underfoot"
+    },
+    {
+      "file": "src/InventoryOperations.cpp",
+      "original": "\tauto it = std::ranges::find_if(inventory.items, has_id);\n\treturn it != inventory.items.end() ? it->get() : nullptr;\n}\n\nItem* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept",
+      "mutated": "\tauto it = std::ranges::find_if(inventory.items, has_id);\n\treturn nullptr;\n}\n\nItem* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept",
+      "catches": "the floor never answering for an item it holds, so every menu choice reports the item gone"
+    }
+  ]
+}

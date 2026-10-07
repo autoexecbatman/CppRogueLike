@@ -90,6 +90,7 @@ nlohmann::json encode_item(const ItemParams& params)
 	record["itemClass"] = encode_item_class(params.itemClass);
 	record["value"] = params.value;
 	record["pickableType"] = encode_pickable_type(params.pickableType);
+	record["equipmentSlot"] = std::string{ encode_equipment_slot(params.equipmentSlot) };
 	record["baseWeight"] = params.baseWeight;
 	record["weight"] = params.weight;
 	record["levelMin"] = params.levelMin;
@@ -160,6 +161,7 @@ ParsedItem parse_item(const std::string& key, const nlohmann::json& record)
 	params.itemClass = parse_item_class(required_field(record, key, "itemClass").get<std::string>());
 	params.value = required_field(record, key, "value");
 	params.pickableType = parse_pickable_type(required_field(record, key, "pickableType").get<std::string>());
+	params.equipmentSlot = parse_equipment_slot(required_field(record, key, "equipmentSlot").get<std::string>());
 	params.baseWeight = required_field(record, key, "baseWeight");
 	params.weight = required_field(record, key, "weight");
 	params.levelMin = required_field(record, key, "levelMin");
@@ -265,6 +267,12 @@ std::vector<std::string> ItemRegistry::get_all_keys() const
 	}
 
 	return keys;
+}
+
+const ItemParams* ItemRegistry::find_params(std::string_view key) const
+{
+	const auto found = entries.find(key);
+	return found != entries.end() ? &found->second.params : nullptr;
 }
 
 const ItemParams& ItemRegistry::get_params(std::string_view key) const

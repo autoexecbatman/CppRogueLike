@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "BuffType.h"
+#include "EquipmentSlot.h"
 #include "ItemClassification.h"
 #include "MagicalItemEffects.h"
 #include "Pickable.h"
@@ -65,6 +66,12 @@ struct ItemParams
 	MagicalEffect effect{ MagicalEffect::NONE };
 	// The strength of that effect.
 	int effectBonus{ 0 };
+
+	// Where a worn item is worn. NONE for anything that is not worn in a slot of its
+	// own, which is most of the table. This is the only statement of the slot: the
+	// behaviour that grants the bonuses no longer decides it, because there are three
+	// of those for more worn kinds than three, and a cloak was being put on the hands.
+	EquipmentSlot equipmentSlot{ EquipmentSlot::NONE };
 
 	// What an ability item does to Strength.
 	int strBonus{ 0 };
@@ -195,6 +202,12 @@ public:
 
 	// Throws std::out_of_range if key is unknown.
 	[[nodiscard]] const ItemParams& get_params(std::string_view key) const;
+
+	// The same parameters, or null when the registry has never heard of the key. For a
+	// caller walking items it did not choose, where a key the registry does not hold is
+	// a state to branch on rather than a defect. Code that knows the key is real asks
+	// get_params and lets an unknown one throw.
+	[[nodiscard]] const ItemParams* find_params(std::string_view key) const;
 
 	// Replaces an item's parameters, keeping its own name and category. Throws
 	// std::out_of_range if key is unknown.

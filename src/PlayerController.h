@@ -56,6 +56,7 @@ private:
 	//   pick_item(ctx);   // "You picked up a health potion." - the floor loses it
 	//   pick_item(ctx);   // "There's nothing here to pick up." - the tile is bare now
 	void pick_item(GameContext& ctx);
+
 	void drop_item(GameContext& ctx);
 	bool is_pickable_at_position(const Actor& actor) const;
 	Item* chose_from_inventory(int ascii, GameContext& ctx);

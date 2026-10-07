@@ -51,6 +51,7 @@
 #include "InventoryOperations.h"
 #include "InventoryUI.h"
 #include "ItemClassification.h"
+#include "ItemRegistry.h"
 #include "MessageSystem.h"
 #include "Pickable.h"
 #include "Player.h"
@@ -262,7 +263,7 @@ void InventoryUI::rebuild_item_list(const Player& player, GameContext& ctx)
 			continue;
 		}
 
-		if (filterMode && !item_fits_slot(*item, filterSlot))
+		if (filterMode && !item_fits_slot(*item, filterSlot, ctx))
 		{
 			continue;
 		}
@@ -359,8 +360,21 @@ void InventoryUI::rebuild_item_list(const Player& player, GameContext& ctx)
 	}
 }
 
-bool InventoryUI::item_fits_slot(const Item& item, EquipmentSlot slot) const
+bool InventoryUI::item_fits_slot(const Item& item, EquipmentSlot slot, const GameContext& ctx) const
 {
+	assert(ctx.itemRegistry && "item_fits_slot: no item registry to ask where an item is worn");
+
+	// A worn item names its slot in the data, and that is the whole answer. Matching a
+	// cloak or a pair of boots by display name here was the second opinion that let an
+	// item be put on through one row and turn up on another.
+	const ItemParams* params = ctx.itemRegistry->find_params(item.itemKey);
+	if (params != nullptr && params->equipmentSlot != EquipmentSlot::NONE)
+	{
+		return params->equipmentSlot == slot;
+	}
+
+	// What is left names no slot of its own, so it is sorted by what kind of thing it
+	// is. These also answer for an item built outside the registry.
 	switch (slot)
 	{
 	case EquipmentSlot::HEAD:
@@ -379,10 +393,6 @@ bool InventoryUI::item_fits_slot(const Item& item, EquipmentSlot slot) const
 	{
 		return item.is_girdle();
 	}
-	case EquipmentSlot::CLOAK:
-	{
-		return item.get_name().find("cloak") != std::string::npos;
-	}
 	case EquipmentSlot::RIGHT_HAND:
 	{
 		return item.is_weapon() && !item.is_ranged_weapon();
@@ -396,18 +406,6 @@ bool InventoryUI::item_fits_slot(const Item& item, EquipmentSlot slot) const
 	{
 		return item.is_ring();
 	}
-	case EquipmentSlot::BRACERS:
-	{
-		return item.get_name().find("bracer") != std::string::npos;
-	}
-	case EquipmentSlot::GAUNTLETS:
-	{
-		return item.is_gauntlets() && item.get_name().find("cloak") == std::string::npos && item.get_name().find("boot") == std::string::npos && item.get_name().find("bracer") == std::string::npos;
-	}
-	case EquipmentSlot::BOOTS:
-	{
-		return item.get_name().find("boot") != std::string::npos;
-	}
 	case EquipmentSlot::MISSILE_WEAPON:
 	{
 		return item.is_ranged_weapon();
@@ -420,6 +418,8 @@ bool InventoryUI::item_fits_slot(const Item& item, EquipmentSlot slot) const
 	{
 		return item.is_tool();
 	}
+	// CLOAK, BRACERS, BOOTS and GAUNTLETS are reached only through the data above. An
+	// item that names no slot is not worn in any of them.
 	default:
 	{
 		return false;

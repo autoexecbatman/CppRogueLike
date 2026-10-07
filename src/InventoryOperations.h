@@ -7,12 +7,14 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include <nlohmann/json.hpp>
 
 #include "Actor.h"
 #include "InventoryData.h"
 #include "Item.h"
+#include "UniqueId.h"
 #include "Vector2D.h"
 
 // Forward declarations
@@ -126,6 +128,20 @@ bool is_within_weight_limit(
 //   is_carrying(emptyPack, "torch");        // -> false
 //   is_carrying(packHoldingATorch, "torch"); // -> true
 [[nodiscard]] bool is_carrying(const CreatureInventory& inventory, std::string_view itemKey) noexcept;
+
+// Every floor item standing on one tile, in the order the floor holds them. Empty
+// when the tile is bare. The floor keeps ownership; these are borrowed views, so a
+// caller must not hold one across a change to the floor.
+//
+// Example:
+//   items_at(floor, bareTile);          // -> {}
+//   items_at(floor, tileUnderTheHeap);  // -> three items, topmost of the heap first
+[[nodiscard]] std::vector<Item*> items_at(FloorInventory& inventory, Vector2D position);
+
+// The floor item carrying this id, or null once it is gone. A menu that offers a
+// choice of floor items outlives the frame that built it, so it holds ids and asks
+// here when the choice lands rather than keeping a pointer that may have dangled.
+Item* find_item_by_id(FloorInventory& inventory, UniqueId::IdType uniqueId) noexcept;
 
 // id-based search - creature backpack only
 Item* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept;

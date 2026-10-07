@@ -94,6 +94,8 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/TrapDamageTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/TrapSerializationTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/WornEffectPersistenceTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Objects/FloorStackPickupTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Objects/WornSlotTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/BuffTypeEncodingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CodecRoundTripTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EnumCycleTest.cpp
@@ -279,6 +281,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/MonsterFactory.cpp
     ${PARENT_SOURCE_DIR}/TurnUndead.cpp
     ${PARENT_SOURCE_DIR}/Vision.cpp
+    ${PARENT_SOURCE_DIR}/Pickup.cpp
     ${PARENT_SOURCE_DIR}/MonsterCreator.cpp
     ${PARENT_SOURCE_DIR}/MonsterRegistry.cpp
     ${PARENT_SOURCE_DIR}/ItemFactory.cpp

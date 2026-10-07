@@ -277,6 +277,42 @@ bool is_carrying(const CreatureInventory& inventory, std::string_view itemKey) n
 	return std::ranges::any_of(inventory.items, has_key);
 }
 
+std::vector<Item*> items_at(FloorInventory& inventory, Vector2D position)
+{
+	[[maybe_unused]] auto is_null = [](const auto& item)
+	{
+		return !item;
+	};
+	assert(std::ranges::none_of(inventory.items, is_null));
+
+	std::vector<Item*> standing{};
+	for (const auto& item : inventory.items)
+	{
+		if (item->position == position)
+		{
+			standing.push_back(item.get());
+		}
+	}
+	return standing;
+}
+
+Item* find_item_by_id(FloorInventory& inventory, UniqueId::IdType uniqueId) noexcept
+{
+	[[maybe_unused]] auto is_null = [](const auto& item)
+	{
+		return !item;
+	};
+	assert(std::ranges::none_of(inventory.items, is_null));
+
+	auto has_id = [uniqueId](const auto& item)
+	{
+		return item->uniqueId == uniqueId;
+	};
+
+	auto it = std::ranges::find_if(inventory.items, has_id);
+	return it != inventory.items.end() ? it->get() : nullptr;
+}
+
 Item* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept
 {
 	[[maybe_unused]] auto is_null = [](const auto& item)

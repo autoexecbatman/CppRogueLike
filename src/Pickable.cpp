@@ -46,6 +46,7 @@
 #include "HungerSystem.h"
 #include "InventoryData.h"
 #include "InventoryOperations.h"
+#include "ItemRegistry.h"
 #include "MagicalItemEffects.h"
 #include "Map.h"
 #include "MessageSystem.h"
@@ -553,19 +554,34 @@ bool use(MagicalRing& magicalRing, Item& owner, Creature& wearer, GameContext& c
 	return use_magical_equip(magicalRing.effect, EquipmentSlot::RIGHT_RING, owner, wearer, ctx);
 }
 
+// Where the data says this item is worn.
+//
+// The one statement of the slot. The behaviour granting the bonuses does not decide,
+// because there are three such behaviours for more worn kinds than three, and
+// "gauntlets" was standing in for all of them - which put every cloak and every pair
+// of boots onto the hands.
+EquipmentSlot worn_slot(const Item& item, const GameContext& ctx)
+{
+	assert(ctx.itemRegistry && "worn_slot: asked where an item is worn with no registry to ask");
+
+	const EquipmentSlot slot = ctx.itemRegistry->get_params(item.itemKey).equipmentSlot;
+	assert(slot != EquipmentSlot::NONE && "worn_slot: a worn item whose data names no slot");
+	return slot;
+}
+
 bool use(JewelryAmulet& jewelryAmulet, Item& owner, Creature& wearer, GameContext& ctx)
 {
-	return use_stat_boost(EquipmentSlot::NECK, owner, wearer, ctx);
+	return use_stat_boost(worn_slot(owner, ctx), owner, wearer, ctx);
 }
 
 bool use(Gauntlets& gauntlets, Item& owner, Creature& wearer, GameContext& ctx)
 {
-	return use_stat_boost(EquipmentSlot::GAUNTLETS, owner, wearer, ctx);
+	return use_stat_boost(worn_slot(owner, ctx), owner, wearer, ctx);
 }
 
 bool use(Girdle& girdle, Item& owner, Creature& wearer, GameContext& ctx)
 {
-	return use_stat_boost(EquipmentSlot::GIRDLE, owner, wearer, ctx);
+	return use_stat_boost(worn_slot(owner, ctx), owner, wearer, ctx);
 }
 
 bool use(Shield& shield, Item& owner, Creature& wearer, GameContext& ctx)

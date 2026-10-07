@@ -137,6 +137,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/TurnUndead.h
     ${PROJECT_SOURCE_DIR}/Vision.cpp
     ${PROJECT_SOURCE_DIR}/Vision.h
+    ${PROJECT_SOURCE_DIR}/Pickup.cpp
+    ${PROJECT_SOURCE_DIR}/Pickup.h
     ${PROJECT_SOURCE_DIR}/TurningTable.h
     ${PROJECT_SOURCE_DIR}/TileFeature.h
     ${PROJECT_SOURCE_DIR}/Stairs.cpp
