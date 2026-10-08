@@ -220,6 +220,11 @@ enum class TileSheet
 	// PNG that is not there yet is the broken half of that chicken and egg - so the
 	// load_static call lands in the same pass as the image.
 	SHEET_SLOTS,
+	// The menu frame's nine cells. Its own static sheet rather than cells inside GUI0,
+	// which is loaded animated: a border that flickers is a border nobody wants.
+	// Declared ahead of its art for the same reason as SHEET_SLOTS - the generator reads
+	// this enum for the sheet number and refuses to install until the entry exists.
+	SHEET_FRAME,
 	COUNT, // sentinel -- keep last
 };
 

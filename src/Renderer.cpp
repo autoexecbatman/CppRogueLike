@@ -342,6 +342,7 @@ void Renderer::load_dawnlike(std::string_view basePath)
 	// by 15 rows. Static, because items do not animate.
 	load_static(TileSheet::SHEET_ITEMS, "Items", "Items/", "Items", 64);
 	load_static(TileSheet::SHEET_SLOTS, "Slots", "GUI/", "Slots", 64);
+	load_static(TileSheet::SHEET_FRAME, "Frame", "GUI/", "Frame", 64);
 
 	// Further character sheets
 	load_animated(TileSheet::SHEET_SLIME0, "Slime0", "Characters/", "Slime", 16);
@@ -807,26 +808,27 @@ void Renderer::draw_frame_pixels(Vector2D screenPos, int widthPixels, int height
 	const int rightX = screenPos.x + widthPixels - tileSize;
 	const int bottomY = screenPos.y + heightPixels - tileSize;
 
-	// Corners first, then the runs between them. A run's last tile may overlap its
-	// neighbour, which is what lets the border meet the corner on any width.
-	draw_tile_screen(screenPos, tileConfig.get("GUI_FRAME_TL"));
-	draw_tile_screen(Vector2D{ rightX, screenPos.y }, tileConfig.get("GUI_FRAME_TR"));
-	draw_tile_screen(Vector2D{ screenPos.x, bottomY }, tileConfig.get("GUI_FRAME_BL"));
-	draw_tile_screen(Vector2D{ rightX, bottomY }, tileConfig.get("GUI_FRAME_BR"));
-
+	// The runs first and the corners over them. A run's last tile overlaps its
+	// neighbour, which is what lets the border close on a width the tile size does not
+	// divide - and that overlap reaches into the corner cell by up to a whole tile. Drawn
+	// the other way round a rail paints across the corner, which costs nothing while the
+	// rails are one pixel wide and cuts the ornament off a heavier frame.
 	for (int x = screenPos.x + tileSize; x < rightX; x += tileSize)
 	{
-		const int clampedX = std::min(x, rightX - 1);
-		draw_tile_screen(Vector2D{ clampedX, screenPos.y }, tileConfig.get("GUI_FRAME_T"));
-		draw_tile_screen(Vector2D{ clampedX, bottomY }, tileConfig.get("GUI_FRAME_B"));
+		draw_tile_screen(Vector2D{ x, screenPos.y }, tileConfig.get("GUI_FRAME_T"));
+		draw_tile_screen(Vector2D{ x, bottomY }, tileConfig.get("GUI_FRAME_B"));
 	}
 
 	for (int y = screenPos.y + tileSize; y < bottomY; y += tileSize)
 	{
-		const int clampedY = std::min(y, bottomY - 1);
-		draw_tile_screen(Vector2D{ screenPos.x, clampedY }, tileConfig.get("GUI_FRAME_L"));
-		draw_tile_screen(Vector2D{ rightX, clampedY }, tileConfig.get("GUI_FRAME_R"));
+		draw_tile_screen(Vector2D{ screenPos.x, y }, tileConfig.get("GUI_FRAME_L"));
+		draw_tile_screen(Vector2D{ rightX, y }, tileConfig.get("GUI_FRAME_R"));
 	}
+
+	draw_tile_screen(screenPos, tileConfig.get("GUI_FRAME_TL"));
+	draw_tile_screen(Vector2D{ rightX, screenPos.y }, tileConfig.get("GUI_FRAME_TR"));
+	draw_tile_screen(Vector2D{ screenPos.x, bottomY }, tileConfig.get("GUI_FRAME_BL"));
+	draw_tile_screen(Vector2D{ rightX, bottomY }, tileConfig.get("GUI_FRAME_BR"));
 }
 
 void Renderer::draw_bar(Vector2D screenPos, int w, int h, float ratio, Color filled, Color empty) const

@@ -121,24 +121,24 @@
       "row": 8
     },
     "GUI_FRAME_TL": {
-      "sheet": 43,
-      "col": 9,
-      "row": 7
+      "sheet": 71,
+      "col": 0,
+      "row": 0
     },
     "GUI_FRAME_T": {
-      "sheet": 43,
-      "col": 10,
-      "row": 7
+      "sheet": 71,
+      "col": 1,
+      "row": 0
     },
     "GUI_FRAME_TR": {
-      "sheet": 43,
-      "col": 11,
-      "row": 7
+      "sheet": 71,
+      "col": 2,
+      "row": 0
     },
     "GUI_FRAME_L": {
-      "sheet": 43,
-      "col": 9,
-      "row": 8
+      "sheet": 71,
+      "col": 0,
+      "row": 1
     },
     "GUI_FRAME_F": {
       "sheet": 43,
@@ -146,24 +146,24 @@
       "row": 8
     },
     "GUI_FRAME_R": {
-      "sheet": 43,
-      "col": 11,
-      "row": 8
+      "sheet": 71,
+      "col": 2,
+      "row": 1
     },
     "GUI_FRAME_BL": {
-      "sheet": 43,
-      "col": 9,
-      "row": 9
+      "sheet": 71,
+      "col": 0,
+      "row": 2
     },
     "GUI_FRAME_B": {
-      "sheet": 43,
-      "col": 10,
-      "row": 9
+      "sheet": 71,
+      "col": 1,
+      "row": 2
     },
     "GUI_FRAME_BR": {
-      "sheet": 43,
-      "col": 11,
-      "row": 9
+      "sheet": 71,
+      "col": 2,
+      "row": 2
     },
     "GUI_HEART_FULL": {
       "sheet": 43,
