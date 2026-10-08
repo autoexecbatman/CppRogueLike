@@ -104,6 +104,13 @@ std::vector<std::string> labels_for_row(InventoryScreen screen, bool rowHoldsIte
 
 // Tile column the right-click menu opens at. Far enough in that it sits over the rows
 // it is about rather than off the left edge of the panel.
+// Where a row's icon and text begin, in pixels from the left of the screen, and how
+// big the icon is. The icon is under the 32 pixel row pitch so two rows never touch.
+constexpr int ROW_TEXT_X = 192;
+constexpr int ROW_ICON_SIZE = 28;
+constexpr int ROW_ICON_GAP = 6;
+constexpr int ROW_ICON_INSET = 2;
+
 constexpr int CONTEXT_MENU_ANCHOR_COL = 6;
 
 static int row_at_y(int tileSize, int screenY)
@@ -523,13 +530,6 @@ void InventoryUI::render_tab_bar(GameContext& ctx)
 		ctx.renderer->draw_text(Vector2D{ px, row_text_y(tileSize, fontSize, TAB_ROW) }, tab.text, colorPair);
 		px += textW + tileSize; // one-tile gap between tabs
 	}
-
-	// Measured back from the panel's inner edge, with clearance for the frame's
-	// own rule. Counting tile columns ran the last glyph into the border.
-	std::string_view hint = "[Left/Right] Switch";
-	int hintW = ctx.renderer->measure_text(hint);
-	int hintX = ctx.renderer->get_screen_width() - tileSize - hintW - PANEL_EDGE_CLEARANCE;
-	ctx.renderer->draw_text(Vector2D{ hintX, row_text_y(tileSize, fontSize, TAB_ROW) }, hint, ColorPairId::CYAN_BLACK);
 }
 
 void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx)
@@ -550,12 +550,21 @@ void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx
 
 		const ColorPairId rowColor = isCursorRow ? ColorPairId::BLACK_WHITE : ColorPairId::WHITE_BLACK;
 
-		std::string slotLabel = std::format("{:<14}: ", slotInfo.label);
+		const std::string slotLabel = std::format("{:<14}: ", slotInfo.label);
 
 		Item* equipped = player.get_equipped_item(slotInfo.slot);
 		std::string line;
 		if (equipped)
 		{
+			// The item's own sprite, the one the map draws it with. Sized under the row
+			// pitch so two rows cannot touch, and drawn before the text so the text
+			// starts clear of it.
+			ctx.renderer->draw_tile_screen_color_sized(
+				Vector2D{ ROW_TEXT_X, row_top_y(tileSize, y) + ROW_ICON_INSET },
+				ROW_ICON_SIZE,
+				equipped->get_display_tile(),
+				WHITE);
+
 			line = slotLabel + std::string(equipped->get_name());
 
 			std::string stats;
@@ -578,10 +587,17 @@ void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx
 		}
 		else
 		{
-			line = slotLabel + "(empty)";
+			// Twelve of fifteen rows are empty on a new character, so the word "(empty)"
+			// twelve times was most of what the screen said. A dash set back in a dimmer
+			// colour leaves the filled rows as the thing the eye finds.
+			line = slotLabel + "-";
 		}
 
-		ctx.renderer->draw_text(Vector2D{ 3 * tileSize, row_text_y(tileSize, fontSize, y) }, line, rowColor);
+		const ColorPairId textColor = (equipped || isCursorRow) ? rowColor : ColorPairId::BLUE_BLACK;
+		ctx.renderer->draw_text(
+			Vector2D{ ROW_TEXT_X + ROW_ICON_SIZE + ROW_ICON_GAP, row_text_y(tileSize, fontSize, y) },
+			line,
+			textColor);
 	}
 
 	if (filterMode)
@@ -734,10 +750,6 @@ void InventoryUI::render_detail_bar(const Player& player, GameContext& ctx)
 		{
 			ctx.renderer->draw_text(Vector2D{ tileSize, row_text_y(tileSize, fontSize, detailY + 1) }, line2, ColorPairId::WHITE_BLACK);
 		}
-	}
-	else if (activeScreen == InventoryScreen::EQUIPMENT)
-	{
-		ctx.renderer->draw_text(Vector2D{ tileSize, row_text_y(tileSize, fontSize, detailY) }, "Press [Enter] to browse items for this slot.", ColorPairId::WHITE_BLACK);
 	}
 
 	const char* keybinds = (activeScreen == InventoryScreen::EQUIPMENT)
