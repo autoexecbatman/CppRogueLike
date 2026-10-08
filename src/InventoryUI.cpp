@@ -29,6 +29,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cctype>
 #include <cstdint>
 #include <format>
 #include <memory>
@@ -38,7 +39,6 @@
 #include <utility>
 #include <variant>
 #include <vector>
-#include <cctype>
 
 #include "Actor.h"
 #include "CloseButtonArea.h"
@@ -77,8 +77,65 @@ static int row_text_y(int tileSize, int fontSize, int row)
 
 // The row a screen y falls in, for a panel filling the screen. Negative above the
 // first row, which the callers test for rather than clamping.
+// Slack either side of a tab's text, so a click just past the last glyph still counts.
+constexpr int TAB_HIT_PADDING = 4;
 namespace InventoryActions
 {
+
+std::array<TabBox, 3> tab_boxes(const Renderer& renderer)
+{
+	const int tileSize = renderer.get_tile_size();
+
+	std::array<TabBox, 3> boxes{ {
+		{ InventoryScreen::EQUIPMENT, "Equipment", 0, 0 },
+		{ InventoryScreen::BACKPACK, "Backpack", 0, 0 },
+		{ InventoryScreen::USABLES, "Usables", 0, 0 },
+	} };
+
+	// Two tiles in, then one tile of gap between tabs. Measured rather than counted in
+	// characters: a character count used as a tile count is how a 33 character line
+	// became 37 tiles wide here before.
+	int px = 2 * tileSize;
+	for (TabBox& box : boxes)
+	{
+		box.width = renderer.measure_text(box.text);
+		box.x = px;
+		px += box.width + tileSize;
+	}
+	return boxes;
+}
+
+std::optional<InventoryScreen> tab_at(int pixelX, int pixelY, const Renderer& renderer)
+{
+	const int tileSize = renderer.get_tile_size();
+	if (panel_text_row_at_y(0, tileSize, pixelY) != TAB_ROW)
+	{
+		return std::nullopt;
+	}
+
+	for (const TabBox& box : tab_boxes(renderer))
+	{
+		if (pixelX >= box.x - TAB_HIT_PADDING && pixelX < box.x + box.width + TAB_HIT_PADDING)
+		{
+			return box.screen;
+		}
+	}
+	return std::nullopt;
+}
+
+InventoryScreen next_screen(InventoryScreen screen)
+{
+	switch (screen)
+	{
+	case InventoryScreen::EQUIPMENT:
+		return InventoryScreen::BACKPACK;
+	case InventoryScreen::BACKPACK:
+		return InventoryScreen::USABLES;
+	case InventoryScreen::USABLES:
+		return InventoryScreen::EQUIPMENT;
+	}
+	return InventoryScreen::EQUIPMENT;
+}
 
 std::vector<std::string> labels_for_row(InventoryScreen screen, bool rowHoldsItem)
 {
@@ -522,33 +579,17 @@ void InventoryUI::render_tab_bar(GameContext& ctx)
 	}
 
 	int tabY = row_top_y(tileSize, TAB_ROW);
-	int px = 2 * tileSize; // start 2 tiles from left
-
-	struct TabLabel
-	{
-		InventoryScreen screen;
-		const char* text;
-	};
-
-	const TabLabel tabs[] = {
-		{ InventoryScreen::EQUIPMENT, "Equipment" },
-		{ InventoryScreen::BACKPACK, "Backpack" },
-		{ InventoryScreen::USABLES, "Usables" },
-	};
-
-	for (const auto& tab : tabs)
+	for (const InventoryActions::TabBox& tab : InventoryActions::tab_boxes(*ctx.renderer))
 	{
 		const ColorPairId colorPair = (tab.screen == activeScreen) ? ColorPairId::BLACK_WHITE : ColorPairId::WHITE_BLACK;
-		int textW = ctx.renderer->measure_text(tab.text);
 
 		if (tab.screen == activeScreen)
 		{
 			ColorPair pair = ctx.renderer->get_color_pair(ColorPairId::BLACK_WHITE);
-			DrawRectangle(px - 4, tabY, textW + 8, UI_TEXT_ROW_PITCH, pair.bg);
+			DrawRectangle(tab.x - TAB_HIT_PADDING, tabY, tab.width + TAB_HIT_PADDING * 2, UI_TEXT_ROW_PITCH, pair.bg);
 		}
 
-		ctx.renderer->draw_text(Vector2D{ px, row_text_y(tileSize, fontSize, TAB_ROW) }, tab.text, colorPair);
-		px += textW + tileSize; // one-tile gap between tabs
+		ctx.renderer->draw_text(Vector2D{ tab.x, row_text_y(tileSize, fontSize, TAB_ROW) }, tab.text, colorPair);
 	}
 }
 
@@ -600,9 +641,15 @@ void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx
 			{
 				line += " " + stats;
 			}
+			// Worth and weight together. The band at the top of the screen gives a total
+			// against a limit, and until now no row said what it was contributing to it.
 			if (equipped->get_value() > 0)
 			{
-				line += std::format(" ({} gp)", equipped->get_value());
+				line += std::format(" ({} gp, {} lb)", equipped->get_value(), equipped->enhancement.weight);
+			}
+			else
+			{
+				line += std::format(" ({} lb)", equipped->enhancement.weight);
 			}
 		}
 		else
@@ -1032,6 +1079,10 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 		return false;
 	}
 
+	// The Tab key reaches here as MINIMAP_TOGGLE: InputSystem names a key for what the
+	// map does with it, so nothing ever produces GameKey::TAB and that case alone could
+	// never fire. Inside a menu there is no minimap, and Tab means the next pane.
+	case GameKey::MINIMAP_TOGGLE:
 	case GameKey::TAB:
 	case GameKey::RIGHT:
 	{
@@ -1123,30 +1174,11 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 			return false;
 		}
 
-		// Tab bar (tile row 1)
-		if (mouseRow == 1)
+		// The tab bar. Its geometry is tab_boxes, the same thing the drawing walks, so a
+		// tab cannot be painted in one place and clicked in another.
+		if (const auto clickedTab = InventoryActions::tab_at(mousePixelX, mousePixelY, *ctx.renderer))
 		{
-			const std::array<const char*, 3> tabLabels{
-				"Equipment", "Backpack", "Usables"
-			};
-			int px = 2 * tileSize;
-			for (int i = 0; i < 3; ++i)
-			{
-				int textW = ctx.renderer->measure_text(tabLabels[static_cast<size_t>(i)]);
-				if (mousePixelX >= px - 4 && mousePixelX < px + textW + 4)
-				{
-					activeScreen = static_cast<InventoryScreen>(i);
-					if (filterMode && activeScreen == InventoryScreen::EQUIPMENT)
-					{
-						filterMode = false;
-						filterSlot = EquipmentSlot::NONE;
-					}
-					listCursor = 0;
-					scrollOffset = 0;
-					return true;
-				}
-				px += textW + tileSize;
-			}
+			switch_to_screen(*clickedTab);
 			return true;
 		}
 
@@ -1259,18 +1291,9 @@ void InventoryUI::handle_cursor_down(GameContext& ctx)
 void InventoryUI::handle_tab_switch(int direction)
 {
 	constexpr int numTabs = 3;
-	int current = static_cast<int>(activeScreen);
-	current = (current + direction + numTabs) % numTabs;
-	activeScreen = static_cast<InventoryScreen>(current);
-
-	if (filterMode && activeScreen == InventoryScreen::EQUIPMENT)
-	{
-		filterMode = false;
-		filterSlot = EquipmentSlot::NONE;
-	}
-
-	listCursor = 0;
-	scrollOffset = 0;
+	const int current = static_cast<int>(activeScreen);
+	const int target = (current + direction + numTabs) % numTabs;
+	switch_to_screen(static_cast<InventoryScreen>(target));
 }
 
 void InventoryUI::handle_enter_equipment(Player& player, GameContext& ctx)
@@ -1339,6 +1362,22 @@ void InventoryUI::handle_enter_item(Player& player, GameContext& ctx)
 // Capturing this is safe although the menu outlives the call: MenuManager ticks only
 // menus.back(), so while the context menu is on top this screen does not run and cannot
 // close itself out from under it.
+void InventoryUI::switch_to_screen(InventoryScreen screen)
+{
+	activeScreen = screen;
+
+	// Leaving the equipment pane ends any slot filter with it: the filtered backpack is
+	// a view of one slot, and that slot is no longer what the screen is about.
+	if (filterMode && activeScreen == InventoryScreen::EQUIPMENT)
+	{
+		filterMode = false;
+		filterSlot = EquipmentSlot::NONE;
+	}
+
+	listCursor = 0;
+	scrollOffset = 0;
+}
+
 void InventoryUI::open_row_menu(Player& player, int mouseRow, GameContext& ctx)
 {
 	const bool isEquipment = activeScreen == InventoryScreen::EQUIPMENT;

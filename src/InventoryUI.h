@@ -14,6 +14,7 @@ class Creature;
 class Item;
 class Player;
 struct GameContext;
+class Renderer;
 
 enum class InventoryScreen
 {
@@ -39,6 +40,35 @@ namespace InventoryActions
 //   labels_for_row(InventoryScreen::EQUIPMENT, false);   // -> Browse, Cancel
 //   labels_for_row(InventoryScreen::BACKPACK, false);    // -> {}, a category heading
 [[nodiscard]] std::vector<std::string> labels_for_row(InventoryScreen screen, bool rowHoldsItem);
+
+// Where one pane tab sits on the tab row.
+struct TabBox
+{
+	InventoryScreen screen{ InventoryScreen::EQUIPMENT };
+	const char* text{ "" };
+	int x{ 0 };
+	int width{ 0 };
+};
+
+// The three tabs, left to right. Drawing paints these and the click test reads these,
+// so the two cannot disagree about where a tab is - which they did: the hit test looked
+// on row 1 while TAB_ROW is 0, and no tab could be clicked at all.
+[[nodiscard]] std::array<TabBox, 3> tab_boxes(const Renderer& renderer);
+
+// Which pane the pointer is over, or nothing when it is not on a tab.
+//
+// Example:
+//   tab_at(middleOfTheBackpackTab, tabRowY, renderer);   // -> BACKPACK
+//   tab_at(middleOfTheBackpackTab, aContentRowY, r);     // -> nothing, wrong row
+[[nodiscard]] std::optional<InventoryScreen> tab_at(int pixelX, int pixelY, const Renderer& renderer);
+
+// The pane after this one, wrapping. Tab steps through the panes with the keyboard the
+// way clicking steps through them with the mouse.
+//
+// Example:
+//   next_screen(InventoryScreen::EQUIPMENT);   // -> BACKPACK
+//   next_screen(InventoryScreen::USABLES);     // -> EQUIPMENT
+[[nodiscard]] InventoryScreen next_screen(InventoryScreen screen);
 
 } // namespace InventoryActions
 
@@ -172,6 +202,9 @@ private:
 	// Opens the right-click menu for the row under the pointer, or nothing when that row
 	// has no action. Its entries call the same handlers the keyboard does.
 	void open_row_menu(Player& player, int mouseRow, GameContext& ctx);
+	// Shows a pane and puts its cursor at the top. The one way the active pane changes,
+	// so clicking a tab and pressing Tab cannot leave different state behind them.
+	void switch_to_screen(InventoryScreen screen);
 
 	// Cursor helpers
 	std::optional<int> get_next_item_index(int from, int direction) const;

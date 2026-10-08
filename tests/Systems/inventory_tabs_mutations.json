@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=InventoryTabsTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/InventoryUI.cpp",
+      "original": "\tif (panel_text_row_at_y(0, tileSize, pixelY) != TAB_ROW)",
+      "mutated": "\tif (panel_text_row_at_y(0, tileSize, pixelY) != 1)",
+      "catches": "the row number written into the hit test instead of read from the constant the drawing uses, which is the defect: no tab could be clicked at all"
+    },
+    {
+      "file": "src/InventoryUI.cpp",
+      "original": "\t\tpx += box.width + tileSize;",
+      "mutated": "\t\tpx += box.width;",
+      "catches": "the gap between tabs gone, so they stack at one x and the bar stops being three separate targets"
+    },
+    {
+      "file": "src/InventoryUI.cpp",
+      "original": "\t\tif (pixelX >= box.x - TAB_HIT_PADDING && pixelX < box.x + box.width + TAB_HIT_PADDING)",
+      "mutated": "\t\tif (true)",
+      "catches": "the across test gone, so every click on the tab row answers Equipment whatever it was aimed at"
+    },
+    {
+      "file": "src/InventoryUI.cpp",
+      "original": "\tcase InventoryScreen::BACKPACK:\n\t\treturn InventoryScreen::USABLES;",
+      "mutated": "\tcase InventoryScreen::BACKPACK:\n\t\treturn InventoryScreen::EQUIPMENT;",
+      "catches": "Tab cycling between two panes and never reaching Usables"
+    }
+  ]
+}
