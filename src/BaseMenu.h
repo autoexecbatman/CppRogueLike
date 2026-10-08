@@ -2,6 +2,7 @@
 
 #include "Colors.h"
 
+#include <optional>
 #include <string>
 
 #include "InputSystem.h"
@@ -27,6 +28,27 @@ protected:
 	// Paints one row at an already-resolved pixel column, with the highlight bar
 	// when one is on. Both menu_print forms end here so a row is drawn one way.
 	void menu_draw_row(int pixelX, int row, const std::string& text);
+
+	// Which text row of this menu a pointer at this screen pixel sits on, or nothing when
+	// it is outside the panel. rowCount is how many rows the menu is showing, so a pointer
+	// below the last one answers nothing rather than a row that is not drawn.
+	//
+	// Example, a menu four tiles in and eight wide at a 64 pixel tile:
+	//   menu_row_at(300, 200, 5);   // -> 1
+	//   menu_row_at(900, 200, 5);   // -> nothing, right of the panel
+	//   menu_row_at(300, 40, 5);    // -> nothing, on the frame above row 0
+	[[nodiscard]] std::optional<size_t> menu_row_at(int pixelX, int pixelY, size_t rowCount) const;
+
+	// True only on a frame where the pointer actually moved. A menu that re-seats its
+	// cursor from a stationary pointer overwrites it every frame, and the arrow keys then
+	// look broken while the pointer rests inside the panel.
+	[[nodiscard]] bool menu_pointer_moved() const;
+
+	// Whether this frame carries a click. Asked through InputSystem rather than Raylib:
+	// menu_key_listen calls poll(), which consumes the press transition, so a raw
+	// IsMouseButtonPressed in the same frame sees prev == curr and answers false.
+	[[nodiscard]] bool menu_left_clicked() const;
+	[[nodiscard]] bool menu_right_clicked() const;
 
 public:
 	bool run{ true };

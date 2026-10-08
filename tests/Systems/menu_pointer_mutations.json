@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=MenuPointerTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/BaseMenu.cpp",
+      "original": "\tif (pixelX < leftEdge || pixelX >= rightEdge)\n\t{\n\t\treturn std::nullopt;\n\t}",
+      "mutated": "",
+      "catches": "the horizontal bound gone, which is the defect lifted out of ListMenu: a click level with a row but far beside the panel fires it"
+    },
+    {
+      "file": "src/BaseMenu.cpp",
+      "original": "\tconst int rightEdge = leftEdge + static_cast<int>(menuWidth) * tileSize;",
+      "mutated": "\tconst int rightEdge = leftEdge;",
+      "catches": "a panel of no width, so no pointer is ever inside it and the menu stops answering clicks"
+    },
+    {
+      "file": "src/BaseMenu.cpp",
+      "original": "\tif (row < 0 || static_cast<size_t>(row) >= rowCount)",
+      "mutated": "\tif (row < 0)",
+      "catches": "a pointer below the last row answering a row the menu does not draw"
+    },
+    {
+      "file": "src/BaseMenu.cpp",
+      "original": "\tconst int row = panel_text_row_at_y(static_cast<int>(menuStartY) * tileSize, tileSize, pixelY);",
+      "mutated": "\tconst int row = panel_text_row_at_y(0, tileSize, pixelY);",
+      "catches": "the panel's own top forgotten, so every row answers as if the menu began at the top of the screen"
+    }
+  ]
+}

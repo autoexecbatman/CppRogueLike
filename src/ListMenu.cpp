@@ -97,7 +97,7 @@ void ListMenu::on_key(GameContext& ctx)
 	}
 	else
 	{
-		// Hotkey match — case-insensitive so 'M' and 'm' both work.
+		// Hotkey match, case-insensitive so 'M' and 'm' both work.
 		for (auto& entry : entries)
 		{
 			if (entry.hotkey != 0 && std::tolower(lastChar) == std::tolower(entry.hotkey))
@@ -121,48 +121,35 @@ void ListMenu::menu(GameContext& ctx)
 	}
 	menu_key_listen();
 
-	// Hover -- update cursor only when the mouse actually moves.
-	// Without the delta guard, a stationary mouse inside the menu area
-	// resets cursorIndex every frame, making keyboard UP/DOWN invisible.
-	::Vector2 mouseDelta = GetMouseDelta();
-	bool mouseMoved = (mouseDelta.x != 0.0f || mouseDelta.y != 0.0f);
-	if (mouseMoved && inputSystem && renderer)
+	// Hover follows the pointer, and only on a frame it moved: a stationary pointer
+	// inside the panel would re-seat the cursor every frame and hide the arrow keys.
+	if (menu_pointer_moved())
 	{
-		int tileSize = renderer->get_tile_size();
-		::Vector2 rawMouse = GetMousePosition();
-		int relRow = panel_text_row_at_y(static_cast<int>(menuStartY) * tileSize, tileSize, static_cast<int>(rawMouse.y));
-		if (relRow >= 0 && relRow < static_cast<int>(entries.size()))
+		const ::Vector2 pointer = GetMousePosition();
+		const auto hovered = menu_row_at(static_cast<int>(pointer.x), static_cast<int>(pointer.y), entries.size());
+		if (hovered)
 		{
-			cursorIndex = static_cast<size_t>(relRow);
+			cursorIndex = *hovered;
 		}
 	}
 
 	draw();
 
-	// Use inputSystem->get_key() instead of IsMouseButtonPressed() directly.
-	// On Emscripten, poll() (called inside menu_key_listen()) consumes the
-	// prev->curr transition. A second raw IsMouseButtonPressed() call in the
-	// same frame sees prev=curr=1 and returns false.
-	if (inputSystem && inputSystem->get_key() == GameKey::MOUSE_LEFT)
+	if (menu_left_clicked())
 	{
-		if (renderer)
+		const ::Vector2 pointer = GetMousePosition();
+		const auto clicked = menu_row_at(static_cast<int>(pointer.x), static_cast<int>(pointer.y), entries.size());
+		if (clicked)
 		{
-			int tileSize = renderer->get_tile_size();
-			::Vector2 rawMouse = GetMousePosition();
-			int relRow = panel_text_row_at_y(static_cast<int>(menuStartY) * tileSize, tileSize, static_cast<int>(rawMouse.y));
-			if (relRow >= 0 && relRow < static_cast<int>(entries.size()))
+			menu_set_run_false();
+			if (entries[*clicked].command)
 			{
-				menu_set_run_false();
-				if (entries[static_cast<size_t>(relRow)].command)
-				{
-					(*entries[static_cast<size_t>(relRow)].command)(ctx);
-				}
-				return;
+				(*entries[*clicked].command)(ctx);
 			}
 		}
-		// Click outside menu bounds = ignore. Do not cancel or fire onEscape.
-		// onEscape is reserved for the ESC key — a misclick outside the menu
-		// should never trigger quit or close behaviour.
+
+		// A click beside the panel is ignored rather than treated as a cancel. onEscape
+		// belongs to the ESC key; a misclick must never close or quit.
 		return;
 	}
 

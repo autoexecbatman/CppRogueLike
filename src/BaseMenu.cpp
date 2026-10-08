@@ -140,3 +140,45 @@ void BaseMenu::menu_draw_title(std::string_view title, ColorPairId colorPair)
 void BaseMenu::on_key(GameContext& ctx)
 {
 }
+
+std::optional<size_t> BaseMenu::menu_row_at(int pixelX, int pixelY, size_t rowCount) const
+{
+	if (renderer == nullptr)
+	{
+		return std::nullopt;
+	}
+
+	const int tileSize = renderer->get_tile_size();
+
+	// Across first. A text row's line runs the full width of the window, so a test on
+	// the vertical alone answers a row for a pointer that is nowhere near the menu.
+	const int leftEdge = static_cast<int>(menuStartX) * tileSize;
+	const int rightEdge = leftEdge + static_cast<int>(menuWidth) * tileSize;
+	if (pixelX < leftEdge || pixelX >= rightEdge)
+	{
+		return std::nullopt;
+	}
+
+	const int row = panel_text_row_at_y(static_cast<int>(menuStartY) * tileSize, tileSize, pixelY);
+	if (row < 0 || static_cast<size_t>(row) >= rowCount)
+	{
+		return std::nullopt;
+	}
+	return static_cast<size_t>(row);
+}
+
+bool BaseMenu::menu_pointer_moved() const
+{
+	const ::Vector2 delta = GetMouseDelta();
+	return delta.x != 0.0f || delta.y != 0.0f;
+}
+
+bool BaseMenu::menu_left_clicked() const
+{
+	return inputSystem != nullptr && inputSystem->get_key() == GameKey::MOUSE_LEFT;
+}
+
+bool BaseMenu::menu_right_clicked() const
+{
+	return inputSystem != nullptr && inputSystem->get_key() == GameKey::MOUSE_RIGHT;
+}
