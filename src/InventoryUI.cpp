@@ -38,6 +38,7 @@
 #include <utility>
 #include <variant>
 #include <vector>
+#include <cctype>
 
 #include "Actor.h"
 #include "CloseButtonArea.h"
@@ -58,6 +59,7 @@
 #include "Player.h"
 #include "PlayerTurn.h"
 #include "Renderer.h"
+#include "TileConfig.h"
 #include "WeaponDamageRegistry.h"
 
 // Where one text row sits, and where a glyph sits inside it. Drawing and mouse
@@ -110,6 +112,24 @@ constexpr int ROW_TEXT_X = 192;
 constexpr int ROW_ICON_SIZE = 28;
 constexpr int ROW_ICON_GAP = 6;
 constexpr int ROW_ICON_INSET = 2;
+
+// How bright an empty slot's symbol is drawn. It is the same art a filled row uses, so
+// the dimming is this number rather than a second set of faded sprites: a full-colour
+// sword at a fifth of its brightness is a sword-shaped socket.
+constexpr Color EMPTY_SLOT_TINT{ 120, 120, 145, 255 };
+
+// The tile_config key naming the symbol for a slot. encode_equipment_slot spells the
+// slot in lower case and the keys are upper, so this is the one place that converts
+// between them; getting it wrong throws on an unknown key rather than drawing nothing.
+static std::string slot_symbol_key(EquipmentSlot slot)
+{
+	std::string name{ encode_equipment_slot(slot) };
+	for (char& letter : name)
+	{
+		letter = static_cast<char>(std::toupper(static_cast<unsigned char>(letter)));
+	}
+	return "TILE_SLOT_" + name;
+}
 
 constexpr int CONTEXT_MENU_ANCHOR_COL = 6;
 
@@ -550,7 +570,7 @@ void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx
 
 		const ColorPairId rowColor = isCursorRow ? ColorPairId::BLACK_WHITE : ColorPairId::WHITE_BLACK;
 
-		const std::string slotLabel = std::format("{:<14}: ", slotInfo.label);
+		const std::string slotLabel = std::format("{:<14}", slotInfo.label);
 
 		Item* equipped = player.get_equipped_item(slotInfo.slot);
 		std::string line;
@@ -565,7 +585,7 @@ void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx
 				equipped->get_display_tile(),
 				WHITE);
 
-			line = slotLabel + std::string(equipped->get_name());
+			line = slotLabel + ": " + std::string(equipped->get_name());
 
 			std::string stats;
 			if (equipped->is_weapon())
@@ -587,10 +607,17 @@ void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx
 		}
 		else
 		{
-			// Twelve of fifteen rows are empty on a new character, so the word "(empty)"
-			// twelve times was most of what the screen said. A dash set back in a dimmer
-			// colour leaves the filled rows as the thing the eye finds.
-			line = slotLabel + "-";
+			// The symbol for what belongs here, dimmed. An empty row then says which slot
+			// it is twice over, in the label and in a shape, and the filled rows still
+			// carry the eye because they are the bright ones.
+			assert(ctx.tileConfig && "render_equipment_screen: no tileConfig to read slot symbols from");
+			ctx.renderer->draw_tile_screen_color_sized(
+				Vector2D{ ROW_TEXT_X, row_top_y(tileSize, y) + ROW_ICON_INSET },
+				ROW_ICON_SIZE,
+				ctx.tileConfig->get(slot_symbol_key(slotInfo.slot)),
+				EMPTY_SLOT_TINT);
+
+			line = slotLabel;
 		}
 
 		const ColorPairId textColor = (equipped || isCursorRow) ? rowColor : ColorPairId::BLUE_BLACK;

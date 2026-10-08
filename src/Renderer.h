@@ -211,6 +211,15 @@ enum class TileSheet
 	// Generated item art -- appended to preserve existing enum integer values.
 	// One 64px sheet holding every item in items.json, addressed by tiles.json.
 	SHEET_ITEMS,
+	// Equipment slot symbols, one per slot the inventory draws, so an empty slot can
+	// show what belongs in it rather than a dash. Appended for the same reason as the
+	// line above: inserting anywhere else renumbers every sheet after it.
+	//
+	// Declared ahead of its art. The generator reads this enum to learn the sheet
+	// number and refuses to install until the entry exists, and a loader pointing at a
+	// PNG that is not there yet is the broken half of that chicken and egg - so the
+	// load_static call lands in the same pass as the image.
+	SHEET_SLOTS,
 	COUNT, // sentinel -- keep last
 };
 

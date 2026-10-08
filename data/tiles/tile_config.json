@@ -284,6 +284,81 @@
       "sheet": 4,
       "col": 3,
       "row": 2
+    },
+    "TILE_SLOT_HEAD": {
+      "sheet": 70,
+      "col": 0,
+      "row": 0
+    },
+    "TILE_SLOT_NECK": {
+      "sheet": 70,
+      "col": 1,
+      "row": 0
+    },
+    "TILE_SLOT_BODY": {
+      "sheet": 70,
+      "col": 2,
+      "row": 0
+    },
+    "TILE_SLOT_GIRDLE": {
+      "sheet": 70,
+      "col": 3,
+      "row": 0
+    },
+    "TILE_SLOT_CLOAK": {
+      "sheet": 70,
+      "col": 4,
+      "row": 0
+    },
+    "TILE_SLOT_RIGHT_HAND": {
+      "sheet": 70,
+      "col": 5,
+      "row": 0
+    },
+    "TILE_SLOT_LEFT_HAND": {
+      "sheet": 70,
+      "col": 6,
+      "row": 0
+    },
+    "TILE_SLOT_RIGHT_RING": {
+      "sheet": 70,
+      "col": 0,
+      "row": 1
+    },
+    "TILE_SLOT_LEFT_RING": {
+      "sheet": 70,
+      "col": 0,
+      "row": 1
+    },
+    "TILE_SLOT_BRACERS": {
+      "sheet": 70,
+      "col": 1,
+      "row": 1
+    },
+    "TILE_SLOT_GAUNTLETS": {
+      "sheet": 70,
+      "col": 2,
+      "row": 1
+    },
+    "TILE_SLOT_BOOTS": {
+      "sheet": 70,
+      "col": 3,
+      "row": 1
+    },
+    "TILE_SLOT_MISSILE_WEAPON": {
+      "sheet": 70,
+      "col": 4,
+      "row": 1
+    },
+    "TILE_SLOT_MISSILES": {
+      "sheet": 70,
+      "col": 5,
+      "row": 1
+    },
+    "TILE_SLOT_TOOL": {
+      "sheet": 70,
+      "col": 6,
+      "row": 1
     }
   },
   "autotile_groups": {
