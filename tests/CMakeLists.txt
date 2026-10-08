@@ -103,6 +103,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EnumCycleTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/MutationPlanTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/MenuPointerTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/InventoryContextActionsTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CreatureScheduleTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/DurationScheduleTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/RoundUpkeepTest.cpp

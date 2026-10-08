@@ -42,6 +42,7 @@
 #include "Actor.h"
 #include "CloseButtonArea.h"
 #include "Colors.h"
+#include "ContextMenu.h"
 #include "DamageInfo.h"
 #include "DataManager.h"
 #include "Encumbrance.h"
@@ -74,6 +75,37 @@ static int row_text_y(int tileSize, int fontSize, int row)
 
 // The row a screen y falls in, for a panel filling the screen. Negative above the
 // first row, which the callers test for rather than clamping.
+namespace InventoryActions
+{
+
+std::vector<std::string> labels_for_row(InventoryScreen screen, bool rowHoldsItem)
+{
+	if (screen == InventoryScreen::EQUIPMENT)
+	{
+		// An empty slot has one thing worth offering: what would fit it. That is already
+		// what Enter does there, which opens the backpack filtered to the slot.
+		if (!rowHoldsItem)
+		{
+			return { "Browse", "Cancel" };
+		}
+		return { "Unequip", "Drop", "Cancel" };
+	}
+
+	// A backpack or usables row that is a category heading rather than an item. Nothing
+	// applies, and the caller opens no menu at all.
+	if (!rowHoldsItem)
+	{
+		return {};
+	}
+	return { "Use", "Drop", "Cancel" };
+}
+
+} // namespace InventoryActions
+
+// Tile column the right-click menu opens at. Far enough in that it sits over the rows
+// it is about rather than off the left edge of the panel.
+constexpr int CONTEXT_MENU_ANCHOR_COL = 6;
+
 static int row_at_y(int tileSize, int screenY)
 {
 	return panel_text_row_at_y(0, tileSize, screenY);
@@ -1007,6 +1039,26 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 		return true;
 	}
 
+	case GameKey::MOUSE_RIGHT:
+	{
+		assert(ctx.renderer && "InventoryUI::handle_input MOUSE_RIGHT called without a renderer");
+
+		const int tileSize = ctx.renderer->get_tile_size();
+		const ::Vector2 rawMouse = GetMousePosition();
+		const int mouseRow = row_at_y(tileSize, static_cast<int>(rawMouse.y));
+		const int detailY = detail_bar_top_row(*ctx.renderer);
+
+		// Outside the rows is not a miss worth answering: a right-click there does
+		// nothing rather than closing, because closing is what the left button does.
+		if (mouseRow < FIRST_CONTENT_ROW || mouseRow >= detailY)
+		{
+			return true;
+		}
+
+		open_row_menu(player, mouseRow, ctx);
+		return true;
+	}
+
 	case GameKey::MOUSE_LEFT:
 	{
 		assert(ctx.renderer && "InventoryUI::handle_input MOUSE_LEFT called without a renderer");
@@ -1238,6 +1290,84 @@ void InventoryUI::handle_enter_item(Player& player, GameContext& ctx)
 			activeScreen = InventoryScreen::EQUIPMENT;
 		}
 	}
+}
+
+// Opens the right-click menu for one row, or opens nothing when the row has no action.
+//
+// Every entry runs what the keyboard runs. The menu seats the cursor on the clicked row
+// and calls the same handler, so there is no second statement of what Use or Drop mean.
+//
+// Capturing this is safe although the menu outlives the call: MenuManager ticks only
+// menus.back(), so while the context menu is on top this screen does not run and cannot
+// close itself out from under it.
+void InventoryUI::open_row_menu(Player& player, int mouseRow, GameContext& ctx)
+{
+	const bool isEquipment = activeScreen == InventoryScreen::EQUIPMENT;
+	const int rowIndex = mouseRow - FIRST_CONTENT_ROW;
+
+	bool rowHoldsItem = false;
+	if (isEquipment)
+	{
+		if (rowIndex < 0 || rowIndex >= SLOT_COUNT)
+		{
+			return;
+		}
+		rowHoldsItem = player.get_equipped_item(SLOT_TABLE[rowIndex].slot) != nullptr;
+	}
+	else
+	{
+		const int entryIndex = rowIndex + scrollOffset;
+		if (entryIndex < 0 || entryIndex >= static_cast<int>(listEntries.size()))
+		{
+			return;
+		}
+		rowHoldsItem = listEntries[entryIndex].kind == BackpackEntry::Kind::ITEM;
+	}
+
+	std::vector<std::string> labels = InventoryActions::labels_for_row(activeScreen, rowHoldsItem);
+	if (labels.empty())
+	{
+		return;
+	}
+
+	// Seat the cursor before the menu opens, so the row the player aimed at is the row
+	// the handlers read and the highlight agrees with what the menu is about.
+	if (isEquipment)
+	{
+		equipmentCursor = rowIndex;
+	}
+	else
+	{
+		listCursor = rowIndex + scrollOffset;
+	}
+
+	auto on_select = [this, &player, labels](int selected, GameContext& menuCtx)
+	{
+		if (selected < 0 || selected >= static_cast<int>(labels.size()))
+		{
+			return;
+		}
+		const std::string& chosen = labels[static_cast<size_t>(selected)];
+		if (chosen == "Drop")
+		{
+			handle_drop(player, menuCtx);
+		}
+		else if (chosen == "Unequip" || chosen == "Browse")
+		{
+			handle_enter_equipment(player, menuCtx);
+		}
+		else if (chosen == "Use")
+		{
+			handle_enter_item(player, menuCtx);
+		}
+	};
+
+	ctx.menus->push_back(std::make_unique<ContextMenu>(
+		std::move(labels),
+		CONTEXT_MENU_ANCHOR_COL,
+		mouseRow,
+		std::move(on_select),
+		ctx));
 }
 
 void InventoryUI::handle_drop(Player& player, GameContext& ctx)

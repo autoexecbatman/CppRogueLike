@@ -22,6 +22,26 @@ enum class InventoryScreen
 	USABLES
 };
 
+// What a right-click offers on an inventory row.
+//
+// The labels only. Every one of them is something the keyboard already does, so the
+// menu moves the cursor to the clicked row and calls the same handler rather than
+// carrying a second copy of what the action means.
+namespace InventoryActions
+{
+
+// The labels for a row, in the order shown. Empty when the row has nothing to act on,
+// and no menu is opened at all - the rule the map's context menu already follows.
+//
+// Example:
+//   labels_for_row(InventoryScreen::BACKPACK, true);     // -> Use, Drop, Cancel
+//   labels_for_row(InventoryScreen::EQUIPMENT, true);    // -> Unequip, Drop, Cancel
+//   labels_for_row(InventoryScreen::EQUIPMENT, false);   // -> Browse, Cancel
+//   labels_for_row(InventoryScreen::BACKPACK, false);    // -> {}, a category heading
+[[nodiscard]] std::vector<std::string> labels_for_row(InventoryScreen screen, bool rowHoldsItem);
+
+} // namespace InventoryActions
+
 struct BackpackEntry
 {
 	enum class Kind
@@ -149,6 +169,9 @@ private:
 	void handle_enter_equipment(Player& player, GameContext& ctx);
 	void handle_enter_item(Player& player, GameContext& ctx);
 	void handle_drop(Player& player, GameContext& ctx);
+	// Opens the right-click menu for the row under the pointer, or nothing when that row
+	// has no action. Its entries call the same handlers the keyboard does.
+	void open_row_menu(Player& player, int mouseRow, GameContext& ctx);
 
 	// Cursor helpers
 	std::optional<int> get_next_item_index(int from, int direction) const;

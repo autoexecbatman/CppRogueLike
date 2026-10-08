@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=InventoryContextActionsTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/InventoryUI.cpp",
+      "original": "\t\treturn { \"Unequip\", \"Drop\", \"Cancel\" };",
+      "mutated": "\t\treturn { \"Use\", \"Drop\", \"Cancel\" };",
+      "catches": "a worn item offered Use, which puts it on again rather than taking it off"
+    },
+    {
+      "file": "src/InventoryUI.cpp",
+      "original": "\t\t\treturn { \"Browse\", \"Cancel\" };",
+      "mutated": "\t\t\treturn { \"Browse\", \"Drop\", \"Cancel\" };",
+      "catches": "an empty slot offering to drop what it does not hold"
+    },
+    {
+      "file": "src/InventoryUI.cpp",
+      "original": "\tif (!rowHoldsItem)\n\t{\n\t\treturn {};\n\t}\n\treturn { \"Use\", \"Drop\", \"Cancel\" };",
+      "mutated": "\treturn { \"Use\", \"Drop\", \"Cancel\" };",
+      "catches": "a category heading offered item actions, so a menu opens on a row that is not an item"
+    },
+    {
+      "file": "src/InventoryUI.cpp",
+      "original": "\t\treturn { \"Browse\", \"Cancel\" };",
+      "mutated": "\t\treturn { \"Cancel\", \"Browse\" };",
+      "catches": "Cancel somewhere other than last, so the dismiss entry moves under the pointer by surprise"
+    }
+  ]
+}
