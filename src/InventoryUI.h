@@ -70,6 +70,19 @@ struct TabBox
 //   next_screen(InventoryScreen::USABLES);     // -> EQUIPMENT
 [[nodiscard]] InventoryScreen next_screen(InventoryScreen screen);
 
+// What an item's row says about its worth and its weight, ready to append.
+//
+// One statement of it: the equipment screen and the backpack list describe the same
+// item, and until this existed each wrote its own and only one of them mentioned
+// weight. Weight is always shown, because the band at the top of the screen measures a
+// total against a carrying limit and a row with no weight on it cannot be checked
+// against that. Worth is shown only when there is any.
+//
+// Example:
+//   value_and_weight(leatherArmor);   // -> " (5 gp, 15 lb)"
+//   value_and_weight(aCorpse);        // -> " (8 lb)", worth nothing
+[[nodiscard]] std::string value_and_weight(const Item& item);
+
 } // namespace InventoryActions
 
 struct BackpackEntry

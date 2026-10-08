@@ -82,6 +82,15 @@ constexpr int TAB_HIT_PADDING = 4;
 namespace InventoryActions
 {
 
+std::string value_and_weight(const Item& item)
+{
+	if (item.get_value() > 0)
+	{
+		return std::format(" ({} gp, {} lb)", item.get_value(), item.enhancement.weight);
+	}
+	return std::format(" ({} lb)", item.enhancement.weight);
+}
+
 std::array<TabBox, 3> tab_boxes(const Renderer& renderer)
 {
 	const int tileSize = renderer.get_tile_size();
@@ -641,16 +650,7 @@ void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx
 			{
 				line += " " + stats;
 			}
-			// Worth and weight together. The band at the top of the screen gives a total
-			// against a limit, and until now no row said what it was contributing to it.
-			if (equipped->get_value() > 0)
-			{
-				line += std::format(" ({} gp, {} lb)", equipped->get_value(), equipped->enhancement.weight);
-			}
-			else
-			{
-				line += std::format(" ({} lb)", equipped->enhancement.weight);
-			}
+			line += InventoryActions::value_and_weight(*equipped);
 		}
 		else
 		{
@@ -741,10 +741,7 @@ void InventoryUI::render_item_list_screen(GameContext& ctx)
 				line += " " + stats;
 			}
 
-			if (entry.item->get_value() > 0)
-			{
-				line += std::format(" ({} gp)", entry.item->get_value());
-			}
+			line += InventoryActions::value_and_weight(*entry.item);
 
 			const ColorPairId itemColor = isCursorRow ? ColorPairId::BLACK_WHITE : entry.item->actorData.color;
 			ctx.renderer->draw_text(Vector2D{ 3 * tileSize, row_text_y(tileSize, fontSize, y) }, line, itemColor);
@@ -960,12 +957,15 @@ std::string InventoryUI::format_enhancement_info(const Item& item) const
 
 std::string InventoryUI::format_value_info(const Item& item) const
 {
-	int val = item.get_value();
-	if (val > 0)
+	// The detail bar is the third place describing one item, after the equipment row and
+	// the backpack row. It said a price and no weight, so a player reading the bar could
+	// not tell what the thing was costing them against the limit in the band above.
+	const int value = item.get_value();
+	if (value > 0)
 	{
-		return std::format("Value: {} gp", val);
+		return std::format("Value: {} gp   Weight: {} lb", value, item.enhancement.weight);
 	}
-	return "";
+	return std::format("Weight: {} lb", item.enhancement.weight);
 }
 
 std::string InventoryUI::get_category_name(ItemCategory cat) const

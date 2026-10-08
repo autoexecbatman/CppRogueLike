@@ -1,0 +1,29 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=ItemRowTextTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/InventoryUI.cpp",
+      "original": "\treturn std::format(\" ({} lb)\", item.enhancement.weight);",
+      "mutated": "\treturn \"\";",
+      "catches": "a worthless item saying nothing, so a corpse carries no weight on its row - exactly the case the weight is wanted for"
+    },
+    {
+      "file": "src/InventoryUI.cpp",
+      "original": "\t\treturn std::format(\" ({} gp, {} lb)\", item.get_value(), item.enhancement.weight);",
+      "mutated": "\t\treturn std::format(\" ({} gp)\", item.get_value());",
+      "catches": "the weight dropped wherever an item is worth something, which is how the backpack read before this"
+    },
+    {
+      "file": "src/InventoryUI.cpp",
+      "original": "\tif (item.get_value() > 0)",
+      "mutated": "\tif (item.get_value() >= 0)",
+      "catches": "a worthless item reported as worth zero gold rather than simply weighed"
+    }
+  ]
+}

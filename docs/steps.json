@@ -23,5 +23,7 @@
   {"label": "thief_point_taken_back", "keys": ["ArrowLeft"]},
   {"label": "in_game_after_thief_skills", "keys": ["Enter"]},
   {"label": "hide_in_shadows", "keys": ["Shift+h"]},
-  {"label": "inventory_weight_band", "keys": ["i"]}
+  {"label": "inventory_weight_band", "keys": ["i"]},
+  {"label": "backpack_pane", "keys": ["ArrowRight"]},
+  {"label": "usables_pane", "keys": ["ArrowRight"]}
 ]
