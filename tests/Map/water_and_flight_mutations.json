@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=WaterSpawnTest.*:DrowningInWaterTest.*:DrowningTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/SpawnUtils.cpp",
+      "original": "\t\t!ctx.map->is_water(pos) &&\n",
+      "mutated": "",
+      "catches": "water allowed back into the placement predicate, so a land monster is generated standing in it"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tif (!ctx.map->is_water(position) || is_flying() || !needs_air_underwater())",
+      "mutated": "\tif (!ctx.map->is_water(position) || !needs_air_underwater())",
+      "catches": "flight ignored by the breath clock, so a bat over water holds a breath and drowns"
+    },
+    {
+      "file": "src/MonsterCreator.cpp",
+      "original": "\tif (params.canFly)\n\t{\n\t\tc->add_state(ActorState::CAN_FLY);\n\t}",
+      "mutated": "",
+      "catches": "the data read and the state never granted, so no monster in the game flies"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\tparams.canFly = entry.at(\"can_fly\").get<bool>();",
+      "mutated": "\tparams.canFly = false;",
+      "catches": "the field parsed off the data and thrown away"
+    },
+    {
+      "file": "src/Creature.h",
+      "original": "\t[[nodiscard]] bool is_flying() const noexcept { return has_state(ActorState::CAN_FLY); }",
+      "mutated": "\t[[nodiscard]] bool is_flying() const noexcept { return has_state(ActorState::CAN_SWIM); }",
+      "catches": "flight answered by the swimming state, so the two abilities stop being separate"
+    }
+  ]
+}

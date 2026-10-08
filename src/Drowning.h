@@ -6,11 +6,14 @@
 // longer it stays. The rules are the Player's Handbook's, PDF pages 239 and 240 of the
 // archive, under "Holding Your Breath".
 //
-// Water in this game is a tile only something that can swim may enter, so these apply
-// to whatever got in: a character wearing the gauntlets of swimming, or a creature with
-// the ability. They do not apply to a creature that lives in water, and they do not
-// apply to anyone wearing a helm of underwater action, which keeps a globe of air about
-// the head.
+// Nothing stops a creature entering water: can_walk tests wall, closed door, actor and
+// decoration, and takes no creature, so it cannot ask who is walking. These apply to
+// whatever is standing in it, whether it meant to be or not. They do not apply to a
+// creature that breathes water, to one wearing a helm of underwater action, which keeps
+// a globe of air about the head, or to one crossing on wings rather than through the
+// water.
+//
+// What is kept out of water is placement: nothing is generated standing in it.
 //
 // Usage:
 //

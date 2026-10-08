@@ -2,6 +2,7 @@
 
 #include <iterator>
 #include <memory>
+#include <optional>
 #include <span>
 #include <vector>
 
@@ -50,5 +51,7 @@ private:
 		std::span<const std::unique_ptr<Creature>> creatures,
 		int max_creatures) const noexcept;
 
-	Vector2D find_spawn_position(GameContext& ctx);
+	// A tile somewhere on the level a creature can be put on, or nullopt when no room has
+	// one. Each room is visited at most once from a random start, so this always returns.
+	std::optional<Vector2D> find_spawn_position(GameContext& ctx);
 };

@@ -23,6 +23,7 @@ enum class ActorState
 	BLOCKS,
 	FOV_ONLY,
 	CAN_SWIM,
+	CAN_FLY,
 	IS_EQUIPPED,
 	IS_CONFUSED,
 	IS_INVISIBLE,

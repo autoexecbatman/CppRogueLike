@@ -946,6 +946,8 @@ std::string MonsterEditor::field_label(FieldId f) const
 		return "Morality";
 	case FieldId::CAN_SWIM:
 		return "Can Swim";
+	case FieldId::CAN_FLY:
+		return "Can Fly";
 	case FieldId::WEIGHT:
 		return "Spawn Weight";
 	case FieldId::DEPTH_MIN:
@@ -1040,6 +1042,8 @@ std::string MonsterEditor::field_value(FieldId f) const
 		return std::string(encode_morality(m_working.morality));
 	case FieldId::CAN_SWIM:
 		return m_working.canSwim ? "yes" : "no";
+	case FieldId::CAN_FLY:
+		return m_working.canFly ? "yes" : "no";
 	case FieldId::WEIGHT:
 		return std::format("{}", m_working.baseWeight);
 	case FieldId::DEPTH_MIN:
@@ -1060,7 +1064,7 @@ bool MonsterEditor::field_is_string(FieldId f) const
 
 bool MonsterEditor::field_is_toggle(FieldId f) const
 {
-	return f == FieldId::AI_TYPE || f == FieldId::CAN_SWIM || f == FieldId::ETHICS || f == FieldId::MORALITY || f == FieldId::DMG_TYPE;
+	return f == FieldId::AI_TYPE || f == FieldId::CAN_SWIM || f == FieldId::CAN_FLY || f == FieldId::ETHICS || f == FieldId::MORALITY || f == FieldId::DMG_TYPE;
 }
 
 void MonsterEditor::field_adjust(FieldId f, int delta)
@@ -1183,6 +1187,10 @@ void MonsterEditor::field_toggle(FieldId f)
 	else if (f == FieldId::CAN_SWIM)
 	{
 		m_working.canSwim = !m_working.canSwim;
+	}
+	else if (f == FieldId::CAN_FLY)
+	{
+		m_working.canFly = !m_working.canFly;
 	}
 	else if (f == FieldId::ETHICS)
 	{

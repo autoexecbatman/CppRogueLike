@@ -6,12 +6,13 @@
 
 #include "Creature.h"
 #include "CreatureManager.h"
-#include "TurnSchedule.h"
 #include "GameContext.h"
 #include "Map.h"
 #include "RandomDice.h"
 #include "SpawnUtils.h"
+#include "TurnSchedule.h"
 #include "Vector2D.h"
+#include <optional>
 
 void CreatureManager::add_creature(std::unique_ptr<Creature> creature, GameContext& ctx)
 {
@@ -73,8 +74,12 @@ void CreatureManager::spawn_creatures(GameContext& ctx)
 	{
 		if (can_spawn_creature(*ctx.creatures, maxCreatures))
 		{
-			Vector2D spawnPos = find_spawn_position(ctx);
-			ctx.map->add_monster(spawnPos, ctx);
+			// Nowhere to put one is a legal outcome: the round passes without a monster.
+			const std::optional<Vector2D> spawnPos = find_spawn_position(ctx);
+			if (spawnPos)
+			{
+				ctx.map->add_monster(*spawnPos, ctx);
+			}
 		}
 	}
 }
@@ -101,22 +106,31 @@ bool CreatureManager::can_spawn_creature(
 	return creatures.size() < static_cast<size_t>(max_creatures);
 }
 
-Vector2D CreatureManager::find_spawn_position(GameContext& ctx)
+std::optional<Vector2D> CreatureManager::find_spawn_position(GameContext& ctx)
 {
-	if (ctx.rooms->empty())
+	// A level with no rooms was never built. That is an invariant rather than a state to
+	// branch on, and the empty walk below answers nullopt if it is ever compiled out.
+	assert(ctx.rooms && !ctx.rooms->empty() && "find_spawn_position: a level with no rooms");
+
+	const size_t roomCount = ctx.rooms->size();
+	if (roomCount == 0)
 	{
-		throw std::runtime_error("rooms vector is empty!");
+		return std::nullopt;
 	}
 
-	// Pick a random room; retry with a different room if it is full.
-	while (true)
+	// A random start and then once round, so every room is tried and none is tried twice.
+	// Picking a fresh random room each time could not tell a full dungeon from bad luck,
+	// and spun forever on the first.
+	const size_t start = static_cast<size_t>(ctx.dice->roll(0, static_cast<int>(roomCount) - 1));
+	for (size_t offset = 0; offset < roomCount; ++offset)
 	{
-		const size_t index = static_cast<size_t>(
-			ctx.dice->roll(0, static_cast<int>(ctx.rooms->size()) - 1));
-		auto pos = SpawnUtils::find_random_room_position(ctx.rooms->at(index), ctx);
+		const DungeonRoom& room = ctx.rooms->at((start + offset) % roomCount);
+		const std::optional<Vector2D> pos = SpawnUtils::find_random_room_position(room, ctx);
 		if (pos)
 		{
-			return *pos;
+			return pos;
 		}
 	}
+
+	return std::nullopt;
 }

@@ -3,6 +3,7 @@
     "ac": 7,
     "ai": "ranged",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 3,
@@ -73,6 +74,7 @@
     "ac": 8,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": true,
     "cha": {
       "bonus": 0,
       "num": 1,
@@ -138,6 +140,7 @@
     "ac": 5,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 1,
       "num": 1,
@@ -208,6 +211,7 @@
     "ac": 6,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": true,
     "cha": {
       "bonus": 0,
       "num": 1,
@@ -273,6 +277,7 @@
     "ac": 1,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": true,
     "cha": {
       "bonus": 0,
       "num": 4,
@@ -338,6 +343,7 @@
     "ac": 6,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 1,
       "num": 1,
@@ -403,6 +409,7 @@
     "ac": 5,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": true,
     "cha": {
       "bonus": 0,
       "num": 1,
@@ -468,6 +475,7 @@
     "ac": 6,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 1,
@@ -534,6 +542,7 @@
     "ac": 5,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 1,
@@ -599,6 +608,7 @@
     "ac": 7,
     "ai": "melee",
     "can_swim": true,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 1,
@@ -664,6 +674,7 @@
     "ac": 5,
     "ai": "melee",
     "can_swim": true,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 1,
@@ -729,6 +740,7 @@
     "ac": 5,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 1,
       "num": 1,
@@ -799,6 +811,7 @@
     "ac": 6,
     "ai": "melee",
     "can_swim": true,
+    "can_fly": false,
     "cha": {
       "bonus": 1,
       "num": 1,
@@ -869,6 +882,7 @@
     "ac": 5,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 1,
@@ -934,6 +948,7 @@
     "ac": 7,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": true,
     "cha": {
       "bonus": 0,
       "num": 3,
@@ -999,6 +1014,7 @@
     "ac": 3,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 2,
@@ -1064,6 +1080,7 @@
     "ac": 5,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 1,
       "num": 1,
@@ -1134,6 +1151,7 @@
     "ac": 6,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 1,
       "num": 1,
@@ -1199,6 +1217,7 @@
     "ac": 7,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 1,
       "num": 1,
@@ -1269,6 +1288,7 @@
     "ac": 0,
     "ai": "ranged",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 1,
@@ -1335,6 +1355,7 @@
     "ac": 9,
     "ai": "ranged",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 3,
@@ -1405,6 +1426,7 @@
     "ac": 5,
     "ai": "ranged",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 2,
@@ -1478,6 +1500,7 @@
     "ac": 5,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 1,
@@ -1548,6 +1571,7 @@
     "ac": 6,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 2,
       "num": 1,
@@ -1618,6 +1642,7 @@
     "ac": -3,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 2,
@@ -1683,6 +1708,7 @@
     "ac": 9,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 1,
@@ -1748,6 +1774,7 @@
     "ac": 7,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 1,
@@ -1822,6 +1849,7 @@
     "ac": 7,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 1,
@@ -1912,6 +1940,7 @@
     "ac": 4,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 1,
@@ -1977,6 +2006,7 @@
     "ac": 1,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": true,
     "cha": {
       "bonus": 2,
       "num": 3,
@@ -2043,6 +2073,7 @@
     "ac": 5,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 2,
@@ -2108,6 +2139,7 @@
     "ac": 5,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 1,
@@ -2174,6 +2206,7 @@
     "ac": 7,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 1,
@@ -2239,6 +2272,7 @@
     "ac": 4,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": true,
     "cha": {
       "bonus": 0,
       "num": 1,
@@ -2305,6 +2339,7 @@
     "ac": 3,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": true,
     "cha": {
       "bonus": 0,
       "num": 1,
@@ -2370,6 +2405,7 @@
     "ac": 8,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 1,
@@ -2436,6 +2472,7 @@
     "ac": 4,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 3,
@@ -2507,6 +2544,7 @@
     "ac": 1,
     "ai": "melee",
     "can_swim": false,
+    "can_fly": false,
     "cha": {
       "bonus": 0,
       "num": 3,

@@ -31,6 +31,8 @@
 #include "src/Item.h"
 #include "src/MagicalItemEffects.h"
 #include "src/Map.h"
+#include "src/MonsterCreator.h"
+#include "src/MonsterRegistry.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "tests/mocks/MockGameContext.h"
@@ -232,6 +234,48 @@ TEST_F(DrowningInWaterTest, SomethingThatLivesInWaterNeverHoldsItsBreath)
 
 	EXPECT_FALSE(fish.get_air_until_time().has_value());
 	EXPECT_FALSE(fish.is_dead()) << "a water dweller drowned in its own element";
+}
+
+// A flying creature over water is not in it. The Monstrous Manual gives a bat
+// "Movement: 1, Fl 24 (B)" and a wyvern "6, Fl 24 (E)", so what crosses water on wings
+// is not holding a breath and has nothing to fail a check against.
+TEST_F(DrowningInWaterTest, AFlyingCreatureOverWaterHoldsNoBreath)
+{
+	Creature& bat = swimmer_in_water(3);
+	bat.add_state(ActorState::CAN_FLY);
+
+	for (int round = 0; round < 10; ++round)
+	{
+		round_passes();
+	}
+
+	EXPECT_FALSE(bat.get_air_until_time().has_value()) << "a flier took a breath it had no need of";
+	EXPECT_FALSE(bat.is_dead()) << "a bat drowned flying over a puddle";
+}
+
+// Flight and swimming are separate abilities, so neither stands in for the other: a
+// creature that only swims is still in the water and still holding its breath.
+TEST_F(DrowningInWaterTest, FlyingIsNotSwimming)
+{
+	Creature& flier = swimmer_in_water(12);
+	flier.add_state(ActorState::CAN_FLY);
+
+	EXPECT_FALSE(flier.has_state(ActorState::CAN_SWIM)) << "flight was granted as swimming";
+}
+
+// The data has to say so, or the capability is one nothing in the game ever carries.
+// The Monstrous Manual gives a bat "Movement: 1, Fl 24 (B)" and a goblin "Movement: 6".
+TEST_F(DrowningInWaterTest, ABatBuiltFromTheDataFliesAndAGoblinDoesNot)
+{
+	const auto bat = MonsterCreator::create_from_params(
+		Vector2D{ 5, 5 }, ctx.monsterRegistry->get_params("bat"), ctx);
+	const auto goblin = MonsterCreator::create_from_params(
+		Vector2D{ 6, 6 }, ctx.monsterRegistry->get_params("goblin"), ctx);
+
+	ASSERT_NE(bat, nullptr);
+	ASSERT_NE(goblin, nullptr);
+	EXPECT_TRUE(bat->is_flying()) << "the bat does not fly, so it drowns in a puddle";
+	EXPECT_FALSE(goblin->is_flying()) << "a goblin was given wings";
 }
 
 // A breath already half spent is still half spent after a save. The reading is on the

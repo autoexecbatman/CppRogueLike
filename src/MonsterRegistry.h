@@ -141,6 +141,10 @@ struct MonsterParams
 	MonsterAiType aiType{ MonsterAiType::MELEE };
 	// Whether it can cross deep water.
 	bool canSwim{ false };
+	// Whether it crosses ground by flying over it, which is a second movement rate in
+	// the Monstrous Manual: "Movement: 1, Fl 24 (B)" for a bat. A flier over water is
+	// not in it and holds no breath there.
+	bool canFly{ false };
 
 	// Spawn table
 	int baseWeight{ 10 };

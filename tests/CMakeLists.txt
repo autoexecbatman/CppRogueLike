@@ -76,6 +76,8 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/PathfindingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/FovMapTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/TorchSightTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Map/WaterSpawnTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Map/FullDungeonSpawnTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/EncounterPlannerTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/TreasureRoomTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/WaterMovementTest.cpp

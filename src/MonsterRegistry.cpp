@@ -241,6 +241,7 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 		? MonsterAiType::RANGED
 		: MonsterAiType::MELEE;
 	params.canSwim = entry.at("can_swim").get<bool>();
+	params.canFly = entry.at("can_fly").get<bool>();
 	params.baseWeight = entry.at("weight").get<int>();
 	params.levelMinimum = entry.at("depth_min").get<int>();
 	params.levelMaximum = entry.at("depth_max").get<int>();
@@ -282,6 +283,7 @@ nlohmann::json encode_full_params(const MonsterParams& params)
 		{ "damage", encode_damage(params.damage) },
 		{ "ai", params.aiType == MonsterAiType::RANGED ? "ranged" : "melee" },
 		{ "can_swim", params.canSwim },
+		{ "can_fly", params.canFly },
 		{ "weight", params.baseWeight },
 		{ "depth_min", params.levelMinimum },
 		{ "depth_max", params.levelMaximum },

@@ -1,0 +1,29 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=FullDungeonSpawnTest.*:WaterSpawnTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/SpawnUtils.cpp",
+      "original": "\tif (free.empty())\n\t{\n\t\treturn std::nullopt;\n\t}",
+      "mutated": "\tif (free.empty())\n\t{\n\t\treturn Vector2D{ room.col, room.row };\n\t}",
+      "catches": "a full room answering with a tile it does not have, which is the whole point of the enumeration"
+    },
+    {
+      "file": "src/SpawnUtils.cpp",
+      "original": "\t\t\tif (can_hold_creature(here, ctx))",
+      "mutated": "\t\t\tif (true)",
+      "catches": "every tile of the room counted as free, water and occupied alike"
+    },
+    {
+      "file": "src/CreatureManager.cpp",
+      "original": "\t\t\tconst std::optional<Vector2D> spawnPos = find_spawn_position(ctx);\n\t\t\tif (spawnPos)\n\t\t\t{\n\t\t\t\tctx.map->add_monster(*spawnPos, ctx);\n\t\t\t}",
+      "mutated": "\t\t\tconst std::optional<Vector2D> spawnPos = find_spawn_position(ctx);\n\t\t\tif (!spawnPos)\n\t\t\t{\n\t\t\t\tctx.map->add_monster(Vector2D{ 2, 2 }, ctx);\n\t\t\t}",
+      "catches": "a monster put down precisely when there was nowhere to put one"
+    }
+  ]
+}

@@ -97,6 +97,11 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 		c->add_state(ActorState::CAN_SWIM);
 	}
 
+	if (params.canFly)
+	{
+		c->add_state(ActorState::CAN_FLY);
+	}
+
 	assert(c->ai && "Monster requires Ai");
 	assert(c->attacker && "Monster requires Attacker");
 

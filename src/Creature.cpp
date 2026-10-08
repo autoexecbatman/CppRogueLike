@@ -1043,9 +1043,10 @@ void Creature::tick_breath(GameContext& ctx)
 	assert(ctx.gameState && "tick_breath: a round ran with no clock to hold a breath against");
 	assert(ctx.dice && "tick_breath: a round ran with no dice to check against");
 
-	// Dry ground, or a creature that breathes water, or one wearing the helm: there is
-	// no breath being held, and any that was is over the moment it surfaces.
-	if (!ctx.map->is_water(position) || !needs_air_underwater())
+	// Dry ground, a creature crossing on wings rather than through the water, one that
+	// breathes water, or one wearing the helm: no breath is being held, and any that was
+	// is over the moment it is out.
+	if (!ctx.map->is_water(position) || is_flying() || !needs_air_underwater())
 	{
 		airUntilTime.reset();
 		return;

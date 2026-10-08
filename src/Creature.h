@@ -433,6 +433,15 @@ public:
 	// a globe of air about its head (Dungeon Master Guide, PDF page 970).
 	[[nodiscard]] bool needs_air_underwater() const noexcept;
 
+	// Whether this creature crosses ground by flying over it. A flier above water is not
+	// in the water, so it holds no breath there; the Monstrous Manual writes this as a
+	// second movement rate, "Movement: 1, Fl 24 (B)" for a bat.
+	//
+	// Example:
+	//   bat.is_flying();      // -> true
+	//   goblin.is_flying();   // -> false
+	[[nodiscard]] bool is_flying() const noexcept { return has_state(ActorState::CAN_FLY); }
+
 	// One round of holding a breath. A creature found in water takes a gulp of air that
 	// lasts breath_rounds of its Constitution; past that it rolls a Constitution check
 	// each round, worsening by two each time, and drowns on a failure (Player's

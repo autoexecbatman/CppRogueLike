@@ -71,6 +71,7 @@ private:
 		ETHICS,
 		MORALITY,
 		CAN_SWIM,
+		CAN_FLY,
 		WEIGHT,
 		DEPTH_MIN,
 		DEPTH_MAX,
