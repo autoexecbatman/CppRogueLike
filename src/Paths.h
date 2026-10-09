@@ -13,10 +13,9 @@ inline constexpr std::string_view LOG = "clog.txt";
 inline constexpr std::string_view SAVE_FILE = "saves/game.sav";
 
 inline constexpr std::string_view DAWNLIKE_DIR = "DawnLike";
-// The advance is the load size, not the design: both this and SDS_6x6 measured
-// 16.8 pixels a character at a load size of 16. So the narrower file buys no width
-// and only changes the letterforms, and the width comes from the load size in
-// main.cpp instead.
+// The advance comes from the load size in main.cpp rather than from anything in the
+// file. This face is condensed, which is what makes a written-out HUD label fit the
+// stat panel.
 inline constexpr std::string_view DAWNLIKE_FONT = "DawnLike/GUI/Jersey10.ttf";
 
 inline constexpr std::string_view PREFABS = "data/prefabs.json";

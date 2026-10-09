@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=HudReserveGeometryTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Renderer.h",
+      "original": "inline constexpr int GUI_TEXT_ROWS = 8; // Text rows the HUD lays out\n",
+      "mutated": "inline constexpr int GUI_TEXT_ROWS = 9; // Text rows the HUD lays out\n",
+      "catches": "a row added without the reservation growing to hold it, so the last line draws under the bottom rule"
+    },
+    {
+      "file": "src/Renderer.h",
+      "original": "\treturn tileSize * GUI_FRAME_BOTTOM_RULE_DEPTH / GUI_FRAME_NATIVE_CELL;\n",
+      "mutated": "\treturn 0;\n",
+      "catches": "the bottom rule treated as painting nothing, which is what lets the last row sit under it"
+    },
+    {
+      "file": "src/Renderer.h",
+      "original": "\treturn tileSize * GUI_FRAME_TOP_RULE_DEPTH / GUI_FRAME_NATIVE_CELL;\n",
+      "mutated": "\treturn GUI_FRAME_TOP_RULE_DEPTH;\n",
+      "catches": "a rule depth fixed in pixels rather than scaled with the tile, which is right at one zoom and wrong at every other"
+    },
+    {
+      "file": "src/Renderer.h",
+      "original": "\tconst int neededPixels = gui_frame_top_rule(tileSize) + GUI_TEXT_TOP_INSET + (GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH + fontSize + gui_frame_bottom_rule(tileSize);\n",
+      "mutated": "\tconst int neededPixels = gui_frame_top_rule(tileSize) + GUI_TEXT_TOP_INSET + (GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH + fontSize + tileSize;\n",
+      "catches": "a whole tile reserved for the bottom rule again, which wastes a tile row the panel does not need"
+    },
+    {
+      "file": "src/Renderer.h",
+      "original": "\treturn tileSize * GUI_FRAME_RULE_WIDTH_DEPTH / GUI_FRAME_NATIVE_CELL;\n",
+      "mutated": "\treturn 8;\n",
+      "catches": "the rule width back at the hairline frame's 8 pixels, which puts the first glyph of every line on the brass"
+    }
+  ]
+}

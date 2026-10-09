@@ -20,8 +20,50 @@ inline constexpr int DISPLAY_TILE_SIZE = 64; // Default rendered tile size in pi
 // is as tall as the zoom makes it and a row of text is not, so a pitch measured in
 // tiles puts most of a row on nothing at one zoom and overlaps at the next.
 inline constexpr int UI_TEXT_ROW_PITCH = 32; // Pixels between the tops of two rows of UI text
-inline constexpr int GUI_TEXT_TOP_INSET = 2; // Gap below the frame's top edge before the first row
-inline constexpr int GUI_TEXT_ROWS = 6; // Text rows the HUD lays out
+inline constexpr int GUI_TEXT_TOP_INSET = 2; // Gap below the frame's rule before the first row
+inline constexpr int GUI_TEXT_ROWS = 8; // Text rows the HUD lays out
+
+// A frame edge paints a rule across part of its tile and leaves the rest transparent,
+// so a panel's interior begins where the rule ends and not where the tile does.
+// Measured off DawnLike/GUI/Frame.png at its native cell: the top edge paints rows
+// 1 to 28, the bottom edge rows 33 to 60, the left edge columns 1 to 29, and the
+// divider columns 17 to 46.
+inline constexpr int GUI_FRAME_NATIVE_CELL = 64;
+inline constexpr int GUI_FRAME_TOP_RULE_DEPTH = 29;
+inline constexpr int GUI_FRAME_BOTTOM_RULE_DEPTH = 31;
+inline constexpr int GUI_FRAME_RULE_WIDTH_DEPTH = 30;
+
+// Pixels a frame edge paints into its own tile. The remainder of the tile is
+// transparent and a panel's text may sit on it.
+//
+// Example:
+//
+//   gui_frame_top_rule(64);      // -> 29
+//   gui_frame_bottom_rule(64);   // -> 31
+//   gui_frame_top_rule(16);      // -> 7, the art scales with the tile
+[[nodiscard]] inline constexpr int gui_frame_top_rule(int tileSize)
+{
+	return tileSize * GUI_FRAME_TOP_RULE_DEPTH / GUI_FRAME_NATIVE_CELL;
+}
+
+[[nodiscard]] inline constexpr int gui_frame_bottom_rule(int tileSize)
+{
+	return tileSize * GUI_FRAME_BOTTOM_RULE_DEPTH / GUI_FRAME_NATIVE_CELL;
+}
+
+// Pixels a vertical rule paints across. The left edge paints its tile's first 30
+// columns, the right edge its last 30, and a divider paints 30 from the point it is
+// aimed at, so one number answers for all three. Anything that has to clear a rule
+// clears this and not the tile.
+//
+// Example:
+//
+//   gui_frame_rule_width(64);   // -> 30
+//   gui_frame_rule_width(32);   // -> 15
+[[nodiscard]] inline constexpr int gui_frame_rule_width(int tileSize)
+{
+	return tileSize * GUI_FRAME_RULE_WIDTH_DEPTH / GUI_FRAME_NATIVE_CELL;
+}
 
 // Top of one text row inside a panel whose frame begins at panelTopY. Row 0 sits
 // directly below the frame's top edge, which is one tile tall.
@@ -120,21 +162,18 @@ inline constexpr int GUI_TEXT_ROWS = 6; // Text rows the HUD lays out
 //
 // Example:
 //
-//   gui_reserve_rows(64, 16);   // -> 4, the value this replaced
-//   gui_reserve_rows(16, 16);   // -> 13
-//   gui_reserve_rows(96, 16);   // -> 3
+//   gui_reserve_rows(64, 30);   // -> 5, the size the game ships at
+//   gui_reserve_rows(16, 16);   // -> 16
+//   gui_reserve_rows(96, 16);   // -> 4
 [[nodiscard]] inline constexpr int gui_reserve_rows(int tileSize, int fontSize)
 {
-	// A whole tile for the frame's top edge and another for its bottom, then the rows
-	// between them. The last row needs only the height of the font rather than another
-	// full pitch.
+	// The frame's two rules, then the rows between them. The last row needs only the
+	// height of the font rather than another full pitch.
 	//
-	// The bottom edge used to be left out, so the panel reserved three sides of a frame
-	// and relied on the screen edge to close it. That read as a thin line while the rails
-	// were one pixel wide; with a drawn frame the rails ran to the bottom of the screen
-	// and stopped.
-	const int neededPixels =
-		tileSize + GUI_TEXT_TOP_INSET + (GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH + fontSize + tileSize;
+	// A rule is what the panel has to clear, so that is what is reserved for it. Taking
+	// a whole tile at each end costs 35 pixels above the text and 33 below it at a
+	// 64-pixel tile, which is two rows of text the panel already had room for.
+	const int neededPixels = gui_frame_top_rule(tileSize) + GUI_TEXT_TOP_INSET + (GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH + fontSize + gui_frame_bottom_rule(tileSize);
 	return (neededPixels + tileSize - 1) / tileSize;
 }
 

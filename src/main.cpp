@@ -84,9 +84,9 @@ int main()
 	game->renderer.load_dawnlike(Paths::DAWNLIKE_DIR);
 
 	// This size is the text's width: the advance is whatever is asked for here, so
-	// every layout width in the HUD is measured against it. 14 is a 1.75x bake of an
-	// 8-pixel design, which antialiases the glyph edges slightly; the exact
-	// multiples are 8, 16 and 24, and none of those is both readable and narrow.
+	// every layout width in the HUD is measured against it. Jersey10 is an outline
+	// face, so a size is chosen for legibility against the 32 pixel text row pitch
+	// rather than for a whole multiple of a bitmap design.
 	game->renderer.load_font(Paths::DAWNLIKE_FONT, 30);
 
 	auto ctx = game->context();

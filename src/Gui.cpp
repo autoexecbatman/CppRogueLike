@@ -35,18 +35,8 @@ constexpr int LOG_MAX_MESSAGES = 5;
 constexpr int DIVIDER_CELL_OFFSET = 17;
 
 constexpr int GUI_ICON_SIZE = 32;
-// Left margin inside the first panel, clear of the frame's rule at x=4..7. A
-// half-tile was used here, which varies with zoom for a panel laid out in pixels,
-// and at a 64-pixel tile it spent 32 pixels the bars needed.
-constexpr int GUI_PANEL_LEFT_MARGIN = 12;
 // Height of a bar, leaving a little air inside its row.
 constexpr int GUI_BAR_HEIGHT = UI_TEXT_ROW_PITCH - 10;
-// The frame sprites draw a 4-pixel rule inside their 64-pixel tile rather than at
-// its edge: the outer left edge and both dividers put it 4 pixels in, and the
-// right edge puts it 8 pixels short of the far side. Text has to clear the rule,
-// not the tile, which is what these say. Measured off a render, not assumed.
-constexpr int GUI_RULE_OFFSET = 4;
-constexpr int GUI_RULE_WIDTH = 4;
 // Clear air between a rule and the nearest glyph.
 constexpr int GUI_TEXT_CLEARANCE = 12;
 
@@ -80,18 +70,25 @@ static int hud_divider1_x(int panelWidth)
 {
 	return panelWidth * 15 / 100;
 }
-// The stat panel is as wide as an aligned label and value need, which is more than the
-// abbreviated text used to take. The width comes from the log panel, which is the widest
-// thing on the screen and had it to spare.
+// The stat panel is as wide as its longest label-and-value line, which is Gold carrying
+// a six-figure purse: 153 pixels of the 176 this leaves it at a 1280-pixel screen. Every
+// pixel beyond that belongs to the log, which is the panel that runs out of room first.
 static int hud_divider2_x(int panelWidth)
 {
-	return panelWidth * 35 / 100;
+	return panelWidth * 33 / 100;
 }
 
-// Left edge of the text in the panel that starts at this divider.
-static int hud_panel_text_left(int dividerX)
+// Left margin inside the first panel, clear of the frame's left rule.
+static int hud_panel_left_margin(int tileSize)
 {
-	return dividerX + GUI_RULE_OFFSET + GUI_RULE_WIDTH + GUI_TEXT_CLEARANCE;
+	return gui_frame_rule_width(tileSize) + GUI_TEXT_CLEARANCE;
+}
+
+// Left edge of the text in the panel that starts at this divider. A divider's rule
+// paints to the right of the line it is aimed at, so the text clears the whole of it.
+static int hud_panel_text_left(int dividerX, int tileSize)
+{
+	return dividerX + gui_frame_rule_width(tileSize) + GUI_TEXT_CLEARANCE;
 }
 
 // Right edge of the text in the panel that ends at this divider.
@@ -103,9 +100,9 @@ static int hud_panel_text_right(int dividerX)
 // Right edge of the last panel, which ends at the frame's own rule rather than at
 // a divider. That rule sits near the far side of its tile, so the panel reaches
 // most of a tile further right than the tile's left edge suggests.
-static int hud_frame_text_right(int panelWidth)
+static int hud_frame_text_right(int panelWidth, int tileSize)
 {
-	return panelWidth - GUI_RULE_OFFSET - GUI_RULE_WIDTH - GUI_TEXT_CLEARANCE;
+	return panelWidth - gui_frame_rule_width(tileSize) - GUI_TEXT_CLEARANCE;
 }
 
 // Top edge of the HUD panel. Measured up from the bottom of the screen rather than
@@ -117,18 +114,18 @@ static int hud_base_y(const Renderer& renderer)
 	return renderer.get_screen_height() - renderer.get_gui_reserve_rows() * renderer.get_tile_size();
 }
 
-// Top edge of one HUD text row, counting from zero below the frame's top edge.
+// Top edge of one HUD text row, counting from zero below the frame's rule. The rule is
+// what the text has to clear; the rest of the edge tile is transparent.
 static int hud_text_row_y(int baseY, int tileSize, int row)
 {
-	return baseY + tileSize + GUI_TEXT_TOP_INSET + row * UI_TEXT_ROW_PITCH;
+	return baseY + gui_frame_top_rule(tileSize) + GUI_TEXT_TOP_INSET + row * UI_TEXT_ROW_PITCH;
 }
 
 // How many text rows fit in the panel. The last row needs only the height of the
 // font, not a whole pitch, which is why it is added back on.
 static int hud_text_row_count(int tileSize, int fontSize)
 {
-	const int contentHeight =
-		(gui_reserve_rows(tileSize, fontSize) - 1) * tileSize - GUI_TEXT_TOP_INSET - fontSize;
+	const int contentHeight = gui_reserve_rows(tileSize, fontSize) * tileSize - gui_frame_top_rule(tileSize) - gui_frame_bottom_rule(tileSize) - GUI_TEXT_TOP_INSET - fontSize;
 	return contentHeight / UI_TEXT_ROW_PITCH + 1;
 }
 
@@ -279,15 +276,24 @@ void Gui::gui_render(const GameContext& ctx)
 	// so the cell is aimed DIVIDER_CELL_OFFSET further left to leave the divider where it
 	// has always been drawn. Row 0 keeps the top rail, so a divider starts below it and
 	// does not paint over that rail's trim.
+	//
+	// The rail spans the panel's interior rather than a whole number of tile rows. The
+	// interior runs from the end of the top rule to the start of the bottom one and the
+	// text fills all of it, so a rail stepped on the tile grid leaves the first and last
+	// rows standing outside the column they belong to.
+	const int interiorTop = baseY + gui_frame_top_rule(tileSize);
+	const int interiorBottom = baseY + reserveRows * tileSize - gui_frame_bottom_rule(tileSize);
 	for (const int dividerX : { div1, div2 })
 	{
 		ctx.renderer->draw_tile_screen(Vector2D{ dividerX, baseY }, tileConfig.get("GUI_FRAME_T"));
-		// Stops one row short of the bottom edge. A divider that reaches the last row
-		// paints over the bottom rail and carries on through it to the screen edge.
-		for (int row = 1; row < reserveRows - 1; ++row)
+		for (int railY = interiorTop; railY < interiorBottom; railY += tileSize)
 		{
+			// The last tile is pulled up to land flush on the bottom rule rather than
+			// carrying on through it to the screen edge. The rail art is uniform down
+			// its length, so overlapping the tile above it leaves no seam.
+			const int tileY = std::min(railY, interiorBottom - tileSize);
 			ctx.renderer->draw_tile_screen(
-				Vector2D{ dividerX - DIVIDER_CELL_OFFSET, baseY + row * tileSize },
+				Vector2D{ dividerX - DIVIDER_CELL_OFFSET, tileY },
 				tileConfig.get("GUI_FRAME_V"));
 		}
 	}
@@ -326,10 +332,10 @@ void Gui::render_hp_bar(const GameContext& ctx)
 
 	// Heart icon in the first column, sized to the row rather than to a map tile.
 	ctx.renderer->draw_tile_screen_sized(
-		Vector2D{ GUI_PANEL_LEFT_MARGIN, rowY }, ctx.tileConfig->get("GUI_HEART_FULL"), GUI_ICON_SIZE);
+		Vector2D{ hud_panel_left_margin(tileSize), rowY }, ctx.tileConfig->get("GUI_HEART_FULL"), GUI_ICON_SIZE);
 
 	// Bar fills what is left of the panel, starting clear of the icon.
-	const int barX = GUI_PANEL_LEFT_MARGIN + GUI_ICON_SIZE + 8;
+	const int barX = hud_panel_left_margin(tileSize) + GUI_ICON_SIZE + 8;
 	const int barW = hud_panel_text_right(div1) - barX;
 	const int barH = GUI_BAR_HEIGHT;
 	const int barY = rowY + (UI_TEXT_ROW_PITCH - barH) / 2;
@@ -388,10 +394,10 @@ void Gui::render_hunger_status(const GameContext& ctx)
 
 	// Food icon in the first column, on the same pitch as the heart above it.
 	ctx.renderer->draw_tile_screen_sized(
-		Vector2D{ GUI_PANEL_LEFT_MARGIN, rowY }, TileRef{ TileSheet::SHEET_FOOD, 0, 0 }, GUI_ICON_SIZE);
+		Vector2D{ hud_panel_left_margin(tileSize), rowY }, TileRef{ TileSheet::SHEET_FOOD, 0, 0 }, GUI_ICON_SIZE);
 
 	// Bar fills what is left of the panel, starting clear of the icon.
-	const int barX = GUI_PANEL_LEFT_MARGIN + GUI_ICON_SIZE + 8;
+	const int barX = hud_panel_left_margin(tileSize) + GUI_ICON_SIZE + 8;
 	const int barW = hud_panel_text_right(div1) - barX;
 	const int barH = GUI_BAR_HEIGHT;
 	const int barY = rowY + (UI_TEXT_ROW_PITCH - barH) / 2;
@@ -419,7 +425,7 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 	const int tileSize = ctx.renderer->get_tile_size();
 	const int panelWidth = ctx.renderer->get_screen_width();
 	const int baseY = hud_base_y(*ctx.renderer);
-	const int statsX = hud_panel_text_left(hud_divider1_x(panelWidth));
+	const int statsX = hud_panel_text_left(hud_divider1_x(panelWidth), tileSize);
 	const int statsWidth = hud_panel_text_right(hud_divider2_x(panelWidth)) - statsX;
 
 	if (ctx.player()->actorData.name.empty())
@@ -429,45 +435,36 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 
 	// What is missing here is on the character sheet, which carries the name, race, gold
 	// and all six ability scores with their derived modifiers.
-	//
-	// Labels start at the left of their column and values end at the right of theirs, so
-	// a reader looking for one number runs down a column rather than reading every line.
-	// These used to be abbreviated to twelve characters to fit a wider font; the current
-	// one is condensed, so the words are written out and the numbers are aligned.
 
-	// The column a second pair starts at, and where each column's values end.
-	const int columnWidth = statsWidth / 2;
-	const int columnGap = 22;
-
-	// One label and one value, the label against the left of its column and the value
-	// against the right. Numbers compared down a column have to end on the same pixel.
-	auto draw_pair = [&](int row, int columnLeft, int columnRight, std::string_view label, const std::string& value)
+	// One stat a row: the label against the panel's left edge, the value against its
+	// right. Every number on the panel therefore ends on the same pixel, so a reader
+	// after one of them runs down a single column. One value a row is what buys that:
+	// two of them share the row's width, so the first ends at the halfway mark and the
+	// panel carries two right edges.
+	auto draw_stat = [&](int row, std::string_view label, const std::string& value)
 	{
 		const int y = hud_text_row_y(baseY, tileSize, row);
-		ctx.renderer->draw_text(Vector2D{ statsX + columnLeft, y }, label, ColorPairId::WHITE_BLACK);
+		ctx.renderer->draw_text(Vector2D{ statsX, y }, label, ColorPairId::WHITE_BLACK);
 		const int valueWidth = ctx.renderer->measure_text(value);
-		ctx.renderer->draw_text(Vector2D{ statsX + columnRight - valueWidth, y }, value, ColorPairId::WHITE_BLACK);
+		ctx.renderer->draw_text(Vector2D{ statsX + statsWidth - valueWidth, y }, value, ColorPairId::WHITE_BLACK);
 	};
 
-	const int rightColumnLeft = columnWidth + columnGap;
-
-	// Rows 1 and 2: who this is. Both run the full width and are not a label and value.
+	// Rows 1 and 2: who this is. Both run the full width and carry no value.
 	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 0) }, ctx.renderer->fit_text_to_width(ctx.player()->actorData.name, statsWidth), ColorPairId::YELLOW_BLACK);
 	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 1) }, ctx.renderer->fit_text_to_width(ctx.player_concrete().get_class_display_name(), statsWidth), ColorPairId::YELLOW_BLACK);
 
-	// Row 3: level, and the number a d20 must meet to hit Armour Class 0, which is the
-	// whole of 2e attack resolution.
-	draw_pair(2, 0, columnWidth, "Level", std::format("{}", ctx.player()->get_level()));
-	draw_pair(2, rightColumnLeft, statsWidth, "THAC0", std::format("{}", ctx.player()->get_thaco()));
+	// Rows 3 and 4: the attack numbers. THAC0 is what a d20 must meet to hit Armour
+	// Class 0, which is the whole of 2e attack resolution.
+	draw_stat(2, "Level", std::format("{}", ctx.player()->get_level()));
+	draw_stat(3, "THAC0", std::format("{}", ctx.player()->get_thaco()));
 
-	// Row 4: what stops a hit landing, and what it costs when one does.
-	draw_pair(3, 0, columnWidth, "AC", std::format("{}", ctx.player()->get_armor_class()));
-	draw_pair(3, rightColumnLeft, statsWidth, "DR", std::format("{}", ctx.player()->get_dr()));
+	// Rows 5 and 6: what stops a hit landing, and what it costs when one does.
+	draw_stat(4, "AC", std::format("{}", ctx.player()->get_armor_class()));
+	draw_stat(5, "DR", std::format("{}", ctx.player()->get_dr()));
 
-	// Rows 5 and 6 carry one value each, so it ends at the panel's right rather than at
-	// the first column's.
-	draw_pair(4, 0, statsWidth, "Attack", std::string{ ctx.player_concrete().get_equipped_weapon_damage_roll() });
-	draw_pair(5, 0, statsWidth, "Gold", std::format("{} gp", ctx.player_concrete().get_gold()));
+	// Rows 7 and 8: what this character swings, and what it is carrying.
+	draw_stat(6, "Attack", std::string{ ctx.player_concrete().get_equipped_weapon_damage_roll() });
+	draw_stat(7, "Gold", std::format("{} gp", ctx.player_concrete().get_gold()));
 }
 
 // ---------------------------------------------------------------------------
@@ -480,7 +477,7 @@ void Gui::gui_print_log(const GameContext& ctx)
 	const int tileSize = ctx.renderer->get_tile_size();
 	const int panelWidth = ctx.renderer->get_screen_width();
 	const int baseY = hud_base_y(*ctx.renderer);
-	const int logX = hud_panel_text_left(hud_divider2_x(panelWidth));
+	const int logX = hud_panel_text_left(hud_divider2_x(panelWidth), tileSize);
 
 	const int messagesToShow = std::min(
 		LOG_MAX_MESSAGES,
@@ -488,7 +485,7 @@ void Gui::gui_print_log(const GameContext& ctx)
 
 	const LogPanel panel{
 		.leftEdge = logX,
-		.rightEdge = hud_frame_text_right(panelWidth),
+		.rightEdge = hud_frame_text_right(panelWidth, tileSize),
 		.baseY = baseY,
 		.tileSize = tileSize,
 		.rowCount = hud_text_row_count(tileSize, ctx.renderer->get_font_size())
@@ -533,7 +530,7 @@ void Gui::render_player_status(const GameContext& ctx)
 	if (ctx.player()->has_state(ActorState::IS_CONFUSED))
 	{
 		ctx.renderer->draw_text(
-			Vector2D{ GUI_PANEL_LEFT_MARGIN, hud_text_row_y(baseY, tileSize, 2) },
+			Vector2D{ hud_panel_left_margin(tileSize), hud_text_row_y(baseY, tileSize, 2) },
 			"CONFUSED",
 			ColorPairId::RED_BLACK);
 	}

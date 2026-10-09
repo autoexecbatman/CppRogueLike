@@ -24,6 +24,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/PathsTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Utils/UniqueIdTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Utils/PanelRowGeometryTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Utils/HudReserveGeometryTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/GameContextWiringTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/AbilityTableLoadingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Utils/Vector2DTest.cpp
