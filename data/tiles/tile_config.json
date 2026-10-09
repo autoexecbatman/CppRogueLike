@@ -359,6 +359,11 @@
       "sheet": 70,
       "col": 6,
       "row": 1
+    },
+    "GUI_FRAME_V": {
+      "sheet": 71,
+      "col": 1,
+      "row": 1
     }
   },
   "autotile_groups": {

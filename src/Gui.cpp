@@ -29,6 +29,11 @@ constexpr int LOG_MAX_MESSAGES = 5;
 // of step at any zoom but the one they were written for.
 
 // Icons sit on the same pitch as the text beside them.
+// How far left a divider's cell is aimed so its rail lands where the old one did.
+// GUI_FRAME_L puts its rail against the left of its cell; GUI_FRAME_V centres its rail,
+// so without this the divider would step right by half the difference.
+constexpr int DIVIDER_CELL_OFFSET = 17;
+
 constexpr int GUI_ICON_SIZE = 32;
 // Left margin inside the first panel, clear of the frame's rule at x=4..7. A
 // half-tile was used here, which varies with zoom for a panel laid out in pixels,
@@ -75,9 +80,12 @@ static int hud_divider1_x(int panelWidth)
 {
 	return panelWidth * 15 / 100;
 }
+// The stat panel is as wide as an aligned label and value need, which is more than the
+// abbreviated text used to take. The width comes from the log panel, which is the widest
+// thing on the screen and had it to spare.
 static int hud_divider2_x(int panelWidth)
 {
-	return panelWidth * 32 / 100;
+	return panelWidth * 35 / 100;
 }
 
 // Left edge of the text in the panel that starts at this divider.
@@ -248,18 +256,40 @@ void Gui::gui_render(const GameContext& ctx)
 		ctx.renderer->draw_tile_screen(Vector2D{ rightEdgeX, baseY + row * tileSize }, tileConfig.get("GUI_FRAME_R"));
 	}
 
-	// ---- Divider 1: bar panel | stat panel --------------------------------
-	ctx.renderer->draw_tile_screen(Vector2D{ div1, baseY }, tileConfig.get("GUI_FRAME_T"));
-	for (int row = 1; row < reserveRows; ++row)
+	// ---- Bottom edge -------------------------------------------------------
+	//
+	// Drawn last so the corners sit over the ends of the runs, as draw_frame_pixels does
+	// for a menu: a run's tile reaches into the corner cell, and a rail over a corner cuts
+	// the plate.
+	const int bottomY = baseY + (reserveRows - 1) * tileSize;
+	for (int col = tileSize; col < rightEdgeX; col += tileSize)
 	{
-		ctx.renderer->draw_tile_screen(Vector2D{ div1, baseY + row * tileSize }, tileConfig.get("GUI_FRAME_L"));
+		ctx.renderer->draw_tile_screen(Vector2D{ col, bottomY }, tileConfig.get("GUI_FRAME_B"));
 	}
+	ctx.renderer->draw_tile_screen(Vector2D{ 0, bottomY }, tileConfig.get("GUI_FRAME_BL"));
+	ctx.renderer->draw_tile_screen(Vector2D{ rightEdgeX, bottomY }, tileConfig.get("GUI_FRAME_BR"));
 
-	// ---- Divider 2: stat panel | log panel --------------------------------
-	ctx.renderer->draw_tile_screen(Vector2D{ div2, baseY }, tileConfig.get("GUI_FRAME_T"));
-	for (int row = 1; row < reserveRows; ++row)
+	// ---- The two internal dividers ----------------------------------------
+	//
+	// GUI_FRAME_V rather than GUI_FRAME_L. The left rail is an outer edge: brass trim on
+	// its inner face and shadow on its outer one, which in the middle of a panel is lit
+	// wrongly on one side. The divider carries trim on both faces.
+	//
+	// Its rail is centred in its cell where the left rail sits against the cell's edge,
+	// so the cell is aimed DIVIDER_CELL_OFFSET further left to leave the divider where it
+	// has always been drawn. Row 0 keeps the top rail, so a divider starts below it and
+	// does not paint over that rail's trim.
+	for (const int dividerX : { div1, div2 })
 	{
-		ctx.renderer->draw_tile_screen(Vector2D{ div2, baseY + row * tileSize }, tileConfig.get("GUI_FRAME_L"));
+		ctx.renderer->draw_tile_screen(Vector2D{ dividerX, baseY }, tileConfig.get("GUI_FRAME_T"));
+		// Stops one row short of the bottom edge. A divider that reaches the last row
+		// paints over the bottom rail and carries on through it to the screen edge.
+		for (int row = 1; row < reserveRows - 1; ++row)
+		{
+			ctx.renderer->draw_tile_screen(
+				Vector2D{ dividerX - DIVIDER_CELL_OFFSET, baseY + row * tileSize },
+				tileConfig.get("GUI_FRAME_V"));
+		}
 	}
 
 	// ---- Panel content ----------------------------------------------------
@@ -397,39 +427,47 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 		ctx.player()->actorData.name = "Player";
 	}
 
-	// The panel is as wide as its widest line, so every line here is twelve
-	// characters or fewer and the width left over goes to the log. What is missing
-	// is on the character sheet, which carries the name, race, gold and all six
-	// ability scores with their derived modifiers.
+	// What is missing here is on the character sheet, which carries the name, race, gold
+	// and all six ability scores with their derived modifiers.
+	//
+	// Labels start at the left of their column and values end at the right of theirs, so
+	// a reader looking for one number runs down a column rather than reading every line.
+	// These used to be abbreviated to twelve characters to fit a wider font; the current
+	// one is condensed, so the words are written out and the numbers are aligned.
 
-	// Row 1: Name, which clips to the panel. Everything below it is sized to fit.
+	// The column a second pair starts at, and where each column's values end.
+	const int columnWidth = statsWidth / 2;
+	const int columnGap = 22;
+
+	// One label and one value, the label against the left of its column and the value
+	// against the right. Numbers compared down a column have to end on the same pixel.
+	auto draw_pair = [&](int row, int columnLeft, int columnRight, std::string_view label, const std::string& value)
+	{
+		const int y = hud_text_row_y(baseY, tileSize, row);
+		ctx.renderer->draw_text(Vector2D{ statsX + columnLeft, y }, label, ColorPairId::WHITE_BLACK);
+		const int valueWidth = ctx.renderer->measure_text(value);
+		ctx.renderer->draw_text(Vector2D{ statsX + columnRight - valueWidth, y }, value, ColorPairId::WHITE_BLACK);
+	};
+
+	const int rightColumnLeft = columnWidth + columnGap;
+
+	// Rows 1 and 2: who this is. Both run the full width and are not a label and value.
 	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 0) }, ctx.renderer->fit_text_to_width(ctx.player()->actorData.name, statsWidth), ColorPairId::YELLOW_BLACK);
-
-	// Row 2: Class
 	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 1) }, ctx.renderer->fit_text_to_width(ctx.player_concrete().get_class_display_name(), statsWidth), ColorPairId::YELLOW_BLACK);
 
-	// Row 3: Level and to-hit. T0 = THAC0 abbreviation.
-	auto levelLine = std::format(
-		"Lv.{}  T0:{}",
-		ctx.player()->get_level(),
-		ctx.player()->get_thaco());
-	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 2) }, ctx.renderer->fit_text_to_width(levelLine, statsWidth), ColorPairId::WHITE_BLACK);
+	// Row 3: level, and the number a d20 must meet to hit Armour Class 0, which is the
+	// whole of 2e attack resolution.
+	draw_pair(2, 0, columnWidth, "Level", std::format("{}", ctx.player()->get_level()));
+	draw_pair(2, rightColumnLeft, statsWidth, "THAC0", std::format("{}", ctx.player()->get_thaco()));
 
-	// Row 4: What stops a hit landing, and what it costs when one does.
-	auto defenceLine = std::format(
-		"AC:{}  DR:{}",
-		ctx.player()->get_armor_class(),
-		ctx.player()->get_dr());
-	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 3) }, ctx.renderer->fit_text_to_width(defenceLine, statsWidth), ColorPairId::WHITE_BLACK);
+	// Row 4: what stops a hit landing, and what it costs when one does.
+	draw_pair(3, 0, columnWidth, "AC", std::format("{}", ctx.player()->get_armor_class()));
+	draw_pair(3, rightColumnLeft, statsWidth, "DR", std::format("{}", ctx.player()->get_dr()));
 
-	// Row 5: Attack roll
-	auto atkLine = std::format(
-		"Atk: {}", ctx.player_concrete().get_equipped_weapon_damage_roll());
-	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 4) }, ctx.renderer->fit_text_to_width(atkLine, statsWidth), ColorPairId::GREEN_BLACK);
-
-	// Row 6: Gold. The "gp" suffix went with the rest of the width.
-	auto goldLine = std::format("Gold: {}", ctx.player_concrete().get_gold());
-	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 5) }, ctx.renderer->fit_text_to_width(goldLine, statsWidth), ColorPairId::YELLOW_BLACK);
+	// Rows 5 and 6 carry one value each, so it ends at the panel's right rather than at
+	// the first column's.
+	draw_pair(4, 0, statsWidth, "Attack", std::string{ ctx.player_concrete().get_equipped_weapon_damage_roll() });
+	draw_pair(5, 0, statsWidth, "Gold", std::format("{} gp", ctx.player_concrete().get_gold()));
 }
 
 // ---------------------------------------------------------------------------

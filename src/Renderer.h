@@ -20,7 +20,7 @@ inline constexpr int DISPLAY_TILE_SIZE = 64; // Default rendered tile size in pi
 // is as tall as the zoom makes it and a row of text is not, so a pitch measured in
 // tiles puts most of a row on nothing at one zoom and overlaps at the next.
 inline constexpr int UI_TEXT_ROW_PITCH = 32; // Pixels between the tops of two rows of UI text
-inline constexpr int GUI_TEXT_TOP_INSET = 6; // Gap below the frame's top edge before the first row
+inline constexpr int GUI_TEXT_TOP_INSET = 2; // Gap below the frame's top edge before the first row
 inline constexpr int GUI_TEXT_ROWS = 6; // Text rows the HUD lays out
 
 // Top of one text row inside a panel whose frame begins at panelTopY. Row 0 sits
@@ -125,10 +125,16 @@ inline constexpr int GUI_TEXT_ROWS = 6; // Text rows the HUD lays out
 //   gui_reserve_rows(96, 16);   // -> 3
 [[nodiscard]] inline constexpr int gui_reserve_rows(int tileSize, int fontSize)
 {
-	// One whole tile for the frame's top edge, then the rows. The last row needs
-	// only the height of the font rather than another full pitch.
+	// A whole tile for the frame's top edge and another for its bottom, then the rows
+	// between them. The last row needs only the height of the font rather than another
+	// full pitch.
+	//
+	// The bottom edge used to be left out, so the panel reserved three sides of a frame
+	// and relied on the screen edge to close it. That read as a thin line while the rails
+	// were one pixel wide; with a drawn frame the rails ran to the bottom of the screen
+	// and stopped.
 	const int neededPixels =
-		tileSize + GUI_TEXT_TOP_INSET + (GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH + fontSize;
+		tileSize + GUI_TEXT_TOP_INSET + (GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH + fontSize + tileSize;
 	return (neededPixels + tileSize - 1) / tileSize;
 }
 

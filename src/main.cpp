@@ -87,7 +87,7 @@ int main()
 	// every layout width in the HUD is measured against it. 14 is a 1.75x bake of an
 	// 8-pixel design, which antialiases the glyph edges slightly; the exact
 	// multiples are 8, 16 and 24, and none of those is both readable and narrow.
-	game->renderer.load_font(Paths::DAWNLIKE_FONT, 16);
+	game->renderer.load_font(Paths::DAWNLIKE_FONT, 30);
 
 	auto ctx = game->context();
 	game->decorEditor.load_palette(Paths::TILE_CONFIG);

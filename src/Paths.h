@@ -17,7 +17,7 @@ inline constexpr std::string_view DAWNLIKE_DIR = "DawnLike";
 // 16.8 pixels a character at a load size of 16. So the narrower file buys no width
 // and only changes the letterforms, and the width comes from the load size in
 // main.cpp instead.
-inline constexpr std::string_view DAWNLIKE_FONT = "DawnLike/GUI/SDS_8x8.ttf";
+inline constexpr std::string_view DAWNLIKE_FONT = "DawnLike/GUI/Jersey10.ttf";
 
 inline constexpr std::string_view PREFABS = "data/prefabs.json";
 inline constexpr std::string_view CONTENT_TILES = "data/content/tiles.json";
