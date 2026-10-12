@@ -23,6 +23,17 @@ inline constexpr int UI_TEXT_ROW_PITCH = 32; // Pixels between the tops of two r
 inline constexpr int GUI_TEXT_TOP_INSET = 2; // Gap below the frame's rule before the first row
 inline constexpr int GUI_TEXT_ROWS = 8; // Text rows the HUD lays out
 
+// The bar sheet's cell. A bar is one text row tall, so a cell of this size is drawn
+// at its own resolution however the zoom moves, and only its width is stretched.
+// The sheet is loaded at this size, which is what keeps the two equal.
+inline constexpr int GUI_BARS_CELL_SIZE = UI_TEXT_ROW_PITCH;
+
+// Opaque width of a bar's end plate, which is what its cell paints and the rest of
+// that cell leaves clear. A bar's trough runs between the two plates, so this is the
+// inset its contents take at each end. BarSheetGeometryTest reads it back off the
+// sheet, so art that changes the plate fails rather than hiding a sliver of fill.
+inline constexpr int GUI_BAR_PLATE_WIDTH = 13;
+
 // A frame edge paints a rule across part of its tile and leaves the rest transparent,
 // so a panel's interior begins where the rule ends and not where the tile does.
 // Measured off DawnLike/GUI/Frame.png at its native cell: the top edge paints rows
@@ -155,10 +166,9 @@ inline constexpr int GUI_FRAME_RULE_WIDTH_DEPTH = 30;
 //
 // Derived rather than fixed. The HUD holds a constant amount of text, so the
 // pixels it needs do not change with zoom; the number of tile rows covering them
-// therefore must. As a constant it was 4, which is right only at a 64-pixel tile:
-// at 16 the panel was 64 pixels tall for 198 pixels of content and the lower rows
-// drew off the bottom of the screen, and at 96 it took 384 pixels to hold the same
-// six rows.
+// therefore must. A fixed count is right at one tile size and wrong at every other:
+// at a smaller tile the rows it fails to cover draw off the bottom of the screen, and
+// at a larger one it takes map rows the text has no use for.
 //
 // Example:
 //
@@ -270,6 +280,11 @@ enum class TileSheet
 	// Declared ahead of its art for the same reason as SHEET_SLOTS - the generator reads
 	// this enum for the sheet number and refuses to install until the entry exists.
 	SHEET_FRAME,
+	// The health and hunger bars: a rim, a fill the code tints, and the two icons
+	// beside them. A 32px cell, because a bar is a text row tall at every zoom, so
+	// the art is never scaled vertically. Declared ahead of its art for the same
+	// reason as SHEET_SLOTS.
+	SHEET_BARS,
 	COUNT, // sentinel -- keep last
 };
 
@@ -381,12 +396,20 @@ public:
 	void draw_tile_screen(Vector2D screenPos, TileRef tile) const;
 	void draw_tile_screen_color(Vector2D screenPos, TileRef tile, Color tint) const;
 	void draw_tile_screen_color_sized(Vector2D screenPos, int size, TileRef tile, Color tint) const;
+	// One tile stretched to fill a rectangle, in a tint. The HUD's bars use it: their
+	// height is a text row and their width is whatever the panel leaves, so a bar's art
+	// is drawn at its own height and stretched across.
+	void draw_tile_screen_color_rect(
+		Vector2D screenPos,
+		int width,
+		int height,
+		TileRef tile,
+		Color tint) const;
 
 	// Screen-space drawing at an explicit pixel size (used by tile picker).
 	void draw_tile_screen_sized(Vector2D screenPos, TileRef tile, int displaySize) const;
 	void draw_text(Vector2D screenPos, std::string_view text, ColorPairId colorPair) const;
 	void draw_text_color(Vector2D screenPos, std::string_view text, Color color) const;
-	void draw_bar(Vector2D screenPos, int w, int h, float ratio, Color filled, Color empty) const;
 
 	// Draw a DawnLike-tiled frame with dark background fill.
 	// screenPos = top-left in pixels; wTiles/hTiles = dimensions in tiles.

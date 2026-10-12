@@ -364,6 +364,36 @@
       "sheet": 71,
       "col": 1,
       "row": 1
+    },
+    "GUI_BAR_RIM": {
+      "sheet": 72,
+      "col": 0,
+      "row": 0
+    },
+    "GUI_BAR_FILL": {
+      "sheet": 72,
+      "col": 1,
+      "row": 0
+    },
+    "GUI_ICON_HEART": {
+      "sheet": 72,
+      "col": 0,
+      "row": 1
+    },
+    "GUI_ICON_FOOD": {
+      "sheet": 72,
+      "col": 1,
+      "row": 1
+    },
+    "GUI_BAR_CAP_L": {
+      "sheet": 72,
+      "col": 0,
+      "row": 2
+    },
+    "GUI_BAR_CAP_R": {
+      "sheet": 72,
+      "col": 1,
+      "row": 2
     }
   },
   "autotile_groups": {

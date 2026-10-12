@@ -28,21 +28,30 @@ constexpr int LOG_MAX_MESSAGES = 5;
 // has to fill it, so one of them holding the numbers privately puts the two out
 // of step at any zoom but the one they were written for.
 
-// Icons sit on the same pitch as the text beside them.
 // How far left a divider's cell is aimed so its rail lands where the old one did.
 // GUI_FRAME_L puts its rail against the left of its cell; GUI_FRAME_V centres its rail,
 // so without this the divider would step right by half the difference.
 constexpr int DIVIDER_CELL_OFFSET = 17;
 
-constexpr int GUI_ICON_SIZE = 32;
-// Height of a bar, leaving a little air inside its row.
-constexpr int GUI_BAR_HEIGHT = UI_TEXT_ROW_PITCH - 10;
+// An icon shares its row with a bar, so the two are drawn the same height.
+constexpr int GUI_ICON_SIZE = UI_TEXT_ROW_PITCH;
+// A bar is a whole text row tall, which is the height its art is drawn at. The air
+// inside the row is in the art, as clear rows above and below its rails.
+constexpr int GUI_BAR_HEIGHT = UI_TEXT_ROW_PITCH;
 // Clear air between a rule and the nearest glyph.
 constexpr int GUI_TEXT_CLEARANCE = 12;
 
-// The panel's background, matching the colour the frame sprites paint inside
-// themselves. While the two differed, every frame tile showed as a 56-pixel band
-// and any text near a divider sat on a visible box.
+// The dark of a trough the fill has not reached.
+constexpr Color GUI_BAR_CHANNEL{ 20, 20, 30, 255 };
+// A white tint leaves a sprite its own colours.
+constexpr Color GUI_UNTINTED{ 255, 255, 255, 255 };
+// Laid under a reading that has to stay legible over any fill colour.
+constexpr Color GUI_TEXT_SHADOW{ 0, 0, 0, 200 };
+
+// The whole HUD strip is painted with this before the frame goes over it. Every
+// frame sprite is transparent outside the rule it paints - the divider's cell
+// covers thirty of its sixty-four columns - so nothing in the art supplies a panel
+// colour and the map would otherwise show through.
 constexpr Color GUI_PANEL_BACKGROUND{ 20, 12, 28, 255 };
 
 // ---------------------------------------------------------------------------
@@ -57,13 +66,13 @@ constexpr Color GUI_PANEL_BACKGROUND{ 20, 12, 28, 255 };
 // not. Each of the first two panels gets what its widest content needs and the log
 // gets the remainder, because it is the panel that runs out of room first.
 //
-// Sized against the font's advance, which is its load size in main.cpp, currently
-// about 14.8 pixels a character. Re-measure these if that changes, and measure the
-// advance rather than the ink: the ink of the last glyph stops short of its own
+// Sized against the font's advance, which is the load size in main.cpp and nothing
+// in the font file, so a change there is what makes these fractions wrong. Measure
+// the advance rather than the ink: the ink of the last glyph stops short of its own
 // advance, and fit_text_to_width counts the advance.
-//   bars  - icon at 12, bar from 52, longest label is a hunger state at 8
-//           characters, about 118px, so 182 needed
-//   stats - every line is 12 characters or fewer, about 178px, so 210 needed
+//   bars  - an icon at the left margin, then a bar running to the divider with its
+//           own reading centred on it, which is the part that overruns if it narrows
+//   stats - one stat a row, its label at the left edge and its value flush right
 // Both panels hold only what the character sheet does not: the sheet carries the
 // name, race, gold and all six ability scores in more detail than this ever did.
 static int hud_divider1_x(int panelWidth)
@@ -71,8 +80,9 @@ static int hud_divider1_x(int panelWidth)
 	return panelWidth * 15 / 100;
 }
 // The stat panel is as wide as its longest label-and-value line, which is Gold carrying
-// a six-figure purse: 153 pixels of the 176 this leaves it at a 1280-pixel screen. Every
-// pixel beyond that belongs to the log, which is the panel that runs out of room first.
+// a six-figure purse: that line and the clearance either side of it are what this
+// fraction has to cover, and it is measured against a render rather than assumed. Every
+// pixel beyond it belongs to the log, which is the panel that runs out of room first.
 static int hud_divider2_x(int panelWidth)
 {
 	return panelWidth * 33 / 100;
@@ -127,6 +137,57 @@ static int hud_text_row_count(int tileSize, int fontSize)
 {
 	const int contentHeight = gui_reserve_rows(tileSize, fontSize) * tileSize - gui_frame_top_rule(tileSize) - gui_frame_bottom_rule(tileSize) - GUI_TEXT_TOP_INSET - fontSize;
 	return contentHeight / UI_TEXT_ROW_PITCH + 1;
+}
+
+// A bar in its trough: the dark channel, the fill over the share the bar has, the rim
+// over both, then an end plate at each end. The rim's rails are opaque and cover the
+// fill's top and bottom edges, so how deep they are stays the art's business and no
+// number here describes them. The rim is stretched to the bar's width and the plates
+// are not, which is why the ornament is on the plates.
+static void draw_hud_bar(
+	const GameContext& ctx,
+	Vector2D pos,
+	int width,
+	float ratio,
+	Color fillTint)
+{
+	assert(width > 2 * GUI_BAR_PLATE_WIDTH && "a bar narrower than its two end plates has no trough");
+
+	const TileConfig& tileConfig = *ctx.tileConfig;
+
+	// The trough is the span between the end plates rather than the whole bar. A plate
+	// is opaque, so a share measured across the whole bar puts the last few percent
+	// underneath the left one - which is the reading a player most needs to see.
+	const Vector2D troughPos{ pos.x + GUI_BAR_PLATE_WIDTH, pos.y };
+	const int troughWidth = width - 2 * GUI_BAR_PLATE_WIDTH;
+	DrawRectangle(troughPos.x, troughPos.y, troughWidth, GUI_BAR_HEIGHT, GUI_BAR_CHANNEL);
+
+	const int filledWidth = static_cast<int>(static_cast<float>(troughWidth) * ratio);
+	ctx.renderer->draw_tile_screen_color_rect(troughPos, filledWidth, GUI_BAR_HEIGHT, tileConfig.get("GUI_BAR_FILL"), fillTint);
+
+	// The rim is stretched the length of the bar and the plates are drawn at their own
+	// size, which is why every piece of ornament is on a plate and the rim carries none.
+	ctx.renderer->draw_tile_screen_color_rect(pos, width, GUI_BAR_HEIGHT, tileConfig.get("GUI_BAR_RIM"), GUI_UNTINTED);
+	ctx.renderer->draw_tile_screen_sized(pos, tileConfig.get("GUI_BAR_CAP_L"), GUI_BARS_CELL_SIZE);
+	ctx.renderer->draw_tile_screen_sized(
+		Vector2D{ pos.x + width - GUI_BARS_CELL_SIZE, pos.y }, tileConfig.get("GUI_BAR_CAP_R"), GUI_BARS_CELL_SIZE);
+}
+
+// A bar's reading, centred on it and never left of it. The shadow under the text is what
+// keeps it legible: the fill behind it is green, yellow or red by turns, and white on
+// yellow is the pair that fails.
+static void draw_bar_reading(
+	const GameContext& ctx,
+	Vector2D barPos,
+	int barWidth,
+	std::string_view reading,
+	ColorPairId readingColor)
+{
+	const int textWidth = ctx.renderer->measure_text(reading);
+	const int textX = barPos.x + std::max(0, (barWidth - textWidth) / 2);
+	const int textY = barPos.y + (GUI_BAR_HEIGHT - ctx.renderer->get_font_size()) / 2;
+	ctx.renderer->draw_text_color(Vector2D{ textX + 1, textY + 1 }, reading, GUI_TEXT_SHADOW);
+	ctx.renderer->draw_text(Vector2D{ textX, textY }, reading, readingColor);
 }
 
 // The rectangle log text is laid out in. Pixels across, rows down.
@@ -332,13 +393,11 @@ void Gui::render_hp_bar(const GameContext& ctx)
 
 	// Heart icon in the first column, sized to the row rather than to a map tile.
 	ctx.renderer->draw_tile_screen_sized(
-		Vector2D{ hud_panel_left_margin(tileSize), rowY }, ctx.tileConfig->get("GUI_HEART_FULL"), GUI_ICON_SIZE);
+		Vector2D{ hud_panel_left_margin(tileSize), rowY }, ctx.tileConfig->get("GUI_ICON_HEART"), GUI_ICON_SIZE);
 
 	// Bar fills what is left of the panel, starting clear of the icon.
 	const int barX = hud_panel_left_margin(tileSize) + GUI_ICON_SIZE + 8;
 	const int barW = hud_panel_text_right(div1) - barX;
-	const int barH = GUI_BAR_HEIGHT;
-	const int barY = rowY + (UI_TEXT_ROW_PITCH - barH) / 2;
 
 	Color filled;
 	if (ratio > 0.5f)
@@ -354,19 +413,13 @@ void Gui::render_hp_bar(const GameContext& ctx)
 		filled = ctx.renderer->get_color_pair(ColorPairId::RED_BLACK).fg;
 	}
 
-	Color barEmpty = { 20, 20, 30, 255 };
-	ctx.renderer->draw_bar(Vector2D{ barX, barY }, barW, barH, ratio, filled, barEmpty);
+	const Vector2D barPos{ barX, rowY };
+	draw_hud_bar(ctx, barPos, barW, ratio, filled);
 
-	// "HP 45/50" centered on the bar, and never left of it.
-	// No "HP" prefix: the heart icon beside the bar already says what this counts,
-	// and at three digits each the prefix was what set the bar panel's width.
-	auto hpText = std::format("{}/{}", hp, maxHp);
-	const int textW = ctx.renderer->measure_text(hpText);
-	const int textX = barX + std::max(0, (barW - textW) / 2);
-	ctx.renderer->draw_text(
-		Vector2D{ textX, rowY + (UI_TEXT_ROW_PITCH - ctx.renderer->get_font_size()) / 2 },
-		hpText,
-		ColorPairId::WHITE_BLACK);
+	// No "HP" prefix: the heart icon beside the bar already says what this counts, and
+	// at three digits each the reading alone takes most of the bar, so a prefix overruns
+	// the divider.
+	draw_bar_reading(ctx, barPos, barW, std::format("{}/{}", hp, maxHp), ColorPairId::WHITE_BLACK);
 }
 
 void Gui::render_hunger_status(const GameContext& ctx)
@@ -394,25 +447,17 @@ void Gui::render_hunger_status(const GameContext& ctx)
 
 	// Food icon in the first column, on the same pitch as the heart above it.
 	ctx.renderer->draw_tile_screen_sized(
-		Vector2D{ hud_panel_left_margin(tileSize), rowY }, TileRef{ TileSheet::SHEET_FOOD, 0, 0 }, GUI_ICON_SIZE);
+		Vector2D{ hud_panel_left_margin(tileSize), rowY }, ctx.tileConfig->get("GUI_ICON_FOOD"), GUI_ICON_SIZE);
 
 	// Bar fills what is left of the panel, starting clear of the icon.
 	const int barX = hud_panel_left_margin(tileSize) + GUI_ICON_SIZE + 8;
 	const int barW = hud_panel_text_right(div1) - barX;
-	const int barH = GUI_BAR_HEIGHT;
-	const int barY = rowY + (UI_TEXT_ROW_PITCH - barH) / 2;
 
-	Color filled = ctx.renderer->get_color_pair(ColorPairId::YELLOW_BLACK).fg;
-	Color barEmpty = { 20, 20, 30, 255 };
-	ctx.renderer->draw_bar(Vector2D{ barX, barY }, barW, barH, ratio, filled, barEmpty);
+	const Color filled = ctx.renderer->get_color_pair(ColorPairId::YELLOW_BLACK).fg;
+	const Vector2D barPos{ barX, rowY };
+	draw_hud_bar(ctx, barPos, barW, ratio, filled);
 
-	// Hunger state centered on the bar, and never left of it.
-	const int textW = ctx.renderer->measure_text(hungerText);
-	const int textX = barX + std::max(0, (barW - textW) / 2);
-	ctx.renderer->draw_text(
-		Vector2D{ textX, rowY + (UI_TEXT_ROW_PITCH - ctx.renderer->get_font_size()) / 2 },
-		hungerText,
-		hungerColor);
+	draw_bar_reading(ctx, barPos, barW, hungerText, hungerColor);
 }
 
 // ---------------------------------------------------------------------------

@@ -343,6 +343,7 @@ void Renderer::load_dawnlike(std::string_view basePath)
 	load_static(TileSheet::SHEET_ITEMS, "Items", "Items/", "Items", 64);
 	load_static(TileSheet::SHEET_SLOTS, "Slots", "GUI/", "Slots", 64);
 	load_static(TileSheet::SHEET_FRAME, "Frame", "GUI/", "Frame", 64);
+	load_static(TileSheet::SHEET_BARS, "Bars", "GUI/", "Bars", GUI_BARS_CELL_SIZE);
 
 	// Further character sheets
 	load_animated(TileSheet::SHEET_SLIME0, "Slime0", "Characters/", "Slime", 16);
@@ -674,6 +675,44 @@ void Renderer::draw_tile_screen_color_sized(Vector2D screenPos, int size, TileRe
 	DrawTexturePro(texture, srcRect, destRect, { 0.0f, 0.0f }, 0.0f, tint);
 }
 
+void Renderer::draw_tile_screen_color_rect(
+	Vector2D screenPos,
+	int width,
+	int height,
+	TileRef tile,
+	Color tint) const
+{
+	assert(sheetsLoaded);
+	if (!tile.is_valid() || width <= 0 || height <= 0)
+	{
+		return;
+	}
+
+	assert(sheet_idx(tile.sheet) < sheets.size());
+	const SpriteSheet& sheet = sheets[sheet_idx(tile.sheet)];
+	assert(sheet.loaded && sheet.tilesPerRow > 0);
+
+	const Texture2D& texture = (sheet.animated && currentAnimFrame == 1)
+		? sheet.frame1
+		: sheet.frame0;
+
+	Rectangle srcRect = {
+		static_cast<float>(tile.col * sheet.cellSize),
+		static_cast<float>(tile.row * sheet.cellSize),
+		static_cast<float>(sheet.cellSize),
+		static_cast<float>(sheet.cellSize)
+	};
+
+	Rectangle destRect = {
+		static_cast<float>(screenPos.x),
+		static_cast<float>(screenPos.y),
+		static_cast<float>(width),
+		static_cast<float>(height)
+	};
+
+	DrawTexturePro(texture, srcRect, destRect, { 0.0f, 0.0f }, 0.0f, tint);
+}
+
 void Renderer::draw_tile_screen_sized(Vector2D screenPos, TileRef tile, int displaySize) const
 {
 	assert(sheetsLoaded);
@@ -829,17 +868,6 @@ void Renderer::draw_frame_pixels(Vector2D screenPos, int widthPixels, int height
 	draw_tile_screen(Vector2D{ rightX, screenPos.y }, tileConfig.get("GUI_FRAME_TR"));
 	draw_tile_screen(Vector2D{ screenPos.x, bottomY }, tileConfig.get("GUI_FRAME_BL"));
 	draw_tile_screen(Vector2D{ rightX, bottomY }, tileConfig.get("GUI_FRAME_BR"));
-}
-
-void Renderer::draw_bar(Vector2D screenPos, int w, int h, float ratio, Color filled, Color empty) const
-{
-	DrawRectangle(screenPos.x, screenPos.y, w, h, empty);
-
-	int filledW = static_cast<int>(static_cast<float>(w) * ratio);
-	if (filledW > 0)
-	{
-		DrawRectangle(screenPos.x, screenPos.y, filledW, h, filled);
-	}
 }
 
 void Renderer::set_camera_center(int world_tile_x, int world_tile_y, int map_w, int map_h)
