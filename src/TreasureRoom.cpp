@@ -371,7 +371,7 @@ void TreasureRoom::create(
 				ctx.dice->roll(room.col, room.col_end()),
 				ctx.dice->roll(room.row, room.row_end())
 			};
-			if (ctx.map->can_walk(candidate, ctx) && ctx.map->get_actor(candidate, ctx) == nullptr)
+			if (ctx.map->is_unobstructed(candidate, ctx) && ctx.map->get_actor(candidate, ctx) == nullptr)
 			{
 				wardenPos = candidate;
 			}
@@ -421,7 +421,7 @@ void TreasureRoom::create(
 				ctx.dice->roll(room.row, room.row_end())
 			};
 			if (candidate != center &&
-				ctx.map->can_walk(candidate, ctx) &&
+				ctx.map->is_unobstructed(candidate, ctx) &&
 				ctx.map->get_actor(candidate, ctx) == nullptr &&
 				ctx.map->find_decoration_at(candidate, ctx) == nullptr)
 			{

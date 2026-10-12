@@ -506,7 +506,7 @@ bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext&
 
 	TileType targetTileType = ctx.map->get_tile_type(targetPosition);
 
-	if (!ctx.map->is_collision(playerOwner, targetTileType, targetPosition, ctx))
+	if (ctx.map->can_walk(playerOwner, targetPosition, ctx))
 	{
 		bool blocked = false;
 
@@ -637,7 +637,7 @@ Vector2D PlayerController::find_door_approach(Vector2D doorTile, const GameConte
 	for (auto d : dirs)
 	{
 		Vector2D adj{ doorTile.x + d.x, doorTile.y + d.y };
-		if (!ctx.map->can_walk(adj, ctx))
+		if (!ctx.map->can_walk(playerOwner, adj, ctx))
 		{
 			continue;
 		}
@@ -1048,7 +1048,7 @@ void PlayerController::handle_right_click(GameContext& ctx)
 	}
 
 	// Walk here -- any non-player walkable tile with no creature
-	if (!isPlayerTile && ctx.map->can_walk(world_tile, ctx) && creature == nullptr)
+	if (!isPlayerTile && ctx.map->can_walk(playerOwner, world_tile, ctx) && creature == nullptr)
 	{
 		actions.push_back({ "Walk here",
 			[this, world_tile](GameContext& c)
@@ -1233,7 +1233,7 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 		for (const auto& offset : cardinals)
 		{
 			Vector2D spawnPos = playerOwner.position + offset;
-			if (ctx.map->can_walk(spawnPos, ctx))
+			if (ctx.map->is_unobstructed(spawnPos, ctx))
 			{
 				ctx.creatureManager->add_creature(ShopkeeperFactory::create_shopkeeper(spawnPos, ctx.levelManager->get_dungeon_level(), ctx), ctx);
 				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "DEBUG: Shopkeeper spawned.", MessageCompletion::FINISHED);

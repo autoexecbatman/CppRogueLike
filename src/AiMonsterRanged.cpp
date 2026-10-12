@@ -63,7 +63,7 @@ void AiMonsterRanged::move_or_attack(Creature& owner, Vector2D targetPosition, G
 
 		// Try to move away in this direction
 		Vector2D newPos = owner.position + moveDir;
-		if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
+		if (ctx.map->can_walk(owner, newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
 		{
 			owner.position = newPos;
 			return;

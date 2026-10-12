@@ -123,7 +123,7 @@ TEST_F(PathfindingTest, EveryStepIsOntoAnAdjacentCellThatCanBeWalked)
 	{
 		EXPECT_EQ(chebyshev(path[step - 1], path[step]), 1)
 			<< "step " << step << " jumps further than one cell";
-		EXPECT_TRUE(map.can_walk(path[step], ctx))
+		EXPECT_TRUE(map.is_unobstructed(path[step], ctx))
 			<< "step " << step << " lands where the walker cannot stand";
 	}
 }

@@ -64,7 +64,7 @@ protected:
         ctx.creatures = &creatures;
         ctx.map = map.get();
 
-        // What a tile does is data, and is_collision reads it.
+        // What a tile does is data, and the creature-aware can_walk reads it.
         try
         {
             tileConfig.load(Paths::TILE_CONFIG);
@@ -507,11 +507,11 @@ TEST_F(MapTest, WaterIsCrossedByWhateverGrantsSwimming)
     map->set_tile(pool, TileType::WATER, 1.0);
 
     Creature wader{ Vector2D{ 3, 4 }, ActorData{ TileRef{}, "wader", ColorPairId::WHITE_BLACK } };
-    EXPECT_TRUE(map->is_collision(wader, TileType::WATER, pool, ctx)) << "water stopped nobody";
+    EXPECT_FALSE(map->can_walk(wader, pool, ctx)) << "water stopped nobody";
 
     Creature spider{ Vector2D{ 3, 4 }, ActorData{ TileRef{}, "spider", ColorPairId::WHITE_BLACK } };
     spider.add_state(ActorState::CAN_SWIM);
-    EXPECT_FALSE(map->is_collision(spider, TileType::WATER, pool, ctx));
+    EXPECT_TRUE(map->can_walk(spider, pool, ctx));
 
     // Worn rather than innate, and put straight into the slot: how it got there is
     // Player::equip_item's business, not the map's.
@@ -519,6 +519,6 @@ TEST_F(MapTest, WaterIsCrossedByWhateverGrantsSwimming)
     gauntlets->behavior = Gauntlets{ .effect = MagicalEffect::SWIMMING };
     wader.equippedItems.emplace_back(std::move(gauntlets), EquipmentSlot::GAUNTLETS);
 
-    EXPECT_FALSE(map->is_collision(wader, TileType::WATER, pool, ctx))
+    EXPECT_TRUE(map->can_walk(wader, pool, ctx))
         << "the map asked the creature's own states and not what it wears";
 }

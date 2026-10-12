@@ -115,9 +115,31 @@ public:
 	bool is_water(Vector2D pos) const noexcept;
 	// Tells the player about the tile they are on, where it is worth remarking on.
 	void describe_tile(TileType tileType, GameContext& ctx);
-	bool is_collision(Creature& owner, TileType tileType, Vector2D pos, GameContext& ctx);
 	bool is_explored(Vector2D pos) const noexcept; // indicates whether this tile has already been seen by the player
-	bool can_walk(Vector2D pos, const GameContext& ctx) const noexcept;
+
+	// Whether nothing stands in the way at that tile: not a wall, not a shut door, no
+	// creature and no decoration. It says nothing about what the terrain demands of
+	// whoever crosses it, because it is asked where there is no mover - choosing where
+	// to put an item down, expanding a search frontier.
+	//
+	//   map.is_unobstructed(pool, ctx);   // -> true, a pool obstructs nobody
+	//
+	// It is deliberately not named for walking. It and can_walk give different answers
+	// for the same tile, so they carry different names: an overload pair here would let
+	// a caller select the weaker answer by leaving an argument out, which is how every
+	// monster in the game came to walk into water.
+	bool is_unobstructed(Vector2D pos, const GameContext& ctx) const noexcept;
+
+	// Whether this creature may enter that tile: unobstructed, and either the terrain
+	// demands nothing or the mover carries what it demands - CAN_SWIM for water, from
+	// the creature's own states or from what it wears.
+	//
+	// Example, a goblin and a spider at the edge of a pool:
+	//   map.can_walk(goblin, pool, ctx);   // -> false, goblins do not swim
+	//   map.can_walk(spider, pool, ctx);   // -> true, spiders set CAN_SWIM
+	//
+	// Every path that moves a creature asks this one.
+	bool can_walk(const Creature& mover, Vector2D pos, const GameContext& ctx) const noexcept;
 	void add_monster(Vector2D pos, GameContext& ctx) const;
 	void compute_fov(GameContext& ctx);
 	void update();

@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=MonsterWaterAvoidanceTest.*:WaterMovementTest.*:SanctuaryPursuitTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/AiMonster.cpp",
+      "original": "\t\tif (!ctx.map->can_walk(owner, candidate, ctx))\n\t\t{\n\t\t\tcontinue;\n\t\t}\n\t\tint candidateCost = ctx.map->get_dijkstra_cost(candidate);\n\t\tif (candidateCost < bestCost && !is_blocked(candidate))",
+      "mutated": "\t\tif (!ctx.map->is_unobstructed(candidate, ctx))\n\t\t{\n\t\t\tcontinue;\n\t\t}\n\t\tint candidateCost = ctx.map->get_dijkstra_cost(candidate);\n\t\tif (candidateCost < bestCost && !is_blocked(candidate))",
+      "catches": "the hunting step asking the gate that takes no creature, which is the defect itself: every monster walks into water and drowns"
+    },
+    {
+      "file": "src/AiMonster.cpp",
+      "original": "\tint bestCost = ctx.map->get_dijkstra_cost(owner.position);",
+      "mutated": "\tint bestCost = std::numeric_limits<int>::max();",
+      "catches": "a hunting monster accepting any walkable neighbour rather than a better one, so at a barred gradient it steps away from its quarry and back again every other round"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\tif (!definition.blocksMovement)\n\t{\n\t\treturn true;\n\t}",
+      "mutated": "\tif (definition.blocksMovement)\n\t{\n\t\treturn true;\n\t}",
+      "catches": "the blocking test inverted, which opens water to everyone and shuts the floor"
+    },
+    {
+      "file": "src/AiMonster.cpp",
+      "original": "\tif (ctx.map->can_walk(owner, newPos, ctx) && !ctx.map->get_actor(newPos, ctx))",
+      "mutated": "\tif (ctx.map->is_unobstructed(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))",
+      "catches": "random drift ignoring what the drifter can cross - the path an unaware monster takes into a pool"
+    }
+  ]
+}

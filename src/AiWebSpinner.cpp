@@ -230,7 +230,7 @@ bool AiWebSpinner::is_valid_web_position(Vector2D pos, GameContext& ctx)
 	}
 
 	// Check if the position is walkable
-	if (!ctx.map->can_walk(pos, ctx))
+	if (!ctx.map->is_unobstructed(pos, ctx))
 	{
 		return false;
 	}

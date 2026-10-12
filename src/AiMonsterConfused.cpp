@@ -47,7 +47,7 @@ void AiMonsterConfused::update(Creature& owner, GameContext& ctx)
 
 void AiMonsterConfused::attempt_move(Creature& owner, const Vector2D& destination, GameContext& ctx)
 {
-	if (ctx.map->can_walk(destination, ctx))
+	if (ctx.map->can_walk(owner, destination, ctx))
 	{
 		owner.position = destination;
 	}

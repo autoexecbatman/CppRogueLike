@@ -27,7 +27,7 @@ constexpr int MAP_EDGE_MARGIN = 2;
 // still walk into water during play; it is only never generated standing in it.
 bool can_hold_creature(Vector2D pos, const GameContext& ctx)
 {
-	return ctx.map->can_walk(pos, ctx) &&
+	return ctx.map->is_unobstructed(pos, ctx) &&
 		!ctx.map->is_water(pos) &&
 		ctx.map->get_actor(pos, ctx) == nullptr &&
 		ctx.map->find_decoration_at(pos, ctx) == nullptr;

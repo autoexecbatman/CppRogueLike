@@ -176,7 +176,7 @@ void AiSpider::move_toward_player(Creature& owner, GameContext& ctx)
 	Vector2D newPos = owner.position + Vector2D{ dx, dy };
 
 	// Check if the move is valid
-	if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
+	if (ctx.map->can_walk(owner, newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
 	{
 		owner.position = newPos;
 	}
@@ -184,7 +184,7 @@ void AiSpider::move_toward_player(Creature& owner, GameContext& ctx)
 	{
 		// Try horizontal move
 		newPos = owner.position + Vector2D{ dx, 0 };
-		if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
+		if (ctx.map->can_walk(owner, newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
 		{
 			owner.position = newPos;
 		}
@@ -192,7 +192,7 @@ void AiSpider::move_toward_player(Creature& owner, GameContext& ctx)
 		{
 			// Try vertical move
 			newPos = owner.position + Vector2D{ 0, dy };
-			if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
+			if (ctx.map->can_walk(owner, newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
 			{
 				owner.position = newPos;
 			}
@@ -208,7 +208,7 @@ void AiSpider::random_move(Creature& owner, GameContext& ctx)
 	if (dx != 0 || dy != 0)
 	{
 		Vector2D newPos = owner.position + Vector2D{ dx, dy };
-		if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
+		if (ctx.map->can_walk(owner, newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
 		{
 			owner.position = newPos;
 		}
@@ -247,7 +247,7 @@ void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameCont
 			Vector2D newPos = owner.position + Vector2D{ dx, dy };
 
 			// Check if position is walkable and not occupied
-			if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
+			if (ctx.map->can_walk(owner, newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
 			{
 				// Check if this position is adjacent to a wall
 				bool adjacentToWall = false;
@@ -373,7 +373,7 @@ std::optional<Vector2D> AiSpider::find_ambush_position(
 
 	auto is_valid_ambush = [&](Vector2D pos) -> bool
 	{
-		return ctx.map->can_walk(pos, ctx) &&
+		return ctx.map->can_walk(owner, pos, ctx) &&
 			!ctx.map->get_actor(pos, ctx) &&
 			is_good_ambush_spot(pos, ctx);
 	};

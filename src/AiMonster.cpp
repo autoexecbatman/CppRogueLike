@@ -46,7 +46,7 @@ void flee(Creature& owner, GameContext& ctx)
 		{
 			continue;
 		}
-		if (!ctx.map->can_walk(candidate, ctx))
+		if (!ctx.map->can_walk(owner, candidate, ctx))
 		{
 			continue;
 		}
@@ -108,7 +108,7 @@ void random_wander(Creature& owner, GameContext& ctx)
 		return;
 	}
 	Vector2D newPos = owner.position + Vector2D{ dx, dy };
-	if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
+	if (ctx.map->can_walk(owner, newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
 	{
 		owner.position = newPos;
 	}
@@ -146,8 +146,14 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 		return ctx.map->get_actor(pos, ctx) != nullptr || ctx.map->find_decoration_at(pos, ctx) != nullptr;
 	};
 
+	// Start at the tile already stood on, so only a strictly better neighbour is worth
+	// a step. Starting at the maximum accepts any walkable neighbour at all, which at a
+	// dead end means stepping away from the quarry and back again every other round -
+	// visible wherever the gradient's best neighbour is one this creature may not enter,
+	// such as the water a non-swimmer has just been barred from. flee() already measures
+	// from its own tile for the same reason.
 	std::optional<Vector2D> bestStep;
-	int bestCost = std::numeric_limits<int>::max();
+	int bestCost = ctx.map->get_dijkstra_cost(owner.position);
 
 	for (const Vector2D& delta : NEIGHBORS)
 	{
@@ -156,7 +162,7 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 		{
 			continue;
 		}
-		if (!ctx.map->can_walk(candidate, ctx))
+		if (!ctx.map->can_walk(owner, candidate, ctx))
 		{
 			continue;
 		}

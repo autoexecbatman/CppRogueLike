@@ -4,7 +4,7 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=SwimmingGauntletsTest.*:DrowningInWaterTest.*:StatBoostEquipmentTest.*:MapTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=SwimmingGauntletsTest.*:DrowningInWaterTest.*:StatBoostEquipmentTest.*:MapTest.*:WaterMovementTest.*:MonsterWaterAvoidanceTest.*"
   ],
   "mutations": [
     {
@@ -39,8 +39,8 @@
     },
     {
       "file": "src/Map.cpp",
-      "original": "\treturn !(definition.hasBypassState && owner.has_bypass(definition.bypassState));",
-      "mutated": "\treturn !(definition.hasBypassState && owner.has_state(definition.bypassState));",
+      "original": "\treturn definition.hasBypassState && mover.has_bypass(definition.bypassState);",
+      "mutated": "\treturn definition.hasBypassState && mover.has_state(definition.bypassState);",
       "catches": "the map reading a creature's own flags and never what it wears"
     },
     {

@@ -1,10 +1,10 @@
 // file: WaterMovementTest.cpp
 // Verifies that water bars a creature that cannot swim and admits one that can.
 //
-// The rule was present in Map::is_collision as a commented-out line, replaced
-// by "return false" - so water blocked nobody, the "You can't swim." message in
-// PlayerController was unreachable, and ActorState::CAN_SWIM was authored in
-// the monster editor and read by nothing that affects movement.
+// This asks the predicate directly. MonsterWaterAvoidanceTest asks the same rule
+// through a monster's turn, which is the half that was missing: the rule was correct
+// here for a year while every monster walked into pools, because the gate the AI used
+// was a different function that took no creature.
 
 #include <gtest/gtest.h>
 
@@ -45,7 +45,7 @@ protected:
 // A creature with no swim ability cannot enter water.
 TEST_F(WaterMovementTest, WaterBlocksACreatureThatCannotSwim)
 {
-	EXPECT_TRUE(map.is_collision(*player, TileType::WATER, waterTile, ctx));
+	EXPECT_FALSE(map.can_walk(*player, waterTile, ctx));
 }
 
 // CAN_SWIM is what lets a creature cross; spiders set it at construction.
@@ -53,26 +53,26 @@ TEST_F(WaterMovementTest, WaterAdmitsACreatureThatCanSwim)
 {
 	swimmer.add_state(ActorState::CAN_SWIM);
 
-	EXPECT_FALSE(map.is_collision(swimmer, TileType::WATER, waterTile, ctx));
+	EXPECT_TRUE(map.can_walk(swimmer, waterTile, ctx));
 }
 
 // Dry land is unaffected either way, so the rule is about water alone.
 TEST_F(WaterMovementTest, FloorIsPassableRegardlessOfSwimming)
 {
-	EXPECT_FALSE(map.is_collision(*player, TileType::FLOOR, floorTile, ctx));
+	EXPECT_TRUE(map.can_walk(*player, floorTile, ctx));
 
 	player->add_state(ActorState::CAN_SWIM);
 
-	EXPECT_FALSE(map.is_collision(*player, TileType::FLOOR, floorTile, ctx));
+	EXPECT_TRUE(map.can_walk(*player, floorTile, ctx));
 }
 
 // Losing the ability closes the water again.
 TEST_F(WaterMovementTest, RemovingSwimClosesTheWater)
 {
 	player->add_state(ActorState::CAN_SWIM);
-	ASSERT_FALSE(map.is_collision(*player, TileType::WATER, waterTile, ctx));
+	ASSERT_TRUE(map.can_walk(*player, waterTile, ctx));
 
 	player->remove_state(ActorState::CAN_SWIM);
 
-	EXPECT_TRUE(map.is_collision(*player, TileType::WATER, waterTile, ctx));
+	EXPECT_FALSE(map.can_walk(*player, waterTile, ctx));
 }

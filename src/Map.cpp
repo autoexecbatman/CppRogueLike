@@ -96,7 +96,7 @@ void Map::init_tiles()
 {
 	tiles.clear();
 
-	// FovMap must be reset alongside tiles so can_walk / is_wall see correct
+	// FovMap must be reset alongside tiles so is_unobstructed / is_wall see correct
 	// state even when init_tiles is called standalone (e.g. in tests).
 	// All FovCells default to walkable=false, transparent=false — matches WALL.
 	fovMap = std::make_unique<FovMap>(mapWidth, mapHeight);
@@ -363,37 +363,6 @@ Decoration* Map::find_decoration_at(Vector2D pos, const GameContext& ctx) const 
 	}
 
 	return nullptr;
-}
-
-bool Map::is_collision(Creature& owner, TileType tileType, Vector2D pos, GameContext& ctx)
-{
-	// if there is an actor at the position
-	const auto& actor = get_actor(pos, ctx);
-	if (actor)
-	{
-		return true;
-	}
-
-	if (auto* decor = find_decoration_at(pos, ctx))
-	{
-		if (decor->blocks_movement)
-		{
-			return true;
-		}
-	}
-
-	// What a tile does is data: TileConfig holds whether it blocks and what
-	// crosses it anyway. See data/tiles/tile_config.json.
-	const TileDefinition& definition = ctx.tileConfig->get_tile_definition(tileType);
-
-	if (!definition.blocksMovement)
-	{
-		return false;
-	}
-
-	// An ability can carry a creature through - a spider across water, or anyone
-	// wearing the gauntlets that grant it.
-	return !(definition.hasBypassState && owner.has_bypass(definition.bypassState));
 }
 
 void Map::compute_fov(GameContext& ctx)
@@ -960,7 +929,7 @@ void Map::set_tile(Vector2D pos, TileType newType, double cost)
 	tiles.at(idx).type = newType;
 	tiles.at(idx).cost = cost;
 
-	// Keep fovMap in sync so is_wall / can_walk / A* see the change immediately.
+	// Keep fovMap in sync so is_wall / is_unobstructed / A* see the change immediately.
 	const auto [walkable, transparent] = fov_properties_for(newType);
 	fovMap->set_properties(pos.x, pos.y, walkable, transparent);
 }
@@ -1427,7 +1396,7 @@ void Map::spawn_items(const DungeonRoom& room, GameContext& ctx)
 		constexpr int MAX_ITEM_TRIES = 20;
 		int itemTries = 0;
 		while (itemTries < MAX_ITEM_TRIES &&
-			(!can_walk(itemPos, ctx) || is_water(itemPos) || is_stairs(itemPos, ctx) || find_decoration_at(itemPos, ctx) != nullptr))
+			(!is_unobstructed(itemPos, ctx) || is_water(itemPos) || is_stairs(itemPos, ctx) || find_decoration_at(itemPos, ctx) != nullptr))
 		{
 			itemPos.x = ctx.dice->roll(room.col, room.col_end());
 			itemPos.y = ctx.dice->roll(room.row, room.row_end());
@@ -1457,7 +1426,7 @@ void Map::spawn_barrels(const DungeonRoom& room, GameContext& ctx)
 		Vector2D pos{ mapRng.roll(room.col, room.col_end()), mapRng.roll(room.row, room.row_end()) };
 		constexpr int MAX_TRIES = 20;
 		int tries = 0;
-		while (tries < MAX_TRIES && (!can_walk(pos, ctx) || find_decoration_at(pos, ctx) != nullptr))
+		while (tries < MAX_TRIES && (!is_unobstructed(pos, ctx) || find_decoration_at(pos, ctx) != nullptr))
 		{
 			pos.x = mapRng.roll(room.col, room.col_end());
 			pos.y = mapRng.roll(room.row, room.row_end());
@@ -1488,7 +1457,7 @@ void Map::spawn_player(const DungeonRoom& room, GameContext& ctx)
 	constexpr int MAX_PLAYER_TRIES = 50;
 	int playerTries = 0;
 	while (playerTries < MAX_PLAYER_TRIES &&
-		(!can_walk(pos, ctx) || is_water(pos) || find_decoration_at(pos, ctx) != nullptr))
+		(!is_unobstructed(pos, ctx) || is_water(pos) || find_decoration_at(pos, ctx) != nullptr))
 	{
 		pos.x = ctx.dice->roll(room.col, room.col_end());
 		pos.y = ctx.dice->roll(room.row, room.row_end());
@@ -1534,7 +1503,7 @@ void Map::place_stairs(GameContext& ctx)
 	constexpr int MAX_STAIR_TRIES = 200;
 	for (int attempt = 0; attempt < MAX_STAIR_TRIES; ++attempt)
 	{
-		if (can_walk(stairsPos, ctx) && !is_water(stairsPos) && find_decoration_at(stairsPos, ctx) == nullptr)
+		if (is_unobstructed(stairsPos, ctx) && !is_water(stairsPos) && find_decoration_at(stairsPos, ctx) == nullptr)
 		{
 			break;
 		}
@@ -1549,7 +1518,7 @@ bool Map::is_stairs(Vector2D pos, GameContext& ctx) const
 	return ctx.stairs && ctx.stairs->position == pos;
 }
 
-bool Map::can_walk(Vector2D pos, const GameContext& ctx) const noexcept
+bool Map::is_unobstructed(Vector2D pos, const GameContext& ctx) const noexcept
 {
 	if (is_wall(pos))
 	{
@@ -1572,6 +1541,28 @@ bool Map::can_walk(Vector2D pos, const GameContext& ctx) const noexcept
 	}
 
 	return true;
+}
+
+bool Map::can_walk(const Creature& mover, Vector2D pos, const GameContext& ctx) const noexcept
+{
+	if (!is_unobstructed(pos, ctx))
+	{
+		return false;
+	}
+
+	// What a tile does is data: TileConfig holds whether it blocks and what crosses it
+	// anyway. See data/tiles/tile_config.json.
+	assert(ctx.tileConfig && "can_walk: asked whether a creature may enter a tile with no tile configuration loaded");
+	const TileDefinition& definition = ctx.tileConfig->get_tile_definition(get_tile_type(pos));
+
+	if (!definition.blocksMovement)
+	{
+		return true;
+	}
+
+	// An ability can carry a creature through - a spider across water, or anyone
+	// wearing the gauntlets that grant it.
+	return definition.hasBypassState && mover.has_bypass(definition.bypassState);
 }
 
 void Map::add_monster(Vector2D pos, GameContext& ctx) const
@@ -1695,7 +1686,7 @@ std::vector<Vector2D> Map::neighbors(Vector2D id, const GameContext& ctx, std::o
 					results.push_back(next);
 				}
 			}
-			else if (can_walk(next, ctx))
+			else if (is_unobstructed(next, ctx))
 			{
 				results.push_back(next);
 			}
@@ -2067,9 +2058,12 @@ void Map::place_amulet(GameContext& ctx)
 		const int index = ctx.dice->roll(0, static_cast<int>(ctx.rooms->size()) - 1);
 		const DungeonRoom& room = ctx.rooms->at(index);
 
-		// Find a walkable position in the room
+		// Somewhere the player can actually reach. Water is excluded rather than left to
+		// can_walk and the player's own states: the amulet is the win condition, it is
+		// placed once, and a character who later loses the means to swim would be shut
+		// out of a game that was winnable when it was generated.
 		Vector2D amuletPos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
-		while (!can_walk(amuletPos, ctx) || is_stairs(amuletPos, ctx))
+		while (!is_unobstructed(amuletPos, ctx) || is_water(amuletPos) || is_stairs(amuletPos, ctx))
 		{
 			amuletPos.x = ctx.dice->roll(room.col, room.col_end());
 			amuletPos.y = ctx.dice->roll(room.row, room.row_end());

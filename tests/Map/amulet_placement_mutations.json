@@ -1,0 +1,23 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=AmuletPlacementTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\twhile (!is_unobstructed(amuletPos, ctx) || is_water(amuletPos) || is_stairs(amuletPos, ctx))",
+      "mutated": "\t\twhile (!is_unobstructed(amuletPos, ctx) || is_stairs(amuletPos, ctx))",
+      "catches": "the water exclusion dropped, which puts the win condition where a character who cannot swim never reaches it"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\twhile (!is_unobstructed(amuletPos, ctx) || is_water(amuletPos) || is_stairs(amuletPos, ctx))",
+      "mutated": "\t\twhile (!is_unobstructed(amuletPos, ctx) || !is_water(amuletPos) || is_stairs(amuletPos, ctx))",
+      "catches": "the exclusion inverted, so the amulet is placed only in water"
+    }
+  ]
+}
