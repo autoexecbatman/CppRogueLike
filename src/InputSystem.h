@@ -61,6 +61,7 @@ enum class GameKey
 	BALANCE_VIEWER,
 	REVEAL,
 	REGEN,
+	COST_OVERLAY,
 
 	// Mouse
 	MOUSE_LEFT,

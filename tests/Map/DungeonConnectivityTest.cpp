@@ -199,3 +199,48 @@ TEST_F(DungeonConnectivityTest, AStartOffTheMapIsRefusedRatherThanReportedClean)
 	EXPECT_EQ(map.count_unreachable_tiles(Vector2D{ 0, 0 }), -1);
 	EXPECT_EQ(map.count_unreachable_tiles(Vector2D{ -1, -1 }), -1);
 }
+
+// Monster movement relies on this rather than checking each neighbour against the map's
+// edge: nothing walkable on the edge means nothing stands there.
+TEST_F(DungeonConnectivityTest, EveryDungeonIsRingedByWall)
+{
+	for (int attempt = 0; attempt < DUNGEONS; ++attempt)
+	{
+		Map map{ MAP_WIDTH, MAP_HEIGHT };
+		generate_into(map);
+		ASSERT_TRUE(map.has_wall_border()) << "dungeon " << attempt << " carved into the map's edge";
+	}
+}
+
+// One floor tile on each edge in turn, so a check that skips a side is caught on that side.
+TEST_F(DungeonConnectivityTest, FloorOnAnyEdgeBreaksTheRing)
+{
+	const Vector2D edgeTiles[] = {
+		Vector2D{ 5, 0 },
+		Vector2D{ 5, MAP_HEIGHT - 1 },
+		Vector2D{ 0, 5 },
+		Vector2D{ MAP_WIDTH - 1, 5 },
+	};
+
+	for (const Vector2D& edgeTile : edgeTiles)
+	{
+		Map map{ MAP_WIDTH, MAP_HEIGHT };
+		map.init_tiles();
+		ASSERT_TRUE(map.has_wall_border()) << "a map of solid rock is ringed by wall";
+
+		map.set_tile(edgeTile, TileType::FLOOR, 1.0);
+		EXPECT_FALSE(map.has_wall_border())
+			<< "floor at (" << edgeTile.x << "," << edgeTile.y << ") was not seen";
+	}
+}
+
+// Floor one tile in from every edge is the most a room may reach, and leaves the ring whole.
+TEST_F(DungeonConnectivityTest, FloorJustInsideTheEdgeLeavesTheRingWhole)
+{
+	Map map{ MAP_WIDTH, MAP_HEIGHT };
+	map.init_tiles();
+	map.set_tile(Vector2D{ 1, 1 }, TileType::FLOOR, 1.0);
+	map.set_tile(Vector2D{ MAP_WIDTH - 2, MAP_HEIGHT - 2 }, TileType::FLOOR, 1.0);
+
+	EXPECT_TRUE(map.has_wall_border());
+}

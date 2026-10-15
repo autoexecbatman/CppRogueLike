@@ -58,6 +58,16 @@ TEST(GameContextWiring, ContextCarriesTheGamesItemRegistry)
 	EXPECT_EQ(ctx.itemRegistry, &game.itemRegistry);
 }
 
+// The cost overlay the debug key toggles is the one Game owns, the one the renderer draws.
+TEST(GameContextWiring, ContextCarriesTheGamesCostOverlay)
+{
+	Game game;
+
+	const GameContext ctx = game.context();
+
+	EXPECT_EQ(ctx.costOverlay, &game.costOverlay);
+}
+
 // With a Player owned, both views name that object.
 TEST(GameContextWiring, ContextWithPlayer_BothViewsNameIt)
 {

@@ -223,3 +223,120 @@ TEST_F(MonsterWaterAvoidanceTest, TheSameDriftCarriesASwimmerIn)
 	EXPECT_EQ(goblin.position.x, POOL_COLUMN) << "a swimmer takes the step the goblin was refused";
 	EXPECT_TRUE(map.is_water(goblin.position));
 }
+
+namespace
+{
+
+// The room the second fixture carves, in map coordinates. One scattered water tile,
+// which is all Map::spawn_water ever makes: it flips a 5 percent coin per floor tile
+// independently, so a pool wide enough to need a detour is not what the generator
+// produces - a single tile beside the player is.
+//
+//   . . . . . G . . .      row 2, the goblin
+//   . . . . . . . . .      row 3
+//   . . . . . . ~ . .      row 4, the water
+//   . . . . . . . P .      row 5, the player
+//   . . . . . . . . .      row 6
+//
+// The goblin walks to row 3 and then wants the water, because the water is the only
+// tile nearer the player than the one it is standing on. Every dry tile beside it is
+// the same distance away, not nearer. So the question this fixture asks is whether a
+// creature will step sideways to get round a tile it may not enter.
+constexpr int ROOM_COL = 2;
+constexpr int ROOM_ROW = 2;
+constexpr int ROOM_COL_END = 10;
+constexpr int ROOM_ROW_END = 6;
+constexpr Vector2D POOL{ 8, 4 };
+constexpr Vector2D PLAYER_TILE{ 9, 5 };
+constexpr Vector2D GOBLIN_TILE{ 7, 2 };
+
+} // namespace
+
+class MonsterWaterDetourTest : public ::testing::Test
+{
+protected:
+	void SetUp() override
+	{
+		game.dataManager.load_all_data(game.messageSystem);
+		game.tileConfig.load(Paths::TILE_CONFIG);
+
+		player->experienceReward = std::make_unique<ExperienceReward>(0);
+		player->healthPool = std::make_unique<HealthPool>(STARTING_HP);
+		player->armorClass = std::make_unique<ArmorClass>(10);
+		player->attacker = std::make_unique<PlayerAttacker>(*player);
+		player->set_dr(0);
+		player->set_thaco(20);
+		player->set_strength(10);
+		player->set_dexterity(10);
+
+		goblin.experienceReward = std::make_unique<ExperienceReward>(0);
+		goblin.healthPool = std::make_unique<HealthPool>(STARTING_HP);
+		goblin.armorClass = std::make_unique<ArmorClass>(10);
+		goblin.attacker = std::make_unique<MonsterAttacker>(goblin, DamageInfo{ "1d4", DamageType::PHYSICAL });
+		goblin.set_dr(0);
+		goblin.set_thaco(20);
+		goblin.set_strength(8);
+		goblin.set_dexterity(10);
+		goblin.set_natural_attack("bite");
+		goblin.ai = std::make_unique<AiMonster>();
+
+		ctx = game.context();
+		ctx.playerOwner = &player;
+		ctx.map = &map;
+		ctx.creatures = &creatures;
+
+		map.init_tiles();
+		for (int row = ROOM_ROW; row <= ROOM_ROW_END; ++row)
+		{
+			for (int column = ROOM_COL; column <= ROOM_COL_END; ++column)
+			{
+				map.set_tile(Vector2D{ column, row }, TileType::FLOOR, 1.0);
+			}
+		}
+		map.set_tile(POOL, TileType::WATER, 10.0);
+		map.compute_fov(ctx);
+		map.rebuild_dijkstra_map({ player->position }, ctx);
+
+		game.dice.set_test_mode(true);
+	}
+
+	void TearDown() override
+	{
+		game.dice.set_test_mode(false);
+		game.dice.clear_fixed_rolls();
+	}
+
+	int distance_to_player() const
+	{
+		return goblin.get_tile_distance(player->position);
+	}
+
+	Game game{};
+	GameContext ctx{};
+	Map map{ 20, 20 };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(PLAYER_TILE) };
+	std::vector<std::unique_ptr<Creature>> creatures{};
+	Creature goblin{ GOBLIN_TILE, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK } };
+};
+
+// A monster must not be stopped by a puddle it could walk around. Barring water left
+// the tiles beside it all the same distance from the player, and a rule that demands a
+// strictly nearer tile cannot step across that - so the goblin stands two tiles away
+// and never attacks.
+TEST_F(MonsterWaterDetourTest, AMonsterWalksRoundAPuddleInsteadOfStoppingAtIt)
+{
+	ASSERT_FALSE(goblin.has_state(ActorState::CAN_SWIM)) << "the goblin under test must not be a swimmer";
+	ASSERT_EQ(distance_to_player(), 3) << "the fixture should start the goblin three tiles out";
+	ASSERT_TRUE(map.is_in_fov(goblin.position)) << "an aware goblin hunts; an unseen one drifts on a die instead";
+
+	for (int round = 0; round < ROUNDS; ++round)
+	{
+		goblin.ai->update(goblin, ctx);
+		EXPECT_FALSE(map.is_water(goblin.position))
+			<< "round " << round << ": the goblin stood in water at (" << goblin.position.x << "," << goblin.position.y << ")";
+	}
+
+	EXPECT_LE(distance_to_player(), 1)
+		<< "the goblin held at (" << goblin.position.x << "," << goblin.position.y
+		<< "), " << distance_to_player() << " tiles out, because the only nearer tile was the water";
+}

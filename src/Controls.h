@@ -38,6 +38,7 @@ enum class Controls
 	BALANCE_VIEWER = 'B',
 	REVEAL = 'm',
 	REGEN = 'n',
+	COST_OVERLAY = 'v',
 	OPEN_DOOR = 'o',
 	CLOSE_DOOR = 'k',
 	DISARM = 's',

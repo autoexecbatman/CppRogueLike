@@ -12,6 +12,7 @@
 #include "BodyPlanRegistry.h"
 #include "BuffSystem.h"
 #include "ContentRegistry.h"
+#include "CostOverlay.h"
 #include "CreatureManager.h"
 #include "CurseSystem.h"
 #include "DataManager.h"
@@ -74,6 +75,9 @@ struct Game
 
 	// Minimap overlay
 	Minimap minimap{};
+
+	// Debug view of the monsters' cost map
+	CostOverlay costOverlay{};
 
 	// Rendering (raylib)
 	Renderer renderer{};

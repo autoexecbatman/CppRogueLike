@@ -152,6 +152,7 @@ void Map::init(GameContext& ctx)
 	assert(
 		count_unreachable_tiles(ctx.player()->position) == 0 &&
 		"Map::init left tiles the player cannot reach");
+	assert(has_wall_border() && "Map::init carved into the map's edge");
 }
 
 void Map::generate_rooms(GameContext& ctx)
@@ -271,6 +272,26 @@ int Map::count_unreachable_tiles(Vector2D start) const noexcept
 		}
 	}
 	return unreachable;
+}
+
+bool Map::has_wall_border() const noexcept
+{
+	// Top and bottom rows, then the left and right columns.
+	for (int col = 0; col < mapWidth; ++col)
+	{
+		if (get_tile_type(Vector2D{ col, 0 }) != TileType::WALL || get_tile_type(Vector2D{ col, mapHeight - 1 }) != TileType::WALL)
+		{
+			return false;
+		}
+	}
+	for (int row = 0; row < mapHeight; ++row)
+	{
+		if (get_tile_type(Vector2D{ 0, row }) != TileType::WALL || get_tile_type(Vector2D{ mapWidth - 1, row }) != TileType::WALL)
+		{
+			return false;
+		}
+	}
+	return true;
 }
 
 bool Map::is_explored(Vector2D pos) const noexcept

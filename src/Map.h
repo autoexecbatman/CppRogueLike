@@ -218,6 +218,17 @@ public:
 	//   map.count_unreachable_tiles(entrance);        // -> 0 on a sound dungeon
 	//   map.count_unreachable_tiles(Vector2D{0, 0});  // -> -1, the border is wall
 	int count_unreachable_tiles(Vector2D start) const noexcept;
+
+	// Whether every tile on the map's outer edge is wall. Generation must leave it so:
+	// nothing can then stand on the edge, and every neighbour of a walkable tile is on
+	// the map.
+	//
+	// Example:
+	//   map.init_tiles();
+	//   map.has_wall_border(); // -> true
+	//   map.set_tile(Vector2D{ 0, 5 }, TileType::FLOOR, 1.0);
+	//   map.has_wall_border(); // -> false
+	bool has_wall_border() const noexcept;
 	int get_dijkstra_cost(Vector2D pos) const noexcept;
 	void rebuild_dijkstra_map(const std::vector<Vector2D>& goals, const GameContext& ctx);
 	void set_tile(Vector2D pos, TileType newType, double cost);

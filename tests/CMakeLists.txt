@@ -121,6 +121,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/DrowningTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/Thac0ProgressionTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/TileDefinitionTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CostOverlayTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SleepSpellTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/FireballDamageTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ConstitutionTrackerTest.cpp
@@ -242,6 +243,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/DungeonNames.cpp
     ${PARENT_SOURCE_DIR}/FovMap.cpp
     ${PARENT_SOURCE_DIR}/Minimap.cpp
+    ${PARENT_SOURCE_DIR}/CostOverlay.cpp
 
     # Items
     ${PARENT_SOURCE_DIR}/ItemClassification.cpp

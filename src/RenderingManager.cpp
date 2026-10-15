@@ -5,6 +5,7 @@
 #include <span>
 
 #include "Actor.h"
+#include "CostOverlay.h"
 #include "Creature.h"
 #include "Decoration.h"
 #include "GameContext.h"
@@ -43,6 +44,12 @@ void RenderingManager::render_world(const GameContext& ctx) const
 
 	apply_lighting(ctx);
 	render_mouse_path_overlay(ctx);
+
+	// After the lighting, so a cost is readable in the dark parts of the map too.
+	if (ctx.costOverlay)
+	{
+		ctx.costOverlay->render(ctx);
+	}
 
 	if (ctx.minimap)
 	{

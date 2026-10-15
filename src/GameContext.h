@@ -13,6 +13,7 @@
 struct Game;
 class Map;
 class Minimap;
+class CostOverlay;
 struct Decoration;
 class TileConfig;
 class BodyPlanRegistry;
@@ -211,6 +212,7 @@ struct GameContext
 	CurseSystem* curseSystem{ nullptr };
 	ContentRegistry* contentRegistry{ nullptr };
 	Minimap* minimap{ nullptr };
+	CostOverlay* costOverlay{ nullptr };
 	Dijkstra* pathfinder{ nullptr }; // Persistent pathfinding object (reused across turns)
 	DecorEditor* decorEditor{ nullptr };
 	PrefabLibrary* prefabLibrary{ nullptr };

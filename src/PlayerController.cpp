@@ -16,6 +16,7 @@
 #include "Colors.h"
 #include "ContextMenu.h"
 #include "Controls.h"
+#include "CostOverlay.h"
 #include "Creature.h"
 #include "CreatureManager.h"
 #include "DecorEditor.h"
@@ -1189,6 +1190,12 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 	case Controls::REGEN:
 	{
 		ctx.map->regenerate(ctx);
+		break;
+	}
+
+	case Controls::COST_OVERLAY:
+	{
+		ctx.costOverlay->toggle();
 		break;
 	}
 

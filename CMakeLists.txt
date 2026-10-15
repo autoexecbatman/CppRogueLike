@@ -255,6 +255,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/FovMap.h
     ${PROJECT_SOURCE_DIR}/Minimap.cpp
     ${PROJECT_SOURCE_DIR}/Minimap.h
+    ${PROJECT_SOURCE_DIR}/CostOverlay.cpp
+    ${PROJECT_SOURCE_DIR}/CostOverlay.h
     ${PROJECT_SOURCE_DIR}/Decoration.h
 
     # Items - Updated paths

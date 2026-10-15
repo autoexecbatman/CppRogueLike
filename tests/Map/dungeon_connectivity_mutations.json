@@ -30,6 +30,24 @@
       "original": "\t\tif (tile.type != TileType::WALL && !reached[get_index(tile.position)])",
       "mutated": "\t\tif (tile.type != TileType::WALL && reached[get_index(tile.position)])",
       "catches": "the count reporting what it reached instead of what it could not"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "get_tile_type(Vector2D{ col, mapHeight - 1 })",
+      "mutated": "get_tile_type(Vector2D{ col, mapHeight - 2 })",
+      "catches": "the ring check reading the row inside the bottom edge, so floor on the edge passes and a room's own floor fails"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\tfor (int row = 0; row < mapHeight; ++row)\n\t{\n\t\tif (get_tile_type(Vector2D{ 0, row })",
+      "mutated": "\tfor (int row = 0; row < 0; ++row)\n\t{\n\t\tif (get_tile_type(Vector2D{ 0, row })",
+      "catches": "the ring check skipping the left and right edges"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "get_tile_type(Vector2D{ mapWidth - 1, row }) != TileType::WALL",
+      "mutated": "get_tile_type(Vector2D{ mapWidth - 1, row }) == TileType::WALL",
+      "catches": "the right edge read inverted, so solid rock reads as a broken ring"
     }
   ]
 }

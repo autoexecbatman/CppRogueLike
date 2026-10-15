@@ -1,4 +1,6 @@
 // file: InputSystem.cpp
+#include <array>
+
 #include <raylib.h>
 
 #include "InputSystem.h"
@@ -6,6 +8,79 @@
 
 constexpr double REPEAT_DELAY = 0.30; // seconds before repeat begins
 constexpr double REPEAT_INTERVAL = 0.10; // seconds between repeat fires
+
+// The keys poll() reads, in priority order when two arrive in one frame. A case in its
+// switch whose key is missing here never fires.
+constexpr std::array POLLED_KEYS{
+	// Control
+	KEY_ENTER,
+	KEY_ESCAPE,
+	KEY_TAB,
+	KEY_SPACE,
+	KEY_BACKSPACE,
+	// Arrows
+	KEY_UP,
+	KEY_DOWN,
+	KEY_LEFT,
+	KEY_RIGHT,
+	// Numpad
+	KEY_KP_1,
+	KEY_KP_2,
+	KEY_KP_3,
+	KEY_KP_4,
+	KEY_KP_5,
+	KEY_KP_6,
+	KEY_KP_7,
+	KEY_KP_8,
+	KEY_KP_9,
+	KEY_KP_MULTIPLY,
+	// Letters
+	KEY_W,
+	KEY_A,
+	KEY_S,
+	KEY_D,
+	KEY_Q,
+	KEY_E,
+	KEY_Z,
+	KEY_C,
+	KEY_H,
+	KEY_T,
+	KEY_B,
+	KEY_P,
+	KEY_L,
+	KEY_I,
+	KEY_O,
+	KEY_K,
+	KEY_R,
+	KEY_U,
+	KEY_X,
+	KEY_M,
+	KEY_N,
+	KEY_V,
+	// Digits
+	KEY_ONE,
+	KEY_TWO,
+	KEY_THREE,
+	KEY_FOUR,
+	KEY_FIVE,
+	KEY_SIX,
+	KEY_SEVEN,
+	KEY_EIGHT,
+	KEY_NINE,
+	KEY_ZERO,
+	// Editor
+	KEY_F2,
+	KEY_F3,
+	// Punctuation
+	KEY_EQUAL,
+	KEY_MINUS,
+	KEY_COMMA,
+	KEY_PERIOD,
+	KEY_SLASH,
+	KEY_SEMICOLON,
+	KEY_APOSTROPHE,
+	KEY_GRAVE
+};
 
 void InputSystem::poll()
 {
@@ -84,26 +159,25 @@ void InputSystem::poll()
 	// platform. IsKeyPressed (prev/curr state transition) works correctly
 	// because PollInputEvents() is called explicitly in end_frame() before
 	// SwapScreenBuffer(), keeping prev/curr in sync.
-	auto isPressed = [](int k)
+	auto isPressed = [](int raylibKey)
 	{
-		return IsKeyPressed(k);
+		return IsKeyPressed(raylibKey);
 	};
 #else
 	// On native, prefer the GLFW queue -- it is not subject to prev/curr
 	// timing issues and handles rapid key-press/release within one frame.
 	int queued = GetKeyPressed();
-	auto isPressed = [queued](int k)
+	auto isPressed = [queued](int raylibKey)
 	{
-		return queued == k;
+		return queued == raylibKey;
 	};
 #endif
 	int newKey = 0;
-	for (int k : {
-			 KEY_ENTER, KEY_ESCAPE, KEY_TAB, KEY_SPACE, KEY_BACKSPACE, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_KP_1, KEY_KP_2, KEY_KP_3, KEY_KP_4, KEY_KP_5, KEY_KP_6, KEY_KP_7, KEY_KP_8, KEY_KP_9, KEY_KP_MULTIPLY, KEY_W, KEY_A, KEY_S, KEY_D, KEY_Q, KEY_E, KEY_Z, KEY_C, KEY_H, KEY_T, KEY_B, KEY_P, KEY_L, KEY_I, KEY_O, KEY_K, KEY_R, KEY_U, KEY_X, KEY_M, KEY_N, KEY_ONE, KEY_TWO, KEY_THREE, KEY_FOUR, KEY_FIVE, KEY_SIX, KEY_SEVEN, KEY_EIGHT, KEY_NINE, KEY_ZERO, KEY_F2, KEY_F3, KEY_EQUAL, KEY_MINUS, KEY_COMMA, KEY_PERIOD, KEY_SLASH, KEY_SEMICOLON, KEY_APOSTROPHE, KEY_GRAVE })
+	for (const int raylibKey : POLLED_KEYS)
 	{
-		if (isPressed(k))
+		if (isPressed(raylibKey))
 		{
-			newKey = k;
+			newKey = raylibKey;
 			break;
 		}
 	}
@@ -394,6 +468,12 @@ void InputSystem::poll()
 	case KEY_N:
 	{
 		register_key(KEY_N, GameKey::REGEN, shift ? 'N' : 'n', false);
+		return;
+	}
+
+	case KEY_V:
+	{
+		register_key(KEY_V, GameKey::COST_OVERLAY, shift ? 'V' : 'v', false);
 		return;
 	}
 

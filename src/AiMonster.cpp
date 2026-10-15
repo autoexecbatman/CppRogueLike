@@ -42,10 +42,6 @@ void flee(Creature& owner, GameContext& ctx)
 	for (const Vector2D& delta : NEIGHBORS)
 	{
 		Vector2D candidate{ owner.position.x + delta.x, owner.position.y + delta.y };
-		if (!ctx.map->is_in_bounds(candidate))
-		{
-			continue;
-		}
 		if (!ctx.map->can_walk(owner, candidate, ctx))
 		{
 			continue;
@@ -146,28 +142,27 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 		return ctx.map->get_actor(pos, ctx) != nullptr || ctx.map->find_decoration_at(pos, ctx) != nullptr;
 	};
 
-	// Start at the tile already stood on, so only a strictly better neighbour is worth
-	// a step. Starting at the maximum accepts any walkable neighbour at all, which at a
-	// dead end means stepping away from the quarry and back again every other round -
-	// visible wherever the gradient's best neighbour is one this creature may not enter,
-	// such as the water a non-swimmer has just been barred from. flee() already measures
-	// from its own tile for the same reason.
+	const int holdingCost = ctx.map->get_dijkstra_cost(owner.position);
+
 	std::optional<Vector2D> bestStep;
-	int bestCost = ctx.map->get_dijkstra_cost(owner.position);
+	int bestCost = std::numeric_limits<int>::max();
+
+	// Step only to a tile no further from the quarry than this one, so a creature can
+	// sidestep a tile it may not enter.
+	auto is_better_step = [&holdingCost, &bestCost, &is_blocked](const Vector2D& candidate, int candidateCost)
+	{
+		return candidateCost <= holdingCost && candidateCost < bestCost && !is_blocked(candidate);
+	};
 
 	for (const Vector2D& delta : NEIGHBORS)
 	{
 		Vector2D candidate{ owner.position.x + delta.x, owner.position.y + delta.y };
-		if (!ctx.map->is_in_bounds(candidate))
-		{
-			continue;
-		}
 		if (!ctx.map->can_walk(owner, candidate, ctx))
 		{
 			continue;
 		}
 		int candidateCost = ctx.map->get_dijkstra_cost(candidate);
-		if (candidateCost < bestCost && !is_blocked(candidate))
+		if (is_better_step(candidate, candidateCost))
 		{
 			bestCost = candidateCost;
 			bestStep = candidate;

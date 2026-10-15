@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=CostOverlayTest.*:GameContextWiring.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/CostOverlay.cpp",
+      "original": "\tif (cost == UNREACHED_COST)\n\t{\n\t\treturn std::nullopt;\n\t}",
+      "mutated": "\tif (false)\n\t{\n\t\treturn std::nullopt;\n\t}",
+      "catches": "a tile the flood never reached labelled with the sentinel, painting 2147483647 over every wall"
+    },
+    {
+      "file": "src/CostOverlay.cpp",
+      "original": "\tvisible = !visible;",
+      "mutated": "\tvisible = true;",
+      "catches": "the key turning the overlay on and never off again"
+    },
+    {
+      "file": "src/CostOverlay.cpp",
+      "original": "\tif (farthestCost == 0)\n\t{\n\t\treturn COST_NEAR_TINT;\n\t}",
+      "mutated": "\tif (farthestCost == 0)\n\t{\n\t\treturn COST_FAR_TINT;\n\t}",
+      "catches": "the player's own tile drawn as the far end when it is the only tile reached"
+    },
+    {
+      "file": "src/CostOverlay.cpp",
+      "original": "(farValue - nearValue) * cost / farthestCost);",
+      "mutated": "(farValue - nearValue) * cost / (farthestCost + 1));",
+      "catches": "the blend stopping short of the far tint, so the farthest tile is not the coolest colour"
+    },
+    {
+      "file": "src/Game.cpp",
+      "original": "\t\t.costOverlay = &costOverlay,",
+      "mutated": "\t\t.costOverlay = nullptr,",
+      "catches": "the context handing the renderer and the debug key no overlay, so the key dereferences null"
+    }
+  ]
+}

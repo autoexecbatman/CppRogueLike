@@ -38,6 +38,7 @@
 		.curseSystem = &curseSystem,
 		.contentRegistry = &contentRegistry,
 		.minimap = &minimap,
+		.costOverlay = &costOverlay,
 		.pathfinder = &pathfinder,
 
 		.decorEditor = &decorEditor,
