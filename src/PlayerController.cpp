@@ -1068,7 +1068,7 @@ void PlayerController::handle_right_click(GameContext& ctx)
 	}
 
 	// Cancel closes the menu and does nothing else.
-	const auto do_nothing = [](GameContext& actionCtx) {
+	const auto do_nothing = []([[maybe_unused]] GameContext& actionCtx) {
 	};
 	actions.push_back({ "Cancel", do_nothing });
 

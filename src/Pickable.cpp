@@ -694,13 +694,13 @@ int get_item_ac_bonus(const ItemBehavior& behavior) noexcept
 		VariantVisitor{
 			[](const Armor& a) -> int
 			{ return a.armorClass; },
-			[](const Shield&) -> int
+			[]([[maybe_unused]] const Shield& shield) -> int
 			{ return -1; }, // +1 AC in AD&D terms
 			[](const MagicalHelm& mh) -> int
 			{ return MagicalEffectUtils::get_ac_bonus(mh.effect, mh.bonus); },
 			[](const MagicalRing& mr) -> int
 			{ return MagicalEffectUtils::get_protection_bonus(mr.effect); },
-			[](const auto&) -> int
+			[]([[maybe_unused]] const auto& otherBehavior) -> int
 			{ return 0; },
 		},
 		behavior);
@@ -742,7 +742,7 @@ int get_item_resistance_strength(const ItemBehavior& behavior, DamageType damage
 			{ return percent_if(ring.effect, ring.bonus); },
 			[&percent_if](const MagicalHelm& helm) -> int
 			{ return percent_if(helm.effect, helm.bonus); },
-			[](const auto&) -> int
+			[]([[maybe_unused]] const auto& otherBehavior) -> int
 			{ return 0; },
 		},
 		behavior);
@@ -771,7 +771,7 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 				output["weaponSize"] = encode_weapon_size(b.weaponSize);
 				output["strengthRating"] = b.strengthRating;
 			},
-			[&output](const Shield&)
+			[&output]([[maybe_unused]] const Shield& shield)
 			{ output["type"] = encode_pickable_type(PickableType::SHIELD); },
 			[&output](const TargetedScroll& b)
 			{
@@ -784,9 +784,9 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 				output["buffType"] = encode_buff_type(b.buffType);
 				output["buffDuration"] = b.buffDuration;
 			},
-			[&output](const Teleporter&)
+			[&output]([[maybe_unused]] const Teleporter& teleporter)
 			{ output["type"] = encode_pickable_type(PickableType::TELEPORTER); },
-			[&output](const IdentifyScroll&)
+			[&output]([[maybe_unused]] const IdentifyScroll& identifyScroll)
 			{ output["type"] = encode_pickable_type(PickableType::IDENTIFY_SCROLL); },
 			[&output](const Gold& b)
 			{
@@ -826,9 +826,9 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 			{ save_stat_boost(b, PickableType::GAUNTLETS, output); },
 			[&output](const Girdle& b)
 			{ save_stat_boost(b, PickableType::GIRDLE, output); },
-			[&output](const Amulet&)
+			[&output]([[maybe_unused]] const Amulet& amulet)
 			{ output["type"] = encode_pickable_type(PickableType::QUEST_ITEM); },
-			[&output](const DungeonKey&)
+			[&output]([[maybe_unused]] const DungeonKey& dungeonKey)
 			{ output["type"] = encode_pickable_type(PickableType::DUNGEON_KEY); },
 		},
 		behavior);
