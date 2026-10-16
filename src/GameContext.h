@@ -241,6 +241,7 @@ struct GameContext
 	std::vector<std::unique_ptr<SpellTile>>* spellTiles{ nullptr };
 	std::vector<std::unique_ptr<Decoration>>* decorations{ nullptr };
 	FloorInventory* floorInventory{ nullptr };
+	// Every creature on the level except the player, who is reached through player().
 	std::vector<std::unique_ptr<Creature>>* creatures{ nullptr };
 	std::vector<DungeonRoom>* rooms{ nullptr };
 

@@ -661,14 +661,10 @@ bool Player::rest(GameContext& ctx)
 	for (const auto& creature : *ctx.creatures)
 	{
 		assert(creature && "Player::rest: creatures list holds a null entry");
+		// The player is reached through ctx.player(), never through this list.
+		assert(creature.get() != this && "Player::rest: the creatures list holds the player");
 
 		if (creature->is_dead())
-		{
-			continue;
-		}
-
-		// Skip the player themselves
-		if (creature.get() == this)
 		{
 			continue;
 		}
