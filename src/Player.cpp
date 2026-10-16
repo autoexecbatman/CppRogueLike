@@ -745,6 +745,7 @@ void Player::animate_resting(GameContext& ctx)
 	// Alternate lowercase/uppercase by hp recovered so far (varies nicely).
 	const bool big = (get_max_hp() - get_hp()) < 5;
 	const std::string symbol = big ? "Z" : "z";
+	assert(ctx.floatingText && "animate_resting: a rest was shown with no floating text system");
 	ctx.floatingText->spawn_text(
 		Vector2D{ position.x, position.y - 1 }, // a row above the sleeper
 		symbol,

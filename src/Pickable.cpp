@@ -641,16 +641,14 @@ bool use([[maybe_unused]] IdentifyScroll& identifyScroll, Item& owner, Creature&
 		{
 			item->identify_all();
 			++identifiedCount;
-			if (ctx.floatingText)
-			{
-				ctx.floatingText->spawn_text(
-					wearer.position,
-					std::string(item->get_name()) + " identified!",
-					0,
-					255,
-					255,
-					2.0f);
-			}
+			assert(ctx.floatingText && "use(IdentifyScroll): an item was identified with no floating text to show it");
+			ctx.floatingText->spawn_text(
+				wearer.position,
+				std::string(item->get_name()) + " identified!",
+				0,
+				255,
+				255,
+				2.0f);
 		}
 	}
 	ctx.messageSystem->message(

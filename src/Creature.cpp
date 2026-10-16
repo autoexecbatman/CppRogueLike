@@ -729,13 +729,11 @@ int Creature::take_damage_hit_points(int damage, GameContext& ctx, DamageType da
 {
 	const int actualDamage = healthPool->take_damage(*this, damage, ctx, damageType);
 
-	if (ctx.floatingText)
-	{
-		ctx.floatingText->spawn_damage(
-			position,
-			actualDamage,
-			is_player() ? DamageSubject::PLAYER : DamageSubject::MONSTER);
-	}
+	assert(ctx.floatingText && "take_damage_hit_points: damage was taken with no floating text to show it");
+	ctx.floatingText->spawn_damage(
+		position,
+		actualDamage,
+		is_player() ? DamageSubject::PLAYER : DamageSubject::MONSTER);
 
 	return actualDamage;
 }

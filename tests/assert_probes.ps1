@@ -42,6 +42,11 @@ $exe = Join-Path $root "build/bin/Debug/test_exe.exe"
 # vacuous deletion would report the probe as falsified while changing nothing.
 $probes = @(
     @{
+        test   = "AssertProbeDeathTest.TakingDamageWithNoFloatingTextAborts"
+        file   = "src/Creature.cpp"
+        anchor = 'assert(ctx.floatingText && "take_damage_hit_points: damage was taken with no floating text to show it");'
+    },
+    @{
         test   = "AssertProbeDeathTest.AMimicWithNoAppearanceToWearAborts"
         file   = "src/AiMimic.cpp"
         anchor = 'assert(!possibleDisguises.empty() && "AiMimic: a mimic was built with no appearance to wear");'

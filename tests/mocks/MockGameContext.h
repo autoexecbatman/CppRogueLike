@@ -4,6 +4,7 @@
 #include "src/ContentRegistry.h"
 #include "src/CreatureManager.h"
 #include "src/DataManager.h"
+#include "src/FloatingTextSystem.h"
 #include "src/GameContext.h"
 #include "src/InventoryData.h"
 #include "src/ItemRegistry.h"
@@ -34,6 +35,7 @@ struct MockGameContext
 	MonsterRegistry monsterRegistry{};
 	ItemRegistry itemRegistry{};
 	Pathfinding::Pathfinder pathfinder{};
+	FloatingTextSystem floatingText{};
 
 	MockGameContext()
 	{
@@ -72,6 +74,7 @@ struct MockGameContext
 			.creatureManager = &creature_mgr,
 			.dataManager = &data_manager,
 			.buffSystem = &buffs,
+			.floatingText = &floatingText,
 			.contentRegistry = &content_registry,
 			.pathfinder = &pathfinder,
 			.tileConfig = &tile_config,

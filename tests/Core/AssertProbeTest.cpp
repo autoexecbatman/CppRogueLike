@@ -203,6 +203,17 @@ TEST_F(AssertProbeDeathTest, TakingFireAsAPlainTotalAborts)
 	EXPECT_DEATH(creature->take_damage_and_check_death(5, ctx, DamageType::FIRE), "arrive as ResistedDamage");
 }
 
+// Floating text is always wired in a running game, so a context without it is a fault and
+// the first damage number fails where it would have been drawn.
+TEST_F(AssertProbeDeathTest, TakingDamageWithNoFloatingTextAborts)
+{
+	std::unique_ptr<Creature> creature = make_creature();
+	creature->set_hit_dice(10);
+	ctx.floatingText = nullptr;
+
+	EXPECT_DEATH(creature->take_damage_and_check_death(2, ctx, DamageType::PHYSICAL), "with no floating text");
+}
+
 // Every monster's body comes from the registry. Without one it would be built
 // with no slots at all and quietly wear nothing it was authored to carry.
 TEST_F(AssertProbeDeathTest, BuildingAMonsterWithNoBodyPlanRegistryAborts)

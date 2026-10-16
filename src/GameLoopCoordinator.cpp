@@ -235,10 +235,8 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 		ctx.animSystem->update_and_render(*ctx.renderer);
 	}
 
-	if (ctx.floatingText)
-	{
-		ctx.floatingText->update_and_render(*ctx.renderer);
-	}
+	assert(ctx.floatingText && "render: a frame was drawn with no floating text system");
+	ctx.floatingText->update_and_render(*ctx.renderer);
 
 #ifndef __EMSCRIPTEN__
 	if (ctx.decorEditor)
