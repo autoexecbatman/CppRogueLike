@@ -5,7 +5,6 @@
 #include <concepts>
 #include <cstdint>
 #include <memory>
-#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -182,17 +181,6 @@ inline void set_inventory_capacity(CreatureInventory& inventory, size_t newCapac
 
 	inventory.capacity = newCapacity;
 	inventory.items.reserve(inventory.capacity);
-
-	if (inventory.eventHandler)
-	{
-		InventoryEvent event{
-			.type = InventoryEvent::Type::CAPACITY_CHANGED,
-			.item = nullptr,
-			.currentSize = inventory.items.size(),
-			.capacity = inventory.capacity
-		};
-		inventory.eventHandler(event);
-	}
 }
 
 // ===== ITEM ACCESS =====
@@ -237,39 +225,6 @@ bool contains_item(const T& inventory, const Item& item) noexcept
 		{
 			return storedItem.get() == &item;
 		});
-}
-
-// ===== EVENT SYSTEM =====
-
-// A pack's limit, or nothing for the floor, which has none.
-inline std::optional<size_t> capacity_of(const CreatureInventory& inventory) noexcept
-{
-	return inventory.capacity;
-}
-inline std::optional<size_t> capacity_of([[maybe_unused]] const FloorInventory& inventory) noexcept
-{
-	return std::nullopt;
-}
-
-template <AnyInventory T>
-void set_inventory_event_handler(T& inventory, InventoryEventHandler handler)
-{
-	inventory.eventHandler = std::move(handler);
-}
-
-template <AnyInventory T>
-void fire_inventory_event(T& inventory, InventoryEvent::Type type, const Item* item = nullptr)
-{
-	if (inventory.eventHandler)
-	{
-		InventoryEvent event{
-			.type = type,
-			.item = item,
-			.currentSize = inventory.items.size(),
-			.capacity = capacity_of(inventory)
-		};
-		inventory.eventHandler(event);
-	}
 }
 
 // ===== PERSISTENCE =====

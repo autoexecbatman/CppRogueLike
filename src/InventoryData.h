@@ -1,9 +1,7 @@
 #pragma once
 
 #include <expected>
-#include <functional>
 #include <memory>
-#include <optional>
 #include <vector>
 
 #include "Item.h"
@@ -20,32 +18,12 @@ enum class InventoryError
 template <typename T>
 using InventoryResult = std::expected<T, InventoryError>;
 
-// Event system for decoupled notification
-struct InventoryEvent
-{
-	enum class Type
-	{
-		ITEM_ADDED,
-		ITEM_REMOVED,
-		INVENTORY_FULL,
-		CAPACITY_CHANGED
-	};
-	Type type{ Type::ITEM_ADDED };
-	const Item* item{ nullptr };
-	size_t currentSize{ 0 };
-	// The pack's limit; a floor has none.
-	std::optional<size_t> capacity{};
-};
-
-using InventoryEventHandler = std::function<void(const InventoryEvent&)>;
-
 // Items on the dungeon floor.
 // No weight owner and no limit: an add always lands, so nothing dropped is ever lost.
 // Cleared on level transition, which is the only bound on what it holds.
 struct FloorInventory
 {
 	std::vector<std::unique_ptr<Item>> items{};
-	InventoryEventHandler eventHandler{ nullptr };
 
 	FloorInventory() = default;
 	FloorInventory(FloorInventory&&) noexcept = default;
@@ -62,7 +40,6 @@ struct CreatureInventory
 {
 	std::vector<std::unique_ptr<Item>> items;
 	size_t capacity{ 0 };
-	InventoryEventHandler eventHandler{ nullptr };
 
 	explicit CreatureInventory(size_t initialCapacity)
 		: capacity(initialCapacity)

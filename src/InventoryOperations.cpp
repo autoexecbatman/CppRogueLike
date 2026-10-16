@@ -22,10 +22,7 @@ void add_item(FloorInventory& inventory, std::unique_ptr<Item> item)
 {
 	assert(item && "add_item: an empty item was put on the floor");
 
-	const auto* itemPtr = item.get();
 	inventory.items.push_back(std::move(item));
-
-	fire_inventory_event(inventory, InventoryEvent::Type::ITEM_ADDED, itemPtr);
 }
 
 InventoryResult<bool> add_item(CreatureInventory& inventory, std::unique_ptr<Item> item)
@@ -37,14 +34,11 @@ InventoryResult<bool> add_item(CreatureInventory& inventory, std::unique_ptr<Ite
 
 	if (is_inventory_full(inventory))
 	{
-		fire_inventory_event(inventory, InventoryEvent::Type::INVENTORY_FULL, item.get());
 		return std::unexpected(InventoryError::FULL);
 	}
 
-	const auto* itemPtr = item.get();
 	inventory.items.push_back(std::move(item));
 
-	fire_inventory_event(inventory, InventoryEvent::Type::ITEM_ADDED, itemPtr);
 	return true;
 }
 
@@ -61,20 +55,16 @@ InventoryResult<bool> add_item_to_inventory(
 
 	if (is_inventory_full(inventory))
 	{
-		fire_inventory_event(inventory, InventoryEvent::Type::INVENTORY_FULL, item.get());
 		return std::unexpected(InventoryError::FULL);
 	}
 
 	if (!is_within_weight_limit(*item, owner, dataManager))
 	{
-		fire_inventory_event(inventory, InventoryEvent::Type::INVENTORY_FULL, item.get());
 		return std::unexpected(InventoryError::CAPACITY_EXCEEDED);
 	}
 
-	const auto* itemPtr = item.get();
 	inventory.items.push_back(std::move(item));
 
-	fire_inventory_event(inventory, InventoryEvent::Type::ITEM_ADDED, itemPtr);
 	return true;
 }
 
@@ -100,7 +90,6 @@ InventoryResult<std::unique_ptr<Item>> remove_item(FloorInventory& inventory, co
 	auto removedItem = std::move(matches.front());
 	optimize_inventory_storage(inventory);
 
-	fire_inventory_event(inventory, InventoryEvent::Type::ITEM_REMOVED, removedItem.get());
 	return std::move(removedItem);
 }
 
@@ -126,7 +115,6 @@ InventoryResult<std::unique_ptr<Item>> remove_item(CreatureInventory& inventory,
 	auto removedItem = std::move(matches.front());
 	optimize_inventory_storage(inventory);
 
-	fire_inventory_event(inventory, InventoryEvent::Type::ITEM_REMOVED, removedItem.get());
 	return std::move(removedItem);
 }
 
@@ -140,7 +128,6 @@ InventoryResult<std::unique_ptr<Item>> remove_item_at(FloorInventory& inventory,
 	auto removedItem = std::move(inventory.items[index]);
 	inventory.items.erase(inventory.items.begin() + index);
 
-	fire_inventory_event(inventory, InventoryEvent::Type::ITEM_REMOVED, removedItem.get());
 	optimize_inventory_storage(inventory);
 
 	return std::move(removedItem);
@@ -156,7 +143,6 @@ InventoryResult<std::unique_ptr<Item>> remove_item_at(CreatureInventory& invento
 	auto removedItem = std::move(inventory.items[index]);
 	inventory.items.erase(inventory.items.begin() + index);
 
-	fire_inventory_event(inventory, InventoryEvent::Type::ITEM_REMOVED, removedItem.get());
 	optimize_inventory_storage(inventory);
 
 	return std::move(removedItem);
@@ -184,7 +170,6 @@ InventoryResult<std::unique_ptr<Item>> remove_item_by_id(CreatureInventory& inve
 	auto removedItem = std::move(matches.front());
 	optimize_inventory_storage(inventory);
 
-	fire_inventory_event(inventory, InventoryEvent::Type::ITEM_REMOVED, removedItem.get());
 	return std::move(removedItem);
 }
 
@@ -336,5 +321,4 @@ const Item* find_item_by_id(const CreatureInventory& inventory, uint64_t uniqueI
 
 	return it != inventory.items.end() ? it->get() : nullptr;
 }
-
 } // namespace InventoryOperations
