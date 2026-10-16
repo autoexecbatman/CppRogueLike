@@ -1,0 +1,53 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=TeleportLandingTest.*:FullDungeonSpawnTest.*:WaterSpawnTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/SpawnUtils.cpp",
+      "original": "ctx.map->get_tile_type(here) == TileType::FLOOR && ctx.map->can_place_at(here, ctx)",
+      "mutated": "ctx.map->get_tile_type(here) == TileType::FLOOR",
+      "catches": "a teleport landing on a creature's tile"
+    },
+    {
+      "file": "src/SpawnUtils.cpp",
+      "original": "ctx.map->get_tile_type(here) == TileType::FLOOR && ctx.map->can_place_at(here, ctx)",
+      "mutated": "ctx.map->can_place_at(here, ctx)",
+      "catches": "any open tile offered, rock and water aside, instead of floor"
+    },
+    {
+      "file": "src/SpawnUtils.cpp",
+      "original": "\tfor (int row = MAP_EDGE_MARGIN; row <= ctx.map->get_height() - MAP_EDGE_MARGIN; ++row)",
+      "mutated": "\tfor (int row = MAP_EDGE_MARGIN + 3; row <= ctx.map->get_height() - MAP_EDGE_MARGIN; ++row)",
+      "catches": "the top rows of the map never searched"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, \"The magic finds nowhere to take you.\", MessageCompletion::FINISHED);\n\t\treturn consume_item(owner, wearer);",
+      "mutated": "\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, \"The magic finds nowhere to take you.\", MessageCompletion::FINISHED);\n\t\treturn false;",
+      "catches": "a scroll with nowhere to go kept rather than spent"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, \"The magic finds nowhere to take you.\", MessageCompletion::FINISHED);\n",
+      "mutated": "",
+      "catches": "a scroll failing without a word"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \"The magic finds nowhere to take you.\");\n",
+      "mutated": "",
+      "catches": "the spell failing without a word"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \"The magic finds nowhere to take you.\");\n\t\tctx.messageSystem->finalize_message();\n\t\treturn true;",
+      "mutated": "\t\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \"The magic finds nowhere to take you.\");\n\t\tctx.messageSystem->finalize_message();\n\t\treturn false;",
+      "catches": "a teleport casting with nowhere to go kept rather than spent"
+    }
+  ]
+}

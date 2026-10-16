@@ -608,7 +608,15 @@ bool use(Shield& shield, Item& owner, Creature& wearer, GameContext& ctx)
 
 bool use(Teleporter& teleporter, Item& owner, Creature& wearer, GameContext& ctx)
 {
-	wearer.position = SpawnUtils::find_random_floor_tile(ctx);
+	// Reading the scroll is the cost, so it is spent whether or not there is anywhere to go.
+	const std::optional<Vector2D> landing = SpawnUtils::find_random_floor_tile(ctx);
+	if (!landing)
+	{
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "The magic finds nowhere to take you.", MessageCompletion::FINISHED);
+		return consume_item(owner, wearer);
+	}
+
+	wearer.position = *landing;
 	ctx.map->compute_fov(ctx);
 	ctx.messageSystem->message(ColorPairId::BLUE_BLACK, "You feel disoriented as the world shifts around you!", MessageCompletion::FINISHED);
 	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You have been teleported to a new location.", MessageCompletion::FINISHED);

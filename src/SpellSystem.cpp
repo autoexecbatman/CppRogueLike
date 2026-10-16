@@ -29,6 +29,7 @@
 #include <cassert>
 #include <format>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -946,7 +947,17 @@ bool SpellSystem::cast_invisibility(Creature& caster, GameContext& ctx)
 
 bool SpellSystem::cast_teleport(Creature& caster, GameContext& ctx)
 {
-	caster.position = SpawnUtils::find_random_floor_tile(ctx);
+	// The casting is spent with nowhere to go, as Knock's is with no door in reach.
+	const std::optional<Vector2D> landing = SpawnUtils::find_random_floor_tile(ctx);
+	if (!landing)
+	{
+		ctx.messageSystem->append_message_part(ColorPairId::MAGENTA_BLACK, "Teleport! ");
+		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "The magic finds nowhere to take you.");
+		ctx.messageSystem->finalize_message();
+		return true;
+	}
+
+	caster.position = *landing;
 	ctx.map->compute_fov(ctx);
 
 	ctx.messageSystem->append_message_part(ColorPairId::MAGENTA_BLACK, "Teleport! ");

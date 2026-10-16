@@ -39,47 +39,48 @@ std::vector<Vector2D> free_tiles_in(const DungeonRoom& room, const GameContext& 
 	}
 	return free;
 }
+
+// One of the candidates, chosen evenly, or nullopt when there are none.
+//
+// Example:
+//   pick_one({ Vector2D{ 4, 4 } }, ctx); // -> (4,4)
+//   pick_one({}, ctx); // -> nullopt
+std::optional<Vector2D> pick_one(const std::vector<Vector2D>& candidates, GameContext& ctx)
+{
+	if (candidates.empty())
+	{
+		return std::nullopt;
+	}
+
+	const int pick = ctx.dice->roll(0, static_cast<int>(candidates.size()) - 1);
+	return candidates[static_cast<size_t>(pick)];
+}
 } // namespace
 
-// Full-map random unoccupied floor tile.
-// Skips the 1-tile border ring — map edges are always walls.
-// Loops until a valid position is found; dungeons always have reachable floor.
-Vector2D find_random_floor_tile(GameContext& ctx)
+// A random floor tile anywhere inside the map's edge margin that a creature can be put on,
+// or nullopt when the level has none. The candidates are enumerated and one is chosen, so
+// a full or flooded level answers nothing instead of the search running forever.
+std::optional<Vector2D> find_random_floor_tile(GameContext& ctx)
 {
 	assert(ctx.map);
 	assert(ctx.dice);
+	// can_place_at asks get_actor, which walks the creature list without checking it.
 	assert(ctx.creatures);
-	assert(ctx.player());
 
-	auto is_position_free = [&](Vector2D pos) -> bool
+	// Floor only, so a corridor or an open doorway is never a landing.
+	std::vector<Vector2D> free{};
+	for (int row = MAP_EDGE_MARGIN; row <= ctx.map->get_height() - MAP_EDGE_MARGIN; ++row)
 	{
-		for (const auto& creature : *ctx.creatures)
+		for (int column = MAP_EDGE_MARGIN; column <= ctx.map->get_width() - MAP_EDGE_MARGIN; ++column)
 		{
-			assert(creature);
-			if (creature->position == pos)
+			const Vector2D here{ column, row };
+			if (ctx.map->get_tile_type(here) == TileType::FLOOR && ctx.map->can_place_at(here, ctx))
 			{
-				return false;
+				free.push_back(here);
 			}
 		}
-		if (ctx.player()->position == pos)
-		{
-			return false;
-		}
-		return true;
-	};
-
-	while (true)
-	{
-		const Vector2D pos{
-			ctx.dice->roll(MAP_EDGE_MARGIN, ctx.map->get_width() - MAP_EDGE_MARGIN),
-			ctx.dice->roll(MAP_EDGE_MARGIN, ctx.map->get_height() - MAP_EDGE_MARGIN)
-		};
-
-		if (ctx.map->get_tile_type(pos) == TileType::FLOOR && is_position_free(pos))
-		{
-			return pos;
-		}
 	}
+	return pick_one(free, ctx);
 }
 
 // A random tile of the room that a creature can be put on, or nullopt when the room has
@@ -93,14 +94,7 @@ std::optional<Vector2D> find_random_room_position(const DungeonRoom& room, GameC
 	assert(ctx.map);
 	assert(ctx.dice);
 
-	const std::vector<Vector2D> free = free_tiles_in(room, ctx);
-	if (free.empty())
-	{
-		return std::nullopt;
-	}
-
-	const int pick = ctx.dice->roll(0, static_cast<int>(free.size()) - 1);
-	return free[static_cast<size_t>(pick)];
+	return pick_one(free_tiles_in(room, ctx), ctx);
 }
 
 } // namespace SpawnUtils

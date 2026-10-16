@@ -77,6 +77,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/MapTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/AmuletPlacementTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/TrapSpawnTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Map/TeleportLandingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/DoorLockingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/PathfindingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/FovMapTest.cpp
