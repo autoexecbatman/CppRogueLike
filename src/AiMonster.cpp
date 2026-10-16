@@ -1,5 +1,4 @@
 #include <cassert>
-#include <limits>
 #include <optional>
 #include <vector>
 
@@ -162,48 +161,46 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 		return;
 	}
 
-	auto is_blocked = [&ctx](const Vector2D& pos)
-	{
-		return ctx.map->get_actor(pos, ctx) != nullptr;
-	};
-
 	assert(ctx.tileConfig && "move_or_attack: a monster hunted with no tile configuration");
 	const Pathfinding::Mobility mobility = Pathfinding::mobility_of(owner, *ctx.tileConfig);
-	const std::optional<int> holdingCost = ctx.pathfinder->cost_to(targetPosition, owner.position, mobility, ctx);
 
+	// The cost map ignores creatures, so it says whether terrain allows any way at all.
+	const std::optional<int> holdingCost = ctx.pathfinder->cost_to(targetPosition, owner.position, mobility, ctx);
 	if (!holdingCost)
 	{
 		close_in_without_a_route(owner, targetPosition, mobility, ctx);
 		return;
 	}
 
-	std::optional<Vector2D> bestStep;
-	int bestCost = std::numeric_limits<int>::max();
+	// The route goes round the creatures standing now. Each step shortens it while they
+	// stand still, so a crowd cannot hold the hunter pacing between equal tiles.
+	const std::vector<Vector2D> route = ctx.pathfinder->find_route(owner.position, targetPosition, mobility, ctx);
+	std::optional<Vector2D> nextStep = route.size() >= 2 ? std::optional<Vector2D>{ route[1] } : std::nullopt;
 
-	// Step only to a tile no further from the quarry than this one, so a creature can
-	// sidestep a tile it may not enter.
-	auto is_better_step = [&holdingCost, &bestCost, &is_blocked](const Vector2D& candidate, int candidateCost)
+	// The crowd has closed every way: come up behind it, downhill only, so each step is
+	// strictly nearer and none can be undone by the next.
+	if (!nextStep)
 	{
-		return candidateCost <= *holdingCost && candidateCost < bestCost && !is_blocked(candidate);
-	};
-
-	// A tile this creature may not enter is one its own cost map never reached.
-	for (const Vector2D& delta : NEIGHBORS)
-	{
-		Vector2D candidate{ owner.position.x + delta.x, owner.position.y + delta.y };
-		const std::optional<int> candidateCost = ctx.pathfinder->cost_to(targetPosition, candidate, mobility, ctx);
-		if (candidateCost && is_better_step(candidate, *candidateCost))
+		int bestCost = *holdingCost;
+		for (const Vector2D& delta : NEIGHBORS)
 		{
-			bestCost = *candidateCost;
-			bestStep = candidate;
+			const Vector2D candidate = owner.position + delta;
+			const std::optional<int> candidateCost = ctx.pathfinder->cost_to(targetPosition, candidate, mobility, ctx);
+			if (candidateCost && *candidateCost < bestCost && ctx.map->get_actor(candidate, ctx) == nullptr)
+			{
+				bestCost = *candidateCost;
+				nextStep = candidate;
+			}
 		}
 	}
 
-	// A shut door on the way is opened this turn and walked through the next.
-	if (bestStep)
+	if (!nextStep)
 	{
-		Pathfinding::step(owner, *bestStep, ctx);
+		return;
 	}
+
+	// A shut door on the way is opened this turn and walked through the next.
+	Pathfinding::step(owner, *nextStep, ctx);
 }
 
 // Keeps the creature's awareness current for this turn.

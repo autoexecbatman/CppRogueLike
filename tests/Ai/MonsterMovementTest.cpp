@@ -235,9 +235,8 @@ TEST_F(MonsterMovementTest, ANonSwimmerTakesTheLongWayRoundWater)
 	EXPECT_LE(monster.position.chebyshev_distance_to(player->position), 1) << "the goblin never came round the water";
 }
 
-// A crowd: the tiles straight ahead are taken, so the hunter steps sideways to a tile no
-// further from the player and goes round them from there. Open on both sides, because
-// which sidestep it takes is issues/0186's question rather than this one.
+// A crowd: the tiles straight ahead are taken, so the hunter goes round it, with room on
+// both sides.
 TEST_F(MonsterMovementTest, AHunterSidestepsRoundCreaturesInItsWay)
 {
 	open_room(Vector2D{ 1, 2 }, Vector2D{ 12, 6 });
@@ -250,18 +249,83 @@ TEST_F(MonsterMovementTest, AHunterSidestepsRoundCreaturesInItsWay)
 	EXPECT_LE(monster.position.chebyshev_distance_to(player->position), 1) << "the hunter stayed behind the crowd";
 }
 
-// Boxed in on every side that is no further from the player, the hunter holds its ground
-// rather than backing away and pacing.
-TEST_F(MonsterMovementTest, AHunterBoxedInHoldsRatherThanBackingAway)
+// The crowd leaves a dead end on one side and a way round on the other. A sidestep into
+// the dead end leads back to where the hunter stood, so it must take the open side.
+TEST_F(MonsterMovementTest, AHunterTakesTheSideOfACrowdThatLeadsSomewhere)
+{
+	open_room(Vector2D{ 1, 3 }, Vector2D{ 12, 6 });
+	player->position = Vector2D{ 2, 4 };
+	monster.position = Vector2D{ 7, 4 };
+	place_blockers({ Vector2D{ 6, 3 }, Vector2D{ 6, 4 }, Vector2D{ 6, 5 } });
+
+	hunt(ROUNDS);
+
+	EXPECT_LE(monster.position.chebyshev_distance_to(player->position), 1) << "the hunter paced at the dead end";
+}
+
+// A wall of creatures with one gap at the far end: every tile along it is as far from the
+// player as the next, and the hunter walks its length to the gap.
+TEST_F(MonsterMovementTest, AHunterWalksTheLengthOfAWideCrowdToItsGap)
+{
+	open_room(Vector2D{ 1, 1 }, Vector2D{ 12, 8 });
+	player->position = Vector2D{ 2, 4 };
+	monster.position = Vector2D{ 7, 4 };
+	place_blockers({ Vector2D{ 6, 1 }, Vector2D{ 6, 2 }, Vector2D{ 6, 3 }, Vector2D{ 6, 4 }, Vector2D{ 6, 5 }, Vector2D{ 6, 6 }, Vector2D{ 6, 7 } });
+
+	hunt(ROUNDS);
+
+	EXPECT_LE(monster.position.chebyshev_distance_to(player->position), 1) << "the hunter never found the gap";
+}
+
+// Hemmed in on every side that is no further from the player, the hunter backs out and
+// goes round, because the way round is a route and backing out is its first step.
+TEST_F(MonsterMovementTest, AHunterBoxedInBacksOutAndGoesRound)
 {
 	open_room(Vector2D{ 1, 3 }, Vector2D{ 12, 6 });
 	player->position = Vector2D{ 2, 4 };
 	monster.position = Vector2D{ 7, 4 };
 	place_blockers({ Vector2D{ 6, 3 }, Vector2D{ 6, 4 }, Vector2D{ 6, 5 }, Vector2D{ 7, 3 }, Vector2D{ 7, 5 } });
 
-	hunt(1);
+	hunt(ROUNDS);
 
-	EXPECT_EQ(monster.position, (Vector2D{ 7, 4 })) << "the hunter stepped further from the player";
+	EXPECT_LE(monster.position.chebyshev_distance_to(player->position), 1) << "the hunter stayed boxed in";
+}
+
+// The player stands inside a closed ring of creatures, so no route reaches it. The hunter
+// comes up to the ring, going past a creature on its straight line in, and then holds:
+// every tile beside it is either taken or no nearer, and a step to one of those would
+// only be undone by the next.
+TEST_F(MonsterMovementTest, AHunterComesUpToAClosedRingAndHolds)
+{
+	open_room(Vector2D{ 1, 1 }, Vector2D{ 12, 8 });
+	player->position = Vector2D{ 5, 4 };
+	place_blockers({ Vector2D{ 4, 3 }, Vector2D{ 5, 3 }, Vector2D{ 6, 3 }, Vector2D{ 4, 4 }, Vector2D{ 6, 4 }, Vector2D{ 4, 5 }, Vector2D{ 5, 5 }, Vector2D{ 6, 5 } });
+	// On the hunter's straight line in.
+	place_blockers({ Vector2D{ 5, 6 } });
+	monster.position = Vector2D{ 5, 7 };
+
+	hunt(1);
+	const Vector2D atTheRing = monster.position;
+	ASSERT_EQ(atTheRing.chebyshev_distance_to(player->position), 2) << "the hunter did not come up to the ring";
+
+	// Every round, because a pace of two steps ends where it began.
+	for (int round = 0; round < ROUNDS; ++round)
+	{
+		hunt(1);
+		ASSERT_EQ(monster.position, atTheRing) << "the hunter paced along the ring at round " << round;
+	}
+}
+
+// In a corridor with a creature between it and the player there is no way round, so the
+// hunter comes up behind the creature and waits there.
+TEST_F(MonsterMovementTest, AHunterBehindACreatureInACorridorWaits)
+{
+	place_blockers({ Vector2D{ 4, CORRIDOR_ROW } });
+	monster.position = Vector2D{ 7, CORRIDOR_ROW };
+
+	hunt(ROUNDS);
+
+	EXPECT_EQ(monster.position, (Vector2D{ 5, CORRIDOR_ROW })) << "the hunter should wait behind the creature";
 }
 
 // end of file: MonsterMovementTest.cpp
