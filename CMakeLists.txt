@@ -364,6 +364,8 @@ set(SOURCE_FILES # Add Source Files Here !
     # Objects - Updated paths
     ${PROJECT_SOURCE_DIR}/Web.cpp
     ${PROJECT_SOURCE_DIR}/Web.h
+    ${PROJECT_SOURCE_DIR}/Wording.cpp
+    ${PROJECT_SOURCE_DIR}/Wording.h
     ${PROJECT_SOURCE_DIR}/Trap.cpp
     ${PROJECT_SOURCE_DIR}/Trap.h
     ${PROJECT_SOURCE_DIR}/SpellTile.h

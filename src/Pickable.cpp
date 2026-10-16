@@ -61,6 +61,7 @@
 #include "TargetingSystem.h"
 #include "Vector2D.h"
 #include "Weapons.h"
+#include "Wording.h"
 
 // ========== Internal helpers ==========
 
@@ -282,7 +283,7 @@ bool use(Consumable& consumable, Item& owner, Creature& wearer, GameContext& ctx
 		ctx.buffSystem->add_buff(wearer, consumable.buffType, consumable.amount, consumable.duration, consumable.isSetEffect, ctx.gameState->get_time());
 		ctx.messageSystem->message(
 			ColorPairId::CYAN_BLACK,
-			std::format("You feel the effect of the {} for {} turns.", owner.get_name(), consumable.duration),
+			std::format("You feel the effect of the {} for {}.", owner.get_name(), Wording::counted(consumable.duration, "turn", "turns")),
 			MessageCompletion::FINISHED);
 		break;
 	}
@@ -372,7 +373,7 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 		if (affected > 0)
 		{
 			ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, std::format("{}! ", owner.get_name()));
-			ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format("{} creatures are affected.", affected));
+			ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format("{} affected.", Wording::counted(affected, "creature", "creatures")));
 			ctx.messageSystem->finalize_message();
 		}
 		else
@@ -647,7 +648,7 @@ bool use(IdentifyScroll& identifyScroll, Item& owner, Creature& wearer, GameCont
 	ctx.messageSystem->message(
 		ColorPairId::CYAN_BLACK,
 		identifiedCount > 0
-			? std::format("You use the {}. {} items identified!", owner.get_name(), identifiedCount)
+			? std::format("You use the {}. {} identified!", owner.get_name(), Wording::counted(identifiedCount, "item", "items"))
 			: std::format("You use the {}. All items were already identified.", owner.get_name()),
 		MessageCompletion::FINISHED);
 	return consume_item(owner, wearer);

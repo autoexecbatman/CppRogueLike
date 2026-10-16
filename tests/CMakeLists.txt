@@ -125,6 +125,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/TileDefinitionTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CostOverlayTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SleepSpellTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/WordingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/FireballDamageTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ConstitutionTrackerTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/StartingHitPointsTest.cpp
@@ -304,6 +305,7 @@ set(PARENT_SOURCES
 
     # Objects
     ${PARENT_SOURCE_DIR}/Web.cpp
+    ${PARENT_SOURCE_DIR}/Wording.cpp
     ${PARENT_SOURCE_DIR}/Trap.cpp
 
     # Utils

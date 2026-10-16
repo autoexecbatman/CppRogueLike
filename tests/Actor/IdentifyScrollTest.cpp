@@ -134,6 +134,29 @@ TEST_F(IdentifyScrollTest, APackAlreadyKnownStillSpendsTheScroll)
 		<< "the pack was fully identified and the scroll did not say so";
 }
 
+// The scroll alone in the pack identifies itself, and one item is said in the singular.
+TEST_F(IdentifyScrollTest, OneItemIdentifiedIsSaidInTheSingular)
+{
+	ASSERT_EQ(reader->inventoryData.items.size(), 1u) << "the fixture put something else in the pack";
+
+	read_the_scroll();
+
+	EXPECT_TRUE(said_anything_about("1 item identified!")) << "one item was not counted as one";
+	EXPECT_FALSE(said_anything_about("1 items")) << "one item was counted in the plural";
+}
+
+// Two unknown potions beside a known scroll: the count is two, in the plural.
+TEST_F(IdentifyScrollTest, TwoItemsIdentifiedAreSaidInThePlural)
+{
+	carried("health_potion");
+	carried("mana_potion");
+	scrollItem->identify_all();
+
+	read_the_scroll();
+
+	EXPECT_TRUE(said_anything_about("2 items identified!"));
+}
+
 // A pack holding nothing but the scroll is a legal thing to read it over.
 TEST_F(IdentifyScrollTest, APackHoldingOnlyTheScrollStillSpendsIt)
 {

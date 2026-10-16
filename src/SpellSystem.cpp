@@ -61,6 +61,7 @@
 #include "TargetingMenu.h"
 #include "TileConfig.h"
 #include "Vector2D.h"
+#include "Wording.h"
 
 namespace
 {
@@ -487,9 +488,9 @@ bool SpellSystem::cast_protection_from_evil(Creature& caster, GameContext& ctx)
 	ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Protection From Evil! ");
 	ctx.messageSystem->append_message_part(
 		ColorPairId::WHITE_BLACK,
-		std::format("Evil creatures strike at {} against you for {} turns.",
+		std::format("Evil creatures strike at {} against you for {}.",
 			PROTECTION_FROM_EVIL_PENALTY,
-			duration));
+			Wording::counted(duration, "turn", "turns")));
 	ctx.messageSystem->finalize_message();
 	return true;
 }
@@ -505,7 +506,7 @@ bool SpellSystem::cast_sanctuary(Creature& caster, GameContext& ctx)
 	ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Sanctuary! ");
 	ctx.messageSystem->append_message_part(
 		ColorPairId::WHITE_BLACK,
-		std::format("Divine protection shields you for {} turns.", duration));
+		std::format("Divine protection shields you for {}.", Wording::counted(duration, "turn", "turns")));
 	ctx.messageSystem->finalize_message();
 	return true;
 }
@@ -555,7 +556,7 @@ void SpellSystem::cast_silence(
 		innerCtx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Silence! ");
 		innerCtx.messageSystem->append_message_part(
 			ColorPairId::WHITE_BLACK,
-			std::format("{} is struck mute for {} turns.", target->get_name(), duration));
+			std::format("{} is struck mute for {}.", target->get_name(), Wording::counted(duration, "turn", "turns")));
 		innerCtx.messageSystem->finalize_message();
 
 		onSuccess(innerCtx);
@@ -868,7 +869,7 @@ bool SpellSystem::cast_sleep(Creature& caster, GameContext& ctx)
 	{
 		ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Sleep! ");
 		ctx.messageSystem->append_message_part(
-			ColorPairId::WHITE_BLACK, std::format("{} creatures fall asleep.", affected));
+			ColorPairId::WHITE_BLACK, std::format("{} put to sleep.", Wording::counted(affected, "creature", "creatures")));
 		ctx.messageSystem->finalize_message();
 	}
 	else
@@ -923,7 +924,7 @@ bool SpellSystem::cast_hold_person(Creature& caster, GameContext& ctx)
 	{
 		ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Hold Person! ");
 		ctx.messageSystem->append_message_part(
-			ColorPairId::WHITE_BLACK, std::format("{} creatures paralyzed for {} turns.", affected, duration));
+			ColorPairId::WHITE_BLACK, std::format("{} paralyzed for {}.", Wording::counted(affected, "creature", "creatures"), Wording::counted(duration, "turn", "turns")));
 		ctx.messageSystem->finalize_message();
 	}
 	else

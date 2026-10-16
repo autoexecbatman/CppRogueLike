@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=WordingTest.*:IdentifyScrollTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Wording.cpp",
+      "original": "count == 1 ? singular : plural",
+      "mutated": "plural",
+      "catches": "one counted in the plural, the original \"1 items identified!\""
+    },
+    {
+      "file": "src/Wording.cpp",
+      "original": "count == 1 ? singular : plural",
+      "mutated": "singular",
+      "catches": "every count in the singular"
+    },
+    {
+      "file": "src/Wording.cpp",
+      "original": "count == 1 ? singular : plural",
+      "mutated": "count <= 1 ? singular : plural",
+      "catches": "none counted in the singular, \"0 item\""
+    },
+    {
+      "file": "src/Wording.cpp",
+      "original": "count == 1 ? singular : plural",
+      "mutated": "count == 1 ? plural : singular",
+      "catches": "the two forms swapped"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "Wording::counted(identifiedCount, \"item\", \"items\")",
+      "mutated": "Wording::counted(identifiedCount, \"items\", \"items\")",
+      "catches": "the identify message passing the plural for both forms"
+    }
+  ]
+}
