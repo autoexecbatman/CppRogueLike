@@ -1,4 +1,5 @@
 // file: InputSystem.cpp
+#include <algorithm>
 #include <array>
 
 #include <raylib.h>
@@ -35,28 +36,32 @@ constexpr std::array POLLED_KEYS{
 	KEY_KP_9,
 	KEY_KP_MULTIPLY,
 	// Letters
-	KEY_W,
 	KEY_A,
-	KEY_S,
-	KEY_D,
-	KEY_Q,
-	KEY_E,
-	KEY_Z,
-	KEY_C,
-	KEY_H,
-	KEY_T,
 	KEY_B,
-	KEY_P,
-	KEY_L,
+	KEY_C,
+	KEY_D,
+	KEY_E,
+	KEY_F,
+	KEY_G,
+	KEY_H,
 	KEY_I,
-	KEY_O,
+	KEY_J,
 	KEY_K,
-	KEY_R,
-	KEY_U,
-	KEY_X,
+	KEY_L,
 	KEY_M,
 	KEY_N,
+	KEY_O,
+	KEY_P,
+	KEY_Q,
+	KEY_R,
+	KEY_S,
+	KEY_T,
+	KEY_U,
 	KEY_V,
+	KEY_W,
+	KEY_X,
+	KEY_Y,
+	KEY_Z,
 	// Digits
 	KEY_ONE,
 	KEY_TWO,
@@ -81,6 +86,28 @@ constexpr std::array POLLED_KEYS{
 	KEY_APOSTROPHE,
 	KEY_GRAVE
 };
+
+namespace InputPolling
+{
+// Whether every letter is polled. The web build reads a typed letter from the polled key,
+// so a letter missing from the list can never be typed there.
+//
+// Example:
+//   polls_every_letter(); // -> true, KEY_A through KEY_Z are all in POLLED_KEYS
+consteval bool polls_every_letter()
+{
+	for (int letter = KEY_A; letter <= KEY_Z; ++letter)
+	{
+		if (std::ranges::find(POLLED_KEYS, letter) == POLLED_KEYS.end())
+		{
+			return false;
+		}
+	}
+	return true;
+}
+} // namespace InputPolling
+
+static_assert(InputPolling::polls_every_letter(), "POLLED_KEYS is missing a letter, which the web build can then never type");
 
 void InputSystem::poll()
 {
