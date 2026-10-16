@@ -64,10 +64,7 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 	// Build disguise list -- single source of truth is in AiMimic (Appearance::build_mimic_list).
 	auto disguises = Appearance::build_mimic_list(*ctx.contentRegistry, *ctx.itemRegistry);
 
-	if (disguises.empty())
-	{
-		throw("possibleDisguises is empty from Appearance::build_mimic_list()!");
-	}
+	assert(!disguises.empty() && "Mimic: the content gave a mimic no appearance to wear");
 
 	// Apply initial random disguise to this creature's visible appearance.
 	const size_t index = ctx.dice->roll(0, static_cast<int>(disguises.size()) - 1);

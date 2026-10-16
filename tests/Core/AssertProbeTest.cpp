@@ -43,6 +43,7 @@
 #include <string_view>
 #include <vector>
 
+#include "src/AiMimic.h"
 #include "src/ArmorClass.h"
 #include "src/AttackKind.h"
 #include "src/Colors.h"
@@ -495,4 +496,11 @@ TEST_F(AssertProbeDeathTest, ScriptingARollBelowWhatTheDieCanMakeAborts)
 	dice.set_next_roll(0);
 
 	EXPECT_DEATH(dice.roll(1, 20), "outside the range");
+}
+
+// A mimic is a creature wearing the look of an item, so one built with no item looks to
+// wear is a broken content load, refused where the list is handed over.
+TEST_F(AssertProbeDeathTest, AMimicWithNoAppearanceToWearAborts)
+{
+	EXPECT_DEATH(AiMimic{ std::vector<Disguise>{} }, "no appearance to wear");
 }

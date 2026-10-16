@@ -87,6 +87,7 @@ std::vector<Disguise> Appearance::build_mimic_list(ContentRegistry& tiles, const
 AiMimic::AiMimic(std::vector<Disguise> initialDisguises)
 	: possibleDisguises(std::move(initialDisguises))
 {
+	assert(!possibleDisguises.empty() && "AiMimic: a mimic was built with no appearance to wear");
 }
 
 void AiMimic::update(Creature& owner, GameContext& ctx)
@@ -95,6 +96,7 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 	if (possibleDisguises.empty())
 	{
 		possibleDisguises = Appearance::build_mimic_list(*ctx.contentRegistry, *ctx.itemRegistry);
+		assert(!possibleDisguises.empty() && "AiMimic::update: the loaded mimic was given no appearance to wear");
 	}
 
 	if (owner.is_dead())
@@ -362,18 +364,12 @@ void AiMimic::change_disguise(Creature& owner, GameContext& ctx)
 		return;
 	}
 
-	if (!possibleDisguises.empty())
-	{
-		const size_t index = ctx.dice->roll(0, static_cast<int>(possibleDisguises.size()) - 1);
-		const auto& chosen = possibleDisguises.at(index);
-		owner.actorData.tile = chosen.tile;
-		owner.actorData.name = chosen.name;
-		owner.actorData.color = chosen.color;
-	}
-	else
-	{
-		throw "possibleDisguises is empty in change_disguise()";
-	}
+	// update rebuilt the list before calling, and neither builder leaves it empty.
+	const size_t index = ctx.dice->roll(0, static_cast<int>(possibleDisguises.size()) - 1);
+	const auto& chosen = possibleDisguises.at(index);
+	owner.actorData.tile = chosen.tile;
+	owner.actorData.name = chosen.name;
+	owner.actorData.color = chosen.color;
 
 	owner.remove_state(ActorState::BLOCKS);
 }
