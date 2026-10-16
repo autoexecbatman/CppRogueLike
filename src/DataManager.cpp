@@ -29,7 +29,6 @@
 // Strength's percentile band is the one genuine option: only the 18/xx rows carry it.
 #include <algorithm>
 #include <cassert>
-#include <filesystem>
 #include <format>
 #include <fstream>
 #include <ranges>
@@ -49,6 +48,7 @@
 #include "DexterityAttributes.h"
 #include "IntelligenceAttributes.h"
 #include "MessageSystem.h"
+#include "Paths.h"
 #include "StrengthAttributes.h"
 #include "WisdomAttributes.h"
 
@@ -84,33 +84,12 @@ constexpr int NON_WARRIOR_BONUS_CAP = 2;
 
 namespace
 {
-// Search multiple paths for a JSON file
-std::string find_data_file(const std::string& filename)
-{
-	std::vector<std::string> searchPaths = {
-		"./" + filename, // Current directory
-		"./bin/Debug/" + filename, // Build output (Debug)
-		"./bin/Release/" + filename, // Build output (Release)
-		"../src/json/" + filename, // From build dir to source
-		"./src/json/" + filename, // From project root
-	};
-
-	for (const auto& path : searchPaths)
-	{
-		if (std::filesystem::exists(path))
-		{
-			return path;
-		}
-	}
-	return "./" + filename; // Fallback to original behavior
-}
-
 // The whole of one table file. A file that cannot be opened stops the load, so a game
 // never runs on empty ability tables that only fail at the first lookup.
 //
 // Example:
-//   read_table(find_data_file("wisdom.json")); // -> the 25 Wisdom rows as JSON
-//   read_table("missing.json");                // throws std::runtime_error naming the file
+//   read_table(Paths::resolve(Paths::WISDOM_TABLE).string()); // -> the 25 Wisdom rows as JSON
+//   read_table("missing.json"); // throws std::runtime_error naming the file
 nlohmann::json read_table(const std::string& filename)
 {
 	std::ifstream file(filename);
@@ -226,7 +205,7 @@ void DataManager::load_all_data(MessageSystem& message_system)
 
 	// The 18/xx bands are kept apart, so the plain rows stay indexed by score. Assigned
 	// rather than appended, so a second load replaces the first.
-	std::vector<StrengthAttributes> strengthRows = load_strength(find_data_file("strength.json"), message_system);
+	std::vector<StrengthAttributes> strengthRows = load_strength(Paths::resolve(Paths::STRENGTH_TABLE).string(), message_system);
 	auto is_exceptional_band = [](const StrengthAttributes& row)
 	{
 		return row.exceptionalFrom > 0;
@@ -234,11 +213,11 @@ void DataManager::load_all_data(MessageSystem& message_system)
 	exceptionalStrengthBands = strengthRows | std::views::filter(is_exceptional_band) | std::ranges::to<std::vector>();
 	std::erase_if(strengthRows, is_exceptional_band);
 	strengthAttributes = std::move(strengthRows);
-	dexterityAttributes = load_dexterity(find_data_file("dexterity.json"), message_system);
-	constitutionAttributes = load_constitution(find_data_file("constitution.json"), message_system);
-	charismaAttributes = load_charisma(find_data_file("charisma.json"), message_system);
-	intelligenceAttributes = load_intelligence(find_data_file("intelligence.json"), message_system);
-	wisdomAttributes = load_wisdom(find_data_file("wisdom.json"), message_system);
+	dexterityAttributes = load_dexterity(Paths::resolve(Paths::DEXTERITY_TABLE).string(), message_system);
+	constitutionAttributes = load_constitution(Paths::resolve(Paths::CONSTITUTION_TABLE).string(), message_system);
+	charismaAttributes = load_charisma(Paths::resolve(Paths::CHARISMA_TABLE).string(), message_system);
+	intelligenceAttributes = load_intelligence(Paths::resolve(Paths::INTELLIGENCE_TABLE).string(), message_system);
+	wisdomAttributes = load_wisdom(Paths::resolve(Paths::WISDOM_TABLE).string(), message_system);
 
 	message_system.log("DataManager: All game data loaded successfully");
 }

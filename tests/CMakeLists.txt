@@ -354,17 +354,6 @@ if(MSVC)
     set_target_properties(test_exe PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:test_exe>")
 endif()
 
-# Copy all JSON files from source to test binary directory
-file(GLOB JSON_FILES "${PARENT_SOURCE_DIR}/json/*.json")
-
-foreach(JSON_FILE ${JSON_FILES})
-    get_filename_component(JSON_FILENAME ${JSON_FILE} NAME)
-    add_custom_command(TARGET test_exe POST_BUILD
-                      COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                              ${JSON_FILE}
-                              $<TARGET_FILE_DIR:test_exe>/${JSON_FILENAME})
-endforeach()
-
 # Copy tileset BMPs to test build directory (optional - enables tile rendering)
 if(EXISTS "${CMAKE_SOURCE_DIR}/tileset.bmp")
     add_custom_command(TARGET test_exe POST_BUILD

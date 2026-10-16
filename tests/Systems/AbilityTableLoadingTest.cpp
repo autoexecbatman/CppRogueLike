@@ -29,6 +29,7 @@
 
 #include "src/DataManager.h"
 #include "src/MessageSystem.h"
+#include "src/Paths.h"
 
 using json = nlohmann::json;
 
@@ -245,4 +246,21 @@ TEST(AbilityTableLoadingTest, AMissingTableFileStopsTheLoad)
 	}
 
 	std::filesystem::remove(emptyDirectory);
+}
+
+// The tables are found by walking up to the repository root, so a working directory two
+// levels inside it - where none of the old fixed guesses pointed - still loads all six.
+TEST(AbilityTableLoadingTest, TheTablesLoadFromAnyDirectoryInsideTheRepository)
+{
+	const std::filesystem::path deepInside = Paths::resolve("tests/Map");
+	ASSERT_TRUE(std::filesystem::is_directory(deepInside)) << deepInside.string();
+	DataManager dataManager{};
+	MessageSystem messages{};
+
+	{
+		const WorkingDirectoryScope inTests{ deepInside };
+		EXPECT_NO_THROW(dataManager.load_all_data(messages));
+	}
+
+	EXPECT_FALSE(dataManager.get_wisdom_attributes().empty()) << "the Wisdom table came back empty";
 }

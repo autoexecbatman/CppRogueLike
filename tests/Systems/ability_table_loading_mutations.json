@@ -42,6 +42,12 @@
       "original": "\t\tthrow std::runtime_error(std::format(\"DataManager: cannot open {}, so its ability table cannot be read\", filename));",
       "mutated": "\t\treturn nlohmann::json::array();",
       "catches": "a missing table file loaded as an empty table, the silent failure the first ability lookup trips over"
+    },
+    {
+      "file": "src/Paths.h",
+      "original": "inline constexpr std::string_view WISDOM_TABLE = \"src/json/wisdom.json\";",
+      "mutated": "inline constexpr std::string_view WISDOM_TABLE = \"wisdom.json\";",
+      "catches": "a table named by its bare file name, which only the working directory it happens to sit in can find"
     }
   ]
 }

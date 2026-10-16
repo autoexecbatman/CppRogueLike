@@ -48,13 +48,10 @@ if(EMSCRIPTEN)
     # PollInputEvents() explicitly in handle_input_phase before reading key state.
     set(EMCC_FLAGS "-sWASM=1 -sALLOW_MEMORY_GROWTH=1 -sEXPORTED_RUNTIME_METHODS=['cwrap'] -sASSERTIONS=1 -sERROR_ON_UNDEFINED_SYMBOLS=0 -sEXPORTED_FUNCTIONS=['_main','_malloc'] -sNO_DISABLE_EXCEPTION_CATCHING -sUSE_GLFW=3 -sGL_ENABLE_GET_PROC_ADDRESS=1 -sASYNCIFY -sASYNCIFY_STACK_SIZE=65536")
 
-    # Copy all JSON files to the build directory
-    file(GLOB JSON_FILES ${CMAKE_SOURCE_DIR}/src/json/*.json)
-    file(COPY ${JSON_FILES} DESTINATION "${CMAKE_BINARY_DIR}")
-
     # Set linker flags with shell file and preload all JSON files at once
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EMCC_FLAGS} --shell-file ${CMAKE_SOURCE_DIR}/shell.html")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file strength.json --preload-file dexterity.json --preload-file constitution.json --preload-file wisdom.json --preload-file intelligence.json --preload-file charisma.json")
+    # The ability tables are read at src/json/, where Paths::resolve looks for them.
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file ${CMAKE_SOURCE_DIR}/src/json@src/json")
     # Copy DawnLike tileset for web build
     if(EXISTS "${CMAKE_SOURCE_DIR}/DawnLike")
         file(COPY "${CMAKE_SOURCE_DIR}/DawnLike" DESTINATION "${CMAKE_BINARY_DIR}")
@@ -469,26 +466,8 @@ else()
         set_target_properties(${PROJECT_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
     endif()
 
-    # Copy JSON files to build directory
-    set(JSON_FILES
-        "${PROJECT_SOURCE_DIR}/json/strength.json"
-        "${PROJECT_SOURCE_DIR}/json/dexterity.json"
-        "${PROJECT_SOURCE_DIR}/json/constitution.json"
-        "${PROJECT_SOURCE_DIR}/json/wisdom.json"
-        "${PROJECT_SOURCE_DIR}/json/intelligence.json"
-        "${PROJECT_SOURCE_DIR}/json/charisma.json"
-    )
-
     # Ensure the data directory exists in the source tree (editor-authored files live here)
     file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/data")
-
-    foreach(JSON_FILE ${JSON_FILES})
-        get_filename_component(JSON_FILENAME ${JSON_FILE} NAME)
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                          COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                                  ${JSON_FILE}
-                                  $<TARGET_FILE_DIR:${PROJECT_NAME}>/${JSON_FILENAME})
-    endforeach()
 
     # Copy DawnLike tileset directory to build output
     if(EXISTS "${CMAKE_SOURCE_DIR}/DawnLike")
