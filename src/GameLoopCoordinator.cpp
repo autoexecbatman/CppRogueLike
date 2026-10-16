@@ -488,8 +488,12 @@ void GameLoopCoordinator::update(GameContext& ctx)
 				"",
 				"Your legend will be remembered." },
 			ctx);
-		victoryMenu->set_on_close([](GameContext& c)
-			{ c.gameState->set_run(false); });
+		// Closing the victory screen ends the run.
+		const auto end_the_run = [](GameContext& closeCtx)
+		{
+			closeCtx.gameState->set_run(false);
+		};
+		victoryMenu->set_on_close(end_the_run);
 		ctx.menus->push_back(std::move(victoryMenu));
 		ctx.gameState->set_game_status(GameStatus::IDLE);
 	}

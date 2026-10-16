@@ -304,7 +304,7 @@ TEST_F(AssertProbeDeathTest, SleepingWithANullInTheCreatureListAborts)
 {
 	// An orc casts on no Wisdom table, so the spell reaches its effect without a fizzle roll.
 	std::unique_ptr<Creature> caster = make_creature();
-	const auto ignoreCompletion = [](GameContext&) {
+	const auto ignoreCompletion = [](GameContext& completedCtx) {
 	};
 
 	std::vector<std::unique_ptr<Creature>> creatures{};
@@ -357,7 +357,7 @@ TEST_F(AssertProbeDeathTest, CastingMagicMissileWithANullInTheCreatureListAborts
 	creatures.push_back(nullptr);
 	ctx.creatures = &creatures;
 
-	const auto ignoreCompletion = [](GameContext&) {
+	const auto ignoreCompletion = [](GameContext& completedCtx) {
 	};
 
 	EXPECT_DEATH(SpellSystem::cast_spell_by_key("magic_missile", *caster, SpellSource::MEMORIZED, ignoreCompletion, ctx),
@@ -373,7 +373,7 @@ TEST_F(AssertProbeDeathTest, CastingHoldPersonWithANullInTheCreatureListAborts)
 	creatures.push_back(nullptr);
 	ctx.creatures = &creatures;
 
-	const auto ignoreCompletion = [](GameContext&) {
+	const auto ignoreCompletion = [](GameContext& completedCtx) {
 	};
 
 	EXPECT_DEATH(SpellSystem::cast_spell_by_key("hold_person", *caster, SpellSource::MEMORIZED, ignoreCompletion, ctx),

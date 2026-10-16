@@ -73,7 +73,9 @@ protected:
 	// The public path the game uses; cast_sleep itself is private.
 	void cast_sleep()
 	{
-		SpellSystem::cast_spell_by_key("sleep", *caster, SpellSource::MEMORIZED, [](GameContext&) {}, ctx);
+		const auto ignore_completion = [](GameContext& completedCtx) {
+		};
+		SpellSystem::cast_spell_by_key("sleep", *caster, SpellSource::MEMORIZED, ignore_completion, ctx);
 	}
 
 	MockGameContext mock{};

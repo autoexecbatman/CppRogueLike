@@ -931,22 +931,28 @@ void PlayerController::handle_right_click(GameContext& ctx)
 
 	if (isPlayerTile)
 	{
-		actions.push_back({ "Open Inventory",
-			[this](GameContext& c)
-			{ display_inventory(c); } });
-		actions.push_back({ "Character Sheet",
-			[this](GameContext& c)
-			{ c.displayManager->display_character_sheet(playerOwner, c); } });
-		actions.push_back({ "Rest",
-			[this](GameContext& c)
-			{
-				playerOwner.rest(c);
-			} });
+		const auto open_inventory = [this](GameContext& actionCtx)
+		{
+			display_inventory(actionCtx);
+		};
+		const auto open_character_sheet = [this](GameContext& actionCtx)
+		{
+			actionCtx.displayManager->display_character_sheet(playerOwner, actionCtx);
+		};
+		const auto rest_here = [this](GameContext& actionCtx)
+		{
+			playerOwner.rest(actionCtx);
+		};
+		actions.push_back({ "Open Inventory", open_inventory });
+		actions.push_back({ "Character Sheet", open_character_sheet });
+		actions.push_back({ "Rest", rest_here });
 		if (!playerOwner.memorizedSpells.empty())
 		{
-			actions.push_back({ "Cast Spell",
-				[this](GameContext& c)
-				{ SpellSystem::show_casting_menu(playerOwner, c); } });
+			const auto open_casting_menu = [this](GameContext& actionCtx)
+			{
+				SpellSystem::show_casting_menu(playerOwner, actionCtx);
+			};
+			actions.push_back({ "Cast Spell", open_casting_menu });
 		}
 	}
 
@@ -958,16 +964,16 @@ void PlayerController::handle_right_click(GameContext& ctx)
 		if (item->position == world_tile)
 		{
 			std::string itemName = item->actorData.name.substr(0, 16);
-			actions.push_back({ "Pick up " + itemName,
-				[this, world_tile](GameContext& c)
-				{
-					begin_path_walk(
-						world_tile,
-						world_tile,
-						MouseMode::WALK_TO_PICKUP,
-						PendingDoorAction::NONE,
-						c);
-				} });
+			const auto walk_to_pick_up = [this, world_tile](GameContext& actionCtx)
+			{
+				begin_path_walk(
+					world_tile,
+					world_tile,
+					MouseMode::WALK_TO_PICKUP,
+					PendingDoorAction::NONE,
+					actionCtx);
+			};
+			actions.push_back({ "Pick up " + itemName, walk_to_pick_up });
 			break;
 		}
 	}
@@ -980,82 +986,79 @@ void PlayerController::handle_right_click(GameContext& ctx)
 		PendingDoorAction doorAction = doorIsOpen ? PendingDoorAction::CLOSE : PendingDoorAction::OPEN;
 		std::string doorLabel = doorIsOpen ? "Close door" : "Open door";
 
-		actions.push_back({ doorLabel,
-			[this, world_tile, doorAction](GameContext& c)
+		// Beside the door it is worked at once; further off, the player walks up to it first.
+		const auto work_the_door = [this, world_tile, doorAction](GameContext& actionCtx)
+		{
+			if (actionCtx.player()->position.chebyshev_distance_to(world_tile) <= 1)
 			{
-				int dx = std::abs(c.player()->position.x - world_tile.x);
-				int dy = std::abs(c.player()->position.y - world_tile.y);
-				if (dx <= 1 && dy <= 1)
+				if (doorAction == PendingDoorAction::OPEN)
 				{
-					if (doorAction == PendingDoorAction::OPEN)
-					{
-						c.map->open_door(world_tile, c);
-					}
-					else
-					{
-						c.map->close_door(world_tile, c);
-					}
-					spend_player_action(c, TIME_UNITS_PER_ROUND);
+					actionCtx.map->open_door(world_tile, actionCtx);
 				}
 				else
 				{
-					Vector2D adj = find_door_approach(world_tile, c);
-					if (adj.x != -1)
-					{
-						begin_path_walk(adj, world_tile, MouseMode::WALK_TO_DOOR, doorAction, c);
-					}
+					actionCtx.map->close_door(world_tile, actionCtx);
 				}
-			} });
+				spend_player_action(actionCtx, TIME_UNITS_PER_ROUND);
+			}
+			else
+			{
+				const Vector2D approach = find_door_approach(world_tile, actionCtx);
+				if (approach.x != -1)
+				{
+					begin_path_walk(approach, world_tile, MouseMode::WALK_TO_DOOR, doorAction, actionCtx);
+				}
+			}
+		};
+		actions.push_back({ doorLabel, work_the_door });
 	}
 
 	// Stairs at tile
 	if (ctx.stairs && ctx.stairs->position == world_tile)
 	{
-		actions.push_back({ "Descend stairs",
-			[this, world_tile](GameContext& c)
-			{
-				begin_path_walk(
-					world_tile,
-					world_tile,
-					MouseMode::WALK_TO_STAIRS,
-					PendingDoorAction::NONE,
-					c);
-			} });
+		const auto walk_to_stairs = [this, world_tile](GameContext& actionCtx)
+		{
+			begin_path_walk(
+				world_tile,
+				world_tile,
+				MouseMode::WALK_TO_STAIRS,
+				PendingDoorAction::NONE,
+				actionCtx);
+		};
+		actions.push_back({ "Descend stairs", walk_to_stairs });
 	}
 
 	// Monster at tile (non-player)
 	Creature* creature = ctx.map->get_actor(world_tile, ctx);
 	if (creature && !creature->is_player())
 	{
-		int dx = std::abs(playerOwner.position.x - world_tile.x);
-		int dy = std::abs(playerOwner.position.y - world_tile.y);
-		if (dx <= 1 && dy <= 1)
+		if (playerOwner.position.chebyshev_distance_to(world_tile) <= 1)
 		{
-			std::string monName = creature->actorData.name.substr(0, 16);
-			actions.push_back({ "Attack " + monName,
-				[this, world_tile](GameContext& c)
-				{
-					Vector2D target = world_tile;
-					look_to_attack(target, c);
-					flush_fov(c);
-					spend_player_action(c, TIME_UNITS_PER_ROUND);
-				} });
+			const std::string monsterName = creature->actorData.name.substr(0, 16);
+			const auto attack_it = [this, world_tile](GameContext& actionCtx)
+			{
+				Vector2D target = world_tile;
+				look_to_attack(target, actionCtx);
+				flush_fov(actionCtx);
+				spend_player_action(actionCtx, TIME_UNITS_PER_ROUND);
+			};
+			actions.push_back({ "Attack " + monsterName, attack_it });
 		}
 	}
 
 	// Walk here -- any non-player walkable tile with no creature
 	if (!isPlayerTile && Pathfinding::can_enter(playerOwner, world_tile, ctx) && creature == nullptr)
 	{
-		actions.push_back({ "Walk here",
-			[this, world_tile](GameContext& c)
-			{
-				begin_path_walk(
-					world_tile,
-					world_tile,
-					MouseMode::WALK,
-					PendingDoorAction::NONE,
-					c);
-			} });
+		const auto walk_here = [this, world_tile](GameContext& actionCtx)
+		{
+			begin_path_walk(
+				world_tile,
+				world_tile,
+				MouseMode::WALK,
+				PendingDoorAction::NONE,
+				actionCtx);
+		};
+		actions.push_back({ "Walk here", walk_here });
 	}
 
 	// Nothing actionable -- skip the menu entirely
@@ -1064,20 +1067,23 @@ void PlayerController::handle_right_click(GameContext& ctx)
 		return;
 	}
 
-	actions.push_back({ "Cancel", [](GameContext&) {} });
+	// Cancel closes the menu and does nothing else.
+	const auto do_nothing = [](GameContext& actionCtx) {
+	};
+	actions.push_back({ "Cancel", do_nothing });
 
 	std::vector<std::string> labels;
 	labels.reserve(actions.size());
-	for (const auto& a : actions)
+	for (const auto& action : actions)
 	{
-		labels.push_back(a.label);
+		labels.push_back(action.label);
 	}
 
-	auto on_select = [actions = std::move(actions)](int sel, GameContext& c)
+	auto on_select = [actions = std::move(actions)](int selected, GameContext& selectCtx)
 	{
-		if (sel >= 0 && sel < static_cast<int>(actions.size()))
+		if (selected >= 0 && selected < static_cast<int>(actions.size()))
 		{
-			actions[sel].execute(c);
+			actions[selected].execute(selectCtx);
 		}
 	};
 

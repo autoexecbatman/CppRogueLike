@@ -13,10 +13,10 @@
 //
 // Usage:
 //
-//   const auto on_spent = [](GameContext&) {};                  // runs on success
+//   const auto on_spent = [](GameContext& spentCtx) {}; // runs on success
 //   SpellSystem::cast_spell_by_key("magic_missile", caster, SpellSource::MEMORIZED, on_spent, ctx);
 //   SpellSystem::cast_spell_by_key("web", caster, SpellSource::SCROLL, on_spent, ctx);
-//                                                               // cursor opens; on_spent fires on confirm
+//   // the web's cursor opens, and on_spent fires on confirm
 //
 //   SpellSystem::burst_fireball(center, 3, 2, ctx);             // -> { 3, 18, 1 }
 //                                                               // public so a test skips the cursor

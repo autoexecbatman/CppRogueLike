@@ -128,7 +128,7 @@ TEST_F(SpellFailureTest, AFizzledSpellIsSpentAndDoesNothing)
 	priest.set_hp(10);
 
 	bool spent = false;
-	const auto onCastComplete = [&spent](GameContext&)
+	const auto onCastComplete = [&spent](GameContext& completedCtx)
 	{
 		spent = true;
 	};
@@ -149,7 +149,7 @@ TEST_F(SpellFailureTest, ASpellThatDoesNotFizzleLands)
 	priest.set_hp(10);
 
 	bool spent = false;
-	const auto onCastComplete = [&spent](GameContext&)
+	const auto onCastComplete = [&spent](GameContext& completedCtx)
 	{
 		spent = true;
 	};
@@ -171,7 +171,7 @@ TEST_F(SpellFailureTest, AnItemsSpellDoesNotFizzle)
 	priest.set_hp(10);
 
 	bool spent = false;
-	const auto onCastComplete = [&spent](GameContext&)
+	const auto onCastComplete = [&spent](GameContext& completedCtx)
 	{
 		spent = true;
 	};

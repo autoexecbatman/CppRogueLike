@@ -75,7 +75,9 @@ protected:
 	// The public path the game uses; cast_cure_light_wounds itself is private.
 	void cast()
 	{
-		SpellSystem::cast_spell_by_key("cure_light_wounds", *caster, SpellSource::MEMORIZED, [](GameContext&) {}, ctx);
+		const auto ignore_completion = [](GameContext& completedCtx) {
+		};
+		SpellSystem::cast_spell_by_key("cure_light_wounds", *caster, SpellSource::MEMORIZED, ignore_completion, ctx);
 	}
 
 	// Every part of every finalized message, joined. What the spell healed is

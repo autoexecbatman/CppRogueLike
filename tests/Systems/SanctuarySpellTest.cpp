@@ -91,7 +91,9 @@ protected:
 
 	void cast(const char* key)
 	{
-		SpellSystem::cast_spell_by_key(key, *caster, SpellSource::MEMORIZED, [](GameContext&) {}, ctx);
+		const auto ignore_completion = [](GameContext& completedCtx) {
+		};
+		SpellSystem::cast_spell_by_key(key, *caster, SpellSource::MEMORIZED, ignore_completion, ctx);
 	}
 
 	static int hp_lost(const Creature& creature)
