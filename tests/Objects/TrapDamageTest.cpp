@@ -23,6 +23,7 @@
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/GameContext.h"
+#include "src/Player.h"
 #include "src/TileFeature.h"
 #include "src/Trap.h"
 #include "tests/mocks/MockGameContext.h"
@@ -50,7 +51,8 @@ protected:
 
 	MockGameContext mock{};
 	GameContext ctx{};
-	Creature victim{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "adventurer", ColorPairId::WHITE_BLACK } };
+	// The player, because only the player gets the roll to notice a hidden trap.
+	Player victim{ Vector2D{ 5, 5 } };
 };
 
 TEST_F(TrapDamageTest, APitDealsTwoSixSidedDice)

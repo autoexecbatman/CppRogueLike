@@ -10,7 +10,6 @@
 
 #include <gtest/gtest.h>
 
-#include <limits>
 
 #include <raylib.h>
 
@@ -49,7 +48,7 @@ TEST(CostOverlayTest, AReachedTileIsLabelledWithItsCost)
 
 TEST(CostOverlayTest, ATileTheFloodNeverReachedHasNoLabel)
 {
-	EXPECT_EQ(dijkstra_cost_label(std::numeric_limits<int>::max()), std::nullopt);
+	EXPECT_EQ(dijkstra_cost_label(std::nullopt), std::nullopt);
 }
 
 TEST(CostOverlayTest, ThePlayerTileIsNearAndTheFarthestTileIsFar)

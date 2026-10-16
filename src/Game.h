@@ -17,7 +17,6 @@
 #include "CurseSystem.h"
 #include "DataManager.h"
 #include "Decoration.h"
-#include "Dijkstra.h"
 #include "DisplayManager.h"
 #include "DungeonRoom.h"
 #include "FloatingTextSystem.h"
@@ -36,6 +35,7 @@
 #include "MessageSystem.h"
 #include "Minimap.h"
 #include "MonsterRegistry.h"
+#include "Pathfinding.h"
 #include "Player.h"
 #include "RandomDice.h"
 #include "Renderer.h"
@@ -101,7 +101,7 @@ struct Game
 	FloatingTextSystem floatingText{};
 	AnimationSystem animSystem{};
 	ContentRegistry contentRegistry{};
-	Dijkstra pathfinder{ get_map_width(), get_map_height() };
+	Pathfinding::Pathfinder pathfinder{};
 	DecorEditor decorEditor{};
 	PrefabLibrary prefabLibrary{};
 	CurseSystem curseSystem{};

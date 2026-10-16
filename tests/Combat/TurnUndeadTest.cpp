@@ -297,9 +297,9 @@ TEST_F(TurnUndeadTest, AWallBetweenPriestAndUndeadDoesNotStopTheTurning)
 	map.init_tiles();
 	for (int col = 1; col < 19; ++col)
 	{
-		map.set_tile(Vector2D{ col, 5 }, TileType::FLOOR, 1.0);
+		map.set_tile(Vector2D{ col, 5 }, TileType::FLOOR);
 	}
-	map.set_tile(Vector2D{ 6, 5 }, TileType::WALL, 0.0);
+	map.set_tile(Vector2D{ 6, 5 }, TileType::WALL);
 	ctx.map = &map;
 
 	Creature& skeleton = add_undead(1, Vector2D{ 7, 5 });

@@ -421,10 +421,10 @@ TEST_F(RoomShapeTest, AnExitCellStepsAsideWhenTheCentreIsWalled)
 	{
 		for (int column = room.col; column <= room.col_end(); ++column)
 		{
-			map.set_tile(Vector2D{ column, row }, TileType::FLOOR, 1);
+			map.set_tile(Vector2D{ column, row }, TileType::FLOOR);
 		}
 	}
-	map.set_tile(Vector2D{ room.center_col(), room.row }, TileType::WALL, 0);
+	map.set_tile(Vector2D{ room.center_col(), room.row }, TileType::WALL);
 
 	const int chosen = map.exit_column(room, room.row);
 	EXPECT_NE(chosen, room.center_col()) << "the exit stayed on the walled centre column";

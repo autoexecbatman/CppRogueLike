@@ -21,7 +21,6 @@
 #include "CreatureManager.h"
 #include "DecorEditor.h"
 #include "Decoration.h"
-#include "Dijkstra.h"
 #include "DisplayManager.h"
 #include "GameContext.h"
 #include "InputHandler.h"
@@ -29,7 +28,6 @@
 #include "InventoryOperations.h"
 #include "InventoryUI.h"
 #include "Item.h"
-#include "ItemClassification.h"
 #include "ItemCreator.h"
 #include "ItemFactory.h"
 #include "LevelManager.h"
@@ -39,8 +37,8 @@
 #include "MenuEntry.h"
 #include "MenuTrade.h"
 #include "MessageSystem.h"
+#include "Pathfinding.h"
 #include "Persistent.h"
-#include "Pickable.h"
 #include "Pickup.h"
 #include "Player.h"
 #include "PlayerController.h"
@@ -505,83 +503,71 @@ bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext&
 		return false;
 	}
 
-	TileType targetTileType = ctx.map->get_tile_type(targetPosition);
+	const TileType targetTileType = ctx.map->get_tile_type(targetPosition);
 
-	if (ctx.map->can_walk(playerOwner, targetPosition, ctx))
+	// The step is the same one every monster takes; what is said and what it costs are
+	// the player's own.
+	switch (Pathfinding::step(playerOwner, targetPosition, ctx))
 	{
-		bool blocked = false;
 
-		// Everything standing on the tile gets one entry, whichever container it
-		// lives in. A feature that destroyed itself this turn is inert until the
-		// sweep.
-		const auto enter_all = [&](auto& features)
-		{
-			for (const auto& feature : features)
-			{
-				assert(feature && "look_to_move: a floor container holds a null entry");
+	case Pathfinding::StepResult::MOVED:
+	{
+		ctx.map->describe_tile(targetTileType, ctx);
+		spend_player_action(ctx, TIME_UNITS_PER_ROUND);
+		shouldComputeFOV = true;
+		return true;
+	}
 
-				if (blocked || feature->is_destroyed() || feature->position != targetPosition)
-				{
-					continue;
-				}
-
-				if (feature->on_creature_enter(playerOwner, ctx) == EntryResult::BLOCKED)
-				{
-					blocked = true;
-				}
-			}
-		};
-		enter_all(*ctx.traps);
-		enter_all(*ctx.spellTiles);
-
-		if (!blocked)
-		{
-			move(targetPosition);
-			ctx.map->describe_tile(targetTileType, ctx);
-			spend_player_action(ctx, TIME_UNITS_PER_ROUND);
-			shouldComputeFOV = true;
-			return true;
-		}
+	case Pathfinding::StepResult::OPENED_DOOR:
+	{
+		spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 		return false;
 	}
-	else
+
+	case Pathfinding::StepResult::STOPPED:
 	{
-		switch (targetTileType)
-		{
+		return false;
+	}
 
-		case TileType::WATER:
-		case TileType::WALL:
+	case Pathfinding::StepResult::REFUSED:
+	{
+		break;
+	}
+	}
+
+	switch (targetTileType)
+	{
+
+	case TileType::WATER:
+	case TileType::WALL:
+	{
+		// What a blocked tile says is authored in tile_config.json.
+		const std::string& blockedMessage =
+			ctx.tileConfig->get_tile_definition(targetTileType).blockedMessage;
+		if (!blockedMessage.empty())
 		{
-			// What a blocked tile says is authored in tile_config.json.
-			const std::string& blockedMessage =
-				ctx.tileConfig->get_tile_definition(targetTileType).blockedMessage;
-			if (!blockedMessage.empty())
-			{
-				ctx.messageSystem->log(blockedMessage);
-				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, blockedMessage, MessageCompletion::FINISHED);
-			}
-			break;
+			ctx.messageSystem->log(blockedMessage);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, blockedMessage, MessageCompletion::FINISHED);
 		}
+		break;
+	}
 
-		case TileType::CLOSED_DOOR:
+	case TileType::CLOSED_DOOR:
+	{
+		// An unlocked door opened in the step; a refused one is locked.
+		if (ctx.map->is_door_locked(targetPosition))
 		{
-			if (!ctx.map->is_door_locked(targetPosition))
-			{
-				ctx.map->open_door(targetPosition, ctx);
-				spend_player_action(ctx, TIME_UNITS_PER_ROUND);
-				break;
-			}
 			resolve_locked_door(targetPosition, ctx);
-			break;
 		}
-
-		default:
-		{
-			break;
-		}
-		}
-		return false;
+		break;
 	}
+
+	default:
+	{
+		break;
+	}
+	}
+	return false;
 }
 
 bool PlayerController::resolve_mouse_world_tile(GameContext& ctx, Vector2D& out_world_tile) const
@@ -638,7 +624,7 @@ Vector2D PlayerController::find_door_approach(Vector2D doorTile, const GameConte
 	for (auto d : dirs)
 	{
 		Vector2D adj{ doorTile.x + d.x, doorTile.y + d.y };
-		if (!ctx.map->can_walk(playerOwner, adj, ctx))
+		if (!Pathfinding::can_enter(playerOwner, adj, ctx))
 		{
 			continue;
 		}
@@ -705,7 +691,7 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 		const int strRoll = ctx.dice->d20() + (playerOwner.get_strength() - 10) / 2;
 		if (strRoll >= BASH_DC)
 		{
-			ctx.map->set_tile(doorPos, TileType::FLOOR, 1);
+			ctx.map->set_tile(doorPos, TileType::FLOOR);
 			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You smash the door open! The crash echoes down the corridor.", MessageCompletion::FINISHED);
 		}
 		else
@@ -738,7 +724,12 @@ void PlayerController::begin_path_walk(
 		return;
 	}
 
-	auto path = ctx.pathfinder->a_star_search(*ctx.map, ctx.player()->position, walkDest, true, ctx);
+	assert(ctx.tileConfig && "begin_path_walk: a route was planned with no tile configuration");
+	auto path = ctx.pathfinder->find_route(
+		ctx.player()->position,
+		walkDest,
+		Pathfinding::mobility_of(playerOwner, *ctx.tileConfig),
+		ctx);
 
 	if (path.empty())
 	{
@@ -826,6 +817,7 @@ bool PlayerController::handle_mouse_path(GameContext& ctx)
 
 	Vector2D next = ctx.mousePathOverlay->front();
 	Vector2D prevPos = playerOwner.position;
+	const bool isShutDoorAhead = ctx.map->get_tile_type(next) == TileType::CLOSED_DOOR;
 	look_to_move(next, ctx);
 	look_to_attack(next, ctx);
 	look_on_floor(next, ctx);
@@ -836,7 +828,10 @@ bool PlayerController::handle_mouse_path(GameContext& ctx)
 		ctx.mousePathOverlay->erase(ctx.mousePathOverlay->begin());
 	}
 
-	if (playerOwner.position == prevPos)
+	// A door the route runs through is opened on one turn and walked on the next, so
+	// standing still after opening it is progress rather than an obstacle.
+	const bool isDoorOpenedOnTheWay = isShutDoorAhead && ctx.map->is_open_door(next);
+	if (playerOwner.position == prevPos && !isDoorOpenedOnTheWay)
 	{
 		ctx.mousePathOverlay->clear();
 		mouseMode = MouseMode::IDLE;
@@ -1049,7 +1044,7 @@ void PlayerController::handle_right_click(GameContext& ctx)
 	}
 
 	// Walk here -- any non-player walkable tile with no creature
-	if (!isPlayerTile && ctx.map->can_walk(playerOwner, world_tile, ctx) && creature == nullptr)
+	if (!isPlayerTile && Pathfinding::can_enter(playerOwner, world_tile, ctx) && creature == nullptr)
 	{
 		actions.push_back({ "Walk here",
 			[this, world_tile](GameContext& c)

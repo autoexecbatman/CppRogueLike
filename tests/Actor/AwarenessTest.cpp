@@ -30,7 +30,7 @@ protected:
 		// rather than of walls.
 		for (int col = 1; col < 19; ++col)
 		{
-			map.set_tile(Vector2D{ col, 5 }, TileType::FLOOR, 1.0);
+			map.set_tile(Vector2D{ col, 5 }, TileType::FLOOR);
 		}
 	}
 

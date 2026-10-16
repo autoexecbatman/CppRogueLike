@@ -43,7 +43,7 @@ protected:
 	void SetUp() override
 	{
 		map.init_tiles();
-		map.set_tile(PLAIN_FLOOR, TileType::FLOOR, 1.0);
+		map.set_tile(PLAIN_FLOOR, TileType::FLOOR);
 		map.set_door(DOORWAY);
 	}
 

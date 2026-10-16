@@ -1,8 +1,9 @@
 // file: CostOverlay.h
-// A debug view of the cost map monsters step by. Every tile the flood from the player
-// reached shows its cost, on a tint running from warm beside the player to cool at the
-// farthest reached tile; a tile the flood never reached is left bare. The overlay starts
-// hidden, and `v` toggles it in a Debug build.
+// A debug view of the cost map monsters step by: the one a creature that moves as the
+// player does would descend to reach the player, from Pathfinding. Every reached tile
+// shows its cost, on a tint running from warm beside the player to cool at the farthest
+// reached tile; a tile nothing reaches is left bare. The overlay starts hidden, and `v`
+// toggles it in a Debug build.
 //
 // Example:
 //   CostOverlay overlay{};
@@ -11,7 +12,7 @@
 //   overlay.is_visible();              // -> true, drawn from the next frame
 //
 //   dijkstra_cost_label(7);            // -> "7"
-//   dijkstra_cost_label(INT_MAX);      // -> nullopt, the flood never reached the tile
+//   dijkstra_cost_label(std::nullopt); // -> nullopt, the flood never reached the tile
 //   dijkstra_cost_tint(0, 40);         // -> COST_NEAR_TINT, the player's own tile
 //   dijkstra_cost_tint(40, 40);        // -> COST_FAR_TINT, the farthest reached tile
 #pragma once
@@ -27,7 +28,7 @@ inline constexpr Color COST_NEAR_TINT{ 230, 70, 40, 120 };
 inline constexpr Color COST_FAR_TINT{ 40, 110, 230, 120 };
 
 // The text a tile shows for its cost, or nothing for a tile the flood never reached.
-std::optional<std::string> dijkstra_cost_label(int cost);
+std::optional<std::string> dijkstra_cost_label(std::optional<int> cost);
 
 // The tint for a reached tile, a straight blend from COST_NEAR_TINT at cost 0 to
 // COST_FAR_TINT at farthestCost. Requires 0 <= cost <= farthestCost; when the player's

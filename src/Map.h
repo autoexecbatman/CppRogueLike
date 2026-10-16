@@ -2,7 +2,6 @@
 
 #include <array>
 #include <memory>
-#include <optional>
 #include <vector>
 
 #include "Decoration.h"
@@ -54,13 +53,10 @@ struct Tile
 	Vector2D position{};
 	TileType type{};
 	bool explored{};
-	double cost{};
 	DoorState doorState{ DoorState::OPEN };
 
-	// overload the greater than operator
-	bool operator>(const Tile& other) const { return cost > other.cost; }
-	Tile(Vector2D pos, TileType type, double cost)
-		: position(pos), type(type), explored(false), cost(cost), doorState(DoorState::OPEN) {}
+	Tile(Vector2D pos, TileType type)
+		: position(pos), type(type), explored(false), doorState(DoorState::OPEN) {}
 };
 
 //==Map==
@@ -72,7 +68,6 @@ private:
 	int mapWidth{};
 	int mapHeight{};
 	static constexpr std::array<Vector2D, 8> DIRS = { DIR_N, DIR_NE, DIR_E, DIR_SE, DIR_S, DIR_SW, DIR_W, DIR_NW };
-	std::vector<int> dijkstraCosts;
 
 	Vector2D get_map_size() const noexcept
 	{
@@ -124,22 +119,10 @@ public:
 	//
 	//   map.is_unobstructed(pool, ctx);   // -> true, a pool obstructs nobody
 	//
-	// It is deliberately not named for walking. It and can_walk give different answers
-	// for the same tile, so they carry different names: an overload pair here would let
-	// a caller select the weaker answer by leaving an argument out, which is how every
-	// monster in the game came to walk into water.
+	// It is deliberately not named for walking: whether a creature may go there is
+	// Pathfinding's question, and asking this one instead is how every monster in the
+	// game once came to walk into water.
 	bool is_unobstructed(Vector2D pos, const GameContext& ctx) const noexcept;
-
-	// Whether this creature may enter that tile: unobstructed, and either the terrain
-	// demands nothing or the mover carries what it demands - CAN_SWIM for water, from
-	// the creature's own states or from what it wears.
-	//
-	// Example, a goblin and a spider at the edge of a pool:
-	//   map.can_walk(goblin, pool, ctx);   // -> false, goblins do not swim
-	//   map.can_walk(spider, pool, ctx);   // -> true, spiders set CAN_SWIM
-	//
-	// Every path that moves a creature asks this one.
-	bool can_walk(const Creature& mover, Vector2D pos, const GameContext& ctx) const noexcept;
 	void add_monster(Vector2D pos, GameContext& ctx) const;
 	void compute_fov(GameContext& ctx);
 	void update();
@@ -149,8 +132,6 @@ public:
 	std::vector<std::vector<Tile>> get_map() const noexcept;
 	void reveal(); // reveal the map
 	void regenerate(GameContext& ctx); // regenerate the map
-	std::vector<Vector2D> neighbors(Vector2D id, const GameContext& ctx, std::optional<Vector2D> target) const;
-	double cost(Vector2D fromNode, Vector2D toNode, const GameContext& ctx);
 	int get_width() const noexcept { return mapWidth; }
 	int get_height() const noexcept { return mapHeight; }
 	long get_seed() const noexcept { return seed; }
@@ -167,7 +148,6 @@ public:
 			throw std::out_of_range{ "Map::get_index() out of bounds" };
 		}
 	} // Note: Cannot be noexcept due to exception
-	double get_cost(Vector2D pos) const noexcept;
 	bool has_los(Vector2D from, Vector2D to) const noexcept;
 	bool open_door(Vector2D pos, GameContext& ctx);
 	bool close_door(Vector2D pos, GameContext& ctx);
@@ -226,12 +206,10 @@ public:
 	// Example:
 	//   map.init_tiles();
 	//   map.has_wall_border(); // -> true
-	//   map.set_tile(Vector2D{ 0, 5 }, TileType::FLOOR, 1.0);
+	//   map.set_tile(Vector2D{ 0, 5 }, TileType::FLOOR);
 	//   map.has_wall_border(); // -> false
 	bool has_wall_border() const noexcept;
-	int get_dijkstra_cost(Vector2D pos) const noexcept;
-	void rebuild_dijkstra_map(const std::vector<Vector2D>& goals, const GameContext& ctx);
-	void set_tile(Vector2D pos, TileType newType, double cost);
+	void set_tile(Vector2D pos, TileType newType);
 	void place_from_graph(
 		const std::vector<DungeonRoom>& rooms,
 		GameContext& ctx);

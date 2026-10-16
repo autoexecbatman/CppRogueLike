@@ -164,8 +164,9 @@ EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 		return EntryResult::UNAFFECTED;
 	}
 
-	// The one detection roll a hidden trap gets: noticed now, the creature stops short.
-	if (state == TrapState::HIDDEN)
+	// The one detection roll a hidden trap gets, and only the player gets it: noticed now,
+	// the player stops short. A monster walks in.
+	if (state == TrapState::HIDDEN && creature.is_player())
 	{
 		attempt_passive_detection(creature, ctx);
 		if (state == TrapState::DETECTED)
@@ -206,7 +207,14 @@ EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 			break;
 		}
 		}
-		ctx.messageSystem->message(ColorPairId::RED_BLACK, std::format("You trigger the {} and take {} damage!", trapName, damage), MessageCompletion::FINISHED);
+		if (creature.is_player())
+		{
+			ctx.messageSystem->message(ColorPairId::RED_BLACK, std::format("You trigger the {} and take {} damage!", trapName, damage), MessageCompletion::FINISHED);
+		}
+		else if (ctx.map->is_in_fov(creature.position))
+		{
+			ctx.messageSystem->message(ColorPairId::RED_BLACK, std::format("The {} triggers the {} and takes {} damage!", creature.actorData.name, trapName, damage), MessageCompletion::FINISHED);
+		}
 	}
 
 	creature.take_damage_and_check_death(damage, ctx, DamageType::PHYSICAL);
@@ -215,7 +223,7 @@ EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 	if (ctx.dice->d2() == 1)
 	{
 		destroy();
-		if (ctx.messageSystem)
+		if (ctx.messageSystem && (creature.is_player() || ctx.map->is_in_fov(position)))
 		{
 			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "The trap is destroyed.", MessageCompletion::FINISHED);
 		}

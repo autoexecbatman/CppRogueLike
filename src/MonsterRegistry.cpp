@@ -235,7 +235,13 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 	params.chaDice = parse_dice(entry.at("cha"));
 	params.naturalAttack = entry.at("natural_attack").get<std::string>();
 	params.equipment = parse_equipment(entry.at("equipment"));
+	// Required and named: the body decides the slots and whether the creature has hands,
+	// so an empty one is an unfinished record rather than a creature with no body.
 	params.bodyPlanName = entry.at("body").get<std::string>();
+	if (params.bodyPlanName.empty())
+	{
+		throw std::runtime_error("MonsterRegistry -- a monster names no body; use \"beast\" for one that wears nothing");
+	}
 	params.damage = parse_damage(entry.at("damage"));
 	params.aiType = (entry.at("ai").get<std::string>() == "ranged")
 		? MonsterAiType::RANGED

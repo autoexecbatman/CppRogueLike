@@ -4,7 +4,7 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=TrapDamageTest.*:TrapDisarmTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=TrapDamageTest.*:TrapDisarmTest.*:PathfindingTest.*"
   ],
   "mutations": [
     {
@@ -27,8 +27,8 @@
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\t// The one detection roll a hidden trap gets: noticed now, the creature stops short.\n\tif (state == TrapState::HIDDEN)",
-      "mutated": "\t// The one detection roll a hidden trap gets: noticed now, the creature stops short.\n\tif (state == TrapState::HIDDEN || state == TrapState::DETECTED)",
+      "original": "\tif (state == TrapState::HIDDEN && creature.is_player())",
+      "mutated": "\tif ((state == TrapState::HIDDEN || state == TrapState::DETECTED) && creature.is_player())",
       "catches": "a known trap stopping the step again instead of springing"
     },
     {
@@ -42,6 +42,12 @@
       "original": "\t// A disarmed trap is walked over.\n\tif (state == TrapState::DISARMED)",
       "mutated": "\t// A disarmed trap is walked over.\n\tif (state == TrapState::DISARMED || state == TrapState::TRIGGERED)",
       "catches": "a trap that has gone off before read as spent, so the accident on 96 costs nothing"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\tif (state == TrapState::HIDDEN && creature.is_player())",
+      "mutated": "\tif (state == TrapState::HIDDEN)",
+      "catches": "a monster getting the player's roll to notice a trap, so it stops short instead of walking in"
     }
   ]
 }

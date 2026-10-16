@@ -85,7 +85,7 @@ private:
 	// Turns a left click on the map into an action, chosen by what is under it.
 	// Clicking the player's own tile takes the stairs when standing on them and picks
 	// up otherwise. Clicking an adjacent creature attacks it at once; a distant one is
-	// not walked to, because A* is blocked by can_walk. Any other tile begins a path,
+	// not walked to, because a route never runs through a creature. Any other tile begins a path,
 	// and a tile holding an item or a door walks to pick up or to open.
 	//
 	// Example, clicking a tile two squares away that holds a potion:

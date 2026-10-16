@@ -111,6 +111,16 @@ public:
 	//   water.blocksMovement;  // -> true
 	//   water.bypassState;     // -> ActorState::CAN_SWIM
 	[[nodiscard]] const TileDefinition& get_tile_definition(TileType tileType) const;
+
+	// Every authored tile type with its definition, for a question asked of all of them -
+	// which ones a creature may enter.
+	//
+	// Example:
+	//   config.get_tile_definitions().size();  // -> 6, one per TileType in tile_config.json
+	[[nodiscard]] const std::unordered_map<TileType, TileDefinition>& get_tile_definitions() const noexcept
+	{
+		return m_tile_definitions;
+	}
 	void load(std::string_view path);
 
 private:

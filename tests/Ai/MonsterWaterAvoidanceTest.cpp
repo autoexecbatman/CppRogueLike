@@ -9,7 +9,7 @@
 // decorations and never opens the tile definition. Water is walkable in the
 // field-of-view grid, so that overload called it passable for everybody, and all 43
 // monsters in data/content/monsters.json have canSwim false. is_collision is gone now
-// and its rule lives in can_walk(mover, pos, ctx), which is what every mover asks.
+// and its rule lives in Pathfinding::step_cost, which every mover asks.
 //
 // These tests drive AiMonster::update rather than a predicate, because the defect was
 // never in the rule - it was in which gate the movement asks.
@@ -98,11 +98,10 @@ protected:
 		map.init_tiles();
 		for (int column = 1; column < 19; ++column)
 		{
-			map.set_tile(Vector2D{ column, CORRIDOR_ROW }, TileType::FLOOR, 1.0);
+			map.set_tile(Vector2D{ column, CORRIDOR_ROW }, TileType::FLOOR);
 		}
-		map.set_tile(Vector2D{ WATER_COLUMN, CORRIDOR_ROW }, TileType::WATER, 10.0);
+		map.set_tile(Vector2D{ WATER_COLUMN, CORRIDOR_ROW }, TileType::WATER);
 		map.compute_fov(ctx);
-		map.rebuild_dijkstra_map({ player->position }, ctx);
 
 		game.dice.set_test_mode(true);
 	}
@@ -184,7 +183,7 @@ TEST_F(MonsterWaterAvoidanceTest, DriftingDoesNotCarryAMonsterIntoWater)
 	// hunting, and inside fifteen tiles so that is the branch that runs.
 	constexpr int POOL_COLUMN = 14;
 	constexpr int DRIFTER_COLUMN = 15;
-	map.set_tile(Vector2D{ POOL_COLUMN, CORRIDOR_ROW }, TileType::WATER, 10.0);
+	map.set_tile(Vector2D{ POOL_COLUMN, CORRIDOR_ROW }, TileType::WATER);
 	goblin.position = Vector2D{ DRIFTER_COLUMN, CORRIDOR_ROW };
 	ASSERT_FALSE(map.is_in_fov(goblin.position)) << "an unseen drifter is the point; a seen one hunts instead";
 
@@ -209,7 +208,7 @@ TEST_F(MonsterWaterAvoidanceTest, TheSameDriftCarriesASwimmerIn)
 {
 	constexpr int POOL_COLUMN = 14;
 	constexpr int DRIFTER_COLUMN = 15;
-	map.set_tile(Vector2D{ POOL_COLUMN, CORRIDOR_ROW }, TileType::WATER, 10.0);
+	map.set_tile(Vector2D{ POOL_COLUMN, CORRIDOR_ROW }, TileType::WATER);
 	goblin.position = Vector2D{ DRIFTER_COLUMN, CORRIDOR_ROW };
 	goblin.add_state(ActorState::CAN_SWIM);
 
@@ -290,12 +289,11 @@ protected:
 		{
 			for (int column = ROOM_COL; column <= ROOM_COL_END; ++column)
 			{
-				map.set_tile(Vector2D{ column, row }, TileType::FLOOR, 1.0);
+				map.set_tile(Vector2D{ column, row }, TileType::FLOOR);
 			}
 		}
-		map.set_tile(POOL, TileType::WATER, 10.0);
+		map.set_tile(POOL, TileType::WATER);
 		map.compute_fov(ctx);
-		map.rebuild_dijkstra_map({ player->position }, ctx);
 
 		game.dice.set_test_mode(true);
 	}

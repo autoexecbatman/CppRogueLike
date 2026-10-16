@@ -349,7 +349,7 @@ void TreasureRoom::create(
 		{
 			if (ctx.map->get_tile_type(Vector2D{ x, y }) == TileType::WATER)
 			{
-				ctx.map->set_tile(Vector2D{ x, y }, TileType::FLOOR, 1);
+				ctx.map->set_tile(Vector2D{ x, y }, TileType::FLOOR);
 			}
 		}
 	}

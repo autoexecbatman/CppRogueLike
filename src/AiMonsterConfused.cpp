@@ -7,6 +7,7 @@
 #include "Creature.h"
 #include "GameContext.h"
 #include "Map.h"
+#include "Pathfinding.h"
 #include "Persistent.h"
 #include "RandomDice.h"
 #include "Vector2D.h"
@@ -47,19 +48,16 @@ void AiMonsterConfused::update(Creature& owner, GameContext& ctx)
 
 void AiMonsterConfused::attempt_move(Creature& owner, const Vector2D& destination, GameContext& ctx)
 {
-	if (ctx.map->can_walk(owner, destination, ctx))
+	// Whatever stands in the way is struck instead.
+	const auto& actor = ctx.map->get_actor(destination, ctx);
+	if (actor && owner.attacker)
 	{
-		owner.position = destination;
+		owner.attacker->attack(*actor, AttackKind::MELEE, ctx);
+		return;
 	}
-	else
-	{
-		// Try to attack whatever is blocking the way
-		const auto& actor = ctx.map->get_actor(destination, ctx);
-		if (actor && owner.attacker)
-		{
-			owner.attacker->attack(*actor, AttackKind::MELEE, ctx);
-		}
-	}
+
+	// A confused creature still opens a door it bumps and still springs a trap.
+	Pathfinding::step(owner, destination, ctx);
 }
 
 void AiMonsterConfused::restore_original_ai(Creature& owner)

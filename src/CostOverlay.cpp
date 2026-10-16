@@ -1,23 +1,21 @@
 // file: CostOverlay.cpp
 #include <algorithm>
 #include <cassert>
-#include <limits>
 #include <optional>
 #include <string>
 
 #include <raylib.h>
 
 #include "CostOverlay.h"
+#include "Creature.h"
 #include "GameContext.h"
 #include "Map.h"
+#include "Pathfinding.h"
 #include "Renderer.h"
 #include "Vector2D.h"
 
 namespace
 {
-
-// The cost the flood leaves on a tile it never reached.
-constexpr int UNREACHED_COST = std::numeric_limits<int>::max();
 
 unsigned char blend_channel(unsigned char nearValue, unsigned char farValue, int cost, int farthestCost)
 {
@@ -26,13 +24,13 @@ unsigned char blend_channel(unsigned char nearValue, unsigned char farValue, int
 
 } // namespace
 
-std::optional<std::string> dijkstra_cost_label(int cost)
+std::optional<std::string> dijkstra_cost_label(std::optional<int> cost)
 {
-	if (cost == UNREACHED_COST)
+	if (!cost)
 	{
 		return std::nullopt;
 	}
-	return std::to_string(cost);
+	return std::to_string(*cost);
 }
 
 Color dijkstra_cost_tint(int cost, int farthestCost)
@@ -70,9 +68,19 @@ void CostOverlay::render(const GameContext& ctx) const
 	}
 	assert(ctx.map && "CostOverlay::render called without a map");
 	assert(ctx.renderer && "CostOverlay::render called without a renderer");
+	assert(ctx.pathfinder && "CostOverlay::render called without a pathfinder");
+	assert(ctx.tileConfig && "CostOverlay::render called without a tile configuration");
 
 	const Map& map = *ctx.map;
 	const Renderer& renderer = *ctx.renderer;
+
+	// The map a creature that moves as the player does would descend toward the player.
+	const Vector2D goal = ctx.player()->position;
+	const Pathfinding::Mobility mobility = Pathfinding::mobility_of(*ctx.player(), *ctx.tileConfig);
+	const auto cost_at = [&](int col, int row)
+	{
+		return ctx.pathfinder->cost_to(goal, Vector2D{ col, row }, mobility, ctx);
+	};
 
 	// The tint is relative to the farthest tile reached, so find it before drawing any.
 	int farthestCost = 0;
@@ -80,10 +88,10 @@ void CostOverlay::render(const GameContext& ctx) const
 	{
 		for (int col = 0; col < map.get_width(); ++col)
 		{
-			const int cost = map.get_dijkstra_cost(Vector2D{ col, row });
-			if (cost != UNREACHED_COST)
+			const std::optional<int> cost = cost_at(col, row);
+			if (cost)
 			{
-				farthestCost = std::max(farthestCost, cost);
+				farthestCost = std::max(farthestCost, *cost);
 			}
 		}
 	}
@@ -107,14 +115,14 @@ void CostOverlay::render(const GameContext& ctx) const
 				continue;
 			}
 
-			const int cost = map.get_dijkstra_cost(Vector2D{ col, row });
+			const std::optional<int> cost = cost_at(col, row);
 			const std::optional<std::string> label = dijkstra_cost_label(cost);
 			if (!label)
 			{
 				continue;
 			}
 
-			DrawRectangle(screenX, screenY, tileSize, tileSize, dijkstra_cost_tint(cost, farthestCost));
+			DrawRectangle(screenX, screenY, tileSize, tileSize, dijkstra_cost_tint(*cost, farthestCost));
 
 			// Centred on the tile, so a three-digit cost does not run into its neighbour.
 			const int labelX = screenX + (tileSize - renderer.measure_text(*label)) / 2;

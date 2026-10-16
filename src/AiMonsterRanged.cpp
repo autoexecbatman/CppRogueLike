@@ -13,6 +13,7 @@
 #include "Creature.h"
 #include "GameContext.h"
 #include "Map.h"
+#include "Pathfinding.h"
 #include "Persistent.h"
 #include "TileConfig.h"
 #include "Vector2D.h"
@@ -61,11 +62,10 @@ void AiMonsterRanged::move_or_attack(Creature& owner, Vector2D targetPosition, G
 			moveDir.y = moveDir.y / maxComponent;
 		}
 
-		// Try to move away in this direction
-		Vector2D newPos = owner.position + moveDir;
-		if (ctx.map->can_walk(owner, newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
+		// Try to move away in this direction; a step that did anything spends the turn.
+		const Pathfinding::StepResult backedAway = Pathfinding::step(owner, owner.position + moveDir, ctx);
+		if (backedAway != Pathfinding::StepResult::REFUSED)
 		{
-			owner.position = newPos;
 			return;
 		}
 	}

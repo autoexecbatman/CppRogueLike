@@ -38,10 +38,10 @@
       "catches": "any effect-bearing item answering for every effect"
     },
     {
-      "file": "src/Map.cpp",
-      "original": "\treturn definition.hasBypassState && mover.has_bypass(definition.bypassState);",
-      "mutated": "\treturn definition.hasBypassState && mover.has_state(definition.bypassState);",
-      "catches": "the map reading a creature's own flags and never what it wears"
+      "file": "src/Pathfinding.cpp",
+      "original": "\t\tconst bool isBypassed = definition.hasBypassState && creature.has_bypass(definition.bypassState);",
+      "mutated": "\t\tconst bool isBypassed = definition.hasBypassState && creature.has_state(definition.bypassState);",
+      "catches": "the movement rule reading a creature's own flags and never what it wears"
     },
     {
       "file": "src/Creature.cpp",

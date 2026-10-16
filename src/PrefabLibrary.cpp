@@ -75,7 +75,7 @@ void stamp_room(
 			// Interior '#': wall this floor cell back to create room shape.
 			if (sym == '#')
 			{
-				map.set_tile(Vector2D{ worldX, worldY }, TileType::WALL, 0);
+				map.set_tile(Vector2D{ worldX, worldY }, TileType::WALL);
 				continue;
 			}
 

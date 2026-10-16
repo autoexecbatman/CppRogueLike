@@ -70,7 +70,7 @@ protected:
 		{
 			for (int row = ROOM_ROW; row < ROOM_ROW + ROOM_SIZE; ++row)
 			{
-				map.set_tile(Vector2D{ column, row }, type, 1.0);
+				map.set_tile(Vector2D{ column, row }, type);
 			}
 		}
 	}

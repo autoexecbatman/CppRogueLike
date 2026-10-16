@@ -31,9 +31,11 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "src/ArmorClass.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/DecorEditor.h"
 #include "src/Decoration.h"
@@ -43,6 +45,7 @@
 #include "src/HealthPool.h"
 #include "src/LevelManager.h"
 #include "src/Map.h"
+#include "src/Pathfinding.h"
 #include "src/Paths.h"
 #include "src/Player.h"
 #include "src/PrefabLibrary.h"
@@ -190,6 +193,73 @@ TEST_F(DungeonConnectivityTest, WaterOnlyEverReplacesFloorTheRoomCarved)
 	}
 }
 
+// The cost maps monsters descend promise nothing the step refuses. Every tile a map
+// reaches may itself be entered by that mobility, and has a cheaper neighbour it may also
+// enter, so a monster walking downhill from anywhere the map reaches is never led to a
+// tile its own step turns away.
+TEST_F(DungeonConnectivityTest, EveryTileACostMapReachesLeadsDownToTheGoal)
+{
+	Creature goblin{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK } };
+	goblin.set_body_plan(mock.body_plans.get("humanoid"));
+	Creature wolf{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "wolf", ColorPairId::WHITE_BLACK } };
+	wolf.set_body_plan(mock.body_plans.get("beast"));
+	const std::vector<Pathfinding::Mobility> mobilities{
+		Pathfinding::mobility_of(goblin, mock.tile_config),
+		Pathfinding::mobility_of(wolf, mock.tile_config)
+	};
+
+	int unenterable = 0;
+	int deadEnds = 0;
+	for (int attempt = 0; attempt < DUNGEONS; ++attempt)
+	{
+		Map map{ MAP_WIDTH, MAP_HEIGHT };
+		generate_into(map);
+		const Vector2D goal = player_start();
+
+		for (const Pathfinding::Mobility& mobility : mobilities)
+		{
+			for (int row = 1; row < MAP_HEIGHT - 1; ++row)
+			{
+				for (int col = 1; col < MAP_WIDTH - 1; ++col)
+				{
+					const Vector2D tile{ col, row };
+					const std::optional<int> cost = mock.pathfinder.cost_to(goal, tile, mobility, ctx);
+					if (!cost || tile == goal)
+					{
+						continue;
+					}
+					if (!Pathfinding::step_cost(tile, mobility, ctx))
+					{
+						++unenterable;
+					}
+
+					bool hasWayDown = false;
+					for (int rowStep = -1; rowStep <= 1; ++rowStep)
+					{
+						for (int colStep = -1; colStep <= 1; ++colStep)
+						{
+							const Vector2D next{ col + colStep, row + rowStep };
+							const std::optional<int> nextCost = mock.pathfinder.cost_to(goal, next, mobility, ctx);
+							const bool isEnterable = next == goal || Pathfinding::step_cost(next, mobility, ctx).has_value();
+							if (nextCost && *nextCost < *cost && isEnterable)
+							{
+								hasWayDown = true;
+							}
+						}
+					}
+					if (!hasWayDown)
+					{
+						++deadEnds;
+					}
+				}
+			}
+		}
+	}
+
+	EXPECT_EQ(unenterable, 0) << "a cost map reached tiles its own mobility may not enter";
+	EXPECT_EQ(deadEnds, 0) << "a cost map left tiles with no way down a monster may take";
+}
+
 TEST_F(DungeonConnectivityTest, AStartOffTheMapIsRefusedRatherThanReportedClean)
 {
 	Map map{ MAP_WIDTH, MAP_HEIGHT };
@@ -228,7 +298,7 @@ TEST_F(DungeonConnectivityTest, FloorOnAnyEdgeBreaksTheRing)
 		map.init_tiles();
 		ASSERT_TRUE(map.has_wall_border()) << "a map of solid rock is ringed by wall";
 
-		map.set_tile(edgeTile, TileType::FLOOR, 1.0);
+		map.set_tile(edgeTile, TileType::FLOOR);
 		EXPECT_FALSE(map.has_wall_border())
 			<< "floor at (" << edgeTile.x << "," << edgeTile.y << ") was not seen";
 	}
@@ -239,8 +309,8 @@ TEST_F(DungeonConnectivityTest, FloorJustInsideTheEdgeLeavesTheRingWhole)
 {
 	Map map{ MAP_WIDTH, MAP_HEIGHT };
 	map.init_tiles();
-	map.set_tile(Vector2D{ 1, 1 }, TileType::FLOOR, 1.0);
-	map.set_tile(Vector2D{ MAP_WIDTH - 2, MAP_HEIGHT - 2 }, TileType::FLOOR, 1.0);
+	map.set_tile(Vector2D{ 1, 1 }, TileType::FLOOR);
+	map.set_tile(Vector2D{ MAP_WIDTH - 2, MAP_HEIGHT - 2 }, TileType::FLOOR);
 
 	EXPECT_TRUE(map.has_wall_border());
 }

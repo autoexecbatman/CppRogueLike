@@ -11,6 +11,7 @@
 #include "src/MessageSystem.h"
 #include "src/RandomDice.h"
 #include "src/TileConfig.h"
+#include "src/Pathfinding.h"
 #include "src/Paths.h"
 #include "src/Item.h"
 #include "src/Pickable.h"
@@ -64,7 +65,7 @@ protected:
         ctx.creatures = &creatures;
         ctx.map = map.get();
 
-        // What a tile does is data, and the creature-aware can_walk reads it.
+        // What a tile does is data, and Pathfinding::can_enter reads it.
         try
         {
             tileConfig.load(Paths::TILE_CONFIG);
@@ -94,7 +95,7 @@ protected:
         {
             for (int x = x1; x <= x2; ++x)
             {
-                map->set_tile(Vector2D{x, y}, TileType::FLOOR, 1.0);
+                map->set_tile(Vector2D{x, y}, TileType::FLOOR);
             }
         }
     }
@@ -125,20 +126,20 @@ TEST_F(MapTest, SetTile_ChangesType)
 {
     Vector2D pos{5, 5};
 
-    map->set_tile(pos, TileType::FLOOR, 1.0);
+    map->set_tile(pos, TileType::FLOOR);
     EXPECT_EQ(map->get_tile_type(pos), TileType::FLOOR);
 
-    map->set_tile(pos, TileType::WATER, 10.0);
+    map->set_tile(pos, TileType::WATER);
     EXPECT_EQ(map->get_tile_type(pos), TileType::WATER);
 
-    map->set_tile(pos, TileType::CORRIDOR, 1.0);
+    map->set_tile(pos, TileType::CORRIDOR);
     EXPECT_EQ(map->get_tile_type(pos), TileType::CORRIDOR);
 }
 
 TEST_F(MapTest, SetTile_OutOfBounds_DoesNotCrash)
 {
-    EXPECT_NO_THROW(map->set_tile(Vector2D{-1, -1}, TileType::FLOOR, 1.0));
-    EXPECT_NO_THROW(map->set_tile(Vector2D{999, 999}, TileType::FLOOR, 1.0));
+    EXPECT_NO_THROW(map->set_tile(Vector2D{-1, -1}, TileType::FLOOR));
+    EXPECT_NO_THROW(map->set_tile(Vector2D{999, 999}, TileType::FLOOR));
 }
 
 // ----------------------------------------------------------------------------
@@ -148,7 +149,7 @@ TEST_F(MapTest, SetTile_OutOfBounds_DoesNotCrash)
 TEST_F(MapTest, IsDoor_ClosedDoor)
 {
     Vector2D pos{5, 5};
-    map->set_tile(pos, TileType::CLOSED_DOOR, 2.0);
+    map->set_tile(pos, TileType::CLOSED_DOOR);
 
     EXPECT_TRUE(map->is_door(pos));
     EXPECT_FALSE(map->is_open_door(pos));
@@ -157,7 +158,7 @@ TEST_F(MapTest, IsDoor_ClosedDoor)
 TEST_F(MapTest, IsDoor_OpenDoor)
 {
     Vector2D pos{5, 5};
-    map->set_tile(pos, TileType::OPEN_DOOR, 1.0);
+    map->set_tile(pos, TileType::OPEN_DOOR);
 
     EXPECT_TRUE(map->is_door(pos));
     EXPECT_TRUE(map->is_open_door(pos));
@@ -166,7 +167,7 @@ TEST_F(MapTest, IsDoor_OpenDoor)
 TEST_F(MapTest, IsDoor_Floor_NotDoor)
 {
     Vector2D pos{5, 5};
-    map->set_tile(pos, TileType::FLOOR, 1.0);
+    map->set_tile(pos, TileType::FLOOR);
 
     EXPECT_FALSE(map->is_door(pos));
     EXPECT_FALSE(map->is_open_door(pos));
@@ -175,7 +176,7 @@ TEST_F(MapTest, IsDoor_Floor_NotDoor)
 TEST_F(MapTest, OpenDoor_ClosedDoor_Opens)
 {
     Vector2D pos{5, 5};
-    map->set_tile(pos, TileType::CLOSED_DOOR, 2.0);
+    map->set_tile(pos, TileType::CLOSED_DOOR);
 
     bool result = map->open_door(pos, ctx);
 
@@ -186,7 +187,7 @@ TEST_F(MapTest, OpenDoor_ClosedDoor_Opens)
 TEST_F(MapTest, OpenDoor_AlreadyOpen_ReturnsFalse)
 {
     Vector2D pos{5, 5};
-    map->set_tile(pos, TileType::OPEN_DOOR, 1.0);
+    map->set_tile(pos, TileType::OPEN_DOOR);
 
     bool result = map->open_door(pos, ctx);
 
@@ -196,7 +197,7 @@ TEST_F(MapTest, OpenDoor_AlreadyOpen_ReturnsFalse)
 TEST_F(MapTest, OpenDoor_NotADoor_ReturnsFalse)
 {
     Vector2D pos{5, 5};
-    map->set_tile(pos, TileType::FLOOR, 1.0);
+    map->set_tile(pos, TileType::FLOOR);
 
     bool result = map->open_door(pos, ctx);
 
@@ -206,7 +207,7 @@ TEST_F(MapTest, OpenDoor_NotADoor_ReturnsFalse)
 TEST_F(MapTest, CloseDoor_OpenDoor_Closes)
 {
     Vector2D pos{7, 7};  // Use different pos than player (5,5)
-    map->set_tile(pos, TileType::OPEN_DOOR, 1.0);
+    map->set_tile(pos, TileType::OPEN_DOOR);
 
     bool result = map->close_door(pos, ctx);
 
@@ -217,7 +218,7 @@ TEST_F(MapTest, CloseDoor_OpenDoor_Closes)
 TEST_F(MapTest, CloseDoor_AlreadyClosed_ReturnsFalse)
 {
     Vector2D pos{7, 7};  // Use different pos than player (5,5)
-    map->set_tile(pos, TileType::CLOSED_DOOR, 2.0);
+    map->set_tile(pos, TileType::CLOSED_DOOR);
 
     bool result = map->close_door(pos, ctx);
 
@@ -227,7 +228,7 @@ TEST_F(MapTest, CloseDoor_AlreadyClosed_ReturnsFalse)
 TEST_F(MapTest, CloseDoor_NotADoor_ReturnsFalse)
 {
     Vector2D pos{7, 7};  // Use different pos than player (5,5)
-    map->set_tile(pos, TileType::WALL, 1.0);
+    map->set_tile(pos, TileType::WALL);
 
     bool result = map->close_door(pos, ctx);
 
@@ -238,7 +239,7 @@ TEST_F(MapTest, CloseDoor_ActorOnDoor_ReturnsFalse)
 {
     // Player is at {5, 5} - try to close door there
     Vector2D pos{5, 5};
-    map->set_tile(pos, TileType::OPEN_DOOR, 1.0);
+    map->set_tile(pos, TileType::OPEN_DOOR);
 
     bool result = map->close_door(pos, ctx);
 
@@ -261,12 +262,12 @@ TEST_F(MapTest, IsWall_SyncedBySetTile)
     EXPECT_TRUE(map->is_wall(pos));
 
     // Setting FLOOR must make the tile walkable in fovMap too.
-    map->set_tile(pos, TileType::FLOOR, 1.0);
+    map->set_tile(pos, TileType::FLOOR);
     EXPECT_EQ(map->get_tile_type(pos), TileType::FLOOR);
     EXPECT_FALSE(map->is_wall(pos)) << "set_tile must sync fovMap walkability";
 
     // Reverting to WALL must make it non-walkable again.
-    map->set_tile(pos, TileType::WALL, 0.0);
+    map->set_tile(pos, TileType::WALL);
     EXPECT_TRUE(map->is_wall(pos)) << "set_tile to WALL must mark tile non-walkable";
 }
 
@@ -322,16 +323,6 @@ TEST_F(MapTest, IsExplored_OutOfBounds_ReturnsFalse)
 }
 
 // ----------------------------------------------------------------------------
-// Get Cost Tests
-// ----------------------------------------------------------------------------
-
-TEST_F(MapTest, GetCost_OutOfBounds_ReturnsHighCost)
-{
-    double cost = map->get_cost(Vector2D{-1, -1});
-    EXPECT_GE(cost, 1000.0);
-}
-
-// ----------------------------------------------------------------------------
 // Serialization Tests
 // ----------------------------------------------------------------------------
 
@@ -349,7 +340,7 @@ TEST_F(MapTest, Serialization_TilesPreserved)
 {
     // Set some specific tile
     Vector2D testPos{5, 5};
-    map->set_tile(testPos, TileType::WATER, 10.0);
+    map->set_tile(testPos, TileType::WATER);
 
     json j;
     map->save(j);
@@ -408,33 +399,6 @@ TEST_F(MapTest, HasLOS_AdjacentFloor_ReturnsTrue)
 }
 
 // ----------------------------------------------------------------------------
-// Neighbor Finding Tests
-// ----------------------------------------------------------------------------
-
-TEST_F(MapTest, Neighbors_ReturnsAdjacentWalkable)
-{
-    // Create a small room
-    create_simple_room(5, 5, 7, 7);
-
-    Vector2D center{6, 6};
-    auto neighbors = map->neighbors(center, ctx, Vector2D{-1, -1});
-
-    // Should return adjacent walkable tiles
-    // Number depends on which tiles are walkable after init
-    EXPECT_GE(neighbors.size(), 0u); // At minimum, won't crash
-}
-
-TEST_F(MapTest, Neighbors_CornerPosition_LessNeighbors)
-{
-    // Corner should have fewer potential neighbors
-    Vector2D corner{0, 0};
-    auto neighbors = map->neighbors(corner, ctx, Vector2D{-1, -1});
-
-    // Maximum 3 for corner (if all walkable), usually 0 (walls)
-    EXPECT_LE(neighbors.size(), 3u);
-}
-
-// ----------------------------------------------------------------------------
 // Reveal Map Test
 // ----------------------------------------------------------------------------
 
@@ -470,33 +434,6 @@ TEST_F(MapTest, GetActor_PlayerPosition_ReturnsPlayer)
     EXPECT_EQ(actor, player.get());
 }
 
-// ----------------------------------------------------------------------------
-// Pathfinding Cost Tests
-// ----------------------------------------------------------------------------
-
-TEST_F(MapTest, Cost_FloorToFloor_IsOne)
-{
-    create_simple_room(5, 5, 7, 7);
-
-    // Cost between adjacent floor tiles should be low
-    // (Actual value depends on implementation)
-}
-
-TEST_F(MapTest, Cost_WaterTile_IsHigher)
-{
-    // Water has higher movement cost
-    Vector2D floorPos{5, 5};
-    Vector2D waterPos{6, 5};
-
-    map->set_tile(floorPos, TileType::FLOOR, 1.0);
-    map->set_tile(waterPos, TileType::WATER, 10.0);
-
-    double waterCost = map->get_cost(waterPos);
-    double floorCost = map->get_cost(floorPos);
-
-    EXPECT_GT(waterCost, floorCost);
-}
-
 
 // Water blocks whoever cannot cross it, and the tile's bypass state is asked of the
 // creature rather than of its own flags alone - so a creature wearing the gauntlets of
@@ -504,14 +441,14 @@ TEST_F(MapTest, Cost_WaterTile_IsHigher)
 TEST_F(MapTest, WaterIsCrossedByWhateverGrantsSwimming)
 {
     const Vector2D pool{ 4, 4 };
-    map->set_tile(pool, TileType::WATER, 1.0);
+    map->set_tile(pool, TileType::WATER);
 
     Creature wader{ Vector2D{ 3, 4 }, ActorData{ TileRef{}, "wader", ColorPairId::WHITE_BLACK } };
-    EXPECT_FALSE(map->can_walk(wader, pool, ctx)) << "water stopped nobody";
+    EXPECT_FALSE(Pathfinding::can_enter(wader, pool, ctx)) << "water stopped nobody";
 
     Creature spider{ Vector2D{ 3, 4 }, ActorData{ TileRef{}, "spider", ColorPairId::WHITE_BLACK } };
     spider.add_state(ActorState::CAN_SWIM);
-    EXPECT_TRUE(map->can_walk(spider, pool, ctx));
+    EXPECT_TRUE(Pathfinding::can_enter(spider, pool, ctx));
 
     // Worn rather than innate, and put straight into the slot: how it got there is
     // Player::equip_item's business, not the map's.
@@ -519,6 +456,6 @@ TEST_F(MapTest, WaterIsCrossedByWhateverGrantsSwimming)
     gauntlets->behavior = Gauntlets{ .effect = MagicalEffect::SWIMMING };
     wader.equippedItems.emplace_back(std::move(gauntlets), EquipmentSlot::GAUNTLETS);
 
-    EXPECT_TRUE(map->can_walk(wader, pool, ctx))
+    EXPECT_TRUE(Pathfinding::can_enter(wader, pool, ctx))
         << "the map asked the creature's own states and not what it wears";
 }

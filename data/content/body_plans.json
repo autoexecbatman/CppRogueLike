@@ -32,10 +32,11 @@
     "missiles",
     "tool"
   ],
-  "taloned": [
+  "hands_only": [
     "right_hand",
     "left_hand"
   ],
+  "beast": [],
   "grave_clothed": [
     "body",
     "cloak",

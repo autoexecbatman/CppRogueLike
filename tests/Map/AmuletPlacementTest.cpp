@@ -93,10 +93,10 @@ protected:
 		{
 			for (int col = ROOM_COL; col < ROOM_COL + ROOM_WIDTH; ++col)
 			{
-				map->set_tile(Vector2D{ col, row }, TileType::WATER, 10.0);
+				map->set_tile(Vector2D{ col, row }, TileType::WATER);
 			}
 		}
-		map->set_tile(Vector2D{ DRY_COL, DRY_ROW }, TileType::FLOOR, 1.0);
+		map->set_tile(Vector2D{ DRY_COL, DRY_ROW }, TileType::FLOOR);
 
 		rooms.clear();
 		rooms.push_back(DungeonRoom{ ROOM_COL, ROOM_ROW, ROOM_WIDTH, ROOM_HEIGHT });

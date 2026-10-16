@@ -1,3 +1,4 @@
+#include <cassert>
 #include <limits>
 #include <optional>
 #include <vector>
@@ -11,6 +12,7 @@
 #include "Creature.h"
 #include "GameContext.h"
 #include "Map.h"
+#include "Pathfinding.h"
 #include "Persistent.h"
 #include "Vector2D.h"
 
@@ -20,7 +22,7 @@ const std::vector<Vector2D> NEIGHBORS = {
 	DIR_N, DIR_S, DIR_W, DIR_E, DIR_NW, DIR_NE, DIR_SW, DIR_SE
 };
 
-// AD&D 2e: Move away from player using inverted Dijkstra gradient.
+// AD&D 2e: Move away from player, up the cost map this creature would descend to reach it.
 void flee(Creature& owner, GameContext& ctx)
 {
 	auto is_occupied = [&ctx](const Vector2D& pos)
@@ -28,35 +30,34 @@ void flee(Creature& owner, GameContext& ctx)
 		return ctx.map->get_actor(pos, ctx) != nullptr;
 	};
 
-	const int currentCost = ctx.map->get_dijkstra_cost(owner.position);
+	const Vector2D quarry = ctx.player()->position;
+	const Pathfinding::Mobility mobility = Pathfinding::mobility_of(owner, *ctx.tileConfig);
+	const std::optional<int> currentCost = ctx.pathfinder->cost_to(quarry, owner.position, mobility, ctx);
 
-	// Disconnected tile (unreachable from player) — costs are meaningless, hold position.
-	if (currentCost == std::numeric_limits<int>::max())
+	// Disconnected tile (unreachable from player): costs are meaningless, hold position.
+	if (!currentCost)
 	{
 		return;
 	}
 
 	std::optional<Vector2D> bestStep;
-	int bestCost = currentCost; // only accept tiles strictly further than current position
+	int bestCost = *currentCost; // only accept tiles strictly further than current position
 
+	// A tile this creature may not enter is one its own cost map never reached.
 	for (const Vector2D& delta : NEIGHBORS)
 	{
 		Vector2D candidate{ owner.position.x + delta.x, owner.position.y + delta.y };
-		if (!ctx.map->can_walk(owner, candidate, ctx))
+		const std::optional<int> candidateCost = ctx.pathfinder->cost_to(quarry, candidate, mobility, ctx);
+		if (candidateCost && *candidateCost > bestCost && !is_occupied(candidate))
 		{
-			continue;
-		}
-		int candidateCost = ctx.map->get_dijkstra_cost(candidate);
-		if (candidateCost > bestCost && !is_occupied(candidate))
-		{
-			bestCost = candidateCost;
+			bestCost = *candidateCost;
 			bestStep = candidate;
 		}
 	}
 
 	if (bestStep)
 	{
-		owner.position = *bestStep;
+		Pathfinding::step(owner, *bestStep, ctx);
 	}
 	else
 	{
@@ -103,12 +104,36 @@ void random_wander(Creature& owner, GameContext& ctx)
 	{
 		return;
 	}
-	Vector2D newPos = owner.position + Vector2D{ dx, dy };
-	if (ctx.map->can_walk(owner, newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
+	Pathfinding::step(owner, owner.position + Vector2D{ dx, dy }, ctx);
+}
+// With no way through to the quarry, a creature still comes as close as the ground lets
+// it, so it waits at the bank of a moat rather than wherever it stood.
+void close_in_without_a_route(Creature& owner, Vector2D targetPosition, const Pathfinding::Mobility& mobility, GameContext& ctx)
+{
+	std::optional<Vector2D> bestStep;
+	int bestDistance = owner.get_tile_distance(targetPosition);
+
+	for (const Vector2D& delta : NEIGHBORS)
 	{
-		owner.position = newPos;
+		const Vector2D candidate = owner.position + delta;
+		if (!Pathfinding::step_cost(candidate, mobility, ctx) || ctx.map->get_actor(candidate, ctx) != nullptr)
+		{
+			continue;
+		}
+		const int distance = candidate.chebyshev_distance_to(targetPosition);
+		if (distance < bestDistance)
+		{
+			bestDistance = distance;
+			bestStep = candidate;
+		}
+	}
+
+	if (bestStep)
+	{
+		Pathfinding::step(owner, *bestStep, ctx);
 	}
 }
+
 // Returns true when this creature must skip its turn entirely.
 bool cannot_act(Creature& owner)
 {
@@ -139,10 +164,18 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 
 	auto is_blocked = [&ctx](const Vector2D& pos)
 	{
-		return ctx.map->get_actor(pos, ctx) != nullptr || ctx.map->find_decoration_at(pos, ctx) != nullptr;
+		return ctx.map->get_actor(pos, ctx) != nullptr;
 	};
 
-	const int holdingCost = ctx.map->get_dijkstra_cost(owner.position);
+	assert(ctx.tileConfig && "move_or_attack: a monster hunted with no tile configuration");
+	const Pathfinding::Mobility mobility = Pathfinding::mobility_of(owner, *ctx.tileConfig);
+	const std::optional<int> holdingCost = ctx.pathfinder->cost_to(targetPosition, owner.position, mobility, ctx);
+
+	if (!holdingCost)
+	{
+		close_in_without_a_route(owner, targetPosition, mobility, ctx);
+		return;
+	}
 
 	std::optional<Vector2D> bestStep;
 	int bestCost = std::numeric_limits<int>::max();
@@ -151,27 +184,25 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 	// sidestep a tile it may not enter.
 	auto is_better_step = [&holdingCost, &bestCost, &is_blocked](const Vector2D& candidate, int candidateCost)
 	{
-		return candidateCost <= holdingCost && candidateCost < bestCost && !is_blocked(candidate);
+		return candidateCost <= *holdingCost && candidateCost < bestCost && !is_blocked(candidate);
 	};
 
+	// A tile this creature may not enter is one its own cost map never reached.
 	for (const Vector2D& delta : NEIGHBORS)
 	{
 		Vector2D candidate{ owner.position.x + delta.x, owner.position.y + delta.y };
-		if (!ctx.map->can_walk(owner, candidate, ctx))
+		const std::optional<int> candidateCost = ctx.pathfinder->cost_to(targetPosition, candidate, mobility, ctx);
+		if (candidateCost && is_better_step(candidate, *candidateCost))
 		{
-			continue;
-		}
-		int candidateCost = ctx.map->get_dijkstra_cost(candidate);
-		if (is_better_step(candidate, candidateCost))
-		{
-			bestCost = candidateCost;
+			bestCost = *candidateCost;
 			bestStep = candidate;
 		}
 	}
 
+	// A shut door on the way is opened this turn and walked through the next.
 	if (bestStep)
 	{
-		owner.position = *bestStep;
+		Pathfinding::step(owner, *bestStep, ctx);
 	}
 }
 
@@ -209,7 +240,7 @@ void AiMonster::update_tracking(Creature& owner, const GameContext& ctx)
 //   d6=2,d10=2  -> pos=(10,2) distance=6    // stands still
 //
 // Both moving branches reach (9,2) because that dead end offers one legal step. The
-// first picks it off the Dijkstra gradient and the second off a die.
+// first picks it off the cost map and the second off a die.
 void AiMonster::decide_action(Creature& owner, GameContext& ctx)
 {
 	// Routed creatures run before any die is read.

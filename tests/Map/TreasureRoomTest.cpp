@@ -97,7 +97,7 @@ protected:
         {
             for (int x = col; x < col + w; ++x)
             {
-                map->set_tile(Vector2D{ x, y }, TileType::FLOOR, 1.0);
+                map->set_tile(Vector2D{ x, y }, TileType::FLOOR);
             }
         }
         return DungeonRoom{ col, row, w, h };
@@ -105,12 +105,12 @@ protected:
 
     void place_door(Vector2D pos)
     {
-        map->set_tile(pos, TileType::CLOSED_DOOR, 2.0);
+        map->set_tile(pos, TileType::CLOSED_DOOR);
     }
 
     void place_corridor(Vector2D pos)
     {
-        map->set_tile(pos, TileType::CORRIDOR, 1.0);
+        map->set_tile(pos, TileType::CORRIDOR);
     }
 };
 
@@ -217,10 +217,10 @@ TEST_F(TreasureRoomFixture, VaultClearsItsWaterAndAdoptsNoCorridor)
     // The two cells that cut that corner off from the rest of the room's floor.
     const Vector2D cornerWallAbove{ 10, 10 };
     const Vector2D cornerWallBeside{ 11, 11 };
-    map->set_tile(shapeWall, TileType::WALL, 0.0);
-    map->set_tile(pool, TileType::WATER, 10.0);
-    map->set_tile(cornerWallAbove, TileType::WALL, 0.0);
-    map->set_tile(cornerWallBeside, TileType::WALL, 0.0);
+    map->set_tile(shapeWall, TileType::WALL);
+    map->set_tile(pool, TileType::WATER);
+    map->set_tile(cornerWallAbove, TileType::WALL);
+    map->set_tile(cornerWallBeside, TileType::WALL);
     place_corridor(clippedCorner);
     ASSERT_TRUE(map->room_interior_is_one_piece(room))
         << "the room is split before the vault touches it - the case measures nothing";
@@ -257,7 +257,7 @@ TEST_F(TreasureRoomFixture, GuardSetup_NoJailerSpawn_DoorsRolledBack)
 
     // The dungeon generator in SetUp may have placed floor/corridor at (8,7).
     // Explicitly reset it to WALL to guarantee the outward walk is blocked.
-    map->set_tile(Vector2D{ 8, 7 }, TileType::WALL, 0.0);
+    map->set_tile(Vector2D{ 8, 7 }, TileType::WALL);
 
     // Confirm the outward tile is a wall (precondition).
     ASSERT_EQ(map->get_tile_type(Vector2D{ 8, 7 }), TileType::WALL);

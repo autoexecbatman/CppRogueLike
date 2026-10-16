@@ -133,9 +133,9 @@ struct MonsterParams
 	std::string naturalAttack{};
 
 	// Which body template this creature is built on, named in the body_plans
-	// table. Empty for anything that wears nothing, which is most of the
-	// bestiary. The slots themselves come from the BodyPlanRegistry.
-	std::string bodyPlanName{};
+	// table: "beast" for anything with no slots, which is also what a monster
+	// built in code starts as. The slots themselves come from the BodyPlanRegistry.
+	std::string bodyPlanName{ "beast" };
 
 	// Behaviour
 	MonsterAiType aiType{ MonsterAiType::MELEE };

@@ -96,10 +96,9 @@ protected:
 		map.init_tiles();
 		for (int column = 1; column < 19; ++column)
 		{
-			map.set_tile(Vector2D{ column, CORRIDOR_ROW }, TileType::FLOOR, 1.0);
+			map.set_tile(Vector2D{ column, CORRIDOR_ROW }, TileType::FLOOR);
 		}
 		map.compute_fov(ctx);
-		map.rebuild_dijkstra_map({ player->position }, ctx);
 
 		game.dice.set_test_mode(true);
 	}

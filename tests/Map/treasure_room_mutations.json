@@ -21,7 +21,7 @@
     },
     {
       "file": "src/TreasureRoom.cpp",
-      "original": "\t\t\t\tctx.map->set_tile(Vector2D{ x, y }, TileType::FLOOR, 1);",
+      "original": "\t\t\t\tctx.map->set_tile(Vector2D{ x, y }, TileType::FLOOR);",
       "mutated": "",
       "catches": "the vault leaving its pools standing, so the treasure sits in water"
     },

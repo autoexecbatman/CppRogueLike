@@ -9,9 +9,9 @@
   "mutations": [
     {
       "file": "src/CostOverlay.cpp",
-      "original": "\tif (cost == UNREACHED_COST)\n\t{\n\t\treturn std::nullopt;\n\t}",
+      "original": "\tif (!cost)\n\t{\n\t\treturn std::nullopt;\n\t}",
       "mutated": "\tif (false)\n\t{\n\t\treturn std::nullopt;\n\t}",
-      "catches": "a tile the flood never reached labelled with the sentinel, painting 2147483647 over every wall"
+      "catches": "a tile the flood never reached given a label, reading a cost that is not there"
     },
     {
       "file": "src/CostOverlay.cpp",

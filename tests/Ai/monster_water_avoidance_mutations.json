@@ -4,38 +4,44 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=MonsterWaterAvoidanceTest.*:MonsterWaterDetourTest.*:WaterMovementTest.*:SanctuaryPursuitTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=MonsterWaterAvoidanceTest.*:MonsterWaterDetourTest.*:WaterMovementTest.*:SanctuaryPursuitTest.*:MonsterMovementTest.*"
   ],
   "mutations": [
     {
       "file": "src/AiMonster.cpp",
-      "original": "\t\tif (!ctx.map->can_walk(owner, candidate, ctx))\n\t\t{\n\t\t\tcontinue;\n\t\t}\n\t\tint candidateCost = ctx.map->get_dijkstra_cost(candidate);\n\t\tif (is_better_step(candidate, candidateCost))",
-      "mutated": "\t\tif (!ctx.map->is_unobstructed(candidate, ctx))\n\t\t{\n\t\t\tcontinue;\n\t\t}\n\t\tint candidateCost = ctx.map->get_dijkstra_cost(candidate);\n\t\tif (is_better_step(candidate, candidateCost))",
-      "catches": "the hunting step asking the gate that takes no creature, which is the defect itself: every monster walks into water and drowns"
+      "original": "\tconst Pathfinding::Mobility mobility = Pathfinding::mobility_of(owner, *ctx.tileConfig);\n\tconst std::optional<int> holdingCost",
+      "mutated": "\tconst Pathfinding::Mobility mobility = Pathfinding::mobility_of(*ctx.player(), *ctx.tileConfig);\n\tconst std::optional<int> holdingCost",
+      "catches": "the hunt descending a map made for some other creature's legs"
     },
     {
       "file": "src/AiMonster.cpp",
-      "original": "\t\treturn candidateCost <= holdingCost && candidateCost < bestCost && !is_blocked(candidate);",
-      "mutated": "\t\treturn candidateCost < holdingCost && candidateCost < bestCost && !is_blocked(candidate);",
-      "catches": "the hunting step demanding a strictly nearer tile, which cannot cross the ring of equally-distant tiles a barred tile leaves, so a monster stops two tiles short beside a puddle"
+      "original": "\t\treturn candidateCost <= *holdingCost && candidateCost < bestCost && !is_blocked(candidate);",
+      "mutated": "\t\treturn candidateCost < *holdingCost && candidateCost < bestCost && !is_blocked(candidate);",
+      "catches": "the hunting step demanding a strictly nearer tile, which cannot cross the ring of equally-distant tiles a barred tile leaves"
     },
     {
-      "file": "src/Map.cpp",
-      "original": "\tif (!definition.blocksMovement)\n\t{\n\t\treturn true;\n\t}",
-      "mutated": "\tif (definition.blocksMovement)\n\t{\n\t\treturn true;\n\t}",
+      "file": "src/Pathfinding.cpp",
+      "original": "\t\tif (!definition.blocksMovement || isBypassed)",
+      "mutated": "\t\tif (definition.blocksMovement || isBypassed)",
       "catches": "the blocking test inverted, which opens water to everyone and shuts the floor"
     },
     {
       "file": "src/AiMonster.cpp",
-      "original": "\tif (ctx.map->can_walk(owner, newPos, ctx) && !ctx.map->get_actor(newPos, ctx))",
-      "mutated": "\tif (ctx.map->is_unobstructed(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))",
-      "catches": "random drift ignoring what the drifter can cross - the path an unaware monster takes into a pool"
+      "original": "\tPathfinding::step(owner, owner.position + Vector2D{ dx, dy }, ctx);",
+      "mutated": "\towner.position = owner.position + Vector2D{ dx, dy };",
+      "catches": "random drift written straight onto the position, the path an unaware monster takes into a pool"
     },
     {
       "file": "src/AiMonster.cpp",
-      "original": "\t\treturn candidateCost <= holdingCost && candidateCost < bestCost && !is_blocked(candidate);",
-      "mutated": "\t\treturn candidateCost <= holdingCost + 1 && candidateCost < bestCost && !is_blocked(candidate);",
+      "original": "\t\treturn candidateCost <= *holdingCost && candidateCost < bestCost && !is_blocked(candidate);",
+      "mutated": "\t\treturn candidateCost <= *holdingCost + 1 && candidateCost < bestCost && !is_blocked(candidate);",
       "catches": "the ceiling loosened by one, which lets a hunting monster step further from its quarry and pace at a dead end"
+    },
+    {
+      "file": "src/AiMonster.cpp",
+      "original": "\t\tclose_in_without_a_route(owner, targetPosition, mobility, ctx);\n",
+      "mutated": "",
+      "catches": "a monster cut off by water standing where it was instead of waiting at the bank"
     }
   ]
 }

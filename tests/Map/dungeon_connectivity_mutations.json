@@ -48,6 +48,12 @@
       "original": "get_tile_type(Vector2D{ mapWidth - 1, row }) != TileType::WALL",
       "mutated": "get_tile_type(Vector2D{ mapWidth - 1, row }) == TileType::WALL",
       "catches": "the right edge read inverted, so solid rock reads as a broken ring"
+    },
+    {
+      "file": "src/Pathfinding.cpp",
+      "original": "\t\t\tconst std::optional<int> price = step_cost(next, mobility, ctx);",
+      "mutated": "\t\t\tconst std::optional<int> price = map.get_tile_type(next) == TileType::WALL ? std::nullopt : std::optional<int>{ 1 };",
+      "catches": "the flood ignoring the mover, as the old one did, so it promises water and shut doors the step refuses"
     }
   ]
 }

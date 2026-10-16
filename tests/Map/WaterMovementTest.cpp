@@ -12,6 +12,7 @@
 #include "src/Creature.h"
 #include "src/Player.h"
 #include "src/Map.h"
+#include "src/Pathfinding.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
@@ -23,13 +24,14 @@ protected:
 		ctx = mock.to_game_context();
 		ctx.creatures = &creatures;
 		ctx.playerOwner = &player;
+		ctx.map = &map;
 
 		player->healthPool = std::make_unique<HealthPool>(20);
 		player->armorClass = std::make_unique<ArmorClass>(10);
 
 		map.init_tiles();
-		map.set_tile(waterTile, TileType::WATER, 10.0);
-		map.set_tile(floorTile, TileType::FLOOR, 1.0);
+		map.set_tile(waterTile, TileType::WATER);
+		map.set_tile(floorTile, TileType::FLOOR);
 	}
 
 	MockGameContext mock{};
@@ -45,7 +47,7 @@ protected:
 // A creature with no swim ability cannot enter water.
 TEST_F(WaterMovementTest, WaterBlocksACreatureThatCannotSwim)
 {
-	EXPECT_FALSE(map.can_walk(*player, waterTile, ctx));
+	EXPECT_FALSE(Pathfinding::can_enter(*player, waterTile, ctx));
 }
 
 // CAN_SWIM is what lets a creature cross; spiders set it at construction.
@@ -53,26 +55,26 @@ TEST_F(WaterMovementTest, WaterAdmitsACreatureThatCanSwim)
 {
 	swimmer.add_state(ActorState::CAN_SWIM);
 
-	EXPECT_TRUE(map.can_walk(swimmer, waterTile, ctx));
+	EXPECT_TRUE(Pathfinding::can_enter(swimmer, waterTile, ctx));
 }
 
 // Dry land is unaffected either way, so the rule is about water alone.
 TEST_F(WaterMovementTest, FloorIsPassableRegardlessOfSwimming)
 {
-	EXPECT_TRUE(map.can_walk(*player, floorTile, ctx));
+	EXPECT_TRUE(Pathfinding::can_enter(*player, floorTile, ctx));
 
 	player->add_state(ActorState::CAN_SWIM);
 
-	EXPECT_TRUE(map.can_walk(*player, floorTile, ctx));
+	EXPECT_TRUE(Pathfinding::can_enter(*player, floorTile, ctx));
 }
 
 // Losing the ability closes the water again.
 TEST_F(WaterMovementTest, RemovingSwimClosesTheWater)
 {
 	player->add_state(ActorState::CAN_SWIM);
-	ASSERT_TRUE(map.can_walk(*player, waterTile, ctx));
+	ASSERT_TRUE(Pathfinding::can_enter(*player, waterTile, ctx));
 
 	player->remove_state(ActorState::CAN_SWIM);
 
-	EXPECT_FALSE(map.can_walk(*player, waterTile, ctx));
+	EXPECT_FALSE(Pathfinding::can_enter(*player, waterTile, ctx));
 }

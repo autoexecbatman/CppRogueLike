@@ -369,8 +369,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/SpellTile.h
 
     # Utils - Updated paths
-    ${PROJECT_SOURCE_DIR}/Dijkstra.cpp
-    ${PROJECT_SOURCE_DIR}/Dijkstra.h
+    ${PROJECT_SOURCE_DIR}/Pathfinding.cpp
+    ${PROJECT_SOURCE_DIR}/Pathfinding.h
     ${PROJECT_SOURCE_DIR}/Vector2D.h
     ${PROJECT_SOURCE_DIR}/UniqueId.cpp
     ${PROJECT_SOURCE_DIR}/UniqueId.h

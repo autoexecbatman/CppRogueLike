@@ -59,7 +59,10 @@ class Renderer;
 class InputSystem;
 class Creature;
 class Player;
-class Dijkstra;
+namespace Pathfinding
+{
+class Pathfinder;
+}
 
 enum class GameStatus
 {
@@ -213,7 +216,7 @@ struct GameContext
 	ContentRegistry* contentRegistry{ nullptr };
 	Minimap* minimap{ nullptr };
 	CostOverlay* costOverlay{ nullptr };
-	Dijkstra* pathfinder{ nullptr }; // Persistent pathfinding object (reused across turns)
+	Pathfinding::Pathfinder* pathfinder{ nullptr };
 	DecorEditor* decorEditor{ nullptr };
 	PrefabLibrary* prefabLibrary{ nullptr };
 #ifndef __EMSCRIPTEN__

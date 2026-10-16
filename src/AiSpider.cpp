@@ -23,6 +23,7 @@
 #include "GameContext.h"
 #include "Map.h"
 #include "MessageSystem.h"
+#include "Pathfinding.h"
 #include "Persistent.h"
 #include "SavingThrow.h"
 #include "TurnSchedule.h"
@@ -111,7 +112,8 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 
 			if (ambushPos)
 			{
-				// Move to ambush position
+				// A leap to the ambush spot rather than a step, so nothing between here and
+				// there - a door, a trap - has a say.
 				owner.position = *ambushPos;
 				isAmbushing = true;
 				ambushEndTime = expiry_time(ctx.gameState->get_time(), AMBUSH_DURATION);
@@ -172,30 +174,17 @@ void AiSpider::move_toward_player(Creature& owner, GameContext& ctx)
 	int dx = (dirToPlayer.x != 0) ? (dirToPlayer.x > 0 ? 1 : -1) : 0;
 	int dy = (dirToPlayer.y != 0) ? (dirToPlayer.y > 0 ? 1 : -1) : 0;
 
-	// Try to move in that direction
-	Vector2D newPos = owner.position + Vector2D{ dx, dy };
-
-	// Check if the move is valid
-	if (ctx.map->can_walk(owner, newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
+	// Straight at the player, then along each axis alone; the first step that is not
+	// refused is the turn. An axis the player shares with the spider is no step at all.
+	for (const Vector2D& direction : { Vector2D{ dx, dy }, Vector2D{ dx, 0 }, Vector2D{ 0, dy } })
 	{
-		owner.position = newPos;
-	}
-	else
-	{
-		// Try horizontal move
-		newPos = owner.position + Vector2D{ dx, 0 };
-		if (ctx.map->can_walk(owner, newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
+		if (direction == Vector2D{ 0, 0 })
 		{
-			owner.position = newPos;
+			continue;
 		}
-		else
+		if (Pathfinding::step(owner, owner.position + direction, ctx) != Pathfinding::StepResult::REFUSED)
 		{
-			// Try vertical move
-			newPos = owner.position + Vector2D{ 0, dy };
-			if (ctx.map->can_walk(owner, newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
-			{
-				owner.position = newPos;
-			}
+			return;
 		}
 	}
 }
@@ -207,11 +196,7 @@ void AiSpider::random_move(Creature& owner, GameContext& ctx)
 
 	if (dx != 0 || dy != 0)
 	{
-		Vector2D newPos = owner.position + Vector2D{ dx, dy };
-		if (ctx.map->can_walk(owner, newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
-		{
-			owner.position = newPos;
-		}
+		Pathfinding::step(owner, owner.position + Vector2D{ dx, dy }, ctx);
 	}
 }
 
@@ -247,7 +232,7 @@ void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameCont
 			Vector2D newPos = owner.position + Vector2D{ dx, dy };
 
 			// Check if position is walkable and not occupied
-			if (ctx.map->can_walk(owner, newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
+			if (Pathfinding::can_enter(owner, newPos, ctx))
 			{
 				// Check if this position is adjacent to a wall
 				bool adjacentToWall = false;
@@ -307,10 +292,10 @@ void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameCont
 		}
 	}
 
-	// Move to best position - final validation to prevent stacking
-	if (bestMove != owner.position && !ctx.map->get_actor(bestMove, ctx))
+	// Move to best position; the step refuses a tile another creature has taken.
+	if (bestMove != owner.position)
 	{
-		owner.position = bestMove;
+		Pathfinding::step(owner, bestMove, ctx);
 	}
 }
 
@@ -373,8 +358,7 @@ std::optional<Vector2D> AiSpider::find_ambush_position(
 
 	auto is_valid_ambush = [&](Vector2D pos) -> bool
 	{
-		return ctx.map->can_walk(owner, pos, ctx) &&
-			!ctx.map->get_actor(pos, ctx) &&
+		return Pathfinding::can_enter(owner, pos, ctx) &&
 			is_good_ambush_spot(pos, ctx);
 	};
 

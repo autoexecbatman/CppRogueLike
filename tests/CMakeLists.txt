@@ -70,6 +70,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Ai/AiMimicTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Ai/SanctuaryPursuitTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Ai/MonsterWaterAvoidanceTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Ai/MonsterMovementTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/DecorationLookupTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/DungeonConnectivityTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/RoomShapeTest.cpp
@@ -305,7 +306,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Trap.cpp
 
     # Utils
-    ${PARENT_SOURCE_DIR}/Dijkstra.cpp
+    ${PARENT_SOURCE_DIR}/Pathfinding.cpp
     ${PARENT_SOURCE_DIR}/UniqueId.cpp
 
     # Combat

@@ -134,7 +134,7 @@
     "corpse_weight": 8,
     "equipment": [],
     "natural_attack": "Bite",
-    "body": ""
+    "body": "beast"
   },
   "bugbear": {
     "ac": 5,
@@ -271,7 +271,7 @@
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Fire Breath",
-    "body": ""
+    "body": "beast"
   },
   "dragon": {
     "ac": 1,
@@ -337,7 +337,7 @@
     "corpse_weight": 600,
     "equipment": [],
     "natural_attack": "Fiery Breath",
-    "body": ""
+    "body": "beast"
   },
   "fire_wolf": {
     "ac": 6,
@@ -403,7 +403,7 @@
     "corpse_weight": 130,
     "equipment": [],
     "natural_attack": "Flaming Bite",
-    "body": ""
+    "body": "beast"
   },
   "gargoyle": {
     "ac": 5,
@@ -469,7 +469,7 @@
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Claw",
-    "body": ""
+    "body": "hands_only"
   },
   "ghoul": {
     "ac": 6,
@@ -536,7 +536,7 @@
     "undead": true,
     "equipment": [],
     "natural_attack": "Paralytic Claw",
-    "body": ""
+    "body": "hands_only"
   },
   "giant_centipede": {
     "ac": 5,
@@ -602,7 +602,7 @@
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Poison Bite",
-    "body": ""
+    "body": "beast"
   },
   "giant_rat": {
     "ac": 7,
@@ -668,7 +668,7 @@
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Bite",
-    "body": ""
+    "body": "beast"
   },
   "giant_snake": {
     "ac": 5,
@@ -734,7 +734,7 @@
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Poison Bite",
-    "body": ""
+    "body": "beast"
   },
   "gnoll": {
     "ac": 5,
@@ -942,7 +942,7 @@
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Stone Fist",
-    "body": ""
+    "body": "hands_only"
   },
   "harpy": {
     "ac": 7,
@@ -1008,7 +1008,7 @@
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Talons",
-    "body": "taloned"
+    "body": "hands_only"
   },
   "hill_giant": {
     "ac": 3,
@@ -1211,7 +1211,7 @@
     "corpse_weight": 130,
     "equipment": [],
     "natural_attack": "Freezing Bite",
-    "body": ""
+    "body": "beast"
   },
   "kobold": {
     "ac": 7,
@@ -1702,7 +1702,7 @@
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Hellfire Strike",
-    "body": ""
+    "body": "hands_only"
   },
   "rat": {
     "ac": 9,
@@ -1768,7 +1768,7 @@
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Bite",
-    "body": ""
+    "body": "beast"
   },
   "shadow": {
     "ac": 7,
@@ -1835,7 +1835,7 @@
     "undead": true,
     "equipment": [],
     "natural_attack": "Strength Drain",
-    "body": ""
+    "body": "hands_only"
   },
   "shopkeeper": {
     "tile": {
@@ -2000,7 +2000,7 @@
     "corpse_weight": 280,
     "equipment": [],
     "natural_attack": "Claws",
-    "body": ""
+    "body": "hands_only"
   },
   "vampire": {
     "ac": 1,
@@ -2200,7 +2200,7 @@
     "undead": true,
     "equipment": [],
     "natural_attack": "Energy Drain",
-    "body": ""
+    "body": "hands_only"
   },
   "wolf": {
     "ac": 7,
@@ -2266,7 +2266,7 @@
     "corpse_weight": 120,
     "equipment": [],
     "natural_attack": "Bite",
-    "body": ""
+    "body": "beast"
   },
   "wraith": {
     "ac": 4,
@@ -2333,7 +2333,7 @@
     "undead": true,
     "equipment": [],
     "natural_attack": "Energy Drain",
-    "body": ""
+    "body": "hands_only"
   },
   "wyvern": {
     "ac": 3,
@@ -2399,7 +2399,7 @@
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Poison Sting",
-    "body": ""
+    "body": "beast"
   },
   "zombie": {
     "ac": 8,

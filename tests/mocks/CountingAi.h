@@ -4,7 +4,7 @@
 //
 // A mind that does nothing but count how many times it was asked to act. The turn
 // order's claim is about how often a creature is driven, so what it does when driven
-// is not the subject - and a real Ai would need a map, a Dijkstra field and a player
+// is not the subject - and a real Ai would need a map, a cost map and a player
 // to walk towards.
 //
 // Usage:

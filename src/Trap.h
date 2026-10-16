@@ -43,10 +43,11 @@ public:
 	// Returns true if trap is now detected (was hidden, now revealed)
 	bool attempt_detect(Creature& creature, GameContext& ctx);
 
-	// Applies the trap's effect to a creature entering its tile. A hidden trap gets
-	// one detection roll: missed, it springs; noticed, the creature stops short and it
-	// stays armed. A known or triggered trap springs with no roll; a disarmed one is
-	// walked over. Springing deals the damage dice and stops the move.
+	// Applies the trap's effect to a creature entering its tile. A hidden trap gives the
+	// player one detection roll: missed, it springs; noticed, the player stops short and
+	// it stays armed. A monster gets no roll and walks in. A known or triggered trap
+	// springs with no roll; a disarmed one is walked over. Springing deals the damage
+	// dice and stops the move.
 	EntryResult on_creature_enter(Creature& creature, GameContext& ctx) override;
 
 	// One attempt at removing this trap, rolled against the character's own

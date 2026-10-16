@@ -36,12 +36,6 @@ void BodyPlanRegistry::load(std::string_view path)
 
 const std::vector<EquipmentSlot>& BodyPlanRegistry::get(std::string_view name) const
 {
-	// A creature that wears nothing names no template.
-	if (name.empty())
-	{
-		return nothing;
-	}
-
 	auto found = plans.find(std::string{ name });
 	if (found == plans.end())
 	{

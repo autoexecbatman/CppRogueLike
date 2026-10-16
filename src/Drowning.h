@@ -6,9 +6,9 @@
 // longer it stays. The rules are the Player's Handbook's, PDF pages 239 and 240 of the
 // archive, under "Holding Your Breath".
 //
-// Nothing stops a creature entering water: can_walk tests wall, closed door, actor and
-// decoration, and takes no creature, so it cannot ask who is walking. These apply to
-// whatever is standing in it, whether it meant to be or not. They do not apply to a
+// Pathfinding refuses water to a creature that cannot swim, but one can still be in it:
+// put there, or left there when its gauntlets come off. These apply to whatever is
+// standing in it, whether it meant to be or not. They do not apply to a
 // creature that breathes water, to one wearing a helm of underwater action, which keeps
 // a globe of air about the head, or to one crossing on wings rather than through the
 // water.

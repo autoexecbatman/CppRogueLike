@@ -9,6 +9,7 @@
 #include "src/ItemRegistry.h"
 #include "src/MessageSystem.h"
 #include "src/MonsterRegistry.h"
+#include "src/Pathfinding.h"
 #include "src/Paths.h"
 #include "src/RandomDice.h"
 #include "src/SpellRegistry.h"
@@ -32,6 +33,7 @@ struct MockGameContext
 	SpellRegistry spellRegistry{};
 	MonsterRegistry monsterRegistry{};
 	ItemRegistry itemRegistry{};
+	Pathfinding::Pathfinder pathfinder{};
 
 	MockGameContext()
 	{
@@ -71,6 +73,7 @@ struct MockGameContext
 			.dataManager = &data_manager,
 			.buffSystem = &buffs,
 			.contentRegistry = &content_registry,
+			.pathfinder = &pathfinder,
 			.tileConfig = &tile_config,
 			.bodyPlanRegistry = &body_plans,
 			.spellRegistry = &spellRegistry,

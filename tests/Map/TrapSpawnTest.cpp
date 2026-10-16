@@ -74,7 +74,7 @@ protected:
 		{
 			for (int col = room.col; col <= room.col_end(); ++col)
 			{
-				map->set_tile(Vector2D{ col, row }, TileType::FLOOR, 1.0);
+				map->set_tile(Vector2D{ col, row }, TileType::FLOOR);
 			}
 		}
 

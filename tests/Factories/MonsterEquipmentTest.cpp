@@ -2,12 +2,17 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <fstream>
 #include <map>
 #include <set>
 #include <string>
+#include <string_view>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "src/MonsterCreator.h"
+#include "src/Paths.h"
 #include "src/MonsterRegistry.h"
 #include "src/ItemRegistry.h"
 #include "src/BodyPlanRegistry.h"
@@ -126,7 +131,54 @@ TEST_F(MonsterEquipmentTest, WieldersShareOneBodyTemplate)
 {
 	EXPECT_EQ(monsters.get_params("orc").bodyPlanName, "humanoid");
 	EXPECT_EQ(monsters.get_params("kobold").bodyPlanName, "humanoid");
-	EXPECT_TRUE(monsters.get_params("wolf").bodyPlanName.empty());
+	EXPECT_EQ(monsters.get_params("wolf").bodyPlanName, "beast");
+}
+
+// Every monster says what body it has. Hands open doors, so a record that names no body
+// would leave a troll pawing at a door it can open.
+TEST_F(MonsterEquipmentTest, EveryMonsterNamesABody)
+{
+	for (const std::string& key : monsters.get_all_keys())
+	{
+		EXPECT_FALSE(monsters.get_params(key).bodyPlanName.empty())
+			<< key << " names no body";
+	}
+}
+
+// A record with no body is unfinished, and loading it fails rather than building a
+// creature whose hands nobody decided on.
+TEST_F(MonsterEquipmentTest, AMonsterWithNoBodyIsRefused)
+{
+	std::ifstream source(Paths::resolve("data/content/monsters.json"));
+	nlohmann::json root = nlohmann::json::parse(source);
+	root.at("orc").at("body") = "";
+
+	const std::filesystem::path bodiless =
+		std::filesystem::temp_directory_path() / "monsters_bodiless.json";
+	{
+		std::ofstream out(bodiless);
+		out << root.dump();
+	}
+
+	EXPECT_THROW(monsters.load(bodiless.string()), std::runtime_error);
+
+	std::filesystem::remove(bodiless);
+}
+
+// The claw-and-fist creatures of the Monstrous Manual have hands and wear nothing; the
+// animals have neither.
+TEST_F(MonsterEquipmentTest, ClawedCreaturesHaveHandsAndBeastsDoNot)
+{
+	for (const std::string_view handed : { "troll", "ghoul", "wight", "shadow", "wraith", "gargoyle", "pit_fiend", "golem_stone" })
+	{
+		const std::vector<EquipmentSlot>& plan = bodyPlans.get(monsters.get_params(handed).bodyPlanName);
+		EXPECT_NE(std::ranges::find(plan, EquipmentSlot::RIGHT_HAND), plan.end()) << handed << " has no hands";
+		EXPECT_EQ(std::ranges::find(plan, EquipmentSlot::BODY), plan.end()) << handed << " has a wardrobe";
+	}
+	for (const std::string_view beast : { "wolf", "rat", "giant_snake", "bat", "dragon" })
+	{
+		EXPECT_TRUE(bodyPlans.get(monsters.get_params(beast).bodyPlanName).empty()) << beast << " has slots";
+	}
 }
 
 // A misspelled template is a data error and must not read as a creature that
@@ -134,7 +186,7 @@ TEST_F(MonsterEquipmentTest, WieldersShareOneBodyTemplate)
 TEST_F(MonsterEquipmentTest, UnknownBodyTemplateIsRefused)
 {
 	EXPECT_THROW(bodyPlans.get("humaniod"), std::runtime_error);
-	EXPECT_NO_THROW(bodyPlans.get(""));
+	EXPECT_THROW(bodyPlans.get(""), std::runtime_error);
 }
 
 // The saver rebuilds the file from scratch, so anything it does not write is
@@ -175,12 +227,15 @@ TEST_F(MonsterEquipmentTest, MedusaHasNoHeadSlot)
 	EXPECT_NE(std::ranges::find(plan, EquipmentSlot::BODY), plan.end());
 }
 
-// The stone golem entry says it is weaponless and wears nothing, so it gets no
-// slots at all rather than a body nobody fills.
-TEST_F(MonsterEquipmentTest, StoneGolemWearsNothing)
+// The stone golem entry says it is weaponless and wears nothing. It is still man-shaped,
+// so it has hands and no wardrobe.
+TEST_F(MonsterEquipmentTest, StoneGolemHasHandsAndWearsNothing)
 {
-	EXPECT_TRUE(monsters.get_params("golem_stone").bodyPlanName.empty());
-	EXPECT_TRUE(bodyPlans.get(monsters.get_params("golem_stone").bodyPlanName).empty());
+	const std::vector<EquipmentSlot>& plan = bodyPlans.get(monsters.get_params("golem_stone").bodyPlanName);
+
+	EXPECT_EQ(plan.size(), 2u);
+	EXPECT_NE(std::ranges::find(plan, EquipmentSlot::LEFT_HAND), plan.end());
+	EXPECT_EQ(std::ranges::find(plan, EquipmentSlot::BODY), plan.end());
 }
 
 // A harpy uses a club and wears nothing, so it has hands and no wardrobe.

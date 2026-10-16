@@ -105,7 +105,7 @@ protected:
 		ctx.gameLoopCoordinator = &coordinator;
 
 		map.init_tiles();
-		map.set_tile(Vector2D{ 5, 5 }, TileType::WATER, 1.0);
+		map.set_tile(Vector2D{ 5, 5 }, TileType::WATER);
 	}
 
 	// A swimmer standing in the one water tile, able to be there and still breathing air.

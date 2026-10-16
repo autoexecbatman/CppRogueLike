@@ -79,7 +79,6 @@ FovProperties fov_properties_for(TileType type) noexcept
 Map::Map(int mapWidth, int mapHeight)
 	: mapWidth(mapWidth),
 	  mapHeight(mapHeight),
-	  dijkstraCosts(static_cast<size_t>(mapWidth) * mapHeight, std::numeric_limits<int>::max()),
 	  fovMap(std::make_unique<FovMap>(mapWidth, mapHeight)),
 	  seed(0)
 {
@@ -105,7 +104,7 @@ void Map::init_tiles()
 	{
 		for (int x = 0; x < mapWidth; x++)
 		{
-			tiles.emplace_back(Tile(Vector2D{ x, y }, TileType::WALL, 0));
+			tiles.emplace_back(Tile(Vector2D{ x, y }, TileType::WALL));
 		}
 	}
 }
@@ -177,9 +176,8 @@ void Map::load(const json& j)
 
 		TileType type = static_cast<TileType>(tileJson.at("type").get<int>());
 		bool explored = tileJson.at("explored").get<bool>();
-		double cost = tileJson.at("cost").get<double>();
 
-		tiles.emplace_back(position, type, cost);
+		tiles.emplace_back(position, type);
 		tiles.back().explored = explored;
 	}
 
@@ -211,8 +209,7 @@ void Map::save(json& j)
 		j["tiles"].push_back(
 			{ { "position", { { "y", tile.position.y }, { "x", tile.position.x } } },
 				{ "type", static_cast<int>(tile.type) }, // TileType is an enum
-				{ "explored", tile.explored },
-				{ "cost", tile.cost } });
+				{ "explored", tile.explored } });
 	}
 }
 
@@ -400,7 +397,6 @@ void Map::compute_fov(GameContext& ctx)
 		"Map::compute_fov: player position out of map bounds");
 
 	fovMap->compute_fov(ctx.player()->position.x, ctx.player()->position.y, Vision::sight_radius(*ctx.player()));
-	rebuild_dijkstra_map({ ctx.player()->position }, ctx);
 }
 
 void Map::update()
@@ -725,7 +721,7 @@ void Map::dig(Vector2D begin, Vector2D end)
 	{
 		for (int tileX = begin.x; tileX <= end.x; tileX++)
 		{
-			set_tile(Vector2D{ tileX, tileY }, TileType::FLOOR, 1);
+			set_tile(Vector2D{ tileX, tileY }, TileType::FLOOR);
 			fovMap->set_properties(tileX, tileY, true, true);
 		}
 	}
@@ -752,7 +748,7 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 
 		if (get_tile_type(pos) == TileType::WALL)
 		{
-			set_tile(pos, TileType::CORRIDOR, 1);
+			set_tile(pos, TileType::CORRIDOR);
 		}
 		fovMap->set_properties(pos.x, pos.y, true, true);
 	};
@@ -930,7 +926,7 @@ bool Map::room_interior_is_one_piece(const DungeonRoom& room) const
 
 void Map::set_door(Vector2D position)
 {
-	set_tile(position, TileType::CLOSED_DOOR, 2);
+	set_tile(position, TileType::CLOSED_DOOR);
 	fovMap->set_properties(position.x, position.y, false, false);
 
 	size_t tileIndex = get_index(position);
@@ -940,7 +936,7 @@ void Map::set_door(Vector2D position)
 	}
 }
 
-void Map::set_tile(Vector2D pos, TileType newType, double cost)
+void Map::set_tile(Vector2D pos, TileType newType)
 {
 	if (!in_bounds(pos))
 	{
@@ -948,9 +944,8 @@ void Map::set_tile(Vector2D pos, TileType newType, double cost)
 	}
 	const size_t idx = get_index(pos);
 	tiles.at(idx).type = newType;
-	tiles.at(idx).cost = cost;
 
-	// Keep fovMap in sync so is_wall / is_unobstructed / A* see the change immediately.
+	// Keep fovMap in sync so is_wall and is_unobstructed see the change immediately.
 	const auto [walkable, transparent] = fov_properties_for(newType);
 	fovMap->set_properties(pos.x, pos.y, walkable, transparent);
 }
@@ -965,7 +960,7 @@ void Map::apply_room_shape(const DungeonRoom& room)
 
 	auto wall_back = [&](int x, int y)
 	{
-		set_tile(Vector2D{ x, y }, TileType::WALL, 0);
+		set_tile(Vector2D{ x, y }, TileType::WALL);
 	};
 
 	switch (room.shape)
@@ -1262,7 +1257,7 @@ void Map::spawn_water(const DungeonRoom& room, GameContext& ctx)
 				// CRITICAL FIX: Check if water would block entrances using pattern matching
 				if (!would_water_block_entrance(waterPos, ctx))
 				{
-					set_tile(waterPos, TileType::WATER, 10);
+					set_tile(waterPos, TileType::WATER);
 					fovMap->set_properties(waterPos.x, waterPos.y, true, true); // walkable and transparent
 				}
 			}
@@ -1564,28 +1559,6 @@ bool Map::is_unobstructed(Vector2D pos, const GameContext& ctx) const noexcept
 	return true;
 }
 
-bool Map::can_walk(const Creature& mover, Vector2D pos, const GameContext& ctx) const noexcept
-{
-	if (!is_unobstructed(pos, ctx))
-	{
-		return false;
-	}
-
-	// What a tile does is data: TileConfig holds whether it blocks and what crosses it
-	// anyway. See data/tiles/tile_config.json.
-	assert(ctx.tileConfig && "can_walk: asked whether a creature may enter a tile with no tile configuration loaded");
-	const TileDefinition& definition = ctx.tileConfig->get_tile_definition(get_tile_type(pos));
-
-	if (!definition.blocksMovement)
-	{
-		return true;
-	}
-
-	// An ability can carry a creature through - a spider across water, or anyone
-	// wearing the gauntlets that grant it.
-	return definition.hasBypassState && mover.has_bypass(definition.bypassState);
-}
-
 void Map::add_monster(Vector2D pos, GameContext& ctx) const
 {
 	// Use the monster factory to create a monster appropriate for the current dungeon level
@@ -1688,79 +1661,6 @@ void Map::regenerate(GameContext& ctx)
 	init(ctx);
 }
 
-std::vector<Vector2D> Map::neighbors(Vector2D id, const GameContext& ctx, std::optional<Vector2D> target) const
-{
-	std::vector<Vector2D> results;
-
-	for (Vector2D dir : DIRS)
-	{
-		Vector2D next{ id.x + dir.x, id.y + dir.y };
-		if (in_bounds(next))
-		{
-			// Allow target position even if occupied (for pathfinding to reach goal)
-			bool isTarget = (target && next == *target);
-			if (isTarget)
-			{
-				// Allow closed doors as target; exclude only solid walls
-				if (!is_wall(next) || get_tile_type(next) == TileType::CLOSED_DOOR)
-				{
-					results.push_back(next);
-				}
-			}
-			else if (is_unobstructed(next, ctx))
-			{
-				results.push_back(next);
-			}
-		}
-	}
-
-	if ((id.x + id.y) % 2 == 0)
-	{
-		// see "Ugly paths" section for an explanation:
-		std::reverse(results.begin(), results.end());
-	}
-
-	return results;
-}
-
-double Map::cost(Vector2D fromNode, Vector2D toNode, const GameContext& ctx)
-{
-	// if there is an actor on the tile, return a high cost
-	if (get_actor(toNode, ctx) != nullptr)
-	{
-		return 1000.0;
-	}
-
-	double baseCost = get_cost(toNode);
-
-	// Check if this is a diagonal move (8-directional grid)
-	int dx = std::abs(toNode.x - fromNode.x);
-	int dy = std::abs(toNode.y - fromNode.y);
-
-	if (dx == 1 && dy == 1) // Diagonal move
-	{
-		return baseCost * 1.414213562373095; // sqrt(2)
-	}
-
-	return baseCost;
-}
-
-double Map::get_cost(Vector2D pos) const noexcept
-{
-	if (!in_bounds(pos))
-	{
-		// Logging moved to callers with GameContext access
-		return 1000.0; // High cost for out of bounds
-	}
-	size_t index = get_index(pos);
-	if (index >= tiles.size())
-	{
-		// Logging moved to callers with GameContext access
-		return 1000.0;
-	}
-	return tiles.at(index).cost;
-}
-
 std::vector<Vector2D> Map::bresenham_line(Vector2D from, Vector2D to)
 {
 	std::vector<Vector2D> path;
@@ -1850,7 +1750,7 @@ bool Map::open_door(Vector2D pos, GameContext& ctx)
 		return false;
 	}
 
-	set_tile(pos, TileType::OPEN_DOOR, 1);
+	set_tile(pos, TileType::OPEN_DOOR);
 
 	// Clear door state when opening
 	size_t tileIndex = get_index(pos);
@@ -1904,7 +1804,7 @@ bool Map::close_door(Vector2D pos, GameContext& ctx)
 	}
 
 	// Change the tile type to DOOR (closed)
-	set_tile(pos, TileType::CLOSED_DOOR, 2);
+	set_tile(pos, TileType::CLOSED_DOOR);
 
 	// New doors are unlocked by default
 	size_t tileIndex = get_index(pos);
@@ -2080,7 +1980,7 @@ void Map::place_amulet(GameContext& ctx)
 		const DungeonRoom& room = ctx.rooms->at(index);
 
 		// Somewhere the player can actually reach. Water is excluded rather than left to
-		// can_walk and the player's own states: the amulet is the win condition, it is
+		// the movement rule and the player's own states: the amulet is the win condition, it is
 		// placed once, and a character who later loses the means to swim would be shut
 		// out of a game that was winnable when it was generated.
 		Vector2D amuletPos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
@@ -2357,85 +2257,6 @@ void Map::place_from_graph(
 	if (ctx.messageSystem)
 	{
 		ctx.messageSystem->log("place_from_graph: Finished. Dug " + std::to_string(dug_edges.size()) + " edges");
-	}
-}
-
-int Map::get_dijkstra_cost(Vector2D pos) const noexcept
-{
-	if (!in_bounds(pos))
-	{
-		return std::numeric_limits<int>::max();
-	}
-
-	return dijkstraCosts[static_cast<size_t>(pos.y) * mapWidth + pos.x];
-}
-
-void Map::rebuild_dijkstra_map(const std::vector<Vector2D>& goals, const GameContext& ctx)
-{
-	std::fill(dijkstraCosts.begin(), dijkstraCosts.end(), std::numeric_limits<int>::max());
-
-	struct FrontierEntry
-	{
-		int cost{ 0 };
-		Vector2D position;
-		bool operator>(const FrontierEntry& rhs) const noexcept { return cost > rhs.cost; }
-	};
-	std::priority_queue<FrontierEntry, std::vector<FrontierEntry>, std::greater<FrontierEntry>> frontier;
-
-	for (const Vector2D& goal : goals)
-	{
-		if (!in_bounds(goal))
-		{
-			continue;
-		}
-		const size_t goalIndex = static_cast<size_t>(goal.y) * mapWidth + goal.x;
-		dijkstraCosts[goalIndex] = 0;
-		frontier.push(FrontierEntry{ 0, goal });
-	}
-
-	if (frontier.empty())
-	{
-		return;
-	}
-
-	static const std::vector<Vector2D> cardinalAndDiagonal = {
-		DIR_N, DIR_S, DIR_W, DIR_E, DIR_NW, DIR_NE, DIR_SW, DIR_SE
-	};
-
-	while (!frontier.empty())
-	{
-		const FrontierEntry top = frontier.top();
-		frontier.pop();
-
-		const size_t currentIndex = static_cast<size_t>(top.position.y) * mapWidth + top.position.x;
-		if (top.cost > dijkstraCosts[currentIndex])
-		{
-			continue;
-		}
-
-		for (const Vector2D& delta : cardinalAndDiagonal)
-		{
-			Vector2D next{ top.position.x + delta.x, top.position.y + delta.y };
-			if (!in_bounds(next))
-			{
-				continue;
-			}
-			if (!fovMap->is_walkable(next.x, next.y))
-			{
-				continue;
-			}
-			if (find_decoration_at(next, ctx) != nullptr)
-			{
-				continue;
-			}
-			const size_t nextIndex = static_cast<size_t>(next.y) * mapWidth + next.x;
-			const int newCost = top.cost + 1;
-			if (newCost < dijkstraCosts[nextIndex])
-			{
-				dijkstraCosts[nextIndex] = newCost;
-				frontier.push(FrontierEntry{ newCost, next });
-			}
-		}
 	}
 }
 

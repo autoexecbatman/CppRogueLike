@@ -3,10 +3,10 @@
 // That nothing is placed standing in water.
 //
 // What it is for. is_water is consulted in four places in the whole source, and three
-// of them place items and stairs. No creature placement path asked it, and can_walk -
-// the predicate every monster spawn goes through - tests wall, closed door, actor and
-// decoration and never water. can_walk takes no creature either, so it could not ask
-// whether this one swims.
+// of them place items and stairs. No creature placement path asked it, and the
+// predicate every monster spawn went through tested wall, closed door, actor and
+// decoration and never water. It took no creature either, so it could not ask whether
+// this one swims.
 //
 // The ordering is why: find_spawn_position picks the tile, then add_monster picks what
 // stands there, so the tile is committed before anyone knows what will occupy it. Of 38
@@ -54,7 +54,7 @@ protected:
 		{
 			for (int row = ROOM_ROW; row < ROOM_ROW + ROOM_SIZE; ++row)
 			{
-				map.set_tile(Vector2D{ column, row }, TileType::FLOOR, 1.0);
+				map.set_tile(Vector2D{ column, row }, TileType::FLOOR);
 			}
 		}
 	}
@@ -70,7 +70,7 @@ protected:
 				const Vector2D here{ column, row };
 				if (!(here == dryTile))
 				{
-					map.set_tile(here, TileType::WATER, 1.0);
+					map.set_tile(here, TileType::WATER);
 				}
 			}
 		}
