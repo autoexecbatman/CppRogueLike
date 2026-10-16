@@ -9,8 +9,8 @@
   "mutations": [
     {
       "file": "src/Pickable.cpp",
-      "original": "bool use(Gauntlets& gauntlets, Item& owner, Creature& wearer, GameContext& ctx)\n{\n\treturn use_stat_boost(worn_slot(owner, ctx), owner, wearer, ctx);",
-      "mutated": "bool use(Gauntlets& gauntlets, Item& owner, Creature& wearer, GameContext& ctx)\n{\n\treturn use_stat_boost(EquipmentSlot::GAUNTLETS, owner, wearer, ctx);",
+      "original": "bool use([[maybe_unused]] Gauntlets& gauntlets, Item& owner, Creature& wearer, GameContext& ctx)\n{\n\treturn use_stat_boost(worn_slot(owner, ctx), owner, wearer, ctx);",
+      "mutated": "bool use([[maybe_unused]] Gauntlets& gauntlets, Item& owner, Creature& wearer, GameContext& ctx)\n{\n\treturn use_stat_boost(EquipmentSlot::GAUNTLETS, owner, wearer, ctx);",
       "catches": "the behaviour deciding the slot again, which is the defect: every cloak and every pair of boots back on the hands"
     },
     {
@@ -27,8 +27,8 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "bool use(Girdle& girdle, Item& owner, Creature& wearer, GameContext& ctx)\n{\n\treturn use_stat_boost(worn_slot(owner, ctx), owner, wearer, ctx);",
-      "mutated": "bool use(Girdle& girdle, Item& owner, Creature& wearer, GameContext& ctx)\n{\n\treturn use_stat_boost(EquipmentSlot::CLOAK, owner, wearer, ctx);",
+      "original": "bool use([[maybe_unused]] Girdle& girdle, Item& owner, Creature& wearer, GameContext& ctx)\n{\n\treturn use_stat_boost(worn_slot(owner, ctx), owner, wearer, ctx);",
+      "mutated": "bool use([[maybe_unused]] Girdle& girdle, Item& owner, Creature& wearer, GameContext& ctx)\n{\n\treturn use_stat_boost(EquipmentSlot::CLOAK, owner, wearer, ctx);",
       "catches": "a girdle worn as a cloak, the same class of error one behaviour further along"
     }
   ]

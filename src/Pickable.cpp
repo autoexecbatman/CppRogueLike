@@ -528,7 +528,7 @@ bool use(CorpseFood& corpseFood, Item& owner, Creature& wearer, GameContext& ctx
 	return consume_item(owner, wearer);
 }
 
-bool use(Armor& armor, Item& item, Creature& wearer, GameContext& ctx)
+bool use([[maybe_unused]] Armor& armor, Item& item, Creature& wearer, GameContext& ctx)
 {
 	const bool was_equipped = wearer.is_item_equipped(item.uniqueId);
 	const bool success = wearer.toggle_armor(item.uniqueId, ctx);
@@ -570,22 +570,22 @@ EquipmentSlot worn_slot(const Item& item, const GameContext& ctx)
 	return slot;
 }
 
-bool use(JewelryAmulet& jewelryAmulet, Item& owner, Creature& wearer, GameContext& ctx)
+bool use([[maybe_unused]] JewelryAmulet& jewelryAmulet, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	return use_stat_boost(worn_slot(owner, ctx), owner, wearer, ctx);
 }
 
-bool use(Gauntlets& gauntlets, Item& owner, Creature& wearer, GameContext& ctx)
+bool use([[maybe_unused]] Gauntlets& gauntlets, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	return use_stat_boost(worn_slot(owner, ctx), owner, wearer, ctx);
 }
 
-bool use(Girdle& girdle, Item& owner, Creature& wearer, GameContext& ctx)
+bool use([[maybe_unused]] Girdle& girdle, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	return use_stat_boost(worn_slot(owner, ctx), owner, wearer, ctx);
 }
 
-bool use(Shield& shield, Item& owner, Creature& wearer, GameContext& ctx)
+bool use([[maybe_unused]] Shield& shield, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	const bool success = wearer.toggle_shield(owner.uniqueId, ctx);
 	if (success)
@@ -606,7 +606,7 @@ bool use(Shield& shield, Item& owner, Creature& wearer, GameContext& ctx)
 	return false;
 }
 
-bool use(Teleporter& teleporter, Item& owner, Creature& wearer, GameContext& ctx)
+bool use([[maybe_unused]] Teleporter& teleporter, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	// Reading the scroll is the cost, so it is spent whether or not there is anywhere to go.
 	const std::optional<Vector2D> landing = SpawnUtils::find_random_floor_tile(ctx);
@@ -630,7 +630,7 @@ bool use(Teleporter& teleporter, Item& owner, Creature& wearer, GameContext& ctx
 // Example, a pack holding two unknown potions and one known sword:
 //   use(scroll, scrollItem, player, ctx);   // -> true, "2 items identified!"
 //   use(scroll, scrollItem, player, ctx);   // -> true, "All items were already identified."
-bool use(IdentifyScroll& identifyScroll, Item& owner, Creature& wearer, GameContext& ctx)
+bool use([[maybe_unused]] IdentifyScroll& identifyScroll, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	int identifiedCount = 0;
 	for (auto& item : wearer.inventoryData.items)
@@ -662,7 +662,7 @@ bool use(IdentifyScroll& identifyScroll, Item& owner, Creature& wearer, GameCont
 	return consume_item(owner, wearer);
 }
 
-bool use(Amulet& amulet, Item& owner, Creature& wearer, GameContext& ctx)
+bool use([[maybe_unused]] Amulet& amulet, [[maybe_unused]] Item& owner, [[maybe_unused]] Creature& wearer, GameContext& ctx)
 {
 	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "The Amulet of Yendor glows brightly in your hands!", MessageCompletion::FINISHED);
 	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You feel a powerful magic enveloping you...", MessageCompletion::FINISHED);
@@ -670,7 +670,7 @@ bool use(Amulet& amulet, Item& owner, Creature& wearer, GameContext& ctx)
 	return false;
 }
 
-bool use(DungeonKey& key, Item& owner, Creature& wearer, GameContext& ctx)
+bool use([[maybe_unused]] DungeonKey& key, [[maybe_unused]] Item& owner, [[maybe_unused]] Creature& wearer, GameContext& ctx)
 {
 	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Bump into a locked door to use this key.", MessageCompletion::FINISHED);
 	return false;
