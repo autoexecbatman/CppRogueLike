@@ -225,7 +225,7 @@ void ItemFactory::generate_treasure(Vector2D position, int dungeonLevel, int qua
 		itemPos.y += ctx.dice->roll(-1, 1);
 
 		// Ensure position is valid
-		if (!ctx.map->is_unobstructed(itemPos, ctx))
+		if (!ctx.map->can_place_at(itemPos, ctx))
 		{
 			itemPos = position; // Fallback to original position
 		}

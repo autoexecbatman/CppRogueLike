@@ -9,15 +9,9 @@
   "mutations": [
     {
       "file": "src/Map.cpp",
-      "original": "\t\twhile (!is_unobstructed(amuletPos, ctx) || is_water(amuletPos) || is_stairs(amuletPos, ctx))",
+      "original": "\t\twhile (!can_place_at(amuletPos, ctx) || is_stairs(amuletPos, ctx))",
       "mutated": "\t\twhile (!is_unobstructed(amuletPos, ctx) || is_stairs(amuletPos, ctx))",
       "catches": "the water exclusion dropped, which puts the win condition where a character who cannot swim never reaches it"
-    },
-    {
-      "file": "src/Map.cpp",
-      "original": "\t\twhile (!is_unobstructed(amuletPos, ctx) || is_water(amuletPos) || is_stairs(amuletPos, ctx))",
-      "mutated": "\t\twhile (!is_unobstructed(amuletPos, ctx) || !is_water(amuletPos) || is_stairs(amuletPos, ctx))",
-      "catches": "the exclusion inverted, so the amulet is placed only in water"
     }
   ]
 }

@@ -17,22 +17,6 @@ namespace
 {
 constexpr int MAP_EDGE_MARGIN = 2;
 
-// Whether a creature can be put on this tile. The one statement of it, so the
-// enumeration below and anything that asks later cannot disagree.
-//
-// Water is refused because a spawn tile is chosen before the monster is: the caller
-// picks here and add_monster then decides what stands on it, so nothing at this point
-// knows whether the occupant can swim. Of the 38 monsters, 35 cannot, and one placed in
-// water holds its breath for a round or two and then rolls to drown. A swimmer can
-// still walk into water during play; it is only never generated standing in it.
-bool can_hold_creature(Vector2D pos, const GameContext& ctx)
-{
-	return ctx.map->is_unobstructed(pos, ctx) &&
-		!ctx.map->is_water(pos) &&
-		ctx.map->get_actor(pos, ctx) == nullptr &&
-		ctx.map->find_decoration_at(pos, ctx) == nullptr;
-}
-
 // Every tile of the room a creature could be put on, in reading order.
 //
 // One pass over the room rather than a sampling loop, so an empty answer means the room
@@ -46,7 +30,8 @@ std::vector<Vector2D> free_tiles_in(const DungeonRoom& room, const GameContext& 
 		for (int column = room.col; column <= room.col_end(); ++column)
 		{
 			const Vector2D here{ column, row };
-			if (can_hold_creature(here, ctx))
+			// The tile is chosen before the monster is, so nothing here knows whether it swims.
+			if (ctx.map->can_place_at(here, ctx))
 			{
 				free.push_back(here);
 			}
@@ -102,7 +87,7 @@ Vector2D find_random_floor_tile(GameContext& ctx)
 //
 // The free tiles are enumerated and one is chosen, so nullopt is an answer rather than a
 // search giving up, and there is no draw budget to pick. What makes a tile usable is
-// can_hold_creature above, which is also what excludes water.
+// Map::can_place_at, which is also what excludes water.
 std::optional<Vector2D> find_random_room_position(const DungeonRoom& room, GameContext& ctx)
 {
 	assert(ctx.map);

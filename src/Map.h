@@ -123,6 +123,13 @@ public:
 	// Pathfinding's question, and asking this one instead is how every monster in the
 	// game once came to walk into water.
 	bool is_unobstructed(Vector2D pos, const GameContext& ctx) const noexcept;
+	// Whether generation may put something on that tile - a creature, an item, a barrel,
+	// the stairs or the amulet: unobstructed, and dry, because the character a game starts
+	// with cannot enter water, so whatever is put there is out of its reach.
+	//
+	//   map.can_place_at(floorTile, ctx); // -> true
+	//   map.can_place_at(pool, ctx);      // -> false
+	bool can_place_at(Vector2D pos, const GameContext& ctx) const noexcept;
 	void add_monster(Vector2D pos, GameContext& ctx) const;
 	void compute_fov(GameContext& ctx);
 	void update();

@@ -15,7 +15,7 @@
     },
     {
       "file": "src/SpawnUtils.cpp",
-      "original": "\t\t\tif (can_hold_creature(here, ctx))",
+      "original": "\t\t\tif (ctx.map->can_place_at(here, ctx))",
       "mutated": "\t\t\tif (true)",
       "catches": "every tile of the room counted as free, water and occupied alike"
     },

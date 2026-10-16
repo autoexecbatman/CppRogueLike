@@ -8,10 +8,10 @@
   ],
   "mutations": [
     {
-      "file": "src/SpawnUtils.cpp",
-      "original": "\t\t!ctx.map->is_water(pos) &&\n",
-      "mutated": "",
-      "catches": "water allowed back into the placement predicate, so a land monster is generated standing in it"
+      "file": "src/Map.cpp",
+      "original": "\treturn is_unobstructed(pos, ctx) && !is_water(pos);",
+      "mutated": "\treturn is_unobstructed(pos, ctx);",
+      "catches": "water allowed back into the placement predicate, so a land monster, a barrel or an item is generated standing in it"
     },
     {
       "file": "src/Creature.cpp",

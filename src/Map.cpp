@@ -1412,7 +1412,7 @@ void Map::spawn_items(const DungeonRoom& room, GameContext& ctx)
 		constexpr int MAX_ITEM_TRIES = 20;
 		int itemTries = 0;
 		while (itemTries < MAX_ITEM_TRIES &&
-			(!is_unobstructed(itemPos, ctx) || is_water(itemPos) || is_stairs(itemPos, ctx) || find_decoration_at(itemPos, ctx) != nullptr))
+			!can_place_at(itemPos, ctx))
 		{
 			itemPos.x = ctx.dice->roll(room.col, room.col_end());
 			itemPos.y = ctx.dice->roll(room.row, room.row_end());
@@ -1442,7 +1442,7 @@ void Map::spawn_barrels(const DungeonRoom& room, GameContext& ctx)
 		Vector2D pos{ mapRng.roll(room.col, room.col_end()), mapRng.roll(room.row, room.row_end()) };
 		constexpr int MAX_TRIES = 20;
 		int tries = 0;
-		while (tries < MAX_TRIES && (!is_unobstructed(pos, ctx) || find_decoration_at(pos, ctx) != nullptr))
+		while (tries < MAX_TRIES && !can_place_at(pos, ctx))
 		{
 			pos.x = mapRng.roll(room.col, room.col_end());
 			pos.y = mapRng.roll(room.row, room.row_end());
@@ -1473,7 +1473,7 @@ void Map::spawn_player(const DungeonRoom& room, GameContext& ctx)
 	constexpr int MAX_PLAYER_TRIES = 50;
 	int playerTries = 0;
 	while (playerTries < MAX_PLAYER_TRIES &&
-		(!is_unobstructed(pos, ctx) || is_water(pos) || find_decoration_at(pos, ctx) != nullptr))
+		!can_place_at(pos, ctx))
 	{
 		pos.x = ctx.dice->roll(room.col, room.col_end());
 		pos.y = ctx.dice->roll(room.row, room.row_end());
@@ -1519,7 +1519,7 @@ void Map::place_stairs(GameContext& ctx)
 	constexpr int MAX_STAIR_TRIES = 200;
 	for (int attempt = 0; attempt < MAX_STAIR_TRIES; ++attempt)
 	{
-		if (is_unobstructed(stairsPos, ctx) && !is_water(stairsPos) && find_decoration_at(stairsPos, ctx) == nullptr)
+		if (can_place_at(stairsPos, ctx))
 		{
 			break;
 		}
@@ -1557,6 +1557,11 @@ bool Map::is_unobstructed(Vector2D pos, const GameContext& ctx) const noexcept
 	}
 
 	return true;
+}
+
+bool Map::can_place_at(Vector2D pos, const GameContext& ctx) const noexcept
+{
+	return is_unobstructed(pos, ctx) && !is_water(pos);
 }
 
 void Map::add_monster(Vector2D pos, GameContext& ctx) const
@@ -1984,7 +1989,7 @@ void Map::place_amulet(GameContext& ctx)
 		// placed once, and a character who later loses the means to swim would be shut
 		// out of a game that was winnable when it was generated.
 		Vector2D amuletPos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
-		while (!is_unobstructed(amuletPos, ctx) || is_water(amuletPos) || is_stairs(amuletPos, ctx))
+		while (!can_place_at(amuletPos, ctx) || is_stairs(amuletPos, ctx))
 		{
 			amuletPos.x = ctx.dice->roll(room.col, room.col_end());
 			amuletPos.y = ctx.dice->roll(room.row, room.row_end());

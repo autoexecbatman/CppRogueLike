@@ -54,6 +54,30 @@
       "original": "\t\t\tconst std::optional<int> price = step_cost(next, mobility, ctx);",
       "mutated": "\t\t\tconst std::optional<int> price = map.get_tile_type(next) == TileType::WALL ? std::nullopt : std::optional<int>{ 1 };",
       "catches": "the flood ignoring the mover, as the old one did, so it promises water and shut doors the step refuses"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\twhile (tries < MAX_TRIES && !can_place_at(pos, ctx))",
+      "mutated": "\t\twhile (tries < MAX_TRIES && !is_unobstructed(pos, ctx))",
+      "catches": "the barrel placement asking only whether the tile is clear, which drops barrels into water"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\t\t!can_place_at(itemPos, ctx))",
+      "mutated": "\t\t\t!is_unobstructed(itemPos, ctx))",
+      "catches": "room items placed wherever the tile is clear, water included"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\tif (can_place_at(stairsPos, ctx))",
+      "mutated": "\t\tif (is_unobstructed(stairsPos, ctx))",
+      "catches": "the stairs down placed in water, where a character who cannot swim never reaches them"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\t!can_place_at(pos, ctx))\n\t{\n\t\tpos.x = ctx.dice->roll",
+      "mutated": "\t\t!is_unobstructed(pos, ctx))\n\t{\n\t\tpos.x = ctx.dice->roll",
+      "catches": "the player started standing in water"
     }
   ]
 }

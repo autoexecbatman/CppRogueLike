@@ -1235,7 +1235,7 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 		for (const auto& offset : cardinals)
 		{
 			Vector2D spawnPos = playerOwner.position + offset;
-			if (ctx.map->is_unobstructed(spawnPos, ctx))
+			if (ctx.map->can_place_at(spawnPos, ctx))
 			{
 				ctx.creatureManager->add_creature(ShopkeeperFactory::create_shopkeeper(spawnPos, ctx.levelManager->get_dungeon_level(), ctx), ctx);
 				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "DEBUG: Shopkeeper spawned.", MessageCompletion::FINISHED);

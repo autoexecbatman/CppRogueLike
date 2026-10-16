@@ -21,9 +21,13 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <vector>
 
+#include "src/Colors.h"
 #include "src/Creature.h"
+#include "src/Decoration.h"
 #include "src/DungeonRoom.h"
+#include "src/HealthPool.h"
 #include "src/Map.h"
 #include "src/Player.h"
 #include "src/SpawnUtils.h"
@@ -83,6 +87,33 @@ protected:
 	std::unique_ptr<Player> player{};
 	DungeonRoom room{ ROOM_COL, ROOM_ROW, ROOM_SIZE, ROOM_SIZE };
 };
+
+// The one question every generation site asks: open floor answers yes; water, rock, a
+// shut door, a creature's tile and a barrel's tile each answer no.
+TEST_F(WaterSpawnTest, GenerationPlacesOnlyOnDryUnobstructedTiles)
+{
+	std::vector<std::unique_ptr<Decoration>> decorations{};
+	ctx.decorations = &decorations;
+	const Vector2D floorTile{ ROOM_COL, ROOM_ROW };
+	const Vector2D pool{ ROOM_COL + 1, ROOM_ROW };
+	const Vector2D shutDoor{ ROOM_COL + 2, ROOM_ROW };
+	const Vector2D creatureTile{ ROOM_COL, ROOM_ROW + 1 };
+	const Vector2D barrelTile{ ROOM_COL + 1, ROOM_ROW + 1 };
+	const Vector2D rock{ 0, 0 };
+	map.set_tile(pool, TileType::WATER);
+	map.set_tile(shutDoor, TileType::CLOSED_DOOR);
+	auto orc = std::make_unique<Creature>(creatureTile, ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK });
+	orc->healthPool = std::make_unique<HealthPool>(8);
+	creatures.push_back(std::move(orc));
+	decorations.push_back(std::make_unique<Decoration>(Decoration{ .position = barrelTile, .name = "barrel" }));
+
+	EXPECT_TRUE(map.can_place_at(floorTile, ctx));
+	EXPECT_FALSE(map.can_place_at(pool, ctx)) << "a non-swimmer could never reach it";
+	EXPECT_FALSE(map.can_place_at(rock, ctx));
+	EXPECT_FALSE(map.can_place_at(shutDoor, ctx));
+	EXPECT_FALSE(map.can_place_at(creatureTile, ctx));
+	EXPECT_FALSE(map.can_place_at(barrelTile, ctx));
+}
 
 TEST_F(WaterSpawnTest, ADryRoomStillAnswers)
 {

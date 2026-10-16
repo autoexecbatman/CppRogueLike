@@ -30,6 +30,7 @@
 
 #include <gtest/gtest.h>
 
+#include <cassert>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -258,6 +259,40 @@ TEST_F(DungeonConnectivityTest, EveryTileACostMapReachesLeadsDownToTheGoal)
 
 	EXPECT_EQ(unenterable, 0) << "a cost map reached tiles its own mobility may not enter";
 	EXPECT_EQ(deadEnds, 0) << "a cost map left tiles with no way down a monster may take";
+}
+
+// Nothing a level is generated with stands in water, because the character a game starts
+// with cannot go in after it: no barrel, no item on the floor, not the stairs and not the
+// player.
+TEST_F(DungeonConnectivityTest, NothingIsGeneratedStandingInWater)
+{
+	int wetBarrels = 0;
+	int wetItems = 0;
+	int wetStairs = 0;
+	int wetPlayers = 0;
+	for (int attempt = 0; attempt < DUNGEONS; ++attempt)
+	{
+		Map map{ MAP_WIDTH, MAP_HEIGHT };
+		generate_into(map);
+
+		for (const auto& decoration : decorations)
+		{
+			assert(decoration && "a generated level holds a null decoration");
+			wetBarrels += map.is_water(decoration->position) ? 1 : 0;
+		}
+		for (const auto& item : floor.items)
+		{
+			assert(item && "a generated level holds a null item");
+			wetItems += map.is_water(item->position) ? 1 : 0;
+		}
+		wetStairs += map.is_water(stairs.position) ? 1 : 0;
+		wetPlayers += map.is_water(player_start()) ? 1 : 0;
+	}
+
+	EXPECT_EQ(wetBarrels, 0) << "barrels generated in water across " << DUNGEONS << " dungeons";
+	EXPECT_EQ(wetItems, 0) << "items generated in water";
+	EXPECT_EQ(wetStairs, 0) << "stairs generated in water";
+	EXPECT_EQ(wetPlayers, 0) << "a player started in water";
 }
 
 TEST_F(DungeonConnectivityTest, AStartOffTheMapIsRefusedRatherThanReportedClean)
