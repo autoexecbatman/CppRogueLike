@@ -282,6 +282,9 @@ TEST_F(TreasureRoomFixture, GuardSetup_WithCorridor_JailerIsPlaced)
     const Vector2D corridorPos{ 8, 7 };
     place_door(doorPos);
     place_corridor(corridorPos);
+    // The stairs lie down the corridor, which is what makes it the way in: a jailer is only
+    // posted where the stairs can be reached without passing a locked door.
+    ctx.stairs->position = corridorPos;
 
     const std::size_t creaturesBefore = creatures.size();
     TreasureRoom::setup_guard(room, ctx);
