@@ -7,11 +7,13 @@
 #include "src/BaseMenu.h"
 #include "src/BodyPlanRegistry.h"
 #include "src/BuffSystem.h"
+#include "src/ContentEditor.h"
 #include "src/ContentRegistry.h"
 #include "src/CostOverlay.h"
 #include "src/Creature.h"
 #include "src/CreatureManager.h"
 #include "src/DataManager.h"
+#include "src/DecorEditor.h"
 #include "src/Decoration.h"
 #include "src/DisplayManager.h"
 #include "src/DungeonRoom.h"
@@ -21,17 +23,21 @@
 #include "src/GameStateManager.h"
 #include "src/HungerSystem.h"
 #include "src/InventoryData.h"
+#include "src/ItemEditor.h"
 #include "src/ItemRegistry.h"
 #include "src/LevelManager.h"
 #include "src/Map.h"
 #include "src/MenuManager.h"
 #include "src/MessageSystem.h"
+#include "src/MonsterEditor.h"
 #include "src/MonsterRegistry.h"
 #include "src/Pathfinding.h"
 #include "src/Paths.h"
 #include "src/Player.h"
 #include "src/PrefabLibrary.h"
 #include "src/RandomDice.h"
+#include "src/RoomEditor.h"
+#include "src/SpellEditor.h"
 #include "src/SpellRegistry.h"
 #include "src/SpellTile.h"
 #include "src/Stairs.h"
@@ -82,6 +88,12 @@ struct MockGameContext
 	std::vector<DungeonRoom> rooms{};
 	std::deque<std::unique_ptr<BaseMenu>> menus{};
 	std::vector<Vector2D> mousePathOverlay{};
+	DecorEditor decorEditor{};
+	ContentEditor contentEditor{};
+	RoomEditor roomEditor{};
+	ItemEditor itemEditor{};
+	MonsterEditor monsterEditor{};
+	SpellEditor spellEditor{};
 
 	MockGameContext()
 	{
@@ -113,6 +125,7 @@ struct MockGameContext
 
 		// Loaded as main.cpp loads it. An empty library lets generation pass in a fixture while
 		// the game aborts on its first map, and a loader that opens nothing returns quietly.
+		decorEditor.load_palette(Paths::TILE_CONFIG);
 		prefabLibrary.load_tile_labels(Paths::TILE_CONFIG);
 		prefabLibrary.load(Paths::PREFABS);
 		assert(prefabLibrary.count() > 0 && "MockGameContext: no prefabs loaded");
@@ -140,7 +153,13 @@ struct MockGameContext
 			.contentRegistry = &content_registry,
 			.costOverlay = &costOverlay,
 			.pathfinder = &pathfinder,
+			.decorEditor = &decorEditor,
 			.prefabLibrary = &prefabLibrary,
+			.contentEditor = &contentEditor,
+			.roomEditor = &roomEditor,
+			.itemEditor = &itemEditor,
+			.monsterEditor = &monsterEditor,
+			.spellEditor = &spellEditor,
 			.tileConfig = &tile_config,
 			.bodyPlanRegistry = &body_plans,
 			.spellRegistry = &spellRegistry,
