@@ -36,6 +36,24 @@
       "original": "\tinventoryData.items.clear();\n",
       "mutated": "",
       "catches": "a looted corpse still listing what it no longer holds"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tInventoryOperations::add_item(*ctx.floorInventory, std::move(equipped.item));\n",
+      "mutated": "",
+      "catches": "a monster's worn gear destroyed with it, the defect issue 0070 closed"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tequipped.item->remove_state(ActorState::IS_EQUIPPED);\n",
+      "mutated": "",
+      "catches": "worn gear dropped on death still marked as worn"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tequipped.item->position = position;\n",
+      "mutated": "",
+      "catches": "worn gear landing where it was made rather than where the creature fell"
     }
   ]
 }

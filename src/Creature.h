@@ -573,8 +573,9 @@ public:
 	// already dead is left alone.
 	void tick_poison(GameContext& ctx);
 
-	// Lifecycle hooks — Player overrides; monsters no-op
-	// Called when a creature dies — Player saves/defeats, monsters drop corpses
+	// Lifecycle hooks - Player overrides; monsters no-op
+	// Called when a creature dies - Player saves/defeats; a monster drops its pack and what it
+	// wore where it fell, and leaves a corpse
 	virtual void die(GameContext& ctx);
 
 	TileRef get_display_tile() const noexcept override;

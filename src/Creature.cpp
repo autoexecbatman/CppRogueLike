@@ -1517,6 +1517,16 @@ void Creature::die(GameContext& ctx)
 	}
 	inventoryData.items.clear();
 
+	// What it wore falls with it, no longer worn. The floor has no limit, so nothing is lost.
+	for (EquippedItem& equipped : equippedItems)
+	{
+		assert(equipped.item && "Creature::die: an equipment entry holds no item");
+		equipped.item->position = position;
+		equipped.item->remove_state(ActorState::IS_EQUIPPED);
+		InventoryOperations::add_item(*ctx.floorInventory, std::move(equipped.item));
+	}
+	equippedItems.clear();
+
 	// Create a corpse on the floor in place of the creature.
 	auto corpse = std::make_unique<Item>(position, actorData);
 	corpse->actorData.name = std::format("dead {}", get_name());

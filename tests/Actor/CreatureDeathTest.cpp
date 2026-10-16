@@ -4,20 +4,13 @@
 // Creature::die is the death every monster in the game actually goes through:
 // combat reaches it through take_damage_and_check_death, and Player overrides it
 // with the defeat screen. What it does, in order: says the creature is dead,
-// hands its experience to the player, drops what it was carrying onto the floor
-// where it fell, and leaves a corpse in its place.
+// hands its experience to the player, drops what it was carrying and what it wore
+// onto the floor where it fell, and leaves a corpse in its place.
 //
 // It is reached here by calling die(). src/DeathHandler.cpp held a second copy of
 // this body that nothing constructed, and testing that copy is what this file did
 // until 2026-09-30 - it measured a function the game never called. Those files are
 // gone now.
-//
-// What these tests deliberately do not claim: that a monster's *worn* gear
-// disappears. It does - execute walks inventoryData.items and never touches
-// equippedItems, so the long sword an orc was wielding is destroyed with it, and
-// eleven of the forty-three monster records carry equipment. That is a defect
-// rather than a rule, so it is recorded and not pinned here; a test asserting
-// the sword vanishes would make the bug permanent.
 //
 // Run it:
 //
@@ -187,6 +180,28 @@ TEST_F(CreatureDeathTest, ACrowdedFloorStillTakesEverythingTheDeadCarried)
 	EXPECT_TRUE(floor_holds(first)) << "a crowded floor destroyed the pack";
 	EXPECT_TRUE(floor_holds(second));
 	EXPECT_NE(corpse_on_the_floor(), nullptr) << "a crowded floor destroyed the corpse";
+}
+
+// What it wore falls with it: the sword in its hand and the armour on its back land where
+// it fell, no longer worn, and the body keeps nothing.
+TEST_F(CreatureDeathTest, WhatItWoreFallsWhereItDied)
+{
+	monster->set_body_plan(mock.body_plans.get("humanoid"));
+	auto sword = ItemCreator::create("long_sword", PICKED_UP_OVER_THERE, ctx);
+	auto armour = ItemCreator::create("leather_armor", PICKED_UP_OVER_THERE, ctx);
+	const Item& wielded = *sword;
+	const Item& worn = *armour;
+	monster->wear(std::move(sword), EquipmentSlot::RIGHT_HAND);
+	monster->wear(std::move(armour), EquipmentSlot::BODY);
+
+	kill_it();
+
+	EXPECT_TRUE(floor_holds(wielded)) << "the sword it was wielding was destroyed with it";
+	EXPECT_TRUE(floor_holds(worn)) << "the armour it was wearing was destroyed with it";
+	EXPECT_EQ(wielded.position, WHERE_IT_FELL);
+	EXPECT_EQ(worn.position, WHERE_IT_FELL);
+	EXPECT_FALSE(wielded.has_state(ActorState::IS_EQUIPPED)) << "the dropped sword still counts as worn";
+	EXPECT_TRUE(monster->equippedItems.empty()) << "the corpse still wears its gear";
 }
 
 // end of file: CreatureDeathTest.cpp
