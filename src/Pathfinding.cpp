@@ -310,7 +310,8 @@ std::vector<Vector2D> Pathfinder::find_route(Vector2D start, Vector2D goal, cons
 	std::vector<std::optional<Vector2D>> cameFrom(cellCount, std::nullopt);
 
 	// The goal is let in where the rule alone would refuse it: a creature may stand there
-	// now, and any shut door is somewhere to walk up to.
+	// now, any shut door is somewhere to walk up to, and a decoration is bumped from the
+	// last step.
 	const auto price_of = [&](Vector2D position) -> std::optional<double>
 	{
 		if (position == goal)
@@ -318,6 +319,10 @@ std::vector<Vector2D> Pathfinder::find_route(Vector2D start, Vector2D goal, cons
 			if (map.get_tile_type(goal) == TileType::CLOSED_DOOR)
 			{
 				return static_cast<double>(SHUT_DOOR_COST);
+			}
+			if (map.find_decoration_at(goal, ctx) != nullptr && mobility.contains(map.get_tile_type(goal)))
+			{
+				return static_cast<double>(STEP_COST);
 			}
 			const std::optional<int> goalPrice = step_cost(goal, mobility, ctx);
 			return goalPrice ? std::optional<double>{ static_cast<double>(*goalPrice) } : std::nullopt;

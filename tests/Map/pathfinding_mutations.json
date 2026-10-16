@@ -108,6 +108,12 @@
       "original": "\t\tif (map.get_actor(position, ctx) != nullptr)\n\t\t{\n\t\t\treturn std::nullopt;\n\t\t}",
       "mutated": "",
       "catches": "a route that runs straight through a creature"
+    },
+    {
+      "file": "src/Pathfinding.cpp",
+      "original": "\t\t\tif (map.find_decoration_at(goal, ctx) != nullptr && mobility.contains(map.get_tile_type(goal)))",
+      "mutated": "\t\t\tif (false)",
+      "catches": "the walk to a barrel refused, so a click can never break one"
     }
   ]
 }

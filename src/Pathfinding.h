@@ -118,9 +118,9 @@ public:
 	// The cheapest route from start to goal, both included, for that mobility, found by A*:
 	// a diagonal costs its price times sqrt 2, and the Chebyshev distance to the goal is
 	// the heuristic, which never overestimates because no step costs less than 1. Tiles a
-	// creature stands on are avoided, except the goal, and the goal may be any shut door,
-	// locked or not, because walking to a door is how its lock is reached. Empty when the
-	// goal cannot be reached.
+	// creature stands on are avoided, except the goal. The goal may be any shut door,
+	// locked or not, because walking to a door is how its lock is reached, and any
+	// decoration, because the last step bumps it. Empty when the goal cannot be reached.
 	[[nodiscard]] std::vector<Vector2D> find_route(Vector2D start, Vector2D goal, const Mobility& mobility, const GameContext& ctx) const;
 };
 

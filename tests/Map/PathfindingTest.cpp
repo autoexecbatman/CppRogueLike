@@ -297,6 +297,21 @@ TEST_F(PathfindingTest, ALockedDoorCanBeReachedButNotPassed)
 	EXPECT_TRUE(route(Vector2D{ 2, 5 }, Vector2D{ 16, 5 }, *walker).empty()) << "a route ran through a lock";
 }
 
+// A barrel is never passed, but it can be walked up to: the last step is the bump that
+// breaks it.
+TEST_F(PathfindingTest, ABarrelCanBeReachedButNotPassed)
+{
+	open_room(Vector2D{ 1, 5 }, Vector2D{ 18, 5 });
+	const Vector2D barrelTile{ 9, 5 };
+	decorations.push_back(std::make_unique<Decoration>(Decoration{ .position = barrelTile, .name = "barrel" }));
+
+	const std::vector<Vector2D> toTheBarrel = route(Vector2D{ 2, 5 }, barrelTile, *walker);
+
+	ASSERT_FALSE(toTheBarrel.empty()) << "the walk to the barrel was refused";
+	EXPECT_EQ(toTheBarrel.back(), barrelTile);
+	EXPECT_TRUE(route(Vector2D{ 2, 5 }, Vector2D{ 16, 5 }, *walker).empty()) << "a route ran through a barrel";
+}
+
 // A cost is the price of the tiles walked onto: one a pace, two for the shut door.
 TEST_F(PathfindingTest, CostToCountsPacesAndADoorCountsTwo)
 {
