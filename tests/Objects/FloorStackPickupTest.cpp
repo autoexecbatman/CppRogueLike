@@ -65,8 +65,7 @@ protected:
 		auto item = std::make_unique<Item>(where, ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK });
 		item->enhancement.weight = 1;
 		Item& placed = *item;
-		const auto added = InventoryOperations::add_item(*ctx.floorInventory, std::move(item));
-		EXPECT_TRUE(added.has_value()) << "the fixture could not put " << name << " on the floor";
+		InventoryOperations::add_item(*ctx.floorInventory, std::move(item));
 		return placed;
 	}
 

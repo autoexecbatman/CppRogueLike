@@ -353,8 +353,9 @@ TEST_F(StatBoostEquipmentTest, AnItemTakenOffIntoAFullPackIsSetDown)
 	EXPECT_TRUE(is_on_floor(*ctx.floorInventory, gauntlets, player->position)) << "the gauntlets were destroyed";
 }
 
-// With nowhere to put it - a full pack and a full floor - the item stays on.
-TEST_F(StatBoostEquipmentTest, AnItemWithNowhereToGoStaysOn)
+// A full pack over a floor already holding a thousand items: the floor has no limit, so
+// the item still comes off and lands at the wearer's feet.
+TEST_F(StatBoostEquipmentTest, AnItemTakenOffOverACrowdedFloorStillLands)
 {
 	put_on("gauntlets_of_ogre_power");
 	const Item* gauntlets = player->get_equipped_item(EquipmentSlot::GAUNTLETS);
@@ -362,14 +363,16 @@ TEST_F(StatBoostEquipmentTest, AnItemWithNowhereToGoStaysOn)
 	{
 		load_pack(*player, 0, ctx);
 	}
-	FloorInventory crowded{ 1 };
-	[[maybe_unused]] const auto placed = InventoryOperations::add_item(crowded, ItemCreator::create("dagger", player->position, ctx));
-	ctx.floorInventory = &crowded;
+	constexpr int ITEMS_ALREADY_THERE = 1000;
+	for (int already = 0; already < ITEMS_ALREADY_THERE; ++already)
+	{
+		ctx.floorInventory->items.push_back(ItemCreator::create("dagger", player->position, ctx));
+	}
 
-	EXPECT_FALSE(player->unequip_item(EquipmentSlot::GAUNTLETS, ctx));
+	EXPECT_TRUE(player->unequip_item(EquipmentSlot::GAUNTLETS, ctx));
 
-	EXPECT_EQ(player->get_equipped_item(EquipmentSlot::GAUNTLETS), gauntlets) << "the gauntlets came off into nowhere";
-	EXPECT_EQ(player->get_strength(), 18);
+	EXPECT_TRUE(is_on_floor(*ctx.floorInventory, gauntlets, player->position)) << "a crowded floor destroyed the gauntlets";
+	EXPECT_EQ(player->get_strength(), BASE_STRENGTH);
 }
 
 // The rule is the creature's, not the player's: a monster wearing a girdle has its Strength.

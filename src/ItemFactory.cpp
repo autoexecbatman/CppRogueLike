@@ -49,10 +49,9 @@ void place_enhanced_item(const EnhancedItemSpawnRule& rule, Vector2D position, G
 	const ItemEnhancement enhancement = (rule.enhancementCategory == EnhancedItemCategory::WEAPON)
 		? ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, *ctx.dice)
 		: ItemEnhancement::generate_armor_enhancement(MagicalPrefixes::ALLOWED, *ctx.dice);
-	[[maybe_unused]] const auto spawnItemResult = InventoryOperations::add_item(
+	InventoryOperations::add_item(
 		*ctx.floorInventory,
 		ItemCreator::create_with_enhancement(baseKey, position, enhancement.prefix, enhancement.suffix, ctx));
-	assert(spawnItemResult.has_value());
 }
 
 // The spawn table as the registry holds it now: every item with a spawn weight, in key
@@ -74,17 +73,15 @@ std::vector<ItemType> spawn_table(const ItemRegistry& items)
 		{
 			const int level = ctx.levelManager->get_dungeon_level();
 			const int amount = ctx.dice->roll(level * 3, level * 10);
-			[[maybe_unused]] const auto spawnItemResult = InventoryOperations::add_item(
+			InventoryOperations::add_item(
 				*ctx.floorInventory,
 				ItemCreator::create_with_gold_amount(pos, amount, ctx));
-			assert(spawnItemResult.has_value());
 		};
 		auto place_item = [key](Vector2D pos, GameContext& ctx)
 		{
-			[[maybe_unused]] const auto spawnItemResult = InventoryOperations::add_item(
+			InventoryOperations::add_item(
 				*ctx.floorInventory,
 				ItemCreator::create(key, pos, ctx));
-			assert(spawnItemResult.has_value());
 		};
 
 		table.push_back(
@@ -213,8 +210,7 @@ void ItemFactory::generate_treasure(Vector2D position, int dungeonLevel, int qua
 	// Through the registry, so a treasure pile is the same item as a floor pile: one
 	// number for what it pays and what it is worth, and a tile the item data owns.
 	auto goldPile = ItemCreator::create_with_gold_amount(position, goldAmount, ctx);
-	[[maybe_unused]] const auto placed = InventoryOperations::add_item(*ctx.floorInventory, std::move(goldPile));
-	assert(placed.has_value());
+	InventoryOperations::add_item(*ctx.floorInventory, std::move(goldPile));
 
 	// Generate other random items
 	for (int itemIndex = 0; itemIndex < itemCount; ++itemIndex)

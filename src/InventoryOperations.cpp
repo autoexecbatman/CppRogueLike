@@ -18,24 +18,14 @@ namespace InventoryOperations
 
 // ===== CORE OPERATIONS =====
 
-InventoryResult<bool> add_item(FloorInventory& inventory, std::unique_ptr<Item> item)
+void add_item(FloorInventory& inventory, std::unique_ptr<Item> item)
 {
-	if (!item)
-	{
-		return std::unexpected(InventoryError::INVALID_ITEM);
-	}
-
-	if (is_inventory_full(inventory))
-	{
-		fire_inventory_event(inventory, InventoryEvent::Type::INVENTORY_FULL, item.get());
-		return std::unexpected(InventoryError::FULL);
-	}
+	assert(item && "add_item: an empty item was put on the floor");
 
 	const auto* itemPtr = item.get();
 	inventory.items.push_back(std::move(item));
 
 	fire_inventory_event(inventory, InventoryEvent::Type::ITEM_ADDED, itemPtr);
-	return true;
 }
 
 InventoryResult<bool> add_item(CreatureInventory& inventory, std::unique_ptr<Item> item)

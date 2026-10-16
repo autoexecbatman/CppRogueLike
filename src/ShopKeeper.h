@@ -38,7 +38,8 @@ private:
 	ShopType shopType{ ShopType::GENERAL_STORE };
 	ShopQuality shopQuality{ ShopQuality::AVERAGE };
 	std::string shopName{};
-	FloorInventory shopInventory{ 50 }; // Shop's items for sale
+	// The shop's goods. Its own stock, so it keeps a pack's limit: full shelves refuse a sale.
+	CreatureInventory shopInventory{ 50 };
 	int markupPercent{ 120 }; // Buy price percentage
 	int sellbackPercent{ 60 }; // Sell price percentage
 
@@ -73,8 +74,8 @@ public:
 	ShopType get_shop_type() const noexcept { return shopType; }
 	ShopQuality get_shop_quality() const noexcept { return shopQuality; }
 	const std::string& get_shop_name() const noexcept { return shopName; }
-	FloorInventory& get_shop_inventory() noexcept { return shopInventory; }
-	const FloorInventory& get_shop_inventory() const noexcept { return shopInventory; }
+	CreatureInventory& get_shop_inventory() noexcept { return shopInventory; }
+	const CreatureInventory& get_shop_inventory() const noexcept { return shopInventory; }
 	int get_markup_percent() const noexcept { return markupPercent; }
 	void set_markup_percent(int value) noexcept { markupPercent = value; }
 	int get_sellback_percent() const noexcept { return sellbackPercent; }

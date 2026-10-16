@@ -88,18 +88,19 @@ TEST(SaveFieldNamesTest, ALevelManagerRefusesASaveMissingOnlyTheShopkeeperCount)
 namespace
 {
 
-// A saved floor holding two items, as save_inventory writes it.
-json saved_floor_of_two_items()
+// A saved pack holding two items, as save_inventory writes it. A pack, because only a
+// pack has a capacity to record; a floor has no limit.
+json saved_pack_of_two_items()
 {
-	FloorInventory floor{ 10 };
+	CreatureInventory pack{ 10 };
 	for (const char* name : { "first stone", "second stone" })
 	{
 		[[maybe_unused]] const auto added = InventoryOperations::add_item(
-			floor,
+			pack,
 			std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK }));
 	}
 	json saved;
-	InventoryOperations::save_inventory(floor, saved);
+	InventoryOperations::save_inventory(pack, saved);
 	return saved;
 }
 
@@ -109,9 +110,9 @@ TEST(SaveFieldNamesTest, AnInventoryRefusesARecordMissingItsCapacityOrItems)
 {
 	for (const char* key : { "capacity", "inventory" })
 	{
-		json missingOne = saved_floor_of_two_items();
+		json missingOne = saved_pack_of_two_items();
 		missingOne.erase(key);
-		FloorInventory loaded{ 1 };
+		CreatureInventory loaded{ 1 };
 		EXPECT_ANY_THROW(InventoryOperations::load_inventory(loaded, missingOne))
 			<< "an inventory record without \"" << key << "\" loaded quietly";
 	}
@@ -120,11 +121,11 @@ TEST(SaveFieldNamesTest, AnInventoryRefusesARecordMissingItsCapacityOrItems)
 TEST(SaveFieldNamesTest, ABrokenItemStopsTheInventoryLoadingRatherThanShorteningIt)
 {
 	// The second item's record loses a field Item::save always writes. A loader that
-	// caught the error would hand back a floor holding one stone and say nothing.
-	json saved = saved_floor_of_two_items();
+	// caught the error would hand back a pack holding one stone and say nothing.
+	json saved = saved_pack_of_two_items();
 	saved.at("inventory").at(1).erase("itemKey");
 
-	FloorInventory loaded{ 1 };
+	CreatureInventory loaded{ 1 };
 	EXPECT_ANY_THROW(InventoryOperations::load_inventory(loaded, saved))
 		<< "a broken item was dropped from the inventory without a word";
 }

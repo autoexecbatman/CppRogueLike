@@ -21,15 +21,9 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tif (!fitsInPack && InventoryOperations::is_inventory_full(*ctx.floorInventory))",
-      "mutated": "\t\tif (false)",
-      "catches": "an item taken off with nowhere to put it"
-    },
-    {
-      "file": "src/Creature.cpp",
-      "original": "\t\t\tequippedItems.emplace_back(std::move(removed), slot);\n\t\t\treturn false;",
-      "mutated": "\t\t\tequippedItems.emplace_back(std::move(removed), slot);\n\t\t\treturn true;",
-      "catches": "an item kept on reported as taken off"
+      "original": "\t\t\tInventoryOperations::add_item(*ctx.floorInventory, std::move(removed));\n",
+      "mutated": "",
+      "catches": "an item taken off into a full pack that never reaches the floor, destroyed"
     },
     {
       "file": "src/Creature.cpp",

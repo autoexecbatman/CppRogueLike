@@ -382,7 +382,7 @@ void ShopKeeper::load(const json& j)
 	sellbackPercent = j.at("sellback_percent").get<int>();
 
 	// Load shop inventory
-	shopInventory = FloorInventory(50);
+	shopInventory = CreatureInventory(50);
 	load_inventory(shopInventory, j.at("shop_inventory"));
 }
 

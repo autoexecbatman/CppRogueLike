@@ -1192,24 +1192,12 @@ void Creature::drop(Item& item, GameContext& ctx)
 		return;
 	}
 
-	// A floor with no room refuses before anything moves, so the item stays in the pack
+	// The floor has no limit, so a drop always lands.
 	auto& foundPtr = matches.front();
-	if (InventoryOperations::is_inventory_full(*ctx.floorInventory))
-	{
-		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			std::format("There is no room to set the {} down here.", foundPtr->actorData.name),
-			MessageCompletion::FINISHED);
-		return;
-	}
 	foundPtr->position = position;
-
-	auto addResult = InventoryOperations::add_item(*ctx.floorInventory, std::move(foundPtr));
-	if (addResult.has_value())
-	{
-		InventoryOperations::optimize_inventory_storage(inventoryData);
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You dropped the item.", MessageCompletion::FINISHED);
-	}
+	InventoryOperations::add_item(*ctx.floorInventory, std::move(foundPtr));
+	InventoryOperations::optimize_inventory_storage(inventoryData);
+	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You dropped the item.", MessageCompletion::FINISHED);
 }
 
 bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameContext& ctx)
@@ -1313,18 +1301,9 @@ bool Creature::unequip_item(EquipmentSlot slot, GameContext& ctx)
 		equippedItems.erase(it);
 
 		// The pack takes it if it can. A full pack, or one too heavy now - taking off a
-		// Strength item lowers what can be carried - leaves it at the wearer's feet; with
-		// nowhere at all to put it, it stays on. An item that comes off is never lost.
+		// Strength item lowers what can be carried - leaves it at the wearer's feet, and
+		// the floor always has room, so an item that comes off is never lost.
 		const bool fitsInPack = !InventoryOperations::is_inventory_full(inventoryData) && InventoryOperations::is_within_weight_limit(*removed, *this, *ctx.dataManager);
-		if (!fitsInPack && InventoryOperations::is_inventory_full(*ctx.floorInventory))
-		{
-			ctx.messageSystem->message(
-				ColorPairId::WHITE_BLACK,
-				std::format("There is nowhere to put the {}, so you keep it on.", removed->actorData.name),
-				MessageCompletion::FINISHED);
-			equippedItems.emplace_back(std::move(removed), slot);
-			return false;
-		}
 
 		removed->remove_state(ActorState::IS_EQUIPPED);
 		if (fitsInPack)
@@ -1339,8 +1318,7 @@ bool Creature::unequip_item(EquipmentSlot slot, GameContext& ctx)
 				std::format("You cannot carry the {} as well, and set it down.", removed->actorData.name),
 				MessageCompletion::FINISHED);
 			removed->position = position;
-			[[maybe_unused]] const auto setDown = InventoryOperations::add_item(*ctx.floorInventory, std::move(removed));
-			assert(setDown.has_value());
+			InventoryOperations::add_item(*ctx.floorInventory, std::move(removed));
 		}
 
 		// Update armor class if armor or shield was unequipped
@@ -1535,8 +1513,7 @@ void Creature::die(GameContext& ctx)
 	for (auto& item : inventoryData.items)
 	{
 		item->position = position;
-		[[maybe_unused]] const auto dropOnDeathResult = InventoryOperations::add_item(*ctx.floorInventory, std::move(item));
-		assert(dropOnDeathResult.has_value());
+		InventoryOperations::add_item(*ctx.floorInventory, std::move(item));
 	}
 	inventoryData.items.clear();
 
@@ -1546,8 +1523,7 @@ void Creature::die(GameContext& ctx)
 	corpse->actorData.tile = ctx.tileConfig->get("TILE_CORPSE");
 	corpse->enhancement.weight = get_corpse_weight();
 	corpse->behavior = CorpseFood{ 0 };
-	[[maybe_unused]] const auto placeCorpseResult = InventoryOperations::add_item(*ctx.floorInventory, std::move(corpse));
-	assert(placeCorpseResult.has_value());
+	InventoryOperations::add_item(*ctx.floorInventory, std::move(corpse));
 }
 
 int Creature::get_exceptional_strength() const noexcept

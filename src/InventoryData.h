@@ -3,6 +3,7 @@
 #include <expected>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "Item.h"
@@ -32,25 +33,21 @@ struct InventoryEvent
 	Type type{ Type::ITEM_ADDED };
 	const Item* item{ nullptr };
 	size_t currentSize{ 0 };
-	size_t capacity{ 0 };
+	// The pack's limit; a floor has none.
+	std::optional<size_t> capacity{};
 };
 
 using InventoryEventHandler = std::function<void(const InventoryEvent&)>;
 
 // Items on the dungeon floor.
-// No weight owner. No carry cap. Cleared on level transition.
+// No weight owner and no limit: an add always lands, so nothing dropped is ever lost.
+// Cleared on level transition, which is the only bound on what it holds.
 struct FloorInventory
 {
-	std::vector<std::unique_ptr<Item>> items;
-	size_t capacity{ 0 };
+	std::vector<std::unique_ptr<Item>> items{};
 	InventoryEventHandler eventHandler{ nullptr };
 
-	explicit FloorInventory(size_t initialCapacity)
-		: capacity(initialCapacity)
-	{
-		items.reserve(initialCapacity);
-	}
-
+	FloorInventory() = default;
 	FloorInventory(FloorInventory&&) noexcept = default;
 	FloorInventory& operator=(FloorInventory&&) noexcept = default;
 	~FloorInventory() = default;

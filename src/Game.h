@@ -124,7 +124,7 @@ struct Game
 	std::vector<std::unique_ptr<Trap>> traps{};
 	std::vector<std::unique_ptr<SpellTile>> spellTiles{};
 	std::vector<std::unique_ptr<Decoration>> decorations{};
-	FloorInventory floorInventory{ 1000 };
+	FloorInventory floorInventory{};
 
 	// Character creation blueprint — persists across ticks
 	PlayerBlueprint playerBlueprint{};

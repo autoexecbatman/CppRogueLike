@@ -71,7 +71,7 @@ protected:
 	// Stocks the shop to its capacity, so nothing more fits on the shelves.
 	void fill_shelves()
 	{
-		FloorInventory& shelves = shop.get_shop_inventory();
+		CreatureInventory& shelves = shop.get_shop_inventory();
 		while (!InventoryOperations::is_inventory_full(shelves))
 		{
 			ASSERT_TRUE(InventoryOperations::add_item(

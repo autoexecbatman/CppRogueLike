@@ -170,4 +170,23 @@ TEST_F(CreatureDeathTest, EveryCarriedItemFalls)
 	EXPECT_TRUE(floor_holds(second)) << "only part of the pack was dropped";
 }
 
+// The floor has no cap: a level already holding a thousand items still takes everything
+// the dead carried, and the corpse beside it.
+TEST_F(CreatureDeathTest, ACrowdedFloorStillTakesEverythingTheDeadCarried)
+{
+	constexpr int ITEMS_ALREADY_THERE = 1000;
+	for (int already = 0; already < ITEMS_ALREADY_THERE; ++already)
+	{
+		ctx.floorInventory->items.push_back(std::make_unique<Item>(PICKED_UP_OVER_THERE, ActorData{ TileRef{}, "pebble", ColorPairId::WHITE_BLACK }));
+	}
+	Item& first = carried("health_potion");
+	Item& second = carried("bread");
+
+	kill_it();
+
+	EXPECT_TRUE(floor_holds(first)) << "a crowded floor destroyed the pack";
+	EXPECT_TRUE(floor_holds(second));
+	EXPECT_NE(corpse_on_the_floor(), nullptr) << "a crowded floor destroyed the corpse";
+}
+
 // end of file: CreatureDeathTest.cpp

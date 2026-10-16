@@ -214,8 +214,7 @@ protected:
 	std::vector<std::unique_ptr<Trap>> traps{};
 	std::vector<std::unique_ptr<Decoration>> decorations{};
 	Stairs stairs{ Vector2D{ 1, 1 } };
-	// Room enough for every dungeon a case builds; the mock's own floor is sized for one.
-	FloorInventory floor{ 4000 };
+	FloorInventory floor{};
 };
 
 TEST_F(RoomShapeTest, EveryRoomKeepsTheShapeItWasGiven)

@@ -22,7 +22,7 @@ struct MockGameContext
 	CreatureManager creature_mgr{};
 	DataManager data_manager{};
 	ContentRegistry content_registry{};
-	FloorInventory inventory{ 100 };
+	FloorInventory inventory{};
 	GameState game_state{};
 
 	// Stateless, and every creature update reaches through it: Creature::update

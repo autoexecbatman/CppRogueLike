@@ -1996,8 +1996,7 @@ void Map::place_amulet(GameContext& ctx)
 		}
 
 		// Create and place the amulet
-		[[maybe_unused]] const auto placeAmuletResult = InventoryOperations::add_item(*ctx.floorInventory, ItemCreator::create("amulet_of_yendor", amuletPos, ctx));
-		assert(placeAmuletResult.has_value());
+		InventoryOperations::add_item(*ctx.floorInventory, ItemCreator::create("amulet_of_yendor", amuletPos, ctx));
 
 		// Log the placement (debug info)
 		if (ctx.messageSystem)

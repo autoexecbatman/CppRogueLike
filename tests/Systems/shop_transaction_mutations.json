@@ -21,9 +21,9 @@
     },
     {
       "file": "src/ItemFactory.cpp",
-      "original": "\t[[maybe_unused]] const auto placed = InventoryOperations::add_item(*ctx.floorInventory, std::move(goldPile));\n\tassert(placed.has_value());",
-      "mutated": "\tassert(InventoryOperations::add_item(*ctx.floorInventory, std::move(goldPile)).has_value());",
-      "catches": "the treasure pile back inside the assert, so a shipped treasure room holds no gold"
+      "original": "\tInventoryOperations::add_item(*ctx.floorInventory, std::move(goldPile));\n",
+      "mutated": "",
+      "catches": "the treasure pile never put down, so a treasure room holds no gold"
     },
     {
       "file": "src/ShopKeeper.cpp",

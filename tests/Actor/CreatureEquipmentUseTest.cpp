@@ -159,21 +159,29 @@ TEST_F(CreatureEquipmentUseTest, AnOverloadedCreatureKeepsTheBowItCannotDraw)
 	EXPECT_TRUE(pack_holds(bow)) << "the undrawable bow was destroyed rather than put back";
 }
 
-// A floor with no room refuses the drop before anything moves, so the pack keeps the
-// item and holds no empty slot where it was.
-TEST_F(CreatureEquipmentUseTest, DroppingOntoAFullFloorKeepsTheItem)
+// The floor has no limit: a drop onto one already holding a thousand items still lands,
+// and the pack holds no empty slot where the item was.
+TEST_F(CreatureEquipmentUseTest, DroppingOntoACrowdedFloorStillLands)
 {
 	Item& sword = carry("long_sword");
-	InventoryOperations::set_inventory_capacity(*ctx.floorInventory, ctx.floorInventory->items.size());
-	ASSERT_TRUE(InventoryOperations::is_inventory_full(*ctx.floorInventory));
+	constexpr int ITEMS_ALREADY_THERE = 1000;
+	for (int already = 0; already < ITEMS_ALREADY_THERE; ++already)
+	{
+		ctx.floorInventory->items.push_back(std::make_unique<Item>(orc->position, ActorData{ TileRef{}, "pebble", ColorPairId::WHITE_BLACK }));
+	}
 
 	orc->drop(sword, ctx);
 
+	auto is_the_sword = [&sword](const std::unique_ptr<Item>& dropped)
+	{
+		return dropped.get() == &sword;
+	};
 	auto is_empty_slot = [](const std::unique_ptr<Item>& packed)
 	{
 		return !packed;
 	};
-	EXPECT_TRUE(pack_holds(sword)) << "the sword left the pack for a floor with no room";
+	EXPECT_TRUE(std::ranges::any_of(ctx.floorInventory->items, is_the_sword)) << "a crowded floor refused the sword";
+	EXPECT_FALSE(pack_holds(sword));
 	EXPECT_TRUE(std::ranges::none_of(orc->inventoryData.items, is_empty_slot)) << "the pack holds an empty slot where the sword was";
 }
 

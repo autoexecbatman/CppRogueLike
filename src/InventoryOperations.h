@@ -5,6 +5,7 @@
 #include <concepts>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -32,8 +33,9 @@ concept AnyInventory = std::same_as<T, FloorInventory> || std::same_as<T, Creatu
 // ===== CORE OPERATIONS =====
 // Non-template - defined in InventoryOperations.cpp
 
-// Add to floor. No weight check. Use for loot spawns, drops, and corpses.
-InventoryResult<bool> add_item(FloorInventory& inventory, std::unique_ptr<Item> item);
+// Add to floor. No weight check and no limit, so it always lands. Use for loot spawns,
+// drops, and corpses.
+void add_item(FloorInventory& inventory, std::unique_ptr<Item> item);
 
 // Add to creature backpack. Capacity check only - no weight gate.
 // Use for initialization (starting gear, load). Weight gate lives in add_item_to_inventory.
@@ -149,8 +151,7 @@ const Item* find_item_by_id(const CreatureInventory& inventory, uint64_t uniqueI
 
 // ===== CAPACITY MANAGEMENT =====
 
-template <AnyInventory T>
-bool is_inventory_full(const T& inventory) noexcept
+inline bool is_inventory_full(const CreatureInventory& inventory) noexcept
 {
 	return inventory.items.size() >= inventory.capacity;
 }
@@ -167,14 +168,12 @@ size_t get_item_count(const T& inventory) noexcept
 	return inventory.items.size();
 }
 
-template <AnyInventory T>
-size_t get_remaining_space(const T& inventory) noexcept
+inline size_t get_remaining_space(const CreatureInventory& inventory) noexcept
 {
 	return inventory.capacity - inventory.items.size();
 }
 
-template <AnyInventory T>
-void set_inventory_capacity(T& inventory, size_t newCapacity)
+inline void set_inventory_capacity(CreatureInventory& inventory, size_t newCapacity)
 {
 	if (newCapacity < inventory.items.size())
 	{
@@ -242,6 +241,16 @@ bool contains_item(const T& inventory, const Item& item) noexcept
 
 // ===== EVENT SYSTEM =====
 
+// A pack's limit, or nothing for the floor, which has none.
+inline std::optional<size_t> capacity_of(const CreatureInventory& inventory) noexcept
+{
+	return inventory.capacity;
+}
+inline std::optional<size_t> capacity_of([[maybe_unused]] const FloorInventory& inventory) noexcept
+{
+	return std::nullopt;
+}
+
 template <AnyInventory T>
 void set_inventory_event_handler(T& inventory, InventoryEventHandler handler)
 {
@@ -257,7 +266,7 @@ void fire_inventory_event(T& inventory, InventoryEvent::Type type, const Item* i
 			.type = type,
 			.item = item,
 			.currentSize = inventory.items.size(),
-			.capacity = inventory.capacity
+			.capacity = capacity_of(inventory)
 		};
 		inventory.eventHandler(event);
 	}
@@ -268,9 +277,12 @@ void fire_inventory_event(T& inventory, InventoryEvent::Type type, const Item* i
 template <AnyInventory T>
 void load_inventory(T& inventory, const nlohmann::json& j)
 {
-	inventory.capacity = j.at("capacity").get<size_t>();
+	// Only a pack has a limit to restore; a floor has none.
+	if constexpr (std::same_as<T, CreatureInventory>)
+	{
+		inventory.capacity = j.at("capacity").get<size_t>();
+	}
 	inventory.items.clear();
-	inventory.items.reserve(inventory.capacity);
 
 	// A broken item record throws out of here: catching it would hand back the items that
 	// came before it and silently drop the rest.
@@ -282,7 +294,7 @@ void load_inventory(T& inventory, const nlohmann::json& j)
 	}
 }
 
-// Writes the capacity and one record per item, in the order the inventory holds them.
+// Writes a pack's capacity and one record per item, in the order the inventory holds them.
 // An inventory owns everything in it, so a null entry is a fault rather than an empty
 // slot: skipping one would write a record shorter than the inventory and the next load
 // would hand back fewer items with nothing said. load_inventory already refuses to lose
@@ -300,7 +312,10 @@ void load_inventory(T& inventory, const nlohmann::json& j)
 template <AnyInventory T>
 void save_inventory(const T& inventory, nlohmann::json& j)
 {
-	j["capacity"] = inventory.capacity;
+	if constexpr (std::same_as<T, CreatureInventory>)
+	{
+		j["capacity"] = inventory.capacity;
+	}
 	j["inventory"] = nlohmann::json::array();
 
 	for (const auto& item : inventory.items)
@@ -315,8 +330,7 @@ void save_inventory(const T& inventory, nlohmann::json& j)
 
 // ===== DEBUG =====
 
-template <AnyInventory T>
-std::string get_inventory_debug_info(const T& inventory)
+inline std::string get_inventory_debug_info(const CreatureInventory& inventory)
 {
 	return std::format(
 		"Inventory{{items:{}, capacity:{}, full:{}}}",
