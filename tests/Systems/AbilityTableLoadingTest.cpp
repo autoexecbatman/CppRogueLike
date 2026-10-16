@@ -22,9 +22,13 @@
 
 #include <gtest/gtest.h>
 
+#include <filesystem>
+#include <stdexcept>
+
 #include <nlohmann/json.hpp>
 
 #include "src/DataManager.h"
+#include "src/MessageSystem.h"
 
 using json = nlohmann::json;
 
@@ -198,4 +202,47 @@ TEST(AbilityTableLoadingTest, APlainStrengthRowWithNoPercentileBandStillParses)
 
 	EXPECT_EQ(row.exceptionalFrom, 0);
 	EXPECT_EQ(row.exceptionalTo, 0);
+}
+
+namespace
+{
+// Moves the working directory for one test and puts it back however the test ends, so a
+// failed assertion cannot leave the rest of the suite reading from the wrong place.
+class WorkingDirectoryScope
+{
+private:
+	std::filesystem::path previous{};
+
+public:
+	explicit WorkingDirectoryScope(const std::filesystem::path& target)
+		: previous(std::filesystem::current_path())
+	{
+		std::filesystem::current_path(target);
+	}
+	~WorkingDirectoryScope()
+	{
+		std::filesystem::current_path(previous);
+	}
+	WorkingDirectoryScope(const WorkingDirectoryScope&) = delete;
+	WorkingDirectoryScope& operator=(const WorkingDirectoryScope&) = delete;
+	WorkingDirectoryScope(WorkingDirectoryScope&&) = delete;
+	WorkingDirectoryScope& operator=(WorkingDirectoryScope&&) = delete;
+};
+} // namespace
+
+// Run from a directory holding none of the six tables, the load refuses outright rather
+// than handing back empty tables for the first ability lookup to trip over.
+TEST(AbilityTableLoadingTest, AMissingTableFileStopsTheLoad)
+{
+	const std::filesystem::path emptyDirectory = std::filesystem::temp_directory_path() / "roguelike_no_ability_tables";
+	std::filesystem::create_directories(emptyDirectory);
+	DataManager dataManager{};
+	MessageSystem messages{};
+
+	{
+		const WorkingDirectoryScope inEmptyDirectory{ emptyDirectory };
+		EXPECT_THROW(dataManager.load_all_data(messages), std::runtime_error);
+	}
+
+	std::filesystem::remove(emptyDirectory);
 }

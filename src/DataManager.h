@@ -11,7 +11,6 @@
 #include "DexterityAttributes.h"
 #include "IntelligenceAttributes.h"
 #include "StrengthAttributes.h"
-#include "Weapons.h"
 #include "WisdomAttributes.h"
 
 class MessageSystem;
@@ -40,7 +39,6 @@ public:
 	void load_all_data(MessageSystem& message_system);
 
 	// Accessors for loaded data
-	const std::vector<Weapons>& get_weapons() const { return weapons; }
 	const std::vector<StrengthAttributes>& get_strength_attributes() const { return strengthAttributes; }
 	const std::vector<DexterityAttributes>& get_dexterity_attributes() const { return dexterityAttributes; }
 	const std::vector<ConstitutionAttributes>& get_constitution_attributes() const { return constitutionAttributes; }
@@ -98,7 +96,6 @@ public:
 
 private:
 	// Data storage
-	std::vector<Weapons> weapons;
 	std::vector<StrengthAttributes> strengthAttributes;
 	std::vector<StrengthAttributes> exceptionalStrengthBands;
 	std::vector<DexterityAttributes> dexterityAttributes;
@@ -108,7 +105,6 @@ private:
 	std::vector<WisdomAttributes> wisdomAttributes;
 
 	// Simple JSON loading functions
-	std::vector<Weapons> load_weapons(const std::string& filename, MessageSystem& message_system);
 	std::vector<StrengthAttributes> load_strength(const std::string& filename, MessageSystem& message_system);
 	std::vector<DexterityAttributes> load_dexterity(const std::string& filename, MessageSystem& message_system);
 	std::vector<ConstitutionAttributes> load_constitution(const std::string& filename, MessageSystem& message_system);

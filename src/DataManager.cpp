@@ -33,6 +33,7 @@
 #include <format>
 #include <fstream>
 #include <ranges>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -49,7 +50,6 @@
 #include "IntelligenceAttributes.h"
 #include "MessageSystem.h"
 #include "StrengthAttributes.h"
-#include "Weapons.h"
 #include "WisdomAttributes.h"
 
 namespace
@@ -103,6 +103,25 @@ std::string find_data_file(const std::string& filename)
 		}
 	}
 	return "./" + filename; // Fallback to original behavior
+}
+
+// The whole of one table file. A file that cannot be opened stops the load, so a game
+// never runs on empty ability tables that only fail at the first lookup.
+//
+// Example:
+//   read_table(find_data_file("wisdom.json")); // -> the 25 Wisdom rows as JSON
+//   read_table("missing.json");                // throws std::runtime_error naming the file
+nlohmann::json read_table(const std::string& filename)
+{
+	std::ifstream file(filename);
+	if (!file.is_open())
+	{
+		throw std::runtime_error(std::format("DataManager: cannot open {}, so its ability table cannot be read", filename));
+	}
+
+	nlohmann::json table;
+	file >> table;
+	return table;
 }
 } // namespace
 
@@ -269,108 +288,9 @@ int DataManager::constitution_hit_point_adjustment(int score, CreatureClass crea
 	return std::min(tableAdjustment, NON_WARRIOR_BONUS_CAP);
 }
 
-std::vector<Weapons> DataManager::load_weapons(const std::string& filename, MessageSystem& message_system)
-{
-	std::ifstream file(filename);
-	if (!file.is_open())
-	{
-		message_system.log(std::format("DataManager: Error opening {}", filename));
-		return {};
-	}
-
-	nlohmann::json j;
-	file >> j;
-
-	std::vector<Weapons> data;
-	for (const auto& item : j)
-	{
-		Weapons w;
-		w.name = item.value("name", "");
-		w.type = item.value("type", "");
-		w.damageRoll = item.value("damageRoll", "");
-		w.damageRollTwoHanded = item.value("damageRollTwoHanded", "");
-		w.enhancementLevel = item.value("enhancementLevel", 0);
-
-		// Handle enum values with defaults
-		std::string handReq = item.value("handRequirement", "ONE_HANDED");
-		if (handReq == "TWO_HANDED")
-		{
-			w.handRequirement = HandRequirement::TWO_HANDED;
-		}
-		else if (handReq == "OFF_HAND_ONLY")
-		{
-			w.handRequirement = HandRequirement::OFF_HAND_ONLY;
-		}
-		else
-		{
-			w.handRequirement = HandRequirement::ONE_HANDED;
-		}
-
-		std::string weapSize = item.value("weaponSize", "MEDIUM");
-		if (weapSize == "TINY")
-		{
-			w.weaponSize = WeaponSize::TINY;
-		}
-		else if (weapSize == "SMALL")
-		{
-			w.weaponSize = WeaponSize::SMALL;
-		}
-		else if (weapSize == "LARGE")
-		{
-			w.weaponSize = WeaponSize::LARGE;
-		}
-		else if (weapSize == "GIANT")
-		{
-			w.weaponSize = WeaponSize::GIANT;
-		}
-		else
-		{
-			w.weaponSize = WeaponSize::MEDIUM;
-		}
-
-		// Handle arrays if they exist in JSON
-		if (item.contains("hitBonusRange") && item["hitBonusRange"].is_array())
-		{
-			for (const auto& bonus : item["hitBonusRange"])
-			{
-				w.hitBonusRange.push_back(bonus.get<int>());
-			}
-		}
-
-		if (item.contains("damageBonusRange") && item["damageBonusRange"].is_array())
-		{
-			for (const auto& bonus : item["damageBonusRange"])
-			{
-				w.damageBonusRange.push_back(bonus.get<int>());
-			}
-		}
-
-		if (item.contains("specialProperties") && item["specialProperties"].is_array())
-		{
-			for (const auto& prop : item["specialProperties"])
-			{
-				w.specialProperties.push_back(prop.get<std::string>());
-			}
-		}
-
-		data.push_back(w);
-	}
-
-	message_system.log(std::format("DataManager: Loaded {} weapons", data.size()));
-	return data;
-}
-
 std::vector<StrengthAttributes> DataManager::load_strength(const std::string& filename, MessageSystem& message_system)
 {
-	std::ifstream file(filename);
-	if (!file.is_open())
-	{
-		message_system.log(std::format("DataManager: Error opening {}", filename));
-		return {};
-	}
-
-	nlohmann::json j;
-	file >> j;
+	const nlohmann::json j = read_table(filename);
 
 	std::vector<StrengthAttributes> data;
 	for (const auto& item : j)
@@ -384,15 +304,7 @@ std::vector<StrengthAttributes> DataManager::load_strength(const std::string& fi
 
 std::vector<DexterityAttributes> DataManager::load_dexterity(const std::string& filename, MessageSystem& message_system)
 {
-	std::ifstream file(filename);
-	if (!file.is_open())
-	{
-		message_system.log(std::format("DataManager: Error opening {}", filename));
-		return {};
-	}
-
-	nlohmann::json j;
-	file >> j;
+	const nlohmann::json j = read_table(filename);
 
 	std::vector<DexterityAttributes> data;
 	for (const auto& item : j)
@@ -406,15 +318,7 @@ std::vector<DexterityAttributes> DataManager::load_dexterity(const std::string& 
 
 std::vector<ConstitutionAttributes> DataManager::load_constitution(const std::string& filename, MessageSystem& message_system)
 {
-	std::ifstream file(filename);
-	if (!file.is_open())
-	{
-		message_system.log(std::format("DataManager: Error opening {}", filename));
-		return {};
-	}
-
-	nlohmann::json j;
-	file >> j;
+	const nlohmann::json j = read_table(filename);
 
 	std::vector<ConstitutionAttributes> data;
 	for (const auto& item : j)
@@ -428,15 +332,7 @@ std::vector<ConstitutionAttributes> DataManager::load_constitution(const std::st
 
 std::vector<CharismaAttributes> DataManager::load_charisma(const std::string& filename, MessageSystem& message_system)
 {
-	std::ifstream file(filename);
-	if (!file.is_open())
-	{
-		message_system.log(std::format("DataManager: Error opening {}", filename));
-		return {};
-	}
-
-	nlohmann::json j;
-	file >> j;
+	const nlohmann::json j = read_table(filename);
 
 	std::vector<CharismaAttributes> data;
 	for (const auto& item : j)
@@ -450,15 +346,7 @@ std::vector<CharismaAttributes> DataManager::load_charisma(const std::string& fi
 
 std::vector<IntelligenceAttributes> DataManager::load_intelligence(const std::string& filename, MessageSystem& message_system)
 {
-	std::ifstream file(filename);
-	if (!file.is_open())
-	{
-		message_system.log(std::format("DataManager: Error opening {}", filename));
-		return {};
-	}
-
-	nlohmann::json j;
-	file >> j;
+	const nlohmann::json j = read_table(filename);
 
 	std::vector<IntelligenceAttributes> data;
 	for (const auto& item : j)
@@ -472,15 +360,7 @@ std::vector<IntelligenceAttributes> DataManager::load_intelligence(const std::st
 
 std::vector<WisdomAttributes> DataManager::load_wisdom(const std::string& filename, MessageSystem& message_system)
 {
-	std::ifstream file(filename);
-	if (!file.is_open())
-	{
-		message_system.log(std::format("DataManager: Error opening {}", filename));
-		return {};
-	}
-
-	nlohmann::json j;
-	file >> j;
+	const nlohmann::json j = read_table(filename);
 
 	std::vector<WisdomAttributes> data;
 	for (const auto& item : j)

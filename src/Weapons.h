@@ -72,33 +72,6 @@ inline constexpr std::array<WeaponSize, 5> ALL_WEAPON_SIZE = {
 	return *(found + 1);
 }
 
-// LEGACY: Weapons struct maintained for data loading compatibility only
-// Combat system uses WeaponDamageRegistry + DamageInfo exclusively
-// DO NOT EXPAND - Enhancement system removed, dual-wield removed
-// Usage limited to: DataManager loading, ItemCreator template data
-struct Weapons
-{
-	std::string name{};
-	std::string type{};
-	std::string damageRoll{};
-	std::string damageRollTwoHanded{}; // For versatile weapons when used two-handed
-	HandRequirement handRequirement{ HandRequirement::ONE_HANDED };
-	WeaponSize weaponSize{ WeaponSize::MEDIUM }; // AD&D 2e size category
-	std::vector<int> hitBonusRange{};
-	std::vector<int> damageBonusRange{};
-	std::vector<std::string> specialProperties{};
-	int enhancementLevel{ 0 };
-
-	// NOTE: Enhancement system removed - was never integrated with combat
-
-	// Two-handed weapon methods
-	bool is_two_handed() const noexcept { return handRequirement == HandRequirement::TWO_HANDED; }
-	bool can_use_one_handed() const noexcept { return handRequirement == HandRequirement::ONE_HANDED; }
-	bool can_use_two_handed() const noexcept { return handRequirement == HandRequirement::TWO_HANDED; }
-
-	// NOTE: Complex dual-wield logic removed - was never integrated with combat
-};
-
 inline std::string_view encode_hand_requirement(HandRequirement handRequirement)
 {
 	switch (handRequirement)
