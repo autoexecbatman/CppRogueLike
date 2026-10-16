@@ -90,6 +90,20 @@ private:
 	void set_explored(Vector2D pos); // set the tile as explored
 	void post_process_doors();
 
+protected:
+	std::unique_ptr<FovMap> fovMap{};
+	RandomDice mapRng{};
+	long seed{ 0 };
+	friend class DungeonGenerator;
+	void dig(Vector2D begin, Vector2D end);
+	void dig_corridor(Vector2D begin, Vector2D end);
+	void set_door(Vector2D position);
+	void create_room(const DungeonRoom& room, bool first, GameContext& ctx);
+	// Walls back cells inside the bounding box that the chosen RoomShape excludes.
+	// Must be called after dig() and before any spawning. No-op for RECT.
+	void apply_room_shape(const DungeonRoom& room);
+	void spawn_traps(const DungeonRoom& room, GameContext& ctx);
+
 public:
 	Map(int mapWidth, int mapHeight);
 
@@ -221,19 +235,5 @@ public:
 		const std::vector<DungeonRoom>& rooms,
 		GameContext& ctx);
 
-	std::vector<Tile> tiles;
-
-protected:
-	std::unique_ptr<FovMap> fovMap;
-	RandomDice mapRng;
-	long seed;
-	friend class DungeonGenerator;
-	void dig(Vector2D begin, Vector2D end);
-	void dig_corridor(Vector2D begin, Vector2D end);
-	void set_door(Vector2D position);
-	void create_room(const DungeonRoom& room, bool first, GameContext& ctx);
-	// Walls back cells inside the bounding box that the chosen RoomShape excludes.
-	// Must be called after dig() and before any spawning. No-op for RECT.
-	void apply_room_shape(const DungeonRoom& room);
-	void spawn_traps(const DungeonRoom& room, GameContext& ctx);
+	std::vector<Tile> tiles{};
 };

@@ -34,6 +34,24 @@ class MessageSystem;
 
 class DataManager
 {
+private:
+	// Data storage
+	std::vector<StrengthAttributes> strengthAttributes{};
+	std::vector<StrengthAttributes> exceptionalStrengthBands{};
+	std::vector<DexterityAttributes> dexterityAttributes{};
+	std::vector<ConstitutionAttributes> constitutionAttributes{};
+	std::vector<CharismaAttributes> charismaAttributes{};
+	std::vector<IntelligenceAttributes> intelligenceAttributes{};
+	std::vector<WisdomAttributes> wisdomAttributes{};
+
+	// Simple JSON loading functions
+	std::vector<StrengthAttributes> load_strength(const std::string& filename, MessageSystem& message_system);
+	std::vector<DexterityAttributes> load_dexterity(const std::string& filename, MessageSystem& message_system);
+	std::vector<ConstitutionAttributes> load_constitution(const std::string& filename, MessageSystem& message_system);
+	std::vector<CharismaAttributes> load_charisma(const std::string& filename, MessageSystem& message_system);
+	std::vector<IntelligenceAttributes> load_intelligence(const std::string& filename, MessageSystem& message_system);
+	std::vector<WisdomAttributes> load_wisdom(const std::string& filename, MessageSystem& message_system);
+
 public:
 	// Load all game data
 	void load_all_data(MessageSystem& message_system);
@@ -93,22 +111,4 @@ public:
 	//   dataManager.constitution_hit_point_adjustment(17, CreatureClass::WIZARD); // -> 2
 	//   dataManager.constitution_hit_point_adjustment(3, CreatureClass::WIZARD); // -> -2
 	[[nodiscard]] int constitution_hit_point_adjustment(int score, CreatureClass creatureClass) const;
-
-private:
-	// Data storage
-	std::vector<StrengthAttributes> strengthAttributes;
-	std::vector<StrengthAttributes> exceptionalStrengthBands;
-	std::vector<DexterityAttributes> dexterityAttributes;
-	std::vector<ConstitutionAttributes> constitutionAttributes;
-	std::vector<CharismaAttributes> charismaAttributes;
-	std::vector<IntelligenceAttributes> intelligenceAttributes;
-	std::vector<WisdomAttributes> wisdomAttributes;
-
-	// Simple JSON loading functions
-	std::vector<StrengthAttributes> load_strength(const std::string& filename, MessageSystem& message_system);
-	std::vector<DexterityAttributes> load_dexterity(const std::string& filename, MessageSystem& message_system);
-	std::vector<ConstitutionAttributes> load_constitution(const std::string& filename, MessageSystem& message_system);
-	std::vector<CharismaAttributes> load_charisma(const std::string& filename, MessageSystem& message_system);
-	std::vector<IntelligenceAttributes> load_intelligence(const std::string& filename, MessageSystem& message_system);
-	std::vector<WisdomAttributes> load_wisdom(const std::string& filename, MessageSystem& message_system);
 };
