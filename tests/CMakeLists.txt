@@ -161,7 +161,6 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/AbilityTableTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellDataLoadTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellRegistryTest.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CurseSystemTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/InventoryPersistenceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/HungerSystemTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SaveFieldNamesTest.cpp
@@ -261,7 +260,6 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/SpawnUtils.cpp
     ${PARENT_SOURCE_DIR}/HungerSystem.cpp
     ${PARENT_SOURCE_DIR}/BuffSystem.cpp
-    ${PARENT_SOURCE_DIR}/CurseSystem.cpp
     ${PARENT_SOURCE_DIR}/LevelUpSystem.cpp
     ${PARENT_SOURCE_DIR}/MessageSystem.cpp
     ${PARENT_SOURCE_DIR}/RenderingManager.cpp

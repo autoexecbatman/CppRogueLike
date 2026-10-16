@@ -22,12 +22,12 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "src/Colors.h"
 #include "src/ArmorClass.h"
 #include "src/Creature.h"
-#include "src/CurseSystem.h"
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
 #include "src/GameContext.h"
@@ -36,6 +36,8 @@
 #include "src/HealthPool.h"
 #include "src/HungerSystem.h"
 #include "src/Item.h"
+#include "src/ItemClassification.h"
+#include "src/ItemIdentification.h"
 #include "src/Map.h"
 #include "src/Player.h"
 #include "tests/mocks/MockGameContext.h"
@@ -68,7 +70,6 @@ protected:
 		ctx.playerOwner = &player;
 		ctx.creatures = &creatures;
 		ctx.hungerSystem = &hungerSystem;
-		ctx.curseSystem = &curseSystem;
 		ctx.gameLoopCoordinator = &coordinator;
 
 		// A round reaches every body on the level, and a body has to be standing
@@ -109,10 +110,42 @@ protected:
 	GameLoopCoordinator coordinator{};
 	Map map{ 20, 20 };
 	HungerSystem hungerSystem{};
-	CurseSystem curseSystem{};
 	std::unique_ptr<Player> player{};
 	std::vector<std::unique_ptr<Creature>> creatures{};
 };
+
+// A cursed item is found by what it does and by refusing to come off, as the book's cursed
+// items are: a round worn in a cursed sword and a cursed amulet announces nothing and costs
+// no hit points.
+TEST_F(RoundUpkeepTest, CursedGearSaysNothingAndTakesNothingEachRound)
+{
+	player->set_body_plan(mock.body_plans.get("humanoid"));
+	auto sword = std::make_unique<Item>(Vector2D{ 1, 1 }, ActorData{ TileRef{}, "sword", ColorPairId::WHITE_BLACK });
+	sword->itemClass = ItemClass::SWORD;
+	sword->enhancement.blessing = BlessingStatus::CURSED;
+	auto amulet = std::make_unique<Item>(Vector2D{ 1, 1 }, ActorData{ TileRef{}, "amulet", ColorPairId::WHITE_BLACK });
+	amulet->itemClass = ItemClass::AMULET;
+	amulet->enhancement.blessing = BlessingStatus::CURSED;
+	player->wear(std::move(sword), EquipmentSlot::RIGHT_HAND);
+	player->wear(std::move(amulet), EquipmentSlot::NECK);
+	const int hitPointsBefore = player->healthPool->get_hp();
+	const size_t messagesBefore = mock.messages.get_stored_message_count();
+
+	run_rounds(1);
+
+	EXPECT_EQ(player->healthPool->get_hp(), hitPointsBefore) << "a cursed item cost hit points for a round of wearing it";
+	// Hunger speaks in its first round; nothing may speak of the curse.
+	for (size_t index = messagesBefore; index < mock.messages.get_stored_message_count(); ++index)
+	{
+		std::string whole;
+		for (const auto& run : mock.messages.get_attack_message_at(index))
+		{
+			whole += run.text;
+		}
+		EXPECT_EQ(whole.find("curse"), std::string::npos) << "a round of wearing cursed gear was announced: " << whole;
+		EXPECT_EQ(whole.find("aim"), std::string::npos) << whole;
+	}
+}
 
 // Constitution 25 mends a point a turn, and the upkeep is what asks it to.
 TEST_F(RoundUpkeepTest, AConstitutionThatMendsHealsOnTheTurnsRound)

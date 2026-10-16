@@ -14,7 +14,6 @@
 #include "ContentRegistry.h"
 #include "CostOverlay.h"
 #include "CreatureManager.h"
-#include "CurseSystem.h"
 #include "DataManager.h"
 #include "Decoration.h"
 #include "DisplayManager.h"
@@ -104,7 +103,6 @@ struct Game
 	Pathfinding::Pathfinder pathfinder{};
 	DecorEditor decorEditor{};
 	PrefabLibrary prefabLibrary{};
-	CurseSystem curseSystem{};
 #ifndef __EMSCRIPTEN__
 	ContentEditor contentEditor{};
 	RoomEditor roomEditor{};

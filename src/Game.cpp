@@ -35,7 +35,6 @@
 		.buffSystem = &buffSystem,
 		.floatingText = &floatingText,
 		.animSystem = &animSystem,
-		.curseSystem = &curseSystem,
 		.contentRegistry = &contentRegistry,
 		.minimap = &minimap,
 		.costOverlay = &costOverlay,

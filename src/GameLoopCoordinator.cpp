@@ -14,7 +14,6 @@
 #include "ContentEditor.h"
 #include "Creature.h"
 #include "CreatureManager.h"
-#include "CurseSystem.h"
 #include "DataManager.h"
 #include "DeathMenu.h"
 #include "DecorEditor.h"
@@ -431,7 +430,6 @@ void GameLoopCoordinator::apply_round_upkeep(GameContext& ctx)
 	// Game, so none of them is absent in a running game.
 	assert(ctx.player() && "apply_round_upkeep: a round ran with no player");
 	assert(ctx.hungerSystem && "apply_round_upkeep: a round ran with no hunger system");
-	assert(ctx.curseSystem && "apply_round_upkeep: a round ran with no curse system");
 
 	// Rounds whose upkeep is owed. The clock counts time units, so one action may
 	// finish no round at all or several, and a round is fed once either way - which
@@ -467,8 +465,6 @@ void GameLoopCoordinator::apply_round_upkeep(GameContext& ctx)
 
 	ctx.hungerSystem->increase_hunger(ctx, 1);
 	ctx.hungerSystem->apply_hunger_effects(ctx);
-
-	ctx.curseSystem->apply_curses(ctx.player_concrete(), ctx);
 
 	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
 

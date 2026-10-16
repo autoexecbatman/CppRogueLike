@@ -37,7 +37,6 @@ class HungerSystem;
 class BuffSystem;
 class FloatingTextSystem;
 class AnimationSystem;
-class CurseSystem;
 class ContentRegistry;
 class DecorEditor;
 class PrefabLibrary;
@@ -212,7 +211,6 @@ struct GameContext
 	BuffSystem* buffSystem{ nullptr };
 	FloatingTextSystem* floatingText{ nullptr };
 	AnimationSystem* animSystem{ nullptr };
-	CurseSystem* curseSystem{ nullptr };
 	ContentRegistry* contentRegistry{ nullptr };
 	Minimap* minimap{ nullptr };
 	CostOverlay* costOverlay{ nullptr };

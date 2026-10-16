@@ -279,8 +279,6 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/HungerSystem.h
     ${PROJECT_SOURCE_DIR}/BuffSystem.cpp
     ${PROJECT_SOURCE_DIR}/BuffSystem.h
-    ${PROJECT_SOURCE_DIR}/CurseSystem.cpp
-    ${PROJECT_SOURCE_DIR}/CurseSystem.h
     ${PROJECT_SOURCE_DIR}/LevelUpSystem.cpp
     ${PROJECT_SOURCE_DIR}/LevelUpSystem.h
     ${PROJECT_SOURCE_DIR}/MessageSystem.cpp

@@ -22,7 +22,6 @@
 
 #include "src/ArmorClass.h"
 #include "src/Creature.h"
-#include "src/CurseSystem.h"
 #include "src/Drowning.h"
 #include "src/ExperienceReward.h"
 #include "src/GameLoopCoordinator.h"
@@ -101,7 +100,6 @@ protected:
 		ctx.creatures = &creatures;
 		ctx.map = &map;
 		ctx.hungerSystem = &hungerSystem;
-		ctx.curseSystem = &curseSystem;
 		ctx.gameLoopCoordinator = &coordinator;
 
 		map.init_tiles();
@@ -131,7 +129,6 @@ protected:
 	Map map{ 20, 20 };
 	GameLoopCoordinator coordinator{};
 	HungerSystem hungerSystem{};
-	CurseSystem curseSystem{};
 	std::unique_ptr<Player> player{};
 	std::vector<std::unique_ptr<Creature>> creatures{};
 };
