@@ -1,0 +1,53 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=ThiefSkillKeyTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/MenuThiefSkills.cpp",
+      "original": "\t\tscreen.cursor = previous_thief_skill(screen.cursor);",
+      "mutated": "\t\tscreen.cursor = next_thief_skill(screen.cursor);",
+      "catches": "up moving the cursor down the list"
+    },
+    {
+      "file": "src/MenuThiefSkills.cpp",
+      "original": "\t\tscreen.cursor = next_thief_skill(screen.cursor);\n",
+      "mutated": "\n",
+      "catches": "down leaving the cursor where it was"
+    },
+    {
+      "file": "src/MenuThiefSkills.cpp",
+      "original": "\t\tif (screen.allocation.can_assign(screen.cursor))\n\t\t{\n\t\t\tscreen.allocation.assign(screen.cursor);\n\t\t}\n",
+      "mutated": "",
+      "catches": "right placing no point"
+    },
+    {
+      "file": "src/MenuThiefSkills.cpp",
+      "original": "\t\tif (screen.allocation.can_take_back(screen.cursor))\n\t\t{\n\t\t\tscreen.allocation.take_back(screen.cursor);\n\t\t}\n",
+      "mutated": "",
+      "catches": "left taking no point back"
+    },
+    {
+      "file": "src/MenuThiefSkills.cpp",
+      "original": "\t\tif (screen.allocation.can_take_back(screen.cursor))",
+      "mutated": "\t\tif (true)",
+      "catches": "left taking back a point that was never placed"
+    },
+    {
+      "file": "src/MenuThiefSkills.cpp",
+      "original": "\t\twhile (screen.allocation.can_assign(screen.cursor))",
+      "mutated": "\t\tif (screen.allocation.can_assign(screen.cursor))",
+      "catches": "space placing one point rather than filling the skill"
+    },
+    {
+      "file": "src/MenuThiefSkills.cpp",
+      "original": "\tdefault:\n\t{\n\t\tbreak;\n\t}\n\t}\n\n\treturn screen;",
+      "mutated": "\tdefault:\n\t{\n\t\tscreen.cursor = next_thief_skill(screen.cursor);\n\t\tbreak;\n\t}\n\t}\n\n\treturn screen;",
+      "catches": "a key the screen does not use moving the cursor"
+    }
+  ]
+}

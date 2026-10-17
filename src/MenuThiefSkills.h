@@ -27,6 +27,7 @@
 #include <string>
 
 #include "BaseMenu.h"
+#include "InputSystem.h"
 #include "ThiefSkills.h"
 
 struct GameContext;
@@ -59,12 +60,31 @@ class Player;
 //   push_thief_skill_allocation(player, 4, ctx);   // no screen, nothing to spend
 void push_thief_skill_allocation(Player& character, int level, GameContext& ctx);
 
+// What the screen holds between keys: the skill the cursor is on, and the points as
+// they are placed so far.
+struct ThiefSkillScreenState
+{
+	ThiefSkill cursor{ ThiefSkill::PICK_POCKETS };
+	ThiefSkillAllocation allocation;
+};
+
+// The screen as it stands after one key. Up and down move the cursor, wrapping at
+// either end; right puts one point on the skill under it and left takes one back;
+// space puts on as many as the grant, the per-skill limit and the 95 ceiling allow.
+// A point the allocation refuses is not placed, and any other key, enter included,
+// leaves the screen as it was: accepting is the menu's, since it hands the result on.
+//
+// Example, a 1st-level thief with the cursor on Pick Pockets and 60 points:
+//   after_thief_skill_key(GameKey::RIGHT, screen); // 1 point on Pick Pockets, 59 left
+//   after_thief_skill_key(GameKey::SPACE, screen); // 30 on Pick Pockets, the limit
+//   after_thief_skill_key(GameKey::LEFT, screen); // nothing placed, so nothing changes
+[[nodiscard]] ThiefSkillScreenState after_thief_skill_key(GameKey key, ThiefSkillScreenState screen);
+
 class MenuThiefSkills : public BaseMenu
 {
 private:
-	ThiefSkillAllocation allocation;
+	ThiefSkillScreenState screen;
 	std::function<void(std::array<int, THIEF_SKILL_COUNT>, GameContext&)> onAccept;
-	ThiefSkill cursor{ ThiefSkill::PICK_POCKETS };
 
 	void draw_allocation_screen();
 

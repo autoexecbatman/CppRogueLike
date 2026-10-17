@@ -64,11 +64,66 @@ void push_thief_skill_allocation(Player& character, int level, GameContext& ctx)
 	ctx.menus->push_back(std::make_unique<MenuThiefSkills>(ctx, std::move(allocation), keep_the_points));
 }
 
+ThiefSkillScreenState after_thief_skill_key(GameKey key, ThiefSkillScreenState screen)
+{
+	switch (key)
+	{
+
+	case GameKey::UP:
+	{
+		screen.cursor = previous_thief_skill(screen.cursor);
+		break;
+	}
+
+	case GameKey::DOWN:
+	{
+		screen.cursor = next_thief_skill(screen.cursor);
+		break;
+	}
+
+	case GameKey::RIGHT:
+	{
+		if (screen.allocation.can_assign(screen.cursor))
+		{
+			screen.allocation.assign(screen.cursor);
+		}
+		break;
+	}
+
+	case GameKey::LEFT:
+	{
+		if (screen.allocation.can_take_back(screen.cursor))
+		{
+			screen.allocation.take_back(screen.cursor);
+		}
+		break;
+	}
+
+	case GameKey::SPACE:
+	{
+		// Sixty points one keypress at a time is sixty keypresses, so one key puts
+		// on as many as the grant, the per-skill limit and the 95 ceiling allow.
+		while (screen.allocation.can_assign(screen.cursor))
+		{
+			screen.allocation.assign(screen.cursor);
+		}
+		break;
+	}
+
+	default:
+	{
+		break;
+	}
+	}
+
+	return screen;
+}
+
 MenuThiefSkills::MenuThiefSkills(
 	GameContext& ctx,
 	ThiefSkillAllocation startingAllocation,
 	std::function<void(std::array<int, THIEF_SKILL_COUNT>, GameContext&)> acceptCallback)
-	: allocation{ std::move(startingAllocation) }, onAccept{ std::move(acceptCallback) }
+	: screen{ .cursor = ThiefSkill::PICK_POCKETS, .allocation = std::move(startingAllocation) }, onAccept{ std::move(acceptCallback) }
 {
 	assert(ctx.renderer && "MenuThiefSkills requires a renderer to size its box");
 	assert(onAccept && "MenuThiefSkills requires somewhere to put the result");
@@ -94,31 +149,31 @@ int MenuThiefSkills::interior_width() const
 
 std::string MenuThiefSkills::row_for(ThiefSkill skill) const
 {
-	const std::string marker = (cursor == skill) ? ">" : " ";
-	const int assigned = allocation.assigned_to(skill);
+	const std::string marker = (screen.cursor == skill) ? ">" : " ";
+	const int assigned = screen.allocation.assigned_to(skill);
 
 	// What this grant put here is shown only where it put something, so a screen
 	// nobody has touched yet is eight plain numbers.
 	if (assigned == 0)
 	{
-		return std::format("{} {:<15}{:>3}%", marker, thief_skill_name(skill), allocation.score(skill));
+		return std::format("{} {:<15}{:>3}%", marker, thief_skill_name(skill), screen.allocation.score(skill));
 	}
 	return std::format(
 		"{} {:<15}{:>3}% +{}",
 		marker,
 		thief_skill_name(skill),
-		allocation.score(skill),
+		screen.allocation.score(skill),
 		assigned);
 }
 
 std::string MenuThiefSkills::pool_line() const
 {
-	return std::format("Points left: {}", allocation.remaining_points());
+	return std::format("Points left: {}", screen.allocation.remaining_points());
 }
 
 std::string MenuThiefSkills::status_line() const
 {
-	if (allocation.remaining_points() == 0)
+	if (screen.allocation.remaining_points() == 0)
 	{
 		return "All spent.";
 	}
@@ -147,14 +202,14 @@ void MenuThiefSkills::draw_allocation_screen()
 	int row = FIRST_SKILL_ROW;
 	for (const ThiefSkill skill : ALL_THIEF_SKILL)
 	{
-		const ColorPairId colorPair = (skill == cursor) ? ColorPairId::YELLOW_BLACK : ColorPairId::WHITE_BLACK;
+		const ColorPairId colorPair = (skill == screen.cursor) ? ColorPairId::YELLOW_BLACK : ColorPairId::WHITE_BLACK;
 		draw_row(row, row_for(skill), colorPair);
 		++row;
 	}
 
 	draw_row(POOL_ROW, pool_line(), ColorPairId::WHITE_BLACK);
 
-	const bool allSpent = allocation.remaining_points() == 0;
+	const bool allSpent = screen.allocation.remaining_points() == 0;
 	draw_row(STATUS_ROW, status_line(), allSpent ? ColorPairId::GREEN_BLACK : ColorPairId::RED_BLACK);
 	draw_row(FIRST_HINT_ROW, "[up/down] skill   [left/right] one point", ColorPairId::CYAN_BLACK);
 	draw_row(FIRST_HINT_ROW + 1, "[space] fill it   [Enter] done", ColorPairId::CYAN_BLACK);
@@ -166,64 +221,20 @@ void MenuThiefSkills::menu(GameContext& ctx)
 {
 	assert(inputSystem && "MenuThiefSkills::menu called before menu_new");
 	inputSystem->poll();
+	const GameKey key = inputSystem->get_key();
 
-	switch (inputSystem->get_key())
-	{
-
-	case GameKey::UP:
-	{
-		cursor = previous_thief_skill(cursor);
-		break;
-	}
-
-	case GameKey::DOWN:
-	{
-		cursor = next_thief_skill(cursor);
-		break;
-	}
-
-	case GameKey::RIGHT:
-	{
-		if (allocation.can_assign(cursor))
-		{
-			allocation.assign(cursor);
-		}
-		break;
-	}
-
-	case GameKey::LEFT:
-	{
-		if (allocation.can_take_back(cursor))
-		{
-			allocation.take_back(cursor);
-		}
-		break;
-	}
-
-	case GameKey::SPACE:
-	{
-		// Sixty points one keypress at a time is sixty keypresses, so one key puts
-		// on as many as the grant, the per-skill limit and the 95 ceiling allow.
-		while (allocation.can_assign(cursor))
-		{
-			allocation.assign(cursor);
-		}
-		break;
-	}
-
-	case GameKey::ENTER:
+	// Accepting hands the result on, which only the menu can do; every other key is
+	// the screen's own.
+	if (key == GameKey::ENTER)
 	{
 		// The book leaves the distribution entirely to the player, so nothing here
 		// refuses an acceptance - the status row says what is being left behind.
 		menu_set_run_false();
-		onAccept(allocation.total_points(), ctx);
-		break;
+		onAccept(screen.allocation.total_points(), ctx);
 	}
-
-	default:
+	else
 	{
-		break;
-	}
+		screen = after_thief_skill_key(key, screen);
 	}
 
 	draw_allocation_screen();
