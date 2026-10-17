@@ -11,12 +11,14 @@ public:
 	void update(GameContext& ctx);
 
 	// Everything a passing round does to whoever is standing in it: the Constitution
-	// bonus, both regenerations, poison, hunger and curses, then the dead are swept and
-	// the clock moves on. Apart from the creatures' turns, which is where the AI runs, so
-	// a round's upkeep can be driven without a map or a monster deciding anything.
+	// bonus, both regenerations, poison, breath and hunger, then the dead are swept. Fed
+	// once for every round the clock has finished since the last call, in order, and
+	// stopped by the player's death. Apart from the creatures' turns, which is where the
+	// AI runs, so a round's upkeep can be driven without a monster deciding anything.
 	//
-	// Example:
-	//   apply_round_upkeep(ctx);   // -> time is one higher, everyone has felt the round
+	// Example, after the player spends an action of seven rounds:
+	//   apply_round_upkeep(ctx);   // -> rounds 1 to 7 fed; get_rounds_run() is 7
+	//   apply_round_upkeep(ctx);   // -> nothing owed, nothing fed
 	void apply_round_upkeep(GameContext& ctx);
 
 private:

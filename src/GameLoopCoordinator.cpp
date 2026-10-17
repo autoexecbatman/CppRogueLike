@@ -430,8 +430,8 @@ void GameLoopCoordinator::apply_round_upkeep(GameContext& ctx)
 	assert(ctx.hungerSystem && "apply_round_upkeep: a round ran with no hunger system");
 
 	// Rounds whose upkeep is owed. The clock counts time units, so one action may
-	// finish no round at all or several, and a round is fed once either way - which
-	// is what stops a creature that acts twice in a round feeling it twice.
+	// finish no round at all or several, and each round is fed once - which is what
+	// stops a creature that acts twice in a round feeling it twice.
 	const int roundsFinished = rounds_completed_at(ctx.gameState->get_time());
 	if (ctx.gameState->get_rounds_run() >= roundsFinished)
 	{
@@ -439,11 +439,9 @@ void GameLoopCoordinator::apply_round_upkeep(GameContext& ctx)
 		return;
 	}
 
-	const int thisRound = ctx.gameState->get_rounds_run() + 1;
-
 	// One place for what a round does to a body, so the player and the creatures cannot
 	// drift apart - they were two copies of these four calls.
-	const auto feel_the_round = [&ctx, thisRound](Creature& creature)
+	const auto feel_the_round = [&ctx](Creature& creature, int thisRound)
 	{
 		creature.update_constitution_bonus(ctx);
 		creature.regenerate_from_constitution(thisRound, *ctx.dataManager);
@@ -452,21 +450,33 @@ void GameLoopCoordinator::apply_round_upkeep(GameContext& ctx)
 		creature.tick_breath(ctx);
 	};
 
-	for (const auto& creature : *ctx.creatures)
+	// Every round that finished is fed, in order and under its own number, so an action
+	// of several rounds pays for each of them.
+	for (int thisRound = ctx.gameState->get_rounds_run() + 1; thisRound <= roundsFinished; ++thisRound)
 	{
-		assert(creature && "apply_round_upkeep: the creature list holds a null entry");
-		feel_the_round(*creature);
+		for (const auto& creature : *ctx.creatures)
+		{
+			assert(creature && "apply_round_upkeep: the creature list holds a null entry");
+			feel_the_round(*creature, thisRound);
+		}
+
+		// The player is not in that list, so the round has to reach them on its own.
+		feel_the_round(*ctx.player(), thisRound);
+
+		ctx.hungerSystem->increase_hunger(ctx, 1);
+		ctx.hungerSystem->apply_hunger_effects(ctx);
+
+		// Erased at the end of the round they died in, so the dead are fed no later round.
+		ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
+
+		ctx.gameState->set_rounds_run(thisRound);
+
+		// The player is never erased, so a dead player ends the rounds instead.
+		if (ctx.player()->is_dead())
+		{
+			break;
+		}
 	}
-
-	// The player is not in that list, so the round has to reach them on its own.
-	feel_the_round(*ctx.player());
-
-	ctx.hungerSystem->increase_hunger(ctx, 1);
-	ctx.hungerSystem->apply_hunger_effects(ctx);
-
-	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
-
-	ctx.gameState->set_rounds_run(thisRound);
 }
 
 void GameLoopCoordinator::update(GameContext& ctx)

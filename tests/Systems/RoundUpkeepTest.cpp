@@ -39,6 +39,7 @@
 #include "src/ItemClassification.h"
 #include "src/ItemIdentification.h"
 #include "src/Map.h"
+#include "src/MessageSystem.h"
 #include "src/Player.h"
 #include "tests/mocks/MockGameContext.h"
 
@@ -103,6 +104,27 @@ protected:
 			ctx.gameState->advance_clock(TIME_UNITS_PER_ROUND);
 			coordinator.apply_round_upkeep(ctx);
 		}
+	}
+
+	// One action that takes this many rounds: the clock moves by all of them and the
+	// upkeep runs once, as it does after any action the player takes.
+	void spend_one_action_of(int rounds)
+	{
+		ctx.gameState->advance_clock(TIME_UNITS_PER_ROUND * rounds);
+		coordinator.apply_round_upkeep(ctx);
+	}
+
+	std::string all_message_text() const
+	{
+		std::string joined;
+		for (size_t index = 0; index < ctx.messageSystem->get_stored_message_count(); ++index)
+		{
+			for (const auto& part : ctx.messageSystem->get_attack_message_at(index))
+			{
+				joined += part.text;
+			}
+		}
+		return joined;
 	}
 
 	MockGameContext mock{};
@@ -234,3 +256,100 @@ TEST_F(RoundUpkeepTest, HungerRisesAndTheClockMoves)
 	// body untouched.
 	EXPECT_EQ(ctx.gameState->get_rounds_run(), 3) << "a round passed without being fed";
 }
+
+// An action that takes seven rounds is seven rounds of upkeep: every round that finished
+// is fed, not only the first.
+TEST_F(RoundUpkeepTest, ASevenRoundActionPaysSevenRoundsOfHunger)
+{
+	const int hungerBefore = hungerSystem.get_hunger_value();
+
+	spend_one_action_of(7);
+
+	EXPECT_EQ(ctx.gameState->get_rounds_run(), 7) << "rounds finished without being fed";
+	EXPECT_EQ(hungerSystem.get_hunger_value(), hungerBefore + 7);
+}
+
+// And a one-round action is one round, so paying the backlog cannot overpay.
+TEST_F(RoundUpkeepTest, AOneRoundActionPaysExactlyOneRound)
+{
+	const int hungerBefore = hungerSystem.get_hunger_value();
+
+	spend_one_action_of(1);
+	coordinator.apply_round_upkeep(ctx);
+
+	EXPECT_EQ(ctx.gameState->get_rounds_run(), 1);
+	EXPECT_EQ(hungerSystem.get_hunger_value(), hungerBefore + 1) << "a round was paid twice";
+}
+
+// A dose with seven rounds to go lands inside a seven-round action; one with eight does
+// not, and lands on the round after.
+TEST_F(RoundUpkeepTest, APoisonDueWithinALongActionLandsInIt)
+{
+	Creature& due = add_creature("due", 10);
+	Creature& later = add_creature("later", 10);
+	const int before = due.healthPool->get_hp();
+	due.take_poison(PendingPoison{ .roundsUntilOnset = 7, .damage = 3 });
+	later.take_poison(PendingPoison{ .roundsUntilOnset = 8, .damage = 3 });
+
+	spend_one_action_of(7);
+	EXPECT_EQ(due.healthPool->get_hp(), before - 3) << "the dose due on round 7 never landed";
+	EXPECT_EQ(later.healthPool->get_hp(), before) << "the dose due on round 8 landed early";
+
+	spend_one_action_of(1);
+	EXPECT_EQ(later.healthPool->get_hp(), before - 3) << "the dose due on round 8 never landed";
+}
+
+// Regeneration is due on round 10, and an action covering rounds 2 to 10 heals once:
+// each round is fed under its own number.
+TEST_F(RoundUpkeepTest, RegenerationLandsOnceOnItsRoundInsideALongAction)
+{
+	Creature& mender = add_creature("mender", 25);
+	mender.healthPool->set_hp(STARTING_HP - 5);
+	run_rounds(1);
+	const int settled = mender.healthPool->get_hp();
+
+	spend_one_action_of(ROUNDS_IN_A_TURN - 1);
+
+	EXPECT_EQ(mender.healthPool->get_hp(), settled + 1) << "round 10 healed other than once";
+}
+
+// A creature that dies on round 3 of 7 is gone before round 4. Its air runs out at the
+// action's end, so each round it is fed is one breath check: the first three pass, and
+// a fourth would drown it again - a second death and a second reward.
+TEST_F(RoundUpkeepTest, ACreatureThatDiesMidActionIsNotFedTheRoundsAfter)
+{
+	map.set_tile(Vector2D{ 5, 5 }, TileType::WATER);
+	Creature& diver = add_creature("diver", 10);
+	diver.set_air_until_time(7 * TIME_UNITS_PER_ROUND);
+	diver.take_poison(PendingPoison{ .roundsUntilOnset = 3, .damage = STARTING_HP });
+	for (const int roll : { 1, 1, 1, 20, 20, 20, 20 })
+	{
+		mock.dice.set_next_roll(roll);
+	}
+
+	spend_one_action_of(7);
+
+	EXPECT_TRUE(creatures.empty()) << "the dead diver is still on the level";
+	EXPECT_EQ(player->get_kill_count(), 1) << "the diver died more than once";
+	EXPECT_EQ(all_message_text().find("drowns"), std::string::npos) << all_message_text();
+}
+
+// The player is never erased, so the rounds stop when the player dies.
+TEST_F(RoundUpkeepTest, ThePlayerWhoDiesMidActionIsNotFedTheRoundsAfter)
+{
+	map.set_tile(Vector2D{ 1, 1 }, TileType::WATER);
+	player->set_air_until_time(7 * TIME_UNITS_PER_ROUND);
+	player->take_poison(PendingPoison{ .roundsUntilOnset = 3, .damage = STARTING_HP });
+	for (const int roll : { 1, 1, 1, 20, 20, 20, 20 })
+	{
+		mock.dice.set_next_roll(roll);
+	}
+
+	spend_one_action_of(7);
+
+	EXPECT_TRUE(player->is_dead());
+	EXPECT_EQ(ctx.gameState->get_rounds_run(), 3) << "rounds were fed to a dead player";
+	EXPECT_EQ(all_message_text().find("drowns"), std::string::npos) << all_message_text();
+}
+
+// end of file: RoundUpkeepTest.cpp

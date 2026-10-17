@@ -27,7 +27,7 @@
     },
     {
       "file": "src/GameLoopCoordinator.cpp",
-      "original": "\tfeel_the_round(*ctx.player());",
+      "original": "\t\tfeel_the_round(*ctx.player(), thisRound);",
       "mutated": "",
       "catches": "the round reaching every creature and skipping the player, who is not in that list"
     },
@@ -42,6 +42,42 @@
       "original": "\tctx.gameState->set_rounds_run(thisRound);",
       "mutated": "",
       "catches": "the round never marked as fed, so the same round's upkeep runs again on every action for the rest of the game"
+    },
+    {
+      "file": "src/GameLoopCoordinator.cpp",
+      "original": "thisRound <= roundsFinished; ++thisRound",
+      "mutated": "thisRound < roundsFinished; ++thisRound",
+      "catches": "an action of several rounds paying one round short"
+    },
+    {
+      "file": "src/GameLoopCoordinator.cpp",
+      "original": "thisRound <= roundsFinished; ++thisRound",
+      "mutated": "thisRound <= roundsFinished + 1; ++thisRound",
+      "catches": "every action paying one round more than it took"
+    },
+    {
+      "file": "src/GameLoopCoordinator.cpp",
+      "original": "for (int thisRound = ctx.gameState->get_rounds_run() + 1;",
+      "mutated": "for (int thisRound = ctx.gameState->get_rounds_run() + 2;",
+      "catches": "the first owed round skipped"
+    },
+    {
+      "file": "src/GameLoopCoordinator.cpp",
+      "original": "\t\tcreature.regenerate_from_constitution(thisRound, *ctx.dataManager);",
+      "mutated": "\t\tcreature.regenerate_from_constitution(rounds_completed_at(ctx.gameState->get_time()), *ctx.dataManager);",
+      "catches": "every round of a long action fed under the action's last round number, so the round regeneration is due heals once per round fed"
+    },
+    {
+      "file": "src/GameLoopCoordinator.cpp",
+      "original": "\t\t// Erased at the end of the round they died in, so the dead are fed no later round.\n\t\tctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);\n",
+      "mutated": "",
+      "catches": "a creature that died mid-action fed the rounds after its death"
+    },
+    {
+      "file": "src/GameLoopCoordinator.cpp",
+      "original": "\t\tif (ctx.player()->is_dead())\n\t\t{\n\t\t\tbreak;",
+      "mutated": "\t\tif (false)\n\t\t{\n\t\t\tbreak;",
+      "catches": "a dead player fed the rest of the action's rounds"
     }
   ]
 }
