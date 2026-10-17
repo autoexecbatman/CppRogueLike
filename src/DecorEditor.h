@@ -2,6 +2,7 @@
 #pragma once
 
 #include <cstdint>
+#include <nlohmann/json_fwd.hpp>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -34,9 +35,7 @@
 // ---------------------------------------------------------------------------
 class DecorEditor
 {
-public:
-	DecorEditor();
-
+private:
 	struct PaletteEntry
 	{
 		TileRef tile{};
@@ -44,39 +43,10 @@ public:
 		char symbol{ 0 }; // 0 = no symbol (tile not usable in prefabs)
 	};
 
-	void toggle();
+	// nlohmann's readers and writers for a palette row, found by argument-dependent lookup.
+	friend void to_json(nlohmann::json& j, const PaletteEntry& entry);
+	friend void from_json(const nlohmann::json& j, PaletteEntry& entry);
 
-	void set_char_input(int ch) noexcept { buffered_char = ch; }
-
-	void cycle_next();
-	void cycle_prev();
-
-	void set_active_map(long seed, int dungeon_level);
-
-	// Palette persistence -- both read/write the "palette" array in tile_config.json.
-	void save_palette(std::string_view path) const;
-	void load_palette(std::string_view path);
-
-	// Called every render frame while active.
-	void update_and_render(const Renderer& renderer);
-
-	[[nodiscard]] bool is_active() const { return active; }
-
-	[[nodiscard]] bool is_browser_open() const { return browser_open; }
-
-	[[nodiscard]] TileRef get_override(Vector2D worldPosition) const;
-
-	void place(Vector2D worldPosition);
-	void erase(Vector2D worldPosition);
-
-	// Direct tile placement bypassing the palette -- used by PrefabLibrary.
-	void place_tile(Vector2D worldPosition, TileRef tile);
-
-	[[nodiscard]] bool is_active_map_empty() const;
-
-	[[nodiscard]] const std::vector<PaletteEntry>& get_palette() const { return palette; }
-
-private:
 	bool active{ false };
 	int palette_index{ 0 };
 	mutable double last_save_time{ -10.0 };
@@ -129,4 +99,39 @@ private:
 	[[nodiscard]] std::optional<int> palette_find(TileRef tile) const;
 	void palette_add_or_update(TileRef tile, std::string_view label, char symbol);
 	void palette_remove(TileRef tile);
+
+public:
+	DecorEditor();
+
+	void toggle();
+
+	void set_char_input(int ch) noexcept { buffered_char = ch; }
+
+	void cycle_next();
+	void cycle_prev();
+
+	void set_active_map(long seed, int dungeon_level);
+
+	// Palette persistence -- both read/write the "palette" array in tile_config.json.
+	void save_palette(std::string_view path) const;
+	void load_palette(std::string_view path);
+
+	// Called every render frame while active.
+	void update_and_render(const Renderer& renderer);
+
+	[[nodiscard]] bool is_active() const { return active; }
+
+	[[nodiscard]] bool is_browser_open() const { return browser_open; }
+
+	[[nodiscard]] TileRef get_override(Vector2D worldPosition) const;
+
+	void place(Vector2D worldPosition);
+	void erase(Vector2D worldPosition);
+
+	// Direct tile placement bypassing the palette -- used by PrefabLibrary.
+	void place_tile(Vector2D worldPosition, TileRef tile);
+
+	[[nodiscard]] bool is_active_map_empty() const;
+
+	[[nodiscard]] const std::vector<PaletteEntry>& get_palette() const { return palette; }
 };

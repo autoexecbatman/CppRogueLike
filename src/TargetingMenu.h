@@ -13,9 +13,17 @@ struct GameContext;
 
 class TargetingMenu : public BaseMenu
 {
-public:
+private:
 	using Callback = std::function<void(bool confirmed, Vector2D position, GameContext&)>;
 
+	Vector2D cursor{};
+	int maxRange{};
+	int aoeRadius{};
+	Callback onComplete;
+
+	void draw_cursor(GameContext& ctx) const;
+
+public:
 	TargetingMenu(int maxRange, int aoeRadius, Callback onComplete, GameContext& ctx);
 	~TargetingMenu() = default;
 	TargetingMenu(const TargetingMenu&) = delete;
@@ -24,14 +32,6 @@ public:
 	TargetingMenu& operator=(TargetingMenu&&) = delete;
 
 	void menu(GameContext& ctx) override;
-
-private:
-	Vector2D cursor{};
-	int maxRange{};
-	int aoeRadius{};
-	Callback onComplete;
-
-	void draw_cursor(GameContext& ctx) const;
 };
 
 // end of file: Systems/TargetingMenu.h

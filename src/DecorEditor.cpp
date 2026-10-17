@@ -72,7 +72,7 @@ void DecorEditor::palette_remove(TileRef tile)
 // tile is stored as human-readable sheet/col/row.
 // ---------------------------------------------------------------------------
 
-static void to_json(json& j, const DecorEditor::PaletteEntry& e)
+void to_json(json& j, const DecorEditor::PaletteEntry& e)
 {
 	j = {
 		{ "sheet", static_cast<int>(e.tile.sheet) },
@@ -83,7 +83,7 @@ static void to_json(json& j, const DecorEditor::PaletteEntry& e)
 	};
 }
 
-static void from_json(const json& j, DecorEditor::PaletteEntry& e)
+void from_json(const json& j, DecorEditor::PaletteEntry& e)
 {
 	e.tile = TileRef{
 		static_cast<TileSheet>(j.value("sheet", 0)),
