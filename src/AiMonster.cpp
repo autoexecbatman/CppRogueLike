@@ -295,7 +295,7 @@ void AiMonster::update(Creature& owner, GameContext& ctx)
 	decide_action(owner, ctx);
 }
 
-void AiMonster::load(const json& j)
+void AiMonster::load([[maybe_unused]] const json& j)
 {
 }
 

@@ -7,7 +7,7 @@
 #include "GameContext.h"
 #include "Persistent.h"
 
-void AiShopkeeper::update(Creature& owner, GameContext& ctx)
+void AiShopkeeper::update(Creature& owner, [[maybe_unused]] GameContext& ctx)
 {
 	assert(owner.ai != nullptr && "AiShopkeeper::update called on creature with null ai");
 
@@ -19,7 +19,7 @@ void AiShopkeeper::update(Creature& owner, GameContext& ctx)
 	// TODO: implement shopkeeper idle behavior (tend shop, wander near spawn point)
 }
 
-void AiShopkeeper::load(const json& j)
+void AiShopkeeper::load([[maybe_unused]] const json& j)
 {
 }
 

@@ -583,11 +583,11 @@ void Gui::render_player_status(const GameContext& ctx)
 
 // The interface is redrawn from game state every frame, so it holds nothing
 // of its own to persist.
-void Gui::save(json& savedState)
+void Gui::save([[maybe_unused]] json& savedState)
 {
 }
 
-void Gui::load(const json& savedState)
+void Gui::load([[maybe_unused]] const json& savedState)
 {
 }
 
