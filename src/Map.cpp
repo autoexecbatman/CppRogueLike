@@ -1521,7 +1521,8 @@ void Map::place_stairs(GameContext& ctx)
 
 bool Map::is_stairs(Vector2D pos, GameContext& ctx) const
 {
-	return ctx.stairs && ctx.stairs->position == pos;
+	assert(ctx.stairs && "Map::is_stairs: called without stairs");
+	return ctx.stairs->position == pos;
 }
 
 bool Map::is_unobstructed(Vector2D pos, const GameContext& ctx) const noexcept

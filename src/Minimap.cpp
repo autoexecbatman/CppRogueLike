@@ -1,5 +1,6 @@
 // file: Minimap.cpp
 #include <algorithm>
+#include <cassert>
 
 #include <raylib.h>
 
@@ -78,18 +79,16 @@ void Minimap::render(const GameContext& ctx) const
 		}
 	}
 
-	if (ctx.stairs)
+	assert(ctx.stairs && "Minimap::render: called without stairs");
+	Vector2D sp = ctx.stairs->position;
+	if (map.is_explored(sp))
 	{
-		Vector2D sp = ctx.stairs->position;
-		if (map.is_explored(sp))
-		{
-			DrawRectangle(
-				originX + sp.x * tilePx - 1,
-				originY + sp.y * tilePx - 1,
-				tilePx + 2,
-				tilePx + 2,
-				Color{ 255, 210, 50, 255 });
-		}
+		DrawRectangle(
+			originX + sp.x * tilePx - 1,
+			originY + sp.y * tilePx - 1,
+			tilePx + 2,
+			tilePx + 2,
+			Color{ 255, 210, 50, 255 });
 	}
 
 	Vector2D pp = ctx.player()->position;

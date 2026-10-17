@@ -773,7 +773,8 @@ bool PlayerController::execute_arrival(GameContext& ctx)
 
 	case MouseMode::WALK_TO_STAIRS:
 	{
-		if (ctx.stairs && ctx.stairs->position == playerOwner.position)
+		assert(ctx.stairs && "PlayerController::execute_arrival: called without stairs");
+		if (ctx.stairs->position == playerOwner.position)
 		{
 			ctx.levelManager->advance_to_next_level(ctx);
 			ctx.gameState->set_game_status(GameStatus::STARTUP);
@@ -858,7 +859,8 @@ void PlayerController::handle_left_click(GameContext& ctx)
 
 	if (world_tile == playerOwner.position)
 	{
-		if (ctx.stairs && ctx.stairs->position == playerOwner.position)
+		assert(ctx.stairs && "PlayerController::handle_left_click: called without stairs");
+		if (ctx.stairs->position == playerOwner.position)
 		{
 			ctx.levelManager->advance_to_next_level(ctx);
 			ctx.gameState->set_game_status(GameStatus::STARTUP);
@@ -885,7 +887,8 @@ void PlayerController::handle_left_click(GameContext& ctx)
 	}
 
 	MouseMode mode = MouseMode::WALK;
-	if (ctx.stairs && ctx.stairs->position == world_tile)
+	assert(ctx.stairs && "PlayerController::handle_left_click: called without stairs");
+	if (ctx.stairs->position == world_tile)
 	{
 		mode = MouseMode::WALK_TO_STAIRS;
 	}
@@ -1011,7 +1014,8 @@ void PlayerController::handle_right_click(GameContext& ctx)
 	}
 
 	// Stairs at tile
-	if (ctx.stairs && ctx.stairs->position == world_tile)
+	assert(ctx.stairs && "PlayerController::handle_right_click: called without stairs");
+	if (ctx.stairs->position == world_tile)
 	{
 		const auto walk_to_stairs = [this, world_tile](GameContext& actionCtx)
 		{
