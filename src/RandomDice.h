@@ -12,18 +12,18 @@ class RandomDice
 private:
 	// we use the mersenne twister engine for our random number generator
 	// we seed it with a random device
-	std::mt19937 m_gen{ std::random_device{}() };
+	std::mt19937 generator{ std::random_device{}() };
 
 #ifdef TESTING_MODE
-	bool m_test_mode{ false };
-	std::vector<int> m_fixed_rolls;
+	bool testMode{ false };
+	std::vector<int> fixedRolls;
 #endif
 
 public:
 	RandomDice() = default;
 
 	explicit RandomDice(unsigned int seed) noexcept
-		: m_gen(seed)
+		: generator(seed)
 	{
 	}
 
@@ -59,10 +59,10 @@ public:
 	{
 #ifdef TESTING_MODE
 		// In test mode, use fixed values if set
-		if (m_test_mode && !m_fixed_rolls.empty())
+		if (testMode && !fixedRolls.empty())
 		{
-			int value = m_fixed_rolls.front();
-			m_fixed_rolls.erase(m_fixed_rolls.begin());
+			int value = fixedRolls.front();
+			fixedRolls.erase(fixedRolls.begin());
 			if (value == HIGHEST)
 			{
 				return max;
@@ -77,27 +77,27 @@ public:
 		}
 #endif
 		std::uniform_int_distribution<int> dist(min, max);
-		return dist(m_gen);
+		return dist(generator);
 	}
 
 #ifdef TESTING_MODE
 	// Test-only methods for deterministic dice rolls
-	void set_test_mode(bool enabled) { m_test_mode = enabled; }
+	void set_test_mode(bool enabled) { testMode = enabled; }
 
 	void set_next_d20(int value)
 	{
-		m_test_mode = true;
-		m_fixed_rolls.push_back(value);
+		testMode = true;
+		fixedRolls.push_back(value);
 	}
 
 	void set_next_roll(int value)
 	{
-		m_test_mode = true;
-		m_fixed_rolls.push_back(value);
+		testMode = true;
+		fixedRolls.push_back(value);
 	}
 
-	void clear_fixed_rolls() { m_fixed_rolls.clear(); }
+	void clear_fixed_rolls() { fixedRolls.clear(); }
 #endif
 
-	[[nodiscard]] std::mt19937& get_rng() noexcept { return m_gen; }
+	[[nodiscard]] std::mt19937& get_rng() noexcept { return generator; }
 };

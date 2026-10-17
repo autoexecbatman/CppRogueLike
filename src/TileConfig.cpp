@@ -98,37 +98,37 @@ using json = nlohmann::json;
 
 TileRef TileConfig::get(std::string_view key) const
 {
-	if (!m_tiles.contains(std::string(key)))
+	if (!tiles.contains(std::string(key)))
 	{
 		fprintf(stderr, "ERROR: TileConfig::get -- unknown key '%s'\n", std::string(key).c_str());
 		fflush(stderr);
 		throw std::runtime_error(std::format("TileConfig::get -- unknown key '{}'", key));
 	}
-	return m_tiles.at(std::string(key));
+	return tiles.at(std::string(key));
 }
 
 AutotileGroup TileConfig::get_autotile(std::string_view key) const
 {
-	if (!m_autotile_groups.contains(std::string(key)))
+	if (!autotileGroups.contains(std::string(key)))
 	{
 		throw std::runtime_error(std::format("TileConfig::get_autotile -- unknown key '{}'", key));
 	}
-	return m_autotile_groups.at(std::string(key));
+	return autotileGroups.at(std::string(key));
 }
 
 WallAutotileGroup TileConfig::get_wall_autotile(std::string_view key) const
 {
-	if (!m_wall_autotile_groups.contains(std::string(key)))
+	if (!wallAutotileGroups.contains(std::string(key)))
 	{
 		throw std::runtime_error(std::format("TileConfig::get_wall_autotile -- unknown key '{}'", key));
 	}
-	return m_wall_autotile_groups.at(std::string(key));
+	return wallAutotileGroups.at(std::string(key));
 }
 
 const TileDefinition& TileConfig::get_tile_definition(TileType tileType) const
 {
-	const auto found = m_tile_definitions.find(tileType);
-	if (found == m_tile_definitions.end())
+	const auto found = tileDefinitions.find(tileType);
+	if (found == tileDefinitions.end())
 	{
 		throw std::runtime_error(std::format(
 			"TileConfig: no definition for tile type {} -- add it to tile_config.json",
@@ -157,7 +157,7 @@ void TileConfig::load(std::string_view path)
 			auto sheet = static_cast<TileSheet>(val["sheet"].get<int>());
 			int col = val["col"].get<int>();
 			int row = val["row"].get<int>();
-			m_tiles[key] = TileRef{ sheet, col, row };
+			tiles[key] = TileRef{ sheet, col, row };
 		}
 	}
 
@@ -165,7 +165,7 @@ void TileConfig::load(std::string_view path)
 	{
 		for (auto& [key, val] : root["autotile_groups"].items())
 		{
-			m_autotile_groups[key] = AutotileGroup{
+			autotileGroups[key] = AutotileGroup{
 				static_cast<TileSheet>(val["sheet"].get<int>()),
 				val["origin_col"].get<int>(),
 				val["origin_row"].get<int>()
@@ -177,7 +177,7 @@ void TileConfig::load(std::string_view path)
 	{
 		for (auto& [key, val] : root["wall_autotile_groups"].items())
 		{
-			m_wall_autotile_groups[key] = WallAutotileGroup{
+			wallAutotileGroups[key] = WallAutotileGroup{
 				static_cast<TileSheet>(val["sheet"].get<int>()),
 				val["origin_col"].get<int>(),
 				val["origin_row"].get<int>()
@@ -189,7 +189,7 @@ void TileConfig::load(std::string_view path)
 	{
 		for (auto& [key, val] : root["tile_types"].items())
 		{
-			m_tile_definitions[parse_tile_type(key)] = parse_tile_definition(val);
+			tileDefinitions[parse_tile_type(key)] = parse_tile_definition(val);
 		}
 	}
 }

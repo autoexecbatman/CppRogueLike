@@ -98,10 +98,10 @@ constexpr TileRef wall_resolve_mask(WallAutotileGroup group, int mask)
 class TileConfig
 {
 private:
-	std::unordered_map<std::string, TileRef> m_tiles;
-	std::unordered_map<std::string, AutotileGroup> m_autotile_groups;
-	std::unordered_map<std::string, WallAutotileGroup> m_wall_autotile_groups;
-	std::unordered_map<TileType, TileDefinition> m_tile_definitions;
+	std::unordered_map<std::string, TileRef> tiles;
+	std::unordered_map<std::string, AutotileGroup> autotileGroups;
+	std::unordered_map<std::string, WallAutotileGroup> wallAutotileGroups;
+	std::unordered_map<TileType, TileDefinition> tileDefinitions;
 
 public:
 	[[nodiscard]] TileRef get(std::string_view key) const;
@@ -125,7 +125,7 @@ public:
 	//   config.get_tile_definitions().size();  // -> 6, one per TileType in tile_config.json
 	[[nodiscard]] const std::unordered_map<TileType, TileDefinition>& get_tile_definitions() const noexcept
 	{
-		return m_tile_definitions;
+		return tileDefinitions;
 	}
 
 	void load(std::string_view path);
