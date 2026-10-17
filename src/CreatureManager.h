@@ -17,6 +17,19 @@ struct GameContext;
 // - Handles all creature lifecycle and management
 class CreatureManager
 {
+private:
+	int maxCreatures{ 10 };
+	int spawnRate{ 2 };
+
+	// Helper methods
+	bool can_spawn_creature(
+		std::span<const std::unique_ptr<Creature>> creatures,
+		int max_creatures) const noexcept;
+
+	// A tile somewhere on the level a creature can be put on, or nullopt when no room has
+	// one. Each room is visited at most once from a random start, so this always returns.
+	std::optional<Vector2D> find_spawn_position(GameContext& ctx);
+
 public:
 	// Creature lifecycle
 	void update_creatures(std::span<std::unique_ptr<Creature>> creatures, GameContext& ctx);
@@ -41,17 +54,4 @@ public:
 	Creature* get_actor_at_position(
 		std::span<const std::unique_ptr<Creature>> creatures,
 		Vector2D pos) const noexcept;
-
-private:
-	int maxCreatures{ 10 };
-	int spawnRate{ 2 };
-
-	// Helper methods
-	bool can_spawn_creature(
-		std::span<const std::unique_ptr<Creature>> creatures,
-		int max_creatures) const noexcept;
-
-	// A tile somewhere on the level a creature can be put on, or nullopt when no room has
-	// one. Each room is visited at most once from a random start, so this always returns.
-	std::optional<Vector2D> find_spawn_position(GameContext& ctx);
 };

@@ -11,6 +11,14 @@ struct Vector2D;
 
 class AiMonsterConfused : public Ai
 {
+private:
+	int confusionEndTime{ 0 };
+	std::unique_ptr<Ai> oldAi;
+
+	[[nodiscard]] Vector2D get_random_direction(GameContext& ctx) const;
+	void attempt_move(Creature& owner, const Vector2D& destination, GameContext& ctx);
+	void restore_original_ai(Creature& owner);
+
 public:
 	// Takes the clock reading the confusion ends at rather than a count of rounds: the
 	// creature's own update runs once per action, so a count would fall twice as fast
@@ -29,12 +37,4 @@ public:
 
 	void load(const json& j) override;
 	void save(json& j) override;
-
-private:
-	int confusionEndTime{ 0 };
-	std::unique_ptr<Ai> oldAi;
-
-	[[nodiscard]] Vector2D get_random_direction(GameContext& ctx) const;
-	void attempt_move(Creature& owner, const Vector2D& destination, GameContext& ctx);
-	void restore_original_ai(Creature& owner);
 };

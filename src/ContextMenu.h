@@ -10,6 +10,13 @@ struct GameContext;
 
 class ContextMenu : public BaseMenu
 {
+private:
+	std::vector<std::string> menuOptions;
+	int selectedIndex{ 0 };
+	std::function<void(int, GameContext&)> onSelect;
+	void draw_content() override;
+	void on_key(GameContext& ctx) override;
+
 public:
 	ContextMenu(
 		std::vector<std::string> options,
@@ -20,11 +27,4 @@ public:
 
 	// Called once per frame by MenuManager -- no blocking loop
 	void menu(GameContext& ctx) override;
-
-private:
-	std::vector<std::string> menuOptions;
-	int selectedIndex{ 0 };
-	std::function<void(int, GameContext&)> onSelect;
-	void draw_content() override;
-	void on_key(GameContext& ctx) override;
 };

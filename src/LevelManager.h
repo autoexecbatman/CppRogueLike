@@ -11,6 +11,14 @@ struct GameContext;
 // - Handles dungeon level progression and level-specific state
 class LevelManager
 {
+private:
+	int dungeon_level{ 1 };
+	int shopkeepers_on_current_level{ 0 };
+
+	// Helper methods
+	void display_level_messages(MessageSystem& message_system) const;
+	void heal_player_between_levels(GameContext& ctx) const;
+
 public:
 	// Level state
 	int get_dungeon_level() const noexcept { return dungeon_level; }
@@ -29,12 +37,4 @@ public:
 	// Save/Load
 	void save_to_json(nlohmann::json& j) const;
 	void load_from_json(const nlohmann::json& j);
-
-private:
-	int dungeon_level{ 1 };
-	int shopkeepers_on_current_level{ 0 };
-
-	// Helper methods
-	void display_level_messages(MessageSystem& message_system) const;
-	void heal_player_between_levels(GameContext& ctx) const;
 };

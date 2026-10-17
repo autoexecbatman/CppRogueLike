@@ -9,6 +9,16 @@
 // We want this class to be the only random number generator for the game right now.
 class RandomDice
 {
+private:
+	// we use the mersenne twister engine for our random number generator
+	// we seed it with a random device
+	std::mt19937 m_gen{ std::random_device{}() };
+
+#ifdef TESTING_MODE
+	bool m_test_mode{ false };
+	std::vector<int> m_fixed_rolls;
+#endif
+
 public:
 	RandomDice() = default;
 
@@ -90,14 +100,4 @@ public:
 #endif
 
 	[[nodiscard]] std::mt19937& get_rng() noexcept { return m_gen; }
-
-private:
-	// we use the mersenne twister engine for our random number generator
-	// we seed it with a random device
-	std::mt19937 m_gen{ std::random_device{}() };
-
-#ifdef TESTING_MODE
-	bool m_test_mode{ false };
-	std::vector<int> m_fixed_rolls;
-#endif
 };

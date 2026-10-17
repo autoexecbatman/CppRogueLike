@@ -7,6 +7,10 @@ struct GameContext;
 
 class LevelUpUI : public BaseMenu
 {
+private:
+	Player& playerRef;
+	int level{};
+
 public:
 	LevelUpUI(Player& player, int newLevel);
 	~LevelUpUI() = default;
@@ -16,8 +20,4 @@ public:
 	LevelUpUI& operator=(LevelUpUI&&) = delete;
 
 	void menu(GameContext& ctx) override;
-
-private:
-	Player& playerRef;
-	int level{};
 };

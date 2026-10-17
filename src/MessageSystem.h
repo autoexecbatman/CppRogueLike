@@ -22,6 +22,16 @@ enum class MessageCompletion
 // - Handles all messaging and logging functionality
 class MessageSystem
 {
+private:
+	// Message storage
+	std::vector<LogMessage> attackMessageParts;
+	std::vector<std::vector<LogMessage>> attackMessagesWhole;
+	std::string messageToDisplay{ "Init Message" };
+	ColorPairId messageColor{ ColorPairId::WHITE_BLACK };
+
+	// Debug state
+	bool debugMode{ true };
+
 public:
 	MessageSystem();
 	~MessageSystem() = default;
@@ -60,14 +70,4 @@ public:
 	{
 		return attackMessagesWhole.at(index);
 	}
-
-private:
-	// Message storage
-	std::vector<LogMessage> attackMessageParts;
-	std::vector<std::vector<LogMessage>> attackMessagesWhole;
-	std::string messageToDisplay{ "Init Message" };
-	ColorPairId messageColor{ ColorPairId::WHITE_BLACK };
-
-	// Debug state
-	bool debugMode{ true };
 };

@@ -14,16 +14,6 @@ struct GameContext;
 
 class BalanceViewer : public BaseMenu
 {
-public:
-	BalanceViewer(int dungeonLevel, GameContext& ctx);
-	~BalanceViewer() = default;
-	BalanceViewer(const BalanceViewer&) = delete;
-	BalanceViewer& operator=(const BalanceViewer&) = delete;
-	BalanceViewer(BalanceViewer&&) = delete;
-	BalanceViewer& operator=(BalanceViewer&&) = delete;
-
-	void menu(GameContext& ctx) override;
-
 private:
 	int dungeonLevel{};
 	std::vector<MonsterPercentage> monsterDist{};
@@ -39,6 +29,16 @@ private:
 		const std::vector<ItemPercentage>& dist,
 		int startCol,
 		GameContext& ctx);
+
+public:
+	BalanceViewer(int dungeonLevel, GameContext& ctx);
+	~BalanceViewer() = default;
+	BalanceViewer(const BalanceViewer&) = delete;
+	BalanceViewer& operator=(const BalanceViewer&) = delete;
+	BalanceViewer(BalanceViewer&&) = delete;
+	BalanceViewer& operator=(BalanceViewer&&) = delete;
+
+	void menu(GameContext& ctx) override;
 };
 
 // end of file: Tools/BalanceViewer.h

@@ -15,15 +15,15 @@
 
 class ContentRegistry
 {
+private:
+	std::unordered_map<std::string, TileRef> itemTiles;
+
 public:
 	ContentRegistry() = default;
 
 	[[nodiscard]] TileRef get_tile(std::string_view key) const;
 	void set_tile(std::string_view key, TileRef tile);
 	[[nodiscard]] const std::unordered_map<std::string, TileRef>& all_tiles() const;
-
-private:
-	std::unordered_map<std::string, TileRef> itemTiles;
 };
 
 // end of file: ContentRegistry.h

@@ -97,6 +97,12 @@ constexpr TileRef wall_resolve_mask(WallAutotileGroup group, int mask)
 // ---------------------------------------------------------------------------
 class TileConfig
 {
+private:
+	std::unordered_map<std::string, TileRef> m_tiles;
+	std::unordered_map<std::string, AutotileGroup> m_autotile_groups;
+	std::unordered_map<std::string, WallAutotileGroup> m_wall_autotile_groups;
+	std::unordered_map<TileType, TileDefinition> m_tile_definitions;
+
 public:
 	[[nodiscard]] TileRef get(std::string_view key) const;
 	[[nodiscard]] AutotileGroup get_autotile(std::string_view key) const;
@@ -123,12 +129,6 @@ public:
 	}
 
 	void load(std::string_view path);
-
-private:
-	std::unordered_map<std::string, TileRef> m_tiles;
-	std::unordered_map<std::string, AutotileGroup> m_autotile_groups;
-	std::unordered_map<std::string, WallAutotileGroup> m_wall_autotile_groups;
-	std::unordered_map<TileType, TileDefinition> m_tile_definitions;
 };
 
 // end of file: TileConfig.h

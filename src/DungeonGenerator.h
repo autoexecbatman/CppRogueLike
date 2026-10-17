@@ -21,14 +21,6 @@ struct GameContext;
 
 class DungeonGenerator
 {
-public:
-	void generate(
-		int mapWidth,
-		int mapHeight,
-		RandomDice& rng,
-		GameContext& ctx,
-		Map& map) const;
-
 private:
 	std::vector<DungeonRoom> place_rooms(
 		int mapWidth,
@@ -51,4 +43,12 @@ private:
 		std::vector<DungeonRoom>& rooms,
 		int indexA,
 		int indexB) const;
+
+public:
+	void generate(
+		int mapWidth,
+		int mapHeight,
+		RandomDice& rng,
+		GameContext& ctx,
+		Map& map) const;
 };

@@ -36,6 +36,9 @@ namespace CharacterSheetText
 
 class CharacterSheetUI : public BaseMenu
 {
+private:
+	const Player& player_ref;
+
 public:
 	CharacterSheetUI(const Player& player);
 	~CharacterSheetUI() = default;
@@ -45,7 +48,4 @@ public:
 	CharacterSheetUI& operator=(CharacterSheetUI&&) = delete;
 
 	void menu(GameContext& ctx) override;
-
-private:
-	const Player& player_ref;
 };

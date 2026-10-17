@@ -22,15 +22,6 @@ class ItemRegistry;
 
 class ContentEditor
 {
-public:
-	void toggle(ContentRegistry& registry, MonsterRegistry& monsters, const ItemRegistry& items);
-
-	void set_char_input(int ch) noexcept { m_buffered_char = ch; }
-
-	void update_and_render(const Renderer& renderer, ContentRegistry& registry, MonsterRegistry& monsters);
-
-	[[nodiscard]] bool is_active() const { return m_active; }
-
 private:
 	struct Entry
 	{
@@ -70,4 +61,13 @@ private:
 	{
 		return m_tab == 0 ? m_item_entries : m_monster_entries;
 	}
+
+public:
+	void toggle(ContentRegistry& registry, MonsterRegistry& monsters, const ItemRegistry& items);
+
+	void set_char_input(int ch) noexcept { m_buffered_char = ch; }
+
+	void update_and_render(const Renderer& renderer, ContentRegistry& registry, MonsterRegistry& monsters);
+
+	[[nodiscard]] bool is_active() const { return m_active; }
 };

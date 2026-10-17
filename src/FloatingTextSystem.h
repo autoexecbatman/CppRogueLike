@@ -27,6 +27,9 @@ enum class DamageSubject
 
 class FloatingTextSystem
 {
+private:
+	std::vector<FloatingEntry> entries;
+
 public:
 	// Shows a damage number rising off a tile, coloured by who was hit.
 	void spawn_damage(Vector2D worldPosition, int value, DamageSubject subject);
@@ -40,7 +43,4 @@ public:
 		float lifetime);
 
 	void update_and_render(const Renderer& renderer);
-
-private:
-	std::vector<FloatingEntry> entries;
 };

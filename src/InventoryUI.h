@@ -159,16 +159,6 @@ inline constexpr std::array<ItemCategory, 3> USABLE_CATEGORIES{ {
 
 class InventoryUI : public BaseMenu
 {
-public:
-	InventoryUI(Player& player, InventoryScreen startScreen, GameContext& ctx);
-	~InventoryUI() = default;
-	InventoryUI(const InventoryUI&) = delete;
-	InventoryUI& operator=(const InventoryUI&) = delete;
-	InventoryUI(InventoryUI&&) = delete;
-	InventoryUI& operator=(InventoryUI&&) = delete;
-
-	void menu(GameContext& ctx) override;
-
 private:
 	// What a use leaves the screen doing. A use that moves the player closes it, so the
 	// map shows where they are.
@@ -239,4 +229,14 @@ private:
 
 	void draw_frame(GameContext& ctx);
 	void draw_highlight_row(int row, GameContext& ctx);
+
+public:
+	InventoryUI(Player& player, InventoryScreen startScreen, GameContext& ctx);
+	~InventoryUI() = default;
+	InventoryUI(const InventoryUI&) = delete;
+	InventoryUI& operator=(const InventoryUI&) = delete;
+	InventoryUI(InventoryUI&&) = delete;
+	InventoryUI& operator=(InventoryUI&&) = delete;
+
+	void menu(GameContext& ctx) override;
 };

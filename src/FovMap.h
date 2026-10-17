@@ -21,14 +21,6 @@ struct FovCell
 // ---------------------------------------------------------------------------
 class FovMap
 {
-public:
-	FovMap(int width, int height);
-
-	void set_properties(int col, int row, bool walkable, bool transparent) noexcept;
-	bool is_walkable(int col, int row) const noexcept;
-	bool is_in_fov(int col, int row) const noexcept;
-	void compute_fov(int panelX, int panelY, int radius);
-
 private:
 	int width_;
 	int height_;
@@ -48,4 +40,12 @@ private:
 		int xy,
 		int yx,
 		int yy);
+
+public:
+	FovMap(int width, int height);
+
+	void set_properties(int col, int row, bool walkable, bool transparent) noexcept;
+	bool is_walkable(int col, int row) const noexcept;
+	bool is_in_fov(int col, int row) const noexcept;
+	void compute_fov(int panelX, int panelY, int radius);
 };

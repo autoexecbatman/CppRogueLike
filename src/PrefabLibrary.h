@@ -49,6 +49,15 @@ struct Prefab
 
 class PrefabLibrary
 {
+private:
+	std::vector<Prefab> prefabs;
+	std::unordered_map<char, TileRef> symbolToTile; // char -> tile (invalid = structural)
+	std::unordered_map<char, std::string> symbolToLabel;
+	std::vector<PaletteEntry> paletteOrder; // stable display order
+
+	void build_structural_symbols();
+	void register_symbol(char sym, TileRef tile, std::string_view label);
+
 public:
 	void load(std::string_view path);
 	void save(std::string_view path) const;
@@ -79,13 +88,4 @@ public:
 		const std::vector<DungeonRoom>& rooms,
 		DecorEditor& editor,
 		Map& map) const;
-
-private:
-	std::vector<Prefab> prefabs;
-	std::unordered_map<char, TileRef> symbolToTile; // char -> tile (invalid = structural)
-	std::unordered_map<char, std::string> symbolToLabel;
-	std::vector<PaletteEntry> paletteOrder; // stable display order
-
-	void build_structural_symbols();
-	void register_symbol(char sym, TileRef tile, std::string_view label);
 };

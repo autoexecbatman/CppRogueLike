@@ -15,6 +15,11 @@ struct GameContext;
  */
 class ShopkeeperFactory
 {
+private:
+	// Internal helpers
+	static ShopType select_shop_type_for_level(int dungeonLevel, GameContext& ctx);
+	static ShopQuality select_shop_quality_for_level(int dungeonLevel, GameContext& ctx);
+
 public:
 	// Main creation method - single source for shopkeeper spawning
 	static std::unique_ptr<Creature> create_shopkeeper(Vector2D position, int dungeonLevel, GameContext& ctx);
@@ -24,9 +29,4 @@ public:
 
 	// Configure shopkeeper stats, AI, and shop component
 	static void configure_shopkeeper(Creature& shopkeeper, int dungeonLevel, GameContext& ctx);
-
-private:
-	// Internal helpers
-	static ShopType select_shop_type_for_level(int dungeonLevel, GameContext& ctx);
-	static ShopQuality select_shop_quality_for_level(int dungeonLevel, GameContext& ctx);
 };

@@ -8,6 +8,12 @@ struct GameContext;
 
 class MenuManager
 {
+private:
+	bool gameWasInit{ false };
+	bool shouldTakeInput{ true };
+
+	void restore_game_display(GameContext& ctx);
+
 public:
 	// Core menu management
 	void handle_menus(std::deque<std::unique_ptr<BaseMenu>>& menus, GameContext& ctx);
@@ -28,10 +34,4 @@ public:
 	// also being processed as a game action). Reset to true by handle_input_phase
 	// at the start of each frame.
 	void set_should_take_input(bool takeInput) noexcept { shouldTakeInput = takeInput; }
-
-private:
-	bool gameWasInit{ false };
-	bool shouldTakeInput{ true };
-
-	void restore_game_display(GameContext& ctx);
 };

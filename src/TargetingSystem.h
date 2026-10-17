@@ -16,6 +16,10 @@ struct TargetResult
 
 class TargetingSystem
 {
+private:
+	static int get_weapon_range(const Item* weapon);
+	TargetResult target_auto_nearest(GameContext& ctx, const Creature& attacker, int range) const;
+
 public:
 	void draw_los(GameContext& ctx, Vector2D targetCursor) const;
 	void draw_range_indicator(GameContext& ctx, Vector2D center, int range) const;
@@ -36,8 +40,4 @@ public:
 	//   result.success;          // -> false when nothing hostile is in range
 	//   result.creatures.size(); // -> 1 on success
 	TargetResult acquire_nearest(GameContext& ctx, const Creature& attacker, int range) const;
-
-private:
-	static int get_weapon_range(const Item* weapon);
-	TargetResult target_auto_nearest(GameContext& ctx, const Creature& attacker, int range) const;
 };

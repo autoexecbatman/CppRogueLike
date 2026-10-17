@@ -10,6 +10,9 @@ class TileConfig;
 // Web class - represents a spider web that can trap players
 class Web : public SpellTile
 {
+private:
+	int webStrength{ 2 }; // How strong the web is (affects escape difficulty)
+
 public:
 	Web(Vector2D position, int strength, const TileConfig& tileConfig);
 
@@ -24,7 +27,4 @@ public:
 
 	// Destroy this web
 	void destroy();
-
-private:
-	int webStrength{ 2 }; // How strong the web is (affects escape difficulty)
 };

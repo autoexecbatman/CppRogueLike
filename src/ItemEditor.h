@@ -26,13 +26,6 @@ class ContentRegistry;
 
 class ItemEditor
 {
-public:
-	void enter(GameContext& ctx);
-	void exit(GameContext& ctx);
-	void tick(GameContext& ctx);
-
-	[[nodiscard]] bool is_active() const { return m_active; }
-
 private:
 	enum class Mode
 	{
@@ -139,4 +132,11 @@ private:
 	void field_adjust(FieldId f, int delta);
 	void field_toggle(FieldId f);
 	void field_set_string(FieldId f, std::string val);
+
+public:
+	void enter(GameContext& ctx);
+	void exit(GameContext& ctx);
+	void tick(GameContext& ctx);
+
+	[[nodiscard]] bool is_active() const { return m_active; }
 };

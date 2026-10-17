@@ -58,6 +58,17 @@ struct ProjectileEntry
 
 class AnimationSystem
 {
+private:
+	std::vector<AnimEntry> entries;
+	std::vector<ProjectileEntry> projectiles;
+	TileRef m_blood_tile{};
+	TileRef m_spark_tile{};
+	TileRef m_missile_tile{};
+	int m_tile_size{ 32 };
+	std::mt19937 m_rng;
+
+	float random_range(float lo, float hi);
+
 public:
 	void init(const TileConfig& tileConfig, int tile_size);
 
@@ -111,15 +122,4 @@ public:
 	{
 		return !entries.empty() || !projectiles.empty();
 	}
-
-private:
-	std::vector<AnimEntry> entries;
-	std::vector<ProjectileEntry> projectiles;
-	TileRef m_blood_tile{};
-	TileRef m_spark_tile{};
-	TileRef m_missile_tile{};
-	int m_tile_size{ 32 };
-	std::mt19937 m_rng;
-
-	float random_range(float lo, float hi);
 };
