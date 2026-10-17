@@ -12,8 +12,8 @@
 //
 // Expected values: with the attack roll forced to hit, a fire wolf's 1d6 forced
 // to 6 through a ring is 4; an ice wolf's 6 through a ring of warmth is 5; a
-// chimera's 3d12 at 12, 12, 12 through the helm is 8 + 8 + 8; a dragon's
-// 1d12+5 at 12 through a ring is 10 + 5.
+// chimera's 3d12 at 12, 12, 12 through the helm is 8 + 8 + 8; a fire
+// attack of 1d12+5 at 12 through a ring is 10 + 5.
 
 #include <gtest/gtest.h>
 
@@ -133,14 +133,15 @@ TEST_F(TypedAttackResistanceTest, TheHelmTakesFourOffEveryDieOfAChimera)
 	EXPECT_EQ(hp_lost_after(*chimera), 24);
 }
 
-// A dragon's 1d12+5: the die is reduced, the +5 is not a die.
+// A fire attack of 1d12+5, which no monster in the data carries: the die is
+// reduced, the +5 is not a die.
 TEST_F(TypedAttackResistanceTest, ABonusOnTheRollIsNotADie)
 {
 	wear("ring_of_fire_resistance", EquipmentSlot::RIGHT_RING);
-	auto dragon = monster_with(DamageInfo{ "1d12+5", DamageType::FIRE });
+	auto fireAttacker = monster_with(DamageInfo{ "1d12+5", DamageType::FIRE });
 	force_hit_then_dice({ 12 });
 
-	EXPECT_EQ(hp_lost_after(*dragon), 15);
+	EXPECT_EQ(hp_lost_after(*fireAttacker), 15);
 }
 
 // A physical bite is untouched by a ring of fire resistance.

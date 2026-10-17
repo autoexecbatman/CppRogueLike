@@ -81,14 +81,13 @@ TEST_F(MonsterRoundTripTest, EveryDamageTypeInTheFileIsANameNotANumber)
 	EXPECT_GT(checked, 0) << "no record carried a damage block; the case measures nothing";
 }
 
-// The nine records whose damage is not plain physical, each keeping the type the file
-// gave it. Twenty-nine of the thirty-eight are physical, so a mapping that collapsed
+// The eight records whose damage is not plain physical, each keeping the type the file
+// gave it. Thirty of the thirty-eight are physical, so a mapping that collapsed
 // every type onto the first one would pass a check that only counted strings.
 TEST_F(MonsterRoundTripTest, TheTypedDamagersKeepTheirType)
 {
 	const std::map<std::string, DamageType> expected{
 		{ "chimera", DamageType::FIRE },
-		{ "dragon", DamageType::FIRE },
 		{ "fire_wolf", DamageType::FIRE },
 		{ "pit_fiend", DamageType::FIRE },
 		{ "ice_wolf", DamageType::COLD },

@@ -1,0 +1,95 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=DragonStatBlockTest.*:MonsterRoundTripTest.*:MonsterSizeTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "data/content/monsters.json",
+      "original": "\"dragon\": {\n    \"ac\": -3,",
+      "mutated": "\"dragon\": {\n    \"ac\": -2,",
+      "catches": "a dragon one place of armour class softer than the juvenile's -3"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "\"num\": 15,",
+      "mutated": "\"num\": 14,",
+      "catches": "fourteen Hit Dice where the book gives fifteen"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "\"bonus\": 0,\n      \"num\": 15,\n      \"sides\": 8",
+      "mutated": "\"bonus\": 0,\n      \"num\": 15,\n      \"sides\": 10",
+      "catches": "Hit Dice of ten sides where the Monstrous Manual rolls eight"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "\"bonus\": 0,\n      \"num\": 15,",
+      "mutated": "\"bonus\": 4,\n      \"num\": 15,",
+      "catches": "a hit point bonus a juvenile's Nil modifier does not give"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "\"thaco\": 5,",
+      "mutated": "\"thaco\": 7,",
+      "catches": "the entry's misprinted 7 (at 9 HD) in place of Table 39 at 15 HD"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "\"xp\": 12000,",
+      "mutated": "\"xp\": 10000,",
+      "catches": "the age 3 experience value, 10,000, in place of the juvenile's 12,000"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "\"type\": \"physical\"\n    },\n    \"depth_max\": 0,\n    \"depth_min\": 9,",
+      "mutated": "\"type\": \"physical\"\n    },\n    \"depth_max\": 0,\n    \"depth_min\": 8,",
+      "catches": "a dragon met a level above the owner's ninth"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "\"type\": \"physical\"\n    },\n    \"depth_max\": 0,\n    \"depth_min\": 9,",
+      "mutated": "\"type\": \"physical\"\n    },\n    \"depth_max\": 9,\n    \"depth_min\": 9,",
+      "catches": "a dragon that stops appearing below the ninth level"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "\"display\": \"3d10+4\"",
+      "mutated": "\"display\": \"3d10+3\"",
+      "catches": "a bite without the juvenile's full +4 combat modifier"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "\"display\": \"3d10+4\"",
+      "mutated": "\"display\": \"2d10+4\"",
+      "catches": "a bite of two dice where the entry gives three"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "\"display\": \"3d10+4\"",
+      "mutated": "\"display\": \"3d8+4\"",
+      "catches": "a bite of d8s where the entry gives d10s"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "\"display\": \"3d10+4\",\n      \"type\": \"physical\"",
+      "mutated": "\"display\": \"3d10+4\",\n      \"type\": \"fire\"",
+      "catches": "the bite typed as fire, as the old breath-as-melee hit was"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "\"morale\": 18,\n    \"size\": \"gargantuan\"",
+      "mutated": "\"morale\": 19,\n    \"size\": \"gargantuan\"",
+      "catches": "morale above the Fanatic band of 17-18"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "\"natural_attack\": \"bite\"",
+      "mutated": "\"natural_attack\": \"Fiery Breath\"",
+      "catches": "the attack still named for the breath it does not model"
+    }
+  ]
+}

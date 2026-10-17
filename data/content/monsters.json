@@ -258,7 +258,7 @@
     "body": "beast"
   },
   "dragon": {
-    "ac": 1,
+    "ac": -3,
     "ai": "melee",
     "can_swim": false,
     "can_fly": true,
@@ -270,11 +270,11 @@
     "color": "red_yellow",
     "corpse": "dead dragon",
     "damage": {
-      "display": "1d12+5",
-      "type": "fire"
+      "display": "3d10+4",
+      "type": "physical"
     },
     "depth_max": 0,
-    "depth_min": 5,
+    "depth_min": 9,
     "depth_scale": 1.0,
     "dex": {
       "bonus": 0,
@@ -285,23 +285,23 @@
     "ethics": "chaotic",
     "morality": "evil",
     "hp": {
-      "bonus": 5,
-      "num": 1,
-      "sides": 12
+      "bonus": 0,
+      "num": 15,
+      "sides": 8
     },
     "int": {
       "bonus": 3,
       "num": 3,
       "sides": 6
     },
-    "morale": 19,
+    "morale": 18,
     "size": "gargantuan",
     "str": {
       "bonus": 0,
       "num": 5,
       "sides": 6
     },
-    "thaco": 9,
+    "thaco": 5,
     "tile": {
       "col": 3,
       "row": 3,
@@ -313,10 +313,10 @@
       "num": 3,
       "sides": 6
     },
-    "xp": 600,
+    "xp": 12000,
     "corpse_weight": 600,
     "equipment": [],
-    "natural_attack": "Fiery Breath",
+    "natural_attack": "bite",
     "body": "beast"
   },
   "fire_wolf": {
