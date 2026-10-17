@@ -24,6 +24,8 @@ const std::vector<Vector2D> NEIGHBORS = {
 // AD&D 2e: Move away from player, up the cost map this creature would descend to reach it.
 void flee(Creature& owner, GameContext& ctx)
 {
+	assert(ctx.map && "flee: called without a map");
+
 	auto is_occupied = [&ctx](const Vector2D& pos)
 	{
 		return ctx.map->get_actor(pos, ctx) != nullptr;
@@ -114,6 +116,8 @@ void random_wander(Creature& owner, GameContext& ctx)
 // it, so it waits at the bank of a moat rather than wherever it stood.
 void close_in_without_a_route(Creature& owner, Vector2D targetPosition, const Pathfinding::Mobility& mobility, GameContext& ctx)
 {
+	assert(ctx.map && "close_in_without_a_route: called without a map");
+
 	std::optional<Vector2D> bestStep;
 	int bestDistance = owner.get_tile_distance(targetPosition);
 
@@ -151,6 +155,8 @@ bool cannot_act(Creature& owner)
 
 void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
 {
+	assert(ctx.map && "AiMonster::move_or_attack: called without a map");
+
 	check_morale(owner, ctx);
 
 	if (owner.has_state(ActorState::IS_FLEEING))

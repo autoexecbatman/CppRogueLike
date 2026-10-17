@@ -167,6 +167,7 @@ DisarmResult Trap::attempt_disarm(Player& creature, GameContext& ctx)
 
 EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 {
+	assert(ctx.map && "Trap::on_creature_enter: called without a map");
 	assert(ctx.dice && "Trap::on_creature_enter: called without dice");
 
 	// A disarmed trap is walked over.

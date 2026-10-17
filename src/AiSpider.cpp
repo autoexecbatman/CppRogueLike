@@ -58,6 +58,7 @@ bool is_surprised(const Creature& creature, GameContext& ctx)
 
 void AiSpider::update(Creature& owner, GameContext& ctx)
 {
+	assert(ctx.map && "AiSpider::update: called without a map");
 	assert(ctx.dice && "AiSpider::update: called without dice");
 
 	// Skip if spider is dead
@@ -205,6 +206,8 @@ void AiSpider::random_move(Creature& owner, GameContext& ctx)
 
 void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
 {
+	assert(ctx.map && "AiSpider::move_or_attack: called without a map");
+
 	// Get distance to target
 	int distanceToTarget = owner.get_tile_distance(targetPosition);
 
@@ -353,6 +356,7 @@ std::optional<Vector2D> AiSpider::find_ambush_position(
 	Vector2D targetPosition,
 	GameContext& ctx)
 {
+	assert(ctx.map && "AiSpider::find_ambush_position: called without a map");
 	assert(ctx.dice && "AiSpider::find_ambush_position: called without dice");
 
 	auto is_in_bounds = [&](Vector2D pos) -> bool
@@ -409,6 +413,7 @@ std::optional<Vector2D> AiSpider::find_ambush_position(
 
 bool AiSpider::is_good_ambush_spot(Vector2D position, GameContext& ctx)
 {
+	assert(ctx.map && "AiSpider::is_good_ambush_spot: called without a map");
 	assert(!ctx.map->is_wall(position));
 
 	struct AmbushMetrics

@@ -171,6 +171,7 @@ bool place_one_of(const std::vector<const ItemType*>& candidates, Vector2D posit
 
 void ItemFactory::generate_treasure(Vector2D position, int dungeonLevel, int quality, GameContext& ctx)
 {
+	assert(ctx.map && "ItemFactory::generate_treasure: called without a map");
 	assert(ctx.dice && "ItemFactory::generate_treasure: called without dice");
 
 	// quality is 1-3: 1=normal, 2=good, 3=exceptional

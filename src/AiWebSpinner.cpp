@@ -27,6 +27,7 @@ constexpr int WEB_STRENGTH = 3;
 
 void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 {
+	assert(ctx.map && "AiWebSpinner::update: called without a map");
 	assert(ctx.dice && "AiWebSpinner::update: called without dice");
 
 	// DIRECT ATTACK CODE - Check if player is adjacent
@@ -150,6 +151,8 @@ bool AiWebSpinner::should_create_web(Creature& owner, GameContext& ctx)
 
 bool AiWebSpinner::try_create_web(Creature& owner, GameContext& ctx)
 {
+	assert(ctx.map && "AiWebSpinner::try_create_web: called without a map");
+
 	// Determine the web size - bigger webs when player is closer
 	int distToPlayer = owner.get_tile_distance(ctx.player()->position);
 	int webSize = WEB_MAX_SIZE;
@@ -224,6 +227,8 @@ bool AiWebSpinner::try_create_web(Creature& owner, GameContext& ctx)
 // Helper method to check if a position is valid for placing a web
 bool AiWebSpinner::is_valid_web_position(Vector2D pos, GameContext& ctx)
 {
+	assert(ctx.map && "AiWebSpinner::is_valid_web_position: called without a map");
+
 	// Check bounds
 	if (pos.y < 0 ||
 		pos.y >= ctx.map->get_height() ||

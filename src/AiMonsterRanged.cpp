@@ -36,6 +36,8 @@ void AiMonsterRanged::update(Creature& owner, GameContext& ctx)
 
 void AiMonsterRanged::move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
 {
+	assert(ctx.map && "AiMonsterRanged::move_or_attack: called without a map");
+
 	int distance = owner.get_tile_distance(targetPosition);
 
 	// If at optimal range and have line of sight, try a ranged attack
@@ -78,6 +80,8 @@ void AiMonsterRanged::move_or_attack(Creature& owner, Vector2D targetPosition, G
 
 bool AiMonsterRanged::tryRangedAttack(Creature& owner, Vector2D targetPos, GameContext& ctx)
 {
+	assert(ctx.map && "AiMonsterRanged::tryRangedAttack: called without a map");
+
 	// Check if there's a clear line of sight
 	if (!ctx.map->has_los(owner.position, targetPos))
 	{

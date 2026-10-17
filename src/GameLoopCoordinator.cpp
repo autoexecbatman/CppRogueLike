@@ -46,6 +46,8 @@
 // load_all sets the initialised flag itself.
 void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNum)
 {
+	assert(ctx.map && "GameLoopCoordinator::handle_gameloop: called without a map");
+
 	if (ctx.messageSystem->is_debug_mode())
 	{
 		ctx.messageSystem->log("//====================LOOP====================//");
@@ -104,6 +106,8 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
 
 void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 {
+	assert(ctx.map && "GameLoopCoordinator::handle_input_phase: called without a map");
+
 	ctx.inputHandler->reset_key();
 	if (ctx.menuManager->should_take_input())
 	{
@@ -221,6 +225,8 @@ void GameLoopCoordinator::handle_update_phase(GameContext& ctx, Gui& gui)
 
 void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 {
+	assert(ctx.map && "GameLoopCoordinator::handle_render_phase: called without a map");
+
 	ctx.messageSystem->log("Running render...");
 
 	// Center camera on player before rendering

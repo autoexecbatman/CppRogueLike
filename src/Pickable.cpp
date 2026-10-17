@@ -345,6 +345,8 @@ bool use(Weapon& weapon, Item& owner, Creature& wearer, GameContext& ctx)
 
 bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContext& ctx)
 {
+	assert(ctx.map && "use(TargetedScroll): called without a map");
+
 	// FOV_BUFF and AUTO_NEAREST are synchronous — no targeting cursor needed
 	if (targetScroll.targetMode == TargetMode::FOV_BUFF)
 	{
@@ -464,6 +466,8 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 
 ScrollReading read_confusion_at(const Creature& reader, Vector2D tile, int turns, GameContext& ctx)
 {
+	assert(ctx.map && "read_confusion_at: called without a map");
+
 	Creature* target = ctx.map->get_actor(tile, ctx);
 
 	// The reader ignores a creature whose Sanctuary turns them away, and reads at nothing.
@@ -610,6 +614,8 @@ bool use([[maybe_unused]] Shield& shield, Item& owner, Creature& wearer, GameCon
 
 bool use([[maybe_unused]] Teleporter& teleporter, Item& owner, Creature& wearer, GameContext& ctx)
 {
+	assert(ctx.map && "use(Teleporter): called without a map");
+
 	// Reading the scroll is the cost, so it is spent whether or not there is anywhere to go.
 	const std::optional<Vector2D> landing = SpawnUtils::find_random_floor_tile(ctx);
 	if (!landing)

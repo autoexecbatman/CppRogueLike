@@ -94,6 +94,8 @@ void TargetingSystem::draw_range_indicator(GameContext& ctx, Vector2D center, in
 
 bool TargetingSystem::is_valid_target(GameContext& ctx, Vector2D from, Vector2D to, int maxRange) const
 {
+	assert(ctx.map && "TargetingSystem::is_valid_target: called without a map");
+
 	if (from.distance_to(to) > maxRange)
 	{
 		return false;

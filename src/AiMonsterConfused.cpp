@@ -1,3 +1,4 @@
+#include <cassert>
 #include <memory>
 #include <utility>
 
@@ -48,6 +49,8 @@ void AiMonsterConfused::update(Creature& owner, GameContext& ctx)
 
 void AiMonsterConfused::attempt_move(Creature& owner, const Vector2D& destination, GameContext& ctx)
 {
+	assert(ctx.map && "AiMonsterConfused::attempt_move: called without a map");
+
 	// Whatever stands in the way is struck instead.
 	const auto& actor = ctx.map->get_actor(destination, ctx);
 	if (actor && owner.attacker)

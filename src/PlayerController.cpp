@@ -91,6 +91,7 @@ PlayerController::PlayerController(Player& owner)
 
 void PlayerController::update(GameContext& ctx)
 {
+	assert(ctx.map && "PlayerController::update: called without a map");
 	assert(ctx.dice && "PlayerController::update: called without dice");
 
 	// If stuck in a web, try to break free and skip turn if still stuck
@@ -497,6 +498,8 @@ void PlayerController::strike(Creature& target, GameContext& ctx)
 
 bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext& ctx)
 {
+	assert(ctx.map && "PlayerController::look_to_move: called without a map");
+
 	if (ctx.map->get_actor(targetPosition, ctx) != nullptr)
 	{
 		return false;
@@ -571,6 +574,7 @@ bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext&
 
 bool PlayerController::resolve_mouse_world_tile(GameContext& ctx, Vector2D& out_world_tile) const
 {
+	assert(ctx.map && "PlayerController::resolve_mouse_world_tile: called without a map");
 	assert(ctx.inputSystem && "PlayerController::resolve_mouse_world_tile: called without an inputSystem");
 	if (!ctx.renderer)
 	{
@@ -593,6 +597,8 @@ bool PlayerController::resolve_mouse_world_tile(GameContext& ctx, Vector2D& out_
 
 void PlayerController::flush_fov(GameContext& ctx)
 {
+	assert(ctx.map && "PlayerController::flush_fov: called without a map");
+
 	if (shouldComputeFOV)
 	{
 		shouldComputeFOV = false;
@@ -638,6 +644,7 @@ Vector2D PlayerController::find_door_approach(Vector2D doorTile, const GameConte
 
 bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 {
+	assert(ctx.map && "PlayerController::resolve_locked_door: called without a map");
 	assert(ctx.dice && "PlayerController::resolve_locked_door: called without dice");
 
 	// Branch 1: player carries a dungeon key -- consume it, unlock, open.
@@ -741,6 +748,8 @@ void PlayerController::begin_path_walk(
 
 bool PlayerController::execute_arrival(GameContext& ctx)
 {
+	assert(ctx.map && "PlayerController::execute_arrival: called without a map");
+
 	switch (mouseMode)
 	{
 
@@ -789,6 +798,8 @@ bool PlayerController::execute_arrival(GameContext& ctx)
 
 bool PlayerController::handle_mouse_path(GameContext& ctx)
 {
+	assert(ctx.map && "PlayerController::handle_mouse_path: called without a map");
+
 	if (mouseMode == MouseMode::IDLE)
 	{
 		return false;
@@ -851,6 +862,8 @@ bool PlayerController::handle_mouse_path(GameContext& ctx)
 
 void PlayerController::handle_left_click(GameContext& ctx)
 {
+	assert(ctx.map && "PlayerController::handle_left_click: called without a map");
+
 	Vector2D world_tile;
 	if (!resolve_mouse_world_tile(ctx, world_tile))
 	{
@@ -910,6 +923,8 @@ void PlayerController::handle_left_click(GameContext& ctx)
 
 void PlayerController::handle_right_click(GameContext& ctx)
 {
+	assert(ctx.map && "PlayerController::handle_right_click: called without a map");
+
 	Vector2D world_tile;
 	if (!resolve_mouse_world_tile(ctx, world_tile))
 	{
@@ -1094,6 +1109,8 @@ void PlayerController::handle_right_click(GameContext& ctx)
 
 void PlayerController::call_action(Controls key, GameContext& ctx)
 {
+	assert(ctx.map && "PlayerController::call_action: called without a map");
+
 	switch (key)
 	{
 
@@ -1339,6 +1356,8 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 
 bool PlayerController::resolve_pending_door(GameContext& ctx)
 {
+	assert(ctx.map && "PlayerController::resolve_pending_door: called without a map");
+
 	if (pendingDoorAction == PendingDoorAction::NONE)
 	{
 		return false;
@@ -1426,6 +1445,8 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 
 Vector2D PlayerController::handle_direction_input(int dirKey, GameContext& ctx)
 {
+	assert(ctx.map && "PlayerController::handle_direction_input: called without a map");
+
 	const auto& moves = direction_map();
 	const auto controlKey = static_cast<Controls>(dirKey);
 	if (!moves.contains(controlKey))

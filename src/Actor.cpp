@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 #include <string>
 #include <vector>
 
@@ -104,6 +105,8 @@ void Actor::render(const GameContext& ctx) const noexcept
 // check if the actor is visible
 bool Actor::is_visible(const GameContext& ctx) const noexcept
 {
+	assert(ctx.map && "Actor::is_visible: called without a map");
+
 	// Invisible actors are hidden unless there's special detection
 	if (has_state(ActorState::IS_INVISIBLE))
 	{

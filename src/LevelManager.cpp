@@ -1,4 +1,5 @@
 // LevelManager.cpp - Handles dungeon level progression and level-specific state
+#include <cassert>
 #include <format>
 
 #include <nlohmann/json.hpp>
@@ -12,6 +13,8 @@
 
 void LevelManager::advance_to_next_level(GameContext& ctx)
 {
+	assert(ctx.map && "LevelManager::advance_to_next_level: called without a map");
+
 	dungeon_level++;
 	shopkeepers_on_current_level = 0; // Reset shopkeeper counter for new level
 

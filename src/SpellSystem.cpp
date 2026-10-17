@@ -561,6 +561,7 @@ void cast_fireball(
 
 bool cast_magic_missile(Creature& caster, GameContext& ctx)
 {
+	assert(ctx.map && "SpellSystem::cast_magic_missile: called without a map");
 	assert(ctx.dice && "SpellSystem::cast_magic_missile: called without dice");
 
 	// Get caster level
@@ -646,6 +647,7 @@ bool cast_shield(Creature& caster, GameContext& ctx)
 
 bool cast_sleep(Creature& caster, GameContext& ctx)
 {
+	assert(ctx.map && "SpellSystem::cast_sleep: called without a map");
 	assert(ctx.dice && "SpellSystem::cast_sleep: called without dice");
 
 	// AD&D 2e, Player's Handbook page 279: the spell affects 2d4 Hit Dice of
@@ -723,6 +725,7 @@ bool cast_sleep(Creature& caster, GameContext& ctx)
 
 bool cast_hold_person(Creature& caster, GameContext& ctx)
 {
+	assert(ctx.map && "SpellSystem::cast_hold_person: called without a map");
 	assert(ctx.dice && "SpellSystem::cast_hold_person: called without dice");
 
 	// AD&D 2e: paralyzes up to 1d4 humanoids in FOV; save vs. spells (d20 >= 15) negates
@@ -789,6 +792,8 @@ bool cast_invisibility(Creature& caster, GameContext& ctx)
 
 bool cast_teleport(Creature& caster, GameContext& ctx)
 {
+	assert(ctx.map && "SpellSystem::cast_teleport: called without a map");
+
 	// The casting is spent with nowhere to go, as Knock's is with no door in reach.
 	const std::optional<Vector2D> landing = SpawnUtils::find_random_floor_tile(ctx);
 	if (!landing)
@@ -810,6 +815,8 @@ bool cast_teleport(Creature& caster, GameContext& ctx)
 
 bool cast_knock(Creature& caster, GameContext& ctx)
 {
+	assert(ctx.map && "SpellSystem::cast_knock: called without a map");
+
 	// AD&D 2e: Knock opens any locked door within range.
 	// Scan a 7-tile radius for the nearest locked door and open it.
 	constexpr int KNOCK_RADIUS = 7;

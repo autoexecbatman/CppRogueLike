@@ -66,6 +66,8 @@ void CreatureManager::cleanup_dead_creatures(std::vector<std::unique_ptr<Creatur
 
 void CreatureManager::spawn_creatures(GameContext& ctx)
 {
+	assert(ctx.map && "CreatureManager::spawn_creatures: called without a map");
+
 	// One new monster every spawnRate rounds. Read off the clock as rounds rather
 	// than as time units: the clock advances by a hundred or so per action, so a
 	// remainder taken on it directly would be zero almost every turn.

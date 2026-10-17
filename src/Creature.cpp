@@ -765,6 +765,7 @@ void Creature::update(GameContext& ctx)
 
 void Creature::update_awareness(const GameContext& ctx)
 {
+	assert(ctx.map && "Creature::update_awareness: called without a map");
 	assert(ctx.gameState && "update_awareness: a creature looked for the player with no clock to remember by");
 
 	// An invisible player is not seen even in plain line of sight.

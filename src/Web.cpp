@@ -24,6 +24,7 @@ Web::Web(Vector2D position, int strength, const TileConfig& tileConfig)
 // Apply web effect when a creature tries to pass through
 EntryResult Web::on_creature_enter(Creature& creature, GameContext& ctx)
 {
+	assert(ctx.map && "Web::on_creature_enter: called without a map");
 	assert(ctx.dice && "Web::on_creature_enter: called without dice");
 
 	// Spiders and their kin move across webs freely.

@@ -162,6 +162,7 @@ std::optional<int> step_cost(Vector2D position, const Mobility& mobility, const 
 
 bool can_enter(const Creature& creature, Vector2D position, const GameContext& ctx)
 {
+	assert(ctx.map && "Pathfinding::can_enter: called without a map");
 	assert(ctx.tileConfig && "can_enter: asked with no tile configuration loaded");
 
 	if (!step_cost(position, mobility_of(creature, *ctx.tileConfig), ctx))
@@ -174,6 +175,7 @@ bool can_enter(const Creature& creature, Vector2D position, const GameContext& c
 
 StepResult step(Creature& creature, Vector2D destination, GameContext& ctx)
 {
+	assert(ctx.map && "Pathfinding::step: called without a map");
 	assert(creature.position.chebyshev_distance_to(destination) == 1 && "step: the destination is not a neighbouring tile");
 	assert(ctx.tileConfig && "step: a creature moved with no tile configuration loaded");
 
@@ -277,6 +279,8 @@ const Pathfinder::CostMap& Pathfinder::cost_map(Vector2D goal, const Mobility& m
 
 std::optional<int> Pathfinder::cost_to(Vector2D goal, Vector2D from, const Mobility& mobility, const GameContext& ctx)
 {
+	assert(ctx.map && "Pathfinder::cost_to: called without a map");
+
 	const CostMap& costMap = cost_map(goal, mobility, ctx);
 
 	if (!ctx.map->is_in_bounds(from))

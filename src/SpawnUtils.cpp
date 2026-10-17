@@ -23,6 +23,8 @@ constexpr int MAP_EDGE_MARGIN = 2;
 // this at 126 tests.
 std::vector<Vector2D> free_tiles_in(const DungeonRoom& room, const GameContext& ctx)
 {
+	assert(ctx.map && "SpawnUtils::free_tiles_in: called without a map");
+
 	std::vector<Vector2D> free{};
 	for (int row = room.row; row <= room.row_end(); ++row)
 	{
