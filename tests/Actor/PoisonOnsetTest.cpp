@@ -104,7 +104,7 @@ protected:
 		const int before = victim.get_hp();
 		for (int round = 0; round < rounds; ++round)
 		{
-			victim.tick_poison(ctx);
+			victim.tick_poison(ctx.gameState->get_time(), ctx);
 		}
 		return before - victim.get_hp();
 	}

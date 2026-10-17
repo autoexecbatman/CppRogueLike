@@ -4,7 +4,7 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=RoundUpkeepTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=RoundUpkeepTest.*:DrowningInWaterTest.*"
   ],
   "mutations": [
     {
@@ -21,7 +21,7 @@
     },
     {
       "file": "src/GameLoopCoordinator.cpp",
-      "original": "\t\tcreature.tick_poison(ctx);",
+      "original": "\t\tcreature.tick_poison(roundEndTime, ctx);",
       "mutated": "",
       "catches": "a dose that never comes due, so poison is a message and no damage"
     },
@@ -78,6 +78,24 @@
       "original": "\t\tif (ctx.player()->is_dead())\n\t\t{\n\t\t\tbreak;",
       "mutated": "\t\tif (false)\n\t\t{\n\t\t\tbreak;",
       "catches": "a dead player fed the rest of the action's rounds"
+    },
+    {
+      "file": "src/GameLoopCoordinator.cpp",
+      "original": "\t\tconst int roundEndTime = thisRound * TIME_UNITS_PER_ROUND;",
+      "mutated": "\t\tconst int roundEndTime = ctx.gameState->get_time();",
+      "catches": "every round of a long action held against the action's end, as before issues/0203"
+    },
+    {
+      "file": "src/GameLoopCoordinator.cpp",
+      "original": "\t\tconst int roundEndTime = thisRound * TIME_UNITS_PER_ROUND;",
+      "mutated": "\t\tconst int roundEndTime = (thisRound + 1) * TIME_UNITS_PER_ROUND;",
+      "catches": "each round held against the next round's end, one round too late"
+    },
+    {
+      "file": "src/GameLoopCoordinator.cpp",
+      "original": "\t\tconst int roundEndTime = thisRound * TIME_UNITS_PER_ROUND;",
+      "mutated": "\t\tconst int roundEndTime = (thisRound - 1) * TIME_UNITS_PER_ROUND;",
+      "catches": "each round held against the previous round's end, one round too early"
     }
   ]
 }

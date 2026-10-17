@@ -130,7 +130,7 @@ protected:
 		for (int round = 0; round < count; ++round)
 		{
 			ctx.gameState->advance_clock(TIME_UNITS_PER_ROUND);
-			player->tick_poison(ctx);
+			player->tick_poison(ctx.gameState->get_time(), ctx);
 			ctx.buffSystem->update_creature_buffs(*player, ctx.gameState->get_time());
 		}
 	}

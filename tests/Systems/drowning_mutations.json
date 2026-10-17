@@ -33,8 +33,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tairUntilTime = expiry_time(currentTime, breath_rounds(get_constitution()));",
-      "mutated": "\t\tairUntilTime = expiry_time(currentTime, breath_rounds(get_constitution()) * 2);",
+      "original": "\t\tairUntilTime = expiry_time(roundEndTime, breath_rounds(get_constitution()));",
+      "mutated": "\t\tairUntilTime = expiry_time(roundEndTime, breath_rounds(get_constitution()) * 2);",
       "catches": "twice the air the Constitution buys"
     },
     {
@@ -45,7 +45,7 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tconst int roundsPast = rounds_completed_at(currentTime - *airUntilTime);",
+      "original": "\tconst int roundsPast = rounds_completed_at(roundEndTime - *airUntilTime);",
       "mutated": "\tconst int roundsPast = 0;",
       "catches": "every check unmodified however long the creature holds out, so the penalty never accumulates"
     },

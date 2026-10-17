@@ -27,6 +27,7 @@
 
 #include "src/Colors.h"
 #include "src/ArmorClass.h"
+#include "src/BuffSystem.h"
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
@@ -350,6 +351,25 @@ TEST_F(RoundUpkeepTest, ThePlayerWhoDiesMidActionIsNotFedTheRoundsAfter)
 	EXPECT_TRUE(player->is_dead());
 	EXPECT_EQ(ctx.gameState->get_rounds_run(), 3) << "rounds were fed to a dead player";
 	EXPECT_EQ(all_message_text().find("drowns"), std::string::npos) << all_message_text();
+}
+
+// A venom that debilitates starts its condition when its dose lands, in the round it
+// lands in. Landing on round 3 of a seven-round action, ten rounds of it run to the end
+// of round 13, so at the action's end six remain.
+TEST_F(RoundUpkeepTest, AVenomLandingInsideALongActionStartsInItsOwnRound)
+{
+	Creature& bitten = add_creature("bitten", 10);
+	bitten.take_poison(PendingPoison{
+		.roundsUntilOnset = 3,
+		.damage = 0,
+		.effect = BuffType::HAIRY_SPIDER_VENOM,
+		.effectValue = 1,
+		.effectRounds = 10 });
+
+	spend_one_action_of(7);
+
+	EXPECT_EQ(ctx.buffSystem->get_buff_turns(bitten, BuffType::HAIRY_SPIDER_VENOM, ctx.gameState->get_time()), 6)
+		<< "the venom started at the action's end, not the round it landed in";
 }
 
 // end of file: RoundUpkeepTest.cpp

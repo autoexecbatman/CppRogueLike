@@ -648,7 +648,7 @@ void Creature::take_poison(PendingPoison dose)
 	pendingPoison = dose;
 }
 
-void Creature::tick_poison(GameContext& ctx)
+void Creature::tick_poison(int roundEndTime, GameContext& ctx)
 {
 	if (!pendingPoison.has_value() || is_dead())
 	{
@@ -671,7 +671,7 @@ void Creature::tick_poison(GameContext& ctx)
 	// A poison that debilitates leaves its condition behind; one that wounds does not.
 	if (effect != BuffType::NONE)
 	{
-		ctx.buffSystem->add_buff(*this, effect, effectValue, effectRounds, false, ctx.gameState->get_time());
+		ctx.buffSystem->add_buff(*this, effect, effectValue, effectRounds, false, roundEndTime);
 
 		// The onset is a round after the bite, so it is announced when it arrives.
 		ctx.messageSystem->message(actorData.color, actorData.name, MessageCompletion::CONTINUED);
@@ -1036,10 +1036,9 @@ bool Creature::needs_air_underwater() const noexcept
 	return !wears_item_with(MagicalEffect::UNDERWATER_ACTION);
 }
 
-void Creature::tick_breath(GameContext& ctx)
+void Creature::tick_breath(int roundEndTime, GameContext& ctx)
 {
 	assert(ctx.map && "tick_breath: a round ran with no map to stand on");
-	assert(ctx.gameState && "tick_breath: a round ran with no clock to hold a breath against");
 	assert(ctx.dice && "tick_breath: a round ran with no dice to check against");
 
 	// Dry ground, a creature crossing on wings rather than through the water, one that
@@ -1051,23 +1050,21 @@ void Creature::tick_breath(GameContext& ctx)
 		return;
 	}
 
-	const int currentTime = ctx.gameState->get_time();
-
 	// The round it is first found in water is the gulp of air.
 	if (!airUntilTime.has_value())
 	{
-		airUntilTime = expiry_time(currentTime, breath_rounds(get_constitution()));
+		airUntilTime = expiry_time(roundEndTime, breath_rounds(get_constitution()));
 		return;
 	}
 
-	if (currentTime < *airUntilTime)
+	if (roundEndTime < *airUntilTime)
 	{
 		return;
 	}
 
 	// Past the allowance. The penalty comes off the clock rather than a second counter:
 	// how far past it is already says how many checks have been made.
-	const int roundsPast = rounds_completed_at(currentTime - *airUntilTime);
+	const int roundsPast = rounds_completed_at(roundEndTime - *airUntilTime);
 	const int target = get_constitution() + breath_check_penalty(roundsPast);
 
 	if (ctx.dice->d20() <= target)

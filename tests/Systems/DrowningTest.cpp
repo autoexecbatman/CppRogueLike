@@ -19,6 +19,7 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <optional>
 
 #include "src/ArmorClass.h"
 #include "src/Creature.h"
@@ -34,6 +35,7 @@
 #include "src/MonsterRegistry.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
+#include "src/TurnSchedule.h"
 #include "tests/mocks/MockGameContext.h"
 
 // A third of the score, and the book says rounded up rather than down.
@@ -121,6 +123,14 @@ protected:
 	void round_passes()
 	{
 		ctx.gameState->advance_clock(TIME_UNITS_PER_ROUND);
+		coordinator.apply_round_upkeep(ctx);
+	}
+
+	// One action of that many rounds: the clock moves by all of them and the upkeep runs
+	// once, feeding each round in turn.
+	void one_action_of(int rounds)
+	{
+		ctx.gameState->advance_clock(TIME_UNITS_PER_ROUND * rounds);
 		coordinator.apply_round_upkeep(ctx);
 	}
 
@@ -366,6 +376,44 @@ TEST_F(DrowningInWaterTest, TheHelmAloneCarriesAWearerIntoWater)
 	diver.equippedItems.emplace_back(std::move(helm), EquipmentSlot::HEAD);
 
 	EXPECT_TRUE(diver.has_bypass(ActorState::CAN_SWIM)) << "the helm did not carry its wearer into the water";
+}
+
+// A creature in water when a seven-round action begins takes its gulp in the first
+// round, so the air runs out breath_rounds after that round ends - not after the action
+// does. Constitution 15 holds five rounds: round 1 ends at one round, the air at six.
+TEST_F(DrowningInWaterTest, AGulpTakenInsideALongActionCountsFromItsOwnRound)
+{
+	Creature& diver = swimmer_in_water(15);
+	// Rounds 6 and 7 are past the air, so each makes a check; both pass.
+	mock.dice.set_next_roll(1);
+	mock.dice.set_next_roll(1);
+
+	one_action_of(7);
+
+	EXPECT_EQ(diver.get_air_until_time(), std::optional<int>{ (1 + breath_rounds(15)) * TIME_UNITS_PER_ROUND })
+		<< "the breath was taken at the action's end";
+}
+
+// A creature whose air runs out at the end of round 1 checks in rounds 1 to 4 at 0, -2,
+// -4 and -6 against Constitution 10, so it needs 10, 8, 6 and 4. Each roll sits on its
+// round's target, and the fourth is one over: the first three pass and the fourth
+// drowns it, which only those four penalties, in that order, produce.
+TEST_F(DrowningInWaterTest, EachRoundOfALongActionChecksAtItsOwnPenalty)
+{
+	Creature& diver = swimmer_in_water(10);
+	diver.set_air_until_time(TIME_UNITS_PER_ROUND);
+	for (const int roll : { 10, 8, 6, 5 })
+	{
+		mock.dice.set_next_roll(roll);
+	}
+	// Taken by nothing in the action: it proves all four checks, and no more, were made.
+	constexpr int UNTOUCHED = 17;
+	mock.dice.set_next_roll(UNTOUCHED);
+
+	one_action_of(4);
+
+	EXPECT_TRUE(creatures.empty()) << "the fourth check, at -6, did not drown it";
+	EXPECT_EQ(mock.dice.d20(), UNTOUCHED) << "the checks were not the four the rounds call for";
 }
 
 // end of file: DrowningTest.cpp

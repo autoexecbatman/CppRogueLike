@@ -446,8 +446,10 @@ public:
 	// lasts breath_rounds of its Constitution; past that it rolls a Constitution check
 	// each round, worsening by two each time, and drowns on a failure (Player's
 	// Handbook, PDF pages 239 and 240). Surfacing clears it, so nothing has to watch
-	// the move - standing somewhere dry on any round is enough.
-	void tick_breath(GameContext& ctx);
+	// the move - standing somewhere dry on any round is enough. roundEndTime is the clock
+	// reading at which this round ends, so each round of a long action is held against
+	// its own time rather than the action's.
+	void tick_breath(int roundEndTime, GameContext& ctx);
 
 	// Whether this creature still remembers the player at `currentTime`. A memory the
 	// clock has passed is gone, so nothing has to run it down.
@@ -570,8 +572,9 @@ public:
 	void take_poison(PendingPoison dose);
 
 	// One round of that wait. The dose lands when its rounds run out, and a creature
-	// already dead is left alone.
-	void tick_poison(GameContext& ctx);
+	// already dead is left alone. A dose that debilitates starts its condition at
+	// roundEndTime, the clock reading at which the round it landed in ends.
+	void tick_poison(int roundEndTime, GameContext& ctx);
 
 	// Lifecycle hooks - Player overrides; monsters no-op
 	// Called when a creature dies - Player saves/defeats; a monster drops its pack and what it

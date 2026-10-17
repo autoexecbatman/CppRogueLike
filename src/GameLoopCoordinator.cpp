@@ -443,11 +443,14 @@ void GameLoopCoordinator::apply_round_upkeep(GameContext& ctx)
 	// drift apart - they were two copies of these four calls.
 	const auto feel_the_round = [&ctx](Creature& creature, int thisRound)
 	{
+		// The clock reading this round ends at, which is what the clock-held effects read,
+		// so every round of a long action is held against its own time.
+		const int roundEndTime = thisRound * TIME_UNITS_PER_ROUND;
 		creature.update_constitution_bonus(ctx);
 		creature.regenerate_from_constitution(thisRound, *ctx.dataManager);
 		creature.regenerate_from_ring(thisRound);
-		creature.tick_poison(ctx);
-		creature.tick_breath(ctx);
+		creature.tick_poison(roundEndTime, ctx);
+		creature.tick_breath(roundEndTime, ctx);
 	};
 
 	// Every round that finished is fed, in order and under its own number, so an action
