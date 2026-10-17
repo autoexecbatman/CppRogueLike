@@ -105,6 +105,7 @@ void random_wander(Creature& owner, GameContext& ctx)
 	}
 	Pathfinding::step(owner, owner.position + Vector2D{ dx, dy }, ctx);
 }
+
 // With no way through to the quarry, a creature still comes as close as the ground lets
 // it, so it waits at the bank of a moat rather than wherever it stood.
 void close_in_without_a_route(Creature& owner, Vector2D targetPosition, const Pathfinding::Mobility& mobility, GameContext& ctx)

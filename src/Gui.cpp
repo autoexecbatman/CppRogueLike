@@ -79,6 +79,7 @@ static int hud_divider1_x(int panelWidth)
 {
 	return panelWidth * 15 / 100;
 }
+
 // The stat panel is as wide as its longest label-and-value line, which is Gold carrying
 // a six-figure purse: that line and the clearance either side of it are what this
 // fraction has to cover, and it is measured against a render rather than assumed. Every

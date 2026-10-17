@@ -42,15 +42,19 @@ public:
 
 	// Getters for current message state
 	const std::string& get_current_message() const noexcept { return messageToDisplay; }
+
 	ColorPairId get_current_message_color() const noexcept { return messageColor; }
 
 	// Debug mode control
 	void enable_debug_mode() noexcept { debugMode = true; }
+
 	void disable_debug_mode() noexcept { debugMode = false; }
+
 	bool is_debug_mode() const noexcept { return debugMode; }
 
 	// Get size of stored messages
 	size_t get_stored_message_count() const noexcept { return attackMessagesWhole.size(); }
+
 	// Get attack messages whole at index
 	const std::vector<LogMessage>& get_attack_message_at(size_t index) const
 	{

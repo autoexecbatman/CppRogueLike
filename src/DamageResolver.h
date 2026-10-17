@@ -26,11 +26,14 @@ private:
 	int hitPoints{ 0 };
 
 	ResistedDamage(DamageType damageType, int points) : type(damageType), hitPoints(points) {}
+
 	friend ResistedDamage reduce_dice(const std::vector<int>& dice, DamageType damageType, int strength);
 
 public:
 	[[nodiscard]] DamageType damage_type() const noexcept { return type; }
+
 	[[nodiscard]] int hit_points() const noexcept { return hitPoints; }
+
 	// The same resisted damage at a different number, never below zero.
 	[[nodiscard]] ResistedDamage at(int points) const noexcept { return ResistedDamage{ type, points < 0 ? 0 : points }; }
 };

@@ -16,6 +16,7 @@ public:
 	[[nodiscard]] int get_xp() const noexcept { return xp; }
 
 	void set_xp(int value) noexcept { xp = value; }
+
 	void add_xp(int amount) noexcept { xp += amount; }
 
 	void load(const json& j);

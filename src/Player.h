@@ -127,7 +127,9 @@ public:
 	// Display interface overrides
 	std::string get_class_display_name() const;
 	std::string get_race_display_name() const;
+
 	int get_kill_count() const noexcept { return killCount; }
+
 	std::string get_equipped_weapon_damage_roll() const noexcept;
 
 	// Lifecycle hook overrides
@@ -158,6 +160,7 @@ public:
 		int offHandPenalty{ 0 };
 		std::string offHandDamageRoll{ "D2" };
 	};
+
 	DualWieldInfo get_dual_wield_info() const noexcept;
 };
 

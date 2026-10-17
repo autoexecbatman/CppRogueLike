@@ -58,10 +58,15 @@ public:
 
 	// Accessors for loaded data
 	const std::vector<StrengthAttributes>& get_strength_attributes() const { return strengthAttributes; }
+
 	const std::vector<DexterityAttributes>& get_dexterity_attributes() const { return dexterityAttributes; }
+
 	const std::vector<ConstitutionAttributes>& get_constitution_attributes() const { return constitutionAttributes; }
+
 	const std::vector<CharismaAttributes>& get_charisma_attributes() const { return charismaAttributes; }
+
 	const std::vector<IntelligenceAttributes>& get_intelligence_attributes() const { return intelligenceAttributes; }
+
 	const std::vector<WisdomAttributes>& get_wisdom_attributes() const { return wisdomAttributes; }
 
 	// The Table 2 row a Dexterity score reads. A score past the table's end - which no

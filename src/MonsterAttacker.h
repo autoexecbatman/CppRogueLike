@@ -20,5 +20,6 @@ public:
 
 	// load/save delegate to Attacker base (DamageInfo serialization).
 	void load(const json& j) override { Attacker::load(j); }
+
 	void save(json& j) override { Attacker::save(j); }
 };

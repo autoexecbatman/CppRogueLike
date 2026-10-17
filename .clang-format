@@ -33,3 +33,6 @@ SpacesInContainerLiterals: true
 # Braces on every if/for/while body. This does NOT brace a case body -
 # no clang-format option does; see issues/0097.
 InsertBraces: true
+# A blank line between definitions, one-line accessors included. The owner's ruling,
+# 2026-10-17: "Formatter."
+SeparateDefinitionBlocks: Always

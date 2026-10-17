@@ -79,6 +79,7 @@ static int row_text_y(int tileSize, int fontSize, int row)
 // first row, which the callers test for rather than clamping.
 // Slack either side of a tab's text, so a click just past the last glyph still counts.
 constexpr int TAB_HIT_PADDING = 4;
+
 namespace InventoryActions
 {
 

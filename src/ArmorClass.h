@@ -50,9 +50,11 @@ public:
 	ArmorClass& operator=(ArmorClass&&) = delete;
 
 	[[nodiscard]] int get_armor_class() const noexcept { return armorClass; }
+
 	[[nodiscard]] int get_base_armor_class() const noexcept { return baseArmorClass; }
 
 	void set_armor_class(int value) noexcept { armorClass = value; }
+
 	void set_base_armor_class(int value) noexcept { baseArmorClass = value; }
 
 	// Recomputes and stores the armour class, returning how it was reached.

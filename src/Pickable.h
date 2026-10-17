@@ -190,10 +190,15 @@ struct Weapon
 	int strengthRating{ 0 };
 
 	bool is_ranged() const noexcept { return ranged; }
+
 	bool is_two_handed() const noexcept { return handRequirement == HandRequirement::TWO_HANDED; }
+
 	WeaponSize get_weapon_size() const noexcept { return weaponSize; }
+
 	HandRequirement get_hand_requirement() const noexcept { return handRequirement; }
+
 	bool can_be_off_hand() const noexcept { return weaponSize <= WeaponSize::SMALL; }
+
 	bool validate_dual_wield(const Item* mainHand, const Item* offHand) const;
 	EquipmentSlot get_preferred_slot(const Creature* wearer) const;
 };

@@ -26,6 +26,7 @@ public:
 
 	// Get default unarmed damage
 	static DamageInfo get_unarmed_damage_info() noexcept { return DamageValues::Unarmed(); }
+
 	static std::string get_unarmed_damage() noexcept { return "1d2"; }
 
 private:

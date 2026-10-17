@@ -55,7 +55,9 @@ public:
 	BarSheet& operator=(BarSheet&&) = delete;
 
 	[[nodiscard]] bool is_loaded() const { return image.data != nullptr; }
+
 	[[nodiscard]] int width() const { return image.width; }
+
 	[[nodiscard]] int height() const { return image.height; }
 
 	// Left to right: whether each column of the cell paints anything at all.

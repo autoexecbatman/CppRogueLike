@@ -78,11 +78,13 @@ void animate_heal(const Vector2D& pos, GameContext& ctx)
 		60,
 		0.5f);
 }
+
 // AD&D 2e: 1 missile at level 1, +1 every 2 levels, max 5
 int calculate_num_missiles(int casterLevel)
 {
 	return std::min(5, 1 + (casterLevel - 1) / 2);
 }
+
 // The spell list a class casts from; the classes that cast none answer NONE.
 CasterClass to_caster_class(CreatureClass creatureClass)
 {
@@ -109,6 +111,7 @@ CasterClass to_caster_class(CreatureClass creatureClass)
 
 	std::unreachable();
 }
+
 // Table 24's sixth and seventh columns are footnoted: a priest reaches them only at
 // these Wisdom scores. The rows are counted from one, so the fifth column is five
 // rows and the sixth is six.

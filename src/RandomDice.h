@@ -19,12 +19,19 @@ public:
 
 	// public functions to emulate a set of dice from d2 to d100
 	int d2() { return roll(1, 2); }
+
 	int d4() { return roll(1, 4); }
+
 	int d6() { return roll(1, 6); }
+
 	int d8() { return roll(1, 8); }
+
 	int d10() { return roll(1, 10); }
+
 	int d12() { return roll(1, 12); }
+
 	int d20() { return roll(1, 20); }
+
 	int d100() { return roll(1, 100); }
 
 	// Damage strings such as "1d8+2" are rolled by DamageInfo::roll_damage.
@@ -66,16 +73,19 @@ public:
 #ifdef TESTING_MODE
 	// Test-only methods for deterministic dice rolls
 	void set_test_mode(bool enabled) { m_test_mode = enabled; }
+
 	void set_next_d20(int value)
 	{
 		m_test_mode = true;
 		m_fixed_rolls.push_back(value);
 	}
+
 	void set_next_roll(int value)
 	{
 		m_test_mode = true;
 		m_fixed_rolls.push_back(value);
 	}
+
 	void clear_fixed_rolls() { m_fixed_rolls.clear(); }
 #endif
 

@@ -76,6 +76,7 @@ TEST_F(ConstitutionRegenerationTest, EachScoreHealsAPointEveryListedTurn)
 		int constitution{ 0 };
 		int turnsBetweenPoints{ 0 };
 	};
+
 	constexpr std::array<RegenerationRow, 6> TABLE_THREE{ {
 		{ 20, 6 },
 		{ 21, 5 },

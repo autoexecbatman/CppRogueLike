@@ -17,6 +17,7 @@ public:
 
 	// Game state accessors
 	bool is_game_initialized() const noexcept { return gameWasInit; }
+
 	void set_game_initialized(bool initialized) noexcept { gameWasInit = initialized; }
 
 	bool should_take_input() const noexcept { return shouldTakeInput; }

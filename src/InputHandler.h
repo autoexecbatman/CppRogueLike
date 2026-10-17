@@ -23,6 +23,7 @@ public:
 	Vector2D get_mouse_position_old() const noexcept;
 
 	int get_current_key() const noexcept { return keyPress; }
+
 	int get_last_key() const noexcept { return lastKey; }
 
 	void reset_key() noexcept
@@ -34,5 +35,6 @@ public:
 	bool is_animation_tick() const noexcept { return animationTick; }
 
 	bool was_resized() const noexcept { return screenResized; }
+
 	void clear_resize() noexcept { screenResized = false; }
 };

@@ -88,6 +88,7 @@ TEST_F(StartingHitPointsTest, EachClassRollsItsOwnDieOnTopOfTwenty)
 		CreatureClass creatureClass{ CreatureClass::MONSTER };
 		int die{ 0 };
 	};
+
 	constexpr std::array<ClassDie, 4> FROM_THE_CLASS_TABLES{ {
 		{ CreatureClass::FIGHTER, 10 },
 		{ CreatureClass::CLERIC, 8 },

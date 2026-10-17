@@ -45,7 +45,9 @@ public:
 	};
 
 	void toggle();
+
 	void set_char_input(int ch) noexcept { buffered_char = ch; }
+
 	void cycle_next();
 	void cycle_prev();
 
@@ -59,6 +61,7 @@ public:
 	void update_and_render(const Renderer& renderer);
 
 	[[nodiscard]] bool is_active() const { return active; }
+
 	[[nodiscard]] bool is_browser_open() const { return browser_open; }
 
 	[[nodiscard]] TileRef get_override(Vector2D worldPosition) const;

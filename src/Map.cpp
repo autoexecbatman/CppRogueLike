@@ -422,6 +422,7 @@ void Map::render(const GameContext& ctx) const
 		Vector2D offset;
 		uint8_t bit;
 	};
+
 	constexpr uint8_t northBit = 8;
 	constexpr uint8_t eastBit = 4;
 	constexpr uint8_t southBit = 2;

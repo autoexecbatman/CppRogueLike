@@ -48,6 +48,7 @@ protected:
 
 	MockGameContext mock{};
 	GameContext ctx{};
+
 	// Puts one item into the seller's pack and returns it, still owned by the pack.
 	Item& give_seller(const char* itemKey)
 	{

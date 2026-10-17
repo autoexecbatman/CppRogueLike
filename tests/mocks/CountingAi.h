@@ -32,6 +32,7 @@ public:
 	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::MONSTER; }
 
 	void load(const json& j) override { (void)j; }
+
 	void save(json& j) override { (void)j; }
 };
 

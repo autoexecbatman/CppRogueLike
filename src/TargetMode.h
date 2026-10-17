@@ -37,6 +37,7 @@ inline constexpr std::array<TargetMode, 4> ALL_TARGET_MODE = {
 	}
 	return *(found + 1);
 }
+
 enum class ScrollAnimation : int
 {
 	NONE,

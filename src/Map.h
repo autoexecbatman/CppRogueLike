@@ -22,6 +22,7 @@ inline int get_map_width()
 {
 	return DEFAULT_MAP_WIDTH;
 }
+
 inline int get_map_height()
 {
 	return DEFAULT_MAP_HEIGHT;
@@ -76,6 +77,7 @@ private:
 		size.y = mapHeight;
 		return size;
 	}
+
 	bool in_bounds(Vector2D pos) const noexcept;
 
 	void place_stairs(GameContext& ctx);
@@ -86,7 +88,9 @@ private:
 	void spawn_barrels(const DungeonRoom& room, GameContext& ctx);
 	void spawn_player(const DungeonRoom& room, GameContext& ctx);
 	void generate_rooms(GameContext& ctx);
+
 	bool is_floor(Vector2D pos) const noexcept { return get_tile_type(pos) == TileType::FLOOR; }
+
 	void set_explored(Vector2D pos); // set the tile as explored
 	void post_process_doors();
 
@@ -153,11 +157,17 @@ public:
 	std::vector<std::vector<Tile>> get_map() const noexcept;
 	void reveal(); // reveal the map
 	void regenerate(GameContext& ctx); // regenerate the map
+
 	int get_width() const noexcept { return mapWidth; }
+
 	int get_height() const noexcept { return mapHeight; }
+
 	long get_seed() const noexcept { return seed; }
+
 	bool is_in_bounds(Vector2D pos) const noexcept { return pos.x >= 0 && pos.x < mapWidth && pos.y >= 0 && pos.y < mapHeight; }
+
 	static std::vector<Vector2D> bresenham_line(Vector2D from, Vector2D to);
+
 	size_t get_index(Vector2D pos) const
 	{
 		if (in_bounds(pos))
@@ -169,6 +179,7 @@ public:
 			throw std::out_of_range{ "Map::get_index() out of bounds" };
 		}
 	} // Note: Cannot be noexcept due to exception
+
 	bool has_los(Vector2D from, Vector2D to) const noexcept;
 	bool open_door(Vector2D pos, GameContext& ctx);
 	bool close_door(Vector2D pos, GameContext& ctx);

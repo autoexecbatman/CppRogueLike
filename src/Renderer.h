@@ -297,6 +297,7 @@ struct TileRef
 	int row{ -1 };
 
 	[[nodiscard]] bool is_valid() const noexcept { return col >= 0; }
+
 	[[nodiscard]] bool operator==(const TileRef& o) const noexcept
 	{
 		return sheet == o.sheet && col == o.col && row == o.row;
@@ -463,17 +464,27 @@ public:
 	[[nodiscard]] std::string fit_text_to_width(std::string_view text, int maxWidth) const;
 
 	[[nodiscard]] bool is_initialized() const { return initialized; }
+
 	[[nodiscard]] int get_tile_size() const { return tileSize; }
+
 	[[nodiscard]] int get_font_size() const { return fontSize; }
+
 	// Tile rows the HUD needs at the current zoom. Everything that splits the
 	// screen between map and HUD asks this rather than assuming a number.
 	[[nodiscard]] int get_gui_reserve_rows() const { return gui_reserve_rows(tileSize, fontSize); }
+
 	[[nodiscard]] int get_viewport_cols() const { return viewportCols; }
+
 	[[nodiscard]] int get_viewport_rows() const { return viewportRows; }
+
 	[[nodiscard]] int get_screen_width() const { return screenWidth; }
+
 	[[nodiscard]] int get_screen_height() const { return screenHeight; }
+
 	[[nodiscard]] int get_camera_x() const { return camera.x + shakeOffset.x; }
+
 	[[nodiscard]] int get_camera_y() const { return camera.y + shakeOffset.y; }
+
 	[[nodiscard]] int get_sheet_cols(TileSheet sheet) const;
 	[[nodiscard]] int get_sheet_rows(TileSheet sheet) const;
 	// Source pixel size of one cell in this sheet: 16 for DawnLike, 64 for the

@@ -220,10 +220,12 @@ public:
 	{
 		std::filesystem::current_path(target);
 	}
+
 	~WorkingDirectoryScope()
 	{
 		std::filesystem::current_path(previous);
 	}
+
 	WorkingDirectoryScope(const WorkingDirectoryScope&) = delete;
 	WorkingDirectoryScope& operator=(const WorkingDirectoryScope&) = delete;
 	WorkingDirectoryScope(WorkingDirectoryScope&&) = delete;

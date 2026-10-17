@@ -11,6 +11,7 @@
 struct GameContext;
 
 inline constexpr int GUI_HEIGHT{ 7 };
+
 inline int gui_width()
 {
 	return 118;
@@ -43,8 +44,11 @@ public:
 	void render_messages() noexcept;
 
 	void set_message(const std::string& msg) { guiMessage = msg; }
+
 	void set_message_color(ColorPairId color) { guiMessageColor = color; }
+
 	const std::string& get_message() const { return guiMessage; }
+
 	ColorPairId get_message_color() const { return guiMessageColor; }
 
 protected:

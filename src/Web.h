@@ -15,6 +15,7 @@ public:
 
 	// Web properties
 	int get_strength() const { return webStrength; }
+
 	void set_strength(int strength) { webStrength = strength; }
 
 	// Apply web effect to a creature trying to pass through

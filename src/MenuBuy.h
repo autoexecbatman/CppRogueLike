@@ -23,7 +23,9 @@ class MenuBuy : public BaseMenu
 
 	void populate_items();
 	void menu_print_state(size_t state);
+
 	std::string menu_get_string(size_t state) { return menuItems.at(state); }
+
 	void handle_buy();
 	void draw_content() override;
 

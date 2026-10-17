@@ -14,6 +14,7 @@ class LevelManager
 public:
 	// Level state
 	int get_dungeon_level() const noexcept { return dungeon_level; }
+
 	int get_shopkeepers_count() const noexcept { return shopkeepers_on_current_level; }
 
 	// Level management
@@ -22,6 +23,7 @@ public:
 
 	// Shopkeeper management
 	void increment_shopkeeper_count() { shopkeepers_on_current_level++; }
+
 	bool can_spawn_shopkeeper(int max_shopkeepers = 3) const noexcept;
 
 	// Save/Load

@@ -38,6 +38,7 @@ struct DiceExpr
 
 	// The least and the most the expression can roll.
 	[[nodiscard]] constexpr int min_total() const noexcept { return num + bonus; }
+
 	[[nodiscard]] constexpr int max_total() const noexcept { return num * sides + bonus; }
 };
 

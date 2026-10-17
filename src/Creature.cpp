@@ -1273,6 +1273,7 @@ bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCo
 
 	return true;
 }
+
 bool Creature::unequip_item(EquipmentSlot slot, GameContext& ctx)
 {
 	// erase after move requires iterator; find_if + erase is the correct C++23 pattern here
@@ -1329,14 +1330,17 @@ bool Creature::unequip_item(EquipmentSlot slot, GameContext& ctx)
 
 	return false;
 }
+
 bool Creature::is_slot_occupied(EquipmentSlot slot) const noexcept
 {
 	return get_equipped_item(slot) != nullptr;
 }
+
 bool Creature::is_item_equipped(uint64_t itemUniqueId) const noexcept
 {
 	return std::ranges::any_of(equippedItems, matches_unique_id(itemUniqueId));
 }
+
 bool Creature::is_dual_wielding() const noexcept
 {
 	// Check if both hands have weapons equipped
@@ -1362,6 +1366,7 @@ bool Creature::is_dual_wielding() const noexcept
 
 	return false;
 }
+
 // Clean Equipment System using Unique IDs
 bool Creature::toggle_armor(uint64_t itemUniqueId, GameContext& ctx)
 {
@@ -1381,6 +1386,7 @@ bool Creature::toggle_armor(uint64_t itemUniqueId, GameContext& ctx)
 		return false;
 	}
 }
+
 bool Creature::toggle_shield(uint64_t itemUniqueId, GameContext& ctx)
 {
 	// Shields always go in LEFT_HAND slot
@@ -1398,6 +1404,7 @@ bool Creature::toggle_shield(uint64_t itemUniqueId, GameContext& ctx)
 		return false;
 	}
 }
+
 // Clean Weapon Equipment System using Unique IDs
 bool Creature::toggle_weapon(uint64_t itemUniqueId, EquipmentSlot preferredSlot, GameContext& ctx)
 {
@@ -1444,6 +1451,7 @@ bool Creature::toggle_weapon(uint64_t itemUniqueId, EquipmentSlot preferredSlot,
 	}
 	return false;
 }
+
 bool Creature::toggle_equipment(uint64_t itemUniqueId, EquipmentSlot slot, GameContext& ctx)
 {
 	// Check if item is already equipped

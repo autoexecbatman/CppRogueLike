@@ -41,6 +41,7 @@ struct Prefab
 	std::vector<std::string> rows; // ASCII rows; all rows must be the same length
 
 	int width() const { return rows.empty() ? 0 : static_cast<int>(rows[0].size()); }
+
 	int height() const { return static_cast<int>(rows.size()); }
 };
 
@@ -58,6 +59,7 @@ public:
 	void remove(const std::string& name);
 
 	int count() const { return static_cast<int>(prefabs.size()); }
+
 	const std::vector<Prefab>& all() const { return prefabs; }
 
 	TileRef resolve_decor(char symbol) const;

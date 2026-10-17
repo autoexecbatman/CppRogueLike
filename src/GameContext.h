@@ -59,6 +59,7 @@ class Renderer;
 class InputSystem;
 class Creature;
 class Player;
+
 namespace Pathfinding
 {
 class Pathfinder;
@@ -104,29 +105,37 @@ private:
 
 public:
 	bool get_run() const noexcept { return run; }
+
 	void set_run(bool v) noexcept { run = v; }
 
 	bool get_should_save() const noexcept { return shouldSave; }
+
 	void set_should_save(bool v) noexcept { shouldSave = v; }
 
 	bool get_is_loaded_game() const noexcept { return isLoadedGame; }
+
 	void set_is_loaded_game(bool v) noexcept { isLoadedGame = v; }
 
 	// The clock in time units. Advanced only by an action being spent, which is
 	// spend_player_action and nothing else.
 	int get_time() const noexcept { return time; }
+
 	void set_time(int v) noexcept { time = v; }
+
 	void advance_clock(int timeUnits) noexcept { time += timeUnits; }
 
 	// Rounds whose upkeep has run. apply_round_upkeep raises it to the round the
 	// clock has reached, so an action spanning several rounds feeds all of them.
 	int get_rounds_run() const noexcept { return roundsRun; }
+
 	void set_rounds_run(int v) noexcept { roundsRun = v; }
 
 	GameStatus get_game_status() const noexcept { return gameStatus; }
+
 	void set_game_status(GameStatus s) noexcept { gameStatus = s; }
 
 	WindowState get_window_state() const noexcept { return windowState; }
+
 	void set_window_state(WindowState s) noexcept { windowState = s; }
 };
 

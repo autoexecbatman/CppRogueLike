@@ -67,6 +67,7 @@ protected:
 	}
 
 	int fire_strength() { return DamageResolver::resistance_strength(DamageType::FIRE, *player, ctx); }
+
 	int cold_strength() { return DamageResolver::resistance_strength(DamageType::COLD, *player, ctx); }
 
 	MockGameContext mock{};

@@ -109,6 +109,7 @@ struct ItemGrantedSpell
 	std::string key{};
 	std::string source{}; // "Ring", "Helm", etc.
 };
+
 std::vector<ItemGrantedSpell> get_item_granted_spells(const Player& player);
 
 // What one fireball did: the dice it rolled and how many it struck.

@@ -102,6 +102,7 @@ TEST(ConstitutionAdjustmentLevelTest, EachClassTakesItThroughItsLastRolledDie)
 		CreatureClass creatureClass{ CreatureClass::MONSTER };
 		int level{ 0 };
 	};
+
 	constexpr std::array<LastRolledDie, 4> FROM_THE_CLASS_TABLES{ {
 		{ CreatureClass::FIGHTER, 9 },
 		{ CreatureClass::CLERIC, 9 },
@@ -226,6 +227,7 @@ TEST_F(HitPointGainTest, AWarriorGainsTheParentheticalBonus)
 		int constitution{ 0 };
 		int bonus{ 0 };
 	};
+
 	constexpr std::array<WarriorBonus, 6> TABLE_THREE_WARRIOR{ {
 		{ 17, 3 },
 		{ 18, 4 },
@@ -283,6 +285,7 @@ TEST_F(HitPointGainTest, FromTwentyALowRollCountsAsTheFootnoteSays)
 		int rolled{ 0 };
 		int gain{ 0 };
 	};
+
 	constexpr std::array<LowRoll, 7> RAISED_BY_TABLE_THREE{ {
 		{ CreatureClass::FIGHTER, 20, 1, 2 + 5 },
 		{ CreatureClass::WIZARD, 20, 1, 2 + 2 },

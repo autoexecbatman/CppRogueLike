@@ -119,5 +119,6 @@ public:
 	void display_inventory(GameContext& ctx);
 
 	void apply_confusion(int durationRounds, int currentTime) { confusionEndTime = expiry_time(currentTime, durationRounds); }
+
 	[[nodiscard]] bool is_confused(int currentTime) const { return currentTime < confusionEndTime; }
 };

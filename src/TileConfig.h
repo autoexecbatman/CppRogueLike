@@ -121,6 +121,7 @@ public:
 	{
 		return m_tile_definitions;
 	}
+
 	void load(std::string_view path);
 
 private:

@@ -15,9 +15,11 @@ public:
 		: dr(drValue), thaco(thacoValue) {}
 
 	[[nodiscard]] int get_dr() const noexcept { return dr; }
+
 	[[nodiscard]] int get_thaco() const noexcept { return thaco; }
 
 	void set_dr(int value) noexcept { dr = value; }
+
 	void set_thaco(int value) noexcept { thaco = value; }
 
 	void load(const json& j);

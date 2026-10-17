@@ -97,6 +97,7 @@ public:
 
 	// DamageInfo accessors — valid for MonsterAttacker; PlayerAttacker leaves this empty.
 	const DamageInfo& get_damage_info() const noexcept { return damageInfo; }
+
 	void set_damage_info(const DamageInfo& damage) noexcept { damageInfo = damage; }
 
 	// Serializes damageInfo — used by MonsterAttacker. PlayerAttacker overrides with no-ops.

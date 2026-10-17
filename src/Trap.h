@@ -81,8 +81,11 @@ public:
 
 	// Trap properties
 	TrapType get_type() const { return type; }
+
 	TrapState get_state() const { return state; }
+
 	int get_damage_dice_count() const { return damageDiceCount; }
+
 	int get_damage_dice_size() const { return damageDiceSize; }
 
 	// Applies the trap's effect to a creature entering its tile. A hidden or known trap

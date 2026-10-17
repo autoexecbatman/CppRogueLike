@@ -72,13 +72,21 @@ public:
 
 	// Accessors
 	ShopType get_shop_type() const noexcept { return shopType; }
+
 	ShopQuality get_shop_quality() const noexcept { return shopQuality; }
+
 	const std::string& get_shop_name() const noexcept { return shopName; }
+
 	CreatureInventory& get_shop_inventory() noexcept { return shopInventory; }
+
 	const CreatureInventory& get_shop_inventory() const noexcept { return shopInventory; }
+
 	int get_markup_percent() const noexcept { return markupPercent; }
+
 	void set_markup_percent(int value) noexcept { markupPercent = value; }
+
 	int get_sellback_percent() const noexcept { return sellbackPercent; }
+
 	void set_sellback_percent(int value) noexcept { sellbackPercent = value; }
 
 	// Trading operations

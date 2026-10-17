@@ -73,15 +73,23 @@ public:
 	// beneath it rather than sitting on the tile grid.
 	void menu_print_header();
 	void menu_refresh();
+
 	void menu_highlight_on() { isHighlighted = true; }
+
 	void menu_highlight_off() { isHighlighted = false; }
+
 	void menu_key_listen();
+
 	void menu_set_run_true() { run = true; }
+
 	void menu_set_run_false() { run = false; }
+
 	void menu_draw_box();
 	void menu_draw_title(std::string_view title, ColorPairId colorPair);
 
 	virtual void menu(GameContext& ctx) = 0;
+
 	virtual void draw_content() {}
+
 	virtual void on_key(GameContext& ctx);
 };

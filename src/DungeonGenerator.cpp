@@ -126,6 +126,7 @@ std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 					int index;
 					float weight;
 				};
+
 				std::vector<Candidate> candidates;
 				const auto& all = prefabs->all();
 				for (int i = 0; i < static_cast<int>(all.size()); ++i)

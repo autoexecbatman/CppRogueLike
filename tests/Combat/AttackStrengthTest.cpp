@@ -120,6 +120,7 @@ TEST_F(AttackStrengthTest, EachSourceTakesItsPartOfTheRow)
 		int hit{ 0 };
 		int damage{ 0 };
 	};
+
 	constexpr std::array<Case, 11> FROM_PAGE_181{ {
 		{ "a swing, 18/00", 18, 100, AttackKind::MELEE, "", 3, 6 },
 		{ "a swing, 3", 3, 0, AttackKind::MELEE, "", -3, -1 },
@@ -168,6 +169,7 @@ TEST_F(AttackStrengthTest, OgreGauntletsBesideAGirdleAddTheirOwnRow)
 		int hit{ 0 };
 		int damage{ 0 };
 	};
+
 	const std::array<Case, 3> FROM_PAGES_964_AND_966{ {
 		{ "a swing", AttackKind::MELEE, nullptr, 6, 13 },
 		{ "a hurled or natural missile", AttackKind::RANGED, nullptr, 6, 13 },
