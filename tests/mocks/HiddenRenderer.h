@@ -23,7 +23,7 @@
 //       GameContext ctx = mock.to_game_context();
 //       ctx.renderer = &hidden.renderer;                    // only this test has one
 //       ...                                                 // build the menu, drive it
-//       exit_unless(sold, "the menu did not sell the item"); // stderr, then exit 43
+//       exit_unless(sold, "the menu did not sell the item"); // stdout, then exit 43
 //       std::_Exit(HIDDEN_RENDERER_PASSED);
 //   }
 //
@@ -96,8 +96,9 @@ inline void exit_on_missing_opengl(int logLevel, const char* text, va_list args)
 	}
 }
 
-// In a child, a check that ends the child when it fails: the message to stderr, where
-// the parent's output shows it, then exit 43.
+// In a child, a check that ends the child when it fails: the message to stdout, then
+// exit 43. Stdout because a death test keeps a child's stderr to itself when the exit
+// code is accepted, which this fixture's always is.
 //
 // Example:
 //   exit_unless(player.get_gold() == 12, "the seller was not paid"); // passes, returns
@@ -106,8 +107,8 @@ inline void exit_unless(bool holds, std::string_view what)
 {
 	if (!holds)
 	{
-		std::fprintf(stderr, "child check failed: %.*s\n", static_cast<int>(what.size()), what.data());
-		std::fflush(stderr);
+		std::fprintf(stdout, "child check failed: %.*s\n", static_cast<int>(what.size()), what.data());
+		std::fflush(stdout);
 		std::_Exit(HIDDEN_RENDERER_EXPECTATION_FAILED);
 	}
 }
