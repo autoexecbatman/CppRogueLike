@@ -109,11 +109,29 @@ consteval bool polls_every_letter()
 
 static_assert(InputPolling::polls_every_letter(), "POLLED_KEYS is missing a letter, which the web build can then never type");
 
+#ifdef TESTING_MODE
+void InputSystem::queue_key(GameKey key, int character)
+{
+	scriptedKeys.push_back(ScriptedKey{ .key = key, .character = character });
+}
+#endif
+
 void InputSystem::poll()
 {
 	currentKey = GameKey::NONE;
 	charInput = 0;
 	resized = false;
+
+#ifdef TESTING_MODE
+	// A queued key stands in for the whole frame, so nothing the keyboard holds is read.
+	if (!scriptedKeys.empty())
+	{
+		currentKey = scriptedKeys.front().key;
+		charInput = scriptedKeys.front().character;
+		scriptedKeys.pop_front();
+		return;
+	}
+#endif
 
 	if (IsWindowResized())
 	{

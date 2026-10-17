@@ -22,6 +22,8 @@
 #include "src/GameLoopCoordinator.h"
 #include "src/GameStateManager.h"
 #include "src/HungerSystem.h"
+#include "src/InputHandler.h"
+#include "src/InputSystem.h"
 #include "src/InventoryData.h"
 #include "src/ItemEditor.h"
 #include "src/ItemRegistry.h"
@@ -95,6 +97,11 @@ struct MockGameContext
 	MonsterEditor monsterEditor{};
 	SpellEditor spellEditor{};
 
+	// The input path a key takes in play: poll() fills inputSystem, and inputHandler
+	// translates it into the key the controllers read. A test queues keys on inputSystem.
+	InputSystem inputSystem{};
+	InputHandler inputHandler{};
+
 	MockGameContext()
 	{
 #ifdef TESTING_MODE
@@ -141,11 +148,13 @@ struct MockGameContext
 			.dice = &dice,
 			.creatureManager = &creature_mgr,
 			.levelManager = &levelManager,
+			.inputHandler = &inputHandler,
 			.stateManager = &stateManager,
 			.menuManager = &menuManager,
 			.displayManager = &displayManager,
 			.gameLoopCoordinator = &gameLoopCoordinator,
 			.dataManager = &data_manager,
+			.inputSystem = &inputSystem,
 			.targeting = &targeting,
 			.hungerSystem = &hungerSystem,
 			.buffSystem = &buffs,

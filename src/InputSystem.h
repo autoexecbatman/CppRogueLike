@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef TESTING_MODE
+#include <deque>
+#endif
+
 #include "Vector2D.h"
 
 enum class GameKey
@@ -88,6 +92,15 @@ enum class GameKey
 	MINIMAP_TOGGLE
 };
 
+#ifdef TESTING_MODE
+// One frame of input as poll() records it: the key, and the character it typed.
+struct ScriptedKey
+{
+	GameKey key{ GameKey::NONE };
+	int character{ 0 };
+};
+#endif
+
 class InputSystem
 {
 private:
@@ -104,6 +117,10 @@ private:
 	double holdStart{ 0.0 };
 	double lastRepeat{ 0.0 };
 
+#ifdef TESTING_MODE
+	std::deque<ScriptedKey> scriptedKeys{};
+#endif
+
 public:
 	InputSystem() = default;
 	~InputSystem() = default;
@@ -114,6 +131,18 @@ public:
 	InputSystem& operator=(InputSystem&&) = delete;
 
 	void poll();
+
+#ifdef TESTING_MODE
+	// Queues one frame of input that poll() returns ahead of the keyboard, so a test drives
+	// the game down the path a player's keys take. Each poll() takes the oldest.
+	//
+	// Example:
+	//   input.queue_key(GameKey::RIGHT, 0); // the right arrow, which types no character
+	//   input.queue_key(GameKey::NONE, 'g'); // the g key, read as a character
+	//   input.poll(); // get_key() -> RIGHT, get_char_input() -> 0
+	//   input.poll(); // get_key() -> NONE, get_char_input() -> 'g'
+	void queue_key(GameKey key, int character);
+#endif
 
 	[[nodiscard]] GameKey get_key() const { return currentKey; }
 	[[nodiscard]] int get_char_input() const { return charInput; }
