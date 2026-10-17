@@ -24,6 +24,7 @@ void RenderingManager::render(GameContext& ctx) const
 
 void RenderingManager::render_world(const GameContext& ctx) const
 {
+	assert(ctx.floorInventory && "RenderingManager::render_world: called without a floorInventory");
 	assert(ctx.map && "RenderingManager::render_world: called without a map");
 
 	ctx.map->render(ctx);

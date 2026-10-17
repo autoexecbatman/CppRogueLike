@@ -1936,6 +1936,8 @@ bool Map::is_door_locked(Vector2D pos) const noexcept
 
 void Map::place_amulet(GameContext& ctx)
 {
+	assert(ctx.floorInventory && "Map::place_amulet: called without a floorInventory");
+
 	// Only place the amulet on the final level
 	assert(ctx.levelManager && "Map::place_amulet called without levelManager");
 	assert(ctx.player() && "Map::place_amulet called without player");

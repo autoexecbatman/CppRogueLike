@@ -265,6 +265,8 @@ Item* PlayerController::chose_from_inventory(int ascii, GameContext& ctx)
 
 void PlayerController::look_on_floor(Vector2D target, GameContext& ctx)
 {
+	assert(ctx.floorInventory && "PlayerController::look_on_floor: called without a floorInventory");
+
 	if (ctx.floorInventory->items.empty())
 	{
 		return;
@@ -862,6 +864,7 @@ bool PlayerController::handle_mouse_path(GameContext& ctx)
 
 void PlayerController::handle_left_click(GameContext& ctx)
 {
+	assert(ctx.floorInventory && "PlayerController::handle_left_click: called without a floorInventory");
 	assert(ctx.map && "PlayerController::handle_left_click: called without a map");
 
 	Vector2D world_tile;
@@ -923,6 +926,7 @@ void PlayerController::handle_left_click(GameContext& ctx)
 
 void PlayerController::handle_right_click(GameContext& ctx)
 {
+	assert(ctx.floorInventory && "PlayerController::handle_right_click: called without a floorInventory");
 	assert(ctx.map && "PlayerController::handle_right_click: called without a map");
 
 	Vector2D world_tile;

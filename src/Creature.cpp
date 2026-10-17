@@ -1174,6 +1174,8 @@ void Creature::apply_confusion(int durationRounds, int currentTime)
 
 void Creature::drop(Item& item, GameContext& ctx)
 {
+	assert(ctx.floorInventory && "Creature::drop: called without a floorInventory");
+
 	[[maybe_unused]] auto is_null = [](const auto& invItem)
 	{
 		return !invItem;
@@ -1279,6 +1281,8 @@ bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCo
 
 bool Creature::unequip_item(EquipmentSlot slot, GameContext& ctx)
 {
+	assert(ctx.floorInventory && "Creature::unequip_item: called without a floorInventory");
+
 	// erase after move requires iterator; find_if + erase is the correct C++23 pattern here
 	auto it = std::ranges::find_if(equippedItems, matches_slot(slot));
 
@@ -1494,6 +1498,8 @@ ColorPairId Creature::get_display_color() const noexcept
 
 void Creature::die(GameContext& ctx)
 {
+	assert(ctx.floorInventory && "Creature::die: called without a floorInventory");
+
 	// Monster death: message, reward, animation, drop items, create corpse
 	ctx.messageSystem->append_message_part(actorData.color, std::format("{}", actorData.name));
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " is dead.\n");

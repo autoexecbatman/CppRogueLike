@@ -40,6 +40,7 @@ struct ItemType
 // Places one enhanced item drawn from a rule's pool at position.
 void place_enhanced_item(const EnhancedItemSpawnRule& rule, Vector2D position, GameContext& ctx)
 {
+	assert(ctx.floorInventory && "place_enhanced_item: called without a floorInventory");
 	assert(ctx.dice && "place_enhanced_item: called without dice");
 
 	const int poolIndex = ctx.dice->roll(0, static_cast<int>(rule.itemPool.size()) - 1);
@@ -70,6 +71,7 @@ std::vector<ItemType> spawn_table(const ItemRegistry& items)
 		auto place_gold = [](Vector2D pos, GameContext& ctx)
 		{
 			assert(ctx.dice && "ItemFactory place_gold: called without dice");
+			assert(ctx.floorInventory && "ItemFactory place_gold: called without a floorInventory");
 
 			const int level = ctx.levelManager->get_dungeon_level();
 			const int amount = ctx.dice->roll(level * 3, level * 10);
@@ -79,6 +81,8 @@ std::vector<ItemType> spawn_table(const ItemRegistry& items)
 		};
 		auto place_item = [key](Vector2D pos, GameContext& ctx)
 		{
+			assert(ctx.floorInventory && "ItemFactory place_item: called without a floorInventory");
+
 			InventoryOperations::add_item(
 				*ctx.floorInventory,
 				ItemCreator::create(key, pos, ctx));
@@ -171,6 +175,7 @@ bool place_one_of(const std::vector<const ItemType*>& candidates, Vector2D posit
 
 void ItemFactory::generate_treasure(Vector2D position, int dungeonLevel, int quality, GameContext& ctx)
 {
+	assert(ctx.floorInventory && "ItemFactory::generate_treasure: called without a floorInventory");
 	assert(ctx.map && "ItemFactory::generate_treasure: called without a map");
 	assert(ctx.dice && "ItemFactory::generate_treasure: called without dice");
 
