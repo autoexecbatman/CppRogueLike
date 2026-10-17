@@ -68,6 +68,7 @@ private:
 		ETHICS,
 		MORALITY,
 		SIZE,
+		INTELLIGENCE,
 		CAN_SWIM,
 		CAN_FLY,
 		WEIGHT,

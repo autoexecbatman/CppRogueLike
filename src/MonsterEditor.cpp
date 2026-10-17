@@ -9,6 +9,7 @@
 
 #include "DiceExpr.h"
 #include "GameContext.h"
+#include "IntelligenceRating.h"
 #include "Menu.h"
 #include "MonsterEditor.h"
 #include "MonsterRegistry.h"
@@ -938,6 +939,8 @@ std::string MonsterEditor::field_label(FieldId f) const
 		return "Morality";
 	case FieldId::SIZE:
 		return "Size";
+	case FieldId::INTELLIGENCE:
+		return "Intelligence";
 	case FieldId::CAN_SWIM:
 		return "Can Swim";
 	case FieldId::CAN_FLY:
@@ -1030,6 +1033,8 @@ std::string MonsterEditor::field_value(FieldId f) const
 		return std::string(encode_morality(m_working.morality));
 	case FieldId::SIZE:
 		return std::string(encode_creature_size(m_working.size));
+	case FieldId::INTELLIGENCE:
+		return std::string(encode_intelligence_rating(m_working.intelligence));
 	case FieldId::CAN_SWIM:
 		return m_working.canSwim ? "yes" : "no";
 	case FieldId::CAN_FLY:
@@ -1054,7 +1059,7 @@ bool MonsterEditor::field_is_string(FieldId f) const
 
 bool MonsterEditor::field_is_toggle(FieldId f) const
 {
-	return f == FieldId::AI_TYPE || f == FieldId::CAN_SWIM || f == FieldId::CAN_FLY || f == FieldId::ETHICS || f == FieldId::MORALITY || f == FieldId::SIZE || f == FieldId::DMG_TYPE;
+	return f == FieldId::AI_TYPE || f == FieldId::CAN_SWIM || f == FieldId::CAN_FLY || f == FieldId::ETHICS || f == FieldId::MORALITY || f == FieldId::SIZE || f == FieldId::INTELLIGENCE || f == FieldId::DMG_TYPE;
 }
 
 void MonsterEditor::field_adjust(FieldId f, int delta)
@@ -1184,6 +1189,10 @@ void MonsterEditor::field_toggle(FieldId f)
 	else if (f == FieldId::SIZE)
 	{
 		m_working.size = next_creature_size(m_working.size);
+	}
+	else if (f == FieldId::INTELLIGENCE)
+	{
+		m_working.intelligence = next_intelligence_rating(m_working.intelligence);
 	}
 	else if (f == FieldId::DMG_TYPE)
 	{

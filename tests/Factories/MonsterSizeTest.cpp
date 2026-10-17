@@ -41,7 +41,7 @@ constexpr BookSize BOOK_SIZES[] = {
 	{ "ghoul", CreatureSize::MEDIUM }, // Ghoul p1406, Ghoul column
 	{ "giant_centipede", CreatureSize::TINY }, // Centipede p1173, Giant column
 	{ "giant_rat", CreatureSize::TINY }, // Rat p1812, Rat (Giant) column
-	{ "giant_snake", CreatureSize::MEDIUM }, // Snake p1861, Poisonous (Giant): closest, AC 5 and HD 4+2
+	{ "giant_snake", CreatureSize::MEDIUM }, // Snake p1862, Poisonous (Giant): closest, AC 5 and HD 4+2
 	{ "gnoll", CreatureSize::LARGE }, // Gnoll p1472, Gnoll column
 	{ "goblin", CreatureSize::SMALL }, // Goblin p1483
 	{ "golem_stone", CreatureSize::LARGE }, // Golem, Greater p1491, Stone column

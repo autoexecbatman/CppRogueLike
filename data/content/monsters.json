@@ -36,6 +36,7 @@
       "num": 3,
       "sides": 6
     },
+    "intelligence": "average",
     "morale": 9,
     "size": "medium",
     "str": {
@@ -103,6 +104,7 @@
       "num": 1,
       "sides": 2
     },
+    "intelligence": "animal",
     "morale": 4,
     "size": "tiny",
     "str": {
@@ -165,6 +167,7 @@
       "num": 2,
       "sides": 6
     },
+    "intelligence": "low",
     "morale": 10,
     "size": "large",
     "str": {
@@ -232,6 +235,7 @@
       "num": 1,
       "sides": 6
     },
+    "intelligence": "semi",
     "morale": 13,
     "size": "large",
     "str": {
@@ -294,6 +298,7 @@
       "num": 3,
       "sides": 6
     },
+    "intelligence": "exceptional",
     "morale": 18,
     "size": "gargantuan",
     "str": {
@@ -356,6 +361,7 @@
       "num": 1,
       "sides": 6
     },
+    "intelligence": "low",
     "morale": 10,
     "size": "medium",
     "str": {
@@ -418,6 +424,7 @@
       "num": 2,
       "sides": 6
     },
+    "intelligence": "low",
     "morale": 14,
     "size": "medium",
     "str": {
@@ -480,6 +487,7 @@
       "num": 2,
       "sides": 6
     },
+    "intelligence": "low",
     "morale": 11,
     "size": "medium",
     "str": {
@@ -543,6 +551,7 @@
       "num": 1,
       "sides": 2
     },
+    "intelligence": "non",
     "morale": 5,
     "size": "tiny",
     "str": {
@@ -605,6 +614,7 @@
       "num": 1,
       "sides": 4
     },
+    "intelligence": "semi",
     "morale": 6,
     "size": "tiny",
     "str": {
@@ -667,6 +677,7 @@
       "num": 1,
       "sides": 4
     },
+    "intelligence": "animal",
     "morale": 9,
     "size": "medium",
     "str": {
@@ -729,6 +740,7 @@
       "num": 2,
       "sides": 6
     },
+    "intelligence": "low",
     "morale": 9,
     "size": "large",
     "str": {
@@ -796,6 +808,7 @@
       "num": 1,
       "sides": 6
     },
+    "intelligence": "low",
     "morale": 6,
     "size": "small",
     "str": {
@@ -863,6 +876,7 @@
       "num": 1,
       "sides": 2
     },
+    "intelligence": "non",
     "morale": 20,
     "size": "large",
     "str": {
@@ -925,6 +939,7 @@
       "num": 2,
       "sides": 6
     },
+    "intelligence": "low",
     "morale": 8,
     "size": "medium",
     "str": {
@@ -987,6 +1002,7 @@
       "num": 1,
       "sides": 6
     },
+    "intelligence": "low",
     "morale": 11,
     "size": "huge",
     "str": {
@@ -1049,6 +1065,7 @@
       "num": 2,
       "sides": 6
     },
+    "intelligence": "average",
     "morale": 8,
     "size": "medium",
     "str": {
@@ -1116,6 +1133,7 @@
       "num": 1,
       "sides": 6
     },
+    "intelligence": "average",
     "morale": 10,
     "size": "large",
     "str": {
@@ -1178,6 +1196,7 @@
       "num": 2,
       "sides": 6
     },
+    "intelligence": "average",
     "morale": 6,
     "size": "small",
     "str": {
@@ -1245,6 +1264,7 @@
       "num": 3,
       "sides": 6
     },
+    "intelligence": "supra_genius",
     "morale": 20,
     "size": "medium",
     "str": {
@@ -1308,6 +1328,7 @@
       "num": 3,
       "sides": 6
     },
+    "intelligence": "average",
     "morale": 7,
     "size": "medium",
     "str": {
@@ -1375,6 +1396,7 @@
       "num": 2,
       "sides": 6
     },
+    "intelligence": "very",
     "morale": 13,
     "size": "medium",
     "str": {
@@ -1445,6 +1467,7 @@
       "num": 1,
       "sides": 6
     },
+    "intelligence": "low",
     "morale": 10,
     "size": "large",
     "str": {
@@ -1512,6 +1535,7 @@
       "num": 2,
       "sides": 6
     },
+    "intelligence": "average",
     "morale": 8,
     "size": "medium",
     "str": {
@@ -1579,6 +1603,7 @@
       "num": 3,
       "sides": 6
     },
+    "intelligence": "genius",
     "morale": 18,
     "size": "large",
     "str": {
@@ -1641,6 +1666,7 @@
       "num": 1,
       "sides": 2
     },
+    "intelligence": "animal",
     "morale": 4,
     "size": "tiny",
     "str": {
@@ -1703,6 +1729,7 @@
       "num": 2,
       "sides": 6
     },
+    "intelligence": "low",
     "morale": 12,
     "size": "medium",
     "str": {
@@ -1774,6 +1801,7 @@
       "num": 1,
       "sides": 2
     },
+    "intelligence": "non",
     "morale": 20,
     "size": "medium",
     "str": {
@@ -1861,6 +1889,7 @@
       "num": 1,
       "sides": 4
     },
+    "intelligence": "low",
     "morale": 12,
     "size": "large",
     "str": {
@@ -1923,6 +1952,7 @@
       "num": 3,
       "sides": 6
     },
+    "intelligence": "exceptional",
     "morale": 18,
     "size": "medium",
     "str": {
@@ -1986,6 +2016,7 @@
       "num": 2,
       "sides": 6
     },
+    "intelligence": "average",
     "morale": 12,
     "size": "medium",
     "str": {
@@ -2048,6 +2079,7 @@
       "num": 2,
       "sides": 6
     },
+    "intelligence": "average",
     "morale": 15,
     "size": "medium",
     "str": {
@@ -2111,6 +2143,7 @@
       "num": 1,
       "sides": 4
     },
+    "intelligence": "semi",
     "morale": 9,
     "size": "small",
     "str": {
@@ -2173,6 +2206,7 @@
       "num": 2,
       "sides": 6
     },
+    "intelligence": "very",
     "morale": 15,
     "size": "medium",
     "str": {
@@ -2236,6 +2270,7 @@
       "num": 1,
       "sides": 6
     },
+    "intelligence": "low",
     "morale": 13,
     "size": "gargantuan",
     "str": {
@@ -2298,6 +2333,7 @@
       "num": 1,
       "sides": 2
     },
+    "intelligence": "non",
     "morale": 20,
     "size": "medium",
     "str": {
@@ -2361,6 +2397,7 @@
       "num": 3,
       "sides": 6
     },
+    "intelligence": "average",
     "morale": 12,
     "name": "Dungeon Jailer",
     "size": "medium",
@@ -2429,6 +2466,7 @@
       "num": 3,
       "sides": 6
     },
+    "intelligence": "average",
     "morale": 12,
     "name": "Dungeon Warden",
     "size": "medium",

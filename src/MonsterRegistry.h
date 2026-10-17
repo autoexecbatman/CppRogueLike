@@ -13,6 +13,7 @@
 #include "DamageInfo.h"
 #include "DiceExpr.h"
 #include "EquipmentSlot.h"
+#include "IntelligenceRating.h"
 #include "Renderer.h"
 
 // file: MonsterRegistry.h
@@ -100,6 +101,9 @@ struct MonsterParams
 	int corpseWeight{ 50 };
 	// The size its Monstrous Manual entry prints, which the DMG reads its ability scores by.
 	CreatureSize size{ CreatureSize::MEDIUM };
+	// The Intelligence rating its Monstrous Manual entry prints, which the DMG reads its
+	// Intelligence, Wisdom and Charisma by.
+	IntelligenceRating intelligence{ IntelligenceRating::AVERAGE };
 
 	// Ability scores
 	DiceExpr strDice{ 3, 6, 0 };

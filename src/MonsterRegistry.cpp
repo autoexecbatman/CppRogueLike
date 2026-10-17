@@ -15,6 +15,7 @@
 #include <nlohmann/json.hpp>
 
 #include "EquipmentSlot.h"
+#include "IntelligenceRating.h"
 #include "MonsterRegistry.h"
 #include "Paths.h"
 
@@ -229,6 +230,8 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 	params.corpseWeight = entry.value("corpse_weight", 50);
 	// Required: the book prints a size for every monster, and the ability scores are read by it.
 	params.size = parse_creature_size(entry.at("size").get<std::string>());
+	// Required for the same reason: Intelligence, Wisdom and Charisma are read by it.
+	params.intelligence = parse_intelligence_rating(entry.at("intelligence").get<std::string>());
 	params.strDice = parse_dice(entry.at("str"));
 	params.dexDice = parse_dice(entry.at("dex"));
 	params.intDice = parse_dice(entry.at("int"));
@@ -279,6 +282,7 @@ nlohmann::json encode_full_params(const MonsterParams& params)
 		{ "morality", encode_morality(params.morality) },
 		{ "corpse_weight", params.corpseWeight },
 		{ "size", encode_creature_size(params.size) },
+		{ "intelligence", encode_intelligence_rating(params.intelligence) },
 		{ "str", encode_dice(params.strDice) },
 		{ "dex", encode_dice(params.dexDice) },
 		{ "int", encode_dice(params.intDice) },
