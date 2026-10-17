@@ -1,0 +1,53 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=ClassDisplayNameTest.*:PlayerSerializationTest.*:StartingHitPointsTest.*:PlayerVirtualInterfaceTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Player.cpp",
+      "original": "\tcase CreatureClass::ROGUE:\n\t{\n\t\treturn \"Rogue\";\n\t}",
+      "mutated": "\tcase CreatureClass::ROGUE:\n\t{\n\t\treturn \"Fighter\";\n\t}",
+      "catches": "two classes sharing a name in the table"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tcase CreatureClass::WIZARD:\n\t{\n\t\treturn \"Wizard\";\n\t}",
+      "mutated": "\tcase CreatureClass::WIZARD:\n\t{\n\t\treturn \"\";\n\t}",
+      "catches": "a class with no name to show"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\treturn std::string{ class_display_name(get_creature_class()) };",
+      "mutated": "\treturn std::string{ class_display_name(CreatureClass::FIGHTER) };",
+      "catches": "every character shown as a fighter whatever its class"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tj[\"playerRaceState\"] = static_cast<int>(playerRaceState);\n",
+      "mutated": "\tj[\"playerRaceState\"] = static_cast<int>(playerRaceState);\n\tj[\"playerClass\"] = get_class_display_name();\n",
+      "catches": "the class's name saved beside the class"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tset_creature_class(blueprint.creatureClass);\n",
+      "mutated": "",
+      "catches": "a new character built without the class the menu chose"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tcase CreatureClass::ROGUE:\n\t{\n\t\tset_hit_die(6);",
+      "mutated": "\tcase CreatureClass::ROGUE:\n\t{\n\t\tset_hit_die(8);",
+      "catches": "a rogue rolling a priest's hit die"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tcase CreatureClass::WIZARD:\n\t{\n\t\tset_hit_die(4);",
+      "mutated": "\tcase CreatureClass::WIZARD:\n\t{\n\t\tset_hit_die(6);",
+      "catches": "a wizard rolling a rogue's hit die"
+    }
+  ]
+}

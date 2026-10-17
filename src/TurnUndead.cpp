@@ -2,9 +2,9 @@
 #include <cassert>
 
 #include "Creature.h"
+#include "CreatureClass.h"
 #include "DamageInfo.h"
 #include "GameContext.h"
-#include "Player.h"
 #include "RandomDice.h"
 #include "TurnUndead.h"
 #include "TurningTable.h"
@@ -15,13 +15,7 @@ namespace
 // which this game has no class for yet.
 bool can_turn_undead(const Creature& creature)
 {
-	if (!creature.is_player())
-	{
-		return false;
-	}
-
-	const Player& player = static_cast<const Player&>(creature);
-	return player.playerClassState == Player::PlayerClassState::CLERIC;
+	return creature.is_player() && creature.get_creature_class() == CreatureClass::CLERIC;
 }
 } // namespace
 

@@ -30,6 +30,8 @@ protected:
         data_manager.load_all_data(mock.messages);
 
         player = std::make_unique<Player>(Vector2D{ 0, 0 });
+        // A player always has a class, and its experience table is read when a kill pays it.
+        player->set_creature_class(CreatureClass::FIGHTER);
         player->experienceReward = std::make_unique<ExperienceReward>(0);
         player->set_dr(5);
         player->set_thaco(20);
@@ -56,7 +58,7 @@ protected:
 
 TEST_F(PlayerVirtualInterfaceTest, Player_GetClassDisplayName_ReturnsPlayerClass)
 {
-    player->playerClass = "Fighter";
+    player->set_creature_class(CreatureClass::FIGHTER);
 
     EXPECT_EQ(player->get_class_display_name(), "Fighter");
 }

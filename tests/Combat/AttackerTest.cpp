@@ -42,6 +42,8 @@ protected:
 		game.tileConfig.load(Paths::TILE_CONFIG);
 
 		player = std::make_unique<Player>(Vector2D{ 0, 0 });
+		// A player always has a class, and its experience table is read when a kill pays it.
+		player->set_creature_class(CreatureClass::FIGHTER);
 		player->experienceReward = std::make_unique<ExperienceReward>(0);
 		player->set_dr(0);
 		player->set_thaco(20);

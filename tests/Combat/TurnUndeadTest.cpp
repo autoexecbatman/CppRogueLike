@@ -35,7 +35,7 @@ protected:
 		// A destroyed undead reaches Creature::die, which pays the player its
 		// kill reward, so the player needs one too.
 		player->experienceReward = std::make_unique<ExperienceReward>(0);
-		player->playerClassState = Player::PlayerClassState::CLERIC;
+		player->set_creature_class(CreatureClass::CLERIC);
 		player->set_creature_level(7);
 	}
 
@@ -81,7 +81,7 @@ protected:
 // Only a cleric channels a deity.
 TEST_F(TurnUndeadTest, NonClericCannotAttempt)
 {
-	player->playerClassState = Player::PlayerClassState::FIGHTER;
+	player->set_creature_class(CreatureClass::FIGHTER);
 	add_undead(1, Vector2D{ 6, 5 });
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);

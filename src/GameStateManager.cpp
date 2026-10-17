@@ -196,7 +196,7 @@ bool GameStateManager::load_all(GameContext& ctx)
 		return false;
 	}
 
-	// load_game restores playerClassState, so the class sprite is only known now.
+	// load_game restores the creature class, so the class sprite is only known now.
 	ctx.player()->actorData.tile = ctx.tileConfig->get(ctx.player_concrete().sprite_tile_key());
 
 	ctx.gameState->set_is_loaded_game(true);

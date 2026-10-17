@@ -109,7 +109,6 @@ TEST_F(ScriptedInputTest, TheDisarmKeyReachesAFoundTrapOnTheFloor)
 {
 	Player& thief = ctx.player_concrete();
 	thief.set_creature_class(CreatureClass::ROGUE);
-	thief.playerClassState = Player::PlayerClassState::ROGUE;
 	thief.playerRaceState = PlayerRaceState::HUMAN;
 	thief.set_dexterity(13);
 	thief.set_creature_level(1);

@@ -33,9 +33,8 @@ protected:
         player->set_gold(500);
 
         // Set class/race
-        player->playerClassState = Player::PlayerClassState::FIGHTER;
+        player->set_creature_class(CreatureClass::FIGHTER);
         player->playerRaceState = PlayerRaceState::HUMAN;
-        player->playerClass = "Fighter";
         player->set_attacks_per_round(1.5f);
 
         // Set up components
@@ -78,9 +77,9 @@ TEST_F(PlayerSerializationTest, ClassAndRace_Preserved) {
     auto loaded = std::make_unique<Player>(Vector2D{0, 0});
     loaded->load(j);
 
-    EXPECT_EQ(loaded->playerClassState, Player::PlayerClassState::FIGHTER);
+    EXPECT_EQ(loaded->get_creature_class(), CreatureClass::FIGHTER);
     EXPECT_EQ(loaded->playerRaceState, PlayerRaceState::HUMAN);
-    EXPECT_EQ(loaded->playerClass, "Fighter");
+    EXPECT_EQ(loaded->get_class_display_name(), class_display_name(CreatureClass::FIGHTER));
     EXPECT_EQ(loaded->get_race_display_name(), "Human");
 }
 
@@ -95,6 +94,20 @@ TEST_F(PlayerSerializationTest, TheRaceIsSavedOnceAsTheEnum)
 
 	EXPECT_TRUE(j.contains("playerRaceState"));
 	EXPECT_FALSE(j.contains("playerRace")) << "the race's name was saved beside the race";
+}
+
+// The class is saved once, as the enum Creature already writes. Its name is derived
+// from it, and a second enum or a stored name could only ever disagree with it.
+TEST_F(PlayerSerializationTest, TheClassIsSavedOnceAsTheEnum)
+{
+	auto original = create_test_player();
+
+	json j;
+	original->save(j);
+
+	EXPECT_TRUE(j.contains("creatureClass"));
+	EXPECT_FALSE(j.contains("playerClassState")) << "a second enum for the class was saved";
+	EXPECT_FALSE(j.contains("playerClass")) << "the class's name was saved beside the class";
 }
 
 TEST_F(PlayerSerializationTest, CombatStats_Preserved) {
@@ -191,16 +204,9 @@ TEST_F(PlayerSerializationTest, AllRaces_SaveLoad) {
 }
 
 TEST_F(PlayerSerializationTest, AllClasses_SaveLoad) {
-    std::vector<Player::PlayerClassState> classes = {
-        Player::PlayerClassState::FIGHTER,
-        Player::PlayerClassState::ROGUE,
-        Player::PlayerClassState::CLERIC,
-        Player::PlayerClassState::WIZARD
-    };
-
-    for (auto playerClass : classes) {
+    for (const CreatureClass creatureClass : ALL_PLAYER_CLASS) {
         auto player = create_test_player();
-        player->playerClassState = playerClass;
+        player->set_creature_class(creatureClass);
 
         json j;
         player->save(j);
@@ -208,7 +214,10 @@ TEST_F(PlayerSerializationTest, AllClasses_SaveLoad) {
         auto loaded = std::make_unique<Player>(Vector2D{0, 0});
         loaded->load(j);
 
-        EXPECT_EQ(loaded->playerClassState, playerClass) << "Class mismatch for " << static_cast<int>(playerClass);
+        EXPECT_EQ(loaded->get_creature_class(), creatureClass) << "Class mismatch for " << encode_creature_class(creatureClass);
+        // The name shown is the loaded class's own, which a fighter alone cannot tell apart
+        // from a name that is always the fighter's.
+        EXPECT_EQ(loaded->get_class_display_name(), class_display_name(creatureClass));
     }
 }
 

@@ -191,6 +191,7 @@ TEST_F(AssertProbeDeathTest, DroppingAPackHoldingNothingAborts)
 	// die() checks for a player first, so without one this would abort on that
 	// instead and prove nothing about the pack.
 	std::unique_ptr<Player> killer = std::make_unique<Player>(Vector2D{ 1, 1 });
+	killer->set_creature_class(CreatureClass::FIGHTER);
 	killer->healthPool = std::make_unique<HealthPool>(20);
 	killer->experienceReward = std::make_unique<ExperienceReward>(0);
 	ctx.playerOwner = &killer;
@@ -309,7 +310,7 @@ TEST_F(AssertProbeDeathTest, TurningWithANullInTheCreatureListAborts)
 {
 	// Only a cleric reaches the walk; anything else is refused before it.
 	std::unique_ptr<Player> priest = std::make_unique<Player>(Vector2D{ 1, 1 });
-	priest->playerClassState = Player::PlayerClassState::CLERIC;
+	priest->set_creature_class(CreatureClass::CLERIC);
 	ctx.playerOwner = &priest;
 
 	std::vector<std::unique_ptr<Creature>> creatures{};

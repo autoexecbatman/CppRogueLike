@@ -54,9 +54,7 @@ protected:
 		player->set_wisdom(10);
 		player->set_charisma(10);
 
-		player->playerClassState = Player::PlayerClassState::ROGUE;
 		player->set_creature_class(CreatureClass::ROGUE);
-		player->playerClass = "Rogue";
 		player->playerRaceState = PlayerRaceState::DWARF;
 
 		ctx = game.context();
@@ -137,7 +135,6 @@ TEST_F(ThiefSkillAllocationTest, TheGrantIsSixtyAtFirstLevelAndThirtyAfter)
 // all belongs to the caller that opens the screen.
 TEST_F(ThiefSkillAllocationTest, NoScreenOpensForACharacterWithNoThiefSkills)
 {
-	player->playerClassState = Player::PlayerClassState::FIGHTER;
 	player->set_creature_class(CreatureClass::FIGHTER);
 
 	const size_t before = ctx.menus->size();

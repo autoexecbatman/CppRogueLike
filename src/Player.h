@@ -30,16 +30,6 @@ class Player : public Creature
 public:
 	PlayerRaceState playerRaceState{ PlayerRaceState::NONE };
 
-	enum class PlayerClassState
-	{
-		NONE,
-		FIGHTER,
-		ROGUE,
-		CLERIC,
-		WIZARD
-	} playerClassState{ PlayerClassState::NONE };
-
-	std::string playerClass{ "None" };
 	int killCount{ 0 }; // Tracks kill count for log.
 
 	std::vector<std::string> memorizedSpells;
@@ -135,7 +125,7 @@ public:
 	[[nodiscard]] std::optional<int> thief_skill(ThiefSkill skill) const noexcept;
 
 	// Display interface overrides
-	std::string get_class_display_name() const { return playerClass; }
+	std::string get_class_display_name() const;
 	std::string get_race_display_name() const;
 	int get_kill_count() const noexcept { return killCount; }
 	std::string get_equipped_weapon_damage_roll() const noexcept;
@@ -181,6 +171,25 @@ inline constexpr std::array<PlayerRaceState, 6> ALL_PLAYER_RACE{
 	PlayerRaceState::HALFELF,
 	PlayerRaceState::HALFLING
 };
+
+// The four classes a character can be, in the order the class menu offers them.
+// MONSTER is not among them: it is the class of every creature that is not a player.
+inline constexpr std::array<CreatureClass, 4> ALL_PLAYER_CLASS{
+	CreatureClass::FIGHTER,
+	CreatureClass::ROGUE,
+	CreatureClass::CLERIC,
+	CreatureClass::WIZARD
+};
+
+// What a class is called on screen. **This is the only place a class's name is
+// written** - the class menu, the character sheet, the level-up screen, the HUD and
+// the death screen all read it from here. MONSTER is never a player's class, so asking
+// for its name is an assertion rather than an answer.
+//
+// Example:
+//   class_display_name(CreatureClass::CLERIC);    // -> "Cleric"
+//   class_display_name(CreatureClass::MONSTER);   // -> asserts
+[[nodiscard]] std::string_view class_display_name(CreatureClass creatureClass);
 
 // What a race is called on screen. **This is the only place a race's name is
 // written** - the menu that offers it, the character sheet and the death screen all

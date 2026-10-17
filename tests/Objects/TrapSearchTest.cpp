@@ -54,27 +54,26 @@ protected:
 		// the base score, the race and the points, with nothing else folded in.
 		searcher.set_dexterity(13);
 		searcher.set_creature_level(1);
-		become(CreatureClass::FIGHTER, Player::PlayerClassState::FIGHTER, PlayerRaceState::HUMAN);
+		become(CreatureClass::FIGHTER, PlayerRaceState::HUMAN);
 	}
 
-	void become(CreatureClass creatureClass, Player::PlayerClassState playerClass, PlayerRaceState race)
+	void become(CreatureClass creatureClass, PlayerRaceState race)
 	{
 		searcher.set_creature_class(creatureClass);
-		searcher.playerClassState = playerClass;
 		searcher.playerRaceState = race;
 	}
 
 	// A human thief whose Find/Remove Traps is THIEF_SKILL.
 	void become_thief()
 	{
-		become(CreatureClass::ROGUE, Player::PlayerClassState::ROGUE, PlayerRaceState::HUMAN);
+		become(CreatureClass::ROGUE, PlayerRaceState::HUMAN);
 		searcher.thiefSkillPoints.at(thief_skill_index(ThiefSkill::FIND_REMOVE_TRAPS)) = 40;
 		ASSERT_EQ(searcher.thief_skill(ThiefSkill::FIND_REMOVE_TRAPS), THIEF_SKILL);
 	}
 
 	void become_dwarf_fighter()
 	{
-		become(CreatureClass::FIGHTER, Player::PlayerClassState::FIGHTER, PlayerRaceState::DWARF);
+		become(CreatureClass::FIGHTER, PlayerRaceState::DWARF);
 	}
 
 	Trap& place(TrapType kind, Vector2D position)

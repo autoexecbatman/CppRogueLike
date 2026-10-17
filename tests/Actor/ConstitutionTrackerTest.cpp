@@ -55,11 +55,11 @@ protected:
 	// Rolls a character of the given class with the forced scores above. The
 	// class decides the cap: warriors keep the whole table, every other class
 	// stops at +2 (Player's Handbook, Table 3).
-	void make_player(std::string_view playerClass, int constitution)
+	void make_player(CreatureClass creatureClass, int constitution)
 	{
 		PlayerBlueprint blueprint{};
 		blueprint.name = "Tester";
-		blueprint.playerClass = std::string{ playerClass };
+		blueprint.creatureClass = creatureClass;
 		blueprint.playerRaceState = PlayerRaceState::HUMAN;
 
 		// Every other score is an unremarkable 9.
@@ -96,7 +96,7 @@ protected:
 // was accounted for.
 TEST_F(ConstitutionTrackerTest, FirstTickAppliesTheBonusWithoutReportingAChange)
 {
-	make_player("Fighter", 17);
+	make_player(CreatureClass::FIGHTER, 17);
 	ASSERT_EQ(player->get_constitution(), 17);
 	ASSERT_EQ(player->get_max_hp(), BASE_HP);
 
@@ -110,7 +110,7 @@ TEST_F(ConstitutionTrackerTest, FirstTickAppliesTheBonusWithoutReportingAChange)
 // A second tick with nothing moved changes nothing and says nothing.
 TEST_F(ConstitutionTrackerTest, ASteadyScoreIsSilent)
 {
-	make_player("Fighter", 17);
+	make_player(CreatureClass::FIGHTER, 17);
 	player->update_constitution_bonus(ctx);
 	player->update_constitution_bonus(ctx);
 
@@ -121,7 +121,7 @@ TEST_F(ConstitutionTrackerTest, ASteadyScoreIsSilent)
 // A real change is reported between the two scores the character held.
 TEST_F(ConstitutionTrackerTest, ARealChangeIsReportedBetweenItsTwoScores)
 {
-	make_player("Fighter", 17);
+	make_player(CreatureClass::FIGHTER, 17);
 	player->update_constitution_bonus(ctx);
 	player->adjust_constitution(1);
 
@@ -136,7 +136,7 @@ TEST_F(ConstitutionTrackerTest, ARealChangeIsReportedBetweenItsTwoScores)
 // Table 3 gives 17 a +3 and 18 a +4 for warriors only; everyone else stops at +2.
 TEST_F(ConstitutionTrackerTest, ANonWarriorStopsAtPlusTwo)
 {
-	make_player("Wizard", 17);
+	make_player(CreatureClass::WIZARD, 17);
 
 	player->update_constitution_bonus(ctx);
 
@@ -147,7 +147,7 @@ TEST_F(ConstitutionTrackerTest, ANonWarriorStopsAtPlusTwo)
 // The cap is on the bonus, never on the penalty: a low score hurts every class alike.
 TEST_F(ConstitutionTrackerTest, ThePenaltyIsNotCapped)
 {
-	make_player("Wizard", 3);
+	make_player(CreatureClass::WIZARD, 3);
 	ASSERT_EQ(player->get_constitution(), 3);
 
 	player->update_constitution_bonus(ctx);
@@ -159,7 +159,7 @@ TEST_F(ConstitutionTrackerTest, ThePenaltyIsNotCapped)
 // fighter's ended at 9th, so a point from 17 to 18 is worth 9 hit points, not 12.
 TEST_F(ConstitutionTrackerTest, AFightersChangeCountsOnlyTheLevelsThatRolled)
 {
-	make_player("Fighter", 17);
+	make_player(CreatureClass::FIGHTER, 17);
 	player->set_creature_level(12);
 	player->update_constitution_bonus(ctx);
 	const int before = player->get_max_hp();
@@ -174,7 +174,7 @@ TEST_F(ConstitutionTrackerTest, AFightersChangeCountsOnlyTheLevelsThatRolled)
 // each of ten levels.
 TEST_F(ConstitutionTrackerTest, AWizardsChangeCountsOnlyTheLevelsThatRolled)
 {
-	make_player("Wizard", 17);
+	make_player(CreatureClass::WIZARD, 17);
 	player->set_creature_level(12);
 	player->update_constitution_bonus(ctx);
 	const int before = player->get_max_hp();
@@ -190,7 +190,7 @@ TEST_F(ConstitutionTrackerTest, AWizardsChangeCountsOnlyTheLevelsThatRolled)
 // and the paying half runs without a window so it can be checked here.
 TEST_F(ConstitutionTrackerTest, AHalflingPaysItsRacialAdjustment)
 {
-	make_player("Fighter", 17);
+	make_player(CreatureClass::FIGHTER, 17);
 	player->playerRaceState = PlayerRaceState::HALFLING;
 	const int allocatedStrength = player->get_strength();
 	const int allocatedDexterity = player->get_dexterity();
@@ -205,7 +205,7 @@ TEST_F(ConstitutionTrackerTest, AHalflingPaysItsRacialAdjustment)
 // A human modifies nothing, so there is nothing to pay and nothing to show.
 TEST_F(ConstitutionTrackerTest, AHumanPaysNothing)
 {
-	make_player("Fighter", 17);
+	make_player(CreatureClass::FIGHTER, 17);
 	player->playerRaceState = PlayerRaceState::HUMAN;
 	const int allocatedStrength = player->get_strength();
 

@@ -65,7 +65,7 @@ protected:
 		player->healthPool = std::make_unique<HealthPool>(STARTING_HP);
 		player->set_constitution(10);
 		// A Player built here keeps creatureClass at MONSTER, and the regeneration rule
-		// reads that field rather than playerClassState.
+		// reads that field.
 		player->set_creature_class(CreatureClass::FIGHTER);
 
 		ctx = mock.to_game_context();

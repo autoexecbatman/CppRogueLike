@@ -43,7 +43,6 @@ protected:
 		// A dwarf thief can find every kind of trap. Dexterity 13 leaves its Find/Remove
 		// Traps at the base, the race and the points.
 		finder.set_creature_class(CreatureClass::ROGUE);
-		finder.playerClassState = Player::PlayerClassState::ROGUE;
 		finder.set_dexterity(13);
 		finder.playerRaceState = PlayerRaceState::DWARF;
 		finder.set_creature_level(1);

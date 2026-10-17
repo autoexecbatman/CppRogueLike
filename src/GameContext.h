@@ -136,14 +136,14 @@ struct PlayerBlueprint
 {
 	std::string gender{ "None" };
 	std::string name{ "Player" };
-	std::string playerClass{ "None" };
 	PlayerRaceState playerRaceState{ PlayerRaceState::NONE };
 
 	// The six as Method VI allocated them, before the race is paid. They start
 	// where the method starts them, so a blueprint that never reached the
 	// allocation screen still builds a legal character rather than a blank one.
-	// The class as the menu that picked it already knew it, so the allocation
-	// screen reads Table 13's row without parsing a display name back into an enum.
+	// The class the menu picked, and the only record of it: its name is derived by
+	// class_display_name. MONSTER until a class is chosen, which the Player
+	// constructor refuses.
 	CreatureClass creatureClass{ CreatureClass::MONSTER };
 
 	std::array<int, ABILITY_COUNT> abilityScores{

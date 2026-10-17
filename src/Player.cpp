@@ -127,74 +127,76 @@ std::string_view Player::sprite_tile_key() const noexcept
 	// Only human and dwarf art exists; the other races borrow the human row.
 	const bool isDwarf = (playerRaceState == PlayerRaceState::DWARF);
 
-	switch (playerClassState)
+	switch (get_creature_class())
 	{
 
-	case PlayerClassState::FIGHTER:
+	case CreatureClass::FIGHTER:
 	{
 		return isDwarf ? "TILE_PLAYER_DWARF_FIGHTER" : "TILE_PLAYER_HUMAN_FIGHTER";
 	}
 
-	case PlayerClassState::ROGUE:
+	case CreatureClass::ROGUE:
 	{
 		return isDwarf ? "TILE_PLAYER_DWARF_ROGUE" : "TILE_PLAYER_HUMAN_ROGUE";
 	}
 
-	case PlayerClassState::CLERIC:
+	case CreatureClass::CLERIC:
 	{
 		return isDwarf ? "TILE_PLAYER_DWARF_CLERIC" : "TILE_PLAYER_HUMAN_CLERIC";
 	}
 
-	case PlayerClassState::WIZARD:
+	case CreatureClass::WIZARD:
 	{
 		return isDwarf ? "TILE_PLAYER_DWARF_WIZARD" : "TILE_PLAYER_HUMAN_WIZARD";
 	}
 
-	case PlayerClassState::NONE:
+	case CreatureClass::MONSTER:
 	{
+		assert(false && "Player::sprite_tile_key: a player with a monster's class");
 		return "TILE_PLAYER";
 	}
 	}
 
-	return "TILE_PLAYER";
+	std::unreachable();
 }
 
 Player::Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext& ctx)
 	: Creature(position, ActorData{ TileRef{}, blueprint.name, ColorPairId::WHITE_BLACK })
 {
 	set_gender(blueprint.gender);
-	playerClass = blueprint.playerClass;
 	playerRaceState = blueprint.playerRaceState;
 
-	auto applyClassData = [this](std::string_view name)
+	// The class is the blueprint's enum, and its hit die is the class's: a warrior's d10,
+	// a priest's d8, a rogue's d6, a wizard's d4.
+	set_creature_class(blueprint.creatureClass);
+	switch (blueprint.creatureClass)
 	{
-		if (name == "Fighter")
-		{
-			playerClassState = PlayerClassState::FIGHTER;
-			set_creature_class(CreatureClass::FIGHTER);
-			set_hit_die(10);
-		}
-		else if (name == "Rogue")
-		{
-			playerClassState = PlayerClassState::ROGUE;
-			set_creature_class(CreatureClass::ROGUE);
-			set_hit_die(6);
-		}
-		else if (name == "Cleric")
-		{
-			playerClassState = PlayerClassState::CLERIC;
-			set_creature_class(CreatureClass::CLERIC);
-			set_hit_die(8);
-		}
-		else if (name == "Wizard")
-		{
-			playerClassState = PlayerClassState::WIZARD;
-			set_creature_class(CreatureClass::WIZARD);
-			set_hit_die(4);
-		}
-	};
-
-	applyClassData(blueprint.playerClass);
+	case CreatureClass::FIGHTER:
+	{
+		set_hit_die(10);
+		break;
+	}
+	case CreatureClass::ROGUE:
+	{
+		set_hit_die(6);
+		break;
+	}
+	case CreatureClass::CLERIC:
+	{
+		set_hit_die(8);
+		break;
+	}
+	case CreatureClass::WIZARD:
+	{
+		set_hit_die(4);
+		break;
+	}
+	case CreatureClass::MONSTER:
+	{
+		assert(false && "Player: a blueprint reached construction with no class chosen");
+		break;
+	}
+	}
 
 	// The six come from the allocation screen rather than from dice here: Method VI
 	// is what character creation runs, and the blueprint carries what it produced.
@@ -282,10 +284,10 @@ void Player::on_kill_reward(int xp, GameContext& ctx)
 
 void Player::equip_class_starting_gear(GameContext& ctx)
 {
-	switch (playerClassState)
+	switch (get_creature_class())
 	{
 
-	case PlayerClassState::FIGHTER:
+	case CreatureClass::FIGHTER:
 	{
 		int startingGold = (ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4()) * 10;
 		set_gold(startingGold);
@@ -301,7 +303,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		break;
 	}
 
-	case PlayerClassState::ROGUE:
+	case CreatureClass::ROGUE:
 	{
 		int startingGold = (ctx.dice->d6() + ctx.dice->d6()) * 10;
 		set_gold(startingGold);
@@ -313,7 +315,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		break;
 	}
 
-	case PlayerClassState::CLERIC:
+	case CreatureClass::CLERIC:
 	{
 		int startingGold = (ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()) * 10;
 		set_gold(startingGold);
@@ -331,7 +333,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		break;
 	}
 
-	case PlayerClassState::WIZARD:
+	case CreatureClass::WIZARD:
 	{
 		int startingGold = (ctx.dice->d4() + ctx.dice->d4()) * 10;
 		set_gold(startingGold);
@@ -349,11 +351,47 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		break;
 	}
 
-	default:
+	case CreatureClass::MONSTER:
 	{
+		assert(false && "Player::equip_class_starting_gear: a player with a monster's class");
 		break;
 	}
 	}
+}
+
+std::string_view class_display_name(CreatureClass creatureClass)
+{
+	switch (creatureClass)
+	{
+	case CreatureClass::FIGHTER:
+	{
+		return "Fighter";
+	}
+	case CreatureClass::ROGUE:
+	{
+		return "Rogue";
+	}
+	case CreatureClass::CLERIC:
+	{
+		return "Cleric";
+	}
+	case CreatureClass::WIZARD:
+	{
+		return "Wizard";
+	}
+	case CreatureClass::MONSTER:
+	{
+		assert(false && "class_display_name: a monster's class has no player-facing name");
+		return "Monster";
+	}
+	}
+
+	std::unreachable();
+}
+
+std::string Player::get_class_display_name() const
+{
+	return std::string{ class_display_name(get_creature_class()) };
 }
 
 std::string_view race_display_name(PlayerRaceState race)
@@ -464,35 +502,36 @@ void Player::calculate_thaco()
 	// Static instance for efficiency - no need to recreate each time
 	static constexpr CombatProgressionTables combatTables;
 
-	switch (playerClassState)
+	switch (get_creature_class())
 	{
 
-	case PlayerClassState::FIGHTER:
+	case CreatureClass::FIGHTER:
 	{
 		set_thaco(combatTables.get_fighter(get_creature_level()));
 		break;
 	}
 
-	case PlayerClassState::ROGUE:
+	case CreatureClass::ROGUE:
 	{
 		set_thaco(combatTables.get_rogue(get_creature_level()));
 		break;
 	}
 
-	case PlayerClassState::CLERIC:
+	case CreatureClass::CLERIC:
 	{
 		set_thaco(combatTables.get_cleric(get_creature_level()));
 		break;
 	}
 
-	case PlayerClassState::WIZARD:
+	case CreatureClass::WIZARD:
 	{
 		set_thaco(combatTables.get_wizard(get_creature_level()));
 		break;
 	}
 
-	case PlayerClassState::NONE:
+	case CreatureClass::MONSTER:
 	{
+		assert(false && "Player::calculate_thaco: a player with a monster's class");
 		break;
 	}
 
@@ -685,7 +724,7 @@ bool Player::rest(GameContext& ctx)
 	ctx.messageSystem->finalize_message();
 
 	// Memorize spells for casters
-	if (playerClassState == PlayerClassState::CLERIC || playerClassState == PlayerClassState::WIZARD)
+	if (get_creature_class() == CreatureClass::CLERIC || get_creature_class() == CreatureClass::WIZARD)
 	{
 		SpellSystem::show_memorization_menu(*this, ctx);
 	}
@@ -794,7 +833,7 @@ Player::DualWieldInfo Player::get_dual_wield_info() const noexcept
 	info.offHandPenalty = -4;
 
 	// Fighters have Two-Weapon Fighting proficiency: penalties reduce to 0/-2
-	if (playerClassState == PlayerClassState::FIGHTER)
+	if (get_creature_class() == CreatureClass::FIGHTER)
 	{
 		info.mainHandPenalty = 0;
 		info.offHandPenalty = -2;
@@ -836,8 +875,6 @@ void Player::save(json& j)
 
 	// Player-specific fields
 	j["playerRaceState"] = static_cast<int>(playerRaceState);
-	j["playerClassState"] = static_cast<int>(playerClassState);
-	j["playerClass"] = playerClass;
 	j["killCount"] = killCount;
 	j["memorizedSpells"] = memorizedSpells;
 	j["thiefSkillPoints"] = thiefSkillPoints;
@@ -892,8 +929,6 @@ void Player::load(const json& j)
 
 	// Player-specific fields
 	playerRaceState = static_cast<PlayerRaceState>(j.at("playerRaceState").get<int>());
-	playerClassState = static_cast<PlayerClassState>(j.at("playerClassState").get<int>());
-	playerClass = j.at("playerClass").get<std::string>();
 	killCount = j.at("killCount").get<int>();
 	memorizedSpells = j.at("memorizedSpells").get<std::vector<std::string>>();
 	thiefSkillPoints = j.at("thiefSkillPoints").get<std::array<int, THIEF_SKILL_COUNT>>();
@@ -933,34 +968,37 @@ int Player::get_next_level_xp() const
 {
 	int currentLevel = get_creature_level();
 
-	switch (playerClassState)
+	switch (get_creature_class())
 	{
 
-	case PlayerClassState::FIGHTER:
+	case CreatureClass::FIGHTER:
 	{
 		return calculate_fighter_xp(currentLevel);
 	}
 
-	case PlayerClassState::ROGUE:
+	case CreatureClass::ROGUE:
 	{
 		return calculate_rogue_xp(currentLevel);
 	}
 
-	case PlayerClassState::CLERIC:
+	case CreatureClass::CLERIC:
 	{
 		return calculate_cleric_xp(currentLevel);
 	}
 
-	case PlayerClassState::WIZARD:
+	case CreatureClass::WIZARD:
 	{
 		return calculate_wizard_xp(currentLevel);
 	}
 
-	default:
+	case CreatureClass::MONSTER:
 	{
+		assert(false && "Player::get_next_level_xp: a player with a monster's class");
 		return 2000 * currentLevel;
 	}
 	}
+
+	std::unreachable();
 }
 
 void Player::levelup_update(GameContext& ctx)

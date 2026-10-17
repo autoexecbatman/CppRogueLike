@@ -51,6 +51,8 @@ protected:
 		player->experienceReward = std::make_unique<ExperienceReward>(0);
 		player->healthPool = std::make_unique<HealthPool>(20);
 		player->armorClass = std::make_unique<ArmorClass>(10);
+		// A player always has a class, and its experience table is read when a kill pays it.
+		player->set_creature_class(CreatureClass::FIGHTER);
 		player->set_strength(14);
 
 		monster = std::make_unique<Creature>(

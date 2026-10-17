@@ -1,11 +1,14 @@
 // file: MenuClass.cpp
 #include <memory>
+#include <string>
 #include <vector>
 
+#include "CreatureClass.h"
 #include "GameContext.h"
 #include "ListMenu.h"
 #include "MenuAbilityScores.h"
 #include "MenuClass.h"
+#include "Player.h"
 #include "RandomDice.h"
 
 std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
@@ -14,35 +17,31 @@ std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
 
 	auto fighterCommand = [](GameContext& ctx)
 	{
-		ctx.playerBlueprint->playerClass = "Fighter";
 		ctx.playerBlueprint->creatureClass = CreatureClass::FIGHTER;
 		ctx.menus->push_back(std::make_unique<MenuAbilityScores>(ctx));
 	};
-	entries.push_back({ "Fighter", 'f', fighterCommand });
+	entries.push_back({ std::string{ class_display_name(CreatureClass::FIGHTER) }, 'f', fighterCommand });
 
 	auto rogueCommand = [](GameContext& ctx)
 	{
-		ctx.playerBlueprint->playerClass = "Rogue";
 		ctx.playerBlueprint->creatureClass = CreatureClass::ROGUE;
 		ctx.menus->push_back(std::make_unique<MenuAbilityScores>(ctx));
 	};
-	entries.push_back({ "Rogue", 'r', rogueCommand });
+	entries.push_back({ std::string{ class_display_name(CreatureClass::ROGUE) }, 'r', rogueCommand });
 
 	auto clericCommand = [](GameContext& ctx)
 	{
-		ctx.playerBlueprint->playerClass = "Cleric";
 		ctx.playerBlueprint->creatureClass = CreatureClass::CLERIC;
 		ctx.menus->push_back(std::make_unique<MenuAbilityScores>(ctx));
 	};
-	entries.push_back({ "Cleric", 'c', clericCommand });
+	entries.push_back({ std::string{ class_display_name(CreatureClass::CLERIC) }, 'c', clericCommand });
 
 	auto wizardCommand = [](GameContext& ctx)
 	{
-		ctx.playerBlueprint->playerClass = "Wizard";
 		ctx.playerBlueprint->creatureClass = CreatureClass::WIZARD;
 		ctx.menus->push_back(std::make_unique<MenuAbilityScores>(ctx));
 	};
-	entries.push_back({ "Wizard", 'z', wizardCommand });
+	entries.push_back({ std::string{ class_display_name(CreatureClass::WIZARD) }, 'z', wizardCommand });
 
 	auto randomCommand = [](GameContext& ctx)
 	{
@@ -51,28 +50,24 @@ std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
 
 		case 1:
 		{
-			ctx.playerBlueprint->playerClass = "Fighter";
 			ctx.playerBlueprint->creatureClass = CreatureClass::FIGHTER;
 			break;
 		}
 
 		case 2:
 		{
-			ctx.playerBlueprint->playerClass = "Rogue";
 			ctx.playerBlueprint->creatureClass = CreatureClass::ROGUE;
 			break;
 		}
 
 		case 3:
 		{
-			ctx.playerBlueprint->playerClass = "Wizard";
 			ctx.playerBlueprint->creatureClass = CreatureClass::WIZARD;
 			break;
 		}
 
 		case 4:
 		{
-			ctx.playerBlueprint->playerClass = "Cleric";
 			ctx.playerBlueprint->creatureClass = CreatureClass::CLERIC;
 			break;
 		}

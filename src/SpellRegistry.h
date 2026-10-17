@@ -24,7 +24,7 @@
 //   spells.get_by_key("no_such_spell"); // throws std::out_of_range
 //   spells.save("data/content/spells.json");
 
-// Mirror of Player::PlayerClassState to avoid circular dependency
+// The spell list a caster draws from, which SpellSystem derives from the caster's CreatureClass
 enum class CasterClass
 {
 	CLERIC,

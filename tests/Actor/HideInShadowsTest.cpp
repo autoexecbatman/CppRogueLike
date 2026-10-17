@@ -56,7 +56,6 @@ protected:
 		thief->healthPool = std::make_unique<HealthPool>(20);
 		thief->armorClass = std::make_unique<ArmorClass>(10);
 		thief->set_creature_class(CreatureClass::ROGUE);
-		thief->playerClassState = Player::PlayerClassState::ROGUE;
 		thief->playerRaceState = PlayerRaceState::HUMAN;
 		// Dexterity 13 is the middle of Table 28's flat row, so the percentage is the
 		// base score and the points, with nothing else folded in.
@@ -143,7 +142,6 @@ TEST_F(HideInShadowsTest, BothOutcomesAreTheOneAnswerThatSpendsTheTurn)
 TEST_F(HideInShadowsTest, AClassWithNoThiefSkillCannotTry)
 {
 	thief->set_creature_class(CreatureClass::FIGHTER);
-	thief->playerClassState = Player::PlayerClassState::FIGHTER;
 
 	// A certain success is queued and must not be reached.
 	mock.dice.set_next_roll(1);

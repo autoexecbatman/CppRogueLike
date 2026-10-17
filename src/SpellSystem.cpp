@@ -83,27 +83,31 @@ int calculate_num_missiles(int casterLevel)
 {
 	return std::min(5, 1 + (casterLevel - 1) / 2);
 }
-// Helper to convert PlayerClassState to CasterClass
-CasterClass to_caster_class(Player::PlayerClassState state)
+// The spell list a class casts from; the classes that cast none answer NONE.
+CasterClass to_caster_class(CreatureClass creatureClass)
 {
-	switch (state)
+	switch (creatureClass)
 	{
 
-	case Player::PlayerClassState::CLERIC:
+	case CreatureClass::CLERIC:
 	{
 		return CasterClass::CLERIC;
 	}
 
-	case Player::PlayerClassState::WIZARD:
+	case CreatureClass::WIZARD:
 	{
 		return CasterClass::WIZARD;
 	}
 
-	default:
+	case CreatureClass::FIGHTER:
+	case CreatureClass::ROGUE:
+	case CreatureClass::MONSTER:
 	{
 		return CasterClass::NONE;
 	}
 	}
+
+	std::unreachable();
 }
 // Table 24's sixth and seventh columns are footnoted: a priest reaches them only at
 // these Wisdom scores. The rows are counted from one, so the fifth column is five
@@ -1077,7 +1081,7 @@ void SpellSystem::burn_with_fireball(Creature& target, const FireballBurst& burs
 
 void SpellSystem::show_memorization_menu(Player& player, GameContext& ctx)
 {
-	CasterClass casterClass = to_caster_class(player.playerClassState);
+	CasterClass casterClass = to_caster_class(player.get_creature_class());
 	auto slots = get_spell_slots(casterClass, player.get_creature_level(), player.get_wisdom(), *ctx.dataManager);
 	if (slots.empty())
 	{

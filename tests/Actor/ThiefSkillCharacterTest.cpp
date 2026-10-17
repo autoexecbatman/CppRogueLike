@@ -52,9 +52,7 @@ protected:
 		player->set_wisdom(10);
 		player->set_charisma(10);
 
-		player->playerClassState = Player::PlayerClassState::ROGUE;
 		player->set_creature_class(CreatureClass::ROGUE);
-		player->playerClass = "Rogue";
 		player->playerRaceState = PlayerRaceState::DWARF;
 
 		ctx = game.context();
@@ -130,7 +128,6 @@ TEST_F(ThiefSkillCharacterTest, ArmorOffTheTableLeavesNoSkillAtAll)
 TEST_F(ThiefSkillCharacterTest, OnlyARogueHasThiefSkillsAtAll)
 {
 	player->set_creature_class(CreatureClass::FIGHTER);
-	player->playerClassState = Player::PlayerClassState::FIGHTER;
 
 	for (const ThiefSkill skill : ALL_THIEF_SKILL)
 	{

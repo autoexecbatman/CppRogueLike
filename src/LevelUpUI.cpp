@@ -1,4 +1,5 @@
 // LevelUpUI.cpp - Handles level up screen display
+#include <cassert>
 #include <format>
 
 #include "Colors.h"
@@ -28,7 +29,7 @@ void draw_title(const Player& player, int level, GameContext& ctx, int& row)
 	row++;
 
 	ctx.renderer->draw_text(
-		Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, std::format("Class: {}", player.playerClass), ColorPairId::WHITE_BLACK);
+		Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, std::format("Class: {}", player.get_class_display_name()), ColorPairId::WHITE_BLACK);
 	row += 2;
 }
 
@@ -58,9 +59,9 @@ void draw_level_benefits(const Player& player, int level, GameContext& ctx, int&
 		row++;
 	}
 
-	switch (player.playerClassState)
+	switch (player.get_creature_class())
 	{
-	case Player::PlayerClassState::FIGHTER:
+	case CreatureClass::FIGHTER:
 	{
 		ctx.renderer->draw_text(Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, "Hit Dice: d10", ColorPairId::WHITE_BLACK);
 		row++;
@@ -78,7 +79,7 @@ void draw_level_benefits(const Player& player, int level, GameContext& ctx, int&
 		}
 		break;
 	}
-	case Player::PlayerClassState::ROGUE:
+	case CreatureClass::ROGUE:
 	{
 		ctx.renderer->draw_text(Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, "Hit Dice: d6", ColorPairId::WHITE_BLACK);
 		row++;
@@ -92,7 +93,7 @@ void draw_level_benefits(const Player& player, int level, GameContext& ctx, int&
 		}
 		break;
 	}
-	case Player::PlayerClassState::CLERIC:
+	case CreatureClass::CLERIC:
 	{
 		ctx.renderer->draw_text(Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, "Hit Dice: d8", ColorPairId::WHITE_BLACK);
 		row++;
@@ -104,7 +105,7 @@ void draw_level_benefits(const Player& player, int level, GameContext& ctx, int&
 		}
 		break;
 	}
-	case Player::PlayerClassState::WIZARD:
+	case CreatureClass::WIZARD:
 	{
 		ctx.renderer->draw_text(Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, "Hit Dice: d4", ColorPairId::WHITE_BLACK);
 		row++;
@@ -120,8 +121,11 @@ void draw_level_benefits(const Player& player, int level, GameContext& ctx, int&
 		}
 		break;
 	}
-	default:
+	case CreatureClass::MONSTER:
+	{
+		assert(false && "LevelUpUI: a player with a monster's class levelled up");
 		break;
+	}
 	}
 
 	row++;

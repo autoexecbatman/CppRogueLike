@@ -56,7 +56,6 @@ protected:
 
 		thief->healthPool = std::make_unique<HealthPool>(40);
 		thief->set_creature_class(CreatureClass::ROGUE);
-		thief->playerClassState = Player::PlayerClassState::ROGUE;
 		// Dexterity 13 is the middle of Table 28's flat row, so the percentage below
 		// is the base score and the points, with nothing else folded in.
 		thief->set_dexterity(13);
@@ -66,7 +65,6 @@ protected:
 		// A dwarf thief can find every kind of trap, so it finds them for the cases whose
 		// own character could not.
 		finder.set_creature_class(CreatureClass::ROGUE);
-		finder.playerClassState = Player::PlayerClassState::ROGUE;
 		finder.set_dexterity(13);
 		finder.playerRaceState = PlayerRaceState::DWARF;
 		finder.set_creature_level(1);
@@ -287,7 +285,6 @@ TEST_F(TrapDisarmTest, AFailureOnOneTrapDoesNotLockAnother)
 TEST_F(TrapDisarmTest, AClassWithNoThiefSkillCannotTryAtAll)
 {
 	thief->set_creature_class(CreatureClass::FIGHTER);
-	thief->playerClassState = Player::PlayerClassState::FIGHTER;
 	auto pit = found_trap();
 
 	// A certain success is queued and must not be reached.
@@ -398,7 +395,6 @@ TEST_F(TrapDisarmTest, ARefusalRollsNothingAndTakesNoTime)
 	EXPECT_NE(all_message_text().find("This trap stays beyond you until you gain a level."), std::string::npos) << all_message_text();
 
 	thief->set_creature_class(CreatureClass::FIGHTER);
-	thief->playerClassState = Player::PlayerClassState::FIGHTER;
 	thief->set_creature_level(2);
 	mock.dice.set_next_roll(7);
 	EXPECT_EQ(TrapDisarm::disarm_at(*thief, EAST_OF_THIEF, ctx), std::nullopt);

@@ -142,6 +142,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PoisonOnsetTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/RangedWeaponTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/RaceDisplayNameTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ClassDisplayNameTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CarryCapacityTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CarryWeightTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/AbilityAllocationTest.cpp

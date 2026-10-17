@@ -93,6 +93,8 @@ protected:
 	void SetUp() override
 	{
 		player = std::make_unique<Player>(Vector2D{ 1, 1 });
+		// A player always has a class, and its experience table is read when a kill pays it.
+		player->set_creature_class(CreatureClass::FIGHTER);
 		player->experienceReward = std::make_unique<ExperienceReward>(0);
 		player->armorClass = std::make_unique<ArmorClass>(10);
 		player->healthPool = std::make_unique<HealthPool>(30);
