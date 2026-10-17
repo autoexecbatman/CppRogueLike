@@ -1,0 +1,23 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=RoomDoorsTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\tif (!belongsToRoom)\n\t\t{\n\t\t\tcontinue;\n\t\t}\n",
+      "mutated": "",
+      "catches": "every room's doors opened, not only the room the key was used on"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t// Fallback: no room found, open only this door.\n\tunlock_door(doorPos);\n\topen_door(doorPos, ctx);\n",
+      "mutated": "",
+      "catches": "a door of no room left shut when its key is used"
+    }
+  ]
+}
