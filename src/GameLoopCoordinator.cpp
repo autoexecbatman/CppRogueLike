@@ -73,7 +73,8 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
 
 	// Update game state only when player provides input and editor is not open
 #ifndef __EMSCRIPTEN__
-	const bool editor_active = (ctx.decorEditor && ctx.decorEditor->is_active()) ||
+	assert(ctx.decorEditor && "GameLoopCoordinator::handle_gameloop: called without a decorEditor");
+	const bool editor_active = ctx.decorEditor->is_active() ||
 		(ctx.contentEditor && ctx.contentEditor->is_active());
 #else
 	const bool editor_active = false;
@@ -130,7 +131,8 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 				return true;
 			}
 #ifndef __EMSCRIPTEN__
-			if (key == GameKey::DECOR_EDIT_TOGGLE && ctx.decorEditor)
+			assert(ctx.decorEditor && "GameLoopCoordinator::handle_input_phase: called without a decorEditor");
+			if (key == GameKey::DECOR_EDIT_TOGGLE)
 			{
 				ctx.decorEditor->toggle();
 				return true;
@@ -140,7 +142,7 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 				ctx.contentEditor->toggle(*ctx.contentRegistry, *ctx.monsterRegistry, *ctx.itemRegistry);
 				return true;
 			}
-			if (ctx.decorEditor && ctx.decorEditor->is_active())
+			if (ctx.decorEditor->is_active())
 			{
 				if (key == GameKey::DECOR_PREV)
 				{
@@ -188,7 +190,8 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 			return;
 		}
 
-		if (ctx.decorEditor && ctx.decorEditor->is_active())
+		assert(ctx.decorEditor && "GameLoopCoordinator::handle_input_phase: called without a decorEditor");
+		if (ctx.decorEditor->is_active())
 		{
 			handle_zoom();
 			ctx.decorEditor->set_char_input(ctx.inputSystem->get_char_input());
@@ -236,10 +239,8 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 	ctx.floatingText->update_and_render(*ctx.renderer);
 
 #ifndef __EMSCRIPTEN__
-	if (ctx.decorEditor)
-	{
-		ctx.decorEditor->update_and_render(*ctx.renderer);
-	}
+	assert(ctx.decorEditor && "GameLoopCoordinator::handle_render_phase: called without a decorEditor");
+	ctx.decorEditor->update_and_render(*ctx.renderer);
 
 	if (ctx.contentEditor)
 	{
@@ -497,7 +498,8 @@ void GameLoopCoordinator::update(GameContext& ctx)
 #ifndef __EMSCRIPTEN__
 		// Ensure active map key is set for loaded games (new games set it in Map::init).
 		assert(ctx.levelManager && "GameLoopCoordinator::update: a loaded game resumed without a levelManager");
-		if (ctx.decorEditor && ctx.map)
+		assert(ctx.decorEditor && "GameLoopCoordinator::update: called without a decorEditor");
+		if (ctx.map)
 		{
 			ctx.decorEditor->set_active_map(
 				ctx.map->get_seed(),

@@ -309,10 +309,8 @@ bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 			if (decor->hp <= 0)
 			{
 				decor->isBroken = true;
-				if (ctx.decorEditor)
-				{
-					ctx.decorEditor->erase(decor->position);
-				}
+				assert(ctx.decorEditor && "PlayerController::look_to_attack: called without a decorEditor");
+				ctx.decorEditor->erase(decor->position);
 
 				ctx.messageSystem->message(
 					ColorPairId::WHITE_BLACK,

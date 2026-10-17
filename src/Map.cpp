@@ -120,10 +120,8 @@ void Map::init(GameContext& ctx)
 	// Register the active map key before rooms are generated so decoration
 	// stamps inside create_room land in the correct DecorEditor bucket.
 	assert(ctx.levelManager && "Map::init: called without a levelManager");
-	if (ctx.decorEditor)
-	{
-		ctx.decorEditor->set_active_map(seed, ctx.levelManager->get_dungeon_level());
-	}
+	assert(ctx.decorEditor && "Map::init: called without a decorEditor");
+	ctx.decorEditor->set_active_map(seed, ctx.levelManager->get_dungeon_level());
 
 	generate_rooms(ctx);
 
@@ -1087,7 +1085,8 @@ void Map::create_room(const DungeonRoom& room, bool first, GameContext& ctx)
 	apply_room_shape(room);
 
 	// Stamp prefab decorations before water so water can see occupied tiles.
-	if (ctx.prefabLibrary && ctx.decorEditor)
+	assert(ctx.decorEditor && "Map::create_room: called without a decorEditor");
+	if (ctx.prefabLibrary)
 	{
 		ctx.prefabLibrary->apply_to_room(room, *ctx.decorEditor, *this);
 
@@ -1240,7 +1239,8 @@ void Map::spawn_water(const DungeonRoom& room, GameContext& ctx)
 					continue;
 				}
 				// Never place water on a decorated tile.
-				if (ctx.decorEditor && ctx.decorEditor->get_override(waterPos).is_valid())
+				assert(ctx.decorEditor && "Map::spawn_water: called without a decorEditor");
+				if (ctx.decorEditor->get_override(waterPos).is_valid())
 				{
 					continue;
 				}
