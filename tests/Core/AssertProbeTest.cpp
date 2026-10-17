@@ -50,6 +50,7 @@
 #include "src/Creature.h"
 #include "src/DamageInfo.h"
 #include "src/Decoration.h"
+#include "src/DungeonRoom.h"
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
 #include "src/HealthPool.h"
@@ -77,6 +78,14 @@ using namespace Turning;
 
 // GoogleTest runs any suite whose name ends in DeathTest before the others, so
 // the abort happens before anything else has had a chance to start a thread.
+// set_door is protected, so a probe that needs a door placed reaches it through this.
+class MapWithProbeDoors : public Map
+{
+public:
+	using Map::Map;
+	using Map::set_door;
+};
+
 class AssertProbeDeathTest : public ::testing::Test
 {
 protected:
@@ -545,4 +554,20 @@ TEST_F(AssertProbeDeathTest, SteppingOntoAFloorHoldingANullAborts)
 	ctx.inputHandler->key_listen(*ctx.inputSystem);
 
 	EXPECT_DEATH(ctx.player_concrete().controller->update(ctx), "look_on_floor: the floor holds a null");
+}
+
+// A door is locked only on a room's wall ring, by the treasure room's pass, so a locked
+// door inside a room's floor is a locker that broke that rule.
+TEST_F(AssertProbeDeathTest, OpeningARoomWithALockedDoorOnItsFloorAborts)
+{
+	MapWithProbeDoors map{ 20, 20 };
+	map.init_tiles();
+	std::vector<DungeonRoom> rooms{ DungeonRoom{ .col = 2, .row = 2, .width = 5, .height = 4 } };
+	// Inside the room's floor, which runs over columns 2-6 and rows 2-5.
+	map.set_door(Vector2D{ 4, 3 });
+	ASSERT_TRUE(map.lock_door(Vector2D{ 4, 3 }));
+	ctx.rooms = &rooms;
+
+	// From a door on the room's top wall, so the room is found and its ring scanned.
+	EXPECT_DEATH(map.open_all_room_doors(Vector2D{ 4, 1 }, ctx), "a locked door inside a room's floor");
 }

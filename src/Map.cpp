@@ -1878,7 +1878,7 @@ void Map::open_all_room_doors(Vector2D doorPos, GameContext& ctx)
 			for (int x = room.left_wall(); x <= room.right_wall(); ++x)
 			{
 				Vector2D pos{ x, y };
-				if (!in_bounds(pos) || room.contains(x, y))
+				if (!in_bounds(pos))
 				{
 					continue;
 				}
@@ -1886,6 +1886,9 @@ void Map::open_all_room_doors(Vector2D doorPos, GameContext& ctx)
 				{
 					continue;
 				}
+				// Doors are locked only on a room's wall ring, so the floor this scan crosses
+				// never holds one.
+				assert(!room.contains(x, y) && "open_all_room_doors: a locked door inside a room's floor");
 
 				auto opens_this_room = [&]()
 				{

@@ -195,6 +195,11 @@ $probes = @(
         test   = "AssertProbeDeathTest.SteppingOntoAFloorHoldingANullAborts"
         file   = "src/PlayerController.cpp"
         anchor = 'assert(floorItem && "look_on_floor: the floor holds a null where an item should be");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.OpeningARoomWithALockedDoorOnItsFloorAborts"
+        file   = "src/Map.cpp"
+        anchor = 'assert(!room.contains(x, y) && "open_all_room_doors: a locked door inside a room''s floor");'
     }
 )
 
