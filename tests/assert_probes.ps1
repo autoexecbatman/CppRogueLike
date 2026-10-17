@@ -197,6 +197,11 @@ $probes = @(
         anchor = 'assert(floorItem && "look_on_floor: the floor holds a null where an item should be");'
     },
     @{
+        test   = "AssertProbeDeathTest.OpeningTheSellMenuOnACreatureWithNoShopAborts"
+        file   = "src/MenuSell.cpp"
+        anchor = 'assert(shopkeeper.shop && "MenuSell opened on a creature with no shop");'
+    },
+    @{
         test   = "AssertProbeDeathTest.OpeningARoomWithALockedDoorOnItsFloorAborts"
         file   = "src/Map.cpp"
         anchor = 'assert(!room.contains(x, y) && "open_all_room_doors: a locked door inside a room''s floor");'

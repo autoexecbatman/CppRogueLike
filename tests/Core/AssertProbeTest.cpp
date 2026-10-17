@@ -60,6 +60,7 @@
 #include "src/Item.h"
 #include "src/ItemCreator.h"
 #include "src/Map.h"
+#include "src/MenuSell.h"
 #include "src/MonsterAttacker.h"
 #include "src/MonsterCreator.h"
 #include "src/Paths.h"
@@ -67,6 +68,7 @@
 #include "src/Player.h"
 #include "src/PlayerController.h"
 #include "src/RandomDice.h"
+#include "src/ShopKeeper.h"
 #include "src/ShopkeeperFactory.h"
 #include "src/SpellSystem.h"
 #include "src/TargetingSystem.h"
@@ -74,6 +76,7 @@
 
 using namespace Turning;
 #include "src/WeaponDamageRegistry.h"
+#include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"
 
 // GoogleTest runs any suite whose name ends in DeathTest before the others, so
@@ -571,4 +574,25 @@ TEST_F(AssertProbeDeathTest, OpeningARoomWithALockedDoorOnItsFloorAborts)
 
 	// From a door on the room's top wall, so the room is found and its ring scanned.
 	EXPECT_DEATH(map.open_all_room_doors(Vector2D{ 4, 1 }, ctx), "a locked door inside a room's floor");
+}
+
+// Every way into the sell menu comes from a shopkeeper, so a creature with no shop is a
+// caller that broke that. The assertion sits after the menu's renderer check, so the
+// probe opens a hidden renderer first; where none can open, it skips with the reason.
+TEST_F(AssertProbeDeathTest, OpeningTheSellMenuOnACreatureWithNoShopAborts)
+{
+	if (exit_code_in_child(&open_and_close_hidden_renderer) == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
+	{
+		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
+	}
+
+	const auto open_the_menu_on_a_creature_with_no_shop = [this]()
+	{
+		HiddenRenderer hidden{};
+		ctx.renderer = &hidden.renderer;
+		Player seller{ Vector2D{ 1, 1 } };
+		auto shopless = make_creature();
+		MenuSell menu{ *shopless, seller, ctx };
+	};
+	EXPECT_DEATH(open_the_menu_on_a_creature_with_no_shop(), "MenuSell opened on a creature with no shop");
 }

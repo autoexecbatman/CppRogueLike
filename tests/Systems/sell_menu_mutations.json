@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=SellMenuTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/MenuSell.cpp",
+      "original": "\t\t\thandle_sell(shopkeeper, player, ctx);\n",
+      "mutated": "",
+      "catches": "Enter in the sell menu doing nothing"
+    },
+    {
+      "file": "src/MenuSell.cpp",
+      "original": "\t\tcurrentState = (currentState + 1) % menuItems.size();\n",
+      "mutated": "\t\tcurrentState = currentState + 1;\n",
+      "catches": "Down walking the cursor off the end instead of wrapping"
+    },
+    {
+      "file": "src/MenuSell.cpp",
+      "original": "\tif (shopkeeper.shop->process_player_sale(ctx, *item, seller, shopkeeper)",
+      "mutated": "\tif (false",
+      "catches": "the menu never asking the shop to make the sale"
+    },
+    {
+      "file": "src/MenuSell.cpp",
+      "original": "\tmenu_key_listen();\n\tdraw();\n\ton_key(ctx);",
+      "mutated": "\tmenu_key_listen();\n\tdraw();",
+      "catches": "a frame that reads its key and never acts on it"
+    }
+  ]
+}
