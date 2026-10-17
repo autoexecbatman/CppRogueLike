@@ -127,7 +127,9 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 		{
 			.name = "Mimic",
 			.baseWeight = 6,
-			.levelMinimum = 2,
+			// The owner's depth for a 9-10 HD killer mimic, beside the monsters with its
+			// THAC0 and XP.
+			.levelMinimum = 6,
 			.levelMaximum = 0,
 			.levelScaling = 0.5f,
 			.createFunc = [](Vector2D pos, GameContext& ctx)

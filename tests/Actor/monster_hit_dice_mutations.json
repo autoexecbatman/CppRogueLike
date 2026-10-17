@@ -33,14 +33,14 @@
     },
     {
       "file": "src/Monsters.cpp",
-      "original": "\tconst int firstHitDie = roll_hit_die(6);",
-      "mutated": "\tconst int firstHitDie = ctx.dice->d6();",
-      "catches": "the mimic's larger hit die rolled with no score on it"
+      "original": "\t\tget_constitution(),",
+      "mutated": "\t\t10,",
+      "catches": "the mimic's hit dice rolled with no score on them"
     },
     {
       "file": "src/Monsters.cpp",
-      "original": "\tset_hit_dice(firstHitDie + secondHitDie);",
-      "mutated": "\thealthPool = std::make_unique<HealthPool>(firstHitDie + secondHitDie);",
+      "original": "\tset_hit_dice(LevelUpSystem::roll_hit_points(",
+      "mutated": "\thealthPool = std::make_unique<HealthPool>(LevelUpSystem::roll_hit_points(",
       "catches": "the mimic building its pool directly again, so its score is never recorded"
     },
     {

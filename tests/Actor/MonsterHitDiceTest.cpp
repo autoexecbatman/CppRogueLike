@@ -191,23 +191,22 @@ TEST_F(MonsterHitDiceTest, ASmallSpiderTakesItsConstitutionPenalty)
 	EXPECT_EQ(small.get_max_hp(), 3);
 }
 
-// Mimic, large: strength 3d6+2, dexterity 3d6, Constitution 3d6 read from Table 8 (a
-// 15 reading 18), intelligence d4+2,
-// wisdom 2d6+1, charisma d4, then a d6 and a d4 of hit points. Two dice, so a
-// score of 18 adds 4 twice.
-TEST_F(MonsterHitDiceTest, AMimicTakesItsConstitutionOnBothHitDice)
+// Mimic, the killer mimic and large: strength 3d6+2, dexterity 3d6, Constitution 3d6
+// read from Table 8 (a 15 reading 18), intelligence d4+2, wisdom 2d6+1, charisma d4,
+// then 9 or 10 hit dice and a d8 for each. A score of 18 adds 4 to every one of them.
+TEST_F(MonsterHitDiceTest, AMimicTakesItsConstitutionOnEveryHitDie)
 {
-	force_rolls({ 3, 3, 3, 3, 3, 3, 5, 5, 5, 1, 1, 1, 1, 1, 1 });
+	force_rolls({ 3, 3, 3, 3, 3, 3, 5, 5, 5, 1, 1, 1, 1, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1 });
 	Mimic mimic{ Vector2D{ 0, 0 }, ctx };
 
 	ASSERT_EQ(mimic.get_constitution(), 18);
-	EXPECT_EQ(mimic.get_max_hp(), 10);
+	EXPECT_EQ(mimic.get_max_hp(), 45);
 
 	// The score reached the dice, so it is spent and the first round adds none of
 	// it again - which a pool built without set_hit_dice would.
 	mimic.update_constitution_bonus(ctx);
 
-	EXPECT_EQ(mimic.get_max_hp(), 10);
+	EXPECT_EQ(mimic.get_max_hp(), 45);
 	EXPECT_TRUE(mimic.get_last_constitution().has_value());
 }
 

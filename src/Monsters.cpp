@@ -19,7 +19,8 @@
 Mimic::Mimic(Vector2D position, GameContext& ctx)
 	: Creature(position, ActorData{ ctx.monsterRegistry->get_tile(MonsterId::MIMIC), "mimic", ColorPairId::RED_YELLOW })
 {
-	const int thaco = 17;
+	// Monstrous Manual, the killer mimic (PDF page 1700): THAC0 11, AC 7.
+	const int thaco = 11;
 	const int ac = 7;
 
 	// Mimic: AD&D 2e -- strong pseudopod, average dex, tough, low animal INT,
@@ -39,28 +40,25 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 	set_ethics(Ethics::NEUTRAL);
 	set_morality(Morality::EVIL);
 
-	attacker = std::make_unique<MonsterAttacker>(*this, DamageValues::Dagger());
-	experienceReward = std::make_unique<ExperienceReward>(150);
+	// Damage/Attack 3-12 (smash), which is 3d4.
+	attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ "3d4", DamageType::PHYSICAL });
 	set_dr(1);
 	set_thaco(thaco);
 	armorClass = std::make_unique<ArmorClass>(ac);
 
-	// Two hit dice of different sizes, rolled after the score each of them
-	// carries. Each is named, because the operands of + are unsequenced and
-	// these draw from the die stream.
+	// Hit Dice 9-10: the number is its level, each d8 carries its Constitution, and its
+	// XP Value is the book's for that many, 2,000 at 9 and 3,000 at 10. Rolled after
+	// the score the dice carry.
 	assert(ctx.dataManager && "Mimic built without a dataManager");
-	const auto roll_hit_die = [this, &ctx](int sides)
-	{
-		return LevelUpSystem::roll_hit_points(
-			DiceExpr{ 1, sides, 0 },
-			get_creature_class(),
-			get_constitution(),
-			*ctx.dataManager,
-			*ctx.dice);
-	};
-	const int firstHitDie = roll_hit_die(6);
-	const int secondHitDie = roll_hit_die(4);
-	set_hit_dice(firstHitDie + secondHitDie);
+	const int hitDice = ctx.dice->roll(9, 10);
+	set_creature_level(hitDice);
+	set_hit_dice(LevelUpSystem::roll_hit_points(
+		DiceExpr{ hitDice, 8, 0 },
+		get_creature_class(),
+		get_constitution(),
+		*ctx.dataManager,
+		*ctx.dice));
+	experienceReward = std::make_unique<ExperienceReward>(hitDice == 9 ? 2000 : 3000);
 
 	// Build disguise list -- single source of truth is in AiMimic (Appearance::build_mimic_list).
 	auto disguises = Appearance::build_mimic_list(*ctx.contentRegistry, *ctx.itemRegistry);
