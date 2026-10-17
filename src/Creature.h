@@ -124,12 +124,6 @@ private:
 	int webStrength{ 0 }; // strength of the web holding this creature
 	Web* trappingWeb{ nullptr }; // the web holding it, destroyed on escape
 
-protected:
-	// Shared per-turn logic (buffs, armor, constitution) used by both
-	// Creature::update() and Player::update().
-	void update_creature_state(GameContext& ctx);
-
-private:
 	//==Actor Attributes - Base values (buffs calculated dynamically)==
 	int baseStrength{ 0 };
 	// Exceptional Strength as percentile, 100 being 18/00; 0 for none. Counts only while
@@ -180,6 +174,13 @@ private:
 	// AD&D 2e: Calculate effective stat value (MAX(base, SET) + ADD); under a girdle of
 	// giant strength, Strength adds its penalties and none of its bonuses
 	int calculate_effective_stat(int base_value, BuffType type) const noexcept;
+
+	void release_from_web();
+
+protected:
+	// Shared per-turn logic (buffs, armor, constitution) used by both
+	// Creature::update() and Player::update().
+	void update_creature_state(GameContext& ctx);
 
 public:
 	// Unified buff system - modifier stack pattern (managed by BuffSystem)
@@ -542,10 +543,6 @@ public:
 	// Frees the creature and destroys the web on either escape.
 	WebEscape try_break_web(GameContext& ctx);
 
-private:
-	void release_from_web();
-
-public:
 	// Armor Class accessors
 	[[nodiscard]] int get_armor_class() const noexcept { return armorClass->get_armor_class(); }
 
