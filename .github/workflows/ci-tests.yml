@@ -15,6 +15,11 @@ jobs:
     # updates the image. The pinned copy lives beside it, never in it.
     env:
       PINNED_VCPKG: C:\vcpkg-pinned
+      # vcpkg writes each library it builds to this directory as a zip, and reads one back
+      # instead of building whenever the zip's ABI hash matches. The cache steps below
+      # carry the directory from one run to the next.
+      VCPKG_ARCHIVES: C:\vcpkg-archives
+      VCPKG_BINARY_SOURCES: clear;files,C:\vcpkg-archives,readwrite
 
     steps:
     - name: Checkout code
@@ -34,9 +39,31 @@ jobs:
         & "$env:PINNED_VCPKG\bootstrap-vcpkg.bat"
         if ($LASTEXITCODE -ne 0) { exit 1 }
 
+    # Keyed on vcpkg.json, which holds both the pinned baseline and the dependency list, so
+    # the archives are reused until either changes. A miss still restores the newest older
+    # set, and vcpkg takes from it whatever still matches.
+    - name: Restore vcpkg archives
+      id: restore-vcpkg-archives
+      uses: actions/cache/restore@v4
+      with:
+        path: ${{ env.VCPKG_ARCHIVES }}
+        key: vcpkg-archives-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+          vcpkg-archives-${{ runner.os }}-
+
     - name: Configure CMake
       run: |
+        New-Item -ItemType Directory -Force -Path $env:VCPKG_ARCHIVES | Out-Null
         cmake -B build -S . -DBUILD_TESTS=ON "-DCMAKE_TOOLCHAIN_FILE=$env:PINNED_VCPKG\scripts\buildsystems\vcpkg.cmake"
+
+    # Saved straight after the configure that built them, so a later failing test does not
+    # throw the build away. Only on a miss: a cache key is written once and never replaced.
+    - name: Save vcpkg archives
+      if: steps.restore-vcpkg-archives.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ env.VCPKG_ARCHIVES }}
+        key: vcpkg-archives-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
 
     - name: Build tests
       run: |
