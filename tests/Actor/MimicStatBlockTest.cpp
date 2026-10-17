@@ -4,9 +4,9 @@
 // at 9 HD or 3,000 at 10. Each expectation below is that block's, read from the page.
 // The owner set its first depth at 6, beside the monsters with the same THAC0 and XP.
 //
-// The scripted rolls are taken in the order the constructor draws them: Strength 3d6,
-// Dexterity 3d6, Constitution 3d6 (Table 8, large), Intelligence d4, Wisdom 2d6,
-// Charisma d4, the number of hit dice, then each hit die.
+// The scripted rolls are taken in the order the constructor draws them: one 3d6 for
+// each of the six scores (Constitution read from Table 8, large), the number of hit
+// dice, then each hit die.
 //
 // Run it:
 //
@@ -52,7 +52,7 @@ protected:
 	// The six scores, then how many hit dice, then a 1 on each of them.
 	void script_a_mimic_of(int hitDice)
 	{
-		for (const int roll : { 3, 3, 3, 3, 3, 3, 5, 5, 5, 1, 1, 1, 1 })
+		for (const int roll : { 3, 3, 3, 3, 3, 3, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1 })
 		{
 			mock.dice.set_next_roll(roll);
 		}

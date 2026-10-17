@@ -21,14 +21,14 @@
     },
     {
       "file": "src/Monsters.cpp",
-      "original": "CreatureSize::LARGE));",
-      "mutated": "CreatureSize::MEDIUM));",
+      "original": "roll_monster_ability_scores(*this, CreatureSize::LARGE, IntelligenceRating::SEMI, *ctx.dice);",
+      "mutated": "roll_monster_ability_scores(*this, CreatureSize::MEDIUM, IntelligenceRating::SEMI, *ctx.dice);",
       "catches": "the mimic read as man-sized rather than large"
     },
     {
       "file": "src/Spider.cpp",
-      "original": "monster_constitution_score(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6(), CreatureSize::TINY));",
-      "mutated": "monster_constitution_score(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6(), CreatureSize::SMALL));",
+      "original": "roll_monster_ability_scores(*this, CreatureSize::TINY, IntelligenceRating::LOW, *ctx.dice);",
+      "mutated": "roll_monster_ability_scores(*this, CreatureSize::SMALL, IntelligenceRating::LOW, *ctx.dice);",
       "catches": "the hairy spider read as small rather than tiny"
     }
   ]

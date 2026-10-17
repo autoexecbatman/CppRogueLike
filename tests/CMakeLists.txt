@@ -50,6 +50,11 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterSizeTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/DragonStatBlockTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterConstitutionTableTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterStrengthTableTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterDexterityTableTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterIntelligenceTableTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterWisdomTableTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterCharismaTableTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/ItemRoundTripTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/EnhancedRulesLoadTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/TreasureGoldTest.cpp
@@ -159,6 +164,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EncumbranceBandTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/MonsterHitDiceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/MimicStatBlockTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CodeBuiltMonsterAbilityTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/SpiderAmbushTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/WebSpinnerSanctuaryTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/StatBoostEquipmentTest.cpp
@@ -244,6 +250,7 @@ set(PARENT_SOURCES
 
     # ActorTypes
     ${PARENT_SOURCE_DIR}/Monsters.cpp
+    ${PARENT_SOURCE_DIR}/MonsterAbilityTables.cpp
     ${PARENT_SOURCE_DIR}/Player.cpp
     ${PARENT_SOURCE_DIR}/Spider.cpp
 

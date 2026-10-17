@@ -5,9 +5,11 @@
 #include "Actor.h"
 #include "AiMimic.h"
 #include "Colors.h"
+#include "CreatureSize.h"
 #include "DamageInfo.h"
 #include "ExperienceReward.h"
 #include "GameContext.h"
+#include "IntelligenceRating.h"
 #include "LevelUpSystem.h"
 #include "MonsterAbilityTables.h"
 #include "MonsterAttacker.h"
@@ -23,15 +25,10 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 	const int thaco = 11;
 	const int ac = 7;
 
-	// Mimic: AD&D 2e -- strong pseudopod, average dex, tough, low animal INT,
-	// decent predator WIS, very low CHA (horrifying when revealed).
-	set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6() + 2); // 3d6+2 avg 12
-	set_dexterity(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()); // 3d6    avg 10
-	// Table 8 by size; the killer mimic is large (Monstrous Manual p1700).
-	set_constitution(monster_constitution_score(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6(), CreatureSize::LARGE));
-	set_intelligence(ctx.dice->d4() + 2); // 1d4+2  avg  4
-	set_wisdom(ctx.dice->d6() + ctx.dice->d6() + 1); // 2d6+1  avg  8
-	set_charisma(ctx.dice->d4()); // 1d4    avg  2
+	// Tables 6 to 11: the killer mimic is large and semi-intelligent (Monstrous Manual
+	// p1700). Before the hit points, which read the Constitution.
+	assert(ctx.dice && "Mimic constructed without dice");
+	roll_monster_ability_scores(*this, CreatureSize::LARGE, IntelligenceRating::SEMI, *ctx.dice);
 
 	set_natural_attack("Pseudopod");
 

@@ -131,6 +131,7 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Alignment.h
     ${PROJECT_SOURCE_DIR}/CreatureClass.h
     ${PROJECT_SOURCE_DIR}/CreatureSize.h
+    ${PROJECT_SOURCE_DIR}/IntelligenceRating.h
     ${PROJECT_SOURCE_DIR}/MonsterAbilityTables.h
     ${PROJECT_SOURCE_DIR}/TurnUndead.cpp
     ${PROJECT_SOURCE_DIR}/TurnUndead.h
@@ -227,6 +228,7 @@ set(SOURCE_FILES # Add Source Files Here !
 
     # ActorTypes
     ${PROJECT_SOURCE_DIR}/Monsters.cpp
+    ${PROJECT_SOURCE_DIR}/MonsterAbilityTables.cpp
     ${PROJECT_SOURCE_DIR}/Monsters.h
     ${PROJECT_SOURCE_DIR}/Player.cpp
     ${PROJECT_SOURCE_DIR}/Player.h

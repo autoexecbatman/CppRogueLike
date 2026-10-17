@@ -168,11 +168,12 @@ TEST_F(MonsterHitDiceTest, AMonstersChangedScoreMovesByItsHitDice)
 }
 
 // Web weaver, the book's giant spider and large: strength 3d6, dexterity 3d6, then
-// Constitution 3d6 read from Table 8, a 15 reading 18, then d8+5 hit points. A
-// score of 18 adds 4 to the die and leaves the 5 alone.
+// Constitution 3d6 read from Table 8, a 15 reading 18, then intelligence, wisdom and
+// charisma 3d6 each, then d8+5 hit points. A score of 18 adds 4 to the die and leaves
+// the 5 alone.
 TEST_F(MonsterHitDiceTest, AWebWeaverTakesItsConstitutionOnItsHitDie)
 {
-	force_rolls({ 3, 3, 3, 3, 3, 3, 5, 5, 5, 4 });
+	force_rolls({ 3, 3, 3, 3, 3, 3, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4 });
 	Spider weaver{ Vector2D{ 0, 0 }, ctx, SpiderType::WEB_SPINNER };
 
 	ASSERT_EQ(weaver.get_constitution(), 18);
@@ -180,23 +181,24 @@ TEST_F(MonsterHitDiceTest, AWebWeaverTakesItsConstitutionOnItsHitDie)
 }
 
 // Small spider, the book's hairy spider and tiny: strength 3d6, dexterity 3d6, then
-// Constitution 3d6 read from Table 8, a 6 reading 6, then d2+2 hit points. A score
+// Constitution 3d6 read from Table 8, a 6 reading 6, then intelligence, wisdom and
+// charisma 3d6 each, then d2+2 hit points. A score
 // of 6 takes 1 off the die, and a rolled 2 is worth 1.
 TEST_F(MonsterHitDiceTest, ASmallSpiderTakesItsConstitutionPenalty)
 {
-	force_rolls({ 3, 3, 3, 3, 3, 3, 2, 2, 2, 2 });
+	force_rolls({ 3, 3, 3, 3, 3, 3, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2 });
 	Spider small{ Vector2D{ 0, 0 }, ctx, SpiderType::SMALL };
 
 	ASSERT_EQ(small.get_constitution(), 6);
 	EXPECT_EQ(small.get_max_hp(), 3);
 }
 
-// Mimic, the killer mimic and large: strength 3d6+2, dexterity 3d6, Constitution 3d6
-// read from Table 8 (a 15 reading 18), intelligence d4+2, wisdom 2d6+1, charisma d4,
+// Mimic, the killer mimic and large: strength 3d6, dexterity 3d6, Constitution 3d6
+// read from Table 8 (a 15 reading 18), intelligence, wisdom and charisma 3d6 each,
 // then 9 or 10 hit dice and a d8 for each. A score of 18 adds 4 to every one of them.
 TEST_F(MonsterHitDiceTest, AMimicTakesItsConstitutionOnEveryHitDie)
 {
-	force_rolls({ 3, 3, 3, 3, 3, 3, 5, 5, 5, 1, 1, 1, 1, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1 });
+	force_rolls({ 3, 3, 3, 3, 3, 3, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1 });
 	Mimic mimic{ Vector2D{ 0, 0 }, ctx };
 
 	ASSERT_EQ(mimic.get_constitution(), 18);

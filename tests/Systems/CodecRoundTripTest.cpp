@@ -29,6 +29,7 @@
 #include "src/CreatureClass.h"
 #include "src/CreatureSize.h"
 #include "src/DamageInfo.h"
+#include "src/IntelligenceRating.h"
 #include "src/ItemClassification.h"
 #include "src/MagicalItemEffects.h"
 #include "src/Pickable.h"
@@ -93,6 +94,14 @@ TEST(CodecRoundTripTest, CreatureSizeSurvivesEncoding)
 	for (const auto size : ALL_CREATURE_SIZE)
 	{
 		expect_round_trip(size, encode_creature_size, parse_creature_size, "CreatureSize");
+	}
+}
+
+TEST(CodecRoundTripTest, IntelligenceRatingSurvivesEncoding)
+{
+	for (const auto rating : ALL_INTELLIGENCE_RATING)
+	{
+		expect_round_trip(rating, encode_intelligence_rating, parse_intelligence_rating, "IntelligenceRating");
 	}
 }
 
@@ -222,6 +231,7 @@ TEST(CodecRoundTripTest, UnknownStringsThrow)
 	EXPECT_THROW((void)parse_hand_requirement("not_a_requirement"), std::runtime_error);
 	EXPECT_THROW((void)parse_weapon_size("not_a_size"), std::runtime_error);
 	EXPECT_THROW((void)parse_creature_size("enormous"), std::runtime_error);
+	EXPECT_THROW((void)parse_intelligence_rating("brilliant"), std::runtime_error);
 	EXPECT_THROW((void)parse_buff_type("not_a_buff"), std::runtime_error);
 	EXPECT_THROW((void)parse_item_class("not_a_class"), std::runtime_error);
 	EXPECT_THROW((void)parse_pickable_type("not_a_type"), std::runtime_error);

@@ -21,9 +21,11 @@
 #include "AiSpider.h"
 #include "AiWebSpinner.h"
 #include "Colors.h"
+#include "CreatureSize.h"
 #include "DamageInfo.h"
 #include "ExperienceReward.h"
 #include "GameContext.h"
+#include "IntelligenceRating.h"
 #include "LevelUpSystem.h"
 #include "MonsterAbilityTables.h"
 #include "MonsterAttacker.h"
@@ -84,17 +86,17 @@ void Spider::init_spider_type(GameContext& ctx)
 			*ctx.dice);
 	};
 
+	// Every variant rolls its scores and hit dice on these.
+	assert(ctx.dice && "Spider built without dice");
 	switch (spiderType)
 	{
 	case SpiderType::SMALL:
 		// Update actor data for small spider
 		actorData = ActorData{ ctx.monsterRegistry->get_tile(MonsterId::SPIDER_SMALL), "small spider", ColorPairId::GREEN_BLACK };
 
-		// Stats for small spider
-		set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()); // Minimum strength of 3
-		set_dexterity(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()); // Small spiders are very agile
-		// Table 8 by size; the hairy spider is tiny (Monstrous Manual p1876).
-		set_constitution(monster_constitution_score(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6(), CreatureSize::TINY));
+		// Tables 6 to 11: the hairy spider is tiny and of low intelligence (Monstrous
+		// Manual p1876).
+		roll_monster_ability_scores(*this, CreatureSize::TINY, IntelligenceRating::LOW, *ctx.dice);
 
 		// Combat properties - TRIPLED XP for solo play
 		experienceReward = std::make_unique<ExperienceReward>(45); // TRIPLED from 15 for solo play bonus
@@ -112,11 +114,9 @@ void Spider::init_spider_type(GameContext& ctx)
 		// Update actor data for giant spider
 		actorData = ActorData{ ctx.monsterRegistry->get_tile(MonsterId::SPIDER_GIANT), "giant spider", ColorPairId::RED_BLACK };
 
-		// Stats for giant spider
-		set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
-		set_dexterity(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
-		// Table 8 by size; the huge spider is man-sized (Monstrous Manual p1876).
-		set_constitution(monster_constitution_score(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6(), CreatureSize::MEDIUM));
+		// Tables 6 to 11: the huge spider is man-sized and of animal intelligence
+		// (Monstrous Manual p1876).
+		roll_monster_ability_scores(*this, CreatureSize::MEDIUM, IntelligenceRating::ANIMAL, *ctx.dice);
 
 		// Combat properties - giant spiders have more HP and do more damage - TRIPLED XP for solo play
 		experienceReward = std::make_unique<ExperienceReward>(120); // TRIPLED from 40 for solo play bonus
@@ -134,11 +134,9 @@ void Spider::init_spider_type(GameContext& ctx)
 		// Update actor data for web spinner
 		actorData = ActorData{ ctx.monsterRegistry->get_tile(MonsterId::SPIDER_WEAVER), "web weaver", ColorPairId::BLACK_GREEN };
 
-		// Stats for web spinner - now much more formidable
-		set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
-		set_dexterity(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
-		// Table 8 by size; the giant spider is large (Monstrous Manual p1876).
-		set_constitution(monster_constitution_score(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6(), CreatureSize::LARGE));
+		// Tables 6 to 11: the giant spider is large and of low intelligence (Monstrous
+		// Manual p1876).
+		roll_monster_ability_scores(*this, CreatureSize::LARGE, IntelligenceRating::LOW, *ctx.dice);
 
 		// Combat properties - significantly stronger - TRIPLED XP for solo play
 		experienceReward = std::make_unique<ExperienceReward>(180); // TRIPLED from 60 for solo play bonus

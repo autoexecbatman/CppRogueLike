@@ -8,9 +8,11 @@
 #include "BodyPlanRegistry.h"
 #include "Colors.h"
 #include "Creature.h"
+#include "CreatureSize.h"
 #include "DamageInfo.h"
 #include "ExperienceReward.h"
 #include "GameContext.h"
+#include "IntelligenceRating.h"
 #include "ItemCreator.h"
 #include "MessageSystem.h"
 #include "MonsterAbilityTables.h"
@@ -50,8 +52,10 @@ void ShopkeeperFactory::configure_shopkeeper(Creature& shopkeeper, int dungeonLe
 	shopkeeper.set_attitude(Attitude::PEACEFUL);
 	shopkeeper.set_displaceable(false);
 
-	// Table 8 by size, a human being man-sized. Before the hit points, which record it.
-	shopkeeper.set_constitution(monster_constitution_score(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6(), CreatureSize::MEDIUM));
+	// Tables 6 to 11, a human being man-sized and of average intelligence. Before the
+	// hit points, which record the Constitution.
+	assert(ctx.dice && "ShopkeeperFactory::configure_shopkeeper called without dice");
+	roll_monster_ability_scores(shopkeeper, CreatureSize::MEDIUM, IntelligenceRating::AVERAGE, *ctx.dice);
 
 	// Set combat stats - non-hostile defensive stats
 	shopkeeper.experienceReward = std::make_unique<ExperienceReward>(0);
