@@ -111,6 +111,8 @@ void Map::init_tiles()
 // for enabling loading the map from the file.
 void Map::init(GameContext& ctx)
 {
+	assert(ctx.rooms && "Map::init: called without rooms");
+
 	init_tiles(); // resets tiles + fovMap to all-walls
 	assert(ctx.messageSystem && "Map::init: called without a messageSystem");
 	ctx.messageSystem->log("Map::init: " + std::to_string(mapWidth) + "x" + std::to_string(mapHeight) + " tile grid reset");

@@ -814,6 +814,7 @@ bool PlayerController::execute_arrival(GameContext& ctx)
 
 bool PlayerController::handle_mouse_path(GameContext& ctx)
 {
+	assert(ctx.mousePathOverlay && "PlayerController::handle_mouse_path: called without a mousePathOverlay");
 	assert(ctx.map && "PlayerController::handle_mouse_path: called without a map");
 
 	if (mouseMode == MouseMode::IDLE)

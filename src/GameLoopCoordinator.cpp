@@ -46,6 +46,7 @@
 // load_all sets the initialised flag itself.
 void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNum)
 {
+	assert(ctx.inputHandler && "GameLoopCoordinator::handle_gameloop: called without an inputHandler");
 	assert(ctx.gui && "GameLoopCoordinator::handle_gameloop: called without a gui");
 	assert(ctx.map && "GameLoopCoordinator::handle_gameloop: called without a map");
 
@@ -511,6 +512,7 @@ void GameLoopCoordinator::apply_round_upkeep(GameContext& ctx)
 
 void GameLoopCoordinator::update(GameContext& ctx)
 {
+	assert(ctx.gui && "GameLoopCoordinator::update: called without a gui");
 	assert(ctx.traps && "GameLoopCoordinator::update: called without traps");
 	assert(ctx.spellTiles && "GameLoopCoordinator::update: called without spellTiles");
 	assert(ctx.creatureManager && "GameLoopCoordinator::update: called without a creatureManager");

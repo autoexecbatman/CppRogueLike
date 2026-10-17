@@ -67,6 +67,7 @@ void MenuName::draw_name_screen()
 
 void MenuName::menu(GameContext& ctx)
 {
+	assert(ctx.menuManager && "MenuName::menu: called without a menuManager");
 	assert(ctx.stateManager && "MenuName::menu: called without a stateManager");
 	assert(ctx.playerBlueprint && "MenuName::menu: called without a playerBlueprint");
 	assert(ctx.renderingManager && "MenuName::menu: called without a renderingManager");
