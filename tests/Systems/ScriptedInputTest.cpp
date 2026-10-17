@@ -21,6 +21,7 @@
 #include "src/PlayerRaceState.h"
 #include "src/ThiefSkills.h"
 #include "src/Trap.h"
+#include "src/TurnSchedule.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
@@ -118,8 +119,11 @@ TEST_F(ScriptedInputTest, TheDisarmKeyReachesAFoundTrapOnTheFloor)
 	mock.dice.set_next_roll(1);
 	ASSERT_EQ(dart.search(thief, ctx), TrapSearchResult::FOUND);
 
-	// The disarm key, then east; the d100 is a certain success.
+	// The disarm key, then east; the d100 is a certain success and the 1d10 shows 7. An
+	// ordinary pace charges the rounds as they are.
 	mock.dice.set_next_roll(1);
+	mock.dice.set_next_roll(7);
+	ASSERT_EQ(thief.get_action_delay(), TIME_UNITS_PER_ROUND);
 	const int timeBefore = ctx.gameState->get_time();
 	ctx.inputSystem->queue_key(GameKey::S, 's');
 	read_one_frame_of_input();
@@ -129,7 +133,7 @@ TEST_F(ScriptedInputTest, TheDisarmKeyReachesAFoundTrapOnTheFloor)
 	ctx.player_concrete().controller->update(ctx);
 
 	EXPECT_EQ(dart.get_state(), TrapState::DISARMED);
-	EXPECT_GT(ctx.gameState->get_time(), timeBefore) << "the attempt took no time";
+	EXPECT_EQ(ctx.gameState->get_time(), timeBefore + 7 * TIME_UNITS_PER_ROUND) << "the attempt did not take its seven rounds";
 	EXPECT_EQ(ctx.player()->position, START) << "the direction walked the thief instead of aiming the disarm";
 }
 

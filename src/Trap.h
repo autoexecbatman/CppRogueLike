@@ -170,13 +170,14 @@ namespace TrapDisarm
 // The disarm action on one tile: works on the live trap there, says what came of it,
 // and returns the rounds it took, or nullopt for a refusal that made no roll - nothing
 // there, a trap not yet found, one already disarmed, no skill, or this level's attempt
-// already spent. An attempt that rolled, whatever it rolled, takes one round.
+// already spent. An attempt that rolled, whatever it rolled, takes the book's 1d10
+// rounds (PHB page 87), rolled after the attempt.
 //
 // Example, a thief with Find/Remove Traps 45 facing a found dart trap to the east:
-//   TrapDisarm::disarm_at(thief, eastTile, ctx);   // d100 40 -> 1; "You successfully disarm the trap."
-//   TrapDisarm::disarm_at(thief, eastTile, ctx);   // no roll -> nullopt; "That trap is already disarmed."
+//   TrapDisarm::disarm_at(thief, eastTile, ctx);   // d100 40, d10 7 -> 7; "You successfully disarm the trap."
+//   TrapDisarm::disarm_at(thief, eastTile, ctx);   // no roll        -> nullopt; "That trap is already disarmed."
 // Facing bare floor:
-//   TrapDisarm::disarm_at(thief, westTile, ctx);   // no roll -> nullopt; "There is no trap there."
+//   TrapDisarm::disarm_at(thief, westTile, ctx);   // no roll        -> nullopt; "There is no trap there."
 [[nodiscard]] std::optional<int> disarm_at(Player& thief, Vector2D target, GameContext& ctx);
 
 } // namespace TrapDisarm

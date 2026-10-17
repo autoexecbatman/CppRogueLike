@@ -39,8 +39,12 @@ constexpr int SEARCH_REACH = 1;
 // A dwarf's look takes one round, a stated deviation: the book gives it no time.
 constexpr int DWARF_SEARCH_ROUNDS = 1;
 
-// A disarm attempt takes one action.
-constexpr int DISARM_ROUNDS = 1;
+// The rounds a disarm attempt took, rolled after the attempt itself: "This also requires
+// 1d10 rounds" (PHB page 87). Only an attempt that rolled takes them.
+int roll_disarm_rounds(RandomDice& dice)
+{
+	return dice.d10();
+}
 
 // Whether this character's racial sense finds stonework traps.
 bool is_dwarf(const Player& searcher)
@@ -229,6 +233,8 @@ EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 
 TrapSearchResult Trap::search(Player& searcher, GameContext& ctx)
 {
+	assert(ctx.dice && "Trap::search: called without dice");
+
 	// Only a hidden trap has anything to find.
 	if (state != TrapState::HIDDEN)
 	{
@@ -268,6 +274,7 @@ std::optional<int> TrapSearch::search_around(Player& searcher, GameContext& ctx)
 {
 	assert(ctx.messageSystem && "TrapSearch::search_around: called without a messageSystem");
 	assert(ctx.traps && "TrapSearch::search_around: called without traps");
+	assert(ctx.dice && "TrapSearch::search_around: called without dice");
 
 	// A character with no way to find any trap is told so, and loses no time on it.
 	const bool isThief = has_find_traps(searcher.thief_skill(ThiefSkill::FIND_REMOVE_TRAPS));
@@ -306,6 +313,7 @@ std::optional<int> TrapDisarm::disarm_at(Player& thief, Vector2D target, GameCon
 {
 	assert(ctx.messageSystem && "TrapDisarm::disarm_at: called without a messageSystem");
 	assert(ctx.traps && "TrapDisarm::disarm_at: called without traps");
+	assert(ctx.dice && "TrapDisarm::disarm_at: called without dice");
 
 	// The live trap on the target tile, if there is one.
 	const auto is_live_trap_at_target = [target](const std::unique_ptr<Trap>& trap)
@@ -320,7 +328,7 @@ std::optional<int> TrapDisarm::disarm_at(Player& thief, Vector2D target, GameCon
 		return std::nullopt;
 	}
 
-	// Only an attempt that rolled takes the action; every refusal answers before the dice.
+	// Only an attempt that rolled takes time; every refusal answers before the dice.
 	switch ((*found)->attempt_disarm(thief, ctx))
 	{
 	case DisarmResult::NOT_DISARMABLE:
@@ -351,17 +359,17 @@ std::optional<int> TrapDisarm::disarm_at(Player& thief, Vector2D target, GameCon
 	case DisarmResult::BEYOND_SKILL:
 	{
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "This trap is beyond you.", MessageCompletion::FINISHED);
-		return DISARM_ROUNDS;
+		return roll_disarm_rounds(*ctx.dice);
 	}
 	case DisarmResult::DISARMED:
 	{
 		ctx.messageSystem->message(ColorPairId::GREEN_BLACK, "You successfully disarm the trap.", MessageCompletion::FINISHED);
-		return DISARM_ROUNDS;
+		return roll_disarm_rounds(*ctx.dice);
 	}
 	case DisarmResult::TRIGGERED:
 	{
 		ctx.messageSystem->message(ColorPairId::RED_BLACK, "You trigger the trap while attempting to disarm it!", MessageCompletion::FINISHED);
-		return DISARM_ROUNDS;
+		return roll_disarm_rounds(*ctx.dice);
 	}
 	}
 	std::unreachable();
