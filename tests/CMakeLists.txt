@@ -127,6 +127,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CostOverlayTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SleepSpellTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/WordingTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/HeadlessRendererTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/FireballDamageTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ConstitutionTrackerTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/StartingHitPointsTest.cpp
