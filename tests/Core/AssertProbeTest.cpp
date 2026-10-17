@@ -438,6 +438,17 @@ TEST_F(AssertProbeDeathTest, FindingADecorationWithANullInTheListAborts)
 		"find_decoration_at: the decoration list holds a null entry");
 }
 
+// The decoration list is Game's own member, wired into every context the game builds,
+// so a lookup with no list is a broken context rather than a level without decorations.
+TEST_F(AssertProbeDeathTest, FindingADecorationWithNoListAborts)
+{
+	Map map{ 20, 20 };
+	ctx.decorations = nullptr;
+
+	EXPECT_DEATH([[maybe_unused]] const Decoration* found = map.find_decoration_at(Vector2D{ 1, 1 }, ctx),
+		"find_decoration_at: called without decorations");
+}
+
 // An equipment entry owns the item in it. The entry exists because something put an
 // item in a slot, so an entry with nothing in it is a slot that lost what it was
 // holding - and ten readers across five files reach through this pointer, which is

@@ -172,6 +172,11 @@ $probes = @(
         anchor = 'assert(decoration && "find_decoration_at: the decoration list holds a null entry");'
     },
     @{
+        test   = "AssertProbeDeathTest.FindingADecorationWithNoListAborts"
+        file   = "src/Map.cpp"
+        anchor = 'assert(ctx.decorations && "Map::find_decoration_at: called without decorations");'
+    },
+    @{
         test   = "AssertProbeDeathTest.AnEquipmentEntryBuiltWithNoItemAborts"
         file   = "src/Creature.cpp"
         anchor = 'assert(item && "an equipment slot is built around the item in it");'

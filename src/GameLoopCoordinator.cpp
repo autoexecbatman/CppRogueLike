@@ -548,12 +548,10 @@ void GameLoopCoordinator::update(GameContext& ctx)
 		std::erase_if(*ctx.traps, is_spent);
 		std::erase_if(*ctx.spellTiles, is_spent);
 
-		if (ctx.decorations)
-		{
-			std::erase_if(*ctx.decorations,
-				[](const auto& d)
-				{ return !d || d->isBroken; });
-		}
+		assert(ctx.decorations && "GameLoopCoordinator::update: called without decorations");
+		std::erase_if(*ctx.decorations,
+			[](const auto& d)
+			{ return !d || d->isBroken; });
 
 		ctx.creatureManager->update_creatures(*ctx.creatures, ctx);
 		ctx.creatureManager->spawn_creatures(ctx);

@@ -18,12 +18,6 @@
       "original": "\t\t\treturn decoration.get();\n",
       "mutated": "\t\t\treturn nullptr;\n",
       "catches": "a decoration found and then reported as absent"
-    },
-    {
-      "file": "src/Map.cpp",
-      "original": "\tif (!ctx.decorations)\n",
-      "mutated": "\tif (false)\n",
-      "catches": "a level with no decoration list reaching through the null instead of answering no"
     }
   ]
 }

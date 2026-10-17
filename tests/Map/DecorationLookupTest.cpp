@@ -90,11 +90,3 @@ TEST_F(DecorationLookupTest, ABrokenOneDoesNotHideAWholeOneOnTheSameTile)
 
 	EXPECT_EQ(map.find_decoration_at(THE_TILE, ctx), &whole);
 }
-
-// A level built without a decoration list answers no rather than reaching through null.
-TEST_F(DecorationLookupTest, ALevelWithNoDecorationListAnswersNothing)
-{
-	ctx.decorations = nullptr;
-
-	EXPECT_EQ(map.find_decoration_at(THE_TILE, ctx), nullptr);
-}

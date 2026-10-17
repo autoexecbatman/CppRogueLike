@@ -5,6 +5,7 @@
 #include "src/Map.h"
 #include "src/DungeonRoom.h"
 #include "src/GameContext.h"
+#include "src/Decoration.h"
 #include "src/InventoryData.h"
 #include "src/Player.h"
 #include "src/ExperienceReward.h"
@@ -40,6 +41,7 @@ protected:
     DataManager dataManager;
     MessageSystem messageSystem;
     FloorInventory floorInventory{};
+    std::vector<std::unique_ptr<Decoration>> decorations{};
     RandomDice dice;
     TileConfig tileConfig;
 
@@ -64,6 +66,7 @@ protected:
         ctx.dataManager = &dataManager;
         ctx.messageSystem = &messageSystem;
         ctx.floorInventory = &floorInventory;
+        ctx.decorations = &decorations;
         ctx.dice = &dice;
         ctx.creatures = &creatures;
         ctx.map = map.get();

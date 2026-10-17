@@ -357,10 +357,7 @@ void Map::describe_tile(TileType tileType, GameContext& ctx)
 
 Decoration* Map::find_decoration_at(Vector2D pos, const GameContext& ctx) const noexcept
 {
-	if (!ctx.decorations)
-	{
-		return nullptr;
-	}
+	assert(ctx.decorations && "Map::find_decoration_at: called without decorations");
 
 	for (auto& decoration : *ctx.decorations)
 	{
@@ -1111,27 +1108,25 @@ void Map::create_room(const DungeonRoom& room, bool first, GameContext& ctx)
 		}
 
 		// Register a blocking Decoration for every stamped tile.
-		if (ctx.decorations)
+		assert(ctx.decorations && "Map::create_room: called without decorations");
+		for (int dy = room.row; dy <= room.row_end(); ++dy)
 		{
-			for (int dy = room.row; dy <= room.row_end(); ++dy)
+			for (int dx = room.col; dx <= room.col_end(); ++dx)
 			{
-				for (int dx = room.col; dx <= room.col_end(); ++dx)
+				TileRef t = ctx.decorEditor->get_override(Vector2D{ dx, dy });
+				if (!t.is_valid())
 				{
-					TileRef t = ctx.decorEditor->get_override(Vector2D{ dx, dy });
-					if (!t.is_valid())
-					{
-						continue;
-					}
-					auto d = std::make_unique<Decoration>();
-					d->position = Vector2D{ dx, dy };
-					d->tile = t;
-					d->name = "decoration";
-					d->hp = 3;
-					d->blocks_movement = true;
-					d->lootTableKey = "";
-					d->isBroken = false;
-					ctx.decorations->push_back(std::move(d));
+					continue;
 				}
+				auto d = std::make_unique<Decoration>();
+				d->position = Vector2D{ dx, dy };
+				d->tile = t;
+				d->name = "decoration";
+				d->hp = 3;
+				d->blocks_movement = true;
+				d->lootTableKey = "";
+				d->isBroken = false;
+				ctx.decorations->push_back(std::move(d));
 			}
 		}
 	}
@@ -1418,7 +1413,8 @@ void Map::spawn_items(const DungeonRoom& room, GameContext& ctx)
 
 void Map::spawn_barrels(const DungeonRoom& room, GameContext& ctx)
 {
-	if (!ctx.decorations || !ctx.tileConfig)
+	assert(ctx.decorations && "Map::spawn_barrels: called without decorations");
+	if (!ctx.tileConfig)
 	{
 		return;
 	}
@@ -1638,10 +1634,8 @@ void Map::regenerate(GameContext& ctx)
 	{
 		ctx.spellTiles->clear();
 	}
-	if (ctx.decorations)
-	{
-		ctx.decorations->clear();
-	}
+	assert(ctx.decorations && "Map::regenerate: called without decorations");
+	ctx.decorations->clear();
 
 	// generate a new map at current window dimensions (keep old size if curses not active)
 	const int newH = get_map_height();

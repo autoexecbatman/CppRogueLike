@@ -36,10 +36,8 @@ void RenderingManager::render_world(const GameContext& ctx) const
 	render_creatures(*ctx.creatures, ctx);
 	ctx.player()->render(ctx);
 
-	if (ctx.decorations)
-	{
-		render_decorations(*ctx.decorations, ctx);
-	}
+	assert(ctx.decorations && "RenderingManager::render_world: called without decorations");
+	render_decorations(*ctx.decorations, ctx);
 
 	apply_lighting(ctx);
 	render_mouse_path_overlay(ctx);

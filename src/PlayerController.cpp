@@ -301,36 +301,34 @@ bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 	}
 
 	assert(ctx.map && "PlayerController::look_to_attack: called without a map");
-	if (ctx.decorations)
+	assert(ctx.decorations && "PlayerController::look_to_attack: called without decorations");
+	auto* decor = ctx.map->find_decoration_at(target, ctx);
+	if (decor && !decor->isBroken)
 	{
-		auto* decor = ctx.map->find_decoration_at(target, ctx);
-		if (decor && !decor->isBroken)
+		--decor->hp;
+		if (decor->hp <= 0)
 		{
-			--decor->hp;
-			if (decor->hp <= 0)
-			{
-				decor->isBroken = true;
-				assert(ctx.decorEditor && "PlayerController::look_to_attack: called without a decorEditor");
-				ctx.decorEditor->erase(decor->position);
+			decor->isBroken = true;
+			assert(ctx.decorEditor && "PlayerController::look_to_attack: called without a decorEditor");
+			ctx.decorEditor->erase(decor->position);
 
-				ctx.messageSystem->message(
-					ColorPairId::WHITE_BLACK,
-					std::format("The {} shatters!", decor->name),
-					MessageCompletion::FINISHED);
-				if (!decor->lootTableKey.empty())
-				{
-					ctx.map->add_item(decor->position, ctx);
-				}
-			}
-			else
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				std::format("The {} shatters!", decor->name),
+				MessageCompletion::FINISHED);
+			if (!decor->lootTableKey.empty())
 			{
-				ctx.messageSystem->message(
-					ColorPairId::WHITE_BLACK,
-					std::format("You hit the {}.", decor->name),
-					MessageCompletion::FINISHED);
+				ctx.map->add_item(decor->position, ctx);
 			}
-			return false;
 		}
+		else
+		{
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				std::format("You hit the {}.", decor->name),
+				MessageCompletion::FINISHED);
+		}
+		return false;
 	}
 
 	return true;
