@@ -151,7 +151,7 @@ TEST(CodecRoundTripTest, ConsumableEffectSurvivesEncoding)
 // depend on the order of an enum nobody reads when editing it.
 TEST(CodecRoundTripTest, AiTypeSurvivesEncoding)
 {
-	constexpr std::array kinds = { AiType::MONSTER, AiType::CONFUSED_MONSTER, AiType::SHOPKEEPER, AiType::MIMIC, AiType::SPIDER, AiType::WEB_SPINNER, AiType::GIANT_SPIDER };
+	constexpr std::array kinds = { AiType::MONSTER, AiType::RANGED_MONSTER, AiType::CONFUSED_MONSTER, AiType::SHOPKEEPER, AiType::MIMIC, AiType::SPIDER, AiType::WEB_SPINNER, AiType::GIANT_SPIDER };
 
 	for (const auto kind : kinds)
 	{

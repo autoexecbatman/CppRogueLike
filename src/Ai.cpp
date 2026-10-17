@@ -5,6 +5,7 @@
 #include "AiMimic.h"
 #include "AiMonster.h"
 #include "AiMonsterConfused.h"
+#include "AiMonsterRanged.h"
 #include "AiShopkeeper.h"
 #include "AiSpider.h"
 #include "AiWebSpinner.h"
@@ -22,6 +23,13 @@ std::unique_ptr<Ai> Ai::create(const json& j)
 	case AiType::MONSTER:
 	{
 		ai = std::make_unique<AiMonster>();
+		break;
+	}
+
+	case AiType::RANGED_MONSTER:
+	{
+		// The two distances restored from JSON by AiMonsterRanged::load()
+		ai = std::make_unique<AiMonsterRanged>();
 		break;
 	}
 

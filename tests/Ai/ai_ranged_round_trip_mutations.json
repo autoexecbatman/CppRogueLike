@@ -1,0 +1,23 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=AiRangedRoundTripTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Ai.cpp",
+      "original": "\t\tai = std::make_unique<AiMonsterRanged>();",
+      "mutated": "\t\tai = std::make_unique<AiMonster>();",
+      "catches": "a saved ranged Ai loaded as a melee one, its distances dropped"
+    },
+    {
+      "file": "src/AiMonsterRanged.h",
+      "original": "{ return AiType::RANGED_MONSTER; }",
+      "mutated": "{ return AiType::MONSTER; }",
+      "catches": "a ranged Ai saving under the melee name"
+    }
+  ]
+}

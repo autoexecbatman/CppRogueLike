@@ -15,6 +15,7 @@ struct GameContext; // for dependency injection
 enum class AiType
 {
 	MONSTER,
+	RANGED_MONSTER,
 	CONFUSED_MONSTER,
 	SHOPKEEPER,
 	MIMIC,
@@ -25,9 +26,9 @@ enum class AiType
 
 // The name a save carries for this Ai.
 //
-// Deliberately without a default case, so adding an AiType warns here and in the
-// parser below under -Wswitch. No build passes -Werror, so the warning is the whole
-// of it: what refuses an unplaced value is CodecRoundTripTest's list.
+// Deliberately without a default case, so an AiType added and left out of this switch,
+// or of Ai::create's, does not compile under -Werror=switch and /we4062. The parser is
+// a chain of ifs the compiler cannot check, so CodecRoundTripTest's list covers it.
 //
 // Example:
 //   encode_ai_type(AiType::WEB_SPINNER); // -> "web_spinner"
@@ -38,6 +39,10 @@ inline std::string_view encode_ai_type(AiType type)
 	case AiType::MONSTER:
 	{
 		return "monster";
+	}
+	case AiType::RANGED_MONSTER:
+	{
+		return "ranged_monster";
 	}
 	case AiType::CONFUSED_MONSTER:
 	{
@@ -79,6 +84,10 @@ inline AiType parse_ai_type(std::string_view name)
 	if (name == "monster")
 	{
 		return AiType::MONSTER;
+	}
+	if (name == "ranged_monster")
+	{
+		return AiType::RANGED_MONSTER;
 	}
 	if (name == "confused_monster")
 	{
