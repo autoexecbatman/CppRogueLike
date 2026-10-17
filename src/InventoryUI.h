@@ -170,6 +170,14 @@ public:
 	void menu(GameContext& ctx) override;
 
 private:
+	// What a use leaves the screen doing. A use that moves the player closes it, so the
+	// map shows where they are.
+	enum class AfterUse
+	{
+		STAYS_OPEN,
+		CLOSES,
+	};
+
 	// State
 	InventoryScreen activeScreen{};
 	int equipmentCursor{};
@@ -210,7 +218,9 @@ private:
 	void handle_cursor_down(GameContext& ctx);
 	void handle_tab_switch(int direction);
 	void handle_enter_equipment(Player& player, GameContext& ctx);
-	void handle_enter_item(Player& player, GameContext& ctx);
+	// Uses the item under the cursor and spends the turn, and says whether the screen
+	// closes after it. Nothing under the cursor, or a use refused, keeps it open.
+	[[nodiscard]] AfterUse handle_enter_item(Player& player, GameContext& ctx);
 	void handle_drop(Player& player, GameContext& ctx);
 	// Opens the right-click menu for the row under the pointer, or nothing when that row
 	// has no action. Its entries call the same handlers the keyboard does.

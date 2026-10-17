@@ -704,6 +704,11 @@ int get_item_ac_bonus(const ItemBehavior& behavior) noexcept
 		behavior);
 }
 
+bool moves_its_user(const ItemBehavior& behavior) noexcept
+{
+	return std::holds_alternative<Teleporter>(behavior);
+}
+
 // The damage type a resistance effect answers for; empty for an effect that
 // resists nothing.
 static std::optional<DamageType> resisted_type(MagicalEffect effect) noexcept

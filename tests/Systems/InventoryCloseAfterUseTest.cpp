@@ -1,0 +1,261 @@
+// file: InventoryCloseAfterUseTest.cpp
+// Which uses close the inventory. Reading a scroll of teleportation moves the player
+// somewhere else, so the screen closes and the map shows where they landed; drinking a
+// healing potion leaves the player where they were, and the screen stays open for the
+// next choice. The owner's rule, 2026-10-17: "After using a teleportation scroll the
+// inventory UI should close automatically."
+//
+// Driven the way a player drives it: the inventory pushed onto the menu stack, a key
+// pressed, and MenuManager run for a frame, which is what removes a closed menu. The
+// right-click path is driven too, because its "Use" runs from the row menu on top of the
+// inventory rather than from the inventory's own key handling.
+//
+// Each test runs in a child process with tests/mocks/HiddenRenderer.h, and skips with
+// the reason where there is no OpenGL driver, which is the CI runner today.
+//
+// Run it:
+//
+//     cmake --build build --config Debug --target test_exe
+//     build\bin\Debug\test_exe.exe --gtest_filter=InventoryCloseAfterUseTest.*
+
+#include <gtest/gtest.h>
+
+#include <cstdlib>
+#include <memory>
+
+#include <raylib.h>
+
+#include "src/ArmorClass.h"
+#include "src/Controls.h"
+#include "src/ExperienceReward.h"
+#include "src/GameContext.h"
+#include "src/HealthPool.h"
+#include "src/InputSystem.h"
+#include "src/InventoryOperations.h"
+#include "src/InventoryUI.h"
+#include "src/Item.h"
+#include "src/ItemCreator.h"
+#include "src/Map.h"
+#include "src/MenuManager.h"
+#include "src/Pickable.h"
+#include "src/Player.h"
+#include "src/Renderer.h"
+#include "src/Vector2D.h"
+#include "tests/mocks/HiddenRenderer.h"
+#include "tests/mocks/MockGameContext.h"
+
+namespace
+{
+// A 3 by 3 room of floor, so a teleport has somewhere to land other than where it began.
+constexpr int ROOM_COL = 2;
+constexpr int ROOM_ROW = 2;
+constexpr int ROOM_SIZE = 3;
+constexpr Vector2D PLAYER_TILE{ ROOM_COL, ROOM_ROW };
+// A creature built in a test has no Strength, and the pack is weight-gated by it.
+constexpr int CARRIER_STRENGTH = 18;
+// Wounded below the potion's ceiling, so drinking it heals and is a spent turn.
+constexpr int MAX_HIT_POINTS = 20;
+constexpr int WOUNDED_HIT_POINTS = 5;
+
+// The mock's context with a renderer, a floored room and a wounded player carrying one
+// item, and the inventory open on its backpack pane on the menu stack.
+class OpenInventory
+{
+public:
+	HiddenRenderer hidden{};
+	MockGameContext mock{};
+	GameContext ctx{};
+
+	explicit OpenInventory(const char* itemKey)
+	{
+		ctx = mock.to_game_context();
+		ctx.renderer = &hidden.renderer;
+
+		mock.map.init_tiles();
+		for (int column = ROOM_COL; column < ROOM_COL + ROOM_SIZE; ++column)
+		{
+			for (int row = ROOM_ROW; row < ROOM_ROW + ROOM_SIZE; ++row)
+			{
+				mock.map.set_tile(Vector2D{ column, row }, TileType::FLOOR);
+			}
+		}
+
+		mock.player = std::make_unique<Player>(PLAYER_TILE);
+		Player& player = *mock.player;
+		player.healthPool = std::make_unique<HealthPool>(MAX_HIT_POINTS);
+		player.armorClass = std::make_unique<ArmorClass>(10);
+		player.experienceReward = std::make_unique<ExperienceReward>(0);
+		player.set_creature_level(1);
+		player.set_strength(CARRIER_STRENGTH);
+		player.set_hp(WOUNDED_HIT_POINTS);
+
+		exit_unless(
+			InventoryOperations::add_item(player.inventoryData, ItemCreator::create(itemKey, PLAYER_TILE, ctx)).has_value(),
+			"the item did not fit the pack");
+
+		mock.menus.push_back(std::make_unique<InventoryUI>(player, InventoryScreen::BACKPACK, ctx));
+	}
+
+	// One frame of the menu stack with a key pressed, as the game loop runs it.
+	void press(GameKey key)
+	{
+		ctx.inputSystem->queue_key(key, 0);
+		ctx.menuManager->handle_menus(*ctx.menus, ctx);
+	}
+};
+
+// The backpack pane's first content row is the category heading; the scroll is below it.
+int scroll_row_y(const OpenInventory& open)
+{
+	return panel_text_row_y(0, open.hidden.renderer.get_tile_size(), FIRST_CONTENT_ROW + 1);
+}
+
+// Enter on the scroll of teleportation: the scroll is read, the turn is spent, and the
+// inventory is off the menu stack.
+[[noreturn]] void reading_the_teleport_scroll_closes_the_inventory()
+{
+	OpenInventory open{ "scroll_teleport" };
+	const int timeBefore = open.ctx.gameState->get_time();
+
+	open.press(GameKey::ENTER);
+
+	exit_unless(open.mock.player->inventoryData.items.empty(), "the scroll was not read");
+	exit_unless(open.ctx.gameState->get_time() > timeBefore, "reading the scroll spent no turn");
+	exit_unless(open.mock.menus.empty(), "the inventory is still open after the teleport");
+	std::_Exit(HIDDEN_RENDERER_PASSED);
+}
+
+// Enter on a healing potion: the potion is drunk and the turn is spent, and the
+// inventory stays open.
+[[noreturn]] void drinking_a_healing_potion_leaves_the_inventory_open()
+{
+	OpenInventory open{ "health_potion" };
+	const int timeBefore = open.ctx.gameState->get_time();
+
+	open.press(GameKey::ENTER);
+
+	exit_unless(open.mock.player->inventoryData.items.empty(), "the potion was not drunk");
+	exit_unless(open.ctx.gameState->get_time() > timeBefore, "drinking the potion spent no turn");
+	exit_unless(open.mock.menus.size() == 1, "the inventory closed after a healing potion");
+	std::_Exit(HIDDEN_RENDERER_PASSED);
+}
+
+// Right-click on the scroll's row and choose Use: the row menu closes, and so does the
+// inventory beneath it, on the next frame and without reading that frame's key.
+[[noreturn]] void using_the_teleport_scroll_from_the_row_menu_closes_the_inventory()
+{
+	OpenInventory open{ "scroll_teleport" };
+	const int timeBefore = open.ctx.gameState->get_time();
+
+	SetMousePosition(HIDDEN_WINDOW_WIDTH / 2, scroll_row_y(open) + 1);
+
+	open.press(GameKey::MOUSE_RIGHT);
+	exit_unless(open.mock.menus.size() == 2, "the right-click opened no row menu");
+
+	// The row menu's first entry is Use.
+	open.press(GameKey::ENTER);
+	exit_unless(open.mock.player->inventoryData.items.empty(), "the scroll was not read");
+	exit_unless(open.ctx.gameState->get_time() > timeBefore, "reading the scroll spent no turn");
+
+	// Enter on the frame after, with a potion now in the pack: the inventory closes
+	// without acting on it, so the potion is still there.
+	exit_unless(
+		InventoryOperations::add_item(open.mock.player->inventoryData, ItemCreator::create("health_potion", PLAYER_TILE, open.ctx)).has_value(),
+		"the potion did not fit the pack");
+	open.press(GameKey::ENTER);
+	exit_unless(open.mock.menus.empty(), "the inventory is still open after the teleport");
+	exit_unless(open.mock.player->inventoryData.items.size() == 1, "the closing inventory acted on the next frame's key");
+	std::_Exit(HIDDEN_RENDERER_PASSED);
+}
+
+// A left click on the scroll's row reads it, and the inventory closes.
+[[noreturn]] void clicking_the_teleport_scroll_closes_the_inventory()
+{
+	OpenInventory open{ "scroll_teleport" };
+	SetMousePosition(HIDDEN_WINDOW_WIDTH / 2, scroll_row_y(open) + 1);
+
+	open.press(GameKey::MOUSE_LEFT);
+
+	exit_unless(open.mock.player->inventoryData.items.empty(), "the click did not read the scroll");
+	exit_unless(open.mock.menus.empty(), "the inventory is still open after the teleport");
+	std::_Exit(HIDDEN_RENDERER_PASSED);
+}
+
+// The letter beside the scroll's row reads it, and the inventory closes.
+[[noreturn]] void the_teleport_scroll_letter_closes_the_inventory()
+{
+	OpenInventory open{ "scroll_teleport" };
+
+	// The scroll is the only item, so its letter is a.
+	open.ctx.inputSystem->queue_key(GameKey::NONE, 'a');
+	open.ctx.menuManager->handle_menus(*open.ctx.menus, open.ctx);
+
+	exit_unless(open.mock.player->inventoryData.items.empty(), "the letter did not read the scroll");
+	exit_unless(open.mock.menus.empty(), "the inventory is still open after the teleport");
+	std::_Exit(HIDDEN_RENDERER_PASSED);
+}
+} // namespace
+
+TEST(InventoryCloseAfterUseTest, ReadingTheTeleportScrollClosesTheInventory)
+{
+	const int childExitCode = exit_code_in_child(&reading_the_teleport_scroll_closes_the_inventory);
+
+	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
+	{
+		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
+	}
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+}
+
+TEST(InventoryCloseAfterUseTest, DrinkingAHealingPotionLeavesTheInventoryOpen)
+{
+	const int childExitCode = exit_code_in_child(&drinking_a_healing_potion_leaves_the_inventory_open);
+
+	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
+	{
+		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
+	}
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+}
+
+TEST(InventoryCloseAfterUseTest, UsingTheTeleportScrollFromTheRowMenuClosesTheInventory)
+{
+	const int childExitCode = exit_code_in_child(&using_the_teleport_scroll_from_the_row_menu_closes_the_inventory);
+
+	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
+	{
+		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
+	}
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+}
+
+TEST(InventoryCloseAfterUseTest, ClickingTheTeleportScrollClosesTheInventory)
+{
+	const int childExitCode = exit_code_in_child(&clicking_the_teleport_scroll_closes_the_inventory);
+
+	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
+	{
+		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
+	}
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+}
+
+TEST(InventoryCloseAfterUseTest, TheTeleportScrollLetterClosesTheInventory)
+{
+	const int childExitCode = exit_code_in_child(&the_teleport_scroll_letter_closes_the_inventory);
+
+	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
+	{
+		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
+	}
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+}
+
+// The item's own answer, with no renderer, so it runs where the tests above skip.
+TEST(InventoryCloseAfterUseTest, OnlyTheTeleportScrollSaysItMovesItsUser)
+{
+	EXPECT_TRUE(moves_its_user(ItemBehavior{ Teleporter{} }));
+	EXPECT_FALSE(moves_its_user(ItemBehavior{ IdentifyScroll{} }));
+}
+
+// end of file: InventoryCloseAfterUseTest.cpp

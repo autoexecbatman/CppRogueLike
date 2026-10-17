@@ -1,0 +1,53 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=InventoryCloseAfterUseTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\treturn std::holds_alternative<Teleporter>(behavior);\n",
+      "mutated": "\treturn false;\n",
+      "catches": "the teleport scroll not saying it moves its reader, so the inventory stays open"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\treturn std::holds_alternative<Teleporter>(behavior);\n",
+      "mutated": "\treturn true;\n",
+      "catches": "every item saying it moves its user, so a healing potion closes the inventory"
+    },
+    {
+      "file": "src/InventoryUI.cpp",
+      "original": "\t\telse if (handle_enter_item(player, ctx) == AfterUse::CLOSES)\n\t\t{\n\t\t\treturn false;\n",
+      "mutated": "\t\telse if (handle_enter_item(player, ctx) == AfterUse::CLOSES)\n\t\t{\n\t\t\treturn true;\n",
+      "catches": "Enter ignoring a use that closes the screen"
+    },
+    {
+      "file": "src/InventoryUI.cpp",
+      "original": "\t\t\tmenu_set_run_false();\n\t\t}\n\t};\n",
+      "mutated": "\t\t}\n\t};\n",
+      "catches": "Use from the row menu leaving the inventory open after a teleport"
+    },
+    {
+      "file": "src/InventoryUI.cpp",
+      "original": "\tif (!run)\n\t{\n\t\treturn;\n\t}\n\n\tctx.inputSystem->poll();\n",
+      "mutated": "\tctx.inputSystem->poll();\n",
+      "catches": "an inventory closed from the row menu acting on the next frame's key before it goes"
+    },
+    {
+      "file": "src/InventoryUI.cpp",
+      "original": "\t\t\t\tif (listEntries[entryIdx].kind == BackpackEntry::Kind::ITEM && handle_enter_item(player, ctx) == AfterUse::CLOSES)\n\t\t\t\t{\n\t\t\t\t\treturn false;\n",
+      "mutated": "\t\t\t\tif (listEntries[entryIdx].kind == BackpackEntry::Kind::ITEM && handle_enter_item(player, ctx) == AfterUse::CLOSES)\n\t\t\t\t{\n\t\t\t\t\treturn true;\n",
+      "catches": "a click on the row ignoring a use that closes the screen"
+    },
+    {
+      "file": "src/InventoryUI.cpp",
+      "original": "\t\t\t\t\t\treturn handle_enter_item(player, ctx) == AfterUse::STAYS_OPEN;\n",
+      "mutated": "\t\t\t\t\t\t[[maybe_unused]] const auto ignored = handle_enter_item(player, ctx);\n\t\t\t\t\t\treturn true;\n",
+      "catches": "the letter shortcut ignoring a use that closes the screen"
+    }
+  ]
+}

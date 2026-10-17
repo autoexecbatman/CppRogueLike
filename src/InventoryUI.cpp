@@ -322,6 +322,13 @@ InventoryUI::InventoryUI(Player& player, InventoryScreen startScreen, GameContex
 
 void InventoryUI::menu(GameContext& ctx)
 {
+	// Closed by a use chosen from the row menu while it was on top: no key is read and
+	// nothing drawn, and MenuManager removes the screen after this frame.
+	if (!run)
+	{
+		return;
+	}
+
 	ctx.inputSystem->poll();
 	if (!handle_input(playerRef, ctx))
 	{
@@ -1117,9 +1124,9 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 		{
 			handle_enter_equipment(player, ctx);
 		}
-		else
+		else if (handle_enter_item(player, ctx) == AfterUse::CLOSES)
 		{
-			handle_enter_item(player, ctx);
+			return false;
 		}
 		return true;
 	}
@@ -1205,9 +1212,9 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 			if (entryIdx >= 0 && entryIdx < static_cast<int>(listEntries.size()))
 			{
 				listCursor = entryIdx;
-				if (listEntries[entryIdx].kind == BackpackEntry::Kind::ITEM)
+				if (listEntries[entryIdx].kind == BackpackEntry::Kind::ITEM && handle_enter_item(player, ctx) == AfterUse::CLOSES)
 				{
-					handle_enter_item(player, ctx);
+					return false;
 				}
 			}
 		}
@@ -1230,8 +1237,7 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 					if (itemCount == letterIndex)
 					{
 						listCursor = i;
-						handle_enter_item(player, ctx);
-						return true;
+						return handle_enter_item(player, ctx) == AfterUse::STAYS_OPEN;
 					}
 					itemCount++;
 				}
@@ -1321,38 +1327,45 @@ void InventoryUI::handle_enter_equipment(Player& player, GameContext& ctx)
 	}
 }
 
-void InventoryUI::handle_enter_item(Player& player, GameContext& ctx)
+InventoryUI::AfterUse InventoryUI::handle_enter_item(Player& player, GameContext& ctx)
 {
 	if (listCursor < 0 || listCursor >= static_cast<int>(listEntries.size()))
 	{
-		return;
+		return AfterUse::STAYS_OPEN;
 	}
 
 	const auto& entry = listEntries[listCursor];
 	if (entry.kind != BackpackEntry::Kind::ITEM || !entry.item)
 	{
-		return;
+		return AfterUse::STAYS_OPEN;
 	}
 
 	Item* selectedItem = entry.item;
 	if (!selectedItem->behavior)
 	{
-		return;
+		return AfterUse::STAYS_OPEN;
 	}
+
+	// Asked before the use, which destroys a scroll and its behaviour with it.
+	const bool movesThePlayer = moves_its_user(*selectedItem->behavior);
 
 	bool itemUsed = use_item(*selectedItem->behavior, *selectedItem, player, ctx);
 
-	if (itemUsed)
+	if (!itemUsed)
 	{
-		spend_player_action(ctx, TIME_UNITS_PER_ROUND);
-
-		if (filterMode)
-		{
-			filterMode = false;
-			filterSlot = EquipmentSlot::NONE;
-			activeScreen = InventoryScreen::EQUIPMENT;
-		}
+		return AfterUse::STAYS_OPEN;
 	}
+
+	spend_player_action(ctx, TIME_UNITS_PER_ROUND);
+
+	if (filterMode)
+	{
+		filterMode = false;
+		filterSlot = EquipmentSlot::NONE;
+		activeScreen = InventoryScreen::EQUIPMENT;
+	}
+
+	return movesThePlayer ? AfterUse::CLOSES : AfterUse::STAYS_OPEN;
 }
 
 // Opens the right-click menu for one row, or opens nothing when the row has no action.
@@ -1435,9 +1448,10 @@ void InventoryUI::open_row_menu(Player& player, int mouseRow, GameContext& ctx)
 		{
 			handle_enter_equipment(player, menuCtx);
 		}
-		else if (chosen == "Use")
+		else if (chosen == "Use" && handle_enter_item(player, menuCtx) == AfterUse::CLOSES)
 		{
-			handle_enter_item(player, menuCtx);
+			// This menu is on top, so the inventory closes on its own next frame.
+			menu_set_run_false();
 		}
 	};
 

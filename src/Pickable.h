@@ -397,6 +397,14 @@ ScrollReading read_confusion_at(const Creature& reader, Vector2D tile, int turns
 bool use_item(ItemBehavior& behavior, Item& owner, Creature& wearer, GameContext& ctx);
 int get_item_ac_bonus(const ItemBehavior& behavior) noexcept;
 
+// Whether using this item puts its user somewhere else. Asked before the use, because the
+// use consumes a scroll: a scroll of teleportation moves its reader, nothing else does.
+//
+// Example:
+//   moves_its_user(ItemBehavior{ Teleporter{} });     // -> true
+//   moves_its_user(ItemBehavior{ IdentifyScroll{} }); // -> false
+bool moves_its_user(const ItemBehavior& behavior) noexcept;
+
 // How strongly a worn item's own effect resists the given type, in rings: a
 // ring of fire resistance or of warmth at its bonus of 1, the helm of
 // brilliance against fire at its bonus of 2 - the book's double-strength ring.
