@@ -68,10 +68,7 @@ namespace
 {
 void animate_heal(const Vector2D& pos, GameContext& ctx)
 {
-	if (!ctx.animSystem)
-	{
-		return;
-	}
+	assert(ctx.animSystem && "SpellSystem::animate_heal: called without an animSystem");
 
 	ctx.animSystem->spawn_effect(
 		pos,

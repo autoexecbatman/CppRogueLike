@@ -1498,10 +1498,8 @@ void Creature::die(GameContext& ctx)
 	assert(ctx.player() != nullptr && "Creature::die requires a live player in context");
 	ctx.player_concrete().on_kill_reward(get_xp(), ctx);
 
-	if (ctx.animSystem)
-	{
-		ctx.animSystem->spawn_death(position);
-	}
+	assert(ctx.animSystem && "Creature::die: called without an animSystem");
+	ctx.animSystem->spawn_death(position);
 
 	[[maybe_unused]] auto is_nothing = [](const auto& carried)
 	{

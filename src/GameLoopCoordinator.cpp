@@ -229,10 +229,8 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 
 	ctx.renderingManager->render(ctx);
 
-	if (ctx.animSystem)
-	{
-		ctx.animSystem->update_and_render(*ctx.renderer);
-	}
+	assert(ctx.animSystem && "GameLoopCoordinator::handle_render_phase: called without an animSystem");
+	ctx.animSystem->update_and_render(*ctx.renderer);
 
 	assert(ctx.floatingText && "render: a frame was drawn with no floating text system");
 	ctx.floatingText->update_and_render(*ctx.renderer);

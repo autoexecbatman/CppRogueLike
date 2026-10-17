@@ -138,10 +138,8 @@ AttackResult Attacker::perform_single_attack(
 			handName,
 			ctx);
 
-		if (ctx.animSystem)
-		{
-			ctx.animSystem->spawn_melee_hit(target.position);
-		}
+		assert(ctx.animSystem && "Attacker::perform_single_attack: called without an animSystem");
+		ctx.animSystem->spawn_melee_hit(target.position);
 		// The reduced roll, carried on to the number the bonus, strength and damage
 		// reduction made of it.
 		target.take_damage_and_check_death(reduced.at(finalDamage), ctx);

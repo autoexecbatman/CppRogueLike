@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include "src/AnimationSystem.h"
 #include "src/BaseMenu.h"
 #include "src/BodyPlanRegistry.h"
 #include "src/BuffSystem.h"
@@ -38,6 +39,7 @@
 #include "src/Player.h"
 #include "src/PrefabLibrary.h"
 #include "src/RandomDice.h"
+#include "src/Renderer.h"
 #include "src/RoomEditor.h"
 #include "src/SpellEditor.h"
 #include "src/SpellRegistry.h"
@@ -68,6 +70,8 @@ struct MockGameContext
 	ItemRegistry itemRegistry{};
 	Pathfinding::Pathfinder pathfinder{};
 	FloatingTextSystem floatingText{};
+	// Built as Game builds it, at the tile size the renderer opens with; it needs no window.
+	AnimationSystem animSystem{};
 
 	// Every member the game's own context wires, so a test reaches the same objects play does.
 	Map map{ get_map_width(), get_map_height() };
@@ -118,6 +122,7 @@ struct MockGameContext
 		// Loaded loudly: a monster built without a body plan is a broken test,
 		// not a test that quietly checks something else.
 		body_plans.load(Paths::BODY_PLANS);
+		animSystem.init(tile_config, DISPLAY_TILE_SIZE);
 
 		// Armour class, missile and surprise rolls read the ability tables, as every
 		// context the game builds can.
@@ -159,6 +164,7 @@ struct MockGameContext
 			.hungerSystem = &hungerSystem,
 			.buffSystem = &buffs,
 			.floatingText = &floatingText,
+			.animSystem = &animSystem,
 			.contentRegistry = &content_registry,
 			.costOverlay = &costOverlay,
 			.pathfinder = &pathfinder,
