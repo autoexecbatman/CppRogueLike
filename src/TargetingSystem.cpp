@@ -26,7 +26,8 @@
 
 void TargetingSystem::draw_los(GameContext& ctx, Vector2D targetCursor) const
 {
-	if (!ctx.renderer || !ctx.map || !ctx.player())
+	assert(ctx.map && "TargetingSystem::draw_los: called without a map");
+	if (!ctx.renderer || !ctx.player())
 	{
 		return;
 	}
@@ -54,7 +55,8 @@ void TargetingSystem::draw_los(GameContext& ctx, Vector2D targetCursor) const
 
 void TargetingSystem::draw_range_indicator(GameContext& ctx, Vector2D center, int range) const
 {
-	if (!ctx.renderer || !ctx.map || range <= 0)
+	assert(ctx.map && "TargetingSystem::draw_range_indicator: called without a map");
+	if (!ctx.renderer || range <= 0)
 	{
 		return;
 	}
@@ -118,7 +120,8 @@ bool TargetingSystem::is_valid_target(GameContext& ctx, Vector2D from, Vector2D 
 
 void TargetingSystem::draw_aoe_preview(GameContext& ctx, Vector2D center, int radius) const
 {
-	if (!ctx.renderer || !ctx.map || radius <= 0)
+	assert(ctx.map && "TargetingSystem::draw_aoe_preview: called without a map");
+	if (!ctx.renderer || radius <= 0)
 	{
 		return;
 	}

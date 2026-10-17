@@ -300,7 +300,8 @@ bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 		}
 	}
 
-	if (ctx.map && ctx.decorations)
+	assert(ctx.map && "PlayerController::look_to_attack: called without a map");
+	if (ctx.decorations)
 	{
 		auto* decor = ctx.map->find_decoration_at(target, ctx);
 		if (decor && !decor->isBroken)
@@ -608,10 +609,7 @@ bool PlayerController::is_mouse_pending_cancelled(GameContext& ctx) const
 
 Vector2D PlayerController::find_door_approach(Vector2D doorTile, const GameContext& ctx) const
 {
-	if (!ctx.map)
-	{
-		throw std::logic_error("PlayerController::find_door_approach -- ctx.map is null");
-	}
+	assert(ctx.map && "PlayerController::find_door_approach: called without a map");
 
 	const std::array<Vector2D, 4> dirs{
 		Vector2D{ 0, -1 }, Vector2D{ 0, 1 }, Vector2D{ -1, 0 }, Vector2D{ 1, 0 }
@@ -716,7 +714,8 @@ void PlayerController::begin_path_walk(
 		throw std::logic_error("PlayerController::begin_path_walk -- mode must not be IDLE");
 	}
 
-	if (!ctx.pathfinder || !ctx.map)
+	assert(ctx.map && "PlayerController::begin_path_walk: called without a map");
+	if (!ctx.pathfinder)
 	{
 		return;
 	}

@@ -270,7 +270,8 @@ void GameLoopCoordinator::handle_menu_check(GameContext& ctx)
 
 void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 {
-	if (!ctx.renderer || !ctx.inputSystem || !ctx.map)
+	assert(ctx.map && "GameLoopCoordinator::draw_hover_tooltip: called without a map");
+	if (!ctx.renderer || !ctx.inputSystem)
 	{
 		return;
 	}
@@ -499,12 +500,10 @@ void GameLoopCoordinator::update(GameContext& ctx)
 		// Ensure active map key is set for loaded games (new games set it in Map::init).
 		assert(ctx.levelManager && "GameLoopCoordinator::update: a loaded game resumed without a levelManager");
 		assert(ctx.decorEditor && "GameLoopCoordinator::update: called without a decorEditor");
-		if (ctx.map)
-		{
-			ctx.decorEditor->set_active_map(
-				ctx.map->get_seed(),
-				ctx.levelManager->get_dungeon_level());
-		}
+		assert(ctx.map && "GameLoopCoordinator::update: called without a map");
+		ctx.decorEditor->set_active_map(
+			ctx.map->get_seed(),
+			ctx.levelManager->get_dungeon_level());
 #endif
 
 		ctx.map->compute_fov(ctx);

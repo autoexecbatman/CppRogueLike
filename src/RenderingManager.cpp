@@ -100,7 +100,8 @@ void RenderingManager::restore_screen(GameContext& ctx) const
 
 void RenderingManager::apply_lighting(const GameContext& ctx) const
 {
-	if (!ctx.renderer || !ctx.map || !ctx.player())
+	assert(ctx.map && "RenderingManager::apply_lighting: called without a map");
+	if (!ctx.renderer || !ctx.player())
 	{
 		return;
 	}
@@ -171,7 +172,8 @@ void RenderingManager::render_decorations(
 	std::span<const std::unique_ptr<Decoration>> decorations,
 	const GameContext& ctx) const
 {
-	if (!ctx.renderer || !ctx.map)
+	assert(ctx.map && "RenderingManager::render_decorations: called without a map");
+	if (!ctx.renderer)
 	{
 		return;
 	}
