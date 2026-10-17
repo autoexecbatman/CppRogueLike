@@ -15,26 +15,26 @@
 float AnimationSystem::random_range(float lo, float hi)
 {
 	std::uniform_real_distribution<float> dist(lo, hi);
-	return dist(m_rng);
+	return dist(generator);
 }
 
 void AnimationSystem::init(const TileConfig& tileConfig, int tile_size)
 {
-	m_tile_size = tile_size;
-	m_blood_tile = tileConfig.get("TILE_EFFECT_BLOOD");
+	tileSize = tile_size;
+	bloodTile = tileConfig.get("TILE_EFFECT_BLOOD");
 	// Spark: fall back to blood tile until TILE_EFFECT_SPARK is added to tile_config.json.
-	m_spark_tile = m_blood_tile;
-	m_missile_tile = tileConfig.get("TILE_EFFECT_MISSILE");
+	sparkTile = bloodTile;
+	missileTile = tileConfig.get("TILE_EFFECT_MISSILE");
 
 	auto seed = static_cast<unsigned>(
 		std::chrono::steady_clock::now().time_since_epoch().count());
-	m_rng.seed(seed);
+	generator.seed(seed);
 }
 
 void AnimationSystem::spawn_blood_burst(Vector2D worldPosition, int count)
 {
-	float cx = static_cast<float>(worldPosition.x * m_tile_size + m_tile_size / 2);
-	float cy = static_cast<float>(worldPosition.y * m_tile_size + m_tile_size / 2);
+	float cx = static_cast<float>(worldPosition.x * tileSize + tileSize / 2);
+	float cy = static_cast<float>(worldPosition.y * tileSize + tileSize / 2);
 	float now = static_cast<float>(GetTime());
 
 	for (int i = 0; i < count; ++i)
@@ -78,8 +78,8 @@ void AnimationSystem::spawn_spark_burst(
 	unsigned char green,
 	unsigned char blue)
 {
-	float cx = static_cast<float>(worldPosition.x * m_tile_size + m_tile_size / 2);
-	float cy = static_cast<float>(worldPosition.y * m_tile_size + m_tile_size / 2);
+	float cx = static_cast<float>(worldPosition.x * tileSize + tileSize / 2);
+	float cy = static_cast<float>(worldPosition.y * tileSize + tileSize / 2);
 	float now = static_cast<float>(GetTime());
 
 	for (int i = 0; i < count; ++i)
@@ -120,16 +120,16 @@ void AnimationSystem::spawn_lightning_path(
 
 	for (const auto& pos : path)
 	{
-		float cx = static_cast<float>(pos.x * m_tile_size);
-		float cy = static_cast<float>(pos.y * m_tile_size);
+		float cx = static_cast<float>(pos.x * tileSize);
+		float cy = static_cast<float>(pos.y * tileSize);
 
 		entries.push_back(AnimEntry{
 			.px_x = cx,
 			.px_y = cy,
 			.vel_x = 0.0f,
 			.vel_y = 0.0f,
-			.radius = static_cast<float>(m_tile_size) * 0.5f,
-			.tile = m_spark_tile,
+			.radius = static_cast<float>(tileSize) * 0.5f,
+			.tile = sparkTile,
 			.r = red,
 			.g = green,
 			.b = blue,
@@ -148,15 +148,15 @@ void AnimationSystem::spawn_effect(
 	unsigned char blue,
 	float duration)
 {
-	float cx = static_cast<float>(worldPosition.x * m_tile_size);
-	float cy = static_cast<float>(worldPosition.y * m_tile_size);
+	float cx = static_cast<float>(worldPosition.x * tileSize);
+	float cy = static_cast<float>(worldPosition.y * tileSize);
 
 	entries.push_back(AnimEntry{
 		.px_x = cx,
 		.px_y = cy,
 		.vel_x = 0.0f,
 		.vel_y = 0.0f,
-		.radius = static_cast<float>(m_tile_size),
+		.radius = static_cast<float>(tileSize),
 		.tile = tile,
 		.r = red,
 		.g = green,
@@ -178,10 +178,10 @@ void AnimationSystem::spawn_projectile(
 	float wobbleStrength,
 	std::function<void()> onArrive)
 {
-	float fromPxX = static_cast<float>(from.x * m_tile_size + m_tile_size / 2);
-	float fromPxY = static_cast<float>(from.y * m_tile_size + m_tile_size / 2);
-	float toPxX = static_cast<float>(to.x * m_tile_size + m_tile_size / 2);
-	float toPxY = static_cast<float>(to.y * m_tile_size + m_tile_size / 2);
+	float fromPxX = static_cast<float>(from.x * tileSize + tileSize / 2);
+	float fromPxY = static_cast<float>(from.y * tileSize + tileSize / 2);
+	float toPxX = static_cast<float>(to.x * tileSize + tileSize / 2);
+	float toPxY = static_cast<float>(to.y * tileSize + tileSize / 2);
 
 	float dx = toPxX - fromPxX;
 	float dy = toPxY - fromPxY;
@@ -306,7 +306,7 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 	std::erase_if(entries, is_expired);
 
 	// Update and render seeking projectiles
-	const float arrivalThreshold = static_cast<float>(m_tile_size) * 0.5f;
+	const float arrivalThreshold = static_cast<float>(tileSize) * 0.5f;
 
 	for (auto& p : projectiles)
 	{
@@ -358,7 +358,7 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 				.px_y = p.pxY,
 				.vel_x = 0.0f,
 				.vel_y = 0.0f,
-				.radius = static_cast<float>(m_tile_size) * 0.3f,
+				.radius = static_cast<float>(tileSize) * 0.3f,
 				.tile = p.tile,
 				.r = p.r,
 				.g = p.g,
@@ -372,7 +372,7 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 		// Render projectile head
 		int screenX = static_cast<int>(p.pxX) - cam_x;
 		int screenY = static_cast<int>(p.pxY) - cam_y;
-		int sz = m_tile_size;
+		int sz = tileSize;
 
 		BeginBlendMode(BLEND_ADDITIVE);
 		renderer.draw_tile_screen_color_sized(
@@ -393,9 +393,9 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 {
 	float now = static_cast<float>(GetTime());
-	float ts = static_cast<float>(m_tile_size);
-	float cx = static_cast<float>(center.x * m_tile_size + m_tile_size / 2);
-	float cy = static_cast<float>(center.y * m_tile_size + m_tile_size / 2);
+	float ts = static_cast<float>(tileSize);
+	float cx = static_cast<float>(center.x * tileSize + tileSize / 2);
+	float cy = static_cast<float>(center.y * tileSize + tileSize / 2);
 	float blastRadius = static_cast<float>(radius);
 	float blastPx = blastRadius * ts;
 

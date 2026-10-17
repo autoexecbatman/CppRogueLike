@@ -61,11 +61,11 @@ class AnimationSystem
 private:
 	std::vector<AnimEntry> entries;
 	std::vector<ProjectileEntry> projectiles;
-	TileRef m_blood_tile{};
-	TileRef m_spark_tile{};
-	TileRef m_missile_tile{};
-	int m_tile_size{ 32 };
-	std::mt19937 m_rng;
+	TileRef bloodTile{};
+	TileRef sparkTile{};
+	TileRef missileTile{};
+	int tileSize{ 32 };
+	std::mt19937 generator;
 
 	float random_range(float lo, float hi);
 
@@ -93,7 +93,7 @@ public:
 		unsigned char green,
 		unsigned char blue);
 
-	[[nodiscard]] TileRef get_missile_tile() const noexcept { return m_missile_tile; }
+	[[nodiscard]] TileRef get_missile_tile() const noexcept { return missileTile; }
 
 	// Seeking projectile with chaotic wobble motion
 	void spawn_projectile(
