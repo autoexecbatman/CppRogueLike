@@ -46,6 +46,7 @@
 // load_all sets the initialised flag itself.
 void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNum)
 {
+	assert(ctx.gui && "GameLoopCoordinator::handle_gameloop: called without a gui");
 	assert(ctx.map && "GameLoopCoordinator::handle_gameloop: called without a map");
 
 	if (ctx.messageSystem->is_debug_mode())
@@ -106,6 +107,13 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
 
 void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 {
+	assert(ctx.minimap && "GameLoopCoordinator::handle_input_phase: called without a minimap");
+	assert(ctx.menuManager && "GameLoopCoordinator::handle_input_phase: called without a menuManager");
+	assert(ctx.inputHandler && "GameLoopCoordinator::handle_input_phase: called without an inputHandler");
+	assert(ctx.inputSystem && "GameLoopCoordinator::handle_input_phase: called without an inputSystem");
+	assert(ctx.contentRegistry && "GameLoopCoordinator::handle_input_phase: called without a contentRegistry");
+	assert(ctx.itemRegistry && "GameLoopCoordinator::handle_input_phase: called without an itemRegistry");
+	assert(ctx.monsterRegistry && "GameLoopCoordinator::handle_input_phase: called without a monsterRegistry");
 	assert(ctx.map && "GameLoopCoordinator::handle_input_phase: called without a map");
 
 	ctx.inputHandler->reset_key();
@@ -217,6 +225,8 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 
 void GameLoopCoordinator::handle_update_phase(GameContext& ctx, Gui& gui)
 {
+	assert(ctx.gameLoopCoordinator && "GameLoopCoordinator::handle_update_phase: called without a gameLoopCoordinator");
+
 	ctx.messageSystem->log("Running update...");
 	ctx.gameLoopCoordinator->update(ctx);
 	gui.gui_update(ctx);
@@ -225,6 +235,9 @@ void GameLoopCoordinator::handle_update_phase(GameContext& ctx, Gui& gui)
 
 void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 {
+	assert(ctx.renderingManager && "GameLoopCoordinator::handle_render_phase: called without a renderingManager");
+	assert(ctx.contentRegistry && "GameLoopCoordinator::handle_render_phase: called without a contentRegistry");
+	assert(ctx.monsterRegistry && "GameLoopCoordinator::handle_render_phase: called without a monsterRegistry");
 	assert(ctx.map && "GameLoopCoordinator::handle_render_phase: called without a map");
 
 	ctx.messageSystem->log("Running render...");
@@ -267,6 +280,8 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 
 void GameLoopCoordinator::handle_menu_check(GameContext& ctx)
 {
+	assert(ctx.menuManager && "GameLoopCoordinator::handle_menu_check: called without a menuManager");
+
 	if (ctx.menuManager->has_active_menus(*ctx.menus))
 	{
 		ctx.gameState->set_window_state(WindowState::MENU);
@@ -276,6 +291,7 @@ void GameLoopCoordinator::handle_menu_check(GameContext& ctx)
 
 void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 {
+	assert(ctx.tileConfig && "GameLoopCoordinator::draw_hover_tooltip: called without a tileConfig");
 	assert(ctx.floorInventory && "GameLoopCoordinator::draw_hover_tooltip: called without a floorInventory");
 	assert(ctx.map && "GameLoopCoordinator::draw_hover_tooltip: called without a map");
 	assert(ctx.inputSystem && "GameLoopCoordinator::draw_hover_tooltip: called without an inputSystem");
@@ -429,6 +445,10 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 
 void GameLoopCoordinator::apply_round_upkeep(GameContext& ctx)
 {
+	assert(ctx.dataManager && "GameLoopCoordinator::apply_round_upkeep: called without a dataManager");
+	assert(ctx.creatureManager && "GameLoopCoordinator::apply_round_upkeep: called without a creatureManager");
+	assert(ctx.creatures && "GameLoopCoordinator::apply_round_upkeep: called without creatures");
+
 	// Stated once, here, rather than re-decided at each use below. A round only runs
 	// under NEW_TURN, after update_creatures, whose monster AI needs a player - a null
 	// one would have broken louder and earlier. Each of these is a value member of
@@ -491,6 +511,11 @@ void GameLoopCoordinator::apply_round_upkeep(GameContext& ctx)
 
 void GameLoopCoordinator::update(GameContext& ctx)
 {
+	assert(ctx.traps && "GameLoopCoordinator::update: called without traps");
+	assert(ctx.spellTiles && "GameLoopCoordinator::update: called without spellTiles");
+	assert(ctx.creatureManager && "GameLoopCoordinator::update: called without a creatureManager");
+	assert(ctx.creatures && "GameLoopCoordinator::update: called without creatures");
+
 	if (ctx.gameState->get_game_status() == GameStatus::VICTORY)
 	{
 		auto victoryMenu = std::make_unique<NotificationMenu>(

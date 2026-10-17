@@ -114,6 +114,8 @@ void MenuTrade::menu(GameContext& ctx)
 
 void open_trade(Creature& shopkeeper, Creature& player, GameContext& ctx)
 {
+	assert(ctx.menuManager && "open_trade: called without a menuManager");
+
 	ctx.menus->push_back(std::make_unique<MenuTrade>(shopkeeper, player, ctx));
 	ctx.menuManager->set_should_take_input(false);
 }

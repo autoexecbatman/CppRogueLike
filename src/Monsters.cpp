@@ -21,6 +21,9 @@
 Mimic::Mimic(Vector2D position, GameContext& ctx)
 	: Creature(position, ActorData{ ctx.monsterRegistry->get_tile(MonsterId::MIMIC), "mimic", ColorPairId::RED_YELLOW })
 {
+	assert(ctx.contentRegistry && "Mimic::Mimic: called without a contentRegistry");
+	assert(ctx.itemRegistry && "Mimic::Mimic: called without an itemRegistry");
+
 	// Monstrous Manual, the killer mimic (PDF page 1700): THAC0 11, AC 7.
 	const int thaco = 11;
 	const int ac = 7;

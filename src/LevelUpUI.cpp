@@ -158,6 +158,8 @@ LevelUpUI::LevelUpUI(Player& player, int newLevel)
 
 void LevelUpUI::menu(GameContext& ctx)
 {
+	assert(ctx.inputSystem && "LevelUpUI::menu: called without an inputSystem");
+
 	ctx.inputSystem->poll();
 	GameKey key = ctx.inputSystem->get_key();
 	if (key == GameKey::SPACE || key == GameKey::ESCAPE || key == GameKey::ENTER)

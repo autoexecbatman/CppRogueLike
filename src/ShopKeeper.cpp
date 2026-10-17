@@ -229,6 +229,8 @@ std::unique_ptr<Item> ShopKeeper::generate_random_misc_item(int dungeonLevel, Ga
 
 bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature& buyer, Creature& owner)
 {
+	assert(ctx.dataManager && "ShopKeeper::process_player_purchase: called without a dataManager");
+
 	const int price = get_buy_price(item);
 
 	// Both refusals come before anything moves, so a refused purchase leaves the shelf,

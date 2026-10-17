@@ -45,6 +45,7 @@ constexpr int SURPRISED_AT_OR_BELOW = 3; // PHB: surprised on a 1, 2 or 3 of 1d1
 //   is_surprised(player, ctx);   // -> true on a 1, false on a 2 (2 + 2 is 4)
 bool is_surprised(const Creature& creature, GameContext& ctx)
 {
+	assert(ctx.dataManager && "is_surprised: called without a dataManager");
 	assert(ctx.dice && "is_surprised: called without dice");
 
 	const int reactionAdjustment = ctx.dataManager->dexterity_for(creature.get_dexterity()).ReactionAdj;
@@ -321,6 +322,7 @@ void AiSpider::bite(Creature& owner, Creature& target, GameContext& ctx)
 
 void AiSpider::inject_venom(Creature& owner, Creature& target, GameContext& ctx)
 {
+	assert(ctx.dataManager && "AiSpider::inject_venom: called without a dataManager");
 	assert(ctx.dice && "AiSpider::inject_venom: called without dice");
 
 	// The Monstrous Manual's hairy spider, whose poison is in no table: "Victims

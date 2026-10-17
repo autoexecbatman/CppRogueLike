@@ -1,5 +1,6 @@
 // file: MonsterEditor.cpp
 #include <algorithm>
+#include <cassert>
 #include <format>
 #include <stdexcept>
 #include <string>
@@ -133,6 +134,8 @@ void MonsterEditor::enter(const MonsterRegistry& monsters)
 
 void MonsterEditor::exit(GameContext& ctx)
 {
+	assert(ctx.monsterRegistry && "MonsterEditor::exit: called without a monsterRegistry");
+
 	commit_working(*ctx.monsterRegistry);
 	m_active = false;
 	ctx.menus->push_back(make_main_menu(true, ctx));
@@ -182,6 +185,8 @@ void MonsterEditor::commit_working(MonsterRegistry& monsters)
 
 void MonsterEditor::handle_input(GameContext& ctx)
 {
+	assert(ctx.monsterRegistry && "MonsterEditor::handle_input: called without a monsterRegistry");
+
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
 
 	if (IsKeyPressed(KEY_ESCAPE))
@@ -220,6 +225,8 @@ void MonsterEditor::handle_input(GameContext& ctx)
 
 void MonsterEditor::handle_normal(const GameContext& ctx)
 {
+	assert(ctx.monsterRegistry && "MonsterEditor::handle_normal: called without a monsterRegistry");
+
 	MonsterRegistry& monsters = *ctx.monsterRegistry;
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
 	const Renderer& r = *ctx.renderer;
@@ -525,6 +532,8 @@ void MonsterEditor::handle_picker(const Renderer& r)
 
 void MonsterEditor::render(const GameContext& ctx) const
 {
+	assert(ctx.monsterRegistry && "MonsterEditor::render: called without a monsterRegistry");
+
 	const Renderer& r = *ctx.renderer;
 	int screenWidth = r.get_screen_width();
 	int screenHeight = r.get_screen_height();

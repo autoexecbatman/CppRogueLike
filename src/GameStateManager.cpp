@@ -147,6 +147,8 @@ void load_traps(const json& j, std::vector<std::unique_ptr<Trap>>& traps, const 
 
 void GameStateManager::init_new_game(GameContext& ctx)
 {
+	assert(ctx.bodyPlanRegistry && "GameStateManager::init_new_game: called without a bodyPlanRegistry");
+	assert(ctx.contentRegistry && "GameStateManager::init_new_game: called without a contentRegistry");
 	assert(ctx.dataManager != nullptr);
 	assert(ctx.messageSystem != nullptr);
 	assert(ctx.levelManager != nullptr);
@@ -176,6 +178,8 @@ void GameStateManager::init_new_game(GameContext& ctx)
 
 bool GameStateManager::load_all(GameContext& ctx)
 {
+	assert(ctx.bodyPlanRegistry && "GameStateManager::load_all: called without a bodyPlanRegistry");
+	assert(ctx.contentRegistry && "GameStateManager::load_all: called without a contentRegistry");
 	assert(ctx.menuManager != nullptr);
 	assert(ctx.dataManager != nullptr);
 	assert(ctx.messageSystem != nullptr);

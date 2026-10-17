@@ -622,6 +622,8 @@ std::optional<int> Player::thief_skill(ThiefSkill skill) const noexcept
 
 void Player::consume_food(int nutrition, GameContext& ctx)
 {
+	assert(ctx.hungerSystem && "Player::consume_food: called without a hungerSystem");
+
 	// Decrease hunger by nutrition value
 	ctx.hungerSystem->decrease_hunger(ctx, nutrition);
 }
@@ -651,6 +653,9 @@ void Player::render(const GameContext& ctx) const noexcept
 //                      // -> true, healed by a fifth of the maximum
 bool Player::rest(GameContext& ctx)
 {
+	assert(ctx.hungerSystem && "Player::rest: called without a hungerSystem");
+	assert(ctx.creatures && "Player::rest: called without creatures");
+
 	// Check if player is already at full health
 	if (get_hp() >= get_max_hp())
 	{
@@ -742,6 +747,8 @@ bool Player::rest(GameContext& ctx)
 
 void Player::animate_resting(GameContext& ctx)
 {
+	assert(ctx.renderingManager && "Player::animate_resting: called without a renderingManager");
+
 	// Spawn one floating 'z'/'Z' above the player each rest turn.
 	// The floating text system handles the animated drift and fade.
 	// Alternate lowercase/uppercase by hp recovered so far (varies nicely).
@@ -760,6 +767,7 @@ void Player::animate_resting(GameContext& ctx)
 
 Player::HideAttempt Player::attempt_hide(GameContext& ctx)
 {
+	assert(ctx.creatures && "Player::attempt_hide: called without creatures");
 	assert(ctx.dice && "Player::attempt_hide: called without dice");
 
 	// Hide in Shadows is the thief's, and a score the adjustments leave at nothing

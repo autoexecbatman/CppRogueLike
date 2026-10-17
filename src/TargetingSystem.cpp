@@ -265,6 +265,8 @@ int TargetingSystem::get_weapon_range(const Item* weapon)
 
 TargetResult TargetingSystem::target_auto_nearest(GameContext& ctx, const Creature& attacker, int range) const
 {
+	assert(ctx.creatures && "TargetingSystem::target_auto_nearest: called without creatures");
+
 	// Living creatures within range - none set means any distance - nearest first, a tie
 	// keeping its order in the list.
 	std::vector<Creature*> candidates;

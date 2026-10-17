@@ -231,6 +231,8 @@ int InventoryUI::screen_rows(GameContext& ctx) const
 
 void InventoryUI::draw_frame(GameContext& ctx)
 {
+	assert(ctx.dataManager && "InventoryUI::draw_frame: called without a dataManager");
+	assert(ctx.tileConfig && "InventoryUI::draw_frame: called without a tileConfig");
 	assert(ctx.renderer && "InventoryUI::draw_frame called without a renderer");
 
 	int tileSize = ctx.renderer->get_tile_size();
@@ -322,6 +324,8 @@ InventoryUI::InventoryUI(Player& player, InventoryScreen startScreen, GameContex
 
 void InventoryUI::menu(GameContext& ctx)
 {
+	assert(ctx.inputSystem && "InventoryUI::menu: called without an inputSystem");
+
 	// Closed by a use chosen from the row menu while it was on top: no key is read and
 	// nothing drawn, and MenuManager removes the screen after this frame.
 	if (!run)
@@ -580,6 +584,8 @@ ItemCategory InventoryUI::get_effective_category(const Item& item) const
 
 void InventoryUI::render_tab_bar(GameContext& ctx)
 {
+	assert(ctx.dataManager && "InventoryUI::render_tab_bar: called without a dataManager");
+
 	int tileSize = ctx.renderer->get_tile_size();
 	int fontSize = ctx.renderer->get_font_size();
 	int fontOff = (tileSize - fontSize) / 2;
@@ -1045,6 +1051,8 @@ std::string InventoryUI::get_category_name(ItemCategory cat) const
 
 bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 {
+	assert(ctx.inputSystem && "InventoryUI::handle_input: called without an inputSystem");
+
 	GameKey key = ctx.inputSystem->get_key();
 
 	// Hover -- track mouse position every frame so cursor follows the pointer

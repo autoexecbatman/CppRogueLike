@@ -70,6 +70,7 @@ std::vector<ItemType> spawn_table(const ItemRegistry& items)
 		// A floor pile of gold is rolled for the level rather than worth its record.
 		auto place_gold = [](Vector2D pos, GameContext& ctx)
 		{
+			assert(ctx.levelManager && "spawn_table place_gold: called without a levelManager");
 			assert(ctx.dice && "ItemFactory place_gold: called without dice");
 			assert(ctx.floorInventory && "ItemFactory place_gold: called without a floorInventory");
 
@@ -308,6 +309,8 @@ std::vector<ItemPercentage> ItemFactory::get_current_distribution(int dungeonLev
 
 void ItemFactory::spawn_item_of_category(Vector2D position, int dungeonLevel, const std::string& category, GameContext& ctx)
 {
+	assert(ctx.itemRegistry && "ItemFactory::spawn_item_of_category: called without an itemRegistry");
+
 	const std::vector<ItemType> table = spawn_table(*ctx.itemRegistry);
 
 	std::vector<const ItemType*> candidates;
@@ -333,6 +336,8 @@ void ItemFactory::spawn_item_of_category(Vector2D position, int dungeonLevel, co
 
 void ItemFactory::spawn_random_item(Vector2D position, int dungeonLevel, GameContext& ctx)
 {
+	assert(ctx.itemRegistry && "ItemFactory::spawn_random_item: called without an itemRegistry");
+
 	const std::vector<ItemType> table = spawn_table(*ctx.itemRegistry);
 
 	std::vector<const ItemType*> candidates;
@@ -349,6 +354,8 @@ void ItemFactory::spawn_random_item(Vector2D position, int dungeonLevel, GameCon
 
 void ItemFactory::spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx)
 {
+	assert(ctx.itemRegistry && "ItemFactory::spawn_all_enhanced_items_debug: called without an itemRegistry");
+
 	ctx.messageSystem->log("DEBUG: Spawning enhanced items from all rules");
 
 	for (const EnhancedItemSpawnRule& rule : ctx.itemRegistry->get_enhanced_rules())

@@ -130,6 +130,9 @@ int TreasureRoom::count_entrances(const Map& map, const DungeonRoom& room)
 
 void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 {
+	assert(ctx.dataManager && "TreasureRoom::setup_guard: called without a dataManager");
+	assert(ctx.creatureManager && "TreasureRoom::setup_guard: called without a creatureManager");
+	assert(ctx.monsterRegistry && "TreasureRoom::setup_guard: called without a monsterRegistry");
 	assert(ctx.map && "TreasureRoom::setup_guard called without a map");
 	assert(ctx.contentRegistry && "TreasureRoom::setup_guard called without contentRegistry");
 	assert(ctx.creatures && "TreasureRoom::setup_guard called without creatures");
@@ -334,6 +337,8 @@ void TreasureRoom::create(
 	RandomDice& generationRng,
 	GameContext& ctx)
 {
+	assert(ctx.creatureManager && "TreasureRoom::create: called without a creatureManager");
+	assert(ctx.monsterRegistry && "TreasureRoom::create: called without a monsterRegistry");
 	assert(ctx.map && "TreasureRoom::create called without a map");
 	assert(ctx.levelManager && "TreasureRoom::create called without levelManager");
 	assert(ctx.dice && "TreasureRoom::create called without dice");

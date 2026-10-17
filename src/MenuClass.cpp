@@ -18,6 +18,8 @@ std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
 
 	auto fighterCommand = [](GameContext& ctx)
 	{
+		assert(ctx.playerBlueprint && "make_class_menu fighterCommand: called without a playerBlueprint");
+
 		ctx.playerBlueprint->creatureClass = CreatureClass::FIGHTER;
 		ctx.menus->push_back(std::make_unique<MenuAbilityScores>(ctx));
 	};
@@ -25,6 +27,8 @@ std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
 
 	auto rogueCommand = [](GameContext& ctx)
 	{
+		assert(ctx.playerBlueprint && "make_class_menu rogueCommand: called without a playerBlueprint");
+
 		ctx.playerBlueprint->creatureClass = CreatureClass::ROGUE;
 		ctx.menus->push_back(std::make_unique<MenuAbilityScores>(ctx));
 	};
@@ -32,6 +36,8 @@ std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
 
 	auto clericCommand = [](GameContext& ctx)
 	{
+		assert(ctx.playerBlueprint && "make_class_menu clericCommand: called without a playerBlueprint");
+
 		ctx.playerBlueprint->creatureClass = CreatureClass::CLERIC;
 		ctx.menus->push_back(std::make_unique<MenuAbilityScores>(ctx));
 	};
@@ -39,6 +45,8 @@ std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
 
 	auto wizardCommand = [](GameContext& ctx)
 	{
+		assert(ctx.playerBlueprint && "make_class_menu wizardCommand: called without a playerBlueprint");
+
 		ctx.playerBlueprint->creatureClass = CreatureClass::WIZARD;
 		ctx.menus->push_back(std::make_unique<MenuAbilityScores>(ctx));
 	};
@@ -46,6 +54,7 @@ std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
 
 	auto randomCommand = [](GameContext& ctx)
 	{
+		assert(ctx.playerBlueprint && "make_class_menu randomCommand: called without a playerBlueprint");
 		assert(ctx.dice && "make_class_menu randomCommand: called without dice");
 
 		switch (ctx.dice->d4())

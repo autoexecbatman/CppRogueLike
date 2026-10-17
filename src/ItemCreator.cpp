@@ -177,11 +177,17 @@ std::unique_ptr<Item> make_item(std::string_view key, const ItemParams& params, 
 
 std::unique_ptr<Item> ItemCreator::create(std::string_view key, Vector2D pos, GameContext& ctx)
 {
+	assert(ctx.contentRegistry && "ItemCreator::create: called without a contentRegistry");
+	assert(ctx.itemRegistry && "ItemCreator::create: called without an itemRegistry");
+
 	return make_item(key, ctx.itemRegistry->get_params(key), pos, *ctx.contentRegistry);
 }
 
 std::unique_ptr<Item> ItemCreator::create_with_gold_amount(Vector2D pos, int goldAmount, GameContext& ctx)
 {
+	assert(ctx.contentRegistry && "ItemCreator::create_with_gold_amount: called without a contentRegistry");
+	assert(ctx.itemRegistry && "ItemCreator::create_with_gold_amount: called without an itemRegistry");
+
 	const ItemParams& params = ctx.itemRegistry->get_params("gold_coin");
 	TileRef tile = ctx.contentRegistry->get_tile("gold_coin");
 	auto item = std::make_unique<Item>(
@@ -226,6 +232,7 @@ std::unique_ptr<Item> ItemCreator::create_random_of_category(
 	GameContext& ctx,
 	int dungeonLevel)
 {
+	assert(ctx.itemRegistry && "ItemCreator::create_random_of_category: called without an itemRegistry");
 	assert(ctx.dice && "ItemCreator::create_random_of_category: called without dice");
 
 	struct Candidate

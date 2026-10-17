@@ -15,6 +15,8 @@
 MenuSpellCast::MenuSpellCast(Player& player, GameContext& ctx)
 	: player(player)
 {
+	assert(ctx.spellRegistry && "MenuSpellCast::MenuSpellCast: called without a spellRegistry");
+
 	populate_spells();
 
 	if (availableSpells.empty())
@@ -172,6 +174,8 @@ void MenuSpellCast::on_key(GameContext& ctx)
 
 void MenuSpellCast::menu(GameContext& ctx)
 {
+	assert(ctx.spellRegistry && "MenuSpellCast::menu: called without a spellRegistry");
+
 	if (availableSpells.empty())
 	{
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "No spells available.", MessageCompletion::FINISHED);

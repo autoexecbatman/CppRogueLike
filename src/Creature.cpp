@@ -1281,6 +1281,7 @@ bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCo
 
 bool Creature::unequip_item(EquipmentSlot slot, GameContext& ctx)
 {
+	assert(ctx.dataManager && "Creature::unequip_item: called without a dataManager");
 	assert(ctx.floorInventory && "Creature::unequip_item: called without a floorInventory");
 
 	// erase after move requires iterator; find_if + erase is the correct C++23 pattern here
@@ -1498,6 +1499,7 @@ ColorPairId Creature::get_display_color() const noexcept
 
 void Creature::die(GameContext& ctx)
 {
+	assert(ctx.tileConfig && "Creature::die: called without a tileConfig");
 	assert(ctx.floorInventory && "Creature::die: called without a floorInventory");
 
 	// Monster death: message, reward, animation, drop items, create corpse

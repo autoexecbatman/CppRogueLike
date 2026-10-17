@@ -82,6 +82,8 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 // victim's Constitution adjusts the roll, as its own table says.
 void AiWebSpinner::inject_venom(Creature& owner, Creature& target, GameContext& ctx)
 {
+	assert(ctx.dataManager && "AiWebSpinner::inject_venom: called without a dataManager");
+
 	const int constitutionAdjustment = ctx.dataManager->constitution_for(target.get_constitution()).PoisonSave;
 	if (SavingThrows::is_made(target, SavingThrow::PARALYZATION_POISON_DEATH, constitutionAdjustment, ctx))
 	{
@@ -99,6 +101,7 @@ void AiWebSpinner::inject_venom(Creature& owner, Creature& target, GameContext& 
 
 bool AiWebSpinner::should_create_web(Creature& owner, GameContext& ctx)
 {
+	assert(ctx.spellTiles && "AiWebSpinner::should_create_web: called without spellTiles");
 	assert(ctx.dice && "AiWebSpinner::should_create_web: called without dice");
 
 	// If player is directly adjacent, don't create web (attack instead)
@@ -227,6 +230,7 @@ bool AiWebSpinner::try_create_web(Creature& owner, GameContext& ctx)
 // Helper method to check if a position is valid for placing a web
 bool AiWebSpinner::is_valid_web_position(Vector2D pos, GameContext& ctx)
 {
+	assert(ctx.spellTiles && "AiWebSpinner::is_valid_web_position: called without spellTiles");
 	assert(ctx.map && "AiWebSpinner::is_valid_web_position: called without a map");
 
 	// Check bounds
@@ -265,6 +269,8 @@ bool AiWebSpinner::is_valid_web_position(Vector2D pos, GameContext& ctx)
 
 void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext& ctx)
 {
+	assert(ctx.spellTiles && "AiWebSpinner::generate_web_entities: called without spellTiles");
+	assert(ctx.tileConfig && "AiWebSpinner::generate_web_entities: called without a tileConfig");
 	assert(ctx.dice && "AiWebSpinner::generate_web_entities: called without dice");
 
 	// Create a complex web pattern centered at the given position

@@ -152,6 +152,7 @@ static void draw_hud_bar(
 	float ratio,
 	Color fillTint)
 {
+	assert(ctx.tileConfig && "draw_hud_bar: called without a tileConfig");
 	assert(width > 2 * GUI_BAR_PLATE_WIDTH && "a bar narrower than its two end plates has no trough");
 
 	const TileConfig& tileConfig = *ctx.tileConfig;
@@ -280,6 +281,7 @@ void Gui::gui_update(GameContext& ctx)
 // ---------------------------------------------------------------------------
 void Gui::gui_render(const GameContext& ctx)
 {
+	assert(ctx.tileConfig && "Gui::gui_render: called without a tileConfig");
 	assert(ctx.renderer && "Gui::gui_render called without a renderer");
 
 	const int tileSize = ctx.renderer->get_tile_size();
@@ -373,6 +375,7 @@ void Gui::gui_render(const GameContext& ctx)
 // ---------------------------------------------------------------------------
 void Gui::render_hp_bar(const GameContext& ctx)
 {
+	assert(ctx.tileConfig && "Gui::render_hp_bar: called without a tileConfig");
 	assert(ctx.renderer && "Gui::render_hp_bar called without a renderer");
 
 	const int tileSize = ctx.renderer->get_tile_size();
@@ -425,6 +428,8 @@ void Gui::render_hp_bar(const GameContext& ctx)
 
 void Gui::render_hunger_status(const GameContext& ctx)
 {
+	assert(ctx.hungerSystem && "Gui::render_hunger_status: called without a hungerSystem");
+	assert(ctx.tileConfig && "Gui::render_hunger_status: called without a tileConfig");
 	assert(ctx.renderer && "Gui::render_hunger_status called without a renderer");
 
 	const int tileSize = ctx.renderer->get_tile_size();

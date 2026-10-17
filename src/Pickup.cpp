@@ -27,6 +27,7 @@ namespace Pickup
 
 void take_floor_item(Creature& taker, Item& item, GameContext& ctx)
 {
+	assert(ctx.dataManager && "Pickup::take_floor_item: called without a dataManager");
 	assert(ctx.floorInventory && "take_floor_item: no floor to take from");
 
 	// Coin never enters the pack. The purse carries it, and a purse's weight is

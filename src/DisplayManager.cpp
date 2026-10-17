@@ -1,5 +1,6 @@
 // file: DisplayManager.cpp
 
+#include <cassert>
 #include <format>
 #include <memory>
 #include <string>
@@ -58,6 +59,8 @@ void DisplayManager::display_character_sheet(const Player& player, GameContext& 
 
 void DisplayManager::display_balance_viewer(GameContext& ctx) const
 {
+	assert(ctx.levelManager && "DisplayManager::display_balance_viewer: called without a levelManager");
+
 	const int level = ctx.levelManager->get_dungeon_level();
 	ctx.menus->push_back(std::make_unique<BalanceViewer>(level, ctx));
 }

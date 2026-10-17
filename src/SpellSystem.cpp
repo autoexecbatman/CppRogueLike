@@ -68,6 +68,7 @@ namespace
 {
 void animate_heal(const Vector2D& pos, GameContext& ctx)
 {
+	assert(ctx.tileConfig && "animate_heal: called without a tileConfig");
 	assert(ctx.animSystem && "SpellSystem::animate_heal: called without an animSystem");
 
 	ctx.animSystem->spawn_effect(
@@ -561,6 +562,8 @@ void cast_fireball(
 
 bool cast_magic_missile(Creature& caster, GameContext& ctx)
 {
+	assert(ctx.creatureManager && "SpellSystem::cast_magic_missile: called without a creatureManager");
+	assert(ctx.creatures && "SpellSystem::cast_magic_missile: called without creatures");
 	assert(ctx.map && "SpellSystem::cast_magic_missile: called without a map");
 	assert(ctx.dice && "SpellSystem::cast_magic_missile: called without dice");
 
@@ -647,6 +650,7 @@ bool cast_shield(Creature& caster, GameContext& ctx)
 
 bool cast_sleep(Creature& caster, GameContext& ctx)
 {
+	assert(ctx.creatures && "SpellSystem::cast_sleep: called without creatures");
 	assert(ctx.map && "SpellSystem::cast_sleep: called without a map");
 	assert(ctx.dice && "SpellSystem::cast_sleep: called without dice");
 
@@ -725,6 +729,7 @@ bool cast_sleep(Creature& caster, GameContext& ctx)
 
 bool cast_hold_person(Creature& caster, GameContext& ctx)
 {
+	assert(ctx.creatures && "SpellSystem::cast_hold_person: called without creatures");
 	assert(ctx.map && "SpellSystem::cast_hold_person: called without a map");
 	assert(ctx.dice && "SpellSystem::cast_hold_person: called without dice");
 
@@ -1027,6 +1032,8 @@ void SpellSystem::cast_spell_by_key(
 	std::function<void(GameContext&)> onCastComplete,
 	GameContext& ctx)
 {
+	assert(ctx.dataManager && "SpellSystem::cast_spell_by_key: called without a dataManager");
+	assert(ctx.spellRegistry && "SpellSystem::cast_spell_by_key: called without a spellRegistry");
 	assert(ctx.dice && "SpellSystem::cast_spell_by_key: called without dice");
 
 	// Every effect that succeeds calls this, at four sites and sometimes a turn
@@ -1054,6 +1061,7 @@ void SpellSystem::cast_spell_by_key(
 
 SpellSystem::FireballBurst SpellSystem::burst_fireball(Vector2D center, int casterLevel, int radius, GameContext& ctx)
 {
+	assert(ctx.creatures && "SpellSystem::burst_fireball: called without creatures");
 	assert(ctx.dice && "SpellSystem::burst_fireball: called without dice");
 
 	// AD&D 2e: 1d6 per caster level, max 10d6
@@ -1103,6 +1111,9 @@ void SpellSystem::burn_with_fireball(Creature& target, const FireballBurst& burs
 
 void SpellSystem::show_memorization_menu(Player& player, GameContext& ctx)
 {
+	assert(ctx.dataManager && "SpellSystem::show_memorization_menu: called without a dataManager");
+	assert(ctx.spellRegistry && "SpellSystem::show_memorization_menu: called without a spellRegistry");
+
 	CasterClass casterClass = to_caster_class(player.get_creature_class());
 	auto slots = get_spell_slots(casterClass, player.get_creature_level(), player.get_wisdom(), *ctx.dataManager);
 	if (slots.empty())

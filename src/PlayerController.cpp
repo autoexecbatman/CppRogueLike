@@ -91,6 +91,7 @@ PlayerController::PlayerController(Player& owner)
 
 void PlayerController::update(GameContext& ctx)
 {
+	assert(ctx.inputHandler && "PlayerController::update: called without an inputHandler");
 	assert(ctx.map && "PlayerController::update: called without a map");
 	assert(ctx.dice && "PlayerController::update: called without dice");
 
@@ -285,6 +286,8 @@ void PlayerController::look_on_floor(Vector2D target, GameContext& ctx)
 
 bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 {
+	assert(ctx.creatures && "PlayerController::look_to_attack: called without creatures");
+
 	for (const auto& c : *ctx.creatures)
 	{
 		assert(c != nullptr && "null creature in creatures list");
@@ -391,6 +394,9 @@ void PlayerController::swap_places_with(Creature& target, GameContext& ctx)
 // spends the turn only when an attempt was actually made.
 void PlayerController::attempt_turn_undead(GameContext& ctx)
 {
+	assert(ctx.creatureManager && "PlayerController::attempt_turn_undead: called without a creatureManager");
+	assert(ctx.creatures && "PlayerController::attempt_turn_undead: called without creatures");
+
 	const Turning::TurnUndeadReport report = Turning::turn_undead(playerOwner, ctx);
 
 	if (!report.attempted)
@@ -488,6 +494,8 @@ void PlayerController::confirm_attack_on_peaceful(Creature& target, GameContext&
 //   strike(goblin, ctx); // one swing, or two at 2.0 attacks per round
 void PlayerController::strike(Creature& target, GameContext& ctx)
 {
+	assert(ctx.creatureManager && "PlayerController::strike: called without a creatureManager");
+	assert(ctx.creatures && "PlayerController::strike: called without creatures");
 	assert(playerOwner.attacker && "strike: the player swung with no attacker");
 
 	// One swing, priced by the rate. A character who attacks faster than once a round
@@ -500,6 +508,7 @@ void PlayerController::strike(Creature& target, GameContext& ctx)
 
 bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext& ctx)
 {
+	assert(ctx.tileConfig && "PlayerController::look_to_move: called without a tileConfig");
 	assert(ctx.map && "PlayerController::look_to_move: called without a map");
 
 	if (ctx.map->get_actor(targetPosition, ctx) != nullptr)
@@ -610,6 +619,8 @@ void PlayerController::flush_fov(GameContext& ctx)
 
 bool PlayerController::is_mouse_pending_cancelled(GameContext& ctx) const
 {
+	assert(ctx.inputHandler && "PlayerController::is_mouse_pending_cancelled: called without an inputHandler");
+
 	const Controls key = static_cast<Controls>(ctx.inputHandler->get_current_key());
 	const auto& moves = direction_map();
 	bool isMovement = moves.contains(key);
@@ -722,6 +733,8 @@ void PlayerController::begin_path_walk(
 	PendingDoorAction doorAction,
 	GameContext& ctx)
 {
+	assert(ctx.mousePathOverlay && "PlayerController::begin_path_walk: called without a mousePathOverlay");
+
 	if (mode == MouseMode::IDLE)
 	{
 		throw std::logic_error("PlayerController::begin_path_walk -- mode must not be IDLE");
@@ -750,6 +763,7 @@ void PlayerController::begin_path_walk(
 
 bool PlayerController::execute_arrival(GameContext& ctx)
 {
+	assert(ctx.levelManager && "PlayerController::execute_arrival: called without a levelManager");
 	assert(ctx.map && "PlayerController::execute_arrival: called without a map");
 
 	switch (mouseMode)
@@ -864,6 +878,7 @@ bool PlayerController::handle_mouse_path(GameContext& ctx)
 
 void PlayerController::handle_left_click(GameContext& ctx)
 {
+	assert(ctx.levelManager && "PlayerController::handle_left_click: called without a levelManager");
 	assert(ctx.floorInventory && "PlayerController::handle_left_click: called without a floorInventory");
 	assert(ctx.map && "PlayerController::handle_left_click: called without a map");
 
@@ -1113,6 +1128,13 @@ void PlayerController::handle_right_click(GameContext& ctx)
 
 void PlayerController::call_action(Controls key, GameContext& ctx)
 {
+	assert(ctx.dataManager && "PlayerController::call_action: called without a dataManager");
+	assert(ctx.costOverlay && "PlayerController::call_action: called without a costOverlay");
+	assert(ctx.displayManager && "PlayerController::call_action: called without a displayManager");
+	assert(ctx.stairs && "PlayerController::call_action: called without stairs");
+	assert(ctx.targeting && "PlayerController::call_action: called without a targeting");
+	assert(ctx.levelManager && "PlayerController::call_action: called without a levelManager");
+	assert(ctx.creatureManager && "PlayerController::call_action: called without a creatureManager");
 	assert(ctx.map && "PlayerController::call_action: called without a map");
 
 	switch (key)
@@ -1360,6 +1382,7 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 
 bool PlayerController::resolve_pending_door(GameContext& ctx)
 {
+	assert(ctx.inputHandler && "PlayerController::resolve_pending_door: called without an inputHandler");
 	assert(ctx.map && "PlayerController::resolve_pending_door: called without a map");
 
 	if (pendingDoorAction == PendingDoorAction::NONE)

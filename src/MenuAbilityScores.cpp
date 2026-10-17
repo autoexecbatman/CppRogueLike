@@ -162,6 +162,7 @@ void MenuAbilityScores::draw_allocation_screen()
 
 void MenuAbilityScores::menu(GameContext& ctx)
 {
+	assert(ctx.playerBlueprint && "MenuAbilityScores::menu: called without a playerBlueprint");
 	assert(inputSystem && "MenuAbilityScores::menu called before menu_new");
 	inputSystem->poll();
 

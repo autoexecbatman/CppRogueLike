@@ -24,6 +24,7 @@ bool Minimap::is_visible() const noexcept
 
 void Minimap::render(const GameContext& ctx) const
 {
+	assert(ctx.tileConfig && "Minimap::render: called without a tileConfig");
 	assert(ctx.map && "Minimap::render: called without a map");
 	if (!visible || !ctx.renderer || !ctx.player())
 	{

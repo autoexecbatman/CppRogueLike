@@ -45,6 +45,8 @@ Spider::Spider(Vector2D position, GameContext& ctx, SpiderType type)
 
 void Spider::init_spider_type(GameContext& ctx)
 {
+	assert(ctx.monsterRegistry && "Spider::init_spider_type: called without a monsterRegistry");
+
 	// Common spider traits
 	add_state(ActorState::CAN_SWIM); // Spiders can walk on water (they're light)
 	add_state(ActorState::CAN_WALK_WEBS); // Spiders are not caught by webs, their own or others'

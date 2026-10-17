@@ -24,6 +24,10 @@ void RenderingManager::render(GameContext& ctx) const
 
 void RenderingManager::render_world(const GameContext& ctx) const
 {
+	assert(ctx.traps && "RenderingManager::render_world: called without traps");
+	assert(ctx.stairs && "RenderingManager::render_world: called without stairs");
+	assert(ctx.spellTiles && "RenderingManager::render_world: called without spellTiles");
+	assert(ctx.creatures && "RenderingManager::render_world: called without creatures");
 	assert(ctx.floorInventory && "RenderingManager::render_world: called without a floorInventory");
 	assert(ctx.map && "RenderingManager::render_world: called without a map");
 

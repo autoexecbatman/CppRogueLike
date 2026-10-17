@@ -47,6 +47,7 @@ AttackResult Attacker::perform_single_attack(
 	AttackKind kind,
 	GameContext& ctx)
 {
+	assert(ctx.dataManager && "Attacker::perform_single_attack: called without a dataManager");
 	assert(ctx.dice && "Attacker::perform_single_attack: called without dice");
 
 	// Shopkeeper interaction, melee only: the shop component is what marks a trader.
@@ -210,6 +211,8 @@ int Attacker::calculate_to_hit_roll(
 	AttackKind kind,
 	GameContext& ctx) const noexcept
 {
+	assert(ctx.dataManager && "Attacker::calculate_to_hit_roll: called without a dataManager");
+
 	// AD&D 2e: THAC0 - AC = roll needed
 	int rollNeeded = attacker.get_thaco() - armor_class_attacked(target, ctx);
 	int hitModifier = attackPenalty + strengthHit;

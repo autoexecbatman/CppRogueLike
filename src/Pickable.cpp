@@ -345,6 +345,9 @@ bool use(Weapon& weapon, Item& owner, Creature& wearer, GameContext& ctx)
 
 bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContext& ctx)
 {
+	assert(ctx.targeting && "use(TargetedScroll): called without a targeting");
+	assert(ctx.creatureManager && "use(TargetedScroll): called without a creatureManager");
+	assert(ctx.creatures && "use(TargetedScroll): called without creatures");
 	assert(ctx.map && "use(TargetedScroll): called without a map");
 
 	// FOV_BUFF and AUTO_NEAREST are synchronous — no targeting cursor needed
@@ -503,6 +506,8 @@ bool use(Gold& gold, Item& owner, Creature& wearer, GameContext& ctx)
 
 bool use(Food& food, Item& owner, Creature& wearer, GameContext& ctx)
 {
+	assert(ctx.hungerSystem && "use(Food): called without a hungerSystem");
+
 	ctx.hungerSystem->decrease_hunger(ctx, food.nutritionValue);
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "You eat the ");
 	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, owner.actorData.name);
@@ -513,6 +518,7 @@ bool use(Food& food, Item& owner, Creature& wearer, GameContext& ctx)
 
 bool use(CorpseFood& corpseFood, Item& owner, Creature& wearer, GameContext& ctx)
 {
+	assert(ctx.hungerSystem && "use(CorpseFood): called without a hungerSystem");
 	assert(ctx.dice && "use(CorpseFood): called without dice");
 
 	if (corpseFood.nutritionValue <= 0)

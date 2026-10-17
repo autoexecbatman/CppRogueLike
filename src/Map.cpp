@@ -343,6 +343,8 @@ TileType Map::get_tile_type(Vector2D pos) const noexcept
 // tile is never either. Floor and corridor are unremarkable by design.
 void Map::describe_tile(TileType tileType, GameContext& ctx)
 {
+	assert(ctx.tileConfig && "Map::describe_tile: called without a tileConfig");
+
 	const TileDefinition& definition = ctx.tileConfig->get_tile_definition(tileType);
 
 	// Most ground is unremarkable and says nothing.
@@ -400,6 +402,8 @@ void Map::update()
 
 void Map::render(const GameContext& ctx) const
 {
+	assert(ctx.tileConfig && "Map::render: called without a tileConfig");
+
 	if (tiles.empty() || !ctx.renderer)
 	{
 		return;
@@ -1563,6 +1567,8 @@ void Map::add_monster(Vector2D pos, GameContext& ctx) const
 // getActor returns the actor at the given coordinates or `nullptr` if there's none
 Creature* Map::get_actor(Vector2D pos, const GameContext& ctx) const noexcept
 {
+	assert(ctx.creatures && "Map::get_actor: called without creatures");
+
 	// Check player position first
 	if (ctx.player() && ctx.player()->position == pos)
 	{

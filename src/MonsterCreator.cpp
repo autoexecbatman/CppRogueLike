@@ -111,6 +111,8 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 
 std::unique_ptr<Creature> MonsterCreator::create(Vector2D pos, MonsterId id, GameContext& ctx)
 {
+	assert(ctx.monsterRegistry && "MonsterCreator::create: called without a monsterRegistry");
+
 	return create_from_params(pos, ctx.monsterRegistry->get_standard_monsters().at(id), ctx);
 }
 

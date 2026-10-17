@@ -22,6 +22,9 @@ TargetingMenu::TargetingMenu(int maxRange, int aoeRadius, Callback onComplete, G
 
 void TargetingMenu::menu(GameContext& ctx)
 {
+	assert(ctx.targeting && "TargetingMenu::menu: called without a targeting");
+	assert(ctx.renderingManager && "TargetingMenu::menu: called without a renderingManager");
+	assert(ctx.inputSystem && "TargetingMenu::menu: called without an inputSystem");
 	assert(ctx.map && "TargetingMenu::menu: called without a map");
 
 	ctx.inputSystem->poll();

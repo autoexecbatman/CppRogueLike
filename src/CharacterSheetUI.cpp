@@ -1,4 +1,5 @@
 // CharacterSheetUI.cpp - Handles character sheet display
+#include <cassert>
 #include <format>
 #include <string>
 
@@ -100,6 +101,8 @@ void display_experience_info(const Player& player, GameContext& ctx, int& row)
 
 void display_attributes(const Player& player, GameContext& ctx, int& row)
 {
+	assert(ctx.dataManager && "display_attributes: called without a dataManager");
+
 	int tileSize = ctx.renderer->get_tile_size();
 	int x = tileSize;
 
@@ -155,6 +158,8 @@ void display_combat_stats(const Player& player, GameContext& ctx, int& row)
 
 void display_equipment_info(const Player& player, GameContext& ctx, int& row)
 {
+	assert(ctx.dataManager && "display_equipment_info: called without a dataManager");
+
 	int tileSize = ctx.renderer->get_tile_size();
 	int x = tileSize;
 
@@ -249,6 +254,9 @@ CharacterSheetUI::CharacterSheetUI(const Player& player)
 
 void CharacterSheetUI::menu(GameContext& ctx)
 {
+	assert(ctx.inputSystem && "CharacterSheetUI::menu: called without an inputSystem");
+	assert(ctx.tileConfig && "CharacterSheetUI::menu: called without a tileConfig");
+
 	ctx.inputSystem->poll();
 	GameKey key = ctx.inputSystem->get_key();
 	if (key == GameKey::ESCAPE || key == GameKey::SPACE)

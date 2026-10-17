@@ -1,4 +1,5 @@
 // file: Menu.cpp
+#include <cassert>
 #include <memory>
 #include <vector>
 
@@ -25,6 +26,8 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
 
 	auto newGameCommand = [](GameContext& ctx)
 	{
+		assert(ctx.menuManager && "make_main_menu newGameCommand: called without a menuManager");
+
 		ctx.menuManager->set_game_initialized(false);
 		ctx.menus->push_back(make_gender_menu(ctx));
 	};
@@ -34,6 +37,8 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
 	{
 		auto loadGameCommand = [](GameContext& ctx)
 		{
+			assert(ctx.stateManager && "make_main_menu loadGameCommand: called without a stateManager");
+
 			ctx.stateManager->load_all(ctx);
 		};
 		entries.push_back({ "Load Game", 'l', loadGameCommand });
@@ -48,24 +53,35 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
 #ifndef __EMSCRIPTEN__
 	auto roomEditorCommand = [](GameContext& ctx)
 	{
+		assert(ctx.roomEditor && "make_main_menu roomEditorCommand: called without a roomEditor");
+		assert(ctx.prefabLibrary && "make_main_menu roomEditorCommand: called without a prefabLibrary");
+
 		ctx.roomEditor->enter(*ctx.prefabLibrary);
 	};
 	entries.push_back({ "Room Editor", 'e', roomEditorCommand });
 
 	auto monsterEditorCommand = [](GameContext& ctx)
 	{
+		assert(ctx.monsterEditor && "make_main_menu monsterEditorCommand: called without a monsterEditor");
+		assert(ctx.monsterRegistry && "make_main_menu monsterEditorCommand: called without a monsterRegistry");
+
 		ctx.monsterEditor->enter(*ctx.monsterRegistry);
 	};
 	entries.push_back({ "Monster Editor", 'm', monsterEditorCommand });
 
 	auto spellEditorCommand = [](GameContext& ctx)
 	{
+		assert(ctx.spellEditor && "make_main_menu spellEditorCommand: called without a spellEditor");
+		assert(ctx.spellRegistry && "make_main_menu spellEditorCommand: called without a spellRegistry");
+
 		ctx.spellEditor->enter(*ctx.spellRegistry);
 	};
 	entries.push_back({ "Spell Editor", 'p', spellEditorCommand });
 
 	auto itemEditorCommand = [](GameContext& ctx)
 	{
+		assert(ctx.itemEditor && "make_main_menu itemEditorCommand: called without an itemEditor");
+
 		ctx.itemEditor->enter(ctx);
 	};
 	entries.push_back({ "Item Editor", 'i', itemEditorCommand });
@@ -92,6 +108,10 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
 	{
 		onFrame = [](GameContext& ctx)
 		{
+			assert(ctx.menuManager && "make_main_menu onFrame: called without a menuManager");
+			assert(ctx.renderingManager && "make_main_menu onFrame: called without a renderingManager");
+			assert(ctx.gui && "make_main_menu onFrame: called without a gui");
+
 			if (ctx.menuManager->is_game_initialized())
 			{
 				ctx.renderingManager->render(ctx);

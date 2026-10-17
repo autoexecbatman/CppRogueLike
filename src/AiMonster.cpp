@@ -24,6 +24,8 @@ const std::vector<Vector2D> NEIGHBORS = {
 // AD&D 2e: Move away from player, up the cost map this creature would descend to reach it.
 void flee(Creature& owner, GameContext& ctx)
 {
+	assert(ctx.pathfinder && "flee: called without a pathfinder");
+	assert(ctx.tileConfig && "flee: called without a tileConfig");
 	assert(ctx.map && "flee: called without a map");
 
 	auto is_occupied = [&ctx](const Vector2D& pos)
@@ -155,6 +157,7 @@ bool cannot_act(Creature& owner)
 
 void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
 {
+	assert(ctx.pathfinder && "AiMonster::move_or_attack: called without a pathfinder");
 	assert(ctx.map && "AiMonster::move_or_attack: called without a map");
 
 	check_morale(owner, ctx);

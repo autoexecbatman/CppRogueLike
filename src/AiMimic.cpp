@@ -92,6 +92,9 @@ AiMimic::AiMimic(std::vector<Disguise> initialDisguises)
 
 void AiMimic::update(Creature& owner, GameContext& ctx)
 {
+	assert(ctx.contentRegistry && "AiMimic::update: called without a contentRegistry");
+	assert(ctx.itemRegistry && "AiMimic::update: called without an itemRegistry");
+
 	// Lazy init after load: possibleDisguises is empty when created via Ai::create().
 	if (possibleDisguises.empty())
 	{
@@ -310,6 +313,8 @@ void AiMimic::boost_confusion_power(GameContext& ctx)
 
 void AiMimic::transform_to_greater_mimic(Creature& owner, GameContext& ctx)
 {
+	assert(ctx.monsterRegistry && "AiMimic::transform_to_greater_mimic: called without a monsterRegistry");
+
 	owner.actorData.tile = ctx.monsterRegistry->get_tile(MonsterId::MIMIC);
 	owner.actorData.color = ColorPairId::RED_YELLOW;
 	owner.actorData.name = "greater mimic";
@@ -318,6 +323,7 @@ void AiMimic::transform_to_greater_mimic(Creature& owner, GameContext& ctx)
 
 void AiMimic::check_revealing(Creature& owner, GameContext& ctx)
 {
+	assert(ctx.monsterRegistry && "AiMimic::check_revealing: called without a monsterRegistry");
 	assert(ctx.dice && "AiMimic::check_revealing: called without dice");
 
 	int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);

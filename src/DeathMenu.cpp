@@ -86,6 +86,7 @@ void DeathMenu::menu(GameContext& ctx)
 
 void DeathMenu::render(GameContext& ctx) const
 {
+	assert(ctx.tileConfig && "DeathMenu::render: called without a tileConfig");
 	assert(ctx.renderer && "DeathMenu::render called without a renderer");
 
 	Renderer& renderer = *ctx.renderer;

@@ -54,6 +54,8 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 				.levelScaling = params.levelScaling,
 				.createFunc = [id](Vector2D pos, GameContext& ctx)
 				{
+					assert(ctx.creatureManager && "spawn_table createFunc[id]: called without a creatureManager");
+
 					ctx.creatureManager->add_creature(MonsterCreator::create(pos, id, ctx), ctx);
 				},
 			});
@@ -76,6 +78,9 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 				.levelScaling = params.levelScaling,
 				.createFunc = [key](Vector2D pos, GameContext& ctx)
 				{
+					assert(ctx.creatureManager && "spawn_table createFunc[key]: called without a creatureManager");
+					assert(ctx.monsterRegistry && "spawn_table createFunc[key]: called without a monsterRegistry");
+
 					ctx.creatureManager->add_creature(
 						MonsterCreator::create_from_params(pos, ctx.monsterRegistry->get_params(key), ctx),
 						ctx);
@@ -93,6 +98,8 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 			.levelScaling = -0.3f,
 			.createFunc = [](Vector2D pos, GameContext& ctx)
 			{
+				assert(ctx.creatureManager && "spawn_table Small Spider createFunc: called without a creatureManager");
+
 				ctx.creatureManager->add_creature(std::make_unique<SmallSpider>(pos, ctx), ctx);
 			},
 		});
@@ -106,6 +113,8 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 			.levelScaling = 0.0f,
 			.createFunc = [](Vector2D pos, GameContext& ctx)
 			{
+				assert(ctx.creatureManager && "spawn_table Giant Spider createFunc: called without a creatureManager");
+
 				ctx.creatureManager->add_creature(std::make_unique<GiantSpider>(pos, ctx), ctx);
 			},
 		});
@@ -119,6 +128,8 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 			.levelScaling = 0.2f,
 			.createFunc = [](Vector2D pos, GameContext& ctx)
 			{
+				assert(ctx.creatureManager && "spawn_table Web Spinner createFunc: called without a creatureManager");
+
 				ctx.creatureManager->add_creature(std::make_unique<WebSpinner>(pos, ctx), ctx);
 			},
 		});
@@ -135,6 +146,8 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 			.levelScaling = 0.5f,
 			.createFunc = [](Vector2D pos, GameContext& ctx)
 			{
+				assert(ctx.creatureManager && "spawn_table Mimic createFunc: called without a creatureManager");
+
 				ctx.creatureManager->add_creature(std::make_unique<Mimic>(pos, ctx), ctx);
 			},
 		});
@@ -149,6 +162,9 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 			.levelScaling = 0.0f,
 			.createFunc = [](Vector2D pos, GameContext& ctx)
 			{
+				assert(ctx.levelManager && "spawn_table Shopkeeper createFunc: called without a levelManager");
+				assert(ctx.creatureManager && "spawn_table Shopkeeper createFunc: called without a creatureManager");
+
 				const int dungeonLevel = ctx.levelManager->get_dungeon_level();
 				if (ShopkeeperFactory::should_spawn_shopkeeper(dungeonLevel, ctx))
 				{
@@ -202,6 +218,7 @@ int calculate_weight(const MonsterType& monster, int dungeonLevel)
 
 void MonsterFactory::spawn_random_monster(Vector2D position, int dungeonLevel, GameContext& ctx)
 {
+	assert(ctx.monsterRegistry && "MonsterFactory::spawn_random_monster: called without a monsterRegistry");
 	assert(ctx.dice && "MonsterFactory::spawn_random_monster: called without dice");
 
 	const std::vector<MonsterType> table = spawn_table(*ctx.monsterRegistry);

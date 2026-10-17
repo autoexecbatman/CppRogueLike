@@ -15,6 +15,8 @@ std::unique_ptr<BaseMenu> make_gender_menu(GameContext& ctx)
 
 	auto maleCommand = [](GameContext& ctx)
 	{
+		assert(ctx.playerBlueprint && "make_gender_menu maleCommand: called without a playerBlueprint");
+
 		ctx.playerBlueprint->gender = "Male";
 		ctx.menus->push_back(make_race_menu(ctx));
 	};
@@ -22,6 +24,8 @@ std::unique_ptr<BaseMenu> make_gender_menu(GameContext& ctx)
 
 	auto femaleCommand = [](GameContext& ctx)
 	{
+		assert(ctx.playerBlueprint && "make_gender_menu femaleCommand: called without a playerBlueprint");
+
 		ctx.playerBlueprint->gender = "Female";
 		ctx.menus->push_back(make_race_menu(ctx));
 	};
@@ -29,6 +33,7 @@ std::unique_ptr<BaseMenu> make_gender_menu(GameContext& ctx)
 
 	auto randomCommand = [](GameContext& ctx)
 	{
+		assert(ctx.playerBlueprint && "make_gender_menu randomCommand: called without a playerBlueprint");
 		assert(ctx.dice && "make_gender_menu randomCommand: called without dice");
 
 		ctx.playerBlueprint->gender = ctx.dice->d2() == 1 ? "Male" : "Female";

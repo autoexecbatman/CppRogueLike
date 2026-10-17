@@ -1,5 +1,6 @@
 // file: ItemEditor.cpp
 #include <algorithm>
+#include <cassert>
 #include <format>
 #include <stdexcept>
 #include <string>
@@ -94,6 +95,8 @@ std::string_view consumable_effect_str(ConsumableEffect e)
 
 void ItemEditor::enter(GameContext& ctx)
 {
+	assert(ctx.itemRegistry && "ItemEditor::enter: called without an itemRegistry");
+
 	m_registry = ctx.contentRegistry;
 	m_active = true;
 	m_mode = Mode::NORMAL;
@@ -111,6 +114,8 @@ void ItemEditor::enter(GameContext& ctx)
 
 void ItemEditor::exit(GameContext& ctx)
 {
+	assert(ctx.itemRegistry && "ItemEditor::exit: called without an itemRegistry");
+
 	commit_working(*ctx.itemRegistry);
 	m_active = false;
 	ctx.menus->push_back(make_main_menu(true, ctx));
@@ -169,6 +174,8 @@ void ItemEditor::commit_working(ItemRegistry& items)
 
 void ItemEditor::handle_input(GameContext& ctx)
 {
+	assert(ctx.itemRegistry && "ItemEditor::handle_input: called without an itemRegistry");
+
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
 
 	if (IsKeyPressed(KEY_ESCAPE))
@@ -211,6 +218,8 @@ void ItemEditor::handle_input(GameContext& ctx)
 
 void ItemEditor::handle_normal(const GameContext& ctx)
 {
+	assert(ctx.itemRegistry && "ItemEditor::handle_normal: called without an itemRegistry");
+
 	ItemRegistry& items = *ctx.itemRegistry;
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
 	const Renderer& r = *ctx.renderer;
@@ -490,6 +499,8 @@ void ItemEditor::handle_picker(const Renderer& r)
 
 void ItemEditor::render(const GameContext& ctx) const
 {
+	assert(ctx.itemRegistry && "ItemEditor::render: called without an itemRegistry");
+
 	const Renderer& r = *ctx.renderer;
 	int screenWidth = r.get_screen_width();
 	int screenHeight = r.get_screen_height();

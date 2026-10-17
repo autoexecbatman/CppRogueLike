@@ -6,6 +6,7 @@
 #include "GameContext.h"
 #include "MessageSystem.h"
 #include "SavingThrow.h"
+#include <cassert>
 
 // Table 51's Type A: 15 points on a failed save and none on a made one (Dungeon Master's
 // Guide, PDF page 737). The Monstrous Manual fixes the onset of this poison at 15 minutes
@@ -17,6 +18,8 @@ constexpr int HUGE_SPIDER_SAVE_BONUS = 1;
 
 void AiGiantSpider::inject_venom(Creature& owner, Creature& target, GameContext& ctx)
 {
+	assert(ctx.dataManager && "AiGiantSpider::inject_venom: called without a dataManager");
+
 	const int constitutionAdjustment = ctx.dataManager->constitution_for(target.get_constitution()).PoisonSave;
 	if (SavingThrows::is_made(target, SavingThrow::PARALYZATION_POISON_DEATH, HUGE_SPIDER_SAVE_BONUS + constitutionAdjustment, ctx))
 	{

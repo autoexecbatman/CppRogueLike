@@ -25,6 +25,8 @@
 
 std::unique_ptr<Creature> ShopkeeperFactory::create_shopkeeper(Vector2D position, int dungeonLevel, GameContext& ctx)
 {
+	assert(ctx.monsterRegistry && "ShopkeeperFactory::create_shopkeeper: called without a monsterRegistry");
+
 	// Create base creature
 	auto shopkeeper = std::make_unique<Creature>(position, ActorData{ ctx.monsterRegistry->get_tile(MonsterId::SHOPKEEPER), "Shopkeeper", ColorPairId::YELLOW_BLACK });
 

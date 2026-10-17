@@ -1,4 +1,5 @@
 // file: BalanceViewer.cpp
+#include <cassert>
 #include <format>
 #include <string>
 
@@ -13,12 +14,18 @@
 BalanceViewer::BalanceViewer(int dungeonLevel, GameContext& ctx)
 	: dungeonLevel(dungeonLevel)
 {
+	assert(ctx.itemRegistry && "BalanceViewer::BalanceViewer: called without an itemRegistry");
+	assert(ctx.monsterRegistry && "BalanceViewer::BalanceViewer: called without a monsterRegistry");
+
 	monsterDist = MonsterFactory::get_current_distribution(dungeonLevel, *ctx.monsterRegistry);
 	itemDist = ItemFactory::get_current_distribution(dungeonLevel, *ctx.itemRegistry);
 }
 
 void BalanceViewer::menu(GameContext& ctx)
 {
+	assert(ctx.inputSystem && "BalanceViewer::menu: called without an inputSystem");
+	assert(ctx.tileConfig && "BalanceViewer::menu: called without a tileConfig");
+
 	ctx.inputSystem->poll();
 	GameKey key = ctx.inputSystem->get_key();
 	if (key == GameKey::ESCAPE || key == GameKey::SPACE)

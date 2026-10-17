@@ -1,5 +1,6 @@
 // file: SpellEditor.cpp
 #include <algorithm>
+#include <cassert>
 #include <format>
 #include <stdexcept>
 #include <string>
@@ -128,6 +129,8 @@ void SpellEditor::enter(const SpellRegistry& spells)
 
 void SpellEditor::exit(GameContext& ctx)
 {
+	assert(ctx.spellRegistry && "SpellEditor::exit: called without a spellRegistry");
+
 	commit_working(*ctx.spellRegistry);
 	active = false;
 	ctx.menus->push_back(make_main_menu(true, ctx));
@@ -175,6 +178,8 @@ void SpellEditor::commit_working(SpellRegistry& spells)
 
 void SpellEditor::handle_input(GameContext& ctx)
 {
+	assert(ctx.spellRegistry && "SpellEditor::handle_input: called without a spellRegistry");
+
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
 
 	if (IsKeyPressed(KEY_ESCAPE))
@@ -209,6 +214,8 @@ void SpellEditor::handle_input(GameContext& ctx)
 
 void SpellEditor::handle_normal(const GameContext& ctx)
 {
+	assert(ctx.spellRegistry && "SpellEditor::handle_normal: called without a spellRegistry");
+
 	SpellRegistry& spells = *ctx.spellRegistry;
 	int total = static_cast<int>(keys.size());
 	::Vector2 mouse = GetMousePosition();
@@ -383,6 +390,8 @@ void SpellEditor::handle_edit_string()
 
 void SpellEditor::render(const GameContext& ctx) const
 {
+	assert(ctx.spellRegistry && "SpellEditor::render: called without a spellRegistry");
+
 	const Renderer& r = *ctx.renderer;
 	int screenWidth = r.get_screen_width();
 	int screenHeight = r.get_screen_height();

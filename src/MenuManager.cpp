@@ -1,3 +1,4 @@
+#include <cassert>
 #include <deque>
 #include <memory>
 
@@ -47,5 +48,7 @@ bool MenuManager::has_active_menus(const std::deque<std::unique_ptr<BaseMenu>>& 
 
 void MenuManager::restore_game_display(GameContext& ctx)
 {
+	assert(ctx.renderingManager && "MenuManager::restore_game_display: called without a renderingManager");
+
 	ctx.renderingManager->restore_game_display();
 }

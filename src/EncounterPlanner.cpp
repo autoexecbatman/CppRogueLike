@@ -132,6 +132,8 @@ std::vector<std::string> select_encounter(
 
 void plan_encounter(const DungeonRoom& room, GameContext& ctx)
 {
+	assert(ctx.creatureManager && "plan_encounter: called without a creatureManager");
+	assert(ctx.monsterRegistry && "plan_encounter: called without a monsterRegistry");
 	assert(ctx.levelManager);
 	assert(ctx.dice);
 	assert(ctx.map);
