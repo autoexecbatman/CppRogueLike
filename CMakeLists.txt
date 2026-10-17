@@ -228,6 +228,7 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Monsters.h
     ${PROJECT_SOURCE_DIR}/Player.cpp
     ${PROJECT_SOURCE_DIR}/Player.h
+    ${PROJECT_SOURCE_DIR}/PlayerRaceState.h
     ${PROJECT_SOURCE_DIR}/Spider.cpp
     ${PROJECT_SOURCE_DIR}/Spider.h
 

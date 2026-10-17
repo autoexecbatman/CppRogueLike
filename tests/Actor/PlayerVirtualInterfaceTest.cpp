@@ -61,9 +61,9 @@ TEST_F(PlayerVirtualInterfaceTest, Player_GetClassDisplayName_ReturnsPlayerClass
     EXPECT_EQ(player->get_class_display_name(), "Fighter");
 }
 
-TEST_F(PlayerVirtualInterfaceTest, Player_GetRaceDisplayName_ReturnsPlayerRace)
+TEST_F(PlayerVirtualInterfaceTest, Player_GetRaceDisplayName_IsTheRacesName)
 {
-    player->playerRace = "Elf";
+    player->playerRaceState = PlayerRaceState::ELF;
 
     EXPECT_EQ(player->get_race_display_name(), "Elf");
 }

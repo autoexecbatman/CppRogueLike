@@ -34,9 +34,8 @@ protected:
 
         // Set class/race
         player->playerClassState = Player::PlayerClassState::FIGHTER;
-        player->playerRaceState = Player::PlayerRaceState::HUMAN;
+        player->playerRaceState = PlayerRaceState::HUMAN;
         player->playerClass = "Fighter";
-        player->playerRace = "Human";
         player->set_attacks_per_round(1.5f);
 
         // Set up components
@@ -80,9 +79,22 @@ TEST_F(PlayerSerializationTest, ClassAndRace_Preserved) {
     loaded->load(j);
 
     EXPECT_EQ(loaded->playerClassState, Player::PlayerClassState::FIGHTER);
-    EXPECT_EQ(loaded->playerRaceState, Player::PlayerRaceState::HUMAN);
+    EXPECT_EQ(loaded->playerRaceState, PlayerRaceState::HUMAN);
     EXPECT_EQ(loaded->playerClass, "Fighter");
-    EXPECT_EQ(loaded->playerRace, "Human");
+    EXPECT_EQ(loaded->get_race_display_name(), "Human");
+}
+
+// The race is saved once, as the enum. Its name is derived from it, so a second field
+// holding the name could only ever disagree with it.
+TEST_F(PlayerSerializationTest, TheRaceIsSavedOnceAsTheEnum)
+{
+	auto original = create_test_player();
+
+	json j;
+	original->save(j);
+
+	EXPECT_TRUE(j.contains("playerRaceState"));
+	EXPECT_FALSE(j.contains("playerRace")) << "the race's name was saved beside the race";
 }
 
 TEST_F(PlayerSerializationTest, CombatStats_Preserved) {
@@ -155,13 +167,13 @@ TEST_F(PlayerSerializationTest, NoEquippedItems_HandledGracefully) {
 }
 
 TEST_F(PlayerSerializationTest, AllRaces_SaveLoad) {
-    std::vector<Player::PlayerRaceState> races = {
-        Player::PlayerRaceState::HUMAN,
-        Player::PlayerRaceState::ELF,
-        Player::PlayerRaceState::DWARF,
-        Player::PlayerRaceState::HALFLING,
-        Player::PlayerRaceState::GNOME,
-        Player::PlayerRaceState::HALFELF
+    std::vector<PlayerRaceState> races = {
+        PlayerRaceState::HUMAN,
+        PlayerRaceState::ELF,
+        PlayerRaceState::DWARF,
+        PlayerRaceState::HALFLING,
+        PlayerRaceState::GNOME,
+        PlayerRaceState::HALFELF
     };
 
     for (auto race : races) {

@@ -47,7 +47,7 @@ protected:
 		PlayerBlueprint blueprint{};
 		blueprint.name = "Tester";
 		blueprint.playerClass = std::string{ playerClass };
-		blueprint.playerRace = "Human";
+		blueprint.playerRaceState = PlayerRaceState::HUMAN;
 		const Player player{ Vector2D{ 0, 0 }, blueprint, ctx };
 		return player.get_max_hp();
 	}

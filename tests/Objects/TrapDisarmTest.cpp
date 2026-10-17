@@ -49,7 +49,7 @@ protected:
 		// Dexterity 13 is the middle of Table 28's flat row, so the percentage below
 		// is the base score and the points, with nothing else folded in.
 		thief->set_dexterity(13);
-		thief->playerRaceState = Player::PlayerRaceState::HUMAN;
+		thief->playerRaceState = PlayerRaceState::HUMAN;
 		thief->set_creature_level(1);
 	}
 

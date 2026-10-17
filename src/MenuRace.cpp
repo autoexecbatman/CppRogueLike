@@ -18,17 +18,17 @@ namespace
 // here. Half-Elf takes no key, 'h' being the human's and 'e' the elf's.
 struct RaceChoice
 {
-	Player::PlayerRaceState race;
+	PlayerRaceState race;
 	char hotkey;
 };
 
 constexpr std::array<RaceChoice, 6> RACE_CHOICES{
-	RaceChoice{ Player::PlayerRaceState::HUMAN, 'h' },
-	RaceChoice{ Player::PlayerRaceState::DWARF, 'd' },
-	RaceChoice{ Player::PlayerRaceState::ELF, 'e' },
-	RaceChoice{ Player::PlayerRaceState::GNOME, 'g' },
-	RaceChoice{ Player::PlayerRaceState::HALFELF, 0 },
-	RaceChoice{ Player::PlayerRaceState::HALFLING, 'l' }
+	RaceChoice{ PlayerRaceState::HUMAN, 'h' },
+	RaceChoice{ PlayerRaceState::DWARF, 'd' },
+	RaceChoice{ PlayerRaceState::ELF, 'e' },
+	RaceChoice{ PlayerRaceState::GNOME, 'g' },
+	RaceChoice{ PlayerRaceState::HALFELF, 0 },
+	RaceChoice{ PlayerRaceState::HALFLING, 'l' }
 };
 } // namespace
 
@@ -36,12 +36,11 @@ std::unique_ptr<BaseMenu> make_race_menu(GameContext& ctx)
 {
 	std::vector<MenuEntry> entries;
 
-	// Writing the race is one operation whichever entry asks for it, so the name and
-	// the modifiers cannot be set from different races by one of them.
-	auto choose_race = [](Player::PlayerRaceState race, GameContext& chosenCtx)
+	// Choosing a race is one operation whichever entry asks for it. The blueprint holds
+	// the race alone; its name and its modifiers are derived from it where they are read.
+	auto choose_race = [](PlayerRaceState race, GameContext& chosenCtx)
 	{
-		chosenCtx.playerBlueprint->playerRace = std::string{ race_display_name(race) };
-		chosenCtx.playerBlueprint->racialModifier = racial_ability_modifiers(race);
+		chosenCtx.playerBlueprint->playerRaceState = race;
 		chosenCtx.menus->push_back(make_class_menu(chosenCtx));
 	};
 

@@ -11,6 +11,7 @@
 #include "InputSystem.h"
 #include "MenuAbilityScores.h"
 #include "MenuName.h"
+#include "Player.h"
 #include "Renderer.h"
 
 namespace
@@ -41,7 +42,7 @@ MenuAbilityScores::MenuAbilityScores(GameContext& ctx)
 	: allocation(
 		  roll_method_six_pool(*ctx.dice),
 		  ctx.playerBlueprint->creatureClass,
-		  ctx.playerBlueprint->racialModifier)
+		  racial_ability_modifiers(ctx.playerBlueprint->playerRaceState))
 {
 	assert(ctx.renderer && "MenuAbilityScores requires a renderer to size its box");
 	assert(ctx.playerBlueprint && "MenuAbilityScores requires the blueprint the menus fill");

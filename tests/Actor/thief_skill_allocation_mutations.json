@@ -28,7 +28,7 @@
     {
       "file": "src/MenuThiefSkills.cpp",
       "original": "\t\tthief_skill_racial_adjustments(character.playerRaceState),",
-      "mutated": "\t\tthief_skill_racial_adjustments(Player::PlayerRaceState::HUMAN),",
+      "mutated": "\t\tthief_skill_racial_adjustments(PlayerRaceState::HUMAN),",
       "catches": "Table 27's column read for the wrong race, so a dwarf loses its lock and trap bonuses"
     },
     {

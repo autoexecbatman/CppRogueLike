@@ -76,7 +76,7 @@ void display_basic_info(const Player& player, GameContext& ctx, int& row)
 		"Name: {}   Class: {}   Race: {}   Level: {}",
 		player.get_name(),
 		player.playerClass,
-		player.playerRace,
+		player.get_race_display_name(),
 		player.get_level());
 	ctx.renderer->draw_text(Vector2D{ x, panel_text_row_y(0, tileSize, row) }, line, ColorPairId::WHITE_BLACK);
 	row += 2;

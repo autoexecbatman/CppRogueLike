@@ -164,7 +164,7 @@ Player::Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext&
 {
 	set_gender(blueprint.gender);
 	playerClass = blueprint.playerClass;
-	playerRace = blueprint.playerRace;
+	playerRaceState = blueprint.playerRaceState;
 
 	auto applyClassData = [this](std::string_view name)
 	{
@@ -194,23 +194,7 @@ Player::Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext&
 		}
 	};
 
-	auto applyRaceData = [this](std::string_view name)
-	{
-		const std::optional<PlayerRaceState> named = race_state_from_display_name(name);
-		// The race menu writes this name from race_display_name, so a name no race
-		// answers to is a wiring fault rather than a choice a player can make. Left
-		// unasserted it was silent: playerRaceState stayed NONE and every racial
-		// adjustment paid nothing.
-		assert(named.has_value() && "Player: built from a blueprint whose race name names no race");
-		if (!named.has_value())
-		{
-			return;
-		}
-		playerRaceState = *named;
-	};
-
 	applyClassData(blueprint.playerClass);
-	applyRaceData(blueprint.playerRace);
 
 	// The six come from the allocation screen rather than from dice here: Method VI
 	// is what character creation runs, and the blueprint carries what it produced.
@@ -224,6 +208,11 @@ Player::Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext&
 	roll_new_character(ctx);
 
 	assert(attacker && "Player requires Attacker");
+}
+
+std::string Player::get_race_display_name() const
+{
+	return std::string{ race_display_name(playerRaceState) };
 }
 
 void Player::roll_new_character(GameContext& ctx)
@@ -367,35 +356,35 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 	}
 }
 
-std::string_view race_display_name(Player::PlayerRaceState race)
+std::string_view race_display_name(PlayerRaceState race)
 {
 	switch (race)
 	{
-	case Player::PlayerRaceState::HUMAN:
+	case PlayerRaceState::HUMAN:
 	{
 		return "Human";
 	}
-	case Player::PlayerRaceState::ELF:
+	case PlayerRaceState::ELF:
 	{
 		return "Elf";
 	}
-	case Player::PlayerRaceState::DWARF:
+	case PlayerRaceState::DWARF:
 	{
 		return "Dwarf";
 	}
-	case Player::PlayerRaceState::HALFLING:
+	case PlayerRaceState::HALFLING:
 	{
 		return "Halfling";
 	}
-	case Player::PlayerRaceState::GNOME:
+	case PlayerRaceState::GNOME:
 	{
 		return "Gnome";
 	}
-	case Player::PlayerRaceState::HALFELF:
+	case PlayerRaceState::HALFELF:
 	{
 		return "Half-Elf";
 	}
-	case Player::PlayerRaceState::NONE:
+	case PlayerRaceState::NONE:
 	{
 		return "None";
 	}
@@ -404,54 +393,29 @@ std::string_view race_display_name(Player::PlayerRaceState race)
 	return "None";
 }
 
-std::optional<Player::PlayerRaceState> race_state_from_display_name(std::string_view displayName)
-{
-	// The unchosen state is the one enumerator the choices list leaves out, and a
-	// blueprint that has not reached the race menu carries its name, so it is
-	// answered before the choices are searched.
-	if (displayName == race_display_name(Player::PlayerRaceState::NONE))
-	{
-		return Player::PlayerRaceState::NONE;
-	}
-
-	// Searched against the names rather than switched on them a second time, so the
-	// round trip holds by construction: there is one table and this reads it backwards.
-	auto is_named = [displayName](Player::PlayerRaceState race)
-	{
-		return race_display_name(race) == displayName;
-	};
-
-	const auto found = std::ranges::find_if(ALL_PLAYER_RACE, is_named);
-	if (found == ALL_PLAYER_RACE.end())
-	{
-		return std::nullopt;
-	}
-	return *found;
-}
-
-std::array<int, ABILITY_COUNT> racial_ability_modifiers(Player::PlayerRaceState race)
+std::array<int, ABILITY_COUNT> racial_ability_modifiers(PlayerRaceState race)
 {
 	switch (race)
 	{
-	case Player::PlayerRaceState::DWARF:
+	case PlayerRaceState::DWARF:
 	{
 		return { 0, 0, 1, 0, 0, -1 };
 	}
-	case Player::PlayerRaceState::ELF:
+	case PlayerRaceState::ELF:
 	{
 		return { 0, 1, -1, 0, 0, 0 };
 	}
-	case Player::PlayerRaceState::GNOME:
+	case PlayerRaceState::GNOME:
 	{
 		return { 0, 0, 0, 1, -1, 0 };
 	}
-	case Player::PlayerRaceState::HALFLING:
+	case PlayerRaceState::HALFLING:
 	{
 		return { -1, 1, 0, 0, 0, 0 };
 	}
-	case Player::PlayerRaceState::HUMAN:
-	case Player::PlayerRaceState::HALFELF:
-	case Player::PlayerRaceState::NONE:
+	case PlayerRaceState::HUMAN:
+	case PlayerRaceState::HALFELF:
+	case PlayerRaceState::NONE:
 	{
 		return {};
 	}
@@ -490,7 +454,7 @@ void Player::show_racial_adjustments(std::vector<std::string> bonusLines, GameCo
 	}
 
 	ctx.menus->push_back(std::make_unique<NotificationMenu>(
-		std::format("Racial Traits: {}", playerRace),
+		std::format("Racial Traits: {}", race_display_name(playerRaceState)),
 		std::move(bonusLines),
 		ctx));
 }
@@ -539,35 +503,35 @@ void Player::calculate_thaco()
 	}
 }
 
-std::array<int, THIEF_SKILL_COUNT> thief_skill_racial_adjustments(Player::PlayerRaceState race)
+std::array<int, THIEF_SKILL_COUNT> thief_skill_racial_adjustments(PlayerRaceState race)
 {
 	// Table 27, read across each race's column: Pick Pockets, Open Locks,
 	// Find/Remove Traps, Move Silently, Hide in Shadows, Detect Noise, Climb Walls,
 	// Read Languages.
 	switch (race)
 	{
-	case Player::PlayerRaceState::DWARF:
+	case PlayerRaceState::DWARF:
 	{
 		return { 0, 10, 15, 0, 0, 0, -10, -5 };
 	}
-	case Player::PlayerRaceState::ELF:
+	case PlayerRaceState::ELF:
 	{
 		return { 5, -5, 0, 5, 10, 5, 0, 0 };
 	}
-	case Player::PlayerRaceState::GNOME:
+	case PlayerRaceState::GNOME:
 	{
 		return { 0, 5, 10, 5, 5, 10, -15, 0 };
 	}
-	case Player::PlayerRaceState::HALFELF:
+	case PlayerRaceState::HALFELF:
 	{
 		return { 10, 0, 0, 0, 5, 0, 0, 0 };
 	}
-	case Player::PlayerRaceState::HALFLING:
+	case PlayerRaceState::HALFLING:
 	{
 		return { 5, 5, 5, 10, 15, 5, -15, -5 };
 	}
-	case Player::PlayerRaceState::HUMAN:
-	case Player::PlayerRaceState::NONE:
+	case PlayerRaceState::HUMAN:
+	case PlayerRaceState::NONE:
 	{
 		return {};
 	}
@@ -874,7 +838,6 @@ void Player::save(json& j)
 	j["playerRaceState"] = static_cast<int>(playerRaceState);
 	j["playerClassState"] = static_cast<int>(playerClassState);
 	j["playerClass"] = playerClass;
-	j["playerRace"] = playerRace;
 	j["killCount"] = killCount;
 	j["memorizedSpells"] = memorizedSpells;
 	j["thiefSkillPoints"] = thiefSkillPoints;
@@ -931,7 +894,6 @@ void Player::load(const json& j)
 	playerRaceState = static_cast<PlayerRaceState>(j.at("playerRaceState").get<int>());
 	playerClassState = static_cast<PlayerClassState>(j.at("playerClassState").get<int>());
 	playerClass = j.at("playerClass").get<std::string>();
-	playerRace = j.at("playerRace").get<std::string>();
 	killCount = j.at("killCount").get<int>();
 	memorizedSpells = j.at("memorizedSpells").get<std::vector<std::string>>();
 	thiefSkillPoints = j.at("thiefSkillPoints").get<std::array<int, THIEF_SKILL_COUNT>>();

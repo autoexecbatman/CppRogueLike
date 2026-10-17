@@ -7,6 +7,7 @@
 
 #include "AbilityAllocation.h"
 #include "InventoryData.h"
+#include "PlayerRaceState.h"
 #include "Stairs.h"
 
 // Forward declarations
@@ -136,16 +137,14 @@ struct PlayerBlueprint
 	std::string gender{ "None" };
 	std::string name{ "Player" };
 	std::string playerClass{ "None" };
-	std::string playerRace{ "None" };
+	PlayerRaceState playerRaceState{ PlayerRaceState::NONE };
 
 	// The six as Method VI allocated them, before the race is paid. They start
 	// where the method starts them, so a blueprint that never reached the
 	// allocation screen still builds a legal character rather than a blank one.
-	// The class and the race as the menus that picked them already knew them,
-	// so the allocation screen reads Table 13's row and the racial modifiers
-	// without parsing a display name back into an enum.
+	// The class as the menu that picked it already knew it, so the allocation
+	// screen reads Table 13's row without parsing a display name back into an enum.
 	CreatureClass creatureClass{ CreatureClass::MONSTER };
-	std::array<int, ABILITY_COUNT> racialModifier{};
 
 	std::array<int, ABILITY_COUNT> abilityScores{
 		METHOD_SIX_STARTING_SCORE,

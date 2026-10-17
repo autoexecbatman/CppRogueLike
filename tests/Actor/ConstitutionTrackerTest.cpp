@@ -60,7 +60,7 @@ protected:
 		PlayerBlueprint blueprint{};
 		blueprint.name = "Tester";
 		blueprint.playerClass = std::string{ playerClass };
-		blueprint.playerRace = "Human";
+		blueprint.playerRaceState = PlayerRaceState::HUMAN;
 
 		// Every other score is an unremarkable 9.
 		blueprint.abilityScores.fill(9);
@@ -191,7 +191,7 @@ TEST_F(ConstitutionTrackerTest, AWizardsChangeCountsOnlyTheLevelsThatRolled)
 TEST_F(ConstitutionTrackerTest, AHalflingPaysItsRacialAdjustment)
 {
 	make_player("Fighter", 17);
-	player->playerRaceState = Player::PlayerRaceState::HALFLING;
+	player->playerRaceState = PlayerRaceState::HALFLING;
 	const int allocatedStrength = player->get_strength();
 	const int allocatedDexterity = player->get_dexterity();
 
@@ -206,7 +206,7 @@ TEST_F(ConstitutionTrackerTest, AHalflingPaysItsRacialAdjustment)
 TEST_F(ConstitutionTrackerTest, AHumanPaysNothing)
 {
 	make_player("Fighter", 17);
-	player->playerRaceState = Player::PlayerRaceState::HUMAN;
+	player->playerRaceState = PlayerRaceState::HUMAN;
 	const int allocatedStrength = player->get_strength();
 
 	EXPECT_TRUE(player->pay_racial_adjustments().empty());

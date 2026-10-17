@@ -55,8 +55,7 @@ protected:
 		player->playerClassState = Player::PlayerClassState::ROGUE;
 		player->set_creature_class(CreatureClass::ROGUE);
 		player->playerClass = "Rogue";
-		player->playerRaceState = Player::PlayerRaceState::DWARF;
-		player->playerRace = "Dwarf";
+		player->playerRaceState = PlayerRaceState::DWARF;
 
 		ctx = game.context();
 		ctx.playerOwner = &player;

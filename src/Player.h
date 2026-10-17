@@ -13,6 +13,7 @@
 #include "EquipmentSlot.h"
 #include "Persistent.h"
 #include "PlayerController.h"
+#include "PlayerRaceState.h"
 #include "ThiefSkills.h"
 #include "Vector2D.h"
 
@@ -27,16 +28,7 @@ inline constexpr int REST_DANGER_RADIUS = 5;
 class Player : public Creature
 {
 public:
-	enum class PlayerRaceState
-	{
-		NONE,
-		HUMAN,
-		ELF,
-		DWARF,
-		HALFLING,
-		GNOME,
-		HALFELF
-	} playerRaceState{ PlayerRaceState::NONE };
+	PlayerRaceState playerRaceState{ PlayerRaceState::NONE };
 
 	enum class PlayerClassState
 	{
@@ -48,7 +40,6 @@ public:
 	} playerClassState{ PlayerClassState::NONE };
 
 	std::string playerClass{ "None" };
-	std::string playerRace{ "None" };
 	int killCount{ 0 }; // Tracks kill count for log.
 
 	std::vector<std::string> memorizedSpells;
@@ -145,7 +136,7 @@ public:
 
 	// Display interface overrides
 	std::string get_class_display_name() const { return playerClass; }
-	std::string get_race_display_name() const { return playerRace; }
+	std::string get_race_display_name() const;
 	int get_kill_count() const noexcept { return killCount; }
 	std::string get_equipped_weapon_damage_roll() const noexcept;
 
@@ -182,13 +173,13 @@ public:
 
 // The six a character can be, in the order the race menu offers them. NONE is not
 // among them: it is the state a Player has before a race is chosen, not a choice.
-inline constexpr std::array<Player::PlayerRaceState, 6> ALL_PLAYER_RACE{
-	Player::PlayerRaceState::HUMAN,
-	Player::PlayerRaceState::DWARF,
-	Player::PlayerRaceState::ELF,
-	Player::PlayerRaceState::GNOME,
-	Player::PlayerRaceState::HALFELF,
-	Player::PlayerRaceState::HALFLING
+inline constexpr std::array<PlayerRaceState, 6> ALL_PLAYER_RACE{
+	PlayerRaceState::HUMAN,
+	PlayerRaceState::DWARF,
+	PlayerRaceState::ELF,
+	PlayerRaceState::GNOME,
+	PlayerRaceState::HALFELF,
+	PlayerRaceState::HALFLING
 };
 
 // What a race is called on screen. **This is the only place a race's name is
@@ -197,21 +188,9 @@ inline constexpr std::array<Player::PlayerRaceState, 6> ALL_PLAYER_RACE{
 // what an unchosen race prints.
 //
 // Example:
-//   race_display_name(Player::PlayerRaceState::HALFELF);   // -> "Half-Elf"
-//   race_display_name(Player::PlayerRaceState::NONE);      // -> "None"
-[[nodiscard]] std::string_view race_display_name(Player::PlayerRaceState race);
-
-// The inverse, for the one caller that has a name and needs the race: the Player
-// constructor, reading a blueprint the menus filled in. Total over the enum, NONE
-// included, because a blueprint that never reached the race menu carries NONE's name
-// and still has to build a character. Empty only for a name no race answers to, which
-// is a wiring fault rather than something a player can choose.
-//
-// Example:
-//   race_state_from_display_name("Half-Elf");   // -> PlayerRaceState::HALFELF
-//   race_state_from_display_name("None");       // -> PlayerRaceState::NONE, the unchosen state
-//   race_state_from_display_name("Half Elf");   // -> empty, the hyphen matters
-[[nodiscard]] std::optional<Player::PlayerRaceState> race_state_from_display_name(std::string_view displayName);
+//   race_display_name(PlayerRaceState::HALFELF);   // -> "Half-Elf"
+//   race_display_name(PlayerRaceState::NONE);      // -> "None"
+[[nodiscard]] std::string_view race_display_name(PlayerRaceState race);
 
 // What a race does to the six scores, in ALL_ABILITY order. AD&D 2e racial ability
 // adjustments; a human and a half-elf take none. One table, read both by the
@@ -219,15 +198,15 @@ inline constexpr std::array<Player::PlayerRaceState, 6> ALL_PLAYER_RACE{
 // Player::pay_racial_adjustments, which pays it once the character exists.
 //
 // Example:
-//   racial_ability_modifiers(Player::PlayerRaceState::HALFLING);   // -> { -1, 1, 0, 0, 0, 0 }
-//   racial_ability_modifiers(Player::PlayerRaceState::HUMAN);      // -> all zero
-[[nodiscard]] std::array<int, ABILITY_COUNT> racial_ability_modifiers(Player::PlayerRaceState race);
+//   racial_ability_modifiers(PlayerRaceState::HALFLING);   // -> { -1, 1, 0, 0, 0, 0 }
+//   racial_ability_modifiers(PlayerRaceState::HUMAN);      // -> all zero
+[[nodiscard]] std::array<int, ABILITY_COUNT> racial_ability_modifiers(PlayerRaceState race);
 
 // Player's Handbook Table 27, Thieving Skill Racial Adjustments (PDF page 85), in
 // ALL_THIEF_SKILL order. A human takes none. It lives here rather than in
 // ThiefSkills because the race does: the tables there take the column as a number.
 //
 // Example:
-//   thief_skill_racial_adjustments(Player::PlayerRaceState::DWARF);
+//   thief_skill_racial_adjustments(PlayerRaceState::DWARF);
 //   // -> { 0, 10, 15, 0, 0, 0, -10, -5 }, being Open Locks +10 and Climb Walls -10
-[[nodiscard]] std::array<int, THIEF_SKILL_COUNT> thief_skill_racial_adjustments(Player::PlayerRaceState race);
+[[nodiscard]] std::array<int, THIEF_SKILL_COUNT> thief_skill_racial_adjustments(PlayerRaceState race);
