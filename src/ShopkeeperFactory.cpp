@@ -36,6 +36,8 @@ std::unique_ptr<Creature> ShopkeeperFactory::create_shopkeeper(Vector2D position
 
 bool ShopkeeperFactory::should_spawn_shopkeeper(int dungeonLevel, GameContext& ctx)
 {
+	assert(ctx.dice && "ShopkeeperFactory::should_spawn_shopkeeper: called without dice");
+
 	// Base 8% chance, increases by 2% per level, cap at 20%
 	int shopkeeperChance = 8 + (dungeonLevel * 2);
 	shopkeeperChance = std::min(shopkeeperChance, 20);
@@ -87,6 +89,8 @@ void ShopkeeperFactory::configure_shopkeeper(Creature& shopkeeper, int dungeonLe
 
 ShopType ShopkeeperFactory::select_shop_type_for_level(int dungeonLevel, GameContext& ctx)
 {
+	assert(ctx.dice && "ShopkeeperFactory::select_shop_type_for_level: called without dice");
+
 	// Early levels favor general stores, deeper levels get specialized shops
 	if (dungeonLevel <= 2)
 	{
@@ -135,6 +139,8 @@ ShopType ShopkeeperFactory::select_shop_type_for_level(int dungeonLevel, GameCon
 
 ShopQuality ShopkeeperFactory::select_shop_quality_for_level(int dungeonLevel, GameContext& ctx)
 {
+	assert(ctx.dice && "ShopkeeperFactory::select_shop_quality_for_level: called without dice");
+
 	// Quality improves with dungeon depth
 	int qualityRoll = ctx.dice->d100();
 	int levelBonus = dungeonLevel * 5; // 5% quality improvement per level

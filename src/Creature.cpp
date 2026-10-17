@@ -1130,6 +1130,8 @@ void Creature::apply_web_effect(int duration, int strength, Web* web)
 //   creature.try_break_web(ctx); // -> WebEscape::BROKE_FREE on a good roll
 WebEscape Creature::try_break_web(GameContext& ctx)
 {
+	assert(ctx.dice && "Creature::try_break_web: called without dice");
+
 	// Stronger creatures tear loose more often; stronger webs hold better.
 	const int breakChance = std::max(10, 20 + (get_strength() * 5) - (webStrength * 10));
 

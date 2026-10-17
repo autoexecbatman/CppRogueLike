@@ -47,6 +47,8 @@ AttackResult Attacker::perform_single_attack(
 	AttackKind kind,
 	GameContext& ctx)
 {
+	assert(ctx.dice && "Attacker::perform_single_attack: called without dice");
+
 	// Shopkeeper interaction, melee only: the shop component is what marks a trader.
 	if (target.shop && kind == AttackKind::MELEE)
 	{

@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 #include <functional>
 #include <string>
 #include <utility>
@@ -39,6 +40,8 @@ struct ItemType
 // Places one enhanced item drawn from a rule's pool at position.
 void place_enhanced_item(const EnhancedItemSpawnRule& rule, Vector2D position, GameContext& ctx)
 {
+	assert(ctx.dice && "place_enhanced_item: called without dice");
+
 	const int poolIndex = ctx.dice->roll(0, static_cast<int>(rule.itemPool.size()) - 1);
 	const std::string_view baseKey = rule.itemPool[poolIndex];
 	const ItemEnhancement enhancement = (rule.enhancementCategory == EnhancedItemCategory::WEAPON)
@@ -66,6 +69,8 @@ std::vector<ItemType> spawn_table(const ItemRegistry& items)
 		// A floor pile of gold is rolled for the level rather than worth its record.
 		auto place_gold = [](Vector2D pos, GameContext& ctx)
 		{
+			assert(ctx.dice && "ItemFactory place_gold: called without dice");
+
 			const int level = ctx.levelManager->get_dungeon_level();
 			const int amount = ctx.dice->roll(level * 3, level * 10);
 			InventoryOperations::add_item(
@@ -131,6 +136,8 @@ int calculate_weight(const ItemType& item, int dungeonLevel)
 // Draws one entry of candidates by weight and places it; false when none can appear.
 bool place_one_of(const std::vector<const ItemType*>& candidates, Vector2D position, int dungeonLevel, GameContext& ctx)
 {
+	assert(ctx.dice && "place_one_of: called without dice");
+
 	int totalWeight = 0;
 	std::vector<int> weights;
 
@@ -164,6 +171,8 @@ bool place_one_of(const std::vector<const ItemType*>& candidates, Vector2D posit
 
 void ItemFactory::generate_treasure(Vector2D position, int dungeonLevel, int quality, GameContext& ctx)
 {
+	assert(ctx.dice && "ItemFactory::generate_treasure: called without dice");
+
 	// quality is 1-3: 1=normal, 2=good, 3=exceptional
 
 	// Number of items to generate

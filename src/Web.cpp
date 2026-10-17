@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 #include <string>
 
 #include "Actor.h"
@@ -23,6 +24,8 @@ Web::Web(Vector2D position, int strength, const TileConfig& tileConfig)
 // Apply web effect when a creature tries to pass through
 EntryResult Web::on_creature_enter(Creature& creature, GameContext& ctx)
 {
+	assert(ctx.dice && "Web::on_creature_enter: called without dice");
+
 	// Spiders and their kin move across webs freely.
 	if (creature.has_state(ActorState::CAN_WALK_WEBS))
 	{

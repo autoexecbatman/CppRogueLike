@@ -219,6 +219,8 @@ std::string Player::get_race_display_name() const
 
 void Player::roll_new_character(GameContext& ctx)
 {
+	assert(ctx.dice && "Player::roll_new_character: called without dice");
+
 	// The six are allocated before the character exists, so nothing here touches them.
 	// The owner's cushion plus one roll of the class's own die, set before this runs.
 	const int playerHp = GameBalance::Leveling::HitPoints::STARTING_CUSHION + ctx.dice->roll(1, get_hit_die());
@@ -261,6 +263,8 @@ void Player::on_new_game_start(GameContext& ctx)
 
 void Player::roll_exceptional_strength(GameContext& ctx)
 {
+	assert(ctx.dice && "Player::roll_exceptional_strength: called without dice");
+
 	// PHB character creation: a fighter who is not a halfling, with Strength 18.
 	const bool isEligible = get_creature_class() == CreatureClass::FIGHTER && playerRaceState != PlayerRaceState::HALFLING && get_strength() == 18;
 	if (!isEligible)
@@ -284,6 +288,8 @@ void Player::on_kill_reward(int xp, GameContext& ctx)
 
 void Player::equip_class_starting_gear(GameContext& ctx)
 {
+	assert(ctx.dice && "Player::equip_class_starting_gear: called without dice");
+
 	switch (get_creature_class())
 	{
 
@@ -754,6 +760,8 @@ void Player::animate_resting(GameContext& ctx)
 
 Player::HideAttempt Player::attempt_hide(GameContext& ctx)
 {
+	assert(ctx.dice && "Player::attempt_hide: called without dice");
+
 	// Hide in Shadows is the thief's, and a score the adjustments leave at nothing
 	// is one the book says has to be bought up before it can be used at all.
 	const std::optional<int> skill = thief_skill(ThiefSkill::HIDE_IN_SHADOWS);

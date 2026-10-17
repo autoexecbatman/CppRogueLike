@@ -1,4 +1,5 @@
 // file: MenuGender.cpp
+#include <cassert>
 #include <memory>
 #include <vector>
 
@@ -28,6 +29,8 @@ std::unique_ptr<BaseMenu> make_gender_menu(GameContext& ctx)
 
 	auto randomCommand = [](GameContext& ctx)
 	{
+		assert(ctx.dice && "make_gender_menu randomCommand: called without dice");
+
 		ctx.playerBlueprint->gender = ctx.dice->d2() == 1 ? "Male" : "Female";
 		ctx.menus->push_back(make_race_menu(ctx));
 	};

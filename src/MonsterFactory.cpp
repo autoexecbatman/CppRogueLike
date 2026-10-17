@@ -1,5 +1,6 @@
 // file: MonsterFactory.cpp
 #include <algorithm>
+#include <cassert>
 #include <functional>
 #include <memory>
 #include <string>
@@ -201,6 +202,8 @@ int calculate_weight(const MonsterType& monster, int dungeonLevel)
 
 void MonsterFactory::spawn_random_monster(Vector2D position, int dungeonLevel, GameContext& ctx)
 {
+	assert(ctx.dice && "MonsterFactory::spawn_random_monster: called without dice");
+
 	const std::vector<MonsterType> table = spawn_table(*ctx.monsterRegistry);
 
 	int totalWeight = 0;

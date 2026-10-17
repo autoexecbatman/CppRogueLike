@@ -509,6 +509,8 @@ bool use(Food& food, Item& owner, Creature& wearer, GameContext& ctx)
 
 bool use(CorpseFood& corpseFood, Item& owner, Creature& wearer, GameContext& ctx)
 {
+	assert(ctx.dice && "use(CorpseFood): called without dice");
+
 	if (corpseFood.nutritionValue <= 0)
 	{
 		corpseFood.nutritionValue = get_or_default(corpseNutritionValues, owner.actorData.name, 50);

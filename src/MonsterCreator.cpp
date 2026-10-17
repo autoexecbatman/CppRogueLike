@@ -25,6 +25,8 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 	const MonsterParams& params,
 	GameContext& ctx)
 {
+	assert(ctx.dice && "MonsterCreator::create_from_params: called without dice");
+
 	auto c = std::make_unique<Creature>(pos, ActorData{ params.symbol, params.name, params.color });
 
 	c->set_strength(std::max(1, roll_dice(ctx.dice, params.strDice)));

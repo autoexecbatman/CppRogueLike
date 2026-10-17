@@ -74,6 +74,8 @@ void flee(Creature& owner, GameContext& ctx)
 // AD&D 2e: Roll 2d10 against morale score; set IS_FLEEING on failure.
 void check_morale(Creature& owner, GameContext& ctx)
 {
+	assert(ctx.dice && "check_morale: called without dice");
+
 	if (owner.has_state(ActorState::IS_FLEEING))
 	{
 		return;
@@ -97,6 +99,8 @@ void check_morale(Creature& owner, GameContext& ctx)
 // One step of random drift. No-ops when the chosen tile is blocked or occupied.
 void random_wander(Creature& owner, GameContext& ctx)
 {
+	assert(ctx.dice && "random_wander: called without dice");
+
 	int dx = ctx.dice->roll(-1, 1);
 	int dy = ctx.dice->roll(-1, 1);
 	if (dx == 0 && dy == 0)
@@ -241,6 +245,8 @@ void AiMonster::update_tracking(Creature& owner, const GameContext& ctx)
 // first picks it off the cost map and the second off a die.
 void AiMonster::decide_action(Creature& owner, GameContext& ctx)
 {
+	assert(ctx.dice && "AiMonster::decide_action: called without dice");
+
 	// Routed creatures run before any die is read.
 	if (owner.has_state(ActorState::IS_FLEEING))
 	{

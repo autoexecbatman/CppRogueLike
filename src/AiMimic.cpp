@@ -318,6 +318,8 @@ void AiMimic::transform_to_greater_mimic(Creature& owner, GameContext& ctx)
 
 void AiMimic::check_revealing(Creature& owner, GameContext& ctx)
 {
+	assert(ctx.dice && "AiMimic::check_revealing: called without dice");
+
 	int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
 	ctx.messageSystem->log("Mimic distance to player: " + std::to_string(distanceToPlayer));
 
@@ -359,6 +361,8 @@ void AiMimic::check_revealing(Creature& owner, GameContext& ctx)
 
 void AiMimic::change_disguise(Creature& owner, GameContext& ctx)
 {
+	assert(ctx.dice && "AiMimic::change_disguise: called without dice");
+
 	if (!isDisguised)
 	{
 		return;

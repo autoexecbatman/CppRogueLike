@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 #include <format>
 #include <memory>
 #include <stdexcept>
@@ -212,6 +213,8 @@ std::unique_ptr<Item> ItemCreator::create_with_enhancement(
 
 std::unique_ptr<Item> ItemCreator::create_gold_pile(Vector2D pos, GameContext& ctx)
 {
+	assert(ctx.dice && "ItemCreator::create_gold_pile: called without dice");
+
 	const int goldAmount = ctx.dice->roll(5, 20);
 
 	return create_with_gold_amount(pos, goldAmount, ctx);
@@ -223,6 +226,8 @@ std::unique_ptr<Item> ItemCreator::create_random_of_category(
 	GameContext& ctx,
 	int dungeonLevel)
 {
+	assert(ctx.dice && "ItemCreator::create_random_of_category: called without dice");
+
 	struct Candidate
 	{
 		std::string key;

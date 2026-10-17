@@ -164,6 +164,8 @@ bool HungerSystem::is_suffering_hunger_penalties() const
 
 void HungerSystem::apply_hunger_effects(GameContext& ctx)
 {
+	assert(ctx.dice && "HungerSystem::apply_hunger_effects: called without dice");
+
 	// The round upkeep is the only caller and it runs on a live game, so a missing
 	// player is a wiring fault rather than a state the game passes through.
 	assert(ctx.player() && "apply_hunger_effects ran without a player");

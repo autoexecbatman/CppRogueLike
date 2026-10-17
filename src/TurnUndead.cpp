@@ -36,6 +36,8 @@ int roll_turning_cap(RandomDice& dice)
 
 TurnUndeadReport turn_undead(Creature& priest, GameContext& ctx)
 {
+	assert(ctx.dice && "Turning::turn_undead: called without dice");
+
 	TurnUndeadReport report{};
 
 	if (!can_turn_undead(priest))

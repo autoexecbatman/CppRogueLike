@@ -27,6 +27,8 @@ constexpr int WEB_STRENGTH = 3;
 
 void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 {
+	assert(ctx.dice && "AiWebSpinner::update: called without dice");
+
 	// DIRECT ATTACK CODE - Check if player is adjacent
 	int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
 	if (distanceToPlayer <= 1 && ctx.map->is_in_fov(owner.position))
@@ -96,6 +98,8 @@ void AiWebSpinner::inject_venom(Creature& owner, Creature& target, GameContext& 
 
 bool AiWebSpinner::should_create_web(Creature& owner, GameContext& ctx)
 {
+	assert(ctx.dice && "AiWebSpinner::should_create_web: called without dice");
+
 	// If player is directly adjacent, don't create web (attack instead)
 	int distToPlayer = owner.get_tile_distance(ctx.player()->position);
 	if (distToPlayer <= 1)
@@ -256,6 +260,8 @@ bool AiWebSpinner::is_valid_web_position(Vector2D pos, GameContext& ctx)
 
 void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext& ctx)
 {
+	assert(ctx.dice && "AiWebSpinner::generate_web_entities: called without dice");
+
 	// Create a complex web pattern centered at the given position
 	// with size determining the radius/complexity
 

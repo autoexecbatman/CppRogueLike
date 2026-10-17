@@ -1,4 +1,5 @@
 // file: MenuClass.cpp
+#include <cassert>
 #include <memory>
 #include <string>
 #include <vector>
@@ -45,6 +46,8 @@ std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
 
 	auto randomCommand = [](GameContext& ctx)
 	{
+		assert(ctx.dice && "make_class_menu randomCommand: called without dice");
+
 		switch (ctx.dice->d4())
 		{
 

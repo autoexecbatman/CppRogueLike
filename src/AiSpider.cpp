@@ -45,6 +45,8 @@ constexpr int SURPRISED_AT_OR_BELOW = 3; // PHB: surprised on a 1, 2 or 3 of 1d1
 //   is_surprised(player, ctx);   // -> true on a 1, false on a 2 (2 + 2 is 4)
 bool is_surprised(const Creature& creature, GameContext& ctx)
 {
+	assert(ctx.dice && "is_surprised: called without dice");
+
 	const int reactionAdjustment = ctx.dataManager->dexterity_for(creature.get_dexterity()).ReactionAdj;
 	return ctx.dice->roll(1, 10) + reactionAdjustment <= SURPRISED_AT_OR_BELOW;
 }
@@ -56,6 +58,8 @@ bool is_surprised(const Creature& creature, GameContext& ctx)
 
 void AiSpider::update(Creature& owner, GameContext& ctx)
 {
+	assert(ctx.dice && "AiSpider::update: called without dice");
+
 	// Skip if spider is dead
 	if (owner.is_dead())
 	{
@@ -188,6 +192,8 @@ void AiSpider::move_toward_player(Creature& owner, GameContext& ctx)
 
 void AiSpider::random_move(Creature& owner, GameContext& ctx)
 {
+	assert(ctx.dice && "AiSpider::random_move: called without dice");
+
 	int dx = ctx.dice->roll(-1, 1);
 	int dy = ctx.dice->roll(-1, 1);
 
@@ -312,6 +318,8 @@ void AiSpider::bite(Creature& owner, Creature& target, GameContext& ctx)
 
 void AiSpider::inject_venom(Creature& owner, Creature& target, GameContext& ctx)
 {
+	assert(ctx.dice && "AiSpider::inject_venom: called without dice");
+
 	// The Monstrous Manual's hairy spider, whose poison is in no table: "Victims
 	// receive a +2 bonus to saving throws vs. the hairy spiders' weak poison. If the
 	// saving throw fails, the victim's AC and attack rolls are penalized by 1, and
@@ -345,6 +353,8 @@ std::optional<Vector2D> AiSpider::find_ambush_position(
 	Vector2D targetPosition,
 	GameContext& ctx)
 {
+	assert(ctx.dice && "AiSpider::find_ambush_position: called without dice");
+
 	auto is_in_bounds = [&](Vector2D pos) -> bool
 	{
 		return pos.x >= 0 &&

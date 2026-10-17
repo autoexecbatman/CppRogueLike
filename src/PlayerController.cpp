@@ -91,6 +91,8 @@ PlayerController::PlayerController(Player& owner)
 
 void PlayerController::update(GameContext& ctx)
 {
+	assert(ctx.dice && "PlayerController::update: called without dice");
+
 	// If stuck in a web, try to break free and skip turn if still stuck
 	if (playerOwner.is_webbed())
 	{
@@ -636,6 +638,8 @@ Vector2D PlayerController::find_door_approach(Vector2D doorTile, const GameConte
 
 bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 {
+	assert(ctx.dice && "PlayerController::resolve_locked_door: called without dice");
+
 	// Branch 1: player carries a dungeon key -- consume it, unlock, open.
 	Item* keyItem = nullptr;
 	for (const auto& item : playerOwner.inventoryData.items)

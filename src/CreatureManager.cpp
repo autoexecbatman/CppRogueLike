@@ -107,6 +107,8 @@ bool CreatureManager::can_spawn_creature(
 
 std::optional<Vector2D> CreatureManager::find_spawn_position(GameContext& ctx)
 {
+	assert(ctx.dice && "CreatureManager::find_spawn_position: called without dice");
+
 	// A level with no rooms was never built. That is an invariant rather than a state to
 	// branch on, and the empty walk below answers nullopt if it is ever compiled out.
 	assert(ctx.rooms && !ctx.rooms->empty() && "find_spawn_position: a level with no rooms");

@@ -46,6 +46,8 @@ std::vector<Vector2D> free_tiles_in(const DungeonRoom& room, const GameContext& 
 //   pick_one({}, ctx); // -> nullopt
 std::optional<Vector2D> pick_one(const std::vector<Vector2D>& candidates, GameContext& ctx)
 {
+	assert(ctx.dice && "SpawnUtils::pick_one: called without dice");
+
 	if (candidates.empty())
 	{
 		return std::nullopt;

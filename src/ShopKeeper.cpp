@@ -70,6 +70,8 @@ int ShopKeeper::get_sell_price(const Item& item) const
 
 void ShopKeeper::generate_initial_inventory(int dungeonLevel, GameContext& ctx)
 {
+	assert(ctx.dice && "ShopKeeper::generate_initial_inventory: called without dice");
+
 	shopInventory.items.clear();
 
 	// Generate 3-7 random items based on shop type
@@ -89,6 +91,8 @@ void ShopKeeper::generate_initial_inventory(int dungeonLevel, GameContext& ctx)
 
 std::unique_ptr<Item> ShopKeeper::generate_random_item_by_type(int dungeonLevel, GameContext& ctx)
 {
+	assert(ctx.dice && "ShopKeeper::generate_random_item_by_type: called without dice");
+
 	switch (shopType)
 	{
 	case ShopType::WEAPON_SHOP:
@@ -140,6 +144,8 @@ std::unique_ptr<Item> ShopKeeper::generate_random_item_by_type(int dungeonLevel,
 
 std::unique_ptr<Item> ShopKeeper::generate_random_weapon(int dungeonLevel, GameContext& ctx)
 {
+	assert(ctx.dice && "ShopKeeper::generate_random_weapon: called without dice");
+
 	auto item = ItemCreator::create_random_of_category("weapon", { 0, 0 }, ctx, dungeonLevel);
 
 	if (item && ctx.dice->roll(1, 100) <= 40)
@@ -152,6 +158,8 @@ std::unique_ptr<Item> ShopKeeper::generate_random_weapon(int dungeonLevel, GameC
 
 std::unique_ptr<Item> ShopKeeper::generate_random_armor(int dungeonLevel, GameContext& ctx)
 {
+	assert(ctx.dice && "ShopKeeper::generate_random_armor: called without dice");
+
 	auto item = ItemCreator::create_random_of_category("armor", { 0, 0 }, ctx, dungeonLevel);
 
 	if (item && ctx.dice->roll(1, 100) <= 35)
@@ -174,6 +182,8 @@ std::unique_ptr<Item> ShopKeeper::generate_random_scroll(int dungeonLevel, GameC
 
 std::unique_ptr<Item> ShopKeeper::generate_random_misc_item(int dungeonLevel, GameContext& ctx)
 {
+	assert(ctx.dice && "ShopKeeper::generate_random_misc_item: called without dice");
+
 	Vector2D shop_pos{ 0, 0 };
 
 	std::unique_ptr<Item> item;

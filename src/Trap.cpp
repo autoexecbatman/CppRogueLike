@@ -110,6 +110,8 @@ Trap::Trap(Vector2D position, TrapType trapType, const TileConfig& tileConfig)
 
 DisarmResult Trap::attempt_disarm(Player& creature, GameContext& ctx)
 {
+	assert(ctx.dice && "Trap::attempt_disarm: called without dice");
+
 	// Nothing left to disarm.
 	if (state == TrapState::DISARMED)
 	{
@@ -165,6 +167,8 @@ DisarmResult Trap::attempt_disarm(Player& creature, GameContext& ctx)
 
 EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 {
+	assert(ctx.dice && "Trap::on_creature_enter: called without dice");
+
 	// A disarmed trap is walked over.
 	if (state == TrapState::DISARMED)
 	{

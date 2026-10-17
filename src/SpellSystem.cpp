@@ -334,6 +334,8 @@ void dispatch_effect(
 
 bool cast_cure_light_wounds(Creature& caster, GameContext& ctx)
 {
+	assert(ctx.dice && "SpellSystem::cast_cure_light_wounds: called without dice");
+
 	animate_heal(caster.position, ctx);
 
 	// Magical healing, which reaches the fire and acid wounds regeneration cannot.
@@ -559,6 +561,8 @@ void cast_fireball(
 
 bool cast_magic_missile(Creature& caster, GameContext& ctx)
 {
+	assert(ctx.dice && "SpellSystem::cast_magic_missile: called without dice");
+
 	// Get caster level
 	int casterLevel = caster.get_creature_level();
 	int numMissiles = calculate_num_missiles(casterLevel);
@@ -642,6 +646,8 @@ bool cast_shield(Creature& caster, GameContext& ctx)
 
 bool cast_sleep(Creature& caster, GameContext& ctx)
 {
+	assert(ctx.dice && "SpellSystem::cast_sleep: called without dice");
+
 	// AD&D 2e, Player's Handbook page 279: the spell affects 2d4 Hit Dice of
 	// monsters, least Hit Dice first, and lasts 5 rounds per caster level.
 	// Undead and creatures of 4+3 Hit Dice or more are unaffected.
@@ -717,6 +723,8 @@ bool cast_sleep(Creature& caster, GameContext& ctx)
 
 bool cast_hold_person(Creature& caster, GameContext& ctx)
 {
+	assert(ctx.dice && "SpellSystem::cast_hold_person: called without dice");
+
 	// AD&D 2e: paralyzes up to 1d4 humanoids in FOV; save vs. spells (d20 >= 15) negates
 	// Duration: 2 rounds per caster level
 	int casterLevel = caster.get_creature_level();
@@ -1012,6 +1020,8 @@ void SpellSystem::cast_spell_by_key(
 	std::function<void(GameContext&)> onCastComplete,
 	GameContext& ctx)
 {
+	assert(ctx.dice && "SpellSystem::cast_spell_by_key: called without dice");
+
 	// Every effect that succeeds calls this, at four sites and sometimes a turn
 	// later from a targeting callback. An empty one throws there rather than
 	// here, which is a long way from the caller that omitted it.
@@ -1037,6 +1047,8 @@ void SpellSystem::cast_spell_by_key(
 
 SpellSystem::FireballBurst SpellSystem::burst_fireball(Vector2D center, int casterLevel, int radius, GameContext& ctx)
 {
+	assert(ctx.dice && "SpellSystem::burst_fireball: called without dice");
+
 	// AD&D 2e: 1d6 per caster level, max 10d6
 	FireballBurst burst{};
 	burst.diceCount = std::min(casterLevel, 10);
