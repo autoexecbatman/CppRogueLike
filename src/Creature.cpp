@@ -433,7 +433,8 @@ void Creature::save(json& j)
 
 void Creature::update_creature_state(GameContext& ctx)
 {
-	if (!invisibleTile.is_valid() && ctx.tileConfig)
+	assert(ctx.tileConfig && "Creature::update_creature_state: called without a tileConfig");
+	if (!invisibleTile.is_valid())
 	{
 		invisibleTile = ctx.tileConfig->get("TILE_INVISIBLE");
 	}

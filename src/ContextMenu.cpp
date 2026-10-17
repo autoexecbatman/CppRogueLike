@@ -149,10 +149,8 @@ void ContextMenu::menu(GameContext& ctx)
 	{
 		renderer->begin_frame();
 	}
-	if (ctx.renderingManager)
-	{
-		ctx.renderingManager->render(ctx);
-	}
+	assert(ctx.renderingManager && "ContextMenu::menu: called without a renderingManager");
+	ctx.renderingManager->render(ctx);
 	if (ctx.gui && ctx.gui->guiInit)
 	{
 		ctx.gui->gui_render(ctx);

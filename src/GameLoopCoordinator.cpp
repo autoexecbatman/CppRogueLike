@@ -271,7 +271,8 @@ void GameLoopCoordinator::handle_menu_check(GameContext& ctx)
 void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 {
 	assert(ctx.map && "GameLoopCoordinator::draw_hover_tooltip: called without a map");
-	if (!ctx.renderer || !ctx.inputSystem)
+	assert(ctx.inputSystem && "GameLoopCoordinator::draw_hover_tooltip: called without an inputSystem");
+	if (!ctx.renderer)
 	{
 		return;
 	}

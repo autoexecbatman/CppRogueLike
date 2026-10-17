@@ -40,6 +40,7 @@
 #include "src/PrefabLibrary.h"
 #include "src/RandomDice.h"
 #include "src/Renderer.h"
+#include "src/RenderingManager.h"
 #include "src/RoomEditor.h"
 #include "src/SpellEditor.h"
 #include "src/SpellRegistry.h"
@@ -79,6 +80,7 @@ struct MockGameContext
 	PlayerBlueprint playerBlueprint{};
 	LevelManager levelManager{};
 	GameStateManager stateManager{};
+	RenderingManager renderingManager{};
 	MenuManager menuManager{};
 	DisplayManager displayManager{};
 	GameLoopCoordinator gameLoopCoordinator{};
@@ -153,6 +155,7 @@ struct MockGameContext
 			.dice = &dice,
 			.creatureManager = &creature_mgr,
 			.levelManager = &levelManager,
+			.renderingManager = &renderingManager,
 			.inputHandler = &inputHandler,
 			.stateManager = &stateManager,
 			.menuManager = &menuManager,

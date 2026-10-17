@@ -568,7 +568,8 @@ bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext&
 
 bool PlayerController::resolve_mouse_world_tile(GameContext& ctx, Vector2D& out_world_tile) const
 {
-	if (!ctx.renderer || !ctx.inputSystem)
+	assert(ctx.inputSystem && "PlayerController::resolve_mouse_world_tile: called without an inputSystem");
+	if (!ctx.renderer)
 	{
 		return false;
 	}
@@ -713,10 +714,7 @@ void PlayerController::begin_path_walk(
 	}
 
 	assert(ctx.map && "PlayerController::begin_path_walk: called without a map");
-	if (!ctx.pathfinder)
-	{
-		return;
-	}
+	assert(ctx.pathfinder && "PlayerController::begin_path_walk: called without a pathfinder");
 
 	assert(ctx.tileConfig && "begin_path_walk: a route was planned with no tile configuration");
 	auto path = ctx.pathfinder->find_route(
@@ -1396,21 +1394,19 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 		// Only a trap disarms, so only traps are asked. NOT_DISARMABLE survives
 		// as the answer when the tile holds none.
 		DisarmResult disarmResult = DisarmResult::NOT_DISARMABLE;
-		if (ctx.traps)
+		assert(ctx.traps && "PlayerController::resolve_pending_door: called without traps");
+		for (auto& trap : *ctx.traps)
 		{
-			for (auto& trap : *ctx.traps)
+			assert(trap && "resolve_pending_door: traps list holds a null entry");
+			if (trap->is_destroyed() || trap->position != doorPos)
 			{
-				assert(trap && "resolve_pending_door: traps list holds a null entry");
-				if (trap->is_destroyed() || trap->position != doorPos)
-				{
-					continue;
-				}
+				continue;
+			}
 
-				disarmResult = trap->attempt_disarm(playerOwner, ctx);
-				if (disarmResult != DisarmResult::NOT_DISARMABLE)
-				{
-					break;
-				}
+			disarmResult = trap->attempt_disarm(playerOwner, ctx);
+			if (disarmResult != DisarmResult::NOT_DISARMABLE)
+			{
+				break;
 			}
 		}
 

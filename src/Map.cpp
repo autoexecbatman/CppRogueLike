@@ -114,7 +114,8 @@ void Map::init(GameContext& ctx)
 	init_tiles(); // resets tiles + fovMap to all-walls
 	assert(ctx.messageSystem && "Map::init: called without a messageSystem");
 	ctx.messageSystem->log("Map::init: " + std::to_string(mapWidth) + "x" + std::to_string(mapHeight) + " tile grid reset");
-	seed = ctx.dice ? ctx.dice->roll(0, std::numeric_limits<int>::max()) : 0;
+	assert(ctx.dice && "Map::init: called without dice");
+	seed = ctx.dice->roll(0, std::numeric_limits<int>::max());
 	mapRng = RandomDice{ static_cast<unsigned int>(seed) };
 
 	// Register the active map key before rooms are generated so decoration
@@ -1081,51 +1082,49 @@ void Map::create_room(const DungeonRoom& room, bool first, GameContext& ctx)
 
 	// Stamp prefab decorations before water so water can see occupied tiles.
 	assert(ctx.decorEditor && "Map::create_room: called without a decorEditor");
-	if (ctx.prefabLibrary)
+	assert(ctx.prefabLibrary && "Map::create_room: called without a prefabLibrary");
+	ctx.prefabLibrary->apply_to_room(room, *ctx.decorEditor, *this);
+
+	// The shape and the prefab both carve walls into this one box and neither sees
+	// the other, so where they cross they can leave two pockets of floor with no way
+	// between them. Both layers are wanted - they are what makes one room unlike the
+	// next - so the pair is tried first and only the shape is given up when it splits
+	// the room. The prefab alone is whole by construction, being one authored drawing.
+	// Try the richest layout first and give a layer up only when it fails: the shape
+	// over the prefab, then the prefab alone, then the plain box. Each fallback is
+	// strictly simpler, so the last one always succeeds - a dug rectangle is whole and
+	// has floor on all four edges by construction.
+	if (!room_layout_is_sound(room))
 	{
+		dig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });
 		ctx.prefabLibrary->apply_to_room(room, *ctx.decorEditor, *this);
 
-		// The shape and the prefab both carve walls into this one box and neither sees
-		// the other, so where they cross they can leave two pockets of floor with no way
-		// between them. Both layers are wanted - they are what makes one room unlike the
-		// next - so the pair is tried first and only the shape is given up when it splits
-		// the room. The prefab alone is whole by construction, being one authored drawing.
-		// Try the richest layout first and give a layer up only when it fails: the shape
-		// over the prefab, then the prefab alone, then the plain box. Each fallback is
-		// strictly simpler, so the last one always succeeds - a dug rectangle is whole and
-		// has floor on all four edges by construction.
 		if (!room_layout_is_sound(room))
 		{
 			dig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });
-			ctx.prefabLibrary->apply_to_room(room, *ctx.decorEditor, *this);
-
-			if (!room_layout_is_sound(room))
-			{
-				dig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });
-			}
 		}
+	}
 
-		// Register a blocking Decoration for every stamped tile.
-		assert(ctx.decorations && "Map::create_room: called without decorations");
-		for (int dy = room.row; dy <= room.row_end(); ++dy)
+	// Register a blocking Decoration for every stamped tile.
+	assert(ctx.decorations && "Map::create_room: called without decorations");
+	for (int dy = room.row; dy <= room.row_end(); ++dy)
+	{
+		for (int dx = room.col; dx <= room.col_end(); ++dx)
 		{
-			for (int dx = room.col; dx <= room.col_end(); ++dx)
+			TileRef t = ctx.decorEditor->get_override(Vector2D{ dx, dy });
+			if (!t.is_valid())
 			{
-				TileRef t = ctx.decorEditor->get_override(Vector2D{ dx, dy });
-				if (!t.is_valid())
-				{
-					continue;
-				}
-				auto d = std::make_unique<Decoration>();
-				d->position = Vector2D{ dx, dy };
-				d->tile = t;
-				d->name = "decoration";
-				d->hp = 3;
-				d->blocks_movement = true;
-				d->lootTableKey = "";
-				d->isBroken = false;
-				ctx.decorations->push_back(std::move(d));
+				continue;
 			}
+			auto d = std::make_unique<Decoration>();
+			d->position = Vector2D{ dx, dy };
+			d->tile = t;
+			d->name = "decoration";
+			d->hp = 3;
+			d->blocks_movement = true;
+			d->lootTableKey = "";
+			d->isBroken = false;
+			ctx.decorations->push_back(std::move(d));
 		}
 	}
 
@@ -1386,7 +1385,8 @@ bool Map::would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const
 
 void Map::spawn_items(const DungeonRoom& room, GameContext& ctx)
 {
-	const int numItems = ctx.dice ? ctx.dice->roll(0, MAX_ROOM_ITEMS) : 0;
+	assert(ctx.dice && "Map::spawn_items: called without dice");
+	const int numItems = ctx.dice->roll(0, MAX_ROOM_ITEMS);
 	for (int i = 0; i < numItems; i++)
 	{
 		Vector2D itemPos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
@@ -1410,10 +1410,7 @@ void Map::spawn_items(const DungeonRoom& room, GameContext& ctx)
 void Map::spawn_barrels(const DungeonRoom& room, GameContext& ctx)
 {
 	assert(ctx.decorations && "Map::spawn_barrels: called without decorations");
-	if (!ctx.tileConfig)
-	{
-		return;
-	}
+	assert(ctx.tileConfig && "Map::spawn_barrels: called without a tileConfig");
 
 	constexpr int MAX_ROOM_BARRELS = 2;
 	const int count = mapRng.roll(0, MAX_ROOM_BARRELS);
@@ -1612,22 +1609,16 @@ void Map::regenerate(GameContext& ctx)
 {
 	// Renderer handles frame clearing
 	// clear the actors container except the player and the stairs
-	if (ctx.creatures)
-	{
-		ctx.creatures->clear();
-	}
+	assert(ctx.creatures && "Map::regenerate: called without creatures");
+	ctx.creatures->clear();
 	assert(ctx.floorInventory && "Map::regenerate: called without a floorInventory");
 	ctx.floorInventory->items.clear();
 	assert(ctx.rooms && "Map::regenerate: called without rooms");
 	ctx.rooms->clear(); // we clear the room coordinates
-	if (ctx.traps)
-	{
-		ctx.traps->clear();
-	}
-	if (ctx.spellTiles)
-	{
-		ctx.spellTiles->clear();
-	}
+	assert(ctx.traps && "Map::regenerate: called without traps");
+	ctx.traps->clear();
+	assert(ctx.spellTiles && "Map::regenerate: called without spellTiles");
+	ctx.spellTiles->clear();
 	assert(ctx.decorations && "Map::regenerate: called without decorations");
 	ctx.decorations->clear();
 

@@ -92,6 +92,7 @@ std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 	RandomDice& rng,
 	const PrefabLibrary* prefabs) const
 {
+	assert(prefabs && "DungeonGenerator::place_rooms: called without a prefab library");
 	const int gridCols = mapWidth / CELL_W;
 	const int gridRows = mapHeight / CELL_H;
 
@@ -117,7 +118,7 @@ std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 			int roomHeight = rng.roll(ROOM_MIN_SIZE, ROOM_VERTICAL_MAX_SIZE);
 			std::string chosenPrefab;
 
-			if (prefabs && prefabs->count() > 0)
+			if (prefabs->count() > 0)
 			{
 				// Collect all prefabs that fit inside this cell.
 				struct Candidate
