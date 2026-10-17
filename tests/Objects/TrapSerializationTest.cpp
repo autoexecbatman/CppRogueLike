@@ -25,6 +25,7 @@
 #include "src/GameStateManager.h"
 #include "src/HealthPool.h"
 #include "src/Persistent.h"
+#include "src/Player.h"
 #include "src/Trap.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
@@ -45,17 +46,18 @@ protected:
 		return std::make_unique<Trap>(position, type, *ctx.tileConfig);
 	}
 
-	// Spots the trap through the path the game uses, rather than a test-only setter:
-	// a roll of 20 against a detection class of 15 finds it.
+	// Spots the trap the way the game does, rather than through a test-only setter: the
+	// player steps onto it, and its one detection roll, a 20 against 15, finds it.
 	void notice(Trap& trap)
 	{
 		mock.dice.set_next_roll(20);
-		ASSERT_TRUE(trap.attempt_detect(finder, ctx));
+		ASSERT_EQ(trap.on_creature_enter(finder, ctx), EntryResult::BLOCKED);
+		ASSERT_EQ(trap.get_state(), TrapState::DETECTED);
 	}
 
 	MockGameContext mock{};
 	GameContext ctx{};
-	Creature finder{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "thief", ColorPairId::WHITE_BLACK } };
+	Player finder{ Vector2D{ 0, 0 } };
 };
 
 // The gap itself: every trap on the level comes back, at the tile it was on.

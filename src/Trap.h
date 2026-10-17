@@ -39,10 +39,6 @@ public:
 	int get_damage_dice_count() const { return damageDiceCount; }
 	int get_damage_dice_size() const { return damageDiceSize; }
 
-	// Detection: player makes DEX check to spot the trap
-	// Returns true if trap is now detected (was hidden, now revealed)
-	bool attempt_detect(Creature& creature, GameContext& ctx);
-
 	// Applies the trap's effect to a creature entering its tile. A hidden trap gives the
 	// player one detection roll: missed, it springs; noticed, the player stops short and
 	// it stays armed. A monster gets no roll and walks in. A known or triggered trap

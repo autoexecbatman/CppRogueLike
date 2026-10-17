@@ -73,30 +73,6 @@ Trap::Trap(Vector2D position, TrapType trapType, const TileConfig& tileConfig)
 	add_state(ActorState::IS_INVISIBLE);
 }
 
-bool Trap::attempt_detect(Creature& creature, GameContext& ctx)
-{
-	if (state != TrapState::HIDDEN)
-	{
-		return false; // Already detected, disarmed, or triggered
-	}
-
-	// Roll 1d20 + DEX modifier vs detection DC
-	int roll = ctx.dice->roll(1, 20);
-	int dexMod = (creature.get_dexterity() - 10) / 2;
-	int checkResult = roll + dexMod;
-
-	if (checkResult >= detectionDC)
-	{
-		state = TrapState::DETECTED;
-		remove_state(ActorState::IS_INVISIBLE); // Trap is now visible
-		assert(ctx.messageSystem && "Trap::attempt_detect: called without a messageSystem");
-		ctx.messageSystem->message(ColorPairId::YELLOW_BLACK, "You notice a hidden trap!", MessageCompletion::FINISHED);
-		return true;
-	}
-
-	return false;
-}
-
 DisarmResult Trap::attempt_disarm(Player& creature, GameContext& ctx)
 {
 	// Nothing left to disarm.
@@ -243,8 +219,8 @@ void Trap::attempt_passive_detection(Creature& creature, GameContext& ctx)
 	if (checkResult >= detectionDC)
 	{
 		state = TrapState::DETECTED;
-		// Spotted is spotted however it was found: attempt_detect does the same,
-		// and without this the message announces a trap that stays invisible.
+		// A spotted trap is shown; without this the message announces a trap that stays
+		// invisible.
 		remove_state(ActorState::IS_INVISIBLE);
 		assert(ctx.messageSystem && "Trap::attempt_passive_detection: called without a messageSystem");
 		ctx.messageSystem->message(ColorPairId::YELLOW_BLACK, "You notice a hidden trap at the last moment!", MessageCompletion::FINISHED);
