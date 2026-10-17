@@ -13,20 +13,6 @@ struct GameContext;
 // Base spider AI class - handles spider movement patterns
 class AiSpider : public AiMonster
 {
-public:
-	void update(Creature& owner, GameContext& ctx) override;
-
-	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::SPIDER; }
-
-	void move_toward_player(Creature& owner, GameContext& ctx);
-	void random_move(Creature& owner, GameContext& ctx);
-	void load(const json& j) override;
-	void save(json& j) override;
-
-	bool has_laid_web() const { return webLaid; }
-
-	void set_web_laid(bool status) { webLaid = status; }
-
 protected:
 	// The clock reading the ambush ends at. Read only while isAmbushing, and always set
 	// when an ambush begins, so there is no reading it before it means anything.
@@ -53,4 +39,18 @@ protected:
 
 	// Check if a position is a good ambush spot (near walls)
 	bool is_good_ambush_spot(Vector2D position, GameContext& ctx);
+
+public:
+	void update(Creature& owner, GameContext& ctx) override;
+
+	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::SPIDER; }
+
+	void move_toward_player(Creature& owner, GameContext& ctx);
+	void random_move(Creature& owner, GameContext& ctx);
+	void load(const json& j) override;
+	void save(json& j) override;
+
+	bool has_laid_web() const { return webLaid; }
+
+	void set_web_laid(bool status) { webLaid = status; }
 };

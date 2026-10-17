@@ -120,6 +120,10 @@ inline AiType parse_ai_type(std::string_view name)
 //==AI==
 class Ai : public Persistent
 {
+protected:
+	// Protected default constructor - only derived classes can use
+	Ai() = default;
+
 public:
 	virtual ~Ai() noexcept = default;
 	Ai(const Ai&) = delete;
@@ -133,8 +137,4 @@ public:
 	[[nodiscard]] virtual AiType get_ai_type() const noexcept = 0;
 
 	[[nodiscard]] static std::unique_ptr<Ai> create(const json& j);
-
-protected:
-	// Protected default constructor - only derived classes can use
-	Ai() = default;
 };

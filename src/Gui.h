@@ -24,6 +24,10 @@ private:
 	std::string guiMessage{};
 	std::vector<std::vector<LogMessage>> displayMessages;
 
+protected:
+	void render_hp_bar(const GameContext& ctx);
+	void render_hunger_status(const GameContext& ctx);
+
 public:
 	bool guiInit{ false };
 
@@ -50,8 +54,4 @@ public:
 	const std::string& get_message() const { return guiMessage; }
 
 	ColorPairId get_message_color() const { return guiMessageColor; }
-
-protected:
-	void render_hp_bar(const GameContext& ctx);
-	void render_hunger_status(const GameContext& ctx);
 };
