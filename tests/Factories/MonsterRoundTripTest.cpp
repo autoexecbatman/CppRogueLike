@@ -168,6 +168,7 @@ void expect_same_monster(const std::string& key, const MonsterParams& before, co
 	EXPECT_EQ(before.undead, after.undead) << key << ".undead";
 	EXPECT_EQ(before.ethics, after.ethics) << key << ".ethics";
 	EXPECT_EQ(before.morality, after.morality) << key << ".morality";
+	EXPECT_EQ(before.size, after.size) << key << ".size";
 	EXPECT_EQ(before.corpseWeight, after.corpseWeight) << key << ".corpseWeight";
 
 	expect_same_dice(key + ".hpDice", before.hpDice, after.hpDice);

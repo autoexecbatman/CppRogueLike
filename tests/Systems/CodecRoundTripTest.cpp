@@ -27,6 +27,7 @@
 #include "src/BuffType.h"
 #include "src/Colors.h"
 #include "src/CreatureClass.h"
+#include "src/CreatureSize.h"
 #include "src/DamageInfo.h"
 #include "src/ItemClassification.h"
 #include "src/MagicalItemEffects.h"
@@ -84,6 +85,14 @@ TEST(CodecRoundTripTest, WeaponSizeSurvivesEncoding)
 	for (const auto size : sizes)
 	{
 		expect_round_trip(size, encode_weapon_size, parse_weapon_size, "WeaponSize");
+	}
+}
+
+TEST(CodecRoundTripTest, CreatureSizeSurvivesEncoding)
+{
+	for (const auto size : ALL_CREATURE_SIZE)
+	{
+		expect_round_trip(size, encode_creature_size, parse_creature_size, "CreatureSize");
 	}
 }
 
@@ -212,6 +221,7 @@ TEST(CodecRoundTripTest, UnknownStringsThrow)
 	EXPECT_THROW((void)parse_scroll_animation("not_an_animation"), std::runtime_error);
 	EXPECT_THROW((void)parse_hand_requirement("not_a_requirement"), std::runtime_error);
 	EXPECT_THROW((void)parse_weapon_size("not_a_size"), std::runtime_error);
+	EXPECT_THROW((void)parse_creature_size("enormous"), std::runtime_error);
 	EXPECT_THROW((void)parse_buff_type("not_a_buff"), std::runtime_error);
 	EXPECT_THROW((void)parse_item_class("not_a_class"), std::runtime_error);
 	EXPECT_THROW((void)parse_pickable_type("not_a_type"), std::runtime_error);

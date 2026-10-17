@@ -28,6 +28,7 @@
 #include <string_view>
 
 #include "src/Colors.h"
+#include "src/CreatureSize.h"
 #include "src/BuffType.h"
 #include "src/ItemClassification.h"
 #include "src/MagicalItemEffects.h"
@@ -80,6 +81,7 @@ TEST(EnumCycleTest, EveryCycleCoversItsEnumAndWraps)
 	expect_cycle_covers(ALL_SCROLL_ANIMATION, next_scroll_animation, "ScrollAnimation");
 	expect_cycle_covers(ALL_HAND_REQUIREMENT, next_hand_requirement, "HandRequirement");
 	expect_cycle_covers(ALL_WEAPON_SIZE, next_weapon_size, "WeaponSize");
+	expect_cycle_covers(ALL_CREATURE_SIZE, next_creature_size, "CreatureSize");
 	expect_cycle_covers(ALL_MAGICAL_EFFECT, next_magical_effect, "MagicalEffect");
 	// ColorPairId is not in EveryListIsTheEnumsOwnOrder below because its values
 	// start at one; Colors.h asserts that ordering at compile time instead.
@@ -96,6 +98,7 @@ TEST(EnumCycleTest, EveryListIsTheEnumsOwnOrder)
 	expect_list_matches_enum(ALL_SCROLL_ANIMATION, "ScrollAnimation");
 	expect_list_matches_enum(ALL_HAND_REQUIREMENT, "HandRequirement");
 	expect_list_matches_enum(ALL_WEAPON_SIZE, "WeaponSize");
+	expect_list_matches_enum(ALL_CREATURE_SIZE, "CreatureSize");
 	expect_list_matches_enum(ALL_MAGICAL_EFFECT, "MagicalEffect");
 }
 

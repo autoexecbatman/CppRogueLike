@@ -130,6 +130,7 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/NPC.h
     ${PROJECT_SOURCE_DIR}/Alignment.h
     ${PROJECT_SOURCE_DIR}/CreatureClass.h
+    ${PROJECT_SOURCE_DIR}/CreatureSize.h
     ${PROJECT_SOURCE_DIR}/TurnUndead.cpp
     ${PROJECT_SOURCE_DIR}/TurnUndead.h
     ${PROJECT_SOURCE_DIR}/Vision.cpp

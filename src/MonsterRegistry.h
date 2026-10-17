@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "Alignment.h"
+#include "CreatureSize.h"
 #include "DamageInfo.h"
 #include "DiceExpr.h"
 #include "EquipmentSlot.h"
@@ -97,6 +98,8 @@ struct MonsterParams
 	Morality morality{ Morality::NEUTRAL };
 	// What its corpse weighs.
 	int corpseWeight{ 50 };
+	// The size its Monstrous Manual entry prints, which the DMG reads its ability scores by.
+	CreatureSize size{ CreatureSize::MEDIUM };
 
 	// Ability scores
 	DiceExpr strDice{ 3, 6, 0 };

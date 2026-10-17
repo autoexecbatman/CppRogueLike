@@ -42,6 +42,7 @@
       "sides": 6
     },
     "morale": 9,
+    "size": "medium",
     "str": {
       "bonus": 0,
       "num": 3,
@@ -113,6 +114,7 @@
       "sides": 2
     },
     "morale": 4,
+    "size": "tiny",
     "str": {
       "bonus": 0,
       "num": 1,
@@ -179,6 +181,7 @@
       "sides": 6
     },
     "morale": 10,
+    "size": "large",
     "str": {
       "bonus": 2,
       "num": 3,
@@ -250,6 +253,7 @@
       "sides": 6
     },
     "morale": 13,
+    "size": "large",
     "str": {
       "bonus": 0,
       "num": 5,
@@ -316,6 +320,7 @@
       "sides": 6
     },
     "morale": 19,
+    "size": "gargantuan",
     "str": {
       "bonus": 0,
       "num": 5,
@@ -382,6 +387,7 @@
       "sides": 6
     },
     "morale": 10,
+    "size": "medium",
     "str": {
       "bonus": 2,
       "num": 3,
@@ -448,6 +454,7 @@
       "sides": 6
     },
     "morale": 14,
+    "size": "medium",
     "str": {
       "bonus": 1,
       "num": 4,
@@ -514,6 +521,7 @@
       "sides": 6
     },
     "morale": 11,
+    "size": "medium",
     "str": {
       "bonus": 1,
       "num": 2,
@@ -581,6 +589,7 @@
       "sides": 2
     },
     "morale": 5,
+    "size": "tiny",
     "str": {
       "bonus": 0,
       "num": 1,
@@ -647,6 +656,7 @@
       "sides": 4
     },
     "morale": 6,
+    "size": "tiny",
     "str": {
       "bonus": 0,
       "num": 1,
@@ -713,6 +723,7 @@
       "sides": 4
     },
     "morale": 9,
+    "size": "medium",
     "str": {
       "bonus": 1,
       "num": 4,
@@ -779,6 +790,7 @@
       "sides": 6
     },
     "morale": 9,
+    "size": "large",
     "str": {
       "bonus": 2,
       "num": 3,
@@ -850,6 +862,7 @@
       "sides": 6
     },
     "morale": 6,
+    "size": "small",
     "str": {
       "bonus": 1,
       "num": 2,
@@ -921,6 +934,7 @@
       "sides": 2
     },
     "morale": 20,
+    "size": "large",
     "str": {
       "bonus": 0,
       "num": 6,
@@ -987,6 +1001,7 @@
       "sides": 6
     },
     "morale": 8,
+    "size": "medium",
     "str": {
       "bonus": 0,
       "num": 3,
@@ -1053,6 +1068,7 @@
       "sides": 6
     },
     "morale": 11,
+    "size": "huge",
     "str": {
       "bonus": 0,
       "num": 6,
@@ -1119,6 +1135,7 @@
       "sides": 6
     },
     "morale": 8,
+    "size": "medium",
     "str": {
       "bonus": 1,
       "num": 3,
@@ -1190,6 +1207,7 @@
       "sides": 6
     },
     "morale": 10,
+    "size": "large",
     "str": {
       "bonus": 2,
       "num": 3,
@@ -1256,6 +1274,7 @@
       "sides": 6
     },
     "morale": 6,
+    "size": "small",
     "str": {
       "bonus": 1,
       "num": 2,
@@ -1327,6 +1346,7 @@
       "sides": 6
     },
     "morale": 20,
+    "size": "medium",
     "str": {
       "bonus": 0,
       "num": 2,
@@ -1394,6 +1414,7 @@
       "sides": 6
     },
     "morale": 7,
+    "size": "medium",
     "str": {
       "bonus": 0,
       "num": 2,
@@ -1465,6 +1486,7 @@
       "sides": 6
     },
     "morale": 13,
+    "size": "medium",
     "str": {
       "bonus": 0,
       "num": 3,
@@ -1539,6 +1561,7 @@
       "sides": 6
     },
     "morale": 10,
+    "size": "large",
     "str": {
       "bonus": 2,
       "num": 5,
@@ -1610,6 +1633,7 @@
       "sides": 6
     },
     "morale": 8,
+    "size": "medium",
     "str": {
       "bonus": 1,
       "num": 3,
@@ -1681,6 +1705,7 @@
       "sides": 6
     },
     "morale": 18,
+    "size": "large",
     "str": {
       "bonus": 0,
       "num": 6,
@@ -1747,6 +1772,7 @@
       "sides": 2
     },
     "morale": 4,
+    "size": "tiny",
     "str": {
       "bonus": 0,
       "num": 1,
@@ -1813,6 +1839,7 @@
       "sides": 6
     },
     "morale": 12,
+    "size": "medium",
     "str": {
       "bonus": 0,
       "num": 2,
@@ -1888,6 +1915,7 @@
       "sides": 2
     },
     "morale": 20,
+    "size": "medium",
     "str": {
       "bonus": 0,
       "num": 2,
@@ -1979,6 +2007,7 @@
       "sides": 4
     },
     "morale": 12,
+    "size": "large",
     "str": {
       "bonus": 0,
       "num": 4,
@@ -2045,6 +2074,7 @@
       "sides": 6
     },
     "morale": 18,
+    "size": "medium",
     "str": {
       "bonus": 2,
       "num": 4,
@@ -2112,6 +2142,7 @@
       "sides": 6
     },
     "morale": 12,
+    "size": "medium",
     "str": {
       "bonus": 2,
       "num": 4,
@@ -2178,6 +2209,7 @@
       "sides": 6
     },
     "morale": 15,
+    "size": "medium",
     "str": {
       "bonus": 1,
       "num": 3,
@@ -2245,6 +2277,7 @@
       "sides": 4
     },
     "morale": 9,
+    "size": "small",
     "str": {
       "bonus": 0,
       "num": 3,
@@ -2311,6 +2344,7 @@
       "sides": 6
     },
     "morale": 15,
+    "size": "medium",
     "str": {
       "bonus": 0,
       "num": 2,
@@ -2378,6 +2412,7 @@
       "sides": 6
     },
     "morale": 13,
+    "size": "gargantuan",
     "str": {
       "bonus": 0,
       "num": 5,
@@ -2444,6 +2479,7 @@
       "sides": 2
     },
     "morale": 20,
+    "size": "medium",
     "str": {
       "bonus": 1,
       "num": 3,
@@ -2512,6 +2548,7 @@
     },
     "morale": 12,
     "name": "Dungeon Jailer",
+    "size": "medium",
     "str": {
       "bonus": 1,
       "num": 3,
@@ -2584,6 +2621,7 @@
     },
     "morale": 12,
     "name": "Dungeon Warden",
+    "size": "medium",
     "str": {
       "bonus": 6,
       "num": 3,

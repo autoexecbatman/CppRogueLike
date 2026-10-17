@@ -70,6 +70,7 @@ private:
 		AI_TYPE,
 		ETHICS,
 		MORALITY,
+		SIZE,
 		CAN_SWIM,
 		CAN_FLY,
 		WEIGHT,
