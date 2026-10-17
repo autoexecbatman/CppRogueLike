@@ -76,13 +76,19 @@ public:
 	// NOTE: coordinates are being set in the function create_room() in Map.cpp
 
 	// Pays the race onto the six scores and reports what it did, one line per
-	// ability it moved. racial_ability_adjustments shows those lines; this is the
+	// ability it moved. show_racial_adjustments shows those lines; this is the
 	// half that changes the character, and it needs no window to run.
 	//
 	// Example, a halfling:
 	//   pay_racial_adjustments();   // -> { "-1 Strength", "+1 Dexterity" }
 	[[nodiscard]] std::vector<std::string> pay_racial_adjustments();
-	void racial_ability_adjustments(GameContext& ctx);
+	// Opens the popup naming what the race did to the scores. A race that moved none,
+	// human or half-elf, opens nothing.
+	//
+	// Example, a halfling:
+	//   show_racial_adjustments(pay_racial_adjustments(), ctx); // a popup listing -1 Strength, +1 Dexterity
+	//   show_racial_adjustments({}, ctx); // a human: no popup
+	void show_racial_adjustments(std::vector<std::string> bonusLines, GameContext& ctx);
 	void equip_class_starting_gear(GameContext& ctx);
 	void calculate_thaco();
 
@@ -210,7 +216,7 @@ inline constexpr std::array<Player::PlayerRaceState, 6> ALL_PLAYER_RACE{
 // What a race does to the six scores, in ALL_ABILITY order. AD&D 2e racial ability
 // adjustments; a human and a half-elf take none. One table, read both by the
 // allocation screen, which shows what a score will become, and by
-// Player::racial_ability_adjustments, which pays it once the character exists.
+// Player::pay_racial_adjustments, which pays it once the character exists.
 //
 // Example:
 //   racial_ability_modifiers(Player::PlayerRaceState::HALFLING);   // -> { -1, 1, 0, 0, 0, 0 }

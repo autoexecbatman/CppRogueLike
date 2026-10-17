@@ -253,7 +253,7 @@ void Player::die(GameContext& ctx)
 
 void Player::on_new_game_start(GameContext& ctx)
 {
-	racial_ability_adjustments(ctx);
+	std::vector<std::string> racialLines = pay_racial_adjustments();
 	// The roll reads the Strength the character ends up with, so it comes after the
 	// race is paid. The halfling is the only race that moves Strength, and the roll
 	// turns that race down by name, so both guards cover the one case.
@@ -263,6 +263,9 @@ void Player::on_new_game_start(GameContext& ctx)
 	// and the kit puts leather on a rogue: a screen opened before it would show
 	// numbers the character loses on its first turn.
 	push_thief_skill_allocation(*this, get_creature_level(), ctx);
+	// Pushed last because the menu stack runs its newest entry: the popup explaining the
+	// race is read before the skill screen that is built on the scores it changed.
+	show_racial_adjustments(std::move(racialLines), ctx);
 }
 
 void Player::roll_exceptional_strength(GameContext& ctx)
@@ -479,9 +482,8 @@ std::vector<std::string> Player::pay_racial_adjustments()
 	return bonusLines;
 }
 
-void Player::racial_ability_adjustments(GameContext& ctx)
+void Player::show_racial_adjustments(std::vector<std::string> bonusLines, GameContext& ctx)
 {
-	std::vector<std::string> bonusLines = pay_racial_adjustments();
 	if (bonusLines.empty())
 	{
 		return;

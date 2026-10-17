@@ -196,7 +196,7 @@ TEST(AbilityAllocationTest, ARaceIsShownAndJudgedButNotAllocated)
 }
 
 // The blueprint is built from what was allocated, not from what the player read,
-// because racial_ability_adjustments pays the race once the character exists.
+// because pay_racial_adjustments pays the race once the character exists.
 TEST(AbilityAllocationTest, TheScoresHandedOnAreTheAllocatedOnes)
 {
 	AbilityAllocation halflingFighter{ { 4 }, CreatureClass::FIGHTER, HALFLING };
