@@ -1,7 +1,6 @@
 // file: NotificationMenu.cpp
 #include <algorithm>
 #include <cassert>
-#include <format>
 
 #include "Colors.h"
 #include "GameContext.h"

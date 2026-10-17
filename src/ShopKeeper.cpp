@@ -10,8 +10,7 @@
 #include "InventoryData.h"
 #include "InventoryOperations.h"
 #include "Item.h"
-#include "ItemCreator.h" // SINGLE SOURCE OF TRUTH
-#include "LevelManager.h"
+#include "ItemCreator.h"
 #include "MessageSystem.h"
 #include "Persistent.h"
 #include "Player.h"

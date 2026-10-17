@@ -1,8 +1,6 @@
 // LevelUpUI.cpp - Handles level up screen display
 #include <format>
 
-#include <raylib.h>
-
 #include "Colors.h"
 #include "GameContext.h"
 #include "InputSystem.h"

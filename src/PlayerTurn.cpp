@@ -1,10 +1,9 @@
 // file: PlayerTurn.cpp
-#include "PlayerTurn.h"
-
 #include <cassert>
 
 #include "Creature.h"
 #include "GameContext.h"
+#include "PlayerTurn.h"
 
 void spend_player_action(GameContext& ctx, int baseCost)
 {

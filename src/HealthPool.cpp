@@ -1,7 +1,6 @@
 // file: HealthPool.cpp
 #include <algorithm>
 #include <cassert>
-#include <format>
 
 #include "Creature.h"
 #include "DamageInfo.h"

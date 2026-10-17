@@ -6,7 +6,6 @@
 #include "AiMimic.h"
 #include "Colors.h"
 #include "DamageInfo.h"
-#include "DataManager.h"
 #include "ExperienceReward.h"
 #include "GameContext.h"
 #include "LevelUpSystem.h"

@@ -2,8 +2,6 @@
 #include <format>
 #include <string>
 
-#include <raylib.h>
-
 #include "AttackKind.h"
 #include "AttackStrength.h"
 #include "CharacterSheetUI.h"

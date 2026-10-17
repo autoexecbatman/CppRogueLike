@@ -1,5 +1,4 @@
 // file: ContentRegistryIO.cpp
-
 #include <filesystem>
 #include <format>
 #include <fstream>

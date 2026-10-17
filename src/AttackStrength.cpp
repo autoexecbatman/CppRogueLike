@@ -1,8 +1,7 @@
 // file: AttackStrength.cpp
-#include "AttackStrength.h"
-
 #include <algorithm>
 
+#include "AttackStrength.h"
 #include "Creature.h"
 #include "DataManager.h"
 #include "Item.h"

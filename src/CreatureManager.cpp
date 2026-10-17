@@ -1,7 +1,6 @@
 #include <cassert>
 #include <memory>
 #include <span>
-#include <stdexcept>
 #include <vector>
 
 #include "Creature.h"

@@ -1,7 +1,4 @@
 // file: SpellAnimations.cpp
-#include <functional>
-#include <vector>
-
 #include "AnimationBarrierMenu.h"
 #include "AnimationSystem.h"
 #include "GameContext.h"

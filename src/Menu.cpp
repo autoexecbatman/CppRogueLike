@@ -2,8 +2,6 @@
 #include <memory>
 #include <vector>
 
-#include <raylib.h>
-
 #include "GameContext.h"
 #include "GameStateManager.h"
 #include "Gui.h"

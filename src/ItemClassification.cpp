@@ -3,7 +3,6 @@
 #include <unordered_map>
 
 #include "ItemClassification.h"
-#include "Weapons.h"
 
 namespace ItemClassificationUtils
 {

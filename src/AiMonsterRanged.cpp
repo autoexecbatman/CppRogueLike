@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <functional>
 
 #include "Actor.h"
 #include "AiMonster.h"

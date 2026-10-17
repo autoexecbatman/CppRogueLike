@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "Attacker.h"
 #include "BalanceViewer.h"
 #include "CharacterSheetUI.h"
 #include "Controls.h"

@@ -2,17 +2,14 @@
 #include <algorithm>
 #include <array>
 #include <limits>
-#include <ranges>
 #include <vector>
 
 #include "DungeonGenerator.h"
 #include "DungeonRoom.h"
 #include "GameContext.h"
-#include "Item.h"
 #include "Map.h"
 #include "PrefabLibrary.h"
 #include "RandomDice.h"
-#include "Vector2D.h"
 
 // Cell dimensions: each grid cell is large enough to hold the largest room
 // plus a guaranteed corridor gap on every side so rooms never share a wall.

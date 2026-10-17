@@ -14,7 +14,6 @@
 #include "ContentEditor.h"
 #include "Creature.h"
 #include "CreatureManager.h"
-#include "DataManager.h"
 #include "DeathMenu.h"
 #include "DecorEditor.h"
 #include "FloatingTextSystem.h"

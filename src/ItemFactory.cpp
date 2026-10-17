@@ -1,8 +1,5 @@
 #include <algorithm>
-#include <cassert>
 #include <functional>
-#include <memory>
-#include <span>
 #include <string>
 #include <utility>
 #include <vector>
@@ -10,7 +7,6 @@
 #include "Colors.h"
 #include "GameContext.h"
 #include "InventoryOperations.h"
-#include "Item.h"
 #include "ItemCreator.h"
 #include "ItemEnhancements.h"
 #include "ItemFactory.h"
@@ -18,7 +14,6 @@
 #include "LevelManager.h"
 #include "Map.h"
 #include "MessageSystem.h"
-#include "Pickable.h"
 #include "RandomDice.h"
 #include "Vector2D.h"
 

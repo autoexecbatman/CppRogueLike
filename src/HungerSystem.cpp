@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <cassert>
-#include <format>
 #include <string>
 #include <utility>
 

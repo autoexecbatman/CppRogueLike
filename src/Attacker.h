@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include <string_view>
 
 #include "AttackKind.h"
 #include "AttackResult.h"
@@ -34,7 +34,7 @@ protected:
 		Creature& target,
 		const DamageInfo& attackDamage,
 		int attackPenalty,
-		const std::string& handName,
+		std::string_view handName,
 		AttackKind kind,
 		GameContext& ctx);
 
@@ -76,7 +76,7 @@ protected:
 		const DamageInfo& attackDamage,
 		int strengthBonus,
 		int dr,
-		const std::string& handName,
+		std::string_view handName,
 		GameContext& ctx) const noexcept;
 
 	void log_attack_miss(
@@ -85,7 +85,7 @@ protected:
 		int attackRoll,
 		int rollNeeded,
 		int attackPenalty,
-		const std::string& handName,
+		std::string_view handName,
 		GameContext& ctx) const noexcept;
 
 public:

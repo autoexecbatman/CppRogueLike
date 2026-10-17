@@ -10,16 +10,13 @@
 #include "BodyPlanRegistry.h"
 #include "Creature.h"
 #include "DamageInfo.h"
-#include "DataManager.h"
 #include "ExperienceReward.h"
 #include "GameContext.h"
-#include "HealthPool.h"
 #include "ItemCreator.h"
 #include "LevelUpSystem.h"
 #include "MonsterAttacker.h"
 #include "MonsterCreator.h"
 #include "MonsterRegistry.h"
-#include "RandomDice.h"
 #include "Vector2D.h"
 
 std::unique_ptr<Creature> MonsterCreator::create_from_params(

@@ -2,7 +2,6 @@
 #include <optional>
 #include <vector>
 
-#include "Creature.h"
 #include "DungeonRoom.h"
 #include "GameContext.h"
 #include "Map.h"

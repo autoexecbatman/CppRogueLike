@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <cassert>
-#include <cmath>
 #include <memory>
 #include <vector>
 
@@ -18,10 +17,8 @@
 #include "ItemClassification.h"
 #include "Map.h"
 #include "MessageSystem.h"
-#include "Player.h"
 #include "PlayerTurn.h"
 #include "Renderer.h"
-#include "RenderingManager.h"
 #include "TargetingMenu.h"
 #include "TargetingSystem.h"
 #include "TileConfig.h"

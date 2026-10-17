@@ -13,7 +13,6 @@
 #include "Actor.h"
 #include "BodyPlanRegistry.h"
 #include "Colors.h"
-#include "ContentRegistry.h"
 #include "ContentRegistryIO.h"
 #include "DataManager.h"
 #include "DungeonRoom.h"

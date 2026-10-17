@@ -15,7 +15,6 @@
 #include "Renderer.h"
 #include "RenderingManager.h"
 #include "SpellTile.h"
-#include "TileFeature.h"
 #include "Trap.h"
 
 void RenderingManager::render(GameContext& ctx) const

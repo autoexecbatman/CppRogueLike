@@ -8,9 +8,7 @@
 #include "Colors.h"
 #include "GameContext.h"
 #include "InputSystem.h"
-#include "Item.h"
 #include "Renderer.h"
-#include "TileConfig.h"
 
 void BaseMenu::menu_new(
 	size_t width,

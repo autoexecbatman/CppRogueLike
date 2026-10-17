@@ -1,16 +1,12 @@
 #include <algorithm>
-#include <cassert>
-#include <format>
 
 #include "ArmorClass.h"
 #include "BuffSystem.h"
-#include "Colors.h"
 #include "Creature.h"
 #include "DataManager.h"
 #include "DexterityAttributes.h"
 #include "EquipmentSlot.h"
 #include "GameContext.h"
-#include "MessageSystem.h"
 #include "Pickable.h"
 
 ArmorClass::ArmorClass(int baseAC)

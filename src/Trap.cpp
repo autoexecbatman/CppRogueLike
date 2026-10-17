@@ -1,11 +1,9 @@
 // file: Trap.cpp
 // Implementation of trap mechanics: detection, triggering, disarming, damage
 
-#include <algorithm>
 #include <cassert>
 #include <format>
 #include <optional>
-#include <ranges>
 #include <string>
 
 #include "Creature.h"

@@ -28,7 +28,6 @@
 #include "MessageSystem.h"
 #include "Persistent.h"
 #include "Pickable.h"
-#include "StrengthAttributes.h"
 
 // OCP: Data-driven buff break messaging - player notifications when buffs end from attacking
 static const std::unordered_map<BuffType, std::string_view> BUFF_BREAK_MESSAGES = {
@@ -44,7 +43,7 @@ AttackResult Attacker::perform_single_attack(
 	Creature& target,
 	const DamageInfo& attackDamage,
 	int attackPenalty,
-	const std::string& handName,
+	std::string_view handName,
 	AttackKind kind,
 	GameContext& ctx)
 {
@@ -278,7 +277,7 @@ void Attacker::log_attack_hit(
 	const DamageInfo& attackDamage,
 	int strengthBonus,
 	int dr,
-	const std::string& handName,
+	std::string_view handName,
 	GameContext& ctx) const noexcept
 {
 	ctx.messageSystem->append_message_part(attacker.actorData.color, attacker.actorData.name);
@@ -315,7 +314,7 @@ void Attacker::log_attack_miss(
 	int attackRoll,
 	int rollNeeded,
 	int attackPenalty,
-	const std::string& handName,
+	std::string_view handName,
 	GameContext& ctx) const noexcept
 {
 	ctx.messageSystem->append_message_part(attacker.actorData.color, attacker.actorData.name);

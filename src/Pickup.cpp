@@ -14,7 +14,6 @@
 #include "MessageSystem.h"
 #include "Pickable.h"
 #include "Pickup.h"
-#include "UniqueId.h"
 
 namespace
 {

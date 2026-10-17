@@ -1,5 +1,4 @@
 #include <memory>
-#include <stdexcept>
 
 #include "Ai.h"
 #include "AiGiantSpider.h"

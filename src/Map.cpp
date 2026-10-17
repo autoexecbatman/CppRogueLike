@@ -3,10 +3,8 @@
 #include <cassert>
 #include <cmath>
 #include <cstdint>
-#include <format>
 #include <limits>
 #include <memory>
-#include <optional>
 #include <queue>
 #include <ranges>
 #include <set>
@@ -31,7 +29,6 @@
 #include "LevelManager.h"
 #include "Map.h"
 #include "MessageSystem.h"
-#include "MonsterCreator.h"
 #include "MonsterFactory.h"
 #include "Persistent.h"
 #include "PrefabLibrary.h"

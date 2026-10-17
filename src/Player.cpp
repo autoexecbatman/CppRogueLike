@@ -27,17 +27,13 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstdint>
 #include <format>
 #include <memory>
 #include <optional>
 #include <string>
-#include <type_traits>
 #include <utility>
-#include <variant>
 
 #include "Actor.h"
-#include "Ai.h"
 #include "BuffSystem.h"
 #include "BuffType.h"
 #include "Colors.h"
@@ -51,15 +47,11 @@
 #include "HealthPool.h"
 #include "HungerSystem.h"
 #include "InventoryOperations.h"
-#include "ItemClassification.h"
 #include "ItemCreator.h"
-#include "ItemIdentification.h"
-#include "Map.h"
 #include "MenuThiefSkills.h"
 #include "MessageSystem.h"
 #include "NotificationMenu.h"
 #include "Persistent.h"
-#include "Pickable.h"
 #include "Player.h"
 #include "PlayerAttacker.h"
 #include "PlayerTurn.h"
@@ -69,7 +61,6 @@
 #include "SpellSystem.h"
 #include "Vector2D.h"
 #include "WeaponDamageRegistry.h"
-#include "Web.h"
 
 // XP table helpers - pure functions, no state
 namespace

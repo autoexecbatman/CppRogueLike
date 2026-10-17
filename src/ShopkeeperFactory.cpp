@@ -11,7 +11,6 @@
 #include "DamageInfo.h"
 #include "ExperienceReward.h"
 #include "GameContext.h"
-#include "HealthPool.h"
 #include "ItemCreator.h"
 #include "MessageSystem.h"
 #include "MonsterAttacker.h"

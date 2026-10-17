@@ -1,12 +1,10 @@
 #include <algorithm>
-#include <cmath>
 #include <string>
 #include <vector>
 
 #include <raylib.h>
 
 #include "Actor.h"
-#include "Ai.h"
 #include "GameContext.h"
 #include "Map.h"
 #include "Persistent.h"

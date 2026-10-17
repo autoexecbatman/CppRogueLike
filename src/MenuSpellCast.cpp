@@ -3,8 +3,6 @@
 #include <format>
 #include <string>
 
-#include <raylib.h>
-
 #include "Colors.h"
 #include "GameContext.h"
 #include "MenuSpellCast.h"
