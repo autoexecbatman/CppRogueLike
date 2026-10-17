@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=MonsterHitDiceTest.*:MonsterConstitutionTableTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/MonsterCreator.cpp",
+      "original": "\tc->set_constitution(monster_constitution_score(roll_dice(ctx.dice, MONSTER_ABILITY_DICE), params.size));",
+      "mutated": "\tc->set_constitution(monster_constitution_score(roll_dice(ctx.dice, MONSTER_ABILITY_DICE), CreatureSize::MEDIUM));",
+      "catches": "a monster's size ignored, every one read in the man-sized column"
+    },
+    {
+      "file": "src/MonsterAbilityTables.h",
+      "original": "\tconst auto row = static_cast<std::size_t>(roll - MONSTER_ABILITY_ROLL_MINIMUM);",
+      "mutated": "\tconst auto row = static_cast<std::size_t>(roll - MONSTER_ABILITY_ROLL_MINIMUM) + 1;",
+      "catches": "the table read one row low"
+    },
+    {
+      "file": "src/Monsters.cpp",
+      "original": "CreatureSize::LARGE));",
+      "mutated": "CreatureSize::MEDIUM));",
+      "catches": "the mimic read as man-sized rather than large"
+    },
+    {
+      "file": "src/Spider.cpp",
+      "original": "monster_constitution_score(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6(), CreatureSize::TINY));",
+      "mutated": "monster_constitution_score(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6(), CreatureSize::SMALL));",
+      "catches": "the hairy spider read as small rather than tiny"
+    }
+  ]
+}

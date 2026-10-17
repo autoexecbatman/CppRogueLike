@@ -315,7 +315,6 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 			defaults.xp = 1;
 			defaults.strDice = DiceExpr{ 3, 6, 0 };
 			defaults.dexDice = DiceExpr{ 3, 6, 0 };
-			defaults.conDice = DiceExpr{ 3, 6, 0 };
 			defaults.intDice = DiceExpr{ 3, 6, 0 };
 			defaults.wisDice = DiceExpr{ 3, 6, 0 };
 			defaults.chaDice = DiceExpr{ 3, 6, 0 };
@@ -903,12 +902,6 @@ std::string MonsterEditor::field_label(FieldId f) const
 		return "DEX Sides";
 	case FieldId::DEX_BONUS:
 		return "DEX Bonus";
-	case FieldId::CON_NUM:
-		return "CON Num";
-	case FieldId::CON_SIDES:
-		return "CON Sides";
-	case FieldId::CON_BONUS:
-		return "CON Bonus";
 	case FieldId::INT_NUM:
 		return "INT Num";
 	case FieldId::INT_SIDES:
@@ -1001,12 +994,6 @@ std::string MonsterEditor::field_value(FieldId f) const
 		return std::format("{}", m_working.dexDice.sides);
 	case FieldId::DEX_BONUS:
 		return std::format("{}", m_working.dexDice.bonus);
-	case FieldId::CON_NUM:
-		return std::format("{}", m_working.conDice.num);
-	case FieldId::CON_SIDES:
-		return std::format("{}", m_working.conDice.sides);
-	case FieldId::CON_BONUS:
-		return std::format("{}", m_working.conDice.bonus);
 	case FieldId::INT_NUM:
 		return std::format("{}", m_working.intDice.num);
 	case FieldId::INT_SIDES:
@@ -1117,15 +1104,6 @@ void MonsterEditor::field_adjust(FieldId f, int delta)
 		break;
 	case FieldId::DEX_BONUS:
 		m_working.dexDice.bonus = clamp_val(m_working.dexDice.bonus, delta, -18, 18);
-		break;
-	case FieldId::CON_NUM:
-		m_working.conDice.num = clamp_val(m_working.conDice.num, delta, 1, 10);
-		break;
-	case FieldId::CON_SIDES:
-		m_working.conDice.sides = clamp_val(m_working.conDice.sides, delta, 2, 20);
-		break;
-	case FieldId::CON_BONUS:
-		m_working.conDice.bonus = clamp_val(m_working.conDice.bonus, delta, -18, 18);
 		break;
 	case FieldId::INT_NUM:
 		m_working.intDice.num = clamp_val(m_working.intDice.num, delta, 1, 10);

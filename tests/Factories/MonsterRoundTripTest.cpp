@@ -174,7 +174,6 @@ void expect_same_monster(const std::string& key, const MonsterParams& before, co
 	expect_same_dice(key + ".hpDice", before.hpDice, after.hpDice);
 	expect_same_dice(key + ".strDice", before.strDice, after.strDice);
 	expect_same_dice(key + ".dexDice", before.dexDice, after.dexDice);
-	expect_same_dice(key + ".conDice", before.conDice, after.conDice);
 	expect_same_dice(key + ".intDice", before.intDice, after.intDice);
 	expect_same_dice(key + ".wisDice", before.wisDice, after.wisDice);
 	expect_same_dice(key + ".chaDice", before.chaDice, after.chaDice);

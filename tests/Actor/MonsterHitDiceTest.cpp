@@ -5,7 +5,8 @@
 // with its actual ability score as listed in the Player's Handbook", and
 // "Constitution: All modifiers apply to creatures in the same way they do for
 // characters. Monsters gain hit point bonuses for high scores as a warrior."
-// This game rolls six scores for every monster, so every monster has them.
+// This game rolls six scores for every monster, so every monster has them, and reads
+// its Constitution from Table 8: 3d6 on the column for its size (PDF page 4858).
 //
 // Expected values are worked from src/json/constitution.json read as the warrior
 // column - 18 adds 4 a die, 21 adds 6 and counts a roll under 3 as 3, 3 takes 2
@@ -16,6 +17,7 @@
 
 #include "src/Colors.h"
 #include "src/Creature.h"
+#include "src/CreatureSize.h"
 #include "src/DataManager.h"
 #include "src/GameContext.h"
 #include "src/ItemCreator.h"
@@ -30,8 +32,8 @@
 
 namespace
 {
-// A score written as a fixed value rolls no dice, so a test's forced rolls are
-// the hit dice alone.
+// A score written as a fixed value rolls no dice, so a test's forced rolls are its
+// Constitution's three dice and then the hit dice.
 DiceExpr fixed_score(int score)
 {
 	return DiceExpr{ 0, 0, score };
@@ -57,15 +59,15 @@ protected:
 		}
 	}
 
-	// A monster whose six scores are fixed and whose hit dice are the caller's,
-	// so the only dice rolled are the hit dice.
-	MonsterParams params_with(int constitution, DiceExpr hitDice)
+	// A monster whose other five scores are fixed, of the caller's size and hit dice,
+	// so the dice rolled are its Constitution's 3d6 and then its hit dice.
+	MonsterParams params_with(CreatureSize size, DiceExpr hitDice)
 	{
 		MonsterParams params = mock.monsterRegistry.get_params("goblin");
 		params.equipment.clear();
 		params.strDice = fixed_score(10);
 		params.dexDice = fixed_score(10);
-		params.conDice = fixed_score(constitution);
+		params.size = size;
 		params.intDice = fixed_score(10);
 		params.wisDice = fixed_score(10);
 		params.chaDice = fixed_score(10);
@@ -79,12 +81,13 @@ protected:
 	LevelManager levelManager{};
 };
 
-// Constitution 18 on the warrior column adds 4 to each of three d8 rolled at 5.
-// Capped at the non-warrior +2 the answer would be 21, and with no adjustment 15.
+// A man-sized monster rolling 17 reads Constitution 18, which on the warrior column
+// adds 4 to each of three d8 rolled at 5. Capped at the non-warrior +2 the answer
+// would be 21, and with no adjustment 15.
 TEST_F(MonsterHitDiceTest, AMonsterAddsItsConstitutionToEveryHitDie)
 {
-	const MonsterParams params = params_with(18, DiceExpr{ 3, 8, 0 });
-	force_rolls({ 5, 5, 5 });
+	const MonsterParams params = params_with(CreatureSize::MEDIUM, DiceExpr{ 3, 8, 0 });
+	force_rolls({ 6, 6, 5, 5, 5, 5 });
 
 	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
@@ -97,20 +100,21 @@ TEST_F(MonsterHitDiceTest, AMonsterAddsItsConstitutionToEveryHitDie)
 // with Constitution 18 are 9 apiece, and the 4 is added once.
 TEST_F(MonsterHitDiceTest, TheFlatBonusOnHitDiceTakesNoAdjustment)
 {
-	const MonsterParams params = params_with(18, DiceExpr{ 2, 8, 4 });
-	force_rolls({ 5, 5 });
+	const MonsterParams params = params_with(CreatureSize::MEDIUM, DiceExpr{ 2, 8, 4 });
+	force_rolls({ 6, 6, 5, 5, 5 });
 
 	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
 	EXPECT_EQ(monster->get_max_hp(), 22);
 }
 
-// Constitution 3 takes 2 off each die, and the two low rolls floor at 1 rather
+// A tiny monster rolling 3 reads Constitution 3, the table's lowest, which takes 2
+// off each die, and the two low rolls floor at 1 rather
 // than at 0 and -1. Without the floor the three dice would come to 2.
 TEST_F(MonsterHitDiceTest, NoHitDieOfAMonsterYieldsLessThanOne)
 {
-	const MonsterParams params = params_with(3, DiceExpr{ 3, 8, 0 });
-	force_rolls({ 1, 2, 5 });
+	const MonsterParams params = params_with(CreatureSize::TINY, DiceExpr{ 3, 8, 0 });
+	force_rolls({ 1, 1, 1, 1, 2, 5 });
 
 	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
@@ -118,13 +122,14 @@ TEST_F(MonsterHitDiceTest, NoHitDieOfAMonsterYieldsLessThanOne)
 	EXPECT_EQ(monster->get_max_hp(), 5);
 }
 
-// Table 3's footnote for a score of 21: all 1s and 2s rolled on hit dice are
+// A large monster rolling 18 reads Constitution 21. Table 3's footnote for that
+// score: all 1s and 2s rolled on hit dice are
 // considered 3s, and the bonus is 6. A rolled 1 is worth 9 and a rolled 8 is
 // worth 14. Without the footnote the pair would come to 21.
 TEST_F(MonsterHitDiceTest, AMonsterOfTwentyOneCountsALowRollAsThree)
 {
-	const MonsterParams params = params_with(21, DiceExpr{ 2, 8, 0 });
-	force_rolls({ 1, 8 });
+	const MonsterParams params = params_with(CreatureSize::LARGE, DiceExpr{ 2, 8, 0 });
+	force_rolls({ 6, 6, 6, 1, 8 });
 
 	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
@@ -135,8 +140,8 @@ TEST_F(MonsterHitDiceTest, AMonsterOfTwentyOneCountsALowRollAsThree)
 // of upkeep finds the score already accounted for and moves nothing.
 TEST_F(MonsterHitDiceTest, AMonsterKeepsWhatItWasMadeWith)
 {
-	const MonsterParams params = params_with(18, DiceExpr{ 3, 8, 0 });
-	force_rolls({ 5, 5, 5 });
+	const MonsterParams params = params_with(CreatureSize::MEDIUM, DiceExpr{ 3, 8, 0 });
+	force_rolls({ 6, 6, 5, 5, 5, 5 });
 	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 	ASSERT_EQ(monster->get_max_hp(), 27);
 
@@ -162,34 +167,37 @@ TEST_F(MonsterHitDiceTest, AMonstersChangedScoreMovesByItsHitDice)
 	EXPECT_EQ(monster.get_max_hp(), 42);
 }
 
-// Web weaver: strength 3d6, dexterity 3d6, constitution 3d6, then d8+5 hit
-// points. A score of 18 adds 4 to the die and leaves the 5 alone.
+// Web weaver, the book's giant spider and large: strength 3d6, dexterity 3d6, then
+// Constitution 3d6 read from Table 8, a 15 reading 18, then d8+5 hit points. A
+// score of 18 adds 4 to the die and leaves the 5 alone.
 TEST_F(MonsterHitDiceTest, AWebWeaverTakesItsConstitutionOnItsHitDie)
 {
-	force_rolls({ 3, 3, 3, 3, 3, 3, 6, 6, 6, 4 });
+	force_rolls({ 3, 3, 3, 3, 3, 3, 5, 5, 5, 4 });
 	Spider weaver{ Vector2D{ 0, 0 }, ctx, SpiderType::WEB_SPINNER };
 
 	ASSERT_EQ(weaver.get_constitution(), 18);
 	EXPECT_EQ(weaver.get_max_hp(), 13);
 }
 
-// Small spider: strength 3d6, dexterity 3d6, constitution 1d6, then d2+2 hit
-// points. A score of 6 takes 1 off the die, and a rolled 2 is worth 1.
+// Small spider, the book's hairy spider and tiny: strength 3d6, dexterity 3d6, then
+// Constitution 3d6 read from Table 8, a 6 reading 6, then d2+2 hit points. A score
+// of 6 takes 1 off the die, and a rolled 2 is worth 1.
 TEST_F(MonsterHitDiceTest, ASmallSpiderTakesItsConstitutionPenalty)
 {
-	force_rolls({ 3, 3, 3, 3, 3, 3, 6, 2 });
+	force_rolls({ 3, 3, 3, 3, 3, 3, 2, 2, 2, 2 });
 	Spider small{ Vector2D{ 0, 0 }, ctx, SpiderType::SMALL };
 
 	ASSERT_EQ(small.get_constitution(), 6);
 	EXPECT_EQ(small.get_max_hp(), 3);
 }
 
-// Mimic: strength 3d6+2, dexterity 3d6, constitution 3d6, intelligence d4+2,
+// Mimic, large: strength 3d6+2, dexterity 3d6, Constitution 3d6 read from Table 8 (a
+// 15 reading 18), intelligence d4+2,
 // wisdom 2d6+1, charisma d4, then a d6 and a d4 of hit points. Two dice, so a
 // score of 18 adds 4 twice.
 TEST_F(MonsterHitDiceTest, AMimicTakesItsConstitutionOnBothHitDice)
 {
-	force_rolls({ 3, 3, 3, 3, 3, 3, 6, 6, 6, 1, 1, 1, 1, 1, 1 });
+	force_rolls({ 3, 3, 3, 3, 3, 3, 5, 5, 5, 1, 1, 1, 1, 1, 1 });
 	Mimic mimic{ Vector2D{ 0, 0 }, ctx };
 
 	ASSERT_EQ(mimic.get_constitution(), 18);

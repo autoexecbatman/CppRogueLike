@@ -9,6 +9,7 @@
 #include "ExperienceReward.h"
 #include "GameContext.h"
 #include "LevelUpSystem.h"
+#include "MonsterAbilityTables.h"
 #include "MonsterAttacker.h"
 #include "MonsterRegistry.h"
 #include "Monsters.h"
@@ -25,7 +26,8 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 	// decent predator WIS, very low CHA (horrifying when revealed).
 	set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6() + 2); // 3d6+2 avg 12
 	set_dexterity(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()); // 3d6    avg 10
-	set_constitution(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()); // 3d6    avg 10
+	// Table 8 by size; the killer mimic is large (Monstrous Manual p1700).
+	set_constitution(monster_constitution_score(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6(), CreatureSize::LARGE));
 	set_intelligence(ctx.dice->d4() + 2); // 1d4+2  avg  4
 	set_wisdom(ctx.dice->d6() + ctx.dice->d6() + 1); // 2d6+1  avg  8
 	set_charisma(ctx.dice->d4()); // 1d4    avg  2

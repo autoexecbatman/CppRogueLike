@@ -25,6 +25,7 @@
 #include "ExperienceReward.h"
 #include "GameContext.h"
 #include "LevelUpSystem.h"
+#include "MonsterAbilityTables.h"
 #include "MonsterAttacker.h"
 #include "MonsterRegistry.h"
 #include "RandomDice.h"
@@ -92,7 +93,8 @@ void Spider::init_spider_type(GameContext& ctx)
 		// Stats for small spider
 		set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()); // Minimum strength of 3
 		set_dexterity(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()); // Small spiders are very agile
-		set_constitution(ctx.dice->d6());
+		// Table 8 by size; the hairy spider is tiny (Monstrous Manual p1876).
+		set_constitution(monster_constitution_score(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6(), CreatureSize::TINY));
 
 		// Combat properties - TRIPLED XP for solo play
 		experienceReward = std::make_unique<ExperienceReward>(45); // TRIPLED from 15 for solo play bonus
@@ -113,7 +115,8 @@ void Spider::init_spider_type(GameContext& ctx)
 		// Stats for giant spider
 		set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
 		set_dexterity(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
-		set_constitution(ctx.dice->d6() + 1);
+		// Table 8 by size; the huge spider is man-sized (Monstrous Manual p1876).
+		set_constitution(monster_constitution_score(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6(), CreatureSize::MEDIUM));
 
 		// Combat properties - giant spiders have more HP and do more damage - TRIPLED XP for solo play
 		experienceReward = std::make_unique<ExperienceReward>(120); // TRIPLED from 40 for solo play bonus
@@ -134,7 +137,8 @@ void Spider::init_spider_type(GameContext& ctx)
 		// Stats for web spinner - now much more formidable
 		set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
 		set_dexterity(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
-		set_constitution(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
+		// Table 8 by size; the giant spider is large (Monstrous Manual p1876).
+		set_constitution(monster_constitution_score(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6(), CreatureSize::LARGE));
 
 		// Combat properties - significantly stronger - TRIPLED XP for solo play
 		experienceReward = std::make_unique<ExperienceReward>(180); // TRIPLED from 60 for solo play bonus

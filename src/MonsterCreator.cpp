@@ -14,6 +14,7 @@
 #include "GameContext.h"
 #include "ItemCreator.h"
 #include "LevelUpSystem.h"
+#include "MonsterAbilityTables.h"
 #include "MonsterAttacker.h"
 #include "MonsterCreator.h"
 #include "MonsterRegistry.h"
@@ -28,7 +29,8 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 
 	c->set_strength(std::max(1, roll_dice(ctx.dice, params.strDice)));
 	c->set_dexterity(std::max(1, roll_dice(ctx.dice, params.dexDice)));
-	c->set_constitution(std::max(1, roll_dice(ctx.dice, params.conDice)));
+	// Table 8 by size: 3d6 read from the column for how big the creature is.
+	c->set_constitution(monster_constitution_score(roll_dice(ctx.dice, MONSTER_ABILITY_DICE), params.size));
 	c->set_intelligence(std::max(1, roll_dice(ctx.dice, params.intDice)));
 	c->set_wisdom(std::max(1, roll_dice(ctx.dice, params.wisDice)));
 	c->set_charisma(std::max(1, roll_dice(ctx.dice, params.chaDice)));

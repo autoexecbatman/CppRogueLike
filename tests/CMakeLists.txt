@@ -48,6 +48,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterEquipmentTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterRoundTripTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterSizeTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterConstitutionTableTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/ItemRoundTripTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/EnhancedRulesLoadTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/TreasureGoldTest.cpp

@@ -10,11 +10,6 @@
       "sides": 6
     },
     "color": "red_black",
-    "con": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "corpse": "dead archer",
     "damage": {
       "display": "1d6",
@@ -82,11 +77,6 @@
       "sides": 2
     },
     "color": "magenta_black",
-    "con": {
-      "bonus": 1,
-      "num": 1,
-      "sides": 4
-    },
     "corpse": "dead bat",
     "damage": {
       "display": "1d2",
@@ -149,11 +139,6 @@
       "sides": 6
     },
     "color": "red_black",
-    "con": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "corpse": "dead bugbear",
     "damage": {
       "display": "2d8",
@@ -221,11 +206,6 @@
       "sides": 6
     },
     "color": "red_yellow",
-    "con": {
-      "bonus": 0,
-      "num": 5,
-      "sides": 6
-    },
     "corpse": "dead chimera",
     "damage": {
       "display": "3d12",
@@ -288,11 +268,6 @@
       "sides": 6
     },
     "color": "red_yellow",
-    "con": {
-      "bonus": 0,
-      "num": 5,
-      "sides": 6
-    },
     "corpse": "dead dragon",
     "damage": {
       "display": "1d12+5",
@@ -355,11 +330,6 @@
       "sides": 4
     },
     "color": "red_yellow",
-    "con": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
     "corpse": "charred wolf corpse",
     "damage": {
       "display": "1d6",
@@ -422,11 +392,6 @@
       "sides": 6
     },
     "color": "brown_black",
-    "con": {
-      "bonus": 0,
-      "num": 4,
-      "sides": 6
-    },
     "corpse": "broken gargoyle",
     "damage": {
       "display": "1d8",
@@ -489,11 +454,6 @@
       "sides": 4
     },
     "color": "cyan_blue",
-    "con": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
     "corpse": "dead ghoul",
     "damage": {
       "display": "1d6",
@@ -557,11 +517,6 @@
       "sides": 2
     },
     "color": "green_black",
-    "con": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 2
-    },
     "corpse": "dead giant centipede",
     "damage": {
       "display": "1d2",
@@ -624,11 +579,6 @@
       "sides": 4
     },
     "color": "brown_black",
-    "con": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 6
-    },
     "corpse": "dead giant rat",
     "damage": {
       "display": "1d3",
@@ -691,11 +641,6 @@
       "sides": 4
     },
     "color": "green_black",
-    "con": {
-      "bonus": 0,
-      "num": 4,
-      "sides": 6
-    },
     "corpse": "dead giant snake",
     "damage": {
       "display": "1d8",
@@ -758,11 +703,6 @@
       "sides": 6
     },
     "color": "red_black",
-    "con": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "corpse": "dead gnoll",
     "damage": {
       "display": "2d8",
@@ -830,11 +770,6 @@
       "sides": 4
     },
     "color": "yellow_black",
-    "con": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
-    },
     "corpse": "dead goblin",
     "damage": {
       "display": "1d6",
@@ -902,11 +837,6 @@
       "sides": 2
     },
     "color": "brown_black",
-    "con": {
-      "bonus": 0,
-      "num": 6,
-      "sides": 6
-    },
     "corpse": "rubble of golem",
     "damage": {
       "display": "3d24",
@@ -969,11 +899,6 @@
       "sides": 6
     },
     "color": "magenta_black",
-    "con": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "corpse": "dead harpy",
     "damage": {
       "display": "1d6",
@@ -1036,11 +961,6 @@
       "sides": 6
     },
     "color": "red_black",
-    "con": {
-      "bonus": 0,
-      "num": 5,
-      "sides": 6
-    },
     "corpse": "dead hill giant",
     "damage": {
       "display": "2d16",
@@ -1103,11 +1023,6 @@
       "sides": 6
     },
     "color": "red_black",
-    "con": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "corpse": "dead hobgoblin",
     "damage": {
       "display": "1d8",
@@ -1175,11 +1090,6 @@
       "sides": 4
     },
     "color": "cyan_blue",
-    "con": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
     "corpse": "frozen wolf corpse",
     "damage": {
       "display": "1d6",
@@ -1242,11 +1152,6 @@
       "sides": 6
     },
     "color": "red_black",
-    "con": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
     "corpse": "dead kobold",
     "damage": {
       "display": "1d4",
@@ -1314,11 +1219,6 @@
       "sides": 4
     },
     "color": "cyan_blue",
-    "con": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "corpse": "dead lich",
     "damage": {
       "display": "1d10",
@@ -1382,11 +1282,6 @@
       "sides": 6
     },
     "color": "white_blue",
-    "con": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
     "corpse": "dead mage",
     "damage": {
       "display": "1d6",
@@ -1454,11 +1349,6 @@
       "sides": 6
     },
     "color": "green_black",
-    "con": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "corpse": "dead medusa",
     "damage": {
       "display": "1d4",
@@ -1529,11 +1419,6 @@
       "sides": 6
     },
     "color": "red_black",
-    "con": {
-      "bonus": 0,
-      "num": 4,
-      "sides": 6
-    },
     "corpse": "dead ogre",
     "damage": {
       "display": "1d10",
@@ -1601,11 +1486,6 @@
       "sides": 6
     },
     "color": "red_black",
-    "con": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "corpse": "dead orc",
     "damage": {
       "display": "1d8",
@@ -1673,11 +1553,6 @@
       "sides": 6
     },
     "color": "red_yellow",
-    "con": {
-      "bonus": 0,
-      "num": 5,
-      "sides": 6
-    },
     "corpse": "dead pit fiend",
     "damage": {
       "display": "1d12",
@@ -1740,11 +1615,6 @@
       "sides": 2
     },
     "color": "brown_black",
-    "con": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 4
-    },
     "corpse": "dead rat",
     "damage": {
       "display": "1d3",
@@ -1807,11 +1677,6 @@
       "sides": 4
     },
     "color": "brown_black",
-    "con": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
     "corpse": "dissipated shadow",
     "damage": {
       "display": "1d4",
@@ -1883,11 +1748,6 @@
       "sides": 2
     },
     "color": "cyan_blue",
-    "con": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 2
-    },
     "corpse": "dead skeleton",
     "damage": {
       "display": "1d6",
@@ -1975,11 +1835,6 @@
       "sides": 4
     },
     "color": "green_black",
-    "con": {
-      "bonus": 0,
-      "num": 4,
-      "sides": 6
-    },
     "corpse": "dead troll",
     "damage": {
       "display": "1d10",
@@ -2042,11 +1897,6 @@
       "sides": 6
     },
     "color": "red_black",
-    "con": {
-      "bonus": 0,
-      "num": 4,
-      "sides": 6
-    },
     "corpse": "dead vampire",
     "damage": {
       "display": "1d10",
@@ -2110,11 +1960,6 @@
       "sides": 6
     },
     "color": "brown_black",
-    "con": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
     "corpse": "dead werewolf",
     "damage": {
       "display": "2d8",
@@ -2177,11 +2022,6 @@
       "sides": 4
     },
     "color": "cyan_blue",
-    "con": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "corpse": "dead wight",
     "damage": {
       "display": "1d6",
@@ -2245,11 +2085,6 @@
       "sides": 4
     },
     "color": "brown_black",
-    "con": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "corpse": "dead wolf",
     "damage": {
       "display": "1d4",
@@ -2312,11 +2147,6 @@
       "sides": 4
     },
     "color": "cyan_blue",
-    "con": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
     "corpse": "dissipated wraith",
     "damage": {
       "display": "1d6",
@@ -2380,11 +2210,6 @@
       "sides": 6
     },
     "color": "green_black",
-    "con": {
-      "bonus": 0,
-      "num": 4,
-      "sides": 6
-    },
     "corpse": "dead wyvern",
     "damage": {
       "display": "2d12",
@@ -2447,11 +2272,6 @@
       "sides": 2
     },
     "color": "green_black",
-    "con": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
     "corpse": "dead zombie",
     "damage": {
       "display": "1d8",
@@ -2515,11 +2335,6 @@
       "sides": 6
     },
     "color": "red_black",
-    "con": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "corpse": "dead jailer",
     "damage": {
       "display": "1d6+1",
@@ -2588,11 +2403,6 @@
       "sides": 6
     },
     "color": "magenta_black",
-    "con": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
     "corpse": "dead warden",
     "damage": {
       "display": "1d8+3",

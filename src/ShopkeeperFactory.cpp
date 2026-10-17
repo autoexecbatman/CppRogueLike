@@ -13,6 +13,7 @@
 #include "GameContext.h"
 #include "ItemCreator.h"
 #include "MessageSystem.h"
+#include "MonsterAbilityTables.h"
 #include "MonsterAttacker.h"
 #include "MonsterRegistry.h"
 #include "RandomDice.h"
@@ -48,6 +49,9 @@ void ShopkeeperFactory::configure_shopkeeper(Creature& shopkeeper, int dungeonLe
 	// Shopkeepers trade rather than fight, and cannot be shoved out of their shop.
 	shopkeeper.set_attitude(Attitude::PEACEFUL);
 	shopkeeper.set_displaceable(false);
+
+	// Table 8 by size, a human being man-sized. Before the hit points, which record it.
+	shopkeeper.set_constitution(monster_constitution_score(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6(), CreatureSize::MEDIUM));
 
 	// Set combat stats - non-hostile defensive stats
 	shopkeeper.experienceReward = std::make_unique<ExperienceReward>(0);

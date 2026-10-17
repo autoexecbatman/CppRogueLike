@@ -105,8 +105,6 @@ struct MonsterParams
 	DiceExpr strDice{ 3, 6, 0 };
 	// Dexterity, rolled when the monster is built.
 	DiceExpr dexDice{ 3, 6, 0 };
-	// Constitution, rolled when the monster is built.
-	DiceExpr conDice{ 3, 6, 0 };
 	// Intelligence, rolled when the monster is built.
 	DiceExpr intDice{ 3, 6, 0 };
 	// Wisdom, rolled when the monster is built.

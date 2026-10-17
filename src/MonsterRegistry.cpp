@@ -231,7 +231,6 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 	params.size = parse_creature_size(entry.at("size").get<std::string>());
 	params.strDice = parse_dice(entry.at("str"));
 	params.dexDice = parse_dice(entry.at("dex"));
-	params.conDice = parse_dice(entry.at("con"));
 	params.intDice = parse_dice(entry.at("int"));
 	params.wisDice = parse_dice(entry.at("wis"));
 	params.chaDice = parse_dice(entry.at("cha"));
@@ -282,7 +281,6 @@ nlohmann::json encode_full_params(const MonsterParams& params)
 		{ "size", encode_creature_size(params.size) },
 		{ "str", encode_dice(params.strDice) },
 		{ "dex", encode_dice(params.dexDice) },
-		{ "con", encode_dice(params.conDice) },
 		{ "int", encode_dice(params.intDice) },
 		{ "wis", encode_dice(params.wisDice) },
 		{ "cha", encode_dice(params.chaDice) },
