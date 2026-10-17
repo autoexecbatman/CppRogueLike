@@ -1,6 +1,7 @@
 // file: DungeonGenerator.cpp
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <limits>
 #include <vector>
 
@@ -383,8 +384,6 @@ void DungeonGenerator::generate(
 	// ---- Render graph to tiles and spawn content ----
 	map.place_from_graph(rooms, ctx);
 
-	if (ctx.rooms)
-	{
-		*ctx.rooms = rooms;
-	}
+	assert(ctx.rooms && "DungeonGenerator::generate: called without rooms");
+	*ctx.rooms = rooms;
 }

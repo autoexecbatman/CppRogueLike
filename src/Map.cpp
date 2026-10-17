@@ -1070,10 +1070,8 @@ void Map::apply_room_shape(const DungeonRoom& room)
 
 void Map::create_room(const DungeonRoom& room, bool first, GameContext& ctx)
 {
-	if (ctx.rooms)
-	{
-		ctx.rooms->push_back(room);
-	}
+	assert(ctx.rooms && "Map::create_room: called without rooms");
+	ctx.rooms->push_back(room);
 
 	dig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });
 
@@ -1362,26 +1360,24 @@ bool Map::would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const
 
 	// ENTRANCE PATTERN 5: Room boundary positions
 	// If this floor tile is on the edge of the room, it might be where a corridor connects
-	if (ctx.rooms)
+	assert(ctx.rooms && "Map::would_water_block_entrance: called without rooms");
+	for (const DungeonRoom& room : *ctx.rooms)
 	{
-		for (const DungeonRoom& room : *ctx.rooms)
+		if (!room.contains(waterPos.x, waterPos.y))
 		{
-			if (!room.contains(waterPos.x, waterPos.y))
-			{
-				continue;
-			}
-
-			// On the floor perimeter -- corridor likely connects here.
-			const bool on_edge =
-				waterPos.x == room.col || waterPos.x == room.col_end() ||
-				waterPos.y == room.row || waterPos.y == room.row_end();
-
-			if (on_edge && adjacentWalls >= 1 && adjacentFloors >= 1)
-			{
-				return true;
-			}
-			break;
+			continue;
 		}
+
+		// On the floor perimeter -- corridor likely connects here.
+		const bool on_edge =
+			waterPos.x == room.col || waterPos.x == room.col_end() ||
+			waterPos.y == room.row || waterPos.y == room.row_end();
+
+		if (on_edge && adjacentWalls >= 1 && adjacentFloors >= 1)
+		{
+			return true;
+		}
+		break;
 	}
 
 	// If none of the blocking patterns match, water is safe to place
@@ -1622,10 +1618,8 @@ void Map::regenerate(GameContext& ctx)
 	}
 	assert(ctx.floorInventory && "Map::regenerate: called without a floorInventory");
 	ctx.floorInventory->items.clear();
-	if (ctx.rooms)
-	{
-		ctx.rooms->clear(); // we clear the room coordinates
-	}
+	assert(ctx.rooms && "Map::regenerate: called without rooms");
+	ctx.rooms->clear(); // we clear the room coordinates
 	if (ctx.traps)
 	{
 		ctx.traps->clear();
@@ -1868,12 +1862,7 @@ void Map::open_all_room_doors(Vector2D doorPos, GameContext& ctx)
 {
 	// Find the room this door belongs to, then open every locked door of that room.
 	// A door belongs to a room iff one of its cardinal neighbors is inside room.contains().
-	if (!ctx.rooms)
-	{
-		unlock_door(doorPos);
-		open_door(doorPos, ctx);
-		return;
-	}
+	assert(ctx.rooms && "Map::open_all_room_doors: called without rooms");
 
 	for (const auto& room : *ctx.rooms)
 	{
