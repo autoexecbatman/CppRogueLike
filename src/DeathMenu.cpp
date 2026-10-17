@@ -42,7 +42,8 @@ static int panel_height_tiles(int viewportRows)
 
 DeathMenu::DeathMenu(GameContext& ctx)
 {
-	dungeonLevel = ctx.levelManager ? ctx.levelManager->get_dungeon_level() : 0;
+	assert(ctx.levelManager && "DeathMenu::DeathMenu: called without a levelManager");
+	dungeonLevel = ctx.levelManager->get_dungeon_level();
 	playerLevel = ctx.player() ? ctx.player()->get_level() : 0;
 	playerXp = ctx.player() ? ctx.player()->get_xp() : 0;
 	killCount = ctx.player() ? ctx.player_concrete().get_kill_count() : 0;

@@ -496,7 +496,8 @@ void GameLoopCoordinator::update(GameContext& ctx)
 	{
 #ifndef __EMSCRIPTEN__
 		// Ensure active map key is set for loaded games (new games set it in Map::init).
-		if (ctx.decorEditor && ctx.map && ctx.levelManager)
+		assert(ctx.levelManager && "GameLoopCoordinator::update: a loaded game resumed without a levelManager");
+		if (ctx.decorEditor && ctx.map)
 		{
 			ctx.decorEditor->set_active_map(
 				ctx.map->get_seed(),

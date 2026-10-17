@@ -119,7 +119,8 @@ void Map::init(GameContext& ctx)
 
 	// Register the active map key before rooms are generated so decoration
 	// stamps inside create_room land in the correct DecorEditor bucket.
-	if (ctx.decorEditor && ctx.levelManager)
+	assert(ctx.levelManager && "Map::init: called without a levelManager");
+	if (ctx.decorEditor)
 	{
 		ctx.decorEditor->set_active_map(seed, ctx.levelManager->get_dungeon_level());
 	}
@@ -128,7 +129,7 @@ void Map::init(GameContext& ctx)
 
 	post_process_doors();
 
-	if (ctx.levelManager && ctx.levelManager->get_dungeon_level() >= 1)
+	if (ctx.levelManager->get_dungeon_level() >= 1)
 	{
 		TreasureRoom::maybe_create(ctx.levelManager->get_dungeon_level(), mapRng, ctx);
 	}
@@ -691,10 +692,8 @@ void Map::add_item(Vector2D pos, GameContext& ctx)
 	}
 
 	// Draw a random item from the registry for this level
-	if (ctx.levelManager)
-	{
-		ItemFactory::spawn_random_item(pos, ctx.levelManager->get_dungeon_level(), ctx);
-	}
+	assert(ctx.levelManager && "Map::add_item: called without a levelManager");
+	ItemFactory::spawn_random_item(pos, ctx.levelManager->get_dungeon_level(), ctx);
 }
 
 void Map::dig(Vector2D begin, Vector2D end)
@@ -1558,17 +1557,15 @@ bool Map::can_place_at(Vector2D pos, const GameContext& ctx) const noexcept
 void Map::add_monster(Vector2D pos, GameContext& ctx) const
 {
 	// Use the monster factory to create a monster appropriate for the current dungeon level
-	if (ctx.levelManager)
-	{
-		MonsterFactory::spawn_random_monster(pos, ctx.levelManager->get_dungeon_level(), ctx);
+	assert(ctx.levelManager && "Map::add_monster: called without a levelManager");
+	MonsterFactory::spawn_random_monster(pos, ctx.levelManager->get_dungeon_level(), ctx);
 
-		// Log the spawn for debugging
-		Creature* monster = get_actor(pos, ctx);
-		assert(ctx.messageSystem && "Map::add_monster: called without a messageSystem");
-		if (monster)
-		{
-			ctx.messageSystem->log("Spawned " + monster->actorData.name + " at level " + std::to_string(ctx.levelManager->get_dungeon_level()));
-		}
+	// Log the spawn for debugging
+	Creature* monster = get_actor(pos, ctx);
+	assert(ctx.messageSystem && "Map::add_monster: called without a messageSystem");
+	if (monster)
+	{
+		ctx.messageSystem->log("Spawned " + monster->actorData.name + " at level " + std::to_string(ctx.levelManager->get_dungeon_level()));
 	}
 }
 
