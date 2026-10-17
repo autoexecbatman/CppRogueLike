@@ -1,10 +1,13 @@
 // file: Trap.cpp
 // Implementation of trap mechanics: searching, triggering, disarming, damage
 
+#include <algorithm>
 #include <cassert>
 #include <format>
+#include <memory>
 #include <optional>
 #include <string>
+#include <utility>
 
 #include "Creature.h"
 #include "DamageInfo.h"
@@ -35,6 +38,9 @@ constexpr int SEARCH_REACH = 1;
 
 // A dwarf's look takes one round, a stated deviation: the book gives it no time.
 constexpr int DWARF_SEARCH_ROUNDS = 1;
+
+// A disarm attempt takes one action.
+constexpr int DISARM_ROUNDS = 1;
 
 // Whether this character's racial sense finds stonework traps.
 bool is_dwarf(const Player& searcher)
@@ -126,7 +132,7 @@ DisarmResult Trap::attempt_disarm(Player& creature, GameContext& ctx)
 	const int level = creature.get_creature_level();
 	if (level <= disarmAttemptedAtLevel)
 	{
-		return DisarmResult::BEYOND_SKILL;
+		return DisarmResult::ALREADY_TRIED;
 	}
 	disarmAttemptedAtLevel = level;
 
@@ -294,6 +300,71 @@ std::optional<int> TrapSearch::search_around(Player& searcher, GameContext& ctx)
 	// The thief's 1d10 rounds whenever the thief's skill was part of the look, else the
 	// dwarf's one round.
 	return isThief ? ctx.dice->d10() : DWARF_SEARCH_ROUNDS;
+}
+
+std::optional<int> TrapDisarm::disarm_at(Player& thief, Vector2D target, GameContext& ctx)
+{
+	assert(ctx.messageSystem && "TrapDisarm::disarm_at: called without a messageSystem");
+	assert(ctx.traps && "TrapDisarm::disarm_at: called without traps");
+
+	// The live trap on the target tile, if there is one.
+	const auto is_live_trap_at_target = [target](const std::unique_ptr<Trap>& trap)
+	{
+		assert(trap && "TrapDisarm::disarm_at: traps list holds a null entry");
+		return !trap->is_destroyed() && trap->position == target;
+	};
+	const auto found = std::ranges::find_if(*ctx.traps, is_live_trap_at_target);
+	if (found == ctx.traps->end())
+	{
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "There is no trap there.", MessageCompletion::FINISHED);
+		return std::nullopt;
+	}
+
+	// Only an attempt that rolled takes the action; every refusal answers before the dice.
+	switch ((*found)->attempt_disarm(thief, ctx))
+	{
+	case DisarmResult::NOT_DISARMABLE:
+	{
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "There is no trap there.", MessageCompletion::FINISHED);
+		return std::nullopt;
+	}
+	case DisarmResult::NOT_VISIBLE:
+	{
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You don't see a trap there.", MessageCompletion::FINISHED);
+		return std::nullopt;
+	}
+	case DisarmResult::ALREADY_DISARMED:
+	{
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "That trap is already disarmed.", MessageCompletion::FINISHED);
+		return std::nullopt;
+	}
+	case DisarmResult::NO_SKILL:
+	{
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You cannot work a trap.", MessageCompletion::FINISHED);
+		return std::nullopt;
+	}
+	case DisarmResult::ALREADY_TRIED:
+	{
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "This trap stays beyond you until you gain a level.", MessageCompletion::FINISHED);
+		return std::nullopt;
+	}
+	case DisarmResult::BEYOND_SKILL:
+	{
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "This trap is beyond you.", MessageCompletion::FINISHED);
+		return DISARM_ROUNDS;
+	}
+	case DisarmResult::DISARMED:
+	{
+		ctx.messageSystem->message(ColorPairId::GREEN_BLACK, "You successfully disarm the trap.", MessageCompletion::FINISHED);
+		return DISARM_ROUNDS;
+	}
+	case DisarmResult::TRIGGERED:
+	{
+		ctx.messageSystem->message(ColorPairId::RED_BLACK, "You trigger the trap while attempting to disarm it!", MessageCompletion::FINISHED);
+		return DISARM_ROUNDS;
+	}
+	}
+	std::unreachable();
 }
 
 int Trap::roll_damage(RandomDice& dice) const

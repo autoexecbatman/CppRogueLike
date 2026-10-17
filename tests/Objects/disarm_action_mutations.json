@@ -1,0 +1,77 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=TrapDisarmTest.*:ScriptedInputTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\tif (pendingDoorAction == PendingDoorAction::DISARM)\n\t{\n\t\tconst std::optional<int> rounds",
+      "mutated": "\tif (pendingDoorAction == PendingDoorAction::DISARM && ctx.map->is_door(doorPos))\n\t{\n\t\tconst std::optional<int> rounds",
+      "catches": "the door check refusing a disarm aimed at a trap on the floor"
+    },
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\t\t\tspend_player_action(ctx, rounds.value() * TIME_UNITS_PER_ROUND);\n\t\t}\n\t\tpendingDoorAction = PendingDoorAction::NONE;",
+      "mutated": "\t\t}\n\t\tpendingDoorAction = PendingDoorAction::NONE;",
+      "catches": "a disarm attempt that takes no time"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\tif (level <= disarmAttemptedAtLevel)\n\t{\n\t\treturn DisarmResult::ALREADY_TRIED;",
+      "mutated": "\tif (level <= disarmAttemptedAtLevel)\n\t{\n\t\treturn DisarmResult::BEYOND_SKILL;",
+      "catches": "a spent attempt answered as a rolled failure, so it takes time"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\"This trap stays beyond you until you gain a level.\", MessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
+      "mutated": "\"This trap stays beyond you until you gain a level.\", MessageCompletion::FINISHED);\n\t\treturn DISARM_ROUNDS;",
+      "catches": "a spent attempt taking an action"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\"You cannot work a trap.\", MessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
+      "mutated": "\"You cannot work a trap.\", MessageCompletion::FINISHED);\n\t\treturn DISARM_ROUNDS;",
+      "catches": "a character with no skill taking an action to be refused"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\"You don't see a trap there.\", MessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
+      "mutated": "\"You don't see a trap there.\", MessageCompletion::FINISHED);\n\t\treturn DISARM_ROUNDS;",
+      "catches": "a hidden trap taking an action to be refused"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\"That trap is already disarmed.\", MessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
+      "mutated": "\"That trap is already disarmed.\", MessageCompletion::FINISHED);\n\t\treturn DISARM_ROUNDS;",
+      "catches": "a disarmed trap taking an action to be refused"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\tif (found == ctx.traps->end())\n\t{\n\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, \"There is no trap there.\", MessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
+      "mutated": "\tif (found == ctx.traps->end())\n\t{\n\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, \"There is no trap there.\", MessageCompletion::FINISHED);\n\t\treturn DISARM_ROUNDS;",
+      "catches": "bare floor taking an action to be refused"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\"This trap is beyond you.\", MessageCompletion::FINISHED);\n\t\treturn DISARM_ROUNDS;",
+      "mutated": "\"This trap is beyond you.\", MessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
+      "catches": "a rolled failure taking no time"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\"You trigger the trap while attempting to disarm it!\", MessageCompletion::FINISHED);\n\t\treturn DISARM_ROUNDS;",
+      "mutated": "\"You trigger the trap while attempting to disarm it!\", MessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
+      "catches": "the 96 accident taking no time"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\t\treturn !trap->is_destroyed() && trap->position == target;",
+      "mutated": "\t\treturn !trap->is_destroyed();",
+      "catches": "a disarm working on a trap other than the one it was aimed at"
+    }
+  ]
+}

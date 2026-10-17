@@ -18,6 +18,9 @@
 #include "src/Map.h"
 #include "src/Player.h"
 #include "src/PlayerController.h"
+#include "src/PlayerRaceState.h"
+#include "src/ThiefSkills.h"
+#include "src/Trap.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
@@ -97,6 +100,37 @@ TEST_F(ScriptedInputTest, AQueuedLeftArrowWalksThePlayerOneStepWest)
 	ctx.player_concrete().controller->update(ctx);
 
 	EXPECT_EQ(ctx.player()->position, (Vector2D{ START.x - 1, CORRIDOR_ROW }));
+}
+
+// The disarm key, then a direction, reaches a found trap on the floor. A trap is only
+// ever placed on floor, so a disarm the door check refused could never reach one.
+TEST_F(ScriptedInputTest, TheDisarmKeyReachesAFoundTrapOnTheFloor)
+{
+	Player& thief = ctx.player_concrete();
+	thief.set_creature_class(CreatureClass::ROGUE);
+	thief.playerClassState = Player::PlayerClassState::ROGUE;
+	thief.playerRaceState = PlayerRaceState::HUMAN;
+	thief.set_dexterity(13);
+	thief.set_creature_level(1);
+	thief.thiefSkillPoints.at(thief_skill_index(ThiefSkill::FIND_REMOVE_TRAPS)) = 40;
+	mock.traps.push_back(std::make_unique<Trap>(Vector2D{ START.x + 1, CORRIDOR_ROW }, TrapType::DART, mock.tile_config));
+	Trap& dart = *mock.traps.back();
+	mock.dice.set_next_roll(1);
+	ASSERT_EQ(dart.search(thief, ctx), TrapSearchResult::FOUND);
+
+	// The disarm key, then east; the d100 is a certain success.
+	mock.dice.set_next_roll(1);
+	const int timeBefore = ctx.gameState->get_time();
+	ctx.inputSystem->queue_key(GameKey::S, 's');
+	read_one_frame_of_input();
+	ctx.player_concrete().controller->update(ctx);
+	ctx.inputSystem->queue_key(GameKey::RIGHT, 0);
+	read_one_frame_of_input();
+	ctx.player_concrete().controller->update(ctx);
+
+	EXPECT_EQ(dart.get_state(), TrapState::DISARMED);
+	EXPECT_GT(ctx.gameState->get_time(), timeBefore) << "the attempt took no time";
+	EXPECT_EQ(ctx.player()->position, START) << "the direction walked the thief instead of aiming the disarm";
 }
 
 // end of file: ScriptedInputTest.cpp

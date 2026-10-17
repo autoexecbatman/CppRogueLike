@@ -116,7 +116,7 @@ public:
 	// Example, a thief whose Find/Remove Traps is 45, on a trap it has found:
 	//   trap.attempt_disarm(thief, ctx);   // d100 40  -> DisarmResult::DISARMED
 	//   trap.attempt_disarm(thief, ctx);   // d100 90  -> BEYOND_SKILL, untouched
-	//   trap.attempt_disarm(thief, ctx);   // no roll  -> BEYOND_SKILL, same level
+	//   trap.attempt_disarm(thief, ctx);   // no roll  -> ALREADY_TRIED, same level
 	//   trap.attempt_disarm(thief, ctx);   // d100 97  -> TRIGGERED, and it hurts
 	// A fighter standing over the same trap:
 	//   trap.attempt_disarm(fighter, ctx); // no roll  -> DisarmResult::NO_SKILL
@@ -163,5 +163,22 @@ namespace TrapSearch
 [[nodiscard]] std::optional<int> search_around(Player& searcher, GameContext& ctx);
 
 } // namespace TrapSearch
+
+namespace TrapDisarm
+{
+
+// The disarm action on one tile: works on the live trap there, says what came of it,
+// and returns the rounds it took, or nullopt for a refusal that made no roll - nothing
+// there, a trap not yet found, one already disarmed, no skill, or this level's attempt
+// already spent. An attempt that rolled, whatever it rolled, takes one round.
+//
+// Example, a thief with Find/Remove Traps 45 facing a found dart trap to the east:
+//   TrapDisarm::disarm_at(thief, eastTile, ctx);   // d100 40 -> 1; "You successfully disarm the trap."
+//   TrapDisarm::disarm_at(thief, eastTile, ctx);   // no roll -> nullopt; "That trap is already disarmed."
+// Facing bare floor:
+//   TrapDisarm::disarm_at(thief, westTile, ctx);   // no roll -> nullopt; "There is no trap there."
+[[nodiscard]] std::optional<int> disarm_at(Player& thief, Vector2D target, GameContext& ctx);
+
+} // namespace TrapDisarm
 
 // end of file: Trap.h

@@ -1360,6 +1360,19 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 		return true;
 	}
 
+	// A trap sits on floor, never on a door, so a disarm is answered before the door
+	// check rather than refused by it.
+	if (pendingDoorAction == PendingDoorAction::DISARM)
+	{
+		const std::optional<int> rounds = TrapDisarm::disarm_at(playerOwner, doorPos, ctx);
+		if (rounds.has_value())
+		{
+			spend_player_action(ctx, rounds.value() * TIME_UNITS_PER_ROUND);
+		}
+		pendingDoorAction = PendingDoorAction::NONE;
+		return true;
+	}
+
 	if (!ctx.map->is_door(doorPos))
 	{
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "There is no door there.", MessageCompletion::FINISHED);
@@ -1400,70 +1413,6 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 		else
 		{
 			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "The door is already closed.", MessageCompletion::FINISHED);
-		}
-	}
-	else if (pendingDoorAction == PendingDoorAction::DISARM)
-	{
-		// Only a trap disarms, so only traps are asked. NOT_DISARMABLE survives
-		// as the answer when the tile holds none.
-		DisarmResult disarmResult = DisarmResult::NOT_DISARMABLE;
-		assert(ctx.traps && "PlayerController::resolve_pending_door: called without traps");
-		for (auto& trap : *ctx.traps)
-		{
-			assert(trap && "resolve_pending_door: traps list holds a null entry");
-			if (trap->is_destroyed() || trap->position != doorPos)
-			{
-				continue;
-			}
-
-			disarmResult = trap->attempt_disarm(playerOwner, ctx);
-			if (disarmResult != DisarmResult::NOT_DISARMABLE)
-			{
-				break;
-			}
-		}
-
-		switch (disarmResult)
-		{
-		case DisarmResult::NOT_DISARMABLE:
-		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "There is no trap there.", MessageCompletion::FINISHED);
-			break;
-		}
-		case DisarmResult::NOT_VISIBLE:
-		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You don't see a trap there.", MessageCompletion::FINISHED);
-			break;
-		}
-		case DisarmResult::ALREADY_DISARMED:
-		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "That trap is already disarmed.", MessageCompletion::FINISHED);
-			break;
-		}
-		case DisarmResult::NO_SKILL:
-		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You cannot work a trap.", MessageCompletion::FINISHED);
-			break;
-		}
-		case DisarmResult::BEYOND_SKILL:
-		{
-			// The attempt is spent until the next level, so the turn is spent too.
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "This trap is beyond you.", MessageCompletion::FINISHED);
-			spend_player_action(ctx, TIME_UNITS_PER_ROUND);
-			break;
-		}
-		case DisarmResult::DISARMED:
-		{
-			ctx.messageSystem->message(ColorPairId::GREEN_BLACK, "You successfully disarm the trap.", MessageCompletion::FINISHED);
-			spend_player_action(ctx, TIME_UNITS_PER_ROUND);
-			break;
-		}
-		case DisarmResult::TRIGGERED:
-		{
-			ctx.messageSystem->message(ColorPairId::RED_BLACK, "You trigger the trap while attempting to disarm it!", MessageCompletion::FINISHED);
-			spend_player_action(ctx, TIME_UNITS_PER_ROUND);
-			break;
-		}
 		}
 	}
 

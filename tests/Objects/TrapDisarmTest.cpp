@@ -25,16 +25,26 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <optional>
+#include <string>
 
 #include "src/GameContext.h"
 #include "src/GameStateManager.h"
 #include "src/HealthPool.h"
+#include "src/MessageSystem.h"
 #include "src/Player.h"
 #include "src/PlayerRaceState.h"
 #include "src/ThiefSkills.h"
 #include "src/TileFeature.h"
 #include "src/Trap.h"
+#include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
+
+namespace
+{
+const Vector2D EAST_OF_THIEF{ 6, 5 };
+const Vector2D WEST_OF_THIEF{ 4, 5 };
+} // namespace
 
 class TrapDisarmTest : public ::testing::Test
 {
@@ -83,6 +93,27 @@ protected:
 	std::unique_ptr<Trap> found_pit()
 	{
 		return found_trap(TrapType::PIT);
+	}
+
+	// A found dart trap on the tile east of the thief, where the disarm action looks.
+	Trap& found_trap_to_the_east()
+	{
+		mock.traps.push_back(found_trap());
+		mock.traps.back()->position = EAST_OF_THIEF;
+		return *mock.traps.back();
+	}
+
+	std::string all_message_text() const
+	{
+		std::string joined;
+		for (size_t index = 0; index < ctx.messageSystem->get_stored_message_count(); ++index)
+		{
+			for (const auto& part : ctx.messageSystem->get_attack_message_at(index))
+			{
+				joined += part.text;
+			}
+		}
+		return joined;
 	}
 
 	// Find/Remove Traps is base 5, so this is what the character rolls against.
@@ -154,12 +185,10 @@ TEST_F(TrapDisarmTest, AnAttemptIsNotHandedBackByReloading)
 
 	// A sure success is queued behind the guard: a trap that remembered the attempt
 	// refuses before rolling and never reaches it, while one that forgot rolls the 1
-	// and defuses. Leaving the die unscripted does not work - an unremembered attempt
-	// then rolls at random and fails against a skill of 20 most of the time, which is
-	// BEYOND_SKILL again and indistinguishable from the guard holding.
+	// and defuses.
 	mock.dice.set_next_roll(1);
 
-	EXPECT_EQ(level.front()->attempt_disarm(*thief, ctx), DisarmResult::BEYOND_SKILL)
+	EXPECT_EQ(level.front()->attempt_disarm(*thief, ctx), DisarmResult::ALREADY_TRIED)
 		<< "reloading gave the thief its attempt back";
 }
 
@@ -232,7 +261,7 @@ TEST_F(TrapDisarmTest, ASecondAttemptWaitsForTheNextLevel)
 	// level is spent. An unscripted roll here would be a real one, so the queue is
 	// what makes the refusal visible rather than lucky.
 	mock.dice.set_next_roll(1);
-	EXPECT_EQ(pit->attempt_disarm(*thief, ctx), DisarmResult::BEYOND_SKILL);
+	EXPECT_EQ(pit->attempt_disarm(*thief, ctx), DisarmResult::ALREADY_TRIED);
 
 	// The level buys the next attempt, and the 1 is still waiting to be spent.
 	thief->set_creature_level(2);
@@ -303,6 +332,80 @@ TEST_F(TrapDisarmTest, AHiddenTrapAndADisarmedOneAnswerBeforeTheDice)
 	const int before = thief->get_hp();
 	EXPECT_EQ(done->on_creature_enter(*thief, ctx), EntryResult::UNAFFECTED);
 	EXPECT_EQ(thief->get_hp(), before) << "a disarmed trap is walked over";
+}
+
+// The disarm action works on the trap on the tile it is aimed at, says so, and an
+// attempt that rolled takes one action.
+TEST_F(TrapDisarmTest, TheDisarmActionWorksOnTheTrapItIsAimedAt)
+{
+	buy_find_remove_traps(40);
+	const Trap& dart = found_trap_to_the_east();
+	mock.dice.set_next_roll(1);
+
+	EXPECT_EQ(TrapDisarm::disarm_at(*thief, EAST_OF_THIEF, ctx), std::optional<int>{ 1 });
+	EXPECT_EQ(dart.get_state(), TrapState::DISARMED);
+	EXPECT_NE(all_message_text().find("You successfully disarm the trap."), std::string::npos) << all_message_text();
+}
+
+// A rolled failure and the 96 accident are attempts too, and each takes its action.
+TEST_F(TrapDisarmTest, AFailedOrSprungAttemptStillTakesItsAction)
+{
+	buy_find_remove_traps(40);
+	const Trap& failed = found_trap_to_the_east();
+	mock.dice.set_next_roll(90);
+	EXPECT_EQ(TrapDisarm::disarm_at(*thief, EAST_OF_THIEF, ctx), std::optional<int>{ 1 });
+	EXPECT_EQ(failed.get_state(), TrapState::DETECTED);
+	EXPECT_NE(all_message_text().find("This trap is beyond you."), std::string::npos) << all_message_text();
+
+	thief->set_creature_level(2);
+	// 96 springs it: a dart for 1, and the coin keeps the trap.
+	mock.dice.set_next_roll(96);
+	mock.dice.set_next_roll(1);
+	mock.dice.set_next_roll(2);
+	EXPECT_EQ(TrapDisarm::disarm_at(*thief, EAST_OF_THIEF, ctx), std::optional<int>{ 1 });
+	EXPECT_NE(all_message_text().find("You trigger the trap while attempting to disarm it!"), std::string::npos) << all_message_text();
+}
+
+// Every refusal is told and costs nothing: no roll was made. Where a trap could be
+// worked, a certain success is queued and must not be reached.
+TEST_F(TrapDisarmTest, ARefusalRollsNothingAndTakesNoTime)
+{
+	buy_find_remove_traps(40);
+
+	EXPECT_EQ(TrapDisarm::disarm_at(*thief, WEST_OF_THIEF, ctx), std::nullopt);
+	EXPECT_NE(all_message_text().find("There is no trap there."), std::string::npos) << all_message_text();
+
+	auto& hidden = *mock.traps.emplace_back(std::make_unique<Trap>(WEST_OF_THIEF, TrapType::DART, mock.tile_config));
+	EXPECT_EQ(TrapDisarm::disarm_at(*thief, WEST_OF_THIEF, ctx), std::nullopt);
+	EXPECT_EQ(hidden.get_state(), TrapState::HIDDEN);
+	EXPECT_NE(all_message_text().find("You don't see a trap there."), std::string::npos) << all_message_text();
+
+	const Trap& tried = found_trap_to_the_east();
+	mock.dice.set_next_roll(90);
+	ASSERT_EQ(TrapDisarm::disarm_at(*thief, EAST_OF_THIEF, ctx), std::optional<int>{ 1 });
+	mock.dice.set_next_roll(1);
+	EXPECT_EQ(TrapDisarm::disarm_at(*thief, EAST_OF_THIEF, ctx), std::nullopt);
+	EXPECT_EQ(tried.get_state(), TrapState::DETECTED) << "a spent attempt rolled again";
+	EXPECT_NE(all_message_text().find("This trap stays beyond you until you gain a level."), std::string::npos) << all_message_text();
+
+	thief->set_creature_class(CreatureClass::FIGHTER);
+	thief->playerClassState = Player::PlayerClassState::FIGHTER;
+	thief->set_creature_level(2);
+	EXPECT_EQ(TrapDisarm::disarm_at(*thief, EAST_OF_THIEF, ctx), std::nullopt);
+	EXPECT_EQ(tried.get_state(), TrapState::DETECTED) << "a fighter rolled a disarm";
+	EXPECT_NE(all_message_text().find("You cannot work a trap."), std::string::npos) << all_message_text();
+}
+
+// A disarmed trap has nothing left to work on.
+TEST_F(TrapDisarmTest, ADisarmedTrapIsRefusedWithoutAnAction)
+{
+	buy_find_remove_traps(40);
+	found_trap_to_the_east();
+	mock.dice.set_next_roll(1);
+	ASSERT_EQ(TrapDisarm::disarm_at(*thief, EAST_OF_THIEF, ctx), std::optional<int>{ 1 });
+
+	EXPECT_EQ(TrapDisarm::disarm_at(*thief, EAST_OF_THIEF, ctx), std::nullopt);
+	EXPECT_NE(all_message_text().find("That trap is already disarmed."), std::string::npos) << all_message_text();
 }
 
 // end of file: TrapDisarmTest.cpp

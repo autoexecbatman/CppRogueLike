@@ -58,7 +58,8 @@ enum class DisarmResult
 	NOT_VISIBLE, // there is something there, but the creature has not found it
 	ALREADY_DISARMED, // disarmed earlier; nothing left to do
 	NO_SKILL, // the character has no Find/Remove Traps percentage to roll against
-	BEYOND_SKILL, // the roll failed without setting it off, and will until a level is gained
+	ALREADY_TRIED, // this level's attempt on this trap is spent; no roll until the next level
+	BEYOND_SKILL, // the roll failed without setting it off
 	DISARMED, // the attempt succeeded
 	TRIGGERED, // the attempt failed and set the feature off
 };
