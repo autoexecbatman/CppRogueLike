@@ -49,22 +49,20 @@ DeathMenu::DeathMenu(GameContext& ctx)
 	playerClass = ctx.player() ? ctx.player_concrete().get_class_display_name() : "Unknown";
 	playerRace = ctx.player() ? ctx.player_concrete().get_race_display_name() : "Unknown";
 
-	if (ctx.messageSystem)
+	assert(ctx.messageSystem && "DeathMenu::DeathMenu: called without a messageSystem");
+	size_t count = ctx.messageSystem->get_stored_message_count();
+	size_t start = count > MAX_LOG_LINES ? count - MAX_LOG_LINES : 0;
+	for (size_t i = start; i < count; ++i)
 	{
-		size_t count = ctx.messageSystem->get_stored_message_count();
-		size_t start = count > MAX_LOG_LINES ? count - MAX_LOG_LINES : 0;
-		for (size_t i = start; i < count; ++i)
+		const auto& parts = ctx.messageSystem->get_attack_message_at(i);
+		std::string line{};
+		for (const auto& part : parts)
 		{
-			const auto& parts = ctx.messageSystem->get_attack_message_at(i);
-			std::string line{};
-			for (const auto& part : parts)
-			{
-				line += part.text;
-			}
-			if (!line.empty())
-			{
-				recentMessages.push_back(std::move(line));
-			}
+			line += part.text;
+		}
+		if (!line.empty())
+		{
+			recentMessages.push_back(std::move(line));
 		}
 	}
 }

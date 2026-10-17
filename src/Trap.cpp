@@ -89,10 +89,8 @@ bool Trap::attempt_detect(Creature& creature, GameContext& ctx)
 	{
 		state = TrapState::DETECTED;
 		remove_state(ActorState::IS_INVISIBLE); // Trap is now visible
-		if (ctx.messageSystem)
-		{
-			ctx.messageSystem->message(ColorPairId::YELLOW_BLACK, "You notice a hidden trap!", MessageCompletion::FINISHED);
-		}
+		assert(ctx.messageSystem && "Trap::attempt_detect: called without a messageSystem");
+		ctx.messageSystem->message(ColorPairId::YELLOW_BLACK, "You notice a hidden trap!", MessageCompletion::FINISHED);
 		return true;
 	}
 
@@ -184,35 +182,33 @@ EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 	const int damage = roll_damage(*ctx.dice);
 
 	// Apply damage to creature
-	if (ctx.messageSystem)
+	assert(ctx.messageSystem && "Trap::on_creature_enter: called without a messageSystem");
+	std::string trapName;
+	switch (type)
 	{
-		std::string trapName;
-		switch (type)
-		{
-		case TrapType::PIT:
-		{
-			trapName = "pit";
-			break;
-		}
-		case TrapType::DART:
-		{
-			trapName = "dart trap";
-			break;
-		}
-		case TrapType::ARROW:
-		{
-			trapName = "arrow trap";
-			break;
-		}
-		}
-		if (creature.is_player())
-		{
-			ctx.messageSystem->message(ColorPairId::RED_BLACK, std::format("You trigger the {} and take {} damage!", trapName, damage), MessageCompletion::FINISHED);
-		}
-		else if (ctx.map->is_in_fov(creature.position))
-		{
-			ctx.messageSystem->message(ColorPairId::RED_BLACK, std::format("The {} triggers the {} and takes {} damage!", creature.actorData.name, trapName, damage), MessageCompletion::FINISHED);
-		}
+	case TrapType::PIT:
+	{
+		trapName = "pit";
+		break;
+	}
+	case TrapType::DART:
+	{
+		trapName = "dart trap";
+		break;
+	}
+	case TrapType::ARROW:
+	{
+		trapName = "arrow trap";
+		break;
+	}
+	}
+	if (creature.is_player())
+	{
+		ctx.messageSystem->message(ColorPairId::RED_BLACK, std::format("You trigger the {} and take {} damage!", trapName, damage), MessageCompletion::FINISHED);
+	}
+	else if (ctx.map->is_in_fov(creature.position))
+	{
+		ctx.messageSystem->message(ColorPairId::RED_BLACK, std::format("The {} triggers the {} and takes {} damage!", creature.actorData.name, trapName, damage), MessageCompletion::FINISHED);
 	}
 
 	creature.take_damage_and_check_death(damage, ctx, DamageType::PHYSICAL);
@@ -221,7 +217,8 @@ EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 	if (ctx.dice->d2() == 1)
 	{
 		destroy();
-		if (ctx.messageSystem && (creature.is_player() || ctx.map->is_in_fov(position)))
+		assert(ctx.messageSystem && "Trap::on_creature_enter: called without a messageSystem");
+		if (creature.is_player() || ctx.map->is_in_fov(position))
 		{
 			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "The trap is destroyed.", MessageCompletion::FINISHED);
 		}
@@ -249,10 +246,8 @@ void Trap::attempt_passive_detection(Creature& creature, GameContext& ctx)
 		// Spotted is spotted however it was found: attempt_detect does the same,
 		// and without this the message announces a trap that stays invisible.
 		remove_state(ActorState::IS_INVISIBLE);
-		if (ctx.messageSystem)
-		{
-			ctx.messageSystem->message(ColorPairId::YELLOW_BLACK, "You notice a hidden trap at the last moment!", MessageCompletion::FINISHED);
-		}
+		assert(ctx.messageSystem && "Trap::attempt_passive_detection: called without a messageSystem");
+		ctx.messageSystem->message(ColorPairId::YELLOW_BLACK, "You notice a hidden trap at the last moment!", MessageCompletion::FINISHED);
 	}
 }
 

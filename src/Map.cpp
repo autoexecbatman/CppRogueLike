@@ -112,10 +112,8 @@ void Map::init_tiles()
 void Map::init(GameContext& ctx)
 {
 	init_tiles(); // resets tiles + fovMap to all-walls
-	if (ctx.messageSystem)
-	{
-		ctx.messageSystem->log("Map::init: " + std::to_string(mapWidth) + "x" + std::to_string(mapHeight) + " tile grid reset");
-	}
+	assert(ctx.messageSystem && "Map::init: called without a messageSystem");
+	ctx.messageSystem->log("Map::init: " + std::to_string(mapWidth) + "x" + std::to_string(mapHeight) + " tile grid reset");
 	seed = ctx.dice ? ctx.dice->roll(0, std::numeric_limits<int>::max()) : 0;
 	mapRng = RandomDice{ static_cast<unsigned int>(seed) };
 
@@ -353,11 +351,9 @@ void Map::describe_tile(TileType tileType, GameContext& ctx)
 		return;
 	}
 
-	if (ctx.messageSystem)
-	{
-		ctx.messageSystem->log(definition.entryMessage);
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, definition.entryMessage, MessageCompletion::FINISHED);
-	}
+	assert(ctx.messageSystem && "Map::describe_tile: called without a messageSystem");
+	ctx.messageSystem->log(definition.entryMessage);
+	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, definition.entryMessage, MessageCompletion::FINISHED);
 }
 
 Decoration* Map::find_decoration_at(Vector2D pos, const GameContext& ctx) const noexcept
@@ -382,10 +378,8 @@ Decoration* Map::find_decoration_at(Vector2D pos, const GameContext& ctx) const 
 
 void Map::compute_fov(GameContext& ctx)
 {
-	if (ctx.messageSystem)
-	{
-		ctx.messageSystem->log("...Computing FOV...");
-	}
+	assert(ctx.messageSystem && "Map::compute_fov: called without a messageSystem");
+	ctx.messageSystem->log("...Computing FOV...");
 
 	assert(ctx.player() && "Map::compute_fov called without player");
 	assert(
@@ -1570,7 +1564,8 @@ void Map::add_monster(Vector2D pos, GameContext& ctx) const
 
 		// Log the spawn for debugging
 		Creature* monster = get_actor(pos, ctx);
-		if (monster && ctx.messageSystem)
+		assert(ctx.messageSystem && "Map::add_monster: called without a messageSystem");
+		if (monster)
 		{
 			ctx.messageSystem->log("Spawned " + monster->actorData.name + " at level " + std::to_string(ctx.levelManager->get_dungeon_level()));
 		}
@@ -1996,13 +1991,11 @@ void Map::place_amulet(GameContext& ctx)
 		InventoryOperations::add_item(*ctx.floorInventory, ItemCreator::create("amulet_of_yendor", amuletPos, ctx));
 
 		// Log the placement (debug info)
-		if (ctx.messageSystem)
-		{
-			ctx.messageSystem->log("Placed Amulet of Yendor at " + std::to_string(amuletPos.x) + "," + std::to_string(amuletPos.y));
+		assert(ctx.messageSystem && "Map::place_amulet: called without a messageSystem");
+		ctx.messageSystem->log("Placed Amulet of Yendor at " + std::to_string(amuletPos.x) + "," + std::to_string(amuletPos.y));
 
-			// Add a hint message
-			ctx.messageSystem->message(ColorPairId::RED_YELLOW, "You sense a powerful artifact somewhere on this level...", MessageCompletion::FINISHED);
-		}
+		// Add a hint message
+		ctx.messageSystem->message(ColorPairId::RED_YELLOW, "You sense a powerful artifact somewhere on this level...", MessageCompletion::FINISHED);
 	}
 }
 
@@ -2161,10 +2154,8 @@ void Map::place_from_graph(
 	const std::vector<DungeonRoom>& rooms,
 	GameContext& ctx)
 {
-	if (ctx.messageSystem)
-	{
-		ctx.messageSystem->log("place_from_graph: Starting with " + std::to_string(rooms.size()) + " rooms");
-	}
+	assert(ctx.messageSystem && "Map::place_from_graph: called without a messageSystem");
+	ctx.messageSystem->log("place_from_graph: Starting with " + std::to_string(rooms.size()) + " rooms");
 
 	// Step 1: Create all rooms (dig them, spawn water/items/player)
 	for (int i = 0; i < static_cast<int>(rooms.size()); ++i)
@@ -2172,10 +2163,8 @@ void Map::place_from_graph(
 		create_room(rooms[i], i == 0, ctx);
 	}
 
-	if (ctx.messageSystem)
-	{
-		ctx.messageSystem->log("place_from_graph: Rooms created, now connecting with corridors");
-	}
+	assert(ctx.messageSystem && "Map::place_from_graph: called without a messageSystem");
+	ctx.messageSystem->log("place_from_graph: Rooms created, now connecting with corridors");
 
 	// Step 2: Connect adjacent rooms with corridors (from graph edges)
 	std::set<std::pair<int, int>> dug_edges;
@@ -2255,10 +2244,8 @@ void Map::place_from_graph(
 		}
 	}
 
-	if (ctx.messageSystem)
-	{
-		ctx.messageSystem->log("place_from_graph: Finished. Dug " + std::to_string(dug_edges.size()) + " edges");
-	}
+	assert(ctx.messageSystem && "Map::place_from_graph: called without a messageSystem");
+	ctx.messageSystem->log("place_from_graph: Finished. Dug " + std::to_string(dug_edges.size()) + " edges");
 }
 
 // end of file: Map.cpp

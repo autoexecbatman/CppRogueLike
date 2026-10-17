@@ -435,16 +435,14 @@ void TreasureRoom::create(
 
 	setup_guard(room, ctx);
 
-	if (ctx.messageSystem)
-	{
-		ctx.messageSystem->log(std::format(
-			"Created treasure room at ({},{}) size {}x{} quality {}",
-			room.col,
-			room.row,
-			room.width,
-			room.height,
-			quality));
-	}
+	assert(ctx.messageSystem && "TreasureRoom::create: called without a messageSystem");
+	ctx.messageSystem->log(std::format(
+		"Created treasure room at ({},{}) size {}x{} quality {}",
+		room.col,
+		room.row,
+		room.width,
+		room.height,
+		quality));
 }
 
 bool TreasureRoom::maybe_create(int dungeonLevel, RandomDice& generationRng, GameContext& ctx)

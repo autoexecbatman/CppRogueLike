@@ -9,14 +9,14 @@
   "mutations": [
     {
       "file": "src/Trap.cpp",
-      "original": "\t\telse if (ctx.map->is_in_fov(creature.position))",
-      "mutated": "\t\telse",
+      "original": "\telse if (ctx.map->is_in_fov(creature.position))",
+      "mutated": "\telse",
       "catches": "a trap springing on an unseen monster announced to the player"
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\t\tif (creature.is_player())\n\t\t{\n\t\t\tctx.messageSystem->message(ColorPairId::RED_BLACK, std::format(\"You trigger",
-      "mutated": "\t\tif (true)\n\t\t{\n\t\t\tctx.messageSystem->message(ColorPairId::RED_BLACK, std::format(\"You trigger",
+      "original": "\tif (creature.is_player())\n\t{\n\t\tctx.messageSystem->message(ColorPairId::RED_BLACK, std::format(\"You trigger",
+      "mutated": "\tif (true)\n\t{\n\t\tctx.messageSystem->message(ColorPairId::RED_BLACK, std::format(\"You trigger",
       "catches": "a monster's trap told to the player in the second person"
     },
     {
