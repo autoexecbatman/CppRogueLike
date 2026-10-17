@@ -22,6 +22,7 @@
 #include "src/GameContext.h"
 #include "src/GameLoopCoordinator.h"
 #include "src/GameStateManager.h"
+#include "src/Gui.h"
 #include "src/HungerSystem.h"
 #include "src/InputHandler.h"
 #include "src/InputSystem.h"
@@ -32,6 +33,7 @@
 #include "src/Map.h"
 #include "src/MenuManager.h"
 #include "src/MessageSystem.h"
+#include "src/Minimap.h"
 #include "src/MonsterEditor.h"
 #include "src/MonsterRegistry.h"
 #include "src/Pathfinding.h"
@@ -87,6 +89,8 @@ struct MockGameContext
 	TargetingSystem targeting{};
 	HungerSystem hungerSystem{};
 	CostOverlay costOverlay{};
+	Minimap minimap{};
+	Gui gui{};
 	PrefabLibrary prefabLibrary{};
 	Stairs stairs{ Vector2D{ 0, 0 } };
 	std::vector<std::unique_ptr<Trap>> traps{};
@@ -149,6 +153,7 @@ struct MockGameContext
 	{
 		return GameContext{
 			.map = &map,
+			.gui = &gui,
 			.playerOwner = &player,
 			.playerBlueprint = &playerBlueprint,
 			.messageSystem = &messages,
@@ -169,6 +174,7 @@ struct MockGameContext
 			.floatingText = &floatingText,
 			.animSystem = &animSystem,
 			.contentRegistry = &content_registry,
+			.minimap = &minimap,
 			.costOverlay = &costOverlay,
 			.pathfinder = &pathfinder,
 			.decorEditor = &decorEditor,

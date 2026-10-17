@@ -24,6 +24,8 @@ void RenderingManager::render(GameContext& ctx) const
 
 void RenderingManager::render_world(const GameContext& ctx) const
 {
+	assert(ctx.minimap && "RenderingManager::render_world: called without a minimap");
+	assert(ctx.costOverlay && "RenderingManager::render_world: called without a costOverlay");
 	assert(ctx.traps && "RenderingManager::render_world: called without traps");
 	assert(ctx.stairs && "RenderingManager::render_world: called without stairs");
 	assert(ctx.spellTiles && "RenderingManager::render_world: called without spellTiles");
@@ -50,15 +52,9 @@ void RenderingManager::render_world(const GameContext& ctx) const
 	render_mouse_path_overlay(ctx);
 
 	// After the lighting, so a cost is readable in the dark parts of the map too.
-	if (ctx.costOverlay)
-	{
-		ctx.costOverlay->render(ctx);
-	}
+	ctx.costOverlay->render(ctx);
 
-	if (ctx.minimap)
-	{
-		ctx.minimap->render(ctx);
-	}
+	ctx.minimap->render(ctx);
 }
 
 void RenderingManager::render_creatures(std::span<const std::unique_ptr<Creature>> creatures, const GameContext& ctx) const
@@ -200,7 +196,9 @@ void RenderingManager::render_decorations(
 
 void RenderingManager::render_mouse_path_overlay(const GameContext& ctx) const
 {
-	if (!ctx.renderer || !ctx.mousePathOverlay || ctx.mousePathOverlay->empty())
+	assert(ctx.mousePathOverlay && "RenderingManager::render_mouse_path_overlay: called without a mousePathOverlay");
+
+	if (!ctx.renderer || ctx.mousePathOverlay->empty())
 	{
 		return;
 	}

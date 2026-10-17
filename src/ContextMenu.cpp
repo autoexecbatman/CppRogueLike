@@ -108,6 +108,8 @@ void ContextMenu::on_key(GameContext& ctx)
 // then we render. This matches InventoryUI's pattern.
 void ContextMenu::menu(GameContext& ctx)
 {
+	assert(ctx.gui && "ContextMenu::menu: called without a gui");
+
 	// --- Input phase (before render, like InventoryUI) ---
 	menu_key_listen();
 
@@ -151,7 +153,7 @@ void ContextMenu::menu(GameContext& ctx)
 	}
 	assert(ctx.renderingManager && "ContextMenu::menu: called without a renderingManager");
 	ctx.renderingManager->render(ctx);
-	if (ctx.gui && ctx.gui->guiInit)
+	if (ctx.gui->guiInit)
 	{
 		ctx.gui->gui_render(ctx);
 	}

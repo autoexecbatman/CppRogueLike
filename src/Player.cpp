@@ -1019,6 +1019,8 @@ int Player::get_next_level_xp() const
 
 void Player::levelup_update(GameContext& ctx)
 {
+	assert(ctx.displayManager && "Player::levelup_update: called without a displayManager");
+
 	ctx.messageSystem->log("Player::levelup_update");
 	int levelUpXp = get_next_level_xp();
 	if (get_xp() >= levelUpXp)
@@ -1030,9 +1032,6 @@ void Player::levelup_update(GameContext& ctx)
 			std::format("Your battle skills grow stronger! You reached level {}", get_creature_level()),
 			MessageCompletion::FINISHED);
 
-		if (ctx.displayManager != nullptr)
-		{
-			ctx.displayManager->display_levelup(*this, get_creature_level(), ctx);
-		}
+		ctx.displayManager->display_levelup(*this, get_creature_level(), ctx);
 	}
 }

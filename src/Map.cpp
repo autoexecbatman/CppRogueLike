@@ -404,6 +404,7 @@ void Map::update()
 
 void Map::render(const GameContext& ctx) const
 {
+	assert(ctx.decorEditor && "Map::render: called without a decorEditor");
 	assert(ctx.tileConfig && "Map::render: called without a tileConfig");
 
 	if (tiles.empty() || !ctx.renderer)
@@ -667,9 +668,7 @@ void Map::render(const GameContext& ctx) const
 			// Decorations: hand-placed overrides take priority over procedural.
 			{
 #ifndef __EMSCRIPTEN__
-				TileRef decorRef = ctx.decorEditor
-					? ctx.decorEditor->get_override(Vector2D{ col, row })
-					: TileRef{};
+				TileRef decorRef = ctx.decorEditor->get_override(Vector2D{ col, row });
 #else
 				TileRef decorRef = resolve_decor(pos, type);
 #endif

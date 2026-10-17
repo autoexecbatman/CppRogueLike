@@ -130,6 +130,7 @@ int TreasureRoom::count_entrances(const Map& map, const DungeonRoom& room)
 
 void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 {
+	assert(ctx.stairs && "TreasureRoom::setup_guard: called without stairs");
 	assert(ctx.dataManager && "TreasureRoom::setup_guard: called without a dataManager");
 	assert(ctx.creatureManager && "TreasureRoom::setup_guard: called without a creatureManager");
 	assert(ctx.monsterRegistry && "TreasureRoom::setup_guard: called without a monsterRegistry");
@@ -285,15 +286,12 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 	// still reachable from the stairs. A dead-end corridor that only connects
 	// back through a locked door will fail this check.
 	const Vector2D playerPos = ctx.player()->position;
-	const bool stairsAvailable = ctx.stairs != nullptr;
-
 	const DoorCandidate* best = nullptr;
 	int bestDist = std::numeric_limits<int>::max();
 
 	for (const DoorCandidate& c : candidates)
 	{
-		if (stairsAvailable &&
-			!is_reachable_without_locked_doors(c.spawnPos, ctx.stairs->position, *ctx.map))
+		if (!is_reachable_without_locked_doors(c.spawnPos, ctx.stairs->position, *ctx.map))
 		{
 			continue; // dead-end pocket — skip
 		}
@@ -315,8 +313,7 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 	}
 
 	assert(
-		(ctx.stairs == nullptr ||
-			is_reachable_without_locked_doors(best->spawnPos, ctx.stairs->position, *ctx.map)) &&
+		is_reachable_without_locked_doors(best->spawnPos, ctx.stairs->position, *ctx.map) &&
 		"TreasureRoom::setup_guard: reachability filter passed but assert disagrees");
 
 	auto jailer = MonsterCreator::create_from_params(

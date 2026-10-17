@@ -46,6 +46,7 @@
 // load_all sets the initialised flag itself.
 void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNum)
 {
+	assert(ctx.mousePathOverlay && "GameLoopCoordinator::handle_gameloop: called without a mousePathOverlay");
 	assert(ctx.inputHandler && "GameLoopCoordinator::handle_gameloop: called without an inputHandler");
 	assert(ctx.gui && "GameLoopCoordinator::handle_gameloop: called without a gui");
 	assert(ctx.map && "GameLoopCoordinator::handle_gameloop: called without a map");
@@ -85,7 +86,7 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
 #endif
 	// Path pacing: allow one update step every 0.12 s while auto-walking.
 	// Keyboard input always bypasses the rate-limit (is_animation_tick() is false).
-	bool has_mouse_path = ctx.mousePathOverlay && !ctx.mousePathOverlay->empty();
+	bool has_mouse_path = !ctx.mousePathOverlay->empty();
 	bool pathStepReady = false;
 	if (has_mouse_path)
 	{
@@ -126,7 +127,7 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 		{
 			GameKey key = ctx.inputSystem->get_key();
 
-			if (key == GameKey::MINIMAP_TOGGLE && ctx.minimap)
+			if (key == GameKey::MINIMAP_TOGGLE)
 			{
 				ctx.minimap->toggle();
 				return true;

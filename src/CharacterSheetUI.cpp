@@ -201,12 +201,12 @@ void display_equipment_info(const Player& player, GameContext& ctx, int& row)
 
 void display_right_panel_info(const Player& player, GameContext& ctx, int& row)
 {
+	assert(ctx.hungerSystem && "display_right_panel_info: called without a hungerSystem");
+
 	int tileSize = ctx.renderer->get_tile_size();
 	int x = tileSize;
 
-	std::string hungerStr = ctx.hungerSystem
-		? ctx.hungerSystem->get_hunger_state_string()
-		: "Unknown";
+	std::string hungerStr = ctx.hungerSystem->get_hunger_state_string();
 
 	ctx.renderer->draw_text(Vector2D{ x, panel_text_row_y(0, tileSize, row) }, "--- OTHER ---", ColorPairId::YELLOW_BLACK);
 	row++;
