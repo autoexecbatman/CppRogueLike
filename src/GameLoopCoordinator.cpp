@@ -74,8 +74,8 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
 	// Update game state only when player provides input and editor is not open
 #ifndef __EMSCRIPTEN__
 	assert(ctx.decorEditor && "GameLoopCoordinator::handle_gameloop: called without a decorEditor");
-	const bool editor_active = ctx.decorEditor->is_active() ||
-		(ctx.contentEditor && ctx.contentEditor->is_active());
+	assert(ctx.contentEditor && "GameLoopCoordinator::handle_gameloop: called without a contentEditor");
+	const bool editor_active = ctx.decorEditor->is_active() || ctx.contentEditor->is_active();
 #else
 	const bool editor_active = false;
 #endif
@@ -137,7 +137,8 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 				ctx.decorEditor->toggle();
 				return true;
 			}
-			if (key == GameKey::CONTENT_EDIT_TOGGLE && ctx.contentEditor)
+			assert(ctx.contentEditor && "GameLoopCoordinator::handle_input_phase: called without a contentEditor");
+			if (key == GameKey::CONTENT_EDIT_TOGGLE)
 			{
 				ctx.contentEditor->toggle(*ctx.contentRegistry, *ctx.monsterRegistry, *ctx.itemRegistry);
 				return true;
@@ -183,7 +184,8 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 
 #ifndef __EMSCRIPTEN__
 		// Editor active: consume all input -- game gets nothing.
-		if (ctx.contentEditor && ctx.contentEditor->is_active())
+		assert(ctx.contentEditor && "GameLoopCoordinator::handle_input_phase: called without a contentEditor");
+		if (ctx.contentEditor->is_active())
 		{
 			handle_zoom();
 			ctx.menuManager->set_should_take_input(true);
@@ -242,10 +244,8 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 	assert(ctx.decorEditor && "GameLoopCoordinator::handle_render_phase: called without a decorEditor");
 	ctx.decorEditor->update_and_render(*ctx.renderer);
 
-	if (ctx.contentEditor)
-	{
-		ctx.contentEditor->update_and_render(*ctx.renderer, *ctx.contentRegistry, *ctx.monsterRegistry);
-	}
+	assert(ctx.contentEditor && "GameLoopCoordinator::handle_render_phase: called without a contentEditor");
+	ctx.contentEditor->update_and_render(*ctx.renderer, *ctx.contentRegistry, *ctx.monsterRegistry);
 #endif
 
 	if (gui.guiInit)
