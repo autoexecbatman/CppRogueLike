@@ -4,32 +4,20 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=TrapDamageTest.*:TrapDisarmTest.*:PathfindingTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=TrapDamageTest.*:TrapDisarmTest.*:PathfindingTest.*:MonsterFeatureEntryTest.*"
   ],
   "mutations": [
     {
       "file": "src/Trap.cpp",
-      "original": "\t\tif (state == TrapState::DETECTED)\n\t\t{\n\t\t\treturn EntryResult::BLOCKED;\n\t\t}",
-      "mutated": "\t\treturn state == TrapState::DETECTED ? EntryResult::BLOCKED : EntryResult::UNAFFECTED;",
-      "catches": "the old ordering: a hidden trap you miss lets you walk over it"
+      "original": "\t// Hidden, found, or left armed by a failed disarm: it springs. Nothing notices a\n\t// trap underfoot; only a search finds one.\n",
+      "mutated": "\t// Hidden, found, or left armed by a failed disarm: it springs. Nothing notices a\n\t// trap underfoot; only a search finds one.\n\tif (state == TrapState::HIDDEN && creature.is_player() && ctx.dice->d20() >= 15)\n\t{\n\t\tstate = TrapState::DETECTED;\n\t\treturn EntryResult::BLOCKED;\n\t}\n",
+      "catches": "the passive notice restored: a hidden trap takes a roll before it springs on the player"
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\t\tif (state == TrapState::DETECTED)\n\t\t{\n\t\t\treturn EntryResult::BLOCKED;\n\t\t}",
-      "mutated": "",
-      "catches": "the old ordering: noticing a trap at the last moment is what springs it"
-    },
-    {
-      "file": "src/Trap.cpp",
-      "original": "\t\t\treturn EntryResult::BLOCKED;\n\t\t}\n\t}\n\n\t// Missed, already known",
-      "mutated": "\t\t\treturn EntryResult::UNAFFECTED;\n\t\t}\n\t}\n\n\t// Missed, already known",
-      "catches": "a trap noticed in time is stepped onto instead of stopped short of"
-    },
-    {
-      "file": "src/Trap.cpp",
-      "original": "\tif (state == TrapState::HIDDEN && creature.is_player())",
-      "mutated": "\tif ((state == TrapState::HIDDEN || state == TrapState::DETECTED) && creature.is_player())",
-      "catches": "a known trap stopping the step again instead of springing"
+      "original": "\t// Hidden, found, or left armed by a failed disarm: it springs. Nothing notices a\n\t// trap underfoot; only a search finds one.\n",
+      "mutated": "\t// Hidden, found, or left armed by a failed disarm: it springs. Nothing notices a\n\t// trap underfoot; only a search finds one.\n\tif (state == TrapState::HIDDEN && creature.is_player())\n\t{\n\t\treturn EntryResult::BLOCKED;\n\t}\n",
+      "catches": "a hidden trap that stops the player short instead of springing"
     },
     {
       "file": "src/Trap.cpp",
@@ -42,12 +30,6 @@
       "original": "\t// A disarmed trap is walked over.\n\tif (state == TrapState::DISARMED)",
       "mutated": "\t// A disarmed trap is walked over.\n\tif (state == TrapState::DISARMED || state == TrapState::TRIGGERED)",
       "catches": "a trap that has gone off before read as spent, so the accident on 96 costs nothing"
-    },
-    {
-      "file": "src/Trap.cpp",
-      "original": "\tif (state == TrapState::HIDDEN && creature.is_player())",
-      "mutated": "\tif (state == TrapState::HIDDEN)",
-      "catches": "a monster getting the player's roll to notice a trap, so it stops short instead of walking in"
     }
   ]
 }

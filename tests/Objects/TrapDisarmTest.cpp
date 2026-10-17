@@ -30,6 +30,7 @@
 #include "src/GameStateManager.h"
 #include "src/HealthPool.h"
 #include "src/Player.h"
+#include "src/PlayerRaceState.h"
 #include "src/ThiefSkills.h"
 #include "src/TileFeature.h"
 #include "src/Trap.h"
@@ -51,15 +52,24 @@ protected:
 		thief->set_dexterity(13);
 		thief->playerRaceState = PlayerRaceState::HUMAN;
 		thief->set_creature_level(1);
+
+		// A dwarf thief can find every kind of trap, so it finds them for the cases whose
+		// own character could not.
+		finder.set_creature_class(CreatureClass::ROGUE);
+		finder.playerClassState = Player::PlayerClassState::ROGUE;
+		finder.set_dexterity(13);
+		finder.playerRaceState = PlayerRaceState::DWARF;
+		finder.set_creature_level(1);
+		finder.thiefSkillPoints.at(thief_skill_index(ThiefSkill::FIND_REMOVE_TRAPS)) = 40;
 	}
 
-	// Puts a known, unsprung trap of that kind in front of the thief.
+	// Puts a known, unsprung trap of that kind in front of the thief, found by the
+	// finder's search on a roll of 1, which finds a pit on 1d6 and a dart on d100.
 	std::unique_ptr<Trap> found_trap(TrapType kind)
 	{
 		auto trap = std::make_unique<Trap>(Vector2D{ 5, 5 }, kind, mock.tile_config);
-		mock.dice.set_next_roll(20);
-		trap->on_creature_enter(*thief, ctx);
-		EXPECT_EQ(trap->get_state(), TrapState::DETECTED) << "a detection roll of 20 finds the trap";
+		mock.dice.set_next_roll(1);
+		EXPECT_EQ(trap->search(finder, ctx), TrapSearchResult::FOUND) << "a search rolling 1 finds the trap";
 		return trap;
 	}
 
@@ -84,6 +94,7 @@ protected:
 	MockGameContext mock{};
 	GameContext ctx{};
 	std::unique_ptr<Player> thief{ std::make_unique<Player>(Vector2D{ 5, 5 }) };
+	Player finder{ Vector2D{ 5, 4 } };
 };
 
 // "If the dice roll indicates success, the trap is disarmed." The number rolled

@@ -1,0 +1,83 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=TrapSearchTest.*:TrapSerializationTest.*:TrapDamageTest.*:TrapDisarmTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Trap.cpp",
+      "original": "\tconst bool canFind = isPit ? is_dwarf(searcher) : has_find_traps(skill);",
+      "mutated": "\tconst bool canFind = is_dwarf(searcher) || has_find_traps(skill);",
+      "catches": "the size filter dropped: a thief finds a pit, a dwarf a dart trap"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "(ctx.dice->d100() <= skill.value())",
+      "mutated": "(ctx.dice->d100() < skill.value())",
+      "catches": "a roll at the thief's own percentage counted as a miss"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "constexpr int DWARF_PIT_FIND_CHANCE = 3;",
+      "mutated": "constexpr int DWARF_PIT_FIND_CHANCE = 4;",
+      "catches": "a dwarf finding a pit on 1-4 instead of 1-3"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "constexpr int DWARF_PIT_FIND_CHANCE = 3;",
+      "mutated": "constexpr int DWARF_PIT_FIND_CHANCE = 2;",
+      "catches": "a dwarf finding a pit on 1-2 instead of 1-3"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\tif (level <= searchedAtLevel)",
+      "mutated": "\tif (level < searchedAtLevel)",
+      "catches": "a trap searched twice at the same level"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\tj[\"searchedAtLevel\"] = searchedAtLevel;",
+      "mutated": "\tj[\"searchedAtLevel\"] = 0;",
+      "catches": "a missed search handed back by reloading"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "trap->position.chebyshev_distance_to(searcher.position) != SEARCH_REACH",
+      "mutated": "trap->position.chebyshev_distance_to(searcher.position) > SEARCH_REACH + 1",
+      "catches": "a search reaching two tiles"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\treturn isThief ? ctx.dice->d10() : DWARF_SEARCH_ROUNDS;",
+      "mutated": "\treturn isThief ? DWARF_SEARCH_ROUNDS : DWARF_SEARCH_ROUNDS;",
+      "catches": "a thief's search costing one round instead of 1d10"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "constexpr int DWARF_SEARCH_ROUNDS = 1;",
+      "mutated": "constexpr int DWARF_SEARCH_ROUNDS = 2;",
+      "catches": "a dwarf's search costing other than its one round"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\tif (!isThief && !is_dwarf(searcher))",
+      "mutated": "\tif (false)",
+      "catches": "a character who cannot search spending a turn on it, without being told"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\tstate = TrapState::DETECTED;\n\tremove_state(ActorState::IS_INVISIBLE);\n\treturn TrapSearchResult::FOUND;",
+      "mutated": "\tstate = TrapState::DETECTED;\n\treturn TrapSearchResult::FOUND;",
+      "catches": "a found trap that stays invisible"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\t\t\tisAnyFound = true;\n",
+      "mutated": "",
+      "catches": "a search that finds a trap and also says it found none"
+    }
+  ]
+}

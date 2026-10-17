@@ -3,6 +3,7 @@
 #include <cassert>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -1277,6 +1278,18 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 	{
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Which direction? (use arrow keys)", MessageCompletion::FINISHED);
 		pendingDoorAction = PendingDoorAction::DISARM;
+		break;
+	}
+
+	case Controls::SEARCH:
+	{
+		// A character who cannot look for traps is told so and loses no time; a search
+		// costs every round it took.
+		const std::optional<int> rounds = TrapSearch::search_around(playerOwner, ctx);
+		if (rounds.has_value())
+		{
+			spend_player_action(ctx, rounds.value() * TIME_UNITS_PER_ROUND);
+		}
 		break;
 	}
 

@@ -7,8 +7,9 @@
 // rule was defeated by the same gap, which is what issues/0037 named.
 //
 // The claim these cases make is that a trap stores only what the constructor cannot
-// rebuild - position, type, state, and the level its last disarm attempt was made at -
-// and that everything else comes back from the type table rather than from the save.
+// rebuild - position, type, state, and the levels its last disarm attempt and its last
+// search were made at - and that everything else comes back from the type table rather
+// than from the save.
 //
 // Run it:
 //
@@ -26,6 +27,8 @@
 #include "src/HealthPool.h"
 #include "src/Persistent.h"
 #include "src/Player.h"
+#include "src/PlayerRaceState.h"
+#include "src/ThiefSkills.h"
 #include "src/Trap.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
@@ -37,8 +40,14 @@ protected:
 	{
 		ctx = mock.to_game_context();
 		finder.healthPool = std::make_unique<HealthPool>(20);
-		// Ten gives a dexterity modifier of zero, so the check is the bare roll.
-		finder.set_dexterity(10);
+		// A dwarf thief can find every kind of trap. Dexterity 13 leaves its Find/Remove
+		// Traps at the base, the race and the points.
+		finder.set_creature_class(CreatureClass::ROGUE);
+		finder.playerClassState = Player::PlayerClassState::ROGUE;
+		finder.set_dexterity(13);
+		finder.playerRaceState = PlayerRaceState::DWARF;
+		finder.set_creature_level(1);
+		finder.thiefSkillPoints.at(thief_skill_index(ThiefSkill::FIND_REMOVE_TRAPS)) = 40;
 	}
 
 	std::unique_ptr<Trap> built(Vector2D position, TrapType type)
@@ -46,13 +55,12 @@ protected:
 		return std::make_unique<Trap>(position, type, *ctx.tileConfig);
 	}
 
-	// Spots the trap the way the game does, rather than through a test-only setter: the
-	// player steps onto it, and its one detection roll, a 20 against 15, finds it.
-	void notice(Trap& trap)
+	// Finds the trap the way the game does, rather than through a test-only setter: a
+	// search rolling 1, which finds a pit on 1d6 and a small trap on d100.
+	void find(Trap& trap)
 	{
-		mock.dice.set_next_roll(20);
-		ASSERT_EQ(trap.on_creature_enter(finder, ctx), EntryResult::BLOCKED);
-		ASSERT_EQ(trap.get_state(), TrapState::DETECTED);
+		mock.dice.set_next_roll(1);
+		ASSERT_EQ(trap.search(finder, ctx), TrapSearchResult::FOUND);
 	}
 
 	MockGameContext mock{};
@@ -87,7 +95,7 @@ TEST_F(TrapSerializationTest, WhatThePlayerHasFoundStaysFound)
 	std::vector<std::unique_ptr<Trap>> traps;
 	traps.push_back(built(Vector2D{ 2, 2 }, TrapType::ARROW));
 	traps.push_back(built(Vector2D{ 5, 5 }, TrapType::PIT));
-	notice(*traps.at(0));
+	find(*traps.at(0));
 
 	json level;
 	save_traps(traps, level);
@@ -108,7 +116,7 @@ TEST_F(TrapSerializationTest, VisibilityIsDerivedFromTheStateOnLoad)
 	std::vector<std::unique_ptr<Trap>> traps;
 	traps.push_back(built(Vector2D{ 2, 2 }, TrapType::ARROW));
 	traps.push_back(built(Vector2D{ 5, 5 }, TrapType::PIT));
-	notice(*traps.at(0));
+	find(*traps.at(0));
 
 	json level;
 	save_traps(traps, level);
@@ -119,6 +127,26 @@ TEST_F(TrapSerializationTest, VisibilityIsDerivedFromTheStateOnLoad)
 	ASSERT_EQ(restored.size(), 2u);
 	EXPECT_FALSE(restored.at(0)->has_state(ActorState::IS_INVISIBLE)) << "a found trap came back invisible";
 	EXPECT_TRUE(restored.at(1)->has_state(ActorState::IS_INVISIBLE)) << "a hidden trap came back visible";
+}
+
+// A search missed at this level is not handed back by reloading: the trap remembers the
+// level it was searched at, and a certain find after the load must not be reached.
+TEST_F(TrapSerializationTest, AMissedSearchIsNotHandedBackByReloading)
+{
+	std::vector<std::unique_ptr<Trap>> traps;
+	traps.push_back(built(Vector2D{ 2, 2 }, TrapType::DART));
+	mock.dice.set_next_roll(100);
+	ASSERT_EQ(traps.at(0)->search(finder, ctx), TrapSearchResult::MISSED);
+
+	json level;
+	save_traps(traps, level);
+	std::vector<std::unique_ptr<Trap>> restored;
+	load_traps(level, restored, *ctx.tileConfig);
+
+	ASSERT_EQ(restored.size(), 1u);
+	mock.dice.set_next_roll(1);
+	EXPECT_EQ(restored.at(0)->search(finder, ctx), TrapSearchResult::ALREADY_SEARCHED);
+	EXPECT_EQ(restored.at(0)->get_state(), TrapState::HIDDEN);
 }
 
 // A mid-session load must not leave the abandoned level's traps on the new map, which

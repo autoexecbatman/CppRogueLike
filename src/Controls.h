@@ -42,6 +42,7 @@ enum class Controls
 	OPEN_DOOR = 'o',
 	CLOSE_DOOR = 'k',
 	DISARM = 's',
+	SEARCH = 'f',
 	REST = 'r',
 	HELP = '?',
 	HIDE = 'H',
@@ -61,7 +62,7 @@ struct CommandHelp
 	std::string_view description{};
 };
 
-inline constexpr std::array<CommandHelp, 15> CHARACTER_COMMANDS{ {
+inline constexpr std::array<CommandHelp, 16> CHARACTER_COMMANDS{ {
 	{ Controls::PICK, "Pick up" },
 	{ Controls::DROP, "Drop" },
 	{ Controls::INVENTORY, "Inventory" },
@@ -75,6 +76,7 @@ inline constexpr std::array<CommandHelp, 15> CHARACTER_COMMANDS{ {
 	{ Controls::TURN_UNDEAD, "Turn undead" },
 	{ Controls::OPEN_DOOR, "Open door" },
 	{ Controls::CLOSE_DOOR, "Close door" },
+	{ Controls::SEARCH, "Search traps" },
 	{ Controls::DISARM, "Disarm trap" },
 	{ Controls::DESCEND, "Descend stairs" },
 } };

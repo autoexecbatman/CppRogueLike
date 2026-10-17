@@ -1,5 +1,5 @@
 // file: Trap.cpp
-// Implementation of trap mechanics: detection, triggering, disarming, damage
+// Implementation of trap mechanics: searching, triggering, disarming, damage
 
 #include <cassert>
 #include <format>
@@ -13,17 +13,42 @@
 #include "Map.h"
 #include "MessageSystem.h"
 #include "Player.h"
+#include "PlayerRaceState.h"
 #include "RandomDice.h"
 #include "ThiefSkills.h"
 #include "TileConfig.h"
 #include "Trap.h"
 
+namespace
+{
 // The lowest d100 roll that sets a trap off on the thief working on it: the book
 // gives the accident a band of its own, 96 to 100, rather than making every
 // failure spring it.
-namespace
-{
 constexpr int ACCIDENTAL_TRIGGER = 96;
+
+// A dwarf finds a pit on 1-3 on 1d6 (PHB page 44).
+constexpr int DWARF_PIT_FIND_CHANCE = 3;
+
+// A search covers the tiles touching the searcher, at Chebyshev distance one. A stated
+// deviation, with its reasons on TrapSearch::search_around.
+constexpr int SEARCH_REACH = 1;
+
+// A dwarf's look takes one round, a stated deviation: the book gives it no time.
+constexpr int DWARF_SEARCH_ROUNDS = 1;
+
+// Whether this character's racial sense finds stonework traps.
+bool is_dwarf(const Player& searcher)
+{
+	return searcher.playerRaceState == PlayerRaceState::DWARF;
+}
+
+// Whether a Find/Remove Traps score is one a thief can roll against. A score of
+// nothing is a skill not yet bought up to a usable percentage, which the book treats as
+// not having it.
+bool has_find_traps(std::optional<int> skill)
+{
+	return skill.has_value() && skill.value() > 0;
+}
 } // namespace
 
 Trap::Trap(Vector2D position, TrapType trapType, const TileConfig& tileConfig)
@@ -136,18 +161,8 @@ EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 		return EntryResult::UNAFFECTED;
 	}
 
-	// The one detection roll a hidden trap gets, and only the player gets it: noticed now,
-	// the player stops short. A monster walks in.
-	if (state == TrapState::HIDDEN && creature.is_player())
-	{
-		attempt_passive_detection(creature, ctx);
-		if (state == TrapState::DETECTED)
-		{
-			return EntryResult::BLOCKED;
-		}
-	}
-
-	// Missed, already known, or left armed by a failed disarm: it springs.
+	// Hidden, found, or left armed by a failed disarm: it springs. Nothing notices a
+	// trap underfoot; only a search finds one.
 	state = TrapState::TRIGGERED;
 	// A sprung trap shows its sprung face, and is visible whether or not the
 	// creature ever spotted it.
@@ -206,25 +221,79 @@ EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 	return EntryResult::BLOCKED;
 }
 
-void Trap::attempt_passive_detection(Creature& creature, GameContext& ctx)
+TrapSearchResult Trap::search(Player& searcher, GameContext& ctx)
 {
-	// Only a hidden trap is looked for; on_creature_enter asks for nothing else.
-	assert(state == TrapState::HIDDEN && "passive detection on a trap that is not hidden");
-
-	// Passive detection: roll vs detection DC
-	const int roll = ctx.dice->roll(1, 20);
-	const int dexMod = (creature.get_dexterity() - 10) / 2;
-	const int checkResult = roll + dexMod;
-
-	if (checkResult >= detectionDC)
+	// Only a hidden trap has anything to find.
+	if (state != TrapState::HIDDEN)
 	{
-		state = TrapState::DETECTED;
-		// A spotted trap is shown; without this the message announces a trap that stays
-		// invisible.
-		remove_state(ActorState::IS_INVISIBLE);
-		assert(ctx.messageSystem && "Trap::attempt_passive_detection: called without a messageSystem");
-		ctx.messageSystem->message(ColorPairId::YELLOW_BLACK, "You notice a hidden trap at the last moment!", MessageCompletion::FINISHED);
+		return TrapSearchResult::NOT_HIDDEN;
 	}
+
+	// A pit is the dwarf's to find and the small traps the thief's; neither finds the
+	// other's kind.
+	const bool isPit = (type == TrapType::PIT);
+	const std::optional<int> skill = searcher.thief_skill(ThiefSkill::FIND_REMOVE_TRAPS);
+	const bool canFind = isPit ? is_dwarf(searcher) : has_find_traps(skill);
+	if (!canFind)
+	{
+		return TrapSearchResult::NO_WAY_TO_FIND;
+	}
+
+	// One search per level on this trap, and the trap remembers which.
+	const int level = searcher.get_creature_level();
+	if (level <= searchedAtLevel)
+	{
+		return TrapSearchResult::ALREADY_SEARCHED;
+	}
+	searchedAtLevel = level;
+
+	const bool isFound = isPit ? (ctx.dice->d6() <= DWARF_PIT_FIND_CHANCE) : (ctx.dice->d100() <= skill.value());
+	if (!isFound)
+	{
+		return TrapSearchResult::MISSED;
+	}
+
+	state = TrapState::DETECTED;
+	remove_state(ActorState::IS_INVISIBLE);
+	return TrapSearchResult::FOUND;
+}
+
+std::optional<int> TrapSearch::search_around(Player& searcher, GameContext& ctx)
+{
+	assert(ctx.messageSystem && "TrapSearch::search_around: called without a messageSystem");
+	assert(ctx.traps && "TrapSearch::search_around: called without traps");
+
+	// A character with no way to find any trap is told so, and loses no time on it.
+	const bool isThief = has_find_traps(searcher.thief_skill(ThiefSkill::FIND_REMOVE_TRAPS));
+	if (!isThief && !is_dwarf(searcher))
+	{
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You don't know how to look for traps.", MessageCompletion::FINISHED);
+		return std::nullopt;
+	}
+
+	bool isAnyFound{ false };
+	for (const auto& trap : *ctx.traps)
+	{
+		assert(trap && "TrapSearch::search_around: traps list holds a null entry");
+		if (trap->is_destroyed() || trap->position.chebyshev_distance_to(searcher.position) != SEARCH_REACH)
+		{
+			continue;
+		}
+		if (trap->search(searcher, ctx) == TrapSearchResult::FOUND)
+		{
+			isAnyFound = true;
+			ctx.messageSystem->message(ColorPairId::YELLOW_BLACK, std::format("You find a hidden {}.", trap->actorData.name), MessageCompletion::FINISHED);
+		}
+	}
+
+	if (!isAnyFound)
+	{
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You find no traps.", MessageCompletion::FINISHED);
+	}
+
+	// The thief's 1d10 rounds whenever the thief's skill was part of the look, else the
+	// dwarf's one round.
+	return isThief ? ctx.dice->d10() : DWARF_SEARCH_ROUNDS;
 }
 
 int Trap::roll_damage(RandomDice& dice) const
@@ -245,6 +314,7 @@ void Trap::save(json& j)
 	j["type"] = static_cast<int>(type);
 	j["state"] = static_cast<int>(state);
 	j["disarmAttemptedAtLevel"] = disarmAttemptedAtLevel;
+	j["searchedAtLevel"] = searchedAtLevel;
 }
 
 void Trap::load(const json& j)
@@ -253,6 +323,7 @@ void Trap::load(const json& j)
 
 	state = static_cast<TrapState>(j.at("state").get<int>());
 	disarmAttemptedAtLevel = j.at("disarmAttemptedAtLevel").get<int>();
+	searchedAtLevel = j.at("searchedAtLevel").get<int>();
 
 	// The type is set by the constructor the caller used, so the damage dice, the name
 	// and both tiles are already right. The base has just restored a saved tile and a
