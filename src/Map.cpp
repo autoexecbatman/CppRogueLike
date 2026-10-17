@@ -1623,10 +1623,8 @@ void Map::regenerate(GameContext& ctx)
 	{
 		ctx.creatures->clear();
 	}
-	if (ctx.floorInventory)
-	{
-		ctx.floorInventory->items.clear();
-	}
+	assert(ctx.floorInventory && "Map::regenerate: called without a floorInventory");
+	ctx.floorInventory->items.clear();
 	if (ctx.rooms)
 	{
 		ctx.rooms->clear(); // we clear the room coordinates
@@ -1783,18 +1781,16 @@ bool Map::close_door(Vector2D pos, GameContext& ctx)
 	}
 
 	// Check if there's a floor item on the door tile
-	if (ctx.floorInventory)
+	assert(ctx.floorInventory && "Map::close_door: called without a floorInventory");
+	assert(std::ranges::none_of(ctx.floorInventory->items, [](const auto& i)
+		{ return !i; }));
+	auto has_item_at_pos = [&pos](const std::unique_ptr<Item>& item)
 	{
-		assert(std::ranges::none_of(ctx.floorInventory->items, [](const auto& i)
-			{ return !i; }));
-		auto has_item_at_pos = [&pos](const std::unique_ptr<Item>& item)
-		{
-			return item->position == pos;
-		};
-		if (std::ranges::any_of(ctx.floorInventory->items, has_item_at_pos))
-		{
-			return false;
-		}
+		return item->position == pos;
+	};
+	if (std::ranges::any_of(ctx.floorInventory->items, has_item_at_pos))
+	{
+		return false;
 	}
 
 	// Change the tile type to DOOR (closed)

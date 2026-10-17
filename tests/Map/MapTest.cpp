@@ -5,6 +5,7 @@
 #include "src/Map.h"
 #include "src/DungeonRoom.h"
 #include "src/GameContext.h"
+#include "src/InventoryData.h"
 #include "src/Player.h"
 #include "src/ExperienceReward.h"
 #include "src/DataManager.h"
@@ -38,6 +39,7 @@ protected:
     GameContext ctx;
     DataManager dataManager;
     MessageSystem messageSystem;
+    FloorInventory floorInventory{};
     RandomDice dice;
     TileConfig tileConfig;
 
@@ -61,6 +63,7 @@ protected:
         ctx.playerOwner = &player;
         ctx.dataManager = &dataManager;
         ctx.messageSystem = &messageSystem;
+        ctx.floorInventory = &floorInventory;
         ctx.dice = &dice;
         ctx.creatures = &creatures;
         ctx.map = map.get();
