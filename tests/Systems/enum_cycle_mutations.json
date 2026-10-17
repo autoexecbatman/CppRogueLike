@@ -27,8 +27,8 @@
     },
     {
       "file": "src/TargetMode.h",
-      "original": "\treturn *(found + 1);\n}\nenum class ScrollAnimation : int",
-      "mutated": "\treturn *found;\n}\nenum class ScrollAnimation : int",
+      "original": "\treturn *(found + 1);\n}\n\nenum class ScrollAnimation : int",
+      "mutated": "\treturn *found;\n}\n\nenum class ScrollAnimation : int",
       "catches": "a cycle that never advances, so the editor's field cannot be changed at all"
     }
   ]
