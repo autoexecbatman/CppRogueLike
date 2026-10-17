@@ -341,6 +341,15 @@ add_executable(test_exe ${TEST_SOURCES} ${PARENT_SOURCES})
 # Add TESTING_MODE definition for test-specific code
 target_compile_definitions(test_exe PRIVATE TESTING_MODE)
 
+# An enumerator no switch handles is a compile error, so a value added to an enum
+# cannot fall through to whatever follows the switch. The same flags as the game
+# target in CMakeLists.txt, so the two builds refuse the same code.
+if(MSVC)
+    target_compile_options(test_exe PRIVATE /we4062)
+else()
+    target_compile_options(test_exe PRIVATE -Werror=switch)
+endif()
+
 # Link against Google Test and required libraries
 target_link_libraries(test_exe
     PRIVATE

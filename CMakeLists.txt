@@ -416,6 +416,15 @@ set(SOURCE_FILES # Add Source Files Here !
 # Create an executable with the listed source files
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
+# An enumerator no switch handles is a compile error, so a value added to an enum
+# cannot fall through to whatever follows the switch. A switch with a default stays
+# silent; -Wswitch-enum and C4061 would be needed to catch those.
+if(MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE /we4062)
+else()
+    target_compile_options(${PROJECT_NAME} PRIVATE -Werror=switch)
+endif()
+
 target_precompile_headers(${PROJECT_NAME} PRIVATE
     <algorithm>
     <cassert>
