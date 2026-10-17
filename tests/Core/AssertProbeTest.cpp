@@ -53,6 +53,7 @@
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
 #include "src/HealthPool.h"
+#include "src/InputSystem.h"
 #include "src/InventoryData.h"
 #include "src/InventoryOperations.h"
 #include "src/Item.h"
@@ -63,6 +64,7 @@
 #include "src/Paths.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
+#include "src/PlayerController.h"
 #include "src/RandomDice.h"
 #include "src/ShopkeeperFactory.h"
 #include "src/SpellSystem.h"
@@ -514,4 +516,22 @@ TEST_F(AssertProbeDeathTest, ScriptingARollBelowWhatTheDieCanMakeAborts)
 TEST_F(AssertProbeDeathTest, AMimicWithNoAppearanceToWearAborts)
 {
 	EXPECT_DEATH(AiMimic{ std::vector<Disguise>{} }, "no appearance to wear");
+}
+
+// The floor list owns every item lying in the dungeon, so a null in it is a fault. A step
+// reads what lies on the tile it lands on, which is reached only through
+// PlayerController::update, so the probe walks the player there with a scripted key.
+TEST_F(AssertProbeDeathTest, SteppingOntoAFloorHoldingANullAborts)
+{
+	mock.map.init_tiles();
+	mock.map.set_tile(Vector2D{ 4, 5 }, TileType::FLOOR);
+	mock.map.set_tile(Vector2D{ 5, 5 }, TileType::FLOOR);
+	mock.player = std::make_unique<Player>(Vector2D{ 4, 5 });
+	ctx.floorInventory->items.push_back(nullptr);
+
+	ctx.inputSystem->queue_key(GameKey::RIGHT, 0);
+	ctx.inputSystem->poll();
+	ctx.inputHandler->key_listen(*ctx.inputSystem);
+
+	EXPECT_DEATH(ctx.player_concrete().controller->update(ctx), "look_on_floor: the floor holds a null");
 }
