@@ -1,0 +1,150 @@
+// SILENT: a file's opening block,
+// which is allowed to be long
+// and sits at file scope.
+
+#include <array>
+#include <functional>
+#include <string>
+
+namespace fixture
+{
+// SILENT: a header block above a function,
+// inside a namespace,
+// is documentation and not in a body.
+int free_function(int value)
+{
+	// REPORT: three lines
+	// inside a free function's
+	// body.
+	const std::string tricky = "{ } // not a comment { {";
+	const char brace = '{';
+	// REPORT: after strings holding braces,
+	// still in the body, at
+	// the right depth.
+	return value + brace + static_cast<int>(tricky.size());
+}
+
+// SILENT: a header block above the class.
+// It is still at namespace scope.
+// Three lines.
+class Widget
+{
+	// SILENT: a block in the class body,
+	// above a member, documents
+	// the member.
+	int count{ 0 };
+
+	// SILENT: above a defaulted member,
+	// in the class body,
+	// not in a body.
+	Widget(const Widget&) = default;
+
+	// SILENT: above a pure virtual,
+	// in the class body,
+	// not in a body.
+	virtual void hook() = 0;
+
+public:
+	int inline_member() const noexcept
+	{
+		// REPORT: an inline member's body
+		// in a class, as a header
+		// would hold it.
+		return count;
+	}
+
+	Widget() : count{ 1 }
+	{
+		// REPORT: a constructor's body,
+		// after an initializer list
+		// with braces of its own.
+		count = 2;
+	}
+};
+
+int member_out_of_line(int value);
+
+const auto namespace_lambda = [](int step)
+{
+	// REPORT: a lambda at namespace scope,
+	// with a parameter list,
+	// three lines.
+	return step;
+};
+
+const auto bare_namespace_lambda = []
+{
+	// REPORT: a lambda at namespace scope,
+	// with no parameter list,
+	// three lines.
+	return 0;
+};
+
+// SILENT: a file-scope initializer,
+// like the old corpse maps,
+// holding a comment of its own below.
+const std::array<int, 3> table = {
+	// SILENT: inside an initializer
+	// at namespace scope,
+	// which is not a body.
+	1,
+	2,
+	3,
+};
+
+int uses_a_lambda(int value)
+{
+	auto lambda = [&value](int step) mutable
+	{
+		// REPORT: inside a lambda
+		// inside a function,
+		// three lines.
+		return value + step;
+	};
+	switch (value)
+	{
+	case 1:
+	{
+		// REPORT: inside a case block,
+		// which is inside a body,
+		// three lines.
+		return lambda(1);
+	}
+	default:
+	{
+		break;
+	}
+	}
+	std::function<int(int)> passed = std::function<int(int)>([&](int step)
+		{
+			// REPORT: a lambda passed as an argument
+			// inside a call,
+			// three lines.
+			return step;
+		});
+	// Two lines in a body
+	// are allowed.
+	const std::array<int, 2> local = {
+		// REPORT: an initializer inside a body
+		// still counts, because a function
+		// encloses it.
+		1,
+		2,
+	};
+	auto bare = [&]
+	{
+		// REPORT: a lambda with no parameter list,
+		// only a capture,
+		// three lines.
+		return value;
+	};
+	int trailing = bare(); // a trailing comment
+	// does not start a run with the line above,
+	// so this is a run of two.
+	return passed(value) + local[0] + trailing;
+}
+} // namespace fixture
+
+/* SILENT: a block comment
+   is not a // run
+   and never counts. */
