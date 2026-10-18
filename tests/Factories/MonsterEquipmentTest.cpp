@@ -185,8 +185,8 @@ TEST_F(MonsterEquipmentTest, ClawedCreaturesHaveHandsAndBeastsDoNot)
 // simply wears nothing.
 TEST_F(MonsterEquipmentTest, UnknownBodyTemplateIsRefused)
 {
-	EXPECT_THROW(bodyPlans.get("humaniod"), std::runtime_error);
-	EXPECT_THROW(bodyPlans.get(""), std::runtime_error);
+	EXPECT_THROW([[maybe_unused]] const auto& misspelled = bodyPlans.get("humaniod"), std::runtime_error);
+	EXPECT_THROW([[maybe_unused]] const auto& unnamed = bodyPlans.get(""), std::runtime_error);
 }
 
 // The saver rebuilds the file from scratch, so anything it does not write is

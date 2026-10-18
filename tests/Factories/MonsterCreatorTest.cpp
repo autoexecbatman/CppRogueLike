@@ -52,7 +52,7 @@ TEST_F(MonsterCreatorTest, EquipmentThatDoesNotFitItsSlotIsRefused)
     params.equipment.push_back({ EquipmentSlot::MISSILE_WEAPON, "dagger" });
 
     EXPECT_THROW(
-        MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx),
+        [[maybe_unused]] const auto refused = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx),
         std::runtime_error);
 }
 
@@ -63,6 +63,6 @@ TEST_F(MonsterCreatorTest, EveryAuthoredMonsterArmsItself)
     for (const std::string& key : { "goblin", "orc", "archer", "mage", "ogre", "kobold" })
     {
         const MonsterParams& params = mock.monsterRegistry.get_params(key);
-        EXPECT_NO_THROW(MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx)) << key;
+        EXPECT_NO_THROW([[maybe_unused]] const auto armed = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx)) << key;
     }
 }

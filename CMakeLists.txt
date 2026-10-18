@@ -422,11 +422,12 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 # An enumerator no switch handles is a compile error, so a value added to an enum
 # cannot fall through to whatever follows the switch. A switch with a default stays
-# silent; -Wswitch-enum and C4061 would be needed to catch those.
+# silent; -Wswitch-enum and C4061 would be needed to catch those. A discarded [[nodiscard]]
+# result is an error too: an intended discard is kept and marked [[maybe_unused]].
 if(MSVC)
-    target_compile_options(${PROJECT_NAME} PRIVATE /we4062)
+    target_compile_options(${PROJECT_NAME} PRIVATE /we4062 /we4834)
 else()
-    target_compile_options(${PROJECT_NAME} PRIVATE -Werror=switch)
+    target_compile_options(${PROJECT_NAME} PRIVATE -Werror=switch -Werror=unused-result)
 endif()
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE
