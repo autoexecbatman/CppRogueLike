@@ -316,6 +316,8 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 			MonsterParams defaults;
 			defaults.name = "New Monster";
 			defaults.corpseName = "dead monster";
+			defaults.corpseNutrition = 40;
+			defaults.corpseTaste = "It tastes like nothing you have eaten before.";
 			defaults.hitDice = MonsterHitDice{ 8, 0, { { 1, 1 } } };
 			defaults.thaco = 20;
 			defaults.ac = 10;
@@ -837,6 +839,12 @@ std::string MonsterEditor::field_label(FieldId f) const
 		return "Name";
 	case FieldId::CORPSE:
 		return "Corpse";
+	case FieldId::CORPSE_NUTRITION:
+		return "Corpse Nutrition";
+	case FieldId::CORPSE_TASTE:
+		return "Corpse Taste";
+	case FieldId::CORPSE_EDIBLE:
+		return "Corpse Edible";
 	case FieldId::HD_LOWEST:
 		return "HD Lowest";
 	case FieldId::HD_HIGHEST:
@@ -917,6 +925,10 @@ std::string MonsterEditor::field_value(FieldId f) const
 		return working.name;
 	case FieldId::CORPSE:
 		return working.corpseName;
+	case FieldId::CORPSE_NUTRITION:
+		return std::format("{}", working.corpseNutrition);
+	case FieldId::CORPSE_TASTE:
+		return working.corpseTaste;
 	case FieldId::HD_LOWEST:
 		return std::format("{}", working.hitDice.counts.front().count);
 	case FieldId::HD_HIGHEST:
@@ -991,6 +1003,8 @@ std::string MonsterEditor::field_value(FieldId f) const
 		return std::string(encode_attitude(working.attitude));
 	case FieldId::DISPLACEABLE:
 		return working.displaceable ? "yes" : "no";
+	case FieldId::CORPSE_EDIBLE:
+		return is_corpse_edible(working.corpseEdibility) ? "yes" : "no";
 	case FieldId::WEIGHT:
 		return std::format("{}", working.baseWeight);
 	case FieldId::DEPTH_MIN:
@@ -1006,12 +1020,12 @@ std::string MonsterEditor::field_value(FieldId f) const
 
 bool MonsterEditor::field_is_string(FieldId f) const
 {
-	return f == FieldId::NAME || f == FieldId::CORPSE || f == FieldId::WEAPON;
+	return f == FieldId::NAME || f == FieldId::CORPSE || f == FieldId::CORPSE_TASTE || f == FieldId::WEAPON;
 }
 
 bool MonsterEditor::field_is_toggle(FieldId f) const
 {
-	return f == FieldId::AI_TYPE || f == FieldId::CAN_SWIM || f == FieldId::CAN_FLY || f == FieldId::WALKS_WEBS || f == FieldId::ATTITUDE || f == FieldId::DISPLACEABLE || f == FieldId::ETHICS || f == FieldId::MORALITY || f == FieldId::SIZE || f == FieldId::INTELLIGENCE || f == FieldId::STR_SOURCE || f == FieldId::DMG_TYPE;
+	return f == FieldId::AI_TYPE || f == FieldId::CAN_SWIM || f == FieldId::CAN_FLY || f == FieldId::WALKS_WEBS || f == FieldId::ATTITUDE || f == FieldId::DISPLACEABLE || f == FieldId::CORPSE_EDIBLE || f == FieldId::ETHICS || f == FieldId::MORALITY || f == FieldId::SIZE || f == FieldId::INTELLIGENCE || f == FieldId::STR_SOURCE || f == FieldId::DMG_TYPE;
 }
 
 void MonsterEditor::field_adjust(FieldId f, int delta)
@@ -1071,6 +1085,9 @@ void MonsterEditor::field_adjust(FieldId f, int delta)
 	}
 	case FieldId::DR:
 		working.dr = clamp_val(working.dr, delta, 0, 20);
+		break;
+	case FieldId::CORPSE_NUTRITION:
+		working.corpseNutrition = clamp_val(working.corpseNutrition, delta, 0, 9999);
 		break;
 	case FieldId::STR_SCORE:
 	{
@@ -1151,6 +1168,10 @@ void MonsterEditor::field_toggle(FieldId f)
 	{
 		working.displaceable = !working.displaceable;
 	}
+	else if (f == FieldId::CORPSE_EDIBLE)
+	{
+		working.corpseEdibility = is_corpse_edible(working.corpseEdibility) ? CorpseEdibility::INEDIBLE : CorpseEdibility::EDIBLE;
+	}
 	else if (f == FieldId::ETHICS)
 	{
 		working.ethics = next_ethics(working.ethics);
@@ -1196,6 +1217,9 @@ void MonsterEditor::field_set_string(FieldId f, std::string val)
 		break;
 	case FieldId::CORPSE:
 		working.corpseName = std::move(val);
+		break;
+	case FieldId::CORPSE_TASTE:
+		working.corpseTaste = std::move(val);
 		break;
 	case FieldId::WEAPON:
 		working.naturalAttack = std::move(val);

@@ -26,7 +26,6 @@
 #include <optional>
 #include <stdexcept>
 #include <string>
-#include <unordered_map>
 #include <variant>
 
 #include "DamageInfo.h"
@@ -74,32 +73,6 @@ bool consume_item(Item& owner, Creature& wearer)
 	return result.has_value();
 }
 
-const std::unordered_map<std::string, int> corpseNutritionValues = {
-	{ "dead goblin", 40 },
-	{ "dead orc", 80 },
-	{ "dead troll", 120 },
-	{ "dead dragon", 200 },
-	{ "dead archer", 70 },
-	{ "dead mage", 60 },
-	{ "dead shopkeeper", 100 },
-};
-
-const std::unordered_map<std::string, std::string> corpseFlavorText = {
-	{ "dead goblin", "It's greasy and gamey." },
-	{ "dead orc", "It's tough and stringy." },
-	{ "dead troll", "It's surprisingly filling, if you can stomach it." },
-	{ "dead dragon", "It tastes exotic and somewhat spicy!" },
-	{ "dead archer", "It tastes... questionable." },
-	{ "dead mage", "There's a strange aftertaste of magical residue." },
-	{ "dead shopkeeper", "Well-marbled, but you feel guilty..." },
-};
-
-template <typename K, typename V>
-const V& get_or_default(const std::unordered_map<K, V>& map, const K& key, const V& default_value) noexcept
-{
-	return map.contains(key) ? map.at(key) : default_value;
-}
-
 // Shared save for stat-boost equipment (Gauntlets, Girdle, JewelryAmulet)
 template <typename T>
 void save_stat_boost(const T& statBoost, PickableType type, json& output)
@@ -113,9 +86,7 @@ void save_stat_boost(const T& statBoost, PickableType type, json& output)
 	output["chaBonus"] = statBoost.chaBonus;
 	output["isSetMode"] = statBoost.isSetMode;
 	output["exceptionalStrength"] = statBoost.exceptionalStrength;
-	// Creature::wears_item_with reads this field off any behaviour that has one, so a
-	// record without it comes back as an ordinary stat boost: the gauntlets of
-	// swimming stopped crossing water once they had been through a save.
+	// Creature::wears_item_with reads this off any behaviour that has one.
 	output["effect"] = encode_magical_effect(statBoost.effect);
 	output["bonus"] = statBoost.bonus;
 }
@@ -521,9 +492,11 @@ bool use(CorpseFood& corpseFood, Item& owner, Creature& wearer, GameContext& ctx
 	assert(ctx.hungerSystem && "use(CorpseFood): called without a hungerSystem");
 	assert(ctx.dice && "use(CorpseFood): called without dice");
 
-	if (corpseFood.nutritionValue <= 0)
+	// An inedible corpse says why and stays where it is; nothing was done, so no time passes.
+	if (corpseFood.edibility == CorpseEdibility::INEDIBLE)
 	{
-		corpseFood.nutritionValue = get_or_default(corpseNutritionValues, owner.actorData.name, 50);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, corpseFood.taste, MessageCompletion::FINISHED);
+		return false;
 	}
 
 	int actual = corpseFood.nutritionValue + ctx.dice->roll(-10, 10);
@@ -531,11 +504,9 @@ bool use(CorpseFood& corpseFood, Item& owner, Creature& wearer, GameContext& ctx
 
 	ctx.hungerSystem->decrease_hunger(ctx, actual);
 
-	const std::string& flavor = get_or_default(corpseFlavorText, owner.actorData.name, std::string{ "It tastes... questionable." });
-
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "You eat the ");
 	ctx.messageSystem->append_message_part(ColorPairId::RED_BLACK, owner.actorData.name);
-	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ". " + flavor);
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ". " + corpseFood.taste);
 	ctx.messageSystem->finalize_message();
 	return consume_item(owner, wearer);
 }
@@ -832,6 +803,8 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 			{
 				output["type"] = encode_pickable_type(PickableType::CORPSE_FOOD);
 				output["nutritionValue"] = b.nutritionValue;
+				output["taste"] = b.taste;
+				output["edible"] = is_corpse_edible(b.edibility);
 			},
 			[&output](const Armor& b)
 			{
@@ -938,6 +911,8 @@ ItemBehavior load_behavior(const json& source)
 	{
 		CorpseFood corpseFood;
 		corpseFood.nutritionValue = source.at("nutritionValue").get<int>();
+		corpseFood.taste = source.at("taste").get<std::string>();
+		corpseFood.edibility = corpse_edibility_from_record(source.at("edible").get<bool>());
 		return corpseFood;
 	}
 

@@ -295,7 +295,10 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 	// gives, so a missing one is an unfinished record rather than a monster with no side.
 	params.ethics = parse_ethics(entry.at("ethics").get<std::string>());
 	params.morality = parse_morality(entry.at("morality").get<std::string>());
-	params.corpseWeight = entry.value("corpse_weight", 50);
+	params.corpseWeight = entry.at("corpse_weight").get<int>();
+	params.corpseNutrition = entry.at("corpse_nutrition").get<int>();
+	params.corpseTaste = entry.at("corpse_taste").get<std::string>();
+	params.corpseEdibility = corpse_edibility_from_record(entry.at("corpse_edible").get<bool>());
 	// Required: the book prints a size for every monster, and the ability scores are read by it.
 	params.size = parse_creature_size(entry.at("size").get<std::string>());
 	// Required for the same reason: Intelligence, Wisdom and Charisma are read by it.
@@ -353,6 +356,9 @@ nlohmann::json encode_full_params(const MonsterParams& params)
 		{ "ethics", encode_ethics(params.ethics) },
 		{ "morality", encode_morality(params.morality) },
 		{ "corpse_weight", params.corpseWeight },
+		{ "corpse_nutrition", params.corpseNutrition },
+		{ "corpse_taste", params.corpseTaste },
+		{ "corpse_edible", is_corpse_edible(params.corpseEdibility) },
 		{ "size", encode_creature_size(params.size) },
 		{ "intelligence", encode_intelligence_rating(params.intelligence) },
 		{ "strength", encode_strength(params.strength) },

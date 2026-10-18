@@ -5,11 +5,13 @@
 
 #include <format>
 #include <stdexcept>
+#include <string>
 #include <string_view>
 
 #include <variant>
 
 #include "BuffType.h"
+#include "CorpseEdibility.h"
 #include "DamageInfo.h"
 #include "EquipmentSlot.h"
 #include "MagicalItemEffects.h"
@@ -239,6 +241,9 @@ struct Food
 struct CorpseFood
 {
 	int nutritionValue{ 0 };
+	// The line printed when it is eaten, or when eating it is refused.
+	std::string taste{};
+	CorpseEdibility edibility{ CorpseEdibility::EDIBLE };
 };
 
 struct Armor

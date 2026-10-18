@@ -1,0 +1,161 @@
+{
+    "cwd": "E:/repo/C++RogueLike",
+    "test_command": [
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=CorpseRecordTest.*:CreatureDeathTest.*:MonsterRoundTripTest.*:CreatureRecordSaveTest.*"
+    ],
+    "mutations": [
+        {
+            "file": "src/MonsterRegistry.cpp",
+            "original": "\tparams.corpseNutrition = entry.at(\"corpse_nutrition\").get<int>();\n",
+            "mutated": "\tparams.corpseNutrition = entry.value(\"corpse_nutrition\", 0);\n",
+            "catches": "a record without corpse_nutrition loading with a hidden 0"
+        },
+        {
+            "file": "src/MonsterRegistry.cpp",
+            "original": "\tparams.corpseTaste = entry.at(\"corpse_taste\").get<std::string>();\n",
+            "mutated": "\tparams.corpseTaste = entry.value(\"corpse_taste\", std::string{});\n",
+            "catches": "a record without corpse_taste loading with no line"
+        },
+        {
+            "file": "src/MonsterRegistry.cpp",
+            "original": "\t\t{ \"corpse_nutrition\", params.corpseNutrition },\n",
+            "mutated": "\t\t{ \"corpse_nutrition\", 0 },\n",
+            "catches": "an edited corpse nutrition lost on save"
+        },
+        {
+            "file": "src/MonsterRegistry.cpp",
+            "original": "\t\t{ \"corpse_taste\", params.corpseTaste },\n",
+            "mutated": "\t\t{ \"corpse_taste\", \"\" },\n",
+            "catches": "an edited corpse taste lost on save"
+        },
+        {
+            "file": "src/MonsterCreator.cpp",
+            "original": "\tc->set_corpse(params.corpseName, params.corpseNutrition, params.corpseTaste, params.corpseEdibility);\n",
+            "mutated": "",
+            "catches": "a monster built without its record's corpse"
+        },
+        {
+            "file": "src/Creature.cpp",
+            "original": "\tcorpseName = j.at(\"corpseName\").get<std::string>();\n",
+            "mutated": "",
+            "catches": "a loaded creature forgetting what its corpse is called"
+        },
+        {
+            "file": "src/Creature.cpp",
+            "original": "\tcorpseNutrition = j.at(\"corpseNutrition\").get<int>();\n",
+            "mutated": "",
+            "catches": "a loaded creature forgetting its corpse's nutrition"
+        },
+        {
+            "file": "src/Creature.cpp",
+            "original": "\tcorpseTaste = j.at(\"corpseTaste\").get<std::string>();\n",
+            "mutated": "",
+            "catches": "a loaded creature forgetting its corpse's taste"
+        },
+        {
+            "file": "src/Creature.cpp",
+            "original": "\tcorpse->behavior = CorpseFood{ corpseNutrition, corpseTaste, corpseEdibility };\n",
+            "mutated": "\tcorpse->behavior = CorpseFood{ 0, corpseTaste, corpseEdibility };\n",
+            "catches": "a corpse left with no nutrition"
+        },
+        {
+            "file": "src/Creature.cpp",
+            "original": "\tcorpse->behavior = CorpseFood{ corpseNutrition, corpseTaste, corpseEdibility };\n",
+            "mutated": "\tcorpse->behavior = CorpseFood{ corpseNutrition, \"\", corpseEdibility };\n",
+            "catches": "a corpse left with no taste"
+        },
+        {
+            "file": "src/Pickable.cpp",
+            "original": "\tint actual = corpseFood.nutritionValue + ctx.dice->roll(-10, 10);\n",
+            "mutated": "\tint actual = 50 + ctx.dice->roll(-10, 10);\n",
+            "catches": "eating any corpse feeding the old hidden 50"
+        },
+        {
+            "file": "src/Pickable.cpp",
+            "original": "\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \". \" + corpseFood.taste);\n",
+            "mutated": "\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \". It tastes... questionable.\");\n",
+            "catches": "eating any corpse printing the old default line"
+        },
+        {
+            "file": "src/Pickable.cpp",
+            "original": "\t\t\t\toutput[\"taste\"] = b.taste;\n",
+            "mutated": "\t\t\t\toutput[\"taste\"] = \"\";\n",
+            "catches": "a saved corpse losing its taste"
+        },
+        {
+            "file": "src/Pickable.cpp",
+            "original": "\t\tcorpseFood.taste = source.at(\"taste\").get<std::string>();\n",
+            "mutated": "",
+            "catches": "a loaded corpse losing its taste"
+        },
+        {
+            "file": "src/MonsterRegistry.cpp",
+            "original": "\tparams.corpseEdibility = corpse_edibility_from_record(entry.at(\"corpse_edible\").get<bool>());\n",
+            "mutated": "\tparams.corpseEdibility = corpse_edibility_from_record(entry.value(\"corpse_edible\", true));\n",
+            "catches": "a record without corpse_edible loading as edible"
+        },
+        {
+            "file": "src/MonsterRegistry.cpp",
+            "original": "\tparams.corpseEdibility = corpse_edibility_from_record(entry.at(\"corpse_edible\").get<bool>());\n",
+            "mutated": "",
+            "catches": "every record's corpse edible whatever it says"
+        },
+        {
+            "file": "src/MonsterRegistry.cpp",
+            "original": "\t\t{ \"corpse_edible\", is_corpse_edible(params.corpseEdibility) },\n",
+            "mutated": "\t\t{ \"corpse_edible\", true },\n",
+            "catches": "an inedible record made edible by a save"
+        },
+        {
+            "file": "src/MonsterCreator.cpp",
+            "original": "\tc->set_corpse(params.corpseName, params.corpseNutrition, params.corpseTaste, params.corpseEdibility);\n",
+            "mutated": "\tc->set_corpse(params.corpseName, params.corpseNutrition, params.corpseTaste, CorpseEdibility::EDIBLE);\n",
+            "catches": "a monster built with an edible corpse its record forbids"
+        },
+        {
+            "file": "src/Creature.cpp",
+            "original": "\tcorpse->behavior = CorpseFood{ corpseNutrition, corpseTaste, corpseEdibility };\n",
+            "mutated": "\tcorpse->behavior = CorpseFood{ corpseNutrition, corpseTaste, CorpseEdibility::EDIBLE };\n",
+            "catches": "an inedible creature leaving an edible corpse"
+        },
+        {
+            "file": "src/Creature.cpp",
+            "original": "\tcorpseEdibility = corpse_edibility_from_record(j.at(\"corpseEdible\").get<bool>());\n",
+            "mutated": "",
+            "catches": "a loaded creature forgetting its corpse is inedible"
+        },
+        {
+            "file": "src/Creature.cpp",
+            "original": "\tj[\"corpseEdible\"] = is_corpse_edible(corpseEdibility);\n",
+            "mutated": "\tj[\"corpseEdible\"] = true;\n",
+            "catches": "a saved creature's corpse made edible"
+        },
+        {
+            "file": "src/Pickable.cpp",
+            "original": "\t\t\t\toutput[\"edible\"] = is_corpse_edible(b.edibility);\n",
+            "mutated": "\t\t\t\toutput[\"edible\"] = true;\n",
+            "catches": "a saved inedible corpse made edible"
+        },
+        {
+            "file": "src/Pickable.cpp",
+            "original": "\t\tcorpseFood.edibility = corpse_edibility_from_record(source.at(\"edible\").get<bool>());\n",
+            "mutated": "",
+            "catches": "a loaded inedible corpse made edible"
+        },
+        {
+            "file": "src/Pickable.cpp",
+            "original": "\tif (corpseFood.edibility == CorpseEdibility::INEDIBLE)\n",
+            "mutated": "\tif (false)\n",
+            "catches": "eating ignoring the flag"
+        },
+        {
+            "file": "src/Pickable.cpp",
+            "original": "\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, corpseFood.taste, MessageCompletion::FINISHED);\n\t\treturn false;\n",
+            "mutated": "\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, corpseFood.taste, MessageCompletion::FINISHED);\n\t\treturn consume_item(owner, wearer);\n",
+            "catches": "a refused corpse consumed anyway"
+        }
+    ]
+}

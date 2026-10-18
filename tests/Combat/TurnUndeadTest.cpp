@@ -44,6 +44,7 @@ protected:
 	Creature& add_undead(int hitDice, Vector2D position)
 	{
 		auto undead = std::make_unique<Creature>(position, ActorData{ TileRef{}, "skeleton", ColorPairId::WHITE_BLACK });
+		undead->set_corpse("test remains", 0, "It is test remains.", CorpseEdibility::EDIBLE);
 		undead->healthPool = std::make_unique<HealthPool>(8);
 
 		// Every creature the game builds has one; die() reads it for the kill reward.
@@ -57,6 +58,7 @@ protected:
 	Creature& add_living(Vector2D position)
 	{
 		auto living = std::make_unique<Creature>(position, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
+		living->set_corpse("test remains", 0, "It is test remains.", CorpseEdibility::EDIBLE);
 		living->healthPool = std::make_unique<HealthPool>(8);
 		creatures.push_back(std::move(living));
 		return *creatures.back();

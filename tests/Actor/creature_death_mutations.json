@@ -21,7 +21,7 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tcorpse->actorData.name = std::format(\"dead {}\", get_name());\n",
+      "original": "\tcorpse->actorData.name = corpseName;\n",
       "mutated": "\tcorpse->actorData.name = get_name();\n",
       "catches": "a corpse that reads as a living creature of the same name"
     },

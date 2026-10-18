@@ -86,6 +86,7 @@ protected:
 	Creature& add_creature(const std::string& name, int constitution)
 	{
 		auto creature = std::make_unique<Creature>(Vector2D{ 5, 5 }, ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK });
+		creature->set_corpse("test remains", 0, "It is test remains.", CorpseEdibility::EDIBLE);
 		creature->experienceReward = std::make_unique<ExperienceReward>(0);
 		creature->armorClass = std::make_unique<ArmorClass>(10);
 		creature->healthPool = std::make_unique<HealthPool>(STARTING_HP);

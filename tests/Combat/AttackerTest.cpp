@@ -54,6 +54,7 @@ protected:
 		player->set_dexterity(10);
 
 		monster = std::make_unique<Creature>(Vector2D{ 0, 1 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
+		monster->set_corpse("test remains", 0, "It is test remains.", CorpseEdibility::EDIBLE);
 		monster->experienceReward = std::make_unique<ExperienceReward>(50);
 		monster->set_dr(0);
 		monster->set_thaco(19);

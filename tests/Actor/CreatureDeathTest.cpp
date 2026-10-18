@@ -61,6 +61,7 @@ protected:
 		monster->healthPool = std::make_unique<HealthPool>(8);
 		monster->armorClass = std::make_unique<ArmorClass>(6);
 		monster->set_strength(14);
+		monster->set_corpse("dead orc", 80, "It's tough and stringy.", CorpseEdibility::EDIBLE);
 	}
 
 	// Puts an item in the monster's pack, as loot it was carrying rather than

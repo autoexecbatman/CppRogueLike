@@ -114,6 +114,7 @@ protected:
 	Creature& swimmer_in_water(int constitution)
 	{
 		auto creature = std::make_unique<Creature>(Vector2D{ 5, 5 }, ActorData{ TileRef{}, "diver", ColorPairId::WHITE_BLACK });
+		creature->set_corpse("test remains", 0, "It is test remains.", CorpseEdibility::EDIBLE);
 		creature->experienceReward = std::make_unique<ExperienceReward>(0);
 		creature->armorClass = std::make_unique<ArmorClass>(10);
 		creature->healthPool = std::make_unique<HealthPool>(30);

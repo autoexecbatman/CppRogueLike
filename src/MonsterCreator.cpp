@@ -62,6 +62,7 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 	c->set_ethics(params.ethics);
 	c->set_morality(params.morality);
 	c->set_corpse_weight(params.corpseWeight);
+	c->set_corpse(params.corpseName, params.corpseNutrition, params.corpseTaste, params.corpseEdibility);
 	// One count needs no choice and spends no die; a range rolls its count, and the level,
 	// the hit points and the experience all follow that roll.
 	assert(is_valid_monster_hit_dice(params.hitDice) && "MonsterCreator::create_from_params: hit dice the loader would refuse");

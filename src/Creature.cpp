@@ -213,6 +213,10 @@ void Creature::load(const json& j)
 	displaceable = j.at("displaceable").get<bool>();
 	morale = j.at("morale").get<int>();
 	corpseWeight = j.at("corpseWeight").get<int>();
+	corpseName = j.at("corpseName").get<std::string>();
+	corpseNutrition = j.at("corpseNutrition").get<int>();
+	corpseTaste = j.at("corpseTaste").get<std::string>();
+	corpseEdibility = corpse_edibility_from_record(j.at("corpseEdible").get<bool>());
 	bodyPlan.clear();
 	for (const auto& slotName : j.at("bodyPlan"))
 	{
@@ -350,6 +354,10 @@ void Creature::save(json& j)
 	j["displaceable"] = displaceable;
 	j["morale"] = morale;
 	j["corpseWeight"] = corpseWeight;
+	j["corpseName"] = corpseName;
+	j["corpseNutrition"] = corpseNutrition;
+	j["corpseTaste"] = corpseTaste;
+	j["corpseEdible"] = is_corpse_edible(corpseEdibility);
 	json slotNames = json::array();
 	for (const EquipmentSlot slot : bodyPlan)
 	{
@@ -1579,12 +1587,13 @@ void Creature::die(GameContext& ctx)
 	}
 	equippedItems.clear();
 
-	// Create a corpse on the floor in place of the creature.
+	// Create a corpse on the floor in place of the creature, as its record describes it.
+	assert(!corpseName.empty() && "Creature::die: the creature was given no corpse to leave");
 	auto corpse = std::make_unique<Item>(position, actorData);
-	corpse->actorData.name = std::format("dead {}", get_name());
+	corpse->actorData.name = corpseName;
 	corpse->actorData.tile = ctx.tileConfig->get("TILE_CORPSE");
 	corpse->enhancement.weight = get_corpse_weight();
-	corpse->behavior = CorpseFood{ 0 };
+	corpse->behavior = CorpseFood{ corpseNutrition, corpseTaste, corpseEdibility };
 	InventoryOperations::add_item(*ctx.floorInventory, std::move(corpse));
 }
 

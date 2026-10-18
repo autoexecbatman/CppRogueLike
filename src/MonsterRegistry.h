@@ -12,6 +12,7 @@
 #include "Ai.h"
 #include "Alignment.h"
 #include "Attitude.h"
+#include "CorpseEdibility.h"
 #include "CreatureSize.h"
 #include "DamageInfo.h"
 #include "DiceExpr.h"
@@ -95,6 +96,11 @@ struct MonsterParams
 	Morality morality{ Morality::NEUTRAL };
 	// What its corpse weighs.
 	int corpseWeight{ 50 };
+	// How much eating its corpse feeds, whether it can be eaten at all, and the line printed
+	// when it is eaten or refused.
+	int corpseNutrition{ 0 };
+	CorpseEdibility corpseEdibility{ CorpseEdibility::EDIBLE };
+	std::string corpseTaste{};
 	// The size its Monstrous Manual entry prints, which the DMG reads its ability scores by.
 	CreatureSize size{ CreatureSize::MEDIUM };
 	// The Intelligence rating its Monstrous Manual entry prints, which the DMG reads its

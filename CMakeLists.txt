@@ -125,6 +125,7 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/InventoryData.h
     ${PROJECT_SOURCE_DIR}/Creature.cpp
     ${PROJECT_SOURCE_DIR}/Creature.h
+    ${PROJECT_SOURCE_DIR}/CorpseEdibility.h
     ${PROJECT_SOURCE_DIR}/Item.cpp
     ${PROJECT_SOURCE_DIR}/Item.h
     ${PROJECT_SOURCE_DIR}/NPC.h

@@ -41,6 +41,9 @@
     },
     "weight": 10,
     "corpse_weight": 160,
+    "corpse_nutrition": 70,
+    "corpse_taste": "It tastes... questionable.",
+    "corpse_edible": true,
     "equipment": [
       {
         "item": "long_bow",
@@ -92,6 +95,9 @@
     },
     "weight": 15,
     "corpse_weight": 8,
+    "corpse_nutrition": 15,
+    "corpse_taste": "Mostly wing and gristle.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Bite",
     "body": "beast"
@@ -141,6 +147,9 @@
     },
     "weight": 11,
     "corpse_weight": 100,
+    "corpse_nutrition": 120,
+    "corpse_taste": "Rank and hairy, but there is a lot of it.",
+    "corpse_edible": true,
     "equipment": [
       {
         "item": "morning_star",
@@ -192,6 +201,9 @@
     },
     "weight": 5,
     "corpse_weight": 100,
+    "corpse_nutrition": 120,
+    "corpse_taste": "Three heads, three flavours, none of them good.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Fire Breath",
     "body": "beast"
@@ -238,6 +250,9 @@
     },
     "weight": 3,
     "corpse_weight": 600,
+    "corpse_nutrition": 200,
+    "corpse_taste": "It tastes exotic and somewhat spicy!",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "bite",
     "body": "beast"
@@ -284,6 +299,9 @@
     },
     "weight": 8,
     "corpse_weight": 130,
+    "corpse_nutrition": 80,
+    "corpse_taste": "Still warm, and it smells of smoke.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Flaming Bite",
     "body": "beast"
@@ -330,6 +348,9 @@
     },
     "weight": 9,
     "corpse_weight": 100,
+    "corpse_nutrition": 80,
+    "corpse_taste": "You chew on grit and something that might have been flesh.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Claw",
     "body": "hands_only"
@@ -376,6 +397,9 @@
     },
     "weight": 10,
     "corpse_weight": 100,
+    "corpse_nutrition": 80,
+    "corpse_taste": "It tastes of the grave it came from.",
+    "corpse_edible": true,
     "undead": true,
     "equipment": [],
     "natural_attack": "Paralytic Claw",
@@ -423,6 +447,9 @@
     },
     "weight": 12,
     "corpse_weight": 100,
+    "corpse_nutrition": 15,
+    "corpse_taste": "Crunchy, with a bitter aftertaste.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Poison Bite",
     "body": "beast"
@@ -469,6 +496,9 @@
     },
     "weight": 18,
     "corpse_weight": 100,
+    "corpse_nutrition": 15,
+    "corpse_taste": "Stringy and sour.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Bite",
     "body": "beast"
@@ -515,6 +545,9 @@
     },
     "weight": 10,
     "corpse_weight": 100,
+    "corpse_nutrition": 80,
+    "corpse_taste": "Like a tough, cold chicken.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Poison Bite",
     "body": "beast"
@@ -561,6 +594,9 @@
     },
     "weight": 13,
     "corpse_weight": 100,
+    "corpse_nutrition": 120,
+    "corpse_taste": "Gamey, like a hyena that ate badly.",
+    "corpse_edible": true,
     "equipment": [
       {
         "item": "battle_axe",
@@ -612,6 +648,9 @@
     },
     "weight": 30,
     "corpse_weight": 90,
+    "corpse_nutrition": 40,
+    "corpse_taste": "It's greasy and gamey.",
+    "corpse_edible": true,
     "equipment": [
       {
         "item": "short_sword",
@@ -666,6 +705,9 @@
     },
     "weight": 4,
     "corpse_weight": 100,
+    "corpse_nutrition": 0,
+    "corpse_taste": "You would break your teeth on it.",
+    "corpse_edible": false,
     "equipment": [],
     "natural_attack": "Stone Fist",
     "body": "hands_only"
@@ -712,6 +754,9 @@
     },
     "weight": 8,
     "corpse_weight": 100,
+    "corpse_nutrition": 80,
+    "corpse_taste": "It tastes like a foul old bird.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Talons",
     "body": "hands_only"
@@ -761,6 +806,9 @@
     },
     "weight": 6,
     "corpse_weight": 100,
+    "corpse_nutrition": 160,
+    "corpse_taste": "Enough to feed a village, if a village would eat it.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Hurled Boulder",
     "body": "humanoid"
@@ -807,6 +855,9 @@
     },
     "weight": 15,
     "corpse_weight": 100,
+    "corpse_nutrition": 80,
+    "corpse_taste": "Tough and salty.",
+    "corpse_edible": true,
     "equipment": [
       {
         "item": "long_sword",
@@ -858,6 +909,9 @@
     },
     "weight": 8,
     "corpse_weight": 130,
+    "corpse_nutrition": 120,
+    "corpse_taste": "It is frozen through, and you gnaw it like ice.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Freezing Bite",
     "body": "beast"
@@ -904,6 +958,9 @@
     },
     "weight": 25,
     "corpse_weight": 85,
+    "corpse_nutrition": 40,
+    "corpse_taste": "Scaly and faintly doglike.",
+    "corpse_edible": true,
     "equipment": [
       {
         "item": "dagger",
@@ -955,6 +1012,9 @@
     },
     "weight": 3,
     "corpse_weight": 100,
+    "corpse_nutrition": 80,
+    "corpse_taste": "Dry as parchment, and it tingles.",
+    "corpse_edible": true,
     "undead": true,
     "equipment": [],
     "natural_attack": "Paralyzing Touch",
@@ -1002,6 +1062,9 @@
     },
     "weight": 10,
     "corpse_weight": 150,
+    "corpse_nutrition": 60,
+    "corpse_taste": "There's a strange aftertaste of magical residue.",
+    "corpse_edible": true,
     "equipment": [
       {
         "item": "staff",
@@ -1053,6 +1116,9 @@
     },
     "weight": 7,
     "corpse_weight": 100,
+    "corpse_nutrition": 80,
+    "corpse_taste": "You avoid the hair.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Petrifying Gaze",
     "body": "serpent_haired"
@@ -1103,6 +1169,9 @@
     },
     "weight": 6,
     "corpse_weight": 100,
+    "corpse_nutrition": 120,
+    "corpse_taste": "Rubbery, like chewing a wet boot.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Pseudopod",
     "body": "beast"
@@ -1152,6 +1221,9 @@
     },
     "weight": 10,
     "corpse_weight": 100,
+    "corpse_nutrition": 120,
+    "corpse_taste": "Fatty and coarse.",
+    "corpse_edible": true,
     "equipment": [
       {
         "item": "club",
@@ -1203,6 +1275,9 @@
     },
     "weight": 15,
     "corpse_weight": 180,
+    "corpse_nutrition": 80,
+    "corpse_taste": "It's tough and stringy.",
+    "corpse_edible": true,
     "equipment": [
       {
         "item": "long_sword",
@@ -1257,6 +1332,9 @@
     },
     "weight": 3,
     "corpse_weight": 100,
+    "corpse_nutrition": 120,
+    "corpse_taste": "It burns your mouth on the way down.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Hellfire Strike",
     "body": "hands_only"
@@ -1303,6 +1381,9 @@
     },
     "weight": 20,
     "corpse_weight": 100,
+    "corpse_nutrition": 15,
+    "corpse_taste": "Barely a mouthful.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Bite",
     "body": "beast"
@@ -1349,6 +1430,9 @@
     },
     "weight": 9,
     "corpse_weight": 100,
+    "corpse_nutrition": 0,
+    "corpse_taste": "There is nothing left of it to eat.",
+    "corpse_edible": false,
     "undead": true,
     "equipment": [],
     "natural_attack": "Strength Drain",
@@ -1396,6 +1480,9 @@
     },
     "weight": 20,
     "corpse_weight": 170,
+    "corpse_nutrition": 100,
+    "corpse_taste": "Well-marbled, but you feel guilty...",
+    "corpse_edible": true,
     "equipment": [
       {
         "item": "dagger",
@@ -1447,6 +1534,9 @@
     },
     "weight": 15,
     "corpse_weight": 100,
+    "corpse_nutrition": 80,
+    "corpse_taste": "There is no meat left on these bones.",
+    "corpse_edible": false,
     "undead": true,
     "equipment": [],
     "natural_attack": "Claw",
@@ -1494,6 +1584,9 @@
     },
     "weight": 10,
     "corpse_weight": 150,
+    "corpse_nutrition": 80,
+    "corpse_taste": "Soft inside, and it tastes of venom.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Giant fangs",
     "body": "beast"
@@ -1540,6 +1633,9 @@
     },
     "weight": 10,
     "corpse_weight": 20,
+    "corpse_nutrition": 15,
+    "corpse_taste": "A bitter crunch.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Venomous fangs",
     "body": "beast"
@@ -1586,6 +1682,9 @@
     },
     "weight": 5,
     "corpse_weight": 160,
+    "corpse_nutrition": 120,
+    "corpse_taste": "Bitter and gluey, with threads of web.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Toxic fangs",
     "body": "beast"
@@ -1632,6 +1731,9 @@
     },
     "weight": 7,
     "corpse_weight": 280,
+    "corpse_nutrition": 120,
+    "corpse_taste": "It's surprisingly filling, if you can stomach it.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Claws",
     "body": "hands_only"
@@ -1681,6 +1783,9 @@
     },
     "weight": 5,
     "corpse_weight": 100,
+    "corpse_nutrition": 80,
+    "corpse_taste": "Cold and bloodless.",
+    "corpse_edible": true,
     "undead": true,
     "equipment": [],
     "natural_attack": "Blood Drain",
@@ -1728,6 +1833,9 @@
     },
     "weight": 8,
     "corpse_weight": 100,
+    "corpse_nutrition": 80,
+    "corpse_taste": "Half man, half wolf, and all of it gamey.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Bite",
     "body": "humanoid"
@@ -1774,6 +1882,9 @@
     },
     "weight": 8,
     "corpse_weight": 100,
+    "corpse_nutrition": 80,
+    "corpse_taste": "It tastes of cold earth.",
+    "corpse_edible": true,
     "undead": true,
     "equipment": [],
     "natural_attack": "Energy Drain",
@@ -1821,6 +1932,9 @@
     },
     "weight": 20,
     "corpse_weight": 120,
+    "corpse_nutrition": 40,
+    "corpse_taste": "Lean and gamey.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Bite",
     "body": "beast"
@@ -1867,6 +1981,9 @@
     },
     "weight": 7,
     "corpse_weight": 100,
+    "corpse_nutrition": 0,
+    "corpse_taste": "It is only a cold mist now; there is nothing to eat.",
+    "corpse_edible": false,
     "undead": true,
     "equipment": [],
     "natural_attack": "Energy Drain",
@@ -1914,6 +2031,9 @@
     },
     "weight": 6,
     "corpse_weight": 100,
+    "corpse_nutrition": 200,
+    "corpse_taste": "Like a dragon, with less spice and more sting.",
+    "corpse_edible": true,
     "equipment": [],
     "natural_attack": "Poison Sting",
     "body": "beast"
@@ -1960,6 +2080,9 @@
     },
     "weight": 14,
     "corpse_weight": 100,
+    "corpse_nutrition": 80,
+    "corpse_taste": "It is already rotten.",
+    "corpse_edible": true,
     "undead": true,
     "equipment": [],
     "natural_attack": "Slam",
@@ -2008,6 +2131,9 @@
     },
     "weight": 0,
     "corpse_weight": 100,
+    "corpse_nutrition": 80,
+    "corpse_taste": "It tastes of sweat and old iron.",
+    "corpse_edible": true,
     "equipment": [
       {
         "item": "mace",
@@ -2060,6 +2186,9 @@
     },
     "weight": 0,
     "corpse_weight": 100,
+    "corpse_nutrition": 80,
+    "corpse_taste": "Tough, like a man who never rested.",
+    "corpse_edible": true,
     "equipment": [
       {
         "item": "long_sword",

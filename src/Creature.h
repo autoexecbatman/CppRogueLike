@@ -3,6 +3,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "AbilityAllocation.h"
@@ -14,6 +15,7 @@
 #include "Attitude.h"
 #include "BuffType.h"
 #include "ConstitutionTracker.h"
+#include "CorpseEdibility.h"
 #include "CreatureClass.h"
 #include "DamageInfo.h"
 #include "DamageResolver.h"
@@ -142,6 +144,10 @@ private:
 	int damageResistance{ 0 };
 	int thaco{ 20 };
 	int corpseWeight{ 50 };
+	std::string corpseName{}; // what the body it leaves is called
+	int corpseNutrition{ 0 }; // how much eating that body feeds
+	std::string corpseTaste{}; // the line printed when it is eaten, or when eating it is refused
+	CorpseEdibility corpseEdibility{ CorpseEdibility::EDIBLE };
 
 	TileRef invisibleTile{}; // lazily resolved from TileConfig on first update()
 
@@ -342,6 +348,23 @@ public:
 	int get_corpse_weight() const noexcept { return corpseWeight; }
 
 	void set_corpse_weight(int value) noexcept { corpseWeight = value; }
+
+	// The body this creature leaves when it dies: its name, its nutrition and its taste.
+	[[nodiscard]] const std::string& get_corpse_name() const noexcept { return corpseName; }
+
+	[[nodiscard]] int get_corpse_nutrition() const noexcept { return corpseNutrition; }
+
+	[[nodiscard]] const std::string& get_corpse_taste() const noexcept { return corpseTaste; }
+
+	[[nodiscard]] CorpseEdibility get_corpse_edibility() const noexcept { return corpseEdibility; }
+
+	void set_corpse(std::string name, int nutrition, std::string taste, CorpseEdibility edibility)
+	{
+		corpseName = std::move(name);
+		corpseNutrition = nutrition;
+		corpseTaste = std::move(taste);
+		corpseEdibility = edibility;
+	}
 
 	// Replaces the creature's mind with a confused one until the clock reaches the end of
 	// the duration. The caller passes the clock because the creature does not hold one.
