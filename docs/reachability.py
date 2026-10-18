@@ -62,6 +62,15 @@ only" that production used perfectly well inside their own file. Counting uses
 rather than mentions, and asking whether production touches the type anywhere at
 all, took the findings from 39 to 2 with nothing real lost.
 
+Falsified again 2026-10-18, issue 0230. CorpseData was compiled and constructed by
+nothing, yet read "self only": its own constructor declaration and the #include in
+its own .cpp were counted as uses. Neither is one now. On the tree as it stood that
+moved exactly three rows, CorpseData, CombatStats and NPC, from "self only" to "dead",
+and changed no other; a grep found each named only in its own files and the CMake
+lists. A throwaway struct with a constructor and one use inside its own header read
+"self only", and with the use removed read "dead", so an encapsulated type still
+stays out of the findings.
+
 """
 
 import argparse
@@ -106,8 +115,9 @@ def files_naming(name, folder, skip):
 def uses_in(paths, name):
     """How many times `name` is *used* across `paths`, rather than declared.
 
-    A type's own files always mention it: once to declare it, and once per
-    out-of-line member definition as `Name::member`. Neither is a use, and
+    A type's own files always mention it: once to declare it, once per constructor or
+    destructor, once per out-of-line member definition as `Name::member`, and in the
+    #include of its own header. None is a use, and
     counting them makes a type nothing constructs look busy. What is left is a
     member of that type, a parameter, a construction - the mentions that mean
     somebody needs it.
@@ -116,6 +126,9 @@ def uses_in(paths, name):
     qualified = re.compile(r"\b" + re.escape(name) + r"\s*::")
     declaration = re.compile(
         r"\b(?:class|struct|enum\s+class|enum)\s+" + re.escape(name) + r"\b")
+    # A constructor or destructor declaration carries the type's name and uses nothing.
+    special_member = re.compile(
+        r"\s*(?:(?:explicit|constexpr|inline|virtual)\s+)*~?" + re.escape(name) + r"\s*\(")
 
     used = 0
     for path in paths:
@@ -125,6 +138,8 @@ def uses_in(paths, name):
             if line.lstrip().startswith("//"):
                 continue
             if declaration.search(line):
+                continue
+            if special_member.match(line) or line.lstrip().startswith("#include"):
                 continue
             hits = len(word.findall(line)) - len(qualified.findall(line))
             used += max(hits, 0)

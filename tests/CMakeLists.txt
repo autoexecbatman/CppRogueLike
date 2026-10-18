@@ -349,9 +349,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/SavingThrow.cpp
     ${PARENT_SOURCE_DIR}/ConstitutionTracker.cpp
     ${PARENT_SOURCE_DIR}/HealthPool.cpp
-    ${PARENT_SOURCE_DIR}/CombatStats.cpp
     ${PARENT_SOURCE_DIR}/ExperienceReward.cpp
-    ${PARENT_SOURCE_DIR}/CorpseData.cpp
 
     # UI
     ${PARENT_SOURCE_DIR}/CloseButtonArea.cpp

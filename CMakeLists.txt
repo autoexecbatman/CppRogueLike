@@ -128,7 +128,6 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/CorpseEdibility.h
     ${PROJECT_SOURCE_DIR}/Item.cpp
     ${PROJECT_SOURCE_DIR}/Item.h
-    ${PROJECT_SOURCE_DIR}/NPC.h
     ${PROJECT_SOURCE_DIR}/Alignment.h
     ${PROJECT_SOURCE_DIR}/CreatureClass.h
     ${PROJECT_SOURCE_DIR}/Attitude.h
@@ -396,12 +395,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/ConstitutionTracker.h
     ${PROJECT_SOURCE_DIR}/HealthPool.cpp
     ${PROJECT_SOURCE_DIR}/HealthPool.h
-    ${PROJECT_SOURCE_DIR}/CombatStats.cpp
-    ${PROJECT_SOURCE_DIR}/CombatStats.h
     ${PROJECT_SOURCE_DIR}/ExperienceReward.cpp
     ${PROJECT_SOURCE_DIR}/ExperienceReward.h
-    ${PROJECT_SOURCE_DIR}/CorpseData.cpp
-    ${PROJECT_SOURCE_DIR}/CorpseData.h
 
     # UI - New UI classes
     ${PROJECT_SOURCE_DIR}/CloseButtonArea.cpp
