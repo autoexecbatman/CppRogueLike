@@ -132,6 +132,4 @@ public:
 	void place_tile(Vector2D worldPosition, TileRef tile);
 
 	[[nodiscard]] bool is_active_map_empty() const;
-
-	[[nodiscard]] const std::vector<PaletteEntry>& get_palette() const { return palette; }
 };
