@@ -1,0 +1,59 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=EnhancementSystemTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/ItemEnhancements.cpp",
+      "original": "\tif (roll < 30) // Prefix only",
+      "mutated": "\tif (roll < 31) // Prefix only",
+      "catches": "the prefix band reaching one roll into the suffix band"
+    },
+    {
+      "file": "src/ItemEnhancements.cpp",
+      "original": "\telse if (roll < 55) // Suffix only",
+      "mutated": "\telse if (roll < 56) // Suffix only",
+      "catches": "the suffix band reaching one roll into the both band"
+    },
+    {
+      "file": "src/ItemEnhancements.cpp",
+      "original": "\telse if (roll < 60) // Both prefix and suffix",
+      "mutated": "\telse if (roll < 61) // Both prefix and suffix",
+      "catches": "the both band reaching one roll into the empty band"
+    },
+    {
+      "file": "src/ItemEnhancements.cpp",
+      "original": "\t\tenhancement.prefix = get_random_universal_prefix(dice);\n\t\tenhancement.suffix = get_random_special_suffix(dice);\n\t}\n\t// 40% chance for no enhancement",
+      "mutated": "\t\tenhancement.suffix = get_random_special_suffix(dice);\n\t\tenhancement.prefix = get_random_universal_prefix(dice);\n\t}\n\t// 40% chance for no enhancement",
+      "catches": "the both band drawing the suffix before the prefix"
+    },
+    {
+      "file": "src/ItemEnhancements.cpp",
+      "original": "\t\tPrefixType::BLESSED, PrefixType::CURSED, PrefixType::ANCIENT, PrefixType::MAGICAL, PrefixType::RUSTED, PrefixType::CRACKED",
+      "mutated": "\t\tPrefixType::CURSED, PrefixType::BLESSED, PrefixType::ANCIENT, PrefixType::MAGICAL, PrefixType::RUSTED, PrefixType::CRACKED",
+      "catches": "the universal pool's first two entries swapped"
+    },
+    {
+      "file": "src/ItemEnhancements.cpp",
+      "original": "\t// 40% chance for no enhancement\n\n\tif (magicalPrefixes == MagicalPrefixes::EXCLUDED)\n\t{\n\t\tenhancement.strip_magical_prefix();",
+      "mutated": "\t// 40% chance for no enhancement\n\n\tif (magicalPrefixes == MagicalPrefixes::EXCLUDED)\n\t{\n\t\t;",
+      "catches": "the general generator keeping MAGICAL when the shop excludes magic"
+    },
+    {
+      "file": "src/ItemEnhancements.cpp",
+      "original": "\treturn special_suffixes[dice.roll(0, static_cast<int>(std::size(special_suffixes)) - 1)];",
+      "mutated": "\treturn special_suffixes[dice.roll(0, static_cast<int>(std::size(special_suffixes)) - 2)];",
+      "catches": "the special-suffix range one short, so OF_BRITTLENESS is never drawn"
+    },
+    {
+      "file": "src/ItemEnhancements.cpp",
+      "original": "\treturn universal_prefixes[dice.roll(0, static_cast<int>(std::size(universal_prefixes)) - 1)];",
+      "mutated": "\treturn universal_prefixes[dice.roll(0, static_cast<int>(std::size(universal_prefixes)) - 2)];",
+      "catches": "the universal range one short, so CRACKED is never drawn"
+    }
+  ]
+}

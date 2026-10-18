@@ -351,6 +351,127 @@ TEST_F(EnhancementSystemTest, AllowingMagicalPrefixesStillDrawsThem) {
     EXPECT_GT(magical, 0) << "the weapon pool never produced a magical prefix at all";
 }
 
+// The general generator, which the shop calls for anything neither weapon nor
+// armour, rolls 0..99 once: under 30 a prefix, 30 to 54 a suffix, 55 to 59
+// both, 60 and over nothing. A prefix then takes an index into the universal
+// pool, a suffix one into the special-suffix pool, prefix first.
+TEST_F(EnhancementSystemTest, TheBandRollDecidesWhatIsDrawn)
+{
+	struct BandCase
+	{
+		int bandRoll{ 0 };
+		bool drawsPrefix{ false };
+		bool drawsSuffix{ false };
+	};
+
+	const BandCase cases[] = {
+		{ 29, true, false },
+		{ 30, false, true },
+		{ 54, false, true },
+		{ 55, true, true },
+		{ 59, true, true },
+		{ 60, false, false },
+	};
+
+	for (const BandCase& bandCase : cases)
+	{
+		// Index 0 of each pool: BLESSED is not magical, so the exclusion cannot bear on the band.
+		dice.set_next_roll(bandCase.bandRoll);
+		if (bandCase.drawsPrefix)
+		{
+			dice.set_next_roll(0);
+		}
+		if (bandCase.drawsSuffix)
+		{
+			dice.set_next_roll(0);
+		}
+
+		const ItemEnhancement enhancement = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, dice);
+
+		EXPECT_EQ(enhancement.prefix, bandCase.drawsPrefix ? PrefixType::BLESSED : PrefixType::NONE) << "band roll " << bandCase.bandRoll;
+		EXPECT_EQ(enhancement.suffix, bandCase.drawsSuffix ? SuffixType::OF_SPEED : SuffixType::NONE) << "band roll " << bandCase.bandRoll;
+	}
+}
+
+// In the both band the first index roll is the prefix's and the second the suffix's.
+TEST_F(EnhancementSystemTest, TheBothBandDrawsThePrefixFirst)
+{
+	dice.set_next_roll(55);
+	dice.set_next_roll(1);
+	dice.set_next_roll(2);
+
+	const ItemEnhancement enhancement = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, dice);
+
+	EXPECT_EQ(enhancement.prefix, PrefixType::CURSED);
+	EXPECT_EQ(enhancement.suffix, SuffixType::OF_MAGIC);
+}
+
+// The universal pool's order: index 0 is BLESSED, index 3 is MAGICAL.
+TEST_F(EnhancementSystemTest, TheIndexRollPicksOutOfTheUniversalPool)
+{
+	dice.set_next_roll(10);
+	dice.set_next_roll(0);
+	const PrefixType first = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, dice).prefix;
+
+	dice.set_next_roll(10);
+	dice.set_next_roll(3);
+	const PrefixType fourth = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, dice).prefix;
+
+	EXPECT_EQ(first, PrefixType::BLESSED);
+	EXPECT_EQ(fourth, PrefixType::MAGICAL);
+}
+
+// The special-suffix pool's order: index 0 is OF_SPEED.
+TEST_F(EnhancementSystemTest, TheIndexRollPicksOutOfTheSpecialSuffixPool)
+{
+	dice.set_next_roll(40);
+	dice.set_next_roll(0);
+
+	const ItemEnhancement enhancement = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, dice);
+
+	EXPECT_EQ(enhancement.prefix, PrefixType::NONE);
+	EXPECT_EQ(enhancement.suffix, SuffixType::OF_SPEED);
+}
+
+// MAGICAL is the universal pool's one magical prefix; the same rolls keep it when
+// allowed and lose it when the shop excludes magic.
+TEST_F(EnhancementSystemTest, ExcludingMagicalPrefixesStripsMagicalFromTheGeneralPool)
+{
+	dice.set_next_roll(10);
+	dice.set_next_roll(3);
+	const PrefixType allowed = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, dice).prefix;
+
+	dice.set_next_roll(10);
+	dice.set_next_roll(3);
+	const PrefixType excluded = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::EXCLUDED, dice).prefix;
+
+	EXPECT_EQ(allowed, PrefixType::MAGICAL);
+	EXPECT_EQ(excluded, PrefixType::NONE);
+}
+
+// A range one short leaves a pool's last entry unreachable, which a scripted roll
+// cannot see. Per draw CRACKED comes up with p = 0.35 / 6 and OF_BRITTLENESS with
+// p = 0.30 / 8; over 1000 draws a correct pool misses them with (1 - p)^1000,
+// 7.9e-27 and 2.5e-17.
+TEST_F(EnhancementSystemTest, EveryEntryOfTheGeneralPoolsIsReachable)
+{
+	constexpr int DRAWS = 1000;
+	constexpr unsigned int SEED = 20261019u;
+	RandomDice seeded{ SEED };
+
+	bool sawLastPrefix = false;
+	bool sawLastSuffix = false;
+	for (int draw = 0; draw < DRAWS; ++draw)
+	{
+		const ItemEnhancement enhancement = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, seeded);
+		sawLastPrefix = sawLastPrefix || enhancement.prefix == PrefixType::CRACKED;
+		sawLastSuffix = sawLastSuffix || enhancement.suffix == SuffixType::OF_BRITTLENESS;
+	}
+
+	EXPECT_TRUE(sawLastPrefix) << "CRACKED, the last universal prefix, is out of reach";
+	EXPECT_TRUE(sawLastSuffix) << "OF_BRITTLENESS, the last special suffix, is out of reach";
+}
+
 // ----------------------------------------------------------------------------
 // Value Modifier Tests
 // ----------------------------------------------------------------------------

@@ -127,7 +127,6 @@ struct ItemEnhancement
 	static ItemEnhancement generate_armor_enhancement(MagicalPrefixes magicalPrefixes, RandomDice& dice);
 
 	// Rarity-based generation
-	static ItemEnhancement generate_by_rarity(int rarity_level, RandomDice& dice); // 1-5
 
 private:
 	// Clears a magical prefix, before the effects are applied - they accumulate,
