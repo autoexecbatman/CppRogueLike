@@ -146,7 +146,7 @@
       "sheet": 6
     },
     "weight": 11,
-    "corpse_weight": 100,
+    "corpse_weight": 400,
     "corpse_nutrition": 120,
     "corpse_taste": "Rank and hairy, but there is a lot of it.",
     "corpse_edible": true,
@@ -200,7 +200,7 @@
       "sheet": 22
     },
     "weight": 5,
-    "corpse_weight": 100,
+    "corpse_weight": 400,
     "corpse_nutrition": 120,
     "corpse_taste": "Three heads, three flavours, none of them good.",
     "corpse_edible": true,
@@ -347,7 +347,7 @@
       "sheet": 20
     },
     "weight": 9,
-    "corpse_weight": 100,
+    "corpse_weight": 150,
     "corpse_nutrition": 80,
     "corpse_taste": "You chew on grit and something that might have been flesh.",
     "corpse_edible": true,
@@ -396,7 +396,7 @@
       "sheet": 16
     },
     "weight": 10,
-    "corpse_weight": 100,
+    "corpse_weight": 150,
     "corpse_nutrition": 80,
     "corpse_taste": "It tastes of the grave it came from.",
     "corpse_edible": true,
@@ -446,7 +446,7 @@
       "sheet": 10
     },
     "weight": 12,
-    "corpse_weight": 100,
+    "corpse_weight": 5,
     "corpse_nutrition": 15,
     "corpse_taste": "Crunchy, with a bitter aftertaste.",
     "corpse_edible": true,
@@ -495,7 +495,7 @@
       "sheet": 22
     },
     "weight": 18,
-    "corpse_weight": 100,
+    "corpse_weight": 5,
     "corpse_nutrition": 15,
     "corpse_taste": "Stringy and sour.",
     "corpse_edible": true,
@@ -544,7 +544,7 @@
       "sheet": 8
     },
     "weight": 10,
-    "corpse_weight": 100,
+    "corpse_weight": 150,
     "corpse_nutrition": 80,
     "corpse_taste": "Like a tough, cold chicken.",
     "corpse_edible": true,
@@ -593,7 +593,7 @@
       "sheet": 4
     },
     "weight": 13,
-    "corpse_weight": 100,
+    "corpse_weight": 400,
     "corpse_nutrition": 120,
     "corpse_taste": "Gamey, like a hyena that ate badly.",
     "corpse_edible": true,
@@ -704,7 +704,7 @@
       "sheet": 6
     },
     "weight": 4,
-    "corpse_weight": 100,
+    "corpse_weight": 400,
     "corpse_nutrition": 0,
     "corpse_taste": "You would break your teeth on it.",
     "corpse_edible": false,
@@ -753,7 +753,7 @@
       "sheet": 6
     },
     "weight": 8,
-    "corpse_weight": 100,
+    "corpse_weight": 150,
     "corpse_nutrition": 80,
     "corpse_taste": "It tastes like a foul old bird.",
     "corpse_edible": true,
@@ -805,7 +805,7 @@
       "sheet": 6
     },
     "weight": 6,
-    "corpse_weight": 100,
+    "corpse_weight": 1500,
     "corpse_nutrition": 160,
     "corpse_taste": "Enough to feed a village, if a village would eat it.",
     "corpse_edible": true,
@@ -854,7 +854,7 @@
       "sheet": 6
     },
     "weight": 15,
-    "corpse_weight": 100,
+    "corpse_weight": 150,
     "corpse_nutrition": 80,
     "corpse_taste": "Tough and salty.",
     "corpse_edible": true,
@@ -1011,7 +1011,7 @@
       "sheet": 16
     },
     "weight": 3,
-    "corpse_weight": 100,
+    "corpse_weight": 150,
     "corpse_nutrition": 80,
     "corpse_taste": "Dry as parchment, and it tingles.",
     "corpse_edible": true,
@@ -1115,7 +1115,7 @@
       "sheet": 6
     },
     "weight": 7,
-    "corpse_weight": 100,
+    "corpse_weight": 150,
     "corpse_nutrition": 80,
     "corpse_taste": "You avoid the hair.",
     "corpse_edible": true,
@@ -1168,7 +1168,7 @@
       "sheet": 20
     },
     "weight": 6,
-    "corpse_weight": 100,
+    "corpse_weight": 400,
     "corpse_nutrition": 120,
     "corpse_taste": "Rubbery, like chewing a wet boot.",
     "corpse_edible": true,
@@ -1220,7 +1220,7 @@
       "sheet": 6
     },
     "weight": 10,
-    "corpse_weight": 100,
+    "corpse_weight": 400,
     "corpse_nutrition": 120,
     "corpse_taste": "Fatty and coarse.",
     "corpse_edible": true,
@@ -1331,7 +1331,7 @@
       "sheet": 20
     },
     "weight": 3,
-    "corpse_weight": 100,
+    "corpse_weight": 400,
     "corpse_nutrition": 120,
     "corpse_taste": "It burns your mouth on the way down.",
     "corpse_edible": true,
@@ -1380,7 +1380,7 @@
       "sheet": 22
     },
     "weight": 20,
-    "corpse_weight": 100,
+    "corpse_weight": 5,
     "corpse_nutrition": 15,
     "corpse_taste": "Barely a mouthful.",
     "corpse_edible": true,
@@ -1429,7 +1429,7 @@
       "sheet": 16
     },
     "weight": 9,
-    "corpse_weight": 100,
+    "corpse_weight": 1,
     "corpse_nutrition": 0,
     "corpse_taste": "There is nothing left of it to eat.",
     "corpse_edible": false,
@@ -1533,7 +1533,7 @@
       "sheet": 16
     },
     "weight": 15,
-    "corpse_weight": 100,
+    "corpse_weight": 150,
     "corpse_nutrition": 80,
     "corpse_taste": "There is no meat left on these bones.",
     "corpse_edible": false,
@@ -1782,7 +1782,7 @@
       "sheet": 16
     },
     "weight": 5,
-    "corpse_weight": 100,
+    "corpse_weight": 150,
     "corpse_nutrition": 80,
     "corpse_taste": "Cold and bloodless.",
     "corpse_edible": true,
@@ -1832,7 +1832,7 @@
       "sheet": 12
     },
     "weight": 8,
-    "corpse_weight": 100,
+    "corpse_weight": 150,
     "corpse_nutrition": 80,
     "corpse_taste": "Half man, half wolf, and all of it gamey.",
     "corpse_edible": true,
@@ -1881,7 +1881,7 @@
       "sheet": 16
     },
     "weight": 8,
-    "corpse_weight": 100,
+    "corpse_weight": 150,
     "corpse_nutrition": 80,
     "corpse_taste": "It tastes of cold earth.",
     "corpse_edible": true,
@@ -1980,7 +1980,7 @@
       "sheet": 16
     },
     "weight": 7,
-    "corpse_weight": 100,
+    "corpse_weight": 1,
     "corpse_nutrition": 0,
     "corpse_taste": "It is only a cold mist now; there is nothing to eat.",
     "corpse_edible": false,
@@ -2030,7 +2030,7 @@
       "sheet": 8
     },
     "weight": 6,
-    "corpse_weight": 100,
+    "corpse_weight": 3000,
     "corpse_nutrition": 200,
     "corpse_taste": "Like a dragon, with less spice and more sting.",
     "corpse_edible": true,
@@ -2079,7 +2079,7 @@
       "sheet": 16
     },
     "weight": 14,
-    "corpse_weight": 100,
+    "corpse_weight": 150,
     "corpse_nutrition": 80,
     "corpse_taste": "It is already rotten.",
     "corpse_edible": true,
@@ -2130,7 +2130,7 @@
       "sheet": 6
     },
     "weight": 0,
-    "corpse_weight": 100,
+    "corpse_weight": 150,
     "corpse_nutrition": 80,
     "corpse_taste": "It tastes of sweat and old iron.",
     "corpse_edible": true,
@@ -2185,7 +2185,7 @@
       "sheet": 6
     },
     "weight": 0,
-    "corpse_weight": 100,
+    "corpse_weight": 150,
     "corpse_nutrition": 80,
     "corpse_taste": "Tough, like a man who never rested.",
     "corpse_edible": true,

@@ -122,6 +122,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/TrapSerializationTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/WornEffectPersistenceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/FloorStackPickupTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Objects/CorpsePickupEntryTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/WornSlotTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/BuffTypeEncodingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CodecRoundTripTest.cpp

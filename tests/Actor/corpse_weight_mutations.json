@@ -1,0 +1,35 @@
+{
+    "cwd": "E:/repo/C++RogueLike",
+    "test_command": [
+        "powershell",
+        "-NoProfile",
+        "-Command",
+        "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=CorpseRecordTest.*:CorpsePickupRatTest.*"
+    ],
+    "mutations": [
+        {
+            "file": "data/content/monsters.json",
+            "original": "    \"weight\": 20,\n    \"corpse_weight\": 5,\n",
+            "mutated": "    \"weight\": 20,\n    \"corpse_weight\": 100,\n",
+            "catches": "the rat's placeholder weight put back"
+        },
+        {
+            "file": "data/content/monsters.json",
+            "original": "    \"corpse_weight\": 1500,\n",
+            "mutated": "    \"corpse_weight\": 5,\n",
+            "catches": "a tiny weight copied onto the hill giant"
+        },
+        {
+            "file": "data/content/monsters.json",
+            "original": "    \"corpse_weight\": 3000,\n",
+            "mutated": "    \"corpse_weight\": 150,\n",
+            "catches": "a medium weight copied onto the wyvern"
+        },
+        {
+            "file": "data/content/monsters.json",
+            "original": "    \"weight\": 14,\n    \"corpse_weight\": 150,\n",
+            "mutated": "    \"weight\": 14,\n    \"corpse_weight\": 100,\n",
+            "catches": "the placeholder left on a medium record, inside its size band"
+        }
+    ]
+}

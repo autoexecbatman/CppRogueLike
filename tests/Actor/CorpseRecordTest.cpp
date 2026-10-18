@@ -20,11 +20,13 @@
 #include <set>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <variant>
 
 #include "src/ArmorClass.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
+#include "src/CreatureSize.h"
 #include "src/ExperienceReward.h"
 #include "src/HealthPool.h"
 #include "src/HungerSystem.h"
@@ -47,6 +49,46 @@ constexpr int FIXTURE_NUTRITION = 37;
 constexpr std::string_view FIXTURE_TASTE = "It tastes of the fixture.";
 constexpr std::string_view FIXTURE_REFUSAL = "The fixture is not for eating.";
 constexpr Vector2D WHERE_IT_FELL{ 7, 9 };
+
+// The weight every record held before its corpse was weighed, 28 of them at once.
+constexpr int PLACEHOLDER_CORPSE_WEIGHT = 100;
+
+// A size's corpse weight in pounds, as ruled 2026-10-18 for every record that had none.
+int ruled_corpse_weight(CreatureSize size)
+{
+	switch (size)
+	{
+	case CreatureSize::TINY:
+	{
+		return 5;
+	}
+	case CreatureSize::SMALL:
+	{
+		return 50;
+	}
+	case CreatureSize::MEDIUM:
+	{
+		return 150;
+	}
+	case CreatureSize::LARGE:
+	{
+		return 400;
+	}
+	case CreatureSize::HUGE_SIZE:
+	{
+		return 1500;
+	}
+	case CreatureSize::GARGANTUAN:
+	{
+		return 3000;
+	}
+	}
+	std::unreachable();
+}
+
+// How far an authored weight may sit from its size's: the dragon, gargantuan at 600
+// against 3000, is the widest, so five is the least factor that admits every record.
+constexpr int SIZE_BAND_FACTOR = 5;
 } // namespace
 
 class CorpseRecordTest : public ::testing::Test
@@ -287,6 +329,34 @@ TEST_F(CorpseRecordTest, EveryRecordCarriesACorpseNutritionAndTaste)
 		EXPECT_GE(params.corpseNutrition, 0) << key;
 		EXPECT_FALSE(params.corpseTaste.empty()) << key << " has no eating line";
 		EXPECT_EQ(params.corpseTaste.find("PLACEHOLDER"), std::string::npos) << key << " still holds a placeholder";
+	}
+}
+
+// 100 was copied onto 28 records in place of a weight, a rat's among them.
+TEST_F(CorpseRecordTest, NoRecordKeepsThePlaceholderCorpseWeight)
+{
+	for (const std::string& key : mock.monsterRegistry.get_all_keys())
+	{
+		EXPECT_NE(mock.monsterRegistry.get_params(key).corpseWeight, PLACEHOLDER_CORPSE_WEIGHT) << key;
+	}
+}
+
+// A corpse weighs within a factor of five of its size's weight, so a weight copied from a
+// record of another size fails. A shadow and a wraith dissipate, and weigh almost nothing.
+TEST_F(CorpseRecordTest, EveryCorpseWeighsWithinItsSize)
+{
+	const std::set<std::string> dissipated{ "shadow", "wraith" };
+	for (const std::string& key : mock.monsterRegistry.get_all_keys())
+	{
+		const MonsterParams& params = mock.monsterRegistry.get_params(key);
+		if (dissipated.contains(key))
+		{
+			EXPECT_EQ(params.corpseWeight, 1) << key;
+			continue;
+		}
+		const int sizeWeight = ruled_corpse_weight(params.size);
+		EXPECT_GE(params.corpseWeight * SIZE_BAND_FACTOR, sizeWeight) << key << " is light for its size";
+		EXPECT_LE(params.corpseWeight, sizeWeight * SIZE_BAND_FACTOR) << key << " is heavy for its size";
 	}
 }
 
