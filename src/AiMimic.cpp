@@ -23,7 +23,7 @@
 #include "Persistent.h"
 #include "TurnSchedule.h"
 
-// Configuration constants (NOT serialized — same for all mimics)
+// Configuration constants (NOT serialized - same for all mimics)
 constexpr int DISGUISE_CHANGE_RATE = 200;
 constexpr int CONSUMPTION_COOLDOWN_TURNS = 3;
 constexpr int CONSUMPTION_RADIUS = 1;
@@ -429,7 +429,7 @@ void AiMimic::save(json& j)
 {
 	AiMonster::save(j);
 
-	// Override the MONSTER type written by AiMonster::save — we are MIMIC.
+	// Override the MONSTER type written by AiMonster::save - we are MIMIC.
 	j["type"] = encode_ai_type(get_ai_type());
 
 	// A mimic with no change booked yet saves nothing for it, so the load path leaves the

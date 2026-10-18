@@ -1,6 +1,6 @@
 #pragma once
 
-// MenuGender.h — factory for the character creation gender selection menu.
+// MenuGender.h - factory for the character creation gender selection menu.
 
 #include <memory>
 

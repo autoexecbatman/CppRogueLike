@@ -219,7 +219,7 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 				const TileType tileType = ctx.map->get_tile_type(candidate);
 				if (tileType == TileType::WALL)
 				{
-					break; // solid obstruction — corridor ends here
+					break; // solid obstruction - corridor ends here
 				}
 				// Skip temporarily-occupied or non-floor tiles; keep stepping.
 				if (tileType == TileType::CLOSED_DOOR)
@@ -281,7 +281,7 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 	{
 		if (!is_reachable_without_locked_doors(c.spawnPos, ctx.stairs->position, *ctx.map))
 		{
-			continue; // dead-end pocket — skip
+			continue; // dead-end pocket - skip
 		}
 
 		const int dist = c.spawnPos.manhattan_distance_to(playerPos);
@@ -347,7 +347,7 @@ void TreasureRoom::create(
 	// Generate treasure at the center of the room
 	ItemFactory::generate_treasure(center, ctx.levelManager->get_dungeon_level(), quality, ctx);
 
-	// Spawn the Dungeon Warden — the named boss guarding the vault.
+	// Spawn the Dungeon Warden - the named boss guarding the vault.
 	// Try the room center first, then spiral outward to find a free tile.
 	{
 		std::optional<Vector2D> wardenPos;

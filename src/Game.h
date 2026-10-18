@@ -124,13 +124,13 @@ struct Game
 	std::vector<std::unique_ptr<Decoration>> decorations{};
 	FloorInventory floorInventory{};
 
-	// Character creation blueprint — persists across ticks
+	// Character creation blueprint - persists across ticks
 	PlayerBlueprint playerBlueprint{};
 
 	// Menu system
 	std::deque<std::unique_ptr<BaseMenu>> menus{};
 
-	// Mouse path overlay — persistent across frames, owned here
+	// Mouse path overlay - persistent across frames, owned here
 	std::vector<Vector2D> mousePathOverlay{};
 
 	[[nodiscard]] GameContext context() noexcept;

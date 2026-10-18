@@ -64,14 +64,14 @@ void flee(Creature& owner, GameContext& ctx)
 	}
 	else
 	{
-		// At escape apex — no tile further from player is available.
+		// At escape apex - no tile further from player is available.
 		// AD&D 2e: fight back only if the threat is adjacent; otherwise hold ground.
 		if (owner.get_tile_distance(ctx.player()->position) <= 1)
 		{
 			owner.remove_state(ActorState::IS_FLEEING);
 			owner.attacker->attack(*ctx.player(), AttackKind::MELEE, ctx);
 		}
-		// else: hold position, keep IS_FLEEING — player has not cornered us yet
+		// else: hold position, keep IS_FLEEING - player has not cornered us yet
 	}
 }
 

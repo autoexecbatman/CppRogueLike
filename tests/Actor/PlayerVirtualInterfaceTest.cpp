@@ -53,7 +53,7 @@ protected:
 };
 
 // ----------------------------------------------------------------------------
-// Player display accessors — read directly off the concrete Player.
+// Player display accessors - read directly off the concrete Player.
 // ----------------------------------------------------------------------------
 
 TEST_F(PlayerVirtualInterfaceTest, Player_GetClassDisplayName_ReturnsPlayerClass)
@@ -78,7 +78,7 @@ TEST_F(PlayerVirtualInterfaceTest, Player_GetKillCount_ReturnsKillCount)
 }
 
 // ----------------------------------------------------------------------------
-// on_kill_reward — critical path (replaced 3 lines of direct Player mutation)
+// on_kill_reward - critical path (replaced 3 lines of direct Player mutation)
 // Regression here means Creature::die() is broken.
 // ----------------------------------------------------------------------------
 

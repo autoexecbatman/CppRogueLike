@@ -1,6 +1,6 @@
 #pragma once
 
-// MenuEntry — a single selectable item in a vertical list menu.
+// MenuEntry - a single selectable item in a vertical list menu.
 // Holds the label shown to the user, an optional hotkey, and the
 // command executed when selected. Shared by ListMenu and MenuTrade.
 

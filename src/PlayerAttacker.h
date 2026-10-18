@@ -9,7 +9,7 @@ struct GameContext;
 
 // Concrete attack strategy for the player.
 // Reads damage from equipped weapons at attack time.
-// Handles dual-wield branching — kept here, not in the engine base.
+// Handles dual-wield branching - kept here, not in the engine base.
 class PlayerAttacker : public Attacker
 {
 private:

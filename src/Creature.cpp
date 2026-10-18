@@ -1,4 +1,4 @@
-﻿#include <algorithm>
+#include <algorithm>
 #include <cassert>
 #include <concepts>
 #include <format>
@@ -392,7 +392,7 @@ void Creature::save(json& j)
 		json attackerJson;
 		attacker->save(attackerJson);
 		// Only write the key if the strategy produced content.
-		// PlayerAttacker::save() is a no-op — no damageInfo to persist.
+		// PlayerAttacker::save() is a no-op - no damageInfo to persist.
 		if (!attackerJson.empty())
 		{
 			j["attacker"] = attackerJson;
@@ -1654,7 +1654,7 @@ int Creature::calculate_effective_stat(int base_value, BuffType type) const noex
 	};
 	auto matchingBuffs = activeBuffs | std::views::filter(matchesType);
 
-	int highestSet = 0; // Highest SET effect (Potion of Giant Strength → 18)
+	int highestSet = 0; // Highest SET effect (Potion of Giant Strength -> 18)
 	int bonuses = 0; // Additions above zero (Gauntlets +2)
 	int penalties = 0; // Additions below zero (a weapon of weakness, -1)
 	auto count_addition = [&bonuses, &penalties](int amount)
@@ -1693,7 +1693,7 @@ int Creature::calculate_effective_stat(int base_value, BuffType type) const noex
 	}
 
 	// AD&D 2e: SET effects replace base (if higher), ADD effects stack
-	// Example: base=14, SET=18, ADD=+2 → MAX(14,18) + 2 = 20
+	// Example: base=14, SET=18, ADD=+2 -> MAX(14,18) + 2 = 20
 	int effectiveBase = (highestSet > 0) ? std::max(base_value, highestSet) : base_value;
 	// A girdle of giant strength refuses the bonuses and keeps the penalties.
 	const bool takesBonuses = type != BuffType::STRENGTH || !wearsGiantStrength;

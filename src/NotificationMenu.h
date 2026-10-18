@@ -1,6 +1,6 @@
 #pragma once
 
-// NotificationMenu — a pure info popup that closes on any keypress.
+// NotificationMenu - a pure info popup that closes on any keypress.
 // Use for one-way messages that require no selection: racial traits,
 // victory screen, help text, etc.
 //

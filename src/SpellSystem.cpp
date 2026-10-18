@@ -165,7 +165,7 @@ void dispatch_effect(
 	std::function<void(GameContext&)> onSuccess,
 	GameContext& ctx);
 
-// Spell effect implementations (instant — return true on success)
+// Spell effect implementations (instant - return true on success)
 bool cast_cure_light_wounds(Creature& caster, GameContext& ctx);
 bool cast_bless(Creature& caster, GameContext& ctx);
 bool cast_sanctuary(Creature& caster, GameContext& ctx);
@@ -193,7 +193,7 @@ bool cast_knock(Creature& caster, GameContext& ctx);
 //   cast_hold_person(caster, ctx);   // -> true, the first orc held for 6 rounds
 bool cast_hold_person(Creature& caster, GameContext& ctx);
 
-// Targeted spell implementations — async via TargetingMenu; onSuccess fires on confirm
+// Targeted spell implementations - async via TargetingMenu; onSuccess fires on confirm
 // Opens a targeting cursor with a range of 5 plus the caster's level, and on
 // confirmation silences the one living creature standing on the chosen tile for
 // two rounds per caster level, preventing it from casting. Returns immediately:
@@ -221,7 +221,7 @@ void dispatch_effect(
 	std::function<void(GameContext&)> onSuccess,
 	GameContext& ctx)
 {
-	// Targeted spells: async via TargetingMenu — onSuccess is forwarded into the callback
+	// Targeted spells: async via TargetingMenu - onSuccess is forwarded into the callback
 	switch (effect)
 	{
 
@@ -851,7 +851,7 @@ bool cast_knock(Creature& caster, GameContext& ctx)
 		ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Knock! ");
 		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "No locked doors are nearby.");
 		ctx.messageSystem->finalize_message();
-		return true; // Spell slot consumed even on miss — AD&D 2e rule
+		return true; // Spell slot consumed even on miss - AD&D 2e rule
 	}
 
 	ctx.map->unlock_door(nearest);

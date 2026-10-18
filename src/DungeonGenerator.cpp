@@ -301,7 +301,7 @@ void DungeonGenerator::add_extra_corridors(
 			continue;
 		}
 
-		// Preserve leaf rooms — skip if either endpoint is currently degree-1.
+		// Preserve leaf rooms - skip if either endpoint is currently degree-1.
 		if (rooms[a].adjacentRoomIndices.size() == 1 ||
 			rooms[b].adjacentRoomIndices.size() == 1)
 		{
@@ -347,7 +347,7 @@ void DungeonGenerator::generate(
 		[](const DungeonRoom& a, const DungeonRoom& b)
 		{ return (a.row * 10000 + a.col) < (b.row * 10000 + b.col); });
 
-	// ---- Phase 1: Prim's MST — full connectivity, no cycles ----
+	// ---- Phase 1: Prim's MST - full connectivity, no cycles ----
 	connect_spanning_tree(rooms);
 
 	// From MST connectivity only: after connect_spanning_tree and before add_extra_corridors,

@@ -182,7 +182,7 @@ AttackResult Attacker::perform_single_attack(
 
 BackstabInfo Attacker::calculate_backstab_bonus(const Creature& owner) const noexcept
 {
-	// AD&D 2e: Invisibility grants backstab — +4 to hit, rogues get damage multiplier
+	// AD&D 2e: Invisibility grants backstab - +4 to hit, rogues get damage multiplier
 	if (!owner.is_invisible())
 	{
 		return BackstabInfo{ false, 0, 1 };

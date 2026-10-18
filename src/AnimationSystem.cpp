@@ -242,7 +242,7 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 
 		float t = (now - e.spawn_time) / e.duration;
 
-		// Particle has a future spawn_time — not yet visible
+		// Particle has a future spawn_time - not yet visible
 		if (t < 0.0f)
 		{
 			continue;
@@ -399,10 +399,10 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 	float blastRadius = static_cast<float>(radius);
 	float blastPx = blastRadius * ts;
 
-	// Phase 0: ignition flash — dense white-hot circles fill the entire blast area.
+	// Phase 0: ignition flash - dense white-hot circles fill the entire blast area.
 	// LOW velocity: circles barely drift, they overlap and stack via additive blend
 	// to create a solid white-yellow glow. This is the "ball of fire" appearance.
-	// Color-over-lifetime: white-yellow → orange as the ball expands and cools.
+	// Color-over-lifetime: white-yellow -> orange as the ball expands and cools.
 	int flashCount = static_cast<int>(blastRadius * blastRadius * 14.0f);
 	for (int i = 0; i < flashCount; ++i)
 	{
@@ -430,10 +430,10 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 			.additive = true });
 	}
 
-	// Phase 1: fireball body — circles spawned throughout blast area with low drift.
+	// Phase 1: fireball body - circles spawned throughout blast area with low drift.
 	// Staggered spawn (delay proportional to distance) gives the expanding ball effect.
 	// Dense overlap at center = bright core. Sparse at edge = fire boundary.
-	// Color-over-lifetime: yellow-orange → dark red (temperature drop over time).
+	// Color-over-lifetime: yellow-orange -> dark red (temperature drop over time).
 	int bodyCount = static_cast<int>(blastRadius * blastRadius * 18.0f);
 	for (int i = 0; i < bodyCount; ++i)
 	{
@@ -441,7 +441,7 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 		float a = random_range(0.0f, 6.2832f);
 		float distRatio = r / blastPx;
 
-		// Stagger: outer circles appear slightly later — expanding ball feel
+		// Stagger: outer circles appear slightly later - expanding ball feel
 		float spawnAt = now + distRatio * 0.12f;
 
 		// Color: inner = yellow-white, outer = orange-red
@@ -472,7 +472,7 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 			.additive = true });
 	}
 
-	// Phase 2: radial sparks — fast pixels at the blast edge, the "pop" of the explosion.
+	// Phase 2: radial sparks - fast pixels at the blast edge, the "pop" of the explosion.
 	// These are debris and hot gas ejected outward. Short duration, high velocity.
 	for (int i = 0; i < 60; ++i)
 	{
@@ -499,7 +499,7 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 			.additive = true });
 	}
 
-	// Phase 3: embers — small count of rising pixels, subtle trailing effect only.
+	// Phase 3: embers - small count of rising pixels, subtle trailing effect only.
 	// These represent hot debris carried upward after the ball dissipates.
 	for (int i = 0; i < 30; ++i)
 	{

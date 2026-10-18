@@ -17,7 +17,7 @@ struct BackstabInfo
 	int damageMultiplier{ 1 };
 };
 
-// Abstract base — combat resolution engine shared by MonsterAttacker and PlayerAttacker.
+// Abstract base - combat resolution engine shared by MonsterAttacker and PlayerAttacker.
 // Subclasses supply the attacker identity (stored owner reference) and implement attack().
 class Attacker : public Persistent
 {
@@ -27,7 +27,7 @@ private:
 protected:
 	explicit Attacker(const DamageInfo& damage);
 
-	// Shared combat resolution engine — called by both strategies.
+	// Shared combat resolution engine - called by both strategies.
 	// DamageInfo is supplied by the caller (subclass), not computed here.
 	AttackResult perform_single_attack(
 		Creature& owner,
@@ -95,12 +95,12 @@ public:
 	// what the attack did, which a bite carrying poison reads before injecting it.
 	virtual AttackResult attack(Creature& target, AttackKind kind, GameContext& ctx) = 0;
 
-	// DamageInfo accessors — valid for MonsterAttacker; PlayerAttacker leaves this empty.
+	// DamageInfo accessors - valid for MonsterAttacker; PlayerAttacker leaves this empty.
 	const DamageInfo& get_damage_info() const noexcept { return damageInfo; }
 
 	void set_damage_info(const DamageInfo& damage) noexcept { damageInfo = damage; }
 
-	// Serializes damageInfo — used by MonsterAttacker. PlayerAttacker overrides with no-ops.
+	// Serializes damageInfo - used by MonsterAttacker. PlayerAttacker overrides with no-ops.
 	void load(const json& j) override;
 	void save(json& j) override;
 };

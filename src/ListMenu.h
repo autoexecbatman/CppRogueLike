@@ -1,10 +1,10 @@
 #pragma once
 
-// ListMenu — a reusable vertical list menu, shared by Menu, MenuClass,
+// ListMenu - a reusable vertical list menu, shared by Menu, MenuClass,
 // MenuRace and MenuGender.
 //
 // Construct via the factory functions in Menu.h, MenuGender.h, MenuRace.h,
-// MenuClass.h — do not instantiate directly from outside the Menu subsystem.
+// MenuClass.h - do not instantiate directly from outside the Menu subsystem.
 //
 // Navigation: UP/DOWN (or w/s). Selection: ENTER or matching hotkey. ESC
 // triggers the optional onEscape callback then closes the menu.

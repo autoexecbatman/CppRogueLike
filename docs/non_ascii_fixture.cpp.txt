@@ -1,0 +1,5 @@
+﻿// file: non_ascii_fixture.cpp.txt - the fixture docs/non_ascii.py --self-test reads.
+// Line 2 is clean.
+// An em dash — at column 14.
+int a = 1; // an arrow → after code.
+const char* s = "ascii only";

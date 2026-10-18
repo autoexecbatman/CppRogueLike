@@ -16,7 +16,7 @@
 
 enum class RoomShape
 {
-	RECT, // full bounding box — default
+	RECT, // full bounding box - default
 	L_SHAPE, // one W/3 x H/3 corner quadrant removed; variant 0-3 = TR, TL, BR, BL
 	CHAMFERED, // single corner cells cut at all four corners
 	CROSS, // center row + center column only; arms extend full width/height

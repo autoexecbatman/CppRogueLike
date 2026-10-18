@@ -84,7 +84,7 @@ protected:
         dice.set_test_mode(true);
 
         // Initialize tiles (required before any tile operations)
-        map->init_tiles();  // blank wall grid — no dungeon generation; tile-level tests need no more
+        map->init_tiles();  // blank wall grid - no dungeon generation; tile-level tests need no more
     }
 
     void TearDown() override
@@ -260,7 +260,7 @@ TEST_F(MapTest, CloseDoor_ActorOnDoor_ReturnsFalse)
 
 TEST_F(MapTest, IsWall_SyncedBySetTile)
 {
-    // set_tile syncs fovMap via fov_properties_for — both tile type and
+    // set_tile syncs fovMap via fov_properties_for - both tile type and
     // FOV walkability are updated atomically. is_wall must reflect the change.
     Vector2D pos{5, 5};
 

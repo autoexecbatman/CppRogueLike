@@ -56,7 +56,7 @@ void NotificationMenu::draw()
 		++row;
 	}
 
-	// Centered prompt — gives the player a visual cue to press any key.
+	// Centered prompt - gives the player a visual cue to press any key.
 	menu_print_centered(row, std::string(PROMPT));
 }
 

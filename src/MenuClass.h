@@ -1,6 +1,6 @@
 #pragma once
 
-// MenuClass.h — factory for the character creation class selection menu.
+// MenuClass.h - factory for the character creation class selection menu.
 
 #include <memory>
 

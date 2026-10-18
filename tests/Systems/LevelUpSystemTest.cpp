@@ -187,7 +187,7 @@ TEST_F(LevelUpSystemTest, FighterExtraAttackSkippedLevel)
     EXPECT_FLOAT_EQ(player->get_attacks_per_round(), 1.5f);
 }
 
-// AD&D 2e XP table compliance — get_next_level_xp now lives on Player
+// AD&D 2e XP table compliance - get_next_level_xp now lives on Player
 TEST_F(LevelUpSystemTest, XpTableFighterLevel1)
 {
     player->set_creature_class(CreatureClass::FIGHTER);

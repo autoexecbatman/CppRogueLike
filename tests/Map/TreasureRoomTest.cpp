@@ -34,7 +34,7 @@
 
 namespace
 {
-    // Fixture map dimensions — single TU, no reason to be class members.
+    // Fixture map dimensions - single TU, no reason to be class members.
     constexpr int FIXTURE_W = 40;
     constexpr int FIXTURE_H = 25;
 
@@ -76,7 +76,7 @@ protected:
         player->healthPool = std::make_unique<HealthPool>(20);
 
         // Use MockGameContext as base so contentRegistry, tileConfig, and
-        // inventoryData are all wired — TreasureRoom::setup_guard needs
+        // inventoryData are all wired - TreasureRoom::setup_guard needs
         // contentRegistry to create the dungeon_key item for the jailer.
         ctx = mock.to_game_context();
         ctx.playerOwner = &player;
@@ -126,7 +126,7 @@ TEST(DungeonNames, ReturnsNonEmptyString)
 
 TEST(DungeonNames, NameContainsSpace)
 {
-    // Format is "[FirstName] [Epithet]" — always has at least one space.
+    // Format is "[FirstName] [Epithet]" - always has at least one space.
     RandomDice rng{ 42 };
     const std::string name = DungeonNames::generate_warden_name(rng);
     EXPECT_NE(name.find(' '), std::string::npos)
@@ -145,8 +145,8 @@ TEST(DungeonNames, NeverEmptyAcross50Seeds)
 
 TEST(DungeonNames, ProducesVariedNamesAcrossSeeds)
 {
-    // 225 combinations — 20 seeds must yield more than 1 distinct result.
-    // P(all 20 identical) < (1/225)^19 — effectively impossible.
+    // 225 combinations - 20 seeds must yield more than 1 distinct result.
+    // P(all 20 identical) < (1/225)^19 - effectively impossible.
     std::set<std::string> seen;
     for (unsigned int seed = 0; seed < 20; ++seed)
     {
@@ -154,7 +154,7 @@ TEST(DungeonNames, ProducesVariedNamesAcrossSeeds)
         seen.insert(DungeonNames::generate_warden_name(rng));
     }
     EXPECT_GT(seen.size(), 1u)
-        << "All 20 seeds produced the same name — pool is not being sampled";
+        << "All 20 seeds produced the same name - pool is not being sampled";
 }
 
 // ============================================================================
@@ -170,7 +170,7 @@ TEST_F(TreasureRoomFixture, CountEntrances_NoDoors_ReturnsZero)
 TEST_F(TreasureRoomFixture, CountEntrances_OneLeftWallDoor_ReturnsOne)
 {
     // Floor [5..10] x [5..10].  Door at (4,7).
-    // (4,7) + DIR_E = (5,7) — inside room.contains() — genuine entrance.
+    // (4,7) + DIR_E = (5,7) - inside room.contains() - genuine entrance.
     const DungeonRoom room = make_room(5, 5, 6, 6);
     place_door(Vector2D{ 4, 7 });
     EXPECT_EQ(TreasureRoom::count_entrances(*map, room), 1);
@@ -248,7 +248,7 @@ TEST_F(TreasureRoomFixture, GuardSetup_NoJailerSpawn_DoorsRolledBack)
 {
     // Room floor at [10..15] x [5..10].
     // Door on left wall at (9, 7).
-    // The tile at (8, 7) stays WALL — outward walk blocked at step 1.
+    // The tile at (8, 7) stays WALL - outward walk blocked at step 1.
     // -> candidates is empty -> unlock_all_room_entrances must fire.
 
     const DungeonRoom room = make_room(10, 5, 6, 6);
@@ -274,7 +274,7 @@ TEST_F(TreasureRoomFixture, GuardSetup_WithCorridor_JailerIsPlaced)
 {
     // Room floor at [10..15] x [5..10].
     // Door on left wall at (9, 7).
-    // Corridor tile at (8, 7) — outward walk succeeds at step 1.
+    // Corridor tile at (8, 7) - outward walk succeeds at step 1.
     // -> jailer spawned at (8, 7) -> door remains locked.
 
     const DungeonRoom room = make_room(10, 5, 6, 6);
@@ -289,7 +289,7 @@ TEST_F(TreasureRoomFixture, GuardSetup_WithCorridor_JailerIsPlaced)
     const std::size_t creaturesBefore = creatures.size();
     TreasureRoom::setup_guard(room, ctx);
 
-    // Door must remain locked — a jailer guards it.
+    // Door must remain locked - a jailer guards it.
     EXPECT_TRUE(map->is_door_locked(doorPos))
         << "Door should stay locked when jailer is successfully placed";
 

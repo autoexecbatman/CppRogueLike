@@ -312,7 +312,7 @@ struct Amulet
 {
 };
 
-// Used on a locked door via bump — consumed automatically by PlayerController.
+// Used on a locked door via bump - consumed automatically by PlayerController.
 // When selected from inventory, shows a hint message.
 struct DungeonKey
 {

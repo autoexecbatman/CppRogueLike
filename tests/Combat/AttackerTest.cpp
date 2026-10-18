@@ -329,14 +329,14 @@ TEST_F(AttackerTest, Attack_MonsterDeathAwardsXP)
 
 // ----------------------------------------------------------------------------
 // Backstab Tests
-// AD&D 2e: invisibility grants backstab — +4 to hit for all, x2+ damage for ROGUE only.
+// AD&D 2e: invisibility grants backstab - +4 to hit for all, x2+ damage for ROGUE only.
 // These tests cover the code path changed from dynamic_cast<Player*> to
 // get_creature_class() == CreatureClass::ROGUE.
 // ----------------------------------------------------------------------------
 
 TEST_F(AttackerTest, Backstab_InvisibleRogue_GetsDamageMultiplier)
 {
-	// Arrange: level 1 ROGUE + invisible → +4 hit, x2 damage multiplier
+	// Arrange: level 1 ROGUE + invisible -> +4 hit, x2 damage multiplier
 	player->set_creature_class(CreatureClass::ROGUE);
 	player->add_state(ActorState::IS_INVISIBLE);
 	monster->set_armor_class(10);
@@ -355,15 +355,15 @@ TEST_F(AttackerTest, Backstab_InvisibleRogue_GetsDamageMultiplier)
 
 TEST_F(AttackerTest, Backstab_InvisibleNonRogue_GetsHitBonusOnly)
 {
-	// Arrange: invisible FIGHTER — +4 to hit, multiplier stays at 1
-	// Default creatureClass is MONSTER, not ROGUE — no multiplier.
+	// Arrange: invisible FIGHTER - +4 to hit, multiplier stays at 1
+	// Default creatureClass is MONSTER, not ROGUE - no multiplier.
 	player->add_state(ActorState::IS_INVISIBLE);
 	monster->set_armor_class(10);
 	monster->set_dr(0);
 
 	// THAC0=20, AC=10: rollNeeded without backstab = 10
 	// With +4 backstab hitBonus: rollNeeded = 6
-	// Roll 6 → would miss at 6 < 10 without the bonus, hits with it.
+	// Roll 6 -> would miss at 6 < 10 without the bonus, hits with it.
 	// damageRoll=3, multiplier=1: finalDamage = 3
 	game.dice.set_next_d20(6);
 	game.dice.set_next_roll(3);
@@ -390,7 +390,7 @@ TEST_F(AttackerTest, PlayerAttacker_FunctionalAfterSaveLoad)
 	loadedPlayer->load(j);
 	ctx.playerOwner = &loadedPlayer;
 
-	// AC=20 → rollNeeded = THAC0(20) - AC(20) = 0; any d20 roll hits
+	// AC=20 -> rollNeeded = THAC0(20) - AC(20) = 0; any d20 roll hits
 	monster->set_armor_class(20);
 	monster->set_dr(0);
 	game.dice.set_next_d20(1);

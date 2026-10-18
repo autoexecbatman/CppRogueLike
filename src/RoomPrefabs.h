@@ -28,7 +28,7 @@ inline const std::vector<RoomPrefab> ALL_PREFABS = {
 		"..............",
 	},
 
-	// 1: Pillar room — four interior pillars
+	// 1: Pillar room - four interior pillars
 	{
 		"..............",
 		".#..........#.",
@@ -40,7 +40,7 @@ inline const std::vector<RoomPrefab> ALL_PREFABS = {
 		"..............",
 	},
 
-	// 2: Cross-shaped room — corners are walls
+	// 2: Cross-shaped room - corners are walls
 	{
 		"#####...#####",
 		"#####...#####",
@@ -53,7 +53,7 @@ inline const std::vector<RoomPrefab> ALL_PREFABS = {
 		"#####...#####",
 	},
 
-	// 3: Water pool room — central pool
+	// 3: Water pool room - central pool
 	{
 		"..............",
 		"..............",
@@ -65,7 +65,7 @@ inline const std::vector<RoomPrefab> ALL_PREFABS = {
 		"..............",
 	},
 
-	// 4: L-shaped room — top-right quadrant is wall
+	// 4: L-shaped room - top-right quadrant is wall
 	{
 		".......#######",
 		".......#######",
@@ -77,7 +77,7 @@ inline const std::vector<RoomPrefab> ALL_PREFABS = {
 		"..............",
 	},
 
-	// 5: Throne room — water dais at top-center
+	// 5: Throne room - water dais at top-center
 	{
 		"......~~......",
 		"..............",
@@ -89,7 +89,7 @@ inline const std::vector<RoomPrefab> ALL_PREFABS = {
 		"..............",
 	},
 
-	// 6: Circular room — rounded corners
+	// 6: Circular room - rounded corners
 	{
 		"#####...#####",
 		"###.......###",
@@ -102,7 +102,7 @@ inline const std::vector<RoomPrefab> ALL_PREFABS = {
 		"#####...#####",
 	},
 
-	// 7: Channel room — narrow floor between wall rows
+	// 7: Channel room - narrow floor between wall rows
 	{
 		"##############",
 		"..............",
@@ -111,7 +111,7 @@ inline const std::vector<RoomPrefab> ALL_PREFABS = {
 		"##############",
 	},
 
-	// 8: Moat room — ring of water with island in center
+	// 8: Moat room - ring of water with island in center
 	{
 		"..............",
 		".~~~~~~~~~~~~.",

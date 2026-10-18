@@ -321,7 +321,7 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 	assert(ctx.creatures && "use(TargetedScroll): called without creatures");
 	assert(ctx.map && "use(TargetedScroll): called without a map");
 
-	// FOV_BUFF and AUTO_NEAREST are synchronous — no targeting cursor needed
+	// FOV_BUFF and AUTO_NEAREST are synchronous - no targeting cursor needed
 	if (targetScroll.targetMode == TargetMode::FOV_BUFF)
 	{
 		int affected = 0;
@@ -382,7 +382,7 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 		return consume_item(owner, wearer);
 	}
 
-	// PICK_TILE_SINGLE and PICK_TILE_AOE — async via TargetingMenu
+	// PICK_TILE_SINGLE and PICK_TILE_AOE - async via TargetingMenu
 	int aoeRadius = (targetScroll.targetMode == TargetMode::PICK_TILE_AOE) ? targetScroll.range : 0;
 	int scrollRange = targetScroll.range;
 	int scrollDamage = targetScroll.damage;

@@ -928,7 +928,7 @@ void Map::apply_room_shape(const DungeonRoom& room)
 	{
 	case RoomShape::RECT:
 	{
-		// Full bounding box already dug — nothing to remove.
+		// Full bounding box already dug - nothing to remove.
 		break;
 	}
 
@@ -1427,7 +1427,7 @@ void Map::place_stairs(GameContext& ctx)
 	assert(ctx.rooms && !ctx.rooms->empty() && "Map::place_stairs called without rooms");
 	assert(ctx.dice && "Map::place_stairs called without dice");
 
-	// BFS from room[0] to find the deepest room — forces player to explore
+	// BFS from room[0] to find the deepest room - forces player to explore
 	const std::vector<DungeonRoom>& rooms = *ctx.rooms;
 	const int roomCount = static_cast<int>(rooms.size());
 
@@ -1994,7 +1994,7 @@ void Map::post_process_doors()
 						shouldExclude = true;
 					}
 
-					// 90� rotation: WWR/CWR/CWR
+					// 90 degree rotation: WWR/CWR/CWR
 					if (isWall(upLeft) && isWall(up) && isRoom(upRight) &&
 						get_tile_type(left) == TileType::CORRIDOR && isRoom(right) &&
 						get_tile_type(downLeft) == TileType::CORRIDOR && isWall(down) && isRoom(downRight))
@@ -2002,7 +2002,7 @@ void Map::post_process_doors()
 						shouldExclude = true;
 					}
 
-					// 180� rotation: WWW/CCW/RRR
+					// 180 degree rotation: WWW/CCW/RRR
 					if (isWall(upLeft) && isWall(up) && isWall(upRight) &&
 						get_tile_type(left) == TileType::CORRIDOR && isWall(right) &&
 						isRoom(downLeft) && isRoom(down) && isRoom(downRight))
@@ -2010,7 +2010,7 @@ void Map::post_process_doors()
 						shouldExclude = true;
 					}
 
-					// 270� rotation: RWC/RWC/RWW
+					// 270 degree rotation: RWC/RWC/RWW
 					if (isRoom(upLeft) && isWall(up) && get_tile_type(upRight) == TileType::CORRIDOR &&
 						isRoom(left) && get_tile_type(right) == TileType::CORRIDOR &&
 						isRoom(downLeft) && isWall(down) && isWall(downRight))

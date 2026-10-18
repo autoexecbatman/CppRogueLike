@@ -57,7 +57,7 @@ void stamp_room(
 			const int worldX = baseX + static_cast<int>(col);
 			const int worldY = baseY + static_cast<int>(row);
 
-			// Clamp to floor area — border '#' characters sit in the wall ring
+			// Clamp to floor area - border '#' characters sit in the wall ring
 			// and must never be processed as interior shape commands.
 			if (worldX < room.col || worldX > room.col_end())
 			{

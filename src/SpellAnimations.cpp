@@ -38,7 +38,7 @@ void animate_explosion(Vector2D center, int radius, GameContext& ctx)
 	ctx.renderer->add_trauma(0.5f);
 
 	// When fired from inside menu context (e.g. scroll used from inventory),
-	// the AnimationSystem is never ticked — only handle_gameloop calls it.
+	// the AnimationSystem is never ticked - only handle_gameloop calls it.
 	// Push a barrier menu that renders the game world + animations until all
 	// particles expire, then pops itself back to whatever was on the stack.
 	if (ctx.menus && !ctx.menus->empty())

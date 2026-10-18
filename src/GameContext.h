@@ -225,7 +225,7 @@ struct GameContext
 	// count or an equipment slot. Asserts a player exists.
 	[[nodiscard]] Player& player_concrete() const;
 
-	// Character creation data — populated by menus, consumed by init_new_game.
+	// Character creation data - populated by menus, consumed by init_new_game.
 	PlayerBlueprint* playerBlueprint{ nullptr };
 
 	// Core systems
@@ -288,7 +288,7 @@ struct GameContext
 	// UI Collections
 	std::deque<std::unique_ptr<BaseMenu>>* menus{ nullptr };
 
-	// Mouse path overlay — written by AiPlayer, read by RenderingManager
+	// Mouse path overlay - written by AiPlayer, read by RenderingManager
 	std::vector<Vector2D>* mousePathOverlay{ nullptr };
 
 	// Game state

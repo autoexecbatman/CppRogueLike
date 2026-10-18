@@ -1,6 +1,6 @@
 #pragma once
 
-// Menu.h — factory for the main game menu (startup and in-game pause).
+// Menu.h - factory for the main game menu (startup and in-game pause).
 // startup=true:  ESC quits the game without saving.
 // startup=false: ESC just closes the menu.
 

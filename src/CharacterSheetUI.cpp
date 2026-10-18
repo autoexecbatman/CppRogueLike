@@ -22,7 +22,7 @@
 #include "WeaponDamageRegistry.h"
 
 // ============================================================================
-// Private helpers — not visible outside this translation unit.
+// Private helpers - not visible outside this translation unit.
 // ============================================================================
 
 namespace

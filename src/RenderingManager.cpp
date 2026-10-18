@@ -220,7 +220,7 @@ void RenderingManager::render_mouse_path_overlay(const GameContext& ctx) const
 			p.y * tileSize - cam_y + tileSize / 2 };
 	};
 
-	// Pass 1 — lines between consecutive nodes, alpha fades toward destination
+	// Pass 1 - lines between consecutive nodes, alpha fades toward destination
 	for (size_t i = 0; i + 1 < count; ++i)
 	{
 		Vector2D a = screen_centre(i);
@@ -237,7 +237,7 @@ void RenderingManager::render_mouse_path_overlay(const GameContext& ctx) const
 			lineColor);
 	}
 
-	// Pass 2 — dots on top of lines, alpha fades toward destination
+	// Pass 2 - dots on top of lines, alpha fades toward destination
 	for (size_t i = 0; i < count; ++i)
 	{
 		Vector2D sc = screen_centre(i);

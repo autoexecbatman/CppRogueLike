@@ -312,7 +312,7 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 	// when cam_x is not tile-aligned (odd viewportCols on web).
 	Vector2D world_tile = ctx.inputSystem->get_mouse_world_tile(cam_x, cam_y, tileSize);
 
-	// Screen pixel position — same formula as tile rendering so the square
+	// Screen pixel position - same formula as tile rendering so the square
 	// tracks the actual rendered tile regardless of camera alignment.
 	int tx = world_tile.x * tileSize - cam_x;
 	int ty = world_tile.y * tileSize - cam_y;

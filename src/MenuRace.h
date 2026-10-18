@@ -1,6 +1,6 @@
 #pragma once
 
-// MenuRace.h — factory for the character creation race selection menu.
+// MenuRace.h - factory for the character creation race selection menu.
 
 #include <memory>
 

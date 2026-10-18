@@ -63,9 +63,9 @@ int encounter_budget(RoomType type, int dungeonLevel)
 
 // ---------------------------------------------------------------------------
 // Two-phase encounter selection:
-// Phase 1 — variety: pick one of each affordable candidate in random order
+// Phase 1 - variety: pick one of each affordable candidate in random order
 //           until budget exhausted or monster cap hit.
-// Phase 2 — fill: spend remaining budget on random duplicates.
+// Phase 2 - fill: spend remaining budget on random duplicates.
 //
 // Standard DP breaks for diminishing-return variety functions (CLRS Ch16).
 // Two-phase approximation produces good variety without DP complexity.

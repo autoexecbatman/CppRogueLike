@@ -18,7 +18,7 @@
 #include "TurningTable.h"
 
 // ============================================================================
-// Private implementation — not visible outside this translation unit.
+// Private implementation - not visible outside this translation unit.
 // ============================================================================
 
 namespace
