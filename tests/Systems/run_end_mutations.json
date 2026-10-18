@@ -1,0 +1,47 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=RunEndTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Game.cpp",
+      "original": "\tif (outcomeBefore == RunOutcome::UNDECIDED && gameState.get_run_outcome() != RunOutcome::UNDECIDED)\n",
+      "mutated": "\tif (gameState.get_run_outcome() != RunOutcome::UNDECIDED)\n",
+      "catches": "the end screen reopened on every tick the run stays ended, replacing the death screen with itself"
+    },
+    {
+      "file": "src/Game.cpp",
+      "original": "\tif (outcomeBefore == RunOutcome::UNDECIDED && gameState.get_run_outcome() != RunOutcome::UNDECIDED)\n",
+      "mutated": "\tif (outcomeBefore == RunOutcome::UNDECIDED && gameState.get_run_outcome() == RunOutcome::DEFEAT)\n",
+      "catches": "a win under a menu leaving the menus open, as a death once did"
+    },
+    {
+      "file": "src/Game.cpp",
+      "original": "\t\tmenus.clear();\n",
+      "mutated": "",
+      "catches": "the menus open when the run ended staying open beneath the end screen"
+    },
+    {
+      "file": "src/Game.cpp",
+      "original": "\t\tgameLoopCoordinator.open_end_of_run_screen(ctx);\n",
+      "mutated": "",
+      "catches": "the run ending with no end screen at all"
+    },
+    {
+      "file": "src/GameLoopCoordinator.cpp",
+      "original": "\t\tctx.menus->push_back(std::make_unique<DeathMenu>(ctx));\n",
+      "mutated": "",
+      "catches": "a lost run opening no death screen"
+    },
+    {
+      "file": "src/GameLoopCoordinator.cpp",
+      "original": "\t\tctx.menus->push_back(std::move(victoryMenu));\n",
+      "mutated": "",
+      "catches": "a won run opening no victory screen"
+    }
+  ]
+}

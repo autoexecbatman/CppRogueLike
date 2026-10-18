@@ -219,7 +219,12 @@ $probes = @(
     @{
         test   = "AssertProbeDeathTest.ALostRunWithALivingPlayerAborts"
         file   = "src/GameLoopCoordinator.cpp"
-        anchor = 'assert(ctx.player()->is_dead() && "update: the run is lost while the player still has hit points");'
+        anchor = 'assert(ctx.player()->is_dead() && "open_end_of_run_screen: the run is lost while the player still has hit points");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.OpeningAnEndScreenOnARunThatHasNotEndedAborts"
+        file   = "src/GameLoopCoordinator.cpp"
+        anchor = 'assert(false && "open_end_of_run_screen: the run has not ended");'
     }
 )
 

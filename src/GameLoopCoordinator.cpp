@@ -516,26 +516,6 @@ void GameLoopCoordinator::update(GameContext& ctx)
 	assert(ctx.creatureManager && "GameLoopCoordinator::update: called without a creatureManager");
 	assert(ctx.creatures && "GameLoopCoordinator::update: called without creatures");
 
-	if (ctx.gameState->get_run_outcome() == RunOutcome::VICTORY)
-	{
-		auto victoryMenu = std::make_unique<NotificationMenu>(
-			"Victory!",
-			std::vector<std::string>{
-				"Congratulations, brave adventurer!",
-				"You have retrieved the Amulet of Yendor",
-				"and escaped the dungeon alive.",
-				"",
-				"Your legend will be remembered." },
-			ctx);
-		// Closing the victory screen ends the run.
-		const auto end_the_run = [](GameContext& closeCtx)
-		{
-			closeCtx.gameState->set_run(false);
-		};
-		victoryMenu->set_on_close(end_the_run);
-		ctx.menus->push_back(std::move(victoryMenu));
-	}
-
 	ctx.map->update();
 	ctx.player()->update(ctx);
 
@@ -605,11 +585,47 @@ void GameLoopCoordinator::update(GameContext& ctx)
 
 		ctx.gameState->set_game_status(GameStatus::IDLE);
 	}
+}
 
-	if (ctx.gameState->get_run_outcome() == RunOutcome::DEFEAT)
+void GameLoopCoordinator::open_end_of_run_screen(GameContext& ctx)
+{
+	assert(ctx.menus && "open_end_of_run_screen: called without a menu stack");
+	assert(ctx.messageSystem && "open_end_of_run_screen: called without a messageSystem");
+
+	switch (ctx.gameState->get_run_outcome())
+	{
+
+	case RunOutcome::UNDECIDED:
+	{
+		assert(false && "open_end_of_run_screen: the run has not ended");
+		break;
+	}
+
+	case RunOutcome::VICTORY:
+	{
+		auto victoryMenu = std::make_unique<NotificationMenu>(
+			"Victory!",
+			std::vector<std::string>{
+				"Congratulations, brave adventurer!",
+				"You have retrieved the Amulet of Yendor",
+				"and escaped the dungeon alive.",
+				"",
+				"Your legend will be remembered." },
+			ctx);
+		// Closing the victory screen ends the run.
+		const auto end_the_run = [](GameContext& closeCtx)
+		{
+			closeCtx.gameState->set_run(false);
+		};
+		victoryMenu->set_on_close(end_the_run);
+		ctx.menus->push_back(std::move(victoryMenu));
+		break;
+	}
+
+	case RunOutcome::DEFEAT:
 	{
 		// The outcome is stored rather than read off the player, so the two are held together here.
-		assert(ctx.player()->is_dead() && "update: the run is lost while the player still has hit points");
+		assert(ctx.player()->is_dead() && "open_end_of_run_screen: the run is lost while the player still has hit points");
 		ctx.messageSystem->log("Player is dead!");
 		// Permadeath: the character is gone, so the save that would restore it goes
 		// too. Called on the class because delete_save_file is static. It reports
@@ -620,5 +636,7 @@ void GameLoopCoordinator::update(GameContext& ctx)
 			std::clog << "[GameLoopCoordinator] the save file could not be deleted; it will outlive the character\n";
 		}
 		ctx.menus->push_back(std::make_unique<DeathMenu>(ctx));
+		break;
+	}
 	}
 }

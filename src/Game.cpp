@@ -107,6 +107,7 @@ bool Game::tick(int& loopNum)
 	}
 
 	auto ctx = context();
+	const RunOutcome outcomeBefore = gameState.get_run_outcome();
 	// The tick owns its one frame, so what runs inside only draws, and a key read here is
 	// spent when the frame ends even if the menu that read it closes without drawing.
 	renderer.begin_frame();
@@ -157,6 +158,14 @@ bool Game::tick(int& loopNum)
 	}
 	}
 	renderer.end_frame();
+
+	// A run that ended during this tick, in a menu or in play, takes the screen now:
+	// whatever was open goes, and the end screen draws from the next tick.
+	if (outcomeBefore == RunOutcome::UNDECIDED && gameState.get_run_outcome() != RunOutcome::UNDECIDED)
+	{
+		menus.clear();
+		gameLoopCoordinator.open_end_of_run_screen(ctx);
+	}
 
 	++loopNum;
 	return gameState.get_run();
