@@ -40,8 +40,8 @@
 struct ItemParams
 {
 	// Display & Classification
-	// The name every menu shows - a view into the string the registry owns.
-	std::string_view name{ "" };
+	// The name every menu shows.
+	std::string name{};
 	// The colour pair it is drawn in.
 	ColorPairId color{ ColorPairId::WHITE_BLACK };
 	// What kind of item it is, for identification and a mimic's disguise.
@@ -125,8 +125,8 @@ struct ItemParams
 	int levelMax{ 0 };
 	// How much its spawn weight grows per level past the first; negative shrinks it.
 	float levelScaling{ 0.0f };
-	// The spawn category it is drawn under - a view into the string the registry owns.
-	std::string_view category{ "" };
+	// The spawn category it is drawn under.
+	std::string category{};
 };
 
 // Which enhancement an enhanced spawn rule gives the item it draws.
@@ -157,38 +157,20 @@ struct EnhancedItemSpawnRule
 };
 
 // The shipped and custom items and the enhanced spawn rules; see the file comment above
-// for use. It cannot be copied: each item's name and category are views into strings
-// its entries own, so a copy's views would point into the original.
+// for use.
 class ItemRegistry
 {
 private:
-	// One item: the name and category strings its params' views point into.
-	struct ItemEntry
-	{
-		std::string name{};
-		std::string category{};
-		ItemParams params{};
-	};
-
-	// Every item by key. Map nodes do not move, so the views into them stay valid.
-	std::map<std::string, ItemEntry, std::less<>> entries{};
+	// Every item by key.
+	std::map<std::string, ItemParams, std::less<>> entries{};
 	// The keys items.json shipped, which cannot be removed.
 	std::unordered_set<std::string> builtinKeys{};
 	// The rules for enhanced weapons and armour.
 	std::vector<EnhancedItemSpawnRule> enhancedRules{};
 
-	// Points an entry's name and category views at the strings it owns. Run whenever an
-	// entry's strings or params are written.
-	static void point_views_at_own_strings(ItemEntry& entry);
-
 public:
 	// Holds no items and no rules until load and load_enhanced_rules.
 	ItemRegistry() = default;
-	~ItemRegistry() = default;
-	ItemRegistry(const ItemRegistry&) = delete;
-	ItemRegistry& operator=(const ItemRegistry&) = delete;
-	ItemRegistry(ItemRegistry&&) = delete;
-	ItemRegistry& operator=(ItemRegistry&&) = delete;
 
 	// Reads every item, replacing all held, custom ones included. A record missing any
 	// field throws, naming the item and the field.

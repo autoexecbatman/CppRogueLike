@@ -27,27 +27,33 @@
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\tfound->second.params = params;\n",
+      "original": "\tfound->second = std::move(replacement);\n",
       "mutated": "",
       "catches": "an edit to an item written nowhere"
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\tentry.params.name = std::string_view{ entry.name };\n",
+      "original": "\treplacement.name = std::move(found->second.name);\n",
       "mutated": "",
-      "catches": "an item's name view left pointing wherever its params came from"
+      "catches": "an edit to an item's params renaming it"
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\tentry.params.category = std::string_view{ entry.category };\n",
+      "original": "\treplacement.category = std::move(found->second.category);\n",
       "mutated": "",
-      "catches": "an item's category view left pointing wherever its params came from"
+      "catches": "an edit to an item's params recategorising it"
     },
     {
       "file": "src/ItemRegistry.h",
-      "original": "\tItemRegistry(const ItemRegistry&) = delete;\n\tItemRegistry& operator=(const ItemRegistry&) = delete;\n",
-      "mutated": "\tItemRegistry(const ItemRegistry&) = default;\n\tItemRegistry& operator=(const ItemRegistry&) = default;\n",
-      "catches": "a registry copied, whose views would point into the original"
+      "original": "\tstd::string name{};\n",
+      "mutated": "\tstd::string_view name{};\n",
+      "catches": "an item's name a view into a string the registry frees on load"
+    },
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "\tparams.name = std::move(name);\n",
+      "mutated": "",
+      "catches": "a custom item added without the name it was given"
     },
     {
       "file": "src/ItemFactory.cpp",

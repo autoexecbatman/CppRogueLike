@@ -85,10 +85,44 @@ TEST(ItemRegistryTest, ALoadReplacesTheCustomItemsItHeld)
 	EXPECT_FALSE(std::ranges::contains(items.get_all_keys(), key)) << "a custom item survived a load";
 }
 
-// Each item's name and category are views into strings the registry owns, so a copy
-// would hold views into the original's strings and read freed memory once it was gone.
-TEST(ItemRegistryTest, ARegistryCannotBeCopied)
+// An item's name and category are strings its params own, so a copy of them outlives the
+// registry entry it was read from.
+TEST(ItemRegistryTest, ItemParamsOwnTheirStrings)
 {
-	EXPECT_FALSE(std::is_copy_constructible_v<ItemRegistry>);
-	EXPECT_FALSE(std::is_copy_assignable_v<ItemRegistry>);
+	EXPECT_TRUE((std::is_same_v<decltype(ItemParams::name), std::string>));
+	EXPECT_TRUE((std::is_same_v<decltype(ItemParams::category), std::string>));
+}
+
+// A params copied out of the registry keeps its name and category after the load that
+// removes its entry. While they were views into the entry, this read freed memory.
+TEST(ItemRegistryTest, AParamsCopyKeepsItsNameAfterAReload)
+{
+	ItemRegistry items{};
+	items.load(Paths::ITEMS);
+	// Longer than any short-string buffer, so the name lives on the heap the load frees.
+	const std::string key = items.add_custom("Registry Trinket Of Some Length", "potion", ItemParams{});
+	const ItemParams copied = items.get_params(key);
+
+	items.load(Paths::ITEMS);
+
+	EXPECT_EQ(copied.name, "Registry Trinket Of Some Length");
+	EXPECT_EQ(copied.category, "potion");
+}
+
+// Replacing an item's params leaves its name and category to set_name_category.
+TEST(ItemRegistryTest, SetParamsKeepsTheItemsOwnNameAndCategory)
+{
+	ItemRegistry items{};
+	items.load(Paths::ITEMS);
+	const ItemParams shipped = items.get_params("health_potion");
+
+	ItemParams renamed = shipped;
+	renamed.name = "Some Other Name";
+	renamed.category = "weapon";
+	renamed.value = shipped.value + 1;
+	items.set_params("health_potion", renamed);
+
+	EXPECT_EQ(items.get_params("health_potion").value, shipped.value + 1);
+	EXPECT_EQ(items.get_params("health_potion").name, shipped.name);
+	EXPECT_EQ(items.get_params("health_potion").category, shipped.category);
 }

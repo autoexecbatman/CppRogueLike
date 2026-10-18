@@ -33,8 +33,8 @@
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\tparsed.name = required_field(record, key, \"name\").get<std::string>();",
-      "mutated": "\tparsed.name = record.value(\"name\", key);",
+      "original": "\tparams.name = required_field(record, key, \"name\").get<std::string>();",
+      "mutated": "\tparams.name = record.value(\"name\", key);",
       "catches": "a missing name silently becoming the registry key"
     },
     {

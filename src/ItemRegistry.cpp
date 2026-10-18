@@ -24,14 +24,6 @@
 namespace
 {
 
-// An item record as read: the strings its params' views will point into once stored.
-struct ParsedItem
-{
-	std::string name{};
-	std::string category{};
-	ItemParams params{};
-};
-
 // A key from a display name: lower case, whitespace as underscores.
 std::string normalize_key(std::string_view raw)
 {
@@ -148,13 +140,11 @@ const nlohmann::json& required_field(
 	return *found;
 }
 
-ParsedItem parse_item(const std::string& key, const nlohmann::json& record)
+ItemParams parse_item(const std::string& key, const nlohmann::json& record)
 {
-	ParsedItem parsed;
-	parsed.name = required_field(record, key, "name").get<std::string>();
-	parsed.category = required_field(record, key, "category").get<std::string>();
-
-	ItemParams& params = parsed.params;
+	ItemParams params;
+	params.name = required_field(record, key, "name").get<std::string>();
+	params.category = required_field(record, key, "category").get<std::string>();
 	params.color = parse_color_pair(required_field(record, key, "color").get<std::string>());
 	params.itemClass = parse_item_class(required_field(record, key, "itemClass").get<std::string>());
 	params.value = required_field(record, key, "value");
@@ -190,19 +180,11 @@ ParsedItem parse_item(const std::string& key, const nlohmann::json& record)
 	params.consumableBuffType = parse_buff_type(required_field(record, key, "consumableBuff").get<std::string>());
 	params.targetMode = parse_target_mode(required_field(record, key, "targetMode").get<std::string>());
 	params.scrollAnimation = parse_scroll_animation(required_field(record, key, "scrollAnimation").get<std::string>());
-	// The name and category views are pointed at the stored entry's strings once it is
-	// in the registry; pointed here, they would dangle when this returns.
 
-	return parsed;
+	return params;
 }
 
 } // namespace
-
-void ItemRegistry::point_views_at_own_strings(ItemEntry& entry)
-{
-	entry.params.name = std::string_view{ entry.name };
-	entry.params.category = std::string_view{ entry.category };
-}
 
 void ItemRegistry::load(std::string_view path)
 {
@@ -220,12 +202,7 @@ void ItemRegistry::load(std::string_view path)
 
 	for (const auto& [key, record] : root.items())
 	{
-		ParsedItem parsed = parse_item(key, record);
-		ItemEntry& entry = entries[key];
-		entry.name = std::move(parsed.name);
-		entry.category = std::move(parsed.category);
-		entry.params = parsed.params;
-		point_views_at_own_strings(entry);
+		entries[key] = parse_item(key, record);
 		builtinKeys.insert(key);
 	}
 }
@@ -236,9 +213,9 @@ void ItemRegistry::save(std::string_view path) const
 	std::filesystem::create_directories(resolved.parent_path());
 
 	nlohmann::json root = nlohmann::json::object();
-	for (const auto& [key, entry] : entries)
+	for (const auto& [key, params] : entries)
 	{
-		root[key] = encode_item(entry.params);
+		root[key] = encode_item(params);
 	}
 
 	std::ofstream file(resolved);
@@ -270,7 +247,7 @@ std::vector<std::string> ItemRegistry::get_all_keys() const
 const ItemParams* ItemRegistry::find_params(std::string_view key) const
 {
 	const auto found = entries.find(key);
-	return found != entries.end() ? &found->second.params : nullptr;
+	return found != entries.end() ? &found->second : nullptr;
 }
 
 const ItemParams& ItemRegistry::get_params(std::string_view key) const
@@ -281,7 +258,7 @@ const ItemParams& ItemRegistry::get_params(std::string_view key) const
 		throw std::out_of_range(
 			std::format("ItemRegistry::get_params -- unknown key '{}'", key));
 	}
-	return found->second.params;
+	return found->second;
 }
 
 void ItemRegistry::set_params(std::string_view key, const ItemParams& params)
@@ -292,8 +269,11 @@ void ItemRegistry::set_params(std::string_view key, const ItemParams& params)
 		throw std::out_of_range(
 			std::format("ItemRegistry::set_params -- unknown key '{}'", key));
 	}
-	found->second.params = params;
-	point_views_at_own_strings(found->second);
+	// The item keeps its own name and category; only set_name_category changes them.
+	ItemParams replacement = params;
+	replacement.name = std::move(found->second.name);
+	replacement.category = std::move(found->second.category);
+	found->second = std::move(replacement);
 }
 
 void ItemRegistry::set_name_category(std::string_view key, std::string name, std::string category)
@@ -306,7 +286,6 @@ void ItemRegistry::set_name_category(std::string_view key, std::string name, std
 	}
 	found->second.name = std::move(name);
 	found->second.category = std::move(category);
-	point_views_at_own_strings(found->second);
 }
 
 std::string ItemRegistry::add_custom(std::string name, std::string category, ItemParams params)
@@ -325,11 +304,9 @@ std::string ItemRegistry::add_custom(std::string name, std::string category, Ite
 		}
 	}
 
-	ItemEntry& entry = entries[key];
-	entry.name = std::move(name);
-	entry.category = std::move(category);
-	entry.params = params;
-	point_views_at_own_strings(entry);
+	params.name = std::move(name);
+	params.category = std::move(category);
+	entries[key] = std::move(params);
 
 	return key;
 }

@@ -10,12 +10,6 @@
 // survive. Not the enhanced spawn rules, which load from a separate file through
 // load_enhanced_rules and have their own schema.
 //
-// A trap this file had to work around, worth knowing before editing it. ItemParams holds
-// name and category as std::string_view pointing into the registry entry that owns them,
-// and load() clears the registry. A params copied by value before a reload therefore has two
-// dangling views afterwards, and comparing them reads freed memory. The owned strings are
-// copied out separately below.
-//
 // The oracle is the registry's parser, the only schema this data has: every key the parser
 // reads is a key the encoder must write. Expected values come from the entry loaded
 // before the save, never from what the encoder produces.
@@ -38,20 +32,6 @@
 #include <stdexcept>
 #include <string>
 
-namespace
-{
-
-// An item as it stood before the save, with the two viewed strings owned so they survive
-// the registry being cleared.
-struct ItemSnapshot
-{
-	std::string name{};
-	std::string category{};
-	ItemParams params{};
-};
-
-}
-
 class ItemRoundTripTest : public ::testing::Test
 {
 protected:
@@ -73,69 +53,68 @@ protected:
 
 // Every field ItemParams declares, named one at a time, so a lost key fails pointing at
 // the field rather than at a count.
-void expect_same_item(const std::string& key, const ItemSnapshot& before, const ItemParams& after)
+void expect_same_item(const std::string& key, const ItemParams& before, const ItemParams& after)
 {
 	EXPECT_EQ(before.name, after.name) << key << ".name";
 	EXPECT_EQ(before.category, after.category) << key << ".category";
-	EXPECT_EQ(before.params.color, after.color) << key << ".color";
-	EXPECT_EQ(before.params.itemClass, after.itemClass) << key << ".itemClass";
-	EXPECT_EQ(before.params.value, after.value) << key << ".value";
-	EXPECT_EQ(before.params.pickableType, after.pickableType) << key << ".pickableType";
+	EXPECT_EQ(before.color, after.color) << key << ".color";
+	EXPECT_EQ(before.itemClass, after.itemClass) << key << ".itemClass";
+	EXPECT_EQ(before.value, after.value) << key << ".value";
+	EXPECT_EQ(before.pickableType, after.pickableType) << key << ".pickableType";
 
-	EXPECT_EQ(before.params.consumableAmount, after.consumableAmount) << key << ".consumableAmount";
-	EXPECT_EQ(before.params.range, after.range) << key << ".range";
-	EXPECT_EQ(before.params.damage, after.damage) << key << ".damage";
-	EXPECT_EQ(before.params.confuseTurns, after.confuseTurns) << key << ".confuseTurns";
-	EXPECT_EQ(before.params.duration, after.duration) << key << ".duration";
+	EXPECT_EQ(before.consumableAmount, after.consumableAmount) << key << ".consumableAmount";
+	EXPECT_EQ(before.range, after.range) << key << ".range";
+	EXPECT_EQ(before.damage, after.damage) << key << ".damage";
+	EXPECT_EQ(before.confuseTurns, after.confuseTurns) << key << ".confuseTurns";
+	EXPECT_EQ(before.duration, after.duration) << key << ".duration";
 
-	EXPECT_EQ(before.params.effect, after.effect) << key << ".effect";
-	EXPECT_EQ(before.params.effectBonus, after.effectBonus) << key << ".effectBonus";
+	EXPECT_EQ(before.effect, after.effect) << key << ".effect";
+	EXPECT_EQ(before.effectBonus, after.effectBonus) << key << ".effectBonus";
 
-	EXPECT_EQ(before.params.strBonus, after.strBonus) << key << ".strBonus";
-	EXPECT_EQ(before.params.dexBonus, after.dexBonus) << key << ".dexBonus";
-	EXPECT_EQ(before.params.conBonus, after.conBonus) << key << ".conBonus";
-	EXPECT_EQ(before.params.intBonus, after.intBonus) << key << ".intBonus";
-	EXPECT_EQ(before.params.wisBonus, after.wisBonus) << key << ".wisBonus";
-	EXPECT_EQ(before.params.chaBonus, after.chaBonus) << key << ".chaBonus";
-	EXPECT_EQ(before.params.isSetMode, after.isSetMode) << key << ".isSetMode";
-	EXPECT_EQ(before.params.exceptionalStrength, after.exceptionalStrength) << key << ".exceptionalStrength";
+	EXPECT_EQ(before.strBonus, after.strBonus) << key << ".strBonus";
+	EXPECT_EQ(before.dexBonus, after.dexBonus) << key << ".dexBonus";
+	EXPECT_EQ(before.conBonus, after.conBonus) << key << ".conBonus";
+	EXPECT_EQ(before.intBonus, after.intBonus) << key << ".intBonus";
+	EXPECT_EQ(before.wisBonus, after.wisBonus) << key << ".wisBonus";
+	EXPECT_EQ(before.chaBonus, after.chaBonus) << key << ".chaBonus";
+	EXPECT_EQ(before.isSetMode, after.isSetMode) << key << ".isSetMode";
+	EXPECT_EQ(before.exceptionalStrength, after.exceptionalStrength) << key << ".exceptionalStrength";
 
-	EXPECT_EQ(before.params.nutritionValue, after.nutritionValue) << key << ".nutritionValue";
-	EXPECT_EQ(before.params.acBonus, after.acBonus) << key << ".acBonus";
+	EXPECT_EQ(before.nutritionValue, after.nutritionValue) << key << ".nutritionValue";
+	EXPECT_EQ(before.acBonus, after.acBonus) << key << ".acBonus";
 
-	EXPECT_EQ(before.params.ranged, after.ranged) << key << ".ranged";
-	EXPECT_EQ(before.params.handRequirement, after.handRequirement) << key << ".handRequirement";
-	EXPECT_EQ(before.params.weaponSize, after.weaponSize) << key << ".weaponSize";
-	EXPECT_EQ(before.params.strengthRating, after.strengthRating) << key << ".strengthRating";
+	EXPECT_EQ(before.ranged, after.ranged) << key << ".ranged";
+	EXPECT_EQ(before.handRequirement, after.handRequirement) << key << ".handRequirement";
+	EXPECT_EQ(before.weaponSize, after.weaponSize) << key << ".weaponSize";
+	EXPECT_EQ(before.strengthRating, after.strengthRating) << key << ".strengthRating";
 
-	EXPECT_EQ(before.params.consumableEffect, after.consumableEffect) << key << ".consumableEffect";
-	EXPECT_EQ(before.params.consumableBuffType, after.consumableBuffType) << key << ".consumableBuffType";
-	EXPECT_EQ(before.params.targetMode, after.targetMode) << key << ".targetMode";
-	EXPECT_EQ(before.params.scrollAnimation, after.scrollAnimation) << key << ".scrollAnimation";
+	EXPECT_EQ(before.consumableEffect, after.consumableEffect) << key << ".consumableEffect";
+	EXPECT_EQ(before.consumableBuffType, after.consumableBuffType) << key << ".consumableBuffType";
+	EXPECT_EQ(before.targetMode, after.targetMode) << key << ".targetMode";
+	EXPECT_EQ(before.scrollAnimation, after.scrollAnimation) << key << ".scrollAnimation";
 
-	EXPECT_EQ(before.params.baseWeight, after.baseWeight) << key << ".baseWeight";
-	EXPECT_EQ(before.params.weight, after.weight) << key << ".weight";
-	EXPECT_EQ(before.params.levelMin, after.levelMin) << key << ".levelMin";
-	EXPECT_EQ(before.params.levelMax, after.levelMax) << key << ".levelMax";
-	EXPECT_FLOAT_EQ(before.params.levelScaling, after.levelScaling) << key << ".levelScaling";
+	EXPECT_EQ(before.baseWeight, after.baseWeight) << key << ".baseWeight";
+	EXPECT_EQ(before.weight, after.weight) << key << ".weight";
+	EXPECT_EQ(before.levelMin, after.levelMin) << key << ".levelMin";
+	EXPECT_EQ(before.levelMax, after.levelMax) << key << ".levelMax";
+	EXPECT_FLOAT_EQ(before.levelScaling, after.levelScaling) << key << ".levelScaling";
 }
 
 TEST_F(ItemRoundTripTest, EveryPersistedFieldSurvivesASave)
 {
-	std::map<std::string, ItemSnapshot> before;
+	std::map<std::string, ItemParams> before;
 	for (const std::string& key : items.get_all_keys())
 	{
-		const ItemParams& params = items.get_params(key);
-		before.emplace(key, ItemSnapshot{ std::string{ params.name }, std::string{ params.category }, params });
+		before.emplace(key, items.get_params(key));
 	}
 	ASSERT_FALSE(before.empty()) << "no items loaded; the test would pass vacuously";
 
 	items.save(roundTrip.string());
 	items.load(roundTrip.string());
 
-	for (const auto& [key, snapshot] : before)
+	for (const auto& [key, params] : before)
 	{
-		expect_same_item(key, snapshot, items.get_params(key));
+		expect_same_item(key, params, items.get_params(key));
 	}
 }
 

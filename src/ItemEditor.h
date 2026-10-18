@@ -90,8 +90,6 @@ private:
 
 	// Working copy of selected item
 	ItemParams working{};
-	std::string workingName;
-	std::string workingCategory;
 	TileRef workingTile{};
 
 	// Field navigation

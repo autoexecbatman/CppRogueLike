@@ -142,8 +142,6 @@ void ItemEditor::load_working(const ItemRegistry& items)
 	const std::string& key = current_key();
 	const ItemParams& p = items.get_params(key);
 	working = p;
-	workingName = std::string{ p.name };
-	workingCategory = std::string{ p.category };
 	workingTile = contentRegistry ? contentRegistry->get_tile(key) : TileRef{};
 	fieldCursor = 0;
 	fieldScroll = 0;
@@ -158,7 +156,7 @@ void ItemEditor::commit_working(ItemRegistry& items)
 		return;
 	}
 	const std::string& key = current_key();
-	items.set_name_category(key, workingName, workingCategory);
+	items.set_name_category(key, working.name, working.category);
 	items.set_params(key, working);
 	if (contentRegistry)
 	{
@@ -584,7 +582,7 @@ void ItemEditor::render_list(const Renderer& r, const ItemRegistry& items) const
 		const bool isCustom = !items.is_builtin_key(keys[i]);
 
 		std::string display_name = is_sel
-			? workingName
+			? working.name
 			: std::string{ items.get_params(keys[i]).name };
 
 		if (display_name.empty())
@@ -902,9 +900,9 @@ std::string ItemEditor::field_value(FieldId f) const
 	switch (f)
 	{
 	case FieldId::NAME:
-		return workingName;
+		return working.name;
 	case FieldId::CATEGORY:
-		return workingCategory;
+		return working.category;
 	case FieldId::ITEM_CLASS:
 		return std::string{ encode_item_class(p.itemClass) };
 	case FieldId::PICKABLE_TYPE:
@@ -1134,10 +1132,10 @@ void ItemEditor::field_set_string(FieldId f, std::string val)
 	switch (f)
 	{
 	case FieldId::NAME:
-		workingName = std::move(val);
+		working.name = std::move(val);
 		break;
 	case FieldId::CATEGORY:
-		workingCategory = std::move(val);
+		working.category = std::move(val);
 		break;
 	default:
 		break;
