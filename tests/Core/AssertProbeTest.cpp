@@ -623,3 +623,19 @@ TEST_F(AssertProbeDeathTest, ClosingAFrameThatIsNotOpenAborts)
 	Renderer renderer{};
 	EXPECT_DEATH(renderer.end_frame(), "end_frame: no frame is open");
 }
+
+// The run's outcome is stored, not read off the player, so a lost run with a player who
+// still has hit points is the two drifting apart. The loop refuses to open the death screen.
+TEST_F(AssertProbeDeathTest, ALostRunWithALivingPlayerAborts)
+{
+	mock.map.init_tiles();
+	mock.map.set_tile(Vector2D{ 4, 5 }, TileType::FLOOR);
+	mock.player = std::make_unique<Player>(Vector2D{ 4, 5 });
+	mock.player->healthPool = std::make_unique<HealthPool>(10);
+	mock.player->armorClass = std::make_unique<ArmorClass>(10);
+	ASSERT_FALSE(ctx.player()->is_dead()) << "the mock's player starts dead, so nothing here is being measured";
+	// Mid-game, so update goes straight to the outcome rather than starting a new game first.
+	ctx.gameState->set_game_status(GameStatus::IDLE);
+	ctx.gameState->set_run_outcome(RunOutcome::DEFEAT);
+	EXPECT_DEATH(ctx.gameLoopCoordinator->update(ctx), "update: the run is lost while the player still has hit points");
+}

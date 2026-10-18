@@ -516,7 +516,7 @@ void GameLoopCoordinator::update(GameContext& ctx)
 	assert(ctx.creatureManager && "GameLoopCoordinator::update: called without a creatureManager");
 	assert(ctx.creatures && "GameLoopCoordinator::update: called without creatures");
 
-	if (ctx.gameState->get_game_status() == GameStatus::VICTORY)
+	if (ctx.gameState->get_run_outcome() == RunOutcome::VICTORY)
 	{
 		auto victoryMenu = std::make_unique<NotificationMenu>(
 			"Victory!",
@@ -534,7 +534,6 @@ void GameLoopCoordinator::update(GameContext& ctx)
 		};
 		victoryMenu->set_on_close(end_the_run);
 		ctx.menus->push_back(std::move(victoryMenu));
-		ctx.gameState->set_game_status(GameStatus::IDLE);
 	}
 
 	ctx.map->update();
@@ -604,14 +603,13 @@ void GameLoopCoordinator::update(GameContext& ctx)
 
 		apply_round_upkeep(ctx);
 
-		if (ctx.gameState->get_game_status() != GameStatus::DEFEAT)
-		{
-			ctx.gameState->set_game_status(GameStatus::IDLE);
-		}
+		ctx.gameState->set_game_status(GameStatus::IDLE);
 	}
 
-	if (ctx.gameState->get_game_status() == GameStatus::DEFEAT)
+	if (ctx.gameState->get_run_outcome() == RunOutcome::DEFEAT)
 	{
+		// The outcome is stored rather than read off the player, so the two are held together here.
+		assert(ctx.player()->is_dead() && "update: the run is lost while the player still has hit points");
 		ctx.messageSystem->log("Player is dead!");
 		// Permadeath: the character is gone, so the save that would restore it goes
 		// too. Called on the class because delete_save_file is static. It reports
@@ -622,6 +620,5 @@ void GameLoopCoordinator::update(GameContext& ctx)
 			std::clog << "[GameLoopCoordinator] the save file could not be deleted; it will outlive the character\n";
 		}
 		ctx.menus->push_back(std::make_unique<DeathMenu>(ctx));
-		ctx.gameState->set_game_status(GameStatus::IDLE);
 	}
 }

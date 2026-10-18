@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=PlayerDeathTest.*:RunOutcomeTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Player.cpp",
+      "original": "\tctx.gameState->set_run_outcome(RunOutcome::DEFEAT);\n",
+      "mutated": "",
+      "catches": "a dying player not losing the run, so no death screen opens"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\tctx.gameState->set_run_outcome(RunOutcome::VICTORY);\n",
+      "mutated": "",
+      "catches": "the Amulet of Yendor not winning the run"
+    },
+    {
+      "file": "src/GameContext.h",
+      "original": "\t\trunOutcome = RunOutcome::UNDECIDED;\n",
+      "mutated": "",
+      "catches": "a new run keeping the last run's outcome, so it opens on the death screen"
+    },
+    {
+      "file": "src/GameContext.h",
+      "original": "\t\tgameStatus = GameStatus::STARTUP;\n",
+      "mutated": "",
+      "catches": "a new run not starting its turn from the beginning"
+    },
+    {
+      "file": "src/PlayerTurn.cpp",
+      "original": "\tctx.gameState->set_game_status(GameStatus::NEW_TURN);\n",
+      "mutated": "\tctx.gameState->set_game_status(GameStatus::NEW_TURN);\n\tctx.gameState->set_run_outcome(RunOutcome::UNDECIDED);\n",
+      "catches": "spending an action erasing the run's outcome, the defect 0215 names"
+    }
+  ]
+}

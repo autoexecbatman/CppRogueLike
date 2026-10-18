@@ -678,7 +678,7 @@ bool use([[maybe_unused]] Amulet& amulet, [[maybe_unused]] Item& owner, [[maybe_
 {
 	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "The Amulet of Yendor glows brightly in your hands!", MessageCompletion::FINISHED);
 	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You feel a powerful magic enveloping you...", MessageCompletion::FINISHED);
-	ctx.gameState->set_game_status(GameStatus::VICTORY);
+	ctx.gameState->set_run_outcome(RunOutcome::VICTORY);
 	return false;
 }
 

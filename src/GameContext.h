@@ -65,11 +65,19 @@ namespace Pathfinding
 class Pathfinder;
 }
 
+// Where the turn is. Moving it on is routine, so nothing final is kept here.
 enum class GameStatus
 {
 	STARTUP,
 	IDLE,
-	NEW_TURN,
+	NEW_TURN
+};
+
+// How the run ended. Kept apart from GameStatus so that a turn moving on cannot undo a
+// death or a win; only the start of a new run sets it back to UNDECIDED.
+enum class RunOutcome
+{
+	UNDECIDED,
 	VICTORY,
 	DEFEAT
 };
@@ -101,6 +109,7 @@ private:
 	int roundsRun{ 0 };
 
 	GameStatus gameStatus{ GameStatus::STARTUP };
+	RunOutcome runOutcome{ RunOutcome::UNDECIDED };
 	WindowState windowState{ WindowState::GAME };
 
 public:
@@ -133,6 +142,31 @@ public:
 	GameStatus get_game_status() const noexcept { return gameStatus; }
 
 	void set_game_status(GameStatus s) noexcept { gameStatus = s; }
+
+	// Written by the end of a run - Player::die for DEFEAT, the Amulet of Yendor for
+	// VICTORY - and set back to UNDECIDED only by begin_run.
+	//
+	// Example:
+	//   gameState.set_run_outcome(RunOutcome::DEFEAT);
+	//   gameState.set_game_status(GameStatus::NEW_TURN); // the turn moves on
+	//   gameState.get_run_outcome();                     // -> RunOutcome::DEFEAT still
+	RunOutcome get_run_outcome() const noexcept { return runOutcome; }
+
+	void set_run_outcome(RunOutcome outcome) noexcept { runOutcome = outcome; }
+
+	// Starts a run, new or loaded: the turn at STARTUP and no outcome yet. The one place
+	// an outcome is forgotten.
+	//
+	// Example:
+	//   gameState.set_run_outcome(RunOutcome::DEFEAT);
+	//   gameState.begin_run();
+	//   gameState.get_run_outcome(); // -> RunOutcome::UNDECIDED
+	//   gameState.get_game_status(); // -> GameStatus::STARTUP
+	void begin_run() noexcept
+	{
+		gameStatus = GameStatus::STARTUP;
+		runOutcome = RunOutcome::UNDECIDED;
+	}
 
 	WindowState get_window_state() const noexcept { return windowState; }
 

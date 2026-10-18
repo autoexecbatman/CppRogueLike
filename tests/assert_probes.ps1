@@ -215,6 +215,11 @@ $probes = @(
         test   = "AssertProbeDeathTest.ClosingAFrameThatIsNotOpenAborts"
         file   = "src/Renderer.cpp"
         anchor = 'assert(frameOpen && "end_frame: no frame is open");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.ALostRunWithALivingPlayerAborts"
+        file   = "src/GameLoopCoordinator.cpp"
+        anchor = 'assert(ctx.player()->is_dead() && "update: the run is lost while the player still has hit points");'
     }
 )
 

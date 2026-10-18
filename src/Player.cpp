@@ -18,7 +18,7 @@
 //   player->save(record);                                       // the whole character
 //   player->load(record);                                       // and back, components included
 //
-//   player->die(ctx);                                           // sets DEFEAT; the loop does the rest
+//   player->die(ctx);                                           // the run is lost; the loop does the rest
 //
 // The one thing to know before editing load(): Creature::load builds the health
 // pool, the armour class and the experience reward only when the record carries
@@ -239,9 +239,9 @@ void Player::roll_new_character(GameContext& ctx)
 void Player::die(GameContext& ctx)
 {
 	// Declaring the run lost is the whole of it. Removing the save is permadeath
-	// housekeeping, which the loop does when it handles DEFEAT - a death is a
+	// housekeeping, which the loop does when it handles the lost run - a death is a
 	// domain event and must not reach the filesystem.
-	ctx.gameState->set_game_status(GameStatus::DEFEAT);
+	ctx.gameState->set_run_outcome(RunOutcome::DEFEAT);
 }
 
 void Player::on_new_game_start(GameContext& ctx)

@@ -172,7 +172,7 @@ void GameStateManager::init_new_game(GameContext& ctx)
 
 	ctx.map->regenerate(ctx);
 
-	ctx.gameState->set_game_status(GameStatus::STARTUP);
+	ctx.gameState->begin_run();
 	ctx.messageSystem->log("New game initialized");
 }
 
@@ -204,7 +204,7 @@ bool GameStateManager::load_all(GameContext& ctx)
 	ctx.player()->actorData.tile = ctx.tileConfig->get(ctx.player_concrete().sprite_tile_key());
 
 	ctx.gameState->set_is_loaded_game(true);
-	ctx.gameState->set_game_status(GameStatus::STARTUP);
+	ctx.gameState->begin_run();
 	ctx.messageSystem->log("GameStatus set to STARTUP after loading for FOV computation");
 	return true;
 }

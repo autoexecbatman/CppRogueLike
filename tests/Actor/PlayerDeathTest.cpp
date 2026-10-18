@@ -28,6 +28,9 @@
 #include "src/HealthPool.h"
 #include "src/Paths.h"
 #include "src/Player.h"
+#include "src/PlayerTurn.h"
+#include "src/SpellSystem.h"
+#include "src/TurnSchedule.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace
@@ -101,8 +104,33 @@ TEST_F(PlayerDeathTest, DyingDeclaresDefeat)
 {
 	player->die(ctx);
 
-	EXPECT_EQ(ctx.gameState->get_game_status(), GameStatus::DEFEAT)
+	EXPECT_EQ(ctx.gameState->get_run_outcome(), RunOutcome::DEFEAT)
 		<< "the player died and the game was not told the run was lost";
+}
+
+// A death inside an action is followed by the action being spent, which moves the turn
+// on. Moving the turn on must not undo the death: a fireball read at the reader's own
+// tile left the player standing at 0 hit points.
+TEST_F(PlayerDeathTest, SpendingTheActionThatKilledThePlayerKeepsTheDefeat)
+{
+	player->die(ctx);
+	spend_player_action(ctx, TIME_UNITS_PER_ROUND);
+
+	EXPECT_EQ(ctx.gameState->get_run_outcome(), RunOutcome::DEFEAT)
+		<< "spending the fatal action erased the defeat, so no death screen opens";
+}
+
+// The same through the fireball's own burn, the way a scroll read at the reader's tile
+// kills: ten sixes are 60 fire, and even the half a made save allows is past 20 hit points.
+TEST_F(PlayerDeathTest, BurningToDeathAndSpendingTheActionKeepsTheDefeat)
+{
+	const SpellSystem::FireballBurst burst{ .diceCount = 10, .dice = { 6, 6, 6, 6, 6, 6, 6, 6, 6, 6 }, .totalDamage = 60, .struck = 0 };
+	SpellSystem::burn_with_fireball(*player, burst, ctx);
+	ASSERT_TRUE(player->is_dead()) << "the burn did not kill, so nothing here is being measured";
+	spend_player_action(ctx, TIME_UNITS_PER_ROUND);
+
+	EXPECT_EQ(ctx.gameState->get_run_outcome(), RunOutcome::DEFEAT)
+		<< "spending the fatal action erased the defeat, so no death screen opens";
 }
 
 // The regression: a death in a unit test must leave the filesystem alone.
