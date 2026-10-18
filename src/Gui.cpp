@@ -157,9 +157,7 @@ static void draw_hud_bar(
 
 	const TileConfig& tileConfig = *ctx.tileConfig;
 
-	// The trough is the span between the end plates rather than the whole bar. A plate
-	// is opaque, so a share measured across the whole bar puts the last few percent
-	// underneath the left one - which is the reading a player most needs to see.
+	// The trough runs between the opaque end plates, so the last few percent stays in sight.
 	const Vector2D troughPos{ pos.x + GUI_BAR_PLATE_WIDTH, pos.y };
 	const int troughWidth = width - 2 * GUI_BAR_PLATE_WIDTH;
 	DrawRectangle(troughPos.x, troughPos.y, troughWidth, GUI_BAR_HEIGHT, GUI_BAR_CHANNEL);
@@ -292,10 +290,7 @@ void Gui::gui_render(const GameContext& ctx)
 	const int div1 = hud_divider1_x(panelWidth);
 	const int div2 = hud_divider2_x(panelWidth);
 
-	// The right edge sits against the screen rather than on the tile grid. Whole
-	// tiles rarely fill the width exactly - at a 96-pixel tile they stop 32 pixels
-	// short - and anchoring to the grid left that strip unpainted and took the
-	// difference out of the panels.
+	// Anchored to the screen edge, since whole tiles rarely fill the width exactly.
 	const int rightEdgeX = panelWidth - tileSize;
 
 	// ---- Background -------------------------------------------------------
@@ -318,10 +313,7 @@ void Gui::gui_render(const GameContext& ctx)
 	}
 
 	// ---- Bottom edge -------------------------------------------------------
-	//
-	// Drawn last so the corners sit over the ends of the runs, as draw_frame_pixels does
-	// for a menu: a run's tile reaches into the corner cell, and a rail over a corner cuts
-	// the plate.
+	// Drawn last, as draw_frame_pixels does, so the corners sit over the ends of the runs.
 	const int bottomY = baseY + (reserveRows - 1) * tileSize;
 	for (int col = tileSize; col < rightEdgeX; col += tileSize)
 	{
@@ -331,20 +323,7 @@ void Gui::gui_render(const GameContext& ctx)
 	ctx.renderer->draw_tile_screen(Vector2D{ rightEdgeX, bottomY }, tileConfig.get("GUI_FRAME_BR"));
 
 	// ---- The two internal dividers ----------------------------------------
-	//
-	// GUI_FRAME_V rather than GUI_FRAME_L. The left rail is an outer edge: brass trim on
-	// its inner face and shadow on its outer one, which in the middle of a panel is lit
-	// wrongly on one side. The divider carries trim on both faces.
-	//
-	// Its rail is centred in its cell where the left rail sits against the cell's edge,
-	// so the cell is aimed DIVIDER_CELL_OFFSET further left to leave the divider where it
-	// has always been drawn. Row 0 keeps the top rail, so a divider starts below it and
-	// does not paint over that rail's trim.
-	//
-	// The rail spans the panel's interior rather than a whole number of tile rows. The
-	// interior runs from the end of the top rule to the start of the bottom one and the
-	// text fills all of it, so a rail stepped on the tile grid leaves the first and last
-	// rows standing outside the column they belong to.
+	// Each rail spans the interior between the two rules, so it covers every text row.
 	const int interiorTop = baseY + gui_frame_top_rule(tileSize);
 	const int interiorBottom = baseY + reserveRows * tileSize - gui_frame_bottom_rule(tileSize);
 	for (const int dividerX : { div1, div2 })
@@ -352,10 +331,10 @@ void Gui::gui_render(const GameContext& ctx)
 		ctx.renderer->draw_tile_screen(Vector2D{ dividerX, baseY }, tileConfig.get("GUI_FRAME_T"));
 		for (int railY = interiorTop; railY < interiorBottom; railY += tileSize)
 		{
-			// The last tile is pulled up to land flush on the bottom rule rather than
-			// carrying on through it to the screen edge. The rail art is uniform down
-			// its length, so overlapping the tile above it leaves no seam.
+			// The last tile is pulled up to sit flush on the bottom rule.
+			// The rail art is uniform down its length, so the overlap leaves no seam.
 			const int tileY = std::min(railY, interiorBottom - tileSize);
+			// GUI_FRAME_V carries trim on both faces; its rail is centred in the cell, hence the offset.
 			ctx.renderer->draw_tile_screen(
 				Vector2D{ dividerX - DIVIDER_CELL_OFFSET, tileY },
 				tileConfig.get("GUI_FRAME_V"));
@@ -420,9 +399,7 @@ void Gui::render_hp_bar(const GameContext& ctx)
 	const Vector2D barPos{ barX, rowY };
 	draw_hud_bar(ctx, barPos, barW, ratio, filled);
 
-	// No "HP" prefix: the heart icon beside the bar already says what this counts, and
-	// at three digits each the reading alone takes most of the bar, so a prefix overruns
-	// the divider.
+	// No "HP" prefix: the heart icon already says it, and at three digits a prefix overruns the divider.
 	draw_bar_reading(ctx, barPos, barW, std::format("{}/{}", hp, maxHp), ColorPairId::WHITE_BLACK);
 }
 
@@ -487,11 +464,8 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 	// What is missing here is on the character sheet, which carries the name, race, gold
 	// and all six ability scores with their derived modifiers.
 
-	// One stat a row: the label against the panel's left edge, the value against its
-	// right. Every number on the panel therefore ends on the same pixel, so a reader
-	// after one of them runs down a single column. One value a row is what buys that:
-	// two of them share the row's width, so the first ends at the halfway mark and the
-	// panel carries two right edges.
+	// One stat a row, the label on the left edge and the value on the right,
+	// so every value ends on the same pixel and the numbers read as one column.
 	auto draw_stat = [&](int row, std::string_view label, const std::string& value)
 	{
 		const int y = hud_text_row_y(baseY, tileSize, row);
@@ -542,9 +516,8 @@ void Gui::gui_print_log(const GameContext& ctx)
 		.rowCount = hud_text_row_count(tileSize, ctx.renderer->get_font_size())
 	};
 
-	// Newest message first, each starting on a row of its own and wrapping as far
-	// as the panel allows. Rows run out before messages do, which is why the count
-	// above is a ceiling rather than the number drawn.
+	// Newest message first, each on rows of its own; rows run out before messages do,
+	// so the count above is a ceiling.
 	LogCursor cursor{ .x = panel.leftEdge, .row = 0 };
 	for (int messageIndex = 0; messageIndex < messagesToShow; ++messageIndex)
 	{

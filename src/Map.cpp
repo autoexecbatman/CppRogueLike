@@ -92,9 +92,8 @@ void Map::init_tiles()
 {
 	tiles.clear();
 
-	// FovMap must be reset alongside tiles so is_unobstructed / is_wall see correct
-	// state even when init_tiles is called standalone (e.g. in tests).
-	// All FovCells default to walkable=false, transparent=false — matches WALL.
+	// Reset with tiles, so is_unobstructed and is_wall agree when init_tiles runs alone, as tests run it.
+	// A new FovCell is neither walkable nor transparent, which is a WALL.
 	fovMap = std::make_unique<FovMap>(mapWidth, mapHeight);
 
 	for (int y = 0; y < mapHeight; y++)
@@ -136,13 +135,8 @@ void Map::init(GameContext& ctx)
 	}
 	place_amulet(ctx);
 
-	// Generation leaves one invariant: everything it carved can be walked to from where
-	// the player starts. A pool or a room sealed inside rock is a defect, not a secret.
-	//
-	// The question is asked from the player's own tile, never the entrance room's centre.
-	// A room's centre is a point of geometry, not of floor: a moat prefab puts a solid
-	// block through the middle of its room, so the centre is rock, and asking from there
-	// says the whole map is unreachable when nothing is wrong with it.
+	// Everything carved must be reachable, asked from the player's tile and never a room's centre,
+	// which a moat prefab fills with rock.
 	assert(!ctx.rooms->empty() && "Map::init generated no rooms");
 	assert(ctx.player() && "Map::init finished without placing the player");
 	assert(
@@ -217,10 +211,7 @@ bool Map::is_wall(Vector2D pos) const noexcept
 
 int Map::count_unreachable_tiles(Vector2D start) const noexcept
 {
-	// Terrain, not permission: a door counts as passable whether it is open, shut or
-	// locked, because a shut door is a way through and a locked one is a puzzle. Asking
-	// is_wall here would call every closed door a wall - it reads the field-of-view grid,
-	// where a closed door is not walkable - and report the treasure room as a defect.
+	// Every door counts as a way through. is_wall reads the field-of-view grid, where a shut door is a wall.
 	auto is_open = [this](Vector2D pos)
 	{
 		return get_tile_type(pos) != TileType::WALL;
@@ -508,11 +499,8 @@ void Map::render(const GameContext& ctx) const
 		return hashValue;
 	};
 
-	// ---------------------------------------------------------------------------
-	// Zone-based decoration system.
-	// 20-tile grid cells match room scale -- most rooms fall within one zone.
+	// Decoration zones on a 20-tile grid, about one room per cell.
 	// Zones: 0=dungeon, 1=library, 2=armory, 3=storage, 4=chapel
-	// ---------------------------------------------------------------------------
 	constexpr int zoneChapel = 4;
 
 	auto resolve_decor = [&](Vector2D pos, TileType tileType) -> TileRef
@@ -552,10 +540,8 @@ void Map::render(const GameContext& ctx) const
 				continue;
 			}
 
-			// In FOV: full colour. Explored but not visible: dimmed memory tint.
-			// The memory tint multiplies with the memory light quad, so a warm value
-			// here is a second warm multiply on top of the first. Neutral, so what
-			// separates remembered ground from lit ground is how dark it is.
+			// In FOV: full colour. Explored but not visible: a neutral memory tint, since it multiplies
+			// with the warm memory light quad and only darkness should separate the two.
 			bool inFov = is_in_fov(pos);
 			Color tint = inFov
 				? Color{ 255, 255, 255, 255 }
@@ -573,11 +559,8 @@ void Map::render(const GameContext& ctx) const
 				{
 					continue; // Interior wall -- no walkable neighbor, render as void
 				}
-				// Two border walls connect only if they share a common walkable 8-neighbor.
-				// A void wall sitting between a room wall and a corridor shares no walkable
-				// neighbor with the room wall, so it cannot bleed into the room wall mask.
-				// Corner walls (only diagonally adjacent to floor) still connect because
-				// their shared floor tile IS a common 8-neighbor of both wall tiles.
+				// Two border walls connect only through a shared walkable 8-neighbour, so a void wall
+				// by a corridor cannot bleed into a room wall, while a corner wall still connects.
 				auto connected_wall = [&](Vector2D neighbor) -> bool
 				{
 					if (!is_border_wall(neighbor))
@@ -728,9 +711,7 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 
 	const bool horizontal_first = mapRng.roll(0, 1) == 1;
 
-	// Only carve WALL tiles -- floor/corridor tiles keep their existing type.
-	// This prevents corridors from visually scarring room interiors when the
-	// MST path passes through another room's bounding box.
+	// Only WALL tiles are carved, so a corridor crossing another room's box leaves its floor alone.
 	auto dig_one = [&](Vector2D pos)
 	{
 		if (!in_bounds(pos))
@@ -779,10 +760,7 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 
 int Map::exit_column(const DungeonRoom& room, int interiorRow) const
 {
-	// The corridor leaves through the cell just inside the wall, so that cell has to be
-	// floor. A prefab or a room shape may have walled the centre column itself, which is
-	// where a corridor would otherwise aim, so walk outwards from the centre and take the
-	// nearest column whose cell on this row can be walked.
+	// Walk outwards from the centre column to the nearest one whose cell on this row is floor.
 	const int centre = room.center_col();
 	for (int offset = 0; offset <= room.width; ++offset)
 	{
@@ -850,14 +828,7 @@ bool Map::room_layout_is_sound(const DungeonRoom& room) const
 
 bool Map::room_interior_is_one_piece(const DungeonRoom& room) const
 {
-	// Floods the room's own floor without leaving its box. Two carvers write into this
-	// box - the room's shape and its prefab - and neither sees the other, so where they
-	// cross they can leave two pockets of floor with no way between them.
-	//
-	// A corridor tile is not the room's floor even when it lies inside the box: a corridor
-	// crossing a corner of the box is cut off from the room by the wall between them, and
-	// counting it here would call a sound room split. Only what the room itself carved
-	// counts, which is floor and the water poured onto it.
+	// A corridor crossing the box is walled off from the room, so only its floor and water count.
 	auto belongs_to_room = [this](Vector2D pos)
 	{
 		const TileType type = get_tile_type(pos);
@@ -944,9 +915,7 @@ void Map::set_tile(Vector2D pos, TileType newType)
 
 void Map::apply_room_shape(const DungeonRoom& room)
 {
-	// The contract says this runs after dig(), and dig() carves the whole bounding
-	// box, so the centre is floor by then. Called before it, every wall_back below
-	// writes a wall onto a wall and the shape silently does nothing.
+	// Before dig() the centre is still wall, and every wall_back below would change nothing.
 	assert(!is_wall(Vector2D{ room.col + room.width / 2, room.row + room.height / 2 })
 		&& "apply_room_shape: the room has not been dug yet, so shaping it does nothing");
 
@@ -1059,9 +1028,7 @@ void Map::apply_room_shape(const DungeonRoom& room)
 
 	case RoomShape::PILLARED:
 	{
-		// Full rect kept; place four 1x1 wall pillars at interior corners.
-		// Pillar offset: 2 cells in from each corner edge.
-		// Only place a pillar if the room is large enough to keep floor around it.
+		// Four 1x1 pillars, two cells in from each corner, only where the room keeps floor around them.
 		constexpr int pillarOffset = 2;
 		if (room.width >= 8 && room.height >= 6)
 		{
@@ -1091,15 +1058,8 @@ void Map::create_room(const DungeonRoom& room, bool first, GameContext& ctx)
 	assert(ctx.prefabLibrary && "Map::create_room: called without a prefabLibrary");
 	ctx.prefabLibrary->apply_to_room(room, *ctx.decorEditor, *this);
 
-	// The shape and the prefab both carve walls into this one box and neither sees
-	// the other, so where they cross they can leave two pockets of floor with no way
-	// between them. Both layers are wanted - they are what makes one room unlike the
-	// next - so the pair is tried first and only the shape is given up when it splits
-	// the room. The prefab alone is whole by construction, being one authored drawing.
-	// Try the richest layout first and give a layer up only when it fails: the shape
-	// over the prefab, then the prefab alone, then the plain box. Each fallback is
-	// strictly simpler, so the last one always succeeds - a dug rectangle is whole and
-	// has floor on all four edges by construction.
+	// Richest layout first, giving a layer up only when it fails: shape over prefab, prefab alone, plain box.
+	// A dug rectangle is whole with floor on every edge, so the last always succeeds.
 	if (!room_layout_is_sound(room))
 	{
 		dig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });
@@ -1229,9 +1189,7 @@ void Map::spawn_water(const DungeonRoom& room, GameContext& ctx)
 			const int rolld100 = mapRng.roll(1, 100);
 			if (rolld100 < waterPercentage)
 			{
-				// Water fills a floor the room actually carved. This loop walks the
-				// bounding box, and a shaped room - L, cross, chamfered, pillared -
-				// leaves wall inside its own box; water there is a pool sealed in rock.
+				// Only on carved floor: a shaped room leaves wall inside its box, and water there is sealed in rock.
 				if (get_tile_type(waterPos) != TileType::FLOOR)
 				{
 					continue;
@@ -1305,17 +1263,13 @@ bool Map::would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const
 		return true; // Would block horizontal passage
 	}
 
-	// Check vertical corridor pattern: W
-	//                                    F
-	//                                    W
+	// Check vertical corridor pattern: wall above and below (W/F/W)
 	if (isWallOrOOB({ waterPos.x, waterPos.y - 1 }) && isWallOrOOB({ waterPos.x, waterPos.y + 1 }))
 	{
 		return true; // Would block vertical passage
 	}
 
-	// ENTRANCE PATTERN 3: Near room edge with potential door placement
-	// Check if this position could be part of a future door placement
-	// Look for patterns where this floor tile is adjacent to potential door areas
+	// ENTRANCE PATTERN 3: near a room edge, where a door may later be placed
 
 	// Check for L-shaped entrance patterns (common near room corners)
 	int adjacentWalls = 0;
@@ -1957,10 +1911,8 @@ void Map::place_amulet(GameContext& ctx)
 		const int index = ctx.dice->roll(0, static_cast<int>(ctx.rooms->size()) - 1);
 		const DungeonRoom& room = ctx.rooms->at(index);
 
-		// Somewhere the player can actually reach. Water is excluded rather than left to
-		// the movement rule and the player's own states: the amulet is the win condition, it is
-		// placed once, and a character who later loses the means to swim would be shut
-		// out of a game that was winnable when it was generated.
+		// Somewhere reachable without water: the amulet is placed once, and a character who
+		// later loses the means to swim must still be able to win.
 		Vector2D amuletPos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
 		while (!can_place_at(amuletPos, ctx) || is_stairs(amuletPos, ctx))
 		{
@@ -2172,9 +2124,7 @@ void Map::place_from_graph(
 			const bool a_above = a.bottom_wall() < b.top_wall();
 			const bool a_left = a.right_wall() < b.left_wall();
 
-			// Each room is left by a cell its floor actually reaches, not by its geometric
-			// centre: a prefab or a shape may have walled the centre, and a corridor aimed
-			// there opens onto rock and strands whatever lay past the room.
+			// Each room is left by a cell its floor reaches; a corridor aimed at a walled centre opens onto rock.
 			if (a_below)
 			{
 				// a is below b -- corridor rises from a, crosses horizontally, drops to b

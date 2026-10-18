@@ -102,9 +102,7 @@ std::array<TabBox, 3> tab_boxes(const Renderer& renderer)
 		{ InventoryScreen::USABLES, "Usables", 0, 0 },
 	} };
 
-	// Two tiles in, then one tile of gap between tabs. Measured rather than counted in
-	// characters: a character count used as a tile count is how a 33 character line
-	// became 37 tiles wide here before.
+	// Two tiles in, then one tile of gap between tabs; widths are measured, never counted in characters.
 	int px = 2 * tileSize;
 	for (TabBox& box : boxes)
 	{
@@ -259,9 +257,8 @@ void InventoryUI::draw_frame(GameContext& ctx)
 		playerRef.get_exceptional_strength());
 	const std::optional<EncumbranceBand> band = encumbrance_band(currentWeight, strengthRow);
 
-	// Where Table 47 prints no bands the line shows the load alone, rather than a word
-	// the book never wrote. Over the maximum it still reads Overloaded: that comes from
-	// a column every row has, and is what render_tab_bar's banner reports.
+	// Where Table 47 prints no bands the line shows the load alone. Overloaded still shows,
+	// from the maximum column every row has, as render_tab_bar's banner does.
 	const auto colour_for = [](EncumbranceBand named)
 	{
 		switch (named)
@@ -384,9 +381,8 @@ void InventoryUI::rebuild_item_list(const Player& player, GameContext& ctx)
 	{
 		assert(item && "rebuild_item_list: the pack holds a null where an item should be");
 
-		// An item the player is wearing belongs to the Equipment screen, so the
-		// backpack list does not repeat it. Identity is the unique id, because the
-		// pack and the slots can hold two of the same kind.
+		// A worn item is on the Equipment screen, so the backpack skips it. Matched by unique id,
+		// since the pack and the slots can hold two of the same kind.
 		const auto is_equipped = [&item](const EquippedItem& equipped)
 		{
 			return equipped.item->uniqueId == item->uniqueId;
@@ -497,9 +493,7 @@ bool InventoryUI::item_fits_slot(const Item& item, EquipmentSlot slot, const Gam
 {
 	assert(ctx.itemRegistry && "item_fits_slot: no item registry to ask where an item is worn");
 
-	// A worn item names its slot in the data, and that is the whole answer. Matching a
-	// cloak or a pair of boots by display name here was the second opinion that let an
-	// item be put on through one row and turn up on another.
+	// A worn item names its slot in the data, and that is the whole answer.
 	const ItemParams* params = ctx.itemRegistry->find_params(item.itemKey);
 	if (params != nullptr && params->equipmentSlot != EquipmentSlot::NONE)
 	{
@@ -636,9 +630,8 @@ void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx
 		std::string line;
 		if (equipped)
 		{
-			// The item's own sprite, the one the map draws it with. Sized under the row
-			// pitch so two rows cannot touch, and drawn before the text so the text
-			// starts clear of it.
+			// The item's own map sprite, sized under the row pitch so two rows cannot touch.
+			// Drawn before the text, which starts clear of it.
 			ctx.renderer->draw_tile_screen_color_sized(
 				Vector2D{ ROW_TEXT_X, row_top_y(tileSize, y) + ROW_ICON_INSET },
 				ROW_ICON_SIZE,
@@ -664,9 +657,7 @@ void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx
 		}
 		else
 		{
-			// The symbol for what belongs here, dimmed. An empty row then says which slot
-			// it is twice over, in the label and in a shape, and the filled rows still
-			// carry the eye because they are the bright ones.
+			// The slot's symbol, dimmed: an empty row names its slot twice, and the filled rows stay brightest.
 			assert(ctx.tileConfig && "render_equipment_screen: no tileConfig to read slot symbols from");
 			ctx.renderer->draw_tile_screen_color_sized(
 				Vector2D{ ROW_TEXT_X, row_top_y(tileSize, y) + ROW_ICON_INSET },
@@ -967,9 +958,7 @@ std::string InventoryUI::format_enhancement_info(const Item& item) const
 
 std::string InventoryUI::format_value_info(const Item& item) const
 {
-	// The detail bar is the third place describing one item, after the equipment row and
-	// the backpack row. It said a price and no weight, so a player reading the bar could
-	// not tell what the thing was costing them against the limit in the band above.
+	// Weight beside the price, so the bar shows what an item costs against the load limit.
 	const int value = item.get_value();
 	if (value > 0)
 	{
@@ -1091,9 +1080,8 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 		return false;
 	}
 
-	// The Tab key reaches here as MINIMAP_TOGGLE: InputSystem names a key for what the
-	// map does with it, so nothing ever produces GameKey::TAB and that case alone could
-	// never fire. Inside a menu there is no minimap, and Tab means the next pane.
+	// Tab arrives as MINIMAP_TOGGLE, since InputSystem names a key by its map action.
+	// Inside a menu there is no minimap, so it means the next pane.
 	case GameKey::MINIMAP_TOGGLE:
 	case GameKey::TAB:
 	case GameKey::RIGHT:
