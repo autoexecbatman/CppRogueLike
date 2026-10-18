@@ -48,9 +48,7 @@ DamageInfo WeaponDamageRegistry::get_damage_info(std::string_view weaponKey) noe
 {
 	const auto found = weaponDamageMap.find(std::string{ weaponKey });
 
-	// Every caller asks is_weapon() first and a test walks the data for a weapon this
-	// table has no row for, so a key that is not here means the two disagree rather
-	// than that the player is holding something odd.
+	// Callers ask is_weapon() first and a test walks the data, so a missing key means the two disagree.
 	assert(found != weaponDamageMap.end() && "get_damage_info: asked for a key the weapon table has no damage of its own for");
 
 	// What a Release build draws rather than crashing on a path the character sheet

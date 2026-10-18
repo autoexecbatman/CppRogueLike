@@ -136,11 +136,8 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 		ctx.messageSystem->log("Spider attempting attack with poison");
 		bite(owner, *ctx.player(), ctx);
 
-		// PHB: an ambush's victim rolls for surprise after the initial attack, and a
-		// surprised victim takes one more round before it can act. A spider the player's
-		// Sanctuary turned away ignores the player, so there is no round to take; the bite
-		// above asked, so this reads its answer rather than rolling one. The surprise roll
-		// comes last because it spends a die, and only a round that can happen should.
+		// PHB: the ambushed victim rolls for surprise after the bite; a spider Sanctuary turned away gets no round.
+		// The surprise roll comes last because it spends a die, and only a round that can happen should.
 		if (ambushSprung && !ctx.player()->is_dead() && !ctx.buffSystem->is_turned_away_by_sanctuary(owner, *ctx.player(), ctx) && is_surprised(*ctx.player(), ctx))
 		{
 			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You are caught off guard!", MessageCompletion::FINISHED);
@@ -325,14 +322,8 @@ void AiSpider::inject_venom(Creature& owner, Creature& target, GameContext& ctx)
 	assert(ctx.dataManager && "AiSpider::inject_venom: called without a dataManager");
 	assert(ctx.dice && "AiSpider::inject_venom: called without dice");
 
-	// The Monstrous Manual's hairy spider, whose poison is in no table: "Victims
-	// receive a +2 bonus to saving throws vs. the hairy spiders' weak poison. If the
-	// saving throw fails, the victim's AC and attack rolls are penalized by 1, and
-	// Dexterity is penalized by -3 with respect to Dexterity checks. These effects
-	// begin one round after the bite and last for 1d4+1 rounds."
-	//
-	// The Dexterity penalty is left out: it is on Dexterity checks, and the game has
-	// no check separate from the score.
+	// Monstrous Manual hairy spider: +2 to save; on a failure -1 AC and attack after one round, for 1d4+1 rounds.
+	// Its Dexterity-check penalty is left out: the game has no check separate from the score.
 	const int constitutionAdjustment = ctx.dataManager->constitution_for(target.get_constitution()).PoisonSave;
 	if (SavingThrows::is_made(target, SavingThrow::PARALYZATION_POISON_DEATH, HAIRY_SPIDER_SAVE_BONUS + constitutionAdjustment, ctx))
 	{

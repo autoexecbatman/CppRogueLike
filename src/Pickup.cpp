@@ -117,9 +117,8 @@ void from_floor(Creature& taker, GameContext& ctx)
 	{
 		assert(item && "from_floor: the floor holds a null where an item should be");
 
-		// Init-capture by id: this menu outlives the frame that built it, and the
-		// floor can lose an item in between, so the choice is resolved against the
-		// floor rather than against a pointer taken now.
+		// Captured by id: the menu outlives this frame and the floor may lose the item, so the choice is
+		// resolved against the floor rather than a pointer taken now.
 		auto takeCommand = [who = &taker, wanted = item->uniqueId](GameContext& menuCtx)
 		{
 			Item* stillThere = InventoryOperations::find_item_by_id(*menuCtx.floorInventory, wanted);

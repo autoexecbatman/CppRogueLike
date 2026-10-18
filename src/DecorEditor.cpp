@@ -506,9 +506,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		return s;
 	};
 
-	// Single point that opens the edit panel for any TileRef.
-	// Looks up whether the tile is already in the palette and initialises
-	// all editing state from that one source.
+	// The one place the edit panel opens for any TileRef, with all editing state read from the palette.
 	auto begin_edit = [this, &renderer](TileRef tid)
 	{
 		browser_selected = tid;
@@ -785,9 +783,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 			editing = false;
 		}
 
-		// Use the char that InputSystem::poll() already popped from raylib's
-		// GetCharPressed() queue.  Calling GetCharPressed() here directly would
-		// always return 0 because the queue was consumed in handle_input_phase.
+		// The char InputSystem::poll() already took from GetCharPressed(); a second call here returns 0.
 		const int ch = buffered_char;
 		buffered_char = 0;
 

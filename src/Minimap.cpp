@@ -39,9 +39,7 @@ void Minimap::render(const GameContext& ctx) const
 	int screenW = renderer.get_screen_width();
 	int screenH = renderer.get_screen_height();
 
-	// The largest whole number of pixels a map tile can take and still leave the
-	// overlay inside its share of the window. Whole pixels, so no cell is a
-	// different size from its neighbour.
+	// The largest whole number of pixels a tile can take inside the overlay's share, so every cell matches.
 	const int tilePx = std::max(1, std::min(screenW * MAX_WIDTH_PERCENT / 100 / mapW, screenH * MAX_HEIGHT_PERCENT / 100 / mapH));
 
 	int panelW = mapW * tilePx;
@@ -49,9 +47,7 @@ void Minimap::render(const GameContext& ctx) const
 	int originX = screenW - panelW - PADDING;
 	int originY = PADDING;
 
-	// Opaque, with an edge. A translucent black backdrop is invisible against the
-	// unexplored parts of the map, which left the overlay reading as loose specks
-	// with no bounds.
+	// Opaque, with an edge: a translucent backdrop vanishes against unexplored map and leaves no bounds.
 	DrawRectangle(originX - BORDER, originY - BORDER, panelW + 2 * BORDER, panelH + 2 * BORDER, Color{ 20, 12, 28, 255 });
 	DrawRectangleLines(originX - BORDER, originY - BORDER, panelW + 2 * BORDER, panelH + 2 * BORDER, Color{ 120, 120, 150, 255 });
 

@@ -255,9 +255,7 @@ bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature&
 	auto taken = remove_item(shopInventory, item);
 	assert(taken.has_value() && "process_player_purchase called with an item not on the shelves");
 
-	// The item itself moves, so its key and enhancement come with it. Room and weight
-	// were checked above, so this add cannot fail, and the item lives on in the pack,
-	// which keeps the reference valid for the message below.
+	// The item itself moves, key and enhancement with it; room and weight were checked above, so the add cannot fail.
 	[[maybe_unused]] const auto handedOver = add_item_to_inventory(buyer.inventoryData, std::move(*taken), buyer, *ctx.dataManager);
 	assert(handedOver.has_value());
 

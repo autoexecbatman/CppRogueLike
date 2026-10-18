@@ -41,9 +41,7 @@ void stamp_room(
 	DecorEditor& editor,
 	Map& map)
 {
-	// Prefab origin [0,0] = top-left wall corner of the room.
-	// Room was sized to (p.width()-2) x (p.height()-2) so the '#' border
-	// aligns exactly with the room wall ring -- no centering offset needed.
+	// Prefab [0,0] is the room's top-left wall corner; the room was sized so the '#' border is its wall ring.
 	const int baseX = room.left_wall();
 	const int baseY = room.top_wall();
 
@@ -132,9 +130,7 @@ void PrefabLibrary::load_tile_labels(std::string_view path)
 {
 	build_structural_symbols();
 
-	// Resolved, as every other loader here does: a bare relative path opens only from
-	// the repository root, so a build run from anywhere else got an empty library and
-	// rooms with no prefab in them, silently.
+	// Resolved like every other loader: a bare relative path opens only from the repository root.
 	std::ifstream in(Paths::resolve(path));
 	if (!in.is_open())
 	{

@@ -199,11 +199,8 @@ void InputSystem::poll()
 	};
 
 #ifdef __EMSCRIPTEN__
-	// On Emscripten, the GLFW key-press queue (GetKeyPressed) is never
-	// populated because the GLFW key callback does not fire on the web
-	// platform. IsKeyPressed (prev/curr state transition) works correctly
-	// because PollInputEvents() is called explicitly in end_frame() before
-	// SwapScreenBuffer(), keeping prev/curr in sync.
+	// On Emscripten GetKeyPressed's queue is never filled, so keys are read as prev/curr transitions,
+	// which stay in sync because end_frame() polls before swapping.
 	auto isPressed = [](int raylibKey)
 	{
 		return IsKeyPressed(raylibKey);
@@ -576,9 +573,8 @@ void InputSystem::poll()
 	}
 	}
 
-	// Shift+symbol keys and char_input for text fields.
-	// GetCharPressed() is also broken on Emscripten (queue never filled),
-	// so derive char from the pressed key + shift state on web.
+	// Shift+symbol keys and char_input for text fields. GetCharPressed() is empty on Emscripten too,
+	// so on the web the char is derived from the key and the shift state.
 #ifdef __EMSCRIPTEN__
 	int ch = 0;
 	if (newKey >= KEY_A && newKey <= KEY_Z)

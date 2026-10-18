@@ -192,9 +192,7 @@ int coin_weight(int goldPieces) noexcept
 
 int get_total_weight(const Creature& owner) noexcept
 {
-	// "Add five pounds for clothing, if any is worn" (Player's Handbook, PDF page 160).
-	// Table 47 is Character Encumbrance and nothing here dresses a creature, so a
-	// character starts from the allowance and a monster from nothing.
+	// "Add five pounds for clothing, if any is worn" (PHB, PDF page 160): a character starts from it, a monster from 0.
 	int total = (owner.get_creature_class() == CreatureClass::MONSTER) ? 0 : CLOTHING_POUNDS;
 	for (const auto& item : owner.inventoryData.items)
 	{

@@ -29,9 +29,7 @@ void CreatureManager::update_creatures(std::span<std::unique_ptr<Creature>> crea
 {
 	assert(ctx.gameState && "update_creatures: the creatures acted with no clock");
 
-	// How far this window reaches. The clock is where the player now stands, so each
-	// creature takes the actions it is due before the player comes round again: one
-	// for an ordinary creature, several for a faster one, none for one that overshot.
+	// The clock is where the player stands, so each creature takes the actions it is due before then.
 	const int clockLimit = ctx.gameState->get_time();
 
 	for (const auto& creature : creatures)
@@ -69,9 +67,7 @@ void CreatureManager::spawn_creatures(GameContext& ctx)
 	assert(ctx.creatures && "CreatureManager::spawn_creatures: called without creatures");
 	assert(ctx.map && "CreatureManager::spawn_creatures: called without a map");
 
-	// One new monster every spawnRate rounds. Read off the clock as rounds rather
-	// than as time units: the clock advances by a hundred or so per action, so a
-	// remainder taken on it directly would be zero almost every turn.
+	// One new monster every spawnRate rounds, read as rounds: the clock moves about a hundred units an action.
 	if (rounds_completed_at(ctx.gameState->get_time()) % spawnRate == 0)
 	{
 		if (can_spawn_creature(*ctx.creatures, maxCreatures))
@@ -122,9 +118,7 @@ std::optional<Vector2D> CreatureManager::find_spawn_position(GameContext& ctx)
 		return std::nullopt;
 	}
 
-	// A random start and then once round, so every room is tried and none is tried twice.
-	// Picking a fresh random room each time could not tell a full dungeon from bad luck,
-	// and spun forever on the first.
+	// A random start, then once round every room, so a full dungeon is told from bad luck and the loop ends.
 	const size_t start = static_cast<size_t>(ctx.dice->roll(0, static_cast<int>(roomCount) - 1));
 	for (size_t offset = 0; offset < roomCount; ++offset)
 	{

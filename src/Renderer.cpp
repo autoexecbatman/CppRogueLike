@@ -358,9 +358,8 @@ void Renderer::load_dawnlike(std::string_view basePath)
 	load_animated(TileSheet::SHEET_HILL0, "Hill0", "Objects/", "Hill", 16);
 	load_animated(TileSheet::SHEET_TREE0, "Tree0", "Objects/", "Tree", 16);
 	load_animated(TileSheet::SHEET_GROUND0, "Ground0", "Objects/", "Ground", 16);
-	// Generated trap art: three types, armed on row 0 and sprung on row 1, at
-	// 64px. Static rather than an animated pair, because a trap does not
-	// animate and a generated second frame boils rather than breathes.
+	// Generated trap art: three types at 64px, armed on row 0 and sprung on row 1. Static, since a trap
+	// does not animate and a generated second frame boils.
 	load_static(TileSheet::SHEET_TRAP0, "Trap0", "Objects/", "Trap0", 64);
 	load_static(TileSheet::SHEET_FENCE, "Fence", "Objects/", "Fence", 16);
 	load_animated(TileSheet::SHEET_MAP0, "Map0", "Objects/", "Map", 16);
@@ -420,12 +419,8 @@ void Renderer::end_frame()
 	frameOpen = false;
 
 #ifdef __EMSCRIPTEN__
-	// EndDrawing's order is: flush -> swap -> WaitTime -> PollInputEvents.
-	// glfwSwapBuffers may yield (emscripten_sleep), so events can fire between
-	// swap and PollInputEvents, causing PollInputEvents to see prev=curr=1 and
-	// making IsKeyPressed permanently false.
-	// Fix: flush -> PollInputEvents -> swap.
-	// Events that arrive during the swap yield are captured next frame with prev=0.
+	// Flush, then poll, then swap: the swap may yield, and a poll after it can see prev=curr=1 and lose
+	// IsKeyPressed for good. Events arriving during the yield are read next frame.
 	rlDrawRenderBatchActive();
 	PollInputEvents();
 	SwapScreenBuffer();
@@ -853,11 +848,8 @@ void Renderer::draw_frame_pixels(Vector2D screenPos, int widthPixels, int height
 	const int rightX = screenPos.x + widthPixels - tileSize;
 	const int bottomY = screenPos.y + heightPixels - tileSize;
 
-	// The runs first and the corners over them. A run's last tile overlaps its
-	// neighbour, which is what lets the border close on a width the tile size does not
-	// divide - and that overlap reaches into the corner cell by up to a whole tile. Drawn
-	// the other way round a rail paints across the corner, which costs nothing while the
-	// rails are one pixel wide and cuts the ornament off a heavier frame.
+	// The runs first and the corners over them: a run's last tile overlaps into the corner cell,
+	// and a rail drawn over a corner cuts the ornament off a heavier frame.
 	for (int x = screenPos.x + tileSize; x < rightX; x += tileSize)
 	{
 		draw_tile_screen(Vector2D{ x, screenPos.y }, tileConfig.get("GUI_FRAME_T"));

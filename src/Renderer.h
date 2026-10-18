@@ -177,12 +177,8 @@ inline constexpr int GUI_FRAME_RULE_WIDTH_DEPTH = 30;
 //   gui_reserve_rows(96, 16);   // -> 4
 [[nodiscard]] inline constexpr int gui_reserve_rows(int tileSize, int fontSize)
 {
-	// The frame's two rules, then the rows between them. The last row needs only the
-	// height of the font rather than another full pitch.
-	//
-	// A rule is what the panel has to clear, so that is what is reserved for it. Taking
-	// a whole tile at each end costs 35 pixels above the text and 33 below it at a
-	// 64-pixel tile, which is two rows of text the panel already had room for.
+	// The frame's two rules, then the rows between them; the last row needs only the font's height.
+	// The rules are reserved as drawn, since a whole tile at each end wastes two rows at 64px.
 	const int neededPixels = gui_frame_top_rule(tileSize) + GUI_TEXT_TOP_INSET + (GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH + fontSize + gui_frame_bottom_rule(tileSize);
 	return (neededPixels + tileSize - 1) / tileSize;
 }

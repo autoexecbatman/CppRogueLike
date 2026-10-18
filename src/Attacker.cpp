@@ -107,9 +107,8 @@ AttackResult Attacker::perform_single_attack(
 
 	const int attackRoll = ctx.dice->d20();
 
-	// A die at a time: fire and cold are resisted on each die by the book, and
-	// the bonus on the roll is not a die. A bite offers no saving throw, so the
-	// ring's save bonus has nothing to add here.
+	// A die at a time: fire and cold are resisted per die, and the roll's bonus is not a die.
+	// A bite offers no saving throw, so a ring's save bonus adds nothing here.
 	const std::vector<int> dice = roll_each_die(ctx.dice, attackDamage.dice);
 	const int strength = DamageResolver::resistance_strength(attackDamage.damageType, target, ctx);
 	const DamageResolver::ResistedDamage reduced = DamageResolver::reduce_dice(dice, attackDamage.damageType, strength);

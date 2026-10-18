@@ -61,9 +61,7 @@ inline std::string_view damage_type_name(DamageType damageType)
 		return "magic";
 	}
 	}
-	// Every type returns above; a new one warns under -Wswitch rather than falling
-	// through to a name that belongs to nothing. It is a warning, not a refusal: no
-	// build here passes -Werror.
+	// Every type returns above; a new one is a compile error under -Werror=switch and /we4062.
 	std::unreachable();
 }
 

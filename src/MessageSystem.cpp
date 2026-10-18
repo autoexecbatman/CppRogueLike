@@ -64,8 +64,6 @@ void MessageSystem::log(std::string_view message) const
 
 void MessageSystem::display_debug_messages() const noexcept
 {
-	// Scrollable debug log viewer - not yet ported from curses to Raylib.
-	// The log() function already streams to std::clog / std::cout in debug mode.
-	// When implemented: read log file and render via ctx.renderer with scroll support.
+	// Not yet ported from curses to Raylib; log() already streams to std::clog in debug mode.
 	log("display_debug_messages: debug viewer not yet implemented for Raylib");
 }

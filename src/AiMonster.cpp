@@ -266,11 +266,8 @@ void AiMonster::decide_action(Creature& owner, GameContext& ctx)
 	// Chebyshev tiles. Only the second branch reads it.
 	int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
 
-	// A failed save against Sanctuary means this creature "loses track of and totally
-	// ignores the warded creature for the duration of the spell" (PHB page 436): the
-	// player stops being a target at all, and the turn becomes whatever this creature
-	// does with no quarry. Reading the record costs no save, because a save is owed
-	// only to an opponent already swinging.
+	// A failed save against Sanctuary means this creature ignores the warded player (PHB page 436).
+	// Reading the record costs no save: a save is owed only to an opponent already swinging.
 	const bool hasLostTrackOfPlayer = ctx.buffSystem->ignores_warded_creature(owner, *ctx.player());
 
 	// Perceived: hunt, with no die in the way.

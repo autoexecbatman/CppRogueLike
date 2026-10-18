@@ -113,13 +113,8 @@ void RenderingManager::apply_lighting(const GameContext& ctx) const
 	const int cameraY = renderer.get_camera_y();
 
 	static constexpr float torchRadiusTiles = 6.5f;
-	// The light is a multiply over sprites that are already painted in colour, so
-	// whatever it takes out of a channel is taken out of the art. The old inner
-	// colour held blue at 55 percent of red and applied that at full strength on the
-	// player's own tile, which pulled a yellow cast over every lit pixel - measured
-	// at blue/red 0.48 to 0.55 right across the radius. Near the flame the light is
-	// bright enough to read as white; the warmth belongs at the edge, where the
-	// falloff now runs out through amber instead of straight to black.
+	// The light multiplies painted sprites, so a warm inner colour casts over every lit pixel;
+	// near white at the flame, with the warmth at the edge as the falloff runs through amber.
 	static constexpr Color torchInner = { 255, 250, 240, 255 };
 	static constexpr Color torchOuter = { 34, 18, 6, 255 };
 	// Remembered ground is dimmer and a touch cooler than lit ground, so the two

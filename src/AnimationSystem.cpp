@@ -399,9 +399,7 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 	float blastRadius = static_cast<float>(radius);
 	float blastPx = blastRadius * ts;
 
-	// Phase 0: ignition flash - dense white-hot circles fill the entire blast area.
-	// LOW velocity: circles barely drift, they overlap and stack via additive blend
-	// to create a solid white-yellow glow. This is the "ball of fire" appearance.
+	// Phase 0: ignition flash - slow white-hot circles stacking additively into a solid glow.
 	// Color-over-lifetime: white-yellow -> orange as the ball expands and cools.
 	int flashCount = static_cast<int>(blastRadius * blastRadius * 14.0f);
 	for (int i = 0; i < flashCount; ++i)
@@ -430,9 +428,7 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 			.additive = true });
 	}
 
-	// Phase 1: fireball body - circles spawned throughout blast area with low drift.
-	// Staggered spawn (delay proportional to distance) gives the expanding ball effect.
-	// Dense overlap at center = bright core. Sparse at edge = fire boundary.
+	// Phase 1: fireball body - circles staggered by distance, dense at the core and sparse at the edge.
 	// Color-over-lifetime: yellow-orange -> dark red (temperature drop over time).
 	int bodyCount = static_cast<int>(blastRadius * blastRadius * 18.0f);
 	for (int i = 0; i < bodyCount; ++i)

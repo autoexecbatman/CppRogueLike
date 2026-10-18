@@ -237,9 +237,7 @@ const Pathfinder::CostMap& Pathfinder::cost_map(Vector2D goal, const Mobility& m
 		return costMap;
 	}
 
-	// Dijkstra's algorithm outward from the goal, run until the frontier is empty; each
-	// tile costs what entering it does, so a tile beyond a shut door is two dearer than
-	// the door's near side.
+	// Dijkstra outward from the goal until the frontier is empty; a tile costs what entering it does.
 	FrontierQueue frontier;
 	costMap.costs[index_of(goal, costMap.width)] = 0;
 	frontier.push(Frontier{ 0.0, goal });
@@ -313,9 +311,8 @@ std::vector<Vector2D> Pathfinder::find_route(Vector2D start, Vector2D goal, cons
 	std::vector<double> costSoFar(cellCount, UNSEEN);
 	std::vector<std::optional<Vector2D>> cameFrom(cellCount, std::nullopt);
 
-	// The goal is let in where the rule alone would refuse it: a creature may stand there
-	// now, any shut door is somewhere to walk up to, and a decoration is bumped from the
-	// last step.
+	// The goal is let in where the rule alone refuses it: a creature may stand there, a shut door
+	// is somewhere to walk up to, and a decoration is bumped from the last step.
 	const auto price_of = [&](Vector2D position) -> std::optional<double>
 	{
 		if (position == goal)

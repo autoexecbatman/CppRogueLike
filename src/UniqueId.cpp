@@ -25,9 +25,7 @@ void load(const json& j)
 		return;
 	}
 
-	// Never backwards. Loading a save from inside a running game finds the counter
-	// already past what the file holds, and lowering it would hand out ids that
-	// objects still in memory are using.
+	// Never backwards: loading in a running game finds the counter ahead, and objects in memory hold those ids.
 	const IdType stored = j["nextUniqueId"].get<IdType>();
 	Generator::set_next_id(std::max(stored, Generator::peek_next_id()));
 }

@@ -197,9 +197,7 @@ std::unique_ptr<Item> ItemCreator::create_with_gold_amount(Vector2D pos, int gol
 	item->itemKey = "gold_coin";
 	item->itemClass = params.itemClass;
 	item->set_value(goldAmount);
-	// A pile weighs what its coins weigh, so the record's constant cannot answer for
-	// it. Same rule the purse is weighed by, so a hoard reads the same on the floor
-	// as in hand.
+	// A pile weighs what its coins weigh, by the purse's own rule, so a hoard reads the same on the floor as in hand.
 	item->enhancement.weight = InventoryOperations::coin_weight(goldAmount);
 	return item;
 }

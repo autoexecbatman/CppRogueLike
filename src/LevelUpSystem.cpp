@@ -188,10 +188,8 @@ void apply_rogue_improvements(int newLevel, GameContext* ctx)
 		ctx->messageSystem->log(std::format("Rogue backstab multiplier increased to x{}", backstabMultiplier));
 	}
 
-	// "Each time the thief rises a level in experience, the player receives another
-	// 30 points to distribute" (PHB page 84). What the level gives is the points;
-	// the screen that spends them is opened by DisplayManager, the half of a
-	// level-up that draws.
+	// "The player receives another 30 points to distribute" each thief level (PHB page 84);
+	// DisplayManager opens the screen that spends them.
 	ctx->messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, "Thief skills: ");
 	ctx->messageSystem->append_message_part(
 		ColorPairId::GREEN_BLACK,
@@ -205,9 +203,7 @@ void apply_rogue_improvements(int newLevel, GameContext* ctx)
 // cannot disagree.
 void announce_new_spell_level(CasterClass casterClass, const Creature& owner, int newLevel, GameContext* ctx)
 {
-	// The only raw GameContext pointer in the level-up path; every other function
-	// here takes a reference. Both the table and the message are read through it on
-	// the next two lines.
+	// ctx is a pointer in this path; the table and the message below are both read through it.
 	assert(ctx && ctx->dataManager && "announce_new_spell_level: no context to read the progression table from");
 
 	const int wisdom = owner.get_wisdom();
@@ -233,9 +229,7 @@ void apply_cleric_improvements(const Creature& owner, int newLevel, GameContext*
 		return;
 	}
 
-	// Announce only when a tougher class of undead comes into reach. The target
-	// numbers improve at almost every level, so announcing those would announce
-	// almost every level.
+	// Announce only a tougher class of undead coming into reach; the target numbers improve almost every level.
 	const int reachNow = highest_turnable_hit_dice(newLevel);
 	if (reachNow > highest_turnable_hit_dice(newLevel - 1))
 	{

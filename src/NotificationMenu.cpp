@@ -20,9 +20,7 @@ NotificationMenu::NotificationMenu(
 	const int tileSize = ctx.renderer->get_tile_size();
 	const int fontSize = ctx.renderer->get_font_size();
 
-	// Sized from measured text. A character count used as a tile count made the
-	// help screen 37 tiles wide - 2368 pixels on a 1280-pixel screen - which threw
-	// its centred title off to the right and filled the window top to bottom.
+	// Sized from measured text, never from a character count used as a tile count.
 	int widestText = ctx.renderer->measure_text(this->title);
 	for (const auto& line : this->lines)
 	{

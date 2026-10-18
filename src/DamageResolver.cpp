@@ -37,13 +37,8 @@ int DamageResolver::apply_resistances(
 	const Creature& owner,
 	GameContext& ctx)
 {
-	// Fire and cold are resisted at the source, on the dice and the save, by
-	// every producer there is: SpellSystem::burn_with_fireball for the fireball
-	// spell and scroll, and Attacker::perform_single_attack for every typed
-	// natural attack - chimera, fire wolf, pit fiend, ice wolf. A new
-	// producer of fire or cold rolls its dice through reduce_dice and joins this
-	// list. A fire or cold total can only arrive here as a ResistedDamage, because
-	// the plain-integer damage path refuses those types.
+	// Fire and cold are resisted at their producers, on the dice and the save; a new producer rolls through reduce_dice.
+	// The plain-integer path refuses those types, so a fire or cold total arrives here only as ResistedDamage.
 	if (damageType == DamageType::FIRE || damageType == DamageType::COLD)
 	{
 		return damage;

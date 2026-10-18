@@ -28,9 +28,7 @@ DamageInfo PlayerAttacker::compute_weapon_damage(EquipmentSlot slot) const
 
 AttackResult PlayerAttacker::attack(Creature& target, AttackKind kind, GameContext& ctx)
 {
-	// Every to-hit adjustment the equipped weapon confers, resolved at the point of
-	// attack so there is one source of truth. AD&D 2e PHB p.88: a cursed weapon is
-	// -2 to attack rolls; an enhanced weapon grants its toHitBonus.
+	// The weapon's to-hit adjustments, read at the attack (PHB p.88): cursed -2, enhanced its toHitBonus.
 	auto weapon_hit_modifier = [this](EquipmentSlot slot) -> int
 	{
 		Item* weapon = owner.get_equipped_item(slot);

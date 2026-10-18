@@ -67,11 +67,8 @@ public:
 			{
 				return max;
 			}
-			// A queued value is the roll a test means a die to make, so it has to be one
-			// that die can make. Scripting a 5 on a d4 asserts something about a
-			// character no dice could produce, and it cannot be checked where the queue
-			// is filled: what will be rolled against it is not known until something
-			// rolls. Queue HIGHEST to mean the top of the range by name.
+			// A queued value must be one this die can make; the range is known only now, when something rolls.
+			// Queue HIGHEST to mean the top of the range by name.
 			assert(value >= min && value <= max && "a scripted roll is outside the range the die was asked for");
 			return value;
 		}

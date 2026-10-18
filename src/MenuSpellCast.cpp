@@ -114,12 +114,8 @@ void MenuSpellCast::handle_selection(GameContext& ctx)
 	const std::string key = availableSpells[selectedIndex];
 	const bool isMemorized = spellSources[selectedIndex].empty();
 
-	// onCastComplete fires when the casting is over, which is not the same as the
-	// spell working: a priest's Wisdom can fizzle it, and the book expends the spell
-	// either way. Immediate for an instant spell, a turn later through the
-	// TargetingMenu callback for a targeted one.
-	// Init-capture &playerRef = player binds to the Player member (session lifetime),
-	// not to a local alias that would dangle after handle_selection() returns.
+	// onCastComplete fires when casting is over, whether or not the spell worked: Wisdom can fizzle it.
+	// &playerRef binds to the Player member, not to a local that would dangle after handle_selection().
 	auto onCastComplete = [key, isMemorized, &playerRef = player](GameContext& innerCtx)
 	{
 		if (isMemorized)

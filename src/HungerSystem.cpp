@@ -249,9 +249,7 @@ void HungerSystem::notify_state_change(GameContext& ctx)
 
 	const HungerState previous = *lastNotifiedState;
 
-	// Say it before recording that it was said. Recording first and then throwing
-	// on the way out would mark this threshold announced and silence it forever,
-	// leaving a correct state and a missing message that no test can distinguish.
+	// Say it before recording it: recording first and then throwing would silence this threshold forever.
 	ctx.messageSystem->append_message_part(get_hunger_color(), "You are now " + get_hunger_state_string() + ".");
 	ctx.messageSystem->finalize_message();
 

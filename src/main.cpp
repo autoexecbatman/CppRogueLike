@@ -83,10 +83,8 @@ int main()
 			  << std::flush;
 	game->renderer.load_dawnlike(Paths::DAWNLIKE_DIR);
 
-	// This size is the text's width: the advance is whatever is asked for here, so
-	// every layout width in the HUD is measured against it. Jersey10 is an outline
-	// face, so a size is chosen for legibility against the 32 pixel text row pitch
-	// rather than for a whole multiple of a bitmap design.
+	// The font size sets every HUD width. Jersey10 is an outline face, sized for legibility against the
+	// 32 pixel row pitch rather than a bitmap multiple.
 	game->renderer.load_font(Paths::DAWNLIKE_FONT, 30);
 
 	auto ctx = game->context();

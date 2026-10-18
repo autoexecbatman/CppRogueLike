@@ -267,9 +267,7 @@ void CharacterSheetUI::menu(GameContext& ctx)
 
 	int tileSize = ctx.renderer->get_tile_size();
 	int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
-	// The panel spans the screen in pixels. Whole tiles stop short of it at most
-	// zooms, which left a strip unpainted and put the closing hint above the
-	// panel's own floor, on top of the last row of content.
+	// The panel spans the screen in pixels; whole tiles stop short of it at most zooms.
 	int screenW = ctx.renderer->get_screen_width();
 	int screenH = ctx.renderer->get_screen_height();
 

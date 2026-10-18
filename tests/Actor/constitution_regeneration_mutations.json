@@ -9,8 +9,8 @@
   "mutations": [
     {
       "file": "src/Creature.cpp",
-      "original": "\t// The column holds 0 below Constitution 20, the book's \"Nil\".",
-      "mutated": "\tif (creatureClass == CreatureClass::MONSTER)\n\t{\n\t\treturn;\n\t}\n\t// The column holds 0 below Constitution 20, the book's \"Nil\".",
+      "original": "\tconst int turnsBetweenPoints = dataManager.constitution_for(get_constitution()).Regeneration;",
+      "mutated": "\tif (creatureClass == CreatureClass::MONSTER)\n\t{\n\t\treturn;\n\t}\n\tconst int turnsBetweenPoints = dataManager.constitution_for(get_constitution()).Regeneration;",
       "catches": "a monster shut out of the regeneration column again, which is a different column from the hit point one that does exclude it"
     },
     {

@@ -37,9 +37,8 @@ int get_ac_bonus(MagicalEffect effect, int bonus)
 {
 	switch (effect)
 	{
-	// Both are worth what their own enchantment says, so neither keeps a number beside
-	// the data: a helm of brilliance "is armor of +2 value" (Dungeon Master's Guide, PDF
-	// page 968), which is the +2 its record carries.
+	// Both are worth their own enchantment, so neither keeps a number beside the data: a helm of brilliance
+	// "is armor of +2 value" (DMG, PDF page 968), the +2 its record carries.
 	case MagicalEffect::BRILLIANCE:
 	case MagicalEffect::PROTECTION:
 		return -bonus;

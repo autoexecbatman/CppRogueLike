@@ -113,18 +113,14 @@ void ContextMenu::menu(GameContext& ctx)
 	// --- Input phase (before render, like InventoryUI) ---
 	menu_key_listen();
 
-	// Use inputSystem->get_key() instead of IsMouseButtonPressed() directly.
-	// On Emscripten, poll() (called inside menu_key_listen()) consumes the
-	// prev->curr transition for mouse buttons. A second raw IsMouseButtonPressed()
-	// call in the same frame sees prev=curr=1 and returns false. Reading through
-	// the InputSystem avoids the double-consumption.
+	// Read the click through inputSystem: poll() inside menu_key_listen() has already consumed
+	// the button's transition, so a raw IsMouseButtonPressed() here returns false.
 	if (inputSystem && inputSystem->get_key() == GameKey::MOUSE_LEFT)
 	{
 		int sel = -1;
 		int tileSize = renderer ? renderer->get_tile_size() : 16;
-		// The options are drawn by menu_print, a text-row pitch apart, with the
-		// title on the frame's top edge rather than in a row of its own. So the
-		// option under the pointer is the text row under it, with no offset.
+		// Options are menu_print rows a pitch apart and the title sits on the frame, so the row under
+		// the pointer is the option, with no offset.
 		::Vector2 rawMouse = GetMousePosition();
 		int relRow = panel_text_row_at_y(static_cast<int>(menuStartY) * tileSize, tileSize, static_cast<int>(rawMouse.y));
 		if (relRow >= 0 && relRow < static_cast<int>(menuOptions.size()))

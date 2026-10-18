@@ -670,13 +670,8 @@ void Creature::regenerate_from_constitution(int roundsElapsed, const DataManager
 {
 	assert(roundsElapsed > 0 && "Creature::regenerate_from_constitution called before a round has run");
 
-	// Every creature with a Constitution score mends by it, monsters included: the DMG's
-	// Ability Scores for Monsters gives a creature "all the bonuses and penalties
-	// associated with its actual ability score as listed in the Player's Handbook". What
-	// a monster does not take is Table 3's hit point adjustment, which is a different
-	// column of the same table.
-	//
-	// The column holds 0 below Constitution 20, the book's "Nil".
+	// Every creature mends by Constitution, monsters included (DMG, Ability Scores for Monsters);
+	// the column holds 0 below Constitution 20, the book's "Nil".
 	const int turnsBetweenPoints = dataManager.constitution_for(get_constitution()).Regeneration;
 	if (turnsBetweenPoints == 0)
 	{
@@ -1089,9 +1084,7 @@ void Creature::tick_breath(int roundEndTime, GameContext& ctx)
 	assert(ctx.map && "tick_breath: a round ran with no map to stand on");
 	assert(ctx.dice && "tick_breath: a round ran with no dice to check against");
 
-	// Dry ground, a creature crossing on wings rather than through the water, one that
-	// breathes water, or one wearing the helm: no breath is being held, and any that was
-	// is over the moment it is out.
+	// Dry ground, flight over water, water breathing or the helm: no breath is held, and any held is over.
 	if (!ctx.map->is_water(position) || is_flying() || !needs_air_underwater())
 	{
 		airUntilTime.reset();
@@ -1124,9 +1117,7 @@ void Creature::tick_breath(int roundEndTime, GameContext& ctx)
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " cannot hold out any longer and drowns!\n");
 	ctx.messageSystem->finalize_message();
 
-	// Drowning is not damage that might leave a creature standing. die() carries out
-	// what death does - the reward, the corpse, the message - and reads the health pool
-	// rather than emptying it, so the pool is emptied first.
+	// die() reads the health pool rather than emptying it, so drowning empties it first.
 	set_hp(0);
 	die(ctx);
 }
@@ -1352,9 +1343,8 @@ bool Creature::unequip_item(EquipmentSlot slot, GameContext& ctx)
 		std::unique_ptr<Item> removed = std::move(it->item);
 		equippedItems.erase(it);
 
-		// The pack takes it if it can. A full pack, or one too heavy now - taking off a
-		// Strength item lowers what can be carried - leaves it at the wearer's feet, and
-		// the floor always has room, so an item that comes off is never lost.
+		// The pack takes it if it has room and weight to spare; otherwise it drops at the wearer's feet,
+		// since taking off a Strength item can lower the limit, and the floor always has room.
 		const bool fitsInPack = !InventoryOperations::is_inventory_full(inventoryData) && InventoryOperations::is_within_weight_limit(*removed, *this, *ctx.dataManager);
 
 		removed->remove_state(ActorState::IS_EQUIPPED);
