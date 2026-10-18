@@ -178,7 +178,6 @@ void GameStateManager::init_new_game(GameContext& ctx)
 
 bool GameStateManager::load_all(GameContext& ctx)
 {
-	assert(ctx.bodyPlanRegistry && "GameStateManager::load_all: called without a bodyPlanRegistry");
 	assert(ctx.contentRegistry && "GameStateManager::load_all: called without a contentRegistry");
 	assert(ctx.menuManager != nullptr);
 	assert(ctx.dataManager != nullptr);
@@ -192,7 +191,6 @@ bool GameStateManager::load_all(GameContext& ctx)
 	ctx.dataManager->load_all_data(*ctx.messageSystem);
 
 	*ctx.playerOwner = std::make_unique<Player>(Vector2D{ 0, 0 });
-	ctx.player()->set_body_plan(ctx.bodyPlanRegistry->get("humanoid"));
 
 	if (!load_game(ctx))
 	{

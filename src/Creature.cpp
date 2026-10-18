@@ -209,6 +209,15 @@ void Creature::load(const json& j)
 	morality = parse_morality(j.at("morality").get<std::string>());
 	undead = j.at("undead").get<bool>();
 	awareUntilTime = j.at("awareUntilTime").get<int>();
+	attitude = parse_attitude(j.at("attitude").get<std::string>());
+	displaceable = j.at("displaceable").get<bool>();
+	morale = j.at("morale").get<int>();
+	corpseWeight = j.at("corpseWeight").get<int>();
+	bodyPlan.clear();
+	for (const auto& slotName : j.at("bodyPlan"))
+	{
+		bodyPlan.push_back(parse_equipment_slot(slotName.get<std::string>()));
+	}
 
 	// Absent when the creature is not holding a breath, which is the usual case, so the
 	// key is written only when there is one and read only when it is there.
@@ -219,6 +228,7 @@ void Creature::load(const json& j)
 	}
 	webStuckTurns = j.at("webStuckTurns").get<int>();
 	webStrength = j.at("webStrength").get<int>();
+	// trappingWeb stays empty: webs are spell tiles, which the save does not hold (issues/0167).
 	creatureClass = parse_creature_class(j.at("creatureClass").get<std::string>());
 	hitDie = j.at("hitDie").get<int>();
 	attacksPerRound = j.at("attacksPerRound").get<float>();
@@ -307,6 +317,15 @@ void Creature::load(const json& j)
 			activeBuffs.push_back(buff);
 		}
 	}
+
+	equippedItems.clear();
+	for (const auto& itemEntry : j.at("equippedItems"))
+	{
+		const EquipmentSlot slot = parse_equipment_slot(itemEntry.at("slot").get<std::string>());
+		auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+		item->load(itemEntry.at("item"));
+		equippedItems.emplace_back(std::move(item), slot);
+	}
 }
 
 void Creature::save(json& j)
@@ -327,6 +346,16 @@ void Creature::save(json& j)
 	j["morality"] = encode_morality(morality);
 	j["undead"] = undead;
 	j["awareUntilTime"] = awareUntilTime;
+	j["attitude"] = encode_attitude(attitude);
+	j["displaceable"] = displaceable;
+	j["morale"] = morale;
+	j["corpseWeight"] = corpseWeight;
+	json slotNames = json::array();
+	for (const EquipmentSlot slot : bodyPlan)
+	{
+		slotNames.push_back(encode_equipment_slot(slot));
+	}
+	j["bodyPlan"] = slotNames;
 	if (airUntilTime.has_value())
 	{
 		j["airUntilTime"] = *airUntilTime;
@@ -429,6 +458,16 @@ void Creature::save(json& j)
 		buffsJson.push_back(buffJson);
 	}
 	j["activeBuffs"] = buffsJson;
+
+	json equippedJson = json::array();
+	for (const EquippedItem& equipped : equippedItems)
+	{
+		assert(equipped.item && "Creature::save: an equipment entry holds no item");
+		json itemJson;
+		equipped.item->save(itemJson);
+		equippedJson.push_back(json{ { "slot", encode_equipment_slot(equipped.slot) }, { "item", itemJson } });
+	}
+	j["equippedItems"] = equippedJson;
 }
 
 void Creature::update_creature_state(GameContext& ctx)

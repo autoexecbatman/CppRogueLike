@@ -21,8 +21,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tequippedItems.emplace_back(std::move(item), slot);\n",
-      "mutated": "\tequippedItems.emplace_back(std::move(item), EquipmentSlot::BODY);\n",
+      "original": "\t// Add equipped item\n\tequippedItems.emplace_back(std::move(item), slot);\n",
+      "mutated": "\t// Add equipped item\n\tequippedItems.emplace_back(std::move(item), EquipmentSlot::BODY);\n",
       "catches": "an item put in whichever slot, not the one asked for"
     }
   ]

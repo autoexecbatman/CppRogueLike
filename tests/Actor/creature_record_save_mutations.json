@@ -1,0 +1,47 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=CreatureRecordSaveTest.*:CreatureSerializationTest.*:PlayerSerializationTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tattitude = parse_attitude(j.at(\"attitude\").get<std::string>());\n",
+      "mutated": "",
+      "catches": "a loaded creature's attitude left at hostile, so the shopkeeper turns on the player"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tdisplaceable = j.at(\"displaceable\").get<bool>();\n",
+      "mutated": "",
+      "catches": "a loaded creature left displaceable, so the shopkeeper can be shoved"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tmorale = j.at(\"morale\").get<int>();\n",
+      "mutated": "",
+      "catches": "a loaded creature's morale left at 10"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tcorpseWeight = j.at(\"corpseWeight\").get<int>();\n",
+      "mutated": "",
+      "catches": "a loaded creature's corpse left at 50"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tbodyPlan.push_back(parse_equipment_slot(slotName.get<std::string>()));\n",
+      "mutated": "",
+      "catches": "a loaded creature left with no slots"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tequippedItems.emplace_back(std::move(item), slot);\n",
+      "mutated": "",
+      "catches": "a loaded creature's equipment thrown away"
+    }
+  ]
+}

@@ -73,6 +73,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ShopTransactionTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EnhancementSystemTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CreatureSerializationTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CreatureRecordSaveTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ItemSerializationTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/BehaviorRecordTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PlayerSerializationTest.cpp

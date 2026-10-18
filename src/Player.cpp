@@ -868,8 +868,8 @@ Player::DualWieldInfo Player::get_dual_wield_info() const noexcept
 	return info;
 }
 
-// Writes the whole character into j: the creature half through Creature::save, then
-// the fields only a player has, then every equipped item with the slot it sits in.
+// Writes the whole character into j: the creature half through Creature::save, which
+// includes every equipped item with the slot it sits in, then the fields only a player has.
 // Every field written here is required on load - there are no save fallbacks.
 //
 // Example:
@@ -894,19 +894,6 @@ void Player::save(json& j)
 	j["killCount"] = killCount;
 	j["memorizedSpells"] = memorizedSpells;
 	j["thiefSkillPoints"] = thiefSkillPoints;
-
-	// Save equipped items
-	json equippedJson = json::array();
-	for (const auto& equipped : equippedItems)
-	{
-		json itemEntry;
-		itemEntry["slot"] = static_cast<int>(equipped.slot);
-		json itemJson;
-		equipped.item->save(itemJson);
-		itemEntry["item"] = itemJson;
-		equippedJson.push_back(itemEntry);
-	}
-	j["equippedItems"] = equippedJson;
 }
 
 // Rebuilds the character from j, and refuses a record that is missing anything.
@@ -948,17 +935,6 @@ void Player::load(const json& j)
 	killCount = j.at("killCount").get<int>();
 	memorizedSpells = j.at("memorizedSpells").get<std::vector<std::string>>();
 	thiefSkillPoints = j.at("thiefSkillPoints").get<std::array<int, THIEF_SKILL_COUNT>>();
-	// trappingWeb is not serialized - it's a map reference that needs to be re-established
-
-	// Load equipped items
-	equippedItems.clear();
-	for (const auto& itemEntry : j.at("equippedItems"))
-	{
-		EquipmentSlot slot = static_cast<EquipmentSlot>(itemEntry.at("slot").get<int>());
-		auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
-		item->load(itemEntry.at("item"));
-		equippedItems.emplace_back(std::move(item), slot);
-	}
 
 	// Closes the null window this function opens. Creature::load builds the pool, the
 	// armour class and the reward only when the record carries them, which is right for
