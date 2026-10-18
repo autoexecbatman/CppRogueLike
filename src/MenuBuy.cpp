@@ -36,7 +36,7 @@ void MenuBuy::populate_items()
 		{ return !item; }));
 	for (const auto& item : shopkeeper.get_shop_inventory().items)
 	{
-		std::string itemName = item->actorData.name;
+		std::string itemName = item->get_name();
 		int price = shopkeeper.get_buy_price(*item);
 		std::string goldText = "(" + std::to_string(price) + "g)";
 

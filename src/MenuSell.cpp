@@ -67,7 +67,7 @@ void MenuSell::populate_items(std::span<std::unique_ptr<Item>> items)
 	{
 		assert(item && "populate_items: the pack holds a null where an item should be");
 
-		std::string itemName = item->actorData.name;
+		std::string itemName = item->get_name();
 
 		const int sellPrice = shopkeeper.shop->get_sell_price(*item);
 		std::string goldText = "(" + std::to_string(sellPrice) + "g)";

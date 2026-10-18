@@ -367,7 +367,7 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 		{
 			if (item->position == world_tile)
 			{
-				desc += " [" + item->actorData.name + "]";
+				desc += " [" + item->get_name() + "]";
 				if (!actor)
 				{
 					hr = 100;

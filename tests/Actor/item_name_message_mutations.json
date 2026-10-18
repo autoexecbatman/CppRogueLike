@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=ItemNameMessageTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Creature.cpp",
+      "original": "std::format(\"The {} is cursed and cannot be removed!\", it->item->get_name()),",
+      "mutated": "std::format(\"The {} is cursed and cannot be removed!\", it->item->actorData.name),",
+      "catches": "the cursed message naming the bare base name"
+    },
+    {
+      "file": "src/Pickup.cpp",
+      "original": "\tconst std::string itemName = item.get_name();",
+      "mutated": "\tconst std::string itemName = item.actorData.name;",
+      "catches": "the pickup message naming the bare base name"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "ctx.messageSystem->message(ColorPairId::WHITE_BLACK, \"You put on the \" + item.get_name() + \".\", MessageCompletion::FINISHED);",
+      "mutated": "ctx.messageSystem->message(ColorPairId::WHITE_BLACK, \"You put on the \" + item.actorData.name + \".\", MessageCompletion::FINISHED);",
+      "catches": "the ring's put-on message naming the bare base name"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "std::format(\"You cannot carry the {} as well, and set it down.\", removed->get_name()),",
+      "mutated": "std::format(\"You cannot carry the {} as well, and set it down.\", removed->actorData.name),",
+      "catches": "the set-down message naming the bare base name"
+    }
+  ]
+}

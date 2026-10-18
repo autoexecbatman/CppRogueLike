@@ -67,8 +67,6 @@ public:
 	void render(const GameContext& ctx) const noexcept;
 	bool is_visible(const GameContext& ctx) const noexcept;
 
-	[[nodiscard]] std::string_view get_name() const { return actorData.name; }
-
 	virtual TileRef get_display_tile() const noexcept
 	{
 		return actorData.tile;

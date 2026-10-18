@@ -280,7 +280,7 @@ void PlayerController::look_on_floor(Vector2D target, GameContext& ctx)
 
 		if (floorItem->position == target)
 		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "There's a " + floorItem->actorData.name + " here", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "There's a " + floorItem->get_name() + " here", MessageCompletion::FINISHED);
 		}
 	}
 }
@@ -993,7 +993,7 @@ void PlayerController::handle_right_click(GameContext& ctx)
 
 		if (item->position == world_tile)
 		{
-			std::string itemName = item->actorData.name.substr(0, 16);
+			std::string itemName = item->get_name().substr(0, 16);
 			const auto walk_to_pick_up = [this, world_tile](GameContext& actionCtx)
 			{
 				begin_path_walk(

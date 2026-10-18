@@ -175,23 +175,23 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 		}
 
 		const int itemDistance = owner.get_tile_distance(item->position);
-		ctx.messageSystem->log(std::format("Item at distance {}: {}", itemDistance, item->actorData.name));
+		ctx.messageSystem->log(std::format("Item at distance {}: {}", itemDistance, item->get_name()));
 
 		if (itemDistance <= CONSUMPTION_RADIUS)
 		{
 			if (!item->behavior)
 			{
-				ctx.messageSystem->log(std::format("Mimic found non-pickable item, skipping: {}", item->actorData.name));
+				ctx.messageSystem->log(std::format("Mimic found non-pickable item, skipping: {}", item->get_name()));
 				continue;
 			}
 
 			ctx.messageSystem->append_message_part(ColorPairId::RED_YELLOW, "The mimic ");
 			ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "consumes the ");
-			ctx.messageSystem->append_message_part(item->actorData.color, item->actorData.name);
+			ctx.messageSystem->append_message_part(item->actorData.color, item->get_name());
 			ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "!");
 			ctx.messageSystem->finalize_message();
 
-			ctx.messageSystem->log(std::format("Mimic consuming item: {}", item->actorData.name));
+			ctx.messageSystem->log(std::format("Mimic consuming item: {}", item->get_name()));
 
 			++itemsConsumed;
 			apply_item_bonus(owner, item->itemClass, ctx);

@@ -448,6 +448,9 @@ public:
 	// neither, which is a creature with hands and nothing in them.
 	[[nodiscard]] std::string get_attack_name() const;
 
+	// A creature's name is its record's; an item composes its own in Item::get_name.
+	[[nodiscard]] std::string_view get_name() const { return actorData.name; }
+
 	// Type query - allows polymorphic identification without RTTI or cross-module deps
 	virtual bool is_player() const noexcept { return false; }
 

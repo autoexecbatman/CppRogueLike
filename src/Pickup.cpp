@@ -60,7 +60,7 @@ void take_floor_item(Creature& taker, Item& item, GameContext& ctx)
 	}
 
 	// Read before the move: the item is gone from under this reference afterwards.
-	const std::string itemName = item.actorData.name;
+	const std::string itemName = item.get_name();
 
 	auto removeResult = InventoryOperations::remove_item(*ctx.floorInventory, item);
 	if (!removeResult.has_value())
@@ -133,7 +133,7 @@ void from_floor(Creature& taker, GameContext& ctx)
 			menuCtx.menus->back()->back = true;
 		};
 
-		entries.push_back({ item->actorData.name, hotkey, takeCommand });
+		entries.push_back({ item->get_name(), hotkey, takeCommand });
 		++hotkey;
 	}
 

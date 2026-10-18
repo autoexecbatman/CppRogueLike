@@ -125,7 +125,7 @@ bool use_stat_boost(EquipmentSlot slot, Item& item, Creature& wearer, GameContex
 	wearer.update_armor_class(ctx);
 	ctx.messageSystem->message(
 		ColorPairId::WHITE_BLACK,
-		std::format("You {} the {}.", wasEquipped ? "remove" : "put on", item.actorData.name),
+		std::format("You {} the {}.", wasEquipped ? "remove" : "put on", item.get_name()),
 		MessageCompletion::FINISHED);
 	return true;
 }
@@ -155,7 +155,7 @@ bool use_magical_equip(MagicalEffect effect, EquipmentSlot slot, Item& item, Cre
 				ctx.buffSystem->remove_buff(wearer, BuffType::INVISIBILITY);
 				ctx.messageSystem->message(ColorPairId::CYAN_BLACK, "Your invisibility fades.", MessageCompletion::FINISHED);
 			}
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You remove the " + item.actorData.name + ".", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You remove the " + item.get_name() + ".", MessageCompletion::FINISHED);
 		}
 		else
 		{
@@ -163,7 +163,7 @@ bool use_magical_equip(MagicalEffect effect, EquipmentSlot slot, Item& item, Cre
 			{
 				ctx.messageSystem->message(ColorPairId::CYAN_BLACK, "The ring pulses with arcane power. Press Ctrl+C to cast.", MessageCompletion::FINISHED);
 			}
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You put on the " + item.actorData.name + ".", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You put on the " + item.get_name() + ".", MessageCompletion::FINISHED);
 		}
 
 		if (MagicalEffectUtils::is_protection_effect(effect) || effect == MagicalEffect::BRILLIANCE)
@@ -478,7 +478,7 @@ bool use(Food& food, Item& owner, Creature& wearer, GameContext& ctx)
 
 	ctx.hungerSystem->decrease_hunger(ctx, food.nutritionValue);
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "You eat the ");
-	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, owner.actorData.name);
+	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, owner.get_name());
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ".");
 	ctx.messageSystem->finalize_message();
 	return consume_item(owner, wearer);
@@ -502,7 +502,7 @@ bool use(CorpseFood& corpseFood, Item& owner, Creature& wearer, GameContext& ctx
 	ctx.hungerSystem->decrease_hunger(ctx, actual);
 
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "You eat the ");
-	ctx.messageSystem->append_message_part(ColorPairId::RED_BLACK, owner.actorData.name);
+	ctx.messageSystem->append_message_part(ColorPairId::RED_BLACK, owner.get_name());
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ". " + corpseFood.taste);
 	ctx.messageSystem->finalize_message();
 	return consume_item(owner, wearer);
@@ -517,8 +517,8 @@ bool use([[maybe_unused]] Armor& armor, Item& item, Creature& wearer, GameContex
 	{
 		ctx.messageSystem->message(
 			ColorPairId::WHITE_BLACK,
-			was_equipped ? "You remove the " + item.actorData.name + "."
-						 : "You put on the " + item.actorData.name + ".",
+			was_equipped ? "You remove the " + item.get_name() + "."
+						 : "You put on the " + item.get_name() + ".",
 			MessageCompletion::FINISHED);
 	}
 

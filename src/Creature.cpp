@@ -1254,11 +1254,11 @@ bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCo
 	{
 		if (ctx.messageSystem->is_debug_mode())
 		{
-			ctx.messageSystem->log("DEBUG: can_equip failed for " + item->actorData.name);
+			ctx.messageSystem->log("DEBUG: can_equip failed for " + item->get_name());
 			ctx.messageSystem->log("DEBUG: Item class: " + std::to_string(static_cast<int>(item->itemClass)));
 			ctx.messageSystem->log("DEBUG: Is armor: " + std::string(item->is_armor() ? "true" : "false"));
 			ctx.messageSystem->log("DEBUG: Slot: " + std::to_string(static_cast<int>(slot)));
-			ctx.messageSystem->log("DEBUG: equip_item failed - can_equip returned false for " + item->actorData.name + " in slot " + std::to_string(static_cast<int>(slot)));
+			ctx.messageSystem->log("DEBUG: equip_item failed - can_equip returned false for " + item->get_name() + " in slot " + std::to_string(static_cast<int>(slot)));
 		}
 		// Back to the pack it came out of: carrying it again adds no weight, so no weight gate
 		[[maybe_unused]] const auto pickUpItemResult = InventoryOperations::add_item(inventoryData, std::move(item));
@@ -1272,7 +1272,7 @@ bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCo
 	{
 		ctx.messageSystem->message(
 			ColorPairId::WHITE_BLACK,
-			std::format("You are not strong enough to draw the {}.", item->actorData.name),
+			std::format("You are not strong enough to draw the {}.", item->get_name()),
 			MessageCompletion::FINISHED);
 		// Back to the pack it came out of, as for a slot that refuses it
 		[[maybe_unused]] const auto returnedToPack = InventoryOperations::add_item(inventoryData, std::move(item));
@@ -1290,7 +1290,7 @@ bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCo
 		{
 			// Two-handed weapon - also unequip left hand
 			unequip_item(EquipmentSlot::LEFT_HAND, ctx);
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You grip the " + item->actorData.name + " with both hands.", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You grip the " + item->get_name() + " with both hands.", MessageCompletion::FINISHED);
 		}
 	}
 
@@ -1304,7 +1304,7 @@ bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCo
 	if (slot == EquipmentSlot::RIGHT_HAND && equippedItems.back().item->is_weapon())
 	{
 		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(equippedItems.back().item->itemKey);
-		ctx.messageSystem->log("Equipped " + equippedItems.back().item->actorData.name + " - damage: " + weaponDamage);
+		ctx.messageSystem->log("Equipped " + equippedItems.back().item->get_name() + " - damage: " + weaponDamage);
 	}
 
 	// Update armor class if armor or shield was equipped
@@ -1333,7 +1333,7 @@ bool Creature::unequip_item(EquipmentSlot slot, GameContext& ctx)
 		{
 			ctx.messageSystem->message(
 				ColorPairId::RED_BLACK,
-				std::format("The {} is cursed and cannot be removed!", it->item->actorData.name),
+				std::format("The {} is cursed and cannot be removed!", it->item->get_name()),
 				MessageCompletion::FINISHED);
 			return false;
 		}
@@ -1357,7 +1357,7 @@ bool Creature::unequip_item(EquipmentSlot slot, GameContext& ctx)
 		{
 			ctx.messageSystem->message(
 				ColorPairId::WHITE_BLACK,
-				std::format("You cannot carry the {} as well, and set it down.", removed->actorData.name),
+				std::format("You cannot carry the {} as well, and set it down.", removed->get_name()),
 				MessageCompletion::FINISHED);
 			removed->position = position;
 			InventoryOperations::add_item(*ctx.floorInventory, std::move(removed));
