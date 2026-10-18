@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=MonsterDamageBookTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "data/content/monsters.json",
+      "original": "    \"color\": \"brown_black\",\n    \"corpse\": \"dead werewolf\",\n    \"damage\": {\n      \"display\": \"2d4\",\n",
+      "mutated": "    \"color\": \"brown_black\",\n    \"corpse\": \"dead werewolf\",\n    \"damage\": {\n      \"display\": \"2d8\",\n",
+      "catches": "the werewolf back to 2d8, the 2-8 read as 2d8"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "    \"color\": \"green_black\",\n    \"corpse\": \"dead troll\",\n    \"damage\": {\n      \"display\": \"1d8+4\",\n",
+      "mutated": "    \"color\": \"green_black\",\n    \"corpse\": \"dead troll\",\n    \"damage\": {\n      \"display\": \"1d10\",\n",
+      "catches": "the troll back to 1d10, not its entry's bite"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "    \"color\": \"brown_black\",\n    \"corpse\": \"dead rat\",\n    \"damage\": {\n      \"display\": \"1\",\n",
+      "mutated": "    \"color\": \"brown_black\",\n    \"corpse\": \"dead rat\",\n    \"damage\": {\n      \"display\": \"1d3\",\n",
+      "catches": "the ordinary rat given the giant rat's 1-3"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "    \"color\": \"brown_black\",\n    \"corpse\": \"dissipated shadow\",\n    \"damage\": {\n      \"display\": \"1d4+1\",\n",
+      "mutated": "    \"color\": \"brown_black\",\n    \"corpse\": \"dissipated shadow\",\n    \"damage\": {\n      \"display\": \"1d4\",\n",
+      "catches": "the shadow's 2-5 read without its +1"
+    }
+  ]
+}

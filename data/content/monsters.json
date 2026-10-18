@@ -64,7 +64,7 @@
     "color": "magenta_black",
     "corpse": "dead bat",
     "damage": {
-      "display": "1d2",
+      "display": "1",
       "type": "physical"
     },
     "depth_max": 3,
@@ -170,7 +170,7 @@
     "color": "red_yellow",
     "corpse": "dead chimera",
     "damage": {
-      "display": "3d12",
+      "display": "3d4",
       "type": "fire"
     },
     "depth_max": 0,
@@ -268,7 +268,7 @@
     "color": "red_yellow",
     "corpse": "charred wolf corpse",
     "damage": {
-      "display": "1d6",
+      "display": "1d10",
       "type": "fire"
     },
     "depth_max": 0,
@@ -317,7 +317,7 @@
     "color": "brown_black",
     "corpse": "broken gargoyle",
     "damage": {
-      "display": "1d8",
+      "display": "1d6",
       "type": "physical"
     },
     "depth_max": 8,
@@ -514,7 +514,7 @@
     "color": "green_black",
     "corpse": "dead giant snake",
     "damage": {
-      "display": "1d8",
+      "display": "1d3",
       "type": "poison"
     },
     "depth_max": 7,
@@ -563,7 +563,7 @@
     "color": "red_black",
     "corpse": "dead gnoll",
     "damage": {
-      "display": "2d8",
+      "display": "1d8",
       "type": "physical"
     },
     "depth_max": 6,
@@ -878,7 +878,7 @@
     "color": "cyan_blue",
     "corpse": "frozen wolf corpse",
     "damage": {
-      "display": "1d6",
+      "display": "2d4",
       "type": "cold"
     },
     "depth_max": 0,
@@ -1350,7 +1350,7 @@
     "color": "brown_black",
     "corpse": "dead rat",
     "damage": {
-      "display": "1d3",
+      "display": "1",
       "type": "physical"
     },
     "depth_max": 3,
@@ -1399,7 +1399,7 @@
     "color": "brown_black",
     "corpse": "dissipated shadow",
     "damage": {
-      "display": "1d4",
+      "display": "1d4+1",
       "type": "physical"
     },
     "depth_max": 7,
@@ -1700,7 +1700,7 @@
     "color": "green_black",
     "corpse": "dead troll",
     "damage": {
-      "display": "1d10",
+      "display": "1d8+4",
       "type": "physical"
     },
     "depth_max": 0,
@@ -1802,7 +1802,7 @@
     "color": "brown_black",
     "corpse": "dead werewolf",
     "damage": {
-      "display": "2d8",
+      "display": "2d4",
       "type": "physical"
     },
     "depth_max": 8,
@@ -1851,7 +1851,7 @@
     "color": "cyan_blue",
     "corpse": "dead wight",
     "damage": {
-      "display": "1d6",
+      "display": "1d4",
       "type": "physical"
     },
     "depth_max": 8,
@@ -1901,7 +1901,7 @@
     "color": "brown_black",
     "corpse": "dead wolf",
     "damage": {
-      "display": "1d4",
+      "display": "1d4+1",
       "type": "physical"
     },
     "depth_max": 5,
@@ -2000,7 +2000,7 @@
     "color": "green_black",
     "corpse": "dead wyvern",
     "damage": {
-      "display": "2d12",
+      "display": "2d8",
       "type": "poison"
     },
     "depth_max": 0,

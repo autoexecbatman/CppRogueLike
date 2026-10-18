@@ -50,6 +50,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterSizeTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterIntelligenceRatingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterStrengthTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterDamageBookTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterAbilityScoresTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterHitDiceCountsTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/SpiderStatBlockTest.cpp
