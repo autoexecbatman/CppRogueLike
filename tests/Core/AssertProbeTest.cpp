@@ -374,6 +374,16 @@ TEST_F(AssertProbeDeathTest, BurstingAFireballWithANullInTheCreatureListAborts)
 		"burst_fireball: creatures list holds a null entry");
 }
 
+// The burst reaches the player too, so a context with no player is a fault in its wiring.
+TEST_F(AssertProbeDeathTest, BurstingAFireballWithNoPlayerAborts)
+{
+	std::vector<std::unique_ptr<Creature>> creatures{};
+	ctx.creatures = &creatures;
+
+	EXPECT_DEATH([[maybe_unused]] const auto burst = SpellSystem::burst_fireball(Vector2D{ 5, 5 }, 3, 2, ctx),
+		"burst_fireball: called without a player");
+}
+
 // Magic missile gathers its targets from the whole list before it fires any.
 TEST_F(AssertProbeDeathTest, CastingMagicMissileWithANullInTheCreatureListAborts)
 {

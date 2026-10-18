@@ -60,6 +60,36 @@
       "original": "inline constexpr int SCROLL_FIREBALL_CASTER_LEVEL = 6;",
       "mutated": "inline constexpr int SCROLL_FIREBALL_CASTER_LEVEL = 5;",
       "catches": "a scroll's fireball cast below the book's 6th level"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "if (!player->is_dead() && player->get_tile_distance(center) <= static_cast<double>(radius))",
+      "mutated": "if (false)",
+      "catches": "the burst passing over the player inside its radius"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "if (!player->is_dead() && player->get_tile_distance(center) <= static_cast<double>(radius))",
+      "mutated": "if (!player->is_dead() && player->get_tile_distance(center) <= static_cast<double>(radius) + 1.0)",
+      "catches": "the burst reaching the player one tile past its radius"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "if (!player->is_dead() && player->get_tile_distance(center) <= static_cast<double>(radius))",
+      "mutated": "if (player->get_tile_distance(center) <= static_cast<double>(radius))",
+      "catches": "the burst burning and counting a dead player"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\t++burst.struck;\n\t\tburst.playerReach = PlayerReach::STRUCK;",
+      "mutated": "\t\tburst.playerReach = PlayerReach::STRUCK;",
+      "catches": "the player burned and left out of the count"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "burst.playerReach = PlayerReach::STRUCK;",
+      "mutated": "burst.playerReach = PlayerReach::OUTSIDE;",
+      "catches": "the burst reporting the player outside after burning the player"
     }
   ]
 }

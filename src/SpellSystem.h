@@ -112,24 +112,33 @@ struct ItemGrantedSpell
 
 std::vector<ItemGrantedSpell> get_item_granted_spells(const Player& player);
 
-// What one fireball did: the dice it rolled and how many it struck.
+// Whether a burst reached the player, so a caller animates the hit the burst dealt.
+enum class PlayerReach
+{
+	OUTSIDE,
+	STRUCK
+};
+
+// What one fireball did: the dice it rolled, how many it struck, and whether the player was one.
 struct FireballBurst
 {
 	int diceCount{ 0 };
 	std::vector<int> dice{};
 	int totalDamage{ 0 };
 	int struck{ 0 };
+	PlayerReach playerReach{ PlayerReach::OUTSIDE };
 };
 
-// Burns every living creature within radius of center for 1d6 per caster
-// level, ten dice at most, rolled once for the whole burst. Each creature
-// saves versus spells at 15 or better with its fire resistance's bonus added,
-// takes the dice reduced per die by that resistance, and half of that on a
-// save. Public so a test can reach the burst without driving the targeting
-// menu that precedes it in play, and so the scroll can cast it.
+// Burns every living creature within radius of center, the player among them,
+// for 1d6 per caster level, ten dice at most, rolled once for the whole burst.
+// Each creature saves versus spells on its own Table 60 row with its fire
+// resistance's bonus added, takes the dice reduced per die by that resistance,
+// and half of that on a save. Public so a test can reach the burst without
+// driving the targeting menu that precedes it in play, and so the scroll can cast it.
 //
 // Example, caster level 3, one goblin adjacent, dice forced to 6, 6, 6 and a save of 1:
-//   burst_fireball(center, 3, 2, ctx);   // -> { 3, 18, 1 }, goblin takes 18
+//   burst_fireball(center, 3, 2, ctx);   // -> { 3, 18, 1, OUTSIDE }, goblin takes 18
+//   // the same with the player beside the goblin -> { 3, 18, 2, STRUCK }
 FireballBurst burst_fireball(Vector2D center, int casterLevel, int radius, GameContext& ctx);
 
 // Burns one creature with an already-rolled burst: its save with its fire

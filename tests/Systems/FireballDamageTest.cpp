@@ -81,7 +81,8 @@ protected:
 	MockGameContext mock{};
 	GameContext ctx{};
 	BuffSystem buffs{};
-	std::unique_ptr<Player> caster{ std::make_unique<Player>(Vector2D{ 2, 5 }) };
+	// Outside every burst below, unless a test moves it in.
+	std::unique_ptr<Player> caster{ std::make_unique<Player>(Vector2D{ 20, 5 }) };
 	std::vector<std::unique_ptr<Creature>> creatures{};
 };
 
@@ -226,4 +227,61 @@ TEST_F(FireballDamageTest, TheScrollBurstRollsSixDice)
 
 	EXPECT_EQ(burst.diceCount, 6);
 	EXPECT_EQ(burst.totalDamage, 36);
+}
+
+// The book's burst burns every creature within its radius, and the player is one.
+TEST_F(FireballDamageTest, TheBurstBurnsThePlayerInsideItsRadius)
+{
+	Creature& goblin = add_creature(4);
+	caster->position = Vector2D{ 2, 5 };
+	const int casterHpBefore = caster->get_hp();
+	force_max_dice_then_saves({ 1, 1 });
+
+	const auto burst = burst_at(Vector2D{ 3, 5 });
+
+	EXPECT_EQ(burst.struck, 2);
+	EXPECT_EQ(burst.playerReach, SpellSystem::PlayerReach::STRUCK);
+	EXPECT_EQ(goblin.get_hp(), STARTING_HP - MAX_DAMAGE);
+	EXPECT_EQ(caster->get_hp(), casterHpBefore - MAX_DAMAGE);
+}
+
+// A player who makes the save takes half, as any creature does.
+TEST_F(FireballDamageTest, APlayerWhoSavesTakesHalf)
+{
+	caster->position = Vector2D{ 2, 5 };
+	const int casterHpBefore = caster->get_hp();
+	force_max_dice_then_saves({ 20 });
+
+	const auto burst = burst_at(Vector2D{ 3, 5 });
+
+	EXPECT_EQ(burst.struck, 1);
+	EXPECT_EQ(caster->get_hp(), casterHpBefore - MAX_DAMAGE / 2);
+}
+
+// One tile past the radius the player is neither burned nor counted.
+TEST_F(FireballDamageTest, ThePlayerOutsideTheRadiusIsUntouched)
+{
+	add_creature(3);
+	caster->position = Vector2D{ 3 + RADIUS + 1, 5 };
+	const int casterHpBefore = caster->get_hp();
+	force_max_dice_then_saves({ 1 });
+
+	const auto burst = burst_at(Vector2D{ 3, 5 });
+
+	EXPECT_EQ(burst.struck, 1);
+	EXPECT_EQ(burst.playerReach, SpellSystem::PlayerReach::OUTSIDE);
+	EXPECT_EQ(caster->get_hp(), casterHpBefore);
+}
+
+// A dead player is passed over, as a dead creature is.
+TEST_F(FireballDamageTest, ADeadPlayerIsNeitherBurnedNorCounted)
+{
+	caster->position = Vector2D{ 2, 5 };
+	caster->healthPool->set_hp(0);
+	force_max_dice_then_saves({ 1 });
+
+	const auto burst = burst_at(Vector2D{ 3, 5 });
+
+	EXPECT_EQ(burst.struck, 0);
+	EXPECT_EQ(burst.playerReach, SpellSystem::PlayerReach::OUTSIDE);
 }

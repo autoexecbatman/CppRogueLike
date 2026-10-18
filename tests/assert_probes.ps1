@@ -147,6 +147,11 @@ $probes = @(
         anchor = 'assert(creature && "burst_fireball: creatures list holds a null entry");'
     },
     @{
+        test   = "AssertProbeDeathTest.BurstingAFireballWithNoPlayerAborts"
+        file   = "src/SpellSystem.cpp"
+        anchor = 'assert(player && "burst_fireball: called without a player");'
+    },
+    @{
         test   = "AssertProbeDeathTest.CastingMagicMissileWithANullInTheCreatureListAborts"
         file   = "src/SpellSystem.cpp"
         anchor = 'assert(creature && "cast_magic_missile: creatures list holds a null entry");'

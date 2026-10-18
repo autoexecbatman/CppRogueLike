@@ -1081,6 +1081,16 @@ SpellSystem::FireballBurst SpellSystem::burst_fireball(Vector2D center, int cast
 		++burst.struck;
 	}
 
+	// The player is never in ctx.creatures, and the burst reaches the reader or caster all the same.
+	Creature* player = ctx.player();
+	assert(player && "burst_fireball: called without a player");
+	if (!player->is_dead() && player->get_tile_distance(center) <= static_cast<double>(radius))
+	{
+		burn_with_fireball(*player, burst, ctx);
+		++burst.struck;
+		burst.playerReach = PlayerReach::STRUCK;
+	}
+
 	return burst;
 }
 

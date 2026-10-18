@@ -411,10 +411,9 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 				std::format("{}d6 = {} fire, {} struck.", burst.diceCount, burst.totalDamage, burst.struck),
 				MessageCompletion::FINISHED);
 
-			if (innerCtx.player()->get_tile_distance(targetPos) <= aoeRadius)
+			if (burst.playerReach == SpellSystem::PlayerReach::STRUCK)
 			{
 				SpellAnimations::animate_creature_hit(innerCtx.player()->position, innerCtx);
-				SpellSystem::burn_with_fireball(*innerCtx.player(), burst, innerCtx);
 			}
 			innerCtx.creatureManager->cleanup_dead_creatures(*innerCtx.creatures);
 		}
