@@ -126,57 +126,6 @@ TEST_F(EnhancementSystemTest, GetSuffixName_OfFireResistance_ReturnsCorrect) {
 }
 
 // ----------------------------------------------------------------------------
-// Full Name Tests
-// ----------------------------------------------------------------------------
-
-TEST_F(EnhancementSystemTest, GetFullName_NoPrefixNoSuffix_ReturnsBaseName) {
-    defaultEnhancement.prefix = PrefixType::NONE;
-    defaultEnhancement.suffix = SuffixType::NONE;
-
-    std::string fullName = defaultEnhancement.get_full_name("long sword");
-
-    EXPECT_EQ(fullName, "long sword");
-}
-
-TEST_F(EnhancementSystemTest, GetFullName_PrefixOnly_PrependPrefix) {
-    defaultEnhancement.prefix = PrefixType::SHARP;
-    defaultEnhancement.suffix = SuffixType::NONE;
-
-    std::string fullName = defaultEnhancement.get_full_name("long sword");
-
-    EXPECT_EQ(fullName, "Sharp long sword");
-}
-
-TEST_F(EnhancementSystemTest, GetFullName_SuffixOnly_AppendSuffix) {
-    defaultEnhancement.prefix = PrefixType::NONE;
-    defaultEnhancement.suffix = SuffixType::OF_SLAYING;
-
-    std::string fullName = defaultEnhancement.get_full_name("long sword");
-
-    EXPECT_EQ(fullName, "long sword of Slaying");
-}
-
-TEST_F(EnhancementSystemTest, GetFullName_PrefixAndSuffix_IncludesBoth) {
-    defaultEnhancement.prefix = PrefixType::SHARP;
-    defaultEnhancement.suffix = SuffixType::OF_THE_BEAR;
-
-    std::string fullName = defaultEnhancement.get_full_name("long sword");
-
-    EXPECT_EQ(fullName, "Sharp long sword of the Bear");
-}
-
-TEST_F(EnhancementSystemTest, GetFullName_WithEnhancementLevel_IncludesPlus) {
-    defaultEnhancement.enhancementLevel = 2;
-    defaultEnhancement.prefix = PrefixType::NONE;
-    defaultEnhancement.suffix = SuffixType::NONE;
-
-    std::string fullName = defaultEnhancement.get_full_name("long sword");
-
-    // Should include "+2" somewhere
-    EXPECT_NE(fullName.find("+2"), std::string::npos);
-}
-
-// ----------------------------------------------------------------------------
 // Apply Enhancement Effects Tests
 // ----------------------------------------------------------------------------
 
@@ -291,19 +240,6 @@ TEST_F(EnhancementSystemTest, ColdResistance_InValidRange) {
 // Random Generation Tests
 // ----------------------------------------------------------------------------
 
-TEST_F(EnhancementSystemTest, GenerateRandom_ReturnsValidEnhancement) {
-    auto enhancement = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, dice);
-
-    // Should have at least one enhancement (prefix or suffix or level)
-    bool hasEnhancement = (enhancement.prefix != PrefixType::NONE) ||
-                          (enhancement.suffix != SuffixType::NONE) ||
-                          (enhancement.enhancementLevel > 0);
-
-    // May or may not have enhancement depending on random chance
-    // Just verify no crash
-    EXPECT_NO_THROW(enhancement.get_full_name("test item"));
-}
-
 // An enhancement is drawn from the game's own generator, so a test can queue the
 // rolls and get a determined result. It used to draw from rand(), which no test
 // could reach: the same scripted sequence gave a different answer every call.
@@ -415,45 +351,6 @@ TEST_F(EnhancementSystemTest, AllowingMagicalPrefixesStillDrawsThem) {
     EXPECT_GT(magical, 0) << "the weapon pool never produced a magical prefix at all";
 }
 
-TEST_F(EnhancementSystemTest, GenerateWeaponEnhancement_ValidForWeapons) {
-    auto enhancement = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, dice);
-
-    // Weapon enhancements should typically affect damage or to-hit
-    // After applying effects
-    enhancement.apply_enhancement_effects();
-
-    // Verify no crash and structure is valid
-    EXPECT_NO_THROW(enhancement.get_full_name("sword"));
-}
-
-TEST_F(EnhancementSystemTest, GenerateArmorEnhancement_ValidForArmor) {
-    auto enhancement = ItemEnhancement::generate_armor_enhancement(MagicalPrefixes::ALLOWED, dice);
-
-    enhancement.apply_enhancement_effects();
-
-    // Armor enhancements should affect AC
-    EXPECT_NO_THROW(enhancement.get_full_name("armor"));
-}
-
-TEST_F(EnhancementSystemTest, GenerateByRarity_Level1_BasicEnhancement) {
-    auto enhancement = ItemEnhancement::generate_by_rarity(1, dice);
-
-    // Low rarity should have minimal bonuses
-    enhancement.apply_enhancement_effects();
-
-    // Verify structure is valid
-    EXPECT_NO_THROW(enhancement.get_full_name("item"));
-}
-
-TEST_F(EnhancementSystemTest, GenerateByRarity_Level5_PowerfulEnhancement) {
-    auto enhancement = ItemEnhancement::generate_by_rarity(5, dice);
-
-    enhancement.apply_enhancement_effects();
-
-    // High rarity may have better bonuses
-    EXPECT_NO_THROW(enhancement.get_full_name("item"));
-}
-
 // ----------------------------------------------------------------------------
 // Value Modifier Tests
 // ----------------------------------------------------------------------------
@@ -483,27 +380,6 @@ TEST_F(EnhancementSystemTest, ValueModifier_50_DecreasesValue) {
     int enhancedValue = (baseValue * defaultEnhancement.valueModifier) / 100;
 
     EXPECT_EQ(enhancedValue, 50);
-}
-
-// ----------------------------------------------------------------------------
-// Enhancement Level Tests
-// ----------------------------------------------------------------------------
-
-TEST_F(EnhancementSystemTest, EnhancementLevel_AffectsName) {
-    defaultEnhancement.enhancementLevel = 3;
-
-    std::string name = defaultEnhancement.get_full_name("sword");
-
-    EXPECT_NE(name.find("+3"), std::string::npos);
-}
-
-TEST_F(EnhancementSystemTest, EnhancementLevel_Zero_NoPlus) {
-    defaultEnhancement.enhancementLevel = 0;
-
-    std::string name = defaultEnhancement.get_full_name("sword");
-
-    // Should not have "+0" in name
-    EXPECT_EQ(name.find("+0"), std::string::npos);
 }
 
 // ----------------------------------------------------------------------------
@@ -542,26 +418,6 @@ TEST_F(EnhancementSystemTest, BlessedItem_CannotBeCursed) {
 // ----------------------------------------------------------------------------
 // Edge Cases
 // ----------------------------------------------------------------------------
-
-TEST_F(EnhancementSystemTest, EmptyBaseName_StillWorks) {
-    defaultEnhancement.prefix = PrefixType::SHARP;
-    defaultEnhancement.suffix = SuffixType::OF_SLAYING;
-
-    std::string name = defaultEnhancement.get_full_name("");
-
-    // Should not crash, may produce "Sharp  of Slaying" or similar
-    EXPECT_FALSE(name.empty());
-}
-
-TEST_F(EnhancementSystemTest, VeryLongBaseName_StillWorks) {
-    defaultEnhancement.prefix = PrefixType::SHARP;
-
-    std::string longName(1000, 'a');
-    std::string name = defaultEnhancement.get_full_name(longName);
-
-    EXPECT_FALSE(name.empty());
-    EXPECT_GT(name.length(), longName.length());
-}
 
 TEST_F(EnhancementSystemTest, MultipleApplyEffects_Idempotent) {
     defaultEnhancement.prefix = PrefixType::SHARP;

@@ -24,6 +24,18 @@
       "original": "\t\t\tdisplayName += \" (cursed)\";",
       "mutated": "\t\t\tdisplayName += \"\";",
       "catches": "an identified curse left off the name"
+    },
+    {
+      "file": "src/Item.cpp",
+      "original": "\t\tdisplayName += \" \" + enhancement.get_suffix_name();",
+      "mutated": "\t\tdisplayName += \"\";",
+      "catches": "an identified suffix left out of the name"
+    },
+    {
+      "file": "src/Item.cpp",
+      "original": "\t\tdisplayName += \" \" + enhancement.get_suffix_name();",
+      "mutated": "\t\tdisplayName = enhancement.get_suffix_name() + \" \" + displayName;",
+      "catches": "an identified suffix written before the name"
     }
   ]
 }

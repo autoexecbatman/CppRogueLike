@@ -117,7 +117,6 @@ struct ItemEnhancement
 	// Generate enhancement name
 	std::string get_prefix_name() const;
 	std::string get_suffix_name() const;
-	std::string get_full_name(const std::string& base_name) const;
 
 	// Apply enhancement effects
 	void apply_enhancement_effects();

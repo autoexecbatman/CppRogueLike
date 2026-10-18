@@ -92,33 +92,6 @@ std::string ItemEnhancement::get_suffix_name() const
 	}
 }
 
-std::string ItemEnhancement::get_full_name(const std::string& base_name) const
-{
-	std::string name = "";
-
-	// Handle traditional "+X" enhancement level first
-	if (enhancementLevel > 0)
-	{
-		name = base_name + " +" + std::to_string(enhancementLevel);
-		return name;
-	}
-
-	// Handle prefix/suffix system
-	if (prefix != PrefixType::NONE)
-	{
-		name += get_prefix_name() + " ";
-	}
-
-	name += base_name;
-
-	if (suffix != SuffixType::NONE)
-	{
-		name += " " + get_suffix_name();
-	}
-
-	return name;
-}
-
 int ItemEnhancement::resistance_strength(DamageType damageType) const noexcept
 {
 	// Any non-zero field is one ring's worth: the magnitude is not the book's unit.
