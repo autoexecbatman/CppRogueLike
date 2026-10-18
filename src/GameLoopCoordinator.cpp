@@ -448,16 +448,12 @@ void GameLoopCoordinator::apply_round_upkeep(GameContext& ctx)
 	assert(ctx.creatureManager && "GameLoopCoordinator::apply_round_upkeep: called without a creatureManager");
 	assert(ctx.creatures && "GameLoopCoordinator::apply_round_upkeep: called without creatures");
 
-	// Stated once, here, rather than re-decided at each use below. A round only runs
-	// under NEW_TURN, after update_creatures, whose monster AI needs a player - a null
-	// one would have broken louder and earlier. Each of these is a value member of
-	// Game, so none of them is absent in a running game.
+	// A round runs only after update_creatures, whose AI needs a player; the rest are Game's value members.
 	assert(ctx.player() && "apply_round_upkeep: a round ran with no player");
 	assert(ctx.hungerSystem && "apply_round_upkeep: a round ran with no hunger system");
 
-	// Rounds whose upkeep is owed. The clock counts time units, so one action may
-	// finish no round at all or several, and each round is fed once - which is what
-	// stops a creature that acts twice in a round feeling it twice.
+	// Rounds owed. One action may finish none or several, and each is fed once,
+	// so a creature acting twice in a round does not feel it twice.
 	const int roundsFinished = rounds_completed_at(ctx.gameState->get_time());
 	if (ctx.gameState->get_rounds_run() >= roundsFinished)
 	{
@@ -547,10 +543,7 @@ void GameLoopCoordinator::update(GameContext& ctx)
 		}
 		else
 		{
-			// Opens the first turn of a new game. Set directly rather than through
-			// spend_player_action, which is the only other writer: nobody has spent
-			// anything here, and charging the player for starting would put them a
-			// round behind every creature on the level.
+			// Opens the first turn directly: spend_player_action would charge the player for starting.
 			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		}
 
@@ -627,10 +620,7 @@ void GameLoopCoordinator::open_end_of_run_screen(GameContext& ctx)
 		// The outcome is stored rather than read off the player, so the two are held together here.
 		assert(ctx.player()->is_dead() && "open_end_of_run_screen: the run is lost while the player still has hit points");
 		ctx.messageSystem->log("Player is dead!");
-		// Permadeath: the character is gone, so the save that would restore it goes
-		// too. Called on the class because delete_save_file is static. It reports
-		// true when there was nothing to delete, so false means a save outlived the
-		// character who owned it and the next run would offer it.
+		// Permadeath removes the save; false means a save outlived its character and would be offered next run.
 		if (!GameStateManager::delete_save_file())
 		{
 			std::clog << "[GameLoopCoordinator] the save file could not be deleted; it will outlive the character\n";

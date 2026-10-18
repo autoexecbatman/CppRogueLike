@@ -111,9 +111,7 @@ std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 			const int cellX = gc * CELL_W;
 			const int cellY = gr * CELL_H;
 
-			// Prefab defines the room.  Pick a prefab that fits inside the cell
-			// (total dims including wall border must not exceed CELL_W x CELL_H).
-			// If no library is available (e.g. unit tests), fall back to random size.
+			// Pick a prefab that fits the cell, wall border included; with no library, as in unit tests, a random size.
 			int roomWidth = rng.roll(ROOM_MIN_SIZE, ROOM_HORIZONTAL_MAX_SIZE);
 			int roomHeight = rng.roll(ROOM_MIN_SIZE, ROOM_VERTICAL_MAX_SIZE);
 			std::string chosenPrefab;
@@ -193,11 +191,8 @@ std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 			DungeonRoom room{ roomCol, roomRow, roomWidth, roomHeight };
 			room.prefabName = std::move(chosenPrefab);
 
-			// A room takes a prefab and a procedural shape, so the two vary independently
-			// and one room in twenty is unlike any other. Both only turn floor into wall
-			// and neither sees the other, so the pair can cut a room in two; Map::create_room
-			// carves, checks the floor is still one piece, and keeps the prefab alone when
-			// it is not. The variance is the point, so the check is there rather than here.
+			// Prefab and shape vary independently, and the pair can split a room;
+			// Map::create_room checks the floor and drops the shape when it does.
 			room.shape = pick_room_shape(roomWidth, roomHeight, rng);
 			room.shapeVariant = rng.roll(0, 3);
 
@@ -291,14 +286,7 @@ void DungeonGenerator::add_extra_corridors(
 	const int n = static_cast<int>(rooms.size());
 
 	// ---- Extra short-range corridors (~33 %) to create loop paths ----
-	// Limit to adjacent cells only (diagonal included). Rooms 2+ cells apart
-	// produce corridors whose mid-turn segment can pass through an intermediate
-	// room. CELL_W^2 + CELL_H^2 is the squared diagonal between adjacent cell
-	// centres -- the tightest upper bound that still covers all adjacent pairs.
-	//
-	// Leaf rooms (degree-1 after the MST) are excluded from extra corridors.
-	// Preserving them guarantees single-entrance rooms exist for treasure room
-	// placement — connecting a leaf removes its only locked-door candidate.
+	// Adjacent cells only, so no corridor crosses a third room; leaf rooms keep one entrance for vaults.
 
 	const int extraTarget = std::max(1, n / 3);
 	int added = 0;
@@ -362,9 +350,8 @@ void DungeonGenerator::generate(
 	// ---- Phase 1: Prim's MST — full connectivity, no cycles ----
 	connect_spanning_tree(rooms);
 
-	// Assign room types based on MST connectivity only.
-	// Must run AFTER connect_spanning_tree but BEFORE add_extra_corridors
-	// so extra loop edges do not demote leaf rooms to STANDARD.
+	// From MST connectivity only: after connect_spanning_tree and before add_extra_corridors,
+	// so loop edges do not demote leaf rooms.
 	rooms[0].type = RoomType::ENTRANCE;
 	for (size_t i = 1; i < rooms.size(); ++i)
 	{

@@ -499,9 +499,7 @@ void PlayerController::strike(Creature& target, GameContext& ctx)
 	assert(ctx.creatures && "PlayerController::strike: called without creatures");
 	assert(playerOwner.attacker && "strike: the player swung with no attacker");
 
-	// One swing, priced by the rate. A character who attacks faster than once a round
-	// pays less of the clock for each swing and so comes round again sooner, which is
-	// what Table 58's three-attacks-in-two-rounds is.
+	// One swing, priced by the rate, so a faster attacker comes round sooner (Table 58).
 	playerOwner.attacker->attack(target, AttackKind::MELEE, ctx);
 	spend_player_action(ctx, attack_cost(playerOwner.get_attacks_per_round()));
 	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
@@ -683,9 +681,8 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 		return true;
 	}
 
-	// Branch 2: Rogue -- Open Locks percentage roll (PHB Tables 26 to 29). A score
-	// of zero is a skill the thief has not bought up to a usable percentage yet,
-	// and armour the book gives no column for answers with no skill at all.
+	// Branch 2: Rogue -- Open Locks percentage roll (PHB Tables 26 to 29).
+	// A score of zero, or armour the book gives no column, means no skill.
 	const int openLocksChance = playerOwner.thief_skill(ThiefSkill::OPEN_LOCKS).value_or(0);
 	if (openLocksChance > 0)
 	{
@@ -953,11 +950,8 @@ void PlayerController::handle_right_click(GameContext& ctx)
 	}
 
 	int tileSize = ctx.renderer->get_tile_size();
-	// Where that world tile actually sits on screen. The camera is a pixel value and
-	// is not tile-aligned - set_camera_center subtracts half a viewport, which lands
-	// on a half tile whenever the viewport is an odd number of columns wide. So the
-	// screen column is the drawn position divided down, the same formula the tile
-	// rendering uses; subtracting a separately-divided camera is off by one there.
+	// The screen column is the drawn position divided down, as the tile renderer does;
+	// the camera is not tile-aligned, so dividing it separately is off by one.
 	int anchor_col = (world_tile.x * tileSize - ctx.renderer->get_camera_x()) / tileSize;
 	int anchor_row = (world_tile.y * tileSize - ctx.renderer->get_camera_y()) / tileSize;
 
@@ -1249,10 +1243,7 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 	case Controls::TEST_COMMAND:
 	{
 		ItemFactory::spawn_all_enhanced_items_debug(playerOwner.position, ctx);
-		// Weight-gated, so an overloaded player is refused. That is a runtime outcome
-		// rather than a wiring fault, which is why it is reported rather than asserted:
-		// a debug command that kills the process because the player is carrying too
-		// much is not a usable debug command.
+		// Weight-gated: an overloaded player is refused and told, since a debug key must not abort.
 		const auto debugSpawnBowResult = InventoryOperations::add_item_to_inventory(
 			playerOwner.inventoryData,
 			ItemCreator::create("long_bow", playerOwner.position, ctx),
@@ -1279,9 +1270,7 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 		playerOwner.memorizedSpells.push_back("teleport");
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "DEBUG: Spells added -- press Shift+C to cast.", MessageCompletion::FINISHED);
 
-		// Spawn a shopkeeper on the first walkable adjacent tile. All four can be wall -
-		// in a corridor end, or a one-tile alcove - and saying nothing then leaves the
-		// key looking broken, which is the same fault the bow above had.
+		// Spawn a shopkeeper on the first walkable adjacent tile, and say so when all four are wall.
 		const std::array<Vector2D, 4> cardinals{ Vector2D{ 0, -1 }, Vector2D{ 0, 1 }, Vector2D{ -1, 0 }, Vector2D{ 1, 0 } };
 		bool shopkeeperSpawned = false;
 		for (const auto& offset : cardinals)

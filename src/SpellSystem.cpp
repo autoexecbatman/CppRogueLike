@@ -654,12 +654,8 @@ bool cast_sleep(Creature& caster, GameContext& ctx)
 	assert(ctx.map && "SpellSystem::cast_sleep: called without a map");
 	assert(ctx.dice && "SpellSystem::cast_sleep: called without dice");
 
-	// AD&D 2e, Player's Handbook page 279: the spell affects 2d4 Hit Dice of
-	// monsters, least Hit Dice first, and lasts 5 rounds per caster level.
-	// Undead and creatures of 4+3 Hit Dice or more are unaffected.
-	//
-	// The book's threshold is four Hit Dice plus three hit points. Creatures
-	// here carry whole Hit Dice, so anything above four is out of reach.
+	// PHB p.279: 2d4 Hit Dice of monsters, fewest first, 5 rounds a level; undead and 4+3 HD are immune.
+	// Creatures here carry whole Hit Dice, so 4+3 becomes anything above four.
 	constexpr int SLEEP_MAX_HIT_DICE = 4;
 	constexpr int SLEEP_ROUNDS_PER_LEVEL = 5;
 
@@ -874,9 +870,8 @@ std::vector<int> SpellSystem::progression_slots(CasterClass classState, int leve
 	// AD&D 2e spell progression tables
 	// Returns slots per spell level [level1, level2, level3, ...]
 
-	// Priest Spell Progression, Player's Handbook Table 24 (PDF page 72), one row
-	// per level from 1st to 20th. The sixth and seventh columns carry footnotes the
-	// game does not honour yet: they need Wisdom 17 and 18.
+	// Priest Spell Progression, PHB Table 24 (PDF page 72), levels 1 to 20.
+	// Columns six and seven need Wisdom 17 and 18, which the game does not check yet.
 	if (classState == CasterClass::CLERIC)
 	{
 		static const std::vector<std::vector<int>> clericSlots = {
@@ -1001,9 +996,7 @@ int SpellSystem::highest_spell_level(CasterClass classState, int level, int wisd
 
 int SpellSystem::spell_failure_chance(const Creature& caster, const DataManager& dataManager)
 {
-	// Table 5 is Wisdom's, and the column is the priest's: "Priests with low Wisdom
-	// scores run the risk of having their spells fizzle." A wizard casts on
-	// Intelligence and the book gives it no such chance.
+	// Table 5 is Wisdom's, and only priests risk a fizzle; a wizard casts on Intelligence.
 	if (caster.get_creature_class() != CreatureClass::CLERIC)
 	{
 		return 0;
@@ -1036,9 +1029,7 @@ void SpellSystem::cast_spell_by_key(
 	assert(ctx.spellRegistry && "SpellSystem::cast_spell_by_key: called without a spellRegistry");
 	assert(ctx.dice && "SpellSystem::cast_spell_by_key: called without dice");
 
-	// Every effect that succeeds calls this, at four sites and sometimes a turn
-	// later from a targeting callback. An empty one throws there rather than
-	// here, which is a long way from the caller that omitted it.
+	// Every successful effect calls this, sometimes a turn later; an empty one would throw far from its cause.
 	assert(onCastComplete && "cast_spell_by_key requires a callback");
 
 	if (caster.has_state(ActorState::IS_SILENCED))

@@ -140,16 +140,7 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 	assert(ctx.dice && "TreasureRoom::setup_guard called without dice");
 	assert(ctx.player() && "TreasureRoom::setup_guard called without player");
 
-	// Two separate passes over the wall border:
-	//
-	// Pass 1 — lock EVERY genuine room entrance.
-	//   A door belongs to this room iff one of its cardinal neighbors is inside
-	//   room.contains(). Lock it regardless of what tile type is outside.
-	//
-	// Pass 2 — collect jailer spawn candidates.
-	//   Walk outward from each locked entrance up to MAX_WALK steps.
-	//   Break only on walls; skip actors/decorations/other doors.
-	//   Reachability filter (below) guarantees the spawn is on the corridor side.
+	// A door belongs to this room when a cardinal neighbour is inside it, whatever lies outside.
 
 	auto find_inward_dir = [&](Vector2D doorPos) -> Vector2D
 	{
@@ -186,10 +177,8 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 		}
 	}
 
-	// Pass 2: collect jailer spawn candidates.
-	// For each locked entrance, walk outward (away from the room) up to MAX_WALK
-	// steps. Break only on map boundary or solid wall — skip past actors, decorations,
-	// and other doors (temporary occupants that do not block the corridor permanently).
+	// Pass 2: collect jailer spawn candidates, walking out from each locked entrance up to MAX_WALK steps.
+	// Only a wall or the map edge stops the walk; actors, decorations and other doors are passed.
 	struct DoorCandidate
 	{
 		Vector2D doorPos;
@@ -282,9 +271,8 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 		return;
 	}
 
-	// With all doors now locked, filter to candidates whose spawn tile is
-	// still reachable from the stairs. A dead-end corridor that only connects
-	// back through a locked door will fail this check.
+	// With every door locked, keep the candidates still reachable from the stairs;
+	// a dead end that only connects back through a locked door fails.
 	const Vector2D playerPos = ctx.player()->position;
 	const DoorCandidate* best = nullptr;
 	int bestDist = std::numeric_limits<int>::max();
@@ -341,9 +329,7 @@ void TreasureRoom::create(
 	assert(ctx.dice && "TreasureRoom::create called without dice");
 
 	// Drain the pools on the vault floor, so the treasure and its warden stand dry.
-	// Water is the whole of the clearing: this walks the bounding box, which also holds
-	// the walls the room's shape carved and any corridor that clipped a corner of it,
-	// and floor written over either one flattens the shape or seals off a pocket.
+	// Only water is cleared: the box also holds shaped walls and clipped corridors.
 	for (int y = room.row; y <= room.row_end(); y++)
 	{
 		for (int x = room.col; x <= room.col_end(); x++)
@@ -465,9 +451,8 @@ bool TreasureRoom::maybe_create(int dungeonLevel, RandomDice& generationRng, Gam
 		return false;
 	}
 
-	// Collect candidate rooms: single-entrance, not the player's starting room,
-	// and not the room that already contains the stairs. Locking a staircase
-	// inside the treasure room traps the player on this level permanently.
+	// Candidates have one entrance and are neither the starting room nor the stairs' room:
+	// stairs locked inside would trap the player on this level.
 
 	auto is_valid_treasure_room = [&](int roomIndex) -> bool
 	{

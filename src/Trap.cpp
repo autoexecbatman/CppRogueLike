@@ -65,9 +65,7 @@ Trap::Trap(Vector2D position, TrapType trapType, const TileConfig& tileConfig)
 	: TileFeature(position, ActorData{}),
 	  type(trapType)
 {
-	// Set damage dice, display name and both tiles based on trap type. The
-	// tiles are only ever seen once the trap is no longer hidden: a hidden trap
-	// carries IS_INVISIBLE and draws nothing at all.
+	// Damage dice, name and both tiles by type; a hidden trap carries IS_INVISIBLE and draws nothing.
 	std::string trapName;
 	switch (type)
 	{
@@ -124,9 +122,7 @@ DisarmResult Trap::attempt_disarm(Player& creature, GameContext& ctx)
 		return DisarmResult::NOT_VISIBLE;
 	}
 
-	// Find/Remove Traps is the thief's, and the book gives nobody else a way to
-	// work on a trap. A score of nothing is a skill not yet bought up to a usable
-	// percentage, which the book treats the same way.
+	// Find/Remove Traps is the thief's alone, and a score of nothing counts as no skill.
 	const std::optional<int> skill = creature.thief_skill(ThiefSkill::FIND_REMOVE_TRAPS);
 	if (!skill.has_value() || skill.value() <= 0)
 	{
@@ -230,9 +226,7 @@ EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 		}
 	}
 
-	// The step is refused, and the step is also what paid for the turn: both paths
-	// that reach a feature charge the player themselves, so charging again here
-	// would take two rounds off the clock for one pace.
+	// Refused and not charged: both paths that reach a feature already charge the player.
 	return EntryResult::BLOCKED;
 }
 
@@ -409,10 +403,8 @@ void Trap::load(const json& j)
 	disarmAttemptedAtLevel = j.at("disarmAttemptedAtLevel").get<int>();
 	searchedAtLevel = j.at("searchedAtLevel").get<int>();
 
-	// The type is set by the constructor the caller used, so the damage dice, the name
-	// and both tiles are already right. The base has just restored a saved tile and a
-	// saved invisibility over the top of them, and the state is what decides those - so
-	// they are worked out again here rather than trusted from the record.
+	// The constructor set the type's dice, name and tiles; the base just restored a saved tile and visibility,
+	// so the state's appearance is applied again over them.
 	apply_state_appearance();
 }
 

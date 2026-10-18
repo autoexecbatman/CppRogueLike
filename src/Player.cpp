@@ -238,23 +238,17 @@ void Player::roll_new_character(GameContext& ctx)
 
 void Player::die(GameContext& ctx)
 {
-	// Declaring the run lost is the whole of it. Removing the save is permadeath
-	// housekeeping, which the loop does when it handles the lost run - a death is a
-	// domain event and must not reach the filesystem.
+	// Only declares the run lost; the loop removes the save, so a death never reaches the filesystem.
 	ctx.gameState->set_run_outcome(RunOutcome::DEFEAT);
 }
 
 void Player::on_new_game_start(GameContext& ctx)
 {
 	std::vector<std::string> racialLines = pay_racial_adjustments();
-	// The roll reads the Strength the character ends up with, so it comes after the
-	// race is paid. The halfling is the only race that moves Strength, and the roll
-	// turns that race down by name, so both guards cover the one case.
+	// After the racial adjustments, since the roll reads the Strength they leave.
 	roll_exceptional_strength(ctx);
 	equip_class_starting_gear(ctx);
-	// After the gear, because Table 29 reads the armour the thief is standing in
-	// and the kit puts leather on a rogue: a screen opened before it would show
-	// numbers the character loses on its first turn.
+	// After the gear: Table 29 reads the armour the kit puts on a rogue, so an earlier screen shows wrong numbers.
 	push_thief_skill_allocation(*this, get_creature_level(), ctx);
 	// Pushed last because the menu stack runs its newest entry: the popup explaining the
 	// race is read before the skill screen that is built on the scores it changed.
@@ -550,9 +544,8 @@ void Player::calculate_thaco()
 
 std::array<int, THIEF_SKILL_COUNT> thief_skill_racial_adjustments(PlayerRaceState race)
 {
-	// Table 27, read across each race's column: Pick Pockets, Open Locks,
-	// Find/Remove Traps, Move Silently, Hide in Shadows, Detect Noise, Climb Walls,
-	// Read Languages.
+	// Table 27 across each race's column: Pick Pockets, Open Locks, Find/Remove Traps, Move Silently,
+	// Hide in Shadows, Detect Noise, Climb Walls, Read Languages.
 	switch (race)
 	{
 	case PlayerRaceState::DWARF:
@@ -749,9 +742,7 @@ void Player::animate_resting(GameContext& ctx)
 {
 	assert(ctx.renderingManager && "Player::animate_resting: called without a renderingManager");
 
-	// Spawn one floating 'z'/'Z' above the player each rest turn.
-	// The floating text system handles the animated drift and fade.
-	// Alternate lowercase/uppercase by hp recovered so far (varies nicely).
+	// One floating z above the player each rest turn, a capital Z within 5 hit points of full.
 	const bool big = (get_max_hp() - get_hp()) < 5;
 	const std::string symbol = big ? "Z" : "z";
 	assert(ctx.floatingText && "animate_resting: a rest was shown with no floating text system");
@@ -786,9 +777,8 @@ Player::HideAttempt Player::attempt_hide(GameContext& ctx)
 		return HideAttempt::ALREADY_HIDDEN;
 	}
 
-	// "A thief can never become hidden while a guard is watching him, no matter what
-	// his dice roll is." What settles it is whether anything is looking for him,
-	// which is what awareness holds - not whether he happens to be able to see it.
+	// "A thief can never become hidden while a guard is watching him": watching is awareness,
+	// whether anything is looking for him, not whether he can see it.
 	const int currentTime = ctx.gameState->get_time();
 	const auto is_watching = [currentTime](const std::unique_ptr<Creature>& creature)
 	{
@@ -801,10 +791,8 @@ Player::HideAttempt Player::attempt_hide(GameContext& ctx)
 		return HideAttempt::WATCHED;
 	}
 
-	// "The DM rolls the dice and keeps the result secret, but the thief always thinks
-	// he is hidden": the roll decides whether anything happens and the line the player
-	// reads is the same either way. The duration is the game's own, since the book
-	// ends a hide by moving rather than by counting turns.
+	// The thief always thinks he is hidden, so the line is the same whatever the secret roll gave.
+	// The duration is the game's own; the book ends a hide by moving.
 	if (ctx.dice->d100() <= skill.value())
 	{
 		const int hideDuration = 10 + get_creature_level() * 2;
@@ -925,9 +913,7 @@ void Player::load(const json& j)
 	// PlayerController is not in the Ai hierarchy -- construct directly.
 	controller = std::make_unique<PlayerController>(*this);
 
-	// After construction, because the fresh controller would otherwise overwrite what
-	// the record says. Required rather than tolerated: a save without this section is
-	// a save this build did not write, and the parser is the only schema there is.
+	// After construction, so the fresh controller cannot overwrite the record; a save without it is refused.
 	controller->load(j.at("controller"));
 
 	// Player-specific fields
@@ -936,10 +922,7 @@ void Player::load(const json& j)
 	memorizedSpells = j.at("memorizedSpells").get<std::vector<std::string>>();
 	thiefSkillPoints = j.at("thiefSkillPoints").get<std::array<int, THIEF_SKILL_COUNT>>();
 
-	// Closes the null window this function opens. Creature::load builds the pool, the
-	// armour class and the reward only when the record carries them, which is right for
-	// a monster and wrong for the player: the HUD reads all three on the first frame.
-	// Without this, a record missing one loads and the crash lands somewhere unrelated.
+	// Creature::load builds these only when the record has them, and the HUD reads them all on the first frame.
 	assert(healthPool && armorClass && experienceReward && attacker && controller && "Player::load finished with a player the game cannot run");
 }
 
