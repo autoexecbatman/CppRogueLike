@@ -405,6 +405,23 @@ int get_item_ac_bonus(const ItemBehavior& behavior) noexcept;
 //   moves_its_user(ItemBehavior{ IdentifyScroll{} }); // -> false
 bool moves_its_user(const ItemBehavior& behavior) noexcept;
 
+// Whether using this item acts on creatures the reader picks out or can see. Every
+// targeted scroll does: sleep, hold person, lightning, confusion and fireball.
+//
+// Example:
+//   targets_creatures(ItemBehavior{ TargetedScroll{} }); // -> true
+//   targets_creatures(ItemBehavior{ Teleporter{} });     // -> false
+bool targets_creatures(const ItemBehavior& behavior) noexcept;
+
+// Whether using this item hands the reader to a targeting cursor that finishes the use
+// later: a targeted scroll aimed at a tile, which is confusion and fireball. The use
+// reports nothing consumed when it returns, because the cursor has not closed yet.
+//
+// Example:
+//   hands_over_to_targeting(ItemBehavior{ TargetedScroll{ .targetMode = TargetMode::PICK_TILE_AOE } }); // -> true
+//   hands_over_to_targeting(ItemBehavior{ TargetedScroll{ .targetMode = TargetMode::FOV_BUFF } });      // -> false
+bool hands_over_to_targeting(const ItemBehavior& behavior) noexcept;
+
 // How strongly a worn item's own effect resists the given type, in rings: a
 // ring of fire resistance or of warmth at its bonus of 1, the helm of
 // brilliance against fire at its bonus of 2 - the book's double-strength ring.

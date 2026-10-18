@@ -160,8 +160,8 @@ inline constexpr std::array<ItemCategory, 3> USABLE_CATEGORIES{ {
 class InventoryUI : public BaseMenu
 {
 private:
-	// What a use leaves the screen doing. A use that moves the player closes it, so the
-	// map shows where they are.
+	// What a use leaves the screen doing. A use that plays out on the map - moving the
+	// player, or acting on creatures - closes it, so the map is what the player sees next.
 	enum class AfterUse
 	{
 		STAYS_OPEN,
@@ -209,7 +209,8 @@ private:
 	void handle_tab_switch(int direction);
 	void handle_enter_equipment(Player& player, GameContext& ctx);
 	// Uses the item under the cursor and spends the turn, and says whether the screen
-	// closes after it. Nothing under the cursor, or a use refused, keeps it open.
+	// closes after it. Nothing under the cursor, or a use refused, keeps it open; a use
+	// handed to a targeting cursor closes it whatever the cursor then does.
 	[[nodiscard]] AfterUse handle_enter_item(Player& player, GameContext& ctx);
 	void handle_drop(Player& player, GameContext& ctx);
 	// Opens the right-click menu for the row under the pointer, or nothing when that row

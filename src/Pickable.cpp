@@ -723,6 +723,17 @@ bool moves_its_user(const ItemBehavior& behavior) noexcept
 	return std::holds_alternative<Teleporter>(behavior);
 }
 
+bool targets_creatures(const ItemBehavior& behavior) noexcept
+{
+	return std::holds_alternative<TargetedScroll>(behavior);
+}
+
+bool hands_over_to_targeting(const ItemBehavior& behavior) noexcept
+{
+	const TargetedScroll* scroll = std::get_if<TargetedScroll>(&behavior);
+	return scroll != nullptr && (scroll->targetMode == TargetMode::PICK_TILE_SINGLE || scroll->targetMode == TargetMode::PICK_TILE_AOE);
+}
+
 // The damage type a resistance effect answers for; empty for an effect that
 // resists nothing.
 static std::optional<DamageType> resisted_type(MagicalEffect effect) noexcept

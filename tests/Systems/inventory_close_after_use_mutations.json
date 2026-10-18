@@ -48,6 +48,48 @@
       "original": "\t\t\t\t\t\treturn handle_enter_item(player, ctx) == AfterUse::STAYS_OPEN;\n",
       "mutated": "\t\t\t\t\t\t[[maybe_unused]] const auto ignored = handle_enter_item(player, ctx);\n\t\t\t\t\t\treturn true;\n",
       "catches": "the letter shortcut ignoring a use that closes the screen"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\treturn std::holds_alternative<TargetedScroll>(behavior);\n",
+      "mutated": "\treturn false;\n",
+      "catches": "the targeted scrolls not saying they act on creatures, so sleep leaves the inventory open"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\treturn std::holds_alternative<TargetedScroll>(behavior);\n",
+      "mutated": "\treturn true;\n",
+      "catches": "every item saying it acts on creatures, so a healing potion closes the inventory"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\treturn scroll != nullptr && (scroll->targetMode == TargetMode::PICK_TILE_SINGLE || scroll->targetMode == TargetMode::PICK_TILE_AOE);\n",
+      "mutated": "\treturn scroll != nullptr && scroll->targetMode == TargetMode::PICK_TILE_SINGLE;\n",
+      "catches": "fireball not handing over to the cursor, so the inventory comes back after it"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\treturn scroll != nullptr && (scroll->targetMode == TargetMode::PICK_TILE_SINGLE || scroll->targetMode == TargetMode::PICK_TILE_AOE);\n",
+      "mutated": "\treturn scroll != nullptr && scroll->targetMode == TargetMode::PICK_TILE_AOE;\n",
+      "catches": "confusion not handing over to the cursor, so the inventory comes back after it"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\treturn scroll != nullptr && (scroll->targetMode == TargetMode::PICK_TILE_SINGLE || scroll->targetMode == TargetMode::PICK_TILE_AOE);\n",
+      "mutated": "\treturn scroll != nullptr;\n",
+      "catches": "every targeted scroll handing over to a cursor, so lightning with no target closes the inventory"
+    },
+    {
+      "file": "src/InventoryUI.cpp",
+      "original": "\tif (handsOverToTargeting)\n\t{\n\t\treturn AfterUse::CLOSES;\n\t}\n",
+      "mutated": "",
+      "catches": "a scroll aimed at a tile leaving the inventory to come back when the cursor closes"
+    },
+    {
+      "file": "src/InventoryUI.cpp",
+      "original": "moves_its_user(*selectedItem->behavior) || targets_creatures(*selectedItem->behavior);\n",
+      "mutated": "moves_its_user(*selectedItem->behavior);\n",
+      "catches": "the close rule asking only whether the player moved, so sleep leaves the inventory open"
     }
   ]
 }

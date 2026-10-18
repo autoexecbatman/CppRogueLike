@@ -1351,9 +1351,17 @@ InventoryUI::AfterUse InventoryUI::handle_enter_item(Player& player, GameContext
 	}
 
 	// Asked before the use, which destroys a scroll and its behaviour with it.
-	const bool movesThePlayer = moves_its_user(*selectedItem->behavior);
+	const bool playsOutOnTheMap = moves_its_user(*selectedItem->behavior) || targets_creatures(*selectedItem->behavior);
+	const bool handsOverToTargeting = hands_over_to_targeting(*selectedItem->behavior);
 
 	bool itemUsed = use_item(*selectedItem->behavior, *selectedItem, player, ctx);
+
+	// The targeting cursor now on top finishes this use, so the screen beneath it goes when
+	// the cursor closes, whether the scroll was aimed or the cursor cancelled.
+	if (handsOverToTargeting)
+	{
+		return AfterUse::CLOSES;
+	}
 
 	if (!itemUsed)
 	{
@@ -1369,7 +1377,7 @@ InventoryUI::AfterUse InventoryUI::handle_enter_item(Player& player, GameContext
 		activeScreen = InventoryScreen::EQUIPMENT;
 	}
 
-	return movesThePlayer ? AfterUse::CLOSES : AfterUse::STAYS_OPEN;
+	return playsOutOnTheMap ? AfterUse::CLOSES : AfterUse::STAYS_OPEN;
 }
 
 // Opens the right-click menu for one row, or opens nothing when the row has no action.
