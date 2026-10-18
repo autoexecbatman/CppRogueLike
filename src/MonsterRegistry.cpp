@@ -16,6 +16,7 @@
 
 #include "EquipmentSlot.h"
 #include "IntelligenceRating.h"
+#include "MonsterHitDice.h"
 #include "MonsterRegistry.h"
 #include "MonsterStrength.h"
 #include "Paths.h"
@@ -142,24 +143,6 @@ nlohmann::json encode_tile(TileRef tile)
 	};
 }
 
-DiceExpr parse_dice(const nlohmann::json& record)
-{
-	return DiceExpr{
-		record.at("num").get<int>(),
-		record.at("sides").get<int>(),
-		record.at("bonus").get<int>()
-	};
-}
-
-nlohmann::json encode_dice(const DiceExpr& dice)
-{
-	return nlohmann::json{
-		{ "num", dice.num },
-		{ "sides", dice.sides },
-		{ "bonus", dice.bonus }
-	};
-}
-
 // The dice are the record; the range is theirs to derive, so a file cannot
 // carry a minimum its dice never roll.
 DamageInfo parse_damage(const nlohmann::json& record)
@@ -167,6 +150,48 @@ DamageInfo parse_damage(const nlohmann::json& record)
 	return DamageInfo{
 		record.at("display").get<std::string>(),
 		parse_damage_type(record.at("type").get<std::string>())
+	};
+}
+
+// A record's hit dice: the die, the bonus added once to the total, and each count with the
+// experience it is worth. Hit dice the book cannot write - no count, a gap or a fall
+// between counts, a count below 1, negative experience, a die of no sides - are an
+// authoring error and throw.
+//
+// Example:
+//   parse_hit_dice({ { "sides", 8 }, { "bonus", 0 }, { "counts", { { { "count", 9 }, { "xp", 2000 } } } } }); // -> { 8, 0, { { 9, 2000 } } }
+//   parse_hit_dice({ { "sides", 8 }, { "bonus", 0 }, { "counts", nlohmann::json::array() } }); // throws std::runtime_error
+MonsterHitDice parse_hit_dice(const nlohmann::json& record)
+{
+	MonsterHitDice hitDice{ record.at("sides").get<int>(), record.at("bonus").get<int>(), {} };
+	for (const nlohmann::json& entry : record.at("counts"))
+	{
+		hitDice.counts.push_back(HitDiceCount{ entry.at("count").get<int>(), entry.at("xp").get<int>() });
+	}
+	if (!is_valid_monster_hit_dice(hitDice))
+	{
+		throw std::runtime_error(
+			"MonsterRegistry -- hit dice the book cannot write: they need a die of at least one side, "
+			"and counts from 1 up, each one more than the last, worth no negative experience");
+	}
+	return hitDice;
+}
+
+// The inverse of parse_hit_dice.
+//
+// Example:
+//   encode_hit_dice(MonsterHitDice{ 8, 2, { { 2, 270 } } }); // -> { "sides": 8, "bonus": 2, "counts": [ { "count": 2, "xp": 270 } ] }
+nlohmann::json encode_hit_dice(const MonsterHitDice& hitDice)
+{
+	nlohmann::json counts = nlohmann::json::array();
+	for (const HitDiceCount& entry : hitDice.counts)
+	{
+		counts.push_back({ { "count", entry.count }, { "xp", entry.xp } });
+	}
+	return nlohmann::json{
+		{ "sides", hitDice.sides },
+		{ "bonus", hitDice.bonus },
+		{ "counts", counts }
 	};
 }
 
@@ -262,10 +287,9 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 	params.symbol = parse_tile(entry.at("tile"));
 	params.color = parse_color_pair(entry.at("color").get<std::string>());
 	params.corpseName = entry.at("corpse").get<std::string>();
-	params.hpDice = parse_dice(entry.at("hp"));
+	params.hitDice = parse_hit_dice(entry.at("hit_dice"));
 	params.thaco = entry.at("thaco").get<int>();
 	params.ac = entry.at("ac").get<int>();
-	params.xp = entry.at("xp").get<int>();
 	params.dr = entry.at("dr").get<int>();
 	params.morale = entry.at("morale").get<int>();
 	// Optional by design: entries authored before turning existed are living.
@@ -315,10 +339,9 @@ nlohmann::json encode_full_params(const MonsterParams& params)
 		{ "color", color_pair_name(params.color) },
 		{ "name", params.name },
 		{ "corpse", params.corpseName },
-		{ "hp", encode_dice(params.hpDice) },
+		{ "hit_dice", encode_hit_dice(params.hitDice) },
 		{ "thaco", params.thaco },
 		{ "ac", params.ac },
-		{ "xp", params.xp },
 		{ "dr", params.dr },
 		{ "morale", params.morale },
 		{ "undead", params.undead },
@@ -423,7 +446,7 @@ void MonsterRegistry::load(std::string_view path)
 		knownKeys.insert(std::string{ monster_key(id) });
 	}
 
-	// Standard monsters: entry has "hp" field.
+	// Standard monsters: entry has "hit_dice" field.
 	for (MonsterId id : STANDARD_IDS)
 	{
 		const std::string key{ monster_key(id) };
@@ -461,7 +484,7 @@ void MonsterRegistry::load(std::string_view path)
 		}
 	}
 
-	// Custom monsters: any remaining JSON entry with an "hp" field
+	// Custom monsters: any remaining JSON entry with a "hit_dice" field
 	for (const auto& [key, entry] : root.items())
 	{
 		if (knownKeys.contains(key))
@@ -469,7 +492,7 @@ void MonsterRegistry::load(std::string_view path)
 			continue;
 		}
 
-		if (!entry.contains("hp"))
+		if (!entry.contains("hit_dice"))
 		{
 			continue;
 		}

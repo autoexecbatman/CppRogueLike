@@ -133,6 +133,7 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/CreatureSize.h
     ${PROJECT_SOURCE_DIR}/IntelligenceRating.h
     ${PROJECT_SOURCE_DIR}/MonsterAbilityTables.h
+    ${PROJECT_SOURCE_DIR}/MonsterHitDice.h
     ${PROJECT_SOURCE_DIR}/MonsterStrength.h
     ${PROJECT_SOURCE_DIR}/TurnUndead.cpp
     ${PROJECT_SOURCE_DIR}/TurnUndead.h

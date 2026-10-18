@@ -1,0 +1,113 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=MonsterHitDiceCountsTest.*:MonsterHitDiceRangeTest.*:MonsterHitDiceTest.*:MonsterRoundTripTest.*:MonsterRegistryTest.*:MonsterCreatorTest.*:DragonStatBlockTest.*:EncounterPlannerTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\tif (!is_valid_monster_hit_dice(hitDice))\n",
+      "mutated": "\tif (false)\n",
+      "catches": "hit dice the book cannot write loaded rather than refused"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\t\tcounts.push_back({ { \"count\", entry.count }, { \"xp\", entry.xp } });\n",
+      "mutated": "\t\tcounts.push_back({ { \"count\", entry.count }, { \"xp\", 0 } });\n",
+      "catches": "a save that drops every count's experience"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\t\tif (!entry.contains(\"hit_dice\"))\n",
+      "mutated": "\t\tif (!entry.contains(\"hp\"))\n",
+      "catches": "a custom monster recognised by the key the file no longer writes"
+    },
+    {
+      "file": "src/MonsterHitDice.h",
+      "original": "if (hitDice.counts.empty() || hitDice.sides < 1 ||",
+      "mutated": "if (hitDice.sides < 1 ||",
+      "catches": "hit dice with no count accepted"
+    },
+    {
+      "file": "src/MonsterHitDice.h",
+      "original": "hitDice.sides < 1 ||",
+      "mutated": "hitDice.sides < 0 ||",
+      "catches": "a die of no sides accepted"
+    },
+    {
+      "file": "src/MonsterHitDice.h",
+      "original": "hitDice.counts.front().count < MONSTER_HIT_DICE_LOWEST_COUNT)",
+      "mutated": "hitDice.counts.front().count < 0)",
+      "catches": "a count of zero accepted as a level"
+    },
+    {
+      "file": "src/MonsterHitDice.h",
+      "original": "\t\tif (entry.xp < 0 || !followsByOne)\n",
+      "mutated": "\t\tif (!followsByOne)\n",
+      "catches": "negative experience accepted"
+    },
+    {
+      "file": "src/MonsterHitDice.h",
+      "original": "entry.count == hitDice.counts.at(index - 1).count + 1;",
+      "mutated": "entry.count > hitDice.counts.at(index - 1).count;",
+      "catches": "a gap between counts accepted"
+    },
+    {
+      "file": "src/MonsterHitDice.h",
+      "original": "\t\tif (entry.xp < 0 || !followsByOne)\n",
+      "mutated": "\t\tif (entry.xp < 0)\n",
+      "catches": "counts in any order accepted"
+    },
+    {
+      "file": "src/MonsterHitDice.h",
+      "original": "\t\tconst HitDiceCount below{ hitDice.counts.front().count - 1, hitDice.counts.front().xp };\n",
+      "mutated": "\t\tconst HitDiceCount below{ hitDice.counts.front().count - 1, 0 };\n",
+      "catches": "a count the editor adds at the bottom worth nothing"
+    },
+    {
+      "file": "src/MonsterHitDice.h",
+      "original": "\tconst int target = std::clamp(lowest, MONSTER_HIT_DICE_LOWEST_COUNT, highest_count(hitDice).count);\n",
+      "mutated": "\tconst int target = std::clamp(lowest, 0, highest_count(hitDice).count);\n",
+      "catches": "the editor lowering a range to count 0"
+    },
+    {
+      "file": "src/MonsterHitDice.h",
+      "original": "inline constexpr int MONSTER_HIT_DICE_HIGHEST_COUNT = 99;",
+      "mutated": "inline constexpr int MONSTER_HIT_DICE_HIGHEST_COUNT = 100;",
+      "catches": "the editor raising a range past 99"
+    },
+    {
+      "file": "src/MonsterCreator.cpp",
+      "original": "\tconst int count = params.hitDice.counts.size() == 1\n",
+      "mutated": "\tconst int count = false\n",
+      "catches": "a one-count monster that spends a die choosing its count"
+    },
+    {
+      "file": "src/MonsterCreator.cpp",
+      "original": "\t\t: ctx.dice->roll(lowest.count, highest_count(params.hitDice).count);\n",
+      "mutated": "\t\t: lowest.count;\n",
+      "catches": "a range that always takes its lowest count"
+    },
+    {
+      "file": "src/MonsterCreator.cpp",
+      "original": "\tc->set_creature_level(rolled.count);\n",
+      "mutated": "\tc->set_creature_level(lowest.count);\n",
+      "catches": "the level taken from the lowest count rather than the rolled one"
+    },
+    {
+      "file": "src/MonsterCreator.cpp",
+      "original": "ExperienceReward>(rolled.xp);",
+      "mutated": "ExperienceReward>(lowest.xp);",
+      "catches": "the experience taken from the lowest count rather than the rolled one"
+    },
+    {
+      "file": "src/EncounterPlanner.cpp",
+      "original": "\t\tconst int worstCaseXp = highest_count(params.hitDice).xp;\n",
+      "mutated": "\t\tconst int worstCaseXp = params.hitDice.counts.front().xp;\n",
+      "catches": "an encounter budget paying the lowest count's experience"
+    }
+  ]
+}

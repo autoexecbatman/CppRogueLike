@@ -15,6 +15,7 @@
 #include "DiceExpr.h"
 #include "EquipmentSlot.h"
 #include "IntelligenceRating.h"
+#include "MonsterHitDice.h"
 #include "MonsterStrength.h"
 #include "Renderer.h"
 
@@ -82,13 +83,12 @@ struct MonsterParams
 	std::string corpseName;
 
 	// Combat
-	DiceExpr hpDice{};
+	// Its hit dice and the experience each count is worth.
+	MonsterHitDice hitDice{};
 	// The d20 roll it needs to hit armour class 0.
 	int thaco{ 20 };
 	// Its armour class; lower is harder to hit.
 	int ac{ 10 };
-	// The experience a kill is worth.
-	int xp{ 0 };
 	// Its damage reduction.
 	int dr{ 0 };
 	// The morale score its flight is rolled against.

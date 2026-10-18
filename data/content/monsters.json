@@ -16,9 +16,14 @@
     "dr": 0,
     "ethics": "neutral",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 1,
+      "counts": [
+        {
+          "count": 1,
+          "xp": 120
+        }
+      ],
       "sides": 8
     },
     "intelligence": "average",
@@ -32,7 +37,6 @@
       "sheet": 6
     },
     "weight": 10,
-    "xp": 120,
     "corpse_weight": 160,
     "equipment": [
       {
@@ -60,9 +64,14 @@
     "dr": 0,
     "ethics": "neutral",
     "morality": "neutral",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 1,
+      "counts": [
+        {
+          "count": 1,
+          "xp": 30
+        }
+      ],
       "sides": 2
     },
     "intelligence": "animal",
@@ -76,7 +85,6 @@
       "sheet": 14
     },
     "weight": 15,
-    "xp": 30,
     "corpse_weight": 8,
     "equipment": [],
     "natural_attack": "Bite",
@@ -99,9 +107,14 @@
     "dr": 0,
     "ethics": "chaotic",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 1,
-      "num": 3,
+      "counts": [
+        {
+          "count": 3,
+          "xp": 175
+        }
+      ],
       "sides": 8
     },
     "intelligence": "low",
@@ -118,7 +131,6 @@
       "sheet": 6
     },
     "weight": 11,
-    "xp": 175,
     "corpse_weight": 100,
     "equipment": [
       {
@@ -146,9 +158,14 @@
     "dr": 0,
     "ethics": "chaotic",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 9,
+      "counts": [
+        {
+          "count": 9,
+          "xp": 2000
+        }
+      ],
       "sides": 8
     },
     "intelligence": "semi",
@@ -162,7 +179,6 @@
       "sheet": 22
     },
     "weight": 5,
-    "xp": 2000,
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Fire Breath",
@@ -185,9 +201,14 @@
     "dr": 2,
     "ethics": "chaotic",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 15,
+      "counts": [
+        {
+          "count": 15,
+          "xp": 12000
+        }
+      ],
       "sides": 8
     },
     "intelligence": "exceptional",
@@ -201,7 +222,6 @@
       "sheet": 8
     },
     "weight": 3,
-    "xp": 12000,
     "corpse_weight": 600,
     "equipment": [],
     "natural_attack": "bite",
@@ -224,9 +244,14 @@
     "dr": 0,
     "ethics": "lawful",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 2,
+      "counts": [
+        {
+          "count": 2,
+          "xp": 120
+        }
+      ],
       "sides": 6
     },
     "intelligence": "low",
@@ -240,7 +265,6 @@
       "sheet": 12
     },
     "weight": 8,
-    "xp": 120,
     "corpse_weight": 130,
     "equipment": [],
     "natural_attack": "Flaming Bite",
@@ -263,9 +287,14 @@
     "dr": 1,
     "ethics": "chaotic",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 4,
+      "counts": [
+        {
+          "count": 4,
+          "xp": 270
+        }
+      ],
       "sides": 8
     },
     "intelligence": "low",
@@ -279,7 +308,6 @@
       "sheet": 20
     },
     "weight": 9,
-    "xp": 270,
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Claw",
@@ -302,9 +330,14 @@
     "dr": 0,
     "ethics": "chaotic",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 2,
+      "counts": [
+        {
+          "count": 2,
+          "xp": 175
+        }
+      ],
       "sides": 8
     },
     "intelligence": "low",
@@ -318,7 +351,6 @@
       "sheet": 16
     },
     "weight": 10,
-    "xp": 175,
     "corpse_weight": 100,
     "undead": true,
     "equipment": [],
@@ -342,9 +374,14 @@
     "dr": 0,
     "ethics": "neutral",
     "morality": "neutral",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 1,
+      "counts": [
+        {
+          "count": 1,
+          "xp": 35
+        }
+      ],
       "sides": 2
     },
     "intelligence": "non",
@@ -358,7 +395,6 @@
       "sheet": 10
     },
     "weight": 12,
-    "xp": 35,
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Poison Bite",
@@ -381,9 +417,14 @@
     "dr": 0,
     "ethics": "neutral",
     "morality": "neutral",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 1,
+      "counts": [
+        {
+          "count": 1,
+          "xp": 35
+        }
+      ],
       "sides": 4
     },
     "intelligence": "semi",
@@ -397,7 +438,6 @@
       "sheet": 22
     },
     "weight": 18,
-    "xp": 35,
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Bite",
@@ -420,9 +460,14 @@
     "dr": 0,
     "ethics": "neutral",
     "morality": "neutral",
-    "hp": {
+    "hit_dice": {
       "bonus": 4,
-      "num": 4,
+      "counts": [
+        {
+          "count": 4,
+          "xp": 270
+        }
+      ],
       "sides": 8
     },
     "intelligence": "animal",
@@ -436,7 +481,6 @@
       "sheet": 8
     },
     "weight": 10,
-    "xp": 270,
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Poison Bite",
@@ -459,9 +503,14 @@
     "dr": 0,
     "ethics": "chaotic",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 2,
+      "counts": [
+        {
+          "count": 2,
+          "xp": 120
+        }
+      ],
       "sides": 8
     },
     "intelligence": "low",
@@ -475,7 +524,6 @@
       "sheet": 4
     },
     "weight": 13,
-    "xp": 120,
     "corpse_weight": 100,
     "equipment": [
       {
@@ -503,9 +551,14 @@
     "dr": 0,
     "ethics": "lawful",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": -1,
-      "num": 1,
+      "counts": [
+        {
+          "count": 1,
+          "xp": 105
+        }
+      ],
       "sides": 8
     },
     "intelligence": "low",
@@ -519,7 +572,6 @@
       "sheet": 6
     },
     "weight": 30,
-    "xp": 105,
     "corpse_weight": 90,
     "equipment": [
       {
@@ -547,9 +599,14 @@
     "dr": 4,
     "ethics": "neutral",
     "morality": "neutral",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 12,
+      "counts": [
+        {
+          "count": 12,
+          "xp": 3000
+        }
+      ],
       "sides": 8
     },
     "intelligence": "non",
@@ -566,7 +623,6 @@
       "sheet": 6
     },
     "weight": 4,
-    "xp": 3000,
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Stone Fist",
@@ -589,9 +645,14 @@
     "dr": 0,
     "ethics": "chaotic",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 3,
+      "counts": [
+        {
+          "count": 3,
+          "xp": 175
+        }
+      ],
       "sides": 8
     },
     "intelligence": "low",
@@ -605,7 +666,6 @@
       "sheet": 6
     },
     "weight": 8,
-    "xp": 175,
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Talons",
@@ -628,9 +688,14 @@
     "dr": 0,
     "ethics": "chaotic",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 8,
+      "counts": [
+        {
+          "count": 8,
+          "xp": 2000
+        }
+      ],
       "sides": 8
     },
     "intelligence": "low",
@@ -647,7 +712,6 @@
       "sheet": 6
     },
     "weight": 6,
-    "xp": 2000,
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Hurled Boulder",
@@ -670,9 +734,14 @@
     "dr": 0,
     "ethics": "lawful",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 1,
-      "num": 1,
+      "counts": [
+        {
+          "count": 1,
+          "xp": 65
+        }
+      ],
       "sides": 8
     },
     "intelligence": "average",
@@ -686,7 +755,6 @@
       "sheet": 6
     },
     "weight": 15,
-    "xp": 65,
     "corpse_weight": 100,
     "equipment": [
       {
@@ -714,9 +782,14 @@
     "dr": 0,
     "ethics": "neutral",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 2,
+      "counts": [
+        {
+          "count": 2,
+          "xp": 120
+        }
+      ],
       "sides": 6
     },
     "intelligence": "average",
@@ -730,7 +803,6 @@
       "sheet": 12
     },
     "weight": 8,
-    "xp": 120,
     "corpse_weight": 130,
     "equipment": [],
     "natural_attack": "Freezing Bite",
@@ -753,9 +825,14 @@
     "dr": 0,
     "ethics": "lawful",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 1,
+      "counts": [
+        {
+          "count": 1,
+          "xp": 45
+        }
+      ],
       "sides": 4
     },
     "intelligence": "average",
@@ -769,7 +846,6 @@
       "sheet": 4
     },
     "weight": 25,
-    "xp": 45,
     "corpse_weight": 85,
     "equipment": [
       {
@@ -797,9 +873,14 @@
     "dr": 2,
     "ethics": "lawful",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 11,
+      "counts": [
+        {
+          "count": 11,
+          "xp": 4000
+        }
+      ],
       "sides": 8
     },
     "intelligence": "supra_genius",
@@ -813,7 +894,6 @@
       "sheet": 16
     },
     "weight": 3,
-    "xp": 4000,
     "corpse_weight": 100,
     "undead": true,
     "equipment": [],
@@ -837,9 +917,14 @@
     "dr": 0,
     "ethics": "neutral",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 1,
+      "counts": [
+        {
+          "count": 1,
+          "xp": 180
+        }
+      ],
       "sides": 6
     },
     "intelligence": "average",
@@ -853,7 +938,6 @@
       "sheet": 6
     },
     "weight": 10,
-    "xp": 180,
     "corpse_weight": 150,
     "equipment": [
       {
@@ -881,9 +965,14 @@
     "dr": 0,
     "ethics": "lawful",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 6,
+      "counts": [
+        {
+          "count": 6,
+          "xp": 1400
+        }
+      ],
       "sides": 8
     },
     "intelligence": "very",
@@ -897,7 +986,6 @@
       "sheet": 6
     },
     "weight": 7,
-    "xp": 1400,
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Petrifying Gaze",
@@ -928,9 +1016,14 @@
     "dr": 0,
     "ethics": "chaotic",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 1,
-      "num": 4,
+      "counts": [
+        {
+          "count": 4,
+          "xp": 270
+        }
+      ],
       "sides": 8
     },
     "intelligence": "low",
@@ -947,7 +1040,6 @@
       "sheet": 6
     },
     "weight": 10,
-    "xp": 270,
     "corpse_weight": 100,
     "equipment": [
       {
@@ -975,9 +1067,14 @@
     "dr": 0,
     "ethics": "lawful",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 1,
+      "counts": [
+        {
+          "count": 1,
+          "xp": 105
+        }
+      ],
       "sides": 10
     },
     "intelligence": "average",
@@ -991,7 +1088,6 @@
       "sheet": 6
     },
     "weight": 15,
-    "xp": 105,
     "corpse_weight": 180,
     "equipment": [
       {
@@ -1019,9 +1115,14 @@
     "dr": 3,
     "ethics": "lawful",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 13,
+      "counts": [
+        {
+          "count": 13,
+          "xp": 4000
+        }
+      ],
       "sides": 8
     },
     "intelligence": "genius",
@@ -1038,7 +1139,6 @@
       "sheet": 20
     },
     "weight": 3,
-    "xp": 4000,
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Hellfire Strike",
@@ -1061,9 +1161,14 @@
     "dr": 0,
     "ethics": "neutral",
     "morality": "neutral",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 1,
+      "counts": [
+        {
+          "count": 1,
+          "xp": 15
+        }
+      ],
       "sides": 2
     },
     "intelligence": "animal",
@@ -1077,7 +1182,6 @@
       "sheet": 22
     },
     "weight": 20,
-    "xp": 15,
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Bite",
@@ -1100,9 +1204,14 @@
     "dr": 0,
     "ethics": "chaotic",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 3,
-      "num": 3,
+      "counts": [
+        {
+          "count": 3,
+          "xp": 420
+        }
+      ],
       "sides": 8
     },
     "intelligence": "low",
@@ -1116,7 +1225,6 @@
       "sheet": 16
     },
     "weight": 9,
-    "xp": 420,
     "corpse_weight": 100,
     "undead": true,
     "equipment": [],
@@ -1148,9 +1256,14 @@
     "dr": 0,
     "ethics": "neutral",
     "morality": "neutral",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 1,
+      "counts": [
+        {
+          "count": 1,
+          "xp": 65
+        }
+      ],
       "sides": 8
     },
     "intelligence": "non",
@@ -1164,7 +1277,6 @@
       "sheet": 16
     },
     "weight": 15,
-    "xp": 65,
     "corpse_weight": 100,
     "undead": true,
     "equipment": [],
@@ -1212,9 +1324,14 @@
     "dr": 1,
     "ethics": "chaotic",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 1,
+      "counts": [
+        {
+          "count": 1,
+          "xp": 300
+        }
+      ],
       "sides": 12
     },
     "intelligence": "low",
@@ -1228,7 +1345,6 @@
       "sheet": 6
     },
     "weight": 7,
-    "xp": 300,
     "corpse_weight": 280,
     "equipment": [],
     "natural_attack": "Claws",
@@ -1251,9 +1367,14 @@
     "dr": 3,
     "ethics": "chaotic",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 3,
-      "num": 8,
+      "counts": [
+        {
+          "count": 8,
+          "xp": 2000
+        }
+      ],
       "sides": 8
     },
     "intelligence": "exceptional",
@@ -1270,7 +1391,6 @@
       "sheet": 16
     },
     "weight": 5,
-    "xp": 2000,
     "corpse_weight": 100,
     "undead": true,
     "equipment": [],
@@ -1294,9 +1414,14 @@
     "dr": 1,
     "ethics": "chaotic",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 3,
-      "num": 4,
+      "counts": [
+        {
+          "count": 4,
+          "xp": 420
+        }
+      ],
       "sides": 8
     },
     "intelligence": "average",
@@ -1310,7 +1435,6 @@
       "sheet": 12
     },
     "weight": 8,
-    "xp": 420,
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Bite",
@@ -1333,9 +1457,14 @@
     "dr": 1,
     "ethics": "lawful",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 3,
-      "num": 4,
+      "counts": [
+        {
+          "count": 4,
+          "xp": 650
+        }
+      ],
       "sides": 8
     },
     "intelligence": "average",
@@ -1349,7 +1478,6 @@
       "sheet": 16
     },
     "weight": 8,
-    "xp": 650,
     "corpse_weight": 100,
     "undead": true,
     "equipment": [],
@@ -1373,9 +1501,14 @@
     "dr": 0,
     "ethics": "neutral",
     "morality": "neutral",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 2,
+      "counts": [
+        {
+          "count": 2,
+          "xp": 45
+        }
+      ],
       "sides": 4
     },
     "intelligence": "semi",
@@ -1389,7 +1522,6 @@
       "sheet": 12
     },
     "weight": 20,
-    "xp": 45,
     "corpse_weight": 120,
     "equipment": [],
     "natural_attack": "Bite",
@@ -1412,9 +1544,14 @@
     "dr": 1,
     "ethics": "lawful",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 3,
-      "num": 5,
+      "counts": [
+        {
+          "count": 5,
+          "xp": 975
+        }
+      ],
       "sides": 8
     },
     "intelligence": "very",
@@ -1428,7 +1565,6 @@
       "sheet": 16
     },
     "weight": 7,
-    "xp": 975,
     "corpse_weight": 100,
     "undead": true,
     "equipment": [],
@@ -1452,9 +1588,14 @@
     "dr": 0,
     "ethics": "neutral",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 7,
-      "num": 7,
+      "counts": [
+        {
+          "count": 7,
+          "xp": 1400
+        }
+      ],
       "sides": 8
     },
     "intelligence": "low",
@@ -1468,7 +1609,6 @@
       "sheet": 8
     },
     "weight": 6,
-    "xp": 1400,
     "corpse_weight": 100,
     "equipment": [],
     "natural_attack": "Poison Sting",
@@ -1491,9 +1631,14 @@
     "dr": 0,
     "ethics": "neutral",
     "morality": "neutral",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 2,
+      "counts": [
+        {
+          "count": 2,
+          "xp": 65
+        }
+      ],
       "sides": 8
     },
     "intelligence": "non",
@@ -1507,7 +1652,6 @@
       "sheet": 16
     },
     "weight": 14,
-    "xp": 65,
     "corpse_weight": 100,
     "undead": true,
     "equipment": [],
@@ -1531,9 +1675,14 @@
     "dr": 0,
     "ethics": "lawful",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 3,
+      "counts": [
+        {
+          "count": 3,
+          "xp": 65
+        }
+      ],
       "sides": 8
     },
     "intelligence": "average",
@@ -1548,7 +1697,6 @@
       "sheet": 6
     },
     "weight": 0,
-    "xp": 65,
     "corpse_weight": 100,
     "equipment": [
       {
@@ -1576,9 +1724,14 @@
     "dr": 2,
     "ethics": "lawful",
     "morality": "evil",
-    "hp": {
+    "hit_dice": {
       "bonus": 0,
-      "num": 5,
+      "counts": [
+        {
+          "count": 5,
+          "xp": 650
+        }
+      ],
       "sides": 10
     },
     "intelligence": "average",
@@ -1593,7 +1746,6 @@
       "sheet": 6
     },
     "weight": 0,
-    "xp": 650,
     "corpse_weight": 100,
     "equipment": [
       {

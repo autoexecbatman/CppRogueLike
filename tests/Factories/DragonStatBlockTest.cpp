@@ -51,9 +51,10 @@ TEST(DragonStatBlockTest, AJuvenileHasFifteenEightSidedHitDice)
 {
 	const MonsterParams dragon = dragon_from_data();
 
-	EXPECT_EQ(dragon.hpDice.num, 15);
-	EXPECT_EQ(dragon.hpDice.sides, 8);
-	EXPECT_EQ(dragon.hpDice.bonus, 0);
+	ASSERT_EQ(dragon.hitDice.counts.size(), 1u);
+	EXPECT_EQ(dragon.hitDice.counts.front().count, 15);
+	EXPECT_EQ(dragon.hitDice.sides, 8);
+	EXPECT_EQ(dragon.hitDice.bonus, 0);
 }
 
 // Table 39 at 15 Hit Dice, not the entry's "7 (at 9 HD)".
@@ -69,7 +70,7 @@ TEST(DragonStatBlockTest, AJuvenileHasArmorClassMinusThree)
 
 TEST(DragonStatBlockTest, AJuvenileIsWorthTwelveThousandExperience)
 {
-	EXPECT_EQ(dragon_from_data().xp, 12000);
+	EXPECT_EQ(highest_count(dragon_from_data().hitDice).xp, 12000);
 }
 
 // Fanatic is 17-18.

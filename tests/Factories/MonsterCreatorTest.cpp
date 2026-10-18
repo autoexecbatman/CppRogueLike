@@ -19,7 +19,7 @@ protected:
 };
 
 // AD&D 2e invariant: a monster's effective level equals its Hit Dice count.
-// This guards the set_creature_level(hpDice.num) line in create_from_params.
+// This guards the set_creature_level line in create_from_params, for a one-count record.
 TEST_F(MonsterCreatorTest, MonsterLevelEqualsHitDice)
 {
     const MonsterParams& params = mock.monsterRegistry.get_params("troll");
@@ -27,7 +27,7 @@ TEST_F(MonsterCreatorTest, MonsterLevelEqualsHitDice)
     auto creature = MonsterCreator::create(Vector2D(0, 0), MonsterId::TROLL, ctx);
 
     ASSERT_NE(creature, nullptr);
-    EXPECT_EQ(creature->get_creature_level(), params.hpDice.num);
+    EXPECT_EQ(creature->get_creature_level(), highest_count(params.hitDice).count);
 }
 
 TEST_F(MonsterCreatorTest, WeakMonsterLevelIsAtLeastOne)
@@ -37,7 +37,7 @@ TEST_F(MonsterCreatorTest, WeakMonsterLevelIsAtLeastOne)
     auto creature = MonsterCreator::create(Vector2D(0, 0), MonsterId::GOBLIN, ctx);
 
     ASSERT_NE(creature, nullptr);
-    EXPECT_EQ(creature->get_creature_level(), params.hpDice.num);
+    EXPECT_EQ(creature->get_creature_level(), highest_count(params.hitDice).count);
     EXPECT_GE(creature->get_creature_level(), 1);
 }
 

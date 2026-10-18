@@ -151,7 +151,7 @@ TEST(AlignmentDataTest, EveryParsedRecordCarriesBothAxes)
 	{
 		// The five class-based creatures persist a tile only; their alignment is set where
 		// they are built, since the full parser never sees them.
-		if (!record.contains("hp"))
+		if (!record.contains("hit_dice"))
 		{
 			continue;
 		}

@@ -68,7 +68,7 @@ protected:
 		params.equipment.clear();
 		params.strength = MonsterStrength{ 10, 0 };
 		params.size = size;
-		params.hpDice = hitDice;
+		params.hitDice = MonsterHitDice{ hitDice.sides, hitDice.bonus, { { hitDice.num, 0 } } };
 		return params;
 	}
 

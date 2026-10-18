@@ -130,6 +130,32 @@ std::vector<std::string> select_encounter(
 // Public interface
 // ---------------------------------------------------------------------------
 
+std::vector<MonsterCandidate> encounter_candidates(const MonsterRegistry& monsters, int dungeonLevel)
+{
+	std::vector<MonsterCandidate> candidates;
+	for (const auto& key : monsters.get_all_keys())
+	{
+		// A monster worth nothing, such as one built in code, is never planned.
+		const MonsterParams& params = monsters.get_params(key);
+		const int worstCaseXp = highest_count(params.hitDice).xp;
+		if (worstCaseXp <= 0)
+		{
+			continue;
+		}
+		// Only monsters whose depth range holds this level.
+		if (params.levelMinimum > dungeonLevel)
+		{
+			continue;
+		}
+		if (params.levelMaximum > 0 && params.levelMaximum < dungeonLevel)
+		{
+			continue;
+		}
+		candidates.push_back({ key, worstCaseXp });
+	}
+	return candidates;
+}
+
 void plan_encounter(const DungeonRoom& room, GameContext& ctx)
 {
 	assert(ctx.creatureManager && "plan_encounter: called without a creatureManager");
@@ -150,24 +176,7 @@ void plan_encounter(const DungeonRoom& room, GameContext& ctx)
 	}
 
 	// Build candidate list: monsters eligible for this dungeon level
-	std::vector<MonsterCandidate> candidates;
-	for (const auto& key : ctx.monsterRegistry->get_all_keys())
-	{
-		const MonsterParams& params = ctx.monsterRegistry->get_params(key);
-		if (params.xp <= 0)
-		{
-			continue;
-		}
-		if (params.levelMinimum > dungeonLevel)
-		{
-			continue;
-		}
-		if (params.levelMaximum > 0 && params.levelMaximum < dungeonLevel)
-		{
-			continue;
-		}
-		candidates.push_back({ key, params.xp });
-	}
+	std::vector<MonsterCandidate> candidates = encounter_candidates(*ctx.monsterRegistry, dungeonLevel);
 
 	if (candidates.empty())
 	{

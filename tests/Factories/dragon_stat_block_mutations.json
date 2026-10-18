@@ -15,20 +15,20 @@
     },
     {
       "file": "data/content/monsters.json",
-      "original": "\"num\": 15,",
-      "mutated": "\"num\": 14,",
+      "original": "    \"hit_dice\": {\n      \"bonus\": 0,\n      \"counts\": [\n        {\n          \"count\": 15,\n          \"xp\": 12000\n        }\n      ],\n      \"sides\": 8\n    },\n",
+      "mutated": "    \"hit_dice\": {\n      \"bonus\": 0,\n      \"counts\": [\n        {\n          \"count\": 14,\n          \"xp\": 12000\n        }\n      ],\n      \"sides\": 8\n    },\n",
       "catches": "fourteen Hit Dice where the book gives fifteen"
     },
     {
       "file": "data/content/monsters.json",
-      "original": "\"bonus\": 0,\n      \"num\": 15,\n      \"sides\": 8",
-      "mutated": "\"bonus\": 0,\n      \"num\": 15,\n      \"sides\": 10",
+      "original": "    \"hit_dice\": {\n      \"bonus\": 0,\n      \"counts\": [\n        {\n          \"count\": 15,\n          \"xp\": 12000\n        }\n      ],\n      \"sides\": 8\n    },\n",
+      "mutated": "    \"hit_dice\": {\n      \"bonus\": 0,\n      \"counts\": [\n        {\n          \"count\": 15,\n          \"xp\": 12000\n        }\n      ],\n      \"sides\": 10\n    },\n",
       "catches": "Hit Dice of ten sides where the Monstrous Manual rolls eight"
     },
     {
       "file": "data/content/monsters.json",
-      "original": "\"bonus\": 0,\n      \"num\": 15,",
-      "mutated": "\"bonus\": 4,\n      \"num\": 15,",
+      "original": "    \"hit_dice\": {\n      \"bonus\": 0,\n      \"counts\": [\n        {\n          \"count\": 15,\n          \"xp\": 12000\n        }\n      ],\n      \"sides\": 8\n    },\n",
+      "mutated": "    \"hit_dice\": {\n      \"bonus\": 4,\n      \"counts\": [\n        {\n          \"count\": 15,\n          \"xp\": 12000\n        }\n      ],\n      \"sides\": 8\n    },\n",
       "catches": "a hit point bonus a juvenile's Nil modifier does not give"
     },
     {
@@ -39,8 +39,8 @@
     },
     {
       "file": "data/content/monsters.json",
-      "original": "\"xp\": 12000,",
-      "mutated": "\"xp\": 10000,",
+      "original": "    \"hit_dice\": {\n      \"bonus\": 0,\n      \"counts\": [\n        {\n          \"count\": 15,\n          \"xp\": 12000\n        }\n      ],\n      \"sides\": 8\n    },\n",
+      "mutated": "    \"hit_dice\": {\n      \"bonus\": 0,\n      \"counts\": [\n        {\n          \"count\": 15,\n          \"xp\": 10000\n        }\n      ],\n      \"sides\": 8\n    },\n",
       "catches": "the age 3 experience value, 10,000, in place of the juvenile's 12,000"
     },
     {

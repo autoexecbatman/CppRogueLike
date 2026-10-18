@@ -15,20 +15,20 @@
     },
     {
       "file": "data/content/monsters.json",
-      "original": "      \"num\": 1,\n      \"sides\": 4\n    },\n    \"intelligence\": \"semi\",\n",
-      "mutated": "      \"num\": 1,\n      \"sides\": 4\n    },\n    \"intelligence\": \"animal\",\n",
+      "original": "    \"hit_dice\": {\n      \"bonus\": 0,\n      \"counts\": [\n        {\n          \"count\": 1,\n          \"xp\": 35\n        }\n      ],\n      \"sides\": 4\n    },\n    \"intelligence\": \"semi\",\n",
+      "mutated": "    \"hit_dice\": {\n      \"bonus\": 0,\n      \"counts\": [\n        {\n          \"count\": 1,\n          \"xp\": 35\n        }\n      ],\n      \"sides\": 4\n    },\n    \"intelligence\": \"animal\",\n",
       "catches": "the giant rat given the ordinary rat's Animal rating"
     },
     {
       "file": "data/content/monsters.json",
-      "original": "      \"num\": 1,\n      \"sides\": 8\n    },\n    \"intelligence\": \"low\",\n",
-      "mutated": "      \"num\": 1,\n      \"sides\": 8\n    },\n    \"intelligence\": \"average\",\n",
+      "original": "    \"hit_dice\": {\n      \"bonus\": -1,\n      \"counts\": [\n        {\n          \"count\": 1,\n          \"xp\": 105\n        }\n      ],\n      \"sides\": 8\n    },\n    \"intelligence\": \"low\",\n",
+      "mutated": "    \"hit_dice\": {\n      \"bonus\": -1,\n      \"counts\": [\n        {\n          \"count\": 1,\n          \"xp\": 105\n        }\n      ],\n      \"sides\": 8\n    },\n    \"intelligence\": \"average\",\n",
       "catches": "the goblin's Low to average read as Average rather than the first named"
     },
     {
       "file": "data/content/monsters.json",
-      "original": "  \"zombie\": {\n    \"ac\": 8,\n    \"ai\": \"melee\",\n    \"can_swim\": false,\n    \"can_fly\": false,\n    \"color\": \"green_black\",\n    \"corpse\": \"dead zombie\",\n    \"damage\": {\n      \"display\": \"1d8\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 6,\n    \"depth_min\": 2,\n    \"depth_scale\": 0.10000000149011612,\n    \"dr\": 0,\n    \"ethics\": \"neutral\",\n    \"morality\": \"neutral\",\n    \"hp\": {\n      \"bonus\": 0,\n      \"num\": 2,\n      \"sides\": 8\n    },\n    \"intelligence\": \"non\",\n",
-      "mutated": "  \"zombie\": {\n    \"ac\": 8,\n    \"ai\": \"melee\",\n    \"can_swim\": false,\n    \"can_fly\": false,\n    \"color\": \"green_black\",\n    \"corpse\": \"dead zombie\",\n    \"damage\": {\n      \"display\": \"1d8\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 6,\n    \"depth_min\": 2,\n    \"depth_scale\": 0.10000000149011612,\n    \"dr\": 0,\n    \"ethics\": \"neutral\",\n    \"morality\": \"neutral\",\n    \"hp\": {\n      \"bonus\": 0,\n      \"num\": 2,\n      \"sides\": 8\n    },\n    \"intelligence\": \"animal\",\n",
+      "original": "  \"zombie\": {\n    \"ac\": 8,\n    \"ai\": \"melee\",\n    \"can_swim\": false,\n    \"can_fly\": false,\n    \"color\": \"green_black\",\n    \"corpse\": \"dead zombie\",\n    \"damage\": {\n      \"display\": \"1d8\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 6,\n    \"depth_min\": 2,\n    \"depth_scale\": 0.10000000149011612,\n    \"dr\": 0,\n    \"ethics\": \"neutral\",\n    \"morality\": \"neutral\",\n    \"hit_dice\": {\n      \"bonus\": 0,\n      \"counts\": [\n        {\n          \"count\": 2,\n          \"xp\": 65\n        }\n      ],\n      \"sides\": 8\n    },\n    \"intelligence\": \"non\",\n",
+      "mutated": "  \"zombie\": {\n    \"ac\": 8,\n    \"ai\": \"melee\",\n    \"can_swim\": false,\n    \"can_fly\": false,\n    \"color\": \"green_black\",\n    \"corpse\": \"dead zombie\",\n    \"damage\": {\n      \"display\": \"1d8\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 6,\n    \"depth_min\": 2,\n    \"depth_scale\": 0.10000000149011612,\n    \"dr\": 0,\n    \"ethics\": \"neutral\",\n    \"morality\": \"neutral\",\n    \"hit_dice\": {\n      \"bonus\": 0,\n      \"counts\": [\n        {\n          \"count\": 2,\n          \"xp\": 65\n        }\n      ],\n      \"sides\": 8\n    },\n    \"intelligence\": \"animal\",\n",
       "catches": "the zombie given Animal intelligence rather than Non-"
     },
     {

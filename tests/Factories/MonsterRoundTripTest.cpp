@@ -141,13 +141,6 @@ bool is_class_based(const std::string& key)
 		|| key == "spider_giant" || key == "spider_weaver";
 }
 
-void expect_same_dice(const std::string& what, const DiceExpr& before, const DiceExpr& after)
-{
-	EXPECT_EQ(before.num, after.num) << what << ".num";
-	EXPECT_EQ(before.sides, after.sides) << what << ".sides";
-	EXPECT_EQ(before.bonus, after.bonus) << what << ".bonus";
-}
-
 // Every field MonsterParams declares, named one at a time. A dropped key fails here
 // pointing at the field, which is what a count of surviving keys could not do.
 void expect_same_monster(const std::string& key, const MonsterParams& before, const MonsterParams& after)
@@ -161,7 +154,6 @@ void expect_same_monster(const std::string& key, const MonsterParams& before, co
 
 	EXPECT_EQ(before.thaco, after.thaco) << key << ".thaco";
 	EXPECT_EQ(before.ac, after.ac) << key << ".ac";
-	EXPECT_EQ(before.xp, after.xp) << key << ".xp";
 	EXPECT_EQ(before.dr, after.dr) << key << ".dr";
 	EXPECT_EQ(before.morale, after.morale) << key << ".morale";
 	EXPECT_EQ(before.undead, after.undead) << key << ".undead";
@@ -171,7 +163,14 @@ void expect_same_monster(const std::string& key, const MonsterParams& before, co
 	EXPECT_EQ(before.intelligence, after.intelligence) << key << ".intelligence";
 	EXPECT_EQ(before.corpseWeight, after.corpseWeight) << key << ".corpseWeight";
 
-	expect_same_dice(key + ".hpDice", before.hpDice, after.hpDice);
+	EXPECT_EQ(before.hitDice.sides, after.hitDice.sides) << key << ".hitDice.sides";
+	EXPECT_EQ(before.hitDice.bonus, after.hitDice.bonus) << key << ".hitDice.bonus";
+	ASSERT_EQ(before.hitDice.counts.size(), after.hitDice.counts.size()) << key << ".hitDice.counts";
+	for (size_t entry = 0; entry < before.hitDice.counts.size(); ++entry)
+	{
+		EXPECT_EQ(before.hitDice.counts.at(entry).count, after.hitDice.counts.at(entry).count) << key << ".hitDice.counts[" << entry << "].count";
+		EXPECT_EQ(before.hitDice.counts.at(entry).xp, after.hitDice.counts.at(entry).xp) << key << ".hitDice.counts[" << entry << "].xp";
+	}
 	ASSERT_EQ(before.strength.has_value(), after.strength.has_value()) << key << ".strength";
 	if (before.strength.has_value())
 	{

@@ -37,11 +37,13 @@ private:
 	{
 		NAME,
 		CORPSE,
-		HP_NUM,
-		HP_SIDES,
-		HP_BONUS,
+		HD_LOWEST,
+		HD_HIGHEST,
+		HD_SIDES,
+		HD_BONUS,
 		THACO,
 		AC,
+		XP_COUNT,
 		XP,
 		DR,
 		STR_SOURCE,
@@ -80,6 +82,9 @@ private:
 	// Working copy of selected monster's params
 	MonsterParams m_working{};
 	bool m_is_class_based{ false };
+
+	// Which of the working monster's hit dice counts the XP field edits.
+	size_t selectedXpCount{ 0 };
 
 	// Field navigation
 	int m_field_cursor{ 0 };

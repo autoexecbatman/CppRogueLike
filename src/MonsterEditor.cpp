@@ -164,6 +164,7 @@ void MonsterEditor::load_working(const MonsterRegistry& monsters)
 	const std::string& key = current_key();
 	m_is_class_based = monsters.is_class_key(key);
 	m_working = monsters.get_params(key);
+	selectedXpCount = 0;
 	m_field_cursor = m_is_class_based ? static_cast<int>(FieldId::TILE) : 0;
 	m_field_scroll = 0;
 	m_mode = Mode::NORMAL;
@@ -317,10 +318,9 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 			MonsterParams defaults;
 			defaults.name = "New Monster";
 			defaults.corpseName = "dead monster";
-			defaults.hpDice = DiceExpr{ 1, 8, 0 };
+			defaults.hitDice = MonsterHitDice{ 8, 0, { { 1, 1 } } };
 			defaults.thaco = 20;
 			defaults.ac = 10;
-			defaults.xp = 1;
 			defaults.strength = std::nullopt;
 			defaults.naturalAttack = "claws";
 			defaults.damage = DamageInfo{ DiceExpr{ 1, 4, 0 }, DamageType::PHYSICAL };
@@ -882,16 +882,20 @@ std::string MonsterEditor::field_label(FieldId f) const
 		return "Name";
 	case FieldId::CORPSE:
 		return "Corpse";
-	case FieldId::HP_NUM:
-		return "HP Num";
-	case FieldId::HP_SIDES:
-		return "HP Sides";
-	case FieldId::HP_BONUS:
-		return "HP Bonus";
+	case FieldId::HD_LOWEST:
+		return "HD Lowest";
+	case FieldId::HD_HIGHEST:
+		return "HD Highest";
+	case FieldId::HD_SIDES:
+		return "HD Sides";
+	case FieldId::HD_BONUS:
+		return "HD Bonus";
 	case FieldId::THACO:
 		return "THAC0";
 	case FieldId::AC:
 		return "AC";
+	case FieldId::XP_COUNT:
+		return "XP For HD";
 	case FieldId::XP:
 		return "XP";
 	case FieldId::DR:
@@ -952,18 +956,22 @@ std::string MonsterEditor::field_value(FieldId f) const
 		return m_working.name;
 	case FieldId::CORPSE:
 		return m_working.corpseName;
-	case FieldId::HP_NUM:
-		return std::format("{}", m_working.hpDice.num);
-	case FieldId::HP_SIDES:
-		return std::format("{}", m_working.hpDice.sides);
-	case FieldId::HP_BONUS:
-		return std::format("{}", m_working.hpDice.bonus);
+	case FieldId::HD_LOWEST:
+		return std::format("{}", m_working.hitDice.counts.front().count);
+	case FieldId::HD_HIGHEST:
+		return std::format("{}", highest_count(m_working.hitDice).count);
+	case FieldId::HD_SIDES:
+		return std::format("{}", m_working.hitDice.sides);
+	case FieldId::HD_BONUS:
+		return std::format("{}", m_working.hitDice.bonus);
 	case FieldId::THACO:
 		return std::format("{}", m_working.thaco);
 	case FieldId::AC:
 		return std::format("{}", m_working.ac);
+	case FieldId::XP_COUNT:
+		return std::format("{} HD", m_working.hitDice.counts.at(selectedXpCount).count);
 	case FieldId::XP:
-		return std::format("{}", m_working.xp);
+		return std::format("{}", m_working.hitDice.counts.at(selectedXpCount).xp);
 	case FieldId::DR:
 		return std::format("{}", m_working.dr);
 	case FieldId::STR_SOURCE:
@@ -1048,14 +1056,26 @@ void MonsterEditor::field_adjust(FieldId f, int delta)
 
 	switch (f)
 	{
-	case FieldId::HP_NUM:
-		m_working.hpDice.num = clamp_val(m_working.hpDice.num, delta, 1, 99);
+	case FieldId::HD_LOWEST:
+	{
+		m_working.hitDice = with_lowest_count(m_working.hitDice, m_working.hitDice.counts.front().count + delta);
+		// The range may have shrunk under the selected count.
+		selectedXpCount = std::min(selectedXpCount, m_working.hitDice.counts.size() - 1);
+		assert(is_valid_monster_hit_dice(m_working.hitDice) && "MonsterEditor: the lowest count left hit dice the loader refuses");
 		break;
-	case FieldId::HP_SIDES:
-		m_working.hpDice.sides = clamp_val(m_working.hpDice.sides, delta, 2, 20);
+	}
+	case FieldId::HD_HIGHEST:
+	{
+		m_working.hitDice = with_highest_count(m_working.hitDice, highest_count(m_working.hitDice).count + delta);
+		selectedXpCount = std::min(selectedXpCount, m_working.hitDice.counts.size() - 1);
+		assert(is_valid_monster_hit_dice(m_working.hitDice) && "MonsterEditor: the highest count left hit dice the loader refuses");
 		break;
-	case FieldId::HP_BONUS:
-		m_working.hpDice.bonus = clamp_val(m_working.hpDice.bonus, delta, -99, 99);
+	}
+	case FieldId::HD_SIDES:
+		m_working.hitDice.sides = clamp_val(m_working.hitDice.sides, delta, 1, 20);
+		break;
+	case FieldId::HD_BONUS:
+		m_working.hitDice.bonus = clamp_val(m_working.hitDice.bonus, delta, -99, 99);
 		break;
 	case FieldId::THACO:
 		m_working.thaco = clamp_val(m_working.thaco, delta, 1, 25);
@@ -1063,9 +1083,25 @@ void MonsterEditor::field_adjust(FieldId f, int delta)
 	case FieldId::AC:
 		m_working.ac = clamp_val(m_working.ac, delta, -10, 10);
 		break;
-	case FieldId::XP:
-		m_working.xp = clamp_val(m_working.xp, delta, 0, 9999);
+	case FieldId::XP_COUNT:
+	{
+		// One count a step, whatever the step size, and never past either end.
+		if (delta < 0 && selectedXpCount > 0)
+		{
+			--selectedXpCount;
+		}
+		else if (delta > 0 && selectedXpCount + 1 < m_working.hitDice.counts.size())
+		{
+			++selectedXpCount;
+		}
 		break;
+	}
+	case FieldId::XP:
+	{
+		HitDiceCount& selected = m_working.hitDice.counts.at(selectedXpCount);
+		selected.xp = clamp_val(selected.xp, delta, 0, 99999);
+		break;
+	}
 	case FieldId::DR:
 		m_working.dr = clamp_val(m_working.dr, delta, 0, 20);
 		break;

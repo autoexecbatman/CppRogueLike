@@ -5,6 +5,7 @@
 
 #include "DungeonRoom.h"
 
+class MonsterRegistry;
 struct GameContext;
 
 // A monster candidate for the knapsack solver.
@@ -30,6 +31,14 @@ std::vector<std::string> select_encounter(
 	int budget,
 	int cap,
 	RandomDice& rng);
+
+// The monsters an encounter at this depth may draw on, each at the experience its budget
+// pays: the highest count's, so a budget covers the worst roll. A monster worth nothing, or
+// outside its depth range, is left out.
+//
+// Example, a registry holding a monster of 9 or 10 hit dice worth 2,000 or 3,000:
+//   encounter_candidates(monsters, 1); // -> includes { "ranged_count_beast", 3000 }, the worst roll
+std::vector<MonsterCandidate> encounter_candidates(const MonsterRegistry& monsters, int dungeonLevel);
 
 // Plan and spawn an encounter for the given room.
 // Budget is derived from room type and dungeon level.

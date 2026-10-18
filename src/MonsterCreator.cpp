@@ -17,6 +17,7 @@
 #include "MonsterAbilityTables.h"
 #include "MonsterAttacker.h"
 #include "MonsterCreator.h"
+#include "MonsterHitDice.h"
 #include "MonsterRegistry.h"
 #include "Vector2D.h"
 
@@ -61,19 +62,26 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 	c->set_ethics(params.ethics);
 	c->set_morality(params.morality);
 	c->set_corpse_weight(params.corpseWeight);
-	c->set_creature_level(params.hpDice.num);
+	// One count needs no choice and spends no die; a range rolls its count, and the level,
+	// the hit points and the experience all follow that roll.
+	const HitDiceCount& lowest = params.hitDice.counts.front();
+	const int count = params.hitDice.counts.size() == 1
+		? lowest.count
+		: ctx.dice->roll(lowest.count, highest_count(params.hitDice).count);
+	const HitDiceCount& rolled = count_entry(params.hitDice, count);
+	c->set_creature_level(rolled.count);
 
 	// Rolled after the scores are set, because each die carries the Constitution.
 	assert(ctx.dataManager && "MonsterCreator::create_from_params called without a dataManager");
 	const int hp = LevelUpSystem::roll_hit_points(
-		params.hpDice,
+		dice_for(params.hitDice, rolled.count),
 		c->get_creature_class(),
 		c->get_constitution(),
 		*ctx.dataManager,
 		*ctx.dice);
 
 	c->attacker = std::make_unique<MonsterAttacker>(*c, params.damage);
-	c->experienceReward = std::make_unique<ExperienceReward>(params.xp);
+	c->experienceReward = std::make_unique<ExperienceReward>(rolled.xp);
 	c->set_dr(params.dr);
 	c->set_thaco(params.thaco);
 	c->armorClass = std::make_unique<ArmorClass>(params.ac);
