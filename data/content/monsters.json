@@ -1,9 +1,12 @@
 {
   "archer": {
     "ac": 7,
-    "ai": "ranged",
+    "ai": "ranged_monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "red_black",
     "corpse": "dead archer",
     "damage": {
@@ -49,9 +52,12 @@
   },
   "bat": {
     "ac": 8,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": true,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "magenta_black",
     "corpse": "dead bat",
     "damage": {
@@ -92,9 +98,12 @@
   },
   "bugbear": {
     "ac": 5,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "red_black",
     "corpse": "dead bugbear",
     "damage": {
@@ -143,9 +152,12 @@
   },
   "chimera": {
     "ac": 6,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": true,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "red_yellow",
     "corpse": "dead chimera",
     "damage": {
@@ -186,9 +198,12 @@
   },
   "dragon": {
     "ac": -3,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": true,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "red_yellow",
     "corpse": "dead dragon",
     "damage": {
@@ -229,9 +244,12 @@
   },
   "fire_wolf": {
     "ac": 6,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "red_yellow",
     "corpse": "charred wolf corpse",
     "damage": {
@@ -272,9 +290,12 @@
   },
   "gargoyle": {
     "ac": 5,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": true,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "brown_black",
     "corpse": "broken gargoyle",
     "damage": {
@@ -315,9 +336,12 @@
   },
   "ghoul": {
     "ac": 6,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "cyan_blue",
     "corpse": "dead ghoul",
     "damage": {
@@ -359,9 +383,12 @@
   },
   "giant_centipede": {
     "ac": 5,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "green_black",
     "corpse": "dead giant centipede",
     "damage": {
@@ -402,9 +429,12 @@
   },
   "giant_rat": {
     "ac": 7,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": true,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "brown_black",
     "corpse": "dead giant rat",
     "damage": {
@@ -445,9 +475,12 @@
   },
   "giant_snake": {
     "ac": 5,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": true,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "green_black",
     "corpse": "dead giant snake",
     "damage": {
@@ -488,9 +521,12 @@
   },
   "gnoll": {
     "ac": 5,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "red_black",
     "corpse": "dead gnoll",
     "damage": {
@@ -536,9 +572,12 @@
   },
   "goblin": {
     "ac": 6,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": true,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "yellow_black",
     "corpse": "dead goblin",
     "damage": {
@@ -584,9 +623,12 @@
   },
   "golem_stone": {
     "ac": 5,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "brown_black",
     "corpse": "rubble of golem",
     "damage": {
@@ -630,9 +672,12 @@
   },
   "harpy": {
     "ac": 7,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": true,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "magenta_black",
     "corpse": "dead harpy",
     "damage": {
@@ -673,9 +718,12 @@
   },
   "hill_giant": {
     "ac": 3,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "red_black",
     "corpse": "dead hill giant",
     "damage": {
@@ -719,9 +767,12 @@
   },
   "hobgoblin": {
     "ac": 5,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "red_black",
     "corpse": "dead hobgoblin",
     "damage": {
@@ -767,9 +818,12 @@
   },
   "ice_wolf": {
     "ac": 6,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "cyan_blue",
     "corpse": "frozen wolf corpse",
     "damage": {
@@ -810,9 +864,12 @@
   },
   "kobold": {
     "ac": 7,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "red_black",
     "corpse": "dead kobold",
     "damage": {
@@ -858,9 +915,12 @@
   },
   "lich": {
     "ac": 0,
-    "ai": "ranged",
+    "ai": "ranged_monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "cyan_blue",
     "corpse": "dead lich",
     "damage": {
@@ -902,9 +962,12 @@
   },
   "mage": {
     "ac": 9,
-    "ai": "ranged",
+    "ai": "ranged_monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "white_blue",
     "corpse": "dead mage",
     "damage": {
@@ -950,9 +1013,12 @@
   },
   "medusa": {
     "ac": 5,
-    "ai": "ranged",
+    "ai": "ranged_monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "green_black",
     "corpse": "dead medusa",
     "damage": {
@@ -992,18 +1058,63 @@
     "body": "serpent_haired"
   },
   "mimic": {
+    "ac": 7,
+    "ai": "mimic",
+    "can_swim": false,
+    "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
+    "color": "red_yellow",
+    "corpse": "dead mimic",
+    "damage": {
+      "display": "3d4",
+      "type": "physical"
+    },
+    "depth_max": 0,
+    "depth_min": 6,
+    "depth_scale": 0.5,
+    "dr": 1,
+    "ethics": "neutral",
+    "morality": "evil",
+    "hit_dice": {
+      "bonus": 0,
+      "counts": [
+        {
+          "count": 9,
+          "xp": 2000
+        },
+        {
+          "count": 10,
+          "xp": 3000
+        }
+      ],
+      "sides": 8
+    },
+    "intelligence": "semi",
+    "morale": 16,
+    "size": "large",
+    "strength": null,
+    "thaco": 11,
     "tile": {
       "col": 1,
       "row": 2,
       "sheet": 20
     },
-    "corpse_weight": 100
+    "weight": 6,
+    "corpse_weight": 100,
+    "equipment": [],
+    "natural_attack": "Pseudopod",
+    "body": "beast"
   },
   "ogre": {
     "ac": 5,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "red_black",
     "corpse": "dead ogre",
     "damage": {
@@ -1052,9 +1163,12 @@
   },
   "orc": {
     "ac": 6,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "red_black",
     "corpse": "dead orc",
     "damage": {
@@ -1100,9 +1214,12 @@
   },
   "pit_fiend": {
     "ac": -3,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "red_yellow",
     "corpse": "dead pit fiend",
     "damage": {
@@ -1146,9 +1263,12 @@
   },
   "rat": {
     "ac": 9,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "brown_black",
     "corpse": "dead rat",
     "damage": {
@@ -1189,9 +1309,12 @@
   },
   "shadow": {
     "ac": 7,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "brown_black",
     "corpse": "dissipated shadow",
     "damage": {
@@ -1232,18 +1355,64 @@
     "body": "hands_only"
   },
   "shopkeeper": {
+    "ac": 10,
+    "ai": "shopkeeper",
+    "can_swim": false,
+    "can_fly": false,
+    "walks_webs": false,
+    "attitude": "peaceful",
+    "displaceable": false,
+    "color": "yellow_black",
+    "corpse": "dead shopkeeper",
+    "damage": {
+      "display": "1d4",
+      "type": "physical"
+    },
+    "depth_max": 0,
+    "depth_min": 1,
+    "depth_scale": 0.0,
+    "dr": 20,
+    "ethics": "neutral",
+    "morality": "neutral",
+    "hit_dice": {
+      "bonus": 99,
+      "counts": [
+        {
+          "count": 1,
+          "xp": 0
+        }
+      ],
+      "sides": 1
+    },
+    "intelligence": "average",
+    "morale": 10,
+    "size": "medium",
+    "strength": null,
+    "thaco": 20,
     "tile": {
       "col": 2,
       "row": 9,
       "sheet": 6
     },
-    "corpse_weight": 170
+    "weight": 20,
+    "corpse_weight": 170,
+    "equipment": [
+      {
+        "item": "dagger",
+        "slot": "right_hand"
+      }
+    ],
+    "natural_attack": "",
+    "body": "humanoid"
   },
   "skeleton": {
     "ac": 7,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "cyan_blue",
     "corpse": "dead skeleton",
     "damage": {
@@ -1284,34 +1453,151 @@
     "body": "humanoid"
   },
   "spider_giant": {
+    "ac": 6,
+    "ai": "giant_spider",
+    "can_swim": true,
+    "can_fly": false,
+    "walks_webs": true,
+    "attitude": "hostile",
+    "displaceable": true,
+    "color": "red_black",
+    "corpse": "dead giant spider",
+    "damage": {
+      "display": "1d6",
+      "type": "physical"
+    },
+    "depth_max": 0,
+    "depth_min": 2,
+    "depth_scale": 0.0,
+    "dr": 1,
+    "ethics": "neutral",
+    "morality": "neutral",
+    "hit_dice": {
+      "bonus": 2,
+      "counts": [
+        {
+          "count": 2,
+          "xp": 270
+        }
+      ],
+      "sides": 8
+    },
+    "intelligence": "animal",
+    "morale": 8,
+    "size": "medium",
+    "strength": null,
+    "thaco": 19,
     "tile": {
       "col": 2,
       "row": 4,
       "sheet": 10
     },
-    "corpse_weight": 150
+    "weight": 10,
+    "corpse_weight": 150,
+    "equipment": [],
+    "natural_attack": "Giant fangs",
+    "body": "beast"
   },
   "spider_small": {
+    "ac": 8,
+    "ai": "spider",
+    "can_swim": true,
+    "can_fly": false,
+    "walks_webs": true,
+    "attitude": "hostile",
+    "displaceable": true,
+    "color": "green_black",
+    "corpse": "dead small spider",
+    "damage": {
+      "display": "1",
+      "type": "physical"
+    },
+    "depth_max": 0,
+    "depth_min": 1,
+    "depth_scale": -0.30000001192092896,
+    "dr": 0,
+    "ethics": "neutral",
+    "morality": "evil",
+    "hit_dice": {
+      "bonus": -1,
+      "counts": [
+        {
+          "count": 1,
+          "xp": 65
+        }
+      ],
+      "sides": 8
+    },
+    "intelligence": "low",
+    "morale": 10,
+    "size": "tiny",
+    "strength": null,
+    "thaco": 20,
     "tile": {
       "col": 0,
       "row": 4,
       "sheet": 10
     },
-    "corpse_weight": 20
+    "weight": 10,
+    "corpse_weight": 20,
+    "equipment": [],
+    "natural_attack": "Venomous fangs",
+    "body": "beast"
   },
   "spider_weaver": {
+    "ac": 4,
+    "ai": "web_spinner",
+    "can_swim": true,
+    "can_fly": false,
+    "walks_webs": true,
+    "attitude": "hostile",
+    "displaceable": true,
+    "color": "black_green",
+    "corpse": "dead web weaver",
+    "damage": {
+      "display": "1d8",
+      "type": "physical"
+    },
+    "depth_max": 0,
+    "depth_min": 3,
+    "depth_scale": 0.20000000298023224,
+    "dr": 1,
+    "ethics": "chaotic",
+    "morality": "evil",
+    "hit_dice": {
+      "bonus": 3,
+      "counts": [
+        {
+          "count": 3,
+          "xp": 420
+        }
+      ],
+      "sides": 8
+    },
+    "intelligence": "low",
+    "morale": 13,
+    "size": "large",
+    "strength": null,
+    "thaco": 17,
     "tile": {
       "col": 1,
       "row": 4,
       "sheet": 10
     },
-    "corpse_weight": 160
+    "weight": 5,
+    "corpse_weight": 160,
+    "equipment": [],
+    "natural_attack": "Toxic fangs",
+    "body": "beast"
   },
   "troll": {
     "ac": 4,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "green_black",
     "corpse": "dead troll",
     "damage": {
@@ -1352,9 +1638,12 @@
   },
   "vampire": {
     "ac": 1,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": true,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "red_black",
     "corpse": "dead vampire",
     "damage": {
@@ -1399,9 +1688,12 @@
   },
   "werewolf": {
     "ac": 5,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "brown_black",
     "corpse": "dead werewolf",
     "damage": {
@@ -1442,9 +1734,12 @@
   },
   "wight": {
     "ac": 5,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "cyan_blue",
     "corpse": "dead wight",
     "damage": {
@@ -1486,9 +1781,12 @@
   },
   "wolf": {
     "ac": 7,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "brown_black",
     "corpse": "dead wolf",
     "damage": {
@@ -1529,9 +1827,12 @@
   },
   "wraith": {
     "ac": 4,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": true,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "cyan_blue",
     "corpse": "dissipated wraith",
     "damage": {
@@ -1573,9 +1874,12 @@
   },
   "wyvern": {
     "ac": 3,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": true,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "green_black",
     "corpse": "dead wyvern",
     "damage": {
@@ -1616,9 +1920,12 @@
   },
   "zombie": {
     "ac": 8,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "green_black",
     "corpse": "dead zombie",
     "damage": {
@@ -1660,9 +1967,12 @@
   },
   "dungeon_jailer": {
     "ac": 4,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "red_black",
     "corpse": "dead jailer",
     "damage": {
@@ -1709,9 +2019,12 @@
   },
   "dungeon_warden": {
     "ac": 1,
-    "ai": "melee",
+    "ai": "monster",
     "can_swim": false,
     "can_fly": false,
+    "walks_webs": false,
+    "attitude": "hostile",
+    "displaceable": true,
     "color": "magenta_black",
     "corpse": "dead warden",
     "damage": {

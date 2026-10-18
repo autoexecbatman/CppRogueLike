@@ -66,7 +66,7 @@ static const std::unordered_map<ItemClass, MimicBonusType> item_bonus_map = {
 };
 
 // Single source of truth: which item appearances a mimic can adopt.
-// Called at fresh construction (Mimic ctor) and as lazy init after load.
+// Called by on_created when a mimic is built, and as lazy init after load.
 std::vector<Disguise> Appearance::build_mimic_list(ContentRegistry& tiles, const ItemRegistry& items)
 {
 	auto from_item = [&tiles, &items](std::string_view key) -> Disguise
@@ -84,10 +84,16 @@ std::vector<Disguise> Appearance::build_mimic_list(ContentRegistry& tiles, const
 	};
 }
 
-AiMimic::AiMimic(std::vector<Disguise> initialDisguises)
-	: possibleDisguises(std::move(initialDisguises))
+void AiMimic::on_created(Creature& owner, GameContext& ctx)
 {
+	assert(ctx.contentRegistry && "AiMimic::on_created: called without a contentRegistry");
+	assert(ctx.itemRegistry && "AiMimic::on_created: called without an itemRegistry");
+
+	possibleDisguises = Appearance::build_mimic_list(*ctx.contentRegistry, *ctx.itemRegistry);
 	assert(!possibleDisguises.empty() && "AiMimic: a mimic was built with no appearance to wear");
+
+	// A new mimic is disguised, so this dresses it in its first appearance.
+	change_disguise(owner, ctx);
 }
 
 void AiMimic::update(Creature& owner, GameContext& ctx)

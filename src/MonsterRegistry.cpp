@@ -112,9 +112,6 @@ constexpr MonsterId STANDARD_IDS[] = {
 	MonsterId::ICE_WOLF,
 	MonsterId::BAT,
 	MonsterId::KOBOLD,
-};
-
-constexpr MonsterId CLASS_IDS[] = {
 	MonsterId::MIMIC,
 	MonsterId::SHOPKEEPER,
 	MonsterId::SPIDER_SMALL,
@@ -315,11 +312,19 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 		throw std::runtime_error("MonsterRegistry -- a monster names no body; use \"beast\" for one that wears nothing");
 	}
 	params.damage = parse_damage(entry.at("damage"));
-	params.aiType = (entry.at("ai").get<std::string>() == "ranged")
-		? MonsterAiType::RANGED
-		: MonsterAiType::MELEE;
+	// Named by the Ai's save name; a Confused Ai wraps another and is never authored.
+	params.aiType = parse_ai_type(entry.at("ai").get<std::string>());
+	if (!is_authorable_ai_type(params.aiType))
+	{
+		throw std::runtime_error(std::format(
+			"MonsterRegistry -- a monster's ai '{}' is not one a record may name",
+			encode_ai_type(params.aiType)));
+	}
 	params.canSwim = entry.at("can_swim").get<bool>();
 	params.canFly = entry.at("can_fly").get<bool>();
+	params.walksWebs = entry.at("walks_webs").get<bool>();
+	params.attitude = parse_attitude(entry.at("attitude").get<std::string>());
+	params.displaceable = entry.at("displaceable").get<bool>();
 	params.baseWeight = entry.at("weight").get<int>();
 	params.levelMinimum = entry.at("depth_min").get<int>();
 	params.levelMaximum = entry.at("depth_max").get<int>();
@@ -355,9 +360,12 @@ nlohmann::json encode_full_params(const MonsterParams& params)
 		{ "equipment", encode_equipment(params.equipment) },
 		{ "body", params.bodyPlanName },
 		{ "damage", encode_damage(params.damage) },
-		{ "ai", params.aiType == MonsterAiType::RANGED ? "ranged" : "melee" },
+		{ "ai", encode_ai_type(params.aiType) },
 		{ "can_swim", params.canSwim },
 		{ "can_fly", params.canFly },
+		{ "walks_webs", params.walksWebs },
+		{ "attitude", encode_attitude(params.attitude) },
+		{ "displaceable", params.displaceable },
 		{ "weight", params.baseWeight },
 		{ "depth_min", params.levelMinimum },
 		{ "depth_max", params.levelMaximum },
@@ -371,19 +379,6 @@ nlohmann::json encode_full_params(const MonsterParams& params)
 std::optional<MonsterId> key_to_standard_id(std::string_view key)
 {
 	for (MonsterId id : STANDARD_IDS)
-	{
-		if (monster_key(id) == key)
-		{
-			return id;
-		}
-	}
-
-	return std::nullopt;
-}
-
-std::optional<MonsterId> key_to_class_id(std::string_view key)
-{
-	for (MonsterId id : CLASS_IDS)
 	{
 		if (monster_key(id) == key)
 		{
@@ -430,18 +425,11 @@ void MonsterRegistry::load(std::string_view path)
 	const nlohmann::json root = nlohmann::json::parse(file);
 
 	standardMonsters.clear();
-	classTiles.clear();
 	customMonsters.clear();
-	classParams.clear();
 
 	// Collect known builtin keys for custom detection
 	std::set<std::string> knownKeys;
 	for (MonsterId id : STANDARD_IDS)
-	{
-		knownKeys.insert(std::string{ monster_key(id) });
-	}
-
-	for (MonsterId id : CLASS_IDS)
 	{
 		knownKeys.insert(std::string{ monster_key(id) });
 	}
@@ -465,22 +453,6 @@ void MonsterRegistry::load(std::string_view path)
 		else
 		{
 			params.name = key;
-		}
-	}
-
-	// Class-based monsters: entry only has tile (and optional color).
-	for (MonsterId id : CLASS_IDS)
-	{
-		const std::string key{ monster_key(id) };
-		if (root.contains(key))
-		{
-			classTiles[id] = parse_tile(root.at(key).at("tile"));
-		}
-		MonsterParams& params = classParams[id];
-		params.name = key;
-		if (classTiles.contains(id))
-		{
-			params.symbol = classTiles.at(id);
 		}
 	}
 
@@ -521,21 +493,6 @@ void MonsterRegistry::save(std::string_view path) const
 		}
 	}
 
-	for (MonsterId id : CLASS_IDS)
-	{
-		nlohmann::json entry = nlohmann::json::object();
-		if (classTiles.contains(id))
-		{
-			entry["tile"] = encode_tile(classTiles.at(id));
-		}
-
-		if (standardMonsters.contains(id))
-		{
-			entry["color"] = standardMonsters.at(id).color;
-		}
-		root[std::string{ monster_key(id) }] = entry;
-	}
-
 	for (const auto& [key, params] : customMonsters)
 	{
 		root[key] = encode_full_params(params);
@@ -567,11 +524,6 @@ TileRef MonsterRegistry::get_tile(MonsterId id) const
 		return standardMonsters.at(id).symbol;
 	}
 
-	if (classTiles.contains(id))
-	{
-		return classTiles.at(id);
-	}
-
 	return TileRef{};
 }
 
@@ -581,16 +533,12 @@ void MonsterRegistry::set_tile(MonsterId id, TileRef tile)
 	{
 		standardMonsters.at(id).symbol = tile;
 	}
-	else
-	{
-		classTiles[id] = tile;
-	}
 }
 
 std::vector<std::string> MonsterRegistry::get_all_keys() const
 {
 	std::vector<std::string> keys;
-	keys.reserve(std::size(STANDARD_IDS) + customMonsters.size() + std::size(CLASS_IDS));
+	keys.reserve(std::size(STANDARD_IDS) + customMonsters.size());
 	for (MonsterId id : STANDARD_IDS)
 	{
 		keys.push_back(std::string{ monster_key(id) });
@@ -598,10 +546,6 @@ std::vector<std::string> MonsterRegistry::get_all_keys() const
 	for (const auto& [key, _] : customMonsters)
 	{
 		keys.push_back(key);
-	}
-	for (MonsterId id : CLASS_IDS)
-	{
-		keys.push_back(std::string{ monster_key(id) });
 	}
 
 	return keys;
@@ -624,16 +568,6 @@ const MonsterParams& MonsterRegistry::get_params(std::string_view key) const
 		return customMonsters.at(std::string{ key });
 	}
 
-	if (const std::optional<MonsterId> id = key_to_class_id(key))
-	{
-		if (!classParams.contains(*id))
-		{
-			throw std::out_of_range(std::format("MonsterRegistry::get_params -- class entry '{}' not initialised", key));
-		}
-
-		return classParams.at(*id);
-	}
-
 	throw std::out_of_range(std::format("MonsterRegistry::get_params -- unknown key '{}'", key));
 }
 
@@ -642,13 +576,6 @@ void MonsterRegistry::set_params(std::string_view key, const MonsterParams& para
 	if (const std::optional<MonsterId> id = key_to_standard_id(key))
 	{
 		standardMonsters[*id] = params;
-		return;
-	}
-
-	if (const std::optional<MonsterId> id = key_to_class_id(key))
-	{
-		classTiles[*id] = params.symbol;
-		classParams[*id] = params;
 		return;
 	}
 
@@ -664,11 +591,6 @@ void MonsterRegistry::set_params(std::string_view key, const MonsterParams& para
 TileRef MonsterRegistry::get_tile(std::string_view key) const
 {
 	if (const std::optional<MonsterId> id = key_to_standard_id(key))
-	{
-		return get_tile(*id);
-	}
-
-	if (const std::optional<MonsterId> id = key_to_class_id(key))
 	{
 		return get_tile(*id);
 	}
@@ -689,12 +611,6 @@ void MonsterRegistry::set_tile(std::string_view key, TileRef tile)
 		return;
 	}
 
-	if (const std::optional<MonsterId> id = key_to_class_id(key))
-	{
-		set_tile(*id, tile);
-		return;
-	}
-
 	if (customMonsters.contains(key))
 	{
 		customMonsters.at(std::string{ key }).symbol = tile;
@@ -708,7 +624,7 @@ std::string MonsterRegistry::add_custom(MonsterParams params)
 {
 	auto is_taken = [this](std::string_view key) -> bool
 	{
-		return key_to_standard_id(key).has_value() || key_to_class_id(key).has_value() || customMonsters.contains(key);
+		return key_to_standard_id(key).has_value() || customMonsters.contains(key);
 	};
 
 	const std::string base = normalize_key(params.name.empty() ? "new_monster" : params.name);
@@ -731,7 +647,7 @@ std::string MonsterRegistry::add_custom(MonsterParams params)
 
 void MonsterRegistry::remove_custom(std::string_view key)
 {
-	if (key_to_standard_id(key) || key_to_class_id(key))
+	if (key_to_standard_id(key))
 	{
 		throw std::invalid_argument(
 			std::format("MonsterRegistry::remove_custom -- '{}' is a built-in monster and cannot be removed", key));
@@ -747,9 +663,4 @@ void MonsterRegistry::remove_custom(std::string_view key)
 bool MonsterRegistry::is_builtin(std::string_view key) const
 {
 	return key_to_standard_id(key).has_value();
-}
-
-bool MonsterRegistry::is_class_key(std::string_view key) const
-{
-	return key_to_class_id(key).has_value();
 }

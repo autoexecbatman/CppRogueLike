@@ -35,12 +35,12 @@ struct HitDiceCount
 };
 
 // The die, the bonus added once to the total, and the counts in ascending order with no
-// gaps.
+// gaps. Hit dice nobody filled hold no count, which the loader and the creator refuse.
 struct MonsterHitDice
 {
 	int sides{ 8 };
 	int bonus{ 0 };
-	std::vector<HitDiceCount> counts{ { 1, 0 } };
+	std::vector<HitDiceCount> counts{};
 };
 
 // Whether the book can write these hit dice: at least one count, the first at least 1 since

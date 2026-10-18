@@ -9,6 +9,8 @@
 
 #include <raylib.h>
 
+#include "Ai.h"
+#include "Attitude.h"
 #include "DiceExpr.h"
 #include "GameContext.h"
 #include "IntelligenceRating.h"
@@ -25,7 +27,6 @@ constexpr int HINT_HEIGHT = 28;
 constexpr int FIELD_HEIGHT = 26;
 constexpr int ITEM_HEIGHT = 30;
 constexpr int LIST_TILE_SIZE = 22;
-constexpr int CLASS_TILE_PREVIEW_SIZE = 40;
 constexpr int LIST_PAD = 6;
 constexpr int PICKER_PAD = 10;
 constexpr int PICKER_SUB_HEADER_HEIGHT = 28;
@@ -162,10 +163,9 @@ void MonsterEditor::load_working(const MonsterRegistry& monsters)
 	}
 
 	const std::string& key = current_key();
-	m_is_class_based = monsters.is_class_key(key);
 	m_working = monsters.get_params(key);
 	selectedXpCount = 0;
-	m_field_cursor = m_is_class_based ? static_cast<int>(FieldId::TILE) : 0;
+	m_field_cursor = 0;
 	m_field_scroll = 0;
 	m_mode = Mode::NORMAL;
 	m_edit_buf.clear();
@@ -257,10 +257,8 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 		else if (m_mode == Mode::NORMAL)
 		{
 			m_focus = 1;
-			int max_field = m_is_class_based ? static_cast<int>(FieldId::TILE) : FIELD_COUNT - 1;
 			int idx = m_field_scroll + static_cast<int>(mouse.y - HEADER_HEIGHT) / FIELD_HEIGHT;
-			idx = std::clamp(idx, 0, max_field);
-			m_field_cursor = m_is_class_based ? static_cast<int>(FieldId::TILE) : idx;
+			m_field_cursor = std::clamp(idx, 0, FIELD_COUNT - 1);
 		}
 	}
 
@@ -275,7 +273,7 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 				0,
 				std::max(0, total - 1));
 		}
-		else if (!m_is_class_based)
+		else
 		{
 			m_field_scroll = std::clamp(
 				m_field_scroll - static_cast<int>(wheel),
@@ -342,7 +340,7 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 		}
 		else if (IsKeyPressed(KEY_DELETE))
 		{
-			if (!monsters.is_builtin(current_key()) && !monsters.is_class_key(current_key()))
+			if (!monsters.is_builtin(current_key()))
 			{
 				monsters.remove_custom(current_key());
 				m_keys = monsters.get_all_keys();
@@ -354,16 +352,6 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 	}
 
 	// Keyboard: field panel
-	if (m_is_class_based)
-	{
-		// Only TILE field is editable for class-based monsters
-		if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_F2))
-		{
-			m_mode = Mode::TILE_PICKER;
-		}
-		return;
-	}
-
 	int field_max = FIELD_COUNT - 1;
 
 	if (IsKeyPressed(KEY_UP) && m_field_cursor > 0)
@@ -589,12 +577,9 @@ void MonsterEditor::render_list(const Renderer& renderer, const MonsterRegistry&
 		if (i > scroll)
 		{
 			const bool previousIsBuiltin = monsters.is_builtin(m_keys[i - 1]);
-			const bool previousIsClass = monsters.is_class_key(m_keys[i - 1]);
-			const bool currentIsClass = monsters.is_class_key(m_keys[i]);
-			const bool currentIsCustom = !monsters.is_builtin(m_keys[i]) && !currentIsClass;
-			const bool previousIsCustom = !previousIsBuiltin && !previousIsClass;
+			const bool currentIsCustom = !monsters.is_builtin(m_keys[i]);
 
-			if ((previousIsBuiltin && currentIsCustom) || (previousIsCustom && currentIsClass))
+			if (previousIsBuiltin && currentIsCustom)
 			{
 				DrawLine(LIST_PAD, itemY, LIST_WIDTH - LIST_PAD, itemY, Color{ 70, 70, 70, 200 });
 			}
@@ -625,8 +610,7 @@ void MonsterEditor::render_list(const Renderer& renderer, const MonsterRegistry&
 		const TileRef tile = is_sel ? m_working.symbol : monsters.get_tile(m_keys[i]);
 		renderer.draw_tile_screen_sized(Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - LIST_TILE_SIZE) / 2 }, tile, LIST_TILE_SIZE);
 
-		const bool isClass = monsters.is_class_key(m_keys[i]);
-		const bool isCustom = !monsters.is_builtin(m_keys[i]) && !isClass;
+		const bool isCustom = !monsters.is_builtin(m_keys[i]);
 
 		std::string displayName = is_sel
 			? m_working.name
@@ -640,15 +624,7 @@ void MonsterEditor::render_list(const Renderer& renderer, const MonsterRegistry&
 			displayName += " *";
 		}
 
-		Color textColor;
-		if (is_sel)
-		{
-			textColor = isClass ? Color{ 255, 200, 80, 255 } : Color{ 255, 255, 100, 255 };
-		}
-		else
-		{
-			textColor = isClass ? Color{ 150, 130, 110, 255 } : Color{ 200, 200, 200, 255 };
-		}
+		const Color textColor = is_sel ? Color{ 255, 255, 100, 255 } : Color{ 200, 200, 200, 255 };
 
 		renderer.draw_text_color(Vector2D{ LIST_PAD + LIST_TILE_SIZE + 4, itemY + (ITEM_HEIGHT - 16) / 2 }, displayName, textColor);
 	}
@@ -664,23 +640,6 @@ void MonsterEditor::render_fields(const Renderer& r) const
 	int fieldsHeight = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
 
 	DrawRectangle(panelX, panelY, fieldsWidth, fieldsHeight, Color{ 8, 8, 16, 255 });
-
-	if (m_is_class_based)
-	{
-		r.draw_text_color(Vector2D{ panelX + 12, panelY + 10 },
-			"Class-based monster -- only tile is editable.",
-			Color{ 160, 160, 100, 255 });
-
-		int fieldY = panelY + 44;
-		DrawRectangle(panelX, fieldY, fieldsWidth, FIELD_HEIGHT, Color{ 60, 60, 0, 200 });
-		r.draw_text_color(Vector2D{ panelX + 12, fieldY + (FIELD_HEIGHT - 16) / 2 }, "Tile", Color{ 255, 220, 80, 255 });
-		r.draw_tile_screen_sized(Vector2D{ screenWidth - CLASS_TILE_PREVIEW_SIZE - 12, fieldY + (FIELD_HEIGHT - CLASS_TILE_PREVIEW_SIZE) / 2 }, m_working.symbol, CLASS_TILE_PREVIEW_SIZE);
-		DrawRectangleLines(screenWidth - CLASS_TILE_PREVIEW_SIZE - 12, fieldY + (FIELD_HEIGHT - CLASS_TILE_PREVIEW_SIZE) / 2, CLASS_TILE_PREVIEW_SIZE, CLASS_TILE_PREVIEW_SIZE, Color{ 255, 255, 0, 255 });
-		r.draw_text_color(Vector2D{ panelX + 12, fieldY + FIELD_HEIGHT + 8 },
-			"Press Enter or F2 to open tile picker.",
-			Color{ 130, 130, 100, 255 });
-		return;
-	}
 
 	int visible = fieldsHeight / FIELD_HEIGHT;
 	int max_scroll = std::max(0, FIELD_COUNT - visible);
@@ -867,10 +826,6 @@ const std::string& MonsterEditor::current_key() const
 
 MonsterEditor::FieldId MonsterEditor::current_field() const
 {
-	if (m_is_class_based)
-	{
-		return FieldId::TILE;
-	}
 	return static_cast<FieldId>(m_field_cursor);
 }
 
@@ -930,6 +885,12 @@ std::string MonsterEditor::field_label(FieldId f) const
 		return "Can Swim";
 	case FieldId::CAN_FLY:
 		return "Can Fly";
+	case FieldId::WALKS_WEBS:
+		return "Walks Webs";
+	case FieldId::ATTITUDE:
+		return "Attitude";
+	case FieldId::DISPLACEABLE:
+		return "Displaceable";
 	case FieldId::WEIGHT:
 		return "Spawn Weight";
 	case FieldId::DEPTH_MIN:
@@ -1011,7 +972,7 @@ std::string MonsterEditor::field_value(FieldId f) const
 	case FieldId::DMG_TYPE:
 		return std::string(damage_type_name(m_working.damage.damageType));
 	case FieldId::AI_TYPE:
-		return m_working.aiType == MonsterAiType::MELEE ? "melee" : "ranged";
+		return std::string(encode_ai_type(m_working.aiType));
 	case FieldId::ETHICS:
 		return std::string(encode_ethics(m_working.ethics));
 	case FieldId::MORALITY:
@@ -1024,6 +985,12 @@ std::string MonsterEditor::field_value(FieldId f) const
 		return m_working.canSwim ? "yes" : "no";
 	case FieldId::CAN_FLY:
 		return m_working.canFly ? "yes" : "no";
+	case FieldId::WALKS_WEBS:
+		return m_working.walksWebs ? "yes" : "no";
+	case FieldId::ATTITUDE:
+		return std::string(encode_attitude(m_working.attitude));
+	case FieldId::DISPLACEABLE:
+		return m_working.displaceable ? "yes" : "no";
 	case FieldId::WEIGHT:
 		return std::format("{}", m_working.baseWeight);
 	case FieldId::DEPTH_MIN:
@@ -1044,7 +1011,7 @@ bool MonsterEditor::field_is_string(FieldId f) const
 
 bool MonsterEditor::field_is_toggle(FieldId f) const
 {
-	return f == FieldId::AI_TYPE || f == FieldId::CAN_SWIM || f == FieldId::CAN_FLY || f == FieldId::ETHICS || f == FieldId::MORALITY || f == FieldId::SIZE || f == FieldId::INTELLIGENCE || f == FieldId::STR_SOURCE || f == FieldId::DMG_TYPE;
+	return f == FieldId::AI_TYPE || f == FieldId::CAN_SWIM || f == FieldId::CAN_FLY || f == FieldId::WALKS_WEBS || f == FieldId::ATTITUDE || f == FieldId::DISPLACEABLE || f == FieldId::ETHICS || f == FieldId::MORALITY || f == FieldId::SIZE || f == FieldId::INTELLIGENCE || f == FieldId::STR_SOURCE || f == FieldId::DMG_TYPE;
 }
 
 void MonsterEditor::field_adjust(FieldId f, int delta)
@@ -1162,9 +1129,7 @@ void MonsterEditor::field_toggle(FieldId f)
 {
 	if (f == FieldId::AI_TYPE)
 	{
-		m_working.aiType = (m_working.aiType == MonsterAiType::MELEE)
-			? MonsterAiType::RANGED
-			: MonsterAiType::MELEE;
+		m_working.aiType = next_authorable_ai_type(m_working.aiType);
 	}
 	else if (f == FieldId::CAN_SWIM)
 	{
@@ -1173,6 +1138,18 @@ void MonsterEditor::field_toggle(FieldId f)
 	else if (f == FieldId::CAN_FLY)
 	{
 		m_working.canFly = !m_working.canFly;
+	}
+	else if (f == FieldId::WALKS_WEBS)
+	{
+		m_working.walksWebs = !m_working.walksWebs;
+	}
+	else if (f == FieldId::ATTITUDE)
+	{
+		m_working.attitude = next_attitude(m_working.attitude);
+	}
+	else if (f == FieldId::DISPLACEABLE)
+	{
+		m_working.displaceable = !m_working.displaceable;
 	}
 	else if (f == FieldId::ETHICS)
 	{

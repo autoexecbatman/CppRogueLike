@@ -37,6 +37,8 @@
 #include "MenuEntry.h"
 #include "MenuTrade.h"
 #include "MessageSystem.h"
+#include "MonsterCreator.h"
+#include "MonsterRegistry.h"
 #include "Pathfinding.h"
 #include "Persistent.h"
 #include "Pickup.h"
@@ -44,7 +46,6 @@
 #include "PlayerController.h"
 #include "PlayerTurn.h"
 #include "Renderer.h"
-#include "ShopkeeperFactory.h"
 #include "SpellSystem.h"
 #include "SpellTile.h"
 #include "TargetingSystem.h"
@@ -1288,7 +1289,7 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 			Vector2D spawnPos = playerOwner.position + offset;
 			if (ctx.map->can_place_at(spawnPos, ctx))
 			{
-				ctx.creatureManager->add_creature(ShopkeeperFactory::create_shopkeeper(spawnPos, ctx.levelManager->get_dungeon_level(), ctx), ctx);
+				ctx.creatureManager->add_creature(MonsterCreator::create(spawnPos, MonsterId::SHOPKEEPER, ctx), ctx);
 				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "DEBUG: Shopkeeper spawned.", MessageCompletion::FINISHED);
 				shopkeeperSpawned = true;
 				break;

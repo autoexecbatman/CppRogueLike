@@ -1,9 +1,9 @@
 // file: ShopStockLevelTest.cpp
 // A shop stocks for the dungeon level it was placed at, and it is told that
 // level: it does not read a level from the context that may say something
-// else. The defect this pins had configure_shopkeeper choosing shop type and
-// quality from its dungeonLevel parameter while the stock generator read
-// ctx.levelManager - one fact from two sources.
+// else. ShopkeeperFactory::open_shop chooses the shop's type and quality from
+// its dungeonLevel parameter, and the stock generator must use that same level
+// rather than read ctx.levelManager - one fact from one source.
 //
 // The observable is armour, the category with real level gates in
 // data/content/items.json. Candidates are walked in key order and a roll past

@@ -21,15 +21,15 @@
     },
     {
       "file": "src/MonsterRegistry.cpp",
-      "original": "key_to_standard_id(key).has_value() || key_to_class_id(key).has_value() || customMonsters.contains(key)",
-      "mutated": "key_to_standard_id(key).has_value() || customMonsters.contains(key)",
-      "catches": "a class-based creature's key handed to a custom monster"
+      "original": "key_to_standard_id(key).has_value() || customMonsters.contains(key)",
+      "mutated": "customMonsters.contains(key)",
+      "catches": "a standard monster's key handed to a custom monster"
     },
     {
       "file": "src/MonsterRegistry.cpp",
-      "original": "\tif (key_to_standard_id(key) || key_to_class_id(key))\n",
-      "mutated": "\tif (key_to_standard_id(key))\n",
-      "catches": "a class-based creature treated as removable"
+      "original": "\tif (key_to_standard_id(key))\n",
+      "mutated": "\tif (false)\n",
+      "catches": "a standard monster treated as removable"
     },
     {
       "file": "src/MonsterRegistry.cpp",
@@ -51,7 +51,7 @@
     },
     {
       "file": "src/MonsterFactory.cpp",
-      "original": "\t\tif (monsters.is_builtin(key) || monsters.is_class_key(key))\n",
+      "original": "\t\tif (monsters.is_builtin(key))\n",
       "mutated": "\t\tif (true)\n",
       "catches": "custom monsters left out of the table"
     },

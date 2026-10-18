@@ -13,6 +13,8 @@
 
 #include <gtest/gtest.h>
 
+#include <iterator>
+#include <string>
 #include <string_view>
 
 #include "src/CreatureSize.h"
@@ -53,12 +55,17 @@ constexpr BookSize BOOK_SIZES[] = {
 	{ "lich", CreatureSize::MEDIUM }, // Lich p1634, Lich column
 	{ "mage", CreatureSize::MEDIUM }, // no entry; a human
 	{ "medusa", CreatureSize::MEDIUM }, // Medusa p1693, Medusa column
+	{ "mimic", CreatureSize::LARGE }, // Mimic p1700, Killer column
 	{ "ogre", CreatureSize::LARGE }, // Ogre p1750, Ogre column
 	{ "orc", CreatureSize::MEDIUM }, // Orc p1769, Orc column
 	{ "pit_fiend", CreatureSize::LARGE }, // Baatezu p1101, Pit Fiend column
 	{ "rat", CreatureSize::TINY }, // Rat p1812: closest, the giant rat's column
 	{ "shadow", CreatureSize::MEDIUM }, // Shadow p1841
+	{ "shopkeeper", CreatureSize::MEDIUM }, // no entry: a human, man-sized
 	{ "skeleton", CreatureSize::MEDIUM }, // Skeleton p1849, Skeleton column
+	{ "spider_giant", CreatureSize::MEDIUM }, // Spider p1876, Huge column
+	{ "spider_small", CreatureSize::TINY }, // Spider p1876, Hairy column
+	{ "spider_weaver", CreatureSize::LARGE }, // Spider p1876, Giant column
 	{ "troll", CreatureSize::LARGE }, // Troll p1930, Troll column
 	{ "vampire", CreatureSize::MEDIUM }, // Vampire p1945
 	{ "werewolf", CreatureSize::MEDIUM }, // Lycanthrope, Werewolf p1677
@@ -79,6 +86,7 @@ TEST(MonsterSizeTest, EveryMonsterCarriesTheSizeItsBookEntryPrints)
 	{
 		EXPECT_EQ(monsters.get_params(std::string{ book.key }).size, book.size) << book.key;
 	}
+	EXPECT_EQ(std::size(BOOK_SIZES), monsters.get_all_keys().size()) << "a monster in the data is missing from the book's table";
 }
 
 // end of file: MonsterSizeTest.cpp

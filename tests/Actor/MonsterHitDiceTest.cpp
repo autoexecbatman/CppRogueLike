@@ -15,6 +15,9 @@
 
 #include <gtest/gtest.h>
 
+#include <memory>
+#include <string_view>
+
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/CreatureSize.h"
@@ -24,10 +27,8 @@
 #include "src/LevelManager.h"
 #include "src/MonsterCreator.h"
 #include "src/MonsterRegistry.h"
-#include "src/Monsters.h"
 #include "src/Paths.h"
-#include "src/ShopkeeperFactory.h"
-#include "src/Spider.h"
+#include "src/RandomDice.h"
 #include "tests/mocks/MockGameContext.h"
 
 class MonsterHitDiceTest : public ::testing::Test
@@ -62,6 +63,12 @@ protected:
 
 	// A monster of the caller's size and hit dice with a printed Strength, so it rolls no
 	// Strength die; its other scores come from the tables.
+	// A monster built from its record in monsters.json, as the spawn table builds one.
+	std::unique_ptr<Creature> build(std::string_view key)
+	{
+		return MonsterCreator::create_from_params(Vector2D{ 0, 0 }, mock.monsterRegistry.get_params(key), ctx);
+	}
+
 	MonsterParams params_with(CreatureSize size, DiceExpr hitDice)
 	{
 		MonsterParams params = mock.monsterRegistry.get_params("goblin");
@@ -164,30 +171,30 @@ TEST_F(MonsterHitDiceTest, AMonstersChangedScoreMovesByItsHitDice)
 	EXPECT_EQ(monster.get_max_hp(), 42);
 }
 
-// Web weaver, the book's giant spider and large: strength 3d6, dexterity 3d6, then
-// Constitution 3d6 read from Table 8, a 15 reading 18, then intelligence, wisdom and
-// charisma 3d6 each, then d8+5 hit points. A score of 18 adds 4 to the die and leaves
-// the 5 alone.
-TEST_F(MonsterHitDiceTest, AWebWeaverTakesItsConstitutionOnItsHitDie)
+// Web weaver, the book's giant spider at 3+3 and large: strength 3d6, dexterity 3d6,
+// then Constitution 3d6 read from Table 8, a 15 reading 18, then intelligence, wisdom
+// and charisma 3d6 each, then three d8. A score of 18 adds 4 to each die, and the 3 is
+// added once to the total: 3 x (4 + 4) + 3.
+TEST_F(MonsterHitDiceTest, AWebWeaverTakesItsConstitutionOnEachHitDie)
 {
-	force_rolls({ 3, 3, 3, 3, 3, 3, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4 });
-	Spider weaver{ Vector2D{ 0, 0 }, ctx, SpiderType::WEB_SPINNER };
+	force_rolls({ 3, 3, 3, 3, 3, 3, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4 });
+	const auto weaver = build("spider_weaver");
 
-	ASSERT_EQ(weaver.get_constitution(), 18);
-	EXPECT_EQ(weaver.get_max_hp(), 13);
+	ASSERT_EQ(weaver->get_constitution(), 18);
+	EXPECT_EQ(weaver->get_max_hp(), 27);
 }
 
-// Small spider, the book's hairy spider and tiny: strength 3d6, dexterity 3d6, then
-// Constitution 3d6 read from Table 8, a 6 reading 6, then intelligence, wisdom and
-// charisma 3d6 each, then d2+2 hit points. A score
-// of 6 takes 1 off the die, and a rolled 2 is worth 1.
+// Small spider, the book's hairy spider at 1-1 and tiny: strength 3d6, dexterity 3d6,
+// then Constitution 3d6 read from Table 8, a 6 reading 6, then intelligence, wisdom and
+// charisma 3d6 each, then one d8. A score of 6 takes 1 off the die and the -1 is taken
+// once from the total: 5 - 1 - 1.
 TEST_F(MonsterHitDiceTest, ASmallSpiderTakesItsConstitutionPenalty)
 {
-	force_rolls({ 3, 3, 3, 3, 3, 3, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 2 });
-	Spider small{ Vector2D{ 0, 0 }, ctx, SpiderType::SMALL };
+	force_rolls({ 3, 3, 3, 3, 3, 3, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5 });
+	const auto small = build("spider_small");
 
-	ASSERT_EQ(small.get_constitution(), 6);
-	EXPECT_EQ(small.get_max_hp(), 3);
+	ASSERT_EQ(small->get_constitution(), 6);
+	EXPECT_EQ(small->get_max_hp(), 3);
 }
 
 // Mimic, the killer mimic and large: strength 3d6, dexterity 3d6, Constitution 3d6
@@ -196,27 +203,36 @@ TEST_F(MonsterHitDiceTest, ASmallSpiderTakesItsConstitutionPenalty)
 TEST_F(MonsterHitDiceTest, AMimicTakesItsConstitutionOnEveryHitDie)
 {
 	force_rolls({ 3, 3, 3, 3, 3, 3, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1 });
-	Mimic mimic{ Vector2D{ 0, 0 }, ctx };
+	const auto mimic = build("mimic");
 
-	ASSERT_EQ(mimic.get_constitution(), 18);
-	EXPECT_EQ(mimic.get_max_hp(), 45);
+	ASSERT_EQ(mimic->get_constitution(), 18);
+	EXPECT_EQ(mimic->get_max_hp(), 45);
 
 	// The score reached the dice, so it is spent and the first round adds none of
 	// it again - which a pool built without set_hit_dice would.
-	mimic.update_constitution_bonus(ctx);
+	mimic->update_constitution_bonus(ctx);
 
-	EXPECT_EQ(mimic.get_max_hp(), 45);
-	EXPECT_TRUE(mimic.get_last_constitution().has_value());
+	EXPECT_EQ(mimic->get_max_hp(), 45);
+	EXPECT_TRUE(mimic->get_last_constitution().has_value());
 }
 
-// A shopkeeper is given a hit point total rather than hit dice, and a total has
-// no dice for a score to adjust - the score is still recorded as accounted for.
-TEST_F(MonsterHitDiceTest, AShopkeeperRecordsItsScoreAtCreation)
+// The shopkeeper's 1d1+99 is one die, so its Constitution rides on it like any monster's:
+// every die at its highest gives 19 on Table 8, man-sized, worth 5, so 1 + 5 + 99. The
+// score is spent at creation and the first round adds none of it again.
+TEST_F(MonsterHitDiceTest, AShopkeeperTakesItsConstitutionOnItsOneDie)
 {
-	const auto shopkeeper = ShopkeeperFactory::create_shopkeeper(Vector2D{ 0, 0 }, 1, ctx);
-	ASSERT_TRUE(shopkeeper);
+	// Building it stocks a shop, which rolls far more than the monster does.
+	for (int roll = 0; roll < 400; ++roll)
+	{
+		mock.dice.set_next_roll(RandomDice::HIGHEST);
+	}
+	const auto shopkeeper = build("shopkeeper");
 
-	EXPECT_TRUE(shopkeeper->get_last_constitution().has_value());
+	ASSERT_EQ(shopkeeper->get_constitution(), 19);
+	EXPECT_EQ(shopkeeper->get_max_hp(), 105);
+
 	shopkeeper->update_constitution_bonus(ctx);
-	EXPECT_EQ(shopkeeper->get_max_hp(), 100);
+
+	EXPECT_EQ(shopkeeper->get_max_hp(), 105);
+	EXPECT_TRUE(shopkeeper->get_last_constitution().has_value());
 }

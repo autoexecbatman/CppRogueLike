@@ -133,14 +133,6 @@ TEST_F(MonsterRoundTripTest, AuthoredDisplayNameSurvivesASave)
 	EXPECT_EQ(monsters.get_params("dungeon_warden").name, "Dungeon Warden");
 }
 
-// The five class-based creatures persist a tile and a colour only; MonsterRegistry::load
-// builds the rest in code, so their other fields are not expected to survive a file.
-bool is_class_based(const std::string& key)
-{
-	return key == "mimic" || key == "shopkeeper" || key == "spider_small"
-		|| key == "spider_giant" || key == "spider_weaver";
-}
-
 // Every field MonsterParams declares, named one at a time. A dropped key fails here
 // pointing at the field, which is what a count of surviving keys could not do.
 void expect_same_monster(const std::string& key, const MonsterParams& before, const MonsterParams& after)
@@ -197,6 +189,10 @@ void expect_same_monster(const std::string& key, const MonsterParams& before, co
 
 	EXPECT_EQ(before.aiType, after.aiType) << key << ".aiType";
 	EXPECT_EQ(before.canSwim, after.canSwim) << key << ".canSwim";
+	EXPECT_EQ(before.canFly, after.canFly) << key << ".canFly";
+	EXPECT_EQ(before.walksWebs, after.walksWebs) << key << ".walksWebs";
+	EXPECT_EQ(before.attitude, after.attitude) << key << ".attitude";
+	EXPECT_EQ(before.displaceable, after.displaceable) << key << ".displaceable";
 	EXPECT_EQ(before.baseWeight, after.baseWeight) << key << ".baseWeight";
 	EXPECT_EQ(before.levelMinimum, after.levelMinimum) << key << ".levelMinimum";
 	EXPECT_EQ(before.levelMaximum, after.levelMaximum) << key << ".levelMaximum";
@@ -209,10 +205,7 @@ TEST_F(MonsterRoundTripTest, EveryPersistedFieldSurvivesASave)
 	std::map<std::string, MonsterParams> before;
 	for (const std::string& key : monsters.get_all_keys())
 	{
-		if (!is_class_based(key))
-		{
-			before.emplace(key, monsters.get_params(key));
-		}
+		before.emplace(key, monsters.get_params(key));
 	}
 	ASSERT_FALSE(before.empty()) << "no monsters loaded; the test would pass vacuously";
 

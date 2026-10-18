@@ -16,8 +16,7 @@ struct GameContext;
 
 namespace MonsterCreator
 {
-// A standard monster at pos, built from ctx.monsterRegistry's parameters for it. Not
-// for class-based creatures, which their own classes construct.
+// A standard monster at pos, built from ctx.monsterRegistry's parameters for it.
 [[nodiscard]] std::unique_ptr<Creature> create(Vector2D pos, MonsterId id, GameContext& ctx);
 
 // A monster at pos built from params. An item it cannot carry in the slot the params

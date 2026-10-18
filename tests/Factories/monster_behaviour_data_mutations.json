@@ -1,0 +1,191 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=MonsterBehaviourDataTest.*:SpiderStatBlockTest.*:MimicStatBlockTest.*:MonsterRoundTripTest.*:CodecRoundTripTest.*:EnumCycleTest.*:MonsterHitDiceTest.*:AlignmentCodeBuiltTest.*:MonsterSpawnTableTest.*:AiMimicTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/MonsterFactory.cpp",
+      "original": "\t\tif (id == MonsterId::SHOPKEEPER)\n",
+      "mutated": "\t\tif (false)\n",
+      "catches": "the shopkeeper drawn as an ordinary monster beside its gated entry"
+    },
+    {
+      "file": "src/MonsterFactory.cpp",
+      "original": "\t\t\t.baseWeight = shopkeeper.baseWeight,\n",
+      "mutated": "\t\t\t.baseWeight = 0,\n",
+      "catches": "the shopkeeper's gated entry never drawn"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\tif (!is_authorable_ai_type(params.aiType))\n",
+      "mutated": "\tif (false)\n",
+      "catches": "a record naming the Confused Ai accepted"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\tparams.walksWebs = entry.at(\"walks_webs\").get<bool>();\n",
+      "mutated": "\tparams.walksWebs = false;\n",
+      "catches": "walks_webs never read, so no spider crosses a web"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\tparams.attitude = parse_attitude(entry.at(\"attitude\").get<std::string>());\n",
+      "mutated": "\tparams.attitude = Attitude::HOSTILE;\n",
+      "catches": "attitude never read, so the shopkeeper is hostile"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\tparams.displaceable = entry.at(\"displaceable\").get<bool>();\n",
+      "mutated": "\tparams.displaceable = true;\n",
+      "catches": "displaceable never read, so the shopkeeper can be shoved"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\t\t{ \"ai\", encode_ai_type(params.aiType) },\n",
+      "mutated": "\t\t{ \"ai\", \"monster\" },\n",
+      "catches": "a save writing every monster's Ai as a plain monster"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\t\t{ \"walks_webs\", params.walksWebs },\n",
+      "mutated": "\t\t{ \"walks_webs\", false },\n",
+      "catches": "a save dropping walks_webs"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\t\t{ \"attitude\", encode_attitude(params.attitude) },\n",
+      "mutated": "\t\t{ \"attitude\", \"hostile\" },\n",
+      "catches": "a save dropping the attitude"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\t\t{ \"displaceable\", params.displaceable },\n",
+      "mutated": "\t\t{ \"displaceable\", true },\n",
+      "catches": "a save dropping displaceable"
+    },
+    {
+      "file": "src/MonsterCreator.cpp",
+      "original": "\tc->ai = Ai::make(params.aiType);\n",
+      "mutated": "\tc->ai = Ai::make(AiType::MONSTER);\n",
+      "catches": "every monster built with the plain Ai whatever its record names"
+    },
+    {
+      "file": "src/MonsterCreator.cpp",
+      "original": "\t\tc->add_state(ActorState::CAN_WALK_WEBS);\n",
+      "mutated": "\t\t;\n",
+      "catches": "a spider built without the web-walking state"
+    },
+    {
+      "file": "src/MonsterCreator.cpp",
+      "original": "\tc->set_attitude(params.attitude);\n",
+      "mutated": "\tc->set_attitude(Attitude::HOSTILE);\n",
+      "catches": "the shopkeeper built hostile"
+    },
+    {
+      "file": "src/MonsterCreator.cpp",
+      "original": "\tc->set_displaceable(params.displaceable);\n",
+      "mutated": "\tc->set_displaceable(true);\n",
+      "catches": "the shopkeeper built displaceable"
+    },
+    {
+      "file": "src/MonsterCreator.cpp",
+      "original": "\tc->ai->on_created(*c, ctx);\n",
+      "mutated": "\t;\n",
+      "catches": "the Ai's birth hook never called: no disguise, no shop"
+    },
+    {
+      "file": "src/AiMimic.cpp",
+      "original": "\t// A new mimic is disguised, so this dresses it in its first appearance.\n\tchange_disguise(owner, ctx);\n",
+      "mutated": "\t// A new mimic is disguised, so this dresses it in its first appearance.\n",
+      "catches": "a new mimic standing undisguised and blocking"
+    },
+    {
+      "file": "src/AiShopkeeper.cpp",
+      "original": "\tShopkeeperFactory::open_shop(owner, ctx.levelManager->get_dungeon_level(), ctx);\n",
+      "mutated": "\t;\n",
+      "catches": "a shopkeeper built with no shop"
+    },
+    {
+      "file": "src/Ai.h",
+      "original": "\treturn std::ranges::find(AUTHORABLE_AI_TYPES, type) != AUTHORABLE_AI_TYPES.end();\n",
+      "mutated": "\treturn true;\n",
+      "catches": "the Confused Ai counted as authorable"
+    },
+    {
+      "file": "src/Ai.h",
+      "original": "\t\treturn AUTHORABLE_AI_TYPES.front();\n\t}\n\treturn *(found + 1);\n",
+      "mutated": "\t\treturn AiType::CONFUSED_MONSTER;\n\t}\n\treturn *(found + 1);\n",
+      "catches": "the editor's Ai cycle wrapping onto the Confused Ai"
+    },
+    {
+      "file": "src/Attitude.h",
+      "original": "\t\treturn ALL_ATTITUDE.front();\n",
+      "mutated": "\t\treturn Attitude::TAME;\n",
+      "catches": "the editor's attitude cycle not wrapping to hostile"
+    },
+    {
+      "file": "src/Attitude.h",
+      "original": "\t\treturn \"peaceful\";\n",
+      "mutated": "\t\treturn \"friendly\";\n",
+      "catches": "peaceful and friendly sharing a name"
+    },
+    {
+      "file": "src/Attitude.h",
+      "original": "\t\tthrow std::runtime_error(std::format(\"unknown attitude '{}'\", name));\n",
+      "mutated": "\t\treturn Attitude::HOSTILE;\n",
+      "catches": "an unknown attitude read as hostile in silence"
+    },
+    {
+      "file": "src/Attitude.h",
+      "original": "\tAttitude::PEACEFUL,\n\tAttitude::FRIENDLY,\n",
+      "mutated": "\tAttitude::FRIENDLY,\n\tAttitude::PEACEFUL,\n",
+      "catches": "the attitude list out of the enum's order"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\t\t{ \"can_fly\", params.canFly },\n",
+      "mutated": "\t\t{ \"can_fly\", false },\n",
+      "catches": "a save dropping can_fly, so the bat walks"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "  \"shopkeeper\": {\n    \"ac\": 10,\n    \"ai\": \"shopkeeper\",\n    \"can_swim\": false,\n    \"can_fly\": false,\n    \"walks_webs\": false,\n    \"attitude\": \"peaceful\",\n    \"displaceable\": false,\n    \"color\": \"yellow_black\",\n    \"corpse\": \"dead shopkeeper\",\n    \"damage\": {\n      \"display\": \"1d4\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 0,\n    \"depth_min\": 1,\n    \"depth_scale\": 0.0,\n    \"dr\": 20,\n    \"ethics\": \"neutral\",\n    \"morality\": \"neutral\",\n    \"hit_dice\": {\n      \"bonus\": 99,\n      \"counts\": [\n        {\n          \"count\": 1,\n          \"xp\": 0\n",
+      "mutated": "  \"shopkeeper\": {\n    \"ac\": 10,\n    \"ai\": \"shopkeeper\",\n    \"can_swim\": false,\n    \"can_fly\": false,\n    \"walks_webs\": false,\n    \"attitude\": \"peaceful\",\n    \"displaceable\": false,\n    \"color\": \"yellow_black\",\n    \"corpse\": \"dead shopkeeper\",\n    \"damage\": {\n      \"display\": \"1d4\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 0,\n    \"depth_min\": 1,\n    \"depth_scale\": 0.0,\n    \"dr\": 20,\n    \"ethics\": \"neutral\",\n    \"morality\": \"neutral\",\n    \"hit_dice\": {\n      \"bonus\": 99,\n      \"counts\": [\n        {\n          \"count\": 1,\n          \"xp\": 35\n",
+      "catches": "the shopkeeper given experience, so the encounter planner fills rooms with them"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "  \"spider_weaver\": {\n    \"ac\": 4,\n    \"ai\": \"web_spinner\",\n",
+      "mutated": "  \"spider_weaver\": {\n    \"ac\": 4,\n    \"ai\": \"spider\",\n",
+      "catches": "the web weaver built with the hairy spider's Ai, so it spins no webs"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "  \"shopkeeper\": {\n    \"ac\": 10,\n    \"ai\": \"shopkeeper\",\n    \"can_swim\": false,\n    \"can_fly\": false,\n    \"walks_webs\": false,\n    \"attitude\": \"peaceful\",\n",
+      "mutated": "  \"shopkeeper\": {\n    \"ac\": 10,\n    \"ai\": \"shopkeeper\",\n    \"can_swim\": false,\n    \"can_fly\": false,\n    \"walks_webs\": false,\n    \"attitude\": \"hostile\",\n",
+      "catches": "the shopkeeper's record made hostile"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "  \"spider_small\": {\n    \"ac\": 8,\n    \"ai\": \"spider\",\n    \"can_swim\": true,\n    \"can_fly\": false,\n    \"walks_webs\": true,\n",
+      "mutated": "  \"spider_small\": {\n    \"ac\": 8,\n    \"ai\": \"spider\",\n    \"can_swim\": true,\n    \"can_fly\": false,\n    \"walks_webs\": false,\n",
+      "catches": "the hairy spider caught in webs"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "  \"mimic\": {\n    \"ac\": 7,\n    \"ai\": \"mimic\",\n    \"can_swim\": false,\n    \"can_fly\": false,\n    \"walks_webs\": false,\n    \"attitude\": \"hostile\",\n    \"displaceable\": true,\n    \"color\": \"red_yellow\",\n    \"corpse\": \"dead mimic\",\n    \"damage\": {\n      \"display\": \"3d4\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 0,\n    \"depth_min\": 6,\n    \"depth_scale\": 0.5,\n    \"dr\": 1,\n    \"ethics\": \"neutral\",\n    \"morality\": \"evil\",\n    \"hit_dice\": {\n      \"bonus\": 0,\n      \"counts\": [\n        {\n          \"count\": 9,\n          \"xp\": 2000\n        },\n        {\n          \"count\": 10,\n          \"xp\": 3000\n        }\n      ],\n      \"sides\": 8\n    },\n    \"intelligence\": \"semi\",\n    \"morale\": 16,\n",
+      "mutated": "  \"mimic\": {\n    \"ac\": 7,\n    \"ai\": \"mimic\",\n    \"can_swim\": false,\n    \"can_fly\": false,\n    \"walks_webs\": false,\n    \"attitude\": \"hostile\",\n    \"displaceable\": true,\n    \"color\": \"red_yellow\",\n    \"corpse\": \"dead mimic\",\n    \"damage\": {\n      \"display\": \"3d4\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 0,\n    \"depth_min\": 6,\n    \"depth_scale\": 0.5,\n    \"dr\": 1,\n    \"ethics\": \"neutral\",\n    \"morality\": \"evil\",\n    \"hit_dice\": {\n      \"bonus\": 0,\n      \"counts\": [\n        {\n          \"count\": 9,\n          \"xp\": 2000\n        },\n        {\n          \"count\": 10,\n          \"xp\": 3000\n        }\n      ],\n      \"sides\": 8\n    },\n    \"intelligence\": \"semi\",\n    \"morale\": 15,\n",
+      "catches": "the mimic's Champion morale read from the bottom of the band"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "  \"spider_small\": {\n    \"ac\": 8,\n    \"ai\": \"spider\",\n    \"can_swim\": true,\n    \"can_fly\": false,\n    \"walks_webs\": true,\n    \"attitude\": \"hostile\",\n    \"displaceable\": true,\n    \"color\": \"green_black\",\n    \"corpse\": \"dead small spider\",\n    \"damage\": {\n      \"display\": \"1\",\n",
+      "mutated": "  \"spider_small\": {\n    \"ac\": 8,\n    \"ai\": \"spider\",\n    \"can_swim\": true,\n    \"can_fly\": false,\n    \"walks_webs\": true,\n    \"attitude\": \"hostile\",\n    \"displaceable\": true,\n    \"color\": \"green_black\",\n    \"corpse\": \"dead small spider\",\n    \"damage\": {\n      \"display\": \"1d4\",\n",
+      "catches": "the hairy spider's fixed bite of 1 rolled as dice"
+    }
+  ]
+}

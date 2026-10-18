@@ -27,8 +27,8 @@
     },
     {
       "file": "src/Ai.cpp",
-      "original": "\tconst AiType type = parse_ai_type(j.at(\"type\").get<std::string>());",
-      "mutated": "\tconst AiType type = AiType::MONSTER;",
+      "original": "\tstd::unique_ptr<Ai> ai = make(parse_ai_type(j.at(\"type\").get<std::string>()));",
+      "mutated": "\tstd::unique_ptr<Ai> ai = make(AiType::MONSTER);",
       "catches": "the saved name never read, so every creature loads as a plain monster"
     },
     {

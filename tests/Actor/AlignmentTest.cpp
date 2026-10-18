@@ -8,16 +8,16 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <vector>
 
 #include "src/Colors.h"
 #include "src/Alignment.h"
 #include "src/Paths.h"
-#include "src/Monsters.h"
-#include "src/Spider.h"
 #include "tests/mocks/MockGameContext.h"
 #include "src/Creature.h"
+#include "src/MonsterCreator.h"
 #include "src/MonsterRegistry.h"
 #include "src/Vector2D.h"
 
@@ -149,12 +149,6 @@ TEST(AlignmentDataTest, EveryParsedRecordCarriesBothAxes)
 	int checked = 0;
 	for (const auto& [key, record] : content.items())
 	{
-		// The five class-based creatures persist a tile only; their alignment is set where
-		// they are built, since the full parser never sees them.
-		if (!record.contains("hit_dice"))
-		{
-			continue;
-		}
 		EXPECT_TRUE(record.contains("ethics")) << key << " carries no ethics";
 		EXPECT_TRUE(record.contains("morality")) << key << " carries no morality";
 		++checked;
@@ -180,31 +174,38 @@ TEST(AlignmentDataTest, TheDungeonHoldsMonstersProtectionFromEvilWardsAgainst)
 	EXPECT_EQ(evil, 6) << "the commonest dungeon monsters are not evil, so the ward does nothing";
 }
 
-// The five creatures built in code rather than authored: the full parser never sees
-// them, so their alignment is set where they are constructed and this is what checks it.
-// The shopkeeper is left at the Creature default, true neutral, which is the answer a
-// merchant wants - stated here so the absence reads as a decision.
-TEST(AlignmentCodeBuiltTest, TheCreaturesBuiltInCodeCarryTheirEntrysAlignment)
+// The spiders and the mimic carry their Monstrous Manual entry's alignment in their
+// records, and are built with it. The shopkeeper has no entry and its record is true
+// neutral, which is the answer a merchant wants.
+TEST(AlignmentCodeBuiltTest, TheSpidersAndTheMimicCarryTheirEntrysAlignment)
 {
 	MockGameContext mock{};
 	mock.dice.set_test_mode(false);
 	GameContext ctx = mock.to_game_context();
+	const auto build = [&mock, &ctx](std::string_view key)
+	{
+		return MonsterCreator::create_from_params(Vector2D{ 1, 1 }, mock.monsterRegistry.get_params(key), ctx);
+	};
 
-	const SmallSpider hairy{ Vector2D{ 1, 1 }, ctx };
-	EXPECT_EQ(hairy.get_ethics(), Ethics::NEUTRAL);
-	EXPECT_EQ(hairy.get_morality(), Morality::EVIL) << "the hairy spider is neutral evil";
+	const auto hairy = build("spider_small");
+	EXPECT_EQ(hairy->get_ethics(), Ethics::NEUTRAL);
+	EXPECT_EQ(hairy->get_morality(), Morality::EVIL) << "the hairy spider is neutral evil";
 
-	const GiantSpider huge{ Vector2D{ 2, 1 }, ctx };
-	EXPECT_EQ(huge.get_ethics(), Ethics::NEUTRAL);
-	EXPECT_EQ(huge.get_morality(), Morality::NEUTRAL) << "the huge spider is neutral";
+	const auto huge = build("spider_giant");
+	EXPECT_EQ(huge->get_ethics(), Ethics::NEUTRAL);
+	EXPECT_EQ(huge->get_morality(), Morality::NEUTRAL) << "the huge spider is neutral";
 
-	const WebSpinner giant{ Vector2D{ 3, 1 }, ctx };
-	EXPECT_EQ(giant.get_ethics(), Ethics::CHAOTIC);
-	EXPECT_EQ(giant.get_morality(), Morality::EVIL) << "the giant spider is chaotic evil";
+	const auto giant = build("spider_weaver");
+	EXPECT_EQ(giant->get_ethics(), Ethics::CHAOTIC);
+	EXPECT_EQ(giant->get_morality(), Morality::EVIL) << "the giant spider is chaotic evil";
 
-	const Mimic killer{ Vector2D{ 4, 1 }, ctx };
-	EXPECT_EQ(killer.get_ethics(), Ethics::NEUTRAL);
-	EXPECT_EQ(killer.get_morality(), Morality::EVIL) << "the killer mimic is neutral (evil)";
+	const auto killer = build("mimic");
+	EXPECT_EQ(killer->get_ethics(), Ethics::NEUTRAL);
+	EXPECT_EQ(killer->get_morality(), Morality::EVIL) << "the killer mimic is neutral (evil)";
+
+	const MonsterParams& shopkeeper = mock.monsterRegistry.get_params("shopkeeper");
+	EXPECT_EQ(shopkeeper.ethics, Ethics::NEUTRAL);
+	EXPECT_EQ(shopkeeper.morality, Morality::NEUTRAL) << "the shopkeeper is true neutral";
 }
 
 // A record that names no alignment is an unfinished record, refused rather than handed a

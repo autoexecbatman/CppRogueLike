@@ -52,6 +52,8 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterStrengthTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterAbilityScoresTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterHitDiceCountsTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Factories/SpiderStatBlockTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterBehaviourDataTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/DragonStatBlockTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterConstitutionTableTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterStrengthTableTest.cpp
@@ -173,7 +175,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EncumbranceBandTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/MonsterHitDiceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/MimicStatBlockTest.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CodeBuiltMonsterAbilityTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/MimicSpiderShopkeeperAbilityTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/SpiderAmbushTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/WebSpinnerSanctuaryTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/StatBoostEquipmentTest.cpp
@@ -258,10 +260,8 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/DeathMenu.cpp
 
     # ActorTypes
-    ${PARENT_SOURCE_DIR}/Monsters.cpp
     ${PARENT_SOURCE_DIR}/MonsterAbilityTables.cpp
     ${PARENT_SOURCE_DIR}/Player.cpp
-    ${PARENT_SOURCE_DIR}/Spider.cpp
 
     # Gui
     ${PARENT_SOURCE_DIR}/Gui.cpp

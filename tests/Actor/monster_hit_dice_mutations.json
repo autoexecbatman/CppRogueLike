@@ -32,28 +32,22 @@
       "catches": "the flat bonus written into a hit dice expression dropped"
     },
     {
-      "file": "src/Monsters.cpp",
-      "original": "\t\tget_constitution(),",
-      "mutated": "\t\t10,",
-      "catches": "the mimic's hit dice rolled with no score on them"
+      "file": "src/MonsterCreator.cpp",
+      "original": "\tc->set_hit_dice(hp);\n",
+      "mutated": "\tc->healthPool = std::make_unique<HealthPool>(hp);\n",
+      "catches": "a monster from data building its pool directly, so its score is never recorded"
     },
     {
-      "file": "src/Monsters.cpp",
-      "original": "\tset_hit_dice(LevelUpSystem::roll_hit_points(",
-      "mutated": "\thealthPool = std::make_unique<HealthPool>(LevelUpSystem::roll_hit_points(",
-      "catches": "the mimic building its pool directly again, so its score is never recorded"
+      "file": "data/content/monsters.json",
+      "original": "  \"spider_weaver\": {\n    \"ac\": 4,\n    \"ai\": \"web_spinner\",\n    \"can_swim\": true,\n    \"can_fly\": false,\n    \"walks_webs\": true,\n    \"attitude\": \"hostile\",\n    \"displaceable\": true,\n    \"color\": \"black_green\",\n    \"corpse\": \"dead web weaver\",\n    \"damage\": {\n      \"display\": \"1d8\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 0,\n    \"depth_min\": 3,\n    \"depth_scale\": 0.20000000298023224,\n    \"dr\": 1,\n    \"ethics\": \"chaotic\",\n    \"morality\": \"evil\",\n    \"hit_dice\": {\n      \"bonus\": 3,\n",
+      "mutated": "  \"spider_weaver\": {\n    \"ac\": 4,\n    \"ai\": \"web_spinner\",\n    \"can_swim\": true,\n    \"can_fly\": false,\n    \"walks_webs\": true,\n    \"attitude\": \"hostile\",\n    \"displaceable\": true,\n    \"color\": \"black_green\",\n    \"corpse\": \"dead web weaver\",\n    \"damage\": {\n      \"display\": \"1d8\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 0,\n    \"depth_min\": 3,\n    \"depth_scale\": 0.20000000298023224,\n    \"dr\": 1,\n    \"ethics\": \"chaotic\",\n    \"morality\": \"evil\",\n    \"hit_dice\": {\n      \"bonus\": 0,\n",
+      "catches": "the web weaver's 3+3 read as 3, its bonus dropped"
     },
     {
-      "file": "src/Spider.cpp",
-      "original": "\t\tset_hit_dice(roll_hit_dice(8, 5));",
-      "mutated": "\t\tset_hit_dice(ctx.dice->d8() + 5);",
-      "catches": "the web weaver rolling hit dice with no score on them"
-    },
-    {
-      "file": "src/ShopkeeperFactory.cpp",
-      "original": "\tshopkeeper.set_hit_dice(100);",
-      "mutated": "\tshopkeeper.healthPool = std::make_unique<HealthPool>(100);",
-      "catches": "the shopkeeper building its pool directly again"
+      "file": "data/content/monsters.json",
+      "original": "  \"shopkeeper\": {\n    \"ac\": 10,\n    \"ai\": \"shopkeeper\",\n    \"can_swim\": false,\n    \"can_fly\": false,\n    \"walks_webs\": false,\n    \"attitude\": \"peaceful\",\n    \"displaceable\": false,\n    \"color\": \"yellow_black\",\n    \"corpse\": \"dead shopkeeper\",\n    \"damage\": {\n      \"display\": \"1d4\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 0,\n    \"depth_min\": 1,\n    \"depth_scale\": 0.0,\n    \"dr\": 20,\n    \"ethics\": \"neutral\",\n    \"morality\": \"neutral\",\n    \"hit_dice\": {\n      \"bonus\": 99,\n",
+      "mutated": "  \"shopkeeper\": {\n    \"ac\": 10,\n    \"ai\": \"shopkeeper\",\n    \"can_swim\": false,\n    \"can_fly\": false,\n    \"walks_webs\": false,\n    \"attitude\": \"peaceful\",\n    \"displaceable\": false,\n    \"color\": \"yellow_black\",\n    \"corpse\": \"dead shopkeeper\",\n    \"damage\": {\n      \"display\": \"1d4\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 0,\n    \"depth_min\": 1,\n    \"depth_scale\": 0.0,\n    \"dr\": 20,\n    \"ethics\": \"neutral\",\n    \"morality\": \"neutral\",\n    \"hit_dice\": {\n      \"bonus\": 98,\n",
+      "catches": "the shopkeeper's 1d1+99 read as 1d1+98"
     }
   ]
 }

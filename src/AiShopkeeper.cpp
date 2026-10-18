@@ -5,7 +5,9 @@
 #include "AiShopkeeper.h"
 #include "Creature.h"
 #include "GameContext.h"
+#include "LevelManager.h"
 #include "Persistent.h"
+#include "ShopkeeperFactory.h"
 
 void AiShopkeeper::update(Creature& owner, [[maybe_unused]] GameContext& ctx)
 {
@@ -17,6 +19,12 @@ void AiShopkeeper::update(Creature& owner, [[maybe_unused]] GameContext& ctx)
 	}
 
 	// TODO: implement shopkeeper idle behavior (tend shop, wander near spawn point)
+}
+
+void AiShopkeeper::on_created(Creature& owner, GameContext& ctx)
+{
+	assert(ctx.levelManager && "AiShopkeeper::on_created: called without a levelManager");
+	ShopkeeperFactory::open_shop(owner, ctx.levelManager->get_dungeon_level(), ctx);
 }
 
 void AiShopkeeper::load([[maybe_unused]] const json& j)

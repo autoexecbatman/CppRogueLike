@@ -3,38 +3,12 @@
 #include <format>
 #include <memory>
 
-#include "Actor.h"
-#include "AiShopkeeper.h"
-#include "BodyPlanRegistry.h"
-#include "Colors.h"
 #include "Creature.h"
-#include "CreatureSize.h"
-#include "DamageInfo.h"
-#include "ExperienceReward.h"
 #include "GameContext.h"
-#include "IntelligenceRating.h"
-#include "ItemCreator.h"
 #include "MessageSystem.h"
-#include "MonsterAbilityTables.h"
-#include "MonsterAttacker.h"
-#include "MonsterRegistry.h"
 #include "RandomDice.h"
 #include "ShopKeeper.h"
 #include "ShopkeeperFactory.h"
-#include "Vector2D.h"
-
-std::unique_ptr<Creature> ShopkeeperFactory::create_shopkeeper(Vector2D position, int dungeonLevel, GameContext& ctx)
-{
-	assert(ctx.monsterRegistry && "ShopkeeperFactory::create_shopkeeper: called without a monsterRegistry");
-
-	// Create base creature
-	auto shopkeeper = std::make_unique<Creature>(position, ActorData{ ctx.monsterRegistry->get_tile(MonsterId::SHOPKEEPER), "Shopkeeper", ColorPairId::YELLOW_BLACK });
-
-	// Configure all shopkeeper components in one place
-	configure_shopkeeper(*shopkeeper, dungeonLevel, ctx);
-
-	return shopkeeper;
-}
 
 bool ShopkeeperFactory::should_spawn_shopkeeper(int dungeonLevel, GameContext& ctx)
 {
@@ -47,38 +21,9 @@ bool ShopkeeperFactory::should_spawn_shopkeeper(int dungeonLevel, GameContext& c
 	return ctx.dice->d100() <= shopkeeperChance;
 }
 
-void ShopkeeperFactory::configure_shopkeeper(Creature& shopkeeper, int dungeonLevel, GameContext& ctx)
+void ShopkeeperFactory::open_shop(Creature& shopkeeper, int dungeonLevel, GameContext& ctx)
 {
-	// Set AI - single source for shopkeeper behavior
-	shopkeeper.ai = std::make_unique<AiShopkeeper>();
-
-	// Shopkeepers trade rather than fight, and cannot be shoved out of their shop.
-	shopkeeper.set_attitude(Attitude::PEACEFUL);
-	shopkeeper.set_displaceable(false);
-
-	// Tables 6 to 11, a human being man-sized and of average intelligence. Before the
-	// hit points, which record the Constitution.
-	assert(ctx.dice && "ShopkeeperFactory::configure_shopkeeper called without dice");
-	roll_monster_ability_scores(shopkeeper, CreatureSize::MEDIUM, IntelligenceRating::AVERAGE, std::nullopt, *ctx.dice);
-
-	// Set combat stats - non-hostile defensive stats
-	shopkeeper.experienceReward = std::make_unique<ExperienceReward>(0);
-	shopkeeper.set_dr(20);
-	shopkeeper.set_thaco(20);
-	shopkeeper.armorClass = std::make_unique<ArmorClass>(10);
-	shopkeeper.set_hit_dice(100);
-	shopkeeper.attacker = std::make_unique<MonsterAttacker>(shopkeeper, DamageValues::Dagger());
-	// A merchant is a person with a knife, so the dagger is a real item in a
-	// real hand rather than a name on the creature.
-	assert(ctx.bodyPlanRegistry && "configure_shopkeeper called without a bodyPlanRegistry");
-	assert(ctx.contentRegistry && "configure_shopkeeper called without a contentRegistry");
-	shopkeeper.set_body_plan(ctx.bodyPlanRegistry->get("humanoid"));
-	shopkeeper.wear(
-		ItemCreator::create("dagger", shopkeeper.position, ctx),
-		EquipmentSlot::RIGHT_HAND);
-
-	assert(shopkeeper.ai && "Shopkeeper requires Ai");
-	assert(shopkeeper.attacker && "Shopkeeper requires Attacker");
+	assert(ctx.dice && "ShopkeeperFactory::open_shop: called without dice");
 
 	// Create shop component with level-appropriate configuration
 	ShopType shopType = select_shop_type_for_level(dungeonLevel, ctx);

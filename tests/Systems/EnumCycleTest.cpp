@@ -27,6 +27,8 @@
 #include <set>
 #include <string_view>
 
+#include "src/Ai.h"
+#include "src/Attitude.h"
 #include "src/Colors.h"
 #include "src/CreatureSize.h"
 #include "src/IntelligenceRating.h"
@@ -85,6 +87,8 @@ TEST(EnumCycleTest, EveryCycleCoversItsEnumAndWraps)
 	expect_cycle_covers(ALL_CREATURE_SIZE, next_creature_size, "CreatureSize");
 	expect_cycle_covers(ALL_INTELLIGENCE_RATING, next_intelligence_rating, "IntelligenceRating");
 	expect_cycle_covers(ALL_MAGICAL_EFFECT, next_magical_effect, "MagicalEffect");
+	expect_cycle_covers(ALL_ATTITUDE, next_attitude, "Attitude");
+	expect_cycle_covers(AUTHORABLE_AI_TYPES, next_authorable_ai_type, "authorable AiType");
 	// ColorPairId is not in EveryListIsTheEnumsOwnOrder below because its values
 	// start at one; Colors.h asserts that ordering at compile time instead.
 	expect_cycle_covers(ALL_COLOR_PAIR, next_color_pair, "ColorPairId");
@@ -103,6 +107,7 @@ TEST(EnumCycleTest, EveryListIsTheEnumsOwnOrder)
 	expect_list_matches_enum(ALL_CREATURE_SIZE, "CreatureSize");
 	expect_list_matches_enum(ALL_INTELLIGENCE_RATING, "IntelligenceRating");
 	expect_list_matches_enum(ALL_MAGICAL_EFFECT, "MagicalEffect");
+	expect_list_matches_enum(ALL_ATTITUDE, "Attitude");
 }
 
 // The six values the stale counts had cut off, named so this stays a check on the defect

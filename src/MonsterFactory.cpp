@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "Creature.h"
 #include "CreatureManager.h"
 #include "GameContext.h"
 #include "LevelManager.h"
@@ -13,10 +14,8 @@
 #include "MonsterCreator.h"
 #include "MonsterFactory.h"
 #include "MonsterRegistry.h"
-#include "Monsters.h"
 #include "RandomDice.h"
 #include "ShopkeeperFactory.h"
-#include "Spider.h"
 #include "Vector2D.h"
 
 namespace
@@ -36,7 +35,7 @@ struct MonsterType
 };
 
 // The spawn table as the registry holds it now: its standard monsters, then its
-// custom ones, then the class-based creatures, whose weights are fixed here.
+// custom ones, then the shopkeeper behind its own gate.
 std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 {
 	std::vector<MonsterType> table{};
@@ -45,6 +44,11 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 	// in the registry - nothing here changes.
 	for (const auto& [id, params] : monsters.get_standard_monsters())
 	{
+		// The shopkeeper is drawn only through its gated entry below.
+		if (id == MonsterId::SHOPKEEPER)
+		{
+			continue;
+		}
 		table.push_back(
 			{
 				.name = params.name,
@@ -64,7 +68,7 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 	// Custom monsters - composed via editor, spawned from saved params
 	for (const std::string& key : monsters.get_all_keys())
 	{
-		if (monsters.is_builtin(key) || monsters.is_class_key(key))
+		if (monsters.is_builtin(key))
 		{
 			continue;
 		}
@@ -88,78 +92,16 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 			});
 	}
 
-	// Spiders - class-based (unique web-spinning behaviour)
+	// The shopkeeper: its record's weight, but a draw spawns one only when the level's
+	// shop roll passes, and a goblin otherwise.
+	const MonsterParams& shopkeeper = monsters.get_standard_monsters().at(MonsterId::SHOPKEEPER);
 	table.push_back(
 		{
-			.name = "Small Spider",
-			.baseWeight = 10,
-			.levelMinimum = 1,
-			.levelMaximum = 0,
-			.levelScaling = -0.3f,
-			.createFunc = [](Vector2D pos, GameContext& ctx)
-			{
-				assert(ctx.creatureManager && "spawn_table Small Spider createFunc: called without a creatureManager");
-
-				ctx.creatureManager->add_creature(std::make_unique<SmallSpider>(pos, ctx), ctx);
-			},
-		});
-
-	table.push_back(
-		{
-			.name = "Giant Spider",
-			.baseWeight = 10,
-			.levelMinimum = 2,
-			.levelMaximum = 0,
-			.levelScaling = 0.0f,
-			.createFunc = [](Vector2D pos, GameContext& ctx)
-			{
-				assert(ctx.creatureManager && "spawn_table Giant Spider createFunc: called without a creatureManager");
-
-				ctx.creatureManager->add_creature(std::make_unique<GiantSpider>(pos, ctx), ctx);
-			},
-		});
-
-	table.push_back(
-		{
-			.name = "Web Spinner",
-			.baseWeight = 5,
-			.levelMinimum = 3,
-			.levelMaximum = 0,
-			.levelScaling = 0.2f,
-			.createFunc = [](Vector2D pos, GameContext& ctx)
-			{
-				assert(ctx.creatureManager && "spawn_table Web Spinner createFunc: called without a creatureManager");
-
-				ctx.creatureManager->add_creature(std::make_unique<WebSpinner>(pos, ctx), ctx);
-			},
-		});
-
-	// Mimic - class-based (disguise logic)
-	table.push_back(
-		{
-			.name = "Mimic",
-			.baseWeight = 6,
-			// The owner's depth for a 9-10 HD killer mimic, beside the monsters with its
-			// THAC0 and XP.
-			.levelMinimum = 6,
-			.levelMaximum = 0,
-			.levelScaling = 0.5f,
-			.createFunc = [](Vector2D pos, GameContext& ctx)
-			{
-				assert(ctx.creatureManager && "spawn_table Mimic createFunc: called without a creatureManager");
-
-				ctx.creatureManager->add_creature(std::make_unique<Mimic>(pos, ctx), ctx);
-			},
-		});
-
-	// Shopkeeper - class-based (shop inventory logic)
-	table.push_back(
-		{
-			.name = "Shopkeeper",
-			.baseWeight = 20,
-			.levelMinimum = 1,
-			.levelMaximum = 0,
-			.levelScaling = 0.0f,
+			.name = shopkeeper.name,
+			.baseWeight = shopkeeper.baseWeight,
+			.levelMinimum = shopkeeper.levelMinimum,
+			.levelMaximum = shopkeeper.levelMaximum,
+			.levelScaling = shopkeeper.levelScaling,
 			.createFunc = [](Vector2D pos, GameContext& ctx)
 			{
 				assert(ctx.levelManager && "spawn_table Shopkeeper createFunc: called without a levelManager");
@@ -168,7 +110,7 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 				const int dungeonLevel = ctx.levelManager->get_dungeon_level();
 				if (ShopkeeperFactory::should_spawn_shopkeeper(dungeonLevel, ctx))
 				{
-					ctx.creatureManager->add_creature(ShopkeeperFactory::create_shopkeeper(pos, dungeonLevel, ctx), ctx);
+					ctx.creatureManager->add_creature(MonsterCreator::create(pos, MonsterId::SHOPKEEPER, ctx), ctx);
 					ctx.messageSystem->log("Shopkeeper spawned at level " + std::to_string(dungeonLevel));
 				}
 				else

@@ -49,7 +49,7 @@ TEST(MonsterRegistryTest, ACustomMonsterBelongsToTheRegistryItWasAddedTo)
 	EXPECT_FALSE(std::ranges::contains(second.get_all_keys(), key)) << "a custom monster reached another registry";
 }
 
-// A name already taken - by a custom monster, a standard one or a class-based one - is
+// A name already taken - by a custom monster or a standard one - is
 // numbered from 2.
 TEST(MonsterRegistryTest, ATakenNameIsNumbered)
 {

@@ -23,7 +23,7 @@ struct Disguise
 };
 
 // Build the list of item appearances a mimic can adopt.
-// Single source of truth: called at fresh construction AND as lazy init after load.
+// Single source of truth: called when a mimic is built AND as lazy init after load.
 namespace Appearance
 {
 [[nodiscard]] std::vector<Disguise> build_mimic_list(ContentRegistry& tiles, const ItemRegistry& items);
@@ -58,10 +58,16 @@ private:
 	void transform_to_greater_mimic(Creature& owner, GameContext& ctx);
 
 public:
-	AiMimic() = default; // load path: possibleDisguises rebuilt lazily on first update
-	explicit AiMimic(std::vector<Disguise> initialDisguises);
+	AiMimic() = default; // possibleDisguises filled by on_created, or lazily on first update after a load
 
 	void update(Creature& owner, GameContext& ctx) override;
+
+	// Gathers the appearances it may wear and puts one on at random, so a mimic first
+	// stands on the map as an item and does not block.
+	//
+	// Example:
+	//   mimic.ai->on_created(mimic, ctx); // mimic.actorData.name -> "Gold coin", say
+	void on_created(Creature& owner, GameContext& ctx) override;
 
 	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::MIMIC; }
 

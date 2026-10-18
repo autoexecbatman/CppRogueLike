@@ -135,7 +135,7 @@ std::vector<MonsterCandidate> encounter_candidates(const MonsterRegistry& monste
 	std::vector<MonsterCandidate> candidates;
 	for (const auto& key : monsters.get_all_keys())
 	{
-		// A monster worth nothing, such as one built in code, is never planned.
+		// A monster worth nothing, such as the shopkeeper, is never planned.
 		const MonsterParams& params = monsters.get_params(key);
 		const int worstCaseXp = highest_count(params.hitDice).xp;
 		if (worstCaseXp <= 0)

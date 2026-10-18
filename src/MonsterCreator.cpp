@@ -64,6 +64,7 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 	c->set_corpse_weight(params.corpseWeight);
 	// One count needs no choice and spends no die; a range rolls its count, and the level,
 	// the hit points and the experience all follow that roll.
+	assert(is_valid_monster_hit_dice(params.hitDice) && "MonsterCreator::create_from_params: hit dice the loader would refuse");
 	const HitDiceCount& lowest = params.hitDice.counts.front();
 	const int count = params.hitDice.counts.size() == 1
 		? lowest.count
@@ -87,14 +88,9 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 	c->armorClass = std::make_unique<ArmorClass>(params.ac);
 	c->set_hit_dice(hp);
 
-	if (params.aiType == MonsterAiType::RANGED)
-	{
-		c->ai = std::make_unique<AiMonsterRanged>();
-	}
-	else
-	{
-		c->ai = std::make_unique<AiMonster>();
-	}
+	// The Ai its record names; the loader admits only those a record may name.
+	assert(is_authorable_ai_type(params.aiType) && "MonsterCreator::create_from_params: a record named an Ai no record may name");
+	c->ai = Ai::make(params.aiType);
 
 	if (params.canSwim)
 	{
@@ -106,8 +102,19 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 		c->add_state(ActorState::CAN_FLY);
 	}
 
+	if (params.walksWebs)
+	{
+		c->add_state(ActorState::CAN_WALK_WEBS);
+	}
+
+	c->set_attitude(params.attitude);
+	c->set_displaceable(params.displaceable);
+
 	assert(c->ai && "Monster requires Ai");
 	assert(c->attacker && "Monster requires Attacker");
+
+	// Last, so whatever its Ai does at birth sees the creature whole.
+	c->ai->on_created(*c, ctx);
 
 	return c;
 }

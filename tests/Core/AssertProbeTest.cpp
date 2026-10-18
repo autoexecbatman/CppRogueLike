@@ -43,7 +43,7 @@
 #include <string_view>
 #include <vector>
 
-#include "src/AiMimic.h"
+#include "src/Ai.h"
 #include "src/ArmorClass.h"
 #include "src/AttackKind.h"
 #include "src/Colors.h"
@@ -70,7 +70,6 @@
 #include "src/RandomDice.h"
 #include "src/Renderer.h"
 #include "src/ShopKeeper.h"
-#include "src/ShopkeeperFactory.h"
 #include "src/SpellSystem.h"
 #include "src/TargetingSystem.h"
 #include "src/TurnUndead.h"
@@ -248,15 +247,15 @@ TEST_F(AssertProbeDeathTest, BuildingAMonsterWithNoContentRegistryAborts)
 	EXPECT_DEATH(build_a_goblin(), "create_from_params called without a contentRegistry");
 }
 
-// A shopkeeper is a person with a knife, and the dagger is a real item in a
-// real hand rather than a name on the creature.
-TEST_F(AssertProbeDeathTest, ConfiguringAShopkeeperWithNoContentRegistryAborts)
+// A shopkeeper's shop is chosen for the level it stands on, so one built with no level
+// manager has no level to stock for.
+TEST_F(AssertProbeDeathTest, AShopkeeperBuiltWithNoLevelManagerAborts)
 {
 	std::unique_ptr<Creature> shopkeeper = make_creature();
-	ctx.contentRegistry = nullptr;
+	const std::unique_ptr<Ai> ai = Ai::make(AiType::SHOPKEEPER);
+	ctx.levelManager = nullptr;
 
-	EXPECT_DEATH(ShopkeeperFactory::configure_shopkeeper(*shopkeeper, 1, ctx),
-		"configure_shopkeeper called without a contentRegistry");
+	EXPECT_DEATH(ai->on_created(*shopkeeper, ctx), "AiShopkeeper::on_created: called without a levelManager");
 }
 
 // Death pays experience to the player, so a context holding no player has
@@ -536,11 +535,15 @@ TEST_F(AssertProbeDeathTest, ScriptingARollBelowWhatTheDieCanMakeAborts)
 	EXPECT_DEATH(dice.roll(1, 20), "outside the range");
 }
 
-// A mimic is a creature wearing the look of an item, so one built with no item looks to
-// wear is a broken content load, refused where the list is handed over.
-TEST_F(AssertProbeDeathTest, AMimicWithNoAppearanceToWearAborts)
+// A mimic wears the look of an item, read from the item registry, so one built with no
+// registry has nothing to look like.
+TEST_F(AssertProbeDeathTest, AMimicBuiltWithNoItemRegistryAborts)
 {
-	EXPECT_DEATH(AiMimic{ std::vector<Disguise>{} }, "no appearance to wear");
+	std::unique_ptr<Creature> mimic = make_creature();
+	const std::unique_ptr<Ai> ai = Ai::make(AiType::MIMIC);
+	ctx.itemRegistry = nullptr;
+
+	EXPECT_DEATH(ai->on_created(*mimic, ctx), "AiMimic::on_created: called without an itemRegistry");
 }
 
 // The floor list owns every item lying in the dungeon, so a null in it is a fault. A step

@@ -11,6 +11,7 @@
 #include "Alignment.h"
 #include "ArmorClass.h"
 #include "Attacker.h"
+#include "Attitude.h"
 #include "BuffType.h"
 #include "ConstitutionTracker.h"
 #include "CreatureClass.h"
@@ -54,30 +55,6 @@ constexpr auto matches_slot = [](EquipmentSlot slot)
 		return equipped.slot == slot;
 	};
 };
-
-// How a creature feels about the player. Ordered from most hostile to most
-// friendly, so threshold comparisons are meaningful.
-//
-// This is deliberately separate from whether the creature has noticed the
-// player: a hostile creature that has not seen you is still hostile.
-enum class Attitude
-{
-	HOSTILE, // attacks the player on sight
-	PEACEFUL, // will not attack unless provoked
-	FRIENDLY, // will not attack, and sides with the player
-	TAME, // a companion under the player's direction
-};
-
-// True when attacking this creature is a deliberate act the player should be
-// asked to confirm.
-//
-// Example:
-//   needs_attack_confirmation(Attitude::HOSTILE);  // -> false
-//   needs_attack_confirmation(Attitude::PEACEFUL); // -> true
-[[nodiscard]] constexpr bool needs_attack_confirmation(Attitude attitude)
-{
-	return attitude >= Attitude::PEACEFUL;
-}
 
 // Rounds a creature keeps tracking the player after losing sight of them. Rounds
 // rather than turns: a creature that acts twice in a round does not forget twice as

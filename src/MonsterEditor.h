@@ -61,6 +61,9 @@ private:
 		INTELLIGENCE,
 		CAN_SWIM,
 		CAN_FLY,
+		WALKS_WEBS,
+		ATTITUDE,
+		DISPLACEABLE,
 		WEIGHT,
 		DEPTH_MIN,
 		DEPTH_MAX,
@@ -74,14 +77,13 @@ private:
 	Mode m_mode{ Mode::NORMAL };
 	int m_focus{ 0 }; // 0 = list panel, 1 = field panel
 
-	// Monster list (string keys: builtins, custom, class-based)
+	// Monster list (string keys: builtins, then custom)
 	std::vector<std::string> m_keys;
 	int m_list_cursor{ 0 };
 	int m_list_scroll{ 0 };
 
 	// Working copy of selected monster's params
 	MonsterParams m_working{};
-	bool m_is_class_based{ false };
 
 	// Which of the working monster's hit dice counts the XP field edits.
 	size_t selectedXpCount{ 0 };

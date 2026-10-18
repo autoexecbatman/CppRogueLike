@@ -9,8 +9,8 @@
 //
 // Draws a random monster for a dungeon level. The table it draws from is derived from
 // a MonsterRegistry on every call - the registry's standard and custom monsters with
-// the weights they hold at that moment, then the class-based creatures, whose weights
-// are written in the factory - so nothing keeps a copy that an edit, a new level or a
+// the weights they hold at that moment, the shopkeeper among them behind its own spawn
+// gate - so nothing keeps a copy that an edit, a new level or a
 // game loaded from a save could find stale or empty.
 //
 // Usage:

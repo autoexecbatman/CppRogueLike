@@ -20,15 +20,15 @@
       "catches": "the table read one row low"
     },
     {
-      "file": "src/Monsters.cpp",
-      "original": "roll_monster_ability_scores(*this, CreatureSize::LARGE, IntelligenceRating::SEMI, std::nullopt, *ctx.dice);",
-      "mutated": "roll_monster_ability_scores(*this, CreatureSize::MEDIUM, IntelligenceRating::SEMI, std::nullopt, *ctx.dice);",
+      "file": "data/content/monsters.json",
+      "original": "  \"mimic\": {\n    \"ac\": 7,\n    \"ai\": \"mimic\",\n    \"can_swim\": false,\n    \"can_fly\": false,\n    \"walks_webs\": false,\n    \"attitude\": \"hostile\",\n    \"displaceable\": true,\n    \"color\": \"red_yellow\",\n    \"corpse\": \"dead mimic\",\n    \"damage\": {\n      \"display\": \"3d4\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 0,\n    \"depth_min\": 6,\n    \"depth_scale\": 0.5,\n    \"dr\": 1,\n    \"ethics\": \"neutral\",\n    \"morality\": \"evil\",\n    \"hit_dice\": {\n      \"bonus\": 0,\n      \"counts\": [\n        {\n          \"count\": 9,\n          \"xp\": 2000\n        },\n        {\n          \"count\": 10,\n          \"xp\": 3000\n        }\n      ],\n      \"sides\": 8\n    },\n    \"intelligence\": \"semi\",\n    \"morale\": 16,\n    \"size\": \"large\",\n",
+      "mutated": "  \"mimic\": {\n    \"ac\": 7,\n    \"ai\": \"mimic\",\n    \"can_swim\": false,\n    \"can_fly\": false,\n    \"walks_webs\": false,\n    \"attitude\": \"hostile\",\n    \"displaceable\": true,\n    \"color\": \"red_yellow\",\n    \"corpse\": \"dead mimic\",\n    \"damage\": {\n      \"display\": \"3d4\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 0,\n    \"depth_min\": 6,\n    \"depth_scale\": 0.5,\n    \"dr\": 1,\n    \"ethics\": \"neutral\",\n    \"morality\": \"evil\",\n    \"hit_dice\": {\n      \"bonus\": 0,\n      \"counts\": [\n        {\n          \"count\": 9,\n          \"xp\": 2000\n        },\n        {\n          \"count\": 10,\n          \"xp\": 3000\n        }\n      ],\n      \"sides\": 8\n    },\n    \"intelligence\": \"semi\",\n    \"morale\": 16,\n    \"size\": \"medium\",\n",
       "catches": "the mimic read as man-sized rather than large"
     },
     {
-      "file": "src/Spider.cpp",
-      "original": "roll_monster_ability_scores(*this, CreatureSize::TINY, IntelligenceRating::LOW, std::nullopt, *ctx.dice);",
-      "mutated": "roll_monster_ability_scores(*this, CreatureSize::SMALL, IntelligenceRating::LOW, std::nullopt, *ctx.dice);",
+      "file": "data/content/monsters.json",
+      "original": "  \"spider_small\": {\n    \"ac\": 8,\n    \"ai\": \"spider\",\n    \"can_swim\": true,\n    \"can_fly\": false,\n    \"walks_webs\": true,\n    \"attitude\": \"hostile\",\n    \"displaceable\": true,\n    \"color\": \"green_black\",\n    \"corpse\": \"dead small spider\",\n    \"damage\": {\n      \"display\": \"1\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 0,\n    \"depth_min\": 1,\n    \"depth_scale\": -0.30000001192092896,\n    \"dr\": 0,\n    \"ethics\": \"neutral\",\n    \"morality\": \"evil\",\n    \"hit_dice\": {\n      \"bonus\": -1,\n      \"counts\": [\n        {\n          \"count\": 1,\n          \"xp\": 65\n        }\n      ],\n      \"sides\": 8\n    },\n    \"intelligence\": \"low\",\n    \"morale\": 10,\n    \"size\": \"tiny\",\n",
+      "mutated": "  \"spider_small\": {\n    \"ac\": 8,\n    \"ai\": \"spider\",\n    \"can_swim\": true,\n    \"can_fly\": false,\n    \"walks_webs\": true,\n    \"attitude\": \"hostile\",\n    \"displaceable\": true,\n    \"color\": \"green_black\",\n    \"corpse\": \"dead small spider\",\n    \"damage\": {\n      \"display\": \"1\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 0,\n    \"depth_min\": 1,\n    \"depth_scale\": -0.30000001192092896,\n    \"dr\": 0,\n    \"ethics\": \"neutral\",\n    \"morality\": \"evil\",\n    \"hit_dice\": {\n      \"bonus\": -1,\n      \"counts\": [\n        {\n          \"count\": 1,\n          \"xp\": 65\n        }\n      ],\n      \"sides\": 8\n    },\n    \"intelligence\": \"low\",\n    \"morale\": 10,\n    \"size\": \"small\",\n",
       "catches": "the hairy spider read as small rather than tiny"
     }
   ]

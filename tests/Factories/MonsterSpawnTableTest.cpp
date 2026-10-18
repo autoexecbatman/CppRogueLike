@@ -45,10 +45,6 @@ std::string first_drawable(const MonsterRegistry& monsters, int dungeonLevel)
 {
 	for (const std::string& key : monsters.get_all_keys())
 	{
-		if (monsters.is_class_key(key))
-		{
-			continue;
-		}
 		const MonsterParams& params = monsters.get_params(key);
 		const bool admitsLevel = params.levelMinimum <= dungeonLevel && (params.levelMaximum == 0 || dungeonLevel <= params.levelMaximum);
 		if (params.baseWeight > 0 && admitsLevel)
@@ -103,7 +99,7 @@ TEST(MonsterSpawnTableTest, ASpawnDrawsFromTheRegistryInCtx)
 		ctx.creatures = &creatures;
 		for (const std::string& key : mock.monsterRegistry.get_all_keys())
 		{
-			if (mock.monsterRegistry.is_class_key(key) || key == survivor)
+			if (key == survivor)
 			{
 				continue;
 			}

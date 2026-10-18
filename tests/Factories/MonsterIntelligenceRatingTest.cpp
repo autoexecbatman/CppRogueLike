@@ -25,6 +25,7 @@
 
 #include <gtest/gtest.h>
 
+#include <iterator>
 #include <string>
 #include <string_view>
 
@@ -66,12 +67,17 @@ constexpr BookRating BOOK_RATINGS[] = {
 	{ "lich", IntelligenceRating::SUPRA_GENIUS }, // Lich p1634, Lich column: Supra-genius (19-20)
 	{ "mage", IntelligenceRating::AVERAGE }, // no entry; a human
 	{ "medusa", IntelligenceRating::VERY }, // Medusa p1693, Medusa column: Very (11-12)
+	{ "mimic", IntelligenceRating::SEMI }, // Mimic p1700, Killer column: Semi- (2-4)
 	{ "ogre", IntelligenceRating::LOW }, // Ogre p1750, Ogre column: Low (8)
 	{ "orc", IntelligenceRating::AVERAGE }, // Orc p1769, Orc column: Average (8-9)
 	{ "pit_fiend", IntelligenceRating::GENIUS }, // Baatezu p1101, Pit Fiend column: Genius (17-18)
 	{ "rat", IntelligenceRating::ANIMAL }, // Rat p1812, Rat (Giant) column, the rat's value: Animal (1)
 	{ "shadow", IntelligenceRating::LOW }, // Shadow p1841: Low (5-7)
+	{ "shopkeeper", IntelligenceRating::AVERAGE }, // no entry: a human, Average
 	{ "skeleton", IntelligenceRating::NON }, // Skeleton p1849, Skeleton column: Non- (0)
+	{ "spider_giant", IntelligenceRating::ANIMAL }, // Spider p1876, Huge column: Animal (1)
+	{ "spider_small", IntelligenceRating::LOW }, // Spider p1876, Hairy column: Low (5-7)
+	{ "spider_weaver", IntelligenceRating::LOW }, // Spider p1876, Giant column: Low (5-7)
 	{ "troll", IntelligenceRating::LOW }, // Troll p1930, Troll column: Low (5-7)
 	{ "vampire", IntelligenceRating::EXCEPTIONAL }, // Vampire p1945: Exceptional (15-16)
 	{ "werewolf", IntelligenceRating::AVERAGE }, // Lycanthrope, Werewolf p1677: Average (8-10)
@@ -92,6 +98,7 @@ TEST(MonsterIntelligenceRatingTest, EveryMonsterCarriesTheRatingItsBookEntryPrin
 	{
 		EXPECT_EQ(monsters.get_params(std::string{ book.key }).intelligence, book.rating) << book.key;
 	}
+	EXPECT_EQ(std::size(BOOK_RATINGS), monsters.get_all_keys().size()) << "a monster in the data is missing from the book's table";
 }
 
 // end of file: MonsterIntelligenceRatingTest.cpp

@@ -24,6 +24,7 @@
 
 #include "src/Ai.h"
 #include "src/Alignment.h"
+#include "src/Attitude.h"
 #include "src/BuffType.h"
 #include "src/Colors.h"
 #include "src/CreatureClass.h"
@@ -168,6 +169,27 @@ TEST(CodecRoundTripTest, AiTypeSurvivesEncoding)
 	}
 }
 
+// How a monster's record says it feels about the player.
+TEST(CodecRoundTripTest, AttitudeSurvivesEncoding)
+{
+	for (const auto attitude : ALL_ATTITUDE)
+	{
+		expect_round_trip(attitude, encode_attitude, parse_attitude, "Attitude");
+	}
+}
+
+// A record names its Ai from these, and the one that wraps another is not among them.
+TEST(CodecRoundTripTest, OnlyAConfusedAiIsNotAuthorable)
+{
+	EXPECT_FALSE(is_authorable_ai_type(AiType::CONFUSED_MONSTER));
+	for (const auto kind : AUTHORABLE_AI_TYPES)
+	{
+		EXPECT_TRUE(is_authorable_ai_type(kind)) << encode_ai_type(kind);
+		EXPECT_NE(kind, AiType::CONFUSED_MONSTER);
+	}
+	EXPECT_EQ(AUTHORABLE_AI_TYPES.size(), 7u) << "every AiType but CONFUSED_MONSTER";
+}
+
 // Where a creature stands on the law/chaos axis, and on the good/evil one. Two axes
 // rather than nine labels, so each one round-trips on its own.
 TEST(CodecRoundTripTest, AlignmentSurvivesEncoding)
@@ -237,6 +259,7 @@ TEST(CodecRoundTripTest, UnknownStringsThrow)
 	EXPECT_THROW((void)parse_pickable_type("not_a_type"), std::runtime_error);
 	EXPECT_THROW((void)parse_magical_effect("not_an_effect"), std::runtime_error);
 	EXPECT_THROW((void)parse_ai_type("not_an_ai"), std::runtime_error);
+	EXPECT_THROW((void)parse_attitude("grumpy"), std::runtime_error);
 	EXPECT_THROW((void)parse_consumable_effect("not_an_effect"), std::runtime_error);
 }
 

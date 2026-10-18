@@ -14,7 +14,13 @@
 //==AI==
 std::unique_ptr<Ai> Ai::create(const json& j)
 {
-	const AiType type = parse_ai_type(j.at("type").get<std::string>());
+	std::unique_ptr<Ai> ai = make(parse_ai_type(j.at("type").get<std::string>()));
+	ai->load(j);
+	return ai;
+}
+
+std::unique_ptr<Ai> Ai::make(AiType type)
+{
 	std::unique_ptr<Ai> ai;
 
 	switch (type)
@@ -28,7 +34,7 @@ std::unique_ptr<Ai> Ai::create(const json& j)
 
 	case AiType::RANGED_MONSTER:
 	{
-		// The two distances restored from JSON by AiMonsterRanged::load()
+		// Its two distances as built; a save's own come back through AiMonsterRanged::load()
 		ai = std::make_unique<AiMonsterRanged>();
 		break;
 	}
@@ -47,34 +53,33 @@ std::unique_ptr<Ai> Ai::create(const json& j)
 
 	case AiType::MIMIC:
 	{
-		// Default ctor -- possibleDisguises rebuilt lazily on first update via ContentRegistry.
+		// Its disguises come from on_created when it is built, or on its first update after a load.
 		ai = std::make_unique<AiMimic>();
 		break;
 	}
 
 	case AiType::SPIDER:
 	{
-		// poisonChance restored from JSON by AiSpider::load()
+		// its poison chance as built; a save's own comes back through AiSpider::load()
 		ai = std::make_unique<AiSpider>();
 		break;
 	}
 
 	case AiType::WEB_SPINNER:
 	{
-		// poisonChance restored from JSON by AiSpider::load()
+		// its poison chance as built; a save's own comes back through AiSpider::load()
 		ai = std::make_unique<AiWebSpinner>();
 		break;
 	}
 
 	case AiType::GIANT_SPIDER:
 	{
-		// poisonChance restored from JSON by AiSpider::load()
+		// its poison chance as built; a save's own comes back through AiSpider::load()
 		ai = std::make_unique<AiGiantSpider>();
 		break;
 	}
 
 	} // end of switch (type)
 
-	ai->load(j);
 	return ai;
 }

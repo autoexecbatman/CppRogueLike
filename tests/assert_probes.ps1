@@ -47,9 +47,9 @@ $probes = @(
         anchor = 'assert(ctx.floatingText && "take_damage_hit_points: damage was taken with no floating text to show it");'
     },
     @{
-        test   = "AssertProbeDeathTest.AMimicWithNoAppearanceToWearAborts"
+        test   = "AssertProbeDeathTest.AMimicBuiltWithNoItemRegistryAborts"
         file   = "src/AiMimic.cpp"
-        anchor = 'assert(!possibleDisguises.empty() && "AiMimic: a mimic was built with no appearance to wear");'
+        anchor = 'assert(ctx.itemRegistry && "AiMimic::on_created: called without an itemRegistry");'
     },
     @{
         test   = "AssertProbeDeathTest.AskingTheWeaponTableForSomethingThatIsNotAWeaponAborts"
@@ -87,9 +87,9 @@ $probes = @(
         anchor = 'assert(ctx.contentRegistry && "MonsterCreator::create_from_params called without a contentRegistry");'
     },
     @{
-        test   = "AssertProbeDeathTest.ConfiguringAShopkeeperWithNoContentRegistryAborts"
-        file   = "src/ShopkeeperFactory.cpp"
-        anchor = 'assert(ctx.contentRegistry && "configure_shopkeeper called without a contentRegistry");'
+        test   = "AssertProbeDeathTest.AShopkeeperBuiltWithNoLevelManagerAborts"
+        file   = "src/AiShopkeeper.cpp"
+        anchor = 'assert(ctx.levelManager && "AiShopkeeper::on_created: called without a levelManager");'
     },
     @{
         test   = "AssertProbeDeathTest.KillingACreatureWithNoPlayerInContextAborts"
