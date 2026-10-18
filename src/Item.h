@@ -21,11 +21,8 @@ public:
 	void load(const json& j) override;
 	void save(json& j) override;
 
-	// Name accessors
-	// get_name() returns identified parts; unknown parts shown as "?"
-	// get_true_name() returns full name (internal use only)
-	const std::string& get_name() const noexcept;
-	const std::string& get_true_name() const noexcept;
+	// The name the player sees; identified parts by name, unknown ones as "?".
+	[[nodiscard]] std::string get_name() const;
 
 	const std::string& get_base_name() const noexcept { return actorData.name; }
 

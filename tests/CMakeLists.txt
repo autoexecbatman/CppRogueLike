@@ -76,6 +76,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CreatureRecordSaveTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CorpseRecordTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ItemSerializationTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ItemNameTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/BehaviorRecordTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PlayerSerializationTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PickableAcBonusTest.cpp

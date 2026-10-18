@@ -1,0 +1,29 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=ItemNameTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Item.cpp",
+      "original": "\t\tdisplayName = \"? \";",
+      "mutated": "\t\tdisplayName = \"\";",
+      "catches": "an unidentified enhancement shown with no question mark"
+    },
+    {
+      "file": "src/Item.cpp",
+      "original": "\t\t\tdisplayName += enhancement.get_prefix_name() + \" \";",
+      "mutated": "\t\t\tdisplayName += \" \";",
+      "catches": "an identified prefix left out of the name"
+    },
+    {
+      "file": "src/Item.cpp",
+      "original": "\t\t\tdisplayName += \" (cursed)\";",
+      "mutated": "\t\t\tdisplayName += \"\";",
+      "catches": "an identified curse left off the name"
+    }
+  ]
+}

@@ -98,30 +98,23 @@ void Item::save(json& j)
 	}
 }
 
-const std::string& Item::get_true_name() const noexcept
+// The name the player sees: identified enhancement parts by name, unknown ones
+// as "?", and a known blessing or curse appended. Built per call and returned by
+// value, so two names held at once are two strings.
+//
+// Example, a long sword with the SHARP prefix:
+//   sword.get_name();   // -> "? long sword", enhancement not yet identified
+//   sword.identify_enhancement();
+//   sword.get_name();   // -> "Sharp long sword"
+//   // cursed, with its blessing identified -> "Sharp long sword (cursed)"
+std::string Item::get_name() const
 {
-	// Returns the complete, true name (for internal use)
-	if (is_enhanced())
-	{
-		static std::string enhancedName;
-		enhancedName = enhancement.get_full_name(actorData.name);
-		return enhancedName;
-	}
-	return actorData.name;
-}
-
-const std::string& Item::get_name() const noexcept
-{
-	// Returns identified parts only; unknown parts marked with "?"
-	static std::string displayName;
-
 	if (!is_enhanced())
 	{
-		// No enhancement: just use base name, maybe with unknown marker
 		return actorData.name;
 	}
 
-	displayName = "";
+	std::string displayName{};
 
 	// Build prefix
 	if (!identification.identifiedEnhancement)
