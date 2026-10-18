@@ -4,11 +4,6 @@
     "ai": "ranged",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "color": "red_black",
     "corpse": "dead archer",
     "damage": {
@@ -18,11 +13,6 @@
     "depth_max": 0,
     "depth_min": 2,
     "depth_scale": 0.20000000298023224,
-    "dex": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "neutral",
     "morality": "evil",
@@ -30,11 +20,6 @@
       "bonus": 0,
       "num": 1,
       "sides": 8
-    },
-    "int": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
     },
     "intelligence": "average",
     "morale": 9,
@@ -47,11 +32,6 @@
       "sheet": 6
     },
     "weight": 10,
-    "wis": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "xp": 120,
     "corpse_weight": 160,
     "equipment": [
@@ -68,11 +48,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": true,
-    "cha": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 2
-    },
     "color": "magenta_black",
     "corpse": "dead bat",
     "damage": {
@@ -82,20 +57,10 @@
     "depth_max": 3,
     "depth_min": 1,
     "depth_scale": -0.30000001192092896,
-    "dex": {
-      "bonus": 6,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "neutral",
     "morality": "neutral",
     "hp": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 2
-    },
-    "int": {
       "bonus": 0,
       "num": 1,
       "sides": 2
@@ -111,11 +76,6 @@
       "sheet": 14
     },
     "weight": 15,
-    "wis": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
     "xp": 30,
     "corpse_weight": 8,
     "equipment": [],
@@ -127,11 +87,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 1,
-      "num": 1,
-      "sides": 6
-    },
     "color": "red_black",
     "corpse": "dead bugbear",
     "damage": {
@@ -141,11 +96,6 @@
     "depth_max": 7,
     "depth_min": 3,
     "depth_scale": 0.20000000298023224,
-    "dex": {
-      "bonus": 1,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "chaotic",
     "morality": "evil",
@@ -153,11 +103,6 @@
       "bonus": 1,
       "num": 3,
       "sides": 8
-    },
-    "int": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
     },
     "intelligence": "low",
     "morale": 10,
@@ -173,11 +118,6 @@
       "sheet": 6
     },
     "weight": 11,
-    "wis": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
-    },
     "xp": 175,
     "corpse_weight": 100,
     "equipment": [
@@ -194,11 +134,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": true,
-    "cha": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 6
-    },
     "color": "red_yellow",
     "corpse": "dead chimera",
     "damage": {
@@ -208,11 +143,6 @@
     "depth_max": 0,
     "depth_min": 7,
     "depth_scale": 0.5,
-    "dex": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "chaotic",
     "morality": "evil",
@@ -220,11 +150,6 @@
       "bonus": 0,
       "num": 9,
       "sides": 8
-    },
-    "int": {
-      "bonus": 1,
-      "num": 1,
-      "sides": 6
     },
     "intelligence": "semi",
     "morale": 13,
@@ -237,11 +162,6 @@
       "sheet": 22
     },
     "weight": 5,
-    "wis": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 6
-    },
     "xp": 2000,
     "corpse_weight": 100,
     "equipment": [],
@@ -253,11 +173,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": true,
-    "cha": {
-      "bonus": 0,
-      "num": 4,
-      "sides": 6
-    },
     "color": "red_yellow",
     "corpse": "dead dragon",
     "damage": {
@@ -267,11 +182,6 @@
     "depth_max": 0,
     "depth_min": 9,
     "depth_scale": 1.0,
-    "dex": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 2,
     "ethics": "chaotic",
     "morality": "evil",
@@ -279,11 +189,6 @@
       "bonus": 0,
       "num": 15,
       "sides": 8
-    },
-    "int": {
-      "bonus": 3,
-      "num": 3,
-      "sides": 6
     },
     "intelligence": "exceptional",
     "morale": 18,
@@ -296,11 +201,6 @@
       "sheet": 8
     },
     "weight": 3,
-    "wis": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "xp": 12000,
     "corpse_weight": 600,
     "equipment": [],
@@ -312,11 +212,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 1,
-      "num": 1,
-      "sides": 4
-    },
     "color": "red_yellow",
     "corpse": "charred wolf corpse",
     "damage": {
@@ -326,22 +221,12 @@
     "depth_max": 0,
     "depth_min": 3,
     "depth_scale": 0.30000001192092896,
-    "dex": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "lawful",
     "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 2,
-      "sides": 6
-    },
-    "int": {
-      "bonus": 2,
-      "num": 1,
       "sides": 6
     },
     "intelligence": "low",
@@ -355,11 +240,6 @@
       "sheet": 12
     },
     "weight": 8,
-    "wis": {
-      "bonus": 2,
-      "num": 2,
-      "sides": 6
-    },
     "xp": 120,
     "corpse_weight": 130,
     "equipment": [],
@@ -371,11 +251,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": true,
-    "cha": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 6
-    },
     "color": "brown_black",
     "corpse": "broken gargoyle",
     "damage": {
@@ -385,11 +260,6 @@
     "depth_max": 8,
     "depth_min": 4,
     "depth_scale": 0.30000001192092896,
-    "dex": {
-      "bonus": 1,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 1,
     "ethics": "chaotic",
     "morality": "evil",
@@ -397,11 +267,6 @@
       "bonus": 0,
       "num": 4,
       "sides": 8
-    },
-    "int": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
     },
     "intelligence": "low",
     "morale": 14,
@@ -414,11 +279,6 @@
       "sheet": 20
     },
     "weight": 9,
-    "wis": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
     "xp": 270,
     "corpse_weight": 100,
     "equipment": [],
@@ -430,11 +290,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 4
-    },
     "color": "cyan_blue",
     "corpse": "dead ghoul",
     "damage": {
@@ -444,11 +299,6 @@
     "depth_max": 6,
     "depth_min": 2,
     "depth_scale": 0.10000000149011612,
-    "dex": {
-      "bonus": 1,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "chaotic",
     "morality": "evil",
@@ -456,11 +306,6 @@
       "bonus": 0,
       "num": 2,
       "sides": 8
-    },
-    "int": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
     },
     "intelligence": "low",
     "morale": 11,
@@ -473,11 +318,6 @@
       "sheet": 16
     },
     "weight": 10,
-    "wis": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 4
-    },
     "xp": 175,
     "corpse_weight": 100,
     "undead": true,
@@ -490,11 +330,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 2
-    },
     "color": "green_black",
     "corpse": "dead giant centipede",
     "damage": {
@@ -504,20 +339,10 @@
     "depth_max": 4,
     "depth_min": 1,
     "depth_scale": -0.20000000298023224,
-    "dex": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "neutral",
     "morality": "neutral",
     "hp": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 2
-    },
-    "int": {
       "bonus": 0,
       "num": 1,
       "sides": 2
@@ -533,11 +358,6 @@
       "sheet": 10
     },
     "weight": 12,
-    "wis": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 2
-    },
     "xp": 35,
     "corpse_weight": 100,
     "equipment": [],
@@ -549,11 +369,6 @@
     "ai": "melee",
     "can_swim": true,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 4
-    },
     "color": "brown_black",
     "corpse": "dead giant rat",
     "damage": {
@@ -563,20 +378,10 @@
     "depth_max": 4,
     "depth_min": 1,
     "depth_scale": -0.20000000298023224,
-    "dex": {
-      "bonus": 1,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "neutral",
     "morality": "neutral",
     "hp": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 4
-    },
-    "int": {
       "bonus": 0,
       "num": 1,
       "sides": 4
@@ -592,11 +397,6 @@
       "sheet": 22
     },
     "weight": 18,
-    "wis": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 4
-    },
     "xp": 35,
     "corpse_weight": 100,
     "equipment": [],
@@ -608,11 +408,6 @@
     "ai": "melee",
     "can_swim": true,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 4
-    },
     "color": "green_black",
     "corpse": "dead giant snake",
     "damage": {
@@ -622,11 +417,6 @@
     "depth_max": 7,
     "depth_min": 3,
     "depth_scale": 0.10000000149011612,
-    "dex": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "neutral",
     "morality": "neutral",
@@ -634,11 +424,6 @@
       "bonus": 4,
       "num": 4,
       "sides": 8
-    },
-    "int": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 4
     },
     "intelligence": "animal",
     "morale": 9,
@@ -651,11 +436,6 @@
       "sheet": 8
     },
     "weight": 10,
-    "wis": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 4
-    },
     "xp": 270,
     "corpse_weight": 100,
     "equipment": [],
@@ -667,11 +447,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 1,
-      "num": 1,
-      "sides": 6
-    },
     "color": "red_black",
     "corpse": "dead gnoll",
     "damage": {
@@ -681,11 +456,6 @@
     "depth_max": 6,
     "depth_min": 3,
     "depth_scale": 0.10000000149011612,
-    "dex": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "chaotic",
     "morality": "evil",
@@ -693,11 +463,6 @@
       "bonus": 0,
       "num": 2,
       "sides": 8
-    },
-    "int": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
     },
     "intelligence": "low",
     "morale": 9,
@@ -710,11 +475,6 @@
       "sheet": 4
     },
     "weight": 13,
-    "wis": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
-    },
     "xp": 120,
     "corpse_weight": 100,
     "equipment": [
@@ -731,11 +491,6 @@
     "ai": "melee",
     "can_swim": true,
     "can_fly": false,
-    "cha": {
-      "bonus": 1,
-      "num": 1,
-      "sides": 4
-    },
     "color": "yellow_black",
     "corpse": "dead goblin",
     "damage": {
@@ -745,11 +500,6 @@
     "depth_max": 5,
     "depth_min": 1,
     "depth_scale": -0.20000000298023224,
-    "dex": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "lawful",
     "morality": "evil",
@@ -757,11 +507,6 @@
       "bonus": -1,
       "num": 1,
       "sides": 8
-    },
-    "int": {
-      "bonus": 3,
-      "num": 1,
-      "sides": 6
     },
     "intelligence": "low",
     "morale": 6,
@@ -774,11 +519,6 @@
       "sheet": 6
     },
     "weight": 30,
-    "wis": {
-      "bonus": 3,
-      "num": 1,
-      "sides": 6
-    },
     "xp": 105,
     "corpse_weight": 90,
     "equipment": [
@@ -795,11 +535,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 2
-    },
     "color": "brown_black",
     "corpse": "rubble of golem",
     "damage": {
@@ -809,11 +544,6 @@
     "depth_max": 0,
     "depth_min": 7,
     "depth_scale": 0.5,
-    "dex": {
-      "bonus": -2,
-      "num": 1,
-      "sides": 6
-    },
     "dr": 4,
     "ethics": "neutral",
     "morality": "neutral",
@@ -821,11 +551,6 @@
       "bonus": 0,
       "num": 12,
       "sides": 8
-    },
-    "int": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 2
     },
     "intelligence": "non",
     "morale": 20,
@@ -841,11 +566,6 @@
       "sheet": 6
     },
     "weight": 4,
-    "wis": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 2
-    },
     "xp": 3000,
     "corpse_weight": 100,
     "equipment": [],
@@ -857,11 +577,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": true,
-    "cha": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "color": "magenta_black",
     "corpse": "dead harpy",
     "damage": {
@@ -871,11 +586,6 @@
     "depth_max": 6,
     "depth_min": 3,
     "depth_scale": 0.0,
-    "dex": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "chaotic",
     "morality": "evil",
@@ -883,11 +593,6 @@
       "bonus": 0,
       "num": 3,
       "sides": 8
-    },
-    "int": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
     },
     "intelligence": "low",
     "morale": 8,
@@ -900,11 +605,6 @@
       "sheet": 6
     },
     "weight": 8,
-    "wis": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
     "xp": 175,
     "corpse_weight": 100,
     "equipment": [],
@@ -916,11 +616,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
     "color": "red_black",
     "corpse": "dead hill giant",
     "damage": {
@@ -930,11 +625,6 @@
     "depth_max": 0,
     "depth_min": 6,
     "depth_scale": 0.5,
-    "dex": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "chaotic",
     "morality": "evil",
@@ -942,11 +632,6 @@
       "bonus": 0,
       "num": 8,
       "sides": 8
-    },
-    "int": {
-      "bonus": 1,
-      "num": 1,
-      "sides": 6
     },
     "intelligence": "low",
     "morale": 11,
@@ -962,11 +647,6 @@
       "sheet": 6
     },
     "weight": 6,
-    "wis": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 6
-    },
     "xp": 2000,
     "corpse_weight": 100,
     "equipment": [],
@@ -978,11 +658,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 1,
-      "num": 1,
-      "sides": 6
-    },
     "color": "red_black",
     "corpse": "dead hobgoblin",
     "damage": {
@@ -992,11 +667,6 @@
     "depth_max": 5,
     "depth_min": 2,
     "depth_scale": -0.10000000149011612,
-    "dex": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "lawful",
     "morality": "evil",
@@ -1004,11 +674,6 @@
       "bonus": 1,
       "num": 1,
       "sides": 8
-    },
-    "int": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
     },
     "intelligence": "average",
     "morale": 8,
@@ -1021,11 +686,6 @@
       "sheet": 6
     },
     "weight": 15,
-    "wis": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
-    },
     "xp": 65,
     "corpse_weight": 100,
     "equipment": [
@@ -1042,11 +702,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 1,
-      "num": 1,
-      "sides": 4
-    },
     "color": "cyan_blue",
     "corpse": "frozen wolf corpse",
     "damage": {
@@ -1056,22 +711,12 @@
     "depth_max": 0,
     "depth_min": 3,
     "depth_scale": 0.30000001192092896,
-    "dex": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "neutral",
     "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 2,
-      "sides": 6
-    },
-    "int": {
-      "bonus": 2,
-      "num": 1,
       "sides": 6
     },
     "intelligence": "average",
@@ -1085,11 +730,6 @@
       "sheet": 12
     },
     "weight": 8,
-    "wis": {
-      "bonus": 2,
-      "num": 2,
-      "sides": 6
-    },
     "xp": 120,
     "corpse_weight": 130,
     "equipment": [],
@@ -1101,11 +741,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 1,
-      "num": 1,
-      "sides": 6
-    },
     "color": "red_black",
     "corpse": "dead kobold",
     "damage": {
@@ -1115,11 +750,6 @@
     "depth_max": 4,
     "depth_min": 1,
     "depth_scale": -0.20000000298023224,
-    "dex": {
-      "bonus": 1,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "lawful",
     "morality": "evil",
@@ -1127,11 +757,6 @@
       "bonus": 0,
       "num": 1,
       "sides": 4
-    },
-    "int": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
     },
     "intelligence": "average",
     "morale": 6,
@@ -1144,11 +769,6 @@
       "sheet": 4
     },
     "weight": 25,
-    "wis": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
     "xp": 45,
     "corpse_weight": 85,
     "equipment": [
@@ -1165,11 +785,6 @@
     "ai": "ranged",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 4
-    },
     "color": "cyan_blue",
     "corpse": "dead lich",
     "damage": {
@@ -1179,11 +794,6 @@
     "depth_max": 0,
     "depth_min": 8,
     "depth_scale": 0.800000011920929,
-    "dex": {
-      "bonus": 1,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 2,
     "ethics": "lawful",
     "morality": "evil",
@@ -1191,11 +801,6 @@
       "bonus": 0,
       "num": 11,
       "sides": 8
-    },
-    "int": {
-      "bonus": 4,
-      "num": 3,
-      "sides": 6
     },
     "intelligence": "supra_genius",
     "morale": 20,
@@ -1208,11 +813,6 @@
       "sheet": 16
     },
     "weight": 3,
-    "wis": {
-      "bonus": 3,
-      "num": 3,
-      "sides": 6
-    },
     "xp": 4000,
     "corpse_weight": 100,
     "undead": true,
@@ -1225,11 +825,6 @@
     "ai": "ranged",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "color": "white_blue",
     "corpse": "dead mage",
     "damage": {
@@ -1239,22 +834,12 @@
     "depth_max": 0,
     "depth_min": 3,
     "depth_scale": 0.30000001192092896,
-    "dex": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "neutral",
     "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 1,
-      "sides": 6
-    },
-    "int": {
-      "bonus": 3,
-      "num": 3,
       "sides": 6
     },
     "intelligence": "average",
@@ -1268,11 +853,6 @@
       "sheet": 6
     },
     "weight": 10,
-    "wis": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
     "xp": 180,
     "corpse_weight": 150,
     "equipment": [
@@ -1289,11 +869,6 @@
     "ai": "ranged",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
     "color": "green_black",
     "corpse": "dead medusa",
     "damage": {
@@ -1303,11 +878,6 @@
     "depth_max": 9,
     "depth_min": 5,
     "depth_scale": 0.30000001192092896,
-    "dex": {
-      "bonus": 1,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "lawful",
     "morality": "evil",
@@ -1315,11 +885,6 @@
       "bonus": 0,
       "num": 6,
       "sides": 8
-    },
-    "int": {
-      "bonus": 2,
-      "num": 2,
-      "sides": 6
     },
     "intelligence": "very",
     "morale": 13,
@@ -1332,11 +897,6 @@
       "sheet": 6
     },
     "weight": 7,
-    "wis": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
-    },
     "xp": 1400,
     "corpse_weight": 100,
     "equipment": [],
@@ -1356,11 +916,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 6
-    },
     "color": "red_black",
     "corpse": "dead ogre",
     "damage": {
@@ -1370,11 +925,6 @@
     "depth_max": 8,
     "depth_min": 4,
     "depth_scale": 0.30000001192092896,
-    "dex": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "chaotic",
     "morality": "evil",
@@ -1382,11 +932,6 @@
       "bonus": 1,
       "num": 4,
       "sides": 8
-    },
-    "int": {
-      "bonus": 1,
-      "num": 1,
-      "sides": 6
     },
     "intelligence": "low",
     "morale": 10,
@@ -1402,11 +947,6 @@
       "sheet": 6
     },
     "weight": 10,
-    "wis": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 6
-    },
     "xp": 270,
     "corpse_weight": 100,
     "equipment": [
@@ -1423,11 +963,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 2,
-      "num": 1,
-      "sides": 6
-    },
     "color": "red_black",
     "corpse": "dead orc",
     "damage": {
@@ -1437,11 +972,6 @@
     "depth_max": 0,
     "depth_min": 2,
     "depth_scale": 0.0,
-    "dex": {
-      "bonus": 2,
-      "num": 2,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "lawful",
     "morality": "evil",
@@ -1449,11 +979,6 @@
       "bonus": 0,
       "num": 1,
       "sides": 10
-    },
-    "int": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
     },
     "intelligence": "average",
     "morale": 8,
@@ -1466,11 +991,6 @@
       "sheet": 6
     },
     "weight": 15,
-    "wis": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
-    },
     "xp": 105,
     "corpse_weight": 180,
     "equipment": [
@@ -1487,11 +1007,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
     "color": "red_yellow",
     "corpse": "dead pit fiend",
     "damage": {
@@ -1501,11 +1016,6 @@
     "depth_max": 0,
     "depth_min": 9,
     "depth_scale": 1.0,
-    "dex": {
-      "bonus": 1,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 3,
     "ethics": "lawful",
     "morality": "evil",
@@ -1513,11 +1023,6 @@
       "bonus": 0,
       "num": 13,
       "sides": 8
-    },
-    "int": {
-      "bonus": 3,
-      "num": 3,
-      "sides": 6
     },
     "intelligence": "genius",
     "morale": 18,
@@ -1533,11 +1038,6 @@
       "sheet": 20
     },
     "weight": 3,
-    "wis": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
     "xp": 4000,
     "corpse_weight": 100,
     "equipment": [],
@@ -1549,11 +1049,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 2
-    },
     "color": "brown_black",
     "corpse": "dead rat",
     "damage": {
@@ -1563,20 +1058,10 @@
     "depth_max": 3,
     "depth_min": 1,
     "depth_scale": -0.30000001192092896,
-    "dex": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "neutral",
     "morality": "neutral",
     "hp": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 2
-    },
-    "int": {
       "bonus": 0,
       "num": 1,
       "sides": 2
@@ -1592,11 +1077,6 @@
       "sheet": 22
     },
     "weight": 20,
-    "wis": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 2
-    },
     "xp": 15,
     "corpse_weight": 100,
     "equipment": [],
@@ -1608,11 +1088,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 4
-    },
     "color": "brown_black",
     "corpse": "dissipated shadow",
     "damage": {
@@ -1622,11 +1097,6 @@
     "depth_max": 7,
     "depth_min": 3,
     "depth_scale": 0.10000000149011612,
-    "dex": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "chaotic",
     "morality": "evil",
@@ -1634,11 +1104,6 @@
       "bonus": 3,
       "num": 3,
       "sides": 8
-    },
-    "int": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
     },
     "intelligence": "low",
     "morale": 12,
@@ -1651,11 +1116,6 @@
       "sheet": 16
     },
     "weight": 9,
-    "wis": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
-    },
     "xp": 420,
     "corpse_weight": 100,
     "undead": true,
@@ -1676,11 +1136,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 2
-    },
     "color": "cyan_blue",
     "corpse": "dead skeleton",
     "damage": {
@@ -1690,11 +1145,6 @@
     "depth_max": 6,
     "depth_min": 1,
     "depth_scale": 0.10000000149011612,
-    "dex": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "neutral",
     "morality": "neutral",
@@ -1702,11 +1152,6 @@
       "bonus": 0,
       "num": 1,
       "sides": 8
-    },
-    "int": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 2
     },
     "intelligence": "non",
     "morale": 20,
@@ -1719,11 +1164,6 @@
       "sheet": 16
     },
     "weight": 15,
-    "wis": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 2
-    },
     "xp": 65,
     "corpse_weight": 100,
     "undead": true,
@@ -1760,11 +1200,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 4
-    },
     "color": "green_black",
     "corpse": "dead troll",
     "damage": {
@@ -1774,11 +1209,6 @@
     "depth_max": 0,
     "depth_min": 4,
     "depth_scale": 0.5,
-    "dex": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 1,
     "ethics": "chaotic",
     "morality": "evil",
@@ -1786,11 +1216,6 @@
       "bonus": 0,
       "num": 1,
       "sides": 12
-    },
-    "int": {
-      "bonus": 1,
-      "num": 1,
-      "sides": 4
     },
     "intelligence": "low",
     "morale": 12,
@@ -1803,11 +1228,6 @@
       "sheet": 6
     },
     "weight": 7,
-    "wis": {
-      "bonus": 2,
-      "num": 1,
-      "sides": 4
-    },
     "xp": 300,
     "corpse_weight": 280,
     "equipment": [],
@@ -1819,11 +1239,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": true,
-    "cha": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
     "color": "red_black",
     "corpse": "dead vampire",
     "damage": {
@@ -1833,11 +1248,6 @@
     "depth_max": 0,
     "depth_min": 7,
     "depth_scale": 0.5,
-    "dex": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 3,
     "ethics": "chaotic",
     "morality": "evil",
@@ -1845,11 +1255,6 @@
       "bonus": 3,
       "num": 8,
       "sides": 8
-    },
-    "int": {
-      "bonus": 3,
-      "num": 3,
-      "sides": 6
     },
     "intelligence": "exceptional",
     "morale": 18,
@@ -1865,11 +1270,6 @@
       "sheet": 16
     },
     "weight": 5,
-    "wis": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
     "xp": 2000,
     "corpse_weight": 100,
     "undead": true,
@@ -1882,11 +1282,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
     "color": "brown_black",
     "corpse": "dead werewolf",
     "damage": {
@@ -1896,11 +1291,6 @@
     "depth_max": 8,
     "depth_min": 4,
     "depth_scale": 0.20000000298023224,
-    "dex": {
-      "bonus": 1,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 1,
     "ethics": "chaotic",
     "morality": "evil",
@@ -1908,11 +1298,6 @@
       "bonus": 3,
       "num": 4,
       "sides": 8
-    },
-    "int": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
     },
     "intelligence": "average",
     "morale": 12,
@@ -1925,11 +1310,6 @@
       "sheet": 12
     },
     "weight": 8,
-    "wis": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
-    },
     "xp": 420,
     "corpse_weight": 100,
     "equipment": [],
@@ -1941,11 +1321,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 4
-    },
     "color": "cyan_blue",
     "corpse": "dead wight",
     "damage": {
@@ -1955,11 +1330,6 @@
     "depth_max": 8,
     "depth_min": 4,
     "depth_scale": 0.20000000298023224,
-    "dex": {
-      "bonus": 1,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 1,
     "ethics": "lawful",
     "morality": "evil",
@@ -1967,11 +1337,6 @@
       "bonus": 3,
       "num": 4,
       "sides": 8
-    },
-    "int": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
     },
     "intelligence": "average",
     "morale": 15,
@@ -1984,11 +1349,6 @@
       "sheet": 16
     },
     "weight": 8,
-    "wis": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
-    },
     "xp": 650,
     "corpse_weight": 100,
     "undead": true,
@@ -2001,11 +1361,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 4
-    },
     "color": "brown_black",
     "corpse": "dead wolf",
     "damage": {
@@ -2015,22 +1370,12 @@
     "depth_max": 5,
     "depth_min": 1,
     "depth_scale": -0.10000000149011612,
-    "dex": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "neutral",
     "morality": "neutral",
     "hp": {
       "bonus": 0,
       "num": 2,
-      "sides": 4
-    },
-    "int": {
-      "bonus": 1,
-      "num": 1,
       "sides": 4
     },
     "intelligence": "semi",
@@ -2044,11 +1389,6 @@
       "sheet": 12
     },
     "weight": 20,
-    "wis": {
-      "bonus": 2,
-      "num": 2,
-      "sides": 6
-    },
     "xp": 45,
     "corpse_weight": 120,
     "equipment": [],
@@ -2060,11 +1400,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": true,
-    "cha": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 4
-    },
     "color": "cyan_blue",
     "corpse": "dissipated wraith",
     "damage": {
@@ -2074,11 +1409,6 @@
     "depth_max": 9,
     "depth_min": 5,
     "depth_scale": 0.20000000298023224,
-    "dex": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 1,
     "ethics": "lawful",
     "morality": "evil",
@@ -2086,11 +1416,6 @@
       "bonus": 3,
       "num": 5,
       "sides": 8
-    },
-    "int": {
-      "bonus": 2,
-      "num": 2,
-      "sides": 6
     },
     "intelligence": "very",
     "morale": 15,
@@ -2103,11 +1428,6 @@
       "sheet": 16
     },
     "weight": 7,
-    "wis": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
-    },
     "xp": 975,
     "corpse_weight": 100,
     "undead": true,
@@ -2120,11 +1440,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": true,
-    "cha": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 6
-    },
     "color": "green_black",
     "corpse": "dead wyvern",
     "damage": {
@@ -2134,11 +1449,6 @@
     "depth_max": 0,
     "depth_min": 6,
     "depth_scale": 0.4000000059604645,
-    "dex": {
-      "bonus": 1,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "neutral",
     "morality": "evil",
@@ -2146,11 +1456,6 @@
       "bonus": 7,
       "num": 7,
       "sides": 8
-    },
-    "int": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 6
     },
     "intelligence": "low",
     "morale": 13,
@@ -2163,11 +1468,6 @@
       "sheet": 8
     },
     "weight": 6,
-    "wis": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 6
-    },
     "xp": 1400,
     "corpse_weight": 100,
     "equipment": [],
@@ -2179,11 +1479,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 2
-    },
     "color": "green_black",
     "corpse": "dead zombie",
     "damage": {
@@ -2193,11 +1488,6 @@
     "depth_max": 6,
     "depth_min": 2,
     "depth_scale": 0.10000000149011612,
-    "dex": {
-      "bonus": -2,
-      "num": 2,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "neutral",
     "morality": "neutral",
@@ -2205,11 +1495,6 @@
       "bonus": 0,
       "num": 2,
       "sides": 8
-    },
-    "int": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 2
     },
     "intelligence": "non",
     "morale": 20,
@@ -2222,11 +1507,6 @@
       "sheet": 16
     },
     "weight": 14,
-    "wis": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 2
-    },
     "xp": 65,
     "corpse_weight": 100,
     "undead": true,
@@ -2239,11 +1519,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "color": "red_black",
     "corpse": "dead jailer",
     "damage": {
@@ -2253,11 +1528,6 @@
     "depth_max": 0,
     "depth_min": 2,
     "depth_scale": 0.0,
-    "dex": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 0,
     "ethics": "lawful",
     "morality": "evil",
@@ -2265,11 +1535,6 @@
       "bonus": 0,
       "num": 3,
       "sides": 8
-    },
-    "int": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
     },
     "intelligence": "average",
     "morale": 12,
@@ -2283,11 +1548,6 @@
       "sheet": 6
     },
     "weight": 0,
-    "wis": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "xp": 65,
     "corpse_weight": 100,
     "equipment": [
@@ -2304,11 +1564,6 @@
     "ai": "melee",
     "can_swim": false,
     "can_fly": false,
-    "cha": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "color": "magenta_black",
     "corpse": "dead warden",
     "damage": {
@@ -2318,11 +1573,6 @@
     "depth_max": 0,
     "depth_min": 2,
     "depth_scale": 0.0,
-    "dex": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "dr": 2,
     "ethics": "lawful",
     "morality": "evil",
@@ -2330,11 +1580,6 @@
       "bonus": 0,
       "num": 5,
       "sides": 10
-    },
-    "int": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
     },
     "intelligence": "average",
     "morale": 12,
@@ -2348,11 +1593,6 @@
       "sheet": 6
     },
     "weight": 0,
-    "wis": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
     "xp": 650,
     "corpse_weight": 100,
     "equipment": [

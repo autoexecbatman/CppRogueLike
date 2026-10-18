@@ -30,16 +30,6 @@
 #include "src/Spider.h"
 #include "tests/mocks/MockGameContext.h"
 
-namespace
-{
-// A score written as a fixed value rolls no dice, so a test's forced rolls are its
-// Constitution's three dice and then the hit dice.
-DiceExpr fixed_score(int score)
-{
-	return DiceExpr{ 0, 0, score };
-}
-} // namespace
-
 class MonsterHitDiceTest : public ::testing::Test
 {
 protected:
@@ -59,18 +49,25 @@ protected:
 		}
 	}
 
-	// A monster whose other five scores are fixed, of the caller's size and hit dice,
-	// so the dice rolled are its Constitution's 3d6 and then its hit dice.
+	// Queues a data-built monster's dice in the order it rolls them: Dexterity's 3d6, then
+	// the Constitution the test names, then Intelligence, Wisdom and Charisma's 3d6 each,
+	// then the hit dice the test names. The scores the test does not name roll 3s.
+	void force_constitution_and_hit_dice(std::initializer_list<int> constitution, std::initializer_list<int> hitDice)
+	{
+		force_rolls({ 3, 3, 3 });
+		force_rolls(constitution);
+		force_rolls({ 3, 3, 3, 3, 3, 3, 3, 3, 3 });
+		force_rolls(hitDice);
+	}
+
+	// A monster of the caller's size and hit dice with a printed Strength, so it rolls no
+	// Strength die; its other scores come from the tables.
 	MonsterParams params_with(CreatureSize size, DiceExpr hitDice)
 	{
 		MonsterParams params = mock.monsterRegistry.get_params("goblin");
 		params.equipment.clear();
 		params.strength = MonsterStrength{ 10, 0 };
-		params.dexDice = fixed_score(10);
 		params.size = size;
-		params.intDice = fixed_score(10);
-		params.wisDice = fixed_score(10);
-		params.chaDice = fixed_score(10);
 		params.hpDice = hitDice;
 		return params;
 	}
@@ -87,7 +84,7 @@ protected:
 TEST_F(MonsterHitDiceTest, AMonsterAddsItsConstitutionToEveryHitDie)
 {
 	const MonsterParams params = params_with(CreatureSize::MEDIUM, DiceExpr{ 3, 8, 0 });
-	force_rolls({ 6, 6, 5, 5, 5, 5 });
+	force_constitution_and_hit_dice({ 6, 6, 5 }, { 5, 5, 5 });
 
 	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
@@ -101,7 +98,7 @@ TEST_F(MonsterHitDiceTest, AMonsterAddsItsConstitutionToEveryHitDie)
 TEST_F(MonsterHitDiceTest, TheFlatBonusOnHitDiceTakesNoAdjustment)
 {
 	const MonsterParams params = params_with(CreatureSize::MEDIUM, DiceExpr{ 2, 8, 4 });
-	force_rolls({ 6, 6, 5, 5, 5 });
+	force_constitution_and_hit_dice({ 6, 6, 5 }, { 5, 5 });
 
 	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
@@ -114,7 +111,7 @@ TEST_F(MonsterHitDiceTest, TheFlatBonusOnHitDiceTakesNoAdjustment)
 TEST_F(MonsterHitDiceTest, NoHitDieOfAMonsterYieldsLessThanOne)
 {
 	const MonsterParams params = params_with(CreatureSize::TINY, DiceExpr{ 3, 8, 0 });
-	force_rolls({ 1, 1, 1, 1, 2, 5 });
+	force_constitution_and_hit_dice({ 1, 1, 1 }, { 1, 2, 5 });
 
 	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
@@ -129,7 +126,7 @@ TEST_F(MonsterHitDiceTest, NoHitDieOfAMonsterYieldsLessThanOne)
 TEST_F(MonsterHitDiceTest, AMonsterOfTwentyOneCountsALowRollAsThree)
 {
 	const MonsterParams params = params_with(CreatureSize::LARGE, DiceExpr{ 2, 8, 0 });
-	force_rolls({ 6, 6, 6, 1, 8 });
+	force_constitution_and_hit_dice({ 6, 6, 6 }, { 1, 8 });
 
 	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
@@ -141,7 +138,7 @@ TEST_F(MonsterHitDiceTest, AMonsterOfTwentyOneCountsALowRollAsThree)
 TEST_F(MonsterHitDiceTest, AMonsterKeepsWhatItWasMadeWith)
 {
 	const MonsterParams params = params_with(CreatureSize::MEDIUM, DiceExpr{ 3, 8, 0 });
-	force_rolls({ 6, 6, 5, 5, 5, 5 });
+	force_constitution_and_hit_dice({ 6, 6, 5 }, { 5, 5, 5 });
 	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 	ASSERT_EQ(monster->get_max_hp(), 27);
 

@@ -98,7 +98,7 @@ void Spider::init_spider_type(GameContext& ctx)
 
 		// Tables 6 to 11: the hairy spider is tiny and of low intelligence (Monstrous
 		// Manual p1876).
-		roll_monster_ability_scores(*this, CreatureSize::TINY, IntelligenceRating::LOW, *ctx.dice);
+		roll_monster_ability_scores(*this, CreatureSize::TINY, IntelligenceRating::LOW, std::nullopt, *ctx.dice);
 
 		// Combat properties - TRIPLED XP for solo play
 		experienceReward = std::make_unique<ExperienceReward>(45); // TRIPLED from 15 for solo play bonus
@@ -118,7 +118,7 @@ void Spider::init_spider_type(GameContext& ctx)
 
 		// Tables 6 to 11: the huge spider is man-sized and of animal intelligence
 		// (Monstrous Manual p1876).
-		roll_monster_ability_scores(*this, CreatureSize::MEDIUM, IntelligenceRating::ANIMAL, *ctx.dice);
+		roll_monster_ability_scores(*this, CreatureSize::MEDIUM, IntelligenceRating::ANIMAL, std::nullopt, *ctx.dice);
 
 		// Combat properties - giant spiders have more HP and do more damage - TRIPLED XP for solo play
 		experienceReward = std::make_unique<ExperienceReward>(120); // TRIPLED from 40 for solo play bonus
@@ -138,7 +138,7 @@ void Spider::init_spider_type(GameContext& ctx)
 
 		// Tables 6 to 11: the giant spider is large and of low intelligence (Monstrous
 		// Manual p1876).
-		roll_monster_ability_scores(*this, CreatureSize::LARGE, IntelligenceRating::LOW, *ctx.dice);
+		roll_monster_ability_scores(*this, CreatureSize::LARGE, IntelligenceRating::LOW, std::nullopt, *ctx.dice);
 
 		// Combat properties - significantly stronger - TRIPLED XP for solo play
 		experienceReward = std::make_unique<ExperienceReward>(180); // TRIPLED from 60 for solo play bonus

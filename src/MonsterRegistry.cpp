@@ -281,10 +281,6 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 	params.intelligence = parse_intelligence_rating(entry.at("intelligence").get<std::string>());
 	// Required: null is a monster whose entry prints no Strength, which a missing key is not.
 	params.strength = parse_strength(entry.at("strength"));
-	params.dexDice = parse_dice(entry.at("dex"));
-	params.intDice = parse_dice(entry.at("int"));
-	params.wisDice = parse_dice(entry.at("wis"));
-	params.chaDice = parse_dice(entry.at("cha"));
 	params.naturalAttack = entry.at("natural_attack").get<std::string>();
 	params.equipment = parse_equipment(entry.at("equipment"));
 	// Required and named: the body decides the slots and whether the creature has hands,
@@ -332,10 +328,6 @@ nlohmann::json encode_full_params(const MonsterParams& params)
 		{ "size", encode_creature_size(params.size) },
 		{ "intelligence", encode_intelligence_rating(params.intelligence) },
 		{ "strength", encode_strength(params.strength) },
-		{ "dex", encode_dice(params.dexDice) },
-		{ "int", encode_dice(params.intDice) },
-		{ "wis", encode_dice(params.wisDice) },
-		{ "cha", encode_dice(params.chaDice) },
 		{ "natural_attack", params.naturalAttack },
 		{ "equipment", encode_equipment(params.equipment) },
 		{ "body", params.bodyPlanName },

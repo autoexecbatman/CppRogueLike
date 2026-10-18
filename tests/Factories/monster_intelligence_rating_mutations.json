@@ -9,32 +9,32 @@
   "mutations": [
     {
       "file": "data/content/monsters.json",
-      "original": "    \"int\": {\n      \"bonus\": 4,\n      \"num\": 3,\n      \"sides\": 6\n    },\n    \"intelligence\": \"supra_genius\",\n",
-      "mutated": "    \"int\": {\n      \"bonus\": 4,\n      \"num\": 3,\n      \"sides\": 6\n    },\n    \"intelligence\": \"genius\",\n",
+      "original": "    \"intelligence\": \"supra_genius\",\n",
+      "mutated": "    \"intelligence\": \"genius\",\n",
       "catches": "the lich one rating short of its Supra-genius"
     },
     {
       "file": "data/content/monsters.json",
-      "original": "    \"int\": {\n      \"bonus\": 0,\n      \"num\": 1,\n      \"sides\": 4\n    },\n    \"intelligence\": \"semi\",\n",
-      "mutated": "    \"int\": {\n      \"bonus\": 0,\n      \"num\": 1,\n      \"sides\": 4\n    },\n    \"intelligence\": \"animal\",\n",
+      "original": "      \"num\": 1,\n      \"sides\": 4\n    },\n    \"intelligence\": \"semi\",\n",
+      "mutated": "      \"num\": 1,\n      \"sides\": 4\n    },\n    \"intelligence\": \"animal\",\n",
       "catches": "the giant rat given the ordinary rat's Animal rating"
     },
     {
       "file": "data/content/monsters.json",
-      "original": "    \"int\": {\n      \"bonus\": 3,\n      \"num\": 1,\n      \"sides\": 6\n    },\n    \"intelligence\": \"low\",\n",
-      "mutated": "    \"int\": {\n      \"bonus\": 3,\n      \"num\": 1,\n      \"sides\": 6\n    },\n    \"intelligence\": \"average\",\n",
+      "original": "      \"num\": 1,\n      \"sides\": 8\n    },\n    \"intelligence\": \"low\",\n",
+      "mutated": "      \"num\": 1,\n      \"sides\": 8\n    },\n    \"intelligence\": \"average\",\n",
       "catches": "the goblin's Low to average read as Average rather than the first named"
     },
     {
       "file": "data/content/monsters.json",
-      "original": "  \"zombie\": {\n    \"ac\": 8,\n    \"ai\": \"melee\",\n    \"can_swim\": false,\n    \"can_fly\": false,\n    \"cha\": {\n      \"bonus\": 0,\n      \"num\": 1,\n      \"sides\": 2\n    },\n    \"color\": \"green_black\",\n    \"corpse\": \"dead zombie\",\n    \"damage\": {\n      \"display\": \"1d8\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 6,\n    \"depth_min\": 2,\n    \"depth_scale\": 0.10000000149011612,\n    \"dex\": {\n      \"bonus\": -2,\n      \"num\": 2,\n      \"sides\": 6\n    },\n    \"dr\": 0,\n    \"ethics\": \"neutral\",\n    \"morality\": \"neutral\",\n    \"hp\": {\n      \"bonus\": 0,\n      \"num\": 2,\n      \"sides\": 8\n    },\n    \"int\": {\n      \"bonus\": 0,\n      \"num\": 1,\n      \"sides\": 2\n    },\n    \"intelligence\": \"non\",\n",
-      "mutated": "  \"zombie\": {\n    \"ac\": 8,\n    \"ai\": \"melee\",\n    \"can_swim\": false,\n    \"can_fly\": false,\n    \"cha\": {\n      \"bonus\": 0,\n      \"num\": 1,\n      \"sides\": 2\n    },\n    \"color\": \"green_black\",\n    \"corpse\": \"dead zombie\",\n    \"damage\": {\n      \"display\": \"1d8\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 6,\n    \"depth_min\": 2,\n    \"depth_scale\": 0.10000000149011612,\n    \"dex\": {\n      \"bonus\": -2,\n      \"num\": 2,\n      \"sides\": 6\n    },\n    \"dr\": 0,\n    \"ethics\": \"neutral\",\n    \"morality\": \"neutral\",\n    \"hp\": {\n      \"bonus\": 0,\n      \"num\": 2,\n      \"sides\": 8\n    },\n    \"int\": {\n      \"bonus\": 0,\n      \"num\": 1,\n      \"sides\": 2\n    },\n    \"intelligence\": \"animal\",\n",
+      "original": "  \"zombie\": {\n    \"ac\": 8,\n    \"ai\": \"melee\",\n    \"can_swim\": false,\n    \"can_fly\": false,\n    \"color\": \"green_black\",\n    \"corpse\": \"dead zombie\",\n    \"damage\": {\n      \"display\": \"1d8\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 6,\n    \"depth_min\": 2,\n    \"depth_scale\": 0.10000000149011612,\n    \"dr\": 0,\n    \"ethics\": \"neutral\",\n    \"morality\": \"neutral\",\n    \"hp\": {\n      \"bonus\": 0,\n      \"num\": 2,\n      \"sides\": 8\n    },\n    \"intelligence\": \"non\",\n",
+      "mutated": "  \"zombie\": {\n    \"ac\": 8,\n    \"ai\": \"melee\",\n    \"can_swim\": false,\n    \"can_fly\": false,\n    \"color\": \"green_black\",\n    \"corpse\": \"dead zombie\",\n    \"damage\": {\n      \"display\": \"1d8\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 6,\n    \"depth_min\": 2,\n    \"depth_scale\": 0.10000000149011612,\n    \"dr\": 0,\n    \"ethics\": \"neutral\",\n    \"morality\": \"neutral\",\n    \"hp\": {\n      \"bonus\": 0,\n      \"num\": 2,\n      \"sides\": 8\n    },\n    \"intelligence\": \"animal\",\n",
       "catches": "the zombie given Animal intelligence rather than Non-"
     },
     {
       "file": "data/content/monsters.json",
-      "original": "    \"int\": {\n      \"bonus\": 3,\n      \"num\": 3,\n      \"sides\": 6\n    },\n    \"intelligence\": \"genius\",\n",
-      "mutated": "    \"int\": {\n      \"bonus\": 3,\n      \"num\": 3,\n      \"sides\": 6\n    },\n    \"intelligence\": \"supra_genius\",\n",
+      "original": "    \"intelligence\": \"genius\",\n",
+      "mutated": "    \"intelligence\": \"supra_genius\",\n",
       "catches": "the pit fiend raised to Supra-genius"
     },
     {

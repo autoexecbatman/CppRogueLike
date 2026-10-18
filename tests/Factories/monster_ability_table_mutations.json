@@ -129,8 +129,8 @@
     },
     {
       "file": "src/Monsters.cpp",
-      "original": "IntelligenceRating::SEMI, *ctx.dice);",
-      "mutated": "IntelligenceRating::LOW, *ctx.dice);",
+      "original": "IntelligenceRating::SEMI, std::nullopt, *ctx.dice);",
+      "mutated": "IntelligenceRating::LOW, std::nullopt, *ctx.dice);",
       "catches": "the killer mimic given low intelligence rather than semi-"
     },
     {
@@ -141,8 +141,8 @@
     },
     {
       "file": "src/ShopkeeperFactory.cpp",
-      "original": "\troll_monster_ability_scores(shopkeeper, CreatureSize::MEDIUM, IntelligenceRating::AVERAGE, *ctx.dice);\n",
-      "mutated": "\troll_monster_ability_scores(shopkeeper, CreatureSize::MEDIUM, IntelligenceRating::LOW, *ctx.dice);\n",
+      "original": "\troll_monster_ability_scores(shopkeeper, CreatureSize::MEDIUM, IntelligenceRating::AVERAGE, std::nullopt, *ctx.dice);\n",
+      "mutated": "\troll_monster_ability_scores(shopkeeper, CreatureSize::MEDIUM, IntelligenceRating::LOW, std::nullopt, *ctx.dice);\n",
       "catches": "the shopkeeper given low intelligence rather than average"
     }
   ]

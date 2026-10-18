@@ -81,11 +81,6 @@ bool prints_a_strength(std::string_view key)
 	return std::ranges::any_of(BOOK_STRENGTHS, isThisMonster);
 }
 
-// A score written as a fixed value rolls no dice.
-DiceExpr fixed_score(int score)
-{
-	return DiceExpr{ 0, 0, score };
-}
 } // namespace
 
 class MonsterStrengthTest : public ::testing::Test
@@ -113,18 +108,14 @@ protected:
 		}
 	}
 
-	// A goblin of the caller's size and Strength whose other rolled scores are fixed, so
-	// the dice rolled are its Strength's 3d6 if it has none, then its Constitution's.
+	// A goblin of the caller's size and Strength carrying nothing, so the dice rolled are its
+	// Strength's 3d6 if it has none, then its Dexterity's, then its Constitution's.
 	MonsterParams params_with(CreatureSize size, std::optional<MonsterStrength> strength)
 	{
 		MonsterParams params = mock.monsterRegistry.get_params("goblin");
 		params.equipment.clear();
 		params.size = size;
 		params.strength = strength;
-		params.dexDice = fixed_score(10);
-		params.intDice = fixed_score(10);
-		params.wisDice = fixed_score(10);
-		params.chaDice = fixed_score(10);
 		return params;
 	}
 
@@ -197,11 +188,12 @@ TEST_F(MonsterStrengthTest, AMonsterWithNoStrengthOfItsOwnRollsTable6BySize)
 }
 
 // The printed Strength is the monster's, and it rolls nothing for it: the first three
-// dice are its Constitution's, 17 for a man-sized creature reading 18 on Table 8.
+// dice are its Dexterity's and the next three its Constitution's, 17 for a man-sized
+// creature reading 18 on Table 8.
 TEST_F(MonsterStrengthTest, AMonsterWithAStrengthOfItsOwnKeepsItAndRollsNoDieForIt)
 {
 	const MonsterParams params = params_with(CreatureSize::MEDIUM, MonsterStrength{ 18, 100 });
-	force_rolls({ 6, 6, 5 });
+	force_rolls({ 3, 3, 3, 6, 6, 5 });
 
 	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 

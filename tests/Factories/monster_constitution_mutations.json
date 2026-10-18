@@ -9,8 +9,8 @@
   "mutations": [
     {
       "file": "src/MonsterCreator.cpp",
-      "original": "\tc->set_constitution(monster_constitution_score(roll_dice(ctx.dice, MONSTER_ABILITY_DICE), params.size));",
-      "mutated": "\tc->set_constitution(monster_constitution_score(roll_dice(ctx.dice, MONSTER_ABILITY_DICE), CreatureSize::MEDIUM));",
+      "original": "\troll_monster_ability_scores(*c, params.size, params.intelligence, params.strength, *ctx.dice);",
+      "mutated": "\troll_monster_ability_scores(*c, CreatureSize::MEDIUM, params.intelligence, params.strength, *ctx.dice);",
       "catches": "a monster's size ignored, every one read in the man-sized column"
     },
     {
@@ -21,14 +21,14 @@
     },
     {
       "file": "src/Monsters.cpp",
-      "original": "roll_monster_ability_scores(*this, CreatureSize::LARGE, IntelligenceRating::SEMI, *ctx.dice);",
-      "mutated": "roll_monster_ability_scores(*this, CreatureSize::MEDIUM, IntelligenceRating::SEMI, *ctx.dice);",
+      "original": "roll_monster_ability_scores(*this, CreatureSize::LARGE, IntelligenceRating::SEMI, std::nullopt, *ctx.dice);",
+      "mutated": "roll_monster_ability_scores(*this, CreatureSize::MEDIUM, IntelligenceRating::SEMI, std::nullopt, *ctx.dice);",
       "catches": "the mimic read as man-sized rather than large"
     },
     {
       "file": "src/Spider.cpp",
-      "original": "roll_monster_ability_scores(*this, CreatureSize::TINY, IntelligenceRating::LOW, *ctx.dice);",
-      "mutated": "roll_monster_ability_scores(*this, CreatureSize::SMALL, IntelligenceRating::LOW, *ctx.dice);",
+      "original": "roll_monster_ability_scores(*this, CreatureSize::TINY, IntelligenceRating::LOW, std::nullopt, *ctx.dice);",
+      "mutated": "roll_monster_ability_scores(*this, CreatureSize::SMALL, IntelligenceRating::LOW, std::nullopt, *ctx.dice);",
       "catches": "the hairy spider read as small rather than tiny"
     }
   ]

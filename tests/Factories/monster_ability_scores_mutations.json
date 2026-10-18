@@ -1,0 +1,59 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=MonsterAbilityScoresTest.*:MonsterStrengthTest.*:MonsterHitDiceTest.*:CodeBuiltMonsterAbilityTest.*:MonsterRoundTripTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/MonsterCreator.cpp",
+      "original": "\troll_monster_ability_scores(*c, params.size, params.intelligence, params.strength, *ctx.dice);",
+      "mutated": "\troll_monster_ability_scores(*c, params.size, params.intelligence, std::nullopt, *ctx.dice);",
+      "catches": "a record's printed Strength ignored on the data path"
+    },
+    {
+      "file": "src/MonsterCreator.cpp",
+      "original": "\troll_monster_ability_scores(*c, params.size, params.intelligence, params.strength, *ctx.dice);",
+      "mutated": "\troll_monster_ability_scores(*c, params.size, IntelligenceRating::AVERAGE, params.strength, *ctx.dice);",
+      "catches": "every data monster read as of average intelligence"
+    },
+    {
+      "file": "src/MonsterAbilityTables.cpp",
+      "original": "\tcreature.set_dexterity(monster_dexterity_score(roll_dice(&dice, MONSTER_ABILITY_DICE), size));\n",
+      "mutated": "\tcreature.set_dexterity(monster_dexterity_score(roll_dice(&dice, MONSTER_ABILITY_DICE), CreatureSize::MEDIUM));\n",
+      "catches": "Dexterity read from the man-sized column whatever the size"
+    },
+    {
+      "file": "src/MonsterAbilityTables.cpp",
+      "original": "\tcreature.set_dexterity(monster_dexterity_score(roll_dice(&dice, MONSTER_ABILITY_DICE), size));\n\tcreature.set_constitution(monster_constitution_score(roll_dice(&dice, MONSTER_ABILITY_DICE), size));\n",
+      "mutated": "\tcreature.set_constitution(monster_constitution_score(roll_dice(&dice, MONSTER_ABILITY_DICE), size));\n\tcreature.set_dexterity(monster_dexterity_score(roll_dice(&dice, MONSTER_ABILITY_DICE), size));\n",
+      "catches": "Constitution rolled before Dexterity, out of the book's order"
+    },
+    {
+      "file": "src/MonsterAbilityTables.cpp",
+      "original": "\tcreature.set_wisdom(monster_wisdom_score(roll_dice(&dice, MONSTER_ABILITY_DICE), rating));\n",
+      "mutated": "\tcreature.set_wisdom(monster_wisdom_score(roll_dice(&dice, MONSTER_ABILITY_DICE), IntelligenceRating::ANIMAL));\n",
+      "catches": "Wisdom read from the Animal column whatever the rating"
+    },
+    {
+      "file": "src/MonsterAbilityTables.cpp",
+      "original": "\tcreature.set_charisma(monster_charisma_score(roll_dice(&dice, MONSTER_ABILITY_DICE), rating));\n",
+      "mutated": "\tcreature.set_charisma(monster_wisdom_score(roll_dice(&dice, MONSTER_ABILITY_DICE), rating));\n",
+      "catches": "Charisma read from the Wisdom table"
+    },
+    {
+      "file": "src/MonsterAbilityTables.cpp",
+      "original": "\t\t? *printedStrength\n",
+      "mutated": "\t\t? (static_cast<void>(roll_dice(&dice, MONSTER_ABILITY_DICE)), *printedStrength)\n",
+      "catches": "a printed Strength that still spends a die, shifting every later score"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "    \"size\": \"large\",\n    \"strength\": null,\n    \"thaco\": 10,\n",
+      "mutated": "    \"size\": \"large\",\n    \"strength\": null,\n    \"dex\": {\n      \"bonus\": 0,\n      \"num\": 3,\n      \"sides\": 6\n    },\n    \"thaco\": 10,\n",
+      "catches": "a record left carrying Dexterity dice"
+    }
+  ]
+}

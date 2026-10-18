@@ -59,7 +59,7 @@ void ShopkeeperFactory::configure_shopkeeper(Creature& shopkeeper, int dungeonLe
 	// Tables 6 to 11, a human being man-sized and of average intelligence. Before the
 	// hit points, which record the Constitution.
 	assert(ctx.dice && "ShopkeeperFactory::configure_shopkeeper called without dice");
-	roll_monster_ability_scores(shopkeeper, CreatureSize::MEDIUM, IntelligenceRating::AVERAGE, *ctx.dice);
+	roll_monster_ability_scores(shopkeeper, CreatureSize::MEDIUM, IntelligenceRating::AVERAGE, std::nullopt, *ctx.dice);
 
 	// Set combat stats - non-hostile defensive stats
 	shopkeeper.experienceReward = std::make_unique<ExperienceReward>(0);

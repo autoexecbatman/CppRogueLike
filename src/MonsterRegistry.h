@@ -111,14 +111,6 @@ struct MonsterParams
 	// The Strength its Monstrous Manual entry prints, or none, in which case it is rolled
 	// on Table 6 by size when the monster is built.
 	std::optional<MonsterStrength> strength{};
-	// Dexterity, rolled when the monster is built.
-	DiceExpr dexDice{ 3, 6, 0 };
-	// Intelligence, rolled when the monster is built.
-	DiceExpr intDice{ 3, 6, 0 };
-	// Wisdom, rolled when the monster is built.
-	DiceExpr wisDice{ 3, 6, 0 };
-	// Charisma, rolled when the monster is built.
-	DiceExpr chaDice{ 3, 6, 0 };
 
 	// Damage this creature deals
 	DamageInfo damage{};

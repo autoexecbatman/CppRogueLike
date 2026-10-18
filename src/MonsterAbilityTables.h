@@ -3,6 +3,7 @@
 #include <array>
 #include <cassert>
 #include <cstddef>
+#include <optional>
 
 #include "CreatureSize.h"
 #include "DiceExpr.h"
@@ -24,7 +25,7 @@ class RandomDice;
 //
 //   const int roll = roll_dice(dice, MONSTER_ABILITY_DICE); // the 3d6 the table is read by
 //   monster_constitution_score(roll, CreatureSize::LARGE); // a 15 reads 18 for a large creature
-//   roll_monster_ability_scores(mimic, CreatureSize::LARGE, IntelligenceRating::SEMI, *ctx.dice); // all six at once
+//   roll_monster_ability_scores(mimic, CreatureSize::LARGE, IntelligenceRating::SEMI, std::nullopt, *ctx.dice); // all six at once
 
 // The 3d6 every table is read by.
 inline constexpr DiceExpr MONSTER_ABILITY_DICE{ 3, 6, 0 };
@@ -259,18 +260,23 @@ inline constexpr std::array<std::array<int, MONSTER_RATING_COLUMNS>, MONSTER_ABI
 	return MONSTER_CHARISMA_TABLE.at(monster_ability_row(roll)).at(monster_rating_column(column));
 }
 
-// Rolls all six of a monster's ability scores, one 3d6 each, and reads them by its size
-// (Tables 6 to 8) and its Intelligence rating (Tables 9 to 11). Strength above 18 lands
-// as its score and exceptional percentile. Defined in MonsterAbilityTables.cpp.
+// Rolls a monster's six ability scores, one 3d6 each in the book's order, and reads them
+// by its size (Tables 6 to 8) and its Intelligence rating (Tables 9 to 11). A Strength its
+// Monstrous Manual entry prints is set as given and rolls no die; otherwise Table 6 is
+// read, and above 18 lands as its score and exceptional percentile. Defined in
+// MonsterAbilityTables.cpp.
 //
 // Example, every die at its highest:
-//   roll_monster_ability_scores(spider, CreatureSize::TINY, IntelligenceRating::LOW, dice);
+//   roll_monster_ability_scores(spider, CreatureSize::TINY, IntelligenceRating::LOW, std::nullopt, dice);
 //   spider.get_dexterity(); // -> 25
 //   spider.get_intelligence(); // -> 9
+//   roll_monster_ability_scores(ogre, CreatureSize::LARGE, IntelligenceRating::LOW, MonsterStrength{ 18, 100 }, dice);
+//   ogre.get_exceptional_strength(); // -> 100, and the first three dice were Dexterity's
 void roll_monster_ability_scores(
 	Creature& creature,
 	CreatureSize size,
 	IntelligenceRating rating,
+	std::optional<MonsterStrength> printedStrength,
 	RandomDice& dice);
 
 // end of file: MonsterAbilityTables.h

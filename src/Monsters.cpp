@@ -31,7 +31,7 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 	// Tables 6 to 11: the killer mimic is large and semi-intelligent (Monstrous Manual
 	// p1700). Before the hit points, which read the Constitution.
 	assert(ctx.dice && "Mimic constructed without dice");
-	roll_monster_ability_scores(*this, CreatureSize::LARGE, IntelligenceRating::SEMI, *ctx.dice);
+	roll_monster_ability_scores(*this, CreatureSize::LARGE, IntelligenceRating::SEMI, std::nullopt, *ctx.dice);
 
 	set_natural_attack("Pseudopod");
 

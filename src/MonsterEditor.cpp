@@ -322,10 +322,6 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 			defaults.ac = 10;
 			defaults.xp = 1;
 			defaults.strength = std::nullopt;
-			defaults.dexDice = DiceExpr{ 3, 6, 0 };
-			defaults.intDice = DiceExpr{ 3, 6, 0 };
-			defaults.wisDice = DiceExpr{ 3, 6, 0 };
-			defaults.chaDice = DiceExpr{ 3, 6, 0 };
 			defaults.naturalAttack = "claws";
 			defaults.damage = DamageInfo{ DiceExpr{ 1, 4, 0 }, DamageType::PHYSICAL };
 			defaults.baseWeight = 10;
@@ -906,30 +902,6 @@ std::string MonsterEditor::field_label(FieldId f) const
 		return "STR Score";
 	case FieldId::STR_EXCEPTIONAL:
 		return "STR Exceptional";
-	case FieldId::DEX_NUM:
-		return "DEX Num";
-	case FieldId::DEX_SIDES:
-		return "DEX Sides";
-	case FieldId::DEX_BONUS:
-		return "DEX Bonus";
-	case FieldId::INT_NUM:
-		return "INT Num";
-	case FieldId::INT_SIDES:
-		return "INT Sides";
-	case FieldId::INT_BONUS:
-		return "INT Bonus";
-	case FieldId::WIS_NUM:
-		return "WIS Num";
-	case FieldId::WIS_SIDES:
-		return "WIS Sides";
-	case FieldId::WIS_BONUS:
-		return "WIS Bonus";
-	case FieldId::CHA_NUM:
-		return "CHA Num";
-	case FieldId::CHA_SIDES:
-		return "CHA Sides";
-	case FieldId::CHA_BONUS:
-		return "CHA Bonus";
 	case FieldId::WEAPON:
 		return "Natural Attack";
 	case FieldId::DMG_NUM:
@@ -1020,30 +992,6 @@ std::string MonsterEditor::field_value(FieldId f) const
 		}
 		return std::format("{} (18/{:02})", strength.exceptional, strength.exceptional);
 	}
-	case FieldId::DEX_NUM:
-		return std::format("{}", m_working.dexDice.num);
-	case FieldId::DEX_SIDES:
-		return std::format("{}", m_working.dexDice.sides);
-	case FieldId::DEX_BONUS:
-		return std::format("{}", m_working.dexDice.bonus);
-	case FieldId::INT_NUM:
-		return std::format("{}", m_working.intDice.num);
-	case FieldId::INT_SIDES:
-		return std::format("{}", m_working.intDice.sides);
-	case FieldId::INT_BONUS:
-		return std::format("{}", m_working.intDice.bonus);
-	case FieldId::WIS_NUM:
-		return std::format("{}", m_working.wisDice.num);
-	case FieldId::WIS_SIDES:
-		return std::format("{}", m_working.wisDice.sides);
-	case FieldId::WIS_BONUS:
-		return std::format("{}", m_working.wisDice.bonus);
-	case FieldId::CHA_NUM:
-		return std::format("{}", m_working.chaDice.num);
-	case FieldId::CHA_SIDES:
-		return std::format("{}", m_working.chaDice.sides);
-	case FieldId::CHA_BONUS:
-		return std::format("{}", m_working.chaDice.bonus);
 	case FieldId::WEAPON:
 		return m_working.naturalAttack;
 	case FieldId::DMG_NUM:
@@ -1149,42 +1097,6 @@ void MonsterEditor::field_adjust(FieldId f, int delta)
 		assert(is_valid_monster_strength(strength) && "MonsterEditor: the percentile left a Strength the loader refuses");
 		break;
 	}
-	case FieldId::DEX_NUM:
-		m_working.dexDice.num = clamp_val(m_working.dexDice.num, delta, 1, 10);
-		break;
-	case FieldId::DEX_SIDES:
-		m_working.dexDice.sides = clamp_val(m_working.dexDice.sides, delta, 2, 20);
-		break;
-	case FieldId::DEX_BONUS:
-		m_working.dexDice.bonus = clamp_val(m_working.dexDice.bonus, delta, -18, 18);
-		break;
-	case FieldId::INT_NUM:
-		m_working.intDice.num = clamp_val(m_working.intDice.num, delta, 1, 10);
-		break;
-	case FieldId::INT_SIDES:
-		m_working.intDice.sides = clamp_val(m_working.intDice.sides, delta, 2, 20);
-		break;
-	case FieldId::INT_BONUS:
-		m_working.intDice.bonus = clamp_val(m_working.intDice.bonus, delta, -18, 18);
-		break;
-	case FieldId::WIS_NUM:
-		m_working.wisDice.num = clamp_val(m_working.wisDice.num, delta, 1, 10);
-		break;
-	case FieldId::WIS_SIDES:
-		m_working.wisDice.sides = clamp_val(m_working.wisDice.sides, delta, 2, 20);
-		break;
-	case FieldId::WIS_BONUS:
-		m_working.wisDice.bonus = clamp_val(m_working.wisDice.bonus, delta, -18, 18);
-		break;
-	case FieldId::CHA_NUM:
-		m_working.chaDice.num = clamp_val(m_working.chaDice.num, delta, 1, 10);
-		break;
-	case FieldId::CHA_SIDES:
-		m_working.chaDice.sides = clamp_val(m_working.chaDice.sides, delta, 2, 20);
-		break;
-	case FieldId::CHA_BONUS:
-		m_working.chaDice.bonus = clamp_val(m_working.chaDice.bonus, delta, -18, 18);
-		break;
 	// The dice are the record: every change rebuilds the damage, so its text and
 	// its range follow rather than being edited into disagreement.
 	case FieldId::DMG_NUM:
