@@ -48,6 +48,18 @@
       "original": "\t\tassert(creature && \"burst_fireball: creatures list holds a null entry\");\n\n\t\tif (creature->is_dead())\n",
       "mutated": "\t\tassert(creature && \"burst_fireball: creatures list holds a null entry\");\n\n\t\tif (!creature->is_dead())\n",
       "catches": "the burst passing over the living and burning only the dead"
+    },
+    {
+      "file": "data/content/items.json",
+      "original": "\"scroll_fireball\": {\n        \"acBonus\": 0,\n        \"baseWeight\": 15,\n        \"weight\": 0,\n        \"category\": \"scroll\",\n        \"chaBonus\": 0,\n        \"color\": \"red_yellow\",\n        \"conBonus\": 0,\n        \"confuseTurns\": 0,\n        \"consumableAmount\": 0,\n        \"consumableBuff\": \"none\",\n        \"consumableEffect\": \"none\",\n        \"damage\": 0,",
+      "mutated": "\"scroll_fireball\": {\n        \"acBonus\": 0,\n        \"baseWeight\": 15,\n        \"weight\": 0,\n        \"category\": \"scroll\",\n        \"chaBonus\": 0,\n        \"color\": \"red_yellow\",\n        \"conBonus\": 0,\n        \"confuseTurns\": 0,\n        \"consumableAmount\": 0,\n        \"consumableBuff\": \"none\",\n        \"consumableEffect\": \"none\",\n        \"damage\": 12,",
+      "catches": "the fireball scroll's record carrying a damage figure nothing reads"
+    },
+    {
+      "file": "src/SpellSystem.h",
+      "original": "inline constexpr int SCROLL_FIREBALL_CASTER_LEVEL = 6;",
+      "mutated": "inline constexpr int SCROLL_FIREBALL_CASTER_LEVEL = 5;",
+      "catches": "a scroll's fireball cast below the book's 6th level"
     }
   ]
 }

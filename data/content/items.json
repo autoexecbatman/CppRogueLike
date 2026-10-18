@@ -3209,7 +3209,7 @@
         "consumableAmount": 0,
         "consumableBuff": "none",
         "consumableEffect": "none",
-        "damage": 12,
+        "damage": 0,
         "dexBonus": 0,
         "duration": 0,
         "effect": "none",

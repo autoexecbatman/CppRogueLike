@@ -384,11 +384,10 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 	// PICK_TILE_SINGLE and PICK_TILE_AOE - async via TargetingMenu
 	int aoeRadius = (targetScroll.targetMode == TargetMode::PICK_TILE_AOE) ? targetScroll.range : 0;
 	int scrollRange = targetScroll.range;
-	int scrollDamage = targetScroll.damage;
 	int confuseTurns = targetScroll.confuseTurns;
 	TargetMode mode = targetScroll.targetMode;
 
-	auto onTarget = [mode, aoeRadius, scrollRange, scrollDamage, confuseTurns, &owner, &wearer](
+	auto onTarget = [mode, aoeRadius, scrollRange, confuseTurns, &owner, &wearer](
 						bool confirmed,
 						Vector2D targetPos,
 						GameContext& innerCtx) mutable

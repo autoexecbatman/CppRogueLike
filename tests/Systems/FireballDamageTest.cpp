@@ -205,3 +205,25 @@ TEST_F(FireballDamageTest, ARingAddsFourToTheSave)
 	EXPECT_EQ(wearer.get_hp(), STARTING_HP - (CASTER_LEVEL * 4) / 2);
 	EXPECT_EQ(bare.get_hp(), STARTING_HP - MAX_DAMAGE);
 }
+
+// A fireball scroll's damage is the spell's, caster level in d6, so its record
+// carries none for the editor to show as real.
+TEST_F(FireballDamageTest, TheFireballScrollRecordCarriesNoDamage)
+{
+	EXPECT_EQ(ctx.itemRegistry->get_params("scroll_fireball").damage, 0);
+}
+
+// The Dungeon Master's Guide casts a scroll's spell at never below 6th level,
+// so the scroll's burst rolls six dice: six sixes are 36.
+TEST_F(FireballDamageTest, TheScrollBurstRollsSixDice)
+{
+	for (int die = 0; die < 6; ++die)
+	{
+		mock.dice.set_next_roll(6);
+	}
+
+	const auto burst = SpellSystem::burst_fireball(Vector2D{ 3, 5 }, SpellSystem::SCROLL_FIREBALL_CASTER_LEVEL, RADIUS, ctx);
+
+	EXPECT_EQ(burst.diceCount, 6);
+	EXPECT_EQ(burst.totalDamage, 36);
+}
