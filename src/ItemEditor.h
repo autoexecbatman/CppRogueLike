@@ -78,33 +78,33 @@ private:
 
 	static constexpr int FIELD_COUNT = static_cast<int>(FieldId::COUNT);
 
-	ContentRegistry* m_registry{ nullptr };
-	bool m_active{ false };
-	Mode m_mode{ Mode::NORMAL };
-	int m_focus{ 0 }; // 0 = list panel, 1 = field panel
+	ContentRegistry* contentRegistry{ nullptr };
+	bool active{ false };
+	Mode mode{ Mode::NORMAL };
+	int focus{ 0 }; // 0 = list panel, 1 = field panel
 
 	// Item list (all registered keys)
-	std::vector<std::string> m_keys;
-	int m_list_cursor{ 0 };
-	int m_list_scroll{ 0 };
+	std::vector<std::string> keys;
+	int listCursor{ 0 };
+	int listScroll{ 0 };
 
 	// Working copy of selected item
-	ItemParams m_working{};
-	std::string m_working_name;
-	std::string m_working_category;
-	TileRef m_working_tile{};
+	ItemParams working{};
+	std::string workingName;
+	std::string workingCategory;
+	TileRef workingTile{};
 
 	// Field navigation
-	int m_field_cursor{ 0 };
-	int m_field_scroll{ 0 };
-	std::string m_edit_buf;
+	int fieldCursor{ 0 };
+	int fieldScroll{ 0 };
+	std::string editBuffer;
 
 	// Tile picker state
-	int m_picker_sheet{ 0 };
-	int m_picker_scroll{ 0 };
+	int pickerSheet{ 0 };
+	int pickerScroll{ 0 };
 
 	// Status feedback
-	double m_last_save_time{ -100.0 };
+	double lastSaveTime{ -100.0 };
 
 	void load_working(const ItemRegistry& items);
 	void commit_working(ItemRegistry& items);
@@ -138,5 +138,5 @@ public:
 	void exit(GameContext& ctx);
 	void tick(GameContext& ctx);
 
-	[[nodiscard]] bool is_active() const { return m_active; }
+	[[nodiscard]] bool is_active() const { return active; }
 };

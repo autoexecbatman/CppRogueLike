@@ -97,17 +97,17 @@ void ItemEditor::enter(GameContext& ctx)
 {
 	assert(ctx.itemRegistry && "ItemEditor::enter: called without an itemRegistry");
 
-	m_registry = ctx.contentRegistry;
-	m_active = true;
-	m_mode = Mode::NORMAL;
-	m_focus = 0;
+	contentRegistry = ctx.contentRegistry;
+	active = true;
+	mode = Mode::NORMAL;
+	focus = 0;
 
-	m_keys = ctx.itemRegistry->get_all_keys();
+	keys = ctx.itemRegistry->get_all_keys();
 
-	m_list_cursor = 0;
-	m_list_scroll = 0;
-	m_picker_sheet = 0;
-	m_picker_scroll = 0;
+	listCursor = 0;
+	listScroll = 0;
+	pickerSheet = 0;
+	pickerScroll = 0;
 
 	load_working(*ctx.itemRegistry);
 }
@@ -117,7 +117,7 @@ void ItemEditor::exit(GameContext& ctx)
 	assert(ctx.itemRegistry && "ItemEditor::exit: called without an itemRegistry");
 
 	commit_working(*ctx.itemRegistry);
-	m_active = false;
+	active = false;
 	ctx.menus->push_back(make_main_menu(true, ctx));
 }
 
@@ -134,35 +134,35 @@ void ItemEditor::tick(GameContext& ctx)
 
 void ItemEditor::load_working(const ItemRegistry& items)
 {
-	if (m_keys.empty())
+	if (keys.empty())
 	{
 		return;
 	}
 
 	const std::string& key = current_key();
 	const ItemParams& p = items.get_params(key);
-	m_working = p;
-	m_working_name = std::string{ p.name };
-	m_working_category = std::string{ p.category };
-	m_working_tile = m_registry ? m_registry->get_tile(key) : TileRef{};
-	m_field_cursor = 0;
-	m_field_scroll = 0;
-	m_mode = Mode::NORMAL;
-	m_edit_buf.clear();
+	working = p;
+	workingName = std::string{ p.name };
+	workingCategory = std::string{ p.category };
+	workingTile = contentRegistry ? contentRegistry->get_tile(key) : TileRef{};
+	fieldCursor = 0;
+	fieldScroll = 0;
+	mode = Mode::NORMAL;
+	editBuffer.clear();
 }
 
 void ItemEditor::commit_working(ItemRegistry& items)
 {
-	if (m_keys.empty())
+	if (keys.empty())
 	{
 		return;
 	}
 	const std::string& key = current_key();
-	items.set_name_category(key, m_working_name, m_working_category);
-	items.set_params(key, m_working);
-	if (m_registry)
+	items.set_name_category(key, workingName, workingCategory);
+	items.set_params(key, working);
+	if (contentRegistry)
 	{
-		m_registry->set_tile(key, m_working_tile);
+		contentRegistry->set_tile(key, workingTile);
 	}
 }
 
@@ -186,29 +186,29 @@ void ItemEditor::handle_input(GameContext& ctx)
 	{
 		commit_working(*ctx.itemRegistry);
 		ctx.itemRegistry->save(Paths::ITEMS);
-		if (m_registry)
+		if (contentRegistry)
 		{
-			ContentRegistryIO::save(*m_registry, Paths::CONTENT_TILES);
+			ContentRegistryIO::save(*contentRegistry, Paths::CONTENT_TILES);
 		}
-		m_last_save_time = GetTime();
+		lastSaveTime = GetTime();
 		return;
 	}
 
 	if (IsKeyPressed(KEY_TAB))
 	{
-		m_focus = 1 - m_focus;
+		focus = 1 - focus;
 		return;
 	}
 
-	if (m_mode == Mode::NORMAL)
+	if (mode == Mode::NORMAL)
 	{
 		handle_normal(ctx);
 	}
-	else if (m_mode == Mode::EDIT_STRING)
+	else if (mode == Mode::EDIT_STRING)
 	{
 		handle_edit_string();
 	}
-	else if (m_mode == Mode::TILE_PICKER)
+	else if (mode == Mode::TILE_PICKER)
 	{
 		handle_picker(*ctx.renderer);
 	}
@@ -224,7 +224,7 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 	int screenHeight = r.get_screen_height();
 	int body_h = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
 	int visible_fields = body_h / FIELD_HEIGHT;
-	int total = static_cast<int>(m_keys.size());
+	int total = static_cast<int>(keys.size());
 
 	::Vector2 mouse = GetMousePosition();
 	bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
@@ -233,22 +233,22 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 	{
 		if (mouse.x < LIST_WIDTH)
 		{
-			m_focus = 0;
-			int idx = m_list_scroll + static_cast<int>(mouse.y - HEADER_HEIGHT) / ITEM_HEIGHT;
+			focus = 0;
+			int idx = listScroll + static_cast<int>(mouse.y - HEADER_HEIGHT) / ITEM_HEIGHT;
 			idx = std::clamp(idx, 0, total - 1);
-			if (idx != m_list_cursor)
+			if (idx != listCursor)
 			{
 				commit_working(items);
-				m_list_cursor = idx;
+				listCursor = idx;
 				load_working(items);
 			}
 		}
-		else if (m_mode == Mode::NORMAL)
+		else if (mode == Mode::NORMAL)
 		{
-			m_focus = 1;
-			int idx = m_field_scroll + static_cast<int>(mouse.y - HEADER_HEIGHT) / FIELD_HEIGHT;
+			focus = 1;
+			int idx = fieldScroll + static_cast<int>(mouse.y - HEADER_HEIGHT) / FIELD_HEIGHT;
 			idx = std::clamp(idx, 0, FIELD_COUNT - 1);
-			m_field_cursor = idx;
+			fieldCursor = idx;
 		}
 	}
 
@@ -257,47 +257,47 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 	{
 		if (mouse.x < LIST_WIDTH)
 		{
-			m_list_scroll = std::clamp(
-				m_list_scroll - static_cast<int>(wheel),
+			listScroll = std::clamp(
+				listScroll - static_cast<int>(wheel),
 				0,
 				std::max(0, total - 1));
 		}
 		else
 		{
-			m_field_scroll = std::clamp(
-				m_field_scroll - static_cast<int>(wheel),
+			fieldScroll = std::clamp(
+				fieldScroll - static_cast<int>(wheel),
 				0,
 				std::max(0, FIELD_COUNT - visible_fields));
 		}
 	}
 
 	// Keyboard: list panel
-	if (m_focus == 0)
+	if (focus == 0)
 	{
-		if (IsKeyPressed(KEY_UP) && m_list_cursor > 0)
+		if (IsKeyPressed(KEY_UP) && listCursor > 0)
 		{
 			commit_working(items);
-			--m_list_cursor;
-			if (m_list_cursor < m_list_scroll)
+			--listCursor;
+			if (listCursor < listScroll)
 			{
-				m_list_scroll = m_list_cursor;
+				listScroll = listCursor;
 			}
 			load_working(items);
 		}
-		else if (IsKeyPressed(KEY_DOWN) && m_list_cursor < total - 1)
+		else if (IsKeyPressed(KEY_DOWN) && listCursor < total - 1)
 		{
 			commit_working(items);
-			++m_list_cursor;
+			++listCursor;
 			int vis_list = body_h / 30;
-			if (m_list_cursor >= m_list_scroll + vis_list)
+			if (listCursor >= listScroll + vis_list)
 			{
-				m_list_scroll = m_list_cursor - vis_list + 1;
+				listScroll = listCursor - vis_list + 1;
 			}
 			load_working(items);
 		}
 		else if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_RIGHT))
 		{
-			m_focus = 1;
+			focus = 1;
 		}
 		else if (IsKeyPressed(KEY_A))
 		{
@@ -312,25 +312,25 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 			defaults.handRequirement = HandRequirement::ONE_HANDED;
 			defaults.weaponSize = WeaponSize::MEDIUM;
 			const std::string newKey = items.add_custom("New Item", "weapon", defaults);
-			m_keys = items.get_all_keys();
-			for (int i = 0; i < static_cast<int>(m_keys.size()); ++i)
+			keys = items.get_all_keys();
+			for (int i = 0; i < static_cast<int>(keys.size()); ++i)
 			{
-				if (m_keys[i] == newKey)
+				if (keys[i] == newKey)
 				{
-					m_list_cursor = i;
+					listCursor = i;
 					break;
 				}
 			}
 			load_working(items);
-			m_focus = 1;
+			focus = 1;
 		}
 		else if (IsKeyPressed(KEY_DELETE))
 		{
 			if (!items.is_builtin_key(current_key()))
 			{
 				items.remove_custom(current_key());
-				m_keys = items.get_all_keys();
-				m_list_cursor = std::clamp(m_list_cursor, 0, static_cast<int>(m_keys.size()) - 1);
+				keys = items.get_all_keys();
+				listCursor = std::clamp(listCursor, 0, static_cast<int>(keys.size()) - 1);
 				load_working(items);
 			}
 		}
@@ -340,20 +340,20 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 	// Keyboard: field panel
 	int field_max = FIELD_COUNT - 1;
 
-	if (IsKeyPressed(KEY_UP) && m_field_cursor > 0)
+	if (IsKeyPressed(KEY_UP) && fieldCursor > 0)
 	{
-		--m_field_cursor;
-		if (m_field_cursor < m_field_scroll)
+		--fieldCursor;
+		if (fieldCursor < fieldScroll)
 		{
-			m_field_scroll = m_field_cursor;
+			fieldScroll = fieldCursor;
 		}
 	}
-	else if (IsKeyPressed(KEY_DOWN) && m_field_cursor < field_max)
+	else if (IsKeyPressed(KEY_DOWN) && fieldCursor < field_max)
 	{
-		++m_field_cursor;
-		if (m_field_cursor >= m_field_scroll + visible_fields)
+		++fieldCursor;
+		if (fieldCursor >= fieldScroll + visible_fields)
 		{
-			m_field_scroll = m_field_cursor - visible_fields + 1;
+			fieldScroll = fieldCursor - visible_fields + 1;
 		}
 	}
 
@@ -361,7 +361,7 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 
 	if (IsKeyPressed(KEY_F2) || (fid == FieldId::TILE && IsKeyPressed(KEY_ENTER)))
 	{
-		m_mode = Mode::TILE_PICKER;
+		mode = Mode::TILE_PICKER;
 		return;
 	}
 
@@ -369,8 +369,8 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 	{
 		if (field_is_string(fid))
 		{
-			m_edit_buf = field_value(fid);
-			m_mode = Mode::EDIT_STRING;
+			editBuffer = field_value(fid);
+			mode = Mode::EDIT_STRING;
 		}
 		else if (field_is_toggle(fid))
 		{
@@ -400,25 +400,25 @@ void ItemEditor::handle_edit_string()
 	{
 		if (ch >= 32 && ch < 127)
 		{
-			m_edit_buf += static_cast<char>(ch);
+			editBuffer += static_cast<char>(ch);
 		}
 		ch = GetCharPressed();
 	}
 
-	if (IsKeyPressed(KEY_BACKSPACE) && !m_edit_buf.empty())
+	if (IsKeyPressed(KEY_BACKSPACE) && !editBuffer.empty())
 	{
-		m_edit_buf.pop_back();
+		editBuffer.pop_back();
 	}
 
 	if (IsKeyPressed(KEY_ENTER))
 	{
-		field_set_string(current_field(), m_edit_buf);
-		m_mode = Mode::NORMAL;
+		field_set_string(current_field(), editBuffer);
+		mode = Mode::NORMAL;
 	}
 
 	if (IsKeyPressed(KEY_ESCAPE))
 	{
-		m_mode = Mode::NORMAL;
+		mode = Mode::NORMAL;
 	}
 }
 
@@ -430,16 +430,16 @@ void ItemEditor::handle_picker(const Renderer& r)
 	{
 		for (int i = 0; i < total_sheets; ++i)
 		{
-			m_picker_sheet = (m_picker_sheet + dir + total_sheets) % total_sheets;
-			if (r.sheet_is_loaded(static_cast<TileSheet>(m_picker_sheet)))
+			pickerSheet = (pickerSheet + dir + total_sheets) % total_sheets;
+			if (r.sheet_is_loaded(static_cast<TileSheet>(pickerSheet)))
 			{
 				break;
 			}
 		}
-		m_picker_scroll = 0;
+		pickerScroll = 0;
 	};
 
-	if (!r.sheet_is_loaded(static_cast<TileSheet>(m_picker_sheet)))
+	if (!r.sheet_is_loaded(static_cast<TileSheet>(pickerSheet)))
 	{
 		advance_sheet(1);
 	}
@@ -454,11 +454,11 @@ void ItemEditor::handle_picker(const Renderer& r)
 	}
 	if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_F2))
 	{
-		m_mode = Mode::NORMAL;
+		mode = Mode::NORMAL;
 		return;
 	}
 
-	int sheet_rows = r.get_sheet_rows(static_cast<TileSheet>(m_picker_sheet));
+	int sheet_rows = r.get_sheet_rows(static_cast<TileSheet>(pickerSheet));
 	::Vector2 mouse = GetMousePosition();
 	bool in_picker = mouse.x >= LIST_WIDTH;
 
@@ -467,8 +467,8 @@ void ItemEditor::handle_picker(const Renderer& r)
 		float wheel = GetMouseWheelMove();
 		if (wheel != 0.0f)
 		{
-			m_picker_scroll = std::clamp(
-				m_picker_scroll - static_cast<int>(wheel),
+			pickerScroll = std::clamp(
+				pickerScroll - static_cast<int>(wheel),
 				0,
 				std::max(0, sheet_rows - 1));
 		}
@@ -478,15 +478,15 @@ void ItemEditor::handle_picker(const Renderer& r)
 
 	if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && in_picker)
 	{
-		const int pickerTileSize = picker_tile_size(r, m_picker_sheet);
+		const int pickerTileSize = picker_tile_size(r, pickerSheet);
 		int col = static_cast<int>(mouse.x - LIST_WIDTH - PICKER_PAD) / (pickerTileSize + 2);
-		int row = m_picker_scroll + static_cast<int>(mouse.y - grid_y) / (pickerTileSize + 2);
-		int sheet_cols = r.get_sheet_cols(static_cast<TileSheet>(m_picker_sheet));
+		int row = pickerScroll + static_cast<int>(mouse.y - grid_y) / (pickerTileSize + 2);
+		int sheet_cols = r.get_sheet_cols(static_cast<TileSheet>(pickerSheet));
 
 		if (col >= 0 && col < sheet_cols && row >= 0 && row < sheet_rows)
 		{
-			m_working_tile = TileRef{ static_cast<TileSheet>(m_picker_sheet), col, row };
-			m_mode = Mode::NORMAL;
+			workingTile = TileRef{ static_cast<TileSheet>(pickerSheet), col, row };
+			mode = Mode::NORMAL;
 		}
 	}
 }
@@ -508,7 +508,7 @@ void ItemEditor::render(const GameContext& ctx) const
 	render_header(r);
 	render_list(r, *ctx.itemRegistry);
 
-	if (m_mode == Mode::TILE_PICKER)
+	if (mode == Mode::TILE_PICKER)
 	{
 		render_picker(r);
 	}
@@ -539,10 +539,10 @@ void ItemEditor::render_list(const Renderer& r, const ItemRegistry& items) const
 	DrawRectangle(0, body_y, LIST_WIDTH, body_h, Color{ 5, 10, 5, 255 });
 	DrawLine(LIST_WIDTH, body_y, LIST_WIDTH, body_y + body_h, Color{ 80, 120, 80, 255 });
 
-	int total = static_cast<int>(m_keys.size());
+	int total = static_cast<int>(keys.size());
 	int visibleCount = body_h / ITEM_HEIGHT;
 	int max_scroll = std::max(0, total - visibleCount);
-	int scroll = std::clamp(m_list_scroll, 0, max_scroll);
+	int scroll = std::clamp(listScroll, 0, max_scroll);
 
 	::Vector2 mouse = GetMousePosition();
 
@@ -554,11 +554,11 @@ void ItemEditor::render_list(const Renderer& r, const ItemRegistry& items) const
 			break;
 		}
 
-		bool is_sel = (i == m_list_cursor);
+		bool is_sel = (i == listCursor);
 		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH && mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
-		if (is_sel && m_focus == 0)
+		if (is_sel && focus == 0)
 		{
 			bgColor = Color{ 0, 60, 0, 200 };
 		}
@@ -577,19 +577,19 @@ void ItemEditor::render_list(const Renderer& r, const ItemRegistry& items) const
 		}
 
 		TileRef tile = is_sel
-			? m_working_tile
-			: (m_registry ? m_registry->get_tile(m_keys[i]) : TileRef{});
+			? workingTile
+			: (contentRegistry ? contentRegistry->get_tile(keys[i]) : TileRef{});
 		r.draw_tile_screen_sized(Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - LIST_TILE_SIZE) / 2 }, tile, LIST_TILE_SIZE);
 
-		const bool isCustom = !items.is_builtin_key(m_keys[i]);
+		const bool isCustom = !items.is_builtin_key(keys[i]);
 
 		std::string display_name = is_sel
-			? m_working_name
-			: std::string{ items.get_params(m_keys[i]).name };
+			? workingName
+			: std::string{ items.get_params(keys[i]).name };
 
 		if (display_name.empty())
 		{
-			display_name = prettify_key(m_keys[i]);
+			display_name = prettify_key(keys[i]);
 		}
 
 		if (isCustom)
@@ -618,7 +618,7 @@ void ItemEditor::render_fields(const Renderer& r) const
 
 	int visible = fieldsHeight / FIELD_HEIGHT;
 	int max_scroll = std::max(0, FIELD_COUNT - visible);
-	int scroll = std::clamp(m_field_scroll, 0, max_scroll);
+	int scroll = std::clamp(fieldScroll, 0, max_scroll);
 
 	::Vector2 mouse = GetMousePosition();
 
@@ -631,11 +631,11 @@ void ItemEditor::render_fields(const Renderer& r) const
 		}
 
 		FieldId fid = static_cast<FieldId>(i);
-		bool is_sel = (i == m_field_cursor);
+		bool is_sel = (i == fieldCursor);
 		bool hovered = mouse.x >= panelX && mouse.x < screenWidth && mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
-		if (is_sel && m_focus == 1)
+		if (is_sel && focus == 1)
 		{
 			bgColor = Color{ 0, 60, 0, 200 };
 		}
@@ -660,7 +660,7 @@ void ItemEditor::render_fields(const Renderer& r) const
 
 		if (fid == FieldId::TILE)
 		{
-			r.draw_tile_screen_sized(Vector2D{ screenWidth - LIST_TILE_SIZE - 12, itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2 }, m_working_tile, LIST_TILE_SIZE);
+			r.draw_tile_screen_sized(Vector2D{ screenWidth - LIST_TILE_SIZE - 12, itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2 }, workingTile, LIST_TILE_SIZE);
 			if (is_sel)
 			{
 				DrawRectangleLines(
@@ -674,9 +674,9 @@ void ItemEditor::render_fields(const Renderer& r) const
 		else
 		{
 			std::string val;
-			if (is_sel && m_mode == Mode::EDIT_STRING)
+			if (is_sel && mode == Mode::EDIT_STRING)
 			{
-				val = m_edit_buf + "_";
+				val = editBuffer + "_";
 			}
 			else
 			{
@@ -703,24 +703,24 @@ void ItemEditor::render_picker(const Renderer& r) const
 	int total_sheets = r.get_loaded_sheet_count();
 	std::string hdr = std::format(
 		"Sheet: {} ({}/{})  --  Left/Right:change  Esc/F2:back",
-		r.get_sheet_name(static_cast<TileSheet>(m_picker_sheet)),
-		m_picker_sheet + 1,
+		r.get_sheet_name(static_cast<TileSheet>(pickerSheet)),
+		pickerSheet + 1,
 		total_sheets);
 	r.draw_text_color(Vector2D{ panelX + PICKER_PAD, body_y + 6 }, hdr, Color{ 120, 200, 200, 255 });
 
 	int grid_y = body_y + PICKER_SUB_HEADER_HEIGHT;
 	int grid_h = body_h - PICKER_SUB_HEADER_HEIGHT;
-	int sheet_cols = r.get_sheet_cols(static_cast<TileSheet>(m_picker_sheet));
-	int sheet_rows = r.get_sheet_rows(static_cast<TileSheet>(m_picker_sheet));
-	const int pickerTileSize = picker_tile_size(r, m_picker_sheet);
+	int sheet_cols = r.get_sheet_cols(static_cast<TileSheet>(pickerSheet));
+	int sheet_rows = r.get_sheet_rows(static_cast<TileSheet>(pickerSheet));
+	const int pickerTileSize = picker_tile_size(r, pickerSheet);
 
 	::Vector2 mouse = GetMousePosition();
 
 	BeginScissorMode(panelX, grid_y, panelWidth, grid_h);
 
-	for (int row = m_picker_scroll; row < sheet_rows; ++row)
+	for (int row = pickerScroll; row < sheet_rows; ++row)
 	{
-		int py = grid_y + (row - m_picker_scroll) * (pickerTileSize + 2);
+		int py = grid_y + (row - pickerScroll) * (pickerTileSize + 2);
 		if (py >= grid_y + grid_h)
 		{
 			break;
@@ -729,9 +729,9 @@ void ItemEditor::render_picker(const Renderer& r) const
 		for (int col = 0; col < sheet_cols; ++col)
 		{
 			int px = panelX + PICKER_PAD + col * (pickerTileSize + 2);
-			TileRef tid{ static_cast<TileSheet>(m_picker_sheet), col, row };
+			TileRef tid{ static_cast<TileSheet>(pickerSheet), col, row };
 
-			bool is_cur = (tid == m_working_tile);
+			bool is_cur = (tid == workingTile);
 			bool hovered = mouse.x >= px && mouse.x < px + pickerTileSize && mouse.y >= py && mouse.y < py + pickerTileSize;
 
 			if (is_cur)
@@ -764,21 +764,21 @@ void ItemEditor::render_hint(const Renderer& r) const
 	DrawRectangle(0, hint_y, screenWidth, HINT_HEIGHT, Color{ 0, 20, 40, 255 });
 
 	std::string msg;
-	bool saved_flash = (GetTime() - m_last_save_time) < 2.0;
+	bool saved_flash = (GetTime() - lastSaveTime) < 2.0;
 
 	if (saved_flash)
 	{
 		msg = "Saved!";
 	}
-	else if (m_mode == Mode::EDIT_STRING)
+	else if (mode == Mode::EDIT_STRING)
 	{
 		msg = "Typing  --  Enter:confirm  Esc:cancel";
 	}
-	else if (m_mode == Mode::TILE_PICKER)
+	else if (mode == Mode::TILE_PICKER)
 	{
 		msg = "Tile Picker  --  Left/Right:sheet  Click:assign  Esc/F2:back";
 	}
-	else if (m_focus == 0)
+	else if (focus == 0)
 	{
 		msg = "[LIST] Up/Down:navigate  A:add new  Del:remove custom  Enter:edit fields  Tab:switch  Ctrl+S:save  Esc:exit";
 	}
@@ -797,16 +797,16 @@ void ItemEditor::render_hint(const Renderer& r) const
 
 const std::string& ItemEditor::current_key() const
 {
-	if (m_keys.empty())
+	if (keys.empty())
 	{
 		throw std::out_of_range("ItemEditor::current_key -- key list is empty");
 	}
-	return m_keys[m_list_cursor];
+	return keys[listCursor];
 }
 
 ItemEditor::FieldId ItemEditor::current_field() const
 {
-	return static_cast<FieldId>(m_field_cursor);
+	return static_cast<FieldId>(fieldCursor);
 }
 
 std::string ItemEditor::field_label(FieldId f) const
@@ -898,13 +898,13 @@ std::string ItemEditor::field_label(FieldId f) const
 
 std::string ItemEditor::field_value(FieldId f) const
 {
-	const ItemParams& p = m_working;
+	const ItemParams& p = working;
 	switch (f)
 	{
 	case FieldId::NAME:
-		return m_working_name;
+		return workingName;
 	case FieldId::CATEGORY:
-		return m_working_category;
+		return workingCategory;
 	case FieldId::ITEM_CLASS:
 		return std::string{ encode_item_class(p.itemClass) };
 	case FieldId::PICKABLE_TYPE:
@@ -1001,7 +1001,7 @@ void ItemEditor::field_adjust(FieldId f, int delta)
 		return std::clamp(v + d, lo, hi);
 	};
 
-	ItemParams& p = m_working;
+	ItemParams& p = working;
 	switch (f)
 	{
 	case FieldId::VALUE:
@@ -1085,7 +1085,7 @@ void ItemEditor::field_adjust(FieldId f, int delta)
 
 void ItemEditor::field_toggle(FieldId f)
 {
-	ItemParams& p = m_working;
+	ItemParams& p = working;
 	switch (f)
 	{
 	case FieldId::COLOR:
@@ -1134,10 +1134,10 @@ void ItemEditor::field_set_string(FieldId f, std::string val)
 	switch (f)
 	{
 	case FieldId::NAME:
-		m_working_name = std::move(val);
+		workingName = std::move(val);
 		break;
 	case FieldId::CATEGORY:
-		m_working_category = std::move(val);
+		workingCategory = std::move(val);
 		break;
 	default:
 		break;

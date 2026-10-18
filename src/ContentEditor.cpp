@@ -51,30 +51,30 @@ constexpr MonsterEntry MONSTER_TABLE[] = {
 
 void ContentEditor::toggle(ContentRegistry& registry, MonsterRegistry& monsters, const ItemRegistry& items)
 {
-	m_registry = &registry;
+	contentRegistry = &registry;
 
-	if (m_active)
+	if (active)
 	{
 		// Closing: persist all assignments immediately.
-		ContentRegistryIO::save(*m_registry, Paths::CONTENT_TILES);
+		ContentRegistryIO::save(*contentRegistry, Paths::CONTENT_TILES);
 		monsters.save(Paths::MONSTERS);
 	}
 
-	m_active = !m_active;
+	active = !active;
 
-	if (m_active && m_item_entries.empty())
+	if (active && itemEntries.empty())
 	{
 		for (const std::string& key : items.get_all_keys())
 		{
 			const ItemParams& params = items.get_params(key);
-			m_item_entries.push_back({ std::string(params.name), key, 0 });
+			itemEntries.push_back({ std::string(params.name), key, 0 });
 		}
 		for (const auto& row : MONSTER_TABLE)
 		{
-			m_monster_entries.push_back({ row.name, {}, static_cast<int>(row.id) });
+			monsterEntries.push_back({ row.name, {}, static_cast<int>(row.id) });
 		}
-		m_list_cursor = 0;
-		m_list_scroll = 0;
+		listCursor = 0;
+		listScroll = 0;
 	}
 }
 
@@ -86,13 +86,13 @@ TileRef ContentEditor::current_tile(const MonsterRegistry& monsters) const
 		return TileRef{};
 	}
 
-	const auto& sel = entries[m_list_cursor];
-	if (m_tab == 0)
+	const auto& sel = entries[listCursor];
+	if (tab == 0)
 	{
-		return m_registry ? m_registry->get_tile(sel.item_key) : TileRef{};
+		return contentRegistry ? contentRegistry->get_tile(sel.itemKey) : TileRef{};
 	}
 
-	return monsters.get_tile(static_cast<MonsterId>(sel.entity_key));
+	return monsters.get_tile(static_cast<MonsterId>(sel.entityKey));
 }
 
 void ContentEditor::assign_tile(TileRef tile, MonsterRegistry& monsters)
@@ -103,17 +103,17 @@ void ContentEditor::assign_tile(TileRef tile, MonsterRegistry& monsters)
 		return;
 	}
 
-	const auto& sel = entries[m_list_cursor];
-	if (m_tab == 0)
+	const auto& sel = entries[listCursor];
+	if (tab == 0)
 	{
-		if (m_registry)
+		if (contentRegistry)
 		{
-			m_registry->set_tile(sel.item_key, tile);
+			contentRegistry->set_tile(sel.itemKey, tile);
 		}
 	}
 	else
 	{
-		monsters.set_tile(static_cast<MonsterId>(sel.entity_key), tile);
+		monsters.set_tile(static_cast<MonsterId>(sel.entityKey), tile);
 	}
 }
 
@@ -123,11 +123,11 @@ void ContentEditor::assign_tile(TileRef tile, MonsterRegistry& monsters)
 
 void ContentEditor::update_and_render(const Renderer& renderer, ContentRegistry& registry, MonsterRegistry& monsters)
 {
-	if (!m_active)
+	if (!active)
 	{
 		return;
 	}
-	m_registry = &registry;
+	contentRegistry = &registry;
 
 	handle_keyboard();
 
@@ -167,7 +167,7 @@ void ContentEditor::draw_header(const Renderer& renderer)
 	for (int t = 0; t < 2; ++t)
 	{
 		int tx = 8 + t * (TAB_W + 4);
-		bool sel = (m_tab == t);
+		bool sel = (tab == t);
 		Color bgColor = sel ? Color{ 80, 80, 0, 255 } : Color{ 30, 30, 60, 255 };
 		Color textColor = sel ? Color{ 255, 255, 100, 255 } : Color{ 160, 160, 160, 255 };
 
@@ -181,9 +181,9 @@ void ContentEditor::draw_header(const Renderer& renderer)
 
 		if (click_tab)
 		{
-			m_tab = t;
-			m_list_cursor = 0;
-			m_list_scroll = 0;
+			tab = t;
+			listCursor = 0;
+			listScroll = 0;
 		}
 	}
 }
@@ -207,7 +207,7 @@ void ContentEditor::draw_list(
 	int total = static_cast<int>(entries.size());
 	int visible = list_h / ITEM_H;
 	int max_scroll = std::max(0, total - visible);
-	m_list_scroll = std::clamp(m_list_scroll, 0, max_scroll);
+	listScroll = std::clamp(listScroll, 0, max_scroll);
 
 	::Vector2 mouse = GetMousePosition();
 	bool in_list = mouse.x >= list_x && mouse.x < list_x + list_w &&
@@ -218,21 +218,21 @@ void ContentEditor::draw_list(
 		float wheel = GetMouseWheelMove();
 		if (wheel != 0.0f)
 		{
-			m_list_scroll = std::clamp(m_list_scroll - static_cast<int>(wheel), 0, max_scroll);
+			listScroll = std::clamp(listScroll - static_cast<int>(wheel), 0, max_scroll);
 		}
 	}
 
 	BeginScissorMode(list_x, list_y, list_w, list_h);
 
-	for (int i = m_list_scroll; i < total; ++i)
+	for (int i = listScroll; i < total; ++i)
 	{
-		int itemY = list_y + (i - m_list_scroll) * ITEM_H;
+		int itemY = list_y + (i - listScroll) * ITEM_H;
 		if (itemY + ITEM_H > list_y + list_h)
 		{
 			break;
 		}
 
-		bool is_sel = (i == m_list_cursor);
+		bool is_sel = (i == listCursor);
 		bool hovered = in_list && mouse.y >= itemY && mouse.y < itemY + ITEM_H;
 
 		if (is_sel)
@@ -244,9 +244,9 @@ void ContentEditor::draw_list(
 			DrawRectangle(list_x, itemY, list_w, ITEM_H, Color{ 30, 30, 30, 180 });
 		}
 
-		TileRef tile = (m_tab == 0)
-			? (m_registry ? m_registry->get_tile(entries[i].item_key) : TileRef{})
-			: monsters.get_tile(static_cast<MonsterId>(entries[i].entity_key));
+		TileRef tile = (tab == 0)
+			? (contentRegistry ? contentRegistry->get_tile(entries[i].itemKey) : TileRef{})
+			: monsters.get_tile(static_cast<MonsterId>(entries[i].entityKey));
 
 		renderer.draw_tile_screen_sized(Vector2D{ list_x + PAD, itemY + (ITEM_H - TILE_SZ) / 2 }, tile, TILE_SZ);
 
@@ -255,7 +255,7 @@ void ContentEditor::draw_list(
 
 		if (hovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
 		{
-			m_list_cursor = i;
+			listCursor = i;
 		}
 	}
 
@@ -279,16 +279,16 @@ void ContentEditor::draw_browser(
 	{
 		for (int i = 0; i < total_sheets; ++i)
 		{
-			m_browser_sheet = (m_browser_sheet + dir + total_sheets) % total_sheets;
-			if (renderer.sheet_is_loaded(static_cast<TileSheet>(m_browser_sheet)))
+			browserSheet = (browserSheet + dir + total_sheets) % total_sheets;
+			if (renderer.sheet_is_loaded(static_cast<TileSheet>(browserSheet)))
 			{
 				break;
 			}
 		}
-		m_browser_scroll = 0;
+		browserScroll = 0;
 	};
 
-	if (!renderer.sheet_is_loaded(static_cast<TileSheet>(m_browser_sheet)))
+	if (!renderer.sheet_is_loaded(static_cast<TileSheet>(browserSheet)))
 	{
 		advance_sheet(1);
 	}
@@ -302,15 +302,15 @@ void ContentEditor::draw_browser(
 		advance_sheet(1);
 	}
 
-	const int sheet_cols = renderer.get_sheet_cols(static_cast<TileSheet>(m_browser_sheet));
-	const int sheet_rows = renderer.get_sheet_rows(static_cast<TileSheet>(m_browser_sheet));
+	const int sheet_cols = renderer.get_sheet_cols(static_cast<TileSheet>(browserSheet));
+	const int sheet_rows = renderer.get_sheet_rows(static_cast<TileSheet>(browserSheet));
 
 	DrawRectangle(panelX, panelY, bw, SUB_HEADER_H, Color{ 15, 15, 30, 255 });
 
 	std::string hdr = std::format(
 		"Sheet: {} ({}/{})  --  {}x{} tiles",
-		renderer.get_sheet_name(static_cast<TileSheet>(m_browser_sheet)),
-		m_browser_sheet + 1,
+		renderer.get_sheet_name(static_cast<TileSheet>(browserSheet)),
+		browserSheet + 1,
 		total_sheets,
 		sheet_cols,
 		sheet_rows);
@@ -329,8 +329,8 @@ void ContentEditor::draw_browser(
 		float wheel = GetMouseWheelMove();
 		if (wheel != 0.0f)
 		{
-			m_browser_scroll -= static_cast<int>(wheel);
-			m_browser_scroll = std::clamp(m_browser_scroll, 0, std::max(0, sheet_rows - 1));
+			browserScroll -= static_cast<int>(wheel);
+			browserScroll = std::clamp(browserScroll, 0, std::max(0, sheet_rows - 1));
 		}
 	}
 
@@ -338,9 +338,9 @@ void ContentEditor::draw_browser(
 
 	BeginScissorMode(panelX, grid_y, bw, grid_h);
 
-	for (int row = m_browser_scroll; row < sheet_rows; ++row)
+	for (int row = browserScroll; row < sheet_rows; ++row)
 	{
-		int py = grid_y + (row - m_browser_scroll) * (BROWSER_TILE + 2);
+		int py = grid_y + (row - browserScroll) * (BROWSER_TILE + 2);
 		if (py >= grid_y + grid_h)
 		{
 			break;
@@ -349,7 +349,7 @@ void ContentEditor::draw_browser(
 		for (int col = 0; col < sheet_cols; ++col)
 		{
 			int px = panelX + PAD + col * (BROWSER_TILE + 2);
-			TileRef tid{ static_cast<TileSheet>(m_browser_sheet), col, row };
+			TileRef tid{ static_cast<TileSheet>(browserSheet), col, row };
 
 			bool is_sel = (tid == selected_tile);
 			bool hovered_tile = mouse.x >= px && mouse.x < px + BROWSER_TILE &&
@@ -390,7 +390,7 @@ void ContentEditor::draw_hint_bar(const Renderer& renderer) const
 	int hint_y = screenHeight - HINT_H;
 	DrawRectangle(0, hint_y, screenWidth, HINT_H, Color{ 20, 20, 40, 255 });
 
-	bool saved_flash = (GetTime() - m_last_save_time) < 2.0;
+	bool saved_flash = (GetTime() - lastSaveTime) < 2.0;
 	std::string hint = std::format(
 		"Tab:switch tab   Up/Down:select   Left/Right:sheet   Click tile:assign   Ctrl+S:save{}",
 		saved_flash ? "   -- SAVED!" : "");
@@ -403,30 +403,30 @@ void ContentEditor::handle_keyboard()
 {
 	if (IsKeyPressed(KEY_TAB))
 	{
-		m_tab = 1 - m_tab;
-		m_list_cursor = 0;
-		m_list_scroll = 0;
+		tab = 1 - tab;
+		listCursor = 0;
+		listScroll = 0;
 	}
 
 	if (IsKeyPressed(KEY_UP))
 	{
-		m_list_cursor = std::max(0, m_list_cursor - 1);
-		m_list_scroll = std::min(m_list_scroll, m_list_cursor);
+		listCursor = std::max(0, listCursor - 1);
+		listScroll = std::min(listScroll, listCursor);
 	}
 
 	if (IsKeyPressed(KEY_DOWN))
 	{
 		int max_idx = static_cast<int>(active_entries().size()) - 1;
-		m_list_cursor = std::min(max_idx, m_list_cursor + 1);
+		listCursor = std::min(max_idx, listCursor + 1);
 	}
 
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
 	if (ctrl && IsKeyPressed(KEY_S))
 	{
-		if (m_registry)
+		if (contentRegistry)
 		{
-			ContentRegistryIO::save(*m_registry, Paths::CONTENT_TILES);
+			ContentRegistryIO::save(*contentRegistry, Paths::CONTENT_TILES);
 		}
-		m_last_save_time = GetTime();
+		lastSaveTime = GetTime();
 	}
 }

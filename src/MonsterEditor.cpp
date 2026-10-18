@@ -121,16 +121,16 @@ std::string prettify_key(std::string_view key)
 
 void MonsterEditor::enter(const MonsterRegistry& monsters)
 {
-	m_active = true;
-	m_mode = Mode::NORMAL;
-	m_focus = 0;
+	active = true;
+	mode = Mode::NORMAL;
+	focus = 0;
 
-	m_keys = monsters.get_all_keys();
+	keys = monsters.get_all_keys();
 
-	m_list_cursor = 0;
-	m_list_scroll = 0;
-	m_picker_sheet = 0;
-	m_picker_scroll = 0;
+	listCursor = 0;
+	listScroll = 0;
+	pickerSheet = 0;
+	pickerScroll = 0;
 
 	load_working(monsters);
 }
@@ -140,7 +140,7 @@ void MonsterEditor::exit(GameContext& ctx)
 	assert(ctx.monsterRegistry && "MonsterEditor::exit: called without a monsterRegistry");
 
 	commit_working(*ctx.monsterRegistry);
-	m_active = false;
+	active = false;
 	ctx.menus->push_back(make_main_menu(true, ctx));
 }
 
@@ -157,27 +157,27 @@ void MonsterEditor::tick(GameContext& ctx)
 
 void MonsterEditor::load_working(const MonsterRegistry& monsters)
 {
-	if (m_keys.empty())
+	if (keys.empty())
 	{
 		return;
 	}
 
 	const std::string& key = current_key();
-	m_working = monsters.get_params(key);
+	working = monsters.get_params(key);
 	selectedXpCount = 0;
-	m_field_cursor = 0;
-	m_field_scroll = 0;
-	m_mode = Mode::NORMAL;
-	m_edit_buf.clear();
+	fieldCursor = 0;
+	fieldScroll = 0;
+	mode = Mode::NORMAL;
+	editBuffer.clear();
 }
 
 void MonsterEditor::commit_working(MonsterRegistry& monsters)
 {
-	if (m_keys.empty())
+	if (keys.empty())
 	{
 		return;
 	}
-	monsters.set_params(current_key(), m_working);
+	monsters.set_params(current_key(), working);
 }
 
 // ---------------------------------------------------------------------------
@@ -200,25 +200,25 @@ void MonsterEditor::handle_input(GameContext& ctx)
 	{
 		commit_working(*ctx.monsterRegistry);
 		ctx.monsterRegistry->save(Paths::MONSTERS);
-		m_last_save_time = GetTime();
+		lastSaveTime = GetTime();
 		return;
 	}
 
 	if (IsKeyPressed(KEY_TAB))
 	{
-		m_focus = 1 - m_focus;
+		focus = 1 - focus;
 		return;
 	}
 
-	if (m_mode == Mode::NORMAL)
+	if (mode == Mode::NORMAL)
 	{
 		handle_normal(ctx);
 	}
-	else if (m_mode == Mode::EDIT_STRING)
+	else if (mode == Mode::EDIT_STRING)
 	{
 		handle_edit_string();
 	}
-	else if (m_mode == Mode::TILE_PICKER)
+	else if (mode == Mode::TILE_PICKER)
 	{
 		handle_picker(*ctx.renderer);
 	}
@@ -234,7 +234,7 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 	int screenHeight = r.get_screen_height();
 	int body_h = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
 	int visible_fields = body_h / FIELD_HEIGHT;
-	int total = static_cast<int>(m_keys.size());
+	int total = static_cast<int>(keys.size());
 
 	::Vector2 mouse = GetMousePosition();
 	bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
@@ -244,21 +244,21 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 	{
 		if (mouse.x < LIST_WIDTH)
 		{
-			m_focus = 0;
-			int idx = m_list_scroll + static_cast<int>(mouse.y - HEADER_HEIGHT) / ITEM_HEIGHT;
+			focus = 0;
+			int idx = listScroll + static_cast<int>(mouse.y - HEADER_HEIGHT) / ITEM_HEIGHT;
 			idx = std::clamp(idx, 0, total - 1);
-			if (idx != m_list_cursor)
+			if (idx != listCursor)
 			{
 				commit_working(monsters);
-				m_list_cursor = idx;
+				listCursor = idx;
 				load_working(monsters);
 			}
 		}
-		else if (m_mode == Mode::NORMAL)
+		else if (mode == Mode::NORMAL)
 		{
-			m_focus = 1;
-			int idx = m_field_scroll + static_cast<int>(mouse.y - HEADER_HEIGHT) / FIELD_HEIGHT;
-			m_field_cursor = std::clamp(idx, 0, FIELD_COUNT - 1);
+			focus = 1;
+			int idx = fieldScroll + static_cast<int>(mouse.y - HEADER_HEIGHT) / FIELD_HEIGHT;
+			fieldCursor = std::clamp(idx, 0, FIELD_COUNT - 1);
 		}
 	}
 
@@ -268,47 +268,47 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 	{
 		if (mouse.x < LIST_WIDTH)
 		{
-			m_list_scroll = std::clamp(
-				m_list_scroll - static_cast<int>(wheel),
+			listScroll = std::clamp(
+				listScroll - static_cast<int>(wheel),
 				0,
 				std::max(0, total - 1));
 		}
 		else
 		{
-			m_field_scroll = std::clamp(
-				m_field_scroll - static_cast<int>(wheel),
+			fieldScroll = std::clamp(
+				fieldScroll - static_cast<int>(wheel),
 				0,
 				std::max(0, FIELD_COUNT - visible_fields));
 		}
 	}
 
 	// Keyboard: list panel
-	if (m_focus == 0)
+	if (focus == 0)
 	{
-		if (IsKeyPressed(KEY_UP) && m_list_cursor > 0)
+		if (IsKeyPressed(KEY_UP) && listCursor > 0)
 		{
 			commit_working(monsters);
-			--m_list_cursor;
-			if (m_list_cursor < m_list_scroll)
+			--listCursor;
+			if (listCursor < listScroll)
 			{
-				m_list_scroll = m_list_cursor;
+				listScroll = listCursor;
 			}
 			load_working(monsters);
 		}
-		else if (IsKeyPressed(KEY_DOWN) && m_list_cursor < total - 1)
+		else if (IsKeyPressed(KEY_DOWN) && listCursor < total - 1)
 		{
 			commit_working(monsters);
-			++m_list_cursor;
+			++listCursor;
 			int vis_list = body_h / 30;
-			if (m_list_cursor >= m_list_scroll + vis_list)
+			if (listCursor >= listScroll + vis_list)
 			{
-				m_list_scroll = m_list_cursor - vis_list + 1;
+				listScroll = listCursor - vis_list + 1;
 			}
 			load_working(monsters);
 		}
 		else if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_RIGHT))
 		{
-			m_focus = 1;
+			focus = 1;
 		}
 		else if (IsKeyPressed(KEY_A))
 		{
@@ -326,25 +326,25 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 			defaults.levelMinimum = 1;
 			defaults.levelMaximum = 5;
 			const std::string newKey = monsters.add_custom(std::move(defaults));
-			m_keys = monsters.get_all_keys();
-			for (int i = 0; i < static_cast<int>(m_keys.size()); ++i)
+			keys = monsters.get_all_keys();
+			for (int i = 0; i < static_cast<int>(keys.size()); ++i)
 			{
-				if (m_keys[i] == newKey)
+				if (keys[i] == newKey)
 				{
-					m_list_cursor = i;
+					listCursor = i;
 					break;
 				}
 			}
 			load_working(monsters);
-			m_focus = 1;
+			focus = 1;
 		}
 		else if (IsKeyPressed(KEY_DELETE))
 		{
 			if (!monsters.is_builtin(current_key()))
 			{
 				monsters.remove_custom(current_key());
-				m_keys = monsters.get_all_keys();
-				m_list_cursor = std::clamp(m_list_cursor, 0, static_cast<int>(m_keys.size()) - 1);
+				keys = monsters.get_all_keys();
+				listCursor = std::clamp(listCursor, 0, static_cast<int>(keys.size()) - 1);
 				load_working(monsters);
 			}
 		}
@@ -354,32 +354,32 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 	// Keyboard: field panel
 	int field_max = FIELD_COUNT - 1;
 
-	if (IsKeyPressed(KEY_UP) && m_field_cursor > 0)
+	if (IsKeyPressed(KEY_UP) && fieldCursor > 0)
 	{
-		--m_field_cursor;
-		if (m_field_cursor < m_field_scroll)
+		--fieldCursor;
+		if (fieldCursor < fieldScroll)
 		{
-			m_field_scroll = m_field_cursor;
+			fieldScroll = fieldCursor;
 		}
 	}
-	else if (IsKeyPressed(KEY_DOWN) && m_field_cursor < field_max)
+	else if (IsKeyPressed(KEY_DOWN) && fieldCursor < field_max)
 	{
-		++m_field_cursor;
-		if (m_field_cursor >= m_field_scroll + visible_fields)
+		++fieldCursor;
+		if (fieldCursor >= fieldScroll + visible_fields)
 		{
-			m_field_scroll = m_field_cursor - visible_fields + 1;
+			fieldScroll = fieldCursor - visible_fields + 1;
 		}
 	}
-	else if (IsKeyPressed(KEY_LEFT) && m_focus == 0)
+	else if (IsKeyPressed(KEY_LEFT) && focus == 0)
 	{
-		m_focus = 0;
+		focus = 0;
 	}
 
 	FieldId fid = current_field();
 
 	if (IsKeyPressed(KEY_F2) || (fid == FieldId::TILE && IsKeyPressed(KEY_ENTER)))
 	{
-		m_mode = Mode::TILE_PICKER;
+		mode = Mode::TILE_PICKER;
 		return;
 	}
 
@@ -387,8 +387,8 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 	{
 		if (field_is_string(fid))
 		{
-			m_edit_buf = field_value(fid);
-			m_mode = Mode::EDIT_STRING;
+			editBuffer = field_value(fid);
+			mode = Mode::EDIT_STRING;
 		}
 		else if (field_is_toggle(fid))
 		{
@@ -419,25 +419,25 @@ void MonsterEditor::handle_edit_string()
 	{
 		if (ch >= 32 && ch < 127)
 		{
-			m_edit_buf += static_cast<char>(ch);
+			editBuffer += static_cast<char>(ch);
 		}
 		ch = GetCharPressed();
 	}
 
-	if (IsKeyPressed(KEY_BACKSPACE) && !m_edit_buf.empty())
+	if (IsKeyPressed(KEY_BACKSPACE) && !editBuffer.empty())
 	{
-		m_edit_buf.pop_back();
+		editBuffer.pop_back();
 	}
 
 	if (IsKeyPressed(KEY_ENTER))
 	{
-		field_set_string(current_field(), m_edit_buf);
-		m_mode = Mode::NORMAL;
+		field_set_string(current_field(), editBuffer);
+		mode = Mode::NORMAL;
 	}
 
 	if (IsKeyPressed(KEY_ESCAPE))
 	{
-		m_mode = Mode::NORMAL;
+		mode = Mode::NORMAL;
 	}
 }
 
@@ -449,16 +449,16 @@ void MonsterEditor::handle_picker(const Renderer& r)
 	{
 		for (int i = 0; i < total_sheets; ++i)
 		{
-			m_picker_sheet = (m_picker_sheet + dir + total_sheets) % total_sheets;
-			if (r.sheet_is_loaded(static_cast<TileSheet>(m_picker_sheet)))
+			pickerSheet = (pickerSheet + dir + total_sheets) % total_sheets;
+			if (r.sheet_is_loaded(static_cast<TileSheet>(pickerSheet)))
 			{
 				break;
 			}
 		}
-		m_picker_scroll = 0;
+		pickerScroll = 0;
 	};
 
-	if (!r.sheet_is_loaded(static_cast<TileSheet>(m_picker_sheet)))
+	if (!r.sheet_is_loaded(static_cast<TileSheet>(pickerSheet)))
 	{
 		advance_sheet(1);
 	}
@@ -473,11 +473,11 @@ void MonsterEditor::handle_picker(const Renderer& r)
 	}
 	if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_F2))
 	{
-		m_mode = Mode::NORMAL;
+		mode = Mode::NORMAL;
 		return;
 	}
 
-	int sheet_rows = r.get_sheet_rows(static_cast<TileSheet>(m_picker_sheet));
+	int sheet_rows = r.get_sheet_rows(static_cast<TileSheet>(pickerSheet));
 	::Vector2 mouse = GetMousePosition();
 	bool in_picker = mouse.x >= LIST_WIDTH;
 
@@ -486,8 +486,8 @@ void MonsterEditor::handle_picker(const Renderer& r)
 		float wheel = GetMouseWheelMove();
 		if (wheel != 0.0f)
 		{
-			m_picker_scroll = std::clamp(
-				m_picker_scroll - static_cast<int>(wheel),
+			pickerScroll = std::clamp(
+				pickerScroll - static_cast<int>(wheel),
 				0,
 				std::max(0, sheet_rows - 1));
 		}
@@ -497,15 +497,15 @@ void MonsterEditor::handle_picker(const Renderer& r)
 
 	if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && in_picker)
 	{
-		const int pickerTileSize = picker_tile_size(r, m_picker_sheet);
+		const int pickerTileSize = picker_tile_size(r, pickerSheet);
 		int col = static_cast<int>(mouse.x - LIST_WIDTH - PICKER_PAD) / (pickerTileSize + 2);
-		int row = m_picker_scroll + static_cast<int>(mouse.y - grid_y) / (pickerTileSize + 2);
-		int sheet_cols = r.get_sheet_cols(static_cast<TileSheet>(m_picker_sheet));
+		int row = pickerScroll + static_cast<int>(mouse.y - grid_y) / (pickerTileSize + 2);
+		int sheet_cols = r.get_sheet_cols(static_cast<TileSheet>(pickerSheet));
 
 		if (col >= 0 && col < sheet_cols && row >= 0 && row < sheet_rows)
 		{
-			m_working.symbol = TileRef{ static_cast<TileSheet>(m_picker_sheet), col, row };
-			m_mode = Mode::NORMAL;
+			working.symbol = TileRef{ static_cast<TileSheet>(pickerSheet), col, row };
+			mode = Mode::NORMAL;
 		}
 	}
 }
@@ -527,7 +527,7 @@ void MonsterEditor::render(const GameContext& ctx) const
 	render_header(r);
 	render_list(r, *ctx.monsterRegistry);
 
-	if (m_mode == Mode::TILE_PICKER)
+	if (mode == Mode::TILE_PICKER)
 	{
 		render_picker(r);
 	}
@@ -558,10 +558,10 @@ void MonsterEditor::render_list(const Renderer& renderer, const MonsterRegistry&
 	DrawRectangle(0, body_y, LIST_WIDTH, body_h, Color{ 10, 10, 20, 255 });
 	DrawLine(LIST_WIDTH, body_y, LIST_WIDTH, body_y + body_h, Color{ 80, 80, 120, 255 });
 
-	int total = static_cast<int>(m_keys.size());
+	int total = static_cast<int>(keys.size());
 	int visibleCount = body_h / ITEM_HEIGHT;
 	int max_scroll = std::max(0, total - visibleCount);
-	int scroll = std::clamp(m_list_scroll, 0, max_scroll);
+	int scroll = std::clamp(listScroll, 0, max_scroll);
 
 	::Vector2 mouse = GetMousePosition();
 
@@ -576,8 +576,8 @@ void MonsterEditor::render_list(const Renderer& renderer, const MonsterRegistry&
 		// Section separators
 		if (i > scroll)
 		{
-			const bool previousIsBuiltin = monsters.is_builtin(m_keys[i - 1]);
-			const bool currentIsCustom = !monsters.is_builtin(m_keys[i]);
+			const bool previousIsBuiltin = monsters.is_builtin(keys[i - 1]);
+			const bool currentIsCustom = !monsters.is_builtin(keys[i]);
 
 			if (previousIsBuiltin && currentIsCustom)
 			{
@@ -585,11 +585,11 @@ void MonsterEditor::render_list(const Renderer& renderer, const MonsterRegistry&
 			}
 		}
 
-		bool is_sel = (i == m_list_cursor);
+		bool is_sel = (i == listCursor);
 		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH && mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
-		if (is_sel && m_focus == 0)
+		if (is_sel && focus == 0)
 		{
 			bgColor = Color{ 60, 60, 0, 200 };
 		}
@@ -607,17 +607,17 @@ void MonsterEditor::render_list(const Renderer& renderer, const MonsterRegistry&
 			DrawRectangle(0, itemY, LIST_WIDTH, ITEM_HEIGHT, bgColor);
 		}
 
-		const TileRef tile = is_sel ? m_working.symbol : monsters.get_tile(m_keys[i]);
+		const TileRef tile = is_sel ? working.symbol : monsters.get_tile(keys[i]);
 		renderer.draw_tile_screen_sized(Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - LIST_TILE_SIZE) / 2 }, tile, LIST_TILE_SIZE);
 
-		const bool isCustom = !monsters.is_builtin(m_keys[i]);
+		const bool isCustom = !monsters.is_builtin(keys[i]);
 
 		std::string displayName = is_sel
-			? m_working.name
-			: monsters.get_params(m_keys[i]).name;
+			? working.name
+			: monsters.get_params(keys[i]).name;
 		if (displayName.empty())
 		{
-			displayName = prettify_key(m_keys[i]);
+			displayName = prettify_key(keys[i]);
 		}
 		if (isCustom)
 		{
@@ -643,7 +643,7 @@ void MonsterEditor::render_fields(const Renderer& r) const
 
 	int visible = fieldsHeight / FIELD_HEIGHT;
 	int max_scroll = std::max(0, FIELD_COUNT - visible);
-	int scroll = std::clamp(m_field_scroll, 0, max_scroll);
+	int scroll = std::clamp(fieldScroll, 0, max_scroll);
 
 	::Vector2 mouse = GetMousePosition();
 
@@ -656,11 +656,11 @@ void MonsterEditor::render_fields(const Renderer& r) const
 		}
 
 		FieldId fid = static_cast<FieldId>(i);
-		bool is_sel = (i == m_field_cursor);
+		bool is_sel = (i == fieldCursor);
 		bool hovered = mouse.x >= panelX && mouse.x < screenWidth && mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
-		if (is_sel && m_focus == 1)
+		if (is_sel && focus == 1)
 		{
 			bgColor = Color{ 60, 60, 0, 200 };
 		}
@@ -685,7 +685,7 @@ void MonsterEditor::render_fields(const Renderer& r) const
 
 		if (fid == FieldId::TILE)
 		{
-			r.draw_tile_screen_sized(Vector2D{ screenWidth - LIST_TILE_SIZE - 12, itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2 }, m_working.symbol, LIST_TILE_SIZE);
+			r.draw_tile_screen_sized(Vector2D{ screenWidth - LIST_TILE_SIZE - 12, itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2 }, working.symbol, LIST_TILE_SIZE);
 			if (is_sel)
 			{
 				DrawRectangleLines(screenWidth - LIST_TILE_SIZE - 12, itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2, LIST_TILE_SIZE, LIST_TILE_SIZE, Color{ 255, 255, 0, 255 });
@@ -694,9 +694,9 @@ void MonsterEditor::render_fields(const Renderer& r) const
 		else
 		{
 			std::string val;
-			if (is_sel && m_mode == Mode::EDIT_STRING)
+			if (is_sel && mode == Mode::EDIT_STRING)
 			{
-				val = m_edit_buf + "_";
+				val = editBuffer + "_";
 			}
 			else
 			{
@@ -723,24 +723,24 @@ void MonsterEditor::render_picker(const Renderer& r) const
 	int total_sheets = r.get_loaded_sheet_count();
 	std::string hdr = std::format(
 		"Sheet: {} ({}/{})  --  Left/Right:change  Esc/F2:back",
-		r.get_sheet_name(static_cast<TileSheet>(m_picker_sheet)),
-		m_picker_sheet + 1,
+		r.get_sheet_name(static_cast<TileSheet>(pickerSheet)),
+		pickerSheet + 1,
 		total_sheets);
 	r.draw_text_color(Vector2D{ panelX + PICKER_PAD, body_y + 6 }, hdr, Color{ 200, 200, 120, 255 });
 
 	int grid_y = body_y + PICKER_SUB_HEADER_HEIGHT;
 	int grid_h = body_h - PICKER_SUB_HEADER_HEIGHT;
-	int sheet_cols = r.get_sheet_cols(static_cast<TileSheet>(m_picker_sheet));
-	int sheet_rows = r.get_sheet_rows(static_cast<TileSheet>(m_picker_sheet));
-	const int pickerTileSize = picker_tile_size(r, m_picker_sheet);
+	int sheet_cols = r.get_sheet_cols(static_cast<TileSheet>(pickerSheet));
+	int sheet_rows = r.get_sheet_rows(static_cast<TileSheet>(pickerSheet));
+	const int pickerTileSize = picker_tile_size(r, pickerSheet);
 
 	::Vector2 mouse = GetMousePosition();
 
 	BeginScissorMode(panelX, grid_y, panelWidth, grid_h);
 
-	for (int row = m_picker_scroll; row < sheet_rows; ++row)
+	for (int row = pickerScroll; row < sheet_rows; ++row)
 	{
-		int py = grid_y + (row - m_picker_scroll) * (pickerTileSize + 2);
+		int py = grid_y + (row - pickerScroll) * (pickerTileSize + 2);
 		if (py >= grid_y + grid_h)
 		{
 			break;
@@ -749,9 +749,9 @@ void MonsterEditor::render_picker(const Renderer& r) const
 		for (int col = 0; col < sheet_cols; ++col)
 		{
 			int px = panelX + PICKER_PAD + col * (pickerTileSize + 2);
-			TileRef tid{ static_cast<TileSheet>(m_picker_sheet), col, row };
+			TileRef tid{ static_cast<TileSheet>(pickerSheet), col, row };
 
-			bool is_cur = (tid == m_working.symbol);
+			bool is_cur = (tid == working.symbol);
 			bool hovered = mouse.x >= px && mouse.x < px + pickerTileSize && mouse.y >= py && mouse.y < py + pickerTileSize;
 
 			if (is_cur)
@@ -784,21 +784,21 @@ void MonsterEditor::render_hint(const Renderer& r) const
 	DrawRectangle(0, hint_y, screenWidth, HINT_HEIGHT, Color{ 20, 20, 40, 255 });
 
 	std::string msg;
-	bool saved_flash = (GetTime() - m_last_save_time) < 2.0;
+	bool saved_flash = (GetTime() - lastSaveTime) < 2.0;
 
 	if (saved_flash)
 	{
 		msg = "Saved!";
 	}
-	else if (m_mode == Mode::EDIT_STRING)
+	else if (mode == Mode::EDIT_STRING)
 	{
 		msg = "Typing  --  Enter:confirm  Esc:cancel";
 	}
-	else if (m_mode == Mode::TILE_PICKER)
+	else if (mode == Mode::TILE_PICKER)
 	{
 		msg = "Tile Picker  --  Left/Right:sheet  Click:assign  Esc/F2:back";
 	}
-	else if (m_focus == 0)
+	else if (focus == 0)
 	{
 		msg = "[LIST] Up/Down:navigate  A:add new  Del:remove custom  Enter:edit fields  Tab:switch  Ctrl+S:save  Esc:exit";
 	}
@@ -817,16 +817,16 @@ void MonsterEditor::render_hint(const Renderer& r) const
 
 const std::string& MonsterEditor::current_key() const
 {
-	if (m_keys.empty())
+	if (keys.empty())
 	{
 		throw std::out_of_range("MonsterEditor::current_key -- key list is empty");
 	}
-	return m_keys[m_list_cursor];
+	return keys[listCursor];
 }
 
 MonsterEditor::FieldId MonsterEditor::current_field() const
 {
-	return static_cast<FieldId>(m_field_cursor);
+	return static_cast<FieldId>(fieldCursor);
 }
 
 std::string MonsterEditor::field_label(FieldId f) const
@@ -906,7 +906,7 @@ std::string MonsterEditor::field_label(FieldId f) const
 
 void MonsterEditor::set_damage_dice(int num, int sides, int bonus)
 {
-	m_working.damage = DamageInfo{ DiceExpr{ num, sides, bonus }, m_working.damage.damageType };
+	working.damage = DamageInfo{ DiceExpr{ num, sides, bonus }, working.damage.damageType };
 }
 
 std::string MonsterEditor::field_value(FieldId f) const
@@ -914,39 +914,39 @@ std::string MonsterEditor::field_value(FieldId f) const
 	switch (f)
 	{
 	case FieldId::NAME:
-		return m_working.name;
+		return working.name;
 	case FieldId::CORPSE:
-		return m_working.corpseName;
+		return working.corpseName;
 	case FieldId::HD_LOWEST:
-		return std::format("{}", m_working.hitDice.counts.front().count);
+		return std::format("{}", working.hitDice.counts.front().count);
 	case FieldId::HD_HIGHEST:
-		return std::format("{}", highest_count(m_working.hitDice).count);
+		return std::format("{}", highest_count(working.hitDice).count);
 	case FieldId::HD_SIDES:
-		return std::format("{}", m_working.hitDice.sides);
+		return std::format("{}", working.hitDice.sides);
 	case FieldId::HD_BONUS:
-		return std::format("{}", m_working.hitDice.bonus);
+		return std::format("{}", working.hitDice.bonus);
 	case FieldId::THACO:
-		return std::format("{}", m_working.thaco);
+		return std::format("{}", working.thaco);
 	case FieldId::AC:
-		return std::format("{}", m_working.ac);
+		return std::format("{}", working.ac);
 	case FieldId::XP_COUNT:
-		return std::format("{} HD", m_working.hitDice.counts.at(selectedXpCount).count);
+		return std::format("{} HD", working.hitDice.counts.at(selectedXpCount).count);
 	case FieldId::XP:
-		return std::format("{}", m_working.hitDice.counts.at(selectedXpCount).xp);
+		return std::format("{}", working.hitDice.counts.at(selectedXpCount).xp);
 	case FieldId::DR:
-		return std::format("{}", m_working.dr);
+		return std::format("{}", working.dr);
 	case FieldId::STR_SOURCE:
-		return m_working.strength.has_value() ? "Printed in its entry" : "Table 6 by size";
+		return working.strength.has_value() ? "Printed in its entry" : "Table 6 by size";
 	case FieldId::STR_SCORE:
-		return m_working.strength.has_value() ? std::format("{}", m_working.strength->score) : "-";
+		return working.strength.has_value() ? std::format("{}", working.strength->score) : "-";
 	case FieldId::STR_EXCEPTIONAL:
 	{
 		// 0 is no percentile, 1 to 100 is the percentile with 100 as 18/00, and only an 18 has one.
-		if (!m_working.strength.has_value())
+		if (!working.strength.has_value())
 		{
 			return "-";
 		}
-		const MonsterStrength strength = *m_working.strength;
+		const MonsterStrength strength = *working.strength;
 		if (strength.score != MONSTER_STRENGTH_EXCEPTIONAL_SCORE)
 		{
 			return "only on an 18";
@@ -962,41 +962,41 @@ std::string MonsterEditor::field_value(FieldId f) const
 		return std::format("{} (18/{:02})", strength.exceptional, strength.exceptional);
 	}
 	case FieldId::WEAPON:
-		return m_working.naturalAttack;
+		return working.naturalAttack;
 	case FieldId::DMG_NUM:
-		return std::format("{}", m_working.damage.dice.num);
+		return std::format("{}", working.damage.dice.num);
 	case FieldId::DMG_SIDES:
-		return std::format("{}", m_working.damage.dice.sides);
+		return std::format("{}", working.damage.dice.sides);
 	case FieldId::DMG_BONUS:
-		return std::format("{}", m_working.damage.dice.bonus);
+		return std::format("{}", working.damage.dice.bonus);
 	case FieldId::DMG_TYPE:
-		return std::string(damage_type_name(m_working.damage.damageType));
+		return std::string(damage_type_name(working.damage.damageType));
 	case FieldId::AI_TYPE:
-		return std::string(encode_ai_type(m_working.aiType));
+		return std::string(encode_ai_type(working.aiType));
 	case FieldId::ETHICS:
-		return std::string(encode_ethics(m_working.ethics));
+		return std::string(encode_ethics(working.ethics));
 	case FieldId::MORALITY:
-		return std::string(encode_morality(m_working.morality));
+		return std::string(encode_morality(working.morality));
 	case FieldId::SIZE:
-		return std::string(encode_creature_size(m_working.size));
+		return std::string(encode_creature_size(working.size));
 	case FieldId::INTELLIGENCE:
-		return std::string(encode_intelligence_rating(m_working.intelligence));
+		return std::string(encode_intelligence_rating(working.intelligence));
 	case FieldId::CAN_SWIM:
-		return m_working.canSwim ? "yes" : "no";
+		return working.canSwim ? "yes" : "no";
 	case FieldId::CAN_FLY:
-		return m_working.canFly ? "yes" : "no";
+		return working.canFly ? "yes" : "no";
 	case FieldId::WALKS_WEBS:
-		return m_working.walksWebs ? "yes" : "no";
+		return working.walksWebs ? "yes" : "no";
 	case FieldId::ATTITUDE:
-		return std::string(encode_attitude(m_working.attitude));
+		return std::string(encode_attitude(working.attitude));
 	case FieldId::DISPLACEABLE:
-		return m_working.displaceable ? "yes" : "no";
+		return working.displaceable ? "yes" : "no";
 	case FieldId::WEIGHT:
-		return std::format("{}", m_working.baseWeight);
+		return std::format("{}", working.baseWeight);
 	case FieldId::DEPTH_MIN:
-		return std::format("{}", m_working.levelMinimum);
+		return std::format("{}", working.levelMinimum);
 	case FieldId::DEPTH_MAX:
-		return std::format("{}", m_working.levelMaximum);
+		return std::format("{}", working.levelMaximum);
 	case FieldId::TILE:
 		return "(tile)";
 	default:
@@ -1025,30 +1025,30 @@ void MonsterEditor::field_adjust(FieldId f, int delta)
 	{
 	case FieldId::HD_LOWEST:
 	{
-		m_working.hitDice = with_lowest_count(m_working.hitDice, m_working.hitDice.counts.front().count + delta);
+		working.hitDice = with_lowest_count(working.hitDice, working.hitDice.counts.front().count + delta);
 		// The range may have shrunk under the selected count.
-		selectedXpCount = std::min(selectedXpCount, m_working.hitDice.counts.size() - 1);
-		assert(is_valid_monster_hit_dice(m_working.hitDice) && "MonsterEditor: the lowest count left hit dice the loader refuses");
+		selectedXpCount = std::min(selectedXpCount, working.hitDice.counts.size() - 1);
+		assert(is_valid_monster_hit_dice(working.hitDice) && "MonsterEditor: the lowest count left hit dice the loader refuses");
 		break;
 	}
 	case FieldId::HD_HIGHEST:
 	{
-		m_working.hitDice = with_highest_count(m_working.hitDice, highest_count(m_working.hitDice).count + delta);
-		selectedXpCount = std::min(selectedXpCount, m_working.hitDice.counts.size() - 1);
-		assert(is_valid_monster_hit_dice(m_working.hitDice) && "MonsterEditor: the highest count left hit dice the loader refuses");
+		working.hitDice = with_highest_count(working.hitDice, highest_count(working.hitDice).count + delta);
+		selectedXpCount = std::min(selectedXpCount, working.hitDice.counts.size() - 1);
+		assert(is_valid_monster_hit_dice(working.hitDice) && "MonsterEditor: the highest count left hit dice the loader refuses");
 		break;
 	}
 	case FieldId::HD_SIDES:
-		m_working.hitDice.sides = clamp_val(m_working.hitDice.sides, delta, 1, 20);
+		working.hitDice.sides = clamp_val(working.hitDice.sides, delta, 1, 20);
 		break;
 	case FieldId::HD_BONUS:
-		m_working.hitDice.bonus = clamp_val(m_working.hitDice.bonus, delta, -99, 99);
+		working.hitDice.bonus = clamp_val(working.hitDice.bonus, delta, -99, 99);
 		break;
 	case FieldId::THACO:
-		m_working.thaco = clamp_val(m_working.thaco, delta, 1, 25);
+		working.thaco = clamp_val(working.thaco, delta, 1, 25);
 		break;
 	case FieldId::AC:
-		m_working.ac = clamp_val(m_working.ac, delta, -10, 10);
+		working.ac = clamp_val(working.ac, delta, -10, 10);
 		break;
 	case FieldId::XP_COUNT:
 	{
@@ -1057,7 +1057,7 @@ void MonsterEditor::field_adjust(FieldId f, int delta)
 		{
 			--selectedXpCount;
 		}
-		else if (delta > 0 && selectedXpCount + 1 < m_working.hitDice.counts.size())
+		else if (delta > 0 && selectedXpCount + 1 < working.hitDice.counts.size())
 		{
 			++selectedXpCount;
 		}
@@ -1065,21 +1065,21 @@ void MonsterEditor::field_adjust(FieldId f, int delta)
 	}
 	case FieldId::XP:
 	{
-		HitDiceCount& selected = m_working.hitDice.counts.at(selectedXpCount);
+		HitDiceCount& selected = working.hitDice.counts.at(selectedXpCount);
 		selected.xp = clamp_val(selected.xp, delta, 0, 99999);
 		break;
 	}
 	case FieldId::DR:
-		m_working.dr = clamp_val(m_working.dr, delta, 0, 20);
+		working.dr = clamp_val(working.dr, delta, 0, 20);
 		break;
 	case FieldId::STR_SCORE:
 	{
 		// A Table 6 monster has no score to adjust.
-		if (!m_working.strength.has_value())
+		if (!working.strength.has_value())
 		{
 			break;
 		}
-		MonsterStrength& strength = *m_working.strength;
+		MonsterStrength& strength = *working.strength;
 		strength.score = clamp_val(strength.score, delta, MONSTER_STRENGTH_SCORE_MINIMUM, MONSTER_STRENGTH_SCORE_MAXIMUM);
 		// A percentile rides only on an 18, so leaving 18 drops it rather than writing what the loader refuses.
 		if (strength.score != MONSTER_STRENGTH_EXCEPTIONAL_SCORE)
@@ -1091,11 +1091,11 @@ void MonsterEditor::field_adjust(FieldId f, int delta)
 	}
 	case FieldId::STR_EXCEPTIONAL:
 	{
-		if (!m_working.strength.has_value() || m_working.strength->score != MONSTER_STRENGTH_EXCEPTIONAL_SCORE)
+		if (!working.strength.has_value() || working.strength->score != MONSTER_STRENGTH_EXCEPTIONAL_SCORE)
 		{
 			break;
 		}
-		MonsterStrength& strength = *m_working.strength;
+		MonsterStrength& strength = *working.strength;
 		strength.exceptional = clamp_val(strength.exceptional, delta, MONSTER_STRENGTH_EXCEPTIONAL_NONE, MONSTER_STRENGTH_EXCEPTIONAL_MAXIMUM);
 		assert(is_valid_monster_strength(strength) && "MonsterEditor: the percentile left a Strength the loader refuses");
 		break;
@@ -1103,22 +1103,22 @@ void MonsterEditor::field_adjust(FieldId f, int delta)
 	// The dice are the record: every change rebuilds the damage, so its text and
 	// its range follow rather than being edited into disagreement.
 	case FieldId::DMG_NUM:
-		set_damage_dice(clamp_val(m_working.damage.dice.num, delta, 1, 99), m_working.damage.dice.sides, m_working.damage.dice.bonus);
+		set_damage_dice(clamp_val(working.damage.dice.num, delta, 1, 99), working.damage.dice.sides, working.damage.dice.bonus);
 		break;
 	case FieldId::DMG_SIDES:
-		set_damage_dice(m_working.damage.dice.num, clamp_val(m_working.damage.dice.sides, delta, 2, 20), m_working.damage.dice.bonus);
+		set_damage_dice(working.damage.dice.num, clamp_val(working.damage.dice.sides, delta, 2, 20), working.damage.dice.bonus);
 		break;
 	case FieldId::DMG_BONUS:
-		set_damage_dice(m_working.damage.dice.num, m_working.damage.dice.sides, clamp_val(m_working.damage.dice.bonus, delta, -99, 99));
+		set_damage_dice(working.damage.dice.num, working.damage.dice.sides, clamp_val(working.damage.dice.bonus, delta, -99, 99));
 		break;
 	case FieldId::WEIGHT:
-		m_working.baseWeight = clamp_val(m_working.baseWeight, delta, 0, 100);
+		working.baseWeight = clamp_val(working.baseWeight, delta, 0, 100);
 		break;
 	case FieldId::DEPTH_MIN:
-		m_working.levelMinimum = clamp_val(m_working.levelMinimum, delta, 1, 20);
+		working.levelMinimum = clamp_val(working.levelMinimum, delta, 1, 20);
 		break;
 	case FieldId::DEPTH_MAX:
-		m_working.levelMaximum = clamp_val(m_working.levelMaximum, delta, 0, 20);
+		working.levelMaximum = clamp_val(working.levelMaximum, delta, 0, 20);
 		break;
 	default:
 		break;
@@ -1129,61 +1129,61 @@ void MonsterEditor::field_toggle(FieldId f)
 {
 	if (f == FieldId::AI_TYPE)
 	{
-		m_working.aiType = next_authorable_ai_type(m_working.aiType);
+		working.aiType = next_authorable_ai_type(working.aiType);
 	}
 	else if (f == FieldId::CAN_SWIM)
 	{
-		m_working.canSwim = !m_working.canSwim;
+		working.canSwim = !working.canSwim;
 	}
 	else if (f == FieldId::CAN_FLY)
 	{
-		m_working.canFly = !m_working.canFly;
+		working.canFly = !working.canFly;
 	}
 	else if (f == FieldId::WALKS_WEBS)
 	{
-		m_working.walksWebs = !m_working.walksWebs;
+		working.walksWebs = !working.walksWebs;
 	}
 	else if (f == FieldId::ATTITUDE)
 	{
-		m_working.attitude = next_attitude(m_working.attitude);
+		working.attitude = next_attitude(working.attitude);
 	}
 	else if (f == FieldId::DISPLACEABLE)
 	{
-		m_working.displaceable = !m_working.displaceable;
+		working.displaceable = !working.displaceable;
 	}
 	else if (f == FieldId::ETHICS)
 	{
-		m_working.ethics = next_ethics(m_working.ethics);
+		working.ethics = next_ethics(working.ethics);
 	}
 	else if (f == FieldId::MORALITY)
 	{
-		m_working.morality = next_morality(m_working.morality);
+		working.morality = next_morality(working.morality);
 	}
 	else if (f == FieldId::SIZE)
 	{
-		m_working.size = next_creature_size(m_working.size);
+		working.size = next_creature_size(working.size);
 	}
 	else if (f == FieldId::INTELLIGENCE)
 	{
-		m_working.intelligence = next_intelligence_rating(m_working.intelligence);
+		working.intelligence = next_intelligence_rating(working.intelligence);
 	}
 	else if (f == FieldId::STR_SOURCE)
 	{
 		// A printed Strength starts at 10, the middle of 3d6, for the author to set to the entry's figure.
 		constexpr MonsterStrength startingPrintedStrength{ 10, MONSTER_STRENGTH_EXCEPTIONAL_NONE };
-		if (m_working.strength.has_value())
+		if (working.strength.has_value())
 		{
-			m_working.strength.reset();
+			working.strength.reset();
 		}
 		else
 		{
-			m_working.strength = startingPrintedStrength;
+			working.strength = startingPrintedStrength;
 		}
 	}
 	else if (f == FieldId::DMG_TYPE)
 	{
 		// The dice are unchanged; only what they deal is.
-		m_working.damage = DamageInfo{ m_working.damage.dice, next_damage_type(m_working.damage.damageType) };
+		working.damage = DamageInfo{ working.damage.dice, next_damage_type(working.damage.damageType) };
 	}
 }
 
@@ -1192,13 +1192,13 @@ void MonsterEditor::field_set_string(FieldId f, std::string val)
 	switch (f)
 	{
 	case FieldId::NAME:
-		m_working.name = std::move(val);
+		working.name = std::move(val);
 		break;
 	case FieldId::CORPSE:
-		m_working.corpseName = std::move(val);
+		working.corpseName = std::move(val);
 		break;
 	case FieldId::WEAPON:
-		m_working.naturalAttack = std::move(val);
+		working.naturalAttack = std::move(val);
 		break;
 	default:
 		break;

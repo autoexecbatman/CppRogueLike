@@ -26,8 +26,8 @@ private:
 	struct Entry
 	{
 		std::string name;
-		std::string item_key; // for item tab (string key into ItemCreator)
-		int entity_key{ 0 }; // for monster tab (MonsterId int cast)
+		std::string itemKey; // for item tab (string key into ItemCreator)
+		int entityKey{ 0 }; // for monster tab (MonsterId int cast)
 	};
 
 	[[nodiscard]] TileRef current_tile(const MonsterRegistry& monsters) const;
@@ -39,35 +39,35 @@ private:
 	void draw_hint_bar(const Renderer& renderer) const;
 	void handle_keyboard();
 
-	ContentRegistry* m_registry{ nullptr };
-	bool m_active{ false };
-	int m_tab{ 0 };
-	int m_list_scroll{ 0 };
-	int m_list_cursor{ 0 };
-	int m_browser_sheet{ 0 };
-	int m_browser_scroll{ 0 };
-	int m_buffered_char{ 0 };
-	mutable double m_last_save_time{ -10.0 };
+	ContentRegistry* contentRegistry{ nullptr };
+	bool active{ false };
+	int tab{ 0 };
+	int listScroll{ 0 };
+	int listCursor{ 0 };
+	int browserSheet{ 0 };
+	int browserScroll{ 0 };
+	int bufferedChar{ 0 };
+	mutable double lastSaveTime{ -10.0 };
 
-	std::vector<Entry> m_item_entries;
-	std::vector<Entry> m_monster_entries;
+	std::vector<Entry> itemEntries;
+	std::vector<Entry> monsterEntries;
 
 	[[nodiscard]] std::vector<Entry>& active_entries()
 	{
-		return m_tab == 0 ? m_item_entries : m_monster_entries;
+		return tab == 0 ? itemEntries : monsterEntries;
 	}
 
 	[[nodiscard]] const std::vector<Entry>& active_entries() const
 	{
-		return m_tab == 0 ? m_item_entries : m_monster_entries;
+		return tab == 0 ? itemEntries : monsterEntries;
 	}
 
 public:
 	void toggle(ContentRegistry& registry, MonsterRegistry& monsters, const ItemRegistry& items);
 
-	void set_char_input(int ch) noexcept { m_buffered_char = ch; }
+	void set_char_input(int ch) noexcept { bufferedChar = ch; }
 
 	void update_and_render(const Renderer& renderer, ContentRegistry& registry, MonsterRegistry& monsters);
 
-	[[nodiscard]] bool is_active() const { return m_active; }
+	[[nodiscard]] bool is_active() const { return active; }
 };
