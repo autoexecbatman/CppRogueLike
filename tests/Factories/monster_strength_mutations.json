@@ -1,0 +1,119 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=MonsterStrengthTest.*:MonsterRoundTripTest.*:MonsterHitDiceTest.*:MonsterStrengthTableTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/MonsterCreator.cpp",
+      "original": "\t\t? *params.strength\n",
+      "mutated": "\t\t? MonsterStrength{ params.strength->score, 0 }\n",
+      "catches": "a printed 18/00 built as a plain 18"
+    },
+    {
+      "file": "src/MonsterCreator.cpp",
+      "original": "\tc->set_exceptional_strength(strength.exceptional);\n",
+      "mutated": "",
+      "catches": "a Table 6 roll of 18/51 built as a plain 18"
+    },
+    {
+      "file": "src/MonsterCreator.cpp",
+      "original": "\t\t: monster_strength_score(roll_dice(ctx.dice, MONSTER_ABILITY_DICE), params.size);\n",
+      "mutated": "\t\t: monster_strength_score(roll_dice(ctx.dice, MONSTER_ABILITY_DICE), CreatureSize::MEDIUM);\n",
+      "catches": "Table 6 read from the man-sized column whatever the monster's size"
+    },
+    {
+      "file": "src/MonsterCreator.cpp",
+      "original": "\tconst MonsterStrength strength = params.strength.has_value()\n",
+      "mutated": "\tconst MonsterStrength strength = params.strength.has_value() && false\n",
+      "catches": "a printed Strength ignored and Table 6 rolled instead, spending a die"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\tif (!is_valid_monster_strength(strength))\n",
+      "mutated": "\tif (false)\n",
+      "catches": "a Strength the book cannot write loaded rather than refused"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\treturn strength;\n}\n",
+      "mutated": "\treturn std::nullopt;\n}\n",
+      "catches": "every printed Strength read as none"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\t\t{ \"exceptional\", strength->exceptional }\n",
+      "mutated": "\t\t{ \"exceptional\", 0 }\n",
+      "catches": "a save that drops the percentile, so 18/00 comes back an 18"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\t\treturn nullptr;\n",
+      "mutated": "\t\treturn nlohmann::json{ { \"score\", 10 }, { \"exceptional\", 0 } };\n",
+      "catches": "a save that writes a Strength for a monster that rolls Table 6"
+    },
+    {
+      "file": "src/MonsterStrength.h",
+      "original": "strength.score == MONSTER_STRENGTH_EXCEPTIONAL_SCORE;",
+      "mutated": "strength.score >= MONSTER_STRENGTH_EXCEPTIONAL_SCORE;",
+      "catches": "a percentile allowed on a score above 18"
+    },
+    {
+      "file": "src/MonsterStrength.h",
+      "original": "strength.score <= MONSTER_STRENGTH_SCORE_MAXIMUM;",
+      "mutated": "strength.score < MONSTER_STRENGTH_SCORE_MAXIMUM;",
+      "catches": "25, strength.json's last row, refused"
+    },
+    {
+      "file": "src/MonsterStrength.h",
+      "original": "strength.score >= MONSTER_STRENGTH_SCORE_MINIMUM &&",
+      "mutated": "strength.score > MONSTER_STRENGTH_SCORE_MINIMUM &&",
+      "catches": "1, strength.json's first row, refused"
+    },
+    {
+      "file": "src/MonsterStrength.h",
+      "original": "strength.exceptional <= MONSTER_STRENGTH_EXCEPTIONAL_MAXIMUM;",
+      "mutated": "strength.exceptional < MONSTER_STRENGTH_EXCEPTIONAL_MAXIMUM;",
+      "catches": "18/00 refused"
+    },
+    {
+      "file": "src/MonsterStrength.h",
+      "original": "inline constexpr int MONSTER_STRENGTH_SCORE_MAXIMUM = 25;",
+      "mutated": "inline constexpr int MONSTER_STRENGTH_SCORE_MAXIMUM = 26;",
+      "catches": "a score with no strength.json row allowed"
+    },
+    {
+      "file": "src/MonsterStrength.h",
+      "original": "inline constexpr int MONSTER_STRENGTH_EXCEPTIONAL_MAXIMUM = 100;",
+      "mutated": "inline constexpr int MONSTER_STRENGTH_EXCEPTIONAL_MAXIMUM = 101;",
+      "catches": "a percentile past 18/00 allowed"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "      \"exceptional\": 100,\n      \"score\": 18\n    },\n    \"thaco\": 7,\n",
+      "mutated": "      \"exceptional\": 99,\n      \"score\": 18\n    },\n    \"thaco\": 7,\n",
+      "catches": "the pit fiend's 18/00 written as 18/99"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "      \"exceptional\": 0,\n      \"score\": 19\n    },\n    \"thaco\": 11,\n",
+      "mutated": "      \"exceptional\": 0,\n      \"score\": 18\n    },\n    \"thaco\": 11,\n",
+      "catches": "the hill giant one Strength short of the row its +7 is"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "      \"display\": \"3d8\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 0,\n    \"depth_min\": 7,\n",
+      "mutated": "      \"display\": \"3d24\",\n      \"type\": \"physical\"\n    },\n    \"depth_max\": 0,\n    \"depth_min\": 7,\n",
+      "catches": "the stone golem back on the 3d24 its entry never printed"
+    },
+    {
+      "file": "data/content/monsters.json",
+      "original": "    \"morale\": 12,\n    \"size\": \"large\",\n    \"strength\": null,\n    \"thaco\": 13,\n",
+      "mutated": "    \"morale\": 12,\n    \"size\": \"large\",\n    \"strength\": {\n      \"exceptional\": 0,\n      \"score\": 18\n    },\n    \"thaco\": 13,\n",
+      "catches": "the troll's surprising strength given a figure its entry does not print"
+    }
+  ]
+}

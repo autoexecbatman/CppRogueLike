@@ -17,6 +17,7 @@
 #include "EquipmentSlot.h"
 #include "IntelligenceRating.h"
 #include "MonsterRegistry.h"
+#include "MonsterStrength.h"
 #include "Paths.h"
 
 namespace
@@ -169,6 +170,52 @@ DamageInfo parse_damage(const nlohmann::json& record)
 	};
 }
 
+// A record's Strength: null when its entry prints none and it rolls Table 6, otherwise
+// the score and percentile its entry prints. A Strength the book cannot write - no row
+// in strength.json, or a percentile on anything but an 18 - is an authoring error and
+// throws, naming what was wrong.
+//
+// Example:
+//   parse_strength(nullptr); // -> std::nullopt
+//   parse_strength({ { "score", 18 }, { "exceptional", 76 } }); // -> MonsterStrength{ 18, 76 }
+//   parse_strength({ { "score", 17 }, { "exceptional", 50 } }); // throws std::runtime_error
+std::optional<MonsterStrength> parse_strength(const nlohmann::json& record)
+{
+	if (record.is_null())
+	{
+		return std::nullopt;
+	}
+	const MonsterStrength strength{ record.at("score").get<int>(), record.at("exceptional").get<int>() };
+	if (!is_valid_monster_strength(strength))
+	{
+		throw std::runtime_error(std::format(
+			"MonsterRegistry -- Strength {}/{} is not one the book can write: the score runs {} to {}, and a percentile from 1 to {} rides only on an 18",
+			strength.score,
+			strength.exceptional,
+			MONSTER_STRENGTH_SCORE_MINIMUM,
+			MONSTER_STRENGTH_SCORE_MAXIMUM,
+			MONSTER_STRENGTH_EXCEPTIONAL_MAXIMUM));
+	}
+	return strength;
+}
+
+// The inverse of parse_strength: null for none.
+//
+// Example:
+//   encode_strength(std::nullopt); // -> null
+//   encode_strength(MonsterStrength{ 19, 0 }); // -> { "score": 19, "exceptional": 0 }
+nlohmann::json encode_strength(const std::optional<MonsterStrength>& strength)
+{
+	if (!strength.has_value())
+	{
+		return nullptr;
+	}
+	return nlohmann::json{
+		{ "score", strength->score },
+		{ "exceptional", strength->exceptional }
+	};
+}
+
 nlohmann::json encode_damage(const DamageInfo& damage)
 {
 	return nlohmann::json{
@@ -232,7 +279,8 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 	params.size = parse_creature_size(entry.at("size").get<std::string>());
 	// Required for the same reason: Intelligence, Wisdom and Charisma are read by it.
 	params.intelligence = parse_intelligence_rating(entry.at("intelligence").get<std::string>());
-	params.strDice = parse_dice(entry.at("str"));
+	// Required: null is a monster whose entry prints no Strength, which a missing key is not.
+	params.strength = parse_strength(entry.at("strength"));
 	params.dexDice = parse_dice(entry.at("dex"));
 	params.intDice = parse_dice(entry.at("int"));
 	params.wisDice = parse_dice(entry.at("wis"));
@@ -283,7 +331,7 @@ nlohmann::json encode_full_params(const MonsterParams& params)
 		{ "corpse_weight", params.corpseWeight },
 		{ "size", encode_creature_size(params.size) },
 		{ "intelligence", encode_intelligence_rating(params.intelligence) },
-		{ "str", encode_dice(params.strDice) },
+		{ "strength", encode_strength(params.strength) },
 		{ "dex", encode_dice(params.dexDice) },
 		{ "int", encode_dice(params.intDice) },
 		{ "wis", encode_dice(params.wisDice) },

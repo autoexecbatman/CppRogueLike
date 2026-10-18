@@ -3,6 +3,7 @@
 #include "Colors.h"
 
 #include <map>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -14,6 +15,7 @@
 #include "DiceExpr.h"
 #include "EquipmentSlot.h"
 #include "IntelligenceRating.h"
+#include "MonsterStrength.h"
 #include "Renderer.h"
 
 // file: MonsterRegistry.h
@@ -106,7 +108,9 @@ struct MonsterParams
 	IntelligenceRating intelligence{ IntelligenceRating::AVERAGE };
 
 	// Ability scores
-	DiceExpr strDice{ 3, 6, 0 };
+	// The Strength its Monstrous Manual entry prints, or none, in which case it is rolled
+	// on Table 6 by size when the monster is built.
+	std::optional<MonsterStrength> strength{};
 	// Dexterity, rolled when the monster is built.
 	DiceExpr dexDice{ 3, 6, 0 };
 	// Intelligence, rolled when the monster is built.

@@ -49,6 +49,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterRoundTripTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterSizeTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterIntelligenceRatingTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterStrengthTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/DragonStatBlockTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterConstitutionTableTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterStrengthTableTest.cpp

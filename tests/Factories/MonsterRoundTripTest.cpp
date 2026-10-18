@@ -172,7 +172,12 @@ void expect_same_monster(const std::string& key, const MonsterParams& before, co
 	EXPECT_EQ(before.corpseWeight, after.corpseWeight) << key << ".corpseWeight";
 
 	expect_same_dice(key + ".hpDice", before.hpDice, after.hpDice);
-	expect_same_dice(key + ".strDice", before.strDice, after.strDice);
+	ASSERT_EQ(before.strength.has_value(), after.strength.has_value()) << key << ".strength";
+	if (before.strength.has_value())
+	{
+		EXPECT_EQ(before.strength->score, after.strength->score) << key << ".strength.score";
+		EXPECT_EQ(before.strength->exceptional, after.strength->exceptional) << key << ".strength.exceptional";
+	}
 	expect_same_dice(key + ".dexDice", before.dexDice, after.dexDice);
 	expect_same_dice(key + ".intDice", before.intDice, after.intDice);
 	expect_same_dice(key + ".wisDice", before.wisDice, after.wisDice);

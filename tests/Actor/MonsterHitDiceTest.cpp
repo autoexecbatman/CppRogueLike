@@ -65,7 +65,7 @@ protected:
 	{
 		MonsterParams params = mock.monsterRegistry.get_params("goblin");
 		params.equipment.clear();
-		params.strDice = fixed_score(10);
+		params.strength = MonsterStrength{ 10, 0 };
 		params.dexDice = fixed_score(10);
 		params.size = size;
 		params.intDice = fixed_score(10);

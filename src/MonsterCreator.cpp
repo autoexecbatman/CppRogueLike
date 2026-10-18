@@ -29,7 +29,12 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 
 	auto c = std::make_unique<Creature>(pos, ActorData{ params.symbol, params.name, params.color });
 
-	c->set_strength(std::max(1, roll_dice(ctx.dice, params.strDice)));
+	// The Strength its entry prints, or Table 6 by size; no die is rolled for a printed one.
+	const MonsterStrength strength = params.strength.has_value()
+		? *params.strength
+		: monster_strength_score(roll_dice(ctx.dice, MONSTER_ABILITY_DICE), params.size);
+	c->set_strength(strength.score);
+	c->set_exceptional_strength(strength.exceptional);
 	c->set_dexterity(std::max(1, roll_dice(ctx.dice, params.dexDice)));
 	// Table 8 by size: 3d6 read from the column for how big the creature is.
 	c->set_constitution(monster_constitution_score(roll_dice(ctx.dice, MONSTER_ABILITY_DICE), params.size));

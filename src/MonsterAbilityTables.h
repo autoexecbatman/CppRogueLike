@@ -7,6 +7,7 @@
 #include "CreatureSize.h"
 #include "DiceExpr.h"
 #include "IntelligenceRating.h"
+#include "MonsterStrength.h"
 
 class Creature;
 class RandomDice;
@@ -68,17 +69,9 @@ inline constexpr std::array<std::array<int, 6>, MONSTER_ABILITY_ROLL_MAXIMUM - M
 	return MONSTER_CONSTITUTION_TABLE.at(row).at(static_cast<std::size_t>(size));
 }
 
-// A Strength score as Table 6 prints it: 18/51 is a score of 18 and an exceptional
-// percentile of 51, the floor of the band it names, and 18/00 is the percentile 100.
-// Every other score has a percentile of 0.
-struct MonsterStrength
-{
-	int score{ 0 };
-	int exceptional{ 0 };
-};
-
 // Table 6, Monster Strength Scores (PDF page 4857): rows and columns as Table 8's. The
-// book's worked example calls it Table 5; the table it prints is 6.
+// book's worked example calls it Table 5; the table it prints is 6. An 18/51 cell is the
+// floor of the band it names, and 18/00 is the percentile 100.
 inline constexpr std::array<std::array<MonsterStrength, 6>, MONSTER_ABILITY_ROLL_MAXIMUM - MONSTER_ABILITY_ROLL_MINIMUM + 1> MONSTER_STRENGTH_TABLE{ {
 	{ { { 2, 0 }, { 4, 0 }, { 6, 0 }, { 13, 0 }, { 15, 0 }, { 18, 0 } } }, // 3
 	{ { { 3, 0 }, { 5, 0 }, { 7, 0 }, { 14, 0 }, { 17, 0 }, { 18, 1 } } }, // 4

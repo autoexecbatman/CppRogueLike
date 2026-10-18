@@ -39,11 +39,7 @@
     "intelligence": "average",
     "morale": 9,
     "size": "medium",
-    "str": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 18,
     "tile": {
       "col": 2,
@@ -107,11 +103,7 @@
     "intelligence": "animal",
     "morale": 4,
     "size": "tiny",
-    "str": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 4
-    },
+    "strength": null,
     "thaco": 20,
     "tile": {
       "col": 0,
@@ -143,7 +135,7 @@
     "color": "red_black",
     "corpse": "dead bugbear",
     "damage": {
-      "display": "2d8",
+      "display": "2d4",
       "type": "physical"
     },
     "depth_max": 7,
@@ -170,10 +162,9 @@
     "intelligence": "low",
     "morale": 10,
     "size": "large",
-    "str": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
+    "strength": {
+      "exceptional": 0,
+      "score": 18
     },
     "thaco": 16,
     "tile": {
@@ -238,11 +229,7 @@
     "intelligence": "semi",
     "morale": 13,
     "size": "large",
-    "str": {
-      "bonus": 0,
-      "num": 5,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 10,
     "tile": {
       "col": 0,
@@ -301,11 +288,7 @@
     "intelligence": "exceptional",
     "morale": 18,
     "size": "gargantuan",
-    "str": {
-      "bonus": 0,
-      "num": 5,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 5,
     "tile": {
       "col": 3,
@@ -364,11 +347,7 @@
     "intelligence": "low",
     "morale": 10,
     "size": "medium",
-    "str": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 18,
     "tile": {
       "col": 0,
@@ -427,11 +406,7 @@
     "intelligence": "low",
     "morale": 14,
     "size": "medium",
-    "str": {
-      "bonus": 1,
-      "num": 4,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 15,
     "tile": {
       "col": 6,
@@ -490,11 +465,7 @@
     "intelligence": "low",
     "morale": 11,
     "size": "medium",
-    "str": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 17,
     "tile": {
       "col": 4,
@@ -554,11 +525,7 @@
     "intelligence": "non",
     "morale": 5,
     "size": "tiny",
-    "str": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 4
-    },
+    "strength": null,
     "thaco": 20,
     "tile": {
       "col": 1,
@@ -617,11 +584,7 @@
     "intelligence": "semi",
     "morale": 6,
     "size": "tiny",
-    "str": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 20,
     "tile": {
       "col": 6,
@@ -680,11 +643,7 @@
     "intelligence": "animal",
     "morale": 9,
     "size": "medium",
-    "str": {
-      "bonus": 1,
-      "num": 4,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 15,
     "tile": {
       "col": 5,
@@ -743,11 +702,7 @@
     "intelligence": "low",
     "morale": 9,
     "size": "large",
-    "str": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 17,
     "tile": {
       "col": 0,
@@ -811,11 +766,7 @@
     "intelligence": "low",
     "morale": 6,
     "size": "small",
-    "str": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 20,
     "tile": {
       "col": 0,
@@ -852,7 +803,7 @@
     "color": "brown_black",
     "corpse": "rubble of golem",
     "damage": {
-      "display": "3d24",
+      "display": "3d8",
       "type": "physical"
     },
     "depth_max": 0,
@@ -879,10 +830,9 @@
     "intelligence": "non",
     "morale": 20,
     "size": "large",
-    "str": {
-      "bonus": 0,
-      "num": 6,
-      "sides": 6
+    "strength": {
+      "exceptional": 0,
+      "score": 22
     },
     "thaco": 9,
     "tile": {
@@ -942,11 +892,7 @@
     "intelligence": "low",
     "morale": 8,
     "size": "medium",
-    "str": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 16,
     "tile": {
       "col": 2,
@@ -978,7 +924,7 @@
     "color": "red_black",
     "corpse": "dead hill giant",
     "damage": {
-      "display": "2d16",
+      "display": "2d6",
       "type": "physical"
     },
     "depth_max": 0,
@@ -1005,10 +951,9 @@
     "intelligence": "low",
     "morale": 11,
     "size": "huge",
-    "str": {
-      "bonus": 0,
-      "num": 6,
-      "sides": 6
+    "strength": {
+      "exceptional": 0,
+      "score": 19
     },
     "thaco": 11,
     "tile": {
@@ -1068,11 +1013,7 @@
     "intelligence": "average",
     "morale": 8,
     "size": "medium",
-    "str": {
-      "bonus": 1,
-      "num": 3,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 19,
     "tile": {
       "col": 1,
@@ -1136,11 +1077,7 @@
     "intelligence": "average",
     "morale": 10,
     "size": "large",
-    "str": {
-      "bonus": 2,
-      "num": 3,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 18,
     "tile": {
       "col": 2,
@@ -1199,11 +1136,7 @@
     "intelligence": "average",
     "morale": 6,
     "size": "small",
-    "str": {
-      "bonus": 1,
-      "num": 2,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 20,
     "tile": {
       "col": 0,
@@ -1267,11 +1200,7 @@
     "intelligence": "supra_genius",
     "morale": 20,
     "size": "medium",
-    "str": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 9,
     "tile": {
       "col": 6,
@@ -1331,11 +1260,7 @@
     "intelligence": "average",
     "morale": 7,
     "size": "medium",
-    "str": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 19,
     "tile": {
       "col": 5,
@@ -1399,11 +1324,7 @@
     "intelligence": "very",
     "morale": 13,
     "size": "medium",
-    "str": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 13,
     "tile": {
       "col": 0,
@@ -1443,7 +1364,7 @@
     "color": "red_black",
     "corpse": "dead ogre",
     "damage": {
-      "display": "1d10",
+      "display": "1d6",
       "type": "physical"
     },
     "depth_max": 8,
@@ -1470,10 +1391,9 @@
     "intelligence": "low",
     "morale": 10,
     "size": "large",
-    "str": {
-      "bonus": 2,
-      "num": 5,
-      "sides": 6
+    "strength": {
+      "exceptional": 100,
+      "score": 18
     },
     "thaco": 15,
     "tile": {
@@ -1538,11 +1458,7 @@
     "intelligence": "average",
     "morale": 8,
     "size": "medium",
-    "str": {
-      "bonus": 1,
-      "num": 3,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 19,
     "tile": {
       "col": 3,
@@ -1579,7 +1495,7 @@
     "color": "red_yellow",
     "corpse": "dead pit fiend",
     "damage": {
-      "display": "1d12",
+      "display": "2d6",
       "type": "fire"
     },
     "depth_max": 0,
@@ -1606,10 +1522,9 @@
     "intelligence": "genius",
     "morale": 18,
     "size": "large",
-    "str": {
-      "bonus": 0,
-      "num": 6,
-      "sides": 6
+    "strength": {
+      "exceptional": 100,
+      "score": 18
     },
     "thaco": 7,
     "tile": {
@@ -1669,11 +1584,7 @@
     "intelligence": "animal",
     "morale": 4,
     "size": "tiny",
-    "str": {
-      "bonus": 0,
-      "num": 1,
-      "sides": 4
-    },
+    "strength": null,
     "thaco": 20,
     "tile": {
       "col": 5,
@@ -1732,11 +1643,7 @@
     "intelligence": "low",
     "morale": 12,
     "size": "medium",
-    "str": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 16,
     "tile": {
       "col": 3,
@@ -1804,11 +1711,7 @@
     "intelligence": "non",
     "morale": 20,
     "size": "medium",
-    "str": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 19,
     "tile": {
       "col": 0,
@@ -1892,11 +1795,7 @@
     "intelligence": "low",
     "morale": 12,
     "size": "large",
-    "str": {
-      "bonus": 0,
-      "num": 4,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 13,
     "tile": {
       "col": 0,
@@ -1928,7 +1827,7 @@
     "color": "red_black",
     "corpse": "dead vampire",
     "damage": {
-      "display": "1d10",
+      "display": "1d6",
       "type": "physical"
     },
     "depth_max": 0,
@@ -1955,10 +1854,9 @@
     "intelligence": "exceptional",
     "morale": 18,
     "size": "medium",
-    "str": {
-      "bonus": 2,
-      "num": 4,
-      "sides": 6
+    "strength": {
+      "exceptional": 76,
+      "score": 18
     },
     "thaco": 11,
     "tile": {
@@ -2019,11 +1917,7 @@
     "intelligence": "average",
     "morale": 12,
     "size": "medium",
-    "str": {
-      "bonus": 2,
-      "num": 4,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 15,
     "tile": {
       "col": 5,
@@ -2082,11 +1976,7 @@
     "intelligence": "average",
     "morale": 15,
     "size": "medium",
-    "str": {
-      "bonus": 1,
-      "num": 3,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 15,
     "tile": {
       "col": 0,
@@ -2146,11 +2036,7 @@
     "intelligence": "semi",
     "morale": 9,
     "size": "small",
-    "str": {
-      "bonus": 0,
-      "num": 3,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 19,
     "tile": {
       "col": 0,
@@ -2209,11 +2095,7 @@
     "intelligence": "very",
     "morale": 15,
     "size": "medium",
-    "str": {
-      "bonus": 0,
-      "num": 2,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 14,
     "tile": {
       "col": 2,
@@ -2273,11 +2155,7 @@
     "intelligence": "low",
     "morale": 13,
     "size": "gargantuan",
-    "str": {
-      "bonus": 0,
-      "num": 5,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 12,
     "tile": {
       "col": 0,
@@ -2336,11 +2214,7 @@
     "intelligence": "non",
     "morale": 20,
     "size": "medium",
-    "str": {
-      "bonus": 1,
-      "num": 3,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 17,
     "tile": {
       "col": 7,
@@ -2401,11 +2275,7 @@
     "morale": 12,
     "name": "Dungeon Jailer",
     "size": "medium",
-    "str": {
-      "bonus": 1,
-      "num": 3,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 15,
     "tile": {
       "col": 3,
@@ -2470,11 +2340,7 @@
     "morale": 12,
     "name": "Dungeon Warden",
     "size": "medium",
-    "str": {
-      "bonus": 6,
-      "num": 3,
-      "sides": 6
-    },
+    "strength": null,
     "thaco": 16,
     "tile": {
       "col": 4,

@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cassert>
 #include <format>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -14,6 +15,7 @@
 #include "Menu.h"
 #include "MonsterEditor.h"
 #include "MonsterRegistry.h"
+#include "MonsterStrength.h"
 #include "Paths.h"
 #include "Renderer.h"
 
@@ -319,7 +321,7 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 			defaults.thaco = 20;
 			defaults.ac = 10;
 			defaults.xp = 1;
-			defaults.strDice = DiceExpr{ 3, 6, 0 };
+			defaults.strength = std::nullopt;
 			defaults.dexDice = DiceExpr{ 3, 6, 0 };
 			defaults.intDice = DiceExpr{ 3, 6, 0 };
 			defaults.wisDice = DiceExpr{ 3, 6, 0 };
@@ -898,12 +900,12 @@ std::string MonsterEditor::field_label(FieldId f) const
 		return "XP";
 	case FieldId::DR:
 		return "DR";
-	case FieldId::STR_NUM:
-		return "STR Num";
-	case FieldId::STR_SIDES:
-		return "STR Sides";
-	case FieldId::STR_BONUS:
-		return "STR Bonus";
+	case FieldId::STR_SOURCE:
+		return "Strength";
+	case FieldId::STR_SCORE:
+		return "STR Score";
+	case FieldId::STR_EXCEPTIONAL:
+		return "STR Exceptional";
 	case FieldId::DEX_NUM:
 		return "DEX Num";
 	case FieldId::DEX_SIDES:
@@ -992,12 +994,32 @@ std::string MonsterEditor::field_value(FieldId f) const
 		return std::format("{}", m_working.xp);
 	case FieldId::DR:
 		return std::format("{}", m_working.dr);
-	case FieldId::STR_NUM:
-		return std::format("{}", m_working.strDice.num);
-	case FieldId::STR_SIDES:
-		return std::format("{}", m_working.strDice.sides);
-	case FieldId::STR_BONUS:
-		return std::format("{}", m_working.strDice.bonus);
+	case FieldId::STR_SOURCE:
+		return m_working.strength.has_value() ? "Printed in its entry" : "Table 6 by size";
+	case FieldId::STR_SCORE:
+		return m_working.strength.has_value() ? std::format("{}", m_working.strength->score) : "-";
+	case FieldId::STR_EXCEPTIONAL:
+	{
+		// 0 is no percentile, 1 to 100 is the percentile with 100 as 18/00, and only an 18 has one.
+		if (!m_working.strength.has_value())
+		{
+			return "-";
+		}
+		const MonsterStrength strength = *m_working.strength;
+		if (strength.score != MONSTER_STRENGTH_EXCEPTIONAL_SCORE)
+		{
+			return "only on an 18";
+		}
+		if (strength.exceptional == MONSTER_STRENGTH_EXCEPTIONAL_NONE)
+		{
+			return "0 (none)";
+		}
+		if (strength.exceptional == MONSTER_STRENGTH_EXCEPTIONAL_MAXIMUM)
+		{
+			return std::format("{} (18/00)", strength.exceptional);
+		}
+		return std::format("{} (18/{:02})", strength.exceptional, strength.exceptional);
+	}
 	case FieldId::DEX_NUM:
 		return std::format("{}", m_working.dexDice.num);
 	case FieldId::DEX_SIDES:
@@ -1066,7 +1088,7 @@ bool MonsterEditor::field_is_string(FieldId f) const
 
 bool MonsterEditor::field_is_toggle(FieldId f) const
 {
-	return f == FieldId::AI_TYPE || f == FieldId::CAN_SWIM || f == FieldId::CAN_FLY || f == FieldId::ETHICS || f == FieldId::MORALITY || f == FieldId::SIZE || f == FieldId::INTELLIGENCE || f == FieldId::DMG_TYPE;
+	return f == FieldId::AI_TYPE || f == FieldId::CAN_SWIM || f == FieldId::CAN_FLY || f == FieldId::ETHICS || f == FieldId::MORALITY || f == FieldId::SIZE || f == FieldId::INTELLIGENCE || f == FieldId::STR_SOURCE || f == FieldId::DMG_TYPE;
 }
 
 void MonsterEditor::field_adjust(FieldId f, int delta)
@@ -1099,15 +1121,34 @@ void MonsterEditor::field_adjust(FieldId f, int delta)
 	case FieldId::DR:
 		m_working.dr = clamp_val(m_working.dr, delta, 0, 20);
 		break;
-	case FieldId::STR_NUM:
-		m_working.strDice.num = clamp_val(m_working.strDice.num, delta, 1, 10);
+	case FieldId::STR_SCORE:
+	{
+		// A Table 6 monster has no score to adjust.
+		if (!m_working.strength.has_value())
+		{
+			break;
+		}
+		MonsterStrength& strength = *m_working.strength;
+		strength.score = clamp_val(strength.score, delta, MONSTER_STRENGTH_SCORE_MINIMUM, MONSTER_STRENGTH_SCORE_MAXIMUM);
+		// A percentile rides only on an 18, so leaving 18 drops it rather than writing what the loader refuses.
+		if (strength.score != MONSTER_STRENGTH_EXCEPTIONAL_SCORE)
+		{
+			strength.exceptional = MONSTER_STRENGTH_EXCEPTIONAL_NONE;
+		}
+		assert(is_valid_monster_strength(strength) && "MonsterEditor: the Strength score left a Strength the loader refuses");
 		break;
-	case FieldId::STR_SIDES:
-		m_working.strDice.sides = clamp_val(m_working.strDice.sides, delta, 2, 20);
+	}
+	case FieldId::STR_EXCEPTIONAL:
+	{
+		if (!m_working.strength.has_value() || m_working.strength->score != MONSTER_STRENGTH_EXCEPTIONAL_SCORE)
+		{
+			break;
+		}
+		MonsterStrength& strength = *m_working.strength;
+		strength.exceptional = clamp_val(strength.exceptional, delta, MONSTER_STRENGTH_EXCEPTIONAL_NONE, MONSTER_STRENGTH_EXCEPTIONAL_MAXIMUM);
+		assert(is_valid_monster_strength(strength) && "MonsterEditor: the percentile left a Strength the loader refuses");
 		break;
-	case FieldId::STR_BONUS:
-		m_working.strDice.bonus = clamp_val(m_working.strDice.bonus, delta, -18, 18);
-		break;
+	}
 	case FieldId::DEX_NUM:
 		m_working.dexDice.num = clamp_val(m_working.dexDice.num, delta, 1, 10);
 		break;
@@ -1200,6 +1241,19 @@ void MonsterEditor::field_toggle(FieldId f)
 	else if (f == FieldId::INTELLIGENCE)
 	{
 		m_working.intelligence = next_intelligence_rating(m_working.intelligence);
+	}
+	else if (f == FieldId::STR_SOURCE)
+	{
+		// A printed Strength starts at 10, the middle of 3d6, for the author to set to the entry's figure.
+		constexpr MonsterStrength startingPrintedStrength{ 10, MONSTER_STRENGTH_EXCEPTIONAL_NONE };
+		if (m_working.strength.has_value())
+		{
+			m_working.strength.reset();
+		}
+		else
+		{
+			m_working.strength = startingPrintedStrength;
+		}
 	}
 	else if (f == FieldId::DMG_TYPE)
 	{
