@@ -362,6 +362,9 @@ class Renderer
 	int currentAnimFrame{ 0 };
 	double lastAnimToggle{ 0.0 };
 
+	// Between begin_frame and end_frame. Game::tick is the one caller of both.
+	bool frameOpen{ false };
+
 	std::array<ColorPair, COLOR_PAIR_TABLE_SIZE> colorPairs{};
 
 	void init_color_pairs();
@@ -383,7 +386,22 @@ public:
 	void load_dawnlike(std::string_view basePath);
 	void load_font(std::string_view fontPath, int size);
 
+	// Opens the one frame of a game tick: everything drawn until end_frame lands on it.
+	// Game::tick owns the pair, so a menu or a view only draws. Refuses, by assertion, a
+	// frame opened while one is already open.
+	//
+	// Example:
+	//   renderer.begin_frame(); // the screen is cleared to black
+	//   renderer.begin_frame(); // aborts: "begin_frame: a frame is already open"
 	void begin_frame();
+
+	// Closes the frame and moves input on, so a press read during it is past for the next
+	// tick's reader. Refuses, by assertion, a close with no frame open.
+	//
+	// Example:
+	//   renderer.begin_frame();
+	//   renderer.end_frame(); // drawn, shown, and IsKeyPressed is false for a held key
+	//   renderer.end_frame(); // aborts: "end_frame: no frame is open"
 	void end_frame();
 
 	// World-space tile drawing (camera offset applied)

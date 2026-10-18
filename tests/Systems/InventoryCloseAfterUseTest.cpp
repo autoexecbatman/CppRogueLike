@@ -100,7 +100,15 @@ public:
 	void press(GameKey key)
 	{
 		ctx.inputSystem->queue_key(key, 0);
+		run_one_frame();
+	}
+
+	// One pass of the menu stack inside a frame, which Game::tick opens and closes.
+	void run_one_frame()
+	{
+		hidden.renderer.begin_frame();
 		ctx.menuManager->handle_menus(*ctx.menus, ctx);
+		hidden.renderer.end_frame();
 	}
 };
 
@@ -188,7 +196,7 @@ int scroll_row_y(const OpenInventory& open)
 
 	// The scroll is the only item, so its letter is a.
 	open.ctx.inputSystem->queue_key(GameKey::NONE, 'a');
-	open.ctx.menuManager->handle_menus(*open.ctx.menus, open.ctx);
+	open.run_one_frame();
 
 	exit_unless(open.mock.player->inventoryData.items.empty(), "the letter did not read the scroll");
 	exit_unless(open.mock.menus.empty(), "the inventory is still open after the teleport");

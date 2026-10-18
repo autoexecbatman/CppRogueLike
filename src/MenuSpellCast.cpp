@@ -83,7 +83,6 @@ std::string MenuSpellCast::spell_line(size_t index, const SpellRegistry& spells)
 
 void MenuSpellCast::draw(const SpellRegistry& spells)
 {
-	menu_clear();
 	menu_draw_box();
 	menu_print(1, 0, "Cast Spell (ESC to cancel):");
 
@@ -103,8 +102,6 @@ void MenuSpellCast::draw(const SpellRegistry& spells)
 			menu_highlight_off();
 		}
 	}
-
-	menu_refresh();
 }
 
 void MenuSpellCast::handle_selection(GameContext& ctx)

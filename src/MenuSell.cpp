@@ -163,14 +163,12 @@ void MenuSell::draw_content()
 
 void MenuSell::draw()
 {
-	menu_clear();
 	menu_draw_box();
 	menu_draw_title("SELL ITEMS", ColorPairId::YELLOW_BLACK);
 
 	menu_print_header();
 
 	draw_content();
-	menu_refresh();
 }
 
 void MenuSell::on_key(GameContext& ctx)

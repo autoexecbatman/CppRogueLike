@@ -168,8 +168,6 @@ void LevelUpUI::menu(GameContext& ctx)
 		return;
 	}
 
-	ctx.renderer->begin_frame();
-
 	int row = 0;
 	draw_title(playerRef, level, ctx, row);
 	draw_current_stats(playerRef, ctx, row);
@@ -178,6 +176,4 @@ void LevelUpUI::menu(GameContext& ctx)
 
 	int tileSize = ctx.renderer->get_tile_size();
 	ctx.renderer->draw_text(Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, "Press [SPACE] to continue", ColorPairId::CYAN_BLACK);
-
-	ctx.renderer->end_frame();
 }

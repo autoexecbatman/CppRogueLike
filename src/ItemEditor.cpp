@@ -125,9 +125,7 @@ void ItemEditor::tick(GameContext& ctx)
 {
 	handle_input(ctx);
 
-	ctx.renderer->begin_frame();
 	render(ctx);
-	ctx.renderer->end_frame();
 }
 
 // ---------------------------------------------------------------------------

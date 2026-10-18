@@ -63,9 +63,7 @@ void RoomEditor::tick(GameContext& ctx)
 	tileConfig = ctx.tileConfig;
 	handle_input(ctx);
 
-	ctx.renderer->begin_frame();
 	render(ctx);
-	ctx.renderer->end_frame();
 }
 
 // ---------------------------------------------------------------------------

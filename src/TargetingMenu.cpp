@@ -115,7 +115,6 @@ void TargetingMenu::menu(GameContext& ctx)
 		}
 	}
 
-	ctx.renderer->begin_frame();
 	ctx.renderingManager->render(ctx);
 
 	ctx.targeting->draw_range_indicator(ctx, ctx.player()->position, maxRange);
@@ -131,8 +130,6 @@ void TargetingMenu::menu(GameContext& ctx)
 		Vector2D{ 4, 4 },
 		"Select target -- arrows/WASD: move  Enter: confirm  Esc: cancel",
 		ColorPairId::WHITE_BLACK);
-
-	ctx.renderer->end_frame();
 }
 
 void TargetingMenu::draw_cursor(GameContext& ctx) const

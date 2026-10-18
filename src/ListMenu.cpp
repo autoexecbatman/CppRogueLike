@@ -62,11 +62,9 @@ void ListMenu::draw_entries()
 
 void ListMenu::draw()
 {
-	menu_clear();
 	menu_draw_box();
 	menu_draw_title(title, ColorPairId::YELLOW_BLACK);
 	draw_entries();
-	menu_refresh();
 }
 
 void ListMenu::on_key(GameContext& ctx)

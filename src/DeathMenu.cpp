@@ -78,9 +78,7 @@ void DeathMenu::menu(GameContext& ctx)
 		0,
 		ctx);
 	menu_key_listen();
-	menu_clear();
 	render(ctx);
-	menu_refresh();
 	handle_input(ctx);
 }
 

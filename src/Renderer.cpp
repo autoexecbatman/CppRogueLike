@@ -386,6 +386,9 @@ void Renderer::add_trauma(float amount)
 
 void Renderer::begin_frame()
 {
+	assert(!frameOpen && "begin_frame: a frame is already open");
+	frameOpen = true;
+
 	// Decay trauma and compute shake offsets
 	shakeTrauma = std::max(0.0f, shakeTrauma - GetFrameTime() * 3.0f);
 	float magnitude = shakeTrauma * shakeTrauma;
@@ -413,6 +416,9 @@ void Renderer::begin_frame()
 
 void Renderer::end_frame()
 {
+	assert(frameOpen && "end_frame: no frame is open");
+	frameOpen = false;
+
 #ifdef __EMSCRIPTEN__
 	// EndDrawing's order is: flush -> swap -> WaitTime -> PollInputEvents.
 	// glfwSwapBuffers may yield (emscripten_sleep), so events can fire between

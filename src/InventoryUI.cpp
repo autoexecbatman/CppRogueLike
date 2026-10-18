@@ -342,8 +342,6 @@ void InventoryUI::menu(GameContext& ctx)
 
 	rebuild_item_list(playerRef, ctx);
 
-	ctx.renderer->begin_frame();
-
 	draw_frame(ctx);
 	render_tab_bar(ctx);
 
@@ -357,8 +355,6 @@ void InventoryUI::menu(GameContext& ctx)
 	}
 
 	render_detail_bar(playerRef, ctx);
-
-	ctx.renderer->end_frame();
 }
 
 // ============================================================

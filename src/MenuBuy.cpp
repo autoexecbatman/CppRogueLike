@@ -93,7 +93,6 @@ void MenuBuy::draw_content()
 
 void MenuBuy::draw()
 {
-	menu_clear();
 	menu_draw_box();
 	menu_draw_title("BUY ITEMS", ColorPairId::YELLOW_BLACK);
 
@@ -104,7 +103,6 @@ void MenuBuy::draw()
 	{
 		menu_print_state(i);
 	}
-	menu_refresh();
 }
 
 void MenuBuy::on_key(GameContext& ctx)

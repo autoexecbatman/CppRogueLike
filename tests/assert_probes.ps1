@@ -205,6 +205,16 @@ $probes = @(
         test   = "AssertProbeDeathTest.OpeningARoomWithALockedDoorOnItsFloorAborts"
         file   = "src/Map.cpp"
         anchor = 'assert(!room.contains(x, y) && "open_all_room_doors: a locked door inside a room''s floor");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.OpeningAFrameInsideAnOpenFrameAborts"
+        file   = "src/Renderer.cpp"
+        anchor = 'assert(!frameOpen && "begin_frame: a frame is already open");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.ClosingAFrameThatIsNotOpenAborts"
+        file   = "src/Renderer.cpp"
+        anchor = 'assert(frameOpen && "end_frame: no frame is open");'
     }
 )
 

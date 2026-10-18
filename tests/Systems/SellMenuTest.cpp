@@ -63,7 +63,10 @@ constexpr int SELLER_STRENGTH = 10;
 
 	MenuSell menu{ shopkeeper, seller, ctx };
 	ctx.inputSystem->queue_key(GameKey::ENTER, 0);
+	// Inside a frame, which Game::tick opens and closes around every menu.
+	hidden.renderer.begin_frame();
 	menu.menu(ctx);
+	hidden.renderer.end_frame();
 
 	exit_unless(seller.inventoryData.items.empty(), "the potion is still in the pack");
 	exit_unless(shopkeeper.shop->get_shop_inventory().items.size() == shelvesBefore + 1, "the potion did not reach the shelves");
@@ -99,7 +102,9 @@ constexpr int SELLER_STRENGTH = 10;
 	for (const GameKey key : { GameKey::DOWN, GameKey::DOWN, GameKey::ENTER })
 	{
 		ctx.inputSystem->queue_key(key, 0);
+		hidden.renderer.begin_frame();
 		menu.menu(ctx);
+		hidden.renderer.end_frame();
 	}
 
 	exit_unless(seller.inventoryData.items.size() == 1, "not exactly one item was sold");

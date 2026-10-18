@@ -125,7 +125,6 @@ std::string allocation_status_line(const AbilityAllocation& allocation)
 
 void MenuAbilityScores::draw_allocation_screen()
 {
-	menu_clear();
 	menu_draw_box();
 	menu_draw_title("ABILITY SCORES", ColorPairId::YELLOW_BLACK);
 
@@ -156,8 +155,6 @@ void MenuAbilityScores::draw_allocation_screen()
 	draw_row(STATUS_ROW, allocation_status_line(allocation), ready ? ColorPairId::GREEN_BLACK : ColorPairId::RED_BLACK);
 	draw_row(FIRST_HINT_ROW, "[up/down] choose an ability   [1-7] spend that die", ColorPairId::CYAN_BLACK);
 	draw_row(FIRST_HINT_ROW + 1, "[backspace] take a die back   [Enter] done", ColorPairId::CYAN_BLACK);
-
-	menu_refresh();
 }
 
 void MenuAbilityScores::menu(GameContext& ctx)

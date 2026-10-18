@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=FrameBoundaryTest.*:SellMenuTest.*:InventoryCloseAfterUseTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Game.cpp",
+      "original": "\trenderer.begin_frame();\n",
+      "mutated": "",
+      "catches": "the tick opening no frame, so the close at its end finds none open"
+    },
+    {
+      "file": "src/Game.cpp",
+      "original": "\trenderer.end_frame();\n",
+      "mutated": "",
+      "catches": "the tick ending no frame, so a key it read is still a press for the next reader"
+    },
+    {
+      "file": "src/Renderer.cpp",
+      "original": "\tframeOpen = true;\n",
+      "mutated": "",
+      "catches": "an opened frame not being recorded, so its close is refused"
+    },
+    {
+      "file": "src/Renderer.cpp",
+      "original": "\tframeOpen = false;\n",
+      "mutated": "",
+      "catches": "a closed frame still counting as open, so the next tick's open is refused"
+    }
+  ]
+}

@@ -29,12 +29,6 @@ void BaseMenu::menu_new(
 	tileConfig = ctx.tileConfig;
 }
 
-void BaseMenu::menu_clear()
-{
-	assert(renderer && "BaseMenu::menu_clear called without a renderer");
-	renderer->begin_frame();
-}
-
 void BaseMenu::menu_print(int x, int row, const std::string& text)
 {
 	assert(renderer && "BaseMenu::menu_print called without a renderer");
@@ -89,12 +83,6 @@ void BaseMenu::menu_draw_row(int pixelX, int row, const std::string& text)
 	{
 		renderer->draw_text(Vector2D{ pixelX, glyphY }, text, ColorPairId::WHITE_BLACK);
 	}
-}
-
-void BaseMenu::menu_refresh()
-{
-	assert(renderer && "BaseMenu::menu_refresh called without a renderer");
-	renderer->end_frame();
 }
 
 void BaseMenu::menu_key_listen()

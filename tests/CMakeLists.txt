@@ -139,6 +139,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SleepSpellTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/WordingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/HeadlessRendererTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/FrameBoundaryTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SellMenuTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/InventoryCloseAfterUseTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/FireballDamageTest.cpp

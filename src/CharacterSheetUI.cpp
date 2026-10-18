@@ -265,8 +265,6 @@ void CharacterSheetUI::menu(GameContext& ctx)
 		return;
 	}
 
-	ctx.renderer->begin_frame();
-
 	int tileSize = ctx.renderer->get_tile_size();
 	int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
 	// The panel spans the screen in pixels. Whole tiles stop short of it at most
@@ -294,6 +292,4 @@ void CharacterSheetUI::menu(GameContext& ctx)
 	display_combat_stats(player_ref, ctx, row);
 	display_equipment_info(player_ref, ctx, row);
 	display_right_panel_info(player_ref, ctx, row);
-
-	ctx.renderer->end_frame();
 }

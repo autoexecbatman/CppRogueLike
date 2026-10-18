@@ -62,7 +62,6 @@ public:
 	BaseMenu& operator=(BaseMenu&&) = delete;
 
 	void menu_new(size_t width, size_t height, size_t startX, size_t startY, GameContext& ctx);
-	void menu_clear();
 	// Draws text at a tile column and a text row inside the menu. Row 0 sits just
 	// below the top border. Rows run on a pixel pitch rather than the tile grid,
 	// so a menu holds the same lines however far the map is zoomed.
@@ -72,7 +71,6 @@ public:
 	// The shop screens' column header, on row 0 so it shares the pitch of the rows
 	// beneath it rather than sitting on the tile grid.
 	void menu_print_header();
-	void menu_refresh();
 
 	void menu_highlight_on() { isHighlighted = true; }
 

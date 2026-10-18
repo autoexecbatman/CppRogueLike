@@ -68,6 +68,7 @@
 #include "src/Player.h"
 #include "src/PlayerController.h"
 #include "src/RandomDice.h"
+#include "src/Renderer.h"
 #include "src/ShopKeeper.h"
 #include "src/ShopkeeperFactory.h"
 #include "src/SpellSystem.h"
@@ -595,4 +596,30 @@ TEST_F(AssertProbeDeathTest, OpeningTheSellMenuOnACreatureWithNoShopAborts)
 		MenuSell menu{ *shopless, seller, ctx };
 	};
 	EXPECT_DEATH(open_the_menu_on_a_creature_with_no_shop(), "MenuSell opened on a creature with no shop");
+}
+
+// Game::tick opens the one frame of a tick, so a second open is a menu or a view that
+// still frames itself. The first open needs a window, so the probe opens a hidden one.
+TEST_F(AssertProbeDeathTest, OpeningAFrameInsideAnOpenFrameAborts)
+{
+	if (exit_code_in_child(&open_and_close_hidden_renderer) == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
+	{
+		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
+	}
+
+	const auto open_the_frame_twice = []()
+	{
+		HiddenRenderer hidden{};
+		hidden.renderer.begin_frame();
+		hidden.renderer.begin_frame();
+	};
+	EXPECT_DEATH(open_the_frame_twice(), "begin_frame: a frame is already open");
+}
+
+// A close with no frame open is a second close in one tick, or a close by something
+// other than Game::tick. The assertion comes before any raylib call, so no window is needed.
+TEST_F(AssertProbeDeathTest, ClosingAFrameThatIsNotOpenAborts)
+{
+	Renderer renderer{};
+	EXPECT_DEATH(renderer.end_frame(), "end_frame: no frame is open");
 }

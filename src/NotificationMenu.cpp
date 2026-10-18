@@ -46,7 +46,6 @@ NotificationMenu::NotificationMenu(
 
 void NotificationMenu::draw()
 {
-	menu_clear();
 	menu_draw_box();
 	menu_draw_title(title, ColorPairId::YELLOW_BLACK);
 
@@ -59,8 +58,6 @@ void NotificationMenu::draw()
 
 	// Centered prompt — gives the player a visual cue to press any key.
 	menu_print_centered(row, std::string(PROMPT));
-
-	menu_refresh();
 }
 
 void NotificationMenu::set_on_close(std::function<void(GameContext&)> callback)

@@ -69,14 +69,12 @@ void MenuTrade::draw_content()
 
 void MenuTrade::draw()
 {
-	menu_clear();
 	menu_draw_box();
 	menu_draw_title("TRADE", ColorPairId::YELLOW_BLACK);
 	for (size_t i{ 0 }; i < entries.size(); ++i)
 	{
 		menu_print_state(i);
 	}
-	menu_refresh();
 }
 
 void MenuTrade::on_key(GameContext& ctx)

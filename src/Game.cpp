@@ -107,6 +107,9 @@ bool Game::tick(int& loopNum)
 	}
 
 	auto ctx = context();
+	// The tick owns its one frame, so what runs inside only draws, and a key read here is
+	// spent when the frame ends even if the menu that read it closes without drawing.
+	renderer.begin_frame();
 	switch (gameState.get_window_state())
 	{
 
@@ -153,6 +156,7 @@ bool Game::tick(int& loopNum)
 		throw std::logic_error("windowState is unknown.");
 	}
 	}
+	renderer.end_frame();
 
 	++loopNum;
 	return gameState.get_run();

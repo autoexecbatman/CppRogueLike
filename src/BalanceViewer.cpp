@@ -34,8 +34,6 @@ void BalanceViewer::menu(GameContext& ctx)
 		return;
 	}
 
-	ctx.renderer->begin_frame();
-
 	int tileSize = ctx.renderer->get_tile_size();
 	int fontOff = (tileSize - ctx.renderer->get_font_size()) / 2;
 	int vcols = ctx.renderer->get_viewport_cols();
@@ -57,8 +55,6 @@ void BalanceViewer::menu(GameContext& ctx)
 	const int halfCols = vcols / 2;
 	draw_column("MONSTERS", monsterDist, 0, ctx);
 	draw_item_column("ITEMS", itemDist, halfCols, ctx);
-
-	ctx.renderer->end_frame();
 }
 
 void BalanceViewer::draw_column(

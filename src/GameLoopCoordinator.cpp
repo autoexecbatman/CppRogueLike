@@ -251,8 +251,6 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 		ctx.map->get_width(),
 		ctx.map->get_height());
 
-	ctx.renderer->begin_frame();
-
 	ctx.renderingManager->render(ctx);
 
 	assert(ctx.animSystem && "GameLoopCoordinator::handle_render_phase: called without an animSystem");
@@ -276,7 +274,6 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 
 	draw_hover_tooltip(ctx);
 
-	ctx.renderer->end_frame();
 	ctx.messageSystem->log("Render OK.");
 }
 

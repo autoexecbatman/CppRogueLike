@@ -47,7 +47,6 @@ int MenuName::interior_width() const
 
 void MenuName::draw_name_screen()
 {
-	menu_clear();
 	menu_draw_box();
 	menu_draw_title("ENTER NAME", ColorPairId::YELLOW_BLACK);
 
@@ -61,8 +60,6 @@ void MenuName::draw_name_screen()
 		Vector2D{ textX, firstRowY + TEXT_ROW_PITCH },
 		renderer->fit_text_to_width("[Enter] Confirm  [Esc] Skip", interior_width()),
 		ColorPairId::CYAN_BLACK);
-
-	menu_refresh();
 }
 
 void MenuName::menu(GameContext& ctx)
