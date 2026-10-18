@@ -2,7 +2,7 @@
 //
 // What reading an identify scroll does to the pack it is read over.
 //
-// The scroll identifies everything the wearer is carrying that is not already fully
+// The scroll identifies everything else the wearer is carrying that is not already fully
 // identified, says how many that was, and is consumed either way - reading it is the
 // cost, so a pack that was already known still burns it. That last part is the branch
 // nothing covered before 2026-10-01: the loop was exercised by play and the
@@ -123,9 +123,6 @@ TEST_F(IdentifyScrollTest, APackAlreadyKnownStillSpendsTheScroll)
 {
 	Item& known = carried("health_potion");
 	known.identify_all();
-	// The scroll is in the pack too and counts as an item, so it has to be identified
-	// as well or the count comes out at one and this never reaches the branch it names.
-	scrollItem->identify_all();
 
 	const bool spent = read_the_scroll();
 
@@ -134,23 +131,35 @@ TEST_F(IdentifyScrollTest, APackAlreadyKnownStillSpendsTheScroll)
 		<< "the pack was fully identified and the scroll did not say so";
 }
 
-// The scroll alone in the pack identifies itself, and one item is said in the singular.
+// One unknown potion beside the unknown scroll: the potion is the one item identified,
+// said in the singular.
 TEST_F(IdentifyScrollTest, OneItemIdentifiedIsSaidInTheSingular)
 {
-	ASSERT_EQ(reader->inventoryData.items.size(), 1u) << "the fixture put something else in the pack";
+	carried("health_potion");
 
 	read_the_scroll();
 
-	EXPECT_TRUE(said_anything_about("1 item identified!")) << "one item was not counted as one";
+	EXPECT_TRUE(said_anything_about("1 item identified!")) << "the scroll counted itself beside the potion, or one item was not counted as one";
 	EXPECT_FALSE(said_anything_about("1 items")) << "one item was counted in the plural";
 }
 
-// Two unknown potions beside a known scroll: the count is two, in the plural.
+// The scroll alone in the pack has nothing else to identify, so it says the pack was
+// already known rather than counting itself.
+TEST_F(IdentifyScrollTest, TheScrollAloneIdentifiesNothing)
+{
+	ASSERT_EQ(reader->inventoryData.items.size(), 1u) << "the fixture put something else in the pack";
+	ASSERT_FALSE(scrollItem->is_fully_identified()) << "the scroll starts identified, so this cannot see it count itself";
+
+	read_the_scroll();
+
+	EXPECT_TRUE(said_anything_about("already identified")) << "the scroll counted itself as an item it identified";
+}
+
+// Two unknown potions beside the unknown scroll: the count is two, in the plural.
 TEST_F(IdentifyScrollTest, TwoItemsIdentifiedAreSaidInThePlural)
 {
 	carried("health_potion");
 	carried("mana_potion");
-	scrollItem->identify_all();
 
 	read_the_scroll();
 

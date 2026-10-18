@@ -9,7 +9,7 @@
   "mutations": [
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tif (!item->is_fully_identified())\n",
+      "original": "\t\tif (item.get() != &owner && !item->is_fully_identified())\n",
       "mutated": "\t\tif (false)\n",
       "catches": "a scroll that reads the pack and identifies nothing in it"
     },
@@ -24,6 +24,12 @@
       "original": "\t\tidentifiedCount > 0\n",
       "mutated": "\t\tidentifiedCount >= 0\n",
       "catches": "a pack that was already known told that items were identified anyway"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tif (item.get() != &owner && !item->is_fully_identified())\n",
+      "mutated": "\t\tif (!item->is_fully_identified())\n",
+      "catches": "the scroll counting itself among the items it identified, as 0212 found"
     }
   ]
 }

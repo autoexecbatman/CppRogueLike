@@ -637,12 +637,14 @@ bool use([[maybe_unused]] Teleporter& teleporter, Item& owner, Creature& wearer,
 	return consume_item(owner, wearer);
 }
 
-// Identifies every item in the wearer's pack that is not already fully identified, and
-// says how many that was. The scroll is consumed either way: reading it is the cost, and
-// a pack that was already identified still burns it.
+// Identifies every other item in the wearer's pack that is not already fully identified,
+// and says how many that was. The scroll never counts itself: it is consumed by the
+// reading, so what it would learn about itself is never seen. It is consumed either way,
+// and a pack that was already identified still burns it.
 //
-// Example, a pack holding two unknown potions and one known sword:
+// Example, a pack holding the scroll, two unknown potions and one known sword:
 //   use(scroll, scrollItem, player, ctx);   // -> true, "2 items identified!"
+//   // a pack holding the scroll alone:
 //   use(scroll, scrollItem, player, ctx);   // -> true, "All items were already identified."
 bool use([[maybe_unused]] IdentifyScroll& identifyScroll, Item& owner, Creature& wearer, GameContext& ctx)
 {
@@ -651,7 +653,7 @@ bool use([[maybe_unused]] IdentifyScroll& identifyScroll, Item& owner, Creature&
 	{
 		assert(item && "identify scroll: the pack holds a null where an item should be");
 
-		if (!item->is_fully_identified())
+		if (item.get() != &owner && !item->is_fully_identified())
 		{
 			item->identify_all();
 			++identifiedCount;
