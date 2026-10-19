@@ -109,29 +109,29 @@ private:
 	void handle_input(GameContext& ctx);
 	void handle_normal(const GameContext& ctx);
 	void handle_edit_string();
-	void handle_picker(const Renderer& r);
+	void handle_picker(const Renderer& renderer);
 
 	void render(const GameContext& ctx) const;
-	void render_header(const Renderer& r) const;
+	void render_header(const Renderer& renderer) const;
 	void render_list(const Renderer& renderer, const MonsterRegistry& monsters) const;
-	void render_fields(const Renderer& r) const;
-	void render_picker(const Renderer& r) const;
-	void render_hint(const Renderer& r) const;
+	void render_fields(const Renderer& renderer) const;
+	void render_picker(const Renderer& renderer) const;
+	void render_hint(const Renderer& renderer) const;
 
 	[[nodiscard]] const std::string& current_key() const;
 	[[nodiscard]] FieldId current_field() const;
 
-	[[nodiscard]] std::string field_label(FieldId f) const;
+	[[nodiscard]] std::string field_label(FieldId field) const;
 	// Rebuilds the working damage from dice, so its text and its range follow.
 	void set_damage_dice(int num, int sides, int bonus);
 
-	[[nodiscard]] std::string field_value(FieldId f) const;
-	[[nodiscard]] bool field_is_string(FieldId f) const;
-	[[nodiscard]] bool field_is_toggle(FieldId f) const;
+	[[nodiscard]] std::string field_value(FieldId field) const;
+	[[nodiscard]] bool field_is_string(FieldId field) const;
+	[[nodiscard]] bool field_is_toggle(FieldId field) const;
 
-	void field_adjust(FieldId f, int delta);
-	void field_toggle(FieldId f);
-	void field_set_string(FieldId f, std::string val);
+	void field_adjust(FieldId field, int delta);
+	void field_toggle(FieldId field);
+	void field_set_string(FieldId field, std::string val);
 
 public:
 	void enter(const MonsterRegistry& monsters);

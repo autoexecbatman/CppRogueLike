@@ -52,29 +52,29 @@ std::string prettify_key(std::string_view key)
 {
 	std::string result;
 	bool cap_next = true;
-	for (char c : key)
+	for (char character : key)
 	{
-		if (c == '_')
+		if (character == '_')
 		{
 			result += ' ';
 			cap_next = true;
 		}
 		else if (cap_next)
 		{
-			result += static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
+			result += static_cast<char>(std::toupper(static_cast<unsigned char>(character)));
 			cap_next = false;
 		}
 		else
 		{
-			result += c;
+			result += character;
 		}
 	}
 	return result;
 }
 
-std::string_view consumable_effect_str(ConsumableEffect e)
+std::string_view consumable_effect_str(ConsumableEffect effect)
 {
-	switch (e)
+	switch (effect)
 	{
 	case ConsumableEffect::NONE:
 		return "none";
@@ -141,8 +141,8 @@ void ItemEditor::load_working(const ItemRegistry& items)
 	}
 
 	const std::string& key = current_key();
-	const ItemParams& p = items.get_params(key);
-	working = p;
+	const ItemParams& params = items.get_params(key);
+	working = params;
 	workingTile = contentRegistry ? contentRegistry->get_tile(key) : TileRef{};
 	fieldCursor = 0;
 	fieldScroll = 0;
@@ -219,8 +219,8 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 
 	ItemRegistry& items = *ctx.itemRegistry;
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
-	const Renderer& r = *ctx.renderer;
-	int screenHeight = r.get_screen_height();
+	const Renderer& renderer = *ctx.renderer;
+	int screenHeight = renderer.get_screen_height();
 	int body_h = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
 	int visible_fields = body_h / FIELD_HEIGHT;
 	int total = static_cast<int>(keys.size());
@@ -312,11 +312,11 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 			defaults.weaponSize = WeaponSize::MEDIUM;
 			const std::string newKey = items.add_custom("New Item", "weapon", defaults);
 			keys = items.get_all_keys();
-			for (int i = 0; i < static_cast<int>(keys.size()); ++i)
+			for (int keyIndex = 0; keyIndex < static_cast<int>(keys.size()); ++keyIndex)
 			{
-				if (keys[i] == newKey)
+				if (keys[keyIndex] == newKey)
 				{
-					listCursor = i;
+					listCursor = keyIndex;
 					break;
 				}
 			}
@@ -399,14 +399,14 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 
 void ItemEditor::handle_edit_string()
 {
-	int ch = GetCharPressed();
-	while (ch != 0)
+	int pressed = GetCharPressed();
+	while (pressed != 0)
 	{
-		if (ch >= 32 && ch < 127)
+		if (pressed >= 32 && pressed < 127)
 		{
-			editBuffer += static_cast<char>(ch);
+			editBuffer += static_cast<char>(pressed);
 		}
-		ch = GetCharPressed();
+		pressed = GetCharPressed();
 	}
 
 	if (IsKeyPressed(KEY_BACKSPACE) && !editBuffer.empty())
@@ -426,16 +426,16 @@ void ItemEditor::handle_edit_string()
 	}
 }
 
-void ItemEditor::handle_picker(const Renderer& r)
+void ItemEditor::handle_picker(const Renderer& renderer)
 {
-	int total_sheets = r.get_loaded_sheet_count();
+	int total_sheets = renderer.get_loaded_sheet_count();
 
 	auto advance_sheet = [&](int dir)
 	{
-		for (int i = 0; i < total_sheets; ++i)
+		for (int sheetsTried = 0; sheetsTried < total_sheets; ++sheetsTried)
 		{
 			pickerSheet = (pickerSheet + dir + total_sheets) % total_sheets;
-			if (r.sheet_is_loaded(static_cast<TileSheet>(pickerSheet)))
+			if (renderer.sheet_is_loaded(static_cast<TileSheet>(pickerSheet)))
 			{
 				break;
 			}
@@ -443,7 +443,7 @@ void ItemEditor::handle_picker(const Renderer& r)
 		pickerScroll = 0;
 	};
 
-	if (!r.sheet_is_loaded(static_cast<TileSheet>(pickerSheet)))
+	if (!renderer.sheet_is_loaded(static_cast<TileSheet>(pickerSheet)))
 	{
 		advance_sheet(1);
 	}
@@ -462,7 +462,7 @@ void ItemEditor::handle_picker(const Renderer& r)
 		return;
 	}
 
-	int sheet_rows = r.get_sheet_rows(static_cast<TileSheet>(pickerSheet));
+	int sheet_rows = renderer.get_sheet_rows(static_cast<TileSheet>(pickerSheet));
 	::Vector2 mouse = GetMousePosition();
 	bool in_picker = mouse.x >= LIST_WIDTH;
 
@@ -482,10 +482,10 @@ void ItemEditor::handle_picker(const Renderer& r)
 
 	if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && in_picker)
 	{
-		const int pickerTileSize = picker_tile_size(r, pickerSheet);
+		const int pickerTileSize = picker_tile_size(renderer, pickerSheet);
 		int col = static_cast<int>(mouse.x - LIST_WIDTH - PICKER_PAD) / (pickerTileSize + 2);
 		int row = pickerScroll + static_cast<int>(mouse.y - grid_y) / (pickerTileSize + 2);
-		int sheet_cols = r.get_sheet_cols(static_cast<TileSheet>(pickerSheet));
+		int sheet_cols = renderer.get_sheet_cols(static_cast<TileSheet>(pickerSheet));
 
 		if (col >= 0 && col < sheet_cols && row >= 0 && row < sheet_rows)
 		{
@@ -503,40 +503,40 @@ void ItemEditor::render(const GameContext& ctx) const
 {
 	assert(ctx.itemRegistry && "ItemEditor::render: called without an itemRegistry");
 
-	const Renderer& r = *ctx.renderer;
-	int screenWidth = r.get_screen_width();
-	int screenHeight = r.get_screen_height();
+	const Renderer& renderer = *ctx.renderer;
+	int screenWidth = renderer.get_screen_width();
+	int screenHeight = renderer.get_screen_height();
 
 	DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 0, 0, 0, 255 });
 
-	render_header(r);
-	render_list(r, *ctx.itemRegistry);
+	render_header(renderer);
+	render_list(renderer, *ctx.itemRegistry);
 
 	if (mode == Mode::TILE_PICKER)
 	{
-		render_picker(r);
+		render_picker(renderer);
 	}
 	else
 	{
-		render_fields(r);
+		render_fields(renderer);
 	}
 
-	render_hint(r);
+	render_hint(renderer);
 }
 
-void ItemEditor::render_header(const Renderer& r) const
+void ItemEditor::render_header(const Renderer& renderer) const
 {
-	int screenWidth = r.get_screen_width();
+	int screenWidth = renderer.get_screen_width();
 	DrawRectangle(0, 0, screenWidth, HEADER_HEIGHT, Color{ 0, 20, 40, 255 });
-	r.draw_text_color(Vector2D{ 8, 6 }, "ITEM EDITOR", Color{ 180, 255, 180, 255 });
-	r.draw_text_color(Vector2D{ 8, 26 },
+	renderer.draw_text_color(Vector2D{ 8, 6 }, "ITEM EDITOR", Color{ 180, 255, 180, 255 });
+	renderer.draw_text_color(Vector2D{ 8, 26 },
 		"Tab:switch focus  Left/Right:adjust  Enter:edit  F2:tile  Ctrl+S:save  Esc:exit",
 		Color{ 100, 130, 100, 255 });
 }
 
-void ItemEditor::render_list(const Renderer& r, const ItemRegistry& items) const
+void ItemEditor::render_list(const Renderer& renderer, const ItemRegistry& items) const
 {
-	int screenHeight = r.get_screen_height();
+	int screenHeight = renderer.get_screen_height();
 	int body_y = HEADER_HEIGHT;
 	int body_h = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
 
@@ -550,15 +550,15 @@ void ItemEditor::render_list(const Renderer& r, const ItemRegistry& items) const
 
 	::Vector2 mouse = GetMousePosition();
 
-	for (int i = scroll; i < total; ++i)
+	for (int itemIndex = scroll; itemIndex < total; ++itemIndex)
 	{
-		int itemY = body_y + (i - scroll) * ITEM_HEIGHT;
+		int itemY = body_y + (itemIndex - scroll) * ITEM_HEIGHT;
 		if (itemY + ITEM_HEIGHT > body_y + body_h)
 		{
 			break;
 		}
 
-		bool is_sel = (i == listCursor);
+		bool is_sel = (itemIndex == listCursor);
 		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH && mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
@@ -582,18 +582,18 @@ void ItemEditor::render_list(const Renderer& r, const ItemRegistry& items) const
 
 		TileRef tile = is_sel
 			? workingTile
-			: (contentRegistry ? contentRegistry->get_tile(keys[i]) : TileRef{});
-		r.draw_tile_screen_sized(Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - LIST_TILE_SIZE) / 2 }, tile, LIST_TILE_SIZE);
+			: (contentRegistry ? contentRegistry->get_tile(keys[itemIndex]) : TileRef{});
+		renderer.draw_tile_screen_sized(Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - LIST_TILE_SIZE) / 2 }, tile, LIST_TILE_SIZE);
 
-		const bool isCustom = !items.is_builtin_key(keys[i]);
+		const bool isCustom = !items.is_builtin_key(keys[itemIndex]);
 
 		std::string display_name = is_sel
 			? working.name
-			: std::string{ items.get_params(keys[i]).name };
+			: std::string{ items.get_params(keys[itemIndex]).name };
 
 		if (display_name.empty())
 		{
-			display_name = prettify_key(keys[i]);
+			display_name = prettify_key(keys[itemIndex]);
 		}
 
 		if (isCustom)
@@ -605,14 +605,14 @@ void ItemEditor::render_list(const Renderer& r, const ItemRegistry& items) const
 			? Color{ 150, 255, 150, 255 }
 			: Color{ 200, 200, 200, 255 };
 
-		r.draw_text_color(Vector2D{ LIST_PAD + LIST_TILE_SIZE + 4, itemY + (ITEM_HEIGHT - 16) / 2 }, display_name, textColor);
+		renderer.draw_text_color(Vector2D{ LIST_PAD + LIST_TILE_SIZE + 4, itemY + (ITEM_HEIGHT - 16) / 2 }, display_name, textColor);
 	}
 }
 
-void ItemEditor::render_fields(const Renderer& r) const
+void ItemEditor::render_fields(const Renderer& renderer) const
 {
-	int screenWidth = r.get_screen_width();
-	int screenHeight = r.get_screen_height();
+	int screenWidth = renderer.get_screen_width();
+	int screenHeight = renderer.get_screen_height();
 	int panelX = LIST_WIDTH;
 	int panelY = HEADER_HEIGHT;
 	int fieldsWidth = screenWidth - LIST_WIDTH;
@@ -626,16 +626,16 @@ void ItemEditor::render_fields(const Renderer& r) const
 
 	::Vector2 mouse = GetMousePosition();
 
-	for (int i = scroll; i < FIELD_COUNT; ++i)
+	for (int fieldIndex = scroll; fieldIndex < FIELD_COUNT; ++fieldIndex)
 	{
-		int itemY = panelY + (i - scroll) * FIELD_HEIGHT;
+		int itemY = panelY + (fieldIndex - scroll) * FIELD_HEIGHT;
 		if (itemY + FIELD_HEIGHT > panelY + fieldsHeight)
 		{
 			break;
 		}
 
-		FieldId fid = static_cast<FieldId>(i);
-		bool is_sel = (i == fieldCursor);
+		FieldId fid = static_cast<FieldId>(fieldIndex);
+		bool is_sel = (fieldIndex == fieldCursor);
 		bool hovered = mouse.x >= panelX && mouse.x < screenWidth && mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
@@ -660,11 +660,11 @@ void ItemEditor::render_fields(const Renderer& r) const
 		Color labelColor = is_sel ? Color{ 150, 255, 150, 255 } : Color{ 150, 150, 150, 255 };
 		Color valueColor = is_sel ? Color{ 220, 255, 220, 255 } : Color{ 200, 200, 200, 255 };
 
-		r.draw_text_color(Vector2D{ panelX + 12, itemY + (FIELD_HEIGHT - 16) / 2 }, field_label(fid), labelColor);
+		renderer.draw_text_color(Vector2D{ panelX + 12, itemY + (FIELD_HEIGHT - 16) / 2 }, field_label(fid), labelColor);
 
 		if (fid == FieldId::TILE)
 		{
-			r.draw_tile_screen_sized(Vector2D{ screenWidth - LIST_TILE_SIZE - 12, itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2 }, workingTile, LIST_TILE_SIZE);
+			renderer.draw_tile_screen_sized(Vector2D{ screenWidth - LIST_TILE_SIZE - 12, itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2 }, workingTile, LIST_TILE_SIZE);
 			if (is_sel)
 			{
 				DrawRectangleLines(
@@ -686,16 +686,16 @@ void ItemEditor::render_fields(const Renderer& r) const
 			{
 				val = field_value(fid);
 			}
-			int vx = screenWidth - r.measure_text(val) - 16;
-			r.draw_text_color(Vector2D{ vx, itemY + (FIELD_HEIGHT - 16) / 2 }, val, valueColor);
+			int valuePixelX = screenWidth - renderer.measure_text(val) - 16;
+			renderer.draw_text_color(Vector2D{ valuePixelX, itemY + (FIELD_HEIGHT - 16) / 2 }, val, valueColor);
 		}
 	}
 }
 
-void ItemEditor::render_picker(const Renderer& r) const
+void ItemEditor::render_picker(const Renderer& renderer) const
 {
-	int screenWidth = r.get_screen_width();
-	int screenHeight = r.get_screen_height();
+	int screenWidth = renderer.get_screen_width();
+	int screenHeight = renderer.get_screen_height();
 	int panelX = LIST_WIDTH;
 	int panelWidth = screenWidth - LIST_WIDTH;
 	int body_y = HEADER_HEIGHT;
@@ -704,19 +704,19 @@ void ItemEditor::render_picker(const Renderer& r) const
 	DrawRectangle(panelX, body_y, panelWidth, body_h, Color{ 5, 8, 24, 255 });
 
 	DrawRectangle(panelX, body_y, panelWidth, PICKER_SUB_HEADER_HEIGHT, Color{ 8, 15, 40, 255 });
-	int total_sheets = r.get_loaded_sheet_count();
+	int total_sheets = renderer.get_loaded_sheet_count();
 	std::string hdr = std::format(
 		"Sheet: {} ({}/{})  --  Left/Right:change  Esc/F2:back",
-		r.get_sheet_name(static_cast<TileSheet>(pickerSheet)),
+		renderer.get_sheet_name(static_cast<TileSheet>(pickerSheet)),
 		pickerSheet + 1,
 		total_sheets);
-	r.draw_text_color(Vector2D{ panelX + PICKER_PAD, body_y + 6 }, hdr, Color{ 120, 200, 200, 255 });
+	renderer.draw_text_color(Vector2D{ panelX + PICKER_PAD, body_y + 6 }, hdr, Color{ 120, 200, 200, 255 });
 
 	int grid_y = body_y + PICKER_SUB_HEADER_HEIGHT;
 	int grid_h = body_h - PICKER_SUB_HEADER_HEIGHT;
-	int sheet_cols = r.get_sheet_cols(static_cast<TileSheet>(pickerSheet));
-	int sheet_rows = r.get_sheet_rows(static_cast<TileSheet>(pickerSheet));
-	const int pickerTileSize = picker_tile_size(r, pickerSheet);
+	int sheet_cols = renderer.get_sheet_cols(static_cast<TileSheet>(pickerSheet));
+	int sheet_rows = renderer.get_sheet_rows(static_cast<TileSheet>(pickerSheet));
+	const int pickerTileSize = picker_tile_size(renderer, pickerSheet);
 
 	::Vector2 mouse = GetMousePosition();
 
@@ -724,34 +724,34 @@ void ItemEditor::render_picker(const Renderer& r) const
 
 	for (int row = pickerScroll; row < sheet_rows; ++row)
 	{
-		int py = grid_y + (row - pickerScroll) * (pickerTileSize + 2);
-		if (py >= grid_y + grid_h)
+		int cellPixelY = grid_y + (row - pickerScroll) * (pickerTileSize + 2);
+		if (cellPixelY >= grid_y + grid_h)
 		{
 			break;
 		}
 
 		for (int col = 0; col < sheet_cols; ++col)
 		{
-			int px = panelX + PICKER_PAD + col * (pickerTileSize + 2);
+			int cellPixelX = panelX + PICKER_PAD + col * (pickerTileSize + 2);
 			TileRef tid{ static_cast<TileSheet>(pickerSheet), col, row };
 
 			bool is_cur = (tid == workingTile);
-			bool hovered = mouse.x >= px && mouse.x < px + pickerTileSize && mouse.y >= py && mouse.y < py + pickerTileSize;
+			bool hovered = mouse.x >= cellPixelX && mouse.x < cellPixelX + pickerTileSize && mouse.y >= cellPixelY && mouse.y < cellPixelY + pickerTileSize;
 
 			if (is_cur)
 			{
-				DrawRectangle(px, py, pickerTileSize, pickerTileSize, Color{ 0, 60, 0, 220 });
+				DrawRectangle(cellPixelX, cellPixelY, pickerTileSize, pickerTileSize, Color{ 0, 60, 0, 220 });
 			}
 			else if (hovered)
 			{
-				DrawRectangle(px, py, pickerTileSize, pickerTileSize, Color{ 20, 40, 20, 160 });
+				DrawRectangle(cellPixelX, cellPixelY, pickerTileSize, pickerTileSize, Color{ 20, 40, 20, 160 });
 			}
 
-			r.draw_tile_screen_sized(Vector2D{ px, py }, tid, pickerTileSize);
+			renderer.draw_tile_screen_sized(Vector2D{ cellPixelX, cellPixelY }, tid, pickerTileSize);
 
 			if (is_cur)
 			{
-				DrawRectangleLines(px, py, pickerTileSize, pickerTileSize, Color{ 0, 255, 100, 255 });
+				DrawRectangleLines(cellPixelX, cellPixelY, pickerTileSize, pickerTileSize, Color{ 0, 255, 100, 255 });
 			}
 		}
 	}
@@ -759,10 +759,10 @@ void ItemEditor::render_picker(const Renderer& r) const
 	EndScissorMode();
 }
 
-void ItemEditor::render_hint(const Renderer& r) const
+void ItemEditor::render_hint(const Renderer& renderer) const
 {
-	int screenWidth = r.get_screen_width();
-	int screenHeight = r.get_screen_height();
+	int screenWidth = renderer.get_screen_width();
+	int screenHeight = renderer.get_screen_height();
 	int hint_y = screenHeight - HINT_HEIGHT;
 
 	DrawRectangle(0, hint_y, screenWidth, HINT_HEIGHT, Color{ 0, 20, 40, 255 });
@@ -792,7 +792,7 @@ void ItemEditor::render_hint(const Renderer& r) const
 	}
 
 	Color hintColor = saved_flash ? Color{ 100, 255, 100, 255 } : Color{ 120, 160, 120, 255 };
-	r.draw_text_color(Vector2D{ 8, hint_y + 6 }, msg, hintColor);
+	renderer.draw_text_color(Vector2D{ 8, hint_y + 6 }, msg, hintColor);
 }
 
 // ---------------------------------------------------------------------------
@@ -813,9 +813,9 @@ ItemEditor::FieldId ItemEditor::current_field() const
 	return static_cast<FieldId>(fieldCursor);
 }
 
-std::string ItemEditor::field_label(FieldId f) const
+std::string ItemEditor::field_label(FieldId field) const
 {
-	switch (f)
+	switch (field)
 	{
 	case FieldId::NAME:
 		return "Name";
@@ -910,97 +910,97 @@ std::string ItemEditor::field_label(FieldId f) const
 	}
 }
 
-std::string ItemEditor::field_value(FieldId f) const
+std::string ItemEditor::field_value(FieldId field) const
 {
-	const ItemParams& p = working;
-	switch (f)
+	const ItemParams& params = working;
+	switch (field)
 	{
 	case FieldId::NAME:
 		return working.name;
 	case FieldId::CATEGORY:
 		return working.category;
 	case FieldId::ITEM_CLASS:
-		return std::string{ encode_item_class(p.itemClass) };
+		return std::string{ encode_item_class(params.itemClass) };
 	case FieldId::PICKABLE_TYPE:
-		return std::string{ encode_pickable_type(p.pickableType) };
+		return std::string{ encode_pickable_type(params.pickableType) };
 	case FieldId::COLOR:
-		return std::string{ color_pair_name(p.color) };
+		return std::string{ color_pair_name(params.color) };
 	case FieldId::VALUE:
-		return std::format("{}", p.value);
+		return std::format("{}", params.value);
 	case FieldId::BASE_WEIGHT:
-		return std::format("{}", p.baseWeight);
+		return std::format("{}", params.baseWeight);
 	case FieldId::WEIGHT:
-		return std::format("{}", p.weight);
+		return std::format("{}", params.weight);
 	case FieldId::LEVEL_MIN:
-		return std::format("{}", p.levelMin);
+		return std::format("{}", params.levelMin);
 	case FieldId::LEVEL_MAX:
-		return std::format("{}", p.levelMax);
+		return std::format("{}", params.levelMax);
 	case FieldId::LEVEL_SCALING:
-		return std::format("{:.2f}", p.levelScaling);
+		return std::format("{:.2f}", params.levelScaling);
 	case FieldId::CONSUMABLE_EFFECT:
-		return std::string{ consumable_effect_str(p.consumableEffect) };
+		return std::string{ consumable_effect_str(params.consumableEffect) };
 	case FieldId::CONSUMABLE_BUFF:
-		return std::string{ encode_buff_type(p.consumableBuffType) };
+		return std::string{ encode_buff_type(params.consumableBuffType) };
 	case FieldId::CONSUMABLE_AMT_DICE:
-		return std::format("{} ({})", p.consumableAmount.num, to_text(p.consumableAmount));
+		return std::format("{} ({})", params.consumableAmount.num, to_text(params.consumableAmount));
 	case FieldId::CONSUMABLE_AMT_SIDES:
-		return std::format("{}", p.consumableAmount.sides);
+		return std::format("{}", params.consumableAmount.sides);
 	case FieldId::CONSUMABLE_AMT_BONUS:
-		return std::format("{}", p.consumableAmount.bonus);
+		return std::format("{}", params.consumableAmount.bonus);
 	case FieldId::DURATION_TURNS_DICE:
-		return std::format("{} ({})", p.durationTurns.num, to_text(p.durationTurns));
+		return std::format("{} ({})", params.durationTurns.num, to_text(params.durationTurns));
 	case FieldId::DURATION_TURNS_SIDES:
-		return std::format("{}", p.durationTurns.sides);
+		return std::format("{}", params.durationTurns.sides);
 	case FieldId::DURATION_TURNS_BONUS:
-		return std::format("{}", p.durationTurns.bonus);
+		return std::format("{}", params.durationTurns.bonus);
 	case FieldId::DURATION:
-		return std::format("{}", p.duration);
+		return std::format("{}", params.duration);
 	case FieldId::TARGET_MODE:
-		return std::string{ encode_target_mode(p.targetMode) };
+		return std::string{ encode_target_mode(params.targetMode) };
 	case FieldId::SCROLL_ANIM:
-		return std::string{ encode_scroll_animation(p.scrollAnimation) };
+		return std::string{ encode_scroll_animation(params.scrollAnimation) };
 	case FieldId::RANGE:
-		return std::format("{}", p.range);
+		return std::format("{}", params.range);
 	case FieldId::DAMAGE:
-		return std::format("{}", p.damage);
+		return std::format("{}", params.damage);
 	case FieldId::CONFUSE_TURNS:
-		return std::format("{}", p.confuseTurns);
+		return std::format("{}", params.confuseTurns);
 	case FieldId::RANGED:
-		return p.ranged ? "yes" : "no";
+		return params.ranged ? "yes" : "no";
 	case FieldId::HAND_REQUIREMENT:
-		return std::string{ encode_hand_requirement(p.handRequirement) };
+		return std::string{ encode_hand_requirement(params.handRequirement) };
 	case FieldId::WEAPON_SIZE:
-		return std::string{ encode_weapon_size(p.weaponSize) };
+		return std::string{ encode_weapon_size(params.weaponSize) };
 	case FieldId::STRENGTH_RATING:
 	{
-		return std::format("{}", p.strengthRating);
+		return std::format("{}", params.strengthRating);
 	}
 	case FieldId::AC_BONUS:
-		return std::format("{}", p.acBonus);
+		return std::format("{}", params.acBonus);
 	case FieldId::EFFECT:
-		return std::string{ encode_magical_effect(p.effect) };
+		return std::string{ encode_magical_effect(params.effect) };
 	case FieldId::EFFECT_BONUS:
-		return std::format("{}", p.effectBonus);
+		return std::format("{}", params.effectBonus);
 	case FieldId::STR_BONUS:
-		return std::format("{}", p.strBonus);
+		return std::format("{}", params.strBonus);
 	case FieldId::DEX_BONUS:
-		return std::format("{}", p.dexBonus);
+		return std::format("{}", params.dexBonus);
 	case FieldId::CON_BONUS:
-		return std::format("{}", p.conBonus);
+		return std::format("{}", params.conBonus);
 	case FieldId::INT_BONUS:
-		return std::format("{}", p.intBonus);
+		return std::format("{}", params.intBonus);
 	case FieldId::WIS_BONUS:
-		return std::format("{}", p.wisBonus);
+		return std::format("{}", params.wisBonus);
 	case FieldId::CHA_BONUS:
-		return std::format("{}", p.chaBonus);
+		return std::format("{}", params.chaBonus);
 	case FieldId::APPLICATION:
-		return std::string{ encode_buff_application(p.application) };
+		return std::string{ encode_buff_application(params.application) };
 	case FieldId::EXCEPTIONAL_STRENGTH:
 	{
-		return std::format("{}", p.exceptionalStrength);
+		return std::format("{}", params.exceptionalStrength);
 	}
 	case FieldId::NUTRITION:
-		return std::format("{}", p.nutritionValue);
+		return std::format("{}", params.nutritionValue);
 	case FieldId::TILE:
 		return "(tile)";
 	default:
@@ -1008,177 +1008,177 @@ std::string ItemEditor::field_value(FieldId f) const
 	}
 }
 
-bool ItemEditor::field_is_string(FieldId f) const
+bool ItemEditor::field_is_string(FieldId field) const
 {
-	return f == FieldId::NAME || f == FieldId::CATEGORY;
+	return field == FieldId::NAME || field == FieldId::CATEGORY;
 }
 
-bool ItemEditor::field_is_toggle(FieldId f) const
+bool ItemEditor::field_is_toggle(FieldId field) const
 {
-	return f == FieldId::ITEM_CLASS || f == FieldId::PICKABLE_TYPE || f == FieldId::CONSUMABLE_EFFECT || f == FieldId::CONSUMABLE_BUFF || f == FieldId::TARGET_MODE || f == FieldId::SCROLL_ANIM || f == FieldId::RANGED || f == FieldId::HAND_REQUIREMENT || f == FieldId::WEAPON_SIZE || f == FieldId::EFFECT || f == FieldId::COLOR || f == FieldId::APPLICATION;
+	return field == FieldId::ITEM_CLASS || field == FieldId::PICKABLE_TYPE || field == FieldId::CONSUMABLE_EFFECT || field == FieldId::CONSUMABLE_BUFF || field == FieldId::TARGET_MODE || field == FieldId::SCROLL_ANIM || field == FieldId::RANGED || field == FieldId::HAND_REQUIREMENT || field == FieldId::WEAPON_SIZE || field == FieldId::EFFECT || field == FieldId::COLOR || field == FieldId::APPLICATION;
 }
 
-void ItemEditor::field_adjust(FieldId f, int delta)
+void ItemEditor::field_adjust(FieldId field, int delta)
 {
-	auto clamp_val = [](int v, int d, int lo, int hi) -> int
+	auto clamp_val = [](int value, int step, int low, int high) -> int
 	{
-		return std::clamp(v + d, lo, hi);
+		return std::clamp(value + step, low, high);
 	};
 
-	ItemParams& p = working;
-	switch (f)
+	ItemParams& params = working;
+	switch (field)
 	{
 	case FieldId::VALUE:
-		p.value = clamp_val(p.value, delta, 0, 99999);
+		params.value = clamp_val(params.value, delta, 0, 99999);
 		break;
 	case FieldId::BASE_WEIGHT:
-		p.baseWeight = clamp_val(p.baseWeight, delta, 0, 100);
+		params.baseWeight = clamp_val(params.baseWeight, delta, 0, 100);
 		break;
 	case FieldId::WEIGHT:
-		p.weight = clamp_val(p.weight, delta, 0, 1000);
+		params.weight = clamp_val(params.weight, delta, 0, 1000);
 		break;
 	case FieldId::LEVEL_MIN:
-		p.levelMin = clamp_val(p.levelMin, delta, 1, 20);
+		params.levelMin = clamp_val(params.levelMin, delta, 1, 20);
 		break;
 	case FieldId::LEVEL_MAX:
-		p.levelMax = clamp_val(p.levelMax, delta, 0, 20);
+		params.levelMax = clamp_val(params.levelMax, delta, 0, 20);
 		break;
 	case FieldId::LEVEL_SCALING:
 	{
-		float raw = p.levelScaling + static_cast<float>(delta) * 0.01f;
-		p.levelScaling = std::clamp(raw, 0.0f, 5.0f);
+		float raw = params.levelScaling + static_cast<float>(delta) * 0.01f;
+		params.levelScaling = std::clamp(raw, 0.0f, 5.0f);
 		break;
 	}
 	case FieldId::CONSUMABLE_AMT_DICE:
 	{
 		// No dice is a fixed amount; any dice need a die to roll, and a d2 is the least.
-		p.consumableAmount.num = clamp_val(p.consumableAmount.num, delta, 0, 99);
-		p.consumableAmount.sides = p.consumableAmount.num == 0 ? 0 : std::max(p.consumableAmount.sides, 2);
+		params.consumableAmount.num = clamp_val(params.consumableAmount.num, delta, 0, 99);
+		params.consumableAmount.sides = params.consumableAmount.num == 0 ? 0 : std::max(params.consumableAmount.sides, 2);
 		break;
 	}
 	case FieldId::CONSUMABLE_AMT_SIDES:
-		p.consumableAmount.sides = p.consumableAmount.num == 0 ? 0 : clamp_val(p.consumableAmount.sides, delta, 2, 20);
+		params.consumableAmount.sides = params.consumableAmount.num == 0 ? 0 : clamp_val(params.consumableAmount.sides, delta, 2, 20);
 		break;
 	case FieldId::CONSUMABLE_AMT_BONUS:
-		p.consumableAmount.bonus = clamp_val(p.consumableAmount.bonus, delta, 0, 9999);
+		params.consumableAmount.bonus = clamp_val(params.consumableAmount.bonus, delta, 0, 9999);
 		break;
 	case FieldId::DURATION_TURNS_DICE:
 	{
 		// No dice is a fixed duration; any dice need a die to roll, and a d2 is the least.
-		p.durationTurns.num = clamp_val(p.durationTurns.num, delta, 0, 99);
-		p.durationTurns.sides = p.durationTurns.num == 0 ? 0 : std::max(p.durationTurns.sides, 2);
+		params.durationTurns.num = clamp_val(params.durationTurns.num, delta, 0, 99);
+		params.durationTurns.sides = params.durationTurns.num == 0 ? 0 : std::max(params.durationTurns.sides, 2);
 		break;
 	}
 	case FieldId::DURATION_TURNS_SIDES:
-		p.durationTurns.sides = p.durationTurns.num == 0 ? 0 : clamp_val(p.durationTurns.sides, delta, 2, 20);
+		params.durationTurns.sides = params.durationTurns.num == 0 ? 0 : clamp_val(params.durationTurns.sides, delta, 2, 20);
 		break;
 	case FieldId::DURATION_TURNS_BONUS:
-		p.durationTurns.bonus = clamp_val(p.durationTurns.bonus, delta, 0, 99);
+		params.durationTurns.bonus = clamp_val(params.durationTurns.bonus, delta, 0, 99);
 		break;
 	case FieldId::DURATION:
-		p.duration = clamp_val(p.duration, delta, 0, 9999);
+		params.duration = clamp_val(params.duration, delta, 0, 9999);
 		break;
 	case FieldId::RANGE:
-		p.range = clamp_val(p.range, delta, 0, 50);
+		params.range = clamp_val(params.range, delta, 0, 50);
 		break;
 	case FieldId::DAMAGE:
-		p.damage = clamp_val(p.damage, delta, 0, 999);
+		params.damage = clamp_val(params.damage, delta, 0, 999);
 		break;
 	case FieldId::CONFUSE_TURNS:
-		p.confuseTurns = clamp_val(p.confuseTurns, delta, 0, 999);
+		params.confuseTurns = clamp_val(params.confuseTurns, delta, 0, 999);
 		break;
 	case FieldId::STRENGTH_RATING:
 	{
 		// 0 is an ordinary weapon; a rating is a Strength score, and Table 1 stops at 25.
-		p.strengthRating = clamp_val(p.strengthRating, delta, 0, 25);
+		params.strengthRating = clamp_val(params.strengthRating, delta, 0, 25);
 		break;
 	}
 	case FieldId::AC_BONUS:
-		p.acBonus = clamp_val(p.acBonus, delta, -10, 10);
+		params.acBonus = clamp_val(params.acBonus, delta, -10, 10);
 		break;
 	case FieldId::EFFECT_BONUS:
-		p.effectBonus = clamp_val(p.effectBonus, delta, 0, 20);
+		params.effectBonus = clamp_val(params.effectBonus, delta, 0, 20);
 		break;
 	case FieldId::STR_BONUS:
-		p.strBonus = clamp_val(p.strBonus, delta, -18, 18);
+		params.strBonus = clamp_val(params.strBonus, delta, -18, 18);
 		break;
 	case FieldId::DEX_BONUS:
-		p.dexBonus = clamp_val(p.dexBonus, delta, -18, 18);
+		params.dexBonus = clamp_val(params.dexBonus, delta, -18, 18);
 		break;
 	case FieldId::CON_BONUS:
-		p.conBonus = clamp_val(p.conBonus, delta, -18, 18);
+		params.conBonus = clamp_val(params.conBonus, delta, -18, 18);
 		break;
 	case FieldId::INT_BONUS:
-		p.intBonus = clamp_val(p.intBonus, delta, -18, 18);
+		params.intBonus = clamp_val(params.intBonus, delta, -18, 18);
 		break;
 	case FieldId::WIS_BONUS:
-		p.wisBonus = clamp_val(p.wisBonus, delta, -18, 18);
+		params.wisBonus = clamp_val(params.wisBonus, delta, -18, 18);
 		break;
 	case FieldId::CHA_BONUS:
-		p.chaBonus = clamp_val(p.chaBonus, delta, -18, 18);
+		params.chaBonus = clamp_val(params.chaBonus, delta, -18, 18);
 		break;
 	case FieldId::EXCEPTIONAL_STRENGTH:
 	{
-		p.exceptionalStrength = clamp_val(p.exceptionalStrength, delta, 0, 100);
+		params.exceptionalStrength = clamp_val(params.exceptionalStrength, delta, 0, 100);
 		break;
 	}
 	case FieldId::NUTRITION:
-		p.nutritionValue = clamp_val(p.nutritionValue, delta, 0, 9999);
+		params.nutritionValue = clamp_val(params.nutritionValue, delta, 0, 9999);
 		break;
 	default:
 		break;
 	}
 }
 
-void ItemEditor::field_toggle(FieldId f)
+void ItemEditor::field_toggle(FieldId field)
 {
-	ItemParams& p = working;
-	switch (f)
+	ItemParams& params = working;
+	switch (field)
 	{
 	case FieldId::COLOR:
-		p.color = next_color_pair(p.color);
+		params.color = next_color_pair(params.color);
 		break;
 	case FieldId::ITEM_CLASS:
-		p.itemClass = next_item_class(p.itemClass);
+		params.itemClass = next_item_class(params.itemClass);
 		break;
 	case FieldId::PICKABLE_TYPE:
-		p.pickableType = next_pickable_type(p.pickableType);
+		params.pickableType = next_pickable_type(params.pickableType);
 		break;
 	case FieldId::CONSUMABLE_EFFECT:
-		p.consumableEffect = next_consumable_effect(p.consumableEffect);
+		params.consumableEffect = next_consumable_effect(params.consumableEffect);
 		break;
 	case FieldId::CONSUMABLE_BUFF:
-		p.consumableBuffType = next_buff_type(p.consumableBuffType);
+		params.consumableBuffType = next_buff_type(params.consumableBuffType);
 		break;
 	case FieldId::TARGET_MODE:
-		p.targetMode = next_target_mode(p.targetMode);
+		params.targetMode = next_target_mode(params.targetMode);
 		break;
 	case FieldId::SCROLL_ANIM:
-		p.scrollAnimation = next_scroll_animation(p.scrollAnimation);
+		params.scrollAnimation = next_scroll_animation(params.scrollAnimation);
 		break;
 	case FieldId::RANGED:
-		p.ranged = !p.ranged;
+		params.ranged = !params.ranged;
 		break;
 	case FieldId::HAND_REQUIREMENT:
-		p.handRequirement = next_hand_requirement(p.handRequirement);
+		params.handRequirement = next_hand_requirement(params.handRequirement);
 		break;
 	case FieldId::WEAPON_SIZE:
-		p.weaponSize = next_weapon_size(p.weaponSize);
+		params.weaponSize = next_weapon_size(params.weaponSize);
 		break;
 	case FieldId::EFFECT:
-		p.effect = next_magical_effect(p.effect);
+		params.effect = next_magical_effect(params.effect);
 		break;
 	case FieldId::APPLICATION:
-		p.application = p.application == BuffApplication::ADD ? BuffApplication::SET : BuffApplication::ADD;
+		params.application = params.application == BuffApplication::ADD ? BuffApplication::SET : BuffApplication::ADD;
 		break;
 	default:
 		break;
 	}
 }
 
-void ItemEditor::field_set_string(FieldId f, std::string val)
+void ItemEditor::field_set_string(FieldId field, std::string val)
 {
-	switch (f)
+	switch (field)
 	{
 	case FieldId::NAME:
 		working.name = std::move(val);
