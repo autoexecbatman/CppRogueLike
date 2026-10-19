@@ -2,9 +2,10 @@
 
 The house order is private, then protected, then public (CLAUDE.md, C++ rules). This
 reads every class and struct body in the files it is given and reports each one whose
-explicit access labels ever step back down that order: a `private:` after a `public:`,
-or a `protected:` after a `public:`. Repeating a label is not a finding, so a class may
-open `private:` twice.
+access sections ever step back down that order: a `private:` after a `public:`, or a
+`protected:` after a `public:`. Repeating a label is not a finding, so a class may open
+`private:` twice. A struct's members before its first label are public, so they count as
+an implicit `public` section at that position.
 
     python docs/section_order.py              # every .h and .cpp directly in src/
     python docs/section_order.py src/Trap.h   # just the files named
@@ -14,6 +15,9 @@ Each finding is one line: the label that steps back, at its file:line, the class
 in, and that class's labels in order.
 
     src/GameLoopCoordinator.h:24  GameLoopCoordinator  public -> private
+    src/ItemEnhancements.h:131  ItemEnhancement  (public) -> private
+
+An implicit section is shown in parentheses.
 
 HOW IT READS. Comments, string literals and character literals are blanked first, line
 breaks kept, so line numbers stay true. Then a brace stack: a `{` opens a class body
@@ -22,11 +26,10 @@ when the text since the previous `;`, `{` or `}` ends in `class Name` or `struct
 `enum`. Every other `{` is an ordinary block. A label counts only at the top of its own
 class body, so a nested class keeps its own order and a function body holds none.
 
-WHAT IT CANNOT SEE. The implicit section before the first label - members a class holds
-privately, or a struct publicly, before any label is written - is not read, so a struct
-that declares members and then says `private:` is not reported. Macros that expand to
-labels or class heads are invisible, and so is code the preprocessor removes. It reads
-text, never a build.
+WHAT IT CANNOT SEE. A class's members before its first label are private, the lowest
+rank, so they can never be out of order and are not read. Macros that expand to labels
+or class heads are invisible, and so is code the preprocessor removes. It reads text,
+never a build.
 
 FALSIFICATIONS, run 2026-10-17 before the count was trusted:
 1. GameLoopCoordinator.h as it stood at 68314610 (public then private) was reported at
@@ -35,6 +38,15 @@ FALSIFICATIONS, run 2026-10-17 before the count was trusted:
    `class T` in its parameter list, a nested struct whose own order is right inside an
    outer class whose order is wrong, a label inside a string literal and one inside a
    comment: exactly one finding, the outer class's, at the right line.
+3. Run 2026-10-19, when the implicit public section of a struct was added: with
+   ItemEnhancements.h as it stood at 1164f488 (28 lines of members, then `private:`),
+   every file in src/ gave exactly one finding, ItemEnhancement at its `private:` line.
+   Before the rule it reported 0. After the private functions moved above an explicit
+   `public:`, the tree reports 0 again.
+4. The same day, a scratch header of six structs and classes: members then an explicit
+   `public:`, an empty struct, a template with `class T`, a nested enum before `private:`,
+   a class with leading members, and a struct opening `private:`. Exactly two findings,
+   the template and the nested enum, each at its `private:` line.
 """
 
 import argparse
@@ -45,6 +57,8 @@ import sys
 RANK = {"private": 0, "protected": 1, "public": 2}
 LABEL = re.compile(r"\b(public|protected|private)\s*:(?!:)")
 CLASS_HEAD = re.compile(r"\b(enum\s+)?(class|struct)\s+([A-Za-z_]\w*)")
+# A struct's members before its first label are public, shown as an implicit section.
+IMPLICIT_PUBLIC = "(public)"
 
 
 def blank_comments_and_literals(text):
@@ -88,10 +102,11 @@ def blank_comments_and_literals(text):
 
 
 def class_name_opened(statement):
-    """Returns the class a `{` after this text opens, or None for an ordinary block.
+    """Returns (name, keyword) for the class a `{` after this text opens, or None for a block.
 
     Example:
-        class_name_opened("class Trap : public TileFeature\\n")   # -> 'Trap'
+        class_name_opened("class Trap : public TileFeature\\n")   # -> ('Trap', 'class')
+        class_name_opened("struct Box\\n")                        # -> ('Box', 'struct')
         class_name_opened("enum class TrapType\\n")               # -> None
         class_name_opened("void Trap::save(json& j)\\n")          # -> None
     """
@@ -105,7 +120,7 @@ def class_name_opened(statement):
     # A parenthesis after the name means a function returning or taking a class.
     if "(" in statement[last.end():]:
         return None
-    return last.group(3)
+    return last.group(3), last.group(2)
 
 
 def findings_in(path):
@@ -116,7 +131,7 @@ def findings_in(path):
         # -> [(24, 'GameLoopCoordinator', ['public', 'private'])]
     """
     text = blank_comments_and_literals(path.read_text(encoding="utf-8", errors="replace"))
-    # Each frame is (class name or None, [(label, line), ...]).
+    # Each frame is (class head or None, [(label, line), ...]); a head is (name, keyword).
     stack = []
     statement_start = 0
     found = []
@@ -131,8 +146,8 @@ def findings_in(path):
             statement_start = index + 1
         elif char == "}":
             if stack:
-                name, labels = stack.pop()
-                found.extend(out_of_order(name, labels))
+                head, labels = stack.pop()
+                found.extend(out_of_order(head[0] if head else None, labels))
             statement_start = index + 1
         elif char == ";":
             statement_start = index + 1
@@ -143,6 +158,9 @@ def findings_in(path):
                 stack[-1][1].append((match.group(1), line))
                 index = match.end()
                 continue
+            # The first member of a struct, before any label, opens its implicit public section.
+            if stack[-1][0][1] == "struct" and not stack[-1][1] and not char.isspace():
+                stack[-1][1].append((IMPLICIT_PUBLIC, line))
         index += 1
     return found
 
@@ -153,14 +171,16 @@ def out_of_order(name, labels):
     Example:
         out_of_order("Box", [("public", 3), ("private", 9)])   # -> [(9, 'Box', ['public', 'private'])]
         out_of_order("Box", [("private", 3), ("public", 9)])   # -> []
+        out_of_order("Box", [("(public)", 2), ("private", 9)]) # -> [(9, 'Box', ['(public)', 'private'])]
     """
     if name is None:
         return []
     highest = -1
     for label, line in labels:
-        if RANK[label] < highest:
+        rank = RANK["public"] if label == IMPLICIT_PUBLIC else RANK[label]
+        if rank < highest:
             return [(line, name, [each for each, _ in labels])]
-        highest = max(highest, RANK[label])
+        highest = max(highest, rank)
     return []
 
 

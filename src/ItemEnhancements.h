@@ -69,6 +69,19 @@ enum class SuffixType
 
 struct ItemEnhancement
 {
+private:
+	// Clears a magical prefix, before the effects are applied - they accumulate,
+	// so a prefix cleared afterwards would leave its bonuses behind.
+	void strip_magical_prefix();
+
+	static PrefixType get_random_weapon_prefix(RandomDice& dice);
+	static PrefixType get_random_armor_prefix(RandomDice& dice);
+	static PrefixType get_random_universal_prefix(RandomDice& dice);
+	static SuffixType get_random_combat_suffix(RandomDice& dice);
+	static SuffixType get_random_resistance_suffix(RandomDice& dice);
+	static SuffixType get_random_special_suffix(RandomDice& dice);
+
+public:
 	PrefixType prefix{ PrefixType::NONE };
 	SuffixType suffix{ SuffixType::NONE };
 
@@ -125,18 +138,4 @@ struct ItemEnhancement
 	static ItemEnhancement generate_random_enhancement(MagicalPrefixes magicalPrefixes, RandomDice& dice);
 	static ItemEnhancement generate_weapon_enhancement(MagicalPrefixes magicalPrefixes, RandomDice& dice);
 	static ItemEnhancement generate_armor_enhancement(MagicalPrefixes magicalPrefixes, RandomDice& dice);
-
-	// Rarity-based generation
-
-private:
-	// Clears a magical prefix, before the effects are applied - they accumulate,
-	// so a prefix cleared afterwards would leave its bonuses behind.
-	void strip_magical_prefix();
-
-	static PrefixType get_random_weapon_prefix(RandomDice& dice);
-	static PrefixType get_random_armor_prefix(RandomDice& dice);
-	static PrefixType get_random_universal_prefix(RandomDice& dice);
-	static SuffixType get_random_combat_suffix(RandomDice& dice);
-	static SuffixType get_random_resistance_suffix(RandomDice& dice);
-	static SuffixType get_random_special_suffix(RandomDice& dice);
 };

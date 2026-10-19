@@ -435,3 +435,7 @@ CMakeSettings.json
 # the task that found it. Working notes for whoever picks the repository up next,
 # not part of the source.
 /issues/
+
+# What each item cost: one JSON line per item, with wall-clock per phase, build count
+# and CI time. Working data for deciding where the process is slow, not part of the source.
+/ledger/
