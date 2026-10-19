@@ -152,4 +152,22 @@ TEST_F(FovMapTest, AWalkableCellCanStillBlockSight)
 	EXPECT_FALSE(fov.is_in_fov(STANDING_AT + 2, STANDING_AT)) << "sight passed a cell that blocks it";
 }
 
+// Sight reaches every side. Each cell lies inside one octant's wedge, off the axes and
+// diagonals where neighbouring octants overlap, so an octant mapped wrongly leaves its
+// cell dark.
+TEST_F(FovMapTest, SightReachesIntoEveryOctant)
+{
+	open_everything();
+	look_from_the_middle();
+
+	EXPECT_TRUE(fov.is_in_fov(STANDING_AT + 3, STANDING_AT - 1));
+	EXPECT_TRUE(fov.is_in_fov(STANDING_AT + 3, STANDING_AT + 1));
+	EXPECT_TRUE(fov.is_in_fov(STANDING_AT - 3, STANDING_AT - 1));
+	EXPECT_TRUE(fov.is_in_fov(STANDING_AT - 3, STANDING_AT + 1));
+	EXPECT_TRUE(fov.is_in_fov(STANDING_AT - 1, STANDING_AT + 3));
+	EXPECT_TRUE(fov.is_in_fov(STANDING_AT + 1, STANDING_AT + 3));
+	EXPECT_TRUE(fov.is_in_fov(STANDING_AT - 1, STANDING_AT - 3));
+	EXPECT_TRUE(fov.is_in_fov(STANDING_AT + 1, STANDING_AT - 3));
+}
+
 // end of file: FovMapTest.cpp

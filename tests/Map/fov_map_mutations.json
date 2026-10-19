@@ -15,8 +15,8 @@
     },
     {
       "file": "src/FovMap.cpp",
-      "original": "\tcells[cell_index(col, row)].visible = true;\n\n\tstatic const int octantTransforms",
-      "mutated": "\tstatic const int octantTransforms",
+      "original": "\tcells[cell_index(col, row)].visible = true;\n\n\t// The eight octants",
+      "mutated": "\t// The eight octants",
       "catches": "the cell underfoot unlit, so a creature cannot see where it stands"
     },
     {
@@ -30,6 +30,12 @@
       "original": "\t\t\telse if (!in_bounds(col, row) || !cells[cell_index(col, row)].transparent)\n\t\t\t{\n\t\t\t\tblocked = true;\n",
       "mutated": "\t\t\telse if (false)\n\t\t\t{\n\t\t\t\tblocked = true;\n",
       "catches": "nothing ever casting a shadow, so a wall is seen through"
+    },
+    {
+      "file": "src/FovMap.cpp",
+      "original": "\t\t{ 0, -1, 1, 0 },\n",
+      "mutated": "\t\t{ 0, 1, 1, 0 },\n",
+      "catches": "one octant mapped onto another's cells, so a wedge of the view is never scanned"
     }
   ]
 }

@@ -1,9 +1,19 @@
-// FovMap.cpp -- standalone FOV grid using recursive shadowcasting.
+// file: FovMap.cpp
+//
+// The field-of-view grid's storage and its recursive shadowcasting. FovMap.h holds the
+// usage and each function's contract.
+
+#include <array>
+#include <cassert>
+#include <cstddef>
+
 #include "FovMap.h"
 
 FovMap::FovMap(int gridWidth, int gridHeight)
-	: width(gridWidth), height(gridHeight), cells(gridWidth * gridHeight)
+	: width(gridWidth), height(gridHeight)
 {
+	assert(gridWidth >= 0 && gridHeight >= 0 && "FovMap: a grid side is negative");
+	cells.resize(static_cast<std::size_t>(gridWidth) * static_cast<std::size_t>(gridHeight));
 }
 
 void FovMap::set_properties(int col, int row, FovProperties properties) noexcept
@@ -43,19 +53,11 @@ bool FovMap::in_bounds(int col, int row) const noexcept
 	return col >= 0 && col < width && row >= 0 && row < height;
 }
 
-int FovMap::cell_index(int col, int row) const noexcept
+std::size_t FovMap::cell_index(int col, int row) const noexcept
 {
-	return row * width + col;
+	assert(in_bounds(col, row) && "FovMap::cell_index: the caller did not check in_bounds");
+	return static_cast<std::size_t>(row) * static_cast<std::size_t>(width) + static_cast<std::size_t>(col);
 }
-
-// ---------------------------------------------------------------------------
-// FOV -- recursive shadowcasting
-//
-// Reference: Bjorn Pettersen's algorithm (Roguebasin C++ shadowcasting).
-// For each of 8 octants, scan_octant() casts shadows row by row.
-//   octantTransforms[4][8]: each column is one octant's four coefficients, in the order
-//   scan_octant takes them.
-// ---------------------------------------------------------------------------
 
 void FovMap::compute_fov(int col, int row, int radius)
 {
@@ -71,26 +73,21 @@ void FovMap::compute_fov(int col, int row, int radius)
 
 	cells[cell_index(col, row)].visible = true;
 
-	static const int octantTransforms[4][8] = {
-		{ 1, 0, 0, -1, -1, 0, 0, 1 },
-		{ 0, 1, -1, 0, 0, -1, 1, 0 },
-		{ 0, 1, 1, 0, 0, -1, -1, 0 },
-		{ 1, 0, 0, 1, -1, 0, 0, -1 },
-	};
+	// The eight octants, each mapping the scan's offsets onto the grid.
+	static constexpr std::array<OctantTransform, 8> OCTANT_TRANSFORMS{ {
+		{ 1, 0, 0, 1 },
+		{ 0, 1, 1, 0 },
+		{ 0, -1, 1, 0 },
+		{ -1, 0, 0, 1 },
+		{ -1, 0, 0, -1 },
+		{ 0, -1, -1, 0 },
+		{ 0, 1, -1, 0 },
+		{ 1, 0, 0, -1 },
+	} };
 
-	for (int octant = 0; octant < 8; ++octant)
+	for (const OctantTransform& transform : OCTANT_TRANSFORMS)
 	{
-		scan_octant(
-			col,
-			row,
-			radius,
-			1,
-			1.0f,
-			0.0f,
-			octantTransforms[0][octant],
-			octantTransforms[1][octant],
-			octantTransforms[2][octant],
-			octantTransforms[3][octant]);
+		scan_octant(col, row, radius, 1, 1.0f, 0.0f, transform);
 	}
 }
 
@@ -101,10 +98,7 @@ void FovMap::scan_octant(
 	int firstDepth,
 	float start,
 	float end,
-	int colPerColOffset,
-	int colPerRowOffset,
-	int rowPerColOffset,
-	int rowPerRowOffset)
+	const OctantTransform& transform)
 {
 	if (start < end)
 	{
@@ -133,8 +127,8 @@ void FovMap::scan_octant(
 				break;
 			}
 
-			const int col = originCol + colOffset * colPerColOffset + rowOffset * colPerRowOffset;
-			const int row = originRow + colOffset * rowPerColOffset + rowOffset * rowPerRowOffset;
+			const int col = originCol + colOffset * transform.colPerColOffset + rowOffset * transform.colPerRowOffset;
+			const int row = originRow + colOffset * transform.rowPerColOffset + rowOffset * transform.rowPerRowOffset;
 
 			if (in_bounds(col, row) && colOffset * colOffset + rowOffset * rowOffset <= radius * radius)
 			{
@@ -158,7 +152,7 @@ void FovMap::scan_octant(
 				blocked = true;
 				if (depth < radius)
 				{
-					scan_octant(originCol, originRow, radius, depth + 1, start, leftSlope, colPerColOffset, colPerRowOffset, rowPerColOffset, rowPerRowOffset);
+					scan_octant(originCol, originRow, radius, depth + 1, start, leftSlope, transform);
 				}
 				nextStart = rightSlope;
 			}
