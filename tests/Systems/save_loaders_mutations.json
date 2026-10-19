@@ -21,14 +21,14 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": "\tkillCount = j.at(\"killCount\").get<int>();",
-      "mutated": "\tkillCount = j.value(\"killCount\", 0);",
+      "original": "\tkillCount = source.at(\"killCount\").get<int>();",
+      "mutated": "\tkillCount = source.value(\"killCount\", 0);",
       "catches": "a player with no kill count loading at zero"
     },
     {
       "file": "src/Player.cpp",
-      "original": "\tmemorizedSpells = j.at(\"memorizedSpells\").get<std::vector<std::string>>();",
-      "mutated": "\tmemorizedSpells = j.value(\"memorizedSpells\", std::vector<std::string>{});",
+      "original": "\tmemorizedSpells = source.at(\"memorizedSpells\").get<std::vector<std::string>>();",
+      "mutated": "\tmemorizedSpells = source.value(\"memorizedSpells\", std::vector<std::string>{});",
       "catches": "a player's memorised spells lost without a word"
     },
     {
@@ -39,13 +39,13 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tif (j.contains(\"healthPool\"))\n",
+      "original": "\tif (source.contains(\"healthPool\"))\n",
       "mutated": "\tif (false)\n",
       "catches": "a saved player loading with no health pool, which the HUD reads on the first frame"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tif (j.contains(\"armorClass\"))\n",
+      "original": "\tif (source.contains(\"armorClass\"))\n",
       "mutated": "\tif (false)\n",
       "catches": "a saved player loading with no armour class, which every attack against it reads"
     },

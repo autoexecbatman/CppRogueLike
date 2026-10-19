@@ -23,6 +23,6 @@ public:
 	// The name its save carries, so a load builds a ranged Ai and not a melee one.
 	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::RANGED_MONSTER; }
 
-	void load(const json& j) override;
-	void save(json& j) override;
+	void load(const json& source) override;
+	void save(json& output) override;
 };

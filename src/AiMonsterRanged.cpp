@@ -89,24 +89,24 @@ bool AiMonsterRanged::tryRangedAttack(Creature& owner, Vector2D targetPos, GameC
 	return true;
 }
 
-void AiMonsterRanged::load(const json& j)
+void AiMonsterRanged::load(const json& source)
 {
-	AiMonster::load(j);
+	AiMonster::load(source);
 	// Additional ranged AI properties can be loaded here
-	if (j.contains("maxRangeDistance"))
+	if (source.contains("maxRangeDistance"))
 	{
-		maxRangeDistance = j.at("maxRangeDistance").get<int>();
+		maxRangeDistance = source.at("maxRangeDistance").get<int>();
 	}
-	if (j.contains("optimalDistance"))
+	if (source.contains("optimalDistance"))
 	{
-		optimalDistance = j.at("optimalDistance").get<int>();
+		optimalDistance = source.at("optimalDistance").get<int>();
 	}
 }
 
-void AiMonsterRanged::save(json& j)
+void AiMonsterRanged::save(json& output)
 {
-	AiMonster::save(j);
+	AiMonster::save(output);
 	// Additional ranged AI properties
-	j["maxRangeDistance"] = maxRangeDistance;
-	j["optimalDistance"] = optimalDistance;
+	output["maxRangeDistance"] = maxRangeDistance;
+	output["optimalDistance"] = optimalDistance;
 }

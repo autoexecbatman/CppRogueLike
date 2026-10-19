@@ -23,6 +23,6 @@ public:
 	AttackResult attack(Creature& target, AttackKind kind, GameContext& ctx) override;
 
 	// Player has no base DamageInfo to serialize.
-	void load(const json& j) override;
-	void save(json& j) override;
+	void load(const json& source) override;
+	void save(json& output) override;
 };

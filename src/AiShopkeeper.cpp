@@ -27,11 +27,11 @@ void AiShopkeeper::on_created(Creature& owner, GameContext& ctx)
 	ShopkeeperFactory::open_shop(owner, ctx.levelManager->get_dungeon_level(), ctx);
 }
 
-void AiShopkeeper::load([[maybe_unused]] const json& j)
+void AiShopkeeper::load([[maybe_unused]] const json& source)
 {
 }
 
-void AiShopkeeper::save(json& j)
+void AiShopkeeper::save(json& output)
 {
-	j["type"] = encode_ai_type(get_ai_type());
+	output["type"] = encode_ai_type(get_ai_type());
 }

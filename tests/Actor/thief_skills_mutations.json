@@ -111,7 +111,7 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": "\tj[\"thiefSkillPoints\"] = thiefSkillPoints;",
+      "original": "\toutput[\"thiefSkillPoints\"] = thiefSkillPoints;",
       "mutated": "",
       "catches": "a character's spent points not written to the save at all"
     },

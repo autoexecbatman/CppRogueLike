@@ -33,7 +33,7 @@
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\t\t\tit->application = application;\n",
+      "original": "\t\t\tfound->application = application;\n",
       "mutated": "",
       "catches": "a stronger casting over a running buff keeping the old one's application"
     },

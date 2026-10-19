@@ -15,8 +15,8 @@
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\tj[\"damageInfo\"][\"type\"] = damage_type_name(damageInfo.damageType);",
-      "mutated": "\tj[\"damageInfo\"][\"type\"] = damage_type_name(DamageType::PHYSICAL);",
+      "original": "\toutput[\"damageInfo\"][\"type\"] = damage_type_name(damageInfo.damageType);",
+      "mutated": "\toutput[\"damageInfo\"][\"type\"] = damage_type_name(DamageType::PHYSICAL);",
       "catches": "every attack saved as physical, which a round trip against the same saver cannot see"
     },
     {

@@ -105,29 +105,29 @@ static std::optional<int> later_ending(std::optional<int> first, std::optional<i
 static void grant_buff(Creature& creature, BuffType type, int value, std::optional<int> expiry, BuffApplication application) noexcept
 {
 	// Find if buff already exists
-	auto matches_type = [type](const Buff& b)
+	auto matches_type = [type](const Buff& buff)
 	{
-		return b.type == type;
+		return buff.type == type;
 	};
-	auto it = std::ranges::find_if(creature.activeBuffs, matches_type);
+	auto found = std::ranges::find_if(creature.activeBuffs, matches_type);
 
-	if (it != creature.activeBuffs.end())
+	if (found != creature.activeBuffs.end())
 	{
 		// A save is good against "that casting of the spell" (Player's Handbook, PDF page
 		// 436), so a casting over a running one is met with fresh saves.
-		it->opponentSaves.clear();
+		found->opponentSaves.clear();
 
 		// AD&D 2e: Same buff type - take highest value, extend duration
-		if (value > it->value)
+		if (value > found->value)
 		{
-			it->value = value; // Better buff, update value
-			it->expiryTime = expiry; // The new casting's ending replaces the old one
-			it->application = application;
+			found->value = value; // Better buff, update value
+			found->expiryTime = expiry; // The new casting's ending replaces the old one
+			found->application = application;
 		}
 		else
 		{
 			// Weaker or equal buff, so it can only make the one already running last longer
-			it->expiryTime = later_ending(it->expiryTime, expiry);
+			found->expiryTime = later_ending(found->expiryTime, expiry);
 		}
 	}
 	else
@@ -159,9 +159,9 @@ void BuffSystem::add_buff_until_broken(Creature& creature, BuffType type) noexce
 void BuffSystem::remove_buff(Creature& creature, BuffType type) noexcept
 {
 	// Remove buff - no stat restoration needed, getters calculate on the fly
-	auto matches_type = [type](const Buff& b)
+	auto matches_type = [type](const Buff& buff)
 	{
-		return b.type == type;
+		return buff.type == type;
 	};
 	std::erase_if(creature.activeBuffs, matches_type);
 
@@ -172,9 +172,9 @@ void BuffSystem::update_creature_buffs(Creature& creature, int currentTime) noex
 {
 	// A buff the clock has reached or passed is over. Asked rather than counted, so the
 	// answer is the same however many times a creature is driven in one round.
-	auto is_expired = [currentTime](const Buff& b)
+	auto is_expired = [currentTime](const Buff& buff)
 	{
-		return b.expiryTime.has_value() && currentTime >= *b.expiryTime;
+		return buff.expiryTime.has_value() && currentTime >= *buff.expiryTime;
 	};
 
 	std::erase_if(creature.activeBuffs, is_expired);
@@ -185,34 +185,34 @@ void BuffSystem::update_creature_buffs(Creature& creature, int currentTime) noex
 
 int BuffSystem::get_buff_value(const Creature& creature, BuffType type) const noexcept
 {
-	auto matches_type = [type](const Buff& b)
+	auto matches_type = [type](const Buff& buff)
 	{
-		return b.type == type;
+		return buff.type == type;
 	};
-	auto it = std::ranges::find_if(creature.activeBuffs, matches_type);
-	return it != creature.activeBuffs.end() ? it->value : 0;
+	auto found = std::ranges::find_if(creature.activeBuffs, matches_type);
+	return found != creature.activeBuffs.end() ? found->value : 0;
 }
 
 int BuffSystem::get_buff_turns(const Creature& creature, BuffType type, int currentTime) const noexcept
 {
-	auto matches_type = [type](const Buff& b)
+	auto matches_type = [type](const Buff& buff)
 	{
-		return b.type == type;
+		return buff.type == type;
 	};
-	auto it = std::ranges::find_if(creature.activeBuffs, matches_type);
-	if (it == creature.activeBuffs.end())
+	auto found = std::ranges::find_if(creature.activeBuffs, matches_type);
+	if (found == creature.activeBuffs.end())
 	{
 		return 0;
 	}
-	assert(it->expiryTime.has_value() && "get_buff_turns: a buff lasting until broken has no rounds to count");
-	return rounds_remaining(currentTime, *it->expiryTime);
+	assert(found->expiryTime.has_value() && "get_buff_turns: a buff lasting until broken has no rounds to count");
+	return rounds_remaining(currentTime, *found->expiryTime);
 }
 
 bool BuffSystem::has_buff(const Creature& creature, BuffType type) const noexcept
 {
-	auto matches_type = [type](const Buff& b)
+	auto matches_type = [type](const Buff& buff)
 	{
-		return b.type == type;
+		return buff.type == type;
 	};
 	return std::ranges::any_of(creature.activeBuffs, matches_type);
 }

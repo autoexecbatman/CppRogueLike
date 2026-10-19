@@ -39,19 +39,19 @@
         },
         {
             "file": "src/Creature.cpp",
-            "original": "\tcorpseName = j.at(\"corpseName\").get<std::string>();\n",
+            "original": "\tcorpseName = source.at(\"corpseName\").get<std::string>();\n",
             "mutated": "",
             "catches": "a loaded creature forgetting what its corpse is called"
         },
         {
             "file": "src/Creature.cpp",
-            "original": "\tcorpseNutrition = j.at(\"corpseNutrition\").get<int>();\n",
+            "original": "\tcorpseNutrition = source.at(\"corpseNutrition\").get<int>();\n",
             "mutated": "",
             "catches": "a loaded creature forgetting its corpse's nutrition"
         },
         {
             "file": "src/Creature.cpp",
-            "original": "\tcorpseTaste = j.at(\"corpseTaste\").get<std::string>();\n",
+            "original": "\tcorpseTaste = source.at(\"corpseTaste\").get<std::string>();\n",
             "mutated": "",
             "catches": "a loaded creature forgetting its corpse's taste"
         },
@@ -123,14 +123,14 @@
         },
         {
             "file": "src/Creature.cpp",
-            "original": "\tcorpseEdibility = corpse_edibility_from_record(j.at(\"corpseEdible\").get<bool>());\n",
+            "original": "\tcorpseEdibility = corpse_edibility_from_record(source.at(\"corpseEdible\").get<bool>());\n",
             "mutated": "",
             "catches": "a loaded creature forgetting its corpse is inedible"
         },
         {
             "file": "src/Creature.cpp",
-            "original": "\tj[\"corpseEdible\"] = is_corpse_edible(corpseEdibility);\n",
-            "mutated": "\tj[\"corpseEdible\"] = true;\n",
+            "original": "\toutput[\"corpseEdible\"] = is_corpse_edible(corpseEdibility);\n",
+            "mutated": "\toutput[\"corpseEdible\"] = true;\n",
             "catches": "a saved creature's corpse made edible"
         },
         {

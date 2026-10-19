@@ -171,12 +171,12 @@ void AiSpider::move_toward_player(Creature& owner, GameContext& ctx)
 {
 	// Get direction to player
 	Vector2D dirToPlayer = ctx.player()->position - owner.position;
-	int dx = (dirToPlayer.x != 0) ? (dirToPlayer.x > 0 ? 1 : -1) : 0;
-	int dy = (dirToPlayer.y != 0) ? (dirToPlayer.y > 0 ? 1 : -1) : 0;
+	int stepCol = (dirToPlayer.x != 0) ? (dirToPlayer.x > 0 ? 1 : -1) : 0;
+	int stepRow = (dirToPlayer.y != 0) ? (dirToPlayer.y > 0 ? 1 : -1) : 0;
 
 	// Straight at the player, then along each axis alone; the first step that is not
 	// refused is the turn. An axis the player shares with the spider is no step at all.
-	for (const Vector2D& direction : { Vector2D{ dx, dy }, Vector2D{ dx, 0 }, Vector2D{ 0, dy } })
+	for (const Vector2D& direction : { Vector2D{ stepCol, stepRow }, Vector2D{ stepCol, 0 }, Vector2D{ 0, stepRow } })
 	{
 		if (direction == Vector2D{ 0, 0 })
 		{
@@ -193,12 +193,12 @@ void AiSpider::random_move(Creature& owner, GameContext& ctx)
 {
 	assert(ctx.dice && "AiSpider::random_move: called without dice");
 
-	int dx = ctx.dice->roll(-1, 1);
-	int dy = ctx.dice->roll(-1, 1);
+	int deltaCol = ctx.dice->roll(-1, 1);
+	int deltaRow = ctx.dice->roll(-1, 1);
 
-	if (dx != 0 || dy != 0)
+	if (deltaCol != 0 || deltaRow != 0)
 	{
-		Pathfinding::step(owner, owner.position + Vector2D{ dx, dy }, ctx);
+		Pathfinding::step(owner, owner.position + Vector2D{ deltaCol, deltaRow }, ctx);
 	}
 }
 
@@ -224,32 +224,32 @@ void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameCont
 	std::vector<Vector2D> possibleMoves;
 
 	// Get possible moves (all adjacent tiles)
-	for (int dy = -1; dy <= 1; dy++)
+	for (int deltaRow = -1; deltaRow <= 1; deltaRow++)
 	{
-		for (int dx = -1; dx <= 1; dx++)
+		for (int deltaCol = -1; deltaCol <= 1; deltaCol++)
 		{
-			if (dx == 0 && dy == 0)
+			if (deltaCol == 0 && deltaRow == 0)
 			{
 				continue; // Skip current position
 			}
 
-			Vector2D newPos = owner.position + Vector2D{ dx, dy };
+			Vector2D newPos = owner.position + Vector2D{ deltaCol, deltaRow };
 
 			// Check if position is walkable and not occupied
 			if (Pathfinding::can_enter(owner, newPos, ctx))
 			{
 				// Check if this position is adjacent to a wall
 				bool adjacentToWall = false;
-				for (int wy = -1; wy <= 1; wy++)
+				for (int wallDeltaRow = -1; wallDeltaRow <= 1; wallDeltaRow++)
 				{
-					for (int wx = -1; wx <= 1; wx++)
+					for (int wallDeltaCol = -1; wallDeltaCol <= 1; wallDeltaCol++)
 					{
-						if (wx == 0 && wy == 0)
+						if (wallDeltaCol == 0 && wallDeltaRow == 0)
 						{
 							continue;
 						}
 
-						Vector2D wallCheck = newPos + Vector2D{ wx, wy };
+						Vector2D wallCheck = newPos + Vector2D{ wallDeltaCol, wallDeltaRow };
 						if (ctx.map->is_wall(wallCheck))
 						{
 							adjacentToWall = true;
@@ -467,27 +467,27 @@ bool AiSpider::is_good_ambush_spot(Vector2D position, GameContext& ctx)
 	return metrics.wallCount >= 2 || metrics.hasCorner;
 }
 
-void AiSpider::load(const json& j)
+void AiSpider::load(const json& source)
 {
-	AiMonster::load(j);
+	AiMonster::load(source);
 
 	// Load AiSpider specific data
-	if (j.contains("ambushEndTime"))
+	if (source.contains("ambushEndTime"))
 	{
-		ambushEndTime = j.at("ambushEndTime").get<int>();
+		ambushEndTime = source.at("ambushEndTime").get<int>();
 	}
 
-	if (j.contains("isAmbushing"))
+	if (source.contains("isAmbushing"))
 	{
-		isAmbushing = j.at("isAmbushing").get<bool>();
+		isAmbushing = source.at("isAmbushing").get<bool>();
 	}
 }
 
-void AiSpider::save(json& j)
+void AiSpider::save(json& output)
 {
-	AiMonster::save(j);
-	j["type"] = encode_ai_type(get_ai_type());
+	AiMonster::save(output);
+	output["type"] = encode_ai_type(get_ai_type());
 
-	j["ambushEndTime"] = ambushEndTime;
-	j["isAmbushing"] = isAmbushing;
+	output["ambushEndTime"] = ambushEndTime;
+	output["isAmbushing"] = isAmbushing;
 }

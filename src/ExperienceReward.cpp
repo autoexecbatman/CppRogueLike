@@ -1,11 +1,11 @@
 #include "ExperienceReward.h"
 
-void ExperienceReward::load(const json& j)
+void ExperienceReward::load(const json& source)
 {
-	xp = j.at("xp").get<int>();
+	xp = source.at("xp").get<int>();
 }
 
-void ExperienceReward::save(json& j) const
+void ExperienceReward::save(json& output) const
 {
-	j["xp"] = xp;
+	output["xp"] = xp;
 }

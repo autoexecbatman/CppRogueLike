@@ -51,8 +51,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tj[\"exceptionalStrength\"] = exceptionalStrength;",
-      "mutated": "\tj[\"exceptionalStrength\"] = 0;",
+      "original": "\toutput[\"exceptionalStrength\"] = exceptionalStrength;",
+      "mutated": "\toutput[\"exceptionalStrength\"] = 0;",
       "catches": "exceptional Strength lost in a save"
     },
     {

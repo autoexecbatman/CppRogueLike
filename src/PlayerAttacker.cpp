@@ -85,10 +85,10 @@ AttackResult PlayerAttacker::attack(Creature& target, AttackKind kind, GameConte
 
 // A player's damage comes from the weapon in hand, which the item itself
 // serializes, so there is nothing here to write or read back.
-void PlayerAttacker::load([[maybe_unused]] const json& j)
+void PlayerAttacker::load([[maybe_unused]] const json& source)
 {
 }
 
-void PlayerAttacker::save([[maybe_unused]] json& j)
+void PlayerAttacker::save([[maybe_unused]] json& output)
 {
 }

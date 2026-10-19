@@ -190,8 +190,8 @@ public:
 	// from whether anything is in it.
 	[[nodiscard]] bool has_slot(EquipmentSlot slot) const noexcept;
 
-	void load(const json& j) override;
-	void save(json& j) override;
+	void load(const json& source) override;
+	void save(json& output) override;
 
 	virtual void update(GameContext& ctx);
 
@@ -299,9 +299,9 @@ public:
 
 	float get_attacks_per_round() const noexcept { return attacksPerRound; }
 
-	void set_creature_class(CreatureClass cc) noexcept { creatureClass = cc; }
+	void set_creature_class(CreatureClass newClass) noexcept { creatureClass = newClass; }
 
-	void set_hit_die(int hd) noexcept { hitDie = hd; }
+	void set_hit_die(int newHitDie) noexcept { hitDie = newHitDie; }
 
 	void set_attacks_per_round(float apr) noexcept { attacksPerRound = apr; }
 

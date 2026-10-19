@@ -35,6 +35,6 @@ public:
 
 	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::WEB_SPINNER; }
 
-	void load(const json& j) override;
-	void save(json& j) override;
+	void load(const json& source) override;
+	void save(json& output) override;
 };

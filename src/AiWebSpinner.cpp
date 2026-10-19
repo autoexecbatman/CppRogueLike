@@ -182,20 +182,20 @@ bool AiWebSpinner::try_create_web(Creature& owner, GameContext& ctx)
 	if (ctx.map->is_in_fov(owner.position) && distToPlayer < 10)
 	{
 		// If player can see spider, create web between spider and player
-		int dx = ctx.player()->position.x - owner.position.x;
-		int dy = ctx.player()->position.y - owner.position.y;
+		int deltaCol = ctx.player()->position.x - owner.position.x;
+		int deltaRow = ctx.player()->position.y - owner.position.y;
 
-		if (dx != 0)
+		if (deltaCol != 0)
 		{
-			dx = dx / std::abs(dx);
+			deltaCol = deltaCol / std::abs(deltaCol);
 		}
-		if (dy != 0)
+		if (deltaRow != 0)
 		{
-			dy = dy / std::abs(dy);
+			deltaRow = deltaRow / std::abs(deltaRow);
 		}
 
 		// Position web to block player's path
-		webCenter = owner.position + Vector2D{ dx * 2, dy * 2 };
+		webCenter = owner.position + Vector2D{ deltaCol * 2, deltaRow * 2 };
 
 		// Make sure center is in bounds
 		webCenter.x = std::max(0, std::min(webCenter.x, ctx.map->get_width() - 1));
@@ -295,19 +295,19 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 	{
 	case WebPattern::CIRCULAR:
 		// Create a circular/oval web
-		for (int y = -size; y <= size; y++)
+		for (int offsetRow = -size; offsetRow <= size; offsetRow++)
 		{
-			for (int x = -size; x <= size; x++)
+			for (int offsetCol = -size; offsetCol <= size; offsetCol++)
 			{
 
-				float normalizedDist = ((float)(x * x) / (size * size)) + ((float)(y * y) / (size * size));
+				float normalizedDist = ((float)(offsetCol * offsetCol) / (size * size)) + ((float)(offsetRow * offsetRow) / (size * size));
 
 				// Create web with higher density near the edges
 				if (normalizedDist <= 1.0f &&
 					(normalizedDist >= 0.7f || ctx.dice->d100() < 40))
 				{
 
-					Vector2D pos = center + Vector2D{ x, y };
+					Vector2D pos = center + Vector2D{ offsetCol, offsetRow };
 					if (is_valid_web_position(pos, ctx))
 					{
 						webPositions.push_back(pos);
@@ -323,18 +323,18 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 			float angle = 0.0f;
 			float radiusStep = (float)size / 20.0f;
 
-			for (int i = 0; i < 20 * size; i++)
+			for (int spiralStep = 0; spiralStep < 20 * size; spiralStep++)
 			{
-				float radius = radiusStep * i;
+				float radius = radiusStep * spiralStep;
 				if (radius > size)
 				{
 					break;
 				}
 
-				int x = center.x + (int)(radius * cos(angle));
-				int y = center.y + (int)(radius * sin(angle));
+				int col = center.x + (int)(radius * cos(angle));
+				int row = center.y + (int)(radius * sin(angle));
 
-				Vector2D pos{ x, y };
+				Vector2D pos{ col, row };
 				if (is_valid_web_position(pos, ctx))
 				{
 					webPositions.push_back(pos);
@@ -345,10 +345,10 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 				// Add some random offshoots from the spiral
 				if (ctx.dice->d100() < 30)
 				{
-					for (int j = 1; j <= 3; j++)
+					for (int offshoot = 1; offshoot <= 3; offshoot++)
 					{
-						int offX = x + ctx.dice->roll(-1, 1);
-						int offY = y + ctx.dice->roll(-1, 1);
+						int offX = col + ctx.dice->roll(-1, 1);
+						int offY = row + ctx.dice->roll(-1, 1);
 
 						Vector2D offPos{ offX, offY };
 						if (is_valid_web_position(offPos, ctx))
@@ -367,16 +367,16 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 			// First create the spokes
 			int numSpokes = 6 + ctx.dice->roll(0, 4); // 6-10 spokes
 
-			for (int i = 0; i < numSpokes; i++)
+			for (int spokeIndex = 0; spokeIndex < numSpokes; spokeIndex++)
 			{
-				float angle = static_cast<float>(i) * (2.0f * 3.14159f / numSpokes);
+				float angle = static_cast<float>(spokeIndex) * (2.0f * 3.14159f / numSpokes);
 
 				for (int dist = 1; dist <= size; dist++)
 				{
-					int x = center.x + (int)(dist * cos(angle));
-					int y = center.y + (int)(dist * sin(angle));
+					int col = center.x + (int)(dist * cos(angle));
+					int row = center.y + (int)(dist * sin(angle));
 
-					Vector2D pos{ x, y };
+					Vector2D pos{ col, row };
 					if (is_valid_web_position(pos, ctx))
 					{
 						webPositions.push_back(pos);
@@ -389,10 +389,10 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 			{
 				for (float angle = 0; angle < 2.0f * 3.14159f; angle += 0.2f)
 				{
-					int x = center.x + (int)(radius * cos(angle));
-					int y = center.y + (int)(radius * sin(angle));
+					int col = center.x + (int)(radius * cos(angle));
+					int row = center.y + (int)(radius * sin(angle));
 
-					Vector2D pos{ x, y };
+					Vector2D pos{ col, row };
 					if (is_valid_web_position(pos, ctx))
 					{
 						webPositions.push_back(pos);
@@ -406,13 +406,13 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 		// Create a chaotic, asymmetric web
 		{
 			// Start with a dense center
-			for (int y = -2; y <= 2; y++)
+			for (int offsetRow = -2; offsetRow <= 2; offsetRow++)
 			{
-				for (int x = -2; x <= 2; x++)
+				for (int offsetCol = -2; offsetCol <= 2; offsetCol++)
 				{
-					if (abs(x) + abs(y) <= 3)
+					if (abs(offsetCol) + abs(offsetRow) <= 3)
 					{
-						Vector2D pos = center + Vector2D{ x, y };
+						Vector2D pos = center + Vector2D{ offsetCol, offsetRow };
 						if (is_valid_web_position(pos, ctx))
 						{
 							webPositions.push_back(pos);
@@ -430,11 +430,11 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 				for (int step = 0; step < strandLength; step++)
 				{
 					// Random direction but with bias toward continuing current direction
-					int dx = ctx.dice->roll(-1, 1);
-					int dy = ctx.dice->roll(-1, 1);
+					int deltaCol = ctx.dice->roll(-1, 1);
+					int deltaRow = ctx.dice->roll(-1, 1);
 
-					strandPos.x += dx;
-					strandPos.y += dy;
+					strandPos.x += deltaCol;
+					strandPos.y += deltaRow;
 
 					if (is_valid_web_position(strandPos, ctx))
 					{
@@ -489,20 +489,20 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 	}
 }
 
-void AiWebSpinner::load(const json& j)
+void AiWebSpinner::load(const json& source)
 {
-	AiSpider::load(j);
+	AiSpider::load(source);
 
 	// Load AiWebSpinner specific data
-	if (j.contains("webReadyTime"))
+	if (source.contains("webReadyTime"))
 	{
-		webReadyTime = j.at("webReadyTime").get<int>();
+		webReadyTime = source.at("webReadyTime").get<int>();
 	}
 }
 
-void AiWebSpinner::save(json& j)
+void AiWebSpinner::save(json& output)
 {
-	AiSpider::save(j);
+	AiSpider::save(output);
 
-	j["webReadyTime"] = webReadyTime;
+	output["webReadyTime"] = webReadyTime;
 }

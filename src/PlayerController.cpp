@@ -290,23 +290,23 @@ bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 {
 	assert(ctx.creatures && "PlayerController::look_to_attack: called without creatures");
 
-	for (const auto& c : *ctx.creatures)
+	for (const auto& creature : *ctx.creatures)
 	{
-		assert(c != nullptr && "null creature in creatures list");
-		if (!c->is_dead() && c->position == target)
+		assert(creature != nullptr && "null creature in creatures list");
+		if (!creature->is_dead() && creature->position == target)
 		{
-			assert(c->ai != nullptr && "living creature at target has no AI");
+			assert(creature->ai != nullptr && "living creature at target has no AI");
 
 			// Bumping anything the player would not attack outright resolves as
 			// an interaction rather than a swing.
-			if (needs_attack_confirmation(c->get_attitude()))
+			if (needs_attack_confirmation(creature->get_attitude()))
 			{
-				resolve_peaceful_bump(*c, ctx);
+				resolve_peaceful_bump(*creature, ctx);
 				spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 				return false;
 			}
 
-			strike(*c, ctx);
+			strike(*creature, ctx);
 			return false;
 		}
 	}
@@ -637,9 +637,9 @@ Vector2D PlayerController::find_door_approach(Vector2D doorTile, const GameConte
 	};
 	Vector2D best{ -1, -1 };
 	int bestDist = INT_MAX;
-	for (auto d : dirs)
+	for (auto direction : dirs)
 	{
-		Vector2D adj{ doorTile.x + d.x, doorTile.y + d.y };
+		Vector2D adj{ doorTile.x + direction.x, doorTile.y + direction.y };
 		if (!Pathfinding::can_enter(playerOwner, adj, ctx))
 		{
 			continue;
@@ -906,9 +906,9 @@ void PlayerController::handle_left_click(GameContext& ctx)
 
 	if (ctx.map->get_actor(world_tile, ctx) != nullptr)
 	{
-		int dx = std::abs(playerOwner.position.x - world_tile.x);
-		int dy = std::abs(playerOwner.position.y - world_tile.y);
-		if (dx <= 1 && dy <= 1)
+		int deltaCol = std::abs(playerOwner.position.x - world_tile.x);
+		int deltaRow = std::abs(playerOwner.position.y - world_tile.y);
+		if (deltaCol <= 1 && deltaRow <= 1)
 		{
 			look_to_attack(world_tile, ctx);
 			flush_fov(ctx);

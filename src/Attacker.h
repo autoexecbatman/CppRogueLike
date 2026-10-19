@@ -101,8 +101,8 @@ public:
 	void set_damage_info(const DamageInfo& damage) noexcept { damageInfo = damage; }
 
 	// Serializes damageInfo - used by MonsterAttacker. PlayerAttacker overrides with no-ops.
-	void load(const json& j) override;
-	void save(json& j) override;
+	void load(const json& source) override;
+	void save(json& output) override;
 };
 
 // What a fired missile shows, decided by how its attack came out.

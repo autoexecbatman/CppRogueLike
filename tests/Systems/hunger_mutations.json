@@ -51,7 +51,7 @@
     },
     {
       "file": "src/HungerSystem.cpp",
-      "original": "\t\tj[\"lastNotifiedState\"] = static_cast<int>(*lastNotifiedState);\n",
+      "original": "\t\toutput[\"lastNotifiedState\"] = static_cast<int>(*lastNotifiedState);\n",
       "mutated": "",
       "catches": "a load that re-announces a state the player was already told"
     },

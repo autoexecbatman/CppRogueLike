@@ -71,27 +71,27 @@ void AiMonsterConfused::restore_original_ai(Creature& owner)
 	}
 }
 
-void AiMonsterConfused::load(const json& j)
+void AiMonsterConfused::load(const json& source)
 {
-	confusionEndTime = j.at("confusionEndTime").get<int>();
+	confusionEndTime = source.at("confusionEndTime").get<int>();
 
 	// Create the oldAi if it exists in the JSON
-	if (j.contains("oldAi"))
+	if (source.contains("oldAi"))
 	{
-		oldAi = Ai::create(j["oldAi"]);
+		oldAi = Ai::create(source["oldAi"]);
 	}
 }
 
-void AiMonsterConfused::save(json& j)
+void AiMonsterConfused::save(json& output)
 {
-	j["type"] = encode_ai_type(get_ai_type());
-	j["confusionEndTime"] = confusionEndTime;
+	output["type"] = encode_ai_type(get_ai_type());
+	output["confusionEndTime"] = confusionEndTime;
 
 	// Save the oldAi if it exists
 	if (oldAi != nullptr)
 	{
 		json oldAiJson;
 		oldAi->save(oldAiJson);
-		j["oldAi"] = oldAiJson;
+		output["oldAi"] = oldAiJson;
 	}
 }

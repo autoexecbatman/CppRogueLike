@@ -166,9 +166,9 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 	std::vector<size_t> itemsToRemove;
 	bool itemConsumed = false;
 
-	for (size_t i = 0; i < ctx.floorInventory->items.size(); ++i)
+	for (size_t itemIndex = 0; itemIndex < ctx.floorInventory->items.size(); ++itemIndex)
 	{
-		const auto& item = ctx.floorInventory->items[i];
+		const auto& item = ctx.floorInventory->items[itemIndex];
 		if (!item)
 		{
 			continue;
@@ -201,7 +201,7 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 				transform_to_greater_mimic(owner, ctx);
 			}
 
-			itemsToRemove.push_back(i);
+			itemsToRemove.push_back(itemIndex);
 			itemConsumed = true;
 			break;
 		}
@@ -389,57 +389,57 @@ void AiMimic::change_disguise(Creature& owner, GameContext& ctx)
 	owner.remove_state(ActorState::BLOCKS);
 }
 
-void AiMimic::load(const json& j)
+void AiMimic::load(const json& source)
 {
-	AiMonster::load(j);
+	AiMonster::load(source);
 
-	if (j.contains("disguiseChangeTime"))
+	if (source.contains("disguiseChangeTime"))
 	{
-		disguiseChangeTime = j.at("disguiseChangeTime").get<int>();
+		disguiseChangeTime = source.at("disguiseChangeTime").get<int>();
 	}
 
-	if (j.contains("consumptionReadyTime"))
+	if (source.contains("consumptionReadyTime"))
 	{
-		consumptionReadyTime = j.at("consumptionReadyTime").get<int>();
+		consumptionReadyTime = source.at("consumptionReadyTime").get<int>();
 	}
 
-	if (j.contains("isDisguised"))
+	if (source.contains("isDisguised"))
 	{
-		isDisguised = j.at("isDisguised").get<bool>();
+		isDisguised = source.at("isDisguised").get<bool>();
 	}
 
-	if (j.contains("revealDistance"))
+	if (source.contains("revealDistance"))
 	{
-		revealDistance = j.at("revealDistance").get<int>();
+		revealDistance = source.at("revealDistance").get<int>();
 	}
 
-	if (j.contains("confusionDuration"))
+	if (source.contains("confusionDuration"))
 	{
-		confusionDuration = j.at("confusionDuration").get<int>();
+		confusionDuration = source.at("confusionDuration").get<int>();
 	}
 
-	if (j.contains("itemsConsumed"))
+	if (source.contains("itemsConsumed"))
 	{
-		itemsConsumed = j.at("itemsConsumed").get<int>();
+		itemsConsumed = source.at("itemsConsumed").get<int>();
 	}
 }
 
-void AiMimic::save(json& j)
+void AiMimic::save(json& output)
 {
-	AiMonster::save(j);
+	AiMonster::save(output);
 
 	// Override the MONSTER type written by AiMonster::save - we are MIMIC.
-	j["type"] = encode_ai_type(get_ai_type());
+	output["type"] = encode_ai_type(get_ai_type());
 
 	// A mimic with no change booked yet saves nothing for it, so the load path leaves the
 	// optional empty and the next turn books one.
 	if (disguiseChangeTime.has_value())
 	{
-		j["disguiseChangeTime"] = *disguiseChangeTime;
+		output["disguiseChangeTime"] = *disguiseChangeTime;
 	}
-	j["consumptionReadyTime"] = consumptionReadyTime;
-	j["isDisguised"] = isDisguised;
-	j["revealDistance"] = revealDistance;
-	j["confusionDuration"] = confusionDuration;
-	j["itemsConsumed"] = itemsConsumed;
+	output["consumptionReadyTime"] = consumptionReadyTime;
+	output["isDisguised"] = isDisguised;
+	output["revealDistance"] = revealDistance;
+	output["confusionDuration"] = confusionDuration;
+	output["itemsConsumed"] = itemsConsumed;
 }

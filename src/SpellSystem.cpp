@@ -607,16 +607,16 @@ bool cast_magic_missile(Creature& caster, GameContext& ctx)
 	std::unordered_map<Creature*, int> damagePerTarget;
 
 	// Fire missiles - distribute among targets, prioritizing nearest
-	for (int i = 0; i < numMissiles; ++i)
+	for (int missileIndex = 0; missileIndex < numMissiles; ++missileIndex)
 	{
 		// Target nearest living enemy the caster may strike; one whose Sanctuary turns
 		// the caster away is ignored, and the missile goes to the next.
 		Creature* target = nullptr;
-		for (Creature* t : targets)
+		for (Creature* candidate : targets)
 		{
-			if (!t->is_dead() && !ctx.buffSystem->is_turned_away_by_sanctuary(caster, *t, ctx))
+			if (!candidate->is_dead() && !ctx.buffSystem->is_turned_away_by_sanctuary(caster, *candidate, ctx))
 			{
-				target = t;
+				target = candidate;
 				break;
 			}
 		}
@@ -836,18 +836,18 @@ bool cast_knock(Creature& caster, GameContext& ctx)
 	Vector2D nearest{ -1, -1 };
 	int bestDist = KNOCK_RADIUS + 1;
 
-	for (int dy = -KNOCK_RADIUS; dy <= KNOCK_RADIUS; ++dy)
+	for (int deltaRow = -KNOCK_RADIUS; deltaRow <= KNOCK_RADIUS; ++deltaRow)
 	{
-		for (int dx = -KNOCK_RADIUS; dx <= KNOCK_RADIUS; ++dx)
+		for (int deltaCol = -KNOCK_RADIUS; deltaCol <= KNOCK_RADIUS; ++deltaCol)
 		{
-			Vector2D candidate{ caster.position.x + dx, caster.position.y + dy };
+			Vector2D candidate{ caster.position.x + deltaCol, caster.position.y + deltaRow };
 			if (!ctx.map->is_in_bounds(candidate))
 			{
 				continue;
 			}
 			if (ctx.map->is_door_locked(candidate))
 			{
-				int dist = std::abs(dx) + std::abs(dy);
+				int dist = std::abs(deltaCol) + std::abs(deltaRow);
 				if (dist < bestDist)
 				{
 					bestDist = dist;
@@ -1156,13 +1156,13 @@ void SpellSystem::show_memorization_menu(Player& player, GameContext& ctx)
 	}
 
 	ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Spells memorized: ");
-	for (size_t i = 0; i < player.memorizedSpells.size(); ++i)
+	for (size_t spellIndex = 0; spellIndex < player.memorizedSpells.size(); ++spellIndex)
 	{
-		if (i > 0)
+		if (spellIndex > 0)
 		{
 			ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ", ");
 		}
-		ctx.messageSystem->append_message_part(ColorPairId::GREEN_BLACK, ctx.spellRegistry->get_by_key(player.memorizedSpells[i]).name);
+		ctx.messageSystem->append_message_part(ColorPairId::GREEN_BLACK, ctx.spellRegistry->get_by_key(player.memorizedSpells[spellIndex]).name);
 	}
 	ctx.messageSystem->finalize_message();
 }

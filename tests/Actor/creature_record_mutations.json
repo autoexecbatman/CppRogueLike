@@ -15,44 +15,44 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tcreatureClass = parse_creature_class(j.at(\"creatureClass\").get<std::string>());",
-      "mutated": "\tcreatureClass = j.contains(\"creatureClass\") ? parse_creature_class(j.at(\"creatureClass\").get<std::string>()) : CreatureClass::MONSTER;",
+      "original": "\tcreatureClass = parse_creature_class(source.at(\"creatureClass\").get<std::string>());",
+      "mutated": "\tcreatureClass = source.contains(\"creatureClass\") ? parse_creature_class(source.at(\"creatureClass\").get<std::string>()) : CreatureClass::MONSTER;",
       "catches": "a record without its class loading as a monster, with a monster's hit dice and THAC0"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tthaco = j.at(\"thaco\").get<int>();",
-      "mutated": "\tthaco = j.value(\"thaco\", 20);",
+      "original": "\tthaco = source.at(\"thaco\").get<int>();",
+      "mutated": "\tthaco = source.value(\"thaco\", 20);",
       "catches": "a record without its THAC0 loading at 20"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tInventoryOperations::load_inventory(inventoryData, j.at(\"inventoryData\"));",
-      "mutated": "\tif (j.contains(\"inventoryData\")) { InventoryOperations::load_inventory(inventoryData, j.at(\"inventoryData\")); }",
+      "original": "\tInventoryOperations::load_inventory(inventoryData, source.at(\"inventoryData\"));",
+      "mutated": "\tif (source.contains(\"inventoryData\")) { InventoryOperations::load_inventory(inventoryData, source.at(\"inventoryData\")); }",
       "catches": "a record without its inventory loading as an empty pack"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tconst auto& constJson = j.at(\"constitutionTracker\");",
-      "mutated": "\t\tif (!j.contains(\"constitutionTracker\")) { return; }\n\t\tconst auto& constJson = j.at(\"constitutionTracker\");",
+      "original": "\t\tconst auto& constJson = source.at(\"constitutionTracker\");",
+      "mutated": "\t\tif (!source.contains(\"constitutionTracker\")) { return; }\n\t\tconst auto& constJson = source.at(\"constitutionTracker\");",
       "catches": "a record without its Constitution record loading quietly"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tj[\"ethics\"] = encode_ethics(ethics);",
-      "mutated": "\tj[\"ethics\"] = encode_ethics(Ethics::NEUTRAL);",
+      "original": "\toutput[\"ethics\"] = encode_ethics(ethics);",
+      "mutated": "\toutput[\"ethics\"] = encode_ethics(Ethics::NEUTRAL);",
       "catches": "every creature saved as neutral on the law/chaos axis, which a round trip against the same saver cannot see"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tj[\"morality\"] = encode_morality(morality);",
-      "mutated": "\tj[\"morality\"] = encode_morality(Morality::NEUTRAL);",
+      "original": "\toutput[\"morality\"] = encode_morality(morality);",
+      "mutated": "\toutput[\"morality\"] = encode_morality(Morality::NEUTRAL);",
       "catches": "every creature saved as neutral on the good/evil axis"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tj[\"creatureClass\"] = encode_creature_class(creatureClass);",
-      "mutated": "\tj[\"creatureClass\"] = encode_creature_class(CreatureClass::MONSTER);",
+      "original": "\toutput[\"creatureClass\"] = encode_creature_class(creatureClass);",
+      "mutated": "\toutput[\"creatureClass\"] = encode_creature_class(CreatureClass::MONSTER);",
       "catches": "every saved creature written down as a monster whatever class it is"
     },
     {
@@ -63,8 +63,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tethics = parse_ethics(j.at(\"ethics\").get<std::string>());",
-      "mutated": "\tethics = j.contains(\"ethics\") ? parse_ethics(j.at(\"ethics\").get<std::string>()) : Ethics::NEUTRAL;",
+      "original": "\tethics = parse_ethics(source.at(\"ethics\").get<std::string>());",
+      "mutated": "\tethics = source.contains(\"ethics\") ? parse_ethics(source.at(\"ethics\").get<std::string>()) : Ethics::NEUTRAL;",
       "catches": "a record without an alignment loading as neutral rather than being refused"
     }
   ]

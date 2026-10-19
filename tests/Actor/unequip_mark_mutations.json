@@ -9,7 +9,7 @@
   "mutations": [
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tequippedItems.erase(it);\n",
+      "original": "\t\tequippedItems.erase(found);\n",
       "mutated": "",
       "catches": "an item taken off still held by the slot it left"
     },

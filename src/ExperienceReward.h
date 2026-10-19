@@ -19,6 +19,6 @@ public:
 
 	void add_xp(int amount) noexcept { xp += amount; }
 
-	void load(const json& j);
-	void save(json& j) const;
+	void load(const json& source);
+	void save(json& output) const;
 };

@@ -51,13 +51,13 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tactionDelay = j.at(\"actionDelay\").get<int>();",
+      "original": "\tactionDelay = source.at(\"actionDelay\").get<int>();",
       "mutated": "\tactionDelay = TIME_UNITS_PER_ROUND;",
       "catches": "a loaded game flattening every creature's pace, so a saved quickling comes back ordinary"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tnextActionTime = j.at(\"nextActionTime\").get<int>();",
+      "original": "\tnextActionTime = source.at(\"nextActionTime\").get<int>();",
       "mutated": "\tnextActionTime = 0;",
       "catches": "a loaded level reordered, with every creature due at once regardless of where it stood"
     },

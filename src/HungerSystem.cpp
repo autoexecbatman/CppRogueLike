@@ -263,39 +263,39 @@ void HungerSystem::notify_state_change(GameContext& ctx)
 	}
 }
 
-void HungerSystem::save(json& j) const
+void HungerSystem::save(json& output) const
 {
-	j["hungerValue"] = hungerValue;
-	j["hungerMax"] = hungerMax;
-	j["wellFedMessageShown"] = wellFedMessageShown;
+	output["hungerValue"] = hungerValue;
+	output["hungerMax"] = hungerMax;
+	output["wellFedMessageShown"] = wellFedMessageShown;
 
 	// Only what the player was told. The state itself is derived from hungerValue,
 	// so storing it would be a second copy free to disagree with the counter.
 	if (lastNotifiedState.has_value())
 	{
-		j["lastNotifiedState"] = static_cast<int>(*lastNotifiedState);
+		output["lastNotifiedState"] = static_cast<int>(*lastNotifiedState);
 	}
 }
 
-void HungerSystem::load(const json& j)
+void HungerSystem::load(const json& source)
 {
-	if (j.contains("hungerValue"))
+	if (source.contains("hungerValue"))
 	{
-		hungerValue = j["hungerValue"];
+		hungerValue = source["hungerValue"];
 	}
-	if (j.contains("hungerMax"))
+	if (source.contains("hungerMax"))
 	{
-		hungerMax = j["hungerMax"];
+		hungerMax = source["hungerMax"];
 	}
-	if (j.contains("wellFedMessageShown"))
+	if (source.contains("wellFedMessageShown"))
 	{
-		wellFedMessageShown = j["wellFedMessageShown"];
+		wellFedMessageShown = source["wellFedMessageShown"];
 	}
 
 	// A save written before this field existed leaves it empty, and the first tick
 	// after the load sets the baseline without announcing anything.
-	if (j.contains("lastNotifiedState"))
+	if (source.contains("lastNotifiedState"))
 	{
-		lastNotifiedState = static_cast<HungerState>(j["lastNotifiedState"].get<int>());
+		lastNotifiedState = static_cast<HungerState>(source["lastNotifiedState"].get<int>());
 	}
 }

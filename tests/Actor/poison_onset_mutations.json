@@ -39,7 +39,7 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tj[\"pendingPoison\"] = poisonJson;\n",
+      "original": "\t\toutput[\"pendingPoison\"] = poisonJson;\n",
       "mutated": "",
       "catches": "a dose left out of the saved game, so sleeping it off works"
     },

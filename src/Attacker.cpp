@@ -364,20 +364,20 @@ int Attacker::armor_class_attacked(const Creature& target, GameContext& ctx) con
 	return target.get_armor_class();
 }
 
-void Attacker::load(const json& j)
+void Attacker::load(const json& source)
 {
 	// The dice are the record; the range is derived from them.
-	const json& damageJson = j.at("damageInfo");
+	const json& damageJson = source.at("damageInfo");
 	damageInfo = DamageInfo{
 		damageJson.at("display").get<std::string>(),
 		parse_damage_type(damageJson.at("type").get<std::string>())
 	};
 }
 
-void Attacker::save(json& j)
+void Attacker::save(json& output)
 {
-	j["damageInfo"]["display"] = damageInfo.displayRoll;
-	j["damageInfo"]["type"] = damage_type_name(damageInfo.damageType);
+	output["damageInfo"]["display"] = damageInfo.displayRoll;
+	output["damageInfo"]["type"] = damage_type_name(damageInfo.damageType);
 }
 
 ShotImpact RangedShot::impact_of(AttackResult result) noexcept

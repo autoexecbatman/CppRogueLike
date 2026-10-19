@@ -9,8 +9,8 @@
   "mutations": [
     {
       "file": "src/Creature.cpp",
-      "original": "std::format(\"The {} is cursed and cannot be removed!\", it->item->get_name()),",
-      "mutated": "std::format(\"The {} is cursed and cannot be removed!\", it->item->actorData.name),",
+      "original": "std::format(\"The {} is cursed and cannot be removed!\", found->item->get_name()),",
+      "mutated": "std::format(\"The {} is cursed and cannot be removed!\", found->item->actorData.name),",
       "catches": "the cursed message naming the bare base name"
     },
     {

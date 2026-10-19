@@ -51,13 +51,13 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": "\tj[\"controller\"] = controllerJson;",
-      "mutated": "\tj[\"controller\"] = json::object();",
+      "original": "\toutput[\"controller\"] = controllerJson;",
+      "mutated": "\toutput[\"controller\"] = json::object();",
       "catches": "the controller's section written empty, so the load finds no reading to restore"
     },
     {
       "file": "src/Player.cpp",
-      "original": "\tcontroller->load(j.at(\"controller\"));",
+      "original": "\tcontroller->load(source.at(\"controller\"));",
       "mutated": "\t;",
       "catches": "a player loaded without its controller ever being told what the record said"
     }

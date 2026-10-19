@@ -45,8 +45,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tstd::unique_ptr<Item> removed = std::move(it->item);\n\t\tequippedItems.erase(it);\n",
-      "mutated": "\t\tstd::unique_ptr<Item> removed = std::move(it->item);\n",
+      "original": "\t\tstd::unique_ptr<Item> removed = std::move(found->item);\n\t\tequippedItems.erase(found);\n",
+      "mutated": "\t\tstd::unique_ptr<Item> removed = std::move(found->item);\n",
       "catches": "the slot list read while it holds an emptied slot"
     }
   ]

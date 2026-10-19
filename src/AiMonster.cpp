@@ -105,13 +105,13 @@ void random_wander(Creature& owner, GameContext& ctx)
 {
 	assert(ctx.dice && "random_wander: called without dice");
 
-	int dx = ctx.dice->roll(-1, 1);
-	int dy = ctx.dice->roll(-1, 1);
-	if (dx == 0 && dy == 0)
+	int deltaCol = ctx.dice->roll(-1, 1);
+	int deltaRow = ctx.dice->roll(-1, 1);
+	if (deltaCol == 0 && deltaRow == 0)
 	{
 		return;
 	}
-	Pathfinding::step(owner, owner.position + Vector2D{ dx, dy }, ctx);
+	Pathfinding::step(owner, owner.position + Vector2D{ deltaCol, deltaRow }, ctx);
 }
 
 // With no way through to the quarry, a creature still comes as close as the ground lets
@@ -308,13 +308,13 @@ void AiMonster::update(Creature& owner, GameContext& ctx)
 	decide_action(owner, ctx);
 }
 
-void AiMonster::load([[maybe_unused]] const json& j)
+void AiMonster::load([[maybe_unused]] const json& source)
 {
 }
 
-void AiMonster::save(json& j)
+void AiMonster::save(json& output)
 {
-	j["type"] = encode_ai_type(get_ai_type());
+	output["type"] = encode_ai_type(get_ai_type());
 }
 
 // file: AiMonster.cpp

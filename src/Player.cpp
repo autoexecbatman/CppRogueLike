@@ -65,8 +65,8 @@
 // XP table helpers - pure functions, no state
 namespace
 {
-template <std::size_t N>
-constexpr int calculate_xp_for_level(int level, const std::array<int, N>& xpTable, int linearProgression) noexcept
+template <std::size_t TableSize>
+constexpr int calculate_xp_for_level(int level, const std::array<int, TableSize>& xpTable, int linearProgression) noexcept
 {
 	if (level <= 0)
 	{
@@ -897,23 +897,23 @@ Player::DualWieldInfo Player::get_dual_wield_info() const noexcept
 //   player->save(record);
 //   record["killCount"];              // -> 7
 //   record["equippedItems"].size();   // -> 2
-void Player::save(json& j)
+void Player::save(json& output)
 {
-	Creature::save(j); // Call base class save
+	Creature::save(output); // Call base class save
 
 	// The controller owns the confusion timer, so it writes its own section rather
 	// than the player reaching in for one field.
 	assert(controller && "Player::save called with null controller");
 	json controllerJson;
 	controller->save(controllerJson);
-	j["controller"] = controllerJson;
+	output["controller"] = controllerJson;
 
 	// Player-specific fields
-	j["playerRaceState"] = static_cast<int>(playerRaceState);
-	j["killCount"] = killCount;
-	j["memorizedSpells"] = memorizedSpells;
-	j["thiefSkillPoints"] = thiefSkillPoints;
-	j["hidingSpot"] = hidingSpot.has_value()
+	output["playerRaceState"] = static_cast<int>(playerRaceState);
+	output["killCount"] = killCount;
+	output["memorizedSpells"] = memorizedSpells;
+	output["thiefSkillPoints"] = thiefSkillPoints;
+	output["hidingSpot"] = hidingSpot.has_value()
 		? json{ { "x", hidingSpot->x }, { "y", hidingSpot->y } }
 		: json(nullptr);
 }
@@ -938,9 +938,9 @@ void Player::save(json& j)
 //
 //   record.erase("killCount");
 //   loaded->load(record);     // throws: no field this saver writes is optional
-void Player::load(const json& j)
+void Player::load(const json& source)
 {
-	Creature::load(j); // Call base class load
+	Creature::load(source); // Call base class load
 	// Creature::load constructs MonsterAttacker when attacker data is present.
 	// Replace with the correct PlayerAttacker strategy.
 	attacker = std::make_unique<PlayerAttacker>(*this);
@@ -948,14 +948,14 @@ void Player::load(const json& j)
 	controller = std::make_unique<PlayerController>(*this);
 
 	// After construction, so the fresh controller cannot overwrite the record; a save without it is refused.
-	controller->load(j.at("controller"));
+	controller->load(source.at("controller"));
 
 	// Player-specific fields
-	playerRaceState = static_cast<PlayerRaceState>(j.at("playerRaceState").get<int>());
-	killCount = j.at("killCount").get<int>();
-	memorizedSpells = j.at("memorizedSpells").get<std::vector<std::string>>();
-	thiefSkillPoints = j.at("thiefSkillPoints").get<std::array<int, THIEF_SKILL_COUNT>>();
-	const json& spot = j.at("hidingSpot");
+	playerRaceState = static_cast<PlayerRaceState>(source.at("playerRaceState").get<int>());
+	killCount = source.at("killCount").get<int>();
+	memorizedSpells = source.at("memorizedSpells").get<std::vector<std::string>>();
+	thiefSkillPoints = source.at("thiefSkillPoints").get<std::array<int, THIEF_SKILL_COUNT>>();
+	const json& spot = source.at("hidingSpot");
 	hidingSpot = spot.is_null()
 		? std::nullopt
 		: std::optional<Vector2D>{ Vector2D{ spot.at("x").get<int>(), spot.at("y").get<int>() } };

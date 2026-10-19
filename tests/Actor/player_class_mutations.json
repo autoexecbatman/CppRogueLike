@@ -27,8 +27,8 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": "\tj[\"playerRaceState\"] = static_cast<int>(playerRaceState);\n",
-      "mutated": "\tj[\"playerRaceState\"] = static_cast<int>(playerRaceState);\n\tj[\"playerClass\"] = get_class_display_name();\n",
+      "original": "\toutput[\"playerRaceState\"] = static_cast<int>(playerRaceState);\n",
+      "mutated": "\toutput[\"playerRaceState\"] = static_cast<int>(playerRaceState);\n\toutput[\"playerClass\"] = get_class_display_name();\n",
       "catches": "the class's name saved beside the class"
     },
     {

@@ -19,6 +19,6 @@ private:
 	//   shopkeeper.ai->on_created(shopkeeper, ctx); // shopkeeper.shop is now set
 	void on_created(Creature& owner, GameContext& ctx) override;
 
-	void load(const json& j) override;
-	void save(json& j) override;
+	void load(const json& source) override;
+	void save(json& output) override;
 };

@@ -12,10 +12,10 @@
 #include "Persistent.h"
 
 //==AI==
-std::unique_ptr<Ai> Ai::create(const json& j)
+std::unique_ptr<Ai> Ai::create(const json& source)
 {
-	std::unique_ptr<Ai> ai = make(parse_ai_type(j.at("type").get<std::string>()));
-	ai->load(j);
+	std::unique_ptr<Ai> ai = make(parse_ai_type(source.at("type").get<std::string>()));
+	ai->load(source);
 	return ai;
 }
 

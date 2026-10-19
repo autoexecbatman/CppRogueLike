@@ -19,7 +19,7 @@ public:
 	AttackResult attack(Creature& target, AttackKind kind, GameContext& ctx) override;
 
 	// load/save delegate to Attacker base (DamageInfo serialization).
-	void load(const json& j) override { Attacker::load(j); }
+	void load(const json& source) override { Attacker::load(source); }
 
-	void save(json& j) override { Attacker::save(j); }
+	void save(json& output) override { Attacker::save(output); }
 };

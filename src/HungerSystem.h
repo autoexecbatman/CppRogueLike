@@ -104,6 +104,6 @@ public:
 	void apply_hunger_effects(GameContext& ctx);
 
 	// Save/Load methods for game persistence
-	void save(nlohmann::json& j) const;
-	void load(const nlohmann::json& j);
+	void save(nlohmann::json& output) const;
+	void load(const nlohmann::json& source);
 };

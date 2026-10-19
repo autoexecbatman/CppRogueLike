@@ -9,14 +9,14 @@
   "mutations": [
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\t\treturn b.expiryTime.has_value() && currentTime >= *b.expiryTime;",
-      "mutated": "\t\treturn b.expiryTime.has_value() && currentTime > *b.expiryTime;",
+      "original": "\t\treturn buff.expiryTime.has_value() && currentTime >= *buff.expiryTime;",
+      "mutated": "\t\treturn buff.expiryTime.has_value() && currentTime > *buff.expiryTime;",
       "catches": "a buff living one reading past the time it ends at, so every duration is a round long"
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\t\treturn b.expiryTime.has_value() && currentTime >= *b.expiryTime;",
-      "mutated": "\t\treturn b.expiryTime.has_value() && currentTime > *b.expiryTime + TIME_UNITS_PER_ROUND;",
+      "original": "\t\treturn buff.expiryTime.has_value() && currentTime >= *buff.expiryTime;",
+      "mutated": "\t\treturn buff.expiryTime.has_value() && currentTime > *buff.expiryTime + TIME_UNITS_PER_ROUND;",
       "catches": "a buff outstaying its duration by a whole round"
     },
     {
@@ -27,14 +27,14 @@
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\t\t\tit->expiryTime = later_ending(it->expiryTime, expiry);",
-      "mutated": "\t\t\tit->expiryTime = expiry;",
+      "original": "\t\t\tfound->expiryTime = later_ending(found->expiryTime, expiry);",
+      "mutated": "\t\t\tfound->expiryTime = expiry;",
       "catches": "a weaker second casting cutting short a longer one already running"
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\treturn rounds_remaining(currentTime, *it->expiryTime);",
-      "mutated": "\treturn *it->expiryTime;",
+      "original": "\treturn rounds_remaining(currentTime, *found->expiryTime);",
+      "mutated": "\treturn *found->expiryTime;",
       "catches": "the raw clock reading reported where rounds left belong"
     },
     {

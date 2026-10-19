@@ -190,5 +190,5 @@ public:
 	[[nodiscard]] static std::unique_ptr<Ai> make(AiType type);
 
 	// The Ai a save describes: made by its kind, then loaded from the record.
-	[[nodiscard]] static std::unique_ptr<Ai> create(const json& j);
+	[[nodiscard]] static std::unique_ptr<Ai> create(const json& source);
 };

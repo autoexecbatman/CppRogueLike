@@ -111,8 +111,8 @@ WornAbilityEffect worn_ability_effect(const Item& item, BuffType ability) noexce
 
 	auto from_stat_boost = [ability, &effect](const auto& boost)
 	{
-		using T = std::decay_t<decltype(boost)>;
-		if constexpr (std::is_same_v<T, JewelryAmulet> || std::is_same_v<T, Gauntlets> || std::is_same_v<T, Girdle>)
+		using BoostType = std::decay_t<decltype(boost)>;
+		if constexpr (std::is_same_v<BoostType, JewelryAmulet> || std::is_same_v<BoostType, Gauntlets> || std::is_same_v<BoostType, Girdle>)
 		{
 			int amount = 0;
 			switch (ability)
@@ -191,34 +191,34 @@ const Gauntlets* strength_setting_gauntlets(const Item& item) noexcept
 } // namespace
 
 //==Creature==
-void Creature::load(const json& j)
+void Creature::load(const json& source)
 {
-	Actor::load(j); // Call base class load
-	baseStrength = j.at("strength").get<int>();
-	exceptionalStrength = j.at("exceptionalStrength").get<int>();
-	baseDexterity = j.at("dexterity").get<int>();
-	baseConstitution = j.at("constitution").get<int>();
-	baseIntelligence = j.at("intelligence").get<int>();
-	baseWisdom = j.at("wisdom").get<int>();
-	baseCharisma = j.at("charisma").get<int>();
-	creatureLevel = j.at("playerLevel").get<int>();
-	gold = j.at("gold").get<int>();
-	gender = j.at("gender").get<std::string>();
-	naturalAttack = j.at("naturalAttack").get<std::string>();
-	ethics = parse_ethics(j.at("ethics").get<std::string>());
-	morality = parse_morality(j.at("morality").get<std::string>());
-	undead = j.at("undead").get<bool>();
-	awareUntilTime = j.at("awareUntilTime").get<int>();
-	attitude = parse_attitude(j.at("attitude").get<std::string>());
-	displaceable = j.at("displaceable").get<bool>();
-	morale = j.at("morale").get<int>();
-	corpseWeight = j.at("corpseWeight").get<int>();
-	corpseName = j.at("corpseName").get<std::string>();
-	corpseNutrition = j.at("corpseNutrition").get<int>();
-	corpseTaste = j.at("corpseTaste").get<std::string>();
-	corpseEdibility = corpse_edibility_from_record(j.at("corpseEdible").get<bool>());
+	Actor::load(source); // Call base class load
+	baseStrength = source.at("strength").get<int>();
+	exceptionalStrength = source.at("exceptionalStrength").get<int>();
+	baseDexterity = source.at("dexterity").get<int>();
+	baseConstitution = source.at("constitution").get<int>();
+	baseIntelligence = source.at("intelligence").get<int>();
+	baseWisdom = source.at("wisdom").get<int>();
+	baseCharisma = source.at("charisma").get<int>();
+	creatureLevel = source.at("playerLevel").get<int>();
+	gold = source.at("gold").get<int>();
+	gender = source.at("gender").get<std::string>();
+	naturalAttack = source.at("naturalAttack").get<std::string>();
+	ethics = parse_ethics(source.at("ethics").get<std::string>());
+	morality = parse_morality(source.at("morality").get<std::string>());
+	undead = source.at("undead").get<bool>();
+	awareUntilTime = source.at("awareUntilTime").get<int>();
+	attitude = parse_attitude(source.at("attitude").get<std::string>());
+	displaceable = source.at("displaceable").get<bool>();
+	morale = source.at("morale").get<int>();
+	corpseWeight = source.at("corpseWeight").get<int>();
+	corpseName = source.at("corpseName").get<std::string>();
+	corpseNutrition = source.at("corpseNutrition").get<int>();
+	corpseTaste = source.at("corpseTaste").get<std::string>();
+	corpseEdibility = corpse_edibility_from_record(source.at("corpseEdible").get<bool>());
 	bodyPlan.clear();
-	for (const auto& slotName : j.at("bodyPlan"))
+	for (const auto& slotName : source.at("bodyPlan"))
 	{
 		bodyPlan.push_back(parse_equipment_slot(slotName.get<std::string>()));
 	}
@@ -226,25 +226,25 @@ void Creature::load(const json& j)
 	// Absent when the creature is not holding a breath, which is the usual case, so the
 	// key is written only when there is one and read only when it is there.
 	airUntilTime.reset();
-	if (j.contains("airUntilTime"))
+	if (source.contains("airUntilTime"))
 	{
-		airUntilTime = j.at("airUntilTime").get<int>();
+		airUntilTime = source.at("airUntilTime").get<int>();
 	}
-	webStuckTurns = j.at("webStuckTurns").get<int>();
-	webStrength = j.at("webStrength").get<int>();
+	webStuckTurns = source.at("webStuckTurns").get<int>();
+	webStrength = source.at("webStrength").get<int>();
 	// trappingWeb stays empty: webs are spell tiles, which the save does not hold (issues/0167).
-	creatureClass = parse_creature_class(j.at("creatureClass").get<std::string>());
-	hitDie = j.at("hitDie").get<int>();
-	attacksPerRound = j.at("attacksPerRound").get<float>();
-	actionDelay = j.at("actionDelay").get<int>();
-	nextActionTime = j.at("nextActionTime").get<int>();
-	damageResistance = j.at("dr").get<int>();
-	thaco = j.at("thaco").get<int>();
+	creatureClass = parse_creature_class(source.at("creatureClass").get<std::string>());
+	hitDie = source.at("hitDie").get<int>();
+	attacksPerRound = source.at("attacksPerRound").get<float>();
+	actionDelay = source.at("actionDelay").get<int>();
+	nextActionTime = source.at("nextActionTime").get<int>();
+	damageResistance = source.at("dr").get<int>();
+	thaco = source.at("thaco").get<int>();
 	// Written only while a dose is working, so a record without one carries none.
 	pendingPoison.reset();
-	if (j.contains("pendingPoison"))
+	if (source.contains("pendingPoison"))
 	{
-		const auto& poisonJson = j.at("pendingPoison");
+		const auto& poisonJson = source.at("pendingPoison");
 		PendingPoison dose{};
 		dose.roundsUntilOnset = poisonJson.at("roundsUntilOnset").get<int>();
 		dose.damage = poisonJson.at("damage").get<int>();
@@ -253,16 +253,16 @@ void Creature::load(const json& j)
 		dose.effectRounds = poisonJson.at("effectRounds").get<int>();
 		pendingPoison = dose;
 	}
-	if (j.contains("attacker"))
+	if (source.contains("attacker"))
 	{
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{});
-		attacker->load(j["attacker"]);
+		attacker->load(source["attacker"]);
 	}
 	// A pool that was saved is built from its record, as the other components are: the game
 	// loads a level's monsters into fresh objects, which have none to fill in.
-	if (j.contains("healthPool"))
+	if (source.contains("healthPool"))
 	{
-		const auto& healthJson = j.at("healthPool");
+		const auto& healthJson = source.at("healthPool");
 		healthPool = std::make_unique<HealthPool>(healthJson.at("hpMax").get<int>());
 		healthPool->set_hp(healthJson.at("hp").get<int>());
 		healthPool->set_hp_base(healthJson.at("hpBase").get<int>());
@@ -271,41 +271,41 @@ void Creature::load(const json& j)
 	}
 	// Load constitution tracker state; the score inside is saved only once one is recorded.
 	{
-		const auto& constJson = j.at("constitutionTracker");
+		const auto& constJson = source.at("constitutionTracker");
 		if (constJson.contains("lastConstitution"))
 		{
 			constitutionTracker->set_last_constitution(constJson.at("lastConstitution").get<int>());
 		}
 	}
 	// Load experience reward
-	if (j.contains("experienceReward"))
+	if (source.contains("experienceReward"))
 	{
 		experienceReward = std::make_unique<ExperienceReward>(0);
-		experienceReward->load(j["experienceReward"]);
+		experienceReward->load(source["experienceReward"]);
 	}
 	// Load armor class
-	if (j.contains("armorClass"))
+	if (source.contains("armorClass"))
 	{
-		const auto& acJson = j["armorClass"];
+		const auto& acJson = source["armorClass"];
 		armorClass = std::make_unique<ArmorClass>(10);
 		armorClass->set_armor_class(acJson.at("armorClass").get<int>());
 		armorClass->set_base_armor_class(acJson.at("baseArmorClass").get<int>());
 	}
-	if (j.contains("ai"))
+	if (source.contains("ai"))
 	{
-		ai = Ai::create(j["ai"]);
+		ai = Ai::create(source["ai"]);
 	}
 	inventoryData = CreatureInventory(50); // Default capacity
-	InventoryOperations::load_inventory(inventoryData, j.at("inventoryData"));
-	if (j.contains("shop"))
+	InventoryOperations::load_inventory(inventoryData, source.at("inventoryData"));
+	if (source.contains("shop"))
 	{
-		shop = ShopKeeper::create(j["shop"]);
+		shop = ShopKeeper::create(source["shop"]);
 	}
 
 	// Load unified buff system
 	{
 		activeBuffs.clear();
-		for (const auto& buffJson : j.at("activeBuffs"))
+		for (const auto& buffJson : source.at("activeBuffs"))
 		{
 			Buff buff{};
 			buff.type = parse_buff_type(buffJson.at("type").get<std::string>());
@@ -327,7 +327,7 @@ void Creature::load(const json& j)
 	}
 
 	equippedItems.clear();
-	for (const auto& itemEntry : j.at("equippedItems"))
+	for (const auto& itemEntry : source.at("equippedItems"))
 	{
 		const EquipmentSlot slot = parse_equipment_slot(itemEntry.at("slot").get<std::string>());
 		auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
@@ -336,61 +336,61 @@ void Creature::load(const json& j)
 	}
 }
 
-void Creature::save(json& j)
+void Creature::save(json& output)
 {
-	Actor::save(j); // Call base class save
+	Actor::save(output); // Call base class save
 	// A buff-imposed state is derived from the buffs saved below, so the save holds only the buffs.
 	json ownStates = json::array();
-	for (const json& state : j.at("states"))
+	for (const json& state : output.at("states"))
 	{
 		if (!BuffSystem::is_buff_imposed(state.get<ActorState>()))
 		{
 			ownStates.push_back(state);
 		}
 	}
-	j["states"] = ownStates;
-	j["strength"] = baseStrength;
-	j["exceptionalStrength"] = exceptionalStrength;
-	j["dexterity"] = baseDexterity;
-	j["constitution"] = baseConstitution;
-	j["intelligence"] = baseIntelligence;
-	j["wisdom"] = baseWisdom;
-	j["charisma"] = baseCharisma;
-	j["playerLevel"] = creatureLevel;
-	j["gold"] = gold;
-	j["gender"] = gender;
-	j["naturalAttack"] = naturalAttack;
-	j["ethics"] = encode_ethics(ethics);
-	j["morality"] = encode_morality(morality);
-	j["undead"] = undead;
-	j["awareUntilTime"] = awareUntilTime;
-	j["attitude"] = encode_attitude(attitude);
-	j["displaceable"] = displaceable;
-	j["morale"] = morale;
-	j["corpseWeight"] = corpseWeight;
-	j["corpseName"] = corpseName;
-	j["corpseNutrition"] = corpseNutrition;
-	j["corpseTaste"] = corpseTaste;
-	j["corpseEdible"] = is_corpse_edible(corpseEdibility);
+	output["states"] = ownStates;
+	output["strength"] = baseStrength;
+	output["exceptionalStrength"] = exceptionalStrength;
+	output["dexterity"] = baseDexterity;
+	output["constitution"] = baseConstitution;
+	output["intelligence"] = baseIntelligence;
+	output["wisdom"] = baseWisdom;
+	output["charisma"] = baseCharisma;
+	output["playerLevel"] = creatureLevel;
+	output["gold"] = gold;
+	output["gender"] = gender;
+	output["naturalAttack"] = naturalAttack;
+	output["ethics"] = encode_ethics(ethics);
+	output["morality"] = encode_morality(morality);
+	output["undead"] = undead;
+	output["awareUntilTime"] = awareUntilTime;
+	output["attitude"] = encode_attitude(attitude);
+	output["displaceable"] = displaceable;
+	output["morale"] = morale;
+	output["corpseWeight"] = corpseWeight;
+	output["corpseName"] = corpseName;
+	output["corpseNutrition"] = corpseNutrition;
+	output["corpseTaste"] = corpseTaste;
+	output["corpseEdible"] = is_corpse_edible(corpseEdibility);
 	json slotNames = json::array();
 	for (const EquipmentSlot slot : bodyPlan)
 	{
 		slotNames.push_back(encode_equipment_slot(slot));
 	}
-	j["bodyPlan"] = slotNames;
+	output["bodyPlan"] = slotNames;
 	if (airUntilTime.has_value())
 	{
-		j["airUntilTime"] = *airUntilTime;
+		output["airUntilTime"] = *airUntilTime;
 	}
-	j["webStuckTurns"] = webStuckTurns;
-	j["webStrength"] = webStrength;
-	j["creatureClass"] = encode_creature_class(creatureClass);
-	j["hitDie"] = hitDie;
-	j["attacksPerRound"] = attacksPerRound;
-	j["actionDelay"] = actionDelay;
-	j["nextActionTime"] = nextActionTime;
-	j["dr"] = damageResistance;
-	j["thaco"] = thaco;
+	output["webStuckTurns"] = webStuckTurns;
+	output["webStrength"] = webStrength;
+	output["creatureClass"] = encode_creature_class(creatureClass);
+	output["hitDie"] = hitDie;
+	output["attacksPerRound"] = attacksPerRound;
+	output["actionDelay"] = actionDelay;
+	output["nextActionTime"] = nextActionTime;
+	output["dr"] = damageResistance;
+	output["thaco"] = thaco;
 	if (pendingPoison.has_value())
 	{
 		json poisonJson;
@@ -399,7 +399,7 @@ void Creature::save(json& j)
 		poisonJson["effect"] = encode_buff_type(pendingPoison->effect);
 		poisonJson["effectValue"] = pendingPoison->effectValue;
 		poisonJson["effectRounds"] = pendingPoison->effectRounds;
-		j["pendingPoison"] = poisonJson;
+		output["pendingPoison"] = poisonJson;
 	}
 	if (attacker)
 	{
@@ -409,7 +409,7 @@ void Creature::save(json& j)
 		// PlayerAttacker::save() is a no-op - no damageInfo to persist.
 		if (!attackerJson.empty())
 		{
-			j["attacker"] = attackerJson;
+			output["attacker"] = attackerJson;
 		}
 	}
 	// Save health pool data
@@ -421,7 +421,7 @@ void Creature::save(json& j)
 		healthJson["hpBase"] = healthPool->get_hp_base();
 		healthJson["tempHp"] = healthPool->get_temp_hp();
 		healthJson["unregenerableDamage"] = healthPool->get_unregenerable_damage();
-		j["healthPool"] = healthJson;
+		output["healthPool"] = healthJson;
 	}
 	// Save constitution tracker state
 	json constJson;
@@ -429,13 +429,13 @@ void Creature::save(json& j)
 	{
 		constJson["lastConstitution"] = *lastConstitution;
 	}
-	j["constitutionTracker"] = constJson;
+	output["constitutionTracker"] = constJson;
 	// Save experience reward
 	if (experienceReward)
 	{
 		json expJson;
 		experienceReward->save(expJson);
-		j["experienceReward"] = expJson;
+		output["experienceReward"] = expJson;
 	}
 	// Save armor class
 	if (armorClass)
@@ -443,23 +443,23 @@ void Creature::save(json& j)
 		json acJson;
 		acJson["armorClass"] = armorClass->get_armor_class();
 		acJson["baseArmorClass"] = armorClass->get_base_armor_class();
-		j["armorClass"] = acJson;
+		output["armorClass"] = acJson;
 	}
 	if (ai)
 	{
 		json aiJson;
 		ai->save(aiJson);
-		j["ai"] = aiJson;
+		output["ai"] = aiJson;
 	}
 	// Always save inventory data since it always exists
 	json inventoryJson;
 	InventoryOperations::save_inventory(inventoryData, inventoryJson);
-	j["inventoryData"] = inventoryJson;
+	output["inventoryData"] = inventoryJson;
 	if (shop)
 	{
 		json shopJson;
 		shop->save(shopJson);
-		j["shop"] = shopJson;
+		output["shop"] = shopJson;
 	}
 
 	// Save unified buff system
@@ -479,7 +479,7 @@ void Creature::save(json& j)
 		buffJson["opponentSaves"] = savesJson;
 		buffsJson.push_back(buffJson);
 	}
-	j["activeBuffs"] = buffsJson;
+	output["activeBuffs"] = buffsJson;
 
 	json equippedJson = json::array();
 	for (const EquippedItem& equipped : equippedItems)
@@ -489,7 +489,7 @@ void Creature::save(json& j)
 		equipped.item->save(itemJson);
 		equippedJson.push_back(json{ { "slot", encode_equipment_slot(equipped.slot) }, { "item", itemJson } });
 	}
-	j["equippedItems"] = equippedJson;
+	output["equippedItems"] = equippedJson;
 }
 
 void Creature::update_creature_state(GameContext& ctx)
@@ -1332,25 +1332,25 @@ bool Creature::unequip_item(EquipmentSlot slot, GameContext& ctx)
 	assert(ctx.floorInventory && "Creature::unequip_item: called without a floorInventory");
 
 	// erase after move requires iterator; find_if + erase is the correct C++23 pattern here
-	auto it = std::ranges::find_if(equippedItems, matches_slot(slot));
+	auto found = std::ranges::find_if(equippedItems, matches_slot(slot));
 
-	if (it != equippedItems.end())
+	if (found != equippedItems.end())
 	{
 		// AD&D 2e PHB p.230: cursed items are magically bound to the wearer.
 		// Only a Remove Curse spell breaks the bond.
-		if (it->item->get_enhancement().blessing == BlessingStatus::CURSED)
+		if (found->item->get_enhancement().blessing == BlessingStatus::CURSED)
 		{
 			ctx.messageSystem->message(
 				ColorPairId::RED_BLACK,
-				std::format("The {} is cursed and cannot be removed!", it->item->get_name()),
+				std::format("The {} is cursed and cannot be removed!", found->item->get_name()),
 				MessageCompletion::FINISHED);
 			return false;
 		}
 
 		// Out of the slot list before anything reads it again: the pack's weight check reads
 		// Strength, which counts every worn item.
-		std::unique_ptr<Item> removed = std::move(it->item);
-		equippedItems.erase(it);
+		std::unique_ptr<Item> removed = std::move(found->item);
+		equippedItems.erase(found);
 
 		// The pack takes it if it has room and weight to spare; otherwise it drops at the wearer's feet,
 		// since taking off a Strength item can lower the limit, and the floor always has room.
@@ -1601,8 +1601,8 @@ int Creature::get_exceptional_strength() const noexcept
 	// A worn item that sets Strength to 18 brings its own percentile; the higher counts.
 	auto from_setting_item = [&exceptional](const auto& boost)
 	{
-		using T = std::decay_t<decltype(boost)>;
-		if constexpr (std::is_same_v<T, JewelryAmulet> || std::is_same_v<T, Gauntlets> || std::is_same_v<T, Girdle>)
+		using BoostType = std::decay_t<decltype(boost)>;
+		if constexpr (std::is_same_v<BoostType, JewelryAmulet> || std::is_same_v<BoostType, Gauntlets> || std::is_same_v<BoostType, Girdle>)
 		{
 			if (boost.application == BuffApplication::SET && boost.strBonus == 18)
 			{
@@ -1645,9 +1645,9 @@ const Gauntlets* Creature::get_gauntlets_beside_girdle() const noexcept
 // with it.
 int Creature::calculate_effective_stat(int base_value, BuffType type) const noexcept
 {
-	auto matchesType = [type](const Buff& b)
+	auto matchesType = [type](const Buff& activeBuff)
 	{
-		return b.type == type;
+		return activeBuff.type == type;
 	};
 	auto matchingBuffs = activeBuffs | std::views::filter(matchesType);
 

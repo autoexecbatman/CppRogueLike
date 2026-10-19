@@ -56,8 +56,8 @@ public:
 	[[nodiscard]] std::string_view sprite_tile_key() const noexcept;
 
 	// Serialization - overrides Creature
-	void load(const json& j) override;
-	void save(json& j) override;
+	void load(const json& source) override;
+	void save(json& output) override;
 
 	// NOTE: coordinates are being set in the function create_room() in Map.cpp
 
