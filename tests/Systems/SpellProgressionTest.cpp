@@ -194,7 +194,7 @@ protected:
 		caster.set_creature_level(newLevel);
 
 		const std::size_t before = mock.messages.get_stored_message_count();
-		LevelUpSystem::apply_level_up_benefits(caster, newLevel, &ctx);
+		LevelUpSystem::apply_level_up_benefits(caster, newLevel, ctx);
 
 		for (std::size_t index = before; index < mock.messages.get_stored_message_count(); ++index)
 		{
@@ -235,7 +235,7 @@ protected:
 		caster.set_creature_level(newLevel);
 
 		const std::size_t before = mock.messages.get_stored_message_count();
-		LevelUpSystem::apply_level_up_benefits(caster, newLevel, &ctx);
+		LevelUpSystem::apply_level_up_benefits(caster, newLevel, ctx);
 
 		for (std::size_t index = before; index < mock.messages.get_stored_message_count(); ++index)
 		{

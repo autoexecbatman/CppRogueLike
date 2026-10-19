@@ -90,7 +90,7 @@ protected:
 	void gain_a_level(int newLevel)
 	{
 		game.dice.set_next_d20(HIT_DIE_ROLL);
-		LevelUpSystem::apply_level_up_benefits(*player, newLevel, &ctx);
+		LevelUpSystem::apply_level_up_benefits(*player, newLevel, ctx);
 	}
 
 	Game game;

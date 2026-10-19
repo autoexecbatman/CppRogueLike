@@ -41,7 +41,7 @@ void DisplayManager::display_help(GameContext& ctx) const
 void DisplayManager::display_levelup(Player& player, int xpLevel, GameContext& ctx) const
 {
 	// Apply all level up benefits through the new LevelUpSystem
-	LevelUpSystem::apply_level_up_benefits(player, xpLevel, &ctx);
+	LevelUpSystem::apply_level_up_benefits(player, xpLevel, ctx);
 
 	// A thief's thirty points per level (PHB page 84) get their own screen, pushed under the summary
 	// so the player reads what the level gave first.

@@ -161,7 +161,7 @@ protected:
 	int gain_at_level(int newLevel)
 	{
 		const int before = fighter.get_max_hp();
-		LevelUpSystem::apply_level_up_benefits(fighter, newLevel, &ctx);
+		LevelUpSystem::apply_level_up_benefits(fighter, newLevel, ctx);
 		return fighter.get_max_hp() - before;
 	}
 
@@ -178,7 +178,7 @@ protected:
 		mock.dice.set_next_roll(rolled);
 
 		const int before = adventurer.get_max_hp();
-		LevelUpSystem::apply_level_up_benefits(adventurer, 2, &ctx);
+		LevelUpSystem::apply_level_up_benefits(adventurer, 2, ctx);
 		return adventurer.get_max_hp() - before;
 	}
 

@@ -63,7 +63,7 @@ protected:
 		for (int levelUp = 0; levelUp < LEVEL_UPS; ++levelUp)
 		{
 			const int before = fighter->get_hp_base();
-			LevelUpSystem::apply_level_up_benefits(*fighter, 2, &ctx);
+			LevelUpSystem::apply_level_up_benefits(*fighter, 2, ctx);
 			rolled.insert(fighter->get_hp_base() - before);
 		}
 		return rolled;

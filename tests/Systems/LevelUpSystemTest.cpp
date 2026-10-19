@@ -65,7 +65,7 @@ TEST_F(LevelUpSystemTest, FighterLevelUpHPGain)
 
     game.dice.set_next_d20(8);
 
-    LevelUpSystem::apply_level_up_benefits(*player, 2, &ctx);
+    LevelUpSystem::apply_level_up_benefits(*player, 2, ctx);
 
     EXPECT_EQ(player->get_hp_base(), 18);
     EXPECT_EQ(player->get_max_hp(), 18);
@@ -93,7 +93,7 @@ TEST_F(LevelUpSystemTest, WizardLevelUpHPGainWithConBonus)
 
     game.dice.set_next_d20(3);
 
-    LevelUpSystem::apply_level_up_benefits(*player, 2, &ctx);
+    LevelUpSystem::apply_level_up_benefits(*player, 2, ctx);
 
     int gained = 3 + expectedBonus;
     EXPECT_EQ(player->get_max_hp(), oldMaxHP + gained);
@@ -105,7 +105,7 @@ TEST_F(LevelUpSystemTest, FighterExtraAttackAtLevel7)
     player->set_hit_die(10);
     player->set_attacks_per_round(1.0f);
 
-    LevelUpSystem::apply_level_up_benefits(*player, 7, &ctx);
+    LevelUpSystem::apply_level_up_benefits(*player, 7, ctx);
 
     EXPECT_FLOAT_EQ(player->get_attacks_per_round(), 1.5f);
 }
@@ -116,7 +116,7 @@ TEST_F(LevelUpSystemTest, FighterExtraAttackAtLevel13)
     player->set_hit_die(10);
     player->set_attacks_per_round(1.5f);
 
-    LevelUpSystem::apply_level_up_benefits(*player, 13, &ctx);
+    LevelUpSystem::apply_level_up_benefits(*player, 13, ctx);
 
     EXPECT_FLOAT_EQ(player->get_attacks_per_round(), 2.0f);
 }
@@ -137,7 +137,7 @@ TEST_F(LevelUpSystemTest, ALevelRaisesNoAbilityScore)
 
         for (const int level : { 4, 8, 12 })
         {
-            LevelUpSystem::apply_level_up_benefits(*player, level, &ctx);
+            LevelUpSystem::apply_level_up_benefits(*player, level, ctx);
         }
 
         EXPECT_EQ(player->get_strength(), 15) << "class " << static_cast<int>(creatureClass);
@@ -155,7 +155,7 @@ TEST_F(LevelUpSystemTest, AStrengthBuffIsNotKeptByALevel)
     player->set_strength(15);
     ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, 19, 10, true, ctx.gameState->get_time());
 
-    LevelUpSystem::apply_level_up_benefits(*player, 4, &ctx);
+    LevelUpSystem::apply_level_up_benefits(*player, 4, ctx);
     ctx.buffSystem->remove_buff(*player, BuffType::STRENGTH);
 
     EXPECT_EQ(player->get_strength(), 15) << "the level kept the potion's Strength";
@@ -169,7 +169,7 @@ TEST_F(LevelUpSystemTest, FighterTHAC0Improvement)
 
     game.dice.set_next_d20(5);
 
-    LevelUpSystem::apply_level_up_benefits(*player, 2, &ctx);
+    LevelUpSystem::apply_level_up_benefits(*player, 2, ctx);
 
     EXPECT_EQ(player->get_thaco(), 19);
 }
@@ -182,7 +182,7 @@ TEST_F(LevelUpSystemTest, FighterExtraAttackSkippedLevel)
 
     game.dice.set_next_d20(5);
 
-    LevelUpSystem::apply_level_up_benefits(*player, 8, &ctx);
+    LevelUpSystem::apply_level_up_benefits(*player, 8, ctx);
 
     EXPECT_FLOAT_EQ(player->get_attacks_per_round(), 1.5f);
 }

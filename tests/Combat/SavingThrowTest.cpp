@@ -143,7 +143,7 @@ protected:
 		creature.set_creature_level(newLevel);
 
 		const size_t before = mock.messages.get_stored_message_count();
-		LevelUpSystem::apply_level_up_benefits(creature, newLevel, &ctx);
+		LevelUpSystem::apply_level_up_benefits(creature, newLevel, ctx);
 
 		for (size_t index = before; index < mock.messages.get_stored_message_count(); ++index)
 		{

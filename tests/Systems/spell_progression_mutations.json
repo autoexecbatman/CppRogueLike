@@ -75,8 +75,8 @@
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "\tif (reachNow <= SpellSystem::highest_spell_level(casterClass, newLevel - 1, wisdom, *ctx->dataManager))",
-      "mutated": "\tif (reachNow < SpellSystem::highest_spell_level(casterClass, newLevel - 1, wisdom, *ctx->dataManager))",
+      "original": "\tif (reachNow <= SpellSystem::highest_spell_level(casterClass, newLevel - 1, wisdom, *ctx.dataManager))",
+      "mutated": "\tif (reachNow < SpellSystem::highest_spell_level(casterClass, newLevel - 1, wisdom, *ctx.dataManager))",
       "catches": "a level that opened nothing announcing a spell level all the same"
     },
     {
