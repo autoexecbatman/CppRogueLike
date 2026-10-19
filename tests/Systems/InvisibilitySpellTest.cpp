@@ -20,6 +20,7 @@
 #include <string_view>
 
 #include "src/BuffSystem.h"
+#include "src/BuffType.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/GameContext.h"
@@ -44,12 +45,12 @@ protected:
 		ctx = mock.to_game_context();
 	}
 
-	// The spell cast from an item, which no Intelligence can fizzle.
+	// The wizard's own casting, from memory; only a priest's spell can fizzle.
 	void cast_invisibility()
 	{
 		const auto casting_spent = [](GameContext& completedCtx) {
 		};
-		SpellSystem::cast_spell_by_key("invisibility", wizard, SpellSource::ITEM, casting_spent, ctx);
+		SpellSystem::cast_spell_by_key("invisibility", wizard, SpellSource::MEMORIZED, casting_spent, ctx);
 	}
 
 	// Whether the wizard is still invisible once the clock reads `rounds` after the casting.
@@ -98,6 +99,15 @@ TEST_F(InvisibilitySpellTest, ItLastsADayAndNoLonger)
 
 	EXPECT_TRUE(is_invisible_after(ROUNDS_IN_A_DAY - 1)) << "gone before the day was out";
 	EXPECT_FALSE(is_invisible_after(ROUNDS_IN_A_DAY)) << "still invisible after a full day";
+}
+
+// Cast from memory it is the spell's own invisibility, which no ring's removal ends.
+TEST_F(InvisibilitySpellTest, CastFromMemoryItIsTheSpellsOwn)
+{
+	cast_invisibility();
+
+	EXPECT_TRUE(ctx.buffSystem->has_buff(wizard, BuffType::INVISIBILITY));
+	EXPECT_FALSE(ctx.buffSystem->has_buff(wizard, BuffType::ITEM_INVISIBILITY));
 }
 
 // The line the caster reads no longer promises the old twenty.

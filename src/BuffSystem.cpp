@@ -17,6 +17,7 @@
 static const std::unordered_map<BuffType, ActorState> buff_state_effects = {
 	{ BuffType::INVISIBILITY, ActorState::IS_INVISIBLE },
 	{ BuffType::HIDDEN_IN_SHADOWS, ActorState::IS_INVISIBLE },
+	{ BuffType::ITEM_INVISIBILITY, ActorState::IS_INVISIBLE },
 	{ BuffType::SLEEP, ActorState::IS_SLEEPING },
 	{ BuffType::HOLD_PERSON, ActorState::IS_HELD },
 	{ BuffType::SILENCE, ActorState::IS_SILENCED },
@@ -37,6 +38,7 @@ static const std::unordered_set<BuffType> buffs_broken_by_attacking = {
 	BuffType::INVISIBILITY,
 	BuffType::SANCTUARY,
 	BuffType::HIDDEN_IN_SHADOWS,
+	BuffType::ITEM_INVISIBILITY,
 };
 
 // OCP: Data-driven hit calculation - BuffTypes that modify to-hit rolls

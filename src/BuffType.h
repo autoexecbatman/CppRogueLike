@@ -43,6 +43,8 @@ enum class BuffType
 	WEBBED,
 	HAIRY_SPIDER_VENOM,
 	HIDDEN_IN_SHADOWS,
+	// Invisibility a worn item grants, apart from the spell's so taking the item off ends only it.
+	ITEM_INVISIBILITY,
 };
 
 // The hairy spider's weak poison: "the victim's AC and attack rolls are penalized by
@@ -52,7 +54,7 @@ inline constexpr int HAIRY_SPIDER_VENOM_PENALTY = 1;
 
 // Every BuffType, in the order the enum declares them, so a cycle through the
 // editor's field reaches all of them and adding one is a single edit here.
-inline constexpr std::array<BuffType, 23> ALL_BUFF_TYPE = {
+inline constexpr std::array<BuffType, 24> ALL_BUFF_TYPE = {
 	BuffType::NONE,
 	BuffType::INVISIBILITY,
 	BuffType::BLESS,
@@ -76,6 +78,7 @@ inline constexpr std::array<BuffType, 23> ALL_BUFF_TYPE = {
 	BuffType::WEBBED,
 	BuffType::HAIRY_SPIDER_VENOM,
 	BuffType::HIDDEN_IN_SHADOWS,
+	BuffType::ITEM_INVISIBILITY,
 };
 
 // The next BuffType in that order, wrapping at the end.
@@ -197,6 +200,10 @@ inline constexpr std::string_view encode_buff_type(BuffType buffType)
 	case BuffType::HIDDEN_IN_SHADOWS:
 	{
 		return "hidden_in_shadows";
+	}
+	case BuffType::ITEM_INVISIBILITY:
+	{
+		return "item_invisibility";
 	}
 	}
 
@@ -372,6 +379,10 @@ inline BuffType parse_buff_type(std::string_view name)
 	if (name == "hidden_in_shadows")
 	{
 		return BuffType::HIDDEN_IN_SHADOWS;
+	}
+	if (name == "item_invisibility")
+	{
+		return BuffType::ITEM_INVISIBILITY;
 	}
 
 	throw std::runtime_error(std::format("unknown buff_type '{}'", name));

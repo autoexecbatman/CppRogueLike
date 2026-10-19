@@ -150,9 +150,10 @@ bool use_magical_equip(MagicalEffect effect, EquipmentSlot slot, Item& item, Cre
 	{
 		if (wasEquipped)
 		{
-			if (effect == MagicalEffect::INVISIBILITY && wearer.is_invisible())
+			// The ring ends only its own invisibility, and not while another such ring is worn.
+			if (effect == MagicalEffect::INVISIBILITY && ctx.buffSystem->has_buff(wearer, BuffType::ITEM_INVISIBILITY) && !wearer.wears_ring_of(MagicalEffect::INVISIBILITY))
 			{
-				ctx.buffSystem->remove_buff(wearer, BuffType::INVISIBILITY);
+				ctx.buffSystem->remove_buff(wearer, BuffType::ITEM_INVISIBILITY);
 				ctx.messageSystem->message(ColorPairId::CYAN_BLACK, "Your invisibility fades.", MessageCompletion::FINISHED);
 			}
 			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You remove the " + item.get_name() + ".", MessageCompletion::FINISHED);

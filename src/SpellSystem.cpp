@@ -163,6 +163,7 @@ namespace
 void dispatch_effect(
 	SpellEffectType effect,
 	Creature& caster,
+	SpellSource source,
 	std::function<void(GameContext&)> onSuccess,
 	GameContext& ctx);
 
@@ -182,7 +183,9 @@ bool cast_protection_from_evil(Creature& caster, GameContext& ctx);
 bool cast_magic_missile(Creature& caster, GameContext& ctx);
 bool cast_shield(Creature& caster, GameContext& ctx);
 bool cast_sleep(Creature& caster, GameContext& ctx);
-bool cast_invisibility(Creature& caster, GameContext& ctx);
+// Makes the caster invisible for the spell's day, as the given buff, so a worn item's
+// grant can be ended apart from the spell's.
+bool cast_invisibility(Creature& caster, BuffType granted, GameContext& ctx);
 bool cast_teleport(Creature& caster, GameContext& ctx);
 bool cast_knock(Creature& caster, GameContext& ctx);
 // Paralyzes up to 1d4 humanoids in the caster's field of view for two rounds
@@ -219,6 +222,7 @@ void cast_fireball(Creature& caster, std::function<void(GameContext&)> onSuccess
 void dispatch_effect(
 	SpellEffectType effect,
 	Creature& caster,
+	SpellSource source,
 	std::function<void(GameContext&)> onSuccess,
 	GameContext& ctx)
 {
@@ -305,7 +309,9 @@ void dispatch_effect(
 
 	case SpellEffectType::INVISIBILITY:
 	{
-		result = cast_invisibility(caster, ctx);
+		// An item's casting is the item's own buff, which taking the item off ends.
+		const BuffType granted = source == SpellSource::ITEM ? BuffType::ITEM_INVISIBILITY : BuffType::INVISIBILITY;
+		result = cast_invisibility(caster, granted, ctx);
 		break;
 	}
 
@@ -787,9 +793,9 @@ bool cast_hold_person(Creature& caster, GameContext& ctx)
 // hours have passed". The attack break is BuffSystem's; this is the day.
 inline constexpr int INVISIBILITY_SPELL_ROUNDS = 24 * ROUNDS_PER_HOUR;
 
-bool cast_invisibility(Creature& caster, GameContext& ctx)
+bool cast_invisibility(Creature& caster, BuffType granted, GameContext& ctx)
 {
-	ctx.buffSystem->add_buff(caster, BuffType::INVISIBILITY, 0, INVISIBILITY_SPELL_ROUNDS, BuffApplication::ADD, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(caster, granted, 0, INVISIBILITY_SPELL_ROUNDS, BuffApplication::ADD, ctx.gameState->get_time());
 	ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Invisibility! ");
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "You fade from view.");
 	ctx.messageSystem->finalize_message();
@@ -1052,7 +1058,7 @@ void SpellSystem::cast_spell_by_key(
 	}
 
 	const SpellDefinition& definition = ctx.spellRegistry->get_by_key(key);
-	dispatch_effect(definition.effect_type, caster, std::move(onCastComplete), ctx);
+	dispatch_effect(definition.effect_type, caster, source, std::move(onCastComplete), ctx);
 }
 
 SpellSystem::FireballBurst SpellSystem::burst_fireball(Vector2D center, int casterLevel, int radius, GameContext& ctx)

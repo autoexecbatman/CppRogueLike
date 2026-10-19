@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=RingInvisibilityTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\tconst BuffType granted = source == SpellSource::ITEM ? BuffType::ITEM_INVISIBILITY : BuffType::INVISIBILITY;\n",
+      "mutated": "\t\tconst BuffType granted = source != SpellSource::ITEM ? BuffType::ITEM_INVISIBILITY : BuffType::INVISIBILITY;\n",
+      "catches": "a casting through the ring granting the spell's buff, so the ring cannot tell its own invisibility apart"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\t\t\tctx.buffSystem->remove_buff(wearer, BuffType::ITEM_INVISIBILITY);\n",
+      "mutated": "\t\t\t\tctx.buffSystem->remove_buff(wearer, BuffType::INVISIBILITY);\n",
+      "catches": "taking the ring off ending the spell's invisibility instead of its own"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": " && !wearer.wears_ring_of(MagicalEffect::INVISIBILITY))\n",
+      "mutated": ")\n",
+      "catches": "one ring coming off ending the invisibility a second worn ring still grants"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\tBuffType::SANCTUARY,\n\tBuffType::HIDDEN_IN_SHADOWS,\n\tBuffType::ITEM_INVISIBILITY,\n};\n",
+      "mutated": "\tBuffType::SANCTUARY,\n\tBuffType::HIDDEN_IN_SHADOWS,\n};\n",
+      "catches": "the ring's invisibility surviving an attack, which the spell's does not"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\t{ BuffType::ITEM_INVISIBILITY, ActorState::IS_INVISIBLE },\n",
+      "mutated": "",
+      "catches": "the ring's buff granted but its wearer never unseen"
+    }
+  ]
+}
