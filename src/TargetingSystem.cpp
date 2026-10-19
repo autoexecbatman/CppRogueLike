@@ -6,8 +6,7 @@
 #include <raylib.h>
 
 #include "Actor.h"
-#include "AnimationSystem.h"
-#include "AttackKind.h"
+#include "Attacker.h"
 #include "BuffSystem.h"
 #include "Colors.h"
 #include "Creature.h"
@@ -21,7 +20,6 @@
 #include "Renderer.h"
 #include "TargetingMenu.h"
 #include "TargetingSystem.h"
-#include "TileConfig.h"
 #include "Vector2D.h"
 
 void TargetingSystem::draw_los(GameContext& ctx, Vector2D targetCursor) const
@@ -184,33 +182,8 @@ void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
 			return;
 		}
 
-		if (innerCtx.animSystem && innerCtx.tileConfig)
-		{
-			const TileRef boltTile = innerCtx.tileConfig->get("TILE_EFFECT_BOLT");
-
-			auto onArrive = [targetPos, &innerCtx]()
-			{
-				if (innerCtx.animSystem)
-				{
-					innerCtx.animSystem->spawn_blood_burst(targetPos, 3);
-				}
-			};
-
-			innerCtx.animSystem->spawn_projectile(
-				innerCtx.player()->position,
-				targetPos,
-				boltTile,
-				210,
-				180,
-				100,
-				550.0f,
-				0.0f,
-				std::move(onArrive));
-		}
-
-		assert(innerCtx.player()->attacker && "ranged attack fired with no attacker component");
 		assert(innerCtx.creatureManager && "ranged attack fired with no creature manager");
-		innerCtx.player()->attacker->attack(*target, AttackKind::RANGED, innerCtx);
+		RangedShot::fire(*innerCtx.player(), *target, innerCtx);
 		innerCtx.creatureManager->cleanup_dead_creatures(*innerCtx.creatures);
 		spend_player_action(innerCtx, TIME_UNITS_PER_ROUND);
 	};

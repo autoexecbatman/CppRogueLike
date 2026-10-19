@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=RangedShotTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\tcase AttackResult::LANDED:\n\t{\n\t\treturn ShotImpact::MISSILE_AND_BLOOD;",
+      "mutated": "\tcase AttackResult::LANDED:\n\t{\n\t\treturn ShotImpact::MISSILE;",
+      "catches": "a shot that landed drawing no blood"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\tcase AttackResult::MISSED:\n\t{\n\t\treturn ShotImpact::MISSILE;",
+      "mutated": "\tcase AttackResult::MISSED:\n\t{\n\t\treturn ShotImpact::MISSILE_AND_BLOOD;",
+      "catches": "a miss drawing blood, the defect 0074 names"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\tcase AttackResult::PREVENTED:\n\t{\n\t\treturn ShotImpact::NOTHING;",
+      "mutated": "\tcase AttackResult::PREVENTED:\n\t{\n\t\treturn ShotImpact::MISSILE;",
+      "catches": "a shot never loosed drawing a missile"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\tif (impact == ShotImpact::NOTHING)\n\t{\n\t\treturn result;\n\t}",
+      "mutated": "\tif (false)\n\t{\n\t\treturn result;\n\t}",
+      "catches": "fire drawing a missile whatever the picture says"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\tcase AttackResult::MISSED:\n\t{\n\t\treturn ShotImpact::MISSILE;",
+      "mutated": "\tcase AttackResult::MISSED:\n\t{\n\t\treturn ShotImpact::NOTHING;",
+      "catches": "a missed shot drawing no missile at all"
+    }
+  ]
+}

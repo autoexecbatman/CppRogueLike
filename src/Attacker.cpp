@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "Actor.h"
@@ -29,6 +30,8 @@
 #include "Persistent.h"
 #include "Pickable.h"
 #include "Player.h"
+#include "TileConfig.h"
+#include "Vector2D.h"
 
 // OCP: Data-driven buff break messaging - player notifications when buffs end from attacking
 static const std::unordered_map<BuffType, std::string_view> BUFF_BREAK_MESSAGES = {
@@ -374,4 +377,63 @@ void Attacker::save(json& j)
 {
 	j["damageInfo"]["display"] = damageInfo.displayRoll;
 	j["damageInfo"]["type"] = damage_type_name(damageInfo.damageType);
+}
+
+ShotImpact RangedShot::impact_of(AttackResult result) noexcept
+{
+	switch (result)
+	{
+	case AttackResult::LANDED:
+	{
+		return ShotImpact::MISSILE_AND_BLOOD;
+	}
+	case AttackResult::MISSED:
+	{
+		return ShotImpact::MISSILE;
+	}
+	case AttackResult::PREVENTED:
+	{
+		return ShotImpact::NOTHING;
+	}
+	}
+
+	std::unreachable();
+}
+
+AttackResult RangedShot::fire(Creature& shooter, Creature& target, GameContext& ctx)
+{
+	assert(shooter.attacker && "RangedShot::fire: the shooter has no attacker");
+	assert(ctx.animSystem && "RangedShot::fire: called without an animSystem");
+	assert(ctx.tileConfig && "RangedShot::fire: called without a tileConfig");
+
+	// The attack resolves as the missile leaves, so its messages print before it lands.
+	const AttackResult result = shooter.attacker->attack(target, AttackKind::RANGED, ctx);
+	const ShotImpact impact = impact_of(result);
+	if (impact == ShotImpact::NOTHING)
+	{
+		return result;
+	}
+
+	// A missile with no arrival callback is dropped at once, so a miss carries an empty one.
+	const Vector2D landing = target.position;
+	const bool isBloody = impact == ShotImpact::MISSILE_AND_BLOOD;
+	AnimationSystem& animSystem = *ctx.animSystem;
+	const auto on_arrive = [landing, isBloody, &animSystem]()
+	{
+		if (isBloody)
+		{
+			animSystem.spawn_blood_burst(landing, 3);
+		}
+	};
+	animSystem.spawn_projectile(
+		shooter.position,
+		landing,
+		ctx.tileConfig->get("TILE_EFFECT_BOLT"),
+		210,
+		180,
+		100,
+		550.0f,
+		0.0f,
+		on_arrive);
+	return result;
 }

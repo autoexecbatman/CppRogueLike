@@ -5,8 +5,6 @@
 #include "Actor.h"
 #include "AiMonster.h"
 #include "AiMonsterRanged.h"
-#include "AnimationSystem.h"
-#include "AttackKind.h"
 #include "Attacker.h"
 #include "BuffSystem.h"
 #include "Creature.h"
@@ -14,7 +12,6 @@
 #include "Map.h"
 #include "Pathfinding.h"
 #include "Persistent.h"
-#include "TileConfig.h"
 #include "Vector2D.h"
 
 void AiMonsterRanged::update(Creature& owner, GameContext& ctx)
@@ -88,35 +85,8 @@ bool AiMonsterRanged::tryRangedAttack(Creature& owner, Vector2D targetPos, GameC
 		return false;
 	}
 
-	animate_arrow(owner.position, targetPos, ctx);
-
-	// Perform the attack
-	owner.attacker->attack(*ctx.player(), AttackKind::RANGED, ctx);
+	RangedShot::fire(owner, *ctx.player(), ctx);
 	return true;
-}
-
-void AiMonsterRanged::animate_arrow(Vector2D from, Vector2D to, GameContext& ctx)
-{
-	assert(ctx.animSystem && "AiMonsterRanged::animate_arrow called without an animSystem");
-	assert(ctx.tileConfig && "AiMonsterRanged::animate_arrow called without a tileConfig");
-
-	const TileRef boltTile = ctx.tileConfig->get("TILE_EFFECT_BOLT");
-
-	auto onArrive = [to, &ctx]()
-	{
-		ctx.animSystem->spawn_blood_burst(to, 3);
-	};
-
-	ctx.animSystem->spawn_projectile(
-		from,
-		to,
-		boltTile,
-		210,
-		180,
-		100,
-		550.0f,
-		0.0f,
-		std::move(onArrive));
 }
 
 void AiMonsterRanged::load(const json& j)

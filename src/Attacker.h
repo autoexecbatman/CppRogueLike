@@ -104,3 +104,34 @@ public:
 	void load(const json& j) override;
 	void save(json& j) override;
 };
+
+// What a fired missile shows, decided by how its attack came out.
+enum class ShotImpact
+{
+	NOTHING, // nothing was loosed, so nothing flies
+	MISSILE, // the missile flies and misses
+	MISSILE_AND_BLOOD, // the missile flies and lands
+};
+
+namespace RangedShot
+{
+
+// The picture an attack's outcome earns: blood only where it landed, and no missile
+// where none was loosed.
+//
+// Example:
+//   RangedShot::impact_of(AttackResult::LANDED);      // -> ShotImpact::MISSILE_AND_BLOOD
+//   RangedShot::impact_of(AttackResult::MISSED);      // -> ShotImpact::MISSILE
+//   RangedShot::impact_of(AttackResult::PREVENTED);   // -> ShotImpact::NOTHING
+[[nodiscard]] ShotImpact impact_of(AttackResult result) noexcept;
+
+// One ranged attack by `shooter` at `target`, for the player and the monsters alike.
+// The attack resolves first, so its messages print as the missile leaves, and the
+// missile drawn after it is the one impact_of names. Refuses a shooter with no attacker.
+//
+// Example, an archer two squares from the player:
+//   RangedShot::fire(archer, player, ctx);   // -> AttackResult::LANDED; a bolt, then blood
+//   RangedShot::fire(archer, corpse, ctx);   // -> AttackResult::PREVENTED; nothing drawn
+AttackResult fire(Creature& shooter, Creature& target, GameContext& ctx);
+
+} // namespace RangedShot
