@@ -131,12 +131,12 @@ public:
 	// Writes what cannot be rebuilt from the type: where it is, which kind it is, what
 	// state it is in, and the experience levels its last disarm attempt and its last
 	// search were made at.
-	void save(json& j) override;
+	void save(json& output) override;
 
 	// Restores those five and nothing else. The damage dice, the name, both tiles and
 	// the colour come from the constructor, so a save can never disagree with the type
 	// table; visibility follows from the state rather than being stored.
-	void load(const json& j) override;
+	void load(const json& source) override;
 };
 
 namespace TrapSearch

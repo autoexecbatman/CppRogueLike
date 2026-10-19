@@ -9,8 +9,8 @@
   "mutations": [
     {
       "file": "src/TreasureRoom.cpp",
-      "original": "\t\t\tif (ctx.map->get_tile_type(Vector2D{ x, y }) == TileType::WATER)",
-      "mutated": "\t\t\tif (ctx.map->get_tile_type(Vector2D{ x, y }) != TileType::WATER)",
+      "original": "\t\t\tif (ctx.map->get_tile_type(Vector2D{ col, row }) == TileType::WATER)",
+      "mutated": "\t\t\tif (ctx.map->get_tile_type(Vector2D{ col, row }) != TileType::WATER)",
       "catches": "the vault filling its whole bounding box again, flattening whichever shape it landed on"
     },
     {
@@ -27,8 +27,8 @@
     },
     {
       "file": "src/PrefabLibrary.cpp",
-      "original": "void PrefabLibrary::load(std::string_view path)\n{\n\tstd::ifstream in(Paths::resolve(path));",
-      "mutated": "void PrefabLibrary::load(std::string_view path)\n{\n\tstd::ifstream in(path.data());",
+      "original": "void PrefabLibrary::load(std::string_view path)\n{\n\tstd::ifstream prefabsFile(Paths::resolve(path));",
+      "mutated": "void PrefabLibrary::load(std::string_view path)\n{\n\tstd::ifstream prefabsFile(path.data());",
       "catches": "the prefab library silently loading nothing when the working directory is not the repository root"
     }
   ]

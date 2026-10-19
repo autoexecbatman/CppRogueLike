@@ -9,19 +9,19 @@
   "mutations": [
     {
       "file": "src/TreasureRoom.cpp",
-      "original": "\tint count = 0;\n\tfor (int y = room.top_wall(); y <= room.bottom_wall(); ++y)",
-      "mutated": "\tint count = 1;\n\tfor (int y = room.top_wall(); y <= room.bottom_wall(); ++y)",
+      "original": "\tint count = 0;\n\tfor (int row = room.top_wall(); row <= room.bottom_wall(); ++row)",
+      "mutated": "\tint count = 1;\n\tfor (int row = room.top_wall(); row <= room.bottom_wall(); ++row)",
       "catches": "the counter starting off by one, which proves the tests link this translation unit rather than a stale copy"
     },
     {
       "file": "src/TreasureRoom.cpp",
-      "original": "\t\t\tif (ctx.map->get_tile_type(Vector2D{ x, y }) == TileType::WATER)",
-      "mutated": "\t\t\tif (ctx.map->get_tile_type(Vector2D{ x, y }) != TileType::WALL)",
+      "original": "\t\t\tif (ctx.map->get_tile_type(Vector2D{ col, row }) == TileType::WATER)",
+      "mutated": "\t\t\tif (ctx.map->get_tile_type(Vector2D{ col, row }) != TileType::WALL)",
       "catches": "the vault clearing every cell of its box that is not wall, so a corridor clipping a corner becomes a pocket of room floor"
     },
     {
       "file": "src/TreasureRoom.cpp",
-      "original": "\t\t\t\tctx.map->set_tile(Vector2D{ x, y }, TileType::FLOOR);",
+      "original": "\t\t\t\tctx.map->set_tile(Vector2D{ col, row }, TileType::FLOOR);",
       "mutated": "",
       "catches": "the vault leaving its pools standing, so the treasure sits in water"
     },

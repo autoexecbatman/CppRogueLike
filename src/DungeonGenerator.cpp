@@ -99,17 +99,17 @@ std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 	std::vector<DungeonRoom> rooms;
 	rooms.reserve(gridCols * gridRows);
 
-	for (int gr = 0; gr < gridRows; ++gr)
+	for (int gridRow = 0; gridRow < gridRows; ++gridRow)
 	{
-		for (int gc = 0; gc < gridCols; ++gc)
+		for (int gridCol = 0; gridCol < gridCols; ++gridCol)
 		{
 			if (rng.roll(0, 99) < SKIP_PCTG)
 			{
 				continue;
 			}
 
-			const int cellX = gc * CELL_W;
-			const int cellY = gr * CELL_H;
+			const int cellX = gridCol * CELL_W;
+			const int cellY = gridRow * CELL_H;
 
 			// Pick a prefab that fits the cell, wall border included; with no library, as in unit tests, a random size.
 			int roomWidth = rng.roll(ROOM_MIN_SIZE, ROOM_HORIZONTAL_MAX_SIZE);
@@ -127,38 +127,38 @@ std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 
 				std::vector<Candidate> candidates;
 				const auto& all = prefabs->all();
-				for (int i = 0; i < static_cast<int>(all.size()); ++i)
+				for (int prefabIndex = 0; prefabIndex < static_cast<int>(all.size()); ++prefabIndex)
 				{
-					const Prefab& p = all[i];
-					if (p.width() <= CELL_W && p.height() <= CELL_H)
+					const Prefab& prefab = all[prefabIndex];
+					if (prefab.width() <= CELL_W && prefab.height() <= CELL_H)
 					{
-						candidates.push_back({ i, p.weight });
+						candidates.push_back({ prefabIndex, prefab.weight });
 					}
 				}
 
 				if (!candidates.empty())
 				{
 					float total = 0.0f;
-					for (const auto& c : candidates)
+					for (const auto& candidate : candidates)
 					{
-						total += c.weight;
+						total += candidate.weight;
 					}
 					float roll = static_cast<float>(rng.roll(0, 999999)) / 1000000.0f * total;
 					float accumulated = 0.0f;
 					int chosen = candidates.back().index;
-					for (const auto& c : candidates)
+					for (const auto& candidate : candidates)
 					{
-						accumulated += c.weight;
+						accumulated += candidate.weight;
 						if (roll < accumulated)
 						{
-							chosen = c.index;
+							chosen = candidate.index;
 							break;
 						}
 					}
-					const Prefab& p = all[chosen];
-					roomWidth = p.width() - 2;
-					roomHeight = p.height() - 2;
-					chosenPrefab = p.name;
+					const Prefab& prefab = all[chosen];
+					roomWidth = prefab.width() - 2;
+					roomHeight = prefab.height() - 2;
+					chosenPrefab = prefab.name;
 				}
 			}
 
@@ -224,41 +224,41 @@ void DungeonGenerator::connect_spanning_tree(
 		return;
 	}
 
-	const int n = static_cast<int>(rooms.size());
+	const int roomCount = static_cast<int>(rooms.size());
 
 	// ---- Prim's MST: guarantees full connectivity ----
-	std::vector<bool> inTree(n, false);
+	std::vector<bool> inTree(roomCount, false);
 	inTree[0] = true;
 	int inCount = 1;
 
-	while (inCount < n)
+	while (inCount < roomCount)
 	{
 		int bestA = -1;
 		int bestB = -1;
 		int bestDist = std::numeric_limits<int>::max();
 
-		for (int i = 0; i < n; ++i)
+		for (int treeRoom = 0; treeRoom < roomCount; ++treeRoom)
 		{
-			if (!inTree[i])
+			if (!inTree[treeRoom])
 			{
 				continue;
 			}
 
-			for (int j = 0; j < n; ++j)
+			for (int outsideRoom = 0; outsideRoom < roomCount; ++outsideRoom)
 			{
-				if (inTree[j])
+				if (inTree[outsideRoom])
 				{
 					continue;
 				}
 
-				const int dx = rooms[i].center_col() - rooms[j].center_col();
-				const int dy = rooms[i].center_row() - rooms[j].center_row();
-				const int dist = dx * dx + dy * dy;
+				const int deltaCol = rooms[treeRoom].center_col() - rooms[outsideRoom].center_col();
+				const int deltaRow = rooms[treeRoom].center_row() - rooms[outsideRoom].center_row();
+				const int dist = deltaCol * deltaCol + deltaRow * deltaRow;
 				if (dist < bestDist)
 				{
 					bestDist = dist;
-					bestA = i;
-					bestB = j;
+					bestA = treeRoom;
+					bestB = outsideRoom;
 				}
 			}
 		}
@@ -283,45 +283,45 @@ void DungeonGenerator::add_extra_corridors(
 		return;
 	}
 
-	const int n = static_cast<int>(rooms.size());
+	const int roomCount = static_cast<int>(rooms.size());
 
 	// ---- Extra short-range corridors (~33 %) to create loop paths ----
 	// Adjacent cells only, so no corridor crosses a third room; leaf rooms keep one entrance for vaults.
 
-	const int extraTarget = std::max(1, n / 3);
+	const int extraTarget = std::max(1, roomCount / 3);
 	int added = 0;
 	const int maxAttempts = extraTarget * 6;
 
 	for (int attempt = 0; attempt < maxAttempts && added < extraTarget; ++attempt)
 	{
-		const int a = rng.roll(0, n - 1);
-		const int b = rng.roll(0, n - 1);
-		if (a == b)
+		const int fromRoom = rng.roll(0, roomCount - 1);
+		const int toRoom = rng.roll(0, roomCount - 1);
+		if (fromRoom == toRoom)
 		{
 			continue;
 		}
 
 		// Preserve leaf rooms - skip if either endpoint is currently degree-1.
-		if (rooms[a].adjacentRoomIndices.size() == 1 ||
-			rooms[b].adjacentRoomIndices.size() == 1)
+		if (rooms[fromRoom].adjacentRoomIndices.size() == 1 ||
+			rooms[toRoom].adjacentRoomIndices.size() == 1)
 		{
 			continue;
 		}
 
-		const int dx = rooms[a].center_col() - rooms[b].center_col();
-		const int dy = rooms[a].center_row() - rooms[b].center_row();
-		const int dist = dx * dx + dy * dy;
+		const int deltaCol = rooms[fromRoom].center_col() - rooms[toRoom].center_col();
+		const int deltaRow = rooms[fromRoom].center_row() - rooms[toRoom].center_row();
+		const int dist = deltaCol * deltaCol + deltaRow * deltaRow;
 		if (dist > LOOP_RADIUS)
 		{
 			continue;
 		}
 
-		if (std::ranges::contains(rooms[a].adjacentRoomIndices, b))
+		if (std::ranges::contains(rooms[fromRoom].adjacentRoomIndices, toRoom))
 		{
 			continue;
 		}
 
-		connect_pair(rooms, a, b);
+		connect_pair(rooms, fromRoom, toRoom);
 		++added;
 	}
 }
@@ -344,8 +344,8 @@ void DungeonGenerator::generate(
 
 	// Sort top-left first so room[0] is always the player spawn.
 	std::ranges::sort(rooms,
-		[](const DungeonRoom& a, const DungeonRoom& b)
-		{ return (a.row * 10000 + a.col) < (b.row * 10000 + b.col); });
+		[](const DungeonRoom& left, const DungeonRoom& right)
+		{ return (left.row * 10000 + left.col) < (right.row * 10000 + right.col); });
 
 	// ---- Phase 1: Prim's MST - full connectivity, no cycles ----
 	connect_spanning_tree(rooms);
@@ -353,16 +353,16 @@ void DungeonGenerator::generate(
 	// From MST connectivity only: after connect_spanning_tree and before add_extra_corridors,
 	// so loop edges do not demote leaf rooms.
 	rooms[0].type = RoomType::ENTRANCE;
-	for (size_t i = 1; i < rooms.size(); ++i)
+	for (size_t roomIndex = 1; roomIndex < rooms.size(); ++roomIndex)
 	{
-		const bool isLeaf = rooms[i].adjacentRoomIndices.size() == 1;
+		const bool isLeaf = rooms[roomIndex].adjacentRoomIndices.size() == 1;
 		if (isLeaf)
 		{
-			rooms[i].type = (rng.roll(1, 2) == 1) ? RoomType::DANGER : RoomType::TREASURE;
+			rooms[roomIndex].type = (rng.roll(1, 2) == 1) ? RoomType::DANGER : RoomType::TREASURE;
 		}
 		else
 		{
-			rooms[i].type = RoomType::STANDARD;
+			rooms[roomIndex].type = RoomType::STANDARD;
 		}
 	}
 

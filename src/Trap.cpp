@@ -385,23 +385,23 @@ void Trap::destroy()
 	mark_destroyed();
 }
 
-void Trap::save(json& j)
+void Trap::save(json& output)
 {
-	Actor::save(j); // Call base class save
+	Actor::save(output); // Call base class save
 
-	j["type"] = static_cast<int>(type);
-	j["state"] = static_cast<int>(state);
-	j["disarmAttemptedAtLevel"] = disarmAttemptedAtLevel;
-	j["searchedAtLevel"] = searchedAtLevel;
+	output["type"] = static_cast<int>(type);
+	output["state"] = static_cast<int>(state);
+	output["disarmAttemptedAtLevel"] = disarmAttemptedAtLevel;
+	output["searchedAtLevel"] = searchedAtLevel;
 }
 
-void Trap::load(const json& j)
+void Trap::load(const json& source)
 {
-	Actor::load(j); // Call base class load
+	Actor::load(source); // Call base class load
 
-	state = static_cast<TrapState>(j.at("state").get<int>());
-	disarmAttemptedAtLevel = j.at("disarmAttemptedAtLevel").get<int>();
-	searchedAtLevel = j.at("searchedAtLevel").get<int>();
+	state = static_cast<TrapState>(source.at("state").get<int>());
+	disarmAttemptedAtLevel = source.at("disarmAttemptedAtLevel").get<int>();
+	searchedAtLevel = source.at("searchedAtLevel").get<int>();
 
 	// The constructor set the type's dice, name and tiles; the base just restored a saved tile and visibility,
 	// so the state's appearance is applied again over them.

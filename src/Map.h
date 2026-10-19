@@ -111,8 +111,8 @@ protected:
 public:
 	Map(int mapWidth, int mapHeight);
 
-	void load(const json& j) override;
-	void save(json& j) override;
+	void load(const json& source) override;
+	void save(json& output) override;
 
 	// Initialize the tile grid to all-walls. No dungeon generation.
 	// Useful as a test seam when unit tests need a blank map.

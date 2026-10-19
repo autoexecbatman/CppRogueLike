@@ -24,18 +24,18 @@ std::optional<size_t> find_prefab_index(
 	const std::vector<Prefab>& prefabs,
 	const std::string& name)
 {
-	for (size_t i = 0; i < prefabs.size(); ++i)
+	for (size_t index = 0; index < prefabs.size(); ++index)
 	{
-		if (prefabs[i].name == name)
+		if (prefabs[index].name == name)
 		{
-			return i;
+			return index;
 		}
 	}
 	return std::nullopt;
 }
 
 void stamp_room(
-	const Prefab& p,
+	const Prefab& prefab,
 	const DungeonRoom& room,
 	const std::unordered_map<char, TileRef>& symbolToTile,
 	DecorEditor& editor,
@@ -45,9 +45,9 @@ void stamp_room(
 	const int baseX = room.left_wall();
 	const int baseY = room.top_wall();
 
-	for (size_t row = 0; row < p.rows.size(); ++row)
+	for (size_t row = 0; row < prefab.rows.size(); ++row)
 	{
-		const std::string& rowStr = p.rows[row];
+		const std::string& rowStr = prefab.rows[row];
 		for (size_t col = 0; col < rowStr.size(); ++col)
 		{
 			char sym = rowStr[col];
@@ -131,25 +131,25 @@ void PrefabLibrary::load_tile_labels(std::string_view path)
 	build_structural_symbols();
 
 	// Resolved like every other loader: a bare relative path opens only from the repository root.
-	std::ifstream in(Paths::resolve(path));
-	if (!in.is_open())
+	std::ifstream tileConfigFile(Paths::resolve(path));
+	if (!tileConfigFile.is_open())
 	{
 		return;
 	}
 
-	json j;
+	json tileConfigDocument;
 	try
 	{
-		in >> j;
+		tileConfigFile >> tileConfigDocument;
 
-		if (!j.contains("palette"))
+		if (!tileConfigDocument.contains("palette"))
 		{
 			return;
 		}
 
-		for (const auto& e : j["palette"])
+		for (const auto& paletteEntry : tileConfigDocument["palette"])
 		{
-			std::string symbolString = e.value("symbol", "");
+			std::string symbolString = paletteEntry.value("symbol", "");
 
 			if (symbolString.empty())
 			{
@@ -158,18 +158,18 @@ void PrefabLibrary::load_tile_labels(std::string_view path)
 
 			char sym = symbolString[0];
 			TileRef tile{
-				static_cast<TileSheet>(e.value("sheet", 0)),
-				e.value("col", -1),
-				e.value("row", -1)
+				static_cast<TileSheet>(paletteEntry.value("sheet", 0)),
+				paletteEntry.value("col", -1),
+				paletteEntry.value("row", -1)
 			};
-			std::string label = e.value("label", symbolString);
+			std::string label = paletteEntry.value("label", symbolString);
 
 			register_symbol(sym, tile, label);
 		}
 	}
-	catch (const json::exception& e)
+	catch (const json::exception& error)
 	{
-		std::clog << std::format("[PrefabLibrary] tile_config.json error: {}\n", e.what());
+		std::clog << std::format("[PrefabLibrary] tile_config.json error: {}\n", error.what());
 	}
 }
 
@@ -201,71 +201,71 @@ std::string PrefabLibrary::symbol_label(char symbol) const
 
 void PrefabLibrary::load(std::string_view path)
 {
-	std::ifstream in(Paths::resolve(path));
+	std::ifstream prefabsFile(Paths::resolve(path));
 
-	if (!in.is_open())
+	if (!prefabsFile.is_open())
 	{
 		return;
 	}
 
-	json j;
+	json prefabsDocument;
 	try
 	{
-		in >> j;
+		prefabsFile >> prefabsDocument;
 
-		if (!j.contains("prefabs"))
+		if (!prefabsDocument.contains("prefabs"))
 		{
 			return;
 		}
 
 		prefabs.clear();
-		for (const auto& entry : j["prefabs"])
+		for (const auto& entry : prefabsDocument["prefabs"])
 		{
-			Prefab p;
-			p.name = entry.value("name", "unnamed");
-			p.depthMin = entry.value("depth_min", 1);
-			p.depthMax = entry.value("depth_max", 99);
-			p.weight = entry.value("weight", 1.0f);
+			Prefab prefab;
+			prefab.name = entry.value("name", "unnamed");
+			prefab.depthMin = entry.value("depth_min", 1);
+			prefab.depthMax = entry.value("depth_max", 99);
+			prefab.weight = entry.value("weight", 1.0f);
 
 			if (entry.contains("rows"))
 			{
 				for (const auto& row : entry["rows"])
 				{
-					p.rows.push_back(row.get<std::string>());
+					prefab.rows.push_back(row.get<std::string>());
 				}
 			}
 
-			if (!p.rows.empty())
+			if (!prefab.rows.empty())
 			{
-				prefabs.push_back(std::move(p));
+				prefabs.push_back(std::move(prefab));
 			}
 		}
 	}
-	catch (const json::exception& e)
+	catch (const json::exception& error)
 	{
-		std::clog << std::format("[PrefabLibrary] prefabs.json error, clearing: {}\n", e.what());
+		std::clog << std::format("[PrefabLibrary] prefabs.json error, clearing: {}\n", error.what());
 		prefabs.clear();
 	}
 }
 
 void PrefabLibrary::save(std::string_view path) const
 {
-	json j;
+	json prefabsDocument;
 	json arr = json::array();
-	for (const auto& p : prefabs)
+	for (const auto& prefab : prefabs)
 	{
 		json entry;
-		entry["name"] = p.name;
-		entry["depth_min"] = p.depthMin;
-		entry["depth_max"] = p.depthMax;
-		entry["weight"] = p.weight;
-		entry["rows"] = p.rows;
+		entry["name"] = prefab.name;
+		entry["depth_min"] = prefab.depthMin;
+		entry["depth_max"] = prefab.depthMax;
+		entry["weight"] = prefab.weight;
+		entry["rows"] = prefab.rows;
 		arr.push_back(entry);
 	}
-	j["prefabs"] = arr;
+	prefabsDocument["prefabs"] = arr;
 
 	std::ofstream out(path.data());
-	out << j.dump(2);
+	out << prefabsDocument.dump(2);
 }
 
 // Overwrite the tile sprite assigned to a symbol in the map.
@@ -278,9 +278,9 @@ void PrefabLibrary::set_symbol_tile(char sym, TileRef tile)
 void PrefabLibrary::set_symbol_label(char sym, const std::string& label)
 {
 	symbolToLabel[sym] = label;
-	auto matches_symbol = [sym](const PaletteEntry& e)
+	auto matches_symbol = [sym](const PaletteEntry& paletteEntry)
 	{
-		return e.symbol == sym;
+		return paletteEntry.symbol == sym;
 	};
 	auto matches = paletteOrder | std::views::filter(matches_symbol);
 	if (!matches.empty())
@@ -289,27 +289,27 @@ void PrefabLibrary::set_symbol_label(char sym, const std::string& label)
 	}
 }
 
-void PrefabLibrary::add_or_replace(Prefab p)
+void PrefabLibrary::add_or_replace(Prefab prefab)
 {
-	auto has_same_name = [&p](const Prefab& existing)
+	auto has_same_name = [&prefab](const Prefab& existing)
 	{
-		return existing.name == p.name;
+		return existing.name == prefab.name;
 	};
 	auto matches = prefabs | std::views::filter(has_same_name);
 	if (matches.empty())
 	{
-		prefabs.push_back(std::move(p));
+		prefabs.push_back(std::move(prefab));
 	}
 	else
 	{
-		matches.front() = std::move(p);
+		matches.front() = std::move(prefab);
 	}
 }
 
 void PrefabLibrary::remove(const std::string& name)
 {
-	std::erase_if(prefabs, [&](const Prefab& p)
-		{ return p.name == name; });
+	std::erase_if(prefabs, [&](const Prefab& prefab)
+		{ return prefab.name == name; });
 }
 
 // ---------------------------------------------------------------------------

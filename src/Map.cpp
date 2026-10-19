@@ -90,11 +90,11 @@ void Map::init_tiles()
 	// A new FovCell is neither walkable nor transparent, which is a WALL.
 	fovMap = std::make_unique<FovMap>(mapWidth, mapHeight);
 
-	for (int y = 0; y < mapHeight; y++)
+	for (int row = 0; row < mapHeight; row++)
 	{
-		for (int x = 0; x < mapWidth; x++)
+		for (int col = 0; col < mapWidth; col++)
 		{
-			tiles.emplace_back(Tile(Vector2D{ x, y }, TileType::WALL));
+			tiles.emplace_back(Tile(Vector2D{ col, row }, TileType::WALL));
 		}
 	}
 }
@@ -146,14 +146,14 @@ void Map::generate_rooms(GameContext& ctx)
 	place_stairs(ctx);
 }
 
-void Map::load(const json& j)
+void Map::load(const json& source)
 {
-	mapWidth = j.at("map_width").get<int>();
-	mapHeight = j.at("map_height").get<int>();
-	seed = j.at("seed").get<int>();
+	mapWidth = source.at("map_width").get<int>();
+	mapHeight = source.at("map_height").get<int>();
+	seed = source.at("seed").get<int>();
 
 	tiles.clear();
-	for (const auto& tileJson : j.at("tiles"))
+	for (const auto& tileJson : source.at("tiles"))
 	{
 		Vector2D position(
 			tileJson.at("position").at("x").get<int>(),
@@ -181,16 +181,16 @@ void Map::load(const json& j)
 	// Note: Logging requires GameContext access - moved to caller
 }
 
-void Map::save(json& j)
+void Map::save(json& output)
 {
-	j["map_width"] = mapWidth;
-	j["map_height"] = mapHeight;
-	j["seed"] = seed;
+	output["map_width"] = mapWidth;
+	output["map_height"] = mapHeight;
+	output["seed"] = seed;
 
-	j["tiles"] = json::array();
+	output["tiles"] = json::array();
 	for (const auto& tile : tiles)
 	{
-		j["tiles"].push_back(
+		output["tiles"].push_back(
 			{ { "position", { { "y", tile.position.y }, { "x", tile.position.x } } },
 				{ "type", static_cast<int>(tile.type) }, // TileType is an enum
 				{ "explored", tile.explored } });
@@ -696,10 +696,10 @@ void Map::dig(Vector2D begin, Vector2D end)
 
 void Map::dig_corridor(Vector2D begin, Vector2D end)
 {
-	const int x1 = begin.x;
-	const int y1 = begin.y;
-	const int x2 = end.x;
-	const int y2 = end.y;
+	const int beginCol = begin.x;
+	const int beginRow = begin.y;
+	const int endCol = end.x;
+	const int endRow = end.y;
 
 	const bool horizontal_first = mapRng.roll(0, 1) == 1;
 
@@ -719,32 +719,32 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 
 	if (horizontal_first)
 	{
-		for (int x = std::min(x1, x2); x <= std::max(x1, x2); ++x)
+		for (int col = std::min(beginCol, endCol); col <= std::max(beginCol, endCol); ++col)
 		{
-			dig_one(Vector2D{ x, y1 });
+			dig_one(Vector2D{ col, beginRow });
 		}
-		for (int y = std::min(y1, y2); y <= std::max(y1, y2); ++y)
+		for (int row = std::min(beginRow, endRow); row <= std::max(beginRow, endRow); ++row)
 		{
-			if (y == y1)
+			if (row == beginRow)
 			{
 				continue;
 			}
-			dig_one(Vector2D{ x2, y });
+			dig_one(Vector2D{ endCol, row });
 		}
 	}
 	else
 	{
-		for (int y = std::min(y1, y2); y <= std::max(y1, y2); ++y)
+		for (int row = std::min(beginRow, endRow); row <= std::max(beginRow, endRow); ++row)
 		{
-			dig_one(Vector2D{ x1, y });
+			dig_one(Vector2D{ beginCol, row });
 		}
-		for (int x = std::min(x1, x2); x <= std::max(x1, x2); ++x)
+		for (int col = std::min(beginCol, endCol); col <= std::max(beginCol, endCol); ++col)
 		{
-			if (x == x1)
+			if (col == beginCol)
 			{
 				continue;
 			}
-			dig_one(Vector2D{ x, y2 });
+			dig_one(Vector2D{ col, endRow });
 		}
 	}
 }
@@ -908,9 +908,9 @@ void Map::apply_room_shape(const DungeonRoom& room)
 	assert(!is_wall(Vector2D{ room.col + room.width / 2, room.row + room.height / 2 })
 		&& "apply_room_shape: the room has not been dug yet, so shaping it does nothing");
 
-	auto wall_back = [&](int x, int y)
+	auto wall_back = [&](int col, int row)
 	{
-		set_tile(Vector2D{ x, y }, TileType::WALL);
+		set_tile(Vector2D{ col, row }, TileType::WALL);
 	};
 
 	switch (room.shape)
@@ -969,11 +969,11 @@ void Map::apply_room_shape(const DungeonRoom& room)
 		}
 		}
 
-		for (int y = yStart; y <= yEnd; ++y)
+		for (int row = yStart; row <= yEnd; ++row)
 		{
-			for (int x = xStart; x <= xEnd; ++x)
+			for (int col = xStart; col <= xEnd; ++col)
 			{
-				wall_back(x, y);
+				wall_back(col, row);
 			}
 		}
 		break;
@@ -1000,15 +1000,15 @@ void Map::apply_room_shape(const DungeonRoom& room)
 		const int colBandStart = room.col + (room.width - armThicknessW) / 2;
 		const int colBandEnd = colBandStart + armThicknessW - 1;
 
-		for (int y = room.row; y <= room.row_end(); ++y)
+		for (int row = room.row; row <= room.row_end(); ++row)
 		{
-			for (int x = room.col; x <= room.col_end(); ++x)
+			for (int col = room.col; col <= room.col_end(); ++col)
 			{
-				const bool inRowBand = (y >= rowBandStart && y <= rowBandEnd);
-				const bool inColBand = (x >= colBandStart && x <= colBandEnd);
+				const bool inRowBand = (row >= rowBandStart && row <= rowBandEnd);
+				const bool inColBand = (col >= colBandStart && col <= colBandEnd);
 				if (!inRowBand && !inColBand)
 				{
-					wall_back(x, y);
+					wall_back(col, row);
 				}
 			}
 		}
@@ -1062,24 +1062,24 @@ void Map::create_room(const DungeonRoom& room, bool first, GameContext& ctx)
 
 	// Register a blocking Decoration for every stamped tile.
 	assert(ctx.decorations && "Map::create_room: called without decorations");
-	for (int dy = room.row; dy <= room.row_end(); ++dy)
+	for (int row = room.row; row <= room.row_end(); ++row)
 	{
-		for (int dx = room.col; dx <= room.col_end(); ++dx)
+		for (int col = room.col; col <= room.col_end(); ++col)
 		{
-			TileRef t = ctx.decorEditor->get_override(Vector2D{ dx, dy });
-			if (!t.is_valid())
+			TileRef overrideTile = ctx.decorEditor->get_override(Vector2D{ col, row });
+			if (!overrideTile.is_valid())
 			{
 				continue;
 			}
-			auto d = std::make_unique<Decoration>();
-			d->position = Vector2D{ dx, dy };
-			d->tile = t;
-			d->name = "decoration";
-			d->hp = 3;
-			d->blocks_movement = true;
-			d->lootTableKey = "";
-			d->isBroken = false;
-			ctx.decorations->push_back(std::move(d));
+			auto decoration = std::make_unique<Decoration>();
+			decoration->position = Vector2D{ col, row };
+			decoration->tile = overrideTile;
+			decoration->name = "decoration";
+			decoration->hp = 3;
+			decoration->blocks_movement = true;
+			decoration->lootTableKey = "";
+			decoration->isBroken = false;
+			ctx.decorations->push_back(std::move(decoration));
 		}
 	}
 
@@ -1111,7 +1111,7 @@ void Map::spawn_traps(const DungeonRoom& room, GameContext& ctx)
 	// Room gets 1-2 random traps
 	int trapCount = ctx.dice->roll(1, 2);
 
-	for (int i = 0; i < trapCount; ++i)
+	for (int trapIndex = 0; trapIndex < trapCount; ++trapIndex)
 	{
 		// Pick random valid floor tile in room
 		Vector2D trapPos;
@@ -1335,7 +1335,7 @@ void Map::spawn_items(const DungeonRoom& room, GameContext& ctx)
 {
 	assert(ctx.dice && "Map::spawn_items: called without dice");
 	const int numItems = ctx.dice->roll(0, MAX_ROOM_ITEMS);
-	for (int i = 0; i < numItems; i++)
+	for (int itemIndex = 0; itemIndex < numItems; itemIndex++)
 	{
 		Vector2D itemPos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
 		constexpr int MAX_ITEM_TRIES = 20;
@@ -1364,7 +1364,7 @@ void Map::spawn_barrels(const DungeonRoom& room, GameContext& ctx)
 	const int count = mapRng.roll(0, MAX_ROOM_BARRELS);
 	const TileRef barrel_tile = ctx.tileConfig->get("TILE_BARREL");
 
-	for (int i = 0; i < count; ++i)
+	for (int barrelIndex = 0; barrelIndex < count; ++barrelIndex)
 	{
 		Vector2D pos{ mapRng.roll(room.col, room.col_end()), mapRng.roll(room.row, room.row_end()) };
 		constexpr int MAX_TRIES = 20;
@@ -1587,31 +1587,31 @@ std::vector<Vector2D> Map::bresenham_line(Vector2D from, Vector2D to)
 {
 	std::vector<Vector2D> path;
 
-	int x0 = from.x;
-	int y0 = from.y;
-	const int x1 = to.x;
-	const int y1 = to.y;
+	int currentCol = from.x;
+	int currentRow = from.y;
+	const int endCol = to.x;
+	const int endRow = to.y;
 
-	const int dx = std::abs(x1 - x0);
-	const int dy = std::abs(y1 - y0);
-	const int sx = (x0 < x1) ? 1 : -1;
-	const int sy = (y0 < y1) ? 1 : -1;
-	int err = dx - dy;
+	const int deltaCol = std::abs(endCol - currentCol);
+	const int deltaRow = std::abs(endRow - currentRow);
+	const int stepCol = (currentCol < endCol) ? 1 : -1;
+	const int stepRow = (currentRow < endRow) ? 1 : -1;
+	int err = deltaCol - deltaRow;
 
-	while (x0 != x1 || y0 != y1)
+	while (currentCol != endCol || currentRow != endRow)
 	{
-		int e2 = 2 * err;
-		if (e2 > -dy)
+		int doubledError = 2 * err;
+		if (doubledError > -deltaRow)
 		{
-			err -= dy;
-			x0 += sx;
+			err -= deltaRow;
+			currentCol += stepCol;
 		}
-		if (e2 < dx)
+		if (doubledError < deltaCol)
 		{
-			err += dx;
-			y0 += sy;
+			err += deltaCol;
+			currentRow += stepRow;
 		}
-		path.push_back(Vector2D{ x0, y0 });
+		path.push_back(Vector2D{ currentCol, currentRow });
 	}
 
 	return path;
@@ -1808,8 +1808,8 @@ void Map::open_all_room_doors(Vector2D doorPos, GameContext& ctx)
 		bool belongsToRoom = false;
 		for (Vector2D dir : { DIR_N, DIR_S, DIR_E, DIR_W })
 		{
-			Vector2D nb = doorPos + dir;
-			if (room.contains(nb.x, nb.y))
+			Vector2D neighbor = doorPos + dir;
+			if (room.contains(neighbor.x, neighbor.y))
 			{
 				belongsToRoom = true;
 				break;
@@ -1821,11 +1821,11 @@ void Map::open_all_room_doors(Vector2D doorPos, GameContext& ctx)
 		}
 
 		// Open every locked door on this room's wall border.
-		for (int y = room.top_wall(); y <= room.bottom_wall(); ++y)
+		for (int row = room.top_wall(); row <= room.bottom_wall(); ++row)
 		{
-			for (int x = room.left_wall(); x <= room.right_wall(); ++x)
+			for (int col = room.left_wall(); col <= room.right_wall(); ++col)
 			{
-				Vector2D pos{ x, y };
+				Vector2D pos{ col, row };
 				if (!in_bounds(pos))
 				{
 					continue;
@@ -1836,7 +1836,7 @@ void Map::open_all_room_doors(Vector2D doorPos, GameContext& ctx)
 				}
 				// Doors are locked only on a room's wall ring, so the floor this scan crosses
 				// never holds one.
-				assert(!room.contains(x, y) && "open_all_room_doors: a locked door inside a room's floor");
+				assert(!room.contains(col, row) && "open_all_room_doors: a locked door inside a room's floor");
 
 				auto opens_this_room = [&]()
 				{
@@ -1929,11 +1929,11 @@ void Map::post_process_doors()
 		return in_bounds(pos) && get_tile_type(pos) == TileType::WALL;
 	};
 
-	for (int y = 0; y < mapHeight; ++y)
+	for (int row = 0; row < mapHeight; ++row)
 	{
-		for (int x = 0; x < mapWidth; ++x)
+		for (int col = 0; col < mapWidth; ++col)
 		{
-			Vector2D pos{ x, y };
+			Vector2D pos{ col, row };
 			if (get_tile_type(pos) == TileType::CORRIDOR)
 			{
 				int roomNeighbors = 0;
@@ -2077,9 +2077,9 @@ void Map::place_from_graph(
 	ctx.messageSystem->log("place_from_graph: Starting with " + std::to_string(rooms.size()) + " rooms");
 
 	// Step 1: Create all rooms (dig them, spawn water/items/player)
-	for (int i = 0; i < static_cast<int>(rooms.size()); ++i)
+	for (int roomIndex = 0; roomIndex < static_cast<int>(rooms.size()); ++roomIndex)
 	{
-		create_room(rooms[i], i == 0, ctx);
+		create_room(rooms[roomIndex], roomIndex == 0, ctx);
 	}
 
 	assert(ctx.messageSystem && "Map::place_from_graph: no messageSystem once the rooms were created");
@@ -2090,9 +2090,9 @@ void Map::place_from_graph(
 
 	for (int a_idx = 0; a_idx < static_cast<int>(rooms.size()); ++a_idx)
 	{
-		const DungeonRoom& a = rooms[a_idx];
+		const DungeonRoom& room = rooms[a_idx];
 
-		for (int b_idx : a.adjacentRoomIndices)
+		for (int b_idx : room.adjacentRoomIndices)
 		{
 			// Avoid digging the same corridor twice
 			std::pair<int, int> edge_forward(std::min(a_idx, b_idx), std::max(a_idx, b_idx));
@@ -2102,61 +2102,61 @@ void Map::place_from_graph(
 			}
 			dug_edges.insert(edge_forward);
 
-			const DungeonRoom& b = rooms[b_idx];
+			const DungeonRoom& adjacent = rooms[b_idx];
 
 			// Determine relative positions and dig L-shape corridor
-			const bool a_below = a.top_wall() > b.bottom_wall();
-			const bool a_right = a.left_wall() > b.right_wall();
-			const bool a_above = a.bottom_wall() < b.top_wall();
-			const bool a_left = a.right_wall() < b.left_wall();
+			const bool a_below = room.top_wall() > adjacent.bottom_wall();
+			const bool a_right = room.left_wall() > adjacent.right_wall();
+			const bool a_above = room.bottom_wall() < adjacent.top_wall();
+			const bool a_left = room.right_wall() < adjacent.left_wall();
 
 			// Each room is left by a cell its floor reaches; a corridor aimed at a walled centre opens onto rock.
 			if (a_below)
 			{
-				// a is below b -- corridor rises from a, crosses horizontally, drops to b
-				const int mid = (b.bottom_wall() + a.top_wall()) / 2;
-				const int aCol = exit_column(a, a.row);
-				const int bCol = exit_column(b, b.row_end());
-				dig_corridor(Vector2D{ aCol, a.top_wall() }, Vector2D{ aCol, mid });
+				// room is below adjacent -- corridor rises from room, crosses horizontally, drops to adjacent
+				const int mid = (adjacent.bottom_wall() + room.top_wall()) / 2;
+				const int aCol = exit_column(room, room.row);
+				const int bCol = exit_column(adjacent, adjacent.row_end());
+				dig_corridor(Vector2D{ aCol, room.top_wall() }, Vector2D{ aCol, mid });
 				dig_corridor(Vector2D{ aCol, mid }, Vector2D{ bCol, mid });
-				dig_corridor(Vector2D{ bCol, mid }, Vector2D{ bCol, b.bottom_wall() });
+				dig_corridor(Vector2D{ bCol, mid }, Vector2D{ bCol, adjacent.bottom_wall() });
 			}
 			else if (a_right)
 			{
-				// a is to the right of b
-				const int mid = (b.right_wall() + a.left_wall()) / 2;
-				const int aRow = exit_row(a, a.col);
-				const int bRow = exit_row(b, b.col_end());
-				dig_corridor(Vector2D{ a.left_wall(), aRow }, Vector2D{ mid, aRow });
+				// room is to the right of adjacent
+				const int mid = (adjacent.right_wall() + room.left_wall()) / 2;
+				const int aRow = exit_row(room, room.col);
+				const int bRow = exit_row(adjacent, adjacent.col_end());
+				dig_corridor(Vector2D{ room.left_wall(), aRow }, Vector2D{ mid, aRow });
 				dig_corridor(Vector2D{ mid, aRow }, Vector2D{ mid, bRow });
-				dig_corridor(Vector2D{ mid, bRow }, Vector2D{ b.right_wall(), bRow });
+				dig_corridor(Vector2D{ mid, bRow }, Vector2D{ adjacent.right_wall(), bRow });
 			}
 			else if (a_above)
 			{
-				// a is above b
-				const int mid = (a.bottom_wall() + b.top_wall()) / 2;
-				const int aCol = exit_column(a, a.row_end());
-				const int bCol = exit_column(b, b.row);
-				dig_corridor(Vector2D{ aCol, a.bottom_wall() }, Vector2D{ aCol, mid });
+				// room is above adjacent
+				const int mid = (room.bottom_wall() + adjacent.top_wall()) / 2;
+				const int aCol = exit_column(room, room.row_end());
+				const int bCol = exit_column(adjacent, adjacent.row);
+				dig_corridor(Vector2D{ aCol, room.bottom_wall() }, Vector2D{ aCol, mid });
 				dig_corridor(Vector2D{ aCol, mid }, Vector2D{ bCol, mid });
-				dig_corridor(Vector2D{ bCol, mid }, Vector2D{ bCol, b.top_wall() });
+				dig_corridor(Vector2D{ bCol, mid }, Vector2D{ bCol, adjacent.top_wall() });
 			}
 			else if (a_left)
 			{
-				// a is to the left of b
-				const int mid = (a.right_wall() + b.left_wall()) / 2;
-				const int aRow = exit_row(a, a.col_end());
-				const int bRow = exit_row(b, b.col);
-				dig_corridor(Vector2D{ a.right_wall(), aRow }, Vector2D{ mid, aRow });
+				// room is to the left of adjacent
+				const int mid = (room.right_wall() + adjacent.left_wall()) / 2;
+				const int aRow = exit_row(room, room.col_end());
+				const int bRow = exit_row(adjacent, adjacent.col);
+				dig_corridor(Vector2D{ room.right_wall(), aRow }, Vector2D{ mid, aRow });
 				dig_corridor(Vector2D{ mid, aRow }, Vector2D{ mid, bRow });
-				dig_corridor(Vector2D{ mid, bRow }, Vector2D{ b.left_wall(), bRow });
+				dig_corridor(Vector2D{ mid, bRow }, Vector2D{ adjacent.left_wall(), bRow });
 			}
 			else
 			{
 				// Rooms are adjacent or overlapping -- direct L-shape between centres.
 				dig_corridor(
-					Vector2D{ a.center_col(), a.center_row() },
-					Vector2D{ b.center_col(), b.center_row() });
+					Vector2D{ room.center_col(), room.center_row() },
+					Vector2D{ adjacent.center_col(), adjacent.center_row() });
 			}
 		}
 	}

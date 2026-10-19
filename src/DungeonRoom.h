@@ -67,9 +67,9 @@ struct DungeonRoom
 
 	[[nodiscard]] int total_height() const { return height + 2; }
 
-	// True if (c, r) lies inside the floor area
-	[[nodiscard]] bool contains(int c, int r) const
+	// True if (tileCol, tileRow) lies inside the floor area
+	[[nodiscard]] bool contains(int tileCol, int tileRow) const
 	{
-		return c >= col && c <= col_end() && r >= row && r <= row_end();
+		return tileCol >= col && tileCol <= col_end() && tileRow >= row && tileRow <= row_end();
 	}
 };

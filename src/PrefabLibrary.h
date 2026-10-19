@@ -64,7 +64,7 @@ public:
 
 	void load_tile_labels(std::string_view path);
 
-	void add_or_replace(Prefab p);
+	void add_or_replace(Prefab prefab);
 	void remove(const std::string& name);
 
 	int count() const { return static_cast<int>(prefabs.size()); }

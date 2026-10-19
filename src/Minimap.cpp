@@ -51,48 +51,48 @@ void Minimap::render(const GameContext& ctx) const
 	DrawRectangle(originX - BORDER, originY - BORDER, panelW + 2 * BORDER, panelH + 2 * BORDER, Color{ 20, 12, 28, 255 });
 	DrawRectangleLines(originX - BORDER, originY - BORDER, panelW + 2 * BORDER, panelH + 2 * BORDER, Color{ 120, 120, 150, 255 });
 
-	for (int y = 0; y < mapH; ++y)
+	for (int row = 0; row < mapH; ++row)
 	{
-		for (int x = 0; x < mapW; ++x)
+		for (int col = 0; col < mapW; ++col)
 		{
-			Vector2D pos{ x, y };
+			Vector2D pos{ col, row };
 			if (!map.is_explored(pos))
 			{
 				continue;
 			}
 
 			bool inFov = map.is_in_fov(pos);
-			Color c{};
+			Color cellColor{};
 
 			const TileDefinition& definition = ctx.tileConfig->get_tile_definition(map.get_tile_type(pos));
 			const TileColor& authored = inFov ? definition.minimapVisible : definition.minimapRemembered;
-			c = Color{
+			cellColor = Color{
 				static_cast<unsigned char>(authored.red),
 				static_cast<unsigned char>(authored.green),
 				static_cast<unsigned char>(authored.blue),
 				static_cast<unsigned char>(authored.alpha)
 			};
 
-			DrawRectangle(originX + x * tilePx, originY + y * tilePx, tilePx, tilePx, c);
+			DrawRectangle(originX + col * tilePx, originY + row * tilePx, tilePx, tilePx, cellColor);
 		}
 	}
 
 	assert(ctx.stairs && "Minimap::render: called without stairs");
-	Vector2D sp = ctx.stairs->position;
-	if (map.is_explored(sp))
+	Vector2D stairsPos = ctx.stairs->position;
+	if (map.is_explored(stairsPos))
 	{
 		DrawRectangle(
-			originX + sp.x * tilePx - 1,
-			originY + sp.y * tilePx - 1,
+			originX + stairsPos.x * tilePx - 1,
+			originY + stairsPos.y * tilePx - 1,
 			tilePx + 2,
 			tilePx + 2,
 			Color{ 255, 210, 50, 255 });
 	}
 
-	Vector2D pp = ctx.player()->position;
+	Vector2D playerPos = ctx.player()->position;
 	DrawRectangle(
-		originX + pp.x * tilePx - 1,
-		originY + pp.y * tilePx - 1,
+		originX + playerPos.x * tilePx - 1,
+		originY + playerPos.y * tilePx - 1,
 		tilePx + 2,
 		tilePx + 2,
 		Color{ 255, 255, 0, 255 });

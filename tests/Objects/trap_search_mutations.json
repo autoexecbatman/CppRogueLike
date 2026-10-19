@@ -39,8 +39,8 @@
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\tj[\"searchedAtLevel\"] = searchedAtLevel;",
-      "mutated": "\tj[\"searchedAtLevel\"] = 0;",
+      "original": "\toutput[\"searchedAtLevel\"] = searchedAtLevel;",
+      "mutated": "\toutput[\"searchedAtLevel\"] = 0;",
       "catches": "a missed search handed back by reloading"
     },
     {

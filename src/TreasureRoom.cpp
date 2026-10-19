@@ -102,12 +102,12 @@ bool is_reachable_without_locked_doors(
 int TreasureRoom::count_entrances(const Map& map, const DungeonRoom& room)
 {
 	int count = 0;
-	for (int y = room.top_wall(); y <= room.bottom_wall(); ++y)
+	for (int row = room.top_wall(); row <= room.bottom_wall(); ++row)
 	{
-		for (int x = room.left_wall(); x <= room.right_wall(); ++x)
+		for (int col = room.left_wall(); col <= room.right_wall(); ++col)
 		{
-			const Vector2D pos{ x, y };
-			if (!map.is_in_bounds(pos) || room.contains(x, y))
+			const Vector2D pos{ col, row };
+			if (!map.is_in_bounds(pos) || room.contains(col, row))
 			{
 				continue;
 			}
@@ -155,12 +155,12 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 	};
 
 	// Pass 1: lock all genuine entrances.
-	for (int y = room.top_wall(); y <= room.bottom_wall(); ++y)
+	for (int row = room.top_wall(); row <= room.bottom_wall(); ++row)
 	{
-		for (int x = room.left_wall(); x <= room.right_wall(); ++x)
+		for (int col = room.left_wall(); col <= room.right_wall(); ++col)
 		{
-			Vector2D doorPos{ x, y };
-			if (!ctx.map->is_in_bounds(doorPos) || room.contains(x, y))
+			Vector2D doorPos{ col, row };
+			if (!ctx.map->is_in_bounds(doorPos) || room.contains(col, row))
 			{
 				continue;
 			}
@@ -187,12 +187,12 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 
 	std::vector<DoorCandidate> candidates;
 
-	for (int y = room.top_wall(); y <= room.bottom_wall(); ++y)
+	for (int row = room.top_wall(); row <= room.bottom_wall(); ++row)
 	{
-		for (int x = room.left_wall(); x <= room.right_wall(); ++x)
+		for (int col = room.left_wall(); col <= room.right_wall(); ++col)
 		{
-			Vector2D doorPos{ x, y };
-			if (!ctx.map->is_in_bounds(doorPos) || room.contains(x, y))
+			Vector2D doorPos{ col, row };
+			if (!ctx.map->is_in_bounds(doorPos) || room.contains(col, row))
 			{
 				continue;
 			}
@@ -251,12 +251,12 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 	// when we bail out without placing a jailer.
 	auto unlock_all_room_entrances = [&]()
 	{
-		for (int y = room.top_wall(); y <= room.bottom_wall(); ++y)
+		for (int row = room.top_wall(); row <= room.bottom_wall(); ++row)
 		{
-			for (int x = room.left_wall(); x <= room.right_wall(); ++x)
+			for (int col = room.left_wall(); col <= room.right_wall(); ++col)
 			{
-				const Vector2D pos{ x, y };
-				if (!ctx.map->is_in_bounds(pos) || room.contains(x, y))
+				const Vector2D pos{ col, row };
+				if (!ctx.map->is_in_bounds(pos) || room.contains(col, row))
 				{
 					continue;
 				}
@@ -277,18 +277,18 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 	const DoorCandidate* best = nullptr;
 	int bestDist = std::numeric_limits<int>::max();
 
-	for (const DoorCandidate& c : candidates)
+	for (const DoorCandidate& doorCandidate : candidates)
 	{
-		if (!is_reachable_without_locked_doors(c.spawnPos, ctx.stairs->position, *ctx.map))
+		if (!is_reachable_without_locked_doors(doorCandidate.spawnPos, ctx.stairs->position, *ctx.map))
 		{
 			continue; // dead-end pocket - skip
 		}
 
-		const int dist = c.spawnPos.manhattan_distance_to(playerPos);
+		const int dist = doorCandidate.spawnPos.manhattan_distance_to(playerPos);
 		if (dist < bestDist)
 		{
 			bestDist = dist;
-			best = &c;
+			best = &doorCandidate;
 		}
 	}
 
@@ -330,13 +330,13 @@ void TreasureRoom::create(
 
 	// Drain the pools on the vault floor, so the treasure and its warden stand dry.
 	// Only water is cleared: the box also holds shaped walls and clipped corridors.
-	for (int y = room.row; y <= room.row_end(); y++)
+	for (int row = room.row; row <= room.row_end(); row++)
 	{
-		for (int x = room.col; x <= room.col_end(); x++)
+		for (int col = room.col; col <= room.col_end(); col++)
 		{
-			if (ctx.map->get_tile_type(Vector2D{ x, y }) == TileType::WATER)
+			if (ctx.map->get_tile_type(Vector2D{ col, row }) == TileType::WATER)
 			{
-				ctx.map->set_tile(Vector2D{ x, y }, TileType::FLOOR);
+				ctx.map->set_tile(Vector2D{ col, row }, TileType::FLOOR);
 			}
 		}
 	}
@@ -352,7 +352,7 @@ void TreasureRoom::create(
 	{
 		std::optional<Vector2D> wardenPos;
 		constexpr int MAX_WARDEN_TRIES = 50;
-		for (int t = 0; t < MAX_WARDEN_TRIES && !wardenPos; ++t)
+		for (int attempt = 0; attempt < MAX_WARDEN_TRIES && !wardenPos; ++attempt)
 		{
 			Vector2D candidate{
 				ctx.dice->roll(room.col, room.col_end()),
@@ -397,11 +397,11 @@ void TreasureRoom::create(
 	}
 	}
 
-	for (int i = 0; i < guardianCount; i++)
+	for (int guardianIndex = 0; guardianIndex < guardianCount; guardianIndex++)
 	{
 		std::optional<Vector2D> guardPos;
 		constexpr int MAX_GUARD_TRIES = 50;
-		for (int t = 0; t < MAX_GUARD_TRIES; ++t)
+		for (int attempt = 0; attempt < MAX_GUARD_TRIES; ++attempt)
 		{
 			Vector2D candidate{
 				ctx.dice->roll(room.col, room.col_end()),
