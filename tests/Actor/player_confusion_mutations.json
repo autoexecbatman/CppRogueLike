@@ -1,0 +1,47 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=PlayerConfusionTest.*:PlayerSerializationTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\t\t\tconfusionEndTime.reset();\n",
+      "mutated": "",
+      "catches": "an ended confusion kept pending, so the mind clears again every action"
+    },
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\tif (confusionEndTime.has_value())\n",
+      "mutated": "\tif (true)\n",
+      "catches": "a player never confused told their mind clears"
+    },
+    {
+      "file": "src/PlayerController.h",
+      "original": "return confusionEndTime.has_value() && currentTime < *confusionEndTime;",
+      "mutated": "return confusionEndTime.has_value() && currentTime <= *confusionEndTime;",
+      "catches": "a confusion lasting into the reading it ends at"
+    },
+    {
+      "file": "src/PlayerController.h",
+      "original": "return confusionEndTime.has_value() && currentTime < *confusionEndTime;",
+      "mutated": "return confusionEndTime.has_value();",
+      "catches": "a confusion that never ends by the clock"
+    },
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\tconfusionEndTime = endTime.is_null() ? std::nullopt : std::optional<int>{ endTime.get<int>() };",
+      "mutated": "\tconfusionEndTime = std::optional<int>{ endTime.get<int>() };",
+      "catches": "a load that cannot read a player with no confusion pending"
+    },
+    {
+      "file": "src/AiMimic.cpp",
+      "original": "\t\t\tctx.player()->apply_confusion(confusionDuration, ctx.gameState->get_time());\n",
+      "mutated": "",
+      "catches": "a mimic's reveal that confuses nobody"
+    }
+  ]
+}

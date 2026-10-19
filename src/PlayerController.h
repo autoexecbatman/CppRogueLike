@@ -3,6 +3,8 @@
 // Not an AI -- does not inherit from Ai. Player owns this; monsters never touch it.
 #pragma once
 
+#include <optional>
+
 #include "GameContext.h"
 #include "Persistent.h"
 #include "TurnSchedule.h"
@@ -38,9 +40,10 @@ private:
 
 	bool shouldComputeFOV{ false };
 	bool isWaiting{ false };
-	// The clock reading the confusion ends at. A count of rounds would fall once per
-	// action, so a hasted player would shake the spell off in half the rounds it named.
-	int confusionEndTime{ 0 };
+	// The clock reading the confusion ends at, held until the player is told it has ended;
+	// empty when no confusion is pending. A clock reading rather than a count of rounds,
+	// which would fall once per action and free a hasted player in half the rounds named.
+	std::optional<int> confusionEndTime{};
 	PendingDoorAction pendingDoorAction{ PendingDoorAction::NONE };
 	MouseMode mouseMode{ MouseMode::IDLE };
 	PendingDoorAction mouseDoorAction{ PendingDoorAction::NONE };
@@ -120,5 +123,5 @@ public:
 
 	void apply_confusion(int durationRounds, int currentTime) { confusionEndTime = expiry_time(currentTime, durationRounds); }
 
-	[[nodiscard]] bool is_confused(int currentTime) const { return currentTime < confusionEndTime; }
+	[[nodiscard]] bool is_confused(int currentTime) const { return confusionEndTime.has_value() && currentTime < *confusionEndTime; }
 };

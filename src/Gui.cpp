@@ -17,6 +17,7 @@
 #include "MessageSystem.h"
 #include "Persistent.h"
 #include "Player.h"
+#include "PlayerController.h"
 #include "Renderer.h"
 #include "TileConfig.h"
 
@@ -551,7 +552,9 @@ void Gui::render_player_status(const GameContext& ctx)
 	const int tileSize = ctx.renderer->get_tile_size();
 	const int baseY = hud_base_y(*ctx.renderer);
 
-	if (ctx.player()->has_state(ActorState::IS_CONFUSED))
+	assert(ctx.player_concrete().controller && "Gui::render_player_status: the player has no controller");
+	assert(ctx.gameState && "Gui::render_player_status: called without a clock to read the confusion against");
+	if (ctx.player_concrete().controller->is_confused(ctx.gameState->get_time()))
 	{
 		ctx.renderer->draw_text(
 			Vector2D{ hud_panel_left_margin(tileSize), hud_text_row_y(baseY, tileSize, 2) },

@@ -135,12 +135,12 @@ void PlayerController::update(GameContext& ctx)
 	const Controls key = static_cast<Controls>(ctx.inputHandler->get_current_key());
 	Vector2D moveVector{ 0, 0 };
 
-	// Handle confused state -- randomly move or act
-	if (playerOwner.has_state(ActorState::IS_CONFUSED))
+	// A pending confusion is either still in force or has ended since the player last acted.
+	if (confusionEndTime.has_value())
 	{
 		if (!is_confused(ctx.gameState->get_time()))
 		{
-			playerOwner.remove_state(ActorState::IS_CONFUSED);
+			confusionEndTime.reset();
 			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Your mind clears.", MessageCompletion::FINISHED);
 		}
 		else
@@ -208,12 +208,13 @@ void PlayerController::update(GameContext& ctx)
 // still running when the player saves is still running when they come back.
 void PlayerController::load(const json& savedState)
 {
-	confusionEndTime = savedState.at("confusionEndTime").get<int>();
+	const json& endTime = savedState.at("confusionEndTime");
+	confusionEndTime = endTime.is_null() ? std::nullopt : std::optional<int>{ endTime.get<int>() };
 }
 
 void PlayerController::save(json& savedState)
 {
-	savedState["confusionEndTime"] = confusionEndTime;
+	savedState["confusionEndTime"] = confusionEndTime.has_value() ? json(*confusionEndTime) : json(nullptr);
 }
 
 void PlayerController::move(Vector2D target)

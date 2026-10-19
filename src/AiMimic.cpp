@@ -357,7 +357,6 @@ void AiMimic::check_revealing(Creature& owner, GameContext& ctx)
 			ctx.messageSystem->append_message_part(ColorPairId::WHITE_GREEN, " reveals itself and confuses you!");
 			ctx.messageSystem->finalize_message();
 
-			ctx.player()->add_state(ActorState::IS_CONFUSED);
 			ctx.player()->apply_confusion(confusionDuration, ctx.gameState->get_time());
 			ctx.messageSystem->log("Applied confusion to player for " + std::to_string(confusionDuration) + " turns");
 		}

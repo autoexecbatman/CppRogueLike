@@ -83,6 +83,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ItemNameTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ItemNameMessageTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/BehaviorRecordTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PlayerConfusionTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PlayerSerializationTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PickableAcBonusTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/IdentifyScrollTest.cpp

@@ -39,14 +39,14 @@
     },
     {
       "file": "src/PlayerController.cpp",
-      "original": "\tsavedState[\"confusionEndTime\"] = confusionEndTime;",
-      "mutated": "\tsavedState[\"confusionEndTime\"] = 0;",
+      "original": "\tsavedState[\"confusionEndTime\"] = confusionEndTime.has_value() ? json(*confusionEndTime) : json(nullptr);",
+      "mutated": "\tsavedState[\"confusionEndTime\"] = json(nullptr);",
       "catches": "a save that drops the confusion, so reloading frees a confused player on the next action"
     },
     {
       "file": "src/PlayerController.cpp",
-      "original": "\tconfusionEndTime = savedState.at(\"confusionEndTime\").get<int>();",
-      "mutated": "\tconfusionEndTime = 0;",
+      "original": "\tconfusionEndTime = endTime.is_null() ? std::nullopt : std::optional<int>{ endTime.get<int>() };",
+      "mutated": "\tconfusionEndTime = endTime.is_null() ? std::nullopt : std::optional<int>{};",
       "catches": "a load that drops the confusion, which reads to the next action as the spell having run out"
     },
     {

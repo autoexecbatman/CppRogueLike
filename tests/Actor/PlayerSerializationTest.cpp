@@ -284,10 +284,8 @@ TEST_F(PlayerSerializationTest, EveryComponentTheGameReadsSurvivesARoundTrip)
 	EXPECT_NE(loaded->controller, nullptr) << "loaded without a controller";
 }
 
-// A confusion is a duration on the shared clock, and nothing carried it across a save.
-// PlayerController::save and load were empty bodies that nothing called, so the timer
-// came back zero while IS_CONFUSED came back set - and the next action read that as the
-// spell having run out and printed "Your mind clears." The player was freed early.
+// A confusion is a reading on the shared clock and is carried across a save; a load that
+// dropped it would free a confused player on their next action.
 TEST_F(PlayerSerializationTest, AConfusionSurvivesTheSave)
 {
 	auto original = create_test_player();
