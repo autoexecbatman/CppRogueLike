@@ -164,12 +164,12 @@ TEST_F(ItemSerializationTest, AllItemClasses_SaveLoad) {
 }
 
 // ----------------------------------------------------------------------------
-// State Serialization Tests (Regression: auto-equip on load bug)
+// State Serialization Tests
 // ----------------------------------------------------------------------------
 
 TEST_F(ItemSerializationTest, States_SavedAndLoaded) {
     auto original = create_test_item();
-    original->add_state(ActorState::IS_EQUIPPED);
+    original->add_state(ActorState::FOV_ONLY);
 
     json j;
     original->save(j);
@@ -177,12 +177,12 @@ TEST_F(ItemSerializationTest, States_SavedAndLoaded) {
     auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
     loaded->load(j);
 
-    EXPECT_TRUE(loaded->has_state(ActorState::IS_EQUIPPED));
+    EXPECT_TRUE(loaded->has_state(ActorState::FOV_ONLY));
 }
 
-TEST_F(ItemSerializationTest, States_NotEquipped_StaysUnequipped) {
+TEST_F(ItemSerializationTest, States_AbsentState_StaysAbsent) {
     auto original = create_test_item();
-    // Don't add IS_EQUIPPED state
+    // Don't add FOV_ONLY
 
     json j;
     original->save(j);
@@ -190,33 +190,33 @@ TEST_F(ItemSerializationTest, States_NotEquipped_StaysUnequipped) {
     auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
     loaded->load(j);
 
-    EXPECT_FALSE(loaded->has_state(ActorState::IS_EQUIPPED));
+    EXPECT_FALSE(loaded->has_state(ActorState::FOV_ONLY));
 }
 
 TEST_F(ItemSerializationTest, States_LoadClearsPreviousStates) {
     // Regression test: loading should clear existing states, not accumulate
     auto original = create_test_item();
-    // Original has NO equipped state
+    // Original has no FOV_ONLY
 
     json j;
     original->save(j);
 
     // Create item and give it a state BEFORE loading
     auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
-    loaded->add_state(ActorState::IS_EQUIPPED);  // Pre-existing state
-    ASSERT_TRUE(loaded->has_state(ActorState::IS_EQUIPPED));
+    loaded->add_state(ActorState::FOV_ONLY);  // Pre-existing state
+    ASSERT_TRUE(loaded->has_state(ActorState::FOV_ONLY));
 
     // Load should REPLACE states, not ADD to them
     loaded->load(j);
 
     // After loading, the pre-existing state should be gone
-    EXPECT_FALSE(loaded->has_state(ActorState::IS_EQUIPPED))
+    EXPECT_FALSE(loaded->has_state(ActorState::FOV_ONLY))
         << "Loading should clear previous states, not accumulate";
 }
 
 TEST_F(ItemSerializationTest, States_MultipleStates_AllPreserved) {
     auto original = create_test_item();
-    original->add_state(ActorState::IS_EQUIPPED);
+    original->add_state(ActorState::FOV_ONLY);
     original->add_state(ActorState::BLOCKS);
 
     json j;
@@ -225,7 +225,7 @@ TEST_F(ItemSerializationTest, States_MultipleStates_AllPreserved) {
     auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
     loaded->load(j);
 
-    EXPECT_TRUE(loaded->has_state(ActorState::IS_EQUIPPED));
+    EXPECT_TRUE(loaded->has_state(ActorState::FOV_ONLY));
     EXPECT_TRUE(loaded->has_state(ActorState::BLOCKS));
 }
 

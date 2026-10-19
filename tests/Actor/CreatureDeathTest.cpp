@@ -203,7 +203,6 @@ TEST_F(CreatureDeathTest, WhatItWoreFallsWhereItDied)
 	EXPECT_TRUE(floor_holds(worn)) << "the armour it was wearing was destroyed with it";
 	EXPECT_EQ(wielded.position, WHERE_IT_FELL);
 	EXPECT_EQ(worn.position, WHERE_IT_FELL);
-	EXPECT_FALSE(wielded.has_state(ActorState::IS_EQUIPPED)) << "the dropped sword still counts as worn";
 	EXPECT_TRUE(monster->equippedItems.empty()) << "the corpse still wears its gear";
 }
 

@@ -45,15 +45,21 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tequipped.item->remove_state(ActorState::IS_EQUIPPED);\n",
-      "mutated": "",
-      "catches": "worn gear dropped on death still marked as worn"
+      "original": "\t\tInventoryOperations::add_item(*ctx.floorInventory, std::move(equipped.item));\n\t}\n\tequippedItems.clear();\n",
+      "mutated": "\t\tInventoryOperations::add_item(*ctx.floorInventory, std::move(equipped.item));\n\t}\n",
+      "catches": "a dead creature still wearing the gear it dropped"
     },
     {
       "file": "src/Creature.cpp",
       "original": "\t\tequipped.item->position = position;\n",
       "mutated": "",
       "catches": "worn gear landing where it was made rather than where the creature fell"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tequippedItems.push_back(EquippedItem(std::move(item), slot));\n",
+      "mutated": "",
+      "catches": "a creature's wear storing nothing, so what it wears is lost rather than worn"
     }
   ]
 }

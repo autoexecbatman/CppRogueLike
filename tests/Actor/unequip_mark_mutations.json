@@ -9,9 +9,9 @@
   "mutations": [
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tremoved->remove_state(ActorState::IS_EQUIPPED);\n",
+      "original": "\t\tequippedItems.erase(it);\n",
       "mutated": "",
-      "catches": "an item packed away still claiming to be worn, which is what made Creature::drop carry a branch for it"
+      "catches": "an item taken off still held by the slot it left"
     },
     {
       "file": "src/Creature.cpp",

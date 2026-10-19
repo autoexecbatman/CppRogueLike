@@ -839,7 +839,6 @@ void Creature::wear(std::unique_ptr<Item> item, EquipmentSlot slot)
 	assert(item && "Creature::wear called with no item");
 	assert(has_slot(slot) && "Creature::wear called with a slot this body does not have");
 
-	item->add_state(ActorState::IS_EQUIPPED);
 	equippedItems.push_back(EquippedItem(std::move(item), slot));
 }
 
@@ -1296,9 +1295,6 @@ bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCo
 	// Add equipped item
 	equippedItems.emplace_back(std::move(item), slot);
 
-	// Mark item as equipped
-	equippedItems.back().item->add_state(ActorState::IS_EQUIPPED);
-
 	// Log weapon equip
 	if (slot == EquipmentSlot::RIGHT_HAND && equippedItems.back().item->is_weapon())
 	{
@@ -1346,7 +1342,6 @@ bool Creature::unequip_item(EquipmentSlot slot, GameContext& ctx)
 		// since taking off a Strength item can lower the limit, and the floor always has room.
 		const bool fitsInPack = !InventoryOperations::is_inventory_full(inventoryData) && InventoryOperations::is_within_weight_limit(*removed, *this, *ctx.dataManager);
 
-		removed->remove_state(ActorState::IS_EQUIPPED);
 		if (fitsInPack)
 		{
 			[[maybe_unused]] const auto packed = InventoryOperations::add_item_to_inventory(inventoryData, std::move(removed), *this, *ctx.dataManager);
@@ -1571,7 +1566,6 @@ void Creature::die(GameContext& ctx)
 	{
 		assert(equipped.item && "Creature::die: an equipment entry holds no item");
 		equipped.item->position = position;
-		equipped.item->remove_state(ActorState::IS_EQUIPPED);
 		InventoryOperations::add_item(*ctx.floorInventory, std::move(equipped.item));
 	}
 	equippedItems.clear();

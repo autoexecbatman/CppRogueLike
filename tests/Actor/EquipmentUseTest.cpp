@@ -75,7 +75,7 @@ protected:
 		return *carried;
 	}
 
-	// Whether the pack holds this item, and whether it still says it is worn.
+	// Whether the pack holds this item.
 	bool pack_holds(const Item& item) const
 	{
 		auto is_the_item = [&item](const std::unique_ptr<Item>& packed)
@@ -90,7 +90,6 @@ protected:
 	{
 		EXPECT_FALSE(use_item(*item.behavior, item, *player, ctx)) << item.actorData.name << ": a failed removal spent a turn";
 		EXPECT_EQ(player->get_equipped_item(slot), &item) << item.actorData.name << " came off";
-		EXPECT_TRUE(item.has_state(ActorState::IS_EQUIPPED)) << item.actorData.name << " lost its equipped mark while worn";
 	}
 
 	Game game;
@@ -126,18 +125,16 @@ TEST_F(EquipmentUseTest, ACursedShieldThatWillNotComeOffCostsNothing)
 	expect_nothing_happens(shield, EquipmentSlot::LEFT_HAND);
 }
 
-// An item taken off goes back to the pack without its equipped mark. Creature::drop
-// searches the pack alone and trusts that, so a mark left behind would make a
-// dropped item claim to be worn.
-TEST_F(EquipmentUseTest, AnItemTakenOffLeavesItsMarkBehind)
+// An item taken off goes back to the pack and leaves its slot empty; whether it is worn
+// is the wearer's slot, so nothing on the item has to be cleared.
+TEST_F(EquipmentUseTest, AnItemTakenOffGoesBackToThePackAndLeavesItsSlot)
 {
 	Item& armor = wear("leather_armor", EquipmentSlot::BODY);
 
-	ASSERT_TRUE(armor.has_state(ActorState::IS_EQUIPPED)) << "it was not worn to begin with";
 	ASSERT_FALSE(pack_holds(armor)) << "a worn item is owned by its slot, not by the pack";
 
 	ASSERT_TRUE(player->unequip_item(EquipmentSlot::BODY, ctx));
 
 	EXPECT_TRUE(pack_holds(armor)) << "it did not come back to the pack";
-	EXPECT_FALSE(armor.has_state(ActorState::IS_EQUIPPED)) << "a packed item still claims to be worn";
+	EXPECT_EQ(player->get_equipped_item(EquipmentSlot::BODY), nullptr) << "the slot still holds what was taken off";
 }

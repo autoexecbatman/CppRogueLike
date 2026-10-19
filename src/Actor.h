@@ -24,7 +24,6 @@ enum class ActorState
 	FOV_ONLY,
 	CAN_SWIM,
 	CAN_FLY,
-	IS_EQUIPPED,
 	IS_INVISIBLE,
 	IS_SLEEPING,
 	IS_HELD,
