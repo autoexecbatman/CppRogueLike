@@ -46,7 +46,7 @@ struct TabBox
 {
 	InventoryScreen screen{ InventoryScreen::EQUIPMENT };
 	const char* text{ "" };
-	int x{ 0 };
+	int pixelX{ 0 };
 	int width{ 0 };
 };
 

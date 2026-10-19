@@ -26,8 +26,8 @@ namespace InventoryOperations
 
 // Both FloorInventory and CreatureInventory share the same data shape.
 // This concept gates shared operations. Weight-gated add is CreatureInventory-only.
-template <typename T>
-concept AnyInventory = std::same_as<T, FloorInventory> || std::same_as<T, CreatureInventory>;
+template <typename Inventory>
+concept AnyInventory = std::same_as<Inventory, FloorInventory> || std::same_as<Inventory, CreatureInventory>;
 
 // ===== CORE OPERATIONS =====
 // Non-template - defined in InventoryOperations.cpp
@@ -155,14 +155,14 @@ inline bool is_inventory_full(const CreatureInventory& inventory) noexcept
 	return inventory.items.size() >= inventory.capacity;
 }
 
-template <AnyInventory T>
-bool is_inventory_empty(const T& inventory) noexcept
+template <AnyInventory Inventory>
+bool is_inventory_empty(const Inventory& inventory) noexcept
 {
 	return inventory.items.empty();
 }
 
-template <AnyInventory T>
-size_t get_item_count(const T& inventory) noexcept
+template <AnyInventory Inventory>
+size_t get_item_count(const Inventory& inventory) noexcept
 {
 	return inventory.items.size();
 }
@@ -185,22 +185,22 @@ inline void set_inventory_capacity(CreatureInventory& inventory, size_t newCapac
 
 // ===== ITEM ACCESS =====
 
-template <AnyInventory T>
-Item* get_item_at(T& inventory, size_t index) noexcept
+template <AnyInventory Inventory>
+Item* get_item_at(Inventory& inventory, size_t index) noexcept
 {
 	return index < inventory.items.size() ? inventory.items[index].get() : nullptr;
 }
 
-template <AnyInventory T>
-const Item* get_item_at(const T& inventory, size_t index) noexcept
+template <AnyInventory Inventory>
+const Item* get_item_at(const Inventory& inventory, size_t index) noexcept
 {
 	return index < inventory.items.size() ? inventory.items[index].get() : nullptr;
 }
 
 // ===== SEARCH OPERATIONS =====
 
-template <AnyInventory T>
-const Item* find_item_by_name(const T& inventory, std::string_view name) noexcept
+template <AnyInventory Inventory>
+const Item* find_item_by_name(const Inventory& inventory, std::string_view name) noexcept
 {
 	[[maybe_unused]] auto is_null = [](const auto& item)
 	{
@@ -208,17 +208,17 @@ const Item* find_item_by_name(const T& inventory, std::string_view name) noexcep
 	};
 	assert(std::ranges::none_of(inventory.items, is_null) && "InventoryOperations::find_item_by_name: the inventory holds a null item");
 
-	auto it = std::ranges::find_if(inventory.items,
+	auto found = std::ranges::find_if(inventory.items,
 		[name](const auto& item)
 		{
 			return item->actorData.name == name;
 		});
 
-	return it != inventory.items.end() ? it->get() : nullptr;
+	return found != inventory.items.end() ? found->get() : nullptr;
 }
 
-template <AnyInventory T>
-bool contains_item(const T& inventory, const Item& item) noexcept
+template <AnyInventory Inventory>
+bool contains_item(const Inventory& inventory, const Item& item) noexcept
 {
 	return std::ranges::any_of(inventory.items,
 		[&item](const auto& storedItem)
@@ -229,19 +229,19 @@ bool contains_item(const T& inventory, const Item& item) noexcept
 
 // ===== PERSISTENCE =====
 
-template <AnyInventory T>
-void load_inventory(T& inventory, const nlohmann::json& j)
+template <AnyInventory Inventory>
+void load_inventory(Inventory& inventory, const nlohmann::json& source)
 {
 	// Only a pack has a limit to restore; a floor has none.
-	if constexpr (std::same_as<T, CreatureInventory>)
+	if constexpr (std::same_as<Inventory, CreatureInventory>)
 	{
-		inventory.capacity = j.at("capacity").get<size_t>();
+		inventory.capacity = source.at("capacity").get<size_t>();
 	}
 	inventory.items.clear();
 
 	// A broken item record throws out of here: catching it would hand back the items that
 	// came before it and silently drop the rest.
-	for (const auto& itemJson : j.at("inventory"))
+	for (const auto& itemJson : source.at("inventory"))
 	{
 		auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});
 		item->load(itemJson);
@@ -264,14 +264,14 @@ void load_inventory(T& inventory, const nlohmann::json& j)
 //
 //   save_inventory(emptyPack, record);   // an empty inventory is legal
 //   record["inventory"].size();          // -> 0
-template <AnyInventory T>
-void save_inventory(const T& inventory, nlohmann::json& j)
+template <AnyInventory Inventory>
+void save_inventory(const Inventory& inventory, nlohmann::json& output)
 {
-	if constexpr (std::same_as<T, CreatureInventory>)
+	if constexpr (std::same_as<Inventory, CreatureInventory>)
 	{
-		j["capacity"] = inventory.capacity;
+		output["capacity"] = inventory.capacity;
 	}
-	j["inventory"] = nlohmann::json::array();
+	output["inventory"] = nlohmann::json::array();
 
 	for (const auto& item : inventory.items)
 	{
@@ -279,7 +279,7 @@ void save_inventory(const T& inventory, nlohmann::json& j)
 
 		nlohmann::json itemJson;
 		item->save(itemJson);
-		j["inventory"].push_back(itemJson);
+		output["inventory"].push_back(itemJson);
 	}
 }
 
@@ -296,8 +296,8 @@ inline std::string get_inventory_debug_info(const CreatureInventory& inventory)
 
 // ===== OPTIMIZATION =====
 
-template <AnyInventory T>
-void optimize_inventory_storage(T& inventory)
+template <AnyInventory Inventory>
+void optimize_inventory_storage(Inventory& inventory)
 {
 	std::erase_if(inventory.items, [](const auto& item)
 		{ return !item; });

@@ -27,8 +27,8 @@
     },
     {
       "file": "src/InventoryOperations.cpp",
-      "original": "\tauto it = std::ranges::find_if(inventory.items, has_id);\n\treturn it != inventory.items.end() ? it->get() : nullptr;\n}\n\nItem* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept",
-      "mutated": "\tauto it = std::ranges::find_if(inventory.items, has_id);\n\treturn nullptr;\n}\n\nItem* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept",
+      "original": "\tauto found = std::ranges::find_if(inventory.items, has_id);\n\treturn found != inventory.items.end() ? found->get() : nullptr;\n}\n\nItem* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept",
+      "mutated": "\tauto found = std::ranges::find_if(inventory.items, has_id);\n\treturn nullptr;\n}\n\nItem* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept",
       "catches": "the floor never answering for an item it holds, so every menu choice reports the item gone"
     }
   ]

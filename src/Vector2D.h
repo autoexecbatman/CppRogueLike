@@ -94,18 +94,18 @@ struct Vector2D
 	}
 
 	// for std::cout
-	friend std::ostream& operator<<(std::ostream& os, const Vector2D& v)
+	friend std::ostream& operator<<(std::ostream& stream, const Vector2D& position)
 	{
-		os << "Vector2D: {y: " << v.y << ", x: " << v.x << "}";
-		return os;
+		stream << "Vector2D: {y: " << position.y << ", x: " << position.x << "}";
+		return stream;
 	}
 
 	// Get distance to another position
 	float distance_to(Vector2D other) const
 	{
-		float dx = static_cast<float>(x - other.x);
-		float dy = static_cast<float>(y - other.y);
-		return std::sqrt(dx * dx + dy * dy);
+		float deltaX = static_cast<float>(x - other.x);
+		float deltaY = static_cast<float>(y - other.y);
+		return std::sqrt(deltaX * deltaX + deltaY * deltaY);
 	}
 
 	// Manhattan distance (noexcept alternative)

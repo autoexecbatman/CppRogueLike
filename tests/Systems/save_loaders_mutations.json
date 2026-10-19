@@ -9,14 +9,14 @@
   "mutations": [
     {
       "file": "src/InventoryOperations.h",
-      "original": "\tfor (const auto& itemJson : j.at(\"inventory\"))\n\t{\n\t\tauto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});\n\t\titem->load(itemJson);\n\t\tinventory.items.push_back(std::move(item));\n\t}",
-      "mutated": "\tfor (const auto& itemJson : j.at(\"inventory\"))\n\t{\n\t\tauto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});\n\t\ttry { item->load(itemJson); } catch (const std::exception&) { break; }\n\t\tinventory.items.push_back(std::move(item));\n\t}",
+      "original": "\tfor (const auto& itemJson : source.at(\"inventory\"))\n\t{\n\t\tauto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});\n\t\titem->load(itemJson);\n\t\tinventory.items.push_back(std::move(item));\n\t}",
+      "mutated": "\tfor (const auto& itemJson : source.at(\"inventory\"))\n\t{\n\t\tauto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});\n\t\ttry { item->load(itemJson); } catch (const std::exception&) { break; }\n\t\tinventory.items.push_back(std::move(item));\n\t}",
       "catches": "a broken item swallowed again, the inventory silently cut short at it"
     },
     {
       "file": "src/InventoryOperations.h",
-      "original": "\tinventory.capacity = j.at(\"capacity\").get<size_t>();",
-      "mutated": "\tinventory.capacity = j.value(\"capacity\", size_t{ 0 });",
+      "original": "\tinventory.capacity = source.at(\"capacity\").get<size_t>();",
+      "mutated": "\tinventory.capacity = source.value(\"capacity\", size_t{ 0 });",
       "catches": "an inventory with no capacity loading as one that holds nothing"
     },
     {
@@ -33,8 +33,8 @@
     },
     {
       "file": "src/ShopKeeper.cpp",
-      "original": "\tload_inventory(shopInventory, j.at(\"shop_inventory\"));",
-      "mutated": "\tif (j.contains(\"shop_inventory\")) { load_inventory(shopInventory, j.at(\"shop_inventory\")); }",
+      "original": "\tload_inventory(shopInventory, source.at(\"shop_inventory\"));",
+      "mutated": "\tif (source.contains(\"shop_inventory\")) { load_inventory(shopInventory, source.at(\"shop_inventory\")); }",
       "catches": "a shop whose shelves are missing loading as an empty shop"
     },
     {
@@ -51,14 +51,14 @@
     },
     {
       "file": "src/InventoryOperations.h",
-      "original": "\t\tj[\"inventory\"].push_back(itemJson);\n",
+      "original": "\t\toutput[\"inventory\"].push_back(itemJson);\n",
       "mutated": "",
       "catches": "an item written to a record and then left out of it, so a save loses the lot"
     },
     {
       "file": "src/InventoryOperations.h",
-      "original": "\tj[\"capacity\"] = inventory.capacity;\n",
-      "mutated": "\tj[\"capacity\"] = 0;\n",
+      "original": "\toutput[\"capacity\"] = inventory.capacity;\n",
+      "mutated": "\toutput[\"capacity\"] = 0;\n",
       "catches": "an inventory's capacity lost on the way out, so it reloads holding nothing"
     }
   ]

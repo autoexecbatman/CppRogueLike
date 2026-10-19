@@ -43,9 +43,9 @@ int main()
 		debugFile.open(Paths::resolve(Paths::LOG));
 		std::clog.rdbuf(debugFile.rdbuf());
 	}
-	catch (const std::exception& e)
+	catch (const std::exception& error)
 	{
-		std::cerr << "Warning: Could not open debug file: " << e.what() << std::endl;
+		std::cerr << "Warning: Could not open debug file: " << error.what() << std::endl;
 	}
 
 	std::clog << "STARTUP: Opened debug log\n"
@@ -117,9 +117,9 @@ int main()
 		{
 			debugFile.close();
 		}
-		catch (const std::exception& e)
+		catch (const std::exception& error)
 		{
-			std::cerr << "Warning: Exception closing debug file: " << e.what() << std::endl;
+			std::cerr << "Warning: Exception closing debug file: " << error.what() << std::endl;
 		}
 	}
 

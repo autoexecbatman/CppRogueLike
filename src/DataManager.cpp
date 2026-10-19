@@ -109,22 +109,22 @@ nlohmann::json read_table(const std::string& filename)
 
 StrengthAttributes strength_row_from(const nlohmann::json& item)
 {
-	StrengthAttributes s;
-	s.Str = item.at("Str").get<int>();
-	s.hitProb = item.at("Hit").get<int>();
-	s.dmgAdj = item.at("Dmg").get<int>();
-	s.wgtAllow = item.at("Wgt").get<int>();
-	s.maxPress = item.at("MaxPress").get<int>();
-	s.maxCarried = item.at("maxCarried").get<int>();
-	s.openDoors = item.at("OpenDoors").get<int>();
-	s.BB_LG = item.at("BB_LG").get<double>();
-	s.notes = item.at("Notes").get<std::string>();
+	StrengthAttributes strength;
+	strength.Str = item.at("Str").get<int>();
+	strength.hitProb = item.at("Hit").get<int>();
+	strength.dmgAdj = item.at("Dmg").get<int>();
+	strength.wgtAllow = item.at("Wgt").get<int>();
+	strength.maxPress = item.at("MaxPress").get<int>();
+	strength.maxCarried = item.at("maxCarried").get<int>();
+	strength.openDoors = item.at("OpenDoors").get<int>();
+	strength.BB_LG = item.at("BB_LG").get<double>();
+	strength.notes = item.at("Notes").get<std::string>();
 
 	// An 18/xx band carries its percentile range; a plain score's row carries none.
 	if (item.contains("ExceptionalFrom"))
 	{
-		s.exceptionalFrom = item.at("ExceptionalFrom").get<int>();
-		s.exceptionalTo = item.at("ExceptionalTo").get<int>();
+		strength.exceptionalFrom = item.at("ExceptionalFrom").get<int>();
+		strength.exceptionalTo = item.at("ExceptionalTo").get<int>();
 	}
 
 	// Table 47's bands, null on the scores the table does not print. The key is
@@ -132,70 +132,70 @@ StrengthAttributes strength_row_from(const nlohmann::json& item)
 	const nlohmann::json& bands = item.at("encumbrance");
 	if (!bands.is_null())
 	{
-		s.encumbrance = EncumbranceBands{
+		strength.encumbrance = EncumbranceBands{
 			bands.at("unencumberedTo").get<int>(),
 			bands.at("lightTo").get<int>(),
 			bands.at("moderateTo").get<int>(),
 			bands.at("heavyTo").get<int>()
 		};
 	}
-	return s;
+	return strength;
 }
 
 DexterityAttributes dexterity_row_from(const nlohmann::json& item)
 {
-	DexterityAttributes d;
-	d.Dex = item.at("Dex").get<int>();
-	d.ReactionAdj = item.at("ReactionAdj").get<int>();
-	d.MissileAttackAdj = item.at("MissileAttackAdj").get<int>();
-	d.DefensiveAdj = item.at("DefensiveAdj").get<int>();
-	return d;
+	DexterityAttributes dexterity;
+	dexterity.Dex = item.at("Dex").get<int>();
+	dexterity.ReactionAdj = item.at("ReactionAdj").get<int>();
+	dexterity.MissileAttackAdj = item.at("MissileAttackAdj").get<int>();
+	dexterity.DefensiveAdj = item.at("DefensiveAdj").get<int>();
+	return dexterity;
 }
 
 ConstitutionAttributes constitution_row_from(const nlohmann::json& item)
 {
-	ConstitutionAttributes c;
-	c.Con = item.at("Con").get<int>();
-	c.HPAdj = item.at("HPAdj").get<int>();
-	c.hitDieMinimum = item.at("hitDieMinimum").get<int>();
-	c.SystemShock = item.at("SystemShock").get<int>();
-	c.ResurrectionSurvival = item.at("ResurrectionSurvival").get<int>();
-	c.PoisonSave = item.at("PoisonSave").get<int>();
-	c.Regeneration = item.at("Regeneration").get<int>();
-	return c;
+	ConstitutionAttributes constitution;
+	constitution.Con = item.at("Con").get<int>();
+	constitution.HPAdj = item.at("HPAdj").get<int>();
+	constitution.hitDieMinimum = item.at("hitDieMinimum").get<int>();
+	constitution.SystemShock = item.at("SystemShock").get<int>();
+	constitution.ResurrectionSurvival = item.at("ResurrectionSurvival").get<int>();
+	constitution.PoisonSave = item.at("PoisonSave").get<int>();
+	constitution.Regeneration = item.at("Regeneration").get<int>();
+	return constitution;
 }
 
 CharismaAttributes charisma_row_from(const nlohmann::json& item)
 {
-	CharismaAttributes c;
-	c.Cha = item.at("Cha").get<int>();
-	c.MaxHencmen = item.at("MaxHencmen").get<int>();
-	c.Loyalty = item.at("Loyalty").get<int>();
-	c.ReactionAdj = item.at("ReactionAdj").get<int>();
-	return c;
+	CharismaAttributes charisma;
+	charisma.Cha = item.at("Cha").get<int>();
+	charisma.MaxHencmen = item.at("MaxHencmen").get<int>();
+	charisma.Loyalty = item.at("Loyalty").get<int>();
+	charisma.ReactionAdj = item.at("ReactionAdj").get<int>();
+	return charisma;
 }
 
 IntelligenceAttributes intelligence_row_from(const nlohmann::json& item)
 {
-	IntelligenceAttributes i;
-	i.Int = item.at("Int").get<int>();
-	i.NumberOfLanguages = item.at("NumberOfLanguages").get<int>();
-	i.SpellLevel = item.at("SpellLevel").get<int>();
-	i.ChanceToLearnSpell = item.at("ChanceToLearnSpell").get<int>();
-	i.MaxNumberOfSpells = item.at("MaxNumberOfSpells").get<int>();
-	i.IllusionImmunity = item.at("IllusionImmunity").get<int>();
-	return i;
+	IntelligenceAttributes intelligence;
+	intelligence.Int = item.at("Int").get<int>();
+	intelligence.NumberOfLanguages = item.at("NumberOfLanguages").get<int>();
+	intelligence.SpellLevel = item.at("SpellLevel").get<int>();
+	intelligence.ChanceToLearnSpell = item.at("ChanceToLearnSpell").get<int>();
+	intelligence.MaxNumberOfSpells = item.at("MaxNumberOfSpells").get<int>();
+	intelligence.IllusionImmunity = item.at("IllusionImmunity").get<int>();
+	return intelligence;
 }
 
 WisdomAttributes wisdom_row_from(const nlohmann::json& item)
 {
-	WisdomAttributes w;
-	w.Wis = item.at("Wis").get<int>();
-	w.MagicalDefenseAdj = item.at("MagicalDefenseAdj").get<int>();
-	w.bonusSpells = item.at("bonusSpells").get<std::vector<int>>();
-	w.ChanceOfSpellFailure = item.at("ChanceOfSpellFailure").get<int>();
-	w.SpellImmunity = item.at("SpellImmunity").get<int>();
-	return w;
+	WisdomAttributes wisdom;
+	wisdom.Wis = item.at("Wis").get<int>();
+	wisdom.MagicalDefenseAdj = item.at("MagicalDefenseAdj").get<int>();
+	wisdom.bonusSpells = item.at("bonusSpells").get<std::vector<int>>();
+	wisdom.ChanceOfSpellFailure = item.at("ChanceOfSpellFailure").get<int>();
+	wisdom.SpellImmunity = item.at("SpellImmunity").get<int>();
+	return wisdom;
 }
 
 void DataManager::load_all_data(MessageSystem& message_system)
@@ -268,10 +268,10 @@ int DataManager::constitution_hit_point_adjustment(int score, CreatureClass crea
 
 std::vector<StrengthAttributes> DataManager::load_strength(const std::string& filename, MessageSystem& message_system)
 {
-	const nlohmann::json j = read_table(filename);
+	const nlohmann::json table = read_table(filename);
 
 	std::vector<StrengthAttributes> data;
-	for (const auto& item : j)
+	for (const auto& item : table)
 	{
 		data.push_back(strength_row_from(item));
 	}
@@ -282,10 +282,10 @@ std::vector<StrengthAttributes> DataManager::load_strength(const std::string& fi
 
 std::vector<DexterityAttributes> DataManager::load_dexterity(const std::string& filename, MessageSystem& message_system)
 {
-	const nlohmann::json j = read_table(filename);
+	const nlohmann::json table = read_table(filename);
 
 	std::vector<DexterityAttributes> data;
-	for (const auto& item : j)
+	for (const auto& item : table)
 	{
 		data.push_back(dexterity_row_from(item));
 	}
@@ -296,10 +296,10 @@ std::vector<DexterityAttributes> DataManager::load_dexterity(const std::string& 
 
 std::vector<ConstitutionAttributes> DataManager::load_constitution(const std::string& filename, MessageSystem& message_system)
 {
-	const nlohmann::json j = read_table(filename);
+	const nlohmann::json table = read_table(filename);
 
 	std::vector<ConstitutionAttributes> data;
-	for (const auto& item : j)
+	for (const auto& item : table)
 	{
 		data.push_back(constitution_row_from(item));
 	}
@@ -310,10 +310,10 @@ std::vector<ConstitutionAttributes> DataManager::load_constitution(const std::st
 
 std::vector<CharismaAttributes> DataManager::load_charisma(const std::string& filename, MessageSystem& message_system)
 {
-	const nlohmann::json j = read_table(filename);
+	const nlohmann::json table = read_table(filename);
 
 	std::vector<CharismaAttributes> data;
-	for (const auto& item : j)
+	for (const auto& item : table)
 	{
 		data.push_back(charisma_row_from(item));
 	}
@@ -324,10 +324,10 @@ std::vector<CharismaAttributes> DataManager::load_charisma(const std::string& fi
 
 std::vector<IntelligenceAttributes> DataManager::load_intelligence(const std::string& filename, MessageSystem& message_system)
 {
-	const nlohmann::json j = read_table(filename);
+	const nlohmann::json table = read_table(filename);
 
 	std::vector<IntelligenceAttributes> data;
-	for (const auto& item : j)
+	for (const auto& item : table)
 	{
 		data.push_back(intelligence_row_from(item));
 	}
@@ -338,10 +338,10 @@ std::vector<IntelligenceAttributes> DataManager::load_intelligence(const std::st
 
 std::vector<WisdomAttributes> DataManager::load_wisdom(const std::string& filename, MessageSystem& message_system)
 {
-	const nlohmann::json j = read_table(filename);
+	const nlohmann::json table = read_table(filename);
 
 	std::vector<WisdomAttributes> data;
-	for (const auto& item : j)
+	for (const auto& item : table)
 	{
 		data.push_back(wisdom_row_from(item));
 	}

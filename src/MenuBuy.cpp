@@ -88,9 +88,9 @@ void MenuBuy::menu_print_state(size_t state)
 void MenuBuy::draw_content()
 {
 	populate_items();
-	for (size_t i{ 0 }; i < menuItems.size(); ++i)
+	for (size_t itemIndex{ 0 }; itemIndex < menuItems.size(); ++itemIndex)
 	{
-		menu_print_state(i);
+		menu_print_state(itemIndex);
 	}
 }
 
@@ -102,9 +102,9 @@ void MenuBuy::draw()
 	menu_print_header();
 
 	populate_items();
-	for (size_t i{ 0 }; i < menuItems.size(); ++i)
+	for (size_t itemIndex{ 0 }; itemIndex < menuItems.size(); ++itemIndex)
 	{
-		menu_print_state(i);
+		menu_print_state(itemIndex);
 	}
 }
 

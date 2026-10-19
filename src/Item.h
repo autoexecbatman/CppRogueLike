@@ -18,8 +18,8 @@ private:
 public:
 	Item(Vector2D position, ActorData data);
 
-	void load(const json& j) override;
-	void save(json& j) override;
+	void load(const json& source) override;
+	void save(json& output) override;
 
 	// The name the player sees; identified parts by name, unknown ones as "?".
 	[[nodiscard]] std::string get_name() const;
@@ -56,7 +56,7 @@ public:
 	// Value: baseValue * enhancement.valueModifier / 100  (modifier defaults to 100)
 	int get_value() const noexcept { return (baseValue * enhancement.valueModifier) / 100; }
 
-	void set_value(int v) noexcept { baseValue = v; }
+	void set_value(int newValue) noexcept { baseValue = newValue; }
 
 	std::string itemKey; // JSON registry key
 	ItemClass itemClass{ ItemClass::UNKNOWN }; // Item category classification

@@ -15,13 +15,13 @@
     },
     {
       "file": "src/InventoryUI.cpp",
-      "original": "\t\tpx += box.width + tileSize;",
-      "mutated": "\t\tpx += box.width;",
+      "original": "\t\tpixelX += box.width + tileSize;",
+      "mutated": "\t\tpixelX += box.width;",
       "catches": "the gap between tabs gone, so they stack at one x and the bar stops being three separate targets"
     },
     {
       "file": "src/InventoryUI.cpp",
-      "original": "\t\tif (pixelX >= box.x - TAB_HIT_PADDING && pixelX < box.x + box.width + TAB_HIT_PADDING)",
+      "original": "\t\tif (pixelX >= box.pixelX - TAB_HIT_PADDING && pixelX < box.pixelX + box.width + TAB_HIT_PADDING)",
       "mutated": "\t\tif (true)",
       "catches": "the across test gone, so every click on the tab row answers Equipment whatever it was aimed at"
     },

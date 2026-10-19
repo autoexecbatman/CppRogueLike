@@ -19,17 +19,17 @@ void InputHandler::key_listen(InputSystem& input) noexcept
 	}
 
 	// Character keys first (ASCII values match Controls enum)
-	int ch = input.get_char_input();
-	if (ch != 0)
+	int character = input.get_char_input();
+	if (character != 0)
 	{
-		keyPress = ch;
+		keyPress = character;
 		logicFrame = true;
 		return;
 	}
 
 	// Special keys mapped to legacy keycodes
-	GameKey gk = input.get_key();
-	switch (gk)
+	GameKey key = input.get_key();
+	switch (key)
 	{
 
 	case GameKey::UP:

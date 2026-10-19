@@ -93,8 +93,8 @@
     },
     {
       "file": "src/MonsterCreator.cpp",
-      "original": "\tc->set_creature_level(rolled.count);\n",
-      "mutated": "\tc->set_creature_level(lowest.count);\n",
+      "original": "\tcreature->set_creature_level(rolled.count);\n",
+      "mutated": "\tcreature->set_creature_level(lowest.count);\n",
       "catches": "the level taken from the lowest count rather than the rolled one"
     },
     {

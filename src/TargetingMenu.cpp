@@ -135,17 +135,17 @@ void TargetingMenu::menu(GameContext& ctx)
 void TargetingMenu::draw_cursor(GameContext& ctx) const
 {
 	int tileSize = ctx.renderer->get_tile_size();
-	int sx = cursor.x * tileSize - ctx.renderer->get_camera_x();
-	int sy = cursor.y * tileSize - ctx.renderer->get_camera_y();
+	int screenPixelX = cursor.x * tileSize - ctx.renderer->get_camera_x();
+	int screenPixelY = cursor.y * tileSize - ctx.renderer->get_camera_y();
 	float pulse = (std::sin(static_cast<float>(GetTime()) * 6.28318f * 4.0f) + 1.0f) * 0.5f;
 	auto fillAlpha = static_cast<unsigned char>(40.0f + 30.0f * pulse);
 	auto ringAlpha = static_cast<unsigned char>(120.0f + 100.0f * pulse);
 
-	DrawRectangle(sx, sy, tileSize, tileSize, Color{ 255, 255, 50, fillAlpha });
+	DrawRectangle(screenPixelX, screenPixelY, tileSize, tileSize, Color{ 255, 255, 50, fillAlpha });
 	DrawRectangleLinesEx(
 		Rectangle{
-			static_cast<float>(sx),
-			static_cast<float>(sy),
+			static_cast<float>(screenPixelX),
+			static_cast<float>(screenPixelY),
 			static_cast<float>(tileSize),
 			static_cast<float>(tileSize) },
 		2.0f,

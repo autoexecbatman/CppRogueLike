@@ -46,14 +46,14 @@ ListMenu::ListMenu(
 
 void ListMenu::draw_entries()
 {
-	for (size_t i = 0; i < entries.size(); ++i)
+	for (size_t entryIndex = 0; entryIndex < entries.size(); ++entryIndex)
 	{
-		if (cursorIndex == i)
+		if (cursorIndex == entryIndex)
 		{
 			menu_highlight_on();
 		}
-		menu_print(1, static_cast<int>(i), entries[i].label);
-		if (cursorIndex == i)
+		menu_print(1, static_cast<int>(entryIndex), entries[entryIndex].label);
+		if (cursorIndex == entryIndex)
 		{
 			menu_highlight_off();
 		}

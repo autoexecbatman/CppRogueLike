@@ -141,14 +141,14 @@ const TileDefinition& TileConfig::get_tile_definition(TileType tileType) const
 void TileConfig::load(std::string_view path)
 {
 	auto resolved = Paths::resolve(path);
-	std::ifstream f(resolved);
+	std::ifstream configFile(resolved);
 
-	if (!f.is_open())
+	if (!configFile.is_open())
 	{
 		throw std::runtime_error(std::format("TileConfig::load -- cannot open '{}' -- tile config JSON is required", resolved.string()));
 	}
 
-	const json root = json::parse(f);
+	const json root = json::parse(configFile);
 
 	if (root.contains("tiles"))
 	{

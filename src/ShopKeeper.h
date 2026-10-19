@@ -64,11 +64,11 @@ public:
 	ShopKeeper& operator=(ShopKeeper&&) = default;
 
 	// Serialization - required by Persistent interface
-	void load(const json& j) override;
-	void save(json& j) override;
+	void load(const json& source) override;
+	void save(json& output) override;
 
 	// Factory method for deserialization
-	static std::unique_ptr<ShopKeeper> create(const json& j);
+	static std::unique_ptr<ShopKeeper> create(const json& source);
 
 	// Accessors
 	ShopType get_shop_type() const noexcept { return shopType; }

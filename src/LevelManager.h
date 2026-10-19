@@ -35,6 +35,6 @@ public:
 	bool can_spawn_shopkeeper(int max_shopkeepers = 3) const noexcept;
 
 	// Save/Load
-	void save_to_json(nlohmann::json& j) const;
-	void load_from_json(const nlohmann::json& j);
+	void save_to_json(nlohmann::json& output) const;
+	void load_from_json(const nlohmann::json& source);
 };

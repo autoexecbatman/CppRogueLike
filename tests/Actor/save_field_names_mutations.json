@@ -27,8 +27,8 @@
     },
     {
       "file": "src/LevelManager.cpp",
-      "original": "\tconst auto& levelData = j.at(\"level_manager\");",
-      "mutated": "\tconst auto& levelData = j.contains(\"level_manager\") ? j.at(\"level_manager\") : j;",
+      "original": "\tconst auto& levelData = source.at(\"level_manager\");",
+      "mutated": "\tconst auto& levelData = source.contains(\"level_manager\") ? source.at(\"level_manager\") : source;",
       "catches": "a save without the block falling back to an old shape instead of failing"
     },
     {

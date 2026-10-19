@@ -61,9 +61,9 @@ void MenuTrade::menu_print_state(size_t state)
 
 void MenuTrade::draw_content()
 {
-	for (size_t i{ 0 }; i < entries.size(); ++i)
+	for (size_t entryIndex{ 0 }; entryIndex < entries.size(); ++entryIndex)
 	{
-		menu_print_state(i);
+		menu_print_state(entryIndex);
 	}
 }
 
@@ -71,9 +71,9 @@ void MenuTrade::draw()
 {
 	menu_draw_box();
 	menu_draw_title("TRADE", ColorPairId::YELLOW_BLACK);
-	for (size_t i{ 0 }; i < entries.size(); ++i)
+	for (size_t entryIndex{ 0 }; entryIndex < entries.size(); ++entryIndex)
 	{
-		menu_print_state(i);
+		menu_print_state(entryIndex);
 	}
 }
 

@@ -9,8 +9,8 @@
   "mutations": [
     {
       "file": "src/GameStateManager.cpp",
-      "original": "\trooms.clear();\n\n\tif (!j.contains(\"rooms\")",
-      "mutated": "\n\tif (!j.contains(\"rooms\")",
+      "original": "\trooms.clear();\n\n\tif (!source.contains(\"rooms\")",
+      "mutated": "\n\tif (!source.contains(\"rooms\")",
       "catches": "a load stacking the saved rooms on the abandoned level's"
     },
     {

@@ -57,8 +57,8 @@ public:
 	void add_state(ActorState state) noexcept;
 	void remove_state(ActorState state) noexcept;
 
-	void load(const json& j) override;
-	void save(json& j) override;
+	void load(const json& source) override;
+	void save(json& output) override;
 
 	int get_tile_distance(Vector2D tilePosition) const noexcept;
 	void render(const GameContext& ctx) const noexcept;

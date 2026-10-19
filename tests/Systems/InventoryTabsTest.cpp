@@ -32,7 +32,7 @@ protected:
 
 	int middle_of(const InventoryActions::TabBox& box) const
 	{
-		return box.x + box.width / 2;
+		return box.pixelX + box.width / 2;
 	}
 
 	Renderer renderer{};
@@ -45,8 +45,8 @@ TEST_F(InventoryTabsTest, TheThreeTabsRunLeftToRightWithoutOverlapping)
 	EXPECT_EQ(boxes[0].screen, InventoryScreen::EQUIPMENT);
 	EXPECT_EQ(boxes[1].screen, InventoryScreen::BACKPACK);
 	EXPECT_EQ(boxes[2].screen, InventoryScreen::USABLES);
-	EXPECT_LT(boxes[0].x, boxes[1].x);
-	EXPECT_LT(boxes[1].x, boxes[2].x);
+	EXPECT_LT(boxes[0].pixelX, boxes[1].pixelX);
+	EXPECT_LT(boxes[1].pixelX, boxes[2].pixelX);
 }
 
 TEST_F(InventoryTabsTest, EveryTabIsReachableByPointer)
@@ -74,7 +74,7 @@ TEST_F(InventoryTabsTest, APointerOffTheTabRowHitsNoTab)
 TEST_F(InventoryTabsTest, APointerPastTheLastTabHitsNoTab)
 {
 	const auto boxes = InventoryActions::tab_boxes(renderer);
-	const int pastTheEnd = boxes[2].x + boxes[2].width + 200;
+	const int pastTheEnd = boxes[2].pixelX + boxes[2].width + 200;
 
 	EXPECT_FALSE(InventoryActions::tab_at(pastTheEnd, tab_row_y(), renderer).has_value());
 }

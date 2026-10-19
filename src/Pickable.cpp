@@ -76,8 +76,8 @@ bool consume_item(Item& owner, Creature& wearer)
 }
 
 // Shared save for stat-boost equipment (Gauntlets, Girdle, JewelryAmulet)
-template <typename T>
-void save_stat_boost(const T& statBoost, PickableType type, json& output)
+template <typename StatBoost>
+void save_stat_boost(const StatBoost& statBoost, PickableType type, json& output)
 {
 	output["type"] = encode_pickable_type(type);
 	output["strBonus"] = statBoost.strBonus;
@@ -93,8 +93,8 @@ void save_stat_boost(const T& statBoost, PickableType type, json& output)
 	output["bonus"] = statBoost.bonus;
 }
 
-template <typename T>
-void load_stat_boost(T& statBoost, const json& source)
+template <typename StatBoost>
+void load_stat_boost(StatBoost& statBoost, const json& source)
 {
 	statBoost.strBonus = source.at("strBonus").get<int>();
 	statBoost.dexBonus = source.at("dexBonus").get<int>();

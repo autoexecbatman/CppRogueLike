@@ -189,9 +189,9 @@ void Game::shutdown()
 			auto ctx = context();
 			stateManager.save_game(ctx);
 		}
-		catch (const std::exception& e)
+		catch (const std::exception& error)
 		{
-			messageSystem.log("Error saving: " + std::string(e.what()));
+			messageSystem.log("Error saving: " + std::string(error.what()));
 		}
 	}
 }

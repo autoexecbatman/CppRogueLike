@@ -33,7 +33,7 @@
         },
         {
             "file": "src/MonsterCreator.cpp",
-            "original": "\tc->set_corpse(params.corpseName, params.corpseNutrition, params.corpseTaste, params.corpseEdibility);\n",
+            "original": "\tcreature->set_corpse(params.corpseName, params.corpseNutrition, params.corpseTaste, params.corpseEdibility);\n",
             "mutated": "",
             "catches": "a monster built without its record's corpse"
         },
@@ -111,8 +111,8 @@
         },
         {
             "file": "src/MonsterCreator.cpp",
-            "original": "\tc->set_corpse(params.corpseName, params.corpseNutrition, params.corpseTaste, params.corpseEdibility);\n",
-            "mutated": "\tc->set_corpse(params.corpseName, params.corpseNutrition, params.corpseTaste, CorpseEdibility::EDIBLE);\n",
+            "original": "\tcreature->set_corpse(params.corpseName, params.corpseNutrition, params.corpseTaste, params.corpseEdibility);\n",
+            "mutated": "\tcreature->set_corpse(params.corpseName, params.corpseNutrition, params.corpseTaste, CorpseEdibility::EDIBLE);\n",
             "catches": "a monster built with an edible corpse its record forbids"
         },
         {

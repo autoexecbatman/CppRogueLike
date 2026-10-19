@@ -178,15 +178,15 @@ void InputSystem::poll()
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
 	bool alt = IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT);
 
-	auto register_key = [&](int raylibKey, GameKey gk, int ch, bool repeatable)
+	auto register_key = [&](int raylibKey, GameKey gameKey, int character, bool repeatable)
 	{
-		currentKey = gk;
-		charInput = ch;
+		currentKey = gameKey;
+		charInput = character;
 		if (repeatable)
 		{
 			heldRaylibKey = raylibKey;
-			heldGameKey = gk;
-			heldCharInput = ch;
+			heldGameKey = gameKey;
+			heldCharInput = character;
 			holdStart = GetTime();
 			lastRepeat = GetTime();
 		}
@@ -576,94 +576,94 @@ void InputSystem::poll()
 	// Shift+symbol keys and char_input for text fields. GetCharPressed() is empty on Emscripten too,
 	// so on the web the char is derived from the key and the shift state.
 #ifdef __EMSCRIPTEN__
-	int ch = 0;
+	int keyCharacter = 0;
 	if (newKey >= KEY_A && newKey <= KEY_Z)
 	{
-		ch = shift ? (newKey - KEY_A + 'A') : (newKey - KEY_A + 'a');
+		keyCharacter = shift ? (newKey - KEY_A + 'A') : (newKey - KEY_A + 'a');
 	}
 	else if (newKey == KEY_ONE)
 	{
-		ch = shift ? '!' : '1';
+		keyCharacter = shift ? '!' : '1';
 	}
 	else if (newKey == KEY_TWO)
 	{
-		ch = shift ? '@' : '2';
+		keyCharacter = shift ? '@' : '2';
 	}
 	else if (newKey == KEY_THREE)
 	{
-		ch = shift ? '#' : '3';
+		keyCharacter = shift ? '#' : '3';
 	}
 	else if (newKey == KEY_FOUR)
 	{
-		ch = shift ? '$' : '4';
+		keyCharacter = shift ? '$' : '4';
 	}
 	else if (newKey == KEY_FIVE)
 	{
-		ch = shift ? '%' : '5';
+		keyCharacter = shift ? '%' : '5';
 	}
 	else if (newKey == KEY_SIX)
 	{
-		ch = shift ? '^' : '6';
+		keyCharacter = shift ? '^' : '6';
 	}
 	else if (newKey == KEY_SEVEN)
 	{
-		ch = shift ? '&' : '7';
+		keyCharacter = shift ? '&' : '7';
 	}
 	else if (newKey == KEY_EIGHT)
 	{
-		ch = shift ? '*' : '8';
+		keyCharacter = shift ? '*' : '8';
 	}
 	else if (newKey == KEY_NINE)
 	{
-		ch = shift ? '(' : '9';
+		keyCharacter = shift ? '(' : '9';
 	}
 	else if (newKey == KEY_ZERO)
 	{
-		ch = shift ? ')' : '0';
+		keyCharacter = shift ? ')' : '0';
 	}
 	else if (newKey == KEY_EQUAL)
 	{
-		ch = shift ? '+' : '=';
+		keyCharacter = shift ? '+' : '=';
 	}
 	else if (newKey == KEY_MINUS)
 	{
-		ch = shift ? '_' : '-';
+		keyCharacter = shift ? '_' : '-';
 	}
 	else if (newKey == KEY_COMMA)
 	{
-		ch = shift ? '<' : ',';
+		keyCharacter = shift ? '<' : ',';
 	}
 	else if (newKey == KEY_PERIOD)
 	{
-		ch = shift ? '>' : '.';
+		keyCharacter = shift ? '>' : '.';
 	}
 	else if (newKey == KEY_SLASH)
 	{
-		ch = shift ? '?' : '/';
+		keyCharacter = shift ? '?' : '/';
 	}
 	else if (newKey == KEY_SEMICOLON)
 	{
-		ch = shift ? ':' : ';';
+		keyCharacter = shift ? ':' : ';';
 	}
 	else if (newKey == KEY_APOSTROPHE)
 	{
-		ch = shift ? '"' : '\'';
+		keyCharacter = shift ? '"' : '\'';
 	}
 	else if (newKey == KEY_GRAVE)
 	{
-		ch = shift ? '~' : '`';
+		keyCharacter = shift ? '~' : '`';
 	}
 	else if (newKey == KEY_SPACE)
 	{
-		ch = ' ';
+		keyCharacter = ' ';
 	}
 #else
-	int ch = GetCharPressed();
+	int keyCharacter = GetCharPressed();
 #endif
-	if (ch > 0)
+	if (keyCharacter > 0)
 	{
-		charInput = ch;
-		switch (ch)
+		charInput = keyCharacter;
+		switch (keyCharacter)
 		{
 
 		case '@':

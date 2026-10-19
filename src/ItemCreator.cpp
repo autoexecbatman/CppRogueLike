@@ -25,10 +25,10 @@ namespace
 // ---------------------------------------------------------------------------
 // Behavior construction
 // ---------------------------------------------------------------------------
-template <typename T>
-T create_stat_behavior(const ItemParams& params)
+template <typename Behavior>
+Behavior create_stat_behavior(const ItemParams& params)
 {
-	T item;
+	Behavior item;
 	item.strBonus = params.strBonus;
 	item.dexBonus = params.dexBonus;
 	item.conBonus = params.conBonus;

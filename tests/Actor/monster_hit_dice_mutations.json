@@ -21,7 +21,7 @@
     },
     {
       "file": "src/MonsterCreator.cpp",
-      "original": "\t\tc->get_constitution(),",
+      "original": "\t\tcreature->get_constitution(),",
       "mutated": "\t\t10,",
       "catches": "creation rolling hit dice against a score that is not the monster's"
     },
@@ -33,8 +33,8 @@
     },
     {
       "file": "src/MonsterCreator.cpp",
-      "original": "\tc->set_hit_dice(hp);\n",
-      "mutated": "\tc->healthPool = std::make_unique<HealthPool>(hp);\n",
+      "original": "\tcreature->set_hit_dice(hp);\n",
+      "mutated": "\tcreature->healthPool = std::make_unique<HealthPool>(hp);\n",
       "catches": "a monster from data building its pool directly, so its score is never recorded"
     },
     {

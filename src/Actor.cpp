@@ -34,43 +34,43 @@ void Actor::add_state(ActorState state) noexcept
 void Actor::remove_state(ActorState state) noexcept
 {
 	std::erase_if(states,
-		[state](ActorState s)
+		[state](ActorState existing)
 		{
-			return s == state;
+			return existing == state;
 		});
 }
 
-void Actor::load(const json& j)
+void Actor::load(const json& source)
 {
-	position.x = j["position"]["x"];
-	position.y = j["position"]["y"];
-	direction.x = j["direction"]["x"];
-	direction.y = j["direction"]["y"];
-	actorData.tile = TileRefJson::parse_tile(j["actorData"].at("tile"));
-	actorData.name = j["actorData"].at("name").get<std::string>();
-	actorData.color = parse_color_pair(j["actorData"].at("color").get<std::string>());
-	uniqueId = j.at("uniqueId").get<UniqueId::IdType>();
+	position.x = source["position"]["x"];
+	position.y = source["position"]["y"];
+	direction.x = source["direction"]["x"];
+	direction.y = source["direction"]["y"];
+	actorData.tile = TileRefJson::parse_tile(source["actorData"].at("tile"));
+	actorData.name = source["actorData"].at("name").get<std::string>();
+	actorData.color = parse_color_pair(source["actorData"].at("color").get<std::string>());
+	uniqueId = source.at("uniqueId").get<UniqueId::IdType>();
 
 	// Clear existing states before loading saved states
 	states.clear();
 
 	// Deserialize vector of states
-	for (const auto& state : j["states"])
+	for (const auto& state : source["states"])
 	{
 		states.push_back(state);
 	}
 }
 
-void Actor::save(json& j)
+void Actor::save(json& output)
 {
-	j["position"] = { { "y", position.y }, { "x", position.x } };
-	j["direction"] = { { "y", direction.y }, { "x", direction.x } };
-	j["actorData"] = {
+	output["position"] = { { "y", position.y }, { "x", position.x } };
+	output["direction"] = { { "y", direction.y }, { "x", direction.x } };
+	output["actorData"] = {
 		{ "tile", TileRefJson::encode_tile(actorData.tile) },
 		{ "name", actorData.name },
 		{ "color", color_pair_name(actorData.color) }
 	};
-	j["uniqueId"] = uniqueId;
+	output["uniqueId"] = uniqueId;
 
 	// Serialize vector of states
 	json statesJson;
@@ -78,7 +78,7 @@ void Actor::save(json& j)
 	{
 		statesJson.push_back(state);
 	}
-	j["states"] = statesJson;
+	output["states"] = statesJson;
 }
 
 // a function to get the Chebyshev distance from an actor to a specific tile of the map

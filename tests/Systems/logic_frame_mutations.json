@@ -15,8 +15,8 @@
     },
     {
       "file": "src/InputHandler.cpp",
-      "original": "\t\tkeyPress = ch;\n\t\tlogicFrame = true;\n",
-      "mutated": "\t\tkeyPress = ch;\n\t\tlogicFrame = false;\n",
+      "original": "\t\tkeyPress = character;\n\t\tlogicFrame = true;\n",
+      "mutated": "\t\tkeyPress = character;\n\t\tlogicFrame = false;\n",
       "catches": "a typed character never reaching the update"
     },
     {

@@ -31,9 +31,9 @@ MenuSpellCast::MenuSpellCast(Player& player, GameContext& ctx)
 	// 45 was a character count handed to menu_new, which reads tiles: 2880 pixels
 	// on a 1280-pixel screen. Measured off the lines this menu actually draws.
 	int widestText = ctx.renderer->measure_text("Cast Spell (ESC to cancel):");
-	for (size_t i = 0; i < availableSpells.size(); ++i)
+	for (size_t spellIndex = 0; spellIndex < availableSpells.size(); ++spellIndex)
 	{
-		widestText = std::max(widestText, ctx.renderer->measure_text(spell_line(i, *ctx.spellRegistry)));
+		widestText = std::max(widestText, ctx.renderer->measure_text(spell_line(spellIndex, *ctx.spellRegistry)));
 	}
 
 	// One header row, then a row per spell.
@@ -86,18 +86,18 @@ void MenuSpellCast::draw(const SpellRegistry& spells)
 	menu_draw_box();
 	menu_print(1, 0, "Cast Spell (ESC to cancel):");
 
-	for (size_t i = 0; i < availableSpells.size(); ++i)
+	for (size_t spellIndex = 0; spellIndex < availableSpells.size(); ++spellIndex)
 	{
-		const int row = static_cast<int>(i) + 1;
+		const int row = static_cast<int>(spellIndex) + 1;
 
-		if (static_cast<int>(i) == selectedIndex)
+		if (static_cast<int>(spellIndex) == selectedIndex)
 		{
 			menu_highlight_on();
 		}
 
-		menu_print(1, row, spell_line(i, spells));
+		menu_print(1, row, spell_line(spellIndex, spells));
 
-		if (static_cast<int>(i) == selectedIndex)
+		if (static_cast<int>(spellIndex) == selectedIndex)
 		{
 			menu_highlight_off();
 		}

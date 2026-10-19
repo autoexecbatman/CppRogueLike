@@ -115,21 +115,21 @@ private:
 public:
 	bool get_run() const noexcept { return run; }
 
-	void set_run(bool v) noexcept { run = v; }
+	void set_run(bool newValue) noexcept { run = newValue; }
 
 	bool get_should_save() const noexcept { return shouldSave; }
 
-	void set_should_save(bool v) noexcept { shouldSave = v; }
+	void set_should_save(bool newValue) noexcept { shouldSave = newValue; }
 
 	bool get_is_loaded_game() const noexcept { return isLoadedGame; }
 
-	void set_is_loaded_game(bool v) noexcept { isLoadedGame = v; }
+	void set_is_loaded_game(bool newValue) noexcept { isLoadedGame = newValue; }
 
 	// The clock in time units. Advanced only by an action being spent, which is
 	// spend_player_action and nothing else.
 	int get_time() const noexcept { return time; }
 
-	void set_time(int v) noexcept { time = v; }
+	void set_time(int newValue) noexcept { time = newValue; }
 
 	void advance_clock(int timeUnits) noexcept { time += timeUnits; }
 
@@ -137,11 +137,11 @@ public:
 	// clock has reached, so an action spanning several rounds feeds all of them.
 	int get_rounds_run() const noexcept { return roundsRun; }
 
-	void set_rounds_run(int v) noexcept { roundsRun = v; }
+	void set_rounds_run(int newValue) noexcept { roundsRun = newValue; }
 
 	GameStatus get_game_status() const noexcept { return gameStatus; }
 
-	void set_game_status(GameStatus s) noexcept { gameStatus = s; }
+	void set_game_status(GameStatus newStatus) noexcept { gameStatus = newStatus; }
 
 	// Written by the end of a run - Player::die for DEFEAT, the Amulet of Yendor for
 	// VICTORY - and set back to UNDECIDED only by begin_run.
@@ -170,7 +170,7 @@ public:
 
 	WindowState get_window_state() const noexcept { return windowState; }
 
-	void set_window_state(WindowState s) noexcept { windowState = s; }
+	void set_window_state(WindowState newState) noexcept { windowState = newState; }
 };
 
 // Data collected by character creation menus before Player is constructed.

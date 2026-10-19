@@ -27,8 +27,8 @@
     },
     {
       "file": "src/DataManager.cpp",
-      "original": "\tc.hitDieMinimum = item.at(\"hitDieMinimum\").get<int>();",
-      "mutated": "\tc.hitDieMinimum = item.at(\"HPAdj\").get<int>();",
+      "original": "\tconstitution.hitDieMinimum = item.at(\"hitDieMinimum\").get<int>();",
+      "mutated": "\tconstitution.hitDieMinimum = item.at(\"HPAdj\").get<int>();",
       "catches": "the loader reading another column into the minimum"
     },
     {

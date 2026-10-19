@@ -314,21 +314,21 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 
 	// Screen pixel position - same formula as tile rendering so the square
 	// tracks the actual rendered tile regardless of camera alignment.
-	int tx = world_tile.x * tileSize - cam_x;
-	int ty = world_tile.y * tileSize - cam_y;
+	int tilePixelX = world_tile.x * tileSize - cam_x;
+	int tilePixelY = world_tile.y * tileSize - cam_y;
 
 	// Ignore cursor over the GUI panel rows at the bottom
 	int map_rows = ctx.renderer->get_viewport_rows() - ctx.renderer->get_gui_reserve_rows();
 
-	if (tx < 0 || ty < 0)
+	if (tilePixelX < 0 || tilePixelY < 0)
 	{
 		return;
 	}
-	if (ty / tileSize >= map_rows)
+	if (tilePixelY / tileSize >= map_rows)
 	{
 		return;
 	}
-	if (tx / tileSize >= ctx.renderer->get_viewport_cols())
+	if (tilePixelX / tileSize >= ctx.renderer->get_viewport_cols())
 	{
 		return;
 	}
@@ -349,7 +349,7 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 	desc = ctx.tileConfig->get_tile_definition(ctx.map->get_tile_type(world_tile)).displayName;
 
 	// Tint: cyan (terrain), amber (creature), pale green (item)
-	unsigned char hr = 0, hg = 220, hb = 255;
+	unsigned char tintRed = 0, tintGreen = 220, tintBlue = 255;
 
 	if (in_fov)
 	{
@@ -357,9 +357,9 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 		if (actor)
 		{
 			desc = actor->actorData.name;
-			hr = 255;
-			hg = 180;
-			hb = 0; // amber
+			tintRed = 255;
+			tintGreen = 180;
+			tintBlue = 0; // amber
 		}
 		[[maybe_unused]] auto is_null = [](const auto& entry)
 		{
@@ -373,9 +373,9 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 				desc += " [" + item->get_name() + "]";
 				if (!actor)
 				{
-					hr = 100;
-					hg = 255;
-					hb = 120;
+					tintRed = 100;
+					tintGreen = 255;
+					tintBlue = 120;
 				} // pale green
 				break;
 			}
@@ -385,36 +385,36 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 	// Pulse: 3 Hz sine, range [0, 1]
 	float pulse = (std::sin(static_cast<float>(GetTime()) * 6.28318f * 3.0f) + 1.0f) * 0.5f;
 
-	float tx_f = static_cast<float>(tx);
-	float ty_f = static_cast<float>(ty);
+	float tx_f = static_cast<float>(tilePixelX);
+	float ty_f = static_cast<float>(tilePixelY);
 	float ts_f = static_cast<float>(tileSize);
 
 	// Inner fill: very subtle tint
 	unsigned char fill_a = static_cast<unsigned char>(10 + static_cast<int>(15.0f * pulse));
-	DrawRectangle(tx, ty, tileSize, tileSize, Color{ hr, hg, hb, fill_a });
+	DrawRectangle(tilePixelX, tilePixelY, tileSize, tileSize, Color{ tintRed, tintGreen, tintBlue, fill_a });
 
 	// Full perimeter: thin line, pulsing alpha
 	unsigned char border_a = static_cast<unsigned char>(70 + static_cast<int>(80.0f * pulse));
-	DrawRectangleLinesEx(Rectangle{ tx_f, ty_f, ts_f, ts_f }, 1.0f, Color{ hr, hg, hb, border_a });
+	DrawRectangleLinesEx(Rectangle{ tx_f, ty_f, ts_f, ts_f }, 1.0f, Color{ tintRed, tintGreen, tintBlue, border_a });
 
 	// Corner L-accents: bright, 2 px thick, clen px long
 	int clen = tileSize / 4;
 	int clw = 2;
 	unsigned char corner_a = static_cast<unsigned char>(160 + static_cast<int>(95.0f * pulse));
-	Color cc = Color{ hr, hg, hb, corner_a };
+	Color cornerColor = Color{ tintRed, tintGreen, tintBlue, corner_a };
 
 	// Top-left
-	DrawRectangle(tx, ty, clen, clw, cc);
-	DrawRectangle(tx, ty, clw, clen, cc);
+	DrawRectangle(tilePixelX, tilePixelY, clen, clw, cornerColor);
+	DrawRectangle(tilePixelX, tilePixelY, clw, clen, cornerColor);
 	// Top-right
-	DrawRectangle(tx + tileSize - clen, ty, clen, clw, cc);
-	DrawRectangle(tx + tileSize - clw, ty, clw, clen, cc);
+	DrawRectangle(tilePixelX + tileSize - clen, tilePixelY, clen, clw, cornerColor);
+	DrawRectangle(tilePixelX + tileSize - clw, tilePixelY, clw, clen, cornerColor);
 	// Bottom-left
-	DrawRectangle(tx, ty + tileSize - clw, clen, clw, cc);
-	DrawRectangle(tx, ty + tileSize - clen, clw, clen, cc);
+	DrawRectangle(tilePixelX, tilePixelY + tileSize - clw, clen, clw, cornerColor);
+	DrawRectangle(tilePixelX, tilePixelY + tileSize - clen, clw, clen, cornerColor);
 	// Bottom-right
-	DrawRectangle(tx + tileSize - clen, ty + tileSize - clw, clen, clw, cc);
-	DrawRectangle(tx + tileSize - clw, ty + tileSize - clen, clw, clen, cc);
+	DrawRectangle(tilePixelX + tileSize - clen, tilePixelY + tileSize - clw, clen, clw, cornerColor);
+	DrawRectangle(tilePixelX + tileSize - clw, tilePixelY + tileSize - clen, clw, clen, cornerColor);
 
 	// Tooltip box below (or above if near bottom)
 	int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
@@ -422,8 +422,8 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 	int pad = tileSize / 4;
 	int box_w = text_w + pad * 2;
 	int box_h = tileSize;
-	int tip_px = tx;
-	int tip_py = ty + tileSize;
+	int tip_px = tilePixelX;
+	int tip_py = tilePixelY + tileSize;
 
 	if (tip_px + box_w > ctx.renderer->get_screen_width())
 	{
@@ -432,7 +432,7 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 
 	if (tip_py + box_h > ctx.renderer->get_screen_height())
 	{
-		tip_py = ty - box_h;
+		tip_py = tilePixelY - box_h;
 	}
 
 	// Dark background + matching accent border on tooltip
@@ -441,7 +441,7 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 		Rectangle{
 			static_cast<float>(tip_px), static_cast<float>(tip_py), static_cast<float>(box_w), static_cast<float>(box_h) },
 		1.0f,
-		Color{ hr, hg, hb, 180 });
+		Color{ tintRed, tintGreen, tintBlue, 180 });
 	ctx.renderer->draw_text(Vector2D{ tip_px + pad, tip_py + font_off }, desc, ColorPairId::WHITE_BLACK);
 }
 
@@ -571,8 +571,8 @@ void GameLoopCoordinator::update(GameContext& ctx)
 
 		assert(ctx.decorations && "GameLoopCoordinator::update: called without decorations");
 		std::erase_if(*ctx.decorations,
-			[](const auto& d)
-			{ return !d || d->isBroken; });
+			[](const auto& decoration)
+			{ return !decoration || decoration->isBroken; });
 
 		// A thief who left the square he hid on is seen before anything looks, whatever moved him.
 		ctx.player_concrete().leave_shadows_if_moved(ctx);

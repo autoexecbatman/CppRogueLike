@@ -63,11 +63,11 @@ void TargetingSystem::draw_range_indicator(GameContext& ctx, Vector2D center, in
 	int cameraOffsetX = ctx.renderer->get_camera_x();
 	int cameraOffsetY = ctx.renderer->get_camera_y();
 
-	for (int dy = -range; dy <= range; ++dy)
+	for (int deltaRow = -range; deltaRow <= range; ++deltaRow)
 	{
-		for (int dx = -range; dx <= range; ++dx)
+		for (int deltaCol = -range; deltaCol <= range; ++deltaCol)
 		{
-			Vector2D pos{ center.x + dx, center.y + dy };
+			Vector2D pos{ center.x + deltaCol, center.y + deltaRow };
 			if (!ctx.map->is_in_bounds(pos))
 			{
 				continue;
@@ -130,11 +130,11 @@ void TargetingSystem::draw_aoe_preview(GameContext& ctx, Vector2D center, int ra
 	int cameraOffsetX = ctx.renderer->get_camera_x();
 	int cameraOffsetY = ctx.renderer->get_camera_y();
 
-	for (int dy = -radius; dy <= radius; ++dy)
+	for (int deltaRow = -radius; deltaRow <= radius; ++deltaRow)
 	{
-		for (int dx = -radius; dx <= radius; ++dx)
+		for (int deltaCol = -radius; deltaCol <= radius; ++deltaCol)
 		{
-			Vector2D pos{ center.x + dx, center.y + dy };
+			Vector2D pos{ center.x + deltaCol, center.y + deltaRow };
 			if (!ctx.map->is_in_bounds(pos))
 			{
 				continue;

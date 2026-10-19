@@ -77,7 +77,7 @@ void ShopKeeper::generate_initial_inventory(int dungeonLevel, GameContext& ctx)
 	// Generate 3-7 random items based on shop type
 	int item_count = ctx.dice->roll(3, 7);
 
-	for (int i = 0; i < item_count; i++)
+	for (int itemIndex = 0; itemIndex < item_count; itemIndex++)
 	{
 		std::unique_ptr<Item> item = generate_random_item_by_type(dungeonLevel, ctx);
 		if (item)
@@ -368,36 +368,36 @@ void ShopKeeper::generate_shop_name(RandomDice& dice)
 	}
 }
 
-void ShopKeeper::save(json& j)
+void ShopKeeper::save(json& output)
 {
-	j["shop_type"] = static_cast<int>(shopType);
-	j["shop_quality"] = static_cast<int>(shopQuality);
-	j["shop_name"] = shopName;
-	j["markup_percent"] = markupPercent;
-	j["sellback_percent"] = sellbackPercent;
+	output["shop_type"] = static_cast<int>(shopType);
+	output["shop_quality"] = static_cast<int>(shopQuality);
+	output["shop_name"] = shopName;
+	output["markup_percent"] = markupPercent;
+	output["sellback_percent"] = sellbackPercent;
 
 	// Save shop inventory
 	json inventoryJson;
 	save_inventory(shopInventory, inventoryJson);
-	j["shop_inventory"] = inventoryJson;
+	output["shop_inventory"] = inventoryJson;
 }
 
-void ShopKeeper::load(const json& j)
+void ShopKeeper::load(const json& source)
 {
-	shopType = static_cast<ShopType>(j.at("shop_type").get<int>());
-	shopQuality = static_cast<ShopQuality>(j.at("shop_quality").get<int>());
-	shopName = j.at("shop_name").get<std::string>();
-	markupPercent = j.at("markup_percent").get<int>();
-	sellbackPercent = j.at("sellback_percent").get<int>();
+	shopType = static_cast<ShopType>(source.at("shop_type").get<int>());
+	shopQuality = static_cast<ShopQuality>(source.at("shop_quality").get<int>());
+	shopName = source.at("shop_name").get<std::string>();
+	markupPercent = source.at("markup_percent").get<int>();
+	sellbackPercent = source.at("sellback_percent").get<int>();
 
 	// Load shop inventory
 	shopInventory = CreatureInventory(50);
-	load_inventory(shopInventory, j.at("shop_inventory"));
+	load_inventory(shopInventory, source.at("shop_inventory"));
 }
 
-std::unique_ptr<ShopKeeper> ShopKeeper::create(const json& j)
+std::unique_ptr<ShopKeeper> ShopKeeper::create(const json& source)
 {
 	auto shopkeeper = std::make_unique<ShopKeeper>();
-	shopkeeper->load(j);
+	shopkeeper->load(source);
 	return shopkeeper;
 }

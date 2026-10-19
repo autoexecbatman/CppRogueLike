@@ -42,7 +42,7 @@ inline std::filesystem::path resolve(std::string_view relative)
 {
 	namespace fs = std::filesystem;
 	auto dir = fs::current_path();
-	for (int i = 0; i < 8; ++i)
+	for (int levelsUp = 0; levelsUp < 8; ++levelsUp)
 	{
 		if (fs::is_directory(dir / "data"))
 		{

@@ -15,8 +15,8 @@ enum class InventoryError
 	CAPACITY_EXCEEDED // only possible from add_item_to_inventory (CreatureInventory)
 };
 
-template <typename T>
-using InventoryResult = std::expected<T, InventoryError>;
+template <typename Value>
+using InventoryResult = std::expected<Value, InventoryError>;
 
 // Items on the dungeon floor.
 // No weight owner and no limit: an add always lands, so nothing dropped is ever lost.

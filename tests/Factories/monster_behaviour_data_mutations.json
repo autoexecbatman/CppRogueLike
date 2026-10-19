@@ -69,31 +69,31 @@
     },
     {
       "file": "src/MonsterCreator.cpp",
-      "original": "\tc->ai = Ai::make(params.aiType);\n",
-      "mutated": "\tc->ai = Ai::make(AiType::MONSTER);\n",
+      "original": "\tcreature->ai = Ai::make(params.aiType);\n",
+      "mutated": "\tcreature->ai = Ai::make(AiType::MONSTER);\n",
       "catches": "every monster built with the plain Ai whatever its record names"
     },
     {
       "file": "src/MonsterCreator.cpp",
-      "original": "\t\tc->add_state(ActorState::CAN_WALK_WEBS);\n",
+      "original": "\t\tcreature->add_state(ActorState::CAN_WALK_WEBS);\n",
       "mutated": "\t\t;\n",
       "catches": "a spider built without the web-walking state"
     },
     {
       "file": "src/MonsterCreator.cpp",
-      "original": "\tc->set_attitude(params.attitude);\n",
-      "mutated": "\tc->set_attitude(Attitude::HOSTILE);\n",
+      "original": "\tcreature->set_attitude(params.attitude);\n",
+      "mutated": "\tcreature->set_attitude(Attitude::HOSTILE);\n",
       "catches": "the shopkeeper built hostile"
     },
     {
       "file": "src/MonsterCreator.cpp",
-      "original": "\tc->set_displaceable(params.displaceable);\n",
-      "mutated": "\tc->set_displaceable(true);\n",
+      "original": "\tcreature->set_displaceable(params.displaceable);\n",
+      "mutated": "\tcreature->set_displaceable(true);\n",
       "catches": "the shopkeeper built displaceable"
     },
     {
       "file": "src/MonsterCreator.cpp",
-      "original": "\tc->ai->on_created(*c, ctx);\n",
+      "original": "\tcreature->ai->on_created(*creature, ctx);\n",
       "mutated": "\t;\n",
       "catches": "the Ai's birth hook never called: no disguise, no shop"
     },

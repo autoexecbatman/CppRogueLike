@@ -54,9 +54,9 @@ DeathMenu::DeathMenu(GameContext& ctx)
 	assert(ctx.messageSystem && "DeathMenu::DeathMenu: called without a messageSystem");
 	size_t count = ctx.messageSystem->get_stored_message_count();
 	size_t start = count > MAX_LOG_LINES ? count - MAX_LOG_LINES : 0;
-	for (size_t i = start; i < count; ++i)
+	for (size_t messageIndex = start; messageIndex < count; ++messageIndex)
 	{
-		const auto& parts = ctx.messageSystem->get_attack_message_at(i);
+		const auto& parts = ctx.messageSystem->get_attack_message_at(messageIndex);
 		std::string line{};
 		for (const auto& part : parts)
 		{

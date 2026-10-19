@@ -65,7 +65,7 @@ public:
 	// Draws text at a tile column and a text row inside the menu. Row 0 sits just
 	// below the top border. Rows run on a pixel pitch rather than the tile grid,
 	// so a menu holds the same lines however far the map is zoomed.
-	void menu_print(int x, int row, const std::string& text);
+	void menu_print(int col, int row, const std::string& text);
 	// The same, horizontally centred inside the menu's borders by measured width.
 	void menu_print_centered(int row, const std::string& text);
 	// The shop screens' column header, on row 0 so it shares the pitch of the rows

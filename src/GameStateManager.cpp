@@ -42,12 +42,12 @@ using namespace InventoryOperations;
 namespace
 {
 
-void save_rooms(const std::vector<DungeonRoom>& rooms, json& j)
+void save_rooms(const std::vector<DungeonRoom>& rooms, json& output)
 {
-	j["rooms"] = json::array();
+	output["rooms"] = json::array();
 	for (const auto& room : rooms)
 	{
-		j["rooms"].push_back({ { "col", room.col },
+		output["rooms"].push_back({ { "col", room.col },
 			{ "row", room.row },
 			{ "width", room.width },
 			{ "height", room.height },
@@ -57,24 +57,24 @@ void save_rooms(const std::vector<DungeonRoom>& rooms, json& j)
 
 } // namespace
 
-void load_rooms(const json& j, std::vector<DungeonRoom>& rooms)
+void load_rooms(const json& source, std::vector<DungeonRoom>& rooms)
 {
 	// Replace rather than append, as every loader of a level container does.
 	rooms.clear();
 
-	if (!j.contains("rooms") || !j["rooms"].is_array())
+	if (!source.contains("rooms") || !source["rooms"].is_array())
 	{
 		return;
 	}
 
-	for (const auto& d : j["rooms"])
+	for (const auto& roomRecord : source["rooms"])
 	{
 		DungeonRoom room;
-		room.col = d.value("col", 0);
-		room.row = d.value("row", 0);
-		room.width = d.value("width", 1);
-		room.height = d.value("height", 1);
-		room.type = static_cast<RoomType>(d.value("type", static_cast<int>(RoomType::STANDARD)));
+		room.col = roomRecord.value("col", 0);
+		room.row = roomRecord.value("row", 0);
+		room.width = roomRecord.value("width", 1);
+		room.height = roomRecord.value("height", 1);
+		room.type = static_cast<RoomType>(roomRecord.value("type", static_cast<int>(RoomType::STANDARD)));
 		rooms.push_back(std::move(room));
 	}
 }
@@ -94,29 +94,29 @@ namespace
 //
 //   save_creatures({}, level);          // an empty level is legal
 //   level["creatures"].size();          // -> 0
-void save_creatures(const std::vector<std::unique_ptr<Creature>>& creatures, json& j)
+void save_creatures(const std::vector<std::unique_ptr<Creature>>& creatures, json& output)
 {
-	j["creatures"] = json::array();
+	output["creatures"] = json::array();
 	for (const auto& creature : creatures)
 	{
 		assert(creature && "save_creatures: creatures list holds a null entry");
 
 		json creatureJson;
 		creature->save(creatureJson);
-		j["creatures"].push_back(creatureJson);
+		output["creatures"].push_back(creatureJson);
 	}
 }
 
 } // namespace
 
-void load_creatures(const json& j, std::vector<std::unique_ptr<Creature>>& creatures)
+void load_creatures(const json& source, std::vector<std::unique_ptr<Creature>>& creatures)
 {
 	// Replace rather than append, as every loader of a level container does.
 	creatures.clear();
 
-	if (j.contains("creatures") && j["creatures"].is_array())
+	if (source.contains("creatures") && source["creatures"].is_array())
 	{
-		for (const auto& creatureData : j["creatures"])
+		for (const auto& creatureData : source["creatures"])
 		{
 			auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "Unnamed", ColorPairId::WHITE_BLACK });
 			creature->load(creatureData);
@@ -125,13 +125,13 @@ void load_creatures(const json& j, std::vector<std::unique_ptr<Creature>>& creat
 	}
 }
 
-void save_decorations(const std::vector<std::unique_ptr<Decoration>>& decorations, json& j)
+void save_decorations(const std::vector<std::unique_ptr<Decoration>>& decorations, json& output)
 {
-	j["decorations"] = json::array();
+	output["decorations"] = json::array();
 	for (const auto& decoration : decorations)
 	{
 		assert(decoration && "save_decorations: the decoration list holds a null entry");
-		j["decorations"].push_back({ { "position", { { "x", decoration->position.x }, { "y", decoration->position.y } } },
+		output["decorations"].push_back({ { "position", { { "x", decoration->position.x }, { "y", decoration->position.y } } },
 			{ "tile", TileRefJson::encode_tile(decoration->tile) },
 			{ "name", decoration->name },
 			{ "hp", decoration->hp },
@@ -141,12 +141,12 @@ void save_decorations(const std::vector<std::unique_ptr<Decoration>>& decoration
 	}
 }
 
-void load_decorations(const json& j, std::vector<std::unique_ptr<Decoration>>& decorations)
+void load_decorations(const json& source, std::vector<std::unique_ptr<Decoration>>& decorations)
 {
 	// Replace rather than append, as every loader of a level container does.
 	decorations.clear();
 
-	for (const auto& record : j.at("decorations"))
+	for (const auto& record : source.at("decorations"))
 	{
 		auto decoration = std::make_unique<Decoration>();
 		decoration->position = Vector2D{ record.at("position").at("x").get<int>(), record.at("position").at("y").get<int>() };
@@ -160,30 +160,30 @@ void load_decorations(const json& j, std::vector<std::unique_ptr<Decoration>>& d
 	}
 }
 
-void save_traps(const std::vector<std::unique_ptr<Trap>>& traps, json& j)
+void save_traps(const std::vector<std::unique_ptr<Trap>>& traps, json& output)
 {
-	j["traps"] = json::array();
+	output["traps"] = json::array();
 	for (const auto& trap : traps)
 	{
 		assert(trap && "save_traps: the trap list holds a null entry");
 		json trapJson;
 		trap->save(trapJson);
-		j["traps"].push_back(trapJson);
+		output["traps"].push_back(trapJson);
 	}
 }
 
-void load_traps(const json& j, std::vector<std::unique_ptr<Trap>>& traps, const TileConfig& tileConfig)
+void load_traps(const json& source, std::vector<std::unique_ptr<Trap>>& traps, const TileConfig& tileConfig)
 {
 	// Replace rather than append: a load during play would otherwise leave the
 	// abandoned level's traps on the new map, at the tiles they had there.
 	traps.clear();
 
-	if (!j.contains("traps") || !j["traps"].is_array())
+	if (!source.contains("traps") || !source["traps"].is_array())
 	{
 		return;
 	}
 
-	for (const auto& trapJson : j["traps"])
+	for (const auto& trapJson : source["traps"])
 	{
 		// Built through the same constructor the generator uses, so the type decides
 		// the dice, the name and both tiles exactly as it did the first time.
@@ -282,43 +282,43 @@ void GameStateManager::save_game(GameContext& ctx)
 			throw std::runtime_error("Error occurred while saving the game.");
 		}
 
-		json j;
+		json saveDocument;
 
-		ctx.map->save(j);
-		save_rooms(*ctx.rooms, j);
+		ctx.map->save(saveDocument);
+		save_rooms(*ctx.rooms, saveDocument);
 
 		assert(ctx.traps && "save_game: the level was saved with no trap container");
-		save_traps(*ctx.traps, j);
+		save_traps(*ctx.traps, saveDocument);
 		assert(ctx.decorations && "save_game: the level was saved with no decoration container");
-		save_decorations(*ctx.decorations, j);
+		save_decorations(*ctx.decorations, saveDocument);
 
 		json playerJson;
 		ctx.player()->save(playerJson);
-		j["player"] = playerJson;
+		saveDocument["player"] = playerJson;
 
 		json stairsJson;
 		ctx.stairs->save(stairsJson);
-		j["stairs"] = stairsJson;
+		saveDocument["stairs"] = stairsJson;
 
-		save_creatures(*ctx.creatures, j);
-		save_inventory(*ctx.floorInventory, j);
+		save_creatures(*ctx.creatures, saveDocument);
+		save_inventory(*ctx.floorInventory, saveDocument);
 
 		json guiJson;
 		ctx.gui->save(guiJson);
-		j["gui"] = guiJson;
+		saveDocument["gui"] = guiJson;
 
 		json hungerJson;
 		ctx.hungerSystem->save(hungerJson);
-		j["hunger_system"] = hungerJson;
+		saveDocument["hunger_system"] = hungerJson;
 
-		ctx.levelManager->save_to_json(j);
-		j["time"] = ctx.gameState->get_time();
-		j["roundsRun"] = ctx.gameState->get_rounds_run();
+		ctx.levelManager->save_to_json(saveDocument);
+		saveDocument["time"] = ctx.gameState->get_time();
+		saveDocument["roundsRun"] = ctx.gameState->get_rounds_run();
 
 		// Last, because every save above may still have been issuing ids.
-		UniqueId::save(j);
+		UniqueId::save(saveDocument);
 
-		file << j.dump(4);
+		file << saveDocument.dump(4);
 	}
 
 	std::filesystem::rename(temp_path, save_path);
@@ -343,60 +343,60 @@ bool GameStateManager::load_game(GameContext& ctx)
 		return false;
 	}
 
-	json j;
-	file >> j;
+	json saveDocument;
+	file >> saveDocument;
 
-	ctx.map->load(j);
-	load_rooms(j, *ctx.rooms);
+	ctx.map->load(saveDocument);
+	load_rooms(saveDocument, *ctx.rooms);
 
 	assert(ctx.traps && "load_game: a level was loaded with no trap container");
 	assert(ctx.tileConfig && "load_game: a trap cannot be rebuilt without the tile table");
-	load_traps(j, *ctx.traps, *ctx.tileConfig);
+	load_traps(saveDocument, *ctx.traps, *ctx.tileConfig);
 	assert(ctx.decorations && "load_game: a level was loaded with no decoration container");
-	load_decorations(j, *ctx.decorations);
+	load_decorations(saveDocument, *ctx.decorations);
 
 	// Spell tiles are not saved, so a load clears them: the abandoned level's would
 	// otherwise stay at their old coordinates, which a fresh launch never shows.
 	assert(ctx.spellTiles && "load_game: a level was loaded with no spell tile container");
 	ctx.spellTiles->clear();
 
-	if (j.contains("player"))
+	if (saveDocument.contains("player"))
 	{
-		ctx.player()->load(j["player"]);
+		ctx.player()->load(saveDocument["player"]);
 	}
 
-	if (j.contains("stairs"))
+	if (saveDocument.contains("stairs"))
 	{
-		ctx.stairs->load(j["stairs"]);
+		ctx.stairs->load(saveDocument["stairs"]);
 	}
 
-	load_creatures(j, *ctx.creatures);
+	load_creatures(saveDocument, *ctx.creatures);
 
 	// After every actor is built, because building one issues an id that its own
 	// saved id then overwrites - so the counter has to be put back afterwards.
-	UniqueId::load(j);
-	load_inventory(*ctx.floorInventory, j);
+	UniqueId::load(saveDocument);
+	load_inventory(*ctx.floorInventory, saveDocument);
 
-	if (j.contains("gui"))
+	if (saveDocument.contains("gui"))
 	{
-		ctx.gui->load(j["gui"]);
+		ctx.gui->load(saveDocument["gui"]);
 	}
 
-	if (j.contains("hunger_system"))
+	if (saveDocument.contains("hunger_system"))
 	{
-		ctx.hungerSystem->load(j["hunger_system"]);
+		ctx.hungerSystem->load(saveDocument["hunger_system"]);
 	}
 
-	ctx.levelManager->load_from_json(j);
+	ctx.levelManager->load_from_json(saveDocument);
 
-	if (j.contains("roundsRun"))
+	if (saveDocument.contains("roundsRun"))
 	{
-		ctx.gameState->set_rounds_run(j["roundsRun"]);
+		ctx.gameState->set_rounds_run(saveDocument["roundsRun"]);
 	}
 
-	if (j.contains("time"))
+	if (saveDocument.contains("time"))
 	{
-		ctx.gameState->set_time(j["time"]);
+		ctx.gameState->set_time(saveDocument["time"]);
 	}
 
 	return true; // Successfully loaded
@@ -410,14 +410,14 @@ bool GameStateManager::save_file_exists()
 
 bool GameStateManager::delete_save_file()
 {
-	std::error_code ec;
+	std::error_code error;
 	auto save_path = Paths::resolve(Paths::SAVE_FILE);
 
-	if (!std::filesystem::exists(save_path, ec))
+	if (!std::filesystem::exists(save_path, error))
 	{
 		return true; // File doesn't exist, nothing to delete
 	}
 
-	const bool removed = std::filesystem::remove(save_path, ec);
-	return removed && !ec;
+	const bool removed = std::filesystem::remove(save_path, error);
+	return removed && !error;
 }

@@ -45,17 +45,17 @@ bool LevelManager::can_spawn_shopkeeper(int max_shopkeepers) const noexcept
 	return shopkeepers_on_current_level < max_shopkeepers;
 }
 
-void LevelManager::save_to_json(nlohmann::json& j) const
+void LevelManager::save_to_json(nlohmann::json& output) const
 {
-	j["level_manager"] = {
+	output["level_manager"] = {
 		{ "dungeonLevel", dungeon_level },
 		{ "shopkeepersOnCurrentLevel", shopkeepers_on_current_level }
 	};
 }
 
-void LevelManager::load_from_json(const nlohmann::json& j)
+void LevelManager::load_from_json(const nlohmann::json& source)
 {
-	const auto& levelData = j.at("level_manager");
+	const auto& levelData = source.at("level_manager");
 	dungeon_level = levelData.at("dungeonLevel").get<int>();
 	shopkeepers_on_current_level = levelData.at("shopkeepersOnCurrentLevel").get<int>();
 }

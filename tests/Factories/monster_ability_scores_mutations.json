@@ -9,14 +9,14 @@
   "mutations": [
     {
       "file": "src/MonsterCreator.cpp",
-      "original": "\troll_monster_ability_scores(*c, params.size, params.intelligence, params.strength, *ctx.dice);",
-      "mutated": "\troll_monster_ability_scores(*c, params.size, params.intelligence, std::nullopt, *ctx.dice);",
+      "original": "\troll_monster_ability_scores(*creature, params.size, params.intelligence, params.strength, *ctx.dice);",
+      "mutated": "\troll_monster_ability_scores(*creature, params.size, params.intelligence, std::nullopt, *ctx.dice);",
       "catches": "a record's printed Strength ignored on the data path"
     },
     {
       "file": "src/MonsterCreator.cpp",
-      "original": "\troll_monster_ability_scores(*c, params.size, params.intelligence, params.strength, *ctx.dice);",
-      "mutated": "\troll_monster_ability_scores(*c, params.size, IntelligenceRating::AVERAGE, params.strength, *ctx.dice);",
+      "original": "\troll_monster_ability_scores(*creature, params.size, params.intelligence, params.strength, *ctx.dice);",
+      "mutated": "\troll_monster_ability_scores(*creature, params.size, IntelligenceRating::AVERAGE, params.strength, *ctx.dice);",
       "catches": "every data monster read as of average intelligence"
     },
     {

@@ -9,7 +9,7 @@
   "mutations": [
     {
       "file": "src/UniqueId.cpp",
-      "original": "\tj[\"nextUniqueId\"] = Generator::peek_next_id();\n",
+      "original": "\toutput[\"nextUniqueId\"] = Generator::peek_next_id();\n",
       "mutated": "",
       "catches": "a save that does not carry the counter, so a load resumes below the ids it restored"
     },
@@ -21,8 +21,8 @@
     },
     {
       "file": "src/UniqueId.cpp",
-      "original": "\tif (!j.contains(\"nextUniqueId\"))\n",
-      "mutated": "\tif (j.contains(\"nextUniqueId\"))\n",
+      "original": "\tif (!source.contains(\"nextUniqueId\"))\n",
+      "mutated": "\tif (source.contains(\"nextUniqueId\"))\n",
       "catches": "the stored counter ignored on every save that has one"
     },
     {

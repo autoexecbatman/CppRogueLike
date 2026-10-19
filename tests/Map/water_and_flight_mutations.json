@@ -21,7 +21,7 @@
     },
     {
       "file": "src/MonsterCreator.cpp",
-      "original": "\tif (params.canFly)\n\t{\n\t\tc->add_state(ActorState::CAN_FLY);\n\t}",
+      "original": "\tif (params.canFly)\n\t{\n\t\tcreature->add_state(ActorState::CAN_FLY);\n\t}",
       "mutated": "",
       "catches": "the data read and the state never granted, so no monster in the game flies"
     },

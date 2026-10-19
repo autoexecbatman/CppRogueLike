@@ -5,16 +5,16 @@ Item::Item(Vector2D position, ActorData data)
 		  // ItemClass should be set by ItemCreator, not by fragile string matching
 	  };
 
-void Item::load(const json& j)
+void Item::load(const json& source)
 {
-	Actor::load(j); // Call base class load
-	baseValue = j.at("baseValue").get<int>();
-	itemKey = j.at("itemKey").get<std::string>();
-	itemClass = static_cast<ItemClass>(j.at("itemClass").get<int>());
+	Actor::load(source); // Call base class load
+	baseValue = source.at("baseValue").get<int>();
+	itemKey = source.at("itemKey").get<std::string>();
+	itemClass = static_cast<ItemClass>(source.at("itemClass").get<int>());
 
 	// Load enhancement data
 	{
-		const auto& enh = j.at("enhancement");
+		const auto& enh = source.at("enhancement");
 		enhancement.prefix = static_cast<PrefixType>(enh.at("prefix").get<int>());
 		enhancement.suffix = static_cast<SuffixType>(enh.at("suffix").get<int>());
 		enhancement.damageBonus = enh.at("damageBonus").get<int>();
@@ -39,25 +39,25 @@ void Item::load(const json& j)
 
 	// Load identification status
 	{
-		const auto& id = j.at("identification");
+		const auto& id = source.at("identification");
 		identification.identifiedType = id.at("identifiedType").get<bool>();
 		identification.identifiedEnhancement = id.at("identifiedEnhancement").get<bool>();
 		identification.identifiedBuc = id.at("identifiedBuc").get<bool>();
 	}
 
 	// Saved only when the item has a behaviour, so its absence is a real state.
-	if (j.contains("pickable"))
+	if (source.contains("pickable"))
 	{
-		behavior = load_behavior(j["pickable"]);
+		behavior = load_behavior(source["pickable"]);
 	}
 }
 
-void Item::save(json& j)
+void Item::save(json& output)
 {
-	Actor::save(j); // Call base class save
-	j["baseValue"] = baseValue;
-	j["itemKey"] = itemKey;
-	j["itemClass"] = static_cast<int>(itemClass);
+	Actor::save(output); // Call base class save
+	output["baseValue"] = baseValue;
+	output["itemKey"] = itemKey;
+	output["itemClass"] = static_cast<int>(itemClass);
 
 	// Save enhancement data
 	json enh;
@@ -81,20 +81,20 @@ void Item::save(json& j)
 	enh["isMagical"] = enhancement.isMagical;
 	enh["enhancementLevel"] = enhancement.enhancementLevel;
 	enh["valueModifier"] = enhancement.valueModifier;
-	j["enhancement"] = enh;
+	output["enhancement"] = enh;
 
 	// Save identification status
 	json id;
 	id["identifiedType"] = identification.identifiedType;
 	id["identifiedEnhancement"] = identification.identifiedEnhancement;
 	id["identifiedBuc"] = identification.identifiedBuc;
-	j["identification"] = id;
+	output["identification"] = id;
 
 	if (behavior)
 	{
 		json pickableJson;
 		save_behavior(*behavior, pickableJson);
-		j["pickable"] = pickableJson;
+		output["pickable"] = pickableJson;
 	}
 }
 

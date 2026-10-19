@@ -13,20 +13,20 @@ using json = nlohmann::json;
 // Start IDs at 1 (0 is reserved for INVALID_ID)
 std::atomic<IdType> Generator::nextId{ 1 };
 
-void save(json& j)
+void save(json& output)
 {
-	j["nextUniqueId"] = Generator::peek_next_id();
+	output["nextUniqueId"] = Generator::peek_next_id();
 }
 
-void load(const json& j)
+void load(const json& source)
 {
-	if (!j.contains("nextUniqueId"))
+	if (!source.contains("nextUniqueId"))
 	{
 		return;
 	}
 
 	// Never backwards: loading in a running game finds the counter ahead, and objects in memory hold those ids.
-	const IdType stored = j["nextUniqueId"].get<IdType>();
+	const IdType stored = source["nextUniqueId"].get<IdType>();
 	Generator::set_next_id(std::max(stored, Generator::peek_next_id()));
 }
 } // namespace UniqueId

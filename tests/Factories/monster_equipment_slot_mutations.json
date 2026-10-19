@@ -9,7 +9,7 @@
   "mutations": [
     {
       "file": "src/MonsterCreator.cpp",
-      "original": "\t\tif (!c->can_equip(*carriedItem, carried.slot))",
+      "original": "\t\tif (!creature->can_equip(*carriedItem, carried.slot))",
       "mutated": "\t\tif (false)",
       "catches": "authored equipment armed without being checked against its slot"
     },

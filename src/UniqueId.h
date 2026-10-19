@@ -52,6 +52,6 @@ constexpr IdType INVALID_ID = 0;
 //   // ... process restarts, counter is back at 1 ...
 //   UniqueId::load(saved);              // resumes from the stored value
 //   UniqueId::Generator::generate();    // -> higher than any id the save holds
-void save(nlohmann::json& j);
-void load(const nlohmann::json& j);
+void save(nlohmann::json& output);
+void load(const nlohmann::json& source);
 } // namespace UniqueId

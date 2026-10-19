@@ -282,8 +282,8 @@ Item* find_item_by_id(FloorInventory& inventory, UniqueId::IdType uniqueId) noex
 		return item->uniqueId == uniqueId;
 	};
 
-	auto it = std::ranges::find_if(inventory.items, has_id);
-	return it != inventory.items.end() ? it->get() : nullptr;
+	auto found = std::ranges::find_if(inventory.items, has_id);
+	return found != inventory.items.end() ? found->get() : nullptr;
 }
 
 Item* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept
@@ -294,13 +294,13 @@ Item* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept
 	};
 	assert(std::ranges::none_of(inventory.items, is_null) && "InventoryOperations::find_item_by_id(CreatureInventory): the pack holds a null item");
 
-	auto it = std::ranges::find_if(inventory.items,
+	auto found = std::ranges::find_if(inventory.items,
 		[uniqueId](const auto& item)
 		{
 			return item->uniqueId == uniqueId;
 		});
 
-	return it != inventory.items.end() ? it->get() : nullptr;
+	return found != inventory.items.end() ? found->get() : nullptr;
 }
 
 const Item* find_item_by_id(const CreatureInventory& inventory, uint64_t uniqueId) noexcept
@@ -311,12 +311,12 @@ const Item* find_item_by_id(const CreatureInventory& inventory, uint64_t uniqueI
 	};
 	assert(std::ranges::none_of(inventory.items, is_null) && "InventoryOperations::find_item_by_id(const CreatureInventory): the pack holds a null item");
 
-	auto it = std::ranges::find_if(inventory.items,
+	auto found = std::ranges::find_if(inventory.items,
 		[uniqueId](const auto& item)
 		{
 			return item->uniqueId == uniqueId;
 		});
 
-	return it != inventory.items.end() ? it->get() : nullptr;
+	return found != inventory.items.end() ? found->get() : nullptr;
 }
 } // namespace InventoryOperations

@@ -54,14 +54,14 @@ void ContextMenu::draw_content()
 	menu_draw_box();
 	menu_draw_title("Action", ColorPairId::WHITE_BLACK);
 
-	for (int i = 0; i < static_cast<int>(menuOptions.size()); ++i)
+	for (int optionIndex = 0; optionIndex < static_cast<int>(menuOptions.size()); ++optionIndex)
 	{
-		if (i == selectedIndex)
+		if (optionIndex == selectedIndex)
 		{
 			menu_highlight_on();
 		}
-		menu_print(1, i, menuOptions[static_cast<size_t>(i)]);
-		if (i == selectedIndex)
+		menu_print(1, optionIndex, menuOptions[static_cast<size_t>(optionIndex)]);
+		if (optionIndex == selectedIndex)
 		{
 			menu_highlight_off();
 		}

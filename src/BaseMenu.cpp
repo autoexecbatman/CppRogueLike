@@ -29,13 +29,13 @@ void BaseMenu::menu_new(
 	tileConfig = ctx.tileConfig;
 }
 
-void BaseMenu::menu_print(int x, int row, const std::string& text)
+void BaseMenu::menu_print(int col, int row, const std::string& text)
 {
 	assert(renderer && "BaseMenu::menu_print called without a renderer");
 
 	int tileSize = renderer->get_tile_size();
-	int px = (static_cast<int>(menuStartX) + x) * tileSize;
-	menu_draw_row(px, row, text);
+	int pixelX = (static_cast<int>(menuStartX) + col) * tileSize;
+	menu_draw_row(pixelX, row, text);
 }
 
 void BaseMenu::menu_print_centered(int row, const std::string& text)
@@ -46,8 +46,8 @@ void BaseMenu::menu_print_centered(int row, const std::string& text)
 	int interiorLeft = (static_cast<int>(menuStartX) + 1) * tileSize;
 	int interiorWidth = (static_cast<int>(menuWidth) - 2) * tileSize;
 	// Text wider than the menu starts at the left edge rather than outside it.
-	int px = std::max(interiorLeft, interiorLeft + (interiorWidth - renderer->measure_text(text)) / 2);
-	menu_draw_row(px, row, text);
+	int pixelX = std::max(interiorLeft, interiorLeft + (interiorWidth - renderer->measure_text(text)) / 2);
+	menu_draw_row(pixelX, row, text);
 }
 
 void BaseMenu::menu_print_header()

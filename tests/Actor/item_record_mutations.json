@@ -9,26 +9,26 @@
   "mutations": [
     {
       "file": "src/Item.cpp",
-      "original": "\titemKey = j.at(\"itemKey\").get<std::string>();",
-      "mutated": "\titemKey = j.value(\"itemKey\", std::string{});",
+      "original": "\titemKey = source.at(\"itemKey\").get<std::string>();",
+      "mutated": "\titemKey = source.value(\"itemKey\", std::string{});",
       "catches": "an item loading with no key when its record has none"
     },
     {
       "file": "src/Item.cpp",
-      "original": "\t\tconst auto& enh = j.at(\"enhancement\");",
-      "mutated": "\t\tconst json emptyEnhancement = json::object();\n\t\tif (!j.contains(\"enhancement\")) { return; }\n\t\tconst auto& enh = j.at(\"enhancement\");",
+      "original": "\t\tconst auto& enh = source.at(\"enhancement\");",
+      "mutated": "\t\tconst json emptyEnhancement = json::object();\n\t\tif (!source.contains(\"enhancement\")) { return; }\n\t\tconst auto& enh = source.at(\"enhancement\");",
       "catches": "a record without its enhancement block loading quietly"
     },
     {
       "file": "src/Item.cpp",
-      "original": "\t\tconst auto& id = j.at(\"identification\");",
-      "mutated": "\t\tif (!j.contains(\"identification\")) { return; }\n\t\tconst auto& id = j.at(\"identification\");",
+      "original": "\t\tconst auto& id = source.at(\"identification\");",
+      "mutated": "\t\tif (!source.contains(\"identification\")) { return; }\n\t\tconst auto& id = source.at(\"identification\");",
       "catches": "a record without its identification block loading quietly"
     },
     {
       "file": "src/Item.cpp",
-      "original": "\tif (j.contains(\"pickable\"))\n\t{\n\t\tbehavior = load_behavior(j[\"pickable\"]);\n\t}",
-      "mutated": "\tbehavior = load_behavior(j.at(\"pickable\"));",
+      "original": "\tif (source.contains(\"pickable\"))\n\t{\n\t\tbehavior = load_behavior(source[\"pickable\"]);\n\t}",
+      "mutated": "\tbehavior = load_behavior(source.at(\"pickable\"));",
       "catches": "an item with no behaviour refused, the one block that is legitimately absent"
     }
   ]
