@@ -5,12 +5,29 @@
 #include "BuffType.h"
 
 struct GameContext;
+enum class ActorState;
 class Creature;
 
 // BuffSystem - Centralized buff management following system architecture pattern
 class BuffSystem
 {
 public:
+	// Gives the creature each state some buff it carries imposes, and takes away each state
+	// none does. The only writer of buff-imposed states: BuffSystem calls it after every
+	// buff change, and Creature::load is its one caller outside, deriving them on load.
+	//
+	// Example, a creature loaded with a hold among its buffs and no states:
+	//   BuffSystem::sync_states(creature);
+	//   creature.has_state(ActorState::IS_HELD);   // -> true
+	static void sync_states(Creature& creature) noexcept;
+
+	// Whether some buff imposes this state, so a save can leave it to be derived.
+	//
+	// Example:
+	//   BuffSystem::is_buff_imposed(ActorState::IS_HELD);      // -> true, Hold Person and webs
+	//   BuffSystem::is_buff_imposed(ActorState::IS_FLEEING);   // -> false, the creature's own
+	[[nodiscard]] static bool is_buff_imposed(ActorState state) noexcept;
+
 	// Grants a buff for a duration the book prints in rounds, read from `currentTime` on
 	// GameState's clock. A second casting of the same type keeps the better value and
 	// the later ending, and gives every opponent a fresh save against it.

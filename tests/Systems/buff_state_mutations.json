@@ -27,21 +27,45 @@
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\t\tcreature.activeBuffs.push_back(newBuff);\n\t}\n\n\tsync_buff_states(creature);\n",
+      "original": "\t\tcreature.activeBuffs.push_back(newBuff);\n\t}\n\n\tBuffSystem::sync_states(creature);\n",
       "mutated": "\t\tcreature.activeBuffs.push_back(newBuff);\n\t}\n",
       "catches": "a buff granted without the state it imposes"
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\tstd::erase_if(creature.activeBuffs, matches_type);\n\n\tsync_buff_states(creature);\n",
+      "original": "\tstd::erase_if(creature.activeBuffs, matches_type);\n\n\tsync_states(creature);\n",
       "mutated": "\tstd::erase_if(creature.activeBuffs, matches_type);\n",
       "catches": "a removed buff leaving its state behind"
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\t// Every buff left is live, loaded ones included, so the states are read from them now.\n\tsync_buff_states(creature);\n",
+      "original": "\t// Every buff left is live, loaded ones included, so the states are read from them now.\n\tsync_states(creature);\n",
       "mutated": "",
       "catches": "an expired buff leaving its state behind, and a loaded buff imposing none"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tBuffSystem::sync_states(*this);\n",
+      "mutated": "",
+      "catches": "a loaded creature's buff-imposed states missing until its first update"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tif (!BuffSystem::is_buff_imposed(state.get<ActorState>()))\n",
+      "mutated": "\t\tif (true)\n",
+      "catches": "a save storing states its own buffs determine"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tif (!BuffSystem::is_buff_imposed(state.get<ActorState>()))\n",
+      "mutated": "\t\tif (BuffSystem::is_buff_imposed(state.get<ActorState>()))\n",
+      "catches": "a save dropping the creature's own states and keeping the derived ones"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\t\treturn entry.second == state;\n",
+      "mutated": "\t\treturn false;\n",
+      "catches": "no state counted as buff-imposed, so all are saved"
     }
   ]
 }

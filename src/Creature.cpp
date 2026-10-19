@@ -321,6 +321,9 @@ void Creature::load(const json& j)
 			}
 			activeBuffs.push_back(buff);
 		}
+
+		// The buff-imposed states were not saved; they are derived here, before anything reads them.
+		BuffSystem::sync_states(*this);
 	}
 
 	equippedItems.clear();
@@ -336,6 +339,16 @@ void Creature::load(const json& j)
 void Creature::save(json& j)
 {
 	Actor::save(j); // Call base class save
+	// A buff-imposed state is derived from the buffs saved below, so the save holds only the buffs.
+	json ownStates = json::array();
+	for (const json& state : j.at("states"))
+	{
+		if (!BuffSystem::is_buff_imposed(state.get<ActorState>()))
+		{
+			ownStates.push_back(state);
+		}
+	}
+	j["states"] = ownStates;
 	j["strength"] = baseStrength;
 	j["exceptionalStrength"] = exceptionalStrength;
 	j["dexterity"] = baseDexterity;

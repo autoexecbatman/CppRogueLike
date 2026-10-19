@@ -13,13 +13,12 @@
 #include "TurnSchedule.h"
 
 // The state each buff imposes. A creature's copy of these states is written only by
-// sync_buff_states, so two buffs granting one state cannot clear each other.
+// BuffSystem::sync_states, so two buffs granting one state cannot clear each other.
 static const std::unordered_map<BuffType, ActorState> buff_state_effects = {
 	{ BuffType::INVISIBILITY, ActorState::IS_INVISIBLE },
 	{ BuffType::HIDDEN_IN_SHADOWS, ActorState::IS_INVISIBLE },
 	{ BuffType::SLEEP, ActorState::IS_SLEEPING },
 	{ BuffType::HOLD_PERSON, ActorState::IS_HELD },
-	{ BuffType::SANCTUARY, ActorState::IS_PROTECTED },
 	{ BuffType::SILENCE, ActorState::IS_SILENCED },
 	{ BuffType::WEBBED, ActorState::IS_HELD },
 };
@@ -48,9 +47,16 @@ static const std::unordered_map<BuffType, int> buff_hit_modifiers = {
 	// Future extensions: {BuffType::PRAYER, 1}, {BuffType::CURSE, -1}, etc.
 };
 
-// Gives the creature each state some buff it carries imposes, and takes away each state
-// none does.
-static void sync_buff_states(Creature& creature) noexcept
+bool BuffSystem::is_buff_imposed(ActorState state) noexcept
+{
+	const auto imposes_state = [state](const auto& entry)
+	{
+		return entry.second == state;
+	};
+	return std::ranges::any_of(buff_state_effects, imposes_state);
+}
+
+void BuffSystem::sync_states(Creature& creature) noexcept
 {
 	for (const auto& [buffType, state] : buff_state_effects)
 	{
@@ -134,7 +140,7 @@ static void grant_buff(Creature& creature, BuffType type, int value, std::option
 		creature.activeBuffs.push_back(newBuff);
 	}
 
-	sync_buff_states(creature);
+	BuffSystem::sync_states(creature);
 }
 
 void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int durationRounds, bool isSetEffect, int currentTime) noexcept
@@ -157,7 +163,7 @@ void BuffSystem::remove_buff(Creature& creature, BuffType type) noexcept
 	};
 	std::erase_if(creature.activeBuffs, matches_type);
 
-	sync_buff_states(creature);
+	sync_states(creature);
 }
 
 void BuffSystem::update_creature_buffs(Creature& creature, int currentTime) noexcept
@@ -172,7 +178,7 @@ void BuffSystem::update_creature_buffs(Creature& creature, int currentTime) noex
 	std::erase_if(creature.activeBuffs, is_expired);
 
 	// Every buff left is live, loaded ones included, so the states are read from them now.
-	sync_buff_states(creature);
+	sync_states(creature);
 }
 
 int BuffSystem::get_buff_value(const Creature& creature, BuffType type) const noexcept

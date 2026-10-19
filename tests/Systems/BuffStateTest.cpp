@@ -11,12 +11,21 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <memory>
+
+#include <nlohmann/json.hpp>
 
 #include "src/Actor.h"
+#include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
+#include "src/ExperienceReward.h"
+#include "src/HealthPool.h"
+#include "src/Persistent.h"
+#include "src/Player.h"
+#include "src/PlayerAttacker.h"
 #include "src/Renderer.h"
 #include "src/TurnSchedule.h"
 #include "src/Vector2D.h"
@@ -125,4 +134,84 @@ TEST_F(BuffStateTest, RemovingTheOnlyWebFreesTheCreature)
 	buffs.remove_buff(creature, BuffType::WEBBED);
 
 	EXPECT_FALSE(creature.has_state(ActorState::IS_HELD)) << "held by a web that was removed";
+}
+
+// A creature with the parts a save writes, so it can be saved and loaded.
+static void give_save_parts(Creature& subject)
+{
+	subject.experienceReward = std::make_unique<ExperienceReward>(0);
+	subject.armorClass = std::make_unique<ArmorClass>(10);
+	subject.healthPool = std::make_unique<HealthPool>(10);
+}
+
+// Whether a saved record's "states" array holds the given state.
+static bool record_holds_state(const json& record, ActorState state)
+{
+	const json& states = record.at("states");
+	return std::ranges::find(states, json(state)) != states.end();
+}
+
+// The buffs are the input and the states are derived from them, so a save holds the
+// buffs and no buff-imposed state.
+TEST_F(BuffStateTest, ASaveHoldsTheBuffAndNotTheStateItImposes)
+{
+	give_save_parts(creature);
+	buffs.add_buff(creature, BuffType::HOLD_PERSON, 0, 10, false, at_round(0));
+	ASSERT_TRUE(creature.has_state(ActorState::IS_HELD));
+
+	json record{};
+	creature.save(record);
+
+	EXPECT_FALSE(record_holds_state(record, ActorState::IS_HELD)) << "the save stores a state its own buffs determine";
+	EXPECT_EQ(record.at("activeBuffs").size(), 1u) << "the hold itself was not saved";
+}
+
+// The load derives the state from the buff, so a creature saved while held is held the
+// moment it is loaded - read here before any update or tick runs.
+TEST_F(BuffStateTest, ACreatureSavedHeldIsHeldTheMomentItLoads)
+{
+	give_save_parts(creature);
+	buffs.add_buff(creature, BuffType::HOLD_PERSON, 0, 10, false, at_round(0));
+	json record{};
+	creature.save(record);
+	// A record whose states say nothing, so only the buff can make it held.
+	record["states"] = json::array();
+
+	Creature loaded{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK } };
+	loaded.load(record);
+
+	EXPECT_TRUE(loaded.has_state(ActorState::IS_HELD)) << "held only after an update, not at load";
+}
+
+// The same for the player, through Player::load: a player saved invisible is invisible
+// the moment the game is loaded.
+TEST_F(BuffStateTest, APlayerSavedInvisibleIsInvisibleTheMomentItLoads)
+{
+	Player saved{ Vector2D{ 0, 0 } };
+	give_save_parts(saved);
+	saved.attacker = std::make_unique<PlayerAttacker>(saved);
+	buffs.add_buff(saved, BuffType::INVISIBILITY, 0, 10, false, at_round(0));
+	json record{};
+	saved.save(record);
+	record["states"] = json::array();
+
+	Player loaded{ Vector2D{ 0, 0 } };
+	loaded.load(record);
+
+	EXPECT_TRUE(loaded.is_invisible()) << "a player saved invisible loaded visible";
+}
+
+// A state no buff imposes is the creature's own and is still saved: only buff-imposed
+// states are dropped.
+TEST_F(BuffStateTest, AStateNoBuffImposesIsStillSaved)
+{
+	give_save_parts(creature);
+	creature.add_state(ActorState::IS_FLEEING);
+	json record{};
+	creature.save(record);
+
+	Creature loaded{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK } };
+	loaded.load(record);
+
+	EXPECT_TRUE(loaded.has_state(ActorState::IS_FLEEING)) << "a fleeing creature stopped fleeing across a save";
 }
