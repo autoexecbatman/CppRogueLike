@@ -43,12 +43,6 @@
 
 namespace
 {
-struct FovProperties
-{
-	bool walkable{};
-	bool transparent{};
-};
-
 // Single source of truth for how each tile type maps onto the FOV grid.
 // Used by both set_tile (runtime mutations) and Map::load (FOV rebuild).
 FovProperties fov_properties_for(TileType type) noexcept
@@ -178,8 +172,7 @@ void Map::load(const json& j)
 	// Rebuild FOV grid from loaded tile data.
 	for (const auto& tile : tiles)
 	{
-		const auto [walkable, transparent] = fov_properties_for(tile.type);
-		fovMap->set_properties(tile.position.x, tile.position.y, walkable, transparent);
+		fovMap->set_properties(tile.position.x, tile.position.y, fov_properties_for(tile.type));
 	}
 
 	// Post-process to place doors after loading map
@@ -697,7 +690,6 @@ void Map::dig(Vector2D begin, Vector2D end)
 		for (int tileX = begin.x; tileX <= end.x; tileX++)
 		{
 			set_tile(Vector2D{ tileX, tileY }, TileType::FLOOR);
-			fovMap->set_properties(tileX, tileY, true, true);
 		}
 	}
 }
@@ -723,7 +715,6 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 		{
 			set_tile(pos, TileType::CORRIDOR);
 		}
-		fovMap->set_properties(pos.x, pos.y, true, true);
 	};
 
 	if (horizontal_first)
@@ -890,7 +881,6 @@ bool Map::room_interior_is_one_piece(const DungeonRoom& room) const
 void Map::set_door(Vector2D position)
 {
 	set_tile(position, TileType::CLOSED_DOOR);
-	fovMap->set_properties(position.x, position.y, false, false);
 
 	size_t tileIndex = get_index(position);
 	if (tileIndex < tiles.size())
@@ -909,8 +899,7 @@ void Map::set_tile(Vector2D pos, TileType newType)
 	tiles.at(idx).type = newType;
 
 	// Keep fovMap in sync so is_wall and is_unobstructed see the change immediately.
-	const auto [walkable, transparent] = fov_properties_for(newType);
-	fovMap->set_properties(pos.x, pos.y, walkable, transparent);
+	fovMap->set_properties(pos.x, pos.y, fov_properties_for(newType));
 }
 
 void Map::apply_room_shape(const DungeonRoom& room)
@@ -1204,7 +1193,6 @@ void Map::spawn_water(const DungeonRoom& room, GameContext& ctx)
 				if (!would_water_block_entrance(waterPos, ctx))
 				{
 					set_tile(waterPos, TileType::WATER);
-					fovMap->set_properties(waterPos.x, waterPos.y, true, true); // walkable and transparent
 				}
 			}
 		}
@@ -1693,8 +1681,6 @@ bool Map::open_door(Vector2D pos, GameContext& ctx)
 		tiles[tileIndex].doorState = DoorState::OPEN;
 	}
 
-	fovMap->set_properties(pos.x, pos.y, true, true);
-
 	if (ctx.player() && ctx.player()->get_tile_distance(pos) <= Vision::sight_radius(*ctx.player()))
 	{
 		compute_fov(ctx);
@@ -1744,9 +1730,6 @@ bool Map::close_door(Vector2D pos, GameContext& ctx)
 	{
 		tiles[tileIndex].doorState = DoorState::CLOSED_UNLOCKED;
 	}
-
-	// Make the tile non-walkable and non-transparent
-	fovMap->set_properties(pos.x, pos.y, false, false);
 
 	if (ctx.player() && ctx.player()->get_tile_distance(pos) <= Vision::sight_radius(*ctx.player()))
 	{

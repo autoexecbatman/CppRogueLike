@@ -28,11 +28,12 @@ constexpr Vector2D DOORWAY{ 5, 7 };
 constexpr Vector2D PLAIN_FLOOR{ 8, 7 };
 } // namespace
 
-// set_door is protected, so the map is reached through a type that exposes it
-// rather than by widening the interface the game uses.
+// set_door and dig_corridor are protected, so the map is reached through a type that
+// exposes them rather than by widening the interface the game uses.
 class MapWithADoorway : public Map
 {
 public:
+	using Map::dig_corridor;
 	using Map::Map;
 	using Map::set_door;
 };
@@ -82,6 +83,17 @@ TEST_F(DoorLockingTest, LockingRefusesWhatItCannotLock)
 	EXPECT_FALSE(map.lock_door(DOORWAY)) << "a door already locked";
 	EXPECT_FALSE(map.lock_door(PLAIN_FLOOR)) << "a stretch of floor is not a door";
 	EXPECT_FALSE(map.is_door_locked(PLAIN_FLOOR));
+}
+
+// A corridor dug through a shut door leaves it shut: the tile stays a door, and the
+// field-of-view grid, which is_wall reads, still calls it a wall. The row is the door's,
+// so either order the corridor rolls crosses it.
+TEST_F(DoorLockingTest, ACorridorThroughAShutDoorLeavesItShut)
+{
+	map.dig_corridor(Vector2D{ 2, DOORWAY.y }, Vector2D{ 9, DOORWAY.y });
+
+	EXPECT_EQ(map.get_tile_type(DOORWAY), TileType::CLOSED_DOOR);
+	EXPECT_TRUE(map.is_wall(DOORWAY)) << "the corridor opened the door in the grid alone";
 }
 
 // end of file: DoorLockingTest.cpp

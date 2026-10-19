@@ -37,14 +37,14 @@ protected:
 		{
 			for (int col = 0; col < GRID_SIDE; ++col)
 			{
-				fov.set_properties(col, row, true, true);
+				fov.set_properties(col, row, FovProperties{ .walkable = true, .transparent = true });
 			}
 		}
 	}
 
 	void wall_at(int col, int row)
 	{
-		fov.set_properties(col, row, false, false);
+		fov.set_properties(col, row, FovProperties{ .walkable = false, .transparent = false });
 	}
 
 	void look_from_the_middle()
@@ -131,14 +131,25 @@ TEST_F(FovMapTest, AskingOffTheGridAnswersNo)
 // which is what lets a window be seen through and not walked into.
 TEST_F(FovMapTest, WalkableAndTransparentAreRememberedApart)
 {
-	fov.set_properties(3, 4, true, false);
+	fov.set_properties(3, 4, FovProperties{ .walkable = true, .transparent = false });
 	EXPECT_TRUE(fov.is_walkable(3, 4));
 
-	fov.set_properties(5, 6, false, true);
+	fov.set_properties(5, 6, FovProperties{ .walkable = false, .transparent = true });
 	EXPECT_FALSE(fov.is_walkable(5, 6));
 
 	fov.compute_fov(5, 6, SIGHT);
 	EXPECT_TRUE(fov.is_in_fov(5, 6)) << "an unwalkable cell can still be seen";
+}
+
+// Sight and footing are separate: a cell that can be walked into can still stop sight,
+// so the cell behind it stays unseen.
+TEST_F(FovMapTest, AWalkableCellCanStillBlockSight)
+{
+	open_everything();
+	fov.set_properties(STANDING_AT + 1, STANDING_AT, FovProperties{ .walkable = true, .transparent = false });
+	look_from_the_middle();
+
+	EXPECT_FALSE(fov.is_in_fov(STANDING_AT + 2, STANDING_AT)) << "sight passed a cell that blocks it";
 }
 
 // end of file: FovMapTest.cpp

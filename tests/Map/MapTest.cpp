@@ -358,6 +358,15 @@ TEST_F(MapTest, Serialization_TilesPreserved)
     EXPECT_EQ(loadedMap->get_tile_type(testPos), TileType::WATER);
 }
 
+// Water is walked through, so it is no wall.
+TEST_F(MapTest, WaterIsNoWall)
+{
+    const Vector2D pool{ 5, 5 };
+    map->set_tile(pool, TileType::WATER);
+
+    EXPECT_FALSE(map->is_wall(pool));
+}
+
 // A load rebuilds the field-of-view grid from the tiles, so a wall comes back a wall and
 // a floor comes back open.
 TEST_F(MapTest, Serialization_ALoadedLevelKeepsItsWalls)

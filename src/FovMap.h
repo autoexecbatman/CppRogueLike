@@ -13,6 +13,13 @@ struct FovCell
 	bool visible{ false };
 };
 
+// What a cell lets through: a body walking into it, and sight passing across it.
+struct FovProperties
+{
+	bool walkable{ false };
+	bool transparent{ false };
+};
+
 // ---------------------------------------------------------------------------
 // FovMap -- the field-of-view grid.
 //
@@ -44,7 +51,7 @@ private:
 public:
 	FovMap(int width, int height);
 
-	void set_properties(int col, int row, bool walkable, bool transparent) noexcept;
+	void set_properties(int col, int row, FovProperties properties) noexcept;
 	bool is_walkable(int col, int row) const noexcept;
 	bool is_in_fov(int col, int row) const noexcept;
 	void compute_fov(int panelX, int panelY, int radius);

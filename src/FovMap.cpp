@@ -6,7 +6,7 @@ FovMap::FovMap(int width, int height)
 {
 }
 
-void FovMap::set_properties(int col, int row, bool walkable, bool transparent) noexcept
+void FovMap::set_properties(int col, int row, FovProperties properties) noexcept
 {
 	if (!in_bounds(col, row))
 	{
@@ -14,8 +14,8 @@ void FovMap::set_properties(int col, int row, bool walkable, bool transparent) n
 	}
 
 	FovCell& cell = cells_[cell_index(col, row)];
-	cell.walkable = walkable;
-	cell.transparent = transparent;
+	cell.walkable = properties.walkable;
+	cell.transparent = properties.transparent;
 }
 
 bool FovMap::is_walkable(int col, int row) const noexcept

@@ -1,0 +1,47 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=FovMapTest.*:DoorLockingTest.*:WaterMovementTest.*:LevelLoadTest.*:MapTest.*:DungeonConnectivityTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/FovMap.cpp",
+      "original": "\tcell.walkable = properties.walkable;\n",
+      "mutated": "\tcell.walkable = properties.transparent;\n",
+      "catches": "walkability stored from the transparency flag"
+    },
+    {
+      "file": "src/FovMap.cpp",
+      "original": "\tcell.transparent = properties.transparent;\n",
+      "mutated": "\tcell.transparent = properties.walkable;\n",
+      "catches": "transparency stored from the walkability flag"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\tfovMap->set_properties(pos.x, pos.y, fov_properties_for(newType));\n",
+      "mutated": "\tfovMap->set_properties(pos.x, pos.y, FovProperties{ .walkable = true, .transparent = true });\n",
+      "catches": "a tile set at runtime leaving the grid open whatever it became"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\tfovMap->set_properties(tile.position.x, tile.position.y, fov_properties_for(tile.type));\n",
+      "mutated": "\t\tfovMap->set_properties(tile.position.x, tile.position.y, FovProperties{ .walkable = true, .transparent = true });\n",
+      "catches": "a loaded level's walls walkable in the grid"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\tcase TileType::OPEN_DOOR:\n\tcase TileType::WATER:\n",
+      "mutated": "\tcase TileType::OPEN_DOOR:\n",
+      "catches": "water a wall in the grid"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\treturn { false, false };",
+      "mutated": "\t\treturn { true, true };",
+      "catches": "walls and shut doors open in the grid"
+    }
+  ]
+}
