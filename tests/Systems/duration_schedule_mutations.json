@@ -57,8 +57,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tconst int currentTime = ctx.gameState->get_time();\n\tctx.buffSystem->restore_loaded_buff_states(*this, currentTime);\n\tctx.buffSystem->update_creature_buffs(*this, currentTime);",
-      "mutated": "\tconst int currentTime = ctx.gameState->get_time();\n\tctx.buffSystem->restore_loaded_buff_states(*this, currentTime);",
+      "original": "\tconst int currentTime = ctx.gameState->get_time();\n\tctx.buffSystem->update_creature_buffs(*this, currentTime);",
+      "mutated": "\tconst int currentTime = ctx.gameState->get_time();",
       "catches": "nothing retiring a buff the clock has passed, so every buff is permanent"
     }
   ]

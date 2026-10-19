@@ -1,0 +1,47 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=BuffStateTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\t\tif (std::ranges::any_of(creature.activeBuffs, grants_state))\n",
+      "mutated": "\t\tif (!std::ranges::any_of(creature.activeBuffs, grants_state))\n",
+      "catches": "a state imposed where no buff grants it and taken where one does"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\t\tauto grants_state = [state](const Buff& buff)\n\t\t{\n\t\t\tconst auto effect = buff_state_effects.find(buff.type);\n\t\t\treturn effect != buff_state_effects.end() && effect->second == state;\n\t\t};\n",
+      "mutated": "\t\tauto grants_state = [buffType](const Buff& buff)\n\t\t{\n\t\t\treturn buff.type == buffType;\n\t\t};\n",
+      "catches": "a state asked of one buff type, so a second buff granting it is not seen"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\t\t\tif (!creature.has_state(state))\n",
+      "mutated": "\t\t\tif (true)\n",
+      "catches": "a state added again at every update, so the creature's list grows without bound"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\t\tcreature.activeBuffs.push_back(newBuff);\n\t}\n\n\tsync_buff_states(creature);\n",
+      "mutated": "\t\tcreature.activeBuffs.push_back(newBuff);\n\t}\n",
+      "catches": "a buff granted without the state it imposes"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\tstd::erase_if(creature.activeBuffs, matches_type);\n\n\tsync_buff_states(creature);\n",
+      "mutated": "\tstd::erase_if(creature.activeBuffs, matches_type);\n",
+      "catches": "a removed buff leaving its state behind"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\t// Every buff left is live, loaded ones included, so the states are read from them now.\n\tsync_buff_states(creature);\n",
+      "mutated": "",
+      "catches": "an expired buff leaving its state behind, and a loaded buff imposing none"
+    }
+  ]
+}

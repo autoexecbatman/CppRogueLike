@@ -10,7 +10,8 @@
 #include "SavingThrow.h"
 #include "TurnSchedule.h"
 
-// OCP: Data-driven buff state mapping - add new buffs here without modifying methods
+// The state each buff imposes. A creature's copy of these states is written only by
+// sync_buff_states, so two buffs granting one state cannot clear each other.
 static const std::unordered_map<BuffType, ActorState> buff_state_effects = {
 	{ BuffType::INVISIBILITY, ActorState::IS_INVISIBLE },
 	{ BuffType::SLEEP, ActorState::IS_SLEEPING },
@@ -42,6 +43,33 @@ static const std::unordered_map<BuffType, int> buff_hit_modifiers = {
 	{ BuffType::HAIRY_SPIDER_VENOM, -HAIRY_SPIDER_VENOM_PENALTY },
 	// Future extensions: {BuffType::PRAYER, 1}, {BuffType::CURSE, -1}, etc.
 };
+
+// Gives the creature each state some buff it carries imposes, and takes away each state
+// none does.
+static void sync_buff_states(Creature& creature) noexcept
+{
+	for (const auto& [buffType, state] : buff_state_effects)
+	{
+		auto grants_state = [state](const Buff& buff)
+		{
+			const auto effect = buff_state_effects.find(buff.type);
+			return effect != buff_state_effects.end() && effect->second == state;
+		};
+
+		// A state two buffs map to is visited twice; both visits give the same answer.
+		if (std::ranges::any_of(creature.activeBuffs, grants_state))
+		{
+			if (!creature.has_state(state))
+			{
+				creature.add_state(state);
+			}
+		}
+		else
+		{
+			creature.remove_state(state);
+		}
+	}
+}
 
 void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int durationRounds, bool isSetEffect, int currentTime) noexcept
 {
@@ -83,30 +111,22 @@ void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int dura
 		newBuff.expiryTime = expiry;
 		newBuff.isSetEffect = isSetEffect;
 
-		// Apply state effects (data-driven, OCP compliant)
-		if (buff_state_effects.contains(type))
-		{
-			creature.add_state(buff_state_effects.at(type));
-		}
-
 		creature.activeBuffs.push_back(newBuff);
 	}
+
+	sync_buff_states(creature);
 }
 
 void BuffSystem::remove_buff(Creature& creature, BuffType type) noexcept
 {
-	// Clear state effects (data-driven, OCP compliant)
-	if (buff_state_effects.contains(type))
-	{
-		creature.remove_state(buff_state_effects.at(type));
-	}
-
 	// Remove buff - no stat restoration needed, getters calculate on the fly
 	auto matches_type = [type](const Buff& b)
 	{
 		return b.type == type;
 	};
 	std::erase_if(creature.activeBuffs, matches_type);
+
+	sync_buff_states(creature);
 }
 
 void BuffSystem::update_creature_buffs(Creature& creature, int currentTime) noexcept
@@ -118,38 +138,10 @@ void BuffSystem::update_creature_buffs(Creature& creature, int currentTime) noex
 		return currentTime >= b.expiryTime;
 	};
 
-	// Clear states for all expiring buffs (data-driven, OCP compliant)
-	for (const auto& [buffType, state] : buff_state_effects)
-	{
-		auto is_expiring_buff = [buffType, &is_expired](const Buff& b)
-		{
-			return b.type == buffType && is_expired(b);
-		};
-		auto expiring = creature.activeBuffs | std::views::filter(is_expiring_buff);
-
-		if (!std::ranges::empty(expiring))
-		{
-			creature.remove_state(state);
-		}
-	}
-
-	// Remove expired buffs using std::erase_if (ranges-friendly)
 	std::erase_if(creature.activeBuffs, is_expired);
-}
 
-void BuffSystem::restore_loaded_buff_states(Creature& creature, int currentTime) noexcept
-{
-	// Restore state effects for all active buffs (idempotent - called after deserialization)
-	for (const auto& buff : creature.activeBuffs)
-	{
-		if (currentTime < buff.expiryTime)
-		{
-			if (buff_state_effects.contains(buff.type))
-			{
-				creature.add_state(buff_state_effects.at(buff.type));
-			}
-		}
-	}
+	// Every buff left is live, loaded ones included, so the states are read from them now.
+	sync_buff_states(creature);
 }
 
 int BuffSystem::get_buff_value(const Creature& creature, BuffType type) const noexcept

@@ -26,7 +26,6 @@ public:
 	// Called at the top of every creature's update, which is once per action: it reads
 	// the clock rather than counting, so being called twice in a round costs nothing.
 	void update_creature_buffs(Creature& creature, int currentTime) noexcept;
-	void restore_loaded_buff_states(Creature& creature, int currentTime) noexcept;
 
 	// Query methods
 	int get_buff_value(const Creature& creature, BuffType type) const noexcept;

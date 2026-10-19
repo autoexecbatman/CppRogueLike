@@ -67,6 +67,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/TreasureGoldTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/ItemSpawnTableTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterSpawnTableTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/BuffStateTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/LevelUpSystemTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ShopKeeperSerializationTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ShopNameTest.cpp

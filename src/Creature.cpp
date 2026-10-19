@@ -489,10 +489,9 @@ void Creature::update_creature_state(GameContext& ctx)
 	assert(ctx.buffSystem && "update_creature_state: a creature was updated with no buff system");
 	assert(ctx.gameState && "update_creature_state: a creature was updated with no clock to read its buffs against");
 
-	// Both read the clock rather than counting, so running them once per action costs
+	// It reads the clock rather than counting, so running it once per action costs
 	// nothing: a creature acting twice in a round reaches the same answer twice.
 	const int currentTime = ctx.gameState->get_time();
-	ctx.buffSystem->restore_loaded_buff_states(*this, currentTime);
 	ctx.buffSystem->update_creature_buffs(*this, currentTime);
 
 	update_armor_class(ctx);
