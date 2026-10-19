@@ -52,7 +52,7 @@ ItemBehavior create_behavior(const ItemParams& params)
 		return Consumable{
 			params.consumableEffect,
 			params.consumableAmount,
-			params.duration,
+			params.durationTurns,
 			params.consumableBuffType,
 			params.application
 		};

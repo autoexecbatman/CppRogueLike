@@ -19,6 +19,7 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=ItemRoundTripTest.*
 
+#include "src/DiceExpr.h"
 #include "src/ItemRegistry.h"
 #include "src/Paths.h"
 #include <gtest/gtest.h>
@@ -67,6 +68,7 @@ void expect_same_item(const std::string& key, const ItemParams& before, const It
 	EXPECT_EQ(before.damage, after.damage) << key << ".damage";
 	EXPECT_EQ(before.confuseTurns, after.confuseTurns) << key << ".confuseTurns";
 	EXPECT_EQ(before.duration, after.duration) << key << ".duration";
+	EXPECT_EQ(to_text(before.durationTurns), to_text(after.durationTurns)) << key << ".durationTurns";
 
 	EXPECT_EQ(before.effect, after.effect) << key << ".effect";
 	EXPECT_EQ(before.effectBonus, after.effectBonus) << key << ".effectBonus";
@@ -256,6 +258,19 @@ TEST_F(ItemRoundTripTest, AnUnknownApplicationIsRefused)
 	ASSERT_TRUE(source.is_open()) << "cannot read the real items file";
 	nlohmann::json root = nlohmann::json::parse(source);
 	root.at("health_potion")["application"] = "sideways";
+	std::ofstream(roundTrip) << root.dump(4);
+
+	ItemRegistry damaged{};
+	EXPECT_ANY_THROW(damaged.load(roundTrip.string()));
+}
+
+// A potion's duration that is not a dice expression is refused rather than read as none.
+TEST_F(ItemRoundTripTest, ADurationThatIsNotDiceIsRefused)
+{
+	std::ifstream source(Paths::resolve(Paths::ITEMS));
+	ASSERT_TRUE(source.is_open()) << "cannot read the real items file";
+	nlohmann::json root = nlohmann::json::parse(source);
+	root.at("invisibility_potion")["durationTurns"] = "d4";
 	std::ofstream(roundTrip) << root.dump(4);
 
 	ItemRegistry damaged{};

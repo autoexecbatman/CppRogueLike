@@ -11,6 +11,7 @@
 #include "BuffType.h"
 #include "ContentRegistry.h"
 #include "ContentRegistryIO.h"
+#include "DiceExpr.h"
 #include "GameContext.h"
 #include "ItemClassification.h"
 #include "ItemEditor.h"
@@ -844,8 +845,14 @@ std::string ItemEditor::field_label(FieldId f) const
 		return "Consumable Buff";
 	case FieldId::CONSUMABLE_AMT:
 		return "Consumable Amount";
+	case FieldId::DURATION_TURNS_DICE:
+		return "Potion Turns Dice";
+	case FieldId::DURATION_TURNS_SIDES:
+		return "Potion Turns Sides";
+	case FieldId::DURATION_TURNS_BONUS:
+		return "Potion Turns Bonus";
 	case FieldId::DURATION:
-		return "Duration";
+		return "Scroll Rounds";
 	case FieldId::TARGET_MODE:
 		return "Target Mode";
 	case FieldId::SCROLL_ANIM:
@@ -932,6 +939,12 @@ std::string ItemEditor::field_value(FieldId f) const
 		return std::string{ encode_buff_type(p.consumableBuffType) };
 	case FieldId::CONSUMABLE_AMT:
 		return std::format("{}", p.consumableAmount);
+	case FieldId::DURATION_TURNS_DICE:
+		return std::format("{} ({})", p.durationTurns.num, to_text(p.durationTurns));
+	case FieldId::DURATION_TURNS_SIDES:
+		return std::format("{}", p.durationTurns.sides);
+	case FieldId::DURATION_TURNS_BONUS:
+		return std::format("{}", p.durationTurns.bonus);
 	case FieldId::DURATION:
 		return std::format("{}", p.duration);
 	case FieldId::TARGET_MODE:
@@ -1030,6 +1043,19 @@ void ItemEditor::field_adjust(FieldId f, int delta)
 	}
 	case FieldId::CONSUMABLE_AMT:
 		p.consumableAmount = clamp_val(p.consumableAmount, delta, 0, 9999);
+		break;
+	case FieldId::DURATION_TURNS_DICE:
+	{
+		// No dice is a fixed duration; any dice need a die to roll, and a d2 is the least.
+		p.durationTurns.num = clamp_val(p.durationTurns.num, delta, 0, 99);
+		p.durationTurns.sides = p.durationTurns.num == 0 ? 0 : std::max(p.durationTurns.sides, 2);
+		break;
+	}
+	case FieldId::DURATION_TURNS_SIDES:
+		p.durationTurns.sides = p.durationTurns.num == 0 ? 0 : clamp_val(p.durationTurns.sides, delta, 2, 20);
+		break;
+	case FieldId::DURATION_TURNS_BONUS:
+		p.durationTurns.bonus = clamp_val(p.durationTurns.bonus, delta, 0, 99);
 		break;
 	case FieldId::DURATION:
 		p.duration = clamp_val(p.duration, delta, 0, 9999);

@@ -1,0 +1,53 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=PotionDurationTest.*:ItemRoundTripTest.*:ItemCreatorTest.*:BehaviorRecordTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tconst int durationRounds = roll_dice(ctx.dice, consumable.durationTurns) * ROUNDS_PER_TURN;\n",
+      "mutated": "\t\tconst int durationRounds = consumable.durationTurns.min_total() * ROUNDS_PER_TURN;\n",
+      "catches": "a potion always lasting the least of its roll, which is what the fixed figures were"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tconst int durationRounds = roll_dice(ctx.dice, consumable.durationTurns) * ROUNDS_PER_TURN;\n",
+      "mutated": "\t\tconst int durationRounds = roll_dice(ctx.dice, consumable.durationTurns);\n",
+      "catches": "the turns rolled used as rounds, a tenth of the book's duration"
+    },
+    {
+      "file": "src/TurnSchedule.h",
+      "original": "inline constexpr int ROUNDS_PER_TURN = 10;",
+      "mutated": "inline constexpr int ROUNDS_PER_TURN = 9;",
+      "catches": "a turn that is not the book's ten rounds"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\t\t\toutput[\"durationTurns\"] = to_text(b.durationTurns);\n",
+      "mutated": "\t\t\t\toutput[\"durationTurns\"] = \"0\";\n",
+      "catches": "a saved potion losing its dice, so it does nothing once loaded"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "parse_dice_expression(source.at(\"durationTurns\").get<std::string>());\n\t\tconsumable.buffType",
+      "mutated": "DiceExpr{ 0, 0, 3 };\n\t\tconsumable.buffType",
+      "catches": "a loaded potion's dice replaced by a fixed figure"
+    },
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "\tparams.durationTurns = parse_dice_expression(required_field(record, key, \"durationTurns\").get<std::string>());\n",
+      "mutated": "\tparams.durationTurns = DiceExpr{ 0, 0, 3 };\n",
+      "catches": "the data's dice never read, every potion lasting one fixed figure"
+    },
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "\trecord[\"durationTurns\"] = to_text(params.durationTurns);\n",
+      "mutated": "\trecord[\"durationTurns\"] = \"0\";\n",
+      "catches": "the editor's save writing every potion's dice away"
+    }
+  ]
+}

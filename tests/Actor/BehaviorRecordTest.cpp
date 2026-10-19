@@ -32,6 +32,7 @@
 #include <nlohmann/json.hpp>
 
 #include "src/BuffType.h"
+#include "src/DiceExpr.h"
 #include "src/MagicalItemEffects.h"
 #include "src/Pickable.h"
 #include "src/TargetMode.h"
@@ -68,7 +69,7 @@ StatBoost unusual_stat_boost()
 std::vector<NamedBehavior> every_behavior_with_fields()
 {
 	return {
-		{ "consumable", Consumable{ ConsumableEffect::ADD_BUFF, 7, 3, BuffType::SANCTUARY, BuffApplication::SET } },
+		{ "consumable", Consumable{ ConsumableEffect::ADD_BUFF, 7, DiceExpr{ 0, 0, 3 }, BuffType::SANCTUARY, BuffApplication::SET } },
 		{ "weapon", Weapon{ true, HandRequirement::TWO_HANDED, WeaponSize::LARGE, 18 } },
 		{ "targeted scroll", TargetedScroll{ TargetMode::PICK_TILE_AOE, ScrollAnimation::LIGHTNING, 5, 9, 2, BuffType::SANCTUARY, 4 } },
 		{ "gold", Gold{ 12 } },
@@ -171,7 +172,7 @@ TEST(BehaviorRecordTest, EveryBehaviourComesBackAsItsOwnKind)
 TEST(BehaviorRecordTest, APotionsRecordNamesItsEffectAndItsBuff)
 {
 	json saved;
-	save_behavior(Consumable{ ConsumableEffect::ADD_BUFF, 7, 3, BuffType::SANCTUARY, BuffApplication::SET }, saved);
+	save_behavior(Consumable{ ConsumableEffect::ADD_BUFF, 7, DiceExpr{ 0, 0, 3 }, BuffType::SANCTUARY, BuffApplication::SET }, saved);
 
 	EXPECT_EQ(saved.at("type"), "consumable");
 	EXPECT_EQ(saved.at("effect"), "add_buff");
@@ -197,9 +198,9 @@ TEST(BehaviorRecordTest, EveryFieldSurvivesARoundTrip)
 TEST(BehaviorRecordTest, APotionsRecordNamesWhetherItSetsOrAdds)
 {
 	json setting;
-	save_behavior(Consumable{ ConsumableEffect::ADD_BUFF, 19, 3, BuffType::STRENGTH, BuffApplication::SET }, setting);
+	save_behavior(Consumable{ ConsumableEffect::ADD_BUFF, 19, DiceExpr{ 0, 0, 3 }, BuffType::STRENGTH, BuffApplication::SET }, setting);
 	json adding;
-	save_behavior(Consumable{ ConsumableEffect::ADD_BUFF, 1, 3, BuffType::STRENGTH, BuffApplication::ADD }, adding);
+	save_behavior(Consumable{ ConsumableEffect::ADD_BUFF, 1, DiceExpr{ 0, 0, 3 }, BuffType::STRENGTH, BuffApplication::ADD }, adding);
 
 	ASSERT_TRUE(setting.contains("application")) << "a setting potion saved no application";
 	ASSERT_TRUE(adding.contains("application")) << "an adding potion saved no application";
@@ -211,7 +212,7 @@ TEST(BehaviorRecordTest, APotionsRecordNamesWhetherItSetsOrAdds)
 TEST(BehaviorRecordTest, APotionWithAnUnknownApplicationIsRefused)
 {
 	json saved;
-	save_behavior(Consumable{ ConsumableEffect::ADD_BUFF, 19, 3, BuffType::STRENGTH, BuffApplication::SET }, saved);
+	save_behavior(Consumable{ ConsumableEffect::ADD_BUFF, 19, DiceExpr{ 0, 0, 3 }, BuffType::STRENGTH, BuffApplication::SET }, saved);
 	saved["application"] = "sideways";
 
 	EXPECT_ANY_THROW((void)load_behavior(saved));

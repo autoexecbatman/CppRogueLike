@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "BuffType.h"
+#include "DiceExpr.h"
 #include "EquipmentSlot.h"
 #include "ItemClassification.h"
 #include "MagicalItemEffects.h"
@@ -59,8 +60,11 @@ struct ItemParams
 	int damage{ 0 };
 	// How many turns a targeted scroll's confusion lasts.
 	int confuseTurns{ 0 };
-	// How many turns a consumable's or targeted scroll's effect lasts.
+	// How many rounds a targeted scroll's effect lasts. Only TARGETED_SCROLL reads it.
 	int duration{ 0 };
+	// How many turns a consumable's buff lasts, rolled when it is drunk. Only CONSUMABLE
+	// reads it; a bare number is a fixed duration.
+	DiceExpr durationTurns{};
 
 	// A magical helm's, ring's or ability item's effect.
 	MagicalEffect effect{ MagicalEffect::NONE };

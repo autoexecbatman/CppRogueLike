@@ -15,8 +15,8 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tconsumable.duration = source.at(\"duration\").get<int>();",
-      "mutated": "\t\tconsumable.duration = source.value(\"duration\", 0);",
+      "original": "\t\tconsumable.durationTurns = parse_dice_expression(source.at(\"durationTurns\").get<std::string>());",
+      "mutated": "\t\tconsumable.durationTurns = parse_dice_expression(source.value(\"durationTurns\", std::string{ \"0\" }));",
       "catches": "a consumable's duration defaulting quietly when its key is missing"
     },
     {

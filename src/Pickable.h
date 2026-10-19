@@ -13,6 +13,7 @@
 #include "BuffType.h"
 #include "CorpseEdibility.h"
 #include "DamageInfo.h"
+#include "DiceExpr.h"
 #include "EquipmentSlot.h"
 #include "MagicalItemEffects.h"
 #include "Persistent.h"
@@ -178,7 +179,8 @@ struct Consumable
 {
 	ConsumableEffect effect{ ConsumableEffect::NONE };
 	int amount{ 0 };
-	int duration{ 0 };
+	// The buff's duration in turns, rolled once when drunk.
+	DiceExpr durationTurns{};
 	BuffType buffType{ BuffType::NONE };
 	BuffApplication application{ BuffApplication::ADD };
 };

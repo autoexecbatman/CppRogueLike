@@ -58,6 +58,10 @@ inline constexpr int TIME_UNITS_PER_ROUND = 120;
 // approximately one minute long" (PHB page 184), so an hour is sixty of them.
 inline constexpr int ROUNDS_PER_HOUR = 60;
 
+// Rounds in a turn, the unit potions and many spells are printed in: "Ten combat rounds
+// equal a turn" (PHB page 184).
+inline constexpr int ROUNDS_PER_TURN = 10;
+
 // What an action nominally costing `baseCost` actually costs a being whose own ordinary
 // action takes `actionDelay`. A being that acts more often has a smaller delay and so
 // pays less for the same action, which is the whole of what pace does - and it reaches

@@ -51,8 +51,8 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "consumable.duration, consumable.application, ctx.gameState->get_time());",
-      "mutated": "consumable.duration, BuffApplication::ADD, ctx.gameState->get_time());",
+      "original": "durationRounds, consumable.application, ctx.gameState->get_time());",
+      "mutated": "durationRounds, BuffApplication::ADD, ctx.gameState->get_time());",
       "catches": "a potion of giant strength adding to Strength instead of setting it"
     },
     {
