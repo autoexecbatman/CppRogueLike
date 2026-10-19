@@ -352,10 +352,27 @@ TEST_F(MapTest, Serialization_TilesPreserved)
     map->save(j);
 
     // Create new map and load
-    auto loadedMap = std::make_unique<Map>(TEST_MAP_HEIGHT, TEST_MAP_WIDTH);
+    auto loadedMap = std::make_unique<Map>(TEST_MAP_WIDTH, TEST_MAP_HEIGHT);
     loadedMap->load(j);
 
     EXPECT_EQ(loadedMap->get_tile_type(testPos), TileType::WATER);
+}
+
+// A load rebuilds the field-of-view grid from the tiles, so a wall comes back a wall and
+// a floor comes back open.
+TEST_F(MapTest, Serialization_ALoadedLevelKeepsItsWalls)
+{
+    const Vector2D floor{ 6, 5 };
+    const Vector2D wall{ 7, 5 };
+    map->set_tile(floor, TileType::FLOOR);
+    json j;
+    map->save(j);
+
+    auto loadedMap = std::make_unique<Map>(TEST_MAP_WIDTH, TEST_MAP_HEIGHT);
+    loadedMap->load(j);
+
+    EXPECT_TRUE(loadedMap->is_wall(wall));
+    EXPECT_FALSE(loadedMap->is_wall(floor));
 }
 
 // ----------------------------------------------------------------------------

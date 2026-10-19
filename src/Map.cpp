@@ -162,8 +162,8 @@ void Map::load(const json& j)
 	for (const auto& tileJson : j.at("tiles"))
 	{
 		Vector2D position(
-			tileJson.at("position").at("y").get<int>(),
-			tileJson.at("position").at("x").get<int>());
+			tileJson.at("position").at("x").get<int>(),
+			tileJson.at("position").at("y").get<int>());
 
 		TileType type = static_cast<TileType>(tileJson.at("type").get<int>());
 		bool explored = tileJson.at("explored").get<bool>();
