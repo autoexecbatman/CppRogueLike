@@ -27,6 +27,7 @@
 #include "tests/mocks/MockGameContext.h"
 #include <gtest/gtest.h>
 
+#include <array>
 #include <memory>
 #include <vector>
 
@@ -103,6 +104,25 @@ TEST_F(TrapSpawnTest, ASpawnedTrapLandsInTheTrapContainer)
 	EXPECT_EQ(traps[0]->position.x, ROOM_COL + 2);
 	EXPECT_EQ(traps[0]->position.y, ROOM_ROW + 2);
 	EXPECT_EQ(traps[0]->get_type(), TrapType::PIT);
+}
+
+// The type roll is a d3 and each face names one trap: 1 a pit, 2 darts, 3 arrows.
+TEST_F(TrapSpawnTest, EachTypeRollNamesItsTrap)
+{
+	constexpr std::array expected{ TrapType::PIT, TrapType::DART, TrapType::ARROW };
+	for (int face = 1; face <= static_cast<int>(expected.size()); ++face)
+	{
+		traps.clear();
+		for (int roll : { 1, 1, 2, 2, face })
+		{
+			mock.dice.set_next_roll(roll);
+		}
+
+		map->spawn_traps(room, ctx);
+
+		ASSERT_EQ(traps.size(), 1u);
+		EXPECT_EQ(traps[0]->get_type(), expected[face - 1]) << "type roll " << face;
+	}
 }
 
 // A trap is not a spell tile. Nothing may leak into the other container.

@@ -1,0 +1,29 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=TrapSpawnTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Map.cpp",
+      "original": "constexpr std::array trapTypes{ TrapType::PIT, TrapType::DART, TrapType::ARROW };",
+      "mutated": "constexpr std::array trapTypes{ TrapType::PIT, TrapType::ARROW, TrapType::DART };",
+      "catches": "darts and arrows swapped, so a 2 lays arrows and a 3 lays darts"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "ctx.dice->roll(1, static_cast<int>(trapTypes.size()))",
+      "mutated": "ctx.dice->roll(1, 2)",
+      "catches": "the die stops at 2, so no arrow trap is ever laid. Caught in Debug only: the test scripts a 3, and the scripted roll's range assert aborts the run. That assert is compiled out in Release, where the 3 is returned as scripted, indexes ARROW, and this mutant survives"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "static_cast<int>(trapTypes.size())) - 1)]",
+      "mutated": "static_cast<int>(trapTypes.size())))]",
+      "catches": "the face used as the index unshifted, so a 1 lays darts, and reads past the table on a 3, which Debug's bounds check aborts and which is undefined behaviour in Release"
+    }
+  ]
+}

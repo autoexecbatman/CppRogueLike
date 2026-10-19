@@ -1,5 +1,6 @@
 // file: Map.cpp
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cmath>
 #include <cstdint>
@@ -1142,31 +1143,9 @@ void Map::spawn_traps(const DungeonRoom& room, GameContext& ctx)
 			continue; // Couldn't find a valid spot for this trap
 		}
 
-		// Create trap (randomly choose type)
-		TrapType trapType;
-		int trapChoice = ctx.dice->roll(1, 3);
-		switch (trapChoice)
-		{
-		case 1:
-		{
-			trapType = TrapType::PIT;
-			break;
-		}
-		case 2:
-		{
-			trapType = TrapType::DART;
-			break;
-		}
-		case 3:
-		{
-			trapType = TrapType::ARROW;
-			break;
-		}
-		default:
-		{
-			trapType = TrapType::PIT;
-		}
-		}
+		// The die has one face per table entry, so every roll names a trap and none falls outside.
+		constexpr std::array trapTypes{ TrapType::PIT, TrapType::DART, TrapType::ARROW };
+		const TrapType trapType = trapTypes[static_cast<size_t>(ctx.dice->roll(1, static_cast<int>(trapTypes.size())) - 1)];
 
 		auto trap = std::make_unique<Trap>(trapPos, trapType, *ctx.tileConfig);
 		ctx.traps->push_back(std::move(trap));
