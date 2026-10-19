@@ -77,13 +77,21 @@ std::string_view consumable_effect_str(ConsumableEffect effect)
 	switch (effect)
 	{
 	case ConsumableEffect::NONE:
+	{
 		return "none";
+	}
 	case ConsumableEffect::HEAL:
+	{
 		return "heal";
+	}
 	case ConsumableEffect::ADD_BUFF:
+	{
 		return "add_buff";
+	}
 	case ConsumableEffect::FAIL:
+	{
 		return "fail";
+	}
 	}
 	return "none";
 }
@@ -818,95 +826,177 @@ std::string ItemEditor::field_label(FieldId field) const
 	switch (field)
 	{
 	case FieldId::NAME:
+	{
 		return "Name";
+	}
 	case FieldId::CATEGORY:
+	{
 		return "Category";
+	}
 	case FieldId::ITEM_CLASS:
+	{
 		return "Item Class";
+	}
 	case FieldId::PICKABLE_TYPE:
+	{
 		return "Pickable Type";
+	}
 	case FieldId::COLOR:
+	{
 		return "Color";
+	}
 	case FieldId::VALUE:
+	{
 		return "Value";
+	}
 	case FieldId::BASE_WEIGHT:
+	{
 		return "Spawn Weight";
+	}
 	case FieldId::WEIGHT:
+	{
 		return "Carry Weight";
+	}
 	case FieldId::LEVEL_MIN:
+	{
 		return "Level Min";
+	}
 	case FieldId::LEVEL_MAX:
+	{
 		return "Level Max";
+	}
 	case FieldId::LEVEL_SCALING:
+	{
 		return "Level Scaling";
+	}
 	case FieldId::CONSUMABLE_EFFECT:
+	{
 		return "Consumable Effect";
+	}
 	case FieldId::CONSUMABLE_BUFF:
+	{
 		return "Consumable Buff";
+	}
 	case FieldId::CONSUMABLE_AMT_DICE:
+	{
 		return "Amount Dice";
+	}
 	case FieldId::CONSUMABLE_AMT_SIDES:
+	{
 		return "Amount Sides";
+	}
 	case FieldId::CONSUMABLE_AMT_BONUS:
+	{
 		return "Amount Bonus";
+	}
 	case FieldId::DURATION_TURNS_DICE:
+	{
 		return "Potion Turns Dice";
+	}
 	case FieldId::DURATION_TURNS_SIDES:
+	{
 		return "Potion Turns Sides";
+	}
 	case FieldId::DURATION_TURNS_BONUS:
+	{
 		return "Potion Turns Bonus";
+	}
 	case FieldId::DURATION:
+	{
 		return "Scroll Rounds";
+	}
 	case FieldId::TARGET_MODE:
+	{
 		return "Target Mode";
+	}
 	case FieldId::SCROLL_ANIM:
+	{
 		return "Scroll Animation";
+	}
 	case FieldId::RANGE:
+	{
 		return "Range";
+	}
 	case FieldId::DAMAGE:
+	{
 		return "Damage";
+	}
 	case FieldId::CONFUSE_TURNS:
+	{
 		return "Confuse Turns";
+	}
 	case FieldId::RANGED:
+	{
 		return "Ranged";
+	}
 	case FieldId::HAND_REQUIREMENT:
+	{
 		return "Hand Requirement";
+	}
 	case FieldId::WEAPON_SIZE:
+	{
 		return "Weapon Size";
+	}
 	case FieldId::STRENGTH_RATING:
 	{
 		return "Made For STR";
 	}
 	case FieldId::AC_BONUS:
+	{
 		return "AC Bonus";
+	}
 	case FieldId::EFFECT:
+	{
 		return "Effect";
+	}
 	case FieldId::EFFECT_BONUS:
+	{
 		return "Effect Bonus";
+	}
 	case FieldId::STR_BONUS:
+	{
 		return "STR Bonus";
+	}
 	case FieldId::DEX_BONUS:
+	{
 		return "DEX Bonus";
+	}
 	case FieldId::CON_BONUS:
+	{
 		return "CON Bonus";
+	}
 	case FieldId::INT_BONUS:
+	{
 		return "INT Bonus";
+	}
 	case FieldId::WIS_BONUS:
+	{
 		return "WIS Bonus";
+	}
 	case FieldId::CHA_BONUS:
+	{
 		return "CHA Bonus";
+	}
 	case FieldId::APPLICATION:
+	{
 		return "Application";
+	}
 	case FieldId::EXCEPTIONAL_STRENGTH:
 	{
 		return "Exceptional STR";
 	}
 	case FieldId::NUTRITION:
+	{
 		return "Nutrition Value";
+	}
 	case FieldId::TILE:
+	{
 		return "Tile";
+	}
 	default:
+	{
 		return "???";
+	}
 	}
 }
 
@@ -916,95 +1006,177 @@ std::string ItemEditor::field_value(FieldId field) const
 	switch (field)
 	{
 	case FieldId::NAME:
+	{
 		return working.name;
+	}
 	case FieldId::CATEGORY:
+	{
 		return working.category;
+	}
 	case FieldId::ITEM_CLASS:
+	{
 		return std::string{ encode_item_class(params.itemClass) };
+	}
 	case FieldId::PICKABLE_TYPE:
+	{
 		return std::string{ encode_pickable_type(params.pickableType) };
+	}
 	case FieldId::COLOR:
+	{
 		return std::string{ color_pair_name(params.color) };
+	}
 	case FieldId::VALUE:
+	{
 		return std::format("{}", params.value);
+	}
 	case FieldId::BASE_WEIGHT:
+	{
 		return std::format("{}", params.baseWeight);
+	}
 	case FieldId::WEIGHT:
+	{
 		return std::format("{}", params.weight);
+	}
 	case FieldId::LEVEL_MIN:
+	{
 		return std::format("{}", params.levelMin);
+	}
 	case FieldId::LEVEL_MAX:
+	{
 		return std::format("{}", params.levelMax);
+	}
 	case FieldId::LEVEL_SCALING:
+	{
 		return std::format("{:.2f}", params.levelScaling);
+	}
 	case FieldId::CONSUMABLE_EFFECT:
+	{
 		return std::string{ consumable_effect_str(params.consumableEffect) };
+	}
 	case FieldId::CONSUMABLE_BUFF:
+	{
 		return std::string{ encode_buff_type(params.consumableBuffType) };
+	}
 	case FieldId::CONSUMABLE_AMT_DICE:
+	{
 		return std::format("{} ({})", params.consumableAmount.num, to_text(params.consumableAmount));
+	}
 	case FieldId::CONSUMABLE_AMT_SIDES:
+	{
 		return std::format("{}", params.consumableAmount.sides);
+	}
 	case FieldId::CONSUMABLE_AMT_BONUS:
+	{
 		return std::format("{}", params.consumableAmount.bonus);
+	}
 	case FieldId::DURATION_TURNS_DICE:
+	{
 		return std::format("{} ({})", params.durationTurns.num, to_text(params.durationTurns));
+	}
 	case FieldId::DURATION_TURNS_SIDES:
+	{
 		return std::format("{}", params.durationTurns.sides);
+	}
 	case FieldId::DURATION_TURNS_BONUS:
+	{
 		return std::format("{}", params.durationTurns.bonus);
+	}
 	case FieldId::DURATION:
+	{
 		return std::format("{}", params.duration);
+	}
 	case FieldId::TARGET_MODE:
+	{
 		return std::string{ encode_target_mode(params.targetMode) };
+	}
 	case FieldId::SCROLL_ANIM:
+	{
 		return std::string{ encode_scroll_animation(params.scrollAnimation) };
+	}
 	case FieldId::RANGE:
+	{
 		return std::format("{}", params.range);
+	}
 	case FieldId::DAMAGE:
+	{
 		return std::format("{}", params.damage);
+	}
 	case FieldId::CONFUSE_TURNS:
+	{
 		return std::format("{}", params.confuseTurns);
+	}
 	case FieldId::RANGED:
+	{
 		return params.ranged ? "yes" : "no";
+	}
 	case FieldId::HAND_REQUIREMENT:
+	{
 		return std::string{ encode_hand_requirement(params.handRequirement) };
+	}
 	case FieldId::WEAPON_SIZE:
+	{
 		return std::string{ encode_weapon_size(params.weaponSize) };
+	}
 	case FieldId::STRENGTH_RATING:
 	{
 		return std::format("{}", params.strengthRating);
 	}
 	case FieldId::AC_BONUS:
+	{
 		return std::format("{}", params.acBonus);
+	}
 	case FieldId::EFFECT:
+	{
 		return std::string{ encode_magical_effect(params.effect) };
+	}
 	case FieldId::EFFECT_BONUS:
+	{
 		return std::format("{}", params.effectBonus);
+	}
 	case FieldId::STR_BONUS:
+	{
 		return std::format("{}", params.strBonus);
+	}
 	case FieldId::DEX_BONUS:
+	{
 		return std::format("{}", params.dexBonus);
+	}
 	case FieldId::CON_BONUS:
+	{
 		return std::format("{}", params.conBonus);
+	}
 	case FieldId::INT_BONUS:
+	{
 		return std::format("{}", params.intBonus);
+	}
 	case FieldId::WIS_BONUS:
+	{
 		return std::format("{}", params.wisBonus);
+	}
 	case FieldId::CHA_BONUS:
+	{
 		return std::format("{}", params.chaBonus);
+	}
 	case FieldId::APPLICATION:
+	{
 		return std::string{ encode_buff_application(params.application) };
+	}
 	case FieldId::EXCEPTIONAL_STRENGTH:
 	{
 		return std::format("{}", params.exceptionalStrength);
 	}
 	case FieldId::NUTRITION:
+	{
 		return std::format("{}", params.nutritionValue);
+	}
 	case FieldId::TILE:
+	{
 		return "(tile)";
+	}
 	default:
+	{
 		return "";
+	}
 	}
 }
 
@@ -1029,20 +1201,30 @@ void ItemEditor::field_adjust(FieldId field, int delta)
 	switch (field)
 	{
 	case FieldId::VALUE:
+	{
 		params.value = clamp_val(params.value, delta, 0, 99999);
 		break;
+	}
 	case FieldId::BASE_WEIGHT:
+	{
 		params.baseWeight = clamp_val(params.baseWeight, delta, 0, 100);
 		break;
+	}
 	case FieldId::WEIGHT:
+	{
 		params.weight = clamp_val(params.weight, delta, 0, 1000);
 		break;
+	}
 	case FieldId::LEVEL_MIN:
+	{
 		params.levelMin = clamp_val(params.levelMin, delta, 1, 20);
 		break;
+	}
 	case FieldId::LEVEL_MAX:
+	{
 		params.levelMax = clamp_val(params.levelMax, delta, 0, 20);
 		break;
+	}
 	case FieldId::LEVEL_SCALING:
 	{
 		float raw = params.levelScaling + static_cast<float>(delta) * 0.01f;
@@ -1057,11 +1239,15 @@ void ItemEditor::field_adjust(FieldId field, int delta)
 		break;
 	}
 	case FieldId::CONSUMABLE_AMT_SIDES:
+	{
 		params.consumableAmount.sides = params.consumableAmount.num == 0 ? 0 : clamp_val(params.consumableAmount.sides, delta, 2, 20);
 		break;
+	}
 	case FieldId::CONSUMABLE_AMT_BONUS:
+	{
 		params.consumableAmount.bonus = clamp_val(params.consumableAmount.bonus, delta, 0, 9999);
 		break;
+	}
 	case FieldId::DURATION_TURNS_DICE:
 	{
 		// No dice is a fixed duration; any dice need a die to roll, and a d2 is the least.
@@ -1070,23 +1256,35 @@ void ItemEditor::field_adjust(FieldId field, int delta)
 		break;
 	}
 	case FieldId::DURATION_TURNS_SIDES:
+	{
 		params.durationTurns.sides = params.durationTurns.num == 0 ? 0 : clamp_val(params.durationTurns.sides, delta, 2, 20);
 		break;
+	}
 	case FieldId::DURATION_TURNS_BONUS:
+	{
 		params.durationTurns.bonus = clamp_val(params.durationTurns.bonus, delta, 0, 99);
 		break;
+	}
 	case FieldId::DURATION:
+	{
 		params.duration = clamp_val(params.duration, delta, 0, 9999);
 		break;
+	}
 	case FieldId::RANGE:
+	{
 		params.range = clamp_val(params.range, delta, 0, 50);
 		break;
+	}
 	case FieldId::DAMAGE:
+	{
 		params.damage = clamp_val(params.damage, delta, 0, 999);
 		break;
+	}
 	case FieldId::CONFUSE_TURNS:
+	{
 		params.confuseTurns = clamp_val(params.confuseTurns, delta, 0, 999);
 		break;
+	}
 	case FieldId::STRENGTH_RATING:
 	{
 		// 0 is an ordinary weapon; a rating is a Strength score, and Table 1 stops at 25.
@@ -1094,39 +1292,59 @@ void ItemEditor::field_adjust(FieldId field, int delta)
 		break;
 	}
 	case FieldId::AC_BONUS:
+	{
 		params.acBonus = clamp_val(params.acBonus, delta, -10, 10);
 		break;
+	}
 	case FieldId::EFFECT_BONUS:
+	{
 		params.effectBonus = clamp_val(params.effectBonus, delta, 0, 20);
 		break;
+	}
 	case FieldId::STR_BONUS:
+	{
 		params.strBonus = clamp_val(params.strBonus, delta, -18, 18);
 		break;
+	}
 	case FieldId::DEX_BONUS:
+	{
 		params.dexBonus = clamp_val(params.dexBonus, delta, -18, 18);
 		break;
+	}
 	case FieldId::CON_BONUS:
+	{
 		params.conBonus = clamp_val(params.conBonus, delta, -18, 18);
 		break;
+	}
 	case FieldId::INT_BONUS:
+	{
 		params.intBonus = clamp_val(params.intBonus, delta, -18, 18);
 		break;
+	}
 	case FieldId::WIS_BONUS:
+	{
 		params.wisBonus = clamp_val(params.wisBonus, delta, -18, 18);
 		break;
+	}
 	case FieldId::CHA_BONUS:
+	{
 		params.chaBonus = clamp_val(params.chaBonus, delta, -18, 18);
 		break;
+	}
 	case FieldId::EXCEPTIONAL_STRENGTH:
 	{
 		params.exceptionalStrength = clamp_val(params.exceptionalStrength, delta, 0, 100);
 		break;
 	}
 	case FieldId::NUTRITION:
+	{
 		params.nutritionValue = clamp_val(params.nutritionValue, delta, 0, 9999);
 		break;
+	}
 	default:
+	{
 		break;
+	}
 	}
 }
 
@@ -1136,43 +1354,69 @@ void ItemEditor::field_toggle(FieldId field)
 	switch (field)
 	{
 	case FieldId::COLOR:
+	{
 		params.color = next_color_pair(params.color);
 		break;
+	}
 	case FieldId::ITEM_CLASS:
+	{
 		params.itemClass = next_item_class(params.itemClass);
 		break;
+	}
 	case FieldId::PICKABLE_TYPE:
+	{
 		params.pickableType = next_pickable_type(params.pickableType);
 		break;
+	}
 	case FieldId::CONSUMABLE_EFFECT:
+	{
 		params.consumableEffect = next_consumable_effect(params.consumableEffect);
 		break;
+	}
 	case FieldId::CONSUMABLE_BUFF:
+	{
 		params.consumableBuffType = next_buff_type(params.consumableBuffType);
 		break;
+	}
 	case FieldId::TARGET_MODE:
+	{
 		params.targetMode = next_target_mode(params.targetMode);
 		break;
+	}
 	case FieldId::SCROLL_ANIM:
+	{
 		params.scrollAnimation = next_scroll_animation(params.scrollAnimation);
 		break;
+	}
 	case FieldId::RANGED:
+	{
 		params.ranged = !params.ranged;
 		break;
+	}
 	case FieldId::HAND_REQUIREMENT:
+	{
 		params.handRequirement = next_hand_requirement(params.handRequirement);
 		break;
+	}
 	case FieldId::WEAPON_SIZE:
+	{
 		params.weaponSize = next_weapon_size(params.weaponSize);
 		break;
+	}
 	case FieldId::EFFECT:
+	{
 		params.effect = next_magical_effect(params.effect);
 		break;
+	}
 	case FieldId::APPLICATION:
+	{
 		params.application = params.application == BuffApplication::ADD ? BuffApplication::SET : BuffApplication::ADD;
 		break;
+	}
 	default:
+	{
 		break;
+	}
 	}
 }
 
@@ -1181,13 +1425,19 @@ void ItemEditor::field_set_string(FieldId field, std::string val)
 	switch (field)
 	{
 	case FieldId::NAME:
+	{
 		working.name = std::move(val);
 		break;
+	}
 	case FieldId::CATEGORY:
+	{
 		working.category = std::move(val);
 		break;
+	}
 	default:
+	{
 		break;
+	}
 	}
 }
 

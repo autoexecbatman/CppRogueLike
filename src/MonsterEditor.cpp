@@ -836,79 +836,153 @@ std::string MonsterEditor::field_label(FieldId field) const
 	switch (field)
 	{
 	case FieldId::NAME:
+	{
 		return "Name";
+	}
 	case FieldId::CORPSE:
+	{
 		return "Corpse";
+	}
 	case FieldId::CORPSE_NUTRITION:
+	{
 		return "Corpse Nutrition";
+	}
 	case FieldId::CORPSE_TASTE:
+	{
 		return "Corpse Taste";
+	}
 	case FieldId::CORPSE_EDIBLE:
+	{
 		return "Corpse Edible";
+	}
 	case FieldId::HD_LOWEST:
+	{
 		return "HD Lowest";
+	}
 	case FieldId::HD_HIGHEST:
+	{
 		return "HD Highest";
+	}
 	case FieldId::HD_SIDES:
+	{
 		return "HD Sides";
+	}
 	case FieldId::HD_BONUS:
+	{
 		return "HD Bonus";
+	}
 	case FieldId::THACO:
+	{
 		return "THAC0";
+	}
 	case FieldId::AC:
+	{
 		return "AC";
+	}
 	case FieldId::XP_COUNT:
+	{
 		return "XP For HD";
+	}
 	case FieldId::XP:
+	{
 		return "XP";
+	}
 	case FieldId::DR:
+	{
 		return "DR";
+	}
 	case FieldId::STR_SOURCE:
+	{
 		return "Strength";
+	}
 	case FieldId::STR_SCORE:
+	{
 		return "STR Score";
+	}
 	case FieldId::STR_EXCEPTIONAL:
+	{
 		return "STR Exceptional";
+	}
 	case FieldId::WEAPON:
+	{
 		return "Natural Attack";
+	}
 	case FieldId::DMG_NUM:
+	{
 		return "Dmg Num";
+	}
 	case FieldId::DMG_SIDES:
+	{
 		return "Dmg Sides";
+	}
 	case FieldId::DMG_BONUS:
+	{
 		return "Dmg Bonus";
+	}
 	case FieldId::DMG_TYPE:
+	{
 		return "Dmg Type";
+	}
 	case FieldId::AI_TYPE:
+	{
 		return "AI Type";
+	}
 	case FieldId::ETHICS:
+	{
 		return "Ethics";
+	}
 	case FieldId::MORALITY:
+	{
 		return "Morality";
+	}
 	case FieldId::SIZE:
+	{
 		return "Size";
+	}
 	case FieldId::INTELLIGENCE:
+	{
 		return "Intelligence";
+	}
 	case FieldId::CAN_SWIM:
+	{
 		return "Can Swim";
+	}
 	case FieldId::CAN_FLY:
+	{
 		return "Can Fly";
+	}
 	case FieldId::WALKS_WEBS:
+	{
 		return "Walks Webs";
+	}
 	case FieldId::ATTITUDE:
+	{
 		return "Attitude";
+	}
 	case FieldId::DISPLACEABLE:
+	{
 		return "Displaceable";
+	}
 	case FieldId::WEIGHT:
+	{
 		return "Spawn Weight";
+	}
 	case FieldId::DEPTH_MIN:
+	{
 		return "Depth Min";
+	}
 	case FieldId::DEPTH_MAX:
+	{
 		return "Depth Max";
+	}
 	case FieldId::TILE:
+	{
 		return "Tile";
+	}
 	default:
+	{
 		return "???";
+	}
 	}
 }
 
@@ -922,35 +996,65 @@ std::string MonsterEditor::field_value(FieldId field) const
 	switch (field)
 	{
 	case FieldId::NAME:
+	{
 		return working.name;
+	}
 	case FieldId::CORPSE:
+	{
 		return working.corpseName;
+	}
 	case FieldId::CORPSE_NUTRITION:
+	{
 		return std::format("{}", working.corpseNutrition);
+	}
 	case FieldId::CORPSE_TASTE:
+	{
 		return working.corpseTaste;
+	}
 	case FieldId::HD_LOWEST:
+	{
 		return std::format("{}", working.hitDice.counts.front().count);
+	}
 	case FieldId::HD_HIGHEST:
+	{
 		return std::format("{}", highest_count(working.hitDice).count);
+	}
 	case FieldId::HD_SIDES:
+	{
 		return std::format("{}", working.hitDice.sides);
+	}
 	case FieldId::HD_BONUS:
+	{
 		return std::format("{}", working.hitDice.bonus);
+	}
 	case FieldId::THACO:
+	{
 		return std::format("{}", working.thaco);
+	}
 	case FieldId::AC:
+	{
 		return std::format("{}", working.ac);
+	}
 	case FieldId::XP_COUNT:
+	{
 		return std::format("{} HD", working.hitDice.counts.at(selectedXpCount).count);
+	}
 	case FieldId::XP:
+	{
 		return std::format("{}", working.hitDice.counts.at(selectedXpCount).xp);
+	}
 	case FieldId::DR:
+	{
 		return std::format("{}", working.dr);
+	}
 	case FieldId::STR_SOURCE:
+	{
 		return working.strength.has_value() ? "Printed in its entry" : "Table 6 by size";
+	}
 	case FieldId::STR_SCORE:
+	{
 		return working.strength.has_value() ? std::format("{}", working.strength->score) : "-";
+	}
 	case FieldId::STR_EXCEPTIONAL:
 	{
 		// 0 is no percentile, 1 to 100 is the percentile with 100 as 18/00, and only an 18 has one.
@@ -974,47 +1078,89 @@ std::string MonsterEditor::field_value(FieldId field) const
 		return std::format("{} (18/{:02})", strength.exceptional, strength.exceptional);
 	}
 	case FieldId::WEAPON:
+	{
 		return working.naturalAttack;
+	}
 	case FieldId::DMG_NUM:
+	{
 		return std::format("{}", working.damage.dice.num);
+	}
 	case FieldId::DMG_SIDES:
+	{
 		return std::format("{}", working.damage.dice.sides);
+	}
 	case FieldId::DMG_BONUS:
+	{
 		return std::format("{}", working.damage.dice.bonus);
+	}
 	case FieldId::DMG_TYPE:
+	{
 		return std::string(damage_type_name(working.damage.damageType));
+	}
 	case FieldId::AI_TYPE:
+	{
 		return std::string(encode_ai_type(working.aiType));
+	}
 	case FieldId::ETHICS:
+	{
 		return std::string(encode_ethics(working.ethics));
+	}
 	case FieldId::MORALITY:
+	{
 		return std::string(encode_morality(working.morality));
+	}
 	case FieldId::SIZE:
+	{
 		return std::string(encode_creature_size(working.size));
+	}
 	case FieldId::INTELLIGENCE:
+	{
 		return std::string(encode_intelligence_rating(working.intelligence));
+	}
 	case FieldId::CAN_SWIM:
+	{
 		return working.canSwim ? "yes" : "no";
+	}
 	case FieldId::CAN_FLY:
+	{
 		return working.canFly ? "yes" : "no";
+	}
 	case FieldId::WALKS_WEBS:
+	{
 		return working.walksWebs ? "yes" : "no";
+	}
 	case FieldId::ATTITUDE:
+	{
 		return std::string(encode_attitude(working.attitude));
+	}
 	case FieldId::DISPLACEABLE:
+	{
 		return working.displaceable ? "yes" : "no";
+	}
 	case FieldId::CORPSE_EDIBLE:
+	{
 		return is_corpse_edible(working.corpseEdibility) ? "yes" : "no";
+	}
 	case FieldId::WEIGHT:
+	{
 		return std::format("{}", working.baseWeight);
+	}
 	case FieldId::DEPTH_MIN:
+	{
 		return std::format("{}", working.levelMinimum);
+	}
 	case FieldId::DEPTH_MAX:
+	{
 		return std::format("{}", working.levelMaximum);
+	}
 	case FieldId::TILE:
+	{
 		return "(tile)";
+	}
 	default:
+	{
 		return "";
+	}
 	}
 }
 
@@ -1053,17 +1199,25 @@ void MonsterEditor::field_adjust(FieldId field, int delta)
 		break;
 	}
 	case FieldId::HD_SIDES:
+	{
 		working.hitDice.sides = clamp_val(working.hitDice.sides, delta, 1, 20);
 		break;
+	}
 	case FieldId::HD_BONUS:
+	{
 		working.hitDice.bonus = clamp_val(working.hitDice.bonus, delta, -99, 99);
 		break;
+	}
 	case FieldId::THACO:
+	{
 		working.thaco = clamp_val(working.thaco, delta, 1, 25);
 		break;
+	}
 	case FieldId::AC:
+	{
 		working.ac = clamp_val(working.ac, delta, -10, 10);
 		break;
+	}
 	case FieldId::XP_COUNT:
 	{
 		// One count a step, whatever the step size, and never past either end.
@@ -1084,11 +1238,15 @@ void MonsterEditor::field_adjust(FieldId field, int delta)
 		break;
 	}
 	case FieldId::DR:
+	{
 		working.dr = clamp_val(working.dr, delta, 0, 20);
 		break;
+	}
 	case FieldId::CORPSE_NUTRITION:
+	{
 		working.corpseNutrition = clamp_val(working.corpseNutrition, delta, 0, 9999);
 		break;
+	}
 	case FieldId::STR_SCORE:
 	{
 		// A Table 6 monster has no score to adjust.
@@ -1120,25 +1278,39 @@ void MonsterEditor::field_adjust(FieldId field, int delta)
 	// The dice are the record: every change rebuilds the damage, so its text and
 	// its range follow rather than being edited into disagreement.
 	case FieldId::DMG_NUM:
+	{
 		set_damage_dice(clamp_val(working.damage.dice.num, delta, 1, 99), working.damage.dice.sides, working.damage.dice.bonus);
 		break;
+	}
 	case FieldId::DMG_SIDES:
+	{
 		set_damage_dice(working.damage.dice.num, clamp_val(working.damage.dice.sides, delta, 2, 20), working.damage.dice.bonus);
 		break;
+	}
 	case FieldId::DMG_BONUS:
+	{
 		set_damage_dice(working.damage.dice.num, working.damage.dice.sides, clamp_val(working.damage.dice.bonus, delta, -99, 99));
 		break;
+	}
 	case FieldId::WEIGHT:
+	{
 		working.baseWeight = clamp_val(working.baseWeight, delta, 0, 100);
 		break;
+	}
 	case FieldId::DEPTH_MIN:
+	{
 		working.levelMinimum = clamp_val(working.levelMinimum, delta, 1, 20);
 		break;
+	}
 	case FieldId::DEPTH_MAX:
+	{
 		working.levelMaximum = clamp_val(working.levelMaximum, delta, 0, 20);
 		break;
+	}
 	default:
+	{
 		break;
+	}
 	}
 }
 
@@ -1213,19 +1385,29 @@ void MonsterEditor::field_set_string(FieldId field, std::string val)
 	switch (field)
 	{
 	case FieldId::NAME:
+	{
 		working.name = std::move(val);
 		break;
+	}
 	case FieldId::CORPSE:
+	{
 		working.corpseName = std::move(val);
 		break;
+	}
 	case FieldId::CORPSE_TASTE:
+	{
 		working.corpseTaste = std::move(val);
 		break;
+	}
 	case FieldId::WEAPON:
+	{
 		working.naturalAttack = std::move(val);
 		break;
+	}
 	default:
+	{
 		break;
+	}
 	}
 }
 
