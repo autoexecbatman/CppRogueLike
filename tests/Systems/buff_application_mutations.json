@@ -57,7 +57,7 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\t\t\toutput[\"application\"] = encode_buff_application(b.application);\n",
+      "original": "\t\t\t\toutput[\"application\"] = encode_buff_application(consumable.application);\n",
       "mutated": "\t\t\t\toutput[\"application\"] = \"add\";\n",
       "catches": "a potion record written as adding whatever it does"
     },

@@ -9,8 +9,8 @@
   "mutations": [
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\t\t\toutput[\"handRequirement\"] = encode_hand_requirement(b.handRequirement);",
-      "mutated": "\t\t\t\toutput[\"handReq\"] = static_cast<int>(b.handRequirement);",
+      "original": "\t\t\t\toutput[\"handRequirement\"] = encode_hand_requirement(weapon.handRequirement);",
+      "mutated": "\t\t\t\toutput[\"handReq\"] = static_cast<int>(weapon.handRequirement);",
       "catches": "the saver and the loader naming the field differently again"
     },
     {

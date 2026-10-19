@@ -680,14 +680,14 @@ int get_item_ac_bonus(const ItemBehavior& behavior) noexcept
 {
 	return std::visit(
 		VariantVisitor{
-			[](const Armor& a) -> int
-			{ return a.armorClass; },
+			[](const Armor& armor) -> int
+			{ return armor.armorClass; },
 			[]([[maybe_unused]] const Shield& shield) -> int
 			{ return -1; }, // +1 AC in AD&D terms
-			[](const MagicalHelm& mh) -> int
-			{ return MagicalEffectUtils::get_ac_bonus(mh.effect, mh.bonus); },
-			[](const MagicalRing& mr) -> int
-			{ return MagicalEffectUtils::get_protection_bonus(mr.effect); },
+			[](const MagicalHelm& magicalHelm) -> int
+			{ return MagicalEffectUtils::get_ac_bonus(magicalHelm.effect, magicalHelm.bonus); },
+			[](const MagicalRing& magicalRing) -> int
+			{ return MagicalEffectUtils::get_protection_bonus(magicalRing.effect); },
 			[]([[maybe_unused]] const auto& otherBehavior) -> int
 			{ return 0; },
 		},
@@ -758,80 +758,80 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 {
 	std::visit(
 		VariantVisitor{
-			[&output](const Consumable& b)
+			[&output](const Consumable& consumable)
 			{
 				output["type"] = encode_pickable_type(PickableType::CONSUMABLE);
-				output["effect"] = encode_consumable_effect(b.effect);
-				output["amount"] = to_text(b.amount);
-				output["durationTurns"] = to_text(b.durationTurns);
-				output["buffType"] = encode_buff_type(b.buffType);
-				output["application"] = encode_buff_application(b.application);
+				output["effect"] = encode_consumable_effect(consumable.effect);
+				output["amount"] = to_text(consumable.amount);
+				output["durationTurns"] = to_text(consumable.durationTurns);
+				output["buffType"] = encode_buff_type(consumable.buffType);
+				output["application"] = encode_buff_application(consumable.application);
 			},
-			[&output](const Weapon& b)
+			[&output](const Weapon& weapon)
 			{
 				output["type"] = encode_pickable_type(PickableType::WEAPON);
-				output["ranged"] = b.ranged;
-				output["handRequirement"] = encode_hand_requirement(b.handRequirement);
-				output["weaponSize"] = encode_weapon_size(b.weaponSize);
-				output["strengthRating"] = b.strengthRating;
+				output["ranged"] = weapon.ranged;
+				output["handRequirement"] = encode_hand_requirement(weapon.handRequirement);
+				output["weaponSize"] = encode_weapon_size(weapon.weaponSize);
+				output["strengthRating"] = weapon.strengthRating;
 			},
 			[&output]([[maybe_unused]] const Shield& shield)
 			{ output["type"] = encode_pickable_type(PickableType::SHIELD); },
-			[&output](const TargetedScroll& b)
+			[&output](const TargetedScroll& targetedScroll)
 			{
 				output["type"] = encode_pickable_type(PickableType::TARGETED_SCROLL);
-				output["targetMode"] = encode_target_mode(b.targetMode);
-				output["scrollAnimation"] = encode_scroll_animation(b.scrollAnimation);
-				output["range"] = b.range;
-				output["damage"] = b.damage;
-				output["confuseTurns"] = b.confuseTurns;
-				output["buffType"] = encode_buff_type(b.buffType);
-				output["buffDuration"] = b.buffDuration;
+				output["targetMode"] = encode_target_mode(targetedScroll.targetMode);
+				output["scrollAnimation"] = encode_scroll_animation(targetedScroll.scrollAnimation);
+				output["range"] = targetedScroll.range;
+				output["damage"] = targetedScroll.damage;
+				output["confuseTurns"] = targetedScroll.confuseTurns;
+				output["buffType"] = encode_buff_type(targetedScroll.buffType);
+				output["buffDuration"] = targetedScroll.buffDuration;
 			},
 			[&output]([[maybe_unused]] const Teleporter& teleporter)
 			{ output["type"] = encode_pickable_type(PickableType::TELEPORTER); },
 			[&output]([[maybe_unused]] const IdentifyScroll& identifyScroll)
 			{ output["type"] = encode_pickable_type(PickableType::IDENTIFY_SCROLL); },
-			[&output](const Gold& b)
+			[&output](const Gold& gold)
 			{
 				output["type"] = encode_pickable_type(PickableType::GOLD_COIN);
-				output["amount"] = b.amount;
+				output["amount"] = gold.amount;
 			},
-			[&output](const Food& b)
+			[&output](const Food& food)
 			{
 				output["type"] = encode_pickable_type(PickableType::FOOD);
-				output["nutritionValue"] = b.nutritionValue;
+				output["nutritionValue"] = food.nutritionValue;
 			},
-			[&output](const CorpseFood& b)
+			[&output](const CorpseFood& corpseFood)
 			{
 				output["type"] = encode_pickable_type(PickableType::CORPSE_FOOD);
-				output["nutritionValue"] = b.nutritionValue;
-				output["taste"] = b.taste;
-				output["edible"] = is_corpse_edible(b.edibility);
+				output["nutritionValue"] = corpseFood.nutritionValue;
+				output["taste"] = corpseFood.taste;
+				output["edible"] = is_corpse_edible(corpseFood.edibility);
 			},
-			[&output](const Armor& b)
+			[&output](const Armor& armor)
 			{
 				output["type"] = encode_pickable_type(PickableType::ARMOR);
-				output["armorClass"] = b.armorClass;
+				output["armorClass"] = armor.armorClass;
 			},
-			[&output](const MagicalHelm& b)
+			[&output](const MagicalHelm& magicalHelm)
 			{
 				output["type"] = encode_pickable_type(PickableType::MAGICAL_HELM);
-				output["effect"] = encode_magical_effect(b.effect);
-				output["bonus"] = b.bonus;
+				output["effect"] = encode_magical_effect(magicalHelm.effect);
+				output["bonus"] = magicalHelm.bonus;
 			},
-			[&output](const MagicalRing& b)
+			[&output](const MagicalRing& magicalRing)
 			{
 				output["type"] = encode_pickable_type(PickableType::MAGICAL_RING);
-				output["effect"] = encode_magical_effect(b.effect);
-				output["bonus"] = b.bonus;
+				output["effect"] = encode_magical_effect(magicalRing.effect);
+				output["bonus"] = magicalRing.bonus;
 			},
-			[&output](const JewelryAmulet& b)
-			{ save_stat_boost(b, PickableType::JEWELRY_AMULET, output); },
-			[&output](const Gauntlets& b)
-			{ save_stat_boost(b, PickableType::GAUNTLETS, output); },
-			[&output](const Girdle& b)
-			{ save_stat_boost(b, PickableType::GIRDLE, output); },
+			[&output](const JewelryAmulet& jewelryAmulet)
+			{ save_stat_boost(jewelryAmulet, PickableType::JEWELRY_AMULET, output); },
+			[&output](const Gauntlets& gauntlets)
+			{ save_stat_boost(gauntlets, PickableType::GAUNTLETS, output); },
+			[&output](const Girdle& girdle)
+			{ save_stat_boost(girdle, PickableType::GIRDLE, output); },
 			[&output]([[maybe_unused]] const Amulet& amulet)
 			{ output["type"] = encode_pickable_type(PickableType::QUEST_ITEM); },
 			[&output]([[maybe_unused]] const DungeonKey& dungeonKey)

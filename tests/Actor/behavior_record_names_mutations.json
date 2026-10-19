@@ -21,7 +21,7 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\t\t\toutput[\"effect\"] = encode_consumable_effect(b.effect);",
+      "original": "\t\t\t\toutput[\"effect\"] = encode_consumable_effect(consumable.effect);",
       "mutated": "\t\t\t\toutput[\"effect\"] = encode_consumable_effect(ConsumableEffect::NONE);",
       "catches": "a potion's effect saved as none, so it heals nothing when loaded"
     },

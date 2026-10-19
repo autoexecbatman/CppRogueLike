@@ -27,7 +27,7 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\t\t\toutput[\"durationTurns\"] = to_text(b.durationTurns);\n",
+      "original": "\t\t\t\toutput[\"durationTurns\"] = to_text(consumable.durationTurns);\n",
       "mutated": "\t\t\t\toutput[\"durationTurns\"] = \"0\";\n",
       "catches": "a saved potion losing its dice, so it does nothing once loaded"
     },

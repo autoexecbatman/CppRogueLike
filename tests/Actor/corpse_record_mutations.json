@@ -81,7 +81,7 @@
         },
         {
             "file": "src/Pickable.cpp",
-            "original": "\t\t\t\toutput[\"taste\"] = b.taste;\n",
+            "original": "\t\t\t\toutput[\"taste\"] = corpseFood.taste;\n",
             "mutated": "\t\t\t\toutput[\"taste\"] = \"\";\n",
             "catches": "a saved corpse losing its taste"
         },
@@ -135,7 +135,7 @@
         },
         {
             "file": "src/Pickable.cpp",
-            "original": "\t\t\t\toutput[\"edible\"] = is_corpse_edible(b.edibility);\n",
+            "original": "\t\t\t\toutput[\"edible\"] = is_corpse_edible(corpseFood.edibility);\n",
             "mutated": "\t\t\t\toutput[\"edible\"] = true;\n",
             "catches": "a saved inedible corpse made edible"
         },
