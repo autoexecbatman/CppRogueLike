@@ -44,11 +44,12 @@ DeathMenu::DeathMenu(GameContext& ctx)
 {
 	assert(ctx.levelManager && "DeathMenu::DeathMenu: called without a levelManager");
 	dungeonLevel = ctx.levelManager->get_dungeon_level();
-	playerLevel = ctx.player() ? ctx.player()->get_level() : 0;
-	playerXp = ctx.player() ? ctx.player()->get_xp() : 0;
-	killCount = ctx.player() ? ctx.player_concrete().get_kill_count() : 0;
-	playerClass = ctx.player() ? ctx.player_concrete().get_class_display_name() : "Unknown";
-	playerRace = ctx.player() ? ctx.player_concrete().get_race_display_name() : "Unknown";
+	assert(ctx.player() && "DeathMenu::DeathMenu: called without a player to report on");
+	playerLevel = ctx.player()->get_creature_level();
+	playerXp = ctx.player()->get_xp();
+	killCount = ctx.player_concrete().get_kill_count();
+	playerClass = ctx.player_concrete().get_class_display_name();
+	playerRace = ctx.player_concrete().get_race_display_name();
 
 	assert(ctx.messageSystem && "DeathMenu::DeathMenu: called without a messageSystem");
 	size_t count = ctx.messageSystem->get_stored_message_count();

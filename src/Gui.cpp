@@ -481,7 +481,7 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 
 	// Rows 3 and 4: the attack numbers. THAC0 is what a d20 must meet to hit Armour
 	// Class 0, which is the whole of 2e attack resolution.
-	draw_stat(2, "Level", std::format("{}", ctx.player()->get_level()));
+	draw_stat(2, "Level", std::format("{}", ctx.player()->get_creature_level()));
 	draw_stat(3, "THAC0", std::format("{}", ctx.player()->get_thaco()));
 
 	// Rows 5 and 6: what stops a hit landing, and what it costs when one does.

@@ -230,9 +230,6 @@ public:
 
 	int get_creature_level() const noexcept { return creatureLevel; }
 
-	// Virtual for polymorphism - monsters use HD, players override
-	virtual int get_level() const noexcept { return creatureLevel; }
-
 	int get_gold() const noexcept { return gold; }
 
 	const std::string& get_gender() const noexcept { return gender; }
