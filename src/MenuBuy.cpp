@@ -32,8 +32,11 @@ void MenuBuy::populate_items()
 		return;
 	}
 
-	assert(std::ranges::none_of(shopkeeper.get_shop_inventory().items, [](const auto& item)
-		{ return !item; }));
+	[[maybe_unused]] auto is_null = [](const auto& entry)
+	{
+		return !entry;
+	};
+	assert(std::ranges::none_of(shopkeeper.get_shop_inventory().items, is_null) && "MenuBuy::populate_items: the shop's stock holds a null item");
 	for (const auto& item : shopkeeper.get_shop_inventory().items)
 	{
 		std::string itemName = item->get_name();

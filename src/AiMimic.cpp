@@ -214,7 +214,7 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 		if (index < ctx.floorInventory->items.size() && ctx.floorInventory->items[index])
 		{
 			[[maybe_unused]] const auto removeLureResult = InventoryOperations::remove_item_at(*ctx.floorInventory, index);
-			assert(removeLureResult.has_value());
+			assert(removeLureResult.has_value() && "AiMimic::update: the lure checked on the floor could not be taken from it");
 		}
 	}
 

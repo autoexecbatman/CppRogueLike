@@ -219,7 +219,7 @@ EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 	if (ctx.dice->d2() == 1)
 	{
 		destroy();
-		assert(ctx.messageSystem && "Trap::on_creature_enter: called without a messageSystem");
+		assert(ctx.messageSystem && "Trap::on_creature_enter: no messageSystem when the trap broke");
 		if (creature.is_player() || ctx.map->is_in_fov(position))
 		{
 			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "The trap is destroyed.", MessageCompletion::FINISHED);

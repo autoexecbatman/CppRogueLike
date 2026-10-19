@@ -296,9 +296,9 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		equip_item(ItemCreator::create("medium_shield", position, ctx), EquipmentSlot::LEFT_HAND, ctx);
 		equip_item(ItemCreator::create("long_bow", position, ctx), EquipmentSlot::MISSILE_WEAPON, ctx);
 		[[maybe_unused]] const auto grantFireballResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("scroll_fireball", position, ctx));
-		assert(grantFireballResult.has_value());
+		assert(grantFireballResult.has_value() && "Player::equip_class_starting_gear: a fighter's fireball scroll did not fit the pack");
 		[[maybe_unused]] const auto grantIdentifyScrollResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("identify_scroll", position, ctx));
-		assert(grantIdentifyScrollResult.has_value());
+		assert(grantIdentifyScrollResult.has_value() && "Player::equip_class_starting_gear: a fighter's identify scroll did not fit the pack");
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Fighter equipped with plate mail, long sword, shield, long bow, fireball scroll. [DEBUG]", MessageCompletion::FINISHED);
 		break;
 	}
@@ -310,7 +310,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		equip_item(ItemCreator::create("leather_armor", position, ctx), EquipmentSlot::BODY, ctx);
 		equip_item(ItemCreator::create("dagger", position, ctx), EquipmentSlot::RIGHT_HAND, ctx);
 		[[maybe_unused]] const auto grantIdentifyScrollResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("identify_scroll", position, ctx));
-		assert(grantIdentifyScrollResult.has_value());
+		assert(grantIdentifyScrollResult.has_value() && "Player::equip_class_starting_gear: a rogue's identify scroll did not fit the pack");
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Rogue equipped with leather armor and dagger.", MessageCompletion::FINISHED);
 		break;
 	}
@@ -323,11 +323,11 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		equip_item(ItemCreator::create("mace", position, ctx), EquipmentSlot::RIGHT_HAND, ctx);
 		equip_item(ItemCreator::create("medium_shield", position, ctx), EquipmentSlot::LEFT_HAND, ctx);
 		[[maybe_unused]] const auto grantHealthPotionResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("health_potion", position, ctx));
-		assert(grantHealthPotionResult.has_value());
+		assert(grantHealthPotionResult.has_value() && "Player::equip_class_starting_gear: a cleric's health potion did not fit the pack");
 		[[maybe_unused]] const auto grantHoldPersonResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("scroll_hold_person", position, ctx));
-		assert(grantHoldPersonResult.has_value());
+		assert(grantHoldPersonResult.has_value() && "Player::equip_class_starting_gear: a cleric's hold person scroll did not fit the pack");
 		[[maybe_unused]] const auto grantIdentifyScrollResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("identify_scroll", position, ctx));
-		assert(grantIdentifyScrollResult.has_value());
+		assert(grantIdentifyScrollResult.has_value() && "Player::equip_class_starting_gear: a cleric's identify scroll did not fit the pack");
 		SpellSystem::show_memorization_menu(*this, ctx);
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Cleric equipped with chain mail, mace, and shield. Spells memorized.", MessageCompletion::FINISHED);
 		break;
@@ -339,13 +339,13 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		set_gold(startingGold);
 		equip_item(ItemCreator::create("staff", position, ctx), EquipmentSlot::RIGHT_HAND, ctx);
 		[[maybe_unused]] const auto grantFireballResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("scroll_fireball", position, ctx));
-		assert(grantFireballResult.has_value());
+		assert(grantFireballResult.has_value() && "Player::equip_class_starting_gear: a wizard's fireball scroll did not fit the pack");
 		[[maybe_unused]] const auto grantLightningResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("scroll_lightning", position, ctx));
-		assert(grantLightningResult.has_value());
+		assert(grantLightningResult.has_value() && "Player::equip_class_starting_gear: a wizard's lightning scroll did not fit the pack");
 		[[maybe_unused]] const auto grantSleepResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("scroll_sleep", position, ctx));
-		assert(grantSleepResult.has_value());
+		assert(grantSleepResult.has_value() && "Player::equip_class_starting_gear: a wizard's sleep scroll did not fit the pack");
 		[[maybe_unused]] const auto grantIdentifyScrollResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("identify_scroll", position, ctx));
-		assert(grantIdentifyScrollResult.has_value());
+		assert(grantIdentifyScrollResult.has_value() && "Player::equip_class_starting_gear: a wizard's identify scroll did not fit the pack");
 		SpellSystem::show_memorization_menu(*this, ctx);
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Wizard equipped with staff. Attack scrolls and spells ready.", MessageCompletion::FINISHED);
 		break;

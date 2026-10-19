@@ -84,7 +84,7 @@ void ShopKeeper::generate_initial_inventory(int dungeonLevel, GameContext& ctx)
 		{
 			// At most seven items into fifty slots, so stocking cannot overflow.
 			[[maybe_unused]] const auto stocked = add_item(shopInventory, std::move(item));
-			assert(stocked.has_value());
+			assert(stocked.has_value() && "ShopKeeper::generate_initial_inventory: stocking overflowed the shelves");
 		}
 	}
 }
@@ -257,7 +257,7 @@ bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature&
 
 	// The item itself moves, key and enhancement with it; room and weight were checked above, so the add cannot fail.
 	[[maybe_unused]] const auto handedOver = add_item_to_inventory(buyer.inventoryData, std::move(*taken), buyer, *ctx.dataManager);
-	assert(handedOver.has_value());
+	assert(handedOver.has_value() && "ShopKeeper::process_player_purchase: the buyer's pack refused an item checked to fit");
 
 	buyer.adjust_gold(-price);
 	owner.adjust_gold(price);
@@ -296,7 +296,7 @@ bool ShopKeeper::process_player_sale(GameContext& ctx, Item& item, Creature& sel
 	// Room was checked above, so shelving cannot fail. The item lives on in the shop,
 	// which keeps the reference valid for the message below.
 	[[maybe_unused]] const auto shelved = add_item(shopInventory, std::move(*removed));
-	assert(shelved.has_value());
+	assert(shelved.has_value() && "ShopKeeper::process_player_sale: the shelves refused an item checked to fit");
 
 	owner.adjust_gold(-price);
 	seller.adjust_gold(price);

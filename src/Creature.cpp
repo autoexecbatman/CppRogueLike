@@ -1230,7 +1230,7 @@ void Creature::drop(Item& item, GameContext& ctx)
 	{
 		return !invItem;
 	};
-	assert(std::ranges::none_of(inventoryData.items, is_null));
+	assert(std::ranges::none_of(inventoryData.items, is_null) && "Creature::drop: the pack holds a null item");
 
 	auto matches_item = [&item](const auto& invItem)
 	{
@@ -1274,7 +1274,7 @@ bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCo
 		}
 		// Back to the pack it came out of: carrying it again adds no weight, so no weight gate
 		[[maybe_unused]] const auto pickUpItemResult = InventoryOperations::add_item(inventoryData, std::move(item));
-		assert(pickUpItemResult.has_value());
+		assert(pickUpItemResult.has_value() && "Creature::equip_item: an item the slot refused could not go back to the pack");
 		return false;
 	}
 
@@ -1288,7 +1288,7 @@ bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCo
 			MessageCompletion::FINISHED);
 		// Back to the pack it came out of, as for a slot that refuses it
 		[[maybe_unused]] const auto returnedToPack = InventoryOperations::add_item(inventoryData, std::move(item));
-		assert(returnedToPack.has_value());
+		assert(returnedToPack.has_value() && "Creature::equip_item: a bow too strong to draw could not go back to the pack");
 		return false;
 	}
 
@@ -1359,7 +1359,7 @@ bool Creature::unequip_item(EquipmentSlot slot, GameContext& ctx)
 		if (fitsInPack)
 		{
 			[[maybe_unused]] const auto packed = InventoryOperations::add_item_to_inventory(inventoryData, std::move(removed), *this, *ctx.dataManager);
-			assert(packed.has_value());
+			assert(packed.has_value() && "Creature::unequip_item: the pack refused an item checked to fit");
 		}
 		else
 		{

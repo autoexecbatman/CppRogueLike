@@ -664,7 +664,7 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 	Item* keyItem = nullptr;
 	for (const auto& item : playerOwner.inventoryData.items)
 	{
-		assert(item);
+		assert(item && "PlayerController::resolve_locked_door: the pack holds a null item");
 		if (item->itemKey == "dungeon_key")
 		{
 			keyItem = item.get();
@@ -675,7 +675,7 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 	if (keyItem != nullptr)
 	{
 		[[maybe_unused]] const auto consumeUnlockResult = InventoryOperations::remove_item(playerOwner.inventoryData, *keyItem);
-		assert(consumeUnlockResult.has_value());
+		assert(consumeUnlockResult.has_value() && "PlayerController::resolve_locked_door: the key found in the pack could not be taken from it");
 		ctx.map->open_all_room_doors(doorPos, ctx);
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You use the key. The lock turns.", MessageCompletion::FINISHED);
 		spend_player_action(ctx, TIME_UNITS_PER_ROUND);
@@ -890,7 +890,7 @@ void PlayerController::handle_left_click(GameContext& ctx)
 
 	if (world_tile == playerOwner.position)
 	{
-		assert(ctx.stairs && "PlayerController::handle_left_click: called without stairs");
+		assert(ctx.stairs && "PlayerController::handle_left_click: a click on the player came without stairs");
 		if (ctx.stairs->position == playerOwner.position)
 		{
 			ctx.levelManager->advance_to_next_level(ctx);
@@ -918,7 +918,7 @@ void PlayerController::handle_left_click(GameContext& ctx)
 	}
 
 	MouseMode mode = MouseMode::WALK;
-	assert(ctx.stairs && "PlayerController::handle_left_click: called without stairs");
+	assert(ctx.stairs && "PlayerController::handle_left_click: a click away from the player came without stairs");
 	if (ctx.stairs->position == world_tile)
 	{
 		mode = MouseMode::WALK_TO_STAIRS;

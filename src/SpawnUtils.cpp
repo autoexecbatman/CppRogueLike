@@ -65,10 +65,10 @@ std::optional<Vector2D> pick_one(const std::vector<Vector2D>& candidates, GameCo
 // a full or flooded level answers nothing instead of the search running forever.
 std::optional<Vector2D> find_random_floor_tile(GameContext& ctx)
 {
-	assert(ctx.map);
-	assert(ctx.dice);
+	assert(ctx.map && "SpawnUtils::find_random_floor_tile: called without a map");
+	assert(ctx.dice && "SpawnUtils::find_random_floor_tile: called without dice");
 	// can_place_at asks get_actor, which walks the creature list without checking it.
-	assert(ctx.creatures);
+	assert(ctx.creatures && "SpawnUtils::find_random_floor_tile: called without creatures");
 
 	// Floor only, so a corridor or an open doorway is never a landing.
 	std::vector<Vector2D> free{};
@@ -94,8 +94,8 @@ std::optional<Vector2D> find_random_floor_tile(GameContext& ctx)
 // Map::can_place_at, which is also what excludes water.
 std::optional<Vector2D> find_random_room_position(const DungeonRoom& room, GameContext& ctx)
 {
-	assert(ctx.map);
-	assert(ctx.dice);
+	assert(ctx.map && "SpawnUtils::find_random_room_position: called without a map");
+	assert(ctx.dice && "SpawnUtils::find_random_room_position: called without dice");
 
 	return pick_one(free_tiles_in(room, ctx), ctx);
 }

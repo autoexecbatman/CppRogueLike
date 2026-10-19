@@ -145,13 +145,13 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 				return true;
 			}
 #ifndef __EMSCRIPTEN__
-			assert(ctx.decorEditor && "GameLoopCoordinator::handle_input_phase: called without a decorEditor");
+			assert(ctx.decorEditor && "GameLoopCoordinator::handle_input_phase: handle_zoom called without a decorEditor");
 			if (key == GameKey::DECOR_EDIT_TOGGLE)
 			{
 				ctx.decorEditor->toggle();
 				return true;
 			}
-			assert(ctx.contentEditor && "GameLoopCoordinator::handle_input_phase: called without a contentEditor");
+			assert(ctx.contentEditor && "GameLoopCoordinator::handle_input_phase: handle_zoom called without a contentEditor");
 			if (key == GameKey::CONTENT_EDIT_TOGGLE)
 			{
 				ctx.contentEditor->toggle(*ctx.contentRegistry, *ctx.monsterRegistry, *ctx.itemRegistry);
@@ -361,8 +361,11 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 			hg = 180;
 			hb = 0; // amber
 		}
-		assert(std::ranges::none_of(ctx.floorInventory->items, [](const auto& i)
-			{ return !i; }));
+		[[maybe_unused]] auto is_null = [](const auto& entry)
+		{
+			return !entry;
+		};
+		assert(std::ranges::none_of(ctx.floorInventory->items, is_null) && "GameLoopCoordinator::draw_hover_tooltip: the floor holds a null item");
 		for (const auto& item : ctx.floorInventory->items)
 		{
 			if (item->position == world_tile)

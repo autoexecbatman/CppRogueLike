@@ -206,7 +206,7 @@ const Item* find_item_by_name(const T& inventory, std::string_view name) noexcep
 	{
 		return !item;
 	};
-	assert(std::ranges::none_of(inventory.items, is_null));
+	assert(std::ranges::none_of(inventory.items, is_null) && "InventoryOperations::find_item_by_name: the inventory holds a null item");
 
 	auto it = std::ranges::find_if(inventory.items,
 		[name](const auto& item)

@@ -311,7 +311,7 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 
 	auto key = ItemCreator::create("dungeon_key", best->spawnPos, ctx);
 	[[maybe_unused]] const auto giveKeyToJailerResult = InventoryOperations::add_item_to_inventory(jailer->inventoryData, std::move(key), *jailer, *ctx.dataManager);
-	assert(giveKeyToJailerResult.has_value());
+	assert(giveKeyToJailerResult.has_value() && "TreasureRoom::setup_guard: the jailer could not carry its key");
 
 	ctx.creatureManager->add_creature(std::move(jailer), ctx);
 }
@@ -456,7 +456,7 @@ bool TreasureRoom::maybe_create(int dungeonLevel, RandomDice& generationRng, Gam
 
 	auto is_valid_treasure_room = [&](int roomIndex) -> bool
 	{
-		assert(ctx.stairs != nullptr);
+		assert(ctx.stairs != nullptr && "TreasureRoom::maybe_create: called without stairs");
 		const DungeonRoom& room = ctx.rooms->at(roomIndex);
 		if (room.contains(ctx.stairs->position.x, ctx.stairs->position.y))
 		{

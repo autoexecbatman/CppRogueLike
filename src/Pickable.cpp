@@ -332,7 +332,7 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 		int affected = 0;
 		for (const auto& creature : *ctx.creatures)
 		{
-			assert(creature);
+			assert(creature && "use(TargetedScroll): creatures holds a null entry");
 			if (creature->is_dead())
 			{
 				continue;

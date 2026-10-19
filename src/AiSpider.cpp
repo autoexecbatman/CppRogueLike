@@ -407,7 +407,7 @@ std::optional<Vector2D> AiSpider::find_ambush_position(
 bool AiSpider::is_good_ambush_spot(Vector2D position, GameContext& ctx)
 {
 	assert(ctx.map && "AiSpider::is_good_ambush_spot: called without a map");
-	assert(!ctx.map->is_wall(position));
+	assert(!ctx.map->is_wall(position) && "AiSpider::is_good_ambush_spot: called with a wall for a position");
 
 	struct AmbushMetrics
 	{

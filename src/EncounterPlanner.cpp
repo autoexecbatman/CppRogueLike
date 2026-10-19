@@ -160,10 +160,10 @@ void plan_encounter(const DungeonRoom& room, GameContext& ctx)
 {
 	assert(ctx.creatureManager && "plan_encounter: called without a creatureManager");
 	assert(ctx.monsterRegistry && "plan_encounter: called without a monsterRegistry");
-	assert(ctx.levelManager);
-	assert(ctx.dice);
-	assert(ctx.map);
-	assert(ctx.creatures);
+	assert(ctx.levelManager && "plan_encounter: called without a levelManager");
+	assert(ctx.dice && "plan_encounter: called without dice");
+	assert(ctx.map && "plan_encounter: called without a map");
+	assert(ctx.creatures && "plan_encounter: called without creatures");
 
 	const int dungeonLevel = ctx.levelManager->get_dungeon_level();
 	const int baseBudget = encounter_budget(room.type, dungeonLevel);

@@ -74,7 +74,7 @@ InventoryResult<std::unique_ptr<Item>> remove_item(FloorInventory& inventory, co
 	{
 		return !stored;
 	};
-	assert(std::ranges::none_of(inventory.items, is_null));
+	assert(std::ranges::none_of(inventory.items, is_null) && "InventoryOperations::remove_item(FloorInventory): the floor holds a null item");
 
 	auto matches_item = [&item](const auto& stored)
 	{
@@ -99,7 +99,7 @@ InventoryResult<std::unique_ptr<Item>> remove_item(CreatureInventory& inventory,
 	{
 		return !stored;
 	};
-	assert(std::ranges::none_of(inventory.items, is_null));
+	assert(std::ranges::none_of(inventory.items, is_null) && "InventoryOperations::remove_item(CreatureInventory): the pack holds a null item");
 
 	auto matches_item = [&item](const auto& stored)
 	{
@@ -154,7 +154,7 @@ InventoryResult<std::unique_ptr<Item>> remove_item_by_id(CreatureInventory& inve
 	{
 		return !item;
 	};
-	assert(std::ranges::none_of(inventory.items, is_null));
+	assert(std::ranges::none_of(inventory.items, is_null) && "InventoryOperations::remove_item_by_id: the pack holds a null item");
 
 	auto matches_id = [uniqueId](const auto& item)
 	{
@@ -240,7 +240,7 @@ bool is_carrying(const CreatureInventory& inventory, std::string_view itemKey) n
 	{
 		return !item;
 	};
-	assert(std::ranges::none_of(inventory.items, is_null));
+	assert(std::ranges::none_of(inventory.items, is_null) && "InventoryOperations::is_carrying: the pack holds a null item");
 
 	auto has_key = [itemKey](const auto& item)
 	{
@@ -256,7 +256,7 @@ std::vector<Item*> items_at(FloorInventory& inventory, Vector2D position)
 	{
 		return !item;
 	};
-	assert(std::ranges::none_of(inventory.items, is_null));
+	assert(std::ranges::none_of(inventory.items, is_null) && "InventoryOperations::items_at: the floor holds a null item");
 
 	std::vector<Item*> standing{};
 	for (const auto& item : inventory.items)
@@ -275,7 +275,7 @@ Item* find_item_by_id(FloorInventory& inventory, UniqueId::IdType uniqueId) noex
 	{
 		return !item;
 	};
-	assert(std::ranges::none_of(inventory.items, is_null));
+	assert(std::ranges::none_of(inventory.items, is_null) && "InventoryOperations::find_item_by_id(FloorInventory): the floor holds a null item");
 
 	auto has_id = [uniqueId](const auto& item)
 	{
@@ -292,7 +292,7 @@ Item* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept
 	{
 		return !item;
 	};
-	assert(std::ranges::none_of(inventory.items, is_null));
+	assert(std::ranges::none_of(inventory.items, is_null) && "InventoryOperations::find_item_by_id(CreatureInventory): the pack holds a null item");
 
 	auto it = std::ranges::find_if(inventory.items,
 		[uniqueId](const auto& item)
@@ -309,7 +309,7 @@ const Item* find_item_by_id(const CreatureInventory& inventory, uint64_t uniqueI
 	{
 		return !item;
 	};
-	assert(std::ranges::none_of(inventory.items, is_null));
+	assert(std::ranges::none_of(inventory.items, is_null) && "InventoryOperations::find_item_by_id(const CreatureInventory): the pack holds a null item");
 
 	auto it = std::ranges::find_if(inventory.items,
 		[uniqueId](const auto& item)

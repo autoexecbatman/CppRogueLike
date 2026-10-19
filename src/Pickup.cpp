@@ -41,7 +41,7 @@ void take_floor_item(Creature& taker, Item& item, GameContext& ctx)
 			std::format("You picked up {} gold.", goldBehavior.amount),
 			MessageCompletion::FINISHED);
 		[[maybe_unused]] const auto takeGoldResult = InventoryOperations::remove_item(*ctx.floorInventory, item);
-		assert(takeGoldResult.has_value());
+		assert(takeGoldResult.has_value() && "Pickup::take_floor_item: gold found on the floor could not be taken from it");
 		return;
 	}
 

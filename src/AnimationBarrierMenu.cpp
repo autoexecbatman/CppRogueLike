@@ -18,9 +18,9 @@ AnimationBarrierMenu::AnimationBarrierMenu(GameContext& ctx)
 void AnimationBarrierMenu::menu(GameContext& ctx)
 {
 	assert(ctx.gui && "AnimationBarrierMenu::menu: called without a gui");
-	assert(ctx.renderer);
-	assert(ctx.animSystem);
-	assert(ctx.renderingManager);
+	assert(ctx.renderer && "AnimationBarrierMenu::menu: called without a renderer");
+	assert(ctx.animSystem && "AnimationBarrierMenu::menu: called without an animSystem");
+	assert(ctx.renderingManager && "AnimationBarrierMenu::menu: called without a renderingManager");
 
 	ctx.renderingManager->render(ctx);
 	ctx.animSystem->update_and_render(*ctx.renderer);

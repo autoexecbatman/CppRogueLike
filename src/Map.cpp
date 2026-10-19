@@ -1521,7 +1521,7 @@ Creature* Map::get_actor(Vector2D pos, const GameContext& ctx) const noexcept
 	// Check all creatures (excluding dead ones - they shouldn't block)
 	for (const auto& actor : *ctx.creatures)
 	{
-		assert(actor);
+		assert(actor && "Map::get_actor: creatures holds a null entry");
 		if (actor->position == pos)
 		{
 			// Only return living creatures as blockers
@@ -1710,8 +1710,11 @@ bool Map::close_door(Vector2D pos, GameContext& ctx)
 
 	// Check if there's a floor item on the door tile
 	assert(ctx.floorInventory && "Map::close_door: called without a floorInventory");
-	assert(std::ranges::none_of(ctx.floorInventory->items, [](const auto& i)
-		{ return !i; }));
+	[[maybe_unused]] auto is_null = [](const auto& entry)
+	{
+		return !entry;
+	};
+	assert(std::ranges::none_of(ctx.floorInventory->items, is_null) && "Map::close_door: the floor holds a null item");
 	auto has_item_at_pos = [&pos](const std::unique_ptr<Item>& item)
 	{
 		return item->position == pos;
@@ -2079,7 +2082,7 @@ void Map::place_from_graph(
 		create_room(rooms[i], i == 0, ctx);
 	}
 
-	assert(ctx.messageSystem && "Map::place_from_graph: called without a messageSystem");
+	assert(ctx.messageSystem && "Map::place_from_graph: no messageSystem once the rooms were created");
 	ctx.messageSystem->log("place_from_graph: Rooms created, now connecting with corridors");
 
 	// Step 2: Connect adjacent rooms with corridors (from graph edges)
@@ -2158,7 +2161,7 @@ void Map::place_from_graph(
 		}
 	}
 
-	assert(ctx.messageSystem && "Map::place_from_graph: called without a messageSystem");
+	assert(ctx.messageSystem && "Map::place_from_graph: no messageSystem once the corridors were dug");
 	ctx.messageSystem->log("place_from_graph: Finished. Dug " + std::to_string(dug_edges.size()) + " edges");
 }
 

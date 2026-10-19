@@ -93,7 +93,7 @@ void RenderingManager::restore_game_display() const
 
 void RenderingManager::restore_screen(GameContext& ctx) const
 {
-	assert(ctx.gui != nullptr);
+	assert(ctx.gui != nullptr && "RenderingManager::restore_screen: called without a gui");
 
 	render(ctx);
 	ctx.gui->gui_render(ctx);

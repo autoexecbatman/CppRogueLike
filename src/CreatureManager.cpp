@@ -88,7 +88,7 @@ Creature* CreatureManager::get_actor_at_position(
 {
 	for (const auto& actor : creatures)
 	{
-		assert(actor);
+		assert(actor && "CreatureManager::get_actor_at_position: creatures holds a null entry");
 		if (actor->position == pos)
 		{
 			return actor.get();
