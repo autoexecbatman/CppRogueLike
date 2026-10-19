@@ -214,13 +214,15 @@ TEST_F(AttackStrengthTest, AGirdleOrOgreGauntletsAloneGiveOnlyTheirOwnRow)
 	EXPECT_EQ(gauntletsAlone.damage, 6);
 }
 
-// The exception is for gauntlets of ogre power: gauntlets of swimming and climbing leave
-// a girdle's blow at its own +3 and +7.
+// The exception is for gauntlets of ogre power: gauntlets that add Strength leave a
+// girdle's blow at its own +3 and +7. The data's swimming gauntlets carry no Strength, so
+// they are given +2 here; counted beside the girdle, that would add the row for 2.
 TEST_F(AttackStrengthTest, OtherGauntletsBesideAGirdleAddNothing)
 {
 	player->set_strength(12);
 	ASSERT_TRUE(player->equip_item(weapon("girdle_of_hill_giant_strength"), EquipmentSlot::GIRDLE, ctx));
 	ASSERT_TRUE(player->equip_item(weapon("gauntlets_of_swimming_and_climbing"), EquipmentSlot::GAUNTLETS, ctx));
+	player->get_equipped_item(EquipmentSlot::GAUNTLETS)->behavior = Gauntlets{ .strBonus = 2 };
 
 	const AttackStrength::Adjustment swing = AttackStrength::adjustment(
 		mock.data_manager,
