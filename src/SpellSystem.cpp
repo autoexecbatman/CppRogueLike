@@ -61,6 +61,7 @@
 #include "SpellSystem.h"
 #include "TargetingMenu.h"
 #include "TileConfig.h"
+#include "TurnSchedule.h"
 #include "Vector2D.h"
 #include "Wording.h"
 
@@ -782,11 +783,15 @@ bool cast_hold_person(Creature& caster, GameContext& ctx)
 	return true;
 }
 
+// PHB page 291: the spell lasts "until the recipient attacks any creature, or until 24
+// hours have passed". The attack break is BuffSystem's; this is the day.
+inline constexpr int INVISIBILITY_SPELL_ROUNDS = 24 * ROUNDS_PER_HOUR;
+
 bool cast_invisibility(Creature& caster, GameContext& ctx)
 {
-	ctx.buffSystem->add_buff(caster, BuffType::INVISIBILITY, 0, 20, false, ctx.gameState->get_time()); // Spell: ADD effect
+	ctx.buffSystem->add_buff(caster, BuffType::INVISIBILITY, 0, INVISIBILITY_SPELL_ROUNDS, false, ctx.gameState->get_time());
 	ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Invisibility! ");
-	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "You fade from view for 20 turns.");
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "You fade from view.");
 	ctx.messageSystem->finalize_message();
 	return true;
 }

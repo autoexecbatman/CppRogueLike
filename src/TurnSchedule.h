@@ -54,6 +54,10 @@
 // why there is no second constant naming what normal is.
 inline constexpr int TIME_UNITS_PER_ROUND = 120;
 
+// Rounds in an hour of game time. The book's figure, not a measured one: "A round is
+// approximately one minute long" (PHB page 184), so an hour is sixty of them.
+inline constexpr int ROUNDS_PER_HOUR = 60;
+
 // What an action nominally costing `baseCost` actually costs a being whose own ordinary
 // action takes `actionDelay`. A being that acts more often has a smaller delay and so
 // pays less for the same action, which is the whole of what pace does - and it reaches

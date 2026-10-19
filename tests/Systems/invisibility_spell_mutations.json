@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=InvisibilitySpellTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "inline constexpr int INVISIBILITY_SPELL_ROUNDS = 24 * ROUNDS_PER_HOUR;",
+      "mutated": "inline constexpr int INVISIBILITY_SPELL_ROUNDS = 20;",
+      "catches": "the game's old twenty rounds back in place of the book's day"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "inline constexpr int INVISIBILITY_SPELL_ROUNDS = 24 * ROUNDS_PER_HOUR;",
+      "mutated": "inline constexpr int INVISIBILITY_SPELL_ROUNDS = 24 * ROUNDS_PER_HOUR + 1;",
+      "catches": "the spell outstaying the day by a round"
+    },
+    {
+      "file": "src/TurnSchedule.h",
+      "original": "inline constexpr int ROUNDS_PER_HOUR = 60;",
+      "mutated": "inline constexpr int ROUNDS_PER_HOUR = 59;",
+      "catches": "an hour that is not the book's sixty one-minute rounds"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \"You fade from view.\");",
+      "mutated": "\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \"You fade from view for 20 turns.\");",
+      "catches": "the casting still promising the old twenty"
+    }
+  ]
+}

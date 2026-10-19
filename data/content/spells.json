@@ -27,7 +27,7 @@
     "name": "Invisibility",
     "level": 2,
     "class": "wizard",
-    "description": "Become invisible for 20 turns"
+    "description": "Become invisible until you attack, for up to a day"
   },
   "knock": {
     "name": "Knock",
