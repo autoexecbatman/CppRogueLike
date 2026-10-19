@@ -1,8 +1,8 @@
 // FovMap.cpp -- standalone FOV grid using recursive shadowcasting.
 #include "FovMap.h"
 
-FovMap::FovMap(int width, int height)
-	: width_(width), height_(height), cells_(width * height)
+FovMap::FovMap(int gridWidth, int gridHeight)
+	: width(gridWidth), height(gridHeight), cells(gridWidth * gridHeight)
 {
 }
 
@@ -13,7 +13,7 @@ void FovMap::set_properties(int col, int row, FovProperties properties) noexcept
 		return;
 	}
 
-	FovCell& cell = cells_[cell_index(col, row)];
+	FovCell& cell = cells[cell_index(col, row)];
 	cell.walkable = properties.walkable;
 	cell.transparent = properties.transparent;
 }
@@ -25,7 +25,7 @@ bool FovMap::is_walkable(int col, int row) const noexcept
 		return false;
 	}
 
-	return cells_[cell_index(col, row)].walkable;
+	return cells[cell_index(col, row)].walkable;
 }
 
 bool FovMap::is_in_fov(int col, int row) const noexcept
@@ -35,17 +35,17 @@ bool FovMap::is_in_fov(int col, int row) const noexcept
 		return false;
 	}
 
-	return cells_[cell_index(col, row)].visible;
+	return cells[cell_index(col, row)].visible;
 }
 
 bool FovMap::in_bounds(int col, int row) const noexcept
 {
-	return col >= 0 && col < width_ && row >= 0 && row < height_;
+	return col >= 0 && col < width && row >= 0 && row < height;
 }
 
 int FovMap::cell_index(int col, int row) const noexcept
 {
-	return row * width_ + col;
+	return row * width + col;
 }
 
 // ---------------------------------------------------------------------------
@@ -53,113 +53,114 @@ int FovMap::cell_index(int col, int row) const noexcept
 //
 // Reference: Bjorn Pettersen's algorithm (Roguebasin C++ shadowcasting).
 // For each of 8 octants, scan_octant() casts shadows row by row.
-//   mult[4][8]: each column is {xx, xy, yx, yy} for one octant.
+//   octantTransforms[4][8]: each column is one octant's four coefficients, in the order
+//   scan_octant takes them.
 // ---------------------------------------------------------------------------
 
-void FovMap::compute_fov(int panelX, int panelY, int radius)
+void FovMap::compute_fov(int col, int row, int radius)
 {
-	for (auto& c : cells_)
+	for (auto& cell : cells)
 	{
-		c.visible = false;
+		cell.visible = false;
 	}
 
-	if (!in_bounds(panelX, panelY))
+	if (!in_bounds(col, row))
 	{
 		return;
 	}
 
-	cells_[cell_index(panelX, panelY)].visible = true;
+	cells[cell_index(col, row)].visible = true;
 
-	static const int mult[4][8] = {
+	static const int octantTransforms[4][8] = {
 		{ 1, 0, 0, -1, -1, 0, 0, 1 },
 		{ 0, 1, -1, 0, 0, -1, 1, 0 },
 		{ 0, 1, 1, 0, 0, -1, -1, 0 },
 		{ 1, 0, 0, 1, -1, 0, 0, -1 },
 	};
 
-	for (int oct = 0; oct < 8; ++oct)
+	for (int octant = 0; octant < 8; ++octant)
 	{
 		scan_octant(
-			panelX,
-			panelY,
+			col,
+			row,
 			radius,
 			1,
 			1.0f,
 			0.0f,
-			mult[0][oct],
-			mult[1][oct],
-			mult[2][oct],
-			mult[3][oct]);
+			octantTransforms[0][octant],
+			octantTransforms[1][octant],
+			octantTransforms[2][octant],
+			octantTransforms[3][octant]);
 	}
 }
 
 void FovMap::scan_octant(
-	int cx,
-	int cy,
+	int originCol,
+	int originRow,
 	int radius,
-	int row,
+	int firstDepth,
 	float start,
 	float end,
-	int xx,
-	int xy,
-	int yx,
-	int yy)
+	int colPerColOffset,
+	int colPerRowOffset,
+	int rowPerColOffset,
+	int rowPerRowOffset)
 {
 	if (start < end)
 	{
 		return;
 	}
 
-	float new_start = start;
+	float nextStart = start;
 
-	for (int i = row; i <= radius; ++i)
+	for (int depth = firstDepth; depth <= radius; ++depth)
 	{
 		bool blocked = false;
-		const int dy = -i;
+		const int rowOffset = -depth;
 
-		for (int dx = -i; dx <= 0; ++dx)
+		for (int colOffset = -depth; colOffset <= 0; ++colOffset)
 		{
-			float l_slope = (static_cast<float>(dx) - 0.5f) / (static_cast<float>(dy) + 0.5f);
-			float r_slope = (static_cast<float>(dx) + 0.5f) / (static_cast<float>(dy) - 0.5f);
+			float leftSlope = (static_cast<float>(colOffset) - 0.5f) / (static_cast<float>(rowOffset) + 0.5f);
+			float rightSlope = (static_cast<float>(colOffset) + 0.5f) / (static_cast<float>(rowOffset) - 0.5f);
 
-			if (start < r_slope)
+			if (start < rightSlope)
 			{
 				continue;
 			}
 
-			if (end > l_slope)
+			if (end > leftSlope)
 			{
 				break;
 			}
 
-			const int sx = cx + dx * xx + dy * xy;
-			const int sy = cy + dx * yx + dy * yy;
+			const int col = originCol + colOffset * colPerColOffset + rowOffset * colPerRowOffset;
+			const int row = originRow + colOffset * rowPerColOffset + rowOffset * rowPerRowOffset;
 
-			if (in_bounds(sx, sy) && dx * dx + dy * dy <= radius * radius)
+			if (in_bounds(col, row) && colOffset * colOffset + rowOffset * rowOffset <= radius * radius)
 			{
-				cells_[cell_index(sx, sy)].visible = true;
+				cells[cell_index(col, row)].visible = true;
 			}
 
 			if (blocked)
 			{
-				if (!in_bounds(sx, sy) || !cells_[cell_index(sx, sy)].transparent)
+				if (!in_bounds(col, row) || !cells[cell_index(col, row)].transparent)
 				{
-					new_start = r_slope;
+					nextStart = rightSlope;
 				}
 				else
 				{
 					blocked = false;
-					start = new_start;
+					start = nextStart;
 				}
 			}
-			else if (!in_bounds(sx, sy) || !cells_[cell_index(sx, sy)].transparent)
+			else if (!in_bounds(col, row) || !cells[cell_index(col, row)].transparent)
 			{
 				blocked = true;
-				if (i < radius)
+				if (depth < radius)
 				{
-					scan_octant(cx, cy, radius, i + 1, start, l_slope, xx, xy, yx, yy);
+					scan_octant(originCol, originRow, radius, depth + 1, start, leftSlope, colPerColOffset, colPerRowOffset, rowPerColOffset, rowPerRowOffset);
 				}
-				new_start = r_slope;
+				nextStart = rightSlope;
 			}
 		}
 

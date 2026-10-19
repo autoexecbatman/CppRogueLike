@@ -29,30 +29,30 @@ struct FovProperties
 class FovMap
 {
 private:
-	int width_;
-	int height_;
-	std::vector<FovCell> cells_;
+	int width{ 0 };
+	int height{ 0 };
+	std::vector<FovCell> cells{};
 
 	bool in_bounds(int col, int row) const noexcept;
 	int cell_index(int col, int row) const noexcept;
 
 	void scan_octant(
-		int cx,
-		int cy,
+		int originCol,
+		int originRow,
 		int radius,
-		int row,
+		int firstDepth,
 		float start,
 		float end,
-		int xx,
-		int xy,
-		int yx,
-		int yy);
+		int colPerColOffset,
+		int colPerRowOffset,
+		int rowPerColOffset,
+		int rowPerRowOffset);
 
 public:
-	FovMap(int width, int height);
+	FovMap(int gridWidth, int gridHeight);
 
 	void set_properties(int col, int row, FovProperties properties) noexcept;
 	bool is_walkable(int col, int row) const noexcept;
 	bool is_in_fov(int col, int row) const noexcept;
-	void compute_fov(int panelX, int panelY, int radius);
+	void compute_fov(int col, int row, int radius);
 };
