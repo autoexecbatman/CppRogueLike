@@ -18,9 +18,9 @@
 namespace
 {
 
-std::string effect_type_name(SpellEffectType e)
+std::string effect_type_name(SpellEffectType effectType)
 {
-	switch (e)
+	switch (effectType)
 	{
 	case SpellEffectType::CURE_LIGHT_WOUNDS:
 	{
@@ -77,26 +77,26 @@ std::string effect_type_name(SpellEffectType e)
 	}
 }
 
-SpellEffectType effect_type_next(SpellEffectType e)
+SpellEffectType effect_type_next(SpellEffectType effectType)
 {
-	int v = static_cast<int>(e) + 1;
+	int value = static_cast<int>(effectType) + 1;
 	constexpr int LAST = static_cast<int>(SpellEffectType::NONE);
-	if (v > LAST)
+	if (value > LAST)
 	{
-		v = 0;
+		value = 0;
 	}
-	return static_cast<SpellEffectType>(v);
+	return static_cast<SpellEffectType>(value);
 }
 
-SpellEffectType effect_type_prev(SpellEffectType e)
+SpellEffectType effect_type_prev(SpellEffectType effectType)
 {
-	int v = static_cast<int>(e) - 1;
+	int value = static_cast<int>(effectType) - 1;
 	constexpr int LAST = static_cast<int>(SpellEffectType::NONE);
-	if (v < 0)
+	if (value < 0)
 	{
-		v = LAST;
+		value = LAST;
 	}
-	return static_cast<SpellEffectType>(v);
+	return static_cast<SpellEffectType>(value);
 }
 
 } // namespace
@@ -290,11 +290,11 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 			definition.description = "No effect yet.";
 			const std::string newKey = spells.add_custom(std::move(definition));
 			keys = spells.get_all_keys();
-			for (int i = 0; i < static_cast<int>(keys.size()); ++i)
+			for (int keyIndex = 0; keyIndex < static_cast<int>(keys.size()); ++keyIndex)
 			{
-				if (keys[i] == newKey)
+				if (keys[keyIndex] == newKey)
 				{
-					listCursor = i;
+					listCursor = keyIndex;
 					break;
 				}
 			}
@@ -355,14 +355,14 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 
 void SpellEditor::handle_edit_string()
 {
-	int ch = GetCharPressed();
-	while (ch != 0)
+	int pressed = GetCharPressed();
+	while (pressed != 0)
 	{
-		if (ch >= 32 && ch < 127)
+		if (pressed >= 32 && pressed < 127)
 		{
-			editBuffer += static_cast<char>(ch);
+			editBuffer += static_cast<char>(pressed);
 		}
-		ch = GetCharPressed();
+		pressed = GetCharPressed();
 	}
 
 	if (IsKeyPressed(KEY_BACKSPACE) && !editBuffer.empty())
@@ -390,24 +390,24 @@ void SpellEditor::render(const GameContext& ctx) const
 {
 	assert(ctx.spellRegistry && "SpellEditor::render: called without a spellRegistry");
 
-	const Renderer& r = *ctx.renderer;
-	int screenWidth = r.get_screen_width();
-	int screenHeight = r.get_screen_height();
+	const Renderer& renderer = *ctx.renderer;
+	int screenWidth = renderer.get_screen_width();
+	int screenHeight = renderer.get_screen_height();
 
 	DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 0, 0, 0, 255 });
 
-	render_header(r);
-	render_list(r, *ctx.spellRegistry);
-	render_fields(r);
-	render_hint(r);
+	render_header(renderer);
+	render_list(renderer, *ctx.spellRegistry);
+	render_fields(renderer);
+	render_hint(renderer);
 }
 
-void SpellEditor::render_header(const Renderer& r) const
+void SpellEditor::render_header(const Renderer& renderer) const
 {
-	int screenWidth = r.get_screen_width();
+	int screenWidth = renderer.get_screen_width();
 	DrawRectangle(0, 0, screenWidth, HEADER_HEIGHT, Color{ 20, 20, 40, 255 });
-	r.draw_text_color(Vector2D{ 8, 6 }, "SPELL EDITOR", Color{ 180, 255, 180, 255 });
-	r.draw_text_color(Vector2D{ 8, 26 },
+	renderer.draw_text_color(Vector2D{ 8, 6 }, "SPELL EDITOR", Color{ 180, 255, 180, 255 });
+	renderer.draw_text_color(Vector2D{ 8, 26 },
 		"Tab:switch focus  Up/Down:navigate  Left/Right:adjust  Enter:edit/cycle  Ctrl+S:save  Esc:exit",
 		Color{ 130, 130, 100, 255 });
 }
@@ -427,15 +427,15 @@ void SpellEditor::render_list(const Renderer& renderer, const SpellRegistry& spe
 
 	::Vector2 mouse = GetMousePosition();
 
-	for (int i = scroll; i < total; ++i)
+	for (int spellIndex = scroll; spellIndex < total; ++spellIndex)
 	{
-		int itemY = body_y + (i - scroll) * ITEM_HEIGHT;
+		int itemY = body_y + (spellIndex - scroll) * ITEM_HEIGHT;
 		if (itemY + ITEM_HEIGHT > body_y + body_h)
 		{
 			break;
 		}
 
-		bool is_sel = (i == listCursor);
+		bool is_sel = (spellIndex == listCursor);
 		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH && mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
@@ -460,9 +460,9 @@ void SpellEditor::render_list(const Renderer& renderer, const SpellRegistry& spe
 		// Show spell class indicator
 		const SpellDefinition& definition = is_sel
 			? working
-			: spells.get_by_key(keys[i]);
+			: spells.get_by_key(keys[spellIndex]);
 
-		const bool isCustom = !spells.is_builtin_key(keys[i]);
+		const bool isCustom = !spells.is_builtin_key(keys[spellIndex]);
 
 		Color classColour = (definition.spellClass == SpellClass::CLERIC)
 			? Color{ 100, 220, 255, 255 }
@@ -479,10 +479,10 @@ void SpellEditor::render_list(const Renderer& renderer, const SpellRegistry& spe
 	}
 }
 
-void SpellEditor::render_fields(const Renderer& r) const
+void SpellEditor::render_fields(const Renderer& renderer) const
 {
-	int screenWidth = r.get_screen_width();
-	int screenHeight = r.get_screen_height();
+	int screenWidth = renderer.get_screen_width();
+	int screenHeight = renderer.get_screen_height();
 	int panelX = LIST_WIDTH;
 	int panelY = HEADER_HEIGHT;
 	int fieldsWidth = screenWidth - LIST_WIDTH;
@@ -492,16 +492,16 @@ void SpellEditor::render_fields(const Renderer& r) const
 
 	::Vector2 mouse = GetMousePosition();
 
-	for (int i = 0; i < FIELD_COUNT; ++i)
+	for (int fieldIndex = 0; fieldIndex < FIELD_COUNT; ++fieldIndex)
 	{
-		int itemY = panelY + i * FIELD_HEIGHT;
+		int itemY = panelY + fieldIndex * FIELD_HEIGHT;
 		if (itemY + FIELD_HEIGHT > panelY + fieldsHeight)
 		{
 			break;
 		}
 
-		FieldId fid = static_cast<FieldId>(i);
-		bool is_sel = (i == fieldCursor);
+		FieldId fid = static_cast<FieldId>(fieldIndex);
+		bool is_sel = (fieldIndex == fieldCursor);
 		bool hovered = mouse.x >= panelX && mouse.x < screenWidth && mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
@@ -526,7 +526,7 @@ void SpellEditor::render_fields(const Renderer& r) const
 		Color labelColor = is_sel ? Color{ 180, 255, 180, 255 } : Color{ 150, 150, 150, 255 };
 		Color valueColor = is_sel ? Color{ 255, 255, 200, 255 } : Color{ 200, 200, 200, 255 };
 
-		r.draw_text_color(Vector2D{ panelX + 12, itemY + (FIELD_HEIGHT - 16) / 2 }, field_label(fid), labelColor);
+		renderer.draw_text_color(Vector2D{ panelX + 12, itemY + (FIELD_HEIGHT - 16) / 2 }, field_label(fid), labelColor);
 
 		std::string val;
 		if (is_sel && mode == Mode::EDIT_STRING)
@@ -538,15 +538,15 @@ void SpellEditor::render_fields(const Renderer& r) const
 			val = field_value(fid);
 		}
 
-		int vx = screenWidth - r.measure_text(val) - 16;
-		r.draw_text_color(Vector2D{ vx, itemY + (FIELD_HEIGHT - 16) / 2 }, val, valueColor);
+		int valuePixelX = screenWidth - renderer.measure_text(val) - 16;
+		renderer.draw_text_color(Vector2D{ valuePixelX, itemY + (FIELD_HEIGHT - 16) / 2 }, val, valueColor);
 	}
 }
 
-void SpellEditor::render_hint(const Renderer& r) const
+void SpellEditor::render_hint(const Renderer& renderer) const
 {
-	int screenWidth = r.get_screen_width();
-	int screenHeight = r.get_screen_height();
+	int screenWidth = renderer.get_screen_width();
+	int screenHeight = renderer.get_screen_height();
 	int hint_y = screenHeight - HINT_HEIGHT;
 
 	DrawRectangle(0, hint_y, screenWidth, HINT_HEIGHT, Color{ 20, 20, 40, 255 });
@@ -572,7 +572,7 @@ void SpellEditor::render_hint(const Renderer& r) const
 	}
 
 	Color hintColor = saved_flash ? Color{ 100, 255, 100, 255 } : Color{ 160, 160, 120, 255 };
-	r.draw_text_color(Vector2D{ 8, hint_y + 6 }, msg, hintColor);
+	renderer.draw_text_color(Vector2D{ 8, hint_y + 6 }, msg, hintColor);
 }
 
 // ---------------------------------------------------------------------------
@@ -593,9 +593,9 @@ FieldId SpellEditor::current_field() const
 	return static_cast<FieldId>(fieldCursor);
 }
 
-std::string SpellEditor::field_label(FieldId f) const
+std::string SpellEditor::field_label(FieldId field) const
 {
-	switch (f)
+	switch (field)
 	{
 	case FieldId::NAME:
 	{
@@ -620,9 +620,9 @@ std::string SpellEditor::field_label(FieldId f) const
 	}
 }
 
-std::string SpellEditor::field_value(FieldId f) const
+std::string SpellEditor::field_value(FieldId field) const
 {
-	switch (f)
+	switch (field)
 	{
 	case FieldId::NAME:
 	{
@@ -659,18 +659,18 @@ std::string SpellEditor::field_value(FieldId f) const
 	}
 }
 
-bool SpellEditor::field_is_string(FieldId f) const
+bool SpellEditor::field_is_string(FieldId field) const
 {
-	return f == FieldId::NAME || f == FieldId::DESCRIPTION;
+	return field == FieldId::NAME || field == FieldId::DESCRIPTION;
 }
 
-void SpellEditor::field_adjust(FieldId f, int delta)
+void SpellEditor::field_adjust(FieldId field, int delta)
 {
-	if (f == FieldId::LEVEL)
+	if (field == FieldId::LEVEL)
 	{
 		working.level = std::clamp(working.level + delta, 1, 9);
 	}
-	else if (f == FieldId::EFFECT_TYPE)
+	else if (field == FieldId::EFFECT_TYPE)
 	{
 		if (delta > 0)
 		{
@@ -683,9 +683,9 @@ void SpellEditor::field_adjust(FieldId f, int delta)
 	}
 }
 
-void SpellEditor::field_cycle(FieldId f)
+void SpellEditor::field_cycle(FieldId field)
 {
-	if (f == FieldId::CLASS)
+	if (field == FieldId::CLASS)
 	{
 		if (working.spellClass == SpellClass::CLERIC)
 		{
@@ -700,19 +700,19 @@ void SpellEditor::field_cycle(FieldId f)
 			working.spellClass = SpellClass::CLERIC;
 		}
 	}
-	else if (f == FieldId::EFFECT_TYPE)
+	else if (field == FieldId::EFFECT_TYPE)
 	{
 		working.effect_type = effect_type_next(working.effect_type);
 	}
 }
 
-void SpellEditor::field_set_string(FieldId f, std::string val)
+void SpellEditor::field_set_string(FieldId field, std::string val)
 {
-	if (f == FieldId::NAME)
+	if (field == FieldId::NAME)
 	{
 		working.name = std::move(val);
 	}
-	else if (f == FieldId::DESCRIPTION)
+	else if (field == FieldId::DESCRIPTION)
 	{
 		working.description = std::move(val);
 	}

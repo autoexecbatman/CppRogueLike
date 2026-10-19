@@ -67,21 +67,21 @@ private:
 	void handle_edit_string();
 
 	void render(const GameContext& ctx) const;
-	void render_header(const Renderer& r) const;
+	void render_header(const Renderer& renderer) const;
 	void render_list(const Renderer& renderer, const SpellRegistry& spells) const;
-	void render_fields(const Renderer& r) const;
-	void render_hint(const Renderer& r) const;
+	void render_fields(const Renderer& renderer) const;
+	void render_hint(const Renderer& renderer) const;
 
 	[[nodiscard]] const std::string& current_key() const;
 	[[nodiscard]] FieldId current_field() const;
 
-	[[nodiscard]] std::string field_label(FieldId f) const;
-	[[nodiscard]] std::string field_value(FieldId f) const;
-	[[nodiscard]] bool field_is_string(FieldId f) const;
+	[[nodiscard]] std::string field_label(FieldId field) const;
+	[[nodiscard]] std::string field_value(FieldId field) const;
+	[[nodiscard]] bool field_is_string(FieldId field) const;
 
-	void field_adjust(FieldId f, int delta);
-	void field_cycle(FieldId f);
-	void field_set_string(FieldId f, std::string val);
+	void field_adjust(FieldId field, int delta);
+	void field_cycle(FieldId field);
+	void field_set_string(FieldId field, std::string val);
 
 public:
 	void enter(const SpellRegistry& spells);

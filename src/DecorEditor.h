@@ -44,8 +44,8 @@ private:
 	};
 
 	// nlohmann's readers and writers for a palette row, found by argument-dependent lookup.
-	friend void to_json(nlohmann::json& j, const PaletteEntry& entry);
-	friend void from_json(const nlohmann::json& j, PaletteEntry& entry);
+	friend void to_json(nlohmann::json& output, const PaletteEntry& entry);
+	friend void from_json(const nlohmann::json& source, PaletteEntry& entry);
 
 	bool active{ false };
 	int palette_index{ 0 };
@@ -105,7 +105,7 @@ public:
 
 	void toggle();
 
-	void set_char_input(int ch) noexcept { buffered_char = ch; }
+	void set_char_input(int character) noexcept { buffered_char = character; }
 
 	void cycle_next();
 	void cycle_prev();

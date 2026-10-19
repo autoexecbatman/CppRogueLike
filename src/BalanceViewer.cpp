@@ -67,10 +67,10 @@ void BalanceViewer::draw_column(
 	int fontOff = (tileSize - ctx.renderer->get_font_size()) / 2;
 	int vrows = ctx.renderer->get_viewport_rows();
 
-	int x = startCol * tileSize + tileSize;
+	int pixelX = startCol * tileSize + tileSize;
 	int row = 2;
 
-	ctx.renderer->draw_text(Vector2D{ x, row * tileSize + fontOff }, header, ColorPairId::GREEN_BLACK);
+	ctx.renderer->draw_text(Vector2D{ pixelX, row * tileSize + fontOff }, header, ColorPairId::GREEN_BLACK);
 	++row;
 
 	for (const auto& entry : dist)
@@ -81,7 +81,7 @@ void BalanceViewer::draw_column(
 		}
 
 		std::string line = std::format("{}  {:.1f}%", entry.name, entry.percentage);
-		ctx.renderer->draw_text(Vector2D{ x, row * tileSize + fontOff }, line, ColorPairId::WHITE_BLACK);
+		ctx.renderer->draw_text(Vector2D{ pixelX, row * tileSize + fontOff }, line, ColorPairId::WHITE_BLACK);
 		++row;
 	}
 }
@@ -96,10 +96,10 @@ void BalanceViewer::draw_item_column(
 	int fontOff = (tileSize - ctx.renderer->get_font_size()) / 2;
 	int vrows = ctx.renderer->get_viewport_rows();
 
-	int x = startCol * tileSize + tileSize;
+	int pixelX = startCol * tileSize + tileSize;
 	int row = 2;
 
-	ctx.renderer->draw_text(Vector2D{ x, row * tileSize + fontOff }, header, ColorPairId::GREEN_BLACK);
+	ctx.renderer->draw_text(Vector2D{ pixelX, row * tileSize + fontOff }, header, ColorPairId::GREEN_BLACK);
 	++row;
 
 	for (const auto& entry : dist)
@@ -110,7 +110,7 @@ void BalanceViewer::draw_item_column(
 		}
 
 		std::string line = std::format("{:<24} {:5.1f}%  {}", entry.name, entry.percentage, entry.category);
-		ctx.renderer->draw_text(Vector2D{ x, row * tileSize + fontOff }, line, ColorPairId::WHITE_BLACK);
+		ctx.renderer->draw_text(Vector2D{ pixelX, row * tileSize + fontOff }, line, ColorPairId::WHITE_BLACK);
 		++row;
 	}
 }

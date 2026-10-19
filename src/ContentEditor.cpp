@@ -164,24 +164,24 @@ void ContentEditor::draw_header(const Renderer& renderer)
 	const char* TAB_NAMES[2] = { "Items", "Monsters" };
 	::Vector2 mouse = GetMousePosition();
 
-	for (int t = 0; t < 2; ++t)
+	for (int tabIndex = 0; tabIndex < 2; ++tabIndex)
 	{
-		int tx = 8 + t * (TAB_W + 4);
-		bool sel = (tab == t);
+		int tabPixelX = 8 + tabIndex * (TAB_W + 4);
+		bool sel = (tab == tabIndex);
 		Color bgColor = sel ? Color{ 80, 80, 0, 255 } : Color{ 30, 30, 60, 255 };
 		Color textColor = sel ? Color{ 255, 255, 100, 255 } : Color{ 160, 160, 160, 255 };
 
-		DrawRectangle(tx, TAB_Y, TAB_W, TAB_H, bgColor);
-		DrawRectangleLines(tx, TAB_Y, TAB_W, TAB_H, Color{ 100, 100, 60, 255 });
-		renderer.draw_text_color(Vector2D{ tx + 8, TAB_Y + 4 }, TAB_NAMES[t], textColor);
+		DrawRectangle(tabPixelX, TAB_Y, TAB_W, TAB_H, bgColor);
+		DrawRectangleLines(tabPixelX, TAB_Y, TAB_W, TAB_H, Color{ 100, 100, 60, 255 });
+		renderer.draw_text_color(Vector2D{ tabPixelX + 8, TAB_Y + 4 }, TAB_NAMES[tabIndex], textColor);
 
 		bool click_tab = IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
-			mouse.x >= tx && mouse.x < tx + TAB_W &&
+			mouse.x >= tabPixelX && mouse.x < tabPixelX + TAB_W &&
 			mouse.y >= TAB_Y && mouse.y < TAB_Y + TAB_H;
 
 		if (click_tab)
 		{
-			tab = t;
+			tab = tabIndex;
 			listCursor = 0;
 			listScroll = 0;
 		}
@@ -224,15 +224,15 @@ void ContentEditor::draw_list(
 
 	BeginScissorMode(list_x, list_y, list_w, list_h);
 
-	for (int i = listScroll; i < total; ++i)
+	for (int entryIndex = listScroll; entryIndex < total; ++entryIndex)
 	{
-		int itemY = list_y + (i - listScroll) * ITEM_H;
+		int itemY = list_y + (entryIndex - listScroll) * ITEM_H;
 		if (itemY + ITEM_H > list_y + list_h)
 		{
 			break;
 		}
 
-		bool is_sel = (i == listCursor);
+		bool is_sel = (entryIndex == listCursor);
 		bool hovered = in_list && mouse.y >= itemY && mouse.y < itemY + ITEM_H;
 
 		if (is_sel)
@@ -245,17 +245,17 @@ void ContentEditor::draw_list(
 		}
 
 		TileRef tile = (tab == 0)
-			? (contentRegistry ? contentRegistry->get_tile(entries[i].itemKey) : TileRef{})
-			: monsters.get_tile(static_cast<MonsterId>(entries[i].entityKey));
+			? (contentRegistry ? contentRegistry->get_tile(entries[entryIndex].itemKey) : TileRef{})
+			: monsters.get_tile(static_cast<MonsterId>(entries[entryIndex].entityKey));
 
 		renderer.draw_tile_screen_sized(Vector2D{ list_x + PAD, itemY + (ITEM_H - TILE_SZ) / 2 }, tile, TILE_SZ);
 
 		Color textColor = is_sel ? Color{ 255, 255, 100, 255 } : Color{ 200, 200, 200, 255 };
-		renderer.draw_text_color(Vector2D{ list_x + PAD + TILE_SZ + 4, itemY + (ITEM_H - 16) / 2 }, entries[i].name, textColor);
+		renderer.draw_text_color(Vector2D{ list_x + PAD + TILE_SZ + 4, itemY + (ITEM_H - 16) / 2 }, entries[entryIndex].name, textColor);
 
 		if (hovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
 		{
-			listCursor = i;
+			listCursor = entryIndex;
 		}
 	}
 
@@ -267,8 +267,8 @@ void ContentEditor::draw_browser(
 	MonsterRegistry& monsters,
 	int panelX,
 	int panelY,
-	int bw,
-	int bh)
+	int browserWidth,
+	int browserHeight)
 {
 	constexpr int BROWSER_TILE = 36;
 	constexpr int PAD = 10;
@@ -277,7 +277,7 @@ void ContentEditor::draw_browser(
 	const int total_sheets = renderer.get_loaded_sheet_count();
 	auto advance_sheet = [&](int dir)
 	{
-		for (int i = 0; i < total_sheets; ++i)
+		for (int sheetsTried = 0; sheetsTried < total_sheets; ++sheetsTried)
 		{
 			browserSheet = (browserSheet + dir + total_sheets) % total_sheets;
 			if (renderer.sheet_is_loaded(static_cast<TileSheet>(browserSheet)))
@@ -305,7 +305,7 @@ void ContentEditor::draw_browser(
 	const int sheet_cols = renderer.get_sheet_cols(static_cast<TileSheet>(browserSheet));
 	const int sheet_rows = renderer.get_sheet_rows(static_cast<TileSheet>(browserSheet));
 
-	DrawRectangle(panelX, panelY, bw, SUB_HEADER_H, Color{ 15, 15, 30, 255 });
+	DrawRectangle(panelX, panelY, browserWidth, SUB_HEADER_H, Color{ 15, 15, 30, 255 });
 
 	std::string hdr = std::format(
 		"Sheet: {} ({}/{})  --  {}x{} tiles",
@@ -318,10 +318,10 @@ void ContentEditor::draw_browser(
 	renderer.draw_text_color(Vector2D{ panelX + PAD, panelY + 4 }, hdr, Color{ 200, 200, 120, 255 });
 
 	const int grid_y = panelY + SUB_HEADER_H;
-	const int grid_h = bh - SUB_HEADER_H;
+	const int grid_h = browserHeight - SUB_HEADER_H;
 
 	::Vector2 mouse = GetMousePosition();
-	bool in_browser = mouse.x >= panelX && mouse.x < panelX + bw &&
+	bool in_browser = mouse.x >= panelX && mouse.x < panelX + browserWidth &&
 		mouse.y >= grid_y && mouse.y < grid_y + grid_h;
 
 	if (in_browser)
@@ -336,39 +336,39 @@ void ContentEditor::draw_browser(
 
 	TileRef selected_tile = current_tile(monsters);
 
-	BeginScissorMode(panelX, grid_y, bw, grid_h);
+	BeginScissorMode(panelX, grid_y, browserWidth, grid_h);
 
 	for (int row = browserScroll; row < sheet_rows; ++row)
 	{
-		int py = grid_y + (row - browserScroll) * (BROWSER_TILE + 2);
-		if (py >= grid_y + grid_h)
+		int cellPixelY = grid_y + (row - browserScroll) * (BROWSER_TILE + 2);
+		if (cellPixelY >= grid_y + grid_h)
 		{
 			break;
 		}
 
 		for (int col = 0; col < sheet_cols; ++col)
 		{
-			int px = panelX + PAD + col * (BROWSER_TILE + 2);
+			int cellPixelX = panelX + PAD + col * (BROWSER_TILE + 2);
 			TileRef tid{ static_cast<TileSheet>(browserSheet), col, row };
 
 			bool is_sel = (tid == selected_tile);
-			bool hovered_tile = mouse.x >= px && mouse.x < px + BROWSER_TILE &&
-				mouse.y >= py && mouse.y < py + BROWSER_TILE;
+			bool hovered_tile = mouse.x >= cellPixelX && mouse.x < cellPixelX + BROWSER_TILE &&
+				mouse.y >= cellPixelY && mouse.y < cellPixelY + BROWSER_TILE;
 
 			if (is_sel)
 			{
-				DrawRectangle(px, py, BROWSER_TILE, BROWSER_TILE, Color{ 60, 60, 0, 220 });
+				DrawRectangle(cellPixelX, cellPixelY, BROWSER_TILE, BROWSER_TILE, Color{ 60, 60, 0, 220 });
 			}
 			else if (hovered_tile)
 			{
-				DrawRectangle(px, py, BROWSER_TILE, BROWSER_TILE, Color{ 40, 40, 20, 160 });
+				DrawRectangle(cellPixelX, cellPixelY, BROWSER_TILE, BROWSER_TILE, Color{ 40, 40, 20, 160 });
 			}
 
-			renderer.draw_tile_screen_sized(Vector2D{ px, py }, tid, BROWSER_TILE);
+			renderer.draw_tile_screen_sized(Vector2D{ cellPixelX, cellPixelY }, tid, BROWSER_TILE);
 
 			if (is_sel)
 			{
-				DrawRectangleLines(px, py, BROWSER_TILE, BROWSER_TILE, Color{ 255, 255, 0, 255 });
+				DrawRectangleLines(cellPixelX, cellPixelY, BROWSER_TILE, BROWSER_TILE, Color{ 255, 255, 0, 255 });
 			}
 
 			if (hovered_tile && IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && in_browser)
