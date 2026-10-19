@@ -326,6 +326,11 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 		{
 			if (!items.is_builtin_key(current_key()))
 			{
+				// An item deleted before any commit was never given a sprite.
+				if (contentRegistry && contentRegistry->all_tiles().contains(current_key()))
+				{
+					contentRegistry->remove_tile(current_key());
+				}
 				items.remove_custom(current_key());
 				keys = items.get_all_keys();
 				listCursor = std::clamp(listCursor, 0, static_cast<int>(keys.size()) - 1);

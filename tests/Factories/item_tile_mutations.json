@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=ContentRegistryTest.*:ItemTileAgreementTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/ContentRegistry.cpp",
+      "original": "\tif (itemTiles.erase(std::string{ key }) == 0)\n",
+      "mutated": "\tif (!itemTiles.contains(std::string{ key }))\n",
+      "catches": "a removed item's sprite kept, which is the stale tile 0084 names"
+    },
+    {
+      "file": "src/ContentRegistry.cpp",
+      "original": "\t\tthrow std::out_of_range(\n\t\t\tstd::format(\"ContentRegistry::remove_tile -- no tile for '{}'\", key));\n",
+      "mutated": "",
+      "catches": "removing a sprite nobody assigned passing silently"
+    },
+    {
+      "file": "data/content/tiles.json",
+      "original": "    \"items\": {\n",
+      "mutated": "    \"items\": {\n        \"stray_sprite\": {\n            \"col\": 0,\n            \"row\": 0,\n            \"sheet\": 69\n        },\n",
+      "catches": "a sprite in tiles.json that belongs to no item"
+    },
+    {
+      "file": "data/content/tiles.json",
+      "original": "        \"amulet_of_health\": {\n            \"col\": 0,\n            \"row\": 11,\n            \"sheet\": 69\n        },\n",
+      "mutated": "",
+      "catches": "a shipped item with no sprite in tiles.json"
+    }
+  ]
+}

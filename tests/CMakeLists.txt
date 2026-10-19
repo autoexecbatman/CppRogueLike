@@ -42,7 +42,9 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/SavingThrowTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/TypedAttackResistanceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/ItemCreatorTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Factories/ContentRegistryTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/ItemRegistryTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Factories/ItemTileAgreementTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterCreatorTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterRegistryTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterEquipmentTest.cpp
