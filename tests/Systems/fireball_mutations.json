@@ -51,8 +51,8 @@
     },
     {
       "file": "data/content/items.json",
-      "original": "\"scroll_fireball\": {\n        \"acBonus\": 0,\n        \"baseWeight\": 15,\n        \"weight\": 0,\n        \"category\": \"scroll\",\n        \"chaBonus\": 0,\n        \"color\": \"red_yellow\",\n        \"conBonus\": 0,\n        \"confuseTurns\": 0,\n        \"consumableAmount\": 0,\n        \"consumableBuff\": \"none\",\n        \"consumableEffect\": \"none\",\n        \"damage\": 0,",
-      "mutated": "\"scroll_fireball\": {\n        \"acBonus\": 0,\n        \"baseWeight\": 15,\n        \"weight\": 0,\n        \"category\": \"scroll\",\n        \"chaBonus\": 0,\n        \"color\": \"red_yellow\",\n        \"conBonus\": 0,\n        \"confuseTurns\": 0,\n        \"consumableAmount\": 0,\n        \"consumableBuff\": \"none\",\n        \"consumableEffect\": \"none\",\n        \"damage\": 12,",
+      "original": "\"scroll_fireball\": {\n        \"acBonus\": 0,\n        \"application\": \"add\",\n        \"baseWeight\": 15,\n        \"weight\": 0,\n        \"category\": \"scroll\",\n        \"chaBonus\": 0,\n        \"color\": \"red_yellow\",\n        \"conBonus\": 0,\n        \"confuseTurns\": 0,\n        \"consumableAmount\": 0,\n        \"consumableBuff\": \"none\",\n        \"consumableEffect\": \"none\",\n        \"damage\": 0,",
+      "mutated": "\"scroll_fireball\": {\n        \"acBonus\": 0,\n        \"application\": \"add\",\n        \"baseWeight\": 15,\n        \"weight\": 0,\n        \"category\": \"scroll\",\n        \"chaBonus\": 0,\n        \"color\": \"red_yellow\",\n        \"conBonus\": 0,\n        \"confuseTurns\": 0,\n        \"consumableAmount\": 0,\n        \"consumableBuff\": \"none\",\n        \"consumableEffect\": \"none\",\n        \"damage\": 12,",
       "catches": "the fireball scroll's record carrying a damage figure nothing reads"
     },
     {

@@ -884,8 +884,8 @@ std::string ItemEditor::field_label(FieldId f) const
 		return "WIS Bonus";
 	case FieldId::CHA_BONUS:
 		return "CHA Bonus";
-	case FieldId::IS_SET_MODE:
-		return "Is Set Mode";
+	case FieldId::APPLICATION:
+		return "Application";
 	case FieldId::EXCEPTIONAL_STRENGTH:
 	{
 		return "Exceptional STR";
@@ -972,8 +972,8 @@ std::string ItemEditor::field_value(FieldId f) const
 		return std::format("{}", p.wisBonus);
 	case FieldId::CHA_BONUS:
 		return std::format("{}", p.chaBonus);
-	case FieldId::IS_SET_MODE:
-		return p.isSetMode ? "yes" : "no";
+	case FieldId::APPLICATION:
+		return std::string{ encode_buff_application(p.application) };
 	case FieldId::EXCEPTIONAL_STRENGTH:
 	{
 		return std::format("{}", p.exceptionalStrength);
@@ -994,7 +994,7 @@ bool ItemEditor::field_is_string(FieldId f) const
 
 bool ItemEditor::field_is_toggle(FieldId f) const
 {
-	return f == FieldId::ITEM_CLASS || f == FieldId::PICKABLE_TYPE || f == FieldId::CONSUMABLE_EFFECT || f == FieldId::CONSUMABLE_BUFF || f == FieldId::TARGET_MODE || f == FieldId::SCROLL_ANIM || f == FieldId::RANGED || f == FieldId::HAND_REQUIREMENT || f == FieldId::WEAPON_SIZE || f == FieldId::EFFECT || f == FieldId::COLOR || f == FieldId::IS_SET_MODE;
+	return f == FieldId::ITEM_CLASS || f == FieldId::PICKABLE_TYPE || f == FieldId::CONSUMABLE_EFFECT || f == FieldId::CONSUMABLE_BUFF || f == FieldId::TARGET_MODE || f == FieldId::SCROLL_ANIM || f == FieldId::RANGED || f == FieldId::HAND_REQUIREMENT || f == FieldId::WEAPON_SIZE || f == FieldId::EFFECT || f == FieldId::COLOR || f == FieldId::APPLICATION;
 }
 
 void ItemEditor::field_adjust(FieldId f, int delta)
@@ -1124,8 +1124,8 @@ void ItemEditor::field_toggle(FieldId f)
 	case FieldId::EFFECT:
 		p.effect = next_magical_effect(p.effect);
 		break;
-	case FieldId::IS_SET_MODE:
-		p.isSetMode = !p.isSetMode;
+	case FieldId::APPLICATION:
+		p.application = p.application == BuffApplication::ADD ? BuffApplication::SET : BuffApplication::ADD;
 		break;
 	default:
 		break;

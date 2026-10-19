@@ -273,7 +273,7 @@ struct JewelryAmulet
 	int chaBonus{ 0 };
 	MagicalEffect effect{ MagicalEffect::NONE };
 	int bonus{ 0 };
-	bool isSetMode{ false };
+	BuffApplication application{ BuffApplication::ADD };
 	// Exceptional Strength a setting item gives with an 18, 1-100 with 100 as 18/00.
 	int exceptionalStrength{ 0 };
 };
@@ -288,7 +288,7 @@ struct Gauntlets
 	int chaBonus{ 0 };
 	MagicalEffect effect{ MagicalEffect::NONE };
 	int bonus{ 0 };
-	bool isSetMode{ false };
+	BuffApplication application{ BuffApplication::ADD };
 	// Exceptional Strength a setting item gives with an 18, 1-100 with 100 as 18/00.
 	int exceptionalStrength{ 0 };
 };
@@ -303,7 +303,7 @@ struct Girdle
 	int chaBonus{ 0 };
 	MagicalEffect effect{ MagicalEffect::NONE };
 	int bonus{ 0 };
-	bool isSetMode{ false };
+	BuffApplication application{ BuffApplication::ADD };
 	// Exceptional Strength a setting item gives with an 18, 1-100 with 100 as 18/00.
 	int exceptionalStrength{ 0 };
 };

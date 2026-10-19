@@ -37,7 +37,7 @@ T create_stat_behavior(const ItemParams& params)
 	item.chaBonus = params.chaBonus;
 	item.effect = params.effect;
 	item.bonus = params.effectBonus;
-	item.isSetMode = params.isSetMode;
+	item.application = params.application;
 	item.exceptionalStrength = params.exceptionalStrength;
 	return item;
 }
@@ -54,7 +54,7 @@ ItemBehavior create_behavior(const ItemParams& params)
 			params.consumableAmount,
 			params.duration,
 			params.consumableBuffType,
-			params.isSetMode ? BuffApplication::SET : BuffApplication::ADD
+			params.application
 		};
 	}
 

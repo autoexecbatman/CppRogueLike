@@ -97,7 +97,7 @@ protected:
         JewelryAmulet amulet;
         amulet.strBonus = str_bonus;
         amulet.dexBonus = dex_bonus;
-        amulet.isSetMode = false;  // Additive mode, not set mode
+        amulet.application = BuffApplication::ADD;
         item->behavior = amulet;
         return item;
     }

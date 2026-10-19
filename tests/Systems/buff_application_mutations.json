@@ -69,9 +69,9 @@
     },
     {
       "file": "src/ItemCreator.cpp",
-      "original": "\t\t\tparams.isSetMode ? BuffApplication::SET : BuffApplication::ADD\n",
-      "mutated": "\t\t\tparams.isSetMode ? BuffApplication::ADD : BuffApplication::SET\n",
-      "catches": "the item data's set flag crossing into the potion inverted"
+      "original": "\t\t\tparams.application\n",
+      "mutated": "\t\t\tBuffApplication::ADD\n",
+      "catches": "a potion built from the data losing whether it sets"
     },
     {
       "file": "src/BuffType.h",

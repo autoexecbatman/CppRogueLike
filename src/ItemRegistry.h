@@ -86,7 +86,7 @@ struct ItemParams
 	// What an ability item does to Charisma.
 	int chaBonus{ 0 };
 	// Whether those bonuses, and a consumable's amount, set a score rather than add to it.
-	bool isSetMode{ false };
+	BuffApplication application{ BuffApplication::ADD };
 	// The 18/xx percentile an item setting Strength to 18 gives.
 	int exceptionalStrength{ 0 };
 

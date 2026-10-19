@@ -45,7 +45,7 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\treturn gauntlets != nullptr && gauntlets->isSetMode && gauntlets->strBonus > 0 ? gauntlets : nullptr;",
+      "original": "\treturn gauntlets != nullptr && gauntlets->application == BuffApplication::SET && gauntlets->strBonus > 0 ? gauntlets : nullptr;",
       "mutated": "\treturn gauntlets;",
       "catches": "any gauntlets counted beside the girdle, swimming and climbing included"
     }

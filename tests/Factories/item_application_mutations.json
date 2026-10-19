@@ -1,0 +1,65 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=ItemRoundTripTest.*:BehaviorRecordTest.*:StatBoostEquipmentTest.*:EquipmentStatBonusTest.*:AttackStrengthTest.*:CarryCapacityTest.*:AbilityTableTest.*:ItemCreatorTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\t\tif (boost.application == BuffApplication::SET)\n",
+      "mutated": "\t\t\tif (boost.application != BuffApplication::SET)\n",
+      "catches": "a worn item that sets read as one that adds, and the reverse"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "girdle != nullptr && girdle->application == BuffApplication::SET && girdle->strBonus > 0;",
+      "mutated": "girdle != nullptr && girdle->application != BuffApplication::SET && girdle->strBonus > 0;",
+      "catches": "an adding girdle taken for a girdle of giant strength"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "gauntlets != nullptr && gauntlets->application == BuffApplication::SET && gauntlets->strBonus > 0 ? gauntlets : nullptr;",
+      "mutated": "gauntlets != nullptr && gauntlets->application != BuffApplication::SET && gauntlets->strBonus > 0 ? gauntlets : nullptr;",
+      "catches": "adding gauntlets taken for gauntlets of ogre power"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\t\tif (boost.application == BuffApplication::SET && boost.strBonus == 18)\n",
+      "mutated": "\t\t\tif (boost.application != BuffApplication::SET && boost.strBonus == 18)\n",
+      "catches": "a setting item's 18/00 percentile ignored"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\toutput[\"application\"] = encode_buff_application(statBoost.application);\n",
+      "mutated": "\toutput[\"application\"] = \"add\";\n",
+      "catches": "a worn item's record written as adding whatever it does"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\tstatBoost.application = parse_buff_application(source.at(\"application\").get<std::string>());\n",
+      "mutated": "\tstatBoost.application = BuffApplication::ADD;\n",
+      "catches": "a loaded worn item losing whether it sets"
+    },
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "\trecord[\"application\"] = encode_buff_application(params.application);\n",
+      "mutated": "\trecord[\"application\"] = \"add\";\n",
+      "catches": "the editor's save writing every item as adding"
+    },
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "\tparams.application = parse_buff_application(required_field(record, key, \"application\").get<std::string>());\n",
+      "mutated": "\tparams.application = BuffApplication::ADD;\n",
+      "catches": "the data's setting items loaded as adding, and an unknown name accepted"
+    },
+    {
+      "file": "src/ItemCreator.cpp",
+      "original": "\titem.application = params.application;\n",
+      "mutated": "",
+      "catches": "a worn item built from the data losing whether it sets"
+    }
+  ]
+}

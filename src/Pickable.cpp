@@ -84,7 +84,7 @@ void save_stat_boost(const T& statBoost, PickableType type, json& output)
 	output["intBonus"] = statBoost.intBonus;
 	output["wisBonus"] = statBoost.wisBonus;
 	output["chaBonus"] = statBoost.chaBonus;
-	output["isSetMode"] = statBoost.isSetMode;
+	output["application"] = encode_buff_application(statBoost.application);
 	output["exceptionalStrength"] = statBoost.exceptionalStrength;
 	// Creature::wears_item_with reads this off any behaviour that has one.
 	output["effect"] = encode_magical_effect(statBoost.effect);
@@ -100,7 +100,7 @@ void load_stat_boost(T& statBoost, const json& source)
 	statBoost.intBonus = source.at("intBonus").get<int>();
 	statBoost.wisBonus = source.at("wisBonus").get<int>();
 	statBoost.chaBonus = source.at("chaBonus").get<int>();
-	statBoost.isSetMode = source.at("isSetMode").get<bool>();
+	statBoost.application = parse_buff_application(source.at("application").get<std::string>());
 	statBoost.exceptionalStrength = source.at("exceptionalStrength").get<int>();
 	statBoost.effect = parse_magical_effect(source.at("effect").get<std::string>());
 	statBoost.bonus = source.at("bonus").get<int>();

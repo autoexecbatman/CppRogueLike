@@ -45,7 +45,7 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\treturn girdle != nullptr && girdle->isSetMode && girdle->strBonus > 0;",
+      "original": "\treturn girdle != nullptr && girdle->application == BuffApplication::SET && girdle->strBonus > 0;",
       "mutated": "\treturn girdle != nullptr;",
       "catches": "any girdle read as giant strength, a girdle of dwarvenkind included"
     }

@@ -77,7 +77,7 @@ void expect_same_item(const std::string& key, const ItemParams& before, const It
 	EXPECT_EQ(before.intBonus, after.intBonus) << key << ".intBonus";
 	EXPECT_EQ(before.wisBonus, after.wisBonus) << key << ".wisBonus";
 	EXPECT_EQ(before.chaBonus, after.chaBonus) << key << ".chaBonus";
-	EXPECT_EQ(before.isSetMode, after.isSetMode) << key << ".isSetMode";
+	EXPECT_EQ(before.application, after.application) << key << ".application";
 	EXPECT_EQ(before.exceptionalStrength, after.exceptionalStrength) << key << ".exceptionalStrength";
 
 	EXPECT_EQ(before.nutritionValue, after.nutritionValue) << key << ".nutritionValue";
@@ -217,4 +217,47 @@ TEST_F(ItemRoundTripTest, ACategoryImpliesTheItemCanBeDrawnFromIt)
 			<< key << " is in category '" << params.category
 			<< "' but has no spawn weight, so that category can never draw it";
 	}
+}
+
+// Exactly these nine items set a score rather than add to it. The list is the data as it
+// stood when this key was introduced, so converting it cannot change which items set. The book
+// agrees for the girdles, the gauntlets and the potion: gauntlets of ogre power imbue
+// "18/00 Strength" (DMG, PDF page 964), a girdle of giant strength's Strength "is not
+// cumulative" (PDF page 966), and the potion grants a giant's strength (PDF page 890).
+// The amulet of ogre power has no DMG entry; it is the game's own item.
+TEST_F(ItemRoundTripTest, ExactlyTheGiantAndOgreStrengthItemsSetTheirScore)
+{
+	const std::set<std::string> setting{
+		"amulet_of_ogre_power",
+		"gauntlets_of_ogre_power",
+		"girdle_of_cloud_giant_strength",
+		"girdle_of_fire_giant_strength",
+		"girdle_of_frost_giant_strength",
+		"girdle_of_hill_giant_strength",
+		"girdle_of_stone_giant_strength",
+		"girdle_of_storm_giant_strength",
+		"potion_of_giant_strength",
+	};
+	std::ifstream file(Paths::resolve(Paths::ITEMS));
+	const nlohmann::json root = nlohmann::json::parse(file);
+
+	for (const auto& [key, record] : root.items())
+	{
+		ASSERT_TRUE(record.contains("application")) << key << " names no application";
+		EXPECT_EQ(record.at("application"), setting.contains(key) ? "set" : "add") << key;
+	}
+}
+
+// A record naming an application this build does not know is refused rather than read as
+// adding, which is what a silent default would make of it.
+TEST_F(ItemRoundTripTest, AnUnknownApplicationIsRefused)
+{
+	std::ifstream source(Paths::resolve(Paths::ITEMS));
+	ASSERT_TRUE(source.is_open()) << "cannot read the real items file";
+	nlohmann::json root = nlohmann::json::parse(source);
+	root.at("health_potion")["application"] = "sideways";
+	std::ofstream(roundTrip) << root.dump(4);
+
+	ItemRegistry damaged{};
+	EXPECT_ANY_THROW(damaged.load(roundTrip.string()));
 }

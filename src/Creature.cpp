@@ -153,7 +153,7 @@ WornAbilityEffect worn_ability_effect(const Item& item, BuffType ability) noexce
 			}
 			}
 
-			if (boost.isSetMode)
+			if (boost.application == BuffApplication::SET)
 			{
 				effect.setTo = amount;
 			}
@@ -175,7 +175,7 @@ WornAbilityEffect worn_ability_effect(const Item& item, BuffType ability) noexce
 bool is_giant_strength_girdle(const Item& item) noexcept
 {
 	const Girdle* girdle = item.behavior ? std::get_if<Girdle>(&*item.behavior) : nullptr;
-	return girdle != nullptr && girdle->isSetMode && girdle->strBonus > 0;
+	return girdle != nullptr && girdle->application == BuffApplication::SET && girdle->strBonus > 0;
 }
 
 // The item's gauntlets if they set Strength, as gauntlets of ogre power do, or null.
@@ -186,7 +186,7 @@ bool is_giant_strength_girdle(const Item& item) noexcept
 const Gauntlets* strength_setting_gauntlets(const Item& item) noexcept
 {
 	const Gauntlets* gauntlets = item.behavior ? std::get_if<Gauntlets>(&*item.behavior) : nullptr;
-	return gauntlets != nullptr && gauntlets->isSetMode && gauntlets->strBonus > 0 ? gauntlets : nullptr;
+	return gauntlets != nullptr && gauntlets->application == BuffApplication::SET && gauntlets->strBonus > 0 ? gauntlets : nullptr;
 }
 } // namespace
 
@@ -1604,7 +1604,7 @@ int Creature::get_exceptional_strength() const noexcept
 		using T = std::decay_t<decltype(boost)>;
 		if constexpr (std::is_same_v<T, JewelryAmulet> || std::is_same_v<T, Gauntlets> || std::is_same_v<T, Girdle>)
 		{
-			if (boost.isSetMode && boost.strBonus == 18)
+			if (boost.application == BuffApplication::SET && boost.strBonus == 18)
 			{
 				exceptional = std::max(exceptional, boost.exceptionalStrength);
 			}

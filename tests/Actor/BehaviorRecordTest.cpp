@@ -59,7 +59,7 @@ StatBoost unusual_stat_boost()
 	statBoost.intBonus = 1;
 	statBoost.wisBonus = 2;
 	statBoost.chaBonus = 1;
-	statBoost.isSetMode = true;
+	statBoost.application = BuffApplication::SET;
 	statBoost.exceptionalStrength = 50;
 	return statBoost;
 }
@@ -215,4 +215,23 @@ TEST(BehaviorRecordTest, APotionWithAnUnknownApplicationIsRefused)
 	saved["application"] = "sideways";
 
 	EXPECT_ANY_THROW((void)load_behavior(saved));
+}
+
+// Whether a worn item sets the score or adds to it is in its record by name.
+TEST(BehaviorRecordTest, AStatBoostRecordNamesWhetherItSetsOrAdds)
+{
+	Girdle setting{};
+	setting.strBonus = 19;
+	setting.application = BuffApplication::SET;
+	Gauntlets adding{};
+	adding.strBonus = 2;
+	json savedSetting;
+	save_behavior(setting, savedSetting);
+	json savedAdding;
+	save_behavior(adding, savedAdding);
+
+	ASSERT_TRUE(savedSetting.contains("application")) << "a setting girdle saved no application";
+	ASSERT_TRUE(savedAdding.contains("application")) << "adding gauntlets saved no application";
+	EXPECT_EQ(savedSetting.at("application"), "set");
+	EXPECT_EQ(savedAdding.at("application"), "add");
 }

@@ -99,7 +99,7 @@ nlohmann::json encode_item(const ItemParams& params)
 	record["intBonus"] = params.intBonus;
 	record["wisBonus"] = params.wisBonus;
 	record["chaBonus"] = params.chaBonus;
-	record["isSetMode"] = params.isSetMode;
+	record["application"] = encode_buff_application(params.application);
 	record["exceptionalStrength"] = params.exceptionalStrength;
 	record["nutritionValue"] = params.nutritionValue;
 	record["acBonus"] = params.acBonus;
@@ -168,7 +168,7 @@ ItemParams parse_item(const std::string& key, const nlohmann::json& record)
 	params.intBonus = required_field(record, key, "intBonus");
 	params.wisBonus = required_field(record, key, "wisBonus");
 	params.chaBonus = required_field(record, key, "chaBonus");
-	params.isSetMode = required_field(record, key, "isSetMode");
+	params.application = parse_buff_application(required_field(record, key, "application").get<std::string>());
 	params.exceptionalStrength = required_field(record, key, "exceptionalStrength");
 	params.nutritionValue = required_field(record, key, "nutritionValue");
 	params.acBonus = required_field(record, key, "acBonus");
