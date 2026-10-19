@@ -9,20 +9,20 @@
 class CloseButtonArea
 {
 private:
-	int x{};
-	int y{};
+	int pixelX{};
+	int pixelY{};
 	int width{};
 	int height{};
 
 public:
 	CloseButtonArea(Renderer& renderer, int vcols);
 
-	bool contains(int px, int py) const
+	bool contains(int pointX, int pointY) const
 	{
-		return px >= x && px < x + width && py >= y && py < y + height;
+		return pointX >= pixelX && pointX < pixelX + width && pointY >= pixelY && pointY < pixelY + height;
 	}
 
-	int get_x() const { return x; }
+	int get_x() const { return pixelX; }
 
-	int get_y() const { return y; }
+	int get_y() const { return pixelY; }
 };

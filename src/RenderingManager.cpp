@@ -208,50 +208,50 @@ void RenderingManager::render_mouse_path_overlay(const GameContext& ctx) const
 	const size_t lastIdx = count - 1;
 
 	// Pre-compute screen centres
-	auto screen_centre = [&](size_t i) -> Vector2D
+	auto screen_centre = [&](size_t nodeIndex) -> Vector2D
 	{
-		const Vector2D& p = (*ctx.mousePathOverlay)[i];
-		return { p.x * tileSize - cam_x + tileSize / 2,
-			p.y * tileSize - cam_y + tileSize / 2 };
+		const Vector2D& node = (*ctx.mousePathOverlay)[nodeIndex];
+		return { node.x * tileSize - cam_x + tileSize / 2,
+			node.y * tileSize - cam_y + tileSize / 2 };
 	};
 
 	// Pass 1 - lines between consecutive nodes, alpha fades toward destination
-	for (size_t i = 0; i + 1 < count; ++i)
+	for (size_t nodeIndex = 0; nodeIndex + 1 < count; ++nodeIndex)
 	{
-		Vector2D a = screen_centre(i);
-		Vector2D b = screen_centre(i + 1);
+		Vector2D lineStart = screen_centre(nodeIndex);
+		Vector2D lineEnd = screen_centre(nodeIndex + 1);
 
-		float t = static_cast<float>(i) / static_cast<float>(lastIdx);
-		unsigned char alpha = static_cast<unsigned char>(55 + static_cast<int>(80.0f * t));
+		float progress = static_cast<float>(nodeIndex) / static_cast<float>(lastIdx);
+		unsigned char alpha = static_cast<unsigned char>(55 + static_cast<int>(80.0f * progress));
 		Color lineColor = { 220, 220, 220, alpha };
 
 		DrawLineEx(
-			{ static_cast<float>(a.x), static_cast<float>(a.y) },
-			{ static_cast<float>(b.x), static_cast<float>(b.y) },
+			{ static_cast<float>(lineStart.x), static_cast<float>(lineStart.y) },
+			{ static_cast<float>(lineEnd.x), static_cast<float>(lineEnd.y) },
 			2.0f,
 			lineColor);
 	}
 
 	// Pass 2 - dots on top of lines, alpha fades toward destination
-	for (size_t i = 0; i < count; ++i)
+	for (size_t nodeIndex = 0; nodeIndex < count; ++nodeIndex)
 	{
-		Vector2D sc = screen_centre(i);
+		Vector2D centre = screen_centre(nodeIndex);
 
-		float t = static_cast<float>(i) / static_cast<float>(lastIdx);
-		unsigned char alpha = static_cast<unsigned char>(80 + static_cast<int>(120.0f * t));
+		float progress = static_cast<float>(nodeIndex) / static_cast<float>(lastIdx);
+		unsigned char alpha = static_cast<unsigned char>(80 + static_cast<int>(120.0f * progress));
 
-		if (i == lastIdx)
+		if (nodeIndex == lastIdx)
 		{
 			// Destination: bright ring
 			Color destFill = { 255, 255, 255, static_cast<unsigned char>(alpha) };
 			Color destRing = { 255, 255, 255, 200 };
-			DrawCircle(sc.x, sc.y, static_cast<float>(destRadius), destFill);
-			DrawCircleLines(sc.x, sc.y, static_cast<float>(destRadius + 2), destRing);
+			DrawCircle(centre.x, centre.y, static_cast<float>(destRadius), destFill);
+			DrawCircleLines(centre.x, centre.y, static_cast<float>(destRadius + 2), destRing);
 		}
 		else
 		{
 			Color nodeColor = { 210, 210, 210, alpha };
-			DrawCircle(sc.x, sc.y, static_cast<float>(dotRadius), nodeColor);
+			DrawCircle(centre.x, centre.y, static_cast<float>(dotRadius), nodeColor);
 		}
 	}
 }

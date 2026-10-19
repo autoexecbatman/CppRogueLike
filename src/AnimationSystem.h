@@ -27,7 +27,7 @@ struct AnimEntry
 	float turbulence{ 0.0f }; // perpendicular swirl per frame; 0 = straight arcs
 	float radius{ 4.0f }; // pixels, for CIRCLE shape
 	TileRef tile; // used only for TILE shape
-	unsigned char r, g, b;
+	unsigned char red, green, blue;
 	unsigned char r_end{ 0 }; // color at end of lifetime - interpolated over duration
 	unsigned char g_end{ 0 }; // default 0,0,0 = cool to black
 	unsigned char b_end{ 0 };
@@ -48,9 +48,9 @@ struct ProjectileEntry
 	float initialDistance;
 	float lastTrailTime{ 0.0f };
 	TileRef tile;
-	unsigned char r{ 255 };
-	unsigned char g{ 255 };
-	unsigned char b{ 255 };
+	unsigned char red{ 255 };
+	unsigned char green{ 255 };
+	unsigned char blue{ 255 };
 	float spawnTime;
 	float maxDuration;
 	std::function<void()> onArrive;
@@ -67,7 +67,7 @@ private:
 	int tileSize{ 32 };
 	std::mt19937 generator;
 
-	float random_range(float lo, float hi);
+	float random_range(float low, float high);
 
 public:
 	void init(const TileConfig& tileConfig, int tile_size);

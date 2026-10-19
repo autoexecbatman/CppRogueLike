@@ -294,9 +294,9 @@ struct TileRef
 
 	[[nodiscard]] bool is_valid() const noexcept { return col >= 0; }
 
-	[[nodiscard]] bool operator==(const TileRef& o) const noexcept
+	[[nodiscard]] bool operator==(const TileRef& other) const noexcept
 	{
-		return sheet == o.sheet && col == o.col && row == o.row;
+		return sheet == other.sheet && col == other.col && row == other.row;
 	}
 };
 
@@ -313,8 +313,8 @@ struct ScreenMetrics
 
 struct ColorPair
 {
-	Color fg{};
-	Color bg{};
+	Color foreground{};
+	Color background{};
 };
 
 // Holds one DawnLike sprite sheet (optionally two frames for animation).

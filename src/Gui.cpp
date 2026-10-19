@@ -204,7 +204,7 @@ struct LogPanel
 // Where the next piece of log text goes.
 struct LogCursor
 {
-	int x{ 0 };
+	int pixelX{ 0 };
 	int row{ 0 };
 };
 
@@ -220,19 +220,19 @@ static LogCursor draw_log_part(
 	std::string remainingText(part.text);
 	while (!remainingText.empty() && cursor.row < panel.rowCount)
 	{
-		const std::string shown = renderer.fit_text_to_width(remainingText, panel.rightEdge - cursor.x);
+		const std::string shown = renderer.fit_text_to_width(remainingText, panel.rightEdge - cursor.pixelX);
 
 		// Nothing readable fits in what is left of this row: start the next one.
 		// Squeezing a two-letter fragment in first is what splits words.
 		if (shown.empty())
 		{
-			cursor.x = panel.leftEdge;
+			cursor.pixelX = panel.leftEdge;
 			cursor.row++;
 			continue;
 		}
 
 		renderer.draw_text(
-			Vector2D{ cursor.x, hud_text_row_y(panel.baseY, panel.tileSize, cursor.row) },
+			Vector2D{ cursor.pixelX, hud_text_row_y(panel.baseY, panel.tileSize, cursor.row) },
 			shown,
 			part.color);
 		remainingText.erase(0, shown.size());
@@ -240,13 +240,13 @@ static LogCursor draw_log_part(
 		// The part ended on this row, so the next part starts beside it.
 		if (remainingText.empty())
 		{
-			cursor.x += renderer.measure_text(shown);
+			cursor.pixelX += renderer.measure_text(shown);
 			break;
 		}
 
 		// The part was cut, so the rest of it continues on the next row, without
 		// carrying the space the cut was made at.
-		cursor.x = panel.leftEdge;
+		cursor.pixelX = panel.leftEdge;
 		cursor.row++;
 		while (!remainingText.empty() && remainingText.front() == ' ')
 		{
@@ -287,7 +287,7 @@ void Gui::gui_render(const GameContext& ctx)
 	const int panelWidth = ctx.renderer->get_screen_width();
 	const int reserveRows = ctx.renderer->get_gui_reserve_rows();
 	const int baseY = hud_base_y(*ctx.renderer);
-	const int ph = ctx.renderer->get_screen_height() - baseY;
+	const int panelHeight = ctx.renderer->get_screen_height() - baseY;
 	const int div1 = hud_divider1_x(panelWidth);
 	const int div2 = hud_divider2_x(panelWidth);
 
@@ -295,7 +295,7 @@ void Gui::gui_render(const GameContext& ctx)
 	const int rightEdgeX = panelWidth - tileSize;
 
 	// ---- Background -------------------------------------------------------
-	DrawRectangle(0, baseY, panelWidth, ph, GUI_PANEL_BACKGROUND);
+	DrawRectangle(0, baseY, panelWidth, panelHeight, GUI_PANEL_BACKGROUND);
 
 	// ---- Top border row (TL + T... + TR) ----------------------------------
 	const auto& tileConfig = *ctx.tileConfig;
@@ -386,15 +386,15 @@ void Gui::render_hp_bar(const GameContext& ctx)
 	Color filled;
 	if (ratio > 0.5f)
 	{
-		filled = ctx.renderer->get_color_pair(ColorPairId::GREEN_BLACK).fg;
+		filled = ctx.renderer->get_color_pair(ColorPairId::GREEN_BLACK).foreground;
 	}
 	else if (ratio > 0.25f)
 	{
-		filled = ctx.renderer->get_color_pair(ColorPairId::YELLOW_BLACK).fg;
+		filled = ctx.renderer->get_color_pair(ColorPairId::YELLOW_BLACK).foreground;
 	}
 	else
 	{
-		filled = ctx.renderer->get_color_pair(ColorPairId::RED_BLACK).fg;
+		filled = ctx.renderer->get_color_pair(ColorPairId::RED_BLACK).foreground;
 	}
 
 	const Vector2D barPos{ barX, rowY };
@@ -437,7 +437,7 @@ void Gui::render_hunger_status(const GameContext& ctx)
 	const int barX = hud_panel_left_margin(tileSize) + GUI_ICON_SIZE + 8;
 	const int barW = hud_panel_text_right(div1) - barX;
 
-	const Color filled = ctx.renderer->get_color_pair(ColorPairId::YELLOW_BLACK).fg;
+	const Color filled = ctx.renderer->get_color_pair(ColorPairId::YELLOW_BLACK).foreground;
 	const Vector2D barPos{ barX, rowY };
 	draw_hud_bar(ctx, barPos, barW, ratio, filled);
 
@@ -469,10 +469,10 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 	// so every value ends on the same pixel and the numbers read as one column.
 	auto draw_stat = [&](int row, std::string_view label, const std::string& value)
 	{
-		const int y = hud_text_row_y(baseY, tileSize, row);
-		ctx.renderer->draw_text(Vector2D{ statsX, y }, label, ColorPairId::WHITE_BLACK);
+		const int pixelY = hud_text_row_y(baseY, tileSize, row);
+		ctx.renderer->draw_text(Vector2D{ statsX, pixelY }, label, ColorPairId::WHITE_BLACK);
 		const int valueWidth = ctx.renderer->measure_text(value);
-		ctx.renderer->draw_text(Vector2D{ statsX + statsWidth - valueWidth, y }, value, ColorPairId::WHITE_BLACK);
+		ctx.renderer->draw_text(Vector2D{ statsX + statsWidth - valueWidth, pixelY }, value, ColorPairId::WHITE_BLACK);
 	};
 
 	// Rows 1 and 2: who this is. Both run the full width and carry no value.
@@ -519,7 +519,7 @@ void Gui::gui_print_log(const GameContext& ctx)
 
 	// Newest message first, each on rows of its own; rows run out before messages do,
 	// so the count above is a ceiling.
-	LogCursor cursor{ .x = panel.leftEdge, .row = 0 };
+	LogCursor cursor{ .pixelX = panel.leftEdge, .row = 0 };
 	for (int messageIndex = 0; messageIndex < messagesToShow; ++messageIndex)
 	{
 		if (cursor.row >= panel.rowCount)
@@ -537,7 +537,7 @@ void Gui::gui_print_log(const GameContext& ctx)
 		}
 
 		// The next message begins on the row after this one ended.
-		cursor.x = panel.leftEdge;
+		cursor.pixelX = panel.leftEdge;
 		cursor.row++;
 	}
 }

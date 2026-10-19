@@ -12,7 +12,7 @@ struct FloatingEntry
 {
 	Vector2D worldPosition{};
 	std::string text;
-	unsigned char r, g, b;
+	unsigned char red, green, blue;
 	float spawn_time;
 	float lifetime;
 };

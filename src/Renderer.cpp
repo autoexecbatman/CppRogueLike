@@ -76,9 +76,9 @@ static_assert(
 
 constexpr double animInterval = 0.5;
 
-constexpr std::size_t sheet_idx(TileSheet s) noexcept
+constexpr std::size_t sheet_idx(TileSheet sheet) noexcept
 {
-	return static_cast<std::size_t>(s);
+	return static_cast<std::size_t>(sheet);
 }
 
 // DawnLike uses magenta (255,0,255) as the transparency key.
@@ -185,28 +185,28 @@ void Renderer::shutdown()
 
 void Renderer::load_sheet(TileSheet id, std::string_view name, std::string_view path0, std::string_view path1, int cellSize)
 {
-	auto& s = sheets[sheet_idx(id)];
-	s.name = name;
-	s.cellSize = cellSize;
-	s.frame0 = load_dawnlike_texture(path0);
-	s.frame1 = load_dawnlike_texture(path1);
-	s.tilesPerRow = s.frame0.width / cellSize;
-	s.tilesPerCol = s.frame0.height / cellSize;
-	s.animated = (s.frame1.id > 0);
-	s.loaded = (s.frame0.id > 0);
+	auto& sheet = sheets[sheet_idx(id)];
+	sheet.name = name;
+	sheet.cellSize = cellSize;
+	sheet.frame0 = load_dawnlike_texture(path0);
+	sheet.frame1 = load_dawnlike_texture(path1);
+	sheet.tilesPerRow = sheet.frame0.width / cellSize;
+	sheet.tilesPerCol = sheet.frame0.height / cellSize;
+	sheet.animated = (sheet.frame1.id > 0);
+	sheet.loaded = (sheet.frame0.id > 0);
 }
 
 void Renderer::load_sheet_static(TileSheet id, std::string_view name, std::string_view path, int cellSize)
 {
-	auto& s = sheets[sheet_idx(id)];
-	s.name = name;
-	s.cellSize = cellSize;
-	s.frame0 = load_dawnlike_texture(path);
-	s.frame1 = s.frame0;
-	s.tilesPerRow = s.frame0.width / cellSize;
-	s.tilesPerCol = s.frame0.height / cellSize;
-	s.animated = false;
-	s.loaded = (s.frame0.id > 0);
+	auto& sheet = sheets[sheet_idx(id)];
+	sheet.name = name;
+	sheet.cellSize = cellSize;
+	sheet.frame0 = load_dawnlike_texture(path);
+	sheet.frame1 = sheet.frame0;
+	sheet.tilesPerRow = sheet.frame0.width / cellSize;
+	sheet.tilesPerCol = sheet.frame0.height / cellSize;
+	sheet.animated = false;
+	sheet.loaded = (sheet.frame0.id > 0);
 }
 
 int Renderer::get_sheet_cols(TileSheet sheet) const
@@ -257,9 +257,9 @@ std::string_view Renderer::get_sheet_name(TileSheet sheet) const
 int Renderer::get_loaded_sheet_count() const
 {
 	int count = 0;
-	for (const auto& s : sheets)
+	for (const auto& sheet : sheets)
 	{
-		if (s.loaded)
+		if (sheet.loaded)
 		{
 			++count;
 		}
@@ -277,15 +277,15 @@ void Renderer::load_dawnlike(std::string_view basePath)
 
 	auto load_animated = [&](TileSheet id, std::string_view name, const char* dir, const char* file, int cellSize)
 	{
-		std::string p0 = std::format("{}{}{}0.png", base, dir, file);
-		std::string p1 = std::format("{}{}{}1.png", base, dir, file);
-		load_sheet(id, name, p0, p1, cellSize);
+		std::string frame0Path = std::format("{}{}{}0.png", base, dir, file);
+		std::string frame1Path = std::format("{}{}{}1.png", base, dir, file);
+		load_sheet(id, name, frame0Path, frame1Path, cellSize);
 	};
 
 	auto load_static = [&](TileSheet id, std::string_view name, const char* dir, const char* file, int cellSize)
 	{
-		std::string p = std::format("{}{}{}.png", base, dir, file);
-		load_sheet_static(id, name, p, cellSize);
+		std::string path = std::format("{}{}{}.png", base, dir, file);
+		load_sheet_static(id, name, path, cellSize);
 	};
 
 	// Objects
@@ -756,11 +756,11 @@ void Renderer::draw_text(Vector2D screenPos, std::string_view text, ColorPairId 
 	if (fontLoaded)
 	{
 		Vector2 pos = { static_cast<float>(screenPos.x), static_cast<float>(screenPos.y) };
-		DrawTextEx(gameFont, textStr.c_str(), pos, static_cast<float>(fontSize), 1.0f, pair.fg);
+		DrawTextEx(gameFont, textStr.c_str(), pos, static_cast<float>(fontSize), 1.0f, pair.foreground);
 	}
 	else
 	{
-		DrawText(textStr.c_str(), screenPos.x, screenPos.y, fontSize, pair.fg);
+		DrawText(textStr.c_str(), screenPos.x, screenPos.y, fontSize, pair.foreground);
 	}
 }
 
@@ -850,16 +850,16 @@ void Renderer::draw_frame_pixels(Vector2D screenPos, int widthPixels, int height
 
 	// The runs first and the corners over them: a run's last tile overlaps into the corner cell,
 	// and a rail drawn over a corner cuts the ornament off a heavier frame.
-	for (int x = screenPos.x + tileSize; x < rightX; x += tileSize)
+	for (int pixelX = screenPos.x + tileSize; pixelX < rightX; pixelX += tileSize)
 	{
-		draw_tile_screen(Vector2D{ x, screenPos.y }, tileConfig.get("GUI_FRAME_T"));
-		draw_tile_screen(Vector2D{ x, bottomY }, tileConfig.get("GUI_FRAME_B"));
+		draw_tile_screen(Vector2D{ pixelX, screenPos.y }, tileConfig.get("GUI_FRAME_T"));
+		draw_tile_screen(Vector2D{ pixelX, bottomY }, tileConfig.get("GUI_FRAME_B"));
 	}
 
-	for (int y = screenPos.y + tileSize; y < bottomY; y += tileSize)
+	for (int pixelY = screenPos.y + tileSize; pixelY < bottomY; pixelY += tileSize)
 	{
-		draw_tile_screen(Vector2D{ screenPos.x, y }, tileConfig.get("GUI_FRAME_L"));
-		draw_tile_screen(Vector2D{ rightX, y }, tileConfig.get("GUI_FRAME_R"));
+		draw_tile_screen(Vector2D{ screenPos.x, pixelY }, tileConfig.get("GUI_FRAME_L"));
+		draw_tile_screen(Vector2D{ rightX, pixelY }, tileConfig.get("GUI_FRAME_R"));
 	}
 
 	draw_tile_screen(screenPos, tileConfig.get("GUI_FRAME_TL"));

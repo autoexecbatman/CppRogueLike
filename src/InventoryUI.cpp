@@ -304,7 +304,7 @@ void InventoryUI::draw_highlight_row(int row, GameContext& ctx)
 	int barW = ctx.renderer->get_screen_width() - 2 * tileSize;
 
 	ColorPair pair = ctx.renderer->get_color_pair(ColorPairId::BLACK_WHITE);
-	DrawRectangle(barX, row_top_y(tileSize, row), barW, UI_TEXT_ROW_PITCH, pair.bg);
+	DrawRectangle(barX, row_top_y(tileSize, row), barW, UI_TEXT_ROW_PITCH, pair.background);
 }
 
 InventoryUI::InventoryUI(Player& player, InventoryScreen startScreen, GameContext& ctx)
@@ -599,7 +599,7 @@ void InventoryUI::render_tab_bar(GameContext& ctx)
 		if (tab.screen == activeScreen)
 		{
 			ColorPair pair = ctx.renderer->get_color_pair(ColorPairId::BLACK_WHITE);
-			DrawRectangle(tab.x - TAB_HIT_PADDING, tabY, tab.width + TAB_HIT_PADDING * 2, UI_TEXT_ROW_PITCH, pair.bg);
+			DrawRectangle(tab.x - TAB_HIT_PADDING, tabY, tab.width + TAB_HIT_PADDING * 2, UI_TEXT_ROW_PITCH, pair.background);
 		}
 
 		ctx.renderer->draw_text(Vector2D{ tab.x, row_text_y(tileSize, fontSize, TAB_ROW) }, tab.text, colorPair);

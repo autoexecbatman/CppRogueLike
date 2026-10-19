@@ -76,7 +76,7 @@ void BaseMenu::menu_draw_row(int pixelX, int row, const std::string& text)
 		int bar_x = (static_cast<int>(menuStartX) + 1) * tileSize;
 		int bar_w = (static_cast<int>(menuWidth) - 2) * tileSize;
 		ColorPair pair = renderer->get_color_pair(ColorPairId::BLACK_WHITE);
-		DrawRectangle(bar_x, rowTop, bar_w, UI_TEXT_ROW_PITCH, pair.bg);
+		DrawRectangle(bar_x, rowTop, bar_w, UI_TEXT_ROW_PITCH, pair.background);
 		renderer->draw_text(Vector2D{ pixelX, glyphY }, text, ColorPairId::BLACK_WHITE);
 	}
 	else

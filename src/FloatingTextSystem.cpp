@@ -26,9 +26,9 @@ void FloatingTextSystem::spawn_damage(Vector2D worldPosition, int value, DamageS
 	entries.push_back(FloatingEntry{
 		.worldPosition = worldPosition,
 		.text = std::format("{}", value),
-		.r = 255,
-		.g = static_cast<unsigned char>(hurtPlayer ? 80 : 220),
-		.b = static_cast<unsigned char>(hurtPlayer ? 80 : 50),
+		.red = 255,
+		.green = static_cast<unsigned char>(hurtPlayer ? 80 : 220),
+		.blue = static_cast<unsigned char>(hurtPlayer ? 80 : 50),
 		.spawn_time = static_cast<float>(GetTime()),
 		.lifetime = 1.2f });
 }
@@ -44,9 +44,9 @@ void FloatingTextSystem::spawn_text(
 	entries.push_back(FloatingEntry{
 		.worldPosition = worldPosition,
 		.text = std::move(text),
-		.r = red,
-		.g = green,
-		.b = blue,
+		.red = red,
+		.green = green,
+		.blue = blue,
 		.spawn_time = static_cast<float>(GetTime()),
 		.lifetime = lifetime });
 }
@@ -58,34 +58,34 @@ void FloatingTextSystem::update_and_render(const Renderer& renderer)
 	int cam_x = renderer.get_camera_x();
 	int cam_y = renderer.get_camera_y();
 
-	auto is_expired = [&](const FloatingEntry& e)
+	auto is_expired = [&](const FloatingEntry& entry)
 	{
-		return (now - e.spawn_time) >= e.lifetime;
+		return (now - entry.spawn_time) >= entry.lifetime;
 	};
 
-	for (const auto& e : entries)
+	for (const auto& entry : entries)
 	{
-		if (is_expired(e))
+		if (is_expired(entry))
 		{
 			continue;
 		}
 
-		float t = (now - e.spawn_time) / e.lifetime;
+		float lifeFraction = (now - entry.spawn_time) / entry.lifetime;
 
 		// Float upward by 0.75 tiles over the lifetime
-		float offset_px = t * static_cast<float>(tileSize) * 0.75f;
+		float offset_px = lifeFraction * static_cast<float>(tileSize) * 0.75f;
 
 		// Full opacity for first 60%, then fade to zero
-		float alpha_f = (t < 0.6f)
+		float alpha_f = (lifeFraction < 0.6f)
 			? 1.0f
-			: 1.0f - ((t - 0.6f) / 0.4f);
+			: 1.0f - ((lifeFraction - 0.6f) / 0.4f);
 		unsigned char alpha = static_cast<unsigned char>(alpha_f * 255.0f);
 
-		int screen_x = e.worldPosition.x * tileSize - cam_x;
-		int screen_y = e.worldPosition.y * tileSize - cam_y - static_cast<int>(offset_px);
+		int screen_x = entry.worldPosition.x * tileSize - cam_x;
+		int screen_y = entry.worldPosition.y * tileSize - cam_y - static_cast<int>(offset_px);
 
-		Color col{ e.r, e.g, e.b, alpha };
-		renderer.draw_text_color(Vector2D{ screen_x, screen_y }, e.text, col);
+		Color col{ entry.red, entry.green, entry.blue, alpha };
+		renderer.draw_text_color(Vector2D{ screen_x, screen_y }, entry.text, col);
 	}
 
 	std::erase_if(entries, is_expired);

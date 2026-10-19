@@ -12,9 +12,9 @@
 #include "TileConfig.h"
 #include "Vector2D.h"
 
-float AnimationSystem::random_range(float lo, float hi)
+float AnimationSystem::random_range(float low, float high)
 {
-	std::uniform_real_distribution<float> dist(lo, hi);
+	std::uniform_real_distribution<float> dist(low, high);
 	return dist(generator);
 }
 
@@ -33,11 +33,11 @@ void AnimationSystem::init(const TileConfig& tileConfig, int tile_size)
 
 void AnimationSystem::spawn_blood_burst(Vector2D worldPosition, int count)
 {
-	float cx = static_cast<float>(worldPosition.x * tileSize + tileSize / 2);
-	float cy = static_cast<float>(worldPosition.y * tileSize + tileSize / 2);
+	float centerPixelX = static_cast<float>(worldPosition.x * tileSize + tileSize / 2);
+	float centerPixelY = static_cast<float>(worldPosition.y * tileSize + tileSize / 2);
 	float now = static_cast<float>(GetTime());
 
-	for (int i = 0; i < count; ++i)
+	for (int particleIndex = 0; particleIndex < count; ++particleIndex)
 	{
 		float speed = random_range(40.0f, 130.0f);
 		float angle = random_range(0.0f, 6.2832f);
@@ -45,15 +45,15 @@ void AnimationSystem::spawn_blood_burst(Vector2D worldPosition, int count)
 		unsigned char bright = static_cast<unsigned char>(random_range(180.0f, 255.0f));
 
 		entries.push_back(AnimEntry{
-			.px_x = cx,
-			.px_y = cy,
+			.px_x = centerPixelX,
+			.px_y = centerPixelY,
 			.vel_x = std::cos(angle) * speed,
 			.vel_y = std::sin(angle) * speed,
 			.radius = random_range(2.0f, 5.0f),
 			.tile = {},
-			.r = bright,
-			.g = 20,
-			.b = 20,
+			.red = bright,
+			.green = 20,
+			.blue = 20,
 			.spawn_time = now,
 			.duration = dur,
 			.shape = ParticleShape::CIRCLE,
@@ -78,26 +78,26 @@ void AnimationSystem::spawn_spark_burst(
 	unsigned char green,
 	unsigned char blue)
 {
-	float cx = static_cast<float>(worldPosition.x * tileSize + tileSize / 2);
-	float cy = static_cast<float>(worldPosition.y * tileSize + tileSize / 2);
+	float centerPixelX = static_cast<float>(worldPosition.x * tileSize + tileSize / 2);
+	float centerPixelY = static_cast<float>(worldPosition.y * tileSize + tileSize / 2);
 	float now = static_cast<float>(GetTime());
 
-	for (int i = 0; i < count; ++i)
+	for (int particleIndex = 0; particleIndex < count; ++particleIndex)
 	{
 		float speed = random_range(60.0f, 200.0f);
 		float angle = random_range(0.0f, 6.2832f);
 		float dur = random_range(0.3f, 0.7f);
 
 		entries.push_back(AnimEntry{
-			.px_x = cx,
-			.px_y = cy,
+			.px_x = centerPixelX,
+			.px_y = centerPixelY,
 			.vel_x = std::cos(angle) * speed,
 			.vel_y = std::sin(angle) * speed,
 			.radius = random_range(2.0f, 5.0f),
 			.tile = {},
-			.r = red,
-			.g = green,
-			.b = blue,
+			.red = red,
+			.green = green,
+			.blue = blue,
 			.spawn_time = now,
 			.duration = dur,
 			.shape = ParticleShape::CIRCLE,
@@ -120,19 +120,19 @@ void AnimationSystem::spawn_lightning_path(
 
 	for (const auto& pos : path)
 	{
-		float cx = static_cast<float>(pos.x * tileSize);
-		float cy = static_cast<float>(pos.y * tileSize);
+		float pixelX = static_cast<float>(pos.x * tileSize);
+		float pixelY = static_cast<float>(pos.y * tileSize);
 
 		entries.push_back(AnimEntry{
-			.px_x = cx,
-			.px_y = cy,
+			.px_x = pixelX,
+			.px_y = pixelY,
 			.vel_x = 0.0f,
 			.vel_y = 0.0f,
 			.radius = static_cast<float>(tileSize) * 0.5f,
 			.tile = sparkTile,
-			.r = red,
-			.g = green,
-			.b = blue,
+			.red = red,
+			.green = green,
+			.blue = blue,
 			.spawn_time = now,
 			.duration = 0.18f,
 			.shape = ParticleShape::TILE,
@@ -148,19 +148,19 @@ void AnimationSystem::spawn_effect(
 	unsigned char blue,
 	float duration)
 {
-	float cx = static_cast<float>(worldPosition.x * tileSize);
-	float cy = static_cast<float>(worldPosition.y * tileSize);
+	float pixelX = static_cast<float>(worldPosition.x * tileSize);
+	float pixelY = static_cast<float>(worldPosition.y * tileSize);
 
 	entries.push_back(AnimEntry{
-		.px_x = cx,
-		.px_y = cy,
+		.px_x = pixelX,
+		.px_y = pixelY,
 		.vel_x = 0.0f,
 		.vel_y = 0.0f,
 		.radius = static_cast<float>(tileSize),
 		.tile = tile,
-		.r = red,
-		.g = green,
-		.b = blue,
+		.red = red,
+		.green = green,
+		.blue = blue,
 		.spawn_time = static_cast<float>(GetTime()),
 		.duration = duration,
 		.shape = ParticleShape::TILE,
@@ -183,9 +183,9 @@ void AnimationSystem::spawn_projectile(
 	float toPxX = static_cast<float>(to.x * tileSize + tileSize / 2);
 	float toPxY = static_cast<float>(to.y * tileSize + tileSize / 2);
 
-	float dx = toPxX - fromPxX;
-	float dy = toPxY - fromPxY;
-	float dist = std::sqrt(dx * dx + dy * dy);
+	float deltaX = toPxX - fromPxX;
+	float deltaY = toPxY - fromPxY;
+	float dist = std::sqrt(deltaX * deltaX + deltaY * deltaY);
 	float now = static_cast<float>(GetTime());
 
 	projectiles.push_back(ProjectileEntry{
@@ -198,9 +198,9 @@ void AnimationSystem::spawn_projectile(
 		.initialDistance = std::max(dist, 1.0f),
 		.lastTrailTime = now,
 		.tile = tile,
-		.r = red,
-		.g = green,
-		.b = blue,
+		.red = red,
+		.green = green,
+		.blue = blue,
 		.spawnTime = now,
 		.maxDuration = (dist / speed) * 3.0f + 1.0f,
 		.onArrive = std::move(onArrive) });
@@ -209,85 +209,85 @@ void AnimationSystem::spawn_projectile(
 void AnimationSystem::update_and_render(const Renderer& renderer)
 {
 	float now = static_cast<float>(GetTime());
-	float dt = GetFrameTime();
+	float frameSeconds = GetFrameTime();
 	int cam_x = renderer.get_camera_x();
 	int cam_y = renderer.get_camera_y();
 
-	auto is_expired = [&](const AnimEntry& e)
+	auto is_expired = [&](const AnimEntry& particle)
 	{
-		return (now - e.spawn_time) >= e.duration;
+		return (now - particle.spawn_time) >= particle.duration;
 	};
 
-	for (auto& e : entries)
+	for (auto& particle : entries)
 	{
-		if (is_expired(e))
+		if (is_expired(particle))
 		{
 			continue;
 		}
 
 		// Integrate velocity
-		e.px_x += e.vel_x * dt;
-		e.px_y += e.vel_y * dt;
+		particle.px_x += particle.vel_x * frameSeconds;
+		particle.px_y += particle.vel_y * frameSeconds;
 		// Buoyancy applied before drag so upward force fights deceleration each frame
-		e.vel_y += e.accel_y * dt;
+		particle.vel_y += particle.accel_y * frameSeconds;
 		// Turbulence: perpendicular nudge each frame breaks clean arcs into chaotic paths
-		if (e.turbulence > 0.0f)
+		if (particle.turbulence > 0.0f)
 		{
-			e.vel_x += -e.vel_y * e.turbulence * dt;
-			e.vel_y += e.vel_x * e.turbulence * dt;
+			particle.vel_x += -particle.vel_y * particle.turbulence * frameSeconds;
+			particle.vel_y += particle.vel_x * particle.turbulence * frameSeconds;
 		}
 		// Dampen velocity (drag)
-		e.vel_x *= (1.0f - dt * 4.0f);
-		e.vel_y *= (1.0f - dt * 4.0f);
+		particle.vel_x *= (1.0f - frameSeconds * 4.0f);
+		particle.vel_y *= (1.0f - frameSeconds * 4.0f);
 
-		float t = (now - e.spawn_time) / e.duration;
+		float lifeFraction = (now - particle.spawn_time) / particle.duration;
 
 		// Particle has a future spawn_time - not yet visible
-		if (t < 0.0f)
+		if (lifeFraction < 0.0f)
 		{
 			continue;
 		}
 
 		// Flash on, then quadratic falloff
-		float alpha_f = (t < 0.15f)
+		float alpha_f = (lifeFraction < 0.15f)
 			? 1.0f
-			: 1.0f - ((t - 0.15f) / 0.85f) * ((t - 0.15f) / 0.85f);
+			: 1.0f - ((lifeFraction - 0.15f) / 0.85f) * ((lifeFraction - 0.15f) / 0.85f);
 		unsigned char alpha = static_cast<unsigned char>(alpha_f * 255.0f);
 
-		int screen_x = static_cast<int>(e.px_x) - cam_x;
-		int screen_y = static_cast<int>(e.px_y) - cam_y;
+		int screen_x = static_cast<int>(particle.px_x) - cam_x;
+		int screen_y = static_cast<int>(particle.px_y) - cam_y;
 
 		// Color-over-lifetime: interpolate from spawn color to end color
-		auto lerp_channel = [](unsigned char a, unsigned char b, float ratio) -> unsigned char
+		auto lerp_channel = [](unsigned char startValue, unsigned char endValue, float ratio) -> unsigned char
 		{
 			return static_cast<unsigned char>(
-				static_cast<float>(a) + (static_cast<float>(b) - static_cast<float>(a)) * ratio);
+				static_cast<float>(startValue) + (static_cast<float>(endValue) - static_cast<float>(startValue)) * ratio);
 		};
 		Color tint{
-			lerp_channel(e.r, e.r_end, t),
-			lerp_channel(e.g, e.g_end, t),
-			lerp_channel(e.b, e.b_end, t),
+			lerp_channel(particle.red, particle.r_end, lifeFraction),
+			lerp_channel(particle.green, particle.g_end, lifeFraction),
+			lerp_channel(particle.blue, particle.b_end, lifeFraction),
 			alpha
 		};
 
-		if (e.additive)
+		if (particle.additive)
 		{
 			BeginBlendMode(BLEND_ADDITIVE);
 		}
 
-		switch (e.shape)
+		switch (particle.shape)
 		{
 		case ParticleShape::CIRCLE:
-			DrawCircle(screen_x, screen_y, e.radius, tint);
+			DrawCircle(screen_x, screen_y, particle.radius, tint);
 			break;
 
 		case ParticleShape::TILE:
 		{
-			int sz = static_cast<int>(e.radius);
+			int sizePixels = static_cast<int>(particle.radius);
 			renderer.draw_tile_screen_color_sized(
-				Vector2D{ screen_x - sz / 2, screen_y - sz / 2 },
-				sz,
-				e.tile,
+				Vector2D{ screen_x - sizePixels / 2, screen_y - sizePixels / 2 },
+				sizePixels,
+				particle.tile,
 				tint);
 			break;
 		}
@@ -297,7 +297,7 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 			break;
 		}
 
-		if (e.additive)
+		if (particle.additive)
 		{
 			EndBlendMode();
 		}
@@ -308,36 +308,36 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 	// Update and render seeking projectiles
 	const float arrivalThreshold = static_cast<float>(tileSize) * 0.5f;
 
-	for (auto& p : projectiles)
+	for (auto& projectile : projectiles)
 	{
-		float dx = p.targetPxX - p.pxX;
-		float dy = p.targetPxY - p.pxY;
-		float dist = std::sqrt(dx * dx + dy * dy);
+		float deltaX = projectile.targetPxX - projectile.pxX;
+		float deltaY = projectile.targetPxY - projectile.pxY;
+		float dist = std::sqrt(deltaX * deltaX + deltaY * deltaY);
 
 		if (dist < arrivalThreshold)
 		{
-			if (p.onArrive)
+			if (projectile.onArrive)
 			{
-				p.onArrive();
-				p.onArrive = nullptr;
+				projectile.onArrive();
+				projectile.onArrive = nullptr;
 			}
 			continue;
 		}
 
 		// Normalized direction toward target
-		float nx = dx / dist;
-		float ny = dy / dist;
+		float unitX = deltaX / dist;
+		float unitY = deltaY / dist;
 
 		// Perpendicular axis for wobble
-		float perpX = -ny;
-		float perpY = nx;
+		float perpX = -unitY;
+		float perpY = unitX;
 
 		// Wobble shrinks as missile closes in
-		float wobbleAmount = p.wobbleStrength * (dist / p.initialDistance);
+		float wobbleAmount = projectile.wobbleStrength * (dist / projectile.initialDistance);
 		float noise = random_range(-1.0f, 1.0f);
 
-		float dirX = nx + perpX * noise * wobbleAmount;
-		float dirY = ny + perpY * noise * wobbleAmount;
+		float dirX = unitX + perpX * noise * wobbleAmount;
+		float dirY = unitY + perpY * noise * wobbleAmount;
 
 		float dirLen = std::sqrt(dirX * dirX + dirY * dirY);
 		if (dirLen > 0.001f)
@@ -346,23 +346,23 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 			dirY /= dirLen;
 		}
 
-		p.pxX += dirX * p.speed * dt;
-		p.pxY += dirY * p.speed * dt;
+		projectile.pxX += dirX * projectile.speed * frameSeconds;
+		projectile.pxY += dirY * projectile.speed * frameSeconds;
 
 		// Emit trail particle
-		if (now - p.lastTrailTime > 0.03f)
+		if (now - projectile.lastTrailTime > 0.03f)
 		{
-			p.lastTrailTime = now;
+			projectile.lastTrailTime = now;
 			entries.push_back(AnimEntry{
-				.px_x = p.pxX,
-				.px_y = p.pxY,
+				.px_x = projectile.pxX,
+				.px_y = projectile.pxY,
 				.vel_x = 0.0f,
 				.vel_y = 0.0f,
 				.radius = static_cast<float>(tileSize) * 0.3f,
-				.tile = p.tile,
-				.r = p.r,
-				.g = p.g,
-				.b = p.b,
+				.tile = projectile.tile,
+				.red = projectile.red,
+				.green = projectile.green,
+				.blue = projectile.blue,
 				.spawn_time = now,
 				.duration = 0.12f,
 				.shape = ParticleShape::TILE,
@@ -370,22 +370,22 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 		}
 
 		// Render projectile head
-		int screenX = static_cast<int>(p.pxX) - cam_x;
-		int screenY = static_cast<int>(p.pxY) - cam_y;
-		int sz = tileSize;
+		int screenX = static_cast<int>(projectile.pxX) - cam_x;
+		int screenY = static_cast<int>(projectile.pxY) - cam_y;
+		int sizePixels = tileSize;
 
 		BeginBlendMode(BLEND_ADDITIVE);
 		renderer.draw_tile_screen_color_sized(
-			Vector2D{ screenX - sz / 2, screenY - sz / 2 },
-			sz,
-			p.tile,
-			Color{ p.r, p.g, p.b, 255 });
+			Vector2D{ screenX - sizePixels / 2, screenY - sizePixels / 2 },
+			sizePixels,
+			projectile.tile,
+			Color{ projectile.red, projectile.green, projectile.blue, 255 });
 		EndBlendMode();
 	}
 
-	auto is_projectile_done = [&](const ProjectileEntry& p)
+	auto is_projectile_done = [&](const ProjectileEntry& projectile)
 	{
-		return !p.onArrive || (now - p.spawnTime) >= p.maxDuration;
+		return !projectile.onArrive || (now - projectile.spawnTime) >= projectile.maxDuration;
 	};
 	std::erase_if(projectiles, is_projectile_done);
 }
@@ -393,32 +393,32 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 {
 	float now = static_cast<float>(GetTime());
-	float ts = static_cast<float>(tileSize);
-	float cx = static_cast<float>(center.x * tileSize + tileSize / 2);
-	float cy = static_cast<float>(center.y * tileSize + tileSize / 2);
+	float tilePixels = static_cast<float>(tileSize);
+	float centerPixelX = static_cast<float>(center.x * tileSize + tileSize / 2);
+	float centerPixelY = static_cast<float>(center.y * tileSize + tileSize / 2);
 	float blastRadius = static_cast<float>(radius);
-	float blastPx = blastRadius * ts;
+	float blastPx = blastRadius * tilePixels;
 
 	// Phase 0: ignition flash - slow white-hot circles stacking additively into a solid glow.
 	// Color-over-lifetime: white-yellow -> orange as the ball expands and cools.
 	int flashCount = static_cast<int>(blastRadius * blastRadius * 14.0f);
-	for (int i = 0; i < flashCount; ++i)
+	for (int flashIndex = 0; flashIndex < flashCount; ++flashIndex)
 	{
 		// Uniform random position within a circle of radius blastPx
-		float r = blastPx * std::sqrt(random_range(0.0f, 1.0f));
-		float a = random_range(0.0f, 6.2832f);
+		float distance = blastPx * std::sqrt(random_range(0.0f, 1.0f));
+		float bearing = random_range(0.0f, 6.2832f);
 		entries.push_back(AnimEntry{
-			.px_x = cx + r * std::cos(a),
-			.px_y = cy + r * std::sin(a),
+			.px_x = centerPixelX + distance * std::cos(bearing),
+			.px_y = centerPixelY + distance * std::sin(bearing),
 			.vel_x = random_range(-25.0f, 25.0f),
 			.vel_y = random_range(-25.0f, 25.0f),
 			.accel_y = 0.0f,
 			.turbulence = 0.0f,
 			.radius = random_range(4.0f, 8.0f),
 			.tile = {},
-			.r = 255,
-			.g = 230,
-			.b = 140,
+			.red = 255,
+			.green = 230,
+			.blue = 140,
 			.r_end = 255,
 			.g_end = 80,
 			.b_end = 0,
@@ -431,11 +431,11 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 	// Phase 1: fireball body - circles staggered by distance, dense at the core and sparse at the edge.
 	// Color-over-lifetime: yellow-orange -> dark red (temperature drop over time).
 	int bodyCount = static_cast<int>(blastRadius * blastRadius * 18.0f);
-	for (int i = 0; i < bodyCount; ++i)
+	for (int bodyIndex = 0; bodyIndex < bodyCount; ++bodyIndex)
 	{
-		float r = blastPx * std::sqrt(random_range(0.0f, 1.0f));
-		float a = random_range(0.0f, 6.2832f);
-		float distRatio = r / blastPx;
+		float distance = blastPx * std::sqrt(random_range(0.0f, 1.0f));
+		float bearing = random_range(0.0f, 6.2832f);
+		float distRatio = distance / blastPx;
 
 		// Stagger: outer circles appear slightly later - expanding ball feel
 		float spawnAt = now + distRatio * 0.12f;
@@ -448,17 +448,17 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 		// Outer circles drift outward slightly; inner circles barely move
 		float driftSpeed = distRatio * 35.0f;
 		entries.push_back(AnimEntry{
-			.px_x = cx + r * std::cos(a),
-			.px_y = cy + r * std::sin(a),
-			.vel_x = std::cos(a) * driftSpeed + random_range(-10.0f, 10.0f),
-			.vel_y = std::sin(a) * driftSpeed + random_range(-10.0f, 10.0f),
+			.px_x = centerPixelX + distance * std::cos(bearing),
+			.px_y = centerPixelY + distance * std::sin(bearing),
+			.vel_x = std::cos(bearing) * driftSpeed + random_range(-10.0f, 10.0f),
+			.vel_y = std::sin(bearing) * driftSpeed + random_range(-10.0f, 10.0f),
 			.accel_y = 0.0f,
 			.turbulence = 0.0f,
 			.radius = random_range(3.5f, 7.0f) * (1.0f - distRatio * 0.4f),
 			.tile = {},
-			.r = 255,
-			.g = spawnG,
-			.b = spawnB,
+			.red = 255,
+			.green = spawnG,
+			.blue = spawnB,
 			.r_end = 200,
 			.g_end = endG,
 			.b_end = 0,
@@ -470,22 +470,22 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 
 	// Phase 2: radial sparks - fast pixels at the blast edge, the "pop" of the explosion.
 	// These are debris and hot gas ejected outward. Short duration, high velocity.
-	for (int i = 0; i < 60; ++i)
+	for (int sparkIndex = 0; sparkIndex < 60; ++sparkIndex)
 	{
 		float angle = random_range(0.0f, 6.2832f);
 		float speed = random_range(180.0f, 420.0f);
 		entries.push_back(AnimEntry{
-			.px_x = cx,
-			.px_y = cy,
+			.px_x = centerPixelX,
+			.px_y = centerPixelY,
 			.vel_x = std::cos(angle) * speed,
 			.vel_y = std::sin(angle) * speed,
 			.accel_y = 0.0f,
 			.turbulence = 0.0f,
 			.radius = 1.0f,
 			.tile = {},
-			.r = 255,
-			.g = 180,
-			.b = 60,
+			.red = 255,
+			.green = 180,
+			.blue = 60,
 			.r_end = 180,
 			.g_end = 20,
 			.b_end = 0,
@@ -497,22 +497,22 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 
 	// Phase 3: embers - small count of rising pixels, subtle trailing effect only.
 	// These represent hot debris carried upward after the ball dissipates.
-	for (int i = 0; i < 30; ++i)
+	for (int emberIndex = 0; emberIndex < 30; ++emberIndex)
 	{
-		float r = blastPx * random_range(0.0f, 0.6f);
-		float a = random_range(0.0f, 6.2832f);
+		float distance = blastPx * random_range(0.0f, 0.6f);
+		float bearing = random_range(0.0f, 6.2832f);
 		entries.push_back(AnimEntry{
-			.px_x = cx + r * std::cos(a),
-			.px_y = cy + r * std::sin(a),
+			.px_x = centerPixelX + distance * std::cos(bearing),
+			.px_y = centerPixelY + distance * std::sin(bearing),
 			.vel_x = random_range(-15.0f, 15.0f),
 			.vel_y = random_range(-80.0f, -30.0f),
 			.accel_y = random_range(-60.0f, -30.0f),
 			.turbulence = 0.0f,
 			.radius = 1.0f,
 			.tile = {},
-			.r = 220,
-			.g = 80,
-			.b = 10,
+			.red = 220,
+			.green = 80,
+			.blue = 10,
 			.r_end = 80,
 			.g_end = 10,
 			.b_end = 0,
