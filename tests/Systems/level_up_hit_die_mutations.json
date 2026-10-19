@@ -1,0 +1,23 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=LevelUpHitDieTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "\t\treturn ctx->dice->roll(1, owner.get_hit_die());\n",
+      "mutated": "\t\treturn ctx->dice->roll(1, 8);\n",
+      "catches": "every hit die rolled as a d8, which is the defect 0067 named"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "\t\treturn ctx->dice->roll(1, owner.get_hit_die());\n",
+      "mutated": "\t\treturn ctx->dice->roll(1, owner.get_hit_die() - 1);\n",
+      "catches": "a hit die rolled one face short"
+    }
+  ]
+}

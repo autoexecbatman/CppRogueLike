@@ -52,35 +52,13 @@ void apply_thac0_improvement(Creature& owner, int newLevel, GameContext* ctx)
 
 int apply_hit_point_gain(Creature& owner, int newLevel, GameContext* ctx)
 {
-	if (!ctx)
-	{
-		return 0;
-	}
+	assert(ctx && "apply_hit_point_gain: called without a context");
+	assert(owner.get_hit_die() >= 1 && "apply_hit_point_gain: a hit die needs at least one face to roll");
 
+	// The die the creature carries, so the roll and the message name the same one.
 	auto roll_hit_die = [&]() -> int
 	{
-		switch (owner.get_hit_die())
-		{
-		case 4:
-		{
-			return ctx->dice->d4();
-		}
-
-		case 6:
-		{
-			return ctx->dice->d6();
-		}
-
-		case 10:
-		{
-			return ctx->dice->d10();
-		}
-
-		default:
-		{
-			return ctx->dice->d8();
-		}
-		}
+		return ctx->dice->roll(1, owner.get_hit_die());
 	};
 
 	// AD&D 2e: a character rolls hit dice only up to a class-dependent level,
