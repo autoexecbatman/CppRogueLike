@@ -198,13 +198,13 @@ void GameStateManager::init_new_game(GameContext& ctx)
 {
 	assert(ctx.bodyPlanRegistry && "GameStateManager::init_new_game: called without a bodyPlanRegistry");
 	assert(ctx.contentRegistry && "GameStateManager::init_new_game: called without a contentRegistry");
-	assert(ctx.dataManager != nullptr);
-	assert(ctx.messageSystem != nullptr);
-	assert(ctx.levelManager != nullptr);
-	assert(ctx.gameState != nullptr);
-	assert(ctx.map != nullptr);
-	assert(ctx.playerOwner != nullptr);
-	assert(ctx.tileConfig != nullptr);
+	assert(ctx.dataManager != nullptr && "GameStateManager::init_new_game: called without a dataManager");
+	assert(ctx.messageSystem != nullptr && "GameStateManager::init_new_game: called without a messageSystem");
+	assert(ctx.levelManager != nullptr && "GameStateManager::init_new_game: called without a levelManager");
+	assert(ctx.gameState != nullptr && "GameStateManager::init_new_game: called without a gameState");
+	assert(ctx.map != nullptr && "GameStateManager::init_new_game: called without a map");
+	assert(ctx.playerOwner != nullptr && "GameStateManager::init_new_game: called without a playerOwner");
+	assert(ctx.tileConfig != nullptr && "GameStateManager::init_new_game: called without a tileConfig");
 
 	ContentRegistryIO::load(*ctx.contentRegistry, Paths::CONTENT_TILES);
 	ctx.dataManager->load_all_data(*ctx.messageSystem);
@@ -213,7 +213,7 @@ void GameStateManager::init_new_game(GameContext& ctx)
 	ctx.gameState->set_time(0);
 	ctx.gameState->set_is_loaded_game(false);
 
-	assert(ctx.playerBlueprint != nullptr);
+	assert(ctx.playerBlueprint != nullptr && "GameStateManager::init_new_game: called without a playerBlueprint");
 	*ctx.playerOwner = std::make_unique<Player>(Vector2D{ 0, 0 }, *ctx.playerBlueprint, ctx);
 	ctx.player()->set_body_plan(ctx.bodyPlanRegistry->get("humanoid"));
 	*ctx.playerBlueprint = PlayerBlueprint{};
@@ -228,12 +228,12 @@ void GameStateManager::init_new_game(GameContext& ctx)
 bool GameStateManager::load_all(GameContext& ctx)
 {
 	assert(ctx.contentRegistry && "GameStateManager::load_all: called without a contentRegistry");
-	assert(ctx.menuManager != nullptr);
-	assert(ctx.dataManager != nullptr);
-	assert(ctx.messageSystem != nullptr);
-	assert(ctx.gameState != nullptr);
-	assert(ctx.playerOwner != nullptr);
-	assert(ctx.tileConfig != nullptr);
+	assert(ctx.menuManager != nullptr && "GameStateManager::load_all: called without a menuManager");
+	assert(ctx.dataManager != nullptr && "GameStateManager::load_all: called without a dataManager");
+	assert(ctx.messageSystem != nullptr && "GameStateManager::load_all: called without a messageSystem");
+	assert(ctx.gameState != nullptr && "GameStateManager::load_all: called without a gameState");
+	assert(ctx.playerOwner != nullptr && "GameStateManager::load_all: called without a playerOwner");
+	assert(ctx.tileConfig != nullptr && "GameStateManager::load_all: called without a tileConfig");
 
 	ContentRegistryIO::load(*ctx.contentRegistry, Paths::CONTENT_TILES);
 	ctx.menuManager->set_game_initialized(true);
@@ -258,16 +258,16 @@ bool GameStateManager::load_all(GameContext& ctx)
 
 void GameStateManager::save_game(GameContext& ctx)
 {
-	assert(ctx.map != nullptr);
-	assert(ctx.rooms != nullptr);
-	assert(ctx.player() != nullptr);
-	assert(ctx.stairs != nullptr);
-	assert(ctx.creatures != nullptr);
-	assert(ctx.floorInventory != nullptr);
-	assert(ctx.gui != nullptr);
-	assert(ctx.hungerSystem != nullptr);
-	assert(ctx.levelManager != nullptr);
-	assert(ctx.gameState != nullptr);
+	assert(ctx.map != nullptr && "GameStateManager::save_game: called without a map");
+	assert(ctx.rooms != nullptr && "GameStateManager::save_game: called without rooms");
+	assert(ctx.player() != nullptr && "GameStateManager::save_game: called without a player");
+	assert(ctx.stairs != nullptr && "GameStateManager::save_game: called without stairs");
+	assert(ctx.creatures != nullptr && "GameStateManager::save_game: called without creatures");
+	assert(ctx.floorInventory != nullptr && "GameStateManager::save_game: called without a floorInventory");
+	assert(ctx.gui != nullptr && "GameStateManager::save_game: called without a gui");
+	assert(ctx.hungerSystem != nullptr && "GameStateManager::save_game: called without a hungerSystem");
+	assert(ctx.levelManager != nullptr && "GameStateManager::save_game: called without a levelManager");
+	assert(ctx.gameState != nullptr && "GameStateManager::save_game: called without a gameState");
 
 	auto save_path = Paths::resolve(Paths::SAVE_FILE);
 	std::filesystem::create_directories(save_path.parent_path());
@@ -326,16 +326,16 @@ void GameStateManager::save_game(GameContext& ctx)
 
 bool GameStateManager::load_game(GameContext& ctx)
 {
-	assert(ctx.map != nullptr);
-	assert(ctx.rooms != nullptr);
-	assert(ctx.player() != nullptr);
-	assert(ctx.stairs != nullptr);
-	assert(ctx.creatures != nullptr);
-	assert(ctx.floorInventory != nullptr);
-	assert(ctx.gui != nullptr);
-	assert(ctx.hungerSystem != nullptr);
-	assert(ctx.levelManager != nullptr);
-	assert(ctx.gameState != nullptr);
+	assert(ctx.map != nullptr && "GameStateManager::load_game: called without a map");
+	assert(ctx.rooms != nullptr && "GameStateManager::load_game: called without rooms");
+	assert(ctx.player() != nullptr && "GameStateManager::load_game: called without a player");
+	assert(ctx.stairs != nullptr && "GameStateManager::load_game: called without stairs");
+	assert(ctx.creatures != nullptr && "GameStateManager::load_game: called without creatures");
+	assert(ctx.floorInventory != nullptr && "GameStateManager::load_game: called without a floorInventory");
+	assert(ctx.gui != nullptr && "GameStateManager::load_game: called without a gui");
+	assert(ctx.hungerSystem != nullptr && "GameStateManager::load_game: called without a hungerSystem");
+	assert(ctx.levelManager != nullptr && "GameStateManager::load_game: called without a levelManager");
+	assert(ctx.gameState != nullptr && "GameStateManager::load_game: called without a gameState");
 
 	std::ifstream file(Paths::resolve(Paths::SAVE_FILE));
 	if (!file.is_open())

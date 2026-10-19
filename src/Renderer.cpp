@@ -463,15 +463,15 @@ void Renderer::apply_light_mask()
 
 void Renderer::draw_tile(Vector2D gridPos, TileRef tile, Color tint) const
 {
-	assert(sheetsLoaded);
+	assert(sheetsLoaded && "Renderer::draw_tile: called before load_dawnlike loaded the sheets");
 	if (!tile.is_valid())
 	{
 		return;
 	}
 
-	assert(sheet_idx(tile.sheet) < sheets.size());
+	assert(sheet_idx(tile.sheet) < sheets.size() && "Renderer::draw_tile: the tile names a sheet past the end of the table");
 	const SpriteSheet& sheet = sheets[sheet_idx(tile.sheet)];
-	assert(sheet.loaded && sheet.tilesPerRow > 0);
+	assert(sheet.loaded && sheet.tilesPerRow > 0 && "Renderer::draw_tile: the tile's sheet was never loaded");
 
 	// Screen position with camera offset
 	float destX = static_cast<float>(gridPos.x * tileSize - camera.x);
@@ -504,15 +504,15 @@ void Renderer::draw_tile(Vector2D gridPos, TileRef tile, Color tint) const
 
 void Renderer::draw_tile_offset(Vector2D gridPos, int pixelOffsetX, int pixelOffsetY, TileRef tile, Color tint) const
 {
-	assert(sheetsLoaded);
+	assert(sheetsLoaded && "Renderer::draw_tile_offset: called before load_dawnlike loaded the sheets");
 	if (!tile.is_valid())
 	{
 		return;
 	}
 
-	assert(sheet_idx(tile.sheet) < sheets.size());
+	assert(sheet_idx(tile.sheet) < sheets.size() && "Renderer::draw_tile_offset: the tile names a sheet past the end of the table");
 	const SpriteSheet& sheet = sheets[sheet_idx(tile.sheet)];
-	assert(sheet.loaded && sheet.tilesPerRow > 0);
+	assert(sheet.loaded && sheet.tilesPerRow > 0 && "Renderer::draw_tile_offset: the tile's sheet was never loaded");
 
 	float destX = static_cast<float>(gridPos.x * tileSize - camera.x + pixelOffsetX);
 	float destY = static_cast<float>(gridPos.y * tileSize - camera.y + pixelOffsetY);
@@ -542,15 +542,15 @@ void Renderer::draw_tile_offset(Vector2D gridPos, int pixelOffsetX, int pixelOff
 
 void Renderer::draw_tile_static(Vector2D gridPos, TileRef tile, Color tint) const
 {
-	assert(sheetsLoaded);
+	assert(sheetsLoaded && "Renderer::draw_tile_static: called before load_dawnlike loaded the sheets");
 	if (!tile.is_valid())
 	{
 		return;
 	}
 
-	assert(sheet_idx(tile.sheet) < sheets.size());
+	assert(sheet_idx(tile.sheet) < sheets.size() && "Renderer::draw_tile_static: the tile names a sheet past the end of the table");
 	const SpriteSheet& sheet = sheets[sheet_idx(tile.sheet)];
-	assert(sheet.loaded && sheet.tilesPerRow > 0);
+	assert(sheet.loaded && sheet.tilesPerRow > 0 && "Renderer::draw_tile_static: the tile's sheet was never loaded");
 
 	float destX = static_cast<float>(gridPos.x * tileSize - camera.x);
 	float destY = static_cast<float>(gridPos.y * tileSize - camera.y);
@@ -576,15 +576,15 @@ void Renderer::draw_tile_static(Vector2D gridPos, TileRef tile, Color tint) cons
 
 void Renderer::draw_tile_screen(Vector2D screenPos, TileRef tile) const
 {
-	assert(sheetsLoaded);
+	assert(sheetsLoaded && "Renderer::draw_tile_screen: called before load_dawnlike loaded the sheets");
 	if (!tile.is_valid())
 	{
 		return;
 	}
 
-	assert(sheet_idx(tile.sheet) < sheets.size());
+	assert(sheet_idx(tile.sheet) < sheets.size() && "Renderer::draw_tile_screen: the tile names a sheet past the end of the table");
 	const SpriteSheet& sheet = sheets[sheet_idx(tile.sheet)];
-	assert(sheet.loaded && sheet.tilesPerRow > 0);
+	assert(sheet.loaded && sheet.tilesPerRow > 0 && "Renderer::draw_tile_screen: the tile's sheet was never loaded");
 
 	const Texture2D& texture = (sheet.animated && currentAnimFrame == 1)
 		? sheet.frame1
@@ -610,15 +610,15 @@ void Renderer::draw_tile_screen(Vector2D screenPos, TileRef tile) const
 
 void Renderer::draw_tile_screen_color(Vector2D screenPos, TileRef tile, Color tint) const
 {
-	assert(sheetsLoaded);
+	assert(sheetsLoaded && "Renderer::draw_tile_screen_color: called before load_dawnlike loaded the sheets");
 	if (!tile.is_valid())
 	{
 		return;
 	}
 
-	assert(sheet_idx(tile.sheet) < sheets.size());
+	assert(sheet_idx(tile.sheet) < sheets.size() && "Renderer::draw_tile_screen_color: the tile names a sheet past the end of the table");
 	const SpriteSheet& sheet = sheets[sheet_idx(tile.sheet)];
-	assert(sheet.loaded && sheet.tilesPerRow > 0);
+	assert(sheet.loaded && sheet.tilesPerRow > 0 && "Renderer::draw_tile_screen_color: the tile's sheet was never loaded");
 
 	const Texture2D& texture = (sheet.animated && currentAnimFrame == 1)
 		? sheet.frame1
@@ -644,15 +644,15 @@ void Renderer::draw_tile_screen_color(Vector2D screenPos, TileRef tile, Color ti
 
 void Renderer::draw_tile_screen_color_sized(Vector2D screenPos, int size, TileRef tile, Color tint) const
 {
-	assert(sheetsLoaded);
+	assert(sheetsLoaded && "Renderer::draw_tile_screen_color_sized: called before load_dawnlike loaded the sheets");
 	if (!tile.is_valid())
 	{
 		return;
 	}
 
-	assert(sheet_idx(tile.sheet) < sheets.size());
+	assert(sheet_idx(tile.sheet) < sheets.size() && "Renderer::draw_tile_screen_color_sized: the tile names a sheet past the end of the table");
 	const SpriteSheet& sheet = sheets[sheet_idx(tile.sheet)];
-	assert(sheet.loaded && sheet.tilesPerRow > 0);
+	assert(sheet.loaded && sheet.tilesPerRow > 0 && "Renderer::draw_tile_screen_color_sized: the tile's sheet was never loaded");
 
 	const Texture2D& texture = (sheet.animated && currentAnimFrame == 1)
 		? sheet.frame1
@@ -683,15 +683,15 @@ void Renderer::draw_tile_screen_color_rect(
 	TileRef tile,
 	Color tint) const
 {
-	assert(sheetsLoaded);
+	assert(sheetsLoaded && "Renderer::draw_tile_screen_color_rect: called before load_dawnlike loaded the sheets");
 	if (!tile.is_valid() || width <= 0 || height <= 0)
 	{
 		return;
 	}
 
-	assert(sheet_idx(tile.sheet) < sheets.size());
+	assert(sheet_idx(tile.sheet) < sheets.size() && "Renderer::draw_tile_screen_color_rect: the tile names a sheet past the end of the table");
 	const SpriteSheet& sheet = sheets[sheet_idx(tile.sheet)];
-	assert(sheet.loaded && sheet.tilesPerRow > 0);
+	assert(sheet.loaded && sheet.tilesPerRow > 0 && "Renderer::draw_tile_screen_color_rect: the tile's sheet was never loaded");
 
 	const Texture2D& texture = (sheet.animated && currentAnimFrame == 1)
 		? sheet.frame1
@@ -716,15 +716,15 @@ void Renderer::draw_tile_screen_color_rect(
 
 void Renderer::draw_tile_screen_sized(Vector2D screenPos, TileRef tile, int displaySize) const
 {
-	assert(sheetsLoaded);
+	assert(sheetsLoaded && "Renderer::draw_tile_screen_sized: called before load_dawnlike loaded the sheets");
 	if (!tile.is_valid())
 	{
 		return;
 	}
 
-	assert(sheet_idx(tile.sheet) < sheets.size());
+	assert(sheet_idx(tile.sheet) < sheets.size() && "Renderer::draw_tile_screen_sized: the tile names a sheet past the end of the table");
 	const SpriteSheet& sheet = sheets[sheet_idx(tile.sheet)];
-	assert(sheet.loaded && sheet.tilesPerRow > 0);
+	assert(sheet.loaded && sheet.tilesPerRow > 0 && "Renderer::draw_tile_screen_sized: the tile's sheet was never loaded");
 
 	const Texture2D& texture = (sheet.animated && currentAnimFrame == 1)
 		? sheet.frame1
