@@ -1,0 +1,53 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=PotionHealingTest.*:ItemRoundTripTest.*:ItemCreatorTest.*:BehaviorRecordTest.*:CreatureEquipmentUseTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tconst int healed = wearer.heal(roll_dice(ctx.dice, consumable.amount));\n",
+      "mutated": "\t\tconst int healed = wearer.heal(consumable.amount.min_total());\n",
+      "catches": "a healing potion always pouring the least of its roll"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tconst int healed = wearer.heal(roll_dice(ctx.dice, consumable.amount));\n",
+      "mutated": "\t\tconst int healed = wearer.heal(consumable.amount.bonus);\n",
+      "catches": "the dice dropped, so a healing potion pours only its flat part"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tconst int value = roll_dice(ctx.dice, consumable.amount);\n",
+      "mutated": "\t\tconst int value = 0;\n",
+      "catches": "a buff potion's fixed amount lost, so giant strength sets nothing"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\t\t\toutput[\"amount\"] = to_text(b.amount);\n\t\t\t\toutput[\"durationTurns\"]",
+      "mutated": "\t\t\t\toutput[\"amount\"] = \"0\";\n\t\t\t\toutput[\"durationTurns\"]",
+      "catches": "a saved potion losing its dice, so it heals nothing once loaded"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tconsumable.amount = parse_dice_expression(source.at(\"amount\").get<std::string>());\n",
+      "mutated": "\t\tconsumable.amount = DiceExpr{ 0, 0, 10 };\n",
+      "catches": "a loaded potion's dice replaced by the old fixed ten"
+    },
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "\tparams.consumableAmount = parse_dice_expression(required_field(record, key, \"consumableAmount\").get<std::string>());\n",
+      "mutated": "\tparams.consumableAmount = DiceExpr{ 0, 0, 10 };\n",
+      "catches": "the data's dice never read, every potion pouring one fixed figure"
+    },
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "\trecord[\"consumableAmount\"] = to_text(params.consumableAmount);\n",
+      "mutated": "\trecord[\"consumableAmount\"] = \"0\";\n",
+      "catches": "the editor's save writing every potion's amount away"
+    }
+  ]
+}

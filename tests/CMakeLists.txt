@@ -73,6 +73,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/InvisibilitySpellTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/RingInvisibilityTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/PotionDurationTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/PotionHealingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/LevelLoadTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/RangedShotTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/LevelUpHitDieTest.cpp

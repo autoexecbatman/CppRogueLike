@@ -9,7 +9,7 @@
   "mutations": [
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tconst int healed = wearer.heal(consumable.amount);\n",
+      "original": "\t\tconst int healed = wearer.heal(roll_dice(ctx.dice, consumable.amount));\n",
       "mutated": "\t\tconst int healed = wearer.heal(1);\n",
       "catches": "a potion pouring one point instead of what it holds, which an is-it-greater assertion could not see"
     },

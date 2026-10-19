@@ -63,7 +63,7 @@ void expect_same_item(const std::string& key, const ItemParams& before, const It
 	EXPECT_EQ(before.value, after.value) << key << ".value";
 	EXPECT_EQ(before.pickableType, after.pickableType) << key << ".pickableType";
 
-	EXPECT_EQ(before.consumableAmount, after.consumableAmount) << key << ".consumableAmount";
+	EXPECT_EQ(to_text(before.consumableAmount), to_text(after.consumableAmount)) << key << ".consumableAmount";
 	EXPECT_EQ(before.range, after.range) << key << ".range";
 	EXPECT_EQ(before.damage, after.damage) << key << ".damage";
 	EXPECT_EQ(before.confuseTurns, after.confuseTurns) << key << ".confuseTurns";

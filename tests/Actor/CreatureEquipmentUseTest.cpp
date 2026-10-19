@@ -19,7 +19,6 @@
 
 #include <algorithm>
 #include <memory>
-#include <variant>
 
 #include "src/ArmorClass.h"
 #include "src/Creature.h"
@@ -30,6 +29,7 @@
 #include "src/Item.h"
 #include "src/ItemCreator.h"
 #include "src/Pickable.h"
+#include "src/RandomDice.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace
@@ -107,10 +107,10 @@ TEST_F(CreatureEquipmentUseTest, ACreatureDrinksAPotion)
 	Item& potion = carry("health_potion");
 	ASSERT_TRUE(potion.behavior.has_value()) << "the potion carries nothing to use";
 
-	// Asked of the potion rather than written down, so a balance edit to the data
-	// moves the expectation with it instead of failing.
-	const int healsBy = std::get<Consumable>(*potion.behavior).amount;
-	ASSERT_GT(healsBy, 0) << "this potion heals nothing, so the test below proves nothing";
+	// The book's 2d4 + 2 (DMG PDF page 890), with the dice scripted to 3 and 2.
+	mock.dice.set_next_roll(3);
+	mock.dice.set_next_roll(2);
+	const int healsBy = 3 + 2 + 2;
 
 	// Low enough that the whole draught fits: a wearer near full would clamp, and
 	// then any amount at all would look correct.

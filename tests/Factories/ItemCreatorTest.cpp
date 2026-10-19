@@ -90,7 +90,7 @@ TEST_F(ItemCreatorTest, FireResistancePotionIsOneRingsWorth)
 
 	EXPECT_EQ(potion.effect, ConsumableEffect::ADD_BUFF);
 	EXPECT_EQ(potion.buffType, BuffType::FIRE_RESISTANCE);
-	EXPECT_EQ(potion.amount, 1) << "the buff value is the strength in rings";
+	EXPECT_EQ(to_text(potion.amount), "1") << "the buff value is the strength in rings";
 	EXPECT_EQ(to_text(potion.durationTurns), "1") << "the book's one turn, DMG PDF page 889";
 	EXPECT_EQ(potion.application, BuffApplication::ADD);
 }
@@ -104,7 +104,7 @@ TEST_F(ItemCreatorTest, ColdResistancePotionIsOneRingsWorth)
 
 	EXPECT_EQ(potion.effect, ConsumableEffect::ADD_BUFF);
 	EXPECT_EQ(potion.buffType, BuffType::COLD_RESISTANCE);
-	EXPECT_EQ(potion.amount, 1);
+	EXPECT_EQ(to_text(potion.amount), "1");
 	EXPECT_EQ(to_text(potion.durationTurns), "5");
 }
 

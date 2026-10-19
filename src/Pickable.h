@@ -178,7 +178,8 @@ inline ConsumableEffect parse_consumable_effect(std::string_view name)
 struct Consumable
 {
 	ConsumableEffect effect{ ConsumableEffect::NONE };
-	int amount{ 0 };
+	// The hit points healed or the buff's value, rolled once when used.
+	DiceExpr amount{};
 	// The buff's duration in turns, rolled once when drunk.
 	DiceExpr durationTurns{};
 	BuffType buffType{ BuffType::NONE };

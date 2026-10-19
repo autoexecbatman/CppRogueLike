@@ -16,7 +16,7 @@
     {
       "file": "src/ItemCreator.cpp",
       "original": "\t\treturn Gold{ params.value };",
-      "mutated": "\t\treturn Gold{ params.consumableAmount };",
+      "mutated": "\t\treturn Gold{ params.consumableAmount.bonus };",
       "catches": "a field that is zero for a gem read instead of its authored value"
     },
     {

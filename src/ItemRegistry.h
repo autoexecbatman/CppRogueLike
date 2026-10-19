@@ -52,8 +52,9 @@ struct ItemParams
 	// Which behaviour it is given, and so what using it does.
 	PickableType pickableType{ PickableType::WEAPON };
 
-	// A consumable's amount - the hit points healed, or the buff's strength.
-	int consumableAmount{ 0 };
+	// A consumable's amount - the hit points healed, or the buff's strength - as dice
+	// rolled once when it is used; a bare number is a fixed amount.
+	DiceExpr consumableAmount{};
 	// A targeted scroll's reach.
 	int range{ 0 };
 	// A targeted scroll's damage.

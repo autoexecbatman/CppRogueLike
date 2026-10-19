@@ -843,8 +843,12 @@ std::string ItemEditor::field_label(FieldId f) const
 		return "Consumable Effect";
 	case FieldId::CONSUMABLE_BUFF:
 		return "Consumable Buff";
-	case FieldId::CONSUMABLE_AMT:
-		return "Consumable Amount";
+	case FieldId::CONSUMABLE_AMT_DICE:
+		return "Amount Dice";
+	case FieldId::CONSUMABLE_AMT_SIDES:
+		return "Amount Sides";
+	case FieldId::CONSUMABLE_AMT_BONUS:
+		return "Amount Bonus";
 	case FieldId::DURATION_TURNS_DICE:
 		return "Potion Turns Dice";
 	case FieldId::DURATION_TURNS_SIDES:
@@ -937,8 +941,12 @@ std::string ItemEditor::field_value(FieldId f) const
 		return std::string{ consumable_effect_str(p.consumableEffect) };
 	case FieldId::CONSUMABLE_BUFF:
 		return std::string{ encode_buff_type(p.consumableBuffType) };
-	case FieldId::CONSUMABLE_AMT:
-		return std::format("{}", p.consumableAmount);
+	case FieldId::CONSUMABLE_AMT_DICE:
+		return std::format("{} ({})", p.consumableAmount.num, to_text(p.consumableAmount));
+	case FieldId::CONSUMABLE_AMT_SIDES:
+		return std::format("{}", p.consumableAmount.sides);
+	case FieldId::CONSUMABLE_AMT_BONUS:
+		return std::format("{}", p.consumableAmount.bonus);
 	case FieldId::DURATION_TURNS_DICE:
 		return std::format("{} ({})", p.durationTurns.num, to_text(p.durationTurns));
 	case FieldId::DURATION_TURNS_SIDES:
@@ -1041,8 +1049,18 @@ void ItemEditor::field_adjust(FieldId f, int delta)
 		p.levelScaling = std::clamp(raw, 0.0f, 5.0f);
 		break;
 	}
-	case FieldId::CONSUMABLE_AMT:
-		p.consumableAmount = clamp_val(p.consumableAmount, delta, 0, 9999);
+	case FieldId::CONSUMABLE_AMT_DICE:
+	{
+		// No dice is a fixed amount; any dice need a die to roll, and a d2 is the least.
+		p.consumableAmount.num = clamp_val(p.consumableAmount.num, delta, 0, 99);
+		p.consumableAmount.sides = p.consumableAmount.num == 0 ? 0 : std::max(p.consumableAmount.sides, 2);
+		break;
+	}
+	case FieldId::CONSUMABLE_AMT_SIDES:
+		p.consumableAmount.sides = p.consumableAmount.num == 0 ? 0 : clamp_val(p.consumableAmount.sides, delta, 2, 20);
+		break;
+	case FieldId::CONSUMABLE_AMT_BONUS:
+		p.consumableAmount.bonus = clamp_val(p.consumableAmount.bonus, delta, 0, 9999);
 		break;
 	case FieldId::DURATION_TURNS_DICE:
 	{

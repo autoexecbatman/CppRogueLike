@@ -246,7 +246,7 @@ bool use(Consumable& consumable, Item& owner, Creature& wearer, GameContext& ctx
 			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You are already at full health.", MessageCompletion::FINISHED);
 			return false;
 		}
-		const int healed = wearer.heal(consumable.amount);
+		const int healed = wearer.heal(roll_dice(ctx.dice, consumable.amount));
 		ctx.messageSystem->message(ColorPairId::GREEN_BLACK, std::format("You feel better! (+{} HP)", healed), MessageCompletion::FINISHED);
 		break;
 	}
@@ -255,7 +255,8 @@ bool use(Consumable& consumable, Item& owner, Creature& wearer, GameContext& ctx
 	{
 		// Rolled once, at the drink, in the book's turns.
 		const int durationRounds = roll_dice(ctx.dice, consumable.durationTurns) * ROUNDS_PER_TURN;
-		ctx.buffSystem->add_buff(wearer, consumable.buffType, consumable.amount, durationRounds, consumable.application, ctx.gameState->get_time());
+		const int value = roll_dice(ctx.dice, consumable.amount);
+		ctx.buffSystem->add_buff(wearer, consumable.buffType, value, durationRounds, consumable.application, ctx.gameState->get_time());
 		ctx.messageSystem->message(
 			ColorPairId::CYAN_BLACK,
 			std::format("You feel the effect of the {} for {}.", owner.get_name(), Wording::counted(durationRounds, "turn", "turns")),
@@ -761,7 +762,7 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 			{
 				output["type"] = encode_pickable_type(PickableType::CONSUMABLE);
 				output["effect"] = encode_consumable_effect(b.effect);
-				output["amount"] = b.amount;
+				output["amount"] = to_text(b.amount);
 				output["durationTurns"] = to_text(b.durationTurns);
 				output["buffType"] = encode_buff_type(b.buffType);
 				output["application"] = encode_buff_application(b.application);
@@ -850,7 +851,7 @@ ItemBehavior load_behavior(const json& source)
 	{
 		Consumable consumable;
 		consumable.effect = parse_consumable_effect(source.at("effect").get<std::string>());
-		consumable.amount = source.at("amount").get<int>();
+		consumable.amount = parse_dice_expression(source.at("amount").get<std::string>());
 		consumable.durationTurns = parse_dice_expression(source.at("durationTurns").get<std::string>());
 		consumable.buffType = parse_buff_type(source.at("buffType").get<std::string>());
 		consumable.application = parse_buff_application(source.at("application").get<std::string>());

@@ -87,7 +87,7 @@ nlohmann::json encode_item(const ItemParams& params)
 	record["levelMin"] = params.levelMin;
 	record["levelMax"] = params.levelMax;
 	record["levelScaling"] = params.levelScaling;
-	record["consumableAmount"] = params.consumableAmount;
+	record["consumableAmount"] = to_text(params.consumableAmount);
 	record["range"] = params.range;
 	record["damage"] = params.damage;
 	record["confuseTurns"] = params.confuseTurns;
@@ -157,7 +157,7 @@ ItemParams parse_item(const std::string& key, const nlohmann::json& record)
 	params.levelMin = required_field(record, key, "levelMin");
 	params.levelMax = required_field(record, key, "levelMax");
 	params.levelScaling = required_field(record, key, "levelScaling");
-	params.consumableAmount = required_field(record, key, "consumableAmount");
+	params.consumableAmount = parse_dice_expression(required_field(record, key, "consumableAmount").get<std::string>());
 	params.range = required_field(record, key, "range");
 	params.damage = required_field(record, key, "damage");
 	params.confuseTurns = required_field(record, key, "confuseTurns");
