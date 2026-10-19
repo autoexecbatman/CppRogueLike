@@ -20,6 +20,15 @@ public:
 	//   get_buff_turns(cleric, BuffType::BLESS, 0);     // -> 3
 	//   get_buff_turns(cleric, BuffType::BLESS, 240);   // -> 1, two rounds in
 	void add_buff(Creature& creature, BuffType type, int value, int durationRounds, bool isSetEffect, int currentTime) noexcept;
+
+	// Grants a buff with no duration: it lasts until something breaks it. A casting
+	// of the same type already running is made lasting too, its value kept.
+	//
+	// Example, a thief who has melted into the shadows:
+	//   add_buff_until_broken(thief, BuffType::HIDDEN_IN_SHADOWS);
+	//   update_creature_buffs(thief, 1000000);              // still hidden
+	//   remove_buffs_broken_by_attacking(thief);            // -> { HIDDEN_IN_SHADOWS }
+	void add_buff_until_broken(Creature& creature, BuffType type) noexcept;
 	void remove_buff(Creature& creature, BuffType type) noexcept;
 
 	// Retires whatever the clock has passed, clearing the states those buffs imposed.
@@ -32,6 +41,7 @@ public:
 
 	// Whole rounds the buff has left at `currentTime`, rounded up so that a buff still
 	// in force never reports zero. A creature without the buff reads zero as well.
+	// A buff lasting until broken has no rounds to count, and asking is refused.
 	int get_buff_turns(const Creature& creature, BuffType type, int currentTime) const noexcept;
 	bool has_buff(const Creature& creature, BuffType type) const noexcept;
 

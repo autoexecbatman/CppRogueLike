@@ -27,6 +27,11 @@ inline constexpr int REST_DANGER_RADIUS = 5;
 
 class Player : public Creature
 {
+private:
+	// The square the thief last tried to hide on, whether the secret roll made it or
+	// not: "the thief always thinks he is hidden" (PHB page 87). Empty out of hiding.
+	std::optional<Vector2D> hidingSpot{};
+
 public:
 	PlayerRaceState playerRaceState{ PlayerRaceState::NONE };
 
@@ -98,6 +103,33 @@ public:
 	// The same thief with a monster hunting it:
 	//   player.attempt_hide(ctx);   // -> HideAttempt::WATCHED, no roll made
 	[[nodiscard]] HideAttempt attempt_hide(GameContext& ctx);
+
+	// Whether the thief believes he is hidden: he tried, and has not moved or attacked
+	// since. True after a failed roll as well, which is what keeps the roll secret.
+	//
+	// Example:
+	//   player.attempt_hide(ctx);   // the roll fails, in secret
+	//   player.is_in_shadows();     // -> true
+	//   player.is_invisible();      // -> false
+	[[nodiscard]] bool is_in_shadows() const noexcept;
+
+	// Ends a hide, the secret roll's result with it, and says so in a line that reads
+	// the same whether the roll made it or not. Refuses a thief not in the shadows.
+	//
+	// Example, a thief whose roll succeeded and one whose roll failed:
+	//   player.leave_shadows(ctx);   // "You leave the shadows." for both
+	//   player.is_in_shadows();      // -> false
+	void leave_shadows(GameContext& ctx);
+
+	// Ends the hide if the thief is no longer on the square he hid on, by whatever means
+	// he left it: "he remains hidden only as long as he remains virtually motionless".
+	// Run before any creature acts on the player's last action.
+	//
+	// Example, a thief who hid at (2, 5):
+	//   player.leave_shadows_if_moved(ctx);   // still at (2, 5): still hidden
+	//   player.position = Vector2D{ 3, 5 };
+	//   player.leave_shadows_if_moved(ctx);   // "You leave the shadows."
+	void leave_shadows_if_moved(GameContext& ctx);
 
 	// Equipment system methods
 

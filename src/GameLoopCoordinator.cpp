@@ -571,6 +571,8 @@ void GameLoopCoordinator::update(GameContext& ctx)
 			[](const auto& d)
 			{ return !d || d->isBroken; });
 
+		// A thief who left the square he hid on is seen before anything looks, whatever moved him.
+		ctx.player_concrete().leave_shadows_if_moved(ctx);
 		ctx.creatureManager->update_creatures(*ctx.creatures, ctx);
 		ctx.creatureManager->spawn_creatures(ctx);
 

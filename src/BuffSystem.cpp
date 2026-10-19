@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <cassert>
+#include <optional>
 #include <ranges>
 #include <unordered_map>
 #include <unordered_set>
@@ -14,6 +16,7 @@
 // sync_buff_states, so two buffs granting one state cannot clear each other.
 static const std::unordered_map<BuffType, ActorState> buff_state_effects = {
 	{ BuffType::INVISIBILITY, ActorState::IS_INVISIBLE },
+	{ BuffType::HIDDEN_IN_SHADOWS, ActorState::IS_INVISIBLE },
 	{ BuffType::SLEEP, ActorState::IS_SLEEPING },
 	{ BuffType::HOLD_PERSON, ActorState::IS_HELD },
 	{ BuffType::SANCTUARY, ActorState::IS_PROTECTED },
@@ -34,6 +37,7 @@ static const std::unordered_set<BuffType> ac_affecting_buffs = {
 static const std::unordered_set<BuffType> buffs_broken_by_attacking = {
 	BuffType::INVISIBILITY,
 	BuffType::SANCTUARY,
+	BuffType::HIDDEN_IN_SHADOWS,
 };
 
 // OCP: Data-driven hit calculation - BuffTypes that modify to-hit rolls
@@ -71,11 +75,27 @@ static void sync_buff_states(Creature& creature) noexcept
 	}
 }
 
-void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int durationRounds, bool isSetEffect, int currentTime) noexcept
+// The later of two endings, where none is an ending that never comes.
+//
+// Example:
+//   later_ending(360, 960);            // -> 960
+//   later_ending(360, std::nullopt);   // -> nullopt, lasting wins
+static std::optional<int> later_ending(std::optional<int> first, std::optional<int> second) noexcept
 {
-	// When this casting runs out, worked once and stored, so nothing counts it down.
-	const int expiry = expiry_time(currentTime, durationRounds);
+	if (!first.has_value() || !second.has_value())
+	{
+		return std::nullopt;
+	}
+	return std::max(*first, *second);
+}
 
+// Puts one casting on the creature, or folds it into the one of its type already there.
+//
+// Example:
+//   grant_buff(cleric, BuffType::BLESS, 0, 360, false);            // blessed until 360
+//   grant_buff(cleric, BuffType::BLESS, 0, std::nullopt, false);   // now until broken
+static void grant_buff(Creature& creature, BuffType type, int value, std::optional<int> expiry, bool isSetEffect) noexcept
+{
 	// Find if buff already exists
 	auto matches_type = [type](const Buff& b)
 	{
@@ -99,7 +119,7 @@ void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int dura
 		else
 		{
 			// Weaker or equal buff, so it can only make the one already running last longer
-			it->expiryTime = std::max(it->expiryTime, expiry);
+			it->expiryTime = later_ending(it->expiryTime, expiry);
 		}
 	}
 	else
@@ -115,6 +135,17 @@ void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int dura
 	}
 
 	sync_buff_states(creature);
+}
+
+void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int durationRounds, bool isSetEffect, int currentTime) noexcept
+{
+	// When this casting runs out, worked once and stored, so nothing counts it down.
+	grant_buff(creature, type, value, expiry_time(currentTime, durationRounds), isSetEffect);
+}
+
+void BuffSystem::add_buff_until_broken(Creature& creature, BuffType type) noexcept
+{
+	grant_buff(creature, type, 0, std::nullopt, false);
 }
 
 void BuffSystem::remove_buff(Creature& creature, BuffType type) noexcept
@@ -135,7 +166,7 @@ void BuffSystem::update_creature_buffs(Creature& creature, int currentTime) noex
 	// answer is the same however many times a creature is driven in one round.
 	auto is_expired = [currentTime](const Buff& b)
 	{
-		return currentTime >= b.expiryTime;
+		return b.expiryTime.has_value() && currentTime >= *b.expiryTime;
 	};
 
 	std::erase_if(creature.activeBuffs, is_expired);
@@ -161,7 +192,12 @@ int BuffSystem::get_buff_turns(const Creature& creature, BuffType type, int curr
 		return b.type == type;
 	};
 	auto it = std::ranges::find_if(creature.activeBuffs, matches_type);
-	return it != creature.activeBuffs.end() ? rounds_remaining(currentTime, it->expiryTime) : 0;
+	if (it == creature.activeBuffs.end())
+	{
+		return 0;
+	}
+	assert(it->expiryTime.has_value() && "get_buff_turns: a buff lasting until broken has no rounds to count");
+	return rounds_remaining(currentTime, *it->expiryTime);
 }
 
 bool BuffSystem::has_buff(const Creature& creature, BuffType type) const noexcept

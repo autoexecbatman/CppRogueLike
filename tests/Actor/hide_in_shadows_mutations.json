@@ -51,9 +51,63 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": "\t\tconst int hideDuration = 10 + get_creature_level() * 2;\n\t\tctx.buffSystem->add_buff(*this, BuffType::INVISIBILITY, 0, hideDuration, false, ctx.gameState->get_time());\n\t}\n\tctx.messageSystem->message(ColorPairId::CYAN_BLACK, \"You melt into the shadows...\", MessageCompletion::FINISHED);\n\treturn HideAttempt::ATTEMPTED;",
-      "mutated": "\t\tconst int hideDuration = 10 + get_creature_level() * 2;\n\t\tctx.buffSystem->add_buff(*this, BuffType::INVISIBILITY, 0, hideDuration, false, ctx.gameState->get_time());\n\t\tctx.messageSystem->message(ColorPairId::CYAN_BLACK, \"You melt into the shadows...\", MessageCompletion::FINISHED);\n\t\treturn HideAttempt::ATTEMPTED;\n\t}\n\tctx.messageSystem->message(ColorPairId::RED_BLACK, \"You fail to hide.\", MessageCompletion::FINISHED);\n\treturn HideAttempt::WATCHED;",
+      "original": "\t\tctx.buffSystem->add_buff_until_broken(*this, BuffType::HIDDEN_IN_SHADOWS);\n\t}\n\tctx.messageSystem->message(ColorPairId::CYAN_BLACK, \"You melt into the shadows...\", MessageCompletion::FINISHED);\n\treturn HideAttempt::ATTEMPTED;",
+      "mutated": "\t\tctx.buffSystem->add_buff_until_broken(*this, BuffType::HIDDEN_IN_SHADOWS);\n\t\tctx.messageSystem->message(ColorPairId::CYAN_BLACK, \"You melt into the shadows...\", MessageCompletion::FINISHED);\n\t\treturn HideAttempt::ATTEMPTED;\n\t}\n\tctx.messageSystem->message(ColorPairId::RED_BLACK, \"You fail to hide.\", MessageCompletion::FINISHED);\n\treturn HideAttempt::WATCHED;",
       "catches": "the roll's result told to the player, which the book keeps secret"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tif (hidingSpot.has_value() && *hidingSpot != position)",
+      "mutated": "\tif (false)",
+      "catches": "a thief who moved staying hidden, the defect 0039 names"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tif (hidingSpot.has_value() && *hidingSpot != position)",
+      "mutated": "\tif (hidingSpot.has_value())",
+      "catches": "a thief who stood still pulled out of the shadows anyway"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tctx.buffSystem->remove_buff(*this, BuffType::HIDDEN_IN_SHADOWS);\n\thidingSpot.reset();",
+      "mutated": "\tctx.buffSystem->remove_buff(*this, BuffType::INVISIBILITY);\n\thidingSpot.reset();",
+      "catches": "leaving the shadows ending the spell instead of the hide"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\thidingSpot = position;\n\tif (ctx.dice->d100() <= skill.value())",
+      "mutated": "\tif (ctx.dice->d100() <= skill.value())",
+      "catches": "a hide taken from no spot, so nothing can tell that the thief moved"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tif (is_in_shadows() || is_invisible())",
+      "mutated": "\tif (is_invisible())",
+      "catches": "a second try after a failed roll told apart from one after a success"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\tctx.buffSystem->add_buff_until_broken(*this, BuffType::HIDDEN_IN_SHADOWS);",
+      "mutated": "\t\tctx.buffSystem->add_buff(*this, BuffType::HIDDEN_IN_SHADOWS, 0, 10 + get_creature_level() * 2, false, ctx.gameState->get_time());",
+      "catches": "the invented duration coming back"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, \"You leave the shadows.\", MessageCompletion::FINISHED);",
+      "mutated": "\tif (is_invisible())\n\t{\n\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, \"You leave the shadows.\", MessageCompletion::FINISHED);\n\t}",
+      "catches": "the leaving line printed only for a roll that worked, which leaks it"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\t\tif (ctx.player_concrete().is_in_shadows())\n\t\t{\n\t\t\tctx.player_concrete().leave_shadows(ctx);\n\t\t}",
+      "mutated": "",
+      "catches": "a thief who struck from a failed hide still believing he is hidden"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\thidingSpot = spot.is_null()\n\t\t? std::nullopt",
+      "mutated": "\thidingSpot = true\n\t\t? std::nullopt",
+      "catches": "a saved hide coming back with no spot to hold it"
     }
   ]
 }

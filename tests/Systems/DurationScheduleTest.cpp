@@ -219,4 +219,23 @@ TEST_F(DurationScheduleTest, SpeedDoesNotChangeHowLongConfusionLasts)
 	EXPECT_EQ(quickling.ai->get_ai_type(), AiType::MONSTER) << "the confusion outstayed its rounds";
 }
 
+// A buff lasting until broken has no ending for a timed casting folded into it to move
+// earlier, whichever of the two came first. Far past both rounds, both are still there.
+TEST_F(DurationScheduleTest, ALastingBuffKeepsLastingWhateverIsFoldedIntoIt)
+{
+	Creature& lastingFirst = placed(TIME_UNITS_PER_ROUND);
+	Creature& timedFirst = placed(TIME_UNITS_PER_ROUND);
+
+	buffs.add_buff_until_broken(lastingFirst, BuffType::BLESS);
+	buffs.add_buff(lastingFirst, BuffType::BLESS, 0, BLESS_ROUNDS, false, 0);
+	buffs.add_buff(timedFirst, BuffType::BLESS, 0, BLESS_ROUNDS, false, 0);
+	buffs.add_buff_until_broken(timedFirst, BuffType::BLESS);
+
+	buffs.update_creature_buffs(lastingFirst, expiry_time(0, BLESS_ROUNDS * 100));
+	buffs.update_creature_buffs(timedFirst, expiry_time(0, BLESS_ROUNDS * 100));
+
+	EXPECT_TRUE(buffs.has_buff(lastingFirst, BuffType::BLESS)) << "a timed casting gave the lasting one an ending";
+	EXPECT_TRUE(buffs.has_buff(timedFirst, BuffType::BLESS)) << "the lasting grant kept the timed casting's ending";
+}
+
 // end of file: DurationScheduleTest.cpp

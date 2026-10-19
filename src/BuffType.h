@@ -4,6 +4,7 @@
 #include <array>
 
 #include <format>
+#include <optional>
 #include <stdexcept>
 #include <string_view>
 #include <vector>
@@ -40,6 +41,7 @@ enum class BuffType
 	SILENCE,
 	WEBBED,
 	HAIRY_SPIDER_VENOM,
+	HIDDEN_IN_SHADOWS,
 };
 
 // The hairy spider's weak poison: "the victim's AC and attack rolls are penalized by
@@ -49,7 +51,7 @@ inline constexpr int HAIRY_SPIDER_VENOM_PENALTY = 1;
 
 // Every BuffType, in the order the enum declares them, so a cycle through the
 // editor's field reaches all of them and adding one is a single edit here.
-inline constexpr std::array<BuffType, 22> ALL_BUFF_TYPE = {
+inline constexpr std::array<BuffType, 23> ALL_BUFF_TYPE = {
 	BuffType::NONE,
 	BuffType::INVISIBILITY,
 	BuffType::BLESS,
@@ -72,6 +74,7 @@ inline constexpr std::array<BuffType, 22> ALL_BUFF_TYPE = {
 	BuffType::SILENCE,
 	BuffType::WEBBED,
 	BuffType::HAIRY_SPIDER_VENOM,
+	BuffType::HIDDEN_IN_SHADOWS,
 };
 
 // The next BuffType in that order, wrapping at the end.
@@ -190,6 +193,10 @@ inline constexpr std::string_view encode_buff_type(BuffType buffType)
 	{
 		return "hairy_spider_venom";
 	}
+	case BuffType::HIDDEN_IN_SHADOWS:
+	{
+		return "hidden_in_shadows";
+	}
 	}
 
 	return "none";
@@ -210,8 +217,9 @@ struct Buff
 	// The clock reading this casting runs out at, in time units, rather than a count of
 	// rounds left. A creature acts once per action and a count would fall by one each
 	// time, so a hasted creature would run its own Haste out in half the rounds it
-	// bought. Set through expiry_time in TurnSchedule.h; nothing decrements it.
-	int expiryTime{ 0 };
+	// bought. Set through expiry_time in TurnSchedule.h; nothing decrements it. None is a
+	// buff that lasts until something breaks it, as a hide does (PHB page 87).
+	std::optional<int> expiryTime{};
 	bool isSetEffect{ false }; // AD&D 2e: true = SET stat to value (potions), false = ADD value (spells/items)
 	// Note: Modifier stack pattern - no originalStat needed, effective values calculated on the fly
 
@@ -310,6 +318,10 @@ inline BuffType parse_buff_type(std::string_view name)
 	if (name == "hairy_spider_venom")
 	{
 		return BuffType::HAIRY_SPIDER_VENOM;
+	}
+	if (name == "hidden_in_shadows")
+	{
+		return BuffType::HIDDEN_IN_SHADOWS;
 	}
 
 	throw std::runtime_error(std::format("unknown buff_type '{}'", name));

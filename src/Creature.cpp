@@ -310,7 +310,8 @@ void Creature::load(const json& j)
 			Buff buff{};
 			buff.type = parse_buff_type(buffJson.at("type").get<std::string>());
 			buff.value = buffJson.at("value").get<int>();
-			buff.expiryTime = buffJson.at("expiryTime").get<int>();
+			const json& expiry = buffJson.at("expiryTime");
+			buff.expiryTime = expiry.is_null() ? std::nullopt : std::optional<int>{ expiry.get<int>() };
 			buff.isSetEffect = buffJson.at("isSetEffect").get<bool>();
 			for (const auto& saveJson : buffJson.at("opponentSaves"))
 			{
@@ -455,7 +456,7 @@ void Creature::save(json& j)
 		json buffJson;
 		buffJson["type"] = encode_buff_type(buff.type);
 		buffJson["value"] = buff.value;
-		buffJson["expiryTime"] = buff.expiryTime;
+		buffJson["expiryTime"] = buff.expiryTime.has_value() ? json(*buff.expiryTime) : json(nullptr);
 		buffJson["isSetEffect"] = buff.isSetEffect;
 		json savesJson = json::array();
 		for (const OpponentSave& save : buff.opponentSaves)

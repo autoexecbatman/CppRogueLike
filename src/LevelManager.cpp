@@ -21,6 +21,12 @@ void LevelManager::advance_to_next_level(GameContext& ctx)
 	// Display progression messages
 	display_level_messages(*ctx.messageSystem);
 
+	// A new level is a new square, even one at the same coordinates as the hiding spot.
+	if (ctx.player_concrete().is_in_shadows())
+	{
+		ctx.player_concrete().leave_shadows(ctx);
+	}
+
 	// Heal player between levels
 	heal_player_between_levels(ctx);
 

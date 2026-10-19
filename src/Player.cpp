@@ -770,8 +770,9 @@ Player::HideAttempt Player::attempt_hide(GameContext& ctx)
 		return HideAttempt::NOT_A_THIEF;
 	}
 
-	// Nothing to try; the thief is already in the shadows.
-	if (is_invisible())
+	// Nothing to try: the thief believes he is in the shadows whatever the roll gave, or a
+	// spell already hides him.
+	if (is_in_shadows() || is_invisible())
 	{
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You are already hidden.", MessageCompletion::FINISHED);
 		return HideAttempt::ALREADY_HIDDEN;
@@ -791,15 +792,45 @@ Player::HideAttempt Player::attempt_hide(GameContext& ctx)
 		return HideAttempt::WATCHED;
 	}
 
-	// The thief always thinks he is hidden, so the line is the same whatever the secret roll gave.
-	// The duration is the game's own; the book ends a hide by moving.
+	// The thief always thinks he is hidden, so the spot and the line are his whatever the
+	// secret roll gave. The book gives a hide no duration; moving or attacking ends it.
+	hidingSpot = position;
 	if (ctx.dice->d100() <= skill.value())
 	{
-		const int hideDuration = 10 + get_creature_level() * 2;
-		ctx.buffSystem->add_buff(*this, BuffType::INVISIBILITY, 0, hideDuration, false, ctx.gameState->get_time());
+		ctx.buffSystem->add_buff_until_broken(*this, BuffType::HIDDEN_IN_SHADOWS);
 	}
 	ctx.messageSystem->message(ColorPairId::CYAN_BLACK, "You melt into the shadows...", MessageCompletion::FINISHED);
 	return HideAttempt::ATTEMPTED;
+}
+
+bool Player::is_in_shadows() const noexcept
+{
+	return hidingSpot.has_value();
+}
+
+void Player::leave_shadows(GameContext& ctx)
+{
+	assert(hidingSpot.has_value() && "Player::leave_shadows: called on a thief who is not in the shadows");
+	assert(ctx.buffSystem && "Player::leave_shadows: called without a buffSystem");
+	assert(ctx.messageSystem && "Player::leave_shadows: called without a messageSystem");
+
+	// The buff is there only if the roll made it; the line is printed either way.
+	ctx.buffSystem->remove_buff(*this, BuffType::HIDDEN_IN_SHADOWS);
+	hidingSpot.reset();
+	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You leave the shadows.", MessageCompletion::FINISHED);
+}
+
+void Player::leave_shadows_if_moved(GameContext& ctx)
+{
+	assert(ctx.buffSystem && "Player::leave_shadows_if_moved: called without a buffSystem");
+
+	// The invariant: a hide the roll made was taken from a spot, so the buff never outlives it.
+	assert((!ctx.buffSystem->has_buff(*this, BuffType::HIDDEN_IN_SHADOWS) || hidingSpot.has_value()) && "Player::leave_shadows_if_moved: a hide is live with no spot it was taken from");
+
+	if (hidingSpot.has_value() && *hidingSpot != position)
+	{
+		leave_shadows(ctx);
+	}
 }
 
 std::string Player::get_equipped_weapon_damage_roll() const noexcept
@@ -882,6 +913,9 @@ void Player::save(json& j)
 	j["killCount"] = killCount;
 	j["memorizedSpells"] = memorizedSpells;
 	j["thiefSkillPoints"] = thiefSkillPoints;
+	j["hidingSpot"] = hidingSpot.has_value()
+		? json{ { "x", hidingSpot->x }, { "y", hidingSpot->y } }
+		: json(nullptr);
 }
 
 // Rebuilds the character from j, and refuses a record that is missing anything.
@@ -921,6 +955,10 @@ void Player::load(const json& j)
 	killCount = j.at("killCount").get<int>();
 	memorizedSpells = j.at("memorizedSpells").get<std::vector<std::string>>();
 	thiefSkillPoints = j.at("thiefSkillPoints").get<std::array<int, THIEF_SKILL_COUNT>>();
+	const json& spot = j.at("hidingSpot");
+	hidingSpot = spot.is_null()
+		? std::nullopt
+		: std::optional<Vector2D>{ Vector2D{ spot.at("x").get<int>(), spot.at("y").get<int>() } };
 
 	// Creature::load builds these only when the record has them, and the HUD reads them all on the first frame.
 	assert(healthPool && armorClass && experienceReward && attacker && controller && "Player::load finished with a player the game cannot run");

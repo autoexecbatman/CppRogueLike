@@ -9,32 +9,32 @@
   "mutations": [
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\t\treturn currentTime >= b.expiryTime;",
-      "mutated": "\t\treturn currentTime > b.expiryTime;",
+      "original": "\t\treturn b.expiryTime.has_value() && currentTime >= *b.expiryTime;",
+      "mutated": "\t\treturn b.expiryTime.has_value() && currentTime > *b.expiryTime;",
       "catches": "a buff living one reading past the time it ends at, so every duration is a round long"
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\t\treturn currentTime >= b.expiryTime;",
-      "mutated": "\t\treturn currentTime > b.expiryTime + TIME_UNITS_PER_ROUND;",
+      "original": "\t\treturn b.expiryTime.has_value() && currentTime >= *b.expiryTime;",
+      "mutated": "\t\treturn b.expiryTime.has_value() && currentTime > *b.expiryTime + TIME_UNITS_PER_ROUND;",
       "catches": "a buff outstaying its duration by a whole round"
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\tconst int expiry = expiry_time(currentTime, durationRounds);",
-      "mutated": "\tconst int expiry = expiry_time(0, durationRounds);",
+      "original": "\tgrant_buff(creature, type, value, expiry_time(currentTime, durationRounds), isSetEffect);",
+      "mutated": "\tgrant_buff(creature, type, value, expiry_time(0, durationRounds), isSetEffect);",
       "catches": "a spell cast mid-game expiring relative to the start of it, so it lands already over"
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\t\t\tit->expiryTime = std::max(it->expiryTime, expiry);",
+      "original": "\t\t\tit->expiryTime = later_ending(it->expiryTime, expiry);",
       "mutated": "\t\t\tit->expiryTime = expiry;",
       "catches": "a weaker second casting cutting short a longer one already running"
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\treturn it != creature.activeBuffs.end() ? rounds_remaining(currentTime, it->expiryTime) : 0;",
-      "mutated": "\treturn it != creature.activeBuffs.end() ? it->expiryTime : 0;",
+      "original": "\treturn rounds_remaining(currentTime, *it->expiryTime);",
+      "mutated": "\treturn *it->expiryTime;",
       "catches": "the raw clock reading reported where rounds left belong"
     },
     {
@@ -60,6 +60,18 @@
       "original": "\tconst int currentTime = ctx.gameState->get_time();\n\tctx.buffSystem->update_creature_buffs(*this, currentTime);",
       "mutated": "\tconst int currentTime = ctx.gameState->get_time();",
       "catches": "nothing retiring a buff the clock has passed, so every buff is permanent"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\tif (!first.has_value() || !second.has_value())",
+      "mutated": "\tif (!first.has_value() && !second.has_value())",
+      "catches": "a lasting buff given an ending by a timed casting folded into it"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\tgrant_buff(creature, type, 0, std::nullopt, false);",
+      "mutated": "\tgrant_buff(creature, type, 0, 0, false);",
+      "catches": "a buff granted until broken ending the moment it was granted"
     }
   ]
 }

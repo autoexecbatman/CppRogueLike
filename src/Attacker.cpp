@@ -28,6 +28,7 @@
 #include "MessageSystem.h"
 #include "Persistent.h"
 #include "Pickable.h"
+#include "Player.h"
 
 // OCP: Data-driven buff break messaging - player notifications when buffs end from attacking
 static const std::unordered_map<BuffType, std::string_view> BUFF_BREAK_MESSAGES = {
@@ -173,6 +174,12 @@ AttackResult Attacker::perform_single_attack(
 					std::string(BUFF_BREAK_MESSAGES.at(buff_type)),
 					MessageCompletion::FINISHED);
 			}
+		}
+
+		// Striking from the shadows leaves them, with one line whichever way the secret roll went.
+		if (ctx.player_concrete().is_in_shadows())
+		{
+			ctx.player_concrete().leave_shadows(ctx);
 		}
 	}
 
