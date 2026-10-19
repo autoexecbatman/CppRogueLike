@@ -7,6 +7,7 @@
 
 // Forward declarations
 class Trap;
+struct Decoration;
 class TileConfig;
 class Map;
 class Player;
@@ -32,6 +33,28 @@ struct GameContext;
 void save_traps(const std::vector<std::unique_ptr<Trap>>& traps, json& j);
 void load_traps(const json& j, std::vector<std::unique_ptr<Trap>>& traps, const TileConfig& tileConfig);
 
+// Reads every creature in j["creatures"] into the level, replacing whatever it held.
+//
+// Example, a level abandoned with one goblin, loaded from a save of two:
+//   load_creatures(saved, creatures);   // creatures.size() -> 2, the saved two
+void load_creatures(const json& j, std::vector<std::unique_ptr<Creature>>& creatures);
+
+// Reads every room in j["rooms"] into the level, replacing whatever it held.
+//
+// Example, a level of five rooms abandoned for a save of three:
+//   load_rooms(saved, rooms);   // rooms.size() -> 3
+void load_rooms(const json& j, std::vector<DungeonRoom>& rooms);
+
+// Writes every decoration on the level into j["decorations"], and reads them back,
+// replacing whatever the level held. Every field is saved: a decoration is plain data,
+// and a barrel hit once keeps the one hit point it has left.
+//
+// Example, a barrel at 1 of its 2 hit points and an editor-stamped pillar:
+//   save_decorations(decorations, level);   // level["decorations"] is an array of two
+//   load_decorations(level, decorations);   // both back, the barrel still at 1
+void save_decorations(const std::vector<std::unique_ptr<Decoration>>& decorations, json& j);
+void load_decorations(const json& j, std::vector<std::unique_ptr<Decoration>>& decorations);
+
 // - Handles game state persistence and level management
 class GameStateManager
 {
@@ -42,6 +65,14 @@ public:
 
 	// Save/Load operations
 	void save_game(GameContext& ctx);
+
+	// Restores the saved game. A load replaces every level container; each loader clears
+	// what it restores, because a load can arrive from the in-game menu with another
+	// level still in memory and nothing regenerates it first. Spell tiles are not saved,
+	// so they are cleared. False, and nothing changed, when there is no save file.
+	//
+	// Example, a load during play on a level of ten creatures, from a save of three:
+	//   stateManager.load_game(ctx);   // -> true; ctx.creatures->size() -> 3
 	bool load_game(GameContext& ctx);
 
 	// File operations

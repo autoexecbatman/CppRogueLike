@@ -20,6 +20,7 @@
 #include "MonsterRegistry.h"
 #include "MonsterStrength.h"
 #include "Paths.h"
+#include "TileRefJson.h"
 
 namespace
 {
@@ -122,24 +123,6 @@ constexpr MonsterId STANDARD_IDS[] = {
 // ---------------------------------------------------------------------------
 // JSON helpers
 // ---------------------------------------------------------------------------
-TileRef parse_tile(const nlohmann::json& record)
-{
-	return TileRef{
-		static_cast<TileSheet>(record.at("sheet").get<int>()),
-		record.at("col").get<int>(),
-		record.at("row").get<int>()
-	};
-}
-
-nlohmann::json encode_tile(TileRef tile)
-{
-	return nlohmann::json{
-		{ "sheet", static_cast<int>(tile.sheet) },
-		{ "col", tile.col },
-		{ "row", tile.row }
-	};
-}
-
 // The dice are the record; the range is theirs to derive, so a file cannot
 // carry a minimum its dice never roll.
 DamageInfo parse_damage(const nlohmann::json& record)
@@ -281,7 +264,7 @@ nlohmann::json encode_equipment(const std::vector<MonsterParams::StartingItem>& 
 MonsterParams parse_full_params(const nlohmann::json& entry)
 {
 	MonsterParams params;
-	params.symbol = parse_tile(entry.at("tile"));
+	params.symbol = TileRefJson::parse_tile(entry.at("tile"));
 	params.color = parse_color_pair(entry.at("color").get<std::string>());
 	params.corpseName = entry.at("corpse").get<std::string>();
 	params.hitDice = parse_hit_dice(entry.at("hit_dice"));
@@ -343,7 +326,7 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 nlohmann::json encode_full_params(const MonsterParams& params)
 {
 	return nlohmann::json{
-		{ "tile", encode_tile(params.symbol) },
+		{ "tile", TileRefJson::encode_tile(params.symbol) },
 		{ "color", color_pair_name(params.color) },
 		{ "name", params.name },
 		{ "corpse", params.corpseName },

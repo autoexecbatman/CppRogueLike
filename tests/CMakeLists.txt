@@ -71,6 +71,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterSpawnTableTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/BuffStateTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/InvisibilitySpellTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/LevelLoadTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/LevelUpHitDieTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/LevelUpSystemTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ShopKeeperSerializationTest.cpp
@@ -314,6 +315,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/ContentRegistryIO.cpp
     ${PARENT_SOURCE_DIR}/BodyPlanRegistry.cpp
     ${PARENT_SOURCE_DIR}/TileConfig.cpp
+    ${PARENT_SOURCE_DIR}/TileRefJson.cpp
     ${PARENT_SOURCE_DIR}/FloatingTextSystem.cpp
     ${PARENT_SOURCE_DIR}/BalanceViewer.cpp
     ${PARENT_SOURCE_DIR}/ContentEditor.cpp

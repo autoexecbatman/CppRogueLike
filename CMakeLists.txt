@@ -327,6 +327,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/BodyPlanRegistry.h
     ${PROJECT_SOURCE_DIR}/TileConfig.cpp
     ${PROJECT_SOURCE_DIR}/TileConfig.h
+    ${PROJECT_SOURCE_DIR}/TileRefJson.cpp
+    ${PROJECT_SOURCE_DIR}/TileRefJson.h
 
     # Tools
     ${PROJECT_SOURCE_DIR}/BalanceViewer.cpp

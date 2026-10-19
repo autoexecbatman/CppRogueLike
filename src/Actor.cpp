@@ -10,6 +10,7 @@
 #include "Map.h"
 #include "Persistent.h"
 #include "Renderer.h"
+#include "TileRefJson.h"
 #include "UniqueId.h"
 #include "Vector2D.h"
 
@@ -45,12 +46,7 @@ void Actor::load(const json& j)
 	position.y = j["position"]["y"];
 	direction.x = j["direction"]["x"];
 	direction.y = j["direction"]["y"];
-	const auto& tileJ = j["actorData"].at("tile");
-	actorData.tile = TileRef{
-		static_cast<TileSheet>(tileJ.at("sheet").get<int>()),
-		tileJ.at("col").get<int>(),
-		tileJ.at("row").get<int>()
-	};
+	actorData.tile = TileRefJson::parse_tile(j["actorData"].at("tile"));
 	actorData.name = j["actorData"].at("name").get<std::string>();
 	actorData.color = parse_color_pair(j["actorData"].at("color").get<std::string>());
 	uniqueId = j.at("uniqueId").get<UniqueId::IdType>();
@@ -70,7 +66,7 @@ void Actor::save(json& j)
 	j["position"] = { { "y", position.y }, { "x", position.x } };
 	j["direction"] = { { "y", direction.y }, { "x", direction.x } };
 	j["actorData"] = {
-		{ "tile", { { "sheet", static_cast<int>(actorData.tile.sheet) }, { "col", actorData.tile.col }, { "row", actorData.tile.row } } },
+		{ "tile", TileRefJson::encode_tile(actorData.tile) },
 		{ "name", actorData.name },
 		{ "color", color_pair_name(actorData.color) }
 	};

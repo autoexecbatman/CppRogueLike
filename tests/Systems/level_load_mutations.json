@@ -1,0 +1,77 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=LevelLoadTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\trooms.clear();\n\n\tif (!j.contains(\"rooms\")",
+      "mutated": "\n\tif (!j.contains(\"rooms\")",
+      "catches": "a load stacking the saved rooms on the abandoned level's"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\tcreatures.clear();\n",
+      "mutated": "",
+      "catches": "a load stacking the saved creatures on the abandoned level's monsters"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\tdecorations.clear();\n",
+      "mutated": "",
+      "catches": "a load leaving the abandoned level's decorations at their old coordinates"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\t\tdecoration->position = Vector2D{ record.at(\"position\").at(\"x\").get<int>(), record.at(\"position\").at(\"y\").get<int>() };",
+      "mutated": "\t\tdecoration->position = Vector2D{ record.at(\"position\").at(\"y\").get<int>(), record.at(\"position\").at(\"x\").get<int>() };",
+      "catches": "a decoration loaded at its coordinates swapped"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\t\tdecoration->tile = TileRefJson::parse_tile(record.at(\"tile\"));",
+      "mutated": "",
+      "catches": "a decoration coming back with no tile to draw"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\t\tdecoration->name = record.at(\"name\").get<std::string>();",
+      "mutated": "",
+      "catches": "a decoration coming back unnamed"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\t\tdecoration->hp = record.at(\"hp\").get<int>();",
+      "mutated": "",
+      "catches": "a decoration that was struck coming back with the field's default hit points"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\t\tdecoration->blocks_movement = record.at(\"blocksMovement\").get<bool>();",
+      "mutated": "",
+      "catches": "a decoration's blocking reset by a load"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\t\tdecoration->lootTableKey = record.at(\"lootTableKey\").get<std::string>();",
+      "mutated": "",
+      "catches": "a barrel that drops nothing after a load"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\t\tdecoration->isBroken = record.at(\"isBroken\").get<bool>();",
+      "mutated": "",
+      "catches": "a broken decoration coming back whole"
+    },
+    {
+      "file": "src/TileRefJson.cpp",
+      "original": "\t\trecord.at(\"col\").get<int>(),\n\t\trecord.at(\"row\").get<int>()",
+      "mutated": "\t\trecord.at(\"row\").get<int>(),\n\t\trecord.at(\"col\").get<int>()",
+      "catches": "a tile read with its column and row swapped"
+    }
+  ]
+}

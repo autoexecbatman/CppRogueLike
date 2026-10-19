@@ -15,6 +15,7 @@
 #include "Colors.h"
 #include "ContentRegistryIO.h"
 #include "DataManager.h"
+#include "Decoration.h"
 #include "DungeonRoom.h"
 #include "GameContext.h"
 #include "GameStateManager.h"
@@ -28,7 +29,9 @@
 #include "Paths.h"
 #include "Player.h"
 #include "Renderer.h"
+#include "SpellTile.h"
 #include "TileConfig.h"
+#include "TileRefJson.h"
 #include "Trap.h"
 #include "UniqueId.h"
 #include "Vector2D.h"
@@ -52,8 +55,13 @@ void save_rooms(const std::vector<DungeonRoom>& rooms, json& j)
 	}
 }
 
+} // namespace
+
 void load_rooms(const json& j, std::vector<DungeonRoom>& rooms)
 {
+	// Replace rather than append, as every loader of a level container does.
+	rooms.clear();
+
 	if (!j.contains("rooms") || !j["rooms"].is_array())
 	{
 		return;
@@ -70,6 +78,9 @@ void load_rooms(const json& j, std::vector<DungeonRoom>& rooms)
 		rooms.push_back(std::move(room));
 	}
 }
+
+namespace
+{
 
 // Writes every creature on the level into j["creatures"], in the order the vector holds
 // them. The vector owns its entries, so a null one is a fault rather than an empty slot -
@@ -96,8 +107,13 @@ void save_creatures(const std::vector<std::unique_ptr<Creature>>& creatures, jso
 	}
 }
 
+} // namespace
+
 void load_creatures(const json& j, std::vector<std::unique_ptr<Creature>>& creatures)
 {
+	// Replace rather than append, as every loader of a level container does.
+	creatures.clear();
+
 	if (j.contains("creatures") && j["creatures"].is_array())
 	{
 		for (const auto& creatureData : j["creatures"])
@@ -109,7 +125,40 @@ void load_creatures(const json& j, std::vector<std::unique_ptr<Creature>>& creat
 	}
 }
 
-} // namespace
+void save_decorations(const std::vector<std::unique_ptr<Decoration>>& decorations, json& j)
+{
+	j["decorations"] = json::array();
+	for (const auto& decoration : decorations)
+	{
+		assert(decoration && "save_decorations: the decoration list holds a null entry");
+		j["decorations"].push_back({ { "position", { { "x", decoration->position.x }, { "y", decoration->position.y } } },
+			{ "tile", TileRefJson::encode_tile(decoration->tile) },
+			{ "name", decoration->name },
+			{ "hp", decoration->hp },
+			{ "blocksMovement", decoration->blocks_movement },
+			{ "lootTableKey", decoration->lootTableKey },
+			{ "isBroken", decoration->isBroken } });
+	}
+}
+
+void load_decorations(const json& j, std::vector<std::unique_ptr<Decoration>>& decorations)
+{
+	// Replace rather than append, as every loader of a level container does.
+	decorations.clear();
+
+	for (const auto& record : j.at("decorations"))
+	{
+		auto decoration = std::make_unique<Decoration>();
+		decoration->position = Vector2D{ record.at("position").at("x").get<int>(), record.at("position").at("y").get<int>() };
+		decoration->tile = TileRefJson::parse_tile(record.at("tile"));
+		decoration->name = record.at("name").get<std::string>();
+		decoration->hp = record.at("hp").get<int>();
+		decoration->blocks_movement = record.at("blocksMovement").get<bool>();
+		decoration->lootTableKey = record.at("lootTableKey").get<std::string>();
+		decoration->isBroken = record.at("isBroken").get<bool>();
+		decorations.push_back(std::move(decoration));
+	}
+}
 
 void save_traps(const std::vector<std::unique_ptr<Trap>>& traps, json& j)
 {
@@ -240,6 +289,8 @@ void GameStateManager::save_game(GameContext& ctx)
 
 		assert(ctx.traps && "save_game: the level was saved with no trap container");
 		save_traps(*ctx.traps, j);
+		assert(ctx.decorations && "save_game: the level was saved with no decoration container");
+		save_decorations(*ctx.decorations, j);
 
 		json playerJson;
 		ctx.player()->save(playerJson);
@@ -301,6 +352,13 @@ bool GameStateManager::load_game(GameContext& ctx)
 	assert(ctx.traps && "load_game: a level was loaded with no trap container");
 	assert(ctx.tileConfig && "load_game: a trap cannot be rebuilt without the tile table");
 	load_traps(j, *ctx.traps, *ctx.tileConfig);
+	assert(ctx.decorations && "load_game: a level was loaded with no decoration container");
+	load_decorations(j, *ctx.decorations);
+
+	// Spell tiles are not saved, so a load clears them: the abandoned level's would
+	// otherwise stay at their old coordinates, which a fresh launch never shows.
+	assert(ctx.spellTiles && "load_game: a level was loaded with no spell tile container");
+	ctx.spellTiles->clear();
 
 	if (j.contains("player"))
 	{
