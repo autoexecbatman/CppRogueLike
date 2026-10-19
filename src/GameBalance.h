@@ -152,15 +152,6 @@ inline constexpr int FOV_RADIUS = 4; // Tiles visible around player
 }
 
 // ========================================================================
-// ITEM ENHANCEMENTS
-// ========================================================================
-namespace Enhancements
-{
-inline constexpr int SPEED_BONUS_LIGHT_ARMOR = 2; // +2 speed for light armor enchantment
-inline constexpr int SPEED_PENALTY_HEAVY_ARMOR = 2; // -2 speed for heavy armor curse
-} // namespace Enhancements
-
-// ========================================================================
 // GUI & HEALTH DISPLAY
 // ========================================================================
 namespace GUI
