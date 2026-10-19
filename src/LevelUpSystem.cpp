@@ -32,6 +32,7 @@ void apply_thac0_improvement(Creature& owner, int newLevel, GameContext& ctx)
 	{
 		int oldTHAC0 = owner.get_thaco();
 		owner.set_thaco(newTHAC0);
+		assert(ctx.messageSystem && "apply_thac0_improvement: called without a messageSystem");
 
 		if (owner.get_creature_class() != CreatureClass::MONSTER)
 		{
@@ -52,6 +53,9 @@ int apply_hit_point_gain(Creature& owner, int newLevel, GameContext& ctx)
 	// The die the creature carries, so the roll and the message name the same one.
 	auto roll_hit_die = [&]() -> int
 	{
+		// Runs only on a rolled level, which also reads the constitution table.
+		assert(ctx.dice && "apply_hit_point_gain: called without a dice");
+		assert(ctx.dataManager && "apply_hit_point_gain: called without a dataManager");
 		return ctx.dice->roll(1, owner.get_hit_die());
 	};
 
@@ -80,6 +84,7 @@ int apply_hit_point_gain(Creature& owner, int newLevel, GameContext& ctx)
 	owner.set_hp_base(owner.get_hp_base() + hitDiceRoll);
 	owner.set_max_hp(owner.get_max_hp() + totalHPGain);
 	owner.set_hp(owner.get_hp() + totalHPGain);
+	assert(ctx.messageSystem && "apply_hit_point_gain: called without a messageSystem");
 
 	if (owner.get_creature_class() != CreatureClass::MONSTER)
 	{
@@ -116,6 +121,7 @@ void apply_fighter_improvements(Creature& owner, int newLevel, GameContext& ctx)
 		if (owner.get_attacks_per_round() < 2.0f)
 		{
 			owner.set_attacks_per_round(2.0f);
+			assert(ctx.messageSystem && "apply_fighter_improvements: called without a messageSystem to announce the 13th-level gain");
 			ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, "Special: ");
 			ctx.messageSystem->append_message_part(ColorPairId::GREEN_BLACK, "Extra Attack!");
 			ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " You can now attack 2 times per round.");
@@ -128,6 +134,7 @@ void apply_fighter_improvements(Creature& owner, int newLevel, GameContext& ctx)
 		if (owner.get_attacks_per_round() < 1.5f)
 		{
 			owner.set_attacks_per_round(1.5f);
+			assert(ctx.messageSystem && "apply_fighter_improvements: called without a messageSystem to announce the 7th-level gain");
 			ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, "Special: ");
 			ctx.messageSystem->append_message_part(ColorPairId::GREEN_BLACK, "Extra Attack!");
 			ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " You can now attack 3/2 times per round.");
@@ -139,6 +146,7 @@ void apply_fighter_improvements(Creature& owner, int newLevel, GameContext& ctx)
 
 void apply_rogue_improvements(int newLevel, GameContext& ctx)
 {
+	assert(ctx.messageSystem && "apply_rogue_improvements: called without a messageSystem");
 	int backstabMultiplier = LevelUpSystem::calculate_backstab_multiplier(newLevel);
 	if (backstabMultiplier > LevelUpSystem::calculate_backstab_multiplier(newLevel - 1))
 	{
@@ -165,7 +173,6 @@ void apply_rogue_improvements(int newLevel, GameContext& ctx)
 // cannot disagree.
 void announce_new_spell_level(CasterClass casterClass, const Creature& owner, int newLevel, GameContext& ctx)
 {
-	// ctx is a pointer in this path; the table and the message below are both read through it.
 	assert(ctx.dataManager && "announce_new_spell_level: no context to read the progression table from");
 
 	const int wisdom = owner.get_wisdom();
@@ -175,6 +182,7 @@ void announce_new_spell_level(CasterClass casterClass, const Creature& owner, in
 		return;
 	}
 
+	assert(ctx.messageSystem && "announce_new_spell_level: called without a messageSystem");
 	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, "Special: ");
 	ctx.messageSystem->append_message_part(ColorPairId::GREEN_BLACK, "New spell level!");
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " You can now cast level ");
@@ -190,6 +198,7 @@ void apply_cleric_improvements(const Creature& owner, int newLevel, GameContext&
 	const int reachNow = highest_turnable_hit_dice(newLevel);
 	if (reachNow > highest_turnable_hit_dice(newLevel - 1))
 	{
+		assert(ctx.messageSystem && "apply_cleric_improvements: called without a messageSystem");
 		ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, "Special: ");
 		ctx.messageSystem->append_message_part(ColorPairId::GREEN_BLACK, "Turn Undead improved!");
 		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " You can now turn undead of up to ");
@@ -250,6 +259,7 @@ void apply_saving_throw_improvements(Creature& owner, int newLevel, GameContext&
 
 	if (improved)
 	{
+		assert(ctx.messageSystem && "apply_saving_throw_improvements: called without a messageSystem");
 		if (owner.get_creature_class() != CreatureClass::MONSTER)
 		{
 			ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "Saving throws improved!");
@@ -279,6 +289,7 @@ void apply_level_up_benefits(Creature& owner, int newLevel, GameContext& ctx)
 	apply_saving_throw_improvements(owner, newLevel, ctx);
 
 	bool thac0_improved = (oldTHAC0 != owner.get_thaco());
+	assert(ctx.messageSystem && "apply_level_up_benefits: called without a messageSystem");
 
 	if (owner.get_creature_class() != CreatureClass::MONSTER)
 	{
