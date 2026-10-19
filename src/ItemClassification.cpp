@@ -21,46 +21,72 @@ ItemCategory get_category(ItemClass itemClass)
 	case ItemClass::BOW:
 	case ItemClass::CROSSBOW:
 	case ItemClass::SLING:
+	{
 		return ItemCategory::WEAPON;
+	}
 
 	case ItemClass::ARMOR:
+	{
 		return ItemCategory::ARMOR;
+	}
 
 	case ItemClass::HELMET:
+	{
 		return ItemCategory::HELMET;
+	}
 
 	case ItemClass::SHIELD:
+	{
 		return ItemCategory::SHIELD;
+	}
 
 	case ItemClass::GAUNTLETS:
+	{
 		return ItemCategory::GAUNTLETS;
+	}
 
 	case ItemClass::GIRDLE:
+	{
 		return ItemCategory::GIRDLE;
+	}
 
 	case ItemClass::POTION:
 	case ItemClass::FOOD:
+	{
 		return ItemCategory::CONSUMABLE;
+	}
 
 	case ItemClass::SCROLL:
+	{
 		return ItemCategory::SCROLL;
+	}
 
 	case ItemClass::AMULET:
 	case ItemClass::RING:
+	{
 		return ItemCategory::JEWELRY;
+	}
 
 	case ItemClass::GOLD_COIN:
 	case ItemClass::GEM:
+	{
 		return ItemCategory::TREASURE;
+	}
 
 	case ItemClass::TOOL:
+	{
 		return ItemCategory::TOOL;
+	}
 
 	case ItemClass::QUEST_ITEM:
+	{
 		return ItemCategory::QUEST_ITEM;
+	}
 
 	default:
+	{
 		return ItemCategory::UNKNOWN;
+	}
 	}
 }
 
@@ -96,9 +122,13 @@ bool is_two_handed_weapon(ItemClass itemClass)
 	case ItemClass::BOW:
 	case ItemClass::CROSSBOW:
 	case ItemClass::STAFF:
+	{
 		return true;
+	}
 	default:
+	{
 		return false;
+	}
 	}
 }
 

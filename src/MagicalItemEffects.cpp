@@ -7,19 +7,33 @@ const char* get_effect_description(MagicalEffect effect)
 	switch (effect)
 	{
 	case MagicalEffect::BRILLIANCE:
+	{
 		return "Armor of enchanted value, and resists fire";
+	}
 	case MagicalEffect::TELEPORTATION:
+	{
 		return "Teleport at will";
+	}
 	case MagicalEffect::FREE_ACTION:
+	{
 		return "Immune to paralysis, web, and hold spells";
+	}
 	case MagicalEffect::REGENERATION:
+	{
 		return "Regenerate 1 HP per turn";
+	}
 	case MagicalEffect::INVISIBILITY:
+	{
 		return "Turn invisible at will";
+	}
 	case MagicalEffect::PROTECTION:
+	{
 		return "Protection to AC and saves";
+	}
 	default:
+	{
 		return "No special effect";
+	}
 	}
 }
 
@@ -41,9 +55,13 @@ int get_ac_bonus(MagicalEffect effect, int bonus)
 	// "is armor of +2 value" (DMG, PDF page 968), the +2 its record carries.
 	case MagicalEffect::BRILLIANCE:
 	case MagicalEffect::PROTECTION:
+	{
 		return -bonus;
+	}
 	default:
+	{
 		return 0;
+	}
 	}
 }
 } // namespace MagicalEffectUtils

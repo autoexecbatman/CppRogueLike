@@ -27,8 +27,8 @@
     },
     {
       "file": "src/ItemClassification.cpp",
-      "original": "\tcase ItemClass::STAFF:\n\t\treturn true;\n",
-      "mutated": "\t\treturn true;\n",
+      "original": "\tcase ItemClass::STAFF:\n\t{\n\t\treturn true;\n",
+      "mutated": "\t{\n\t\treturn true;\n",
       "catches": "a staff read as one-handed, so it fits the off-hand"
     },
     {

@@ -610,9 +610,13 @@ std::string SpellEditor::field_label(FieldId field) const
 		return "Class";
 	}
 	case FieldId::EFFECT_TYPE:
+	{
 		return "Effect";
+	}
 	case FieldId::DESCRIPTION:
+	{
 		return "Description";
+	}
 	default:
 	{
 		return "???";

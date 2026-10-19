@@ -9,20 +9,20 @@
   "mutations": [
     {
       "file": "src/MagicalItemEffects.cpp",
-      "original": "\tcase MagicalEffect::BRILLIANCE:\n\tcase MagicalEffect::PROTECTION:\n\t\treturn -bonus;",
-      "mutated": "\tcase MagicalEffect::BRILLIANCE:\n\tcase MagicalEffect::PROTECTION:\n\t\treturn -4;",
+      "original": "\tcase MagicalEffect::BRILLIANCE:\n\tcase MagicalEffect::PROTECTION:\n\t{\n\t\treturn -bonus;",
+      "mutated": "\tcase MagicalEffect::BRILLIANCE:\n\tcase MagicalEffect::PROTECTION:\n\t{\n\t\treturn -4;",
       "catches": "the helm carrying a constant again instead of the value its record was given"
     },
     {
       "file": "src/MagicalItemEffects.cpp",
-      "original": "\tcase MagicalEffect::BRILLIANCE:\n\tcase MagicalEffect::PROTECTION:\n\t\treturn -bonus;",
-      "mutated": "\tcase MagicalEffect::BRILLIANCE:\n\tcase MagicalEffect::PROTECTION:\n\t\treturn bonus;",
+      "original": "\tcase MagicalEffect::BRILLIANCE:\n\tcase MagicalEffect::PROTECTION:\n\t{\n\t\treturn -bonus;",
+      "mutated": "\tcase MagicalEffect::BRILLIANCE:\n\tcase MagicalEffect::PROTECTION:\n\t{\n\t\treturn bonus;",
       "catches": "an enchantment that makes its wearer easier to hit, the sign inverted"
     },
     {
       "file": "src/MagicalItemEffects.cpp",
-      "original": "\tcase MagicalEffect::BRILLIANCE:\n\tcase MagicalEffect::PROTECTION:\n\t\treturn -bonus;",
-      "mutated": "\tcase MagicalEffect::PROTECTION:\n\t\treturn -bonus;",
+      "original": "\tcase MagicalEffect::BRILLIANCE:\n\tcase MagicalEffect::PROTECTION:\n\t{\n\t\treturn -bonus;",
+      "mutated": "\tcase MagicalEffect::PROTECTION:\n\t{\n\t\treturn -bonus;",
       "catches": "brilliance falling through to no armour at all"
     }
   ]

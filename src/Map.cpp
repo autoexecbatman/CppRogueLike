@@ -1148,16 +1148,24 @@ void Map::spawn_traps(const DungeonRoom& room, GameContext& ctx)
 		switch (trapChoice)
 		{
 		case 1:
+		{
 			trapType = TrapType::PIT;
 			break;
+		}
 		case 2:
+		{
 			trapType = TrapType::DART;
 			break;
+		}
 		case 3:
+		{
 			trapType = TrapType::ARROW;
 			break;
+		}
 		default:
+		{
 			trapType = TrapType::PIT;
+		}
 		}
 
 		auto trap = std::make_unique<Trap>(trapPos, trapType, *ctx.tileConfig);

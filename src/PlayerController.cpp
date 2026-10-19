@@ -807,7 +807,9 @@ bool PlayerController::execute_arrival(GameContext& ctx)
 	}
 
 	default:
+	{
 		return false;
+	}
 	}
 }
 
@@ -1368,7 +1370,9 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 	}
 
 	default:
+	{
 		break;
+	}
 	}
 }
 

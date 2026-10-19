@@ -136,11 +136,17 @@ InventoryScreen next_screen(InventoryScreen screen)
 	switch (screen)
 	{
 	case InventoryScreen::EQUIPMENT:
+	{
 		return InventoryScreen::BACKPACK;
+	}
 	case InventoryScreen::BACKPACK:
+	{
 		return InventoryScreen::USABLES;
+	}
 	case InventoryScreen::USABLES:
+	{
 		return InventoryScreen::EQUIPMENT;
+	}
 	}
 	return InventoryScreen::EQUIPMENT;
 }

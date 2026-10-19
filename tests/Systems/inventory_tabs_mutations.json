@@ -27,8 +27,8 @@
     },
     {
       "file": "src/InventoryUI.cpp",
-      "original": "\tcase InventoryScreen::BACKPACK:\n\t\treturn InventoryScreen::USABLES;",
-      "mutated": "\tcase InventoryScreen::BACKPACK:\n\t\treturn InventoryScreen::EQUIPMENT;",
+      "original": "\tcase InventoryScreen::BACKPACK:\n\t{\n\t\treturn InventoryScreen::USABLES;",
+      "mutated": "\tcase InventoryScreen::BACKPACK:\n\t{\n\t\treturn InventoryScreen::EQUIPMENT;",
       "catches": "Tab cycling between two panes and never reaching Usables"
     }
   ]

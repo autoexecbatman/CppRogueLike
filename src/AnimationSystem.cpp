@@ -278,8 +278,10 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 		switch (particle.shape)
 		{
 		case ParticleShape::CIRCLE:
+		{
 			DrawCircle(screen_x, screen_y, particle.radius, tint);
 			break;
+		}
 
 		case ParticleShape::TILE:
 		{
@@ -293,8 +295,10 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 		}
 
 		case ParticleShape::PIXEL:
+		{
 			DrawPixel(screen_x, screen_y, tint);
 			break;
+		}
 		}
 
 		if (particle.additive)

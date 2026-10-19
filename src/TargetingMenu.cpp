@@ -101,7 +101,9 @@ void TargetingMenu::menu(GameContext& ctx)
 	}
 
 	default:
+	{
 		break;
+	}
 	}
 
 	if (move.x != 0 || move.y != 0)

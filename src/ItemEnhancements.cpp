@@ -11,39 +11,73 @@ std::string ItemEnhancement::get_prefix_name() const
 	switch (prefix)
 	{
 	case PrefixType::SHARP:
+	{
 		return "Sharp";
+	}
 	case PrefixType::KEEN:
+	{
 		return "Keen";
+	}
 	case PrefixType::MASTERWORK:
+	{
 		return "Masterwork";
+	}
 	case PrefixType::BLESSED:
+	{
 		return "Blessed";
+	}
 	case PrefixType::FLAMING:
+	{
 		return "Flaming";
+	}
 	case PrefixType::FROST:
+	{
 		return "Frost";
+	}
 	case PrefixType::SHOCK:
+	{
 		return "Shock";
+	}
 	case PrefixType::REINFORCED:
+	{
 		return "Reinforced";
+	}
 	case PrefixType::STUDDED:
+	{
 		return "Studded";
+	}
 	case PrefixType::ELVEN:
+	{
 		return "Elven";
+	}
 	case PrefixType::DWARVEN:
+	{
 		return "Dwarven";
+	}
 	case PrefixType::MAGICAL:
+	{
 		return "Magical";
+	}
 	case PrefixType::CURSED:
+	{
 		return "Cursed";
+	}
 	case PrefixType::ANCIENT:
+	{
 		return "Ancient";
+	}
 	case PrefixType::RUSTED:
+	{
 		return "Rusted";
+	}
 	case PrefixType::CRACKED:
+	{
 		return "Cracked";
+	}
 	default:
+	{
 		return "";
+	}
 	}
 }
 
@@ -52,43 +86,81 @@ std::string ItemEnhancement::get_suffix_name() const
 	switch (suffix)
 	{
 	case SuffixType::OF_SLAYING:
+	{
 		return "of Slaying";
+	}
 	case SuffixType::OF_ACCURACY:
+	{
 		return "of Accuracy";
+	}
 	case SuffixType::OF_PROTECTION:
+	{
 		return "of Protection";
+	}
 	case SuffixType::OF_POWER:
+	{
 		return "of Power";
+	}
 	case SuffixType::OF_FIRE_RESISTANCE:
+	{
 		return "of Fire Resistance";
+	}
 	case SuffixType::OF_COLD_RESISTANCE:
+	{
 		return "of Cold Resistance";
+	}
 	case SuffixType::OF_LIGHTNING_RESISTANCE:
+	{
 		return "of Lightning Resistance";
+	}
 	case SuffixType::OF_POISON_RESISTANCE:
+	{
 		return "of Poison Resistance";
+	}
 	case SuffixType::OF_SPEED:
+	{
 		return "of Speed";
+	}
 	case SuffixType::OF_STEALTH:
+	{
 		return "of Stealth";
+	}
 	case SuffixType::OF_MAGIC:
+	{
 		return "of Magic";
+	}
 	case SuffixType::OF_HEALTH:
+	{
 		return "of Health";
+	}
 	case SuffixType::OF_THE_EAGLE:
+	{
 		return "of the Eagle";
+	}
 	case SuffixType::OF_THE_BEAR:
+	{
 		return "of the Bear";
+	}
 	case SuffixType::OF_THE_OWL:
+	{
 		return "of the Owl";
+	}
 	case SuffixType::OF_WEAKNESS:
+	{
 		return "of Weakness";
+	}
 	case SuffixType::OF_SLOWNESS:
+	{
 		return "of Slowness";
+	}
 	case SuffixType::OF_BRITTLENESS:
+	{
 		return "of Brittleness";
+	}
 	default:
+	{
 		return "";
+	}
 	}
 }
 
@@ -395,7 +467,9 @@ void ItemEnhancement::apply_enhancement_effects()
 	}
 
 	default:
+	{
 		break;
+	}
 	}
 }
 

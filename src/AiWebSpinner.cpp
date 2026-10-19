@@ -294,6 +294,7 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 	switch (pattern)
 	{
 	case WebPattern::CIRCULAR:
+	{
 		// Create a circular/oval web
 		for (int offsetRow = -size; offsetRow <= size; offsetRow++)
 		{
@@ -316,6 +317,7 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 			}
 		}
 		break;
+	}
 
 	case WebPattern::SPIRAL:
 		// Create a spiral pattern
