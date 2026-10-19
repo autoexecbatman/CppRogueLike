@@ -26,7 +26,6 @@ protected:
         player->set_thaco(0);
         player->armorClass = std::make_unique<ArmorClass>(10);
         player->healthPool = std::make_unique<HealthPool>(10);
-        player->set_hp_base(10);
 
         ctx = game.context();
         ctx.playerOwner = &player;
