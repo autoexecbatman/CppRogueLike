@@ -111,7 +111,7 @@ protected:
 TEST_F(WebSpinnerSanctuaryTest, SanctuaryHoldsOffASpinnerThatFailsToSave)
 {
 	ASSERT_GT(SavingThrows::target(spinner.get_creature_class(), spinner.get_creature_level(), SavingThrow::SPELL), 12);
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
 	// The save, the attack, the bite's 1d4, then the player's own save against the
 	// venom, which the highest roll makes - so no venom lands either way.
 	script({ 12, 20, 4, RandomDice::HIGHEST });
@@ -123,7 +123,7 @@ TEST_F(WebSpinnerSanctuaryTest, SanctuaryHoldsOffASpinnerThatFailsToSave)
 // Without the save, the attack would take the 20 and the die the next 20.
 TEST_F(WebSpinnerSanctuaryTest, ASpinnerThatSavesBitesAsUsual)
 {
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
 	script({ 20, 20, 4, RandomDice::HIGHEST }); // the last is the player's venom save, made
 
 	EXPECT_EQ(hp_lost_to_one_turn(), 4) << "1d4 at four after a made save";
@@ -135,7 +135,7 @@ TEST_F(WebSpinnerSanctuaryTest, ASpinnerThatSavesBitesAsUsual)
 TEST_F(WebSpinnerSanctuaryTest, NoVenomFromASpinnerTurnedAway)
 {
 	spinner.ai = std::make_unique<AiWebSpinner>();
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
 	script({ 12, 20, 3 });
 
 	EXPECT_EQ(hp_lost_to_one_turn(), 0) << "venom landed through a failed save";

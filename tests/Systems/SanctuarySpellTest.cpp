@@ -67,7 +67,7 @@ protected:
 
 		goblin = &add_creature("goblin", 4);
 		orc = &add_creature("orc", 6);
-		buffs.add_buff(*goblin, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
+		buffs.add_buff(*goblin, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
 	}
 
 	Creature& add_creature(const char* name, int column)

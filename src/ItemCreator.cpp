@@ -54,7 +54,7 @@ ItemBehavior create_behavior(const ItemParams& params)
 			params.consumableAmount,
 			params.duration,
 			params.consumableBuffType,
-			params.isSetMode
+			params.isSetMode ? BuffApplication::SET : BuffApplication::ADD
 		};
 	}
 

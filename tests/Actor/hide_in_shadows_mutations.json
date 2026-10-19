@@ -88,7 +88,7 @@
     {
       "file": "src/Player.cpp",
       "original": "\t\tctx.buffSystem->add_buff_until_broken(*this, BuffType::HIDDEN_IN_SHADOWS);",
-      "mutated": "\t\tctx.buffSystem->add_buff(*this, BuffType::HIDDEN_IN_SHADOWS, 0, 10 + get_creature_level() * 2, false, ctx.gameState->get_time());",
+      "mutated": "\t\tctx.buffSystem->add_buff(*this, BuffType::HIDDEN_IN_SHADOWS, 0, 10 + get_creature_level() * 2, BuffApplication::ADD, ctx.gameState->get_time());",
       "catches": "the invented duration coming back"
     },
     {

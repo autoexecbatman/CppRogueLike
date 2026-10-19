@@ -91,7 +91,7 @@ TEST_F(ItemCreatorTest, FireResistancePotionIsOneRingsWorth)
 	EXPECT_EQ(potion.buffType, BuffType::FIRE_RESISTANCE);
 	EXPECT_EQ(potion.amount, 1) << "the buff value is the strength in rings";
 	EXPECT_EQ(potion.duration, 50);
-	EXPECT_FALSE(potion.isSetEffect);
+	EXPECT_EQ(potion.application, BuffApplication::ADD);
 }
 
 TEST_F(ItemCreatorTest, ColdResistancePotionIsOneRingsWorth)

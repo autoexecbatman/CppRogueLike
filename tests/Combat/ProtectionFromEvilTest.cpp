@@ -24,7 +24,7 @@ protected:
 	void ward_target(int duration)
 	{
 		target.activeBuffs.push_back(
-			Buff{ BuffType::PROTECTION_FROM_EVIL, PROTECTION_FROM_EVIL_PENALTY, duration, false });
+			Buff{ BuffType::PROTECTION_FROM_EVIL, PROTECTION_FROM_EVIL_PENALTY, duration, BuffApplication::ADD });
 	}
 
 	BuffSystem buffs{};

@@ -68,7 +68,7 @@ StatBoost unusual_stat_boost()
 std::vector<NamedBehavior> every_behavior_with_fields()
 {
 	return {
-		{ "consumable", Consumable{ ConsumableEffect::ADD_BUFF, 7, 3, BuffType::SANCTUARY, true } },
+		{ "consumable", Consumable{ ConsumableEffect::ADD_BUFF, 7, 3, BuffType::SANCTUARY, BuffApplication::SET } },
 		{ "weapon", Weapon{ true, HandRequirement::TWO_HANDED, WeaponSize::LARGE, 18 } },
 		{ "targeted scroll", TargetedScroll{ TargetMode::PICK_TILE_AOE, ScrollAnimation::LIGHTNING, 5, 9, 2, BuffType::SANCTUARY, 4 } },
 		{ "gold", Gold{ 12 } },
@@ -84,7 +84,7 @@ std::vector<NamedBehavior> every_behavior_with_fields()
 }
 
 // The fields of a behaviour record that carry an enum.
-constexpr std::array<std::string_view, 7> ENUM_FIELDS = { "type", "effect", "buffType", "handRequirement", "weaponSize", "targetMode", "scrollAnimation" };
+constexpr std::array<std::string_view, 8> ENUM_FIELDS = { "type", "effect", "buffType", "application", "handRequirement", "weaponSize", "targetMode", "scrollAnimation" };
 
 // Whether a record's key is one of those. The array is a file-scope constant and this
 // takes no capture: MSVC 14.51 gives a lambda that captures a function-local constexpr
@@ -171,7 +171,7 @@ TEST(BehaviorRecordTest, EveryBehaviourComesBackAsItsOwnKind)
 TEST(BehaviorRecordTest, APotionsRecordNamesItsEffectAndItsBuff)
 {
 	json saved;
-	save_behavior(Consumable{ ConsumableEffect::ADD_BUFF, 7, 3, BuffType::SANCTUARY, true }, saved);
+	save_behavior(Consumable{ ConsumableEffect::ADD_BUFF, 7, 3, BuffType::SANCTUARY, BuffApplication::SET }, saved);
 
 	EXPECT_EQ(saved.at("type"), "consumable");
 	EXPECT_EQ(saved.at("effect"), "add_buff");
@@ -191,4 +191,28 @@ TEST(BehaviorRecordTest, EveryFieldSurvivesARoundTrip)
 		EXPECT_EQ(savedAgain, saved)
 			<< "a " << named.name << " came back different: a field was read under another name, or not at all";
 	}
+}
+
+// Whether a potion sets the stat or adds to it is in its record by name.
+TEST(BehaviorRecordTest, APotionsRecordNamesWhetherItSetsOrAdds)
+{
+	json setting;
+	save_behavior(Consumable{ ConsumableEffect::ADD_BUFF, 19, 3, BuffType::STRENGTH, BuffApplication::SET }, setting);
+	json adding;
+	save_behavior(Consumable{ ConsumableEffect::ADD_BUFF, 1, 3, BuffType::STRENGTH, BuffApplication::ADD }, adding);
+
+	ASSERT_TRUE(setting.contains("application")) << "a setting potion saved no application";
+	ASSERT_TRUE(adding.contains("application")) << "an adding potion saved no application";
+	EXPECT_EQ(setting.at("application"), "set");
+	EXPECT_EQ(adding.at("application"), "add");
+}
+
+// A potion naming an application this build does not know is refused.
+TEST(BehaviorRecordTest, APotionWithAnUnknownApplicationIsRefused)
+{
+	json saved;
+	save_behavior(Consumable{ ConsumableEffect::ADD_BUFF, 19, 3, BuffType::STRENGTH, BuffApplication::SET }, saved);
+	saved["application"] = "sideways";
+
+	EXPECT_ANY_THROW((void)load_behavior(saved));
 }

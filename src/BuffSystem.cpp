@@ -98,9 +98,9 @@ static std::optional<int> later_ending(std::optional<int> first, std::optional<i
 // Puts one casting on the creature, or folds it into the one of its type already there.
 //
 // Example:
-//   grant_buff(cleric, BuffType::BLESS, 0, 360, false);            // blessed until 360
-//   grant_buff(cleric, BuffType::BLESS, 0, std::nullopt, false);   // now until broken
-static void grant_buff(Creature& creature, BuffType type, int value, std::optional<int> expiry, bool isSetEffect) noexcept
+//   grant_buff(cleric, BuffType::BLESS, 0, 360, BuffApplication::ADD);            // blessed until 360
+//   grant_buff(cleric, BuffType::BLESS, 0, std::nullopt, BuffApplication::ADD);   // now until broken
+static void grant_buff(Creature& creature, BuffType type, int value, std::optional<int> expiry, BuffApplication application) noexcept
 {
 	// Find if buff already exists
 	auto matches_type = [type](const Buff& b)
@@ -120,7 +120,7 @@ static void grant_buff(Creature& creature, BuffType type, int value, std::option
 		{
 			it->value = value; // Better buff, update value
 			it->expiryTime = expiry; // The new casting's ending replaces the old one
-			it->isSetEffect = isSetEffect; // Update effect type
+			it->application = application;
 		}
 		else
 		{
@@ -135,7 +135,7 @@ static void grant_buff(Creature& creature, BuffType type, int value, std::option
 		newBuff.type = type;
 		newBuff.value = value;
 		newBuff.expiryTime = expiry;
-		newBuff.isSetEffect = isSetEffect;
+		newBuff.application = application;
 
 		creature.activeBuffs.push_back(newBuff);
 	}
@@ -143,15 +143,15 @@ static void grant_buff(Creature& creature, BuffType type, int value, std::option
 	BuffSystem::sync_states(creature);
 }
 
-void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int durationRounds, bool isSetEffect, int currentTime) noexcept
+void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int durationRounds, BuffApplication application, int currentTime) noexcept
 {
 	// When this casting runs out, worked once and stored, so nothing counts it down.
-	grant_buff(creature, type, value, expiry_time(currentTime, durationRounds), isSetEffect);
+	grant_buff(creature, type, value, expiry_time(currentTime, durationRounds), application);
 }
 
 void BuffSystem::add_buff_until_broken(Creature& creature, BuffType type) noexcept
 {
-	grant_buff(creature, type, 0, std::nullopt, false);
+	grant_buff(creature, type, 0, std::nullopt, BuffApplication::ADD);
 }
 
 void BuffSystem::remove_buff(Creature& creature, BuffType type) noexcept

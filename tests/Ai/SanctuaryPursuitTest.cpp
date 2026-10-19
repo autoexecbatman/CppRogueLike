@@ -163,7 +163,7 @@ protected:
 
 TEST_F(SanctuaryPursuitTest, AMonsterThatFailedItsSaveStopsClosingIn)
 {
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
 	fail_the_save_with({ 12, 20, 4 });
 	const int distanceBefore = goblin_distance_to_player();
 
@@ -184,7 +184,7 @@ TEST_F(SanctuaryPursuitTest, AMonsterThatMadeItsSaveKeepsHunting)
 {
 	// The other half of the rule: a made save leaves the opponent unaffected, so it must
 	// still come. Without this the fix could be "no monster ever pursues" and pass.
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
 	script({ 20, 20, 4 });
 	goblin.attacker->attack(*player, AttackKind::MELEE, ctx);
 	const int distanceBefore = goblin_distance_to_player();
@@ -203,7 +203,7 @@ TEST_F(SanctuaryPursuitTest, AMonsterThatNeverAttackedIsNotTurnedAway)
 {
 	// "Those not attempting to attack the subject remain unaffected": reading the record
 	// must not roll a save, so a monster that has never swung still hunts.
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
 	const int distanceBefore = goblin_distance_to_player();
 
 	script_idle_rolls(120);
@@ -222,7 +222,7 @@ TEST_F(SanctuaryPursuitTest, AMonsterThatLostTrackStopsAnnouncingItEveryRound)
 	// used to walk up and swing anyway, and every round the log said so - Attacker prints
 	// "cannot bring itself to attack" whenever a turned-away swing is made. Once it stops
 	// hunting there is no swing to turn away, so the line stops too.
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
 	fail_the_save_with({ 12, 20, 4 });
 	const size_t messagesAfterTheOneRefusal = game.messageSystem.get_stored_message_count();
 
@@ -241,7 +241,7 @@ TEST_F(SanctuaryPursuitTest, ARangedMonsterThatLostTrackStopsShootingToo)
 	// The same rule reaches every opponent, so the archer's own update is gated as well.
 	// At this distance it shoots rather than closes, so the shot is what must stop.
 	goblin.ai = std::make_unique<AiMonsterRanged>();
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
 	fail_the_save_with({ 12, 20, 4 });
 	const size_t messagesAfterTheOneRefusal = game.messageSystem.get_stored_message_count();
 
@@ -260,7 +260,7 @@ TEST_F(SanctuaryPursuitTest, AWebSpinnerThatLostTrackStopsClosingIn)
 	// The spinner has its own update and so its own gate. Its poison chance is zero, so
 	// nothing here depends on venom - only on whether it still walks toward the player.
 	goblin.ai = std::make_unique<AiWebSpinner>();
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
 	// The spinner's second roll is the d100 for whether it spins a web, and spinning
 	// needs a tile this fixture does not load. The top of the die is over the chance.
 	fail_the_save_with({ 12, RandomDice::HIGHEST });

@@ -1,0 +1,89 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=BuffStateTest.*:BehaviorRecordTest.*:StatBoostEquipmentTest.*:ItemCreatorTest.*:LevelUpSystemTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tif (buff.application == BuffApplication::SET)\n",
+      "mutated": "\t\tif (buff.application != BuffApplication::SET)\n",
+      "catches": "a setting buff read as an adding one, and the reverse"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\t\tbuff.application = parse_buff_application(buffJson.at(\"application\").get<std::string>());\n",
+      "mutated": "\t\t\tbuff.application = parse_buff_application(buffJson.value(\"application\", std::string{ \"add\" }));\n",
+      "catches": "a buff record without its application defaulted instead of refused"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\t\tbuff.application = parse_buff_application(buffJson.at(\"application\").get<std::string>());\n",
+      "mutated": "\t\t\tbuff.application = BuffApplication::ADD;\n",
+      "catches": "a loaded buff losing whether it sets"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tbuffJson[\"application\"] = encode_buff_application(buff.application);\n",
+      "mutated": "\t\tbuffJson[\"application\"] = \"add\";\n",
+      "catches": "a save writing every buff as adding"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\t\t\tit->application = application;\n",
+      "mutated": "",
+      "catches": "a stronger casting over a running buff keeping the old one's application"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\t\tnewBuff.application = application;\n",
+      "mutated": "",
+      "catches": "a new buff granted as adding whatever it was asked to be"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\tgrant_buff(creature, type, value, expiry_time(currentTime, durationRounds), application);",
+      "mutated": "\tgrant_buff(creature, type, value, expiry_time(currentTime, durationRounds), BuffApplication::ADD);",
+      "catches": "add_buff dropping the application it was given"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "consumable.duration, consumable.application, ctx.gameState->get_time());",
+      "mutated": "consumable.duration, BuffApplication::ADD, ctx.gameState->get_time());",
+      "catches": "a potion of giant strength adding to Strength instead of setting it"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\t\t\toutput[\"application\"] = encode_buff_application(b.application);\n",
+      "mutated": "\t\t\t\toutput[\"application\"] = \"add\";\n",
+      "catches": "a potion record written as adding whatever it does"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tconsumable.application = parse_buff_application(source.at(\"application\").get<std::string>());\n",
+      "mutated": "\t\tconsumable.application = BuffApplication::ADD;\n",
+      "catches": "a loaded potion losing whether it sets, and an unknown name accepted"
+    },
+    {
+      "file": "src/ItemCreator.cpp",
+      "original": "\t\t\tparams.isSetMode ? BuffApplication::SET : BuffApplication::ADD\n",
+      "mutated": "\t\t\tparams.isSetMode ? BuffApplication::ADD : BuffApplication::SET\n",
+      "catches": "the item data's set flag crossing into the potion inverted"
+    },
+    {
+      "file": "src/BuffType.h",
+      "original": "\tif (name == \"set\")\n\t{\n\t\treturn BuffApplication::SET;\n",
+      "mutated": "\tif (name == \"set\")\n\t{\n\t\treturn BuffApplication::ADD;\n",
+      "catches": "a saved set read back as add"
+    },
+    {
+      "file": "src/BuffType.h",
+      "original": "\t\treturn \"set\";\n",
+      "mutated": "\t\treturn \"add\";\n",
+      "catches": "a set written as add"
+    }
+  ]
+}

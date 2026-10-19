@@ -321,7 +321,7 @@ TEST_F(HideInShadowsTest, SpellInvisibilitySurvivesTheStepThatEndsAHide)
 	buy_hide_in_shadows(40);
 	// The hide comes first, because an invisible thief's try is refused as already hidden.
 	hide_with_roll(100);
-	ctx.buffSystem->add_buff(*thief, BuffType::INVISIBILITY, 0, 20, false, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(*thief, BuffType::INVISIBILITY, 0, 20, BuffApplication::ADD, ctx.gameState->get_time());
 
 	thief->position = Vector2D{ 3, 5 };
 	thief->leave_shadows_if_moved(ctx);

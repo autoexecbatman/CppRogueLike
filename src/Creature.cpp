@@ -312,7 +312,7 @@ void Creature::load(const json& j)
 			buff.value = buffJson.at("value").get<int>();
 			const json& expiry = buffJson.at("expiryTime");
 			buff.expiryTime = expiry.is_null() ? std::nullopt : std::optional<int>{ expiry.get<int>() };
-			buff.isSetEffect = buffJson.at("isSetEffect").get<bool>();
+			buff.application = parse_buff_application(buffJson.at("application").get<std::string>());
 			for (const auto& saveJson : buffJson.at("opponentSaves"))
 			{
 				buff.opponentSaves.push_back(OpponentSave{
@@ -470,7 +470,7 @@ void Creature::save(json& j)
 		buffJson["type"] = encode_buff_type(buff.type);
 		buffJson["value"] = buff.value;
 		buffJson["expiryTime"] = buff.expiryTime.has_value() ? json(*buff.expiryTime) : json(nullptr);
-		buffJson["isSetEffect"] = buff.isSetEffect;
+		buffJson["application"] = encode_buff_application(buff.application);
 		json savesJson = json::array();
 		for (const OpponentSave& save : buff.opponentSaves)
 		{
@@ -726,7 +726,7 @@ void Creature::tick_poison(int roundEndTime, GameContext& ctx)
 	// A poison that debilitates leaves its condition behind; one that wounds does not.
 	if (effect != BuffType::NONE)
 	{
-		ctx.buffSystem->add_buff(*this, effect, effectValue, effectRounds, false, roundEndTime);
+		ctx.buffSystem->add_buff(*this, effect, effectValue, effectRounds, BuffApplication::ADD, roundEndTime);
 
 		// The onset is a round after the bite, so it is announced when it arrives.
 		ctx.messageSystem->message(actorData.color, actorData.name, MessageCompletion::CONTINUED);
@@ -1668,7 +1668,7 @@ int Creature::calculate_effective_stat(int base_value, BuffType type) const noex
 
 	for (const auto& buff : matchingBuffs)
 	{
-		if (buff.isSetEffect)
+		if (buff.application == BuffApplication::SET)
 		{
 			highestSet = std::max(highestSet, buff.value);
 		}

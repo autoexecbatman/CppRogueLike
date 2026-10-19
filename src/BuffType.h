@@ -7,6 +7,7 @@
 #include <optional>
 #include <stdexcept>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "UniqueId.h"
@@ -202,6 +203,55 @@ inline constexpr std::string_view encode_buff_type(BuffType buffType)
 	return "none";
 }
 
+// How a buff's value meets the stat it touches. A spell or a worn item adds to the score;
+// a potion of giant strength sets it, and the higher of the set value and the creature's
+// own is what counts.
+enum class BuffApplication
+{
+	ADD,
+	SET
+};
+
+// The name a save writes for an application.
+//
+// Example:
+//   encode_buff_application(BuffApplication::SET);   // -> "set"
+inline constexpr std::string_view encode_buff_application(BuffApplication application)
+{
+	switch (application)
+	{
+	case BuffApplication::ADD:
+	{
+		return "add";
+	}
+	case BuffApplication::SET:
+	{
+		return "set";
+	}
+	}
+
+	std::unreachable();
+}
+
+// The application a save names, refusing a name this build does not know.
+//
+// Example:
+//   parse_buff_application("add");        // -> BuffApplication::ADD
+//   parse_buff_application("sideways");   // throws std::runtime_error
+inline BuffApplication parse_buff_application(std::string_view name)
+{
+	if (name == "add")
+	{
+		return BuffApplication::ADD;
+	}
+	if (name == "set")
+	{
+		return BuffApplication::SET;
+	}
+
+	throw std::runtime_error(std::format("unknown buff application '{}'", name));
+}
+
 // One opponent's saving throw against a casting, kept so it is rolled once.
 struct OpponentSave
 {
@@ -220,7 +270,7 @@ struct Buff
 	// bought. Set through expiry_time in TurnSchedule.h; nothing decrements it. None is a
 	// buff that lasts until something breaks it, as a hide does (PHB page 87).
 	std::optional<int> expiryTime{};
-	bool isSetEffect{ false }; // AD&D 2e: true = SET stat to value (potions), false = ADD value (spells/items)
+	BuffApplication application{ BuffApplication::ADD };
 	// Note: Modifier stack pattern - no originalStat needed, effective values calculated on the fly
 
 	// The saves opponents have rolled against this casting. Sanctuary is the one that

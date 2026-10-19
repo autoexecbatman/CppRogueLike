@@ -115,7 +115,7 @@ TEST_F(WornResistanceTest, TheHelmOfBrillianceIsTwoRings)
 TEST_F(WornResistanceTest, ARingAndAPotionAreOneRing)
 {
 	wear("ring_of_fire_resistance", EquipmentSlot::RIGHT_RING);
-	buffs.add_buff(*player, BuffType::FIRE_RESISTANCE, 1, 10, false, ctx.gameState->get_time());
+	buffs.add_buff(*player, BuffType::FIRE_RESISTANCE, 1, 10, BuffApplication::ADD, ctx.gameState->get_time());
 
 	EXPECT_EQ(fire_strength(), 1);
 }
@@ -124,7 +124,7 @@ TEST_F(WornResistanceTest, ARingAndAPotionAreOneRing)
 TEST_F(WornResistanceTest, TheHelmCannotBeAugmented)
 {
 	wear("helm_of_brilliance", EquipmentSlot::HEAD);
-	buffs.add_buff(*player, BuffType::FIRE_RESISTANCE, 1, 10, false, ctx.gameState->get_time());
+	buffs.add_buff(*player, BuffType::FIRE_RESISTANCE, 1, 10, BuffApplication::ADD, ctx.gameState->get_time());
 
 	EXPECT_EQ(fire_strength(), 2);
 }

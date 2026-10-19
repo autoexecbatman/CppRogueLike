@@ -239,7 +239,7 @@ TEST_F(CreatureSerializationTest, TheAlignmentAndClassAreSavedByName)
 TEST_F(CreatureSerializationTest, ARunningBuffIsSavedByName)
 {
 	auto creature = create_test_creature();
-	creature->activeBuffs.push_back(Buff{ BuffType::BLESS, 1, 30, false, {} });
+	creature->activeBuffs.push_back(Buff{ BuffType::BLESS, 1, 30, BuffApplication::ADD, {} });
 
 	json saved;
 	creature->save(saved);

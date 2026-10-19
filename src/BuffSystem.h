@@ -33,10 +33,10 @@ public:
 	// the later ending, and gives every opponent a fresh save against it.
 	//
 	// Example, blessing a cleric for three rounds at the start of the game:
-	//   add_buff(cleric, BuffType::BLESS, 0, 3, false, 0);
+	//   add_buff(cleric, BuffType::BLESS, 0, 3, BuffApplication::ADD, 0);
 	//   get_buff_turns(cleric, BuffType::BLESS, 0);     // -> 3
 	//   get_buff_turns(cleric, BuffType::BLESS, 240);   // -> 1, two rounds in
-	void add_buff(Creature& creature, BuffType type, int value, int durationRounds, bool isSetEffect, int currentTime) noexcept;
+	void add_buff(Creature& creature, BuffType type, int value, int durationRounds, BuffApplication application, int currentTime) noexcept;
 
 	// Grants a buff with no duration: it lasts until something breaks it. A casting
 	// of the same type already running is made lasting too, its value kept.

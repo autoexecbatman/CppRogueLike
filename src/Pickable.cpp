@@ -250,7 +250,7 @@ bool use(Consumable& consumable, Item& owner, Creature& wearer, GameContext& ctx
 
 	case ConsumableEffect::ADD_BUFF:
 	{
-		ctx.buffSystem->add_buff(wearer, consumable.buffType, consumable.amount, consumable.duration, consumable.isSetEffect, ctx.gameState->get_time());
+		ctx.buffSystem->add_buff(wearer, consumable.buffType, consumable.amount, consumable.duration, consumable.application, ctx.gameState->get_time());
 		ctx.messageSystem->message(
 			ColorPairId::CYAN_BLACK,
 			std::format("You feel the effect of the {} for {}.", owner.get_name(), Wording::counted(consumable.duration, "turn", "turns")),
@@ -340,7 +340,7 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 			// A scroll's effect is a spell: the target saves against it or takes it.
 			if (!SavingThrows::is_made(*creature, SavingThrow::SPELL, 0, ctx))
 			{
-				ctx.buffSystem->add_buff(*creature, targetScroll.buffType, 0, targetScroll.buffDuration, false, ctx.gameState->get_time());
+				ctx.buffSystem->add_buff(*creature, targetScroll.buffType, 0, targetScroll.buffDuration, BuffApplication::ADD, ctx.gameState->get_time());
 				++affected;
 			}
 		}
@@ -759,7 +759,7 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 				output["amount"] = b.amount;
 				output["duration"] = b.duration;
 				output["buffType"] = encode_buff_type(b.buffType);
-				output["isSetEffect"] = b.isSetEffect;
+				output["application"] = encode_buff_application(b.application);
 			},
 			[&output](const Weapon& b)
 			{
@@ -848,7 +848,7 @@ ItemBehavior load_behavior(const json& source)
 		consumable.amount = source.at("amount").get<int>();
 		consumable.duration = source.at("duration").get<int>();
 		consumable.buffType = parse_buff_type(source.at("buffType").get<std::string>());
-		consumable.isSetEffect = source.at("isSetEffect").get<bool>();
+		consumable.application = parse_buff_application(source.at("application").get<std::string>());
 		return consumable;
 	}
 

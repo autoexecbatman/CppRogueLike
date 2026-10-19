@@ -91,7 +91,7 @@ TEST_F(FireballDamageTest, APotionOfFireResistanceTakesTwoOffEveryDie)
 {
 	Creature& resistant = add_creature(3);
 	Creature& exposed = add_creature(4);
-	buffs.add_buff(resistant, BuffType::FIRE_RESISTANCE, 1, 10, false, ctx.gameState->get_time());
+	buffs.add_buff(resistant, BuffType::FIRE_RESISTANCE, 1, 10, BuffApplication::ADD, ctx.gameState->get_time());
 	force_max_dice_then_saves({ 1, 1 });
 
 	const auto burst = burst_at(Vector2D{ 3, 5 });

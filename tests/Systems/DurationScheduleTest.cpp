@@ -100,8 +100,8 @@ TEST_F(DurationScheduleTest, SpeedDoesNotChangeHowLongABuffLasts)
 	Creature& ordinary = placed(TIME_UNITS_PER_ROUND);
 	Creature& quickling = placed(TIME_UNITS_PER_ROUND / 2);
 
-	buffs.add_buff(ordinary, BuffType::BLESS, 0, BLESS_ROUNDS, false, ctx.gameState->get_time());
-	buffs.add_buff(quickling, BuffType::BLESS, 0, BLESS_ROUNDS, false, ctx.gameState->get_time());
+	buffs.add_buff(ordinary, BuffType::BLESS, 0, BLESS_ROUNDS, BuffApplication::ADD, ctx.gameState->get_time());
+	buffs.add_buff(quickling, BuffType::BLESS, 0, BLESS_ROUNDS, BuffApplication::ADD, ctx.gameState->get_time());
 
 	for (int round = 1; round < BLESS_ROUNDS; ++round)
 	{
@@ -140,7 +140,7 @@ TEST_F(DurationScheduleTest, ABuffRunsFromTheReadingItWasGrantedAt)
 
 	const int granted = 9;
 	ctx.gameState->set_time(TIME_UNITS_PER_ROUND * granted);
-	buffs.add_buff(subject, BuffType::BLESS, 0, BLESS_ROUNDS, false, ctx.gameState->get_time());
+	buffs.add_buff(subject, BuffType::BLESS, 0, BLESS_ROUNDS, BuffApplication::ADD, ctx.gameState->get_time());
 
 	for (int round = granted + 1; round < granted + BLESS_ROUNDS; ++round)
 	{
@@ -159,8 +159,8 @@ TEST_F(DurationScheduleTest, AWeakerSecondCastingCanOnlyLengthenTheOneRunning)
 {
 	Creature& subject = placed(TIME_UNITS_PER_ROUND);
 
-	buffs.add_buff(subject, BuffType::SHIELD, 4, 10, false, 0);
-	buffs.add_buff(subject, BuffType::SHIELD, 1, 2, false, 0);
+	buffs.add_buff(subject, BuffType::SHIELD, 4, 10, BuffApplication::ADD, 0);
+	buffs.add_buff(subject, BuffType::SHIELD, 1, 2, BuffApplication::ADD, 0);
 
 	EXPECT_EQ(buffs.get_buff_turns(subject, BuffType::SHIELD, 0), 10) << "the shorter casting cut the longer one short";
 	EXPECT_EQ(buffs.get_buff_value(subject, BuffType::SHIELD), 4) << "the weaker casting lowered the bonus";
@@ -173,7 +173,7 @@ TEST_F(DurationScheduleTest, ABuffStillInForceNeverReportsNoRoundsLeft)
 {
 	Creature& quickling = placed(TIME_UNITS_PER_ROUND / 2);
 
-	buffs.add_buff(quickling, BuffType::BLESS, 0, BLESS_ROUNDS, false, 0);
+	buffs.add_buff(quickling, BuffType::BLESS, 0, BLESS_ROUNDS, BuffApplication::ADD, 0);
 
 	for (int halfRound = 1; halfRound < BLESS_ROUNDS * 2; ++halfRound)
 	{
@@ -227,8 +227,8 @@ TEST_F(DurationScheduleTest, ALastingBuffKeepsLastingWhateverIsFoldedIntoIt)
 	Creature& timedFirst = placed(TIME_UNITS_PER_ROUND);
 
 	buffs.add_buff_until_broken(lastingFirst, BuffType::BLESS);
-	buffs.add_buff(lastingFirst, BuffType::BLESS, 0, BLESS_ROUNDS, false, 0);
-	buffs.add_buff(timedFirst, BuffType::BLESS, 0, BLESS_ROUNDS, false, 0);
+	buffs.add_buff(lastingFirst, BuffType::BLESS, 0, BLESS_ROUNDS, BuffApplication::ADD, 0);
+	buffs.add_buff(timedFirst, BuffType::BLESS, 0, BLESS_ROUNDS, BuffApplication::ADD, 0);
 	buffs.add_buff_until_broken(timedFirst, BuffType::BLESS);
 
 	buffs.update_creature_buffs(lastingFirst, expiry_time(0, BLESS_ROUNDS * 100));

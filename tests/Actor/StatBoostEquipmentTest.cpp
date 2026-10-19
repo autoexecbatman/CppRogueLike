@@ -168,7 +168,7 @@ TEST_F(StatBoostEquipmentTest, TwoSettingItemsComeOffInEitherOrder)
 // A buff that ends while gauntlets are worn does not leave its value behind in the score.
 TEST_F(StatBoostEquipmentTest, ABuffIsNotAbsorbedByEquipment)
 {
-	ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, 19, 10, true, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, 19, 10, BuffApplication::SET, ctx.gameState->get_time());
 	put_on_adding_gauntlets(2);
 	ASSERT_EQ(player->get_strength(), 21) << "the buff's 19, plus 2";
 
@@ -183,7 +183,7 @@ TEST_F(StatBoostEquipmentTest, AGirdleTakesNoBonusFromABuff)
 {
 	put_on("girdle_of_hill_giant_strength");
 
-	ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, 1, 10, false, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, 1, 10, BuffApplication::ADD, ctx.gameState->get_time());
 
 	EXPECT_EQ(player->get_strength(), 19) << "a buff's +1 was added to the girdle's 19";
 }
@@ -203,7 +203,7 @@ TEST_F(StatBoostEquipmentTest, APenaltyStillLowersAGirdlesStrength)
 {
 	put_on("girdle_of_hill_giant_strength");
 
-	ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, -1, 10, false, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, -1, 10, BuffApplication::ADD, ctx.gameState->get_time());
 
 	EXPECT_EQ(player->get_strength(), 18);
 }
@@ -213,7 +213,7 @@ TEST_F(StatBoostEquipmentTest, AGirdleLeavesOtherAbilitiesTheirBonuses)
 {
 	put_on("girdle_of_hill_giant_strength");
 
-	ctx.buffSystem->add_buff(*player, BuffType::DEXTERITY, 1, 10, false, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(*player, BuffType::DEXTERITY, 1, 10, BuffApplication::ADD, ctx.gameState->get_time());
 
 	EXPECT_EQ(player->get_dexterity(), 11);
 }
@@ -385,4 +385,18 @@ TEST_F(StatBoostEquipmentTest, AMonsterWearingAGirdleHasItsStrength)
 	ogre.wear(ItemCreator::create("girdle_of_hill_giant_strength", ogre.position, ctx), EquipmentSlot::GIRDLE);
 
 	EXPECT_EQ(ogre.get_strength(), 19);
+}
+
+// A potion of giant strength sets Strength to the giant's score, as the girdle does,
+// rather than adding it: 19, where an addition to the wearer's 12 would make 31.
+TEST_F(StatBoostEquipmentTest, APotionOfGiantStrengthSetsStrength)
+{
+	auto item = ItemCreator::create("potion_of_giant_strength", player->position, ctx);
+	Item* carried = item.get();
+	[[maybe_unused]] const auto added = InventoryOperations::add_item_to_inventory(player->inventoryData, std::move(item), *player, *ctx.dataManager);
+	ASSERT_TRUE(added.has_value()) << "the potion did not fit in the pack";
+
+	use_item(*carried->behavior, *carried, *player, ctx);
+
+	EXPECT_EQ(player->get_strength(), 19);
 }

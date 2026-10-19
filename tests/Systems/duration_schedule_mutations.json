@@ -21,8 +21,8 @@
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\tgrant_buff(creature, type, value, expiry_time(currentTime, durationRounds), isSetEffect);",
-      "mutated": "\tgrant_buff(creature, type, value, expiry_time(0, durationRounds), isSetEffect);",
+      "original": "\tgrant_buff(creature, type, value, expiry_time(currentTime, durationRounds), application);",
+      "mutated": "\tgrant_buff(creature, type, value, expiry_time(0, durationRounds), application);",
       "catches": "a spell cast mid-game expiring relative to the start of it, so it lands already over"
     },
     {
@@ -69,8 +69,8 @@
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\tgrant_buff(creature, type, 0, std::nullopt, false);",
-      "mutated": "\tgrant_buff(creature, type, 0, 0, false);",
+      "original": "\tgrant_buff(creature, type, 0, std::nullopt, BuffApplication::ADD);",
+      "mutated": "\tgrant_buff(creature, type, 0, 0, BuffApplication::ADD);",
       "catches": "a buff granted until broken ending the moment it was granted"
     }
   ]

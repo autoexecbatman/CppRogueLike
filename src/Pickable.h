@@ -180,7 +180,7 @@ struct Consumable
 	int amount{ 0 };
 	int duration{ 0 };
 	BuffType buffType{ BuffType::NONE };
-	bool isSetEffect{ false };
+	BuffApplication application{ BuffApplication::ADD };
 };
 
 struct Weapon
