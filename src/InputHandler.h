@@ -10,7 +10,7 @@ private:
 	int keyPress{ -1 };
 	int lastKey{ 0 };
 	bool screenResized{ false };
-	bool animationTick{ false };
+	bool logicFrame{ true };
 	Vector2D lastMousePos{ 0, 0 };
 	Vector2D currentMousePos{ 0, 0 };
 
@@ -29,10 +29,12 @@ public:
 	void reset_key() noexcept
 	{
 		keyPress = -1;
-		animationTick = false;
+		logicFrame = true;
 	}
 
-	bool is_animation_tick() const noexcept { return animationTick; }
+	// Whether this frame's input advances the game: true for any recognised key or a
+	// resize, false when no key arrived and the frame only animates.
+	bool is_logic_frame() const noexcept { return logicFrame; }
 
 	bool was_resized() const noexcept { return screenResized; }
 

@@ -136,4 +136,30 @@ TEST_F(ScriptedInputTest, TheDisarmKeyReachesAFoundTrapOnTheFloor)
 	EXPECT_EQ(ctx.player()->position, START) << "the direction walked the thief instead of aiming the disarm";
 }
 
+// A frame carrying a game key advances the game: the loop runs its update on it.
+TEST_F(ScriptedInputTest, AFrameWithAGameKeyRunsTheUpdate)
+{
+	ctx.inputSystem->queue_key(GameKey::RIGHT, 0);
+	read_one_frame_of_input();
+
+	EXPECT_TRUE(ctx.inputHandler->is_logic_frame());
+}
+
+// So does a frame carrying a typed character.
+TEST_F(ScriptedInputTest, AFrameWithACharacterRunsTheUpdate)
+{
+	ctx.inputSystem->queue_key(GameKey::NONE, 'g');
+	read_one_frame_of_input();
+
+	EXPECT_TRUE(ctx.inputHandler->is_logic_frame());
+}
+
+// A frame with no key only animates; the game waits.
+TEST_F(ScriptedInputTest, AFrameWithNoKeyLeavesTheGameWaiting)
+{
+	read_one_frame_of_input();
+
+	EXPECT_FALSE(ctx.inputHandler->is_logic_frame());
+}
+
 // end of file: ScriptedInputTest.cpp

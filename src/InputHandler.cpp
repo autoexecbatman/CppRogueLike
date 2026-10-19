@@ -14,7 +14,7 @@ void InputHandler::key_listen(InputSystem& input) noexcept
 	{
 		screenResized = true;
 		keyPress = -1;
-		animationTick = false;
+		logicFrame = true;
 		return;
 	}
 
@@ -23,7 +23,7 @@ void InputHandler::key_listen(InputSystem& input) noexcept
 	if (ch != 0)
 	{
 		keyPress = ch;
-		animationTick = false;
+		logicFrame = true;
 		return;
 	}
 
@@ -123,12 +123,12 @@ void InputHandler::key_listen(InputSystem& input) noexcept
 	default:
 	{
 		keyPress = -1;
-		animationTick = true;
+		logicFrame = false;
 		return;
 	}
 	}
 
-	animationTick = false;
+	logicFrame = true;
 }
 
 bool InputHandler::mouse_moved() const noexcept

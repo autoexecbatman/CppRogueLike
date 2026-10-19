@@ -85,7 +85,7 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
 	const bool editor_active = false;
 #endif
 	// Path pacing: allow one update step every 0.12 s while auto-walking.
-	// Keyboard input always bypasses the rate-limit (is_animation_tick() is false).
+	// A keypress is a logic frame and runs at once; the pacer only spaces the auto-walk's steps.
 	bool has_mouse_path = !ctx.mousePathOverlay->empty();
 	bool pathStepReady = false;
 	if (has_mouse_path)
@@ -97,7 +97,7 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
 			mousePathStepTime = now;
 		}
 	}
-	if (!editor_active && (!ctx.inputHandler->is_animation_tick() || pathStepReady))
+	if (!editor_active && (ctx.inputHandler->is_logic_frame() || pathStepReady))
 	{
 		handle_update_phase(ctx, gui);
 	}

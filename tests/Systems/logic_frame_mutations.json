@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=ScriptedInputTest.*:PlayerConfusionTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/InputHandler.cpp",
+      "original": "\t\tkeyPress = -1;\n\t\tlogicFrame = false;\n\t\treturn;\n",
+      "mutated": "\t\tkeyPress = -1;\n\t\tlogicFrame = true;\n\t\treturn;\n",
+      "catches": "a frame with no key running the game update, so the world moves without the player"
+    },
+    {
+      "file": "src/InputHandler.cpp",
+      "original": "\t\tkeyPress = ch;\n\t\tlogicFrame = true;\n",
+      "mutated": "\t\tkeyPress = ch;\n\t\tlogicFrame = false;\n",
+      "catches": "a typed character never reaching the update"
+    },
+    {
+      "file": "src/InputHandler.cpp",
+      "original": "\t}\n\t}\n\n\tlogicFrame = true;\n}\n",
+      "mutated": "\t}\n\t}\n\n\tlogicFrame = false;\n}\n",
+      "catches": "an arrow or keypad move never reaching the update"
+    },
+    {
+      "file": "src/InputHandler.h",
+      "original": "\t\tkeyPress = -1;\n\t\tlogicFrame = true;\n\t}\n",
+      "mutated": "\t\tkeyPress = -1;\n\t\tlogicFrame = false;\n\t}\n",
+      "catches": "a frame where key_listen does not run, a menu holding input or a zoom key, vetoing the update; only the game loop reaches it (issue 0151), so expected to survive"
+    },
+    {
+      "file": "src/GameLoopCoordinator.cpp",
+      "original": "if (!editor_active && (ctx.inputHandler->is_logic_frame() || pathStepReady))",
+      "mutated": "if (!editor_active && (!ctx.inputHandler->is_logic_frame() || pathStepReady))",
+      "catches": "the gate inverted, running the update on idle frames; no test runs the game loop (issue 0151), so expected to survive"
+    }
+  ]
+}
