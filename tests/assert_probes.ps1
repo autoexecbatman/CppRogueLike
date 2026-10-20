@@ -209,7 +209,7 @@ $probes = @(
     @{
         test   = "AssertProbeDeathTest.OpeningARoomWithALockedDoorOnItsFloorAborts"
         file   = "src/Map.cpp"
-        anchor = 'assert(!room.contains(x, y) && "open_all_room_doors: a locked door inside a room''s floor");'
+        anchor = 'assert(!room.contains(col, row) && "open_all_room_doors: a locked door inside a room''s floor");'
     },
     @{
         test   = "AssertProbeDeathTest.OpeningAFrameInsideAnOpenFrameAborts"
@@ -265,6 +265,11 @@ $probes = @(
         test   = "AssertProbeDeathTest.ACanvasGridOfNoCellSizeAborts"
         file   = "src/RoomEditor.cpp"
         anchor = 'assert(tileSize > 0 && "CanvasGrid: a cell has no size");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.UpdatingAConstitutionBonusWithNoDataManagerAborts"
+        file   = "src/Creature.cpp"
+        anchor = 'assert(ctx.dataManager && "Creature::update_constitution_bonus: called without a dataManager");'
     }
 )
 

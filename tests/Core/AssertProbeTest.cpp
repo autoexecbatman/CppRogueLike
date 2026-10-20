@@ -703,6 +703,16 @@ TEST_F(AssertProbeDeathTest, EnteringTheRoomEditorWithAnUnloadedPaletteAborts)
 	EXPECT_DEATH(editor.enter(unloaded), "RoomEditor::enter: palette empty; PrefabLibrary::load_tile_labels was not called");
 }
 
+// The Constitution table lives in the data manager, so a creature asked to bring its
+// hit point bonus up to date with none has no table to read.
+TEST_F(AssertProbeDeathTest, UpdatingAConstitutionBonusWithNoDataManagerAborts)
+{
+	std::unique_ptr<Creature> creature = make_creature();
+	ctx.dataManager = nullptr;
+
+	EXPECT_DEATH(creature->update_constitution_bonus(ctx), "update_constitution_bonus: called without a dataManager");
+}
+
 // A canvas cell with no size divides by zero, so the layout that passed it is broken.
 TEST_F(AssertProbeDeathTest, ACanvasGridOfNoCellSizeAborts)
 {

@@ -27,8 +27,8 @@
     },
     {
       "file": "src/ConstitutionTracker.cpp",
-      "original": "const int oldBonus = lastCon.has_value() ? ctx.dataManager->constitution_hit_point_adjustment(*lastCon, owner.get_creature_class()) : 0;",
-      "mutated": "const int oldBonus = ctx.dataManager->constitution_hit_point_adjustment(currentConstitution, owner.get_creature_class());",
+      "original": "const int oldBonus = lastCon.has_value() ? dataManager.constitution_hit_point_adjustment(*lastCon, owner.get_creature_class()) : 0;",
+      "mutated": "const int oldBonus = dataManager.constitution_hit_point_adjustment(currentConstitution, owner.get_creature_class());",
       "catches": "the old bonus read from the new score, so a real change applies nothing"
     },
     {

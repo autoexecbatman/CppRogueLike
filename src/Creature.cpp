@@ -633,8 +633,9 @@ void Creature::set_hit_dice(int hitPoints)
 
 void Creature::update_constitution_bonus(GameContext& ctx)
 {
+	assert(ctx.dataManager && "Creature::update_constitution_bonus: called without a dataManager");
 	const std::optional<int> oldCon = get_last_constitution();
-	const auto result = constitutionTracker->apply_constitution_changes(*this, ctx);
+	const auto result = constitutionTracker->apply_constitution_changes(*this, *ctx.dataManager);
 
 	if (result.hpDifference == 0)
 	{

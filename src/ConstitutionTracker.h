@@ -4,7 +4,7 @@
 #include <optional>
 
 class Creature;
-struct GameContext;
+class DataManager;
 
 class ConstitutionTracker
 {
@@ -37,7 +37,14 @@ public:
 		bool firstApplication{ false };
 	};
 
+	// Brings the owner's Constitution hit point bonus up to its current score: the change
+	// in the table's adjustment, times the levels that take it. Records the score, so a
+	// second call with nothing changed reports nothing. It reports and the caller applies.
+	//
+	// Example, a fighter at Constitution 20 with no earlier score:
+	//   tracker.apply_constitution_changes(fighter, dataManager).newBonus;           // -> 5
+	//   tracker.apply_constitution_changes(fighter, dataManager).firstApplication;   // -> false, already recorded
 	[[nodiscard]] ConstitutionChangeResult apply_constitution_changes(
 		Creature& owner,
-		GameContext& ctx);
+		const DataManager& dataManager);
 };

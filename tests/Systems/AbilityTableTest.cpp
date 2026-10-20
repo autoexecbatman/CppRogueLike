@@ -276,7 +276,23 @@ TEST_F(AbilityTableTest, ConstitutionTwentyKeepsAWarriorsHitPointBonus)
 	dwarf->set_constitution(20);
 	ConstitutionTracker tracker{};
 
-	EXPECT_EQ(tracker.apply_constitution_changes(*dwarf, ctx).newBonus, 5);
+	EXPECT_EQ(tracker.apply_constitution_changes(*dwarf, *ctx.dataManager).newBonus, 5);
+}
+
+// The tracker records the score it applied, so asking again with nothing changed
+// reports no change and no first application.
+TEST_F(AbilityTableTest, ASecondApplicationWithNothingChangedReportsNothing)
+{
+	auto dwarf = brute_with(10, 0);
+	dwarf->set_creature_class(CreatureClass::FIGHTER);
+	dwarf->set_constitution(20);
+	ConstitutionTracker tracker{};
+	ASSERT_TRUE(tracker.apply_constitution_changes(*dwarf, *ctx.dataManager).firstApplication);
+
+	const auto again = tracker.apply_constitution_changes(*dwarf, *ctx.dataManager);
+
+	EXPECT_FALSE(again.firstApplication);
+	EXPECT_EQ(again.hpDifference, 0);
 }
 
 // Character creation: a human fighter with Strength 18 rolls d100 - here 76.
