@@ -6,9 +6,8 @@
 // 1 to 99, and a file that did not open left the game with no prefabs at all, which no
 // player would notice and no test could see.
 //
-// What it does not check: the palette's tile fields (sheet, col, row), which issue 0246
-// routes through parse_tile. An empty symbol is a value DecorEditor writes for a
-// decoration no prefab character maps to, so it is skipped rather than refused.
+// An empty symbol is a value DecorEditor writes for a decoration no prefab character maps
+// to, so that entry is skipped rather than refused - after its fields are read.
 //
 // Each test damages a copy of the real file in its own temporary file, named after the
 // test, so no two tests share one.
@@ -22,8 +21,10 @@
 
 #include <nlohmann/json.hpp>
 
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <stdexcept>
 #include <string>
 
@@ -213,6 +214,42 @@ TEST_F(PrefabLibraryLoadTest, APaletteEntryMissingAFieldIsRefusedByName)
 		const std::string refusal = refusal_of(load_scratch_palette);
 
 		EXPECT_NE(refusal.find(field), std::string::npos) << "refusal does not name " << field << ": " << refusal;
+	}
+}
+
+// A palette entry missing a tile field is refused by name, including an entry with no
+// symbol: the library skips those, but the file holds them to the same shape.
+TEST_F(PrefabLibraryLoadTest, APaletteEntryMissingATileFieldIsRefusedByName)
+{
+	const nlohmann::json real = read_json(Paths::TILE_CONFIG);
+	const nlohmann::json& palette = real.at("palette");
+	const auto has_symbol = [](const nlohmann::json& entry)
+	{
+		return !entry.at("symbol").get<std::string>().empty();
+	};
+	const auto symbolled = std::ranges::find_if(palette, has_symbol);
+	const auto unsymbolled = std::ranges::find_if_not(palette, has_symbol);
+	ASSERT_NE(symbolled, palette.end());
+	ASSERT_NE(unsymbolled, palette.end());
+
+	for (const auto entry : { symbolled, unsymbolled })
+	{
+		const auto entryIndex = static_cast<size_t>(std::distance(palette.begin(), entry));
+		for (const char* field : { "sheet", "col", "row" })
+		{
+			nlohmann::json document = real;
+			document.at("palette").at(entryIndex).erase(field);
+			write_scratch(document);
+
+			const auto load_scratch_palette = [&]()
+			{
+				library.load_tile_labels(scratch.string());
+			};
+			const std::string refusal = refusal_of(load_scratch_palette);
+
+			EXPECT_NE(refusal.find(field), std::string::npos)
+				<< "entry " << entryIndex << ": refusal does not name " << field << ": " << refusal;
+		}
 	}
 }
 

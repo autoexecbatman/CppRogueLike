@@ -49,10 +49,11 @@ private:
 
 	bool active{ false };
 	size_t paletteIndex{ 0 };
-	mutable double lastSaveTime{ -10.0 };
+	double lastSaveTime{ -10.0 };
+	std::optional<std::string> saveError{}; // why the last reported save was refused, until one succeeds
 
 	std::string activeKey{};
-	std::string palettePath{}; // set during load_palette, used by save_palette and browser
+	std::string palettePath{}; // the file load_palette read, where save_palette_reporting writes
 
 	std::unordered_map<std::string, std::unordered_map<uint32_t, TileRef>> allOverrides{};
 
@@ -93,7 +94,7 @@ private:
 	void draw_info_bar(const Renderer& renderer, Vector2D worldPosition) const;
 
 	// Sheet browser
-	void update_browser(const Renderer& renderer, std::string_view sourcePath);
+	void update_browser(const Renderer& renderer);
 
 	// Palette helpers
 	[[nodiscard]] std::optional<size_t> palette_find(TileRef tile) const;
@@ -112,9 +113,36 @@ public:
 
 	void set_active_map(long seed, int dungeonLevel);
 
-	// Palette persistence -- both read/write the "palette" array in tile_config.json.
+	// Writes the palette into the "palette" section of the file at `path`, keeping every
+	// other section. Throws std::runtime_error naming the path when the file does not open
+	// or parse, which would lose those sections, and leaves it untouched. Also throws when
+	// the write fails, which may leave the file partly written.
+	//
+	// Example:
+	//   editor.save_palette(Paths::TILE_CONFIG);   // the palette section now holds the editor's entries
+	//   editor.save_palette("data/missing.json");  // throws: "... cannot open '...missing.json' to keep its other sections"
 	void save_palette(std::string_view path) const;
+
+	// Reads the "palette" section of the file at `path`, keeping only labelled entries.
+	// Every entry needs sheet, col, row, label and symbol. Throws when the file does not
+	// open or parse, has no "palette", or an entry lacks a field; the palette loaded before
+	// is then kept.
+	//
+	// Example:
+	//   editor.load_palette(Paths::TILE_CONFIG);   // every labelled entry of the shipped palette
+	//   editor.load_palette("data/missing.json");  // throws: "... cannot open '...missing.json' -- the palette is required"
 	void load_palette(std::string_view path);
+
+	// Saves to the file the palette was loaded from, for the editor's own save keys. A
+	// refusal is kept for save_error() and drawn until a later save succeeds.
+	//
+	// Example:
+	//   editor.save_palette_reporting();   // saved: save_error() -> nullopt, "SAVED!" shows for two seconds
+	//   editor.save_palette_reporting();   // file unparseable: save_error() -> "... '...tile_config.json' does not parse: ..."
+	void save_palette_reporting();
+
+	// Why the last reported save was refused, or nothing once one succeeds.
+	[[nodiscard]] const std::optional<std::string>& save_error() const noexcept { return saveError; }
 
 	// Called every render frame while active.
 	void update_and_render(const Renderer& renderer);

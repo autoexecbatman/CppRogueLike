@@ -9,6 +9,7 @@
 #include "Paths.h"
 #include "Renderer.h"
 #include "TileConfig.h"
+#include "TileRefJson.h"
 
 namespace
 {
@@ -152,35 +153,32 @@ void TileConfig::load(std::string_view path)
 
 	if (root.contains("tiles"))
 	{
-		for (auto& [key, val] : root["tiles"].items())
+		for (const auto& [key, val] : root.at("tiles").items())
 		{
-			auto sheet = static_cast<TileSheet>(val["sheet"].get<int>());
-			int col = val["col"].get<int>();
-			int row = val["row"].get<int>();
-			tiles[key] = TileRef{ sheet, col, row };
+			tiles[key] = TileRefJson::parse_tile(val);
 		}
 	}
 
 	if (root.contains("autotile_groups"))
 	{
-		for (auto& [key, val] : root["autotile_groups"].items())
+		for (const auto& [key, val] : root.at("autotile_groups").items())
 		{
 			autotileGroups[key] = AutotileGroup{
-				static_cast<TileSheet>(val["sheet"].get<int>()),
-				val["origin_col"].get<int>(),
-				val["origin_row"].get<int>()
+				static_cast<TileSheet>(val.at("sheet").get<int>()),
+				val.at("origin_col").get<int>(),
+				val.at("origin_row").get<int>()
 			};
 		}
 	}
 
 	if (root.contains("wall_autotile_groups"))
 	{
-		for (auto& [key, val] : root["wall_autotile_groups"].items())
+		for (const auto& [key, val] : root.at("wall_autotile_groups").items())
 		{
 			wallAutotileGroups[key] = WallAutotileGroup{
-				static_cast<TileSheet>(val["sheet"].get<int>()),
-				val["origin_col"].get<int>(),
-				val["origin_row"].get<int>()
+				static_cast<TileSheet>(val.at("sheet").get<int>()),
+				val.at("origin_col").get<int>(),
+				val.at("origin_row").get<int>()
 			};
 		}
 	}

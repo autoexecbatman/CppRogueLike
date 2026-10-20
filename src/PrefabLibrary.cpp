@@ -17,6 +17,7 @@
 #include "Paths.h"
 #include "PrefabLibrary.h"
 #include "Renderer.h"
+#include "TileRefJson.h"
 
 namespace
 {
@@ -143,6 +144,8 @@ void PrefabLibrary::load_tile_labels(std::string_view path)
 	for (const auto& paletteEntry : tileConfigDocument.at("palette"))
 	{
 		const std::string symbolString = paletteEntry.at("symbol").get<std::string>();
+		const TileRef tile = TileRefJson::parse_tile(paletteEntry);
+		const std::string label = paletteEntry.at("label").get<std::string>();
 
 		// DecorEditor writes an empty symbol for a decoration no prefab character maps to.
 		if (symbolString.empty())
@@ -150,15 +153,7 @@ void PrefabLibrary::load_tile_labels(std::string_view path)
 			continue;
 		}
 
-		char sym = symbolString[0];
-		TileRef tile{
-			static_cast<TileSheet>(paletteEntry.value("sheet", 0)),
-			paletteEntry.value("col", -1),
-			paletteEntry.value("row", -1)
-		};
-		const std::string label = paletteEntry.at("label").get<std::string>();
-
-		register_symbol(sym, tile, label);
+		register_symbol(symbolString[0], tile, label);
 	}
 }
 

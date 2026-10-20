@@ -1,12 +1,13 @@
 // file: DecorEditor.cpp
 #include <algorithm>
 #include <cstdint>
-#include <filesystem>
 #include <format>
 #include <fstream>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <nlohmann/json.hpp>
@@ -16,8 +17,15 @@
 #include "ListCursor.h"
 #include "Paths.h"
 #include "Renderer.h"
+#include "TileRefJson.h"
 
 using json = nlohmann::json;
+
+namespace
+{
+// The colour of a refused save, in the info bar and the browser header alike.
+constexpr Color SAVE_FAILED_COLOR{ 255, 90, 90, 255 };
+} // namespace
 
 // ---------------------------------------------------------------------------
 
@@ -67,30 +75,22 @@ void DecorEditor::palette_remove(TileRef tile)
 
 // ---------------------------------------------------------------------------
 // nlohmann serialization for PaletteEntry
-// tile is stored as human-readable sheet/col/row.
+// The tile goes through TileRefJson; an empty symbol string means no symbol.
 // ---------------------------------------------------------------------------
 
 void to_json(json& output, const DecorEditor::PaletteEntry& entry)
 {
-	output = {
-		{ "sheet", static_cast<int>(entry.tile.sheet) },
-		{ "col", entry.tile.col },
-		{ "row", entry.tile.row },
-		{ "label", entry.label },
-		{ "symbol", entry.symbol ? std::string(1, entry.symbol) : std::string{} }
-	};
+	output = TileRefJson::encode_tile(entry.tile);
+	output["label"] = entry.label;
+	output["symbol"] = entry.symbol ? std::string(1, entry.symbol) : std::string{};
 }
 
 void from_json(const json& source, DecorEditor::PaletteEntry& entry)
 {
-	entry.tile = TileRef{
-		static_cast<TileSheet>(source.value("sheet", 0)),
-		source.value("col", -1),
-		source.value("row", -1)
-	};
-	entry.label = source.value("label", "");
-	std::string sym = source.value("symbol", "");
-	entry.symbol = sym.empty() ? 0 : sym[0];
+	entry.tile = TileRefJson::parse_tile(source);
+	entry.label = source.at("label").get<std::string>();
+	const std::string symbolString = source.at("symbol").get<std::string>();
+	entry.symbol = symbolString.empty() ? 0 : symbolString[0];
 }
 
 // ---------------------------------------------------------------------------
@@ -99,69 +99,91 @@ void from_json(const json& source, DecorEditor::PaletteEntry& entry)
 
 void DecorEditor::save_palette(std::string_view path) const
 {
-	auto abs = Paths::resolve(path);
+	const auto resolved = Paths::resolve(path);
 
-	// Read the existing file so other sections are preserved.
-	json document = json::object();
+	// The rest of the file belongs to TileConfig, so a file that cannot be read back whole is not written.
+	std::ifstream existingFile(resolved);
+	if (!existingFile.is_open())
 	{
-		std::ifstream existingFile(abs);
-		if (existingFile.is_open())
-		{
-			try
-			{
-				existingFile >> document;
-			}
-			catch (const json::exception& error)
-			{
-				std::clog << std::format("[DecorEditor] tile_config.json error, starting fresh: {}\n", error.what());
-				document = json::object();
-			}
-		}
+		throw std::runtime_error(std::format(
+			"DecorEditor::save_palette -- cannot open '{}' to keep its other sections",
+			resolved.string()));
 	}
+	json document;
+	try
+	{
+		document = json::parse(existingFile);
+	}
+	catch (const json::parse_error& error)
+	{
+		throw std::runtime_error(std::format(
+			"DecorEditor::save_palette -- '{}' does not parse: {}",
+			resolved.string(),
+			error.what()));
+	}
+	existingFile.close();
 
 	document["palette"] = palette;
 
-	std::filesystem::create_directories(abs.parent_path());
-	std::ofstream out(abs);
+	std::ofstream out(resolved);
+	if (!out.is_open())
+	{
+		throw std::runtime_error(std::format(
+			"DecorEditor::save_palette -- cannot open '{}' for writing",
+			resolved.string()));
+	}
 	out << document.dump(4);
+	out.flush();
+	if (out.fail())
+	{
+		throw std::runtime_error(std::format(
+			"DecorEditor::save_palette -- write failed for '{}'",
+			resolved.string()));
+	}
+	std::clog << std::format("[DecorEditor] palette saved: {}\n", resolved.string());
+}
+
+void DecorEditor::save_palette_reporting()
+{
+	try
+	{
+		save_palette(palettePath);
+	}
+	catch (const std::runtime_error& refusal)
+	{
+		std::clog << std::format("[DecorEditor] {}\n", refusal.what());
+		saveError = refusal.what();
+		return;
+	}
+
+	saveError.reset();
 	lastSaveTime = GetTime();
-	std::clog << std::format("[DecorEditor] palette saved: {}\n", abs.string());
 }
 
 void DecorEditor::load_palette(std::string_view path)
 {
-	palettePath = std::string(path);
-	palette.clear();
-	paletteIndex = 0;
-
-	auto abs = Paths::resolve(path);
-	std::ifstream paletteFile(abs);
+	const auto resolved = Paths::resolve(path);
+	std::ifstream paletteFile(resolved);
 	if (!paletteFile.is_open())
 	{
-		std::clog << std::format("[DecorEditor] palette not found: {}\n", abs.string());
-		return;
+		throw std::runtime_error(std::format(
+			"DecorEditor::load_palette -- cannot open '{}' -- the palette is required",
+			resolved.string()));
 	}
-	std::clog << std::format("[DecorEditor] palette loaded: {}\n", abs.string());
 
-	try
+	// Read into a local, so a refused file leaves the palette that was loaded before it.
+	const json document = json::parse(paletteFile);
+	std::vector<PaletteEntry> loaded = document.at("palette").get<std::vector<PaletteEntry>>();
+	const auto is_unlabelled = [](const PaletteEntry& entry)
 	{
-		json document;
-		paletteFile >> document;
-		if (!document.contains("palette"))
-		{
-			return;
-		}
+		return entry.label.empty();
+	};
+	std::erase_if(loaded, is_unlabelled);
 
-		palette = document["palette"].get<std::vector<PaletteEntry>>();
-		std::erase_if(palette,
-			[](const PaletteEntry& entry)
-			{ return entry.label.empty(); });
-	}
-	catch (const json::exception& error)
-	{
-		std::clog << std::format("[DecorEditor] palette error, clearing: {}\n", error.what());
-		palette.clear();
-	}
+	palettePath = std::string(path);
+	palette = std::move(loaded);
+	paletteIndex = 0;
+	std::clog << std::format("[DecorEditor] palette loaded: {}\n", resolved.string());
 }
 
 // ---------------------------------------------------------------------------
@@ -265,13 +287,13 @@ void DecorEditor::update_and_render(const Renderer& renderer)
 		if (!isBrowserOpen)
 		{
 			editing = false;
-			save_palette(palettePath);
+			save_palette_reporting();
 		}
 	}
 
 	if (isBrowserOpen)
 	{
-		update_browser(renderer, palettePath);
+		update_browser(renderer);
 		return;
 	}
 
@@ -372,6 +394,20 @@ void DecorEditor::draw_info_bar(const Renderer& renderer, Vector2D worldPosition
 		? "(no tiles -- Tab to open browser)"
 		: palette[paletteIndex].label;
 
+	// A refused save outranks a recent success: it stays until a save succeeds.
+	std::string saveNote{};
+	Color textColor{ 255, 255, 180, 255 };
+	if (saveError)
+	{
+		saveNote = std::format("  -- SAVE FAILED: {}", *saveError);
+		textColor = SAVE_FAILED_COLOR;
+	}
+	else if (isSaveRecent)
+	{
+		saveNote = "  -- SAVED!";
+		textColor = Color{ 100, 255, 100, 255 };
+	}
+
 	std::string info = std::format(
 		"DECOR EDITOR  |  {}  |  Map: {}  |  Pos: {},{}"
 		"  |  Tab browser  , / . cycle  LClick place  RClick erase  Ctrl+S save{}",
@@ -379,11 +415,7 @@ void DecorEditor::draw_info_bar(const Renderer& renderer, Vector2D worldPosition
 		activeKey.empty() ? "none" : activeKey,
 		worldPosition.x,
 		worldPosition.y,
-		isSaveRecent ? "  -- SAVED!" : "");
-
-	Color textColor = isSaveRecent
-		? Color{ 100, 255, 100, 255 }
-		: Color{ 255, 255, 180, 255 };
+		saveNote);
 
 	renderer.draw_text_color(Vector2D{ 4, barY + 2 }, info, textColor);
 }
@@ -392,7 +424,7 @@ void DecorEditor::draw_info_bar(const Renderer& renderer, Vector2D worldPosition
 // Sheet browser
 // ---------------------------------------------------------------------------
 
-void DecorEditor::update_browser(const Renderer& renderer, std::string_view sourcePath)
+void DecorEditor::update_browser(const Renderer& renderer)
 {
 	const int screenWidth = renderer.get_screen_width();
 	const int screenHeight = renderer.get_screen_height();
@@ -456,7 +488,14 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view sour
 	std::string hintLine = "Left/Right: sheet    Tab: close    Click list entry: rename    [X]: delete    Click tile: add/edit";
 
 	renderer.draw_text_color(Vector2D{ PAD, 6 }, headerLine, Color{ 255, 255, 180, 255 });
-	renderer.draw_text_color(Vector2D{ PAD, 28 }, hintLine, Color{ 160, 160, 120, 255 });
+	if (saveError)
+	{
+		renderer.draw_text_color(Vector2D{ PAD, 28 }, std::format("SAVE FAILED: {}", *saveError), SAVE_FAILED_COLOR);
+	}
+	else
+	{
+		renderer.draw_text_color(Vector2D{ PAD, 28 }, hintLine, Color{ 160, 160, 120, 255 });
+	}
 
 	const int gridY = HEADER_H + 2;
 	const int gridHeight = screenHeight - gridY - (editing ? EDIT_H : 0) - 2;
@@ -597,7 +636,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view sour
 			if (isDeleteButtonHovered && clicked)
 			{
 				palette_remove(palette[entryIndex].tile);
-				save_palette(sourcePath);
+				save_palette_reporting();
 				listCursor.reset();
 				browserSelected = TileRef{};
 				editing = false;
@@ -704,7 +743,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view sour
 	if (browserSelected.is_valid() && IsKeyPressed(KEY_DELETE))
 	{
 		palette_remove(browserSelected);
-		save_palette(sourcePath);
+		save_palette_reporting();
 		editing = false;
 		browserSelected = TileRef{};
 		listCursor.reset();
@@ -776,7 +815,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view sour
 				listCursor = *found;
 				listScroll = *listCursor + 1 > visibleRows ? *listCursor + 1 - visibleRows : 0;
 			}
-			save_palette(sourcePath);
+			save_palette_reporting();
 			editing = false;
 		}
 

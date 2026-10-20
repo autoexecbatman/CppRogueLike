@@ -128,6 +128,14 @@ public:
 		return tileDefinitions;
 	}
 
+	// Reads the tiles, both autotile sections and the tile types from the file at `path`.
+	// Every tile needs sheet, col and row, and every autotile group sheet, origin_col and
+	// origin_row. Throws when the file does not open, and json::out_of_range naming the key
+	// when a record lacks one; sections read before the refusal stay loaded.
+	//
+	// Example:
+	//   config.load(Paths::TILE_CONFIG);        // the shipped file; config.get("TILE_WATER") then answers
+	//   config.load("data/missing.json");       // throws: "TileConfig::load -- cannot open '...' -- tile config JSON is required"
 	void load(std::string_view path);
 };
 

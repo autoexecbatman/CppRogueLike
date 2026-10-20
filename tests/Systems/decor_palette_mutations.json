@@ -1,0 +1,89 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=DecorEditorPaletteTest.*:PrefabLibraryLoadTest.*:CodecRoundTripTest.EveryItemSpriteSurvivesASaveAndALoad"
+  ],
+  "mutations": [
+    {
+      "file": "src/DecorEditor.cpp",
+      "original": "output[\"label\"] = entry.label;",
+      "mutated": "output[\"label\"] = std::string{};",
+      "catches": "a palette entry written without its label, which the next load drops as unlabelled"
+    },
+    {
+      "file": "src/DecorEditor.cpp",
+      "original": "output[\"symbol\"] = entry.symbol ? std::string(1, entry.symbol) : std::string{};",
+      "mutated": "output[\"symbol\"] = std::string{};",
+      "catches": "a palette entry written without its symbol, so the prefab library stops mapping that character"
+    },
+    {
+      "file": "src/DecorEditor.cpp",
+      "original": "entry.symbol = symbolString.empty() ? 0 : symbolString[0];",
+      "mutated": "entry.symbol = 0;",
+      "catches": "a symbol read and then dropped, so a save writes every entry without one"
+    },
+    {
+      "file": "src/DecorEditor.cpp",
+      "original": "\tif (!existingFile.is_open())\n",
+      "mutated": "\tif (false)\n",
+      "catches": "a missing file reported as one that does not parse, which names the wrong fault"
+    },
+    {
+      "file": "src/DecorEditor.cpp",
+      "original": "catch (const json::parse_error& error)",
+      "mutated": "catch (const json::type_error& error)",
+      "catches": "a parse failure escaping unwrapped, without the path and past save_palette_reporting's catch"
+    },
+    {
+      "file": "src/DecorEditor.cpp",
+      "original": "\tif (!out.is_open())\n",
+      "mutated": "\tif (false)\n",
+      "catches": "a file that cannot be opened for writing reported as a failed write"
+    },
+    {
+      "file": "src/DecorEditor.cpp",
+      "original": "\tsaveError.reset();\n",
+      "mutated": "\n",
+      "catches": "a refusal left on screen after a save that succeeded"
+    },
+    {
+      "file": "src/DecorEditor.cpp",
+      "original": "saveError = refusal.what();",
+      "mutated": "saveError = std::string{};",
+      "catches": "a refusal shown without its reason"
+    },
+    {
+      "file": "src/DecorEditor.cpp",
+      "original": "document.at(\"palette\").get<std::vector<PaletteEntry>>()",
+      "mutated": "document.value(\"palette\", json::array()).get<std::vector<PaletteEntry>>()",
+      "catches": "a file with no palette read as an empty one, the lenient read 0246 removed"
+    },
+    {
+      "file": "src/DecorEditor.cpp",
+      "original": "\tstd::ifstream paletteFile(resolved);\n",
+      "mutated": "\tpalette.clear();\n\tstd::ifstream paletteFile(resolved);\n",
+      "catches": "a refused load that empties the palette it was meant to replace"
+    },
+    {
+      "file": "src/PrefabLibrary.cpp",
+      "original": "const TileRef tile = TileRefJson::parse_tile(paletteEntry);",
+      "mutated": "const TileRef tile = paletteEntry.contains(\"sheet\") ? TileRefJson::parse_tile(paletteEntry) : TileRef{};",
+      "catches": "a palette entry missing its sheet read as an empty tile instead of refused"
+    },
+    {
+      "file": "src/ContentRegistryIO.cpp",
+      "original": "itemTiles[key] = TileRefJson::encode_tile(tile);",
+      "mutated": "itemTiles[key] = TileRefJson::encode_tile(TileRef{});",
+      "catches": "item sprites saved as empty tiles"
+    },
+    {
+      "file": "src/ContentRegistryIO.cpp",
+      "original": "reg.set_tile(key, TileRefJson::parse_tile(val));",
+      "mutated": "reg.set_tile(key, TileRef{});",
+      "catches": "item sprites loaded as empty tiles"
+    }
+  ]
+}

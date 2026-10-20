@@ -31,7 +31,6 @@
 #include "MessageSystem.h"
 #include "Minimap.h"
 #include "NotificationMenu.h"
-#include "Paths.h"
 #include "Player.h"
 #include "Renderer.h"
 #include "RenderingManager.h"
@@ -171,7 +170,7 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 				}
 				if (key == GameKey::DECOR_SAVE)
 				{
-					ctx.decorEditor->save_palette(Paths::TILE_CONFIG);
+					ctx.decorEditor->save_palette_reporting();
 					return true;
 				}
 				// Handle placement -- blocked while sheet browser is open

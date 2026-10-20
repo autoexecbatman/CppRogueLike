@@ -16,9 +16,13 @@
 
 #include <gtest/gtest.h>
 
+#include <nlohmann/json.hpp>
+
 #include "src/EquipmentSlot.h"
 #include <algorithm>
 #include <array>
+#include <filesystem>
+#include <fstream>
 #include <string_view>
 #include <vector>
 
@@ -27,13 +31,17 @@
 #include "src/Attitude.h"
 #include "src/BuffType.h"
 #include "src/Colors.h"
+#include "src/ContentRegistry.h"
+#include "src/ContentRegistryIO.h"
 #include "src/CreatureClass.h"
 #include "src/CreatureSize.h"
 #include "src/DamageInfo.h"
 #include "src/IntelligenceRating.h"
 #include "src/ItemClassification.h"
 #include "src/MagicalItemEffects.h"
+#include "src/Paths.h"
 #include "src/Pickable.h"
+#include "src/Renderer.h"
 #include "src/TargetMode.h"
 #include "src/Weapons.h"
 
@@ -264,9 +272,8 @@ TEST(CodecRoundTripTest, UnknownStringsThrow)
 }
 
 // Added 2026-10-01, after docs/pair_symmetry.py reported equipment_slot as the one
-// encode/parse pair in src/ that no test reached. The other two it named cannot be
-// reached at all: parse_equipment and encode_equipment sit in MonsterRegistry.cpp's
-// anonymous namespace, and encode_tile is a lambda inside a function.
+// encode/parse pair in src/ that no test reached. parse_equipment and encode_equipment
+// cannot be reached: they sit in MonsterRegistry.cpp's anonymous namespace.
 TEST(CodecRoundTripTest, EveryEquipmentSlotRoundTrips)
 {
 	for (int index = 0; index <= static_cast<int>(EquipmentSlot::NONE); ++index)
@@ -297,6 +304,35 @@ TEST(CodecRoundTripTest, NoTwoEquipmentSlotsShareASpelling)
 	spellings.erase(duplicates.begin(), duplicates.end());
 
 	EXPECT_EQ(spellings.size(), written) << "two equipment slots encode to the same string";
+}
+
+// Every item sprite in the shipped content file survives a save and a load through the
+// tile codec: same keys, same sheet, column and row.
+TEST(CodecRoundTripTest, EveryItemSpriteSurvivesASaveAndALoad)
+{
+	const std::filesystem::path scratch = std::filesystem::temp_directory_path() / "codec_round_trip_item_tiles.json";
+	ContentRegistry shipped{};
+	ContentRegistryIO::load(shipped, Paths::CONTENT_TILES);
+	ASSERT_FALSE(shipped.all_tiles().empty());
+
+	ContentRegistryIO::save(shipped, scratch.string());
+	ContentRegistry reloaded{};
+	ContentRegistryIO::load(reloaded, scratch.string());
+	std::filesystem::remove(scratch);
+
+	EXPECT_EQ(reloaded.all_tiles(), shipped.all_tiles());
+
+	// Both sides went through one reader, so they are also checked against the file's own records.
+	std::ifstream shippedFile(Paths::resolve(Paths::CONTENT_TILES));
+	const nlohmann::json records = nlohmann::json::parse(shippedFile).at("items");
+	ASSERT_EQ(records.size(), shipped.all_tiles().size());
+	for (const auto& [key, record] : records.items())
+	{
+		const TileRef tile = shipped.get_tile(key);
+		EXPECT_EQ(static_cast<int>(tile.sheet), record.at("sheet").get<int>()) << key;
+		EXPECT_EQ(tile.col, record.at("col").get<int>()) << key;
+		EXPECT_EQ(tile.row, record.at("row").get<int>()) << key;
+	}
 }
 
 // A misspelled slot in a data file fails at load rather than going nowhere.

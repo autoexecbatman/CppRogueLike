@@ -11,6 +11,7 @@
 #include "ContentRegistryIO.h"
 #include "Paths.h"
 #include "Renderer.h"
+#include "TileRefJson.h"
 
 namespace ContentRegistryIO
 {
@@ -30,14 +31,9 @@ void load(ContentRegistry& reg, std::string_view path)
 
 	if (root.contains("items"))
 	{
-		for (auto& [key, val] : root["items"].items())
+		for (const auto& [key, val] : root.at("items").items())
 		{
-			TileRef tile{
-				static_cast<TileSheet>(val.at("sheet").get<int>()),
-				val.at("col").get<int>(),
-				val.at("row").get<int>()
-			};
-			reg.set_tile(key, tile);
+			reg.set_tile(key, TileRefJson::parse_tile(val));
 		}
 	}
 }
@@ -47,23 +43,14 @@ void save(const ContentRegistry& reg, std::string_view path)
 	auto resolved = Paths::resolve(path);
 	std::filesystem::create_directories(resolved.parent_path());
 
-	auto encode_tile = [](TileRef tileRef) -> nlohmann::json
-	{
-		return nlohmann::json{
-			{ "sheet", static_cast<int>(tileRef.sheet) },
-			{ "col", tileRef.col },
-			{ "row", tileRef.row }
-		};
-	};
-
-	nlohmann::json items_obj = nlohmann::json::object();
+	nlohmann::json itemTiles = nlohmann::json::object();
 	for (const auto& [key, tile] : reg.all_tiles())
 	{
-		items_obj[key] = encode_tile(tile);
+		itemTiles[key] = TileRefJson::encode_tile(tile);
 	}
 
 	nlohmann::json root;
-	root["items"] = items_obj;
+	root["items"] = itemTiles;
 
 	std::ofstream tilesFile(resolved);
 	if (!tilesFile.is_open())
