@@ -98,7 +98,7 @@ void MenuSell::menu_print_state(size_t state)
 	}
 }
 
-void MenuSell::handle_sell(Creature& shopkeeper, Creature& seller, GameContext& ctx)
+void MenuSell::handle_sell(Creature& seller, GameContext& ctx)
 {
 	if (InventoryOperations::is_inventory_empty(seller.inventoryData) ||
 		currentState >= InventoryOperations::get_item_count(seller.inventoryData))
@@ -201,7 +201,7 @@ void MenuSell::on_key(GameContext& ctx)
 	{
 		if (!InventoryOperations::is_inventory_empty(player.inventoryData) && !menuItems.empty())
 		{
-			handle_sell(shopkeeper, player, ctx);
+			handle_sell(player, ctx);
 		}
 		else
 		{

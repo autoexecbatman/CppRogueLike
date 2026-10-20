@@ -9,7 +9,7 @@
   "mutations": [
     {
       "file": "src/MenuSell.cpp",
-      "original": "\t\t\thandle_sell(shopkeeper, player, ctx);\n",
+      "original": "\t\t\thandle_sell(player, ctx);\n",
       "mutated": "",
       "catches": "Enter in the sell menu doing nothing"
     },

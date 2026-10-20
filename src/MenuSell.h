@@ -22,7 +22,7 @@ class MenuSell : public BaseMenu
 
 	std::string menu_get_string(size_t state) { return menuItems.at(state); }
 
-	void handle_sell(Creature& shopkeeper, Creature& seller, GameContext& ctx);
+	void handle_sell(Creature& seller, GameContext& ctx);
 	void draw_content() override;
 
 public:
