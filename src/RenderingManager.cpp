@@ -140,7 +140,7 @@ void RenderingManager::apply_lighting(const GameContext& ctx) const
 				{
 					int screenX = tileX * tileSize - cameraX;
 					int screenY = tileY * tileSize - cameraY;
-					renderer.add_light_quad(screenX, screenY, tileSize, exploredMemoryLight);
+					renderer.add_light_quad(screenX, screenY, exploredMemoryLight);
 				}
 				continue;
 			}
@@ -157,7 +157,7 @@ void RenderingManager::apply_lighting(const GameContext& ctx) const
 
 			int screenX = tileX * tileSize - cameraX;
 			int screenY = tileY * tileSize - cameraY;
-			renderer.add_light_quad(screenX, screenY, tileSize, litColor);
+			renderer.add_light_quad(screenX, screenY, litColor);
 		}
 	}
 

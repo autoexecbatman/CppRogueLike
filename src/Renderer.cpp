@@ -439,7 +439,7 @@ void Renderer::begin_light_mask()
 	ClearBackground(RL_BLACK);
 }
 
-void Renderer::add_light_quad(int screenX, int screenY, int tileSize, Color tileColor)
+void Renderer::add_light_quad(int screenX, int screenY, Color tileColor)
 {
 	if (!lightMaskLoaded)
 	{

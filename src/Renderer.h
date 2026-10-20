@@ -447,7 +447,7 @@ public:
 
 	// Dynamic lighting: fill darkness then punch light cones, multiply onto screen.
 	void begin_light_mask();
-	void add_light_quad(int screenX, int screenY, int tileSize, Color tileColor);
+	void add_light_quad(int screenX, int screenY, Color tileColor);
 	void apply_light_mask();
 
 	[[nodiscard]] ColorPair get_color_pair(ColorPairId pair) const;
