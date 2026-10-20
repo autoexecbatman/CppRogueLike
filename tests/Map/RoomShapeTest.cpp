@@ -85,6 +85,14 @@ const char* shape_name(RoomShape shape)
 	return "unnamed shape";
 }
 
+// A map whose room carving a test can call on one room at a time.
+class MapThatCarvesRooms : public Map
+{
+public:
+	using Map::create_room;
+	using Map::Map;
+};
+
 // Cells inside the room's own floor box that are wall. A shape carves these; a plain
 // rectangle has none.
 int walls_inside_box(const Map& map, const DungeonRoom& room)
@@ -271,6 +279,66 @@ TEST_F(RoomShapeTest, EveryRoomKeepsTheShapeItWasGiven)
 			}
 		}
 	}
+}
+
+// A cross under each of these prefabs is unsound as carved: the first two wall off an edge,
+// the last two split the floor. create_room drops the shape and keeps the prefab, so the
+// room it leaves is sound and still holds the prefab's walls. A finished level cannot show
+// this, because the steps after the room is carved reopen it.
+TEST_F(RoomShapeTest, ACrossThePrefabBreaksIsCarvedAsThePrefabAlone)
+{
+	const std::vector<DungeonRoom> breakingRooms{
+		DungeonRoom{ .col = 10, .row = 10, .width = 10, .height = 7, .shape = RoomShape::CROSS, .prefabName = "twin_chambers_12x9" },
+		DungeonRoom{ .col = 10, .row = 10, .width = 10, .height = 7, .shape = RoomShape::CROSS, .prefabName = "guard_post_12x9" },
+		DungeonRoom{ .col = 10, .row = 10, .width = 14, .height = 7, .shape = RoomShape::CROSS, .prefabName = "crypt_bays_16x9" },
+		DungeonRoom{ .col = 10, .row = 10, .width = 10, .height = 7, .shape = RoomShape::CROSS, .prefabName = "moat_room_12x9" },
+	};
+
+	for (const DungeonRoom& room : breakingRooms)
+	{
+		ASSERT_GT(interior_wall_count_of(room.prefabName), 0) << "prefab '" << room.prefabName << "' is not in the library";
+		MapThatCarvesRooms map{ MAP_WIDTH, MAP_HEIGHT };
+		map.init_tiles();
+		ctx.map = &map;
+		rooms.clear();
+
+		map.create_room(room, false, ctx);
+
+		EXPECT_TRUE(map.room_layout_is_sound(room))
+			<< "a cross under prefab '" << room.prefabName << "' was left split or with an edge no corridor can enter";
+		EXPECT_GT(walls_inside_box(map, room), 0)
+			<< "prefab '" << room.prefabName << "' was dropped along with the shape";
+	}
+}
+
+// A prefab whose own wall cuts the room in two is unsound with or without a shape, so
+// create_room gives up both layers and digs the plain box. No prefab in the library does
+// this, so the test draws one.
+TEST_F(RoomShapeTest, APrefabThatSplitsTheRoomByItselfLeavesAPlainBox)
+{
+	prefabs.add_or_replace(Prefab{
+		.name = "wall_across_12x9",
+		.rows = {
+			"############",
+			"#..........#",
+			"#..........#",
+			"#..........#",
+			"############",
+			"#..........#",
+			"#..........#",
+			"#..........#",
+			"############",
+		},
+	});
+	const DungeonRoom room{ .col = 10, .row = 10, .width = 10, .height = 7, .shape = RoomShape::CROSS, .prefabName = "wall_across_12x9" };
+	MapThatCarvesRooms map{ MAP_WIDTH, MAP_HEIGHT };
+	map.init_tiles();
+	ctx.map = &map;
+
+	map.create_room(room, false, ctx);
+
+	EXPECT_TRUE(map.room_layout_is_sound(room)) << "the room was left split by its prefab's wall";
+	EXPECT_EQ(walls_inside_box(map, room), 0) << "the plain box still holds walls";
 }
 
 TEST_F(RoomShapeTest, EveryCorridorOpensOntoTheRoomsFloor)

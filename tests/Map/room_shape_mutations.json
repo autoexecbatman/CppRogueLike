@@ -15,9 +15,15 @@
     },
     {
       "file": "src/Map.cpp",
+      "original": "\tif (!room_layout_is_sound(room))\n\t{\n\t\tdig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });",
+      "mutated": "\tif (false)\n\t{\n\t\tdig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });",
+      "catches": "a room kept as the shape and the prefab carved it, never retried as the prefab alone"
+    },
+    {
+      "file": "src/Map.cpp",
       "original": "\t\tif (!room_layout_is_sound(room))\n\t\t{\n\t\t\tdig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });",
       "mutated": "\t\tif (false)\n\t\t{\n\t\t\tdig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });",
-      "catches": "a room left as the shape and the prefab carved it, split in two or with an edge no corridor can enter"
+      "catches": "a room left as its prefab alone carved it, split in two or with an edge no corridor can enter, instead of dug as a plain box"
     },
     {
       "file": "src/Map.cpp",
