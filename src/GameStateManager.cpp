@@ -118,14 +118,17 @@ void load_creatures(const json& source, std::vector<std::unique_ptr<Creature>>& 
 	// Replace rather than append, as every loader of a level container does.
 	creatures.clear();
 
-	if (source.contains("creatures") && source["creatures"].is_array())
+	const json& creatureRecords = source.at("creatures");
+	if (!creatureRecords.is_array())
 	{
-		for (const auto& creatureData : source["creatures"])
-		{
-			auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "Unnamed", ColorPairId::WHITE_BLACK });
-			creature->load(creatureData);
-			creatures.push_back(std::move(creature));
-		}
+		throw std::runtime_error(std::format("load_creatures: \"creatures\" is {}, not an array", creatureRecords.type_name()));
+	}
+
+	for (const auto& creatureData : creatureRecords)
+	{
+		auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "Unnamed", ColorPairId::WHITE_BLACK });
+		creature->load(creatureData);
+		creatures.push_back(std::move(creature));
 	}
 }
 
@@ -182,12 +185,13 @@ void load_traps(const json& source, std::vector<std::unique_ptr<Trap>>& traps, c
 	// abandoned level's traps on the new map, at the tiles they had there.
 	traps.clear();
 
-	if (!source.contains("traps") || !source["traps"].is_array())
+	const json& trapRecords = source.at("traps");
+	if (!trapRecords.is_array())
 	{
-		return;
+		throw std::runtime_error(std::format("load_traps: \"traps\" is {}, not an array", trapRecords.type_name()));
 	}
 
-	for (const auto& trapJson : source["traps"])
+	for (const auto& trapJson : trapRecords)
 	{
 		// Built through the same constructor the generator uses, so the type decides
 		// the dice, the name and both tiles exactly as it did the first time.

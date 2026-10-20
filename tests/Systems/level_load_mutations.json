@@ -108,6 +108,18 @@
       "original": "{ \"row\", room.row },",
       "mutated": "{ \"row\", room.col },",
       "catches": "the save writing a room's row from another field"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "const json& creatureRecords = source.at(\"creatures\");",
+      "mutated": "const json& creatureRecords = source.value(\"creatures\", json::array());",
+      "catches": "a save with no creature list loaded as a level with no monsters, the quiet return 0292 removed"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "if (!creatureRecords.is_array())",
+      "mutated": "if (false)",
+      "catches": "a \"creatures\" that is not a list read as no monsters"
     }
   ]
 }

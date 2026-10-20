@@ -18,7 +18,9 @@
 
 #include <gtest/gtest.h>
 
+#include <exception>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "src/Actor.h"
@@ -161,6 +163,32 @@ TEST_F(TrapSerializationTest, LoadingReplacesTheTrapsAlreadyThere)
 	load_traps(emptyLevel, stale, *ctx.tileConfig);
 
 	EXPECT_TRUE(stale.empty()) << "the previous level's traps survived the load";
+}
+
+// save_traps always writes "traps" as an array, so a document without it, or with
+// something else there, is refused rather than loaded as a level with no traps.
+TEST_F(TrapSerializationTest, ADocumentWithoutATrapListIsRefused)
+{
+	std::vector<std::unique_ptr<Trap>> level;
+	const auto refusal_of = [&](const json& record)
+	{
+		try
+		{
+			load_traps(record, level, *ctx.tileConfig);
+		}
+		catch (const std::exception& refusal)
+		{
+			return std::string(refusal.what());
+		}
+		ADD_FAILURE() << "the traps were not refused";
+		return std::string{};
+	};
+
+	const std::string missing = refusal_of(json::object());
+	EXPECT_NE(missing.find("traps"), std::string::npos) << missing;
+
+	const std::string notAList = refusal_of(json{ { "traps", json::object() } });
+	EXPECT_NE(notAList.find("traps"), std::string::npos) << notAList;
 }
 
 // end of file: TrapSerializationTest.cpp

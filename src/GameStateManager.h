@@ -22,21 +22,29 @@ struct Vector2D;
 struct DungeonRoom;
 struct GameContext;
 
-// Writes every trap on the level into j["traps"], and reads them back. Traps were
-// absent from the save entirely: a level reloaded in a fresh process had none, and one
-// reloaded mid-session kept the abandoned level's traps at their old coordinates.
-// load_traps clears the container first for that reason.
+// Writes every trap on the level into j["traps"], an array even when there are none.
 //
 // Example, a level holding a hidden pit and a dart a thief has already tried:
 //   save_traps(traps, level);            // level["traps"] is an array of two
-//   load_traps(level, traps, tiles);     // both back, states and attempts intact
 void save_traps(const std::vector<std::unique_ptr<Trap>>& traps, json& output);
+
+// Reads every trap in j["traps"] into the level, replacing whatever it held, so a load
+// during play leaves none of the abandoned level's traps behind. The list is required: a
+// missing "traps" throws json::out_of_range, and one that is not an array throws
+// std::runtime_error.
+//
+// Example:
+//   load_traps(level, traps, tiles);             // both back, states and attempts intact
+//   load_traps(json::object(), traps, tiles);    // throws: key 'traps' not found
 void load_traps(const json& source, std::vector<std::unique_ptr<Trap>>& traps, const TileConfig& tileConfig);
 
-// Reads every creature in j["creatures"] into the level, replacing whatever it held.
+// Reads every creature in j["creatures"] into the level, replacing whatever it held. The
+// list is required: a missing "creatures" throws json::out_of_range, and one that is not
+// an array throws std::runtime_error.
 //
 // Example, a level abandoned with one goblin, loaded from a save of two:
-//   load_creatures(saved, creatures);   // creatures.size() -> 2, the saved two
+//   load_creatures(saved, creatures);            // creatures.size() -> 2, the saved two
+//   load_creatures(json::object(), creatures);   // throws: key 'creatures' not found
 void load_creatures(const json& source, std::vector<std::unique_ptr<Creature>>& creatures);
 
 // Writes every room on the level into j["rooms"]: an array even when there are none, and

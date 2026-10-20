@@ -96,6 +96,18 @@
       "original": "\ttraps.clear();",
       "mutated": "\t;",
       "catches": "a load during play leaving the abandoned level's traps on the new map"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "const json& trapRecords = source.at(\"traps\");",
+      "mutated": "const json& trapRecords = source.value(\"traps\", json::array());",
+      "catches": "a save with no trap list loaded as a level with no traps, the quiet return 0292 removed"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "if (!trapRecords.is_array())",
+      "mutated": "if (false)",
+      "catches": "a \"traps\" that is not a list read as no traps"
     }
   ]
 }

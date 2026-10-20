@@ -61,6 +61,21 @@ protected:
 		return {};
 	}
 
+	// What load_creatures threw for `record`, or a failure if it threw nothing.
+	static std::string refusal_of_creatures(const json& record, std::vector<std::unique_ptr<Creature>>& level)
+	{
+		try
+		{
+			load_creatures(record, level);
+		}
+		catch (const std::exception& refusal)
+		{
+			return refusal.what();
+		}
+		ADD_FAILURE() << "the creatures were not refused";
+		return {};
+	}
+
 	static DungeonRoom room_at(int col)
 	{
 		DungeonRoom room{};
@@ -110,6 +125,32 @@ TEST_F(LevelLoadTest, LoadingCreaturesReplacesTheAbandonedLevels)
 	ASSERT_EQ(level.size(), 2u) << "the abandoned level's goblin is still there";
 	EXPECT_EQ(level.at(0)->actorData.name, "orc");
 	EXPECT_EQ(level.at(1)->actorData.name, "kobold");
+}
+
+// A level saved with no monsters writes an empty list, and it loads as none.
+TEST_F(LevelLoadTest, AnEmptyCreatureListLoadsAsNoCreatures)
+{
+	json record{};
+	record["creatures"] = json::array();
+
+	std::vector<std::unique_ptr<Creature>> level{};
+	level.push_back(creature_named("goblin"));
+	load_creatures(record, level);
+
+	EXPECT_TRUE(level.empty());
+}
+
+// The save always writes "creatures" as an array, so a document without it, or with
+// something else there, is refused rather than loaded as a level with no monsters.
+TEST_F(LevelLoadTest, ADocumentWithoutACreatureListIsRefused)
+{
+	std::vector<std::unique_ptr<Creature>> level{};
+
+	const std::string missing = refusal_of_creatures(json::object(), level);
+	EXPECT_NE(missing.find("creatures"), std::string::npos) << missing;
+
+	const std::string notAList = refusal_of_creatures(json{ { "creatures", json::object() } }, level);
+	EXPECT_NE(notAList.find("creatures"), std::string::npos) << notAList;
 }
 
 // The same for rooms: a level of two rooms loaded from a save of one has one.
