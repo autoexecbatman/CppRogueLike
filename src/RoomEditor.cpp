@@ -1,10 +1,14 @@
 // file: RoomEditor.cpp
 #include <algorithm>
 #include <cassert>
+#include <charconv>
 #include <format>
 #include <iterator>
+#include <optional>
 #include <stdexcept>
 #include <string>
+#include <string_view>
+#include <system_error>
 #include <utility>
 
 #include <raylib.h>
@@ -120,6 +124,20 @@ std::optional<size_t> PrefabListRows::slot_at(int pixelY) const
 // ---------------------------------------------------------------------------
 // Canvas grid
 // ---------------------------------------------------------------------------
+
+std::optional<int> parse_typed_size(std::string_view typed)
+{
+	int value{ 0 };
+	const char* const end = typed.data() + typed.size();
+	const auto [stoppedAt, error] = std::from_chars(typed.data(), end, value);
+
+	// Only the whole text read as one number counts; a prefix of it does not.
+	if (error != std::errc{} || stoppedAt != end)
+	{
+		return std::nullopt;
+	}
+	return value;
+}
 
 CanvasGrid::CanvasGrid(int gridOriginX, int gridOriginY, int cellSize)
 	: originX{ gridOriginX },
@@ -623,16 +641,23 @@ void RoomEditor::handle_input_text()
 	{
 		if (mode == EditorMode::INPUT_WIDTH)
 		{
-			pendingWidth = inputBuffer.empty() ? canvasWidth : std::stoi(inputBuffer);
-			pendingWidth = std::clamp(pendingWidth, 3, 60);
+			const std::optional<int> typedWidth = parse_typed_size(inputBuffer);
+			if (!typedWidth)
+			{
+				set_status(std::format("Width '{}' is not a number -- kept {}", inputBuffer, canvasWidth));
+			}
+			pendingWidth = std::clamp(typedWidth.value_or(canvasWidth), 3, 60);
 			mode = EditorMode::INPUT_HEIGHT;
 			inputBuffer.clear();
 		}
 		else if (mode == EditorMode::INPUT_HEIGHT)
 		{
-			int newHeight = inputBuffer.empty() ? canvasHeight : std::stoi(inputBuffer);
-			newHeight = std::clamp(newHeight, 3, 40);
-			new_canvas(pendingWidth, newHeight);
+			const std::optional<int> typedHeight = parse_typed_size(inputBuffer);
+			if (!typedHeight)
+			{
+				set_status(std::format("Height '{}' is not a number -- kept {}", inputBuffer, canvasHeight));
+			}
+			new_canvas(pendingWidth, std::clamp(typedHeight.value_or(canvasHeight), 3, 40));
 			mode = EditorMode::NORMAL;
 			inputBuffer.clear();
 		}

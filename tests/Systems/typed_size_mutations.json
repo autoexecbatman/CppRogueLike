@@ -1,0 +1,29 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=TypedSizeTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "if (error != std::errc{} || stoppedAt != end)",
+      "mutated": "if (error != std::errc{})",
+      "catches": "a number with text after it read as its prefix, the partial parse std::stoi made"
+    },
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "if (error != std::errc{} || stoppedAt != end)",
+      "mutated": "if (stoppedAt != end)",
+      "catches": "an empty entry or a number past an int read as zero instead of refused"
+    },
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "\treturn value;\n}",
+      "mutated": "\treturn value + 1;\n}",
+      "catches": "a typed size read as some other number"
+    }
+  ]
+}

@@ -148,6 +148,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/PrefabLibraryLoadTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/DecorEditorPaletteTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/TileConfigLoadTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/TypedSizeTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/MutationPlanTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/MenuPointerTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/InventoryContextActionsTest.cpp

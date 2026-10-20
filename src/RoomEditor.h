@@ -20,6 +20,7 @@
 #include <cstddef>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "Renderer.h"
@@ -100,6 +101,17 @@ public:
 	// The row a pixel falls in; negative above row 0.
 	[[nodiscard]] int row_at(int pixelY) const;
 };
+
+// The whole number typed into a size prompt, or nothing when the text is empty, holds
+// anything after the digits, or does not fit an int. A partial number is never read as
+// its prefix.
+//
+// Example:
+//   parse_typed_size("12");            // -> 12
+//   parse_typed_size("12x");           // -> nullopt, stops before the end
+//   parse_typed_size("");              // -> nullopt, the prompt keeps the current size
+//   parse_typed_size("99999999999");   // -> nullopt, does not fit an int
+[[nodiscard]] std::optional<int> parse_typed_size(std::string_view typed);
 
 class RoomEditor
 {
