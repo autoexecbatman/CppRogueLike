@@ -31,6 +31,7 @@
 #include "src/HealthPool.h"
 #include "src/TurnSchedule.h"
 #include "tests/mocks/CountingAi.h"
+#include "tests/mocks/ExpectLastsExactly.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace
@@ -162,14 +163,14 @@ TEST_F(DurationScheduleTest, AWeakerSecondCastingCanOnlyLengthenTheOneRunning)
 	buffs.add_buff(subject, BuffType::SHIELD, 4, 10, BuffApplication::ADD, 0);
 	buffs.add_buff(subject, BuffType::SHIELD, 1, 2, BuffApplication::ADD, 0);
 
-	EXPECT_EQ(buffs.get_buff_turns(subject, BuffType::SHIELD, 0), 10) << "the shorter casting cut the longer one short";
 	EXPECT_EQ(buffs.get_buff_value(subject, BuffType::SHIELD), 4) << "the weaker casting lowered the bonus";
+	// The shorter casting must not cut the longer one short.
+	expect_lasts_exactly(buffs, subject, BuffType::SHIELD, 0, 10);
 }
 
-// The count a screen would print never reads zero while the buff is in force, which is
-// the invariant that lets rounds left be shown at all. A quickling is the creature that
-// produces part-rounds, so it is the one asked.
-TEST_F(DurationScheduleTest, ABuffStillInForceNeverReportsNoRoundsLeft)
+// A creature acting twice a round does not wear a buff out early: it is in force at every
+// half round of its duration. A quickling is the creature that produces part-rounds.
+TEST_F(DurationScheduleTest, AFastCreatureKeepsItsBuffForEveryRoundOfIt)
 {
 	Creature& quickling = placed(TIME_UNITS_PER_ROUND / 2);
 
@@ -182,7 +183,6 @@ TEST_F(DurationScheduleTest, ABuffStillInForceNeverReportsNoRoundsLeft)
 		manager.update_creatures(creatures, ctx);
 
 		ASSERT_TRUE(buffs.has_buff(quickling, BuffType::BLESS)) << "gone at " << currentTime;
-		EXPECT_GT(buffs.get_buff_turns(quickling, BuffType::BLESS, currentTime), 0) << "no rounds left at " << currentTime;
 	}
 }
 

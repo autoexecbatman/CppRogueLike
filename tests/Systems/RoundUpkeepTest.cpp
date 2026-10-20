@@ -25,15 +25,14 @@
 #include <string>
 #include <vector>
 
-#include "src/Colors.h"
 #include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
 #include "src/GameContext.h"
 #include "src/GameLoopCoordinator.h"
-#include "src/TurnSchedule.h"
 #include "src/HealthPool.h"
 #include "src/HungerSystem.h"
 #include "src/Item.h"
@@ -42,6 +41,8 @@
 #include "src/Map.h"
 #include "src/MessageSystem.h"
 #include "src/Player.h"
+#include "src/TurnSchedule.h"
+#include "tests/mocks/ExpectLastsExactly.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace
@@ -369,8 +370,8 @@ TEST_F(RoundUpkeepTest, AVenomLandingInsideALongActionStartsInItsOwnRound)
 
 	spend_one_action_of(7);
 
-	EXPECT_EQ(ctx.buffSystem->get_buff_turns(bitten, BuffType::HAIRY_SPIDER_VENOM, ctx.gameState->get_time()), 6)
-		<< "the venom started at the action's end, not the round it landed in";
+	// The venom started at the action's end, not the round it landed in.
+	expect_lasts_exactly(*ctx.buffSystem, bitten, BuffType::HAIRY_SPIDER_VENOM, ctx.gameState->get_time(), 6);
 }
 
 // end of file: RoundUpkeepTest.cpp

@@ -32,12 +32,6 @@
       "catches": "a weaker second casting cutting short a longer one already running"
     },
     {
-      "file": "src/BuffSystem.cpp",
-      "original": "\treturn rounds_remaining(currentTime, *found->expiryTime);",
-      "mutated": "\treturn *found->expiryTime;",
-      "catches": "the raw clock reading reported where rounds left belong"
-    },
-    {
       "file": "src/AiMonsterConfused.cpp",
       "original": "\tif (ctx.gameState->get_time() >= confusionEndTime)",
       "mutated": "\tif (ctx.gameState->get_time() > confusionEndTime)",

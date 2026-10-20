@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <cassert>
 #include <optional>
 #include <ranges>
 #include <unordered_map>
@@ -191,21 +190,6 @@ int BuffSystem::get_buff_value(const Creature& creature, BuffType type) const no
 	};
 	auto found = std::ranges::find_if(creature.activeBuffs, matches_type);
 	return found != creature.activeBuffs.end() ? found->value : 0;
-}
-
-int BuffSystem::get_buff_turns(const Creature& creature, BuffType type, int currentTime) const noexcept
-{
-	auto matches_type = [type](const Buff& buff)
-	{
-		return buff.type == type;
-	};
-	auto found = std::ranges::find_if(creature.activeBuffs, matches_type);
-	if (found == creature.activeBuffs.end())
-	{
-		return 0;
-	}
-	assert(found->expiryTime.has_value() && "get_buff_turns: a buff lasting until broken has no rounds to count");
-	return rounds_remaining(currentTime, *found->expiryTime);
 }
 
 bool BuffSystem::has_buff(const Creature& creature, BuffType type) const noexcept

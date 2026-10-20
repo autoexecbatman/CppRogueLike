@@ -20,6 +20,7 @@
 #include "src/Player.h"
 #include "src/RandomDice.h"
 #include "src/SpellSystem.h"
+#include "tests/mocks/ExpectLastsExactly.h"
 #include "tests/mocks/MockGameContext.h"
 
 class SleepSpellTest : public ::testing::Test
@@ -153,7 +154,8 @@ TEST_F(SleepSpellTest, DurationScalesWithCasterLevel)
 	cast_sleep();
 
 	ASSERT_TRUE(goblin.has_state(ActorState::IS_SLEEPING));
-	EXPECT_EQ(buffs.get_buff_turns(goblin, BuffType::SLEEP, ctx.gameState->get_time()), 15) << "3rd level caster: 5 rounds per level";
+	// 3rd level caster: 5 rounds per level.
+	expect_lasts_exactly(buffs, goblin, BuffType::SLEEP, ctx.gameState->get_time(), 15);
 }
 
 // A higher-level caster puts them under for longer.
@@ -166,7 +168,7 @@ TEST_F(SleepSpellTest, HigherLevelCasterSleepsThemLonger)
 	cast_sleep();
 
 	ASSERT_TRUE(goblin.has_state(ActorState::IS_SLEEPING));
-	EXPECT_EQ(buffs.get_buff_turns(goblin, BuffType::SLEEP, ctx.gameState->get_time()), 35);
+	expect_lasts_exactly(buffs, goblin, BuffType::SLEEP, ctx.gameState->get_time(), 35);
 }
 
 // The dice the book prints, in absolute terms. Every case above scripts its dice, and

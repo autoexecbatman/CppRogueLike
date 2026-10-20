@@ -187,46 +187,6 @@ TEST(TurnScheduleTest, ADurationOfNoRoundsIsAlreadyOver)
 	const int granted = TIME_UNITS_PER_ROUND * 4;
 
 	EXPECT_EQ(expiry_time(granted, 0), granted);
-	EXPECT_EQ(rounds_remaining(granted, expiry_time(granted, 0)), 0);
-}
-
-// What a duration has left, counted in the rounds the book prints it in.
-TEST(TurnScheduleTest, RoundsRemainingCountsDownAsTheClockRuns)
-{
-	const int expiry = expiry_time(0, 3);
-
-	EXPECT_EQ(rounds_remaining(0, expiry), 3);
-	EXPECT_EQ(rounds_remaining(TIME_UNITS_PER_ROUND, expiry), 2);
-	EXPECT_EQ(rounds_remaining(TIME_UNITS_PER_ROUND * 2, expiry), 1);
-	EXPECT_EQ(rounds_remaining(TIME_UNITS_PER_ROUND * 3, expiry), 0);
-}
-
-// The invariant that makes the count safe to print: zero means over, and nothing else
-// does. A buff with part of a round left has to report one, because a reader that sees
-// zero reads it as expired - which is what the count meant before it was a reading.
-TEST(TurnScheduleTest, RoundsRemainingReadsZeroOnlyOnceTheDurationIsOver)
-{
-	const int expiry = expiry_time(0, 3);
-
-	for (int currentTime = 0; currentTime < expiry; ++currentTime)
-	{
-		ASSERT_GT(rounds_remaining(currentTime, expiry), 0) << "still in force at " << currentTime;
-	}
-
-	EXPECT_EQ(rounds_remaining(expiry, expiry), 0);
-
-	// Two rounds past, not one. Without the guard the ceiling arithmetic returns a
-	// negative count, and one round past is the last overshoot it still truncates to
-	// zero - so a case measured there cannot see the guard at all.
-	EXPECT_EQ(rounds_remaining(expiry + TIME_UNITS_PER_ROUND * 2, expiry), 0) << "and stays zero past it";
-}
-
-// Half a round left is still a round the creature has, which is the case a duration
-// measured in whole rounds cannot see and a fast creature produces constantly.
-TEST(TurnScheduleTest, APartialRoundLeftStillReadsAsOne)
-{
-	EXPECT_EQ(rounds_remaining(TIME_UNITS_PER_ROUND / 2, TIME_UNITS_PER_ROUND), 1);
-	EXPECT_EQ(rounds_remaining(TIME_UNITS_PER_ROUND - 1, TIME_UNITS_PER_ROUND), 1);
 }
 
 // A delay of one round costs one round, and a bigger delay costs more. That is what

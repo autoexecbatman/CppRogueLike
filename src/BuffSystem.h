@@ -34,8 +34,8 @@ public:
 	//
 	// Example, blessing a cleric for three rounds at the start of the game:
 	//   add_buff(cleric, BuffType::BLESS, 0, 3, BuffApplication::ADD, 0);
-	//   get_buff_turns(cleric, BuffType::BLESS, 0);     // -> 3
-	//   get_buff_turns(cleric, BuffType::BLESS, 240);   // -> 1, two rounds in
+	//   update_creature_buffs(cleric, 359);   // has_buff(cleric, BuffType::BLESS) -> true, the last of it
+	//   update_creature_buffs(cleric, 360);   // has_buff(cleric, BuffType::BLESS) -> false, three rounds run
 	void add_buff(Creature& creature, BuffType type, int value, int durationRounds, BuffApplication application, int currentTime) noexcept;
 
 	// Grants a buff with no duration: it lasts until something breaks it. A casting
@@ -56,10 +56,6 @@ public:
 	// Query methods
 	int get_buff_value(const Creature& creature, BuffType type) const noexcept;
 
-	// Whole rounds the buff has left at `currentTime`, rounded up so that a buff still
-	// in force never reports zero. A creature without the buff reads zero as well.
-	// A buff lasting until broken has no rounds to count, and asking is refused.
-	int get_buff_turns(const Creature& creature, BuffType type, int currentTime) const noexcept;
 	bool has_buff(const Creature& creature, BuffType type) const noexcept;
 
 	// Combat calculations - data-driven, OCP compliant

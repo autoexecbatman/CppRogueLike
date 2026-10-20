@@ -27,7 +27,6 @@
 //
 //   // A duration the book prints in rounds, as the clock reading it ends at.
 //   expiry_time(0, 3);            // -> 360, three rounds from the start of the game
-//   rounds_remaining(240, 360);   // -> 1, one round of it left to run
 //
 //   // Which round a point on the clock falls in, counted from one.
 //   round_number_at(0);     // -> 1
@@ -173,26 +172,4 @@ inline constexpr int ROUNDS_PER_TURN = 10;
 	assert(durationRounds >= 0 && "expiry_time: a duration cannot run backwards");
 
 	return currentTime + durationRounds * TIME_UNITS_PER_ROUND;
-}
-
-// Whole rounds a duration has left, for printing a count the book's reader recognises.
-// Rounded up, so it reads zero only once the duration is over: a buff still in force
-// with half a round to run reports one, because reporting none would read as expired.
-//
-// Example, a three-round blessing granted at the start of the game:
-//   rounds_remaining(0, 360);     // -> 3
-//   rounds_remaining(240, 360);   // -> 1
-//   rounds_remaining(359, 360);   // -> 1, the last of it
-//   rounds_remaining(360, 360);   // -> 0, and only here
-[[nodiscard]] constexpr int rounds_remaining(int currentTime, int expiryTime)
-{
-	assert(currentTime >= 0 && "rounds_remaining: the clock starts at zero and only rises");
-
-	const int remaining = expiryTime - currentTime;
-	if (remaining <= 0)
-	{
-		return 0;
-	}
-
-	return (remaining + TIME_UNITS_PER_ROUND - 1) / TIME_UNITS_PER_ROUND;
 }

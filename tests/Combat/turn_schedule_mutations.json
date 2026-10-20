@@ -84,18 +84,6 @@
       "original": "\treturn currentTime + durationRounds * TIME_UNITS_PER_ROUND;",
       "mutated": "\treturn durationRounds * TIME_UNITS_PER_ROUND;",
       "catches": "a duration measured from the start of the game rather than from when it was granted"
-    },
-    {
-      "file": "src/TurnSchedule.h",
-      "original": "\tconst int remaining = expiryTime - currentTime;\n\tif (remaining <= 0)\n\t{\n\t\treturn 0;\n\t}\n\n\treturn (remaining + TIME_UNITS_PER_ROUND - 1) / TIME_UNITS_PER_ROUND;",
-      "mutated": "\tconst int remaining = expiryTime - currentTime;\n\n\treturn (remaining + TIME_UNITS_PER_ROUND - 1) / TIME_UNITS_PER_ROUND;",
-      "catches": "a duration well past its end counted as a negative number of rounds left"
-    },
-    {
-      "file": "src/TurnSchedule.h",
-      "original": "\treturn (remaining + TIME_UNITS_PER_ROUND - 1) / TIME_UNITS_PER_ROUND;",
-      "mutated": "\treturn remaining / TIME_UNITS_PER_ROUND;",
-      "catches": "a buff with part of a round left reporting none, which reads as expired"
     }
   ]
 }

@@ -51,6 +51,7 @@
 #include "src/Player.h"
 #include "src/SavingThrow.h"
 #include "src/TurnSchedule.h"
+#include "tests/mocks/ExpectLastsExactly.h"
 
 class HairySpiderVenomTest : public ::testing::Test
 {
@@ -209,8 +210,8 @@ TEST_F(HairySpiderVenomTest, TheVenomLastsOneDFourPlusOneRounds)
 	rounds_pass(1);
 	ASSERT_TRUE(ctx.buffSystem->has_buff(*player, BuffType::HAIRY_SPIDER_VENOM));
 
-	EXPECT_EQ(ctx.buffSystem->get_buff_turns(*player, BuffType::HAIRY_SPIDER_VENOM, ctx.gameState->get_time()), 2 + 1)
-		<< "1d4 of two, plus one, and the round it lands in is not spent landing";
+	// 1d4 of two, plus one, and the round it lands in is not spent landing.
+	expect_lasts_exactly(*ctx.buffSystem, *player, BuffType::HAIRY_SPIDER_VENOM, ctx.gameState->get_time(), 2 + 1);
 }
 
 // And it does run out, taking its point with it.
