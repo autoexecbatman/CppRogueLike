@@ -10,13 +10,6 @@
 
 struct GameContext;
 
-inline constexpr int GUI_HEIGHT{ 7 };
-
-inline int gui_width()
-{
-	return 118;
-}
-
 class Gui : public Persistent
 {
 private:
