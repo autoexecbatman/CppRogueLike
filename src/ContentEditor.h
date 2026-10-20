@@ -34,7 +34,7 @@ private:
 	void assign_tile(TileRef tile, MonsterRegistry& monsters);
 
 	void draw_header(const Renderer& renderer);
-	void draw_list(const Renderer& renderer, const MonsterRegistry& monsters, int list_x, int list_y, int list_w, int list_h);
+	void draw_list(const Renderer& renderer, const MonsterRegistry& monsters, int listX, int listY, int listWidth, int listHeight);
 	void draw_browser(const Renderer& renderer, MonsterRegistry& monsters, int panelX, int panelY, int browserWidth, int browserHeight);
 	void draw_hint_bar(const Renderer& renderer) const;
 	void handle_keyboard();

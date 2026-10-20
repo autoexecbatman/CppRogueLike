@@ -142,11 +142,11 @@ void ContentEditor::update_and_render(const Renderer& renderer, ContentRegistry&
 
 	draw_header(renderer);
 
-	const int body_y = HEADER_H;
-	const int body_h = screenHeight - HEADER_H - HINT_H;
+	const int bodyY = HEADER_H;
+	const int bodyHeight = screenHeight - HEADER_H - HINT_H;
 
-	draw_list(renderer, monsters, 0, body_y, LIST_W, body_h);
-	draw_browser(renderer, monsters, LIST_W, body_y, screenWidth - LIST_W, body_h);
+	draw_list(renderer, monsters, 0, bodyY, LIST_W, bodyHeight);
+	draw_browser(renderer, monsters, LIST_W, bodyY, screenWidth - LIST_W, bodyHeight);
 	draw_hint_bar(renderer);
 }
 
@@ -175,11 +175,11 @@ void ContentEditor::draw_header(const Renderer& renderer)
 		DrawRectangleLines(tabPixelX, TAB_Y, TAB_W, TAB_H, Color{ 100, 100, 60, 255 });
 		renderer.draw_text_color(Vector2D{ tabPixelX + 8, TAB_Y + 4 }, TAB_NAMES[tabIndex], textColor);
 
-		bool click_tab = IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
+		bool isTabClicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
 			mouse.x >= tabPixelX && mouse.x < tabPixelX + TAB_W &&
 			mouse.y >= TAB_Y && mouse.y < TAB_Y + TAB_H;
 
-		if (click_tab)
+		if (isTabClicked)
 		{
 			tab = tabIndex;
 			listCursor = 0;
@@ -191,67 +191,67 @@ void ContentEditor::draw_header(const Renderer& renderer)
 void ContentEditor::draw_list(
 	const Renderer& renderer,
 	const MonsterRegistry& monsters,
-	int list_x,
-	int list_y,
-	int list_w,
-	int list_h)
+	int listX,
+	int listY,
+	int listWidth,
+	int listHeight)
 {
 	constexpr int ITEM_H = 36;
 	constexpr int TILE_SZ = 28;
 	constexpr int PAD = 8;
 
-	DrawRectangle(list_x, list_y, list_w, list_h, Color{ 10, 10, 20, 255 });
-	DrawLine(list_x + list_w - 1, list_y, list_x + list_w - 1, list_y + list_h, Color{ 80, 80, 120, 255 });
+	DrawRectangle(listX, listY, listWidth, listHeight, Color{ 10, 10, 20, 255 });
+	DrawLine(listX + listWidth - 1, listY, listX + listWidth - 1, listY + listHeight, Color{ 80, 80, 120, 255 });
 
 	const auto& entries = active_entries();
 	int total = static_cast<int>(entries.size());
-	int visible = list_h / ITEM_H;
-	int max_scroll = std::max(0, total - visible);
-	listScroll = std::clamp(listScroll, 0, max_scroll);
+	int visible = listHeight / ITEM_H;
+	int maxScroll = std::max(0, total - visible);
+	listScroll = std::clamp(listScroll, 0, maxScroll);
 
 	::Vector2 mouse = GetMousePosition();
-	bool in_list = mouse.x >= list_x && mouse.x < list_x + list_w &&
-		mouse.y >= list_y && mouse.y < list_y + list_h;
+	bool isMouseInList = mouse.x >= listX && mouse.x < listX + listWidth &&
+		mouse.y >= listY && mouse.y < listY + listHeight;
 
-	if (in_list)
+	if (isMouseInList)
 	{
 		float wheel = GetMouseWheelMove();
 		if (wheel != 0.0f)
 		{
-			listScroll = std::clamp(listScroll - static_cast<int>(wheel), 0, max_scroll);
+			listScroll = std::clamp(listScroll - static_cast<int>(wheel), 0, maxScroll);
 		}
 	}
 
-	BeginScissorMode(list_x, list_y, list_w, list_h);
+	BeginScissorMode(listX, listY, listWidth, listHeight);
 
 	for (int entryIndex = listScroll; entryIndex < total; ++entryIndex)
 	{
-		int itemY = list_y + (entryIndex - listScroll) * ITEM_H;
-		if (itemY + ITEM_H > list_y + list_h)
+		int itemY = listY + (entryIndex - listScroll) * ITEM_H;
+		if (itemY + ITEM_H > listY + listHeight)
 		{
 			break;
 		}
 
-		bool is_sel = (entryIndex == listCursor);
-		bool hovered = in_list && mouse.y >= itemY && mouse.y < itemY + ITEM_H;
+		bool isSelected = (entryIndex == listCursor);
+		bool hovered = isMouseInList && mouse.y >= itemY && mouse.y < itemY + ITEM_H;
 
-		if (is_sel)
+		if (isSelected)
 		{
-			DrawRectangle(list_x, itemY, list_w, ITEM_H, Color{ 60, 60, 0, 220 });
+			DrawRectangle(listX, itemY, listWidth, ITEM_H, Color{ 60, 60, 0, 220 });
 		}
 		else if (hovered)
 		{
-			DrawRectangle(list_x, itemY, list_w, ITEM_H, Color{ 30, 30, 30, 180 });
+			DrawRectangle(listX, itemY, listWidth, ITEM_H, Color{ 30, 30, 30, 180 });
 		}
 
 		TileRef tile = (tab == 0)
 			? (contentRegistry ? contentRegistry->get_tile(entries[entryIndex].itemKey) : TileRef{})
 			: monsters.get_tile(static_cast<MonsterId>(entries[entryIndex].entityKey));
 
-		renderer.draw_tile_screen_sized(Vector2D{ list_x + PAD, itemY + (ITEM_H - TILE_SZ) / 2 }, tile, TILE_SZ);
+		renderer.draw_tile_screen_sized(Vector2D{ listX + PAD, itemY + (ITEM_H - TILE_SZ) / 2 }, tile, TILE_SZ);
 
-		Color textColor = is_sel ? Color{ 255, 255, 100, 255 } : Color{ 200, 200, 200, 255 };
-		renderer.draw_text_color(Vector2D{ list_x + PAD + TILE_SZ + 4, itemY + (ITEM_H - 16) / 2 }, entries[entryIndex].name, textColor);
+		Color textColor = isSelected ? Color{ 255, 255, 100, 255 } : Color{ 200, 200, 200, 255 };
+		renderer.draw_text_color(Vector2D{ listX + PAD + TILE_SZ + 4, itemY + (ITEM_H - 16) / 2 }, entries[entryIndex].name, textColor);
 
 		if (hovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
 		{
@@ -274,12 +274,12 @@ void ContentEditor::draw_browser(
 	constexpr int PAD = 10;
 	constexpr int SUB_HEADER_H = 28;
 
-	const int total_sheets = renderer.get_loaded_sheet_count();
+	const int totalSheets = renderer.get_loaded_sheet_count();
 	auto advance_sheet = [&](int dir)
 	{
-		for (int sheetsTried = 0; sheetsTried < total_sheets; ++sheetsTried)
+		for (int sheetsTried = 0; sheetsTried < totalSheets; ++sheetsTried)
 		{
-			browserSheet = (browserSheet + dir + total_sheets) % total_sheets;
+			browserSheet = (browserSheet + dir + totalSheets) % totalSheets;
 			if (renderer.sheet_is_loaded(static_cast<TileSheet>(browserSheet)))
 			{
 				break;
@@ -302,78 +302,78 @@ void ContentEditor::draw_browser(
 		advance_sheet(1);
 	}
 
-	const int sheet_cols = renderer.get_sheet_cols(static_cast<TileSheet>(browserSheet));
-	const int sheet_rows = renderer.get_sheet_rows(static_cast<TileSheet>(browserSheet));
+	const int sheetColumns = renderer.get_sheet_cols(static_cast<TileSheet>(browserSheet));
+	const int sheetRows = renderer.get_sheet_rows(static_cast<TileSheet>(browserSheet));
 
 	DrawRectangle(panelX, panelY, browserWidth, SUB_HEADER_H, Color{ 15, 15, 30, 255 });
 
-	std::string hdr = std::format(
+	std::string header = std::format(
 		"Sheet: {} ({}/{})  --  {}x{} tiles",
 		renderer.get_sheet_name(static_cast<TileSheet>(browserSheet)),
 		browserSheet + 1,
-		total_sheets,
-		sheet_cols,
-		sheet_rows);
+		totalSheets,
+		sheetColumns,
+		sheetRows);
 
-	renderer.draw_text_color(Vector2D{ panelX + PAD, panelY + 4 }, hdr, Color{ 200, 200, 120, 255 });
+	renderer.draw_text_color(Vector2D{ panelX + PAD, panelY + 4 }, header, Color{ 200, 200, 120, 255 });
 
-	const int grid_y = panelY + SUB_HEADER_H;
-	const int grid_h = browserHeight - SUB_HEADER_H;
+	const int gridY = panelY + SUB_HEADER_H;
+	const int gridHeight = browserHeight - SUB_HEADER_H;
 
 	::Vector2 mouse = GetMousePosition();
-	bool in_browser = mouse.x >= panelX && mouse.x < panelX + browserWidth &&
-		mouse.y >= grid_y && mouse.y < grid_y + grid_h;
+	bool isMouseInBrowser = mouse.x >= panelX && mouse.x < panelX + browserWidth &&
+		mouse.y >= gridY && mouse.y < gridY + gridHeight;
 
-	if (in_browser)
+	if (isMouseInBrowser)
 	{
 		float wheel = GetMouseWheelMove();
 		if (wheel != 0.0f)
 		{
 			browserScroll -= static_cast<int>(wheel);
-			browserScroll = std::clamp(browserScroll, 0, std::max(0, sheet_rows - 1));
+			browserScroll = std::clamp(browserScroll, 0, std::max(0, sheetRows - 1));
 		}
 	}
 
-	TileRef selected_tile = current_tile(monsters);
+	TileRef selectedTile = current_tile(monsters);
 
-	BeginScissorMode(panelX, grid_y, browserWidth, grid_h);
+	BeginScissorMode(panelX, gridY, browserWidth, gridHeight);
 
-	for (int row = browserScroll; row < sheet_rows; ++row)
+	for (int row = browserScroll; row < sheetRows; ++row)
 	{
-		int cellPixelY = grid_y + (row - browserScroll) * (BROWSER_TILE + 2);
-		if (cellPixelY >= grid_y + grid_h)
+		int cellPixelY = gridY + (row - browserScroll) * (BROWSER_TILE + 2);
+		if (cellPixelY >= gridY + gridHeight)
 		{
 			break;
 		}
 
-		for (int col = 0; col < sheet_cols; ++col)
+		for (int col = 0; col < sheetColumns; ++col)
 		{
 			int cellPixelX = panelX + PAD + col * (BROWSER_TILE + 2);
-			TileRef tid{ static_cast<TileSheet>(browserSheet), col, row };
+			TileRef tile{ static_cast<TileSheet>(browserSheet), col, row };
 
-			bool is_sel = (tid == selected_tile);
-			bool hovered_tile = mouse.x >= cellPixelX && mouse.x < cellPixelX + BROWSER_TILE &&
+			bool isSelected = (tile == selectedTile);
+			bool isTileHovered = mouse.x >= cellPixelX && mouse.x < cellPixelX + BROWSER_TILE &&
 				mouse.y >= cellPixelY && mouse.y < cellPixelY + BROWSER_TILE;
 
-			if (is_sel)
+			if (isSelected)
 			{
 				DrawRectangle(cellPixelX, cellPixelY, BROWSER_TILE, BROWSER_TILE, Color{ 60, 60, 0, 220 });
 			}
-			else if (hovered_tile)
+			else if (isTileHovered)
 			{
 				DrawRectangle(cellPixelX, cellPixelY, BROWSER_TILE, BROWSER_TILE, Color{ 40, 40, 20, 160 });
 			}
 
-			renderer.draw_tile_screen_sized(Vector2D{ cellPixelX, cellPixelY }, tid, BROWSER_TILE);
+			renderer.draw_tile_screen_sized(Vector2D{ cellPixelX, cellPixelY }, tile, BROWSER_TILE);
 
-			if (is_sel)
+			if (isSelected)
 			{
 				DrawRectangleLines(cellPixelX, cellPixelY, BROWSER_TILE, BROWSER_TILE, Color{ 255, 255, 0, 255 });
 			}
 
-			if (hovered_tile && IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && in_browser)
+			if (isTileHovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && isMouseInBrowser)
 			{
-				assign_tile(tid, monsters);
+				assign_tile(tile, monsters);
 			}
 		}
 	}
@@ -387,16 +387,16 @@ void ContentEditor::draw_hint_bar(const Renderer& renderer) const
 	const int screenHeight = renderer.get_screen_height();
 	constexpr int HINT_H = 28;
 
-	int hint_y = screenHeight - HINT_H;
-	DrawRectangle(0, hint_y, screenWidth, HINT_H, Color{ 20, 20, 40, 255 });
+	int hintY = screenHeight - HINT_H;
+	DrawRectangle(0, hintY, screenWidth, HINT_H, Color{ 20, 20, 40, 255 });
 
-	bool saved_flash = (GetTime() - lastSaveTime) < 2.0;
+	bool isSaveRecent = (GetTime() - lastSaveTime) < 2.0;
 	std::string hint = std::format(
 		"Tab:switch tab   Up/Down:select   Left/Right:sheet   Click tile:assign   Ctrl+S:save{}",
-		saved_flash ? "   -- SAVED!" : "");
+		isSaveRecent ? "   -- SAVED!" : "");
 
-	Color hintColor = saved_flash ? Color{ 100, 255, 100, 255 } : Color{ 160, 160, 120, 255 };
-	renderer.draw_text_color(Vector2D{ 8, hint_y + 4 }, hint, hintColor);
+	Color hintColor = isSaveRecent ? Color{ 100, 255, 100, 255 } : Color{ 160, 160, 120, 255 };
+	renderer.draw_text_color(Vector2D{ 8, hintY + 4 }, hint, hintColor);
 }
 
 void ContentEditor::handle_keyboard()
@@ -416,8 +416,8 @@ void ContentEditor::handle_keyboard()
 
 	if (IsKeyPressed(KEY_DOWN))
 	{
-		int max_idx = static_cast<int>(active_entries().size()) - 1;
-		listCursor = std::min(max_idx, listCursor + 1);
+		int lastIndex = static_cast<int>(active_entries().size()) - 1;
+		listCursor = std::min(lastIndex, listCursor + 1);
 	}
 
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
