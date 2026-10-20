@@ -25,6 +25,8 @@
 
 #include <gtest/gtest.h>
 
+#include <nlohmann/json.hpp>
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -481,6 +483,38 @@ TEST_F(RoomShapeTest, APrefabsDecorationsAreThePalettesTiles)
 		}
 	}
 	EXPECT_GT(stamped, 0) << "no prefab decoration was stamped in " << DUNGEONS << " dungeons";
+}
+
+// Every generated dungeon, saved and loaded into a fresh map, has the same tiles and the same
+// locks - treasure rooms' locked doors included - and saves again to what it was loaded from.
+TEST_F(RoomShapeTest, EveryDoorKeepsItsStateThroughASave)
+{
+	int lockedDoors = 0;
+	for (int attempt = 0; attempt < DUNGEONS; ++attempt)
+	{
+		Map map{ MAP_WIDTH, MAP_HEIGHT };
+		generate_into(map);
+		nlohmann::json saved;
+		map.save(saved);
+
+		Map fresh{ MAP_WIDTH, MAP_HEIGHT };
+		fresh.load(saved);
+
+		for (int row = 0; row < MAP_HEIGHT; ++row)
+		{
+			for (int col = 0; col < MAP_WIDTH; ++col)
+			{
+				const Vector2D cell{ col, row };
+				EXPECT_EQ(fresh.get_tile_type(cell), map.get_tile_type(cell)) << "dungeon " << attempt << " at " << col << "," << row;
+				EXPECT_EQ(fresh.is_door_locked(cell), map.is_door_locked(cell)) << "dungeon " << attempt << " at " << col << "," << row;
+				lockedDoors += map.is_door_locked(cell) ? 1 : 0;
+			}
+		}
+		nlohmann::json savedAgain;
+		fresh.save(savedAgain);
+		EXPECT_EQ(savedAgain, saved) << "dungeon " << attempt;
+	}
+	EXPECT_GT(lockedDoors, 0) << "no treasure room locked a door in " << DUNGEONS << " dungeons, so no lock was saved";
 }
 
 TEST_F(RoomShapeTest, AnExitCellIsWalkableWheneverItsEdgeHasFloor)

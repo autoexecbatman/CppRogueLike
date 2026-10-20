@@ -106,6 +106,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/DungeonConnectivityTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/RoomShapeTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/MapTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Map/MapDoorPersistenceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/AmuletPlacementTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/TrapSpawnTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/TeleportLandingTest.cpp

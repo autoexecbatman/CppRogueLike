@@ -111,7 +111,19 @@ protected:
 public:
 	Map(int mapWidth, int mapHeight);
 
+	// Replaces the map with a saved one: its size, seed and every tile's type, whether it has
+	// been seen, and its door state. Doors are restored as saved, never placed again. Throws
+	// nlohmann's out_of_range naming any field a record lacks, "doorState" included.
+	//
+	// Example:
+	//   fresh.load(saved);                      // saved by map.save; a door locked there is locked here
+	//   fresh.is_door_locked(treasureDoor);     // -> true
+	//   fresh.load(savedWithoutDoorState);      // throws "... key 'doorState' not found"
 	void load(const json& source) override;
+	// Writes the size, seed and every tile - type, seen, door state - in the shape load reads.
+	//
+	// Example:
+	//   map.save(saved);   // saved["tiles"][0] -> { "position", "type", "explored", "doorState" }
 	void save(json& output) override;
 
 	// Initialize the tile grid to all-walls. No dungeon generation.

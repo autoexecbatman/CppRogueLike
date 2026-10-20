@@ -1,0 +1,47 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=MapDoorPersistenceTest.*:RoomShapeTest.EveryDoorKeepsItsStateThroughASave"
+  ],
+  "mutations": [
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\ttiles.back().doorState = *doorState;\n",
+      "mutated": "",
+      "catches": "a saved lock read back as the default state, the defect 0303 reported"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\ttiles.back().doorState = *doorState;\n",
+      "mutated": "\t\ttiles.back().doorState = DoorState::CLOSED_LOCKED;\n",
+      "catches": "every door read back locked"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "tileJson.at(\"doorState\").get<int>()",
+      "mutated": "tileJson.value(\"doorState\", 0)",
+      "catches": "a tile without its door state read as open instead of refused"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\t\t\t{ \"explored\", tile.explored },\n\t\t\t\t{ \"doorState\", static_cast<int>(tile.doorState) } });\n",
+      "mutated": "\t\t\t\t{ \"explored\", tile.explored },\n\t\t\t\t{ \"doorState\", 0 } });\n",
+      "catches": "every door saved as open, so a lock is lost on the way out"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\tfovMap->set_properties(tile.position.x, tile.position.y, fov_properties_for(tile.type));\n\t}\n\n\t// Note: Logging",
+      "mutated": "\t\tfovMap->set_properties(tile.position.x, tile.position.y, fov_properties_for(tile.type));\n\t}\n\tpost_process_doors();\n\n\t// Note: Logging",
+      "catches": "doors placed again on load, adding a door where a later pass left corridor"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t}\n\treturn std::nullopt;\n}\n} // namespace",
+      "mutated": "\t}\n\treturn candidate;\n}\n} // namespace",
+      "catches": "a corrupt saved door state loaded as a state nothing handles"
+    }
+  ]
+}
