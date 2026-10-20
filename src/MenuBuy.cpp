@@ -52,7 +52,7 @@ void MenuBuy::populate_items()
 }
 
 MenuBuy::MenuBuy(GameContext& ctx, Creature& buyer, Creature& owner)
-	: buyer{ buyer }, owner{ owner }, shopkeeper{ shop_of(owner) }, ctx{ ctx }
+	: buyer{ buyer }, owner{ owner }, shopkeeper{ shop_of(owner) }
 {
 	assert(ctx.renderer && "MenuBuy: renderer required before construction");
 	menuHeight = static_cast<size_t>(ctx.renderer->get_viewport_rows() - ctx.renderer->get_gui_reserve_rows());
@@ -134,7 +134,7 @@ void MenuBuy::on_key(GameContext& ctx)
 	{
 		if (!InventoryOperations::is_inventory_empty(shopkeeper.get_shop_inventory()))
 		{
-			handle_buy();
+			handle_buy(ctx);
 		}
 		else
 		{
@@ -150,7 +150,7 @@ void MenuBuy::menu(GameContext& ctx)
 	on_key(ctx);
 }
 
-void MenuBuy::handle_buy()
+void MenuBuy::handle_buy(GameContext& ctx)
 {
 	if (InventoryOperations::is_inventory_empty(shopkeeper.get_shop_inventory()) ||
 		currentState >= InventoryOperations::get_item_count(shopkeeper.get_shop_inventory()))

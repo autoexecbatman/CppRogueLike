@@ -19,14 +19,15 @@ class MenuBuy : public BaseMenu
 	// owns, which is derived from it.
 	Creature& owner;
 	ShopKeeper& shopkeeper;
-	GameContext& ctx; // Game context for message system
 
 	void populate_items();
 	void menu_print_state(size_t state);
 
 	std::string menu_get_string(size_t state) { return menuItems.at(state); }
 
-	void handle_buy();
+	// Buys the item under the cursor. Takes the frame's context: Game::tick builds a new
+	// one each frame, so a menu that kept the one it was constructed with would outlive it.
+	void handle_buy(GameContext& ctx);
 	void draw_content() override;
 
 public:
