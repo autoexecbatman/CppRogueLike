@@ -21,9 +21,27 @@
     },
     {
       "file": "src/RoomEditor.cpp",
-      "original": "visibleRows = whole_rows_within(panelHeight - headerHeight, rowHeight);",
-      "mutated": "visibleRows = whole_rows_within(panelHeight, rowHeight);",
+      "original": "visibleRows = whole_rows_within(guideTop - top, rowHeight);",
+      "mutated": "visibleRows = whole_rows_within(guideTop - panelTop, rowHeight);",
       "catches": "counting rows in space the header already takes, so the strip below the last row selects one"
+    },
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "guideTop = panelTop + panelHeight - (guideRows * rowHeight + 8);",
+      "mutated": "guideTop = panelTop + panelHeight;",
+      "catches": "a list running on under the guide box, where its rows are hidden and still clickable; the defect in 0288"
+    },
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "const int guideRows = static_cast<int>(std::size(GUIDE)) + 1;",
+      "mutated": "const int guideRows = static_cast<int>(std::size(GUIDE));",
+      "catches": "a guide box sized without its heading, so the last list row runs under the box"
+    },
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "visibleRows = whole_rows_within(guideTop - top, rowHeight);",
+      "mutated": "visibleRows = whole_rows_within(guideTop - top + rowHeight, rowHeight);",
+      "catches": "a last row that overlaps the guide box's top edge"
     },
     {
       "file": "src/RoomEditor.cpp",

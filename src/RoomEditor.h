@@ -30,21 +30,24 @@ struct Prefab;
 struct GameContext;
 
 // The saved-prefab list's rows: where each one is drawn and which one a pixel falls in.
+// The list runs from below its header to the top of the guide box at the panel's bottom.
 // The draw and the click both read this, so a click selects the row drawn under it.
 //
 // Example:
 //   const PrefabListRows rows{ 64, 600, 16 };   // panel top, panel height, font size
 //   rows.row_height();    // -> 20
 //   rows.row_top(0);      // -> 88, below the "SAVED PREFABS" header line
-//   rows.visible_rows();  // -> 28, whole rows that fit under the header
+//   rows.guide_top();     // -> 496, the guide box's heading and lines plus 8 pixels above the panel's bottom
+//   rows.visible_rows();  // -> 20, whole rows between the header and the guide box
 //   rows.slot_at(100);    // -> 0
 //   rows.slot_at(70);     // -> nullopt, the header
-//   rows.slot_at(648);    // -> nullopt, past the last whole row
+//   rows.slot_at(500);    // -> nullopt, under the guide box
 class PrefabListRows
 {
 private:
 	int top{ 0 };
 	int rowHeight{ 0 };
+	int guideTop{ 0 };
 	size_t visibleRows{ 0 };
 
 public:
@@ -55,7 +58,9 @@ public:
 	[[nodiscard]] int row_top(size_t slot) const;
 	// A row's height in pixels: the font plus 4.
 	[[nodiscard]] int row_height() const;
-	// The whole rows that fit below the header; a cut-off row at the bottom is not counted.
+	// The top pixel of the guide box, which runs from here to the panel's bottom.
+	[[nodiscard]] int guide_top() const;
+	// The whole rows that fit between the header and the guide box; a cut-off row is not counted.
 	[[nodiscard]] size_t visible_rows() const;
 
 	// The drawn slot under a pixel row, or nullopt on the header or past the last whole row.

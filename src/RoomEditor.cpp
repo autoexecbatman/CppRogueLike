@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cassert>
 #include <format>
+#include <iterator>
 #include <string>
 #include <utility>
 
@@ -36,6 +37,17 @@ constexpr int RIGHT_W_TILES = 13;
 constexpr int TOP_H_TILES = 1;
 constexpr int BOT_H_TILES = 1;
 
+// The guide box's lines below its "HOW IT WORKS" heading; the box's height is derived from their count.
+constexpr const char* GUIDE[] = {
+	"[N]      new canvas",
+	"[Ctrl+S] name + save",
+	"[Enter]  load selected",
+	"[Del]    delete selected",
+	"Prefabs stamp decor",
+	"onto BSP rooms at",
+	"matching depth + size."
+};
+
 // The prefab list's rows in the right panel at the renderer's current screen, tile and font size.
 PrefabListRows prefab_list_rows(const Renderer& renderer)
 {
@@ -63,7 +75,15 @@ PrefabListRows::PrefabListRows(int panelTop, int panelHeight, int fontSize)
 	// The "SAVED PREFABS" header takes one row and a 4-pixel gap above the first prefab.
 	const int headerHeight = rowHeight + 4;
 	top = panelTop + headerHeight;
-	visibleRows = whole_rows_within(panelHeight - headerHeight, rowHeight);
+	// The guide box holds the heading plus one row per guide line, at the list's pitch, plus 8 pixels.
+	const int guideRows = static_cast<int>(std::size(GUIDE)) + 1;
+	guideTop = panelTop + panelHeight - (guideRows * rowHeight + 8);
+	visibleRows = whole_rows_within(guideTop - top, rowHeight);
+}
+
+int PrefabListRows::guide_top() const
+{
+	return guideTop;
 }
 
 int PrefabListRows::row_top(size_t slot) const
@@ -1137,24 +1157,13 @@ void RoomEditor::render_right_panel(const Renderer& renderer) const
 
 	// Workflow guidance -- drawn in the bottom portion of the right panel
 	int fontH = renderer.get_font_size() + 4;
-	int guideLines = 8;
-	int guideH = guideLines * fontH + 8;
-	int guideY = panelY + panelH - guideH;
+	int guideY = rows.guide_top();
+	int guideH = panelY + panelH - guideY;
 
 	DrawLine(panelX, guideY, panelX + panelW, guideY, Color{ 60, 60, 100, 200 });
 	DrawRectangle(panelX, guideY + 1, panelW, guideH - 1, Color{ 10, 10, 18, 200 });
 
 	renderer.draw_text_color(Vector2D{ panelX + 6, guideY + 4 }, "HOW IT WORKS", Color{ 140, 140, 220, 255 });
-
-	static constexpr const char* GUIDE[] = {
-		"[N]      new canvas",
-		"[Ctrl+S] name + save",
-		"[Enter]  load selected",
-		"[Del]    delete selected",
-		"Prefabs stamp decor",
-		"onto BSP rooms at",
-		"matching depth + size."
-	};
 
 	Color guideCol{ 120, 120, 160, 200 };
 	int guideTextY = guideY + fontH + 6;
