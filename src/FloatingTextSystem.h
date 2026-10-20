@@ -11,10 +11,12 @@ class Renderer;
 struct FloatingEntry
 {
 	Vector2D worldPosition{};
-	std::string text;
-	unsigned char red, green, blue;
-	float spawn_time;
-	float lifetime;
+	std::string text{};
+	unsigned char red{ 255 };
+	unsigned char green{ 255 };
+	unsigned char blue{ 255 };
+	float spawnTime{ 0.0f };
+	float lifetime{ 0.0f };
 };
 
 // Who took the damage, which is all the palette needs to know. Callers state

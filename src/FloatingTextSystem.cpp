@@ -29,7 +29,7 @@ void FloatingTextSystem::spawn_damage(Vector2D worldPosition, int value, DamageS
 		.red = 255,
 		.green = static_cast<unsigned char>(hurtPlayer ? 80 : 220),
 		.blue = static_cast<unsigned char>(hurtPlayer ? 80 : 50),
-		.spawn_time = static_cast<float>(GetTime()),
+		.spawnTime = static_cast<float>(GetTime()),
 		.lifetime = 1.2f });
 }
 
@@ -47,7 +47,7 @@ void FloatingTextSystem::spawn_text(
 		.red = red,
 		.green = green,
 		.blue = blue,
-		.spawn_time = static_cast<float>(GetTime()),
+		.spawnTime = static_cast<float>(GetTime()),
 		.lifetime = lifetime });
 }
 
@@ -60,7 +60,7 @@ void FloatingTextSystem::update_and_render(const Renderer& renderer)
 
 	auto is_expired = [&](const FloatingEntry& entry)
 	{
-		return (now - entry.spawn_time) >= entry.lifetime;
+		return (now - entry.spawnTime) >= entry.lifetime;
 	};
 
 	for (const auto& entry : entries)
@@ -70,7 +70,7 @@ void FloatingTextSystem::update_and_render(const Renderer& renderer)
 			continue;
 		}
 
-		float lifeFraction = (now - entry.spawn_time) / entry.lifetime;
+		float lifeFraction = (now - entry.spawnTime) / entry.lifetime;
 
 		// Float upward by 0.75 tiles over the lifetime
 		float offset_px = lifeFraction * static_cast<float>(tileSize) * 0.75f;

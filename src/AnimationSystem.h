@@ -19,41 +19,43 @@ enum class ParticleShape
 
 struct AnimEntry
 {
-	float px_x; // world-space pixel position
-	float px_y;
-	float vel_x{ 0.0f }; // world-space pixels per second
-	float vel_y{ 0.0f };
-	float accel_y{ 0.0f }; // upward buoyancy - negative = rises; zero = drag only
+	float pixelX{ 0.0f }; // world-space pixel position
+	float pixelY{ 0.0f };
+	float velocityX{ 0.0f }; // world-space pixels per second
+	float velocityY{ 0.0f };
+	float accelerationY{ 0.0f }; // upward buoyancy - negative = rises; zero = drag only
 	float turbulence{ 0.0f }; // perpendicular swirl per frame; 0 = straight arcs
 	float radius{ 4.0f }; // pixels, for CIRCLE shape
-	TileRef tile; // used only for TILE shape
-	unsigned char red, green, blue;
-	unsigned char r_end{ 0 }; // color at end of lifetime - interpolated over duration
-	unsigned char g_end{ 0 }; // default 0,0,0 = cool to black
-	unsigned char b_end{ 0 };
-	float spawn_time;
-	float duration;
+	TileRef tile{}; // used only for TILE shape
+	unsigned char red{ 0 };
+	unsigned char green{ 0 };
+	unsigned char blue{ 0 };
+	unsigned char redEnd{ 0 }; // color at end of lifetime - interpolated over duration
+	unsigned char greenEnd{ 0 }; // default 0,0,0 = cool to black
+	unsigned char blueEnd{ 0 };
+	float spawnTime{ 0.0f };
+	float duration{ 0.0f };
 	ParticleShape shape{ ParticleShape::CIRCLE };
 	bool additive{ false };
 };
 
 struct ProjectileEntry
 {
-	float pxX;
-	float pxY;
-	float targetPxX;
-	float targetPxY;
-	float speed;
-	float wobbleStrength;
-	float initialDistance;
+	float pixelX{ 0.0f };
+	float pixelY{ 0.0f };
+	float targetPixelX{ 0.0f };
+	float targetPixelY{ 0.0f };
+	float speed{ 0.0f };
+	float wobbleStrength{ 0.0f };
+	float initialDistance{ 0.0f };
 	float lastTrailTime{ 0.0f };
-	TileRef tile;
+	TileRef tile{};
 	unsigned char red{ 255 };
 	unsigned char green{ 255 };
 	unsigned char blue{ 255 };
-	float spawnTime;
-	float maxDuration;
-	std::function<void()> onArrive;
+	float spawnTime{ 0.0f };
+	float maxDuration{ 0.0f };
+	std::function<void()> onArrive{};
 };
 
 class AnimationSystem
