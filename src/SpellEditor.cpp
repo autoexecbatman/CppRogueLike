@@ -324,31 +324,31 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 		++fieldCursor;
 	}
 
-	FieldId fid = current_field();
+	FieldId fieldId = current_field();
 
 	if (IsKeyPressed(KEY_ENTER))
 	{
-		if (field_is_string(fid))
+		if (field_is_string(fieldId))
 		{
-			editBuffer = field_value(fid);
+			editBuffer = field_value(fieldId);
 			mode = Mode::EDIT_STRING;
 		}
 		else
 		{
-			field_cycle(fid);
+			field_cycle(fieldId);
 		}
 		return;
 	}
 
-	if (!field_is_string(fid))
+	if (!field_is_string(fieldId))
 	{
 		if (IsKeyPressed(KEY_LEFT))
 		{
-			field_adjust(fid, -1);
+			field_adjust(fieldId, -1);
 		}
 		else if (IsKeyPressed(KEY_RIGHT))
 		{
-			field_adjust(fid, 1);
+			field_adjust(fieldId, 1);
 		}
 	}
 }
@@ -415,35 +415,35 @@ void SpellEditor::render_header(const Renderer& renderer) const
 void SpellEditor::render_list(const Renderer& renderer, const SpellRegistry& spells) const
 {
 	int screenHeight = renderer.get_screen_height();
-	int body_y = HEADER_HEIGHT;
-	int body_h = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
+	int bodyY = HEADER_HEIGHT;
+	int bodyHeight = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
 
-	DrawRectangle(0, body_y, LIST_WIDTH, body_h, Color{ 10, 10, 20, 255 });
-	DrawLine(LIST_WIDTH, body_y, LIST_WIDTH, body_y + body_h, Color{ 80, 80, 120, 255 });
+	DrawRectangle(0, bodyY, LIST_WIDTH, bodyHeight, Color{ 10, 10, 20, 255 });
+	DrawLine(LIST_WIDTH, bodyY, LIST_WIDTH, bodyY + bodyHeight, Color{ 80, 80, 120, 255 });
 
 	int total = static_cast<int>(keys.size());
-	int visibleCount = body_h / ITEM_HEIGHT;
+	int visibleCount = bodyHeight / ITEM_HEIGHT;
 	int scroll = std::clamp(listScroll, 0, std::max(0, total - visibleCount));
 
 	::Vector2 mouse = GetMousePosition();
 
 	for (int spellIndex = scroll; spellIndex < total; ++spellIndex)
 	{
-		int itemY = body_y + (spellIndex - scroll) * ITEM_HEIGHT;
-		if (itemY + ITEM_HEIGHT > body_y + body_h)
+		int itemY = bodyY + (spellIndex - scroll) * ITEM_HEIGHT;
+		if (itemY + ITEM_HEIGHT > bodyY + bodyHeight)
 		{
 			break;
 		}
 
-		bool is_sel = (spellIndex == listCursor);
+		bool isSelected = (spellIndex == listCursor);
 		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH && mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
-		if (is_sel && focus == 0)
+		if (isSelected && focus == 0)
 		{
 			bgColor = Color{ 0, 60, 0, 200 };
 		}
-		else if (is_sel)
+		else if (isSelected)
 		{
 			bgColor = Color{ 0, 40, 0, 150 };
 		}
@@ -458,7 +458,7 @@ void SpellEditor::render_list(const Renderer& renderer, const SpellRegistry& spe
 		}
 
 		// Show spell class indicator
-		const SpellDefinition& definition = is_sel
+		const SpellDefinition& definition = isSelected
 			? working
 			: spells.get_by_key(keys[spellIndex]);
 
@@ -469,7 +469,7 @@ void SpellEditor::render_list(const Renderer& renderer, const SpellRegistry& spe
 			: Color{ 255, 160, 80, 255 };
 
 		std::string label = std::format("[{}] {}{}", definition.level, definition.name, isCustom ? " *" : "");
-		Color textColor = is_sel ? Color{ 180, 255, 180, 255 } : Color{ 200, 200, 200, 255 };
+		Color textColor = isSelected ? Color{ 180, 255, 180, 255 } : Color{ 200, 200, 200, 255 };
 
 		renderer.draw_text_color(Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - 16) / 2 }, label, textColor);
 
@@ -500,16 +500,16 @@ void SpellEditor::render_fields(const Renderer& renderer) const
 			break;
 		}
 
-		FieldId fid = static_cast<FieldId>(fieldIndex);
-		bool is_sel = (fieldIndex == fieldCursor);
+		FieldId fieldId = static_cast<FieldId>(fieldIndex);
+		bool isSelected = (fieldIndex == fieldCursor);
 		bool hovered = mouse.x >= panelX && mouse.x < screenWidth && mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
-		if (is_sel && focus == 1)
+		if (isSelected && focus == 1)
 		{
 			bgColor = Color{ 0, 60, 0, 200 };
 		}
-		else if (is_sel)
+		else if (isSelected)
 		{
 			bgColor = Color{ 0, 40, 0, 140 };
 		}
@@ -523,23 +523,23 @@ void SpellEditor::render_fields(const Renderer& renderer) const
 			DrawRectangle(panelX, itemY, fieldsWidth, FIELD_HEIGHT, bgColor);
 		}
 
-		Color labelColor = is_sel ? Color{ 180, 255, 180, 255 } : Color{ 150, 150, 150, 255 };
-		Color valueColor = is_sel ? Color{ 255, 255, 200, 255 } : Color{ 200, 200, 200, 255 };
+		Color labelColor = isSelected ? Color{ 180, 255, 180, 255 } : Color{ 150, 150, 150, 255 };
+		Color valueColor = isSelected ? Color{ 255, 255, 200, 255 } : Color{ 200, 200, 200, 255 };
 
-		renderer.draw_text_color(Vector2D{ panelX + 12, itemY + (FIELD_HEIGHT - 16) / 2 }, field_label(fid), labelColor);
+		renderer.draw_text_color(Vector2D{ panelX + 12, itemY + (FIELD_HEIGHT - 16) / 2 }, field_label(fieldId), labelColor);
 
-		std::string val;
-		if (is_sel && mode == Mode::EDIT_STRING)
+		std::string valueText;
+		if (isSelected && mode == Mode::EDIT_STRING)
 		{
-			val = editBuffer + "_";
+			valueText = editBuffer + "_";
 		}
 		else
 		{
-			val = field_value(fid);
+			valueText = field_value(fieldId);
 		}
 
-		int valuePixelX = screenWidth - renderer.measure_text(val) - 16;
-		renderer.draw_text_color(Vector2D{ valuePixelX, itemY + (FIELD_HEIGHT - 16) / 2 }, val, valueColor);
+		int valuePixelX = screenWidth - renderer.measure_text(valueText) - 16;
+		renderer.draw_text_color(Vector2D{ valuePixelX, itemY + (FIELD_HEIGHT - 16) / 2 }, valueText, valueColor);
 	}
 }
 
@@ -547,32 +547,32 @@ void SpellEditor::render_hint(const Renderer& renderer) const
 {
 	int screenWidth = renderer.get_screen_width();
 	int screenHeight = renderer.get_screen_height();
-	int hint_y = screenHeight - HINT_HEIGHT;
+	int hintY = screenHeight - HINT_HEIGHT;
 
-	DrawRectangle(0, hint_y, screenWidth, HINT_HEIGHT, Color{ 20, 20, 40, 255 });
+	DrawRectangle(0, hintY, screenWidth, HINT_HEIGHT, Color{ 20, 20, 40, 255 });
 
-	bool saved_flash = (GetTime() - lastSaveTime) < 2.0;
-	std::string msg;
+	bool isSaveRecent = (GetTime() - lastSaveTime) < 2.0;
+	std::string hintText;
 
-	if (saved_flash)
+	if (isSaveRecent)
 	{
-		msg = "Saved!";
+		hintText = "Saved!";
 	}
 	else if (mode == Mode::EDIT_STRING)
 	{
-		msg = "Typing  --  Enter:confirm  Esc:cancel";
+		hintText = "Typing  --  Enter:confirm  Esc:cancel";
 	}
 	else if (focus == 0)
 	{
-		msg = "[LIST] Up/Down:navigate  A:add new  Del:remove custom  Enter:edit fields  Tab:switch  Ctrl+S:save  Esc:exit";
+		hintText = "[LIST] Up/Down:navigate  A:add new  Del:remove custom  Enter:edit fields  Tab:switch  Ctrl+S:save  Esc:exit";
 	}
 	else
 	{
-		msg = "[FIELDS] Up/Down:navigate  Left/Right:adjust  Enter:edit/cycle  Tab:switch  Ctrl+S:save  Esc:exit";
+		hintText = "[FIELDS] Up/Down:navigate  Left/Right:adjust  Enter:edit/cycle  Tab:switch  Ctrl+S:save  Esc:exit";
 	}
 
-	Color hintColor = saved_flash ? Color{ 100, 255, 100, 255 } : Color{ 160, 160, 120, 255 };
-	renderer.draw_text_color(Vector2D{ 8, hint_y + 6 }, msg, hintColor);
+	Color hintColor = isSaveRecent ? Color{ 100, 255, 100, 255 } : Color{ 160, 160, 120, 255 };
+	renderer.draw_text_color(Vector2D{ 8, hintY + 6 }, hintText, hintColor);
 }
 
 // ---------------------------------------------------------------------------
@@ -710,15 +710,15 @@ void SpellEditor::field_cycle(FieldId field)
 	}
 }
 
-void SpellEditor::field_set_string(FieldId field, std::string val)
+void SpellEditor::field_set_string(FieldId field, std::string newValue)
 {
 	if (field == FieldId::NAME)
 	{
-		working.name = std::move(val);
+		working.name = std::move(newValue);
 	}
 	else if (field == FieldId::DESCRIPTION)
 	{
-		working.description = std::move(val);
+		working.description = std::move(newValue);
 	}
 }
 
