@@ -404,7 +404,6 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
 	{
 		::Vector2 mousePosition = GetMousePosition();
-		int canvasCol, canvasRow;
 
 		// Left panel -- select palette symbol
 		auto palIdx = screen_to_palette_index(renderer, static_cast<int>(mousePosition.x), static_cast<int>(mousePosition.y));
@@ -415,19 +414,19 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 		}
 
 		// Canvas
-		if (screen_to_canvas(renderer, static_cast<int>(mousePosition.x), static_cast<int>(mousePosition.y), canvasCol, canvasRow))
+		if (const std::optional<CanvasCell> cell = screen_to_canvas(renderer, static_cast<int>(mousePosition.x), static_cast<int>(mousePosition.y)))
 		{
 			char symbol = selected_sym();
 			bool structural = (symbol == '#' || symbol == '.' || symbol == ',' ||
 				symbol == '+' || symbol == '~');
 			if (structural)
 			{
-				canvas[canvasRow][canvasCol] = symbol;
-				decorCanvas[canvasRow][canvasCol] = ' '; // clear any decor overlay
+				canvas[cell->row][cell->col] = symbol;
+				decorCanvas[cell->row][cell->col] = ' '; // clear any decor overlay
 			}
 			else
 			{
-				decorCanvas[canvasRow][canvasCol] = symbol; // layer over the base tile
+				decorCanvas[cell->row][cell->col] = symbol; // layer over the base tile
 			}
 			return;
 		}
@@ -445,18 +444,17 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 	if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
 	{
 		::Vector2 mousePosition = GetMousePosition();
-		int canvasCol, canvasRow;
-		if (screen_to_canvas(renderer, static_cast<int>(mousePosition.x), static_cast<int>(mousePosition.y), canvasCol, canvasRow))
+		if (const std::optional<CanvasCell> cell = screen_to_canvas(renderer, static_cast<int>(mousePosition.x), static_cast<int>(mousePosition.y)))
 		{
 			// First erase decor overlay; if already empty, erase the base tile.
-			if (decorCanvas[canvasRow][canvasCol] != ' ')
+			if (decorCanvas[cell->row][cell->col] != ' ')
 			{
-				decorCanvas[canvasRow][canvasCol] = ' ';
+				decorCanvas[cell->row][cell->col] = ' ';
 			}
 			else
 			{
-				bool onBorder = (canvasCol == 0 || canvasCol == canvasWidth - 1 || canvasRow == 0 || canvasRow == canvasHeight - 1);
-				canvas[canvasRow][canvasCol] = onBorder ? '#' : '.';
+				bool onBorder = (cell->col == 0 || cell->col == canvasWidth - 1 || cell->row == 0 || cell->row == canvasHeight - 1);
+				canvas[cell->row][cell->col] = onBorder ? '#' : '.';
 			}
 		}
 	}
@@ -549,13 +547,11 @@ void RoomEditor::handle_input_text()
 // Coordinate helpers
 // ---------------------------------------------------------------------------
 
-// Returns canvas cell coords from screen pixel, false if outside canvas.
-bool RoomEditor::screen_to_canvas(
+// Returns the canvas cell under a screen pixel, nullopt if outside the canvas.
+std::optional<RoomEditor::CanvasCell> RoomEditor::screen_to_canvas(
 	const Renderer& renderer,
 	int mousePx,
-	int mousePy,
-	int& outCx,
-	int& outCy) const
+	int mousePy) const
 {
 	int tileSize = renderer.get_tile_size();
 	int areaX = LEFT_W_TILES * tileSize;
@@ -565,29 +561,29 @@ bool RoomEditor::screen_to_canvas(
 
 	if (mousePx < areaX || mousePx >= areaX + areaW)
 	{
-		return false;
+		return std::nullopt;
 	}
 	if (mousePy < areaY || mousePy >= areaY + areaH)
 	{
-		return false;
+		return std::nullopt;
 	}
 
 	int relX = mousePx - areaX + panX;
 	int relY = mousePy - areaY + panY;
 
-	outCx = relX / tileSize;
-	outCy = relY / tileSize;
+	const int col = relX / tileSize;
+	const int row = relY / tileSize;
 
-	if (outCx < 0 || outCx >= canvasWidth)
+	if (col < 0 || col >= canvasWidth)
 	{
-		return false;
+		return std::nullopt;
 	}
-	if (outCy < 0 || outCy >= canvasHeight)
+	if (row < 0 || row >= canvasHeight)
 	{
-		return false;
+		return std::nullopt;
 	}
 
-	return true;
+	return CanvasCell{ col, row };
 }
 
 // Returns prefab list index from screen pixel in right panel. Returns nullopt if outside panel.

@@ -109,12 +109,18 @@ private:
 	void do_delete(size_t prefabIndex);
 	void set_status(const std::string& message);
 
-	[[nodiscard]] bool screen_to_canvas(
+	// A cell of the canvas, by column and row.
+	struct CanvasCell
+	{
+		int col{ 0 };
+		int row{ 0 };
+	};
+
+	// The canvas cell under a screen pixel, or nullopt when the pixel is outside the canvas area or past the canvas's edge.
+	[[nodiscard]] std::optional<CanvasCell> screen_to_canvas(
 		const Renderer& renderer,
 		int mousePx,
-		int mousePy,
-		int& outCx,
-		int& outCy) const;
+		int mousePy) const;
 	[[nodiscard]] std::optional<size_t> screen_to_list_index(const Renderer& renderer, int mousePx, int mousePy) const;
 	[[nodiscard]] std::optional<size_t> screen_to_palette_index(const Renderer& renderer, int mousePx, int mousePy) const;
 	[[nodiscard]] TileRef symbol_tile_id(char symbol) const;
