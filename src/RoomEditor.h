@@ -62,6 +62,40 @@ public:
 	[[nodiscard]] std::optional<size_t> slot_at(int pixelY) const;
 };
 
+// The room canvas's cells on screen: where each one is drawn and which one a pixel falls in.
+// The draw and the click both read this, so a click paints the cell drawn under it at any pan.
+//
+// Example:
+//   const CanvasGrid grid{ 140, 60, 32 };   // screen pixel of cell (0, 0), tile size
+//   grid.cell_left(3);     // -> 236
+//   grid.column_at(171);   // -> 0
+//   grid.column_at(110);   // -> -1, left of column 0, so no cell
+//   grid.row_at(92);       // -> 1
+//   CanvasGrid{ 0, 0, 0 }; // aborts: "CanvasGrid: a cell has no size"
+class CanvasGrid
+{
+private:
+	int originX{ 0 };
+	int originY{ 0 };
+	int tileSize{ 0 };
+
+	// The cell an offset from the origin falls in, rounding down so a negative offset is a negative cell.
+	[[nodiscard]] int cell_index(int offset) const;
+
+public:
+	// A grid whose cell (0, 0) is drawn with its top-left corner at (gridOriginX, gridOriginY).
+	CanvasGrid(int gridOriginX, int gridOriginY, int cellSize);
+
+	// The left pixel of a column.
+	[[nodiscard]] int cell_left(int col) const;
+	// The top pixel of a row.
+	[[nodiscard]] int cell_top(int row) const;
+	// The column a pixel falls in; negative left of column 0.
+	[[nodiscard]] int column_at(int pixelX) const;
+	// The row a pixel falls in; negative above row 0.
+	[[nodiscard]] int row_at(int pixelY) const;
+};
+
 class RoomEditor
 {
 private:

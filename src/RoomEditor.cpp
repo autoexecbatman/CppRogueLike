@@ -44,6 +44,13 @@ PrefabListRows prefab_list_rows(const Renderer& renderer)
 	const int panelH = renderer.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
 	return PrefabListRows{ panelY, panelH, renderer.get_font_size() };
 }
+
+// The canvas's cells at the renderer's current tile size, with cell (0, 0) moved by the pan.
+CanvasGrid canvas_grid(const Renderer& renderer, int panX, int panY)
+{
+	const int tileSize = renderer.get_tile_size();
+	return CanvasGrid{ LEFT_W_TILES * tileSize - panX, TOP_H_TILES * tileSize - panY, tileSize };
+}
 } // namespace
 
 // ---------------------------------------------------------------------------
@@ -87,6 +94,49 @@ std::optional<size_t> PrefabListRows::slot_at(int pixelY) const
 		return std::nullopt;
 	}
 	return slot;
+}
+
+// ---------------------------------------------------------------------------
+// Canvas grid
+// ---------------------------------------------------------------------------
+
+CanvasGrid::CanvasGrid(int gridOriginX, int gridOriginY, int cellSize)
+	: originX{ gridOriginX },
+	  originY{ gridOriginY },
+	  tileSize{ cellSize }
+{
+	assert(tileSize > 0 && "CanvasGrid: a cell has no size");
+}
+
+int CanvasGrid::cell_index(int offset) const
+{
+	// Division truncates toward zero, which would put the strip just left of the origin in cell 0.
+	int index = offset / tileSize;
+	if (offset % tileSize < 0)
+	{
+		--index;
+	}
+	return index;
+}
+
+int CanvasGrid::cell_left(int col) const
+{
+	return originX + col * tileSize;
+}
+
+int CanvasGrid::cell_top(int row) const
+{
+	return originY + row * tileSize;
+}
+
+int CanvasGrid::column_at(int pixelX) const
+{
+	return cell_index(pixelX - originX);
+}
+
+int CanvasGrid::row_at(int pixelY) const
+{
+	return cell_index(pixelY - originY);
 }
 
 // ---------------------------------------------------------------------------
@@ -620,11 +670,10 @@ std::optional<RoomEditor::CanvasCell> RoomEditor::screen_to_canvas(
 		return std::nullopt;
 	}
 
-	int relX = mousePx - areaX + panX;
-	int relY = mousePy - areaY + panY;
-
-	const int col = relX / tileSize;
-	const int row = relY / tileSize;
+	// The cells the draw places; a pixel left of or above cell (0, 0) is a negative cell and rejected below.
+	const CanvasGrid grid = canvas_grid(renderer, panX, panY);
+	const int col = grid.column_at(mousePx);
+	const int row = grid.row_at(mousePy);
 
 	if (col < 0 || col >= canvasWidth)
 	{
@@ -977,8 +1026,9 @@ void RoomEditor::render_canvas(const Renderer& renderer) const
 
 	BeginScissorMode(areaX, areaY, areaW, areaH);
 
-	int startCol = std::max(0, panX / tileSize);
-	int startRow = std::max(0, panY / tileSize);
+	const CanvasGrid grid = canvas_grid(renderer, panX, panY);
+	int startCol = std::max(0, grid.column_at(areaX));
+	int startRow = std::max(0, grid.row_at(areaY));
 	int endCol = std::min(canvasWidth, startCol + areaW / tileSize + 2);
 	int endRow = std::min(canvasHeight, startRow + areaH / tileSize + 2);
 
@@ -989,8 +1039,8 @@ void RoomEditor::render_canvas(const Renderer& renderer) const
 	{
 		for (int col = startCol; col < endCol; ++col)
 		{
-			int cellPixelX = areaX + col * tileSize - panX;
-			int cellPixelY = areaY + row * tileSize - panY;
+			int cellPixelX = grid.cell_left(col);
+			int cellPixelY = grid.cell_top(row);
 
 			// Base layer (structural)
 			TileRef baseTile = canvas_tile_id(col, row);

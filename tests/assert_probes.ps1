@@ -260,6 +260,11 @@ $probes = @(
         test   = "AssertProbeDeathTest.EnteringTheRoomEditorWithAnUnloadedPaletteAborts"
         file   = "src/RoomEditor.cpp"
         anchor = 'assert(!lib.ordered_palette().empty() && "RoomEditor::enter: palette empty; PrefabLibrary::load_tile_labels was not called");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.ACanvasGridOfNoCellSizeAborts"
+        file   = "src/RoomEditor.cpp"
+        anchor = 'assert(tileSize > 0 && "CanvasGrid: a cell has no size");'
     }
 )
 

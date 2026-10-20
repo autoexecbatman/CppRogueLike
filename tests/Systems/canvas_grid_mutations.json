@@ -1,0 +1,47 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=CanvasGridTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "if (offset % tileSize < 0)",
+      "mutated": "if (offset % tileSize < -tileSize)",
+      "catches": "truncating division, which puts the strip left of a panned canvas in column 0; the defect in 0287"
+    },
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "if (offset % tileSize < 0)",
+      "mutated": "if (offset % tileSize <= 0)",
+      "catches": "an exact tile boundary stepping down a cell, so a cell's left pixel belongs to its neighbour"
+    },
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "return originX + col * tileSize;",
+      "mutated": "return originX + col * tileSize + 1;",
+      "catches": "columns drawn a pixel off where clicks read them"
+    },
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "return originY + row * tileSize;",
+      "mutated": "return originX + row * tileSize;",
+      "catches": "rows placed from the horizontal origin"
+    },
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "return cell_index(pixelX - originX);",
+      "mutated": "return cell_index(pixelX - originY);",
+      "catches": "columns read from the vertical origin"
+    },
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "return cell_index(pixelY - originY);",
+      "mutated": "return cell_index(pixelY - originX);",
+      "catches": "rows read from the horizontal origin"
+    }
+  ]
+}

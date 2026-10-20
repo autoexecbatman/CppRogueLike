@@ -702,3 +702,9 @@ TEST_F(AssertProbeDeathTest, EnteringTheRoomEditorWithAnUnloadedPaletteAborts)
 	RoomEditor editor{};
 	EXPECT_DEATH(editor.enter(unloaded), "RoomEditor::enter: palette empty; PrefabLibrary::load_tile_labels was not called");
 }
+
+// A canvas cell with no size divides by zero, so the layout that passed it is broken.
+TEST_F(AssertProbeDeathTest, ACanvasGridOfNoCellSizeAborts)
+{
+	EXPECT_DEATH([[maybe_unused]] const CanvasGrid grid(0, 0, 0), "CanvasGrid: a cell has no size");
+}
