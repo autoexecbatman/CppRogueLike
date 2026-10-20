@@ -14,6 +14,7 @@
 
 #include <gtest/gtest.h>
 
+#include <exception>
 #include <memory>
 #include <string>
 #include <vector>
@@ -43,6 +44,21 @@ protected:
 		creature->healthPool = std::make_unique<HealthPool>(6);
 		creature->ai = Ai::make(AiType::MONSTER);
 		return creature;
+	}
+
+	// What load_rooms threw for `record`, or a failure if it threw nothing.
+	static std::string refusal_of_rooms(const json& record, std::vector<DungeonRoom>& level)
+	{
+		try
+		{
+			load_rooms(record, level);
+		}
+		catch (const std::exception& refusal)
+		{
+			return refusal.what();
+		}
+		ADD_FAILURE() << "the rooms were not refused";
+		return {};
 	}
 
 	static DungeonRoom room_at(int col)
@@ -108,6 +124,88 @@ TEST_F(LevelLoadTest, LoadingRoomsReplacesTheAbandonedLevels)
 
 	ASSERT_EQ(level.size(), 1u) << "the abandoned level's rooms are still there";
 	EXPECT_EQ(level.at(0).col, 20);
+}
+
+// What the save writes, the load reads back field for field: two rooms of different types
+// through save_rooms, the writer save_game uses.
+TEST_F(LevelLoadTest, SavedRoomsComeBackWithEveryField)
+{
+	DungeonRoom treasure = room_at(20);
+	treasure.type = RoomType::TREASURE;
+	const std::vector<DungeonRoom> saved{ room_at(1), treasure };
+	json record{};
+	save_rooms(saved, record);
+
+	std::vector<DungeonRoom> level{};
+	load_rooms(record, level);
+
+	ASSERT_EQ(level.size(), 2u);
+	for (size_t roomIndex = 0; roomIndex < saved.size(); ++roomIndex)
+	{
+		EXPECT_EQ(level.at(roomIndex).col, saved.at(roomIndex).col) << roomIndex;
+		EXPECT_EQ(level.at(roomIndex).row, saved.at(roomIndex).row) << roomIndex;
+		EXPECT_EQ(level.at(roomIndex).width, saved.at(roomIndex).width) << roomIndex;
+		EXPECT_EQ(level.at(roomIndex).height, saved.at(roomIndex).height) << roomIndex;
+		EXPECT_EQ(level.at(roomIndex).type, saved.at(roomIndex).type) << roomIndex;
+	}
+}
+
+// A level saved with no rooms writes an empty list, and it loads as no rooms.
+TEST_F(LevelLoadTest, AnEmptyRoomListLoadsAsNoRooms)
+{
+	json record{};
+	save_rooms({}, record);
+
+	std::vector<DungeonRoom> level{ room_at(1) };
+	load_rooms(record, level);
+
+	EXPECT_TRUE(level.empty());
+}
+
+// The save writes every field of every room, so a record missing one was not written by
+// the game and is refused by name, where it used to load as a 1x1 room at the origin.
+TEST_F(LevelLoadTest, ARoomMissingAFieldIsRefusedByName)
+{
+	for (const char* field : { "col", "row", "width", "height", "type" })
+	{
+		json record{};
+		save_rooms({ room_at(1) }, record);
+		record.at("rooms").at(0).erase(field);
+
+		std::vector<DungeonRoom> level{};
+		const std::string refusal = refusal_of_rooms(record, level);
+
+		EXPECT_NE(refusal.find(field), std::string::npos) << "refusal does not name " << field << ": " << refusal;
+	}
+}
+
+// A type outside RoomType's values is refused naming the value, on either side.
+TEST_F(LevelLoadTest, ARoomTypeOutsideTheEnumIsRefused)
+{
+	for (const int type : { static_cast<int>(RoomType::TREASURE) + 1, -1 })
+	{
+		json record{};
+		save_rooms({ room_at(1) }, record);
+		record.at("rooms").at(0)["type"] = type;
+
+		std::vector<DungeonRoom> level{};
+		const std::string refusal = refusal_of_rooms(record, level);
+
+		EXPECT_NE(refusal.find(std::to_string(type)), std::string::npos) << "refusal does not name " << type << ": " << refusal;
+	}
+}
+
+// The save always writes "rooms" as an array, so a document without it, or with
+// something else there, is refused.
+TEST_F(LevelLoadTest, ADocumentWithoutARoomListIsRefused)
+{
+	std::vector<DungeonRoom> level{};
+
+	const std::string missing = refusal_of_rooms(json::object(), level);
+	EXPECT_NE(missing.find("rooms"), std::string::npos) << missing;
+
+	const std::string notAList = refusal_of_rooms(json{ { "rooms", json::object() } }, level);
+	EXPECT_NE(notAList.find("rooms"), std::string::npos) << notAList;
 }
 
 // Every field of a decoration survives a save and load: where it stands, what it looks

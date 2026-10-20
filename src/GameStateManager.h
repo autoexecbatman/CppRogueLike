@@ -39,10 +39,20 @@ void load_traps(const json& source, std::vector<std::unique_ptr<Trap>>& traps, c
 //   load_creatures(saved, creatures);   // creatures.size() -> 2, the saved two
 void load_creatures(const json& source, std::vector<std::unique_ptr<Creature>>& creatures);
 
-// Reads every room in j["rooms"] into the level, replacing whatever it held.
+// Writes every room on the level into j["rooms"]: an array even when there are none, and
+// every room's col, row, width, height and type.
+//
+// Example:
+//   save_rooms(threeRooms, saved);   // saved["rooms"] is an array of three
+void save_rooms(const std::vector<DungeonRoom>& rooms, json& output);
+
+// Reads every room in j["rooms"] into the level, replacing whatever it held. Everything
+// save_rooms writes is required: a missing key throws json::out_of_range naming it, and a
+// "rooms" that is not an array, or a type outside RoomType, throws std::runtime_error.
 //
 // Example, a level of five rooms abandoned for a save of three:
-//   load_rooms(saved, rooms);   // rooms.size() -> 3
+//   load_rooms(saved, rooms);            // rooms.size() -> 3
+//   load_rooms(json::object(), rooms);   // throws: key 'rooms' not found
 void load_rooms(const json& source, std::vector<DungeonRoom>& rooms);
 
 // Writes every decoration on the level into j["decorations"], and reads them back,

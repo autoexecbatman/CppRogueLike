@@ -1,6 +1,7 @@
 // GameStateManager.cpp - Handles game state persistence and level management
 #include <cassert>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <memory>
 #include <stdexcept>
@@ -39,9 +40,6 @@
 using json = nlohmann::json;
 using namespace InventoryOperations;
 
-namespace
-{
-
 void save_rooms(const std::vector<DungeonRoom>& rooms, json& output)
 {
 	output["rooms"] = json::array();
@@ -55,26 +53,32 @@ void save_rooms(const std::vector<DungeonRoom>& rooms, json& output)
 	}
 }
 
-} // namespace
-
 void load_rooms(const json& source, std::vector<DungeonRoom>& rooms)
 {
 	// Replace rather than append, as every loader of a level container does.
 	rooms.clear();
 
-	if (!source.contains("rooms") || !source["rooms"].is_array())
+	const json& roomRecords = source.at("rooms");
+	if (!roomRecords.is_array())
 	{
-		return;
+		throw std::runtime_error(std::format("load_rooms: \"rooms\" is {}, not an array", roomRecords.type_name()));
 	}
 
-	for (const auto& roomRecord : source["rooms"])
+	for (const auto& roomRecord : roomRecords)
 	{
+		// A type read from disk is a boundary: TREASURE is RoomType's last value.
+		const int type = roomRecord.at("type").get<int>();
+		if (type < 0 || type > static_cast<int>(RoomType::TREASURE))
+		{
+			throw std::runtime_error(std::format("load_rooms: room type {} is not a RoomType", type));
+		}
+
 		DungeonRoom room;
-		room.col = roomRecord.value("col", 0);
-		room.row = roomRecord.value("row", 0);
-		room.width = roomRecord.value("width", 1);
-		room.height = roomRecord.value("height", 1);
-		room.type = static_cast<RoomType>(roomRecord.value("type", static_cast<int>(RoomType::STANDARD)));
+		room.col = roomRecord.at("col").get<int>();
+		room.row = roomRecord.at("row").get<int>();
+		room.width = roomRecord.at("width").get<int>();
+		room.height = roomRecord.at("height").get<int>();
+		room.type = static_cast<RoomType>(type);
 		rooms.push_back(std::move(room));
 	}
 }

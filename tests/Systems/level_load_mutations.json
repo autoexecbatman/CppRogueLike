@@ -9,8 +9,8 @@
   "mutations": [
     {
       "file": "src/GameStateManager.cpp",
-      "original": "\trooms.clear();\n\n\tif (!source.contains(\"rooms\")",
-      "mutated": "\n\tif (!source.contains(\"rooms\")",
+      "original": "\trooms.clear();\n\n\tconst json& roomRecords = source.at(\"rooms\");",
+      "mutated": "\n\tconst json& roomRecords = source.at(\"rooms\");",
       "catches": "a load stacking the saved rooms on the abandoned level's"
     },
     {
@@ -72,6 +72,42 @@
       "original": "\t\trecord.at(\"col\").get<int>(),\n\t\trecord.at(\"row\").get<int>()",
       "mutated": "\t\trecord.at(\"row\").get<int>(),\n\t\trecord.at(\"col\").get<int>()",
       "catches": "a tile read with its column and row swapped"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "if (type < 0 || type > static_cast<int>(RoomType::TREASURE))",
+      "mutated": "if (type > static_cast<int>(RoomType::TREASURE))",
+      "catches": "a negative room type cast to RoomType instead of refused"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "if (type < 0 || type > static_cast<int>(RoomType::TREASURE))",
+      "mutated": "if (type < 0 || type > static_cast<int>(RoomType::TREASURE) + 1)",
+      "catches": "a room type one past TREASURE cast to RoomType instead of refused"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "if (!roomRecords.is_array())",
+      "mutated": "if (false)",
+      "catches": "a \"rooms\" that is not a list read as no rooms"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "room.type = static_cast<RoomType>(type);",
+      "mutated": "room.type = RoomType::STANDARD;",
+      "catches": "every saved room loading as a standard room, the default the lenient read gave"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "room.height = roomRecord.at(\"height\").get<int>();",
+      "mutated": "room.height = roomRecord.at(\"width\").get<int>();",
+      "catches": "a room's height read from another field"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "{ \"row\", room.row },",
+      "mutated": "{ \"row\", room.col },",
+      "catches": "the save writing a room's row from another field"
     }
   ]
 }
