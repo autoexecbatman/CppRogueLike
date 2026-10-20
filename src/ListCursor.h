@@ -58,6 +58,7 @@
 	int pixels,
 	int rowHeight);
 
+// One list's current row and first drawn row; the file block above shows it in use.
 class ListCursor
 {
 private:
