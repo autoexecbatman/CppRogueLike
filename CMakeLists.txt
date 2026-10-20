@@ -50,6 +50,9 @@ if(EMSCRIPTEN)
 
     # Set linker flags with shell file and preload all JSON files at once
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EMCC_FLAGS} --shell-file ${CMAKE_SOURCE_DIR}/shell.html")
+    # Exception catching is a compile and link setting: the link flag above covers the system
+    # libraries, and this one makes a catch in the game's own code catch.
+    add_compile_options(-sNO_DISABLE_EXCEPTION_CATCHING)
     # The ability tables are read at src/json/, where Paths::resolve looks for them.
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file ${CMAKE_SOURCE_DIR}/src/json@src/json")
     # Copy DawnLike tileset for web build
