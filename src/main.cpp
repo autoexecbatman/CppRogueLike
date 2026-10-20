@@ -89,7 +89,6 @@ int main()
 
 	auto ctx = game->context();
 	game->palette.load(Paths::TILE_CONFIG);
-	game->prefabLibrary.load_tile_labels(Paths::TILE_CONFIG);
 	game->prefabLibrary.load(Paths::PREFABS);
 
 	game->menus.push_back(make_main_menu(true, ctx));

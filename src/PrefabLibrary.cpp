@@ -6,7 +6,6 @@
 #include <optional>
 #include <stdexcept>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include <nlohmann/json.hpp>
@@ -14,10 +13,10 @@
 #include "DecorEditor.h"
 #include "DungeonRoom.h"
 #include "Map.h"
+#include "Palette.h"
 #include "Paths.h"
 #include "PrefabLibrary.h"
 #include "Renderer.h"
-#include "TileRefJson.h"
 
 namespace
 {
@@ -39,7 +38,7 @@ std::optional<size_t> find_prefab_index(
 void stamp_room(
 	const Prefab& prefab,
 	const DungeonRoom& room,
-	const std::unordered_map<char, TileRef>& symbolToTile,
+	const Palette& palette,
 	DecorEditor& editor,
 	Map& map)
 {
@@ -79,11 +78,7 @@ void stamp_room(
 				continue;
 			}
 
-			if (!symbolToTile.contains(sym))
-			{
-				continue;
-			}
-			const TileRef tile = symbolToTile.at(sym);
+			const TileRef tile = palette.resolve_decor(sym);
 			if (!tile.is_valid())
 			{
 				continue;
@@ -100,84 +95,6 @@ void stamp_room(
 } // namespace
 
 using json = nlohmann::json;
-
-// ---------------------------------------------------------------------------
-// Symbol map
-// ---------------------------------------------------------------------------
-
-void PrefabLibrary::register_symbol(char sym, TileRef tile, std::string_view label)
-{
-	symbolToTile[sym] = tile;
-	symbolToLabel[sym] = std::string(label);
-	paletteOrder.push_back(SymbolRow{ sym, std::string(label) });
-}
-
-void PrefabLibrary::build_structural_symbols()
-{
-	symbolToTile.clear();
-	symbolToLabel.clear();
-	paletteOrder.clear();
-
-	// Structural markers -- no decoration sprite
-	register_symbol('#', TileRef{}, "Wall");
-	register_symbol('.', TileRef{}, "Floor");
-	register_symbol(',', TileRef{}, "Corridor");
-	register_symbol('+', TileRef{}, "Door");
-	register_symbol('~', TileRef{}, "Water");
-}
-
-// Rebuild the symbol map from tile_labels.json.
-// Call this before load() so prefab symbols resolve correctly.
-void PrefabLibrary::load_tile_labels(std::string_view path)
-{
-	build_structural_symbols();
-
-	// Resolved like every other loader: a bare relative path opens only from the repository root.
-	const std::filesystem::path resolved = Paths::resolve(path);
-	std::ifstream tileConfigFile(resolved);
-	if (!tileConfigFile.is_open())
-	{
-		throw std::runtime_error(std::format("PrefabLibrary::load_tile_labels -- cannot open '{}'", resolved.string()));
-	}
-
-	const json tileConfigDocument = json::parse(tileConfigFile);
-	for (const auto& paletteEntry : tileConfigDocument.at("palette"))
-	{
-		const std::string symbolString = paletteEntry.at("symbol").get<std::string>();
-		const TileRef tile = TileRefJson::parse_tile(paletteEntry);
-		const std::string label = paletteEntry.at("label").get<std::string>();
-
-		// DecorEditor writes an empty symbol for a decoration no prefab character maps to.
-		if (symbolString.empty())
-		{
-			continue;
-		}
-
-		register_symbol(symbolString[0], tile, label);
-	}
-}
-
-// ---------------------------------------------------------------------------
-// Public interface
-// ---------------------------------------------------------------------------
-
-// Returns decoration TileRef for symbol; invalid TileRef for structural symbols (wall/floor/corridor/door/water).
-TileRef PrefabLibrary::resolve_decor(char symbol) const
-{
-	return symbolToTile.contains(symbol) ? symbolToTile.at(symbol) : TileRef{};
-}
-
-// Returns true if symbol maps to a decoration (has a sprite to overlay).
-bool PrefabLibrary::is_decoration(char symbol) const
-{
-	return resolve_decor(symbol).is_valid();
-}
-
-// Human-readable label for a symbol.
-std::string PrefabLibrary::symbol_label(char symbol) const
-{
-	return symbolToLabel.contains(symbol) ? symbolToLabel.at(symbol) : std::string(1, symbol);
-}
 
 // ---------------------------------------------------------------------------
 // Persistence
@@ -245,27 +162,6 @@ void PrefabLibrary::save(std::string_view path) const
 	}
 }
 
-// Overwrite the tile sprite assigned to a symbol in the map.
-void PrefabLibrary::set_symbol_tile(char sym, TileRef tile)
-{
-	symbolToTile[sym] = tile;
-}
-
-// Overwrite the display label for a symbol.
-void PrefabLibrary::set_symbol_label(char sym, const std::string& label)
-{
-	symbolToLabel[sym] = label;
-	auto matches_symbol = [sym](const SymbolRow& paletteEntry)
-	{
-		return paletteEntry.symbol == sym;
-	};
-	auto matches = paletteOrder | std::views::filter(matches_symbol);
-	if (!matches.empty())
-	{
-		matches.front().label = label;
-	}
-}
-
 void PrefabLibrary::add_or_replace(Prefab prefab)
 {
 	auto has_same_name = [&prefab](const Prefab& existing)
@@ -296,6 +192,7 @@ void PrefabLibrary::remove(const std::string& name)
 // Stamps decoration tiles from one room's assigned prefab into editor overrides.
 // Called from Map::create_room before spawn_water so water can see decoration positions.
 void PrefabLibrary::apply_to_room(
+	const Palette& palette,
 	const DungeonRoom& room,
 	DecorEditor& editor,
 	Map& map) const
@@ -309,17 +206,18 @@ void PrefabLibrary::apply_to_room(
 	{
 		return;
 	}
-	stamp_room(prefabs[*prefabIndex], room, symbolToTile, editor, map);
+	stamp_room(prefabs[*prefabIndex], room, palette, editor, map);
 }
 
 // Batch version used as a fallback; prefer apply_to_room called per room.
 void PrefabLibrary::apply_to_rooms(
+	const Palette& palette,
 	const std::vector<DungeonRoom>& rooms,
 	DecorEditor& editor,
 	Map& map) const
 {
 	for (const DungeonRoom& room : rooms)
 	{
-		apply_to_room(room, editor, map);
+		apply_to_room(palette, room, editor, map);
 	}
 }

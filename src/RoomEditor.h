@@ -25,6 +25,7 @@
 
 #include "Renderer.h"
 
+class Palette;
 class PrefabLibrary;
 class TileConfig;
 struct Prefab;
@@ -128,6 +129,8 @@ private:
 
 	bool active{ false };
 	PrefabLibrary* library{ nullptr };
+	// Game declares the palette before the editor, so it outlives every use of this pointer.
+	Palette* palette{ nullptr };
 	const TileConfig* tileConfig{ nullptr };
 
 	// Canvas (two layers)
@@ -205,6 +208,10 @@ private:
 	// as FAILED, so the caller shows its own success message only after a save that happened.
 	[[nodiscard]] SaveOutcome save_library();
 
+	// Writes the palette to the file it was loaded from, the same way save_library writes the
+	// prefabs: a refused write goes in the status line and comes back as FAILED.
+	[[nodiscard]] SaveOutcome save_palette();
+
 	// A cell of the canvas, by column and row.
 	struct CanvasCell
 	{
@@ -225,9 +232,34 @@ private:
 	[[nodiscard]] char selected_sym() const;
 
 public:
-	void enter(PrefabLibrary& lib);
+	// Opens the editor on a fresh canvas, editing `lib`'s prefabs and `editedPalette`'s symbols.
+	//
+	// Example:
+	//   editor.enter(*ctx.prefabLibrary, *ctx.palette);   // is_active() -> true, status() -> ""
+	void enter(PrefabLibrary& lib, Palette& editedPalette);
 	void exit(GameContext& ctx);
 	void tick(GameContext& ctx);
 
 	[[nodiscard]] bool is_active() const { return active; }
+
+	// Renames `symbol` in the palette and saves it. The status line names the new label only
+	// after the save; a refused edit or a refused save puts its reason there instead, and a
+	// refused edit saves nothing.
+	//
+	// Example:
+	//   editor.commit_symbol_label('W', "Spider web");   // status() -> "Label: 'W'=Spider web"
+	//   editor.commit_symbol_label('#', "Stone");        // status() -> "NOT SAVED: # . , + ~ are fixed for ..."
+	//   editor.commit_symbol_label('W', "Web");          // file read-only: status() -> "SAVE FAILED: Palette::save -- cannot open '...' for writing"
+	void commit_symbol_label(char symbol, std::string_view label);
+
+	// Gives `symbol` a new tile in the palette and saves it, reporting in the status line as
+	// commit_symbol_label does.
+	//
+	// Example:
+	//   editor.commit_symbol_tile('W', TileRef{ TileSheet::SHEET_DECOR0, 3, 7 });   // status() -> "'W' -> tile (3,7) sheet Decor0"
+	//   editor.commit_symbol_tile('Q', TileRef{ TileSheet::SHEET_DECOR0, 3, 7 });   // status() -> "NOT SAVED: no entry has that symbol"
+	void commit_symbol_tile(char symbol, TileRef tile);
+
+	// The status line's text, the last thing an action reported.
+	[[nodiscard]] const std::string& status() const noexcept { return statusMsg; }
 };

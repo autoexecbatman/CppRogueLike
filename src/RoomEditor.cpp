@@ -10,6 +10,7 @@
 #include <string_view>
 #include <system_error>
 #include <utility>
+#include <vector>
 
 #include <raylib.h>
 
@@ -17,6 +18,7 @@
 #include "Item.h"
 #include "ListCursor.h"
 #include "Menu.h"
+#include "Palette.h"
 #include "Paths.h"
 #include "PrefabLibrary.h"
 #include "Renderer.h" // includes RaylibIncludes.h -> raylib.h + undefs
@@ -36,6 +38,22 @@ static constexpr std::string_view PICKER_SHEET_NAMES[] = {
 
 namespace
 {
+// The picker's name for a sheet, or its number for a sheet the picker does not offer.
+//
+// Example:
+//   picker_sheet_name(TileSheet::SHEET_DECOR0);   // -> "Decor0"
+std::string picker_sheet_name(TileSheet sheet)
+{
+	for (size_t sheetIndex = 0; sheetIndex < std::size(PICKER_SHEETS); ++sheetIndex)
+	{
+		if (PICKER_SHEETS[sheetIndex] == sheet)
+		{
+			return std::string(PICKER_SHEET_NAMES[sheetIndex]);
+		}
+	}
+	return std::to_string(static_cast<int>(sheet));
+}
+
 // Layout (all in tiles; pixels = value * tile_size)
 constexpr int LEFT_W_TILES = 11;
 constexpr int RIGHT_W_TILES = 13;
@@ -182,11 +200,10 @@ int CanvasGrid::row_at(int pixelY) const
 // Lifecycle
 // ---------------------------------------------------------------------------
 
-void RoomEditor::enter(PrefabLibrary& lib)
+void RoomEditor::enter(PrefabLibrary& lib, Palette& editedPalette)
 {
-	// load_tile_labels registers the structural symbols and nothing removes one, so a loaded library's palette is never empty.
-	assert(!lib.ordered_palette().empty() && "RoomEditor::enter: palette empty; PrefabLibrary::load_tile_labels was not called");
 	library = &lib;
+	palette = &editedPalette;
 	active = true;
 	mode = EditorMode::NORMAL;
 	inputBuffer.clear();
@@ -205,6 +222,8 @@ void RoomEditor::exit(GameContext& ctx)
 
 void RoomEditor::tick(GameContext& ctx)
 {
+	// Every input and render path below reads the palette that enter() stored.
+	assert(palette && "RoomEditor::tick: called before enter");
 	tileConfig = ctx.tileConfig;
 	handle_input(ctx);
 
@@ -377,6 +396,51 @@ RoomEditor::SaveOutcome RoomEditor::save_library()
 	return SaveOutcome::SAVED;
 }
 
+RoomEditor::SaveOutcome RoomEditor::save_palette()
+{
+	assert(palette && "RoomEditor::save_palette: called before enter");
+	try
+	{
+		palette->save();
+	}
+	catch (const std::runtime_error& refusal)
+	{
+		set_status(std::format("SAVE FAILED: {}", refusal.what()));
+		return SaveOutcome::FAILED;
+	}
+	return SaveOutcome::SAVED;
+}
+
+void RoomEditor::commit_symbol_label(char symbol, std::string_view label)
+{
+	assert(palette && "RoomEditor::commit_symbol_label: called before enter");
+	const PaletteEdit edit = palette->set_symbol_label(symbol, label);
+	if (edit != PaletteEdit::APPLIED)
+	{
+		set_status(std::format("NOT SAVED: {}", palette_edit_refusal(edit)));
+		return;
+	}
+	if (save_palette() == SaveOutcome::SAVED)
+	{
+		set_status(std::format("Label: '{}'={}", symbol, label));
+	}
+}
+
+void RoomEditor::commit_symbol_tile(char symbol, TileRef tile)
+{
+	assert(palette && "RoomEditor::commit_symbol_tile: called before enter");
+	const PaletteEdit edit = palette->set_symbol_tile(symbol, tile);
+	if (edit != PaletteEdit::APPLIED)
+	{
+		set_status(std::format("NOT SAVED: {}", palette_edit_refusal(edit)));
+		return;
+	}
+	if (save_palette() == SaveOutcome::SAVED)
+	{
+		set_status(std::format("'{}' -> tile ({},{}) sheet {}", symbol, tile.col, tile.row, picker_sheet_name(tile.sheet)));
+	}
+}
+
 // ---------------------------------------------------------------------------
 // Input
 // ---------------------------------------------------------------------------
@@ -432,27 +496,28 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 	}
 
 	// F3 -- rename label for current palette symbol
-	if (IsKeyPressed(KEY_F3) && library)
+	if (IsKeyPressed(KEY_F3))
 	{
-		const auto& palette = library->ordered_palette();
-		if (paletteIndex < palette.size())
+		const std::vector<SymbolRow> symbolRows = palette->symbol_rows();
+		if (paletteIndex < symbolRows.size())
 		{
-			inputBuffer = palette[paletteIndex].label;
+			inputBuffer = symbolRows[paletteIndex].label;
 			mode = EditorMode::INPUT_LABEL;
 		}
 		return;
 	}
 
-	// Palette navigation. enter() asserted the palette is not empty, so both wraps have a last entry.
-	const auto& palette = library->ordered_palette();
+	// Palette navigation. The rows always begin with the structural symbols, so both wraps have a last entry.
+	static_assert(!STRUCTURAL_SYMBOLS.empty(), "RoomEditor: the palette's wrapping navigation needs a row");
+	const std::vector<SymbolRow> symbolRows = palette->symbol_rows();
 
 	if (IsKeyPressed(KEY_UP))
 	{
-		paletteIndex = paletteIndex == 0 ? palette.size() - 1 : paletteIndex - 1;
+		paletteIndex = paletteIndex == 0 ? symbolRows.size() - 1 : paletteIndex - 1;
 	}
 	if (IsKeyPressed(KEY_DOWN))
 	{
-		paletteIndex = (paletteIndex + 1) % palette.size();
+		paletteIndex = (paletteIndex + 1) % symbolRows.size();
 	}
 
 	// New canvas
@@ -548,7 +613,7 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 
 		if (is_mouse_over_left_panel())
 		{
-			const size_t paletteSize = library->ordered_palette().size();
+			const size_t paletteSize = palette->symbol_rows().size();
 			paletteIndex = step_within(paletteIndex, delta, paletteSize - 1);
 		}
 		else
@@ -669,17 +734,12 @@ void RoomEditor::handle_input_text()
 		}
 		else if (mode == EditorMode::INPUT_LABEL)
 		{
-			if (library && !inputBuffer.empty())
+			if (!inputBuffer.empty())
 			{
-				const auto& palette = library->ordered_palette();
-				if (paletteIndex < palette.size())
+				const std::vector<SymbolRow> symbolRows = palette->symbol_rows();
+				if (paletteIndex < symbolRows.size())
 				{
-					char symbol = palette[paletteIndex].symbol;
-					library->set_symbol_label(symbol, inputBuffer);
-					if (save_library() == SaveOutcome::SAVED)
-					{
-						set_status(std::format("Label: '{}'={}", symbol, inputBuffer));
-					}
+					commit_symbol_label(symbolRows[paletteIndex].symbol, inputBuffer);
 				}
 			}
 			mode = EditorMode::NORMAL;
@@ -815,7 +875,7 @@ std::optional<size_t> RoomEditor::screen_to_palette_index(const Renderer& render
 	const size_t scrollStart = paletteIndex >= maxVisible ? paletteIndex - maxVisible + 1 : 0;
 
 	const size_t paletteEntryIndex = scrollStart + slot;
-	if (paletteEntryIndex >= library->ordered_palette().size() || slot >= maxVisible)
+	if (paletteEntryIndex >= palette->symbol_rows().size() || slot >= maxVisible)
 	{
 		return std::nullopt;
 	}
@@ -830,12 +890,12 @@ std::optional<size_t> RoomEditor::screen_to_palette_index(const Renderer& render
 // Current selected symbol character.
 char RoomEditor::selected_sym() const
 {
-	const auto& palette = library->ordered_palette();
-	if (paletteIndex >= palette.size())
+	const std::vector<SymbolRow> symbolRows = palette->symbol_rows();
+	if (paletteIndex >= symbolRows.size())
 	{
 		return '.';
 	}
-	return palette[paletteIndex].symbol;
+	return symbolRows[paletteIndex].symbol;
 }
 
 // Tile to draw for a symbol in the canvas and palette.
@@ -870,11 +930,7 @@ TileRef RoomEditor::symbol_tile_id(char symbol) const
 	}
 	default:
 	{
-		if (library)
-		{
-			return library->resolve_decor(symbol);
-		}
-		return TileRef{};
+		return palette->resolve_decor(symbol);
 	}
 	}
 }
@@ -998,17 +1054,17 @@ void RoomEditor::render_left_panel(const Renderer& renderer) const
 	DrawRectangle(0, panelY, panelW, panelH, Color{ 15, 15, 22, 230 });
 	DrawLine(panelW - 1, panelY, panelW - 1, panelY + panelH, Color{ 70, 70, 110, 255 });
 
-	const auto& palette = library->ordered_palette();
+	const std::vector<SymbolRow> symbolRows = palette->symbol_rows();
 	const size_t maxVisible = whole_rows_within(panelH, tileSize);
 
 	// Scroll to keep selected entry visible
 	const size_t scrollStart = paletteIndex >= maxVisible ? paletteIndex - maxVisible + 1 : 0;
 
-	for (size_t slot = 0; slot < maxVisible && scrollStart + slot < palette.size(); ++slot)
+	for (size_t slot = 0; slot < maxVisible && scrollStart + slot < symbolRows.size(); ++slot)
 	{
 		const size_t paletteEntryIndex = scrollStart + slot;
 		int slotPixelY = panelY + static_cast<int>(slot) * tileSize;
-		char symbol = palette[paletteEntryIndex].symbol;
+		char symbol = symbolRows[paletteEntryIndex].symbol;
 
 		bool selected = (paletteEntryIndex == paletteIndex);
 
@@ -1071,7 +1127,7 @@ void RoomEditor::render_left_panel(const Renderer& renderer) const
 			? Color{ 255, 255, 100, 255 }
 			: Color{ 180, 180, 200, 200 };
 
-		renderer.draw_text_color(Vector2D{ tileSize + 4, slotPixelY + (tileSize - renderer.get_font_size()) / 2 }, palette[paletteEntryIndex].label, labelCol);
+		renderer.draw_text_color(Vector2D{ tileSize + 4, slotPixelY + (tileSize - renderer.get_font_size()) / 2 }, symbolRows[paletteEntryIndex].label, labelCol);
 
 		if (selected)
 		{
@@ -1318,18 +1374,12 @@ void RoomEditor::handle_input_picker(GameContext& ctx)
 		pickerRow = (pickerRow + 1) % rows;
 	}
 
-	if (IsKeyPressed(KEY_ENTER) && library)
+	if (IsKeyPressed(KEY_ENTER))
 	{
-		const auto& palette = library->ordered_palette();
-		if (paletteIndex < palette.size())
+		const std::vector<SymbolRow> symbolRows = palette->symbol_rows();
+		if (paletteIndex < symbolRows.size())
 		{
-			char symbol = palette[paletteIndex].symbol;
-			TileRef tile{ sheetId, pickerCol, pickerRow };
-			library->set_symbol_tile(symbol, tile);
-			if (save_library() == SaveOutcome::SAVED)
-			{
-				set_status(std::format("'{}' -> tile ({},{}) sheet {}", symbol, pickerCol, pickerRow, PICKER_SHEET_NAMES[pickerSheetListIndex]));
-			}
+			commit_symbol_tile(symbolRows[paletteIndex].symbol, TileRef{ sheetId, pickerCol, pickerRow });
 		}
 		mode = EditorMode::NORMAL;
 	}
@@ -1382,14 +1432,14 @@ void RoomEditor::render_tile_picker(const Renderer& renderer) const
 	}
 
 	// Info bar at top
-	const auto* palette = library ? &library->ordered_palette() : nullptr;
+	const std::vector<SymbolRow> symbolRows = palette->symbol_rows();
 	std::string symInfo = "?";
-	if (palette && paletteIndex < palette->size())
+	if (paletteIndex < symbolRows.size())
 	{
-		char symbol = (*palette)[paletteIndex].symbol;
+		char symbol = symbolRows[paletteIndex].symbol;
 		symInfo = std::format("Assigning tile for '{}' ({})",
 			symbol,
-			library->symbol_label(symbol));
+			palette->symbol_label(symbol));
 	}
 
 	std::string header = std::format(

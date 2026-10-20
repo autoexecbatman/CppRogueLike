@@ -22,6 +22,11 @@ using json = nlohmann::json;
 
 namespace
 {
+// Whether `symbol` is one of the five structural symbols, which no entry may take.
+//
+// Example:
+//   is_structural('#');   // -> true
+//   is_structural('W');   // -> false
 [[nodiscard]] bool is_structural(char symbol)
 {
 	const auto has_symbol = [symbol](const StructuralSymbol& structural)

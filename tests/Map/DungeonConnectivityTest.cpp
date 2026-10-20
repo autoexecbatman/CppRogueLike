@@ -78,7 +78,7 @@ protected:
 
 		// The game loads these in main.cpp, and create_room stamps a prefab only when
 		// both are present: without them the generator takes a path no player ever sees.
-		prefabs.load_tile_labels(Paths::TILE_CONFIG);
+		palette.load(Paths::TILE_CONFIG);
 		prefabs.load(Paths::PREFABS);
 		// A loader that silently opens nothing leaves this suite measuring a generator
 		// no player runs - the failure that kept CI red for 38 pushes, one layer down.
@@ -95,6 +95,7 @@ protected:
 		ctx.rooms = &rooms;
 		ctx.stairs = &stairs;
 		ctx.prefabLibrary = &prefabs;
+		ctx.palette = &palette;
 		ctx.decorEditor = &decorEditor;
 		ctx.creatures = &creatures;
 		ctx.levelManager = &levelManager;

@@ -1046,14 +1046,15 @@ void Map::create_room(const DungeonRoom& room, bool first, GameContext& ctx)
 	// Stamp prefab decorations before water so water can see occupied tiles.
 	assert(ctx.decorEditor && "Map::create_room: called without a decorEditor");
 	assert(ctx.prefabLibrary && "Map::create_room: called without a prefabLibrary");
-	ctx.prefabLibrary->apply_to_room(room, *ctx.decorEditor, *this);
+	assert(ctx.palette && "Map::create_room: called without a palette");
+	ctx.prefabLibrary->apply_to_room(*ctx.palette, room, *ctx.decorEditor, *this);
 
 	// Richest layout first, giving a layer up only when it fails: shape over prefab, prefab alone, plain box.
 	// A dug rectangle is whole with floor on every edge, so the last always succeeds.
 	if (!room_layout_is_sound(room))
 	{
 		dig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });
-		ctx.prefabLibrary->apply_to_room(room, *ctx.decorEditor, *this);
+		ctx.prefabLibrary->apply_to_room(*ctx.palette, room, *ctx.decorEditor, *this);
 
 		if (!room_layout_is_sound(room))
 		{

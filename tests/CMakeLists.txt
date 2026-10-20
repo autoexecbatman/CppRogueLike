@@ -147,6 +147,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/DurationWordingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/PrefabLibraryLoadTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/PaletteTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/RoomEditorPaletteTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/TileConfigLoadTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/TypedSizeTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/MutationPlanTest.cpp

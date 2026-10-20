@@ -149,7 +149,7 @@ protected:
 
 		// The game loads these in main.cpp, and create_room stamps a prefab only when
 		// both are present: without them the generator takes a path no player ever sees.
-		prefabs.load_tile_labels(Paths::TILE_CONFIG);
+		palette.load(Paths::TILE_CONFIG);
 		prefabs.load(Paths::PREFABS);
 
 		player = std::make_unique<Player>(Vector2D{ 1, 1 });
@@ -163,6 +163,7 @@ protected:
 		ctx.rooms = &rooms;
 		ctx.stairs = &stairs;
 		ctx.prefabLibrary = &prefabs;
+		ctx.palette = &palette;
 		ctx.decorEditor = &decorEditor;
 		ctx.creatures = &creatures;
 		ctx.levelManager = &levelManager;
@@ -441,6 +442,45 @@ TEST_F(RoomShapeTest, APrefabRoomKeepsTheWallsItsPrefabDraws)
 				<< " lost every wall its prefab '" << room.prefabName << "' draws";
 		}
 	}
+}
+
+// A prefab's decoration symbols are stamped as the palette's tiles for them: every cell where a
+// prefab draws a decoration and the map kept an override holds that symbol's tile, and some do.
+TEST_F(RoomShapeTest, APrefabsDecorationsAreThePalettesTiles)
+{
+	int stamped = 0;
+	for (int attempt = 0; attempt < DUNGEONS; ++attempt)
+	{
+		Map map{ MAP_WIDTH, MAP_HEIGHT };
+		generate_into(map);
+
+		for (const DungeonRoom& room : rooms)
+		{
+			for (const Prefab& prefab : prefabs.all())
+			{
+				if (prefab.name != room.prefabName)
+				{
+					continue;
+				}
+				for (size_t row = 0; row < prefab.rows.size(); ++row)
+				{
+					for (size_t column = 0; column < prefab.rows[row].size(); ++column)
+					{
+						const TileRef expected = palette.resolve_decor(prefab.rows[row][column]);
+						const Vector2D cell{ room.left_wall() + static_cast<int>(column), room.top_wall() + static_cast<int>(row) };
+						const TileRef placed = decorEditor.get_override(cell);
+						if (!expected.is_valid() || !placed.is_valid())
+						{
+							continue;
+						}
+						EXPECT_EQ(placed, expected) << "prefab '" << prefab.name << "' symbol '" << prefab.rows[row][column] << "'";
+						++stamped;
+					}
+				}
+			}
+		}
+	}
+	EXPECT_GT(stamped, 0) << "no prefab decoration was stamped in " << DUNGEONS << " dungeons";
 }
 
 TEST_F(RoomShapeTest, AnExitCellIsWalkableWheneverItsEdgeHasFloor)

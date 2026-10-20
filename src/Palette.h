@@ -34,32 +34,48 @@
 // One named tile. A symbol of 0 means the tile has no prefab character.
 struct PaletteEntry
 {
+	// The sprite the entry names; no two entries share one.
 	TileRef tile{};
+	// The name the editors show; never empty.
 	std::string label{};
+	// The prefab character that places this tile, or 0 for none; no two entries share one.
 	char symbol{ 0 };
 
+	// Two entries are equal when tile, label and symbol all are.
 	[[nodiscard]] bool operator==(const PaletteEntry& other) const = default;
 };
 
 // nlohmann's readers and writers for a palette row: the tile's three fields, "label" and
 // "symbol", where an empty symbol string is a symbol of 0. Every field is required.
+//
+// Example:
+//   to_json(output, PaletteEntry{ cobweb, "Cobweb", 'W' });   // output -> { sheet, col, row, "label": "Cobweb", "symbol": "W" }
 void to_json(nlohmann::json& output, const PaletteEntry& entry);
+// The reader to_json's writer pairs with; throws nlohmann's out_of_range naming a missing field.
+//
+// Example:
+//   from_json(record, entry);   // record without "label": throws "... key 'label' not found"
 void from_json(const nlohmann::json& source, PaletteEntry& entry);
 
 // A symbol a prefab can use and the name it is shown under, structural or not.
 struct SymbolRow
 {
+	// The character a prefab row uses.
 	char symbol{ 0 };
+	// The name the room editor shows for it.
 	std::string label{};
 };
 
 // A symbol every prefab understands without a palette entry; it carries no sprite.
 struct StructuralSymbol
 {
+	// The character a prefab row uses.
 	char symbol{ 0 };
+	// The name the room editor shows for it.
 	std::string_view label{};
 };
 
+// Walls, floor, corridor, doors and water, in the order the room editor lists them first.
 inline constexpr std::array<StructuralSymbol, 5> STRUCTURAL_SYMBOLS{ {
 	{ '#', "Wall" },
 	{ '.', "Floor" },
@@ -87,6 +103,7 @@ enum class PaletteEdit
 //   palette_edit_refusal(PaletteEdit::APPLIED);            // aborts: an applied edit is not a refusal
 [[nodiscard]] std::string_view palette_edit_refusal(PaletteEdit edit);
 
+// The one copy of the decoration palette, with the invariants above; see the file's opening block.
 class Palette
 {
 private:

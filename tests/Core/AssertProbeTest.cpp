@@ -68,7 +68,6 @@
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/PlayerController.h"
-#include "src/PrefabLibrary.h"
 #include "src/RandomDice.h"
 #include "src/Renderer.h"
 #include "src/RoomEditor.h"
@@ -694,13 +693,12 @@ TEST_F(AssertProbeDeathTest, CountingRowsOfNoHeightAborts)
 	EXPECT_DEATH([[maybe_unused]] const size_t rows = whole_rows_within(90, 0), "whole_rows_within: a row has no height");
 }
 
-// A library whose tile labels were never loaded has no palette, so the room editor's wrapping
-// palette navigation would divide by zero. That is a wiring fault, caught where the editor is entered.
-TEST_F(AssertProbeDeathTest, EnteringTheRoomEditorWithAnUnloadedPaletteAborts)
+// A room editor ticked before it was entered has no palette to draw or edit. That is a wiring
+// fault, caught where every frame of the editor begins.
+TEST_F(AssertProbeDeathTest, TickingTheRoomEditorBeforeEnteringItAborts)
 {
-	PrefabLibrary unloaded{};
 	RoomEditor editor{};
-	EXPECT_DEATH(editor.enter(unloaded), "RoomEditor::enter: palette empty; PrefabLibrary::load_tile_labels was not called");
+	EXPECT_DEATH(editor.tick(ctx), "RoomEditor::tick: called before enter");
 }
 
 // The Constitution table lives in the data manager, so a creature asked to bring its

@@ -25,6 +25,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -203,22 +204,38 @@ TEST_F(PaletteTest, EveryRealEntryLoadsInOrder)
 	}
 }
 
-// Every field of a palette entry, removed from the first one, is named in the refusal.
+// Every field of a palette entry, removed from an entry with a symbol and from one without,
+// is named in the refusal: an entry with no symbol is held to the same shape.
 TEST_F(PaletteTest, AnEntryMissingAFieldIsRefusedByName)
 {
-	for (const char* field : { "sheet", "col", "row", "label", "symbol" })
+	std::optional<size_t> symbolledIndex{};
+	std::optional<size_t> unsymbolledIndex{};
+	for (size_t entryIndex = 0; entryIndex < real.at("palette").size(); ++entryIndex)
 	{
-		nlohmann::json entries = real.at("palette");
-		entries.at(0).erase(field);
-		write_palette(entries);
+		const bool hasSymbol = !real.at("palette").at(entryIndex).at("symbol").get<std::string>().empty();
+		std::optional<size_t>& found = hasSymbol ? symbolledIndex : unsymbolledIndex;
+		found = found.value_or(entryIndex);
+	}
+	ASSERT_TRUE(symbolledIndex.has_value());
+	ASSERT_TRUE(unsymbolledIndex.has_value());
 
-		const auto load_scratch_palette = [&]()
+	for (const size_t entryIndex : { *symbolledIndex, *unsymbolledIndex })
+	{
+		for (const char* field : { "sheet", "col", "row", "label", "symbol" })
 		{
-			palette.load(scratch.string());
-		};
-		const std::string refusal = refusal_of(load_scratch_palette);
+			nlohmann::json entries = real.at("palette");
+			entries.at(entryIndex).erase(field);
+			write_palette(entries);
 
-		EXPECT_NE(refusal.find(field), std::string::npos) << "refusal does not name " << field << ": " << refusal;
+			const auto load_scratch_palette = [&]()
+			{
+				palette.load(scratch.string());
+			};
+			const std::string refusal = refusal_of(load_scratch_palette);
+
+			EXPECT_NE(refusal.find(field), std::string::npos)
+				<< "entry " << entryIndex << ": refusal does not name " << field << ": " << refusal;
+		}
 	}
 }
 

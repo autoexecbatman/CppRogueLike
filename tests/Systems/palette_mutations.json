@@ -4,7 +4,7 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=PaletteTest.*:PrefabLibraryLoadTest.*:CodecRoundTripTest.EveryItemSpriteSurvivesASaveAndALoad"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=PaletteTest.*:RoomEditorPaletteTest.*:RoomShapeTest.APrefabsDecorationsAreThePalettesTiles:PrefabLibraryLoadTest.*:CodecRoundTripTest.EveryItemSpriteSurvivesASaveAndALoad"
   ],
   "mutations": [
     {
@@ -158,10 +158,46 @@
       "catches": "a removed tile left in the palette"
     },
     {
+      "file": "src/RoomEditor.cpp",
+      "original": "\tconst PaletteEdit edit = palette->set_symbol_label(symbol, label);\n\tif (edit != PaletteEdit::APPLIED)",
+      "mutated": "\tconst PaletteEdit edit = palette->set_symbol_label(symbol, label);\n\tif (false)",
+      "catches": "a refused label edit reported as saved"
+    },
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "\tconst PaletteEdit edit = palette->set_symbol_tile(symbol, tile);\n\tif (edit != PaletteEdit::APPLIED)",
+      "mutated": "\tconst PaletteEdit edit = palette->set_symbol_tile(symbol, tile);\n\tif (false)",
+      "catches": "a refused tile pick reported as saved"
+    },
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "\tif (save_palette() == SaveOutcome::SAVED)\n\t{\n\t\tset_status(std::format(\"Label:",
+      "mutated": "\tif (true)\n\t{\n\t\tset_status(std::format(\"Label:",
+      "catches": "a label edit reported after a save that failed, the defect 0290 reported"
+    },
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "\tif (save_palette() == SaveOutcome::SAVED)\n\t{\n\t\tset_status(std::format(\"'{}' -> tile",
+      "mutated": "\tif (true)\n\t{\n\t\tset_status(std::format(\"'{}' -> tile",
+      "catches": "a tile pick reported after a save that failed"
+    },
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "\t\tpalette->save();\n",
+      "mutated": "",
+      "catches": "an edit reported as saved that was never written, the defect 0290 reported"
+    },
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "\t\tset_status(std::format(\"SAVE FAILED: {}\", refusal.what()));\n\t\treturn SaveOutcome::FAILED;\n\t}\n\treturn SaveOutcome::SAVED;\n}\n\nvoid RoomEditor::commit_symbol_label",
+      "mutated": "\t\treturn SaveOutcome::FAILED;\n\t}\n\treturn SaveOutcome::SAVED;\n}\n\nvoid RoomEditor::commit_symbol_label",
+      "catches": "a refused palette save that leaves the status line silent"
+    },
+    {
       "file": "src/PrefabLibrary.cpp",
-      "original": "const TileRef tile = TileRefJson::parse_tile(paletteEntry);",
-      "mutated": "const TileRef tile = paletteEntry.contains(\"sheet\") ? TileRefJson::parse_tile(paletteEntry) : TileRef{};",
-      "catches": "a palette entry missing its sheet read as an empty tile instead of refused"
+      "original": "\t\t\tconst TileRef tile = palette.resolve_decor(sym);\n",
+      "mutated": "\t\t\tconst TileRef tile = TileRef{};\n",
+      "catches": "prefabs stamping no decorations once the palette stopped being the library's"
     },
     {
       "file": "src/ContentRegistryIO.cpp",

@@ -94,7 +94,7 @@ void start_a_game(Game& game, GameContext& ctx, int& loopNum)
 	game.itemRegistry.load(Paths::ITEMS);
 	game.itemRegistry.load_enhanced_rules(Paths::ENHANCED_RULES);
 	game.init_world();
-	game.prefabLibrary.load_tile_labels(Paths::TILE_CONFIG);
+	game.palette.load(Paths::TILE_CONFIG);
 	game.prefabLibrary.load(Paths::PREFABS);
 
 	game.playerBlueprint.creatureClass = CreatureClass::FIGHTER;

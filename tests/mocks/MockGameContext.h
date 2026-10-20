@@ -147,7 +147,6 @@ struct MockGameContext
 		// Loaded as main.cpp loads it. An empty library lets generation pass in a fixture while
 		// the game aborts on its first map, and a loader that opens nothing returns quietly.
 		palette.load(Paths::TILE_CONFIG);
-		prefabLibrary.load_tile_labels(Paths::TILE_CONFIG);
 		prefabLibrary.load(Paths::PREFABS);
 		assert(prefabLibrary.count() > 0 && "MockGameContext: no prefabs loaded");
 	}
