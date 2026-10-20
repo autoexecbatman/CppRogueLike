@@ -22,6 +22,7 @@
 #include "MonsterRegistry.h"
 #include "Persistent.h"
 #include "TurnSchedule.h"
+#include "Wording.h"
 
 // Configuration constants (NOT serialized - same for all mimics)
 constexpr int DISGUISE_CHANGE_RATE = 200;
@@ -358,7 +359,7 @@ void AiMimic::check_revealing(Creature& owner, GameContext& ctx)
 			ctx.messageSystem->finalize_message();
 
 			ctx.player()->apply_confusion(confusionDuration, ctx.gameState->get_time());
-			ctx.messageSystem->log("Applied confusion to player for " + std::to_string(confusionDuration) + " turns");
+			ctx.messageSystem->log(std::format("Applied confusion to player for {}", Wording::counted(confusionDuration, "round", "rounds")));
 		}
 		else
 		{

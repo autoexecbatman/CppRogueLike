@@ -259,7 +259,7 @@ bool use(Consumable& consumable, Item& owner, Creature& wearer, GameContext& ctx
 		ctx.buffSystem->add_buff(wearer, consumable.buffType, value, durationRounds, consumable.application, ctx.gameState->get_time());
 		ctx.messageSystem->message(
 			ColorPairId::CYAN_BLACK,
-			std::format("You feel the effect of the {} for {}.", owner.get_name(), Wording::counted(durationRounds, "turn", "turns")),
+			std::format("You feel the effect of the {} for {}.", owner.get_name(), Wording::counted(durationRounds, "round", "rounds")),
 			MessageCompletion::FINISHED);
 		break;
 	}
