@@ -40,6 +40,7 @@ class FloatingTextSystem;
 class AnimationSystem;
 class ContentRegistry;
 class DecorEditor;
+class Palette;
 class PrefabLibrary;
 #ifndef __EMSCRIPTEN__
 class ContentEditor;
@@ -257,6 +258,7 @@ struct GameContext
 	Minimap* minimap{ nullptr };
 	CostOverlay* costOverlay{ nullptr };
 	Pathfinding::Pathfinder* pathfinder{ nullptr };
+	Palette* palette{ nullptr };
 	DecorEditor* decorEditor{ nullptr };
 	PrefabLibrary* prefabLibrary{ nullptr };
 #ifndef __EMSCRIPTEN__

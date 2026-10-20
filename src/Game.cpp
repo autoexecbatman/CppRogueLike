@@ -40,6 +40,7 @@
 		.costOverlay = &costOverlay,
 		.pathfinder = &pathfinder,
 
+		.palette = &palette,
 		.decorEditor = &decorEditor,
 		.prefabLibrary = &prefabLibrary,
 #ifndef __EMSCRIPTEN__

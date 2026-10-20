@@ -46,6 +46,7 @@
 #include "src/HealthPool.h"
 #include "src/LevelManager.h"
 #include "src/Map.h"
+#include "src/Palette.h"
 #include "src/Pathfinding.h"
 #include "src/Paths.h"
 #include "src/Player.h"
@@ -127,7 +128,9 @@ protected:
 	std::unique_ptr<Player> player{};
 	LevelManager levelManager{};
 	PrefabLibrary prefabs{};
-	DecorEditor decorEditor{};
+	// Declared before the editor, which holds a reference to it.
+	Palette palette{};
+	DecorEditor decorEditor{ palette };
 	std::vector<DungeonRoom> rooms{};
 	std::vector<std::unique_ptr<Creature>> creatures{};
 	std::vector<std::unique_ptr<Trap>> traps{};

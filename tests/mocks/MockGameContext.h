@@ -36,6 +36,7 @@
 #include "src/Minimap.h"
 #include "src/MonsterEditor.h"
 #include "src/MonsterRegistry.h"
+#include "src/Palette.h"
 #include "src/Pathfinding.h"
 #include "src/Paths.h"
 #include "src/Player.h"
@@ -100,7 +101,9 @@ struct MockGameContext
 	std::vector<DungeonRoom> rooms{};
 	std::deque<std::unique_ptr<BaseMenu>> menus{};
 	std::vector<Vector2D> mousePathOverlay{};
-	DecorEditor decorEditor{};
+	// Declared before the editor, which holds a reference to it.
+	Palette palette{};
+	DecorEditor decorEditor{ palette };
 	ContentEditor contentEditor{};
 	RoomEditor roomEditor{};
 	ItemEditor itemEditor{};
@@ -143,7 +146,7 @@ struct MockGameContext
 
 		// Loaded as main.cpp loads it. An empty library lets generation pass in a fixture while
 		// the game aborts on its first map, and a loader that opens nothing returns quietly.
-		decorEditor.load_palette(Paths::TILE_CONFIG);
+		palette.load(Paths::TILE_CONFIG);
 		prefabLibrary.load_tile_labels(Paths::TILE_CONFIG);
 		prefabLibrary.load(Paths::PREFABS);
 		assert(prefabLibrary.count() > 0 && "MockGameContext: no prefabs loaded");
@@ -177,6 +180,7 @@ struct MockGameContext
 			.minimap = &minimap,
 			.costOverlay = &costOverlay,
 			.pathfinder = &pathfinder,
+			.palette = &palette,
 			.decorEditor = &decorEditor,
 			.prefabLibrary = &prefabLibrary,
 			.contentEditor = &contentEditor,

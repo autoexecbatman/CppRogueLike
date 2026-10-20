@@ -88,7 +88,7 @@ int main()
 	game->renderer.load_font(Paths::DAWNLIKE_FONT, 30);
 
 	auto ctx = game->context();
-	game->decorEditor.load_palette(Paths::TILE_CONFIG);
+	game->palette.load(Paths::TILE_CONFIG);
 	game->prefabLibrary.load_tile_labels(Paths::TILE_CONFIG);
 	game->prefabLibrary.load(Paths::PREFABS);
 

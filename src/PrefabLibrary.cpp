@@ -109,7 +109,7 @@ void PrefabLibrary::register_symbol(char sym, TileRef tile, std::string_view lab
 {
 	symbolToTile[sym] = tile;
 	symbolToLabel[sym] = std::string(label);
-	paletteOrder.push_back(PaletteEntry{ sym, std::string(label) });
+	paletteOrder.push_back(SymbolRow{ sym, std::string(label) });
 }
 
 void PrefabLibrary::build_structural_symbols()
@@ -255,7 +255,7 @@ void PrefabLibrary::set_symbol_tile(char sym, TileRef tile)
 void PrefabLibrary::set_symbol_label(char sym, const std::string& label)
 {
 	symbolToLabel[sym] = label;
-	auto matches_symbol = [sym](const PaletteEntry& paletteEntry)
+	auto matches_symbol = [sym](const SymbolRow& paletteEntry)
 	{
 		return paletteEntry.symbol == sym;
 	};

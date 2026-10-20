@@ -34,6 +34,7 @@
 #include "MessageSystem.h"
 #include "Minimap.h"
 #include "MonsterRegistry.h"
+#include "Palette.h"
 #include "Pathfinding.h"
 #include "Player.h"
 #include "RandomDice.h"
@@ -101,7 +102,9 @@ struct Game
 	AnimationSystem animSystem{};
 	ContentRegistry contentRegistry{};
 	Pathfinding::Pathfinder pathfinder{};
-	DecorEditor decorEditor{};
+	// Declared before both editors, which hold references to it.
+	Palette palette{};
+	DecorEditor decorEditor{ palette };
 	PrefabLibrary prefabLibrary{};
 #ifndef __EMSCRIPTEN__
 	ContentEditor contentEditor{};

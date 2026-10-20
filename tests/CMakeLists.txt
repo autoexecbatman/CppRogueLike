@@ -146,7 +146,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CanvasGridTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/DurationWordingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/PrefabLibraryLoadTest.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/DecorEditorPaletteTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/PaletteTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/TileConfigLoadTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/TypedSizeTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/MutationPlanTest.cpp
@@ -336,6 +336,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/ItemEditor.cpp
     ${PARENT_SOURCE_DIR}/ListCursor.cpp
     ${PARENT_SOURCE_DIR}/MonsterEditor.cpp
+    ${PARENT_SOURCE_DIR}/Palette.cpp
     ${PARENT_SOURCE_DIR}/PrefabLibrary.cpp
     ${PARENT_SOURCE_DIR}/RoomEditor.cpp
     ${PARENT_SOURCE_DIR}/SpellEditor.cpp

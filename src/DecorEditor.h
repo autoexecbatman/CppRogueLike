@@ -2,12 +2,11 @@
 #pragma once
 
 #include <cstdint>
-#include <nlohmann/json_fwd.hpp>
 #include <optional>
 #include <string>
 #include <unordered_map>
-#include <vector>
 
+#include "Palette.h"
 #include "Renderer.h"
 #include "Vector2D.h"
 
@@ -36,29 +35,18 @@
 class DecorEditor
 {
 private:
-	struct PaletteEntry
-	{
-		TileRef tile{};
-		std::string label{};
-		char symbol{ 0 }; // 0 = no symbol (tile not usable in prefabs)
-	};
-
-	// nlohmann's readers and writers for a palette row, found by argument-dependent lookup.
-	friend void to_json(nlohmann::json& output, const PaletteEntry& entry);
-	friend void from_json(const nlohmann::json& source, PaletteEntry& entry);
+	// Game declares the palette before the editor, so it outlives every use of this reference.
+	Palette& palette;
 
 	bool active{ false };
 	size_t paletteIndex{ 0 };
 	double lastSaveTime{ -10.0 };
 	std::optional<std::string> saveError{}; // why the last reported save was refused, until one succeeds
+	std::optional<std::string> editRefusal{}; // why the open edit was not applied; cleared when an edit opens
 
 	std::string activeKey{};
-	std::string palettePath{}; // the file load_palette read, where save_palette_reporting writes
 
 	std::unordered_map<std::string, std::unordered_map<uint32_t, TileRef>> allOverrides{};
-
-	// Dynamic palette -- loaded from tile_labels.json, editable at runtime.
-	std::vector<PaletteEntry> palette{};
 
 	// Sheet browser state
 	bool isBrowserOpen{ false };
@@ -96,13 +84,15 @@ private:
 	// Sheet browser
 	void update_browser(const Renderer& renderer);
 
-	// Palette helpers
-	[[nodiscard]] std::optional<size_t> palette_find(TileRef tile) const;
-	void palette_add_or_update(TileRef tile, std::string_view label, char symbol);
-	void palette_remove(TileRef tile);
+	// Takes `tile` out of the palette and keeps the current index inside what is left.
+	void remove_from_palette(TileRef tile);
 
 public:
-	DecorEditor();
+	// The editor edits `editedPalette` in place and saves through it.
+	//
+	// Example:
+	//   DecorEditor editor{ palette };   // loaded or not; place() does nothing while it is empty
+	explicit DecorEditor(Palette& editedPalette);
 
 	void toggle();
 
@@ -113,27 +103,7 @@ public:
 
 	void set_active_map(long seed, int dungeonLevel);
 
-	// Writes the palette into the "palette" section of the file at `path`, keeping every
-	// other section. Throws std::runtime_error naming the path when the file does not open
-	// or parse, which would lose those sections, and leaves it untouched. Also throws when
-	// the write fails, which may leave the file partly written.
-	//
-	// Example:
-	//   editor.save_palette(Paths::TILE_CONFIG);   // the palette section now holds the editor's entries
-	//   editor.save_palette("data/missing.json");  // throws: "... cannot open '...missing.json' to keep its other sections"
-	void save_palette(std::string_view path) const;
-
-	// Reads the "palette" section of the file at `path`, keeping only labelled entries.
-	// Every entry needs sheet, col, row, label and symbol. Throws when the file does not
-	// open or parse, has no "palette", or an entry lacks a field; the palette loaded before
-	// is then kept.
-	//
-	// Example:
-	//   editor.load_palette(Paths::TILE_CONFIG);   // every labelled entry of the shipped palette
-	//   editor.load_palette("data/missing.json");  // throws: "... cannot open '...missing.json' -- the palette is required"
-	void load_palette(std::string_view path);
-
-	// Saves to the file the palette was loaded from, for the editor's own save keys. A
+	// Saves the palette to the file it was loaded from, for the editor's own save keys. A
 	// refusal is kept for save_error() and drawn until a later save succeeds.
 	//
 	// Example:

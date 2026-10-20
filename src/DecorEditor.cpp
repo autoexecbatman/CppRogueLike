@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <cstdint>
 #include <format>
-#include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -10,16 +9,11 @@
 #include <utility>
 #include <vector>
 
-#include <nlohmann/json.hpp>
 #include <raylib.h>
 
 #include "DecorEditor.h"
 #include "ListCursor.h"
-#include "Paths.h"
 #include "Renderer.h"
-#include "TileRefJson.h"
-
-using json = nlohmann::json;
 
 namespace
 {
@@ -29,125 +23,23 @@ constexpr Color SAVE_FAILED_COLOR{ 255, 90, 90, 255 };
 
 // ---------------------------------------------------------------------------
 
-DecorEditor::DecorEditor() = default;
-
-// ---------------------------------------------------------------------------
-// Palette helpers
-// ---------------------------------------------------------------------------
-
-std::optional<size_t> DecorEditor::palette_find(TileRef tile) const
+DecorEditor::DecorEditor(Palette& editedPalette)
+	: palette(editedPalette)
 {
-	for (size_t entryIndex = 0; entryIndex < palette.size(); ++entryIndex)
-	{
-		if (palette[entryIndex].tile == tile)
-		{
-			return entryIndex;
-		}
-	}
-	return std::nullopt;
 }
 
-void DecorEditor::palette_add_or_update(
-	TileRef tile,
-	std::string_view label,
-	char symbol)
+void DecorEditor::remove_from_palette(TileRef tile)
 {
-	auto idx = palette_find(tile);
-	if (idx)
-	{
-		palette[*idx].label = label;
-		palette[*idx].symbol = symbol;
-	}
-	else
-	{
-		palette.push_back({ tile, std::string(label), symbol });
-	}
-}
-
-void DecorEditor::palette_remove(TileRef tile)
-{
-	std::erase_if(palette,
-		[tile](const PaletteEntry& entry)
-		{ return entry.tile == tile; });
-
-	paletteIndex = palette.empty() ? 0 : std::min(paletteIndex, palette.size() - 1);
-}
-
-// ---------------------------------------------------------------------------
-// nlohmann serialization for PaletteEntry
-// The tile goes through TileRefJson; an empty symbol string means no symbol.
-// ---------------------------------------------------------------------------
-
-void to_json(json& output, const DecorEditor::PaletteEntry& entry)
-{
-	output = TileRefJson::encode_tile(entry.tile);
-	output["label"] = entry.label;
-	output["symbol"] = entry.symbol ? std::string(1, entry.symbol) : std::string{};
-}
-
-void from_json(const json& source, DecorEditor::PaletteEntry& entry)
-{
-	entry.tile = TileRefJson::parse_tile(source);
-	entry.label = source.at("label").get<std::string>();
-	const std::string symbolString = source.at("symbol").get<std::string>();
-	entry.symbol = symbolString.empty() ? 0 : symbolString[0];
-}
-
-// ---------------------------------------------------------------------------
-// Persistence -- palette
-// ---------------------------------------------------------------------------
-
-void DecorEditor::save_palette(std::string_view path) const
-{
-	const auto resolved = Paths::resolve(path);
-
-	// The rest of the file belongs to TileConfig, so a file that cannot be read back whole is not written.
-	std::ifstream existingFile(resolved);
-	if (!existingFile.is_open())
-	{
-		throw std::runtime_error(std::format(
-			"DecorEditor::save_palette -- cannot open '{}' to keep its other sections",
-			resolved.string()));
-	}
-	json document;
-	try
-	{
-		document = json::parse(existingFile);
-	}
-	catch (const json::parse_error& error)
-	{
-		throw std::runtime_error(std::format(
-			"DecorEditor::save_palette -- '{}' does not parse: {}",
-			resolved.string(),
-			error.what()));
-	}
-	existingFile.close();
-
-	document["palette"] = palette;
-
-	std::ofstream out(resolved);
-	if (!out.is_open())
-	{
-		throw std::runtime_error(std::format(
-			"DecorEditor::save_palette -- cannot open '{}' for writing",
-			resolved.string()));
-	}
-	out << document.dump(4);
-	out.flush();
-	if (out.fail())
-	{
-		throw std::runtime_error(std::format(
-			"DecorEditor::save_palette -- write failed for '{}'",
-			resolved.string()));
-	}
-	std::clog << std::format("[DecorEditor] palette saved: {}\n", resolved.string());
+	palette.remove(tile);
+	const size_t count = palette.entries().size();
+	paletteIndex = count == 0 ? 0 : std::min(paletteIndex, count - 1);
 }
 
 void DecorEditor::save_palette_reporting()
 {
 	try
 	{
-		save_palette(palettePath);
+		palette.save();
 	}
 	catch (const std::runtime_error& refusal)
 	{
@@ -158,32 +50,6 @@ void DecorEditor::save_palette_reporting()
 
 	saveError.reset();
 	lastSaveTime = GetTime();
-}
-
-void DecorEditor::load_palette(std::string_view path)
-{
-	const auto resolved = Paths::resolve(path);
-	std::ifstream paletteFile(resolved);
-	if (!paletteFile.is_open())
-	{
-		throw std::runtime_error(std::format(
-			"DecorEditor::load_palette -- cannot open '{}' -- the palette is required",
-			resolved.string()));
-	}
-
-	// Read into a local, so a refused file leaves the palette that was loaded before it.
-	const json document = json::parse(paletteFile);
-	std::vector<PaletteEntry> loaded = document.at("palette").get<std::vector<PaletteEntry>>();
-	const auto is_unlabelled = [](const PaletteEntry& entry)
-	{
-		return entry.label.empty();
-	};
-	std::erase_if(loaded, is_unlabelled);
-
-	palettePath = std::string(path);
-	palette = std::move(loaded);
-	paletteIndex = 0;
-	std::clog << std::format("[DecorEditor] palette loaded: {}\n", resolved.string());
 }
 
 // ---------------------------------------------------------------------------
@@ -205,32 +71,32 @@ void DecorEditor::toggle()
 
 void DecorEditor::cycle_next()
 {
-	if (palette.empty())
+	if (palette.entries().empty())
 	{
 		return;
 	}
 
-	paletteIndex = (paletteIndex + 1) % palette.size();
+	paletteIndex = (paletteIndex + 1) % palette.entries().size();
 }
 
 void DecorEditor::cycle_prev()
 {
-	if (palette.empty())
+	if (palette.entries().empty())
 	{
 		return;
 	}
 
-	paletteIndex = paletteIndex == 0 ? palette.size() - 1 : paletteIndex - 1;
+	paletteIndex = paletteIndex == 0 ? palette.entries().size() - 1 : paletteIndex - 1;
 }
 
 void DecorEditor::place(Vector2D worldPosition)
 {
-	if (palette.empty())
+	if (palette.entries().empty())
 	{
 		return;
 	}
 
-	current_map()[make_key(worldPosition)] = palette[paletteIndex].tile;
+	current_map()[make_key(worldPosition)] = palette.entries()[paletteIndex].tile;
 }
 
 void DecorEditor::erase(Vector2D worldPosition)
@@ -319,7 +185,7 @@ void DecorEditor::update_and_render(const Renderer& renderer)
 
 void DecorEditor::draw_cursor(const Renderer& renderer, Vector2D worldPosition) const
 {
-	if (palette.empty())
+	if (palette.entries().empty())
 	{
 		return;
 	}
@@ -334,12 +200,12 @@ void DecorEditor::draw_cursor(const Renderer& renderer, Vector2D worldPosition) 
 	DrawRectangle(pixelX, pixelY, tileSize, tileSize, Color{ 255, 255, 0, 60 });
 	DrawRectangleLines(pixelX, pixelY, tileSize, tileSize, Color{ 255, 255, 0, 220 });
 
-	renderer.draw_tile(Vector2D{ worldPosition.x, worldPosition.y }, palette[paletteIndex].tile, Color{ 255, 255, 255, 180 });
+	renderer.draw_tile(Vector2D{ worldPosition.x, worldPosition.y }, palette.entries()[paletteIndex].tile, Color{ 255, 255, 255, 180 });
 }
 
 void DecorEditor::draw_palette_strip(const Renderer& renderer) const
 {
-	if (palette.empty())
+	if (palette.entries().empty())
 	{
 		return;
 	}
@@ -355,7 +221,7 @@ void DecorEditor::draw_palette_strip(const Renderer& renderer) const
 	{
 		// The slot shows the entry HALF places either side of the current one; past either end it shows nothing.
 		const size_t offset = static_cast<size_t>(slot);
-		if (paletteIndex + offset < HALF || paletteIndex + offset - HALF >= palette.size())
+		if (paletteIndex + offset < HALF || paletteIndex + offset - HALF >= palette.entries().size())
 		{
 			continue;
 		}
@@ -371,7 +237,7 @@ void DecorEditor::draw_palette_strip(const Renderer& renderer) const
 			DrawRectangle(slotPixelX, slotPixelY, tileSize, tileSize, Color{ 255, 255, 0, 80 });
 		}
 
-		renderer.draw_tile_screen(Vector2D{ slotPixelX, slotPixelY }, palette[idx].tile);
+		renderer.draw_tile_screen(Vector2D{ slotPixelX, slotPixelY }, palette.entries()[idx].tile);
 
 		if (isCurrent)
 		{
@@ -390,9 +256,9 @@ void DecorEditor::draw_info_bar(const Renderer& renderer, Vector2D worldPosition
 
 	bool isSaveRecent = (GetTime() - lastSaveTime) < 2.0;
 
-	std::string tileName = palette.empty()
+	std::string tileName = palette.entries().empty()
 		? "(no tiles -- Tab to open browser)"
-		: palette[paletteIndex].label;
+		: palette.entries()[paletteIndex].label;
 
 	// A refused save outranks a recent success: it stays until a save succeeds.
 	std::string saveNote{};
@@ -514,7 +380,7 @@ void DecorEditor::update_browser(const Renderer& renderer)
 	const int listTop = gridY + 20;
 	const int listVisibleHeight = gridHeight - 20;
 	const size_t visibleRows = whole_rows_within(listVisibleHeight, LIST_ITEM_H);
-	const size_t maxScroll = palette.size() > visibleRows ? palette.size() - visibleRows : 0;
+	const size_t maxScroll = palette.entries().size() > visibleRows ? palette.entries().size() - visibleRows : 0;
 	listScroll = std::min(listScroll, maxScroll);
 
 	if (isMouseInList)
@@ -546,12 +412,12 @@ void DecorEditor::update_browser(const Renderer& renderer)
 	auto begin_edit = [this, &renderer](TileRef tile)
 	{
 		browserSelected = tile;
-		auto foundIndex = palette_find(tile);
+		auto foundIndex = palette.find(tile);
 		if (foundIndex)
 		{
 			listCursor = *foundIndex;
-			labelBuffer = palette[*foundIndex].label;
-			symbolBuffer = palette[*foundIndex].symbol;
+			labelBuffer = palette.entries()[*foundIndex].label;
+			symbolBuffer = palette.entries()[*foundIndex].symbol;
 		}
 		else
 		{
@@ -563,13 +429,14 @@ void DecorEditor::update_browser(const Renderer& renderer)
 			symbolBuffer = 0;
 		}
 		editing = true;
+		editRefusal.reset();
 		isEditingSymbol = false;
 		isLabelAllSelected = true;
 	};
 
 	BeginScissorMode(0, listTop, LIST_W, listVisibleHeight);
 
-	for (size_t entryIndex = listScroll; entryIndex < palette.size(); ++entryIndex)
+	for (size_t entryIndex = listScroll; entryIndex < palette.entries().size(); ++entryIndex)
 	{
 		int itemY = listTop + static_cast<int>(entryIndex - listScroll) * LIST_ITEM_H;
 		if (itemY >= listTop + listVisibleHeight)
@@ -591,7 +458,7 @@ void DecorEditor::update_browser(const Renderer& renderer)
 
 		renderer.draw_tile_screen_sized(
 			Vector2D{ PAD, itemY + (LIST_ITEM_H - LIST_TILE) / 2 },
-			palette[entryIndex].tile,
+			palette.entries()[entryIndex].tile,
 			LIST_TILE);
 
 		// Label -- show live edit buffer inline when this row is being renamed.
@@ -612,10 +479,10 @@ void DecorEditor::update_browser(const Renderer& renderer)
 		}
 		else
 		{
-			entryText = palette[entryIndex].label;
-			if (palette[entryIndex].symbol)
+			entryText = palette.entries()[entryIndex].label;
+			if (palette.entries()[entryIndex].symbol)
 			{
-				entryText += std::format(" [{}]", palette[entryIndex].symbol);
+				entryText += std::format(" [{}]", palette.entries()[entryIndex].symbol);
 			}
 			entryText = truncate(entryText);
 			textColor = isSelected ? Color{ 255, 255, 100, 255 } : Color{ 200, 200, 200, 255 };
@@ -635,7 +502,7 @@ void DecorEditor::update_browser(const Renderer& renderer)
 
 			if (isDeleteButtonHovered && clicked)
 			{
-				palette_remove(palette[entryIndex].tile);
+				remove_from_palette(palette.entries()[entryIndex].tile);
 				save_palette_reporting();
 				listCursor.reset();
 				browserSelected = TileRef{};
@@ -647,12 +514,12 @@ void DecorEditor::update_browser(const Renderer& renderer)
 		// Entry click (outside [X] button) -- navigate browser to tile's sheet then edit.
 		if (hovered && clicked && mouse.x < deleteButtonX)
 		{
-			if (renderer.sheet_is_loaded(palette[entryIndex].tile.sheet))
+			if (renderer.sheet_is_loaded(palette.entries()[entryIndex].tile.sheet))
 			{
-				browserSheet = static_cast<int>(palette[entryIndex].tile.sheet);
-				browserScroll = std::max(0, palette[entryIndex].tile.row - 2);
+				browserSheet = static_cast<int>(palette.entries()[entryIndex].tile.sheet);
+				browserScroll = std::max(0, palette.entries()[entryIndex].tile.row - 2);
 			}
-			begin_edit(palette[entryIndex].tile);
+			begin_edit(palette.entries()[entryIndex].tile);
 		}
 	}
 	EndScissorMode();
@@ -684,7 +551,7 @@ void DecorEditor::update_browser(const Renderer& renderer)
 			TileRef tile{ static_cast<TileSheet>(browserSheet), col, row };
 
 			bool isSelected = (tile == browserSelected);
-			bool isInPalette = palette_find(tile).has_value();
+			bool isInPalette = palette.find(tile).has_value();
 			bool isTileHovered = (mouse.x >= cellPixelX && mouse.x < cellPixelX + BROWSER_TILE &&
 				mouse.y >= cellPixelY && mouse.y < cellPixelY + BROWSER_TILE);
 
@@ -714,10 +581,10 @@ void DecorEditor::update_browser(const Renderer& renderer)
 
 			if (isTileHovered)
 			{
-				auto foundIndex = palette_find(tile);
+				auto foundIndex = palette.find(tile);
 				if (foundIndex)
 				{
-					const auto& entry = palette[*foundIndex];
+					const auto& entry = palette.entries()[*foundIndex];
 					std::string tip = entry.label;
 					if (entry.symbol)
 					{
@@ -742,7 +609,7 @@ void DecorEditor::update_browser(const Renderer& renderer)
 	// Delete key
 	if (browserSelected.is_valid() && IsKeyPressed(KEY_DELETE))
 	{
-		palette_remove(browserSelected);
+		remove_from_palette(browserSelected);
 		save_palette_reporting();
 		editing = false;
 		browserSelected = TileRef{};
@@ -791,7 +658,14 @@ void DecorEditor::update_browser(const Renderer& renderer)
 		renderer.draw_text_color(
 			Vector2D{ textX, panelY + 46 }, std::format("Symbol: {}{}", symbolBuffer ? std::string(1, symbolBuffer) : "_", isEditingSymbol ? "|" : ""), symbolColor);
 
-		renderer.draw_text_color(Vector2D{ textX, panelY + 72 }, "Tab=switch field  |  Enter=save  |  Esc=cancel  |  Del=remove", Color{ 140, 140, 140, 255 });
+		if (editRefusal)
+		{
+			renderer.draw_text_color(Vector2D{ textX, panelY + 72 }, std::format("NOT SAVED: {}", *editRefusal), SAVE_FAILED_COLOR);
+		}
+		else
+		{
+			renderer.draw_text_color(Vector2D{ textX, panelY + 72 }, "Tab=switch field  |  Enter=save  |  Esc=cancel  |  Del=remove", Color{ 140, 140, 140, 255 });
+		}
 
 		if (IsKeyPressed(KEY_TAB))
 		{
@@ -809,14 +683,22 @@ void DecorEditor::update_browser(const Renderer& renderer)
 
 		if (IsKeyPressed(KEY_ENTER) && !labelBuffer.empty())
 		{
-			palette_add_or_update(browserSelected, labelBuffer, symbolBuffer);
-			if (auto found = palette_find(browserSelected))
+			const PaletteEdit edit = palette.add_or_update(browserSelected, labelBuffer, symbolBuffer);
+			// A refused edit changed nothing, so the panel stays open on what was typed.
+			if (edit != PaletteEdit::APPLIED)
 			{
-				listCursor = *found;
-				listScroll = *listCursor + 1 > visibleRows ? *listCursor + 1 - visibleRows : 0;
+				editRefusal = std::string{ palette_edit_refusal(edit) };
 			}
-			save_palette_reporting();
-			editing = false;
+			else
+			{
+				if (auto found = palette.find(browserSelected))
+				{
+					listCursor = *found;
+					listScroll = *listCursor + 1 > visibleRows ? *listCursor + 1 - visibleRows : 0;
+				}
+				save_palette_reporting();
+				editing = false;
+			}
 		}
 
 		// The char InputSystem::poll() already took from GetCharPressed(); a second call here returns 0.
