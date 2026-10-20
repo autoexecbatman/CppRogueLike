@@ -80,11 +80,6 @@
       "col": 0,
       "row": 0
     },
-    "TILE_GOLD": {
-      "sheet": 36,
-      "col": 0,
-      "row": 0
-    },
     "TILE_WEB": {
       "sheet": 40,
       "col": 0,

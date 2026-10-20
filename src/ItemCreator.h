@@ -34,9 +34,6 @@ namespace ItemCreator
 // The item a key names, at pos, with an enhancement's prefix and suffix applied.
 [[nodiscard]] std::unique_ptr<Item> create_with_enhancement(std::string_view key, Vector2D pos, PrefixType prefix, SuffixType suffix, GameContext& ctx);
 
-// A pile of 5 to 20 gold at pos.
-[[nodiscard]] std::unique_ptr<Item> create_gold_pile(Vector2D pos, GameContext& ctx);
-
 // One item of a category drawn by spawn weight at dungeonLevel, or nullptr when none of
 // the category can appear there.
 [[nodiscard]] std::unique_ptr<Item> create_random_of_category(std::string_view category, Vector2D pos, GameContext& ctx, int dungeonLevel);

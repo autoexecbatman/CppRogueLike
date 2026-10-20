@@ -215,15 +215,6 @@ std::unique_ptr<Item> ItemCreator::create_with_enhancement(
 	return item;
 }
 
-std::unique_ptr<Item> ItemCreator::create_gold_pile(Vector2D pos, GameContext& ctx)
-{
-	assert(ctx.dice && "ItemCreator::create_gold_pile: called without dice");
-
-	const int goldAmount = ctx.dice->roll(5, 20);
-
-	return create_with_gold_amount(pos, goldAmount, ctx);
-}
-
 std::unique_ptr<Item> ItemCreator::create_random_of_category(
 	std::string_view category,
 	Vector2D pos,
