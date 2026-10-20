@@ -3,6 +3,7 @@
 #include <cassert>
 #include <format>
 #include <iterator>
+#include <stdexcept>
 #include <string>
 #include <utility>
 
@@ -258,8 +259,10 @@ void RoomEditor::do_save(const std::string& name)
 
 	prefabName = prefab.name;
 	library->add_or_replace(std::move(prefab));
-	library->save(Paths::PREFABS);
-	set_status(std::format("Saved: {}", prefabName));
+	if (save_library() == SaveOutcome::SAVED)
+	{
+		set_status(std::format("Saved: {}", prefabName));
+	}
 }
 
 void RoomEditor::do_load(size_t prefabIndex)
@@ -328,15 +331,32 @@ void RoomEditor::do_delete(size_t prefabIndex)
 
 	std::string name = all[prefabIndex].name;
 	library->remove(name);
-	library->save(Paths::PREFABS);
 	listSelected.reset();
-	set_status(std::format("Deleted: {}", name));
+	if (save_library() == SaveOutcome::SAVED)
+	{
+		set_status(std::format("Deleted: {}", name));
+	}
 }
 
 void RoomEditor::set_status(const std::string& message)
 {
 	statusMsg = message;
 	statusTime = GetTime();
+}
+
+RoomEditor::SaveOutcome RoomEditor::save_library()
+{
+	assert(library && "RoomEditor::save_library: called before enter");
+	try
+	{
+		library->save(Paths::PREFABS);
+	}
+	catch (const std::runtime_error& refusal)
+	{
+		set_status(std::format("SAVE FAILED: {}", refusal.what()));
+		return SaveOutcome::FAILED;
+	}
+	return SaveOutcome::SAVED;
 }
 
 // ---------------------------------------------------------------------------
@@ -631,8 +651,10 @@ void RoomEditor::handle_input_text()
 				{
 					char symbol = palette[paletteIndex].symbol;
 					library->set_symbol_label(symbol, inputBuffer);
-					library->save(Paths::PREFABS);
-					set_status(std::format("Label: '{}'={}", symbol, inputBuffer));
+					if (save_library() == SaveOutcome::SAVED)
+					{
+						set_status(std::format("Label: '{}'={}", symbol, inputBuffer));
+					}
 				}
 			}
 			mode = EditorMode::NORMAL;
@@ -1279,8 +1301,10 @@ void RoomEditor::handle_input_picker(GameContext& ctx)
 			char symbol = palette[paletteIndex].symbol;
 			TileRef tile{ sheetId, pickerCol, pickerRow };
 			library->set_symbol_tile(symbol, tile);
-			library->save(Paths::PREFABS);
-			set_status(std::format("'{}' -> tile ({},{}) sheet {}", symbol, pickerCol, pickerRow, PICKER_SHEET_NAMES[pickerSheetListIndex]));
+			if (save_library() == SaveOutcome::SAVED)
+			{
+				set_status(std::format("'{}' -> tile ({},{}) sheet {}", symbol, pickerCol, pickerRow, PICKER_SHEET_NAMES[pickerSheetListIndex]));
+			}
 		}
 		mode = EditorMode::NORMAL;
 	}

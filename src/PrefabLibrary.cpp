@@ -1,9 +1,10 @@
 // file: PrefabLibrary.cpp
 #include <algorithm>
+#include <filesystem>
 #include <format>
 #include <fstream>
-#include <iostream>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -131,45 +132,33 @@ void PrefabLibrary::load_tile_labels(std::string_view path)
 	build_structural_symbols();
 
 	// Resolved like every other loader: a bare relative path opens only from the repository root.
-	std::ifstream tileConfigFile(Paths::resolve(path));
+	const std::filesystem::path resolved = Paths::resolve(path);
+	std::ifstream tileConfigFile(resolved);
 	if (!tileConfigFile.is_open())
 	{
-		return;
+		throw std::runtime_error(std::format("PrefabLibrary::load_tile_labels -- cannot open '{}'", resolved.string()));
 	}
 
-	json tileConfigDocument;
-	try
+	const json tileConfigDocument = json::parse(tileConfigFile);
+	for (const auto& paletteEntry : tileConfigDocument.at("palette"))
 	{
-		tileConfigFile >> tileConfigDocument;
+		const std::string symbolString = paletteEntry.at("symbol").get<std::string>();
 
-		if (!tileConfigDocument.contains("palette"))
+		// DecorEditor writes an empty symbol for a decoration no prefab character maps to.
+		if (symbolString.empty())
 		{
-			return;
+			continue;
 		}
 
-		for (const auto& paletteEntry : tileConfigDocument["palette"])
-		{
-			std::string symbolString = paletteEntry.value("symbol", "");
+		char sym = symbolString[0];
+		TileRef tile{
+			static_cast<TileSheet>(paletteEntry.value("sheet", 0)),
+			paletteEntry.value("col", -1),
+			paletteEntry.value("row", -1)
+		};
+		const std::string label = paletteEntry.at("label").get<std::string>();
 
-			if (symbolString.empty())
-			{
-				continue;
-			}
-
-			char sym = symbolString[0];
-			TileRef tile{
-				static_cast<TileSheet>(paletteEntry.value("sheet", 0)),
-				paletteEntry.value("col", -1),
-				paletteEntry.value("row", -1)
-			};
-			std::string label = paletteEntry.value("label", symbolString);
-
-			register_symbol(sym, tile, label);
-		}
-	}
-	catch (const json::exception& error)
-	{
-		std::clog << std::format("[PrefabLibrary] tile_config.json error: {}\n", error.what());
+		register_symbol(sym, tile, label);
 	}
 }
 
@@ -201,51 +190,33 @@ std::string PrefabLibrary::symbol_label(char symbol) const
 
 void PrefabLibrary::load(std::string_view path)
 {
-	std::ifstream prefabsFile(Paths::resolve(path));
-
+	const std::filesystem::path resolved = Paths::resolve(path);
+	std::ifstream prefabsFile(resolved);
 	if (!prefabsFile.is_open())
 	{
-		return;
+		throw std::runtime_error(std::format("PrefabLibrary::load -- cannot open '{}'", resolved.string()));
 	}
 
-	json prefabsDocument;
-	try
+	const json prefabsDocument = json::parse(prefabsFile);
+
+	// Read into a local, so a record that is refused leaves the library as it was.
+	std::vector<Prefab> loaded;
+	for (const auto& entry : prefabsDocument.at("prefabs"))
 	{
-		prefabsFile >> prefabsDocument;
+		Prefab prefab;
+		prefab.name = entry.at("name").get<std::string>();
+		prefab.depthMin = entry.at("depth_min").get<int>();
+		prefab.depthMax = entry.at("depth_max").get<int>();
+		prefab.weight = entry.at("weight").get<float>();
+		prefab.rows = entry.at("rows").get<std::vector<std::string>>();
 
-		if (!prefabsDocument.contains("prefabs"))
+		if (prefab.rows.empty())
 		{
-			return;
+			throw std::runtime_error(std::format("PrefabLibrary::load -- prefab '{}' has no rows", prefab.name));
 		}
-
-		prefabs.clear();
-		for (const auto& entry : prefabsDocument["prefabs"])
-		{
-			Prefab prefab;
-			prefab.name = entry.value("name", "unnamed");
-			prefab.depthMin = entry.value("depth_min", 1);
-			prefab.depthMax = entry.value("depth_max", 99);
-			prefab.weight = entry.value("weight", 1.0f);
-
-			if (entry.contains("rows"))
-			{
-				for (const auto& row : entry["rows"])
-				{
-					prefab.rows.push_back(row.get<std::string>());
-				}
-			}
-
-			if (!prefab.rows.empty())
-			{
-				prefabs.push_back(std::move(prefab));
-			}
-		}
+		loaded.push_back(std::move(prefab));
 	}
-	catch (const json::exception& error)
-	{
-		std::clog << std::format("[PrefabLibrary] prefabs.json error, clearing: {}\n", error.what());
-		prefabs.clear();
-	}
+	prefabs = std::move(loaded);
 }
 
 void PrefabLibrary::save(std::string_view path) const
@@ -264,8 +235,19 @@ void PrefabLibrary::save(std::string_view path) const
 	}
 	prefabsDocument["prefabs"] = arr;
 
-	std::ofstream out(path.data());
+	// Written where load reads it, so the editor saves to the repository's data/ from any working directory.
+	const std::filesystem::path resolved = Paths::resolve(path);
+	std::ofstream out(resolved);
+	if (!out.is_open())
+	{
+		throw std::runtime_error(std::format("PrefabLibrary::save -- cannot write '{}'", resolved.string()));
+	}
 	out << prefabsDocument.dump(2);
+	out.flush();
+	if (!out)
+	{
+		throw std::runtime_error(std::format("PrefabLibrary::save -- cannot write '{}'; the write failed", resolved.string()));
+	}
 }
 
 // Overwrite the tile sprite assigned to a symbol in the map.

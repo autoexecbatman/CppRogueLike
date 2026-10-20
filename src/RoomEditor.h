@@ -182,6 +182,17 @@ private:
 	void do_delete(size_t prefabIndex);
 	void set_status(const std::string& message);
 
+	// Whether a save reached the disk.
+	enum class SaveOutcome
+	{
+		SAVED,
+		FAILED
+	};
+
+	// Writes the library to prefabs.json. A refused write is put in the status line and reported
+	// as FAILED, so the caller shows its own success message only after a save that happened.
+	[[nodiscard]] SaveOutcome save_library();
+
 	// A cell of the canvas, by column and row.
 	struct CanvasCell
 	{

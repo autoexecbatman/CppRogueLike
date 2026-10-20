@@ -33,9 +33,9 @@
     },
     {
       "file": "src/PrefabLibrary.cpp",
-      "original": "void PrefabLibrary::load(std::string_view path)\n{\n\tstd::ifstream prefabsFile(Paths::resolve(path));",
-      "mutated": "void PrefabLibrary::load(std::string_view path)\n{\n\tstd::ifstream prefabsFile(path.data());",
-      "catches": "the prefab library silently loading nothing when the working directory is not the repository root"
+      "original": "void PrefabLibrary::load(std::string_view path)\n{\n\tconst std::filesystem::path resolved = Paths::resolve(path);",
+      "mutated": "void PrefabLibrary::load(std::string_view path)\n{\n\tconst std::filesystem::path resolved{ path };",
+      "catches": "the prefab library opening its file relative to the working directory instead of the repository root"
     }
   ]
 }
