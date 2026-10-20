@@ -51,12 +51,6 @@
     },
     {
       "file": "src/GameStateManager.cpp",
-      "original": "\t\tdecoration->blocks_movement = record.at(\"blocksMovement\").get<bool>();",
-      "mutated": "",
-      "catches": "a decoration's blocking reset by a load"
-    },
-    {
-      "file": "src/GameStateManager.cpp",
       "original": "\t\tdecoration->lootTableKey = record.at(\"lootTableKey\").get<std::string>();",
       "mutated": "",
       "catches": "a barrel that drops nothing after a load"

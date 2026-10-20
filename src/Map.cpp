@@ -1110,7 +1110,6 @@ void Map::create_room(const DungeonRoom& room, bool first, GameContext& ctx)
 			decoration->tile = overrideTile;
 			decoration->name = "decoration";
 			decoration->hp = 3;
-			decoration->blocks_movement = true;
 			decoration->lootTableKey = "";
 			decoration->isBroken = false;
 			ctx.decorations->push_back(std::move(decoration));
@@ -1405,7 +1404,6 @@ void Map::spawn_barrels(const DungeonRoom& room, GameContext& ctx)
 		barrel->tile = barrel_tile;
 		barrel->name = "barrel";
 		barrel->hp = 2;
-		barrel->blocks_movement = true;
 		barrel->lootTableKey = "gold";
 		ctx.decorations->push_back(std::move(barrel));
 	}

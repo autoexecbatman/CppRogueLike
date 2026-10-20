@@ -16,7 +16,6 @@ struct Decoration
 	TileRef tile{};
 	std::string name{};
 	int hp{ 1 };
-	bool blocks_movement{ true };
 	std::string lootTableKey{}; // "" = drops nothing on break
 	bool isBroken{ false };
 };

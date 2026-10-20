@@ -143,7 +143,6 @@ void save_decorations(const std::vector<std::unique_ptr<Decoration>>& decoration
 			{ "tile", TileRefJson::encode_tile(decoration->tile) },
 			{ "name", decoration->name },
 			{ "hp", decoration->hp },
-			{ "blocksMovement", decoration->blocks_movement },
 			{ "lootTableKey", decoration->lootTableKey },
 			{ "isBroken", decoration->isBroken } });
 	}
@@ -161,7 +160,6 @@ void load_decorations(const json& source, std::vector<std::unique_ptr<Decoration
 		decoration->tile = TileRefJson::parse_tile(record.at("tile"));
 		decoration->name = record.at("name").get<std::string>();
 		decoration->hp = record.at("hp").get<int>();
-		decoration->blocks_movement = record.at("blocksMovement").get<bool>();
 		decoration->lootTableKey = record.at("lootTableKey").get<std::string>();
 		decoration->isBroken = record.at("isBroken").get<bool>();
 		decorations.push_back(std::move(decoration));

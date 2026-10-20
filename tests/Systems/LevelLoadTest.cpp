@@ -95,7 +95,6 @@ protected:
 		barrel->tile = TileRef{ TileSheet::SHEET_DECOR0, 4, 6 };
 		barrel->name = "barrel";
 		barrel->hp = hitPointsLeft;
-		barrel->blocks_movement = false;
 		barrel->lootTableKey = "gold";
 		barrel->isBroken = true;
 		return barrel;
@@ -269,7 +268,6 @@ TEST_F(LevelLoadTest, ADecorationComesBackWithEveryField)
 	EXPECT_EQ(barrel.tile, (TileRef{ TileSheet::SHEET_DECOR0, 4, 6 }));
 	EXPECT_EQ(barrel.name, "barrel");
 	EXPECT_EQ(barrel.hp, 2) << "the hit points it had left were not restored";
-	EXPECT_FALSE(barrel.blocks_movement);
 	EXPECT_EQ(barrel.lootTableKey, "gold");
 	EXPECT_TRUE(barrel.isBroken);
 }
