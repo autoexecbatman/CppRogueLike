@@ -685,3 +685,9 @@ TEST_F(AssertProbeDeathTest, SteppingAValueAboveItsBoundAborts)
 {
 	EXPECT_DEATH([[maybe_unused]] const size_t stepped = step_within(10, 1, 9), "step_within: value is above its own bound");
 }
+
+// A row with no height divides by zero, so the layout that passed it is broken.
+TEST_F(AssertProbeDeathTest, CountingRowsOfNoHeightAborts)
+{
+	EXPECT_DEATH([[maybe_unused]] const size_t rows = whole_rows_within(90, 0), "whole_rows_within: a row has no height");
+}

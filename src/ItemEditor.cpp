@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cassert>
 #include <format>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -113,8 +114,8 @@ void ItemEditor::enter(GameContext& ctx)
 
 	keys = ctx.itemRegistry->get_all_keys();
 
-	listCursor = 0;
-	listScroll = 0;
+	listCursor.reset(keys.size());
+	fieldCursor.reset(FIELD_COUNT);
 	pickerSheet = 0;
 	pickerScroll = 0;
 
@@ -152,8 +153,7 @@ void ItemEditor::load_working(const ItemRegistry& items)
 	const ItemParams& params = items.get_params(key);
 	working = params;
 	workingTile = contentRegistry ? contentRegistry->get_tile(key) : TileRef{};
-	fieldCursor = 0;
-	fieldScroll = 0;
+	fieldCursor.reset(FIELD_COUNT);
 	mode = Mode::NORMAL;
 	editBuffer.clear();
 }
@@ -228,34 +228,36 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 	ItemRegistry& items = *ctx.itemRegistry;
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
 	const Renderer& renderer = *ctx.renderer;
-	int screenHeight = renderer.get_screen_height();
-	int bodyHeight = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
-	int visibleFields = bodyHeight / FIELD_HEIGHT;
-	int total = static_cast<int>(keys.size());
+	int bodyHeight = body_height(renderer);
+	const size_t visibleListRows = whole_rows_within(bodyHeight, ITEM_HEIGHT);
+	const size_t visibleFields = whole_rows_within(bodyHeight, FIELD_HEIGHT);
 
 	::Vector2 mouse = GetMousePosition();
 	bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
 
-	if (clicked)
+	// A click in the header is on neither panel.
+	if (clicked && mouse.y >= HEADER_HEIGHT)
 	{
+		const int pixelsBelowTop = static_cast<int>(mouse.y) - HEADER_HEIGHT;
 		if (mouse.x < LIST_WIDTH)
 		{
 			focus = 0;
-			int idx = listScroll + static_cast<int>(mouse.y - HEADER_HEIGHT) / ITEM_HEIGHT;
-			idx = std::clamp(idx, 0, total - 1);
-			if (idx != listCursor)
+			const std::optional<size_t> row = listCursor.row_under(whole_rows_within(pixelsBelowTop, ITEM_HEIGHT), visibleListRows);
+			if (row && *row != listCursor.current_row())
 			{
 				commit_working(items);
-				listCursor = idx;
+				listCursor.select(*row);
 				load_working(items);
 			}
 		}
 		else if (mode == Mode::NORMAL)
 		{
 			focus = 1;
-			int idx = fieldScroll + static_cast<int>(mouse.y - HEADER_HEIGHT) / FIELD_HEIGHT;
-			idx = std::clamp(idx, 0, FIELD_COUNT - 1);
-			fieldCursor = idx;
+			const std::optional<size_t> field = fieldCursor.row_under(whole_rows_within(pixelsBelowTop, FIELD_HEIGHT), visibleFields);
+			if (field)
+			{
+				fieldCursor.select(*field);
+			}
 		}
 	}
 
@@ -264,42 +266,28 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 	{
 		if (mouse.x < LIST_WIDTH)
 		{
-			listScroll = std::clamp(
-				listScroll - static_cast<int>(wheel),
-				0,
-				std::max(0, total - 1));
+			listCursor.scroll_by(-static_cast<int>(wheel), visibleListRows);
 		}
 		else
 		{
-			fieldScroll = std::clamp(
-				fieldScroll - static_cast<int>(wheel),
-				0,
-				std::max(0, FIELD_COUNT - visibleFields));
+			fieldCursor.scroll_by(-static_cast<int>(wheel), visibleFields);
 		}
 	}
 
 	// Keyboard: list panel
 	if (focus == 0)
 	{
-		if (IsKeyPressed(KEY_UP) && listCursor > 0)
+		if (IsKeyPressed(KEY_UP) && listCursor.can_move_up())
 		{
 			commit_working(items);
-			--listCursor;
-			if (listCursor < listScroll)
-			{
-				listScroll = listCursor;
-			}
+			listCursor.move_up();
 			load_working(items);
 		}
-		else if (IsKeyPressed(KEY_DOWN) && listCursor < total - 1)
+		// A screen too short for one row has nowhere to scroll the cursor to.
+		else if (IsKeyPressed(KEY_DOWN) && listCursor.can_move_down() && visibleListRows > 0)
 		{
 			commit_working(items);
-			++listCursor;
-			int visibleListRows = bodyHeight / 30;
-			if (listCursor >= listScroll + visibleListRows)
-			{
-				listScroll = listCursor - visibleListRows + 1;
-			}
+			listCursor.move_down(visibleListRows);
 			load_working(items);
 		}
 		else if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_RIGHT))
@@ -320,11 +308,12 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 			defaults.weaponSize = WeaponSize::MEDIUM;
 			const std::string newKey = items.add_custom("New Item", "weapon", defaults);
 			keys = items.get_all_keys();
-			for (int keyIndex = 0; keyIndex < static_cast<int>(keys.size()); ++keyIndex)
+			listCursor.set_row_count(keys.size());
+			for (size_t keyIndex = 0; keyIndex < keys.size(); ++keyIndex)
 			{
 				if (keys[keyIndex] == newKey)
 				{
-					listCursor = keyIndex;
+					listCursor.select(keyIndex);
 					break;
 				}
 			}
@@ -342,7 +331,7 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 				}
 				items.remove_custom(current_key());
 				keys = items.get_all_keys();
-				listCursor = std::clamp(listCursor, 0, static_cast<int>(keys.size()) - 1);
+				listCursor.set_row_count(keys.size());
 				load_working(items);
 			}
 		}
@@ -350,23 +339,13 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 	}
 
 	// Keyboard: field panel
-	int lastField = FIELD_COUNT - 1;
-
-	if (IsKeyPressed(KEY_UP) && fieldCursor > 0)
+	if (IsKeyPressed(KEY_UP) && fieldCursor.can_move_up())
 	{
-		--fieldCursor;
-		if (fieldCursor < fieldScroll)
-		{
-			fieldScroll = fieldCursor;
-		}
+		fieldCursor.move_up();
 	}
-	else if (IsKeyPressed(KEY_DOWN) && fieldCursor < lastField)
+	else if (IsKeyPressed(KEY_DOWN) && fieldCursor.can_move_down() && visibleFields > 0)
 	{
-		++fieldCursor;
-		if (fieldCursor >= fieldScroll + visibleFields)
-		{
-			fieldScroll = fieldCursor - visibleFields + 1;
-		}
+		fieldCursor.move_down(visibleFields);
 	}
 
 	FieldId fieldId = current_field();
@@ -542,31 +521,33 @@ void ItemEditor::render_header(const Renderer& renderer) const
 		Color{ 100, 130, 100, 255 });
 }
 
+int ItemEditor::body_height(const Renderer& renderer)
+{
+	return renderer.get_screen_height() - HEADER_HEIGHT - HINT_HEIGHT;
+}
+
 void ItemEditor::render_list(const Renderer& renderer, const ItemRegistry& items) const
 {
-	int screenHeight = renderer.get_screen_height();
 	int bodyY = HEADER_HEIGHT;
-	int bodyHeight = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
+	int bodyHeight = body_height(renderer);
 
 	DrawRectangle(0, bodyY, LIST_WIDTH, bodyHeight, Color{ 5, 10, 5, 255 });
 	DrawLine(LIST_WIDTH, bodyY, LIST_WIDTH, bodyY + bodyHeight, Color{ 80, 120, 80, 255 });
 
-	int total = static_cast<int>(keys.size());
-	int visibleCount = bodyHeight / ITEM_HEIGHT;
-	int maxScroll = std::max(0, total - visibleCount);
-	int scroll = std::clamp(listScroll, 0, maxScroll);
+	const size_t visibleCount = whole_rows_within(bodyHeight, ITEM_HEIGHT);
+	const size_t scroll = listCursor.first_visible(visibleCount);
 
 	::Vector2 mouse = GetMousePosition();
 
-	for (int itemIndex = scroll; itemIndex < total; ++itemIndex)
+	for (size_t itemIndex = scroll; itemIndex < keys.size(); ++itemIndex)
 	{
-		int itemY = bodyY + (itemIndex - scroll) * ITEM_HEIGHT;
+		int itemY = bodyY + static_cast<int>(itemIndex - scroll) * ITEM_HEIGHT;
 		if (itemY + ITEM_HEIGHT > bodyY + bodyHeight)
 		{
 			break;
 		}
 
-		bool isSelected = (itemIndex == listCursor);
+		bool isSelected = (itemIndex == listCursor.current_row());
 		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH && mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
@@ -620,30 +601,28 @@ void ItemEditor::render_list(const Renderer& renderer, const ItemRegistry& items
 void ItemEditor::render_fields(const Renderer& renderer) const
 {
 	int screenWidth = renderer.get_screen_width();
-	int screenHeight = renderer.get_screen_height();
 	int panelX = LIST_WIDTH;
 	int panelY = HEADER_HEIGHT;
 	int fieldsWidth = screenWidth - LIST_WIDTH;
-	int fieldsHeight = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
+	int fieldsHeight = body_height(renderer);
 
 	DrawRectangle(panelX, panelY, fieldsWidth, fieldsHeight, Color{ 5, 8, 5, 255 });
 
-	int visible = fieldsHeight / FIELD_HEIGHT;
-	int maxScroll = std::max(0, FIELD_COUNT - visible);
-	int scroll = std::clamp(fieldScroll, 0, maxScroll);
+	const size_t visible = whole_rows_within(fieldsHeight, FIELD_HEIGHT);
+	const size_t scroll = fieldCursor.first_visible(visible);
 
 	::Vector2 mouse = GetMousePosition();
 
-	for (int fieldIndex = scroll; fieldIndex < FIELD_COUNT; ++fieldIndex)
+	for (size_t fieldIndex = scroll; fieldIndex < FIELD_COUNT; ++fieldIndex)
 	{
-		int itemY = panelY + (fieldIndex - scroll) * FIELD_HEIGHT;
+		int itemY = panelY + static_cast<int>(fieldIndex - scroll) * FIELD_HEIGHT;
 		if (itemY + FIELD_HEIGHT > panelY + fieldsHeight)
 		{
 			break;
 		}
 
 		FieldId fieldId = static_cast<FieldId>(fieldIndex);
-		bool isSelected = (fieldIndex == fieldCursor);
+		bool isSelected = (fieldIndex == fieldCursor.current_row());
 		bool hovered = mouse.x >= panelX && mouse.x < screenWidth && mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
@@ -703,11 +682,10 @@ void ItemEditor::render_fields(const Renderer& renderer) const
 void ItemEditor::render_picker(const Renderer& renderer) const
 {
 	int screenWidth = renderer.get_screen_width();
-	int screenHeight = renderer.get_screen_height();
 	int panelX = LIST_WIDTH;
 	int panelWidth = screenWidth - LIST_WIDTH;
 	int bodyY = HEADER_HEIGHT;
-	int bodyHeight = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
+	int bodyHeight = body_height(renderer);
 
 	DrawRectangle(panelX, bodyY, panelWidth, bodyHeight, Color{ 5, 8, 24, 255 });
 
@@ -813,12 +791,12 @@ const std::string& ItemEditor::current_key() const
 	{
 		throw std::out_of_range("ItemEditor::current_key -- key list is empty");
 	}
-	return keys[listCursor];
+	return keys[listCursor.current_row()];
 }
 
 ItemEditor::FieldId ItemEditor::current_field() const
 {
-	return static_cast<FieldId>(fieldCursor);
+	return static_cast<FieldId>(fieldCursor.current_row());
 }
 
 std::string ItemEditor::field_label(FieldId field) const

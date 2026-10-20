@@ -216,6 +216,27 @@ TEST(ListCursorTest, AStepDownAfterAShrinkKeepsTheDrawnScreen)
 	EXPECT_EQ(cursor.first_visible(3), 0u);
 }
 
+// A place past the bottom of the screen is not drawn, so a click there has no row even
+// when the list runs on below it.
+TEST(ListCursorTest, RowUnderAPlacePastTheScreenIsNothing)
+{
+	ListCursor cursor{};
+	cursor.reset(10);
+	EXPECT_EQ(cursor.row_under(2, 3), std::optional<size_t>{ 2 });
+	EXPECT_EQ(cursor.row_under(3, 3), std::nullopt);
+}
+
+// Only whole rows count: a partial row at the bottom is not one, and a negative extent holds none.
+TEST(WholeRowsWithinTest, CountsOnlyWholeRows)
+{
+	EXPECT_EQ(whole_rows_within(89, 30), 2u);
+	EXPECT_EQ(whole_rows_within(90, 30), 3u);
+	EXPECT_EQ(whole_rows_within(29, 30), 0u);
+	EXPECT_EQ(whole_rows_within(0, 30), 0u);
+	EXPECT_EQ(whole_rows_within(-5, 30), 0u);
+	EXPECT_EQ(whole_rows_within(-60, 30), 0u);
+}
+
 // A signed step clamps at zero and at the bound, and leaves the value alone at zero steps.
 TEST(StepWithinTest, AStepIsHeldBetweenZeroAndTheBound)
 {

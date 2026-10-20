@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "ItemRegistry.h"
+#include "ListCursor.h"
 #include "Renderer.h"
 
 struct GameContext;
@@ -81,7 +82,7 @@ private:
 		COUNT
 	};
 
-	static constexpr int FIELD_COUNT = static_cast<int>(FieldId::COUNT);
+	static constexpr size_t FIELD_COUNT = static_cast<size_t>(FieldId::COUNT);
 
 	ContentRegistry* contentRegistry{ nullptr };
 	bool active{ false };
@@ -90,16 +91,14 @@ private:
 
 	// Item list (all registered keys)
 	std::vector<std::string> keys;
-	int listCursor{ 0 };
-	int listScroll{ 0 };
+	ListCursor listCursor{};
 
 	// Working copy of selected item
 	ItemParams working{};
 	TileRef workingTile{};
 
 	// Field navigation
-	int fieldCursor{ 0 };
-	int fieldScroll{ 0 };
+	ListCursor fieldCursor{};
 	std::string editBuffer;
 
 	// Tile picker state
@@ -119,6 +118,12 @@ private:
 
 	void render(const GameContext& ctx) const;
 	void render_header(const Renderer& renderer) const;
+	// The height of the panels between the header and the hint bar. Input and drawing both
+	// read it, so a click and the row drawn under it come from one row count.
+	//
+	// Example:
+	//   body_height(renderer);   // a 900-pixel screen -> 824, after a 48 header and a 28 hint bar
+	[[nodiscard]] static int body_height(const Renderer& renderer);
 	void render_list(const Renderer& renderer, const ItemRegistry& items) const;
 	void render_fields(const Renderer& renderer) const;
 	void render_picker(const Renderer& renderer) const;

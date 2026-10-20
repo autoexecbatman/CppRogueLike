@@ -45,6 +45,19 @@
 	int steps,
 	size_t highest);
 
+// How many whole rows of `rowHeight` pixels fit in `pixels`: 0 when not even one fits,
+// including a negative extent. It is also the row a pixel falls in, counted from 0, for a
+// pixel already known to be at or below the list's top. This is where a pixel extent from
+// raylib, an int, becomes a row count.
+//
+// Example:
+//   whole_rows_within(89, 30);   // -> 2, the third row is cut off
+//   whole_rows_within(-5, 30);   // -> 0
+//   whole_rows_within(90, 0);    // aborts: "whole_rows_within: a row has no height"
+[[nodiscard]] size_t whole_rows_within(
+	int pixels,
+	int rowHeight);
+
 class ListCursor
 {
 private:
@@ -107,13 +120,13 @@ public:
 	[[nodiscard]] size_t first_visible(size_t visibleRows) const;
 
 	// The row drawn `visibleRowOffset` rows below the top of a screen of `visibleRows`,
-	// or nullopt when that place is below the last row or the list is empty. A click on
-	// empty space under the list selects nothing.
+	// or nullopt when that place is past the bottom of the screen, below the last row, or
+	// the list is empty. A click on empty space under the list selects nothing.
 	//
 	// Example:
 	//   // 10 rows, after scroll_by(7, 3)
 	//   row_under(2, 3);           // -> 9
-	//   row_under(5, 3);           // -> nullopt, below the last row
+	//   row_under(5, 3);           // -> nullopt, past the screen and below the last row
 	[[nodiscard]] std::optional<size_t> row_under(
 		size_t visibleRowOffset,
 		size_t visibleRows) const;

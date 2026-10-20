@@ -24,6 +24,19 @@ size_t step_within(
 	return magnitude >= value ? 0 : value - magnitude;
 }
 
+size_t whole_rows_within(
+	int pixels,
+	int rowHeight)
+{
+	assert(rowHeight > 0 && "whole_rows_within: a row has no height");
+	// A negative extent holds no rows; it is refused before the cast, where it would wrap.
+	if (pixels < 0)
+	{
+		return 0;
+	}
+	return static_cast<size_t>(pixels / rowHeight);
+}
+
 size_t ListCursor::max_first_visible(size_t visibleRows) const
 {
 	return rowCount > visibleRows ? rowCount - visibleRows : 0;
@@ -59,6 +72,11 @@ std::optional<size_t> ListCursor::row_under(
 	size_t visibleRowOffset,
 	size_t visibleRows) const
 {
+	// A place below the screen is not drawn, whatever rows the list holds beyond it.
+	if (visibleRowOffset >= visibleRows)
+	{
+		return std::nullopt;
+	}
 	const size_t row = first_visible(visibleRows) + visibleRowOffset;
 	if (row >= rowCount)
 	{

@@ -250,6 +250,11 @@ $probes = @(
         test   = "AssertProbeDeathTest.SteppingAValueAboveItsBoundAborts"
         file   = "src/ListCursor.cpp"
         anchor = 'assert(value <= highest && "step_within: value is above its own bound");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.CountingRowsOfNoHeightAborts"
+        file   = "src/ListCursor.cpp"
+        anchor = 'assert(rowHeight > 0 && "whole_rows_within: a row has no height");'
     }
 )
 

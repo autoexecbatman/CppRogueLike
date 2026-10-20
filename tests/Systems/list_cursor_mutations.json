@@ -4,7 +4,7 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=ListCursorTest.*:StepWithinTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=ListCursorTest.*:StepWithinTest.*:WholeRowsWithinTest.*"
   ],
   "mutations": [
     {
@@ -108,6 +108,24 @@
       "original": "\tcurrent = row;",
       "mutated": "\tcurrent = 0;",
       "catches": "a click selects nothing"
+    },
+    {
+      "file": "src/ListCursor.cpp",
+      "original": "if (visibleRowOffset >= visibleRows)",
+      "mutated": "if (visibleRowOffset > visibleRows)",
+      "catches": "a click on the partial row below the screen selects a row that is not drawn"
+    },
+    {
+      "file": "src/ListCursor.cpp",
+      "original": "if (pixels < 0)",
+      "mutated": "if (false)",
+      "catches": "a negative extent of a whole row or more reaches the cast and wraps to a huge row count"
+    },
+    {
+      "file": "src/ListCursor.cpp",
+      "original": "return static_cast<size_t>(pixels / rowHeight);",
+      "mutated": "return static_cast<size_t>((pixels + rowHeight - 1) / rowHeight);",
+      "catches": "a partial row counted as a whole one"
     }
   ]
 }
