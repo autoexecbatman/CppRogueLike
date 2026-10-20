@@ -1,5 +1,6 @@
 // GameStateManager.cpp - Handles game state persistence and level management
 #include <cassert>
+#include <exception>
 #include <filesystem>
 #include <format>
 #include <fstream>
@@ -233,7 +234,7 @@ void GameStateManager::init_new_game(GameContext& ctx)
 	ctx.messageSystem->log("New game initialized");
 }
 
-bool GameStateManager::load_all(GameContext& ctx)
+LoadOutcome GameStateManager::load_all(GameContext& ctx)
 {
 	assert(ctx.contentRegistry && "GameStateManager::load_all: called without a contentRegistry");
 	assert(ctx.menuManager != nullptr && "GameStateManager::load_all: called without a menuManager");
@@ -244,16 +245,32 @@ bool GameStateManager::load_all(GameContext& ctx)
 	assert(ctx.tileConfig != nullptr && "GameStateManager::load_all: called without a tileConfig");
 
 	ContentRegistryIO::load(*ctx.contentRegistry, Paths::CONTENT_TILES);
-	ctx.menuManager->set_game_initialized(true);
+	ctx.menuManager->set_game_initialized(false);
 	ctx.dataManager->load_all_data(*ctx.messageSystem);
 
 	*ctx.playerOwner = std::make_unique<Player>(Vector2D{ 0, 0 });
 
-	if (!load_game(ctx))
+	// The one place a save is read, so the one place a loader's refusal is caught.
+	try
 	{
-		ctx.messageSystem->log("Error: Could not open save file.");
-		return false;
+		if (!load_game(ctx))
+		{
+			ctx.messageSystem->log("Error: Could not open save file.");
+			return LoadOutcome{ LoadOutcomeKind::NO_SAVE, "" };
+		}
 	}
+	catch (const std::exception& refusal)
+	{
+		// A delete can fail at run time - a locked or read-only file - so it is reported, never asserted.
+		if (!delete_save_file())
+		{
+			ctx.messageSystem->log(std::format("Load refused, save could not be deleted: {}", refusal.what()));
+			return LoadOutcome{ LoadOutcomeKind::REFUSED_AND_KEPT, refusal.what() };
+		}
+		ctx.messageSystem->log(std::format("Load refused, save deleted: {}", refusal.what()));
+		return LoadOutcome{ LoadOutcomeKind::REFUSED, refusal.what() };
+	}
+	ctx.menuManager->set_game_initialized(true);
 
 	// load_game restores the creature class, so the class sprite is only known now.
 	ctx.player()->actorData.tile = ctx.tileConfig->get(ctx.player_concrete().sprite_tile_key());
@@ -261,7 +278,7 @@ bool GameStateManager::load_all(GameContext& ctx)
 	ctx.gameState->set_is_loaded_game(true);
 	ctx.gameState->begin_run();
 	ctx.messageSystem->log("GameStatus set to STARTUP after loading for FOV computation");
-	return true;
+	return LoadOutcome{ LoadOutcomeKind::LOADED, "" };
 }
 
 void GameStateManager::save_game(GameContext& ctx)

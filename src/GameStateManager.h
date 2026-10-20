@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "Persistent.h" // json
@@ -73,12 +74,41 @@ void load_rooms(const json& source, std::vector<DungeonRoom>& rooms);
 void save_decorations(const std::vector<std::unique_ptr<Decoration>>& decorations, json& output);
 void load_decorations(const json& source, std::vector<std::unique_ptr<Decoration>>& decorations);
 
+// What became of a Load Game: the game is running, there was no save to read, or the
+// loaders refused the save - deleted, or still on disk because the delete failed.
+enum class LoadOutcomeKind
+{
+	LOADED,
+	NO_SAVE,
+	REFUSED,
+	REFUSED_AND_KEPT,
+};
+
+// A load's outcome, and for a refusal the loader's reason, to show the player.
+struct LoadOutcome
+{
+	// Which of the three a Load Game came to.
+	LoadOutcomeKind kind{ LoadOutcomeKind::NO_SAVE };
+	// The loader's own message for a refused load, naming what it could not read; empty otherwise.
+	std::string reason{};
+};
+
 // - Handles game state persistence and level management
 class GameStateManager
 {
 public:
-	// High-level game state operations
-	bool load_all(GameContext& ctx);
+	// Loads the saved game for Load Game. The game is marked running only once the load
+	// succeeds. A save the loaders refuse - unparseable, a required key missing, a value out
+	// of range - is logged, deleted, and reported with the loader's reason, by the owner's
+	// ruling on issues/0293; a delete that fails, as on a locked file, is reported as
+	// REFUSED_AND_KEPT. The containers it half-filled are left for New Game to replace.
+	//
+	// Example:
+	//   stateManager.load_all(ctx);   // a good save   -> { LOADED, "" }, game running
+	//   stateManager.load_all(ctx);   // no save file  -> { NO_SAVE, "" }, not running
+	//   stateManager.load_all(ctx);   // a save of "{}" -> { REFUSED, "[json.exception.out_of_range.403]
+	//                                 //    key 'map_width' not found" }, file deleted, not running
+	LoadOutcome load_all(GameContext& ctx);
 	void init_new_game(GameContext& ctx);
 
 	// Save/Load operations

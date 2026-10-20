@@ -1,0 +1,53 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=LoadRefusalTest.*:LoadRefusalMenuTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "if (!delete_save_file())",
+      "mutated": "if (false)",
+      "catches": "a refused save kept on disk, against the owner's ruling"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "if (!delete_save_file())",
+      "mutated": "if (!delete_save_file() && false)",
+      "catches": "a delete that failed reported as a deleted save"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\tctx.menuManager->set_game_initialized(false);\n\tctx.dataManager->load_all_data",
+      "mutated": "\tctx.menuManager->set_game_initialized(true);\n\tctx.dataManager->load_all_data",
+      "catches": "a load that fails left marked as a running game"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "return LoadOutcome{ LoadOutcomeKind::REFUSED, refusal.what() };",
+      "mutated": "return LoadOutcome{ LoadOutcomeKind::LOADED, refusal.what() };",
+      "catches": "a refusal reported as a loaded game"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "return LoadOutcome{ LoadOutcomeKind::NO_SAVE, \"\" };",
+      "mutated": "return LoadOutcome{ LoadOutcomeKind::LOADED, \"\" };",
+      "catches": "a missing save reported as a loaded game"
+    },
+    {
+      "file": "src/Menu.cpp",
+      "original": "\t\t\t\treport_unloaded_game(outcome, ctx);\n",
+      "mutated": "",
+      "catches": "Load Game on a refused save shows nothing and leaves a closed menu"
+    },
+    {
+      "file": "src/Menu.cpp",
+      "original": "\t\tcloseCtx.menus->clear();\n",
+      "mutated": "",
+      "catches": "closing the notice leaves the abandoned main menu under the new one"
+    }
+  ]
+}
