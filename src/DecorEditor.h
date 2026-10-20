@@ -48,34 +48,34 @@ private:
 	friend void from_json(const nlohmann::json& source, PaletteEntry& entry);
 
 	bool active{ false };
-	int palette_index{ 0 };
-	mutable double last_save_time{ -10.0 };
+	int paletteIndex{ 0 };
+	mutable double lastSaveTime{ -10.0 };
 
-	std::string active_key;
-	std::string palette_path; // set during load_palette, used by save_palette and browser
+	std::string activeKey{};
+	std::string palettePath{}; // set during load_palette, used by save_palette and browser
 
-	std::unordered_map<std::string, std::unordered_map<uint32_t, TileRef>> all_overrides;
+	std::unordered_map<std::string, std::unordered_map<uint32_t, TileRef>> allOverrides{};
 
 	// Dynamic palette -- loaded from tile_labels.json, editable at runtime.
 	std::vector<PaletteEntry> palette;
 
 	// Sheet browser state
-	bool browser_open{ false };
-	int browser_sheet{ 0 };
-	int browser_scroll{ 0 };
-	TileRef browser_selected{}; // selected tile, is_valid() == false means none
+	bool isBrowserOpen{ false };
+	int browserSheet{ 0 };
+	int browserScroll{ 0 };
+	TileRef browserSelected{}; // selected tile, is_valid() == false means none
 
 	// Palette list panel state
-	int list_cursor{ -1 }; // selected palette index; -1 = none
-	int list_scroll{ 0 };
+	int listCursor{ -1 }; // selected palette index; -1 = none
+	int listScroll{ 0 };
 
 	// Label / symbol editing state
 	bool editing{ false };
-	std::string label_buf;
-	char sym_buf{ 0 };
-	bool editing_sym{ false }; // true = cursor in symbol field
-	bool label_all_selected{ false }; // first keystroke replaces entire label
-	int buffered_char{ 0 }; // char polled by InputSystem::poll(), fed in before render
+	std::string labelBuffer{};
+	char symbolBuffer{ 0 };
+	bool isEditingSymbol{ false }; // true = cursor in symbol field
+	bool isLabelAllSelected{ false }; // first keystroke replaces entire label
+	int bufferedCharacter{ 0 }; // char polled by InputSystem::poll(), fed in before render
 
 	// Packs a tile position into one key: row in the high half, column in the
 	// low half. Columns wrap at 65536, which no map approaches.
@@ -105,7 +105,7 @@ public:
 
 	void toggle();
 
-	void set_char_input(int character) noexcept { buffered_char = character; }
+	void set_char_input(int character) noexcept { bufferedCharacter = character; }
 
 	void cycle_next();
 	void cycle_prev();
@@ -121,7 +121,7 @@ public:
 
 	[[nodiscard]] bool is_active() const { return active; }
 
-	[[nodiscard]] bool is_browser_open() const { return browser_open; }
+	[[nodiscard]] bool is_browser_open() const { return isBrowserOpen; }
 
 	[[nodiscard]] TileRef get_override(Vector2D worldPosition) const;
 
