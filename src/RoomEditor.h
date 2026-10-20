@@ -58,7 +58,7 @@ private:
 	float weight{ 1.0f };
 
 	// Palette state
-	int paletteIndex{ 0 };
+	size_t paletteIndex{ 0 };
 
 	// Canvas pan (pixels)
 	int panX{ 0 };
@@ -72,8 +72,8 @@ private:
 	int panStartY{ 0 };
 
 	// Right panel list
-	int listScroll{ 0 };
-	int listSelected{ -1 };
+	size_t listScroll{ 0 };
+	std::optional<size_t> listSelected{}; // the prefab chosen in the list, if any
 
 	// Status flash
 	std::string statusMsg;
@@ -105,8 +105,8 @@ private:
 
 	void new_canvas(int width, int height);
 	void do_save(const std::string& name);
-	void do_load(int prefabIndex);
-	void do_delete(int prefabIndex);
+	void do_load(size_t prefabIndex);
+	void do_delete(size_t prefabIndex);
 	void set_status(const std::string& message);
 
 	[[nodiscard]] bool screen_to_canvas(
@@ -115,8 +115,8 @@ private:
 		int mousePy,
 		int& outCx,
 		int& outCy) const;
-	[[nodiscard]] std::optional<int> screen_to_list_index(const Renderer& renderer, int mousePx, int mousePy) const;
-	[[nodiscard]] std::optional<int> screen_to_palette_index(const Renderer& renderer, int mousePx, int mousePy) const;
+	[[nodiscard]] std::optional<size_t> screen_to_list_index(const Renderer& renderer, int mousePx, int mousePy) const;
+	[[nodiscard]] std::optional<size_t> screen_to_palette_index(const Renderer& renderer, int mousePx, int mousePy) const;
 	[[nodiscard]] TileRef symbol_tile_id(char symbol) const;
 	[[nodiscard]] TileRef canvas_tile_id(int col, int row) const;
 	[[nodiscard]] int canvas_wall_mask(int col, int row) const;

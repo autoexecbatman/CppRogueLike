@@ -1,5 +1,6 @@
 // file: RoomEditor.cpp
 #include <algorithm>
+#include <cassert>
 #include <format>
 #include <string>
 #include <utility>
@@ -8,6 +9,7 @@
 
 #include "GameContext.h"
 #include "Item.h"
+#include "ListCursor.h"
 #include "Menu.h"
 #include "Paths.h"
 #include "PrefabLibrary.h"
@@ -41,11 +43,13 @@ constexpr int BOT_H_TILES = 1;
 
 void RoomEditor::enter(PrefabLibrary& lib)
 {
+	// load_tile_labels registers the structural symbols and nothing removes one, so a loaded library's palette is never empty.
+	assert(!lib.ordered_palette().empty() && "RoomEditor::enter: palette empty; PrefabLibrary::load_tile_labels was not called");
 	library = &lib;
 	active = true;
 	mode = EditorMode::NORMAL;
 	inputBuffer.clear();
-	listSelected = -1;
+	listSelected.reset();
 	listScroll = 0;
 	statusMsg.clear();
 	new_canvas(canvasWidth, canvasHeight);
@@ -136,14 +140,14 @@ void RoomEditor::do_save(const std::string& name)
 	set_status(std::format("Saved: {}", prefabName));
 }
 
-void RoomEditor::do_load(int prefabIndex)
+void RoomEditor::do_load(size_t prefabIndex)
 {
 	if (!library)
 	{
 		return;
 	}
 	const auto& all = library->all();
-	if (prefabIndex < 0 || prefabIndex >= static_cast<int>(all.size()))
+	if (prefabIndex >= all.size())
 	{
 		return;
 	}
@@ -188,14 +192,14 @@ void RoomEditor::do_load(int prefabIndex)
 	set_status(std::format("Loaded: {}", prefabName));
 }
 
-void RoomEditor::do_delete(int prefabIndex)
+void RoomEditor::do_delete(size_t prefabIndex)
 {
 	if (!library)
 	{
 		return;
 	}
 	const auto& all = library->all();
-	if (prefabIndex < 0 || prefabIndex >= static_cast<int>(all.size()))
+	if (prefabIndex >= all.size())
 	{
 		return;
 	}
@@ -203,7 +207,7 @@ void RoomEditor::do_delete(int prefabIndex)
 	std::string name = all[prefabIndex].name;
 	library->remove(name);
 	library->save(Paths::PREFABS);
-	listSelected = -1;
+	listSelected.reset();
 	set_status(std::format("Deleted: {}", name));
 }
 
@@ -271,7 +275,7 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 	if (IsKeyPressed(KEY_F3) && library)
 	{
 		const auto& palette = library->ordered_palette();
-		if (paletteIndex >= 0 && paletteIndex < static_cast<int>(palette.size()))
+		if (paletteIndex < palette.size())
 		{
 			inputBuffer = palette[paletteIndex].label;
 			mode = EditorMode::INPUT_LABEL;
@@ -279,17 +283,16 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 		return;
 	}
 
-	// Palette navigation
+	// Palette navigation. enter() asserted the palette is not empty, so both wraps have a last entry.
 	const auto& palette = library->ordered_palette();
-	int palSize = static_cast<int>(palette.size());
 
 	if (IsKeyPressed(KEY_UP))
 	{
-		paletteIndex = (paletteIndex - 1 + palSize) % palSize;
+		paletteIndex = paletteIndex == 0 ? palette.size() - 1 : paletteIndex - 1;
 	}
 	if (IsKeyPressed(KEY_DOWN))
 	{
-		paletteIndex = (paletteIndex + 1) % palSize;
+		paletteIndex = (paletteIndex + 1) % palette.size();
 	}
 
 	// New canvas
@@ -301,16 +304,16 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 	}
 
 	// Delete selected prefab
-	if (IsKeyPressed(KEY_DELETE) && listSelected >= 0)
+	if (IsKeyPressed(KEY_DELETE) && listSelected.has_value())
 	{
-		do_delete(listSelected);
+		do_delete(*listSelected);
 		return;
 	}
 
 	// Load selected prefab
-	if (IsKeyPressed(KEY_ENTER) && listSelected >= 0)
+	if (IsKeyPressed(KEY_ENTER) && listSelected.has_value())
 	{
-		do_load(listSelected);
+		do_load(*listSelected);
 		return;
 	}
 
@@ -385,13 +388,15 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 
 		if (is_mouse_over_left_panel())
 		{
-			int palSize = static_cast<int>(library->ordered_palette().size());
-			paletteIndex = std::clamp(paletteIndex + delta, 0, std::max(0, palSize - 1));
+			const size_t paletteSize = library->ordered_palette().size();
+			paletteIndex = step_within(paletteIndex, delta, paletteSize - 1);
 		}
 		else
 		{
-			int count = static_cast<int>(library->all().size());
-			listScroll = std::clamp(listScroll + delta, 0, std::max(0, count - 1));
+			const size_t count = library->all().size();
+			const size_t lastPrefab = count == 0 ? 0 : count - 1;
+			// A delete can leave the scroll past the shortened list; any notch then brings it back to the last row.
+			listScroll = listScroll > lastPrefab ? lastPrefab : step_within(listScroll, delta, lastPrefab);
 		}
 	}
 
@@ -502,7 +507,7 @@ void RoomEditor::handle_input_text()
 			if (library && !inputBuffer.empty())
 			{
 				const auto& palette = library->ordered_palette();
-				if (paletteIndex >= 0 && paletteIndex < static_cast<int>(palette.size()))
+				if (paletteIndex < palette.size())
 				{
 					char symbol = palette[paletteIndex].symbol;
 					library->set_symbol_label(symbol, inputBuffer);
@@ -586,7 +591,7 @@ bool RoomEditor::screen_to_canvas(
 }
 
 // Returns prefab list index from screen pixel in right panel. Returns nullopt if outside panel.
-std::optional<int> RoomEditor::screen_to_list_index(const Renderer& renderer, int mousePx, int mousePy) const
+std::optional<size_t> RoomEditor::screen_to_list_index(const Renderer& renderer, int mousePx, int mousePy) const
 {
 	if (!library)
 	{
@@ -608,12 +613,11 @@ std::optional<int> RoomEditor::screen_to_list_index(const Renderer& renderer, in
 	}
 
 	int fontH = renderer.get_font_size() + 2;
-	int entryCount = static_cast<int>(library->all().size());
-	int visible = panelH / fontH;
-	int row = (mousePy - panelY) / fontH;
-	int listIndex = listScroll + row;
+	const size_t visible = whole_rows_within(panelH, fontH);
+	const size_t row = whole_rows_within(mousePy - panelY, fontH);
+	const size_t listIndex = listScroll + row;
 
-	if (listIndex < 0 || listIndex >= entryCount || row >= visible)
+	if (listIndex >= library->all().size() || row >= visible)
 	{
 		return std::nullopt;
 	}
@@ -622,7 +626,7 @@ std::optional<int> RoomEditor::screen_to_list_index(const Renderer& renderer, in
 }
 
 // Returns palette index from screen pixel in left panel. Returns nullopt if outside panel.
-std::optional<int> RoomEditor::screen_to_palette_index(const Renderer& renderer, int mousePx, int mousePy) const
+std::optional<size_t> RoomEditor::screen_to_palette_index(const Renderer& renderer, int mousePx, int mousePy) const
 {
 	if (!library)
 	{
@@ -643,18 +647,14 @@ std::optional<int> RoomEditor::screen_to_palette_index(const Renderer& renderer,
 		return std::nullopt;
 	}
 
-	int maxVisible = panelH / tileSize;
-	int slot = (mousePy - panelY) / tileSize;
-	int palSize = static_cast<int>(library->ordered_palette().size());
+	const size_t maxVisible = whole_rows_within(panelH, tileSize);
+	const size_t slot = whole_rows_within(mousePy - panelY, tileSize);
 
-	int scrollStart = 0;
-	if (paletteIndex >= maxVisible)
-	{
-		scrollStart = paletteIndex - maxVisible + 1;
-	}
+	// The strip scrolls only to keep the selected entry on its last visible slot.
+	const size_t scrollStart = paletteIndex >= maxVisible ? paletteIndex - maxVisible + 1 : 0;
 
-	int paletteEntryIndex = scrollStart + slot;
-	if (paletteEntryIndex < 0 || paletteEntryIndex >= palSize || slot >= maxVisible)
+	const size_t paletteEntryIndex = scrollStart + slot;
+	if (paletteEntryIndex >= library->ordered_palette().size() || slot >= maxVisible)
 	{
 		return std::nullopt;
 	}
@@ -670,7 +670,7 @@ std::optional<int> RoomEditor::screen_to_palette_index(const Renderer& renderer,
 char RoomEditor::selected_sym() const
 {
 	const auto& palette = library->ordered_palette();
-	if (paletteIndex < 0 || paletteIndex >= static_cast<int>(palette.size()))
+	if (paletteIndex >= palette.size())
 	{
 		return '.';
 	}
@@ -838,20 +838,15 @@ void RoomEditor::render_left_panel(const Renderer& renderer) const
 	DrawLine(panelW - 1, panelY, panelW - 1, panelY + panelH, Color{ 70, 70, 110, 255 });
 
 	const auto& palette = library->ordered_palette();
-	int maxVisible = panelH / tileSize;
-	int palSize = static_cast<int>(palette.size());
+	const size_t maxVisible = whole_rows_within(panelH, tileSize);
 
 	// Scroll to keep selected entry visible
-	int scrollStart = 0;
-	if (paletteIndex >= maxVisible)
-	{
-		scrollStart = paletteIndex - maxVisible + 1;
-	}
+	const size_t scrollStart = paletteIndex >= maxVisible ? paletteIndex - maxVisible + 1 : 0;
 
-	for (int slot = 0; slot < maxVisible && (scrollStart + slot) < palSize; ++slot)
+	for (size_t slot = 0; slot < maxVisible && scrollStart + slot < palette.size(); ++slot)
 	{
-		int paletteEntryIndex = scrollStart + slot;
-		int slotPixelY = panelY + slot * tileSize;
+		const size_t paletteEntryIndex = scrollStart + slot;
+		int slotPixelY = panelY + static_cast<int>(slot) * tileSize;
 		char symbol = palette[paletteEntryIndex].symbol;
 
 		bool selected = (paletteEntryIndex == paletteIndex);
@@ -1016,16 +1011,15 @@ void RoomEditor::render_right_panel(const Renderer& renderer) const
 	int fontH = renderer.get_font_size() + 4;
 	int listYOff = fontH + 4;
 	int listH = panelH - listYOff;
-	int visible = listH / fontH;
+	const size_t visible = whole_rows_within(listH, fontH);
 	const auto& all = library->all();
-	int count = static_cast<int>(all.size());
 
-	for (int slot = 0; slot < visible && (listScroll + slot) < count; ++slot)
+	for (size_t slot = 0; slot < visible && listScroll + slot < all.size(); ++slot)
 	{
-		int listIndex = listScroll + slot;
-		int rowPixelY = panelY + listYOff + slot * fontH;
+		const size_t listIndex = listScroll + slot;
+		int rowPixelY = panelY + listYOff + static_cast<int>(slot) * fontH;
 
-		bool selected = (listIndex == listSelected);
+		bool selected = (listSelected == listIndex);
 
 		if (selected)
 		{
@@ -1043,7 +1037,7 @@ void RoomEditor::render_right_panel(const Renderer& renderer) const
 	}
 
 	// Empty state
-	if (count == 0)
+	if (all.empty())
 	{
 		renderer.draw_text_color(
 			Vector2D{ panelX + 6, panelY + listYOff + 4 }, "No prefabs yet.", Color{ 100, 100, 120, 150 });
@@ -1178,7 +1172,7 @@ void RoomEditor::handle_input_picker(GameContext& ctx)
 	if (IsKeyPressed(KEY_ENTER) && library)
 	{
 		const auto& palette = library->ordered_palette();
-		if (paletteIndex >= 0 && paletteIndex < static_cast<int>(palette.size()))
+		if (paletteIndex < palette.size())
 		{
 			char symbol = palette[paletteIndex].symbol;
 			TileRef tile{ sheetId, pickerCol, pickerRow };
@@ -1239,8 +1233,7 @@ void RoomEditor::render_tile_picker(const Renderer& renderer) const
 	// Info bar at top
 	const auto* palette = library ? &library->ordered_palette() : nullptr;
 	std::string symInfo = "?";
-	if (palette && paletteIndex >= 0 &&
-		paletteIndex < static_cast<int>(palette->size()))
+	if (palette && paletteIndex < palette->size())
 	{
 		char symbol = (*palette)[paletteIndex].symbol;
 		symInfo = std::format("Assigning tile for '{}' ({})",

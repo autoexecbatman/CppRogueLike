@@ -255,6 +255,11 @@ $probes = @(
         test   = "AssertProbeDeathTest.CountingRowsOfNoHeightAborts"
         file   = "src/ListCursor.cpp"
         anchor = 'assert(rowHeight > 0 && "whole_rows_within: a row has no height");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.EnteringTheRoomEditorWithAnUnloadedPaletteAborts"
+        file   = "src/RoomEditor.cpp"
+        anchor = 'assert(!lib.ordered_palette().empty() && "RoomEditor::enter: palette empty; PrefabLibrary::load_tile_labels was not called");'
     }
 )
 
