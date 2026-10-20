@@ -46,7 +46,9 @@ enum class DoorState
 {
 	OPEN,
 	CLOSED_UNLOCKED,
-	CLOSED_LOCKED
+	CLOSED_LOCKED,
+	// Locked, and the player has used the one attempt Table 1 allows at forcing it.
+	CLOSED_LOCKED_FORCE_FAILED
 };
 
 struct Tile
@@ -198,6 +200,22 @@ public:
 	bool lock_door(Vector2D pos);
 	bool unlock_door(Vector2D pos);
 	bool is_door_locked(Vector2D pos) const noexcept;
+	// Whether the player has already failed to force this locked door. Table 1 allows one
+	// attempt per door, so a door that resisted once cannot be forced again; a key, a picked
+	// lock or Knock still opens it.
+	//
+	// Example:
+	//   map.has_resisted_forcing(lockedDoor);   // -> false, never tried
+	//   map.mark_resisted_forcing(lockedDoor);
+	//   map.has_resisted_forcing(lockedDoor);   // -> true, and is_door_locked is still true
+	//   map.has_resisted_forcing(plainFloor);   // -> false
+	bool has_resisted_forcing(Vector2D pos) const noexcept;
+	// Records a failed attempt to force a locked door, which stays locked. The door must be
+	// locked and not already marked: forcing is refused before a roll once it has failed.
+	//
+	// Example:
+	//   map.mark_resisted_forcing(lockedDoor);   // has_resisted_forcing(lockedDoor) -> true
+	void mark_resisted_forcing(Vector2D pos);
 	void open_all_room_doors(Vector2D doorPos, GameContext& ctx);
 	void place_amulet(GameContext& ctx);
 	// The first unbroken decoration standing on a tile, or null. A broken one stays in

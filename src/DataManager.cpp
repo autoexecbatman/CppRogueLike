@@ -117,6 +117,7 @@ StrengthAttributes strength_row_from(const nlohmann::json& item)
 	strength.maxPress = item.at("MaxPress").get<int>();
 	strength.maxCarried = item.at("maxCarried").get<int>();
 	strength.openDoors = item.at("OpenDoors").get<int>();
+	strength.lockedDoors = item.at("LockedDoors").get<int>();
 	strength.BB_LG = item.at("BB_LG").get<double>();
 	strength.notes = item.at("Notes").get<std::string>();
 

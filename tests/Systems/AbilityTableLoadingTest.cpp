@@ -24,6 +24,7 @@
 
 #include <filesystem>
 #include <stdexcept>
+#include <string>
 
 #include <nlohmann/json.hpp>
 
@@ -39,7 +40,7 @@ namespace
 json strength_seventeen()
 {
 	return json{
-		{ "Str", 17 }, { "Hit", 1 }, { "Dmg", 1 }, { "Wgt", 85 }, { "MaxPress", 220 }, { "maxCarried", 220 }, { "OpenDoors", 10 }, { "BB_LG", 13 }, { "Notes", "" }, { "encumbrance", { { "unencumberedTo", 85 }, { "lightTo", 121 }, { "moderateTo", 157 }, { "heavyTo", 193 } } }
+		{ "Str", 17 }, { "Hit", 1 }, { "Dmg", 1 }, { "Wgt", 85 }, { "MaxPress", 220 }, { "maxCarried", 220 }, { "OpenDoors", 10 }, { "LockedDoors", 0 }, { "BB_LG", 13 }, { "Notes", "" }, { "encumbrance", { { "unencumberedTo", 85 }, { "lightTo", 121 }, { "moderateTo", 157 }, { "heavyTo", 193 } } }
 	};
 }
 
@@ -148,6 +149,24 @@ TEST(AbilityTableLoadingTest, AStrengthRowMissingItsHitBonusIsRefused)
 
 	EXPECT_THROW([[maybe_unused]] const auto parsed = strength_row_from(row), nlohmann::json::out_of_range)
 		<< "a Strength row with no hit bonus loaded as a zero instead of being refused";
+}
+
+// Most rows print no locked-door chance, so a zero read from a missing key would look right;
+// only the key's presence says the row was written for this column.
+TEST(AbilityTableLoadingTest, AStrengthRowMissingItsLockedDoorChanceIsRefused)
+{
+	json row = strength_seventeen();
+	row.erase("LockedDoors");
+
+	try
+	{
+		[[maybe_unused]] const auto parsed = strength_row_from(row);
+		ADD_FAILURE() << "a Strength row with no locked-door chance loaded as a zero instead of being refused";
+	}
+	catch (const nlohmann::json::out_of_range& refusal)
+	{
+		EXPECT_NE(std::string(refusal.what()).find("LockedDoors"), std::string::npos) << refusal.what();
+	}
 }
 
 TEST(AbilityTableLoadingTest, ADexterityRowMissingItsDefensiveAdjustmentIsRefused)

@@ -83,6 +83,7 @@ std::optional<DoorState> door_state_from(int saved)
 	case DoorState::OPEN:
 	case DoorState::CLOSED_UNLOCKED:
 	case DoorState::CLOSED_LOCKED:
+	case DoorState::CLOSED_LOCKED_FORCE_FAILED:
 	{
 		return candidate;
 	}
@@ -1785,7 +1786,7 @@ bool Map::lock_door(Vector2D pos)
 	}
 
 	// Already locked, so this call changed nothing.
-	if (tiles[tileIndex].doorState == DoorState::CLOSED_LOCKED)
+	if (is_door_locked(pos))
 	{
 		return false;
 	}
@@ -1807,9 +1808,10 @@ bool Map::unlock_door(Vector2D pos)
 		return false;
 	}
 
-	if (tiles[tileIndex].doorState != DoorState::CLOSED_LOCKED)
+	// A door that resisted forcing still turns to a key.
+	if (!is_door_locked(pos))
 	{
-		return false; // Door is not locked
+		return false;
 	}
 
 	tiles[tileIndex].doorState = DoorState::CLOSED_UNLOCKED;
@@ -1897,7 +1899,33 @@ bool Map::is_door_locked(Vector2D pos) const noexcept
 		return false;
 	}
 
-	return tiles[tileIndex].doorState == DoorState::CLOSED_LOCKED;
+	// A door that resisted forcing is still locked.
+	return tiles[tileIndex].doorState == DoorState::CLOSED_LOCKED ||
+		tiles[tileIndex].doorState == DoorState::CLOSED_LOCKED_FORCE_FAILED;
+}
+
+bool Map::has_resisted_forcing(Vector2D pos) const noexcept
+{
+	if (!in_bounds(pos))
+	{
+		return false;
+	}
+
+	const size_t tileIndex = get_index(pos);
+	if (tileIndex >= tiles.size())
+	{
+		return false;
+	}
+
+	return tiles[tileIndex].doorState == DoorState::CLOSED_LOCKED_FORCE_FAILED;
+}
+
+void Map::mark_resisted_forcing(Vector2D pos)
+{
+	assert(in_bounds(pos) && "Map::mark_resisted_forcing: a position off the map");
+	DoorState& doorState = tiles[get_index(pos)].doorState;
+	assert(doorState == DoorState::CLOSED_LOCKED && "Map::mark_resisted_forcing: the door is not locked, or has already resisted");
+	doorState = DoorState::CLOSED_LOCKED_FORCE_FAILED;
 }
 
 void Map::place_amulet(GameContext& ctx)

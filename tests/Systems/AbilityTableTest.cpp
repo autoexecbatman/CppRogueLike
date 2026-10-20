@@ -7,9 +7,9 @@
 // no 18/xx, Constitution ended at 19 though a dwarf with an amulet of health reaches 20,
 // and a creature past the end of either got nothing - or, attacking past Strength 25,
 // never swung at all. The rows below were generated from the book's text, not typed:
-// Strength's parenthesised door chances are dropped, as the data drops them, and
-// Constitution's hit point column is the warrior's, with regeneration as the turns per
-// point, 0 for none.
+// Strength's parenthesised door chances are their own table, 0 where the book prints
+// none, and Constitution's hit point column is the warrior's, with regeneration as the
+// turns per point, 0 for none.
 //
 // Run it:
 //
@@ -60,6 +60,14 @@ struct StrengthBand
 	int maximumPress{ 0 };
 };
 
+// Table 1's parenthesised Open Doors figure for one score and percentile.
+struct LockedDoorChance
+{
+	int score{ 0 };
+	int exceptional{ 0 };
+	int chance{ 0 };
+};
+
 // One row of Table 3.
 struct ConstitutionRow
 {
@@ -105,6 +113,46 @@ const std::vector<StrengthBand> EXCEPTIONAL_BANDS{
 	{ 76, 90, 2, 4, 185, 330 },
 	{ 91, 99, 2, 5, 235, 380 },
 	{ 100, 100, 3, 6, 335, 480 },
+};
+
+// Every row from 1 to 18/76-90 prints no parenthesised figure. 18/91-99 prints 15(3),
+// 18/00 16(6), and 19 to 25 16(8), 17(10), 17(12), 18(14), 18(16), 19(17) and 19(18).
+// Each band is read at both ends of its percentile range.
+const std::vector<LockedDoorChance> TABLE_ONE_LOCKED_DOORS{
+	{ 1, 0, 0 },
+	{ 2, 0, 0 },
+	{ 3, 0, 0 },
+	{ 4, 0, 0 },
+	{ 5, 0, 0 },
+	{ 6, 0, 0 },
+	{ 7, 0, 0 },
+	{ 8, 0, 0 },
+	{ 9, 0, 0 },
+	{ 10, 0, 0 },
+	{ 11, 0, 0 },
+	{ 12, 0, 0 },
+	{ 13, 0, 0 },
+	{ 14, 0, 0 },
+	{ 15, 0, 0 },
+	{ 16, 0, 0 },
+	{ 17, 0, 0 },
+	{ 18, 0, 0 },
+	{ 18, 1, 0 },
+	{ 18, 50, 0 },
+	{ 18, 51, 0 },
+	{ 18, 75, 0 },
+	{ 18, 76, 0 },
+	{ 18, 90, 0 },
+	{ 18, 91, 3 },
+	{ 18, 99, 3 },
+	{ 18, 100, 6 },
+	{ 19, 0, 8 },
+	{ 20, 0, 10 },
+	{ 21, 0, 12 },
+	{ 22, 0, 14 },
+	{ 23, 0, 16 },
+	{ 24, 0, 17 },
+	{ 25, 0, 18 },
 };
 
 const std::vector<ConstitutionRow> TABLE_THREE{
@@ -210,6 +258,16 @@ TEST_F(AbilityTableTest, ExceptionalBandsMatchTableOne)
 			EXPECT_EQ(row.wgtAllow, expected.weightAllowance) << "weight allowance at 18/" << percentile;
 			EXPECT_EQ(row.maxPress, expected.maximumPress) << "maximum press at 18/" << percentile;
 		}
+	}
+}
+
+// Every row's chance to force a locked door, and none below 18/91.
+TEST_F(AbilityTableTest, LockedDoorChancesMatchTableOne)
+{
+	for (const LockedDoorChance& expected : TABLE_ONE_LOCKED_DOORS)
+	{
+		const StrengthAttributes row = game.dataManager.strength_for(expected.score, expected.exceptional);
+		EXPECT_EQ(row.lockedDoors, expected.chance) << "locked doors at " << expected.score << "/" << expected.exceptional;
 	}
 }
 

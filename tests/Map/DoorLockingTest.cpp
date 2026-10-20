@@ -85,6 +85,40 @@ TEST_F(DoorLockingTest, LockingRefusesWhatItCannotLock)
 	EXPECT_FALSE(map.is_door_locked(PLAIN_FLOOR));
 }
 
+// A door that resisted forcing stays locked, and is the only door that answers yes.
+TEST_F(DoorLockingTest, ADoorThatResistedForcingStaysLocked)
+{
+	ASSERT_TRUE(map.lock_door(DOORWAY));
+	EXPECT_FALSE(map.has_resisted_forcing(DOORWAY)) << "a door never tried";
+
+	map.mark_resisted_forcing(DOORWAY);
+
+	EXPECT_TRUE(map.has_resisted_forcing(DOORWAY));
+	EXPECT_TRUE(map.is_door_locked(DOORWAY));
+	EXPECT_FALSE(map.has_resisted_forcing(PLAIN_FLOOR));
+}
+
+// It is still locked, so locking it again is refused as for any locked door.
+TEST_F(DoorLockingTest, LockingRefusesADoorThatResistedForcing)
+{
+	ASSERT_TRUE(map.lock_door(DOORWAY));
+	map.mark_resisted_forcing(DOORWAY);
+
+	EXPECT_FALSE(map.lock_door(DOORWAY));
+	EXPECT_TRUE(map.has_resisted_forcing(DOORWAY)) << "the refused lock forgot the failed attempt";
+}
+
+// Table 1 limits forcing, not keys: unlocking it leaves an ordinary closed door.
+TEST_F(DoorLockingTest, UnlockingOpensTheLockOfADoorThatResistedForcing)
+{
+	ASSERT_TRUE(map.lock_door(DOORWAY));
+	map.mark_resisted_forcing(DOORWAY);
+
+	EXPECT_TRUE(map.unlock_door(DOORWAY));
+	EXPECT_FALSE(map.is_door_locked(DOORWAY));
+	EXPECT_FALSE(map.has_resisted_forcing(DOORWAY));
+}
+
 // A corridor dug through a shut door leaves it shut: the tile stays a door, and the
 // field-of-view grid, which is_wall reads, still calls it a wall. The row is the door's,
 // so either order the corridor rolls crosses it.

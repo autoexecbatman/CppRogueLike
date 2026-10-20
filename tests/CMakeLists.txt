@@ -212,6 +212,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/SanctuarySaveTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SanctuarySpellTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ScriptedInputTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/DoorForcingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/DexterityTableTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/AbilityTableTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellDataLoadTest.cpp

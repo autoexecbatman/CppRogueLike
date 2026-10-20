@@ -19,6 +19,7 @@
 #include "CostOverlay.h"
 #include "Creature.h"
 #include "CreatureManager.h"
+#include "DataManager.h"
 #include "DecorEditor.h"
 #include "Decoration.h"
 #include "DisplayManager.h"
@@ -701,27 +702,34 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 		return true;
 	}
 
-	// Branch 3: Fighter class or STR >= 18 -- bash the door (DC 18).
-	if (playerOwner.get_creature_class() == CreatureClass::FIGHTER ||
-		playerOwner.get_strength() >= 18)
+	// Branch 3: force it, once per door, by Table 1's parenthesised Open Doors figure.
+	if (ctx.map->has_resisted_forcing(doorPos))
 	{
-		constexpr int BASH_DC = 18;
-		const int strRoll = ctx.dice->d20() + (playerOwner.get_strength() - 10) / 2;
-		if (strRoll >= BASH_DC)
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You have already failed to force this door.", MessageCompletion::FINISHED);
+		return false;
+	}
+
+	assert(ctx.dataManager && "PlayerController::resolve_locked_door: called without a dataManager");
+	const int lockedDoorChance = ctx.dataManager->strength_for(playerOwner.get_strength(), playerOwner.get_exceptional_strength()).lockedDoors;
+	if (lockedDoorChance > 0)
+	{
+		if (ctx.dice->d20() <= lockedDoorChance)
 		{
-			ctx.map->set_tile(doorPos, TileType::FLOOR);
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You smash the door open! The crash echoes down the corridor.", MessageCompletion::FINISHED);
+			ctx.map->unlock_door(doorPos);
+			ctx.map->open_door(doorPos, ctx);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You force the door open! The crash echoes down the corridor.", MessageCompletion::FINISHED);
 		}
 		else
 		{
+			ctx.map->mark_resisted_forcing(doorPos);
 			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You slam into the door but it holds.", MessageCompletion::FINISHED);
 		}
 		spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 		return true;
 	}
 
-	// Branch 4: no tool available.
-	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "The door is locked. You have no way through it.", MessageCompletion::FINISHED);
+	// Branch 4: a Strength row that prints no locked-door chance.
+	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "The door is locked. You are not strong enough to force it.", MessageCompletion::FINISHED);
 	return false;
 }
 

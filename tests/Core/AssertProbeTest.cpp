@@ -592,6 +592,17 @@ TEST_F(AssertProbeDeathTest, OpeningARoomWithALockedDoorOnItsFloorAborts)
 	EXPECT_DEATH(map.open_all_room_doors(Vector2D{ 4, 1 }, ctx), "a locked door inside a room's floor");
 }
 
+// Forcing is refused before a roll once a door has resisted, and only a locked door is
+// forced, so marking an unlocked door is a caller that skipped one of those checks.
+TEST_F(AssertProbeDeathTest, MarkingAnUnlockedDoorAsResistedAborts)
+{
+	MapWithProbeDoors map{ 20, 20 };
+	map.init_tiles();
+	map.set_door(Vector2D{ 4, 3 });
+
+	EXPECT_DEATH(map.mark_resisted_forcing(Vector2D{ 4, 3 }), "the door is not locked, or has already resisted");
+}
+
 // Every way into the sell menu comes from a shopkeeper, so a creature with no shop is a
 // caller that broke that. The assertion sits after the menu's renderer check, so the
 // probe opens a hidden renderer first; where none can open, it skips with the reason.

@@ -21,7 +21,7 @@
     },
     {
       "file": "src/Map.cpp",
-      "original": "\t// Already locked, so this call changed nothing.\n\tif (tiles[tileIndex].doorState == DoorState::CLOSED_LOCKED)\n\t{\n\t\treturn false;\n\t}\n",
+      "original": "\t// Already locked, so this call changed nothing.\n\tif (is_door_locked(pos))\n\t{\n\t\treturn false;\n\t}\n",
       "mutated": "",
       "catches": "a second lock on the same door reporting that it did the locking"
     },

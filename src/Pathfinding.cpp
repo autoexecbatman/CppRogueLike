@@ -146,7 +146,7 @@ std::optional<int> step_cost(Vector2D position, const Mobility& mobility, const 
 		return std::nullopt;
 	}
 
-	// A lock stops hands; the key, the pick and the bash belong to the player's own turn.
+	// A lock stops hands; the key, the pick and forcing the door belong to the player's own turn.
 	if (tileType == TileType::CLOSED_DOOR && map.is_door_locked(position))
 	{
 		return std::nullopt;

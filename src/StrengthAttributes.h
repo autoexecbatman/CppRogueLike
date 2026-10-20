@@ -26,6 +26,9 @@ struct StrengthAttributes
 	// the giant scores. Distinct from maxPress, which is a lift overhead rather than a load.
 	int maxCarried{};
 	int openDoors{};
+	// Table 1's parenthesised Open Doors figure: the 1d20 chance to force a locked, barred
+	// or magically held door, once per door. 0 on every row the table prints without one.
+	int lockedDoors{ 0 };
 	double BB_LG{};
 	std::string notes{};
 	// An exceptional band of Strength 18 - 18/01-50 and on to 18/00, as 100 - covers

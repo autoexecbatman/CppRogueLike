@@ -92,6 +92,17 @@ TEST_F(MapDoorPersistenceTest, ClosedAndOpenDoorsKeepTheirStateThroughASave)
 	EXPECT_FALSE(fresh.is_door_locked(OPEN_DOOR));
 }
 
+// A failed attempt at forcing survives a save, so a load does not give the attempt back.
+TEST_F(MapDoorPersistenceTest, ADoorThatResistedForcingStillHasAfterASaveAndALoad)
+{
+	original.mark_resisted_forcing(LOCKED_DOOR);
+
+	Map fresh = reloaded();
+
+	EXPECT_TRUE(fresh.has_resisted_forcing(LOCKED_DOOR));
+	EXPECT_TRUE(fresh.is_door_locked(LOCKED_DOOR));
+}
+
 // Saving the loaded map writes what it was loaded from, door states included.
 TEST_F(MapDoorPersistenceTest, ALoadedMapSavesWhatItWasLoadedFrom)
 {
@@ -131,7 +142,7 @@ TEST_F(MapDoorPersistenceTest, ATileWithoutItsDoorStateIsRefused)
 // corrupt save, refused with the value named rather than loaded as a state nothing handles.
 TEST_F(MapDoorPersistenceTest, ADoorStateNoDoorStateHasIsRefused)
 {
-	const int pastTheLast = static_cast<int>(DoorState::CLOSED_LOCKED) + 1;
+	const int pastTheLast = static_cast<int>(DoorState::CLOSED_LOCKED_FORCE_FAILED) + 1;
 	for (const int corrupt : { pastTheLast, -1 })
 	{
 		nlohmann::json saved;

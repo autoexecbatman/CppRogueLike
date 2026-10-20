@@ -212,6 +212,11 @@ $probes = @(
         anchor = 'assert(!room.contains(col, row) && "open_all_room_doors: a locked door inside a room''s floor");'
     },
     @{
+        test   = "AssertProbeDeathTest.MarkingAnUnlockedDoorAsResistedAborts"
+        file   = "src/Map.cpp"
+        anchor = 'assert(doorState == DoorState::CLOSED_LOCKED && "Map::mark_resisted_forcing: the door is not locked, or has already resisted");'
+    },
+    @{
         test   = "AssertProbeDeathTest.OpeningAFrameInsideAnOpenFrameAborts"
         file   = "src/Renderer.cpp"
         anchor = 'assert(!frameOpen && "begin_frame: a frame is already open");'

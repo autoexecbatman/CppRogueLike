@@ -1,0 +1,107 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=DoorForcingTest.*:DoorLockingTest.*:MapDoorPersistenceTest.*:AbilityTableTest.LockedDoorChancesMatchTableOne:AbilityTableLoadingTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\tif (lockedDoorChance > 0)\n",
+      "mutated": "\tif (lockedDoorChance >= 0)\n",
+      "catches": "a row with no locked-door chance allowed to roll"
+    },
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\t\tif (ctx.dice->d20() <= lockedDoorChance)\n",
+      "mutated": "\t\tif (ctx.dice->d20() < lockedDoorChance)\n",
+      "catches": "a roll equal to the row's figure failing"
+    },
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\t\tif (ctx.dice->d20() <= lockedDoorChance)\n",
+      "mutated": "\t\tif (ctx.dice->d20() <= lockedDoorChance + 1)\n",
+      "catches": "a roll one over the row's figure opening the door"
+    },
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\t\t\tctx.map->mark_resisted_forcing(doorPos);\n",
+      "mutated": "",
+      "catches": "a failed attempt forgotten, so the door may be forced again"
+    },
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\tif (ctx.map->has_resisted_forcing(doorPos))\n\t{\n\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, \"You have already failed to force this door.\", MessageCompletion::FINISHED);\n\t\treturn false;\n\t}\n",
+      "mutated": "",
+      "catches": "a door that resisted rolled for again"
+    },
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\t\t\tctx.map->open_door(doorPos, ctx);\n\t\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, \"You force the door open! The crash echoes down the corridor.\"",
+      "mutated": "\t\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, \"You force the door open! The crash echoes down the corridor.\"",
+      "catches": "a forced door unlocked but left shut"
+    },
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\t\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, \"You slam into the door but it holds.\", MessageCompletion::FINISHED);\n\t\t}\n\t\tspend_player_action(ctx, TIME_UNITS_PER_ROUND);\n",
+      "mutated": "\t\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, \"You slam into the door but it holds.\", MessageCompletion::FINISHED);\n\t\t}\n",
+      "catches": "an attempt at forcing that costs no time"
+    },
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "strength_for(playerOwner.get_strength(), playerOwner.get_exceptional_strength()).lockedDoors",
+      "mutated": "strength_for(playerOwner.get_strength(), 0).lockedDoors",
+      "catches": "exceptional Strength ignored, so no 18/xx may force a door"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\treturn tiles[tileIndex].doorState == DoorState::CLOSED_LOCKED ||\n\t\ttiles[tileIndex].doorState == DoorState::CLOSED_LOCKED_FORCE_FAILED;\n",
+      "mutated": "\treturn tiles[tileIndex].doorState == DoorState::CLOSED_LOCKED;\n",
+      "catches": "a door that resisted forcing read as unlocked"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t// A door that resisted forcing still turns to a key.\n\tif (!is_door_locked(pos))\n",
+      "mutated": "\t// A door that resisted forcing still turns to a key.\n\tif (tiles[tileIndex].doorState != DoorState::CLOSED_LOCKED)\n",
+      "catches": "a key refused by a door that resisted forcing"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\treturn tiles[tileIndex].doorState == DoorState::CLOSED_LOCKED_FORCE_FAILED;\n",
+      "mutated": "\treturn false;\n",
+      "catches": "no door ever reported as having resisted"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\tdoorState = DoorState::CLOSED_LOCKED_FORCE_FAILED;\n",
+      "mutated": "\tdoorState = DoorState::CLOSED_LOCKED;\n",
+      "catches": "a failed attempt not recorded on the door"
+    },
+    {
+      "file": "src/DataManager.cpp",
+      "original": "\tstrength.lockedDoors = item.at(\"LockedDoors\").get<int>();\n",
+      "mutated": "",
+      "catches": "the locked-door column never read, so no one may force a door"
+    },
+    {
+      "file": "src/DataManager.cpp",
+      "original": "item.at(\"LockedDoors\").get<int>()",
+      "mutated": "item.value(\"LockedDoors\", 0)",
+      "catches": "a row without its locked-door chance read as none instead of refused"
+    },
+    {
+      "file": "src/json/strength.json",
+      "original": "\"OpenDoors\": 14,\n\t\t\"LockedDoors\": 0,",
+      "mutated": "\"OpenDoors\": 14,\n\t\t\"LockedDoors\": 3,",
+      "catches": "18/76-90 given a chance Table 1 does not print"
+    },
+    {
+      "file": "src/json/strength.json",
+      "original": "\"LockedDoors\": 18,",
+      "mutated": "\"LockedDoors\": 17,",
+      "catches": "Strength 25's chance one short of Table 1's 18"
+    }
+  ]
+}
