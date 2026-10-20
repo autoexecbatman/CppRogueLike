@@ -13,6 +13,7 @@
 #include <raylib.h>
 
 #include "DecorEditor.h"
+#include "ListCursor.h"
 #include "Paths.h"
 #include "Renderer.h"
 
@@ -26,9 +27,9 @@ DecorEditor::DecorEditor() = default;
 // Palette helpers
 // ---------------------------------------------------------------------------
 
-std::optional<int> DecorEditor::palette_find(TileRef tile) const
+std::optional<size_t> DecorEditor::palette_find(TileRef tile) const
 {
-	for (int entryIndex = 0; entryIndex < static_cast<int>(palette.size()); ++entryIndex)
+	for (size_t entryIndex = 0; entryIndex < palette.size(); ++entryIndex)
 	{
 		if (palette[entryIndex].tile == tile)
 		{
@@ -61,10 +62,7 @@ void DecorEditor::palette_remove(TileRef tile)
 		[tile](const PaletteEntry& entry)
 		{ return entry.tile == tile; });
 
-	if (paletteIndex >= static_cast<int>(palette.size()))
-	{
-		paletteIndex = std::max(0, static_cast<int>(palette.size()) - 1);
-	}
+	paletteIndex = palette.empty() ? 0 : std::min(paletteIndex, palette.size() - 1);
 }
 
 // ---------------------------------------------------------------------------
@@ -190,7 +188,7 @@ void DecorEditor::cycle_next()
 		return;
 	}
 
-	paletteIndex = (paletteIndex + 1) % static_cast<int>(palette.size());
+	paletteIndex = (paletteIndex + 1) % palette.size();
 }
 
 void DecorEditor::cycle_prev()
@@ -200,8 +198,7 @@ void DecorEditor::cycle_prev()
 		return;
 	}
 
-	int paletteSize = static_cast<int>(palette.size());
-	paletteIndex = (paletteIndex - 1 + paletteSize) % paletteSize;
+	paletteIndex = paletteIndex == 0 ? palette.size() - 1 : paletteIndex - 1;
 }
 
 void DecorEditor::place(Vector2D worldPosition)
@@ -327,20 +324,20 @@ void DecorEditor::draw_palette_strip(const Renderer& renderer) const
 
 	const int tileSize = renderer.get_tile_size();
 	const int screenWidth = renderer.get_screen_width();
-	const int paletteSize = static_cast<int>(palette.size());
-
 	constexpr int VISIBLE = 9;
-	int half = VISIBLE / 2;
+	constexpr size_t HALF = VISIBLE / 2;
 
 	DrawRectangle(0, 0, screenWidth, tileSize + 4, Color{ 0, 0, 0, 200 });
 
 	for (int slot = 0; slot < VISIBLE; ++slot)
 	{
-		int idx = paletteIndex - half + slot;
-		if (idx < 0 || idx >= paletteSize)
+		// The slot shows the entry HALF places either side of the current one; past either end it shows nothing.
+		const size_t offset = static_cast<size_t>(slot);
+		if (paletteIndex + offset < HALF || paletteIndex + offset - HALF >= palette.size())
 		{
 			continue;
 		}
+		const size_t idx = paletteIndex + offset - HALF;
 
 		int slotPixelX = slot * tileSize + (screenWidth - VISIBLE * tileSize) / 2;
 		int slotPixelY = 2;
@@ -477,8 +474,8 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view sour
 
 	const int listTop = gridY + 20;
 	const int listVisibleHeight = gridHeight - 20;
-	const int visibleRows = listVisibleHeight / LIST_ITEM_H;
-	const int maxScroll = std::max(0, static_cast<int>(palette.size()) - visibleRows);
+	const size_t visibleRows = whole_rows_within(listVisibleHeight, LIST_ITEM_H);
+	const size_t maxScroll = palette.size() > visibleRows ? palette.size() - visibleRows : 0;
 	listScroll = std::min(listScroll, maxScroll);
 
 	if (isMouseInList)
@@ -486,7 +483,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view sour
 		float wheel = GetMouseWheelMove();
 		if (wheel != 0.0f)
 		{
-			listScroll = std::clamp(listScroll - static_cast<int>(wheel), 0, maxScroll);
+			listScroll = step_within(listScroll, -static_cast<int>(wheel), maxScroll);
 		}
 	}
 
@@ -519,7 +516,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view sour
 		}
 		else
 		{
-			listCursor = -1;
+			listCursor.reset();
 			labelBuffer = std::format("{} {},{}",
 				renderer.get_sheet_name(tile.sheet),
 				tile.col,
@@ -533,15 +530,15 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view sour
 
 	BeginScissorMode(0, listTop, LIST_W, listVisibleHeight);
 
-	for (int entryIndex = listScroll; entryIndex < static_cast<int>(palette.size()); ++entryIndex)
+	for (size_t entryIndex = listScroll; entryIndex < palette.size(); ++entryIndex)
 	{
-		int itemY = listTop + (entryIndex - listScroll) * LIST_ITEM_H;
+		int itemY = listTop + static_cast<int>(entryIndex - listScroll) * LIST_ITEM_H;
 		if (itemY >= listTop + listVisibleHeight)
 		{
 			break;
 		}
 
-		bool isSelected = (entryIndex == listCursor);
+		bool isSelected = (listCursor == entryIndex);
 		bool hovered = isMouseInList && mouse.y >= itemY && mouse.y < itemY + LIST_ITEM_H;
 
 		if (isSelected)
@@ -601,7 +598,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view sour
 			{
 				palette_remove(palette[entryIndex].tile);
 				save_palette(sourcePath);
-				listCursor = -1;
+				listCursor.reset();
 				browserSelected = TileRef{};
 				editing = false;
 				break; // vector modified -- exit loop safely
@@ -710,7 +707,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view sour
 		save_palette(sourcePath);
 		editing = false;
 		browserSelected = TileRef{};
-		listCursor = -1;
+		listCursor.reset();
 	}
 
 	// --- Edit panel ---
@@ -734,7 +731,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view sour
 			static_cast<int>(browserSelected.sheet),
 			browserSelected.col,
 			browserSelected.row);
-		Color spriteColor = listCursor >= 0
+		Color spriteColor = listCursor.has_value()
 			? Color{ 255, 180, 80, 255 }
 			: Color{ 140, 200, 255, 255 };
 		renderer.draw_text_color(Vector2D{ textX, panelY + 6 }, spriteInfo, spriteColor);
@@ -767,7 +764,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view sour
 		{
 			editing = false;
 			browserSelected = TileRef{};
-			listCursor = -1;
+			listCursor.reset();
 			isLabelAllSelected = false;
 		}
 
@@ -777,7 +774,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view sour
 			if (auto found = palette_find(browserSelected))
 			{
 				listCursor = *found;
-				listScroll = std::max(0, listCursor - visibleRows + 1);
+				listScroll = *listCursor + 1 > visibleRows ? *listCursor + 1 - visibleRows : 0;
 			}
 			save_palette(sourcePath);
 			editing = false;

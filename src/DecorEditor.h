@@ -48,7 +48,7 @@ private:
 	friend void from_json(const nlohmann::json& source, PaletteEntry& entry);
 
 	bool active{ false };
-	int paletteIndex{ 0 };
+	size_t paletteIndex{ 0 };
 	mutable double lastSaveTime{ -10.0 };
 
 	std::string activeKey{};
@@ -57,7 +57,7 @@ private:
 	std::unordered_map<std::string, std::unordered_map<uint32_t, TileRef>> allOverrides{};
 
 	// Dynamic palette -- loaded from tile_labels.json, editable at runtime.
-	std::vector<PaletteEntry> palette;
+	std::vector<PaletteEntry> palette{};
 
 	// Sheet browser state
 	bool isBrowserOpen{ false };
@@ -66,8 +66,8 @@ private:
 	TileRef browserSelected{}; // selected tile, is_valid() == false means none
 
 	// Palette list panel state
-	int listCursor{ -1 }; // selected palette index; -1 = none
-	int listScroll{ 0 };
+	std::optional<size_t> listCursor{}; // the selected palette entry, if one is chosen
+	size_t listScroll{ 0 };
 
 	// Label / symbol editing state
 	bool editing{ false };
@@ -96,7 +96,7 @@ private:
 	void update_browser(const Renderer& renderer, std::string_view sourcePath);
 
 	// Palette helpers
-	[[nodiscard]] std::optional<int> palette_find(TileRef tile) const;
+	[[nodiscard]] std::optional<size_t> palette_find(TileRef tile) const;
 	void palette_add_or_update(TileRef tile, std::string_view label, char symbol);
 	void palette_remove(TileRef tile);
 
