@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "ListCursor.h"
 #include "Renderer.h"
 
 class ContentRegistry;
@@ -37,13 +38,13 @@ private:
 	void draw_list(const Renderer& renderer, const MonsterRegistry& monsters, int listX, int listY, int listWidth, int listHeight);
 	void draw_browser(const Renderer& renderer, MonsterRegistry& monsters, int panelX, int panelY, int browserWidth, int browserHeight);
 	void draw_hint_bar(const Renderer& renderer) const;
-	void handle_keyboard();
+	// Tab, Up, Down and Ctrl+S. Up and Down move within a screen of `visibleRows`, the rows draw_list draws.
+	void handle_keyboard(size_t visibleRows);
 
 	ContentRegistry* contentRegistry{ nullptr };
 	bool active{ false };
 	int tab{ 0 };
-	int listScroll{ 0 };
-	int listCursor{ 0 };
+	ListCursor listCursor{};
 	int browserSheet{ 0 };
 	int browserScroll{ 0 };
 	int bufferedChar{ 0 };

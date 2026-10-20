@@ -45,6 +45,9 @@ constexpr MonsterEntry MONSTER_TABLE[] = {
 	{ MonsterId::SPIDER_WEAVER, "Spider (Weaver)" },
 };
 
+// The height of one entry row. The keyboard and the draw both count rows with it.
+constexpr int ITEM_H = 36;
+
 } // namespace
 
 // ---------------------------------------------------------------------------
@@ -73,8 +76,7 @@ void ContentEditor::toggle(ContentRegistry& registry, MonsterRegistry& monsters,
 		{
 			monsterEntries.push_back({ row.name, {}, static_cast<int>(row.id) });
 		}
-		listCursor = 0;
-		listScroll = 0;
+		listCursor.reset(active_entries().size());
 	}
 }
 
@@ -86,7 +88,7 @@ TileRef ContentEditor::current_tile(const MonsterRegistry& monsters) const
 		return TileRef{};
 	}
 
-	const auto& sel = entries[listCursor];
+	const auto& sel = entries[listCursor.current_row()];
 	if (tab == 0)
 	{
 		return contentRegistry ? contentRegistry->get_tile(sel.itemKey) : TileRef{};
@@ -103,7 +105,7 @@ void ContentEditor::assign_tile(TileRef tile, MonsterRegistry& monsters)
 		return;
 	}
 
-	const auto& sel = entries[listCursor];
+	const auto& sel = entries[listCursor.current_row()];
 	if (tab == 0)
 	{
 		if (contentRegistry)
@@ -129,8 +131,6 @@ void ContentEditor::update_and_render(const Renderer& renderer, ContentRegistry&
 	}
 	contentRegistry = &registry;
 
-	handle_keyboard();
-
 	const int screenWidth = renderer.get_screen_width();
 	const int screenHeight = renderer.get_screen_height();
 
@@ -138,12 +138,15 @@ void ContentEditor::update_and_render(const Renderer& renderer, ContentRegistry&
 	constexpr int HINT_H = 28;
 	constexpr int LIST_W = 420;
 
+	const int bodyY = HEADER_H;
+	const int bodyHeight = screenHeight - HEADER_H - HINT_H;
+
+	// The keys move within the rows draw_list draws, so both count them from bodyHeight.
+	handle_keyboard(whole_rows_within(bodyHeight, ITEM_H));
+
 	DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 0, 0, 0, 220 });
 
 	draw_header(renderer);
-
-	const int bodyY = HEADER_H;
-	const int bodyHeight = screenHeight - HEADER_H - HINT_H;
 
 	draw_list(renderer, monsters, 0, bodyY, LIST_W, bodyHeight);
 	draw_browser(renderer, monsters, LIST_W, bodyY, screenWidth - LIST_W, bodyHeight);
@@ -182,8 +185,7 @@ void ContentEditor::draw_header(const Renderer& renderer)
 		if (isTabClicked)
 		{
 			tab = tabIndex;
-			listCursor = 0;
-			listScroll = 0;
+			listCursor.reset(active_entries().size());
 		}
 	}
 }
@@ -196,7 +198,6 @@ void ContentEditor::draw_list(
 	int listWidth,
 	int listHeight)
 {
-	constexpr int ITEM_H = 36;
 	constexpr int TILE_SZ = 28;
 	constexpr int PAD = 8;
 
@@ -204,10 +205,7 @@ void ContentEditor::draw_list(
 	DrawLine(listX + listWidth - 1, listY, listX + listWidth - 1, listY + listHeight, Color{ 80, 80, 120, 255 });
 
 	const auto& entries = active_entries();
-	int total = static_cast<int>(entries.size());
-	int visible = listHeight / ITEM_H;
-	int maxScroll = std::max(0, total - visible);
-	listScroll = std::clamp(listScroll, 0, maxScroll);
+	const size_t visible = whole_rows_within(listHeight, ITEM_H);
 
 	::Vector2 mouse = GetMousePosition();
 	bool isMouseInList = mouse.x >= listX && mouse.x < listX + listWidth &&
@@ -218,21 +216,22 @@ void ContentEditor::draw_list(
 		float wheel = GetMouseWheelMove();
 		if (wheel != 0.0f)
 		{
-			listScroll = std::clamp(listScroll - static_cast<int>(wheel), 0, maxScroll);
+			listCursor.scroll_by(-static_cast<int>(wheel), visible);
 		}
 	}
 
 	BeginScissorMode(listX, listY, listWidth, listHeight);
 
-	for (int entryIndex = listScroll; entryIndex < total; ++entryIndex)
+	const size_t scroll = listCursor.first_visible(visible);
+	for (size_t entryIndex = scroll; entryIndex < entries.size(); ++entryIndex)
 	{
-		int itemY = listY + (entryIndex - listScroll) * ITEM_H;
+		int itemY = listY + static_cast<int>(entryIndex - scroll) * ITEM_H;
 		if (itemY + ITEM_H > listY + listHeight)
 		{
 			break;
 		}
 
-		bool isSelected = (entryIndex == listCursor);
+		bool isSelected = (entryIndex == listCursor.current_row());
 		bool hovered = isMouseInList && mouse.y >= itemY && mouse.y < itemY + ITEM_H;
 
 		if (isSelected)
@@ -255,7 +254,7 @@ void ContentEditor::draw_list(
 
 		if (hovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
 		{
-			listCursor = entryIndex;
+			listCursor.select(entryIndex);
 		}
 	}
 
@@ -399,25 +398,24 @@ void ContentEditor::draw_hint_bar(const Renderer& renderer) const
 	renderer.draw_text_color(Vector2D{ 8, hintY + 4 }, hint, hintColor);
 }
 
-void ContentEditor::handle_keyboard()
+void ContentEditor::handle_keyboard(size_t visibleRows)
 {
 	if (IsKeyPressed(KEY_TAB))
 	{
 		tab = 1 - tab;
-		listCursor = 0;
-		listScroll = 0;
+		listCursor.reset(active_entries().size());
 	}
 
-	if (IsKeyPressed(KEY_UP))
+	// An empty tab has no row to move from, so both keys do nothing there.
+	if (IsKeyPressed(KEY_UP) && listCursor.can_move_up())
 	{
-		listCursor = std::max(0, listCursor - 1);
-		listScroll = std::min(listScroll, listCursor);
+		listCursor.move_up();
 	}
 
-	if (IsKeyPressed(KEY_DOWN))
+	// A screen too short for one row has nowhere to scroll the cursor to.
+	if (IsKeyPressed(KEY_DOWN) && listCursor.can_move_down() && visibleRows > 0)
 	{
-		int lastIndex = static_cast<int>(active_entries().size()) - 1;
-		listCursor = std::min(lastIndex, listCursor + 1);
+		listCursor.move_down(visibleRows);
 	}
 
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
