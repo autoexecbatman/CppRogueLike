@@ -93,7 +93,7 @@ private:
 	void draw_info_bar(const Renderer& renderer, Vector2D worldPosition) const;
 
 	// Sheet browser
-	void update_browser(const Renderer& renderer, std::string_view palette_path);
+	void update_browser(const Renderer& renderer, std::string_view sourcePath);
 
 	// Palette helpers
 	[[nodiscard]] std::optional<int> palette_find(TileRef tile) const;
@@ -110,7 +110,7 @@ public:
 	void cycle_next();
 	void cycle_prev();
 
-	void set_active_map(long seed, int dungeon_level);
+	void set_active_map(long seed, int dungeonLevel);
 
 	// Palette persistence -- both read/write the "palette" array in tile_config.json.
 	void save_palette(std::string_view path) const;
