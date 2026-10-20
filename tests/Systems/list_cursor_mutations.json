@@ -1,0 +1,113 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=ListCursorTest.*:StepWithinTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/ListCursor.cpp",
+      "original": "return magnitude >= highest - value ? highest : value + magnitude;",
+      "mutated": "return value + magnitude;",
+      "catches": "the high clamp dropped, so a step past the bound overshoots it"
+    },
+    {
+      "file": "src/ListCursor.cpp",
+      "original": "return magnitude >= value ? 0 : value - magnitude;",
+      "mutated": "return value - magnitude;",
+      "catches": "the low clamp dropped, so a step below zero wraps to a huge row"
+    },
+    {
+      "file": "src/ListCursor.cpp",
+      "original": "return rowCount > visibleRows ? rowCount - visibleRows : 0;",
+      "mutated": "return rowCount > visibleRows ? rowCount - 1 : 0;",
+      "catches": "the wheel bound back at the last row, so the list scrolls until one row shows"
+    },
+    {
+      "file": "src/ListCursor.cpp",
+      "original": "return current > 0;",
+      "mutated": "return true;",
+      "catches": "up allowed from row 0"
+    },
+    {
+      "file": "src/ListCursor.cpp",
+      "original": "return current + 1 < rowCount;",
+      "mutated": "return current < rowCount;",
+      "catches": "down allowed from the last row"
+    },
+    {
+      "file": "src/ListCursor.cpp",
+      "original": "return std::min(firstVisible, max_first_visible(visibleRows));",
+      "mutated": "return firstVisible;",
+      "catches": "the stored scroll read unclamped, so a screen bigger than the list still scrolls"
+    },
+    {
+      "file": "src/ListCursor.cpp",
+      "original": "const size_t row = first_visible(visibleRows) + visibleRowOffset;",
+      "mutated": "const size_t row = firstVisible + visibleRowOffset;",
+      "catches": "a click reads the stale scroll position after a shrink"
+    },
+    {
+      "file": "src/ListCursor.cpp",
+      "original": "if (row >= rowCount)",
+      "mutated": "if (row > rowCount)",
+      "catches": "the place one below the last row, and row 0 of an empty list, read as rows"
+    },
+    {
+      "file": "src/ListCursor.cpp",
+      "original": "if (current < firstVisible)",
+      "mutated": "if (current + 1 < firstVisible)",
+      "catches": "up past the top leaves the cursor one row above the screen"
+    },
+    {
+      "file": "src/ListCursor.cpp",
+      "original": "firstVisible = current - visibleRows + 1;",
+      "mutated": "firstVisible = current - visibleRows;",
+      "catches": "down past the bottom scrolls one row too few, leaving the cursor below the screen"
+    },
+    {
+      "file": "src/ListCursor.cpp",
+      "original": "firstVisible = first_visible(visibleRows);\n\t++current;",
+      "mutated": "++current;",
+      "catches": "a step down keeps a scroll position a shrink left above the drawn screen, so the list draws from row 1 once it grows again"
+    },
+    {
+      "file": "src/ListCursor.cpp",
+      "original": "firstVisible = step_within(first_visible(visibleRows), steps, max_first_visible(visibleRows));",
+      "mutated": "firstVisible = step_within(firstVisible, steps, max_first_visible(visibleRows));",
+      "catches": "the wheel starts from the stale stored scroll after a shrink, so a notch back moves nothing (Release) or aborts on step_within's bound (Debug)"
+    },
+    {
+      "file": "src/ListCursor.cpp",
+      "original": "current = std::min(current, lastRow);",
+      "mutated": "current = current;",
+      "catches": "a delete of the current last row leaves the cursor past the end"
+    },
+    {
+      "file": "src/ListCursor.cpp",
+      "original": "firstVisible = std::min(firstVisible, lastRow);",
+      "mutated": "firstVisible = firstVisible;",
+      "catches": "emptying and refilling the list keeps the old scroll, so the cursor on row 0 is drawn off screen"
+    },
+    {
+      "file": "src/ListCursor.cpp",
+      "original": "\tcurrent = 0;\n\tfirstVisible = 0;",
+      "mutated": "\tfirstVisible = 0;",
+      "catches": "a reset keeps the old current row"
+    },
+    {
+      "file": "src/ListCursor.cpp",
+      "original": "\tcurrent = 0;\n\tfirstVisible = 0;",
+      "mutated": "\tcurrent = 0;",
+      "catches": "a reset keeps the old scroll position"
+    },
+    {
+      "file": "src/ListCursor.cpp",
+      "original": "\tcurrent = row;",
+      "mutated": "\tcurrent = 0;",
+      "catches": "a click selects nothing"
+    }
+  ]
+}

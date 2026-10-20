@@ -339,6 +339,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/DecorEditor.h
     ${PROJECT_SOURCE_DIR}/ItemEditor.cpp
     ${PROJECT_SOURCE_DIR}/ItemEditor.h
+    ${PROJECT_SOURCE_DIR}/ListCursor.cpp
+    ${PROJECT_SOURCE_DIR}/ListCursor.h
     ${PROJECT_SOURCE_DIR}/MonsterEditor.cpp
     ${PROJECT_SOURCE_DIR}/MonsterEditor.h
     ${PROJECT_SOURCE_DIR}/PrefabLibrary.cpp

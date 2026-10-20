@@ -141,6 +141,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/BuffTypeEncodingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CodecRoundTripTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EnumCycleTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ListCursorTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/MutationPlanTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/MenuPointerTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/InventoryContextActionsTest.cpp
@@ -325,6 +326,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/ContentEditor.cpp
     ${PARENT_SOURCE_DIR}/DecorEditor.cpp
     ${PARENT_SOURCE_DIR}/ItemEditor.cpp
+    ${PARENT_SOURCE_DIR}/ListCursor.cpp
     ${PARENT_SOURCE_DIR}/MonsterEditor.cpp
     ${PARENT_SOURCE_DIR}/PrefabLibrary.cpp
     ${PARENT_SOURCE_DIR}/RoomEditor.cpp

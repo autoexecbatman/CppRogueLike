@@ -230,6 +230,26 @@ $probes = @(
         test   = "AssertProbeDeathTest.OpeningAnEndScreenOnARunThatHasNotEndedAborts"
         file   = "src/GameLoopCoordinator.cpp"
         anchor = 'assert(false && "open_end_of_run_screen: the run has not ended");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.ReadingTheCurrentRowOfAnEmptyListAborts"
+        file   = "src/ListCursor.cpp"
+        anchor = 'assert(!is_empty() && "current_row: the list is empty");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.MovingDownFromTheLastRowAborts"
+        file   = "src/ListCursor.cpp"
+        anchor = 'assert(can_move_down() && "move_down: the cursor cannot move down");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.SelectingARowPastTheEndAborts"
+        file   = "src/ListCursor.cpp"
+        anchor = 'assert(row < rowCount && "select: the row is past the end of the list");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.SteppingAValueAboveItsBoundAborts"
+        file   = "src/ListCursor.cpp"
+        anchor = 'assert(value <= highest && "step_within: value is above its own bound");'
     }
 )
 

@@ -59,6 +59,7 @@
 #include "src/InventoryOperations.h"
 #include "src/Item.h"
 #include "src/ItemCreator.h"
+#include "src/ListCursor.h"
 #include "src/Map.h"
 #include "src/MenuSell.h"
 #include "src/MonsterAttacker.h"
@@ -654,4 +655,33 @@ TEST_F(AssertProbeDeathTest, OpeningAnEndScreenOnARunThatHasNotEndedAborts)
 {
 	ASSERT_EQ(ctx.gameState->get_run_outcome(), RunOutcome::UNDECIDED) << "the mock's run has already ended, so nothing here is being measured";
 	EXPECT_DEATH(ctx.gameLoopCoordinator->open_end_of_run_screen(ctx), "open_end_of_run_screen: the run has not ended");
+}
+
+// A list with no rows has no current row, so reading one is a caller that skipped is_empty().
+TEST_F(AssertProbeDeathTest, ReadingTheCurrentRowOfAnEmptyListAborts)
+{
+	const ListCursor cursor{};
+	EXPECT_DEATH([[maybe_unused]] const size_t row = cursor.current_row(), "current_row: the list is empty");
+}
+
+// Stepping down from the last row is a caller that skipped can_move_down().
+TEST_F(AssertProbeDeathTest, MovingDownFromTheLastRowAborts)
+{
+	ListCursor cursor{};
+	cursor.reset(1);
+	EXPECT_DEATH(cursor.move_down(3), "move_down: the cursor cannot move down");
+}
+
+// Selecting a row the list does not have is a caller that read its row from somewhere else.
+TEST_F(AssertProbeDeathTest, SelectingARowPastTheEndAborts)
+{
+	ListCursor cursor{};
+	cursor.reset(10);
+	EXPECT_DEATH(cursor.select(10), "select: the row is past the end of the list");
+}
+
+// A value already above its bound has no clamped step to take.
+TEST_F(AssertProbeDeathTest, SteppingAValueAboveItsBoundAborts)
+{
+	EXPECT_DEATH([[maybe_unused]] const size_t stepped = step_within(10, 1, 9), "step_within: value is above its own bound");
 }
