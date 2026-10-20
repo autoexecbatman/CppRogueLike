@@ -35,7 +35,59 @@ constexpr int LEFT_W_TILES = 11;
 constexpr int RIGHT_W_TILES = 13;
 constexpr int TOP_H_TILES = 1;
 constexpr int BOT_H_TILES = 1;
+
+// The prefab list's rows in the right panel at the renderer's current screen, tile and font size.
+PrefabListRows prefab_list_rows(const Renderer& renderer)
+{
+	const int tileSize = renderer.get_tile_size();
+	const int panelY = TOP_H_TILES * tileSize;
+	const int panelH = renderer.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
+	return PrefabListRows{ panelY, panelH, renderer.get_font_size() };
+}
 } // namespace
+
+// ---------------------------------------------------------------------------
+// Prefab list rows
+// ---------------------------------------------------------------------------
+
+PrefabListRows::PrefabListRows(int panelTop, int panelHeight, int fontSize)
+	: rowHeight{ fontSize + 4 }
+{
+	// The "SAVED PREFABS" header takes one row and a 4-pixel gap above the first prefab.
+	const int headerHeight = rowHeight + 4;
+	top = panelTop + headerHeight;
+	visibleRows = whole_rows_within(panelHeight - headerHeight, rowHeight);
+}
+
+int PrefabListRows::row_top(size_t slot) const
+{
+	return top + static_cast<int>(slot) * rowHeight;
+}
+
+int PrefabListRows::row_height() const
+{
+	return rowHeight;
+}
+
+size_t PrefabListRows::visible_rows() const
+{
+	return visibleRows;
+}
+
+std::optional<size_t> PrefabListRows::slot_at(int pixelY) const
+{
+	// whole_rows_within counts a negative offset as 0 rows, which would make the header select the first row.
+	if (pixelY < top)
+	{
+		return std::nullopt;
+	}
+	const size_t slot = whole_rows_within(pixelY - top, rowHeight);
+	if (slot >= visibleRows)
+	{
+		return std::nullopt;
+	}
+	return slot;
+}
 
 // ---------------------------------------------------------------------------
 // Lifecycle
@@ -596,24 +648,21 @@ std::optional<size_t> RoomEditor::screen_to_list_index(const Renderer& renderer,
 
 	int tileSize = renderer.get_tile_size();
 	int panelX = renderer.get_screen_width() - RIGHT_W_TILES * tileSize;
-	int panelY = TOP_H_TILES * tileSize;
-	int panelH = renderer.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
 
 	if (mousePx < panelX || mousePx >= renderer.get_screen_width())
 	{
 		return std::nullopt;
 	}
-	if (mousePy < panelY || mousePy >= panelY + panelH)
+
+	// The rows the draw places; slot_at rejects the header and the strip below the last whole row.
+	const std::optional<size_t> slot = prefab_list_rows(renderer).slot_at(mousePy);
+	if (!slot)
 	{
 		return std::nullopt;
 	}
+	const size_t listIndex = listScroll + *slot;
 
-	int fontH = renderer.get_font_size() + 2;
-	const size_t visible = whole_rows_within(panelH, fontH);
-	const size_t row = whole_rows_within(mousePy - panelY, fontH);
-	const size_t listIndex = listScroll + row;
-
-	if (listIndex >= library->all().size() || row >= visible)
+	if (listIndex >= library->all().size())
 	{
 		return std::nullopt;
 	}
@@ -1004,22 +1053,19 @@ void RoomEditor::render_right_panel(const Renderer& renderer) const
 	// Header
 	renderer.draw_text_color(Vector2D{ panelX + 6, panelY + 4 }, "SAVED PREFABS", Color{ 160, 160, 220, 255 });
 
-	int fontH = renderer.get_font_size() + 4;
-	int listYOff = fontH + 4;
-	int listH = panelH - listYOff;
-	const size_t visible = whole_rows_within(listH, fontH);
+	const PrefabListRows rows = prefab_list_rows(renderer);
 	const auto& all = library->all();
 
-	for (size_t slot = 0; slot < visible && listScroll + slot < all.size(); ++slot)
+	for (size_t slot = 0; slot < rows.visible_rows() && listScroll + slot < all.size(); ++slot)
 	{
 		const size_t listIndex = listScroll + slot;
-		int rowPixelY = panelY + listYOff + static_cast<int>(slot) * fontH;
+		int rowPixelY = rows.row_top(slot);
 
 		bool selected = (listSelected == listIndex);
 
 		if (selected)
 		{
-			DrawRectangle(panelX, rowPixelY, panelW, fontH, Color{ 50, 50, 90, 200 });
+			DrawRectangle(panelX, rowPixelY, panelW, rows.row_height(), Color{ 50, 50, 90, 200 });
 		}
 
 		const Prefab& prefab = all[listIndex];
@@ -1036,10 +1082,11 @@ void RoomEditor::render_right_panel(const Renderer& renderer) const
 	if (all.empty())
 	{
 		renderer.draw_text_color(
-			Vector2D{ panelX + 6, panelY + listYOff + 4 }, "No prefabs yet.", Color{ 100, 100, 120, 150 });
+			Vector2D{ panelX + 6, rows.row_top(0) + 4 }, "No prefabs yet.", Color{ 100, 100, 120, 150 });
 	}
 
 	// Workflow guidance -- drawn in the bottom portion of the right panel
+	int fontH = renderer.get_font_size() + 4;
 	int guideLines = 8;
 	int guideH = guideLines * fontH + 8;
 	int guideY = panelY + panelH - guideH;

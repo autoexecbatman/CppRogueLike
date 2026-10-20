@@ -1,0 +1,47 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=PrefabListRowsTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": ": rowHeight{ fontSize + 4 }",
+      "mutated": ": rowHeight{ fontSize + 2 }",
+      "catches": "a row pitch other than the one the list is drawn at, which was the defect in 0286"
+    },
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "const int headerHeight = rowHeight + 4;",
+      "mutated": "const int headerHeight = 0;",
+      "catches": "rows measured from the panel's top instead of below the header line"
+    },
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "visibleRows = whole_rows_within(panelHeight - headerHeight, rowHeight);",
+      "mutated": "visibleRows = whole_rows_within(panelHeight, rowHeight);",
+      "catches": "counting rows in space the header already takes, so the strip below the last row selects one"
+    },
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "if (pixelY < top)",
+      "mutated": "if (pixelY < top - rowHeight)",
+      "catches": "a click on the header selecting the first prefab"
+    },
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "if (slot >= visibleRows)",
+      "mutated": "if (slot > visibleRows)",
+      "catches": "a click below the last whole row selecting a row that is not drawn"
+    },
+    {
+      "file": "src/RoomEditor.cpp",
+      "original": "return top + static_cast<int>(slot) * rowHeight;",
+      "mutated": "return top + static_cast<int>(slot) * (rowHeight + 1);",
+      "catches": "rows drawn at a pitch other than the one clicks are read at"
+    }
+  ]
+}

@@ -142,6 +142,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CodecRoundTripTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EnumCycleTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ListCursorTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/PrefabListRowsTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/MutationPlanTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/MenuPointerTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/InventoryContextActionsTest.cpp
