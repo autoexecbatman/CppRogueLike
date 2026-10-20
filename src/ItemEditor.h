@@ -134,7 +134,7 @@ private:
 
 	void field_adjust(FieldId field, int delta);
 	void field_toggle(FieldId field);
-	void field_set_string(FieldId field, std::string val);
+	void field_set_string(FieldId field, std::string newValue);
 
 public:
 	void enter(GameContext& ctx);
