@@ -15,8 +15,10 @@
 
 #include <gtest/gtest.h>
 
+#include <format>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "src/ArmorClass.h"
@@ -123,6 +125,59 @@ TEST_F(MonsterFeatureEntryTest, AMonsterInSightSpringingATrapIsNamed)
 	const std::string log = all_message_text();
 	EXPECT_NE(log.find("The goblin triggers the dart trap and takes 3 damage!"), std::string::npos) << log;
 	EXPECT_EQ(log.find("You"), std::string::npos) << "a monster's trap was told to the player as the player's: " << log;
+}
+
+// Every kind of trap is named in the log the way a search names it: "pit trap", "dart trap"
+// and "arrow trap", the book's words for the first two. Each die shows 3.
+TEST_F(MonsterFeatureEntryTest, ASprungTrapIsNamedByItsKind)
+{
+	struct NamedTrap
+	{
+		TrapType type{ TrapType::PIT };
+		std::string_view name{};
+		int damage{ 0 };
+	};
+
+	const NamedTrap namedTraps[] = {
+		{ TrapType::PIT, "pit trap", 6 },
+		{ TrapType::DART, "dart trap", 3 },
+		{ TrapType::ARROW, "arrow trap", 3 },
+	};
+	player_looks();
+
+	for (const NamedTrap& namedTrap : namedTraps)
+	{
+		traps.clear();
+		traps.push_back(std::make_unique<Trap>(NEAR_FEATURE, namedTrap.type, mock.tile_config));
+		// Three on every damage die, then the coin that keeps the trap.
+		mock.dice.set_next_roll(3);
+		if (namedTrap.type == TrapType::PIT)
+		{
+			mock.dice.set_next_roll(3);
+		}
+		mock.dice.set_next_roll(2);
+
+		(void)Pathfinding::step(goblin, NEAR_FEATURE, ctx);
+
+		const std::string expected = std::format("The goblin triggers the {} and takes {} damage!", namedTrap.name, namedTrap.damage);
+		EXPECT_NE(all_message_text().find(expected), std::string::npos) << "missing: " << expected << "\nlog: " << all_message_text();
+	}
+}
+
+// The player's own message is fed by the same name, so it is pinned too: a pit underfoot
+// is the pit trap a search would have found.
+TEST_F(MonsterFeatureEntryTest, ThePlayerSpringingAPitIsToldItIsAPitTrap)
+{
+	Trap pit{ Vector2D{ PLAYER_TILE.x + 1, CORRIDOR_ROW }, TrapType::PIT, mock.tile_config };
+	// Three on each of the pit's two dice, then the coin that keeps the trap.
+	mock.dice.set_next_roll(3);
+	mock.dice.set_next_roll(3);
+	mock.dice.set_next_roll(2);
+
+	EXPECT_EQ(pit.on_creature_enter(*player, ctx), EntryResult::BLOCKED);
+
+	const std::string log = all_message_text();
+	EXPECT_NE(log.find("You trigger the pit trap and take 6 damage!"), std::string::npos) << log;
 }
 
 // The same trap at the far end of the corridor still springs on the goblin and breaks,

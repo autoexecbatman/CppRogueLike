@@ -41,8 +41,8 @@ struct GameContext;
 
 // What a tile feature did to a creature that entered its tile.
 //
-// BLOCKED implies the creature was acted on, so ask is_affected() rather than
-// comparing against UNAFFECTED at a call site.
+// AFFECTED and BLOCKED both mean the feature acted; a caller asking whether the move
+// stops compares against BLOCKED.
 enum class EntryResult
 {
 	UNAFFECTED, // the feature did nothing -- a disarmed trap

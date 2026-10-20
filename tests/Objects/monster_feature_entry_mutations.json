@@ -54,6 +54,24 @@
       "original": "\tenter_all(*ctx.spellTiles);\n",
       "mutated": "",
       "catches": "a monster's step that never asks a web"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "std::format(\"You trigger the {} and take {} damage!\", actorData.name, damage)",
+      "mutated": "std::format(\"You trigger the {} and take {} damage!\", \"pit\", damage)",
+      "catches": "the player's sprung-trap message naming the trap with its own literal, the second name 0273 removed"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "creature.actorData.name, actorData.name, damage)",
+      "mutated": "creature.actorData.name, \"pit\", damage)",
+      "catches": "a watched monster's sprung-trap message naming the trap with its own literal"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "trapName = \"pit trap\";",
+      "mutated": "trapName = \"pit\";",
+      "catches": "a pit named \"pit\", the wording 0273 corrected"
     }
   ]
 }

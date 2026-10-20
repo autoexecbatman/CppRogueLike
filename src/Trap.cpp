@@ -185,32 +185,13 @@ EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 
 	// Apply damage to creature
 	assert(ctx.messageSystem && "Trap::on_creature_enter: called without a messageSystem");
-	std::string trapName;
-	switch (type)
-	{
-	case TrapType::PIT:
-	{
-		trapName = "pit";
-		break;
-	}
-	case TrapType::DART:
-	{
-		trapName = "dart trap";
-		break;
-	}
-	case TrapType::ARROW:
-	{
-		trapName = "arrow trap";
-		break;
-	}
-	}
 	if (creature.is_player())
 	{
-		ctx.messageSystem->message(ColorPairId::RED_BLACK, std::format("You trigger the {} and take {} damage!", trapName, damage), MessageCompletion::FINISHED);
+		ctx.messageSystem->message(ColorPairId::RED_BLACK, std::format("You trigger the {} and take {} damage!", actorData.name, damage), MessageCompletion::FINISHED);
 	}
 	else if (ctx.map->is_in_fov(creature.position))
 	{
-		ctx.messageSystem->message(ColorPairId::RED_BLACK, std::format("The {} triggers the {} and takes {} damage!", creature.actorData.name, trapName, damage), MessageCompletion::FINISHED);
+		ctx.messageSystem->message(ColorPairId::RED_BLACK, std::format("The {} triggers the {} and takes {} damage!", creature.actorData.name, actorData.name, damage), MessageCompletion::FINISHED);
 	}
 
 	creature.take_damage_and_check_death(damage, ctx, DamageType::PHYSICAL);
