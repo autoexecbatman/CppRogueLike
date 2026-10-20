@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cassert>
 #include <format>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -107,7 +108,7 @@ constexpr int HINT_HEIGHT = 28;
 constexpr int FIELD_HEIGHT = 30;
 constexpr int ITEM_HEIGHT = 32;
 constexpr int LIST_PAD = 8;
-constexpr int FIELD_COUNT = static_cast<int>(FieldId::COUNT);
+constexpr size_t FIELD_COUNT = static_cast<size_t>(FieldId::COUNT);
 
 // ---------------------------------------------------------------------------
 // Lifecycle
@@ -121,8 +122,8 @@ void SpellEditor::enter(const SpellRegistry& spells)
 
 	keys = spells.get_all_keys();
 
-	listCursor = 0;
-	listScroll = 0;
+	listCursor.reset(keys.size());
+	fieldCursor.reset(FIELD_COUNT);
 
 	load_working(spells);
 }
@@ -155,7 +156,7 @@ void SpellEditor::load_working(const SpellRegistry& spells)
 	}
 
 	working = spells.get_by_key(current_key());
-	fieldCursor = 0;
+	fieldCursor.reset(FIELD_COUNT);
 	mode = Mode::NORMAL;
 	editBuffer.clear();
 }
@@ -215,65 +216,65 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 	assert(ctx.spellRegistry && "SpellEditor::handle_normal: called without a spellRegistry");
 
 	SpellRegistry& spells = *ctx.spellRegistry;
-	int total = static_cast<int>(keys.size());
+	const int bodyHeight = body_height(*ctx.renderer);
+	const size_t visibleListRows = whole_rows_within(bodyHeight, ITEM_HEIGHT);
+	const size_t visibleFields = whole_rows_within(bodyHeight, FIELD_HEIGHT);
 	::Vector2 mouse = GetMousePosition();
 	bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
 
-	if (clicked)
+	// A click in the header is on neither panel.
+	if (clicked && mouse.y >= HEADER_HEIGHT)
 	{
+		const int pixelsBelowTop = static_cast<int>(mouse.y) - HEADER_HEIGHT;
 		if (mouse.x < LIST_WIDTH)
 		{
 			focus = 0;
-			int idx = listScroll + static_cast<int>(mouse.y - HEADER_HEIGHT) / ITEM_HEIGHT;
-			idx = std::clamp(idx, 0, total - 1);
-			if (idx != listCursor)
+			const std::optional<size_t> row = listCursor.row_under(whole_rows_within(pixelsBelowTop, ITEM_HEIGHT), visibleListRows);
+			if (row && *row != listCursor.current_row())
 			{
 				commit_working(spells);
-				listCursor = idx;
+				listCursor.select(*row);
 				load_working(spells);
 			}
 		}
 		else
 		{
 			focus = 1;
-			int idx = static_cast<int>(mouse.y - HEADER_HEIGHT) / FIELD_HEIGHT;
-			idx = std::clamp(idx, 0, FIELD_COUNT - 1);
-			fieldCursor = idx;
+			const std::optional<size_t> field = fieldCursor.row_under(whole_rows_within(pixelsBelowTop, FIELD_HEIGHT), visibleFields);
+			if (field)
+			{
+				fieldCursor.select(*field);
+			}
 		}
 	}
 
 	// Mouse wheel
 	float wheel = GetMouseWheelMove();
-	if (wheel != 0.0f && mouse.x < LIST_WIDTH)
+	if (wheel != 0.0f)
 	{
-		listScroll = std::clamp(
-			listScroll - static_cast<int>(wheel),
-			0,
-			std::max(0, total - 1));
+		if (mouse.x < LIST_WIDTH)
+		{
+			listCursor.scroll_by(-static_cast<int>(wheel), visibleListRows);
+		}
+		else
+		{
+			fieldCursor.scroll_by(-static_cast<int>(wheel), visibleFields);
+		}
 	}
 
 	if (focus == 0)
 	{
-		if (IsKeyPressed(KEY_UP) && listCursor > 0)
+		if (IsKeyPressed(KEY_UP) && listCursor.can_move_up())
 		{
 			commit_working(spells);
-			--listCursor;
-			if (listCursor < listScroll)
-			{
-				listScroll = listCursor;
-			}
+			listCursor.move_up();
 			load_working(spells);
 		}
-		else if (IsKeyPressed(KEY_DOWN) && listCursor < total - 1)
+		// A screen too short for one row has nowhere to scroll the cursor to.
+		else if (IsKeyPressed(KEY_DOWN) && listCursor.can_move_down() && visibleListRows > 0)
 		{
 			commit_working(spells);
-			++listCursor;
-			int screenHeight = ctx.renderer->get_screen_height();
-			int visibleCount = (screenHeight - HEADER_HEIGHT - HINT_HEIGHT) / 32;
-			if (listCursor >= listScroll + visibleCount)
-			{
-				listScroll = listCursor - visibleCount + 1;
-			}
+			listCursor.move_down(visibleListRows);
 			load_working(spells);
 		}
 		else if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_RIGHT))
@@ -290,11 +291,12 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 			definition.description = "No effect yet.";
 			const std::string newKey = spells.add_custom(std::move(definition));
 			keys = spells.get_all_keys();
-			for (int keyIndex = 0; keyIndex < static_cast<int>(keys.size()); ++keyIndex)
+			listCursor.set_row_count(keys.size());
+			for (size_t keyIndex = 0; keyIndex < keys.size(); ++keyIndex)
 			{
 				if (keys[keyIndex] == newKey)
 				{
-					listCursor = keyIndex;
+					listCursor.select(keyIndex);
 					break;
 				}
 			}
@@ -307,7 +309,7 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 			{
 				spells.remove_custom(current_key());
 				keys = spells.get_all_keys();
-				listCursor = std::clamp(listCursor, 0, static_cast<int>(keys.size()) - 1);
+				listCursor.set_row_count(keys.size());
 				load_working(spells);
 			}
 		}
@@ -315,13 +317,13 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 	}
 
 	// Field panel navigation
-	if (IsKeyPressed(KEY_UP) && fieldCursor > 0)
+	if (IsKeyPressed(KEY_UP) && fieldCursor.can_move_up())
 	{
-		--fieldCursor;
+		fieldCursor.move_up();
 	}
-	else if (IsKeyPressed(KEY_DOWN) && fieldCursor < FIELD_COUNT - 1)
+	else if (IsKeyPressed(KEY_DOWN) && fieldCursor.can_move_down() && visibleFields > 0)
 	{
-		++fieldCursor;
+		fieldCursor.move_down(visibleFields);
 	}
 
 	FieldId fieldId = current_field();
@@ -412,30 +414,33 @@ void SpellEditor::render_header(const Renderer& renderer) const
 		Color{ 130, 130, 100, 255 });
 }
 
+int SpellEditor::body_height(const Renderer& renderer)
+{
+	return renderer.get_screen_height() - HEADER_HEIGHT - HINT_HEIGHT;
+}
+
 void SpellEditor::render_list(const Renderer& renderer, const SpellRegistry& spells) const
 {
-	int screenHeight = renderer.get_screen_height();
 	int bodyY = HEADER_HEIGHT;
-	int bodyHeight = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
+	int bodyHeight = body_height(renderer);
 
 	DrawRectangle(0, bodyY, LIST_WIDTH, bodyHeight, Color{ 10, 10, 20, 255 });
 	DrawLine(LIST_WIDTH, bodyY, LIST_WIDTH, bodyY + bodyHeight, Color{ 80, 80, 120, 255 });
 
-	int total = static_cast<int>(keys.size());
-	int visibleCount = bodyHeight / ITEM_HEIGHT;
-	int scroll = std::clamp(listScroll, 0, std::max(0, total - visibleCount));
+	const size_t visibleCount = whole_rows_within(bodyHeight, ITEM_HEIGHT);
+	const size_t scroll = listCursor.first_visible(visibleCount);
 
 	::Vector2 mouse = GetMousePosition();
 
-	for (int spellIndex = scroll; spellIndex < total; ++spellIndex)
+	for (size_t spellIndex = scroll; spellIndex < keys.size(); ++spellIndex)
 	{
-		int itemY = bodyY + (spellIndex - scroll) * ITEM_HEIGHT;
+		int itemY = bodyY + static_cast<int>(spellIndex - scroll) * ITEM_HEIGHT;
 		if (itemY + ITEM_HEIGHT > bodyY + bodyHeight)
 		{
 			break;
 		}
 
-		bool isSelected = (spellIndex == listCursor);
+		bool isSelected = (spellIndex == listCursor.current_row());
 		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH && mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
@@ -482,26 +487,26 @@ void SpellEditor::render_list(const Renderer& renderer, const SpellRegistry& spe
 void SpellEditor::render_fields(const Renderer& renderer) const
 {
 	int screenWidth = renderer.get_screen_width();
-	int screenHeight = renderer.get_screen_height();
 	int panelX = LIST_WIDTH;
 	int panelY = HEADER_HEIGHT;
 	int fieldsWidth = screenWidth - LIST_WIDTH;
-	int fieldsHeight = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
+	int fieldsHeight = body_height(renderer);
 
 	DrawRectangle(panelX, panelY, fieldsWidth, fieldsHeight, Color{ 8, 8, 16, 255 });
 
 	::Vector2 mouse = GetMousePosition();
 
-	for (int fieldIndex = 0; fieldIndex < FIELD_COUNT; ++fieldIndex)
+	const size_t scroll = fieldCursor.first_visible(whole_rows_within(fieldsHeight, FIELD_HEIGHT));
+	for (size_t fieldIndex = scroll; fieldIndex < FIELD_COUNT; ++fieldIndex)
 	{
-		int itemY = panelY + fieldIndex * FIELD_HEIGHT;
+		int itemY = panelY + static_cast<int>(fieldIndex - scroll) * FIELD_HEIGHT;
 		if (itemY + FIELD_HEIGHT > panelY + fieldsHeight)
 		{
 			break;
 		}
 
 		FieldId fieldId = static_cast<FieldId>(fieldIndex);
-		bool isSelected = (fieldIndex == fieldCursor);
+		bool isSelected = (fieldIndex == fieldCursor.current_row());
 		bool hovered = mouse.x >= panelX && mouse.x < screenWidth && mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
@@ -585,12 +590,12 @@ const std::string& SpellEditor::current_key() const
 	{
 		throw std::out_of_range("SpellEditor::current_key -- key list is empty");
 	}
-	return keys[listCursor];
+	return keys[listCursor.current_row()];
 }
 
 FieldId SpellEditor::current_field() const
 {
-	return static_cast<FieldId>(fieldCursor);
+	return static_cast<FieldId>(fieldCursor.current_row());
 }
 
 std::string SpellEditor::field_label(FieldId field) const

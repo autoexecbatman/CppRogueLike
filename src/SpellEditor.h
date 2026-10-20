@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 
+#include "ListCursor.h"
 #include "SpellRegistry.h"
 
 struct GameContext;
@@ -46,14 +47,13 @@ private:
 
 	// Spell list (string keys: builtins then custom)
 	std::vector<std::string> keys;
-	int listCursor{ 0 };
-	int listScroll{ 0 };
+	ListCursor listCursor{};
 
 	// Working copy
 	SpellDefinition working{};
 
 	// Field navigation
-	int fieldCursor{ 0 };
+	ListCursor fieldCursor{};
 	std::string editBuffer;
 
 	// Status feedback
@@ -68,6 +68,12 @@ private:
 
 	void render(const GameContext& ctx) const;
 	void render_header(const Renderer& renderer) const;
+	// The height of the panels between the header and the hint bar. Input and drawing both
+	// read it, so a click and the row drawn under it come from one row count.
+	//
+	// Example:
+	//   body_height(renderer);   // a 900-pixel screen -> 824, after a 48 header and a 28 hint bar
+	[[nodiscard]] static int body_height(const Renderer& renderer);
 	void render_list(const Renderer& renderer, const SpellRegistry& spells) const;
 	void render_fields(const Renderer& renderer) const;
 	void render_hint(const Renderer& renderer) const;
