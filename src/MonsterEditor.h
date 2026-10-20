@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 
+#include "ListCursor.h"
 #include "MonsterRegistry.h"
 #include "Renderer.h"
 
@@ -74,7 +75,7 @@ private:
 		COUNT
 	};
 
-	static constexpr int FIELD_COUNT = static_cast<int>(FieldId::COUNT);
+	static constexpr size_t FIELD_COUNT = static_cast<size_t>(FieldId::COUNT);
 
 	bool active{ false };
 	Mode mode{ Mode::NORMAL };
@@ -82,8 +83,7 @@ private:
 
 	// Monster list (string keys: builtins, then custom)
 	std::vector<std::string> keys;
-	int listCursor{ 0 };
-	int listScroll{ 0 };
+	ListCursor listCursor{};
 
 	// Working copy of selected monster's params
 	MonsterParams working{};
@@ -92,8 +92,7 @@ private:
 	size_t selectedXpCount{ 0 };
 
 	// Field navigation
-	int fieldCursor{ 0 };
-	int fieldScroll{ 0 };
+	ListCursor fieldCursor{};
 	std::string editBuffer;
 
 	// Tile picker state
@@ -113,6 +112,12 @@ private:
 
 	void render(const GameContext& ctx) const;
 	void render_header(const Renderer& renderer) const;
+	// The height of the panels between the header and the hint bar. Input and drawing both
+	// read it, so a click and the row drawn under it come from one row count.
+	//
+	// Example:
+	//   body_height(renderer);   // a 900-pixel screen -> 824, after a 48 header and a 28 hint bar
+	[[nodiscard]] static int body_height(const Renderer& renderer);
 	void render_list(const Renderer& renderer, const MonsterRegistry& monsters) const;
 	void render_fields(const Renderer& renderer) const;
 	void render_picker(const Renderer& renderer) const;
