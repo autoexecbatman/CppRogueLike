@@ -1476,30 +1476,18 @@ bool Creature::toggle_weapon(uint64_t itemUniqueId, EquipmentSlot preferredSlot,
 	}
 	else
 	{
-		// Find item in inventory and equip it
-		Item* itemToEquip = InventoryOperations::find_item_by_id(inventoryData, itemUniqueId);
-		if (itemToEquip)
+		// Take the item out of the pack; an id the pack does not hold equips nothing.
+		auto result = InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
+		if (result.has_value())
 		{
-			// Remove item from inventory
-			auto result = InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
-			if (result.has_value())
-			{
-				auto itemToEquip = std::move(*result);
+			auto itemToEquip = std::move(*result);
 
-				// Determine appropriate slot based on item classification
-				EquipmentSlot target_slot;
+			// A ranged weapon goes to the missile slot whichever hand was asked for.
+			const EquipmentSlot targetSlot = ItemClassificationUtils::is_ranged_weapon(itemToEquip->itemClass)
+				? EquipmentSlot::MISSILE_WEAPON
+				: preferredSlot;
 
-				if (ItemClassificationUtils::is_ranged_weapon(itemToEquip->itemClass))
-				{
-					target_slot = EquipmentSlot::MISSILE_WEAPON;
-				}
-				else
-				{
-					target_slot = preferredSlot;
-				}
-
-				return equip_item(std::move(itemToEquip), target_slot, ctx);
-			}
+			return equip_item(std::move(itemToEquip), targetSlot, ctx);
 		}
 	}
 	return false;

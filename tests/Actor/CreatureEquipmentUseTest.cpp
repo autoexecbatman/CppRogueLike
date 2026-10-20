@@ -89,6 +89,45 @@ TEST_F(CreatureEquipmentUseTest, ACreaturePutsAWeaponInItsHand)
 	EXPECT_EQ(orc->get_attack_name(), "long sword") << "it is not striking with what it holds";
 }
 
+// toggle_weapon on an id the pack does not hold equips nothing and moves nothing.
+TEST_F(CreatureEquipmentUseTest, TogglingAWeaponThePackDoesNotHoldChangesNothing)
+{
+	Item& sword = carry("long_sword");
+	const size_t packed = orc->inventoryData.items.size();
+
+	EXPECT_FALSE(orc->toggle_weapon(sword.uniqueId + 1, EquipmentSlot::RIGHT_HAND, ctx));
+
+	EXPECT_TRUE(pack_holds(sword));
+	EXPECT_EQ(orc->inventoryData.items.size(), packed);
+	EXPECT_EQ(orc->get_equipped_item(EquipmentSlot::RIGHT_HAND), nullptr);
+}
+
+// toggle_weapon takes a carried sword out of the pack into the hand asked for.
+TEST_F(CreatureEquipmentUseTest, TogglingASwordPutsItInTheHandAskedFor)
+{
+	Item& sword = carry("long_sword");
+
+	EXPECT_TRUE(orc->toggle_weapon(sword.uniqueId, EquipmentSlot::RIGHT_HAND, ctx));
+
+	EXPECT_EQ(orc->get_equipped_item(EquipmentSlot::RIGHT_HAND), &sword);
+	EXPECT_FALSE(pack_holds(sword));
+}
+
+// A bow goes to the missile slot whichever hand was asked for.
+TEST_F(CreatureEquipmentUseTest, TogglingABowPutsItInTheMissileSlot)
+{
+	orc->set_body_plan({ EquipmentSlot::RIGHT_HAND, EquipmentSlot::BODY, EquipmentSlot::MISSILE_WEAPON });
+	// A short bow has no strength rating, so the orc's arm is not what this measures.
+	Item& bow = carry("short_bow");
+	ASSERT_TRUE(orc->can_equip(bow, EquipmentSlot::MISSILE_WEAPON)) << "the slot refuses the bow, so the toggle is never reached";
+	ASSERT_TRUE(can_draw(*orc, bow)) << "the orc cannot draw the bow, so the toggle is refused for another reason";
+
+	EXPECT_TRUE(orc->toggle_weapon(bow.uniqueId, EquipmentSlot::RIGHT_HAND, ctx));
+
+	EXPECT_EQ(orc->get_equipped_item(EquipmentSlot::MISSILE_WEAPON), &bow);
+	EXPECT_EQ(orc->get_equipped_item(EquipmentSlot::RIGHT_HAND), nullptr);
+}
+
 TEST_F(CreatureEquipmentUseTest, ACreatureTakesItBackOff)
 {
 	Item& sword = carry("long_sword");

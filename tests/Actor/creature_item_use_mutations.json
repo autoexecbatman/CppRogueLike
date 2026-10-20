@@ -24,6 +24,24 @@
       "original": "\t// Add equipped item\n\tequippedItems.emplace_back(std::move(item), slot);\n",
       "mutated": "\t// Add equipped item\n\tequippedItems.emplace_back(std::move(item), EquipmentSlot::BODY);\n",
       "catches": "an item put in whichever slot, not the one asked for"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "an id the pack does not hold equips nothing.\n\t\tauto result = InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);\n\t\tif (result.has_value())\n",
+      "mutated": "an id the pack does not hold equips nothing.\n\t\tauto result = InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);\n\t\tif (true)\n",
+      "catches": "an id the pack does not hold dereferenced as though it were found, the case the deleted find used to guard"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\t\t\t? EquipmentSlot::MISSILE_WEAPON\n\t\t\t\t: preferredSlot;",
+      "mutated": "\t\t\t\t? preferredSlot\n\t\t\t\t: preferredSlot;",
+      "catches": "a bow put in the hand asked for instead of the missile slot"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\t\t\t? EquipmentSlot::MISSILE_WEAPON\n\t\t\t\t: preferredSlot;",
+      "mutated": "\t\t\t\t? EquipmentSlot::MISSILE_WEAPON\n\t\t\t\t: EquipmentSlot::MISSILE_WEAPON;",
+      "catches": "a sword put in the missile slot instead of the hand asked for"
     }
   ]
 }
