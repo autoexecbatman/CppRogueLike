@@ -3,8 +3,14 @@
   "test_command": [
     "powershell",
     "-NoProfile",
-    "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=CreatureRecordSaveTest.*:CreatureSerializationTest.*:PlayerSerializationTest.*"
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/run_suite.ps1",
+    "-Configuration",
+    "Debug",
+    "-Filter",
+    "--gtest_filter=CreatureRecordSaveTest.*:CreatureSerializationTest.*:PlayerSerializationTest.*"
   ],
   "mutations": [
     {

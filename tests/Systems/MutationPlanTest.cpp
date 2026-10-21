@@ -10,6 +10,10 @@
 // fixture is `TreasureRoomFixture` - so a third of that plan's intended coverage never
 // ran.
 //
+// A third check holds every plan to one way of running the suite: a call to
+// tests/run_suite.ps1, which builds test_exe and runs it from build/bin/<configuration>,
+// the directory CI uses.
+//
 // This is the census that used to be done by hand before every commit. Doing it here
 // means a plan edited out from under itself fails on the next suite run instead of on
 // the next time somebody remembers.
@@ -27,6 +31,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <ranges>
 #include <set>
 #include <string>
 #include <vector>
@@ -182,5 +187,37 @@ TEST(MutationPlanTest, EveryFilterNamesASuiteThatExists)
 				<< planPath.filename().string() << ": the filter names '" << pattern
 				<< "', which matches no test suite in this binary";
 		}
+	}
+}
+
+// tests/run_suite.ps1 is the one definition of how a plan builds and runs the suite, so
+// every plan calls it, naming only a configuration and a filter. The filter is passed
+// by name: given by position, "--gtest_filter=..." is read as a parameter name, the call
+// fails before the build, and every mutant reads as caught. Falsified 2026-10-21: with
+// fov_map_mutations.json put back to its old -Command string, this names that plan.
+TEST(MutationPlanTest, EveryPlanRunsTheSuiteThroughRunSuite)
+{
+	const std::vector<std::filesystem::path> plans = every_plan();
+	ASSERT_FALSE(plans.empty()) << "no plans found; the case measures nothing";
+
+	const std::vector<std::string> prefix{
+		"powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "tests/run_suite.ps1", "-Configuration"
+	};
+	for (const std::filesystem::path& planPath : plans)
+	{
+		std::ifstream planFile(planPath);
+		ASSERT_TRUE(planFile.is_open()) << planPath.string();
+		json plan;
+		planFile >> plan;
+
+		const std::vector<std::string> command = plan.at("test_command").get<std::vector<std::string>>();
+		const bool isCall = command.size() == prefix.size() + 3 &&
+			std::ranges::equal(command | std::views::take(prefix.size()), prefix) &&
+			(command.at(prefix.size()) == "Debug" || command.at(prefix.size()) == "Release") &&
+			command.at(prefix.size() + 1) == "-Filter" &&
+			command.back().starts_with("--gtest_filter=");
+		EXPECT_TRUE(isCall)
+			<< planPath.filename().string() << ": the test_command is not a call to tests/run_suite.ps1 "
+			<< "with -Configuration Debug or Release and -Filter --gtest_filter=...";
 	}
 }
