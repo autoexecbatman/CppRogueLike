@@ -8,11 +8,32 @@
 #include "Attacker.h"
 #include "BuffSystem.h"
 #include "Creature.h"
+#include "EquipmentSlot.h"
 #include "GameContext.h"
+#include "Item.h"
 #include "Map.h"
 #include "Pathfinding.h"
 #include "Persistent.h"
+#include "Pickable.h"
 #include "Vector2D.h"
+
+namespace
+{
+
+// Whether the creature holds a missile weapon its Strength, as it stands now, can draw.
+// Asked every turn, because Strength can fall between one turn and the next.
+//
+// Example:
+//   can_draw_missile_weapon(strength18WithCompositeBow);  // -> true
+//   can_draw_missile_weapon(strength12WithCompositeBow);  // -> false, the composite bow needs 18
+//   can_draw_missile_weapon(archerWithNoBow);             // -> false, nothing to shoot with
+bool can_draw_missile_weapon(const Creature& owner)
+{
+	const Item* missileWeapon = owner.get_equipped_item(EquipmentSlot::MISSILE_WEAPON);
+	return missileWeapon && can_draw(owner, *missileWeapon);
+}
+
+} // namespace
 
 void AiMonsterRanged::update(Creature& owner, GameContext& ctx)
 {
@@ -34,6 +55,13 @@ void AiMonsterRanged::update(Creature& owner, GameContext& ctx)
 void AiMonsterRanged::move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
 {
 	assert(ctx.map && "AiMonsterRanged::move_or_attack: called without a map");
+
+	// An archer with nothing it can draw closes in and fights as any monster does.
+	if (!can_draw_missile_weapon(owner))
+	{
+		AiMonster::move_or_attack(owner, targetPosition, ctx);
+		return;
+	}
 
 	int distance = owner.get_tile_distance(targetPosition);
 

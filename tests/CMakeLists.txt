@@ -98,6 +98,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PlayerRestTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PlayerVirtualInterfaceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Ai/AiMimicTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Ai/RangedDrawTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Ai/SanctuaryPursuitTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Ai/MonsterWaterAvoidanceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Ai/MonsterMovementTest.cpp

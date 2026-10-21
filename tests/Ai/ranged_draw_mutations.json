@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/run_suite.ps1",
+    "-Configuration",
+    "Debug",
+    "-Filter",
+    "--gtest_filter=RangedDrawTest.*:SanctuaryPursuitTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/AiMonsterRanged.cpp",
+      "original": "\tif (!can_draw_missile_weapon(owner))\n\t{\n\t\tAiMonster::move_or_attack(owner, targetPosition, ctx);",
+      "mutated": "\tif (false)\n\t{\n\t\tAiMonster::move_or_attack(owner, targetPosition, ctx);",
+      "catches": "an archer choosing a shot it cannot draw, every round"
+    },
+    {
+      "file": "src/AiMonsterRanged.cpp",
+      "original": "\treturn missileWeapon && can_draw(owner, *missileWeapon);",
+      "mutated": "\treturn missileWeapon != nullptr;",
+      "catches": "an archer with a bow too strong for it shooting as though it could draw it"
+    },
+    {
+      "file": "src/AiMonsterRanged.cpp",
+      "original": "\treturn missileWeapon && can_draw(owner, *missileWeapon);",
+      "mutated": "\treturn false;",
+      "catches": "every archer walking in to melee, a strong one included"
+    }
+  ]
+}
