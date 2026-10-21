@@ -164,7 +164,7 @@ bool use_magical_equip(MagicalEffect effect, EquipmentSlot slot, Item& item, Cre
 		{
 			if (effect == MagicalEffect::INVISIBILITY)
 			{
-				ctx.messageSystem->message(ColorPairId::CYAN_BLACK, "The ring pulses with arcane power. Press Ctrl+C to cast.", MessageCompletion::FINISHED);
+				ctx.messageSystem->message(ColorPairId::CYAN_BLACK, "The ring pulses with arcane power. Press Shift+C to cast.", MessageCompletion::FINISHED);
 			}
 			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You put on the " + item.get_name() + ".", MessageCompletion::FINISHED);
 		}
