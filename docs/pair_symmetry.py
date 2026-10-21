@@ -41,6 +41,25 @@ FALSIFICATIONS, run 2026-10-01 before either zero was trusted. Both checks were 
 from absent to present and back; see the issue that introduced this file for the exact
 edits.
 
+CHECK ONE'S QUERIES, 2026-10-21 (issues/0308). A prefix can be a noun: in
+lock_pick_failed_at_level "lock" is the lock being picked, and in save_file_exists "save"
+is the file. A name is skipped as a query when every header declaration of it is const or
+static and has no non-const reference or pointer parameter; with no header declaration
+it stays a writer. Across src/ that took UNPAIRED VERB from 9 to 6, dropping
+lock_pick_failed_at_level, save_error and save_file_exists. Each clause was driven both
+ways in a copy of src/, run with --root:
+
+    every unlock_door renamed unbar_door         lock_door reported, before and after
+    const removed from lock_pick_failed_at_level  reported again
+    static removed from save_file_exists          reported again
+    save_to_json's json& output made const json&  dropped; as json& it is reported
+
+Two findings that stay, so nobody chases them. save_bonus_against is a known false
+positive: "save" is the saving throw, but a free function cannot be const and it takes
+GameContext&, so its signature says it can write. Exempting GameContext& would lose every
+real save_X(ctx) with no loader. register_key is expected: bindings are registered once
+at start and never removed, which is a design state rather than a missing half.
+
 Neither check reads a build. Both read src/*.cpp and src/*.h as text.
 """
 
@@ -118,11 +137,49 @@ def collect_function_names(files):
     return seen
 
 
-def unpaired_verbs(names):
+def header_declarations(files, name):
+    """Every header line declaring name, as (before the name, parameters, after the list)."""
+    shape = re.compile(r"^\s*(?:\[\[nodiscard\]\]\s*)?([^;(){}]*?)\b" + re.escape(name) + r"\s*\(([^)]*)\)\s*([^;{]*)[;{]")
+    found = []
+    for path in files:
+        if path.suffix != ".h":
+            continue
+        for line in read_lines(path):
+            match = shape.match(strip_comment(line))
+            if match:
+                found.append((match.group(1), match.group(2), match.group(3)))
+    return found
+
+
+def cannot_write(files, name):
+    """Whether every declaration of name shows it cannot write anything.
+
+    A function cannot write when it is const-qualified or static and has no non-const
+    reference or pointer parameter. Without a declaration in a header there is no
+    evidence, so the name stays a writer.
+    """
+    declarations = header_declarations(files, name)
+    if not declarations:
+        return False
+    for before, parameters, after in declarations:
+        # A parameter it can write through: a reference or pointer that is not const.
+        writable = [
+            parameter for parameter in parameters.split(",")
+            if ("&" in parameter or "*" in parameter) and not parameter.strip().startswith("const ")
+        ]
+        is_bound = "const" in after.split() or "static" in before.split()
+        if writable or not is_bound:
+            return False
+    return True
+
+
+def unpaired_verbs(names, files):
     """Writers whose matching reader is nowhere in the tree.
 
     Checked one way only. A writer with no reader means something is written and
-    never read back; a reader with no writer is ordinarily reference data.
+    never read back; a reader with no writer is ordinarily reference data. A name whose
+    declaration shows it cannot write is a query that happens to start with the verb as a
+    noun, such as lock_pick_failed_at_level or save_file_exists, and is not half of a pair.
     """
     findings = []
     for writer, reader in VERB_PAIRS:
@@ -132,6 +189,8 @@ def unpaired_verbs(names):
                 continue
             stem = name[len(prefix):]
             if not stem or f"{reader}_{stem}" in names:
+                continue
+            if cannot_write(files, name):
                 continue
             findings.append((name, f"{reader}_{stem}", filename, number))
     return sorted(findings)
@@ -204,7 +263,7 @@ def main():
     print(f"pair symmetry over {len(files)} files in {root}/")
 
     if run_verbs:
-        findings = unpaired_verbs(collect_function_names(files))
+        findings = unpaired_verbs(collect_function_names(files), files)
         print(f"\nUNPAIRED VERB: {len(findings)}")
         for name, wanted, filename, number in findings:
             print(f"  {filename}:{number}  {name}  has no  {wanted}")

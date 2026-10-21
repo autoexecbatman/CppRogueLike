@@ -45,6 +45,22 @@ FALSIFICATIONS, 2026-10-01, before any count here was trusted. Each check was dr
 from absent to present and back; the edits are recorded in the issue that introduced
 this file. The first run found two of its own bugs - a multiplying star read as a
 dereference, and a guard it never looked for - and check two's first zero was inert.
+
+CHECK TWO'S "only after", 2026-10-21 (issues/0306). The bare phrase matched comments that
+describe an outcome - RoomEditor's "names the new label only after the save" - so it now
+counts only with a call as its subject. Probe trees holding one class whose body asserts
+nothing, run with --root:
+
+    "Call this only after load()."          reported before, reported after
+    "Must be called only after load()."     reported before, reported after
+    "Shows the label only after the save."  reported before, not reported after
+    the same declaration with no comment    not reported, before and after
+
+Across src/ the change took PRECONDITION from 2 to 0 and left the other two counts as they
+were. "assert" joined KEYWORDS in the same change: a probe whose only body line is an
+assert under a precondition comment had that line read as a function named assert once
+before and zero times after. That reading never produced a finding, since no sibling
+holds Class::assert, so the printed report is the same either way.
 """
 
 import argparse
@@ -71,10 +87,13 @@ DECLARATION = re.compile(
 POINTER_PARAM = re.compile(r"(?:^|,)\s*(?:const\s+)?([A-Za-z_]\w*(?:::\w+)*)\s*\*\s*(\w+)\s*(?:,|$)")
 
 # Prose stating a precondition. Deliberately short: a loose set matched ordinary
-# description, and a checker that cries wolf gets ignored.
+# description, and a checker that cries wolf gets ignored. "only after" counts only with
+# a call as its subject: "call this only after load()" binds the caller, while "names the
+# label only after the save" describes what the function does.
 PRECONDITION = re.compile(
     r"\b(must be called|must have|must be set|must already|caller must|requires that|"
-    r"only valid|only after|before any|has to be called|expects a|expects the)\b", re.I)
+    r"only valid|before any|has to be called|expects a|expects the|"
+    r"call(?:ed|ing)?\b[^.;]{0,30}?\bonly after)\b", re.I)
 
 # A dereferencing star opens an expression; a multiplying star follows an operand.
 # "-e.vel_y * e.turbulence" matched the first draft and was reported as a dereference,
@@ -83,7 +102,7 @@ STAR_OPENS = r"(?:^|[=,(\[;{}&|!?:<>+\-*/%]|\breturn\b)\s*"
 
 LOOK_BACK = 6
 MAX_BODY = 160
-KEYWORDS = {"if", "for", "while", "switch", "return", "else", "catch", "do", "sizeof"}
+KEYWORDS = {"if", "for", "while", "switch", "return", "else", "catch", "do", "sizeof", "assert"}
 
 
 def source_files(root):
