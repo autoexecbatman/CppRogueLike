@@ -167,19 +167,6 @@ TEST_F(HungerSystemTest, StateFollowsTheCounterAcrossEveryThreshold)
 	}
 }
 
-// A creature that has eaten is not suffering, and one that is hungry or worse is.
-// The boundary is the HUNGRY threshold, so this is the case that can see it move.
-TEST_F(HungerSystemTest, PenaltiesBeginExactlyWhereHungerDoes)
-{
-	hunger.increase_hunger(ctx, 400);
-	ASSERT_EQ(hunger.get_hunger_state(), HungerState::SATIATED);
-	EXPECT_FALSE(hunger.is_suffering_hunger_penalties()) << "a satiated creature was reported as suffering";
-
-	hunger.increase_hunger(ctx, 1);
-	ASSERT_EQ(hunger.get_hunger_state(), HungerState::HUNGRY);
-	EXPECT_TRUE(hunger.is_suffering_hunger_penalties()) << "hunger arrived without its penalties";
-}
-
 // What the counter is, and what the player was last told, both survive a save. The
 // second is the one worth pinning: it is the only thing stopping a load announcing
 // a state change the player has already been told about.

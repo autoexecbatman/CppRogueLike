@@ -113,9 +113,6 @@ public:
 	// Returns color code for hunger UI display
 	ColorPairId get_hunger_color() const;
 
-	// Returns true if player is hungry enough to suffer penalties
-	bool is_suffering_hunger_penalties() const;
-
 	// Apply hunger effects to player stats
 	void apply_hunger_effects(GameContext& ctx);
 

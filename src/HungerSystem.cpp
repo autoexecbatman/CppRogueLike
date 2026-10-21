@@ -159,14 +159,6 @@ ColorPairId HungerSystem::get_hunger_color() const
 	std::unreachable();
 }
 
-bool HungerSystem::is_suffering_hunger_penalties() const
-{
-	const HungerState state = get_hunger_state();
-	return state == HungerState::HUNGRY ||
-		state == HungerState::STARVING ||
-		state == HungerState::DYING;
-}
-
 void HungerSystem::apply_hunger_effects(GameContext& ctx)
 {
 	assert(ctx.dice && "HungerSystem::apply_hunger_effects: called without dice");
