@@ -1,0 +1,83 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=OpenLocksTest.*:DoorLockingTest.*:MapDoorPersistenceTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\t\tif (level > ctx.map->lock_pick_failed_at_level(doorPos))\n",
+      "mutated": "\t\tif (level >= ctx.map->lock_pick_failed_at_level(doorPos))\n",
+      "catches": "a second pick at the same level allowed"
+    },
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\t\tif (level > ctx.map->lock_pick_failed_at_level(doorPos))\n",
+      "mutated": "\t\tif (level > ctx.map->lock_pick_failed_at_level(doorPos) + 1)\n",
+      "catches": "one level up not enough to try again"
+    },
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\t\t\t\tctx.map->mark_lock_pick_failed(doorPos, level);\n",
+      "mutated": "",
+      "catches": "a failed pick forgotten, so it may be tried again at once"
+    },
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\t\t\tspend_player_action(ctx, rounds * TIME_UNITS_PER_ROUND);\n",
+      "mutated": "\t\t\tspend_player_action(ctx, TIME_UNITS_PER_ROUND);\n",
+      "catches": "a pick taking one round instead of 1d10"
+    },
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\t\t\tconst int rounds = ctx.dice->d10();\n\t\t\tif (ctx.dice->d100() <= openLocksChance)\n",
+      "mutated": "\t\t\tconst int percentile = ctx.dice->d100();\n\t\t\tconst int rounds = ctx.dice->d10();\n\t\t\tif (percentile <= openLocksChance)\n",
+      "catches": "the d100 read before the d10"
+    },
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\t\t\treturn true;\n\t\t}\n\n\t\t// Refused without a roll or a round, and the bump goes on to forcing.\n",
+      "mutated": "\t\t\treturn true;\n\t\t}\n\n\t\t// Refused without a roll or a round, and the bump goes on to forcing.\n\t\treturn false;\n",
+      "catches": "a refused pick ending the bump before forcing"
+    },
+    {
+      "file": "src/PlayerController.cpp",
+      "original": "\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, \"This lock is too difficult for you until you have learned more.\", MessageCompletion::FINISHED);\n",
+      "mutated": "",
+      "catches": "a refused pick saying nothing"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\ttile.lockPickFailedAtLevel = level;\n",
+      "mutated": "",
+      "catches": "Map::mark_lock_pick_failed recording nothing"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\treturn tiles[tileIndex].lockPickFailedAtLevel;\n",
+      "mutated": "\treturn 0;\n",
+      "catches": "Map::lock_pick_failed_at_level answering never"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\t\t\t{ \"lockPickFailedAtLevel\", tile.lockPickFailedAtLevel } });\n",
+      "mutated": "\t\t\t\t{ \"lockPickFailedAtLevel\", 0 } });\n",
+      "catches": "a failed pick saved as never, so a load gives the attempt back"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\ttiles.back().lockPickFailedAtLevel = tileJson.at(\"lockPickFailedAtLevel\").get<int>();\n",
+      "mutated": "",
+      "catches": "a failed pick dropped on load"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\ttiles.back().lockPickFailedAtLevel = tileJson.at(\"lockPickFailedAtLevel\").get<int>();\n",
+      "mutated": "\t\ttiles.back().lockPickFailedAtLevel = tileJson.value(\"lockPickFailedAtLevel\", 0);\n",
+      "catches": "a tile without its failed-pick level loaded as never instead of refused"
+    }
+  ]
+}

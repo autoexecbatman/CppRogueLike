@@ -103,6 +103,17 @@ TEST_F(MapDoorPersistenceTest, ADoorThatResistedForcingStillHasAfterASaveAndALoa
 	EXPECT_TRUE(fresh.is_door_locked(LOCKED_DOOR));
 }
 
+// A failed pick survives a save, so a load does not give the level's attempt back.
+TEST_F(MapDoorPersistenceTest, AFailedPickIsStillRememberedAfterASaveAndALoad)
+{
+	original.mark_lock_pick_failed(LOCKED_DOOR, 4);
+
+	Map fresh = reloaded();
+
+	EXPECT_EQ(fresh.lock_pick_failed_at_level(LOCKED_DOOR), 4);
+	EXPECT_EQ(fresh.lock_pick_failed_at_level(CLOSED_DOOR), 0);
+}
+
 // Saving the loaded map writes what it was loaded from, door states included.
 TEST_F(MapDoorPersistenceTest, ALoadedMapSavesWhatItWasLoadedFrom)
 {
@@ -135,6 +146,28 @@ TEST_F(MapDoorPersistenceTest, ATileWithoutItsDoorStateIsRefused)
 	catch (const nlohmann::json::exception& refusal)
 	{
 		EXPECT_NE(std::string(refusal.what()).find("doorState"), std::string::npos) << refusal.what();
+	}
+}
+
+// A tile record without its failed-pick level is refused, naming the field.
+TEST_F(MapDoorPersistenceTest, ATileWithoutItsFailedPickLevelIsRefused)
+{
+	nlohmann::json saved;
+	original.save(saved);
+	for (nlohmann::json& tile : saved.at("tiles"))
+	{
+		tile.erase("lockPickFailedAtLevel");
+	}
+	Map fresh{ DOOR_MAP_WIDTH, DOOR_MAP_HEIGHT };
+
+	try
+	{
+		fresh.load(saved);
+		ADD_FAILURE() << "a tile without its failed-pick level was loaded";
+	}
+	catch (const nlohmann::json::exception& refusal)
+	{
+		EXPECT_NE(std::string(refusal.what()).find("lockPickFailedAtLevel"), std::string::npos) << refusal.what();
 	}
 }
 

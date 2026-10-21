@@ -57,6 +57,8 @@ struct Tile
 	TileType type{};
 	bool explored{};
 	DoorState doorState{ DoorState::OPEN };
+	// The player's experience level when they last failed to pick this lock, or 0 for never.
+	int lockPickFailedAtLevel{ 0 };
 
 	Tile(Vector2D pos, TileType type)
 		: position(pos), type(type), explored(false), doorState(DoorState::OPEN) {}
@@ -114,18 +116,20 @@ public:
 	Map(int mapWidth, int mapHeight);
 
 	// Replaces the map with a saved one: its size, seed and every tile's type, whether it has
-	// been seen, and its door state. Doors are restored as saved, never placed again. Throws
-	// nlohmann's out_of_range naming any field a record lacks, "doorState" included.
+	// been seen, its door state and the level a pick of its lock failed at. Doors are restored
+	// as saved, never placed again. Throws nlohmann's out_of_range naming any field a record
+	// lacks, "doorState" and "lockPickFailedAtLevel" included.
 	//
 	// Example:
 	//   fresh.load(saved);                      // saved by map.save; a door locked there is locked here
 	//   fresh.is_door_locked(treasureDoor);     // -> true
 	//   fresh.load(savedWithoutDoorState);      // throws "... key 'doorState' not found"
 	void load(const json& source) override;
-	// Writes the size, seed and every tile - type, seen, door state - in the shape load reads.
+	// Writes the size, seed and every tile - type, seen, door state, failed pick - in the shape
+	// load reads.
 	//
 	// Example:
-	//   map.save(saved);   // saved["tiles"][0] -> { "position", "type", "explored", "doorState" }
+	//   map.save(saved);   // saved["tiles"][0] -> { "position", "type", "explored", "doorState", "lockPickFailedAtLevel" }
 	void save(json& output) override;
 
 	// Initialize the tile grid to all-walls. No dungeon generation.
@@ -216,6 +220,23 @@ public:
 	// Example:
 	//   map.mark_resisted_forcing(lockedDoor);   // has_resisted_forcing(lockedDoor) -> true
 	void mark_resisted_forcing(Vector2D pos);
+	// The experience level at which the player last failed to pick this lock, or 0 if they
+	// never have. Open Locks allows one attempt per lock per level, so a pick is refused
+	// until the player's level is higher than this. Off the map answers 0.
+	//
+	// Example:
+	//   map.lock_pick_failed_at_level(lockedDoor);   // -> 0, never tried
+	//   map.mark_lock_pick_failed(lockedDoor, 3);
+	//   map.lock_pick_failed_at_level(lockedDoor);   // -> 3, and is_door_locked is still true
+	//   map.lock_pick_failed_at_level(plainFloor);   // -> 0
+	int lock_pick_failed_at_level(Vector2D pos) const noexcept;
+	// Records a failed attempt to pick a locked door at the player's level. The door must be
+	// locked and the level higher than any recorded, since a pick at a lower one is refused.
+	//
+	// Example:
+	//   map.mark_lock_pick_failed(lockedDoor, 2);   // lock_pick_failed_at_level(lockedDoor) -> 2
+	//   map.mark_lock_pick_failed(lockedDoor, 2);   // asserts: not higher than the recorded 2
+	void mark_lock_pick_failed(Vector2D pos, int level);
 	void open_all_room_doors(Vector2D doorPos, GameContext& ctx);
 	void place_amulet(GameContext& ctx);
 	// The first unbroken decoration standing on a tile, or null. A broken one stays in

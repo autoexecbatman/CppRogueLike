@@ -119,6 +119,31 @@ TEST_F(DoorLockingTest, UnlockingOpensTheLockOfADoorThatResistedForcing)
 	EXPECT_FALSE(map.has_resisted_forcing(DOORWAY));
 }
 
+// A lock remembers the level its pick failed at, and only a lock that was tried answers above 0.
+TEST_F(DoorLockingTest, ALockRemembersTheLevelItsPickFailedAt)
+{
+	ASSERT_TRUE(map.lock_door(DOORWAY));
+	EXPECT_EQ(map.lock_pick_failed_at_level(DOORWAY), 0) << "a lock never tried";
+
+	map.mark_lock_pick_failed(DOORWAY, 3);
+
+	EXPECT_EQ(map.lock_pick_failed_at_level(DOORWAY), 3);
+	EXPECT_TRUE(map.is_door_locked(DOORWAY));
+	EXPECT_EQ(map.lock_pick_failed_at_level(PLAIN_FLOOR), 0);
+	EXPECT_EQ(map.lock_pick_failed_at_level(Vector2D{ -1, -1 }), 0) << "off the map";
+}
+
+// A door can have resisted forcing and a pick at once; neither mark hides the other.
+TEST_F(DoorLockingTest, AFailedPickAndAFailedForcingAreBothKept)
+{
+	ASSERT_TRUE(map.lock_door(DOORWAY));
+	map.mark_resisted_forcing(DOORWAY);
+	map.mark_lock_pick_failed(DOORWAY, 1);
+
+	EXPECT_TRUE(map.has_resisted_forcing(DOORWAY));
+	EXPECT_EQ(map.lock_pick_failed_at_level(DOORWAY), 1);
+}
+
 // A corridor dug through a shut door leaves it shut: the tile stays a door, and the
 // field-of-view grid, which is_wall reads, still calls it a wall. The row is the door's,
 // so either order the corridor rolls crosses it.

@@ -683,23 +683,33 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 		return true;
 	}
 
-	// Branch 2: Rogue -- Open Locks percentage roll (PHB Tables 26 to 29).
-	// A score of zero, or armour the book gives no column, means no skill.
+	// Branch 2: Rogue -- Open Locks percentage roll (PHB Tables 26 to 29), once per lock per
+	// level. A score of zero, or armour the book gives no column, means no skill.
 	const int openLocksChance = playerOwner.thief_skill(ThiefSkill::OPEN_LOCKS).value_or(0);
 	if (openLocksChance > 0)
 	{
-		if (ctx.dice->d100() <= openLocksChance)
+		const int level = playerOwner.get_creature_level();
+		if (level > ctx.map->lock_pick_failed_at_level(doorPos))
 		{
-			ctx.map->unlock_door(doorPos);
-			ctx.map->open_door(doorPos, ctx);
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You pick the lock.", MessageCompletion::FINISHED);
+			// The 1d10 rounds are rolled before the d100, so a failure pays them as a success does.
+			const int rounds = ctx.dice->d10();
+			if (ctx.dice->d100() <= openLocksChance)
+			{
+				ctx.map->unlock_door(doorPos);
+				ctx.map->open_door(doorPos, ctx);
+				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You pick the lock.", MessageCompletion::FINISHED);
+			}
+			else
+			{
+				ctx.map->mark_lock_pick_failed(doorPos, level);
+				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You fail to pick the lock.", MessageCompletion::FINISHED);
+			}
+			spend_player_action(ctx, rounds * TIME_UNITS_PER_ROUND);
+			return true;
 		}
-		else
-		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You fail to pick the lock.", MessageCompletion::FINISHED);
-		}
-		spend_player_action(ctx, TIME_UNITS_PER_ROUND);
-		return true;
+
+		// Refused without a roll or a round, and the bump goes on to forcing.
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "This lock is too difficult for you until you have learned more.", MessageCompletion::FINISHED);
 	}
 
 	// Branch 3: force it, once per door, by Table 1's parenthesised Open Doors figure.

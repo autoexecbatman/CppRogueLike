@@ -213,6 +213,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SanctuarySpellTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ScriptedInputTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/DoorForcingTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/OpenLocksTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/NewRunStateTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/DexterityTableTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/AbilityTableTest.cpp

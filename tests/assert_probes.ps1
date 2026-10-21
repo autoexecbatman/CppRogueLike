@@ -217,6 +217,16 @@ $probes = @(
         anchor = 'assert(doorState == DoorState::CLOSED_LOCKED && "Map::mark_resisted_forcing: the door is not locked, or has already resisted");'
     },
     @{
+        test   = "AssertProbeDeathTest.MarkingAFailedPickOnAnUnlockedDoorAborts"
+        file   = "src/Map.cpp"
+        anchor = 'assert(is_door_locked(pos) && "Map::mark_lock_pick_failed: the door is not locked");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.MarkingAFailedPickAtALevelNotHigherAborts"
+        file   = "src/Map.cpp"
+        anchor = 'assert(level > tile.lockPickFailedAtLevel && "Map::mark_lock_pick_failed: the level is not higher than the one recorded");'
+    },
+    @{
         test   = "AssertProbeDeathTest.OpeningAFrameInsideAnOpenFrameAborts"
         file   = "src/Renderer.cpp"
         anchor = 'assert(!frameOpen && "begin_frame: a frame is already open");'

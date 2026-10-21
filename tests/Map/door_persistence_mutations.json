@@ -27,8 +27,8 @@
     },
     {
       "file": "src/Map.cpp",
-      "original": "\t\t\t\t{ \"explored\", tile.explored },\n\t\t\t\t{ \"doorState\", static_cast<int>(tile.doorState) } });\n",
-      "mutated": "\t\t\t\t{ \"explored\", tile.explored },\n\t\t\t\t{ \"doorState\", 0 } });\n",
+      "original": "\t\t\t\t{ \"explored\", tile.explored },\n\t\t\t\t{ \"doorState\", static_cast<int>(tile.doorState) },\n",
+      "mutated": "\t\t\t\t{ \"explored\", tile.explored },\n\t\t\t\t{ \"doorState\", 0 },\n",
       "catches": "every door saved as open, so a lock is lost on the way out"
     },
     {

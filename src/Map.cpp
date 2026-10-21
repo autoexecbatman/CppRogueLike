@@ -199,6 +199,7 @@ void Map::load(const json& source)
 		}
 		// Doors are read back as saved, never placed again: later passes may have left corridor where a door would go.
 		tiles.back().doorState = *doorState;
+		tiles.back().lockPickFailedAtLevel = tileJson.at("lockPickFailedAtLevel").get<int>();
 	}
 
 	fovMap = std::make_unique<FovMap>(mapWidth, mapHeight);
@@ -226,7 +227,8 @@ void Map::save(json& output)
 			{ { "position", { { "y", tile.position.y }, { "x", tile.position.x } } },
 				{ "type", static_cast<int>(tile.type) }, // TileType is an enum
 				{ "explored", tile.explored },
-				{ "doorState", static_cast<int>(tile.doorState) } });
+				{ "doorState", static_cast<int>(tile.doorState) },
+				{ "lockPickFailedAtLevel", tile.lockPickFailedAtLevel } });
 	}
 }
 
@@ -1924,6 +1926,31 @@ void Map::mark_resisted_forcing(Vector2D pos)
 	DoorState& doorState = tiles[get_index(pos)].doorState;
 	assert(doorState == DoorState::CLOSED_LOCKED && "Map::mark_resisted_forcing: the door is not locked, or has already resisted");
 	doorState = DoorState::CLOSED_LOCKED_FORCE_FAILED;
+}
+
+int Map::lock_pick_failed_at_level(Vector2D pos) const noexcept
+{
+	if (!in_bounds(pos))
+	{
+		return 0;
+	}
+
+	const size_t tileIndex = get_index(pos);
+	if (tileIndex >= tiles.size())
+	{
+		return 0;
+	}
+
+	return tiles[tileIndex].lockPickFailedAtLevel;
+}
+
+void Map::mark_lock_pick_failed(Vector2D pos, int level)
+{
+	assert(in_bounds(pos) && "Map::mark_lock_pick_failed: a position off the map");
+	Tile& tile = tiles[get_index(pos)];
+	assert(is_door_locked(pos) && "Map::mark_lock_pick_failed: the door is not locked");
+	assert(level > tile.lockPickFailedAtLevel && "Map::mark_lock_pick_failed: the level is not higher than the one recorded");
+	tile.lockPickFailedAtLevel = level;
 }
 
 void Map::place_amulet(GameContext& ctx)

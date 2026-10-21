@@ -104,8 +104,9 @@ private:
 	void handle_right_click(GameContext& ctx);
 	Vector2D find_door_approach(Vector2D doorTile, const GameContext& ctx) const;
 	// Four-branch locked-door resolution: key, Open Locks, force by Table 1, blocked.
-	// Forcing is tried once per door, and only on a Strength row that prints a chance for it.
-	// Returns true when a turn is consumed.
+	// A pick takes 1d10 rounds and is tried once per lock per level; a refused pick goes on to
+	// forcing in the same bump. Forcing is tried once per door, and only on a Strength row that
+	// prints a chance for it. Returns true when time is spent.
 	bool resolve_locked_door(Vector2D doorPos, GameContext& ctx);
 	void begin_path_walk(
 		Vector2D walkDest,

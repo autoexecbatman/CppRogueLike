@@ -602,6 +602,30 @@ TEST_F(AssertProbeDeathTest, MarkingAnUnlockedDoorAsResistedAborts)
 	EXPECT_DEATH(map.mark_resisted_forcing(Vector2D{ 4, 3 }), "the door is not locked, or has already resisted");
 }
 
+// Only a locked door is picked, so recording a failed pick on an unlocked one is a
+// caller that skipped the lock check.
+TEST_F(AssertProbeDeathTest, MarkingAFailedPickOnAnUnlockedDoorAborts)
+{
+	MapWithProbeDoors map{ 20, 20 };
+	map.init_tiles();
+	map.set_door(Vector2D{ 4, 3 });
+
+	EXPECT_DEATH(map.mark_lock_pick_failed(Vector2D{ 4, 3 }, 1), "Map::mark_lock_pick_failed: the door is not locked");
+}
+
+// A pick is refused until the level is higher than the one it failed at, so a failure
+// recorded at that level or lower is a caller that skipped the refusal.
+TEST_F(AssertProbeDeathTest, MarkingAFailedPickAtALevelNotHigherAborts)
+{
+	MapWithProbeDoors map{ 20, 20 };
+	map.init_tiles();
+	map.set_door(Vector2D{ 4, 3 });
+	ASSERT_TRUE(map.lock_door(Vector2D{ 4, 3 }));
+	map.mark_lock_pick_failed(Vector2D{ 4, 3 }, 2);
+
+	EXPECT_DEATH(map.mark_lock_pick_failed(Vector2D{ 4, 3 }, 2), "the level is not higher than the one recorded");
+}
+
 // Every way into the sell menu comes from a shopkeeper, so a creature with no shop is a
 // caller that broke that. The assertion sits after the menu's renderer check, so the
 // probe opens a hidden renderer first; where none can open, it skips with the reason.
