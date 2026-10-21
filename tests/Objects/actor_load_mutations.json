@@ -1,0 +1,71 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/run_suite.ps1",
+    "-Configuration",
+    "Debug",
+    "-Filter",
+    "--gtest_filter=ActorLoad*:EveryKeyActorSaveWrites*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Actor.cpp",
+      "original": "\tposition.x = source.at(\"position\").at(\"x\").get<int>();",
+      "mutated": "\tposition.x = source.at(\"position\").value(\"x\", 0);",
+      "catches": "a position without x loading at 0"
+    },
+    {
+      "file": "src/Actor.cpp",
+      "original": "\tposition.x = source.at(\"position\").at(\"x\").get<int>();",
+      "mutated": "\tposition.x = source.at(\"position\").at(\"y\").get<int>();",
+      "catches": "a position loaded with its x and y crossed"
+    },
+    {
+      "file": "src/Actor.cpp",
+      "original": "\tposition.x = source.at(\"position\").at(\"x\").get<int>();\n\tposition.y = source.at(\"position\").at(\"y\").get<int>();",
+      "mutated": "\tposition.x = source.value(\"position\", nlohmann::json{ { \"x\", 0 }, { \"y\", 0 } }).at(\"x\").get<int>();\n\tposition.y = source.value(\"position\", nlohmann::json{ { \"x\", 0 }, { \"y\", 0 } }).at(\"y\").get<int>();",
+      "catches": "a record without its position loading at a default; both lines, since each reads the key and either one alone still throws"
+    },
+    {
+      "file": "src/Actor.cpp",
+      "original": "\tdirection.y = source.at(\"direction\").at(\"y\").get<int>();",
+      "mutated": "\tdirection.y = source.at(\"direction\").value(\"y\", 0);",
+      "catches": "a direction without y loading at 0"
+    },
+    {
+      "file": "src/Actor.cpp",
+      "original": "\tdirection.x = source.at(\"direction\").at(\"x\").get<int>();\n\tdirection.y = source.at(\"direction\").at(\"y\").get<int>();",
+      "mutated": "\tdirection.x = source.value(\"direction\", nlohmann::json{ { \"x\", 0 }, { \"y\", 0 } }).at(\"x\").get<int>();\n\tdirection.y = source.value(\"direction\", nlohmann::json{ { \"x\", 0 }, { \"y\", 0 } }).at(\"y\").get<int>();",
+      "catches": "a record without its direction loading at a default; both lines, for the same reason"
+    },
+    {
+      "file": "src/Actor.cpp",
+      "original": "\tactorData.tile = TileRefJson::parse_tile(source.at(\"actorData\").at(\"tile\"));",
+      "mutated": "\tif (!source.contains(\"actorData\")) { return; } actorData.tile = TileRefJson::parse_tile(source.at(\"actorData\").at(\"tile\"));",
+      "catches": "a record without its actor data loading with the defaults"
+    },
+    {
+      "file": "src/Actor.cpp",
+      "original": "\tfor (const auto& state : source.at(\"states\"))",
+      "mutated": "\tfor (const auto& state : source.value(\"states\", nlohmann::json::array()))",
+      "catches": "a record without its states loading with none"
+    },
+    {
+      "file": "src/Actor.cpp",
+      "original": "\tfor (const auto& state : source.at(\"states\"))",
+      "mutated": "\tfor (const auto& state : source.at(\"states\").get<std::vector<ActorState>>())",
+      "catches": "an actor saved with no states refused, because null is read as a list"
+    },
+    {
+      "file": "src/Actor.cpp",
+      "original": "\t\tstates.push_back(state);",
+      "mutated": "\t\tstates.push_back(ActorState::FOV_ONLY);",
+      "catches": "the saved states replaced on load"
+    }
+  ]
+}

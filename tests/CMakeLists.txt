@@ -137,6 +137,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/WebTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/HelmCommandWordTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/HelmRechargeTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Objects/ActorLoadTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/MonsterFeatureEntryTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/TrapDamageTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/TrapSerializationTest.cpp

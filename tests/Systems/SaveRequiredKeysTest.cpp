@@ -41,7 +41,7 @@ constexpr int ROUNDS_BEFORE_SAVING = 5;
 } // namespace
 
 // A game with its registries loaded, ready to start a run and save it.
-class SaveRequiredKeysControlTest : public ::testing::Test
+class SaveRequiredKeysFixture : public ::testing::Test
 {
 protected:
 	void SetUp() override
@@ -100,6 +100,21 @@ protected:
 		out << saveDocument.dump(4);
 	}
 
+	// Rewrites the save on disk with the player's record missing its position.
+	static void erase_the_players_position()
+	{
+		const std::filesystem::path savePath = Paths::resolve(Paths::SAVE_FILE);
+		nlohmann::json saveDocument;
+		{
+			std::ifstream in{ savePath };
+			in >> saveDocument;
+		}
+		ASSERT_TRUE(saveDocument.at("player").contains("position")) << "the player was saved without a position, so erasing it proves nothing";
+		saveDocument.at("player").erase("position");
+		std::ofstream out{ savePath };
+		out << saveDocument.dump(4);
+	}
+
 	static bool save_exists()
 	{
 		return std::filesystem::exists(Paths::resolve(Paths::SAVE_FILE));
@@ -112,12 +127,12 @@ protected:
 };
 
 // The same game, once per key the writer always writes.
-class SaveRequiredKeysTest : public SaveRequiredKeysControlTest, public ::testing::WithParamInterface<std::string_view>
+class SaveRequiredKeysTest : public SaveRequiredKeysFixture, public ::testing::WithParamInterface<std::string_view>
 {
 };
 
 // The control: the fixture's save loads whole, so a refusal below comes from the erased key.
-TEST_F(SaveRequiredKeysControlTest, AnUntouchedSaveLoadsWithItsClock)
+TEST_F(SaveRequiredKeysFixture, AnUntouchedSaveLoadsWithItsClock)
 {
 	save_a_game_in_progress();
 	ASSERT_TRUE(wroteSave) << "the game could not be saved, so nothing here is being measured";
@@ -126,6 +141,20 @@ TEST_F(SaveRequiredKeysControlTest, AnUntouchedSaveLoadsWithItsClock)
 
 	EXPECT_EQ(outcome.kind, LoadOutcomeKind::LOADED) << outcome.reason;
 	EXPECT_EQ(ctx.gameState->get_time(), savedTime) << "the loaded game did not keep its saved clock";
+}
+
+// One level down: Actor::load's keys are required too, and the whole load refuses.
+TEST_F(SaveRequiredKeysFixture, ASaveWhosePlayerHasNoPositionIsRefused)
+{
+	save_a_game_in_progress();
+	ASSERT_TRUE(wroteSave) << "the game could not be saved, so nothing here is being measured";
+	erase_the_players_position();
+
+	const LoadOutcome outcome = game.stateManager.load_all(ctx);
+
+	EXPECT_EQ(outcome.kind, LoadOutcomeKind::REFUSED) << "a player without a position was not refused";
+	EXPECT_NE(outcome.reason.find("position"), std::string::npos) << "the reason does not name the missing key: " << outcome.reason;
+	EXPECT_FALSE(save_exists()) << "the refused save was kept; the owner's ruling is to delete it";
 }
 
 TEST_P(SaveRequiredKeysTest, ASaveMissingTheKeyIsRefusedNamingItAndDeleted)

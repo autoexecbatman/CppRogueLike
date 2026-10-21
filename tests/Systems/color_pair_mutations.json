@@ -51,7 +51,7 @@
     },
     {
       "file": "src/Actor.cpp",
-      "original": "\tactorData.color = parse_color_pair(source[\"actorData\"].at(\"color\").get<std::string>());",
+      "original": "\tactorData.color = parse_color_pair(source.at(\"actorData\").at(\"color\").get<std::string>());",
       "mutated": "\tactorData.color = ColorPairId::WHITE_BLACK;",
       "catches": "a saved colour not read back, so every loaded actor turns white"
     },

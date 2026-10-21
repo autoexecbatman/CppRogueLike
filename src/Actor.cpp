@@ -42,20 +42,21 @@ void Actor::remove_state(ActorState state) noexcept
 
 void Actor::load(const json& source)
 {
-	position.x = source["position"]["x"];
-	position.y = source["position"]["y"];
-	direction.x = source["direction"]["x"];
-	direction.y = source["direction"]["y"];
-	actorData.tile = TileRefJson::parse_tile(source["actorData"].at("tile"));
-	actorData.name = source["actorData"].at("name").get<std::string>();
-	actorData.color = parse_color_pair(source["actorData"].at("color").get<std::string>());
+	// Actor::save writes every key read here, so each is required: a missing one throws.
+	position.x = source.at("position").at("x").get<int>();
+	position.y = source.at("position").at("y").get<int>();
+	direction.x = source.at("direction").at("x").get<int>();
+	direction.y = source.at("direction").at("y").get<int>();
+	actorData.tile = TileRefJson::parse_tile(source.at("actorData").at("tile"));
+	actorData.name = source.at("actorData").at("name").get<std::string>();
+	actorData.color = parse_color_pair(source.at("actorData").at("color").get<std::string>());
 	uniqueId = source.at("uniqueId").get<UniqueId::IdType>();
 
 	// Clear existing states before loading saved states
 	states.clear();
 
-	// Deserialize vector of states
-	for (const auto& state : source["states"])
+	// An actor with no states was saved with null here, which iterates as empty.
+	for (const auto& state : source.at("states"))
 	{
 		states.push_back(state);
 	}
