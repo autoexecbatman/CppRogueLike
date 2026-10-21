@@ -20,10 +20,11 @@
 
 #include "ItemRegistry.h"
 #include "ListCursor.h"
-#include "Renderer.h"
+#include "TileRef.h"
 
 struct GameContext;
 class ContentRegistry;
+class Renderer;
 
 class ItemEditor
 {

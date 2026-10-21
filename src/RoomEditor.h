@@ -23,10 +23,11 @@
 #include <string_view>
 #include <vector>
 
-#include "Renderer.h"
+#include "TileRef.h"
 
 class Palette;
 class PrefabLibrary;
+class Renderer;
 class TileConfig;
 struct Prefab;
 struct GameContext;

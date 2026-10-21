@@ -20,9 +20,9 @@
 
 #include "ListCursor.h"
 #include "MonsterRegistry.h"
-#include "Renderer.h"
 
 struct GameContext;
+class Renderer;
 
 class MonsterEditor
 {

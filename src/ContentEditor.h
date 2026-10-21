@@ -5,11 +5,12 @@
 #include <vector>
 
 #include "ListCursor.h"
-#include "Renderer.h"
+#include "TileRef.h"
 
 class ContentRegistry;
 class MonsterRegistry;
 class ItemRegistry;
+class Renderer;
 
 // ContentEditor -- developer tool for assigning sprite tiles to items and monsters.
 //

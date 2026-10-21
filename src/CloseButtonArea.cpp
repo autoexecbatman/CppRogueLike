@@ -1,4 +1,5 @@
 #include "CloseButtonArea.h"
+#include "Renderer.h"
 
 CloseButtonArea::CloseButtonArea(Renderer& renderer, int vcols)
 {

@@ -5,9 +5,10 @@
 #include <random>
 #include <vector>
 
-#include "Renderer.h"
+#include "TileRef.h"
 #include "Vector2D.h"
 
+class Renderer;
 class TileConfig;
 
 enum class ParticleShape

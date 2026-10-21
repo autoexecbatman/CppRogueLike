@@ -7,8 +7,10 @@
 #include <unordered_map>
 
 #include "Palette.h"
-#include "Renderer.h"
+#include "TileRef.h"
 #include "Vector2D.h"
+
+class Renderer;
 
 // ---------------------------------------------------------------------------
 // DecorEditor -- in-game decoration placement and tile labeling tool.

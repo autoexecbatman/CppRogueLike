@@ -4,7 +4,7 @@
 // Constructed from a Renderer and viewport column count; answers whether a
 // given pixel coordinate falls inside the button.
 
-#include "Renderer.h"
+class Renderer;
 
 class CloseButtonArea
 {
