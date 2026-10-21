@@ -12,8 +12,8 @@ class SpellRegistry;
 
 class MenuSpellCast : public BaseMenu
 {
-	std::vector<std::string> availableSpells;
-	std::vector<std::string> spellSources; // "" = memorized, "Ring", "Helm", etc.
+	// A memorised spell has an empty source; an item's entry names the item.
+	std::vector<SpellSystem::ItemGrantedSpell> entries;
 	Player& player;
 	int selectedIndex{ 0 };
 

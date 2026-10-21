@@ -103,11 +103,20 @@ void cast_spell_by_key(
 // lost. A caster with no chance to fail is not made to roll.
 [[nodiscard]] bool spell_fizzles(const Creature& caster, const DataManager& dataManager, RandomDice& dice);
 
-// Item-granted spells
+// What choosing an item's entry in the cast menu does: cast the spell it grants, or
+// speak the word that wakes it.
+enum class ItemPower
+{
+	CAST_SPELL,
+	SPEAK_COMMAND_WORD
+};
+
+// Item-granted spells. A command word has no spell, so its key is empty.
 struct ItemGrantedSpell
 {
 	std::string key{};
 	std::string source{}; // "Ring", "Helm", etc.
+	ItemPower power{ ItemPower::CAST_SPELL };
 };
 
 std::vector<ItemGrantedSpell> get_item_granted_spells(const Player& player);

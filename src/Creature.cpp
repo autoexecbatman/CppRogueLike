@@ -1348,10 +1348,13 @@ bool Creature::unequip_item(EquipmentSlot slot, GameContext& ctx)
 			return false;
 		}
 
+		const int armorClassBefore = get_armor_class();
+
 		// Out of the slot list before anything reads it again: the pack's weight check reads
 		// Strength, which counts every worn item.
 		std::unique_ptr<Item> removed = std::move(found->item);
 		equippedItems.erase(found);
+		make_dormant(*removed);
 
 		// The pack takes it if it has room and weight to spare; otherwise it drops at the wearer's feet,
 		// since taking off a Strength item can lower the limit, and the floor always has room.
@@ -1372,10 +1375,10 @@ bool Creature::unequip_item(EquipmentSlot slot, GameContext& ctx)
 			InventoryOperations::add_item(*ctx.floorInventory, std::move(removed));
 		}
 
-		// Update armor class if armor or shield was unequipped
-		if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
+		// Any worn item can carry armour class, so it is recomputed whatever slot was emptied.
+		update_armor_class(ctx);
+		if (get_armor_class() != armorClassBefore)
 		{
-			update_armor_class(ctx);
 			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Your armor class is now " + std::to_string(get_armor_class()) + ".", MessageCompletion::FINISHED);
 		}
 

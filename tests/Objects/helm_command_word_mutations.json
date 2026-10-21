@@ -1,0 +1,113 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/run_suite.ps1",
+    "-Configuration",
+    "Debug",
+    "-Filter",
+    "--gtest_filter=HelmCommandWord*:PickableAcBonus.*:WornResistanceTest.*:FireballDamageTest.*:TypedAttackResistanceTest.*:BehaviorRecord*:CodecRoundTripTest.*:RingEffectsTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\treturn helm.effect != MagicalEffect::BRILLIANCE || helm.command == HelmCommand::EMPOWERED;",
+      "mutated": "\treturn true;",
+      "catches": "a helm of brilliance that protects before its word is spoken"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\t\t{ return is_helm_working(magicalHelm) ? MagicalEffectUtils::get_ac_bonus(magicalHelm.effect, magicalHelm.bonus) : 0; },",
+      "mutated": "\t\t\t{ return MagicalEffectUtils::get_ac_bonus(magicalHelm.effect, magicalHelm.bonus); },",
+      "catches": "a dormant helm's armour still counting"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\t\t{ return is_helm_working(helm) ? percent_if(helm.effect, helm.bonus) : 0; },",
+      "mutated": "\t\t\t{ return percent_if(helm.effect, helm.bonus); },",
+      "catches": "a dormant helm's fire protection still counting"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\treturn helm && helm->effect == MagicalEffect::BRILLIANCE && item.is_type_identified() && helm->command == HelmCommand::DORMANT;",
+      "mutated": "\treturn helm && helm->effect == MagicalEffect::BRILLIANCE && helm->command == HelmCommand::DORMANT;",
+      "catches": "an unidentified helm offering a word nobody has learned"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\treturn helm && helm->effect == MagicalEffect::BRILLIANCE && item.is_type_identified() && helm->command == HelmCommand::DORMANT;",
+      "mutated": "\treturn helm && helm->effect == MagicalEffect::BRILLIANCE && item.is_type_identified();",
+      "catches": "a helm already spoken to offering its word again"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\treturn helm && helm->effect == MagicalEffect::BRILLIANCE && item.is_type_identified() && helm->command == HelmCommand::DORMANT;",
+      "mutated": "\treturn helm && item.is_type_identified() && helm->command == HelmCommand::DORMANT;",
+      "catches": "a helm of teleportation offering a command word it does not have"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\tstd::get<MagicalHelm>(*helm.behavior).command = HelmCommand::EMPOWERED;\n\twearer.update_armor_class(ctx);",
+      "mutated": "\twearer.update_armor_class(ctx);",
+      "catches": "speaking the word leaving the helm dormant"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\tstd::get<MagicalHelm>(*helm.behavior).command = HelmCommand::EMPOWERED;\n\twearer.update_armor_class(ctx);",
+      "mutated": "\tstd::get<MagicalHelm>(*helm.behavior).command = HelmCommand::EMPOWERED;",
+      "catches": "a spoken helm whose armour is not counted until something else recomputes it"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\thelm->command = HelmCommand::DORMANT;",
+      "mutated": "\t\thelm->command = helm->command;",
+      "catches": "a helm keeping its empowerment through being taken off"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tmake_dormant(*removed);",
+      "mutated": "",
+      "catches": "a worn item coming off without going dormant"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\t\t\toutput[\"command\"] = encode_helm_command(magicalHelm.command);",
+      "mutated": "",
+      "catches": "a saved helm that no load can read back"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tmagicalHelm.command = parse_helm_command(source.at(\"command\").get<std::string>());",
+      "mutated": "\t\tmagicalHelm.command = HelmCommand::DORMANT;",
+      "catches": "a load forgetting the spoken word, and taking a record without one"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\t\titemSpells.push_back({ \"\", \"Helm\", ItemPower::SPEAK_COMMAND_WORD });",
+      "mutated": "",
+      "catches": "the cast menu never offering the word"
+    },
+    {
+      "file": "src/MenuSpellCast.cpp",
+      "original": "\t\tspend_player_action(ctx, TIME_UNITS_PER_ROUND);",
+      "mutated": "",
+      "catches": "speaking the word from the cast menu costing no turn"
+    },
+    {
+      "file": "src/Pickable.h",
+      "original": "\t\treturn \"empowered\";",
+      "mutated": "\t\treturn \"dormant\";",
+      "catches": "an empowered helm saved under the dormant name"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tupdate_armor_class(ctx);\n\t\tif (get_armor_class() != armorClassBefore)",
+      "mutated": "\t\tif (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)\n\t\t{\n\t\t\tupdate_armor_class(ctx);\n\t\t}\n\t\tif (get_armor_class() != armorClassBefore)",
+      "catches": "a helm taken off on the equipment screen still counted in armour class until the next update"
+    }
+  ]
+}

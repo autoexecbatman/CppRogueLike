@@ -103,7 +103,7 @@ ItemBehavior create_behavior(const ItemParams& params)
 
 	case PickableType::MAGICAL_HELM:
 	{
-		return MagicalHelm{ params.effect, params.effectBonus };
+		return MagicalHelm{ params.effect, params.effectBonus, HelmCommand::DORMANT };
 	}
 
 	case PickableType::MAGICAL_RING:

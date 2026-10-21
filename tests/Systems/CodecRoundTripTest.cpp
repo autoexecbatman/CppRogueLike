@@ -154,6 +154,16 @@ TEST(CodecRoundTripTest, MagicalEffectSurvivesEncoding)
 	}
 }
 
+TEST(CodecRoundTripTest, HelmCommandSurvivesEncoding)
+{
+	constexpr auto& values = ALL_HELM_COMMAND;
+
+	for (const auto value : values)
+	{
+		expect_round_trip(value, encode_helm_command, parse_helm_command, "HelmCommand");
+	}
+}
+
 // A string no encoder produces must be refused rather than silently defaulted.
 TEST(CodecRoundTripTest, ConsumableEffectSurvivesEncoding)
 {
@@ -263,6 +273,7 @@ TEST(CodecRoundTripTest, UnknownStringsThrow)
 	EXPECT_THROW((void)parse_creature_size("enormous"), std::runtime_error);
 	EXPECT_THROW((void)parse_intelligence_rating("brilliant"), std::runtime_error);
 	EXPECT_THROW((void)parse_buff_type("not_a_buff"), std::runtime_error);
+	EXPECT_THROW((void)parse_helm_command("awake"), std::runtime_error);
 	EXPECT_THROW((void)parse_item_class("not_a_class"), std::runtime_error);
 	EXPECT_THROW((void)parse_pickable_type("not_a_type"), std::runtime_error);
 	EXPECT_THROW((void)parse_magical_effect("not_an_effect"), std::runtime_error);

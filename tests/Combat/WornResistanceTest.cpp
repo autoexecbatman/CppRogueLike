@@ -25,6 +25,7 @@
 #include "src/Item.h"
 #include "src/ItemCreator.h"
 #include "src/Paths.h"
+#include "src/Pickable.h"
 #include "src/Player.h"
 #include "tests/mocks/MockGameContext.h"
 
@@ -49,6 +50,15 @@ protected:
 	void wear(std::string_view key, EquipmentSlot slot)
 	{
 		player->equip_item(ItemCreator::create(key, Vector2D{ 0, 0 }, ctx), slot, ctx);
+	}
+
+	// The helm of brilliance on the head, identified and spoken to: only then does it protect.
+	void wear_spoken_helm_of_brilliance()
+	{
+		wear("helm_of_brilliance", EquipmentSlot::HEAD);
+		Item& helm = *player->get_equipped_item(EquipmentSlot::HEAD);
+		helm.identify_type();
+		speak_command_word(helm, *player, ctx);
 	}
 
 	// A plain sword carrying only an enhancement's fire resistance.
@@ -106,7 +116,7 @@ TEST_F(WornResistanceTest, ARemovedRingProtectsNothing)
 // The helm of brilliance is a double-strength ring against fire.
 TEST_F(WornResistanceTest, TheHelmOfBrillianceIsTwoRings)
 {
-	wear("helm_of_brilliance", EquipmentSlot::HEAD);
+	wear_spoken_helm_of_brilliance();
 
 	EXPECT_EQ(fire_strength(), 2);
 }
@@ -123,7 +133,7 @@ TEST_F(WornResistanceTest, ARingAndAPotionAreOneRing)
 // The helm's protection "cannot be augmented": with a potion it is still two.
 TEST_F(WornResistanceTest, TheHelmCannotBeAugmented)
 {
-	wear("helm_of_brilliance", EquipmentSlot::HEAD);
+	wear_spoken_helm_of_brilliance();
 	buffs.add_buff(*player, BuffType::FIRE_RESISTANCE, 1, 10, BuffApplication::ADD, ctx.gameState->get_time());
 
 	EXPECT_EQ(fire_strength(), 2);
@@ -151,7 +161,7 @@ TEST_F(WornResistanceTest, SaveBonusesFollowTheTwoEntries)
 // The helm's save bonus is the double ring's: +8.
 TEST_F(WornResistanceTest, TheHelmSavesAtPlusEight)
 {
-	wear("helm_of_brilliance", EquipmentSlot::HEAD);
+	wear_spoken_helm_of_brilliance();
 
 	EXPECT_EQ(DamageResolver::save_bonus_against(DamageType::FIRE, *player, ctx), 8);
 }

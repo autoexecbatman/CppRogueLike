@@ -75,7 +75,7 @@ std::vector<NamedBehavior> every_behavior_with_fields()
 		{ "food", Food{ 30 } },
 		{ "corpse", CorpseFood{ 40 } },
 		{ "armor", Armor{ 4 } },
-		{ "magical helm", MagicalHelm{ MagicalEffect::BRILLIANCE, 2 } },
+		{ "magical helm", MagicalHelm{ MagicalEffect::BRILLIANCE, 2, HelmCommand::EMPOWERED } },
 		{ "magical ring", MagicalRing{ MagicalEffect::PROTECTION, 1 } },
 		{ "gauntlets", unusual_stat_boost<Gauntlets>() },
 		{ "girdle", unusual_stat_boost<Girdle>() },

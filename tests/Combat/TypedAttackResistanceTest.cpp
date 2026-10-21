@@ -27,7 +27,9 @@
 #include "src/ExperienceReward.h"
 #include "src/Game.h"
 #include "src/Paths.h"
+#include "src/Item.h"
 #include "src/ItemCreator.h"
+#include "src/Pickable.h"
 #include "tests/mocks/TestDice.h"
 
 class TypedAttackResistanceTest : public ::testing::Test
@@ -81,6 +83,15 @@ protected:
 		player->equip_item(ItemCreator::create(key, Vector2D{ 0, 0 }, ctx), slot, ctx);
 	}
 
+	// The helm of brilliance on the head, identified and spoken to: only then does it protect.
+	void wear_spoken_helm_of_brilliance()
+	{
+		wear("helm_of_brilliance", EquipmentSlot::HEAD);
+		Item& helm = *player->get_equipped_item(EquipmentSlot::HEAD);
+		helm.identify_type();
+		speak_command_word(helm, *player, ctx);
+	}
+
 	// The attack roll first, always a hit, then the damage dice in order.
 	void force_hit_then_dice(std::initializer_list<int> dice)
 	{
@@ -127,7 +138,7 @@ TEST_F(TypedAttackResistanceTest, ARingOfWarmthTakesOneOffAColdBite)
 // A chimera's 3d12 through the helm: every die loses four.
 TEST_F(TypedAttackResistanceTest, TheHelmTakesFourOffEveryDieOfAChimera)
 {
-	wear("helm_of_brilliance", EquipmentSlot::HEAD);
+	wear_spoken_helm_of_brilliance();
 	auto chimera = monster_with(DamageInfo{ "3d12", DamageType::FIRE });
 	force_hit_then_dice({ 12, 12, 12 });
 

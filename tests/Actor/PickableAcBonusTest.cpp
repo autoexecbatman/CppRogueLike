@@ -40,7 +40,7 @@ TEST(PickableAcBonus, Shield_ReturnsMinusOne)
 // code keeps beside it.
 TEST(PickableAcBonus, MagicalHelm_Brilliance_IsWorthItsOwnBonus)
 {
-	const ItemBehavior asTheBookRatesIt = MagicalHelm{ MagicalEffect::BRILLIANCE, 2 };
+	const ItemBehavior asTheBookRatesIt = MagicalHelm{ MagicalEffect::BRILLIANCE, 2, HelmCommand::EMPOWERED };
 	EXPECT_EQ(get_item_ac_bonus(asTheBookRatesIt), -2);
 }
 
@@ -48,7 +48,7 @@ TEST(PickableAcBonus, MagicalHelm_Brilliance_ReadsTheBonusRatherThanAConstant)
 {
 	// A different bonus must give a different answer, or the helm is carrying a number
 	// the data cannot change - which is how it came to be worth +4.
-	const ItemBehavior enchantedFurther = MagicalHelm{ MagicalEffect::BRILLIANCE, 3 };
+	const ItemBehavior enchantedFurther = MagicalHelm{ MagicalEffect::BRILLIANCE, 3, HelmCommand::EMPOWERED };
 	EXPECT_EQ(get_item_ac_bonus(enchantedFurther), -3);
 }
 
@@ -63,8 +63,15 @@ TEST(PickableAcBonus, MagicalHelm_Brilliance_MatchesTheItemTheGameShips)
 	const int shippedBonus = items.at("helm_of_brilliance").at("effectBonus").get<int>();
 	EXPECT_EQ(shippedBonus, 2) << "the shipped helm is no longer the book's +2 helm";
 
-	const ItemBehavior behavior = MagicalHelm{ MagicalEffect::BRILLIANCE, shippedBonus };
+	const ItemBehavior behavior = MagicalHelm{ MagicalEffect::BRILLIANCE, shippedBonus, HelmCommand::EMPOWERED };
 	EXPECT_EQ(get_item_ac_bonus(behavior), -2);
+}
+
+// Until its command word is spoken the helm is "nothing more than an ordinary piece of armor".
+TEST(PickableAcBonus, MagicalHelm_Brilliance_IsWorthNothingDormant)
+{
+	const ItemBehavior unspoken = MagicalHelm{ MagicalEffect::BRILLIANCE, 2, HelmCommand::DORMANT };
+	EXPECT_EQ(get_item_ac_bonus(unspoken), 0);
 }
 
 TEST(PickableAcBonus, MagicalHelm_Protection_ReturnsNegativeBonus)

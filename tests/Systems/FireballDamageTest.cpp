@@ -18,8 +18,10 @@
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
+#include "src/Item.h"
 #include "src/ItemCreator.h"
 #include "src/Paths.h"
+#include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/SpellSystem.h"
 #include "tests/mocks/MockGameContext.h"
@@ -169,6 +171,10 @@ TEST_F(FireballDamageTest, TheHelmOfBrillianceTakesFourOffEveryDie)
 {
 	Creature& wearer = add_creature(3);
 	wearer.wear(ItemCreator::create("helm_of_brilliance", Vector2D{ 3, 5 }, ctx), EquipmentSlot::HEAD);
+	// A dormant helm protects from nothing, so its word is learned and spoken first.
+	Item& helm = *wearer.get_equipped_item(EquipmentSlot::HEAD);
+	helm.identify_type();
+	speak_command_word(helm, wearer, ctx);
 	force_max_dice_then_saves({ 1 });
 
 	burst_at(Vector2D{ 3, 5 });

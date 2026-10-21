@@ -1185,7 +1185,7 @@ std::vector<SpellSystem::ItemGrantedSpell> SpellSystem::get_item_granted_spells(
 	// Check for Ring of Invisibility, once however many are worn
 	if (player.wears_ring_of(MagicalEffect::INVISIBILITY))
 	{
-		itemSpells.push_back({ "invisibility", "Ring" });
+		itemSpells.push_back({ "invisibility", "Ring", ItemPower::CAST_SPELL });
 	}
 
 	// Check for Helm of Teleportation
@@ -1195,8 +1195,14 @@ std::vector<SpellSystem::ItemGrantedSpell> SpellSystem::get_item_granted_spells(
 		{
 			if (magicHelm->effect == MagicalEffect::TELEPORTATION)
 			{
-				itemSpells.push_back({ "teleport", "Helm" });
+				itemSpells.push_back({ "teleport", "Helm", ItemPower::CAST_SPELL });
 			}
+		}
+
+		// The helm of brilliance's word, once identifying the helm has taught it.
+		if (is_awaiting_command_word(*helm))
+		{
+			itemSpells.push_back({ "", "Helm", ItemPower::SPEAK_COMMAND_WORD });
 		}
 	}
 

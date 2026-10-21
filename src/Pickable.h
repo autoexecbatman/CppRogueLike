@@ -173,6 +173,61 @@ inline ConsumableEffect parse_consumable_effect(std::string_view name)
 	throw std::runtime_error(std::format("unknown consumable effect '{}'", name));
 }
 
+// Whether a helm that answers to a command word has been spoken to since it went on.
+// The helm of brilliance "functions only upon the utterance of a special command word"
+// (DMG, PDF page 968), and taking it off sends it dormant again (the owner, 2026-10-21).
+enum class HelmCommand
+{
+	DORMANT,
+	EMPOWERED
+};
+
+// Every HelmCommand, in the order the enum declares them.
+inline constexpr std::array<HelmCommand, 2> ALL_HELM_COMMAND = {
+	HelmCommand::DORMANT,
+	HelmCommand::EMPOWERED,
+};
+
+// The name a record carries for this state.
+//
+// Example:
+//   encode_helm_command(HelmCommand::EMPOWERED); // -> "empowered"
+inline std::string_view encode_helm_command(HelmCommand helmCommand)
+{
+	switch (helmCommand)
+	{
+	case HelmCommand::DORMANT:
+	{
+		return "dormant";
+	}
+	case HelmCommand::EMPOWERED:
+	{
+		return "empowered";
+	}
+	}
+
+	return "dormant";
+}
+
+// The state a record names. Throws naming what it read.
+//
+// Example:
+//   parse_helm_command("empowered");  // -> HelmCommand::EMPOWERED
+//   parse_helm_command("awake");      // throws std::runtime_error
+inline HelmCommand parse_helm_command(std::string_view name)
+{
+	if (name == "dormant")
+	{
+		return HelmCommand::DORMANT;
+	}
+	if (name == "empowered")
+	{
+		return HelmCommand::EMPOWERED;
+	}
+
+	throw std::runtime_error(std::format("unknown helm command '{}'", name));
+}
+
 // ========== Plain data structs (no base class, no virtuals) ==========
 
 struct Consumable
@@ -258,6 +313,8 @@ struct MagicalHelm
 {
 	MagicalEffect effect{ MagicalEffect::NONE };
 	int bonus{ 0 };
+	// Read only by a helm that answers to a command word; every other helm works as worn.
+	HelmCommand command{ HelmCommand::DORMANT };
 };
 
 struct MagicalRing
@@ -341,6 +398,33 @@ struct DungeonKey
 //   can_draw(strength12Archer, compositeBow);   // -> false
 //   can_draw(strength3Archer, longBow);         // -> true, an ordinary bow asks nothing
 [[nodiscard]] bool can_draw(const Creature& wielder, const Item& weapon);
+
+// Whether this is a helm whose command word is known and not yet spoken: a helm of
+// brilliance, its type identified, and dormant. Identifying it is how the word is learned
+// (the owner, 2026-10-21: "Must be discovered"), so an unidentified one is never ready.
+//
+// Example:
+//   is_awaiting_command_word(identifiedDormantBrilliance);    // -> true
+//   is_awaiting_command_word(unidentifiedBrilliance);         // -> false, the word is unknown
+//   is_awaiting_command_word(identifiedEmpoweredBrilliance);  // -> false, already spoken
+//   is_awaiting_command_word(helmOfTeleportation);            // -> false, it has no word
+[[nodiscard]] bool is_awaiting_command_word(const Item& item);
+
+// Speaks the command word to the helm the wearer has on: it is empowered, and its armour
+// and fire protection count from now on. The caller spends the turn. The helm must be
+// worn on the wearer's head and awaiting its word.
+//
+// Example:
+//   speak_command_word(helm, player, ctx);   // AC 10 -> 8, "The helm of brilliance blazes..."
+void speak_command_word(Item& helm, Creature& wearer, GameContext& ctx);
+
+// Ends whatever a worn item was empowered to do, as it comes off: a spoken helm goes
+// dormant. Anything else is left as it is.
+//
+// Example:
+//   make_dormant(empoweredBrilliance);   // its command -> HelmCommand::DORMANT
+//   make_dormant(longSword);             // unchanged
+void make_dormant(Item& item) noexcept;
 
 // ========== The variant ==========
 

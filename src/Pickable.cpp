@@ -17,8 +17,8 @@
 //   std::visit([&](auto& behavior) { return use(behavior, item, wearer, ctx); },
 //              item.behavior);        // -> true when the item was consumed
 //
-// Items reach the pack already identified or not, and several overloads read that:
-// an unidentified potion announces itself by what it does rather than by its name.
+// The identify scroll is what writes an item's identification here, and the helm of
+// brilliance is what reads it: its command word is known once its type is identified.
 
 #include <algorithm>
 #include <cassert>
@@ -46,6 +46,7 @@
 #include "HungerSystem.h"
 #include "InventoryData.h"
 #include "InventoryOperations.h"
+#include "Item.h"
 #include "ItemRegistry.h"
 #include "MagicalItemEffects.h"
 #include "Map.h"
@@ -290,6 +291,34 @@ int strength_rating_of(const Item& item)
 bool can_draw(const Creature& wielder, const Item& weapon)
 {
 	return wielder.get_strength() >= strength_rating_of(weapon);
+}
+
+bool is_awaiting_command_word(const Item& item)
+{
+	const MagicalHelm* helm = item.behavior ? std::get_if<MagicalHelm>(&*item.behavior) : nullptr;
+	return helm && helm->effect == MagicalEffect::BRILLIANCE && item.is_type_identified() && helm->command == HelmCommand::DORMANT;
+}
+
+void speak_command_word(Item& helm, Creature& wearer, GameContext& ctx)
+{
+	assert(wearer.get_equipped_item(EquipmentSlot::HEAD) == &helm && "speak_command_word: the helm is not on the wearer's head");
+	assert(is_awaiting_command_word(helm) && "speak_command_word: the helm is not awaiting its word");
+
+	std::get<MagicalHelm>(*helm.behavior).command = HelmCommand::EMPOWERED;
+	wearer.update_armor_class(ctx);
+	// "When so empowered the true nature of the helm is visible to all."
+	ctx.messageSystem->message(
+		ColorPairId::CYAN_BLACK,
+		std::format("You speak the command word, and the {} blazes with light.", helm.get_name()),
+		MessageCompletion::FINISHED);
+}
+
+void make_dormant(Item& item) noexcept
+{
+	if (MagicalHelm* helm = item.behavior ? std::get_if<MagicalHelm>(&*item.behavior) : nullptr)
+	{
+		helm->command = HelmCommand::DORMANT;
+	}
 }
 
 bool use(Weapon& weapon, Item& owner, Creature& wearer, GameContext& ctx)
@@ -666,6 +695,23 @@ bool use([[maybe_unused]] DungeonKey& key, [[maybe_unused]] Item& owner, [[maybe
 
 // ========== Variant-level dispatchers ==========
 
+namespace
+{
+
+// Whether a worn helm's powers count: a helm of brilliance's only once its word is spoken,
+// every other helm's as soon as it is on.
+//
+// Example:
+//   is_helm_working(MagicalHelm{ MagicalEffect::BRILLIANCE, 2, HelmCommand::DORMANT });    // -> false
+//   is_helm_working(MagicalHelm{ MagicalEffect::BRILLIANCE, 2, HelmCommand::EMPOWERED });  // -> true
+//   is_helm_working(MagicalHelm{ MagicalEffect::PROTECTION, 3, HelmCommand::DORMANT });    // -> true
+bool is_helm_working(const MagicalHelm& helm) noexcept
+{
+	return helm.effect != MagicalEffect::BRILLIANCE || helm.command == HelmCommand::EMPOWERED;
+}
+
+} // namespace
+
 bool use_item(ItemBehavior& behavior, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	return std::visit(
@@ -685,7 +731,7 @@ int get_item_ac_bonus(const ItemBehavior& behavior) noexcept
 			[]([[maybe_unused]] const Shield& shield) -> int
 			{ return -1; }, // +1 AC in AD&D terms
 			[](const MagicalHelm& magicalHelm) -> int
-			{ return MagicalEffectUtils::get_ac_bonus(magicalHelm.effect, magicalHelm.bonus); },
+			{ return is_helm_working(magicalHelm) ? MagicalEffectUtils::get_ac_bonus(magicalHelm.effect, magicalHelm.bonus) : 0; },
 			[](const MagicalRing& magicalRing) -> int
 			{ return MagicalEffectUtils::get_protection_bonus(magicalRing.effect); },
 			[]([[maybe_unused]] const auto& otherBehavior) -> int
@@ -745,7 +791,7 @@ int get_item_resistance_strength(const ItemBehavior& behavior, DamageType damage
 			[&percent_if](const MagicalRing& ring) -> int
 			{ return percent_if(ring.effect, ring.bonus); },
 			[&percent_if](const MagicalHelm& helm) -> int
-			{ return percent_if(helm.effect, helm.bonus); },
+			{ return is_helm_working(helm) ? percent_if(helm.effect, helm.bonus) : 0; },
 			[]([[maybe_unused]] const auto& otherBehavior) -> int
 			{ return 0; },
 		},
@@ -819,6 +865,7 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 				output["type"] = encode_pickable_type(PickableType::MAGICAL_HELM);
 				output["effect"] = encode_magical_effect(magicalHelm.effect);
 				output["bonus"] = magicalHelm.bonus;
+				output["command"] = encode_helm_command(magicalHelm.command);
 			},
 			[&output](const MagicalRing& magicalRing)
 			{
@@ -931,6 +978,7 @@ ItemBehavior load_behavior(const json& source)
 		MagicalHelm magicalHelm;
 		magicalHelm.effect = parse_magical_effect(source.at("effect").get<std::string>());
 		magicalHelm.bonus = source.at("bonus").get<int>();
+		magicalHelm.command = parse_helm_command(source.at("command").get<std::string>());
 		return magicalHelm;
 	}
 
