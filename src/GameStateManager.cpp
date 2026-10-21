@@ -5,6 +5,7 @@
 #include <format>
 #include <fstream>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <system_error>
 #include <utility>
@@ -54,6 +55,31 @@ void save_rooms(const std::vector<DungeonRoom>& rooms, json& output)
 	}
 }
 
+namespace
+{
+// The RoomType a saved integer names, or nullopt for one no RoomType has.
+// The switch has no default, so a type added without a case here is a compile error (C4062, -Wswitch).
+//
+// Example:
+//   room_type_from(3);    // -> RoomType::TREASURE
+//   room_type_from(-1);   // -> nullopt
+std::optional<RoomType> room_type_from(int saved)
+{
+	const RoomType candidate = static_cast<RoomType>(saved);
+	switch (candidate)
+	{
+	case RoomType::ENTRANCE:
+	case RoomType::STANDARD:
+	case RoomType::DANGER:
+	case RoomType::TREASURE:
+	{
+		return candidate;
+	}
+	}
+	return std::nullopt;
+}
+} // namespace
+
 void load_rooms(const json& source, std::vector<DungeonRoom>& rooms)
 {
 	// Replace rather than append, as every loader of a level container does.
@@ -67,11 +93,12 @@ void load_rooms(const json& source, std::vector<DungeonRoom>& rooms)
 
 	for (const auto& roomRecord : roomRecords)
 	{
-		// A type read from disk is a boundary: TREASURE is RoomType's last value.
-		const int type = roomRecord.at("type").get<int>();
-		if (type < 0 || type > static_cast<int>(RoomType::TREASURE))
+		// A type read from disk is a boundary, so a value no RoomType has is refused.
+		const int savedType = roomRecord.at("type").get<int>();
+		const std::optional<RoomType> type = room_type_from(savedType);
+		if (!type)
 		{
-			throw std::runtime_error(std::format("load_rooms: room type {} is not a RoomType", type));
+			throw std::runtime_error(std::format("load_rooms: room type {} is not a RoomType", savedType));
 		}
 
 		DungeonRoom room;
@@ -79,7 +106,7 @@ void load_rooms(const json& source, std::vector<DungeonRoom>& rooms)
 		room.row = roomRecord.at("row").get<int>();
 		room.width = roomRecord.at("width").get<int>();
 		room.height = roomRecord.at("height").get<int>();
-		room.type = static_cast<RoomType>(type);
+		room.type = *type;
 		rooms.push_back(std::move(room));
 	}
 }

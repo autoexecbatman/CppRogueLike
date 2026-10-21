@@ -18,6 +18,7 @@
 #include <nlohmann/json.hpp>
 
 #include <format>
+#include <optional>
 #include <stdexcept>
 #include <string>
 
@@ -171,12 +172,37 @@ TEST_F(MapDoorPersistenceTest, ATileWithoutItsFailedPickLevelIsRefused)
 	}
 }
 
-// A saved door state that no DoorState has - one past the last, or below the first - is a
-// corrupt save, refused with the value named rather than loaded as a state nothing handles.
-TEST_F(MapDoorPersistenceTest, ADoorStateNoDoorStateHasIsRefused)
+// Counting up from 0, every door state below the first one refused loads and saves back as
+// itself. No DoorState is named, so a state added later needs no edit here.
+TEST_F(MapDoorPersistenceTest, EveryDoorStateBelowTheFirstRefusedOneRoundTrips)
 {
-	const int pastTheLast = static_cast<int>(DoorState::CLOSED_LOCKED_FORCE_FAILED) + 1;
-	for (const int corrupt : { pastTheLast, -1 })
+	constexpr int SEARCH_CEILING = 64;
+	std::optional<int> firstRefused{};
+	for (int state = 0; state < SEARCH_CEILING; ++state)
+	{
+		nlohmann::json saved;
+		original.save(saved);
+		saved.at("tiles").at(0).at("doorState") = state;
+		Map fresh{ DOOR_MAP_WIDTH, DOOR_MAP_HEIGHT };
+		try
+		{
+			fresh.load(saved);
+		}
+		catch (const std::runtime_error&)
+		{
+			firstRefused = state;
+			break;
+		}
+
+		nlohmann::json savedAgain;
+		fresh.save(savedAgain);
+		EXPECT_EQ(savedAgain.at("tiles").at(0).at("doorState"), state) << "door state " << state << " loaded as another";
+	}
+	ASSERT_TRUE(firstRefused.has_value()) << "no door state below " << SEARCH_CEILING << " was refused";
+	EXPECT_GT(*firstRefused, 0) << "not even the first door state loaded";
+
+	// The refusal names the value, past the last and below the first alike.
+	for (const int corrupt : { *firstRefused, -1 })
 	{
 		nlohmann::json saved;
 		original.save(saved);

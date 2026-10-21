@@ -13,8 +13,9 @@
 // What this can and cannot catch. `ALL_X[i] == static_cast<X>(i)` fails if a value is
 // inserted in the middle or the list is reordered, because every later entry shifts. A
 // value appended at the end and left out of the list is still silent - the residual risk
-// of having no reflection, the same one CodecRoundTripTest names. The headers used to
-// claim -Wswitch made that impossible; no build here passes -Werror, so it warns at most.
+// of having no reflection, the same one CodecRoundTripTest names. -Wswitch and C4062 do not
+// reach it: they are errors here (-Werror=switch, /we4062) for a switch with no default,
+// and an ALL_X list is an array.
 //
 // Run it:
 //

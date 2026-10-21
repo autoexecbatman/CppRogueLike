@@ -69,15 +69,15 @@
     },
     {
       "file": "src/GameStateManager.cpp",
-      "original": "if (type < 0 || type > static_cast<int>(RoomType::TREASURE))",
-      "mutated": "if (type > static_cast<int>(RoomType::TREASURE))",
-      "catches": "a negative room type cast to RoomType instead of refused"
+      "original": "\t}\n\treturn std::nullopt;\n}\n} // namespace\n\nvoid load_rooms(",
+      "mutated": "\t}\n\treturn RoomType::STANDARD;\n}\n} // namespace\n\nvoid load_rooms(",
+      "catches": "a saved value no RoomType has loaded as a standard room instead of refused"
     },
     {
       "file": "src/GameStateManager.cpp",
-      "original": "if (type < 0 || type > static_cast<int>(RoomType::TREASURE))",
-      "mutated": "if (type < 0 || type > static_cast<int>(RoomType::TREASURE) + 1)",
-      "catches": "a room type one past TREASURE cast to RoomType instead of refused"
+      "original": "\tcase RoomType::DANGER:\n\tcase RoomType::TREASURE:\n\t{\n\t\treturn candidate;\n\t}\n",
+      "mutated": "\tcase RoomType::DANGER:\n\t{\n\t\treturn candidate;\n\t}\n\tcase RoomType::TREASURE:\n\t{\n\t\treturn RoomType::STANDARD;\n\t}\n",
+      "catches": "a saved treasure room read back as a standard one"
     },
     {
       "file": "src/GameStateManager.cpp",
@@ -87,9 +87,9 @@
     },
     {
       "file": "src/GameStateManager.cpp",
-      "original": "room.type = static_cast<RoomType>(type);",
-      "mutated": "room.type = RoomType::STANDARD;",
-      "catches": "every saved room loading as a standard room, the default the lenient read gave"
+      "original": "\t\t\tthrow std::runtime_error(std::format(\"load_rooms: room type {} is not a RoomType\", savedType));\n",
+      "mutated": "\t\t\tcontinue;\n",
+      "catches": "a room no RoomType names skipped instead of refused"
     },
     {
       "file": "src/GameStateManager.cpp",
@@ -114,6 +114,12 @@
       "original": "if (!creatureRecords.is_array())",
       "mutated": "if (false)",
       "catches": "a \"creatures\" that is not a list read as no monsters"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\t\troom.type = *type;\n",
+      "mutated": "\t\troom.type = RoomType::STANDARD;\n",
+      "catches": "every saved room loading as a standard room, the default the lenient read gave"
     }
   ]
 }

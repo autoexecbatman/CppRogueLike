@@ -16,6 +16,7 @@
 
 #include <exception>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -219,20 +220,43 @@ TEST_F(LevelLoadTest, ARoomMissingAFieldIsRefusedByName)
 	}
 }
 
-// A type outside RoomType's values is refused naming the value, on either side.
-TEST_F(LevelLoadTest, ARoomTypeOutsideTheEnumIsRefused)
+// Counting up from 0, every room type below the first one refused loads and saves back as
+// itself, and the refusal names the value, as it does for -1. No RoomType is named, so an
+// enumerator added later needs no edit here.
+TEST_F(LevelLoadTest, EveryRoomTypeBelowTheFirstRefusedOneRoundTrips)
 {
-	for (const int type : { static_cast<int>(RoomType::TREASURE) + 1, -1 })
+	constexpr int SEARCH_CEILING = 64;
+	std::optional<int> firstRefused{};
+	for (int type = 0; type < SEARCH_CEILING; ++type)
 	{
 		json record{};
 		save_rooms({ room_at(1) }, record);
 		record.at("rooms").at(0)["type"] = type;
-
 		std::vector<DungeonRoom> level{};
-		const std::string refusal = refusal_of_rooms(record, level);
+		try
+		{
+			load_rooms(record, level);
+		}
+		catch (const std::exception& refusal)
+		{
+			EXPECT_NE(std::string(refusal.what()).find(std::to_string(type)), std::string::npos) << refusal.what();
+			firstRefused = type;
+			break;
+		}
 
-		EXPECT_NE(refusal.find(std::to_string(type)), std::string::npos) << "refusal does not name " << type << ": " << refusal;
+		json savedAgain{};
+		save_rooms(level, savedAgain);
+		EXPECT_EQ(savedAgain.at("rooms").at(0).at("type"), type) << "room type " << type << " loaded as another";
 	}
+	ASSERT_TRUE(firstRefused.has_value()) << "no room type below " << SEARCH_CEILING << " was refused";
+	EXPECT_GT(*firstRefused, 0) << "not even the first room type loaded";
+
+	json record{};
+	save_rooms({ room_at(1) }, record);
+	record.at("rooms").at(0)["type"] = -1;
+	std::vector<DungeonRoom> level{};
+	const std::string refusal = refusal_of_rooms(record, level);
+	EXPECT_NE(refusal.find("-1"), std::string::npos) << "refusal does not name -1: " << refusal;
 }
 
 // The save always writes "rooms" as an array, so a document without it, or with

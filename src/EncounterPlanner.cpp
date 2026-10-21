@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cassert>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "Creature.h"
@@ -58,7 +59,7 @@ int encounter_budget(RoomType type, int dungeonLevel)
 	}
 	}
 
-	return 0;
+	std::unreachable();
 }
 
 // ---------------------------------------------------------------------------
