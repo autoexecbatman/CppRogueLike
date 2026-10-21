@@ -193,8 +193,9 @@ TEST(MutationPlanTest, EveryFilterNamesASuiteThatExists)
 // tests/run_suite.ps1 is the one definition of how a plan builds and runs the suite, so
 // every plan calls it, naming only a configuration and a filter. The filter is passed
 // by name: given by position, "--gtest_filter=..." is read as a parameter name, the call
-// fails before the build, and every mutant reads as caught. Falsified 2026-10-21: with
-// fov_map_mutations.json put back to its old -Command string, this names that plan.
+// fails before the build, so mutate.py's baseline fails and every sweep is refused.
+// Falsified 2026-10-21: with fov_map_mutations.json put back to its old -Command string,
+// this names that plan.
 TEST(MutationPlanTest, EveryPlanRunsTheSuiteThroughRunSuite)
 {
 	const std::vector<std::filesystem::path> plans = every_plan();
