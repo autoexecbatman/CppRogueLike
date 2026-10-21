@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 #include <algorithm>
 #include <chrono>
-#include <ranges>
 #include <string>
 #include <vector>
 #include "src/WeaponDamageRegistry.h"
