@@ -1,0 +1,47 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/run_suite.ps1",
+    "-Configuration",
+    "Debug",
+    "-Filter",
+    "--gtest_filter=TileConfig*:EverySectionTheLoaderReads*"
+  ],
+  "mutations": [
+    {
+      "file": "src/TileConfig.cpp",
+      "original": "\tfor (const auto& [key, record] : root.at(\"tiles\").items())",
+      "mutated": "\tfor (const auto& [key, record] : root.value(\"tiles\", json::object()).items())",
+      "catches": "a config without its tiles loading with that table empty"
+    },
+    {
+      "file": "src/TileConfig.cpp",
+      "original": "\tfor (const auto& [key, record] : root.at(\"autotile_groups\").items())",
+      "mutated": "\tfor (const auto& [key, record] : root.value(\"autotile_groups\", json::object()).items())",
+      "catches": "a config without its autotile groups loading with that table empty"
+    },
+    {
+      "file": "src/TileConfig.cpp",
+      "original": "\tfor (const auto& [key, record] : root.at(\"wall_autotile_groups\").items())",
+      "mutated": "\tfor (const auto& [key, record] : root.value(\"wall_autotile_groups\", json::object()).items())",
+      "catches": "a config without its wall autotile groups loading with that table empty"
+    },
+    {
+      "file": "src/TileConfig.cpp",
+      "original": "\tfor (const auto& [key, record] : root.at(\"tile_types\").items())",
+      "mutated": "\tfor (const auto& [key, record] : root.value(\"tile_types\", json::object()).items())",
+      "catches": "a config without its tile types loading with that table empty"
+    },
+    {
+      "file": "src/TileConfig.cpp",
+      "original": "\tfor (const auto& [key, record] : root.at(\"tile_types\").items())",
+      "mutated": "\tif (!root.contains(\"tile_types\")) { return; } for (const auto& [key, record] : root[\"tile_types\"].items())",
+      "catches": "the tile types back behind their guard, read through the const operator[]"
+    }
+  ]
+}

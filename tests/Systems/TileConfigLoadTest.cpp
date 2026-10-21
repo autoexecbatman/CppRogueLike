@@ -5,7 +5,10 @@
 // which is undefined for a missing key: an abort in a Debug build, and in the Release
 // build players run, whatever memory sat past the end of the object.
 //
-// What it does not check: tile_types, whose parser has its own tests in
+// It also checks that a config missing any of the four sections the loader reads is
+// refused, naming the section.
+//
+// What it does not check: the fields of a tile type, whose parser has its own tests in
 // TileDefinitionTest, and what a refusal leaves loaded - TileConfig::load fills its
 // members section by section, so an earlier section stays.
 //
@@ -15,16 +18,18 @@
 // Run it:
 //
 //     cmake --build build --config Debug --target test_exe
-//     cd build/bin/Debug && ./test_exe.exe --gtest_filter=TileConfigLoadTest.*
+//     cd build/bin/Debug && ./test_exe.exe --gtest_filter=TileConfig*:EverySectionTheLoaderReads*
 
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
 
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 
 #include "src/Paths.h"
 #include "src/TileConfig.h"
@@ -34,7 +39,9 @@ class TileConfigLoadTest : public ::testing::Test
 protected:
 	void SetUp() override
 	{
-		const std::string testName = ::testing::UnitTest::GetInstance()->current_test_info()->name();
+		// A parameterised case's name holds a slash, which would make the file a path.
+		std::string testName = ::testing::UnitTest::GetInstance()->current_test_info()->name();
+		std::ranges::replace(testName, '/', '_');
 		scratch = std::filesystem::temp_directory_path() / ("tile_config_" + testName + ".json");
 	}
 
@@ -74,6 +81,30 @@ protected:
 		return {};
 	}
 
+	// Removes the whole of `section`, writes the result, and returns what loading it threw.
+	std::string refusal_without_section(const std::string& section)
+	{
+		nlohmann::json document = read_real_config();
+		EXPECT_TRUE(document.contains(section)) << "the shipped config has no " << section << ", so erasing it proves nothing";
+		document.erase(section);
+		{
+			std::ofstream out(scratch);
+			out << document.dump(2);
+		}
+
+		try
+		{
+			TileConfig config{};
+			config.load(scratch.string());
+		}
+		catch (const std::exception& refusal)
+		{
+			return refusal.what();
+		}
+		ADD_FAILURE() << "a config without " << section << " was not refused";
+		return {};
+	}
+
 	std::filesystem::path scratch{};
 };
 
@@ -102,3 +133,29 @@ TEST_F(TileConfigLoadTest, AnAutotileGroupMissingAFieldIsRefusedByName)
 		}
 	}
 }
+
+// The same file, once per section the loader reads: every one is required.
+class TileConfigSectionTest : public TileConfigLoadTest, public ::testing::WithParamInterface<std::string_view>
+{
+};
+
+TEST_P(TileConfigSectionTest, AConfigMissingTheSectionIsRefusedByName)
+{
+	const std::string section{ GetParam() };
+
+	const std::string refusal = refusal_without_section(section);
+
+	EXPECT_NE(refusal.find(section), std::string::npos) << "refusal does not name " << section << ": " << refusal;
+}
+
+// Each case is named for its section, so a failure says which one without reading the output.
+const auto name_for_section = [](const ::testing::TestParamInfo<std::string_view>& info)
+{
+	return std::string{ info.param };
+};
+
+INSTANTIATE_TEST_SUITE_P(
+	EverySectionTheLoaderReads,
+	TileConfigSectionTest,
+	::testing::Values("tiles", "autotile_groups", "wall_autotile_groups", "tile_types"),
+	name_for_section);

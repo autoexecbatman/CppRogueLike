@@ -151,44 +151,33 @@ void TileConfig::load(std::string_view path)
 
 	const json root = json::parse(configFile);
 
-	if (root.contains("tiles"))
+	// All four sections are required: a missing one throws here, naming itself.
+	for (const auto& [key, record] : root.at("tiles").items())
 	{
-		for (const auto& [key, val] : root.at("tiles").items())
-		{
-			tiles[key] = TileRefJson::parse_tile(val);
-		}
+		tiles[key] = TileRefJson::parse_tile(record);
 	}
 
-	if (root.contains("autotile_groups"))
+	for (const auto& [key, record] : root.at("autotile_groups").items())
 	{
-		for (const auto& [key, val] : root.at("autotile_groups").items())
-		{
-			autotileGroups[key] = AutotileGroup{
-				static_cast<TileSheet>(val.at("sheet").get<int>()),
-				val.at("origin_col").get<int>(),
-				val.at("origin_row").get<int>()
-			};
-		}
+		autotileGroups[key] = AutotileGroup{
+			static_cast<TileSheet>(record.at("sheet").get<int>()),
+			record.at("origin_col").get<int>(),
+			record.at("origin_row").get<int>()
+		};
 	}
 
-	if (root.contains("wall_autotile_groups"))
+	for (const auto& [key, record] : root.at("wall_autotile_groups").items())
 	{
-		for (const auto& [key, val] : root.at("wall_autotile_groups").items())
-		{
-			wallAutotileGroups[key] = WallAutotileGroup{
-				static_cast<TileSheet>(val.at("sheet").get<int>()),
-				val.at("origin_col").get<int>(),
-				val.at("origin_row").get<int>()
-			};
-		}
+		wallAutotileGroups[key] = WallAutotileGroup{
+			static_cast<TileSheet>(record.at("sheet").get<int>()),
+			record.at("origin_col").get<int>(),
+			record.at("origin_row").get<int>()
+		};
 	}
 
-	if (root.contains("tile_types"))
+	for (const auto& [key, record] : root.at("tile_types").items())
 	{
-		for (auto& [key, val] : root["tile_types"].items())
-		{
-			tileDefinitions[parse_tile_type(key)] = parse_tile_definition(val);
-		}
+		tileDefinitions[parse_tile_type(key)] = parse_tile_definition(record);
 	}
 }
 
