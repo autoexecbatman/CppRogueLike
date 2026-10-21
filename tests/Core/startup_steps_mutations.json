@@ -1,0 +1,59 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/run_suite.ps1",
+    "-Configuration",
+    "Debug",
+    "-Filter",
+    "--gtest_filter=StartupStepsTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/StartupSteps.cpp",
+      "original": "\t\tcatch (const std::exception& refusal)",
+      "mutated": "\t\tcatch (const std::bad_exception& refusal)",
+      "catches": "a step's refusal escaping startup unreported"
+    },
+    {
+      "file": "src/StartupSteps.cpp",
+      "original": "\t\t\treturn StartupRefusal{ step.name, refusal.what() };",
+      "mutated": "\t\t\tcontinue;",
+      "catches": "startup running on past a refused step, and reporting nothing"
+    },
+    {
+      "file": "src/StartupSteps.cpp",
+      "original": "\t\t\treturn StartupRefusal{ step.name, refusal.what() };",
+      "mutated": "\t\t\treturn StartupRefusal{ \"\", refusal.what() };",
+      "catches": "a refusal that does not say which step refused"
+    },
+    {
+      "file": "src/StartupSteps.cpp",
+      "original": "\t\t\treturn StartupRefusal{ step.name, refusal.what() };",
+      "mutated": "\t\t\treturn StartupRefusal{ step.name, \"refused\" };",
+      "catches": "a refusal that loses the reason its exception gave"
+    },
+    {
+      "file": "src/StartupSteps.cpp",
+      "original": "\t\tlog << \"STARTUP: \" << step.name << '\\n'",
+      "mutated": "\t\tlog",
+      "catches": "a step run with no log line naming it"
+    },
+    {
+      "file": "src/StartupSteps.cpp",
+      "original": "\t\t\tlog << \"STARTUP: \" << step.name << \" failed: \" << refusal.what() << '\\n'",
+      "mutated": "\t\t\tlog",
+      "catches": "a refusal left out of the log"
+    },
+    {
+      "file": "src/StartupSteps.cpp",
+      "original": "\treturn std::format(\"Could not start: {} failed: {}\", refusal.step, refusal.reason);",
+      "mutated": "\treturn std::format(\"Could not start: {}\", refusal.reason);",
+      "catches": "the player's line not naming the step that failed"
+    }
+  ]
+}

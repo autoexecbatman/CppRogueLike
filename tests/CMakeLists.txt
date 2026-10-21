@@ -22,6 +22,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/test_main.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/AssertProbeTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/PathsTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Core/StartupStepsTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Utils/UniqueIdTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Utils/PanelRowGeometryTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Utils/HudReserveGeometryTest.cpp
@@ -340,6 +341,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/ContentRegistryIO.cpp
     ${PARENT_SOURCE_DIR}/BodyPlanRegistry.cpp
     ${PARENT_SOURCE_DIR}/TileConfig.cpp
+    ${PARENT_SOURCE_DIR}/StartupSteps.cpp
     ${PARENT_SOURCE_DIR}/TileRefJson.cpp
     ${PARENT_SOURCE_DIR}/FloatingTextSystem.cpp
     ${PARENT_SOURCE_DIR}/BalanceViewer.cpp

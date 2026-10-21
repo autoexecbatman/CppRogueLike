@@ -3,7 +3,9 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <random>
+#include <vector>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
@@ -13,6 +15,7 @@
 #include "Game.h"
 #include "Menu.h"
 #include "Paths.h"
+#include "StartupSteps.h"
 
 #ifdef __EMSCRIPTEN__
 struct LoopData
@@ -56,41 +59,77 @@ int main()
 			  << std::flush;
 	// Game owns everything including Renderer and InputSystem
 	auto game = std::make_unique<Game>(std::random_device{}());
-	std::clog << "STARTUP: Loading tile config\n"
-			  << std::flush;
-	game->tileConfig.load(Paths::TILE_CONFIG);
-	std::clog << "STARTUP: Loading body plans\n"
-			  << std::flush;
-	game->bodyPlanRegistry.load(Paths::BODY_PLANS);
-	std::clog << "STARTUP: Loading spells\n"
-			  << std::flush;
-	game->spellRegistry.load(Paths::SPELLS);
-	std::clog << "STARTUP: Loading monsters\n"
-			  << std::flush;
-	game->monsterRegistry.load(Paths::MONSTERS);
-	std::clog << "STARTUP: Loading items\n"
-			  << std::flush;
-	game->itemRegistry.load(Paths::ITEMS);
-	game->itemRegistry.load_enhanced_rules(Paths::ENHANCED_RULES);
-	std::clog << "STARTUP: Initializing world\n"
-			  << std::flush;
-	game->init_world();
 
-	std::clog << "STARTUP: Initializing renderer\n"
-			  << std::flush;
-	// Initialize raylib window (fullscreen, auto-detect resolution)
-	game->renderer.init();
-	std::clog << "STARTUP: Loading Dawnlike tileset\n"
-			  << std::flush;
-	game->renderer.load_dawnlike(Paths::DAWNLIKE_DIR);
-
+	const auto load_tile_config = [&game]()
+	{
+		game->tileConfig.load(Paths::TILE_CONFIG);
+	};
+	const auto load_body_plans = [&game]()
+	{
+		game->bodyPlanRegistry.load(Paths::BODY_PLANS);
+	};
+	const auto load_spells = [&game]()
+	{
+		game->spellRegistry.load(Paths::SPELLS);
+	};
+	const auto load_monsters = [&game]()
+	{
+		game->monsterRegistry.load(Paths::MONSTERS);
+	};
+	const auto load_items = [&game]()
+	{
+		game->itemRegistry.load(Paths::ITEMS);
+		game->itemRegistry.load_enhanced_rules(Paths::ENHANCED_RULES);
+	};
+	const auto init_world = [&game]()
+	{
+		game->init_world();
+	};
+	// Opens the raylib window (fullscreen, auto-detect resolution); every step before it runs windowless.
+	const auto init_renderer = [&game]()
+	{
+		game->renderer.init();
+	};
+	const auto load_tileset = [&game]()
+	{
+		game->renderer.load_dawnlike(Paths::DAWNLIKE_DIR);
+	};
 	// The font size sets every HUD width. Jersey10 is an outline face, sized for legibility against the
 	// 32 pixel row pitch rather than a bitmap multiple.
-	game->renderer.load_font(Paths::DAWNLIKE_FONT, 30);
+	const auto load_font = [&game]()
+	{
+		game->renderer.load_font(Paths::DAWNLIKE_FONT, 30);
+	};
+	const auto load_palette = [&game]()
+	{
+		game->palette.load(Paths::TILE_CONFIG);
+	};
+	const auto load_prefabs = [&game]()
+	{
+		game->prefabLibrary.load(Paths::PREFABS);
+	};
+
+	const std::vector<StartupStep> startupSteps{
+		{ "Loading tile config", load_tile_config },
+		{ "Loading body plans", load_body_plans },
+		{ "Loading spells", load_spells },
+		{ "Loading monsters", load_monsters },
+		{ "Loading items", load_items },
+		{ "Initializing world", init_world },
+		{ "Initializing renderer", init_renderer },
+		{ "Loading Dawnlike tileset", load_tileset },
+		{ "Loading font", load_font },
+		{ "Loading palette", load_palette },
+		{ "Loading prefabs", load_prefabs },
+	};
+	const std::optional<StartupRefusal> refusal = run_startup_steps(startupSteps, std::clog);
+	if (refusal)
+	{
+		report_startup_refusal(*refusal);
+		return 1;
+	}
 
 	auto ctx = game->context();
-	game->palette.load(Paths::TILE_CONFIG);
-	game->prefabLibrary.load(Paths::PREFABS);
 
 	game->menus.push_back(make_main_menu(true, ctx));
 
