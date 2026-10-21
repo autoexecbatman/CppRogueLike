@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/run_suite.ps1",
+    "-Configuration",
+    "Debug",
+    "-Filter",
+    "--gtest_filter=AttackTargetTest.*:MonsterMovementTest.*:RangedDrawTest.*:SanctuaryPursuitTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/AiMonster.cpp",
+      "original": "\t\towner.attacker->attack(target, AttackKind::MELEE, ctx);",
+      "mutated": "\t\towner.attacker->attack(*ctx.player(), AttackKind::MELEE, ctx);",
+      "catches": "a hunter striking the player whoever it was handed"
+    },
+    {
+      "file": "src/AiMonsterRanged.cpp",
+      "original": "\tRangedShot::fire(owner, target, ctx);",
+      "mutated": "\tRangedShot::fire(owner, *ctx.player(), ctx);",
+      "catches": "a ranged hunter shooting the player whoever it was handed"
+    },
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\t\tbite(owner, target, ctx);\n\t\treturn;",
+      "mutated": "\t\tbite(owner, *ctx.player(), ctx);\n\t\treturn;",
+      "catches": "a spider biting the player whoever it was handed"
+    }
+  ]
+}

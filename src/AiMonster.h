@@ -14,7 +14,7 @@ private:
 	void decide_action(Creature& owner, GameContext& ctx);
 
 protected:
-	virtual void move_or_attack(Creature& owner, Vector2D position, GameContext& ctx);
+	virtual void move_or_attack(Creature& owner, Creature& target, GameContext& ctx);
 
 public:
 	void update(Creature& owner, GameContext& ctx) override;

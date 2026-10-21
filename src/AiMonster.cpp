@@ -155,7 +155,7 @@ bool cannot_act(Creature& owner)
 }
 } // namespace
 
-void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
+void AiMonster::move_or_attack(Creature& owner, Creature& target, GameContext& ctx)
 {
 	assert(ctx.pathfinder && "AiMonster::move_or_attack: called without a pathfinder");
 	assert(ctx.map && "AiMonster::move_or_attack: called without a map");
@@ -168,10 +168,10 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 		return;
 	}
 
-	int distanceToTarget = owner.get_tile_distance(targetPosition);
+	int distanceToTarget = owner.get_tile_distance(target.position);
 	if (distanceToTarget <= 1)
 	{
-		owner.attacker->attack(*ctx.player(), AttackKind::MELEE, ctx);
+		owner.attacker->attack(target, AttackKind::MELEE, ctx);
 		return;
 	}
 
@@ -179,16 +179,16 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 	const Pathfinding::Mobility mobility = Pathfinding::mobility_of(owner, *ctx.tileConfig);
 
 	// The cost map ignores creatures, so it says whether terrain allows any way at all.
-	const std::optional<int> holdingCost = ctx.pathfinder->cost_to(targetPosition, owner.position, mobility, ctx);
+	const std::optional<int> holdingCost = ctx.pathfinder->cost_to(target.position, owner.position, mobility, ctx);
 	if (!holdingCost)
 	{
-		close_in_without_a_route(owner, targetPosition, mobility, ctx);
+		close_in_without_a_route(owner, target.position, mobility, ctx);
 		return;
 	}
 
 	// The route goes round the creatures standing now. Each step shortens it while they
 	// stand still, so a crowd cannot hold the hunter pacing between equal tiles.
-	const std::vector<Vector2D> route = ctx.pathfinder->find_route(owner.position, targetPosition, mobility, ctx);
+	const std::vector<Vector2D> route = ctx.pathfinder->find_route(owner.position, target.position, mobility, ctx);
 	std::optional<Vector2D> nextStep = route.size() >= 2 ? std::optional<Vector2D>{ route[1] } : std::nullopt;
 
 	// The crowd has closed every way: come up behind it, downhill only, so each step is
@@ -199,7 +199,7 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 		for (const Vector2D& delta : NEIGHBORS)
 		{
 			const Vector2D candidate = owner.position + delta;
-			const std::optional<int> candidateCost = ctx.pathfinder->cost_to(targetPosition, candidate, mobility, ctx);
+			const std::optional<int> candidateCost = ctx.pathfinder->cost_to(target.position, candidate, mobility, ctx);
 			if (candidateCost && *candidateCost < bestCost && ctx.map->get_actor(candidate, ctx) == nullptr)
 			{
 				bestCost = *candidateCost;
@@ -273,7 +273,7 @@ void AiMonster::decide_action(Creature& owner, GameContext& ctx)
 	// Perceived: hunt, with no die in the way.
 	if (owner.is_aware(ctx.gameState->get_time()) && !ctx.player()->is_invisible() && !hasLostTrackOfPlayer)
 	{
-		move_or_attack(owner, ctx.player()->position, ctx);
+		move_or_attack(owner, *ctx.player(), ctx);
 	}
 	// Unperceived and inside 15 tiles: 1/6 of turns hunt anyway, aimed at the player's
 	// exact position, through walls and around corners alike.
@@ -281,7 +281,7 @@ void AiMonster::decide_action(Creature& owner, GameContext& ctx)
 	{
 		if (ctx.dice->d6() == 1)
 		{
-			move_or_attack(owner, ctx.player()->position, ctx);
+			move_or_attack(owner, *ctx.player(), ctx);
 		}
 		// The d6 missed: a tenth of the remainder drifts, which is 1/12 of all turns,
 		// and the other 3/4 hold position.

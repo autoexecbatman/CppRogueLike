@@ -202,21 +202,17 @@ void AiSpider::random_move(Creature& owner, GameContext& ctx)
 	}
 }
 
-void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
+void AiSpider::move_or_attack(Creature& owner, Creature& target, GameContext& ctx)
 {
 	assert(ctx.map && "AiSpider::move_or_attack: called without a map");
 
 	// Get distance to target
-	int distanceToTarget = owner.get_tile_distance(targetPosition);
+	int distanceToTarget = owner.get_tile_distance(target.position);
 
 	// If adjacent to target, attack
 	if (distanceToTarget <= 1)
 	{
-		Creature* target = ctx.map->get_actor(targetPosition, ctx);
-		if (target)
-		{
-			bite(owner, *target, ctx);
-		}
+		bite(owner, target, ctx);
 		return;
 	}
 
@@ -278,7 +274,7 @@ void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameCont
 	// If we have no moves, use default pathfinding
 	if (possibleMoves.empty())
 	{
-		AiMonster::move_or_attack(owner, targetPosition, ctx);
+		AiMonster::move_or_attack(owner, target, ctx);
 		return;
 	}
 
@@ -288,10 +284,10 @@ void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameCont
 
 	for (const auto& move : possibleMoves)
 	{
-		int dist = move.manhattan_distance_to(targetPosition);
-		if (dist < bestDistance)
+		int distance = move.manhattan_distance_to(target.position);
+		if (distance < bestDistance)
 		{
-			bestDistance = dist;
+			bestDistance = distance;
 			bestMove = move;
 		}
 	}

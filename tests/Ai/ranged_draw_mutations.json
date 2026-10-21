@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/AiMonsterRanged.cpp",
-      "original": "\tif (!can_draw_missile_weapon(owner))\n\t{\n\t\tAiMonster::move_or_attack(owner, targetPosition, ctx);",
-      "mutated": "\tif (false)\n\t{\n\t\tAiMonster::move_or_attack(owner, targetPosition, ctx);",
+      "original": "\tif (!can_draw_missile_weapon(owner))\n\t{\n\t\tAiMonster::move_or_attack(owner, target, ctx);",
+      "mutated": "\tif (false)\n\t{\n\t\tAiMonster::move_or_attack(owner, target, ctx);",
       "catches": "an archer choosing a shot it cannot draw, every round"
     },
     {

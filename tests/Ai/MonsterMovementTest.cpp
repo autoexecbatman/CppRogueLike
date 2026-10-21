@@ -133,7 +133,7 @@ protected:
 	{
 		for (int round = 0; round < rounds; ++round)
 		{
-			hunter->move_or_attack(monster, player->position, ctx);
+			hunter->move_or_attack(monster, *player, ctx);
 			game.gameState.advance_clock(1);
 		}
 	}

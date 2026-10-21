@@ -21,7 +21,7 @@ protected:
 	bool webLaid{ false }; // Tracks if this spider has created a web
 
 	// Specialized spider movement pattern that prefers walls and corners
-	void move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx) override;
+	void move_or_attack(Creature& owner, Creature& target, GameContext& ctx) override;
 
 	// One round of the spider's attacks: its bite, and the venom a bite that lands injects.
 	//

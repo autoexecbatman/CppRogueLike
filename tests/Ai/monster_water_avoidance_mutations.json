@@ -57,7 +57,7 @@
     },
     {
       "file": "src/AiMonster.cpp",
-      "original": "\t\tclose_in_without_a_route(owner, targetPosition, mobility, ctx);\n",
+      "original": "\t\tclose_in_without_a_route(owner, target.position, mobility, ctx);\n",
       "mutated": "",
       "catches": "a monster cut off by water standing where it was instead of waiting at the bank"
     }

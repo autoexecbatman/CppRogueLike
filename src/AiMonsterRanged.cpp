@@ -48,27 +48,27 @@ void AiMonsterRanged::update(Creature& owner, GameContext& ctx)
 	// entirely (PHB page 436), so there is nothing here to shoot at or walk toward.
 	if (owner.is_aware(ctx.gameState->get_time()) && !ctx.buffSystem->ignores_warded_creature(owner, *ctx.player()))
 	{
-		move_or_attack(owner, ctx.player()->position, ctx);
+		move_or_attack(owner, *ctx.player(), ctx);
 	}
 }
 
-void AiMonsterRanged::move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
+void AiMonsterRanged::move_or_attack(Creature& owner, Creature& target, GameContext& ctx)
 {
 	assert(ctx.map && "AiMonsterRanged::move_or_attack: called without a map");
 
 	// An archer with nothing it can draw closes in and fights as any monster does.
 	if (!can_draw_missile_weapon(owner))
 	{
-		AiMonster::move_or_attack(owner, targetPosition, ctx);
+		AiMonster::move_or_attack(owner, target, ctx);
 		return;
 	}
 
-	int distance = owner.get_tile_distance(targetPosition);
+	int distance = owner.get_tile_distance(target.position);
 
 	// If at optimal range and have line of sight, try a ranged attack
-	if (distance <= maxRangeDistance && distance >= 2 && ctx.map->has_los(owner.position, targetPosition))
+	if (distance <= maxRangeDistance && distance >= 2 && ctx.map->has_los(owner.position, target.position))
 	{
-		if (tryRangedAttack(owner, targetPosition, ctx))
+		if (try_ranged_attack(owner, target, ctx))
 		{
 			return; // Attack succeeded, end turn
 		}
@@ -78,18 +78,18 @@ void AiMonsterRanged::move_or_attack(Creature& owner, Vector2D targetPosition, G
 	if (distance < optimalDistance)
 	{
 		// Calculate direction away from player
-		Vector2D moveDir = owner.position - targetPosition;
+		Vector2D retreatDirection = owner.position - target.position;
 
 		// Normalize and scale
-		int maxComponent = std::max(std::abs(moveDir.x), std::abs(moveDir.y));
+		int maxComponent = std::max(std::abs(retreatDirection.x), std::abs(retreatDirection.y));
 		if (maxComponent > 0)
 		{
-			moveDir.x = moveDir.x / maxComponent;
-			moveDir.y = moveDir.y / maxComponent;
+			retreatDirection.x = retreatDirection.x / maxComponent;
+			retreatDirection.y = retreatDirection.y / maxComponent;
 		}
 
 		// Try to move away in this direction; a step that did anything spends the turn.
-		const Pathfinding::StepResult backedAway = Pathfinding::step(owner, owner.position + moveDir, ctx);
+		const Pathfinding::StepResult backedAway = Pathfinding::step(owner, owner.position + retreatDirection, ctx);
 		if (backedAway != Pathfinding::StepResult::REFUSED)
 		{
 			return;
@@ -99,21 +99,21 @@ void AiMonsterRanged::move_or_attack(Creature& owner, Vector2D targetPosition, G
 	// If too far or couldn't back up, use regular pathfinding to approach
 	if (distance > maxRangeDistance || distance < optimalDistance)
 	{
-		AiMonster::move_or_attack(owner, targetPosition, ctx);
+		AiMonster::move_or_attack(owner, target, ctx);
 	}
 }
 
-bool AiMonsterRanged::tryRangedAttack(Creature& owner, Vector2D targetPos, GameContext& ctx)
+bool AiMonsterRanged::try_ranged_attack(Creature& owner, Creature& target, GameContext& ctx)
 {
-	assert(ctx.map && "AiMonsterRanged::tryRangedAttack: called without a map");
+	assert(ctx.map && "AiMonsterRanged::try_ranged_attack: called without a map");
 
 	// Check if there's a clear line of sight
-	if (!ctx.map->has_los(owner.position, targetPos))
+	if (!ctx.map->has_los(owner.position, target.position))
 	{
 		return false;
 	}
 
-	RangedShot::fire(owner, *ctx.player(), ctx);
+	RangedShot::fire(owner, target, ctx);
 	return true;
 }
 
