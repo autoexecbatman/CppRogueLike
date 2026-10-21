@@ -1,0 +1,53 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/run_suite.ps1",
+    "-Configuration",
+    "Debug",
+    "-Filter",
+    "--gtest_filter=HungerSystem*:EveryFieldHungerSaveWrites*:SaveRequiredKeys*:EveryKeyTheWriterAlwaysWrites*"
+  ],
+  "mutations": [
+    {
+      "file": "src/HungerSystem.cpp",
+      "original": "\trun.hungerValue = source.at(\"hungerValue\").get<int>();",
+      "mutated": "\trun.hungerValue = source.value(\"hungerValue\", run.hungerValue);",
+      "catches": "a record without its hunger loading at the fresh run's"
+    },
+    {
+      "file": "src/HungerSystem.cpp",
+      "original": "\trun.hungerMax = source.at(\"hungerMax\").get<int>();",
+      "mutated": "\trun.hungerMax = source.value(\"hungerMax\", run.hungerMax);",
+      "catches": "a record without its hunger ceiling loading at the default"
+    },
+    {
+      "file": "src/HungerSystem.cpp",
+      "original": "\trun.wellFedMessageShown = source.at(\"wellFedMessageShown\").get<bool>();",
+      "mutated": "\trun.wellFedMessageShown = source.value(\"wellFedMessageShown\", run.wellFedMessageShown);",
+      "catches": "a record without its well-fed flag loading at the default"
+    },
+    {
+      "file": "src/HungerSystem.cpp",
+      "original": "\tif (source.contains(\"lastNotifiedState\"))\n\t{\n\t\trun.lastNotifiedState = static_cast<HungerState>(source[\"lastNotifiedState\"].get<int>());\n\t}",
+      "mutated": "\trun.lastNotifiedState = static_cast<HungerState>(source.at(\"lastNotifiedState\").get<int>());",
+      "catches": "a system that never announced refused on load, though its writer leaves the field out"
+    },
+    {
+      "file": "src/UniqueId.cpp",
+      "original": "\tconst IdType stored = source.at(\"nextUniqueId\").get<IdType>();",
+      "mutated": "\tconst IdType stored = source.value(\"nextUniqueId\", Generator::peek_next_id());",
+      "catches": "a save without the id counter loaded rather than refused"
+    },
+    {
+      "file": "src/UniqueId.cpp",
+      "original": "\tGenerator::set_next_id(std::max(stored, Generator::peek_next_id()));",
+      "mutated": "\tGenerator::set_next_id(stored);",
+      "catches": "a saved counter behind the ids the load issued, so the next object takes a held id"
+    }
+  ]
+}

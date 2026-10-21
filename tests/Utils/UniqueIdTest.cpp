@@ -1,8 +1,11 @@
 #include <gtest/gtest.h>
 
-#include "src/UniqueId.h"
 #include <atomic>
+#include <stdexcept>
+
 #include <nlohmann/json.hpp>
+
+#include "src/UniqueId.h"
 
 // Test fixture for UniqueId tests
 class UniqueIdTest : public ::testing::Test {
@@ -74,9 +77,9 @@ TEST_F(UniqueIdTest, TheCounterSurvivesASave)
 	EXPECT_GE(afterLoad, 4u) << "the counter resumed below where the session left it";
 }
 
-// A save written before the counter was stored must not send the generator backwards.
-// Loading nothing leaves it where it stands.
-TEST_F(UniqueIdTest, ASaveWithoutTheCounterLeavesItAlone)
+// save always writes the counter, so a record without it is damaged: the load refuses it
+// and the generator stays where it stands.
+TEST_F(UniqueIdTest, ASaveWithoutTheCounterIsRefusedAndLeavesItAlone)
 {
 	using namespace UniqueId;
 
@@ -85,9 +88,9 @@ TEST_F(UniqueIdTest, ASaveWithoutTheCounterLeavesItAlone)
 	const IdType before = Generator::peek_next_id();
 
 	const nlohmann::json empty = nlohmann::json::object();
-	load(empty);
+	EXPECT_THROW(load(empty), std::exception) << "a record without the counter loaded";
 
-	EXPECT_EQ(Generator::peek_next_id(), before) << "an older save reset the counter";
+	EXPECT_EQ(Generator::peek_next_id(), before) << "a refused record moved the counter";
 }
 
 // Nothing may ever be issued the id that means "no id". This is why the counter

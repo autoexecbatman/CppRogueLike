@@ -27,9 +27,9 @@
     },
     {
       "file": "src/UniqueId.cpp",
-      "original": "\tif (!source.contains(\"nextUniqueId\"))\n",
-      "mutated": "\tif (source.contains(\"nextUniqueId\"))\n",
-      "catches": "the stored counter ignored on every save that has one"
+      "original": "\tconst IdType stored = source.at(\"nextUniqueId\").get<IdType>();\n",
+      "mutated": "\tconst IdType stored = source.value(\"nextUniqueId\", Generator::peek_next_id());\n",
+      "catches": "a record without the counter loaded rather than refused"
     },
     {
       "file": "src/UniqueId.h",

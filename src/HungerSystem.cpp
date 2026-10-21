@@ -276,20 +276,12 @@ void HungerSystem::save(json& output) const
 
 void HungerSystem::load(const json& source)
 {
-	if (source.contains("hungerValue"))
-	{
-		run.hungerValue = source["hungerValue"];
-	}
-	if (source.contains("hungerMax"))
-	{
-		run.hungerMax = source["hungerMax"];
-	}
-	if (source.contains("wellFedMessageShown"))
-	{
-		run.wellFedMessageShown = source["wellFedMessageShown"];
-	}
+	// save writes these three every time, so a record without one is refused.
+	run.hungerValue = source.at("hungerValue").get<int>();
+	run.hungerMax = source.at("hungerMax").get<int>();
+	run.wellFedMessageShown = source.at("wellFedMessageShown").get<bool>();
 
-	// A save written before this field existed leaves it empty, and the first tick
+	// save omits this until a state has been announced; left empty, the first tick
 	// after the load sets the baseline without announcing anything.
 	if (source.contains("lastNotifiedState"))
 	{

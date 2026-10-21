@@ -20,13 +20,8 @@ void save(json& output)
 
 void load(const json& source)
 {
-	if (!source.contains("nextUniqueId"))
-	{
-		return;
-	}
-
 	// Never backwards: loading in a running game finds the counter ahead, and objects in memory hold those ids.
-	const IdType stored = source["nextUniqueId"].get<IdType>();
+	const IdType stored = source.at("nextUniqueId").get<IdType>();
 	Generator::set_next_id(std::max(stored, Generator::peek_next_id()));
 }
 } // namespace UniqueId

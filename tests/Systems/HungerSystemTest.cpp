@@ -18,6 +18,9 @@
 //   cd build/bin/Debug && ./test_exe.exe --gtest_filter=HungerSystemTest.*
 
 #include <array>
+#include <stdexcept>
+#include <string>
+#include <string_view>
 
 #include <gtest/gtest.h>
 
@@ -321,3 +324,47 @@ TEST_F(HungerDamageTest, BeingMerelyHungryCostsNoHitPoints)
 
 	EXPECT_EQ(player->get_hp(), before) << "hunger short of starvation took hit points";
 }
+
+// A system that never announced a state saves no lastNotifiedState, and that record loads.
+TEST_F(HungerSystemTest, ARecordWithNothingAnnouncedLoads)
+{
+	nlohmann::json saved;
+	hunger.save(saved);
+	ASSERT_FALSE(saved.contains("lastNotifiedState")) << "the writer saved an announcement, so this pin pins nothing";
+
+	HungerSystem loaded{};
+	loaded.load(saved);
+
+	EXPECT_EQ(loaded.get_hunger_value(), hunger.get_hunger_value());
+}
+
+// The same system, once per field HungerSystem::save always writes.
+class HungerSystemFieldTest : public HungerSystemTest, public ::testing::WithParamInterface<std::string_view>
+{
+};
+
+TEST_P(HungerSystemFieldTest, ARecordMissingTheFieldIsRefused)
+{
+	const std::string field{ GetParam() };
+	hunger.increase_hunger(ctx, 1);
+	nlohmann::json saved;
+	hunger.save(saved);
+	ASSERT_TRUE(saved.contains(field)) << "the writer did not write \"" << field << "\", so erasing it proves nothing";
+	saved.erase(field);
+
+	HungerSystem loaded{};
+
+	EXPECT_THROW(loaded.load(saved), std::exception) << "a record without \"" << field << "\" loaded";
+}
+
+// Each case is named for its field, so a failure says which one without reading the output.
+const auto name_for_hunger_field = [](const ::testing::TestParamInfo<std::string_view>& info)
+{
+	return std::string{ info.param };
+};
+
+INSTANTIATE_TEST_SUITE_P(
+	EveryFieldHungerSaveWrites,
+	HungerSystemFieldTest,
+	::testing::Values("hungerValue", "hungerMax", "wellFedMessageShown"),
+	name_for_hunger_field);

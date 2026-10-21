@@ -18,20 +18,28 @@
 
 #include <gtest/gtest.h>
 
+#include <cassert>
 #include <filesystem>
 #include <fstream>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 
 #include <nlohmann/json.hpp>
 
+#include "src/Creature.h"
 #include "src/CreatureClass.h"
 #include "src/Game.h"
 #include "src/GameContext.h"
 #include "src/GameStateManager.h"
+#include "src/InventoryData.h"
+#include "src/Item.h"
+#include "src/ItemCreator.h"
 #include "src/Paths.h"
+#include "src/Player.h"
 #include "src/PlayerRaceState.h"
 #include "src/TurnSchedule.h"
+#include "src/UniqueId.h"
 #include "tests/mocks/TestDice.h"
 
 namespace
@@ -115,6 +123,47 @@ protected:
 		out << saveDocument.dump(4);
 	}
 
+	// Rewrites the save's id counter to the id its player holds, as though it had fallen behind.
+	static void set_the_saved_counter_to_the_players_id()
+	{
+		const std::filesystem::path savePath = Paths::resolve(Paths::SAVE_FILE);
+		nlohmann::json saveDocument;
+		{
+			std::ifstream in{ savePath };
+			in >> saveDocument;
+		}
+		saveDocument.at("nextUniqueId") = saveDocument.at("player").at("uniqueId");
+		std::ofstream out{ savePath };
+		out << saveDocument.dump(4);
+	}
+
+	// Every id an object of the loaded game holds: the player, the creatures, and what each carries or lies on the floor.
+	std::unordered_set<UniqueId::IdType> held_ids()
+	{
+		std::unordered_set<UniqueId::IdType> ids{ ctx.player()->uniqueId };
+		for (const auto& item : ctx.player()->inventoryData.items)
+		{
+			assert(item && "held_ids: the player's pack holds a null entry");
+			ids.insert(item->uniqueId);
+		}
+		for (const auto& creature : *ctx.creatures)
+		{
+			assert(creature && "held_ids: the creature list holds a null entry");
+			ids.insert(creature->uniqueId);
+			for (const auto& item : creature->inventoryData.items)
+			{
+				assert(item && "held_ids: a creature's pack holds a null entry");
+				ids.insert(item->uniqueId);
+			}
+		}
+		for (const auto& item : ctx.floorInventory->items)
+		{
+			assert(item && "held_ids: the floor holds a null entry");
+			ids.insert(item->uniqueId);
+		}
+		return ids;
+	}
+
 	static bool save_exists()
 	{
 		return std::filesystem::exists(Paths::resolve(Paths::SAVE_FILE));
@@ -157,6 +206,22 @@ TEST_F(SaveRequiredKeysFixture, ASaveWhosePlayerHasNoPositionIsRefused)
 	EXPECT_FALSE(save_exists()) << "the refused save was kept; the owner's ruling is to delete it";
 }
 
+// A saved counter behind an id the save holds is not trusted: the load issued ids of its own
+// while building the actors, and the counter resumes past those.
+TEST_F(SaveRequiredKeysFixture, AnObjectMadeAfterLoadingASaveWithAStaleCounterTakesAnUnheldId)
+{
+	save_a_game_in_progress();
+	ASSERT_TRUE(wroteSave) << "the game could not be saved, so nothing here is being measured";
+	set_the_saved_counter_to_the_players_id();
+
+	const LoadOutcome outcome = game.stateManager.load_all(ctx);
+	ASSERT_EQ(outcome.kind, LoadOutcomeKind::LOADED) << outcome.reason;
+	const std::unordered_set<UniqueId::IdType> held = held_ids();
+	const auto made = ItemCreator::create("dagger", Vector2D{ 0, 0 }, ctx);
+
+	EXPECT_FALSE(held.contains(made->uniqueId)) << "an object made after the load took id " << made->uniqueId << ", which a loaded object already holds";
+}
+
 TEST_P(SaveRequiredKeysTest, ASaveMissingTheKeyIsRefusedNamingItAndDeleted)
 {
 	const std::string_view key = GetParam();
@@ -180,5 +245,5 @@ const auto name_for_key = [](const ::testing::TestParamInfo<std::string_view>& i
 INSTANTIATE_TEST_SUITE_P(
 	EveryKeyTheWriterAlwaysWrites,
 	SaveRequiredKeysTest,
-	::testing::Values("player", "stairs", "gui", "hunger_system", "time", "roundsRun"),
+	::testing::Values("player", "stairs", "gui", "hunger_system", "time", "roundsRun", "nextUniqueId"),
 	name_for_key);
