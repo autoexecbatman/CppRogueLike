@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cmath>
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "AiWebSpinner.h"
@@ -29,10 +30,15 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 {
 	assert(ctx.map && "AiWebSpinner::update: called without a map");
 	assert(ctx.dice && "AiWebSpinner::update: called without dice");
+	assert(ctx.buffSystem && "AiWebSpinner::update: called without a buffSystem");
+
+	// A failed save against the player's Sanctuary loses track of the player for the
+	// whole turn - biting, spinning and walking alike (PHB page 436).
+	const bool hasLostTrack = ctx.buffSystem->ignores_warded_creature(owner, *ctx.player());
+	const std::optional<Vector2D> quarry = hasLostTrack ? std::nullopt : std::optional<Vector2D>{ ctx.player()->position };
 
 	// DIRECT ATTACK CODE - Check if player is adjacent
-	int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
-	if (distanceToPlayer <= 1 && ctx.map->is_in_fov(owner.position))
+	if (quarry && owner.get_tile_distance(*quarry) <= 1 && ctx.map->is_in_fov(owner.position))
 	{
 		ctx.messageSystem->log("Web spinner attempting attack with poison");
 		bite(owner, *ctx.player(), ctx);
@@ -42,9 +48,9 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 	}
 
 	// Web spinning logic - only if not attacking
-	if (ctx.gameState->get_time() >= webReadyTime && should_create_web(owner, ctx))
+	if (ctx.gameState->get_time() >= webReadyTime && should_create_web(owner, quarry, ctx))
 	{
-		if (try_create_web(owner, ctx))
+		if (try_create_web(owner, quarry, ctx))
 		{
 			webReadyTime = expiry_time(ctx.gameState->get_time(), WEB_COOLDOWN);
 
@@ -59,9 +65,8 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 	// Fall back to standard movement behavior
 	owner.update_awareness(ctx);
 
-	// Lost track of the player through a failed Sanctuary save, and so with nothing to
-	// walk toward, it drifts like any spider with no quarry (PHB page 436).
-	if (owner.is_aware(ctx.gameState->get_time()) && !ctx.buffSystem->ignores_warded_creature(owner, *ctx.player()))
+	// With no quarry to walk toward, it drifts like any spider.
+	if (owner.is_aware(ctx.gameState->get_time()) && quarry)
 	{
 		move_toward_player(owner, ctx);
 	}
@@ -99,34 +104,39 @@ void AiWebSpinner::inject_venom(Creature& owner, Creature& target, GameContext& 
 	target.take_damage_and_check_death(target.get_hp(), ctx, DamageType::POISON);
 }
 
-bool AiWebSpinner::should_create_web(Creature& owner, GameContext& ctx)
+bool AiWebSpinner::should_create_web(Creature& owner, std::optional<Vector2D> quarry, GameContext& ctx)
 {
 	assert(ctx.spellTiles && "AiWebSpinner::should_create_web: called without spellTiles");
 	assert(ctx.dice && "AiWebSpinner::should_create_web: called without dice");
 
-	// If player is directly adjacent, don't create web (attack instead)
-	int distToPlayer = owner.get_tile_distance(ctx.player()->position);
-	if (distToPlayer <= 1)
+	// Only a quarry draws a defensive web, or a bite in place of one
+	if (quarry)
 	{
-		return false;
-	}
+		const int distToPlayer = owner.get_tile_distance(*quarry);
 
-	// If spider has already laid a web recently, reduce chance of creating another
-	if (has_laid_web())
-	{
-		// Reduced chance if already laid a web (20% instead of 40%)
-		if (distToPlayer <= 10 && ctx.dice->d100() < 20)
+		// If player is directly adjacent, don't create web (attack instead)
+		if (distToPlayer <= 1)
 		{
-			return true;
+			return false;
 		}
-	}
-	else
-	{
-		// Higher chance if hasn't laid a web yet
-		// If player is nearby, moderate chance to create defensive web
-		if (distToPlayer <= 10 && ctx.dice->d100() < 40)
+
+		// If spider has already laid a web recently, reduce chance of creating another
+		if (has_laid_web())
 		{
-			return true;
+			// Reduced chance if already laid a web (20% instead of 40%)
+			if (distToPlayer <= 10 && ctx.dice->d100() < 20)
+			{
+				return true;
+			}
+		}
+		else
+		{
+			// Higher chance if hasn't laid a web yet
+			// If player is nearby, moderate chance to create defensive web
+			if (distToPlayer <= 10 && ctx.dice->d100() < 40)
+			{
+				return true;
+			}
 		}
 	}
 
@@ -152,59 +162,51 @@ bool AiWebSpinner::should_create_web(Creature& owner, GameContext& ctx)
 	return webCount < MAX_WEBS;
 }
 
-bool AiWebSpinner::try_create_web(Creature& owner, GameContext& ctx)
+bool AiWebSpinner::try_create_web(Creature& owner, std::optional<Vector2D> quarry, GameContext& ctx)
 {
 	assert(ctx.map && "AiWebSpinner::try_create_web: called without a map");
 
-	// Determine the web size - bigger webs when player is closer
-	int distToPlayer = owner.get_tile_distance(ctx.player()->position);
-	int webSize = WEB_MAX_SIZE;
+	// With no quarry, or one far off or out of sight, a minimum size trap web on the spider
+	int webSize = WEB_MIN_SIZE;
+	Vector2D webCenter = owner.position;
 
-	if (distToPlayer < 5)
+	if (quarry)
 	{
-		// Maximum size defensive web
-		webSize = WEB_MAX_SIZE;
-	}
-	else if (distToPlayer < 15)
-	{
-		// Medium size web
-		webSize = WEB_MIN_SIZE + 1;
-	}
-	else
-	{
-		// Minimum size trap web
-		webSize = WEB_MIN_SIZE;
-	}
-
-	// Center the web at the spider's position or at a strategic location
-	Vector2D webCenter;
-
-	if (ctx.map->is_in_fov(owner.position) && distToPlayer < 10)
-	{
-		// If player can see spider, create web between spider and player
-		int deltaCol = ctx.player()->position.x - owner.position.x;
-		int deltaRow = ctx.player()->position.y - owner.position.y;
-
-		if (deltaCol != 0)
+		// Determine the web size - bigger webs when player is closer
+		const int distToPlayer = owner.get_tile_distance(*quarry);
+		if (distToPlayer < 5)
 		{
-			deltaCol = deltaCol / std::abs(deltaCol);
+			// Maximum size defensive web
+			webSize = WEB_MAX_SIZE;
 		}
-		if (deltaRow != 0)
+		else if (distToPlayer < 15)
 		{
-			deltaRow = deltaRow / std::abs(deltaRow);
+			// Medium size web
+			webSize = WEB_MIN_SIZE + 1;
 		}
 
-		// Position web to block player's path
-		webCenter = owner.position + Vector2D{ deltaCol * 2, deltaRow * 2 };
+		if (ctx.map->is_in_fov(owner.position) && distToPlayer < 10)
+		{
+			// If player can see spider, create web between spider and player
+			int deltaCol = quarry->x - owner.position.x;
+			int deltaRow = quarry->y - owner.position.y;
 
-		// Make sure center is in bounds
-		webCenter.x = std::max(0, std::min(webCenter.x, ctx.map->get_width() - 1));
-		webCenter.y = std::max(0, std::min(webCenter.y, ctx.map->get_height() - 1));
-	}
-	else
-	{
-		// If player can't see spider, create web at a nearby location
-		webCenter = owner.position;
+			if (deltaCol != 0)
+			{
+				deltaCol = deltaCol / std::abs(deltaCol);
+			}
+			if (deltaRow != 0)
+			{
+				deltaRow = deltaRow / std::abs(deltaRow);
+			}
+
+			// Position web to block player's path
+			webCenter = owner.position + Vector2D{ deltaCol * 2, deltaRow * 2 };
+
+			// Make sure center is in bounds
+			webCenter.x = std::max(0, std::min(webCenter.x, ctx.map->get_width() - 1));
+			webCenter.y = std::max(0, std::min(webCenter.y, ctx.map->get_height() - 1));
+		}
 	}
 
 	// Generate the web pattern - now creating actual Web entities

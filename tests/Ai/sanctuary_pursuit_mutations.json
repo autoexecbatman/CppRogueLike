@@ -21,7 +21,7 @@
     },
     {
       "file": "src/AiWebSpinner.cpp",
-      "original": "\tif (owner.is_aware(ctx.gameState->get_time()) && !ctx.buffSystem->ignores_warded_creature(owner, *ctx.player()))",
+      "original": "\tif (owner.is_aware(ctx.gameState->get_time()) && quarry)",
       "mutated": "\tif (owner.is_aware(ctx.gameState->get_time()))",
       "catches": "a web spinner walking toward a creature it has lost track of"
     },

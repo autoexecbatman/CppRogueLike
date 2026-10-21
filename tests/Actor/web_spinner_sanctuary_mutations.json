@@ -4,7 +4,7 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=WebSpinnerSanctuaryTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=WebSpinnerSanctuaryTest.*:WebSpinnerQuarryTest.*"
   ],
   "mutations": [
     {
@@ -18,6 +18,42 @@
       "original": "\tconst auto casting = std::ranges::find_if(warded.activeBuffs, is_sanctuary);\n\tif (casting == warded.activeBuffs.end())\n\t{\n\t\treturn false;\n\t}\n\n\t// Already rolled against this casting: the result stands.",
       "mutated": "\tconst auto casting = std::ranges::find_if(warded.activeBuffs, is_sanctuary);\n\tif (casting == warded.activeBuffs.end())\n\t{\n\t\treturn !SavingThrows::is_made(attacker, SavingThrow::SPELL, 0, ctx);\n\t}\n\n\t// Already rolled against this casting: the result stands.",
       "catches": "a save rolled against a player without sanctuary"
+    },
+    {
+      "file": "src/AiWebSpinner.cpp",
+      "original": "\tconst bool hasLostTrack = ctx.buffSystem->ignores_warded_creature(owner, *ctx.player());",
+      "mutated": "\tconst bool hasLostTrack = false;",
+      "catches": "a spinner that never loses track of a warded player"
+    },
+    {
+      "file": "src/AiWebSpinner.cpp",
+      "original": "\t// Only a quarry draws a defensive web, or a bite in place of one\n\tif (quarry)\n\t{\n\t\tconst int distToPlayer = owner.get_tile_distance(*quarry);",
+      "mutated": "\t// Only a quarry draws a defensive web, or a bite in place of one\n\t{\n\t\tconst int distToPlayer = owner.get_tile_distance(ctx.player()->position);",
+      "catches": "a defensive web spun against a player the spinner has lost"
+    },
+    {
+      "file": "src/AiWebSpinner.cpp",
+      "original": "\tVector2D webCenter = owner.position;\n",
+      "mutated": "\tVector2D webCenter = owner.position + Vector2D{ ctx.player()->position.x < owner.position.x ? -2 : 2, 0 };\n",
+      "catches": "a trap web aimed two tiles toward a player the spinner has lost"
+    },
+    {
+      "file": "src/AiWebSpinner.cpp",
+      "original": "\tint webSize = WEB_MIN_SIZE;\n\tVector2D webCenter = owner.position;",
+      "mutated": "\tint webSize = WEB_MAX_SIZE;\n\tVector2D webCenter = owner.position;",
+      "catches": "a trap web spun at the defensive web's size"
+    },
+    {
+      "file": "src/AiWebSpinner.cpp",
+      "original": "\tconst bool hasLostTrack = ctx.buffSystem->ignores_warded_creature(owner, *ctx.player());",
+      "mutated": "\tconst bool hasLostTrack = ctx.buffSystem->is_turned_away_by_sanctuary(owner, *ctx.player(), ctx);",
+      "catches": "a Sanctuary save rolled to decide on a web, which is no attack"
+    },
+    {
+      "file": "src/AiWebSpinner.cpp",
+      "original": "\tif (quarry && owner.get_tile_distance(*quarry) <= 1 && ctx.map->is_in_fov(owner.position))",
+      "mutated": "\tif (owner.get_tile_distance(ctx.player()->position) <= 1 && ctx.map->is_in_fov(owner.position))",
+      "catches": "a bite tried, and turned away, at a player the spinner has lost"
     }
   ]
 }
