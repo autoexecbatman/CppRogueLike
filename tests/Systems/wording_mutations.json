@@ -4,7 +4,7 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=WordingTest.*:IdentifyScrollTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=WordingTest.*:IdentifyScrollTest.*:DurationWordingTest.*"
   ],
   "mutations": [
     {
@@ -36,6 +36,30 @@
       "original": "Wording::counted(identifiedCount, \"item\", \"items\")",
       "mutated": "Wording::counted(identifiedCount, \"items\", \"items\")",
       "catches": "the identify message passing the plural for both forms"
+    },
+    {
+      "file": "src/Wording.cpp",
+      "original": "\treturn counted(count, \"round\", \"rounds\");",
+      "mutated": "\treturn counted(count, \"round\", \"turns\");",
+      "catches": "a duration of rounds named in turns, the wording 0255 removed"
+    },
+    {
+      "file": "src/Wording.cpp",
+      "original": "\treturn counted(count, \"round\", \"rounds\");",
+      "mutated": "\treturn counted(count, \"rounds\", \"rounds\");",
+      "catches": "one round worded as \"1 rounds\""
+    },
+    {
+      "file": "src/Wording.cpp",
+      "original": "\treturn counted(count, \"round\", \"rounds\");",
+      "mutated": "\treturn std::to_string(count);",
+      "catches": "a duration stated with no unit"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "Wording::rounds(durationRounds)",
+      "mutated": "Wording::counted(durationRounds, \"turn\", \"turns\")",
+      "catches": "the potion message wording its own duration, in turns"
     }
   ]
 }

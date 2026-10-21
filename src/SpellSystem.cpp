@@ -363,7 +363,7 @@ bool cast_bless(Creature& caster, GameContext& ctx)
 
 	ctx.buffSystem->add_buff(caster, BuffType::BLESS, 0, duration, BuffApplication::ADD, ctx.gameState->get_time());
 	ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Bless! ");
-	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format("+1 to hit for {}.", Wording::counted(duration, "round", "rounds")));
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format("+1 to hit for {}.", Wording::rounds(duration)));
 	ctx.messageSystem->finalize_message();
 	return true;
 }
@@ -385,7 +385,7 @@ bool cast_protection_from_evil(Creature& caster, GameContext& ctx)
 		ColorPairId::WHITE_BLACK,
 		std::format("Evil creatures strike at {} against you for {}.",
 			PROTECTION_FROM_EVIL_PENALTY,
-			Wording::counted(duration, "round", "rounds")));
+			Wording::rounds(duration)));
 	ctx.messageSystem->finalize_message();
 	return true;
 }
@@ -401,7 +401,7 @@ bool cast_sanctuary(Creature& caster, GameContext& ctx)
 	ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Sanctuary! ");
 	ctx.messageSystem->append_message_part(
 		ColorPairId::WHITE_BLACK,
-		std::format("Divine protection shields you for {}.", Wording::counted(duration, "round", "rounds")));
+		std::format("Divine protection shields you for {}.", Wording::rounds(duration)));
 	ctx.messageSystem->finalize_message();
 	return true;
 }
@@ -451,7 +451,7 @@ void cast_silence(
 		innerCtx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Silence! ");
 		innerCtx.messageSystem->append_message_part(
 			ColorPairId::WHITE_BLACK,
-			std::format("{} is struck mute for {}.", target->get_name(), Wording::counted(duration, "round", "rounds")));
+			std::format("{} is struck mute for {}.", target->get_name(), Wording::rounds(duration)));
 		innerCtx.messageSystem->finalize_message();
 
 		onSuccess(innerCtx);
@@ -514,7 +514,7 @@ void cast_web(
 					"{} creature{} entangled for {}.",
 					affected,
 					affected == 1 ? " is" : "s are",
-					Wording::counted(duration, "round", "rounds")));
+					Wording::rounds(duration)));
 			innerCtx.messageSystem->finalize_message();
 		}
 		else
@@ -656,7 +656,7 @@ bool cast_shield(Creature& caster, GameContext& ctx)
 
 	ctx.buffSystem->add_buff(caster, BuffType::SHIELD, 4, duration, BuffApplication::ADD, ctx.gameState->get_time()); // Spell: ADD +4 AC
 	ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Shield! ");
-	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format("+4 AC for {}.", Wording::counted(duration, "round", "rounds")));
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format("+4 AC for {}.", Wording::rounds(duration)));
 	ctx.messageSystem->finalize_message();
 	return true;
 }
@@ -784,7 +784,7 @@ bool cast_hold_person(Creature& caster, GameContext& ctx)
 	{
 		ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Hold Person! ");
 		ctx.messageSystem->append_message_part(
-			ColorPairId::WHITE_BLACK, std::format("{} paralyzed for {}.", Wording::counted(affected, "creature", "creatures"), Wording::counted(duration, "round", "rounds")));
+			ColorPairId::WHITE_BLACK, std::format("{} paralyzed for {}.", Wording::counted(affected, "creature", "creatures"), Wording::rounds(duration)));
 		ctx.messageSystem->finalize_message();
 	}
 	else

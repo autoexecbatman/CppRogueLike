@@ -15,4 +15,9 @@ std::string counted(int count, std::string_view singular, std::string_view plura
 	return std::format("{} {}", count, count == 1 ? singular : plural);
 }
 
+std::string rounds(int count)
+{
+	return counted(count, "round", "rounds");
+}
+
 } // namespace Wording

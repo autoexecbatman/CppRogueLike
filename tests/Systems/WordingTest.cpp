@@ -1,6 +1,6 @@
 // file: WordingTest.cpp
 // A count beside its noun: the singular for exactly one, the plural for every other count,
-// none included, and the plural taken as given rather than built.
+// none included, and the plural taken as given rather than built; and a duration in rounds.
 //
 // Run it:
 //
@@ -33,6 +33,14 @@ TEST(WordingTest, AnIrregularPluralIsUsedAsGiven)
 {
 	EXPECT_EQ(Wording::counted(1, "foot", "feet"), "1 foot");
 	EXPECT_EQ(Wording::counted(3, "foot", "feet"), "3 feet");
+}
+
+// A duration is a count of rounds, by the same rule: one round, and rounds for any other count.
+TEST(WordingTest, ADurationIsWordedInRounds)
+{
+	EXPECT_EQ(Wording::rounds(1), "1 round");
+	EXPECT_EQ(Wording::rounds(3), "3 rounds");
+	EXPECT_EQ(Wording::rounds(0), "0 rounds");
 }
 
 // end of file: WordingTest.cpp

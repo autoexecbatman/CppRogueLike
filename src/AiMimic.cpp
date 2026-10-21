@@ -315,7 +315,7 @@ void AiMimic::boost_attack(Creature& owner, GameContext& ctx)
 void AiMimic::boost_confusion_power(GameContext& ctx)
 {
 	confusionDuration = std::min(confusionDuration + CONFUSION_BONUS, MAX_CONFUSION_DURATION);
-	ctx.messageSystem->log(std::format("Mimic increased confusion duration to {}", confusionDuration));
+	ctx.messageSystem->log(std::format("Mimic increased confusion duration to {}", Wording::rounds(confusionDuration)));
 }
 
 void AiMimic::transform_to_greater_mimic(Creature& owner, GameContext& ctx)
@@ -359,7 +359,7 @@ void AiMimic::check_revealing(Creature& owner, GameContext& ctx)
 			ctx.messageSystem->finalize_message();
 
 			ctx.player()->apply_confusion(confusionDuration, ctx.gameState->get_time());
-			ctx.messageSystem->log(std::format("Applied confusion to player for {}", Wording::counted(confusionDuration, "round", "rounds")));
+			ctx.messageSystem->log(std::format("Applied confusion to player for {}", Wording::rounds(confusionDuration)));
 		}
 		else
 		{
