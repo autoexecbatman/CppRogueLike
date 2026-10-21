@@ -8,6 +8,7 @@
 #include "Persistent.h"
 
 class Creature;
+class Item;
 struct GameContext;
 
 struct BackstabInfo
@@ -39,6 +40,23 @@ protected:
 		GameContext& ctx);
 
 	BackstabInfo calculate_backstab_bonus(const Creature& owner) const noexcept;
+
+	// What a blow with this weapon rolls: its own dice with its enhancement's damage bonus.
+	// No weapon, or something that is not one, strikes unarmed.
+	//
+	// Example:
+	//   weapon_damage(compositeBow);   // -> 1d6
+	//   weapon_damage(nullptr);        // -> the unarmed 1d2
+	[[nodiscard]] static DamageInfo weapon_damage(const Item* weapon);
+
+	// The weapon's own adjustment to hit (PHB p.88): a cursed one is -2 whatever bonus it
+	// carries, otherwise its enhancement's toHitBonus. No weapon adjusts nothing.
+	//
+	// Example:
+	//   weapon_hit_modifier(bowOfPlusTwo);   // -> 2
+	//   weapon_hit_modifier(cursedBow);      // -> -2
+	//   weapon_hit_modifier(nullptr);        // -> 0
+	[[nodiscard]] static int weapon_hit_modifier(const Item* weapon);
 
 	// The armour class an attack on this target is rolled against: its own, or
 	// without its Dexterity bonus while it is surprised.

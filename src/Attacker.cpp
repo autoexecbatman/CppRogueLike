@@ -24,6 +24,8 @@
 #include "EquipmentSlot.h"
 #include "GameContext.h"
 #include "Item.h"
+#include "ItemEnhancements.h"
+#include "ItemIdentification.h"
 #include "LevelUpSystem.h"
 #include "MenuTrade.h"
 #include "MessageSystem.h"
@@ -32,6 +34,7 @@
 #include "Player.h"
 #include "TileConfig.h"
 #include "Vector2D.h"
+#include "WeaponDamageRegistry.h"
 
 // OCP: Data-driven buff break messaging - player notifications when buffs end from attacking
 static const std::unordered_map<BuffType, std::string_view> BUFF_BREAK_MESSAGES = {
@@ -42,6 +45,31 @@ static const std::unordered_map<BuffType, std::string_view> BUFF_BREAK_MESSAGES 
 
 Attacker::Attacker(const DamageInfo& damage)
 	: damageInfo(damage) {}
+
+DamageInfo Attacker::weapon_damage(const Item* weapon)
+{
+	if (weapon && weapon->is_weapon())
+	{
+		const ItemEnhancement* enhancement = weapon->is_enhanced() ? &weapon->get_enhancement() : nullptr;
+		return WeaponDamageRegistry::get_enhanced_damage_info(weapon->itemKey, enhancement);
+	}
+	return WeaponDamageRegistry::get_unarmed_damage_info();
+}
+
+int Attacker::weapon_hit_modifier(const Item* weapon)
+{
+	if (!weapon)
+	{
+		return 0;
+	}
+
+	const ItemEnhancement& enhancement = weapon->get_enhancement();
+	if (enhancement.blessing == BlessingStatus::CURSED)
+	{
+		return -2;
+	}
+	return enhancement.toHitBonus;
+}
 
 AttackResult Attacker::perform_single_attack(
 	Creature& owner,

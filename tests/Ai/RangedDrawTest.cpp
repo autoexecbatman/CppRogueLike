@@ -21,6 +21,8 @@
 
 #include "src/AiMonsterRanged.h"
 #include "src/ArmorClass.h"
+#include "src/AttackKind.h"
+#include "src/Attacker.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/DamageInfo.h"
@@ -28,7 +30,10 @@
 #include "src/ExperienceReward.h"
 #include "src/Game.h"
 #include "src/HealthPool.h"
+#include "src/Item.h"
 #include "src/ItemCreator.h"
+#include "src/ItemEnhancements.h"
+#include "src/ItemIdentification.h"
 #include "src/LogMessage.h"
 #include "src/Map.h"
 #include "src/MessageSystem.h"
@@ -130,6 +135,24 @@ protected:
 		return false;
 	}
 
+	// The roll the last attack needed, read from its message: " vs 9" is 9.
+	int last_roll_needed() const
+	{
+		const std::string marker = " vs ";
+		const std::vector<LogMessage>& parts = game.messageSystem.get_attack_message_at(game.messageSystem.get_stored_message_count() - 1);
+		for (const LogMessage& part : parts)
+		{
+			if (part.text.starts_with(marker))
+			{
+				return std::stoi(part.text.substr(marker.size()));
+			}
+		}
+		ADD_FAILURE() << "the last message names no roll needed";
+		return 0;
+	}
+
+	Item& bow() { return *archer.get_equipped_item(EquipmentSlot::MISSILE_WEAPON); }
+
 	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
 	Map map{ 20, 20 };
@@ -179,6 +202,71 @@ TEST_F(RangedDrawTest, AnArcherWithNoBowClosesIn)
 	archer.ai->update(archer, ctx);
 
 	EXPECT_EQ(archer.position.x, IN_RANGE_COLUMN - 1) << "an archer with no bow stood off to shoot one";
+}
+
+// The Monstrous Manual (PDF page 1083): a monster using a weapon does the weapon's damage.
+// The composite bow is 1d6 and the archer's own fist 1d4, so the top of the die tells them apart.
+TEST_F(RangedDrawTest, ABowShotDoesTheBowsDamageUnderTheBowsName)
+{
+	archer.set_strength(STRONG_ENOUGH_TO_DRAW);
+
+	ASSERT_EQ(archer.attacker->attack(*player, AttackKind::RANGED, ctx), AttackResult::LANDED);
+
+	// The bow's 6, and its +2 for Strength 18.
+	EXPECT_EQ(player->get_hp(), STARTING_HP - 8) << "the shot did not roll the bow's dice";
+	EXPECT_TRUE(any_message_says("(composite bow)")) << "the shot is not named for the bow";
+}
+
+TEST_F(RangedDrawTest, AStrikeInMeleeStillUsesTheArchersOwnAttack)
+{
+	archer.set_strength(STRONG_ENOUGH_TO_DRAW);
+
+	ASSERT_EQ(archer.attacker->attack(*player, AttackKind::MELEE, ctx), AttackResult::LANDED);
+
+	// The fist's 4, and its +2 for Strength 18.
+	EXPECT_EQ(player->get_hp(), STARTING_HP - 6) << "the strike did not roll the archer's own dice";
+	EXPECT_TRUE(any_message_says("(fist)")) << "the strike is not named for the archer's own attack";
+}
+
+// A bow's enhancement to hit counts for a monster's shot as it does for the player's.
+TEST_F(RangedDrawTest, AnEnhancedBowLowersTheRollTheShotNeeds)
+{
+	archer.set_strength(STRONG_ENOUGH_TO_DRAW);
+	[[maybe_unused]] const AttackResult plain = archer.attacker->attack(*player, AttackKind::RANGED, ctx);
+	const int neededPlain = last_roll_needed();
+
+	bow().enhancement.toHitBonus = 2;
+	[[maybe_unused]] const AttackResult enhanced = archer.attacker->attack(*player, AttackKind::RANGED, ctx);
+
+	EXPECT_EQ(last_roll_needed(), neededPlain - 2) << "the bow's +2 to hit did not count";
+}
+
+// A sharp bow's +1 damage counts for a monster's shot as it does for the player's.
+TEST_F(RangedDrawTest, ASharpBowAddsItsDamageBonusToTheShot)
+{
+	archer.set_strength(STRONG_ENOUGH_TO_DRAW);
+	bow().enhancement.prefix = PrefixType::SHARP;
+	bow().enhancement.damageBonus = 1;
+
+	ASSERT_EQ(archer.attacker->attack(*player, AttackKind::RANGED, ctx), AttackResult::LANDED);
+
+	// The bow's 6, its sharpness's 1, and its +2 for Strength 18.
+	EXPECT_EQ(player->get_hp(), STARTING_HP - 9) << "the sharp bow's damage bonus did not count";
+}
+
+// A cursed weapon is -2 to hit (PHB p.88), for a monster's bow as for the player's.
+TEST_F(RangedDrawTest, ACursedBowRaisesTheRollTheShotNeeds)
+{
+	archer.set_strength(STRONG_ENOUGH_TO_DRAW);
+	[[maybe_unused]] const AttackResult plain = archer.attacker->attack(*player, AttackKind::RANGED, ctx);
+	const int neededPlain = last_roll_needed();
+
+	// A curse outweighs whatever bonus the bow carries.
+	bow().enhancement.toHitBonus = 2;
+	bow().enhancement.blessing = BlessingStatus::CURSED;
+	[[maybe_unused]] const AttackResult cursed = archer.attacker->attack(*player, AttackKind::RANGED, ctx);
+
+	EXPECT_EQ(last_roll_needed(), neededPlain + 2) << "the cursed bow's -2 to hit did not count";
 }
 
 TEST_F(RangedDrawTest, StrengthLostBetweenTurnsIsReadOnTheNextTurn)

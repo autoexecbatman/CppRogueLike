@@ -7,7 +7,7 @@ struct GameContext;
 
 // Concrete attack strategy for monsters.
 // Owns a back-reference to its Creature owner (safe: Creature outlives its components).
-// Uses stored DamageInfo for damage - inherited from Attacker base.
+// Strikes in melee with its stored DamageInfo; shoots with its missile weapon's damage.
 class MonsterAttacker : public Attacker
 {
 private:

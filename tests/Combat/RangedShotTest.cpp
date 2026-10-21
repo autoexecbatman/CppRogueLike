@@ -23,9 +23,11 @@
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/DamageInfo.h"
+#include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
 #include "src/GameContext.h"
 #include "src/HealthPool.h"
+#include "src/ItemCreator.h"
 #include "src/MonsterAttacker.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
@@ -37,13 +39,15 @@ protected:
 	{
 		ctx = mock.to_game_context();
 
-		// A 1d4 shot from THAC0 20, which needs a 10 against armour class 10.
+		// A sling's 1d4 shot from THAC0 20, which needs a 10 against armour class 10.
 		archer.experienceReward = std::make_unique<ExperienceReward>(0);
 		archer.healthPool = std::make_unique<HealthPool>(10);
 		archer.armorClass = std::make_unique<ArmorClass>(10);
 		archer.attacker = std::make_unique<MonsterAttacker>(archer, DamageInfo{ "1d4", DamageType::PHYSICAL });
 		archer.set_thaco(20);
 		archer.set_strength(10);
+		archer.set_body_plan({ EquipmentSlot::MISSILE_WEAPON });
+		archer.wear(ItemCreator::create("sling", archer.position, ctx), EquipmentSlot::MISSILE_WEAPON);
 
 		target.experienceReward = std::make_unique<ExperienceReward>(0);
 		target.healthPool = std::make_unique<HealthPool>(100);

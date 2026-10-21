@@ -1,0 +1,59 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/run_suite.ps1",
+    "-Configuration",
+    "Debug",
+    "-Filter",
+    "--gtest_filter=RangedDrawTest.*:AttackKindTest.*:AttackerTest.*:RangedShotTest.*:SanctuarySaveTest.*:RangedWeaponTest.*:EnhancementSystemTest.*:EquipHandTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/AttackKind.h",
+      "original": "\t\treturn EquipmentSlot::MISSILE_WEAPON;",
+      "mutated": "\t\treturn EquipmentSlot::RIGHT_HAND;",
+      "catches": "a shot made with whatever is in the hand rather than the bow"
+    },
+    {
+      "file": "src/MonsterAttacker.cpp",
+      "original": "\tif (kind == AttackKind::RANGED)\n\t{\n\t\tconst Item* missileWeapon",
+      "mutated": "\tif (false)\n\t{\n\t\tconst Item* missileWeapon",
+      "catches": "a monster's shot rolling its own dice again"
+    },
+    {
+      "file": "src/MonsterAttacker.cpp",
+      "original": "weapon_hit_modifier(missileWeapon), missileWeapon->actorData.name, kind, ctx);",
+      "mutated": "weapon_hit_modifier(missileWeapon), owner.get_attack_name(), kind, ctx);",
+      "catches": "a monster's shot named for its fist"
+    },
+    {
+      "file": "src/MonsterAttacker.cpp",
+      "original": "\treturn perform_single_attack(owner, target, get_damage_info(), 0, owner.get_attack_name(), kind, ctx);",
+      "mutated": "\treturn perform_single_attack(owner, target, weapon_damage(owner.get_equipped_item(EquipmentSlot::RIGHT_HAND)), 0, owner.get_attack_name(), kind, ctx);",
+      "catches": "a monster's melee strike changed to its weapon's dice, which is 0318's question"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\t\tconst ItemEnhancement* enhancement = weapon->is_enhanced() ? &weapon->get_enhancement() : nullptr;\n\t\treturn WeaponDamageRegistry::get_enhanced_damage_info(weapon->itemKey, enhancement);",
+      "mutated": "\t\treturn WeaponDamageRegistry::get_damage_info(weapon->itemKey);",
+      "catches": "an enhanced weapon's damage bonus dropped"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\treturn enhancement.toHitBonus;\n}",
+      "mutated": "\treturn 0;\n}",
+      "catches": "an enhanced weapon's to-hit bonus dropped"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\tif (enhancement.blessing == BlessingStatus::CURSED)\n\t{\n\t\treturn -2;\n\t}\n\treturn enhancement.toHitBonus;",
+      "mutated": "\treturn enhancement.toHitBonus;",
+      "catches": "a cursed weapon striking at its bonus rather than -2"
+    }
+  ]
+}

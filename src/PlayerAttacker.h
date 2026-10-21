@@ -15,8 +15,6 @@ class PlayerAttacker : public Attacker
 private:
 	Player& owner;
 
-	DamageInfo compute_weapon_damage(EquipmentSlot slot) const;
-
 public:
 	explicit PlayerAttacker(Player& owner);
 

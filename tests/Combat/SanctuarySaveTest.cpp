@@ -33,10 +33,13 @@
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/DamageInfo.h"
+#include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
 #include "src/Game.h"
 #include "src/HealthPool.h"
+#include "src/ItemCreator.h"
 #include "src/MonsterAttacker.h"
+#include "src/Paths.h"
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
 #include "src/SavingThrow.h"
@@ -254,6 +257,10 @@ TEST_F(SanctuarySaveTest, AWardedPlayerTurnsAMonstersAttackAway)
 // A shot is held to the same save as a blow: the ranged monster's path asks it too.
 TEST_F(SanctuarySaveTest, AWardedPlayerTurnsAMonstersShotAway)
 {
+	// A shot is made with a missile weapon, so this goblin carries a sling.
+	game.itemRegistry.load(Paths::ITEMS);
+	goblin.set_body_plan({ EquipmentSlot::MISSILE_WEAPON });
+	goblin.wear(ItemCreator::create("sling", goblin.position, ctx), EquipmentSlot::MISSILE_WEAPON);
 	cast_sanctuary(*player);
 	script({ 12, 20, 4 });
 
