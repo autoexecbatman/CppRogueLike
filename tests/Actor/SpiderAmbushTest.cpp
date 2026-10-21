@@ -10,9 +10,9 @@
 // 51, page 181) and without any armour class bonus for high Dexterity (224).
 //
 // Every roll is scripted in the order the game asks for it: the sanctuary save if the
-// player is protected; the attack roll, the damage die and the poison roll of the first
-// bite; the surprise roll; then the same three for the surprise bite. The spider's
-// poison chance is zero, so no venom lands on top of a bite.
+// player is protected; the attack roll, the damage die and the player's save against
+// the venom of the first bite; the surprise roll; then the same three for the surprise
+// bite. The venom saves are queued at the top of the die, so no venom lands on a bite.
 //
 // Run it:
 //
@@ -43,6 +43,7 @@
 #include "src/Player.h"
 #include "src/RandomDice.h"
 #include "src/SavingThrow.h"
+#include "src/TurnSchedule.h"
 #include "tests/mocks/TestDice.h"
 
 class SpiderAmbushTest : public ::testing::Test
@@ -83,9 +84,9 @@ protected:
 		spider.set_dexterity(10);
 		spider.set_natural_attack("fangs");
 
-		// Lying in wait, with turns left, and no venom.
+		// Lying in wait, with ten rounds of the ambush left.
 		auto ambusher = std::make_unique<AiSpider>();
-		ambusher->load(json{ { "isAmbushing", true }, { "ambushCounter", 5 }, { "poisonChance", 0 } });
+		ambusher->load(json{ { "isAmbushing", true }, { "ambushEndTime", expiry_time(0, 10) } });
 		spider.ai = std::move(ambusher);
 	}
 
@@ -213,7 +214,7 @@ TEST_F(SpiderAmbushTest, HighDexterityCanSpareThePlayerTheSurprise)
 // surprise roll, so the 1 queued after the first bite is never read.
 TEST_F(SpiderAmbushTest, AnOrdinaryBiteBringsNoSurpriseRoll)
 {
-	spider.ai->load(json{ { "isAmbushing", false }, { "ambushCounter", 0 }, { "poisonChance", 0 } });
+	spider.ai->load(json{ { "isAmbushing", false }, { "ambushEndTime", 0 } });
 	script({ 20, 4, RandomDice::HIGHEST, 1, 20, 3, RandomDice::HIGHEST });
 
 	EXPECT_EQ(hp_lost_to_the_ambush(), 4) << "surprised by a spider that was never hidden";

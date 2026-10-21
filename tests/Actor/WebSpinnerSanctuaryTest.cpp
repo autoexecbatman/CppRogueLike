@@ -6,8 +6,8 @@
 // spinner's bite and its venom are held off by it like any other attack.
 //
 // Every roll is scripted in the order the game asks for it: the sanctuary save if the
-// player is protected, then the attack roll, the damage die and the venom roll. The
-// spider's poison chance is zero, so no venom lands on top of the bite.
+// player is protected, then the attack roll, the damage die and the player's save
+// against the venom, queued at the top of the die so no venom lands on the bite.
 //
 // WebSpinnerQuarryTest checks the other half of the spell: a spinner that failed its save
 // "totally ignores the warded creature", so it neither bites nor aims a web at it. Laying

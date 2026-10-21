@@ -258,8 +258,8 @@ TEST_F(SanctuaryPursuitTest, ARangedMonsterThatLostTrackStopsShootingToo)
 
 TEST_F(SanctuaryPursuitTest, AWebSpinnerThatLostTrackStopsClosingIn)
 {
-	// The spinner has its own update and so its own gate. Its poison chance is zero, so
-	// nothing here depends on venom - only on whether it still walks toward the player.
+	// The spinner has its own update and so its own gate. Having failed its save it never
+	// bites, so nothing here depends on venom - only on whether it walks toward the player.
 	goblin.ai = std::make_unique<AiWebSpinner>();
 	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
 	// The spinner's second roll is the d100 for whether it spins a web, and spinning

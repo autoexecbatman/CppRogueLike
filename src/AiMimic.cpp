@@ -399,30 +399,11 @@ void AiMimic::load(const json& source)
 		disguiseChangeTime = source.at("disguiseChangeTime").get<int>();
 	}
 
-	if (source.contains("consumptionReadyTime"))
-	{
-		consumptionReadyTime = source.at("consumptionReadyTime").get<int>();
-	}
-
-	if (source.contains("isDisguised"))
-	{
-		isDisguised = source.at("isDisguised").get<bool>();
-	}
-
-	if (source.contains("revealDistance"))
-	{
-		revealDistance = source.at("revealDistance").get<int>();
-	}
-
-	if (source.contains("confusionDuration"))
-	{
-		confusionDuration = source.at("confusionDuration").get<int>();
-	}
-
-	if (source.contains("itemsConsumed"))
-	{
-		itemsConsumed = source.at("itemsConsumed").get<int>();
-	}
+	consumptionReadyTime = source.at("consumptionReadyTime").get<int>();
+	isDisguised = source.at("isDisguised").get<bool>();
+	revealDistance = source.at("revealDistance").get<int>();
+	confusionDuration = source.at("confusionDuration").get<int>();
+	itemsConsumed = source.at("itemsConsumed").get<int>();
 }
 
 void AiMimic::save(json& output)

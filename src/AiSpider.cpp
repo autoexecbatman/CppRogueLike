@@ -472,15 +472,8 @@ void AiSpider::load(const json& source)
 	AiMonster::load(source);
 
 	// Load AiSpider specific data
-	if (source.contains("ambushEndTime"))
-	{
-		ambushEndTime = source.at("ambushEndTime").get<int>();
-	}
-
-	if (source.contains("isAmbushing"))
-	{
-		isAmbushing = source.at("isAmbushing").get<bool>();
-	}
+	ambushEndTime = source.at("ambushEndTime").get<int>();
+	isAmbushing = source.at("isAmbushing").get<bool>();
 }
 
 void AiSpider::save(json& output)

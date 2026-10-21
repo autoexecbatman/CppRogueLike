@@ -1,0 +1,89 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/run_suite.ps1",
+    "-Configuration",
+    "Debug",
+    "-Filter",
+    "--gtest_filter=AiRecordRefusalTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\tambushEndTime = source.at(\"ambushEndTime\").get<int>();",
+      "mutated": "\tif (source.contains(\"ambushEndTime\"))\n\t{\n\t\tambushEndTime = source.at(\"ambushEndTime\").get<int>();\n\t}",
+      "catches": "a record without ambushEndTime loading as though it had the initial value"
+    },
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\tisAmbushing = source.at(\"isAmbushing\").get<bool>();",
+      "mutated": "\tif (source.contains(\"isAmbushing\"))\n\t{\n\t\tisAmbushing = source.at(\"isAmbushing\").get<bool>();\n\t}",
+      "catches": "a record without isAmbushing loading as though it had the initial value"
+    },
+    {
+      "file": "src/AiWebSpinner.cpp",
+      "original": "\twebReadyTime = source.at(\"webReadyTime\").get<int>();",
+      "mutated": "\tif (source.contains(\"webReadyTime\"))\n\t{\n\t\twebReadyTime = source.at(\"webReadyTime\").get<int>();\n\t}",
+      "catches": "a record without webReadyTime loading as though it had the initial value"
+    },
+    {
+      "file": "src/AiMimic.cpp",
+      "original": "\tconsumptionReadyTime = source.at(\"consumptionReadyTime\").get<int>();",
+      "mutated": "\tif (source.contains(\"consumptionReadyTime\"))\n\t{\n\t\tconsumptionReadyTime = source.at(\"consumptionReadyTime\").get<int>();\n\t}",
+      "catches": "a record without consumptionReadyTime loading as though it had the initial value"
+    },
+    {
+      "file": "src/AiMimic.cpp",
+      "original": "\tisDisguised = source.at(\"isDisguised\").get<bool>();",
+      "mutated": "\tif (source.contains(\"isDisguised\"))\n\t{\n\t\tisDisguised = source.at(\"isDisguised\").get<bool>();\n\t}",
+      "catches": "a record without isDisguised loading as though it had the initial value"
+    },
+    {
+      "file": "src/AiMimic.cpp",
+      "original": "\trevealDistance = source.at(\"revealDistance\").get<int>();",
+      "mutated": "\tif (source.contains(\"revealDistance\"))\n\t{\n\t\trevealDistance = source.at(\"revealDistance\").get<int>();\n\t}",
+      "catches": "a record without revealDistance loading as though it had the initial value"
+    },
+    {
+      "file": "src/AiMimic.cpp",
+      "original": "\tconfusionDuration = source.at(\"confusionDuration\").get<int>();",
+      "mutated": "\tif (source.contains(\"confusionDuration\"))\n\t{\n\t\tconfusionDuration = source.at(\"confusionDuration\").get<int>();\n\t}",
+      "catches": "a record without confusionDuration loading as though it had the initial value"
+    },
+    {
+      "file": "src/AiMimic.cpp",
+      "original": "\titemsConsumed = source.at(\"itemsConsumed\").get<int>();",
+      "mutated": "\tif (source.contains(\"itemsConsumed\"))\n\t{\n\t\titemsConsumed = source.at(\"itemsConsumed\").get<int>();\n\t}",
+      "catches": "a record without itemsConsumed loading as though it had the initial value"
+    },
+    {
+      "file": "src/AiMonsterRanged.cpp",
+      "original": "\tmaxRangeDistance = source.at(\"maxRangeDistance\").get<int>();",
+      "mutated": "\tif (source.contains(\"maxRangeDistance\"))\n\t{\n\t\tmaxRangeDistance = source.at(\"maxRangeDistance\").get<int>();\n\t}",
+      "catches": "a record without maxRangeDistance loading as though it had the initial value"
+    },
+    {
+      "file": "src/AiMonsterRanged.cpp",
+      "original": "\toptimalDistance = source.at(\"optimalDistance\").get<int>();",
+      "mutated": "\tif (source.contains(\"optimalDistance\"))\n\t{\n\t\toptimalDistance = source.at(\"optimalDistance\").get<int>();\n\t}",
+      "catches": "a record without optimalDistance loading as though it had the initial value"
+    },
+    {
+      "file": "src/AiMonsterConfused.cpp",
+      "original": "\toldAi = Ai::create(source.at(\"oldAi\"));",
+      "mutated": "\tif (source.contains(\"oldAi\"))\n\t{\n\t\toldAi = Ai::create(source.at(\"oldAi\"));\n\t}",
+      "catches": "a confused record without the mind it wraps loading with none"
+    },
+    {
+      "file": "src/AiMimic.cpp",
+      "original": "\tif (source.contains(\"disguiseChangeTime\"))\n\t{\n\t\tdisguiseChangeTime = source.at(\"disguiseChangeTime\").get<int>();\n\t}",
+      "mutated": "\tdisguiseChangeTime = source.at(\"disguiseChangeTime\").get<int>();",
+      "catches": "a mimic that has booked no disguise change refused on load"
+    }
+  ]
+}

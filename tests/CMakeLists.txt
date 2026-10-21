@@ -102,6 +102,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Ai/MonsterWaterAvoidanceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Ai/MonsterMovementTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Ai/AiRangedRoundTripTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Ai/AiRecordRefusalTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/DecorationLookupTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/DungeonConnectivityTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/RoomShapeTest.cpp

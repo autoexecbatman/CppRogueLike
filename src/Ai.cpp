@@ -60,21 +60,21 @@ std::unique_ptr<Ai> Ai::make(AiType type)
 
 	case AiType::SPIDER:
 	{
-		// its poison chance as built; a save's own comes back through AiSpider::load()
+		// not lying in wait as built; a save's ambush comes back through AiSpider::load()
 		ai = std::make_unique<AiSpider>();
 		break;
 	}
 
 	case AiType::WEB_SPINNER:
 	{
-		// its poison chance as built; a save's own comes back through AiSpider::load()
+		// not lying in wait as built; a save's ambush comes back through AiSpider::load()
 		ai = std::make_unique<AiWebSpinner>();
 		break;
 	}
 
 	case AiType::GIANT_SPIDER:
 	{
-		// its poison chance as built; a save's own comes back through AiSpider::load()
+		// not lying in wait as built; a save's ambush comes back through AiSpider::load()
 		ai = std::make_unique<AiGiantSpider>();
 		break;
 	}

@@ -65,21 +65,16 @@ void AiMonsterConfused::attempt_move(Creature& owner, const Vector2D& destinatio
 
 void AiMonsterConfused::restore_original_ai(Creature& owner)
 {
-	if (oldAi)
-	{
-		owner.ai = std::move(oldAi);
-	}
+	assert(oldAi && "AiMonsterConfused::restore_original_ai: a confused mind wraps no mind to return to");
+	// Destroys this object, whose oldAi has just been moved out.
+	owner.ai = std::move(oldAi);
 }
 
 void AiMonsterConfused::load(const json& source)
 {
 	confusionEndTime = source.at("confusionEndTime").get<int>();
 
-	// Create the oldAi if it exists in the JSON
-	if (source.contains("oldAi"))
-	{
-		oldAi = Ai::create(source["oldAi"]);
-	}
+	oldAi = Ai::create(source.at("oldAi"));
 }
 
 void AiMonsterConfused::save(json& output)
@@ -87,11 +82,8 @@ void AiMonsterConfused::save(json& output)
 	output["type"] = encode_ai_type(get_ai_type());
 	output["confusionEndTime"] = confusionEndTime;
 
-	// Save the oldAi if it exists
-	if (oldAi != nullptr)
-	{
-		json oldAiJson;
-		oldAi->save(oldAiJson);
-		output["oldAi"] = oldAiJson;
-	}
+	assert(oldAi && "AiMonsterConfused::save: a confused mind wraps no mind to return to");
+	json oldAiJson;
+	oldAi->save(oldAiJson);
+	output["oldAi"] = oldAiJson;
 }

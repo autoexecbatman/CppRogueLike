@@ -498,10 +498,7 @@ void AiWebSpinner::load(const json& source)
 	AiSpider::load(source);
 
 	// Load AiWebSpinner specific data
-	if (source.contains("webReadyTime"))
-	{
-		webReadyTime = source.at("webReadyTime").get<int>();
-	}
+	webReadyTime = source.at("webReadyTime").get<int>();
 }
 
 void AiWebSpinner::save(json& output)
