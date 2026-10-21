@@ -41,6 +41,7 @@
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
 #include "src/RandomDice.h"
+#include "tests/mocks/TestDice.h"
 
 namespace
 {
@@ -153,7 +154,7 @@ protected:
 		return goblin.get_tile_distance(player->position);
 	}
 
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
 	Map map{ 20, 20 };
 	std::vector<std::unique_ptr<Creature>> creatures{};

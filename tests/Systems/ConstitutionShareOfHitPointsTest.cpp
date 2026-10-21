@@ -36,6 +36,7 @@
 #include "src/HealthPool.h"
 #include "src/LevelUpSystem.h"
 #include "src/Player.h"
+#include "tests/mocks/TestDice.h"
 
 namespace
 {
@@ -93,7 +94,7 @@ protected:
 		LevelUpSystem::apply_level_up_benefits(*player, newLevel, ctx);
 	}
 
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
 	std::unique_ptr<Player> player;
 };

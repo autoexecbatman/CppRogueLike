@@ -79,6 +79,7 @@ using namespace Turning;
 #include "src/WeaponDamageRegistry.h"
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"
+#include "tests/mocks/TestDice.h"
 
 // GoogleTest runs any suite whose name ends in DeathTest before the others, so
 // the abort happens before anything else has had a chance to start a thread.
@@ -529,7 +530,7 @@ TEST_F(AssertProbeDeathTest, AcquiringATargetWithANullInTheCreatureListAborts)
 // RandomDice::HIGHEST and LOWEST are how a test names an end of the range instead.
 TEST_F(AssertProbeDeathTest, ScriptingARollThatTheDieCannotMakeAborts)
 {
-	RandomDice dice{};
+	RandomDice dice{ TEST_DICE_SEED };
 	dice.set_next_roll(5);
 
 	EXPECT_DEATH(dice.roll(1, 4), "outside the range");
@@ -540,7 +541,7 @@ TEST_F(AssertProbeDeathTest, ScriptingARollThatTheDieCannotMakeAborts)
 // that only checked the top of the range would still let it through.
 TEST_F(AssertProbeDeathTest, ScriptingARollBelowWhatTheDieCanMakeAborts)
 {
-	RandomDice dice{};
+	RandomDice dice{ TEST_DICE_SEED };
 	dice.set_next_roll(0);
 
 	EXPECT_DEATH(dice.roll(1, 20), "outside the range");

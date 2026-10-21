@@ -38,6 +38,7 @@
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
 #include "src/RandomDice.h"
+#include "tests/mocks/TestDice.h"
 
 namespace
 {
@@ -130,7 +131,7 @@ protected:
 		return visited;
 	}
 
-	Game game{};
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx{};
 	Map map{ 20, 20 };
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ PLAYER_COLUMN, CORRIDOR_ROW }) };
@@ -309,7 +310,7 @@ protected:
 		return goblin.get_tile_distance(player->position);
 	}
 
-	Game game{};
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx{};
 	Map map{ 20, 20 };
 	std::unique_ptr<Player> player{ std::make_unique<Player>(PLAYER_TILE) };

@@ -31,6 +31,7 @@
 #include "src/NotificationMenu.h"
 #include "src/Paths.h"
 #include "tests/mocks/HiddenRenderer.h"
+#include "tests/mocks/TestDice.h"
 
 namespace
 {
@@ -56,7 +57,7 @@ void run_one_menu_frame(Game& game, GameContext& ctx, HiddenRenderer& hidden)
 [[noreturn]] void load_game_on_a_refused_save_reports_it_and_returns_to_the_menu()
 {
 	HiddenRenderer hidden{};
-	Game game{};
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx = game.context();
 	ctx.renderer = &hidden.renderer;
 	game.tileConfig.load(Paths::TILE_CONFIG);
@@ -123,7 +124,7 @@ protected:
 		return std::filesystem::exists(Paths::resolve(Paths::SAVE_FILE));
 	}
 
-	Game game{};
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx{ game.context() };
 	bool wroteStandIn{ false };
 };

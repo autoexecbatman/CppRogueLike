@@ -60,6 +60,15 @@
 
 struct Game
 {
+	// The dice draw from diceSeed: main passes std::random_device, a test TEST_DICE_SEED.
+	//
+	// Example:
+	//   Game game{ std::random_device{}() };   // a different game every run
+	//   Game game{ TEST_DICE_SEED };            // the same rolls every run
+	explicit Game(unsigned int diceSeed)
+		: dice(diceSeed)
+	{
+	}
 
 	// Game state
 	GameState gameState{};
@@ -84,7 +93,7 @@ struct Game
 	InputSystem inputSystem{};
 
 	// Core systems
-	RandomDice dice{};
+	RandomDice dice;
 	MessageSystem messageSystem{};
 	RenderingManager renderingManager{};
 	InputHandler inputHandler{};

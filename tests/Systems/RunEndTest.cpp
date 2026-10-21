@@ -34,6 +34,7 @@
 #include "src/Player.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/HiddenRenderer.h"
+#include "tests/mocks/TestDice.h"
 
 namespace
 {
@@ -131,7 +132,7 @@ void load_the_games_renderer(Game& game)
 [[noreturn]] void a_death_under_a_menu_takes_the_screen()
 {
 	HiddenRenderer hidden{};
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	give_the_game_a_player(game);
 	game.menus.push_back(std::make_unique<OpenMenu>());
 	game.menus.push_back(std::make_unique<FatalMenu>());
@@ -149,7 +150,7 @@ void load_the_games_renderer(Game& game)
 [[noreturn]] void a_win_under_a_menu_takes_the_screen()
 {
 	HiddenRenderer hidden{};
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	give_the_game_a_player(game);
 	game.menus.push_back(std::make_unique<OpenMenu>());
 	game.menus.push_back(std::make_unique<WinningMenu>());
@@ -167,7 +168,7 @@ void load_the_games_renderer(Game& game)
 [[noreturn]] void the_death_screen_is_not_taken_down_by_its_own_outcome()
 {
 	HiddenRenderer hidden{};
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	load_the_games_renderer(game);
 	give_the_game_a_player(game);
 	game.menus.push_back(std::make_unique<OpenMenu>());
@@ -189,7 +190,7 @@ void load_the_games_renderer(Game& game)
 [[noreturn]] void a_death_in_a_monsters_round_takes_the_screen()
 {
 	HiddenRenderer hidden{};
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx = game.context();
 	int loopNum{ 0 };
 	start_a_game(game, ctx, loopNum);

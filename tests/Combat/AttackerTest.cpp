@@ -15,6 +15,7 @@
 #include "src/Paths.h"
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
+#include "tests/mocks/TestDice.h"
 
 // ============================================================================
 // ATTACKER TESTS
@@ -24,7 +25,7 @@
 class AttackerTest : public ::testing::Test
 {
 protected:
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
 	std::unique_ptr<Player> player;
 	std::unique_ptr<Creature> monster;

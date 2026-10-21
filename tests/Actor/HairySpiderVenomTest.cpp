@@ -52,6 +52,7 @@
 #include "src/SavingThrow.h"
 #include "src/TurnSchedule.h"
 #include "tests/mocks/ExpectLastsExactly.h"
+#include "tests/mocks/TestDice.h"
 
 class HairySpiderVenomTest : public ::testing::Test
 {
@@ -157,7 +158,7 @@ protected:
 	// "Victims receive a +2 bonus to saving throws vs. the hairy spiders' weak poison."
 	static constexpr int SPIDERS_OWN_SAVE_BONUS = 2;
 
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
 	Map map{ 20, 20 };
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 4, 5 }) };

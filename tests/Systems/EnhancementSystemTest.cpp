@@ -4,6 +4,7 @@
 #include "src/Actor.h"
 #include "src/ItemCreator.h"
 #include "src/WeaponDamageRegistry.h"
+#include "tests/mocks/TestDice.h"
 
 // ============================================================================
 // ENHANCEMENT SYSTEM TESTS
@@ -15,7 +16,7 @@ protected:
     ItemEnhancement defaultEnhancement;
     // The generators draw from this rather than from rand(), so a test can queue
     // the rolls it wants. Left out of test mode except where a test asks for it.
-    RandomDice dice;
+    RandomDice dice{ TEST_DICE_SEED };
 
     void SetUp() override {
         defaultEnhancement = ItemEnhancement{};

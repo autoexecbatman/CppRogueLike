@@ -33,6 +33,7 @@
 #include <cassert>
 #include <memory>
 #include <optional>
+#include <ranges>
 #include <vector>
 
 #include "src/ArmorClass.h"
@@ -55,6 +56,7 @@
 #include "src/TileType.h"
 #include "src/Trap.h"
 #include "tests/mocks/MockGameContext.h"
+#include "tests/mocks/TestDice.h"
 
 namespace
 {
@@ -64,7 +66,8 @@ constexpr int MAP_HEIGHT = 70;
 
 // How many dungeons a case builds. The defect this pins appeared in about a third of
 // maps, so one draw would have passed clean more often than not.
-constexpr int DUNGEONS = 60;
+// One dungeon per seed, from 1 to DUNGEONS, so a failure names the seed that reproduces it.
+constexpr unsigned int DUNGEONS = 60;
 
 } // namespace
 
@@ -106,8 +109,9 @@ protected:
 
 	// Builds one dungeon into a fresh map and returns it, with everything it spawned
 	// cleared first so one run cannot fill the next one's floor.
-	void generate_into(Map& map)
+	void generate_into(Map& map, unsigned int seed)
 	{
+		mock.dice = RandomDice{ seed };
 		ctx.map = &map;
 		rooms.clear();
 		creatures.clear();
@@ -145,10 +149,10 @@ TEST_F(DungeonConnectivityTest, EveryCarvedTileIsReachableFromTheEntrance)
 	int strandedMaps = 0;
 	int worstStranded = 0;
 
-	for (int attempt = 0; attempt < DUNGEONS; ++attempt)
+	for (const unsigned int seed : std::views::iota(1u, DUNGEONS + 1))
 	{
 		Map map{ MAP_WIDTH, MAP_HEIGHT };
-		generate_into(map);
+		generate_into(map, seed);
 		ASSERT_FALSE(rooms.empty()) << "the generator produced no rooms at all";
 
 		const int stranded = map.count_unreachable_tiles(player_start());
@@ -171,10 +175,10 @@ TEST_F(DungeonConnectivityTest, WaterOnlyEverReplacesFloorTheRoomCarved)
 	// The defect behind the stranding, stated directly: every water tile has to sit
 	// where a room or corridor put walkable ground, never in a shaped room's walled-back
 	// corner. A water tile with wall on all four sides is that corner.
-	for (int attempt = 0; attempt < DUNGEONS; ++attempt)
+	for (const unsigned int seed : std::views::iota(1u, DUNGEONS + 1))
 	{
 		Map map{ MAP_WIDTH, MAP_HEIGHT };
-		generate_into(map);
+		generate_into(map, seed);
 
 		for (int row = 1; row < MAP_HEIGHT - 1; ++row)
 		{
@@ -214,10 +218,10 @@ TEST_F(DungeonConnectivityTest, EveryTileACostMapReachesLeadsDownToTheGoal)
 
 	int unenterable = 0;
 	int deadEnds = 0;
-	for (int attempt = 0; attempt < DUNGEONS; ++attempt)
+	for (const unsigned int seed : std::views::iota(1u, DUNGEONS + 1))
 	{
 		Map map{ MAP_WIDTH, MAP_HEIGHT };
-		generate_into(map);
+		generate_into(map, seed);
 		const Vector2D goal = player_start();
 
 		for (const Pathfinding::Mobility& mobility : mobilities)
@@ -273,10 +277,10 @@ TEST_F(DungeonConnectivityTest, NothingIsGeneratedStandingInWater)
 	int wetItems = 0;
 	int wetStairs = 0;
 	int wetPlayers = 0;
-	for (int attempt = 0; attempt < DUNGEONS; ++attempt)
+	for (const unsigned int seed : std::views::iota(1u, DUNGEONS + 1))
 	{
 		Map map{ MAP_WIDTH, MAP_HEIGHT };
-		generate_into(map);
+		generate_into(map, seed);
 
 		for (const auto& decoration : decorations)
 		{
@@ -301,7 +305,7 @@ TEST_F(DungeonConnectivityTest, NothingIsGeneratedStandingInWater)
 TEST_F(DungeonConnectivityTest, AStartOffTheMapIsRefusedRatherThanReportedClean)
 {
 	Map map{ MAP_WIDTH, MAP_HEIGHT };
-	generate_into(map);
+	generate_into(map, TEST_DICE_SEED);
 
 	// The border ring is always wall, so this is a question the map cannot answer.
 	EXPECT_EQ(map.count_unreachable_tiles(Vector2D{ 0, 0 }), -1);
@@ -312,11 +316,11 @@ TEST_F(DungeonConnectivityTest, AStartOffTheMapIsRefusedRatherThanReportedClean)
 // edge: nothing walkable on the edge means nothing stands there.
 TEST_F(DungeonConnectivityTest, EveryDungeonIsRingedByWall)
 {
-	for (int attempt = 0; attempt < DUNGEONS; ++attempt)
+	for (const unsigned int seed : std::views::iota(1u, DUNGEONS + 1))
 	{
 		Map map{ MAP_WIDTH, MAP_HEIGHT };
-		generate_into(map);
-		ASSERT_TRUE(map.has_wall_border()) << "dungeon " << attempt << " carved into the map's edge";
+		generate_into(map, seed);
+		ASSERT_TRUE(map.has_wall_border()) << "seed " << seed << " carved into the map's edge";
 	}
 }
 

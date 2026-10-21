@@ -6,11 +6,12 @@
 #include "src/LevelUpSystem.h"
 #include "src/Player.h"
 #include "src/ExperienceReward.h"
+#include "tests/mocks/TestDice.h"
 
 class LevelUpSystemTest : public ::testing::Test
 {
 protected:
-    Game game;
+    Game game{ TEST_DICE_SEED };
     GameContext ctx;
     std::unique_ptr<Player> player;
 

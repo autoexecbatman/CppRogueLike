@@ -33,6 +33,7 @@
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
 #include "src/Trap.h"
+#include "tests/mocks/TestDice.h"
 
 namespace
 {
@@ -137,7 +138,7 @@ protected:
 		}
 	}
 
-	Game game{};
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx{};
 	Map map{ 20, 20 };
 	std::unique_ptr<Player> player{ std::make_unique<Player>(PLAYER_TILE) };

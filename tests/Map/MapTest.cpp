@@ -19,6 +19,7 @@
 #include "src/Pickable.h"
 #include "src/MagicalItemEffects.h"
 #include "src/EquipmentSlot.h"
+#include "tests/mocks/TestDice.h"
 
 // ============================================================================
 // MAP TESTS
@@ -42,7 +43,7 @@ protected:
     MessageSystem messageSystem;
     FloorInventory floorInventory{};
     std::vector<std::unique_ptr<Decoration>> decorations{};
-    RandomDice dice;
+    RandomDice dice{ TEST_DICE_SEED };
     TileConfig tileConfig;
 
     void SetUp() override

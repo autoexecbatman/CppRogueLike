@@ -36,6 +36,7 @@
 #include "src/MonsterAttacker.h"
 #include "src/Player.h"
 #include "src/StrengthAttributes.h"
+#include "tests/mocks/TestDice.h"
 
 namespace
 {
@@ -228,7 +229,7 @@ protected:
 
 	static constexpr int STARTING_HP = 100;
 
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
 };
 

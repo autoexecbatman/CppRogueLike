@@ -14,6 +14,7 @@
 
 #include "src/DiceExpr.h"
 #include "src/RandomDice.h"
+#include "tests/mocks/TestDice.h"
 
 TEST(DiceExprTest, ReadsCountSidesAndAPositiveBonus)
 {
@@ -56,7 +57,7 @@ TEST(DiceExprTest, ReadsABareIntegerAsAFixedValue)
 	EXPECT_EQ(expr.bonus, 5);
 	EXPECT_EQ(expr.min_total(), 5);
 	EXPECT_EQ(expr.max_total(), 5);
-	RandomDice dice{};
+	RandomDice dice{ TEST_DICE_SEED };
 	EXPECT_EQ(roll_dice(&dice, expr), 5);
 	EXPECT_TRUE(roll_each_die(&dice, expr).empty());
 }
@@ -77,7 +78,7 @@ TEST(DiceExprTest, RefusesWhatIsNotDice)
 // Each die is rolled on its own and the bonus is left to the caller.
 TEST(DiceExprTest, RollsEachDieAndLeavesTheBonusToTheCaller)
 {
-	RandomDice dice{};
+	RandomDice dice{ TEST_DICE_SEED };
 	dice.set_test_mode(true);
 	dice.set_next_roll(3);
 	dice.set_next_roll(4);
@@ -89,7 +90,7 @@ TEST(DiceExprTest, RollsEachDieAndLeavesTheBonusToTheCaller)
 
 TEST(DiceExprTest, RollDiceSumsAndAddsTheBonus)
 {
-	RandomDice dice{};
+	RandomDice dice{ TEST_DICE_SEED };
 	dice.set_test_mode(true);
 	dice.set_next_roll(3);
 	dice.set_next_roll(4);

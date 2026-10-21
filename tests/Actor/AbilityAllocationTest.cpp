@@ -24,6 +24,7 @@
 #include "src/AbilityAllocation.h"
 #include "src/CreatureClass.h"
 #include "src/RandomDice.h"
+#include "tests/mocks/TestDice.h"
 
 namespace
 {
@@ -212,7 +213,7 @@ TEST(AbilityAllocationTest, TheScoresHandedOnAreTheAllocatedOnes)
 // Seven six-sided dice, kept in the order they came up so a screen can show them.
 TEST(AbilityAllocationTest, ThePoolIsSevenSixSidedDice)
 {
-	RandomDice dice{};
+	RandomDice dice{ TEST_DICE_SEED };
 #ifdef TESTING_MODE
 	dice.set_test_mode(true);
 	for (const int forced : { 4, 4, 2, 1, 6, 3, 5 })

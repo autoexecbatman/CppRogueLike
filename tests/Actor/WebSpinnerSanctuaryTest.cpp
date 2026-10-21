@@ -35,6 +35,7 @@
 #include "src/Player.h"
 #include "src/RandomDice.h"
 #include "src/SavingThrow.h"
+#include "tests/mocks/TestDice.h"
 
 class WebSpinnerSanctuaryTest : public ::testing::Test
 {
@@ -99,7 +100,7 @@ protected:
 
 	static constexpr int STARTING_HP = 100;
 
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
 	Map map{ 20, 20 };
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 4, 5 }) };

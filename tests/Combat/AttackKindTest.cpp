@@ -20,11 +20,12 @@
 #include "src/Paths.h"
 #include "src/Game.h"
 #include "src/ShopKeeper.h"
+#include "tests/mocks/TestDice.h"
 
 class AttackKindTest : public ::testing::Test
 {
 protected:
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
 	std::unique_ptr<Player> player;
 	std::unique_ptr<Creature> monster;

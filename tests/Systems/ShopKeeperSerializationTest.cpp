@@ -5,6 +5,7 @@
 #include "src/ItemCreator.h"
 #include "src/Game.h"
 #include "src/GameContext.h"
+#include "tests/mocks/TestDice.h"
 
 using json = nlohmann::json;
 using namespace InventoryOperations;
@@ -16,7 +17,7 @@ using namespace InventoryOperations;
 
 class ShopKeeperSerializationTest : public ::testing::Test {
 protected:
-    Game game;
+    Game game{ TEST_DICE_SEED };
     GameContext ctx;
 
     void SetUp() override

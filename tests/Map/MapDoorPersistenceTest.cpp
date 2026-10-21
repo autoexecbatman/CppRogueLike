@@ -115,6 +115,35 @@ TEST_F(MapDoorPersistenceTest, AFailedPickIsStillRememberedAfterASaveAndALoad)
 	EXPECT_EQ(fresh.lock_pick_failed_at_level(CLOSED_DOOR), 0);
 }
 
+// The door pass runs when a level is generated, never on a load. So a corridor leaving a room
+// through a one-cell gap walled on both sides - the shape that pass turns into a door - is
+// still corridor after a save and a load, on a map built by hand rather than from a seed.
+TEST_F(MapDoorPersistenceTest, AFreshlyCarvedExitIsStillACorridorAfterALoad)
+{
+	MapWithDoors carved{ DOOR_MAP_WIDTH, DOOR_MAP_HEIGHT };
+	carved.init_tiles();
+	// A room over columns 1-3 and rows 2-6, so the gap's west side is floor and its corners are too.
+	for (int row = 2; row <= 6; ++row)
+	{
+		for (int col = 1; col <= 3; ++col)
+		{
+			carved.set_tile(Vector2D{ col, row }, TileType::FLOOR);
+		}
+	}
+	const Vector2D gap{ 4, 4 };
+	for (int col = gap.x; col <= gap.x + 3; ++col)
+	{
+		carved.set_tile(Vector2D{ col, gap.y }, TileType::CORRIDOR);
+	}
+	nlohmann::json saved;
+	carved.save(saved);
+
+	Map fresh{ DOOR_MAP_WIDTH, DOOR_MAP_HEIGHT };
+	fresh.load(saved);
+
+	EXPECT_EQ(fresh.get_tile_type(gap), TileType::CORRIDOR) << "the door pass ran on a load";
+}
+
 // Saving the loaded map writes what it was loaded from, door states included.
 TEST_F(MapDoorPersistenceTest, ALoadedMapSavesWhatItWasLoadedFrom)
 {

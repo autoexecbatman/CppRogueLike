@@ -33,6 +33,7 @@
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
 #include "src/ThiefSkills.h"
+#include "tests/mocks/TestDice.h"
 
 class ThiefSkillAllocationTest : public ::testing::Test
 {
@@ -73,7 +74,7 @@ protected:
 		ASSERT_NE(player->get_equipped_item(EquipmentSlot::BODY), nullptr) << key << " was not put on";
 	}
 
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 0, 0 }) };
 };

@@ -30,6 +30,7 @@
 #include "src/Player.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/HiddenRenderer.h"
+#include "tests/mocks/TestDice.h"
 
 namespace
 {
@@ -62,7 +63,7 @@ void press_mouse_button(int raylibButton)
 [[noreturn]] void escape_closing_the_sheet_is_spent_by_the_tick()
 {
 	HiddenRenderer hidden{};
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	const Player reader{ Vector2D{ 1, 1 } };
 	game.menus.push_back(std::make_unique<CharacterSheetUI>(reader));
 
@@ -82,7 +83,7 @@ void press_mouse_button(int raylibButton)
 [[noreturn]] void a_click_closing_the_context_menu_is_spent_by_the_tick()
 {
 	HiddenRenderer hidden{};
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx = game.context();
 	bool chosen{ false };
 	const auto record_choice = [&chosen]([[maybe_unused]] int choice, [[maybe_unused]] GameContext& choiceCtx)

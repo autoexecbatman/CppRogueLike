@@ -40,6 +40,7 @@
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
 #include "src/SavingThrow.h"
+#include "tests/mocks/TestDice.h"
 
 class SanctuarySaveTest : public ::testing::Test
 {
@@ -110,7 +111,7 @@ protected:
 
 	static constexpr int STARTING_HP = 100;
 
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 4, 5 }) };
 	Creature goblin{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK } };

@@ -12,6 +12,7 @@
 #include "../../src/Player.h"
 #include "../../src/GameContext.h"
 #include "../../src/Game.h"
+#include "tests/mocks/TestDice.h"
 
 namespace
 {
@@ -20,7 +21,7 @@ namespace
 // rather than dereferencing an empty owner.
 TEST(GameContextWiring, ContextFromFreshGame_HasNoPlayer)
 {
-	Game game;
+	Game game{ TEST_DICE_SEED };
 
 	const GameContext ctx = game.context();
 
@@ -31,7 +32,7 @@ TEST(GameContextWiring, ContextFromFreshGame_HasNoPlayer)
 // The spells the game casts are the registry Game owns, the one main loads.
 TEST(GameContextWiring, ContextCarriesTheGamesSpellRegistry)
 {
-	Game game;
+	Game game{ TEST_DICE_SEED };
 
 	const GameContext ctx = game.context();
 
@@ -41,7 +42,7 @@ TEST(GameContextWiring, ContextCarriesTheGamesSpellRegistry)
 // The monsters the game builds and spawns are the registry Game owns, the one main loads.
 TEST(GameContextWiring, ContextCarriesTheGamesMonsterRegistry)
 {
-	Game game;
+	Game game{ TEST_DICE_SEED };
 
 	const GameContext ctx = game.context();
 
@@ -51,7 +52,7 @@ TEST(GameContextWiring, ContextCarriesTheGamesMonsterRegistry)
 // The items the game builds and spawns are the registry Game owns, the one main loads.
 TEST(GameContextWiring, ContextCarriesTheGamesItemRegistry)
 {
-	Game game;
+	Game game{ TEST_DICE_SEED };
 
 	const GameContext ctx = game.context();
 
@@ -61,7 +62,7 @@ TEST(GameContextWiring, ContextCarriesTheGamesItemRegistry)
 // The cost overlay the debug key toggles is the one Game owns, the one the renderer draws.
 TEST(GameContextWiring, ContextCarriesTheGamesCostOverlay)
 {
-	Game game;
+	Game game{ TEST_DICE_SEED };
 
 	const GameContext ctx = game.context();
 
@@ -71,7 +72,7 @@ TEST(GameContextWiring, ContextCarriesTheGamesCostOverlay)
 // With a Player owned, both views name that object.
 TEST(GameContextWiring, ContextWithPlayer_BothViewsNameIt)
 {
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	game.player = std::make_unique<Player>(Vector2D{ 0, 0 });
 
 	const GameContext ctx = game.context();
@@ -84,7 +85,7 @@ TEST(GameContextWiring, ContextWithPlayer_BothViewsNameIt)
 // the owner is visible immediately, because no copy of the pointer is stored.
 TEST(GameContextWiring, ReplacingThePlayer_NeedsNoRefresh)
 {
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	game.player = std::make_unique<Player>(Vector2D{ 0, 0 });
 	const GameContext ctx = game.context();
 

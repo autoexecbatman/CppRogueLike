@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include "src/DamageInfo.h"
 #include "src/RandomDice.h"
+#include "tests/mocks/TestDice.h"
 
 // ============================================================================
 // THE WIZARD'S DAMAGE SYSTEM TESTS
@@ -12,7 +13,7 @@
 
 class DamageInfoTest : public ::testing::Test {
 protected:
-    RandomDice dice;
+    RandomDice dice{ TEST_DICE_SEED };
     DamageInfo dagger{"1d4", DamageType::PHYSICAL};
     DamageInfo longsword{"1d8", DamageType::PHYSICAL};
     DamageInfo warhammer{"1d4+1", DamageType::PHYSICAL};

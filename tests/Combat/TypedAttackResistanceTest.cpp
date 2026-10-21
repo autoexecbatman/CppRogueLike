@@ -28,6 +28,7 @@
 #include "src/Game.h"
 #include "src/Paths.h"
 #include "src/ItemCreator.h"
+#include "tests/mocks/TestDice.h"
 
 class TypedAttackResistanceTest : public ::testing::Test
 {
@@ -98,7 +99,7 @@ protected:
 
 	static constexpr int STARTING_HP = 100;
 
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
 	std::unique_ptr<Player> player;
 };

@@ -5,14 +5,18 @@
 #include <random>
 #include <vector>
 
-// This class is used to generate random numbers for our game->
-// We want this class to be the only random number generator for the game right now.
+// The game's one random number generator. Every construction names its seed: the game passes
+// std::random_device, a map its own seed, and a test a fixed one, so a test run draws the same
+// numbers every time.
+//
+// Example:
+//   RandomDice dice{ 7 };   // the same sequence on every run
+//   dice.d20();             // 1..20
+//   RandomDice unseeded;    // does not compile: there is no default constructor
 class RandomDice
 {
 private:
-	// we use the mersenne twister engine for our random number generator
-	// we seed it with a random device
-	std::mt19937 generator{ std::random_device{}() };
+	std::mt19937 generator{};
 
 #ifdef TESTING_MODE
 	bool testMode{ false };
@@ -20,7 +24,8 @@ private:
 #endif
 
 public:
-	RandomDice() = default;
+	// A seed is always named, so nothing draws from a generator nobody chose.
+	RandomDice() = delete;
 
 	explicit RandomDice(unsigned int seed) noexcept
 		: generator(seed)

@@ -22,6 +22,7 @@
 #include "src/SpellSystem.h"
 #include "tests/mocks/ExpectLastsExactly.h"
 #include "tests/mocks/MockGameContext.h"
+#include "tests/mocks/TestDice.h"
 
 class SleepSpellTest : public ::testing::Test
 {
@@ -189,7 +190,7 @@ TEST(SleepSpellDiceTest, TheBudgetIsTwoFourSidedDice)
 // 2,000 draws: missing an end of a 2d4 by luck is (15/16)^2000, which is 8.8e-57.
 TEST(SleepSpellDiceTest, TwoDiceReachBothEndsOfTheirRange)
 {
-	RandomDice dice{};
+	RandomDice dice{ TEST_DICE_SEED };
 	int lowest = Spells::SLEEP_HIT_DICE_COUNT * Spells::SLEEP_HIT_DICE_SIDES;
 	int highest = 0;
 

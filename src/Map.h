@@ -100,8 +100,9 @@ private:
 
 protected:
 	std::unique_ptr<FovMap> fovMap{};
-	RandomDice mapRng{};
 	long seed{ 0 };
+	// Derived from seed, so a map that has not run init or load is the seed-0 map it reports.
+	RandomDice mapRng{ static_cast<unsigned int>(seed) };
 	friend class DungeonGenerator;
 	void dig(Vector2D begin, Vector2D end);
 	void dig_corridor(Vector2D begin, Vector2D end);

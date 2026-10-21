@@ -31,6 +31,7 @@
 #include "src/Paths.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
+#include "tests/mocks/TestDice.h"
 
 class EquipmentUseTest : public ::testing::Test
 {
@@ -92,7 +93,7 @@ protected:
 		EXPECT_EQ(player->get_equipped_item(slot), &item) << item.actorData.name << " came off";
 	}
 
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 0, 0 }) };
 };

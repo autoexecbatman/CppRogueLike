@@ -19,6 +19,7 @@
 using namespace Turning;
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
+#include "tests/mocks/TestDice.h"
 
 class TurnUndeadTest : public ::testing::Test
 {
@@ -371,7 +372,7 @@ TEST(TurnUndeadDiceTest, TheCapIsTwoSixSidedDice)
 // occurs or the range cannot produce it.
 TEST(TurnUndeadDiceTest, TwoDiceReachBothEndsOfTheirRange)
 {
-	RandomDice dice{};
+	RandomDice dice{ TEST_DICE_SEED };
 	int lowest = TURN_UNDEAD_DICE_COUNT * TURN_UNDEAD_DICE_SIDES;
 	int highest = 0;
 

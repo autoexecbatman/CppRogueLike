@@ -26,6 +26,7 @@
 #include "src/Player.h"
 #include "src/PlayerTurn.h"
 #include "src/TurnSchedule.h"
+#include "tests/mocks/TestDice.h"
 
 class PlayerActionCostTest : public ::testing::Test
 {
@@ -37,7 +38,7 @@ protected:
 		ctx.gameState->set_game_status(GameStatus::IDLE);
 	}
 
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 0, 0 }) };
 };

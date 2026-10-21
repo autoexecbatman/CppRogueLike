@@ -28,6 +28,7 @@
 #include "src/DungeonRoom.h"
 #include "src/EncounterPlanner.h"
 #include "src/RandomDice.h"
+#include "tests/mocks/TestDice.h"
 
 namespace
 {
@@ -56,7 +57,7 @@ int spent(const std::vector<std::string>& selected, const std::vector<MonsterCan
 class EncounterPlannerTest : public ::testing::Test
 {
 protected:
-	RandomDice dice;
+	RandomDice dice{ TEST_DICE_SEED };
 };
 
 // An entrance is where the player arrives, so nothing waits there - at any depth.

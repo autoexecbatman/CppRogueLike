@@ -28,6 +28,7 @@
 #include <nlohmann/json.hpp>
 
 #include <memory>
+#include <ranges>
 #include <string>
 #include <vector>
 
@@ -49,6 +50,7 @@
 #include "src/TileType.h"
 #include "src/Trap.h"
 #include "tests/mocks/MockGameContext.h"
+#include "tests/mocks/TestDice.h"
 
 namespace
 {
@@ -58,7 +60,8 @@ constexpr int MAP_HEIGHT = 70;
 
 // How many dungeons a case builds. The shape defect appeared in about one room in a
 // hundred, so a single map would have passed clean almost every time.
-constexpr int DUNGEONS = 40;
+// One dungeon per seed, from 1 to DUNGEONS, so a failure names the seed that reproduces it.
+constexpr unsigned int DUNGEONS = 40;
 
 const char* shape_name(RoomShape shape)
 {
@@ -204,8 +207,9 @@ protected:
 
 	// Builds one dungeon into a fresh map, with everything the last one spawned cleared
 	// first so one run cannot fill the next one's floor.
-	void generate_into(Map& map)
+	void generate_into(Map& map, unsigned int seed)
 	{
+		mock.dice = RandomDice{ seed };
 		ctx.map = &map;
 		rooms.clear();
 		creatures.clear();
@@ -233,10 +237,10 @@ protected:
 
 TEST_F(RoomShapeTest, EveryRoomKeepsTheShapeItWasGiven)
 {
-	for (int attempt = 0; attempt < DUNGEONS; ++attempt)
+	for (const unsigned int seed : std::views::iota(1u, DUNGEONS + 1))
 	{
 		Map map{ MAP_WIDTH, MAP_HEIGHT };
-		generate_into(map);
+		generate_into(map, seed);
 
 		for (const DungeonRoom& room : rooms)
 		{
@@ -349,10 +353,10 @@ TEST_F(RoomShapeTest, APrefabThatSplitsTheRoomByItselfLeavesAPlainBox)
 
 TEST_F(RoomShapeTest, EveryCorridorOpensOntoTheRoomsFloor)
 {
-	for (int attempt = 0; attempt < DUNGEONS; ++attempt)
+	for (const unsigned int seed : std::views::iota(1u, DUNGEONS + 1))
 	{
 		Map map{ MAP_WIDTH, MAP_HEIGHT };
-		generate_into(map);
+		generate_into(map, seed);
 
 		for (const DungeonRoom& room : rooms)
 		{
@@ -398,10 +402,10 @@ TEST_F(RoomShapeTest, RoomsNeverShareGround)
 {
 	// DungeonGenerator.h states it: each grid cell holds at most one room, so no two
 	// rooms may share a cell of floor.
-	for (int attempt = 0; attempt < DUNGEONS; ++attempt)
+	for (const unsigned int seed : std::views::iota(1u, DUNGEONS + 1))
 	{
 		Map map{ MAP_WIDTH, MAP_HEIGHT };
-		generate_into(map);
+		generate_into(map, seed);
 
 		for (size_t first = 0; first < rooms.size(); ++first)
 		{
@@ -424,10 +428,10 @@ TEST_F(RoomShapeTest, APrefabRoomKeepsTheWallsItsPrefabDraws)
 {
 	// A prefab that draws interior walls must still have them in the finished map. The
 	// treasure vault used to clear its whole bounding box to floor, which erased them.
-	for (int attempt = 0; attempt < DUNGEONS; ++attempt)
+	for (const unsigned int seed : std::views::iota(1u, DUNGEONS + 1))
 	{
 		Map map{ MAP_WIDTH, MAP_HEIGHT };
-		generate_into(map);
+		generate_into(map, seed);
 
 		for (const DungeonRoom& room : rooms)
 		{
@@ -451,10 +455,10 @@ TEST_F(RoomShapeTest, APrefabRoomKeepsTheWallsItsPrefabDraws)
 TEST_F(RoomShapeTest, APrefabsDecorationsAreThePalettesTiles)
 {
 	int stamped = 0;
-	for (int attempt = 0; attempt < DUNGEONS; ++attempt)
+	for (const unsigned int seed : std::views::iota(1u, DUNGEONS + 1))
 	{
 		Map map{ MAP_WIDTH, MAP_HEIGHT };
-		generate_into(map);
+		generate_into(map, seed);
 
 		for (const DungeonRoom& room : rooms)
 		{
@@ -490,10 +494,10 @@ TEST_F(RoomShapeTest, APrefabsDecorationsAreThePalettesTiles)
 TEST_F(RoomShapeTest, EveryDoorKeepsItsStateThroughASave)
 {
 	int lockedDoors = 0;
-	for (int attempt = 0; attempt < DUNGEONS; ++attempt)
+	for (const unsigned int seed : std::views::iota(1u, DUNGEONS + 1))
 	{
 		Map map{ MAP_WIDTH, MAP_HEIGHT };
-		generate_into(map);
+		generate_into(map, seed);
 		nlohmann::json saved;
 		map.save(saved);
 
@@ -505,14 +509,14 @@ TEST_F(RoomShapeTest, EveryDoorKeepsItsStateThroughASave)
 			for (int col = 0; col < MAP_WIDTH; ++col)
 			{
 				const Vector2D cell{ col, row };
-				EXPECT_EQ(fresh.get_tile_type(cell), map.get_tile_type(cell)) << "dungeon " << attempt << " at " << col << "," << row;
-				EXPECT_EQ(fresh.is_door_locked(cell), map.is_door_locked(cell)) << "dungeon " << attempt << " at " << col << "," << row;
+				EXPECT_EQ(fresh.get_tile_type(cell), map.get_tile_type(cell)) << "seed " << seed << " at " << col << "," << row;
+				EXPECT_EQ(fresh.is_door_locked(cell), map.is_door_locked(cell)) << "seed " << seed << " at " << col << "," << row;
 				lockedDoors += map.is_door_locked(cell) ? 1 : 0;
 			}
 		}
 		nlohmann::json savedAgain;
 		fresh.save(savedAgain);
-		EXPECT_EQ(savedAgain, saved) << "dungeon " << attempt;
+		EXPECT_EQ(savedAgain, saved) << "seed " << seed;
 	}
 	EXPECT_GT(lockedDoors, 0) << "no treasure room locked a door in " << DUNGEONS << " dungeons, so no lock was saved";
 }
@@ -521,10 +525,10 @@ TEST_F(RoomShapeTest, AnExitCellIsWalkableWheneverItsEdgeHasFloor)
 {
 	// The contract of exit_column and exit_row, stated without reference to how they
 	// search: if the edge line holds any floor at all, the cell they name is floor.
-	for (int attempt = 0; attempt < DUNGEONS; ++attempt)
+	for (const unsigned int seed : std::views::iota(1u, DUNGEONS + 1))
 	{
 		Map map{ MAP_WIDTH, MAP_HEIGHT };
-		generate_into(map);
+		generate_into(map, seed);
 
 		for (const DungeonRoom& room : rooms)
 		{

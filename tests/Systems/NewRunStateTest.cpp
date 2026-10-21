@@ -32,6 +32,7 @@
 #include "src/Paths.h"
 #include "src/PlayerRaceState.h"
 #include "src/TurnSchedule.h"
+#include "tests/mocks/TestDice.h"
 
 namespace
 {
@@ -126,7 +127,7 @@ protected:
 		EXPECT_FALSE(is_any_line_holding(lines, "Starving")) << "the last run's hunger notice is still on screen";
 	}
 
-	Game game{};
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx{ game.context() };
 };
 

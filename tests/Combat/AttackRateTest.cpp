@@ -29,6 +29,7 @@
 #include "src/PlayerController.h"
 #include "src/PlayerTurn.h"
 #include "src/TurnSchedule.h"
+#include "tests/mocks/TestDice.h"
 
 // One attack a round costs a whole round, which is the floor the book prints for a
 // character and the cost every creature has until something raises its rate.
@@ -100,7 +101,7 @@ protected:
 		ctx.playerOwner = &player;
 	}
 
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 0, 0 }) };
 };

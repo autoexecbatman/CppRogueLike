@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <random>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
@@ -54,7 +55,7 @@ int main()
 	std::clog << "STARTUP: Creating Game\n"
 			  << std::flush;
 	// Game owns everything including Renderer and InputSystem
-	auto game = std::make_unique<Game>();
+	auto game = std::make_unique<Game>(std::random_device{}());
 	std::clog << "STARTUP: Loading tile config\n"
 			  << std::flush;
 	game->tileConfig.load(Paths::TILE_CONFIG);

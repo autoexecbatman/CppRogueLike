@@ -20,6 +20,7 @@
 
 #include "src/RandomDice.h"
 #include "src/ShopKeeper.h"
+#include "tests/mocks/TestDice.h"
 
 namespace
 {
@@ -44,7 +45,7 @@ protected:
 		return ShopKeeper{ type, ShopQuality::AVERAGE, dice }.get_shop_name();
 	}
 
-	RandomDice dice;
+	RandomDice dice{ TEST_DICE_SEED };
 };
 
 // The roll is what decides, so the same roll decides the same way.

@@ -53,10 +53,11 @@
 #include "src/TileConfig.h"
 #include "src/Trap.h"
 #include "src/Vector2D.h"
+#include "tests/mocks/TestDice.h"
 
 struct MockGameContext
 {
-	RandomDice dice{};
+	RandomDice dice{ TEST_DICE_SEED };
 	MessageSystem messages{};
 	CreatureManager creature_mgr{};
 	DataManager data_manager{};

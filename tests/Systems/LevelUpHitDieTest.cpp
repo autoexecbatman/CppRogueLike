@@ -21,6 +21,7 @@
 #include "src/LevelUpSystem.h"
 #include "src/Player.h"
 #include "src/Vector2D.h"
+#include "tests/mocks/TestDice.h"
 
 namespace
 {
@@ -69,7 +70,7 @@ protected:
 		return rolled;
 	}
 
-	Game game{};
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx{};
 	std::unique_ptr<Player> fighter{ std::make_unique<Player>(Vector2D{ 0, 0 }) };
 };

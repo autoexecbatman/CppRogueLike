@@ -42,6 +42,7 @@
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/StrengthAttributes.h"
+#include "tests/mocks/TestDice.h"
 
 class StatBoostEquipmentTest : public ::testing::Test
 {
@@ -105,7 +106,7 @@ protected:
 
 	static constexpr int BASE_STRENGTH = 12;
 
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 0, 0 }) };
 };

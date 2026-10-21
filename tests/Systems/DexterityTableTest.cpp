@@ -23,6 +23,7 @@
 #include "src/ExperienceReward.h"
 #include "src/Game.h"
 #include "src/HealthPool.h"
+#include "tests/mocks/TestDice.h"
 
 namespace
 {
@@ -73,7 +74,7 @@ protected:
 		ctx = game.context();
 	}
 
-	Game game;
+	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
 };
 
