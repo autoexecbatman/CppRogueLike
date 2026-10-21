@@ -321,6 +321,20 @@ void make_dormant(Item& item) noexcept
 	}
 }
 
+bool is_helm_ready(const Item& helm, int now)
+{
+	const MagicalHelm* magicalHelm = helm.behavior ? std::get_if<MagicalHelm>(&*helm.behavior) : nullptr;
+	return magicalHelm && magicalHelm->effect == MagicalEffect::TELEPORTATION && magicalHelm->rechargedAt <= now;
+}
+
+void record_helm_use(Item& helm, int now)
+{
+	MagicalHelm* magicalHelm = helm.behavior ? std::get_if<MagicalHelm>(&*helm.behavior) : nullptr;
+	assert(magicalHelm && magicalHelm->effect == MagicalEffect::TELEPORTATION && "record_helm_use: not a helm of teleportation");
+
+	magicalHelm->rechargedAt = now + ROUNDS_PER_DAY * TIME_UNITS_PER_ROUND;
+}
+
 bool use(Weapon& weapon, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	const EquipmentSlot preferred = weapon.get_preferred_slot(&wearer);
@@ -866,6 +880,7 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 				output["effect"] = encode_magical_effect(magicalHelm.effect);
 				output["bonus"] = magicalHelm.bonus;
 				output["command"] = encode_helm_command(magicalHelm.command);
+				output["rechargedAt"] = magicalHelm.rechargedAt;
 			},
 			[&output](const MagicalRing& magicalRing)
 			{
@@ -979,6 +994,7 @@ ItemBehavior load_behavior(const json& source)
 		magicalHelm.effect = parse_magical_effect(source.at("effect").get<std::string>());
 		magicalHelm.bonus = source.at("bonus").get<int>();
 		magicalHelm.command = parse_helm_command(source.at("command").get<std::string>());
+		magicalHelm.rechargedAt = source.at("rechargedAt").get<int>();
 		return magicalHelm;
 	}
 

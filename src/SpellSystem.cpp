@@ -1178,7 +1178,7 @@ void SpellSystem::show_casting_menu(Player& player, GameContext& ctx)
 	ctx.menus->push_back(std::make_unique<MenuSpellCast>(player, ctx));
 }
 
-std::vector<SpellSystem::ItemGrantedSpell> SpellSystem::get_item_granted_spells(const Player& player)
+std::vector<SpellSystem::ItemGrantedSpell> SpellSystem::get_item_granted_spells(const Player& player, int now)
 {
 	std::vector<ItemGrantedSpell> itemSpells;
 
@@ -1191,12 +1191,9 @@ std::vector<SpellSystem::ItemGrantedSpell> SpellSystem::get_item_granted_spells(
 	// Check for Helm of Teleportation
 	if (Item* helm = player.get_equipped_item(EquipmentSlot::HEAD))
 	{
-		if (const auto* magicHelm = helm->behavior ? std::get_if<MagicalHelm>(&*helm->behavior) : nullptr)
+		if (is_helm_ready(*helm, now))
 		{
-			if (magicHelm->effect == MagicalEffect::TELEPORTATION)
-			{
-				itemSpells.push_back({ "teleport", "Helm", ItemPower::CAST_SPELL });
-			}
+			itemSpells.push_back({ "teleport", "Helm", ItemPower::CAST_SPELL_ONCE_A_DAY });
 		}
 
 		// The helm of brilliance's word, once identifying the helm has taught it.

@@ -21,8 +21,9 @@ MenuSpellCast::MenuSpellCast(Player& player, GameContext& ctx)
 	: player(player)
 {
 	assert(ctx.spellRegistry && "MenuSpellCast::MenuSpellCast: called without a spellRegistry");
+	assert(ctx.gameState && "MenuSpellCast::MenuSpellCast: called without a gameState");
 
-	populate_spells();
+	populate_spells(ctx.gameState->get_time());
 
 	if (entries.empty())
 	{
@@ -52,7 +53,7 @@ MenuSpellCast::MenuSpellCast(Player& player, GameContext& ctx)
 	menu_new(static_cast<size_t>(width), static_cast<size_t>(height), startX, startY, ctx);
 }
 
-void MenuSpellCast::populate_spells()
+void MenuSpellCast::populate_spells(int now)
 {
 	entries.clear();
 
@@ -63,7 +64,7 @@ void MenuSpellCast::populate_spells()
 	}
 
 	// Add item-granted spells
-	std::ranges::copy(SpellSystem::get_item_granted_spells(player), std::back_inserter(entries));
+	std::ranges::copy(SpellSystem::get_item_granted_spells(player, now), std::back_inserter(entries));
 }
 
 std::string MenuSpellCast::spell_line(size_t index, const SpellRegistry& spells) const
@@ -131,14 +132,23 @@ void MenuSpellCast::handle_selection(GameContext& ctx)
 
 	const std::string key = entry.key;
 	const bool isMemorized = entry.source.empty();
+	const bool spendsTheHelm = entry.power == SpellSystem::ItemPower::CAST_SPELL_ONCE_A_DAY;
 
 	// onCastComplete fires when casting is over, whether or not the spell worked: Wisdom can fizzle it.
 	// &playerRef binds to the Player member, not to a local that would dangle after handle_selection().
-	auto onCastComplete = [key, isMemorized, &playerRef = player](GameContext& innerCtx)
+	auto onCastComplete = [key, isMemorized, spendsTheHelm, &playerRef = player](GameContext& innerCtx)
 	{
 		if (isMemorized)
 		{
 			std::erase(playerRef.memorizedSpells, key);
+		}
+		// Recorded before the round is spent, so the day runs from the moment of use.
+		if (spendsTheHelm)
+		{
+			Item* helm = playerRef.get_equipped_item(EquipmentSlot::HEAD);
+			assert(helm && "MenuSpellCast: the helm's daily spell was cast with no helm worn");
+			assert(innerCtx.gameState && "MenuSpellCast: the helm's daily spell was cast without a gameState");
+			record_helm_use(*helm, innerCtx.gameState->get_time());
 		}
 		spend_player_action(innerCtx, TIME_UNITS_PER_ROUND);
 	};

@@ -171,7 +171,7 @@ TEST_F(RingEffectsTest, ARingOfInvisibilityGrantsTheSpell)
 	ctx.playerOwner = &player;
 	ASSERT_TRUE(player->equip_item(ItemCreator::create("ring_of_invisibility", player->position, ctx), EquipmentSlot::LEFT_RING, ctx));
 
-	const std::vector<SpellSystem::ItemGrantedSpell> granted = SpellSystem::get_item_granted_spells(*player);
+	const std::vector<SpellSystem::ItemGrantedSpell> granted = SpellSystem::get_item_granted_spells(*player, ctx.gameState->get_time());
 
 	ASSERT_EQ(granted.size(), 1u);
 	EXPECT_EQ(granted.front().key, "invisibility");

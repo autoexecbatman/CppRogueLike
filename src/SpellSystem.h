@@ -108,6 +108,8 @@ void cast_spell_by_key(
 enum class ItemPower
 {
 	CAST_SPELL,
+	// The worn helm's spell, whose casting spends the helm's use for the day.
+	CAST_SPELL_ONCE_A_DAY,
 	SPEAK_COMMAND_WORD
 };
 
@@ -119,7 +121,9 @@ struct ItemGrantedSpell
 	ItemPower power{ ItemPower::CAST_SPELL };
 };
 
-std::vector<ItemGrantedSpell> get_item_granted_spells(const Player& player);
+// What the player's worn items let them cast at game time `now`. A helm of teleportation
+// is listed only while is_helm_ready says its day has passed; the ring is always listed.
+std::vector<ItemGrantedSpell> get_item_granted_spells(const Player& player, int now);
 
 // Whether a burst reached the player, so a caller animates the hit the burst dealt.
 enum class PlayerReach

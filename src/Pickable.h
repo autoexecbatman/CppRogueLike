@@ -315,6 +315,8 @@ struct MagicalHelm
 	int bonus{ 0 };
 	// Read only by a helm that answers to a command word; every other helm works as worn.
 	HelmCommand command{ HelmCommand::DORMANT };
+	// The game time a once-a-day power is usable again; read only by a helm of teleportation.
+	int rechargedAt{ 0 };
 };
 
 struct MagicalRing
@@ -425,6 +427,25 @@ void speak_command_word(Item& helm, Creature& wearer, GameContext& ctx);
 //   make_dormant(empoweredBrilliance);   // its command -> HelmCommand::DORMANT
 //   make_dormant(longSword);             // unchanged
 void make_dormant(Item& item) noexcept;
+
+// Whether a helm of teleportation can teleport its wearer at game time `now`: it is used
+// "once per day" (DMG, PDF page 970), so a day must have passed since its last use. Any
+// other item has no daily power and is never ready.
+//
+// Example:
+//   is_helm_ready(unusedTeleportation, 5000);          // -> true
+//   record_helm_use(unusedTeleportation, 5000);        // usable again at 177800
+//   is_helm_ready(unusedTeleportation, 177799);        // -> false, a time unit short
+//   is_helm_ready(unusedTeleportation, 177800);        // -> true
+//   is_helm_ready(helmOfBrilliance, 5000);             // -> false, it has no daily power
+[[nodiscard]] bool is_helm_ready(const Item& helm, int now);
+
+// Spends a helm of teleportation's use at game time `now`, so it is ready again a day
+// later. The helm must be a helm of teleportation.
+//
+// Example:
+//   record_helm_use(helm, 5000);   // its rechargedAt -> 177800
+void record_helm_use(Item& helm, int now);
 
 // ========== The variant ==========
 

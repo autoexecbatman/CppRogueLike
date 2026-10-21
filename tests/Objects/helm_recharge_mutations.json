@@ -1,0 +1,107 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/run_suite.ps1",
+    "-Configuration",
+    "Debug",
+    "-Filter",
+    "--gtest_filter=HelmRecharge*:HelmCommandWord*:RingEffectsTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\treturn magicalHelm && magicalHelm->effect == MagicalEffect::TELEPORTATION && magicalHelm->rechargedAt <= now;",
+      "mutated": "\treturn magicalHelm && magicalHelm->effect == MagicalEffect::TELEPORTATION;",
+      "catches": "a helm that never runs out"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\treturn magicalHelm && magicalHelm->effect == MagicalEffect::TELEPORTATION && magicalHelm->rechargedAt <= now;",
+      "mutated": "\treturn magicalHelm && magicalHelm->effect == MagicalEffect::TELEPORTATION && magicalHelm->rechargedAt < now;",
+      "catches": "a helm a time unit late at the end of its day"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\treturn magicalHelm && magicalHelm->effect == MagicalEffect::TELEPORTATION && magicalHelm->rechargedAt <= now;",
+      "mutated": "\treturn magicalHelm && magicalHelm->rechargedAt <= now;",
+      "catches": "every helm answering as though it had a daily teleport"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\treturn magicalHelm && magicalHelm->effect == MagicalEffect::TELEPORTATION && magicalHelm->rechargedAt <= now;",
+      "mutated": "\treturn false;",
+      "catches": "a helm that is never ready"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\tmagicalHelm->rechargedAt = now + ROUNDS_PER_DAY * TIME_UNITS_PER_ROUND;",
+      "mutated": "\tmagicalHelm->rechargedAt = now + ROUNDS_PER_HOUR * TIME_UNITS_PER_ROUND;",
+      "catches": "a helm recharging in an hour"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\tmagicalHelm->rechargedAt = now + ROUNDS_PER_DAY * TIME_UNITS_PER_ROUND;",
+      "mutated": "\tmagicalHelm->rechargedAt = ROUNDS_PER_DAY * TIME_UNITS_PER_ROUND;",
+      "catches": "a day counted from the start of the game rather than from the use"
+    },
+    {
+      "file": "src/TurnSchedule.h",
+      "original": "inline constexpr int ROUNDS_PER_DAY = 24 * ROUNDS_PER_HOUR;",
+      "mutated": "inline constexpr int ROUNDS_PER_DAY = 12 * ROUNDS_PER_HOUR;",
+      "catches": "a day of the wrong length"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\t\t\toutput[\"rechargedAt\"] = magicalHelm.rechargedAt;",
+      "mutated": "\t\t\t\toutput[\"rechargedAt\"] = 0;",
+      "catches": "a save that forgets when the helm recharges"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tmagicalHelm.rechargedAt = source.at(\"rechargedAt\").get<int>();",
+      "mutated": "\t\tmagicalHelm.rechargedAt = source.value(\"rechargedAt\", 0);",
+      "catches": "a record missing its recharge time loading with a default"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\tif (is_helm_ready(*helm, now))",
+      "mutated": "\t\tif (is_helm_ready(*helm, 0))",
+      "catches": "the listing reading a time other than the one it is asked about"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\t\titemSpells.push_back({ \"teleport\", \"Helm\", ItemPower::CAST_SPELL_ONCE_A_DAY });",
+      "mutated": "\t\t\titemSpells.push_back({ \"teleport\", \"Helm\", ItemPower::CAST_SPELL });",
+      "catches": "the helm's teleport cast as a free spell that spends nothing"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\titemSpells.push_back({ \"invisibility\", \"Ring\", ItemPower::CAST_SPELL });",
+      "mutated": "\t\titemSpells.push_back({ \"invisibility\", \"Ring\", ItemPower::CAST_SPELL_ONCE_A_DAY });",
+      "catches": "the ring treated as a daily power"
+    },
+    {
+      "file": "src/MenuSpellCast.cpp",
+      "original": "\tpopulate_spells(ctx.gameState->get_time());",
+      "mutated": "\tpopulate_spells(0);",
+      "catches": "the cast menu listing as of the start of the game"
+    },
+    {
+      "file": "src/MenuSpellCast.cpp",
+      "original": "\t\t\trecord_helm_use(*helm, innerCtx.gameState->get_time());",
+      "mutated": "\t\t\trecord_helm_use(*helm, innerCtx.gameState->get_time() + TIME_UNITS_PER_ROUND);",
+      "catches": "the day counted from after the round is spent"
+    },
+    {
+      "file": "src/MenuSpellCast.cpp",
+      "original": "\tconst bool spendsTheHelm = entry.power == SpellSystem::ItemPower::CAST_SPELL_ONCE_A_DAY;",
+      "mutated": "\tconst bool spendsTheHelm = false;",
+      "catches": "casting from the helm spending nothing"
+    }
+  ]
+}

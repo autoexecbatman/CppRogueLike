@@ -57,6 +57,9 @@ inline constexpr int TIME_UNITS_PER_ROUND = 120;
 // approximately one minute long" (PHB page 184), so an hour is sixty of them.
 inline constexpr int ROUNDS_PER_HOUR = 60;
 
+// Rounds in a day of game time, twenty-four of those hours.
+inline constexpr int ROUNDS_PER_DAY = 24 * ROUNDS_PER_HOUR;
+
 // Rounds in a turn, the unit potions and many spells are printed in: "Ten combat rounds
 // equal a turn" (PHB page 184).
 inline constexpr int ROUNDS_PER_TURN = 10;

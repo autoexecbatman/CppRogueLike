@@ -17,7 +17,7 @@ class MenuSpellCast : public BaseMenu
 	Player& player;
 	int selectedIndex{ 0 };
 
-	void populate_spells();
+	void populate_spells(int now);
 	void draw(const SpellRegistry& spells);
 	void handle_selection(GameContext& ctx);
 	void on_key(GameContext& ctx) override;

@@ -103,7 +103,7 @@ HelmCommand command_of(const Item& helm)
 
 bool offers_the_word(const Player& player)
 {
-	for (const SpellSystem::ItemGrantedSpell& granted : SpellSystem::get_item_granted_spells(player))
+	for (const SpellSystem::ItemGrantedSpell& granted : SpellSystem::get_item_granted_spells(player, 0))
 	{
 		if (granted.power == SpellSystem::ItemPower::SPEAK_COMMAND_WORD)
 		{
@@ -224,11 +224,11 @@ TEST_F(HelmCommandWordTest, AHelmOfTeleportationStillGrantsTeleport)
 	helm->identify_type();
 	ASSERT_TRUE(player().equip_item(std::move(helm), EquipmentSlot::HEAD, ctx));
 
-	const std::vector<SpellSystem::ItemGrantedSpell> granted = SpellSystem::get_item_granted_spells(player());
+	const std::vector<SpellSystem::ItemGrantedSpell> granted = SpellSystem::get_item_granted_spells(player(), ctx.gameState->get_time());
 
 	ASSERT_EQ(granted.size(), 1u);
 	EXPECT_EQ(granted.front().key, "teleport");
-	EXPECT_EQ(granted.front().power, SpellSystem::ItemPower::CAST_SPELL);
+	EXPECT_EQ(granted.front().power, SpellSystem::ItemPower::CAST_SPELL_ONCE_A_DAY);
 }
 
 TEST_F(HelmCommandWordTest, AnEmpoweredHelmSurvivesASave)
