@@ -27,14 +27,22 @@ enum class HungerState
 class HungerSystem
 {
 private:
-	int hungerValue{ 0 }; // Internal hunger counter
-	int hungerMax{ 1000 }; // Maximum hunger value
-	bool wellFedMessageShown{ false }; // Prevents spam of well-fed message
+	// Everything a run owns, replaced whole by begin_run, so a field added here starts each
+	// run fresh without being listed. hungerMax is here because only a load changes it, and a
+	// new game must not keep a loaded game's value.
+	struct RunState
+	{
+		int hungerValue{ 0 }; // Internal hunger counter
+		int hungerMax{ 1000 }; // Maximum hunger value
+		bool wellFedMessageShown{ false }; // Prevents spam of well-fed message
 
-	// What the player was last told they were, empty until the first message.
-	// Held only so a transition has something to compare against; the current
-	// state comes from get_hunger_state().
-	std::optional<HungerState> lastNotifiedState{};
+		// What the player was last told they were, empty until the first message.
+		// Held only so a transition has something to compare against; the current
+		// state comes from get_hunger_state().
+		std::optional<HungerState> lastNotifiedState{};
+	};
+
+	RunState run{};
 
 	// Announces a move to a different state, and records what was announced.
 	void notify_state_change(GameContext& ctx);
@@ -46,6 +54,14 @@ public:
 	HungerSystem& operator=(const HungerSystem&) = delete;
 	HungerSystem(HungerSystem&&) = delete;
 	HungerSystem& operator=(HungerSystem&&) = delete;
+
+	// Puts hunger back where a new game starts it: the counter, its maximum, and what the
+	// player was last told, so the new run's first state is recorded rather than announced.
+	//
+	// Example, after a run that ended starving:
+	//   hunger.begin_run();
+	//   hunger.get_hunger_value();   // -> 0
+	void begin_run();
 
 	// Increases hunger by the specified amount
 	void increase_hunger(GameContext& ctx, int amount);

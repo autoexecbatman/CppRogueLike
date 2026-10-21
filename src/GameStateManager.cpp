@@ -112,6 +112,25 @@ void save_creatures(const std::vector<std::unique_ptr<Creature>>& creatures, jso
 	}
 }
 
+// Puts what a run owns back the way a fresh game has it, so nothing of the last run reaches
+// the next one. Both ways into a run call it first, and a load then writes the save over it.
+// The hunger and message systems each replace their own run state whole, which keeps their
+// settings out of it. GameState also holds session flags, so only its clock and the rounds
+// already run go back.
+//
+// Example, after a run of five rounds that ended starving with a line in the log:
+//   start_fresh_run(*ctx.hungerSystem, *ctx.messageSystem, *ctx.gameState);
+//   ctx.gameState->get_rounds_run();               // -> 0, so the next round is fed
+//   ctx.hungerSystem->get_hunger_value();          // -> 0, a fresh game's hunger
+//   ctx.messageSystem->get_stored_message_count(); // -> 0, the last run's log is gone
+void start_fresh_run(HungerSystem& hungerSystem, MessageSystem& messageSystem, GameState& gameState)
+{
+	hungerSystem.begin_run();
+	messageSystem.begin_run();
+	gameState.set_time(0);
+	gameState.set_rounds_run(0);
+}
+
 } // namespace
 
 void load_creatures(const json& source, std::vector<std::unique_ptr<Creature>>& creatures)
@@ -212,12 +231,14 @@ void GameStateManager::init_new_game(GameContext& ctx)
 	assert(ctx.map != nullptr && "GameStateManager::init_new_game: called without a map");
 	assert(ctx.playerOwner != nullptr && "GameStateManager::init_new_game: called without a playerOwner");
 	assert(ctx.tileConfig != nullptr && "GameStateManager::init_new_game: called without a tileConfig");
+	assert(ctx.hungerSystem != nullptr && "GameStateManager::init_new_game: called without a hungerSystem");
+
+	start_fresh_run(*ctx.hungerSystem, *ctx.messageSystem, *ctx.gameState);
 
 	ContentRegistryIO::load(*ctx.contentRegistry, Paths::CONTENT_TILES);
 	ctx.dataManager->load_all_data(*ctx.messageSystem);
 
 	ctx.levelManager->reset_to_first_level();
-	ctx.gameState->set_time(0);
 	ctx.gameState->set_is_loaded_game(false);
 
 	assert(ctx.playerBlueprint != nullptr && "GameStateManager::init_new_game: called without a playerBlueprint");
@@ -241,6 +262,10 @@ LoadOutcome GameStateManager::load_all(GameContext& ctx)
 	assert(ctx.gameState != nullptr && "GameStateManager::load_all: called without a gameState");
 	assert(ctx.playerOwner != nullptr && "GameStateManager::load_all: called without a playerOwner");
 	assert(ctx.tileConfig != nullptr && "GameStateManager::load_all: called without a tileConfig");
+	assert(ctx.hungerSystem != nullptr && "GameStateManager::load_all: called without a hungerSystem");
+
+	// Before the save is read, so what it holds is what the loaded game keeps.
+	start_fresh_run(*ctx.hungerSystem, *ctx.messageSystem, *ctx.gameState);
 
 	ContentRegistryIO::load(*ctx.contentRegistry, Paths::CONTENT_TILES);
 	ctx.menuManager->set_game_initialized(false);

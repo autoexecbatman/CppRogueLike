@@ -48,21 +48,26 @@ static HungerState hunger_state_for(int hungerValue)
 	return HungerState::DYING;
 }
 
+void HungerSystem::begin_run()
+{
+	run = RunState{};
+}
+
 void HungerSystem::increase_hunger(GameContext& ctx, int amount)
 {
-	hungerValue = std::min(hungerValue + amount, hungerMax);
+	run.hungerValue = std::min(run.hungerValue + amount, run.hungerMax);
 	notify_state_change(ctx);
 }
 
 void HungerSystem::decrease_hunger(GameContext& ctx, int amount)
 {
-	hungerValue = std::max(hungerValue - amount, 0);
+	run.hungerValue = std::max(run.hungerValue - amount, 0);
 	notify_state_change(ctx);
 }
 
 HungerState HungerSystem::get_hunger_state() const
 {
-	return hunger_state_for(hungerValue);
+	return hunger_state_for(run.hungerValue);
 }
 
 std::string HungerSystem::get_hunger_state_string() const
@@ -102,21 +107,21 @@ std::string HungerSystem::get_hunger_state_string() const
 
 int HungerSystem::get_hunger_value() const
 {
-	return hungerValue;
+	return run.hungerValue;
 }
 
 int HungerSystem::get_hunger_max() const
 {
-	return hungerMax;
+	return run.hungerMax;
 }
 
 float HungerSystem::get_fullness_ratio() const
 {
-	if (hungerMax <= 0)
+	if (run.hungerMax <= 0)
 	{
 		return 0.0f;
 	}
-	return std::clamp(1.0f - static_cast<float>(hungerValue) / static_cast<float>(hungerMax), 0.0f, 1.0f);
+	return std::clamp(1.0f - static_cast<float>(run.hungerValue) / static_cast<float>(run.hungerMax), 0.0f, 1.0f);
 }
 
 ColorPairId HungerSystem::get_hunger_color() const
@@ -181,11 +186,11 @@ void HungerSystem::apply_hunger_effects(GameContext& ctx)
 	case HungerState::WELL_FED:
 	{
 		// Said once per spell of being well fed, and reset when the state is left.
-		if (!wellFedMessageShown)
+		if (!run.wellFedMessageShown)
 		{
 			ctx.messageSystem->append_message_part(get_hunger_color(), "You feel strong and energetic!");
 			ctx.messageSystem->finalize_message();
-			wellFedMessageShown = true;
+			run.wellFedMessageShown = true;
 		}
 		break;
 	}
@@ -235,45 +240,45 @@ void HungerSystem::notify_state_change(GameContext& ctx)
 	const HungerState current = get_hunger_state();
 
 	// The first call establishes what the player is; there is no move to report.
-	if (!lastNotifiedState.has_value())
+	if (!run.lastNotifiedState.has_value())
 	{
-		lastNotifiedState = current;
+		run.lastNotifiedState = current;
 		return;
 	}
 
 	// Most ticks move the counter without crossing a threshold.
-	if (*lastNotifiedState == current)
+	if (*run.lastNotifiedState == current)
 	{
 		return;
 	}
 
-	const HungerState previous = *lastNotifiedState;
+	const HungerState previous = *run.lastNotifiedState;
 
 	// Say it before recording it: recording first and then throwing would silence this threshold forever.
 	ctx.messageSystem->append_message_part(get_hunger_color(), "You are now " + get_hunger_state_string() + ".");
 	ctx.messageSystem->finalize_message();
 
-	lastNotifiedState = current;
+	run.lastNotifiedState = current;
 
 	// Leaving well fed re-arms the message that fires on the way back into it.
 	// The equality guard above already establishes that current is something else.
 	if (previous == HungerState::WELL_FED)
 	{
-		wellFedMessageShown = false;
+		run.wellFedMessageShown = false;
 	}
 }
 
 void HungerSystem::save(json& output) const
 {
-	output["hungerValue"] = hungerValue;
-	output["hungerMax"] = hungerMax;
-	output["wellFedMessageShown"] = wellFedMessageShown;
+	output["hungerValue"] = run.hungerValue;
+	output["hungerMax"] = run.hungerMax;
+	output["wellFedMessageShown"] = run.wellFedMessageShown;
 
 	// Only what the player was told. The state itself is derived from hungerValue,
 	// so storing it would be a second copy free to disagree with the counter.
-	if (lastNotifiedState.has_value())
+	if (run.lastNotifiedState.has_value())
 	{
-		output["lastNotifiedState"] = static_cast<int>(*lastNotifiedState);
+		output["lastNotifiedState"] = static_cast<int>(*run.lastNotifiedState);
 	}
 }
 
@@ -281,21 +286,21 @@ void HungerSystem::load(const json& source)
 {
 	if (source.contains("hungerValue"))
 	{
-		hungerValue = source["hungerValue"];
+		run.hungerValue = source["hungerValue"];
 	}
 	if (source.contains("hungerMax"))
 	{
-		hungerMax = source["hungerMax"];
+		run.hungerMax = source["hungerMax"];
 	}
 	if (source.contains("wellFedMessageShown"))
 	{
-		wellFedMessageShown = source["wellFedMessageShown"];
+		run.wellFedMessageShown = source["wellFedMessageShown"];
 	}
 
 	// A save written before this field existed leaves it empty, and the first tick
 	// after the load sets the baseline without announcing anything.
 	if (source.contains("lastNotifiedState"))
 	{
-		lastNotifiedState = static_cast<HungerState>(source["lastNotifiedState"].get<int>());
+		run.lastNotifiedState = static_cast<HungerState>(source["lastNotifiedState"].get<int>());
 	}
 }
