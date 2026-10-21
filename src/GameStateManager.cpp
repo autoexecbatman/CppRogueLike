@@ -435,15 +435,9 @@ bool GameStateManager::load_game(GameContext& ctx)
 	assert(ctx.spellTiles && "load_game: a level was loaded with no spell tile container");
 	ctx.spellTiles->clear();
 
-	if (saveDocument.contains("player"))
-	{
-		ctx.player()->load(saveDocument["player"]);
-	}
-
-	if (saveDocument.contains("stairs"))
-	{
-		ctx.stairs->load(saveDocument["stairs"]);
-	}
+	// save_game always writes each key read with at() here, so a save without one is damaged and refused.
+	ctx.player()->load(saveDocument.at("player"));
+	ctx.stairs->load(saveDocument.at("stairs"));
 
 	load_creatures(saveDocument, *ctx.creatures);
 
@@ -452,27 +446,13 @@ bool GameStateManager::load_game(GameContext& ctx)
 	UniqueId::load(saveDocument);
 	load_inventory(*ctx.floorInventory, saveDocument);
 
-	if (saveDocument.contains("gui"))
-	{
-		ctx.gui->load(saveDocument["gui"]);
-	}
-
-	if (saveDocument.contains("hunger_system"))
-	{
-		ctx.hungerSystem->load(saveDocument["hunger_system"]);
-	}
+	ctx.gui->load(saveDocument.at("gui"));
+	ctx.hungerSystem->load(saveDocument.at("hunger_system"));
 
 	ctx.levelManager->load_from_json(saveDocument);
 
-	if (saveDocument.contains("roundsRun"))
-	{
-		ctx.gameState->set_rounds_run(saveDocument["roundsRun"]);
-	}
-
-	if (saveDocument.contains("time"))
-	{
-		ctx.gameState->set_time(saveDocument["time"]);
-	}
+	ctx.gameState->set_rounds_run(saveDocument.at("roundsRun").get<int>());
+	ctx.gameState->set_time(saveDocument.at("time").get<int>());
 
 	return true; // Successfully loaded
 }

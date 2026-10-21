@@ -1,0 +1,65 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/run_suite.ps1",
+    "-Configuration",
+    "Debug",
+    "-Filter",
+    "--gtest_filter=SaveRequiredKeys*:EveryKeyTheWriterAlwaysWrites*"
+  ],
+  "mutations": [
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\tctx.stairs->load(saveDocument.at(\"stairs\"));",
+      "mutated": "\tif (saveDocument.contains(\"stairs\")) { ctx.stairs->load(saveDocument[\"stairs\"]); }",
+      "catches": "a save without its stairs loading with them at their default"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\tctx.gui->load(saveDocument.at(\"gui\"));",
+      "mutated": "\tif (saveDocument.contains(\"gui\")) { ctx.gui->load(saveDocument[\"gui\"]); }",
+      "catches": "a save without its gui loading with it at its default"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\tctx.hungerSystem->load(saveDocument.at(\"hunger_system\"));",
+      "mutated": "\tif (saveDocument.contains(\"hunger_system\")) { ctx.hungerSystem->load(saveDocument[\"hunger_system\"]); }",
+      "catches": "a save without its hunger loading with it at its default"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\tctx.gameState->set_rounds_run(saveDocument.at(\"roundsRun\").get<int>());",
+      "mutated": "\tif (saveDocument.contains(\"roundsRun\")) { ctx.gameState->set_rounds_run(saveDocument[\"roundsRun\"]); }",
+      "catches": "a save without its round count loading it at 0"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\tctx.gameState->set_time(saveDocument.at(\"time\").get<int>());",
+      "mutated": "\tif (saveDocument.contains(\"time\")) { ctx.gameState->set_time(saveDocument[\"time\"]); }",
+      "catches": "a save without its clock loading at time 0"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\tctx.gameState->set_time(saveDocument.at(\"time\").get<int>());",
+      "mutated": "\tctx.gameState->set_time(saveDocument.value(\"time\", 0));",
+      "catches": "a missing clock read with a default"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\tctx.gameState->set_time(saveDocument.at(\"time\").get<int>());",
+      "mutated": "\tctx.gameState->set_time(0);",
+      "catches": "a loaded game whose clock is not the saved one"
+    },
+    {
+      "file": "src/GameStateManager.cpp",
+      "original": "\tctx.player()->load(saveDocument.at(\"player\"));",
+      "mutated": "\tif (saveDocument.contains(\"player\")) { ctx.player()->load(saveDocument[\"player\"]); }",
+      "catches": "a save without its player loading a blank character; last, because its abort leaves a save that makes later cases skip"
+    }
+  ]
+}

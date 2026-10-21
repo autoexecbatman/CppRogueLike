@@ -227,6 +227,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/InventoryPersistenceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/HungerSystemTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/LoadRefusalTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SaveRequiredKeysTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SaveFieldNamesTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ColorPairTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellProgressionTest.cpp
