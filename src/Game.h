@@ -108,7 +108,7 @@ struct Game
 	PrefabLibrary prefabLibrary{};
 #ifndef __EMSCRIPTEN__
 	ContentEditor contentEditor{};
-	RoomEditor roomEditor{};
+	RoomEditor roomEditor{ prefabLibrary, palette };
 	ItemEditor itemEditor{};
 	MonsterEditor monsterEditor{};
 	SpellEditor spellEditor{};

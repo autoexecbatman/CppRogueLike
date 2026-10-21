@@ -105,7 +105,7 @@ struct MockGameContext
 	Palette palette{};
 	DecorEditor decorEditor{ palette };
 	ContentEditor contentEditor{};
-	RoomEditor roomEditor{};
+	RoomEditor roomEditor{ prefabLibrary, palette };
 	ItemEditor itemEditor{};
 	MonsterEditor monsterEditor{};
 	SpellEditor spellEditor{};

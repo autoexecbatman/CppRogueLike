@@ -262,11 +262,6 @@ $probes = @(
         anchor = 'assert(rowHeight > 0 && "whole_rows_within: a row has no height");'
     },
     @{
-        test   = "AssertProbeDeathTest.TickingTheRoomEditorBeforeEnteringItAborts"
-        file   = "src/RoomEditor.cpp"
-        anchor = 'assert(palette && "RoomEditor::tick: called before enter");'
-    },
-    @{
         test   = "AssertProbeDeathTest.ACanvasGridOfNoCellSizeAborts"
         file   = "src/RoomEditor.cpp"
         anchor = 'assert(tileSize > 0 && "CanvasGrid: a cell has no size");'

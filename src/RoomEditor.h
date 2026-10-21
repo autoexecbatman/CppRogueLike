@@ -128,9 +128,9 @@ private:
 	};
 
 	bool active{ false };
-	PrefabLibrary* library{ nullptr };
-	// Game declares the palette before the editor, so it outlives every use of this pointer.
-	Palette* palette{ nullptr };
+	// Game declares both before the editor, so they outlive every use of these references.
+	PrefabLibrary& library;
+	Palette& palette;
 	const TileConfig* tileConfig{ nullptr };
 
 	// Canvas (two layers)
@@ -232,11 +232,18 @@ private:
 	[[nodiscard]] char selected_sym() const;
 
 public:
-	// Opens the editor on a fresh canvas, editing `lib`'s prefabs and `editedPalette`'s symbols.
+	// An editor of `prefabLibrary`'s prefabs and `editedPalette`'s symbols, inactive until
+	// enter. Both must outlive it. It holds them by reference, so it cannot be assigned.
 	//
 	// Example:
-	//   editor.enter(*ctx.prefabLibrary, *ctx.palette);   // is_active() -> true, status() -> ""
-	void enter(PrefabLibrary& lib, Palette& editedPalette);
+	//   RoomEditor editor{ library, palette };   // inactive: Game ticks it only after enter()
+	RoomEditor(PrefabLibrary& prefabLibrary, Palette& editedPalette);
+
+	// Opens the editor on a fresh canvas.
+	//
+	// Example:
+	//   editor.enter();   // is_active() -> true, status() -> ""
+	void enter();
 	void exit(GameContext& ctx);
 	void tick(GameContext& ctx);
 

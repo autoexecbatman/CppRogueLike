@@ -70,7 +70,6 @@
 #include "src/PlayerController.h"
 #include "src/RandomDice.h"
 #include "src/Renderer.h"
-#include "src/RoomEditor.h"
 #include "src/ShopKeeper.h"
 #include "src/SpellSystem.h"
 #include "src/TargetingSystem.h"
@@ -702,14 +701,6 @@ TEST_F(AssertProbeDeathTest, SteppingAValueAboveItsBoundAborts)
 TEST_F(AssertProbeDeathTest, CountingRowsOfNoHeightAborts)
 {
 	EXPECT_DEATH([[maybe_unused]] const size_t rows = whole_rows_within(90, 0), "whole_rows_within: a row has no height");
-}
-
-// A room editor ticked before it was entered has no palette to draw or edit. That is a wiring
-// fault, caught where every frame of the editor begins.
-TEST_F(AssertProbeDeathTest, TickingTheRoomEditorBeforeEnteringItAborts)
-{
-	RoomEditor editor{};
-	EXPECT_DEATH(editor.tick(ctx), "RoomEditor::tick: called before enter");
 }
 
 // The Constitution table lives in the data manager, so a creature asked to bring its

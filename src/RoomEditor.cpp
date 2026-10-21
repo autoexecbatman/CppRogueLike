@@ -200,10 +200,15 @@ int CanvasGrid::row_at(int pixelY) const
 // Lifecycle
 // ---------------------------------------------------------------------------
 
-void RoomEditor::enter(PrefabLibrary& lib, Palette& editedPalette)
+RoomEditor::RoomEditor(PrefabLibrary& prefabLibrary, Palette& editedPalette)
+	: library(prefabLibrary), palette(editedPalette)
 {
-	library = &lib;
-	palette = &editedPalette;
+	// A canvas from the start, so an editor ticked before enter draws an empty room.
+	new_canvas(canvasWidth, canvasHeight);
+}
+
+void RoomEditor::enter()
+{
 	active = true;
 	mode = EditorMode::NORMAL;
 	inputBuffer.clear();
@@ -222,8 +227,6 @@ void RoomEditor::exit(GameContext& ctx)
 
 void RoomEditor::tick(GameContext& ctx)
 {
-	// Every input and render path below reads the palette that enter() stored.
-	assert(palette && "RoomEditor::tick: called before enter");
 	tileConfig = ctx.tileConfig;
 	handle_input(ctx);
 
@@ -259,11 +262,6 @@ void RoomEditor::new_canvas(int width, int height)
 
 void RoomEditor::do_save(const std::string& name)
 {
-	if (!library)
-	{
-		return;
-	}
-
 	Prefab prefab;
 	prefab.name = name.empty() ? std::format("prefab_{}x{}", canvasWidth, canvasHeight) : name;
 	prefab.depthMin = depthMin;
@@ -295,7 +293,7 @@ void RoomEditor::do_save(const std::string& name)
 	}
 
 	prefabName = prefab.name;
-	library->add_or_replace(std::move(prefab));
+	library.add_or_replace(std::move(prefab));
 	if (save_library() == SaveOutcome::SAVED)
 	{
 		set_status(std::format("Saved: {}", prefabName));
@@ -304,11 +302,7 @@ void RoomEditor::do_save(const std::string& name)
 
 void RoomEditor::do_load(size_t prefabIndex)
 {
-	if (!library)
-	{
-		return;
-	}
-	const auto& all = library->all();
+	const auto& all = library.all();
 	if (prefabIndex >= all.size())
 	{
 		return;
@@ -356,18 +350,14 @@ void RoomEditor::do_load(size_t prefabIndex)
 
 void RoomEditor::do_delete(size_t prefabIndex)
 {
-	if (!library)
-	{
-		return;
-	}
-	const auto& all = library->all();
+	const auto& all = library.all();
 	if (prefabIndex >= all.size())
 	{
 		return;
 	}
 
 	std::string name = all[prefabIndex].name;
-	library->remove(name);
+	library.remove(name);
 	listSelected.reset();
 	if (save_library() == SaveOutcome::SAVED)
 	{
@@ -383,10 +373,9 @@ void RoomEditor::set_status(const std::string& message)
 
 RoomEditor::SaveOutcome RoomEditor::save_library()
 {
-	assert(library && "RoomEditor::save_library: called before enter");
 	try
 	{
-		library->save(Paths::PREFABS);
+		library.save(Paths::PREFABS);
 	}
 	catch (const std::runtime_error& refusal)
 	{
@@ -398,10 +387,9 @@ RoomEditor::SaveOutcome RoomEditor::save_library()
 
 RoomEditor::SaveOutcome RoomEditor::save_palette()
 {
-	assert(palette && "RoomEditor::save_palette: called before enter");
 	try
 	{
-		palette->save();
+		palette.save();
 	}
 	catch (const std::runtime_error& refusal)
 	{
@@ -413,8 +401,7 @@ RoomEditor::SaveOutcome RoomEditor::save_palette()
 
 void RoomEditor::commit_symbol_label(char symbol, std::string_view label)
 {
-	assert(palette && "RoomEditor::commit_symbol_label: called before enter");
-	const PaletteEdit edit = palette->set_symbol_label(symbol, label);
+	const PaletteEdit edit = palette.set_symbol_label(symbol, label);
 	if (edit != PaletteEdit::APPLIED)
 	{
 		set_status(std::format("NOT SAVED: {}", palette_edit_refusal(edit)));
@@ -428,8 +415,7 @@ void RoomEditor::commit_symbol_label(char symbol, std::string_view label)
 
 void RoomEditor::commit_symbol_tile(char symbol, TileRef tile)
 {
-	assert(palette && "RoomEditor::commit_symbol_tile: called before enter");
-	const PaletteEdit edit = palette->set_symbol_tile(symbol, tile);
+	const PaletteEdit edit = palette.set_symbol_tile(symbol, tile);
 	if (edit != PaletteEdit::APPLIED)
 	{
 		set_status(std::format("NOT SAVED: {}", palette_edit_refusal(edit)));
@@ -486,7 +472,7 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 	}
 
 	// F2 -- open tile picker for current palette symbol
-	if (IsKeyPressed(KEY_F2) && library)
+	if (IsKeyPressed(KEY_F2))
 	{
 		pickerSheetListIndex = 0;
 		pickerCol = 0;
@@ -498,7 +484,7 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 	// F3 -- rename label for current palette symbol
 	if (IsKeyPressed(KEY_F3))
 	{
-		const std::vector<SymbolRow> symbolRows = palette->symbol_rows();
+		const std::vector<SymbolRow> symbolRows = palette.symbol_rows();
 		if (paletteIndex < symbolRows.size())
 		{
 			inputBuffer = symbolRows[paletteIndex].label;
@@ -509,7 +495,7 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 
 	// Palette navigation. The rows always begin with the structural symbols, so both wraps have a last entry.
 	static_assert(!STRUCTURAL_SYMBOLS.empty(), "RoomEditor: the palette's wrapping navigation needs a row");
-	const std::vector<SymbolRow> symbolRows = palette->symbol_rows();
+	const std::vector<SymbolRow> symbolRows = palette.symbol_rows();
 
 	if (IsKeyPressed(KEY_UP))
 	{
@@ -600,7 +586,7 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 
 	// Mouse wheel -- scroll palette (left panel) or prefab list (right panel)
 	float wheel = GetMouseWheelMove();
-	if (wheel != 0.0f && library)
+	if (wheel != 0.0f)
 	{
 		::Vector2 mousePosition = GetMousePosition();
 		int delta = (wheel > 0.0f) ? -1 : 1;
@@ -613,12 +599,12 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 
 		if (is_mouse_over_left_panel())
 		{
-			const size_t paletteSize = palette->symbol_rows().size();
+			const size_t paletteSize = palette.symbol_rows().size();
 			paletteIndex = step_within(paletteIndex, delta, paletteSize - 1);
 		}
 		else
 		{
-			const size_t count = library->all().size();
+			const size_t count = library.all().size();
 			const size_t lastPrefab = count == 0 ? 0 : count - 1;
 			// A delete can leave the scroll past the shortened list; any notch then brings it back to the last row.
 			listScroll = listScroll > lastPrefab ? lastPrefab : step_within(listScroll, delta, lastPrefab);
@@ -736,7 +722,7 @@ void RoomEditor::handle_input_text()
 		{
 			if (!inputBuffer.empty())
 			{
-				const std::vector<SymbolRow> symbolRows = palette->symbol_rows();
+				const std::vector<SymbolRow> symbolRows = palette.symbol_rows();
 				if (paletteIndex < symbolRows.size())
 				{
 					commit_symbol_label(symbolRows[paletteIndex].symbol, inputBuffer);
@@ -817,11 +803,6 @@ std::optional<RoomEditor::CanvasCell> RoomEditor::screen_to_canvas(
 // Returns prefab list index from screen pixel in right panel. Returns nullopt if outside panel.
 std::optional<size_t> RoomEditor::screen_to_list_index(const Renderer& renderer, int mousePx, int mousePy) const
 {
-	if (!library)
-	{
-		return std::nullopt;
-	}
-
 	int tileSize = renderer.get_tile_size();
 	int panelX = renderer.get_screen_width() - RIGHT_W_TILES * tileSize;
 
@@ -838,7 +819,7 @@ std::optional<size_t> RoomEditor::screen_to_list_index(const Renderer& renderer,
 	}
 	const size_t listIndex = listScroll + *slot;
 
-	if (listIndex >= library->all().size())
+	if (listIndex >= library.all().size())
 	{
 		return std::nullopt;
 	}
@@ -849,11 +830,6 @@ std::optional<size_t> RoomEditor::screen_to_list_index(const Renderer& renderer,
 // Returns palette index from screen pixel in left panel. Returns nullopt if outside panel.
 std::optional<size_t> RoomEditor::screen_to_palette_index(const Renderer& renderer, int mousePx, int mousePy) const
 {
-	if (!library)
-	{
-		return std::nullopt;
-	}
-
 	int tileSize = renderer.get_tile_size();
 	int panelW = LEFT_W_TILES * tileSize;
 	int panelY = TOP_H_TILES * tileSize;
@@ -875,7 +851,7 @@ std::optional<size_t> RoomEditor::screen_to_palette_index(const Renderer& render
 	const size_t scrollStart = paletteIndex >= maxVisible ? paletteIndex - maxVisible + 1 : 0;
 
 	const size_t paletteEntryIndex = scrollStart + slot;
-	if (paletteEntryIndex >= palette->symbol_rows().size() || slot >= maxVisible)
+	if (paletteEntryIndex >= palette.symbol_rows().size() || slot >= maxVisible)
 	{
 		return std::nullopt;
 	}
@@ -890,7 +866,7 @@ std::optional<size_t> RoomEditor::screen_to_palette_index(const Renderer& render
 // Current selected symbol character.
 char RoomEditor::selected_sym() const
 {
-	const std::vector<SymbolRow> symbolRows = palette->symbol_rows();
+	const std::vector<SymbolRow> symbolRows = palette.symbol_rows();
 	if (paletteIndex >= symbolRows.size())
 	{
 		return '.';
@@ -930,7 +906,7 @@ TileRef RoomEditor::symbol_tile_id(char symbol) const
 	}
 	default:
 	{
-		return palette->resolve_decor(symbol);
+		return palette.resolve_decor(symbol);
 	}
 	}
 }
@@ -1041,11 +1017,6 @@ void RoomEditor::render_top_bar(const Renderer& renderer) const
 
 void RoomEditor::render_left_panel(const Renderer& renderer) const
 {
-	if (!library)
-	{
-		return;
-	}
-
 	int tileSize = renderer.get_tile_size();
 	int panelW = LEFT_W_TILES * tileSize;
 	int panelY = TOP_H_TILES * tileSize;
@@ -1054,7 +1025,7 @@ void RoomEditor::render_left_panel(const Renderer& renderer) const
 	DrawRectangle(0, panelY, panelW, panelH, Color{ 15, 15, 22, 230 });
 	DrawLine(panelW - 1, panelY, panelW - 1, panelY + panelH, Color{ 70, 70, 110, 255 });
 
-	const std::vector<SymbolRow> symbolRows = palette->symbol_rows();
+	const std::vector<SymbolRow> symbolRows = palette.symbol_rows();
 	const size_t maxVisible = whole_rows_within(panelH, tileSize);
 
 	// Scroll to keep selected entry visible
@@ -1209,11 +1180,6 @@ void RoomEditor::render_canvas(const Renderer& renderer) const
 
 void RoomEditor::render_right_panel(const Renderer& renderer) const
 {
-	if (!library)
-	{
-		return;
-	}
-
 	int tileSize = renderer.get_tile_size();
 	int panelX = renderer.get_screen_width() - RIGHT_W_TILES * tileSize;
 	int panelY = TOP_H_TILES * tileSize;
@@ -1227,7 +1193,7 @@ void RoomEditor::render_right_panel(const Renderer& renderer) const
 	renderer.draw_text_color(Vector2D{ panelX + 6, panelY + 4 }, "SAVED PREFABS", Color{ 160, 160, 220, 255 });
 
 	const PrefabListRows rows = prefab_list_rows(renderer);
-	const auto& all = library->all();
+	const auto& all = library.all();
 
 	for (size_t slot = 0; slot < rows.visible_rows() && listScroll + slot < all.size(); ++slot)
 	{
@@ -1376,7 +1342,7 @@ void RoomEditor::handle_input_picker(GameContext& ctx)
 
 	if (IsKeyPressed(KEY_ENTER))
 	{
-		const std::vector<SymbolRow> symbolRows = palette->symbol_rows();
+		const std::vector<SymbolRow> symbolRows = palette.symbol_rows();
 		if (paletteIndex < symbolRows.size())
 		{
 			commit_symbol_tile(symbolRows[paletteIndex].symbol, TileRef{ sheetId, pickerCol, pickerRow });
@@ -1432,14 +1398,14 @@ void RoomEditor::render_tile_picker(const Renderer& renderer) const
 	}
 
 	// Info bar at top
-	const std::vector<SymbolRow> symbolRows = palette->symbol_rows();
+	const std::vector<SymbolRow> symbolRows = palette.symbol_rows();
 	std::string symInfo = "?";
 	if (paletteIndex < symbolRows.size())
 	{
 		char symbol = symbolRows[paletteIndex].symbol;
 		symInfo = std::format("Assigning tile for '{}' ({})",
 			symbol,
-			palette->symbol_label(symbol));
+			palette.symbol_label(symbol));
 	}
 
 	std::string header = std::format(

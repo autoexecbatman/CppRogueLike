@@ -156,10 +156,8 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
 	auto roomEditorCommand = [](GameContext& ctx)
 	{
 		assert(ctx.roomEditor && "make_main_menu roomEditorCommand: called without a roomEditor");
-		assert(ctx.prefabLibrary && "make_main_menu roomEditorCommand: called without a prefabLibrary");
-		assert(ctx.palette && "make_main_menu roomEditorCommand: called without a palette");
 
-		ctx.roomEditor->enter(*ctx.prefabLibrary, *ctx.palette);
+		ctx.roomEditor->enter();
 	};
 	entries.push_back({ "Room Editor", 'e', roomEditorCommand });
 

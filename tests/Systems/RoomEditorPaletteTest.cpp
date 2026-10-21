@@ -57,7 +57,7 @@ protected:
 		out.close();
 
 		palette.load(scratch.string());
-		editor.enter(library, palette);
+		editor.enter();
 	}
 
 	void TearDown() override
@@ -133,7 +133,7 @@ protected:
 	nlohmann::json real{};
 	Palette palette{};
 	PrefabLibrary library{};
-	RoomEditor editor{};
+	RoomEditor editor{ library, palette };
 };
 
 // The issue's check: a label typed in the room editor is in the file, and the status says so.
