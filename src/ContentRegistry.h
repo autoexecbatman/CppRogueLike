@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "Renderer.h"
+#include "TileRef.h"
 
 // ContentRegistry -- value-type source of truth for item-to-tile mappings.
 //

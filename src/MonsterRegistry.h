@@ -20,7 +20,7 @@
 #include "IntelligenceRating.h"
 #include "MonsterHitDice.h"
 #include "MonsterStrength.h"
-#include "Renderer.h"
+#include "TileRef.h"
 
 // file: MonsterRegistry.h
 //

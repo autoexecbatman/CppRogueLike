@@ -27,8 +27,8 @@
 #include "Item.h"
 #include "MagicalItemEffects.h"
 #include "Persistent.h"
-#include "Renderer.h"
 #include "ShopKeeper.h"
+#include "TileRef.h"
 #include "TurnSchedule.h"
 #include "Vector2D.h"
 

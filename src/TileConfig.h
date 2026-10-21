@@ -4,8 +4,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "Renderer.h"
 #include "TileDefinition.h"
+#include "TileRef.h"
 #include "TileType.h"
 
 // ---------------------------------------------------------------------------

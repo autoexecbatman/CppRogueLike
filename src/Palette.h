@@ -29,7 +29,7 @@
 #include <string_view>
 #include <vector>
 
-#include "Renderer.h"
+#include "TileRef.h"
 
 // One named tile. A symbol of 0 means the tile has no prefab character.
 struct PaletteEntry

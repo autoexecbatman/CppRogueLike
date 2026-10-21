@@ -7,7 +7,7 @@
 
 #include <string>
 
-#include "Renderer.h"
+#include "TileRef.h"
 #include "Vector2D.h"
 
 struct Decoration

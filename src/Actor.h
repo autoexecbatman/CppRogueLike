@@ -5,7 +5,7 @@
 
 #include "Colors.h"
 #include "Persistent.h"
-#include "Renderer.h"
+#include "TileRef.h"
 #include "UniqueId.h"
 #include "Vector2D.h"
 

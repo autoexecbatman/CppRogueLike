@@ -9,6 +9,7 @@
 #include "MessageSystem.h"
 #include "Player.h"
 #include "PlayerTurn.h"
+#include "Renderer.h"
 #include "SpellRegistry.h"
 #include "SpellSystem.h"
 

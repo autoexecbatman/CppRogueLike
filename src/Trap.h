@@ -13,12 +13,14 @@
 #include <optional>
 
 #include "Persistent.h" // json
-#include "Renderer.h" // TileRef, held by value below
 #include "TileFeature.h"
+#include "TileRef.h" // TileRef, held by value below
 #include "Vector2D.h"
 
 class Player;
 class RandomDice;
+// Taken by reference in the constructor and not kept, so its definition is not needed here.
+class TileConfig;
 
 enum class TrapType
 {

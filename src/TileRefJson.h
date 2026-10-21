@@ -11,7 +11,7 @@
 //   TileRefJson::parse_tile(json{ { "col", 3 } });   // throws json::out_of_range: no "sheet"
 
 #include "Persistent.h"
-#include "Renderer.h"
+#include "TileRef.h"
 
 namespace TileRefJson
 {
