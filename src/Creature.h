@@ -307,8 +307,17 @@ public:
 
 	// The time one ordinary action takes this creature, in time units; a bigger number
 	// is slower. It prices every action, so it reaches movement, attacks and the rest
-	// alike, and it is what one ordinary action costs with no conversion.
-	[[nodiscard]] int get_action_delay() const noexcept { return actionDelay; }
+	// alike, and it is what one ordinary action costs with no conversion. While a SPEED
+	// buff is present it is half the base delay, however many there are: Haste is "not
+	// cumulative with itself" (PHB, PDF page 308).
+	//
+	// Example, a creature of the ordinary delay before and after a potion of speed:
+	//   creature.get_action_delay();   // -> 120
+	//   creature.get_action_delay();   // -> 60, with SPEED in activeBuffs
+	[[nodiscard]] int get_action_delay() const noexcept;
+
+	// The delay with no haste applied: what is saved, and what a spellcasting costs.
+	[[nodiscard]] int get_unhasted_action_delay() const noexcept { return actionDelay; }
 
 	void set_action_delay(int timeUnits) noexcept { actionDelay = timeUnits; }
 
@@ -327,7 +336,7 @@ public:
 	//   quickling.scheduled_actions_before(TIME_UNITS_PER_ROUND);  // -> 2
 	[[nodiscard]] int scheduled_actions_before(int clockLimit) const noexcept
 	{
-		return actions_before(nextActionTime, actionDelay, clockLimit);
+		return actions_before(nextActionTime, get_action_delay(), clockLimit);
 	}
 
 	int get_morale() const noexcept { return morale; }

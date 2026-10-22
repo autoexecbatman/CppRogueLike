@@ -39,8 +39,8 @@
     },
     {
       "file": "src/Creature.h",
-      "original": "\t\treturn actions_before(nextActionTime, actionDelay, clockLimit);",
-      "mutated": "\t\treturn actions_before(0, actionDelay, clockLimit);",
+      "original": "\t\treturn actions_before(nextActionTime, get_action_delay(), clockLimit);",
+      "mutated": "\t\treturn actions_before(0, get_action_delay(), clockLimit);",
       "catches": "where the creature stands on the clock ignored, so it is owed every action since the game began"
     }
   ]

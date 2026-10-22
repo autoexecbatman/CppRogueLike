@@ -150,7 +150,7 @@ void MenuSpellCast::handle_selection(GameContext& ctx)
 			assert(innerCtx.gameState && "MenuSpellCast: the helm's daily spell was cast without a gameState");
 			record_helm_use(*helm, innerCtx.gameState->get_time());
 		}
-		spend_player_action(innerCtx, TIME_UNITS_PER_ROUND);
+		spend_player_spellcasting(innerCtx);
 	};
 
 	const SpellSource source = isMemorized ? SpellSource::MEMORIZED : SpellSource::ITEM;

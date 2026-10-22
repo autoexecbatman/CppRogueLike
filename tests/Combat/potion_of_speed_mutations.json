@@ -1,0 +1,71 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/run_suite.ps1",
+    "-Configuration",
+    "Debug",
+    "-Filter",
+    "--gtest_filter=PotionOfSpeed*:PlayerActionCostTest.*:CreatureScheduleTest.*:CreatureSerializationTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tconst int hastedDelay = actionDelay / 2;",
+      "mutated": "\tconst int hastedDelay = actionDelay;",
+      "catches": "the halving removed, so the potion does nothing to its drinker's pace"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tconst int hastedDelay = actionDelay / 2;",
+      "mutated": "\tconst int hastedDelay = actionDelay / (2 * static_cast<int>(std::ranges::count_if(activeBuffs, is_speed)));",
+      "catches": "a second speed halving again, which the book's 'not cumulative' forbids"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\treturn activeBuff.type == BuffType::SPEED;",
+      "mutated": "\t\treturn activeBuff.type == BuffType::STRENGTH;",
+      "catches": "the halving keyed on a buff the potion does not grant"
+    },
+    {
+      "file": "src/Creature.h",
+      "original": "\t\treturn actions_before(nextActionTime, get_action_delay(), clockLimit);",
+      "mutated": "\t\treturn actions_before(nextActionTime, actionDelay, clockLimit);",
+      "catches": "the schedule read from the stored member, so a hasted creature is still due one action a round"
+    },
+    {
+      "file": "src/Creature.h",
+      "original": "\t[[nodiscard]] int get_unhasted_action_delay() const noexcept { return actionDelay; }",
+      "mutated": "\t[[nodiscard]] int get_unhasted_action_delay() const noexcept { return get_action_delay(); }",
+      "catches": "the unhasted delay answered with the hasted one"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\toutput[\"actionDelay\"] = actionDelay;",
+      "mutated": "\toutput[\"actionDelay\"] = get_action_delay();",
+      "catches": "the hasted delay saved as the base, so a reload halves it a second time"
+    },
+    {
+      "file": "src/PlayerTurn.cpp",
+      "original": "\tadvance_player_and_open_turn(ctx, scaled_cost(TIME_UNITS_PER_ROUND, ctx.player()->get_unhasted_action_delay()));",
+      "mutated": "\tadvance_player_and_open_turn(ctx, scaled_cost(TIME_UNITS_PER_ROUND, ctx.player()->get_action_delay()));",
+      "catches": "a spellcasting priced on the hasted delay, which the book says it is not"
+    },
+    {
+      "file": "src/MenuSpellCast.cpp",
+      "original": "\t\tspend_player_spellcasting(innerCtx);",
+      "mutated": "\t\tspend_player_action(innerCtx, TIME_UNITS_PER_ROUND);",
+      "catches": "the cast menu pricing a spell as an ordinary action"
+    },
+    {
+      "file": "data/content/items.json",
+      "original": "\"duration\": \"5d4\",\n        \"durationUnit\": \"rounds\",",
+      "mutated": "\"duration\": \"5d4\",\n        \"durationUnit\": \"turns\",",
+      "catches": "the potion's 5d4 read as turns, ten times the book's duration"
+    }
+  ]
+}

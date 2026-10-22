@@ -22,6 +22,11 @@
 //
 // The cost is always given explicitly. There is no default, because a default is how
 // every action ends up costing the same thing again.
+//
+// A spellcasting is the one action haste does not speed (PHB, PDF page 308), so it has
+// its own entry point, priced on the unhasted delay:
+//
+//   spend_player_spellcasting(ctx);   // a hasted player still pays a full round
 
 #include "TurnSchedule.h"
 
@@ -35,3 +40,10 @@ struct GameContext;
 // has happened, and this is the bookkeeping. It asserts a player and a game state,
 // both of which a running game always has.
 void spend_player_action(GameContext& ctx, int baseCost);
+
+// Records that the player cast a spell, one round of the player's unhasted delay, and
+// opens the turn: "Spellcasting and spell effects are not sped up" (PHB, PDF page 308).
+//
+// Example, a hasted player of the ordinary delay at clock 5000:
+//   spend_player_spellcasting(ctx);   // clock -> 5120, where an action would reach 5060
+void spend_player_spellcasting(GameContext& ctx);

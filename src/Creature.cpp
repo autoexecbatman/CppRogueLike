@@ -1629,6 +1629,23 @@ const Gauntlets* Creature::get_gauntlets_beside_girdle() const noexcept
 	return wearsGiantStrength ? strengthGauntlets : nullptr;
 }
 
+int Creature::get_action_delay() const noexcept
+{
+	auto is_speed = [](const Buff& activeBuff)
+	{
+		return activeBuff.type == BuffType::SPEED;
+	};
+	if (!std::ranges::any_of(activeBuffs, is_speed))
+	{
+		return actionDelay;
+	}
+
+	// Twice the actions in the same time is half the time each.
+	const int hastedDelay = actionDelay / 2;
+	assert(hastedDelay >= 1 && "get_action_delay: a base delay too small to halve");
+	return hastedDelay;
+}
+
 // AD&D 2e: an ability score is the creature's own, or the highest value any buff or worn
 // item sets it to if that is higher, plus every buff's and worn item's addition. Under a
 // girdle of giant strength, Strength takes the penalties and none of the bonuses, since

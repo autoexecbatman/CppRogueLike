@@ -37,6 +37,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/AttackRateTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/TurnScheduleTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/PlayerActionCostTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Combat/PotionOfSpeedTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/AttackStrengthTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/AttackerTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/WornResistanceTest.cpp
