@@ -16,6 +16,7 @@
 #include "Renderer.h"
 #include "SpellRegistry.h"
 #include "SpellSystem.h"
+#include "Spellcasting.h"
 
 MenuSpellCast::MenuSpellCast(Player& player, GameContext& ctx)
 	: player(player)
@@ -58,7 +59,7 @@ void MenuSpellCast::populate_spells(int now)
 	entries.clear();
 
 	// Add memorized spells (string keys)
-	for (const auto& key : player.memorizedSpells)
+	for (const auto& key : player.spellcasting.memorizedSpells)
 	{
 		entries.push_back({ key, "", SpellSystem::ItemPower::CAST_SPELL });
 	}
@@ -140,7 +141,7 @@ void MenuSpellCast::handle_selection(GameContext& ctx)
 	{
 		if (isMemorized)
 		{
-			std::erase(playerRef.memorizedSpells, key);
+			spend_memorized(playerRef.spellcasting, key);
 		}
 		// Recorded before the round is spent, so the day runs from the moment of use.
 		if (spendsTheHelm)

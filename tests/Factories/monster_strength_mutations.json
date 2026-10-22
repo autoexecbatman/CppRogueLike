@@ -57,8 +57,8 @@
     },
     {
       "file": "src/MonsterRegistry.cpp",
-      "original": "\t\treturn nullptr;\n",
-      "mutated": "\t\treturn nlohmann::json{ { \"score\", 10 }, { \"exceptional\", 0 } };\n",
+      "original": "\tif (!strength.has_value())\n\t{\n\t\treturn nullptr;\n",
+      "mutated": "\tif (!strength.has_value())\n\t{\n\t\treturn nlohmann::json{ { \"score\", 10 }, { \"exceptional\", 0 } };\n",
       "catches": "a save that writes a Strength for a monster that rolls Table 6"
     },
     {

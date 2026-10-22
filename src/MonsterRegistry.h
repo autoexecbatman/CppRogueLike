@@ -20,6 +20,8 @@
 #include "IntelligenceRating.h"
 #include "MonsterHitDice.h"
 #include "MonsterStrength.h"
+#include "SpellRegistry.h"
+#include "Spellcasting.h"
 #include "TileRef.h"
 
 // file: MonsterRegistry.h
@@ -154,6 +156,12 @@ struct MonsterParams
 	// Whether the player may swap places with it.
 	bool displaceable{ true };
 
+	// Spellcasting
+	// The caster class and level it memorizes at, or none for a monster that memorizes nothing.
+	std::optional<SpellcasterTraining> spellcasterTraining{};
+	// The spell-like powers it uses without memorizing, in the order it tries them.
+	std::vector<InnatePower> innatePowers{};
+
 	// Spawn table
 	int baseWeight{ 10 };
 	// The first dungeon level it can spawn on.
@@ -180,6 +188,15 @@ public:
 
 	// Writes every standard monster and every custom monster.
 	void save(std::string_view path) const;
+
+	// Throws std::runtime_error naming the monster and the key when an innate power names a
+	// spell the registry does not hold. Run after both registries load, since monsters.json
+	// is read without the spells.
+	//
+	// Example:
+	//   monsters.refuse_unknown_spells(spells);   // nothing, every power names a real spell
+	//   // a pit fiend's power renamed "hellfire" -> throws, "pit_fiend ... 'hellfire'"
+	void refuse_unknown_spells(const SpellRegistry& spells) const;
 
 	// Every standard monster's parameters, by id - what the spawn table is drawn from.
 	[[nodiscard]] const std::unordered_map<MonsterId, MonsterParams>& get_standard_monsters() const;

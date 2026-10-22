@@ -222,6 +222,8 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/EquipmentUseTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/SanctuarySaveTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SanctuarySpellTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellcastingTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/MonsterSpellcastingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ScriptedInputTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/DoorForcingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/OpenLocksTest.cpp
@@ -365,6 +367,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/ItemEnhancements.cpp
     ${PARENT_SOURCE_DIR}/SpellRegistry.cpp
     ${PARENT_SOURCE_DIR}/SpellSystem.cpp
+    ${PARENT_SOURCE_DIR}/Spellcasting.cpp
 
     # Factories
     ${PARENT_SOURCE_DIR}/MonsterFactory.cpp
@@ -372,6 +375,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Vision.cpp
     ${PARENT_SOURCE_DIR}/Pickup.cpp
     ${PARENT_SOURCE_DIR}/MonsterCreator.cpp
+    ${PARENT_SOURCE_DIR}/MonsterSpellcasting.cpp
     ${PARENT_SOURCE_DIR}/MonsterRegistry.cpp
     ${PARENT_SOURCE_DIR}/ItemFactory.cpp
     ${PARENT_SOURCE_DIR}/ItemCreator.cpp

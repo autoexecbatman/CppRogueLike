@@ -41,6 +41,7 @@
 #include "Player.h"
 #include "PlayerRaceState.h"
 #include "ShopKeeper.h"
+#include "Spellcasting.h"
 #include "TileConfig.h"
 #include "TurnSchedule.h"
 #include "WeaponDamageRegistry.h"
@@ -254,6 +255,7 @@ void Creature::load(const json& source)
 			lifespanRecord.at("magicalYears").get<int>()
 		};
 	}
+	spellcasting = parse_spellcasting(source.at("spellcasting"));
 	nextActionTime = source.at("nextActionTime").get<int>();
 	damageResistance = source.at("dr").get<int>();
 	thaco = source.at("thaco").get<int>();
@@ -414,6 +416,7 @@ void Creature::save(json& output)
 			  { "magicalYears", lifespan->magicalYears }
 		  }
 		: json(nullptr);
+	output["spellcasting"] = encode_spellcasting(spellcasting);
 	output["nextActionTime"] = nextActionTime;
 	output["dr"] = damageResistance;
 	output["thaco"] = thaco;

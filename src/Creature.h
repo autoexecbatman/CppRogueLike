@@ -29,6 +29,7 @@
 #include "MagicalItemEffects.h"
 #include "Persistent.h"
 #include "ShopKeeper.h"
+#include "Spellcasting.h"
 #include "TileRef.h"
 #include "TurnSchedule.h"
 #include "Vector2D.h"
@@ -178,6 +179,10 @@ public:
 	// The race and age a character lives by. A player always has one and a monster none,
 	// since the book gives monsters no age.
 	std::optional<Lifespan> lifespan{};
+
+	// What this creature casts from: its memorized spells, a monster's stated training and its
+	// innate powers. Empty for a creature that casts nothing.
+	Spellcasting spellcasting{};
 
 	Creature(Vector2D position, ActorData data)
 		: Actor(position, data), constitutionTracker(std::make_unique<ConstitutionTracker>()), inventoryData(CreatureInventory(50))

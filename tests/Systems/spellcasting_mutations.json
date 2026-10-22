@@ -1,0 +1,179 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/run_suite.ps1",
+    "-Configuration",
+    "Debug",
+    "-Filter",
+    "--gtest_filter=SpellcastingTest.*:SpellcastingMenuTest.*:MonsterSpellcastingTest.*:SpellFailureTest.*:SanctuarySpellTest.*:FireballDamageTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Spellcasting.cpp",
+      "original": "\tspellcasting.memorizedSpells.erase(copy);",
+      "mutated": "\tstd::erase(spellcasting.memorizedSpells, std::string{ key });",
+      "catches": "casting one copy wiping every copy of the spell, as the menu used to"
+    },
+    {
+      "file": "src/Spellcasting.cpp",
+      "original": "\tspellcasting.memorizedSpells.erase(copy);",
+      "mutated": "\t(void)copy;",
+      "catches": "a cast spell never spent"
+    },
+    {
+      "file": "src/Spellcasting.cpp",
+      "original": "\tif (power.frequency == PowerFrequency::ONCE_PER_DAY)",
+      "mutated": "\tif (true)",
+      "catches": "an at-will power spent as if it were once a day"
+    },
+    {
+      "file": "src/Spellcasting.cpp",
+      "original": "\t\tpower.readyAgainAt = now + ROUNDS_PER_DAY * TIME_UNITS_PER_ROUND;",
+      "mutated": "\t\tpower.readyAgainAt = now + ROUNDS_PER_DAY * TIME_UNITS_PER_ROUND - 1;",
+      "catches": "a daily power ready a time unit short of the day"
+    },
+    {
+      "file": "src/Spellcasting.cpp",
+      "original": "\t\t\tpower.at(\"readyAgainAt\").get<int>() });",
+      "mutated": "\t\t\t0 });",
+      "catches": "a save losing when a spent daily power comes back"
+    },
+    {
+      "file": "src/Spellcasting.cpp",
+      "original": "\tspellcasting.memorizedSpells = record.at(\"memorizedSpells\").get<std::vector<std::string>>();",
+      "mutated": "\tspellcasting.memorizedSpells = record.value(\"memorizedSpells\", std::vector<std::string>{});",
+      "catches": "a save with no memorized spells loading as an empty mind"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\t\tresolve_magic_missile(caster, { &aimed->target }, ctx);",
+      "mutated": "\t\t\tcast_magic_missile(caster, ctx);",
+      "catches": "a monster's missiles chosen by the player's view instead of at its target"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\t\tresolve_fireball(aimed->target.position, caster_level(caster), ctx);",
+      "mutated": "\t\t\tresolve_fireball(caster.position, caster_level(caster), ctx);",
+      "catches": "a monster's fireball bursting on itself"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\treturn caster.spellcasting.training->casterLevel;",
+      "mutated": "\t\treturn caster.get_creature_level();",
+      "catches": "a lich casting at its Hit Dice rather than its 18th level"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\treturn caster.spellcasting.training->casterClass;",
+      "mutated": "\t\treturn to_caster_class(caster.get_creature_class());",
+      "catches": "a monster's training ignored, so a lich has no spell list"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\treturn distance <= fireball_range(caster_level(caster)) && distance > FIREBALL_RADIUS;",
+      "mutated": "\t\treturn distance > FIREBALL_RADIUS;",
+      "catches": "a fireball cast at a player beyond its range"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\treturn distance <= fireball_range(caster_level(caster)) && distance > FIREBALL_RADIUS;",
+      "mutated": "\t\treturn distance <= fireball_range(caster_level(caster));",
+      "catches": "a caster bursting a fireball it stands inside"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\tif (target.is_dead() || !ctx.map->has_los(caster.position, target.position))",
+      "mutated": "\tif (target.is_dead())",
+      "catches": "a spell cast through a wall"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\tif (caster_class(caster) != CasterClass::CLERIC)",
+      "mutated": "\tif (caster.get_creature_class() != CreatureClass::CLERIC)",
+      "catches": "a cleric-trained monster that never fizzles"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\tcaster.spellcasting.memorizedSpells = spells_to_memorize(caster_class(caster), caster_level(caster), caster.get_wisdom(), spells, dataManager);",
+      "mutated": "\tcaster.spellcasting.memorizedSpells = spells_to_memorize(caster_class(caster), caster.get_creature_level(), caster.get_wisdom(), spells, dataManager);",
+      "catches": "the fill reading the creature level instead of the caster level"
+    },
+    {
+      "file": "src/MonsterSpellcasting.cpp",
+      "original": "\tif (caster.has_state(ActorState::IS_SILENCED))",
+      "mutated": "\tif (false)",
+      "catches": "a silenced monster counted as having cast"
+    },
+    {
+      "file": "src/MonsterSpellcasting.cpp",
+      "original": "\t\tif (!is_power_ready(power, now) || !can_aim(power.spell))",
+      "mutated": "\t\tif (!can_aim(power.spell))",
+      "catches": "a spent daily power used again the same day"
+    },
+    {
+      "file": "src/MonsterSpellcasting.cpp",
+      "original": "\t\t\tspend_memorized(caster.spellcasting, key);",
+      "mutated": "\t\t\t(void)key;",
+      "catches": "a monster's memorized spell never spent"
+    },
+    {
+      "file": "src/MonsterSpellcasting.cpp",
+      "original": "\tfor (const std::string& memorized : caster.spellcasting.memorizedSpells)",
+      "mutated": "\tfor (const std::string& memorized : std::vector<std::string>{})",
+      "catches": "a monster's memorized spells never tried"
+    },
+    {
+      "file": "src/AiMonster.cpp",
+      "original": "\t\tif (MonsterSpellcasting::try_cast_at(owner, *ctx.player(), ctx) == MonsterCast::NOTHING_CAST)",
+      "mutated": "\t\tif (true)",
+      "catches": "a perceived monster that never casts"
+    },
+    {
+      "file": "src/AiMonsterRanged.cpp",
+      "original": "\t\tif (MonsterSpellcasting::try_cast_at(owner, *ctx.player(), ctx) == MonsterCast::NOTHING_CAST)",
+      "mutated": "\t\tif (true)",
+      "catches": "a ranged monster that never casts"
+    },
+    {
+      "file": "src/MonsterCreator.cpp",
+      "original": "\tSpellSystem::memorize_spells(*creature, *ctx.spellRegistry, *ctx.dataManager);",
+      "mutated": "\t(void)ctx.spellRegistry;",
+      "catches": "a monster spawned with nothing memorized"
+    },
+    {
+      "file": "src/MonsterCreator.cpp",
+      "original": "\tcreature->spellcasting.innatePowers = params.innatePowers;",
+      "mutated": "\t(void)params.innatePowers;",
+      "catches": "a monster spawned without its innate powers"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\tparams.innatePowers = parse_innate_powers(entry.at(\"innate_powers\"));",
+      "mutated": "\tparams.innatePowers = parse_innate_powers(entry.value(\"innate_powers\", nlohmann::json::array()));",
+      "catches": "a record with no innate powers field loading as one with none"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\t\t\tif (std::ranges::find(spellKeys, power.spell) == spellKeys.end())",
+      "mutated": "\t\t\tif (false)",
+      "catches": "a power naming an unknown spell loading"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tspellcasting = parse_spellcasting(source.at(\"spellcasting\"));",
+      "mutated": "\tspellcasting = Spellcasting{};",
+      "catches": "a creature's casting lost on load"
+    },
+    {
+      "file": "src/MenuSpellCast.cpp",
+      "original": "\t\t\tspend_memorized(playerRef.spellcasting, key);",
+      "mutated": "\t\t\tstd::erase(playerRef.spellcasting.memorizedSpells, key);",
+      "catches": "the menu wiping every copy of the spell cast"
+    }
+  ]
+}

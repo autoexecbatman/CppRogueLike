@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cctype>
 #include <filesystem>
 #include <format>
@@ -20,6 +21,8 @@
 #include "MonsterRegistry.h"
 #include "MonsterStrength.h"
 #include "Paths.h"
+#include "SpellRegistry.h"
+#include "Spellcasting.h"
 #include "TileRefJson.h"
 
 namespace
@@ -261,6 +264,77 @@ nlohmann::json encode_equipment(const std::vector<MonsterParams::StartingItem>& 
 	return entries;
 }
 
+// A record's training: null for a monster that memorizes nothing, otherwise the caster class
+// and level it memorizes at. A level below 1 is an authoring error and throws.
+//
+// Example:
+//   parse_training(nullptr);                                                // -> std::nullopt
+//   parse_training({ { "caster_class", "wizard" }, { "caster_level", 18 } });   // -> { WIZARD, 18 }
+//   parse_training({ { "caster_class", "none" }, { "caster_level", 1 } });      // throws std::runtime_error
+std::optional<SpellcasterTraining> parse_training(const nlohmann::json& record)
+{
+	if (record.is_null())
+	{
+		return std::nullopt;
+	}
+	const SpellcasterTraining training{
+		parse_caster_class(record.at("caster_class").get<std::string>()),
+		record.at("caster_level").get<int>()
+	};
+	if (training.casterLevel < 1)
+	{
+		throw std::runtime_error(std::format("MonsterRegistry -- a caster level of {}; a caster is at least 1st level", training.casterLevel));
+	}
+	return training;
+}
+
+// The inverse of parse_training: null for none.
+//
+// Example:
+//   encode_training(SpellcasterTraining{ CasterClass::WIZARD, 1 });   // -> { "caster_class": "wizard", "caster_level": 1 }
+nlohmann::json encode_training(const std::optional<SpellcasterTraining>& training)
+{
+	if (!training.has_value())
+	{
+		return nullptr;
+	}
+	return nlohmann::json{
+		{ "caster_class", encode_caster_class(training->casterClass) },
+		{ "caster_level", training->casterLevel }
+	};
+}
+
+// A record's innate powers, each a spell key and its frequency, ready at spawn. An unknown
+// frequency throws; the spell keys are checked by refuse_unknown_spells, once spells load.
+//
+// Example:
+//   parse_innate_powers({ { { "spell", "fireball" }, { "frequency", "at_will" } } });   // -> { { "fireball", AT_WILL, 0 } }
+std::vector<InnatePower> parse_innate_powers(const nlohmann::json& entries)
+{
+	std::vector<InnatePower> powers;
+	for (const nlohmann::json& entry : entries)
+	{
+		powers.push_back(InnatePower{
+			entry.at("spell").get<std::string>(),
+			parse_power_frequency(entry.at("frequency").get<std::string>()),
+			0 });
+	}
+	return powers;
+}
+
+// The inverse of parse_innate_powers. A record holds no clock, so readyAgainAt is not written.
+nlohmann::json encode_innate_powers(const std::vector<InnatePower>& powers)
+{
+	nlohmann::json entries = nlohmann::json::array();
+	for (const InnatePower& power : powers)
+	{
+		entries.push_back(nlohmann::json{
+			{ "spell", power.spell },
+			{ "frequency", encode_power_frequency(power.frequency) } });
+	}
+	return entries;
+}
+
 MonsterParams parse_full_params(const nlohmann::json& entry)
 {
 	MonsterParams params;
@@ -311,6 +385,9 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 	params.walksWebs = entry.at("walks_webs").get<bool>();
 	params.attitude = parse_attitude(entry.at("attitude").get<std::string>());
 	params.displaceable = entry.at("displaceable").get<bool>();
+	// Required: null and an empty list are a monster that casts nothing, which a missing key is not.
+	params.spellcasterTraining = parse_training(entry.at("spellcasting"));
+	params.innatePowers = parse_innate_powers(entry.at("innate_powers"));
 	params.baseWeight = entry.at("weight").get<int>();
 	params.levelMinimum = entry.at("depth_min").get<int>();
 	params.levelMaximum = entry.at("depth_max").get<int>();
@@ -355,6 +432,8 @@ nlohmann::json encode_full_params(const MonsterParams& params)
 		{ "walks_webs", params.walksWebs },
 		{ "attitude", encode_attitude(params.attitude) },
 		{ "displaceable", params.displaceable },
+		{ "spellcasting", encode_training(params.spellcasterTraining) },
+		{ "innate_powers", encode_innate_powers(params.innatePowers) },
 		{ "weight", params.baseWeight },
 		{ "depth_min", params.levelMinimum },
 		{ "depth_max", params.levelMaximum },
@@ -464,6 +543,21 @@ void MonsterRegistry::load(std::string_view path)
 			params.name = key;
 		}
 		customMonsters[key] = std::move(params);
+	}
+}
+
+void MonsterRegistry::refuse_unknown_spells(const SpellRegistry& spells) const
+{
+	const std::vector<std::string> spellKeys = spells.get_all_keys();
+	for (const std::string& key : get_all_keys())
+	{
+		for (const InnatePower& power : get_params(key).innatePowers)
+		{
+			if (std::ranges::find(spellKeys, power.spell) == spellKeys.end())
+			{
+				throw std::runtime_error(std::format("MonsterRegistry -- {} has an innate power naming the unknown spell '{}'", key, power.spell));
+			}
+		}
 	}
 }
 

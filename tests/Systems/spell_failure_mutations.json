@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\tif (caster.get_creature_class() != CreatureClass::CLERIC)",
-      "mutated": "\tif (caster.get_creature_class() == CreatureClass::MONSTER)",
+      "original": "\tif (caster_class(caster) != CasterClass::CLERIC)",
+      "mutated": "\tif (caster_class(caster) == CasterClass::NONE)",
       "catches": "a wizard made to roll on a column the book gives only a priest"
     },
     {

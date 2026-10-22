@@ -7,6 +7,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "red_black",
     "corpse": "dead archer",
     "damage": {
@@ -61,6 +63,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "magenta_black",
     "corpse": "dead bat",
     "damage": {
@@ -110,6 +114,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "red_black",
     "corpse": "dead bugbear",
     "damage": {
@@ -167,6 +173,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "red_yellow",
     "corpse": "dead chimera",
     "damage": {
@@ -216,6 +224,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "red_yellow",
     "corpse": "dead dragon",
     "damage": {
@@ -265,6 +275,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "red_yellow",
     "corpse": "charred wolf corpse",
     "damage": {
@@ -314,6 +326,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "brown_black",
     "corpse": "broken gargoyle",
     "damage": {
@@ -363,6 +377,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "cyan_blue",
     "corpse": "dead ghoul",
     "damage": {
@@ -413,6 +429,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "green_black",
     "corpse": "dead giant centipede",
     "damage": {
@@ -462,6 +480,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "brown_black",
     "corpse": "dead giant rat",
     "damage": {
@@ -511,6 +531,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "green_black",
     "corpse": "dead giant snake",
     "damage": {
@@ -560,6 +582,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "red_black",
     "corpse": "dead gnoll",
     "damage": {
@@ -614,6 +638,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "yellow_black",
     "corpse": "dead goblin",
     "damage": {
@@ -668,6 +694,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "brown_black",
     "corpse": "rubble of golem",
     "damage": {
@@ -720,6 +748,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "magenta_black",
     "corpse": "dead harpy",
     "damage": {
@@ -769,6 +799,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "red_black",
     "corpse": "dead hill giant",
     "damage": {
@@ -821,6 +853,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "red_black",
     "corpse": "dead hobgoblin",
     "damage": {
@@ -875,6 +909,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "cyan_blue",
     "corpse": "frozen wolf corpse",
     "damage": {
@@ -924,6 +960,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "red_black",
     "corpse": "dead kobold",
     "damage": {
@@ -978,6 +1016,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": { "caster_class": "wizard", "caster_level": 18 },
+    "innate_powers": [],
     "color": "cyan_blue",
     "corpse": "dead lich",
     "damage": {
@@ -1028,6 +1068,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": { "caster_class": "wizard", "caster_level": 1 },
+    "innate_powers": [],
     "color": "white_blue",
     "corpse": "dead mage",
     "damage": {
@@ -1082,6 +1124,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "green_black",
     "corpse": "dead medusa",
     "damage": {
@@ -1131,6 +1175,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "red_yellow",
     "corpse": "dead mimic",
     "damage": {
@@ -1184,6 +1230,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "red_black",
     "corpse": "dead ogre",
     "damage": {
@@ -1241,6 +1289,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "red_black",
     "corpse": "dead orc",
     "damage": {
@@ -1295,6 +1345,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [ { "spell": "fireball", "frequency": "at_will" } ],
     "color": "red_yellow",
     "corpse": "dead pit fiend",
     "damage": {
@@ -1347,6 +1399,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "brown_black",
     "corpse": "dead rat",
     "damage": {
@@ -1396,6 +1450,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "brown_black",
     "corpse": "dissipated shadow",
     "damage": {
@@ -1446,6 +1502,8 @@
     "walks_webs": false,
     "attitude": "peaceful",
     "displaceable": false,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "yellow_black",
     "corpse": "dead shopkeeper",
     "damage": {
@@ -1500,6 +1558,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "cyan_blue",
     "corpse": "dead skeleton",
     "damage": {
@@ -1550,6 +1610,8 @@
     "walks_webs": true,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "red_black",
     "corpse": "dead giant spider",
     "damage": {
@@ -1599,6 +1661,8 @@
     "walks_webs": true,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "green_black",
     "corpse": "dead small spider",
     "damage": {
@@ -1648,6 +1712,8 @@
     "walks_webs": true,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "black_green",
     "corpse": "dead web weaver",
     "damage": {
@@ -1697,6 +1763,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "green_black",
     "corpse": "dead troll",
     "damage": {
@@ -1746,6 +1814,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "red_black",
     "corpse": "dead vampire",
     "damage": {
@@ -1799,6 +1869,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "brown_black",
     "corpse": "dead werewolf",
     "damage": {
@@ -1848,6 +1920,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "cyan_blue",
     "corpse": "dead wight",
     "damage": {
@@ -1898,6 +1972,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "brown_black",
     "corpse": "dead wolf",
     "damage": {
@@ -1947,6 +2023,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "cyan_blue",
     "corpse": "dissipated wraith",
     "damage": {
@@ -1997,6 +2075,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "green_black",
     "corpse": "dead wyvern",
     "damage": {
@@ -2046,6 +2126,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "green_black",
     "corpse": "dead zombie",
     "damage": {
@@ -2096,6 +2178,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "red_black",
     "corpse": "dead jailer",
     "damage": {
@@ -2151,6 +2235,8 @@
     "walks_webs": false,
     "attitude": "hostile",
     "displaceable": true,
+    "spellcasting": null,
+    "innate_powers": [],
     "color": "magenta_black",
     "corpse": "dead warden",
     "damage": {

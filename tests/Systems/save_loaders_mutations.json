@@ -32,12 +32,6 @@
       "catches": "a player with no kill count loading at zero"
     },
     {
-      "file": "src/Player.cpp",
-      "original": "\tmemorizedSpells = source.at(\"memorizedSpells\").get<std::vector<std::string>>();",
-      "mutated": "\tmemorizedSpells = source.value(\"memorizedSpells\", std::vector<std::string>{});",
-      "catches": "a player's memorised spells lost without a word"
-    },
-    {
       "file": "src/ShopKeeper.cpp",
       "original": "\tload_inventory(shopInventory, source.at(\"shop_inventory\"));",
       "mutated": "\tif (source.contains(\"shop_inventory\")) { load_inventory(shopInventory, source.at(\"shop_inventory\")); }",

@@ -75,6 +75,7 @@ int main()
 	const auto load_monsters = [&game]()
 	{
 		game->monsterRegistry.load(Paths::MONSTERS);
+		game->monsterRegistry.refuse_unknown_spells(game->spellRegistry);
 	};
 	const auto load_items = [&game]()
 	{

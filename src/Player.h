@@ -41,8 +41,6 @@ public:
 
 	int killCount{ 0 }; // Tracks kill count for log.
 
-	std::vector<std::string> memorizedSpells;
-
 	// The discretionary percentage points the player has put on each thief skill,
 	// in ALL_THIEF_SKILL order. Choices rather than a function of level, so they
 	// are stored and saved; every other part of a skill's number is derived.

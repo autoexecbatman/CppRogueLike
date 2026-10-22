@@ -14,6 +14,8 @@ enum class SpellSource
 {
 	MEMORIZED,
 	ITEM,
+	// A monster's spell-like power, which nothing memorizes and Wisdom cannot fail.
+	INNATE,
 };
 
 #include "SpellRegistry.h"
@@ -90,6 +92,71 @@ void cast_spell_by_key(
 	SpellSource source,
 	std::function<void(GameContext&)> onCastComplete,
 	GameContext& ctx);
+
+// Casts as cast_spell_by_key does, the same refusals and fizzle included, at a target the
+// caller names rather than one the player chooses: magic missile strikes the target, and a
+// fireball bursts on its tile. Asserts can_aim_at says the spell can be aimed. The dead are
+// left for the caller's sweep, because a monster casts from inside the creature loop.
+//
+// Example, a lich of wizard 18 four tiles from the player:
+//   cast_spell_at("magic_missile", lich, SpellSource::MEMORIZED, player, on_spent, ctx);
+//   // -> five missiles at the player; on_spent runs
+void cast_spell_at(
+	std::string_view key,
+	Creature& caster,
+	SpellSource source,
+	Creature& target,
+	std::function<void(GameContext&)> onCastComplete,
+	GameContext& ctx);
+
+// Whether the spell can be aimed at target from where the caster stands: magic missile
+// needs a line of sight, and a fireball needs one, its range of ten tiles plus the caster
+// level, and the target outside its burst radius, so the caster stands clear of it. Every
+// other spell answers false, since none of them can be aimed yet.
+//
+// Example, a lich of wizard 18:
+//   can_aim_at(SpellEffectType::FIREBALL, lich, playerFourTilesAway, ctx);   // -> true
+//   can_aim_at(SpellEffectType::FIREBALL, lich, playerTwoTilesAway, ctx);    // -> false
+//   can_aim_at(SpellEffectType::SLEEP, lich, playerFourTilesAway, ctx);      // -> false
+[[nodiscard]] bool can_aim_at(SpellEffectType effect, const Creature& caster, const Creature& target, GameContext& ctx);
+
+// The spell list a creature casts from: its record's training when it has one, otherwise
+// its class's.
+//
+// Example:
+//   caster_class(wizardPlayer);   // -> CasterClass::WIZARD
+//   caster_class(lich);           // -> CasterClass::WIZARD, from its training
+//   caster_class(goblin);         // -> CasterClass::NONE
+[[nodiscard]] CasterClass caster_class(const Creature& caster);
+
+// The level a creature casts at: its record's training level when it has one, otherwise its
+// creature level, which for a monster's innate power is its Hit Dice.
+//
+// Example:
+//   caster_level(lich);       // -> 18, its training, where its Hit Dice are 11
+//   caster_level(pitFiend);   // -> 13, its Hit Dice
+[[nodiscard]] int caster_level(const Creature& caster);
+
+// The spells a caster of that class, level and Wisdom memorizes: per spell level, lowest
+// first, each spell the registry has for the class once, in the registry's order, while
+// slots remain. Empty for CasterClass::NONE.
+//
+// Example:
+//   spells_to_memorize(CasterClass::WIZARD, 1, 10, spells, dataManager);   // -> { "magic_missile" }
+//   spells_to_memorize(CasterClass::NONE, 9, 10, spells, dataManager);     // -> { }
+[[nodiscard]] std::vector<std::string> spells_to_memorize(
+	CasterClass casterClass,
+	int casterLevel,
+	int wisdom,
+	const SpellRegistry& spells,
+	const DataManager& dataManager);
+
+// Replaces what the creature has memorized with spells_to_memorize for its own class, level
+// and Wisdom. The one fill, for the player's rest and creation and a monster's spawn alike.
+//
+// Example:
+//   memorize_spells(lich, spells, dataManager);   // lich.spellcasting.memorizedSpells -> eight keys
+void memorize_spells(Creature& caster, const SpellRegistry& spells, const DataManager& dataManager);
 
 // What Table 5 gives this caster's Wisdom as a percentage chance that any one of
 // its spells fizzles. Zero for anyone but a priest, and for a priest of Wisdom 13

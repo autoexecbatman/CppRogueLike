@@ -1,6 +1,7 @@
 // file: MonsterEditor.cpp
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <format>
 #include <optional>
 #include <stdexcept>
@@ -20,6 +21,8 @@
 #include "MonsterStrength.h"
 #include "Paths.h"
 #include "Renderer.h"
+#include "SpellRegistry.h"
+#include "Spellcasting.h"
 
 constexpr int LIST_WIDTH = 220;
 constexpr int HEADER_HEIGHT = 48;
@@ -165,6 +168,7 @@ void MonsterEditor::load_working(const MonsterRegistry& monsters)
 	const std::string& key = current_key();
 	working = monsters.get_params(key);
 	selectedXpCount = 0;
+	selectedPower = 0;
 	fieldCursor.reset(FIELD_COUNT);
 	mode = Mode::NORMAL;
 	editBuffer.clear();
@@ -940,6 +944,26 @@ std::string MonsterEditor::field_label(FieldId field) const
 	{
 		return "Displaceable";
 	}
+	case FieldId::CASTER_CLASS:
+	{
+		return "Caster Class";
+	}
+	case FieldId::CASTER_LEVEL:
+	{
+		return "Caster Level";
+	}
+	case FieldId::INNATE_POWER:
+	{
+		return "Innate Power";
+	}
+	case FieldId::INNATE_SPELL:
+	{
+		return "Power Spell";
+	}
+	case FieldId::INNATE_FREQUENCY:
+	{
+		return "Power Frequency";
+	}
 	case FieldId::WEIGHT:
 	{
 		return "Spawn Weight";
@@ -1114,6 +1138,30 @@ std::string MonsterEditor::field_value(FieldId field) const
 	{
 		return working.displaceable ? "yes" : "no";
 	}
+	case FieldId::CASTER_CLASS:
+	{
+		return working.spellcasterTraining.has_value() ? std::string(encode_caster_class(working.spellcasterTraining->casterClass)) : "none";
+	}
+	case FieldId::CASTER_LEVEL:
+	{
+		return working.spellcasterTraining.has_value() ? std::format("{}", working.spellcasterTraining->casterLevel) : "-";
+	}
+	case FieldId::INNATE_POWER:
+	{
+		if (working.innatePowers.empty())
+		{
+			return "none";
+		}
+		return std::format("{} of {}", selectedPower + 1, working.innatePowers.size());
+	}
+	case FieldId::INNATE_SPELL:
+	{
+		return working.innatePowers.empty() ? "" : working.innatePowers.at(selectedPower).spell;
+	}
+	case FieldId::INNATE_FREQUENCY:
+	{
+		return working.innatePowers.empty() ? "-" : std::string(encode_power_frequency(working.innatePowers.at(selectedPower).frequency));
+	}
 	case FieldId::CORPSE_EDIBLE:
 	{
 		return is_corpse_edible(working.corpseEdibility) ? "yes" : "no";
@@ -1143,12 +1191,12 @@ std::string MonsterEditor::field_value(FieldId field) const
 
 bool MonsterEditor::field_is_string(FieldId field) const
 {
-	return field == FieldId::NAME || field == FieldId::CORPSE || field == FieldId::CORPSE_TASTE || field == FieldId::WEAPON;
+	return field == FieldId::NAME || field == FieldId::CORPSE || field == FieldId::CORPSE_TASTE || field == FieldId::WEAPON || field == FieldId::INNATE_SPELL;
 }
 
 bool MonsterEditor::field_is_toggle(FieldId field) const
 {
-	return field == FieldId::AI_TYPE || field == FieldId::CAN_SWIM || field == FieldId::CAN_FLY || field == FieldId::WALKS_WEBS || field == FieldId::ATTITUDE || field == FieldId::DISPLACEABLE || field == FieldId::CORPSE_EDIBLE || field == FieldId::ETHICS || field == FieldId::MORALITY || field == FieldId::SIZE || field == FieldId::INTELLIGENCE || field == FieldId::STR_SOURCE || field == FieldId::DMG_TYPE;
+	return field == FieldId::AI_TYPE || field == FieldId::CAN_SWIM || field == FieldId::CAN_FLY || field == FieldId::WALKS_WEBS || field == FieldId::ATTITUDE || field == FieldId::DISPLACEABLE || field == FieldId::CORPSE_EDIBLE || field == FieldId::ETHICS || field == FieldId::MORALITY || field == FieldId::SIZE || field == FieldId::INTELLIGENCE || field == FieldId::STR_SOURCE || field == FieldId::DMG_TYPE || field == FieldId::CASTER_CLASS || field == FieldId::INNATE_FREQUENCY;
 }
 
 void MonsterEditor::field_adjust(FieldId field, int delta)
@@ -1284,6 +1332,28 @@ void MonsterEditor::field_adjust(FieldId field, int delta)
 		working.levelMaximum = clamp_val(working.levelMaximum, delta, 0, 20);
 		break;
 	}
+	case FieldId::CASTER_LEVEL:
+	{
+		// A monster that memorizes nothing has no level to adjust; the tables print 1st to 20th.
+		if (working.spellcasterTraining.has_value())
+		{
+			working.spellcasterTraining->casterLevel = clamp_val(working.spellcasterTraining->casterLevel, delta, 1, 20);
+		}
+		break;
+	}
+	case FieldId::INNATE_POWER:
+	{
+		// One power a step, as the XP field's count is chosen, and never past either end.
+		if (delta < 0 && selectedPower > 0)
+		{
+			--selectedPower;
+		}
+		else if (delta > 0 && selectedPower + 1 < working.innatePowers.size())
+		{
+			++selectedPower;
+		}
+		break;
+	}
 	default:
 	{
 		break;
@@ -1355,6 +1425,27 @@ void MonsterEditor::field_toggle(FieldId field)
 		// The dice are unchanged; only what they deal is.
 		working.damage = DamageInfo{ working.damage.dice, next_damage_type(working.damage.damageType) };
 	}
+	else if (field == FieldId::CASTER_CLASS)
+	{
+		// None, then a 1st-level wizard, then a priest at the same level, then none again.
+		if (!working.spellcasterTraining.has_value())
+		{
+			working.spellcasterTraining = SpellcasterTraining{ CasterClass::WIZARD, 1 };
+		}
+		else if (working.spellcasterTraining->casterClass == CasterClass::WIZARD)
+		{
+			working.spellcasterTraining->casterClass = CasterClass::CLERIC;
+		}
+		else
+		{
+			working.spellcasterTraining.reset();
+		}
+	}
+	else if (field == FieldId::INNATE_FREQUENCY && !working.innatePowers.empty())
+	{
+		InnatePower& power = working.innatePowers.at(selectedPower);
+		power.frequency = power.frequency == PowerFrequency::AT_WILL ? PowerFrequency::ONCE_PER_DAY : PowerFrequency::AT_WILL;
+	}
 }
 
 void MonsterEditor::field_set_string(FieldId field, std::string newValue)
@@ -1379,6 +1470,27 @@ void MonsterEditor::field_set_string(FieldId field, std::string newValue)
 	case FieldId::WEAPON:
 	{
 		working.naturalAttack = std::move(newValue);
+		break;
+	}
+	case FieldId::INNATE_SPELL:
+	{
+		if (working.innatePowers.empty())
+		{
+			if (!newValue.empty())
+			{
+				working.innatePowers.push_back(InnatePower{ std::move(newValue), PowerFrequency::AT_WILL, 0 });
+				selectedPower = 0;
+			}
+		}
+		else if (newValue.empty())
+		{
+			working.innatePowers.erase(working.innatePowers.begin() + static_cast<std::ptrdiff_t>(selectedPower));
+			selectedPower = selectedPower > 0 ? selectedPower - 1 : 0;
+		}
+		else
+		{
+			working.innatePowers.at(selectedPower).spell = std::move(newValue);
+		}
 		break;
 	}
 	default:

@@ -320,6 +320,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/SpellRegistry.h
     ${PROJECT_SOURCE_DIR}/SpellSystem.cpp
     ${PROJECT_SOURCE_DIR}/SpellSystem.h
+    ${PROJECT_SOURCE_DIR}/Spellcasting.cpp
+    ${PROJECT_SOURCE_DIR}/Spellcasting.h
     ${PROJECT_SOURCE_DIR}/FloatingTextSystem.cpp
     ${PROJECT_SOURCE_DIR}/FloatingTextSystem.h
     ${PROJECT_SOURCE_DIR}/AnimationSystem.cpp
@@ -365,6 +367,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/MonsterFactory.h
     ${PROJECT_SOURCE_DIR}/MonsterCreator.cpp
     ${PROJECT_SOURCE_DIR}/MonsterCreator.h
+    ${PROJECT_SOURCE_DIR}/MonsterSpellcasting.cpp
+    ${PROJECT_SOURCE_DIR}/MonsterSpellcasting.h
     ${PROJECT_SOURCE_DIR}/MonsterRegistry.cpp
     ${PROJECT_SOURCE_DIR}/MonsterRegistry.h
     ${PROJECT_SOURCE_DIR}/ItemFactory.cpp

@@ -68,6 +68,11 @@ private:
 		WALKS_WEBS,
 		ATTITUDE,
 		DISPLACEABLE,
+		CASTER_CLASS,
+		CASTER_LEVEL,
+		INNATE_POWER,
+		INNATE_SPELL,
+		INNATE_FREQUENCY,
 		WEIGHT,
 		DEPTH_MIN,
 		DEPTH_MAX,
@@ -90,6 +95,9 @@ private:
 
 	// Which of the working monster's hit dice counts the XP field edits.
 	size_t selectedXpCount{ 0 };
+
+	// Which of the working monster's innate powers the spell and frequency fields edit.
+	size_t selectedPower{ 0 };
 
 	// Field navigation
 	ListCursor fieldCursor{};

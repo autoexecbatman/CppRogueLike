@@ -997,7 +997,7 @@ void PlayerController::handle_right_click(GameContext& ctx)
 		actions.push_back({ "Open Inventory", open_inventory });
 		actions.push_back({ "Character Sheet", open_character_sheet });
 		actions.push_back({ "Rest", rest_here });
-		if (!playerOwner.memorizedSpells.empty())
+		if (!playerOwner.spellcasting.memorizedSpells.empty())
 		{
 			const auto open_casting_menu = [this](GameContext& actionCtx)
 			{
@@ -1284,11 +1284,12 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 			ctx.messageSystem->message(ColorPairId::WHITE_RED, "DEBUG: the long bow was refused - " + refusal + ".", MessageCompletion::FINISHED);
 		}
 
-		playerOwner.memorizedSpells.push_back("magic_missile");
-		playerOwner.memorizedSpells.push_back("magic_missile");
-		playerOwner.memorizedSpells.push_back("sleep");
-		playerOwner.memorizedSpells.push_back("web");
-		playerOwner.memorizedSpells.push_back("teleport");
+		std::vector<std::string>& memorized = playerOwner.spellcasting.memorizedSpells;
+		memorized.push_back("magic_missile");
+		memorized.push_back("magic_missile");
+		memorized.push_back("sleep");
+		memorized.push_back("web");
+		memorized.push_back("teleport");
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "DEBUG: Spells added -- press Shift+C to cast.", MessageCompletion::FINISHED);
 
 		// Spawn a shopkeeper on the first walkable adjacent tile, and say so when all four are wall.

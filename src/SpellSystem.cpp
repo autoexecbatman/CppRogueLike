@@ -8,15 +8,18 @@
 // player confirms a tile - cast_silence, cast_web, cast_fireball. Nothing here
 // blocks; a menu that waited would hang the browser under Emscripten.
 //
-// Almost nothing calls these directly. cast_spell_by_key is the entry point: it
-// looks the key up in the registry, checks the source, and dispatches.
+// Almost nothing calls these directly. cast_spell_by_key is the player's entry point: it
+// looks the key up in the registry, checks the source, and dispatches. cast_spell_at is a
+// monster's: the same checks, aimed at a creature the caller names instead of chosen.
 //
 // Usage:
 //
 //   const auto on_spent = [](GameContext& spentCtx) {}; // runs on success
 //   SpellSystem::cast_spell_by_key("magic_missile", caster, SpellSource::MEMORIZED, on_spent, ctx);
-//   SpellSystem::cast_spell_by_key("web", caster, SpellSource::SCROLL, on_spent, ctx);
+//   SpellSystem::cast_spell_by_key("web", caster, SpellSource::ITEM, on_spent, ctx);
 //   // the web's cursor opens, and on_spent fires on confirm
+//   SpellSystem::cast_spell_at("fireball", lich, SpellSource::MEMORIZED, player, on_spent, ctx);
+//   // bursts on the player's tile at once
 //
 //   SpellSystem::burst_fireball(center, 3, 2, ctx);             // -> { 3, 18, 1 }
 //                                                               // public so a test skips the cursor
@@ -158,13 +161,50 @@ namespace SpellSystem
 namespace
 {
 
-// Reached only through cast_spell_by_key, so nothing outside this file can call them.
-// Dispatch helpers
+// The player's choice of target, made the way each spell has always made it.
+struct PlayerChooses
+{
+};
+
+// A target the caller names, which a monster's cast passes.
+struct AimedAt
+{
+	// The creature struck, or whose tile a burst centres on.
+	Creature& target;
+};
+
+// Who a spell lands on.
+using SpellTargets = std::variant<PlayerChooses, AimedAt>;
+
+// AD&D 2e: a fireball's 20-foot radius is two tiles, and its range ten tiles plus one a level.
+constexpr int FIREBALL_RADIUS = 2;
+
+// How far a caster of that level can place a fireball, in tiles.
+//
+// Example:
+//   fireball_range(18);   // -> 28
+int fireball_range(int casterLevel)
+{
+	return 10 + casterLevel;
+}
+
+// Reached only through cast_spell_by_key and cast_spell_at, so nothing outside this file can call them.
 void dispatch_effect(
 	SpellEffectType effect,
 	Creature& caster,
 	SpellSource source,
+	const SpellTargets& targets,
 	std::function<void(GameContext&)> onSuccess,
+	GameContext& ctx);
+
+// Every check a casting makes before its effect: silence, then a priest's fizzle. Shared by
+// both entry points, so a monster is refused and fizzles exactly as the player is.
+void cast_with_targets(
+	std::string_view key,
+	Creature& caster,
+	SpellSource source,
+	const SpellTargets& targets,
+	std::function<void(GameContext&)> onCastComplete,
 	GameContext& ctx);
 
 // Spell effect implementations (instant - return true on success)
@@ -172,15 +212,20 @@ bool cast_cure_light_wounds(Creature& caster, GameContext& ctx);
 bool cast_bless(Creature& caster, GameContext& ctx);
 bool cast_sanctuary(Creature& caster, GameContext& ctx);
 bool cast_protection_from_evil(Creature& caster, GameContext& ctx);
-// Fires one missile per two caster levels, five at most, at the living
-// creatures in the caster's field of view, nearest first. A target whose
-// Sanctuary turns the caster away is skipped and the missile goes to the next.
-// Refuses with a message and returns false when nothing is in sight.
+// The player's choice of missile targets: the living creatures in the player's field of
+// view, then fires at them. Refuses with a message and returns false when nothing is in sight.
 //
 // Example, caster level 3, one goblin in view:
 //   cast_magic_missile(caster, ctx);   // -> true, 2 missiles, both to the goblin
 //   cast_magic_missile(caster, ctx);   // -> false when no target is in view
 bool cast_magic_missile(Creature& caster, GameContext& ctx);
+// Fires one missile per two caster levels, five at most, at the targets nearest the caster
+// first. A target whose Sanctuary turns the caster away is skipped and the missile goes to
+// the next. Leaves the dead to the caller.
+//
+// Example, caster level 18, the player the one target:
+//   resolve_magic_missile(lich, { &player }, ctx);   // 5 missiles, all to the player
+void resolve_magic_missile(Creature& caster, std::vector<Creature*> targets, GameContext& ctx);
 bool cast_shield(Creature& caster, GameContext& ctx);
 bool cast_sleep(Creature& caster, GameContext& ctx);
 // Makes the caster invisible for the spell's day, as the given buff, so a worn item's
@@ -218,14 +263,37 @@ void cast_silence(Creature& caster, std::function<void(GameContext&)> onSuccess,
 //                                            // on confirm: each goblin rolls to escape
 void cast_web(Creature& caster, std::function<void(GameContext&)> onSuccess, GameContext& ctx);
 void cast_fireball(Creature& caster, std::function<void(GameContext&)> onSuccess, GameContext& ctx);
+// Bursts a fireball of the caster level on center: the animation, the burst and its message.
+// Leaves the dead to the caller.
+//
+// Example, caster level 13 on the player's tile:
+//   resolve_fireball(player.position, 13, ctx);   // 10d6, the dice cap, "Fireball! 10d6 = ..."
+void resolve_fireball(Vector2D center, int casterLevel, GameContext& ctx);
 
 void dispatch_effect(
 	SpellEffectType effect,
 	Creature& caster,
 	SpellSource source,
+	const SpellTargets& targets,
 	std::function<void(GameContext&)> onSuccess,
 	GameContext& ctx)
 {
+	// A named target skips the player's choice and lands at once.
+	if (const AimedAt* aimed = std::get_if<AimedAt>(&targets))
+	{
+		assert((effect == SpellEffectType::MAGIC_MISSILE || effect == SpellEffectType::FIREBALL) && "dispatch_effect: a spell that cannot be aimed was aimed");
+		if (effect == SpellEffectType::MAGIC_MISSILE)
+		{
+			resolve_magic_missile(caster, { &aimed->target }, ctx);
+		}
+		else
+		{
+			resolve_fireball(aimed->target.position, caster_level(caster), ctx);
+		}
+		onSuccess(ctx);
+		return;
+	}
+
 	// Targeted spells: async via TargetingMenu - onSuccess is forwarded into the callback
 	switch (effect)
 	{
@@ -376,7 +444,7 @@ bool cast_bless(Creature& caster, GameContext& ctx)
 // in this game to act on yet.
 bool cast_protection_from_evil(Creature& caster, GameContext& ctx)
 {
-	const int duration = 2 * caster.get_creature_level();
+	const int duration = 2 * caster_level(caster);
 
 	ctx.buffSystem->add_buff(caster, BuffType::PROTECTION_FROM_EVIL, PROTECTION_FROM_EVIL_PENALTY, duration, BuffApplication::ADD, ctx.gameState->get_time());
 
@@ -393,7 +461,7 @@ bool cast_protection_from_evil(Creature& caster, GameContext& ctx)
 bool cast_sanctuary(Creature& caster, GameContext& ctx)
 {
 	// AD&D 2e, PHB page 436: 2 rounds + 1 round/level. Cancelled by attacking.
-	const int casterLevel = caster.get_creature_level();
+	const int casterLevel = caster_level(caster);
 	const int duration = 2 + casterLevel;
 
 	ctx.buffSystem->add_buff(caster, BuffType::SANCTUARY, 0, duration, BuffApplication::ADD, ctx.gameState->get_time());
@@ -412,7 +480,7 @@ void cast_silence(
 	GameContext& ctx)
 {
 	// AD&D 2e: Duration 2 rounds/level. Targeted single creature. Prevents spellcasting.
-	int casterLevel = caster.get_creature_level();
+	int casterLevel = caster_level(caster);
 	int duration = 2 * casterLevel;
 	int range = 5 + casterLevel;
 
@@ -466,7 +534,7 @@ void cast_web(
 	GameContext& ctx)
 {
 	// AD&D 2e: Save vs. Paralyzation (d20 >= 10) or be entangled. Duration 2 rounds/level.
-	int casterLevel = caster.get_creature_level();
+	int casterLevel = caster_level(caster);
 	int range = 5 * casterLevel;
 	int radius = 2;
 	int duration = 2 * casterLevel;
@@ -533,13 +601,9 @@ void cast_fireball(
 	std::function<void(GameContext&)> onSuccess,
 	GameContext& ctx)
 {
-	int casterLevel = caster.get_creature_level();
+	const int casterLevel = caster_level(caster);
 
-	// AD&D 2e: range 10" + 1"/level (tiles), AoE 20-ft radius (2 tiles)
-	int range = 10 + casterLevel;
-	int radius = 2;
-
-	auto onTarget = [casterLevel, radius, onSuccess = std::move(onSuccess)](
+	auto onTarget = [casterLevel, onSuccess = std::move(onSuccess)](
 						bool confirmed,
 						Vector2D center,
 						GameContext& innerCtx) mutable
@@ -550,24 +614,27 @@ void cast_fireball(
 			return;
 		}
 
-		SpellAnimations::animate_explosion(center, radius, innerCtx);
-
-		const FireballBurst burst = burst_fireball(center, casterLevel, radius, innerCtx);
-
-		innerCtx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, "Fireball! ");
-		innerCtx.messageSystem->append_message_part(ColorPairId::RED_BLACK, std::format("{}d6 = {} damage", burst.diceCount, burst.totalDamage));
-		if (burst.struck > 0)
-		{
-			innerCtx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format(" ({} struck)", burst.struck));
-		}
-		innerCtx.messageSystem->finalize_message();
-
+		resolve_fireball(center, casterLevel, innerCtx);
 		innerCtx.creatureManager->cleanup_dead_creatures(*innerCtx.creatures);
-
 		onSuccess(innerCtx);
 	};
 
-	ctx.menus->push_back(std::make_unique<TargetingMenu>(range, radius, std::move(onTarget), ctx));
+	ctx.menus->push_back(std::make_unique<TargetingMenu>(fireball_range(casterLevel), FIREBALL_RADIUS, std::move(onTarget), ctx));
+}
+
+void resolve_fireball(Vector2D center, int casterLevel, GameContext& ctx)
+{
+	SpellAnimations::animate_explosion(center, FIREBALL_RADIUS, ctx);
+
+	const FireballBurst burst = burst_fireball(center, casterLevel, FIREBALL_RADIUS, ctx);
+
+	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, "Fireball! ");
+	ctx.messageSystem->append_message_part(ColorPairId::RED_BLACK, std::format("{}d6 = {} damage", burst.diceCount, burst.totalDamage));
+	if (burst.struck > 0)
+	{
+		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format(" ({} struck)", burst.struck));
+	}
+	ctx.messageSystem->finalize_message();
 }
 
 bool cast_magic_missile(Creature& caster, GameContext& ctx)
@@ -576,10 +643,6 @@ bool cast_magic_missile(Creature& caster, GameContext& ctx)
 	assert(ctx.creatures && "SpellSystem::cast_magic_missile: called without creatures");
 	assert(ctx.map && "SpellSystem::cast_magic_missile: called without a map");
 	assert(ctx.dice && "SpellSystem::cast_magic_missile: called without dice");
-
-	// Get caster level
-	int casterLevel = caster.get_creature_level();
-	int numMissiles = calculate_num_missiles(casterLevel);
 
 	// Find all valid targets in FOV
 	std::vector<Creature*> targets;
@@ -601,6 +664,18 @@ bool cast_magic_missile(Creature& caster, GameContext& ctx)
 		ctx.messageSystem->message(ColorPairId::RED_BLACK, "No valid target in sight!", MessageCompletion::FINISHED);
 		return false;
 	}
+
+	resolve_magic_missile(caster, std::move(targets), ctx);
+	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
+	return true;
+}
+
+void resolve_magic_missile(Creature& caster, std::vector<Creature*> targets, GameContext& ctx)
+{
+	assert(ctx.dice && "SpellSystem::resolve_magic_missile: called without dice");
+	assert(ctx.buffSystem && "SpellSystem::resolve_magic_missile: called without a buffSystem");
+
+	const int numMissiles = calculate_num_missiles(caster_level(caster));
 
 	// Sort by distance (nearest first)
 	std::sort(targets.begin(), targets.end(), [&caster](Creature* left, Creature* right)
@@ -643,10 +718,6 @@ bool cast_magic_missile(Creature& caster, GameContext& ctx)
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "Total ");
 	ctx.messageSystem->append_message_part(ColorPairId::RED_BLACK, std::format("{} damage!", totalDamage));
 	ctx.messageSystem->finalize_message();
-
-	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
-
-	return true;
 }
 
 bool cast_shield(Creature& caster, GameContext& ctx)
@@ -673,7 +744,7 @@ bool cast_sleep(Creature& caster, GameContext& ctx)
 	constexpr int SLEEP_ROUNDS_PER_LEVEL = 5;
 
 	int hdBudget = Spells::roll_sleep_hit_dice_budget(*ctx.dice);
-	const int duration = SLEEP_ROUNDS_PER_LEVEL * caster.get_creature_level();
+	const int duration = SLEEP_ROUNDS_PER_LEVEL * caster_level(caster);
 
 	// Gather the eligible first: the budget is spent weakest-first, which the
 	// container's own order does not give.
@@ -744,7 +815,7 @@ bool cast_hold_person(Creature& caster, GameContext& ctx)
 
 	// AD&D 2e: paralyzes up to 1d4 humanoids in FOV; save vs. spells (d20 >= 15) negates
 	// Duration: 2 rounds per caster level
-	int casterLevel = caster.get_creature_level();
+	int casterLevel = caster_level(caster);
 	int duration = 2 * casterLevel;
 	int maxTargets = ctx.dice->roll(1, 4);
 	int affected = 0;
@@ -887,8 +958,8 @@ std::vector<int> SpellSystem::progression_slots(CasterClass classState, int leve
 	// AD&D 2e spell progression tables
 	// Returns slots per spell level [level1, level2, level3, ...]
 
-	// Priest Spell Progression, PHB Table 24 (PDF page 72), levels 1 to 20.
-	// Columns six and seven need Wisdom 17 and 18, which the game does not check yet.
+	// Priest Spell Progression, PHB Table 24 (PDF page 72), levels 1 to 20. Columns six and
+	// seven need Wisdom 17 and 18, which get_spell_slots applies.
 	if (classState == CasterClass::CLERIC)
 	{
 		static const std::vector<std::vector<int>> clericSlots = {
@@ -1014,7 +1085,7 @@ int SpellSystem::highest_spell_level(CasterClass classState, int level, int wisd
 int SpellSystem::spell_failure_chance(const Creature& caster, const DataManager& dataManager)
 {
 	// Table 5 is Wisdom's, and only priests risk a fizzle; a wizard casts on Intelligence.
-	if (caster.get_creature_class() != CreatureClass::CLERIC)
+	if (caster_class(caster) != CasterClass::CLERIC)
 	{
 		return 0;
 	}
@@ -1035,10 +1106,15 @@ bool SpellSystem::spell_fizzles(const Creature& caster, const DataManager& dataM
 	return dice.d100() <= chance;
 }
 
-void SpellSystem::cast_spell_by_key(
+namespace SpellSystem
+{
+namespace
+{
+void cast_with_targets(
 	std::string_view key,
 	Creature& caster,
 	SpellSource source,
+	const SpellTargets& targets,
 	std::function<void(GameContext&)> onCastComplete,
 	GameContext& ctx)
 {
@@ -1064,7 +1140,19 @@ void SpellSystem::cast_spell_by_key(
 	}
 
 	const SpellDefinition& definition = ctx.spellRegistry->get_by_key(key);
-	dispatch_effect(definition.effect_type, caster, source, std::move(onCastComplete), ctx);
+	dispatch_effect(definition.effect_type, caster, source, targets, std::move(onCastComplete), ctx);
+}
+} // namespace
+} // namespace SpellSystem
+
+void SpellSystem::cast_spell_by_key(
+	std::string_view key,
+	Creature& caster,
+	SpellSource source,
+	std::function<void(GameContext&)> onCastComplete,
+	GameContext& ctx)
+{
+	cast_with_targets(key, caster, source, PlayerChooses{}, std::move(onCastComplete), ctx);
 }
 
 SpellSystem::FireballBurst SpellSystem::burst_fireball(Vector2D center, int casterLevel, int radius, GameContext& ctx)
@@ -1127,48 +1215,114 @@ void SpellSystem::burn_with_fireball(Creature& target, const FireballBurst& burs
 	target.take_damage_and_check_death(dealt, ctx);
 }
 
+void SpellSystem::cast_spell_at(
+	std::string_view key,
+	Creature& caster,
+	SpellSource source,
+	Creature& target,
+	std::function<void(GameContext&)> onCastComplete,
+	GameContext& ctx)
+{
+	assert(ctx.spellRegistry && "SpellSystem::cast_spell_at: called without a spellRegistry");
+	assert(can_aim_at(ctx.spellRegistry->get_by_key(key).effect_type, caster, target, ctx) && "SpellSystem::cast_spell_at: a spell was aimed where it cannot land");
+
+	cast_with_targets(key, caster, source, AimedAt{ target }, std::move(onCastComplete), ctx);
+}
+
+bool SpellSystem::can_aim_at(SpellEffectType effect, const Creature& caster, const Creature& target, GameContext& ctx)
+{
+	assert(ctx.map && "SpellSystem::can_aim_at: called without a map");
+
+	// Every spell that can be aimed needs its target alive and seen.
+	if (target.is_dead() || !ctx.map->has_los(caster.position, target.position))
+	{
+		return false;
+	}
+	if (effect == SpellEffectType::MAGIC_MISSILE)
+	{
+		return true;
+	}
+	if (effect == SpellEffectType::FIREBALL)
+	{
+		const int distance = caster.get_tile_distance(target.position);
+		return distance <= fireball_range(caster_level(caster)) && distance > FIREBALL_RADIUS;
+	}
+	return false;
+}
+
+CasterClass SpellSystem::caster_class(const Creature& caster)
+{
+	if (caster.spellcasting.training)
+	{
+		return caster.spellcasting.training->casterClass;
+	}
+	return to_caster_class(caster.get_creature_class());
+}
+
+int SpellSystem::caster_level(const Creature& caster)
+{
+	if (caster.spellcasting.training)
+	{
+		return caster.spellcasting.training->casterLevel;
+	}
+	return caster.get_creature_level();
+}
+
+std::vector<std::string> SpellSystem::spells_to_memorize(
+	CasterClass casterClass,
+	int casterLevel,
+	int wisdom,
+	const SpellRegistry& spells,
+	const DataManager& dataManager)
+{
+	const std::vector<int> slots = get_spell_slots(casterClass, casterLevel, wisdom, dataManager);
+	const int maxSpellLevel = static_cast<int>(slots.size());
+	const std::vector<std::string> available = spells.get_available_spells(casterClass, maxSpellLevel);
+
+	std::vector<std::string> memorized;
+	for (int level = 1; level <= maxSpellLevel; ++level)
+	{
+		int slotsAtLevel = slots.at(static_cast<size_t>(level) - 1);
+		for (const std::string& key : available)
+		{
+			if (spells.get_by_key(key).level == level && slotsAtLevel > 0)
+			{
+				memorized.push_back(key);
+				--slotsAtLevel;
+			}
+		}
+	}
+	return memorized;
+}
+
+void SpellSystem::memorize_spells(Creature& caster, const SpellRegistry& spells, const DataManager& dataManager)
+{
+	caster.spellcasting.memorizedSpells = spells_to_memorize(caster_class(caster), caster_level(caster), caster.get_wisdom(), spells, dataManager);
+}
+
 void SpellSystem::show_memorization_menu(Player& player, GameContext& ctx)
 {
 	assert(ctx.dataManager && "SpellSystem::show_memorization_menu: called without a dataManager");
 	assert(ctx.spellRegistry && "SpellSystem::show_memorization_menu: called without a spellRegistry");
 
-	CasterClass casterClass = to_caster_class(player.get_creature_class());
-	auto slots = get_spell_slots(casterClass, player.get_creature_level(), player.get_wisdom(), *ctx.dataManager);
+	const std::vector<int> slots = get_spell_slots(caster_class(player), caster_level(player), player.get_wisdom(), *ctx.dataManager);
 	if (slots.empty())
 	{
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You cannot cast spells.", MessageCompletion::FINISHED);
 		return;
 	}
 
-	int maxSpellLevel = static_cast<int>(slots.size());
-	auto available = ctx.spellRegistry->get_available_spells(casterClass, maxSpellLevel);
+	memorize_spells(player, *ctx.spellRegistry, *ctx.dataManager);
 
-	// Clear current memorized spells
-	player.memorizedSpells.clear();
-
-	// Auto-memorize spells to fill slots (simplified)
-	for (int level = 1; level <= maxSpellLevel; ++level)
-	{
-		int slotsAtLevel = slots[level - 1];
-		for (const std::string& key : available)
-		{
-			const SpellDefinition& definition = ctx.spellRegistry->get_by_key(key);
-			if (definition.level == level && slotsAtLevel > 0)
-			{
-				player.memorizedSpells.push_back(key);
-				--slotsAtLevel;
-			}
-		}
-	}
-
+	const std::vector<std::string>& memorized = player.spellcasting.memorizedSpells;
 	ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Spells memorized: ");
-	for (size_t spellIndex = 0; spellIndex < player.memorizedSpells.size(); ++spellIndex)
+	for (size_t spellIndex = 0; spellIndex < memorized.size(); ++spellIndex)
 	{
 		if (spellIndex > 0)
 		{
 			ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ", ");
 		}
-		ctx.messageSystem->append_message_part(ColorPairId::GREEN_BLACK, ctx.spellRegistry->get_by_key(player.memorizedSpells[spellIndex]).name);
+		ctx.messageSystem->append_message_part(ColorPairId::GREEN_BLACK, ctx.spellRegistry->get_by_key(memorized[spellIndex]).name);
 	}
 	ctx.messageSystem->finalize_message();
 }

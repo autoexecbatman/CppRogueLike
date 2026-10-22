@@ -19,6 +19,7 @@
 #include "MonsterCreator.h"
 #include "MonsterHitDice.h"
 #include "MonsterRegistry.h"
+#include "SpellSystem.h"
 #include "Vector2D.h"
 
 std::unique_ptr<Creature> MonsterCreator::create_from_params(
@@ -110,6 +111,12 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 
 	creature->set_attitude(params.attitude);
 	creature->set_displaceable(params.displaceable);
+
+	// Its record's casting, then the same fill the player memorizes by, from its rolled Wisdom.
+	creature->spellcasting.training = params.spellcasterTraining;
+	creature->spellcasting.innatePowers = params.innatePowers;
+	assert(ctx.spellRegistry && "MonsterCreator::create_from_params called without a spellRegistry");
+	SpellSystem::memorize_spells(*creature, *ctx.spellRegistry, *ctx.dataManager);
 
 	assert(creature->ai && "Monster requires Ai");
 	assert(creature->attacker && "Monster requires Attacker");

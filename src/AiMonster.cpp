@@ -11,6 +11,7 @@
 #include "Creature.h"
 #include "GameContext.h"
 #include "Map.h"
+#include "MonsterSpellcasting.h"
 #include "Pathfinding.h"
 #include "Persistent.h"
 #include "Vector2D.h"
@@ -223,7 +224,8 @@ void AiMonster::update_tracking(Creature& owner, const GameContext& ctx)
 	owner.update_awareness(ctx);
 }
 
-// One creature's turn, chosen from three behaviours: flee, hunt, or drift.
+// One creature's turn, chosen from three behaviours: flee, hunt, or drift. A creature that
+// perceives the player first casts, if a spell it holds reaches (MonsterSpellcasting).
 //
 // Flee outranks everything, so a routed creature is never held up behind the wander
 // dice. Hunting needs all three of awareness, a player who is not invisible, and no
@@ -270,10 +272,13 @@ void AiMonster::decide_action(Creature& owner, GameContext& ctx)
 	// Reading the record costs no save: a save is owed only to an opponent already swinging.
 	const bool hasLostTrackOfPlayer = ctx.buffSystem->ignores_warded_creature(owner, *ctx.player());
 
-	// Perceived: hunt, with no die in the way.
+	// Perceived: cast if a spell reaches, otherwise hunt, with no die in the way.
 	if (owner.is_aware(ctx.gameState->get_time()) && !ctx.player()->is_invisible() && !hasLostTrackOfPlayer)
 	{
-		move_or_attack(owner, *ctx.player(), ctx);
+		if (MonsterSpellcasting::try_cast_at(owner, *ctx.player(), ctx) == MonsterCast::NOTHING_CAST)
+		{
+			move_or_attack(owner, *ctx.player(), ctx);
+		}
 	}
 	// Unperceived and inside 15 tiles: 1/6 of turns hunt anyway, aimed at the player's
 	// exact position, through walls and around corners alike.

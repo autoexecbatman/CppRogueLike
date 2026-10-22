@@ -12,6 +12,7 @@
 #include "GameContext.h"
 #include "Item.h"
 #include "Map.h"
+#include "MonsterSpellcasting.h"
 #include "Pathfinding.h"
 #include "Persistent.h"
 #include "Pickable.h"
@@ -48,7 +49,11 @@ void AiMonsterRanged::update(Creature& owner, GameContext& ctx)
 	// entirely (PHB page 436), so there is nothing here to shoot at or walk toward.
 	if (owner.is_aware(ctx.gameState->get_time()) && !ctx.buffSystem->ignores_warded_creature(owner, *ctx.player()))
 	{
-		move_or_attack(owner, *ctx.player(), ctx);
+		// A spell that reaches is the turn; only without one does the archer shoot or close.
+		if (MonsterSpellcasting::try_cast_at(owner, *ctx.player(), ctx) == MonsterCast::NOTHING_CAST)
+		{
+			move_or_attack(owner, *ctx.player(), ctx);
+		}
 	}
 }
 

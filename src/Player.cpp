@@ -923,7 +923,6 @@ void Player::save(json& output)
 
 	// Player-specific fields
 	output["killCount"] = killCount;
-	output["memorizedSpells"] = memorizedSpells;
 	output["thiefSkillPoints"] = thiefSkillPoints;
 	output["hidingSpot"] = hidingSpot.has_value()
 		? json{ { "x", hidingSpot->x }, { "y", hidingSpot->y } }
@@ -969,7 +968,6 @@ void Player::load(const json& source)
 		throw std::runtime_error("Player::load: a player record with no lifespan");
 	}
 	killCount = source.at("killCount").get<int>();
-	memorizedSpells = source.at("memorizedSpells").get<std::vector<std::string>>();
 	thiefSkillPoints = source.at("thiefSkillPoints").get<std::array<int, THIEF_SKILL_COUNT>>();
 	const json& spot = source.at("hidingSpot");
 	hidingSpot = spot.is_null()
