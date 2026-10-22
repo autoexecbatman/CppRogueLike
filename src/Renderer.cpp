@@ -5,6 +5,7 @@
 #include <cmath>
 #include <format>
 #include <string>
+#include <string_view>
 
 #include <raylib.h>
 
@@ -72,6 +73,117 @@ constexpr std::array<ColorPair, ALL_COLOR_PAIR.size()> PAIR_COLORS = { {
 static_assert(
 	PAIR_COLORS.size() == ALL_COLOR_PAIR.size(),
 	"every colour pair needs its two colours and no more");
+// Whether a sheet is one image, or two frames the renderer alternates between.
+enum class SheetFrames
+{
+	STATIC,
+	ANIMATED,
+};
+
+// One DawnLike sheet: the id it is drawn by, its name, and where its image
+// lives under the DawnLike folder. An animated sheet reads <path>0.png and
+// <path>1.png; a static one reads <path>.png.
+struct SheetSource
+{
+	// The id tiles name this sheet by.
+	TileSheet id{ TileSheet::SHEET_FLOOR };
+	// The sheet's own name, as the renderer reports it.
+	std::string_view name{};
+	// The image's path under DawnLike, with no frame digit or extension.
+	std::string_view path{};
+	// The side of one tile in the image, in pixels.
+	int cellSize{ 0 };
+	// One image, or two frames drawn in turn.
+	SheetFrames frames{ SheetFrames::STATIC };
+};
+
+// Every sheet load_dawnlike loads, in the order it loads them. A new sheet is a
+// new row. The enumerators are named bare only inside this namespace.
+namespace dawnlike_sheets
+{
+using enum TileSheet;
+using enum SheetFrames;
+
+constexpr auto ALL = std::to_array<SheetSource>({
+	// Objects
+	{ SHEET_FLOOR, "Floor", "Objects/Floor", 64, STATIC },
+	{ SHEET_WALL, "Wall", "Objects/Wall", 64, STATIC },
+	{ SHEET_DOOR0, "Door0", "Objects/Door0", 64, STATIC },
+	{ SHEET_DECOR0, "Decor0", "Objects/Decor0", 64, STATIC },
+	{ SHEET_EFFECT0, "Effect0", "Objects/Effect0", 64, STATIC },
+	{ SHEET_TILE, "Tile", "Objects/Tile", 64, STATIC },
+	{ SHEET_PIT0, "Pit0", "Objects/Pit", 64, ANIMATED },
+	{ SHEET_GUI0, "GUI0", "GUI/GUI", 16, ANIMATED },
+
+	// Characters (all animated with 0/1 pairs)
+	{ SHEET_PLAYER0, "Player0", "Characters/Player", 64, ANIMATED },
+	{ SHEET_HUMANOID0, "Humanoid0", "Characters/Humanoid", 64, ANIMATED },
+	{ SHEET_REPTILE0, "Reptile0", "Characters/Reptile", 64, ANIMATED },
+	{ SHEET_PEST0, "Pest0", "Characters/Pest", 64, ANIMATED },
+	{ SHEET_DOG0, "Dog0", "Characters/Dog", 64, ANIMATED },
+	{ SHEET_AVIAN0, "Avian0", "Characters/Avian", 64, ANIMATED },
+	{ SHEET_UNDEAD0, "Undead0", "Characters/Undead", 64, ANIMATED },
+	{ SHEET_QUADRAPED0, "Quadraped0", "Characters/Quadraped", 16, ANIMATED },
+	{ SHEET_DEMON0, "Demon0", "Characters/Demon", 64, ANIMATED },
+	{ SHEET_MISC0, "Misc0", "Characters/Misc", 64, ANIMATED },
+
+	// Items (static -- no animation frames)
+	{ SHEET_POTION, "Potion", "Items/Potion", 16, STATIC },
+	{ SHEET_SCROLL, "Scroll", "Items/Scroll", 16, STATIC },
+	{ SHEET_SHORT_WEP, "ShortWep", "Items/ShortWep", 16, STATIC },
+	{ SHEET_MED_WEP, "MedWep", "Items/MedWep", 16, STATIC },
+	{ SHEET_LONG_WEP, "LongWep", "Items/LongWep", 16, STATIC },
+	{ SHEET_ARMOR, "Armor", "Items/Armor", 16, STATIC },
+	{ SHEET_SHIELD, "Shield", "Items/Shield", 16, STATIC },
+	{ SHEET_HAT, "Hat", "Items/Hat", 16, STATIC },
+	{ SHEET_RING, "Ring", "Items/Ring", 16, STATIC },
+	{ SHEET_AMULET_ITEM, "Amulet", "Items/Amulet", 64, STATIC },
+	{ SHEET_FOOD, "Food", "Items/Food", 16, STATIC },
+	{ SHEET_FLESH, "Flesh", "Items/Flesh", 64, STATIC },
+	{ SHEET_MONEY, "Money", "Items/Money", 64, STATIC },
+
+	// Item sheets
+	{ SHEET_AMMO, "Ammo", "Items/Ammo", 16, STATIC },
+	{ SHEET_WAND, "Wand", "Items/Wand", 16, STATIC },
+	{ SHEET_BOOK, "Book", "Items/Book", 16, STATIC },
+	{ SHEET_BOOT, "Boot", "Items/Boot", 16, STATIC },
+	{ SHEET_GLOVE, "Glove", "Items/Glove", 16, STATIC },
+	{ SHEET_KEY, "Key", "Items/Key", 16, STATIC },
+	{ SHEET_LIGHT, "Light", "Items/Light", 16, STATIC },
+	{ SHEET_TOOL, "Tool", "Items/Tool", 16, STATIC },
+	{ SHEET_ROCK, "Rock", "Items/Rock", 16, STATIC },
+	{ SHEET_MUSIC, "Music", "Items/Music", 16, STATIC },
+	{ SHEET_CHEST0, "Chest0", "Items/Chest", 64, ANIMATED },
+
+	// Generated item sheet: every item in items.json on one 64px grid, 8
+	// columns by 15 rows. Static, because items do not animate.
+	{ SHEET_ITEMS, "Items", "Items/Items", 64, STATIC },
+	{ SHEET_SLOTS, "Slots", "GUI/Slots", 64, STATIC },
+	{ SHEET_FRAME, "Frame", "GUI/Frame", 64, STATIC },
+	{ SHEET_BARS, "Bars", "GUI/Bars", GUI_BARS_CELL_SIZE, STATIC },
+
+	// Further character sheets
+	{ SHEET_SLIME0, "Slime0", "Characters/Slime", 16, ANIMATED },
+	{ SHEET_CAT0, "Cat0", "Characters/Cat", 16, ANIMATED },
+	{ SHEET_RODENT0, "Rodent0", "Characters/Rodent", 16, ANIMATED },
+	{ SHEET_PLANT0, "Plant0", "Characters/Plant", 16, ANIMATED },
+	{ SHEET_ELEMENTAL0, "Elemental0", "Characters/Elemental", 16, ANIMATED },
+	{ SHEET_AQUATIC0, "Aquatic0", "Characters/Aquatic", 16, ANIMATED },
+
+	// Further object sheets
+	{ SHEET_ORE0, "Ore0", "Objects/Ore", 16, ANIMATED },
+	{ SHEET_HILL0, "Hill0", "Objects/Hill", 16, ANIMATED },
+	{ SHEET_TREE0, "Tree0", "Objects/Tree", 16, ANIMATED },
+	{ SHEET_GROUND0, "Ground0", "Objects/Ground", 16, ANIMATED },
+	// Generated trap art: three types at 64px, armed on row 0 and sprung on
+	// row 1. Static, since a trap does not animate and a generated second
+	// frame boils.
+	{ SHEET_TRAP0, "Trap0", "Objects/Trap0", 64, STATIC },
+	{ SHEET_FENCE, "Fence", "Objects/Fence", 16, STATIC },
+	{ SHEET_MAP0, "Map0", "Objects/Map", 16, ANIMATED },
+});
+} // namespace dawnlike_sheets
+
 } // namespace
 
 constexpr double animInterval = 0.5;
@@ -275,94 +387,20 @@ void Renderer::load_dawnlike(std::string_view basePath)
 		base += '/';
 	}
 
-	auto load_animated = [&](TileSheet id, std::string_view name, const char* dir, const char* file, int cellSize)
+	for (const SheetSource& source : dawnlike_sheets::ALL)
 	{
-		std::string frame0Path = std::format("{}{}{}0.png", base, dir, file);
-		std::string frame1Path = std::format("{}{}{}1.png", base, dir, file);
-		load_sheet(id, name, frame0Path, frame1Path, cellSize);
-	};
-
-	auto load_static = [&](TileSheet id, std::string_view name, const char* dir, const char* file, int cellSize)
-	{
-		std::string path = std::format("{}{}{}.png", base, dir, file);
-		load_sheet_static(id, name, path, cellSize);
-	};
-
-	// Objects
-	load_static(TileSheet::SHEET_FLOOR, "Floor", "Objects/", "Floor", 64);
-	load_static(TileSheet::SHEET_WALL, "Wall", "Objects/", "Wall", 64);
-	load_static(TileSheet::SHEET_DOOR0, "Door0", "Objects/", "Door0", 64);
-	load_static(TileSheet::SHEET_DECOR0, "Decor0", "Objects/", "Decor0", 64);
-	load_static(TileSheet::SHEET_EFFECT0, "Effect0", "Objects/", "Effect0", 64);
-	load_static(TileSheet::SHEET_TILE, "Tile", "Objects/", "Tile", 64);
-	load_animated(TileSheet::SHEET_PIT0, "Pit0", "Objects/", "Pit", 64);
-	load_animated(TileSheet::SHEET_GUI0, "GUI0", "GUI/", "GUI", 16);
-
-	// Characters (all animated with 0/1 pairs)
-	load_animated(TileSheet::SHEET_PLAYER0, "Player0", "Characters/", "Player", 64);
-	load_animated(TileSheet::SHEET_HUMANOID0, "Humanoid0", "Characters/", "Humanoid", 64);
-	load_animated(TileSheet::SHEET_REPTILE0, "Reptile0", "Characters/", "Reptile", 64);
-	load_animated(TileSheet::SHEET_PEST0, "Pest0", "Characters/", "Pest", 64);
-	load_animated(TileSheet::SHEET_DOG0, "Dog0", "Characters/", "Dog", 64);
-	load_animated(TileSheet::SHEET_AVIAN0, "Avian0", "Characters/", "Avian", 64);
-	load_animated(TileSheet::SHEET_UNDEAD0, "Undead0", "Characters/", "Undead", 64);
-	load_animated(TileSheet::SHEET_QUADRAPED0, "Quadraped0", "Characters/", "Quadraped", 16);
-	load_animated(TileSheet::SHEET_DEMON0, "Demon0", "Characters/", "Demon", 64);
-	load_animated(TileSheet::SHEET_MISC0, "Misc0", "Characters/", "Misc", 64);
-
-	// Items (static -- no animation frames)
-	load_static(TileSheet::SHEET_POTION, "Potion", "Items/", "Potion", 16);
-	load_static(TileSheet::SHEET_SCROLL, "Scroll", "Items/", "Scroll", 16);
-	load_static(TileSheet::SHEET_SHORT_WEP, "ShortWep", "Items/", "ShortWep", 16);
-	load_static(TileSheet::SHEET_MED_WEP, "MedWep", "Items/", "MedWep", 16);
-	load_static(TileSheet::SHEET_LONG_WEP, "LongWep", "Items/", "LongWep", 16);
-	load_static(TileSheet::SHEET_ARMOR, "Armor", "Items/", "Armor", 16);
-	load_static(TileSheet::SHEET_SHIELD, "Shield", "Items/", "Shield", 16);
-	load_static(TileSheet::SHEET_HAT, "Hat", "Items/", "Hat", 16);
-	load_static(TileSheet::SHEET_RING, "Ring", "Items/", "Ring", 16);
-	load_static(TileSheet::SHEET_AMULET_ITEM, "Amulet", "Items/", "Amulet", 64);
-	load_static(TileSheet::SHEET_FOOD, "Food", "Items/", "Food", 16);
-	load_static(TileSheet::SHEET_FLESH, "Flesh", "Items/", "Flesh", 64);
-	load_static(TileSheet::SHEET_MONEY, "Money", "Items/", "Money", 64);
-
-	// Item sheets
-	load_static(TileSheet::SHEET_AMMO, "Ammo", "Items/", "Ammo", 16);
-	load_static(TileSheet::SHEET_WAND, "Wand", "Items/", "Wand", 16);
-	load_static(TileSheet::SHEET_BOOK, "Book", "Items/", "Book", 16);
-	load_static(TileSheet::SHEET_BOOT, "Boot", "Items/", "Boot", 16);
-	load_static(TileSheet::SHEET_GLOVE, "Glove", "Items/", "Glove", 16);
-	load_static(TileSheet::SHEET_KEY, "Key", "Items/", "Key", 16);
-	load_static(TileSheet::SHEET_LIGHT, "Light", "Items/", "Light", 16);
-	load_static(TileSheet::SHEET_TOOL, "Tool", "Items/", "Tool", 16);
-	load_static(TileSheet::SHEET_ROCK, "Rock", "Items/", "Rock", 16);
-	load_static(TileSheet::SHEET_MUSIC, "Music", "Items/", "Music", 16);
-	load_animated(TileSheet::SHEET_CHEST0, "Chest0", "Items/", "Chest", 64);
-
-	// Generated item sheet: every item in items.json on one 64px grid, 8 columns
-	// by 15 rows. Static, because items do not animate.
-	load_static(TileSheet::SHEET_ITEMS, "Items", "Items/", "Items", 64);
-	load_static(TileSheet::SHEET_SLOTS, "Slots", "GUI/", "Slots", 64);
-	load_static(TileSheet::SHEET_FRAME, "Frame", "GUI/", "Frame", 64);
-	load_static(TileSheet::SHEET_BARS, "Bars", "GUI/", "Bars", GUI_BARS_CELL_SIZE);
-
-	// Further character sheets
-	load_animated(TileSheet::SHEET_SLIME0, "Slime0", "Characters/", "Slime", 16);
-	load_animated(TileSheet::SHEET_CAT0, "Cat0", "Characters/", "Cat", 16);
-	load_animated(TileSheet::SHEET_RODENT0, "Rodent0", "Characters/", "Rodent", 16);
-	load_animated(TileSheet::SHEET_PLANT0, "Plant0", "Characters/", "Plant", 16);
-	load_animated(TileSheet::SHEET_ELEMENTAL0, "Elemental0", "Characters/", "Elemental", 16);
-	load_animated(TileSheet::SHEET_AQUATIC0, "Aquatic0", "Characters/", "Aquatic", 16);
-
-	// Further object sheets
-	load_animated(TileSheet::SHEET_ORE0, "Ore0", "Objects/", "Ore", 16);
-	load_animated(TileSheet::SHEET_HILL0, "Hill0", "Objects/", "Hill", 16);
-	load_animated(TileSheet::SHEET_TREE0, "Tree0", "Objects/", "Tree", 16);
-	load_animated(TileSheet::SHEET_GROUND0, "Ground0", "Objects/", "Ground", 16);
-	// Generated trap art: three types at 64px, armed on row 0 and sprung on row 1. Static, since a trap
-	// does not animate and a generated second frame boils.
-	load_static(TileSheet::SHEET_TRAP0, "Trap0", "Objects/", "Trap0", 64);
-	load_static(TileSheet::SHEET_FENCE, "Fence", "Objects/", "Fence", 16);
-	load_animated(TileSheet::SHEET_MAP0, "Map0", "Objects/", "Map", 16);
+		if (source.frames == SheetFrames::ANIMATED)
+		{
+			const std::string frame0Path = std::format("{}{}0.png", base, source.path);
+			const std::string frame1Path = std::format("{}{}1.png", base, source.path);
+			load_sheet(source.id, source.name, frame0Path, frame1Path, source.cellSize);
+		}
+		else
+		{
+			const std::string path = std::format("{}{}.png", base, source.path);
+			load_sheet_static(source.id, source.name, path, source.cellSize);
+		}
+	}
 
 	sheetsLoaded = true;
 }

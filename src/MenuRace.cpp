@@ -46,7 +46,8 @@ std::unique_ptr<BaseMenu> make_race_menu(GameContext& ctx)
 
 	for (const RaceChoice& choice : RACE_CHOICES)
 	{
-		auto raceCommand = [choose_race, race = choice.race](GameContext& commandCtx)
+		const PlayerRaceState race = choice.race;
+		auto raceCommand = [choose_race, race](GameContext& commandCtx)
 		{
 			choose_race(race, commandCtx);
 		};

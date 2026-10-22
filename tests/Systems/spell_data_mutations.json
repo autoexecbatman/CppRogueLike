@@ -57,8 +57,8 @@
     },
     {
       "file": "src/SpellRegistry.cpp",
-      "original": "(definition.spellClass == targetClass || definition.spellClass == SpellClass::BOTH)",
-      "mutated": "(definition.spellClass == targetClass)",
+      "original": "definition.spellClass == targetClass || definition.spellClass == SpellClass::BOTH;",
+      "mutated": "definition.spellClass == targetClass;",
       "catches": "a spell of both classes offered to neither"
     },
     {

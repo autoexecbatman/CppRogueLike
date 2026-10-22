@@ -247,8 +247,9 @@ void Creature::load(const json& source)
 	lifespan.reset();
 	if (!lifespanRecord.is_null())
 	{
+		const PlayerRaceState race = static_cast<PlayerRaceState>(lifespanRecord.at("race").get<int>());
 		lifespan = Lifespan{
-			static_cast<PlayerRaceState>(lifespanRecord.at("race").get<int>()),
+			race,
 			lifespanRecord.at("startingAge").get<int>(),
 			lifespanRecord.at("maximumAge").get<int>(),
 			lifespanRecord.at("yearsLived").get<int>(),

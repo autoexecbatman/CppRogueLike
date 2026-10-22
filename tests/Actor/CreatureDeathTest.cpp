@@ -98,7 +98,11 @@ protected:
 			return dropped && dropped->actorData.name.starts_with("dead ");
 		};
 		const auto found = std::ranges::find_if(ctx.floorInventory->items, is_a_corpse);
-		return found == ctx.floorInventory->items.end() ? nullptr : found->get();
+		if (found == ctx.floorInventory->items.end())
+		{
+			return nullptr;
+		}
+		return found->get();
 	}
 
 	MockGameContext mock{};

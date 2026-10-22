@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <map>
 #include <set>
@@ -112,8 +113,7 @@ TEST_F(MonsterEquipmentTest, BodyPlanCoversEveryCarriedSlot)
 		for (const MonsterParams::StartingItem& carried : params.equipment)
 		{
 			const bool planned = std::ranges::find(plan, carried.slot) != plan.end();
-			EXPECT_TRUE(planned)
-				<< key << " carries " << carried.itemKey << " in a slot its body does not have";
+			EXPECT_TRUE(planned) << std::format("{} carries {} in a slot its body does not have", key, carried.itemKey);
 		}
 	}
 }

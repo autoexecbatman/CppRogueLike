@@ -159,8 +159,9 @@ void TileConfig::load(std::string_view path)
 
 	for (const auto& [key, record] : root.at("autotile_groups").items())
 	{
+		const TileSheet sheet = static_cast<TileSheet>(record.at("sheet").get<int>());
 		autotileGroups[key] = AutotileGroup{
-			static_cast<TileSheet>(record.at("sheet").get<int>()),
+			sheet,
 			record.at("origin_col").get<int>(),
 			record.at("origin_row").get<int>()
 		};
@@ -168,8 +169,9 @@ void TileConfig::load(std::string_view path)
 
 	for (const auto& [key, record] : root.at("wall_autotile_groups").items())
 	{
+		const TileSheet sheet = static_cast<TileSheet>(record.at("sheet").get<int>());
 		wallAutotileGroups[key] = WallAutotileGroup{
-			static_cast<TileSheet>(record.at("sheet").get<int>()),
+			sheet,
 			record.at("origin_col").get<int>(),
 			record.at("origin_row").get<int>()
 		};

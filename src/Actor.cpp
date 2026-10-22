@@ -110,5 +110,6 @@ bool Actor::is_visible(const GameContext& ctx) const noexcept
 		return false;
 	}
 
-	return (!has_state(ActorState::FOV_ONLY) && ctx.map->is_explored(position)) || ctx.map->is_in_fov(position);
+	const bool isRemembered = !has_state(ActorState::FOV_ONLY) && ctx.map->is_explored(position);
+	return isRemembered || ctx.map->is_in_fov(position);
 }

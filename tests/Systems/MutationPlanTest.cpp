@@ -97,6 +97,19 @@ std::set<std::string> registered_suites()
 	return names;
 }
 
+// The test a registered suite name passes when it begins with suite, so a
+// pattern naming a fixture's prefix still finds its suites.
+//
+// Example, with suite holding "DoorForcing":
+//   naming_a_prefix_of(suite)("DoorForcingTest"); // -> true
+auto naming_a_prefix_of(const std::string& suite)
+{
+	return [&suite](const std::string& registered)
+	{
+		return registered.starts_with(suite);
+	};
+}
+
 } // namespace
 
 // A fragment that is no longer in its file is a mutation that never runs, and mutate.py
@@ -178,10 +191,7 @@ TEST(MutationPlanTest, EveryFilterNamesASuiteThatExists)
 			}
 
 			// A pattern may name a fixture's prefix rather than the whole suite.
-			const auto names_this_suite = [&suite](const std::string& registered)
-			{
-				return registered.starts_with(suite);
-			};
+			const auto names_this_suite = naming_a_prefix_of(suite);
 			const bool known = suites.contains(suite) || std::ranges::any_of(suites, names_this_suite);
 			EXPECT_TRUE(known)
 				<< planPath.filename().string() << ": the filter names '" << pattern

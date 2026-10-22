@@ -284,7 +284,11 @@ inline DurationUnit parse_duration_unit(std::string_view name)
 //   next_duration_unit(DurationUnit::TURNS);    // -> DurationUnit::ROUNDS
 [[nodiscard]] inline DurationUnit next_duration_unit(DurationUnit unit)
 {
-	return unit == DurationUnit::ROUNDS ? DurationUnit::TURNS : DurationUnit::ROUNDS;
+	if (unit == DurationUnit::ROUNDS)
+	{
+		return DurationUnit::TURNS;
+	}
+	return DurationUnit::ROUNDS;
 }
 
 // ========== Plain data structs (no base class, no virtuals) ==========

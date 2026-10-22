@@ -46,6 +46,20 @@
 #include "src/Web.h"
 #include "tests/mocks/TestDice.h"
 
+// The test a spell tile passes when it is a standing web outside the columns
+// westmostCol to eastmostCol.
+//
+// Example, with a web standing at column 9:
+//   std::ranges::any_of(*ctx.spellTiles, standing_outside(10, 14)); // -> true
+auto standing_outside(int westmostCol, int eastmostCol)
+{
+	return [westmostCol, eastmostCol](const std::unique_ptr<SpellTile>& tile)
+	{
+		const bool isOutside = tile->position.x < westmostCol || tile->position.x > eastmostCol;
+		return !tile->is_destroyed() && isOutside;
+	};
+}
+
 class WebSpinnerSanctuaryTest : public ::testing::Test
 {
 protected:
@@ -197,10 +211,7 @@ protected:
 
 	bool has_web_outside(int westmostCol, int eastmostCol) const
 	{
-		auto stands_outside = [westmostCol, eastmostCol](const std::unique_ptr<SpellTile>& spellTile)
-		{
-			return !spellTile->is_destroyed() && (spellTile->position.x < westmostCol || spellTile->position.x > eastmostCol);
-		};
+		auto stands_outside = standing_outside(westmostCol, eastmostCol);
 		return std::ranges::any_of(*ctx.spellTiles, stands_outside);
 	}
 

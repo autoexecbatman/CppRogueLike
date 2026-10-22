@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include <format>
 #include <memory>
 #include <string>
 
@@ -115,7 +116,7 @@ TEST_F(DoorForcingTest, ARowWithNoLockedDoorChanceIsRefusedWithoutARoll)
 
 		walk_into_the_door();
 
-		SCOPED_TRACE(testing::Message() << "Strength " << character.strength << "/" << character.exceptional);
+		SCOPED_TRACE(std::format("Strength {}/{}", character.strength, character.exceptional));
 		EXPECT_EQ(ctx.messageSystem->get_current_message(), TOO_WEAK);
 		EXPECT_FALSE(ctx.map->has_resisted_forcing(DOOR)) << "a refusal used up the attempt";
 		expect_refused_without_a_roll(timeBefore);

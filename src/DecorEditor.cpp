@@ -485,7 +485,9 @@ void DecorEditor::update_browser(const Renderer& renderer)
 				entryText += std::format(" [{}]", palette.entries()[entryIndex].symbol);
 			}
 			entryText = truncate(entryText);
-			textColor = isSelected ? Color{ 255, 255, 100, 255 } : Color{ 200, 200, 200, 255 };
+			constexpr Color SELECTED_TEXT{ 255, 255, 100, 255 };
+			constexpr Color PLAIN_TEXT{ 200, 200, 200, 255 };
+			textColor = isSelected ? SELECTED_TEXT : PLAIN_TEXT;
 		}
 		renderer.draw_text_color(Vector2D{ listTextX, itemY + (LIST_ITEM_H - 16) / 2 }, entryText, textColor);
 
@@ -643,18 +645,16 @@ void DecorEditor::update_browser(const Renderer& renderer)
 		renderer.draw_text_color(Vector2D{ textX, panelY + 6 }, spriteInfo, spriteColor);
 
 		// Label field -- highlighted when all-selected (next keystroke replaces)
-		Color labelColor = !isEditingSymbol
-			? Color{ 255, 255, 100, 255 }
-			: Color{ 160, 160, 80, 255 };
+		constexpr Color EDITING_FIELD{ 255, 255, 100, 255 };
+		constexpr Color IDLE_FIELD{ 160, 160, 80, 255 };
+		Color labelColor = !isEditingSymbol ? EDITING_FIELD : IDLE_FIELD;
 		std::string labelDisplay = isLabelAllSelected
 			? std::format("Label: [{}]", labelBuffer) // brackets = all selected
 			: std::format("Label: {}{}", labelBuffer, !isEditingSymbol ? "|" : "");
 		renderer.draw_text_color(Vector2D{ textX, panelY + 26 }, labelDisplay, labelColor);
 
 		// Symbol field
-		Color symbolColor = isEditingSymbol
-			? Color{ 255, 255, 100, 255 }
-			: Color{ 160, 160, 80, 255 };
+		Color symbolColor = isEditingSymbol ? EDITING_FIELD : IDLE_FIELD;
 		renderer.draw_text_color(
 			Vector2D{ textX, panelY + 46 }, std::format("Symbol: {}{}", symbolBuffer ? std::string(1, symbolBuffer) : "_", isEditingSymbol ? "|" : ""), symbolColor);
 

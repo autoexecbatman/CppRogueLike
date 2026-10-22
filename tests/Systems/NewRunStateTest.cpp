@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include <filesystem>
+#include <format>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -176,7 +177,7 @@ TEST_F(NewRunStateTest, ALoadedGameShowsNothingOfTheLastRunsMessagesAndKeepsItsC
 	const std::filesystem::path savePath = Paths::resolve(Paths::SAVE_FILE);
 	if (std::filesystem::exists(savePath))
 	{
-		GTEST_SKIP() << "a save is already at " << savePath.string() << ", and this test will not overwrite it";
+		GTEST_SKIP() << std::format("a save is already at {}, and this test will not overwrite it", savePath.string());
 	}
 
 	// The game being saved, then a further run on top of it before it is loaded.

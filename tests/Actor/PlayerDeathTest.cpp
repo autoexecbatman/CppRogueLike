@@ -19,6 +19,7 @@
 #include <gtest/gtest.h>
 
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <memory>
 #include <string>
@@ -138,8 +139,9 @@ TEST_F(PlayerDeathTest, DyingLeavesTheSaveFileAlone)
 {
 	if (a_save_already_exists())
 	{
-		GTEST_SKIP() << "a save already exists at " << Paths::resolve(Paths::SAVE_FILE).string()
-					 << "; refusing to overwrite it to run this test";
+		GTEST_SKIP() << std::format(
+			"a save already exists at {}; refusing to overwrite it to run this test",
+			Paths::resolve(Paths::SAVE_FILE).string());
 	}
 	place_sentinel_save();
 	ASSERT_TRUE(wroteSentinel) << "could not write the stand-in save, so nothing here is being measured";

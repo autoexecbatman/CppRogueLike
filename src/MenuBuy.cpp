@@ -171,7 +171,8 @@ void MenuBuy::handle_buy(GameContext& ctx)
 	{
 		if (currentState >= InventoryOperations::get_item_count(shopkeeper.get_shop_inventory()) && !InventoryOperations::is_inventory_empty(shopkeeper.get_shop_inventory()))
 		{
-			currentState = InventoryOperations::get_item_count(shopkeeper.get_shop_inventory()) - 1;
+			const size_t itemCount = InventoryOperations::get_item_count(shopkeeper.get_shop_inventory());
+			currentState = itemCount - 1;
 		}
 
 		populate_items();

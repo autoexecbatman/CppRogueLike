@@ -57,8 +57,8 @@
     },
     {
       "file": "src/PlayerController.cpp",
-      "original": "strength_for(playerOwner.get_strength(), playerOwner.get_exceptional_strength()).lockedDoors",
-      "mutated": "strength_for(playerOwner.get_strength(), 0).lockedDoors",
+      "original": "strength_for(playerOwner.get_strength(), playerOwner.get_exceptional_strength());",
+      "mutated": "strength_for(playerOwner.get_strength(), 0);",
       "catches": "exceptional Strength ignored, so no 18/xx may force a door"
     },
     {

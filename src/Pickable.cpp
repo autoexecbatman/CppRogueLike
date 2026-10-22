@@ -350,7 +350,8 @@ bool use(Weapon& weapon, Item& owner, Creature& wearer, GameContext& ctx)
 		Item* equipped = wearer.get_equipped_item(preferred);
 		if (equipped && equipped->uniqueId == owner.uniqueId)
 		{
-			const std::string slotName = (preferred == EquipmentSlot::LEFT_HAND) ? "off-hand" : "main hand";
+			const bool isOffHand = preferred == EquipmentSlot::LEFT_HAND;
+			const std::string slotName = isOffHand ? "off-hand" : "main hand";
 			ctx.messageSystem->message(
 				ColorPairId::WHITE_BLACK,
 				std::format("You equip the {} in your {}.", owner.get_name(), slotName),
@@ -571,10 +572,11 @@ bool use([[maybe_unused]] Armor& armor, Item& item, Creature& wearer, GameContex
 
 	if (success)
 	{
+		const std::string removedLine = "You remove the " + item.get_name() + ".";
+		const std::string putOnLine = "You put on the " + item.get_name() + ".";
 		ctx.messageSystem->message(
 			ColorPairId::WHITE_BLACK,
-			was_equipped ? "You remove the " + item.get_name() + "."
-						 : "You put on the " + item.get_name() + ".",
+			was_equipped ? removedLine : putOnLine,
 			MessageCompletion::FINISHED);
 	}
 

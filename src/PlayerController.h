@@ -3,6 +3,7 @@
 // Not an AI -- does not inherit from Ai. Player owns this; monsters never touch it.
 #pragma once
 
+#include <functional>
 #include <optional>
 
 #include "GameContext.h"
@@ -102,6 +103,22 @@ private:
 	// Example, right-clicking a tile holding a dagger:
 	//   handle_right_click(ctx);   // a menu with "Pick up dagger" and "Cancel"
 	void handle_right_click(GameContext& ctx);
+	// The command a context menu runs to walk to worldTile and pick up what
+	// lies there.
+	//
+	// Example, the entry for a dagger two tiles away:
+	//   actions.push_back({ "Pick up dagger", walk_to_pick_up_command(tile) });
+	std::function<void(GameContext&)> walk_to_pick_up_command(Vector2D worldTile);
+	// The command a context menu runs to open or close the door on worldTile:
+	// at once when the player stands beside it, after a walk to its approach
+	// otherwise.
+	//
+	// Example, the entry for a closed door:
+	//   const auto open = work_the_door_command(door, PendingDoorAction::OPEN);
+	//   actions.push_back({ "Open door", open });
+	std::function<void(GameContext&)> work_the_door_command(
+		Vector2D worldTile,
+		PendingDoorAction doorAction);
 	Vector2D find_door_approach(Vector2D doorTile, const GameContext& ctx) const;
 	// Four-branch locked-door resolution: key, Open Locks, force by Table 1, blocked.
 	// A pick takes 1d10 rounds and is tried once per lock per level; a refused pick goes on to

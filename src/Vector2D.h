@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <format>
 #include <iostream>
 
 // {x,y} position
@@ -96,7 +97,7 @@ struct Vector2D
 	// for std::cout
 	friend std::ostream& operator<<(std::ostream& stream, const Vector2D& position)
 	{
-		stream << "Vector2D: {y: " << position.y << ", x: " << position.x << "}";
+		stream << std::format("Vector2D: {{y: {}, x: {}}}", position.y, position.x);
 		return stream;
 	}
 

@@ -185,12 +185,16 @@ void save_decorations(const std::vector<std::unique_ptr<Decoration>>& decoration
 	for (const auto& decoration : decorations)
 	{
 		assert(decoration && "save_decorations: the decoration list holds a null entry");
-		output["decorations"].push_back({ { "position", { { "x", decoration->position.x }, { "y", decoration->position.y } } },
+		const nlohmann::json position{ { "x", decoration->position.x }, { "y", decoration->position.y } };
+		const nlohmann::json record{
+			{ "position", position },
 			{ "tile", TileRefJson::encode_tile(decoration->tile) },
 			{ "name", decoration->name },
 			{ "hp", decoration->hp },
 			{ "lootTableKey", decoration->lootTableKey },
-			{ "isBroken", decoration->isBroken } });
+			{ "isBroken", decoration->isBroken }
+		};
+		output["decorations"].push_back(record);
 	}
 }
 

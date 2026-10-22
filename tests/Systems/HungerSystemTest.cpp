@@ -18,6 +18,7 @@
 //   cd build/bin/Debug && ./test_exe.exe --gtest_filter=HungerSystemTest.*
 
 #include <array>
+#include <format>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -349,7 +350,7 @@ TEST_P(HungerSystemFieldTest, ARecordMissingTheFieldIsRefused)
 	hunger.increase_hunger(ctx, 1);
 	nlohmann::json saved;
 	hunger.save(saved);
-	ASSERT_TRUE(saved.contains(field)) << "the writer did not write \"" << field << "\", so erasing it proves nothing";
+	ASSERT_TRUE(saved.contains(field)) << std::format("the writer did not write \"{}\", so erasing it proves nothing", field);
 	saved.erase(field);
 
 	HungerSystem loaded{};

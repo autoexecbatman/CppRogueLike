@@ -161,7 +161,11 @@ ItemClass item_class_from_string(const std::string& typeName)
 		{ "quest_item", ItemClass::QUEST_ITEM }
 	};
 
-	return classMap.contains(typeName) ? classMap.at(typeName) : ItemClass::UNKNOWN;
+	if (!classMap.contains(typeName))
+	{
+		return ItemClass::UNKNOWN;
+	}
+	return classMap.at(typeName);
 }
 
 } // namespace ItemClassificationUtils

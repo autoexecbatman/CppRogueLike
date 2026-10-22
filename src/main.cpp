@@ -1,10 +1,12 @@
 // file: main.cpp
 #include <exception>
+#include <format>
 #include <fstream>
 #include <iostream>
 #include <memory>
 #include <optional>
 #include <random>
+#include <string>
 #include <vector>
 
 #ifdef __EMSCRIPTEN__
@@ -49,7 +51,8 @@ int main()
 	}
 	catch (const std::exception& error)
 	{
-		std::cerr << "Warning: Could not open debug file: " << error.what() << std::endl;
+		const std::string warning = std::format("Warning: Could not open debug file: {}", error.what());
+		std::cerr << warning << std::endl;
 	}
 
 	std::clog << "STARTUP: Opened debug log\n"
@@ -159,7 +162,8 @@ int main()
 		}
 		catch (const std::exception& error)
 		{
-			std::cerr << "Warning: Exception closing debug file: " << error.what() << std::endl;
+			const std::string warning = std::format("Warning: Exception closing debug file: {}", error.what());
+			std::cerr << warning << std::endl;
 		}
 	}
 

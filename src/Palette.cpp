@@ -175,10 +175,15 @@ void Palette::load(std::string_view path)
 		}
 		if (refusal != PaletteEdit::APPLIED)
 		{
+			std::string shownLabel = entry.label;
+			if (shownLabel.empty())
+			{
+				shownLabel = "<empty label>";
+			}
 			throw std::runtime_error(std::format(
 				"Palette::load -- '{}' entry '{}' (sheet {} col {} row {}) is refused: {}",
 				resolved.string(),
-				entry.label.empty() ? std::string{ "<empty label>" } : entry.label,
+				shownLabel,
 				static_cast<int>(entry.tile.sheet),
 				entry.tile.col,
 				entry.tile.row,

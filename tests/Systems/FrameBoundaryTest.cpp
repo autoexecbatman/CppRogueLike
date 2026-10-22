@@ -78,6 +78,24 @@ void press_mouse_button(int raylibButton)
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
+// The callback a context menu runs in these tests: it records that a choice
+// was made, in the flag it was given.
+//
+// Example:
+//   bool chosen{ false };
+//   ChoiceRecorder{ chosen }(0, ctx); // chosen -> true
+struct ChoiceRecorder
+{
+	bool& chosen;
+
+	void operator()(
+		[[maybe_unused]] int choice,
+		[[maybe_unused]] GameContext& choiceCtx) const
+	{
+		chosen = true;
+	}
+};
+
 // A click chooses from the context menu, which closes without drawing; the tick still
 // ends its frame, so the click is not read a second time by the menu beneath.
 [[noreturn]] void a_click_closing_the_context_menu_is_spent_by_the_tick()
@@ -86,10 +104,7 @@ void press_mouse_button(int raylibButton)
 	Game game{ TEST_DICE_SEED };
 	GameContext ctx = game.context();
 	bool chosen{ false };
-	const auto record_choice = [&chosen]([[maybe_unused]] int choice, [[maybe_unused]] GameContext& choiceCtx)
-	{
-		chosen = true;
-	};
+	const ChoiceRecorder record_choice{ chosen };
 	game.menus.push_back(std::make_unique<ContextMenu>(std::vector<std::string>{ "Use" }, 1, 1, record_choice, ctx));
 
 	press_mouse_button(MOUSE_BUTTON_LEFT);

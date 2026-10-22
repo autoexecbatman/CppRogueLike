@@ -249,9 +249,8 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 		}
 
 		// Flash on, then quadratic falloff
-		float alpha_f = (lifeFraction < 0.15f)
-			? 1.0f
-			: 1.0f - ((lifeFraction - 0.15f) / 0.85f) * ((lifeFraction - 0.15f) / 0.85f);
+		const float falloff = (lifeFraction - 0.15f) / 0.85f;
+		float alpha_f = (lifeFraction < 0.15f) ? 1.0f : 1.0f - falloff * falloff;
 		unsigned char alpha = static_cast<unsigned char>(alpha_f * 255.0f);
 
 		int screen_x = static_cast<int>(particle.pixelX) - cam_x;

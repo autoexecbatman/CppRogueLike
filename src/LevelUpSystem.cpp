@@ -425,7 +425,8 @@ int LevelUpSystem::roll_hit_points(
 	int total = hitDice.bonus;
 	for (const int rolled : roll_each_die(&dice, hitDice))
 	{
-		total += LevelUpSystem::hit_die_value(rolled, creatureClass, constitution, dataManager).total;
+		const HitDieValue dieValue = LevelUpSystem::hit_die_value(rolled, creatureClass, constitution, dataManager);
+		total += dieValue.total;
 	}
 
 	// A negative bonus on a small expression can still spend the whole roll.

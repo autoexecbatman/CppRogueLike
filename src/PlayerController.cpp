@@ -720,7 +720,8 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 	}
 
 	assert(ctx.dataManager && "PlayerController::resolve_locked_door: called without a dataManager");
-	const int lockedDoorChance = ctx.dataManager->strength_for(playerOwner.get_strength(), playerOwner.get_exceptional_strength()).lockedDoors;
+	const StrengthAttributes strengthRow = ctx.dataManager->strength_for(playerOwner.get_strength(), playerOwner.get_exceptional_strength());
+	const int lockedDoorChance = strengthRow.lockedDoors;
 	if (lockedDoorChance > 0)
 	{
 		if (ctx.dice->d20() <= lockedDoorChance)
@@ -1015,15 +1016,7 @@ void PlayerController::handle_right_click(GameContext& ctx)
 		if (item->position == world_tile)
 		{
 			std::string itemName = item->get_name().substr(0, 16);
-			const auto walk_to_pick_up = [this, world_tile](GameContext& actionCtx)
-			{
-				begin_path_walk(
-					world_tile,
-					world_tile,
-					MouseMode::WALK_TO_PICKUP,
-					PendingDoorAction::NONE,
-					actionCtx);
-			};
+			const auto walk_to_pick_up = walk_to_pick_up_command(world_tile);
 			actions.push_back({ "Pick up " + itemName, walk_to_pick_up });
 			break;
 		}
@@ -1038,29 +1031,7 @@ void PlayerController::handle_right_click(GameContext& ctx)
 		std::string doorLabel = doorIsOpen ? "Close door" : "Open door";
 
 		// Beside the door it is worked at once; further off, the player walks up to it first.
-		const auto work_the_door = [this, world_tile, doorAction](GameContext& actionCtx)
-		{
-			if (actionCtx.player()->position.chebyshev_distance_to(world_tile) <= 1)
-			{
-				if (doorAction == PendingDoorAction::OPEN)
-				{
-					actionCtx.map->open_door(world_tile, actionCtx);
-				}
-				else
-				{
-					actionCtx.map->close_door(world_tile, actionCtx);
-				}
-				spend_player_action(actionCtx, TIME_UNITS_PER_ROUND);
-			}
-			else
-			{
-				const Vector2D approach = find_door_approach(world_tile, actionCtx);
-				if (approach.x != -1)
-				{
-					begin_path_walk(approach, world_tile, MouseMode::WALK_TO_DOOR, doorAction, actionCtx);
-				}
-			}
-		};
+		const auto work_the_door = work_the_door_command(world_tile, doorAction);
 		actions.push_back({ doorLabel, work_the_door });
 	}
 
@@ -1141,6 +1112,48 @@ void PlayerController::handle_right_click(GameContext& ctx)
 
 	ctx.menus->push_back(std::make_unique<ContextMenu>(
 		std::move(labels), anchor_col, anchor_row, std::move(on_select), ctx));
+}
+
+std::function<void(GameContext&)> PlayerController::walk_to_pick_up_command(Vector2D worldTile)
+{
+	return [this, worldTile](GameContext& actionCtx)
+	{
+		begin_path_walk(
+			worldTile,
+			worldTile,
+			MouseMode::WALK_TO_PICKUP,
+			PendingDoorAction::NONE,
+			actionCtx);
+	};
+}
+
+std::function<void(GameContext&)> PlayerController::work_the_door_command(
+	Vector2D worldTile,
+	PendingDoorAction doorAction)
+{
+	return [this, worldTile, doorAction](GameContext& actionCtx)
+	{
+		if (actionCtx.player()->position.chebyshev_distance_to(worldTile) <= 1)
+		{
+			if (doorAction == PendingDoorAction::OPEN)
+			{
+				actionCtx.map->open_door(worldTile, actionCtx);
+			}
+			else
+			{
+				actionCtx.map->close_door(worldTile, actionCtx);
+			}
+			spend_player_action(actionCtx, TIME_UNITS_PER_ROUND);
+		}
+		else
+		{
+			const Vector2D approach = find_door_approach(worldTile, actionCtx);
+			if (approach.x != -1)
+			{
+				begin_path_walk(approach, worldTile, MouseMode::WALK_TO_DOOR, doorAction, actionCtx);
+			}
+		}
+	};
 }
 
 void PlayerController::call_action(Controls key, GameContext& ctx)

@@ -450,7 +450,8 @@ std::vector<std::string> SpellRegistry::get_available_spells(CasterClass casterC
 
 	auto is_available = [targetClass, maxSpellLevel](const SpellDefinition& definition) -> bool
 	{
-		return (definition.spellClass == targetClass || definition.spellClass == SpellClass::BOTH) && definition.level <= maxSpellLevel;
+		const bool isOfTheClass = definition.spellClass == targetClass || definition.spellClass == SpellClass::BOTH;
+		return isOfTheClass && definition.level <= maxSpellLevel;
 	};
 
 	std::vector<std::string> available;

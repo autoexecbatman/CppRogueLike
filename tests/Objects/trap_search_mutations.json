@@ -21,8 +21,8 @@
     },
     {
       "file": "src/Trap.cpp",
-      "original": "(ctx.dice->d100() <= skill.value())",
-      "mutated": "(ctx.dice->d100() < skill.value())",
+      "original": "return dice.d100() <= skill.value();",
+      "mutated": "return dice.d100() < skill.value();",
       "catches": "a roll at the thief's own percentage counted as a miss"
     },
     {

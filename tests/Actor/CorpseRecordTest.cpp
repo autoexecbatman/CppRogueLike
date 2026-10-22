@@ -128,7 +128,11 @@ protected:
 			return item && item->actorData.name == FIXTURE_NAME;
 		};
 		const auto found = std::ranges::find_if(ctx.floorInventory->items, isTheCorpse);
-		return found == ctx.floorInventory->items.end() ? nullptr : found->get();
+		if (found == ctx.floorInventory->items.end())
+		{
+			return nullptr;
+		}
+		return found->get();
 	}
 
 	// monsters.json with one field taken off the goblin, written where load can read it.

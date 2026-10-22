@@ -14,6 +14,7 @@
 
 #include <gtest/gtest.h>
 
+#include <format>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -117,7 +118,7 @@ TEST_P(ActorLoadKeyTest, ARecordMissingTheKeyIsRefused)
 {
 	const std::string key{ GetParam() };
 	nlohmann::json record = saved_item(true);
-	ASSERT_TRUE(record.contains(key)) << "the writer did not write \"" << key << "\", so erasing it proves nothing";
+	ASSERT_TRUE(record.contains(key)) << std::format("the writer did not write \"{}\", so erasing it proves nothing", key);
 	record.erase(key);
 	auto loaded = blank_item();
 

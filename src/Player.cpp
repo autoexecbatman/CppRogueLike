@@ -115,6 +115,21 @@ constexpr int calculate_wizard_xp(int level) noexcept
 	};
 	return calculate_xp_for_level(level, wizard_xp, 125000);
 }
+
+// The test a creature passes when it watches for a thief at currentTime: it is
+// alive and aware. A dead creature watches for nothing.
+//
+// Example, with a guard aware of the thief:
+//   std::ranges::any_of(*ctx.creatures, watching_at(currentTime)); // -> true
+auto watching_at(int currentTime)
+{
+	return [currentTime](const std::unique_ptr<Creature>& creature)
+	{
+		assert(creature && "attempt_hide: creatures list holds a null entry");
+		return !creature->is_dead() && creature->is_aware(currentTime);
+	};
+}
+
 } // namespace
 
 Player::Player(Vector2D position)
@@ -136,22 +151,38 @@ std::string_view Player::sprite_tile_key() const noexcept
 
 	case CreatureClass::FIGHTER:
 	{
-		return isDwarf ? "TILE_PLAYER_DWARF_FIGHTER" : "TILE_PLAYER_HUMAN_FIGHTER";
+		if (isDwarf)
+		{
+			return "TILE_PLAYER_DWARF_FIGHTER";
+		}
+		return "TILE_PLAYER_HUMAN_FIGHTER";
 	}
 
 	case CreatureClass::ROGUE:
 	{
-		return isDwarf ? "TILE_PLAYER_DWARF_ROGUE" : "TILE_PLAYER_HUMAN_ROGUE";
+		if (isDwarf)
+		{
+			return "TILE_PLAYER_DWARF_ROGUE";
+		}
+		return "TILE_PLAYER_HUMAN_ROGUE";
 	}
 
 	case CreatureClass::CLERIC:
 	{
-		return isDwarf ? "TILE_PLAYER_DWARF_CLERIC" : "TILE_PLAYER_HUMAN_CLERIC";
+		if (isDwarf)
+		{
+			return "TILE_PLAYER_DWARF_CLERIC";
+		}
+		return "TILE_PLAYER_HUMAN_CLERIC";
 	}
 
 	case CreatureClass::WIZARD:
 	{
-		return isDwarf ? "TILE_PLAYER_DWARF_WIZARD" : "TILE_PLAYER_HUMAN_WIZARD";
+		if (isDwarf)
+		{
+			return "TILE_PLAYER_DWARF_WIZARD";
+		}
+		return "TILE_PLAYER_HUMAN_WIZARD";
 	}
 
 	case CreatureClass::MONSTER:
@@ -302,7 +333,8 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 
 	case CreatureClass::FIGHTER:
 	{
-		int startingGold = (ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4()) * 10;
+		const int goldRoll = ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4();
+		int startingGold = goldRoll * 10;
 		set_gold(startingGold);
 		equip_item(ItemCreator::create("plate_mail", position, ctx), EquipmentSlot::BODY, ctx);
 		equip_item(ItemCreator::create("long_sword", position, ctx), EquipmentSlot::RIGHT_HAND, ctx);
@@ -794,11 +826,7 @@ Player::HideAttempt Player::attempt_hide(GameContext& ctx)
 	// "A thief can never become hidden while a guard is watching him": watching is awareness,
 	// whether anything is looking for him, not whether he can see it.
 	const int currentTime = ctx.gameState->get_time();
-	const auto is_watching = [currentTime](const std::unique_ptr<Creature>& creature)
-	{
-		assert(creature && "attempt_hide: creatures list holds a null entry");
-		return !creature->is_dead() && creature->is_aware(currentTime);
-	};
+	const auto is_watching = watching_at(currentTime);
 	if (std::ranges::any_of(*ctx.creatures, is_watching))
 	{
 		ctx.messageSystem->message(ColorPairId::RED_BLACK, "You cannot hide while watched.", MessageCompletion::FINISHED);

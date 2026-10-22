@@ -107,8 +107,8 @@ TEST(SavingThrowTableTest, ImprovementFollowsTheBands)
 	{
 		for (int level = 2; level <= 21; ++level)
 		{
-			const bool shouldImprove =
-				std::find(improvingLevels.begin(), improvingLevels.end(), level) != improvingLevels.end();
+			const auto found = std::ranges::find(improvingLevels, level);
+			const bool shouldImprove = found != improvingLevels.end();
 			EXPECT_EQ(SavingThrows::improves_at(creatureClass, level), shouldImprove)
 				<< "class " << static_cast<int>(creatureClass) << " level " << level;
 		}

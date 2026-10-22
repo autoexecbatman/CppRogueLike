@@ -11,6 +11,7 @@
 #include <raylib.h>
 
 #include <algorithm>
+#include <format>
 #include <string>
 #include <vector>
 
@@ -171,7 +172,7 @@ TEST(BarSheetGeometryTest, TheFillPaintsEveryRowTheRimLeavesClearBetweenItsRails
 		if (!rimRows[row])
 		{
 			++clearInteriorRows;
-			EXPECT_TRUE(fillRows[row]) << "the rim is clear at row " << row << " and the fill paints nothing there";
+			EXPECT_TRUE(fillRows[row]) << std::format("the rim is clear at row {} and the fill paints nothing there", row);
 		}
 	}
 	EXPECT_GT(clearInteriorRows, 0) << "the rim is opaque from rail to rail, so no fill can show";

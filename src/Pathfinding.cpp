@@ -326,14 +326,22 @@ std::vector<Vector2D> Pathfinder::find_route(Vector2D start, Vector2D goal, cons
 				return static_cast<double>(STEP_COST);
 			}
 			const std::optional<int> goalPrice = step_cost(goal, mobility, ctx);
-			return goalPrice ? std::optional<double>{ static_cast<double>(*goalPrice) } : std::nullopt;
+			if (!goalPrice)
+			{
+				return std::nullopt;
+			}
+			return static_cast<double>(*goalPrice);
 		}
 		if (map.get_actor(position, ctx) != nullptr)
 		{
 			return std::nullopt;
 		}
 		const std::optional<int> price = step_cost(position, mobility, ctx);
-		return price ? std::optional<double>{ static_cast<double>(*price) } : std::nullopt;
+		if (!price)
+		{
+			return std::nullopt;
+		}
+		return static_cast<double>(*price);
 	};
 
 	// A*: the frontier is ordered by cost so far plus the heuristic, and stops at the goal.

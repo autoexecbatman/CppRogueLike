@@ -578,9 +578,15 @@ void ItemEditor::render_list(const Renderer& renderer, const ItemRegistry& items
 			DrawRectangle(0, itemY, LIST_WIDTH, ITEM_HEIGHT, bgColor);
 		}
 
-		TileRef tile = isSelected
-			? workingTile
-			: (contentRegistry ? contentRegistry->get_tile(keys[itemIndex]) : TileRef{});
+		TileRef tile{};
+		if (isSelected)
+		{
+			tile = workingTile;
+		}
+		else if (contentRegistry)
+		{
+			tile = contentRegistry->get_tile(keys[itemIndex]);
+		}
 		renderer.draw_tile_screen_sized(Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - LIST_TILE_SIZE) / 2 }, tile, LIST_TILE_SIZE);
 
 		const bool isCustom = !items.is_builtin_key(keys[itemIndex]);
@@ -599,9 +605,9 @@ void ItemEditor::render_list(const Renderer& renderer, const ItemRegistry& items
 			displayName += " *";
 		}
 
-		Color textColor = isSelected
-			? Color{ 150, 255, 150, 255 }
-			: Color{ 200, 200, 200, 255 };
+		constexpr Color SELECTED_TEXT{ 150, 255, 150, 255 };
+		constexpr Color PLAIN_TEXT{ 200, 200, 200, 255 };
+		Color textColor = isSelected ? SELECTED_TEXT : PLAIN_TEXT;
 
 		renderer.draw_text_color(Vector2D{ LIST_PAD + LIST_TILE_SIZE + 4, itemY + (ITEM_HEIGHT - 16) / 2 }, displayName, textColor);
 	}
@@ -786,7 +792,9 @@ void ItemEditor::render_hint(const Renderer& renderer) const
 		hintText = "[FIELDS] Up/Down:navigate  Left/Right:adjust  Enter:edit/toggle  F2:tile  Tab:switch  Ctrl+S:save  Esc:exit";
 	}
 
-	Color hintColor = isSaveRecent ? Color{ 100, 255, 100, 255 } : Color{ 120, 160, 120, 255 };
+	constexpr Color SAVED_HINT{ 100, 255, 100, 255 };
+	constexpr Color PLAIN_HINT{ 120, 160, 120, 255 };
+	Color hintColor = isSaveRecent ? SAVED_HINT : PLAIN_HINT;
 	renderer.draw_text_color(Vector2D{ 8, hintY + 6 }, hintText, hintColor);
 }
 

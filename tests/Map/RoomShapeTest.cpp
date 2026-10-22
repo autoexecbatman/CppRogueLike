@@ -27,6 +27,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include <format>
 #include <memory>
 #include <ranges>
 #include <string>
@@ -142,6 +143,39 @@ bool edge_has_floor(const Map& map, const DungeonRoom& room, int line, bool alon
 	return false;
 }
 
+// The character a room picture draws for one tile: wall, closed door, water,
+// corridor, and floor for anything else.
+//
+// Example:
+//   picture_glyph(TileType::WALL); // -> '#'
+//   picture_glyph(TileType::FLOOR); // -> '.'
+char picture_glyph(TileType type)
+{
+	switch (type)
+	{
+	case TileType::WALL:
+	{
+		return '#';
+	}
+	case TileType::CLOSED_DOOR:
+	{
+		return '+';
+	}
+	case TileType::WATER:
+	{
+		return '~';
+	}
+	case TileType::CORRIDOR:
+	{
+		return ',';
+	}
+	default:
+	{
+		return '.';
+	}
+	}
+}
+
 } // namespace
 
 class RoomShapeTest : public ::testing::Test
@@ -254,19 +288,19 @@ TEST_F(RoomShapeTest, EveryRoomKeepsTheShapeItWasGiven)
 				{
 					for (int pictureCol = room.left_wall(); pictureCol <= room.right_wall(); ++pictureCol)
 					{
-						const TileType type = map.get_tile_type(Vector2D{ pictureCol, pictureRow });
-						picture += (type == TileType::WALL)	  ? '#'
-							: (type == TileType::CLOSED_DOOR) ? '+'
-							: (type == TileType::WATER)		  ? '~'
-							: (type == TileType::CORRIDOR)	  ? ','
-															  : '.';
+						picture += picture_glyph(map.get_tile_type(Vector2D{ pictureCol, pictureRow }));
 					}
 					picture += '\n';
 				}
-				FAIL() << shape_name(room.shape) << " at " << room.col << "," << room.row
-					   << " " << room.width << "x" << room.height
-					   << " prefab '" << room.prefabName << "' has floor split into pockets\n"
-					   << picture;
+				FAIL() << std::format(
+					"{} at {},{} {}x{} prefab '{}' has floor split into pockets\n{}",
+					shape_name(room.shape),
+					room.col,
+					room.row,
+					room.width,
+					room.height,
+					room.prefabName,
+					picture);
 			}
 			if (!room.prefabName.empty())
 			{
@@ -486,7 +520,7 @@ TEST_F(RoomShapeTest, APrefabsDecorationsAreThePalettesTiles)
 			}
 		}
 	}
-	EXPECT_GT(stamped, 0) << "no prefab decoration was stamped in " << DUNGEONS << " dungeons";
+	EXPECT_GT(stamped, 0) << std::format("no prefab decoration was stamped in {} dungeons", DUNGEONS);
 }
 
 // Every generated dungeon, saved and loaded into a fresh map, has the same tiles and the same
@@ -518,7 +552,7 @@ TEST_F(RoomShapeTest, EveryDoorKeepsItsStateThroughASave)
 		fresh.save(savedAgain);
 		EXPECT_EQ(savedAgain, saved) << "seed " << seed;
 	}
-	EXPECT_GT(lockedDoors, 0) << "no treasure room locked a door in " << DUNGEONS << " dungeons, so no lock was saved";
+	EXPECT_GT(lockedDoors, 0) << std::format("no treasure room locked a door in {} dungeons, so no lock was saved", DUNGEONS);
 }
 
 TEST_F(RoomShapeTest, AnExitCellIsWalkableWheneverItsEdgeHasFloor)

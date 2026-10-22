@@ -478,7 +478,9 @@ void SpellEditor::render_list(const Renderer& renderer, const SpellRegistry& spe
 			: Color{ 255, 160, 80, 255 };
 
 		std::string label = std::format("[{}] {}{}", definition.level, definition.name, isCustom ? " *" : "");
-		Color textColor = isSelected ? Color{ 180, 255, 180, 255 } : Color{ 200, 200, 200, 255 };
+		constexpr Color SELECTED_TEXT{ 180, 255, 180, 255 };
+		constexpr Color PLAIN_TEXT{ 200, 200, 200, 255 };
+		Color textColor = isSelected ? SELECTED_TEXT : PLAIN_TEXT;
 
 		renderer.draw_text_color(Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - 16) / 2 }, label, textColor);
 
@@ -580,7 +582,9 @@ void SpellEditor::render_hint(const Renderer& renderer) const
 		hintText = "[FIELDS] Up/Down:navigate  Left/Right:adjust  Enter:edit/cycle  Tab:switch  Ctrl+S:save  Esc:exit";
 	}
 
-	Color hintColor = isSaveRecent ? Color{ 100, 255, 100, 255 } : Color{ 160, 160, 120, 255 };
+	constexpr Color SAVED_HINT{ 100, 255, 100, 255 };
+	constexpr Color PLAIN_HINT{ 160, 160, 120, 255 };
+	Color hintColor = isSaveRecent ? SAVED_HINT : PLAIN_HINT;
 	renderer.draw_text_color(Vector2D{ 8, hintY + 6 }, hintText, hintColor);
 }
 

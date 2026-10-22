@@ -119,7 +119,8 @@ void from_floor(Creature& taker, GameContext& ctx)
 
 		// Captured by id: the menu outlives this frame and the floor may lose the item, so the choice is
 		// resolved against the floor rather than a pointer taken now.
-		auto takeCommand = [who = &taker, wanted = item->uniqueId](GameContext& menuCtx)
+		const UniqueId::IdType wanted = item->uniqueId;
+		auto takeCommand = [who = &taker, wanted](GameContext& menuCtx)
 		{
 			Item* stillThere = InventoryOperations::find_item_by_id(*menuCtx.floorInventory, wanted);
 			if (stillThere == nullptr)

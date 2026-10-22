@@ -41,7 +41,11 @@ ShopType ShopkeeperFactory::select_shop_type_for_level(int dungeonLevel, GameCon
 	// Early levels favor general stores, deeper levels get specialized shops
 	if (dungeonLevel <= 2)
 	{
-		return (ctx.dice->d100() <= 60) ? ShopType::GENERAL_STORE : ShopType::WEAPON_SHOP;
+		if (ctx.dice->d100() <= 60)
+		{
+			return ShopType::GENERAL_STORE;
+		}
+		return ShopType::WEAPON_SHOP;
 	}
 	else if (dungeonLevel <= 4)
 	{

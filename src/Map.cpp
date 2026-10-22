@@ -222,12 +222,15 @@ void Map::save(json& output)
 	output["tiles"] = json::array();
 	for (const auto& tile : tiles)
 	{
-		output["tiles"].push_back(
-			{ { "position", { { "y", tile.position.y }, { "x", tile.position.x } } },
-				{ "type", static_cast<int>(tile.type) }, // TileType is an enum
-				{ "explored", tile.explored },
-				{ "doorState", static_cast<int>(tile.doorState) },
-				{ "lockPickFailedAtLevel", tile.lockPickFailedAtLevel } });
+		const nlohmann::json position{ { "y", tile.position.y }, { "x", tile.position.x } };
+		const nlohmann::json record{
+			{ "position", position },
+			{ "type", static_cast<int>(tile.type) }, // TileType is an enum
+			{ "explored", tile.explored },
+			{ "doorState", static_cast<int>(tile.doorState) },
+			{ "lockPickFailedAtLevel", tile.lockPickFailedAtLevel }
+		};
+		output["tiles"].push_back(record);
 	}
 }
 
@@ -554,7 +557,11 @@ void Map::render(const GameContext& ctx) const
 
 		int zone = static_cast<int>(decor_hash(pos.y / 20, pos.x / 20, 199) % 5);
 		const auto& tileConfig = *ctx.tileConfig;
-		return (zone == zoneChapel) ? tileConfig.get("TILE_CANDELABRA") : tileConfig.get("TILE_TORCH_1");
+		if (zone == zoneChapel)
+		{
+			return tileConfig.get("TILE_CANDELABRA");
+		}
+		return tileConfig.get("TILE_TORCH_1");
 	};
 
 	for (int row = startRow; row < endRow; row++)
@@ -842,11 +849,11 @@ bool Map::room_layout_is_sound(const DungeonRoom& room) const
 		return false;
 	};
 
-	const bool everyEdgeIsOpen =
-		edge_has_floor(Vector2D{ room.col, room.row }, Vector2D{ 1, 0 }, room.width) &&
-		edge_has_floor(Vector2D{ room.col, room.row_end() }, Vector2D{ 1, 0 }, room.width) &&
-		edge_has_floor(Vector2D{ room.col, room.row }, Vector2D{ 0, 1 }, room.height) &&
-		edge_has_floor(Vector2D{ room.col_end(), room.row }, Vector2D{ 0, 1 }, room.height);
+	const bool isTopOpen = edge_has_floor(Vector2D{ room.col, room.row }, Vector2D{ 1, 0 }, room.width);
+	const bool isBottomOpen = edge_has_floor(Vector2D{ room.col, room.row_end() }, Vector2D{ 1, 0 }, room.width);
+	const bool isLeftOpen = edge_has_floor(Vector2D{ room.col, room.row }, Vector2D{ 0, 1 }, room.height);
+	const bool isRightOpen = edge_has_floor(Vector2D{ room.col_end(), room.row }, Vector2D{ 0, 1 }, room.height);
+	const bool everyEdgeIsOpen = isTopOpen && isBottomOpen && isLeftOpen && isRightOpen;
 
 	return everyEdgeIsOpen && room_interior_is_one_piece(room);
 }

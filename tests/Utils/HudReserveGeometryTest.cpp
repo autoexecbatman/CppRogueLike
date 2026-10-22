@@ -100,8 +100,7 @@ TEST(HudReserveGeometryTest, TheRuleIsAsWideAsTheArtPaintsIt)
 	EXPECT_EQ(gui_frame_rule_width(128), 60) << "the rule did not double with the tile";
 
 	EXPECT_GT(gui_frame_rule_width(64), 8)
-		<< "the rule is back to the 8 pixels the hairline frame drew, which no longer "
-		   "covers what the art paints";
+		<< "the rule is back to the 8 pixels the hairline frame drew, which no longer covers what the art paints";
 }
 
 // A rule is a fraction of its tile, so reserving a whole tile for each one wastes

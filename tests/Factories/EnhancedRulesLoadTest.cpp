@@ -24,6 +24,7 @@
 #include <nlohmann/json.hpp>
 
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <stdexcept>
 #include <string>
@@ -73,7 +74,7 @@ protected:
 		{
 			return refusal.what();
 		}
-		ADD_FAILURE() << "loading a rule with " << field << " damaged threw nothing";
+		ADD_FAILURE() << std::format("loading a rule with {} damaged threw nothing", field);
 		return {};
 	}
 };

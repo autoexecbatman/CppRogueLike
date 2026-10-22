@@ -102,7 +102,8 @@ protected:
 	int venom_save_target()
 	{
 		const int constitutionBonus = game.dataManager.constitution_for(player->get_constitution()).PoisonSave;
-		return SavingThrows::target(player->get_creature_class(), player->get_creature_level(), SavingThrow::PARALYZATION_POISON_DEATH) - constitutionBonus;
+		const int baseTarget = SavingThrows::target(player->get_creature_class(), player->get_creature_level(), SavingThrow::PARALYZATION_POISON_DEATH);
+		return baseTarget - constitutionBonus;
 	}
 
 	void one_turn()

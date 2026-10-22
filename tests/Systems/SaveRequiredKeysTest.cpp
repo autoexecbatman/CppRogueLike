@@ -20,6 +20,7 @@
 
 #include <cassert>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <string>
 #include <string_view>
@@ -57,8 +58,9 @@ protected:
 		// A real save is never overwritten to prove anything about saves.
 		if (std::filesystem::exists(Paths::resolve(Paths::SAVE_FILE)))
 		{
-			GTEST_SKIP() << "a save already exists at " << Paths::resolve(Paths::SAVE_FILE).string()
-						 << "; refusing to overwrite it to run this test";
+			GTEST_SKIP() << std::format(
+				"a save already exists at {}; refusing to overwrite it to run this test",
+				Paths::resolve(Paths::SAVE_FILE).string());
 		}
 		game.tileConfig.load(Paths::TILE_CONFIG);
 		game.bodyPlanRegistry.load(Paths::BODY_PLANS);

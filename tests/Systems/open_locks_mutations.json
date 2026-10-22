@@ -69,8 +69,8 @@
     },
     {
       "file": "src/Map.cpp",
-      "original": "\t\t\t\t{ \"lockPickFailedAtLevel\", tile.lockPickFailedAtLevel } });\n",
-      "mutated": "\t\t\t\t{ \"lockPickFailedAtLevel\", 0 } });\n",
+      "original": "\t\t\t{ \"lockPickFailedAtLevel\", tile.lockPickFailedAtLevel }\n",
+      "mutated": "\t\t\t{ \"lockPickFailedAtLevel\", 0 }\n",
       "catches": "a failed pick saved as never, so a load gives the attempt back"
     },
     {

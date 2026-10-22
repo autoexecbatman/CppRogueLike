@@ -298,10 +298,10 @@ nlohmann::json encode_training(const std::optional<SpellcasterTraining>& trainin
 	{
 		return nullptr;
 	}
-	return nlohmann::json{
-		{ "caster_class", encode_caster_class(training->casterClass) },
-		{ "caster_level", training->casterLevel }
-	};
+	nlohmann::json record;
+	record["caster_class"] = encode_caster_class(training->casterClass);
+	record["caster_level"] = training->casterLevel;
+	return record;
 }
 
 // A record's innate powers, each a spell key and its frequency, ready at spawn. An unknown

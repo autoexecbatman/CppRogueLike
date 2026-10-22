@@ -125,7 +125,8 @@ inline constexpr std::array<std::array<int, TURNING_PRINTED_COLUMNS>, TURNING_MA
 		? TURNING_MIN_HIT_DICE
 		: (undeadHitDice > TURNING_MAX_HIT_DICE ? TURNING_MAX_HIT_DICE : undeadHitDice);
 
-	const int entry = TURNING_TABLE[static_cast<std::size_t>(row - 1)][turning_column_for_level(priestLevel)];
+	const auto& tableRow = TURNING_TABLE[static_cast<std::size_t>(row - 1)];
+	const int entry = tableRow[turning_column_for_level(priestLevel)];
 
 	switch (entry)
 	{

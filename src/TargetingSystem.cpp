@@ -46,7 +46,9 @@ void TargetingSystem::draw_los(GameContext& ctx, Vector2D targetCursor) const
 
 		int screenX = pos.x * tileSize - cameraOffsetX;
 		int screenY = pos.y * tileSize - cameraOffsetY;
-		Color tint = hasLineOfSight ? Color{ 50, 220, 100, 50 } : Color{ 220, 50, 50, 50 };
+		constexpr Color CLEAR_TINT{ 50, 220, 100, 50 };
+		constexpr Color BLOCKED_TINT{ 220, 50, 50, 50 };
+		Color tint = hasLineOfSight ? CLEAR_TINT : BLOCKED_TINT;
 		DrawRectangle(screenX, screenY, tileSize, tileSize, tint);
 	}
 }

@@ -91,7 +91,11 @@ TileRef ContentEditor::current_tile(const MonsterRegistry& monsters) const
 	const auto& sel = entries[listCursor.current_row()];
 	if (tab == 0)
 	{
-		return contentRegistry ? contentRegistry->get_tile(sel.itemKey) : TileRef{};
+		if (!contentRegistry)
+		{
+			return TileRef{};
+		}
+		return contentRegistry->get_tile(sel.itemKey);
 	}
 
 	return monsters.get_tile(static_cast<MonsterId>(sel.entityKey));
@@ -249,7 +253,9 @@ void ContentEditor::draw_list(
 
 		renderer.draw_tile_screen_sized(Vector2D{ listX + PAD, itemY + (ITEM_H - TILE_SZ) / 2 }, tile, TILE_SZ);
 
-		Color textColor = isSelected ? Color{ 255, 255, 100, 255 } : Color{ 200, 200, 200, 255 };
+		constexpr Color SELECTED_TEXT{ 255, 255, 100, 255 };
+		constexpr Color PLAIN_TEXT{ 200, 200, 200, 255 };
+		Color textColor = isSelected ? SELECTED_TEXT : PLAIN_TEXT;
 		renderer.draw_text_color(Vector2D{ listX + PAD + TILE_SZ + 4, itemY + (ITEM_H - 16) / 2 }, entries[entryIndex].name, textColor);
 
 		if (hovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
@@ -394,7 +400,9 @@ void ContentEditor::draw_hint_bar(const Renderer& renderer) const
 		"Tab:switch tab   Up/Down:select   Left/Right:sheet   Click tile:assign   Ctrl+S:save{}",
 		isSaveRecent ? "   -- SAVED!" : "");
 
-	Color hintColor = isSaveRecent ? Color{ 100, 255, 100, 255 } : Color{ 160, 160, 120, 255 };
+	constexpr Color SAVED_HINT{ 100, 255, 100, 255 };
+	constexpr Color PLAIN_HINT{ 160, 160, 120, 255 };
+	Color hintColor = isSaveRecent ? SAVED_HINT : PLAIN_HINT;
 	renderer.draw_text_color(Vector2D{ 8, hintY + 4 }, hint, hintColor);
 }
 

@@ -253,11 +253,13 @@ TEST_F(EnhancementSystemTest, ScriptedRollsDetermineTheDraw) {
 
     dice.set_next_roll(10);
     dice.set_next_roll(4);
-    const PrefixType first = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, dice).prefix;
+	const ItemEnhancement firstDraw = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, dice);
+	const PrefixType first = firstDraw.prefix;
 
     dice.set_next_roll(10);
     dice.set_next_roll(4);
-    const PrefixType again = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, dice).prefix;
+	const ItemEnhancement againDraw = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, dice);
+	const PrefixType again = againDraw.prefix;
 
     EXPECT_EQ(first, again) << "the same script gave two different draws, so the rolls are not what decides";
 
@@ -265,7 +267,8 @@ TEST_F(EnhancementSystemTest, ScriptedRollsDetermineTheDraw) {
     // would prove only that the pool has one entry.
     dice.set_next_roll(10);
     dice.set_next_roll(0);
-    const PrefixType other = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, dice).prefix;
+	const ItemEnhancement otherDraw = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, dice);
+	const PrefixType other = otherDraw.prefix;
 
     EXPECT_NE(first, other) << "the index roll did not choose the prefix";
 }
@@ -296,8 +299,8 @@ TEST_F(EnhancementSystemTest, EveryEntryOfTheWeaponPoolIsReachable) {
 
     bool sawLastEntry = false;
     for (int draw = 0; draw < DRAWS && !sawLastEntry; ++draw) {
-        sawLastEntry = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, seeded).prefix
-            == PrefixType::CURSED;
+		const ItemEnhancement drawn = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, seeded);
+		sawLastEntry = drawn.prefix == PrefixType::CURSED;
     }
 
     EXPECT_TRUE(sawLastEntry) << "the last of the nine weapon prefixes is out of reach";
@@ -343,7 +346,8 @@ TEST_F(EnhancementSystemTest, AllowingMagicalPrefixesStillDrawsThem) {
 
     int magical = 0;
     for (int draw = 0; draw < DRAWS; ++draw) {
-        const PrefixType prefix = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, dice).prefix;
+		const ItemEnhancement drawn = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, dice);
+		const PrefixType prefix = drawn.prefix;
         if (prefix == PrefixType::FLAMING || prefix == PrefixType::FROST || prefix == PrefixType::SHOCK) {
             ++magical;
         }
@@ -412,11 +416,13 @@ TEST_F(EnhancementSystemTest, TheIndexRollPicksOutOfTheUniversalPool)
 {
 	dice.set_next_roll(10);
 	dice.set_next_roll(0);
-	const PrefixType first = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, dice).prefix;
+	const ItemEnhancement firstDraw = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, dice);
+	const PrefixType first = firstDraw.prefix;
 
 	dice.set_next_roll(10);
 	dice.set_next_roll(3);
-	const PrefixType fourth = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, dice).prefix;
+	const ItemEnhancement fourthDraw = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, dice);
+	const PrefixType fourth = fourthDraw.prefix;
 
 	EXPECT_EQ(first, PrefixType::BLESSED);
 	EXPECT_EQ(fourth, PrefixType::MAGICAL);
@@ -440,7 +446,8 @@ TEST_F(EnhancementSystemTest, ExcludingMagicalPrefixesStripsMagicalFromTheGenera
 {
 	dice.set_next_roll(10);
 	dice.set_next_roll(3);
-	const PrefixType allowed = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, dice).prefix;
+	const ItemEnhancement allowedDraw = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, dice);
+	const PrefixType allowed = allowedDraw.prefix;
 
 	dice.set_next_roll(10);
 	dice.set_next_roll(3);

@@ -593,8 +593,8 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 
 		auto is_mouse_over_left_panel = [this, &renderer, tileSize, &mousePosition]()
 		{
-			return screen_to_palette_index(renderer, static_cast<int>(mousePosition.x), static_cast<int>(mousePosition.y)).has_value() ||
-				static_cast<int>(mousePosition.x) < LEFT_W_TILES * tileSize;
+			const std::optional<size_t> entryUnderMouse = screen_to_palette_index(renderer, static_cast<int>(mousePosition.x), static_cast<int>(mousePosition.y));
+			return entryUnderMouse.has_value() || static_cast<int>(mousePosition.x) < LEFT_W_TILES * tileSize;
 		};
 
 		if (is_mouse_over_left_panel())

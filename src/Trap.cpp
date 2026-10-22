@@ -59,6 +59,22 @@ bool has_find_traps(std::optional<int> skill)
 {
 	return skill.has_value() && skill.value() > 0;
 }
+
+// Whether one search finds the trap: a dwarf's d6 against a pit, or a thief's
+// d100 against Find Traps. Only the branch taken rolls, and only a thief's
+// search reads the skill, which a dwarf may not have.
+//
+// Example:
+//   rolls_trap_found(true, std::nullopt, dice); // -> true on a d6 of 1 to 3
+//   rolls_trap_found(false, 40, dice); // -> true on a d100 of 1 to 40
+bool rolls_trap_found(bool isPit, std::optional<int> skill, RandomDice& dice)
+{
+	if (isPit)
+	{
+		return dice.d6() <= DWARF_PIT_FIND_CHANCE;
+	}
+	return dice.d100() <= skill.value();
+}
 } // namespace
 
 Trap::Trap(Vector2D position, TrapType trapType, const TileConfig& tileConfig)
@@ -239,7 +255,7 @@ TrapSearchResult Trap::search(Player& searcher, GameContext& ctx)
 	}
 	searchedAtLevel = level;
 
-	const bool isFound = isPit ? (ctx.dice->d6() <= DWARF_PIT_FIND_CHANCE) : (ctx.dice->d100() <= skill.value());
+	const bool isFound = rolls_trap_found(isPit, skill, *ctx.dice);
 	if (!isFound)
 	{
 		return TrapSearchResult::MISSED;
