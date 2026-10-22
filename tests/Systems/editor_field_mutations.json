@@ -1,0 +1,113 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/run_suite.ps1",
+    "-Configuration",
+    "Debug",
+    "-Filter",
+    "--gtest_filter=EditorFieldTest.*:EditorFieldDeathTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/EditorField.h",
+      "original": "\treturn std::to_string(record.*(plain.member));",
+      "mutated": "\treturn std::to_string(record.*(plain.member) + 1);",
+      "catches": "a plain number shown as something other than its member"
+    },
+    {
+      "file": "src/EditorField.h",
+      "original": "\trecord.*(plain.member) = std::clamp(record.*(plain.member) + delta, plain.minimum, plain.maximum);",
+      "mutated": "\trecord.*(plain.member) = std::min(record.*(plain.member) + delta, plain.maximum);",
+      "catches": "a plain number stepped below its least"
+    },
+    {
+      "file": "src/EditorField.h",
+      "original": "\trecord.*(plain.member) = std::clamp(record.*(plain.member) + delta, plain.minimum, plain.maximum);",
+      "mutated": "\trecord.*(plain.member) = std::max(record.*(plain.member) + delta, plain.minimum);",
+      "catches": "a plain number stepped above its greatest"
+    },
+    {
+      "file": "src/EditorField.h",
+      "original": "\trecord.*(plain.member) = std::clamp(record.*(plain.member) + delta, plain.minimum, plain.maximum);",
+      "mutated": "\trecord.*(plain.member) = std::clamp(record.*(plain.member) + std::max(delta, 0), plain.minimum, plain.maximum);",
+      "catches": "the left arrow no longer stepping a plain number down"
+    },
+    {
+      "file": "src/EditorField.h",
+      "original": "\t\tif (entry.field != static_cast<Field>(index))",
+      "mutated": "\t\tif (false)",
+      "catches": "a table out of FieldId order passing, so the sample static_asserts stop the build"
+    },
+    {
+      "file": "src/EditorField.h",
+      "original": "(entry.kind != FieldKind::ADJUST || ",
+      "mutated": "(entry.kind == FieldKind::TEXT || ",
+      "catches": "a plain number on a toggle passing, so the sample static_asserts stop the build"
+    },
+    {
+      "file": "src/EditorField.h",
+      "original": " || entry.plain->minimum > entry.plain->maximum))",
+      "mutated": "))",
+      "catches": "reversed bounds passing, so the sample static_asserts stop the build"
+    },
+    {
+      "file": "src/EditorField.h",
+      "original": "table.at(static_cast<std::size_t>(field));",
+      "mutated": "table.at(0);",
+      "catches": "a lookup answering with the first field whatever was asked"
+    },
+    {
+      "file": "src/EditorField.cpp",
+      "original": "\" has no case for the field '\"",
+      "mutated": "\" has no case for '\"",
+      "catches": "a misrouted field's message losing the words that say what it is"
+    },
+    {
+      "file": "src/EditorField.cpp",
+      "original": "\tstd::cerr << path << \" has no case for the field '\" << label << \"'\\n\";",
+      "mutated": "\tstd::cerr << path << \" has no case for the field '\" << path << \"'\\n\";",
+      "catches": "a misrouted field's message naming the path where the label belongs"
+    },
+    {
+      "file": "src/ItemEditor.h",
+      "original": "Plain{ &ItemParams::value, 0, 99999 }",
+      "mutated": "Plain{ &ItemParams::value, 0, 9999 }",
+      "catches": "an item's value bound moved from the old code's 99999"
+    },
+    {
+      "file": "src/ItemEditor.h",
+      "original": "Plain{ &ItemParams::strBonus, -18, 18 }",
+      "mutated": "Plain{ &ItemParams::dexBonus, -18, 18 }",
+      "catches": "the STR Bonus field reading the DEX Bonus member"
+    },
+    {
+      "file": "src/ItemEditor.h",
+      "original": "FieldId::COLOR, FieldKind::TOGGLE, \"Color\"",
+      "mutated": "FieldId::COLOR, FieldKind::ADJUST, \"Color\"",
+      "catches": "a toggle field marked as stepped by the arrows"
+    },
+    {
+      "file": "src/MonsterEditor.h",
+      "original": "Plain{ &MonsterParams::thaco, 1, 25 }",
+      "mutated": "std::nullopt",
+      "catches": "a plain monster field losing its plain number"
+    },
+    {
+      "file": "src/MonsterEditor.h",
+      "original": "FieldId::HD_SIDES, FieldKind::ADJUST, \"HD Sides\", std::nullopt",
+      "mutated": "FieldId::HD_SIDES, FieldKind::ADJUST, \"HD Sides\", Plain{ &MonsterParams::thaco, 1, 20 }",
+      "catches": "a field with its own case given a plain number"
+    },
+    {
+      "file": "src/SpellEditor.h",
+      "original": "FieldKind::TOGGLE, \"Effect\"",
+      "mutated": "FieldKind::TOGGLE, \"Effect Type\"",
+      "catches": "a spell field's label changed from the old code's"
+    }
+  ]
+}

@@ -35,6 +35,8 @@ constexpr int PICKER_PAD = 10;
 constexpr int PICKER_SUB_HEADER_HEIGHT = 28;
 constexpr int PICKER_TILE_TARGET = 64; // drawn cell size the grid aims for
 
+static_assert(is_well_formed_table(MonsterEditor::FIELDS), "MonsterEditor::FIELDS lists a field out of FieldId order, or a plain number on a field that is not ADJUST");
+
 // Largest integer multiple of the sheet's own cell size that fits the target,
 // so a 16-pixel tile draws at 4x and a 64-pixel tile at 1x - never blurred.
 namespace
@@ -361,7 +363,9 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 
 	FieldId fieldId = current_field();
 
-	if (IsKeyPressed(KEY_F2) || (fieldId == FieldId::TILE && IsKeyPressed(KEY_ENTER)))
+	const FieldKind kind = descriptor_of(FIELDS, fieldId).kind;
+
+	if (IsKeyPressed(KEY_F2) || (kind == FieldKind::TILE && IsKeyPressed(KEY_ENTER)))
 	{
 		mode = Mode::TILE_PICKER;
 		return;
@@ -369,20 +373,19 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 
 	if (IsKeyPressed(KEY_ENTER))
 	{
-		if (field_is_string(fieldId))
+		if (kind == FieldKind::TEXT)
 		{
 			editBuffer = field_value(fieldId);
 			mode = Mode::EDIT_STRING;
 		}
-		else if (field_is_toggle(fieldId))
+		else if (kind == FieldKind::TOGGLE)
 		{
 			field_toggle(fieldId);
 		}
 		return;
 	}
 
-	// Left/Right for int fields
-	if (!field_is_string(fieldId) && !field_is_toggle(fieldId) && fieldId != FieldId::TILE)
+	if (kind == FieldKind::ADJUST)
 	{
 		int delta = ctrl ? 10 : 1;
 		if (IsKeyPressed(KEY_LEFT))
@@ -814,177 +817,7 @@ MonsterEditor::FieldId MonsterEditor::current_field() const
 
 std::string MonsterEditor::field_label(FieldId field) const
 {
-	switch (field)
-	{
-	case FieldId::NAME:
-	{
-		return "Name";
-	}
-	case FieldId::CORPSE:
-	{
-		return "Corpse";
-	}
-	case FieldId::CORPSE_NUTRITION:
-	{
-		return "Corpse Nutrition";
-	}
-	case FieldId::CORPSE_TASTE:
-	{
-		return "Corpse Taste";
-	}
-	case FieldId::CORPSE_EDIBLE:
-	{
-		return "Corpse Edible";
-	}
-	case FieldId::HD_LOWEST:
-	{
-		return "HD Lowest";
-	}
-	case FieldId::HD_HIGHEST:
-	{
-		return "HD Highest";
-	}
-	case FieldId::HD_SIDES:
-	{
-		return "HD Sides";
-	}
-	case FieldId::HD_BONUS:
-	{
-		return "HD Bonus";
-	}
-	case FieldId::THACO:
-	{
-		return "THAC0";
-	}
-	case FieldId::AC:
-	{
-		return "AC";
-	}
-	case FieldId::XP_COUNT:
-	{
-		return "XP For HD";
-	}
-	case FieldId::XP:
-	{
-		return "XP";
-	}
-	case FieldId::DR:
-	{
-		return "DR";
-	}
-	case FieldId::STR_SOURCE:
-	{
-		return "Strength";
-	}
-	case FieldId::STR_SCORE:
-	{
-		return "STR Score";
-	}
-	case FieldId::STR_EXCEPTIONAL:
-	{
-		return "STR Exceptional";
-	}
-	case FieldId::WEAPON:
-	{
-		return "Natural Attack";
-	}
-	case FieldId::DMG_NUM:
-	{
-		return "Dmg Num";
-	}
-	case FieldId::DMG_SIDES:
-	{
-		return "Dmg Sides";
-	}
-	case FieldId::DMG_BONUS:
-	{
-		return "Dmg Bonus";
-	}
-	case FieldId::DMG_TYPE:
-	{
-		return "Dmg Type";
-	}
-	case FieldId::AI_TYPE:
-	{
-		return "AI Type";
-	}
-	case FieldId::ETHICS:
-	{
-		return "Ethics";
-	}
-	case FieldId::MORALITY:
-	{
-		return "Morality";
-	}
-	case FieldId::SIZE:
-	{
-		return "Size";
-	}
-	case FieldId::INTELLIGENCE:
-	{
-		return "Intelligence";
-	}
-	case FieldId::CAN_SWIM:
-	{
-		return "Can Swim";
-	}
-	case FieldId::CAN_FLY:
-	{
-		return "Can Fly";
-	}
-	case FieldId::WALKS_WEBS:
-	{
-		return "Walks Webs";
-	}
-	case FieldId::ATTITUDE:
-	{
-		return "Attitude";
-	}
-	case FieldId::DISPLACEABLE:
-	{
-		return "Displaceable";
-	}
-	case FieldId::CASTER_CLASS:
-	{
-		return "Caster Class";
-	}
-	case FieldId::CASTER_LEVEL:
-	{
-		return "Caster Level";
-	}
-	case FieldId::INNATE_POWER:
-	{
-		return "Innate Power";
-	}
-	case FieldId::INNATE_SPELL:
-	{
-		return "Power Spell";
-	}
-	case FieldId::INNATE_FREQUENCY:
-	{
-		return "Power Frequency";
-	}
-	case FieldId::WEIGHT:
-	{
-		return "Spawn Weight";
-	}
-	case FieldId::DEPTH_MIN:
-	{
-		return "Depth Min";
-	}
-	case FieldId::DEPTH_MAX:
-	{
-		return "Depth Max";
-	}
-	case FieldId::TILE:
-	{
-		return "Tile";
-	}
-	default:
-	{
-		return "???";
-	}
-	}
+	return std::string{ descriptor_of(FIELDS, field).label };
 }
 
 void MonsterEditor::set_damage_dice(int num, int sides, int bonus)
@@ -994,6 +827,12 @@ void MonsterEditor::set_damage_dice(int num, int sides, int bonus)
 
 std::string MonsterEditor::field_value(FieldId field) const
 {
+	const Descriptor& descriptor = descriptor_of(FIELDS, field);
+	if (descriptor.plain.has_value())
+	{
+		return plain_text(*descriptor.plain, working);
+	}
+
 	switch (field)
 	{
 	case FieldId::NAME:
@@ -1003,10 +842,6 @@ std::string MonsterEditor::field_value(FieldId field) const
 	case FieldId::CORPSE:
 	{
 		return working.corpseName;
-	}
-	case FieldId::CORPSE_NUTRITION:
-	{
-		return std::format("{}", working.corpseNutrition);
 	}
 	case FieldId::CORPSE_TASTE:
 	{
@@ -1028,14 +863,6 @@ std::string MonsterEditor::field_value(FieldId field) const
 	{
 		return std::format("{}", working.hitDice.bonus);
 	}
-	case FieldId::THACO:
-	{
-		return std::format("{}", working.thaco);
-	}
-	case FieldId::AC:
-	{
-		return std::format("{}", working.ac);
-	}
 	case FieldId::XP_COUNT:
 	{
 		return std::format("{} HD", working.hitDice.counts.at(selectedXpCount).count);
@@ -1043,10 +870,6 @@ std::string MonsterEditor::field_value(FieldId field) const
 	case FieldId::XP:
 	{
 		return std::format("{}", working.hitDice.counts.at(selectedXpCount).xp);
-	}
-	case FieldId::DR:
-	{
-		return std::format("{}", working.dr);
 	}
 	case FieldId::STR_SOURCE:
 	{
@@ -1166,41 +989,26 @@ std::string MonsterEditor::field_value(FieldId field) const
 	{
 		return is_corpse_edible(working.corpseEdibility) ? "yes" : "no";
 	}
-	case FieldId::WEIGHT:
-	{
-		return std::format("{}", working.baseWeight);
-	}
-	case FieldId::DEPTH_MIN:
-	{
-		return std::format("{}", working.levelMinimum);
-	}
-	case FieldId::DEPTH_MAX:
-	{
-		return std::format("{}", working.levelMaximum);
-	}
 	case FieldId::TILE:
 	{
 		return "(tile)";
 	}
 	default:
 	{
-		return "";
+		refuse_misrouted_field(descriptor.label, "MonsterEditor::field_value");
 	}
 	}
-}
-
-bool MonsterEditor::field_is_string(FieldId field) const
-{
-	return field == FieldId::NAME || field == FieldId::CORPSE || field == FieldId::CORPSE_TASTE || field == FieldId::WEAPON || field == FieldId::INNATE_SPELL;
-}
-
-bool MonsterEditor::field_is_toggle(FieldId field) const
-{
-	return field == FieldId::AI_TYPE || field == FieldId::CAN_SWIM || field == FieldId::CAN_FLY || field == FieldId::WALKS_WEBS || field == FieldId::ATTITUDE || field == FieldId::DISPLACEABLE || field == FieldId::CORPSE_EDIBLE || field == FieldId::ETHICS || field == FieldId::MORALITY || field == FieldId::SIZE || field == FieldId::INTELLIGENCE || field == FieldId::STR_SOURCE || field == FieldId::DMG_TYPE || field == FieldId::CASTER_CLASS || field == FieldId::INNATE_FREQUENCY;
 }
 
 void MonsterEditor::field_adjust(FieldId field, int delta)
 {
+	const Descriptor& descriptor = descriptor_of(FIELDS, field);
+	if (descriptor.plain.has_value())
+	{
+		adjust_plain(*descriptor.plain, working, delta);
+		return;
+	}
+
 	auto clamp_val = [](int value, int step, int low, int high) -> int
 	{
 		return std::clamp(value + step, low, high);
@@ -1233,16 +1041,6 @@ void MonsterEditor::field_adjust(FieldId field, int delta)
 		working.hitDice.bonus = clamp_val(working.hitDice.bonus, delta, -99, 99);
 		break;
 	}
-	case FieldId::THACO:
-	{
-		working.thaco = clamp_val(working.thaco, delta, 1, 25);
-		break;
-	}
-	case FieldId::AC:
-	{
-		working.ac = clamp_val(working.ac, delta, -10, 10);
-		break;
-	}
 	case FieldId::XP_COUNT:
 	{
 		// One count a step, whatever the step size, and never past either end.
@@ -1260,16 +1058,6 @@ void MonsterEditor::field_adjust(FieldId field, int delta)
 	{
 		HitDiceCount& selected = working.hitDice.counts.at(selectedXpCount);
 		selected.xp = clamp_val(selected.xp, delta, 0, 99999);
-		break;
-	}
-	case FieldId::DR:
-	{
-		working.dr = clamp_val(working.dr, delta, 0, 20);
-		break;
-	}
-	case FieldId::CORPSE_NUTRITION:
-	{
-		working.corpseNutrition = clamp_val(working.corpseNutrition, delta, 0, 9999);
 		break;
 	}
 	case FieldId::STR_SCORE:
@@ -1317,21 +1105,6 @@ void MonsterEditor::field_adjust(FieldId field, int delta)
 		set_damage_dice(working.damage.dice.num, working.damage.dice.sides, clamp_val(working.damage.dice.bonus, delta, -99, 99));
 		break;
 	}
-	case FieldId::WEIGHT:
-	{
-		working.baseWeight = clamp_val(working.baseWeight, delta, 0, 100);
-		break;
-	}
-	case FieldId::DEPTH_MIN:
-	{
-		working.levelMinimum = clamp_val(working.levelMinimum, delta, 1, 20);
-		break;
-	}
-	case FieldId::DEPTH_MAX:
-	{
-		working.levelMaximum = clamp_val(working.levelMaximum, delta, 0, 20);
-		break;
-	}
 	case FieldId::CASTER_LEVEL:
 	{
 		// A monster that memorizes nothing has no level to adjust; the tables print 1st to 20th.
@@ -1356,7 +1129,7 @@ void MonsterEditor::field_adjust(FieldId field, int delta)
 	}
 	default:
 	{
-		break;
+		refuse_misrouted_field(descriptor.label, "MonsterEditor::field_adjust");
 	}
 	}
 }
@@ -1441,10 +1214,18 @@ void MonsterEditor::field_toggle(FieldId field)
 			working.spellcasterTraining.reset();
 		}
 	}
-	else if (field == FieldId::INNATE_FREQUENCY && !working.innatePowers.empty())
+	else if (field == FieldId::INNATE_FREQUENCY)
 	{
-		InnatePower& power = working.innatePowers.at(selectedPower);
-		power.frequency = power.frequency == PowerFrequency::AT_WILL ? PowerFrequency::ONCE_PER_DAY : PowerFrequency::AT_WILL;
+		// With no power listed there is no frequency to step.
+		if (!working.innatePowers.empty())
+		{
+			InnatePower& power = working.innatePowers.at(selectedPower);
+			power.frequency = power.frequency == PowerFrequency::AT_WILL ? PowerFrequency::ONCE_PER_DAY : PowerFrequency::AT_WILL;
+		}
+	}
+	else
+	{
+		refuse_misrouted_field(descriptor_of(FIELDS, field).label, "MonsterEditor::field_toggle");
 	}
 }
 
@@ -1495,7 +1276,7 @@ void MonsterEditor::field_set_string(FieldId field, std::string newValue)
 	}
 	default:
 	{
-		break;
+		refuse_misrouted_field(descriptor_of(FIELDS, field).label, "MonsterEditor::field_set_string");
 	}
 	}
 }

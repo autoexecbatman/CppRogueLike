@@ -35,6 +35,8 @@ constexpr int PICKER_PAD = 10;
 constexpr int PICKER_SUB_HEADER_HEIGHT = 28;
 constexpr int PICKER_TILE_TARGET = 64; // drawn cell size the grid aims for
 
+static_assert(is_well_formed_table(ItemEditor::FIELDS), "ItemEditor::FIELDS lists a field out of FieldId order, or a plain number on a field that is not ADJUST");
+
 // Largest integer multiple of the sheet's own cell size that fits the target,
 // so a 16-pixel tile draws at 4x and a 64-pixel tile at 1x - never blurred.
 namespace
@@ -350,7 +352,9 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 
 	FieldId fieldId = current_field();
 
-	if (IsKeyPressed(KEY_F2) || (fieldId == FieldId::TILE && IsKeyPressed(KEY_ENTER)))
+	const FieldKind kind = descriptor_of(FIELDS, fieldId).kind;
+
+	if (IsKeyPressed(KEY_F2) || (kind == FieldKind::TILE && IsKeyPressed(KEY_ENTER)))
 	{
 		mode = Mode::TILE_PICKER;
 		return;
@@ -358,19 +362,19 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 
 	if (IsKeyPressed(KEY_ENTER))
 	{
-		if (field_is_string(fieldId))
+		if (kind == FieldKind::TEXT)
 		{
 			editBuffer = field_value(fieldId);
 			mode = Mode::EDIT_STRING;
 		}
-		else if (field_is_toggle(fieldId))
+		else if (kind == FieldKind::TOGGLE)
 		{
 			field_toggle(fieldId);
 		}
 		return;
 	}
 
-	if (!field_is_string(fieldId) && !field_is_toggle(fieldId) && fieldId != FieldId::TILE)
+	if (kind == FieldKind::ADJUST)
 	{
 		int delta = ctrl ? 10 : 1;
 		if (IsKeyPressed(KEY_LEFT))
@@ -801,189 +805,17 @@ ItemEditor::FieldId ItemEditor::current_field() const
 
 std::string ItemEditor::field_label(FieldId field) const
 {
-	switch (field)
-	{
-	case FieldId::NAME:
-	{
-		return "Name";
-	}
-	case FieldId::CATEGORY:
-	{
-		return "Category";
-	}
-	case FieldId::ITEM_CLASS:
-	{
-		return "Item Class";
-	}
-	case FieldId::PICKABLE_TYPE:
-	{
-		return "Pickable Type";
-	}
-	case FieldId::COLOR:
-	{
-		return "Color";
-	}
-	case FieldId::VALUE:
-	{
-		return "Value";
-	}
-	case FieldId::BASE_WEIGHT:
-	{
-		return "Spawn Weight";
-	}
-	case FieldId::WEIGHT:
-	{
-		return "Carry Weight";
-	}
-	case FieldId::LEVEL_MIN:
-	{
-		return "Level Min";
-	}
-	case FieldId::LEVEL_MAX:
-	{
-		return "Level Max";
-	}
-	case FieldId::LEVEL_SCALING:
-	{
-		return "Level Scaling";
-	}
-	case FieldId::CONSUMABLE_EFFECT:
-	{
-		return "Consumable Effect";
-	}
-	case FieldId::CONSUMABLE_BUFF:
-	{
-		return "Consumable Buff";
-	}
-	case FieldId::CONSUMABLE_AMT_DICE:
-	{
-		return "Amount Dice";
-	}
-	case FieldId::CONSUMABLE_AMT_SIDES:
-	{
-		return "Amount Sides";
-	}
-	case FieldId::CONSUMABLE_AMT_BONUS:
-	{
-		return "Amount Bonus";
-	}
-	case FieldId::DURATION_DICE:
-	{
-		return "Duration Dice";
-	}
-	case FieldId::DURATION_SIDES:
-	{
-		return "Duration Sides";
-	}
-	case FieldId::DURATION_BONUS:
-	{
-		return "Duration Bonus";
-	}
-	case FieldId::DURATION_UNIT:
-	{
-		return "Duration Unit";
-	}
-	case FieldId::AGES_YEARS:
-	{
-		return "Ages Drinker (years)";
-	}
-	case FieldId::TARGET_MODE:
-	{
-		return "Target Mode";
-	}
-	case FieldId::SCROLL_ANIM:
-	{
-		return "Scroll Animation";
-	}
-	case FieldId::RANGE:
-	{
-		return "Range";
-	}
-	case FieldId::DAMAGE:
-	{
-		return "Damage";
-	}
-	case FieldId::CONFUSE_TURNS:
-	{
-		return "Confuse Turns";
-	}
-	case FieldId::RANGED:
-	{
-		return "Ranged";
-	}
-	case FieldId::HAND_REQUIREMENT:
-	{
-		return "Hand Requirement";
-	}
-	case FieldId::WEAPON_SIZE:
-	{
-		return "Weapon Size";
-	}
-	case FieldId::STRENGTH_RATING:
-	{
-		return "Made For STR";
-	}
-	case FieldId::AC_BONUS:
-	{
-		return "AC Bonus";
-	}
-	case FieldId::EFFECT:
-	{
-		return "Effect";
-	}
-	case FieldId::EFFECT_BONUS:
-	{
-		return "Effect Bonus";
-	}
-	case FieldId::STR_BONUS:
-	{
-		return "STR Bonus";
-	}
-	case FieldId::DEX_BONUS:
-	{
-		return "DEX Bonus";
-	}
-	case FieldId::CON_BONUS:
-	{
-		return "CON Bonus";
-	}
-	case FieldId::INT_BONUS:
-	{
-		return "INT Bonus";
-	}
-	case FieldId::WIS_BONUS:
-	{
-		return "WIS Bonus";
-	}
-	case FieldId::CHA_BONUS:
-	{
-		return "CHA Bonus";
-	}
-	case FieldId::APPLICATION:
-	{
-		return "Application";
-	}
-	case FieldId::EXCEPTIONAL_STRENGTH:
-	{
-		return "Exceptional STR";
-	}
-	case FieldId::NUTRITION:
-	{
-		return "Nutrition Value";
-	}
-	case FieldId::TILE:
-	{
-		return "Tile";
-	}
-	default:
-	{
-		return "???";
-	}
-	}
+	return std::string{ descriptor_of(FIELDS, field).label };
 }
 
 std::string ItemEditor::field_value(FieldId field) const
 {
+	const Descriptor& descriptor = descriptor_of(FIELDS, field);
+	if (descriptor.plain.has_value())
+	{
+		return plain_text(*descriptor.plain, working);
+	}
+
 	const ItemParams& params = working;
 	switch (field)
 	{
@@ -1006,26 +838,6 @@ std::string ItemEditor::field_value(FieldId field) const
 	case FieldId::COLOR:
 	{
 		return std::string{ color_pair_name(params.color) };
-	}
-	case FieldId::VALUE:
-	{
-		return std::format("{}", params.value);
-	}
-	case FieldId::BASE_WEIGHT:
-	{
-		return std::format("{}", params.baseWeight);
-	}
-	case FieldId::WEIGHT:
-	{
-		return std::format("{}", params.weight);
-	}
-	case FieldId::LEVEL_MIN:
-	{
-		return std::format("{}", params.levelMin);
-	}
-	case FieldId::LEVEL_MAX:
-	{
-		return std::format("{}", params.levelMax);
 	}
 	case FieldId::LEVEL_SCALING:
 	{
@@ -1067,10 +879,6 @@ std::string ItemEditor::field_value(FieldId field) const
 	{
 		return std::string{ encode_duration_unit(params.durationUnit) };
 	}
-	case FieldId::AGES_YEARS:
-	{
-		return std::format("{}", params.agesYears);
-	}
 	case FieldId::TARGET_MODE:
 	{
 		return std::string{ encode_target_mode(params.targetMode) };
@@ -1078,18 +886,6 @@ std::string ItemEditor::field_value(FieldId field) const
 	case FieldId::SCROLL_ANIM:
 	{
 		return std::string{ encode_scroll_animation(params.scrollAnimation) };
-	}
-	case FieldId::RANGE:
-	{
-		return std::format("{}", params.range);
-	}
-	case FieldId::DAMAGE:
-	{
-		return std::format("{}", params.damage);
-	}
-	case FieldId::CONFUSE_TURNS:
-	{
-		return std::format("{}", params.confuseTurns);
 	}
 	case FieldId::RANGED:
 	{
@@ -1103,57 +899,13 @@ std::string ItemEditor::field_value(FieldId field) const
 	{
 		return std::string{ encode_weapon_size(params.weaponSize) };
 	}
-	case FieldId::STRENGTH_RATING:
-	{
-		return std::format("{}", params.strengthRating);
-	}
-	case FieldId::AC_BONUS:
-	{
-		return std::format("{}", params.acBonus);
-	}
 	case FieldId::EFFECT:
 	{
 		return std::string{ encode_magical_effect(params.effect) };
 	}
-	case FieldId::EFFECT_BONUS:
-	{
-		return std::format("{}", params.effectBonus);
-	}
-	case FieldId::STR_BONUS:
-	{
-		return std::format("{}", params.strBonus);
-	}
-	case FieldId::DEX_BONUS:
-	{
-		return std::format("{}", params.dexBonus);
-	}
-	case FieldId::CON_BONUS:
-	{
-		return std::format("{}", params.conBonus);
-	}
-	case FieldId::INT_BONUS:
-	{
-		return std::format("{}", params.intBonus);
-	}
-	case FieldId::WIS_BONUS:
-	{
-		return std::format("{}", params.wisBonus);
-	}
-	case FieldId::CHA_BONUS:
-	{
-		return std::format("{}", params.chaBonus);
-	}
 	case FieldId::APPLICATION:
 	{
 		return std::string{ encode_buff_application(params.application) };
-	}
-	case FieldId::EXCEPTIONAL_STRENGTH:
-	{
-		return std::format("{}", params.exceptionalStrength);
-	}
-	case FieldId::NUTRITION:
-	{
-		return std::format("{}", params.nutritionValue);
 	}
 	case FieldId::TILE:
 	{
@@ -1161,23 +913,20 @@ std::string ItemEditor::field_value(FieldId field) const
 	}
 	default:
 	{
-		return "";
+		refuse_misrouted_field(descriptor.label, "ItemEditor::field_value");
 	}
 	}
-}
-
-bool ItemEditor::field_is_string(FieldId field) const
-{
-	return field == FieldId::NAME || field == FieldId::CATEGORY;
-}
-
-bool ItemEditor::field_is_toggle(FieldId field) const
-{
-	return field == FieldId::ITEM_CLASS || field == FieldId::PICKABLE_TYPE || field == FieldId::CONSUMABLE_EFFECT || field == FieldId::CONSUMABLE_BUFF || field == FieldId::DURATION_UNIT || field == FieldId::TARGET_MODE || field == FieldId::SCROLL_ANIM || field == FieldId::RANGED || field == FieldId::HAND_REQUIREMENT || field == FieldId::WEAPON_SIZE || field == FieldId::EFFECT || field == FieldId::COLOR || field == FieldId::APPLICATION;
 }
 
 void ItemEditor::field_adjust(FieldId field, int delta)
 {
+	const Descriptor& descriptor = descriptor_of(FIELDS, field);
+	if (descriptor.plain.has_value())
+	{
+		adjust_plain(*descriptor.plain, working, delta);
+		return;
+	}
+
 	auto clamp_val = [](int value, int step, int low, int high) -> int
 	{
 		return std::clamp(value + step, low, high);
@@ -1186,31 +935,6 @@ void ItemEditor::field_adjust(FieldId field, int delta)
 	ItemParams& params = working;
 	switch (field)
 	{
-	case FieldId::VALUE:
-	{
-		params.value = clamp_val(params.value, delta, 0, 99999);
-		break;
-	}
-	case FieldId::BASE_WEIGHT:
-	{
-		params.baseWeight = clamp_val(params.baseWeight, delta, 0, 100);
-		break;
-	}
-	case FieldId::WEIGHT:
-	{
-		params.weight = clamp_val(params.weight, delta, 0, 1000);
-		break;
-	}
-	case FieldId::LEVEL_MIN:
-	{
-		params.levelMin = clamp_val(params.levelMin, delta, 1, 20);
-		break;
-	}
-	case FieldId::LEVEL_MAX:
-	{
-		params.levelMax = clamp_val(params.levelMax, delta, 0, 20);
-		break;
-	}
 	case FieldId::LEVEL_SCALING:
 	{
 		float raw = params.levelScaling + static_cast<float>(delta) * 0.01f;
@@ -1251,85 +975,9 @@ void ItemEditor::field_adjust(FieldId field, int delta)
 		params.duration.bonus = clamp_val(params.duration.bonus, delta, 0, 9999);
 		break;
 	}
-	case FieldId::AGES_YEARS:
-	{
-		params.agesYears = clamp_val(params.agesYears, delta, -99, 99);
-		break;
-	}
-	case FieldId::RANGE:
-	{
-		params.range = clamp_val(params.range, delta, 0, 50);
-		break;
-	}
-	case FieldId::DAMAGE:
-	{
-		params.damage = clamp_val(params.damage, delta, 0, 999);
-		break;
-	}
-	case FieldId::CONFUSE_TURNS:
-	{
-		params.confuseTurns = clamp_val(params.confuseTurns, delta, 0, 999);
-		break;
-	}
-	case FieldId::STRENGTH_RATING:
-	{
-		// 0 is an ordinary weapon; a rating is a Strength score, and Table 1 stops at 25.
-		params.strengthRating = clamp_val(params.strengthRating, delta, 0, 25);
-		break;
-	}
-	case FieldId::AC_BONUS:
-	{
-		params.acBonus = clamp_val(params.acBonus, delta, -10, 10);
-		break;
-	}
-	case FieldId::EFFECT_BONUS:
-	{
-		params.effectBonus = clamp_val(params.effectBonus, delta, 0, 20);
-		break;
-	}
-	case FieldId::STR_BONUS:
-	{
-		params.strBonus = clamp_val(params.strBonus, delta, -18, 18);
-		break;
-	}
-	case FieldId::DEX_BONUS:
-	{
-		params.dexBonus = clamp_val(params.dexBonus, delta, -18, 18);
-		break;
-	}
-	case FieldId::CON_BONUS:
-	{
-		params.conBonus = clamp_val(params.conBonus, delta, -18, 18);
-		break;
-	}
-	case FieldId::INT_BONUS:
-	{
-		params.intBonus = clamp_val(params.intBonus, delta, -18, 18);
-		break;
-	}
-	case FieldId::WIS_BONUS:
-	{
-		params.wisBonus = clamp_val(params.wisBonus, delta, -18, 18);
-		break;
-	}
-	case FieldId::CHA_BONUS:
-	{
-		params.chaBonus = clamp_val(params.chaBonus, delta, -18, 18);
-		break;
-	}
-	case FieldId::EXCEPTIONAL_STRENGTH:
-	{
-		params.exceptionalStrength = clamp_val(params.exceptionalStrength, delta, 0, 100);
-		break;
-	}
-	case FieldId::NUTRITION:
-	{
-		params.nutritionValue = clamp_val(params.nutritionValue, delta, 0, 9999);
-		break;
-	}
 	default:
 	{
-		break;
+		refuse_misrouted_field(descriptor.label, "ItemEditor::field_adjust");
 	}
 	}
 }
@@ -1406,7 +1054,7 @@ void ItemEditor::field_toggle(FieldId field)
 	}
 	default:
 	{
-		break;
+		refuse_misrouted_field(descriptor_of(FIELDS, field).label, "ItemEditor::field_toggle");
 	}
 	}
 }
@@ -1427,7 +1075,7 @@ void ItemEditor::field_set_string(FieldId field, std::string newValue)
 	}
 	default:
 	{
-		break;
+		refuse_misrouted_field(descriptor_of(FIELDS, field).label, "ItemEditor::field_set_string");
 	}
 	}
 }

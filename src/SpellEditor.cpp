@@ -16,6 +16,8 @@
 #include "SpellEditor.h"
 #include "SpellRegistry.h"
 
+static_assert(is_well_formed_table(SpellEditor::FIELDS), "SpellEditor::FIELDS lists a field out of FieldId order, or a plain number on a field that is not ADJUST");
+
 namespace
 {
 
@@ -327,10 +329,11 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 	}
 
 	FieldId fieldId = current_field();
+	const FieldKind kind = descriptor_of(FIELDS, fieldId).kind;
 
 	if (IsKeyPressed(KEY_ENTER))
 	{
-		if (field_is_string(fieldId))
+		if (kind == FieldKind::TEXT)
 		{
 			editBuffer = field_value(fieldId);
 			mode = Mode::EDIT_STRING;
@@ -342,7 +345,7 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 		return;
 	}
 
-	if (!field_is_string(fieldId))
+	if (kind != FieldKind::TEXT)
 	{
 		if (IsKeyPressed(KEY_LEFT))
 		{
@@ -600,33 +603,7 @@ FieldId SpellEditor::current_field() const
 
 std::string SpellEditor::field_label(FieldId field) const
 {
-	switch (field)
-	{
-	case FieldId::NAME:
-	{
-		return "Name";
-	}
-	case FieldId::LEVEL:
-	{
-		return "Level";
-	}
-	case FieldId::CLASS:
-	{
-		return "Class";
-	}
-	case FieldId::EFFECT_TYPE:
-	{
-		return "Effect";
-	}
-	case FieldId::DESCRIPTION:
-	{
-		return "Description";
-	}
-	default:
-	{
-		return "???";
-	}
-	}
+	return std::string{ descriptor_of(FIELDS, field).label };
 }
 
 std::string SpellEditor::field_value(FieldId field) const
@@ -663,14 +640,9 @@ std::string SpellEditor::field_value(FieldId field) const
 	}
 	default:
 	{
-		return "";
+		refuse_misrouted_field(descriptor_of(FIELDS, field).label, "SpellEditor::field_value");
 	}
 	}
-}
-
-bool SpellEditor::field_is_string(FieldId field) const
-{
-	return field == FieldId::NAME || field == FieldId::DESCRIPTION;
 }
 
 void SpellEditor::field_adjust(FieldId field, int delta)
@@ -724,6 +696,10 @@ void SpellEditor::field_set_string(FieldId field, std::string newValue)
 	else if (field == FieldId::DESCRIPTION)
 	{
 		working.description = std::move(newValue);
+	}
+	else
+	{
+		refuse_misrouted_field(descriptor_of(FIELDS, field).label, "SpellEditor::field_set_string");
 	}
 }
 

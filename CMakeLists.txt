@@ -347,6 +347,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/ContentEditor.h
     ${PROJECT_SOURCE_DIR}/DecorEditor.cpp
     ${PROJECT_SOURCE_DIR}/DecorEditor.h
+    ${PROJECT_SOURCE_DIR}/EditorField.cpp
+    ${PROJECT_SOURCE_DIR}/EditorField.h
     ${PROJECT_SOURCE_DIR}/ItemEditor.cpp
     ${PROJECT_SOURCE_DIR}/ItemEditor.h
     ${PROJECT_SOURCE_DIR}/ListCursor.cpp

@@ -224,6 +224,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SanctuarySpellTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellcastingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/MonsterSpellcastingTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EditorFieldTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ScriptedInputTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/DoorForcingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/OpenLocksTest.cpp
@@ -354,6 +355,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/BalanceViewer.cpp
     ${PARENT_SOURCE_DIR}/ContentEditor.cpp
     ${PARENT_SOURCE_DIR}/DecorEditor.cpp
+    ${PARENT_SOURCE_DIR}/EditorField.cpp
     ${PARENT_SOURCE_DIR}/ItemEditor.cpp
     ${PARENT_SOURCE_DIR}/ListCursor.cpp
     ${PARENT_SOURCE_DIR}/MonsterEditor.cpp
