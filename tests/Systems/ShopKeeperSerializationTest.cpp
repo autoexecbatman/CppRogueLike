@@ -1,11 +1,11 @@
-#include <gtest/gtest.h>
-#include <nlohmann/json.hpp>
-#include "src/ShopKeeper.h"
-#include "src/InventoryOperations.h"
-#include "src/ItemCreator.h"
 #include "src/Game.h"
 #include "src/GameContext.h"
+#include "src/InventoryOperations.h"
+#include "src/ItemCreator.h"
+#include "src/ShopKeeper.h"
 #include "tests/mocks/TestDice.h"
+#include <gtest/gtest.h>
+#include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 using namespace InventoryOperations;
@@ -15,131 +15,141 @@ using namespace InventoryOperations;
 // Ensures shop inventory persists across save/load
 // ============================================================================
 
-class ShopKeeperSerializationTest : public ::testing::Test {
+class ShopKeeperSerializationTest : public ::testing::Test
+{
 protected:
-    Game game{ TEST_DICE_SEED };
-    GameContext ctx;
+	Game game{ TEST_DICE_SEED };
+	GameContext ctx;
 
-    void SetUp() override
-    {
-        game.itemRegistry.load("data/content/items.json");
-        ctx = game.context();
-    }
+	void SetUp() override
+	{
+		game.itemRegistry.load("data/content/items.json");
+		ctx = game.context();
+	}
 
-    std::unique_ptr<ShopKeeper> create_test_shop() {
+	std::unique_ptr<ShopKeeper> create_test_shop()
+	{
 		auto shop = std::make_unique<ShopKeeper>(ShopType::WEAPON_SHOP, ShopQuality::GOOD, game.dice);
-        shop->generate_initial_inventory(1, ctx);
-        return shop;
-    }
+		shop->generate_initial_inventory(1, ctx);
+		return shop;
+	}
 };
 
-TEST_F(ShopKeeperSerializationTest, BasicFields_SaveLoad_RoundTrip) {
+TEST_F(ShopKeeperSerializationTest, BasicFields_SaveLoad_RoundTrip)
+{
 	ShopKeeper original(ShopType::ARMOR_SHOP, ShopQuality::EXCELLENT, game.dice);
 
-    json j;
-    original.save(j);
+	json j;
+	original.save(j);
 
-    auto loaded = ShopKeeper::create(j);
+	auto loaded = ShopKeeper::create(j);
 
-    ASSERT_NE(loaded, nullptr);
-    EXPECT_EQ(loaded->get_shop_type(), ShopType::ARMOR_SHOP);
-    EXPECT_EQ(loaded->get_shop_quality(), ShopQuality::EXCELLENT);
-    EXPECT_EQ(loaded->get_shop_name(), original.get_shop_name());
-    EXPECT_EQ(loaded->get_markup_percent(), original.get_markup_percent());
-    EXPECT_EQ(loaded->get_sellback_percent(), original.get_sellback_percent());
+	ASSERT_NE(loaded, nullptr);
+	EXPECT_EQ(loaded->get_shop_type(), ShopType::ARMOR_SHOP);
+	EXPECT_EQ(loaded->get_shop_quality(), ShopQuality::EXCELLENT);
+	EXPECT_EQ(loaded->get_shop_name(), original.get_shop_name());
+	EXPECT_EQ(loaded->get_markup_percent(), original.get_markup_percent());
+	EXPECT_EQ(loaded->get_sellback_percent(), original.get_sellback_percent());
 }
 
-TEST_F(ShopKeeperSerializationTest, Inventory_Preserved) {
+TEST_F(ShopKeeperSerializationTest, Inventory_Preserved)
+{
 	ShopKeeper original(ShopType::WEAPON_SHOP, ShopQuality::AVERAGE, game.dice);
-    original.generate_initial_inventory(1, ctx);
+	original.generate_initial_inventory(1, ctx);
 
-    // Shop should have generated 3-7 items
-    size_t original_count = get_item_count(original.get_shop_inventory());
-    ASSERT_GE(original_count, 3) << "Shop should generate at least 3 items";
-    ASSERT_LE(original_count, 7) << "Shop should generate at most 7 items";
+	// Shop should have generated 3-7 items
+	size_t original_count = get_item_count(original.get_shop_inventory());
+	ASSERT_GE(original_count, 3) << "Shop should generate at least 3 items";
+	ASSERT_LE(original_count, 7) << "Shop should generate at most 7 items";
 
-    json j;
-    original.save(j);
+	json j;
+	original.save(j);
 
-    auto loaded = ShopKeeper::create(j);
+	auto loaded = ShopKeeper::create(j);
 
-    ASSERT_NE(loaded, nullptr);
-    EXPECT_EQ(get_item_count(loaded->get_shop_inventory()), original_count);
+	ASSERT_NE(loaded, nullptr);
+	EXPECT_EQ(get_item_count(loaded->get_shop_inventory()), original_count);
 }
 
-TEST_F(ShopKeeperSerializationTest, AllShopTypes_SaveLoad) {
-    std::vector<ShopType> types = {
-        ShopType::WEAPON_SHOP,
-        ShopType::ARMOR_SHOP,
-        ShopType::GENERAL_STORE,
-        ShopType::POTION_SHOP,
-        ShopType::SCROLL_SHOP,
-        ShopType::ADVENTURING_GEAR
-    };
+TEST_F(ShopKeeperSerializationTest, AllShopTypes_SaveLoad)
+{
+	std::vector<ShopType> types = {
+		ShopType::WEAPON_SHOP,
+		ShopType::ARMOR_SHOP,
+		ShopType::GENERAL_STORE,
+		ShopType::POTION_SHOP,
+		ShopType::SCROLL_SHOP,
+		ShopType::ADVENTURING_GEAR
+	};
 
-    for (ShopType type : types) {
+	for (ShopType type : types)
+	{
 		ShopKeeper original(type, ShopQuality::AVERAGE, game.dice);
-        original.generate_initial_inventory(1, ctx);
+		original.generate_initial_inventory(1, ctx);
 
-        json j;
-        original.save(j);
+		json j;
+		original.save(j);
 
-        auto loaded = ShopKeeper::create(j);
+		auto loaded = ShopKeeper::create(j);
 
-        ASSERT_NE(loaded, nullptr) << "Failed to load shop type " << static_cast<int>(type);
-        EXPECT_EQ(loaded->get_shop_type(), type);
-    }
+		ASSERT_NE(loaded, nullptr) << "Failed to load shop type " << static_cast<int>(type);
+		EXPECT_EQ(loaded->get_shop_type(), type);
+	}
 }
 
-TEST_F(ShopKeeperSerializationTest, AllQualities_SaveLoad) {
-    std::vector<ShopQuality> qualities = {
-        ShopQuality::POOR,
-        ShopQuality::AVERAGE,
-        ShopQuality::GOOD,
-        ShopQuality::EXCELLENT
-    };
+TEST_F(ShopKeeperSerializationTest, AllQualities_SaveLoad)
+{
+	std::vector<ShopQuality> qualities = {
+		ShopQuality::POOR,
+		ShopQuality::AVERAGE,
+		ShopQuality::GOOD,
+		ShopQuality::EXCELLENT
+	};
 
-    for (ShopQuality quality : qualities) {
+	for (ShopQuality quality : qualities)
+	{
 		ShopKeeper original(ShopType::GENERAL_STORE, quality, game.dice);
-        original.generate_initial_inventory(1, ctx);
+		original.generate_initial_inventory(1, ctx);
 
-        json j;
-        original.save(j);
+		json j;
+		original.save(j);
 
-        auto loaded = ShopKeeper::create(j);
+		auto loaded = ShopKeeper::create(j);
 
-        ASSERT_NE(loaded, nullptr) << "Failed to load shop quality " << static_cast<int>(quality);
-        EXPECT_EQ(loaded->get_shop_quality(), quality);
-    }
+		ASSERT_NE(loaded, nullptr) << "Failed to load shop quality " << static_cast<int>(quality);
+		EXPECT_EQ(loaded->get_shop_quality(), quality);
+	}
 }
 
-TEST_F(ShopKeeperSerializationTest, EmptyInventory_HandledGracefully) {
+TEST_F(ShopKeeperSerializationTest, EmptyInventory_HandledGracefully)
+{
 	ShopKeeper original(ShopType::WEAPON_SHOP, ShopQuality::AVERAGE, game.dice);
 
-    original.get_shop_inventory().items.clear();
+	original.get_shop_inventory().items.clear();
 
-    json j;
-    original.save(j);
+	json j;
+	original.save(j);
 
-    auto loaded = ShopKeeper::create(j);
+	auto loaded = ShopKeeper::create(j);
 
-    ASSERT_NE(loaded, nullptr);
-    EXPECT_TRUE(is_inventory_empty(loaded->get_shop_inventory()));
+	ASSERT_NE(loaded, nullptr);
+	EXPECT_TRUE(is_inventory_empty(loaded->get_shop_inventory()));
 }
 
-TEST_F(ShopKeeperSerializationTest, CustomPricing_Preserved) {
+TEST_F(ShopKeeperSerializationTest, CustomPricing_Preserved)
+{
 	ShopKeeper original(ShopType::GENERAL_STORE, ShopQuality::AVERAGE, game.dice);
-    original.set_markup_percent(200);
-    original.set_sellback_percent(30);
+	original.set_markup_percent(200);
+	original.set_sellback_percent(30);
 
-    json j;
-    original.save(j);
+	json j;
+	original.save(j);
 
-    auto loaded = ShopKeeper::create(j);
+	auto loaded = ShopKeeper::create(j);
 
-    ASSERT_NE(loaded, nullptr);
-    EXPECT_EQ(loaded->get_markup_percent(), 200);
-    EXPECT_EQ(loaded->get_sellback_percent(), 30);
+	ASSERT_NE(loaded, nullptr);
+	EXPECT_EQ(loaded->get_markup_percent(), 200);
+	EXPECT_EQ(loaded->get_sellback_percent(), 30);
 }
 
 // ShopKeeper::save writes the shelves on every shop, so a record without them is broken

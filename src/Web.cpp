@@ -6,8 +6,8 @@
 #include "Colors.h"
 #include "Creature.h"
 #include "GameContext.h"
-#include "Map.h"
 #include "MagicalItemEffects.h"
+#include "Map.h"
 #include "MessageSystem.h"
 #include "TileConfig.h" // for TileConfig type used in ctor
 #include "Vector2D.h"

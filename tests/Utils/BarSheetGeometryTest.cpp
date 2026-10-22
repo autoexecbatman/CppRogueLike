@@ -112,7 +112,7 @@ int count_painted(const std::vector<bool>& flags)
 {
 	return static_cast<int>(std::count(flags.begin(), flags.end(), true));
 }
-}
+} // namespace
 
 TEST(BarSheetGeometryTest, TheSheetIsTwoCellsAcrossAndThreeDown)
 {

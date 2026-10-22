@@ -6,10 +6,10 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Colors.h"
-#include "src/Creature.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
+#include "src/Colors.h"
+#include "src/Creature.h"
 #include "src/Vector2D.h"
 
 class ProtectionFromEvilTest : public ::testing::Test

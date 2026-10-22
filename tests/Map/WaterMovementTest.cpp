@@ -10,9 +10,9 @@
 
 #include "src/Colors.h"
 #include "src/Creature.h"
-#include "src/Player.h"
 #include "src/Map.h"
 #include "src/Pathfinding.h"
+#include "src/Player.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 

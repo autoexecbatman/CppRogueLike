@@ -1,12 +1,12 @@
-#include <gtest/gtest.h>
-#include <nlohmann/json.hpp>
+#include "src/ExperienceReward.h"
+#include "src/ItemCreator.h"
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
 #include "src/PlayerController.h"
 #include "src/TurnSchedule.h"
-#include "src/ExperienceReward.h"
-#include "src/ItemCreator.h"
 #include "tests/mocks/MockGameContext.h"
+#include <gtest/gtest.h>
+#include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 
@@ -15,72 +15,76 @@ using json = nlohmann::json;
 // Ensures player state persists correctly including equipment and class/race
 // ============================================================================
 
-class PlayerSerializationTest : public ::testing::Test {
+class PlayerSerializationTest : public ::testing::Test
+{
 protected:
-    MockGameContext mock{};
-    GameContext ctx{ mock.to_game_context() };
+	MockGameContext mock{};
+	GameContext ctx{ mock.to_game_context() };
 
-    std::unique_ptr<Player> create_test_player() {
-        auto player = std::make_unique<Player>(Vector2D{20, 10});
+	std::unique_ptr<Player> create_test_player()
+	{
+		auto player = std::make_unique<Player>(Vector2D{ 20, 10 });
 
-        // Set up basic stats
-        player->set_strength(16);
-        player->set_dexterity(14);
-        player->set_constitution(15);
-        player->set_intelligence(12);
-        player->set_wisdom(10);
-        player->set_charisma(8);
-        player->set_gold(500);
+		// Set up basic stats
+		player->set_strength(16);
+		player->set_dexterity(14);
+		player->set_constitution(15);
+		player->set_intelligence(12);
+		player->set_wisdom(10);
+		player->set_charisma(8);
+		player->set_gold(500);
 
-        // Set class/race
-        player->set_creature_class(CreatureClass::FIGHTER);
-        player->lifespan->race = PlayerRaceState::HUMAN;
-        player->set_attacks_per_round(1.5f);
+		// Set class/race
+		player->set_creature_class(CreatureClass::FIGHTER);
+		player->lifespan->race = PlayerRaceState::HUMAN;
+		player->set_attacks_per_round(1.5f);
 
-        // Set up components
-        player->experienceReward = std::make_unique<ExperienceReward>(0);
-        player->set_dr(2);
-        player->set_thaco(18);
-        player->armorClass = std::make_unique<ArmorClass>(10);
-        player->healthPool = std::make_unique<HealthPool>(30);
-        player->attacker = std::make_unique<PlayerAttacker>(*player);
-        // PlayerController constructed automatically in Player constructor
+		// Set up components
+		player->experienceReward = std::make_unique<ExperienceReward>(0);
+		player->set_dr(2);
+		player->set_thaco(18);
+		player->armorClass = std::make_unique<ArmorClass>(10);
+		player->healthPool = std::make_unique<HealthPool>(30);
+		player->attacker = std::make_unique<PlayerAttacker>(*player);
+		// PlayerController constructed automatically in Player constructor
 
-        return player;
-    }
+		return player;
+	}
 };
 
-TEST_F(PlayerSerializationTest, BasicStats_SaveLoad_RoundTrip) {
-    auto original = create_test_player();
+TEST_F(PlayerSerializationTest, BasicStats_SaveLoad_RoundTrip)
+{
+	auto original = create_test_player();
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Player>(Vector2D{0, 0});
-    loaded->load(j);
+	auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
+	loaded->load(j);
 
-    EXPECT_EQ(loaded->get_strength(), 16);
-    EXPECT_EQ(loaded->get_dexterity(), 14);
-    EXPECT_EQ(loaded->get_constitution(), 15);
-    EXPECT_EQ(loaded->get_intelligence(), 12);
-    EXPECT_EQ(loaded->get_wisdom(), 10);
-    EXPECT_EQ(loaded->get_charisma(), 8);
-    EXPECT_EQ(loaded->get_gold(), 500);
+	EXPECT_EQ(loaded->get_strength(), 16);
+	EXPECT_EQ(loaded->get_dexterity(), 14);
+	EXPECT_EQ(loaded->get_constitution(), 15);
+	EXPECT_EQ(loaded->get_intelligence(), 12);
+	EXPECT_EQ(loaded->get_wisdom(), 10);
+	EXPECT_EQ(loaded->get_charisma(), 8);
+	EXPECT_EQ(loaded->get_gold(), 500);
 }
 
-TEST_F(PlayerSerializationTest, ClassAndRace_Preserved) {
-    auto original = create_test_player();
+TEST_F(PlayerSerializationTest, ClassAndRace_Preserved)
+{
+	auto original = create_test_player();
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Player>(Vector2D{0, 0});
-    loaded->load(j);
+	auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
+	loaded->load(j);
 
-    EXPECT_EQ(loaded->get_creature_class(), CreatureClass::FIGHTER);
-    EXPECT_EQ(loaded->get_race(), PlayerRaceState::HUMAN);
-    EXPECT_EQ(loaded->get_class_display_name(), class_display_name(CreatureClass::FIGHTER));
-    EXPECT_EQ(loaded->get_race_display_name(), "Human");
+	EXPECT_EQ(loaded->get_creature_class(), CreatureClass::FIGHTER);
+	EXPECT_EQ(loaded->get_race(), PlayerRaceState::HUMAN);
+	EXPECT_EQ(loaded->get_class_display_name(), class_display_name(CreatureClass::FIGHTER));
+	EXPECT_EQ(loaded->get_race_display_name(), "Human");
 }
 
 // The race is saved once, as the enum. Its name is derived from it, so a second field
@@ -110,130 +114,139 @@ TEST_F(PlayerSerializationTest, TheClassIsSavedOnceAsTheEnum)
 	EXPECT_FALSE(j.contains("playerClass")) << "the class's name was saved beside the class";
 }
 
-TEST_F(PlayerSerializationTest, CombatStats_Preserved) {
-    auto original = create_test_player();
+TEST_F(PlayerSerializationTest, CombatStats_Preserved)
+{
+	auto original = create_test_player();
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Player>(Vector2D{0, 0});
-    loaded->load(j);
+	auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
+	loaded->load(j);
 
-    EXPECT_FLOAT_EQ(loaded->get_attacks_per_round(), 1.5f);
+	EXPECT_FLOAT_EQ(loaded->get_attacks_per_round(), 1.5f);
 }
 
-TEST_F(PlayerSerializationTest, WebStatus_Preserved) {
-    auto original = create_test_player();
-    original->apply_web_effect(5, 10, nullptr);
-    EXPECT_TRUE(original->is_webbed());
+TEST_F(PlayerSerializationTest, WebStatus_Preserved)
+{
+	auto original = create_test_player();
+	original->apply_web_effect(5, 10, nullptr);
+	EXPECT_TRUE(original->is_webbed());
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Player>(Vector2D{0, 0});
-    loaded->load(j);
+	auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
+	loaded->load(j);
 
-    EXPECT_TRUE(loaded->is_webbed());
+	EXPECT_TRUE(loaded->is_webbed());
 }
 
-TEST_F(PlayerSerializationTest, EquippedItems_Preserved) {
-    auto original = create_test_player();
+TEST_F(PlayerSerializationTest, EquippedItems_Preserved)
+{
+	auto original = create_test_player();
 
-    // Create and equip a sword
-    auto sword = ItemCreator::create("long_sword", Vector2D{0, 0}, ctx);
-    sword->set_value(100);
-    original->equippedItems.emplace_back(std::move(sword), EquipmentSlot::RIGHT_HAND);
+	// Create and equip a sword
+	auto sword = ItemCreator::create("long_sword", Vector2D{ 0, 0 }, ctx);
+	sword->set_value(100);
+	original->equippedItems.emplace_back(std::move(sword), EquipmentSlot::RIGHT_HAND);
 
-    // Create and equip armor
-    auto armor = ItemCreator::create("chain_mail", Vector2D{0, 0}, ctx);
-    armor->set_value(200);
-    original->equippedItems.emplace_back(std::move(armor), EquipmentSlot::BODY);
+	// Create and equip armor
+	auto armor = ItemCreator::create("chain_mail", Vector2D{ 0, 0 }, ctx);
+	armor->set_value(200);
+	original->equippedItems.emplace_back(std::move(armor), EquipmentSlot::BODY);
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Player>(Vector2D{0, 0});
-    loaded->load(j);
+	auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
+	loaded->load(j);
 
-    ASSERT_EQ(loaded->equippedItems.size(), 2) << "Should have 2 equipped items";
+	ASSERT_EQ(loaded->equippedItems.size(), 2) << "Should have 2 equipped items";
 
-    // Check first item
-    EXPECT_EQ(loaded->equippedItems[0].slot, EquipmentSlot::RIGHT_HAND);
-    EXPECT_NE(loaded->equippedItems[0].item, nullptr);
+	// Check first item
+	EXPECT_EQ(loaded->equippedItems[0].slot, EquipmentSlot::RIGHT_HAND);
+	EXPECT_NE(loaded->equippedItems[0].item, nullptr);
 
-    // Check second item
-    EXPECT_EQ(loaded->equippedItems[1].slot, EquipmentSlot::BODY);
-    EXPECT_NE(loaded->equippedItems[1].item, nullptr);
+	// Check second item
+	EXPECT_EQ(loaded->equippedItems[1].slot, EquipmentSlot::BODY);
+	EXPECT_NE(loaded->equippedItems[1].item, nullptr);
 }
 
-TEST_F(PlayerSerializationTest, NoEquippedItems_HandledGracefully) {
-    auto original = create_test_player();
-    // Don't add any equipped items
+TEST_F(PlayerSerializationTest, NoEquippedItems_HandledGracefully)
+{
+	auto original = create_test_player();
+	// Don't add any equipped items
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Player>(Vector2D{0, 0});
-    loaded->load(j);
+	auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
+	loaded->load(j);
 
-    EXPECT_TRUE(loaded->equippedItems.empty());
+	EXPECT_TRUE(loaded->equippedItems.empty());
 }
 
-TEST_F(PlayerSerializationTest, AllRaces_SaveLoad) {
-    std::vector<PlayerRaceState> races = {
-        PlayerRaceState::HUMAN,
-        PlayerRaceState::ELF,
-        PlayerRaceState::DWARF,
-        PlayerRaceState::HALFLING,
-        PlayerRaceState::GNOME,
-        PlayerRaceState::HALFELF
-    };
+TEST_F(PlayerSerializationTest, AllRaces_SaveLoad)
+{
+	std::vector<PlayerRaceState> races = {
+		PlayerRaceState::HUMAN,
+		PlayerRaceState::ELF,
+		PlayerRaceState::DWARF,
+		PlayerRaceState::HALFLING,
+		PlayerRaceState::GNOME,
+		PlayerRaceState::HALFELF
+	};
 
-    for (auto race : races) {
-        auto player = create_test_player();
-        player->lifespan->race = race;
+	for (auto race : races)
+	{
+		auto player = create_test_player();
+		player->lifespan->race = race;
 
-        json j;
-        player->save(j);
+		json j;
+		player->save(j);
 
-        auto loaded = std::make_unique<Player>(Vector2D{0, 0});
-        loaded->load(j);
+		auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
+		loaded->load(j);
 
-        EXPECT_EQ(loaded->get_race(), race) << "Race mismatch for " << static_cast<int>(race);
-    }
+		EXPECT_EQ(loaded->get_race(), race) << "Race mismatch for " << static_cast<int>(race);
+	}
 }
 
-TEST_F(PlayerSerializationTest, AllClasses_SaveLoad) {
-    for (const CreatureClass creatureClass : ALL_PLAYER_CLASS) {
-        auto player = create_test_player();
-        player->set_creature_class(creatureClass);
+TEST_F(PlayerSerializationTest, AllClasses_SaveLoad)
+{
+	for (const CreatureClass creatureClass : ALL_PLAYER_CLASS)
+	{
+		auto player = create_test_player();
+		player->set_creature_class(creatureClass);
 
-        json j;
-        player->save(j);
+		json j;
+		player->save(j);
 
-        auto loaded = std::make_unique<Player>(Vector2D{0, 0});
-        loaded->load(j);
+		auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
+		loaded->load(j);
 
-        EXPECT_EQ(loaded->get_creature_class(), creatureClass) << "Class mismatch for " << encode_creature_class(creatureClass);
-        // The name shown is the loaded class's own, which a fighter alone cannot tell apart
-        // from a name that is always the fighter's.
-        EXPECT_EQ(loaded->get_class_display_name(), class_display_name(creatureClass));
-    }
+		EXPECT_EQ(loaded->get_creature_class(), creatureClass) << "Class mismatch for " << encode_creature_class(creatureClass);
+		// The name shown is the loaded class's own, which a fighter alone cannot tell apart
+		// from a name that is always the fighter's.
+		EXPECT_EQ(loaded->get_class_display_name(), class_display_name(creatureClass));
+	}
 }
 
-TEST_F(PlayerSerializationTest, Components_Preserved) {
-    auto original = create_test_player();
+TEST_F(PlayerSerializationTest, Components_Preserved)
+{
+	auto original = create_test_player();
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Player>(Vector2D{0, 0});
-    loaded->load(j);
+	auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
+	loaded->load(j);
 
-    ASSERT_NE(loaded->attacker, nullptr) << "Attacker not loaded";
-    ASSERT_NE(loaded->controller, nullptr) << "PlayerController not loaded";
+	ASSERT_NE(loaded->attacker, nullptr) << "Attacker not loaded";
+	ASSERT_NE(loaded->controller, nullptr) << "PlayerController not loaded";
 
-    EXPECT_EQ(loaded->get_max_hp(), 30);
+	EXPECT_EQ(loaded->get_max_hp(), 30);
 }
 
 // Every field Player::save writes on every player is required on load: the owner's ruling

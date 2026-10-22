@@ -17,19 +17,19 @@
 
 #include <gtest/gtest.h>
 
+#include "src/AttackKind.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
-#include "src/EquipmentSlot.h"
-#include "src/MonsterAttacker.h"
-#include "src/Player.h"
-#include "src/AttackKind.h"
 #include "src/DamageInfo.h"
+#include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
 #include "src/Game.h"
-#include "src/Paths.h"
 #include "src/Item.h"
 #include "src/ItemCreator.h"
+#include "src/MonsterAttacker.h"
+#include "src/Paths.h"
 #include "src/Pickable.h"
+#include "src/Player.h"
 #include "tests/mocks/TestDice.h"
 
 class TypedAttackResistanceTest : public ::testing::Test

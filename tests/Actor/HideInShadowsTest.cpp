@@ -27,9 +27,9 @@
 
 #include <nlohmann/json.hpp>
 
-#include "src/Colors.h"
 #include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/ExperienceReward.h"
 #include "src/GameContext.h"

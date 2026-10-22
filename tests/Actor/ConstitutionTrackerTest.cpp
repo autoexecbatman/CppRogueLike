@@ -16,10 +16,10 @@
 #include <gtest/gtest.h>
 
 #include "src/Creature.h"
-#include "src/Player.h"
-#include "src/GameContext.h"
 #include "src/DataManager.h"
+#include "src/GameContext.h"
 #include "src/MessageSystem.h"
+#include "src/Player.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace

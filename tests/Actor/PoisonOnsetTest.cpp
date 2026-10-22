@@ -25,11 +25,11 @@
 
 #include <nlohmann/json.hpp>
 
-#include "src/Colors.h"
 #include "src/Actor.h"
 #include "src/AiGiantSpider.h"
 #include "src/ArmorClass.h"
 #include "src/BuffType.h"
+#include "src/Colors.h"
 #include "src/ConstitutionAttributes.h"
 #include "src/Creature.h"
 #include "src/DamageInfo.h"

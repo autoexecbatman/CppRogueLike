@@ -16,8 +16,8 @@
 #include <memory>
 #include <vector>
 
-#include "src/Colors.h"
 #include "src/ArmorClass.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/DexterityAttributes.h"
 #include "src/ExperienceReward.h"

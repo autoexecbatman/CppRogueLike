@@ -9,9 +9,9 @@
 
 #include <gtest/gtest.h>
 
-#include "../../src/Player.h"
-#include "../../src/GameContext.h"
 #include "../../src/Game.h"
+#include "../../src/GameContext.h"
+#include "../../src/Player.h"
 #include "tests/mocks/TestDice.h"
 
 namespace

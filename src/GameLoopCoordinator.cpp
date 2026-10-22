@@ -19,7 +19,6 @@
 #include "FloatingTextSystem.h"
 #include "GameContext.h"
 #include "GameLoopCoordinator.h"
-#include "TurnSchedule.h"
 #include "GameStateManager.h"
 #include "Gui.h"
 #include "HungerSystem.h"
@@ -39,6 +38,7 @@
 #include "TileConfig.h"
 #include "TileFeature.h"
 #include "Trap.h"
+#include "TurnSchedule.h"
 #include "Vector2D.h"
 
 // One pass of the game loop. The game is already initialised by the time this

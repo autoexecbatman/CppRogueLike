@@ -20,8 +20,8 @@
 #include <string_view>
 #include <vector>
 
-#include "src/Colors.h"
 #include "src/ArmorClass.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/CreatureClass.h"
 #include "src/DamageInfo.h"

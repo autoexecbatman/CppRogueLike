@@ -16,13 +16,13 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=TreasureGoldTest.*
 
-#include "src/ItemFactory.h"
-#include "src/ItemCreator.h"
 #include "src/Item.h"
-#include "src/Pickable.h"
+#include "src/ItemCreator.h"
+#include "src/ItemFactory.h"
 #include "src/Map.h"
 #include "src/MessageSystem.h"
 #include "src/Paths.h"
+#include "src/Pickable.h"
 #include "tests/mocks/MockGameContext.h"
 #include <gtest/gtest.h>
 

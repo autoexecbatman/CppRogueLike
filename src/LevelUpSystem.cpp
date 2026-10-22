@@ -1,6 +1,6 @@
 // LevelUpSystem.cpp - Handles combat improvements on level up according to AD&D 2e rules
-#include <cassert>
 #include <algorithm>
+#include <cassert>
 #include <format>
 #include <string>
 

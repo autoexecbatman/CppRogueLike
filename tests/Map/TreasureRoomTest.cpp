@@ -2,24 +2,24 @@
 #include <set>
 #include <string>
 
-#include "src/TileFeature.h"
-#include "src/ItemCreator.h"
+#include "src/DataManager.h"
 #include "src/DungeonNames.h"
 #include "src/DungeonRoom.h"
-#include "src/Map.h"
-#include "src/TreasureRoom.h"
-#include "src/Stairs.h"
-#include "src/Player.h"
 #include "src/ExperienceReward.h"
 #include "src/GameContext.h"
-#include "src/Paths.h"
-#include "src/RandomDice.h"
-#include "src/DataManager.h"
+#include "src/ItemCreator.h"
 #include "src/LevelManager.h"
+#include "src/Map.h"
 #include "src/MessageSystem.h"
-#include "tests/mocks/MockGameContext.h"
+#include "src/Paths.h"
+#include "src/Player.h"
+#include "src/RandomDice.h"
 #include "src/SpellTile.h"
+#include "src/Stairs.h"
+#include "src/TileFeature.h"
 #include "src/Trap.h"
+#include "src/TreasureRoom.h"
+#include "tests/mocks/MockGameContext.h"
 
 // ============================================================================
 // Treasure Room Tests
@@ -34,14 +34,14 @@
 
 namespace
 {
-    // Fixture map dimensions - single TU, no reason to be class members.
-    constexpr int FIXTURE_W = 40;
-    constexpr int FIXTURE_H = 25;
+// Fixture map dimensions - single TU, no reason to be class members.
+constexpr int FIXTURE_W = 40;
+constexpr int FIXTURE_H = 25;
 
-    // Integration test map dimensions.
-    constexpr int STAIR_TEST_W = 120;
-    constexpr int STAIR_TEST_H = 80;
-}
+// Integration test map dimensions.
+constexpr int STAIR_TEST_W = 120;
+constexpr int STAIR_TEST_H = 80;
+} // namespace
 
 // ----------------------------------------------------------------------------
 // Shared fixture
@@ -50,68 +50,70 @@ namespace
 class TreasureRoomFixture : public ::testing::Test
 {
 protected:
-    std::unique_ptr<Map> map;
-    std::unique_ptr<Player> player;
-    std::vector<std::unique_ptr<Creature>> creatures;
-    MockGameContext mock;
-    GameContext ctx;
-    DataManager dataManager;
-    MessageSystem messageSystem;
-    LevelManager levelManager;
+	std::unique_ptr<Map> map;
+	std::unique_ptr<Player> player;
+	std::vector<std::unique_ptr<Creature>> creatures;
+	MockGameContext mock;
+	GameContext ctx;
+	DataManager dataManager;
+	MessageSystem messageSystem;
+	LevelManager levelManager;
 
-    void SetUp() override
-    {
-        try
-        {
-            dataManager.load_all_data(messageSystem);
-        }
-        catch (...) {}
+	void SetUp() override
+	{
+		try
+		{
+			dataManager.load_all_data(messageSystem);
+		}
+		catch (...)
+		{
+		}
 
-        map = std::make_unique<Map>(FIXTURE_W, FIXTURE_H);
-        player = std::make_unique<Player>(Vector2D{ 1, 1 });
-        player->experienceReward = std::make_unique<ExperienceReward>(0);
-        player->set_dr(0);
-        player->set_thaco(20);
-        player->armorClass = std::make_unique<ArmorClass>(10);
-        player->healthPool = std::make_unique<HealthPool>(20);
+		map = std::make_unique<Map>(FIXTURE_W, FIXTURE_H);
+		player = std::make_unique<Player>(Vector2D{ 1, 1 });
+		player->experienceReward = std::make_unique<ExperienceReward>(0);
+		player->set_dr(0);
+		player->set_thaco(20);
+		player->armorClass = std::make_unique<ArmorClass>(10);
+		player->healthPool = std::make_unique<HealthPool>(20);
 
-        // Use MockGameContext as base so contentRegistry, tileConfig, and
-        // inventoryData are all wired - TreasureRoom::setup_guard needs
-        // contentRegistry to create the dungeon_key item for the jailer.
-        ctx = mock.to_game_context();
-        ctx.playerOwner = &player;
-        ctx.dataManager = &dataManager;
-        ctx.messageSystem = &messageSystem;
-        ctx.creatures = &creatures;
-        ctx.map = map.get();
-        // TreasureRoom::create reads the dungeon level for its hoard and its escort.
-        ctx.levelManager = &levelManager;
+		// Use MockGameContext as base so contentRegistry, tileConfig, and
+		// inventoryData are all wired - TreasureRoom::setup_guard needs
+		// contentRegistry to create the dungeon_key item for the jailer.
+		ctx = mock.to_game_context();
+		ctx.playerOwner = &player;
+		ctx.dataManager = &dataManager;
+		ctx.messageSystem = &messageSystem;
+		ctx.creatures = &creatures;
+		ctx.map = map.get();
+		// TreasureRoom::create reads the dungeon level for its hoard and its escort.
+		ctx.levelManager = &levelManager;
 
-        map->init_tiles();  // blank wall grid; tests manually stamp rooms and doors
-    }
+		map->init_tiles(); // blank wall grid; tests manually stamp rooms and doors
+	}
 
-    // Stamp a room floor and return its descriptor.
-    DungeonRoom make_room(int col, int row, int w, int h)
-    {
-        for (int y = row; y < row + h; ++y)
-        {
-            for (int x = col; x < col + w; ++x)
-            {
-                map->set_tile(Vector2D{ x, y }, TileType::FLOOR);
-            }
-        }
-        return DungeonRoom{ col, row, w, h };
-    }
+	// Stamp a room floor and return its descriptor.
+	DungeonRoom make_room(int col, int row, int w, int h)
+	{
+		for (int y = row; y < row + h; ++y)
+		{
+			for (int x = col; x < col + w; ++x)
+			{
+				map->set_tile(Vector2D{ x, y }, TileType::FLOOR);
+			}
+		}
+		return DungeonRoom{ col, row, w, h };
+	}
 
-    void place_door(Vector2D pos)
-    {
-        map->set_tile(pos, TileType::CLOSED_DOOR);
-    }
+	void place_door(Vector2D pos)
+	{
+		map->set_tile(pos, TileType::CLOSED_DOOR);
+	}
 
-    void place_corridor(Vector2D pos)
-    {
-        map->set_tile(pos, TileType::CORRIDOR);
-    }
+	void place_corridor(Vector2D pos)
+	{
+		map->set_tile(pos, TileType::CORRIDOR);
+	}
 };
 
 // ============================================================================
@@ -120,41 +122,41 @@ protected:
 
 TEST(DungeonNames, ReturnsNonEmptyString)
 {
-    RandomDice rng{ 42 };
-    EXPECT_FALSE(DungeonNames::generate_warden_name(rng).empty());
+	RandomDice rng{ 42 };
+	EXPECT_FALSE(DungeonNames::generate_warden_name(rng).empty());
 }
 
 TEST(DungeonNames, NameContainsSpace)
 {
-    // Format is "[FirstName] [Epithet]" - always has at least one space.
-    RandomDice rng{ 42 };
-    const std::string name = DungeonNames::generate_warden_name(rng);
-    EXPECT_NE(name.find(' '), std::string::npos)
-        << "Expected space between name and epithet, got: " << name;
+	// Format is "[FirstName] [Epithet]" - always has at least one space.
+	RandomDice rng{ 42 };
+	const std::string name = DungeonNames::generate_warden_name(rng);
+	EXPECT_NE(name.find(' '), std::string::npos)
+		<< "Expected space between name and epithet, got: " << name;
 }
 
 TEST(DungeonNames, NeverEmptyAcross50Seeds)
 {
-    for (unsigned int seed = 0; seed < 50; ++seed)
-    {
-        RandomDice rng{ seed };
-        EXPECT_FALSE(DungeonNames::generate_warden_name(rng).empty())
-            << "Empty name at seed " << seed;
-    }
+	for (unsigned int seed = 0; seed < 50; ++seed)
+	{
+		RandomDice rng{ seed };
+		EXPECT_FALSE(DungeonNames::generate_warden_name(rng).empty())
+			<< "Empty name at seed " << seed;
+	}
 }
 
 TEST(DungeonNames, ProducesVariedNamesAcrossSeeds)
 {
-    // 225 combinations - 20 seeds must yield more than 1 distinct result.
-    // P(all 20 identical) < (1/225)^19 - effectively impossible.
-    std::set<std::string> seen;
-    for (unsigned int seed = 0; seed < 20; ++seed)
-    {
-        RandomDice rng{ seed };
-        seen.insert(DungeonNames::generate_warden_name(rng));
-    }
-    EXPECT_GT(seen.size(), 1u)
-        << "All 20 seeds produced the same name - pool is not being sampled";
+	// 225 combinations - 20 seeds must yield more than 1 distinct result.
+	// P(all 20 identical) < (1/225)^19 - effectively impossible.
+	std::set<std::string> seen;
+	for (unsigned int seed = 0; seed < 20; ++seed)
+	{
+		RandomDice rng{ seed };
+		seen.insert(DungeonNames::generate_warden_name(rng));
+	}
+	EXPECT_GT(seen.size(), 1u)
+		<< "All 20 seeds produced the same name - pool is not being sampled";
 }
 
 // ============================================================================
@@ -163,40 +165,40 @@ TEST(DungeonNames, ProducesVariedNamesAcrossSeeds)
 
 TEST_F(TreasureRoomFixture, CountEntrances_NoDoors_ReturnsZero)
 {
-    const DungeonRoom room = make_room(5, 5, 6, 6);
-    EXPECT_EQ(TreasureRoom::count_entrances(*map, room), 0);
+	const DungeonRoom room = make_room(5, 5, 6, 6);
+	EXPECT_EQ(TreasureRoom::count_entrances(*map, room), 0);
 }
 
 TEST_F(TreasureRoomFixture, CountEntrances_OneLeftWallDoor_ReturnsOne)
 {
-    // Floor [5..10] x [5..10].  Door at (4,7).
-    // (4,7) + DIR_E = (5,7) - inside room.contains() - genuine entrance.
-    const DungeonRoom room = make_room(5, 5, 6, 6);
-    place_door(Vector2D{ 4, 7 });
-    EXPECT_EQ(TreasureRoom::count_entrances(*map, room), 1);
+	// Floor [5..10] x [5..10].  Door at (4,7).
+	// (4,7) + DIR_E = (5,7) - inside room.contains() - genuine entrance.
+	const DungeonRoom room = make_room(5, 5, 6, 6);
+	place_door(Vector2D{ 4, 7 });
+	EXPECT_EQ(TreasureRoom::count_entrances(*map, room), 1);
 }
 
 TEST_F(TreasureRoomFixture, CountEntrances_OneTopWallDoor_ReturnsOne)
 {
-    const DungeonRoom room = make_room(5, 5, 6, 6);
-    place_door(Vector2D{ 7, 4 });
-    EXPECT_EQ(TreasureRoom::count_entrances(*map, room), 1);
+	const DungeonRoom room = make_room(5, 5, 6, 6);
+	place_door(Vector2D{ 7, 4 });
+	EXPECT_EQ(TreasureRoom::count_entrances(*map, room), 1);
 }
 
 TEST_F(TreasureRoomFixture, CountEntrances_TwoDoors_ReturnsTwo)
 {
-    const DungeonRoom room = make_room(5, 5, 6, 6);
-    place_door(Vector2D{ 4, 7 });  // left wall
-    place_door(Vector2D{ 7, 4 });  // top wall
-    EXPECT_EQ(TreasureRoom::count_entrances(*map, room), 2);
+	const DungeonRoom room = make_room(5, 5, 6, 6);
+	place_door(Vector2D{ 4, 7 }); // left wall
+	place_door(Vector2D{ 7, 4 }); // top wall
+	EXPECT_EQ(TreasureRoom::count_entrances(*map, room), 2);
 }
 
 TEST_F(TreasureRoomFixture, CountEntrances_FarDoor_NotCounted)
 {
-    // A door with no room-interior cardinal neighbour is not an entrance.
-    const DungeonRoom room = make_room(5, 5, 6, 6);
-    place_door(Vector2D{ 20, 15 });
-    EXPECT_EQ(TreasureRoom::count_entrances(*map, room), 0);
+	// A door with no room-interior cardinal neighbour is not an entrance.
+	const DungeonRoom room = make_room(5, 5, 6, 6);
+	place_door(Vector2D{ 20, 15 });
+	EXPECT_EQ(TreasureRoom::count_entrances(*map, room), 0);
 }
 
 // ============================================================================
@@ -205,37 +207,37 @@ TEST_F(TreasureRoomFixture, CountEntrances_FarDoor_NotCounted)
 
 TEST_F(TreasureRoomFixture, VaultClearsItsWaterAndAdoptsNoCorridor)
 {
-    // Floor [10..17] x [5..11]. The wall at (13,8) stands for what a room shape
-    // carves back. The pool at (11,6) is what the clearing exists for. The corridor
-    // at (10,11) clips the bottom-left corner of the box and is walled off from the
-    // room by (10,10) and (11,11) - the shape a corridor leaves when its path crosses
-    // a corner of a room it does not connect.
-    const DungeonRoom room = make_room(10, 5, 8, 7);
-    const Vector2D shapeWall{ 13, 8 };
-    const Vector2D pool{ 11, 6 };
-    const Vector2D clippedCorner{ 10, 11 };
-    // The two cells that cut that corner off from the rest of the room's floor.
-    const Vector2D cornerWallAbove{ 10, 10 };
-    const Vector2D cornerWallBeside{ 11, 11 };
-    map->set_tile(shapeWall, TileType::WALL);
-    map->set_tile(pool, TileType::WATER);
-    map->set_tile(cornerWallAbove, TileType::WALL);
-    map->set_tile(cornerWallBeside, TileType::WALL);
-    place_corridor(clippedCorner);
-    ASSERT_TRUE(map->room_interior_is_one_piece(room))
-        << "the room is split before the vault touches it - the case measures nothing";
+	// Floor [10..17] x [5..11]. The wall at (13,8) stands for what a room shape
+	// carves back. The pool at (11,6) is what the clearing exists for. The corridor
+	// at (10,11) clips the bottom-left corner of the box and is walled off from the
+	// room by (10,10) and (11,11) - the shape a corridor leaves when its path crosses
+	// a corner of a room it does not connect.
+	const DungeonRoom room = make_room(10, 5, 8, 7);
+	const Vector2D shapeWall{ 13, 8 };
+	const Vector2D pool{ 11, 6 };
+	const Vector2D clippedCorner{ 10, 11 };
+	// The two cells that cut that corner off from the rest of the room's floor.
+	const Vector2D cornerWallAbove{ 10, 10 };
+	const Vector2D cornerWallBeside{ 11, 11 };
+	map->set_tile(shapeWall, TileType::WALL);
+	map->set_tile(pool, TileType::WATER);
+	map->set_tile(cornerWallAbove, TileType::WALL);
+	map->set_tile(cornerWallBeside, TileType::WALL);
+	place_corridor(clippedCorner);
+	ASSERT_TRUE(map->room_interior_is_one_piece(room))
+		<< "the room is split before the vault touches it - the case measures nothing";
 
-    RandomDice generationRng{ 7 };
-    TreasureRoom::create(room, 1, generationRng, ctx);
+	RandomDice generationRng{ 7 };
+	TreasureRoom::create(room, 1, generationRng, ctx);
 
-    EXPECT_EQ(map->get_tile_type(pool), TileType::FLOOR)
-        << "the vault left water standing on its own floor";
-    EXPECT_EQ(map->get_tile_type(shapeWall), TileType::WALL)
-        << "the vault flattened the wall its room's shape carved";
-    EXPECT_EQ(map->get_tile_type(clippedCorner), TileType::CORRIDOR)
-        << "the vault took a corridor that only clipped its box for its own floor";
-    EXPECT_TRUE(map->room_interior_is_one_piece(room))
-        << "the vault left a pocket of floor with no way into it";
+	EXPECT_EQ(map->get_tile_type(pool), TileType::FLOOR)
+		<< "the vault left water standing on its own floor";
+	EXPECT_EQ(map->get_tile_type(shapeWall), TileType::WALL)
+		<< "the vault flattened the wall its room's shape carved";
+	EXPECT_EQ(map->get_tile_type(clippedCorner), TileType::CORRIDOR)
+		<< "the vault took a corridor that only clipped its box for its own floor";
+	EXPECT_TRUE(map->room_interior_is_one_piece(room))
+		<< "the vault left a pocket of floor with no way into it";
 }
 
 // ============================================================================
@@ -246,56 +248,56 @@ TEST_F(TreasureRoomFixture, VaultClearsItsWaterAndAdoptsNoCorridor)
 
 TEST_F(TreasureRoomFixture, GuardSetup_NoJailerSpawn_DoorsRolledBack)
 {
-    // Room floor at [10..15] x [5..10].
-    // Door on left wall at (9, 7).
-    // The tile at (8, 7) stays WALL - outward walk blocked at step 1.
-    // -> candidates is empty -> unlock_all_room_entrances must fire.
+	// Room floor at [10..15] x [5..10].
+	// Door on left wall at (9, 7).
+	// The tile at (8, 7) stays WALL - outward walk blocked at step 1.
+	// -> candidates is empty -> unlock_all_room_entrances must fire.
 
-    const DungeonRoom room = make_room(10, 5, 6, 6);
-    const Vector2D doorPos{ 9, 7 };
-    place_door(doorPos);
+	const DungeonRoom room = make_room(10, 5, 6, 6);
+	const Vector2D doorPos{ 9, 7 };
+	place_door(doorPos);
 
-    // The dungeon generator in SetUp may have placed floor/corridor at (8,7).
-    // Explicitly reset it to WALL to guarantee the outward walk is blocked.
-    map->set_tile(Vector2D{ 8, 7 }, TileType::WALL);
+	// The dungeon generator in SetUp may have placed floor/corridor at (8,7).
+	// Explicitly reset it to WALL to guarantee the outward walk is blocked.
+	map->set_tile(Vector2D{ 8, 7 }, TileType::WALL);
 
-    // Confirm the outward tile is a wall (precondition).
-    ASSERT_EQ(map->get_tile_type(Vector2D{ 8, 7 }), TileType::WALL);
+	// Confirm the outward tile is a wall (precondition).
+	ASSERT_EQ(map->get_tile_type(Vector2D{ 8, 7 }), TileType::WALL);
 
-    TreasureRoom::setup_guard(room, ctx);
+	TreasureRoom::setup_guard(room, ctx);
 
-    // The door must NOT remain locked after the failed guard setup.
-    EXPECT_FALSE(map->is_door_locked(doorPos))
-        << "Door at " << doorPos.x << "," << doorPos.y
-        << " must be unlocked when no jailer can be placed";
+	// The door must NOT remain locked after the failed guard setup.
+	EXPECT_FALSE(map->is_door_locked(doorPos))
+		<< "Door at " << doorPos.x << "," << doorPos.y
+		<< " must be unlocked when no jailer can be placed";
 }
 
 TEST_F(TreasureRoomFixture, GuardSetup_WithCorridor_JailerIsPlaced)
 {
-    // Room floor at [10..15] x [5..10].
-    // Door on left wall at (9, 7).
-    // Corridor tile at (8, 7) - outward walk succeeds at step 1.
-    // -> jailer spawned at (8, 7) -> door remains locked.
+	// Room floor at [10..15] x [5..10].
+	// Door on left wall at (9, 7).
+	// Corridor tile at (8, 7) - outward walk succeeds at step 1.
+	// -> jailer spawned at (8, 7) -> door remains locked.
 
-    const DungeonRoom room = make_room(10, 5, 6, 6);
-    const Vector2D doorPos{ 9, 7 };
-    const Vector2D corridorPos{ 8, 7 };
-    place_door(doorPos);
-    place_corridor(corridorPos);
-    // The stairs lie down the corridor, which is what makes it the way in: a jailer is only
-    // posted where the stairs can be reached without passing a locked door.
-    ctx.stairs->position = corridorPos;
+	const DungeonRoom room = make_room(10, 5, 6, 6);
+	const Vector2D doorPos{ 9, 7 };
+	const Vector2D corridorPos{ 8, 7 };
+	place_door(doorPos);
+	place_corridor(corridorPos);
+	// The stairs lie down the corridor, which is what makes it the way in: a jailer is only
+	// posted where the stairs can be reached without passing a locked door.
+	ctx.stairs->position = corridorPos;
 
-    const std::size_t creaturesBefore = creatures.size();
-    TreasureRoom::setup_guard(room, ctx);
+	const std::size_t creaturesBefore = creatures.size();
+	TreasureRoom::setup_guard(room, ctx);
 
-    // Door must remain locked - a jailer guards it.
-    EXPECT_TRUE(map->is_door_locked(doorPos))
-        << "Door should stay locked when jailer is successfully placed";
+	// Door must remain locked - a jailer guards it.
+	EXPECT_TRUE(map->is_door_locked(doorPos))
+		<< "Door should stay locked when jailer is successfully placed";
 
-    // A creature (the jailer) must have been added.
-    EXPECT_GT(creatures.size(), creaturesBefore)
-        << "Expected jailer to be spawned in the corridor";
+	// A creature (the jailer) must have been added.
+	EXPECT_GT(creatures.size(), creaturesBefore)
+		<< "Expected jailer to be spawned in the corridor";
 }
 
 // ============================================================================
@@ -308,58 +310,64 @@ TEST_F(TreasureRoomFixture, GuardSetup_WithCorridor_JailerIsPlaced)
 
 TEST(StairRoomNotLocked, StairsAreNeverAdjacentToLockedDoor)
 {
-    MockGameContext mock;
+	MockGameContext mock;
 
-    auto map = std::make_unique<Map>(STAIR_TEST_W, STAIR_TEST_H);
-    auto player = std::make_unique<Player>(Vector2D{ 5, 5 });
-    player->experienceReward = std::make_unique<ExperienceReward>(0);
-    player->set_dr(0);
-    player->set_thaco(20);
-    player->healthPool = std::make_unique<HealthPool>(20);
-    auto stairs = std::make_unique<Stairs>(Vector2D{ 0, 0 });
+	auto map = std::make_unique<Map>(STAIR_TEST_W, STAIR_TEST_H);
+	auto player = std::make_unique<Player>(Vector2D{ 5, 5 });
+	player->experienceReward = std::make_unique<ExperienceReward>(0);
+	player->set_dr(0);
+	player->set_thaco(20);
+	player->healthPool = std::make_unique<HealthPool>(20);
+	auto stairs = std::make_unique<Stairs>(Vector2D{ 0, 0 });
 
-    std::vector<std::unique_ptr<Creature>> creatures;
-    std::vector<std::unique_ptr<Trap>> traps;
-    std::vector<std::unique_ptr<SpellTile>> spellTiles;
-    std::vector<DungeonRoom> rooms;
-    DataManager dataManager;
-    MessageSystem messageSystem;
-    LevelManager levelManager;
+	std::vector<std::unique_ptr<Creature>> creatures;
+	std::vector<std::unique_ptr<Trap>> traps;
+	std::vector<std::unique_ptr<SpellTile>> spellTiles;
+	std::vector<DungeonRoom> rooms;
+	DataManager dataManager;
+	MessageSystem messageSystem;
+	LevelManager levelManager;
 
-    try { dataManager.load_all_data(messageSystem); } catch (...) {}
+	try
+	{
+		dataManager.load_all_data(messageSystem);
+	}
+	catch (...)
+	{
+	}
 
-    // Start from the mock's wired context (tileConfig, contentRegistry,
-    // inventoryData, dice all set), then override the test-specific members.
-    GameContext ctx = mock.to_game_context();
-    ctx.playerOwner = &player;
-    ctx.stairs = stairs.get();
-    ctx.rooms = &rooms;
-    ctx.creatures = &creatures;
-    ctx.traps = &traps;
-    ctx.spellTiles = &spellTiles;
-    ctx.dataManager = &dataManager;
-    ctx.messageSystem = &messageSystem;
-    ctx.map = map.get();
-    ctx.levelManager = &levelManager;
+	// Start from the mock's wired context (tileConfig, contentRegistry,
+	// inventoryData, dice all set), then override the test-specific members.
+	GameContext ctx = mock.to_game_context();
+	ctx.playerOwner = &player;
+	ctx.stairs = stairs.get();
+	ctx.rooms = &rooms;
+	ctx.creatures = &creatures;
+	ctx.traps = &traps;
+	ctx.spellTiles = &spellTiles;
+	ctx.dataManager = &dataManager;
+	ctx.messageSystem = &messageSystem;
+	ctx.map = map.get();
+	ctx.levelManager = &levelManager;
 
-    // Full init: ctx wires stairs, rooms, levelManager, dice, and the mock provides
-    // tileConfig, contentRegistry, inventoryData. Verifies the stair-adjacency
-    // invariant after a complete dungeon generation pass.
-    map->init(ctx);
+	// Full init: ctx wires stairs, rooms, levelManager, dice, and the mock provides
+	// tileConfig, contentRegistry, inventoryData. Verifies the stair-adjacency
+	// invariant after a complete dungeon generation pass.
+	map->init(ctx);
 
-    const Vector2D stairsPos = stairs->position;
-    ASSERT_TRUE(map->is_in_bounds(stairsPos))
-        << "Stairs at (" << stairsPos.x << "," << stairsPos.y << ") out of bounds";
+	const Vector2D stairsPos = stairs->position;
+	ASSERT_TRUE(map->is_in_bounds(stairsPos))
+		<< "Stairs at (" << stairsPos.x << "," << stairsPos.y << ") out of bounds";
 
-    for (const Vector2D dir : { DIR_N, DIR_S, DIR_E, DIR_W })
-    {
-        const Vector2D neighbour = stairsPos + dir;
-        if (!map->is_in_bounds(neighbour))
-        {
-            continue;
-        }
-        EXPECT_FALSE(map->is_door_locked(neighbour))
-            << "Locked door at (" << neighbour.x << "," << neighbour.y
-            << ") adjacent to stairs at (" << stairsPos.x << "," << stairsPos.y << ")";
-    }
+	for (const Vector2D dir : { DIR_N, DIR_S, DIR_E, DIR_W })
+	{
+		const Vector2D neighbour = stairsPos + dir;
+		if (!map->is_in_bounds(neighbour))
+		{
+			continue;
+		}
+		EXPECT_FALSE(map->is_door_locked(neighbour))
+			<< "Locked door at (" << neighbour.x << "," << neighbour.y
+			<< ") adjacent to stairs at (" << stairsPos.x << "," << stairsPos.y << ")";
+	}
 }

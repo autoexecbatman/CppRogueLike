@@ -16,8 +16,8 @@
 
 #include <memory>
 
-#include "src/Colors.h"
 #include "src/BodyPlanRegistry.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
 #include "src/InventoryOperations.h"

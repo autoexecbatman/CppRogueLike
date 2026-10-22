@@ -26,10 +26,10 @@
 #include <initializer_list>
 #include <memory>
 
-#include "src/Colors.h"
 #include "src/Actor.h"
 #include "src/AiWebSpinner.h"
 #include "src/ArmorClass.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/DamageInfo.h"
 #include "src/DataManager.h"

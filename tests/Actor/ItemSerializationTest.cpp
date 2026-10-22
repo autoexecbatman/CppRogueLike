@@ -1,11 +1,11 @@
+#include "src/Actor.h"
+#include "src/Colors.h"
+#include "src/Item.h"
+#include "src/ItemCreator.h"
+#include "src/ItemEnhancements.h"
+#include "src/Pickable.h"
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
-#include "src/Colors.h"
-#include "src/Actor.h"
-#include "src/Item.h"
-#include "src/Pickable.h"
-#include "src/ItemEnhancements.h"
-#include "src/ItemCreator.h"
 
 using json = nlohmann::json;
 
@@ -14,219 +14,232 @@ using json = nlohmann::json;
 // Ensures items save/load with all fields including enhancements
 // ============================================================================
 
-class ItemSerializationTest : public ::testing::Test {
+class ItemSerializationTest : public ::testing::Test
+{
 protected:
-    std::unique_ptr<Item> create_test_item() {
-        auto item = std::make_unique<Item>(
-            Vector2D{5, 10},
-            ActorData{TileRef{}, "Test Sword", ColorPairId::WHITE_BLACK }
-        );
-        item->set_value(80);
-        item->itemKey = "long_sword";
-        item->itemClass = ItemClass::SWORD;
-        item->behavior = Weapon{ false, HandRequirement::ONE_HANDED, WeaponSize::MEDIUM };
-        return item;
-    }
+	std::unique_ptr<Item> create_test_item()
+	{
+		auto item = std::make_unique<Item>(
+			Vector2D{ 5, 10 },
+			ActorData{ TileRef{}, "Test Sword", ColorPairId::WHITE_BLACK });
+		item->set_value(80);
+		item->itemKey = "long_sword";
+		item->itemClass = ItemClass::SWORD;
+		item->behavior = Weapon{ false, HandRequirement::ONE_HANDED, WeaponSize::MEDIUM };
+		return item;
+	}
 };
 
-TEST_F(ItemSerializationTest, BasicFields_SaveLoad_RoundTrip) {
-    auto original = create_test_item();
+TEST_F(ItemSerializationTest, BasicFields_SaveLoad_RoundTrip)
+{
+	auto original = create_test_item();
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
-    loaded->load(j);
+	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+	loaded->load(j);
 
-    EXPECT_EQ(loaded->get_value(), 80);
-    EXPECT_EQ(loaded->itemKey, "long_sword");
-    EXPECT_EQ(loaded->itemClass, ItemClass::SWORD);
-    EXPECT_EQ(loaded->actorData.name, "Test Sword");
+	EXPECT_EQ(loaded->get_value(), 80);
+	EXPECT_EQ(loaded->itemKey, "long_sword");
+	EXPECT_EQ(loaded->itemClass, ItemClass::SWORD);
+	EXPECT_EQ(loaded->actorData.name, "Test Sword");
 }
 
-TEST_F(ItemSerializationTest, Enhancement_Preserved) {
-    auto original = create_test_item();
+TEST_F(ItemSerializationTest, Enhancement_Preserved)
+{
+	auto original = create_test_item();
 
-    // Set enhancement
-    original->enhancement.prefix = PrefixType::SHARP;
-    original->enhancement.suffix = SuffixType::OF_THE_BEAR;
-    original->enhancement.damageBonus = 2;
-    original->enhancement.toHitBonus = 1;
-    original->enhancement.strengthBonus = 2;
-    original->enhancement.isMagical = true;
-    original->enhancement.enhancementLevel = 3;
-    original->enhancement.valueModifier = 150;
+	// Set enhancement
+	original->enhancement.prefix = PrefixType::SHARP;
+	original->enhancement.suffix = SuffixType::OF_THE_BEAR;
+	original->enhancement.damageBonus = 2;
+	original->enhancement.toHitBonus = 1;
+	original->enhancement.strengthBonus = 2;
+	original->enhancement.isMagical = true;
+	original->enhancement.enhancementLevel = 3;
+	original->enhancement.valueModifier = 150;
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
-    loaded->load(j);
+	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+	loaded->load(j);
 
-    EXPECT_EQ(loaded->enhancement.prefix, PrefixType::SHARP);
-    EXPECT_EQ(loaded->enhancement.suffix, SuffixType::OF_THE_BEAR);
-    EXPECT_EQ(loaded->enhancement.damageBonus, 2);
-    EXPECT_EQ(loaded->enhancement.toHitBonus, 1);
-    EXPECT_EQ(loaded->enhancement.strengthBonus, 2);
-    EXPECT_TRUE(loaded->enhancement.isMagical);
-    EXPECT_EQ(loaded->enhancement.enhancementLevel, 3);
-    EXPECT_EQ(loaded->enhancement.valueModifier, 150);
+	EXPECT_EQ(loaded->enhancement.prefix, PrefixType::SHARP);
+	EXPECT_EQ(loaded->enhancement.suffix, SuffixType::OF_THE_BEAR);
+	EXPECT_EQ(loaded->enhancement.damageBonus, 2);
+	EXPECT_EQ(loaded->enhancement.toHitBonus, 1);
+	EXPECT_EQ(loaded->enhancement.strengthBonus, 2);
+	EXPECT_TRUE(loaded->enhancement.isMagical);
+	EXPECT_EQ(loaded->enhancement.enhancementLevel, 3);
+	EXPECT_EQ(loaded->enhancement.valueModifier, 150);
 }
 
-TEST_F(ItemSerializationTest, Enhancement_AllResistances_Preserved) {
-    auto original = create_test_item();
+TEST_F(ItemSerializationTest, Enhancement_AllResistances_Preserved)
+{
+	auto original = create_test_item();
 
-    original->enhancement.fireResistance = 25;
-    original->enhancement.coldResistance = 30;
-    original->enhancement.lightningResistance = 15;
-    original->enhancement.poisonResistance = 50;
+	original->enhancement.fireResistance = 25;
+	original->enhancement.coldResistance = 30;
+	original->enhancement.lightningResistance = 15;
+	original->enhancement.poisonResistance = 50;
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
-    loaded->load(j);
+	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+	loaded->load(j);
 
-    EXPECT_EQ(loaded->enhancement.fireResistance, 25);
-    EXPECT_EQ(loaded->enhancement.coldResistance, 30);
-    EXPECT_EQ(loaded->enhancement.lightningResistance, 15);
-    EXPECT_EQ(loaded->enhancement.poisonResistance, 50);
+	EXPECT_EQ(loaded->enhancement.fireResistance, 25);
+	EXPECT_EQ(loaded->enhancement.coldResistance, 30);
+	EXPECT_EQ(loaded->enhancement.lightningResistance, 15);
+	EXPECT_EQ(loaded->enhancement.poisonResistance, 50);
 }
 
-TEST_F(ItemSerializationTest, Enhancement_CursedAndBlessed_Preserved) {
-    auto original = create_test_item();
+TEST_F(ItemSerializationTest, Enhancement_CursedAndBlessed_Preserved)
+{
+	auto original = create_test_item();
 
-    original->enhancement.blessing = BlessingStatus::CURSED;
+	original->enhancement.blessing = BlessingStatus::CURSED;
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
-    loaded->load(j);
+	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+	loaded->load(j);
 
-    EXPECT_EQ(loaded->enhancement.blessing, BlessingStatus::CURSED);
+	EXPECT_EQ(loaded->enhancement.blessing, BlessingStatus::CURSED);
 }
 
-TEST_F(ItemSerializationTest, Pickable_Preserved) {
-    auto original = create_test_item();
+TEST_F(ItemSerializationTest, Pickable_Preserved)
+{
+	auto original = create_test_item();
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
-    loaded->load(j);
+	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+	loaded->load(j);
 
-    ASSERT_TRUE(loaded->behavior.has_value()) << "Pickable component not loaded";
+	ASSERT_TRUE(loaded->behavior.has_value()) << "Pickable component not loaded";
 }
 
-TEST_F(ItemSerializationTest, NoEnhancement_DefaultValues) {
-    auto original = create_test_item();
-    // Don't set any enhancement - should use defaults
+TEST_F(ItemSerializationTest, NoEnhancement_DefaultValues)
+{
+	auto original = create_test_item();
+	// Don't set any enhancement - should use defaults
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
-    loaded->load(j);
+	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+	loaded->load(j);
 
-    EXPECT_EQ(loaded->enhancement.prefix, PrefixType::NONE);
-    EXPECT_EQ(loaded->enhancement.suffix, SuffixType::NONE);
-    EXPECT_EQ(loaded->enhancement.damageBonus, 0);
-    EXPECT_EQ(loaded->enhancement.blessing, BlessingStatus::UNCURSED);
-    EXPECT_FALSE(loaded->enhancement.isMagical);
+	EXPECT_EQ(loaded->enhancement.prefix, PrefixType::NONE);
+	EXPECT_EQ(loaded->enhancement.suffix, SuffixType::NONE);
+	EXPECT_EQ(loaded->enhancement.damageBonus, 0);
+	EXPECT_EQ(loaded->enhancement.blessing, BlessingStatus::UNCURSED);
+	EXPECT_FALSE(loaded->enhancement.isMagical);
 }
 
-TEST_F(ItemSerializationTest, AllItemClasses_SaveLoad) {
-    std::vector<ItemClass> classes = {
-        ItemClass::DAGGER,
-        ItemClass::SWORD,
-        ItemClass::GREAT_SWORD,
-        ItemClass::POTION,
-        ItemClass::ARMOR,
-        ItemClass::SHIELD,
-        ItemClass::SCROLL,
-        ItemClass::FOOD
-    };
+TEST_F(ItemSerializationTest, AllItemClasses_SaveLoad)
+{
+	std::vector<ItemClass> classes = {
+		ItemClass::DAGGER,
+		ItemClass::SWORD,
+		ItemClass::GREAT_SWORD,
+		ItemClass::POTION,
+		ItemClass::ARMOR,
+		ItemClass::SHIELD,
+		ItemClass::SCROLL,
+		ItemClass::FOOD
+	};
 
-    for (ItemClass itemClass : classes) {
-        auto item = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "test", ColorPairId::WHITE_BLACK });
-        item->itemClass = itemClass;
-        item->set_value(40);
+	for (ItemClass itemClass : classes)
+	{
+		auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "test", ColorPairId::WHITE_BLACK });
+		item->itemClass = itemClass;
+		item->set_value(40);
 
-        json j;
-        item->save(j);
+		json j;
+		item->save(j);
 
-        auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
-        loaded->load(j);
+		auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+		loaded->load(j);
 
-        EXPECT_EQ(loaded->itemClass, itemClass) << "ItemClass mismatch for " << static_cast<int>(itemClass);
-    }
+		EXPECT_EQ(loaded->itemClass, itemClass) << "ItemClass mismatch for " << static_cast<int>(itemClass);
+	}
 }
 
 // ----------------------------------------------------------------------------
 // State Serialization Tests
 // ----------------------------------------------------------------------------
 
-TEST_F(ItemSerializationTest, States_SavedAndLoaded) {
-    auto original = create_test_item();
-    original->add_state(ActorState::FOV_ONLY);
+TEST_F(ItemSerializationTest, States_SavedAndLoaded)
+{
+	auto original = create_test_item();
+	original->add_state(ActorState::FOV_ONLY);
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
-    loaded->load(j);
+	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+	loaded->load(j);
 
-    EXPECT_TRUE(loaded->has_state(ActorState::FOV_ONLY));
+	EXPECT_TRUE(loaded->has_state(ActorState::FOV_ONLY));
 }
 
-TEST_F(ItemSerializationTest, States_AbsentState_StaysAbsent) {
-    auto original = create_test_item();
-    // Don't add FOV_ONLY
+TEST_F(ItemSerializationTest, States_AbsentState_StaysAbsent)
+{
+	auto original = create_test_item();
+	// Don't add FOV_ONLY
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
-    loaded->load(j);
+	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+	loaded->load(j);
 
-    EXPECT_FALSE(loaded->has_state(ActorState::FOV_ONLY));
+	EXPECT_FALSE(loaded->has_state(ActorState::FOV_ONLY));
 }
 
-TEST_F(ItemSerializationTest, States_LoadClearsPreviousStates) {
-    // Regression test: loading should clear existing states, not accumulate
-    auto original = create_test_item();
-    // Original has no FOV_ONLY
+TEST_F(ItemSerializationTest, States_LoadClearsPreviousStates)
+{
+	// Regression test: loading should clear existing states, not accumulate
+	auto original = create_test_item();
+	// Original has no FOV_ONLY
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    // Create item and give it a state BEFORE loading
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
-    loaded->add_state(ActorState::FOV_ONLY);  // Pre-existing state
-    ASSERT_TRUE(loaded->has_state(ActorState::FOV_ONLY));
+	// Create item and give it a state BEFORE loading
+	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+	loaded->add_state(ActorState::FOV_ONLY); // Pre-existing state
+	ASSERT_TRUE(loaded->has_state(ActorState::FOV_ONLY));
 
-    // Load should REPLACE states, not ADD to them
-    loaded->load(j);
+	// Load should REPLACE states, not ADD to them
+	loaded->load(j);
 
-    // After loading, the pre-existing state should be gone
-    EXPECT_FALSE(loaded->has_state(ActorState::FOV_ONLY))
-        << "Loading should clear previous states, not accumulate";
+	// After loading, the pre-existing state should be gone
+	EXPECT_FALSE(loaded->has_state(ActorState::FOV_ONLY))
+		<< "Loading should clear previous states, not accumulate";
 }
 
-TEST_F(ItemSerializationTest, States_MultipleStates_AllPreserved) {
-    auto original = create_test_item();
-    original->add_state(ActorState::FOV_ONLY);
-    original->add_state(ActorState::BLOCKS);
+TEST_F(ItemSerializationTest, States_MultipleStates_AllPreserved)
+{
+	auto original = create_test_item();
+	original->add_state(ActorState::FOV_ONLY);
+	original->add_state(ActorState::BLOCKS);
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
-    loaded->load(j);
+	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+	loaded->load(j);
 
-    EXPECT_TRUE(loaded->has_state(ActorState::FOV_ONLY));
-    EXPECT_TRUE(loaded->has_state(ActorState::BLOCKS));
+	EXPECT_TRUE(loaded->has_state(ActorState::FOV_ONLY));
+	EXPECT_TRUE(loaded->has_state(ActorState::BLOCKS));
 }
 
 // A two-handed weapon must still need two hands after a save and a load. The fixture

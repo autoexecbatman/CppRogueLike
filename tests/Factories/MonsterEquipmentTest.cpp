@@ -12,14 +12,14 @@
 
 #include <nlohmann/json.hpp>
 
-#include "src/MonsterCreator.h"
-#include "src/Paths.h"
-#include "src/MonsterRegistry.h"
-#include "src/ItemRegistry.h"
 #include "src/BodyPlanRegistry.h"
 #include "src/Creature.h"
-#include "tests/mocks/MockGameContext.h"
 #include "src/EquipmentSlot.h"
+#include "src/ItemRegistry.h"
+#include "src/MonsterCreator.h"
+#include "src/MonsterRegistry.h"
+#include "src/Paths.h"
+#include "tests/mocks/MockGameContext.h"
 
 // A monster either wields an item or fights with its body. The two are
 // separate fields because only one of them names something in items.json.
@@ -40,7 +40,8 @@ protected:
 	static const MonsterParams::StartingItem* find_slot(const MonsterParams& params, EquipmentSlot slot)
 	{
 		auto match = std::ranges::find_if(params.equipment,
-			[slot](const MonsterParams::StartingItem& entry) { return entry.slot == slot; });
+			[slot](const MonsterParams::StartingItem& entry)
+			{ return entry.slot == slot; });
 		return match == params.equipment.end() ? nullptr : &*match;
 	}
 };

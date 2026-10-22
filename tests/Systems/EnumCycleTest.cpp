@@ -30,10 +30,10 @@
 
 #include "src/Ai.h"
 #include "src/Attitude.h"
+#include "src/BuffType.h"
 #include "src/Colors.h"
 #include "src/CreatureSize.h"
 #include "src/IntelligenceRating.h"
-#include "src/BuffType.h"
 #include "src/ItemClassification.h"
 #include "src/MagicalItemEffects.h"
 #include "src/Pickable.h"

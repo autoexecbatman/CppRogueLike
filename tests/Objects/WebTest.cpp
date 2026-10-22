@@ -9,8 +9,8 @@
 #include "src/EquipmentSlot.h"
 #include "src/ItemCreator.h"
 #include "src/Player.h"
-#include "src/Web.h"
 #include "src/Vector2D.h"
+#include "src/Web.h"
 #include "tests/mocks/MockGameContext.h"
 
 class WebTest : public ::testing::Test

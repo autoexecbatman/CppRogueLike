@@ -13,10 +13,10 @@
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
-#include "src/Player.h"
 #include "src/ExperienceReward.h"
-#include "src/Paths.h"
 #include "src/ItemCreator.h"
+#include "src/Paths.h"
+#include "src/Player.h"
 #include "tests/mocks/MockGameContext.h"
 
 class RangedWeaponTest : public ::testing::Test

@@ -1,44 +1,44 @@
 #include "src/MonsterCreator.h"
-#include "src/Paths.h"
-#include "src/ItemCreator.h"
-#include <stdexcept>
 #include "src/Creature.h"
+#include "src/ItemCreator.h"
+#include "src/Paths.h"
 #include "tests/mocks/MockGameContext.h"
 #include <gtest/gtest.h>
+#include <stdexcept>
 
 class MonsterCreatorTest : public ::testing::Test
 {
 protected:
-    MockGameContext mock;
-    GameContext ctx{};
+	MockGameContext mock;
+	GameContext ctx{};
 
-    void SetUp() override
-    {
-        ctx = mock.to_game_context();
-    }
+	void SetUp() override
+	{
+		ctx = mock.to_game_context();
+	}
 };
 
 // AD&D 2e invariant: a monster's effective level equals its Hit Dice count.
 // This guards the set_creature_level line in create_from_params, for a one-count record.
 TEST_F(MonsterCreatorTest, MonsterLevelEqualsHitDice)
 {
-    const MonsterParams& params = mock.monsterRegistry.get_params("troll");
-    GameContext ctx = mock.to_game_context();
-    auto creature = MonsterCreator::create(Vector2D(0, 0), MonsterId::TROLL, ctx);
+	const MonsterParams& params = mock.monsterRegistry.get_params("troll");
+	GameContext ctx = mock.to_game_context();
+	auto creature = MonsterCreator::create(Vector2D(0, 0), MonsterId::TROLL, ctx);
 
-    ASSERT_NE(creature, nullptr);
-    EXPECT_EQ(creature->get_creature_level(), highest_count(params.hitDice).count);
+	ASSERT_NE(creature, nullptr);
+	EXPECT_EQ(creature->get_creature_level(), highest_count(params.hitDice).count);
 }
 
 TEST_F(MonsterCreatorTest, WeakMonsterLevelIsAtLeastOne)
 {
-    const MonsterParams& params = mock.monsterRegistry.get_params("goblin");
-    GameContext ctx = mock.to_game_context();
-    auto creature = MonsterCreator::create(Vector2D(0, 0), MonsterId::GOBLIN, ctx);
+	const MonsterParams& params = mock.monsterRegistry.get_params("goblin");
+	GameContext ctx = mock.to_game_context();
+	auto creature = MonsterCreator::create(Vector2D(0, 0), MonsterId::GOBLIN, ctx);
 
-    ASSERT_NE(creature, nullptr);
-    EXPECT_EQ(creature->get_creature_level(), highest_count(params.hitDice).count);
-    EXPECT_GE(creature->get_creature_level(), 1);
+	ASSERT_NE(creature, nullptr);
+	EXPECT_EQ(creature->get_creature_level(), highest_count(params.hitDice).count);
+	EXPECT_GE(creature->get_creature_level(), 1);
 }
 
 // A monster's equipment is authored as an item key and a slot name, and nothing
@@ -47,22 +47,22 @@ TEST_F(MonsterCreatorTest, WeakMonsterLevelIsAtLeastOne)
 // arming the creature with something it cannot use.
 TEST_F(MonsterCreatorTest, EquipmentThatDoesNotFitItsSlotIsRefused)
 {
-    MonsterParams params = mock.monsterRegistry.get_params("goblin");
-    params.equipment.clear();
-    params.equipment.push_back({ EquipmentSlot::MISSILE_WEAPON, "dagger" });
+	MonsterParams params = mock.monsterRegistry.get_params("goblin");
+	params.equipment.clear();
+	params.equipment.push_back({ EquipmentSlot::MISSILE_WEAPON, "dagger" });
 
-    EXPECT_THROW(
-        [[maybe_unused]] const auto refused = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx),
-        std::runtime_error);
+	EXPECT_THROW(
+		[[maybe_unused]] const auto refused = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx),
+		std::runtime_error);
 }
 
 // The equipment every monster is actually authored with fits the slot named for
 // it, so the rule refuses nothing the game ships.
 TEST_F(MonsterCreatorTest, EveryAuthoredMonsterArmsItself)
 {
-    for (const std::string& key : { "goblin", "orc", "archer", "mage", "ogre", "kobold" })
-    {
-        const MonsterParams& params = mock.monsterRegistry.get_params(key);
-        EXPECT_NO_THROW([[maybe_unused]] const auto armed = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx)) << key;
-    }
+	for (const std::string& key : { "goblin", "orc", "archer", "mage", "ogre", "kobold" })
+	{
+		const MonsterParams& params = mock.monsterRegistry.get_params(key);
+		EXPECT_NO_THROW([[maybe_unused]] const auto armed = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx)) << key;
+	}
 }

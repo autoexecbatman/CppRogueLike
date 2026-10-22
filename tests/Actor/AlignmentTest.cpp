@@ -12,14 +12,14 @@
 #include <tuple>
 #include <vector>
 
-#include "src/Colors.h"
 #include "src/Alignment.h"
-#include "src/Paths.h"
-#include "tests/mocks/MockGameContext.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/MonsterCreator.h"
 #include "src/MonsterRegistry.h"
+#include "src/Paths.h"
 #include "src/Vector2D.h"
+#include "tests/mocks/MockGameContext.h"
 
 class AlignmentTest : public ::testing::Test
 {

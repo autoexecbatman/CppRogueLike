@@ -20,10 +20,10 @@
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/CreatureClass.h"
-#include "src/ExperienceReward.h"
-#include "src/SavingThrow.h"
 #include "src/DataManager.h"
+#include "src/ExperienceReward.h"
 #include "src/LevelUpSystem.h"
+#include "src/SavingThrow.h"
 #include "tests/mocks/MockGameContext.h"
 
 // ---------------------------------------------------------------------------

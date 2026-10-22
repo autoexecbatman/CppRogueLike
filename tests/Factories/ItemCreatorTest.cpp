@@ -1,8 +1,8 @@
-#include "src/DiceExpr.h"
 #include "src/ItemCreator.h"
-#include "src/Vector2D.h"
+#include "src/DiceExpr.h"
 #include "src/Item.h"
 #include "src/Paths.h"
+#include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 #include <gtest/gtest.h>
 

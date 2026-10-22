@@ -20,9 +20,9 @@
 #include <memory>
 #include <string_view>
 
-#include "src/Colors.h"
 #include "src/AttackKind.h"
 #include "src/AttackStrength.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"

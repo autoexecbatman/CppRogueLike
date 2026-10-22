@@ -13,8 +13,8 @@
 
 #include <string>
 
-#include "src/Colors.h"
 #include "src/CharacterSheetUI.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/CreatureClass.h"
 #include "tests/mocks/MockGameContext.h"

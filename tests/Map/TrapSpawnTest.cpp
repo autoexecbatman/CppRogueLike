@@ -20,8 +20,8 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=TrapSpawnTest.*
 
-#include "src/Map.h"
 #include "src/DungeonRoom.h"
+#include "src/Map.h"
 #include "src/SpellTile.h"
 #include "src/Trap.h"
 #include "tests/mocks/MockGameContext.h"

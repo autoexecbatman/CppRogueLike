@@ -8,17 +8,17 @@
 #include <memory>
 #include <string>
 
-#include "src/Colors.h"
 #include "src/Actor.h"
 #include "src/Attacker.h"
-#include "src/Item.h"
-#include "src/MonsterAttacker.h"
-#include "src/PlayerAttacker.h"
-#include "src/Player.h"
+#include "src/Colors.h"
 #include "src/DamageInfo.h"
 #include "src/ExperienceReward.h"
-#include "src/Paths.h"
 #include "src/Game.h"
+#include "src/Item.h"
+#include "src/MonsterAttacker.h"
+#include "src/Paths.h"
+#include "src/Player.h"
+#include "src/PlayerAttacker.h"
 #include "src/ShopKeeper.h"
 #include "tests/mocks/TestDice.h"
 

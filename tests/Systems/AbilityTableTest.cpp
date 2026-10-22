@@ -22,9 +22,9 @@
 #include <memory>
 #include <vector>
 
-#include "src/Colors.h"
 #include "src/ArmorClass.h"
 #include "src/AttackKind.h"
+#include "src/Colors.h"
 #include "src/ConstitutionAttributes.h"
 #include "src/ConstitutionTracker.h"
 #include "src/Creature.h"

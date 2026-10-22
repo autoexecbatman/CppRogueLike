@@ -1,15 +1,15 @@
-#include "src/Colors.h"
 #include "src/Actor.h"
 #include "src/Ai.h"
 #include "src/AiMonster.h"
 #include "src/AiWebSpinner.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/ExperienceReward.h"
 #include "src/MonsterAttacker.h"
 #include <gtest/gtest.h>
 #include <memory>
-#include <stdexcept>
 #include <nlohmann/json.hpp>
+#include <stdexcept>
 
 using json = nlohmann::json;
 
@@ -18,142 +18,149 @@ using json = nlohmann::json;
 // Ensures creatures save/load with all components intact
 // ============================================================================
 
-class CreatureSerializationTest : public ::testing::Test {
+class CreatureSerializationTest : public ::testing::Test
+{
 protected:
-    std::unique_ptr<Creature> create_test_creature() {
-        auto creature = std::make_unique<Creature>(
-            Vector2D{ 20, 10 },
-            ActorData{TileRef{}, "goblin", ColorPairId::BROWN_BLACK }
-        );
-        creature->set_strength(14);
-        creature->set_dexterity(12);
-        creature->set_constitution(10);
-        creature->set_intelligence(8);
-        creature->set_wisdom(7);
-        creature->set_charisma(6);
-        creature->set_gold(50);
-        creature->set_natural_attack("Short Sword");
+	std::unique_ptr<Creature> create_test_creature()
+	{
+		auto creature = std::make_unique<Creature>(
+			Vector2D{ 20, 10 },
+			ActorData{ TileRef{}, "goblin", ColorPairId::BROWN_BLACK });
+		creature->set_strength(14);
+		creature->set_dexterity(12);
+		creature->set_constitution(10);
+		creature->set_intelligence(8);
+		creature->set_wisdom(7);
+		creature->set_charisma(6);
+		creature->set_gold(50);
+		creature->set_natural_attack("Short Sword");
 
-        creature->experienceReward = std::make_unique<ExperienceReward>(35);
-        creature->set_dr(1);
-        creature->set_thaco(19);
-        creature->armorClass = std::make_unique<ArmorClass>(6);
-        creature->healthPool = std::make_unique<HealthPool>(20);
-        creature->attacker = std::make_unique<MonsterAttacker>(*creature, DamageInfo{"1d6", DamageType::PHYSICAL});
-        creature->ai = std::make_unique<AiMonster>();
+		creature->experienceReward = std::make_unique<ExperienceReward>(35);
+		creature->set_dr(1);
+		creature->set_thaco(19);
+		creature->armorClass = std::make_unique<ArmorClass>(6);
+		creature->healthPool = std::make_unique<HealthPool>(20);
+		creature->attacker = std::make_unique<MonsterAttacker>(*creature, DamageInfo{ "1d6", DamageType::PHYSICAL });
+		creature->ai = std::make_unique<AiMonster>();
 
-        return creature;
-    }
+		return creature;
+	}
 };
 
-TEST_F(CreatureSerializationTest, FullCreature_SaveLoad_RoundTrip) {
-    auto original = create_test_creature();
+TEST_F(CreatureSerializationTest, FullCreature_SaveLoad_RoundTrip)
+{
+	auto original = create_test_creature();
 
-    // Save
-    json j;
-    original->save(j);
+	// Save
+	json j;
+	original->save(j);
 
-    // Load into new creature
-    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
-    loaded->load(j);
+	// Load into new creature
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+	loaded->load(j);
 
-    // Verify position (Vector2D is {y, x})
-    EXPECT_EQ(loaded->position.x, 20);
-    EXPECT_EQ(loaded->position.y, 10);
+	// Verify position (Vector2D is {y, x})
+	EXPECT_EQ(loaded->position.x, 20);
+	EXPECT_EQ(loaded->position.y, 10);
 
-    // Verify stats
-    EXPECT_EQ(loaded->get_strength(), 14);
-    EXPECT_EQ(loaded->get_dexterity(), 12);
-    EXPECT_EQ(loaded->get_constitution(), 10);
-    EXPECT_EQ(loaded->get_gold(), 50);
-    EXPECT_EQ(loaded->get_natural_attack(), "Short Sword");
+	// Verify stats
+	EXPECT_EQ(loaded->get_strength(), 14);
+	EXPECT_EQ(loaded->get_dexterity(), 12);
+	EXPECT_EQ(loaded->get_constitution(), 10);
+	EXPECT_EQ(loaded->get_gold(), 50);
+	EXPECT_EQ(loaded->get_natural_attack(), "Short Sword");
 
-    // Verify components exist
-    ASSERT_NE(loaded->attacker, nullptr) << "Attacker not loaded";
-    ASSERT_NE(loaded->ai, nullptr) << "AI not loaded";
+	// Verify components exist
+	ASSERT_NE(loaded->attacker, nullptr) << "Attacker not loaded";
+	ASSERT_NE(loaded->ai, nullptr) << "AI not loaded";
 
-    // Verify destructible values
-    EXPECT_EQ(loaded->get_max_hp(), 20);
-    EXPECT_EQ(loaded->get_dr(), 1);
-    EXPECT_EQ(loaded->get_xp(), 35);
+	// Verify destructible values
+	EXPECT_EQ(loaded->get_max_hp(), 20);
+	EXPECT_EQ(loaded->get_dr(), 1);
+	EXPECT_EQ(loaded->get_xp(), 35);
 }
 
-TEST_F(CreatureSerializationTest, Creature_WithDamage_PreserveHP) {
-    auto original = create_test_creature();
-    original->set_hp(15); // HP: 20 -> 15
+TEST_F(CreatureSerializationTest, Creature_WithDamage_PreserveHP)
+{
+	auto original = create_test_creature();
+	original->set_hp(15); // HP: 20 -> 15
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
-    loaded->load(j);
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+	loaded->load(j);
 
-    EXPECT_EQ(loaded->get_hp(), 15);
+	EXPECT_EQ(loaded->get_hp(), 15);
 }
 
 // Exceptional Strength is part of the saved creature: an 18/76 loads as 18/76.
-TEST_F(CreatureSerializationTest, ExceptionalStrength_Preserved) {
-    auto original = create_test_creature();
-    original->set_strength(18);
-    original->set_exceptional_strength(76);
+TEST_F(CreatureSerializationTest, ExceptionalStrength_Preserved)
+{
+	auto original = create_test_creature();
+	original->set_strength(18);
+	original->set_exceptional_strength(76);
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
-    loaded->load(j);
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+	loaded->load(j);
 
-    EXPECT_EQ(loaded->get_exceptional_strength(), 76);
+	EXPECT_EQ(loaded->get_exceptional_strength(), 76);
 }
 
-TEST_F(CreatureSerializationTest, Creature_Dead_PreservesState) {
-    auto original = create_test_creature();
-    original->set_hp(-5); // Kill it
+TEST_F(CreatureSerializationTest, Creature_Dead_PreservesState)
+{
+	auto original = create_test_creature();
+	original->set_hp(-5); // Kill it
 
-    ASSERT_TRUE(original->is_dead());
+	ASSERT_TRUE(original->is_dead());
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
-    loaded->load(j);
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+	loaded->load(j);
 
-    EXPECT_TRUE(loaded->is_dead());
+	EXPECT_TRUE(loaded->is_dead());
 }
 
-TEST_F(CreatureSerializationTest, Creature_NoHealthPool_HandledGracefully) {
-    // Create creature without healthPool
-    auto original = std::make_unique<Creature>(Vector2D{5, 5}, ActorData{TileRef{}, "mystery", ColorPairId::WHITE_BLACK });
-    // Don't add healthPool
+TEST_F(CreatureSerializationTest, Creature_NoHealthPool_HandledGracefully)
+{
+	// Create creature without healthPool
+	auto original = std::make_unique<Creature>(Vector2D{ 5, 5 }, ActorData{ TileRef{}, "mystery", ColorPairId::WHITE_BLACK });
+	// Don't add healthPool
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    // Verify no healthPool key when not initialized
-    EXPECT_FALSE(j.contains("healthPool"));
-    // But constitutionTracker should still exist
-    EXPECT_TRUE(j.contains("constitutionTracker"));
+	// Verify no healthPool key when not initialized
+	EXPECT_FALSE(j.contains("healthPool"));
+	// But constitutionTracker should still exist
+	EXPECT_TRUE(j.contains("constitutionTracker"));
 
-    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
 	EXPECT_NO_THROW(loaded->load(j)) << "a creature saved with no pool was refused on load";
 	EXPECT_EQ(loaded->healthPool, nullptr) << "a pool appeared that was never saved";
 }
 
-TEST_F(CreatureSerializationTest, AttackerDamage_Preserved) {
-    auto original = create_test_creature();
+TEST_F(CreatureSerializationTest, AttackerDamage_Preserved)
+{
+	auto original = create_test_creature();
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
-    loaded->load(j);
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+	loaded->load(j);
 
-    ASSERT_NE(loaded->attacker, nullptr);
+	ASSERT_NE(loaded->attacker, nullptr);
 
-    // Get damage info and verify
-    const auto& damageInfo = loaded->attacker->get_damage_info();
-    EXPECT_EQ(damageInfo.minDamage, 1);
-    EXPECT_EQ(damageInfo.maxDamage, 6);
+	// Get damage info and verify
+	const auto& damageInfo = loaded->attacker->get_damage_info();
+	EXPECT_EQ(damageInfo.minDamage, 1);
+	EXPECT_EQ(damageInfo.maxDamage, 6);
 }
 
 // Loaded the way the game loads a level's monsters: a fresh Creature, then load(), with
@@ -347,46 +354,48 @@ TEST_F(CreatureSerializationTest, ACreatureRecordMissingAFieldItsSaverAlwaysWrit
 // black is what a colour that failed to load reads as.
 TEST_F(CreatureSerializationTest, DisplayColourSurvivesTheTrip)
 {
-    auto original = create_test_creature();
-    ASSERT_EQ(original->actorData.color, ColorPairId::BROWN_BLACK);
+	auto original = create_test_creature();
+	ASSERT_EQ(original->actorData.color, ColorPairId::BROWN_BLACK);
 
-    json saved;
-    original->save(saved);
-    EXPECT_EQ(saved["actorData"]["color"], "brown_black") << "the save carries the name";
+	json saved;
+	original->save(saved);
+	EXPECT_EQ(saved["actorData"]["color"], "brown_black") << "the save carries the name";
 
-    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK});
-    loaded->load(saved);
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+	loaded->load(saved);
 
-    EXPECT_EQ(loaded->actorData.color, ColorPairId::BROWN_BLACK);
+	EXPECT_EQ(loaded->actorData.color, ColorPairId::BROWN_BLACK);
 }
 
 // A creature's place in the turn order survives a save. Both halves have to: the
 // action delay decides what its actions cost, and the next action time is where it
 // stands on the clock, so a save that kept only one would reorder the level on load.
-TEST_F(CreatureSerializationTest, ActionDelayAndNextActionTimeArePreserved) {
-    auto original = create_test_creature();
+TEST_F(CreatureSerializationTest, ActionDelayAndNextActionTimeArePreserved)
+{
+	auto original = create_test_creature();
 
-    // Two thirds of a round, so half again as quick as ordinary - and a value nothing
-    // defaults to, which is what makes the round trip worth measuring.
-    original->set_action_delay(TIME_UNITS_PER_ROUND * 2 / 3);
-    original->set_next_action_time(437);
+	// Two thirds of a round, so half again as quick as ordinary - and a value nothing
+	// defaults to, which is what makes the round trip worth measuring.
+	original->set_action_delay(TIME_UNITS_PER_ROUND * 2 / 3);
+	original->set_next_action_time(437);
 
-    json j;
-    original->save(j);
+	json j;
+	original->save(j);
 
-    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
-    loaded->load(j);
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+	loaded->load(j);
 
-    EXPECT_EQ(loaded->get_action_delay(), TIME_UNITS_PER_ROUND * 2 / 3);
-    EXPECT_EQ(loaded->get_next_action_time(), 437);
+	EXPECT_EQ(loaded->get_action_delay(), TIME_UNITS_PER_ROUND * 2 / 3);
+	EXPECT_EQ(loaded->get_next_action_time(), 437);
 }
 
 // A creature nobody has given a pace to takes a whole round over an action, and stands
 // at the start of the clock. Those defaults are what makes every creature in the game
 // today behave exactly as it did before a pace existed.
-TEST_F(CreatureSerializationTest, ACreatureWithNoDelaySetTakesAWholeRound) {
-    auto fresh = create_test_creature();
+TEST_F(CreatureSerializationTest, ACreatureWithNoDelaySetTakesAWholeRound)
+{
+	auto fresh = create_test_creature();
 
-    EXPECT_EQ(fresh->get_action_delay(), TIME_UNITS_PER_ROUND);
-    EXPECT_EQ(fresh->get_next_action_time(), 0);
+	EXPECT_EQ(fresh->get_action_delay(), TIME_UNITS_PER_ROUND);
+	EXPECT_EQ(fresh->get_next_action_time(), 0);
 }
