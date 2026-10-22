@@ -21,20 +21,20 @@
     },
     {
       "file": "src/EditorField.h",
-      "original": "\trecord.*(plain.member) = std::clamp(record.*(plain.member) + delta, plain.minimum, plain.maximum);",
-      "mutated": "\trecord.*(plain.member) = std::min(record.*(plain.member) + delta, plain.maximum);",
+      "original": "std::clamp(stepped, plain.minimum, plain.maximum)",
+      "mutated": "std::min(stepped, plain.maximum)",
       "catches": "a plain number stepped below its least"
     },
     {
       "file": "src/EditorField.h",
-      "original": "\trecord.*(plain.member) = std::clamp(record.*(plain.member) + delta, plain.minimum, plain.maximum);",
-      "mutated": "\trecord.*(plain.member) = std::max(record.*(plain.member) + delta, plain.minimum);",
+      "original": "std::clamp(stepped, plain.minimum, plain.maximum)",
+      "mutated": "std::max(stepped, plain.minimum)",
       "catches": "a plain number stepped above its greatest"
     },
     {
       "file": "src/EditorField.h",
-      "original": "\trecord.*(plain.member) = std::clamp(record.*(plain.member) + delta, plain.minimum, plain.maximum);",
-      "mutated": "\trecord.*(plain.member) = std::clamp(record.*(plain.member) + std::max(delta, 0), plain.minimum, plain.maximum);",
+      "original": "record.*(plain.member) + delta;",
+      "mutated": "record.*(plain.member) + std::max(delta, 0);",
       "catches": "the left arrow no longer stepping a plain number down"
     },
     {
@@ -45,19 +45,19 @@
     },
     {
       "file": "src/EditorField.h",
-      "original": "(entry.kind != FieldKind::ADJUST || ",
-      "mutated": "(entry.kind == FieldKind::TEXT || ",
+      "original": "const bool isAdjusted = entry.kind == FieldKind::ADJUST;",
+      "mutated": "const bool isAdjusted = entry.kind != FieldKind::TEXT;",
       "catches": "a plain number on a toggle passing, so the sample static_asserts stop the build"
     },
     {
       "file": "src/EditorField.h",
-      "original": " || entry.plain->minimum > entry.plain->maximum))",
-      "mutated": "))",
+      "original": "plain.minimum <= plain.maximum",
+      "mutated": "true",
       "catches": "reversed bounds passing, so the sample static_asserts stop the build"
     },
     {
       "file": "src/EditorField.h",
-      "original": "table.at(static_cast<std::size_t>(field));",
+      "original": "table.at(position);",
       "mutated": "table.at(0);",
       "catches": "a lookup answering with the first field whatever was asked"
     },
@@ -99,14 +99,14 @@
     },
     {
       "file": "src/MonsterEditor.h",
-      "original": "FieldId::HD_SIDES, FieldKind::ADJUST, \"HD Sides\", std::nullopt",
-      "mutated": "FieldId::HD_SIDES, FieldKind::ADJUST, \"HD Sides\", Plain{ &MonsterParams::thaco, 1, 20 }",
+      "original": "\"HD Sides\",\n\t\t\tstd::nullopt",
+      "mutated": "\"HD Sides\",\n\t\t\tPlain{ &MonsterParams::thaco, 1, 20 }",
       "catches": "a field with its own case given a plain number"
     },
     {
       "file": "src/SpellEditor.h",
-      "original": "FieldKind::TOGGLE, \"Effect\"",
-      "mutated": "FieldKind::TOGGLE, \"Effect Type\"",
+      "original": "\t\t\t\"Effect\",",
+      "mutated": "\t\t\t\"Effect Type\",",
       "catches": "a spell field's label changed from the old code's"
     }
   ]

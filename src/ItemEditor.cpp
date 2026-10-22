@@ -35,7 +35,9 @@ constexpr int PICKER_PAD = 10;
 constexpr int PICKER_SUB_HEADER_HEIGHT = 28;
 constexpr int PICKER_TILE_TARGET = 64; // drawn cell size the grid aims for
 
-static_assert(is_well_formed_table(ItemEditor::FIELDS), "ItemEditor::FIELDS lists a field out of FieldId order, or a plain number on a field that is not ADJUST");
+static_assert(
+	is_well_formed_table(ItemEditor::FIELDS),
+	"ItemEditor::FIELDS is out of order or misplaces a plain number");
 
 // Largest integer multiple of the sheet's own cell size that fits the target,
 // so a 16-pixel tile draws at 4x and a 64-pixel tile at 1x - never blurred.
@@ -354,7 +356,10 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 
 	const FieldKind kind = descriptor_of(FIELDS, fieldId).kind;
 
-	if (IsKeyPressed(KEY_F2) || (kind == FieldKind::TILE && IsKeyPressed(KEY_ENTER)))
+	const bool isPickerKey = IsKeyPressed(KEY_F2);
+	const bool isTileField = kind == FieldKind::TILE;
+	const bool isTileChosen = isTileField && IsKeyPressed(KEY_ENTER);
+	if (isPickerKey || isTileChosen)
 	{
 		mode = Mode::TILE_PICKER;
 		return;
@@ -1054,7 +1059,9 @@ void ItemEditor::field_toggle(FieldId field)
 	}
 	default:
 	{
-		refuse_misrouted_field(descriptor_of(FIELDS, field).label, "ItemEditor::field_toggle");
+		refuse_misrouted_field(
+			descriptor_of(FIELDS, field).label,
+			"ItemEditor::field_toggle");
 	}
 	}
 }
@@ -1075,7 +1082,9 @@ void ItemEditor::field_set_string(FieldId field, std::string newValue)
 	}
 	default:
 	{
-		refuse_misrouted_field(descriptor_of(FIELDS, field).label, "ItemEditor::field_set_string");
+		refuse_misrouted_field(
+			descriptor_of(FIELDS, field).label,
+			"ItemEditor::field_set_string");
 	}
 	}
 }

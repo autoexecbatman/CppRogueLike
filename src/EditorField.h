@@ -2,11 +2,12 @@
 
 // file: EditorField.h
 //
-// What an editor field is: how it is edited, what it is called, and, for a plain number, which
-// member of the record it shows and between which bounds the arrows step it. Each editor holds
-// one table with one descriptor per field. A plain number field is then one table line, which
-// the generic path below formats and adjusts. A field with its own rules is marked by having no
-// plain number, and keeps its case in the editor's switch.
+// What an editor field is: how it is edited, what it is called, and, for a
+// plain number, which member of the record it shows and between which bounds
+// the arrows step it. Each editor holds one table with one descriptor per
+// field. A plain number field is then one table row, which the generic path
+// below formats and adjusts. A field with its own rules has no plain number,
+// and keeps its case in the editor's switch.
 //
 // Usage:
 //
@@ -14,13 +15,18 @@
 //   using Descriptor = FieldDescriptor<FieldId, ItemParams>;
 //   static constexpr std::array<Descriptor, 2> FIELDS{ {
 //       Descriptor{ FieldId::NAME, FieldKind::TEXT, "Name", std::nullopt },
-//       Descriptor{ FieldId::VALUE, FieldKind::ADJUST, "Value", Plain{ &ItemParams::value, 0, 99999 } },
+//       Descriptor{
+//           FieldId::VALUE,
+//           FieldKind::ADJUST,
+//           "Value",
+//           Plain{ &ItemParams::value, 0, 99999 } },
 //   } };
-//   static_assert(is_well_formed_table(FIELDS));      // entry i is field i; a plain number only on ADJUST
+//   // entry i is field i, and a plain number sits only on ADJUST
+//   static_assert(is_well_formed_table(FIELDS));
 //
-//   plain_text(*FIELDS[1].plain, params);             // -> "150", params.value printed
-//   adjust_plain(*FIELDS[1].plain, params, 10);       // params.value 150 -> 160, kept within 0 to 99999
-//   refuse_misrouted_field("Value", "field_adjust");  // writes both names to stderr and aborts
+//   plain_text(*FIELDS[1].plain, params);         // -> "150", params.value
+//   adjust_plain(*FIELDS[1].plain, params, 10);   // 150 -> 160, up to 99999
+//   refuse_misrouted_field("Value", "field_adjust");   // stderr, then abort
 
 #include <algorithm>
 #include <array>
@@ -43,7 +49,8 @@ enum class FieldKind
 	TILE
 };
 
-// A number read straight from one member of the record and stepped within two bounds.
+// A number read straight from one member of the record, stepped within two
+// bounds.
 template <typename Record>
 struct PlainNumber
 {
@@ -65,18 +72,20 @@ struct FieldDescriptor
 	FieldKind kind{ FieldKind::TEXT };
 	// The name the field list shows.
 	std::string_view label{};
-	// The member and bounds of a plain number, or none for a field with its own case.
+	// A plain number's member and bounds, or none for a field with its own
+	// case.
 	std::optional<PlainNumber<Record>> plain{};
 };
 
-// Whether a table lists its fields in enum order, entry i being field i, and gives a plain number
-// only to an ADJUST field, with its bounds in order.
+// Whether a table lists its fields in enum order, entry i being field i, and
+// gives a plain number only to an ADJUST field, with its bounds in order.
 //
 // Example:
 //   is_well_formed_table(FIELDS);   // -> true
-//   // with two entries swapped     -> false, so the static_assert beside the table fails
+//   // two entries swapped          -> false, and the static_assert fails
 template <typename Field, typename Record, std::size_t Count>
-consteval bool is_well_formed_table(const std::array<FieldDescriptor<Field, Record>, Count>& table)
+consteval bool is_well_formed_table(
+	const std::array<FieldDescriptor<Field, Record>, Count>& table)
 {
 	for (std::size_t index = 0; index < Count; ++index)
 	{
@@ -85,7 +94,14 @@ consteval bool is_well_formed_table(const std::array<FieldDescriptor<Field, Reco
 		{
 			return false;
 		}
-		if (entry.plain.has_value() && (entry.kind != FieldKind::ADJUST || entry.plain->minimum > entry.plain->maximum))
+		if (!entry.plain.has_value())
+		{
+			continue;
+		}
+		const PlainNumber<Record>& plain = *entry.plain;
+		const bool isAdjusted = entry.kind == FieldKind::ADJUST;
+		const bool hasOrderedBounds = plain.minimum <= plain.maximum;
+		if (!isAdjusted || !hasOrderedBounds)
 		{
 			return false;
 		}
@@ -93,24 +109,32 @@ consteval bool is_well_formed_table(const std::array<FieldDescriptor<Field, Reco
 	return true;
 }
 
-// The descriptor for one field, which a well-formed table holds at the field's own position.
+// The descriptor for one field, which a well-formed table holds at the
+// field's own position.
 //
 // Example:
 //   descriptor_of(FIELDS, FieldId::VALUE).label;   // -> "Value"
 template <typename Field, typename Record, std::size_t Count>
-[[nodiscard]] constexpr const FieldDescriptor<Field, Record>& descriptor_of(const std::array<FieldDescriptor<Field, Record>, Count>& table, Field field)
+[[nodiscard]] constexpr const FieldDescriptor<Field, Record>& descriptor_of(
+	const std::array<FieldDescriptor<Field, Record>, Count>& table,
+	Field field)
 {
-	const FieldDescriptor<Field, Record>& entry = table.at(static_cast<std::size_t>(field));
-	assert(entry.field == field && "descriptor_of: the table holds another field at this one's position");
+	const std::size_t position = static_cast<std::size_t>(field);
+	const FieldDescriptor<Field, Record>& entry = table.at(position);
+	[[maybe_unused]] const bool isAtItsPosition = entry.field == field;
+	assert(isAtItsPosition && "descriptor_of: the table is out of order");
 	return entry;
 }
 
 // The plain number's text, the member printed as it stands.
 //
 // Example:
-//   plain_text(Plain{ &ItemParams::acBonus, -10, 10 }, params);   // params.acBonus -3 -> "-3"
+//   plain_text(Plain{ &ItemParams::acBonus, -10, 10 }, params);
+//   // params.acBonus -3 -> "-3"
 template <typename Record>
-[[nodiscard]] std::string plain_text(const PlainNumber<Record>& plain, const Record& record)
+[[nodiscard]] std::string plain_text(
+	const PlainNumber<Record>& plain,
+	const Record& record)
 {
 	return std::to_string(record.*(plain.member));
 }
@@ -123,16 +147,20 @@ template <typename Record>
 template <typename Record>
 void adjust_plain(const PlainNumber<Record>& plain, Record& record, int delta)
 {
-	record.*(plain.member) = std::clamp(record.*(plain.member) + delta, plain.minimum, plain.maximum);
+	const int stepped = record.*(plain.member) + delta;
+	record.*(plain.member) = std::clamp(stepped, plain.minimum, plain.maximum);
 }
 
-// Stops the program when a field reaches a path its descriptor does not send it to: a field
-// marked as having its own case that the switch has no case for. Writes the field's label and
-// the path to stderr, then aborts, so a wrongly marked descriptor fails at its first use.
+// Stops the program when a field reaches a path its descriptor does not send
+// it to: a field marked as having its own case that the switch has no case
+// for. Writes the field's label and the path to stderr, then aborts, so a
+// wrongly marked descriptor fails at its first use.
 //
 // Example:
 //   refuse_misrouted_field("Value", "ItemEditor::field_adjust");
-//   // stderr: "ItemEditor::field_adjust has no case for the field 'Value'", then abort
-[[noreturn]] void refuse_misrouted_field(std::string_view label, std::string_view path);
+//   // stderr: "ItemEditor::field_adjust has no case for the field 'Value'"
+[[noreturn]] void refuse_misrouted_field(
+	std::string_view label,
+	std::string_view path);
 
 // end of file: EditorField.h

@@ -83,7 +83,7 @@ private:
 		COUNT
 	};
 
-	// A plain number field's member and bounds, read from the working MonsterParams.
+	// A plain number's member and bounds, read from the working MonsterParams.
 	using Plain = PlainNumber<MonsterParams>;
 	// One field's entry in FIELDS.
 	using Descriptor = FieldDescriptor<FieldId, MonsterParams>;
@@ -153,48 +153,193 @@ private:
 	void field_set_string(FieldId field, std::string newValue);
 
 public:
-	// Every field, in FieldId order: how it is edited, its label, and a plain number's member and bounds.
+	// Every field, in FieldId order: how it is edited, its label, and a plain
+	// number's member and bounds.
 	static constexpr std::array<Descriptor, FIELD_COUNT> FIELDS{ {
 		Descriptor{ FieldId::NAME, FieldKind::TEXT, "Name", std::nullopt },
 		Descriptor{ FieldId::CORPSE, FieldKind::TEXT, "Corpse", std::nullopt },
-		Descriptor{ FieldId::CORPSE_NUTRITION, FieldKind::ADJUST, "Corpse Nutrition", Plain{ &MonsterParams::corpseNutrition, 0, 9999 } },
-		Descriptor{ FieldId::CORPSE_TASTE, FieldKind::TEXT, "Corpse Taste", std::nullopt },
-		Descriptor{ FieldId::CORPSE_EDIBLE, FieldKind::TOGGLE, "Corpse Edible", std::nullopt },
-		Descriptor{ FieldId::HD_LOWEST, FieldKind::ADJUST, "HD Lowest", std::nullopt },
-		Descriptor{ FieldId::HD_HIGHEST, FieldKind::ADJUST, "HD Highest", std::nullopt },
-		Descriptor{ FieldId::HD_SIDES, FieldKind::ADJUST, "HD Sides", std::nullopt },
-		Descriptor{ FieldId::HD_BONUS, FieldKind::ADJUST, "HD Bonus", std::nullopt },
-		Descriptor{ FieldId::THACO, FieldKind::ADJUST, "THAC0", Plain{ &MonsterParams::thaco, 1, 25 } },
-		Descriptor{ FieldId::AC, FieldKind::ADJUST, "AC", Plain{ &MonsterParams::ac, -10, 10 } },
-		Descriptor{ FieldId::XP_COUNT, FieldKind::ADJUST, "XP For HD", std::nullopt },
+		Descriptor{
+			FieldId::CORPSE_NUTRITION,
+			FieldKind::ADJUST,
+			"Corpse Nutrition",
+			Plain{ &MonsterParams::corpseNutrition, 0, 9999 } },
+		Descriptor{
+			FieldId::CORPSE_TASTE,
+			FieldKind::TEXT,
+			"Corpse Taste",
+			std::nullopt },
+		Descriptor{
+			FieldId::CORPSE_EDIBLE,
+			FieldKind::TOGGLE,
+			"Corpse Edible",
+			std::nullopt },
+		Descriptor{
+			FieldId::HD_LOWEST,
+			FieldKind::ADJUST,
+			"HD Lowest",
+			std::nullopt },
+		Descriptor{
+			FieldId::HD_HIGHEST,
+			FieldKind::ADJUST,
+			"HD Highest",
+			std::nullopt },
+		Descriptor{
+			FieldId::HD_SIDES,
+			FieldKind::ADJUST,
+			"HD Sides",
+			std::nullopt },
+		Descriptor{
+			FieldId::HD_BONUS,
+			FieldKind::ADJUST,
+			"HD Bonus",
+			std::nullopt },
+		Descriptor{
+			FieldId::THACO,
+			FieldKind::ADJUST,
+			"THAC0",
+			Plain{ &MonsterParams::thaco, 1, 25 } },
+		Descriptor{
+			FieldId::AC,
+			FieldKind::ADJUST,
+			"AC",
+			Plain{ &MonsterParams::ac, -10, 10 } },
+		Descriptor{
+			FieldId::XP_COUNT,
+			FieldKind::ADJUST,
+			"XP For HD",
+			std::nullopt },
 		Descriptor{ FieldId::XP, FieldKind::ADJUST, "XP", std::nullopt },
-		Descriptor{ FieldId::DR, FieldKind::ADJUST, "DR", Plain{ &MonsterParams::dr, 0, 20 } },
-		Descriptor{ FieldId::STR_SOURCE, FieldKind::TOGGLE, "Strength", std::nullopt },
-		Descriptor{ FieldId::STR_SCORE, FieldKind::ADJUST, "STR Score", std::nullopt },
-		Descriptor{ FieldId::STR_EXCEPTIONAL, FieldKind::ADJUST, "STR Exceptional", std::nullopt },
-		Descriptor{ FieldId::WEAPON, FieldKind::TEXT, "Natural Attack", std::nullopt },
-		Descriptor{ FieldId::DMG_NUM, FieldKind::ADJUST, "Dmg Num", std::nullopt },
-		Descriptor{ FieldId::DMG_SIDES, FieldKind::ADJUST, "Dmg Sides", std::nullopt },
-		Descriptor{ FieldId::DMG_BONUS, FieldKind::ADJUST, "Dmg Bonus", std::nullopt },
-		Descriptor{ FieldId::DMG_TYPE, FieldKind::TOGGLE, "Dmg Type", std::nullopt },
-		Descriptor{ FieldId::AI_TYPE, FieldKind::TOGGLE, "AI Type", std::nullopt },
-		Descriptor{ FieldId::ETHICS, FieldKind::TOGGLE, "Ethics", std::nullopt },
-		Descriptor{ FieldId::MORALITY, FieldKind::TOGGLE, "Morality", std::nullopt },
+		Descriptor{
+			FieldId::DR,
+			FieldKind::ADJUST,
+			"DR",
+			Plain{ &MonsterParams::dr, 0, 20 } },
+		Descriptor{
+			FieldId::STR_SOURCE,
+			FieldKind::TOGGLE,
+			"Strength",
+			std::nullopt },
+		Descriptor{
+			FieldId::STR_SCORE,
+			FieldKind::ADJUST,
+			"STR Score",
+			std::nullopt },
+		Descriptor{
+			FieldId::STR_EXCEPTIONAL,
+			FieldKind::ADJUST,
+			"STR Exceptional",
+			std::nullopt },
+		Descriptor{
+			FieldId::WEAPON,
+			FieldKind::TEXT,
+			"Natural Attack",
+			std::nullopt },
+		Descriptor{
+			FieldId::DMG_NUM,
+			FieldKind::ADJUST,
+			"Dmg Num",
+			std::nullopt },
+		Descriptor{
+			FieldId::DMG_SIDES,
+			FieldKind::ADJUST,
+			"Dmg Sides",
+			std::nullopt },
+		Descriptor{
+			FieldId::DMG_BONUS,
+			FieldKind::ADJUST,
+			"Dmg Bonus",
+			std::nullopt },
+		Descriptor{
+			FieldId::DMG_TYPE,
+			FieldKind::TOGGLE,
+			"Dmg Type",
+			std::nullopt },
+		Descriptor{
+			FieldId::AI_TYPE,
+			FieldKind::TOGGLE,
+			"AI Type",
+			std::nullopt },
+		Descriptor{
+			FieldId::ETHICS,
+			FieldKind::TOGGLE,
+			"Ethics",
+			std::nullopt },
+		Descriptor{
+			FieldId::MORALITY,
+			FieldKind::TOGGLE,
+			"Morality",
+			std::nullopt },
 		Descriptor{ FieldId::SIZE, FieldKind::TOGGLE, "Size", std::nullopt },
-		Descriptor{ FieldId::INTELLIGENCE, FieldKind::TOGGLE, "Intelligence", std::nullopt },
-		Descriptor{ FieldId::CAN_SWIM, FieldKind::TOGGLE, "Can Swim", std::nullopt },
-		Descriptor{ FieldId::CAN_FLY, FieldKind::TOGGLE, "Can Fly", std::nullopt },
-		Descriptor{ FieldId::WALKS_WEBS, FieldKind::TOGGLE, "Walks Webs", std::nullopt },
-		Descriptor{ FieldId::ATTITUDE, FieldKind::TOGGLE, "Attitude", std::nullopt },
-		Descriptor{ FieldId::DISPLACEABLE, FieldKind::TOGGLE, "Displaceable", std::nullopt },
-		Descriptor{ FieldId::CASTER_CLASS, FieldKind::TOGGLE, "Caster Class", std::nullopt },
-		Descriptor{ FieldId::CASTER_LEVEL, FieldKind::ADJUST, "Caster Level", std::nullopt },
-		Descriptor{ FieldId::INNATE_POWER, FieldKind::ADJUST, "Innate Power", std::nullopt },
-		Descriptor{ FieldId::INNATE_SPELL, FieldKind::TEXT, "Power Spell", std::nullopt },
-		Descriptor{ FieldId::INNATE_FREQUENCY, FieldKind::TOGGLE, "Power Frequency", std::nullopt },
-		Descriptor{ FieldId::WEIGHT, FieldKind::ADJUST, "Spawn Weight", Plain{ &MonsterParams::baseWeight, 0, 100 } },
-		Descriptor{ FieldId::DEPTH_MIN, FieldKind::ADJUST, "Depth Min", Plain{ &MonsterParams::levelMinimum, 1, 20 } },
-		Descriptor{ FieldId::DEPTH_MAX, FieldKind::ADJUST, "Depth Max", Plain{ &MonsterParams::levelMaximum, 0, 20 } },
+		Descriptor{
+			FieldId::INTELLIGENCE,
+			FieldKind::TOGGLE,
+			"Intelligence",
+			std::nullopt },
+		Descriptor{
+			FieldId::CAN_SWIM,
+			FieldKind::TOGGLE,
+			"Can Swim",
+			std::nullopt },
+		Descriptor{
+			FieldId::CAN_FLY,
+			FieldKind::TOGGLE,
+			"Can Fly",
+			std::nullopt },
+		Descriptor{
+			FieldId::WALKS_WEBS,
+			FieldKind::TOGGLE,
+			"Walks Webs",
+			std::nullopt },
+		Descriptor{
+			FieldId::ATTITUDE,
+			FieldKind::TOGGLE,
+			"Attitude",
+			std::nullopt },
+		Descriptor{
+			FieldId::DISPLACEABLE,
+			FieldKind::TOGGLE,
+			"Displaceable",
+			std::nullopt },
+		Descriptor{
+			FieldId::CASTER_CLASS,
+			FieldKind::TOGGLE,
+			"Caster Class",
+			std::nullopt },
+		Descriptor{
+			FieldId::CASTER_LEVEL,
+			FieldKind::ADJUST,
+			"Caster Level",
+			std::nullopt },
+		Descriptor{
+			FieldId::INNATE_POWER,
+			FieldKind::ADJUST,
+			"Innate Power",
+			std::nullopt },
+		Descriptor{
+			FieldId::INNATE_SPELL,
+			FieldKind::TEXT,
+			"Power Spell",
+			std::nullopt },
+		Descriptor{
+			FieldId::INNATE_FREQUENCY,
+			FieldKind::TOGGLE,
+			"Power Frequency",
+			std::nullopt },
+		Descriptor{
+			FieldId::WEIGHT,
+			FieldKind::ADJUST,
+			"Spawn Weight",
+			Plain{ &MonsterParams::baseWeight, 0, 100 } },
+		Descriptor{
+			FieldId::DEPTH_MIN,
+			FieldKind::ADJUST,
+			"Depth Min",
+			Plain{ &MonsterParams::levelMinimum, 1, 20 } },
+		Descriptor{
+			FieldId::DEPTH_MAX,
+			FieldKind::ADJUST,
+			"Depth Max",
+			Plain{ &MonsterParams::levelMaximum, 0, 20 } },
 		Descriptor{ FieldId::TILE, FieldKind::TILE, "Tile", std::nullopt },
 	} };
 

@@ -16,7 +16,9 @@
 #include "SpellEditor.h"
 #include "SpellRegistry.h"
 
-static_assert(is_well_formed_table(SpellEditor::FIELDS), "SpellEditor::FIELDS lists a field out of FieldId order, or a plain number on a field that is not ADJUST");
+static_assert(
+	is_well_formed_table(SpellEditor::FIELDS),
+	"SpellEditor::FIELDS is out of order or misplaces a plain number");
 
 namespace
 {
@@ -110,7 +112,6 @@ constexpr int HINT_HEIGHT = 28;
 constexpr int FIELD_HEIGHT = 30;
 constexpr int ITEM_HEIGHT = 32;
 constexpr int LIST_PAD = 8;
-constexpr size_t FIELD_COUNT = static_cast<size_t>(FieldId::COUNT);
 
 // ---------------------------------------------------------------------------
 // Lifecycle
@@ -640,7 +641,9 @@ std::string SpellEditor::field_value(FieldId field) const
 	}
 	default:
 	{
-		refuse_misrouted_field(descriptor_of(FIELDS, field).label, "SpellEditor::field_value");
+		refuse_misrouted_field(
+			descriptor_of(FIELDS, field).label,
+			"SpellEditor::field_value");
 	}
 	}
 }
@@ -699,7 +702,9 @@ void SpellEditor::field_set_string(FieldId field, std::string newValue)
 	}
 	else
 	{
-		refuse_misrouted_field(descriptor_of(FIELDS, field).label, "SpellEditor::field_set_string");
+		refuse_misrouted_field(
+			descriptor_of(FIELDS, field).label,
+			"SpellEditor::field_set_string");
 	}
 }
 

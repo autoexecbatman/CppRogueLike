@@ -47,6 +47,8 @@ private:
 	// One field's entry in FIELDS.
 	using Descriptor = FieldDescriptor<FieldId, SpellDefinition>;
 
+	static constexpr size_t FIELD_COUNT = static_cast<size_t>(FieldId::COUNT);
+
 	bool active{ false };
 	Mode mode{ Mode::NORMAL };
 	int focus{ 0 }; // 0 = list, 1 = fields
@@ -95,13 +97,22 @@ private:
 	void field_set_string(FieldId field, std::string newValue);
 
 public:
-	// Every field, in FieldId order: how it is edited, its label, and a plain number's member and bounds.
-	static constexpr std::array<Descriptor, static_cast<size_t>(FieldId::COUNT)> FIELDS{ {
+	// Every field, in FieldId order: how it is edited, its label, and a plain
+	// number's member and bounds.
+	static constexpr std::array<Descriptor, FIELD_COUNT> FIELDS{ {
 		Descriptor{ FieldId::NAME, FieldKind::TEXT, "Name", std::nullopt },
 		Descriptor{ FieldId::LEVEL, FieldKind::ADJUST, "Level", std::nullopt },
 		Descriptor{ FieldId::CLASS, FieldKind::TOGGLE, "Class", std::nullopt },
-		Descriptor{ FieldId::EFFECT_TYPE, FieldKind::TOGGLE, "Effect", std::nullopt },
-		Descriptor{ FieldId::DESCRIPTION, FieldKind::TEXT, "Description", std::nullopt },
+		Descriptor{
+			FieldId::EFFECT_TYPE,
+			FieldKind::TOGGLE,
+			"Effect",
+			std::nullopt },
+		Descriptor{
+			FieldId::DESCRIPTION,
+			FieldKind::TEXT,
+			"Description",
+			std::nullopt },
 	} };
 
 	void enter(const SpellRegistry& spells);
