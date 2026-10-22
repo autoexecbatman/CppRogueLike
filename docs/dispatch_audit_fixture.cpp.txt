@@ -1,0 +1,255 @@
+// Fixture for docs/dispatch_audit.py --self-test. Never compiled.
+// A statement whose first line carries EXPECT CHAIN <subject> <terms> must be
+// reported with that subject and count. Each EXPECT DISPATCH <class> <subject>
+// <functions> must be reported. Nothing else may be.
+
+enum class Kind
+{
+	A,
+	B,
+	C,
+	D,
+	E
+};
+
+bool four_terms(Kind kind)
+{
+	return kind == Kind::A || kind == Kind::B // EXPECT CHAIN kind 4
+		|| kind == Kind::C || kind == Kind::D;
+}
+
+bool three_terms(Kind kind)
+{
+	// SILENT: three terms is under the threshold.
+	return kind == Kind::A || kind == Kind::B || kind == Kind::C;
+}
+
+bool none_of_four(Kind kind)
+{
+	return kind != Kind::A && kind != Kind::B // EXPECT CHAIN kind 4
+		&& kind != Kind::C && kind != Kind::D;
+}
+
+bool split_over_lines(char symbol)
+{
+	return symbol == '#' // EXPECT CHAIN symbol 5
+		|| symbol == '.'
+		|| symbol == ','
+		|| symbol == '+'
+		|| symbol == '~';
+}
+
+bool in_parentheses(const Grid& grid, int index)
+{
+	if (grid.at(index) == 1 // EXPECT CHAIN grid.at(index) 4
+		|| grid.at(index) == 2
+		|| grid.at(index) == 3
+		|| grid.at(index) == 4)
+	{
+		return true;
+	}
+	return false;
+}
+
+struct Box
+{
+	int left{ 0 };
+	int right{ 0 };
+	int top{ 0 };
+	int bottom{ 0 };
+};
+
+bool same_box(const Box& first, const Box& second)
+{
+	// SILENT: five comparisons of different fields is a record comparison.
+	return first.left == second.left && first.right == second.right
+		&& first.top == second.top && first.bottom == second.bottom
+		&& first.left == second.right;
+}
+
+bool on_edge(int col, int row, int width, int height)
+{
+	// SILENT: two subjects, two comparisons each.
+	return col == 0 || col == width || row == 0 || row == height;
+}
+
+bool equal_and_or(Kind kind)
+{
+	// SILENT: == joined by && is not a membership test, whatever its length.
+	return kind == Kind::A && kind == Kind::B
+		&& kind == Kind::C && kind == Kind::D;
+}
+
+// SILENT: k == Kind::A || k == Kind::B || k == Kind::C || k == Kind::D
+const char* text = "kind == A || kind == B || kind == C || kind == D";
+
+class Shape
+{
+private:
+	Kind kind{ Kind::A };
+	int size{ 0 };
+
+public:
+	// EXPECT DISPATCH Shape kind 4
+	int weight() const
+	{
+		switch (kind)
+		{
+		case Kind::A:
+		{
+			return 1;
+		}
+		default:
+		{
+			return 2;
+		}
+		}
+	}
+
+	int sides() const;
+	const char* name() const;
+	int corners() const;
+	int matches(const std::vector<Shape>& shapes) const;
+	int scale() const;
+};
+
+int Shape::sides() const
+{
+	switch (kind)
+	{
+	case Kind::A:
+	{
+		return 3;
+	}
+	default:
+	{
+		return 4;
+	}
+	}
+}
+
+const char* Shape::name() const
+{
+	if (kind == Kind::A)
+	{
+		return "a";
+	}
+	else if (kind == Kind::B)
+	{
+		return "b";
+	}
+	else if (kind == Kind::C)
+	{
+		return "c";
+	}
+	return "other";
+}
+
+int Shape::matches(const std::vector<Shape>& shapes) const
+{
+	// A lambda passed to a call is still the body of matches, not a function
+	// of a class named after the call's namespace.
+	return std::ranges::count_if(shapes, [this](const Shape& other)
+	{
+		switch (kind)
+		{
+		default:
+		{
+			return other.size == size;
+		}
+		}
+	});
+}
+
+int Shape::corners() const
+{
+	// SILENT: a two-arm ladder is an ordinary if and else, not a dispatch.
+	if (kind == Kind::A)
+	{
+		return 0;
+	}
+	else if (kind == Kind::B)
+	{
+		return 1;
+	}
+	return 2;
+}
+
+int Shape::scale() const
+{
+	// SILENT: one switch on another subject.
+	switch (size)
+	{
+	default:
+	{
+		return size;
+	}
+	}
+}
+
+class Pair
+{
+private:
+	Kind kind{ Kind::A };
+
+public:
+	int first() const;
+	int second() const;
+};
+
+// SILENT: two functions of Pair is under the threshold.
+int Pair::first() const
+{
+	switch (kind)
+	{
+	default:
+	{
+		return 1;
+	}
+	}
+}
+
+int Pair::second() const
+{
+	switch (kind)
+	{
+	default:
+	{
+		return 2;
+	}
+	}
+}
+
+// SILENT: free functions belong to no class, however many switch on kind.
+int free_one(Kind kind)
+{
+	switch (kind)
+	{
+	default:
+	{
+		return 1;
+	}
+	}
+}
+
+int free_two(Kind kind)
+{
+	switch (kind)
+	{
+	default:
+	{
+		return 2;
+	}
+	}
+}
+
+int free_three(Kind kind)
+{
+	switch (kind)
+	{
+	default:
+	{
+		return 3;
+	}
+	}
+}

@@ -1,0 +1,94 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "python",
+    "docs/dispatch_audit.py",
+    "--self-test"
+  ],
+  "mutations": [
+    {
+      "file": "docs/dispatch_audit.py",
+      "original": "            if joiner not in segment:\n                continue\n",
+      "mutated": "            if False:\n                continue\n",
+      "catches": "== joined by && read as a list: the && chain and the record comparison report"
+    },
+    {
+      "file": "docs/dispatch_audit.py",
+      "original": "                if len(values) >= LEAST_CHAIN_TERMS:",
+      "mutated": "                if sum(len(other) for other in groups.values()) >= LEAST_CHAIN_TERMS:",
+      "catches": "comparisons of different subjects pooled: the two-subject edge check reports"
+    },
+    {
+      "file": "docs/dispatch_audit.py",
+      "original": "    return re.sub(r\"//[^\\n]*\", lambda match: \" \" * len(match.group(0)),\n                  without_literals)",
+      "mutated": "    return without_literals",
+      "catches": "comments read as code: the chain written in a comment reports"
+    },
+    {
+      "file": "docs/dispatch_audit.py",
+      "original": "    without_literals = blank_literals(text)",
+      "mutated": "    without_literals = text",
+      "catches": "string literals read as code: the chain inside a string reports"
+    },
+    {
+      "file": "docs/dispatch_audit.py",
+      "original": "        elif character == \"(\":\n            if depth == 0:\n                break\n",
+      "mutated": "        elif character == \"(\":\n            if False:\n                break\n",
+      "catches": "the subject running past the if's own parenthesis: grid.at(index) is misnamed"
+    },
+    {
+      "file": "docs/dispatch_audit.py",
+      "original": "    for match in re.finditer(r\"[;{}]\", text):",
+      "mutated": "    for match in re.finditer(r\"[;{}\\n]\", text):",
+      "catches": "a statement cut at each line: the chain over three lines is missed"
+    },
+    {
+      "file": "docs/dispatch_audit.py",
+      "original": "        for operator, joiner in ((\"==\", \"||\"), (\"!=\", \"&&\")):",
+      "mutated": "        for operator, joiner in ((\"==\", \"||\"),):",
+      "catches": "the negated form dropped: the != chain is missed"
+    },
+    {
+      "file": "docs/dispatch_audit.py",
+      "original": "LEAST_CHAIN_TERMS = 4",
+      "mutated": "LEAST_CHAIN_TERMS = 3",
+      "catches": "the threshold at 3: the three-term chain reports"
+    },
+    {
+      "file": "docs/dispatch_audit.py",
+      "original": "        elif function is None or function[1] is None:",
+      "mutated": "        elif function is None:",
+      "catches": "free functions counted as one class: the three free switches report"
+    },
+    {
+      "file": "docs/dispatch_audit.py",
+      "original": "LEAST_LADDER_ARMS = 3",
+      "mutated": "LEAST_LADDER_ARMS = 2",
+      "catches": "a two-arm if and else counted as a ladder: Shape counts 4 functions"
+    },
+    {
+      "file": "docs/dispatch_audit.py",
+      "original": "    if enclosing and enclosing[0] == \"class\":",
+      "mutated": "    if False:",
+      "catches": "a function defined inside its class belonging to none: Shape counts 2"
+    },
+    {
+      "file": "docs/dispatch_audit.py",
+      "original": "            if not is_else or depth not in ladders:",
+      "mutated": "            if True:",
+      "catches": "every else-if starting its own ladder: the three-arm ladder is missed"
+    },
+    {
+      "file": "docs/dispatch_audit.py",
+      "original": "LEAST_DISPATCH_FUNCTIONS = 3",
+      "mutated": "LEAST_DISPATCH_FUNCTIONS = 2",
+      "catches": "the dispatch threshold at 2: Pair reports"
+    },
+    {
+      "file": "docs/dispatch_audit.py",
+      "original": "            if owner is not None and function is None:",
+      "mutated": "            if owner is not None:",
+      "catches": "a block inside a body read as a new function: Shape's switches move"
+    }
+  ]
+}
