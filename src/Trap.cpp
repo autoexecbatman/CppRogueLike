@@ -49,7 +49,7 @@ int roll_disarm_rounds(RandomDice& dice)
 // Whether this character's racial sense finds stonework traps.
 bool is_dwarf(const Player& searcher)
 {
-	return searcher.playerRaceState == PlayerRaceState::DWARF;
+	return searcher.get_race() == PlayerRaceState::DWARF;
 }
 
 // Whether a Find/Remove Traps score is one a thief can roll against. A score of

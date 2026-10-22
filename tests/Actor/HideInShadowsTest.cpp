@@ -64,7 +64,7 @@ protected:
 		thief->healthPool = std::make_unique<HealthPool>(20);
 		thief->armorClass = std::make_unique<ArmorClass>(10);
 		thief->set_creature_class(CreatureClass::ROGUE);
-		thief->playerRaceState = PlayerRaceState::HUMAN;
+		thief->lifespan->race = PlayerRaceState::HUMAN;
 		// Dexterity 13 is the middle of Table 28's flat row, so the percentage is the
 		// base score and the points, with nothing else folded in.
 		thief->set_dexterity(13);

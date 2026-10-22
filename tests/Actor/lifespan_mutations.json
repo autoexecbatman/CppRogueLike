@@ -1,0 +1,161 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/run_suite.ps1",
+    "-Configuration",
+    "Debug",
+    "-Filter",
+    "--gtest_filter=LifespanTest.*:CharacterAgeingTest.*:PotionOfSpeedTest.*:ItemRoundTripTest.*:BehaviorRecordTest.*:PlayerSerializationTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Lifespan.cpp",
+      "original": "\tconst int physical = lifespan.physical_age();",
+      "mutated": "\tconst int physical = lifespan.natural_age();",
+      "catches": "the body aged by time alone, so magical years cost nothing"
+    },
+    {
+      "file": "src/Lifespan.cpp",
+      "original": "\tconst int natural = lifespan.natural_age();",
+      "mutated": "\tconst int natural = lifespan.physical_age();",
+      "catches": "magical years giving the Intelligence and Wisdom the book reserves for time"
+    },
+    {
+      "file": "src/Lifespan.cpp",
+      "original": "\treturn age_category(age, race) >= band;",
+      "mutated": "\treturn age_category(age, race) == band;",
+      "catches": "the bands not cumulative, so old age forgets middle age's losses"
+    },
+    {
+      "file": "src/Lifespan.cpp",
+      "original": "DiceExpr{ 3, 20, 0 }, 62, 83, 125 };",
+      "mutated": "DiceExpr{ 3, 20, 0 }, 63, 83, 125 };",
+      "catches": "the half-elf's middle age as the fraction rounded up instead of the printed 62"
+    },
+    {
+      "file": "src/Lifespan.cpp",
+      "original": "\t\tconst bool isExceptional = exceptionalStrength > 0;",
+      "mutated": "\t\tconst bool isExceptional = false;",
+      "catches": "exceptional Strength ignored, so an 18/50 loses the point at middle age"
+    },
+    {
+      "file": "src/Lifespan.cpp",
+      "original": "\t\treturn exceptionalStrength / 2;",
+      "mutated": "\t\treturn exceptionalStrength;",
+      "catches": "middle age leaving the exceptional percentile whole"
+    },
+    {
+      "file": "src/Lifespan.cpp",
+      "original": "\tconst int startingAge = row->startingBase + roll_dice(&dice, row->startingVariable);",
+      "mutated": "\tconst int startingAge = row->startingBase;",
+      "catches": "the starting age's die never rolled"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\t\tcount_addition(ageing_change(*lifespan, *ability, exceptionalStrength));",
+      "mutated": "",
+      "catches": "the ability scores never reading the age"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tint exceptional = lifespan ? aged_exceptional_strength(*lifespan, exceptionalStrength) : exceptionalStrength;",
+      "mutated": "\tint exceptional = exceptionalStrength;",
+      "catches": "the exceptional percentile never reading the age"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tif (lifespan->natural_age() >= lifespan->maximumAge)",
+      "mutated": "\tif (lifespan->physical_age() >= lifespan->maximumAge)",
+      "catches": "magical years spending the life span, which the ruling gives to time"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tctx.messageSystem->message(ColorPairId::RED_BLACK, \"You die of old age.\", MessageCompletion::FINISHED);\n\t\tdie(ctx);\n",
+      "mutated": "\t\tctx.messageSystem->message(ColorPairId::RED_BLACK, \"You die of old age.\", MessageCompletion::FINISHED);\n",
+      "catches": "reaching the maximum age and living on"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t++lifespan->yearsLived;",
+      "mutated": "",
+      "catches": "a year passing and the natural age standing still"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tif (after <= before)",
+      "mutated": "\tif (after < before)",
+      "catches": "every year announced, not only one that reaches a new band"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\t\t  { \"magicalYears\", lifespan->magicalYears }\n",
+      "mutated": "\t\t\t  { \"magicalYears\", 0 }\n",
+      "catches": "a save losing the years magic added"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\t\tlifespanRecord.at(\"yearsLived\").get<int>(),",
+      "mutated": "\t\t\t0,",
+      "catches": "a load forgetting the years lived"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\tthrow std::runtime_error(\"Player::load: a player record with no lifespan\");",
+      "mutated": "",
+      "catches": "a player loaded with no lifespan, which every race read then trips on"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tlifespan = roll_lifespan(get_race(), *ctx.dice);\n",
+      "mutated": "",
+      "catches": "a new game never rolling the ages"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tlifespan = Lifespan{ blueprint.playerRaceState };\n",
+      "mutated": "\tlifespan = Lifespan{};\n",
+      "catches": "the chosen race lost at construction"
+    },
+    {
+      "file": "src/GameLoopCoordinator.cpp",
+      "original": "\t\tif (thisRound % ROUNDS_PER_YEAR == 0)",
+      "mutated": "\t\tif ((thisRound + 1) % ROUNDS_PER_YEAR == 0)",
+      "catches": "the year ending a round early"
+    },
+    {
+      "file": "src/GameLoopCoordinator.cpp",
+      "original": "\t\t\tctx.player()->pass_a_year(ctx);\n",
+      "mutated": "",
+      "catches": "the upkeep never passing a year"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\tif (consumable.agesYears != 0)",
+      "mutated": "\tif (false)",
+      "catches": "a potion of speed costing no year"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tconsumable.agesYears = source.at(\"agesYears\").get<int>();",
+      "mutated": "\t\tconsumable.agesYears = 0;",
+      "catches": "a loaded potion forgetting its year"
+    },
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "\tparams.agesYears = required_field(record, key, \"agesYears\");",
+      "mutated": "\tparams.agesYears = record.value(\"agesYears\", 0);",
+      "catches": "a record missing its year read as none instead of refused"
+    },
+    {
+      "file": "src/ItemCreator.cpp",
+      "original": "\t\t\tparams.agesYears\n",
+      "mutated": "\t\t\t0\n",
+      "catches": "a created potion losing its year"
+    }
+  ]
+}

@@ -106,6 +106,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Actor.h
     ${PROJECT_SOURCE_DIR}/AbilityAllocation.cpp
     ${PROJECT_SOURCE_DIR}/AbilityAllocation.h
+    ${PROJECT_SOURCE_DIR}/Lifespan.cpp
+    ${PROJECT_SOURCE_DIR}/Lifespan.h
     ${PROJECT_SOURCE_DIR}/ThiefSkills.cpp
     ${PROJECT_SOURCE_DIR}/ThiefSkills.h
     ${PROJECT_SOURCE_DIR}/MenuThiefSkills.cpp

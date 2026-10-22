@@ -59,6 +59,8 @@ inline constexpr int ROUNDS_PER_HOUR = 60;
 
 // Rounds in a day of game time, twenty-four of those hours.
 inline constexpr int ROUNDS_PER_DAY = 24 * ROUNDS_PER_HOUR;
+// A year is 365 days of 24 hours, the owner's calendar; the PHB defines none.
+inline constexpr int ROUNDS_PER_YEAR = 365 * ROUNDS_PER_DAY;
 
 // Rounds in a turn, the unit potions and many spells are printed in: "Ten combat rounds
 // equal a turn" (PHB page 184).

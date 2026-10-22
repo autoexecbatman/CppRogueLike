@@ -277,6 +277,19 @@ TEST_F(ItemRoundTripTest, ADurationThatIsNotDiceIsRefused)
 	EXPECT_ANY_THROW(damaged.load(roundTrip.string()));
 }
 
+// A record without its years of ageing is refused rather than read as none.
+TEST_F(ItemRoundTripTest, ARecordWithoutItsYearsOfAgeingIsRefused)
+{
+	std::ifstream source(Paths::resolve(Paths::ITEMS));
+	ASSERT_TRUE(source.is_open()) << "cannot read the real items file";
+	nlohmann::json root = nlohmann::json::parse(source);
+	root.at("potion_of_speed").erase("agesYears");
+	std::ofstream(roundTrip) << root.dump(4);
+
+	ItemRegistry damaged{};
+	EXPECT_ANY_THROW(damaged.load(roundTrip.string()));
+}
+
 // A duration with no unit, or a unit this build does not know, is refused rather than read as rounds.
 TEST_F(ItemRoundTripTest, ADurationWithoutAKnownUnitIsRefused)
 {

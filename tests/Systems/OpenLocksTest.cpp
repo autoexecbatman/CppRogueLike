@@ -74,7 +74,7 @@ protected:
 
 		Player& thief = ctx.player_concrete();
 		thief.set_creature_class(CreatureClass::ROGUE);
-		thief.playerRaceState = PlayerRaceState::HUMAN;
+		thief.lifespan->race = PlayerRaceState::HUMAN;
 		thief.set_dexterity(13);
 		thief.set_creature_level(1);
 		thief.thiefSkillPoints.at(thief_skill_index(ThiefSkill::OPEN_LOCKS)) = OPEN_LOCKS_POINTS;

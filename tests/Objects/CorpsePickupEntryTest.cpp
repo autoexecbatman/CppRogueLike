@@ -97,7 +97,7 @@ struct PickupWorld
 		mock.player = std::make_unique<Player>(entry == Entry::WALK_TO_PICKUP ? WALK_START : UNDER_THE_MOUSE);
 		Player& player = ctx.player_concrete();
 		player.set_creature_class(creatureClass);
-		player.playerRaceState = PlayerRaceState::HUMAN;
+		player.lifespan->race = PlayerRaceState::HUMAN;
 		player.set_strength(strength);
 		player.set_creature_level(1);
 		player.experienceReward = std::make_unique<ExperienceReward>(0);

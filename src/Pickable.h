@@ -300,6 +300,9 @@ struct Consumable
 	DurationUnit durationUnit{ DurationUnit::ROUNDS };
 	BuffType buffType{ BuffType::NONE };
 	BuffApplication application{ BuffApplication::ADD };
+	// Years of magical ageing drinking it costs: "ages the individual by one year" for a
+	// potion of speed (DMG, PDF page 895).
+	int agesYears{ 0 };
 };
 
 struct Weapon

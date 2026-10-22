@@ -34,7 +34,7 @@ protected:
 
         // Set class/race
         player->set_creature_class(CreatureClass::FIGHTER);
-        player->playerRaceState = PlayerRaceState::HUMAN;
+        player->lifespan->race = PlayerRaceState::HUMAN;
         player->set_attacks_per_round(1.5f);
 
         // Set up components
@@ -78,7 +78,7 @@ TEST_F(PlayerSerializationTest, ClassAndRace_Preserved) {
     loaded->load(j);
 
     EXPECT_EQ(loaded->get_creature_class(), CreatureClass::FIGHTER);
-    EXPECT_EQ(loaded->playerRaceState, PlayerRaceState::HUMAN);
+    EXPECT_EQ(loaded->get_race(), PlayerRaceState::HUMAN);
     EXPECT_EQ(loaded->get_class_display_name(), class_display_name(CreatureClass::FIGHTER));
     EXPECT_EQ(loaded->get_race_display_name(), "Human");
 }
@@ -92,7 +92,7 @@ TEST_F(PlayerSerializationTest, TheRaceIsSavedOnceAsTheEnum)
 	json j;
 	original->save(j);
 
-	EXPECT_TRUE(j.contains("playerRaceState"));
+	EXPECT_TRUE(j.contains("lifespan"));
 	EXPECT_FALSE(j.contains("playerRace")) << "the race's name was saved beside the race";
 }
 
@@ -191,7 +191,7 @@ TEST_F(PlayerSerializationTest, AllRaces_SaveLoad) {
 
     for (auto race : races) {
         auto player = create_test_player();
-        player->playerRaceState = race;
+        player->lifespan->race = race;
 
         json j;
         player->save(j);
@@ -199,7 +199,7 @@ TEST_F(PlayerSerializationTest, AllRaces_SaveLoad) {
         auto loaded = std::make_unique<Player>(Vector2D{0, 0});
         loaded->load(j);
 
-        EXPECT_EQ(loaded->playerRaceState, race) << "Race mismatch for " << static_cast<int>(race);
+        EXPECT_EQ(loaded->get_race(), race) << "Race mismatch for " << static_cast<int>(race);
     }
 }
 

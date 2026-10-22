@@ -33,7 +33,11 @@ private:
 	std::optional<Vector2D> hidingSpot{};
 
 public:
-	PlayerRaceState playerRaceState{ PlayerRaceState::NONE };
+	// The character's race, held in the lifespan, which a player always has.
+	//
+	// Example:
+	//   player.get_race();   // -> PlayerRaceState::DWARF
+	[[nodiscard]] PlayerRaceState get_race() const;
 
 	int killCount{ 0 }; // Tracks kill count for log.
 

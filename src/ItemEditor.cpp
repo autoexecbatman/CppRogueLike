@@ -883,6 +883,10 @@ std::string ItemEditor::field_label(FieldId field) const
 	{
 		return "Duration Unit";
 	}
+	case FieldId::AGES_YEARS:
+	{
+		return "Ages Drinker (years)";
+	}
 	case FieldId::TARGET_MODE:
 	{
 		return "Target Mode";
@@ -1063,6 +1067,10 @@ std::string ItemEditor::field_value(FieldId field) const
 	{
 		return std::string{ encode_duration_unit(params.durationUnit) };
 	}
+	case FieldId::AGES_YEARS:
+	{
+		return std::format("{}", params.agesYears);
+	}
 	case FieldId::TARGET_MODE:
 	{
 		return std::string{ encode_target_mode(params.targetMode) };
@@ -1241,6 +1249,11 @@ void ItemEditor::field_adjust(FieldId field, int delta)
 	case FieldId::DURATION_BONUS:
 	{
 		params.duration.bonus = clamp_val(params.duration.bonus, delta, 0, 9999);
+		break;
+	}
+	case FieldId::AGES_YEARS:
+	{
+		params.agesYears = clamp_val(params.agesYears, delta, -99, 99);
 		break;
 	}
 	case FieldId::RANGE:

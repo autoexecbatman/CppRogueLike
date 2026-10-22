@@ -25,6 +25,7 @@
 #include "HealthPool.h"
 #include "InventoryData.h"
 #include "Item.h"
+#include "Lifespan.h"
 #include "MagicalItemEffects.h"
 #include "Persistent.h"
 #include "ShopKeeper.h"
@@ -174,6 +175,10 @@ public:
 	// a slot its body plan grants.
 	std::vector<EquippedItem> equippedItems;
 
+	// The race and age a character lives by. A player always has one and a monster none,
+	// since the book gives monsters no age.
+	std::optional<Lifespan> lifespan{};
+
 	Creature(Vector2D position, ActorData data)
 		: Actor(position, data), constitutionTracker(std::make_unique<ConstitutionTracker>()), inventoryData(CreatureInventory(50))
 	{
@@ -320,6 +325,20 @@ public:
 	[[nodiscard]] int get_unhasted_action_delay() const noexcept { return actionDelay; }
 
 	void set_action_delay(int timeUnits) noexcept { actionDelay = timeUnits; }
+
+	// Adds years of magical ageing, or takes them away when negative, and says so when the
+	// body reaches a new band of Table 12. Asserts the creature has a lifespan.
+	//
+	// Example, a human of 44:
+	//   creature.add_magical_years(1, ctx);   // magicalYears 0 -> 1, "You feel the years: middle age."
+	void add_magical_years(int years, GameContext& ctx);
+
+	// One year of game time: the natural age rises, a new band of Table 12 is announced, and
+	// a natural age reaching the maximum dies of old age. Asserts a lifespan with a race.
+	//
+	// Example, a human of 92 who lives to 93:
+	//   creature.pass_a_year(ctx);   // yearsLived +1, "You die of old age.", then die(ctx)
+	void pass_a_year(GameContext& ctx);
 
 	// The point on the shared clock at which this creature acts next.
 	[[nodiscard]] int get_next_action_time() const noexcept { return nextActionTime; }

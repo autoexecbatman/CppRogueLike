@@ -68,7 +68,7 @@ StatBoost unusual_stat_boost()
 std::vector<NamedBehavior> every_behavior_with_fields()
 {
 	return {
-		{ "consumable", Consumable{ ConsumableEffect::ADD_BUFF, DiceExpr{ 0, 0, 7 }, DiceExpr{ 0, 0, 3 }, DurationUnit::TURNS, BuffType::SANCTUARY, BuffApplication::SET } },
+		{ "consumable", Consumable{ ConsumableEffect::ADD_BUFF, DiceExpr{ 0, 0, 7 }, DiceExpr{ 0, 0, 3 }, DurationUnit::TURNS, BuffType::SANCTUARY, BuffApplication::SET, 2 } },
 		{ "weapon", Weapon{ true, HandRequirement::TWO_HANDED, WeaponSize::LARGE, 18 } },
 		{ "targeted scroll", TargetedScroll{ TargetMode::PICK_TILE_AOE, ScrollAnimation::LIGHTNING, 5, 9, 2, BuffType::SANCTUARY, DiceExpr{ 1, 4, 2 }, DurationUnit::TURNS } },
 		{ "gold", Gold{ 12 } },

@@ -202,6 +202,7 @@ void display_equipment_info(const Player& player, GameContext& ctx, int& row)
 void display_right_panel_info(const Player& player, GameContext& ctx, int& row)
 {
 	assert(ctx.hungerSystem && "display_right_panel_info: called without a hungerSystem");
+	assert(player.lifespan && "display_right_panel_info: a player with no lifespan");
 
 	int tileSize = ctx.renderer->get_tile_size();
 	int pixelX = tileSize;
@@ -212,7 +213,7 @@ void display_right_panel_info(const Player& player, GameContext& ctx, int& row)
 	row++;
 
 	ctx.renderer->draw_text(
-		Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) }, std::format("Gender: {}   Gold: {} gp   Hunger: {}", player.get_gender(), player.get_gold(), hungerStr), ColorPairId::WHITE_BLACK);
+		Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) }, std::format("Gender: {}   Age: {}   Gold: {} gp   Hunger: {}", player.get_gender(), player.lifespan->physical_age(), player.get_gold(), hungerStr), ColorPairId::WHITE_BLACK);
 	row += 2;
 }
 

@@ -54,7 +54,7 @@ protected:
 		player->set_charisma(10);
 
 		player->set_creature_class(CreatureClass::ROGUE);
-		player->playerRaceState = PlayerRaceState::DWARF;
+		player->lifespan->race = PlayerRaceState::DWARF;
 
 		ctx = game.context();
 		ctx.playerOwner = &player;

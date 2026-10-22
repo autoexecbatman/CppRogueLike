@@ -75,8 +75,8 @@
     },
     {
       "file": "src/ItemCreator.cpp",
-      "original": "\t\t\tparams.application\n",
-      "mutated": "\t\t\tBuffApplication::ADD\n",
+      "original": "\t\t\tparams.application,\n",
+      "mutated": "\t\t\tBuffApplication::ADD,\n",
       "catches": "a potion built from the data losing whether it sets"
     },
     {

@@ -93,6 +93,7 @@ nlohmann::json encode_item(const ItemParams& params)
 	record["confuseTurns"] = params.confuseTurns;
 	record["duration"] = to_text(params.duration);
 	record["durationUnit"] = encode_duration_unit(params.durationUnit);
+	record["agesYears"] = params.agesYears;
 	record["effect"] = encode_magical_effect(params.effect);
 	record["effectBonus"] = params.effectBonus;
 	record["strBonus"] = params.strBonus;
@@ -163,6 +164,7 @@ ItemParams parse_item(const std::string& key, const nlohmann::json& record)
 	params.confuseTurns = required_field(record, key, "confuseTurns");
 	params.duration = parse_dice_expression(required_field(record, key, "duration").get<std::string>());
 	params.durationUnit = parse_duration_unit(required_field(record, key, "durationUnit").get<std::string>());
+	params.agesYears = required_field(record, key, "agesYears");
 	params.effect = parse_magical_effect(required_field(record, key, "effect").get<std::string>());
 	params.effectBonus = required_field(record, key, "effectBonus");
 	params.strBonus = required_field(record, key, "strBonus");

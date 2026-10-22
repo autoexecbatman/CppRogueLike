@@ -35,7 +35,7 @@ ThiefSkillAllocation thief_skill_allocation_for(const Player& character, int lev
 	return ThiefSkillAllocation{
 		character.thiefSkillPoints,
 		thief_skill_grant_at_level(level),
-		thief_skill_racial_adjustments(character.playerRaceState),
+		thief_skill_racial_adjustments(character.get_race()),
 		character.get_dexterity(),
 		// Armour Table 29 prints no column for adjusts nothing the table can name,
 		// so the points are judged unarmoured rather than being stranded.

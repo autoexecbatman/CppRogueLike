@@ -1,6 +1,6 @@
 // file: PotionOfSpeedTest.cpp
-// The potion of speed doubles its drinker's movement and attacks for 5d4 rounds, and does
-// not speed up spellcasting.
+// The potion of speed doubles its drinker's movement and attacks for 5d4 rounds, does not
+// speed up spellcasting, and ages its drinker by a year.
 //
 // - DMG, potion of speed (PDF page 895): "increases the movement and combat capabilities
 //   of the imbiber by 100%. [...] This does not reduce spellcasting time, however. Use of a
@@ -43,10 +43,12 @@
 #include "src/InventoryOperations.h"
 #include "src/Item.h"
 #include "src/ItemCreator.h"
+#include "src/Lifespan.h"
 #include "src/MenuManager.h"
 #include "src/MenuSpellCast.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
+#include "src/PlayerRaceState.h"
 #include "src/PlayerTurn.h"
 #include "src/RandomDice.h"
 #include "src/Renderer.h"
@@ -189,6 +191,7 @@ TEST_F(PotionOfSpeedTest, ThePotionIsASpeedBuffOf5d4Rounds)
 	EXPECT_EQ(consumable.buffType, BuffType::SPEED);
 	EXPECT_EQ(to_text(consumable.duration), "5d4");
 	EXPECT_EQ(consumable.durationUnit, DurationUnit::ROUNDS);
+	EXPECT_EQ(consumable.agesYears, 1);
 }
 
 // The least of 5d4 is 5 rounds of game time, counted on the clock and not halved by the haste.
@@ -227,10 +230,16 @@ TEST_F(PotionOfSpeedTest, ASavedHastedCreatureKeepsItsBaseDelay)
 	EXPECT_EQ(loaded->get_action_delay(), HASTED_DELAY) << "the reloaded buff did not haste the creature";
 }
 
-// "Use of a speed potion ages the individual by one year." The game has no age to add it to.
+// "Use of a speed potion ages the individual by one year."
 TEST_F(PotionOfSpeedTest, DrinkingAgesTheDrinkerByAYear)
 {
-	GTEST_SKIP() << "issues/0330: the game has no character age, so the potion's year has nothing to be added to";
+	player().lifespan = Lifespan{ PlayerRaceState::HUMAN, 20, 100, 0, 0 };
+
+	drink_with_every_die_at(LOWEST_D4);
+
+	EXPECT_EQ(player().lifespan->magicalYears, 1);
+	EXPECT_EQ(player().lifespan->physical_age(), 21);
+	EXPECT_EQ(player().lifespan->natural_age(), 20) << "the potion's year was counted as time";
 }
 
 namespace

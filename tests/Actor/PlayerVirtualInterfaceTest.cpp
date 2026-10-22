@@ -65,7 +65,7 @@ TEST_F(PlayerVirtualInterfaceTest, Player_GetClassDisplayName_ReturnsPlayerClass
 
 TEST_F(PlayerVirtualInterfaceTest, Player_GetRaceDisplayName_IsTheRacesName)
 {
-    player->playerRaceState = PlayerRaceState::ELF;
+    player->lifespan->race = PlayerRaceState::ELF;
 
     EXPECT_EQ(player->get_race_display_name(), "Elf");
 }

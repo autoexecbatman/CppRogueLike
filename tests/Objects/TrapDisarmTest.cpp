@@ -59,14 +59,14 @@ protected:
 		// Dexterity 13 is the middle of Table 28's flat row, so the percentage below
 		// is the base score and the points, with nothing else folded in.
 		thief->set_dexterity(13);
-		thief->playerRaceState = PlayerRaceState::HUMAN;
+		thief->lifespan->race = PlayerRaceState::HUMAN;
 		thief->set_creature_level(1);
 
 		// A dwarf thief can find every kind of trap, so it finds them for the cases whose
 		// own character could not.
 		finder.set_creature_class(CreatureClass::ROGUE);
 		finder.set_dexterity(13);
-		finder.playerRaceState = PlayerRaceState::DWARF;
+		finder.lifespan->race = PlayerRaceState::DWARF;
 		finder.set_creature_level(1);
 		finder.thiefSkillPoints.at(thief_skill_index(ThiefSkill::FIND_REMOVE_TRAPS)) = 40;
 	}

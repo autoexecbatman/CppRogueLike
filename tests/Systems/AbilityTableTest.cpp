@@ -359,7 +359,7 @@ TEST_F(AbilityTableTest, AFighterWithEighteenRollsExceptionalStrength)
 {
 	Player fighter{ Vector2D{ 0, 0 } };
 	fighter.set_creature_class(CreatureClass::FIGHTER);
-	fighter.playerRaceState = PlayerRaceState::HUMAN;
+	fighter.lifespan->race = PlayerRaceState::HUMAN;
 	fighter.set_strength(18);
 	script({ 76 });
 
@@ -374,17 +374,17 @@ TEST_F(AbilityTableTest, OnlyANonHalflingFighterWithEighteenRolls)
 {
 	Player halfling{ Vector2D{ 0, 0 } };
 	halfling.set_creature_class(CreatureClass::FIGHTER);
-	halfling.playerRaceState = PlayerRaceState::HALFLING;
+	halfling.lifespan->race = PlayerRaceState::HALFLING;
 	halfling.set_strength(18);
 
 	Player cleric{ Vector2D{ 0, 0 } };
 	cleric.set_creature_class(CreatureClass::CLERIC);
-	cleric.playerRaceState = PlayerRaceState::HUMAN;
+	cleric.lifespan->race = PlayerRaceState::HUMAN;
 	cleric.set_strength(18);
 
 	Player weaker{ Vector2D{ 0, 0 } };
 	weaker.set_creature_class(CreatureClass::FIGHTER);
-	weaker.playerRaceState = PlayerRaceState::HUMAN;
+	weaker.lifespan->race = PlayerRaceState::HUMAN;
 	weaker.set_strength(17);
 
 	script({ 76, 76, 76 });

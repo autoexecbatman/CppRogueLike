@@ -30,6 +30,7 @@
 #include <format>
 #include <memory>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <utility>
 
@@ -48,6 +49,7 @@
 #include "HungerSystem.h"
 #include "InventoryOperations.h"
 #include "ItemCreator.h"
+#include "Lifespan.h"
 #include "MenuThiefSkills.h"
 #include "MessageSystem.h"
 #include "NotificationMenu.h"
@@ -118,6 +120,8 @@ constexpr int calculate_wizard_xp(int level) noexcept
 Player::Player(Vector2D position)
 	: Creature(position, ActorData{ TileRef{}, "Player", ColorPairId::WHITE_BLACK })
 {
+	// A shell has no race yet, and a race with no row never ages; a load replaces it.
+	lifespan = Lifespan{};
 	set_gold(100);
 	controller = std::make_unique<PlayerController>(*this);
 }
@@ -125,7 +129,7 @@ Player::Player(Vector2D position)
 std::string_view Player::sprite_tile_key() const noexcept
 {
 	// Only human and dwarf art exists; the other races borrow the human row.
-	const bool isDwarf = (playerRaceState == PlayerRaceState::DWARF);
+	const bool isDwarf = (get_race() == PlayerRaceState::DWARF);
 
 	switch (get_creature_class())
 	{
@@ -164,7 +168,8 @@ Player::Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext&
 	: Creature(position, ActorData{ TileRef{}, blueprint.name, ColorPairId::WHITE_BLACK })
 {
 	set_gender(blueprint.gender);
-	playerRaceState = blueprint.playerRaceState;
+	// The race now; the ages are rolled when the game starts, after the racial adjustments.
+	lifespan = Lifespan{ blueprint.playerRaceState };
 
 	// The class is the blueprint's enum, and its hit die is the class's: a warrior's d10,
 	// a priest's d8, a rogue's d6, a wizard's d4.
@@ -214,7 +219,7 @@ Player::Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext&
 
 std::string Player::get_race_display_name() const
 {
-	return std::string{ race_display_name(playerRaceState) };
+	return std::string{ race_display_name(get_race()) };
 }
 
 void Player::roll_new_character(GameContext& ctx)
@@ -236,6 +241,12 @@ void Player::roll_new_character(GameContext& ctx)
 	healthPool = std::make_unique<HealthPool>(playerHp);
 }
 
+PlayerRaceState Player::get_race() const
+{
+	assert(lifespan && "Player::get_race: a player with no lifespan");
+	return lifespan->race;
+}
+
 void Player::die(GameContext& ctx)
 {
 	// Only declares the run lost; the loop removes the save, so a death never reaches the filesystem.
@@ -247,6 +258,8 @@ void Player::on_new_game_start(GameContext& ctx)
 	std::vector<std::string> racialLines = pay_racial_adjustments();
 	// After the racial adjustments, since the roll reads the Strength they leave.
 	roll_exceptional_strength(ctx);
+	assert(ctx.dice && "Player::on_new_game_start: called without dice");
+	lifespan = roll_lifespan(get_race(), *ctx.dice);
 	equip_class_starting_gear(ctx);
 	// After the gear: Table 29 reads the armour the kit puts on a rogue, so an earlier screen shows wrong numbers.
 	push_thief_skill_allocation(*this, get_creature_level(), ctx);
@@ -260,7 +273,7 @@ void Player::roll_exceptional_strength(GameContext& ctx)
 	assert(ctx.dice && "Player::roll_exceptional_strength: called without dice");
 
 	// PHB character creation: a fighter who is not a halfling, with Strength 18.
-	const bool isEligible = get_creature_class() == CreatureClass::FIGHTER && playerRaceState != PlayerRaceState::HALFLING && get_strength() == 18;
+	const bool isEligible = get_creature_class() == CreatureClass::FIGHTER && get_race() != PlayerRaceState::HALFLING && get_strength() == 18;
 	if (!isEligible)
 	{
 		return;
@@ -466,7 +479,7 @@ std::vector<std::string> Player::pay_racial_adjustments()
 {
 	// Pay the race and collect the display lines in a single pass. Human and
 	// half-elf modify nothing, so they produce no entries and no popup is shown.
-	const std::array<int, ABILITY_COUNT> modifiers = racial_ability_modifiers(playerRaceState);
+	const std::array<int, ABILITY_COUNT> modifiers = racial_ability_modifiers(get_race());
 	std::vector<std::string> bonusLines;
 
 	for (const Ability ability : ALL_ABILITY)
@@ -492,7 +505,7 @@ void Player::show_racial_adjustments(std::vector<std::string> bonusLines, GameCo
 	}
 
 	ctx.menus->push_back(std::make_unique<NotificationMenu>(
-		std::format("Racial Traits: {}", race_display_name(playerRaceState)),
+		std::format("Racial Traits: {}", race_display_name(get_race())),
 		std::move(bonusLines),
 		ctx));
 }
@@ -607,7 +620,7 @@ std::optional<int> Player::thief_skill(ThiefSkill skill) const noexcept
 
 	return thief_skill_score(
 		skill,
-		thief_skill_racial_adjustments(playerRaceState).at(thief_skill_index(skill)),
+		thief_skill_racial_adjustments(get_race()).at(thief_skill_index(skill)),
 		get_dexterity(),
 		armor.value(),
 		thiefSkillPoints.at(thief_skill_index(skill)));
@@ -909,7 +922,6 @@ void Player::save(json& output)
 	output["controller"] = controllerJson;
 
 	// Player-specific fields
-	output["playerRaceState"] = static_cast<int>(playerRaceState);
 	output["killCount"] = killCount;
 	output["memorizedSpells"] = memorizedSpells;
 	output["thiefSkillPoints"] = thiefSkillPoints;
@@ -951,7 +963,11 @@ void Player::load(const json& source)
 	controller->load(source.at("controller"));
 
 	// Player-specific fields
-	playerRaceState = static_cast<PlayerRaceState>(source.at("playerRaceState").get<int>());
+	// The race is in the lifespan Creature::load read, and a player always has one.
+	if (!lifespan)
+	{
+		throw std::runtime_error("Player::load: a player record with no lifespan");
+	}
 	killCount = source.at("killCount").get<int>();
 	memorizedSpells = source.at("memorizedSpells").get<std::vector<std::string>>();
 	thiefSkillPoints = source.at("thiefSkillPoints").get<std::array<int, THIEF_SKILL_COUNT>>();

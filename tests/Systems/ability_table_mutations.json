@@ -45,7 +45,7 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": " && playerRaceState != PlayerRaceState::HALFLING",
+      "original": " && get_race() != PlayerRaceState::HALFLING",
       "mutated": "",
       "catches": "a halfling fighter rolling exceptional Strength"
     },

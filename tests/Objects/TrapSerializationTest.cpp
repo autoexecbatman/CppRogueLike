@@ -46,7 +46,7 @@ protected:
 		// Traps at the base, the race and the points.
 		finder.set_creature_class(CreatureClass::ROGUE);
 		finder.set_dexterity(13);
-		finder.playerRaceState = PlayerRaceState::DWARF;
+		finder.lifespan->race = PlayerRaceState::DWARF;
 		finder.set_creature_level(1);
 		finder.thiefSkillPoints.at(thief_skill_index(ThiefSkill::FIND_REMOVE_TRAPS)) = 40;
 	}

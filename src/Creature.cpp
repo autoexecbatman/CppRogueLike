@@ -3,6 +3,7 @@
 #include <concepts>
 #include <format>
 #include <memory>
+#include <optional>
 #include <ranges>
 #include <string>
 #include <type_traits>
@@ -10,6 +11,7 @@
 #include <variant>
 #include <vector>
 
+#include "AbilityAllocation.h"
 #include "Actor.h"
 #include "Ai.h"
 #include "AiMonsterConfused.h"
@@ -30,12 +32,14 @@
 #include "InventoryData.h"
 #include "InventoryOperations.h"
 #include "Item.h"
+#include "Lifespan.h"
 #include "Map.h"
 #include "MessageSystem.h"
 #include "MonsterAttacker.h"
 #include "Persistent.h"
 #include "Pickable.h"
 #include "Player.h"
+#include "PlayerRaceState.h"
 #include "ShopKeeper.h"
 #include "TileConfig.h"
 #include "TurnSchedule.h"
@@ -237,6 +241,19 @@ void Creature::load(const json& source)
 	hitDie = source.at("hitDie").get<int>();
 	attacksPerRound = source.at("attacksPerRound").get<float>();
 	actionDelay = source.at("actionDelay").get<int>();
+	// Null for a monster, which has no age; every field of a character's is required.
+	const json& lifespanRecord = source.at("lifespan");
+	lifespan.reset();
+	if (!lifespanRecord.is_null())
+	{
+		lifespan = Lifespan{
+			static_cast<PlayerRaceState>(lifespanRecord.at("race").get<int>()),
+			lifespanRecord.at("startingAge").get<int>(),
+			lifespanRecord.at("maximumAge").get<int>(),
+			lifespanRecord.at("yearsLived").get<int>(),
+			lifespanRecord.at("magicalYears").get<int>()
+		};
+	}
 	nextActionTime = source.at("nextActionTime").get<int>();
 	damageResistance = source.at("dr").get<int>();
 	thaco = source.at("thaco").get<int>();
@@ -388,6 +405,15 @@ void Creature::save(json& output)
 	output["hitDie"] = hitDie;
 	output["attacksPerRound"] = attacksPerRound;
 	output["actionDelay"] = actionDelay;
+	output["lifespan"] = lifespan.has_value()
+		? json{
+			  { "race", static_cast<int>(lifespan->race) },
+			  { "startingAge", lifespan->startingAge },
+			  { "maximumAge", lifespan->maximumAge },
+			  { "yearsLived", lifespan->yearsLived },
+			  { "magicalYears", lifespan->magicalYears }
+		  }
+		: json(nullptr);
 	output["nextActionTime"] = nextActionTime;
 	output["dr"] = damageResistance;
 	output["thaco"] = thaco;
@@ -1588,7 +1614,8 @@ void Creature::die(GameContext& ctx)
 
 int Creature::get_exceptional_strength() const noexcept
 {
-	int exceptional = exceptionalStrength;
+	// The creature's own percentile, after what age has taken from it.
+	int exceptional = lifespan ? aged_exceptional_strength(*lifespan, exceptionalStrength) : exceptionalStrength;
 
 	// A worn item that sets Strength to 18 brings its own percentile; the higher counts.
 	auto from_setting_item = [&exceptional](const auto& boost)
@@ -1627,6 +1654,85 @@ const Gauntlets* Creature::get_gauntlets_beside_girdle() const noexcept
 		}
 	}
 	return wearsGiantStrength ? strengthGauntlets : nullptr;
+}
+
+namespace
+{
+// Says so when an age has moved into a later band of Table 12.
+//
+// Example, a human going from 44 to 45:
+//   announce_new_band(AgeCategory::YOUNG, AgeCategory::MIDDLE_AGE, ctx);   // "You feel the years: middle age."
+void announce_new_band(AgeCategory before, AgeCategory after, GameContext& ctx)
+{
+	if (after <= before)
+	{
+		return;
+	}
+	ctx.messageSystem->message(ColorPairId::YELLOW_BLACK, std::format("You feel the years: {}.", age_category_name(after)), MessageCompletion::FINISHED);
+}
+
+// The ability score a buff type raises or lowers, or nothing for a buff that is not one.
+//
+// Example:
+//   ability_of_buff(BuffType::WISDOM);   // -> Ability::WISDOM
+//   ability_of_buff(BuffType::SPEED);    // -> std::nullopt
+std::optional<Ability> ability_of_buff(BuffType type)
+{
+	if (type == BuffType::STRENGTH)
+	{
+		return Ability::STRENGTH;
+	}
+	if (type == BuffType::DEXTERITY)
+	{
+		return Ability::DEXTERITY;
+	}
+	if (type == BuffType::CONSTITUTION)
+	{
+		return Ability::CONSTITUTION;
+	}
+	if (type == BuffType::INTELLIGENCE)
+	{
+		return Ability::INTELLIGENCE;
+	}
+	if (type == BuffType::WISDOM)
+	{
+		return Ability::WISDOM;
+	}
+	if (type == BuffType::CHARISMA)
+	{
+		return Ability::CHARISMA;
+	}
+	return std::nullopt;
+}
+} // namespace
+
+void Creature::add_magical_years(int years, GameContext& ctx)
+{
+	assert(lifespan && "add_magical_years: a creature with no lifespan was aged");
+	assert(ctx.messageSystem && "add_magical_years: called without a messageSystem");
+
+	// The band is read on both sides of the change, so nothing stores it.
+	const AgeCategory before = age_category(lifespan->physical_age(), lifespan->race);
+	lifespan->magicalYears += years;
+	announce_new_band(before, age_category(lifespan->physical_age(), lifespan->race), ctx);
+}
+
+void Creature::pass_a_year(GameContext& ctx)
+{
+	assert(lifespan && "pass_a_year: a year passed for a creature with no lifespan");
+	assert(lifespan->race != PlayerRaceState::NONE && "pass_a_year: a year passed for a character with no race");
+	assert(ctx.messageSystem && "pass_a_year: called without a messageSystem");
+
+	const AgeCategory before = age_category(lifespan->physical_age(), lifespan->race);
+	++lifespan->yearsLived;
+	announce_new_band(before, age_category(lifespan->physical_age(), lifespan->race), ctx);
+
+	// Only time spends the life span, so the natural age is the one that reaches it.
+	if (lifespan->natural_age() >= lifespan->maximumAge)
+	{
+		ctx.messageSystem->message(ColorPairId::RED_BLACK, "You die of old age.", MessageCompletion::FINISHED);
+		die(ctx);
+	}
 }
 
 int Creature::get_action_delay() const noexcept
@@ -1696,6 +1802,15 @@ int Creature::calculate_effective_stat(int base_value, BuffType type) const noex
 		highestSet = std::max(highestSet, effect.setTo);
 		count_addition(effect.add);
 		wearsGiantStrength = wearsGiantStrength || is_giant_strength_girdle(*worn.item);
+	}
+
+	// Ageing counts as an addition, read from the lifespan on every call.
+	if (lifespan)
+	{
+		if (const std::optional<Ability> ability = ability_of_buff(type))
+		{
+			count_addition(ageing_change(*lifespan, *ability, exceptionalStrength));
+		}
 	}
 
 	// AD&D 2e: SET effects replace base (if higher), ADD effects stack

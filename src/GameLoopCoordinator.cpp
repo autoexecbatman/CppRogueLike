@@ -26,6 +26,7 @@
 #include "InputHandler.h"
 #include "InputSystem.h"
 #include "LevelManager.h"
+#include "Lifespan.h"
 #include "Map.h"
 #include "MenuManager.h"
 #include "MessageSystem.h"
@@ -492,6 +493,13 @@ void GameLoopCoordinator::apply_round_upkeep(GameContext& ctx)
 
 		ctx.hungerSystem->increase_hunger(ctx, 1);
 		ctx.hungerSystem->apply_hunger_effects(ctx);
+
+		// A year of the owner's calendar ends on this round.
+		if (thisRound % ROUNDS_PER_YEAR == 0)
+		{
+			ctx.player()->pass_a_year(ctx);
+			assert(ctx.player()->lifespan->yearsLived == thisRound / ROUNDS_PER_YEAR && "apply_round_upkeep: the years lived disagree with the rounds run");
+		}
 
 		// Erased at the end of the round they died in, so the dead are fed no later round.
 		ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);

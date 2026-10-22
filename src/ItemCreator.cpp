@@ -55,7 +55,8 @@ ItemBehavior create_behavior(const ItemParams& params)
 			params.duration,
 			params.durationUnit,
 			params.consumableBuffType,
-			params.application
+			params.application,
+			params.agesYears
 		};
 	}
 

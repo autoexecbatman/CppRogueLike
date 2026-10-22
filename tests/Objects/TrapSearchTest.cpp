@@ -60,7 +60,7 @@ protected:
 	void become(CreatureClass creatureClass, PlayerRaceState race)
 	{
 		searcher.set_creature_class(creatureClass);
-		searcher.playerRaceState = race;
+		searcher.lifespan->race = race;
 	}
 
 	// A human thief whose Find/Remove Traps is THIEF_SKILL.
@@ -184,7 +184,7 @@ TEST_F(TrapSearchTest, ADwarfCannotFindADartTrap)
 TEST_F(TrapSearchTest, ADwarfThiefLooksForBothKindsAndTakesTheThiefsTime)
 {
 	ASSERT_NO_FATAL_FAILURE(become_thief());
-	searcher.playerRaceState = PlayerRaceState::DWARF;
+	searcher.lifespan->race = PlayerRaceState::DWARF;
 	const Trap& pit = place(TrapType::PIT, ADJACENT_TILE);
 	const Trap& dart = place(TrapType::DART, OTHER_ADJACENT_TILE);
 	mock.dice.set_next_roll(2);

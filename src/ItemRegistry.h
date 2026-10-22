@@ -66,6 +66,8 @@ struct ItemParams
 	DiceExpr duration{};
 	// Whether that duration counts rounds or turns.
 	DurationUnit durationUnit{ DurationUnit::ROUNDS };
+	// Years of magical ageing a consumable costs its drinker. Only CONSUMABLE reads it.
+	int agesYears{ 0 };
 
 	// A magical helm's, ring's or ability item's effect.
 	MagicalEffect effect{ MagicalEffect::NONE };

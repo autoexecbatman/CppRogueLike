@@ -191,7 +191,7 @@ TEST_F(ConstitutionTrackerTest, AWizardsChangeCountsOnlyTheLevelsThatRolled)
 TEST_F(ConstitutionTrackerTest, AHalflingPaysItsRacialAdjustment)
 {
 	make_player(CreatureClass::FIGHTER, 17);
-	player->playerRaceState = PlayerRaceState::HALFLING;
+	player->lifespan->race = PlayerRaceState::HALFLING;
 	const int allocatedStrength = player->get_strength();
 	const int allocatedDexterity = player->get_dexterity();
 
@@ -206,7 +206,7 @@ TEST_F(ConstitutionTrackerTest, AHalflingPaysItsRacialAdjustment)
 TEST_F(ConstitutionTrackerTest, AHumanPaysNothing)
 {
 	make_player(CreatureClass::FIGHTER, 17);
-	player->playerRaceState = PlayerRaceState::HUMAN;
+	player->lifespan->race = PlayerRaceState::HUMAN;
 	const int allocatedStrength = player->get_strength();
 
 	EXPECT_TRUE(player->pay_racial_adjustments().empty());

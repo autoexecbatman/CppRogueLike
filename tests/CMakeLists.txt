@@ -38,6 +38,8 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/TurnScheduleTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/PlayerActionCostTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/PotionOfSpeedTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/LifespanTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CharacterAgeingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/AttackStrengthTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/AttackerTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/WornResistanceTest.cpp
@@ -255,6 +257,7 @@ set(PARENT_SOURCES
     # Actor
     ${PARENT_SOURCE_DIR}/Actor.cpp
     ${PARENT_SOURCE_DIR}/AbilityAllocation.cpp
+    ${PARENT_SOURCE_DIR}/Lifespan.cpp
     ${PARENT_SOURCE_DIR}/ThiefSkills.cpp
     ${PARENT_SOURCE_DIR}/MenuThiefSkills.cpp
     ${PARENT_SOURCE_DIR}/Encumbrance.cpp

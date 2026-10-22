@@ -278,6 +278,11 @@ bool use(Consumable& consumable, Item& owner, Creature& wearer, GameContext& ctx
 	}
 	}
 
+	// The year a potion of speed costs comes with drinking it, whatever else it did.
+	if (consumable.agesYears != 0)
+	{
+		wearer.add_magical_years(consumable.agesYears, ctx);
+	}
 	return consume_item(owner, wearer);
 }
 
@@ -829,6 +834,7 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 				output["durationUnit"] = encode_duration_unit(consumable.durationUnit);
 				output["buffType"] = encode_buff_type(consumable.buffType);
 				output["application"] = encode_buff_application(consumable.application);
+				output["agesYears"] = consumable.agesYears;
 			},
 			[&output](const Weapon& weapon)
 			{
@@ -922,6 +928,7 @@ ItemBehavior load_behavior(const json& source)
 		consumable.durationUnit = parse_duration_unit(source.at("durationUnit").get<std::string>());
 		consumable.buffType = parse_buff_type(source.at("buffType").get<std::string>());
 		consumable.application = parse_buff_application(source.at("application").get<std::string>());
+		consumable.agesYears = source.at("agesYears").get<int>();
 		return consumable;
 	}
 

@@ -41,7 +41,7 @@ protected:
 	// the trap is known and unsprung when the test proper begins.
 	void find(Trap& pit)
 	{
-		victim.playerRaceState = PlayerRaceState::DWARF;
+		victim.lifespan->race = PlayerRaceState::DWARF;
 		mock.dice.set_next_roll(1);
 		ASSERT_EQ(pit.search(victim, ctx), TrapSearchResult::FOUND);
 	}
