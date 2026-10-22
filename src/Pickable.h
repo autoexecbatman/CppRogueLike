@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 
 #include <format>
 #include <stdexcept>
@@ -18,6 +19,7 @@
 #include "MagicalItemEffects.h"
 #include "Persistent.h"
 #include "TargetMode.h"
+#include "TurnSchedule.h"
 #include "Vector2D.h"
 #include "Weapons.h"
 
@@ -228,6 +230,63 @@ inline HelmCommand parse_helm_command(std::string_view name)
 	throw std::runtime_error(std::format("unknown helm command '{}'", name));
 }
 
+// Every unit a duration can be written in.
+inline constexpr std::array<DurationUnit, 2> ALL_DURATION_UNIT = {
+	DurationUnit::ROUNDS,
+	DurationUnit::TURNS,
+};
+
+// The name a record holds for a duration's unit.
+//
+// Example:
+//   encode_duration_unit(DurationUnit::TURNS);   // -> "turns"
+inline std::string_view encode_duration_unit(DurationUnit unit)
+{
+	switch (unit)
+	{
+	case DurationUnit::ROUNDS:
+	{
+		return "rounds";
+	}
+	case DurationUnit::TURNS:
+	{
+		return "turns";
+	}
+	}
+
+	assert(false && "encode_duration_unit: a DurationUnit with no name");
+	return "rounds";
+}
+
+// The unit a record names. Throws naming what it read.
+//
+// Example:
+//   parse_duration_unit("turns");   // -> DurationUnit::TURNS
+//   parse_duration_unit("hours");   // throws std::runtime_error
+inline DurationUnit parse_duration_unit(std::string_view name)
+{
+	if (name == "rounds")
+	{
+		return DurationUnit::ROUNDS;
+	}
+	if (name == "turns")
+	{
+		return DurationUnit::TURNS;
+	}
+
+	throw std::runtime_error(std::format("unknown duration unit '{}'", name));
+}
+
+// The unit after this one, wrapping, for the editor's toggle.
+//
+// Example:
+//   next_duration_unit(DurationUnit::ROUNDS);   // -> DurationUnit::TURNS
+//   next_duration_unit(DurationUnit::TURNS);    // -> DurationUnit::ROUNDS
+[[nodiscard]] inline DurationUnit next_duration_unit(DurationUnit unit)
+{
+	return unit == DurationUnit::ROUNDS ? DurationUnit::TURNS : DurationUnit::ROUNDS;
+}
+
 // ========== Plain data structs (no base class, no virtuals) ==========
 
 struct Consumable
@@ -235,8 +294,10 @@ struct Consumable
 	ConsumableEffect effect{ ConsumableEffect::NONE };
 	// The hit points healed or the buff's value, rolled once when used.
 	DiceExpr amount{};
-	// The buff's duration in turns, rolled once when drunk.
-	DiceExpr durationTurns{};
+	// The buff's duration, rolled once when drunk, in durationUnit.
+	DiceExpr duration{};
+	// Whether that duration counts rounds or turns.
+	DurationUnit durationUnit{ DurationUnit::ROUNDS };
 	BuffType buffType{ BuffType::NONE };
 	BuffApplication application{ BuffApplication::ADD };
 };
@@ -275,7 +336,10 @@ struct TargetedScroll
 	int damage{ 0 };
 	int confuseTurns{ 0 };
 	BuffType buffType{ BuffType::NONE };
-	int buffDuration{ 0 };
+	// The effect's duration, rolled once when read, in durationUnit.
+	DiceExpr duration{};
+	// Whether that duration counts rounds or turns.
+	DurationUnit durationUnit{ DurationUnit::ROUNDS };
 };
 
 struct Teleporter

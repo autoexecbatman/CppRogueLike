@@ -61,11 +61,11 @@ struct ItemParams
 	int damage{ 0 };
 	// How many turns a targeted scroll's confusion lasts.
 	int confuseTurns{ 0 };
-	// How many rounds a targeted scroll's effect lasts. Only TARGETED_SCROLL reads it.
-	int duration{ 0 };
-	// How many turns a consumable's buff lasts, rolled when it is drunk. Only CONSUMABLE
-	// reads it; a bare number is a fixed duration.
-	DiceExpr durationTurns{};
+	// How long a consumable's buff or a targeted scroll's effect lasts, rolled when it is
+	// used, in durationUnit; a bare number is a fixed duration.
+	DiceExpr duration{};
+	// Whether that duration counts rounds or turns.
+	DurationUnit durationUnit{ DurationUnit::ROUNDS };
 
 	// A magical helm's, ring's or ability item's effect.
 	MagicalEffect effect{ MagicalEffect::NONE };

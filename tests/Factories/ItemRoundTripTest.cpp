@@ -67,8 +67,8 @@ void expect_same_item(const std::string& key, const ItemParams& before, const It
 	EXPECT_EQ(before.range, after.range) << key << ".range";
 	EXPECT_EQ(before.damage, after.damage) << key << ".damage";
 	EXPECT_EQ(before.confuseTurns, after.confuseTurns) << key << ".confuseTurns";
-	EXPECT_EQ(before.duration, after.duration) << key << ".duration";
-	EXPECT_EQ(to_text(before.durationTurns), to_text(after.durationTurns)) << key << ".durationTurns";
+	EXPECT_EQ(to_text(before.duration), to_text(after.duration)) << key << ".duration";
+	EXPECT_EQ(before.durationUnit, after.durationUnit) << key << ".durationUnit";
 
 	EXPECT_EQ(before.effect, after.effect) << key << ".effect";
 	EXPECT_EQ(before.effectBonus, after.effectBonus) << key << ".effectBonus";
@@ -270,9 +270,29 @@ TEST_F(ItemRoundTripTest, ADurationThatIsNotDiceIsRefused)
 	std::ifstream source(Paths::resolve(Paths::ITEMS));
 	ASSERT_TRUE(source.is_open()) << "cannot read the real items file";
 	nlohmann::json root = nlohmann::json::parse(source);
-	root.at("invisibility_potion")["durationTurns"] = "d4";
+	root.at("invisibility_potion")["duration"] = "d4";
 	std::ofstream(roundTrip) << root.dump(4);
 
 	ItemRegistry damaged{};
 	EXPECT_ANY_THROW(damaged.load(roundTrip.string()));
+}
+
+// A duration with no unit, or a unit this build does not know, is refused rather than read as rounds.
+TEST_F(ItemRoundTripTest, ADurationWithoutAKnownUnitIsRefused)
+{
+	std::ifstream source(Paths::resolve(Paths::ITEMS));
+	ASSERT_TRUE(source.is_open()) << "cannot read the real items file";
+	const nlohmann::json real = nlohmann::json::parse(source);
+
+	nlohmann::json missing = real;
+	missing.at("invisibility_potion").erase("durationUnit");
+	std::ofstream(roundTrip) << missing.dump(4);
+	ItemRegistry withoutUnit{};
+	EXPECT_ANY_THROW(withoutUnit.load(roundTrip.string()));
+
+	nlohmann::json unknown = real;
+	unknown.at("scroll_sleep")["durationUnit"] = "hours";
+	std::ofstream(roundTrip) << unknown.dump(4);
+	ItemRegistry unknownUnit{};
+	EXPECT_ANY_THROW(unknownUnit.load(roundTrip.string()));
 }

@@ -131,7 +131,7 @@ protected:
 TEST_F(DurationWordingTest, ABuffPotionNamesItsRounds)
 {
 	Item potion{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "potion", ColorPairId::WHITE_BLACK } };
-	Consumable consumable{ ConsumableEffect::ADD_BUFF, DiceExpr{ 0, 0, 1 }, DiceExpr{ 0, 0, 3 }, BuffType::STRENGTH, BuffApplication::ADD };
+	Consumable consumable{ ConsumableEffect::ADD_BUFF, DiceExpr{ 0, 0, 1 }, DiceExpr{ 0, 0, 3 }, DurationUnit::TURNS, BuffType::STRENGTH, BuffApplication::ADD };
 
 	// The potion is in no pack, so nothing is used up and use() answers false; the buff and
 	// its message come first.

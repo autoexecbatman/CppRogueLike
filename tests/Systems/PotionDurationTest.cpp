@@ -147,12 +147,14 @@ TEST_F(PotionDurationTest, ASavedPotionKeepsItsDice)
 	auto potion = ItemCreator::create("invisibility_potion", drinker().position, ctx);
 	nlohmann::json saved;
 	save_behavior(*potion->behavior, saved);
-	ASSERT_EQ(saved["durationTurns"], "1d4+2");
+	ASSERT_EQ(saved["duration"], "1d4+2");
+	ASSERT_EQ(saved["durationUnit"], "turns");
 
 	nlohmann::json resaved;
 	save_behavior(load_behavior(saved), resaved);
 
-	EXPECT_EQ(resaved["durationTurns"], "1d4+2");
+	EXPECT_EQ(resaved["duration"], "1d4+2");
+	EXPECT_EQ(resaved["durationUnit"], "turns");
 }
 
 // end of file: PotionDurationTest.cpp

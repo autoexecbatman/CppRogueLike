@@ -203,3 +203,12 @@ TEST(TurnScheduleTest, ABiggerDelayCostsMoreTime)
 	EXPECT_GT(halfPace, ordinary) << "twice the delay did not take longer";
 	EXPECT_LT(doublePace, ordinary) << "half the delay did not act sooner";
 }
+
+// A count of rounds is itself; a turn is ten rounds, "Ten combat rounds equal a turn" (PHB,
+// PDF page 184), so the figure here is written out rather than read from the constant.
+TEST(TurnScheduleTest, ADurationInTurnsIsTenRoundsATurn)
+{
+	EXPECT_EQ(rounds_in(8, DurationUnit::ROUNDS), 8);
+	EXPECT_EQ(rounds_in(3, DurationUnit::TURNS), 30);
+	EXPECT_EQ(rounds_in(0, DurationUnit::TURNS), 0);
+}

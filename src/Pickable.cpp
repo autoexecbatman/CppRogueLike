@@ -254,8 +254,8 @@ bool use(Consumable& consumable, Item& owner, Creature& wearer, GameContext& ctx
 
 	case ConsumableEffect::ADD_BUFF:
 	{
-		// Rolled once, at the drink, in the book's turns.
-		const int durationRounds = roll_dice(ctx.dice, consumable.durationTurns) * ROUNDS_PER_TURN;
+		// Rolled once, at the drink, in the unit the book prints it in.
+		const int durationRounds = rounds_in(roll_dice(ctx.dice, consumable.duration), consumable.durationUnit);
 		const int value = roll_dice(ctx.dice, consumable.amount);
 		ctx.buffSystem->add_buff(wearer, consumable.buffType, value, durationRounds, consumable.application, ctx.gameState->get_time());
 		ctx.messageSystem->message(
@@ -372,6 +372,8 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 	// FOV_BUFF and AUTO_NEAREST are synchronous - no targeting cursor needed
 	if (targetScroll.targetMode == TargetMode::FOV_BUFF)
 	{
+		// Rolled once for the reading, so every creature it reaches keeps it as long.
+		const int durationRounds = rounds_in(roll_dice(ctx.dice, targetScroll.duration), targetScroll.durationUnit);
 		int affected = 0;
 		for (const auto& creature : *ctx.creatures)
 		{
@@ -389,7 +391,7 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 			// A scroll's effect is a spell: the target saves against it or takes it.
 			if (!SavingThrows::is_made(*creature, SavingThrow::SPELL, 0, ctx))
 			{
-				ctx.buffSystem->add_buff(*creature, targetScroll.buffType, 0, targetScroll.buffDuration, BuffApplication::ADD, ctx.gameState->get_time());
+				ctx.buffSystem->add_buff(*creature, targetScroll.buffType, 0, durationRounds, BuffApplication::ADD, ctx.gameState->get_time());
 				++affected;
 			}
 		}
@@ -823,7 +825,8 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 				output["type"] = encode_pickable_type(PickableType::CONSUMABLE);
 				output["effect"] = encode_consumable_effect(consumable.effect);
 				output["amount"] = to_text(consumable.amount);
-				output["durationTurns"] = to_text(consumable.durationTurns);
+				output["duration"] = to_text(consumable.duration);
+				output["durationUnit"] = encode_duration_unit(consumable.durationUnit);
 				output["buffType"] = encode_buff_type(consumable.buffType);
 				output["application"] = encode_buff_application(consumable.application);
 			},
@@ -846,7 +849,8 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 				output["damage"] = targetedScroll.damage;
 				output["confuseTurns"] = targetedScroll.confuseTurns;
 				output["buffType"] = encode_buff_type(targetedScroll.buffType);
-				output["buffDuration"] = targetedScroll.buffDuration;
+				output["duration"] = to_text(targetedScroll.duration);
+				output["durationUnit"] = encode_duration_unit(targetedScroll.durationUnit);
 			},
 			[&output]([[maybe_unused]] const Teleporter& teleporter)
 			{ output["type"] = encode_pickable_type(PickableType::TELEPORTER); },
@@ -914,7 +918,8 @@ ItemBehavior load_behavior(const json& source)
 		Consumable consumable;
 		consumable.effect = parse_consumable_effect(source.at("effect").get<std::string>());
 		consumable.amount = parse_dice_expression(source.at("amount").get<std::string>());
-		consumable.durationTurns = parse_dice_expression(source.at("durationTurns").get<std::string>());
+		consumable.duration = parse_dice_expression(source.at("duration").get<std::string>());
+		consumable.durationUnit = parse_duration_unit(source.at("durationUnit").get<std::string>());
 		consumable.buffType = parse_buff_type(source.at("buffType").get<std::string>());
 		consumable.application = parse_buff_application(source.at("application").get<std::string>());
 		return consumable;
@@ -944,7 +949,8 @@ ItemBehavior load_behavior(const json& source)
 		targetedScroll.damage = source.at("damage").get<int>();
 		targetedScroll.confuseTurns = source.at("confuseTurns").get<int>();
 		targetedScroll.buffType = parse_buff_type(source.at("buffType").get<std::string>());
-		targetedScroll.buffDuration = source.at("buffDuration").get<int>();
+		targetedScroll.duration = parse_dice_expression(source.at("duration").get<std::string>());
+		targetedScroll.durationUnit = parse_duration_unit(source.at("durationUnit").get<std::string>());
 		return targetedScroll;
 	}
 

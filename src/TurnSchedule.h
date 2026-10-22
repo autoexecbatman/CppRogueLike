@@ -64,6 +64,36 @@ inline constexpr int ROUNDS_PER_DAY = 24 * ROUNDS_PER_HOUR;
 // equal a turn" (PHB page 184).
 inline constexpr int ROUNDS_PER_TURN = 10;
 
+// The unit a duration is printed in: rounds, or turns of ten rounds each.
+enum class DurationUnit
+{
+	ROUNDS,
+	TURNS
+};
+
+// A count of the given unit, in rounds.
+//
+// Example:
+//   rounds_in(8, DurationUnit::ROUNDS);   // -> 8
+//   rounds_in(3, DurationUnit::TURNS);    // -> 30
+[[nodiscard]] constexpr int rounds_in(int count, DurationUnit unit) noexcept
+{
+	switch (unit)
+	{
+	case DurationUnit::ROUNDS:
+	{
+		return count;
+	}
+	case DurationUnit::TURNS:
+	{
+		return count * ROUNDS_PER_TURN;
+	}
+	}
+
+	assert(false && "rounds_in: a DurationUnit with no conversion");
+	return count;
+}
+
 // What an action nominally costing `baseCost` actually costs a being whose own ordinary
 // action takes `actionDelay`. A being that acts more often has a smaller delay and so
 // pays less for the same action, which is the whole of what pace does - and it reaches

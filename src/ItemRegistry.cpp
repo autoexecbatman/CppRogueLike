@@ -91,8 +91,8 @@ nlohmann::json encode_item(const ItemParams& params)
 	record["range"] = params.range;
 	record["damage"] = params.damage;
 	record["confuseTurns"] = params.confuseTurns;
-	record["duration"] = params.duration;
-	record["durationTurns"] = to_text(params.durationTurns);
+	record["duration"] = to_text(params.duration);
+	record["durationUnit"] = encode_duration_unit(params.durationUnit);
 	record["effect"] = encode_magical_effect(params.effect);
 	record["effectBonus"] = params.effectBonus;
 	record["strBonus"] = params.strBonus;
@@ -161,8 +161,8 @@ ItemParams parse_item(const std::string& key, const nlohmann::json& record)
 	params.range = required_field(record, key, "range");
 	params.damage = required_field(record, key, "damage");
 	params.confuseTurns = required_field(record, key, "confuseTurns");
-	params.duration = required_field(record, key, "duration");
-	params.durationTurns = parse_dice_expression(required_field(record, key, "durationTurns").get<std::string>());
+	params.duration = parse_dice_expression(required_field(record, key, "duration").get<std::string>());
+	params.durationUnit = parse_duration_unit(required_field(record, key, "durationUnit").get<std::string>());
 	params.effect = parse_magical_effect(required_field(record, key, "effect").get<std::string>());
 	params.effectBonus = required_field(record, key, "effectBonus");
 	params.strBonus = required_field(record, key, "strBonus");

@@ -867,21 +867,21 @@ std::string ItemEditor::field_label(FieldId field) const
 	{
 		return "Amount Bonus";
 	}
-	case FieldId::DURATION_TURNS_DICE:
+	case FieldId::DURATION_DICE:
 	{
-		return "Potion Turns Dice";
+		return "Duration Dice";
 	}
-	case FieldId::DURATION_TURNS_SIDES:
+	case FieldId::DURATION_SIDES:
 	{
-		return "Potion Turns Sides";
+		return "Duration Sides";
 	}
-	case FieldId::DURATION_TURNS_BONUS:
+	case FieldId::DURATION_BONUS:
 	{
-		return "Potion Turns Bonus";
+		return "Duration Bonus";
 	}
-	case FieldId::DURATION:
+	case FieldId::DURATION_UNIT:
 	{
-		return "Scroll Rounds";
+		return "Duration Unit";
 	}
 	case FieldId::TARGET_MODE:
 	{
@@ -1047,21 +1047,21 @@ std::string ItemEditor::field_value(FieldId field) const
 	{
 		return std::format("{}", params.consumableAmount.bonus);
 	}
-	case FieldId::DURATION_TURNS_DICE:
+	case FieldId::DURATION_DICE:
 	{
-		return std::format("{} ({})", params.durationTurns.num, to_text(params.durationTurns));
+		return std::format("{} ({})", params.duration.num, to_text(params.duration));
 	}
-	case FieldId::DURATION_TURNS_SIDES:
+	case FieldId::DURATION_SIDES:
 	{
-		return std::format("{}", params.durationTurns.sides);
+		return std::format("{}", params.duration.sides);
 	}
-	case FieldId::DURATION_TURNS_BONUS:
+	case FieldId::DURATION_BONUS:
 	{
-		return std::format("{}", params.durationTurns.bonus);
+		return std::format("{}", params.duration.bonus);
 	}
-	case FieldId::DURATION:
+	case FieldId::DURATION_UNIT:
 	{
-		return std::format("{}", params.duration);
+		return std::string{ encode_duration_unit(params.durationUnit) };
 	}
 	case FieldId::TARGET_MODE:
 	{
@@ -1165,7 +1165,7 @@ bool ItemEditor::field_is_string(FieldId field) const
 
 bool ItemEditor::field_is_toggle(FieldId field) const
 {
-	return field == FieldId::ITEM_CLASS || field == FieldId::PICKABLE_TYPE || field == FieldId::CONSUMABLE_EFFECT || field == FieldId::CONSUMABLE_BUFF || field == FieldId::TARGET_MODE || field == FieldId::SCROLL_ANIM || field == FieldId::RANGED || field == FieldId::HAND_REQUIREMENT || field == FieldId::WEAPON_SIZE || field == FieldId::EFFECT || field == FieldId::COLOR || field == FieldId::APPLICATION;
+	return field == FieldId::ITEM_CLASS || field == FieldId::PICKABLE_TYPE || field == FieldId::CONSUMABLE_EFFECT || field == FieldId::CONSUMABLE_BUFF || field == FieldId::DURATION_UNIT || field == FieldId::TARGET_MODE || field == FieldId::SCROLL_ANIM || field == FieldId::RANGED || field == FieldId::HAND_REQUIREMENT || field == FieldId::WEAPON_SIZE || field == FieldId::EFFECT || field == FieldId::COLOR || field == FieldId::APPLICATION;
 }
 
 void ItemEditor::field_adjust(FieldId field, int delta)
@@ -1226,26 +1226,21 @@ void ItemEditor::field_adjust(FieldId field, int delta)
 		params.consumableAmount.bonus = clamp_val(params.consumableAmount.bonus, delta, 0, 9999);
 		break;
 	}
-	case FieldId::DURATION_TURNS_DICE:
+	case FieldId::DURATION_DICE:
 	{
 		// No dice is a fixed duration; any dice need a die to roll, and a d2 is the least.
-		params.durationTurns.num = clamp_val(params.durationTurns.num, delta, 0, 99);
-		params.durationTurns.sides = params.durationTurns.num == 0 ? 0 : std::max(params.durationTurns.sides, 2);
+		params.duration.num = clamp_val(params.duration.num, delta, 0, 99);
+		params.duration.sides = params.duration.num == 0 ? 0 : std::max(params.duration.sides, 2);
 		break;
 	}
-	case FieldId::DURATION_TURNS_SIDES:
+	case FieldId::DURATION_SIDES:
 	{
-		params.durationTurns.sides = params.durationTurns.num == 0 ? 0 : clamp_val(params.durationTurns.sides, delta, 2, 20);
+		params.duration.sides = params.duration.num == 0 ? 0 : clamp_val(params.duration.sides, delta, 2, 20);
 		break;
 	}
-	case FieldId::DURATION_TURNS_BONUS:
+	case FieldId::DURATION_BONUS:
 	{
-		params.durationTurns.bonus = clamp_val(params.durationTurns.bonus, delta, 0, 99);
-		break;
-	}
-	case FieldId::DURATION:
-	{
-		params.duration = clamp_val(params.duration, delta, 0, 9999);
+		params.duration.bonus = clamp_val(params.duration.bonus, delta, 0, 9999);
 		break;
 	}
 	case FieldId::RANGE:
@@ -1354,6 +1349,11 @@ void ItemEditor::field_toggle(FieldId field)
 	case FieldId::CONSUMABLE_BUFF:
 	{
 		params.consumableBuffType = next_buff_type(params.consumableBuffType);
+		break;
+	}
+	case FieldId::DURATION_UNIT:
+	{
+		params.durationUnit = next_duration_unit(params.durationUnit);
 		break;
 	}
 	case FieldId::TARGET_MODE:
