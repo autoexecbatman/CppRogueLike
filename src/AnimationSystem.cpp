@@ -57,7 +57,8 @@ void AnimationSystem::spawn_blood_burst(Vector2D worldPosition, int count)
 			.spawnTime = now,
 			.duration = dur,
 			.shape = ParticleShape::CIRCLE,
-			.additive = false });
+			.additive = false,
+		});
 	}
 }
 
@@ -101,7 +102,8 @@ void AnimationSystem::spawn_spark_burst(
 			.spawnTime = now,
 			.duration = dur,
 			.shape = ParticleShape::CIRCLE,
-			.additive = true });
+			.additive = true,
+		});
 	}
 }
 
@@ -136,7 +138,8 @@ void AnimationSystem::spawn_lightning_path(
 			.spawnTime = now,
 			.duration = 0.18f,
 			.shape = ParticleShape::TILE,
-			.additive = true });
+			.additive = true,
+		});
 	}
 }
 
@@ -164,7 +167,8 @@ void AnimationSystem::spawn_effect(
 		.spawnTime = static_cast<float>(GetTime()),
 		.duration = duration,
 		.shape = ParticleShape::TILE,
-		.additive = false });
+		.additive = false,
+	});
 }
 
 void AnimationSystem::spawn_projectile(
@@ -203,7 +207,8 @@ void AnimationSystem::spawn_projectile(
 		.blue = blue,
 		.spawnTime = now,
 		.maxDuration = (dist / speed) * 3.0f + 1.0f,
-		.onArrive = std::move(onArrive) });
+		.onArrive = std::move(onArrive),
+	});
 }
 
 void AnimationSystem::update_and_render(const Renderer& renderer)
@@ -266,7 +271,7 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 			lerp_channel(particle.red, particle.redEnd, lifeFraction),
 			lerp_channel(particle.green, particle.greenEnd, lifeFraction),
 			lerp_channel(particle.blue, particle.blueEnd, lifeFraction),
-			alpha
+			alpha,
 		};
 
 		if (particle.additive)
@@ -286,7 +291,10 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 		{
 			int sizePixels = static_cast<int>(particle.radius);
 			renderer.draw_tile_screen_color_sized(
-				Vector2D{ screen_x - sizePixels / 2, screen_y - sizePixels / 2 },
+				Vector2D{
+					screen_x - sizePixels / 2,
+					screen_y - sizePixels / 2,
+				},
 				sizePixels,
 				particle.tile,
 				tint);
@@ -369,7 +377,8 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 				.spawnTime = now,
 				.duration = 0.12f,
 				.shape = ParticleShape::TILE,
-				.additive = true });
+				.additive = true,
+			});
 		}
 
 		// Render projectile head
@@ -428,7 +437,8 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 			.spawnTime = now,
 			.duration = random_range(0.06f, 0.14f),
 			.shape = ParticleShape::CIRCLE,
-			.additive = true });
+			.additive = true,
+		});
 	}
 
 	// Phase 1: fireball body - circles staggered by distance, dense at the core and sparse at the edge.
@@ -468,7 +478,8 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 			.spawnTime = spawnAt,
 			.duration = random_range(0.35f, 0.75f),
 			.shape = ParticleShape::CIRCLE,
-			.additive = true });
+			.additive = true,
+		});
 	}
 
 	// Phase 2: radial sparks - fast pixels at the blast edge, the "pop" of the explosion.
@@ -495,7 +506,8 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 			.spawnTime = now,
 			.duration = random_range(0.20f, 0.45f),
 			.shape = ParticleShape::PIXEL,
-			.additive = true });
+			.additive = true,
+		});
 	}
 
 	// Phase 3: embers - small count of rising pixels, subtle trailing effect only.
@@ -522,6 +534,7 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 			.spawnTime = now + random_range(0.15f, 0.55f),
 			.duration = random_range(0.7f, 1.4f),
 			.shape = ParticleShape::PIXEL,
-			.additive = true });
+			.additive = true,
+		});
 	}
 }

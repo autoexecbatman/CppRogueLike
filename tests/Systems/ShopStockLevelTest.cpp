@@ -70,7 +70,11 @@ TEST_F(ShopStockLevelTest, StocksForTheLevelItIsTold)
 
 	shop.generate_initial_inventory(20, ctx);
 
-	EXPECT_EQ(stocked_keys(shop), (std::vector<std::string>{ "splint_mail", "splint_mail", "splint_mail" }))
+	EXPECT_EQ(stocked_keys(shop), (std::vector<std::string>{
+									  "splint_mail",
+									  "splint_mail",
+									  "splint_mail",
+								  }))
 		<< "the stock was drawn at the manager's level, not the one the shop was told";
 }
 
@@ -82,7 +86,11 @@ TEST_F(ShopStockLevelTest, StocksForLevelOneWhenToldOne)
 
 	shop.generate_initial_inventory(1, ctx);
 
-	EXPECT_EQ(stocked_keys(shop), (std::vector<std::string>{ "studded_leather", "studded_leather", "studded_leather" }));
+	EXPECT_EQ(stocked_keys(shop), (std::vector<std::string>{
+									  "studded_leather",
+									  "studded_leather",
+									  "studded_leather",
+								  }));
 }
 
 // Being told the level is the whole of it: no level manager is consulted.

@@ -195,7 +195,7 @@ TEST_F(PlayerSerializationTest, AllRaces_SaveLoad)
 		PlayerRaceState::DWARF,
 		PlayerRaceState::HALFLING,
 		PlayerRaceState::GNOME,
-		PlayerRaceState::HALFELF
+		PlayerRaceState::HALFELF,
 	};
 
 	for (auto race : races)

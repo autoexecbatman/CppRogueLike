@@ -410,8 +410,14 @@ TEST_F(MapTest, SingleTileMap)
 TEST_F(MapTest, LargeCoordinates_HandledGracefully)
 {
 	// Very large coordinates should not crash
-	EXPECT_NO_THROW(map->get_tile_type(Vector2D{ std::numeric_limits<int>::max(), std::numeric_limits<int>::max() }));
-	EXPECT_NO_THROW(map->get_tile_type(Vector2D{ std::numeric_limits<int>::min(), std::numeric_limits<int>::min() }));
+	EXPECT_NO_THROW(map->get_tile_type(Vector2D{
+		std::numeric_limits<int>::max(),
+		std::numeric_limits<int>::max(),
+	}));
+	EXPECT_NO_THROW(map->get_tile_type(Vector2D{
+		std::numeric_limits<int>::min(),
+		std::numeric_limits<int>::min(),
+	}));
 }
 
 // ----------------------------------------------------------------------------
@@ -477,10 +483,16 @@ TEST_F(MapTest, WaterIsCrossedByWhateverGrantsSwimming)
 	const Vector2D pool{ 4, 4 };
 	map->set_tile(pool, TileType::WATER);
 
-	Creature wader{ Vector2D{ 3, 4 }, ActorData{ TileRef{}, "wader", ColorPairId::WHITE_BLACK } };
+	Creature wader{
+		Vector2D{ 3, 4 },
+		ActorData{ TileRef{}, "wader", ColorPairId::WHITE_BLACK },
+	};
 	EXPECT_FALSE(Pathfinding::can_enter(wader, pool, ctx)) << "water stopped nobody";
 
-	Creature spider{ Vector2D{ 3, 4 }, ActorData{ TileRef{}, "spider", ColorPairId::WHITE_BLACK } };
+	Creature spider{
+		Vector2D{ 3, 4 },
+		ActorData{ TileRef{}, "spider", ColorPairId::WHITE_BLACK },
+	};
 	spider.add_state(ActorState::CAN_SWIM);
 	EXPECT_TRUE(Pathfinding::can_enter(spider, pool, ctx));
 

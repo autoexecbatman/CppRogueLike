@@ -109,7 +109,11 @@ TEST_F(TrapSpawnTest, ASpawnedTrapLandsInTheTrapContainer)
 // The type roll is a d3 and each face names one trap: 1 a pit, 2 darts, 3 arrows.
 TEST_F(TrapSpawnTest, EachTypeRollNamesItsTrap)
 {
-	constexpr std::array expected{ TrapType::PIT, TrapType::DART, TrapType::ARROW };
+	constexpr std::array expected{
+		TrapType::PIT,
+		TrapType::DART,
+		TrapType::ARROW,
+	};
 	for (int face = 1; face <= static_cast<int>(expected.size()); ++face)
 	{
 		traps.clear();

@@ -639,7 +639,10 @@ void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx
 			// The item's own map sprite, sized under the row pitch so two rows cannot touch.
 			// Drawn before the text, which starts clear of it.
 			ctx.renderer->draw_tile_screen_color_sized(
-				Vector2D{ ROW_TEXT_X, row_top_y(tileSize, row) + ROW_ICON_INSET },
+				Vector2D{
+					ROW_TEXT_X,
+					row_top_y(tileSize, row) + ROW_ICON_INSET,
+				},
 				ROW_ICON_SIZE,
 				equipped->get_display_tile(),
 				WHITE);
@@ -666,7 +669,10 @@ void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx
 			// The slot's symbol, dimmed: an empty row names its slot twice, and the filled rows stay brightest.
 			assert(ctx.tileConfig && "render_equipment_screen: no tileConfig to read slot symbols from");
 			ctx.renderer->draw_tile_screen_color_sized(
-				Vector2D{ ROW_TEXT_X, row_top_y(tileSize, row) + ROW_ICON_INSET },
+				Vector2D{
+					ROW_TEXT_X,
+					row_top_y(tileSize, row) + ROW_ICON_INSET,
+				},
 				ROW_ICON_SIZE,
 				ctx.tileConfig->get(slot_symbol_key(slotInfo.slot)),
 				EMPTY_SLOT_TINT);
@@ -676,7 +682,10 @@ void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx
 
 		const ColorPairId textColor = (equipped || isCursorRow) ? rowColor : ColorPairId::BLUE_BLACK;
 		ctx.renderer->draw_text(
-			Vector2D{ ROW_TEXT_X + ROW_ICON_SIZE + ROW_ICON_GAP, row_text_y(tileSize, fontSize, row) },
+			Vector2D{
+				ROW_TEXT_X + ROW_ICON_SIZE + ROW_ICON_GAP,
+				row_text_y(tileSize, fontSize, row),
+			},
 			line,
 			textColor);
 	}
@@ -707,7 +716,12 @@ void InventoryUI::render_item_list_screen(GameContext& ctx)
 		{
 			msg = "No items fit this slot.";
 		}
-		ctx.renderer->draw_text(Vector2D{ 3 * tileSize, row_text_y(tileSize, fontSize, startY + 1) }, msg, ColorPairId::WHITE_BLACK);
+		ctx.renderer->draw_text(Vector2D{
+									3 * tileSize,
+									row_text_y(tileSize, fontSize, startY + 1),
+								},
+			msg,
+			ColorPairId::WHITE_BLACK);
 		return;
 	}
 
@@ -765,7 +779,12 @@ void InventoryUI::render_item_list_screen(GameContext& ctx)
 	}
 	if (scrollOffset + contentHeight < totalEntries)
 	{
-		ctx.renderer->draw_text(Vector2D{ arrowX, row_text_y(tileSize, fontSize, startY + contentHeight - 1) }, "vvv", ColorPairId::CYAN_BLACK);
+		ctx.renderer->draw_text(Vector2D{
+									arrowX,
+									row_text_y(tileSize, fontSize, startY + contentHeight - 1),
+								},
+			"vvv",
+			ColorPairId::CYAN_BLACK);
 	}
 }
 
@@ -826,7 +845,12 @@ void InventoryUI::render_detail_bar(const Player& player, GameContext& ctx)
 		}
 		if (!line2.empty())
 		{
-			ctx.renderer->draw_text(Vector2D{ tileSize, row_text_y(tileSize, fontSize, detailY + 1) }, line2, ColorPairId::WHITE_BLACK);
+			ctx.renderer->draw_text(Vector2D{
+										tileSize,
+										row_text_y(tileSize, fontSize, detailY + 1),
+									},
+				line2,
+				ColorPairId::WHITE_BLACK);
 		}
 	}
 
@@ -838,7 +862,10 @@ void InventoryUI::render_detail_bar(const Player& player, GameContext& ctx)
 	// and is cut to what the panel actually holds rather than running under the frame.
 	const int keybindWidth = ctx.renderer->get_screen_width() - 2 * tileSize - PANEL_EDGE_CLEARANCE;
 	ctx.renderer->draw_text(
-		Vector2D{ tileSize, row_text_y(tileSize, fontSize, detailY + DETAIL_BAR_ROWS - 1) },
+		Vector2D{
+			tileSize,
+			row_text_y(tileSize, fontSize, detailY + DETAIL_BAR_ROWS - 1),
+		},
 		ctx.renderer->fit_text_to_width(keybinds, keybindWidth),
 		ColorPairId::CYAN_BLACK);
 }

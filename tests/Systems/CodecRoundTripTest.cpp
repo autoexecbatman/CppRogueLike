@@ -179,7 +179,16 @@ TEST(CodecRoundTripTest, ConsumableEffectSurvivesEncoding)
 // depend on the order of an enum nobody reads when editing it.
 TEST(CodecRoundTripTest, AiTypeSurvivesEncoding)
 {
-	constexpr std::array kinds = { AiType::MONSTER, AiType::RANGED_MONSTER, AiType::CONFUSED_MONSTER, AiType::SHOPKEEPER, AiType::MIMIC, AiType::SPIDER, AiType::WEB_SPINNER, AiType::GIANT_SPIDER };
+	constexpr std::array kinds = {
+		AiType::MONSTER,
+		AiType::RANGED_MONSTER,
+		AiType::CONFUSED_MONSTER,
+		AiType::SHOPKEEPER,
+		AiType::MIMIC,
+		AiType::SPIDER,
+		AiType::WEB_SPINNER,
+		AiType::GIANT_SPIDER,
+	};
 
 	for (const auto kind : kinds)
 	{
@@ -212,13 +221,21 @@ TEST(CodecRoundTripTest, OnlyAConfusedAiIsNotAuthorable)
 // rather than nine labels, so each one round-trips on its own.
 TEST(CodecRoundTripTest, AlignmentSurvivesEncoding)
 {
-	constexpr std::array ethics = { Ethics::LAWFUL, Ethics::NEUTRAL, Ethics::CHAOTIC };
+	constexpr std::array ethics = {
+		Ethics::LAWFUL,
+		Ethics::NEUTRAL,
+		Ethics::CHAOTIC,
+	};
 	for (const auto axis : ethics)
 	{
 		expect_round_trip(axis, encode_ethics, parse_ethics, "Ethics");
 	}
 
-	constexpr std::array moralities = { Morality::GOOD, Morality::NEUTRAL, Morality::EVIL };
+	constexpr std::array moralities = {
+		Morality::GOOD,
+		Morality::NEUTRAL,
+		Morality::EVIL,
+	};
 	for (const auto axis : moralities)
 	{
 		expect_round_trip(axis, encode_morality, parse_morality, "Morality");
@@ -229,7 +246,13 @@ TEST(CodecRoundTripTest, AlignmentSurvivesEncoding)
 // is not a player character carries, so a save that loses it loses the most common value.
 TEST(CodecRoundTripTest, CreatureClassSurvivesEncoding)
 {
-	constexpr std::array classes = { CreatureClass::FIGHTER, CreatureClass::ROGUE, CreatureClass::CLERIC, CreatureClass::WIZARD, CreatureClass::MONSTER };
+	constexpr std::array classes = {
+		CreatureClass::FIGHTER,
+		CreatureClass::ROGUE,
+		CreatureClass::CLERIC,
+		CreatureClass::WIZARD,
+		CreatureClass::MONSTER,
+	};
 
 	for (const auto creatureClass : classes)
 	{
@@ -241,7 +264,15 @@ TEST(CodecRoundTripTest, CreatureClassSurvivesEncoding)
 // the only table, so this round trip also pins the label the resolver's log prints.
 TEST(CodecRoundTripTest, DamageTypeSurvivesEncoding)
 {
-	constexpr std::array types = { DamageType::PHYSICAL, DamageType::FIRE, DamageType::COLD, DamageType::LIGHTNING, DamageType::POISON, DamageType::ACID, DamageType::MAGIC };
+	constexpr std::array types = {
+		DamageType::PHYSICAL,
+		DamageType::FIRE,
+		DamageType::COLD,
+		DamageType::LIGHTNING,
+		DamageType::POISON,
+		DamageType::ACID,
+		DamageType::MAGIC,
+	};
 
 	for (const auto type : types)
 	{

@@ -87,7 +87,17 @@ constexpr int calculate_xp_for_level(int level, const std::array<int, TableSize>
 constexpr int calculate_fighter_xp(int level) noexcept
 {
 	constexpr std::array fighter_xp = {
-		0, 2000, 4000, 8000, 16000, 32000, 64000, 125000, 250000, 500000, 750000
+		0,
+		2000,
+		4000,
+		8000,
+		16000,
+		32000,
+		64000,
+		125000,
+		250000,
+		500000,
+		750000,
 	};
 	return calculate_xp_for_level(level, fighter_xp, 250000);
 }
@@ -95,7 +105,17 @@ constexpr int calculate_fighter_xp(int level) noexcept
 constexpr int calculate_rogue_xp(int level) noexcept
 {
 	constexpr std::array rogue_xp = {
-		0, 1250, 2500, 5000, 10000, 20000, 40000, 70000, 110000, 160000, 220000
+		0,
+		1250,
+		2500,
+		5000,
+		10000,
+		20000,
+		40000,
+		70000,
+		110000,
+		160000,
+		220000,
 	};
 	return calculate_xp_for_level(level, rogue_xp, 60000);
 }
@@ -103,7 +123,17 @@ constexpr int calculate_rogue_xp(int level) noexcept
 constexpr int calculate_cleric_xp(int level) noexcept
 {
 	constexpr std::array cleric_xp = {
-		0, 1500, 3000, 6000, 13000, 27500, 55000, 110000, 225000, 450000, 675000
+		0,
+		1500,
+		3000,
+		6000,
+		13000,
+		27500,
+		55000,
+		110000,
+		225000,
+		450000,
+		675000,
 	};
 	return calculate_xp_for_level(level, cleric_xp, 225000);
 }
@@ -111,7 +141,17 @@ constexpr int calculate_cleric_xp(int level) noexcept
 constexpr int calculate_wizard_xp(int level) noexcept
 {
 	constexpr std::array wizard_xp = {
-		0, 2500, 5000, 10000, 20000, 40000, 60000, 90000, 135000, 250000, 375000
+		0,
+		2500,
+		5000,
+		10000,
+		20000,
+		40000,
+		60000,
+		90000,
+		135000,
+		250000,
+		375000,
 	};
 	return calculate_xp_for_level(level, wizard_xp, 125000);
 }
@@ -998,9 +1038,14 @@ void Player::load(const json& source)
 	killCount = source.at("killCount").get<int>();
 	thiefSkillPoints = source.at("thiefSkillPoints").get<std::array<int, THIEF_SKILL_COUNT>>();
 	const json& spot = source.at("hidingSpot");
-	hidingSpot = spot.is_null()
-		? std::nullopt
-		: std::optional<Vector2D>{ Vector2D{ spot.at("x").get<int>(), spot.at("y").get<int>() } };
+	if (spot.is_null())
+	{
+		hidingSpot = std::nullopt;
+	}
+	else
+	{
+		hidingSpot = Vector2D{ spot.at("x").get<int>(), spot.at("y").get<int>() };
+	}
 
 	// Creature::load builds these only when the record has them, and the HUD reads them all on the first frame.
 	assert(healthPool && armorClass && experienceReward && attacker && controller && "Player::load finished with a player the game cannot run");

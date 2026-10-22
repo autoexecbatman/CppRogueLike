@@ -33,8 +33,8 @@
     },
     {
       "file": "src/GameStateManager.cpp",
-      "original": "\t\tdecoration->position = Vector2D{ record.at(\"position\").at(\"x\").get<int>(), record.at(\"position\").at(\"y\").get<int>() };",
-      "mutated": "\t\tdecoration->position = Vector2D{ record.at(\"position\").at(\"y\").get<int>(), record.at(\"position\").at(\"x\").get<int>() };",
+      "original": "\t\tdecoration->position = Vector2D{\n\t\t\trecord.at(\"position\").at(\"x\").get<int>(),\n\t\t\trecord.at(\"position\").at(\"y\").get<int>(),\n\t\t};",
+      "mutated": "\t\tdecoration->position = Vector2D{\n\t\t\trecord.at(\"position\").at(\"y\").get<int>(), record.at(\"position\").at(\"x\").get<int>(),\n\t\t};",
       "catches": "a decoration loaded at its coordinates swapped"
     },
     {

@@ -82,8 +82,13 @@ TEST(HitPointProgressionTest, MonsterHasADefinedProgression)
 // No class rolls forever, and none gains nothing afterwards.
 TEST(HitPointProgressionTest, EveryClassStopsRollingAndStillGains)
 {
-	for (const auto creatureClass : { CreatureClass::FIGHTER, CreatureClass::ROGUE,
-			 CreatureClass::CLERIC, CreatureClass::WIZARD, CreatureClass::MONSTER })
+	for (const auto creatureClass : {
+			 CreatureClass::FIGHTER,
+			 CreatureClass::ROGUE,
+			 CreatureClass::CLERIC,
+			 CreatureClass::WIZARD,
+			 CreatureClass::MONSTER,
+		 })
 	{
 		const auto progression = LevelUpSystem::hit_point_progression(creatureClass);
 
@@ -169,7 +174,10 @@ protected:
 	// score, its hit die scripted to roll `rolled`.
 	int gain_for(CreatureClass creatureClass, int constitution, int rolled)
 	{
-		Creature adventurer{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "adventurer", ColorPairId::WHITE_BLACK } };
+		Creature adventurer{
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "adventurer", ColorPairId::WHITE_BLACK },
+		};
 		adventurer.healthPool = std::make_unique<HealthPool>(50);
 		adventurer.armorClass = std::make_unique<ArmorClass>(10);
 		adventurer.experienceReward = std::make_unique<ExperienceReward>(0);
@@ -184,7 +192,10 @@ protected:
 
 	MockGameContext mock{};
 	GameContext ctx{};
-	Creature fighter{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "hero", ColorPairId::WHITE_BLACK } };
+	Creature fighter{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "hero", ColorPairId::WHITE_BLACK },
+	};
 };
 
 // Past 9th a warrior gains exactly 3, with no die and no Constitution bonus,

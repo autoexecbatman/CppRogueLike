@@ -100,7 +100,11 @@ protected:
 		{
 			entries.push_back({ { "count", entry.count }, { "xp", entry.xp } });
 		}
-		return { { "sides", sides }, { "bonus", bonus }, { "counts", entries } };
+		return {
+			{ "sides", sides },
+			{ "bonus", bonus },
+			{ "counts", entries },
+		};
 	}
 
 	MonsterRegistry monsters{};

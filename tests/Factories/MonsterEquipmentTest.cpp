@@ -170,7 +170,16 @@ TEST_F(MonsterEquipmentTest, AMonsterWithNoBodyIsRefused)
 // animals have neither.
 TEST_F(MonsterEquipmentTest, ClawedCreaturesHaveHandsAndBeastsDoNot)
 {
-	for (const std::string_view handed : { "troll", "ghoul", "wight", "shadow", "wraith", "gargoyle", "pit_fiend", "golem_stone" })
+	for (const std::string_view handed : {
+			 "troll",
+			 "ghoul",
+			 "wight",
+			 "shadow",
+			 "wraith",
+			 "gargoyle",
+			 "pit_fiend",
+			 "golem_stone",
+		 })
 	{
 		const std::vector<EquipmentSlot>& plan = bodyPlans.get(monsters.get_params(handed).bodyPlanName);
 		EXPECT_NE(std::ranges::find(plan, EquipmentSlot::RIGHT_HAND), plan.end()) << handed << " has no hands";

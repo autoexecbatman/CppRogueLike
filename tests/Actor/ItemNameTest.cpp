@@ -55,7 +55,10 @@ TEST(ItemNameTest, ANameOutlivesTheNextCall)
 // An enhancement the player has not identified shows as "?" in place of its prefix.
 TEST(ItemNameTest, AnUnidentifiedPrefixShowsAsAQuestionMark)
 {
-	Item sword{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "long sword", ColorPairId::WHITE_BLACK } };
+	Item sword{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "long sword", ColorPairId::WHITE_BLACK },
+	};
 	ItemEnhancement enhancement{};
 	enhancement.prefix = PrefixType::SHARP;
 	sword.apply_enhancement(enhancement);
@@ -66,7 +69,10 @@ TEST(ItemNameTest, AnUnidentifiedPrefixShowsAsAQuestionMark)
 // A curse the player has identified is appended to the name.
 TEST(ItemNameTest, AnIdentifiedCurseIsAppended)
 {
-	Item sword{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "long sword", ColorPairId::WHITE_BLACK } };
+	Item sword{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "long sword", ColorPairId::WHITE_BLACK },
+	};
 	ItemEnhancement enhancement{};
 	enhancement.prefix = PrefixType::SHARP;
 	enhancement.blessing = BlessingStatus::CURSED;

@@ -314,23 +314,58 @@ bool ShopKeeper::process_player_sale(GameContext& ctx, Item& item, Creature& sel
 void ShopKeeper::generate_shop_name(RandomDice& dice)
 {
 	std::vector<std::string> weapon_names = {
-		"The Sharp Edge", "Blades & Bludgeons", "Steel & Iron", "The Armory", "Warrior's Arsenal", "The Forge", "Sword & Shield", "Battle Ready"
+		"The Sharp Edge",
+		"Blades & Bludgeons",
+		"Steel & Iron",
+		"The Armory",
+		"Warrior's Arsenal",
+		"The Forge",
+		"Sword & Shield",
+		"Battle Ready",
 	};
 
 	std::vector<std::string> armor_names = {
-		"Ironclad Armory", "Plate & Mail", "The Defender", "Armor & Protection", "Steel Defense", "Guardian's Gear", "The Shield Wall", "Heavy Metal"
+		"Ironclad Armory",
+		"Plate & Mail",
+		"The Defender",
+		"Armor & Protection",
+		"Steel Defense",
+		"Guardian's Gear",
+		"The Shield Wall",
+		"Heavy Metal",
 	};
 
 	std::vector<std::string> potion_names = {
-		"Mystic Brews", "The Alchemy Shop", "Bubbling Cauldron", "Elixir Emporium", "Potion Master", "The Brew House", "Magical Mixtures", "Liquid Magic"
+		"Mystic Brews",
+		"The Alchemy Shop",
+		"Bubbling Cauldron",
+		"Elixir Emporium",
+		"Potion Master",
+		"The Brew House",
+		"Magical Mixtures",
+		"Liquid Magic",
 	};
 
 	std::vector<std::string> scroll_names = {
-		"Arcane Scrolls", "The Scriptorium", "Magical Manuscripts", "Spell Scrolls", "The Magic Word", "Enchanted Texts", "Scroll & Quill", "Ancient Writings"
+		"Arcane Scrolls",
+		"The Scriptorium",
+		"Magical Manuscripts",
+		"Spell Scrolls",
+		"The Magic Word",
+		"Enchanted Texts",
+		"Scroll & Quill",
+		"Ancient Writings",
 	};
 
 	std::vector<std::string> general_names = {
-		"General Store", "The Trading Post", "Odds & Ends", "Everything Shop", "The Merchant's Den", "All Things", "Trade & Barter", "The Bazaar"
+		"General Store",
+		"The Trading Post",
+		"Odds & Ends",
+		"Everything Shop",
+		"The Merchant's Den",
+		"All Things",
+		"Trade & Barter",
+		"The Bazaar",
 	};
 
 	switch (shopType)

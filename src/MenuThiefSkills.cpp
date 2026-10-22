@@ -39,7 +39,7 @@ ThiefSkillAllocation thief_skill_allocation_for(const Player& character, int lev
 		character.get_dexterity(),
 		// Armour Table 29 prints no column for adjusts nothing the table can name,
 		// so the points are judged unarmoured rather than being stranded.
-		character.thief_armor().value_or(ThiefArmor::NONE)
+		character.thief_armor().value_or(ThiefArmor::NONE),
 	};
 }
 
@@ -123,7 +123,11 @@ MenuThiefSkills::MenuThiefSkills(
 	GameContext& ctx,
 	ThiefSkillAllocation startingAllocation,
 	std::function<void(std::array<int, THIEF_SKILL_COUNT>, GameContext&)> acceptCallback)
-	: screen{ .cursor = ThiefSkill::PICK_POCKETS, .allocation = std::move(startingAllocation) }, onAccept{ std::move(acceptCallback) }
+	: screen{
+		  .cursor = ThiefSkill::PICK_POCKETS,
+		  .allocation = std::move(startingAllocation),
+	  },
+	  onAccept{ std::move(acceptCallback) }
 {
 	assert(ctx.renderer && "MenuThiefSkills requires a renderer to size its box");
 	assert(onAccept && "MenuThiefSkills requires somewhere to put the result");

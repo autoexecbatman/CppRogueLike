@@ -66,7 +66,10 @@ protected:
 
 	MockGameContext mock{};
 	GameContext ctx{};
-	Creature wearer{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "wearer", ColorPairId::WHITE_BLACK } };
+	Creature wearer{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "wearer", ColorPairId::WHITE_BLACK },
+	};
 };
 
 TEST_F(WornSlotTest, TheDataNamesASlotForEveryWornKind)

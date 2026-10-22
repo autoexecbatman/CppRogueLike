@@ -30,7 +30,8 @@ void FloatingTextSystem::spawn_damage(Vector2D worldPosition, int value, DamageS
 		.green = static_cast<unsigned char>(hurtPlayer ? 80 : 220),
 		.blue = static_cast<unsigned char>(hurtPlayer ? 80 : 50),
 		.spawnTime = static_cast<float>(GetTime()),
-		.lifetime = 1.2f });
+		.lifetime = 1.2f,
+	});
 }
 
 void FloatingTextSystem::spawn_text(
@@ -48,7 +49,8 @@ void FloatingTextSystem::spawn_text(
 		.green = green,
 		.blue = blue,
 		.spawnTime = static_cast<float>(GetTime()),
-		.lifetime = lifetime });
+		.lifetime = lifetime,
+	});
 }
 
 void FloatingTextSystem::update_and_render(const Renderer& renderer)

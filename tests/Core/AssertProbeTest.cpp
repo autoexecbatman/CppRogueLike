@@ -117,7 +117,11 @@ protected:
 
 	static std::unique_ptr<Item> make_item(std::string_view name)
 	{
-		return std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, std::string(name), ColorPairId::WHITE_BLACK });
+		return std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{
+															TileRef{},
+															std::string(name),
+															ColorPairId::WHITE_BLACK,
+														});
 	}
 
 	// The goblin carries a short sword, so this one call reaches both of

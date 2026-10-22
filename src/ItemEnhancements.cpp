@@ -585,7 +585,15 @@ ItemEnhancement ItemEnhancement::generate_armor_enhancement(MagicalPrefixes magi
 PrefixType ItemEnhancement::get_random_weapon_prefix(RandomDice& dice)
 {
 	static const PrefixType weapon_prefixes[] = {
-		PrefixType::SHARP, PrefixType::KEEN, PrefixType::MASTERWORK, PrefixType::BLESSED, PrefixType::FLAMING, PrefixType::FROST, PrefixType::SHOCK, PrefixType::ANCIENT, PrefixType::CURSED
+		PrefixType::SHARP,
+		PrefixType::KEEN,
+		PrefixType::MASTERWORK,
+		PrefixType::BLESSED,
+		PrefixType::FLAMING,
+		PrefixType::FROST,
+		PrefixType::SHOCK,
+		PrefixType::ANCIENT,
+		PrefixType::CURSED,
 	};
 
 	return weapon_prefixes[dice.roll(0, static_cast<int>(std::size(weapon_prefixes)) - 1)];
@@ -594,7 +602,14 @@ PrefixType ItemEnhancement::get_random_weapon_prefix(RandomDice& dice)
 PrefixType ItemEnhancement::get_random_armor_prefix(RandomDice& dice)
 {
 	static const PrefixType armor_prefixes[] = {
-		PrefixType::REINFORCED, PrefixType::STUDDED, PrefixType::ELVEN, PrefixType::DWARVEN, PrefixType::MAGICAL, PrefixType::ANCIENT, PrefixType::CURSED, PrefixType::RUSTED
+		PrefixType::REINFORCED,
+		PrefixType::STUDDED,
+		PrefixType::ELVEN,
+		PrefixType::DWARVEN,
+		PrefixType::MAGICAL,
+		PrefixType::ANCIENT,
+		PrefixType::CURSED,
+		PrefixType::RUSTED,
 	};
 
 	return armor_prefixes[dice.roll(0, static_cast<int>(std::size(armor_prefixes)) - 1)];
@@ -603,7 +618,12 @@ PrefixType ItemEnhancement::get_random_armor_prefix(RandomDice& dice)
 PrefixType ItemEnhancement::get_random_universal_prefix(RandomDice& dice)
 {
 	static const PrefixType universal_prefixes[] = {
-		PrefixType::BLESSED, PrefixType::CURSED, PrefixType::ANCIENT, PrefixType::MAGICAL, PrefixType::RUSTED, PrefixType::CRACKED
+		PrefixType::BLESSED,
+		PrefixType::CURSED,
+		PrefixType::ANCIENT,
+		PrefixType::MAGICAL,
+		PrefixType::RUSTED,
+		PrefixType::CRACKED,
 	};
 
 	return universal_prefixes[dice.roll(0, static_cast<int>(std::size(universal_prefixes)) - 1)];
@@ -612,7 +632,12 @@ PrefixType ItemEnhancement::get_random_universal_prefix(RandomDice& dice)
 SuffixType ItemEnhancement::get_random_combat_suffix(RandomDice& dice)
 {
 	static const SuffixType combat_suffixes[] = {
-		SuffixType::OF_SLAYING, SuffixType::OF_ACCURACY, SuffixType::OF_PROTECTION, SuffixType::OF_POWER, SuffixType::OF_THE_BEAR, SuffixType::OF_THE_EAGLE
+		SuffixType::OF_SLAYING,
+		SuffixType::OF_ACCURACY,
+		SuffixType::OF_PROTECTION,
+		SuffixType::OF_POWER,
+		SuffixType::OF_THE_BEAR,
+		SuffixType::OF_THE_EAGLE,
 	};
 
 	return combat_suffixes[dice.roll(0, static_cast<int>(std::size(combat_suffixes)) - 1)];
@@ -630,7 +655,14 @@ SuffixType ItemEnhancement::get_random_resistance_suffix(RandomDice& dice)
 SuffixType ItemEnhancement::get_random_special_suffix(RandomDice& dice)
 {
 	static const SuffixType special_suffixes[] = {
-		SuffixType::OF_SPEED, SuffixType::OF_STEALTH, SuffixType::OF_MAGIC, SuffixType::OF_HEALTH, SuffixType::OF_THE_OWL, SuffixType::OF_WEAKNESS, SuffixType::OF_SLOWNESS, SuffixType::OF_BRITTLENESS
+		SuffixType::OF_SPEED,
+		SuffixType::OF_STEALTH,
+		SuffixType::OF_MAGIC,
+		SuffixType::OF_HEALTH,
+		SuffixType::OF_THE_OWL,
+		SuffixType::OF_WEAKNESS,
+		SuffixType::OF_SLOWNESS,
+		SuffixType::OF_BRITTLENESS,
 	};
 
 	return special_suffixes[dice.roll(0, static_cast<int>(std::size(special_suffixes)) - 1)];

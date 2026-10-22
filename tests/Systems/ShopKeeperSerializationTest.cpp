@@ -79,7 +79,7 @@ TEST_F(ShopKeeperSerializationTest, AllShopTypes_SaveLoad)
 		ShopType::GENERAL_STORE,
 		ShopType::POTION_SHOP,
 		ShopType::SCROLL_SHOP,
-		ShopType::ADVENTURING_GEAR
+		ShopType::ADVENTURING_GEAR,
 	};
 
 	for (ShopType type : types)
@@ -103,7 +103,7 @@ TEST_F(ShopKeeperSerializationTest, AllQualities_SaveLoad)
 		ShopQuality::POOR,
 		ShopQuality::AVERAGE,
 		ShopQuality::GOOD,
-		ShopQuality::EXCELLENT
+		ShopQuality::EXCELLENT,
 	};
 
 	for (ShopQuality quality : qualities)

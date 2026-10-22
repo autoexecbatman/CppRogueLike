@@ -50,7 +50,10 @@ void flee(Creature& owner, GameContext& ctx)
 	// A tile this creature may not enter is one its own cost map never reached.
 	for (const Vector2D& delta : NEIGHBORS)
 	{
-		Vector2D candidate{ owner.position.x + delta.x, owner.position.y + delta.y };
+		Vector2D candidate{
+			owner.position.x + delta.x,
+			owner.position.y + delta.y,
+		};
 		const std::optional<int> candidateCost = ctx.pathfinder->cost_to(quarry, candidate, mobility, ctx);
 		if (candidateCost && *candidateCost > bestCost && !is_occupied(candidate))
 		{

@@ -51,7 +51,10 @@ constexpr int SELLER_STRENGTH = 10;
 
 	Player seller{ Vector2D{ 1, 1 } };
 	seller.set_strength(SELLER_STRENGTH);
-	Creature shopkeeper{ Vector2D{ 2, 1 }, ActorData{ TileRef{}, "shopkeeper", ColorPairId::WHITE_BLACK } };
+	Creature shopkeeper{
+		Vector2D{ 2, 1 },
+		ActorData{ TileRef{}, "shopkeeper", ColorPairId::WHITE_BLACK },
+	};
 	shopkeeper.shop = std::make_unique<ShopKeeper>(ShopType::GENERAL_STORE, ShopQuality::AVERAGE, mock.dice);
 
 	auto potion = ItemCreator::create("health_potion", Vector2D{ 0, 0 }, ctx);
@@ -87,7 +90,10 @@ constexpr int SELLER_STRENGTH = 10;
 
 	Player seller{ Vector2D{ 1, 1 } };
 	seller.set_strength(SELLER_STRENGTH);
-	Creature shopkeeper{ Vector2D{ 2, 1 }, ActorData{ TileRef{}, "shopkeeper", ColorPairId::WHITE_BLACK } };
+	Creature shopkeeper{
+		Vector2D{ 2, 1 },
+		ActorData{ TileRef{}, "shopkeeper", ColorPairId::WHITE_BLACK },
+	};
 	shopkeeper.shop = std::make_unique<ShopKeeper>(ShopType::GENERAL_STORE, ShopQuality::AVERAGE, mock.dice);
 
 	// The first row is the health potion and the second the mana potion, in the order added.

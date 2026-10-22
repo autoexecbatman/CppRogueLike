@@ -13,7 +13,7 @@ TileRef parse_tile(const json& record)
 	return TileRef{
 		static_cast<TileSheet>(record.at("sheet").get<int>()),
 		record.at("col").get<int>(),
-		record.at("row").get<int>()
+		record.at("row").get<int>(),
 	};
 }
 
@@ -22,7 +22,7 @@ json encode_tile(TileRef tile)
 	return json{
 		{ "sheet", static_cast<int>(tile.sheet) },
 		{ "col", tile.col },
-		{ "row", tile.row }
+		{ "row", tile.row },
 	};
 }
 

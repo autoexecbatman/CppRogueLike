@@ -176,7 +176,11 @@ void AiSpider::move_toward_player(Creature& owner, GameContext& ctx)
 
 	// Straight at the player, then along each axis alone; the first step that is not
 	// refused is the turn. An axis the player shares with the spider is no step at all.
-	for (const Vector2D& direction : { Vector2D{ stepCol, stepRow }, Vector2D{ stepCol, 0 }, Vector2D{ 0, stepRow } })
+	for (const Vector2D& direction : {
+			 Vector2D{ stepCol, stepRow },
+			 Vector2D{ stepCol, 0 },
+			 Vector2D{ 0, stepRow },
+		 })
 	{
 		if (direction == Vector2D{ 0, 0 })
 		{
@@ -337,7 +341,8 @@ void AiSpider::inject_venom(Creature& owner, Creature& target, GameContext& ctx)
 		.damage = 0,
 		.effect = BuffType::HAIRY_SPIDER_VENOM,
 		.effectValue = -HAIRY_SPIDER_VENOM_PENALTY,
-		.effectRounds = ctx.dice->d4() + 1 });
+		.effectRounds = ctx.dice->d4() + 1,
+	});
 }
 
 std::optional<Vector2D> AiSpider::find_ambush_position(

@@ -30,5 +30,8 @@ void AiGiantSpider::inject_venom(Creature& owner, Creature& target, GameContext&
 
 	ctx.messageSystem->message(owner.actorData.color, owner.actorData.name, MessageCompletion::CONTINUED);
 	ctx.messageSystem->message(ColorPairId::WHITE_RED, " injects a venom that will take hold!", MessageCompletion::FINISHED);
-	target.take_poison(PendingPoison{ .roundsUntilOnset = TYPE_A_ONSET_ROUNDS, .damage = TYPE_A_DAMAGE });
+	target.take_poison(PendingPoison{
+		.roundsUntilOnset = TYPE_A_ONSET_ROUNDS,
+		.damage = TYPE_A_DAMAGE,
+	});
 }

@@ -24,12 +24,23 @@ protected:
 	void ward_target(int duration)
 	{
 		target.activeBuffs.push_back(
-			Buff{ BuffType::PROTECTION_FROM_EVIL, PROTECTION_FROM_EVIL_PENALTY, duration, BuffApplication::ADD });
+			Buff{
+				BuffType::PROTECTION_FROM_EVIL,
+				PROTECTION_FROM_EVIL_PENALTY,
+				duration,
+				BuffApplication::ADD,
+			});
 	}
 
 	BuffSystem buffs{};
-	Creature attacker{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK } };
-	Creature target{ Vector2D{ 1, 0 }, ActorData{ TileRef{}, "cleric", ColorPairId::WHITE_BLACK } };
+	Creature attacker{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK },
+	};
+	Creature target{
+		Vector2D{ 1, 0 },
+		ActorData{ TileRef{}, "cleric", ColorPairId::WHITE_BLACK },
+	};
 };
 
 // An unwarded target imposes nothing, however evil the attacker.

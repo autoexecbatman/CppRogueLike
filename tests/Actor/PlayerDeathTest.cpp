@@ -125,7 +125,12 @@ TEST_F(PlayerDeathTest, SpendingTheActionThatKilledThePlayerKeepsTheDefeat)
 // kills: ten sixes are 60 fire, and even the half a made save allows is past 20 hit points.
 TEST_F(PlayerDeathTest, BurningToDeathAndSpendingTheActionKeepsTheDefeat)
 {
-	const SpellSystem::FireballBurst burst{ .diceCount = 10, .dice = { 6, 6, 6, 6, 6, 6, 6, 6, 6, 6 }, .totalDamage = 60, .struck = 0 };
+	const SpellSystem::FireballBurst burst{
+		.diceCount = 10,
+		.dice = { 6, 6, 6, 6, 6, 6, 6, 6, 6, 6 },
+		.totalDamage = 60,
+		.struck = 0,
+	};
 	SpellSystem::burn_with_fireball(*player, burst, ctx);
 	ASSERT_TRUE(player->is_dead()) << "the burn did not kill, so nothing here is being measured";
 	spend_player_action(ctx, TIME_UNITS_PER_ROUND);

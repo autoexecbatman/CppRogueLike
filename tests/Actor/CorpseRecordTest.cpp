@@ -239,8 +239,16 @@ TEST_F(CorpseRecordTest, AnInedibleCreatureLeavesAnInedibleCorpse)
 // not move, and the use reports nothing done, so no time passes.
 TEST_F(CorpseRecordTest, AnInedibleCorpseIsRefusedAndKept)
 {
-	auto corpse = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, std::string{ FIXTURE_NAME }, ColorPairId::WHITE_BLACK });
-	corpse->behavior = CorpseFood{ FIXTURE_NUTRITION, std::string{ FIXTURE_REFUSAL }, CorpseEdibility::INEDIBLE };
+	auto corpse = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{
+															   TileRef{},
+															   std::string{ FIXTURE_NAME },
+															   ColorPairId::WHITE_BLACK,
+														   });
+	corpse->behavior = CorpseFood{
+		FIXTURE_NUTRITION,
+		std::string{ FIXTURE_REFUSAL },
+		CorpseEdibility::INEDIBLE,
+	};
 	Item& held = *corpse;
 	ASSERT_TRUE(InventoryOperations::add_item(player->inventoryData, std::move(corpse)).has_value());
 	ctx.hungerSystem->increase_hunger(ctx, 500);
@@ -291,12 +299,26 @@ TEST_F(CorpseRecordTest, EatingACorpseFeedsItsNutritionAndSaysItsTaste)
 // A corpse lying on the floor across a save keeps what eating it does.
 TEST_F(CorpseRecordTest, ACorpseKeepsItsNutritionAndTasteAcrossASave)
 {
-	Item original{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, std::string{ FIXTURE_NAME }, ColorPairId::WHITE_BLACK } };
-	original.behavior = CorpseFood{ FIXTURE_NUTRITION, std::string{ FIXTURE_TASTE }, CorpseEdibility::INEDIBLE };
+	Item original{
+		Vector2D{ 0, 0 },
+		ActorData{
+			TileRef{},
+			std::string{ FIXTURE_NAME },
+			ColorPairId::WHITE_BLACK,
+		},
+	};
+	original.behavior = CorpseFood{
+		FIXTURE_NUTRITION,
+		std::string{ FIXTURE_TASTE },
+		CorpseEdibility::INEDIBLE,
+	};
 	nlohmann::json record;
 	original.save(record);
 
-	Item loaded{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK } };
+	Item loaded{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK },
+	};
 	loaded.load(record);
 
 	ASSERT_TRUE(loaded.behavior.has_value());
@@ -315,7 +337,10 @@ TEST_F(CorpseRecordTest, ACreatureKeepsItsCorpseAcrossASave)
 	nlohmann::json record;
 	original->save(record);
 
-	Creature loaded{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK } };
+	Creature loaded{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK },
+	};
 	loaded.load(record);
 
 	EXPECT_EQ(loaded.get_corpse_name(), FIXTURE_NAME);
@@ -367,7 +392,12 @@ TEST_F(CorpseRecordTest, EveryCorpseWeighsWithinItsSize)
 // The owner's ruling, 2026-10-18: these four corpses cannot be eaten, and every other can.
 TEST_F(CorpseRecordTest, OnlyTheOddCorpsesAreInedible)
 {
-	const std::set<std::string> inedible{ "golem_stone", "shadow", "skeleton", "wraith" };
+	const std::set<std::string> inedible{
+		"golem_stone",
+		"shadow",
+		"skeleton",
+		"wraith",
+	};
 	for (const std::string& key : mock.monsterRegistry.get_all_keys())
 	{
 		const CorpseEdibility expected = inedible.contains(key) ? CorpseEdibility::INEDIBLE : CorpseEdibility::EDIBLE;

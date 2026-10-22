@@ -332,10 +332,38 @@ TEST_F(RoomShapeTest, EveryRoomKeepsTheShapeItWasGiven)
 TEST_F(RoomShapeTest, ACrossThePrefabBreaksIsCarvedAsThePrefabAlone)
 {
 	const std::vector<DungeonRoom> breakingRooms{
-		DungeonRoom{ .col = 10, .row = 10, .width = 10, .height = 7, .shape = RoomShape::CROSS, .prefabName = "twin_chambers_12x9" },
-		DungeonRoom{ .col = 10, .row = 10, .width = 10, .height = 7, .shape = RoomShape::CROSS, .prefabName = "guard_post_12x9" },
-		DungeonRoom{ .col = 10, .row = 10, .width = 14, .height = 7, .shape = RoomShape::CROSS, .prefabName = "crypt_bays_16x9" },
-		DungeonRoom{ .col = 10, .row = 10, .width = 10, .height = 7, .shape = RoomShape::CROSS, .prefabName = "moat_room_12x9" },
+		DungeonRoom{
+			.col = 10,
+			.row = 10,
+			.width = 10,
+			.height = 7,
+			.shape = RoomShape::CROSS,
+			.prefabName = "twin_chambers_12x9",
+		},
+		DungeonRoom{
+			.col = 10,
+			.row = 10,
+			.width = 10,
+			.height = 7,
+			.shape = RoomShape::CROSS,
+			.prefabName = "guard_post_12x9",
+		},
+		DungeonRoom{
+			.col = 10,
+			.row = 10,
+			.width = 14,
+			.height = 7,
+			.shape = RoomShape::CROSS,
+			.prefabName = "crypt_bays_16x9",
+		},
+		DungeonRoom{
+			.col = 10,
+			.row = 10,
+			.width = 10,
+			.height = 7,
+			.shape = RoomShape::CROSS,
+			.prefabName = "moat_room_12x9",
+		},
 	};
 
 	for (const DungeonRoom& room : breakingRooms)
@@ -374,7 +402,14 @@ TEST_F(RoomShapeTest, APrefabThatSplitsTheRoomByItselfLeavesAPlainBox)
 			"############",
 		},
 	});
-	const DungeonRoom room{ .col = 10, .row = 10, .width = 10, .height = 7, .shape = RoomShape::CROSS, .prefabName = "wall_across_12x9" };
+	const DungeonRoom room{
+		.col = 10,
+		.row = 10,
+		.width = 10,
+		.height = 7,
+		.shape = RoomShape::CROSS,
+		.prefabName = "wall_across_12x9",
+	};
 	MapThatCarvesRooms map{ MAP_WIDTH, MAP_HEIGHT };
 	map.init_tiles();
 	ctx.map = &map;
@@ -412,11 +447,17 @@ TEST_F(RoomShapeTest, EveryCorridorOpensOntoTheRoomsFloor)
 				}
 				else if (room.bottom_wall() < other.top_wall())
 				{
-					justInside = Vector2D{ map.exit_column(room, room.row_end()), room.row_end() };
+					justInside = Vector2D{
+						map.exit_column(room, room.row_end()),
+						room.row_end(),
+					};
 				}
 				else if (room.right_wall() < other.left_wall())
 				{
-					justInside = Vector2D{ room.col_end(), map.exit_row(room, room.col_end()) };
+					justInside = Vector2D{
+						room.col_end(),
+						map.exit_row(room, room.col_end()),
+					};
 				}
 				else
 				{
@@ -573,7 +614,11 @@ TEST_F(RoomShapeTest, AnExitCellIsWalkableWheneverItsEdgeHasFloor)
 			}
 			if (edge_has_floor(map, room, room.row_end(), true))
 			{
-				EXPECT_NE(map.get_tile_type(Vector2D{ map.exit_column(room, room.row_end()), room.row_end() }), TileType::WALL)
+				EXPECT_NE(map.get_tile_type(Vector2D{
+							  map.exit_column(room, room.row_end()),
+							  room.row_end(),
+						  }),
+					TileType::WALL)
 					<< "bottom edge of the room at " << room.col << "," << room.row;
 			}
 			if (edge_has_floor(map, room, room.col, false))
@@ -583,7 +628,11 @@ TEST_F(RoomShapeTest, AnExitCellIsWalkableWheneverItsEdgeHasFloor)
 			}
 			if (edge_has_floor(map, room, room.col_end(), false))
 			{
-				EXPECT_NE(map.get_tile_type(Vector2D{ room.col_end(), map.exit_row(room, room.col_end()) }), TileType::WALL)
+				EXPECT_NE(map.get_tile_type(Vector2D{
+							  room.col_end(),
+							  map.exit_row(room, room.col_end()),
+						  }),
+					TileType::WALL)
 					<< "right edge of the room at " << room.col << "," << room.row;
 			}
 		}

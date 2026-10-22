@@ -326,11 +326,17 @@ TEST_F(CreatureSerializationTest, ARecordNumberingItsEnumsIsRefused)
 
 TEST_F(CreatureSerializationTest, ACreatureRecordMissingAFieldItsSaverAlwaysWritesIsRefused)
 {
-	Creature bare{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "bare", ColorPairId::WHITE_BLACK } };
+	Creature bare{
+		Vector2D{ 5, 5 },
+		ActorData{ TileRef{}, "bare", ColorPairId::WHITE_BLACK },
+	};
 	json bareRecord;
 	bare.save(bareRecord);
 
-	Actor plainActor{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "bare", ColorPairId::WHITE_BLACK } };
+	Actor plainActor{
+		Vector2D{ 5, 5 },
+		ActorData{ TileRef{}, "bare", ColorPairId::WHITE_BLACK },
+	};
 	json actorRecord;
 	plainActor.save(actorRecord);
 

@@ -62,7 +62,7 @@ TileColor parse_color(const json& value)
 		value.at("r").get<int>(),
 		value.at("g").get<int>(),
 		value.at("b").get<int>(),
-		value.at("a").get<int>()
+		value.at("a").get<int>(),
 	};
 }
 
@@ -163,7 +163,7 @@ void TileConfig::load(std::string_view path)
 		autotileGroups[key] = AutotileGroup{
 			sheet,
 			record.at("origin_col").get<int>(),
-			record.at("origin_row").get<int>()
+			record.at("origin_row").get<int>(),
 		};
 	}
 
@@ -173,7 +173,7 @@ void TileConfig::load(std::string_view path)
 		wallAutotileGroups[key] = WallAutotileGroup{
 			sheet,
 			record.at("origin_col").get<int>(),
-			record.at("origin_row").get<int>()
+			record.at("origin_row").get<int>(),
 		};
 	}
 

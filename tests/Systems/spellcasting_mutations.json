@@ -39,8 +39,8 @@
     },
     {
       "file": "src/Spellcasting.cpp",
-      "original": "\t\t\tpower.at(\"readyAgainAt\").get<int>() });",
-      "mutated": "\t\t\t0 });",
+      "original": "\t\t\tpower.at(\"readyAgainAt\").get<int>(),\n\t\t});",
+      "mutated": "\t\t\t0,\n\t\t});",
       "catches": "a save losing when a spent daily power comes back"
     },
     {

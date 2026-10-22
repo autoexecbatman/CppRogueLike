@@ -27,13 +27,21 @@
 
 // Sheets available in the picker, in Tab-cycle order.
 static constexpr TileSheet PICKER_SHEETS[] = {
-	TileSheet::SHEET_DECOR0, TileSheet::SHEET_DECOR1, TileSheet::SHEET_FLOOR, TileSheet::SHEET_WALL, TileSheet::SHEET_TILE
+	TileSheet::SHEET_DECOR0,
+	TileSheet::SHEET_DECOR1,
+	TileSheet::SHEET_FLOOR,
+	TileSheet::SHEET_WALL,
+	TileSheet::SHEET_TILE,
 };
 
 static constexpr int PICKER_SHEET_COUNT = 5;
 
 static constexpr std::string_view PICKER_SHEET_NAMES[] = {
-	"Decor0", "Decor1", "Floor", "Wall", "Tile"
+	"Decor0",
+	"Decor1",
+	"Floor",
+	"Wall",
+	"Tile",
 };
 
 namespace
@@ -68,7 +76,7 @@ constexpr const char* GUIDE[] = {
 	"[Del]    delete selected",
 	"Prefabs stamp decor",
 	"onto BSP rooms at",
-	"matching depth + size."
+	"matching depth + size.",
 };
 
 // The prefab list's rows in the right panel at the renderer's current screen, tile and font size.
@@ -84,7 +92,11 @@ PrefabListRows prefab_list_rows(const Renderer& renderer)
 CanvasGrid canvas_grid(const Renderer& renderer, int panX, int panY)
 {
 	const int tileSize = renderer.get_tile_size();
-	return CanvasGrid{ LEFT_W_TILES * tileSize - panX, TOP_H_TILES * tileSize - panY, tileSize };
+	return CanvasGrid{
+		LEFT_W_TILES * tileSize - panX,
+		TOP_H_TILES * tileSize - panY,
+		tileSize,
+	};
 }
 } // namespace
 
@@ -1098,7 +1110,12 @@ void RoomEditor::render_left_panel(const Renderer& renderer) const
 			? Color{ 255, 255, 100, 255 }
 			: Color{ 180, 180, 200, 200 };
 
-		renderer.draw_text_color(Vector2D{ tileSize + 4, slotPixelY + (tileSize - renderer.get_font_size()) / 2 }, symbolRows[paletteEntryIndex].label, labelCol);
+		renderer.draw_text_color(Vector2D{
+									 tileSize + 4,
+									 slotPixelY + (tileSize - renderer.get_font_size()) / 2,
+								 },
+			symbolRows[paletteEntryIndex].label,
+			labelCol);
 
 		if (selected)
 		{

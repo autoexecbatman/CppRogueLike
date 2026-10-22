@@ -23,7 +23,11 @@ std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
 		ctx.playerBlueprint->creatureClass = CreatureClass::FIGHTER;
 		ctx.menus->push_back(std::make_unique<MenuAbilityScores>(ctx));
 	};
-	entries.push_back({ std::string{ class_display_name(CreatureClass::FIGHTER) }, 'f', fighterCommand });
+	entries.push_back({
+		std::string{ class_display_name(CreatureClass::FIGHTER) },
+		'f',
+		fighterCommand,
+	});
 
 	auto rogueCommand = [](GameContext& ctx)
 	{
@@ -32,7 +36,11 @@ std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
 		ctx.playerBlueprint->creatureClass = CreatureClass::ROGUE;
 		ctx.menus->push_back(std::make_unique<MenuAbilityScores>(ctx));
 	};
-	entries.push_back({ std::string{ class_display_name(CreatureClass::ROGUE) }, 'r', rogueCommand });
+	entries.push_back({
+		std::string{ class_display_name(CreatureClass::ROGUE) },
+		'r',
+		rogueCommand,
+	});
 
 	auto clericCommand = [](GameContext& ctx)
 	{
@@ -41,7 +49,11 @@ std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
 		ctx.playerBlueprint->creatureClass = CreatureClass::CLERIC;
 		ctx.menus->push_back(std::make_unique<MenuAbilityScores>(ctx));
 	};
-	entries.push_back({ std::string{ class_display_name(CreatureClass::CLERIC) }, 'c', clericCommand });
+	entries.push_back({
+		std::string{ class_display_name(CreatureClass::CLERIC) },
+		'c',
+		clericCommand,
+	});
 
 	auto wizardCommand = [](GameContext& ctx)
 	{
@@ -50,7 +62,11 @@ std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
 		ctx.playerBlueprint->creatureClass = CreatureClass::WIZARD;
 		ctx.menus->push_back(std::make_unique<MenuAbilityScores>(ctx));
 	};
-	entries.push_back({ std::string{ class_display_name(CreatureClass::WIZARD) }, 'z', wizardCommand });
+	entries.push_back({
+		std::string{ class_display_name(CreatureClass::WIZARD) },
+		'z',
+		wizardCommand,
+	});
 
 	auto randomCommand = [](GameContext& ctx)
 	{

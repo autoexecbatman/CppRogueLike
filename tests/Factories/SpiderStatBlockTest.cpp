@@ -57,9 +57,45 @@ struct BookSpider
 };
 
 constexpr BookSpider BOOK_SPIDERS[] = {
-	{ "spider_small", 8, 1, -1, 20, "1", 10, 65, CreatureSize::TINY, IntelligenceRating::LOW, AiType::SPIDER },
-	{ "spider_giant", 6, 2, 2, 19, "1d6", 8, 270, CreatureSize::MEDIUM, IntelligenceRating::ANIMAL, AiType::GIANT_SPIDER },
-	{ "spider_weaver", 4, 3, 3, 17, "1d8", 13, 420, CreatureSize::LARGE, IntelligenceRating::LOW, AiType::WEB_SPINNER },
+	{
+		"spider_small",
+		8,
+		1,
+		-1,
+		20,
+		"1",
+		10,
+		65,
+		CreatureSize::TINY,
+		IntelligenceRating::LOW,
+		AiType::SPIDER,
+	},
+	{
+		"spider_giant",
+		6,
+		2,
+		2,
+		19,
+		"1d6",
+		8,
+		270,
+		CreatureSize::MEDIUM,
+		IntelligenceRating::ANIMAL,
+		AiType::GIANT_SPIDER,
+	},
+	{
+		"spider_weaver",
+		4,
+		3,
+		3,
+		17,
+		"1d8",
+		13,
+		420,
+		CreatureSize::LARGE,
+		IntelligenceRating::LOW,
+		AiType::WEB_SPINNER,
+	},
 };
 } // namespace
 

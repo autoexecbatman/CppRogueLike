@@ -118,7 +118,10 @@ TEST_F(DexterityTableTest, AScoreBelowOneCarriesNoAdjustment)
 // Gauntlets taking an elf's 19 to 21 improve armour class further, -5 on the table.
 TEST_F(DexterityTableTest, DexterityPastTwentyStillImprovesArmourClass)
 {
-	Creature elf{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "elf", ColorPairId::WHITE_BLACK } };
+	Creature elf{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "elf", ColorPairId::WHITE_BLACK },
+	};
 	elf.experienceReward = std::make_unique<ExperienceReward>(0);
 	elf.healthPool = std::make_unique<HealthPool>(10);
 	elf.armorClass = std::make_unique<ArmorClass>(10);
@@ -132,7 +135,10 @@ TEST_F(DexterityTableTest, DexterityPastTwentyStillImprovesArmourClass)
 // Through the path that uses it: Dexterity 7 leaves armour class 10 where it is.
 TEST_F(DexterityTableTest, DexteritySevenLeavesArmourClassAlone)
 {
-	Creature fighter{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "fighter", ColorPairId::WHITE_BLACK } };
+	Creature fighter{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "fighter", ColorPairId::WHITE_BLACK },
+	};
 	fighter.experienceReward = std::make_unique<ExperienceReward>(0);
 	fighter.healthPool = std::make_unique<HealthPool>(10);
 	fighter.armorClass = std::make_unique<ArmorClass>(10);

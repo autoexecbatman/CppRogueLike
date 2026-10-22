@@ -129,14 +129,14 @@
     },
     {
       "file": "src/ItemCreator.cpp",
-      "original": "\t\t\tparams.duration,\n\t\t\tparams.durationUnit,\n",
-      "mutated": "\t\t\tparams.duration,\n\t\t\tDurationUnit::ROUNDS,\n",
+      "original": "\t\t\tparams.duration,\n\t\t\tparams.durationUnit,\n\t\t\tparams.consumableBuffType,\n",
+      "mutated": "\t\t\tparams.duration,DurationUnit::ROUNDS,\n\t\t\tparams.consumableBuffType,\n",
       "catches": "a created potion losing its unit"
     },
     {
       "file": "src/ItemCreator.cpp",
-      "original": "\t\t\tparams.duration,\n\t\t\tparams.durationUnit\n",
-      "mutated": "\t\t\tparams.duration,\n\t\t\tDurationUnit::TURNS\n",
+      "original": "\t\t\tparams.duration,\n\t\t\tparams.durationUnit,\n\t\t};\n",
+      "mutated": "\t\t\tparams.duration,DurationUnit::TURNS,\n\t\t};\n",
       "catches": "a created scroll's unit replaced"
     }
   ]

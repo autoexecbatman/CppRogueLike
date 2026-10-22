@@ -201,7 +201,11 @@ TEST_F(RoundUpkeepTest, ARingOfRegenerationHealsOnTheTurnsRound)
 
 	// A hand to wear it on: a creature built in a test has no body until it is given one.
 	wearer.set_body_plan({ EquipmentSlot::RIGHT_RING });
-	auto ring = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "ring of regeneration", ColorPairId::WHITE_BLACK });
+	auto ring = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{
+															 TileRef{},
+															 "ring of regeneration",
+															 ColorPairId::WHITE_BLACK,
+														 });
 	ring->behavior = MagicalRing{ MagicalEffect::REGENERATION, 0 };
 	wearer.wear(std::move(ring), EquipmentSlot::RIGHT_RING);
 	ASSERT_TRUE(wearer.wears_ring_of(MagicalEffect::REGENERATION)) << "the ring is not on";
@@ -366,7 +370,8 @@ TEST_F(RoundUpkeepTest, AVenomLandingInsideALongActionStartsInItsOwnRound)
 		.damage = 0,
 		.effect = BuffType::HAIRY_SPIDER_VENOM,
 		.effectValue = 1,
-		.effectRounds = 10 });
+		.effectRounds = 10,
+	});
 
 	spend_one_action_of(7);
 

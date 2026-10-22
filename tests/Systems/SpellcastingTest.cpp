@@ -182,7 +182,16 @@ TEST_F(SpellcastingTest, AFirstLevelWizardMemorizesMagicMissile)
 TEST_F(SpellcastingTest, AnEighteenthLevelWizardMemorizesEveryWizardSpellOnce)
 {
 	EXPECT_EQ(SpellSystem::spells_to_memorize(CasterClass::WIZARD, 18, 10, mock.spellRegistry, mock.data_manager),
-		(Keys{ "magic_missile", "shield", "sleep", "invisibility", "web", "knock", "fireball", "teleport" }));
+		(Keys{
+			"magic_missile",
+			"shield",
+			"sleep",
+			"invisibility",
+			"web",
+			"knock",
+			"fireball",
+			"teleport",
+		}));
 }
 
 // A 5th-level priest has three 1st-level slots, so it holds three of the four 1st-level spells;
@@ -190,9 +199,22 @@ TEST_F(SpellcastingTest, AnEighteenthLevelWizardMemorizesEveryWizardSpellOnce)
 TEST_F(SpellcastingTest, APriestsWisdomAddsTheBonusSlotsToTheFill)
 {
 	EXPECT_EQ(SpellSystem::spells_to_memorize(CasterClass::CLERIC, 5, 10, mock.spellRegistry, mock.data_manager),
-		(Keys{ "cure_light_wounds", "bless", "sanctuary", "hold_person", "silence" }));
+		(Keys{
+			"cure_light_wounds",
+			"bless",
+			"sanctuary",
+			"hold_person",
+			"silence",
+		}));
 	EXPECT_EQ(SpellSystem::spells_to_memorize(CasterClass::CLERIC, 5, 18, mock.spellRegistry, mock.data_manager),
-		(Keys{ "cure_light_wounds", "bless", "sanctuary", "protection_from_evil", "hold_person", "silence" }));
+		(Keys{
+			"cure_light_wounds",
+			"bless",
+			"sanctuary",
+			"protection_from_evil",
+			"hold_person",
+			"silence",
+		}));
 	EXPECT_TRUE(SpellSystem::spells_to_memorize(CasterClass::NONE, 9, 18, mock.spellRegistry, mock.data_manager).empty());
 }
 
@@ -205,13 +227,19 @@ TEST_F(SpellcastingTest, ACasterCastsAtItsTrainingWhenItHasOneAndItsLevelOtherwi
 	EXPECT_EQ(SpellSystem::caster_class(wizard), CasterClass::WIZARD);
 	EXPECT_EQ(SpellSystem::caster_level(wizard), 7);
 
-	Creature lich{ Vector2D{ 2, 2 }, ActorData{ TileRef{}, "lich", ColorPairId::WHITE_BLACK } };
+	Creature lich{
+		Vector2D{ 2, 2 },
+		ActorData{ TileRef{}, "lich", ColorPairId::WHITE_BLACK },
+	};
 	lich.set_creature_level(11);
 	lich.spellcasting.training = SpellcasterTraining{ CasterClass::WIZARD, 18 };
 	EXPECT_EQ(SpellSystem::caster_class(lich), CasterClass::WIZARD);
 	EXPECT_EQ(SpellSystem::caster_level(lich), 18);
 
-	Creature pitFiend{ Vector2D{ 3, 3 }, ActorData{ TileRef{}, "pit fiend", ColorPairId::WHITE_BLACK } };
+	Creature pitFiend{
+		Vector2D{ 3, 3 },
+		ActorData{ TileRef{}, "pit fiend", ColorPairId::WHITE_BLACK },
+	};
 	pitFiend.set_creature_level(13);
 	EXPECT_EQ(SpellSystem::caster_class(pitFiend), CasterClass::NONE);
 	EXPECT_EQ(SpellSystem::caster_level(pitFiend), 13);
@@ -221,7 +249,10 @@ TEST_F(SpellcastingTest, ACasterCastsAtItsTrainingWhenItHasOneAndItsLevelOtherwi
 // percent, as it is for the player's priest. A wizard-trained monster risks none.
 TEST_F(SpellcastingTest, AClericTrainedMonsterFizzlesByTableFive)
 {
-	Creature shaman{ Vector2D{ 2, 2 }, ActorData{ TileRef{}, "shaman", ColorPairId::WHITE_BLACK } };
+	Creature shaman{
+		Vector2D{ 2, 2 },
+		ActorData{ TileRef{}, "shaman", ColorPairId::WHITE_BLACK },
+	};
 	shaman.set_wisdom(9);
 	shaman.spellcasting.training = SpellcasterTraining{ CasterClass::CLERIC, 5 };
 	EXPECT_EQ(SpellSystem::spell_failure_chance(shaman, mock.data_manager), 20);
@@ -246,7 +277,10 @@ TEST_F(SpellcastingTest, MemorizingWritesTheFillForTheCreaturesOwnClassAndLevel)
 // Table 21's one slot, where its own level would give it seven spells.
 TEST_F(SpellcastingTest, AMonsterMemorizesAtItsTrainingLevelAndNotItsHitDice)
 {
-	Creature conjurer{ Vector2D{ 2, 2 }, ActorData{ TileRef{}, "conjurer", ColorPairId::WHITE_BLACK } };
+	Creature conjurer{
+		Vector2D{ 2, 2 },
+		ActorData{ TileRef{}, "conjurer", ColorPairId::WHITE_BLACK },
+	};
 	conjurer.set_creature_level(5);
 	conjurer.spellcasting.training = SpellcasterTraining{ CasterClass::WIZARD, 1 };
 
@@ -285,7 +319,16 @@ TEST_F(SpellcastingTest, AMonsterIsBuiltWithItsCastingAndMemorizesAtSpawn)
 	const std::unique_ptr<Creature> lich = build("lich");
 	EXPECT_EQ(SpellSystem::caster_level(*lich), 18);
 	EXPECT_EQ(lich->spellcasting.memorizedSpells,
-		(Keys{ "magic_missile", "shield", "sleep", "invisibility", "web", "knock", "fireball", "teleport" }));
+		(Keys{
+			"magic_missile",
+			"shield",
+			"sleep",
+			"invisibility",
+			"web",
+			"knock",
+			"fireball",
+			"teleport",
+		}));
 
 	const std::unique_ptr<Creature> pitFiend = build("pit_fiend");
 	EXPECT_TRUE(pitFiend->spellcasting.memorizedSpells.empty());
@@ -335,7 +378,10 @@ TEST_F(SpellcastingTest, APowerNamingAnUnknownSpellIsRefusedOnceBothRegistriesLo
 // The creature's save carries its casting, so a spent copy stays spent across a load.
 TEST_F(SpellcastingTest, ACreatureSavesItsCasting)
 {
-	Creature lich{ Vector2D{ 2, 2 }, ActorData{ TileRef{}, "lich", ColorPairId::WHITE_BLACK } };
+	Creature lich{
+		Vector2D{ 2, 2 },
+		ActorData{ TileRef{}, "lich", ColorPairId::WHITE_BLACK },
+	};
 	lich.healthPool = std::make_unique<HealthPool>(5);
 	lich.armorClass = std::make_unique<ArmorClass>(10);
 	lich.spellcasting.memorizedSpells = { "fireball" };
@@ -343,7 +389,10 @@ TEST_F(SpellcastingTest, ACreatureSavesItsCasting)
 	nlohmann::json saved;
 	lich.save(saved);
 
-	Creature loaded{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK } };
+	Creature loaded{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK },
+	};
 	loaded.load(saved);
 
 	EXPECT_EQ(loaded.spellcasting.memorizedSpells, (Keys{ "fireball" }));

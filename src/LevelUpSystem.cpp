@@ -71,7 +71,11 @@ int apply_hit_point_gain(Creature& owner, int newLevel, GameContext& ctx)
 	// handed out has no die for the score to ride on.
 	const LevelUpSystem::HitDieValue gained = stillRollsDice
 		? LevelUpSystem::hit_die_value(roll_hit_die(), owner.get_creature_class(), owner.get_constitution(), *ctx.dataManager)
-		: LevelUpSystem::HitDieValue{ progression.flatGain, 0, progression.flatGain };
+		: LevelUpSystem::HitDieValue{
+			  progression.flatGain,
+			  0,
+			  progression.flatGain,
+		  };
 
 	const std::string diceType = stillRollsDice
 		? std::format("d{}", owner.get_hit_die())
@@ -350,27 +354,42 @@ LevelUpSystem::HitPointProgression LevelUpSystem::hit_point_progression(Creature
 	{
 	case CreatureClass::ROGUE:
 	{
-		return LevelUpSystem::HitPointProgression{ ROGUE_LAST_ROLLED_LEVEL, ROGUE_FLAT_GAIN };
+		return LevelUpSystem::HitPointProgression{
+			ROGUE_LAST_ROLLED_LEVEL,
+			ROGUE_FLAT_GAIN,
+		};
 	}
 
 	case CreatureClass::CLERIC:
 	{
-		return LevelUpSystem::HitPointProgression{ CLERIC_LAST_ROLLED_LEVEL, CLERIC_FLAT_GAIN };
+		return LevelUpSystem::HitPointProgression{
+			CLERIC_LAST_ROLLED_LEVEL,
+			CLERIC_FLAT_GAIN,
+		};
 	}
 
 	case CreatureClass::WIZARD:
 	{
-		return LevelUpSystem::HitPointProgression{ WIZARD_LAST_ROLLED_LEVEL, WIZARD_FLAT_GAIN };
+		return LevelUpSystem::HitPointProgression{
+			WIZARD_LAST_ROLLED_LEVEL,
+			WIZARD_FLAT_GAIN,
+		};
 	}
 
 	case CreatureClass::FIGHTER:
 	case CreatureClass::MONSTER:
 	{
-		return LevelUpSystem::HitPointProgression{ FIGHTER_LAST_ROLLED_LEVEL, FIGHTER_FLAT_GAIN };
+		return LevelUpSystem::HitPointProgression{
+			FIGHTER_LAST_ROLLED_LEVEL,
+			FIGHTER_FLAT_GAIN,
+		};
 	}
 	}
 
-	return LevelUpSystem::HitPointProgression{ FIGHTER_LAST_ROLLED_LEVEL, FIGHTER_FLAT_GAIN };
+	return LevelUpSystem::HitPointProgression{
+		FIGHTER_LAST_ROLLED_LEVEL,
+		FIGHTER_FLAT_GAIN,
+	};
 }
 
 // Whether this level adds the Constitution hit point adjustment.
@@ -406,7 +425,11 @@ LevelUpSystem::HitDieValue LevelUpSystem::hit_die_value(
 	const int adjustment = dataManager.constitution_hit_point_adjustment(constitution, creatureClass);
 
 	// "No Hit Die ever yields less than 1 hit point, regardless of modifications."
-	return LevelUpSystem::HitDieValue{ dieValue, adjustment, std::max(1, dieValue + adjustment) };
+	return LevelUpSystem::HitDieValue{
+		dieValue,
+		adjustment,
+		std::max(1, dieValue + adjustment),
+	};
 }
 
 // A whole hit dice expression rolled and adjusted.

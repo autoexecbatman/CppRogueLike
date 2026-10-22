@@ -45,7 +45,10 @@ class BuffStateTest : public ::testing::Test
 {
 protected:
 	BuffSystem buffs{};
-	Creature creature{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK } };
+	Creature creature{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK },
+	};
 };
 
 // The web runs out first; the hold still holds.
@@ -91,7 +94,10 @@ TEST_F(BuffStateTest, TheLastHoldEndingFreesTheCreature)
 	buffs.update_creature_buffs(creature, at_round(10));
 	EXPECT_FALSE(creature.has_state(ActorState::IS_HELD)) << "held after both grants ran out";
 
-	Creature webbed{ Vector2D{ 1, 0 }, ActorData{ TileRef{}, "kobold", ColorPairId::WHITE_BLACK } };
+	Creature webbed{
+		Vector2D{ 1, 0 },
+		ActorData{ TileRef{}, "kobold", ColorPairId::WHITE_BLACK },
+	};
 	buffs.add_buff(webbed, BuffType::WEBBED, 0, 2, BuffApplication::ADD, at_round(0));
 	EXPECT_TRUE(webbed.has_state(ActorState::IS_HELD)) << "a web holds from the moment it is cast";
 	buffs.update_creature_buffs(webbed, at_round(2));
@@ -177,7 +183,10 @@ TEST_F(BuffStateTest, ACreatureSavedHeldIsHeldTheMomentItLoads)
 	// A record whose states say nothing, so only the buff can make it held.
 	record["states"] = json::array();
 
-	Creature loaded{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK } };
+	Creature loaded{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK },
+	};
 	loaded.load(record);
 
 	EXPECT_TRUE(loaded.has_state(ActorState::IS_HELD)) << "held only after an update, not at load";
@@ -210,7 +219,10 @@ TEST_F(BuffStateTest, AStateNoBuffImposesIsStillSaved)
 	json record{};
 	creature.save(record);
 
-	Creature loaded{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK } };
+	Creature loaded{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK },
+	};
 	loaded.load(record);
 
 	EXPECT_TRUE(loaded.has_state(ActorState::IS_FLEEING)) << "a fleeing creature stopped fleeing across a save";
@@ -243,7 +255,10 @@ TEST_F(BuffStateTest, ABuffThatSetsStillSetsAfterALoad)
 	json record{};
 	creature.save(record);
 
-	Creature loaded{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK } };
+	Creature loaded{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK },
+	};
 	loaded.load(record);
 
 	EXPECT_EQ(loaded.get_strength(), 19);
@@ -258,7 +273,10 @@ TEST_F(BuffStateTest, ABuffThatAddsStillAddsAfterALoad)
 	json record{};
 	creature.save(record);
 
-	Creature loaded{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK } };
+	Creature loaded{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK },
+	};
 	loaded.load(record);
 
 	EXPECT_EQ(loaded.get_strength(), 11);
@@ -273,7 +291,10 @@ TEST_F(BuffStateTest, ABuffRecordWithoutItsApplicationIsRefused)
 	creature.save(record);
 	record.at("activeBuffs")[0].erase("application");
 
-	Creature loaded{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK } };
+	Creature loaded{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK },
+	};
 	EXPECT_ANY_THROW(loaded.load(record));
 }
 
@@ -286,7 +307,10 @@ TEST_F(BuffStateTest, ABuffRecordWithAnUnknownApplicationIsRefused)
 	creature.save(record);
 	record.at("activeBuffs")[0]["application"] = "sideways";
 
-	Creature loaded{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK } };
+	Creature loaded{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK },
+	};
 	EXPECT_ANY_THROW(loaded.load(record));
 }
 

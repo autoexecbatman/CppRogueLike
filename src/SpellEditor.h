@@ -107,12 +107,14 @@ public:
 			FieldId::EFFECT_TYPE,
 			FieldKind::TOGGLE,
 			"Effect",
-			std::nullopt },
+			std::nullopt,
+		},
 		Descriptor{
 			FieldId::DESCRIPTION,
 			FieldKind::TEXT,
 			"Description",
-			std::nullopt },
+			std::nullopt,
+		},
 	} };
 
 	void enter(const SpellRegistry& spells);

@@ -39,7 +39,10 @@
 // OCP: Data-driven buff break messaging - player notifications when buffs end from attacking
 static const std::unordered_map<BuffType, std::string_view> BUFF_BREAK_MESSAGES = {
 	{ BuffType::INVISIBILITY, "Your invisibility fades as you attack!" },
-	{ BuffType::ITEM_INVISIBILITY, "Your invisibility fades as you attack!" },
+	{
+		BuffType::ITEM_INVISIBILITY,
+		"Your invisibility fades as you attack!",
+	},
 	{ BuffType::SANCTUARY, "Your sanctuary is broken by your aggression!" },
 };
 
@@ -398,7 +401,7 @@ void Attacker::load(const json& source)
 	const json& damageJson = source.at("damageInfo");
 	damageInfo = DamageInfo{
 		damageJson.at("display").get<std::string>(),
-		parse_damage_type(damageJson.at("type").get<std::string>())
+		parse_damage_type(damageJson.at("type").get<std::string>()),
 	};
 }
 

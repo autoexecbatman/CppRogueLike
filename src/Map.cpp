@@ -222,13 +222,16 @@ void Map::save(json& output)
 	output["tiles"] = json::array();
 	for (const auto& tile : tiles)
 	{
-		const nlohmann::json position{ { "y", tile.position.y }, { "x", tile.position.x } };
+		const nlohmann::json position{
+			{ "y", tile.position.y },
+			{ "x", tile.position.x },
+		};
 		const nlohmann::json record{
 			{ "position", position },
 			{ "type", static_cast<int>(tile.type) }, // TileType is an enum
 			{ "explored", tile.explored },
 			{ "doorState", static_cast<int>(tile.doorState) },
-			{ "lockPickFailedAtLevel", tile.lockPickFailedAtLevel }
+			{ "lockPickFailedAtLevel", tile.lockPickFailedAtLevel },
 		};
 		output["tiles"].push_back(record);
 	}
@@ -265,7 +268,10 @@ int Map::count_unreachable_tiles(Vector2D start) const noexcept
 		// Four-way: the player moves on eight, but a diagonal pinched between two walls
 		// is not a passage anything should depend on.
 		const Vector2D steps[4] = {
-			Vector2D{ here.x + 1, here.y }, Vector2D{ here.x - 1, here.y }, Vector2D{ here.x, here.y + 1 }, Vector2D{ here.x, here.y - 1 }
+			Vector2D{ here.x + 1, here.y },
+			Vector2D{ here.x - 1, here.y },
+			Vector2D{ here.x, here.y + 1 },
+			Vector2D{ here.x, here.y - 1 },
 		};
 		for (const Vector2D& next : steps)
 		{
@@ -455,10 +461,14 @@ void Map::render(const GameContext& ctx) const
 	constexpr uint8_t eastBit = 4;
 	constexpr uint8_t southBit = 2;
 	constexpr uint8_t westBit = 1;
-	const std::array<NeighborDef, 4> cardinals = { { { DIR_N, northBit },
-		{ DIR_E, eastBit },
-		{ DIR_S, southBit },
-		{ DIR_W, westBit } } };
+	const std::array<NeighborDef, 4> cardinals = {
+		{
+			{ DIR_N, northBit },
+			{ DIR_E, eastBit },
+			{ DIR_S, southBit },
+			{ DIR_W, westBit },
+		},
+	};
 
 	auto build_mask = [&](Vector2D center, auto predicate) -> uint8_t
 	{
@@ -841,7 +851,10 @@ bool Map::room_layout_is_sound(const DungeonRoom& room) const
 	{
 		for (int taken = 0; taken < cells; ++taken)
 		{
-			if (get_tile_type(Vector2D{ from.x + step.x * taken, from.y + step.y * taken }) != TileType::WALL)
+			if (get_tile_type(Vector2D{
+					from.x + step.x * taken,
+					from.y + step.y * taken,
+				}) != TileType::WALL)
 			{
 				return true;
 			}
@@ -899,7 +912,10 @@ bool Map::room_interior_is_one_piece(const DungeonRoom& room) const
 		++reachedCells;
 
 		const Vector2D steps[4] = {
-			Vector2D{ here.x + 1, here.y }, Vector2D{ here.x - 1, here.y }, Vector2D{ here.x, here.y + 1 }, Vector2D{ here.x, here.y - 1 }
+			Vector2D{ here.x + 1, here.y },
+			Vector2D{ here.x - 1, here.y },
+			Vector2D{ here.x, here.y + 1 },
+			Vector2D{ here.x, here.y - 1 },
 		};
 		for (const Vector2D& next : steps)
 		{
@@ -946,8 +962,11 @@ void Map::set_tile(Vector2D pos, TileType newType)
 void Map::apply_room_shape(const DungeonRoom& room)
 {
 	// Before dig() the centre is still wall, and every wall_back below would change nothing.
-	assert(!is_wall(Vector2D{ room.col + room.width / 2, room.row + room.height / 2 })
-		&& "apply_room_shape: the room has not been dug yet, so shaping it does nothing");
+	assert(!is_wall(Vector2D{
+			   room.col + room.width / 2,
+			   room.row + room.height / 2,
+		   }) &&
+		"apply_room_shape: the room has not been dug yet, so shaping it does nothing");
 
 	auto wall_back = [&](int col, int row)
 	{
@@ -1184,7 +1203,11 @@ void Map::spawn_traps(const DungeonRoom& room, GameContext& ctx)
 		}
 
 		// The die has one face per table entry, so every roll names a trap and none falls outside.
-		constexpr std::array trapTypes{ TrapType::PIT, TrapType::DART, TrapType::ARROW };
+		constexpr std::array trapTypes{
+			TrapType::PIT,
+			TrapType::DART,
+			TrapType::ARROW,
+		};
 		const TrapType trapType = trapTypes[static_cast<size_t>(ctx.dice->roll(1, static_cast<int>(trapTypes.size())) - 1)];
 
 		auto trap = std::make_unique<Trap>(trapPos, trapType, *ctx.tileConfig);
@@ -1364,7 +1387,10 @@ void Map::spawn_items(const DungeonRoom& room, GameContext& ctx)
 	const int numItems = ctx.dice->roll(0, MAX_ROOM_ITEMS);
 	for (int itemIndex = 0; itemIndex < numItems; itemIndex++)
 	{
-		Vector2D itemPos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
+		Vector2D itemPos{
+			ctx.dice->roll(room.col, room.col_end()),
+			ctx.dice->roll(room.row, room.row_end()),
+		};
 		constexpr int MAX_ITEM_TRIES = 20;
 		int itemTries = 0;
 		while (itemTries < MAX_ITEM_TRIES &&
@@ -1393,7 +1419,10 @@ void Map::spawn_barrels(const DungeonRoom& room, GameContext& ctx)
 
 	for (int barrelIndex = 0; barrelIndex < count; ++barrelIndex)
 	{
-		Vector2D pos{ mapRng.roll(room.col, room.col_end()), mapRng.roll(room.row, room.row_end()) };
+		Vector2D pos{
+			mapRng.roll(room.col, room.col_end()),
+			mapRng.roll(room.row, room.row_end()),
+		};
 		constexpr int MAX_TRIES = 20;
 		int tries = 0;
 		while (tries < MAX_TRIES && !can_place_at(pos, ctx))
@@ -1422,7 +1451,10 @@ void Map::spawn_player(const DungeonRoom& room, GameContext& ctx)
 	assert(ctx.player() && "Map::spawn_player called without player");
 	assert(ctx.dice && "Map::spawn_player called without dice");
 
-	Vector2D pos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
+	Vector2D pos{
+		ctx.dice->roll(room.col, room.col_end()),
+		ctx.dice->roll(room.row, room.row_end()),
+	};
 	constexpr int MAX_PLAYER_TRIES = 50;
 	int playerTries = 0;
 	while (playerTries < MAX_PLAYER_TRIES &&
@@ -1468,7 +1500,10 @@ void Map::place_stairs(GameContext& ctx)
 		std::ranges::max_element(depth) - depth.begin());
 
 	const DungeonRoom& room = rooms[deepestIndex];
-	Vector2D stairsPos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
+	Vector2D stairsPos{
+		ctx.dice->roll(room.col, room.col_end()),
+		ctx.dice->roll(room.row, room.row_end()),
+	};
 	constexpr int MAX_STAIR_TRIES = 200;
 	for (int attempt = 0; attempt < MAX_STAIR_TRIES; ++attempt)
 	{
@@ -1977,7 +2012,10 @@ void Map::place_amulet(GameContext& ctx)
 
 		// Somewhere reachable without water: the amulet is placed once, and a character who
 		// later loses the means to swim must still be able to win.
-		Vector2D amuletPos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
+		Vector2D amuletPos{
+			ctx.dice->roll(room.col, room.col_end()),
+			ctx.dice->roll(room.row, room.row_end()),
+		};
 		while (!can_place_at(amuletPos, ctx) || is_stairs(amuletPos, ctx))
 		{
 			amuletPos.x = ctx.dice->roll(room.col, room.col_end());

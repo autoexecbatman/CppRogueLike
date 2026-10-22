@@ -70,7 +70,11 @@ TEST(InventoryContextActionsTest, EveryMenuOfferedCanBeDismissed)
 {
 	// Without Cancel the only way out of an opened menu is ESC, which a player who
 	// reached it with the mouse has no reason to look for.
-	for (const auto screen : { InventoryScreen::EQUIPMENT, InventoryScreen::BACKPACK, InventoryScreen::USABLES })
+	for (const auto screen : {
+			 InventoryScreen::EQUIPMENT,
+			 InventoryScreen::BACKPACK,
+			 InventoryScreen::USABLES,
+		 })
 	{
 		for (const bool holdsItem : { true, false })
 		{

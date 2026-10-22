@@ -53,7 +53,8 @@ TEST(SpellRegistryTest, ACustomSpellBelongsToTheRegistryItWasAddedTo)
 		.level = 1,
 		.spellClass = SpellClass::WIZARD,
 		.description = "a spell only one registry holds",
-		.effect_type = SpellEffectType::MAGIC_MISSILE });
+		.effect_type = SpellEffectType::MAGIC_MISSILE,
+	});
 
 	EXPECT_EQ(key, "registry_spark") << "the key is the name, lower case, spaces as underscores";
 	EXPECT_TRUE(std::ranges::contains(first.get_all_keys(), key));
@@ -82,7 +83,8 @@ TEST(SpellRegistryTest, ACasterSeesItsClassAndBothAtOrBelowItsLevel)
 		.level = 1,
 		.spellClass = SpellClass::BOTH,
 		.description = "a spell of both classes",
-		.effect_type = SpellEffectType::NONE });
+		.effect_type = SpellEffectType::NONE,
+	});
 
 	std::ifstream file(Paths::resolve(Paths::SPELLS));
 	const nlohmann::json shipped = nlohmann::json::parse(file);

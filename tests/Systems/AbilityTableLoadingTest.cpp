@@ -40,38 +40,81 @@ namespace
 json strength_seventeen()
 {
 	return json{
-		{ "Str", 17 }, { "Hit", 1 }, { "Dmg", 1 }, { "Wgt", 85 }, { "MaxPress", 220 }, { "maxCarried", 220 }, { "OpenDoors", 10 }, { "LockedDoors", 0 }, { "BB_LG", 13 }, { "Notes", "" }, { "encumbrance", { { "unencumberedTo", 85 }, { "lightTo", 121 }, { "moderateTo", 157 }, { "heavyTo", 193 } } }
+		{ "Str", 17 },
+		{ "Hit", 1 },
+		{ "Dmg", 1 },
+		{ "Wgt", 85 },
+		{ "MaxPress", 220 },
+		{ "maxCarried", 220 },
+		{ "OpenDoors", 10 },
+		{ "LockedDoors", 0 },
+		{ "BB_LG", 13 },
+		{ "Notes", "" },
+		{
+			"encumbrance",
+			{
+				{ "unencumberedTo", 85 },
+				{ "lightTo", 121 },
+				{ "moderateTo", 157 },
+				{ "heavyTo", 193 },
+			},
+		},
 	};
 }
 
 json dexterity_seventeen()
 {
-	return json{ { "Dex", 17 }, { "ReactionAdj", 2 }, { "MissileAttackAdj", 2 }, { "DefensiveAdj", -3 } };
+	return json{
+		{ "Dex", 17 },
+		{ "ReactionAdj", 2 },
+		{ "MissileAttackAdj", 2 },
+		{ "DefensiveAdj", -3 },
+	};
 }
 
 json constitution_seventeen()
 {
 	return json{
-		{ "Con", 17 }, { "HPAdj", 3 }, { "hitDieMinimum", 1 }, { "SystemShock", 97 }, { "ResurrectionSurvival", 98 }, { "PoisonSave", 0 }, { "Regeneration", 0 }
+		{ "Con", 17 },
+		{ "HPAdj", 3 },
+		{ "hitDieMinimum", 1 },
+		{ "SystemShock", 97 },
+		{ "ResurrectionSurvival", 98 },
+		{ "PoisonSave", 0 },
+		{ "Regeneration", 0 },
 	};
 }
 
 json charisma_seventeen()
 {
-	return json{ { "Cha", 17 }, { "MaxHencmen", 10 }, { "Loyalty", 6 }, { "ReactionAdj", 6 } };
+	return json{
+		{ "Cha", 17 },
+		{ "MaxHencmen", 10 },
+		{ "Loyalty", 6 },
+		{ "ReactionAdj", 6 },
+	};
 }
 
 json intelligence_seventeen()
 {
 	return json{
-		{ "Int", 17 }, { "NumberOfLanguages", 6 }, { "SpellLevel", 8 }, { "ChanceToLearnSpell", 75 }, { "MaxNumberOfSpells", 14 }, { "IllusionImmunity", 0 }
+		{ "Int", 17 },
+		{ "NumberOfLanguages", 6 },
+		{ "SpellLevel", 8 },
+		{ "ChanceToLearnSpell", 75 },
+		{ "MaxNumberOfSpells", 14 },
+		{ "IllusionImmunity", 0 },
 	};
 }
 
 json wisdom_seventeen()
 {
 	return json{
-		{ "Wis", 17 }, { "MagicalDefenseAdj", 3 }, { "ChanceOfSpellFailure", 0 }, { "SpellImmunity", 0 }, { "bonusSpells", json::array({ 3 }) }
+		{ "Wis", 17 },
+		{ "MagicalDefenseAdj", 3 },
+		{ "ChanceOfSpellFailure", 0 },
+		{ "SpellImmunity", 0 },
+		{ "bonusSpells", json::array({ 3 }) },
 	};
 }
 } // namespace

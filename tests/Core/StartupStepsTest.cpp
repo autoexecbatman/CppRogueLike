@@ -43,7 +43,11 @@ StartupStep recording_step(const std::string& name, RunOrder& order)
 TEST(StartupStepsTest, EveryStepRunsInOrderAndNothingIsRefused)
 {
 	RunOrder order{};
-	const std::vector<StartupStep> steps{ recording_step("first", order), recording_step("second", order), recording_step("third", order) };
+	const std::vector<StartupStep> steps{
+		recording_step("first", order),
+		recording_step("second", order),
+		recording_step("third", order),
+	};
 	std::ostringstream log{};
 
 	const std::optional<StartupRefusal> refusal = run_startup_steps(steps, log);
@@ -70,7 +74,11 @@ TEST(StartupStepsTest, AThrowingStepStopsStartupAndIsNamedWithItsReason)
 	{
 		throw std::runtime_error("key 'tiles' not found");
 	};
-	const std::vector<StartupStep> steps{ recording_step("first", order), StartupStep{ "Loading tile config", refuse_the_data }, recording_step("third", order) };
+	const std::vector<StartupStep> steps{
+		recording_step("first", order),
+		StartupStep{ "Loading tile config", refuse_the_data },
+		recording_step("third", order),
+	};
 	std::ostringstream log{};
 
 	const std::optional<StartupRefusal> refusal = run_startup_steps(steps, log);
@@ -84,7 +92,10 @@ TEST(StartupStepsTest, AThrowingStepStopsStartupAndIsNamedWithItsReason)
 
 TEST(StartupStepsTest, TheRefusalLineNamesTheStepAndTheReason)
 {
-	const StartupRefusal refusal{ "Loading tile config", "key 'tiles' not found" };
+	const StartupRefusal refusal{
+		"Loading tile config",
+		"key 'tiles' not found",
+	};
 
 	EXPECT_EQ(startup_refusal_line(refusal), "Could not start: Loading tile config failed: key 'tiles' not found");
 }
@@ -96,7 +107,12 @@ TEST(StartupStepsTest, AThrowThatIsNotAStdExceptionEscapes)
 	{
 		throw 7;
 	};
-	const std::vector<StartupStep> steps{ StartupStep{ "Throwing a number", throw_a_number } };
+	const std::vector<StartupStep> steps{
+		StartupStep{
+			"Throwing a number",
+			throw_a_number,
+		},
+	};
 	std::ostringstream log{};
 
 	EXPECT_THROW((void)run_startup_steps(steps, log), int) << "a fault was swallowed as though it were a refusal";

@@ -49,7 +49,7 @@ void LevelManager::save_to_json(nlohmann::json& output) const
 {
 	output["level_manager"] = {
 		{ "dungeonLevel", dungeon_level },
-		{ "shopkeepersOnCurrentLevel", shopkeepers_on_current_level }
+		{ "shopkeepersOnCurrentLevel", shopkeepers_on_current_level },
 	};
 }
 

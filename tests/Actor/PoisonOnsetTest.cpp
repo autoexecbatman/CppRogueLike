@@ -127,13 +127,19 @@ protected:
 	GameContext ctx;
 	Map map{ 20, 20 };
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 4, 5 }) };
-	Creature spider{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "giant spider", ColorPairId::WHITE_BLACK } };
+	Creature spider{
+		Vector2D{ 5, 5 },
+		ActorData{ TileRef{}, "giant spider", ColorPairId::WHITE_BLACK },
+	};
 };
 
 // A dose waits its rounds out, and lands on the last of them.
 TEST_F(PoisonOnsetTest, ADoseLandsWhenItsRoundsRunOut)
 {
-	player->take_poison(PendingPoison{ .roundsUntilOnset = TYPE_A_ONSET_ROUNDS, .damage = TYPE_A_DAMAGE });
+	player->take_poison(PendingPoison{
+		.roundsUntilOnset = TYPE_A_ONSET_ROUNDS,
+		.damage = TYPE_A_DAMAGE,
+	});
 
 	EXPECT_EQ(tick_through(*player, TYPE_A_ONSET_ROUNDS - 1), 0) << "the poison landed early";
 	EXPECT_EQ(tick_through(*player, 1), TYPE_A_DAMAGE);
@@ -194,7 +200,8 @@ TEST_F(PoisonOnsetTest, ADoseCarriesItsConditionThroughASaveAndALoad)
 		.damage = 0,
 		.effect = BuffType::HAIRY_SPIDER_VENOM,
 		.effectValue = -1,
-		.effectRounds = 3 });
+		.effectRounds = 3,
+	});
 
 	nlohmann::json saved;
 	player->save(saved);
@@ -218,7 +225,10 @@ TEST_F(PoisonOnsetTest, WithoutADoseNothingHappens)
 // The dead are not poisoned further: the dose stays where it is, and nothing lands.
 TEST_F(PoisonOnsetTest, ADeadCreatureIsLeftAlone)
 {
-	Creature victim{ Vector2D{ 7, 5 }, ActorData{ TileRef{}, "victim", ColorPairId::WHITE_BLACK } };
+	Creature victim{
+		Vector2D{ 7, 5 },
+		ActorData{ TileRef{}, "victim", ColorPairId::WHITE_BLACK },
+	};
 	victim.healthPool = std::make_unique<HealthPool>(10);
 	victim.take_poison(PendingPoison{ .roundsUntilOnset = 1, .damage = TYPE_A_DAMAGE });
 	victim.set_hp(0);

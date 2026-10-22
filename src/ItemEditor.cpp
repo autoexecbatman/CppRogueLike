@@ -609,7 +609,12 @@ void ItemEditor::render_list(const Renderer& renderer, const ItemRegistry& items
 		constexpr Color PLAIN_TEXT{ 200, 200, 200, 255 };
 		Color textColor = isSelected ? SELECTED_TEXT : PLAIN_TEXT;
 
-		renderer.draw_text_color(Vector2D{ LIST_PAD + LIST_TILE_SIZE + 4, itemY + (ITEM_HEIGHT - 16) / 2 }, displayName, textColor);
+		renderer.draw_text_color(Vector2D{
+									 LIST_PAD + LIST_TILE_SIZE + 4,
+									 itemY + (ITEM_HEIGHT - 16) / 2,
+								 },
+			displayName,
+			textColor);
 	}
 }
 
@@ -666,7 +671,12 @@ void ItemEditor::render_fields(const Renderer& renderer) const
 
 		if (fieldId == FieldId::TILE)
 		{
-			renderer.draw_tile_screen_sized(Vector2D{ screenWidth - LIST_TILE_SIZE - 12, itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2 }, workingTile, LIST_TILE_SIZE);
+			renderer.draw_tile_screen_sized(Vector2D{
+												screenWidth - LIST_TILE_SIZE - 12,
+												itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2,
+											},
+				workingTile,
+				LIST_TILE_SIZE);
 			if (isSelected)
 			{
 				DrawRectangleLines(

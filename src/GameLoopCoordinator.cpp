@@ -439,7 +439,11 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 	DrawRectangle(tip_px, tip_py, box_w, box_h, Color{ 8, 8, 16, 220 });
 	DrawRectangleLinesEx(
 		Rectangle{
-			static_cast<float>(tip_px), static_cast<float>(tip_py), static_cast<float>(box_w), static_cast<float>(box_h) },
+			static_cast<float>(tip_px),
+			static_cast<float>(tip_py),
+			static_cast<float>(box_w),
+			static_cast<float>(box_h),
+		},
 		1.0f,
 		Color{ tintRed, tintGreen, tintBlue, 180 });
 	ctx.renderer->draw_text(Vector2D{ tip_px + pad, tip_py + font_off }, desc, ColorPairId::WHITE_BLACK);
@@ -615,7 +619,8 @@ void GameLoopCoordinator::open_end_of_run_screen(GameContext& ctx)
 				"You have retrieved the Amulet of Yendor",
 				"and escaped the dungeon alive.",
 				"",
-				"Your legend will be remembered." },
+				"Your legend will be remembered.",
+			},
 			ctx);
 		// Closing the victory screen ends the run.
 		const auto end_the_run = [](GameContext& closeCtx)

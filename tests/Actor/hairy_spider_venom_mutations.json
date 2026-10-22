@@ -21,8 +21,8 @@
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "\t\t.effectRounds = ctx.dice->d4() + 1 });",
-      "mutated": "\t\t.effectRounds = ctx.dice->d4() });",
+      "original": "\t\t.effectRounds = ctx.dice->d4() + 1,\n\t});",
+      "mutated": "\t\t.effectRounds = ctx.dice->d4(),\n\t});",
       "catches": "1d4 rounds where the book prints 1d4+1"
     },
     {

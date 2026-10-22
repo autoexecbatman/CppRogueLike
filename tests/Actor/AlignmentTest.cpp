@@ -24,7 +24,10 @@
 class AlignmentTest : public ::testing::Test
 {
 protected:
-	Creature creature{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK } };
+	Creature creature{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK },
+	};
 };
 
 // Nothing is aligned until its data says so.

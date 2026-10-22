@@ -39,7 +39,8 @@ ThiefSkillScreenState screen_at_level(int level, std::array<int, THIEF_SKILL_COU
 			thief_skill_grant_at_level(level),
 			NO_RACIAL_ADJUSTMENT,
 			UNADJUSTED_DEXTERITY,
-			ThiefArmor::LEATHER }
+			ThiefArmor::LEATHER,
+		},
 	};
 }
 

@@ -202,7 +202,7 @@ struct MockGameContext
 			.rooms = &rooms,
 			.menus = &menus,
 			.mousePathOverlay = &mousePathOverlay,
-			.gameState = &game_state
+			.gameState = &game_state,
 		};
 	}
 };

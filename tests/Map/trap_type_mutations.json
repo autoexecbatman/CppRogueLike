@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/Map.cpp",
-      "original": "constexpr std::array trapTypes{ TrapType::PIT, TrapType::DART, TrapType::ARROW };",
-      "mutated": "constexpr std::array trapTypes{ TrapType::PIT, TrapType::ARROW, TrapType::DART };",
+      "original": "constexpr std::array trapTypes{\n\t\t\tTrapType::PIT,\n\t\t\tTrapType::DART,\n\t\t\tTrapType::ARROW,\n\t\t};",
+      "mutated": "constexpr std::array trapTypes{\n\t\t\tTrapType::PIT,\n\t\t\tTrapType::ARROW, TrapType::DART,\n\t\t};",
       "catches": "darts and arrows swapped, so a 2 lays arrows and a 3 lays darts"
     },
     {

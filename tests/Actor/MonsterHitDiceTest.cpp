@@ -75,7 +75,11 @@ protected:
 		params.equipment.clear();
 		params.strength = MonsterStrength{ 10, 0 };
 		params.size = size;
-		params.hitDice = MonsterHitDice{ hitDice.sides, hitDice.bonus, { { hitDice.num, 0 } } };
+		params.hitDice = MonsterHitDice{
+			hitDice.sides,
+			hitDice.bonus,
+			{ { hitDice.num, 0 } },
+		};
 		return params;
 	}
 
@@ -160,7 +164,10 @@ TEST_F(MonsterHitDiceTest, AMonsterKeepsWhatItWasMadeWith)
 // three hit dice carry it three times.
 TEST_F(MonsterHitDiceTest, AMonstersChangedScoreMovesByItsHitDice)
 {
-	Creature monster{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "pit fiend", ColorPairId::WHITE_BLACK } };
+	Creature monster{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "pit fiend", ColorPairId::WHITE_BLACK },
+	};
 	monster.set_creature_level(3);
 	monster.set_constitution(14);
 	monster.set_hit_dice(30);
@@ -202,7 +209,36 @@ TEST_F(MonsterHitDiceTest, ASmallSpiderTakesItsConstitutionPenalty)
 // then 9 or 10 hit dice and a d8 for each. A score of 18 adds 4 to every one of them.
 TEST_F(MonsterHitDiceTest, AMimicTakesItsConstitutionOnEveryHitDie)
 {
-	force_rolls({ 3, 3, 3, 3, 3, 3, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1 });
+	force_rolls({
+		3,
+		3,
+		3,
+		3,
+		3,
+		3,
+		5,
+		5,
+		5,
+		1,
+		1,
+		1,
+		1,
+		1,
+		1,
+		1,
+		1,
+		1,
+		9,
+		1,
+		1,
+		1,
+		1,
+		1,
+		1,
+		1,
+		1,
+		1,
+	});
 	const auto mimic = build("mimic");
 
 	ASSERT_EQ(mimic->get_constitution(), 18);

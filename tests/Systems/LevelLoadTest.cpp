@@ -158,7 +158,13 @@ TEST_F(LevelLoadTest, LoadingRoomsReplacesTheAbandonedLevels)
 {
 	json record{};
 	record["rooms"] = json::array();
-	record["rooms"].push_back({ { "col", 20 }, { "row", 2 }, { "width", 4 }, { "height", 3 }, { "type", 0 } });
+	record["rooms"].push_back({
+		{ "col", 20 },
+		{ "row", 2 },
+		{ "width", 4 },
+		{ "height", 3 },
+		{ "type", 0 },
+	});
 
 	std::vector<DungeonRoom> level{ room_at(1), room_at(9) };
 	load_rooms(record, level);

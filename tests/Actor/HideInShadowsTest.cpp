@@ -407,4 +407,23 @@ TEST_F(HideInShadowsTest, AHideSurvivesASaveAndLoad)
 	EXPECT_TRUE(loaded.is_in_shadows()) << "the spot came back with the player, so he has not moved";
 }
 
+// A thief saved out of the shadows loads out of them, even into a player that
+// was hidden: the load clears the spot rather than keeping the one it had.
+TEST_F(HideInShadowsTest, AThiefSavedInTheOpenLoadsInTheOpen)
+{
+	nlohmann::json inTheOpen;
+	thief->save(inTheOpen);
+	buy_hide_in_shadows(40);
+	hide_with_roll(1);
+	nlohmann::json hidden;
+	thief->save(hidden);
+
+	Player loaded{ Vector2D{ 0, 0 } };
+	loaded.load(hidden);
+	ASSERT_TRUE(loaded.is_in_shadows()) << "the loaded player has to start hidden, or the second load proves nothing";
+	loaded.load(inTheOpen);
+
+	EXPECT_FALSE(loaded.is_in_shadows());
+}
+
 // end of file: HideInShadowsTest.cpp

@@ -152,7 +152,10 @@ TEST_F(PlayerConfusionTest, AnUnconfusedPlayerIsNeverToldTheirMindClears)
 TEST_F(PlayerConfusionTest, AMimicRevealingItselfConfusesThePlayer)
 {
 	ctx.player()->set_wisdom(3);
-	Creature mimic{ Vector2D{ START.x + 1, CORRIDOR_ROW }, ActorData{ TileRef{}, "chest", ColorPairId::WHITE_BLACK } };
+	Creature mimic{
+		Vector2D{ START.x + 1, CORRIDOR_ROW },
+		ActorData{ TileRef{}, "chest", ColorPairId::WHITE_BLACK },
+	};
 	mimic.healthPool = std::make_unique<HealthPool>(10);
 	mimic.ai = std::make_unique<AiMimic>();
 	mock.dice.set_next_roll(20);

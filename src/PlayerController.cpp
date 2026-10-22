@@ -149,7 +149,14 @@ void PlayerController::update(GameContext& ctx)
 			if (ctx.dice->d2() == 1)
 			{
 				static const std::array<Vector2D, 8> allDirections = {
-					DIR_N, DIR_S, DIR_W, DIR_E, DIR_NW, DIR_NE, DIR_SW, DIR_SE
+					DIR_N,
+					DIR_S,
+					DIR_W,
+					DIR_E,
+					DIR_NW,
+					DIR_NE,
+					DIR_SW,
+					DIR_SE,
 				};
 				moveVector = allDirections[ctx.dice->roll(0, 7)];
 
@@ -634,7 +641,10 @@ Vector2D PlayerController::find_door_approach(Vector2D doorTile, const GameConte
 	assert(ctx.map && "PlayerController::find_door_approach: called without a map");
 
 	const std::array<Vector2D, 4> dirs{
-		Vector2D{ 0, -1 }, Vector2D{ 0, 1 }, Vector2D{ -1, 0 }, Vector2D{ 1, 0 }
+		Vector2D{ 0, -1 },
+		Vector2D{ 0, 1 },
+		Vector2D{ -1, 0 },
+		Vector2D{ 1, 0 },
 	};
 	Vector2D best{ -1, -1 };
 	int bestDist = INT_MAX;
@@ -1306,7 +1316,12 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "DEBUG: Spells added -- press Shift+C to cast.", MessageCompletion::FINISHED);
 
 		// Spawn a shopkeeper on the first walkable adjacent tile, and say so when all four are wall.
-		const std::array<Vector2D, 4> cardinals{ Vector2D{ 0, -1 }, Vector2D{ 0, 1 }, Vector2D{ -1, 0 }, Vector2D{ 1, 0 } };
+		const std::array<Vector2D, 4> cardinals{
+			Vector2D{ 0, -1 },
+			Vector2D{ 0, 1 },
+			Vector2D{ -1, 0 },
+			Vector2D{ 1, 0 },
+		};
 		bool shopkeeperSpawned = false;
 		for (const auto& offset : cardinals)
 		{

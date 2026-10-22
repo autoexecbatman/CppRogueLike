@@ -69,8 +69,8 @@
     },
     {
       "file": "src/MonsterHitDice.h",
-      "original": "\t\tconst HitDiceCount below{ hitDice.counts.front().count - 1, hitDice.counts.front().xp };\n",
-      "mutated": "\t\tconst HitDiceCount below{ hitDice.counts.front().count - 1, 0 };\n",
+      "original": "\t\tconst HitDiceCount below{\n\t\t\thitDice.counts.front().count - 1,\n\t\t\thitDice.counts.front().xp,\n\t\t};\n",
+      "mutated": "\t\tconst HitDiceCount below{\n\t\t\thitDice.counts.front().count - 1,0,\n\t\t};\n",
       "catches": "a count the editor adds at the bottom worth nothing"
     },
     {

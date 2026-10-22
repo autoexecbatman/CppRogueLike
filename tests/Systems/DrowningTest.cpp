@@ -214,7 +214,11 @@ TEST_F(DrowningInWaterTest, APassedCheckCostsNothing)
 TEST_F(DrowningInWaterTest, TheHelmOfUnderwaterActionMeansNoBreathAtAll)
 {
 	Creature& diver = swimmer_in_water(3);
-	auto helm = std::make_unique<Item>(Vector2D{}, ActorData{ TileRef{}, "helm of underwater action", ColorPairId::CYAN_BLACK });
+	auto helm = std::make_unique<Item>(Vector2D{}, ActorData{
+													   TileRef{},
+													   "helm of underwater action",
+													   ColorPairId::CYAN_BLACK,
+												   });
 	helm->itemKey = "helm_of_underwater_action";
 	helm->behavior = MagicalHelm{ MagicalEffect::UNDERWATER_ACTION, 0 };
 	diver.equippedItems.emplace_back(std::move(helm), EquipmentSlot::HEAD);
@@ -301,7 +305,10 @@ TEST_F(DrowningInWaterTest, ABreathAlreadyHeldSurvivesASave)
 	json saved;
 	diver.save(saved);
 
-	Creature restored{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "diver", ColorPairId::WHITE_BLACK } };
+	Creature restored{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "diver", ColorPairId::WHITE_BLACK },
+	};
 	restored.load(saved);
 
 	EXPECT_EQ(restored.get_air_until_time(), heldUntil) << "the diver surfaced and took a fresh breath across the save";
@@ -373,7 +380,11 @@ TEST_F(DrowningInWaterTest, TheHelmAloneCarriesAWearerIntoWater)
 	Creature& diver = swimmer_in_water(10);
 	ASSERT_FALSE(diver.has_bypass(ActorState::CAN_SWIM)) << "nothing worn yet";
 
-	auto helm = std::make_unique<Item>(Vector2D{}, ActorData{ TileRef{}, "helm of underwater action", ColorPairId::CYAN_BLACK });
+	auto helm = std::make_unique<Item>(Vector2D{}, ActorData{
+													   TileRef{},
+													   "helm of underwater action",
+													   ColorPairId::CYAN_BLACK,
+												   });
 	helm->itemKey = "helm_of_underwater_action";
 	helm->behavior = MagicalHelm{ MagicalEffect::UNDERWATER_ACTION, 0 };
 	diver.equippedItems.emplace_back(std::move(helm), EquipmentSlot::HEAD);

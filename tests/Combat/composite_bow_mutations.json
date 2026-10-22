@@ -51,8 +51,8 @@
     },
     {
       "file": "src/ItemCreator.cpp",
-      "original": "\t\treturn Weapon{ params.ranged, params.handRequirement, params.weaponSize, params.strengthRating };",
-      "mutated": "\t\treturn Weapon{ params.ranged, params.handRequirement, params.weaponSize, 0 };",
+      "original": "\t\treturn Weapon{\n\t\t\tparams.ranged,\n\t\t\tparams.handRequirement,\n\t\t\tparams.weaponSize,\n\t\t\tparams.strengthRating,\n\t\t};",
+      "mutated": "\t\treturn Weapon{\n\t\t\tparams.ranged,\n\t\t\tparams.handRequirement,\n\t\t\tparams.weaponSize,0,\n\t\t};",
       "catches": "a made bow built as an ordinary one"
     },
     {

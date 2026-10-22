@@ -71,7 +71,10 @@ std::vector<std::filesystem::path> every_plan()
 std::string source_as_the_tool_reads_it(const std::filesystem::path& path)
 {
 	std::ifstream file(path, std::ios::binary);
-	const std::string raw{ std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>() };
+	const std::string raw{
+		std::istreambuf_iterator<char>(file),
+		std::istreambuf_iterator<char>(),
+	};
 	std::string folded;
 	folded.reserve(raw.size());
 	for (size_t index = 0; index < raw.size(); ++index)
@@ -212,7 +215,13 @@ TEST(MutationPlanTest, EveryPlanRunsTheSuiteThroughRunSuite)
 	ASSERT_FALSE(plans.empty()) << "no plans found; the case measures nothing";
 
 	const std::vector<std::string> prefix{
-		"powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "tests/run_suite.ps1", "-Configuration"
+		"powershell",
+		"-NoProfile",
+		"-ExecutionPolicy",
+		"Bypass",
+		"-File",
+		"tests/run_suite.ps1",
+		"-Configuration",
 	};
 	for (const std::filesystem::path& planPath : plans)
 	{

@@ -118,7 +118,10 @@ protected:
 	GameContext ctx;
 	Map map{ 20, 20 };
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 4, 5 }) };
-	Creature spinner{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "web weaver", ColorPairId::WHITE_BLACK } };
+	Creature spinner{
+		Vector2D{ 5, 5 },
+		ActorData{ TileRef{}, "web weaver", ColorPairId::WHITE_BLACK },
+	};
 };
 
 // "Death/0": a failed save takes every hit point, however many were left.

@@ -138,7 +138,8 @@ protected:
 	std::vector<std::unique_ptr<Creature>> creatures{};
 	Creature goblin{
 		Vector2D{ GOBLIN_START_COLUMN, CORRIDOR_ROW },
-		ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK } };
+		ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK },
+	};
 };
 
 // The whole report: a monster walks into water it cannot swim and drowns there.
@@ -315,7 +316,10 @@ protected:
 	Map map{ 20, 20 };
 	std::unique_ptr<Player> player{ std::make_unique<Player>(PLAYER_TILE) };
 	std::vector<std::unique_ptr<Creature>> creatures{};
-	Creature goblin{ GOBLIN_TILE, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK } };
+	Creature goblin{
+		GOBLIN_TILE,
+		ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK },
+	};
 };
 
 // A monster must not be stopped by a puddle it could walk around. Barring water left

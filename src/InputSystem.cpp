@@ -708,7 +708,7 @@ Vector2D InputSystem::get_mouse_tile(int tileSize) const
 	::Vector2 mousePos = GetMousePosition();
 	return Vector2D{
 		static_cast<int>(mousePos.x) / tileSize,
-		static_cast<int>(mousePos.y) / tileSize
+		static_cast<int>(mousePos.y) / tileSize,
 	};
 }
 
@@ -722,7 +722,7 @@ Vector2D InputSystem::get_mouse_world_tile(int camX, int camY, int tileSize) con
 	::Vector2 mouse_pos = GetMousePosition();
 	return Vector2D{
 		(static_cast<int>(mouse_pos.x) + camX) / tileSize,
-		(static_cast<int>(mouse_pos.y) + camY) / tileSize
+		(static_cast<int>(mouse_pos.y) + camY) / tileSize,
 	};
 }
 

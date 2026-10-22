@@ -158,7 +158,10 @@ protected:
 	Map map{ 20, 20 };
 	std::vector<std::unique_ptr<Creature>> creatures{};
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ PLAYER_COLUMN, CORRIDOR_ROW }) };
-	Creature archer{ Vector2D{ IN_RANGE_COLUMN, CORRIDOR_ROW }, ActorData{ TileRef{}, "archer", ColorPairId::WHITE_BLACK } };
+	Creature archer{
+		Vector2D{ IN_RANGE_COLUMN, CORRIDOR_ROW },
+		ActorData{ TileRef{}, "archer", ColorPairId::WHITE_BLACK },
+	};
 };
 
 TEST_F(RangedDrawTest, AnArcherTooWeakForItsBowClosesInInsteadOfShooting)

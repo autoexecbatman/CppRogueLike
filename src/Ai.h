@@ -84,7 +84,7 @@ inline constexpr std::array<AiType, 7> AUTHORABLE_AI_TYPES = {
 	AiType::MIMIC,
 	AiType::SPIDER,
 	AiType::WEB_SPINNER,
-	AiType::GIANT_SPIDER
+	AiType::GIANT_SPIDER,
 };
 
 // Whether a monster record may name this Ai.

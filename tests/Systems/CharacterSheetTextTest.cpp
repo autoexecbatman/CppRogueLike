@@ -32,7 +32,10 @@ protected:
 	// The line the sheet draws for a character of this class and level at Constitution 17.
 	std::string line_for(CreatureClass creatureClass, int level)
 	{
-		Creature character{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "character", ColorPairId::WHITE_BLACK } };
+		Creature character{
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "character", ColorPairId::WHITE_BLACK },
+		};
 		character.set_creature_class(creatureClass);
 		character.set_creature_level(level);
 		character.set_constitution(CONSTITUTION);

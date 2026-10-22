@@ -379,7 +379,10 @@ TEST_F(StatBoostEquipmentTest, AnItemTakenOffOverACrowdedFloorStillLands)
 // The rule is the creature's, not the player's: a monster wearing a girdle has its Strength.
 TEST_F(StatBoostEquipmentTest, AMonsterWearingAGirdleHasItsStrength)
 {
-	Creature ogre{ Vector2D{ 1, 1 }, ActorData{ TileRef{}, "ogre", ColorPairId::WHITE_BLACK } };
+	Creature ogre{
+		Vector2D{ 1, 1 },
+		ActorData{ TileRef{}, "ogre", ColorPairId::WHITE_BLACK },
+	};
 	ogre.set_strength(BASE_STRENGTH);
 	ogre.set_body_plan({ EquipmentSlot::GIRDLE });
 

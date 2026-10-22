@@ -90,7 +90,11 @@ TEST_F(EncounterPlannerTest, ADangerRoomIsWorthMostAndATreasureRoomSitsBetween)
 // The budget is a ceiling, not a target: whatever is chosen has to fit inside it.
 TEST_F(EncounterPlannerTest, ASelectionNeverSpendsPastItsBudget)
 {
-	const std::vector<MonsterCandidate> candidates{ { "cheap", 10 }, { "middling", 35 }, { "dear", 90 } };
+	const std::vector<MonsterCandidate> candidates{
+		{ "cheap", 10 },
+		{ "middling", 35 },
+		{ "dear", 90 },
+	};
 	const int budget = 100;
 
 	const std::vector<std::string> selected = select_encounter(candidates, budget, CAP, dice);
@@ -131,7 +135,11 @@ TEST_F(EncounterPlannerTest, TheCapBindsWhileTakingOneOfEachKind)
 // room varied rather than five of the same thing.
 TEST_F(EncounterPlannerTest, EveryAffordableKindAppearsWhenTheBudgetAllowsIt)
 {
-	const std::vector<MonsterCandidate> candidates{ { "a", 10 }, { "b", 20 }, { "c", 30 } };
+	const std::vector<MonsterCandidate> candidates{
+		{ "a", 10 },
+		{ "b", 20 },
+		{ "c", 30 },
+	};
 
 	const std::vector<std::string> selected = select_encounter(candidates, 60, CAP, dice);
 

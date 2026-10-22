@@ -531,7 +531,7 @@ void Renderer::draw_tile(Vector2D gridPos, TileRef tile, Color tint) const
 		static_cast<float>(tile.col * sheet.cellSize),
 		static_cast<float>(tile.row * sheet.cellSize),
 		static_cast<float>(sheet.cellSize),
-		static_cast<float>(sheet.cellSize)
+		static_cast<float>(sheet.cellSize),
 	};
 
 	// Destination rect scaled to display tile size
@@ -570,7 +570,7 @@ void Renderer::draw_tile_offset(Vector2D gridPos, int pixelOffsetX, int pixelOff
 		static_cast<float>(tile.col * sheet.cellSize),
 		static_cast<float>(tile.row * sheet.cellSize),
 		static_cast<float>(sheet.cellSize),
-		static_cast<float>(sheet.cellSize)
+		static_cast<float>(sheet.cellSize),
 	};
 
 	Rectangle destRect = { destX, destY, tileSizeFloat, tileSizeFloat };
@@ -604,7 +604,7 @@ void Renderer::draw_tile_static(Vector2D gridPos, TileRef tile, Color tint) cons
 		static_cast<float>(tile.col * sheet.cellSize),
 		static_cast<float>(tile.row * sheet.cellSize),
 		static_cast<float>(sheet.cellSize),
-		static_cast<float>(sheet.cellSize)
+		static_cast<float>(sheet.cellSize),
 	};
 
 	Rectangle destRect = { destX, destY, tileSizeFloat, tileSizeFloat };
@@ -632,7 +632,7 @@ void Renderer::draw_tile_screen(Vector2D screenPos, TileRef tile) const
 		static_cast<float>(tile.col * sheet.cellSize),
 		static_cast<float>(tile.row * sheet.cellSize),
 		static_cast<float>(sheet.cellSize),
-		static_cast<float>(sheet.cellSize)
+		static_cast<float>(sheet.cellSize),
 	};
 
 	float tileSizeFloat = static_cast<float>(tileSize);
@@ -640,7 +640,7 @@ void Renderer::draw_tile_screen(Vector2D screenPos, TileRef tile) const
 		static_cast<float>(screenPos.x),
 		static_cast<float>(screenPos.y),
 		tileSizeFloat,
-		tileSizeFloat
+		tileSizeFloat,
 	};
 
 	DrawTexturePro(texture, srcRect, destRect, { 0.0f, 0.0f }, 0.0f, RL_WHITE);
@@ -666,7 +666,7 @@ void Renderer::draw_tile_screen_color(Vector2D screenPos, TileRef tile, Color ti
 		static_cast<float>(tile.col * sheet.cellSize),
 		static_cast<float>(tile.row * sheet.cellSize),
 		static_cast<float>(sheet.cellSize),
-		static_cast<float>(sheet.cellSize)
+		static_cast<float>(sheet.cellSize),
 	};
 
 	float tileSizeFloat = static_cast<float>(tileSize);
@@ -674,7 +674,7 @@ void Renderer::draw_tile_screen_color(Vector2D screenPos, TileRef tile, Color ti
 		static_cast<float>(screenPos.x),
 		static_cast<float>(screenPos.y),
 		tileSizeFloat,
-		tileSizeFloat
+		tileSizeFloat,
 	};
 
 	DrawTexturePro(texture, srcRect, destRect, { 0.0f, 0.0f }, 0.0f, tint);
@@ -700,7 +700,7 @@ void Renderer::draw_tile_screen_color_sized(Vector2D screenPos, int size, TileRe
 		static_cast<float>(tile.col * sheet.cellSize),
 		static_cast<float>(tile.row * sheet.cellSize),
 		static_cast<float>(sheet.cellSize),
-		static_cast<float>(sheet.cellSize)
+		static_cast<float>(sheet.cellSize),
 	};
 
 	float sizeFloat = static_cast<float>(size);
@@ -708,7 +708,7 @@ void Renderer::draw_tile_screen_color_sized(Vector2D screenPos, int size, TileRe
 		static_cast<float>(screenPos.x),
 		static_cast<float>(screenPos.y),
 		sizeFloat,
-		sizeFloat
+		sizeFloat,
 	};
 
 	DrawTexturePro(texture, srcRect, destRect, { 0.0f, 0.0f }, 0.0f, tint);
@@ -739,14 +739,14 @@ void Renderer::draw_tile_screen_color_rect(
 		static_cast<float>(tile.col * sheet.cellSize),
 		static_cast<float>(tile.row * sheet.cellSize),
 		static_cast<float>(sheet.cellSize),
-		static_cast<float>(sheet.cellSize)
+		static_cast<float>(sheet.cellSize),
 	};
 
 	Rectangle destRect = {
 		static_cast<float>(screenPos.x),
 		static_cast<float>(screenPos.y),
 		static_cast<float>(width),
-		static_cast<float>(height)
+		static_cast<float>(height),
 	};
 
 	DrawTexturePro(texture, srcRect, destRect, { 0.0f, 0.0f }, 0.0f, tint);
@@ -772,7 +772,7 @@ void Renderer::draw_tile_screen_sized(Vector2D screenPos, TileRef tile, int disp
 		static_cast<float>(tile.col * sheet.cellSize),
 		static_cast<float>(tile.row * sheet.cellSize),
 		static_cast<float>(sheet.cellSize),
-		static_cast<float>(sheet.cellSize)
+		static_cast<float>(sheet.cellSize),
 	};
 
 	float displaySizeFloat = static_cast<float>(displaySize);
@@ -780,7 +780,7 @@ void Renderer::draw_tile_screen_sized(Vector2D screenPos, TileRef tile, int disp
 		static_cast<float>(screenPos.x),
 		static_cast<float>(screenPos.y),
 		displaySizeFloat,
-		displaySizeFloat
+		displaySizeFloat,
 	};
 
 	DrawTexturePro(texture, srcRect, destRect, { 0.0f, 0.0f }, 0.0f, RL_WHITE);
@@ -793,7 +793,10 @@ void Renderer::draw_text(Vector2D screenPos, std::string_view text, ColorPairId 
 
 	if (fontLoaded)
 	{
-		Vector2 pos = { static_cast<float>(screenPos.x), static_cast<float>(screenPos.y) };
+		Vector2 pos = {
+			static_cast<float>(screenPos.x),
+			static_cast<float>(screenPos.y),
+		};
 		DrawTextEx(gameFont, textStr.c_str(), pos, static_cast<float>(fontSize), 1.0f, pair.foreground);
 	}
 	else
@@ -808,7 +811,10 @@ void Renderer::draw_text_color(Vector2D screenPos, std::string_view text, Color 
 
 	if (fontLoaded)
 	{
-		Vector2 pos = { static_cast<float>(screenPos.x), static_cast<float>(screenPos.y) };
+		Vector2 pos = {
+			static_cast<float>(screenPos.x),
+			static_cast<float>(screenPos.y),
+		};
 		DrawTextEx(gameFont, textStr.c_str(), pos, static_cast<float>(fontSize), 1.0f, color);
 	}
 	else
@@ -863,16 +869,28 @@ void Renderer::draw_frame(Vector2D screenPos, int wTiles, int hTiles, const Tile
 	for (int row = 1; row < hTiles - 1; ++row)
 	{
 		draw_tile_screen(Vector2D{ screenPos.x, screenPos.y + row * tileSize }, tileConfig.get("GUI_FRAME_L"));
-		draw_tile_screen(Vector2D{ screenPos.x + (wTiles - 1) * tileSize, screenPos.y + row * tileSize }, tileConfig.get("GUI_FRAME_R"));
+		draw_tile_screen(Vector2D{
+							 screenPos.x + (wTiles - 1) * tileSize,
+							 screenPos.y + row * tileSize,
+						 },
+			tileConfig.get("GUI_FRAME_R"));
 	}
 
 	// Bottom border
 	draw_tile_screen(Vector2D{ screenPos.x, screenPos.y + (hTiles - 1) * tileSize }, tileConfig.get("GUI_FRAME_BL"));
 	for (int col = 1; col < wTiles - 1; ++col)
 	{
-		draw_tile_screen(Vector2D{ screenPos.x + col * tileSize, screenPos.y + (hTiles - 1) * tileSize }, tileConfig.get("GUI_FRAME_B"));
+		draw_tile_screen(Vector2D{
+							 screenPos.x + col * tileSize,
+							 screenPos.y + (hTiles - 1) * tileSize,
+						 },
+			tileConfig.get("GUI_FRAME_B"));
 	}
-	draw_tile_screen(Vector2D{ screenPos.x + (wTiles - 1) * tileSize, screenPos.y + (hTiles - 1) * tileSize }, tileConfig.get("GUI_FRAME_BR"));
+	draw_tile_screen(Vector2D{
+						 screenPos.x + (wTiles - 1) * tileSize,
+						 screenPos.y + (hTiles - 1) * tileSize,
+					 },
+		tileConfig.get("GUI_FRAME_BR"));
 }
 
 void Renderer::draw_frame_pixels(Vector2D screenPos, int widthPixels, int heightPixels, const TileConfig& tileConfig) const
@@ -937,7 +955,7 @@ ScreenMetrics Renderer::metrics() const
 		.map_rows = viewportRows - get_gui_reserve_rows(),
 		.gui_rows = get_gui_reserve_rows(),
 		.window_w = screenWidth,
-		.window_h = screenHeight
+		.window_h = screenHeight,
 	};
 }
 

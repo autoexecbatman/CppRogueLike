@@ -130,8 +130,14 @@ protected:
 	Map map{ 20, 20 };
 	std::vector<std::unique_ptr<Creature>> creatures{};
 	std::unique_ptr<Player> player{ std::make_unique<Player>(PLAYER_TILE) };
-	Creature hunter{ HUNTER_TILE, ActorData{ TileRef{}, "hunter", ColorPairId::WHITE_BLACK } };
-	Creature decoy{ ADJACENT_DECOY_TILE, ActorData{ TileRef{}, "decoy", ColorPairId::WHITE_BLACK } };
+	Creature hunter{
+		HUNTER_TILE,
+		ActorData{ TileRef{}, "hunter", ColorPairId::WHITE_BLACK },
+	};
+	Creature decoy{
+		ADJACENT_DECOY_TILE,
+		ActorData{ TileRef{}, "decoy", ColorPairId::WHITE_BLACK },
+	};
 };
 
 TEST_F(AttackTargetTest, AMeleeHunterStrikesTheCreatureItWasHanded)

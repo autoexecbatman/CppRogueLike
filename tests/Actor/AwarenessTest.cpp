@@ -58,7 +58,10 @@ protected:
 	GameContext ctx{};
 	Map map{ 20, 20 };
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 4, 5 }) };
-	Creature monster{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK } };
+	Creature monster{
+		Vector2D{ 5, 5 },
+		ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK },
+	};
 };
 
 // A creature starts with no knowledge of the player.
@@ -103,7 +106,10 @@ TEST_F(AwarenessTest, AwarenessHoldsForItsRoundsThenEnds)
 // of times their pace would drive them.
 TEST_F(AwarenessTest, SpeedDoesNotChangeHowLongAMemoryLasts)
 {
-	Creature quickling{ Vector2D{ 6, 5 }, ActorData{ TileRef{}, "quickling", ColorPairId::WHITE_BLACK } };
+	Creature quickling{
+		Vector2D{ 6, 5 },
+		ActorData{ TileRef{}, "quickling", ColorPairId::WHITE_BLACK },
+	};
 	quickling.set_action_delay(TIME_UNITS_PER_ROUND / 2);
 
 	make_visible();

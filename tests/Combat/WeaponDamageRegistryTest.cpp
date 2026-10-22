@@ -146,7 +146,7 @@ TEST_F(WeaponDamageRegistryTest, AllWeaponsHaveValidDamage)
 		"staff",
 		"long_bow",
 		"short_bow",
-		"light_crossbow"
+		"light_crossbow",
 	};
 
 	for (const auto& weapon : weapons)

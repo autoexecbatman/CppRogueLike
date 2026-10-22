@@ -28,7 +28,14 @@ protected:
 // the replacement for five silent default cases.
 TEST_F(TileDefinitionTest, EveryTileTypeHasADefinition)
 {
-	for (const auto tileType : { TileType::FLOOR, TileType::WALL, TileType::WATER, TileType::CLOSED_DOOR, TileType::OPEN_DOOR, TileType::CORRIDOR })
+	for (const auto tileType : {
+			 TileType::FLOOR,
+			 TileType::WALL,
+			 TileType::WATER,
+			 TileType::CLOSED_DOOR,
+			 TileType::OPEN_DOOR,
+			 TileType::CORRIDOR,
+		 })
 	{
 		EXPECT_NO_THROW((void)config.get_tile_definition(tileType))
 			<< "tile type " << static_cast<int>(tileType) << " has no entry in tile_config.json";
@@ -69,7 +76,14 @@ TEST_F(TileDefinitionTest, OpenGroundIsPassableAndSilent)
 // Every tile is nameable, since the hover tooltip reads this.
 TEST_F(TileDefinitionTest, EveryTileHasADisplayName)
 {
-	for (const auto tileType : { TileType::FLOOR, TileType::WALL, TileType::WATER, TileType::CLOSED_DOOR, TileType::OPEN_DOOR, TileType::CORRIDOR })
+	for (const auto tileType : {
+			 TileType::FLOOR,
+			 TileType::WALL,
+			 TileType::WATER,
+			 TileType::CLOSED_DOOR,
+			 TileType::OPEN_DOOR,
+			 TileType::CORRIDOR,
+		 })
 	{
 		const TileDefinition& definition = config.get_tile_definition(tileType);
 
@@ -81,7 +95,14 @@ TEST_F(TileDefinitionTest, EveryTileHasADisplayName)
 // A minimap colour must be authored, or the tile draws as transparent black.
 TEST_F(TileDefinitionTest, EveryTileHasMinimapColours)
 {
-	for (const auto tileType : { TileType::FLOOR, TileType::WALL, TileType::WATER, TileType::CLOSED_DOOR, TileType::OPEN_DOOR, TileType::CORRIDOR })
+	for (const auto tileType : {
+			 TileType::FLOOR,
+			 TileType::WALL,
+			 TileType::WATER,
+			 TileType::CLOSED_DOOR,
+			 TileType::OPEN_DOOR,
+			 TileType::CORRIDOR,
+		 })
 	{
 		const TileDefinition& definition = config.get_tile_definition(tileType);
 

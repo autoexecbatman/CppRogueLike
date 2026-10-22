@@ -46,8 +46,12 @@ TEST(SaveFieldNamesTest, ALevelManagerReadsTheNamesItsSaveUses)
 {
 	// Written out by hand, so the key names themselves are the claim: if either is
 	// renamed on one side only, this is what notices.
-	const json saved = { { "level_manager",
-		{ { "dungeonLevel", 7 }, { "shopkeepersOnCurrentLevel", 2 } } } };
+	const json saved = {
+		{
+			"level_manager",
+			{ { "dungeonLevel", 7 }, { "shopkeepersOnCurrentLevel", 2 } },
+		},
+	};
 
 	LevelManager read;
 	read.load_from_json(saved);
@@ -61,7 +65,10 @@ TEST(SaveFieldNamesTest, ALevelManagerRefusesTheOldFlatSave)
 	// The exact shape the deleted fallback accepted: both fields at the top level, no
 	// block. It has to be a complete old save, or the refusal could come from the field
 	// that happens to be missing rather than from the shape being gone.
-	const json saved = { { "dungeonLevel", 7 }, { "shopkeepersOnCurrentLevel", 2 } };
+	const json saved = {
+		{ "dungeonLevel", 7 },
+		{ "shopkeepersOnCurrentLevel", 2 },
+	};
 
 	LevelManager read;
 	EXPECT_THROW(read.load_from_json(saved), json::exception);
@@ -71,7 +78,12 @@ TEST(SaveFieldNamesTest, ALevelManagerRefusesASaveMissingOnlyTheLevel)
 {
 	// Everything present but the dungeon level, so nothing else can raise instead: a
 	// loader that defaulted this would put the character on level one and say nothing.
-	const json saved = { { "level_manager", { { "shopkeepersOnCurrentLevel", 2 } } } };
+	const json saved = {
+		{
+			"level_manager",
+			{ { "shopkeepersOnCurrentLevel", 2 } },
+		},
+	};
 
 	LevelManager read;
 	EXPECT_THROW(read.load_from_json(saved), json::exception);

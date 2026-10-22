@@ -185,7 +185,10 @@ protected:
 	// Wisdom matters to a priest: Table 24's sixth and seventh rows are footnoted.
 	int announced_level_at(CreatureClass creatureClass, int newLevel, int wisdom)
 	{
-		Creature caster{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "caster", ColorPairId::WHITE_BLACK } };
+		Creature caster{
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "caster", ColorPairId::WHITE_BLACK },
+		};
 		caster.set_wisdom(wisdom);
 		caster.healthPool = std::make_unique<HealthPool>(50);
 		caster.armorClass = std::make_unique<ArmorClass>(10);
@@ -226,7 +229,10 @@ protected:
 	// Whether any message this level-up produced contains that text.
 	bool said(CreatureClass creatureClass, int newLevel, std::string_view fragment)
 	{
-		Creature caster{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "caster", ColorPairId::WHITE_BLACK } };
+		Creature caster{
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "caster", ColorPairId::WHITE_BLACK },
+		};
 		caster.set_wisdom(18);
 		caster.healthPool = std::make_unique<HealthPool>(50);
 		caster.armorClass = std::make_unique<ArmorClass>(10);

@@ -300,7 +300,11 @@ std::vector<ItemPercentage> ItemFactory::get_current_distribution(int dungeonLev
 		if (weights[index] > 0)
 		{
 			const float percentage = static_cast<float>(weights[index]) / totalWeight * 100.0f;
-			distribution.push_back(ItemPercentage{ table[index].name, table[index].category, percentage });
+			distribution.push_back(ItemPercentage{
+				table[index].name,
+				table[index].category,
+				percentage,
+			});
 		}
 	}
 

@@ -207,9 +207,15 @@ TEST_F(DungeonConnectivityTest, WaterOnlyEverReplacesFloorTheRoomCarved)
 // tile its own step turns away.
 TEST_F(DungeonConnectivityTest, EveryTileACostMapReachesLeadsDownToTheGoal)
 {
-	Creature goblin{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK } };
+	Creature goblin{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK },
+	};
 	goblin.set_body_plan(mock.body_plans.get("humanoid"));
-	Creature wolf{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "wolf", ColorPairId::WHITE_BLACK } };
+	Creature wolf{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "wolf", ColorPairId::WHITE_BLACK },
+	};
 	wolf.set_body_plan(mock.body_plans.get("beast"));
 	const std::vector<Pathfinding::Mobility> mobilities{
 		Pathfinding::mobility_of(goblin, mock.tile_config),

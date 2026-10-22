@@ -76,27 +76,32 @@ const ExpectedField ITEM_FIELDS_AT_HEAD[] = {
 		11,
 		"CONSUMABLE_EFFECT",
 		FieldKind::TOGGLE,
-		"Consumable Effect" },
+		"Consumable Effect",
+	},
 	ExpectedField{
 		12,
 		"CONSUMABLE_BUFF",
 		FieldKind::TOGGLE,
-		"Consumable Buff" },
+		"Consumable Buff",
+	},
 	ExpectedField{
 		13,
 		"CONSUMABLE_AMT_DICE",
 		FieldKind::ADJUST,
-		"Amount Dice" },
+		"Amount Dice",
+	},
 	ExpectedField{
 		14,
 		"CONSUMABLE_AMT_SIDES",
 		FieldKind::ADJUST,
-		"Amount Sides" },
+		"Amount Sides",
+	},
 	ExpectedField{
 		15,
 		"CONSUMABLE_AMT_BONUS",
 		FieldKind::ADJUST,
-		"Amount Bonus" },
+		"Amount Bonus",
+	},
 	ExpectedField{ 16, "DURATION_DICE", FieldKind::ADJUST, "Duration Dice" },
 	ExpectedField{ 17, "DURATION_SIDES", FieldKind::ADJUST, "Duration Sides" },
 	ExpectedField{ 18, "DURATION_BONUS", FieldKind::ADJUST, "Duration Bonus" },
@@ -105,7 +110,8 @@ const ExpectedField ITEM_FIELDS_AT_HEAD[] = {
 		20,
 		"AGES_YEARS",
 		FieldKind::ADJUST,
-		"Ages Drinker (years)" },
+		"Ages Drinker (years)",
+	},
 	ExpectedField{ 21, "TARGET_MODE", FieldKind::TOGGLE, "Target Mode" },
 	ExpectedField{ 22, "SCROLL_ANIM", FieldKind::TOGGLE, "Scroll Animation" },
 	ExpectedField{ 23, "RANGE", FieldKind::ADJUST, "Range" },
@@ -116,7 +122,8 @@ const ExpectedField ITEM_FIELDS_AT_HEAD[] = {
 		27,
 		"HAND_REQUIREMENT",
 		FieldKind::TOGGLE,
-		"Hand Requirement" },
+		"Hand Requirement",
+	},
 	ExpectedField{ 28, "WEAPON_SIZE", FieldKind::TOGGLE, "Weapon Size" },
 	ExpectedField{ 29, "STRENGTH_RATING", FieldKind::ADJUST, "Made For STR" },
 	ExpectedField{ 30, "AC_BONUS", FieldKind::ADJUST, "AC Bonus" },
@@ -133,7 +140,8 @@ const ExpectedField ITEM_FIELDS_AT_HEAD[] = {
 		40,
 		"EXCEPTIONAL_STRENGTH",
 		FieldKind::ADJUST,
-		"Exceptional STR" },
+		"Exceptional STR",
+	},
 	ExpectedField{ 41, "NUTRITION", FieldKind::ADJUST, "Nutrition Value" },
 	ExpectedField{ 42, "TILE", FieldKind::TILE, "Tile" },
 };
@@ -145,7 +153,8 @@ const ExpectedField MONSTER_FIELDS_AT_HEAD[] = {
 		2,
 		"CORPSE_NUTRITION",
 		FieldKind::ADJUST,
-		"Corpse Nutrition" },
+		"Corpse Nutrition",
+	},
 	ExpectedField{ 3, "CORPSE_TASTE", FieldKind::TEXT, "Corpse Taste" },
 	ExpectedField{ 4, "CORPSE_EDIBLE", FieldKind::TOGGLE, "Corpse Edible" },
 	ExpectedField{ 5, "HD_LOWEST", FieldKind::ADJUST, "HD Lowest" },
@@ -163,7 +172,8 @@ const ExpectedField MONSTER_FIELDS_AT_HEAD[] = {
 		16,
 		"STR_EXCEPTIONAL",
 		FieldKind::ADJUST,
-		"STR Exceptional" },
+		"STR Exceptional",
+	},
 	ExpectedField{ 17, "WEAPON", FieldKind::TEXT, "Natural Attack" },
 	ExpectedField{ 18, "DMG_NUM", FieldKind::ADJUST, "Dmg Num" },
 	ExpectedField{ 19, "DMG_SIDES", FieldKind::ADJUST, "Dmg Sides" },
@@ -187,7 +197,8 @@ const ExpectedField MONSTER_FIELDS_AT_HEAD[] = {
 		36,
 		"INNATE_FREQUENCY",
 		FieldKind::TOGGLE,
-		"Power Frequency" },
+		"Power Frequency",
+	},
 	ExpectedField{ 37, "WEIGHT", FieldKind::ADJUST, "Spawn Weight" },
 	ExpectedField{ 38, "DEPTH_MIN", FieldKind::ADJUST, "Depth Min" },
 	ExpectedField{ 39, "DEPTH_MAX", FieldKind::ADJUST, "Depth Max" },
@@ -226,7 +237,8 @@ const ItemPlain ITEM_PLAIN_AT_HEAD[] = {
 		"EXCEPTIONAL_STRENGTH",
 		&ItemParams::exceptionalStrength,
 		0,
-		100 },
+		100,
+	},
 	ItemPlain{ 41, "NUTRITION", &ItemParams::nutritionValue, 0, 9999 },
 };
 
@@ -236,7 +248,8 @@ const MonsterPlain MONSTER_PLAIN_AT_HEAD[] = {
 		"CORPSE_NUTRITION",
 		&MonsterParams::corpseNutrition,
 		0,
-		9999 },
+		9999,
+	},
 	MonsterPlain{ 9, "THACO", &MonsterParams::thaco, 1, 25 },
 	MonsterPlain{ 10, "AC", &MonsterParams::ac, -10, 10 },
 	MonsterPlain{ 13, "DR", &MonsterParams::dr, 0, 20 },
@@ -328,25 +341,25 @@ constexpr SampleDescriptor SAMPLE_FIRST{
 	SampleField::FIRST,
 	FieldKind::ADJUST,
 	"First",
-	SAMPLE_PLAIN
+	SAMPLE_PLAIN,
 };
 constexpr SampleDescriptor SAMPLE_SECOND{
 	SampleField::SECOND,
 	FieldKind::TEXT,
 	"Second",
-	std::nullopt
+	std::nullopt,
 };
 constexpr SampleDescriptor TOGGLE_WITH_PLAIN{
 	SampleField::FIRST,
 	FieldKind::TOGGLE,
 	"First",
-	SAMPLE_PLAIN
+	SAMPLE_PLAIN,
 };
 constexpr SampleDescriptor REVERSED_BOUNDS{
 	SampleField::FIRST,
 	FieldKind::ADJUST,
 	"First",
-	REVERSED_PLAIN
+	REVERSED_PLAIN,
 };
 constexpr SampleTable SAMPLE_TABLE{ { SAMPLE_FIRST, SAMPLE_SECOND } };
 constexpr SampleTable SWAPPED{ { SAMPLE_SECOND, SAMPLE_FIRST } };

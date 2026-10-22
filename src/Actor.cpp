@@ -67,9 +67,12 @@ void Actor::save(json& output)
 	output["position"] = { { "y", position.y }, { "x", position.x } };
 	output["direction"] = { { "y", direction.y }, { "x", direction.x } };
 	output["actorData"] = {
-		{ "tile", TileRefJson::encode_tile(actorData.tile) },
+		{
+			"tile",
+			TileRefJson::encode_tile(actorData.tile),
+		},
 		{ "name", actorData.name },
-		{ "color", color_pair_name(actorData.color) }
+		{ "color", color_pair_name(actorData.color) },
 	};
 	output["uniqueId"] = uniqueId;
 

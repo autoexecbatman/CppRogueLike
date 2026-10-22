@@ -38,7 +38,7 @@ inline constexpr std::array<Attitude, 4> ALL_ATTITUDE = {
 	Attitude::HOSTILE,
 	Attitude::PEACEFUL,
 	Attitude::FRIENDLY,
-	Attitude::TAME
+	Attitude::TAME,
 };
 
 // True when attacking this creature is a deliberate act the player should be

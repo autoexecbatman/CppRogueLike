@@ -111,8 +111,14 @@ TEST(DiceExprTest, WritesTheExpressionTheDataUses)
 
 TEST(DiceExprTest, TextSurvivesARoundTrip)
 {
-	for (const DiceExpr& expr : { DiceExpr{ 1, 8, 0 }, DiceExpr{ 3, 12, 0 }, DiceExpr{ 1, 12, 5 },
-		DiceExpr{ 2, 6, -1 }, DiceExpr{ 0, 0, 5 }, DiceExpr{ 10, 6, 0 } })
+	for (const DiceExpr& expr : {
+			 DiceExpr{ 1, 8, 0 },
+			 DiceExpr{ 3, 12, 0 },
+			 DiceExpr{ 1, 12, 5 },
+			 DiceExpr{ 2, 6, -1 },
+			 DiceExpr{ 0, 0, 5 },
+			 DiceExpr{ 10, 6, 0 },
+		 })
 	{
 		const DiceExpr read = parse_dice_expression(to_text(expr));
 		EXPECT_EQ(read.num, expr.num) << to_text(expr);

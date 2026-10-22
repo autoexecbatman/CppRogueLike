@@ -152,7 +152,7 @@ void RenderingManager::apply_lighting(const GameContext& ctx) const
 				lerp_channel(torchInner.r, torchOuter.r, falloff),
 				lerp_channel(torchInner.g, torchOuter.g, falloff),
 				lerp_channel(torchInner.b, torchOuter.b, falloff),
-				255
+				255,
 			};
 
 			int screenX = tileX * tileSize - cameraX;
@@ -211,8 +211,10 @@ void RenderingManager::render_mouse_path_overlay(const GameContext& ctx) const
 	auto screen_centre = [&](size_t nodeIndex) -> Vector2D
 	{
 		const Vector2D& node = (*ctx.mousePathOverlay)[nodeIndex];
-		return { node.x * tileSize - cam_x + tileSize / 2,
-			node.y * tileSize - cam_y + tileSize / 2 };
+		return {
+			node.x * tileSize - cam_x + tileSize / 2,
+			node.y * tileSize - cam_y + tileSize / 2,
+		};
 	};
 
 	// Pass 1 - lines between consecutive nodes, alpha fades toward destination
@@ -226,7 +228,10 @@ void RenderingManager::render_mouse_path_overlay(const GameContext& ctx) const
 		Color lineColor = { 220, 220, 220, alpha };
 
 		DrawLineEx(
-			{ static_cast<float>(lineStart.x), static_cast<float>(lineStart.y) },
+			{
+				static_cast<float>(lineStart.x),
+				static_cast<float>(lineStart.y),
+			},
 			{ static_cast<float>(lineEnd.x), static_cast<float>(lineEnd.y) },
 			2.0f,
 			lineColor);
@@ -243,7 +248,12 @@ void RenderingManager::render_mouse_path_overlay(const GameContext& ctx) const
 		if (nodeIndex == lastIdx)
 		{
 			// Destination: bright ring
-			Color destFill = { 255, 255, 255, static_cast<unsigned char>(alpha) };
+			Color destFill = {
+				255,
+				255,
+				255,
+				static_cast<unsigned char>(alpha),
+			};
 			Color destRing = { 255, 255, 255, 200 };
 			DrawCircle(centre.x, centre.y, static_cast<float>(destRadius), destFill);
 			DrawCircleLines(centre.x, centre.y, static_cast<float>(destRadius + 2), destRing);

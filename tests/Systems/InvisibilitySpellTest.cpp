@@ -80,7 +80,10 @@ protected:
 
 	MockGameContext mock{};
 	GameContext ctx{};
-	Creature wizard{ Vector2D{ 2, 2 }, ActorData{ TileRef{}, "wizard", ColorPairId::WHITE_BLACK } };
+	Creature wizard{
+		Vector2D{ 2, 2 },
+		ActorData{ TileRef{}, "wizard", ColorPairId::WHITE_BLACK },
+	};
 };
 
 // The game's old twenty rounds is a moment of the book's day.

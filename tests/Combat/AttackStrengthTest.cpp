@@ -124,20 +124,55 @@ TEST_F(AttackStrengthTest, EachSourceTakesItsPartOfTheRow)
 	constexpr std::array<Case, 11> FROM_PAGE_181{ {
 		{ "a swing, 18/00", 18, 100, AttackKind::MELEE, "", 3, 6 },
 		{ "a swing, 3", 3, 0, AttackKind::MELEE, "", -3, -1 },
-		{ "a thrown or natural missile, 18/00", 18, 100, AttackKind::RANGED, "", 3, 6 },
+		{
+			"a thrown or natural missile, 18/00",
+			18,
+			100,
+			AttackKind::RANGED,
+			"",
+			3,
+			6,
+		},
 		{ "a bow, 18/00", 18, 100, AttackKind::RANGED, "long_bow", 0, 0 },
 		{ "a bow, 3", 3, 0, AttackKind::RANGED, "long_bow", -3, -1 },
-		{ "a crossbow, 18/00", 18, 100, AttackKind::RANGED, "light_crossbow", 0, 0 },
+		{
+			"a crossbow, 18/00",
+			18,
+			100,
+			AttackKind::RANGED,
+			"light_crossbow",
+			0,
+			0,
+		},
 		{ "a crossbow, 3", 3, 0, AttackKind::RANGED, "light_crossbow", 0, 0 },
 		{ "a sling, 18/00", 18, 100, AttackKind::RANGED, "sling", 0, 0 },
 		{ "a sling, 3", 3, 0, AttackKind::RANGED, "sling", 0, 0 },
-		{ "a composite bow, 18", 18, 0, AttackKind::RANGED, "composite_bow", 1, 2 },
-		{ "a composite bow, 18/00", 18, 100, AttackKind::RANGED, "composite_bow", 1, 2 },
+		{
+			"a composite bow, 18",
+			18,
+			0,
+			AttackKind::RANGED,
+			"composite_bow",
+			1,
+			2,
+		},
+		{
+			"a composite bow, 18/00",
+			18,
+			100,
+			AttackKind::RANGED,
+			"composite_bow",
+			1,
+			2,
+		},
 	} };
 
 	for (const Case& expected : FROM_PAGE_181)
 	{
-		Creature attacker{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "attacker", ColorPairId::WHITE_BLACK } };
+		Creature attacker{
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "attacker", ColorPairId::WHITE_BLACK },
+		};
 		attacker.set_strength(expected.strength);
 		attacker.set_exceptional_strength(expected.exceptional);
 		const std::unique_ptr<Item> fired = expected.weaponKey.empty() ? nullptr : weapon(expected.weaponKey);
@@ -319,7 +354,10 @@ TEST_F(AttackStrengthTest, AnArmThatLosesItsStrengthCannotDrawTheBowItHolds)
 // A monster holds a rated bow the same way, whoever put it in its hands.
 TEST_F(AttackStrengthTest, AMonsterTooWeakForItsBowDrawsNothing)
 {
-	Creature archer{ Vector2D{ 0, 1 }, ActorData{ TileRef{}, "archer", ColorPairId::WHITE_BLACK } };
+	Creature archer{
+		Vector2D{ 0, 1 },
+		ActorData{ TileRef{}, "archer", ColorPairId::WHITE_BLACK },
+	};
 	archer.experienceReward = std::make_unique<ExperienceReward>(0);
 	archer.armorClass = std::make_unique<ArmorClass>(10);
 	archer.healthPool = std::make_unique<HealthPool>(STARTING_HP);
@@ -340,7 +378,10 @@ TEST_F(AttackStrengthTest, TheRatingSurvivesASave)
 	json saved;
 	weapon("composite_bow")->save(saved);
 
-	Item loaded{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "", ColorPairId::WHITE_BLACK } };
+	Item loaded{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "", ColorPairId::WHITE_BLACK },
+	};
 	loaded.load(saved);
 
 	EXPECT_EQ(strength_rating_of(loaded), 18);
@@ -377,7 +418,10 @@ TEST_F(AttackStrengthTest, ACrossbowIgnoresAWeakArm)
 // A monster's bow is read from its own missile slot, so the rule reaches it too.
 TEST_F(AttackStrengthTest, AMonsterArcherFollowsTheSameRule)
 {
-	Creature archer{ Vector2D{ 0, 1 }, ActorData{ TileRef{}, "archer", ColorPairId::WHITE_BLACK } };
+	Creature archer{
+		Vector2D{ 0, 1 },
+		ActorData{ TileRef{}, "archer", ColorPairId::WHITE_BLACK },
+	};
 	archer.experienceReward = std::make_unique<ExperienceReward>(0);
 	archer.armorClass = std::make_unique<ArmorClass>(10);
 	archer.healthPool = std::make_unique<HealthPool>(STARTING_HP);

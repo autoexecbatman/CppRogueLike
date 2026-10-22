@@ -96,8 +96,13 @@ TEST(Thac0ProgressionTest, RogueImprovesEverySecondLevel)
 // First level is where a character starts, so nothing improved to reach it.
 TEST(Thac0ProgressionTest, FirstLevelIsNotAnImprovement)
 {
-	for (const auto creatureClass : { CreatureClass::FIGHTER, CreatureClass::ROGUE,
-			 CreatureClass::CLERIC, CreatureClass::WIZARD, CreatureClass::MONSTER })
+	for (const auto creatureClass : {
+			 CreatureClass::FIGHTER,
+			 CreatureClass::ROGUE,
+			 CreatureClass::CLERIC,
+			 CreatureClass::WIZARD,
+			 CreatureClass::MONSTER,
+		 })
 	{
 		EXPECT_FALSE(LevelUpSystem::thac0_improves_at(creatureClass, 1));
 	}

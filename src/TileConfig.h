@@ -42,7 +42,11 @@ constexpr TileRef resolve(AutotileGroup group, bool north, bool east, bool south
 														   : 1;
 	int row_offset = (!north && south) ? 0 : (north && !south) ? 2
 															   : 1;
-	return TileRef{ group.sheet, group.origin_col + col_offset, group.origin_row + row_offset };
+	return TileRef{
+		group.sheet,
+		group.origin_col + col_offset,
+		group.origin_row + row_offset,
+	};
 }
 
 constexpr TileRef resolve_mask(AutotileGroup group, int mask)
@@ -79,13 +83,21 @@ constexpr TileRef wall_resolve(WallAutotileGroup group, bool north, bool east, b
 {
 	int mask = (north ? 8 : 0) | (east ? 4 : 0) | (south ? 2 : 0) | (west ? 1 : 0);
 	auto offset = WALL_TABLE[mask];
-	return TileRef{ group.sheet, group.origin_col + offset.col, group.origin_row + offset.row };
+	return TileRef{
+		group.sheet,
+		group.origin_col + offset.col,
+		group.origin_row + offset.row,
+	};
 }
 
 constexpr TileRef wall_resolve_mask(WallAutotileGroup group, int mask)
 {
 	auto offset = WALL_TABLE[mask & 0xF];
-	return TileRef{ group.sheet, group.origin_col + offset.col, group.origin_row + offset.row };
+	return TileRef{
+		group.sheet,
+		group.origin_col + offset.col,
+		group.origin_row + offset.row,
+	};
 }
 } // namespace Autotile
 

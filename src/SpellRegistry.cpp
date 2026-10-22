@@ -308,7 +308,7 @@ void SpellRegistry::save(std::string_view path) const
 			{ "name", definition.name },
 			{ "level", definition.level },
 			{ "class", encode_class(definition.spellClass) },
-			{ "description", definition.description }
+			{ "description", definition.description },
 		};
 	}
 
@@ -319,7 +319,7 @@ void SpellRegistry::save(std::string_view path) const
 			{ "level", definition.level },
 			{ "class", encode_class(definition.spellClass) },
 			{ "description", definition.description },
-			{ "effect", encode_effect_type(definition.effect_type) }
+			{ "effect", encode_effect_type(definition.effect_type) },
 		};
 	}
 

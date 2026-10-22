@@ -153,7 +153,7 @@ TEST_F(ItemSerializationTest, AllItemClasses_SaveLoad)
 		ItemClass::ARMOR,
 		ItemClass::SHIELD,
 		ItemClass::SCROLL,
-		ItemClass::FOOD
+		ItemClass::FOOD,
 	};
 
 	for (ItemClass itemClass : classes)
@@ -313,7 +313,10 @@ TEST_F(ItemSerializationTest, AnItemRecordMissingABlockItsSaverWritesIsRefused)
 	json itemRecord;
 	original->save(itemRecord);
 
-	Actor plainActor{ Vector2D{ 5, 10 }, ActorData{ TileRef{}, "Test Sword", ColorPairId::WHITE_BLACK } };
+	Actor plainActor{
+		Vector2D{ 5, 10 },
+		ActorData{ TileRef{}, "Test Sword", ColorPairId::WHITE_BLACK },
+	};
 	json actorRecord;
 	plainActor.save(actorRecord);
 

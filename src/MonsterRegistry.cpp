@@ -132,7 +132,7 @@ DamageInfo parse_damage(const nlohmann::json& record)
 {
 	return DamageInfo{
 		record.at("display").get<std::string>(),
-		parse_damage_type(record.at("type").get<std::string>())
+		parse_damage_type(record.at("type").get<std::string>()),
 	};
 }
 
@@ -146,10 +146,17 @@ DamageInfo parse_damage(const nlohmann::json& record)
 //   parse_hit_dice({ { "sides", 8 }, { "bonus", 0 }, { "counts", nlohmann::json::array() } }); // throws std::runtime_error
 MonsterHitDice parse_hit_dice(const nlohmann::json& record)
 {
-	MonsterHitDice hitDice{ record.at("sides").get<int>(), record.at("bonus").get<int>(), {} };
+	MonsterHitDice hitDice{
+		record.at("sides").get<int>(),
+		record.at("bonus").get<int>(),
+		{},
+	};
 	for (const nlohmann::json& entry : record.at("counts"))
 	{
-		hitDice.counts.push_back(HitDiceCount{ entry.at("count").get<int>(), entry.at("xp").get<int>() });
+		hitDice.counts.push_back(HitDiceCount{
+			entry.at("count").get<int>(),
+			entry.at("xp").get<int>(),
+		});
 	}
 	if (!is_valid_monster_hit_dice(hitDice))
 	{
@@ -174,7 +181,7 @@ nlohmann::json encode_hit_dice(const MonsterHitDice& hitDice)
 	return nlohmann::json{
 		{ "sides", hitDice.sides },
 		{ "bonus", hitDice.bonus },
-		{ "counts", counts }
+		{ "counts", counts },
 	};
 }
 
@@ -193,7 +200,10 @@ std::optional<MonsterStrength> parse_strength(const nlohmann::json& record)
 	{
 		return std::nullopt;
 	}
-	const MonsterStrength strength{ record.at("score").get<int>(), record.at("exceptional").get<int>() };
+	const MonsterStrength strength{
+		record.at("score").get<int>(),
+		record.at("exceptional").get<int>(),
+	};
 	if (!is_valid_monster_strength(strength))
 	{
 		throw std::runtime_error(std::format(
@@ -220,7 +230,7 @@ nlohmann::json encode_strength(const std::optional<MonsterStrength>& strength)
 	}
 	return nlohmann::json{
 		{ "score", strength->score },
-		{ "exceptional", strength->exceptional }
+		{ "exceptional", strength->exceptional },
 	};
 }
 
@@ -228,7 +238,7 @@ nlohmann::json encode_damage(const DamageInfo& damage)
 {
 	return nlohmann::json{
 		{ "display", damage.displayRoll },
-		{ "type", damage_type_name(damage.damageType) }
+		{ "type", damage_type_name(damage.damageType) },
 	};
 }
 
@@ -258,7 +268,8 @@ nlohmann::json encode_equipment(const std::vector<MonsterParams::StartingItem>& 
 	{
 		entries.push_back(nlohmann::json{
 			{ "item", carried.itemKey },
-			{ "slot", encode_equipment_slot(carried.slot) } });
+			{ "slot", encode_equipment_slot(carried.slot) },
+		});
 	}
 
 	return entries;
@@ -317,7 +328,8 @@ std::vector<InnatePower> parse_innate_powers(const nlohmann::json& entries)
 		powers.push_back(InnatePower{
 			entry.at("spell").get<std::string>(),
 			parse_power_frequency(entry.at("frequency").get<std::string>()),
-			0 });
+			0,
+		});
 	}
 	return powers;
 }
@@ -330,7 +342,8 @@ nlohmann::json encode_innate_powers(const std::vector<InnatePower>& powers)
 	{
 		entries.push_back(nlohmann::json{
 			{ "spell", power.spell },
-			{ "frequency", encode_power_frequency(power.frequency) } });
+			{ "frequency", encode_power_frequency(power.frequency) },
+		});
 	}
 	return entries;
 }
@@ -437,7 +450,7 @@ nlohmann::json encode_full_params(const MonsterParams& params)
 		{ "weight", params.baseWeight },
 		{ "depth_min", params.levelMinimum },
 		{ "depth_max", params.levelMaximum },
-		{ "depth_scale", params.levelScaling }
+		{ "depth_scale", params.levelScaling },
 	};
 }
 

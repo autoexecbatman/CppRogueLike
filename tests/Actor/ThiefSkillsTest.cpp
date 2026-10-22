@@ -47,7 +47,13 @@ ThiefSkillAllocation first_level(
 	ThiefArmor armor)
 {
 	constexpr std::array<int, THIEF_SKILL_COUNT> NOTHING_SPENT{ 0, 0, 0, 0, 0, 0, 0, 0 };
-	return ThiefSkillAllocation{ NOTHING_SPENT, thief_skill_grant_at_level(1), race, dexterity, armor };
+	return ThiefSkillAllocation{
+		NOTHING_SPENT,
+		thief_skill_grant_at_level(1),
+		race,
+		dexterity,
+		armor,
+	};
 }
 } // namespace
 
@@ -184,7 +190,12 @@ TEST(ThiefSkillsTest, EveryArmorTheDataShipsIsAnsweredForByTableTwentyNine)
 	file >> items;
 
 	constexpr std::array<std::string_view, 6> WITH_A_COLUMN{
-		"leather_armor", "padded_armor", "studded_leather", "hide_armor", "chain_mail", "ring_mail"
+		"leather_armor",
+		"padded_armor",
+		"studded_leather",
+		"hide_armor",
+		"chain_mail",
+		"ring_mail",
 	};
 
 	int found = 0;
@@ -310,7 +321,7 @@ TEST(ThiefSkillsTest, ALaterGrantPutsNoMoreThanFifteenOnASkillAlreadyBought)
 		thief_skill_grant_at_level(2),
 		NO_RACE,
 		13,
-		ThiefArmor::LEATHER
+		ThiefArmor::LEATHER,
 	};
 
 	for (int point = 0; point < 15; ++point)
@@ -335,7 +346,7 @@ TEST(ThiefSkillsTest, NoPointIsTakenOnceTheScoreStandsAtNinetyFive)
 		thief_skill_grant_at_level(2),
 		NO_RACE,
 		13,
-		ThiefArmor::NONE
+		ThiefArmor::NONE,
 	};
 
 	// Climb Walls: base 60, no armour +10, 25 already spent - the ceiling exactly.
@@ -352,7 +363,7 @@ TEST(ThiefSkillsTest, APointComesBackAndEarlierLevelsPointsDoNot)
 		thief_skill_grant_at_level(3),
 		NO_RACE,
 		13,
-		ThiefArmor::LEATHER
+		ThiefArmor::LEATHER,
 	};
 
 	EXPECT_FALSE(allocation.can_take_back(ThiefSkill::MOVE_SILENTLY));

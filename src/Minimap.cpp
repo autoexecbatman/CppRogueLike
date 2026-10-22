@@ -70,7 +70,7 @@ void Minimap::render(const GameContext& ctx) const
 				static_cast<unsigned char>(authored.red),
 				static_cast<unsigned char>(authored.green),
 				static_cast<unsigned char>(authored.blue),
-				static_cast<unsigned char>(authored.alpha)
+				static_cast<unsigned char>(authored.alpha),
 			};
 
 			DrawRectangle(originX + col * tilePx, originY + row * tilePx, tilePx, tilePx, cellColor);

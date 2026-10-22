@@ -111,9 +111,15 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": "\thidingSpot = spot.is_null()\n\t\t? std::nullopt",
-      "mutated": "\thidingSpot = true\n\t\t? std::nullopt",
+      "original": "\tif (spot.is_null())\n",
+      "mutated": "\tif (true)\n",
       "catches": "a saved hide coming back with no spot to hold it"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tif (spot.is_null())\n\t{\n\t\thidingSpot = std::nullopt;\n\t}\n",
+      "mutated": "\tif (spot.is_null())\n\t{\n\t}\n",
+      "catches": "a load of a thief saved in the open keeping the spot the player already had"
     }
   ]
 }

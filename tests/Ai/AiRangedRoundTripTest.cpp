@@ -27,7 +27,10 @@ constexpr int OPTIMAL_DISTANCE = 4;
 TEST(AiRangedRoundTripTest, ARangedMonsterLoadsAsTheSameAiItSaved)
 {
 	AiMonsterRanged archer{};
-	archer.load(json{ { "maxRangeDistance", MAX_RANGE }, { "optimalDistance", OPTIMAL_DISTANCE } });
+	archer.load(json{
+		{ "maxRangeDistance", MAX_RANGE },
+		{ "optimalDistance", OPTIMAL_DISTANCE },
+	});
 	json saved;
 	archer.save(saved);
 

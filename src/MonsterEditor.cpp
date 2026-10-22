@@ -622,7 +622,12 @@ void MonsterEditor::render_list(const Renderer& renderer, const MonsterRegistry&
 		constexpr Color PLAIN_TEXT{ 200, 200, 200, 255 };
 		const Color textColor = isSelected ? SELECTED_TEXT : PLAIN_TEXT;
 
-		renderer.draw_text_color(Vector2D{ LIST_PAD + LIST_TILE_SIZE + 4, itemY + (ITEM_HEIGHT - 16) / 2 }, displayName, textColor);
+		renderer.draw_text_color(Vector2D{
+									 LIST_PAD + LIST_TILE_SIZE + 4,
+									 itemY + (ITEM_HEIGHT - 16) / 2,
+								 },
+			displayName,
+			textColor);
 	}
 }
 
@@ -679,7 +684,12 @@ void MonsterEditor::render_fields(const Renderer& renderer) const
 
 		if (fieldId == FieldId::TILE)
 		{
-			renderer.draw_tile_screen_sized(Vector2D{ screenWidth - LIST_TILE_SIZE - 12, itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2 }, working.symbol, LIST_TILE_SIZE);
+			renderer.draw_tile_screen_sized(Vector2D{
+												screenWidth - LIST_TILE_SIZE - 12,
+												itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2,
+											},
+				working.symbol,
+				LIST_TILE_SIZE);
 			if (isSelected)
 			{
 				DrawRectangleLines(screenWidth - LIST_TILE_SIZE - 12, itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2, LIST_TILE_SIZE, LIST_TILE_SIZE, Color{ 255, 255, 0, 255 });
@@ -1196,7 +1206,10 @@ void MonsterEditor::field_toggle(FieldId field)
 	else if (field == FieldId::STR_SOURCE)
 	{
 		// A printed Strength starts at 10, the middle of 3d6, for the author to set to the entry's figure.
-		constexpr MonsterStrength startingPrintedStrength{ 10, MONSTER_STRENGTH_EXCEPTIONAL_NONE };
+		constexpr MonsterStrength startingPrintedStrength{
+			10,
+			MONSTER_STRENGTH_EXCEPTIONAL_NONE,
+		};
 		if (working.strength.has_value())
 		{
 			working.strength.reset();
@@ -1209,7 +1222,10 @@ void MonsterEditor::field_toggle(FieldId field)
 	else if (field == FieldId::DMG_TYPE)
 	{
 		// The dice are unchanged; only what they deal is.
-		working.damage = DamageInfo{ working.damage.dice, next_damage_type(working.damage.damageType) };
+		working.damage = DamageInfo{
+			working.damage.dice,
+			next_damage_type(working.damage.damageType),
+		};
 	}
 	else if (field == FieldId::CASTER_CLASS)
 	{
@@ -1281,7 +1297,11 @@ void MonsterEditor::field_set_string(FieldId field, std::string newValue)
 		{
 			if (!newValue.empty())
 			{
-				working.innatePowers.push_back(InnatePower{ std::move(newValue), PowerFrequency::AT_WILL, 0 });
+				working.innatePowers.push_back(InnatePower{
+					std::move(newValue),
+					PowerFrequency::AT_WILL,
+					0,
+				});
 				selectedPower = 0;
 			}
 		}

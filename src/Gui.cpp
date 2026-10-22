@@ -232,7 +232,10 @@ static LogCursor draw_log_part(
 		}
 
 		renderer.draw_text(
-			Vector2D{ cursor.pixelX, hud_text_row_y(panel.baseY, panel.tileSize, cursor.row) },
+			Vector2D{
+				cursor.pixelX,
+				hud_text_row_y(panel.baseY, panel.tileSize, cursor.row),
+			},
 			shown,
 			part.color);
 		remainingText.erase(0, shown.size());
@@ -514,7 +517,7 @@ void Gui::gui_print_log(const GameContext& ctx)
 		.rightEdge = hud_frame_text_right(panelWidth, tileSize),
 		.baseY = baseY,
 		.tileSize = tileSize,
-		.rowCount = hud_text_row_count(tileSize, ctx.renderer->get_font_size())
+		.rowCount = hud_text_row_count(tileSize, ctx.renderer->get_font_size()),
 	};
 
 	// Newest message first, each on rows of its own; rows run out before messages do,
@@ -557,7 +560,10 @@ void Gui::render_player_status(const GameContext& ctx)
 	if (ctx.player_concrete().controller->is_confused(ctx.gameState->get_time()))
 	{
 		ctx.renderer->draw_text(
-			Vector2D{ hud_panel_left_margin(tileSize), hud_text_row_y(baseY, tileSize, 2) },
+			Vector2D{
+				hud_panel_left_margin(tileSize),
+				hud_text_row_y(baseY, tileSize, 2),
+			},
 			"CONFUSED",
 			ColorPairId::RED_BLACK);
 	}

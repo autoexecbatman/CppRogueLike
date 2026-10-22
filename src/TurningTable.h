@@ -59,7 +59,18 @@ inline constexpr int TURNING_MAX_PRIEST_LEVEL = 14;
 // "1" through "9", then "10-11", "12-13" and "14+". This is the only place the
 // headings are written down.
 inline constexpr std::array<int, TURNING_PRINTED_COLUMNS> TURNING_COLUMN_FIRST_LEVEL = {
-	1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, TURNING_MAX_PRIEST_LEVEL
+	1,
+	2,
+	3,
+	4,
+	5,
+	6,
+	7,
+	8,
+	9,
+	10,
+	12,
+	TURNING_MAX_PRIEST_LEVEL,
 };
 
 // Rows are undead hit dice 1 through 11, the book's rows that name a number

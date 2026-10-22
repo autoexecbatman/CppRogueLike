@@ -39,8 +39,8 @@
     },
     {
       "file": "src/ItemEnhancements.cpp",
-      "original": "\t\tPrefixType::BLESSED, PrefixType::CURSED, PrefixType::ANCIENT, PrefixType::MAGICAL, PrefixType::RUSTED, PrefixType::CRACKED",
-      "mutated": "\t\tPrefixType::CURSED, PrefixType::BLESSED, PrefixType::ANCIENT, PrefixType::MAGICAL, PrefixType::RUSTED, PrefixType::CRACKED",
+      "original": "\t\tPrefixType::BLESSED,\n\t\tPrefixType::CURSED,\n\t\tPrefixType::ANCIENT,\n\t\tPrefixType::MAGICAL,\n\t\tPrefixType::RUSTED,\n\t\tPrefixType::CRACKED",
+      "mutated": "\t\tPrefixType::CURSED, PrefixType::BLESSED,\n\t\tPrefixType::ANCIENT,\n\t\tPrefixType::MAGICAL,\n\t\tPrefixType::RUSTED,\n\t\tPrefixType::CRACKED",
       "catches": "the universal pool's first two entries swapped"
     },
     {

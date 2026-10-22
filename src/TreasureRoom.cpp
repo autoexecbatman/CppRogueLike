@@ -356,7 +356,7 @@ void TreasureRoom::create(
 		{
 			Vector2D candidate{
 				ctx.dice->roll(room.col, room.col_end()),
-				ctx.dice->roll(room.row, room.row_end())
+				ctx.dice->roll(room.row, room.row_end()),
 			};
 			if (ctx.map->can_place_at(candidate, ctx))
 			{
@@ -405,7 +405,7 @@ void TreasureRoom::create(
 		{
 			Vector2D candidate{
 				ctx.dice->roll(room.col, room.col_end()),
-				ctx.dice->roll(room.row, room.row_end())
+				ctx.dice->roll(room.row, room.row_end()),
 			};
 			if (candidate != center && ctx.map->can_place_at(candidate, ctx))
 			{

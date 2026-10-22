@@ -57,7 +57,10 @@ protected:
 	GameContext ctx{};
 	DataManager dataManager{};
 	MessageSystem messages{};
-	Creature priest{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "priest", ColorPairId::WHITE_BLACK } };
+	Creature priest{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "priest", ColorPairId::WHITE_BLACK },
+	};
 };
 
 // Table 5's column, read straight down the rows a priest can have.

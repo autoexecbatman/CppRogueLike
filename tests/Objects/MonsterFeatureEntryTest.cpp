@@ -106,7 +106,10 @@ protected:
 	std::vector<std::unique_ptr<Trap>> traps{};
 	std::vector<std::unique_ptr<SpellTile>> spellTiles{};
 	std::vector<std::unique_ptr<Decoration>> decorations{};
-	Creature goblin{ NEAR_TILE, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK } };
+	Creature goblin{
+		NEAR_TILE,
+		ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK },
+	};
 };
 
 // A goblin the player watches walk onto a dart trap is named in the log, with the damage,
@@ -168,7 +171,11 @@ TEST_F(MonsterFeatureEntryTest, ASprungTrapIsNamedByItsKind)
 // is the pit trap a search would have found.
 TEST_F(MonsterFeatureEntryTest, ThePlayerSpringingAPitIsToldItIsAPitTrap)
 {
-	Trap pit{ Vector2D{ PLAYER_TILE.x + 1, CORRIDOR_ROW }, TrapType::PIT, mock.tile_config };
+	Trap pit{
+		Vector2D{ PLAYER_TILE.x + 1, CORRIDOR_ROW },
+		TrapType::PIT,
+		mock.tile_config,
+	};
 	// Three on each of the pit's two dice, then the coin that keeps the trap.
 	mock.dice.set_next_roll(3);
 	mock.dice.set_next_roll(3);

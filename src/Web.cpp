@@ -37,7 +37,11 @@ void narrate(
 } // namespace
 
 Web::Web(Vector2D position, int strength, const TileConfig& tileConfig)
-	: SpellTile(position, ActorData{ tileConfig.get("TILE_WEB"), "spider web", ColorPairId::BLACK_WHITE }),
+	: SpellTile(position, ActorData{
+							  tileConfig.get("TILE_WEB"),
+							  "spider web",
+							  ColorPairId::BLACK_WHITE,
+						  }),
 	  webStrength(strength)
 {
 	// Webs don't block movement but do have their effect when passed through

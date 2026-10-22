@@ -122,7 +122,10 @@ struct MonsterHitDice
 	}
 	while (hitDice.counts.front().count > target)
 	{
-		const HitDiceCount below{ hitDice.counts.front().count - 1, hitDice.counts.front().xp };
+		const HitDiceCount below{
+			hitDice.counts.front().count - 1,
+			hitDice.counts.front().xp,
+		};
 		hitDice.counts.insert(hitDice.counts.begin(), below);
 	}
 	return hitDice;
@@ -144,7 +147,10 @@ struct MonsterHitDice
 	}
 	while (highest_count(hitDice).count < target)
 	{
-		const HitDiceCount above{ highest_count(hitDice).count + 1, highest_count(hitDice).xp };
+		const HitDiceCount above{
+			highest_count(hitDice).count + 1,
+			highest_count(hitDice).xp,
+		};
 		hitDice.counts.push_back(above);
 	}
 	return hitDice;

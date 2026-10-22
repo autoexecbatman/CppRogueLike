@@ -45,7 +45,11 @@ constexpr unsigned int AUTOMATION_MOUSE_BUTTON_DOWN = 6;
 //   IsKeyPressed(KEY_ESCAPE); // -> true until a frame ends
 void press_key(int raylibKey)
 {
-	PlayAutomationEvent(AutomationEvent{ .frame = 0, .type = AUTOMATION_KEY_DOWN, .params = { raylibKey, 0, 0, 0 } });
+	PlayAutomationEvent(AutomationEvent{
+		.frame = 0,
+		.type = AUTOMATION_KEY_DOWN,
+		.params = { raylibKey, 0, 0, 0 },
+	});
 }
 
 // Presses a mouse button as the mouse would.
@@ -55,7 +59,11 @@ void press_key(int raylibKey)
 //   IsMouseButtonPressed(MOUSE_BUTTON_LEFT); // -> true until a frame ends
 void press_mouse_button(int raylibButton)
 {
-	PlayAutomationEvent(AutomationEvent{ .frame = 0, .type = AUTOMATION_MOUSE_BUTTON_DOWN, .params = { raylibButton, 0, 0, 0 } });
+	PlayAutomationEvent(AutomationEvent{
+		.frame = 0,
+		.type = AUTOMATION_MOUSE_BUTTON_DOWN,
+		.params = { raylibButton, 0, 0, 0 },
+	});
 }
 
 // The character sheet closes on Escape without drawing; the tick still ends its frame,

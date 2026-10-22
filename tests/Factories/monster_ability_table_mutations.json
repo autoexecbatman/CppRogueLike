@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/MonsterAbilityTables.h",
-      "original": "\t{ { { 8, 0 }, { 10, 0 }, { 12, 0 }, { 18, 1 }, { 18, 91 }, { 19, 0 } } }, // 9\n",
-      "mutated": "\t{ { { 8, 0 }, { 10, 0 }, { 12, 0 }, { 18, 51 }, { 18, 91 }, { 19, 0 } } }, // 9\n",
+      "original": "\t{\n\t\t{\n\t\t\t{ 8, 0 },\n\t\t\t{ 10, 0 },\n\t\t\t{ 12, 0 },\n\t\t\t{ 18, 1 },\n\t\t\t{ 18, 91 },\n\t\t\t{ 19, 0 },\n\t\t},\n\t}, // 9\n",
+      "mutated": "\t{\n\t\t{\n\t\t\t{ 8, 0 },\n\t\t\t{ 10, 0 },\n\t\t\t{ 12, 0 },\n\t\t\t{ 18,5 1 },\n\t\t\t{ 18, 91 },\n\t\t\t{ 19, 0 },\n\t\t},\n\t}, // 9\n",
       "catches": "a Table 6 cell's percentile wrong: 18/01 read as 18/51"
     },
     {

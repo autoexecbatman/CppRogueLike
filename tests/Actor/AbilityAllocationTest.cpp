@@ -182,7 +182,11 @@ TEST(AbilityAllocationTest, AClassWithNoRowIsNeverShort)
 // to 9 leaves it short; 10 is what a halfling fighter has to reach.
 TEST(AbilityAllocationTest, ARaceIsShownAndJudgedButNotAllocated)
 {
-	AbilityAllocation halflingFighter{ { 1, 1 }, CreatureClass::FIGHTER, HALFLING };
+	AbilityAllocation halflingFighter{
+		{ 1, 1 },
+		CreatureClass::FIGHTER,
+		HALFLING,
+	};
 	halflingFighter.spend(Ability::STRENGTH, 0);
 
 	EXPECT_EQ(halflingFighter.allocated(Ability::STRENGTH), 9) << "the race is not spent from the pool";
@@ -200,7 +204,11 @@ TEST(AbilityAllocationTest, ARaceIsShownAndJudgedButNotAllocated)
 // because pay_racial_adjustments pays the race once the character exists.
 TEST(AbilityAllocationTest, TheScoresHandedOnAreTheAllocatedOnes)
 {
-	AbilityAllocation halflingFighter{ { 4 }, CreatureClass::FIGHTER, HALFLING };
+	AbilityAllocation halflingFighter{
+		{ 4 },
+		CreatureClass::FIGHTER,
+		HALFLING,
+	};
 	halflingFighter.spend(Ability::STRENGTH, 0);
 
 	const std::array<int, ABILITY_COUNT> scores = halflingFighter.allocated_scores();

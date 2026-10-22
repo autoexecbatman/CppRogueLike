@@ -142,7 +142,10 @@ TEST_F(PlayerRestTest, AHostileSixTilesAwayDoesNotBlockTheRest)
 TEST_F(PlayerRestTest, AHostileOnTheDiagonalBlocksAtTheSameRange)
 {
 	standing_at(
-		Vector2D{ THE_PLAYERS_TILE.x + REST_DANGER_RADIUS, THE_PLAYERS_TILE.y + REST_DANGER_RADIUS },
+		Vector2D{
+			THE_PLAYERS_TILE.x + REST_DANGER_RADIUS,
+			THE_PLAYERS_TILE.y + REST_DANGER_RADIUS,
+		},
 		Attitude::HOSTILE);
 
 	EXPECT_FALSE(player->rest(ctx));

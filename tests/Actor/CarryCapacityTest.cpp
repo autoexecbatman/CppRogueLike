@@ -41,7 +41,10 @@ protected:
 
 	MockGameContext mock{};
 	GameContext ctx{ mock.to_game_context() };
-	Creature carrier{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "carrier", ColorPairId::WHITE_BLACK } };
+	Creature carrier{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "carrier", ColorPairId::WHITE_BLACK },
+	};
 };
 
 TEST_F(CarryCapacityTest, AnAverageStrengthCarriesTheTablesHundredAndTen)

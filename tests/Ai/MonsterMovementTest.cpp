@@ -143,7 +143,10 @@ protected:
 	Map map{ 20, 20 };
 	std::unique_ptr<Player> player{ std::make_unique<Player>(PLAYER_TILE) };
 	std::vector<std::unique_ptr<Creature>> creatures{};
-	Creature monster{ MONSTER_START, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK } };
+	Creature monster{
+		MONSTER_START,
+		ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK },
+	};
 	HuntingAi* hunter{ nullptr };
 
 	void TearDown() override
@@ -271,7 +274,15 @@ TEST_F(MonsterMovementTest, AHunterWalksTheLengthOfAWideCrowdToItsGap)
 	open_room(Vector2D{ 1, 1 }, Vector2D{ 12, 8 });
 	player->position = Vector2D{ 2, 4 };
 	monster.position = Vector2D{ 7, 4 };
-	place_blockers({ Vector2D{ 6, 1 }, Vector2D{ 6, 2 }, Vector2D{ 6, 3 }, Vector2D{ 6, 4 }, Vector2D{ 6, 5 }, Vector2D{ 6, 6 }, Vector2D{ 6, 7 } });
+	place_blockers({
+		Vector2D{ 6, 1 },
+		Vector2D{ 6, 2 },
+		Vector2D{ 6, 3 },
+		Vector2D{ 6, 4 },
+		Vector2D{ 6, 5 },
+		Vector2D{ 6, 6 },
+		Vector2D{ 6, 7 },
+	});
 
 	hunt(ROUNDS);
 
@@ -285,7 +296,13 @@ TEST_F(MonsterMovementTest, AHunterBoxedInBacksOutAndGoesRound)
 	open_room(Vector2D{ 1, 3 }, Vector2D{ 12, 6 });
 	player->position = Vector2D{ 2, 4 };
 	monster.position = Vector2D{ 7, 4 };
-	place_blockers({ Vector2D{ 6, 3 }, Vector2D{ 6, 4 }, Vector2D{ 6, 5 }, Vector2D{ 7, 3 }, Vector2D{ 7, 5 } });
+	place_blockers({
+		Vector2D{ 6, 3 },
+		Vector2D{ 6, 4 },
+		Vector2D{ 6, 5 },
+		Vector2D{ 7, 3 },
+		Vector2D{ 7, 5 },
+	});
 
 	hunt(ROUNDS);
 
@@ -300,7 +317,16 @@ TEST_F(MonsterMovementTest, AHunterComesUpToAClosedRingAndHolds)
 {
 	open_room(Vector2D{ 1, 1 }, Vector2D{ 12, 8 });
 	player->position = Vector2D{ 5, 4 };
-	place_blockers({ Vector2D{ 4, 3 }, Vector2D{ 5, 3 }, Vector2D{ 6, 3 }, Vector2D{ 4, 4 }, Vector2D{ 6, 4 }, Vector2D{ 4, 5 }, Vector2D{ 5, 5 }, Vector2D{ 6, 5 } });
+	place_blockers({
+		Vector2D{ 4, 3 },
+		Vector2D{ 5, 3 },
+		Vector2D{ 6, 3 },
+		Vector2D{ 4, 4 },
+		Vector2D{ 6, 4 },
+		Vector2D{ 4, 5 },
+		Vector2D{ 5, 5 },
+		Vector2D{ 6, 5 },
+	});
 	// On the hunter's straight line in.
 	place_blockers({ Vector2D{ 5, 6 } });
 	monster.position = Vector2D{ 5, 7 };

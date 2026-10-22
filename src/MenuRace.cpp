@@ -51,7 +51,11 @@ std::unique_ptr<BaseMenu> make_race_menu(GameContext& ctx)
 		{
 			choose_race(race, commandCtx);
 		};
-		entries.push_back({ std::string{ race_display_name(choice.race) }, choice.hotkey, raceCommand });
+		entries.push_back({
+			std::string{ race_display_name(choice.race) },
+			choice.hotkey,
+			raceCommand,
+		});
 	}
 
 	// A d6 over the six the menu offers, so a race added to the list is rollable by

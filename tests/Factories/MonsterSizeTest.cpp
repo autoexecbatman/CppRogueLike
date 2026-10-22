@@ -35,7 +35,10 @@ constexpr BookSize BOOK_SIZES[] = {
 	{ "bat", CreatureSize::TINY }, // Bat p1110, Common column
 	{ "bugbear", CreatureSize::LARGE }, // Bugbear p1148
 	{ "chimera", CreatureSize::LARGE }, // Chimera p1176, Chimera column
-	{ "dragon", CreatureSize::GARGANTUAN }, // Dragon, Chromatic Red Dragon p1240
+	{
+		"dragon",
+		CreatureSize::GARGANTUAN,
+	}, // Dragon, Chromatic Red Dragon p1240
 	{ "dungeon_jailer", CreatureSize::MEDIUM }, // no entry; a human
 	{ "dungeon_warden", CreatureSize::MEDIUM }, // no entry; a human
 	{ "fire_wolf", CreatureSize::MEDIUM }, // Hell Hound p1544
@@ -43,10 +46,16 @@ constexpr BookSize BOOK_SIZES[] = {
 	{ "ghoul", CreatureSize::MEDIUM }, // Ghoul p1406, Ghoul column
 	{ "giant_centipede", CreatureSize::TINY }, // Centipede p1173, Giant column
 	{ "giant_rat", CreatureSize::TINY }, // Rat p1812, Rat (Giant) column
-	{ "giant_snake", CreatureSize::MEDIUM }, // Snake p1862, Poisonous (Giant): closest, AC 5 and HD 4+2
+	{
+		"giant_snake",
+		CreatureSize::MEDIUM,
+	}, // Snake p1862, Poisonous (Giant): closest, AC 5 and HD 4+2
 	{ "gnoll", CreatureSize::LARGE }, // Gnoll p1472, Gnoll column
 	{ "goblin", CreatureSize::SMALL }, // Goblin p1483
-	{ "golem_stone", CreatureSize::LARGE }, // Golem, Greater p1491, Stone column
+	{
+		"golem_stone",
+		CreatureSize::LARGE,
+	}, // Golem, Greater p1491, Stone column
 	{ "harpy", CreatureSize::MEDIUM }, // Harpy p1537
 	{ "hill_giant", CreatureSize::HUGE_SIZE }, // Giant, Hill p1431
 	{ "hobgoblin", CreatureSize::MEDIUM }, // Hobgoblin p1553

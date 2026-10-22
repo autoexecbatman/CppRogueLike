@@ -45,7 +45,10 @@ constexpr int ROOM_COL = 2;
 constexpr int ROOM_ROW = 2;
 constexpr int ROOM_SIZE = 3;
 constexpr Vector2D PLAYER_TILE{ ROOM_COL, ROOM_ROW };
-constexpr Vector2D LAST_FREE_TILE{ ROOM_COL + ROOM_SIZE - 1, ROOM_ROW + ROOM_SIZE - 1 };
+constexpr Vector2D LAST_FREE_TILE{
+	ROOM_COL + ROOM_SIZE - 1,
+	ROOM_ROW + ROOM_SIZE - 1,
+};
 // Enough draws that a picker ignoring what stands on a tile lands on a taken one.
 constexpr int DRAWS = 30;
 } // namespace

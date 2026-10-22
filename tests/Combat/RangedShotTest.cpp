@@ -56,8 +56,14 @@ protected:
 
 	MockGameContext mock{};
 	GameContext ctx{};
-	Creature archer{ Vector2D{ 2, 5 }, ActorData{ TileRef{}, "archer", ColorPairId::WHITE_BLACK } };
-	Creature target{ Vector2D{ 6, 5 }, ActorData{ TileRef{}, "target", ColorPairId::WHITE_BLACK } };
+	Creature archer{
+		Vector2D{ 2, 5 },
+		ActorData{ TileRef{}, "archer", ColorPairId::WHITE_BLACK },
+	};
+	Creature target{
+		Vector2D{ 6, 5 },
+		ActorData{ TileRef{}, "target", ColorPairId::WHITE_BLACK },
+	};
 };
 
 // Each outcome earns its own picture, and only a landed attack draws blood.

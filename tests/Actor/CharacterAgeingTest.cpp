@@ -165,7 +165,10 @@ TEST_F(CharacterAgeingTest, ExceptionalStrengthAgesBeforeThePoint)
 
 TEST_F(CharacterAgeingTest, AMonsterHasNoLifespanAndNoAgeing)
 {
-	Creature monster{ Vector2D{ 2, 2 }, ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK } };
+	Creature monster{
+		Vector2D{ 2, 2 },
+		ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK },
+	};
 	monster.set_strength(BASE_SCORE);
 
 	EXPECT_FALSE(monster.lifespan.has_value());
@@ -293,7 +296,10 @@ TEST_F(CharacterAgeingTest, APlayerWithNoLifespanIsRefused)
 
 TEST_F(CharacterAgeingTest, AMonstersEmptyLifespanSavesAndLoads)
 {
-	Creature monster{ Vector2D{ 2, 2 }, ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK } };
+	Creature monster{
+		Vector2D{ 2, 2 },
+		ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK },
+	};
 	monster.healthPool = std::make_unique<HealthPool>(5);
 	monster.armorClass = std::make_unique<ArmorClass>(10);
 	nlohmann::json saved;
@@ -302,7 +308,10 @@ TEST_F(CharacterAgeingTest, AMonstersEmptyLifespanSavesAndLoads)
 	ASSERT_TRUE(saved.contains("lifespan"));
 	EXPECT_TRUE(saved.at("lifespan").is_null());
 
-	Creature loaded{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK } };
+	Creature loaded{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK },
+	};
 	loaded.load(saved);
 	EXPECT_FALSE(loaded.lifespan.has_value());
 }

@@ -44,7 +44,11 @@ constexpr std::array<int, ABILITY_COUNT> HUMAN{ 0, 0, 0, 0, 0, 0 };
 // nothing for the modifier half of the line to say.
 TEST(AbilityAllocationTextTest, AnUnmodifiedAbilityPrintsNoRacialHalf)
 {
-	const AbilityAllocation allocation{ ROLLED_POOL, CreatureClass::FIGHTER, HUMAN };
+	const AbilityAllocation allocation{
+		ROLLED_POOL,
+		CreatureClass::FIGHTER,
+		HUMAN,
+	};
 
 	EXPECT_EQ(
 		ability_row_line(allocation, Ability::CONSTITUTION, Ability::STRENGTH),
@@ -55,7 +59,11 @@ TEST(AbilityAllocationTextTest, AnUnmodifiedAbilityPrintsNoRacialHalf)
 // the columns do not.
 TEST(AbilityAllocationTextTest, TheCursorMarkerIsTheFirstCharacterAndShiftsNothing)
 {
-	const AbilityAllocation allocation{ ROLLED_POOL, CreatureClass::FIGHTER, HUMAN };
+	const AbilityAllocation allocation{
+		ROLLED_POOL,
+		CreatureClass::FIGHTER,
+		HUMAN,
+	};
 
 	const std::string away = ability_row_line(allocation, Ability::CONSTITUTION, Ability::STRENGTH);
 	const std::string on = ability_row_line(allocation, Ability::CONSTITUTION, Ability::CONSTITUTION);
@@ -69,7 +77,11 @@ TEST(AbilityAllocationTextTest, TheCursorMarkerIsTheFirstCharacterAndShiftsNothi
 // put there, what the race does to it, and what the character will be built with.
 TEST(AbilityAllocationTextTest, AModifiedAbilityShowsTheDiceTheRaceAndTheResult)
 {
-	AbilityAllocation allocation{ ROLLED_POOL, CreatureClass::FIGHTER, HALFLING };
+	AbilityAllocation allocation{
+		ROLLED_POOL,
+		CreatureClass::FIGHTER,
+		HALFLING,
+	};
 
 	// The 6 is the fifth die, so the starting 8 becomes 14 and the halfling -1
 	// leaves 13.
@@ -84,7 +96,11 @@ TEST(AbilityAllocationTextTest, AModifiedAbilityShowsTheDiceTheRaceAndTheResult)
 // A positive modifier carries its sign, so the two halves of Table 2 read alike.
 TEST(AbilityAllocationTextTest, APositiveModifierCarriesItsSign)
 {
-	AbilityAllocation allocation{ ROLLED_POOL, CreatureClass::FIGHTER, HALFLING };
+	AbilityAllocation allocation{
+		ROLLED_POOL,
+		CreatureClass::FIGHTER,
+		HALFLING,
+	};
 
 	// The 2 is the third die: 8 becomes 10, and the halfling +1 leaves 11.
 	ASSERT_TRUE(allocation.can_spend(Ability::DEXTERITY, 2));
@@ -133,7 +149,11 @@ TEST(AbilityAllocationTextTest, AnEmptyPoolSaysSoRatherThanPrintingNothing)
 // leave rather than on the dice: a halfling fighter at the starting 8 reads 7.
 TEST(AbilityAllocationTextTest, TheStatusLineNamesTheUnmetMinimumThenReportsReady)
 {
-	AbilityAllocation allocation{ ROLLED_POOL, CreatureClass::FIGHTER, HALFLING };
+	AbilityAllocation allocation{
+		ROLLED_POOL,
+		CreatureClass::FIGHTER,
+		HALFLING,
+	};
 
 	EXPECT_EQ(allocation_status_line(allocation), "Needs Strength 9");
 

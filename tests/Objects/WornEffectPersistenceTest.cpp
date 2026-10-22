@@ -120,7 +120,10 @@ TEST(WornEffectPersistenceTest, AHelmAndARingKeepWhatTheyAlreadyKept)
 TEST(WornEffectPersistenceTest, AReloadedWearerStillCrossesWater)
 {
 	MockGameContext mock{};
-	Creature wearer{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "swimmer", ColorPairId::WHITE_BLACK } };
+	Creature wearer{
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "swimmer", ColorPairId::WHITE_BLACK },
+	};
 	wearer.set_body_plan(mock.body_plans.get("humanoid"));
 
 	Gauntlets worn{};

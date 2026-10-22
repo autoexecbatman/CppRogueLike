@@ -114,20 +114,24 @@ nlohmann::json encode_spellcasting(const Spellcasting& spellcasting)
 		powers.push_back(nlohmann::json{
 			{ "spell", power.spell },
 			{ "frequency", encode_power_frequency(power.frequency) },
-			{ "readyAgainAt", power.readyAgainAt } });
+			{ "readyAgainAt", power.readyAgainAt },
+		});
 	}
 
 	const nlohmann::json training = spellcasting.training.has_value()
 		? nlohmann::json{
-			  { "casterClass", encode_caster_class(spellcasting.training->casterClass) },
-			  { "casterLevel", spellcasting.training->casterLevel }
+			  {
+				  "casterClass",
+				  encode_caster_class(spellcasting.training->casterClass),
+			  },
+			  { "casterLevel", spellcasting.training->casterLevel },
 		  }
 		: nlohmann::json(nullptr);
 
 	return nlohmann::json{
 		{ "memorizedSpells", spellcasting.memorizedSpells },
 		{ "training", training },
-		{ "innatePowers", powers }
+		{ "innatePowers", powers },
 	};
 }
 
@@ -150,7 +154,8 @@ Spellcasting parse_spellcasting(const nlohmann::json& record)
 		spellcasting.innatePowers.push_back(InnatePower{
 			power.at("spell").get<std::string>(),
 			parse_power_frequency(power.at("frequency").get<std::string>()),
-			power.at("readyAgainAt").get<int>() });
+			power.at("readyAgainAt").get<int>(),
+		});
 	}
 	return spellcasting;
 }

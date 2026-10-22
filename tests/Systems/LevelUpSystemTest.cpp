@@ -132,7 +132,12 @@ TEST_F(LevelUpSystemTest, FighterExtraAttackAtLevel13)
 // 605 of the 2e archive). Each class's prime requisite is still 15 at 4th, 8th and 12th.
 TEST_F(LevelUpSystemTest, ALevelRaisesNoAbilityScore)
 {
-	const CreatureClass classes[] = { CreatureClass::FIGHTER, CreatureClass::ROGUE, CreatureClass::CLERIC, CreatureClass::WIZARD };
+	const CreatureClass classes[] = {
+		CreatureClass::FIGHTER,
+		CreatureClass::ROGUE,
+		CreatureClass::CLERIC,
+		CreatureClass::WIZARD,
+	};
 	for (const CreatureClass creatureClass : classes)
 	{
 		player->set_creature_class(creatureClass);

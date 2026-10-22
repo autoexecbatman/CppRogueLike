@@ -917,7 +917,10 @@ bool cast_knock(Creature& caster, GameContext& ctx)
 	{
 		for (int deltaCol = -KNOCK_RADIUS; deltaCol <= KNOCK_RADIUS; ++deltaCol)
 		{
-			Vector2D candidate{ caster.position.x + deltaCol, caster.position.y + deltaRow };
+			Vector2D candidate{
+				caster.position.x + deltaCol,
+				caster.position.y + deltaRow,
+			};
 			if (!ctx.map->is_in_bounds(candidate))
 			{
 				continue;

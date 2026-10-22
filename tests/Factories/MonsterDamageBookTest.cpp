@@ -147,7 +147,13 @@ constexpr BookDamage BOOK_DAMAGE[] = {
 };
 
 // The game's own monsters, which the Monstrous Manual does not print.
-constexpr std::string_view NO_ENTRY[] = { "archer", "dungeon_jailer", "dungeon_warden", "mage", "shopkeeper" };
+constexpr std::string_view NO_ENTRY[] = {
+	"archer",
+	"dungeon_jailer",
+	"dungeon_warden",
+	"mage",
+	"shopkeeper",
+};
 
 bool is_listed(std::string_view key)
 {

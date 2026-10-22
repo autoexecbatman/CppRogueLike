@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/TurningTable.h",
-      "original": "\t1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, TURNING_MAX_PRIEST_LEVEL\n",
-      "mutated": "\t1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, TURNING_MAX_PRIEST_LEVEL\n",
+      "original": "\t1,\n\t2,\n\t3,\n\t4,\n\t5,\n\t6,\n\t7,\n\t8,\n\t9,\n\t10,\n\t12,\n\tTURNING_MAX_PRIEST_LEVEL,\n",
+      "mutated": "\t1,\n\t2,\n\t3,\n\t4,\n\t5,\n\t6,\n\t7,\n\t8,\n\t9,\n\t10,\n\t11,\n\tTURNING_MAX_PRIEST_LEVEL,\n",
       "catches": "a column heading read one level early, which is the defect this table was rewritten for"
     },
     {

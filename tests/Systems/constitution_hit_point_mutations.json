@@ -45,8 +45,8 @@
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "\treturn LevelUpSystem::HitDieValue{ dieValue, adjustment, std::max(1, dieValue + adjustment) };",
-      "mutated": "\treturn LevelUpSystem::HitDieValue{ dieValue, adjustment, dieValue + adjustment };",
+      "original": "\treturn LevelUpSystem::HitDieValue{\n\t\tdieValue,\n\t\tadjustment,\n\t\tstd::max(1, dieValue + adjustment),\n\t};",
+      "mutated": "\treturn LevelUpSystem::HitDieValue{\n\t\tdieValue,\n\t\tadjustment,dieValue + adjustment,\n\t};",
       "catches": "a hit die yielding less than 1"
     }
   ]

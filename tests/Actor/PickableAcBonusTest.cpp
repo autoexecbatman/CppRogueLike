@@ -63,7 +63,11 @@ TEST(PickableAcBonus, MagicalHelm_Brilliance_MatchesTheItemTheGameShips)
 	const int shippedBonus = items.at("helm_of_brilliance").at("effectBonus").get<int>();
 	EXPECT_EQ(shippedBonus, 2) << "the shipped helm is no longer the book's +2 helm";
 
-	const ItemBehavior behavior = MagicalHelm{ MagicalEffect::BRILLIANCE, shippedBonus, HelmCommand::EMPOWERED };
+	const ItemBehavior behavior = MagicalHelm{
+		MagicalEffect::BRILLIANCE,
+		shippedBonus,
+		HelmCommand::EMPOWERED,
+	};
 	EXPECT_EQ(get_item_ac_bonus(behavior), -2);
 }
 

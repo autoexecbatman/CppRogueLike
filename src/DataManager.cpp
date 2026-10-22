@@ -137,7 +137,7 @@ StrengthAttributes strength_row_from(const nlohmann::json& item)
 			bands.at("unencumberedTo").get<int>(),
 			bands.at("lightTo").get<int>(),
 			bands.at("moderateTo").get<int>(),
-			bands.at("heavyTo").get<int>()
+			bands.at("heavyTo").get<int>(),
 		};
 	}
 	return strength;

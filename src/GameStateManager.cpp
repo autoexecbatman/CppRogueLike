@@ -47,11 +47,13 @@ void save_rooms(const std::vector<DungeonRoom>& rooms, json& output)
 	output["rooms"] = json::array();
 	for (const auto& room : rooms)
 	{
-		output["rooms"].push_back({ { "col", room.col },
+		output["rooms"].push_back({
+			{ "col", room.col },
 			{ "row", room.row },
 			{ "width", room.width },
 			{ "height", room.height },
-			{ "type", static_cast<int>(room.type) } });
+			{ "type", static_cast<int>(room.type) },
+		});
 	}
 }
 
@@ -185,14 +187,17 @@ void save_decorations(const std::vector<std::unique_ptr<Decoration>>& decoration
 	for (const auto& decoration : decorations)
 	{
 		assert(decoration && "save_decorations: the decoration list holds a null entry");
-		const nlohmann::json position{ { "x", decoration->position.x }, { "y", decoration->position.y } };
+		const nlohmann::json position{
+			{ "x", decoration->position.x },
+			{ "y", decoration->position.y },
+		};
 		const nlohmann::json record{
 			{ "position", position },
 			{ "tile", TileRefJson::encode_tile(decoration->tile) },
 			{ "name", decoration->name },
 			{ "hp", decoration->hp },
 			{ "lootTableKey", decoration->lootTableKey },
-			{ "isBroken", decoration->isBroken }
+			{ "isBroken", decoration->isBroken },
 		};
 		output["decorations"].push_back(record);
 	}
@@ -206,7 +211,10 @@ void load_decorations(const json& source, std::vector<std::unique_ptr<Decoration
 	for (const auto& record : source.at("decorations"))
 	{
 		auto decoration = std::make_unique<Decoration>();
-		decoration->position = Vector2D{ record.at("position").at("x").get<int>(), record.at("position").at("y").get<int>() };
+		decoration->position = Vector2D{
+			record.at("position").at("x").get<int>(),
+			record.at("position").at("y").get<int>(),
+		};
 		decoration->tile = TileRefJson::parse_tile(record.at("tile"));
 		decoration->name = record.at("name").get<std::string>();
 		decoration->hp = record.at("hp").get<int>();
@@ -319,7 +327,10 @@ LoadOutcome GameStateManager::load_all(GameContext& ctx)
 		if (!delete_save_file())
 		{
 			ctx.messageSystem->log(std::format("Load refused, save could not be deleted: {}", refusal.what()));
-			return LoadOutcome{ LoadOutcomeKind::REFUSED_AND_KEPT, refusal.what() };
+			return LoadOutcome{
+				LoadOutcomeKind::REFUSED_AND_KEPT,
+				refusal.what(),
+			};
 		}
 		ctx.messageSystem->log(std::format("Load refused, save deleted: {}", refusal.what()));
 		return LoadOutcome{ LoadOutcomeKind::REFUSED, refusal.what() };

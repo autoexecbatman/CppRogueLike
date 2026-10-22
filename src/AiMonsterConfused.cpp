@@ -43,7 +43,7 @@ void AiMonsterConfused::update(Creature& owner, GameContext& ctx)
 {
 	return Vector2D{
 		ctx.dice->roll(MIN_DIRECTION, MAX_DIRECTION),
-		ctx.dice->roll(MIN_DIRECTION, MAX_DIRECTION)
+		ctx.dice->roll(MIN_DIRECTION, MAX_DIRECTION),
 	};
 }
 

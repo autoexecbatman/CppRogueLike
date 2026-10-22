@@ -59,7 +59,7 @@ inline constexpr std::array<Ability, 6> ALL_ABILITY{
 	Ability::CONSTITUTION,
 	Ability::INTELLIGENCE,
 	Ability::WISDOM,
-	Ability::CHARISMA
+	Ability::CHARISMA,
 };
 
 // How many the six are, for anything that holds one value per ability.

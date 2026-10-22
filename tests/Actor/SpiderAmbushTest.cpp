@@ -86,7 +86,10 @@ protected:
 
 		// Lying in wait, with ten rounds of the ambush left.
 		auto ambusher = std::make_unique<AiSpider>();
-		ambusher->load(json{ { "isAmbushing", true }, { "ambushEndTime", expiry_time(0, 10) } });
+		ambusher->load(json{
+			{ "isAmbushing", true },
+			{ "ambushEndTime", expiry_time(0, 10) },
+		});
 		spider.ai = std::move(ambusher);
 	}
 
@@ -135,7 +138,10 @@ protected:
 	GameContext ctx;
 	Map map{ 20, 20 };
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 4, 5 }) };
-	Creature spider{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "small spider", ColorPairId::WHITE_BLACK } };
+	Creature spider{
+		Vector2D{ 5, 5 },
+		ActorData{ TileRef{}, "small spider", ColorPairId::WHITE_BLACK },
+	};
 };
 
 // The first bite hits for four and a surprise roll of 10 leaves the player ready. A

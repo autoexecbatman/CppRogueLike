@@ -149,7 +149,8 @@ void TargetingMenu::draw_cursor(GameContext& ctx) const
 			static_cast<float>(screenPixelX),
 			static_cast<float>(screenPixelY),
 			static_cast<float>(tileSize),
-			static_cast<float>(tileSize) },
+			static_cast<float>(tileSize),
+		},
 		2.0f,
 		Color{ 255, 255, 50, ringAlpha });
 }

@@ -81,7 +81,11 @@ TEST(MonsterSpawnTableTest, ACustomMonsterJoinsTheTable)
 	MonsterRegistry monsters{};
 	monsters.load(Paths::MONSTERS);
 
-	[[maybe_unused]] const std::string key = monsters.add_custom(MonsterParams{ .name = "Registry Beast", .baseWeight = 10, .levelMinimum = 1 });
+	[[maybe_unused]] const std::string key = monsters.add_custom(MonsterParams{
+		.name = "Registry Beast",
+		.baseWeight = 10,
+		.levelMinimum = 1,
+	});
 
 	EXPECT_TRUE(lists(MonsterFactory::get_current_distribution(DUNGEON_LEVEL, monsters), "Registry Beast"));
 }

@@ -451,7 +451,13 @@ TEST(InventoryCloseAfterUseTest, EveryTargetedScrollSaysItTargetsCreatures)
 {
 	MockGameContext mock{};
 	GameContext ctx = mock.to_game_context();
-	for (const char* scrollKey : { "scroll_confusion", "scroll_fireball", "scroll_hold_person", "scroll_lightning", "scroll_sleep" })
+	for (const char* scrollKey : {
+			 "scroll_confusion",
+			 "scroll_fireball",
+			 "scroll_hold_person",
+			 "scroll_lightning",
+			 "scroll_sleep",
+		 })
 	{
 		const auto scroll = ItemCreator::create(scrollKey, Vector2D{ 0, 0 }, ctx);
 		EXPECT_TRUE(targets_creatures(*scroll->behavior)) << scrollKey;
@@ -470,7 +476,12 @@ TEST(InventoryCloseAfterUseTest, OnlyTheScrollsAimedAtATileHandOverToTargeting)
 		const auto scroll = ItemCreator::create(scrollKey, Vector2D{ 0, 0 }, ctx);
 		EXPECT_TRUE(hands_over_to_targeting(*scroll->behavior)) << scrollKey;
 	}
-	for (const char* scrollKey : { "scroll_hold_person", "scroll_lightning", "scroll_sleep", "scroll_teleport" })
+	for (const char* scrollKey : {
+			 "scroll_hold_person",
+			 "scroll_lightning",
+			 "scroll_sleep",
+			 "scroll_teleport",
+		 })
 	{
 		const auto scroll = ItemCreator::create(scrollKey, Vector2D{ 0, 0 }, ctx);
 		EXPECT_FALSE(hands_over_to_targeting(*scroll->behavior)) << scrollKey;

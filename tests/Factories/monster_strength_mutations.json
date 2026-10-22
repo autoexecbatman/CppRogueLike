@@ -51,8 +51,8 @@
     },
     {
       "file": "src/MonsterRegistry.cpp",
-      "original": "\t\t{ \"exceptional\", strength->exceptional }\n",
-      "mutated": "\t\t{ \"exceptional\", 0 }\n",
+      "original": "\t\t{ \"exceptional\", strength->exceptional },\n",
+      "mutated": "\t\t{ \"exceptional\",0 },\n",
       "catches": "a save that drops the percentile, so 18/00 comes back an 18"
     },
     {

@@ -253,7 +253,7 @@ void Creature::load(const json& source)
 			lifespanRecord.at("startingAge").get<int>(),
 			lifespanRecord.at("maximumAge").get<int>(),
 			lifespanRecord.at("yearsLived").get<int>(),
-			lifespanRecord.at("magicalYears").get<int>()
+			lifespanRecord.at("magicalYears").get<int>(),
 		};
 	}
 	spellcasting = parse_spellcasting(source.at("spellcasting"));
@@ -414,7 +414,7 @@ void Creature::save(json& output)
 			  { "startingAge", lifespan->startingAge },
 			  { "maximumAge", lifespan->maximumAge },
 			  { "yearsLived", lifespan->yearsLived },
-			  { "magicalYears", lifespan->magicalYears }
+			  { "magicalYears", lifespan->magicalYears },
 		  }
 		: json(nullptr);
 	output["spellcasting"] = encode_spellcasting(spellcasting);
@@ -504,7 +504,10 @@ void Creature::save(json& output)
 		json savesJson = json::array();
 		for (const OpponentSave& save : buff.opponentSaves)
 		{
-			savesJson.push_back(json{ { "opponent", save.opponent }, { "isMade", save.isMade } });
+			savesJson.push_back(json{
+				{ "opponent", save.opponent },
+				{ "isMade", save.isMade },
+			});
 		}
 		buffJson["opponentSaves"] = savesJson;
 		buffsJson.push_back(buffJson);
@@ -517,7 +520,10 @@ void Creature::save(json& output)
 		assert(equipped.item && "Creature::save: an equipment entry holds no item");
 		json itemJson;
 		equipped.item->save(itemJson);
-		equippedJson.push_back(json{ { "slot", encode_equipment_slot(equipped.slot) }, { "item", itemJson } });
+		equippedJson.push_back(json{
+			{ "slot", encode_equipment_slot(equipped.slot) },
+			{ "item", itemJson },
+		});
 	}
 	output["equippedItems"] = equippedJson;
 }
@@ -566,7 +572,12 @@ void Creature::update_armor_class(GameContext& ctx)
 		breakdown.temporary));
 
 	// Name each contributing item, skipping the slots that gave nothing.
-	const ArmorClassSource sources[] = { breakdown.armor, breakdown.shield, breakdown.ring, breakdown.helm };
+	const ArmorClassSource sources[] = {
+		breakdown.armor,
+		breakdown.shield,
+		breakdown.ring,
+		breakdown.helm,
+	};
 	for (const ArmorClassSource& source : sources)
 	{
 		if (!source.name.empty())
@@ -1499,7 +1510,11 @@ bool Creature::toggle_weapon(uint64_t itemUniqueId, EquipmentSlot preferredSlot,
 	if (is_item_equipped(itemUniqueId))
 	{
 		// Find which slot and unequip
-		for (auto slot : { EquipmentSlot::RIGHT_HAND, EquipmentSlot::LEFT_HAND, EquipmentSlot::MISSILE_WEAPON })
+		for (auto slot : {
+				 EquipmentSlot::RIGHT_HAND,
+				 EquipmentSlot::LEFT_HAND,
+				 EquipmentSlot::MISSILE_WEAPON,
+			 })
 		{
 			Item* equipped = get_equipped_item(slot);
 			if (equipped && equipped->uniqueId == itemUniqueId)

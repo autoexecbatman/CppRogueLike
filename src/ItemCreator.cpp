@@ -56,7 +56,7 @@ ItemBehavior create_behavior(const ItemParams& params)
 			params.durationUnit,
 			params.consumableBuffType,
 			params.application,
-			params.agesYears
+			params.agesYears,
 		};
 	}
 
@@ -70,7 +70,7 @@ ItemBehavior create_behavior(const ItemParams& params)
 			params.confuseTurns,
 			params.consumableBuffType,
 			params.duration,
-			params.durationUnit
+			params.durationUnit,
 		};
 	}
 
@@ -86,7 +86,12 @@ ItemBehavior create_behavior(const ItemParams& params)
 
 	case PickableType::WEAPON:
 	{
-		return Weapon{ params.ranged, params.handRequirement, params.weaponSize, params.strengthRating };
+		return Weapon{
+			params.ranged,
+			params.handRequirement,
+			params.weaponSize,
+			params.strengthRating,
+		};
 	}
 
 	case PickableType::SHIELD:
@@ -106,7 +111,11 @@ ItemBehavior create_behavior(const ItemParams& params)
 
 	case PickableType::MAGICAL_HELM:
 	{
-		return MagicalHelm{ params.effect, params.effectBonus, HelmCommand::DORMANT };
+		return MagicalHelm{
+			params.effect,
+			params.effectBonus,
+			HelmCommand::DORMANT,
+		};
 	}
 
 	case PickableType::MAGICAL_RING:

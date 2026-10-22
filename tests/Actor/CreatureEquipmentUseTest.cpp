@@ -116,7 +116,11 @@ TEST_F(CreatureEquipmentUseTest, TogglingASwordPutsItInTheHandAskedFor)
 // A bow goes to the missile slot whichever hand was asked for.
 TEST_F(CreatureEquipmentUseTest, TogglingABowPutsItInTheMissileSlot)
 {
-	orc->set_body_plan({ EquipmentSlot::RIGHT_HAND, EquipmentSlot::BODY, EquipmentSlot::MISSILE_WEAPON });
+	orc->set_body_plan({
+		EquipmentSlot::RIGHT_HAND,
+		EquipmentSlot::BODY,
+		EquipmentSlot::MISSILE_WEAPON,
+	});
 	// A short bow has no strength rating, so the orc's arm is not what this measures.
 	Item& bow = carry("short_bow");
 	ASSERT_TRUE(orc->can_equip(bow, EquipmentSlot::MISSILE_WEAPON)) << "the slot refuses the bow, so the toggle is never reached";
@@ -183,7 +187,11 @@ TEST_F(CreatureEquipmentUseTest, AnOverloadedCreatureKeepsWhatItCannotPutOn)
 
 TEST_F(CreatureEquipmentUseTest, AnOverloadedCreatureKeepsTheBowItCannotDraw)
 {
-	orc->set_body_plan({ EquipmentSlot::RIGHT_HAND, EquipmentSlot::BODY, EquipmentSlot::MISSILE_WEAPON });
+	orc->set_body_plan({
+		EquipmentSlot::RIGHT_HAND,
+		EquipmentSlot::BODY,
+		EquipmentSlot::MISSILE_WEAPON,
+	});
 	carry("plate_mail");
 	Item& bow = carry("composite_bow");
 	auto taken = InventoryOperations::remove_item(orc->inventoryData, bow);

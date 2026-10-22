@@ -127,7 +127,10 @@ protected:
 	GameContext ctx;
 	Map map{ 20, 20 };
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 4, 5 }) };
-	Creature spinner{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "web weaver", ColorPairId::WHITE_BLACK } };
+	Creature spinner{
+		Vector2D{ 5, 5 },
+		ActorData{ TileRef{}, "web weaver", ColorPairId::WHITE_BLACK },
+	};
 };
 
 // The spinner saves against the spell on a 12 and fails. A hit is queued behind it, so
@@ -148,7 +151,12 @@ TEST_F(WebSpinnerSanctuaryTest, SanctuaryHoldsOffASpinnerThatFailsToSave)
 TEST_F(WebSpinnerSanctuaryTest, ASpinnerThatSavesBitesAsUsual)
 {
 	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
-	script({ 20, 20, 4, RandomDice::HIGHEST }); // the last is the player's venom save, made
+	script({
+		20,
+		20,
+		4,
+		RandomDice::HIGHEST,
+	}); // the last is the player's venom save, made
 
 	EXPECT_EQ(hp_lost_to_one_turn(), 4) << "1d4 at four after a made save";
 }
@@ -168,7 +176,11 @@ TEST_F(WebSpinnerSanctuaryTest, NoVenomFromASpinnerTurnedAway)
 // No sanctuary, no save: the first roll is the attack.
 TEST_F(WebSpinnerSanctuaryTest, AnUnwardedPlayerIsBittenWithoutASave)
 {
-	script({ 20, 4, RandomDice::HIGHEST }); // the attack, the 1d4, then the venom save, made
+	script({
+		20,
+		4,
+		RandomDice::HIGHEST,
+	}); // the attack, the 1d4, then the venom save, made
 
 	EXPECT_EQ(hp_lost_to_one_turn(), 4) << "a save was rolled against a player without sanctuary";
 }

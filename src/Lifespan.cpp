@@ -34,27 +34,75 @@ std::optional<LifespanTable> lifespan_table(PlayerRaceState race)
 	{
 	case PlayerRaceState::DWARF:
 	{
-		return LifespanTable{ 40, DiceExpr{ 5, 6, 0 }, 250, DiceExpr{ 2, 100, 0 }, 125, 167, 250 };
+		return LifespanTable{
+			40,
+			DiceExpr{ 5, 6, 0 },
+			250,
+			DiceExpr{ 2, 100, 0 },
+			125,
+			167,
+			250,
+		};
 	}
 	case PlayerRaceState::ELF:
 	{
-		return LifespanTable{ 100, DiceExpr{ 5, 6, 0 }, 350, DiceExpr{ 4, 100, 0 }, 175, 233, 350 };
+		return LifespanTable{
+			100,
+			DiceExpr{ 5, 6, 0 },
+			350,
+			DiceExpr{ 4, 100, 0 },
+			175,
+			233,
+			350,
+		};
 	}
 	case PlayerRaceState::GNOME:
 	{
-		return LifespanTable{ 60, DiceExpr{ 3, 12, 0 }, 200, DiceExpr{ 3, 100, 0 }, 100, 133, 200 };
+		return LifespanTable{
+			60,
+			DiceExpr{ 3, 12, 0 },
+			200,
+			DiceExpr{ 3, 100, 0 },
+			100,
+			133,
+			200,
+		};
 	}
 	case PlayerRaceState::HALFELF:
 	{
-		return LifespanTable{ 15, DiceExpr{ 1, 6, 0 }, 125, DiceExpr{ 3, 20, 0 }, 62, 83, 125 };
+		return LifespanTable{
+			15,
+			DiceExpr{ 1, 6, 0 },
+			125,
+			DiceExpr{ 3, 20, 0 },
+			62,
+			83,
+			125,
+		};
 	}
 	case PlayerRaceState::HALFLING:
 	{
-		return LifespanTable{ 20, DiceExpr{ 3, 4, 0 }, 100, DiceExpr{ 1, 100, 0 }, 50, 67, 100 };
+		return LifespanTable{
+			20,
+			DiceExpr{ 3, 4, 0 },
+			100,
+			DiceExpr{ 1, 100, 0 },
+			50,
+			67,
+			100,
+		};
 	}
 	case PlayerRaceState::HUMAN:
 	{
-		return LifespanTable{ 15, DiceExpr{ 1, 4, 0 }, 90, DiceExpr{ 2, 20, 0 }, 45, 60, 90 };
+		return LifespanTable{
+			15,
+			DiceExpr{ 1, 4, 0 },
+			90,
+			DiceExpr{ 2, 20, 0 },
+			45,
+			60,
+			90,
+		};
 	}
 	case PlayerRaceState::NONE:
 	{
