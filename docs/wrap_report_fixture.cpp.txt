@@ -1,0 +1,65 @@
+// Fixture for docs/wrap_report.py --self-test. Never compiled.
+// An EXPECT <class> line names the class of the statement that starts on the
+// next line, which the limit must spread over 3 or more lines. The two long
+// comment lines at the end carry their own markers, one as a plain comment
+// and one as an example line. Nothing else may be reported.
+
+#include <string>
+
+// EXPECT signature
+void a_function_with_a_long_signature(int firstArgument, int secondArgument, int thirdArgument);
+
+void calls(int value)
+{
+	// EXPECT call
+	some_function_with_a_long_name(firstArgumentValue, secondArgumentValue, value);
+	// EXPECT assert
+	assert(value > 0 && "calls: called with a value at or below zero, which nothing makes");
+	// EXPECT test assertion
+	EXPECT_EQ(some_function_with_a_long_name(firstArgumentValue, value), expectedValue);
+	// EXPECT stream chain
+	stream << "a value of " << value << " and another of " << secondArgumentValue << " and a third of " << thirdArgumentValue << " here";
+	// EXPECT condition
+	if (value > firstArgumentValue && value < secondArgumentValue && value != thirdArgumentValue && value != fourthArgumentValue && value != fifthArgumentValue)
+	{
+		return;
+	}
+	// EXPECT control statement
+	if (some_function_with_a_long_name(firstArgumentValue, secondArgumentValue, value))
+	{
+		return;
+	}
+	// EXPECT assignment
+	const int total = some_function_with_a_long_name(firstArgumentValue, secondArgumentValue, thirdArgumentValue);
+	// EXPECT braced initializer
+	const Position position{ firstArgumentValue + secondArgumentValue, thirdArgumentValue + value, fourthArgumentValue + value };
+	// EXPECT control statement
+	for (int index = some_function_with_a_long_name(firstArgumentValue); index < secondArgumentValue; index += thirdArgumentValue)
+	{
+		short_call(index);
+	}
+	// A short call stays on one line, and a two-line wrap is not a finding.
+	short_call(value);
+	const int twoLines = firstArgumentValue + secondArgumentValue + thirdArgumentValue + value;
+}
+
+class Holder
+{
+private:
+	// EXPECT trailing comment
+	int count{ 0 }; // a trailing comment long enough to push the code past the limit
+
+public:
+	// EXPECT signature
+	void a_member_with_a_long_signature(int firstArgument, int secondArgument, int third);
+};
+
+int returns(int value)
+{
+	// EXPECT return
+	return some_function_with_a_long_name(firstArgumentValue, secondArgumentValue, value);
+}
+
+// A comment line that runs well past the eighty-column limit LONG-COMMENT for the test.
+//   example_call(firstArgumentValue, secondArgumentValue);   // LONG-EXAMPLE runs past 80
+// A short comment is not reported.

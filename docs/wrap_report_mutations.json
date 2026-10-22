@@ -1,0 +1,118 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "python",
+    "docs/wrap_report.py",
+    "--self-test"
+  ],
+  "mutations": [
+    {
+      "file": "docs/wrap_report.py",
+      "original": "if frame[\"kind\"] == \"block\" and frame[\"parens\"] == 0:",
+      "mutated": "if frame[\"kind\"] == \"block\":",
+      "catches": "a ; inside a for header ending the statement"
+    },
+    {
+      "file": "docs/wrap_report.py",
+      "original": "            is_block = frame[\"kind\"] == \"block\" and (",
+      "mutated": "            is_block = True or (",
+      "catches": "an initializer's braces read as a block"
+    },
+    {
+      "file": "docs/wrap_report.py",
+      "original": "(?:#.*|(?:public|private|protected)\\s*:)",
+      "mutated": "(?:#.*)",
+      "catches": "an access label heading the next statement"
+    },
+    {
+      "file": "docs/wrap_report.py",
+      "original": "(?:#.*|(?:public|private|protected)\\s*:)",
+      "mutated": "(?:(?:public|private|protected)\\s*:)",
+      "catches": "a preprocessor line heading the next statement"
+    },
+    {
+      "file": "docs/wrap_report.py",
+      "original": "                if code_width <= LIMIT < width(before_text_lines[line]):",
+      "mutated": "                if False:",
+      "catches": "a wrap a trailing comment forced reported as its code's class"
+    },
+    {
+      "file": "docs/wrap_report.py",
+      "original": "        if len(old) <= 2 and len(new) >= 3:",
+      "mutated": "        if len(old) <= 2 and len(new) >= 2:",
+      "catches": "a two-line wrap reported"
+    },
+    {
+      "file": "docs/wrap_report.py",
+      "original": "                     and not (mask[position] == \" \"\n                              and kept_comments[position] != \" \")]",
+      "mutated": "]",
+      "catches": "a comment line above a statement counted as one of its lines"
+    },
+    {
+      "file": "docs/wrap_report.py",
+      "original": "    if re.match(r\"(?:static_)?assert\\s*\\(\", flat):",
+      "mutated": "    if False:",
+      "catches": "an assert classed as a call"
+    },
+    {
+      "file": "docs/wrap_report.py",
+      "original": "    if re.match(r\"(?:EXPECT|ASSERT)_\\w+\\s*\\(\", flat):",
+      "mutated": "    if False:",
+      "catches": "a test assertion classed as a call"
+    },
+    {
+      "file": "docs/wrap_report.py",
+      "original": "        if re.search(r\"&&|\\|\\|\", flat):\n            return \"condition\"",
+      "mutated": "        if False:\n            return \"condition\"",
+      "catches": "a condition joined by && classed as a control statement"
+    },
+    {
+      "file": "docs/wrap_report.py",
+      "original": "    if re.match(r\"return\\b\", flat):",
+      "mutated": "    if False:",
+      "catches": "a return classed by its expression"
+    },
+    {
+      "file": "docs/wrap_report.py",
+      "original": "    if \"<<\" in flat:",
+      "mutated": "    if False:",
+      "catches": "a stream chain classed as a call"
+    },
+    {
+      "file": "docs/wrap_report.py",
+      "original": "    if not is_expression and (is_definition or DECLARATION.match(flat)):",
+      "mutated": "    if False:",
+      "catches": "a signature classed as a call"
+    },
+    {
+      "file": "docs/wrap_report.py",
+      "original": "    if first_brace != -1 and (first_paren == -1 or first_brace < first_paren):",
+      "mutated": "    if False:",
+      "catches": "a braced initializer classed as an assignment"
+    },
+    {
+      "file": "docs/wrap_report.py",
+      "original": "    if ASSIGNMENT.search(flat):\n        return \"assignment\"",
+      "mutated": "    if False:\n        return \"assignment\"",
+      "catches": "an assignment classed as a call"
+    },
+    {
+      "file": "docs/wrap_report.py",
+      "original": "        if line.strip().startswith(\"//\") and width(line) > LIMIT:",
+      "mutated": "        if line.strip().startswith(\"//\") and width(line) > LIMIT + 10:",
+      "catches": "a comment line just over the limit missed"
+    },
+    {
+      "file": "docs/wrap_report.py",
+      "original": "                          \"is_example\": bool(re.match(r\"\\s*//\\s{2,}\\S\",",
+      "mutated": "                          \"is_example\": bool(re.match(r\"\\s*//\\s{9,}\\S\",",
+      "catches": "an example line counted as plain comment"
+    },
+    {
+      "file": "docs/wrap_report.py",
+      "original": "    \"ColumnLimit\": \"80\",",
+      "mutated": "    \"ColumnLimit\": \"120\",",
+      "catches": "the limit itself moved"
+    }
+  ]
+}
