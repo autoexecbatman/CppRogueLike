@@ -439,6 +439,8 @@ target_link_libraries(test_exe
 if(MSVC)
     target_compile_options(test_exe PRIVATE /W3 /utf-8)
     set_target_properties(test_exe PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:test_exe>")
+    # A non-incremental link keeps the PDB from growing on every link.
+    target_link_options(test_exe PRIVATE $<$<CONFIG:Debug>:/INCREMENTAL:NO>)
 endif()
 
 # Copy tileset BMPs to test build directory (optional - enables tile rendering)
