@@ -58,16 +58,27 @@
 #include "src/Paths.h"
 #include "src/Renderer.h"
 
-// What a child reports. Distinct from the codes an abort or a crash gives.
-inline constexpr int HIDDEN_RENDERER_PASSED = 0;
+// What a child reports. Distinct from 0 and 1, which a child's test runner
+// returns, and from 3, which an abort gives; so PASSED is reached only at the
+// end of a body.
 inline constexpr int HIDDEN_RENDERER_NO_OPENGL_DRIVER = 40;
 inline constexpr int HIDDEN_RENDERER_WINDOW_NOT_READY = 41;
 inline constexpr int HIDDEN_RENDERER_FONT_FELL_BACK = 42;
 inline constexpr int HIDDEN_RENDERER_EXPECTATION_FAILED = 43;
+inline constexpr int HIDDEN_RENDERER_PASSED = 44;
+static_assert(
+	HIDDEN_RENDERER_PASSED != 0 && HIDDEN_RENDERER_PASSED != 1 &&
+		HIDDEN_RENDERER_PASSED != 3,
+	"a pass must be a code no runner exit or abort can give");
 
 // What a test says when it skips for the missing driver.
 inline constexpr std::string_view NO_OPENGL_DRIVER_REASON =
 	"no OpenGL driver on this machine (GLFW error 65542, API unavailable), so a raylib window cannot open";
+
+// What the harness says when a child exits 0, which no finished body gives.
+inline constexpr std::string_view CHILD_NEVER_RAN_ITS_BODY_REASON =
+	"the child exited 0 without finishing its body: its re-run of the TEST "
+	"skipped or returned before reaching exit_code_in_child";
 
 // The window's size: twenty tiles by fourteen at the game's 64-pixel tiles, enough for
 // every menu to lay out. Hidden, so nothing appears on the desktop.
@@ -177,7 +188,8 @@ public:
 // A child body that opens a renderer, closes it, and passes: whether one can be built here.
 //
 // Example:
-//   exit_code_in_child(&open_and_close_hidden_renderer); // -> 0 locally, 40 on CI
+//   exit_code_in_child(&open_and_close_hidden_renderer);
+//   // -> 44 locally, 40 on CI
 [[noreturn]] inline void open_and_close_hidden_renderer()
 {
 	{
@@ -206,13 +218,18 @@ public:
 };
 
 // Runs a child body in its own process and returns the code it exited with.
+// A 0 is a failure: the child re-runs the whole TEST, and a re-run that skips
+// or returns before this call exits 0 without running the body.
 //
 // Example:
-//   exit_code_in_child(&open_and_close_hidden_renderer); // -> 0, or 40 with no driver
+//   exit_code_in_child(&open_and_close_hidden_renderer);
+//   // -> 44, or 40 with no driver
+//   exit_code_in_child(&body); // its re-run skipped first: -> 0, a failure
 inline int exit_code_in_child(void (*childBody)())
 {
 	int childExitCode = -1;
 	EXPECT_EXIT(childBody(), RecordExitCode{ &childExitCode }, "");
+	EXPECT_NE(childExitCode, 0) << CHILD_NEVER_RAN_ITS_BODY_REASON;
 	return childExitCode;
 }
 

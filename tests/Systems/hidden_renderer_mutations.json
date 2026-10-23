@@ -1,0 +1,41 @@
+{
+    "cwd": "E:/repo/C++RogueLike",
+    "test_command": [
+        "powershell",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tests/run_suite.ps1",
+        "-Configuration",
+        "Debug",
+        "-Filter",
+        "--gtest_filter=HeadlessRendererTest.*:SellMenuTest.*:RunEndTest.*:FrameBoundaryTest.*:InventoryCloseAfterUseTest.*:LoadRefusalMenuTest.*:SpellcastingMenuTest.*:PotionOfSpeedMenuTest.*:HelmCommandWordMenuTest.*:HelmRechargeMenuTest.*"
+    ],
+    "mutations": [
+        {
+            "file": "tests/mocks/HiddenRenderer.h",
+            "original": "inline constexpr int HIDDEN_RENDERER_PASSED = 44;\nstatic_assert(\n\tHIDDEN_RENDERER_PASSED != 0 && HIDDEN_RENDERER_PASSED != 1 &&\n\t\tHIDDEN_RENDERER_PASSED != 3,\n\t\"a pass must be a code no runner exit or abort can give\");",
+            "mutated": "inline constexpr int HIDDEN_RENDERER_PASSED = 0;",
+            "catches": "a pass read back as the 0 a child gives when its re-run skips before the body"
+        },
+        {
+            "file": "tests/mocks/HiddenRenderer.h",
+            "original": "inline constexpr int HIDDEN_RENDERER_PASSED = 44;",
+            "mutated": "inline constexpr int HIDDEN_RENDERER_PASSED = 1;",
+            "catches": "a pass that a child whose re-run failed a check also gives"
+        },
+        {
+            "file": "tests/mocks/HiddenRenderer.h",
+            "original": "\tEXPECT_NE(childExitCode, 0) << CHILD_NEVER_RAN_ITS_BODY_REASON;\n",
+            "mutated": "",
+            "catches": "a child that never ran its body accepted wherever the caller only checks for a missing driver"
+        },
+        {
+            "file": "tests/mocks/HiddenRenderer.h",
+            "original": "\tEXPECT_NE(childExitCode, 0)",
+            "mutated": "\tEXPECT_NE(childExitCode, 1)",
+            "catches": "the never-ran check aimed at a code other than the 0 a skipped re-run gives"
+        }
+    ]
+}
