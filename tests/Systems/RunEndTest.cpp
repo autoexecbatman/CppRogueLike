@@ -151,7 +151,7 @@ void load_the_games_renderer(Game& game)
 	exit_unless(
 		typeid(*game.menus.back()) == typeid(DeathMenu),
 		"the death screen is not what is left on the stack");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 // The run is won inside a menu with another open beneath it: after the one tick, the
@@ -173,7 +173,7 @@ void load_the_games_renderer(Game& game)
 	exit_unless(
 		typeid(*game.menus.back()) == typeid(NotificationMenu),
 		"the victory screen is not what is left on the stack");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 // The death screen itself ticks with the run already lost; the run ended on an earlier
@@ -199,7 +199,7 @@ void load_the_games_renderer(Game& game)
 	exit_unless(
 		!game.menus.empty() && game.menus.back().get() == deathScreen,
 		"the death screen was replaced by its own outcome");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 // No menu is open; the player waits and a monster's turn in that round kills them. The
@@ -236,7 +236,7 @@ void load_the_games_renderer(Game& game)
 		game.menus.size() == 1 &&
 			typeid(*game.menus.back()) == typeid(DeathMenu),
 		"the death screen is not on the stack after the fatal round");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 // Runs a child body and turns its exit code into a skip or a result.

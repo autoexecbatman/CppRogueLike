@@ -495,7 +495,7 @@ namespace
 	exit_unless(
 		wizard.spellcasting.memorizedSpells == Keys{ "shield" },
 		"casting one shield did not leave exactly the other");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 } // namespace

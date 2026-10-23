@@ -93,7 +93,7 @@ load_game_on_a_refused_save_reports_it_and_returns_to_the_menu()
 		typeid(*game.menus.back()) == typeid(ListMenu) &&
 			game.menus.back()->run,
 		"closing the notice did not leave a running main menu");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 } // namespace
 

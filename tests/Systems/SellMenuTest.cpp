@@ -90,7 +90,7 @@ constexpr int SELLER_STRENGTH = 10;
 	exit_unless(
 		shopkeeper.get_gold() == 0,
 		"the shopkeeper did not pay the price");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 // Two items, Down pressed twice: the cursor wraps from the second row back to the
@@ -140,7 +140,7 @@ constexpr int SELLER_STRENGTH = 10;
 	exit_unless(
 		seller.inventoryData.items.front()->itemKey == "mana_potion",
 		"the cursor did not wrap: the second item was sold");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 } // namespace
 

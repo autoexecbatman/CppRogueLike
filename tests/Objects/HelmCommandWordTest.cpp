@@ -321,7 +321,7 @@ namespace
 	exit_unless(
 		ctx.gameState->get_time() > timeBefore,
 		"speaking the word spent no turn");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 } // namespace

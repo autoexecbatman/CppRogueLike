@@ -91,7 +91,7 @@ void press_mouse_button(int raylibButton)
 	exit_unless(
 		!IsKeyPressed(KEY_ESCAPE),
 		"Escape is still a press after the tick that read it, so the next reader takes it again");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 // The callback a context menu runs in these tests: it records that a choice
@@ -144,7 +144,7 @@ struct ChoiceRecorder
 	exit_unless(
 		!IsMouseButtonPressed(MOUSE_BUTTON_LEFT),
 		"the click is still a press after the tick that read it, so the next reader takes it again");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 } // namespace
 

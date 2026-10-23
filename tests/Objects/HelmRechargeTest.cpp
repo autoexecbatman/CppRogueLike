@@ -251,7 +251,7 @@ void choose_first_entry_from_the_cast_menu(
 	exit_unless(
 		!offers("teleport", *mock.player, ctx.gameState->get_time()),
 		"the menu offers the helm's teleport again straight after its use");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 // The menu lists as of the clock: a day after a use, it offers the helm and casting spends
@@ -279,7 +279,7 @@ void choose_first_entry_from_the_cast_menu(
 		std::get<MagicalHelm>(*helm.behavior).rechargedAt ==
 			aDayLater + DAY_IN_TIME_UNITS,
 		"the menu a day later did not cast the helm's teleport");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 // The ring is at will: cast from the menu, it is offered again at once.
@@ -307,7 +307,7 @@ void choose_first_entry_from_the_cast_menu(
 	exit_unless(
 		offers("invisibility", *mock.player, ctx.gameState->get_time()),
 		"the ring was not offered again after its cast");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 } // namespace

@@ -13,8 +13,9 @@
 // arrives just before that abort, and exits with HIDDEN_RENDERER_NO_OPENGL_DRIVER
 // instead, so the parent can skip with the reason rather than fail.
 //
-// Usage. The test's body is a function that runs in the child and ends in an exit
-// code; the parent reads the code and skips, passes or fails on it:
+// Usage. The test's body is a function that runs in the child and ends with
+// finish_the_child, the only way it passes; the parent reads the exit code and
+// skips, passes or fails on it:
 //
 //   [[noreturn]] void sell_through_the_menu()               // runs in the child
 //   {
@@ -23,8 +24,8 @@
 //       GameContext ctx = mock.to_game_context();
 //       ctx.renderer = &hidden.renderer;                    // only this test has one
 //       ...                                                 // build the menu, drive it
-//       exit_unless(sold, "the menu did not sell the item"); // stdout, then exit 43
-//       std::_Exit(HIDDEN_RENDERER_PASSED);
+//       exit_unless(sold, "not sold"); // stderr, then exit 43
+//       finish_the_child(); // 44, or 43 on a failure
 //   }
 //
 //   TEST(SellMenuTest, ...)
@@ -37,16 +38,20 @@
 //       EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED);    // the child's message says why
 //   }
 //
-// A GoogleTest expectation made inside the child is not reported to the parent, so a
-// child checks with exit_unless. An assertion probe opens a renderer in a first child
-// with open_and_close_hidden_renderer to learn whether it can, and only then expects
-// the death; without the first, a missing driver reads as a probe matching the wrong
-// message.
+// A failing code shows the child's stderr in the parent's failure: an
+// exit_unless message, an assert's text, or a GoogleTest expectation made in
+// the child, which finish_the_child writes there.
+//
+// An assertion probe opens a renderer in a first child with
+// open_and_close_hidden_renderer to learn whether it can, and only then expects
+// the death; without the first, a missing driver reads as a probe matching the
+// wrong message.
 //
 // The renderer's colour pairs are not filled - only Renderer::init does that, and init
 // opens a full-screen window of its own - so text draws in the empty pair. Nothing a
 // test checks reads a colour.
 
+#include <cassert>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
@@ -59,8 +64,8 @@
 #include "src/Renderer.h"
 
 // What a child reports. Distinct from 0 and 1, which a child's test runner
-// returns, and from 3, which an abort gives; so PASSED is reached only at the
-// end of a body.
+// returns, and from 3, which an abort gives; so PASSED comes only from
+// finish_the_child.
 inline constexpr int HIDDEN_RENDERER_NO_OPENGL_DRIVER = 40;
 inline constexpr int HIDDEN_RENDERER_WINDOW_NOT_READY = 41;
 inline constexpr int HIDDEN_RENDERER_FONT_FELL_BACK = 42;
@@ -108,9 +113,9 @@ inline void exit_on_missing_opengl(int logLevel, const char* text, va_list args)
 	}
 }
 
-// In a child, a check that ends the child when it fails: the message to stdout, then
-// exit 43. Stdout because a death test keeps a child's stderr to itself when the exit
-// code is accepted, which this fixture's always is.
+// In a child, a check that ends the child when it fails: the message to
+// stderr, then exit 43. Stderr because the parent's failure for a 43 carries
+// the child's stderr.
 //
 // Example:
 //   exit_unless(player.get_gold() == 12, "the seller was not paid"); // passes, returns
@@ -120,13 +125,54 @@ inline void exit_unless(bool holds, std::string_view what)
 	if (!holds)
 	{
 		std::fprintf(
-			stdout,
+			stderr,
 			"child check failed: %.*s\n",
 			static_cast<int>(what.size()),
 			what.data());
-		std::fflush(stdout);
+		std::fflush(stderr);
 		std::_Exit(HIDDEN_RENDERER_EXPECTATION_FAILED);
 	}
+}
+
+// Ends a child body: 44 when nothing failed; otherwise it writes every failure
+// the child recorded to stderr and exits 43. A death-test child forwards no
+// gtest events, so it prints no failure itself, and this is where its text
+// leaves.
+//
+// Example, in a child:
+//   finish_the_child(); // nothing failed: exits 44, prints nothing
+//   ADD_FAILURE() << "late"; finish_the_child(); // exits 43, having printed:
+//   //   <file of the ADD_FAILURE>:<its line>: Failed
+//   //   late
+[[noreturn]] inline void finish_the_child()
+{
+	const ::testing::TestInfo* test =
+		::testing::UnitTest::GetInstance()->current_test_info();
+	assert(test != nullptr && "finish_the_child called outside a test");
+	const ::testing::TestResult& result = *test->result();
+	bool anyFailed = false;
+	for (int partIndex = 0; partIndex < result.total_part_count(); ++partIndex)
+	{
+		const ::testing::TestPartResult& part =
+			result.GetTestPartResult(partIndex);
+		if (part.failed())
+		{
+			// file_name() is null for a part recorded without a location.
+			std::fprintf(
+				stderr,
+				"%s:%d: %s\n",
+				part.file_name() != nullptr ? part.file_name() : "(no file)",
+				part.line_number(),
+				part.message());
+			anyFailed = true;
+		}
+	}
+	std::fflush(stderr);
+	if (anyFailed)
+	{
+		std::_Exit(HIDDEN_RENDERER_EXPECTATION_FAILED);
+	}
+	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
 // A hidden window and a renderer that draws into it, for one child's lifetime. Builds or
@@ -195,10 +241,17 @@ public:
 	{
 		HiddenRenderer hidden{};
 	}
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
-// Hands a child's exit code back to the parent, which decides between a skip and a failure.
+// Hands a child's exit code back to the parent, which decides between a skip
+// and a failure. It accepts only the codes the parent states itself - a pass,
+// the skip, and a 0, whose cause exit_code_in_child names - so on any other
+// code gtest fails and shows the child's stderr.
+//
+// Example:
+//   RecordExitCode{ &code }(44); // -> true, code is 44
+//   RecordExitCode{ &code }(43); // -> false, code is 43; the text is shown
 class RecordExitCode
 {
 private:
@@ -213,7 +266,9 @@ public:
 	bool operator()(int childExitCode) const
 	{
 		*exitCode = childExitCode;
-		return true;
+		return childExitCode == HIDDEN_RENDERER_PASSED ||
+			childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER ||
+			childExitCode == 0;
 	}
 };
 

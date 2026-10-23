@@ -149,7 +149,7 @@ int scroll_row_y(const OpenInventory& open)
 	exit_unless(
 		open.mock.menus.empty(),
 		"the inventory is still open after the teleport");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 // Enter on a healing potion: the potion is drunk and the turn is spent, and the
@@ -170,7 +170,7 @@ int scroll_row_y(const OpenInventory& open)
 	exit_unless(
 		open.mock.menus.size() == 1,
 		"the inventory closed after a healing potion");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 // Right-click on the scroll's row and choose Use: the row menu closes, and so does the
@@ -212,7 +212,7 @@ using_the_teleport_scroll_from_the_row_menu_closes_the_inventory()
 	exit_unless(
 		open.mock.player->inventoryData.items.size() == 1,
 		"the closing inventory acted on the next frame's key");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 // A left click on the scroll's row reads it, and the inventory closes.
@@ -229,7 +229,7 @@ using_the_teleport_scroll_from_the_row_menu_closes_the_inventory()
 	exit_unless(
 		open.mock.menus.empty(),
 		"the inventory is still open after the teleport");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 // The letter beside the scroll's row reads it, and the inventory closes.
@@ -247,7 +247,7 @@ using_the_teleport_scroll_from_the_row_menu_closes_the_inventory()
 	exit_unless(
 		open.mock.menus.empty(),
 		"the inventory is still open after the teleport");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 // A goblin beside the player with more hit points than any scroll deals, so a scroll aimed
@@ -281,7 +281,7 @@ void reading_closes_the_inventory(const char* scrollKey)
 	exit_unless(
 		open.mock.menus.empty(),
 		"the inventory is still open after the scroll was read");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 [[noreturn]] void reading_the_sleep_scroll_closes_the_inventory()
@@ -311,7 +311,7 @@ void reading_closes_the_inventory(const char* scrollKey)
 	exit_unless(
 		open.mock.menus.empty(),
 		"the inventory is still open after the lightning struck");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 // With nothing in range the lightning scroll is not read: it stays in the pack, no turn
@@ -332,7 +332,7 @@ void reading_closes_the_inventory(const char* scrollKey)
 	exit_unless(
 		open.mock.menus.size() == 1,
 		"the inventory closed though nothing was read");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 // Confusion is aimed at a tile: Enter opens the targeting cursor over the inventory, the
@@ -363,7 +363,7 @@ aiming_the_confusion_scroll_closes_the_inventory_when_targeting_ends()
 	exit_unless(
 		open.mock.menus.empty(),
 		"the inventory came back after the scroll was aimed");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 // Fireball is aimed at a tile too, and cancelling the cursor keeps the scroll and the
@@ -390,7 +390,7 @@ aiming_the_confusion_scroll_closes_the_inventory_when_targeting_ends()
 	exit_unless(
 		open.mock.menus.empty(),
 		"the inventory came back after the fireball was cancelled");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 } // namespace
 

@@ -326,7 +326,7 @@ namespace
 	exit_unless(
 		ctx.gameState->get_time() == TIME_OF_DRINKING + ORDINARY_DELAY,
 		"a hasted casting did not cost a full round");
-	std::_Exit(HIDDEN_RENDERER_PASSED);
+	finish_the_child();
 }
 
 } // namespace

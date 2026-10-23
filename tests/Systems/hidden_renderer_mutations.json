@@ -36,6 +36,42 @@
             "original": "\tEXPECT_NE(childExitCode, 0)",
             "mutated": "\tEXPECT_NE(childExitCode, 1)",
             "catches": "the never-ran check aimed at a code other than the 0 a skipped re-run gives"
+        },
+        {
+            "file": "tests/mocks/HiddenRenderer.h",
+            "original": "\t\t\tchildExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER ||\n\t\t\tchildExitCode == 0;",
+            "mutated": "\t\t\tchildExitCode == 0;",
+            "catches": "the missing-driver code read as a failure, which would fail every renderer test on CI instead of skipping it"
+        },
+        {
+            "file": "tests/mocks/HiddenRenderer.h",
+            "original": "\t\t\tchildExitCode == 0;",
+            "mutated": "\t\t\tchildExitCode == 0 ||\n\t\t\tchildExitCode == HIDDEN_RENDERER_EXPECTATION_FAILED;",
+            "catches": "a failed check accepted by the death test, so its text never reaches the parent"
+        },
+        {
+            "file": "tests/mocks/HiddenRenderer.h",
+            "original": "\t\t\tchildExitCode == 0;",
+            "mutated": "\t\t\tchildExitCode == 0 || childExitCode == 3;",
+            "catches": "an assert's abort accepted by the death test, so its text never reaches the parent"
+        },
+        {
+            "file": "tests/mocks/HiddenRenderer.h",
+            "original": "\tif (anyFailed)\n\t{\n\t\tstd::_Exit(HIDDEN_RENDERER_EXPECTATION_FAILED);\n\t}\n\tstd::_Exit(HIDDEN_RENDERER_PASSED);",
+            "mutated": "\tstd::_Exit(HIDDEN_RENDERER_PASSED);",
+            "catches": "a child whose own expectation failed reported as a pass"
+        },
+        {
+            "file": "tests/mocks/HiddenRenderer.h",
+            "original": "\t\t\t\tpart.message());",
+            "mutated": "\t\t\t\t\"\");",
+            "catches": "a child's failed expectation reported without its text"
+        },
+        {
+            "file": "tests/mocks/HiddenRenderer.h",
+            "original": "\t\t\tstderr,\n\t\t\t\"child check failed: %.*s\\n\",",
+            "mutated": "\t\t\tstdout,\n\t\t\t\"child check failed: %.*s\\n\",",
+            "catches": "an exit_unless message written where the parent's failure does not carry it"
         }
     ]
 }
