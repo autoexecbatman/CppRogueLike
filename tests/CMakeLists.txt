@@ -161,6 +161,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/PaletteTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/RoomEditorPaletteTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/TileConfigLoadTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EnumLoadRefusalTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/TypedSizeTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/MutationPlanTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/MenuPointerTest.cpp

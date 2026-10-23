@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cassert>
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -12,6 +13,7 @@
 #include "MessageSystem.h"
 #include "Player.h"
 #include "RandomDice.h"
+#include "SavedEnum.h"
 
 using json = nlohmann::json;
 
@@ -300,6 +302,33 @@ void HungerSystem::save(json& output) const
 	}
 }
 
+namespace
+{
+// The HungerState a saved integer names, or nullopt for one no state has.
+// The switch has no default, so a state added without a case here is a compile
+// error (C4062, -Wswitch).
+//
+// Example:
+//   hunger_state_from(2);    // -> HungerState::HUNGRY
+//   hunger_state_from(5);    // -> nullopt
+std::optional<HungerState> hunger_state_from(int saved)
+{
+	const HungerState candidate = static_cast<HungerState>(saved);
+	switch (candidate)
+	{
+	case HungerState::WELL_FED:
+	case HungerState::SATIATED:
+	case HungerState::HUNGRY:
+	case HungerState::STARVING:
+	case HungerState::DYING:
+	{
+		return candidate;
+	}
+	}
+	return std::nullopt;
+}
+} // namespace
+
 void HungerSystem::load(const json& source)
 {
 	// save writes these three every time, so a record without one is refused.
@@ -311,7 +340,11 @@ void HungerSystem::load(const json& source)
 	// after the load sets the baseline without announcing anything.
 	if (source.contains("lastNotifiedState"))
 	{
-		run.lastNotifiedState =
-			static_cast<HungerState>(source["lastNotifiedState"].get<int>());
+		run.lastNotifiedState = saved_enum_field(
+			source,
+			"HungerSystem::load",
+			"lastNotifiedState",
+			"HungerState",
+			&hunger_state_from);
 	}
 }

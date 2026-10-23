@@ -37,6 +37,7 @@
 #include "PrefabLibrary.h"
 #include "RandomDice.h"
 #include "Renderer.h"
+#include "SavedEnum.h"
 #include "SpellTile.h"
 #include "TileConfig.h"
 #include "Trap.h"
@@ -83,6 +84,31 @@ std::optional<DoorState> door_state_from(int saved)
 	case DoorState::CLOSED_UNLOCKED:
 	case DoorState::CLOSED_LOCKED:
 	case DoorState::CLOSED_LOCKED_FORCE_FAILED:
+	{
+		return candidate;
+	}
+	}
+	return std::nullopt;
+}
+
+// The TileType a saved integer names, or nullopt for one no TileType has.
+// The switch has no default, so a type added without a case here is a compile
+// error (C4062, -Wswitch).
+//
+// Example:
+//   tile_type_from(1);    // -> TileType::WALL
+//   tile_type_from(6);    // -> nullopt
+std::optional<TileType> tile_type_from(int saved)
+{
+	const TileType candidate = static_cast<TileType>(saved);
+	switch (candidate)
+	{
+	case TileType::FLOOR:
+	case TileType::WALL:
+	case TileType::WATER:
+	case TileType::CLOSED_DOOR:
+	case TileType::OPEN_DOOR:
+	case TileType::CORRIDOR:
 	{
 		return candidate;
 	}
@@ -192,7 +218,12 @@ void Map::load(const json& source)
 			tileJson.at("position").at("x").get<int>(),
 			tileJson.at("position").at("y").get<int>());
 
-		TileType type = static_cast<TileType>(tileJson.at("type").get<int>());
+		const TileType type = saved_enum_field(
+			tileJson,
+			"Map::load",
+			"type",
+			"TileType",
+			&tile_type_from);
 		bool explored = tileJson.at("explored").get<bool>();
 
 		tiles.emplace_back(position, type);

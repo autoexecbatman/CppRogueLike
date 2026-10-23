@@ -1,0 +1,113 @@
+{
+    "cwd": "E:/repo/C++RogueLike",
+    "test_command": [
+        "powershell",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tests/run_suite.ps1",
+        "-Configuration",
+        "Debug",
+        "-Filter",
+        "--gtest_filter=EnumLoadRefusalTest.*"
+    ],
+    "mutations": [
+        {
+            "file": "src/Creature.cpp",
+            "original": "\tcase PlayerRaceState::HALFELF:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
+            "mutated": "\tcase PlayerRaceState::HALFELF:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "catches": "a saved race no PlayerRaceState has loads"
+        },
+        {
+            "file": "src/GameStateManager.cpp",
+            "original": "\tcase TrapType::ARROW:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
+            "mutated": "\tcase TrapType::ARROW:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "catches": "a saved trap type no TrapType has loads"
+        },
+        {
+            "file": "src/Trap.cpp",
+            "original": "\tcase TrapState::DISARMED:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
+            "mutated": "\tcase TrapState::DISARMED:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "catches": "a saved trap state no TrapState has loads"
+        },
+        {
+            "file": "src/HungerSystem.cpp",
+            "original": "\tcase HungerState::DYING:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
+            "mutated": "\tcase HungerState::DYING:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "catches": "a saved lastNotifiedState no HungerState has loads"
+        },
+        {
+            "file": "src/Item.cpp",
+            "original": "\tcase ItemClass::QUEST_ITEM:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
+            "mutated": "\tcase ItemClass::QUEST_ITEM:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "catches": "a saved itemClass no ItemClass has loads"
+        },
+        {
+            "file": "src/Item.cpp",
+            "original": "\tcase PrefixType::CRACKED:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
+            "mutated": "\tcase PrefixType::CRACKED:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "catches": "a saved prefix no PrefixType has loads"
+        },
+        {
+            "file": "src/Item.cpp",
+            "original": "\tcase SuffixType::OF_BRITTLENESS:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
+            "mutated": "\tcase SuffixType::OF_BRITTLENESS:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "catches": "a saved suffix no SuffixType has loads"
+        },
+        {
+            "file": "src/Item.cpp",
+            "original": "\tcase BlessingStatus::CURSED:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
+            "mutated": "\tcase BlessingStatus::CURSED:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "catches": "a saved blessing no BlessingStatus has loads"
+        },
+        {
+            "file": "src/Map.cpp",
+            "original": "\tcase TileType::CORRIDOR:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
+            "mutated": "\tcase TileType::CORRIDOR:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "catches": "a saved tile type no TileType has loads"
+        },
+        {
+            "file": "src/ShopKeeper.cpp",
+            "original": "\tcase ShopType::ADVENTURING_GEAR:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
+            "mutated": "\tcase ShopType::ADVENTURING_GEAR:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "catches": "a saved shop_type no ShopType has loads"
+        },
+        {
+            "file": "src/ShopKeeper.cpp",
+            "original": "\tcase ShopQuality::EXCELLENT:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
+            "mutated": "\tcase ShopQuality::EXCELLENT:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "catches": "a saved shop_quality no ShopQuality has loads"
+        },
+        {
+            "file": "src/TileRefJson.cpp",
+            "original": "\tif (0 <= saved && saved < static_cast<int>(TileSheet::COUNT))",
+            "mutated": "\tif (0 <= saved && saved <= static_cast<int>(TileSheet::COUNT))",
+            "catches": "a saved sheet equal to COUNT loads as a sheet that does not exist"
+        },
+        {
+            "file": "src/TileRefJson.cpp",
+            "original": "\t\t\t\"TileRefJson::parse_tile\",\n\t\t\t\"sheet\",\n\t\t\t\"TileSheet\",\n\t\t\t&tile_sheet_from),",
+            "mutated": "\t\t\t\"TileRefJson::parse_tile\",\n\t\t\t\"sheet\",\n\t\t\t\"TileSheet\",\n\t\t\t+[](int saved) { return std::optional<TileSheet>(static_cast<TileSheet>(saved)); }),",
+            "catches": "parse_tile loads a sheet no TileSheet has, though the range check stands"
+        },
+        {
+            "file": "src/TileConfig.cpp",
+            "original": "\t\t\t\tstd::format(\"TileConfig::load: autotile group {}\", key),\n\t\t\t\t\"sheet\",\n\t\t\t\t\"TileSheet\",\n\t\t\t\t&TileRefJson::tile_sheet_from),",
+            "mutated": "\t\t\t\tstd::format(\"TileConfig::load: autotile group {}\", key),\n\t\t\t\t\"sheet\",\n\t\t\t\t\"TileSheet\",\n\t\t\t\t+[](int saved) { return std::optional<TileSheet>(static_cast<TileSheet>(saved)); }),",
+            "catches": "an autotile group loads a sheet no TileSheet has, though the range check stands"
+        },
+        {
+            "file": "src/TileConfig.cpp",
+            "original": "\t\t\t\tstd::format(\"TileConfig::load: wall autotile group {}\", key),\n\t\t\t\t\"sheet\",\n\t\t\t\t\"TileSheet\",\n\t\t\t\t&TileRefJson::tile_sheet_from),",
+            "mutated": "\t\t\t\tstd::format(\"TileConfig::load: wall autotile group {}\", key),\n\t\t\t\t\"sheet\",\n\t\t\t\t\"TileSheet\",\n\t\t\t\t+[](int saved) { return std::optional<TileSheet>(static_cast<TileSheet>(saved)); }),",
+            "catches": "a wall autotile group loads a sheet no TileSheet has, though the range check stands"
+        },
+        {
+            "file": "src/SavedEnum.h",
+            "original": "\tif (!value)",
+            "mutated": "\tif (value)",
+            "catches": "every saved enum refused, so nothing with an enum field loads"
+        }
+    ]
+}

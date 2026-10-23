@@ -32,6 +32,7 @@
 #include "Paths.h"
 #include "Player.h"
 #include "Renderer.h"
+#include "SavedEnum.h"
 #include "SpellTile.h"
 #include "TileConfig.h"
 #include "TileRefJson.h"
@@ -75,6 +76,28 @@ std::optional<RoomType> room_type_from(int saved)
 	case RoomType::STANDARD:
 	case RoomType::DANGER:
 	case RoomType::TREASURE:
+	{
+		return candidate;
+	}
+	}
+	return std::nullopt;
+}
+
+// The TrapType a saved integer names, or nullopt for one no TrapType has.
+// The switch has no default, so a type added without a case here is a compile
+// error (C4062, -Wswitch).
+//
+// Example:
+//   trap_type_from(1);    // -> TrapType::DART
+//   trap_type_from(3);    // -> nullopt
+std::optional<TrapType> trap_type_from(int saved)
+{
+	const TrapType candidate = static_cast<TrapType>(saved);
+	switch (candidate)
+	{
+	case TrapType::PIT:
+	case TrapType::DART:
+	case TrapType::ARROW:
 	{
 		return candidate;
 	}
@@ -283,7 +306,12 @@ void load_traps(
 	{
 		// Built through the same constructor the generator uses, so the type decides
 		// the dice, the name and both tiles exactly as it did the first time.
-		const auto type = static_cast<TrapType>(trapJson.at("type").get<int>());
+		const TrapType type = saved_enum_field(
+			trapJson,
+			"load_traps",
+			"type",
+			"TrapType",
+			&trap_type_from);
 		auto trap = std::make_unique<Trap>(Vector2D{ 0, 0 }, type, tileConfig);
 		trap->load(trapJson);
 		traps.push_back(std::move(trap));

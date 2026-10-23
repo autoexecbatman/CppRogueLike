@@ -18,6 +18,7 @@
 #include "Player.h"
 #include "PlayerRaceState.h"
 #include "RandomDice.h"
+#include "SavedEnum.h"
 #include "ThiefSkills.h"
 #include "TileConfig.h"
 #include "Trap.h"
@@ -74,6 +75,29 @@ bool rolls_trap_found(bool isPit, std::optional<int> skill, RandomDice& dice)
 		return dice.d6() <= DWARF_PIT_FIND_CHANCE;
 	}
 	return dice.d100() <= skill.value();
+}
+
+// The TrapState a saved integer names, or nullopt for one no state has.
+// The switch has no default, so a state added without a case here is a compile
+// error (C4062, -Wswitch).
+//
+// Example:
+//   trap_state_from(1);    // -> TrapState::DETECTED
+//   trap_state_from(4);    // -> nullopt
+std::optional<TrapState> trap_state_from(int saved)
+{
+	const TrapState candidate = static_cast<TrapState>(saved);
+	switch (candidate)
+	{
+	case TrapState::HIDDEN:
+	case TrapState::DETECTED:
+	case TrapState::TRIGGERED:
+	case TrapState::DISARMED:
+	{
+		return candidate;
+	}
+	}
+	return std::nullopt;
 }
 } // namespace
 
@@ -471,7 +495,12 @@ void Trap::load(const json& source)
 {
 	Actor::load(source); // Call base class load
 
-	state = static_cast<TrapState>(source.at("state").get<int>());
+	state = saved_enum_field(
+		source,
+		"Trap::load",
+		"state",
+		"TrapState",
+		&trap_state_from);
 	disarmAttemptedAtLevel = source.at("disarmAttemptedAtLevel").get<int>();
 	searchedAtLevel = source.at("searchedAtLevel").get<int>();
 

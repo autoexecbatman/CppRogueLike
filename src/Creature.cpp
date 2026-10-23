@@ -40,6 +40,7 @@
 #include "Pickable.h"
 #include "Player.h"
 #include "PlayerRaceState.h"
+#include "SavedEnum.h"
 #include "ShopKeeper.h"
 #include "Spellcasting.h"
 #include "TileConfig.h"
@@ -206,6 +207,32 @@ const Gauntlets* strength_setting_gauntlets(const Item& item) noexcept
 		gauntlets :
 		nullptr;
 }
+
+// The PlayerRaceState a saved integer names, or nullopt for one no race has.
+// The switch has no default, so a race added without a case here is a compile
+// error (C4062, -Wswitch).
+//
+// Example:
+//   player_race_from(3);    // -> PlayerRaceState::DWARF
+//   player_race_from(7);    // -> nullopt
+std::optional<PlayerRaceState> player_race_from(int saved)
+{
+	const PlayerRaceState candidate = static_cast<PlayerRaceState>(saved);
+	switch (candidate)
+	{
+	case PlayerRaceState::NONE:
+	case PlayerRaceState::HUMAN:
+	case PlayerRaceState::ELF:
+	case PlayerRaceState::DWARF:
+	case PlayerRaceState::HALFLING:
+	case PlayerRaceState::GNOME:
+	case PlayerRaceState::HALFELF:
+	{
+		return candidate;
+	}
+	}
+	return std::nullopt;
+}
 } // namespace
 
 //==Creature==
@@ -262,10 +289,13 @@ void Creature::load(const json& source)
 	lifespan.reset();
 	if (!lifespanRecord.is_null())
 	{
-		const PlayerRaceState race =
-			static_cast<PlayerRaceState>(lifespanRecord.at("race").get<int>());
 		lifespan = Lifespan{
-			race,
+			saved_enum_field(
+				lifespanRecord,
+				"Creature::load",
+				"race",
+				"PlayerRaceState",
+				&player_race_from),
 			lifespanRecord.at("startingAge").get<int>(),
 			lifespanRecord.at("maximumAge").get<int>(),
 			lifespanRecord.at("yearsLived").get<int>(),

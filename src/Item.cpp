@@ -1,4 +1,150 @@
+#include <optional>
+
 #include "Item.h"
+#include "SavedEnum.h"
+
+namespace
+{
+// The ItemClass a saved integer names, or nullopt for one no class has.
+// The switch has no default, so a class added without a case here is a compile
+// error (C4062, -Wswitch).
+//
+// Example:
+//   item_class_from(1);     // -> ItemClass::DAGGER
+//   item_class_from(25);    // -> nullopt
+std::optional<ItemClass> item_class_from(int saved)
+{
+	const ItemClass candidate = static_cast<ItemClass>(saved);
+	switch (candidate)
+	{
+	case ItemClass::UNKNOWN:
+	case ItemClass::DAGGER:
+	case ItemClass::SWORD:
+	case ItemClass::GREAT_SWORD:
+	case ItemClass::AXE:
+	case ItemClass::HAMMER:
+	case ItemClass::MACE:
+	case ItemClass::STAFF:
+	case ItemClass::BOW:
+	case ItemClass::CROSSBOW:
+	case ItemClass::SLING:
+	case ItemClass::ARMOR:
+	case ItemClass::SHIELD:
+	case ItemClass::HELMET:
+	case ItemClass::RING:
+	case ItemClass::AMULET:
+	case ItemClass::GAUNTLETS:
+	case ItemClass::GIRDLE:
+	case ItemClass::POTION:
+	case ItemClass::SCROLL:
+	case ItemClass::FOOD:
+	case ItemClass::GOLD_COIN:
+	case ItemClass::GEM:
+	case ItemClass::TOOL:
+	case ItemClass::QUEST_ITEM:
+	{
+		return candidate;
+	}
+	}
+	return std::nullopt;
+}
+
+// The PrefixType a saved integer names, or nullopt for one no prefix has.
+// The switch has no default, so a prefix added without a case here is a compile
+// error (C4062, -Wswitch).
+//
+// Example:
+//   prefix_type_from(1);     // -> PrefixType::SHARP
+//   prefix_type_from(17);    // -> nullopt
+std::optional<PrefixType> prefix_type_from(int saved)
+{
+	const PrefixType candidate = static_cast<PrefixType>(saved);
+	switch (candidate)
+	{
+	case PrefixType::NONE:
+	case PrefixType::SHARP:
+	case PrefixType::KEEN:
+	case PrefixType::MASTERWORK:
+	case PrefixType::BLESSED:
+	case PrefixType::FLAMING:
+	case PrefixType::FROST:
+	case PrefixType::SHOCK:
+	case PrefixType::REINFORCED:
+	case PrefixType::STUDDED:
+	case PrefixType::ELVEN:
+	case PrefixType::DWARVEN:
+	case PrefixType::MAGICAL:
+	case PrefixType::CURSED:
+	case PrefixType::ANCIENT:
+	case PrefixType::RUSTED:
+	case PrefixType::CRACKED:
+	{
+		return candidate;
+	}
+	}
+	return std::nullopt;
+}
+
+// The SuffixType a saved integer names, or nullopt for one no suffix has.
+// The switch has no default, so a suffix added without a case here is a compile
+// error (C4062, -Wswitch).
+//
+// Example:
+//   suffix_type_from(1);     // -> SuffixType::OF_SLAYING
+//   suffix_type_from(19);    // -> nullopt
+std::optional<SuffixType> suffix_type_from(int saved)
+{
+	const SuffixType candidate = static_cast<SuffixType>(saved);
+	switch (candidate)
+	{
+	case SuffixType::NONE:
+	case SuffixType::OF_SLAYING:
+	case SuffixType::OF_ACCURACY:
+	case SuffixType::OF_PROTECTION:
+	case SuffixType::OF_POWER:
+	case SuffixType::OF_FIRE_RESISTANCE:
+	case SuffixType::OF_COLD_RESISTANCE:
+	case SuffixType::OF_LIGHTNING_RESISTANCE:
+	case SuffixType::OF_POISON_RESISTANCE:
+	case SuffixType::OF_SPEED:
+	case SuffixType::OF_STEALTH:
+	case SuffixType::OF_MAGIC:
+	case SuffixType::OF_HEALTH:
+	case SuffixType::OF_THE_EAGLE:
+	case SuffixType::OF_THE_BEAR:
+	case SuffixType::OF_THE_OWL:
+	case SuffixType::OF_WEAKNESS:
+	case SuffixType::OF_SLOWNESS:
+	case SuffixType::OF_BRITTLENESS:
+	{
+		return candidate;
+	}
+	}
+	return std::nullopt;
+}
+
+// The BlessingStatus a saved integer names, or nullopt for one no status has.
+// The switch has no default, so a status added without a case here is a
+// compile error (C4062, -Wswitch).
+//
+// Example:
+//   blessing_status_from(1);    // -> BlessingStatus::BLESSED
+//   blessing_status_from(3);    // -> nullopt
+std::optional<BlessingStatus> blessing_status_from(int saved)
+{
+	const BlessingStatus candidate = static_cast<BlessingStatus>(saved);
+	switch (candidate)
+	{
+	case BlessingStatus::UNCURSED:
+	case BlessingStatus::BLESSED:
+	case BlessingStatus::CURSED:
+	{
+		return candidate;
+	}
+	}
+	return std::nullopt;
+}
+} // namespace
 
 Item::Item(Vector2D position, ActorData data) :
 	Actor(position, data) {
@@ -11,15 +157,28 @@ void Item::load(const json& source)
 	Actor::load(source); // Call base class load
 	baseValue = source.at("baseValue").get<int>();
 	itemKey = source.at("itemKey").get<std::string>();
-	itemClass = static_cast<ItemClass>(source.at("itemClass").get<int>());
+	itemClass = saved_enum_field(
+		source,
+		"Item::load",
+		"itemClass",
+		"ItemClass",
+		&item_class_from);
 
 	// Load enhancement data
 	{
 		const auto& enh = source.at("enhancement");
-		enhancement.prefix =
-			static_cast<PrefixType>(enh.at("prefix").get<int>());
-		enhancement.suffix =
-			static_cast<SuffixType>(enh.at("suffix").get<int>());
+		enhancement.prefix = saved_enum_field(
+			enh,
+			"Item::load",
+			"prefix",
+			"PrefixType",
+			&prefix_type_from);
+		enhancement.suffix = saved_enum_field(
+			enh,
+			"Item::load",
+			"suffix",
+			"SuffixType",
+			&suffix_type_from);
 		enhancement.damageBonus = enh.at("damageBonus").get<int>();
 		enhancement.toHitBonus = enh.at("toHitBonus").get<int>();
 		enhancement.acBonus = enh.at("acBonus").get<int>();
@@ -35,8 +194,12 @@ void Item::load(const json& source)
 		enhancement.lightningResistance =
 			enh.at("lightningResistance").get<int>();
 		enhancement.poisonResistance = enh.at("poisonResistance").get<int>();
-		enhancement.blessing =
-			static_cast<BlessingStatus>(enh.at("blessing").get<int>());
+		enhancement.blessing = saved_enum_field(
+			enh,
+			"Item::load",
+			"blessing",
+			"BlessingStatus",
+			&blessing_status_from);
 		enhancement.isMagical = enh.at("isMagical").get<bool>();
 		enhancement.enhancementLevel = enh.at("enhancementLevel").get<int>();
 		enhancement.valueModifier = enh.at("valueModifier").get<int>();

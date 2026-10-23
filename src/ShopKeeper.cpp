@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cassert>
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -15,6 +16,7 @@
 #include "Persistent.h"
 #include "Player.h"
 #include "RandomDice.h"
+#include "SavedEnum.h"
 #include "ShopKeeper.h"
 #include "Vector2D.h"
 
@@ -529,11 +531,71 @@ void ShopKeeper::save(json& output)
 	output["shop_inventory"] = inventoryJson;
 }
 
+namespace
+{
+// The ShopType a saved integer names, or nullopt for one no ShopType has.
+// The switch has no default, so a type added without a case here is a compile
+// error (C4062, -Wswitch).
+//
+// Example:
+//   shop_type_from(2);    // -> ShopType::GENERAL_STORE
+//   shop_type_from(6);    // -> nullopt
+std::optional<ShopType> shop_type_from(int saved)
+{
+	const ShopType candidate = static_cast<ShopType>(saved);
+	switch (candidate)
+	{
+	case ShopType::WEAPON_SHOP:
+	case ShopType::ARMOR_SHOP:
+	case ShopType::GENERAL_STORE:
+	case ShopType::POTION_SHOP:
+	case ShopType::SCROLL_SHOP:
+	case ShopType::ADVENTURING_GEAR:
+	{
+		return candidate;
+	}
+	}
+	return std::nullopt;
+}
+
+// The ShopQuality a saved integer names, or nullopt for one no quality has.
+// The switch has no default, so a quality added without a case here is a
+// compile error (C4062, -Wswitch).
+//
+// Example:
+//   shop_quality_from(1);    // -> ShopQuality::AVERAGE
+//   shop_quality_from(4);    // -> nullopt
+std::optional<ShopQuality> shop_quality_from(int saved)
+{
+	const ShopQuality candidate = static_cast<ShopQuality>(saved);
+	switch (candidate)
+	{
+	case ShopQuality::POOR:
+	case ShopQuality::AVERAGE:
+	case ShopQuality::GOOD:
+	case ShopQuality::EXCELLENT:
+	{
+		return candidate;
+	}
+	}
+	return std::nullopt;
+}
+} // namespace
+
 void ShopKeeper::load(const json& source)
 {
-	shopType = static_cast<ShopType>(source.at("shop_type").get<int>());
-	shopQuality =
-		static_cast<ShopQuality>(source.at("shop_quality").get<int>());
+	shopType = saved_enum_field(
+		source,
+		"ShopKeeper::load",
+		"shop_type",
+		"ShopType",
+		&shop_type_from);
+	shopQuality = saved_enum_field(
+		source,
+		"ShopKeeper::load",
+		"shop_quality",
+		"ShopQuality",
+		&shop_quality_from);
 	shopName = source.at("shop_name").get<std::string>();
 	markupPercent = source.at("markup_percent").get<int>();
 	sellbackPercent = source.at("sellback_percent").get<int>();

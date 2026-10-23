@@ -8,6 +8,7 @@
 
 #include "Paths.h"
 #include "Renderer.h"
+#include "SavedEnum.h"
 #include "TileConfig.h"
 #include "TileRefJson.h"
 
@@ -175,10 +176,13 @@ void TileConfig::load(std::string_view path)
 
 	for (const auto& [key, record] : root.at("autotile_groups").items())
 	{
-		const TileSheet sheet =
-			static_cast<TileSheet>(record.at("sheet").get<int>());
 		autotileGroups[key] = AutotileGroup{
-			sheet,
+			saved_enum_field(
+				record,
+				std::format("TileConfig::load: autotile group {}", key),
+				"sheet",
+				"TileSheet",
+				&TileRefJson::tile_sheet_from),
 			record.at("origin_col").get<int>(),
 			record.at("origin_row").get<int>(),
 		};
@@ -186,10 +190,13 @@ void TileConfig::load(std::string_view path)
 
 	for (const auto& [key, record] : root.at("wall_autotile_groups").items())
 	{
-		const TileSheet sheet =
-			static_cast<TileSheet>(record.at("sheet").get<int>());
 		wallAutotileGroups[key] = WallAutotileGroup{
-			sheet,
+			saved_enum_field(
+				record,
+				std::format("TileConfig::load: wall autotile group {}", key),
+				"sheet",
+				"TileSheet",
+				&TileRefJson::tile_sheet_from),
 			record.at("origin_col").get<int>(),
 			record.at("origin_row").get<int>(),
 		};

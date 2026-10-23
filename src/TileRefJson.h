@@ -10,14 +10,26 @@
 //   TileRefJson::parse_tile(record);                // -> TileRef{ TileSheet::SHEET_DECOR0, 3, 7 }
 //   TileRefJson::parse_tile(json{ { "col", 3 } });   // throws json::out_of_range: no "sheet"
 
+#include <optional>
+
 #include "Persistent.h"
 #include "TileRef.h"
 
 namespace TileRefJson
 {
 
+// The TileSheet a saved integer names, or nullopt for one outside the sheets.
+// The sheets run contiguously from 0 to COUNT, so COUNT itself is refused.
+//
+// Example:
+//   TileRefJson::tile_sheet_from(0);    // -> the first sheet
+//   TileRefJson::tile_sheet_from(static_cast<int>(TileSheet::COUNT));
+//   // -> nullopt
+[[nodiscard]] std::optional<TileSheet> tile_sheet_from(int saved);
+
 // Reads a tile from its three fields. Every field is required, so a record missing one
-// throws rather than reading as an empty tile.
+// throws rather than reading as an empty tile. A sheet no TileSheet has throws
+// std::runtime_error naming it.
 //
 // Example:
 //   TileRefJson::parse_tile(json{ { "sheet", 0 }, { "col", 2 }, { "row", 5 } });   // -> sheet 0, col 2, row 5

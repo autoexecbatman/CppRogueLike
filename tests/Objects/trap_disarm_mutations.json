@@ -81,7 +81,7 @@
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\tstate = static_cast<TrapState>(source.at(\"state\").get<int>());",
+      "original": "\tstate = saved_enum_field(\n\t\tsource,\n\t\t\"Trap::load\",\n\t\t\"state\",\n\t\t\"TrapState\",\n\t\t&trap_state_from);",
       "mutated": "\tstate = TrapState::HIDDEN;",
       "catches": "every trap hidden again on load, so a level the player has cleared is unknown"
     },
