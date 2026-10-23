@@ -120,7 +120,8 @@ static void grant_buff(Creature& creature, BuffType type, int value, std::option
 		if (value > found->value)
 		{
 			found->value = value; // Better buff, update value
-			found->expiryTime = expiry; // The new casting's ending replaces the old one
+			// The new casting's ending replaces the old one
+			found->expiryTime = expiry;
 			found->application = application;
 		}
 		else

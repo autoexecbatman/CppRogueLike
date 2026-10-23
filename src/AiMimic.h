@@ -44,7 +44,8 @@ private:
 	// itself, which is the first moment it can eat at all.
 	int consumptionReadyTime{ 0 };
 	int revealDistance{ 1 };
-	std::vector<Disguise> possibleDisguises; // empty on load; rebuilt lazily on first update
+	// empty on load; rebuilt lazily on first update
+	std::vector<Disguise> possibleDisguises;
 
 	[[nodiscard]] bool consume_nearby_items(Creature& owner, GameContext& ctx);
 	void check_revealing(Creature& owner, GameContext& ctx);
@@ -58,7 +59,9 @@ private:
 	void transform_to_greater_mimic(Creature& owner, GameContext& ctx);
 
 public:
-	AiMimic() = default; // possibleDisguises filled by on_created, or lazily on first update after a load
+	// possibleDisguises filled by on_created, or lazily on first update after a
+	// load
+	AiMimic() = default;
 
 	void update(Creature& owner, GameContext& ctx) override;
 

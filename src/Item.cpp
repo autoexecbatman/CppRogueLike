@@ -2,7 +2,8 @@
 
 Item::Item(Vector2D position, ActorData data)
 	: Actor(position, data) {
-		  // ItemClass should be set by ItemCreator, not by fragile string matching
+		  // ItemClass should be set by ItemCreator, not by fragile string
+		  // matching
 	  };
 
 void Item::load(const json& source)

@@ -23,7 +23,8 @@ struct BackstabInfo
 class Attacker : public Persistent
 {
 private:
-	DamageInfo damageInfo; // Used by MonsterAttacker. PlayerAttacker ignores it.
+	// Used by MonsterAttacker. PlayerAttacker ignores it.
+	DamageInfo damageInfo;
 
 protected:
 	explicit Attacker(const DamageInfo& damage);

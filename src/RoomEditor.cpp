@@ -645,11 +645,13 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 			if (structural)
 			{
 				canvas[cell->row][cell->col] = symbol;
-				decorCanvas[cell->row][cell->col] = ' '; // clear any decor overlay
+				// clear any decor overlay
+				decorCanvas[cell->row][cell->col] = ' ';
 			}
 			else
 			{
-				decorCanvas[cell->row][cell->col] = symbol; // layer over the base tile
+				// layer over the base tile
+				decorCanvas[cell->row][cell->col] = symbol;
 			}
 			return;
 		}

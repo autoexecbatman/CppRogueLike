@@ -13,15 +13,18 @@
 class TileConfig;
 
 inline constexpr int SPRITE_SIZE = 16; // DawnLike native sprite pixel size
-inline constexpr int DISPLAY_TILE_SIZE = 64; // Default rendered tile size in pixels
+// Default rendered tile size in pixels
+inline constexpr int DISPLAY_TILE_SIZE = 64;
 // The HUD's outer geometry, here rather than in Gui.cpp because two modules need
 // it: the renderer reserves room for the HUD, and the Gui fills it.
 //
 // Its rows run on a pitch of their own rather than on the map's tile grid. A tile
 // is as tall as the zoom makes it and a row of text is not, so a pitch measured in
 // tiles puts most of a row on nothing at one zoom and overlaps at the next.
-inline constexpr int UI_TEXT_ROW_PITCH = 32; // Pixels between the tops of two rows of UI text
-inline constexpr int GUI_TEXT_TOP_INSET = 2; // Gap below the frame's rule before the first row
+// Pixels between the tops of two rows of UI text
+inline constexpr int UI_TEXT_ROW_PITCH = 32;
+// Gap below the frame's rule before the first row
+inline constexpr int GUI_TEXT_TOP_INSET = 2;
 inline constexpr int GUI_TEXT_ROWS = 8; // Text rows the HUD lays out
 
 // The bar sheet's cell. A bar is one text row tall, so a cell of this size is drawn

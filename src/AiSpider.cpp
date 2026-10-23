@@ -35,7 +35,8 @@ constexpr int AMBUSH_CHANCE = 30; // % chance to enter ambush mode when not seen
 constexpr int HAIRY_SPIDER_VENOM_ONSET_ROUNDS = 1;
 // "Victims receive a +2 bonus to saving throws vs. the hairy spiders' weak poison."
 constexpr int HAIRY_SPIDER_SAVE_BONUS = 2;
-constexpr int SURPRISED_AT_OR_BELOW = 3; // PHB: surprised on a 1, 2 or 3 of 1d10
+// PHB: surprised on a 1, 2 or 3 of 1d10
+constexpr int SURPRISED_AT_OR_BELOW = 3;
 
 // Rolls the surprise check an ambush's victim makes (PHB, The Surprise Roll): 1d10
 // plus the Dexterity reaction adjustment, surprised at 3 or less. The roll is the

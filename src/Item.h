@@ -13,7 +13,8 @@
 class Item : public Actor
 {
 private:
-	int baseValue{ 1 }; // base price set at creation; get_value() applies enhancement modifier
+	// base price set at creation; get_value() applies enhancement modifier
+	int baseValue{ 1 };
 
 public:
 	Item(Vector2D position, ActorData data);
@@ -63,7 +64,8 @@ public:
 	ItemEnhancement enhancement; // Enhancement data
 	ItemIdentificationStatus identification; // Identification tracking
 
-	std::optional<ItemBehavior> behavior; // item behavior (replaces pickable hierarchy)
+	// item behavior (replaces pickable hierarchy)
+	std::optional<ItemBehavior> behavior;
 
 	// Item classification utility functions
 	ItemCategory get_category() const noexcept { return ItemClassificationUtils::get_category(itemClass); }

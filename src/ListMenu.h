@@ -24,7 +24,8 @@ class ListMenu : public BaseMenu
 	std::vector<MenuEntry> entries{};
 	size_t cursorIndex{ 0 };
 	std::function<void(GameContext&)> onEscape{}; // null = just close
-	std::function<void(GameContext&)> onFrame{}; // null = no-op; called each frame before input
+	// null = no-op; called each frame before input
+	std::function<void(GameContext&)> onFrame{};
 
 	void draw_entries();
 

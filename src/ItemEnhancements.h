@@ -115,7 +115,8 @@ public:
 	[[nodiscard]] int resistance_strength(DamageType damageType) const noexcept;
 
 	// Special properties
-	BlessingStatus blessing{ BlessingStatus::UNCURSED }; // Three-state: uncursed/blessed/cursed
+	// Three-state: uncursed/blessed/cursed
+	BlessingStatus blessing{ BlessingStatus::UNCURSED };
 	bool isMagical{ false };
 
 	// Numeric enhancement level for traditional "+X" display

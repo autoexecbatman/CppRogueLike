@@ -147,7 +147,8 @@ public:
 	bool is_water(Vector2D pos) const noexcept;
 	// Tells the player about the tile they are on, where it is worth remarking on.
 	void describe_tile(TileType tileType, GameContext& ctx);
-	bool is_explored(Vector2D pos) const noexcept; // indicates whether this tile has already been seen by the player
+	// indicates whether this tile has already been seen by the player
+	bool is_explored(Vector2D pos) const noexcept;
 
 	// Whether nothing stands in the way at that tile: not a wall, not a shut door, no
 	// creature and no decoration. It says nothing about what the terrain demands of
@@ -172,7 +173,9 @@ public:
 	void update();
 	void render(const GameContext& ctx) const;
 	void add_item(Vector2D pos, GameContext& ctx);
-	Creature* get_actor(Vector2D pos, const GameContext& ctx) const noexcept; // getActor returns the actor at the given coordinates or NULL if there's none
+	// getActor returns the actor at the given coordinates or NULL if there's
+	// none
+	Creature* get_actor(Vector2D pos, const GameContext& ctx) const noexcept;
 	std::vector<std::vector<Tile>> get_map() const noexcept;
 	void reveal(); // reveal the map
 	void regenerate(GameContext& ctx); // regenerate the map

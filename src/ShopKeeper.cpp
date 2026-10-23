@@ -263,7 +263,8 @@ bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature&
 	owner.adjust_gold(price);
 
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "You bought ");
-	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, item.get_name()); // Use enhanced name
+	// Use enhanced name
+	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, item.get_name());
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " for ");
 	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, std::to_string(price));
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " gold.");
@@ -302,7 +303,8 @@ bool ShopKeeper::process_player_sale(GameContext& ctx, Item& item, Creature& sel
 	seller.adjust_gold(price);
 
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "You sold ");
-	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, item.get_name()); // Use enhanced name
+	// Use enhanced name
+	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, item.get_name());
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " for ");
 	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, std::to_string(price));
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " gold.");

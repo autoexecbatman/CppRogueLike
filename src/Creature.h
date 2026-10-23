@@ -90,10 +90,13 @@ enum class WebEscape
 class Creature : public Actor
 {
 private:
-	Attitude attitude{ Attitude::HOSTILE }; // how this creature feels about the player
-	Ethics ethics{ Ethics::NEUTRAL }; // law/chaos axis; true neutral until data says otherwise
+	// how this creature feels about the player
+	Attitude attitude{ Attitude::HOSTILE };
+	// law/chaos axis; true neutral until data says otherwise
+	Ethics ethics{ Ethics::NEUTRAL };
 	Morality morality{ Morality::NEUTRAL }; // good/evil axis
-	int awareUntilTime{ 0 }; // the clock reading this creature stops remembering the player at
+	// the clock reading this creature stops remembering the player at
+	int awareUntilTime{ 0 };
 
 	// The clock reading this creature runs out of air at, empty when it is not holding
 	// its breath. Set on the round it is found in water and cleared when it surfaces,
@@ -148,10 +151,12 @@ private:
 	int corpseWeight{ 50 };
 	std::string corpseName{}; // what the body it leaves is called
 	int corpseNutrition{ 0 }; // how much eating that body feeds
-	std::string corpseTaste{}; // the line printed when it is eaten, or when eating it is refused
+	// the line printed when it is eaten, or when eating it is refused
+	std::string corpseTaste{};
 	CorpseEdibility corpseEdibility{ CorpseEdibility::EDIBLE };
 
-	TileRef invisibleTile{}; // lazily resolved from TileConfig on first update()
+	// lazily resolved from TileConfig on first update()
+	TileRef invisibleTile{};
 
 	// The dose working in this creature, if any.
 	std::optional<PendingPoison> pendingPoison{};
@@ -683,10 +688,12 @@ public:
 	ColorPairId get_display_color() const noexcept override;
 
 	std::unique_ptr<Attacker> attacker; // the actor can attack
-	std::unique_ptr<ExperienceReward> experienceReward; // the actor can earn experience
+	// the actor can earn experience
+	std::unique_ptr<ExperienceReward> experienceReward;
 	std::unique_ptr<ArmorClass> armorClass; // the actor has armor class
 	std::unique_ptr<HealthPool> healthPool; // the actor has health
-	std::unique_ptr<ConstitutionTracker> constitutionTracker; // tracks constitution changes for HP adjustments
+	// tracks constitution changes for HP adjustments
+	std::unique_ptr<ConstitutionTracker> constitutionTracker;
 	std::unique_ptr<Ai> ai; // the actor can have AI
 	std::unique_ptr<ShopKeeper> shop; // shopkeeper component for trading
 	CreatureInventory inventoryData;

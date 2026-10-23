@@ -12,8 +12,10 @@ enum class BlessingStatus
 struct ItemIdentificationStatus
 {
 	// Identification flags: what has the player discovered?
-	bool identifiedType{ false }; // Do we know the base item type? (sword vs dagger)
-	bool identifiedEnhancement{ false }; // Do we know the enhancement level/prefix/suffix?
+	// Do we know the base item type? (sword vs dagger)
+	bool identifiedType{ false };
+	// Do we know the enhancement level/prefix/suffix?
+	bool identifiedEnhancement{ false };
 	bool identifiedBuc{ false }; // Do we know the blessing status?
 
 	// Reset identification to unknown

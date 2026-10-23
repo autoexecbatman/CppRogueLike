@@ -203,7 +203,8 @@ TEST_F(TurnUndeadTest, TheWeakestAreAffectedFirstWhenTheCapBinds)
 	Creature& wight = add_undead(5, Vector2D{ 6, 5 });
 	Creature& firstSkeleton = add_undead(1, Vector2D{ 4, 5 });
 	Creature& secondSkeleton = add_undead(1, Vector2D{ 4, 6 });
-	script_attempt(20, 1, 1); // the d20 clears every target number, then 2d6 of two
+	// the d20 clears every target number, then 2d6 of two
+	script_attempt(20, 1, 1);
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 

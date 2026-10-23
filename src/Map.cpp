@@ -1218,7 +1218,8 @@ void Map::spawn_traps(const DungeonRoom& room, GameContext& ctx)
 void Map::spawn_water(const DungeonRoom& room, GameContext& ctx)
 {
 	// Add water tiles
-	constexpr int waterPercentage = 5; // 5% of tiles will be water (reduced from 10%)
+	// 5% of tiles will be water (reduced from 10%)
+	constexpr int waterPercentage = 5;
 	Vector2D waterPos{ 0, 0 };
 	for (waterPos.y = room.row; waterPos.y <= room.row_end(); ++waterPos.y)
 	{

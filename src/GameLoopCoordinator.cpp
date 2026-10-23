@@ -542,7 +542,9 @@ void GameLoopCoordinator::update(GameContext& ctx)
 #endif
 
 		ctx.map->compute_fov(ctx);
-		ctx.map->update(); // stamp explored for the freshly-computed FOV so minimap is correct this frame
+		// stamp explored for the freshly-computed FOV so minimap is correct
+		// this frame
+		ctx.map->update();
 		if (ctx.levelManager->get_dungeon_level() == 1 && !ctx.gameState->get_is_loaded_game())
 		{
 			ctx.player_concrete().on_new_game_start(ctx);

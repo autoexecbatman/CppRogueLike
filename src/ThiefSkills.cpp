@@ -18,7 +18,8 @@ constexpr std::size_t DEXTERITY_ROWS = HIGHEST_PRINTED_DEXTERITY - LOWEST_PRINTE
 // a column; Detect Noise, Climb Walls and Read Languages are printed nowhere in it.
 constexpr std::size_t DEXTERITY_COLUMNS = 5;
 constexpr std::array<std::array<int, DEXTERITY_COLUMNS>, DEXTERITY_ROWS> DEXTERITY_ADJUSTMENT{ {
-	// Pick Pockets, Open Locks, Find/Remove Traps, Move Silently, Hide in Shadows
+	// Pick Pockets, Open Locks, Find/Remove Traps, Move Silently, Hide in
+	// Shadows
 	{ -15, -10, -10, -20, -10 }, //  9
 	{ -10, -5, -10, -15, -5 }, // 10
 	{ -5, 0, -5, -10, 0 }, // 11
@@ -37,7 +38,8 @@ constexpr std::array<std::array<int, DEXTERITY_COLUMNS>, DEXTERITY_ROWS> DEXTERI
 // book; every other column is measured against it.
 constexpr std::size_t ARMOR_COLUMNS = 5;
 constexpr std::array<std::array<int, ARMOR_COLUMNS>, THIEF_SKILL_COUNT> ARMOR_ADJUSTMENT{ {
-	// none, leather, padded or elven chain, hide or studded leather, chain or ring mail
+	// none, leather, padded or elven chain, hide or studded leather, chain
+	// or ring mail
 	{ 5, 0, -20, -30, -25 }, // Pick Pockets
 	{ 0, 0, -5, -10, -10 }, // Open Locks
 	{ 0, 0, -5, -10, -10 }, // Find/Remove Traps

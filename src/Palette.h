@@ -108,7 +108,8 @@ class Palette
 {
 private:
 	std::vector<PaletteEntry> paletteEntries{};
-	std::string sourcePath{}; // the file the last successful load read, where save writes
+	// the file the last successful load read, where save writes
+	std::string sourcePath{};
 
 public:
 	// Reads the "palette" section of the file at `path` and remembers the path for save().

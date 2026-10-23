@@ -154,11 +154,15 @@ TEST_F(DamageInfoTest, IsValid_NormalCases)
 // be built: the constructor refuses dice that roll nothing or less than nothing.
 TEST_F(DamageInfoTest, IsValid_EdgeCases)
 {
-	EXPECT_TRUE(DamageInfo("1", DamageType::PHYSICAL).is_valid()); // A fixed value
+	// A fixed value
+	EXPECT_TRUE(DamageInfo("1", DamageType::PHYSICAL).is_valid());
 	EXPECT_TRUE(DamageInfo("1d4", DamageType::PHYSICAL).is_valid());
-	EXPECT_THROW(DamageInfo("0d5", DamageType::PHYSICAL), std::invalid_argument); // No dice to roll
-	EXPECT_THROW(DamageInfo("5d0", DamageType::PHYSICAL), std::invalid_argument); // No sides
-	EXPECT_THROW(DamageInfo("-1d5", DamageType::PHYSICAL), std::invalid_argument); // A negative count
+	// No dice to roll
+	EXPECT_THROW(DamageInfo("0d5", DamageType::PHYSICAL), std::invalid_argument);
+	// No sides
+	EXPECT_THROW(DamageInfo("5d0", DamageType::PHYSICAL), std::invalid_argument);
+	// A negative count
+	EXPECT_THROW(DamageInfo("-1d5", DamageType::PHYSICAL), std::invalid_argument);
 }
 
 // Display

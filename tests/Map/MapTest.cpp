@@ -460,7 +460,8 @@ TEST_F(MapTest, Reveal_MarksAllExplored)
 
 TEST_F(MapTest, GetActor_EmptyPosition_ReturnsNull)
 {
-	Creature* actor = map->get_actor(Vector2D{ 7, 7 }, ctx); // Not player pos (5,5)
+	// Not player pos (5,5)
+	Creature* actor = map->get_actor(Vector2D{ 7, 7 }, ctx);
 
 	// Empty position should return nullptr
 	EXPECT_EQ(actor, nullptr);

@@ -135,8 +135,10 @@ private:
 	const TileConfig* tileConfig{ nullptr };
 
 	// Canvas (two layers)
-	std::vector<std::string> canvas; // base layer: structural symbols (#  .  ,  +  ~)
-	std::vector<std::string> decorCanvas; // decor layer: non-structural overlays (' ' = empty)
+	// base layer: structural symbols (#  .  ,  +  ~)
+	std::vector<std::string> canvas;
+	// decor layer: non-structural overlays (' ' = empty)
+	std::vector<std::string> decorCanvas;
 	int canvasWidth{ 12 };
 	int canvasHeight{ 8 };
 
@@ -162,7 +164,8 @@ private:
 
 	// Right panel list
 	size_t listScroll{ 0 };
-	std::optional<size_t> listSelected{}; // the prefab chosen in the list, if any
+	// the prefab chosen in the list, if any
+	std::optional<size_t> listSelected{};
 
 	// Status flash
 	std::string statusMsg;

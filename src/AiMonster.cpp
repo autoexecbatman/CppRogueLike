@@ -45,7 +45,8 @@ void flee(Creature& owner, GameContext& ctx)
 	}
 
 	std::optional<Vector2D> bestStep;
-	int bestCost = *currentCost; // only accept tiles strictly further than current position
+	// only accept tiles strictly further than current position
+	int bestCost = *currentCost;
 
 	// A tile this creature may not enter is one its own cost map never reached.
 	for (const Vector2D& delta : NEIGHBORS)

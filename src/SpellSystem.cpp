@@ -725,7 +725,8 @@ bool cast_shield(Creature& caster, GameContext& ctx)
 	// A flat 5 rounds, where the book (PHB page 278) gives 5 rounds per level.
 	const int duration = 5;
 
-	ctx.buffSystem->add_buff(caster, BuffType::SHIELD, 4, duration, BuffApplication::ADD, ctx.gameState->get_time()); // Spell: ADD +4 AC
+	// Spell: ADD +4 AC
+	ctx.buffSystem->add_buff(caster, BuffType::SHIELD, 4, duration, BuffApplication::ADD, ctx.gameState->get_time());
 	ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Shield! ");
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format("+4 AC for {}.", Wording::rounds(duration)));
 	ctx.messageSystem->finalize_message();

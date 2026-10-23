@@ -43,8 +43,10 @@ private:
 	bool active{ false };
 	size_t paletteIndex{ 0 };
 	double lastSaveTime{ -10.0 };
-	std::optional<std::string> saveError{}; // why the last reported save was refused, until one succeeds
-	std::optional<std::string> editRefusal{}; // why the open edit was not applied; cleared when an edit opens
+	// why the last reported save was refused, until one succeeds
+	std::optional<std::string> saveError{};
+	// why the open edit was not applied; cleared when an edit opens
+	std::optional<std::string> editRefusal{};
 
 	std::string activeKey{};
 
@@ -57,7 +59,8 @@ private:
 	TileRef browserSelected{}; // selected tile, is_valid() == false means none
 
 	// Palette list panel state
-	std::optional<size_t> listCursor{}; // the selected palette entry, if one is chosen
+	// the selected palette entry, if one is chosen
+	std::optional<size_t> listCursor{};
 	size_t listScroll{ 0 };
 
 	// Label / symbol editing state
@@ -66,7 +69,8 @@ private:
 	char symbolBuffer{ 0 };
 	bool isEditingSymbol{ false }; // true = cursor in symbol field
 	bool isLabelAllSelected{ false }; // first keystroke replaces entire label
-	int bufferedCharacter{ 0 }; // char polled by InputSystem::poll(), fed in before render
+	// char polled by InputSystem::poll(), fed in before render
+	int bufferedCharacter{ 0 };
 
 	// Packs a tile position into one key: row in the high half, column in the
 	// low half. Columns wrap at 65536, which no map approaches.

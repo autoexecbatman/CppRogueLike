@@ -24,14 +24,17 @@ struct AnimEntry
 	float pixelY{ 0.0f };
 	float velocityX{ 0.0f }; // world-space pixels per second
 	float velocityY{ 0.0f };
-	float accelerationY{ 0.0f }; // upward buoyancy - negative = rises; zero = drag only
-	float turbulence{ 0.0f }; // perpendicular swirl per frame; 0 = straight arcs
+	// upward buoyancy - negative = rises; zero = drag only
+	float accelerationY{ 0.0f };
+	// perpendicular swirl per frame; 0 = straight arcs
+	float turbulence{ 0.0f };
 	float radius{ 4.0f }; // pixels, for CIRCLE shape
 	TileRef tile{}; // used only for TILE shape
 	unsigned char red{ 0 };
 	unsigned char green{ 0 };
 	unsigned char blue{ 0 };
-	unsigned char redEnd{ 0 }; // color at end of lifetime - interpolated over duration
+	// color at end of lifetime - interpolated over duration
+	unsigned char redEnd{ 0 };
 	unsigned char greenEnd{ 0 }; // default 0,0,0 = cool to black
 	unsigned char blueEnd{ 0 };
 	float spawnTime{ 0.0f };

@@ -29,7 +29,8 @@ struct Prefab
 	int depthMin{ 1 };
 	int depthMax{ 99 };
 	float weight{ 1.0f };
-	std::vector<std::string> rows; // ASCII rows; all rows must be the same length
+	// ASCII rows; all rows must be the same length
+	std::vector<std::string> rows;
 
 	int width() const { return rows.empty() ? 0 : static_cast<int>(rows[0].size()); }
 
