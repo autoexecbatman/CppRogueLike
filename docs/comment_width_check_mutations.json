@@ -1,0 +1,118 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "python",
+    "docs/comment_width_check.py",
+    "--self-test"
+  ],
+  "mutations": [
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "            width += TAB - width % TAB",
+      "mutated": "            width += 1",
+      "catches": "a tab counted as one column: the line fitting only at tab 1 is missed"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "columns(text) > LIMIT",
+      "mutated": "columns(text) >= LIMIT",
+      "catches": "the limit off by one: the comment at exactly 80 is reported"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "        text = raw.removesuffix(\"\\r\")",
+      "mutated": "        text = raw",
+      "catches": "a carriage return kept: with CRLF every path ends in it and no file is read"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "                new_left -= 1\n                if path:",
+      "mutated": "                if path:",
+      "catches": "added lines not counted: the hunk never ends and later files are lost"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "                new_left -= 1\n                line += 1",
+      "mutated": "                new_left -= 1",
+      "catches": "a context line not counted: the line after it is numbered one short"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "path = name if CHECKED_PATH.fullmatch(name) else None",
+      "mutated": "path = name",
+      "catches": "every file read: the docs, data and tools lines are reported"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "CHECKED_PATH = re.compile(r\"(?:src|tests)/.*\\.(?:cpp|h)\")",
+      "mutated": "CHECKED_PATH = re.compile(r\"(?:src|tests)/.*\")",
+      "catches": "any file under src/ read: the JSON under src/json/ is reported"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "            name = text[4:].removeprefix(\"b/\")",
+      "mutated": "            name = text[4:]",
+      "catches": "the b/ prefix kept: no path matches and every finding is missed"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "            if text.startswith(\"+\"):",
+      "mutated": "            if text.startswith((\"+\", \"-\")):",
+      "catches": "removed lines read as added: the removed long comment is reported"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "    return \"//\" in blank_literals(text) and columns(text) > LIMIT",
+      "mutated": "    return \"//\" in text and columns(text) > LIMIT",
+      "catches": "literals not blanked: the long URL string reads as a comment"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "    return \"//\" in blank_literals(text) and columns(text) > LIMIT",
+      "mutated": "    return columns(text) > LIMIT",
+      "catches": "no comment required: the long code line is reported"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "PADDED = re.compile(r\"(?:\\t+ +| +)\\S\")",
+      "mutated": "PADDED = re.compile(r\"\\t+ +\\S\")",
+      "catches": "only tabs then spaces: the space-indented line is missed"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "PADDED = re.compile(r\"(?:\\t+ +| +)\\S\")",
+      "mutated": "PADDED = re.compile(r\"(?:\\t+ *| +)\\S\")",
+      "catches": "spaces made optional: tab-indented lines are reported"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "    code = blank(text).rstrip()",
+      "mutated": "    code = text.rstrip()",
+      "catches": "literals not blanked: a { inside a logged string opens a list"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "    if not code.endswith(\",\"):",
+      "mutated": "    if False:",
+      "catches": "no trailing comma required: an opening brace alone is reported"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "        elif character == \"}\" and depth:\n            depth -= 1",
+      "mutated": "        elif character == \"}\" and depth:\n            pass",
+      "catches": "closed braces kept open: a one-line list argument is reported"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "            old_left = int(header.group(1) or 1)",
+      "mutated": "            old_left = int(header.group(1) or 0)",
+      "catches": "an old side with no count read as 0: the hunk overruns into later files"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "            new_left = int(header.group(3) or 1)",
+      "mutated": "            new_left = int(header.group(3) or 0)",
+      "catches": "a new side with no count read as 0: the last file's line is missed"
+    }
+  ]
+}

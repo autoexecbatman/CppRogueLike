@@ -1,0 +1,60 @@
+diff --git a/src/Fixture.cpp b/src/Fixture.cpp
+--- a/src/Fixture.cpp
++++ b/src/Fixture.cpp
+@@ -10,2 +10,2 @@
+-	//  the comment runs on past where it should have stopped the comment runs on past where it
+ 	//  the comment runs on past where it should have stopped the comment runs on past where it
++	//  the comment runs on past where it should have stopped the comment runs on pas
+@@ -40,0 +40,19 @@
++	//  the comment runs on past where it should have stopped the comment runs on
++	//  the comment runs on past where it should have stopped the comment runs o
++										//  the comment runs on past where it should 
++	const int total = compute_total(firstArgument, secondArgument, thirdArgument);
++	int count{ 0 }; //  the comment runs on past where it should have stopped the 
++	const char* address = "http://example.com/a/path/that/runs/well/past/eighty/columns";
++		    secondArgument);
++		secondArgument);
++    secondArgument);
++	const Pair pair = Pair{ first,
++		second };
++	const Pair other = Pair{
++		first,
++		second,
++	};
++	call(Pair{ first, second },
++	const Table table = { { 8, 0 },
++	log("{ a,", value,
++++count; //  the comment runs on past where it should have stopped the comment runs on pas
+diff --git a/tests/Fixture.h b/tests/Fixture.h
+--- a/tests/Fixture.h
++++ b/tests/Fixture.h
+@@ -1 +1,1 @@
+-// The old opening line.
++//  the comment runs on past where it should have stopped the comment runs on pas
+diff --git a/docs/notes.md b/docs/notes.md
+--- a/docs/notes.md
++++ b/docs/notes.md
+@@ -0,0 +1,1 @@
++    //  the comment runs on past where it should have stopped the comment runs on past whe
+diff --git a/src/json/fixture.json b/src/json/fixture.json
+--- a/src/json/fixture.json
++++ b/src/json/fixture.json
+@@ -0,0 +1,1 @@
++    //  the comment runs on past where it should have stopped the comment runs on past whe
+diff --git a/tools/Fixture.cpp b/tools/Fixture.cpp
+--- a/tools/Fixture.cpp
++++ b/tools/Fixture.cpp
+@@ -0,0 +1,1 @@
++    //  the comment runs on past where it should have stopped the comment runs on past whe
+diff --git a/src/Gone.cpp b/src/Gone.cpp
+deleted file mode 100644
+--- a/src/Gone.cpp
++++ /dev/null
+@@ -1,1 +0,0 @@
+-    //  the comment runs on past where it should have stopped the comment runs on past whe
+diff --git a/src/Last.cpp b/src/Last.cpp
+--- a/src/Last.cpp
++++ b/src/Last.cpp
+@@ -5,0 +6 @@
++	    tail();
+\ No newline at end of file

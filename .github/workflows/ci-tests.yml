@@ -8,6 +8,36 @@ on:
   workflow_dispatch:
 
 jobs:
+  added-lines:
+    name: Check added lines against the 80-column rules
+    runs-on: ubuntu-latest
+    steps:
+    # The whole history, so the base of the pushed range exists here.
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    # A push checks what it added since the branch's last tip, and a pull
+    # request what it adds to its base. A new branch or a manual run has no
+    # base, so its last commit is checked.
+    - name: Check the lines the range adds
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        PUSH_BEFORE: ${{ github.event.before }}
+        PULL_REQUEST_BASE: ${{ github.event.pull_request.base.sha }}
+      run: |
+        no_commit=0000000000000000000000000000000000000000
+        if [ "$EVENT_NAME" = "pull_request" ]; then
+          base="$PULL_REQUEST_BASE"
+        elif [ "$EVENT_NAME" = "push" ] && [ -n "$PUSH_BEFORE" ] &&
+          [ "$PUSH_BEFORE" != "$no_commit" ]; then
+          base="$PUSH_BEFORE"
+        else
+          base="$(git rev-parse HEAD^)"
+        fi
+        python3 docs/comment_width_check.py --range "$base..HEAD"
+
   build-and-test:
     name: Build and Run Tests
     runs-on: windows-latest
