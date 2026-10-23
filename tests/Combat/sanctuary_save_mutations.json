@@ -53,7 +53,10 @@
       "file": "src/BuffSystem.cpp",
       "original": "\tauto found = std::ranges::find_if(creature.activeBuffs, matches_type);\n\n\tif (found != creature.activeBuffs.end())",
       "mutated": "\tauto found = std::ranges::find_if(creature.activeBuffs, matches_type);\n\tfor (Buff& anyBuff : creature.activeBuffs)\n\t{\n\t\tanyBuff.opponentSaves.clear();\n\t}\n\n\tif (found != creature.activeBuffs.end())",
-      "catches": "any other spell clearing the sanctuary's saves, not a new casting of it"
+      "catches": "any other spell clearing the sanctuary's saves, not a new casting of it",
+      "introduces": [
+        "anyBuff"
+      ]
     },
     {
       "file": "src/Creature.cpp",

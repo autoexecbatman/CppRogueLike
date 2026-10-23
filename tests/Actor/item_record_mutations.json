@@ -23,7 +23,10 @@
       "file": "src/Item.cpp",
       "original": "\t\tconst auto& enh = source.at(\"enhancement\");",
       "mutated": "\t\tconst json emptyEnhancement = json::object();\n\t\tif (!source.contains(\"enhancement\")) { return; }\n\t\tconst auto& enh = source.at(\"enhancement\");",
-      "catches": "a record without its enhancement block loading quietly"
+      "catches": "a record without its enhancement block loading quietly",
+      "introduces": [
+        "emptyEnhancement"
+      ]
     },
     {
       "file": "src/Item.cpp",

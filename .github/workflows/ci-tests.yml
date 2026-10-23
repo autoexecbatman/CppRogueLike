@@ -38,6 +38,12 @@ jobs:
         fi
         python3 docs/comment_width_check.py --range "$base..HEAD"
 
+    # A mutant whose text holds a token no edit meant cannot build, and a
+    # sweep reads a failed build as caught. Every plan is read, since a plan
+    # can break without its own file changing.
+    - name: Check the mutation plans for fused tokens
+      run: python3 docs/fused_tokens.py
+
   build-and-test:
     name: Build and Run Tests
     runs-on: windows-latest

@@ -89,13 +89,19 @@
       "file": "src/Trap.cpp",
       "original": "\tswitch ((*found)->attempt_disarm(thief, ctx))",
       "mutated": "\tconst int roundsRolledFirst = roll_disarm_rounds(*ctx.dice);\n\tconst auto roll_disarm_rounds = [roundsRolledFirst](RandomDice&)\n\t{\n\t\treturn roundsRolledFirst;\n\t};\n\tswitch ((*found)->attempt_disarm(thief, ctx))",
-      "catches": "the 1d10 for the time rolled before the d100 for the attempt"
+      "catches": "the 1d10 for the time rolled before the d100 for the attempt",
+      "introduces": [
+        "roundsRolledFirst"
+      ]
     },
     {
       "file": "src/Trap.cpp",
       "original": "\tcase DisarmResult::ALREADY_TRIED:\n\t{\n",
       "mutated": "\tcase DisarmResult::ALREADY_TRIED:\n\t{\n\t\t[[maybe_unused]] const int wasted = roll_disarm_rounds(*ctx.dice);\n",
-      "catches": "a refusal that rolls the 1d10 and throws it away"
+      "catches": "a refusal that rolls the 1d10 and throws it away",
+      "introduces": [
+        "wasted"
+      ]
     }
   ]
 }

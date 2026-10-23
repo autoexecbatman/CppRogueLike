@@ -1,0 +1,3 @@
+// The tests/ half of the sources docs/fused_tokens.py --self-test reads.
+// label is named only here, so a silent entry using it needs tests/ read.
+void check_label(int label);

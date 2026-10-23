@@ -41,7 +41,10 @@
       "file": "src/Palette.cpp",
       "original": "catch (const json::parse_error& error)",
       "mutated": "catch (const json::type_error& error)",
-      "catches": "a parse failure escaping unwrapped, without the path and past save_palette_reporting's catch"
+      "catches": "a parse failure escaping unwrapped, without the path and past save_palette_reporting's catch",
+      "introduces": [
+        "type_error"
+      ]
     },
     {
       "file": "src/Palette.cpp",

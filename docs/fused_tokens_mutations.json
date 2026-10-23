@@ -1,0 +1,82 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "python",
+    "docs/fused_tokens.py",
+    "--self-test"
+  ],
+  "mutations": [
+    {
+      "file": "docs/fused_tokens.py",
+      "original": "    return set(IDENTIFIER.findall(blank(text)))",
+      "mutated": "    return set(IDENTIFIER.findall(text))",
+      "catches": "literals and comments read as code: returntrue in a string is refused"
+    },
+    {
+      "file": "docs/fused_tokens.py",
+      "original": "            if CODE_FILE.fullmatch(path.name):",
+      "mutated": "            if True:",
+      "catches": "every file in src/ read as source: a note's returntrue becomes known"
+    },
+    {
+      "file": "docs/fused_tokens.py",
+      "original": "    for folder in (\"src\", \"tests\"):",
+      "mutated": "    for folder in (\"src\",):",
+      "catches": "tests/ not read: a name only a test defines is refused"
+    },
+    {
+      "file": "docs/fused_tokens.py",
+      "original": "    if not CODE_FILE.fullmatch(entry[\"file\"]):",
+      "mutated": "    if False:",
+      "catches": "every entry read: a Python method in a docs/ plan is refused"
+    },
+    {
+      "file": "docs/fused_tokens.py",
+      "original": "    allowed = known | identifiers(entry[\"original\"]) | set(declared)",
+      "mutated": "    allowed = known | set(declared)",
+      "catches": "the entry's original ignored: a name it already held is refused"
+    },
+    {
+      "file": "docs/fused_tokens.py",
+      "original": "    allowed = known | identifiers(entry[\"original\"]) | set(declared)",
+      "mutated": "    allowed = known | identifiers(entry[\"original\"])",
+      "catches": "the declaration ignored: a declared new name is refused"
+    },
+    {
+      "file": "docs/fused_tokens.py",
+      "original": "    allowed = known | identifiers(entry[\"original\"]) | set(declared)",
+      "mutated": "    allowed = identifiers(entry[\"original\"]) | set(declared)",
+      "catches": "the sources ignored: every known name is refused"
+    },
+    {
+      "file": "docs/fused_tokens.py",
+      "original": "SPLIT_NUMBER = re.compile(r\"\\b\\d+\\s+\\d+\\b\")",
+      "mutated": "SPLIT_NUMBER = re.compile(r\"\\b\\d+\\s*\\d+\\b\")",
+      "catches": "no space required: the number 51 reads as 5 and 1"
+    },
+    {
+      "file": "docs/fused_tokens.py",
+      "original": "              for pair in SPLIT_NUMBER.findall(blank(entry[\"mutated\"]))]",
+      "mutated": "              for pair in []]",
+      "catches": "the split-number rule gone: { 18,5 1 } passes"
+    },
+    {
+      "file": "docs/fused_tokens.py",
+      "original": "              for pair in SPLIT_NUMBER.findall(blank(entry[\"mutated\"]))]",
+      "mutated": "              for pair in SPLIT_NUMBER.findall(entry[\"mutated\"])]",
+      "catches": "numbers read inside literals: a logged \"18 5\" is refused"
+    },
+    {
+      "file": "docs/fused_tokens.py",
+      "original": "              if name not in mutated_names]",
+      "mutated": "              if False]",
+      "catches": "no stale check: a declaration naming nothing passes"
+    },
+    {
+      "file": "docs/fused_tokens.py",
+      "original": "IDENTIFIER = re.compile(r\"\\b[A-Za-z_]\\w*\\b\")",
+      "mutated": "IDENTIFIER = re.compile(r\"\\b[A-Za-z]+\\b\")",
+      "catches": "identifiers cut at a digit: total2 reads as the known total"
+    }
+  ]
+}

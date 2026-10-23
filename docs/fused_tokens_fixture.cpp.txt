@@ -1,0 +1,11 @@
+// The src/ half of the sources docs/fused_tokens.py --self-test reads its
+// known identifiers from. fused_tokens_fixture_test.cpp.txt is the tests/
+// half; a silent entry in fused_tokens_fixture.json uses names from both.
+#include <string>
+
+bool is_ready(const std::string& name)
+{
+	const int total = 0;
+	log(name);
+	return total == 0 ? true : false;
+}

@@ -1,0 +1,94 @@
+{
+  "cwd": ".",
+  "test_command": [
+    "python",
+    "docs/fused_tokens.py",
+    "--self-test"
+  ],
+  "mutations": [
+    {
+      "file": "src/Fixture.cpp",
+      "original": "\treturn false;",
+      "mutated": "\treturntrue;",
+      "catches": "fixture case 1"
+    },
+    {
+      "file": "src/Fixture.cpp",
+      "original": "\t{ 18, 1 },",
+      "mutated": "\t{ 18,5 1 },",
+      "catches": "fixture case 2"
+    },
+    {
+      "file": "src/Fixture.cpp",
+      "original": "\tconst std::string name = label;",
+      "mutated": "\tconststd::string name = label;",
+      "catches": "fixture case 3"
+    },
+    {
+      "file": "src/Fixture.h",
+      "original": "\treturn total;",
+      "mutated": "\treturn label;",
+      "catches": "fixture case 4",
+      "introduces": [
+        "anyBuff"
+      ]
+    },
+    {
+      "file": "src/Fixture.cpp",
+      "original": "\treturn total;",
+      "mutated": "\treturn anyBuff;",
+      "catches": "fixture case 5",
+      "introduces": [
+        "anyBuff"
+      ]
+    },
+    {
+      "file": "tests/FixtureTest.cpp",
+      "original": "\tconst int spare = total;",
+      "mutated": "\tconst int spare = spare;",
+      "catches": "fixture case 6"
+    },
+    {
+      "file": "src/Fixture.cpp",
+      "original": "\treturn total;",
+      "mutated": "\treturn label;",
+      "catches": "fixture case 7"
+    },
+    {
+      "file": "src/Fixture.cpp",
+      "original": "\tlog(label);",
+      "mutated": "\tlog(\"returntrue\");",
+      "catches": "fixture case 8"
+    },
+    {
+      "file": "src/Fixture.cpp",
+      "original": "\treturn total;",
+      "mutated": "\treturn total; // returntrue",
+      "catches": "fixture case 9"
+    },
+    {
+      "file": "src/Fixture.cpp",
+      "original": "\t{ 18, 1 },",
+      "mutated": "\t{ 18, 51 },",
+      "catches": "fixture case 10"
+    },
+    {
+      "file": "docs/fixture.py",
+      "original": "    return text",
+      "mutated": "    return text.rstrip()",
+      "catches": "fixture case 11"
+    },
+    {
+      "file": "src/Fixture.cpp",
+      "original": "\tlog(name);",
+      "mutated": "\tlog(\"18 5\");",
+      "catches": "fixture case 12"
+    },
+    {
+      "file": "src/Fixture.cpp",
+      "original": "\treturn total + 2;",
+      "mutated": "\treturn total2;",
+      "catches": "fixture case 13"
+    }
+  ]
+}
