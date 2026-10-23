@@ -127,7 +127,8 @@ void spend_memorized(Spellcasting& spellcasting, std::string_view key);
 // Example:
 //   encode_spellcasting(Spellcasting{});
 //   // -> { "memorizedSpells": [], "training": null, "innatePowers": [] }
-[[nodiscard]] nlohmann::json encode_spellcasting(const Spellcasting& spellcasting);
+[[nodiscard]] nlohmann::json encode_spellcasting(
+	const Spellcasting& spellcasting);
 
 // The inverse of encode_spellcasting. Throws when a field is missing or a name is unknown.
 //

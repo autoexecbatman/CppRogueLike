@@ -17,9 +17,14 @@
 namespace
 {
 
-unsigned char blend_channel(unsigned char nearValue, unsigned char farValue, int cost, int farthestCost)
+unsigned char blend_channel(
+	unsigned char nearValue,
+	unsigned char farValue,
+	int cost,
+	int farthestCost)
 {
-	return static_cast<unsigned char>(nearValue + (farValue - nearValue) * cost / farthestCost);
+	return static_cast<unsigned char>(
+		nearValue + (farValue - nearValue) * cost / farthestCost);
 }
 
 } // namespace
@@ -35,7 +40,9 @@ std::optional<std::string> dijkstra_cost_label(std::optional<int> cost)
 
 Color dijkstra_cost_tint(int cost, int farthestCost)
 {
-	assert(cost >= 0 && cost <= farthestCost && "dijkstra_cost_tint: cost lies outside the reached range");
+	assert(
+		cost >= 0 && cost <= farthestCost &&
+		"dijkstra_cost_tint: cost lies outside the reached range");
 
 	// Only the player's tile was reached, so there is no far end to blend toward.
 	if (farthestCost == 0)
@@ -69,17 +76,21 @@ void CostOverlay::render(const GameContext& ctx) const
 	assert(ctx.map && "CostOverlay::render called without a map");
 	assert(ctx.renderer && "CostOverlay::render called without a renderer");
 	assert(ctx.pathfinder && "CostOverlay::render called without a pathfinder");
-	assert(ctx.tileConfig && "CostOverlay::render called without a tile configuration");
+	assert(
+		ctx.tileConfig &&
+		"CostOverlay::render called without a tile configuration");
 
 	const Map& map = *ctx.map;
 	const Renderer& renderer = *ctx.renderer;
 
 	// The map a creature that moves as the player does would descend toward the player.
 	const Vector2D goal = ctx.player()->position;
-	const Pathfinding::Mobility mobility = Pathfinding::mobility_of(*ctx.player(), *ctx.tileConfig);
+	const Pathfinding::Mobility mobility =
+		Pathfinding::mobility_of(*ctx.player(), *ctx.tileConfig);
 	const auto cost_at = [&](int col, int row)
 	{
-		return ctx.pathfinder->cost_to(goal, Vector2D{ col, row }, mobility, ctx);
+		return ctx.pathfinder
+			->cost_to(goal, Vector2D{ col, row }, mobility, ctx);
 	};
 
 	// The tint is relative to the farthest tile reached, so find it before drawing any.
@@ -110,7 +121,8 @@ void CostOverlay::render(const GameContext& ctx) const
 			const int screenY = row * tileSize - cameraY;
 
 			// A tile wholly off the screen draws nothing anyone can see.
-			if (screenX + tileSize <= 0 || screenY + tileSize <= 0 || screenX >= screenWidth || screenY >= screenHeight)
+			if (screenX + tileSize <= 0 || screenY + tileSize <= 0 ||
+				screenX >= screenWidth || screenY >= screenHeight)
 			{
 				continue;
 			}
@@ -122,11 +134,18 @@ void CostOverlay::render(const GameContext& ctx) const
 				continue;
 			}
 
-			DrawRectangle(screenX, screenY, tileSize, tileSize, dijkstra_cost_tint(*cost, farthestCost));
+			DrawRectangle(
+				screenX,
+				screenY,
+				tileSize,
+				tileSize,
+				dijkstra_cost_tint(*cost, farthestCost));
 
 			// Centred on the tile, so a three-digit cost does not run into its neighbour.
-			const int labelX = screenX + (tileSize - renderer.measure_text(*label)) / 2;
-			const int labelY = screenY + (tileSize - renderer.get_font_size()) / 2;
+			const int labelX =
+				screenX + (tileSize - renderer.measure_text(*label)) / 2;
+			const int labelY =
+				screenY + (tileSize - renderer.get_font_size()) / 2;
 			renderer.draw_text_color(Vector2D{ labelX, labelY }, *label, WHITE);
 		}
 	}

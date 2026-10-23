@@ -36,7 +36,9 @@ protected:
 	// The key is deliberately not a builtin's: a builtin spell's effect is
 	// compiled in rather than read from data, so only a custom key exercises
 	// parse_effect_type at all.
-	std::string write_spell(std::string_view spellClass, std::string_view effect)
+	std::string write_spell(
+		std::string_view spellClass,
+		std::string_view effect)
 	{
 		nlohmann::json root = shipped_spells();
 		root["test_only_spell"] = {
@@ -62,9 +64,8 @@ protected:
 		return scratchFile.string();
 	}
 
-	std::filesystem::path scratchFile{
-		std::filesystem::temp_directory_path() / "rogue_spell_load_test.json"
-	};
+	std::filesystem::path scratchFile{ std::filesystem::temp_directory_path() /
+		"rogue_spell_load_test.json" };
 	SpellRegistry spells{};
 };
 
@@ -79,7 +80,8 @@ TEST_F(SpellDataLoadTest, ShippedSpellDataLoads)
 TEST_F(SpellDataLoadTest, AFileWithoutABuiltinSpellIsRefused)
 {
 	nlohmann::json root = shipped_spells();
-	ASSERT_EQ(root.erase("bless"), 1U) << "the shipped file no longer has bless to remove";
+	ASSERT_EQ(root.erase("bless"), 1U)
+		<< "the shipped file no longer has bless to remove";
 
 	EXPECT_THROW(spells.load(write(root)), std::runtime_error);
 }
@@ -107,6 +109,7 @@ TEST_F(SpellDataLoadTest, EveryKnownClassLoads)
 	{
 		const std::string path = write_spell(spellClass, "bless");
 
-		EXPECT_NO_THROW(spells.load(path)) << "class '" << spellClass << "' was refused";
+		EXPECT_NO_THROW(spells.load(path))
+			<< "class '" << spellClass << "' was refused";
 	}
 }

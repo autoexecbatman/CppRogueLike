@@ -42,5 +42,6 @@ public:
 
 	// The slots a template grants. An unknown name throws, the empty name
 	// included: a creature that wears nothing is built on "beast".
-	[[nodiscard]] const std::vector<EquipmentSlot>& get(std::string_view name) const;
+	[[nodiscard]] const std::vector<EquipmentSlot>& get(
+		std::string_view name) const;
 };

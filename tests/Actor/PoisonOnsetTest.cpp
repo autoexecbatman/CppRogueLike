@@ -75,7 +75,9 @@ protected:
 		spider.experienceReward = std::make_unique<ExperienceReward>(0);
 		spider.healthPool = std::make_unique<HealthPool>(10);
 		spider.armorClass = std::make_unique<ArmorClass>(5);
-		spider.attacker = std::make_unique<MonsterAttacker>(spider, DamageInfo{ "1d6", DamageType::PHYSICAL });
+		spider.attacker = std::make_unique<MonsterAttacker>(
+			spider,
+			DamageInfo{ "1d6", DamageType::PHYSICAL });
 		spider.set_dr(0);
 		spider.set_thaco(20);
 		spider.set_strength(8);
@@ -113,8 +115,13 @@ protected:
 	// The roll this player needs against poison, with its Constitution adjustment.
 	int venom_save_target()
 	{
-		const int constitutionBonus = game.dataManager.constitution_for(player->get_constitution()).PoisonSave;
-		const int baseTarget = SavingThrows::target(player->get_creature_class(), player->get_creature_level(), SavingThrow::PARALYZATION_POISON_DEATH);
+		const int constitutionBonus =
+			game.dataManager.constitution_for(player->get_constitution())
+				.PoisonSave;
+		const int baseTarget = SavingThrows::target(
+			player->get_creature_class(),
+			player->get_creature_level(),
+			SavingThrow::PARALYZATION_POISON_DEATH);
 		return baseTarget - constitutionBonus;
 	}
 
@@ -126,7 +133,8 @@ protected:
 	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
 	Map map{ 20, 20 };
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 4, 5 }) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ 4, 5 }) };
 	Creature spider{
 		Vector2D{ 5, 5 },
 		ActorData{ TileRef{}, "giant spider", ColorPairId::WHITE_BLACK },
@@ -136,20 +144,24 @@ protected:
 // A dose waits its rounds out, and lands on the last of them.
 TEST_F(PoisonOnsetTest, ADoseLandsWhenItsRoundsRunOut)
 {
-	player->take_poison(PendingPoison{
-		.roundsUntilOnset = TYPE_A_ONSET_ROUNDS,
-		.damage = TYPE_A_DAMAGE,
-	});
+	player->take_poison(
+		PendingPoison{
+			.roundsUntilOnset = TYPE_A_ONSET_ROUNDS,
+			.damage = TYPE_A_DAMAGE,
+		});
 
-	EXPECT_EQ(tick_through(*player, TYPE_A_ONSET_ROUNDS - 1), 0) << "the poison landed early";
+	EXPECT_EQ(tick_through(*player, TYPE_A_ONSET_ROUNDS - 1), 0)
+		<< "the poison landed early";
 	EXPECT_EQ(tick_through(*player, 1), TYPE_A_DAMAGE);
-	EXPECT_FALSE(player->get_pending_poison().has_value()) << "the dose is still working after it landed";
+	EXPECT_FALSE(player->get_pending_poison().has_value())
+		<< "the dose is still working after it landed";
 }
 
 // It lands once, not every round after.
 TEST_F(PoisonOnsetTest, ADoseLandsOnlyOnce)
 {
-	player->take_poison(PendingPoison{ .roundsUntilOnset = 1, .damage = TYPE_A_DAMAGE });
+	player->take_poison(
+		PendingPoison{ .roundsUntilOnset = 1, .damage = TYPE_A_DAMAGE });
 
 	EXPECT_EQ(tick_through(*player, 20), TYPE_A_DAMAGE);
 }
@@ -168,7 +180,8 @@ TEST_F(PoisonOnsetTest, ASecondDoseReplacesTheFirst)
 TEST_F(PoisonOnsetTest, ADoseCanKill)
 {
 	player->set_hp(4);
-	player->take_poison(PendingPoison{ .roundsUntilOnset = 1, .damage = TYPE_A_DAMAGE });
+	player->take_poison(
+		PendingPoison{ .roundsUntilOnset = 1, .damage = TYPE_A_DAMAGE });
 
 	tick_through(*player, 1);
 
@@ -178,7 +191,8 @@ TEST_F(PoisonOnsetTest, ADoseCanKill)
 // A dose survives a saved game: what is owed is owed.
 TEST_F(PoisonOnsetTest, ADoseSurvivesASaveAndALoad)
 {
-	player->take_poison(PendingPoison{ .roundsUntilOnset = 9, .damage = TYPE_A_DAMAGE });
+	player->take_poison(
+		PendingPoison{ .roundsUntilOnset = 9, .damage = TYPE_A_DAMAGE });
 
 	nlohmann::json saved;
 	player->save(saved);
@@ -186,7 +200,8 @@ TEST_F(PoisonOnsetTest, ADoseSurvivesASaveAndALoad)
 	loaded->healthPool = std::make_unique<HealthPool>(STARTING_HP);
 	loaded->load(saved);
 
-	ASSERT_TRUE(loaded->get_pending_poison().has_value()) << "the poison was forgotten in the save";
+	ASSERT_TRUE(loaded->get_pending_poison().has_value())
+		<< "the poison was forgotten in the save";
 	EXPECT_EQ(loaded->get_pending_poison()->roundsUntilOnset, 9);
 	EXPECT_EQ(loaded->get_pending_poison()->damage, TYPE_A_DAMAGE);
 }
@@ -195,13 +210,14 @@ TEST_F(PoisonOnsetTest, ADoseSurvivesASaveAndALoad)
 // that keeps only the damage keeps nothing: it comes back as a dose that does nothing.
 TEST_F(PoisonOnsetTest, ADoseCarriesItsConditionThroughASaveAndALoad)
 {
-	player->take_poison(PendingPoison{
-		.roundsUntilOnset = 1,
-		.damage = 0,
-		.effect = BuffType::HAIRY_SPIDER_VENOM,
-		.effectValue = -1,
-		.effectRounds = 3,
-	});
+	player->take_poison(
+		PendingPoison{
+			.roundsUntilOnset = 1,
+			.damage = 0,
+			.effect = BuffType::HAIRY_SPIDER_VENOM,
+			.effectValue = -1,
+			.effectRounds = 3,
+		});
 
 	nlohmann::json saved;
 	player->save(saved);
@@ -209,8 +225,11 @@ TEST_F(PoisonOnsetTest, ADoseCarriesItsConditionThroughASaveAndALoad)
 	loaded->healthPool = std::make_unique<HealthPool>(STARTING_HP);
 	loaded->load(saved);
 
-	ASSERT_TRUE(loaded->get_pending_poison().has_value()) << "the poison was forgotten in the save";
-	EXPECT_EQ(loaded->get_pending_poison()->effect, BuffType::HAIRY_SPIDER_VENOM);
+	ASSERT_TRUE(loaded->get_pending_poison().has_value())
+		<< "the poison was forgotten in the save";
+	EXPECT_EQ(
+		loaded->get_pending_poison()->effect,
+		BuffType::HAIRY_SPIDER_VENOM);
 	EXPECT_EQ(loaded->get_pending_poison()->effectValue, -1);
 	EXPECT_EQ(loaded->get_pending_poison()->effectRounds, 3);
 }
@@ -230,13 +249,16 @@ TEST_F(PoisonOnsetTest, ADeadCreatureIsLeftAlone)
 		ActorData{ TileRef{}, "victim", ColorPairId::WHITE_BLACK },
 	};
 	victim.healthPool = std::make_unique<HealthPool>(10);
-	victim.take_poison(PendingPoison{ .roundsUntilOnset = 1, .damage = TYPE_A_DAMAGE });
+	victim.take_poison(
+		PendingPoison{ .roundsUntilOnset = 1, .damage = TYPE_A_DAMAGE });
 	victim.set_hp(0);
 
 	tick_through(victim, 20);
 
-	ASSERT_TRUE(victim.get_pending_poison().has_value()) << "a dead creature took its dose";
-	EXPECT_EQ(victim.get_pending_poison()->roundsUntilOnset, 1) << "the dose counted down in a dead creature";
+	ASSERT_TRUE(victim.get_pending_poison().has_value())
+		<< "a dead creature took its dose";
+	EXPECT_EQ(victim.get_pending_poison()->roundsUntilOnset, 1)
+		<< "the dose counted down in a dead creature";
 }
 
 // The bite: a failed save costs nothing at the time, and fifteen points fifteen rounds on.
@@ -246,9 +268,12 @@ TEST_F(PoisonOnsetTest, AFailedSaveAgainstAGiantSpiderPaysFifteenRoundsLater)
 
 	spider.ai->update(spider, ctx);
 
-	EXPECT_EQ(STARTING_HP - player->get_hp(), BITE_DIE) << "the venom landed with the bite";
-	ASSERT_TRUE(player->get_pending_poison().has_value()) << "no poison was left working";
-	EXPECT_EQ(tick_through(*player, TYPE_A_ONSET_ROUNDS - 1), 0) << "the fifteen minutes were not waited out";
+	EXPECT_EQ(STARTING_HP - player->get_hp(), BITE_DIE)
+		<< "the venom landed with the bite";
+	ASSERT_TRUE(player->get_pending_poison().has_value())
+		<< "no poison was left working";
+	EXPECT_EQ(tick_through(*player, TYPE_A_ONSET_ROUNDS - 1), 0)
+		<< "the fifteen minutes were not waited out";
 	EXPECT_EQ(tick_through(*player, 1), TYPE_A_DAMAGE);
 }
 
@@ -259,7 +284,8 @@ TEST_F(PoisonOnsetTest, AMadeSaveAgainstAGiantSpiderLeavesNoPoison)
 
 	spider.ai->update(spider, ctx);
 
-	EXPECT_FALSE(player->get_pending_poison().has_value()) << "a made save still poisoned";
+	EXPECT_FALSE(player->get_pending_poison().has_value())
+		<< "a made save still poisoned";
 	EXPECT_EQ(tick_through(*player, 30), 0);
 }
 
@@ -272,7 +298,8 @@ TEST_F(PoisonOnsetTest, TheHugeSpidersVictimSavesAtPlusOne)
 
 	spider.ai->update(spider, ctx);
 
-	EXPECT_FALSE(player->get_pending_poison().has_value()) << "the spider's own +1 was left out";
+	EXPECT_FALSE(player->get_pending_poison().has_value())
+		<< "the spider's own +1 was left out";
 }
 
 // Two short of it fails, so the +1 is one point and not a licence.
@@ -283,5 +310,6 @@ TEST_F(PoisonOnsetTest, TwoShortOfTheTargetStillFails)
 
 	spider.ai->update(spider, ctx);
 
-	EXPECT_TRUE(player->get_pending_poison().has_value()) << "a roll two under the target saved";
+	EXPECT_TRUE(player->get_pending_poison().has_value())
+		<< "a roll two under the target saved";
 }

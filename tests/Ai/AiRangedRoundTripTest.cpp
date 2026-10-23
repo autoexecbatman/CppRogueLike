@@ -27,10 +27,11 @@ constexpr int OPTIMAL_DISTANCE = 4;
 TEST(AiRangedRoundTripTest, ARangedMonsterLoadsAsTheSameAiItSaved)
 {
 	AiMonsterRanged archer{};
-	archer.load(json{
-		{ "maxRangeDistance", MAX_RANGE },
-		{ "optimalDistance", OPTIMAL_DISTANCE },
-	});
+	archer.load(
+		json{
+			{ "maxRangeDistance", MAX_RANGE },
+			{ "optimalDistance", OPTIMAL_DISTANCE },
+		});
 	json saved;
 	archer.save(saved);
 
@@ -40,7 +41,8 @@ TEST(AiRangedRoundTripTest, ARangedMonsterLoadsAsTheSameAiItSaved)
 
 	EXPECT_EQ(archer.get_ai_type(), AiType::RANGED_MONSTER);
 	EXPECT_EQ(loaded->get_ai_type(), archer.get_ai_type());
-	EXPECT_EQ(resaved, saved) << "the loaded Ai saved something else: " << resaved.dump();
+	EXPECT_EQ(resaved, saved)
+		<< "the loaded Ai saved something else: " << resaved.dump();
 }
 
 // end of file: AiRangedRoundTripTest.cpp

@@ -32,8 +32,11 @@ private:
 
 public:
 	// Creature lifecycle
-	void update_creatures(std::span<std::unique_ptr<Creature>> creatures, GameContext& ctx);
-	void cleanup_dead_creatures(std::vector<std::unique_ptr<Creature>>& creatures);
+	void update_creatures(
+		std::span<std::unique_ptr<Creature>> creatures,
+		GameContext& ctx);
+	void cleanup_dead_creatures(
+		std::vector<std::unique_ptr<Creature>>& creatures);
 
 	// Puts a creature on the level and on the clock, at the moment it arrives. The
 	// one way a creature enters play: pushing onto ctx.creatures directly leaves it

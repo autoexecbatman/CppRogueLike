@@ -78,7 +78,8 @@ Item& carry_helm(Player& player, GameContext& ctx)
 {
 	auto helm = ItemCreator::create("helm_of_brilliance", player.position, ctx);
 	Item* carried = helm.get();
-	[[maybe_unused]] const auto added = InventoryOperations::add_item(player.inventoryData, std::move(helm));
+	[[maybe_unused]] const auto added =
+		InventoryOperations::add_item(player.inventoryData, std::move(helm));
 	return *carried;
 }
 
@@ -93,7 +94,8 @@ Item& carry_identified_helm(Player& player, GameContext& ctx)
 // Puts on or takes off an item the way the inventory's use does.
 void use(Item& item, Player& player, GameContext& ctx)
 {
-	[[maybe_unused]] const bool used = use_item(*item.behavior, item, player, ctx);
+	[[maybe_unused]] const bool used =
+		use_item(*item.behavior, item, player, ctx);
 }
 
 HelmCommand command_of(const Item& helm)
@@ -103,7 +105,9 @@ HelmCommand command_of(const Item& helm)
 
 bool offers_the_word(const Player& player)
 {
-	for (const SpellSystem::ItemGrantedSpell& granted : SpellSystem::get_item_granted_spells(player, 0))
+	for (
+		const SpellSystem::ItemGrantedSpell& granted :
+		SpellSystem::get_item_granted_spells(player, 0))
 	{
 		if (granted.power == SpellSystem::ItemPower::SPEAK_COMMAND_WORD)
 		{
@@ -127,7 +131,13 @@ protected:
 
 	Player& player() { return *mock.player; }
 
-	int fire_strength() { return DamageResolver::resistance_strength(DamageType::FIRE, player(), ctx); }
+	int fire_strength()
+	{
+		return DamageResolver::resistance_strength(
+			DamageType::FIRE,
+			player(),
+			ctx);
+	}
 
 	MockGameContext mock{};
 	GameContext ctx{};
@@ -139,11 +149,15 @@ TEST_F(HelmCommandWordTest, AnUnidentifiedHelmWornGivesNothingAndOffersNoWord)
 	Item& helm = carry_helm(player(), ctx);
 
 	use(helm, player(), ctx);
-	ASSERT_EQ(player().get_equipped_item(EquipmentSlot::HEAD), &helm) << "the helm did not go on";
+	ASSERT_EQ(player().get_equipped_item(EquipmentSlot::HEAD), &helm)
+		<< "the helm did not go on";
 
-	EXPECT_EQ(player().get_armor_class(), BARE_ARMOR_CLASS) << "the helm's armour counts before its word is spoken";
-	EXPECT_EQ(fire_strength(), 0) << "the helm's fire protection counts before its word is spoken";
-	EXPECT_FALSE(offers_the_word(player())) << "an unidentified helm offered a word nobody knows";
+	EXPECT_EQ(player().get_armor_class(), BARE_ARMOR_CLASS)
+		<< "the helm's armour counts before its word is spoken";
+	EXPECT_EQ(fire_strength(), 0)
+		<< "the helm's fire protection counts before its word is spoken";
+	EXPECT_FALSE(offers_the_word(player()))
+		<< "an unidentified helm offered a word nobody knows";
 }
 
 TEST_F(HelmCommandWordTest, AnIdentifiedDormantHelmOffersItsWord)
@@ -152,10 +166,13 @@ TEST_F(HelmCommandWordTest, AnIdentifiedDormantHelmOffersItsWord)
 
 	use(helm, player(), ctx);
 
-	EXPECT_EQ(player().get_armor_class(), BARE_ARMOR_CLASS) << "the helm's armour counts before its word is spoken";
-	EXPECT_EQ(fire_strength(), 0) << "the helm's fire protection counts before its word is spoken";
+	EXPECT_EQ(player().get_armor_class(), BARE_ARMOR_CLASS)
+		<< "the helm's armour counts before its word is spoken";
+	EXPECT_EQ(fire_strength(), 0)
+		<< "the helm's fire protection counts before its word is spoken";
 	EXPECT_TRUE(is_awaiting_command_word(helm));
-	EXPECT_TRUE(offers_the_word(player())) << "an identified helm on the head offered no word to speak";
+	EXPECT_TRUE(offers_the_word(player()))
+		<< "an identified helm on the head offered no word to speak";
 }
 
 TEST_F(HelmCommandWordTest, SpeakingTheWordEmpowersTheHelm)
@@ -166,9 +183,12 @@ TEST_F(HelmCommandWordTest, SpeakingTheWordEmpowersTheHelm)
 	speak_command_word(helm, player(), ctx);
 
 	EXPECT_EQ(command_of(helm), HelmCommand::EMPOWERED);
-	EXPECT_EQ(player().get_armor_class(), EMPOWERED_ARMOR_CLASS) << "the spoken helm's armour does not count";
-	EXPECT_EQ(fire_strength(), EMPOWERED_FIRE_STRENGTH) << "the spoken helm's fire protection does not count";
-	EXPECT_FALSE(offers_the_word(player())) << "a helm already spoken to offered its word again";
+	EXPECT_EQ(player().get_armor_class(), EMPOWERED_ARMOR_CLASS)
+		<< "the spoken helm's armour does not count";
+	EXPECT_EQ(fire_strength(), EMPOWERED_FIRE_STRENGTH)
+		<< "the spoken helm's fire protection does not count";
+	EXPECT_FALSE(offers_the_word(player()))
+		<< "a helm already spoken to offered its word again";
 }
 
 TEST_F(HelmCommandWordTest, TakingTheHelmOffSendsItDormant)
@@ -178,12 +198,15 @@ TEST_F(HelmCommandWordTest, TakingTheHelmOffSendsItDormant)
 	speak_command_word(helm, player(), ctx);
 
 	use(helm, player(), ctx);
-	ASSERT_EQ(player().get_equipped_item(EquipmentSlot::HEAD), nullptr) << "the helm did not come off";
+	ASSERT_EQ(player().get_equipped_item(EquipmentSlot::HEAD), nullptr)
+		<< "the helm did not come off";
 	use(helm, player(), ctx);
 
-	EXPECT_EQ(command_of(helm), HelmCommand::DORMANT) << "the helm kept its empowerment through being taken off";
+	EXPECT_EQ(command_of(helm), HelmCommand::DORMANT)
+		<< "the helm kept its empowerment through being taken off";
 	EXPECT_EQ(player().get_armor_class(), BARE_ARMOR_CLASS);
-	EXPECT_TRUE(offers_the_word(player())) << "the helm put back on did not ask for its word again";
+	EXPECT_TRUE(offers_the_word(player()))
+		<< "the helm put back on did not ask for its word again";
 }
 
 TEST_F(HelmCommandWordTest, AHelmUnequippedFromTheEquipmentScreenGoesDormant)
@@ -195,60 +218,77 @@ TEST_F(HelmCommandWordTest, AHelmUnequippedFromTheEquipmentScreenGoesDormant)
 
 	ASSERT_TRUE(player().unequip_item(EquipmentSlot::HEAD, ctx));
 
-	EXPECT_EQ(command_of(helm), HelmCommand::DORMANT) << "a helm taken off on the equipment screen kept its empowerment";
+	EXPECT_EQ(command_of(helm), HelmCommand::DORMANT)
+		<< "a helm taken off on the equipment screen kept its empowerment";
 }
 
-TEST_F(HelmCommandWordTest, AHelmTakenOffOnTheEquipmentScreenStopsProtectingAtOnce)
+TEST_F(
+	HelmCommandWordTest,
+	AHelmTakenOffOnTheEquipmentScreenStopsProtectingAtOnce)
 {
 	Item& helm = carry_identified_helm(player(), ctx);
 	use(helm, player(), ctx);
 	speak_command_word(helm, player(), ctx);
-	ASSERT_EQ(player().get_armor_class(), EMPOWERED_ARMOR_CLASS) << "the spoken helm never protected, so its removal shows nothing";
+	ASSERT_EQ(player().get_armor_class(), EMPOWERED_ARMOR_CLASS)
+		<< "the spoken helm never protected, so its removal shows nothing";
 
 	ASSERT_TRUE(player().unequip_item(EquipmentSlot::HEAD, ctx));
 
-	EXPECT_EQ(player().get_armor_class(), BARE_ARMOR_CLASS) << "the armour class still counts a helm that has come off";
+	EXPECT_EQ(player().get_armor_class(), BARE_ARMOR_CLASS)
+		<< "the armour class still counts a helm that has come off";
 }
 
 TEST_F(HelmCommandWordTest, AnIdentifiedHelmInThePackOffersNoWord)
 {
 	[[maybe_unused]] Item& helm = carry_identified_helm(player(), ctx);
 
-	EXPECT_FALSE(offers_the_word(player())) << "a helm nobody is wearing offered its word";
+	EXPECT_FALSE(offers_the_word(player()))
+		<< "a helm nobody is wearing offered its word";
 }
 
 TEST_F(HelmCommandWordTest, AHelmOfTeleportationStillGrantsTeleport)
 {
 	// Identified, so the only thing keeping a command word off it is that it has none.
-	auto helm = ItemCreator::create("helm_of_teleportation", player().position, ctx);
+	auto helm =
+		ItemCreator::create("helm_of_teleportation", player().position, ctx);
 	helm->identify_type();
 	ASSERT_TRUE(player().equip_item(std::move(helm), EquipmentSlot::HEAD, ctx));
 
-	const std::vector<SpellSystem::ItemGrantedSpell> granted = SpellSystem::get_item_granted_spells(player(), ctx.gameState->get_time());
+	const std::vector<SpellSystem::ItemGrantedSpell> granted =
+		SpellSystem::get_item_granted_spells(
+			player(),
+			ctx.gameState->get_time());
 
 	ASSERT_EQ(granted.size(), 1u);
 	EXPECT_EQ(granted.front().key, "teleport");
-	EXPECT_EQ(granted.front().power, SpellSystem::ItemPower::CAST_SPELL_ONCE_A_DAY);
+	EXPECT_EQ(
+		granted.front().power,
+		SpellSystem::ItemPower::CAST_SPELL_ONCE_A_DAY);
 }
 
 TEST_F(HelmCommandWordTest, AnEmpoweredHelmSurvivesASave)
 {
-	const ItemBehavior empowered = MagicalHelm{ MagicalEffect::BRILLIANCE, 2, HelmCommand::EMPOWERED };
+	const ItemBehavior empowered =
+		MagicalHelm{ MagicalEffect::BRILLIANCE, 2, HelmCommand::EMPOWERED };
 	json record;
 	save_behavior(empowered, record);
 
 	const ItemBehavior loaded = load_behavior(record);
 
-	EXPECT_EQ(std::get<MagicalHelm>(loaded).command, HelmCommand::EMPOWERED) << "the save lost the spoken word";
+	EXPECT_EQ(std::get<MagicalHelm>(loaded).command, HelmCommand::EMPOWERED)
+		<< "the save lost the spoken word";
 }
 
 TEST_F(HelmCommandWordTest, AHelmRecordWithoutItsCommandIsRefused)
 {
 	json record;
-	save_behavior(MagicalHelm{ MagicalEffect::BRILLIANCE, 2, HelmCommand::DORMANT }, record);
+	save_behavior(
+		MagicalHelm{ MagicalEffect::BRILLIANCE, 2, HelmCommand::DORMANT },
+		record);
 	record.erase("command");
 
-	EXPECT_THROW((void)load_behavior(record), std::exception) << "a helm record missing its command loaded with a default";
+	EXPECT_THROW((void)load_behavior(record), std::exception)
+		<< "a helm record missing its command loaded with a default";
 }
 
 namespace
@@ -275,8 +315,12 @@ namespace
 	ctx.menuManager->handle_menus(*ctx.menus, ctx);
 	hidden.renderer.end_frame();
 
-	exit_unless(command_of(helm) == HelmCommand::EMPOWERED, "choosing the word from the cast menu did not speak it");
-	exit_unless(ctx.gameState->get_time() > timeBefore, "speaking the word spent no turn");
+	exit_unless(
+		command_of(helm) == HelmCommand::EMPOWERED,
+		"choosing the word from the cast menu did not speak it");
+	exit_unless(
+		ctx.gameState->get_time() > timeBefore,
+		"speaking the word spent no turn");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
@@ -284,11 +328,13 @@ namespace
 
 TEST(HelmCommandWordMenuTest, SpeakingFromTheCastMenuSpendsATurn)
 {
-	const int childExitCode = exit_code_in_child(&speaking_from_the_cast_menu_spends_a_turn);
+	const int childExitCode =
+		exit_code_in_child(&speaking_from_the_cast_menu_spends_a_turn);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }

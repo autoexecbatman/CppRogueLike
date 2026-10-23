@@ -64,7 +64,8 @@ protected:
 
 		// Every other score is an unremarkable 9.
 		blueprint.abilityScores.fill(9);
-		blueprint.abilityScores.at(ability_index(Ability::CONSTITUTION)) = constitution;
+		blueprint.abilityScores.at(ability_index(Ability::CONSTITUTION)) =
+			constitution;
 		player = std::make_unique<Player>(Vector2D{ 0, 0 }, blueprint, ctx);
 		ctx.playerOwner = &player;
 	}
@@ -73,7 +74,9 @@ protected:
 	std::vector<std::string> constitution_messages() const
 	{
 		std::vector<std::string> found;
-		for (size_t index = 0; index < mock.messages.get_stored_message_count(); ++index)
+		for (
+			size_t index = 0; index < mock.messages.get_stored_message_count();
+			++index)
 		{
 			for (const auto& part : mock.messages.get_attack_message_at(index))
 			{
@@ -104,7 +107,8 @@ TEST_F(ConstitutionTrackerTest, FirstTickAppliesTheBonusWithoutReportingAChange)
 
 	EXPECT_EQ(player->get_max_hp(), BASE_HP + BONUS_AT_17);
 	EXPECT_TRUE(constitution_messages().empty())
-		<< "reported a change from a score the character never had: " << constitution_messages().front();
+		<< "reported a change from a score the character never had: "
+		<< constitution_messages().front();
 }
 
 // A second tick with nothing moved changes nothing and says nothing.
@@ -129,7 +133,9 @@ TEST_F(ConstitutionTrackerTest, ARealChangeIsReportedBetweenItsTwoScores)
 
 	EXPECT_EQ(player->get_max_hp(), BASE_HP + BONUS_AT_18);
 	ASSERT_EQ(constitution_messages().size(), 1u);
-	EXPECT_NE(constitution_messages().front().find("from 17 to 18"), std::string::npos)
+	EXPECT_NE(
+		constitution_messages().front().find("from 17 to 18"),
+		std::string::npos)
 		<< constitution_messages().front();
 }
 
@@ -167,7 +173,9 @@ TEST_F(ConstitutionTrackerTest, AFightersChangeCountsOnlyTheLevelsThatRolled)
 
 	player->update_constitution_bonus(ctx);
 
-	EXPECT_EQ(player->get_max_hp() - before, (BONUS_AT_18 - BONUS_AT_17) * FIGHTER_LAST_ROLLED_LEVEL);
+	EXPECT_EQ(
+		player->get_max_hp() - before,
+		(BONUS_AT_18 - BONUS_AT_17) * FIGHTER_LAST_ROLLED_LEVEL);
 }
 
 // A wizard's ended at 10th: 17 to 15 moves the capped +2 to +1, one hit point off
@@ -182,7 +190,9 @@ TEST_F(ConstitutionTrackerTest, AWizardsChangeCountsOnlyTheLevelsThatRolled)
 
 	player->update_constitution_bonus(ctx);
 
-	EXPECT_EQ(player->get_max_hp() - before, (BONUS_AT_15 - NON_WARRIOR_CAP) * WIZARD_LAST_ROLLED_LEVEL);
+	EXPECT_EQ(
+		player->get_max_hp() - before,
+		(BONUS_AT_15 - NON_WARRIOR_CAP) * WIZARD_LAST_ROLLED_LEVEL);
 }
 
 // The race is paid onto the character, not merely announced. A halfling trades a
@@ -199,7 +209,9 @@ TEST_F(ConstitutionTrackerTest, AHalflingPaysItsRacialAdjustment)
 
 	EXPECT_EQ(player->get_strength(), allocatedStrength - 1);
 	EXPECT_EQ(player->get_dexterity(), allocatedDexterity + 1);
-	EXPECT_EQ(shown, (std::vector<std::string>{ "-1 Strength", "+1 Dexterity" }));
+	EXPECT_EQ(
+		shown,
+		(std::vector<std::string>{ "-1 Strength", "+1 Dexterity" }));
 }
 
 // A human modifies nothing, so there is nothing to pay and nothing to show.

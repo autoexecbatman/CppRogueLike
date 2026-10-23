@@ -27,14 +27,14 @@
     },
     {
       "file": "src/DiceExpr.h",
-      "original": "\tstd::string text = std::to_string(expr.num) + \"d\" + std::to_string(expr.sides);",
-      "mutated": "\tstd::string text = std::to_string(expr.sides) + \"d\" + std::to_string(expr.num);",
+      "original": "\tstd::string text =\n\t\tstd::to_string(expr.num) + \"d\" + std::to_string(expr.sides);",
+      "mutated": "\tstd::string text =\n\t\tstd::to_string(expr.sides) + \"d\" + std::to_string(expr.num);",
       "catches": "the count and the sides written the wrong way round"
     },
     {
       "file": "src/DamageInfo.h",
-      "original": ", displayRoll(to_text(dice))",
-      "mutated": ", displayRoll(\"1d2\")",
+      "original": ",\n\t\tdisplayRoll(to_text(dice))",
+      "mutated": ",\n\t\tdisplayRoll(\"1d2\")",
       "catches": "the display no longer naming the dice it was built from"
     }
   ]

@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\t\t\tif (!candidate->is_dead() && !ctx.buffSystem->is_turned_away_by_sanctuary(caster, *candidate, ctx))",
+      "original": "\t\t\tif (!candidate->is_dead() &&\n\t\t\t\t!ctx.buffSystem\n\t\t\t\t\t->is_turned_away_by_sanctuary(caster, *candidate, ctx))",
       "mutated": "\t\t\tif (!candidate->is_dead())",
       "catches": "a missile that never asks its target's Sanctuary"
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\t\t\tif (!candidate->is_dead() && !ctx.buffSystem->is_turned_away_by_sanctuary(caster, *candidate, ctx))",
-      "mutated": "\t\t\tif (!candidate->is_dead() && (ctx.buffSystem->is_turned_away_by_sanctuary(caster, *candidate, ctx) || true))",
+      "original": "\t\t\tif (!candidate->is_dead() &&\n\t\t\t\t!ctx.buffSystem\n\t\t\t\t\t->is_turned_away_by_sanctuary(caster, *candidate, ctx))",
+      "mutated": "\t\t\tif (!candidate->is_dead() &&(ctx.buffSystem->is_turned_away_by_sanctuary(caster, *candidate, ctx) || true))",
       "catches": "a missile that asks and strikes anyway"
     },
     {
@@ -39,7 +39,7 @@
     },
     {
       "file": "src/TargetingSystem.cpp",
-      "original": "\t\tif (!ctx.buffSystem->is_turned_away_by_sanctuary(attacker, *candidate, ctx))",
+      "original": "\t\tif (!ctx.buffSystem\n\t\t\t\t->is_turned_away_by_sanctuary(attacker, *candidate, ctx))",
       "mutated": "\t\tif (true)",
       "catches": "the nearest target taken whatever its Sanctuary"
     },
@@ -51,7 +51,7 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\tif (target && ctx.buffSystem->is_turned_away_by_sanctuary(reader, *target, ctx))",
+      "original": "\tif (target &&\n\t\tctx.buffSystem->is_turned_away_by_sanctuary(reader, *target, ctx))",
       "mutated": "\tif (false)",
       "catches": "a confusion scroll read at a warded creature without asking"
     },

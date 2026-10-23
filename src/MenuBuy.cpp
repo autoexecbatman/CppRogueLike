@@ -26,7 +26,8 @@ void MenuBuy::populate_items()
 {
 	menuItems.clear();
 
-	if (InventoryOperations::is_inventory_empty(shopkeeper.get_shop_inventory()))
+	if (InventoryOperations::is_inventory_empty(
+			shopkeeper.get_shop_inventory()))
 	{
 		menuItems.push_back("No items for sale");
 		return;
@@ -36,7 +37,9 @@ void MenuBuy::populate_items()
 	{
 		return !entry;
 	};
-	assert(std::ranges::none_of(shopkeeper.get_shop_inventory().items, is_null) && "MenuBuy::populate_items: the shop's stock holds a null item");
+	assert(
+		std::ranges::none_of(shopkeeper.get_shop_inventory().items, is_null) &&
+		"MenuBuy::populate_items: the shop's stock holds a null item");
 	for (const auto& item : shopkeeper.get_shop_inventory().items)
 	{
 		std::string itemName = item->get_name();
@@ -44,27 +47,29 @@ void MenuBuy::populate_items()
 		std::string goldText = "(" + std::to_string(price) + "g)";
 
 		size_t totalWidth = 28;
-		size_t padding = totalWidth > (itemName.length() + goldText.length()) ? totalWidth - itemName.length() - goldText.length() : 1;
+		size_t padding = totalWidth > (itemName.length() + goldText.length()) ?
+			totalWidth - itemName.length() - goldText.length() :
+			1;
 
-		std::string itemDisplay = itemName + std::string(padding, ' ') + goldText;
+		std::string itemDisplay =
+			itemName + std::string(padding, ' ') + goldText;
 		menuItems.push_back(itemDisplay);
 	}
 }
 
-MenuBuy::MenuBuy(GameContext& ctx, Creature& buyer, Creature& owner)
-	: buyer{ buyer }, owner{ owner }, shopkeeper{ shop_of(owner) }
+MenuBuy::MenuBuy(GameContext& ctx, Creature& buyer, Creature& owner) :
+	buyer{ buyer },
+	owner{ owner },
+	shopkeeper{ shop_of(owner) }
 {
 	assert(ctx.renderer && "MenuBuy: renderer required before construction");
-	menuHeight = static_cast<size_t>(ctx.renderer->get_viewport_rows() - ctx.renderer->get_gui_reserve_rows());
+	menuHeight = static_cast<size_t>(
+		ctx.renderer->get_viewport_rows() -
+		ctx.renderer->get_gui_reserve_rows());
 	menuWidth = static_cast<size_t>(ctx.renderer->get_viewport_cols());
 
 	populate_items();
-	menu_new(
-		menuWidth,
-		menuHeight,
-		menuStartX,
-		menuStartY,
-		ctx);
+	menu_new(menuWidth, menuHeight, menuStartX, menuStartY, ctx);
 }
 
 void MenuBuy::menu_print_state(size_t state)
@@ -132,13 +137,17 @@ void MenuBuy::on_key(GameContext& ctx)
 	}
 	else if (lastKey == GameKey::ENTER)
 	{
-		if (!InventoryOperations::is_inventory_empty(shopkeeper.get_shop_inventory()))
+		if (!InventoryOperations::is_inventory_empty(
+				shopkeeper.get_shop_inventory()))
 		{
 			handle_buy(ctx);
 		}
 		else
 		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "No items for sale.", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"No items for sale.",
+				MessageCompletion::FINISHED);
 		}
 	}
 }
@@ -152,26 +161,40 @@ void MenuBuy::menu(GameContext& ctx)
 
 void MenuBuy::handle_buy(GameContext& ctx)
 {
-	if (InventoryOperations::is_inventory_empty(shopkeeper.get_shop_inventory()) ||
-		currentState >= InventoryOperations::get_item_count(shopkeeper.get_shop_inventory()))
+	if (InventoryOperations::is_inventory_empty(
+			shopkeeper.get_shop_inventory()) ||
+		currentState >= InventoryOperations::get_item_count(
+							shopkeeper.get_shop_inventory()))
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Invalid selection.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"Invalid selection.",
+			MessageCompletion::FINISHED);
 		return;
 	}
 
-	Item* item = InventoryOperations::get_item_at(shopkeeper.get_shop_inventory(), currentState);
+	Item* item = InventoryOperations::get_item_at(
+		shopkeeper.get_shop_inventory(),
+		currentState);
 	if (!item)
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Invalid selection.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"Invalid selection.",
+			MessageCompletion::FINISHED);
 		return;
 	}
 
 	// The shop moves the item off its shelves; this menu only keeps its cursor in range.
 	if (shopkeeper.process_player_purchase(ctx, *item, buyer, owner))
 	{
-		if (currentState >= InventoryOperations::get_item_count(shopkeeper.get_shop_inventory()) && !InventoryOperations::is_inventory_empty(shopkeeper.get_shop_inventory()))
+		if (currentState >= InventoryOperations::get_item_count(
+								shopkeeper.get_shop_inventory()) &&
+			!InventoryOperations::is_inventory_empty(
+				shopkeeper.get_shop_inventory()))
 		{
-			const size_t itemCount = InventoryOperations::get_item_count(shopkeeper.get_shop_inventory());
+			const size_t itemCount = InventoryOperations::get_item_count(
+				shopkeeper.get_shop_inventory());
 			currentState = itemCount - 1;
 		}
 

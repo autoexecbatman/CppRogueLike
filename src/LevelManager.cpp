@@ -13,7 +13,8 @@
 
 void LevelManager::advance_to_next_level(GameContext& ctx)
 {
-	assert(ctx.map && "LevelManager::advance_to_next_level: called without a map");
+	assert(
+		ctx.map && "LevelManager::advance_to_next_level: called without a map");
 
 	dungeon_level++;
 	shopkeepers_on_current_level = 0; // Reset shopkeeper counter for new level
@@ -57,15 +58,28 @@ void LevelManager::load_from_json(const nlohmann::json& source)
 {
 	const auto& levelData = source.at("level_manager");
 	dungeon_level = levelData.at("dungeonLevel").get<int>();
-	shopkeepers_on_current_level = levelData.at("shopkeepersOnCurrentLevel").get<int>();
+	shopkeepers_on_current_level =
+		levelData.at("shopkeepersOnCurrentLevel").get<int>();
 }
 
 void LevelManager::display_level_messages(MessageSystem& message_system) const
 {
-	message_system.message(ColorPairId::WHITE_BLACK, "You take a moment to rest, and recover your strength.", MessageCompletion::FINISHED);
-	message_system.message(ColorPairId::WHITE_BLACK, "After a rare moment of peace, you descend", MessageCompletion::FINISHED);
-	message_system.message(ColorPairId::WHITE_BLACK, "deeper into the heart of the dungeon...", MessageCompletion::FINISHED);
-	message_system.message(ColorPairId::WHITE_BLACK, std::format("You are now on level {}", dungeon_level), MessageCompletion::FINISHED);
+	message_system.message(
+		ColorPairId::WHITE_BLACK,
+		"You take a moment to rest, and recover your strength.",
+		MessageCompletion::FINISHED);
+	message_system.message(
+		ColorPairId::WHITE_BLACK,
+		"After a rare moment of peace, you descend",
+		MessageCompletion::FINISHED);
+	message_system.message(
+		ColorPairId::WHITE_BLACK,
+		"deeper into the heart of the dungeon...",
+		MessageCompletion::FINISHED);
+	message_system.message(
+		ColorPairId::WHITE_BLACK,
+		std::format("You are now on level {}", dungeon_level),
+		MessageCompletion::FINISHED);
 }
 
 void LevelManager::heal_player_between_levels(GameContext& ctx) const
@@ -80,8 +94,11 @@ void LevelManager::heal_player_between_levels(GameContext& ctx) const
 
 	if (actualHealed > 0)
 	{
-		ctx.messageSystem->message(ColorPairId::GREEN_BLACK,
-			std::format("You rest between levels and recover {} HP.", actualHealed),
+		ctx.messageSystem->message(
+			ColorPairId::GREEN_BLACK,
+			std::format(
+				"You rest between levels and recover {} HP.",
+				actualHealed),
 			MessageCompletion::FINISHED);
 	}
 }

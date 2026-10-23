@@ -21,7 +21,7 @@
     },
     {
       "file": "src/ContentRegistry.cpp",
-      "original": "\t\tthrow std::out_of_range(\n\t\t\tstd::format(\"ContentRegistry::remove_tile -- no tile for '{}'\", key));\n",
+      "original": "\t\tthrow std::out_of_range(\n\t\t\tstd::format(\n\t\t\t\t\"ContentRegistry::remove_tile -- no tile for '{}'\",\n\t\t\t\tkey));\n",
       "mutated": "",
       "catches": "removing a sprite nobody assigned passing silently"
     },

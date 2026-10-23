@@ -45,7 +45,8 @@ namespace
 {
 int picker_tile_size(const Renderer& renderer, int sheetIndex)
 {
-	const int cellSize = renderer.get_sheet_cell_size(static_cast<TileSheet>(sheetIndex));
+	const int cellSize =
+		renderer.get_sheet_cell_size(static_cast<TileSheet>(sheetIndex));
 	return cellSize * std::max(1, PICKER_TILE_TARGET / cellSize);
 }
 } // namespace
@@ -66,7 +67,8 @@ std::string prettify_key(std::string_view key)
 		}
 		else if (isWordStart)
 		{
-			result += static_cast<char>(std::toupper(static_cast<unsigned char>(character)));
+			result += static_cast<char>(
+				std::toupper(static_cast<unsigned char>(character)));
 			isWordStart = false;
 		}
 		else
@@ -109,7 +111,9 @@ std::string_view consumable_effect_str(ConsumableEffect effect)
 
 void ItemEditor::enter(GameContext& ctx)
 {
-	assert(ctx.itemRegistry && "ItemEditor::enter: called without an itemRegistry");
+	assert(
+		ctx.itemRegistry &&
+		"ItemEditor::enter: called without an itemRegistry");
 
 	contentRegistry = ctx.contentRegistry;
 	active = true;
@@ -128,7 +132,8 @@ void ItemEditor::enter(GameContext& ctx)
 
 void ItemEditor::exit(GameContext& ctx)
 {
-	assert(ctx.itemRegistry && "ItemEditor::exit: called without an itemRegistry");
+	assert(
+		ctx.itemRegistry && "ItemEditor::exit: called without an itemRegistry");
 
 	commit_working(*ctx.itemRegistry);
 	active = false;
@@ -183,7 +188,9 @@ void ItemEditor::commit_working(ItemRegistry& items)
 
 void ItemEditor::handle_input(GameContext& ctx)
 {
-	assert(ctx.itemRegistry && "ItemEditor::handle_input: called without an itemRegistry");
+	assert(
+		ctx.itemRegistry &&
+		"ItemEditor::handle_input: called without an itemRegistry");
 
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
 
@@ -227,7 +234,9 @@ void ItemEditor::handle_input(GameContext& ctx)
 
 void ItemEditor::handle_normal(const GameContext& ctx)
 {
-	assert(ctx.itemRegistry && "ItemEditor::handle_normal: called without an itemRegistry");
+	assert(
+		ctx.itemRegistry &&
+		"ItemEditor::handle_normal: called without an itemRegistry");
 
 	ItemRegistry& items = *ctx.itemRegistry;
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
@@ -246,7 +255,9 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 		if (mouse.x < LIST_WIDTH)
 		{
 			focus = 0;
-			const std::optional<size_t> row = listCursor.row_under(whole_rows_within(pixelsBelowTop, ITEM_HEIGHT), visibleListRows);
+			const std::optional<size_t> row = listCursor.row_under(
+				whole_rows_within(pixelsBelowTop, ITEM_HEIGHT),
+				visibleListRows);
 			if (row && *row != listCursor.current_row())
 			{
 				commit_working(items);
@@ -257,7 +268,9 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 		else if (mode == Mode::NORMAL)
 		{
 			focus = 1;
-			const std::optional<size_t> field = fieldCursor.row_under(whole_rows_within(pixelsBelowTop, FIELD_HEIGHT), visibleFields);
+			const std::optional<size_t> field = fieldCursor.row_under(
+				whole_rows_within(pixelsBelowTop, FIELD_HEIGHT),
+				visibleFields);
 			if (field)
 			{
 				fieldCursor.select(*field);
@@ -288,7 +301,9 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 			load_working(items);
 		}
 		// A screen too short for one row has nowhere to scroll the cursor to.
-		else if (IsKeyPressed(KEY_DOWN) && listCursor.can_move_down() && visibleListRows > 0)
+		else if (
+			IsKeyPressed(KEY_DOWN) && listCursor.can_move_down() &&
+			visibleListRows > 0)
 		{
 			commit_working(items);
 			listCursor.move_down(visibleListRows);
@@ -310,7 +325,8 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 			defaults.levelMax = 5;
 			defaults.handRequirement = HandRequirement::ONE_HANDED;
 			defaults.weaponSize = WeaponSize::MEDIUM;
-			const std::string newKey = items.add_custom("New Item", "weapon", defaults);
+			const std::string newKey =
+				items.add_custom("New Item", "weapon", defaults);
 			keys = items.get_all_keys();
 			listCursor.set_row_count(keys.size());
 			for (size_t keyIndex = 0; keyIndex < keys.size(); ++keyIndex)
@@ -329,7 +345,8 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 			if (!items.is_builtin_key(current_key()))
 			{
 				// An item deleted before any commit was never given a sprite.
-				if (contentRegistry && contentRegistry->all_tiles().contains(current_key()))
+				if (contentRegistry &&
+					contentRegistry->all_tiles().contains(current_key()))
 				{
 					contentRegistry->remove_tile(current_key());
 				}
@@ -347,7 +364,9 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 	{
 		fieldCursor.move_up();
 	}
-	else if (IsKeyPressed(KEY_DOWN) && fieldCursor.can_move_down() && visibleFields > 0)
+	else if (
+		IsKeyPressed(KEY_DOWN) && fieldCursor.can_move_down() &&
+		visibleFields > 0)
 	{
 		fieldCursor.move_down(visibleFields);
 	}
@@ -458,7 +477,8 @@ void ItemEditor::handle_picker(const Renderer& renderer)
 		return;
 	}
 
-	int sheetRows = renderer.get_sheet_rows(static_cast<TileSheet>(pickerSheet));
+	int sheetRows =
+		renderer.get_sheet_rows(static_cast<TileSheet>(pickerSheet));
 	::Vector2 mouse = GetMousePosition();
 	bool isMouseInPicker = mouse.x >= LIST_WIDTH;
 
@@ -479,13 +499,17 @@ void ItemEditor::handle_picker(const Renderer& renderer)
 	if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && isMouseInPicker)
 	{
 		const int pickerTileSize = picker_tile_size(renderer, pickerSheet);
-		int col = static_cast<int>(mouse.x - LIST_WIDTH - PICKER_PAD) / (pickerTileSize + 2);
-		int row = pickerScroll + static_cast<int>(mouse.y - gridY) / (pickerTileSize + 2);
-		int sheetColumns = renderer.get_sheet_cols(static_cast<TileSheet>(pickerSheet));
+		int col = static_cast<int>(mouse.x - LIST_WIDTH - PICKER_PAD) /
+			(pickerTileSize + 2);
+		int row = pickerScroll +
+			static_cast<int>(mouse.y - gridY) / (pickerTileSize + 2);
+		int sheetColumns =
+			renderer.get_sheet_cols(static_cast<TileSheet>(pickerSheet));
 
 		if (col >= 0 && col < sheetColumns && row >= 0 && row < sheetRows)
 		{
-			workingTile = TileRef{ static_cast<TileSheet>(pickerSheet), col, row };
+			workingTile =
+				TileRef{ static_cast<TileSheet>(pickerSheet), col, row };
 			mode = Mode::NORMAL;
 		}
 	}
@@ -497,7 +521,9 @@ void ItemEditor::handle_picker(const Renderer& renderer)
 
 void ItemEditor::render(const GameContext& ctx) const
 {
-	assert(ctx.itemRegistry && "ItemEditor::render: called without an itemRegistry");
+	assert(
+		ctx.itemRegistry &&
+		"ItemEditor::render: called without an itemRegistry");
 
 	const Renderer& renderer = *ctx.renderer;
 	int screenWidth = renderer.get_screen_width();
@@ -524,8 +550,12 @@ void ItemEditor::render_header(const Renderer& renderer) const
 {
 	int screenWidth = renderer.get_screen_width();
 	DrawRectangle(0, 0, screenWidth, HEADER_HEIGHT, Color{ 0, 20, 40, 255 });
-	renderer.draw_text_color(Vector2D{ 8, 6 }, "ITEM EDITOR", Color{ 180, 255, 180, 255 });
-	renderer.draw_text_color(Vector2D{ 8, 26 },
+	renderer.draw_text_color(
+		Vector2D{ 8, 6 },
+		"ITEM EDITOR",
+		Color{ 180, 255, 180, 255 });
+	renderer.draw_text_color(
+		Vector2D{ 8, 26 },
 		"Tab:switch focus  Left/Right:adjust  Enter:edit  F2:tile  Ctrl+S:save  Esc:exit",
 		Color{ 100, 130, 100, 255 });
 }
@@ -535,13 +565,20 @@ int ItemEditor::body_height(const Renderer& renderer)
 	return renderer.get_screen_height() - HEADER_HEIGHT - HINT_HEIGHT;
 }
 
-void ItemEditor::render_list(const Renderer& renderer, const ItemRegistry& items) const
+void ItemEditor::render_list(
+	const Renderer& renderer,
+	const ItemRegistry& items) const
 {
 	int bodyY = HEADER_HEIGHT;
 	int bodyHeight = body_height(renderer);
 
 	DrawRectangle(0, bodyY, LIST_WIDTH, bodyHeight, Color{ 5, 10, 5, 255 });
-	DrawLine(LIST_WIDTH, bodyY, LIST_WIDTH, bodyY + bodyHeight, Color{ 80, 120, 80, 255 });
+	DrawLine(
+		LIST_WIDTH,
+		bodyY,
+		LIST_WIDTH,
+		bodyY + bodyHeight,
+		Color{ 80, 120, 80, 255 });
 
 	const size_t visibleCount = whole_rows_within(bodyHeight, ITEM_HEIGHT);
 	const size_t scroll = listCursor.first_visible(visibleCount);
@@ -557,7 +594,8 @@ void ItemEditor::render_list(const Renderer& renderer, const ItemRegistry& items
 		}
 
 		bool isSelected = (itemIndex == listCursor.current_row());
-		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH && mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
+		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH &&
+			mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
 		if (isSelected && focus == 0)
@@ -587,13 +625,16 @@ void ItemEditor::render_list(const Renderer& renderer, const ItemRegistry& items
 		{
 			tile = contentRegistry->get_tile(keys[itemIndex]);
 		}
-		renderer.draw_tile_screen_sized(Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - LIST_TILE_SIZE) / 2 }, tile, LIST_TILE_SIZE);
+		renderer.draw_tile_screen_sized(
+			Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - LIST_TILE_SIZE) / 2 },
+			tile,
+			LIST_TILE_SIZE);
 
 		const bool isCustom = !items.is_builtin_key(keys[itemIndex]);
 
-		std::string displayName = isSelected
-			? working.name
-			: std::string{ items.get_params(keys[itemIndex]).name };
+		std::string displayName = isSelected ?
+			working.name :
+			std::string{ items.get_params(keys[itemIndex]).name };
 
 		if (displayName.empty())
 		{
@@ -609,10 +650,11 @@ void ItemEditor::render_list(const Renderer& renderer, const ItemRegistry& items
 		constexpr Color PLAIN_TEXT{ 200, 200, 200, 255 };
 		Color textColor = isSelected ? SELECTED_TEXT : PLAIN_TEXT;
 
-		renderer.draw_text_color(Vector2D{
-									 LIST_PAD + LIST_TILE_SIZE + 4,
-									 itemY + (ITEM_HEIGHT - 16) / 2,
-								 },
+		renderer.draw_text_color(
+			Vector2D{
+				LIST_PAD + LIST_TILE_SIZE + 4,
+				itemY + (ITEM_HEIGHT - 16) / 2,
+			},
 			displayName,
 			textColor);
 	}
@@ -626,7 +668,12 @@ void ItemEditor::render_fields(const Renderer& renderer) const
 	int fieldsWidth = screenWidth - LIST_WIDTH;
 	int fieldsHeight = body_height(renderer);
 
-	DrawRectangle(panelX, panelY, fieldsWidth, fieldsHeight, Color{ 5, 8, 5, 255 });
+	DrawRectangle(
+		panelX,
+		panelY,
+		fieldsWidth,
+		fieldsHeight,
+		Color{ 5, 8, 5, 255 });
 
 	const size_t visible = whole_rows_within(fieldsHeight, FIELD_HEIGHT);
 	const size_t scroll = fieldCursor.first_visible(visible);
@@ -635,7 +682,8 @@ void ItemEditor::render_fields(const Renderer& renderer) const
 
 	for (size_t fieldIndex = scroll; fieldIndex < FIELD_COUNT; ++fieldIndex)
 	{
-		int itemY = panelY + static_cast<int>(fieldIndex - scroll) * FIELD_HEIGHT;
+		int itemY =
+			panelY + static_cast<int>(fieldIndex - scroll) * FIELD_HEIGHT;
 		if (itemY + FIELD_HEIGHT > panelY + fieldsHeight)
 		{
 			break;
@@ -643,7 +691,8 @@ void ItemEditor::render_fields(const Renderer& renderer) const
 
 		FieldId fieldId = static_cast<FieldId>(fieldIndex);
 		bool isSelected = (fieldIndex == fieldCursor.current_row());
-		bool hovered = mouse.x >= panelX && mouse.x < screenWidth && mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
+		bool hovered = mouse.x >= panelX && mouse.x < screenWidth &&
+			mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
 		if (isSelected && focus == 1)
@@ -664,17 +713,23 @@ void ItemEditor::render_fields(const Renderer& renderer) const
 			DrawRectangle(panelX, itemY, fieldsWidth, FIELD_HEIGHT, bgColor);
 		}
 
-		Color labelColor = isSelected ? Color{ 150, 255, 150, 255 } : Color{ 150, 150, 150, 255 };
-		Color valueColor = isSelected ? Color{ 220, 255, 220, 255 } : Color{ 200, 200, 200, 255 };
+		Color labelColor = isSelected ? Color{ 150, 255, 150, 255 } :
+										Color{ 150, 150, 150, 255 };
+		Color valueColor = isSelected ? Color{ 220, 255, 220, 255 } :
+										Color{ 200, 200, 200, 255 };
 
-		renderer.draw_text_color(Vector2D{ panelX + 12, itemY + (FIELD_HEIGHT - 16) / 2 }, field_label(fieldId), labelColor);
+		renderer.draw_text_color(
+			Vector2D{ panelX + 12, itemY + (FIELD_HEIGHT - 16) / 2 },
+			field_label(fieldId),
+			labelColor);
 
 		if (fieldId == FieldId::TILE)
 		{
-			renderer.draw_tile_screen_sized(Vector2D{
-												screenWidth - LIST_TILE_SIZE - 12,
-												itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2,
-											},
+			renderer.draw_tile_screen_sized(
+				Vector2D{
+					screenWidth - LIST_TILE_SIZE - 12,
+					itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2,
+				},
 				workingTile,
 				LIST_TILE_SIZE);
 			if (isSelected)
@@ -698,8 +753,12 @@ void ItemEditor::render_fields(const Renderer& renderer) const
 			{
 				valueText = field_value(fieldId);
 			}
-			int valuePixelX = screenWidth - renderer.measure_text(valueText) - 16;
-			renderer.draw_text_color(Vector2D{ valuePixelX, itemY + (FIELD_HEIGHT - 16) / 2 }, valueText, valueColor);
+			int valuePixelX =
+				screenWidth - renderer.measure_text(valueText) - 16;
+			renderer.draw_text_color(
+				Vector2D{ valuePixelX, itemY + (FIELD_HEIGHT - 16) / 2 },
+				valueText,
+				valueColor);
 		}
 	}
 }
@@ -712,21 +771,36 @@ void ItemEditor::render_picker(const Renderer& renderer) const
 	int bodyY = HEADER_HEIGHT;
 	int bodyHeight = body_height(renderer);
 
-	DrawRectangle(panelX, bodyY, panelWidth, bodyHeight, Color{ 5, 8, 24, 255 });
+	DrawRectangle(
+		panelX,
+		bodyY,
+		panelWidth,
+		bodyHeight,
+		Color{ 5, 8, 24, 255 });
 
-	DrawRectangle(panelX, bodyY, panelWidth, PICKER_SUB_HEADER_HEIGHT, Color{ 8, 15, 40, 255 });
+	DrawRectangle(
+		panelX,
+		bodyY,
+		panelWidth,
+		PICKER_SUB_HEADER_HEIGHT,
+		Color{ 8, 15, 40, 255 });
 	int totalSheets = renderer.get_loaded_sheet_count();
 	std::string header = std::format(
 		"Sheet: {} ({}/{})  --  Left/Right:change  Esc/F2:back",
 		renderer.get_sheet_name(static_cast<TileSheet>(pickerSheet)),
 		pickerSheet + 1,
 		totalSheets);
-	renderer.draw_text_color(Vector2D{ panelX + PICKER_PAD, bodyY + 6 }, header, Color{ 120, 200, 200, 255 });
+	renderer.draw_text_color(
+		Vector2D{ panelX + PICKER_PAD, bodyY + 6 },
+		header,
+		Color{ 120, 200, 200, 255 });
 
 	int gridY = bodyY + PICKER_SUB_HEADER_HEIGHT;
 	int gridHeight = bodyHeight - PICKER_SUB_HEADER_HEIGHT;
-	int sheetColumns = renderer.get_sheet_cols(static_cast<TileSheet>(pickerSheet));
-	int sheetRows = renderer.get_sheet_rows(static_cast<TileSheet>(pickerSheet));
+	int sheetColumns =
+		renderer.get_sheet_cols(static_cast<TileSheet>(pickerSheet));
+	int sheetRows =
+		renderer.get_sheet_rows(static_cast<TileSheet>(pickerSheet));
 	const int pickerTileSize = picker_tile_size(renderer, pickerSheet);
 
 	::Vector2 mouse = GetMousePosition();
@@ -747,22 +821,42 @@ void ItemEditor::render_picker(const Renderer& renderer) const
 			TileRef tile{ static_cast<TileSheet>(pickerSheet), col, row };
 
 			bool isCurrentTile = (tile == workingTile);
-			bool hovered = mouse.x >= cellPixelX && mouse.x < cellPixelX + pickerTileSize && mouse.y >= cellPixelY && mouse.y < cellPixelY + pickerTileSize;
+			bool hovered = mouse.x >= cellPixelX &&
+				mouse.x < cellPixelX + pickerTileSize &&
+				mouse.y >= cellPixelY && mouse.y < cellPixelY + pickerTileSize;
 
 			if (isCurrentTile)
 			{
-				DrawRectangle(cellPixelX, cellPixelY, pickerTileSize, pickerTileSize, Color{ 0, 60, 0, 220 });
+				DrawRectangle(
+					cellPixelX,
+					cellPixelY,
+					pickerTileSize,
+					pickerTileSize,
+					Color{ 0, 60, 0, 220 });
 			}
 			else if (hovered)
 			{
-				DrawRectangle(cellPixelX, cellPixelY, pickerTileSize, pickerTileSize, Color{ 20, 40, 20, 160 });
+				DrawRectangle(
+					cellPixelX,
+					cellPixelY,
+					pickerTileSize,
+					pickerTileSize,
+					Color{ 20, 40, 20, 160 });
 			}
 
-			renderer.draw_tile_screen_sized(Vector2D{ cellPixelX, cellPixelY }, tile, pickerTileSize);
+			renderer.draw_tile_screen_sized(
+				Vector2D{ cellPixelX, cellPixelY },
+				tile,
+				pickerTileSize);
 
 			if (isCurrentTile)
 			{
-				DrawRectangleLines(cellPixelX, cellPixelY, pickerTileSize, pickerTileSize, Color{ 0, 255, 100, 255 });
+				DrawRectangleLines(
+					cellPixelX,
+					cellPixelY,
+					pickerTileSize,
+					pickerTileSize,
+					Color{ 0, 255, 100, 255 });
 			}
 		}
 	}
@@ -791,15 +885,18 @@ void ItemEditor::render_hint(const Renderer& renderer) const
 	}
 	else if (mode == Mode::TILE_PICKER)
 	{
-		hintText = "Tile Picker  --  Left/Right:sheet  Click:assign  Esc/F2:back";
+		hintText =
+			"Tile Picker  --  Left/Right:sheet  Click:assign  Esc/F2:back";
 	}
 	else if (focus == 0)
 	{
-		hintText = "[LIST] Up/Down:navigate  A:add new  Del:remove custom  Enter:edit fields  Tab:switch  Ctrl+S:save  Esc:exit";
+		hintText =
+			"[LIST] Up/Down:navigate  A:add new  Del:remove custom  Enter:edit fields  Tab:switch  Ctrl+S:save  Esc:exit";
 	}
 	else
 	{
-		hintText = "[FIELDS] Up/Down:navigate  Left/Right:adjust  Enter:edit/toggle  F2:tile  Tab:switch  Ctrl+S:save  Esc:exit";
+		hintText =
+			"[FIELDS] Up/Down:navigate  Left/Right:adjust  Enter:edit/toggle  F2:tile  Tab:switch  Ctrl+S:save  Esc:exit";
 	}
 
 	constexpr Color SAVED_HINT{ 100, 255, 100, 255 };
@@ -876,7 +973,10 @@ std::string ItemEditor::field_value(FieldId field) const
 	}
 	case FieldId::CONSUMABLE_AMT_DICE:
 	{
-		return std::format("{} ({})", params.consumableAmount.num, to_text(params.consumableAmount));
+		return std::format(
+			"{} ({})",
+			params.consumableAmount.num,
+			to_text(params.consumableAmount));
 	}
 	case FieldId::CONSUMABLE_AMT_SIDES:
 	{
@@ -888,7 +988,10 @@ std::string ItemEditor::field_value(FieldId field) const
 	}
 	case FieldId::DURATION_DICE:
 	{
-		return std::format("{} ({})", params.duration.num, to_text(params.duration));
+		return std::format(
+			"{} ({})",
+			params.duration.num,
+			to_text(params.duration));
 	}
 	case FieldId::DURATION_SIDES:
 	{
@@ -967,35 +1070,45 @@ void ItemEditor::field_adjust(FieldId field, int delta)
 	case FieldId::CONSUMABLE_AMT_DICE:
 	{
 		// No dice is a fixed amount; any dice need a die to roll, and a d2 is the least.
-		params.consumableAmount.num = clamp_val(params.consumableAmount.num, delta, 0, 99);
-		params.consumableAmount.sides = params.consumableAmount.num == 0 ? 0 : std::max(params.consumableAmount.sides, 2);
+		params.consumableAmount.num =
+			clamp_val(params.consumableAmount.num, delta, 0, 99);
+		params.consumableAmount.sides = params.consumableAmount.num == 0 ?
+			0 :
+			std::max(params.consumableAmount.sides, 2);
 		break;
 	}
 	case FieldId::CONSUMABLE_AMT_SIDES:
 	{
-		params.consumableAmount.sides = params.consumableAmount.num == 0 ? 0 : clamp_val(params.consumableAmount.sides, delta, 2, 20);
+		params.consumableAmount.sides = params.consumableAmount.num == 0 ?
+			0 :
+			clamp_val(params.consumableAmount.sides, delta, 2, 20);
 		break;
 	}
 	case FieldId::CONSUMABLE_AMT_BONUS:
 	{
-		params.consumableAmount.bonus = clamp_val(params.consumableAmount.bonus, delta, 0, 9999);
+		params.consumableAmount.bonus =
+			clamp_val(params.consumableAmount.bonus, delta, 0, 9999);
 		break;
 	}
 	case FieldId::DURATION_DICE:
 	{
 		// No dice is a fixed duration; any dice need a die to roll, and a d2 is the least.
 		params.duration.num = clamp_val(params.duration.num, delta, 0, 99);
-		params.duration.sides = params.duration.num == 0 ? 0 : std::max(params.duration.sides, 2);
+		params.duration.sides =
+			params.duration.num == 0 ? 0 : std::max(params.duration.sides, 2);
 		break;
 	}
 	case FieldId::DURATION_SIDES:
 	{
-		params.duration.sides = params.duration.num == 0 ? 0 : clamp_val(params.duration.sides, delta, 2, 20);
+		params.duration.sides = params.duration.num == 0 ?
+			0 :
+			clamp_val(params.duration.sides, delta, 2, 20);
 		break;
 	}
 	case FieldId::DURATION_BONUS:
 	{
-		params.duration.bonus = clamp_val(params.duration.bonus, delta, 0, 9999);
+		params.duration.bonus =
+			clamp_val(params.duration.bonus, delta, 0, 9999);
 		break;
 	}
 	default:
@@ -1027,7 +1140,8 @@ void ItemEditor::field_toggle(FieldId field)
 	}
 	case FieldId::CONSUMABLE_EFFECT:
 	{
-		params.consumableEffect = next_consumable_effect(params.consumableEffect);
+		params.consumableEffect =
+			next_consumable_effect(params.consumableEffect);
 		break;
 	}
 	case FieldId::CONSUMABLE_BUFF:
@@ -1072,7 +1186,9 @@ void ItemEditor::field_toggle(FieldId field)
 	}
 	case FieldId::APPLICATION:
 	{
-		params.application = params.application == BuffApplication::ADD ? BuffApplication::SET : BuffApplication::ADD;
+		params.application = params.application == BuffApplication::ADD ?
+			BuffApplication::SET :
+			BuffApplication::ADD;
 		break;
 	}
 	default:

@@ -27,7 +27,9 @@ namespace Pickup
 
 void take_floor_item(Creature& taker, Item& item, GameContext& ctx)
 {
-	assert(ctx.dataManager && "Pickup::take_floor_item: called without a dataManager");
+	assert(
+		ctx.dataManager &&
+		"Pickup::take_floor_item: called without a dataManager");
 	assert(ctx.floorInventory && "take_floor_item: no floor to take from");
 
 	// Coin never enters the pack. The purse carries it, and a purse's weight is
@@ -40,32 +42,46 @@ void take_floor_item(Creature& taker, Item& item, GameContext& ctx)
 			ColorPairId::YELLOW_BLACK,
 			std::format("You picked up {} gold.", goldBehavior.amount),
 			MessageCompletion::FINISHED);
-		[[maybe_unused]] const auto takeGoldResult = InventoryOperations::remove_item(*ctx.floorInventory, item);
-		assert(takeGoldResult.has_value() && "Pickup::take_floor_item: gold found on the floor could not be taken from it");
+		[[maybe_unused]] const auto takeGoldResult =
+			InventoryOperations::remove_item(*ctx.floorInventory, item);
+		assert(
+			takeGoldResult.has_value() &&
+			"Pickup::take_floor_item: gold found on the floor could not be taken from it");
 		return;
 	}
 
 	// Slot capacity, checked before ownership moves.
 	if (InventoryOperations::is_inventory_full(taker.inventoryData))
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Your inventory is full!", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"Your inventory is full!",
+			MessageCompletion::FINISHED);
 		return;
 	}
 
 	// Weight, likewise: a refusal after the floor had let go would destroy the item.
-	if (!InventoryOperations::is_within_weight_limit(item, taker, *ctx.dataManager))
+	if (!InventoryOperations::is_within_weight_limit(
+			item,
+			taker,
+			*ctx.dataManager))
 	{
-		ctx.messageSystem->message(ColorPairId::RED_BLACK, "Too heavy to carry.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::RED_BLACK,
+			"Too heavy to carry.",
+			MessageCompletion::FINISHED);
 		return;
 	}
 
 	// Read before the move: the item is gone from under this reference afterwards.
 	const std::string itemName = item.get_name();
 
-	auto removeResult = InventoryOperations::remove_item(*ctx.floorInventory, item);
+	auto removeResult =
+		InventoryOperations::remove_item(*ctx.floorInventory, item);
 	if (!removeResult.has_value())
 	{
-		ctx.messageSystem->log("ERROR: take_floor_item -- remove_item failed unexpectedly");
+		ctx.messageSystem->log(
+			"ERROR: take_floor_item -- remove_item failed unexpectedly");
 		return;
 	}
 
@@ -85,7 +101,8 @@ void take_floor_item(Creature& taker, Item& item, GameContext& ctx)
 	}
 	else
 	{
-		ctx.messageSystem->log("ERROR: take_floor_item -- add failed after pre-checks; item lost");
+		ctx.messageSystem->log(
+			"ERROR: take_floor_item -- add failed after pre-checks; item lost");
 	}
 }
 
@@ -93,11 +110,15 @@ void from_floor(Creature& taker, GameContext& ctx)
 {
 	assert(ctx.floorInventory && "from_floor: no floor to take from");
 
-	const std::vector<Item*> standing = InventoryOperations::items_at(*ctx.floorInventory, taker.position);
+	const std::vector<Item*> standing =
+		InventoryOperations::items_at(*ctx.floorInventory, taker.position);
 
 	if (standing.empty())
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "There's nothing here to pick up.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"There's nothing here to pick up.",
+			MessageCompletion::FINISHED);
 		return;
 	}
 
@@ -108,24 +129,33 @@ void from_floor(Creature& taker, GameContext& ctx)
 		return;
 	}
 
-	assert(ctx.menus && "from_floor: a heap needs a menu and there is nowhere to put one");
+	assert(
+		ctx.menus &&
+		"from_floor: a heap needs a menu and there is nowhere to put one");
 
 	std::vector<MenuEntry> entries{};
 	char hotkey = FIRST_HOTKEY;
 
 	for (Item* item : standing)
 	{
-		assert(item && "from_floor: the floor holds a null where an item should be");
+		assert(
+			item &&
+			"from_floor: the floor holds a null where an item should be");
 
 		// Captured by id: the menu outlives this frame and the floor may lose the item, so the choice is
 		// resolved against the floor rather than a pointer taken now.
 		const UniqueId::IdType wanted = item->uniqueId;
 		auto takeCommand = [who = &taker, wanted](GameContext& menuCtx)
 		{
-			Item* stillThere = InventoryOperations::find_item_by_id(*menuCtx.floorInventory, wanted);
+			Item* stillThere = InventoryOperations::find_item_by_id(
+				*menuCtx.floorInventory,
+				wanted);
 			if (stillThere == nullptr)
 			{
-				menuCtx.messageSystem->message(ColorPairId::WHITE_BLACK, "It is not there any more.", MessageCompletion::FINISHED);
+				menuCtx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					"It is not there any more.",
+					MessageCompletion::FINISHED);
 			}
 			else
 			{
@@ -138,12 +168,13 @@ void from_floor(Creature& taker, GameContext& ctx)
 		++hotkey;
 	}
 
-	ctx.menus->push_back(std::make_unique<ListMenu>(
-		"Pick up what?",
-		std::move(entries),
-		std::function<void(GameContext&)>{},
-		std::function<void(GameContext&)>{},
-		ctx));
+	ctx.menus->push_back(
+		std::make_unique<ListMenu>(
+			"Pick up what?",
+			std::move(entries),
+			std::function<void(GameContext&)>{},
+			std::function<void(GameContext&)>{},
+			ctx));
 }
 
 } // namespace Pickup

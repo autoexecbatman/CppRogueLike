@@ -18,13 +18,23 @@ class TargetingSystem
 {
 private:
 	static int get_weapon_range(const Item* weapon);
-	TargetResult target_auto_nearest(GameContext& ctx, const Creature& attacker, int range) const;
+	TargetResult target_auto_nearest(
+		GameContext& ctx,
+		const Creature& attacker,
+		int range) const;
 
 public:
 	void draw_los(GameContext& ctx, Vector2D targetCursor) const;
-	void draw_range_indicator(GameContext& ctx, Vector2D center, int range) const;
+	void draw_range_indicator(
+		GameContext& ctx,
+		Vector2D center,
+		int range) const;
 	void draw_aoe_preview(GameContext& ctx, Vector2D center, int radius) const;
-	bool is_valid_target(GameContext& ctx, Vector2D from, Vector2D to, int maxRange) const;
+	bool is_valid_target(
+		GameContext& ctx,
+		Vector2D from,
+		Vector2D to,
+		int maxRange) const;
 	void handle_ranged_attack(GameContext& ctx) const;
 	// Picks the nearest hostile creature within range of the attacker, immediately.
 	// A creature whose Sanctuary turns the attacker away is passed over for the next
@@ -39,5 +49,8 @@ public:
 	//   const TargetResult result = targeting.acquire_nearest(ctx, player, 6);
 	//   result.success;          // -> false when nothing hostile is in range
 	//   result.creatures.size(); // -> 1 on success
-	TargetResult acquire_nearest(GameContext& ctx, const Creature& attacker, int range) const;
+	TargetResult acquire_nearest(
+		GameContext& ctx,
+		const Creature& attacker,
+		int range) const;
 };

@@ -1,10 +1,10 @@
 #include "Item.h"
 
-Item::Item(Vector2D position, ActorData data)
-	: Actor(position, data) {
-		  // ItemClass should be set by ItemCreator, not by fragile string
-		  // matching
-	  };
+Item::Item(Vector2D position, ActorData data) :
+	Actor(position, data) {
+		// ItemClass should be set by ItemCreator, not by fragile string
+		// matching
+	};
 
 void Item::load(const json& source)
 {
@@ -16,8 +16,10 @@ void Item::load(const json& source)
 	// Load enhancement data
 	{
 		const auto& enh = source.at("enhancement");
-		enhancement.prefix = static_cast<PrefixType>(enh.at("prefix").get<int>());
-		enhancement.suffix = static_cast<SuffixType>(enh.at("suffix").get<int>());
+		enhancement.prefix =
+			static_cast<PrefixType>(enh.at("prefix").get<int>());
+		enhancement.suffix =
+			static_cast<SuffixType>(enh.at("suffix").get<int>());
 		enhancement.damageBonus = enh.at("damageBonus").get<int>();
 		enhancement.toHitBonus = enh.at("toHitBonus").get<int>();
 		enhancement.acBonus = enh.at("acBonus").get<int>();
@@ -30,9 +32,11 @@ void Item::load(const json& source)
 		enhancement.stealthBonus = enh.at("stealthBonus").get<int>();
 		enhancement.fireResistance = enh.at("fireResistance").get<int>();
 		enhancement.coldResistance = enh.at("coldResistance").get<int>();
-		enhancement.lightningResistance = enh.at("lightningResistance").get<int>();
+		enhancement.lightningResistance =
+			enh.at("lightningResistance").get<int>();
 		enhancement.poisonResistance = enh.at("poisonResistance").get<int>();
-		enhancement.blessing = static_cast<BlessingStatus>(enh.at("blessing").get<int>());
+		enhancement.blessing =
+			static_cast<BlessingStatus>(enh.at("blessing").get<int>());
 		enhancement.isMagical = enh.at("isMagical").get<bool>();
 		enhancement.enhancementLevel = enh.at("enhancementLevel").get<int>();
 		enhancement.valueModifier = enh.at("valueModifier").get<int>();
@@ -42,7 +46,8 @@ void Item::load(const json& source)
 	{
 		const auto& id = source.at("identification");
 		identification.identifiedType = id.at("identifiedType").get<bool>();
-		identification.identifiedEnhancement = id.at("identifiedEnhancement").get<bool>();
+		identification.identifiedEnhancement =
+			id.at("identifiedEnhancement").get<bool>();
 		identification.identifiedBuc = id.at("identifiedBuc").get<bool>();
 	}
 
@@ -136,11 +141,14 @@ std::string Item::get_name() const
 	displayName += actorData.name;
 
 	// Build suffix
-	if (identification.identifiedEnhancement && enhancement.suffix != SuffixType::NONE)
+	if (identification.identifiedEnhancement &&
+		enhancement.suffix != SuffixType::NONE)
 	{
 		displayName += " " + enhancement.get_suffix_name();
 	}
-	else if (!identification.identifiedEnhancement && enhancement.suffix != SuffixType::NONE)
+	else if (
+		!identification.identifiedEnhancement &&
+		enhancement.suffix != SuffixType::NONE)
 	{
 		displayName += " ?";
 	}
@@ -180,25 +188,31 @@ void Item::apply_enhancement(const ItemEnhancement& newEnhancement)
 	// Name is computed dynamically by get_name() -- do not modify actorData.name
 }
 
-void Item::generate_random_enhancement(MagicalPrefixes magicalPrefixes, RandomDice& dice)
+void Item::generate_random_enhancement(
+	MagicalPrefixes magicalPrefixes,
+	RandomDice& dice)
 {
 	// Each kind of item draws from its own pool, and every pool holds magical
 	// prefixes, so the choice goes to whichever generator runs.
 	if (is_weapon())
 	{
-		enhancement = ItemEnhancement::generate_weapon_enhancement(magicalPrefixes, dice);
+		enhancement =
+			ItemEnhancement::generate_weapon_enhancement(magicalPrefixes, dice);
 	}
 	else if (is_armor())
 	{
-		enhancement = ItemEnhancement::generate_armor_enhancement(magicalPrefixes, dice);
+		enhancement =
+			ItemEnhancement::generate_armor_enhancement(magicalPrefixes, dice);
 	}
 	else
 	{
-		enhancement = ItemEnhancement::generate_random_enhancement(magicalPrefixes, dice);
+		enhancement =
+			ItemEnhancement::generate_random_enhancement(magicalPrefixes, dice);
 	}
 }
 
 bool Item::is_enhanced() const noexcept
 {
-	return enhancement.prefix != PrefixType::NONE || enhancement.suffix != SuffixType::NONE;
+	return enhancement.prefix != PrefixType::NONE ||
+		enhancement.suffix != SuffixType::NONE;
 }

@@ -23,7 +23,9 @@ public:
 
 	// Apply web effect to a creature trying to pass through
 
-	EntryResult on_creature_enter(Creature& creature, GameContext& ctx) override;
+	EntryResult on_creature_enter(
+		Creature& creature,
+		GameContext& ctx) override;
 
 	// Destroy this web
 	void destroy();

@@ -104,19 +104,22 @@ protected:
 		player->set_creature_class(CreatureClass::FIGHTER);
 	}
 
-	void TearDown() override
-	{
-		std::filesystem::remove(edited);
-	}
+	void TearDown() override { std::filesystem::remove(edited); }
 
 	// A creature whose corpse is the fixture's.
 	std::unique_ptr<Creature> fixture_creature() const
 	{
-		auto creature = std::make_unique<Creature>(WHERE_IT_FELL, ActorData{ TileRef{}, "fixture", ColorPairId::WHITE_BLACK });
+		auto creature = std::make_unique<Creature>(
+			WHERE_IT_FELL,
+			ActorData{ TileRef{}, "fixture", ColorPairId::WHITE_BLACK });
 		creature->experienceReward = std::make_unique<ExperienceReward>(1);
 		creature->healthPool = std::make_unique<HealthPool>(8);
 		creature->armorClass = std::make_unique<ArmorClass>(6);
-		creature->set_corpse(std::string{ FIXTURE_NAME }, FIXTURE_NUTRITION, std::string{ FIXTURE_TASTE }, CorpseEdibility::EDIBLE);
+		creature->set_corpse(
+			std::string{ FIXTURE_NAME },
+			FIXTURE_NUTRITION,
+			std::string{ FIXTURE_TASTE },
+			CorpseEdibility::EDIBLE);
 		return creature;
 	}
 
@@ -127,7 +130,8 @@ protected:
 		{
 			return item && item->actorData.name == FIXTURE_NAME;
 		};
-		const auto found = std::ranges::find_if(ctx.floorInventory->items, isTheCorpse);
+		const auto found =
+			std::ranges::find_if(ctx.floorInventory->items, isTheCorpse);
 		if (found == ctx.floorInventory->items.end())
 		{
 			return nullptr;
@@ -140,7 +144,8 @@ protected:
 	{
 		std::ifstream source(Paths::resolve(Paths::MONSTERS));
 		nlohmann::json root = nlohmann::json::parse(source);
-		ASSERT_TRUE(root.at("goblin").contains(std::string{ field })) << "the goblin never carried " << field;
+		ASSERT_TRUE(root.at("goblin").contains(std::string{ field }))
+			<< "the goblin never carried " << field;
 		root.at("goblin").erase(std::string{ field });
 		std::ofstream out(edited);
 		out << root.dump();
@@ -149,10 +154,15 @@ protected:
 	// Whether any stored message holds the given text, its coloured runs joined.
 	bool said(std::string_view wanted) const
 	{
-		for (size_t index = 0; index < ctx.messageSystem->get_stored_message_count(); ++index)
+		for (
+			size_t index = 0;
+			index < ctx.messageSystem->get_stored_message_count();
+			++index)
 		{
 			std::string whole;
-			for (const LogMessage& run : ctx.messageSystem->get_attack_message_at(index))
+			for (
+				const LogMessage& run :
+				ctx.messageSystem->get_attack_message_at(index))
 			{
 				whole += run.text;
 			}
@@ -166,8 +176,10 @@ protected:
 
 	MockGameContext mock{};
 	GameContext ctx{};
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 1, 1 }) };
-	std::filesystem::path edited{ std::filesystem::temp_directory_path() / "monsters_corpse.json" };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ 1, 1 }) };
+	std::filesystem::path edited{ std::filesystem::temp_directory_path() /
+		"monsters_corpse.json" };
 };
 
 TEST_F(CorpseRecordTest, ARecordWithoutCorpseNutritionRefusesToLoad)
@@ -202,7 +214,8 @@ TEST_F(CorpseRecordTest, AMonsterIsBuiltCarryingItsRecordsCorpse)
 	params.corpseNutrition = FIXTURE_NUTRITION;
 	params.corpseTaste = std::string{ FIXTURE_TASTE };
 
-	const auto built = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
+	const auto built =
+		MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
 	EXPECT_EQ(built->get_corpse_name(), FIXTURE_NAME);
 	EXPECT_EQ(built->get_corpse_nutrition(), FIXTURE_NUTRITION);
@@ -215,7 +228,8 @@ TEST_F(CorpseRecordTest, AMonsterIsBuiltWithItsRecordsCorpseEdibility)
 	MonsterParams params = mock.monsterRegistry.get_params("goblin");
 	params.corpseEdibility = CorpseEdibility::INEDIBLE;
 
-	const auto built = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
+	const auto built =
+		MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
 	EXPECT_EQ(built->get_corpse_edibility(), CorpseEdibility::INEDIBLE);
 }
@@ -224,7 +238,11 @@ TEST_F(CorpseRecordTest, AMonsterIsBuiltWithItsRecordsCorpseEdibility)
 TEST_F(CorpseRecordTest, AnInedibleCreatureLeavesAnInedibleCorpse)
 {
 	auto creature = fixture_creature();
-	creature->set_corpse(std::string{ FIXTURE_NAME }, FIXTURE_NUTRITION, std::string{ FIXTURE_REFUSAL }, CorpseEdibility::INEDIBLE);
+	creature->set_corpse(
+		std::string{ FIXTURE_NAME },
+		FIXTURE_NUTRITION,
+		std::string{ FIXTURE_REFUSAL },
+		CorpseEdibility::INEDIBLE);
 	creature->die(ctx);
 
 	const Item* corpse = fixture_corpse();
@@ -239,26 +257,32 @@ TEST_F(CorpseRecordTest, AnInedibleCreatureLeavesAnInedibleCorpse)
 // not move, and the use reports nothing done, so no time passes.
 TEST_F(CorpseRecordTest, AnInedibleCorpseIsRefusedAndKept)
 {
-	auto corpse = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{
-															   TileRef{},
-															   std::string{ FIXTURE_NAME },
-															   ColorPairId::WHITE_BLACK,
-														   });
+	auto corpse = std::make_unique<Item>(
+		Vector2D{ 0, 0 },
+		ActorData{
+			TileRef{},
+			std::string{ FIXTURE_NAME },
+			ColorPairId::WHITE_BLACK,
+		});
 	corpse->behavior = CorpseFood{
 		FIXTURE_NUTRITION,
 		std::string{ FIXTURE_REFUSAL },
 		CorpseEdibility::INEDIBLE,
 	};
 	Item& held = *corpse;
-	ASSERT_TRUE(InventoryOperations::add_item(player->inventoryData, std::move(corpse)).has_value());
+	ASSERT_TRUE(
+		InventoryOperations::add_item(player->inventoryData, std::move(corpse))
+			.has_value());
 	ctx.hungerSystem->increase_hunger(ctx, 500);
 	const int before = ctx.hungerSystem->get_hunger_value();
 
 	const bool used = use_item(*held.behavior, held, *player, ctx);
 
 	EXPECT_FALSE(used) << "a refused meal reported itself as done";
-	EXPECT_EQ(ctx.hungerSystem->get_hunger_value(), before) << "a refused meal fed the eater";
-	EXPECT_EQ(InventoryOperations::get_item_count(player->inventoryData), 1u) << "a refused corpse left the pack";
+	EXPECT_EQ(ctx.hungerSystem->get_hunger_value(), before)
+		<< "a refused meal fed the eater";
+	EXPECT_EQ(InventoryOperations::get_item_count(player->inventoryData), 1u)
+		<< "a refused corpse left the pack";
 	EXPECT_TRUE(said(FIXTURE_REFUSAL)) << "the refusal line was not printed";
 	EXPECT_FALSE(said("You eat the")) << "the refusal said it was eaten";
 }
@@ -269,7 +293,8 @@ TEST_F(CorpseRecordTest, ADeadCreatureLeavesItsRecordsCorpse)
 	fixture_creature()->die(ctx);
 
 	const Item* corpse = fixture_corpse();
-	ASSERT_NE(corpse, nullptr) << "no corpse named \"" << FIXTURE_NAME << "\" was left";
+	ASSERT_NE(corpse, nullptr)
+		<< "no corpse named \"" << FIXTURE_NAME << "\" was left";
 	ASSERT_TRUE(corpse->behavior.has_value());
 	const CorpseFood* food = std::get_if<CorpseFood>(&*corpse->behavior);
 	ASSERT_NE(food, nullptr) << "the corpse is not food";
@@ -293,7 +318,8 @@ TEST_F(CorpseRecordTest, EatingACorpseFeedsItsNutritionAndSaysItsTaste)
 	use_item(*corpse->behavior, *corpse, *player, ctx);
 
 	EXPECT_EQ(before - ctx.hungerSystem->get_hunger_value(), FIXTURE_NUTRITION);
-	EXPECT_TRUE(said(FIXTURE_TASTE)) << "eating did not print the corpse's taste";
+	EXPECT_TRUE(said(FIXTURE_TASTE))
+		<< "eating did not print the corpse's taste";
 }
 
 // A corpse lying on the floor across a save keeps what eating it does.
@@ -326,14 +352,19 @@ TEST_F(CorpseRecordTest, ACorpseKeepsItsNutritionAndTasteAcrossASave)
 	ASSERT_NE(food, nullptr);
 	EXPECT_EQ(food->nutritionValue, FIXTURE_NUTRITION);
 	EXPECT_EQ(food->taste, FIXTURE_TASTE);
-	EXPECT_EQ(food->edibility, CorpseEdibility::INEDIBLE) << "an inedible corpse became edible across a save";
+	EXPECT_EQ(food->edibility, CorpseEdibility::INEDIBLE)
+		<< "an inedible corpse became edible across a save";
 }
 
 // A living creature across a save keeps the corpse it will leave.
 TEST_F(CorpseRecordTest, ACreatureKeepsItsCorpseAcrossASave)
 {
 	const auto original = fixture_creature();
-	original->set_corpse(std::string{ FIXTURE_NAME }, FIXTURE_NUTRITION, std::string{ FIXTURE_TASTE }, CorpseEdibility::INEDIBLE);
+	original->set_corpse(
+		std::string{ FIXTURE_NAME },
+		FIXTURE_NUTRITION,
+		std::string{ FIXTURE_TASTE },
+		CorpseEdibility::INEDIBLE);
 	nlohmann::json record;
 	original->save(record);
 
@@ -346,7 +377,8 @@ TEST_F(CorpseRecordTest, ACreatureKeepsItsCorpseAcrossASave)
 	EXPECT_EQ(loaded.get_corpse_name(), FIXTURE_NAME);
 	EXPECT_EQ(loaded.get_corpse_nutrition(), FIXTURE_NUTRITION);
 	EXPECT_EQ(loaded.get_corpse_taste(), FIXTURE_TASTE);
-	EXPECT_EQ(loaded.get_corpse_edibility(), CorpseEdibility::INEDIBLE) << "an inedible creature became edible across a save";
+	EXPECT_EQ(loaded.get_corpse_edibility(), CorpseEdibility::INEDIBLE)
+		<< "an inedible creature became edible across a save";
 }
 
 // Every record says what its corpse feeds and how it tastes.
@@ -356,8 +388,10 @@ TEST_F(CorpseRecordTest, EveryRecordCarriesACorpseNutritionAndTaste)
 	{
 		const MonsterParams& params = mock.monsterRegistry.get_params(key);
 		EXPECT_GE(params.corpseNutrition, 0) << key;
-		EXPECT_FALSE(params.corpseTaste.empty()) << key << " has no eating line";
-		EXPECT_EQ(params.corpseTaste.find("PLACEHOLDER"), std::string::npos) << key << " still holds a placeholder";
+		EXPECT_FALSE(params.corpseTaste.empty())
+			<< key << " has no eating line";
+		EXPECT_EQ(params.corpseTaste.find("PLACEHOLDER"), std::string::npos)
+			<< key << " still holds a placeholder";
 	}
 }
 
@@ -366,7 +400,10 @@ TEST_F(CorpseRecordTest, NoRecordKeepsThePlaceholderCorpseWeight)
 {
 	for (const std::string& key : mock.monsterRegistry.get_all_keys())
 	{
-		EXPECT_NE(mock.monsterRegistry.get_params(key).corpseWeight, PLACEHOLDER_CORPSE_WEIGHT) << key;
+		EXPECT_NE(
+			mock.monsterRegistry.get_params(key).corpseWeight,
+			PLACEHOLDER_CORPSE_WEIGHT)
+			<< key;
 	}
 }
 
@@ -384,8 +421,10 @@ TEST_F(CorpseRecordTest, EveryCorpseWeighsWithinItsSize)
 			continue;
 		}
 		const int sizeWeight = ruled_corpse_weight(params.size);
-		EXPECT_GE(params.corpseWeight * SIZE_BAND_FACTOR, sizeWeight) << key << " is light for its size";
-		EXPECT_LE(params.corpseWeight, sizeWeight * SIZE_BAND_FACTOR) << key << " is heavy for its size";
+		EXPECT_GE(params.corpseWeight * SIZE_BAND_FACTOR, sizeWeight)
+			<< key << " is light for its size";
+		EXPECT_LE(params.corpseWeight, sizeWeight * SIZE_BAND_FACTOR)
+			<< key << " is heavy for its size";
 	}
 }
 
@@ -400,8 +439,13 @@ TEST_F(CorpseRecordTest, OnlyTheOddCorpsesAreInedible)
 	};
 	for (const std::string& key : mock.monsterRegistry.get_all_keys())
 	{
-		const CorpseEdibility expected = inedible.contains(key) ? CorpseEdibility::INEDIBLE : CorpseEdibility::EDIBLE;
-		EXPECT_EQ(mock.monsterRegistry.get_params(key).corpseEdibility, expected) << key;
+		const CorpseEdibility expected = inedible.contains(key) ?
+			CorpseEdibility::INEDIBLE :
+			CorpseEdibility::EDIBLE;
+		EXPECT_EQ(
+			mock.monsterRegistry.get_params(key).corpseEdibility,
+			expected)
+			<< key;
 	}
 }
 

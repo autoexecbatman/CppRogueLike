@@ -1,0 +1,28 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "python",
+    "docs/missing_assertions.py",
+    "--self-test"
+  ],
+  "mutations": [
+    {
+      "file": "docs/missing_assertions.py",
+      "original": "    while paren_depth(joined) > 0 and last + 1 < len(lines):",
+      "mutated": "    while False and last + 1 < len(lines):",
+      "catches": "a wrapped assert read as its first line: the wrapped assert's loop reports"
+    },
+    {
+      "file": "docs/missing_assertions.py",
+      "original": "    without_literals = re.sub(\n        r'\"(?:[^\"\\\\]|\\\\.)*\"|\\'(?:[^\\'\\\\]|\\\\.)*\\'', \"\", code)",
+      "mutated": "    without_literals = code",
+      "catches": "a parenthesis in a message counted: the assert after the use excuses it"
+    },
+    {
+      "file": "docs/missing_assertions.py",
+      "original": "                inner = statement_at(lines, offset)",
+      "mutated": "                inner = strip_comment(lines[offset])",
+      "catches": "the joined statement unused: the wrapped assert's loop reports"
+    }
+  ]
+}

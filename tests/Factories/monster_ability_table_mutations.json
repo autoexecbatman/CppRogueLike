@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/MonsterAbilityTables.h",
-      "original": "\t{\n\t\t{\n\t\t\t{ 8, 0 },\n\t\t\t{ 10, 0 },\n\t\t\t{ 12, 0 },\n\t\t\t{ 18, 1 },\n\t\t\t{ 18, 91 },\n\t\t\t{ 19, 0 },\n\t\t},\n\t}, // 9\n",
-      "mutated": "\t{\n\t\t{\n\t\t\t{ 8, 0 },\n\t\t\t{ 10, 0 },\n\t\t\t{ 12, 0 },\n\t\t\t{ 18,5 1 },\n\t\t\t{ 18, 91 },\n\t\t\t{ 19, 0 },\n\t\t},\n\t}, // 9\n",
+      "original": "\t\t{\n\t\t\t{\n\t\t\t\t{ 8, 0 },\n\t\t\t\t{ 10, 0 },\n\t\t\t\t{ 12, 0 },\n\t\t\t\t{ 18, 1 },\n\t\t\t\t{ 18, 91 },\n\t\t\t\t{ 19, 0 },\n\t\t\t},\n\t\t}, // 9\n",
+      "mutated": "\t\t{\n\t\t\t{\n\t\t\t\t{ 8, 0 },\n\t\t\t\t{ 10, 0 },\n\t\t\t\t{ 12, 0 },\n\t\t\t\t{ 18, 51 },\n\t\t\t\t{ 18, 91 },\n\t\t\t\t{ 19, 0 },\n\t\t\t},\n\t\t}, // 9\n",
       "catches": "a Table 6 cell's percentile wrong: 18/01 read as 18/51"
     },
     {
@@ -33,14 +33,14 @@
     },
     {
       "file": "src/MonsterAbilityTables.h",
-      "original": "\t{ 5, 6, 9, 12, 14, 17, 19, 21, 23, 25 }, // 18\n} };\n\n// Table 11",
-      "mutated": "\t{ 5, 6, 9, 12, 14, 17, 19, 21, 23, 24 }, // 18\n} };\n\n// Table 11",
+      "original": "\t\t{ 5, 6, 9, 12, 14, 17, 19, 21, 23, 25 }, // 18\n\t} };\n\n// Table 11",
+      "mutated": "\t\t{ 5, 6, 9, 12, 14, 17, 19, 21, 23, 24 }, // 18\n\t} };\n\n// Table 11",
       "catches": "a Table 10 cell wrong"
     },
     {
       "file": "src/MonsterAbilityTables.h",
-      "original": "\t{ 3, 6, 9, 12, 14, 17, 19, 21, 23, 25 }, // 18\n} };\n\n// The row of",
-      "mutated": "\t{ 3, 6, 9, 12, 14, 17, 19, 21, 23, 24 }, // 18\n} };\n\n// The row of",
+      "original": "\t\t{ 3, 6, 9, 12, 14, 17, 19, 21, 23, 25 }, // 18\n\t} };\n\n// The row of",
+      "mutated": "\t\t{ 3, 6, 9, 12, 14, 17, 19, 21, 23, 24 }, // 18\n\t} };\n\n// The row of",
       "catches": "a Table 11 cell wrong"
     },
     {
@@ -57,14 +57,14 @@
     },
     {
       "file": "src/MonsterAbilityTables.h",
-      "original": "\treturn MONSTER_STRENGTH_TABLE.at(monster_ability_row(roll)).at(static_cast<std::size_t>(size));",
-      "mutated": "\treturn MONSTER_STRENGTH_TABLE.at(monster_ability_row(roll)).at(static_cast<std::size_t>(CreatureSize::MEDIUM));",
+      "original": "\treturn MONSTER_STRENGTH_TABLE.at(monster_ability_row(roll))\n\t\t.at(static_cast<std::size_t>(size));",
+      "mutated": "\treturn MONSTER_STRENGTH_TABLE.at(monster_ability_row(roll))\n\t\t.at(static_cast<std::size_t>(CreatureSize::MEDIUM));",
       "catches": "Strength read without the size"
     },
     {
       "file": "src/MonsterAbilityTables.h",
-      "original": "\treturn MONSTER_DEXTERITY_TABLE.at(monster_ability_row(roll)).at(static_cast<std::size_t>(size));",
-      "mutated": "\treturn MONSTER_DEXTERITY_TABLE.at(monster_ability_row(roll)).at(static_cast<std::size_t>(CreatureSize::MEDIUM));",
+      "original": "\treturn MONSTER_DEXTERITY_TABLE.at(monster_ability_row(roll))\n\t\t.at(static_cast<std::size_t>(size));",
+      "mutated": "\treturn MONSTER_DEXTERITY_TABLE.at(monster_ability_row(roll))\n\t\t.at(static_cast<std::size_t>(CreatureSize::MEDIUM));",
       "catches": "Dexterity read without the size"
     },
     {
@@ -75,14 +75,14 @@
     },
     {
       "file": "src/MonsterAbilityTables.h",
-      "original": "\tconst IntelligenceRating column = rating == IntelligenceRating::NON ? IntelligenceRating::ANIMAL : rating;\n\treturn MONSTER_WISDOM_TABLE",
-      "mutated": "\tconst IntelligenceRating column = rating == IntelligenceRating::NON ? IntelligenceRating::SEMI : rating;\n\treturn MONSTER_WISDOM_TABLE",
+      "original": "\tconst IntelligenceRating column =\n\t\trating == IntelligenceRating::NON ? IntelligenceRating::ANIMAL : rating;\n\treturn MONSTER_WISDOM_TABLE",
+      "mutated": "\tconst IntelligenceRating column =\n\t\trating == IntelligenceRating::NON ? IntelligenceRating::SEMI : rating;\n\treturn MONSTER_WISDOM_TABLE",
       "catches": "a non-intelligent creature's Wisdom read from the Semi- column"
     },
     {
       "file": "src/MonsterAbilityTables.h",
-      "original": "\tconst IntelligenceRating column = rating == IntelligenceRating::NON ? IntelligenceRating::ANIMAL : rating;\n\treturn MONSTER_CHARISMA_TABLE",
-      "mutated": "\tconst IntelligenceRating column = rating == IntelligenceRating::NON ? IntelligenceRating::SEMI : rating;\n\treturn MONSTER_CHARISMA_TABLE",
+      "original": "\tconst IntelligenceRating column =\n\t\trating == IntelligenceRating::NON ? IntelligenceRating::ANIMAL : rating;\n\treturn MONSTER_CHARISMA_TABLE",
+      "mutated": "\tconst IntelligenceRating column =\n\t\trating == IntelligenceRating::NON ? IntelligenceRating::SEMI : rating;\n\treturn MONSTER_CHARISMA_TABLE",
       "catches": "a non-intelligent creature's Charisma read from the Semi- column"
     },
     {
@@ -93,26 +93,26 @@
     },
     {
       "file": "src/MonsterAbilityTables.cpp",
-      "original": "\tcreature.set_dexterity(monster_dexterity_score(roll_dice(&dice, MONSTER_ABILITY_DICE), size));\n",
+      "original": "\tcreature.set_dexterity(\n\t\tmonster_dexterity_score(roll_dice(&dice, MONSTER_ABILITY_DICE), size));\n",
       "mutated": "\tcreature.set_dexterity(roll_dice(&dice, MONSTER_ABILITY_DICE));\n",
       "catches": "Dexterity left as the bare 3d6"
     },
     {
       "file": "src/MonsterAbilityTables.cpp",
-      "original": "\tcreature.set_intelligence(monster_intelligence_score(roll_dice(&dice, MONSTER_ABILITY_DICE), rating));\n",
+      "original": "\tcreature.set_intelligence(monster_intelligence_score(\n\t\troll_dice(&dice, MONSTER_ABILITY_DICE),\n\t\trating));\n",
       "mutated": "\tcreature.set_intelligence(roll_dice(&dice, MONSTER_ABILITY_DICE));\n",
       "catches": "Intelligence left as the bare 3d6"
     },
     {
       "file": "src/MonsterAbilityTables.cpp",
-      "original": "\tcreature.set_wisdom(monster_wisdom_score(roll_dice(&dice, MONSTER_ABILITY_DICE), rating));\n",
-      "mutated": "\tcreature.set_wisdom(monster_wisdom_score(roll_dice(&dice, MONSTER_ABILITY_DICE), IntelligenceRating::AVERAGE));\n",
+      "original": "\tcreature.set_wisdom(\n\t\tmonster_wisdom_score(roll_dice(&dice, MONSTER_ABILITY_DICE), rating));\n",
+      "mutated": "\tcreature.set_wisdom(\n\t\tmonster_wisdom_score(roll_dice(&dice, MONSTER_ABILITY_DICE),IntelligenceRating::AVERAGE));\n",
       "catches": "Wisdom read without the rating"
     },
     {
       "file": "src/MonsterAbilityTables.cpp",
-      "original": "\tcreature.set_charisma(monster_charisma_score(roll_dice(&dice, MONSTER_ABILITY_DICE), rating));\n",
-      "mutated": "\tcreature.set_charisma(monster_charisma_score(roll_dice(&dice, MONSTER_ABILITY_DICE), IntelligenceRating::AVERAGE));\n",
+      "original": "\tcreature.set_charisma(\n\t\tmonster_charisma_score(roll_dice(&dice, MONSTER_ABILITY_DICE), rating));\n",
+      "mutated": "\tcreature.set_charisma(\n\t\tmonster_charisma_score(roll_dice(&dice, MONSTER_ABILITY_DICE),IntelligenceRating::AVERAGE));\n",
       "catches": "Charisma read without the rating"
     },
     {

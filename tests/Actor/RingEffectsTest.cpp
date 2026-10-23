@@ -38,21 +38,24 @@
 class RingEffectsTest : public ::testing::Test
 {
 protected:
-	void SetUp() override
-	{
-		ctx = mock.to_game_context();
-	}
+	void SetUp() override { ctx = mock.to_game_context(); }
 
 	// A creature of this class with maxHp hit points, down to hp, with a hand for each
 	// ring. Constitution 10 regenerates nothing of its own.
-	std::unique_ptr<Creature> make_wearer(CreatureClass creatureClass, int maxHp, int hp)
+	std::unique_ptr<Creature> make_wearer(
+		CreatureClass creatureClass,
+		int maxHp,
+		int hp)
 	{
-		auto wearer = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "wearer", ColorPairId::WHITE_BLACK });
+		auto wearer = std::make_unique<Creature>(
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "wearer", ColorPairId::WHITE_BLACK });
 		wearer->healthPool = std::make_unique<HealthPool>(maxHp);
 		wearer->set_creature_class(creatureClass);
 		wearer->set_constitution(10);
 		wearer->set_hp(hp);
-		wearer->set_body_plan({ EquipmentSlot::RIGHT_RING, EquipmentSlot::LEFT_RING });
+		wearer->set_body_plan(
+			{ EquipmentSlot::RIGHT_RING, EquipmentSlot::LEFT_RING });
 		return wearer;
 	}
 
@@ -81,7 +84,8 @@ protected:
 TEST_F(RingEffectsTest, WearsRingOfAsksBothHandsForTheEffect)
 {
 	auto wearer = make_wearer(CreatureClass::FIGHTER, 20, 20);
-	EXPECT_FALSE(wearer->wears_ring_of(MagicalEffect::FREE_ACTION)) << "bare hands";
+	EXPECT_FALSE(wearer->wears_ring_of(MagicalEffect::FREE_ACTION))
+		<< "bare hands";
 
 	put_on_ring(*wearer, "ring_of_free_action", EquipmentSlot::LEFT_RING);
 
@@ -125,7 +129,9 @@ TEST_F(RingEffectsTest, TheRingMendsFireAndAcid)
 	auto wearer = make_wearer(CreatureClass::FIGHTER, 20, 20);
 	put_on_ring(*wearer, "ring_of_regeneration", EquipmentSlot::RIGHT_RING);
 	wearer->take_damage(6, ctx, DamageType::ACID);
-	wearer->take_damage(DamageResolver::reduce_dice({ 4 }, DamageType::FIRE, 0), ctx);
+	wearer->take_damage(
+		DamageResolver::reduce_dice({ 4 }, DamageType::FIRE, 0),
+		ctx);
 	ASSERT_EQ(wearer->get_hp(), 10);
 
 	EXPECT_EQ(regenerate_through(*wearer, 100), 10);
@@ -169,9 +175,15 @@ TEST_F(RingEffectsTest, ARingOfInvisibilityGrantsTheSpell)
 	player->set_strength(10);
 	player->set_dexterity(10);
 	ctx.playerOwner = &player;
-	ASSERT_TRUE(player->equip_item(ItemCreator::create("ring_of_invisibility", player->position, ctx), EquipmentSlot::LEFT_RING, ctx));
+	ASSERT_TRUE(player->equip_item(
+		ItemCreator::create("ring_of_invisibility", player->position, ctx),
+		EquipmentSlot::LEFT_RING,
+		ctx));
 
-	const std::vector<SpellSystem::ItemGrantedSpell> granted = SpellSystem::get_item_granted_spells(*player, ctx.gameState->get_time());
+	const std::vector<SpellSystem::ItemGrantedSpell> granted =
+		SpellSystem::get_item_granted_spells(
+			*player,
+			ctx.gameState->get_time());
 
 	ASSERT_EQ(granted.size(), 1u);
 	EXPECT_EQ(granted.front().key, "invisibility");

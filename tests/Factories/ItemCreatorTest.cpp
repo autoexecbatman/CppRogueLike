@@ -83,22 +83,26 @@ TEST_F(ItemCreatorTest, CreateIdentifyScroll)
 // notice: a potion that does nothing looks like a potion.
 TEST_F(ItemCreatorTest, FireResistancePotionIsOneRingsWorth)
 {
-	auto item = ItemCreator::create("potion_of_fire_resistance", Vector2D{ 0, 0 }, ctx);
+	auto item =
+		ItemCreator::create("potion_of_fire_resistance", Vector2D{ 0, 0 }, ctx);
 	ASSERT_TRUE(item);
 	ASSERT_TRUE(std::holds_alternative<Consumable>(*item->behavior));
 	const auto& potion = std::get<Consumable>(*item->behavior);
 
 	EXPECT_EQ(potion.effect, ConsumableEffect::ADD_BUFF);
 	EXPECT_EQ(potion.buffType, BuffType::FIRE_RESISTANCE);
-	EXPECT_EQ(to_text(potion.amount), "1") << "the buff value is the strength in rings";
-	EXPECT_EQ(to_text(potion.duration), "1") << "the book's one turn, DMG PDF page 889";
+	EXPECT_EQ(to_text(potion.amount), "1")
+		<< "the buff value is the strength in rings";
+	EXPECT_EQ(to_text(potion.duration), "1")
+		<< "the book's one turn, DMG PDF page 889";
 	EXPECT_EQ(potion.durationUnit, DurationUnit::TURNS);
 	EXPECT_EQ(potion.application, BuffApplication::ADD);
 }
 
 TEST_F(ItemCreatorTest, ColdResistancePotionIsOneRingsWorth)
 {
-	auto item = ItemCreator::create("potion_of_cold_resistance", Vector2D{ 0, 0 }, ctx);
+	auto item =
+		ItemCreator::create("potion_of_cold_resistance", Vector2D{ 0, 0 }, ctx);
 	ASSERT_TRUE(item);
 	ASSERT_TRUE(std::holds_alternative<Consumable>(*item->behavior));
 	const auto& potion = std::get<Consumable>(*item->behavior);
@@ -117,7 +121,8 @@ TEST_F(ItemCreatorTest, ColdResistancePotionIsOneRingsWorth)
 TEST_F(ItemCreatorTest, AGemIsWorthWhatItIsAuthoredToBeWorth)
 {
 	const int authored = mock.itemRegistry.get_params("gem").value;
-	ASSERT_GT(authored, 0) << "the data must give a gem a value for this to mean anything";
+	ASSERT_GT(authored, 0)
+		<< "the data must give a gem a value for this to mean anything";
 
 	auto item = ItemCreator::create("gem", Vector2D{ 0, 0 }, ctx);
 	ASSERT_TRUE(item);
@@ -197,7 +202,11 @@ TEST_F(ItemCreatorTest, CarryWeightDoesNotChangeHowOftenAnItemIsDrawn)
 
 	mock.itemRegistry.load(apart.string());
 	ctx.dice->set_next_roll(50);
-	auto drawn = ItemCreator::create_random_of_category("potion", Vector2D{ 0, 0 }, ctx, 1);
+	auto drawn = ItemCreator::create_random_of_category(
+		"potion",
+		Vector2D{ 0, 0 },
+		ctx,
+		1);
 
 	std::filesystem::remove(apart);
 

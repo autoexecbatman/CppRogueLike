@@ -35,7 +35,8 @@ constexpr int FONT_SIZES[] = { 14, 16, 30 };
 // Bottom of the last row of text the HUD lays out, measured from the panel's top.
 int last_text_row_bottom(int tileSize, int fontSize)
 {
-	return gui_frame_top_rule(tileSize) + GUI_TEXT_TOP_INSET + (GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH + fontSize;
+	return gui_frame_top_rule(tileSize) + GUI_TEXT_TOP_INSET +
+		(GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH + fontSize;
 }
 } // namespace
 
@@ -46,12 +47,17 @@ TEST(HudReserveGeometryTest, EveryTextRowClearsTheBottomRule)
 	{
 		for (int fontSize : FONT_SIZES)
 		{
-			const int reservedPixels = gui_reserve_rows(tileSize, fontSize) * tileSize;
-			const int firstPixelOfBottomRule = reservedPixels - gui_frame_bottom_rule(tileSize);
+			const int reservedPixels =
+				gui_reserve_rows(tileSize, fontSize) * tileSize;
+			const int firstPixelOfBottomRule =
+				reservedPixels - gui_frame_bottom_rule(tileSize);
 
-			EXPECT_LE(last_text_row_bottom(tileSize, fontSize), firstPixelOfBottomRule)
-				<< "the last of " << GUI_TEXT_ROWS << " rows ran under the bottom rule, at tile "
-				<< tileSize << " and font " << fontSize;
+			EXPECT_LE(
+				last_text_row_bottom(tileSize, fontSize),
+				firstPixelOfBottomRule)
+				<< "the last of " << GUI_TEXT_ROWS
+				<< " rows ran under the bottom rule, at tile " << tileSize
+				<< " and font " << fontSize;
 		}
 	}
 }
@@ -65,12 +71,14 @@ TEST(HudReserveGeometryTest, OneTileRowFewerWouldNotFit)
 	{
 		for (int fontSize : FONT_SIZES)
 		{
-			const int neededPixels = last_text_row_bottom(tileSize, fontSize) + gui_frame_bottom_rule(tileSize);
-			const int oneRowFewer = (gui_reserve_rows(tileSize, fontSize) - 1) * tileSize;
+			const int neededPixels = last_text_row_bottom(tileSize, fontSize) +
+				gui_frame_bottom_rule(tileSize);
+			const int oneRowFewer =
+				(gui_reserve_rows(tileSize, fontSize) - 1) * tileSize;
 
 			EXPECT_LT(oneRowFewer, neededPixels)
-				<< "the HUD reserved a tile row it does not need, at tile " << tileSize
-				<< " and font " << fontSize;
+				<< "the HUD reserved a tile row it does not need, at tile "
+				<< tileSize << " and font " << fontSize;
 		}
 	}
 }
@@ -83,9 +91,12 @@ TEST(HudReserveGeometryTest, RuleDepthsMatchTheArtAndScaleWithTheTile)
 	EXPECT_EQ(gui_frame_top_rule(64), 29);
 	EXPECT_EQ(gui_frame_bottom_rule(64), 31);
 
-	EXPECT_EQ(gui_frame_top_rule(32), 14) << "the top rule did not halve with the tile";
-	EXPECT_EQ(gui_frame_bottom_rule(32), 15) << "the bottom rule did not halve with the tile";
-	EXPECT_EQ(gui_frame_top_rule(128), 58) << "the top rule did not double with the tile";
+	EXPECT_EQ(gui_frame_top_rule(32), 14)
+		<< "the top rule did not halve with the tile";
+	EXPECT_EQ(gui_frame_bottom_rule(32), 15)
+		<< "the bottom rule did not halve with the tile";
+	EXPECT_EQ(gui_frame_top_rule(128), 58)
+		<< "the top rule did not double with the tile";
 }
 
 // The vertical rules are the same art turned on its side: the left edge paints columns
@@ -96,8 +107,10 @@ TEST(HudReserveGeometryTest, TheRuleIsAsWideAsTheArtPaintsIt)
 {
 	EXPECT_EQ(gui_frame_rule_width(64), 30);
 
-	EXPECT_EQ(gui_frame_rule_width(32), 15) << "the rule did not halve with the tile";
-	EXPECT_EQ(gui_frame_rule_width(128), 60) << "the rule did not double with the tile";
+	EXPECT_EQ(gui_frame_rule_width(32), 15)
+		<< "the rule did not halve with the tile";
+	EXPECT_EQ(gui_frame_rule_width(128), 60)
+		<< "the rule did not double with the tile";
 
 	EXPECT_GT(gui_frame_rule_width(64), 8)
 		<< "the rule is back to the 8 pixels the hairline frame drew, which no longer covers what the art paints";
@@ -111,7 +124,8 @@ TEST(HudReserveGeometryTest, TheShippingZoomReservesFiveRowsForEightLinesOfText)
 	EXPECT_EQ(gui_reserve_rows(64, 30), 5);
 	EXPECT_EQ(GUI_TEXT_ROWS, 8);
 
-	const int wholeTileReserve = 64 + GUI_TEXT_TOP_INSET + (GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH + 30 + 64;
+	const int wholeTileReserve = 64 + GUI_TEXT_TOP_INSET +
+		(GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH + 30 + 64;
 	EXPECT_GT(wholeTileReserve, 5 * 64)
 		<< "a whole tile an edge still fits, so this test no longer measures anything";
 }

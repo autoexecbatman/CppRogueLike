@@ -63,9 +63,15 @@ protected:
 // number is the cost, so there is no second answer to the same question.
 TEST_F(CreatureScheduleTest, AnOrdinaryActionCostsTheCreaturesOwnDelay)
 {
-	EXPECT_EQ(built(TIME_UNITS_PER_ROUND)->get_action_delay(), TIME_UNITS_PER_ROUND);
-	EXPECT_EQ(built(TIME_UNITS_PER_ROUND / 2)->get_action_delay(), TIME_UNITS_PER_ROUND / 2);
-	EXPECT_EQ(built(TIME_UNITS_PER_ROUND * 2)->get_action_delay(), TIME_UNITS_PER_ROUND * 2);
+	EXPECT_EQ(
+		built(TIME_UNITS_PER_ROUND)->get_action_delay(),
+		TIME_UNITS_PER_ROUND);
+	EXPECT_EQ(
+		built(TIME_UNITS_PER_ROUND / 2)->get_action_delay(),
+		TIME_UNITS_PER_ROUND / 2);
+	EXPECT_EQ(
+		built(TIME_UNITS_PER_ROUND * 2)->get_action_delay(),
+		TIME_UNITS_PER_ROUND * 2);
 }
 
 // One action per round, which is every creature in the game until something sets a
@@ -100,7 +106,8 @@ TEST_F(CreatureScheduleTest, ASnailSkipsTheWindowItHasOvershot)
 	// It acted, which puts it two rounds out.
 	snail->set_next_action_time(snail->get_action_delay());
 
-	EXPECT_EQ(snail->scheduled_actions_before(TIME_UNITS_PER_ROUND * 2), 0) << "the snail acted twice";
+	EXPECT_EQ(snail->scheduled_actions_before(TIME_UNITS_PER_ROUND * 2), 0)
+		<< "the snail acted twice";
 	EXPECT_EQ(snail->scheduled_actions_before(TIME_UNITS_PER_ROUND * 3), 1);
 }
 
@@ -113,8 +120,12 @@ TEST_F(CreatureScheduleTest, AnArrivalStandsWhereTheClockStands)
 	manager.add_creature(built(TIME_UNITS_PER_ROUND), ctx);
 
 	ASSERT_EQ(creatures.size(), 1u);
-	EXPECT_EQ(creatures.front()->get_next_action_time(), TIME_UNITS_PER_ROUND * 7);
-	EXPECT_EQ(creatures.front()->scheduled_actions_before(ctx.gameState->get_time()), 0)
+	EXPECT_EQ(
+		creatures.front()->get_next_action_time(),
+		TIME_UNITS_PER_ROUND * 7);
+	EXPECT_EQ(
+		creatures.front()->scheduled_actions_before(ctx.gameState->get_time()),
+		0)
 		<< "a creature that just arrived acted before anything happened";
 }
 
@@ -126,14 +137,17 @@ TEST_F(CreatureScheduleTest, AnArrivalIsNotOwedEveryActionSinceTheGameBegan)
 	ctx.gameState->set_time(TIME_UNITS_PER_ROUND * 400);
 
 	manager.add_creature(built(TIME_UNITS_PER_ROUND), ctx);
-	const int placed = creatures.front()->scheduled_actions_before(ctx.gameState->get_time());
+	const int placed =
+		creatures.front()->scheduled_actions_before(ctx.gameState->get_time());
 
 	// What it would have been without the placement, for the contrast to be visible.
 	auto unplaced = built(TIME_UNITS_PER_ROUND);
-	const int backlog = unplaced->scheduled_actions_before(ctx.gameState->get_time());
+	const int backlog =
+		unplaced->scheduled_actions_before(ctx.gameState->get_time());
 
 	EXPECT_EQ(placed, 0);
-	EXPECT_EQ(backlog, 400) << "the arithmetic no longer owes an unplaced creature a backlog";
+	EXPECT_EQ(backlog, 400)
+		<< "the arithmetic no longer owes an unplaced creature a backlog";
 }
 
 // Driven for real, through the public loop, with a mind that counts. This is the

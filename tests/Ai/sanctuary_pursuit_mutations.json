@@ -15,13 +15,13 @@
   "mutations": [
     {
       "file": "src/AiMonster.cpp",
-      "original": "\tif (owner.is_aware(ctx.gameState->get_time()) && !ctx.player()->is_invisible() && !hasLostTrackOfPlayer)",
-      "mutated": "\tif (owner.is_aware(ctx.gameState->get_time()) && !ctx.player()->is_invisible())",
+      "original": "\tif (owner.is_aware(ctx.gameState->get_time()) &&\n\t\t!ctx.player()->is_invisible() && !hasLostTrackOfPlayer)",
+      "mutated": "\tif (owner.is_aware(ctx.gameState->get_time()) &&\n\t\t!ctx.player()->is_invisible())",
       "catches": "a monster hunting a creature it has lost track of, as it did before"
     },
     {
       "file": "src/AiMonsterRanged.cpp",
-      "original": "\tif (owner.is_aware(ctx.gameState->get_time()) && !ctx.buffSystem->ignores_warded_creature(owner, *ctx.player()))",
+      "original": "\tif (owner.is_aware(ctx.gameState->get_time()) &&\n\t\t!ctx.buffSystem->ignores_warded_creature(owner, *ctx.player()))",
       "mutated": "\tif (owner.is_aware(ctx.gameState->get_time()))",
       "catches": "an archer loosing arrows at a creature it has lost track of"
     },
@@ -33,7 +33,7 @@
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\treturn std::ranges::any_of(casting->opponentSaves, is_this_attacker_failing);",
+      "original": "\treturn std::ranges::any_of(\n\t\tcasting->opponentSaves,\n\t\tis_this_attacker_failing);",
       "mutated": "\treturn false;",
       "catches": "the record never read, so a failed save changes nothing about hunting"
     },

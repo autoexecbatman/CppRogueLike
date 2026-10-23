@@ -38,8 +38,12 @@ private:
 	int armorClass{};
 	int baseArmorClass{};
 
-	[[nodiscard]] int calculate_dexterity_ac_bonus(const Creature& owner, GameContext& ctx) const;
-	[[nodiscard]] int calculate_equipment_ac_bonus(const Creature& owner, ArmorClassBreakdown& breakdown) const;
+	[[nodiscard]] int calculate_dexterity_ac_bonus(
+		const Creature& owner,
+		GameContext& ctx) const;
+	[[nodiscard]] int calculate_equipment_ac_bonus(
+		const Creature& owner,
+		ArmorClassBreakdown& breakdown) const;
 
 public:
 	ArmorClass(int baseAC);
@@ -51,7 +55,10 @@ public:
 
 	[[nodiscard]] int get_armor_class() const noexcept { return armorClass; }
 
-	[[nodiscard]] int get_base_armor_class() const noexcept { return baseArmorClass; }
+	[[nodiscard]] int get_base_armor_class() const noexcept
+	{
+		return baseArmorClass;
+	}
 
 	void set_armor_class(int value) noexcept { armorClass = value; }
 
@@ -69,5 +76,7 @@ public:
 	//   armorClass->without_dexterity_bonus(player, ctx);   // -> 10
 	// Dexterity 5 made it 12, a penalty, which surprise does not lift:
 	//   armorClass->without_dexterity_bonus(player, ctx);   // -> 12
-	[[nodiscard]] int without_dexterity_bonus(const Creature& owner, GameContext& ctx) const;
+	[[nodiscard]] int without_dexterity_bonus(
+		const Creature& owner,
+		GameContext& ctx) const;
 };

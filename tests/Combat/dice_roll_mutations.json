@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/DamageInfo.h",
-      "original": "\t\treturn roll_dice(rng, dice);",
-      "mutated": "\t\treturn rng->roll(minDamage, maxDamage);",
+      "original": "\tint roll_damage(RandomDice* rng) const { return roll_dice(rng, dice);",
+      "mutated": "\tint roll_damage(RandomDice* rng) const { return rng->roll(minDamage, maxDamage);",
       "catches": "the flat draw restored, which makes 2d6 as likely to be 2 as 7"
     },
     {

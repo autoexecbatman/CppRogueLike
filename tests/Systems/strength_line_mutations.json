@@ -15,26 +15,26 @@
   "mutations": [
     {
       "file": "src/CharacterSheetUI.cpp",
-      "original": "\t\tAttackStrength::adjustment(dataManager, player, AttackKind::MELEE, nullptr);",
-      "mutated": "\t\tAttackStrength::Adjustment{ 0, 0 };",
+      "original": "\tconst AttackStrength::Adjustment swing = AttackStrength::adjustment(\n\t\tdataManager,\n\t\tplayer,\n\t\tAttackKind::MELEE,\n\t\tnullptr);",
+      "mutated": "\tconst AttackStrength::Adjustment swing = AttackStrength::Adjustment{ 0, 0 };",
       "catches": "the sheet no longer reading Table 1 at all, so every score prints as +0 and +0"
     },
     {
       "file": "src/CharacterSheetUI.cpp",
-      "original": "\treturn std::format(\"STR: {:>2}  ({:+d} hit, {:+d} dmg)\", strength_text(player), swing.hit, swing.damage);",
-      "mutated": "\treturn std::format(\"STR: {:>2}  ({:+d} hit, {:+d} dmg)\", strength_text(player), swing.damage, swing.hit);",
+      "original": "\treturn std::format(\n\t\t\"STR: {:>2}  ({:+d} hit, {:+d} dmg)\",\n\t\tstrength_text(player),\n\t\tswing.hit,\n\t\tswing.damage);",
+      "mutated": "\treturn std::format(\n\t\t\"STR: {:>2}  ({:+d} hit, {:+d} dmg)\",\n\t\tstrength_text(player),\n\t\tswing.damage, swing.hit);",
       "catches": "hit and damage printed in each other's place, which agree at most scores and not at 18/00"
     },
     {
       "file": "src/CharacterSheetUI.cpp",
-      "original": "\treturn std::format(\"STR: {:>2}  ({:+d} hit, {:+d} dmg)\", strength_text(player), swing.hit, swing.damage);",
-      "mutated": "\treturn std::format(\"STR: {}  ({:+d} hit, {:+d} dmg)\", strength_text(player), swing.hit, swing.damage);",
+      "original": "\treturn std::format(\n\t\t\"STR: {:>2}  ({:+d} hit, {:+d} dmg)\",\n\t\tstrength_text(player),\n\t\tswing.hit,\n\t\tswing.damage);",
+      "mutated": "\treturn std::format(\n\t\t\"STR: {}  ({:+d} hit, {:+d} dmg)\",\n\t\tstrength_text(player),\n\t\tswing.hit,\n\t\tswing.damage);",
       "catches": "the column padding dropped, so a single-digit score shifts the bracket out of line with every other row"
     },
     {
       "file": "src/CharacterSheetUI.cpp",
-      "original": "\treturn std::format(\"STR: {:>2}  ({:+d} hit, {:+d} dmg)\", strength_text(player), swing.hit, swing.damage);",
-      "mutated": "\treturn std::format(\"STR: {:>2}  ({} hit, {} dmg)\", strength_text(player), swing.hit, swing.damage);",
+      "original": "\treturn std::format(\n\t\t\"STR: {:>2}  ({:+d} hit, {:+d} dmg)\",\n\t\tstrength_text(player),\n\t\tswing.hit,\n\t\tswing.damage);",
+      "mutated": "\treturn std::format(\n\t\t\"STR: {:>2}  ({} hit, {} dmg)\",\n\t\tstrength_text(player),\n\t\tswing.hit,\n\t\tswing.damage);",
       "catches": "the sign dropped, so a bonus of 1 and a penalty of 1 both print as 1"
     },
     {

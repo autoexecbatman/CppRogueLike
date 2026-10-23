@@ -18,20 +18,24 @@
 // Example:
 //   floatingText->spawn_damage(pos, 7, DamageSubject::PLAYER);   // red 7
 //   floatingText->spawn_damage(pos, 7, DamageSubject::MONSTER);  // yellow 7
-void FloatingTextSystem::spawn_damage(Vector2D worldPosition, int value, DamageSubject subject)
+void FloatingTextSystem::spawn_damage(
+	Vector2D worldPosition,
+	int value,
+	DamageSubject subject)
 {
 	// Damage to the player is the one a human needs to notice.
 	const bool hurtPlayer = (subject == DamageSubject::PLAYER);
 
-	entries.push_back(FloatingEntry{
-		.worldPosition = worldPosition,
-		.text = std::format("{}", value),
-		.red = 255,
-		.green = static_cast<unsigned char>(hurtPlayer ? 80 : 220),
-		.blue = static_cast<unsigned char>(hurtPlayer ? 80 : 50),
-		.spawnTime = static_cast<float>(GetTime()),
-		.lifetime = 1.2f,
-	});
+	entries.push_back(
+		FloatingEntry{
+			.worldPosition = worldPosition,
+			.text = std::format("{}", value),
+			.red = 255,
+			.green = static_cast<unsigned char>(hurtPlayer ? 80 : 220),
+			.blue = static_cast<unsigned char>(hurtPlayer ? 80 : 50),
+			.spawnTime = static_cast<float>(GetTime()),
+			.lifetime = 1.2f,
+		});
 }
 
 void FloatingTextSystem::spawn_text(
@@ -42,15 +46,16 @@ void FloatingTextSystem::spawn_text(
 	unsigned char blue,
 	float lifetime)
 {
-	entries.push_back(FloatingEntry{
-		.worldPosition = worldPosition,
-		.text = std::move(text),
-		.red = red,
-		.green = green,
-		.blue = blue,
-		.spawnTime = static_cast<float>(GetTime()),
-		.lifetime = lifetime,
-	});
+	entries.push_back(
+		FloatingEntry{
+			.worldPosition = worldPosition,
+			.text = std::move(text),
+			.red = red,
+			.green = green,
+			.blue = blue,
+			.spawnTime = static_cast<float>(GetTime()),
+			.lifetime = lifetime,
+		});
 }
 
 void FloatingTextSystem::update_and_render(const Renderer& renderer)
@@ -78,16 +83,20 @@ void FloatingTextSystem::update_and_render(const Renderer& renderer)
 		float offset_px = lifeFraction * static_cast<float>(tileSize) * 0.75f;
 
 		// Full opacity for first 60%, then fade to zero
-		float alpha_f = (lifeFraction < 0.6f)
-			? 1.0f
-			: 1.0f - ((lifeFraction - 0.6f) / 0.4f);
+		float alpha_f = (lifeFraction < 0.6f) ?
+			1.0f :
+			1.0f - ((lifeFraction - 0.6f) / 0.4f);
 		unsigned char alpha = static_cast<unsigned char>(alpha_f * 255.0f);
 
 		int screen_x = entry.worldPosition.x * tileSize - cam_x;
-		int screen_y = entry.worldPosition.y * tileSize - cam_y - static_cast<int>(offset_px);
+		int screen_y = entry.worldPosition.y * tileSize - cam_y -
+			static_cast<int>(offset_px);
 
 		Color col{ entry.red, entry.green, entry.blue, alpha };
-		renderer.draw_text_color(Vector2D{ screen_x, screen_y }, entry.text, col);
+		renderer.draw_text_color(
+			Vector2D{ screen_x, screen_y },
+			entry.text,
+			col);
 	}
 
 	std::erase_if(entries, is_expired);

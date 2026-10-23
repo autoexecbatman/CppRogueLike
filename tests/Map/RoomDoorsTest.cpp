@@ -70,7 +70,9 @@ protected:
 				}
 			}
 		}
-		for (const Vector2D door : { A_NORTH_DOOR, A_SOUTH_DOOR, SHARED_DOOR, B_EAST_DOOR, LONE_DOOR })
+		for (
+			const Vector2D door :
+			{ A_NORTH_DOOR, A_SOUTH_DOOR, SHARED_DOOR, B_EAST_DOOR, LONE_DOOR })
 		{
 			map.set_door(door);
 			ASSERT_TRUE(map.lock_door(door));
@@ -92,16 +94,20 @@ TEST_F(RoomDoorsTest, AKeyOpensEveryLockedDoorOfItsRoom)
 {
 	map.open_all_room_doors(A_NORTH_DOOR, ctx);
 
-	EXPECT_TRUE(map.is_open_door(A_NORTH_DOOR)) << "the door the key was used on";
-	EXPECT_TRUE(map.is_open_door(A_SOUTH_DOOR)) << "another door of the same room";
-	EXPECT_TRUE(map.is_open_door(SHARED_DOOR)) << "a door on the room's shared wall";
+	EXPECT_TRUE(map.is_open_door(A_NORTH_DOOR))
+		<< "the door the key was used on";
+	EXPECT_TRUE(map.is_open_door(A_SOUTH_DOOR))
+		<< "another door of the same room";
+	EXPECT_TRUE(map.is_open_door(SHARED_DOOR))
+		<< "a door on the room's shared wall";
 }
 
 TEST_F(RoomDoorsTest, AnotherRoomsDoorStaysLocked)
 {
 	map.open_all_room_doors(A_NORTH_DOOR, ctx);
 
-	EXPECT_TRUE(map.is_door_locked(B_EAST_DOOR)) << "the second room's far door opened";
+	EXPECT_TRUE(map.is_door_locked(B_EAST_DOOR))
+		<< "the second room's far door opened";
 	EXPECT_TRUE(map.is_door_locked(LONE_DOOR)) << "a door of no room opened";
 }
 
@@ -110,7 +116,9 @@ TEST_F(RoomDoorsTest, ADoorOfNoRoomOpensAlone)
 	map.open_all_room_doors(LONE_DOOR, ctx);
 
 	EXPECT_TRUE(map.is_open_door(LONE_DOOR));
-	for (const Vector2D door : { A_NORTH_DOOR, A_SOUTH_DOOR, SHARED_DOOR, B_EAST_DOOR })
+	for (
+		const Vector2D door :
+		{ A_NORTH_DOOR, A_SOUTH_DOOR, SHARED_DOOR, B_EAST_DOOR })
 	{
 		EXPECT_TRUE(map.is_door_locked(door)) << door.x << "," << door.y;
 	}

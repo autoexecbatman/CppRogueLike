@@ -55,7 +55,8 @@ auto standing_outside(int westmostCol, int eastmostCol)
 {
 	return [westmostCol, eastmostCol](const std::unique_ptr<SpellTile>& tile)
 	{
-		const bool isOutside = tile->position.x < westmostCol || tile->position.x > eastmostCol;
+		const bool isOutside =
+			tile->position.x < westmostCol || tile->position.x > eastmostCol;
 		return !tile->is_destroyed() && isOutside;
 	};
 }
@@ -91,7 +92,9 @@ protected:
 		spinner.experienceReward = std::make_unique<ExperienceReward>(0);
 		spinner.healthPool = std::make_unique<HealthPool>(10);
 		spinner.armorClass = std::make_unique<ArmorClass>(5);
-		spinner.attacker = std::make_unique<MonsterAttacker>(spinner, DamageInfo{ "1d4", DamageType::PHYSICAL });
+		spinner.attacker = std::make_unique<MonsterAttacker>(
+			spinner,
+			DamageInfo{ "1d4", DamageType::PHYSICAL });
 		spinner.set_dr(0);
 		spinner.set_thaco(20);
 		spinner.set_strength(8);
@@ -126,7 +129,8 @@ protected:
 	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
 	Map map{ 20, 20 };
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 4, 5 }) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ 4, 5 }) };
 	Creature spinner{
 		Vector2D{ 5, 5 },
 		ActorData{ TileRef{}, "web weaver", ColorPairId::WHITE_BLACK },
@@ -137,26 +141,45 @@ protected:
 // a spinner that skipped the save, or rolled it and bit anyway, lands damage.
 TEST_F(WebSpinnerSanctuaryTest, SanctuaryHoldsOffASpinnerThatFailsToSave)
 {
-	ASSERT_GT(SavingThrows::target(spinner.get_creature_class(), spinner.get_creature_level(), SavingThrow::SPELL), 12);
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
+	ASSERT_GT(
+		SavingThrows::target(
+			spinner.get_creature_class(),
+			spinner.get_creature_level(),
+			SavingThrow::SPELL),
+		12);
+	ctx.buffSystem->add_buff(
+		*player,
+		BuffType::SANCTUARY,
+		0,
+		10,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 	// The save, the attack, the bite's 1d4, then the player's own save against the
 	// venom, which the highest roll makes - so no venom lands either way.
 	script({ 12, 20, 4, RandomDice::HIGHEST });
 
-	EXPECT_EQ(hp_lost_to_one_turn(), 0) << "sanctuary held and the spinner bit anyway";
+	EXPECT_EQ(hp_lost_to_one_turn(), 0)
+		<< "sanctuary held and the spinner bit anyway";
 }
 
 // A 20 makes the save, and the spinner bites as usual: a hit, and the die shows four.
 // Without the save, the attack would take the 20 and the die the next 20.
 TEST_F(WebSpinnerSanctuaryTest, ASpinnerThatSavesBitesAsUsual)
 {
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
-	script({
-		20,
-		20,
-		4,
-		RandomDice::HIGHEST,
-	}); // the last is the player's venom save, made
+	ctx.buffSystem->add_buff(
+		*player,
+		BuffType::SANCTUARY,
+		0,
+		10,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
+	script(
+		{
+			20,
+			20,
+			4,
+			RandomDice::HIGHEST,
+		}); // the last is the player's venom save, made
 
 	EXPECT_EQ(hp_lost_to_one_turn(), 4) << "1d4 at four after a made save";
 }
@@ -167,7 +190,13 @@ TEST_F(WebSpinnerSanctuaryTest, ASpinnerThatSavesBitesAsUsual)
 TEST_F(WebSpinnerSanctuaryTest, NoVenomFromASpinnerTurnedAway)
 {
 	spinner.ai = std::make_unique<AiWebSpinner>();
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(
+		*player,
+		BuffType::SANCTUARY,
+		0,
+		10,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 	script({ 12, 20, 3 });
 
 	EXPECT_EQ(hp_lost_to_one_turn(), 0) << "venom landed through a failed save";
@@ -176,13 +205,15 @@ TEST_F(WebSpinnerSanctuaryTest, NoVenomFromASpinnerTurnedAway)
 // No sanctuary, no save: the first roll is the attack.
 TEST_F(WebSpinnerSanctuaryTest, AnUnwardedPlayerIsBittenWithoutASave)
 {
-	script({
-		20,
-		4,
-		RandomDice::HIGHEST,
-	}); // the attack, the 1d4, then the venom save, made
+	script(
+		{
+			20,
+			4,
+			RandomDice::HIGHEST,
+		}); // the attack, the 1d4, then the venom save, made
 
-	EXPECT_EQ(hp_lost_to_one_turn(), 4) << "a save was rolled against a player without sanctuary";
+	EXPECT_EQ(hp_lost_to_one_turn(), 4)
+		<< "a save was rolled against a player without sanctuary";
 }
 
 // The spinning tests below stand the spinner four tiles off, at (8,5), the edge of the
@@ -202,7 +233,13 @@ protected:
 
 	void ward_player()
 	{
-		ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
+		ctx.buffSystem->add_buff(
+			*player,
+			BuffType::SANCTUARY,
+			0,
+			10,
+			BuffApplication::ADD,
+			ctx.gameState->get_time());
 	}
 
 	// The spinner's save against the ward, rolled and recorded as an attack would.
@@ -216,7 +253,8 @@ protected:
 	{
 		auto stands_at = [position](const std::unique_ptr<SpellTile>& spellTile)
 		{
-			return !spellTile->is_destroyed() && spellTile->position == position;
+			return !spellTile->is_destroyed() &&
+				spellTile->position == position;
 		};
 		return std::ranges::any_of(*ctx.spellTiles, stands_at);
 	}
@@ -232,7 +270,8 @@ protected:
 	{
 		for (const int col : std::views::iota(14, 19))
 		{
-			ctx.spellTiles->emplace_back(std::make_unique<Web>(Vector2D{ col, 5 }, 3, *ctx.tileConfig));
+			ctx.spellTiles->emplace_back(
+				std::make_unique<Web>(Vector2D{ col, 5 }, 3, *ctx.tileConfig));
 		}
 	}
 };
@@ -242,7 +281,12 @@ protected:
 // (11,5). Aimed at the player it would centre on (6,5) at size 5 and reach (1,5).
 TEST_F(WebSpinnerQuarryTest, FailedSpinnerSpinsATrapWebOnItself)
 {
-	ASSERT_GT(SavingThrows::target(spinner.get_creature_class(), spinner.get_creature_level(), SavingThrow::SPELL), 12);
+	ASSERT_GT(
+		SavingThrows::target(
+			spinner.get_creature_class(),
+			spinner.get_creature_level(),
+			SavingThrow::SPELL),
+		12);
 	ward_player();
 	record_spinner_save(12);
 	ASSERT_TRUE(ctx.buffSystem->ignores_warded_creature(spinner, *player));
@@ -251,9 +295,12 @@ TEST_F(WebSpinnerQuarryTest, FailedSpinnerSpinsATrapWebOnItself)
 
 	spinner.ai->update(spinner, ctx);
 
-	EXPECT_TRUE(has_web_at(Vector2D{ 5, 5 })) << "no web edge three tiles west of the spinner";
-	EXPECT_TRUE(has_web_at(Vector2D{ 11, 5 })) << "no web edge three tiles east of the spinner";
-	EXPECT_FALSE(has_web_outside(5, 11)) << "the web was aimed at, or sized for, a player it has lost";
+	EXPECT_TRUE(has_web_at(Vector2D{ 5, 5 }))
+		<< "no web edge three tiles west of the spinner";
+	EXPECT_TRUE(has_web_at(Vector2D{ 11, 5 }))
+		<< "no web edge three tiles east of the spinner";
+	EXPECT_FALSE(has_web_outside(5, 11))
+		<< "the web was aimed at, or sized for, a player it has lost";
 }
 
 // A made save leaves the player in plain sight: the 40% defensive web, size 5 for a player
@@ -267,7 +314,8 @@ TEST_F(WebSpinnerQuarryTest, SavedSpinnerAimsAtThePlayerAsBefore)
 
 	spinner.ai->update(spinner, ctx);
 
-	EXPECT_TRUE(has_web_at(Vector2D{ 1, 5 })) << "a spinner that saved did not aim at the player";
+	EXPECT_TRUE(has_web_at(Vector2D{ 1, 5 }))
+		<< "a spinner that saved did not aim at the player";
 }
 
 // No Sanctuary: the same aimed web.
@@ -277,7 +325,8 @@ TEST_F(WebSpinnerQuarryTest, UnwardedSpinnerAimsAtThePlayerAsBefore)
 
 	spinner.ai->update(spinner, ctx);
 
-	EXPECT_TRUE(has_web_at(Vector2D{ 1, 5 })) << "an unwarded player was not aimed at";
+	EXPECT_TRUE(has_web_at(Vector2D{ 1, 5 }))
+		<< "an unwarded player was not aimed at";
 }
 
 // Spinning is no attack, so deciding to spin rolls no save against the ward: the casting
@@ -290,7 +339,8 @@ TEST_F(WebSpinnerQuarryTest, DecidingToSpinRollsNoSave)
 	spinner.ai->update(spinner, ctx);
 
 	ASSERT_EQ(player->activeBuffs.size(), 1u);
-	EXPECT_TRUE(player->activeBuffs.front().opponentSaves.empty()) << "a save was rolled to decide on a web";
+	EXPECT_TRUE(player->activeBuffs.front().opponentSaves.empty())
+		<< "a save was rolled to decide on a web";
 }
 
 // Beside the player, a spinner that has lost track of it does not try to bite and get
@@ -305,7 +355,8 @@ TEST_F(WebSpinnerQuarryTest, FailedSpinnerBesideThePlayerSpinsInsteadOfBiting)
 	script({ 1, 0 });
 
 	EXPECT_EQ(hp_lost_to_one_turn(), 0);
-	EXPECT_TRUE(has_web_at(Vector2D{ 8, 5 })) << "the spinner bit at a player it has lost instead of spinning";
+	EXPECT_TRUE(has_web_at(Vector2D{ 8, 5 }))
+		<< "the spinner bit at a player it has lost instead of spinning";
 }
 
 // With five webs standing, only a quarry's 40% draws another. A d100 of 30 is under it
@@ -319,7 +370,8 @@ TEST_F(WebSpinnerQuarryTest, FailedSpinnerAtItsWebLimitSpinsNoDefensiveWeb)
 
 	spinner.ai->update(spinner, ctx);
 
-	EXPECT_EQ(ctx.spellTiles->size(), 5u) << "a defensive web was spun against a player it has lost";
+	EXPECT_EQ(ctx.spellTiles->size(), 5u)
+		<< "a defensive web was spun against a player it has lost";
 }
 
 // The control for the test above: the same 30, with the player in sight, spins a web.
@@ -330,5 +382,6 @@ TEST_F(WebSpinnerQuarryTest, UnwardedSpinnerAtItsWebLimitSpinsADefensiveWeb)
 
 	spinner.ai->update(spinner, ctx);
 
-	EXPECT_GT(ctx.spellTiles->size(), 5u) << "the 40% defensive web was not spun";
+	EXPECT_GT(ctx.spellTiles->size(), 5u)
+		<< "the 40% defensive web was not spun";
 }

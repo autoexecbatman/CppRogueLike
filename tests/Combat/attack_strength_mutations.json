@@ -51,8 +51,8 @@
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\tconst Item* missileWeapon = kind == AttackKind::RANGED ? owner.get_equipped_item(EquipmentSlot::MISSILE_WEAPON) : nullptr;",
-      "mutated": "\tconst Item* missileWeapon = nullptr;",
+      "original": "\tconst Item* missileWeapon = kind == AttackKind::RANGED ?\n\t\towner.get_equipped_item(EquipmentSlot::MISSILE_WEAPON) :\n\t\tnullptr;",
+      "mutated": "\tconst Item* missileWeapon =nullptr;",
       "catches": "the attack never asking what it fires"
     },
     {
@@ -63,13 +63,13 @@
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\t\tconst int baseDamage = calculate_damage_with_backstab(damageRoll, strengthOnAttack.damage, backstab, ctx);",
-      "mutated": "\t\tconst int baseDamage = calculate_damage_with_backstab(damageRoll, 0, backstab, ctx);",
+      "original": "\t\tconst int baseDamage = calculate_damage_with_backstab(\n\t\t\tdamageRoll,\n\t\t\tstrengthOnAttack.damage,\n\t\t\tbackstab,\n\t\t\tctx);",
+      "mutated": "\t\tconst int baseDamage = calculate_damage_with_backstab(\n\t\t\tdamageRoll,0,\n\t\t\tbackstab,\n\t\t\tctx);",
       "catches": "Strength dropped from damage"
     },
     {
       "file": "src/ItemClassification.h",
-      "original": "\treturn itemClass == ItemClass::BOW || itemClass == ItemClass::CROSSBOW || itemClass == ItemClass::SLING;",
+      "original": "\treturn itemClass == ItemClass::BOW || itemClass == ItemClass::CROSSBOW ||\n\t\titemClass == ItemClass::SLING;",
       "mutated": "\treturn itemClass == ItemClass::BOW || itemClass == ItemClass::CROSSBOW;",
       "catches": "a sling that cannot be fired"
     },

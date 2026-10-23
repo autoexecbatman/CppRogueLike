@@ -77,7 +77,9 @@ protected:
 		spider.experienceReward = std::make_unique<ExperienceReward>(0);
 		spider.healthPool = std::make_unique<HealthPool>(10);
 		spider.armorClass = std::make_unique<ArmorClass>(7);
-		spider.attacker = std::make_unique<MonsterAttacker>(spider, DamageInfo{ "1d4", DamageType::PHYSICAL });
+		spider.attacker = std::make_unique<MonsterAttacker>(
+			spider,
+			DamageInfo{ "1d4", DamageType::PHYSICAL });
 		spider.set_dr(0);
 		spider.set_thaco(20);
 		spider.set_strength(8);
@@ -86,10 +88,11 @@ protected:
 
 		// Lying in wait, with ten rounds of the ambush left.
 		auto ambusher = std::make_unique<AiSpider>();
-		ambusher->load(json{
-			{ "isAmbushing", true },
-			{ "ambushEndTime", expiry_time(0, 10) },
-		});
+		ambusher->load(
+			json{
+				{ "isAmbushing", true },
+				{ "ambushEndTime", expiry_time(0, 10) },
+			});
 		spider.ai = std::move(ambusher);
 	}
 
@@ -119,9 +122,14 @@ protected:
 	// Whether any finished message carries this text.
 	bool was_told(std::string_view text)
 	{
-		for (size_t index = 0; index < game.messageSystem.get_stored_message_count(); ++index)
+		for (
+			size_t index = 0;
+			index < game.messageSystem.get_stored_message_count();
+			++index)
 		{
-			for (const LogMessage& part : game.messageSystem.get_attack_message_at(index))
+			for (
+				const LogMessage& part :
+				game.messageSystem.get_attack_message_at(index))
 			{
 				if (part.text.find(text) != std::string::npos)
 				{
@@ -137,7 +145,8 @@ protected:
 	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
 	Map map{ 20, 20 };
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 4, 5 }) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ 4, 5 }) };
 	Creature spider{
 		Vector2D{ 5, 5 },
 		ActorData{ TileRef{}, "small spider", ColorPairId::WHITE_BLACK },
@@ -158,7 +167,8 @@ TEST_F(SpiderAmbushTest, ASurprisedPlayerTakesASecondBite)
 {
 	script({ 20, 4, RandomDice::HIGHEST, 1, 20, 3, RandomDice::HIGHEST });
 
-	EXPECT_EQ(hp_lost_to_the_ambush(), 7) << "four, then three in the surprise round";
+	EXPECT_EQ(hp_lost_to_the_ambush(), 7)
+		<< "four, then three in the surprise round";
 }
 
 // THAC0 20 against armour class 10 needs a 10. The surprise bite's 9 hits only at +1.
@@ -179,7 +189,8 @@ TEST_F(SpiderAmbushTest, ASurprisedPlayerLosesTheDexterityBonusToArmourClass)
 	ASSERT_EQ(player->get_armor_class(), 6);
 	script({ 20, 4, RandomDice::HIGHEST, 1, 9, 3, RandomDice::HIGHEST });
 
-	EXPECT_EQ(hp_lost_to_the_ambush(), 7) << "the surprise bite met the Dexterity bonus";
+	EXPECT_EQ(hp_lost_to_the_ambush(), 7)
+		<< "the surprise bite met the Dexterity bonus";
 }
 
 // Dexterity 5 takes 1 off the surprise roll, so a 4 is surprised, and adds 2 to armour
@@ -192,7 +203,8 @@ TEST_F(SpiderAmbushTest, LowDexterityIsSurprisedMoreAndKeepsItsPenalty)
 	ASSERT_EQ(player->get_armor_class(), 12);
 	script({ 20, 4, RandomDice::HIGHEST, 4, 8, 3, RandomDice::HIGHEST });
 
-	EXPECT_EQ(hp_lost_to_the_ambush(), 7) << "surprised on a 4, bitten at armour class 12";
+	EXPECT_EQ(hp_lost_to_the_ambush(), 7)
+		<< "surprised on a 4, bitten at armour class 12";
 }
 
 // Dexterity past the table - 26 here - reads its last row, +5 to the surprise roll, so a 1
@@ -203,7 +215,8 @@ TEST_F(SpiderAmbushTest, APlayerPastTheTableIsReadWithItsLastRow)
 	script({ 20, 4, RandomDice::HIGHEST, 1, 20, 3, RandomDice::HIGHEST });
 
 	int lost = 0;
-	EXPECT_NO_THROW(lost = hp_lost_to_the_ambush()) << "the surprise roll fell off the Dexterity table";
+	EXPECT_NO_THROW(lost = hp_lost_to_the_ambush())
+		<< "the surprise roll fell off the Dexterity table";
 	EXPECT_EQ(lost, 4) << "a 1 with +5 is not surprised";
 }
 
@@ -223,7 +236,8 @@ TEST_F(SpiderAmbushTest, AnOrdinaryBiteBringsNoSurpriseRoll)
 	spider.ai->load(json{ { "isAmbushing", false }, { "ambushEndTime", 0 } });
 	script({ 20, 4, RandomDice::HIGHEST, 1, 20, 3, RandomDice::HIGHEST });
 
-	EXPECT_EQ(hp_lost_to_the_ambush(), 4) << "surprised by a spider that was never hidden";
+	EXPECT_EQ(hp_lost_to_the_ambush(), 4)
+		<< "surprised by a spider that was never hidden";
 }
 
 // Surprise lasts its round; the player is not left surprised for whatever acts next.
@@ -243,7 +257,8 @@ TEST_F(SpiderAmbushTest, AnAmbushRollsAgainstArmourClass)
 	player->armorClass = std::make_unique<ArmorClass>(-10);
 	script({ 20, 4, RandomDice::HIGHEST, 1, 20, 4, RandomDice::HIGHEST });
 
-	EXPECT_EQ(hp_lost_to_the_ambush(), 0) << "the bite cannot hit this armour class";
+	EXPECT_EQ(hp_lost_to_the_ambush(), 0)
+		<< "the bite cannot hit this armour class";
 }
 
 // A protected player: the spider saves against the spell on a 12 and fails. A hit is
@@ -251,11 +266,23 @@ TEST_F(SpiderAmbushTest, AnAmbushRollsAgainstArmourClass)
 // lands damage.
 TEST_F(SpiderAmbushTest, SanctuaryHoldsOffASpiderThatFailsToSave)
 {
-	ASSERT_GT(SavingThrows::target(spider.get_creature_class(), spider.get_creature_level(), SavingThrow::SPELL), 12);
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
+	ASSERT_GT(
+		SavingThrows::target(
+			spider.get_creature_class(),
+			spider.get_creature_level(),
+			SavingThrow::SPELL),
+		12);
+	ctx.buffSystem->add_buff(
+		*player,
+		BuffType::SANCTUARY,
+		0,
+		10,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 	script({ 12, 20, 4, RandomDice::HIGHEST, 10 });
 
-	EXPECT_EQ(hp_lost_to_the_ambush(), 0) << "sanctuary held and the spider struck anyway";
+	EXPECT_EQ(hp_lost_to_the_ambush(), 0)
+		<< "sanctuary held and the spider struck anyway";
 }
 
 // A spider turned away by Sanctuary ignores the player, so it takes no surprise round:
@@ -263,11 +290,19 @@ TEST_F(SpiderAmbushTest, SanctuaryHoldsOffASpiderThatFailsToSave)
 // it failed, so the 1 behind it is what a surprise roll would read, and a 1 surprises.
 TEST_F(SpiderAmbushTest, ASpiderTurnedAwayTakesNoSurpriseRound)
 {
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(
+		*player,
+		BuffType::SANCTUARY,
+		0,
+		10,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 	script({ 12, 1, 20, 4, RandomDice::HIGHEST });
 
 	spider.ai->update(spider, ctx);
 
-	EXPECT_TRUE(was_told("cannot bring itself to attack")) << "the bite was not turned away";
-	EXPECT_FALSE(was_told("caught off guard")) << "a surprise round against a player the spider ignores";
+	EXPECT_TRUE(was_told("cannot bring itself to attack"))
+		<< "the bite was not turned away";
+	EXPECT_FALSE(was_told("caught off guard"))
+		<< "a surprise round against a player the spider ignores";
 }

@@ -99,7 +99,10 @@ public:
 		unsigned char green,
 		unsigned char blue);
 
-	[[nodiscard]] TileRef get_missile_tile() const noexcept { return missileTile; }
+	[[nodiscard]] TileRef get_missile_tile() const noexcept
+	{
+		return missileTile;
+	}
 
 	// Seeking projectile with chaotic wobble motion
 	void spawn_projectile(

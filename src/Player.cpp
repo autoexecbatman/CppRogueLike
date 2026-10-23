@@ -68,7 +68,10 @@
 namespace
 {
 template <std::size_t TableSize>
-constexpr int calculate_xp_for_level(int level, const std::array<int, TableSize>& xpTable, int linearProgression) noexcept
+constexpr int calculate_xp_for_level(
+	int level,
+	const std::array<int, TableSize>& xpTable,
+	int linearProgression) noexcept
 {
 	if (level <= 0)
 	{
@@ -172,8 +175,10 @@ auto watching_at(int currentTime)
 
 } // namespace
 
-Player::Player(Vector2D position)
-	: Creature(position, ActorData{ TileRef{}, "Player", ColorPairId::WHITE_BLACK })
+Player::Player(Vector2D position) :
+	Creature(
+		position,
+		ActorData{ TileRef{}, "Player", ColorPairId::WHITE_BLACK })
 {
 	// A shell has no race yet, and a race with no row never ages; a load replaces it.
 	lifespan = Lifespan{};
@@ -227,7 +232,9 @@ std::string_view Player::sprite_tile_key() const noexcept
 
 	case CreatureClass::MONSTER:
 	{
-		assert(false && "Player::sprite_tile_key: a player with a monster's class");
+		assert(
+			false &&
+			"Player::sprite_tile_key: a player with a monster's class");
 		return "TILE_PLAYER";
 	}
 	}
@@ -235,8 +242,13 @@ std::string_view Player::sprite_tile_key() const noexcept
 	std::unreachable();
 }
 
-Player::Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext& ctx)
-	: Creature(position, ActorData{ TileRef{}, blueprint.name, ColorPairId::WHITE_BLACK })
+Player::Player(
+	Vector2D position,
+	const PlayerBlueprint& blueprint,
+	GameContext& ctx) :
+	Creature(
+		position,
+		ActorData{ TileRef{}, blueprint.name, ColorPairId::WHITE_BLACK })
 {
 	set_gender(blueprint.gender);
 	// The race now; the ages are rolled when the game starts, after the racial adjustments.
@@ -269,7 +281,9 @@ Player::Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext&
 	}
 	case CreatureClass::MONSTER:
 	{
-		assert(false && "Player: a blueprint reached construction with no class chosen");
+		assert(
+			false &&
+			"Player: a blueprint reached construction with no class chosen");
 		break;
 	}
 	}
@@ -278,7 +292,9 @@ Player::Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext&
 	// is what character creation runs, and the blueprint carries what it produced.
 	for (const Ability ability : ALL_ABILITY)
 	{
-		set_ability(ability, blueprint.abilityScores.at(ability_index(ability)));
+		set_ability(
+			ability,
+			blueprint.abilityScores.at(ability_index(ability)));
 	}
 
 	set_gold(100);
@@ -299,7 +315,8 @@ void Player::roll_new_character(GameContext& ctx)
 
 	// The six are allocated before the character exists, so nothing here touches them.
 	// The owner's cushion plus one roll of the class's own die, set before this runs.
-	const int playerHp = GameBalance::Leveling::HitPoints::STARTING_CUSHION + ctx.dice->roll(1, get_hit_die());
+	const int playerHp = GameBalance::Leveling::HitPoints::STARTING_CUSHION +
+		ctx.dice->roll(1, get_hit_die());
 	const int playerDr = 1;
 	const int playerXp = 0;
 	const int playerAC = 10;
@@ -341,10 +358,12 @@ void Player::on_new_game_start(GameContext& ctx)
 
 void Player::roll_exceptional_strength(GameContext& ctx)
 {
-	assert(ctx.dice && "Player::roll_exceptional_strength: called without dice");
+	assert(
+		ctx.dice && "Player::roll_exceptional_strength: called without dice");
 
 	// PHB character creation: a fighter who is not a halfling, with Strength 18.
-	const bool isEligible = get_creature_class() == CreatureClass::FIGHTER && get_race() != PlayerRaceState::HALFLING && get_strength() == 18;
+	const bool isEligible = get_creature_class() == CreatureClass::FIGHTER &&
+		get_race() != PlayerRaceState::HALFLING && get_strength() == 18;
 	if (!isEligible)
 	{
 		return;
@@ -366,25 +385,52 @@ void Player::on_kill_reward(int xp, GameContext& ctx)
 
 void Player::equip_class_starting_gear(GameContext& ctx)
 {
-	assert(ctx.dice && "Player::equip_class_starting_gear: called without dice");
+	assert(
+		ctx.dice && "Player::equip_class_starting_gear: called without dice");
 
 	switch (get_creature_class())
 	{
 
 	case CreatureClass::FIGHTER:
 	{
-		const int goldRoll = ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4();
+		const int goldRoll = ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() +
+			ctx.dice->d4() + ctx.dice->d4();
 		int startingGold = goldRoll * 10;
 		set_gold(startingGold);
-		equip_item(ItemCreator::create("plate_mail", position, ctx), EquipmentSlot::BODY, ctx);
-		equip_item(ItemCreator::create("long_sword", position, ctx), EquipmentSlot::RIGHT_HAND, ctx);
-		equip_item(ItemCreator::create("medium_shield", position, ctx), EquipmentSlot::LEFT_HAND, ctx);
-		equip_item(ItemCreator::create("long_bow", position, ctx), EquipmentSlot::MISSILE_WEAPON, ctx);
-		[[maybe_unused]] const auto grantFireballResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("scroll_fireball", position, ctx));
-		assert(grantFireballResult.has_value() && "Player::equip_class_starting_gear: a fighter's fireball scroll did not fit the pack");
-		[[maybe_unused]] const auto grantIdentifyScrollResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("identify_scroll", position, ctx));
-		assert(grantIdentifyScrollResult.has_value() && "Player::equip_class_starting_gear: a fighter's identify scroll did not fit the pack");
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Fighter equipped with plate mail, long sword, shield, long bow, fireball scroll. [DEBUG]", MessageCompletion::FINISHED);
+		equip_item(
+			ItemCreator::create("plate_mail", position, ctx),
+			EquipmentSlot::BODY,
+			ctx);
+		equip_item(
+			ItemCreator::create("long_sword", position, ctx),
+			EquipmentSlot::RIGHT_HAND,
+			ctx);
+		equip_item(
+			ItemCreator::create("medium_shield", position, ctx),
+			EquipmentSlot::LEFT_HAND,
+			ctx);
+		equip_item(
+			ItemCreator::create("long_bow", position, ctx),
+			EquipmentSlot::MISSILE_WEAPON,
+			ctx);
+		[[maybe_unused]] const auto grantFireballResult =
+			InventoryOperations::add_item(
+				inventoryData,
+				ItemCreator::create("scroll_fireball", position, ctx));
+		assert(
+			grantFireballResult.has_value() &&
+			"Player::equip_class_starting_gear: a fighter's fireball scroll did not fit the pack");
+		[[maybe_unused]] const auto grantIdentifyScrollResult =
+			InventoryOperations::add_item(
+				inventoryData,
+				ItemCreator::create("identify_scroll", position, ctx));
+		assert(
+			grantIdentifyScrollResult.has_value() &&
+			"Player::equip_class_starting_gear: a fighter's identify scroll did not fit the pack");
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"Fighter equipped with plate mail, long sword, shield, long bow, fireball scroll. [DEBUG]",
+			MessageCompletion::FINISHED);
 		break;
 	}
 
@@ -392,29 +438,71 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 	{
 		int startingGold = (ctx.dice->d6() + ctx.dice->d6()) * 10;
 		set_gold(startingGold);
-		equip_item(ItemCreator::create("leather_armor", position, ctx), EquipmentSlot::BODY, ctx);
-		equip_item(ItemCreator::create("dagger", position, ctx), EquipmentSlot::RIGHT_HAND, ctx);
-		[[maybe_unused]] const auto grantIdentifyScrollResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("identify_scroll", position, ctx));
-		assert(grantIdentifyScrollResult.has_value() && "Player::equip_class_starting_gear: a rogue's identify scroll did not fit the pack");
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Rogue equipped with leather armor and dagger.", MessageCompletion::FINISHED);
+		equip_item(
+			ItemCreator::create("leather_armor", position, ctx),
+			EquipmentSlot::BODY,
+			ctx);
+		equip_item(
+			ItemCreator::create("dagger", position, ctx),
+			EquipmentSlot::RIGHT_HAND,
+			ctx);
+		[[maybe_unused]] const auto grantIdentifyScrollResult =
+			InventoryOperations::add_item(
+				inventoryData,
+				ItemCreator::create("identify_scroll", position, ctx));
+		assert(
+			grantIdentifyScrollResult.has_value() &&
+			"Player::equip_class_starting_gear: a rogue's identify scroll did not fit the pack");
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"Rogue equipped with leather armor and dagger.",
+			MessageCompletion::FINISHED);
 		break;
 	}
 
 	case CreatureClass::CLERIC:
 	{
-		int startingGold = (ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()) * 10;
+		int startingGold =
+			(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()) * 10;
 		set_gold(startingGold);
-		equip_item(ItemCreator::create("chain_mail", position, ctx), EquipmentSlot::BODY, ctx);
-		equip_item(ItemCreator::create("mace", position, ctx), EquipmentSlot::RIGHT_HAND, ctx);
-		equip_item(ItemCreator::create("medium_shield", position, ctx), EquipmentSlot::LEFT_HAND, ctx);
-		[[maybe_unused]] const auto grantHealthPotionResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("health_potion", position, ctx));
-		assert(grantHealthPotionResult.has_value() && "Player::equip_class_starting_gear: a cleric's health potion did not fit the pack");
-		[[maybe_unused]] const auto grantHoldPersonResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("scroll_hold_person", position, ctx));
-		assert(grantHoldPersonResult.has_value() && "Player::equip_class_starting_gear: a cleric's hold person scroll did not fit the pack");
-		[[maybe_unused]] const auto grantIdentifyScrollResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("identify_scroll", position, ctx));
-		assert(grantIdentifyScrollResult.has_value() && "Player::equip_class_starting_gear: a cleric's identify scroll did not fit the pack");
+		equip_item(
+			ItemCreator::create("chain_mail", position, ctx),
+			EquipmentSlot::BODY,
+			ctx);
+		equip_item(
+			ItemCreator::create("mace", position, ctx),
+			EquipmentSlot::RIGHT_HAND,
+			ctx);
+		equip_item(
+			ItemCreator::create("medium_shield", position, ctx),
+			EquipmentSlot::LEFT_HAND,
+			ctx);
+		[[maybe_unused]] const auto grantHealthPotionResult =
+			InventoryOperations::add_item(
+				inventoryData,
+				ItemCreator::create("health_potion", position, ctx));
+		assert(
+			grantHealthPotionResult.has_value() &&
+			"Player::equip_class_starting_gear: a cleric's health potion did not fit the pack");
+		[[maybe_unused]] const auto grantHoldPersonResult =
+			InventoryOperations::add_item(
+				inventoryData,
+				ItemCreator::create("scroll_hold_person", position, ctx));
+		assert(
+			grantHoldPersonResult.has_value() &&
+			"Player::equip_class_starting_gear: a cleric's hold person scroll did not fit the pack");
+		[[maybe_unused]] const auto grantIdentifyScrollResult =
+			InventoryOperations::add_item(
+				inventoryData,
+				ItemCreator::create("identify_scroll", position, ctx));
+		assert(
+			grantIdentifyScrollResult.has_value() &&
+			"Player::equip_class_starting_gear: a cleric's identify scroll did not fit the pack");
 		SpellSystem::show_memorization_menu(*this, ctx);
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Cleric equipped with chain mail, mace, and shield. Spells memorized.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"Cleric equipped with chain mail, mace, and shield. Spells memorized.",
+			MessageCompletion::FINISHED);
 		break;
 	}
 
@@ -422,23 +510,51 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 	{
 		int startingGold = (ctx.dice->d4() + ctx.dice->d4()) * 10;
 		set_gold(startingGold);
-		equip_item(ItemCreator::create("staff", position, ctx), EquipmentSlot::RIGHT_HAND, ctx);
-		[[maybe_unused]] const auto grantFireballResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("scroll_fireball", position, ctx));
-		assert(grantFireballResult.has_value() && "Player::equip_class_starting_gear: a wizard's fireball scroll did not fit the pack");
-		[[maybe_unused]] const auto grantLightningResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("scroll_lightning", position, ctx));
-		assert(grantLightningResult.has_value() && "Player::equip_class_starting_gear: a wizard's lightning scroll did not fit the pack");
-		[[maybe_unused]] const auto grantSleepResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("scroll_sleep", position, ctx));
-		assert(grantSleepResult.has_value() && "Player::equip_class_starting_gear: a wizard's sleep scroll did not fit the pack");
-		[[maybe_unused]] const auto grantIdentifyScrollResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("identify_scroll", position, ctx));
-		assert(grantIdentifyScrollResult.has_value() && "Player::equip_class_starting_gear: a wizard's identify scroll did not fit the pack");
+		equip_item(
+			ItemCreator::create("staff", position, ctx),
+			EquipmentSlot::RIGHT_HAND,
+			ctx);
+		[[maybe_unused]] const auto grantFireballResult =
+			InventoryOperations::add_item(
+				inventoryData,
+				ItemCreator::create("scroll_fireball", position, ctx));
+		assert(
+			grantFireballResult.has_value() &&
+			"Player::equip_class_starting_gear: a wizard's fireball scroll did not fit the pack");
+		[[maybe_unused]] const auto grantLightningResult =
+			InventoryOperations::add_item(
+				inventoryData,
+				ItemCreator::create("scroll_lightning", position, ctx));
+		assert(
+			grantLightningResult.has_value() &&
+			"Player::equip_class_starting_gear: a wizard's lightning scroll did not fit the pack");
+		[[maybe_unused]] const auto grantSleepResult =
+			InventoryOperations::add_item(
+				inventoryData,
+				ItemCreator::create("scroll_sleep", position, ctx));
+		assert(
+			grantSleepResult.has_value() &&
+			"Player::equip_class_starting_gear: a wizard's sleep scroll did not fit the pack");
+		[[maybe_unused]] const auto grantIdentifyScrollResult =
+			InventoryOperations::add_item(
+				inventoryData,
+				ItemCreator::create("identify_scroll", position, ctx));
+		assert(
+			grantIdentifyScrollResult.has_value() &&
+			"Player::equip_class_starting_gear: a wizard's identify scroll did not fit the pack");
 		SpellSystem::show_memorization_menu(*this, ctx);
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Wizard equipped with staff. Attack scrolls and spells ready.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"Wizard equipped with staff. Attack scrolls and spells ready.",
+			MessageCompletion::FINISHED);
 		break;
 	}
 
 	case CreatureClass::MONSTER:
 	{
-		assert(false && "Player::equip_class_starting_gear: a player with a monster's class");
+		assert(
+			false &&
+			"Player::equip_class_starting_gear: a player with a monster's class");
 		break;
 	}
 	}
@@ -466,7 +582,9 @@ std::string_view class_display_name(CreatureClass creatureClass)
 	}
 	case CreatureClass::MONSTER:
 	{
-		assert(false && "class_display_name: a monster's class has no player-facing name");
+		assert(
+			false &&
+			"class_display_name: a monster's class has no player-facing name");
 		return "Monster";
 	}
 	}
@@ -551,7 +669,8 @@ std::vector<std::string> Player::pay_racial_adjustments()
 {
 	// Pay the race and collect the display lines in a single pass. Human and
 	// half-elf modify nothing, so they produce no entries and no popup is shown.
-	const std::array<int, ABILITY_COUNT> modifiers = racial_ability_modifiers(get_race());
+	const std::array<int, ABILITY_COUNT> modifiers =
+		racial_ability_modifiers(get_race());
 	std::vector<std::string> bonusLines;
 
 	for (const Ability ability : ALL_ABILITY)
@@ -563,23 +682,27 @@ std::vector<std::string> Player::pay_racial_adjustments()
 		}
 
 		adjust_ability(ability, modifier);
-		bonusLines.push_back(std::format("{:+} {}", modifier, ability_name(ability)));
+		bonusLines.push_back(
+			std::format("{:+} {}", modifier, ability_name(ability)));
 	}
 
 	return bonusLines;
 }
 
-void Player::show_racial_adjustments(std::vector<std::string> bonusLines, GameContext& ctx)
+void Player::show_racial_adjustments(
+	std::vector<std::string> bonusLines,
+	GameContext& ctx)
 {
 	if (bonusLines.empty())
 	{
 		return;
 	}
 
-	ctx.menus->push_back(std::make_unique<NotificationMenu>(
-		std::format("Racial Traits: {}", race_display_name(get_race())),
-		std::move(bonusLines),
-		ctx));
+	ctx.menus->push_back(
+		std::make_unique<NotificationMenu>(
+			std::format("Racial Traits: {}", race_display_name(get_race())),
+			std::move(bonusLines),
+			ctx));
 }
 
 void Player::calculate_thaco()
@@ -616,7 +739,9 @@ void Player::calculate_thaco()
 
 	case CreatureClass::MONSTER:
 	{
-		assert(false && "Player::calculate_thaco: a player with a monster's class");
+		assert(
+			false &&
+			"Player::calculate_thaco: a player with a monster's class");
 		break;
 	}
 
@@ -627,7 +752,8 @@ void Player::calculate_thaco()
 	}
 }
 
-std::array<int, THIEF_SKILL_COUNT> thief_skill_racial_adjustments(PlayerRaceState race)
+std::array<int, THIEF_SKILL_COUNT> thief_skill_racial_adjustments(
+	PlayerRaceState race)
 {
 	// Table 27 across each race's column: Pick Pockets, Open Locks, Find/Remove Traps, Move Silently,
 	// Hide in Shadows, Detect Noise, Climb Walls, Read Languages.
@@ -700,7 +826,9 @@ std::optional<int> Player::thief_skill(ThiefSkill skill) const noexcept
 
 void Player::consume_food(int nutrition, GameContext& ctx)
 {
-	assert(ctx.hungerSystem && "Player::consume_food: called without a hungerSystem");
+	assert(
+		ctx.hungerSystem &&
+		"Player::consume_food: called without a hungerSystem");
 
 	// Decrease hunger by nutrition value
 	ctx.hungerSystem->decrease_hunger(ctx, nutrition);
@@ -737,7 +865,10 @@ bool Player::rest(GameContext& ctx)
 	// Check if player is already at full health
 	if (get_hp() >= get_max_hp())
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You're already at full health.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"You're already at full health.",
+			MessageCompletion::FINISHED);
 		return false;
 	}
 
@@ -747,7 +878,9 @@ bool Player::rest(GameContext& ctx)
 	{
 		assert(creature && "Player::rest: creatures list holds a null entry");
 		// The player is reached through ctx.player(), never through this list.
-		assert(creature.get() != this && "Player::rest: the creatures list holds the player");
+		assert(
+			creature.get() != this &&
+			"Player::rest: the creatures list holds the player");
 
 		if (creature->is_dead())
 		{
@@ -764,7 +897,10 @@ bool Player::rest(GameContext& ctx)
 		// as near as one straight ahead.
 		if (get_tile_distance(creature->position) <= REST_DANGER_RADIUS)
 		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You can't rest with enemies nearby!", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"You can't rest with enemies nearby!",
+				MessageCompletion::FINISHED);
 			return false;
 		}
 	}
@@ -773,7 +909,10 @@ bool Player::rest(GameContext& ctx)
 	if (ctx.hungerSystem->get_hunger_state() == HungerState::STARVING ||
 		ctx.hungerSystem->get_hunger_state() == HungerState::DYING)
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_RED, "You're too hungry to rest!", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_RED,
+			"You're too hungry to rest!",
+			MessageCompletion::FINISHED);
 		return false;
 	}
 
@@ -794,26 +933,37 @@ bool Player::rest(GameContext& ctx)
 	HungerState afterState = ctx.hungerSystem->get_hunger_state();
 
 	// Display message with more detail
-	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "Resting recovers ");
-	ctx.messageSystem->append_message_part(ColorPairId::WHITE_GREEN, std::to_string(amountHealed));
+	ctx.messageSystem->append_message_part(
+		ColorPairId::WHITE_BLACK,
+		"Resting recovers ");
+	ctx.messageSystem->append_message_part(
+		ColorPairId::WHITE_GREEN,
+		std::to_string(amountHealed));
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_GREEN, " health");
 
 	if (beforeState != afterState)
 	{
 		// If hunger state changed, mention it
-		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ", but you've become ");
-		ctx.messageSystem->append_message_part(ctx.hungerSystem->get_hunger_color(), ctx.hungerSystem->get_hunger_state_string().c_str());
+		ctx.messageSystem->append_message_part(
+			ColorPairId::WHITE_BLACK,
+			", but you've become ");
+		ctx.messageSystem->append_message_part(
+			ctx.hungerSystem->get_hunger_color(),
+			ctx.hungerSystem->get_hunger_state_string().c_str());
 		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ".");
 	}
 	else
 	{
-		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ", consuming your food.");
+		ctx.messageSystem->append_message_part(
+			ColorPairId::WHITE_BLACK,
+			", consuming your food.");
 	}
 
 	ctx.messageSystem->finalize_message();
 
 	// Memorize spells for casters
-	if (get_creature_class() == CreatureClass::CLERIC || get_creature_class() == CreatureClass::WIZARD)
+	if (get_creature_class() == CreatureClass::CLERIC ||
+		get_creature_class() == CreatureClass::WIZARD)
 	{
 		SpellSystem::show_memorization_menu(*this, ctx);
 	}
@@ -825,12 +975,16 @@ bool Player::rest(GameContext& ctx)
 
 void Player::animate_resting(GameContext& ctx)
 {
-	assert(ctx.renderingManager && "Player::animate_resting: called without a renderingManager");
+	assert(
+		ctx.renderingManager &&
+		"Player::animate_resting: called without a renderingManager");
 
 	// One floating z above the player each rest turn, a capital Z within 5 hit points of full.
 	const bool big = (get_max_hp() - get_hp()) < 5;
 	const std::string symbol = big ? "Z" : "z";
-	assert(ctx.floatingText && "animate_resting: a rest was shown with no floating text system");
+	assert(
+		ctx.floatingText &&
+		"animate_resting: a rest was shown with no floating text system");
 	ctx.floatingText->spawn_text(
 		Vector2D{ position.x, position.y - 1 }, // a row above the sleeper
 		symbol,
@@ -851,7 +1005,10 @@ Player::HideAttempt Player::attempt_hide(GameContext& ctx)
 	const std::optional<int> skill = thief_skill(ThiefSkill::HIDE_IN_SHADOWS);
 	if (!skill.has_value() || skill.value() <= 0)
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You cannot hide in shadows.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"You cannot hide in shadows.",
+			MessageCompletion::FINISHED);
 		return HideAttempt::NOT_A_THIEF;
 	}
 
@@ -859,7 +1016,10 @@ Player::HideAttempt Player::attempt_hide(GameContext& ctx)
 	// spell already hides him.
 	if (is_in_shadows() || is_invisible())
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You are already hidden.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"You are already hidden.",
+			MessageCompletion::FINISHED);
 		return HideAttempt::ALREADY_HIDDEN;
 	}
 
@@ -869,7 +1029,10 @@ Player::HideAttempt Player::attempt_hide(GameContext& ctx)
 	const auto is_watching = watching_at(currentTime);
 	if (std::ranges::any_of(*ctx.creatures, is_watching))
 	{
-		ctx.messageSystem->message(ColorPairId::RED_BLACK, "You cannot hide while watched.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::RED_BLACK,
+			"You cannot hide while watched.",
+			MessageCompletion::FINISHED);
 		return HideAttempt::WATCHED;
 	}
 
@@ -878,9 +1041,14 @@ Player::HideAttempt Player::attempt_hide(GameContext& ctx)
 	hidingSpot = position;
 	if (ctx.dice->d100() <= skill.value())
 	{
-		ctx.buffSystem->add_buff_until_broken(*this, BuffType::HIDDEN_IN_SHADOWS);
+		ctx.buffSystem->add_buff_until_broken(
+			*this,
+			BuffType::HIDDEN_IN_SHADOWS);
 	}
-	ctx.messageSystem->message(ColorPairId::CYAN_BLACK, "You melt into the shadows...", MessageCompletion::FINISHED);
+	ctx.messageSystem->message(
+		ColorPairId::CYAN_BLACK,
+		"You melt into the shadows...",
+		MessageCompletion::FINISHED);
 	return HideAttempt::ATTEMPTED;
 }
 
@@ -891,22 +1059,35 @@ bool Player::is_in_shadows() const noexcept
 
 void Player::leave_shadows(GameContext& ctx)
 {
-	assert(hidingSpot.has_value() && "Player::leave_shadows: called on a thief who is not in the shadows");
-	assert(ctx.buffSystem && "Player::leave_shadows: called without a buffSystem");
-	assert(ctx.messageSystem && "Player::leave_shadows: called without a messageSystem");
+	assert(
+		hidingSpot.has_value() &&
+		"Player::leave_shadows: called on a thief who is not in the shadows");
+	assert(
+		ctx.buffSystem && "Player::leave_shadows: called without a buffSystem");
+	assert(
+		ctx.messageSystem &&
+		"Player::leave_shadows: called without a messageSystem");
 
 	// The buff is there only if the roll made it; the line is printed either way.
 	ctx.buffSystem->remove_buff(*this, BuffType::HIDDEN_IN_SHADOWS);
 	hidingSpot.reset();
-	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You leave the shadows.", MessageCompletion::FINISHED);
+	ctx.messageSystem->message(
+		ColorPairId::WHITE_BLACK,
+		"You leave the shadows.",
+		MessageCompletion::FINISHED);
 }
 
 void Player::leave_shadows_if_moved(GameContext& ctx)
 {
-	assert(ctx.buffSystem && "Player::leave_shadows_if_moved: called without a buffSystem");
+	assert(
+		ctx.buffSystem &&
+		"Player::leave_shadows_if_moved: called without a buffSystem");
 
 	// The invariant: a hide the roll made was taken from a spot, so the buff never outlives it.
-	assert((!ctx.buffSystem->has_buff(*this, BuffType::HIDDEN_IN_SHADOWS) || hidingSpot.has_value()) && "Player::leave_shadows_if_moved: a hide is live with no spot it was taken from");
+	assert(
+		(!ctx.buffSystem->has_buff(*this, BuffType::HIDDEN_IN_SHADOWS) ||
+			hidingSpot.has_value()) &&
+		"Player::leave_shadows_if_moved: a hide is live with no spot it was taken from");
 
 	if (hidingSpot.has_value() && *hidingSpot != position)
 	{
@@ -961,7 +1142,8 @@ Player::DualWieldInfo Player::get_dual_wield_info() const noexcept
 	{
 		if (leftHandWeapon->is_weapon())
 		{
-			info.offHandDamageRoll = WeaponDamageRegistry::get_damage_roll(leftHandWeapon->itemKey);
+			info.offHandDamageRoll =
+				WeaponDamageRegistry::get_damage_roll(leftHandWeapon->itemKey);
 		}
 	}
 
@@ -992,9 +1174,9 @@ void Player::save(json& output)
 	// Player-specific fields
 	output["killCount"] = killCount;
 	output["thiefSkillPoints"] = thiefSkillPoints;
-	output["hidingSpot"] = hidingSpot.has_value()
-		? json{ { "x", hidingSpot->x }, { "y", hidingSpot->y } }
-		: json(nullptr);
+	output["hidingSpot"] = hidingSpot.has_value() ?
+		json{ { "x", hidingSpot->x }, { "y", hidingSpot->y } } :
+		json(nullptr);
 }
 
 // Rebuilds the character from j, and refuses a record that is missing anything.
@@ -1033,10 +1215,12 @@ void Player::load(const json& source)
 	// The race is in the lifespan Creature::load read, and a player always has one.
 	if (!lifespan)
 	{
-		throw std::runtime_error("Player::load: a player record with no lifespan");
+		throw std::runtime_error(
+			"Player::load: a player record with no lifespan");
 	}
 	killCount = source.at("killCount").get<int>();
-	thiefSkillPoints = source.at("thiefSkillPoints").get<std::array<int, THIEF_SKILL_COUNT>>();
+	thiefSkillPoints =
+		source.at("thiefSkillPoints").get<std::array<int, THIEF_SKILL_COUNT>>();
 	const json& spot = source.at("hidingSpot");
 	if (spot.is_null())
 	{
@@ -1044,11 +1228,15 @@ void Player::load(const json& source)
 	}
 	else
 	{
-		hidingSpot = Vector2D{ spot.at("x").get<int>(), spot.at("y").get<int>() };
+		hidingSpot =
+			Vector2D{ spot.at("x").get<int>(), spot.at("y").get<int>() };
 	}
 
 	// Creature::load builds these only when the record has them, and the HUD reads them all on the first frame.
-	assert(healthPool && armorClass && experienceReward && attacker && controller && "Player::load finished with a player the game cannot run");
+	assert(
+		healthPool && armorClass && experienceReward && attacker &&
+		controller &&
+		"Player::load finished with a player the game cannot run");
 }
 
 void Player::update(GameContext& ctx)
@@ -1093,7 +1281,9 @@ int Player::get_next_level_xp() const
 
 	case CreatureClass::MONSTER:
 	{
-		assert(false && "Player::get_next_level_xp: a player with a monster's class");
+		assert(
+			false &&
+			"Player::get_next_level_xp: a player with a monster's class");
 		return 2000 * currentLevel;
 	}
 	}
@@ -1103,7 +1293,9 @@ int Player::get_next_level_xp() const
 
 void Player::levelup_update(GameContext& ctx)
 {
-	assert(ctx.displayManager && "Player::levelup_update: called without a displayManager");
+	assert(
+		ctx.displayManager &&
+		"Player::levelup_update: called without a displayManager");
 
 	ctx.messageSystem->log("Player::levelup_update");
 	int levelUpXp = get_next_level_xp();
@@ -1113,7 +1305,9 @@ void Player::levelup_update(GameContext& ctx)
 		set_xp(get_xp() - levelUpXp);
 		ctx.messageSystem->message(
 			ColorPairId::WHITE_BLACK,
-			std::format("Your battle skills grow stronger! You reached level {}", get_creature_level()),
+			std::format(
+				"Your battle skills grow stronger! You reached level {}",
+				get_creature_level()),
 			MessageCompletion::FINISHED);
 
 		ctx.displayManager->display_levelup(*this, get_creature_level(), ctx);

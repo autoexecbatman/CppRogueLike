@@ -33,8 +33,8 @@
     },
     {
       "file": "src/AttackStrength.cpp",
-      "original": "dataManager.strength_for(gauntlets->strBonus, gauntlets->exceptionalStrength);",
-      "mutated": "dataManager.strength_for(gauntlets->strBonus, 0);",
+      "original": "dataManager.strength_for(\n\t\t\tgauntlets->strBonus,\n\t\t\tgauntlets->exceptionalStrength);",
+      "mutated": "dataManager.strength_for(\n\t\t\tgauntlets->strBonus,0);",
       "catches": "the gauntlets read as a plain 18, +1 and +2, without their percentile"
     },
     {
@@ -45,13 +45,13 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\twearsGiantStrength = wearsGiantStrength || is_giant_strength_girdle(*worn.item);\n\t\tif (const Gauntlets* gauntlets = strength_setting_gauntlets(*worn.item))",
-      "mutated": "\t\twearsGiantStrength = is_giant_strength_girdle(*worn.item);\n\t\tif (const Gauntlets* gauntlets = strength_setting_gauntlets(*worn.item))",
+      "original": "\t\twearsGiantStrength =\n\t\t\twearsGiantStrength || is_giant_strength_girdle(*worn.item);\n\t\tif (const Gauntlets* gauntlets = strength_setting_gauntlets(*worn.item))",
+      "mutated": "\t\twearsGiantStrength =is_giant_strength_girdle(*worn.item);\n\t\tif (const Gauntlets* gauntlets = strength_setting_gauntlets(*worn.item))",
       "catches": "only the last worn item asked about the girdle, so gauntlets put on after it hide it"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\treturn gauntlets != nullptr && gauntlets->application == BuffApplication::SET && gauntlets->strBonus > 0 ? gauntlets : nullptr;",
+      "original": "\treturn gauntlets != nullptr &&\n\t\t\tgauntlets->application == BuffApplication::SET &&\n\t\t\tgauntlets->strBonus > 0 ?\n\t\tgauntlets :\n\t\tnullptr;",
       "mutated": "\treturn gauntlets;",
       "catches": "any gauntlets counted beside the girdle, swimming and climbing included"
     }

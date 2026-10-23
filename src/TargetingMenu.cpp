@@ -15,16 +15,27 @@
 #include "TargetingSystem.h"
 #include "Vector2D.h"
 
-TargetingMenu::TargetingMenu(int maxRange, int aoeRadius, Callback onComplete, GameContext& ctx)
-	: cursor(ctx.player()->position), maxRange(maxRange), aoeRadius(aoeRadius), onComplete(std::move(onComplete))
+TargetingMenu::TargetingMenu(
+	int maxRange,
+	int aoeRadius,
+	Callback onComplete,
+	GameContext& ctx) :
+	cursor(ctx.player()->position),
+	maxRange(maxRange),
+	aoeRadius(aoeRadius),
+	onComplete(std::move(onComplete))
 {
 }
 
 void TargetingMenu::menu(GameContext& ctx)
 {
 	assert(ctx.targeting && "TargetingMenu::menu: called without a targeting");
-	assert(ctx.renderingManager && "TargetingMenu::menu: called without a renderingManager");
-	assert(ctx.inputSystem && "TargetingMenu::menu: called without an inputSystem");
+	assert(
+		ctx.renderingManager &&
+		"TargetingMenu::menu: called without a renderingManager");
+	assert(
+		ctx.inputSystem &&
+		"TargetingMenu::menu: called without an inputSystem");
 	assert(ctx.map && "TargetingMenu::menu: called without a map");
 
 	ctx.inputSystem->poll();
@@ -110,7 +121,9 @@ void TargetingMenu::menu(GameContext& ctx)
 	{
 		Vector2D next = cursor + move;
 		bool inBounds = ctx.map->is_in_bounds(next);
-		bool inRange = maxRange <= 0 || next.distance_to(ctx.player()->position) <= static_cast<double>(maxRange);
+		bool inRange = maxRange <= 0 ||
+			next.distance_to(ctx.player()->position) <=
+				static_cast<double>(maxRange);
 		if (inBounds && inRange)
 		{
 			cursor = next;
@@ -139,11 +152,18 @@ void TargetingMenu::draw_cursor(GameContext& ctx) const
 	int tileSize = ctx.renderer->get_tile_size();
 	int screenPixelX = cursor.x * tileSize - ctx.renderer->get_camera_x();
 	int screenPixelY = cursor.y * tileSize - ctx.renderer->get_camera_y();
-	float pulse = (std::sin(static_cast<float>(GetTime()) * 6.28318f * 4.0f) + 1.0f) * 0.5f;
+	float pulse =
+		(std::sin(static_cast<float>(GetTime()) * 6.28318f * 4.0f) + 1.0f) *
+		0.5f;
 	auto fillAlpha = static_cast<unsigned char>(40.0f + 30.0f * pulse);
 	auto ringAlpha = static_cast<unsigned char>(120.0f + 100.0f * pulse);
 
-	DrawRectangle(screenPixelX, screenPixelY, tileSize, tileSize, Color{ 255, 255, 50, fillAlpha });
+	DrawRectangle(
+		screenPixelX,
+		screenPixelY,
+		tileSize,
+		tileSize,
+		Color{ 255, 255, 50, fillAlpha });
 	DrawRectangleLinesEx(
 		Rectangle{
 			static_cast<float>(screenPixelX),

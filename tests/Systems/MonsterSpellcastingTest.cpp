@@ -82,13 +82,19 @@ protected:
 
 	Creature& add_creature(const char* name, int column, int hitDice)
 	{
-		auto creature = std::make_unique<Creature>(Vector2D{ column, 5 }, ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK });
+		auto creature = std::make_unique<Creature>(
+			Vector2D{ column, 5 },
+			ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK });
 		creature->healthPool = std::make_unique<HealthPool>(50);
 		creature->armorClass = std::make_unique<ArmorClass>(10);
 		creature->experienceReward = std::make_unique<ExperienceReward>(0);
 		creature->ai = std::make_unique<AiMonster>();
 		creature->set_creature_level(hitDice);
-		creature->set_corpse(std::string{ name } + " corpse", 0, "", CorpseEdibility::EDIBLE);
+		creature->set_corpse(
+			std::string{ name } + " corpse",
+			0,
+			"",
+			CorpseEdibility::EDIBLE);
 		creatures.push_back(std::move(creature));
 		return *creatures.back();
 	}
@@ -97,7 +103,8 @@ protected:
 	Creature& add_lich(int column, Keys memorized)
 	{
 		Creature& lich = add_creature("lich", column, 11);
-		lich.spellcasting.training = SpellcasterTraining{ CasterClass::WIZARD, 18 };
+		lich.spellcasting.training =
+			SpellcasterTraining{ CasterClass::WIZARD, 18 };
 		lich.spellcasting.memorizedSpells = std::move(memorized);
 		return lich;
 	}
@@ -106,7 +113,9 @@ protected:
 	Creature& add_pit_fiend(int column, PowerFrequency frequency)
 	{
 		Creature& pitFiend = add_creature("pit fiend", column, 13);
-		pitFiend.spellcasting.innatePowers = { InnatePower{ "fireball", frequency, 0 } };
+		pitFiend.spellcasting.innatePowers = {
+			InnatePower{ "fireball", frequency, 0 }
+		};
 		return pitFiend;
 	}
 
@@ -127,26 +136,28 @@ protected:
 		}
 	}
 
-	int player_hp_lost() const
-	{
-		return PLAYER_HP - player->get_hp();
-	}
+	int player_hp_lost() const { return PLAYER_HP - player->get_hp(); }
 
 	MockGameContext mock{};
 	GameContext ctx{};
 	BuffSystem buffs{};
 	Map map{ 30, 20 };
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 2, 5 }) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ 2, 5 }) };
 	std::vector<std::unique_ptr<Creature>> creatures{};
 };
 
 // Five missiles of 1d4+1 with every die a 1: ten damage, and one copy spent.
-TEST_F(MonsterSpellcastingTest, ALichCastsFiveMagicMissilesAtThePlayerAndSpendsOneCopy)
+TEST_F(
+	MonsterSpellcastingTest,
+	ALichCastsFiveMagicMissilesAtThePlayerAndSpendsOneCopy)
 {
 	Creature& lich = add_lich(6, { "magic_missile", "fireball" });
 	script({ 1, 1, 1, 1, 1 });
 
-	EXPECT_EQ(MonsterSpellcasting::try_cast_at(lich, *player, ctx), MonsterCast::CAST);
+	EXPECT_EQ(
+		MonsterSpellcasting::try_cast_at(lich, *player, ctx),
+		MonsterCast::CAST);
 
 	EXPECT_EQ(player_hp_lost(), 10);
 	EXPECT_EQ(lich.spellcasting.memorizedSpells, (Keys{ "fireball" }));
@@ -159,15 +170,21 @@ TEST_F(MonsterSpellcastingTest, ALichCastsItsSpellsInOrderAndThenHasNothing)
 {
 	Creature& lich = add_lich(6, { "magic_missile", "fireball" });
 	script({ 1, 1, 1, 1, 1 });
-	ASSERT_EQ(MonsterSpellcasting::try_cast_at(lich, *player, ctx), MonsterCast::CAST);
+	ASSERT_EQ(
+		MonsterSpellcasting::try_cast_at(lich, *player, ctx),
+		MonsterCast::CAST);
 
 	script_ten_ones();
 	script({ 1 });
-	EXPECT_EQ(MonsterSpellcasting::try_cast_at(lich, *player, ctx), MonsterCast::CAST);
+	EXPECT_EQ(
+		MonsterSpellcasting::try_cast_at(lich, *player, ctx),
+		MonsterCast::CAST);
 	EXPECT_EQ(player_hp_lost(), 10 + 10);
 	EXPECT_TRUE(lich.spellcasting.memorizedSpells.empty());
 
-	EXPECT_EQ(MonsterSpellcasting::try_cast_at(lich, *player, ctx), MonsterCast::NOTHING_CAST);
+	EXPECT_EQ(
+		MonsterSpellcasting::try_cast_at(lich, *player, ctx),
+		MonsterCast::NOTHING_CAST);
 	EXPECT_EQ(player_hp_lost(), 20);
 }
 
@@ -179,25 +196,33 @@ TEST_F(MonsterSpellcastingTest, AFirstLevelCasterFiresOneMissile)
 	mage.spellcasting.memorizedSpells = { "magic_missile" };
 	script({ 3 });
 
-	EXPECT_EQ(MonsterSpellcasting::try_cast_at(mage, *player, ctx), MonsterCast::CAST);
+	EXPECT_EQ(
+		MonsterSpellcasting::try_cast_at(mage, *player, ctx),
+		MonsterCast::CAST);
 
 	EXPECT_EQ(player_hp_lost(), 4);
 }
 
 // At will at 13 Hit Dice: ten dice, capped, and the player's save of 20 halves them. The power
 // is never spent, so the next round it bursts again.
-TEST_F(MonsterSpellcastingTest, APitFiendsFireballIsAtWillAndThePlayerSavesForHalf)
+TEST_F(
+	MonsterSpellcastingTest,
+	APitFiendsFireballIsAtWillAndThePlayerSavesForHalf)
 {
 	Creature& pitFiend = add_pit_fiend(6, PowerFrequency::AT_WILL);
 	script_ten_ones();
 	script({ 20 });
 
-	EXPECT_EQ(MonsterSpellcasting::try_cast_at(pitFiend, *player, ctx), MonsterCast::CAST);
+	EXPECT_EQ(
+		MonsterSpellcasting::try_cast_at(pitFiend, *player, ctx),
+		MonsterCast::CAST);
 	EXPECT_EQ(player_hp_lost(), 5);
 
 	script_ten_ones();
 	script({ 1 });
-	EXPECT_EQ(MonsterSpellcasting::try_cast_at(pitFiend, *player, ctx), MonsterCast::CAST);
+	EXPECT_EQ(
+		MonsterSpellcasting::try_cast_at(pitFiend, *player, ctx),
+		MonsterCast::CAST);
 	EXPECT_EQ(player_hp_lost(), 5 + 10);
 	EXPECT_EQ(pitFiend.spellcasting.innatePowers.front().readyAgainAt, 0);
 }
@@ -208,15 +233,21 @@ TEST_F(MonsterSpellcastingTest, ADailyPowerWaitsADayOfTheClock)
 	const int start = ctx.gameState->get_time();
 	script_ten_ones();
 	script({ 1 });
-	ASSERT_EQ(MonsterSpellcasting::try_cast_at(pitFiend, *player, ctx), MonsterCast::CAST);
+	ASSERT_EQ(
+		MonsterSpellcasting::try_cast_at(pitFiend, *player, ctx),
+		MonsterCast::CAST);
 
 	ctx.gameState->set_time(start + ONE_DAY - 1);
-	EXPECT_EQ(MonsterSpellcasting::try_cast_at(pitFiend, *player, ctx), MonsterCast::NOTHING_CAST);
+	EXPECT_EQ(
+		MonsterSpellcasting::try_cast_at(pitFiend, *player, ctx),
+		MonsterCast::NOTHING_CAST);
 
 	ctx.gameState->set_time(start + ONE_DAY);
 	script_ten_ones();
 	script({ 1 });
-	EXPECT_EQ(MonsterSpellcasting::try_cast_at(pitFiend, *player, ctx), MonsterCast::CAST);
+	EXPECT_EQ(
+		MonsterSpellcasting::try_cast_at(pitFiend, *player, ctx),
+		MonsterCast::CAST);
 }
 
 // A wall between them: no line of sight, so nothing is cast and nothing is spent.
@@ -225,8 +256,12 @@ TEST_F(MonsterSpellcastingTest, NothingIsCastWithoutALineOfSight)
 	Creature& lich = add_lich(6, { "magic_missile", "fireball" });
 	map.set_tile(Vector2D{ 4, 5 }, TileType::WALL);
 
-	EXPECT_EQ(MonsterSpellcasting::try_cast_at(lich, *player, ctx), MonsterCast::NOTHING_CAST);
-	EXPECT_EQ(lich.spellcasting.memorizedSpells, (Keys{ "magic_missile", "fireball" }));
+	EXPECT_EQ(
+		MonsterSpellcasting::try_cast_at(lich, *player, ctx),
+		MonsterCast::NOTHING_CAST);
+	EXPECT_EQ(
+		lich.spellcasting.memorizedSpells,
+		(Keys{ "magic_missile", "fireball" }));
 	EXPECT_EQ(player_hp_lost(), 0);
 }
 
@@ -235,26 +270,37 @@ TEST_F(MonsterSpellcastingTest, NothingIsCastWithoutALineOfSight)
 TEST_F(MonsterSpellcastingTest, AFireballIsNotCastBeyondItsRange)
 {
 	Creature& caster = add_creature("conjurer", 2 + 12, 1);
-	caster.spellcasting.training = SpellcasterTraining{ CasterClass::WIZARD, 1 };
+	caster.spellcasting.training =
+		SpellcasterTraining{ CasterClass::WIZARD, 1 };
 	caster.spellcasting.memorizedSpells = { "fireball" };
-	EXPECT_EQ(MonsterSpellcasting::try_cast_at(caster, *player, ctx), MonsterCast::NOTHING_CAST);
+	EXPECT_EQ(
+		MonsterSpellcasting::try_cast_at(caster, *player, ctx),
+		MonsterCast::NOTHING_CAST);
 
 	caster.position = Vector2D{ 2 + 11, 5 };
 	script({ 1, 1 });
-	EXPECT_EQ(MonsterSpellcasting::try_cast_at(caster, *player, ctx), MonsterCast::CAST);
+	EXPECT_EQ(
+		MonsterSpellcasting::try_cast_at(caster, *player, ctx),
+		MonsterCast::CAST);
 }
 
 // Two tiles from the player, the burst would reach the caster, so it does not cast; three
 // tiles away it does.
-TEST_F(MonsterSpellcastingTest, AFireballIsNotCastWhereTheCasterWouldStandInTheBurst)
+TEST_F(
+	MonsterSpellcastingTest,
+	AFireballIsNotCastWhereTheCasterWouldStandInTheBurst)
 {
 	Creature& pitFiend = add_pit_fiend(4, PowerFrequency::AT_WILL);
-	EXPECT_EQ(MonsterSpellcasting::try_cast_at(pitFiend, *player, ctx), MonsterCast::NOTHING_CAST);
+	EXPECT_EQ(
+		MonsterSpellcasting::try_cast_at(pitFiend, *player, ctx),
+		MonsterCast::NOTHING_CAST);
 
 	pitFiend.position = Vector2D{ 5, 5 };
 	script_ten_ones();
 	script({ 1 });
-	EXPECT_EQ(MonsterSpellcasting::try_cast_at(pitFiend, *player, ctx), MonsterCast::CAST);
+	EXPECT_EQ(
+		MonsterSpellcasting::try_cast_at(pitFiend, *player, ctx),
+		MonsterCast::CAST);
 	EXPECT_EQ(pitFiend.get_hp(), 50);
 }
 
@@ -264,7 +310,9 @@ TEST_F(MonsterSpellcastingTest, ASpellThatCannotBeAimedIsPassedOver)
 	Creature& lich = add_lich(6, { "sleep", "magic_missile" });
 	script({ 1, 1, 1, 1, 1 });
 
-	EXPECT_EQ(MonsterSpellcasting::try_cast_at(lich, *player, ctx), MonsterCast::CAST);
+	EXPECT_EQ(
+		MonsterSpellcasting::try_cast_at(lich, *player, ctx),
+		MonsterCast::CAST);
 
 	EXPECT_EQ(lich.spellcasting.memorizedSpells, (Keys{ "sleep" }));
 	EXPECT_EQ(player_hp_lost(), 10);
@@ -275,7 +323,9 @@ TEST_F(MonsterSpellcastingTest, ASilencedMonsterCastsNothing)
 	Creature& lich = add_lich(6, { "magic_missile" });
 	lich.add_state(ActorState::IS_SILENCED);
 
-	EXPECT_EQ(MonsterSpellcasting::try_cast_at(lich, *player, ctx), MonsterCast::NOTHING_CAST);
+	EXPECT_EQ(
+		MonsterSpellcasting::try_cast_at(lich, *player, ctx),
+		MonsterCast::NOTHING_CAST);
 	EXPECT_EQ(lich.spellcasting.memorizedSpells, (Keys{ "magic_missile" }));
 }
 
@@ -288,10 +338,13 @@ TEST_F(MonsterSpellcastingTest, AMonstersCastLeavesItsDeadForTheSweep)
 	script_ten_ones();
 	script({ 1, 1 });
 
-	ASSERT_EQ(MonsterSpellcasting::try_cast_at(pitFiend, *player, ctx), MonsterCast::CAST);
+	ASSERT_EQ(
+		MonsterSpellcasting::try_cast_at(pitFiend, *player, ctx),
+		MonsterCast::CAST);
 
 	EXPECT_TRUE(goblin.is_dead());
-	EXPECT_EQ(creatures.size(), 2u) << "the cast swept the list the creature loop is walking";
+	EXPECT_EQ(creatures.size(), 2u)
+		<< "the cast swept the list the creature loop is walking";
 }
 
 // The perceived arm casts before it closes in: the lich stays put and the player is struck.
@@ -327,12 +380,22 @@ TEST_F(MonsterSpellcastingTest, ThePlayersSpellsKeepThePlayersChoice)
 	const auto ignore_completion = [](GameContext& completedCtx) {
 	};
 	script({ 3 });
-	SpellSystem::cast_spell_by_key("magic_missile", *player, SpellSource::MEMORIZED, ignore_completion, ctx);
+	SpellSystem::cast_spell_by_key(
+		"magic_missile",
+		*player,
+		SpellSource::MEMORIZED,
+		ignore_completion,
+		ctx);
 	EXPECT_EQ(lich.get_hp(), 50 - 4);
 	EXPECT_EQ(player_hp_lost(), 0);
 
 	const size_t menusBefore = ctx.menus->size();
-	SpellSystem::cast_spell_by_key("fireball", *player, SpellSource::MEMORIZED, ignore_completion, ctx);
+	SpellSystem::cast_spell_by_key(
+		"fireball",
+		*player,
+		SpellSource::MEMORIZED,
+		ignore_completion,
+		ctx);
 	EXPECT_EQ(ctx.menus->size(), menusBefore + 1);
 	EXPECT_EQ(player_hp_lost(), 0);
 }

@@ -39,7 +39,7 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\treturn holds_ring_of_effect(EquipmentSlot::RIGHT_RING) || holds_ring_of_effect(EquipmentSlot::LEFT_RING);",
+      "original": "\treturn holds_ring_of_effect(EquipmentSlot::RIGHT_RING) ||\n\t\tholds_ring_of_effect(EquipmentSlot::LEFT_RING);",
       "mutated": "\treturn holds_ring_of_effect(EquipmentSlot::RIGHT_RING);",
       "catches": "a ring on the left hand doing nothing"
     },

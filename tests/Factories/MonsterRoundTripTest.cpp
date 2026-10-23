@@ -41,13 +41,11 @@ protected:
 	void SetUp() override
 	{
 		monsters.load("data/content/monsters.json");
-		roundTrip = std::filesystem::temp_directory_path() / "monsters_roundtrip_fields.json";
+		roundTrip = std::filesystem::temp_directory_path() /
+			"monsters_roundtrip_fields.json";
 	}
 
-	void TearDown() override
-	{
-		std::filesystem::remove(roundTrip);
-	}
+	void TearDown() override { std::filesystem::remove(roundTrip); }
 
 	void save_and_reload()
 	{
@@ -62,7 +60,8 @@ protected:
 TEST_F(MonsterRoundTripTest, EveryDamageTypeInTheFileIsANameNotANumber)
 {
 	std::ifstream file(Paths::resolve(Paths::MONSTERS));
-	ASSERT_TRUE(file.is_open()) << "monsters.json did not open; the case measures nothing";
+	ASSERT_TRUE(file.is_open())
+		<< "monsters.json did not open; the case measures nothing";
 
 	nlohmann::json content;
 	file >> content;
@@ -78,7 +77,8 @@ TEST_F(MonsterRoundTripTest, EveryDamageTypeInTheFileIsANameNotANumber)
 			<< key << " numbers its damage type";
 		++checked;
 	}
-	EXPECT_GT(checked, 0) << "no record carried a damage block; the case measures nothing";
+	EXPECT_GT(checked, 0)
+		<< "no record carried a damage block; the case measures nothing";
 }
 
 // The eight records whose damage is not plain physical, each keeping the type the file
@@ -116,8 +116,11 @@ TEST_F(MonsterRoundTripTest, TheTypedDamagersKeepTheirType)
 // the number lands on.
 TEST_F(MonsterRoundTripTest, ADamageTypeThisBuildDoesNotKnowIsRefused)
 {
-	nlohmann::json record = nlohmann::json{ { "display", "1d6" }, { "type", "sonic" } };
-	EXPECT_THROW((void)parse_damage_type(record.at("type").get<std::string>()), std::runtime_error);
+	nlohmann::json record =
+		nlohmann::json{ { "display", "1d6" }, { "type", "sonic" } };
+	EXPECT_THROW(
+		(void)parse_damage_type(record.at("type").get<std::string>()),
+		std::runtime_error);
 }
 
 // data/content/monsters.json gives dungeon_jailer the display name "Dungeon Jailer".
@@ -135,12 +138,16 @@ TEST_F(MonsterRoundTripTest, AuthoredDisplayNameSurvivesASave)
 
 // Every field MonsterParams declares, named one at a time. A dropped key fails here
 // pointing at the field, which is what a count of surviving keys could not do.
-void expect_same_monster(const std::string& key, const MonsterParams& before, const MonsterParams& after)
+void expect_same_monster(
+	const std::string& key,
+	const MonsterParams& before,
+	const MonsterParams& after)
 {
 	EXPECT_EQ(before.name, after.name) << key << ".name";
 	EXPECT_EQ(before.corpseName, after.corpseName) << key << ".corpseName";
 	EXPECT_EQ(before.color, after.color) << key << ".color";
-	EXPECT_EQ(before.symbol.sheet, after.symbol.sheet) << key << ".symbol.sheet";
+	EXPECT_EQ(before.symbol.sheet, after.symbol.sheet)
+		<< key << ".symbol.sheet";
 	EXPECT_EQ(before.symbol.col, after.symbol.col) << key << ".symbol.col";
 	EXPECT_EQ(before.symbol.row, after.symbol.row) << key << ".symbol.row";
 
@@ -152,36 +159,59 @@ void expect_same_monster(const std::string& key, const MonsterParams& before, co
 	EXPECT_EQ(before.ethics, after.ethics) << key << ".ethics";
 	EXPECT_EQ(before.morality, after.morality) << key << ".morality";
 	EXPECT_EQ(before.size, after.size) << key << ".size";
-	EXPECT_EQ(before.intelligence, after.intelligence) << key << ".intelligence";
-	EXPECT_EQ(before.corpseWeight, after.corpseWeight) << key << ".corpseWeight";
-	EXPECT_EQ(before.corpseNutrition, after.corpseNutrition) << key << ".corpseNutrition";
+	EXPECT_EQ(before.intelligence, after.intelligence)
+		<< key << ".intelligence";
+	EXPECT_EQ(before.corpseWeight, after.corpseWeight)
+		<< key << ".corpseWeight";
+	EXPECT_EQ(before.corpseNutrition, after.corpseNutrition)
+		<< key << ".corpseNutrition";
 	EXPECT_EQ(before.corpseTaste, after.corpseTaste) << key << ".corpseTaste";
-	EXPECT_EQ(before.corpseEdibility, after.corpseEdibility) << key << ".corpseEdibility";
+	EXPECT_EQ(before.corpseEdibility, after.corpseEdibility)
+		<< key << ".corpseEdibility";
 
-	EXPECT_EQ(before.hitDice.sides, after.hitDice.sides) << key << ".hitDice.sides";
-	EXPECT_EQ(before.hitDice.bonus, after.hitDice.bonus) << key << ".hitDice.bonus";
-	ASSERT_EQ(before.hitDice.counts.size(), after.hitDice.counts.size()) << key << ".hitDice.counts";
+	EXPECT_EQ(before.hitDice.sides, after.hitDice.sides)
+		<< key << ".hitDice.sides";
+	EXPECT_EQ(before.hitDice.bonus, after.hitDice.bonus)
+		<< key << ".hitDice.bonus";
+	ASSERT_EQ(before.hitDice.counts.size(), after.hitDice.counts.size())
+		<< key << ".hitDice.counts";
 	for (size_t entry = 0; entry < before.hitDice.counts.size(); ++entry)
 	{
-		EXPECT_EQ(before.hitDice.counts.at(entry).count, after.hitDice.counts.at(entry).count) << key << ".hitDice.counts[" << entry << "].count";
-		EXPECT_EQ(before.hitDice.counts.at(entry).xp, after.hitDice.counts.at(entry).xp) << key << ".hitDice.counts[" << entry << "].xp";
+		EXPECT_EQ(
+			before.hitDice.counts.at(entry).count,
+			after.hitDice.counts.at(entry).count)
+			<< key << ".hitDice.counts[" << entry << "].count";
+		EXPECT_EQ(
+			before.hitDice.counts.at(entry).xp,
+			after.hitDice.counts.at(entry).xp)
+			<< key << ".hitDice.counts[" << entry << "].xp";
 	}
-	ASSERT_EQ(before.strength.has_value(), after.strength.has_value()) << key << ".strength";
+	ASSERT_EQ(before.strength.has_value(), after.strength.has_value())
+		<< key << ".strength";
 	if (before.strength.has_value())
 	{
-		EXPECT_EQ(before.strength->score, after.strength->score) << key << ".strength.score";
-		EXPECT_EQ(before.strength->exceptional, after.strength->exceptional) << key << ".strength.exceptional";
+		EXPECT_EQ(before.strength->score, after.strength->score)
+			<< key << ".strength.score";
+		EXPECT_EQ(before.strength->exceptional, after.strength->exceptional)
+			<< key << ".strength.exceptional";
 	}
 
-	EXPECT_EQ(before.damage.minDamage, after.damage.minDamage) << key << ".damage.minDamage";
-	EXPECT_EQ(before.damage.maxDamage, after.damage.maxDamage) << key << ".damage.maxDamage";
-	EXPECT_EQ(before.damage.displayRoll, after.damage.displayRoll) << key << ".damage.displayRoll";
-	EXPECT_EQ(before.damage.damageType, after.damage.damageType) << key << ".damage.damageType";
+	EXPECT_EQ(before.damage.minDamage, after.damage.minDamage)
+		<< key << ".damage.minDamage";
+	EXPECT_EQ(before.damage.maxDamage, after.damage.maxDamage)
+		<< key << ".damage.maxDamage";
+	EXPECT_EQ(before.damage.displayRoll, after.damage.displayRoll)
+		<< key << ".damage.displayRoll";
+	EXPECT_EQ(before.damage.damageType, after.damage.damageType)
+		<< key << ".damage.damageType";
 
-	EXPECT_EQ(before.naturalAttack, after.naturalAttack) << key << ".naturalAttack";
-	EXPECT_EQ(before.bodyPlanName, after.bodyPlanName) << key << ".bodyPlanName";
+	EXPECT_EQ(before.naturalAttack, after.naturalAttack)
+		<< key << ".naturalAttack";
+	EXPECT_EQ(before.bodyPlanName, after.bodyPlanName)
+		<< key << ".bodyPlanName";
 
-	ASSERT_EQ(before.equipment.size(), after.equipment.size()) << key << ".equipment.size";
+	ASSERT_EQ(before.equipment.size(), after.equipment.size())
+		<< key << ".equipment.size";
 	for (size_t slot = 0; slot < before.equipment.size(); ++slot)
 	{
 		EXPECT_EQ(before.equipment[slot].itemKey, after.equipment[slot].itemKey)
@@ -195,11 +225,15 @@ void expect_same_monster(const std::string& key, const MonsterParams& before, co
 	EXPECT_EQ(before.canFly, after.canFly) << key << ".canFly";
 	EXPECT_EQ(before.walksWebs, after.walksWebs) << key << ".walksWebs";
 	EXPECT_EQ(before.attitude, after.attitude) << key << ".attitude";
-	EXPECT_EQ(before.displaceable, after.displaceable) << key << ".displaceable";
+	EXPECT_EQ(before.displaceable, after.displaceable)
+		<< key << ".displaceable";
 	EXPECT_EQ(before.baseWeight, after.baseWeight) << key << ".baseWeight";
-	EXPECT_EQ(before.levelMinimum, after.levelMinimum) << key << ".levelMinimum";
-	EXPECT_EQ(before.levelMaximum, after.levelMaximum) << key << ".levelMaximum";
-	EXPECT_FLOAT_EQ(before.levelScaling, after.levelScaling) << key << ".levelScaling";
+	EXPECT_EQ(before.levelMinimum, after.levelMinimum)
+		<< key << ".levelMinimum";
+	EXPECT_EQ(before.levelMaximum, after.levelMaximum)
+		<< key << ".levelMaximum";
+	EXPECT_FLOAT_EQ(before.levelScaling, after.levelScaling)
+		<< key << ".levelScaling";
 }
 
 // The whole bestiary through a save and back, field by field.
@@ -210,7 +244,8 @@ TEST_F(MonsterRoundTripTest, EveryPersistedFieldSurvivesASave)
 	{
 		before.emplace(key, monsters.get_params(key));
 	}
-	ASSERT_FALSE(before.empty()) << "no monsters loaded; the test would pass vacuously";
+	ASSERT_FALSE(before.empty())
+		<< "no monsters loaded; the test would pass vacuously";
 
 	save_and_reload();
 

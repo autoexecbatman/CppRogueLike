@@ -39,7 +39,7 @@
         },
         {
             "file": "src/MonsterCreator.cpp",
-            "original": "\tcreature->set_corpse(params.corpseName, params.corpseNutrition, params.corpseTaste, params.corpseEdibility);\n",
+            "original": "\tcreature->set_corpse(\n\t\tparams.corpseName,\n\t\tparams.corpseNutrition,\n\t\tparams.corpseTaste,\n\t\tparams.corpseEdibility);\n",
             "mutated": "",
             "catches": "a monster built without its record's corpse"
         },
@@ -63,14 +63,14 @@
         },
         {
             "file": "src/Creature.cpp",
-            "original": "\tcorpse->behavior = CorpseFood{ corpseNutrition, corpseTaste, corpseEdibility };\n",
-            "mutated": "\tcorpse->behavior = CorpseFood{ 0, corpseTaste, corpseEdibility };\n",
+            "original": "\tcorpse->behavior =\n\t\tCorpseFood{ corpseNutrition, corpseTaste, corpseEdibility };\n",
+            "mutated": "\tcorpse->behavior =\n\t\tCorpseFood{0, corpseTaste, corpseEdibility };\n",
             "catches": "a corpse left with no nutrition"
         },
         {
             "file": "src/Creature.cpp",
-            "original": "\tcorpse->behavior = CorpseFood{ corpseNutrition, corpseTaste, corpseEdibility };\n",
-            "mutated": "\tcorpse->behavior = CorpseFood{ corpseNutrition, \"\", corpseEdibility };\n",
+            "original": "\tcorpse->behavior =\n\t\tCorpseFood{ corpseNutrition, corpseTaste, corpseEdibility };\n",
+            "mutated": "\tcorpse->behavior =\n\t\tCorpseFood{ corpseNutrition,\"\", corpseEdibility };\n",
             "catches": "a corpse left with no taste"
         },
         {
@@ -81,8 +81,8 @@
         },
         {
             "file": "src/Pickable.cpp",
-            "original": "\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \". \" + corpseFood.taste);\n",
-            "mutated": "\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \". It tastes... questionable.\");\n",
+            "original": "\tctx.messageSystem->append_message_part(\n\t\tColorPairId::WHITE_BLACK,\n\t\t\". \" + corpseFood.taste);\n",
+            "mutated": "\tctx.messageSystem->append_message_part(\n\t\tColorPairId::WHITE_BLACK,\n\t\t\". It tastes... questionable.\");\n",
             "catches": "eating any corpse printing the old default line"
         },
         {
@@ -99,13 +99,13 @@
         },
         {
             "file": "src/MonsterRegistry.cpp",
-            "original": "\tparams.corpseEdibility = corpse_edibility_from_record(entry.at(\"corpse_edible\").get<bool>());\n",
-            "mutated": "\tparams.corpseEdibility = corpse_edibility_from_record(entry.value(\"corpse_edible\", true));\n",
+            "original": "\tparams.corpseEdibility =\n\t\tcorpse_edibility_from_record(entry.at(\"corpse_edible\").get<bool>());\n",
+            "mutated": "\tparams.corpseEdibility =\n\t\tcorpse_edibility_from_record(entry.value(\"corpse_edible\", true));\n",
             "catches": "a record without corpse_edible loading as edible"
         },
         {
             "file": "src/MonsterRegistry.cpp",
-            "original": "\tparams.corpseEdibility = corpse_edibility_from_record(entry.at(\"corpse_edible\").get<bool>());\n",
+            "original": "\tparams.corpseEdibility =\n\t\tcorpse_edibility_from_record(entry.at(\"corpse_edible\").get<bool>());\n",
             "mutated": "",
             "catches": "every record's corpse edible whatever it says"
         },
@@ -117,19 +117,19 @@
         },
         {
             "file": "src/MonsterCreator.cpp",
-            "original": "\tcreature->set_corpse(params.corpseName, params.corpseNutrition, params.corpseTaste, params.corpseEdibility);\n",
-            "mutated": "\tcreature->set_corpse(params.corpseName, params.corpseNutrition, params.corpseTaste, CorpseEdibility::EDIBLE);\n",
+            "original": "\tcreature->set_corpse(\n\t\tparams.corpseName,\n\t\tparams.corpseNutrition,\n\t\tparams.corpseTaste,\n\t\tparams.corpseEdibility);\n",
+            "mutated": "\tcreature->set_corpse(\n\t\tparams.corpseName,\n\t\tparams.corpseNutrition,\n\t\tparams.corpseTaste,CorpseEdibility::EDIBLE);\n",
             "catches": "a monster built with an edible corpse its record forbids"
         },
         {
             "file": "src/Creature.cpp",
-            "original": "\tcorpse->behavior = CorpseFood{ corpseNutrition, corpseTaste, corpseEdibility };\n",
-            "mutated": "\tcorpse->behavior = CorpseFood{ corpseNutrition, corpseTaste, CorpseEdibility::EDIBLE };\n",
+            "original": "\tcorpse->behavior =\n\t\tCorpseFood{ corpseNutrition, corpseTaste, corpseEdibility };\n",
+            "mutated": "\tcorpse->behavior =\n\t\tCorpseFood{ corpseNutrition, corpseTaste,CorpseEdibility::EDIBLE };\n",
             "catches": "an inedible creature leaving an edible corpse"
         },
         {
             "file": "src/Creature.cpp",
-            "original": "\tcorpseEdibility = corpse_edibility_from_record(source.at(\"corpseEdible\").get<bool>());\n",
+            "original": "\tcorpseEdibility =\n\t\tcorpse_edibility_from_record(source.at(\"corpseEdible\").get<bool>());\n",
             "mutated": "",
             "catches": "a loaded creature forgetting its corpse is inedible"
         },
@@ -147,7 +147,7 @@
         },
         {
             "file": "src/Pickable.cpp",
-            "original": "\t\tcorpseFood.edibility = corpse_edibility_from_record(source.at(\"edible\").get<bool>());\n",
+            "original": "\t\tcorpseFood.edibility =\n\t\t\tcorpse_edibility_from_record(source.at(\"edible\").get<bool>());\n",
             "mutated": "",
             "catches": "a loaded inedible corpse made edible"
         },
@@ -159,8 +159,8 @@
         },
         {
             "file": "src/Pickable.cpp",
-            "original": "\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, corpseFood.taste, MessageCompletion::FINISHED);\n\t\treturn false;\n",
-            "mutated": "\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, corpseFood.taste, MessageCompletion::FINISHED);\n\t\treturn consume_item(owner, wearer);\n",
+            "original": "\t\tctx.messageSystem->message(\n\t\t\tColorPairId::WHITE_BLACK,\n\t\t\tcorpseFood.taste,\n\t\t\tMessageCompletion::FINISHED);\n\t\treturn false;\n",
+            "mutated": "\t\tctx.messageSystem->message(\n\t\t\tColorPairId::WHITE_BLACK,\n\t\t\tcorpseFood.taste,\n\t\t\tMessageCompletion::FINISHED);\n\t\treturn consume_item(owner, wearer);\n",
             "catches": "a refused corpse consumed anyway"
         }
     ]

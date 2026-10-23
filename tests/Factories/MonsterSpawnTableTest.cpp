@@ -29,7 +29,9 @@ namespace
 constexpr int DUNGEON_LEVEL = 1;
 
 // Whether a distribution lists a monster by name.
-bool lists(const std::vector<MonsterPercentage>& distribution, std::string_view name)
+bool lists(
+	const std::vector<MonsterPercentage>& distribution,
+	std::string_view name)
 {
 	auto is_named = [name](const MonsterPercentage& entry)
 	{
@@ -46,7 +48,8 @@ std::string first_drawable(const MonsterRegistry& monsters, int dungeonLevel)
 	for (const std::string& key : monsters.get_all_keys())
 	{
 		const MonsterParams& params = monsters.get_params(key);
-		const bool admitsLevel = params.levelMinimum <= dungeonLevel && (params.levelMaximum == 0 || dungeonLevel <= params.levelMaximum);
+		const bool admitsLevel = params.levelMinimum <= dungeonLevel &&
+			(params.levelMaximum == 0 || dungeonLevel <= params.levelMaximum);
 		if (params.baseWeight > 0 && admitsLevel)
 		{
 			return key;
@@ -63,15 +66,20 @@ TEST(MonsterSpawnTableTest, TheDistributionIsTheRegistrysAsItStandsNow)
 	MonsterRegistry monsters{};
 	monsters.load(Paths::MONSTERS);
 	const std::string target = first_drawable(monsters, DUNGEON_LEVEL);
-	ASSERT_FALSE(target.empty()) << "no monster is drawable at this level to silence";
+	ASSERT_FALSE(target.empty())
+		<< "no monster is drawable at this level to silence";
 	const std::string name = monsters.get_params(target).name;
-	ASSERT_TRUE(lists(MonsterFactory::get_current_distribution(DUNGEON_LEVEL, monsters), name));
+	ASSERT_TRUE(lists(
+		MonsterFactory::get_current_distribution(DUNGEON_LEVEL, monsters),
+		name));
 
 	MonsterParams silenced = monsters.get_params(target);
 	silenced.baseWeight = 0;
 	monsters.set_params(target, silenced);
 
-	EXPECT_FALSE(lists(MonsterFactory::get_current_distribution(DUNGEON_LEVEL, monsters), name))
+	EXPECT_FALSE(lists(
+		MonsterFactory::get_current_distribution(DUNGEON_LEVEL, monsters),
+		name))
 		<< "silencing " << target << " never reached the distribution";
 }
 
@@ -81,13 +89,16 @@ TEST(MonsterSpawnTableTest, ACustomMonsterJoinsTheTable)
 	MonsterRegistry monsters{};
 	monsters.load(Paths::MONSTERS);
 
-	[[maybe_unused]] const std::string key = monsters.add_custom(MonsterParams{
-		.name = "Registry Beast",
-		.baseWeight = 10,
-		.levelMinimum = 1,
-	});
+	[[maybe_unused]] const std::string key = monsters.add_custom(
+		MonsterParams{
+			.name = "Registry Beast",
+			.baseWeight = 10,
+			.levelMinimum = 1,
+		});
 
-	EXPECT_TRUE(lists(MonsterFactory::get_current_distribution(DUNGEON_LEVEL, monsters), "Registry Beast"));
+	EXPECT_TRUE(lists(
+		MonsterFactory::get_current_distribution(DUNGEON_LEVEL, monsters),
+		"Registry Beast"));
 }
 
 // A spawn draws from the registry in the ctx it is given. Two contexts, each with every
@@ -113,9 +124,14 @@ TEST(MonsterSpawnTableTest, ASpawnDrawsFromTheRegistryInCtx)
 		}
 		mock.dice.set_next_roll(1);
 
-		MonsterFactory::spawn_random_monster(Vector2D{ 1, 1 }, DUNGEON_LEVEL, ctx);
+		MonsterFactory::spawn_random_monster(
+			Vector2D{ 1, 1 },
+			DUNGEON_LEVEL,
+			ctx);
 
-		return creatures.size() == 1 ? creatures.front()->actorData.name : std::string{ "spawned nothing, or more than one" };
+		return creatures.size() == 1 ?
+			creatures.front()->actorData.name :
+			std::string{ "spawned nothing, or more than one" };
 	};
 
 	EXPECT_EQ(spawn_with_only("wolf"), "wolf");

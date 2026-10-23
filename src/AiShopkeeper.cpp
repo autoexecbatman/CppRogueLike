@@ -11,7 +11,9 @@
 
 void AiShopkeeper::update(Creature& owner, [[maybe_unused]] GameContext& ctx)
 {
-	assert(owner.ai != nullptr && "AiShopkeeper::update called on creature with null ai");
+	assert(
+		owner.ai != nullptr &&
+		"AiShopkeeper::update called on creature with null ai");
 
 	if (owner.is_dead())
 	{
@@ -23,13 +25,16 @@ void AiShopkeeper::update(Creature& owner, [[maybe_unused]] GameContext& ctx)
 
 void AiShopkeeper::on_created(Creature& owner, GameContext& ctx)
 {
-	assert(ctx.levelManager && "AiShopkeeper::on_created: called without a levelManager");
-	ShopkeeperFactory::open_shop(owner, ctx.levelManager->get_dungeon_level(), ctx);
+	assert(
+		ctx.levelManager &&
+		"AiShopkeeper::on_created: called without a levelManager");
+	ShopkeeperFactory::open_shop(
+		owner,
+		ctx.levelManager->get_dungeon_level(),
+		ctx);
 }
 
-void AiShopkeeper::load([[maybe_unused]] const json& source)
-{
-}
+void AiShopkeeper::load([[maybe_unused]] const json& source) {}
 
 void AiShopkeeper::save(json& output)
 {

@@ -38,8 +38,14 @@ $root = Split-Path -Parent $PSScriptRoot
 $exe = Join-Path $root "build/bin/Debug/test_exe.exe"
 
 # Each probe names the assertion it claims to exercise. The anchor is matched
-# against whole lines, and a run stops if it does not match exactly one - a
-# vacuous deletion would report the probe as falsified while changing nothing.
+# against runs of whole lines, with whitespace removed from both, so an
+# assertion the formatter wrapped still matches. A probe whose anchor does not
+# match exactly one run is skipped and reported - a vacuous deletion would
+# report the probe as falsified while changing nothing.
+#
+# Falsified 2026-10-22 by calling Get-AnchorRuns on the text in memory: an
+# anchor edited to match no line gave 0 runs, and an assertion's lines copied
+# in again beside it gave 2, so both are skipped rather than deleted.
 $probes = @(
     @{
         test   = "AssertProbeDeathTest.TakingDamageWithNoFloatingTextAborts"
@@ -320,6 +326,40 @@ function Set-FileBytes($path, $bytes)
     return $false
 }
 
+# Every run of consecutive lines, starting on a non-blank one, whose text with
+# all whitespace removed is the anchor with all whitespace removed. Each run is
+# returned as its first and last line index.
+function Get-AnchorRuns($lines, $anchor)
+{
+    $wanted = $anchor -replace '\s', ''
+    $squashed = @($lines | ForEach-Object { $_ -replace '\s', '' })
+    $runs = @()
+    for ($start = 0; $start -lt $squashed.Count; $start++)
+    {
+        # A run can only begin on a line that begins the anchor.
+        $line = $squashed[$start]
+        $ordinal = [StringComparison]::Ordinal
+        if ($line -eq '' -or -not $wanted.StartsWith($line, $ordinal))
+        {
+            continue
+        }
+        $joined = ''
+        for ($end = $start; $end -lt $squashed.Count; $end++)
+        {
+            $joined += $squashed[$end]
+            if ($joined.Length -ge $wanted.Length)
+            {
+                if ($joined -ceq $wanted)
+                {
+                    $runs += , @($start, $end)
+                }
+                break
+            }
+        }
+    }
+    return , $runs
+}
+
 function Get-RecoveryPath($sourcePath)
 {
     return "$sourcePath.assert_probe_recovery"
@@ -386,14 +426,19 @@ foreach ($probe in $probes)
 
     # Whole lines, so a deletion cannot leave half an expression behind.
     $lines = $text -split "`n"
-    $matching = @($lines | Where-Object { $_.Trim() -eq $probe.anchor })
-    if ($matching.Count -ne 1)
+    $runs = Get-AnchorRuns $lines $probe.anchor
+    if ($runs.Count -ne 1)
     {
-        Write-Host ("  {0,-52} ANCHOR MATCHED {1} LINES - deletion would be vacuous" -f $probe.test.Replace("AssertProbeDeathTest.", ""), $matching.Count)
+        Write-Host ("  {0,-52} ANCHOR MATCHED {1} RUNS - deletion would be vacuous" -f $probe.test.Replace("AssertProbeDeathTest.", ""), $runs.Count)
         continue
     }
 
-    $kept = $lines | Where-Object { $_.Trim() -ne $probe.anchor }
+    $first = $runs[0][0]
+    $last = $runs[0][1]
+    $kept = @(
+        0..($lines.Count - 1) |
+            Where-Object { $_ -lt $first -or $_ -gt $last } |
+            ForEach-Object { $lines[$_] })
     $recovery = Get-RecoveryPath $sourcePath
     [IO.File]::WriteAllBytes($recovery, $originalBytes)
     if (-not (Set-FileBytes $sourcePath ([Text.Encoding]::UTF8.GetBytes(($kept -join "`n")))))

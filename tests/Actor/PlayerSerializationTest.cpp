@@ -83,7 +83,9 @@ TEST_F(PlayerSerializationTest, ClassAndRace_Preserved)
 
 	EXPECT_EQ(loaded->get_creature_class(), CreatureClass::FIGHTER);
 	EXPECT_EQ(loaded->get_race(), PlayerRaceState::HUMAN);
-	EXPECT_EQ(loaded->get_class_display_name(), class_display_name(CreatureClass::FIGHTER));
+	EXPECT_EQ(
+		loaded->get_class_display_name(),
+		class_display_name(CreatureClass::FIGHTER));
 	EXPECT_EQ(loaded->get_race_display_name(), "Human");
 }
 
@@ -97,7 +99,8 @@ TEST_F(PlayerSerializationTest, TheRaceIsSavedOnceAsTheEnum)
 	original->save(j);
 
 	EXPECT_TRUE(j.contains("lifespan"));
-	EXPECT_FALSE(j.contains("playerRace")) << "the race's name was saved beside the race";
+	EXPECT_FALSE(j.contains("playerRace"))
+		<< "the race's name was saved beside the race";
 }
 
 // The class is saved once, as the enum Creature already writes. Its name is derived
@@ -110,8 +113,10 @@ TEST_F(PlayerSerializationTest, TheClassIsSavedOnceAsTheEnum)
 	original->save(j);
 
 	EXPECT_TRUE(j.contains("creatureClass"));
-	EXPECT_FALSE(j.contains("playerClassState")) << "a second enum for the class was saved";
-	EXPECT_FALSE(j.contains("playerClass")) << "the class's name was saved beside the class";
+	EXPECT_FALSE(j.contains("playerClassState"))
+		<< "a second enum for the class was saved";
+	EXPECT_FALSE(j.contains("playerClass"))
+		<< "the class's name was saved beside the class";
 }
 
 TEST_F(PlayerSerializationTest, CombatStats_Preserved)
@@ -149,7 +154,9 @@ TEST_F(PlayerSerializationTest, EquippedItems_Preserved)
 	// Create and equip a sword
 	auto sword = ItemCreator::create("long_sword", Vector2D{ 0, 0 }, ctx);
 	sword->set_value(100);
-	original->equippedItems.emplace_back(std::move(sword), EquipmentSlot::RIGHT_HAND);
+	original->equippedItems.emplace_back(
+		std::move(sword),
+		EquipmentSlot::RIGHT_HAND);
 
 	// Create and equip armor
 	auto armor = ItemCreator::create("chain_mail", Vector2D{ 0, 0 }, ctx);
@@ -162,7 +169,8 @@ TEST_F(PlayerSerializationTest, EquippedItems_Preserved)
 	auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
 	loaded->load(j);
 
-	ASSERT_EQ(loaded->equippedItems.size(), 2) << "Should have 2 equipped items";
+	ASSERT_EQ(loaded->equippedItems.size(), 2)
+		<< "Should have 2 equipped items";
 
 	// Check first item
 	EXPECT_EQ(loaded->equippedItems[0].slot, EquipmentSlot::RIGHT_HAND);
@@ -209,7 +217,8 @@ TEST_F(PlayerSerializationTest, AllRaces_SaveLoad)
 		auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
 		loaded->load(j);
 
-		EXPECT_EQ(loaded->get_race(), race) << "Race mismatch for " << static_cast<int>(race);
+		EXPECT_EQ(loaded->get_race(), race)
+			<< "Race mismatch for " << static_cast<int>(race);
 	}
 }
 
@@ -226,10 +235,13 @@ TEST_F(PlayerSerializationTest, AllClasses_SaveLoad)
 		auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
 		loaded->load(j);
 
-		EXPECT_EQ(loaded->get_creature_class(), creatureClass) << "Class mismatch for " << encode_creature_class(creatureClass);
+		EXPECT_EQ(loaded->get_creature_class(), creatureClass)
+			<< "Class mismatch for " << encode_creature_class(creatureClass);
 		// The name shown is the loaded class's own, which a fighter alone cannot tell apart
 		// from a name that is always the fighter's.
-		EXPECT_EQ(loaded->get_class_display_name(), class_display_name(creatureClass));
+		EXPECT_EQ(
+			loaded->get_class_display_name(),
+			class_display_name(creatureClass));
 	}
 }
 
@@ -253,7 +265,9 @@ TEST_F(PlayerSerializationTest, Components_Preserved)
 // is that no save fallbacks exist. The player's own fields are what Player::save writes
 // less what Creature::save writes for the same body, so Creature's fields, pinned in its
 // own test, are not asked about twice.
-TEST_F(PlayerSerializationTest, APlayerRecordMissingAFieldItsSaverAlwaysWritesIsRefused)
+TEST_F(
+	PlayerSerializationTest,
+	APlayerRecordMissingAFieldItsSaverAlwaysWritesIsRefused)
 {
 	auto original = create_test_player();
 	json playerRecord;
@@ -290,9 +304,12 @@ TEST_F(PlayerSerializationTest, EveryComponentTheGameReadsSurvivesARoundTrip)
 	auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
 	loaded->load(record);
 
-	EXPECT_NE(loaded->healthPool, nullptr) << "loaded without a health pool; the HUD reads hp on the first frame";
-	EXPECT_NE(loaded->armorClass, nullptr) << "loaded without an armour class; every attack against the player reads it";
-	EXPECT_NE(loaded->experienceReward, nullptr) << "loaded without an experience reward; the next kill writes to it";
+	EXPECT_NE(loaded->healthPool, nullptr)
+		<< "loaded without a health pool; the HUD reads hp on the first frame";
+	EXPECT_NE(loaded->armorClass, nullptr)
+		<< "loaded without an armour class; every attack against the player reads it";
+	EXPECT_NE(loaded->experienceReward, nullptr)
+		<< "loaded without an experience reward; the next kill writes to it";
 	EXPECT_NE(loaded->attacker, nullptr) << "loaded without an attacker";
 	EXPECT_NE(loaded->controller, nullptr) << "loaded without a controller";
 }
@@ -316,7 +333,8 @@ TEST_F(PlayerSerializationTest, AConfusionSurvivesTheSave)
 	json resaved;
 	loaded->save(resaved);
 
-	ASSERT_TRUE(saved.contains("controller")) << "the controller reached no part of the save";
+	ASSERT_TRUE(saved.contains("controller"))
+		<< "the controller reached no part of the save";
 	EXPECT_EQ(resaved.at("controller"), saved.at("controller"))
 		<< "the confusion did not survive the round trip";
 }
@@ -335,6 +353,8 @@ TEST_F(PlayerSerializationTest, TheControllerCarriesTheConfusionsEndTime)
 	PlayerController restored{ *owner };
 	restored.load(saved);
 
-	EXPECT_TRUE(restored.is_confused(TIME_UNITS_PER_ROUND * 2)) << "two rounds in, the spell has a round to run";
-	EXPECT_FALSE(restored.is_confused(TIME_UNITS_PER_ROUND * 3)) << "and it ends on the third";
+	EXPECT_TRUE(restored.is_confused(TIME_UNITS_PER_ROUND * 2))
+		<< "two rounds in, the spell has a round to run";
+	EXPECT_FALSE(restored.is_confused(TIME_UNITS_PER_ROUND * 3))
+		<< "and it ends on the third";
 }

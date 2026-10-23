@@ -61,7 +61,9 @@ bool takes_constitution_adjustment_at(CreatureClass creatureClass, int level);
 //   levels_taking_constitution_adjustment(CreatureClass::WIZARD, 3);    // -> 3
 //   levels_taking_constitution_adjustment(CreatureClass::FIGHTER, 12);  // -> 9
 //   levels_taking_constitution_adjustment(CreatureClass::MONSTER, 13);  // -> 13
-int levels_taking_constitution_adjustment(CreatureClass creatureClass, int level);
+int levels_taking_constitution_adjustment(
+	CreatureClass creatureClass,
+	int level);
 
 // What one rolled hit die is worth, and the two numbers a level-up message
 // shows: the die after the score's own minimum and the adjustment on it.

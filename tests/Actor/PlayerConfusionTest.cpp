@@ -67,10 +67,15 @@ protected:
 	size_t times_said(std::string_view wanted) const
 	{
 		size_t count = 0;
-		for (size_t index = 0; index < ctx.messageSystem->get_stored_message_count(); ++index)
+		for (
+			size_t index = 0;
+			index < ctx.messageSystem->get_stored_message_count();
+			++index)
 		{
 			std::string whole;
-			for (const LogMessage& run : ctx.messageSystem->get_attack_message_at(index))
+			for (
+				const LogMessage& run :
+				ctx.messageSystem->get_attack_message_at(index))
 			{
 				whole += run.text;
 			}
@@ -84,7 +89,8 @@ protected:
 
 	bool is_confused_now() const
 	{
-		return ctx.player_concrete().controller->is_confused(ctx.gameState->get_time());
+		return ctx.player_concrete().controller->is_confused(
+			ctx.gameState->get_time());
 	}
 
 	MockGameContext mock{};
@@ -108,21 +114,25 @@ TEST_F(PlayerConfusionTest, AConfusedPlayerStumbles)
 
 	take_a_turn();
 
-	EXPECT_EQ(ctx.player()->position, (Vector2D{ START.x + 1, CORRIDOR_ROW })) << "the confused player did not stumble";
+	EXPECT_EQ(ctx.player()->position, (Vector2D{ START.x + 1, CORRIDOR_ROW }))
+		<< "the confused player did not stumble";
 	EXPECT_EQ(times_said("You stumble around in confusion!"), 1u);
 }
 
 // A confusion scroll read at the player's own tile confuses them as any other source does.
 TEST_F(PlayerConfusionTest, AConfusionScrollReadAtThePlayerConfusesThem)
 {
-	ASSERT_EQ(read_confusion_at(*ctx.player(), START, 3, ctx), ScrollReading::SPENT);
+	ASSERT_EQ(
+		read_confusion_at(*ctx.player(), START, 3, ctx),
+		ScrollReading::SPENT);
 	mock.dice.set_next_roll(1);
 	mock.dice.set_next_roll(STUMBLE_EAST);
 
 	take_a_turn();
 
 	EXPECT_TRUE(is_confused_now());
-	EXPECT_EQ(ctx.player()->position, (Vector2D{ START.x + 1, CORRIDOR_ROW })) << "the scroll's confusion made nobody stumble";
+	EXPECT_EQ(ctx.player()->position, (Vector2D{ START.x + 1, CORRIDOR_ROW }))
+		<< "the scroll's confusion made nobody stumble";
 }
 
 // When the confusion's rounds have passed, the player is told once and is clear-headed.
@@ -134,7 +144,8 @@ TEST_F(PlayerConfusionTest, TheMindClearsWhenTheConfusionEnds)
 	take_a_turn();
 	take_a_turn();
 
-	EXPECT_EQ(times_said("Your mind clears."), 1u) << "the clearing was not reported exactly once";
+	EXPECT_EQ(times_said("Your mind clears."), 1u)
+		<< "the clearing was not reported exactly once";
 	EXPECT_FALSE(is_confused_now());
 }
 
@@ -162,5 +173,6 @@ TEST_F(PlayerConfusionTest, AMimicRevealingItselfConfusesThePlayer)
 
 	mimic.ai->update(mimic, ctx);
 
-	EXPECT_TRUE(is_confused_now()) << "the mimic's reveal left the player clear-headed";
+	EXPECT_TRUE(is_confused_now())
+		<< "the mimic's reveal left the player clear-headed";
 }

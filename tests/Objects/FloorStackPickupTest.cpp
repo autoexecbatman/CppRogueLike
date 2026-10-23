@@ -62,7 +62,9 @@ protected:
 	// A light item of the given name standing on the given tile.
 	Item& drop(const std::string& name, Vector2D where)
 	{
-		auto item = std::make_unique<Item>(where, ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK });
+		auto item = std::make_unique<Item>(
+			where,
+			ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK });
 		item->enhancement.weight = 1;
 		Item& placed = *item;
 		InventoryOperations::add_item(*ctx.floorInventory, std::move(item));
@@ -71,7 +73,8 @@ protected:
 
 	size_t items_underfoot() const
 	{
-		return InventoryOperations::items_at(*ctx.floorInventory, UNDERFOOT).size();
+		return InventoryOperations::items_at(*ctx.floorInventory, UNDERFOOT)
+			.size();
 	}
 
 	MockGameContext mock{};
@@ -88,13 +91,18 @@ TEST_F(FloorStackPickupTest, ItemsAtAnswersOnlyTheTileAskedFor)
 	drop("rope", UNDERFOOT);
 	drop("shield", ELSEWHERE);
 
-	EXPECT_EQ(InventoryOperations::items_at(*ctx.floorInventory, UNDERFOOT).size(), 2u);
-	EXPECT_EQ(InventoryOperations::items_at(*ctx.floorInventory, ELSEWHERE).size(), 1u);
+	EXPECT_EQ(
+		InventoryOperations::items_at(*ctx.floorInventory, UNDERFOOT).size(),
+		2u);
+	EXPECT_EQ(
+		InventoryOperations::items_at(*ctx.floorInventory, ELSEWHERE).size(),
+		1u);
 }
 
 TEST_F(FloorStackPickupTest, ItemsAtABareTileIsEmpty)
 {
-	EXPECT_TRUE(InventoryOperations::items_at(*ctx.floorInventory, UNDERFOOT).empty());
+	EXPECT_TRUE(
+		InventoryOperations::items_at(*ctx.floorInventory, UNDERFOOT).empty());
 }
 
 TEST_F(FloorStackPickupTest, OneItemIsTakenWithNoMenuInTheWay)
@@ -103,7 +111,8 @@ TEST_F(FloorStackPickupTest, OneItemIsTakenWithNoMenuInTheWay)
 
 	Pickup::from_floor(*player, ctx);
 
-	EXPECT_TRUE(menus.empty()) << "a single item made the player answer a menu to take it";
+	EXPECT_TRUE(menus.empty())
+		<< "a single item made the player answer a menu to take it";
 	EXPECT_EQ(items_underfoot(), 0u);
 	EXPECT_EQ(InventoryOperations::get_item_count(player->inventoryData), 1u);
 }
@@ -115,8 +124,10 @@ TEST_F(FloorStackPickupTest, AStackOpensAMenuAndTakesNothingYet)
 
 	Pickup::from_floor(*player, ctx);
 
-	EXPECT_EQ(menus.size(), 1u) << "a heap was picked through without ever asking";
-	EXPECT_EQ(items_underfoot(), 2u) << "something was taken before the player chose";
+	EXPECT_EQ(menus.size(), 1u)
+		<< "a heap was picked through without ever asking";
+	EXPECT_EQ(items_underfoot(), 2u)
+		<< "something was taken before the player chose";
 	EXPECT_EQ(InventoryOperations::get_item_count(player->inventoryData), 0u);
 }
 
@@ -128,7 +139,11 @@ TEST_F(FloorStackPickupTest, TakingOneOfAStackLeavesTheRestOnTheFloor)
 	Pickup::take_floor_item(*player, rope, ctx);
 
 	EXPECT_EQ(items_underfoot(), 1u);
-	EXPECT_EQ(InventoryOperations::items_at(*ctx.floorInventory, UNDERFOOT).front()->actorData.name, "dagger");
+	EXPECT_EQ(
+		InventoryOperations::items_at(*ctx.floorInventory, UNDERFOOT)
+			.front()
+			->actorData.name,
+		"dagger");
 	EXPECT_EQ(InventoryOperations::get_item_count(player->inventoryData), 1u);
 }
 
@@ -137,10 +152,14 @@ TEST_F(FloorStackPickupTest, AnIdOutlivesThePointerTheMenuCouldNotHold)
 	Item& rope = drop("rope", UNDERFOOT);
 	const UniqueId::IdType ropeId = rope.uniqueId;
 
-	EXPECT_EQ(InventoryOperations::find_item_by_id(*ctx.floorInventory, ropeId), &rope);
+	EXPECT_EQ(
+		InventoryOperations::find_item_by_id(*ctx.floorInventory, ropeId),
+		&rope);
 
 	Pickup::take_floor_item(*player, rope, ctx);
 
-	EXPECT_EQ(InventoryOperations::find_item_by_id(*ctx.floorInventory, ropeId), nullptr)
+	EXPECT_EQ(
+		InventoryOperations::find_item_by_id(*ctx.floorInventory, ropeId),
+		nullptr)
 		<< "the floor still answers for an item somebody already carried off";
 }

@@ -31,15 +31,20 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 {
 	assert(ctx.map && "AiWebSpinner::update: called without a map");
 	assert(ctx.dice && "AiWebSpinner::update: called without dice");
-	assert(ctx.buffSystem && "AiWebSpinner::update: called without a buffSystem");
+	assert(
+		ctx.buffSystem && "AiWebSpinner::update: called without a buffSystem");
 
 	// A failed save against the player's Sanctuary loses track of the player for the
 	// whole turn - biting, spinning and walking alike (PHB page 436).
-	const bool hasLostTrack = ctx.buffSystem->ignores_warded_creature(owner, *ctx.player());
-	const std::optional<Vector2D> quarry = hasLostTrack ? std::nullopt : std::optional<Vector2D>{ ctx.player()->position };
+	const bool hasLostTrack =
+		ctx.buffSystem->ignores_warded_creature(owner, *ctx.player());
+	const std::optional<Vector2D> quarry = hasLostTrack ?
+		std::nullopt :
+		std::optional<Vector2D>{ ctx.player()->position };
 
 	// DIRECT ATTACK CODE - Check if player is adjacent
-	if (quarry && owner.get_tile_distance(*quarry) <= 1 && ctx.map->is_in_fov(owner.position))
+	if (quarry && owner.get_tile_distance(*quarry) <= 1 &&
+		ctx.map->is_in_fov(owner.position))
 	{
 		ctx.messageSystem->log("Web spinner attempting attack with poison");
 		bite(owner, *ctx.player(), ctx);
@@ -49,15 +54,22 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 	}
 
 	// Web spinning logic - only if not attacking
-	if (ctx.gameState->get_time() >= webReadyTime && should_create_web(owner, quarry, ctx))
+	if (ctx.gameState->get_time() >= webReadyTime &&
+		should_create_web(owner, quarry, ctx))
 	{
 		if (try_create_web(owner, quarry, ctx))
 		{
 			webReadyTime = expiry_time(ctx.gameState->get_time(), WEB_COOLDOWN);
 
 			// Show message about web spinning
-			ctx.messageSystem->message(owner.actorData.color, owner.actorData.name, MessageCompletion::CONTINUED);
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, " spins a sticky web!", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				owner.actorData.color,
+				owner.actorData.name,
+				MessageCompletion::CONTINUED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				" spins a sticky web!",
+				MessageCompletion::FINISHED);
 
 			return;
 		}
@@ -86,28 +98,58 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 // which causes immediate death if the victim fails the saving throw." Table 51 prints
 // Type F as Death/0 (DMG, PDF page 737), so a made save takes nothing at all. The
 // victim's Constitution adjusts the roll, as its own table says.
-void AiWebSpinner::inject_venom(Creature& owner, Creature& target, GameContext& ctx)
+void AiWebSpinner::inject_venom(
+	Creature& owner,
+	Creature& target,
+	GameContext& ctx)
 {
-	assert(ctx.dataManager && "AiWebSpinner::inject_venom: called without a dataManager");
+	assert(
+		ctx.dataManager &&
+		"AiWebSpinner::inject_venom: called without a dataManager");
 
-	const int constitutionAdjustment = ctx.dataManager->constitution_for(target.get_constitution()).PoisonSave;
-	if (SavingThrows::is_made(target, SavingThrow::PARALYZATION_POISON_DEATH, constitutionAdjustment, ctx))
+	const int constitutionAdjustment =
+		ctx.dataManager->constitution_for(target.get_constitution()).PoisonSave;
+	if (SavingThrows::is_made(
+			target,
+			SavingThrow::PARALYZATION_POISON_DEATH,
+			constitutionAdjustment,
+			ctx))
 	{
-		ctx.messageSystem->message(owner.actorData.color, owner.actorData.name, MessageCompletion::CONTINUED);
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, " injects venom, and it does not take hold.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			owner.actorData.color,
+			owner.actorData.name,
+			MessageCompletion::CONTINUED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			" injects venom, and it does not take hold.",
+			MessageCompletion::FINISHED);
 		return;
 	}
 
-	ctx.messageSystem->message(owner.actorData.color, owner.actorData.name, MessageCompletion::CONTINUED);
-	ctx.messageSystem->message(ColorPairId::WHITE_RED, " injects a deadly venom!", MessageCompletion::FINISHED);
+	ctx.messageSystem->message(
+		owner.actorData.color,
+		owner.actorData.name,
+		MessageCompletion::CONTINUED);
+	ctx.messageSystem->message(
+		ColorPairId::WHITE_RED,
+		" injects a deadly venom!",
+		MessageCompletion::FINISHED);
 
 	// "Where death is listed, all hit points are immediately lost."
-	target.take_damage_and_check_death(target.get_hp(), ctx, DamageType::POISON);
+	target.take_damage_and_check_death(
+		target.get_hp(),
+		ctx,
+		DamageType::POISON);
 }
 
-bool AiWebSpinner::should_create_web(Creature& owner, std::optional<Vector2D> quarry, GameContext& ctx)
+bool AiWebSpinner::should_create_web(
+	Creature& owner,
+	std::optional<Vector2D> quarry,
+	GameContext& ctx)
 {
-	assert(ctx.spellTiles && "AiWebSpinner::should_create_web: called without spellTiles");
+	assert(
+		ctx.spellTiles &&
+		"AiWebSpinner::should_create_web: called without spellTiles");
 	assert(ctx.dice && "AiWebSpinner::should_create_web: called without dice");
 
 	// Only a quarry draws a defensive web, or a bite in place of one
@@ -163,7 +205,10 @@ bool AiWebSpinner::should_create_web(Creature& owner, std::optional<Vector2D> qu
 	return webCount < MAX_WEBS;
 }
 
-bool AiWebSpinner::try_create_web(Creature& owner, std::optional<Vector2D> quarry, GameContext& ctx)
+bool AiWebSpinner::try_create_web(
+	Creature& owner,
+	std::optional<Vector2D> quarry,
+	GameContext& ctx)
 {
 	assert(ctx.map && "AiWebSpinner::try_create_web: called without a map");
 
@@ -205,8 +250,10 @@ bool AiWebSpinner::try_create_web(Creature& owner, std::optional<Vector2D> quarr
 			webCenter = owner.position + Vector2D{ deltaCol * 2, deltaRow * 2 };
 
 			// Make sure center is in bounds
-			webCenter.x = std::max(0, std::min(webCenter.x, ctx.map->get_width() - 1));
-			webCenter.y = std::max(0, std::min(webCenter.y, ctx.map->get_height() - 1));
+			webCenter.x =
+				std::max(0, std::min(webCenter.x, ctx.map->get_width() - 1));
+			webCenter.y =
+				std::max(0, std::min(webCenter.y, ctx.map->get_height() - 1));
 		}
 	}
 
@@ -214,14 +261,23 @@ bool AiWebSpinner::try_create_web(Creature& owner, std::optional<Vector2D> quarr
 	generate_web_entities(webCenter, webSize, ctx);
 
 	// Dramatic message about web creation
-	ctx.messageSystem->message(ColorPairId::RED_YELLOW, owner.actorData.name, MessageCompletion::CONTINUED);
+	ctx.messageSystem->message(
+		ColorPairId::RED_YELLOW,
+		owner.actorData.name,
+		MessageCompletion::CONTINUED);
 	if (webSize >= WEB_MAX_SIZE - 1)
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, " creates a massive web network!", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			" creates a massive web network!",
+			MessageCompletion::FINISHED);
 	}
 	else
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, " spins a complex web structure!", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			" spins a complex web structure!",
+			MessageCompletion::FINISHED);
 	}
 
 	// Mark this spider as having laid a web - now using our own method
@@ -233,13 +289,14 @@ bool AiWebSpinner::try_create_web(Creature& owner, std::optional<Vector2D> quarr
 // Helper method to check if a position is valid for placing a web
 bool AiWebSpinner::is_valid_web_position(Vector2D pos, GameContext& ctx)
 {
-	assert(ctx.spellTiles && "AiWebSpinner::is_valid_web_position: called without spellTiles");
-	assert(ctx.map && "AiWebSpinner::is_valid_web_position: called without a map");
+	assert(
+		ctx.spellTiles &&
+		"AiWebSpinner::is_valid_web_position: called without spellTiles");
+	assert(
+		ctx.map && "AiWebSpinner::is_valid_web_position: called without a map");
 
 	// Check bounds
-	if (pos.y < 0 ||
-		pos.y >= ctx.map->get_height() ||
-		pos.x < 0 ||
+	if (pos.y < 0 || pos.y >= ctx.map->get_height() || pos.x < 0 ||
 		pos.x >= ctx.map->get_width())
 	{
 		return false;
@@ -260,7 +317,9 @@ bool AiWebSpinner::is_valid_web_position(Vector2D pos, GameContext& ctx)
 	// Check if there's already a spell tile at this position
 	for (const auto& spellTile : *ctx.spellTiles)
 	{
-		assert(spellTile && "is_valid_web_position: spellTiles holds a null entry");
+		assert(
+			spellTile &&
+			"is_valid_web_position: spellTiles holds a null entry");
 		if (!spellTile->is_destroyed() && spellTile->position == pos)
 		{
 			return false;
@@ -270,11 +329,19 @@ bool AiWebSpinner::is_valid_web_position(Vector2D pos, GameContext& ctx)
 	return true;
 }
 
-void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext& ctx)
+void AiWebSpinner::generate_web_entities(
+	Vector2D center,
+	int size,
+	GameContext& ctx)
 {
-	assert(ctx.spellTiles && "AiWebSpinner::generate_web_entities: called without spellTiles");
-	assert(ctx.tileConfig && "AiWebSpinner::generate_web_entities: called without a tileConfig");
-	assert(ctx.dice && "AiWebSpinner::generate_web_entities: called without dice");
+	assert(
+		ctx.spellTiles &&
+		"AiWebSpinner::generate_web_entities: called without spellTiles");
+	assert(
+		ctx.tileConfig &&
+		"AiWebSpinner::generate_web_entities: called without a tileConfig");
+	assert(
+		ctx.dice && "AiWebSpinner::generate_web_entities: called without dice");
 
 	// Create a complex web pattern centered at the given position
 	// with size determining the radius/complexity
@@ -304,7 +371,9 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 			for (int offsetCol = -size; offsetCol <= size; offsetCol++)
 			{
 
-				float normalizedDist = ((float)(offsetCol * offsetCol) / (size * size)) + ((float)(offsetRow * offsetRow) / (size * size));
+				float normalizedDist =
+					((float)(offsetCol * offsetCol) / (size * size)) +
+					((float)(offsetRow * offsetRow) / (size * size));
 
 				// Create web with higher density near the edges
 				if (normalizedDist <= 1.0f &&
@@ -374,7 +443,8 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 
 			for (int spokeIndex = 0; spokeIndex < numSpokes; spokeIndex++)
 			{
-				float angle = static_cast<float>(spokeIndex) * (2.0f * 3.14159f / numSpokes);
+				float angle = static_cast<float>(spokeIndex) *
+					(2.0f * 3.14159f / numSpokes);
 
 				for (int dist = 1; dist <= size; dist++)
 				{
@@ -417,7 +487,8 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 				{
 					if (abs(offsetCol) + abs(offsetRow) <= 3)
 					{
-						Vector2D pos = center + Vector2D{ offsetCol, offsetRow };
+						Vector2D pos =
+							center + Vector2D{ offsetCol, offsetRow };
 						if (is_valid_web_position(pos, ctx))
 						{
 							webPositions.push_back(pos);

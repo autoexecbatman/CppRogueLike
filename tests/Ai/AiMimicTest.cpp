@@ -29,7 +29,8 @@ TEST(AiMimicTest, Save_PreservesIsDisguisedState)
 	mimic.save(j);
 
 	ASSERT_TRUE(j.contains("isDisguised"));
-	EXPECT_EQ(j["isDisguised"], true) << "freshly constructed mimic starts disguised";
+	EXPECT_EQ(j["isDisguised"], true)
+		<< "freshly constructed mimic starts disguised";
 }
 
 TEST(AiMimicTest, SaveLoad_RoundTrip_PreservesType)

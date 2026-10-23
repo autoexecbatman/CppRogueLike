@@ -77,7 +77,10 @@ public:
 		ctx.player()->die(ctx);
 	}
 
-	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::MONSTER; }
+	[[nodiscard]] AiType get_ai_type() const noexcept override
+	{
+		return AiType::MONSTER;
+	}
 
 	void load([[maybe_unused]] const json& j) override {}
 
@@ -122,7 +125,9 @@ void give_the_game_a_player(Game& game)
 void load_the_games_renderer(Game& game)
 {
 	game.tileConfig.load(Paths::TILE_CONFIG);
-	game.renderer.load_font(Paths::resolve(Paths::DAWNLIKE_FONT).string(), HIDDEN_RENDERER_FONT_SIZE);
+	game.renderer.load_font(
+		Paths::resolve(Paths::DAWNLIKE_FONT).string(),
+		HIDDEN_RENDERER_FONT_SIZE);
 	game.renderer.load_dawnlike(Paths::resolve(Paths::DAWNLIKE_DIR).string());
 	game.renderer.update_viewport();
 }
@@ -140,8 +145,12 @@ void load_the_games_renderer(Game& game)
 	int loopNum{ 0 };
 	game.tick(loopNum);
 
-	exit_unless(game.menus.size() == 1, "the menus open when the player died are still open");
-	exit_unless(typeid(*game.menus.back()) == typeid(DeathMenu), "the death screen is not what is left on the stack");
+	exit_unless(
+		game.menus.size() == 1,
+		"the menus open when the player died are still open");
+	exit_unless(
+		typeid(*game.menus.back()) == typeid(DeathMenu),
+		"the death screen is not what is left on the stack");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
@@ -158,8 +167,12 @@ void load_the_games_renderer(Game& game)
 	int loopNum{ 0 };
 	game.tick(loopNum);
 
-	exit_unless(game.menus.size() == 1, "the menus open when the run was won are still open");
-	exit_unless(typeid(*game.menus.back()) == typeid(NotificationMenu), "the victory screen is not what is left on the stack");
+	exit_unless(
+		game.menus.size() == 1,
+		"the menus open when the run was won are still open");
+	exit_unless(
+		typeid(*game.menus.back()) == typeid(NotificationMenu),
+		"the victory screen is not what is left on the stack");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
@@ -176,12 +189,16 @@ void load_the_games_renderer(Game& game)
 
 	int loopNum{ 0 };
 	game.tick(loopNum);
-	exit_unless(game.menus.size() == 1, "the first tick did not leave the death screen alone on the stack");
+	exit_unless(
+		game.menus.size() == 1,
+		"the first tick did not leave the death screen alone on the stack");
 	const BaseMenu* deathScreen = game.menus.back().get();
 
 	game.tick(loopNum);
 
-	exit_unless(!game.menus.empty() && game.menus.back().get() == deathScreen, "the death screen was replaced by its own outcome");
+	exit_unless(
+		!game.menus.empty() && game.menus.back().get() == deathScreen,
+		"the death screen was replaced by its own outcome");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
@@ -194,10 +211,16 @@ void load_the_games_renderer(Game& game)
 	GameContext ctx = game.context();
 	int loopNum{ 0 };
 	start_a_game(game, ctx, loopNum);
-	exit_unless(game.menus.empty(), "the new game's first turn left a menu open, so this is not a turn with no menu");
-	exit_unless(!game.player->is_dead(), "the player died before the monster was placed");
+	exit_unless(
+		game.menus.empty(),
+		"the new game's first turn left a menu open, so this is not a turn with no menu");
+	exit_unless(
+		!game.player->is_dead(),
+		"the player died before the monster was placed");
 
-	auto killer = std::make_unique<Creature>(game.player->position + Vector2D{ 1, 0 }, ActorData{ TileRef{}, "killer", ColorPairId::WHITE_BLACK });
+	auto killer = std::make_unique<Creature>(
+		game.player->position + Vector2D{ 1, 0 },
+		ActorData{ TileRef{}, "killer", ColorPairId::WHITE_BLACK });
 	killer->healthPool = std::make_unique<HealthPool>(10);
 	killer->armorClass = std::make_unique<ArmorClass>(10);
 	killer->ai = std::make_unique<KillingAi>();
@@ -206,8 +229,13 @@ void load_the_games_renderer(Game& game)
 	ctx.inputSystem->queue_key(GameKey::WAIT, 0);
 	game.tick(loopNum);
 
-	exit_unless(game.player->is_dead(), "the monster's turn did not come in the round the player waited through");
-	exit_unless(game.menus.size() == 1 && typeid(*game.menus.back()) == typeid(DeathMenu), "the death screen is not on the stack after the fatal round");
+	exit_unless(
+		game.player->is_dead(),
+		"the monster's turn did not come in the round the player waited through");
+	exit_unless(
+		game.menus.size() == 1 &&
+			typeid(*game.menus.back()) == typeid(DeathMenu),
+		"the death screen is not on the stack after the fatal round");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
@@ -218,8 +246,9 @@ void expect_child_passes(void (*childBody)())
 	// delete a real save sitting where the game keeps it. It skips rather than do that.
 	if (std::filesystem::exists(Paths::resolve(Paths::SAVE_FILE)))
 	{
-		GTEST_SKIP() << "a save exists at " << Paths::resolve(Paths::SAVE_FILE).string()
-					 << "; a lost run would delete it, so this test refuses to run";
+		GTEST_SKIP()
+			<< "a save exists at " << Paths::resolve(Paths::SAVE_FILE).string()
+			<< "; a lost run would delete it, so this test refuses to run";
 	}
 
 	const int childExitCode = exit_code_in_child(childBody);
@@ -227,7 +256,8 @@ void expect_child_passes(void (*childBody)())
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 } // namespace
 

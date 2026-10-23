@@ -161,17 +161,15 @@ bool is_listed(std::string_view key)
 	{
 		return book.key == key;
 	};
-	return std::ranges::any_of(BOOK_DAMAGE, isThisMonster) || std::ranges::find(NO_ENTRY, key) != std::ranges::end(NO_ENTRY);
+	return std::ranges::any_of(BOOK_DAMAGE, isThisMonster) ||
+		std::ranges::find(NO_ENTRY, key) != std::ranges::end(NO_ENTRY);
 }
 } // namespace
 
 class MonsterDamageBookTest : public ::testing::Test
 {
 protected:
-	void SetUp() override
-	{
-		monsters.load(Paths::MONSTERS);
-	}
+	void SetUp() override { monsters.load(Paths::MONSTERS); }
 
 	MonsterRegistry monsters{};
 };
@@ -181,7 +179,10 @@ TEST_F(MonsterDamageBookTest, EveryMonsterDealsItsEntrysDice)
 {
 	for (const BookDamage& book : BOOK_DAMAGE)
 	{
-		EXPECT_EQ(monsters.get_params(std::string{ book.key }).damage.displayRoll, book.dice) << book.key;
+		EXPECT_EQ(
+			monsters.get_params(std::string{ book.key }).damage.displayRoll,
+			book.dice)
+			<< book.key;
 	}
 }
 
@@ -190,6 +191,8 @@ TEST_F(MonsterDamageBookTest, EveryRecordIsReadAgainstTheBook)
 {
 	for (const std::string& key : monsters.get_all_keys())
 	{
-		EXPECT_TRUE(is_listed(key)) << key << " has no row in BOOK_DAMAGE and is not a game-only monster";
+		EXPECT_TRUE(is_listed(key))
+			<< key
+			<< " has no row in BOOK_DAMAGE and is not a game-only monster";
 	}
 }

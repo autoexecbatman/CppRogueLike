@@ -102,13 +102,18 @@ TEST_F(WaterSpawnTest, GenerationPlacesOnlyOnDryUnobstructedTiles)
 	const Vector2D rock{ 0, 0 };
 	map.set_tile(pool, TileType::WATER);
 	map.set_tile(shutDoor, TileType::CLOSED_DOOR);
-	auto orc = std::make_unique<Creature>(creatureTile, ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK });
+	auto orc = std::make_unique<Creature>(
+		creatureTile,
+		ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK });
 	orc->healthPool = std::make_unique<HealthPool>(8);
 	creatures.push_back(std::move(orc));
-	decorations.push_back(std::make_unique<Decoration>(Decoration{ .position = barrelTile, .name = "barrel" }));
+	decorations.push_back(
+		std::make_unique<Decoration>(
+			Decoration{ .position = barrelTile, .name = "barrel" }));
 
 	EXPECT_TRUE(map.can_place_at(floorTile, ctx));
-	EXPECT_FALSE(map.can_place_at(pool, ctx)) << "a non-swimmer could never reach it";
+	EXPECT_FALSE(map.can_place_at(pool, ctx))
+		<< "a non-swimmer could never reach it";
 	EXPECT_FALSE(map.can_place_at(rock, ctx));
 	EXPECT_FALSE(map.can_place_at(shutDoor, ctx));
 	EXPECT_FALSE(map.can_place_at(creatureTile, ctx));
@@ -120,7 +125,8 @@ TEST_F(WaterSpawnTest, ADryRoomStillAnswers)
 	// The other half: the exclusion must not refuse every tile it is offered.
 	const auto position = SpawnUtils::find_random_room_position(room, ctx);
 
-	ASSERT_TRUE(position.has_value()) << "a room of dry floor gave no spawn tile at all";
+	ASSERT_TRUE(position.has_value())
+		<< "a room of dry floor gave no spawn tile at all";
 	EXPECT_FALSE(map.is_water(*position));
 }
 
@@ -132,7 +138,8 @@ TEST_F(WaterSpawnTest, NoSpawnTileIsEverWater)
 	for (int draw = 0; draw < DRAWS; ++draw)
 	{
 		const auto position = SpawnUtils::find_random_room_position(room, ctx);
-		ASSERT_TRUE(position.has_value()) << "the one dry tile was never offered";
+		ASSERT_TRUE(position.has_value())
+			<< "the one dry tile was never offered";
 		ASSERT_FALSE(map.is_water(*position))
 			<< "draw " << draw << " put a creature in the water at "
 			<< position->x << "," << position->y;

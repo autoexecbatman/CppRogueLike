@@ -79,7 +79,9 @@ protected:
 		monster.experienceReward = std::make_unique<ExperienceReward>(0);
 		monster.healthPool = std::make_unique<HealthPool>(STARTING_HP);
 		monster.armorClass = std::make_unique<ArmorClass>(10);
-		monster.attacker = std::make_unique<MonsterAttacker>(monster, DamageInfo{ "1d4", DamageType::PHYSICAL });
+		monster.attacker = std::make_unique<MonsterAttacker>(
+			monster,
+			DamageInfo{ "1d4", DamageType::PHYSICAL });
 		monster.set_dr(0);
 		monster.set_thaco(20);
 		monster.set_strength(8);
@@ -121,7 +123,9 @@ protected:
 	{
 		for (const Vector2D& tile : tiles)
 		{
-			auto blocker = std::make_unique<Creature>(tile, ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK });
+			auto blocker = std::make_unique<Creature>(
+				tile,
+				ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK });
 			blocker->healthPool = std::make_unique<HealthPool>(STARTING_HP);
 			creatures.push_back(std::move(blocker));
 		}
@@ -149,10 +153,7 @@ protected:
 	};
 	HuntingAi* hunter{ nullptr };
 
-	void TearDown() override
-	{
-		game.dice.clear_fixed_rolls();
-	}
+	void TearDown() override { game.dice.clear_fixed_rolls(); }
 
 public:
 	MonsterMovementTest()
@@ -170,8 +171,10 @@ TEST_F(MonsterMovementTest, AGoblinOpensAShutDoorOnItsWayToThePlayer)
 
 	hunt(ROUNDS);
 
-	EXPECT_TRUE(map.is_open_door(DOOR_TILE)) << "the goblin never opened the door";
-	EXPECT_LE(monster.position.chebyshev_distance_to(PLAYER_TILE), 1) << "the goblin did not reach the player";
+	EXPECT_TRUE(map.is_open_door(DOOR_TILE))
+		<< "the goblin never opened the door";
+	EXPECT_LE(monster.position.chebyshev_distance_to(PLAYER_TILE), 1)
+		<< "the goblin did not reach the player";
 }
 
 // Paws do not: the wolf comes up to the door and waits there.
@@ -183,7 +186,8 @@ TEST_F(MonsterMovementTest, AWolfWaitsAtAShutDoor)
 	hunt(ROUNDS);
 
 	EXPECT_FALSE(map.is_open_door(DOOR_TILE)) << "a wolf opened a door";
-	EXPECT_EQ(monster.position, NEAR_SIDE_OF_DOOR) << "the wolf should wait against the door";
+	EXPECT_EQ(monster.position, NEAR_SIDE_OF_DOOR)
+		<< "the wolf should wait against the door";
 }
 
 // A lock stops hands as well.
@@ -193,19 +197,25 @@ TEST_F(MonsterMovementTest, NobodyPassesALockedDoor)
 
 	hunt(ROUNDS);
 
-	EXPECT_FALSE(map.is_open_door(DOOR_TILE)) << "a goblin opened a locked door";
+	EXPECT_FALSE(map.is_open_door(DOOR_TILE))
+		<< "a goblin opened a locked door";
 	EXPECT_EQ(monster.position, NEAR_SIDE_OF_DOOR);
 }
 
 // A monster does not route round a trap it walks into: the trap springs on it.
 TEST_F(MonsterMovementTest, AMonsterWalksIntoATrapOnItsWay)
 {
-	game.traps.push_back(std::make_unique<Trap>(Vector2D{ 9, CORRIDOR_ROW }, TrapType::DART, game.tileConfig));
+	game.traps.push_back(
+		std::make_unique<Trap>(
+			Vector2D{ 9, CORRIDOR_ROW },
+			TrapType::DART,
+			game.tileConfig));
 	const int healthBefore = monster.get_hp();
 
 	hunt(ROUNDS);
 
-	EXPECT_NE(game.traps.front()->get_state(), TrapState::HIDDEN) << "the trap never went off";
+	EXPECT_NE(game.traps.front()->get_state(), TrapState::HIDDEN)
+		<< "the trap never went off";
 	EXPECT_LT(monster.get_hp(), healthBefore) << "the dart missed nobody";
 }
 
@@ -233,10 +243,12 @@ TEST_F(MonsterMovementTest, ANonSwimmerTakesTheLongWayRoundWater)
 	for (int round = 0; round < ROUNDS; ++round)
 	{
 		hunt(1);
-		ASSERT_FALSE(map.is_water(monster.position)) << "the goblin waded at round " << round;
+		ASSERT_FALSE(map.is_water(monster.position))
+			<< "the goblin waded at round " << round;
 	}
 
-	EXPECT_LE(monster.position.chebyshev_distance_to(player->position), 1) << "the goblin never came round the water";
+	EXPECT_LE(monster.position.chebyshev_distance_to(player->position), 1)
+		<< "the goblin never came round the water";
 }
 
 // A crowd: the tiles straight ahead are taken, so the hunter goes round it, with room on
@@ -250,7 +262,8 @@ TEST_F(MonsterMovementTest, AHunterSidestepsRoundCreaturesInItsWay)
 
 	hunt(ROUNDS);
 
-	EXPECT_LE(monster.position.chebyshev_distance_to(player->position), 1) << "the hunter stayed behind the crowd";
+	EXPECT_LE(monster.position.chebyshev_distance_to(player->position), 1)
+		<< "the hunter stayed behind the crowd";
 }
 
 // The crowd leaves a dead end on one side and a way round on the other. A sidestep into
@@ -264,7 +277,8 @@ TEST_F(MonsterMovementTest, AHunterTakesTheSideOfACrowdThatLeadsSomewhere)
 
 	hunt(ROUNDS);
 
-	EXPECT_LE(monster.position.chebyshev_distance_to(player->position), 1) << "the hunter paced at the dead end";
+	EXPECT_LE(monster.position.chebyshev_distance_to(player->position), 1)
+		<< "the hunter paced at the dead end";
 }
 
 // A wall of creatures with one gap at the far end: every tile along it is as far from the
@@ -274,19 +288,21 @@ TEST_F(MonsterMovementTest, AHunterWalksTheLengthOfAWideCrowdToItsGap)
 	open_room(Vector2D{ 1, 1 }, Vector2D{ 12, 8 });
 	player->position = Vector2D{ 2, 4 };
 	monster.position = Vector2D{ 7, 4 };
-	place_blockers({
-		Vector2D{ 6, 1 },
-		Vector2D{ 6, 2 },
-		Vector2D{ 6, 3 },
-		Vector2D{ 6, 4 },
-		Vector2D{ 6, 5 },
-		Vector2D{ 6, 6 },
-		Vector2D{ 6, 7 },
-	});
+	place_blockers(
+		{
+			Vector2D{ 6, 1 },
+			Vector2D{ 6, 2 },
+			Vector2D{ 6, 3 },
+			Vector2D{ 6, 4 },
+			Vector2D{ 6, 5 },
+			Vector2D{ 6, 6 },
+			Vector2D{ 6, 7 },
+		});
 
 	hunt(ROUNDS);
 
-	EXPECT_LE(monster.position.chebyshev_distance_to(player->position), 1) << "the hunter never found the gap";
+	EXPECT_LE(monster.position.chebyshev_distance_to(player->position), 1)
+		<< "the hunter never found the gap";
 }
 
 // Hemmed in on every side that is no further from the player, the hunter backs out and
@@ -296,17 +312,19 @@ TEST_F(MonsterMovementTest, AHunterBoxedInBacksOutAndGoesRound)
 	open_room(Vector2D{ 1, 3 }, Vector2D{ 12, 6 });
 	player->position = Vector2D{ 2, 4 };
 	monster.position = Vector2D{ 7, 4 };
-	place_blockers({
-		Vector2D{ 6, 3 },
-		Vector2D{ 6, 4 },
-		Vector2D{ 6, 5 },
-		Vector2D{ 7, 3 },
-		Vector2D{ 7, 5 },
-	});
+	place_blockers(
+		{
+			Vector2D{ 6, 3 },
+			Vector2D{ 6, 4 },
+			Vector2D{ 6, 5 },
+			Vector2D{ 7, 3 },
+			Vector2D{ 7, 5 },
+		});
 
 	hunt(ROUNDS);
 
-	EXPECT_LE(monster.position.chebyshev_distance_to(player->position), 1) << "the hunter stayed boxed in";
+	EXPECT_LE(monster.position.chebyshev_distance_to(player->position), 1)
+		<< "the hunter stayed boxed in";
 }
 
 // The player stands inside a closed ring of creatures, so no route reaches it. The hunter
@@ -317,29 +335,32 @@ TEST_F(MonsterMovementTest, AHunterComesUpToAClosedRingAndHolds)
 {
 	open_room(Vector2D{ 1, 1 }, Vector2D{ 12, 8 });
 	player->position = Vector2D{ 5, 4 };
-	place_blockers({
-		Vector2D{ 4, 3 },
-		Vector2D{ 5, 3 },
-		Vector2D{ 6, 3 },
-		Vector2D{ 4, 4 },
-		Vector2D{ 6, 4 },
-		Vector2D{ 4, 5 },
-		Vector2D{ 5, 5 },
-		Vector2D{ 6, 5 },
-	});
+	place_blockers(
+		{
+			Vector2D{ 4, 3 },
+			Vector2D{ 5, 3 },
+			Vector2D{ 6, 3 },
+			Vector2D{ 4, 4 },
+			Vector2D{ 6, 4 },
+			Vector2D{ 4, 5 },
+			Vector2D{ 5, 5 },
+			Vector2D{ 6, 5 },
+		});
 	// On the hunter's straight line in.
 	place_blockers({ Vector2D{ 5, 6 } });
 	monster.position = Vector2D{ 5, 7 };
 
 	hunt(1);
 	const Vector2D atTheRing = monster.position;
-	ASSERT_EQ(atTheRing.chebyshev_distance_to(player->position), 2) << "the hunter did not come up to the ring";
+	ASSERT_EQ(atTheRing.chebyshev_distance_to(player->position), 2)
+		<< "the hunter did not come up to the ring";
 
 	// Every round, because a pace of two steps ends where it began.
 	for (int round = 0; round < ROUNDS; ++round)
 	{
 		hunt(1);
-		ASSERT_EQ(monster.position, atTheRing) << "the hunter paced along the ring at round " << round;
+		ASSERT_EQ(monster.position, atTheRing)
+			<< "the hunter paced along the ring at round " << round;
 	}
 }
 
@@ -352,7 +373,8 @@ TEST_F(MonsterMovementTest, AHunterBehindACreatureInACorridorWaits)
 
 	hunt(ROUNDS);
 
-	EXPECT_EQ(monster.position, (Vector2D{ 5, CORRIDOR_ROW })) << "the hunter should wait behind the creature";
+	EXPECT_EQ(monster.position, (Vector2D{ 5, CORRIDOR_ROW }))
+		<< "the hunter should wait behind the creature";
 }
 
 // end of file: MonsterMovementTest.cpp

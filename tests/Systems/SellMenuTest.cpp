@@ -55,14 +55,21 @@ constexpr int SELLER_STRENGTH = 10;
 		Vector2D{ 2, 1 },
 		ActorData{ TileRef{}, "shopkeeper", ColorPairId::WHITE_BLACK },
 	};
-	shopkeeper.shop = std::make_unique<ShopKeeper>(ShopType::GENERAL_STORE, ShopQuality::AVERAGE, mock.dice);
+	shopkeeper.shop = std::make_unique<ShopKeeper>(
+		ShopType::GENERAL_STORE,
+		ShopQuality::AVERAGE,
+		mock.dice);
 
 	auto potion = ItemCreator::create("health_potion", Vector2D{ 0, 0 }, ctx);
 	const int price = shopkeeper.shop->get_sell_price(*potion);
-	exit_unless(InventoryOperations::add_item(seller.inventoryData, std::move(potion)).has_value(), "the potion did not fit the pack");
+	exit_unless(
+		InventoryOperations::add_item(seller.inventoryData, std::move(potion))
+			.has_value(),
+		"the potion did not fit the pack");
 	shopkeeper.adjust_gold(price);
 	const int sellerGoldBefore = seller.get_gold();
-	const std::size_t shelvesBefore = shopkeeper.shop->get_shop_inventory().items.size();
+	const std::size_t shelvesBefore =
+		shopkeeper.shop->get_shop_inventory().items.size();
 
 	MenuSell menu{ shopkeeper, seller, ctx };
 	ctx.inputSystem->queue_key(GameKey::ENTER, 0);
@@ -71,10 +78,18 @@ constexpr int SELLER_STRENGTH = 10;
 	menu.menu(ctx);
 	hidden.renderer.end_frame();
 
-	exit_unless(seller.inventoryData.items.empty(), "the potion is still in the pack");
-	exit_unless(shopkeeper.shop->get_shop_inventory().items.size() == shelvesBefore + 1, "the potion did not reach the shelves");
-	exit_unless(seller.get_gold() == sellerGoldBefore + price, "the seller was not paid the shop's price");
-	exit_unless(shopkeeper.get_gold() == 0, "the shopkeeper did not pay the price");
+	exit_unless(
+		seller.inventoryData.items.empty(),
+		"the potion is still in the pack");
+	exit_unless(
+		shopkeeper.shop->get_shop_inventory().items.size() == shelvesBefore + 1,
+		"the potion did not reach the shelves");
+	exit_unless(
+		seller.get_gold() == sellerGoldBefore + price,
+		"the seller was not paid the shop's price");
+	exit_unless(
+		shopkeeper.get_gold() == 0,
+		"the shopkeeper did not pay the price");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
@@ -94,14 +109,20 @@ constexpr int SELLER_STRENGTH = 10;
 		Vector2D{ 2, 1 },
 		ActorData{ TileRef{}, "shopkeeper", ColorPairId::WHITE_BLACK },
 	};
-	shopkeeper.shop = std::make_unique<ShopKeeper>(ShopType::GENERAL_STORE, ShopQuality::AVERAGE, mock.dice);
+	shopkeeper.shop = std::make_unique<ShopKeeper>(
+		ShopType::GENERAL_STORE,
+		ShopQuality::AVERAGE,
+		mock.dice);
 
 	// The first row is the health potion and the second the mana potion, in the order added.
 	for (const char* itemKey : { "health_potion", "mana_potion" })
 	{
 		auto item = ItemCreator::create(itemKey, Vector2D{ 0, 0 }, ctx);
 		shopkeeper.adjust_gold(shopkeeper.shop->get_sell_price(*item));
-		exit_unless(InventoryOperations::add_item(seller.inventoryData, std::move(item)).has_value(), "an item did not fit the pack");
+		exit_unless(
+			InventoryOperations::add_item(seller.inventoryData, std::move(item))
+				.has_value(),
+			"an item did not fit the pack");
 	}
 
 	MenuSell menu{ shopkeeper, seller, ctx };
@@ -113,32 +134,40 @@ constexpr int SELLER_STRENGTH = 10;
 		hidden.renderer.end_frame();
 	}
 
-	exit_unless(seller.inventoryData.items.size() == 1, "not exactly one item was sold");
-	exit_unless(seller.inventoryData.items.front()->itemKey == "mana_potion", "the cursor did not wrap: the second item was sold");
+	exit_unless(
+		seller.inventoryData.items.size() == 1,
+		"not exactly one item was sold");
+	exit_unless(
+		seller.inventoryData.items.front()->itemKey == "mana_potion",
+		"the cursor did not wrap: the second item was sold");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 } // namespace
 
 TEST(SellMenuTest, EnterSellsTheItemUnderTheCursor)
 {
-	const int childExitCode = exit_code_in_child(&sell_the_only_item_with_enter);
+	const int childExitCode =
+		exit_code_in_child(&sell_the_only_item_with_enter);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 
 TEST(SellMenuTest, DownFromTheLastRowWrapsToTheFirst)
 {
-	const int childExitCode = exit_code_in_child(&the_cursor_wraps_from_the_last_row_to_the_first);
+	const int childExitCode =
+		exit_code_in_child(&the_cursor_wraps_from_the_last_row_to_the_first);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 
 // end of file: SellMenuTest.cpp

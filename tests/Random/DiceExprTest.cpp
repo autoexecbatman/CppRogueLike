@@ -106,19 +106,21 @@ TEST(DiceExprTest, WritesTheExpressionTheDataUses)
 	EXPECT_EQ(to_text(DiceExpr{ 1, 8, 0 }), "1d8");
 	EXPECT_EQ(to_text(DiceExpr{ 1, 12, 5 }), "1d12+5");
 	EXPECT_EQ(to_text(DiceExpr{ 2, 6, -1 }), "2d6-1");
-	EXPECT_EQ(to_text(DiceExpr{ 0, 0, 5 }), "5") << "a fixed value has no dice to write";
+	EXPECT_EQ(to_text(DiceExpr{ 0, 0, 5 }), "5")
+		<< "a fixed value has no dice to write";
 }
 
 TEST(DiceExprTest, TextSurvivesARoundTrip)
 {
-	for (const DiceExpr& expr : {
-			 DiceExpr{ 1, 8, 0 },
-			 DiceExpr{ 3, 12, 0 },
-			 DiceExpr{ 1, 12, 5 },
-			 DiceExpr{ 2, 6, -1 },
-			 DiceExpr{ 0, 0, 5 },
-			 DiceExpr{ 10, 6, 0 },
-		 })
+	for (
+		const DiceExpr& expr : {
+			DiceExpr{ 1, 8, 0 },
+			DiceExpr{ 3, 12, 0 },
+			DiceExpr{ 1, 12, 5 },
+			DiceExpr{ 2, 6, -1 },
+			DiceExpr{ 0, 0, 5 },
+			DiceExpr{ 10, 6, 0 },
+		})
 	{
 		const DiceExpr read = parse_dice_expression(to_text(expr));
 		EXPECT_EQ(read.num, expr.num) << to_text(expr);

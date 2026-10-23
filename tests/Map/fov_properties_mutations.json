@@ -33,8 +33,8 @@
     },
     {
       "file": "src/Map.cpp",
-      "original": "\t\tfovMap->set_properties(tile.position.x, tile.position.y, fov_properties_for(tile.type));\n",
-      "mutated": "\t\tfovMap->set_properties(tile.position.x, tile.position.y, FovProperties{ .walkable = true, .transparent = true });\n",
+      "original": "\t\tfovMap->set_properties(\n\t\t\ttile.position.x,\n\t\t\ttile.position.y,\n\t\t\tfov_properties_for(tile.type));\n",
+      "mutated": "\t\tfovMap->set_properties(\n\t\t\ttile.position.x,\n\t\t\ttile.position.y,FovProperties{ .walkable = true, .transparent = true });\n",
       "catches": "a loaded level's walls walkable in the grid"
     },
     {

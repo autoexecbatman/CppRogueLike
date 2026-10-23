@@ -54,14 +54,22 @@ protected:
 		player->set_strength(10);
 		player->set_dexterity(10);
 
-		monster = std::make_unique<Creature>(Vector2D{ 0, 1 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
-		monster->set_corpse("test remains", 0, "It is test remains.", CorpseEdibility::EDIBLE);
+		monster = std::make_unique<Creature>(
+			Vector2D{ 0, 1 },
+			ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
+		monster->set_corpse(
+			"test remains",
+			0,
+			"It is test remains.",
+			CorpseEdibility::EDIBLE);
 		monster->experienceReward = std::make_unique<ExperienceReward>(50);
 		monster->set_dr(0);
 		monster->set_thaco(19);
 		monster->armorClass = std::make_unique<ArmorClass>(6);
 		monster->healthPool = std::make_unique<HealthPool>(10);
-		monster->attacker = std::make_unique<MonsterAttacker>(*monster, DamageInfo{ "1d6", DamageType::PHYSICAL });
+		monster->attacker = std::make_unique<MonsterAttacker>(
+			*monster,
+			DamageInfo{ "1d6", DamageType::PHYSICAL });
 		monster->set_strength(8);
 		monster->set_dexterity(10);
 		monster->set_natural_attack("claws");
@@ -77,7 +85,10 @@ protected:
 		// for. A plain long sword is 1d8, so the same numbers are now rolls the die
 		// can make and the damage dealt is unchanged.
 		game.itemRegistry.load(Paths::ITEMS);
-		player->equip_item(ItemCreator::create("long_sword", player->position, ctx), EquipmentSlot::RIGHT_HAND, ctx);
+		player->equip_item(
+			ItemCreator::create("long_sword", player->position, ctx),
+			EquipmentSlot::RIGHT_HAND,
+			ctx);
 
 		game.dice.set_test_mode(true);
 	}
@@ -95,7 +106,9 @@ protected:
 
 TEST_F(AttackerTest, Serialization_RoundTrip)
 {
-	Creature dummy(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "dummy", ColorPairId::WHITE_BLACK });
+	Creature dummy(
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "dummy", ColorPairId::WHITE_BLACK });
 	MonsterAttacker original(dummy, DamageInfo{ "2d4", DamageType::FIRE });
 
 	json j;
@@ -306,7 +319,8 @@ TEST_F(AttackerTest, AttackingAnAlreadyDeadTargetIsRefused)
 	game.dice.set_next_d20(20);
 	game.dice.set_next_roll(6);
 
-	const AttackResult result = player->attacker->attack(*monster, AttackKind::MELEE, ctx);
+	const AttackResult result =
+		player->attacker->attack(*monster, AttackKind::MELEE, ctx);
 
 	EXPECT_EQ(result, AttackResult::PREVENTED);
 	EXPECT_EQ(monster->get_hp(), 0) << "a refused swing still rolled damage";

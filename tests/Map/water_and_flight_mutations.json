@@ -39,8 +39,8 @@
     },
     {
       "file": "src/Creature.h",
-      "original": "\t[[nodiscard]] bool is_flying() const noexcept { return has_state(ActorState::CAN_FLY); }",
-      "mutated": "\t[[nodiscard]] bool is_flying() const noexcept { return has_state(ActorState::CAN_SWIM); }",
+      "original": "\t[[nodiscard]] bool is_flying() const noexcept\n\t{\n\t\treturn has_state(ActorState::CAN_FLY);\n\t}",
+      "mutated": "\t[[nodiscard]] bool is_flying() const noexcept\n\t{\n\t\treturn has_state(ActorState::CAN_SWIM);\n\t}",
       "catches": "flight answered by the swimming state, so the two abilities stop being separate"
     }
   ]

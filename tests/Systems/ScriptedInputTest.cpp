@@ -112,8 +112,13 @@ TEST_F(ScriptedInputTest, TheDisarmKeyReachesAFoundTrapOnTheFloor)
 	thief.lifespan->race = PlayerRaceState::HUMAN;
 	thief.set_dexterity(13);
 	thief.set_creature_level(1);
-	thief.thiefSkillPoints.at(thief_skill_index(ThiefSkill::FIND_REMOVE_TRAPS)) = 40;
-	mock.traps.push_back(std::make_unique<Trap>(Vector2D{ START.x + 1, CORRIDOR_ROW }, TrapType::DART, mock.tile_config));
+	thief.thiefSkillPoints.at(
+		thief_skill_index(ThiefSkill::FIND_REMOVE_TRAPS)) = 40;
+	mock.traps.push_back(
+		std::make_unique<Trap>(
+			Vector2D{ START.x + 1, CORRIDOR_ROW },
+			TrapType::DART,
+			mock.tile_config));
 	Trap& dart = *mock.traps.back();
 	mock.dice.set_next_roll(1);
 	ASSERT_EQ(dart.search(thief, ctx), TrapSearchResult::FOUND);
@@ -132,8 +137,10 @@ TEST_F(ScriptedInputTest, TheDisarmKeyReachesAFoundTrapOnTheFloor)
 	ctx.player_concrete().controller->update(ctx);
 
 	EXPECT_EQ(dart.get_state(), TrapState::DISARMED);
-	EXPECT_EQ(ctx.gameState->get_time(), timeBefore + 7 * TIME_UNITS_PER_ROUND) << "the attempt did not take its seven rounds";
-	EXPECT_EQ(ctx.player()->position, START) << "the direction walked the thief instead of aiming the disarm";
+	EXPECT_EQ(ctx.gameState->get_time(), timeBefore + 7 * TIME_UNITS_PER_ROUND)
+		<< "the attempt did not take its seven rounds";
+	EXPECT_EQ(ctx.player()->position, START)
+		<< "the direction walked the thief instead of aiming the disarm";
 }
 
 // A frame carrying a game key advances the game: the loop runs its update on it.

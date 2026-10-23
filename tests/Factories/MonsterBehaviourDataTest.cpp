@@ -65,14 +65,14 @@ protected:
 		ctx.levelManager = &levelManager;
 	}
 
-	void TearDown() override
-	{
-		std::filesystem::remove(edited);
-	}
+	void TearDown() override { std::filesystem::remove(edited); }
 
 	std::unique_ptr<Creature> build(const std::string& key)
 	{
-		return MonsterCreator::create_from_params(Vector2D{ 0, 0 }, monsters.get_params(key), ctx);
+		return MonsterCreator::create_from_params(
+			Vector2D{ 0, 0 },
+			monsters.get_params(key),
+			ctx);
 	}
 
 	MonsterRegistry monsters{};
@@ -80,7 +80,8 @@ protected:
 	GameContext ctx{};
 	DataManager dataManager{};
 	LevelManager levelManager{};
-	std::filesystem::path edited{ std::filesystem::temp_directory_path() / "monsters_behaviour.json" };
+	std::filesystem::path edited{ std::filesystem::temp_directory_path() /
+		"monsters_behaviour.json" };
 };
 
 // Each monster is built with the Ai its record names.
@@ -129,7 +130,9 @@ TEST_F(MonsterBehaviourDataTest, TheRecordsCarryWebsAttitudeAndDisplacement)
 // Built, the shopkeeper is peaceful, cannot be swapped with, and has a shop. Every die at
 // its highest gives Constitution 19 (Table 8, man-sized), worth 5 a die as a warrior
 // (Player's Handbook Table 3), so its one 1d1+99 die is 1 + 99 + 5.
-TEST_F(MonsterBehaviourDataTest, AShopkeeperIsBuiltPeacefulImmovableAndWithAShop)
+TEST_F(
+	MonsterBehaviourDataTest,
+	AShopkeeperIsBuiltPeacefulImmovableAndWithAShop)
 {
 	for (int roll = 0; roll < SCRIPTED_ROLLS; ++roll)
 	{
@@ -150,7 +153,8 @@ TEST_F(MonsterBehaviourDataTest, AShopkeeperIsBuiltPeacefulImmovableAndWithAShop
 // an ordinary monster beside it.
 TEST_F(MonsterBehaviourDataTest, TheShopkeeperIsNeverAnOrdinarySpawn)
 {
-	const std::vector<MonsterPercentage> distribution = MonsterFactory::get_current_distribution(1, monsters);
+	const std::vector<MonsterPercentage> distribution =
+		MonsterFactory::get_current_distribution(1, monsters);
 
 	const auto sameLetter = [](unsigned char left, unsigned char right)
 	{
@@ -158,7 +162,10 @@ TEST_F(MonsterBehaviourDataTest, TheShopkeeperIsNeverAnOrdinarySpawn)
 	};
 	const auto isAShopkeeper = [&sameLetter](const MonsterPercentage& entry)
 	{
-		return std::ranges::equal(entry.name, std::string_view{ "shopkeeper" }, sameLetter);
+		return std::ranges::equal(
+			entry.name,
+			std::string_view{ "shopkeeper" },
+			sameLetter);
 	};
 	EXPECT_EQ(std::ranges::count_if(distribution, isAShopkeeper), 1);
 }
@@ -173,7 +180,11 @@ TEST_F(MonsterBehaviourDataTest, TheShopkeeperIsNeverPlannedIntoAnEncounter)
 	};
 	for (int dungeonLevel = 1; dungeonLevel <= 10; ++dungeonLevel)
 	{
-		EXPECT_FALSE(std::ranges::any_of(encounter_candidates(monsters, dungeonLevel), isAShopkeeper)) << "level " << dungeonLevel;
+		EXPECT_FALSE(
+			std::ranges::any_of(
+				encounter_candidates(monsters, dungeonLevel),
+				isAShopkeeper))
+			<< "level " << dungeonLevel;
 	}
 }
 

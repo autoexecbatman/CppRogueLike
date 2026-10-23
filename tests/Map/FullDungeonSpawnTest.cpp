@@ -61,7 +61,8 @@ protected:
 
 		map.init_tiles();
 		carve(TileType::FLOOR);
-		rooms.push_back(DungeonRoom{ ROOM_COL, ROOM_ROW, ROOM_SIZE, ROOM_SIZE });
+		rooms.push_back(
+			DungeonRoom{ ROOM_COL, ROOM_ROW, ROOM_SIZE, ROOM_SIZE });
 	}
 
 	void carve(TileType type)
@@ -89,7 +90,8 @@ TEST_F(FullDungeonSpawnTest, ARoomOfWaterOffersNoTile)
 {
 	carve(TileType::WATER);
 
-	EXPECT_FALSE(SpawnUtils::find_random_room_position(rooms.front(), ctx).has_value())
+	EXPECT_FALSE(
+		SpawnUtils::find_random_room_position(rooms.front(), ctx).has_value())
 		<< "a room with nothing but water offered a tile to stand on";
 }
 
@@ -101,7 +103,8 @@ TEST_F(FullDungeonSpawnTest, AFullDungeonSpawnsNothingAndReturns)
 
 	manager.spawn_creatures(ctx);
 
-	EXPECT_EQ(creatures.size(), before) << "a monster was put somewhere there was no room";
+	EXPECT_EQ(creatures.size(), before)
+		<< "a monster was put somewhere there was no room";
 }
 
 TEST_F(FullDungeonSpawnTest, ARoomWithSpaceDoesSpawn)
@@ -112,14 +115,17 @@ TEST_F(FullDungeonSpawnTest, ARoomWithSpaceDoesSpawn)
 
 	manager.spawn_creatures(ctx);
 
-	EXPECT_GT(creatures.size(), before) << "a dry room with space produced no monster";
+	EXPECT_GT(creatures.size(), before)
+		<< "a dry room with space produced no monster";
 }
 
 TEST_F(FullDungeonSpawnTest, ADryRoomStillSpawns)
 {
 	// The other half: the give-up path must not swallow the ordinary case.
-	const auto position = SpawnUtils::find_random_room_position(rooms.front(), ctx);
+	const auto position =
+		SpawnUtils::find_random_room_position(rooms.front(), ctx);
 
-	ASSERT_TRUE(position.has_value()) << "a room of dry floor offered no tile at all";
+	ASSERT_TRUE(position.has_value())
+		<< "a room of dry floor offered no tile at all";
 	EXPECT_FALSE(map.is_water(*position));
 }

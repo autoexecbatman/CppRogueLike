@@ -81,7 +81,11 @@ struct PickupWorld
 		ctx.inputHandler->key_listen(*ctx.inputSystem);
 	}
 
-	PickupOutcome pick_up_through(Entry entry, CreatureClass creatureClass, int strength, const std::string& monsterKey)
+	PickupOutcome pick_up_through(
+		Entry entry,
+		CreatureClass creatureClass,
+		int strength,
+		const std::string& monsterKey)
 	{
 		mock.map.init_tiles();
 		for (int col = 0; col <= WALK_START.x; ++col)
@@ -91,10 +95,16 @@ struct PickupWorld
 		ctx.renderer = &renderer;
 		// A click on the stairs takes them, so they stand off the row the test clicks on.
 		ctx.stairs->position = Vector2D{ WALK_START.x, WALK_START.y + 2 };
-		EXPECT_EQ(ctx.inputSystem->get_mouse_world_tile(renderer.get_camera_x(), renderer.get_camera_y(), renderer.get_tile_size()), UNDER_THE_MOUSE)
+		EXPECT_EQ(
+			ctx.inputSystem->get_mouse_world_tile(
+				renderer.get_camera_x(),
+				renderer.get_camera_y(),
+				renderer.get_tile_size()),
+			UNDER_THE_MOUSE)
 			<< "the mouse is not where this test lays the world out";
 
-		mock.player = std::make_unique<Player>(entry == Entry::WALK_TO_PICKUP ? WALK_START : UNDER_THE_MOUSE);
+		mock.player = std::make_unique<Player>(
+			entry == Entry::WALK_TO_PICKUP ? WALK_START : UNDER_THE_MOUSE);
 		Player& player = ctx.player_concrete();
 		player.set_creature_class(creatureClass);
 		player.lifespan->race = PlayerRaceState::HUMAN;
@@ -106,25 +116,34 @@ struct PickupWorld
 		player.equip_class_starting_gear(ctx);
 
 		// A monster killed where it stood leaves its own record's corpse.
-		auto monster = MonsterCreator::create_from_params(UNDER_THE_MOUSE, ctx.monsterRegistry->get_params(monsterKey), ctx);
+		auto monster = MonsterCreator::create_from_params(
+			UNDER_THE_MOUSE,
+			ctx.monsterRegistry->get_params(monsterKey),
+			ctx);
 		monster->die(ctx);
 		PickupOutcome outcome{
-			.maxCarried = InventoryOperations::get_max_weight(player, *ctx.dataManager),
+			.maxCarried =
+				InventoryOperations::get_max_weight(player, *ctx.dataManager),
 			.carriedBefore = InventoryOperations::get_total_weight(player),
 		};
 		// The corpse is the item that is food, whatever its record names it.
 		const auto is_a_corpse = [](const Item* onFloor)
 		{
-			return onFloor->behavior.has_value() && std::holds_alternative<CorpseFood>(*onFloor->behavior);
+			return onFloor->behavior.has_value() &&
+				std::holds_alternative<CorpseFood>(*onFloor->behavior);
 		};
-		const std::vector<Item*> underfoot = InventoryOperations::items_at(*ctx.floorInventory, UNDER_THE_MOUSE);
+		const std::vector<Item*> underfoot =
+			InventoryOperations::items_at(*ctx.floorInventory, UNDER_THE_MOUSE);
 		const auto found = std::ranges::find_if(underfoot, is_a_corpse);
 		EXPECT_NE(found, underfoot.end()) << monsterKey << " left no corpse";
 		Item* corpse = found == underfoot.end() ? nullptr : *found;
-		outcome.corpseWeight = corpse == nullptr ? 0 : corpse->enhancement.weight;
+		outcome.corpseWeight =
+			corpse == nullptr ? 0 : corpse->enhancement.weight;
 
 		const bool isKey = entry == Entry::PICK_KEY;
-		ctx.inputSystem->queue_key(isKey ? GameKey::PICK : GameKey::MOUSE_LEFT, isKey ? 'p' : 0);
+		ctx.inputSystem->queue_key(
+			isKey ? GameKey::PICK : GameKey::MOUSE_LEFT,
+			isKey ? 'p' : 0);
 		for (int frame = 0; frame < FRAMES_TO_ARRIVE; ++frame)
 		{
 			read_one_frame_of_input();
@@ -138,13 +157,16 @@ struct PickupWorld
 			assert(corpse && "the heap holds no corpse to choose");
 			Pickup::take_floor_item(player, *corpse, ctx);
 		}
-		outcome.isTaken = std::ranges::none_of(InventoryOperations::items_at(*ctx.floorInventory, UNDER_THE_MOUSE), is_a_corpse);
+		outcome.isTaken = std::ranges::none_of(
+			InventoryOperations::items_at(*ctx.floorInventory, UNDER_THE_MOUSE),
+			is_a_corpse);
 		return outcome;
 	}
 };
 } // namespace
 
-class CorpsePickupEntryTest : public ::testing::TestWithParam<std::tuple<CreatureClass, int>>
+class CorpsePickupEntryTest :
+	public ::testing::TestWithParam<std::tuple<CreatureClass, int>>
 {
 };
 
@@ -152,23 +174,43 @@ TEST_P(CorpsePickupEntryTest, EveryEntryPointGivesOneAnswer)
 {
 	const auto [creatureClass, strength] = GetParam();
 
-	const PickupOutcome byKey = std::make_unique<PickupWorld>()->pick_up_through(Entry::PICK_KEY, creatureClass, strength, "goblin");
-	const PickupOutcome byOwnTileClick = std::make_unique<PickupWorld>()->pick_up_through(Entry::CLICK_OWN_TILE, creatureClass, strength, "goblin");
-	const PickupOutcome byWalk = std::make_unique<PickupWorld>()->pick_up_through(Entry::WALK_TO_PICKUP, creatureClass, strength, "goblin");
+	const PickupOutcome byKey =
+		std::make_unique<PickupWorld>()->pick_up_through(
+			Entry::PICK_KEY,
+			creatureClass,
+			strength,
+			"goblin");
+	const PickupOutcome byOwnTileClick =
+		std::make_unique<PickupWorld>()->pick_up_through(
+			Entry::CLICK_OWN_TILE,
+			creatureClass,
+			strength,
+			"goblin");
+	const PickupOutcome byWalk =
+		std::make_unique<PickupWorld>()->pick_up_through(
+			Entry::WALK_TO_PICKUP,
+			creatureClass,
+			strength,
+			"goblin");
 
-	EXPECT_EQ(byKey.isTaken, byOwnTileClick.isTaken) << "the key and a click on the player's tile disagree";
-	EXPECT_EQ(byKey.isTaken, byWalk.isTaken) << "the key and a walk to the corpse disagree";
+	EXPECT_EQ(byKey.isTaken, byOwnTileClick.isTaken)
+		<< "the key and a click on the player's tile disagree";
+	EXPECT_EQ(byKey.isTaken, byWalk.isTaken)
+		<< "the key and a walk to the corpse disagree";
 }
 
 // The owner's report: a rogue at 21 of 110 pounds could not lift a dead rat, whose record
 // weighed it at a placeholder 100. A tiny corpse fits: 21 + 5 is at most 110.
 TEST(CorpsePickupRatTest, ARogueAtStrengthTenPicksUpADeadRat)
 {
-	const PickupOutcome outcome = std::make_unique<PickupWorld>()->pick_up_through(Entry::PICK_KEY, CreatureClass::ROGUE, 10, "rat");
+	const PickupOutcome outcome =
+		std::make_unique<PickupWorld>()
+			->pick_up_through(Entry::PICK_KEY, CreatureClass::ROGUE, 10, "rat");
 
 	EXPECT_EQ(outcome.maxCarried, 110);
 	EXPECT_EQ(outcome.carriedBefore, 21);
-	EXPECT_TRUE(outcome.isTaken) << "a dead rat weighing " << outcome.corpseWeight << " was refused";
+	EXPECT_TRUE(outcome.isTaken)
+		<< "a dead rat weighing " << outcome.corpseWeight << " was refused";
 }
 
 INSTANTIATE_TEST_SUITE_P(

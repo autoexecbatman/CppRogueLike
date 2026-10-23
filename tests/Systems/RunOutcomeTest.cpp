@@ -38,14 +38,17 @@ protected:
 
 	MockGameContext mock{};
 	GameContext ctx{};
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 1, 1 }) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ 1, 1 }) };
 };
 
 // Using the Amulet of Yendor is the win.
 TEST_F(RunOutcomeTest, UsingTheAmuletOfYendorWinsTheRun)
 {
-	auto amulet = ItemCreator::create("amulet_of_yendor", Vector2D{ 1, 1 }, ctx);
-	[[maybe_unused]] const bool spent = use_item(*amulet->behavior, *amulet, *player, ctx);
+	auto amulet =
+		ItemCreator::create("amulet_of_yendor", Vector2D{ 1, 1 }, ctx);
+	[[maybe_unused]] const bool spent =
+		use_item(*amulet->behavior, *amulet, *player, ctx);
 
 	EXPECT_EQ(ctx.gameState->get_run_outcome(), RunOutcome::VICTORY)
 		<< "the amulet was used and the run was not won";

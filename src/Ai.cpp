@@ -14,7 +14,8 @@
 //==AI==
 std::unique_ptr<Ai> Ai::create(const json& source)
 {
-	std::unique_ptr<Ai> ai = make(parse_ai_type(source.at("type").get<std::string>()));
+	std::unique_ptr<Ai> ai =
+		make(parse_ai_type(source.at("type").get<std::string>()));
 	ai->load(source);
 	return ai;
 }

@@ -42,21 +42,28 @@ static int panel_height_tiles(int viewportRows)
 
 DeathMenu::DeathMenu(GameContext& ctx)
 {
-	assert(ctx.levelManager && "DeathMenu::DeathMenu: called without a levelManager");
+	assert(
+		ctx.levelManager &&
+		"DeathMenu::DeathMenu: called without a levelManager");
 	dungeonLevel = ctx.levelManager->get_dungeon_level();
-	assert(ctx.player() && "DeathMenu::DeathMenu: called without a player to report on");
+	assert(
+		ctx.player() &&
+		"DeathMenu::DeathMenu: called without a player to report on");
 	playerLevel = ctx.player()->get_creature_level();
 	playerXp = ctx.player()->get_xp();
 	killCount = ctx.player_concrete().get_kill_count();
 	playerClass = ctx.player_concrete().get_class_display_name();
 	playerRace = ctx.player_concrete().get_race_display_name();
 
-	assert(ctx.messageSystem && "DeathMenu::DeathMenu: called without a messageSystem");
+	assert(
+		ctx.messageSystem &&
+		"DeathMenu::DeathMenu: called without a messageSystem");
 	size_t count = ctx.messageSystem->get_stored_message_count();
 	size_t start = count > MAX_LOG_LINES ? count - MAX_LOG_LINES : 0;
 	for (size_t messageIndex = start; messageIndex < count; ++messageIndex)
 	{
-		const auto& parts = ctx.messageSystem->get_attack_message_at(messageIndex);
+		const auto& parts =
+			ctx.messageSystem->get_attack_message_at(messageIndex);
 		std::string line{};
 		for (const auto& part : parts)
 		{
@@ -91,14 +98,21 @@ void DeathMenu::render(GameContext& ctx) const
 	Renderer& renderer = *ctx.renderer;
 	const int tileSize = renderer.get_tile_size();
 	const int panelWidthTiles = panel_width_tiles(renderer.get_viewport_cols());
-	const int panelHeightTiles = panel_height_tiles(renderer.get_viewport_rows());
+	const int panelHeightTiles =
+		panel_height_tiles(renderer.get_viewport_rows());
 	const int panelWidth = panelWidthTiles * tileSize;
 	const int panelHeight = panelHeightTiles * tileSize;
 
-	const int startX = (renderer.get_viewport_cols() - panelWidthTiles) / 2 * tileSize;
-	const int startY = (renderer.get_viewport_rows() - panelHeightTiles) / 2 * tileSize;
+	const int startX =
+		(renderer.get_viewport_cols() - panelWidthTiles) / 2 * tileSize;
+	const int startY =
+		(renderer.get_viewport_rows() - panelHeightTiles) / 2 * tileSize;
 
-	renderer.draw_frame(Vector2D{ startX, startY }, panelWidthTiles, panelHeightTiles, *ctx.tileConfig);
+	renderer.draw_frame(
+		Vector2D{ startX, startY },
+		panelWidthTiles,
+		panelHeightTiles,
+		*ctx.tileConfig);
 
 	// Text sits inside the frame's tile-wide border on every side.
 	const int textX = startX + tileSize;
@@ -135,11 +149,15 @@ void DeathMenu::render(GameContext& ctx) const
 		YELLOW);
 	textY += TEXT_ROW_PITCH * 2;
 
-	renderer.draw_text_color(Vector2D{ textX, textY }, "-- Last Messages --", GRAY);
+	renderer.draw_text_color(
+		Vector2D{ textX, textY },
+		"-- Last Messages --",
+		GRAY);
 	textY += TEXT_ROW_PITCH;
 
 	// The prompt owns the bottom row, so the log stops before reaching it.
-	const int promptY = startY + panelHeight - tileSize - renderer.get_font_size();
+	const int promptY =
+		startY + panelHeight - tileSize - renderer.get_font_size();
 	for (const std::string& line : recentMessages)
 	{
 		if (textY + TEXT_ROW_PITCH > promptY)
@@ -154,8 +172,12 @@ void DeathMenu::render(GameContext& ctx) const
 	}
 
 	const std::string_view prompt = "[ ENTER ] Return to main menu";
-	const int promptX = startX + (panelWidth - renderer.measure_text(prompt)) / 2;
-	renderer.draw_text_color(Vector2D{ promptX, promptY }, prompt, Color{ 0, 255, 255, 255 });
+	const int promptX =
+		startX + (panelWidth - renderer.measure_text(prompt)) / 2;
+	renderer.draw_text_color(
+		Vector2D{ promptX, promptY },
+		prompt,
+		Color{ 0, 255, 255, 255 });
 }
 
 void DeathMenu::handle_input(GameContext& ctx)

@@ -36,7 +36,8 @@
 // Warriors roll through 9th and gain 3 a level after.
 TEST(HitPointProgressionTest, FighterMatchesTableFourteen)
 {
-	const auto progression = LevelUpSystem::hit_point_progression(CreatureClass::FIGHTER);
+	const auto progression =
+		LevelUpSystem::hit_point_progression(CreatureClass::FIGHTER);
 
 	EXPECT_EQ(progression.lastRolledLevel, 9);
 	EXPECT_EQ(progression.flatGain, 3);
@@ -45,7 +46,8 @@ TEST(HitPointProgressionTest, FighterMatchesTableFourteen)
 // Priests roll through 9th and gain 2 a level after.
 TEST(HitPointProgressionTest, ClericMatchesTableTwentyThree)
 {
-	const auto progression = LevelUpSystem::hit_point_progression(CreatureClass::CLERIC);
+	const auto progression =
+		LevelUpSystem::hit_point_progression(CreatureClass::CLERIC);
 
 	EXPECT_EQ(progression.lastRolledLevel, 9);
 	EXPECT_EQ(progression.flatGain, 2);
@@ -54,7 +56,8 @@ TEST(HitPointProgressionTest, ClericMatchesTableTwentyThree)
 // Rogues roll through 10th and gain 2 a level after.
 TEST(HitPointProgressionTest, RogueMatchesTableTwentyFive)
 {
-	const auto progression = LevelUpSystem::hit_point_progression(CreatureClass::ROGUE);
+	const auto progression =
+		LevelUpSystem::hit_point_progression(CreatureClass::ROGUE);
 
 	EXPECT_EQ(progression.lastRolledLevel, 10);
 	EXPECT_EQ(progression.flatGain, 2);
@@ -63,7 +66,8 @@ TEST(HitPointProgressionTest, RogueMatchesTableTwentyFive)
 // Wizards roll through 10th and gain 1 a level after.
 TEST(HitPointProgressionTest, WizardMatchesTableTwenty)
 {
-	const auto progression = LevelUpSystem::hit_point_progression(CreatureClass::WIZARD);
+	const auto progression =
+		LevelUpSystem::hit_point_progression(CreatureClass::WIZARD);
 
 	EXPECT_EQ(progression.lastRolledLevel, 10);
 	EXPECT_EQ(progression.flatGain, 1);
@@ -72,8 +76,10 @@ TEST(HitPointProgressionTest, WizardMatchesTableTwenty)
 // Monsters do not advance by these tables, but the lookup must still answer.
 TEST(HitPointProgressionTest, MonsterHasADefinedProgression)
 {
-	const auto monster = LevelUpSystem::hit_point_progression(CreatureClass::MONSTER);
-	const auto fighter = LevelUpSystem::hit_point_progression(CreatureClass::FIGHTER);
+	const auto monster =
+		LevelUpSystem::hit_point_progression(CreatureClass::MONSTER);
+	const auto fighter =
+		LevelUpSystem::hit_point_progression(CreatureClass::FIGHTER);
 
 	EXPECT_EQ(monster.lastRolledLevel, fighter.lastRolledLevel);
 	EXPECT_EQ(monster.flatGain, fighter.flatGain);
@@ -82,19 +88,23 @@ TEST(HitPointProgressionTest, MonsterHasADefinedProgression)
 // No class rolls forever, and none gains nothing afterwards.
 TEST(HitPointProgressionTest, EveryClassStopsRollingAndStillGains)
 {
-	for (const auto creatureClass : {
-			 CreatureClass::FIGHTER,
-			 CreatureClass::ROGUE,
-			 CreatureClass::CLERIC,
-			 CreatureClass::WIZARD,
-			 CreatureClass::MONSTER,
-		 })
+	for (
+		const auto creatureClass : {
+			CreatureClass::FIGHTER,
+			CreatureClass::ROGUE,
+			CreatureClass::CLERIC,
+			CreatureClass::WIZARD,
+			CreatureClass::MONSTER,
+		})
 	{
-		const auto progression = LevelUpSystem::hit_point_progression(creatureClass);
+		const auto progression =
+			LevelUpSystem::hit_point_progression(creatureClass);
 
 		EXPECT_GT(progression.lastRolledLevel, 0);
-		EXPECT_LE(progression.lastRolledLevel, 10) << "no 2e class rolls past 10th";
-		EXPECT_GT(progression.flatGain, 0) << "a level must always be worth something";
+		EXPECT_LE(progression.lastRolledLevel, 10)
+			<< "no 2e class rolls past 10th";
+		EXPECT_GT(progression.flatGain, 0)
+			<< "a level must always be worth something";
 	}
 }
 
@@ -117,9 +127,18 @@ TEST(ConstitutionAdjustmentLevelTest, EachClassTakesItThroughItsLastRolledDie)
 
 	for (const LastRolledDie& expected : FROM_THE_CLASS_TABLES)
 	{
-		EXPECT_TRUE(LevelUpSystem::takes_constitution_adjustment_at(expected.creatureClass, 1));
-		EXPECT_TRUE(LevelUpSystem::takes_constitution_adjustment_at(expected.creatureClass, expected.level));
-		EXPECT_FALSE(LevelUpSystem::takes_constitution_adjustment_at(expected.creatureClass, expected.level + 1));
+		EXPECT_TRUE(
+			LevelUpSystem::takes_constitution_adjustment_at(
+				expected.creatureClass,
+				1));
+		EXPECT_TRUE(
+			LevelUpSystem::takes_constitution_adjustment_at(
+				expected.creatureClass,
+				expected.level));
+		EXPECT_FALSE(
+			LevelUpSystem::takes_constitution_adjustment_at(
+				expected.creatureClass,
+				expected.level + 1));
 	}
 }
 
@@ -129,19 +148,47 @@ TEST(ConstitutionAdjustmentLevelTest, AMonsterTakesItOnEveryLevel)
 {
 	for (int level = 1; level <= 13; ++level)
 	{
-		EXPECT_TRUE(LevelUpSystem::takes_constitution_adjustment_at(CreatureClass::MONSTER, level)) << "level " << level;
+		EXPECT_TRUE(
+			LevelUpSystem::takes_constitution_adjustment_at(
+				CreatureClass::MONSTER,
+				level))
+			<< "level " << level;
 	}
 }
 
 // A change of score is multiplied by the levels that took the adjustment.
 TEST(ConstitutionAdjustmentLevelTest, AChangeCountsOnlyTheLevelsThatTookIt)
 {
-	EXPECT_EQ(LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::WIZARD, 3), 3);
-	EXPECT_EQ(LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::WIZARD, 12), 10);
-	EXPECT_EQ(LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::ROGUE, 10), 10);
-	EXPECT_EQ(LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::FIGHTER, 12), 9);
-	EXPECT_EQ(LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::CLERIC, 9), 9);
-	EXPECT_EQ(LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::MONSTER, 13), 13);
+	EXPECT_EQ(
+		LevelUpSystem::levels_taking_constitution_adjustment(
+			CreatureClass::WIZARD,
+			3),
+		3);
+	EXPECT_EQ(
+		LevelUpSystem::levels_taking_constitution_adjustment(
+			CreatureClass::WIZARD,
+			12),
+		10);
+	EXPECT_EQ(
+		LevelUpSystem::levels_taking_constitution_adjustment(
+			CreatureClass::ROGUE,
+			10),
+		10);
+	EXPECT_EQ(
+		LevelUpSystem::levels_taking_constitution_adjustment(
+			CreatureClass::FIGHTER,
+			12),
+		9);
+	EXPECT_EQ(
+		LevelUpSystem::levels_taking_constitution_adjustment(
+			CreatureClass::CLERIC,
+			9),
+		9);
+	EXPECT_EQ(
+		LevelUpSystem::levels_taking_constitution_adjustment(
+			CreatureClass::MONSTER,
+			13),
+		13);
 }
 
 // The table above is only worth having if the level-up path reads it. These
@@ -211,20 +258,36 @@ TEST_F(HitPointGainTest, FighterPastNinthGainsExactlyThree)
 // other classes receive maximum bonus of +2 per die."
 TEST_F(HitPointGainTest, TheBonusAboveTwoIsTheWarriorsAlone)
 {
-	EXPECT_EQ(mock.data_manager.constitution_hit_point_adjustment(17, CreatureClass::FIGHTER), 3);
-	EXPECT_EQ(mock.data_manager.constitution_hit_point_adjustment(17, CreatureClass::WIZARD), 2);
-	EXPECT_EQ(mock.data_manager.constitution_hit_point_adjustment(3, CreatureClass::WIZARD), -2);
+	EXPECT_EQ(
+		mock.data_manager.constitution_hit_point_adjustment(
+			17,
+			CreatureClass::FIGHTER),
+		3);
+	EXPECT_EQ(
+		mock.data_manager.constitution_hit_point_adjustment(
+			17,
+			CreatureClass::WIZARD),
+		2);
+	EXPECT_EQ(
+		mock.data_manager.constitution_hit_point_adjustment(
+			3,
+			CreatureClass::WIZARD),
+		-2);
 }
 
 // Through a level: a rolled 4 is worth 6 to a rogue, priest or wizard at any score from
 // 16 up. A 4 is the highest die any footnote raises to, so only the bonus moves it.
 TEST_F(HitPointGainTest, ANonWarriorsBonusStopsAtTwo)
 {
-	for (const CreatureClass creatureClass : { CreatureClass::ROGUE, CreatureClass::CLERIC, CreatureClass::WIZARD })
+	for (
+		const CreatureClass creatureClass :
+		{ CreatureClass::ROGUE, CreatureClass::CLERIC, CreatureClass::WIZARD })
 	{
 		for (const int constitution : { 16, 17, 18, 19, 20, 25 })
 		{
-			EXPECT_EQ(gain_for(creatureClass, constitution, 4), 6) << "class " << static_cast<int>(creatureClass) << " at Constitution " << constitution;
+			EXPECT_EQ(gain_for(creatureClass, constitution, 4), 6)
+				<< "class " << static_cast<int>(creatureClass)
+				<< " at Constitution " << constitution;
 		}
 	}
 }
@@ -250,7 +313,10 @@ TEST_F(HitPointGainTest, AWarriorGainsTheParentheticalBonus)
 
 	for (const WarriorBonus& expected : TABLE_THREE_WARRIOR)
 	{
-		EXPECT_EQ(gain_for(CreatureClass::FIGHTER, expected.constitution, 4), 4 + expected.bonus) << "Constitution " << expected.constitution;
+		EXPECT_EQ(
+			gain_for(CreatureClass::FIGHTER, expected.constitution, 4),
+			4 + expected.bonus)
+			<< "Constitution " << expected.constitution;
 	}
 }
 
@@ -276,7 +342,8 @@ TEST_F(HitPointGainTest, TableThreeFootnotesSetTheLowestDie)
 {
 	for (int score = 1; score <= 19; ++score)
 	{
-		EXPECT_EQ(mock.data_manager.constitution_for(score).hitDieMinimum, 1) << "Constitution " << score;
+		EXPECT_EQ(mock.data_manager.constitution_for(score).hitDieMinimum, 1)
+			<< "Constitution " << score;
 	}
 	EXPECT_EQ(mock.data_manager.constitution_for(20).hitDieMinimum, 2);
 	EXPECT_EQ(mock.data_manager.constitution_for(21).hitDieMinimum, 3);
@@ -309,8 +376,15 @@ TEST_F(HitPointGainTest, FromTwentyALowRollCountsAsTheFootnoteSays)
 
 	for (const LowRoll& expected : RAISED_BY_TABLE_THREE)
 	{
-		EXPECT_EQ(gain_for(expected.creatureClass, expected.constitution, expected.rolled), expected.gain)
-			<< "class " << static_cast<int>(expected.creatureClass) << " at Constitution " << expected.constitution << " rolling " << expected.rolled;
+		EXPECT_EQ(
+			gain_for(
+				expected.creatureClass,
+				expected.constitution,
+				expected.rolled),
+			expected.gain)
+			<< "class " << static_cast<int>(expected.creatureClass)
+			<< " at Constitution " << expected.constitution << " rolling "
+			<< expected.rolled;
 	}
 }
 

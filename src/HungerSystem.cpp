@@ -121,7 +121,12 @@ float HungerSystem::get_fullness_ratio() const
 	{
 		return 0.0f;
 	}
-	return std::clamp(1.0f - static_cast<float>(run.hungerValue) / static_cast<float>(run.hungerMax), 0.0f, 1.0f);
+	return std::clamp(
+		1.0f -
+			static_cast<float>(run.hungerValue) /
+				static_cast<float>(run.hungerMax),
+		0.0f,
+		1.0f);
 }
 
 ColorPairId HungerSystem::get_hunger_color() const
@@ -161,7 +166,8 @@ ColorPairId HungerSystem::get_hunger_color() const
 
 void HungerSystem::apply_hunger_effects(GameContext& ctx)
 {
-	assert(ctx.dice && "HungerSystem::apply_hunger_effects: called without dice");
+	assert(
+		ctx.dice && "HungerSystem::apply_hunger_effects: called without dice");
 
 	// The round upkeep is the only caller and it runs on a live game, so a missing
 	// player is a wiring fault rather than a state the game passes through.
@@ -180,7 +186,9 @@ void HungerSystem::apply_hunger_effects(GameContext& ctx)
 		// Said once per spell of being well fed, and reset when the state is left.
 		if (!run.wellFedMessageShown)
 		{
-			ctx.messageSystem->append_message_part(get_hunger_color(), "You feel strong and energetic!");
+			ctx.messageSystem->append_message_part(
+				get_hunger_color(),
+				"You feel strong and energetic!");
 			ctx.messageSystem->finalize_message();
 			run.wellFedMessageShown = true;
 		}
@@ -192,7 +200,9 @@ void HungerSystem::apply_hunger_effects(GameContext& ctx)
 		// Flavour only. Hunger costs the player nothing until STARVING.
 		if (ctx.dice->d10() == 1)
 		{ // 10% chance each turn
-			ctx.messageSystem->append_message_part(get_hunger_color(), "Your stomach growls.");
+			ctx.messageSystem->append_message_part(
+				get_hunger_color(),
+				"Your stomach growls.");
 			ctx.messageSystem->finalize_message();
 		}
 		break;
@@ -203,14 +213,21 @@ void HungerSystem::apply_hunger_effects(GameContext& ctx)
 		// Still flavour; the damage below is the first thing hunger actually costs.
 		if (ctx.dice->d6() == 1)
 		{ // ~17% chance each turn
-			ctx.messageSystem->append_message_part(get_hunger_color(), "You are weakened by hunger.");
+			ctx.messageSystem->append_message_part(
+				get_hunger_color(),
+				"You are weakened by hunger.");
 			ctx.messageSystem->finalize_message();
 		}
 		// One point on one turn in twenty, so starving is survivable for a while.
 		if (ctx.dice->d20() == 1)
 		{ // 5% chance each turn
-			ctx.player()->take_damage_and_check_death(1, ctx, DamageType::PHYSICAL);
-			ctx.messageSystem->append_message_part(get_hunger_color(), "You're starving!");
+			ctx.player()->take_damage_and_check_death(
+				1,
+				ctx,
+				DamageType::PHYSICAL);
+			ctx.messageSystem->append_message_part(
+				get_hunger_color(),
+				"You're starving!");
 			ctx.messageSystem->finalize_message();
 		}
 		break;
@@ -218,7 +235,9 @@ void HungerSystem::apply_hunger_effects(GameContext& ctx)
 
 	case HungerState::DYING:
 	{
-		ctx.messageSystem->append_message_part(get_hunger_color(), "You are dying from starvation!");
+		ctx.messageSystem->append_message_part(
+			get_hunger_color(),
+			"You are dying from starvation!");
 		ctx.messageSystem->finalize_message();
 		// Every turn now, with no roll to survive.
 		ctx.player()->take_damage_and_check_death(1, ctx, DamageType::PHYSICAL);
@@ -247,7 +266,9 @@ void HungerSystem::notify_state_change(GameContext& ctx)
 	const HungerState previous = *run.lastNotifiedState;
 
 	// Say it before recording it: recording first and then throwing would silence this threshold forever.
-	ctx.messageSystem->append_message_part(get_hunger_color(), "You are now " + get_hunger_state_string() + ".");
+	ctx.messageSystem->append_message_part(
+		get_hunger_color(),
+		"You are now " + get_hunger_state_string() + ".");
 	ctx.messageSystem->finalize_message();
 
 	run.lastNotifiedState = current;
@@ -285,6 +306,7 @@ void HungerSystem::load(const json& source)
 	// after the load sets the baseline without announcing anything.
 	if (source.contains("lastNotifiedState"))
 	{
-		run.lastNotifiedState = static_cast<HungerState>(source["lastNotifiedState"].get<int>());
+		run.lastNotifiedState =
+			static_cast<HungerState>(source["lastNotifiedState"].get<int>());
 	}
 }

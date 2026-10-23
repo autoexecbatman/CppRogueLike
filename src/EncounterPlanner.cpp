@@ -45,17 +45,20 @@ int encounter_budget(RoomType type, int dungeonLevel)
 
 	case RoomType::STANDARD:
 	{
-		return static_cast<int>(dungeonLevel * BASE_XP_PER_LEVEL * STANDARD_MULTIPLIER);
+		return static_cast<int>(
+			dungeonLevel * BASE_XP_PER_LEVEL * STANDARD_MULTIPLIER);
 	}
 
 	case RoomType::DANGER:
 	{
-		return static_cast<int>(dungeonLevel * BASE_XP_PER_LEVEL * DANGER_MULTIPLIER);
+		return static_cast<int>(
+			dungeonLevel * BASE_XP_PER_LEVEL * DANGER_MULTIPLIER);
 	}
 
 	case RoomType::TREASURE:
 	{
-		return static_cast<int>(dungeonLevel * BASE_XP_PER_LEVEL * TREASURE_MULTIPLIER);
+		return static_cast<int>(
+			dungeonLevel * BASE_XP_PER_LEVEL * TREASURE_MULTIPLIER);
 	}
 	}
 
@@ -131,7 +134,9 @@ std::vector<std::string> select_encounter(
 // Public interface
 // ---------------------------------------------------------------------------
 
-std::vector<MonsterCandidate> encounter_candidates(const MonsterRegistry& monsters, int dungeonLevel)
+std::vector<MonsterCandidate> encounter_candidates(
+	const MonsterRegistry& monsters,
+	int dungeonLevel)
 {
 	std::vector<MonsterCandidate> candidates;
 	for (const auto& key : monsters.get_all_keys())
@@ -159,8 +164,12 @@ std::vector<MonsterCandidate> encounter_candidates(const MonsterRegistry& monste
 
 void plan_encounter(const DungeonRoom& room, GameContext& ctx)
 {
-	assert(ctx.creatureManager && "plan_encounter: called without a creatureManager");
-	assert(ctx.monsterRegistry && "plan_encounter: called without a monsterRegistry");
+	assert(
+		ctx.creatureManager &&
+		"plan_encounter: called without a creatureManager");
+	assert(
+		ctx.monsterRegistry &&
+		"plan_encounter: called without a monsterRegistry");
 	assert(ctx.levelManager && "plan_encounter: called without a levelManager");
 	assert(ctx.dice && "plan_encounter: called without dice");
 	assert(ctx.map && "plan_encounter: called without a map");
@@ -177,7 +186,8 @@ void plan_encounter(const DungeonRoom& room, GameContext& ctx)
 	}
 
 	// Build candidate list: monsters eligible for this dungeon level
-	std::vector<MonsterCandidate> candidates = encounter_candidates(*ctx.monsterRegistry, dungeonLevel);
+	std::vector<MonsterCandidate> candidates =
+		encounter_candidates(*ctx.monsterRegistry, dungeonLevel);
 
 	if (candidates.empty())
 	{
@@ -188,8 +198,8 @@ void plan_encounter(const DungeonRoom& room, GameContext& ctx)
 	std::ranges::shuffle(candidates, ctx.dice->get_rng());
 
 	// Two-phase selection: variety first, fill second
-	std::vector<std::string> selected = select_encounter(
-		candidates, budget, MAX_ENCOUNTER_MONSTERS, *ctx.dice);
+	std::vector<std::string> selected =
+		select_encounter(candidates, budget, MAX_ENCOUNTER_MONSTERS, *ctx.dice);
 
 	// Spawn each selected monster at a random walkable position
 	for (const auto& key : selected)
@@ -200,7 +210,10 @@ void plan_encounter(const DungeonRoom& room, GameContext& ctx)
 			break; // no more walkable positions
 		}
 		ctx.creatureManager->add_creature(
-			MonsterCreator::create_from_params(*pos, ctx.monsterRegistry->get_params(key), ctx),
+			MonsterCreator::create_from_params(
+				*pos,
+				ctx.monsterRegistry->get_params(key),
+				ctx),
 			ctx);
 	}
 }

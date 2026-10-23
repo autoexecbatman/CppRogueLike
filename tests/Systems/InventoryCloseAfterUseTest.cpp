@@ -93,10 +93,17 @@ public:
 		player.set_hp(WOUNDED_HIT_POINTS);
 
 		exit_unless(
-			InventoryOperations::add_item(player.inventoryData, ItemCreator::create(itemKey, PLAYER_TILE, ctx)).has_value(),
+			InventoryOperations::add_item(
+				player.inventoryData,
+				ItemCreator::create(itemKey, PLAYER_TILE, ctx))
+				.has_value(),
 			"the item did not fit the pack");
 
-		mock.menus.push_back(std::make_unique<InventoryUI>(player, InventoryScreen::BACKPACK, ctx));
+		mock.menus.push_back(
+			std::make_unique<InventoryUI>(
+				player,
+				InventoryScreen::BACKPACK,
+				ctx));
 	}
 
 	// One frame of the menu stack with a key pressed, as the game loop runs it.
@@ -118,7 +125,10 @@ public:
 // The backpack pane's first content row is the category heading; the scroll is below it.
 int scroll_row_y(const OpenInventory& open)
 {
-	return panel_text_row_y(0, open.hidden.renderer.get_tile_size(), FIRST_CONTENT_ROW + 1);
+	return panel_text_row_y(
+		0,
+		open.hidden.renderer.get_tile_size(),
+		FIRST_CONTENT_ROW + 1);
 }
 
 // Enter on the scroll of teleportation: the scroll is read, the turn is spent, and the
@@ -130,9 +140,15 @@ int scroll_row_y(const OpenInventory& open)
 
 	open.press(GameKey::ENTER);
 
-	exit_unless(open.mock.player->inventoryData.items.empty(), "the scroll was not read");
-	exit_unless(open.ctx.gameState->get_time() > timeBefore, "reading the scroll spent no turn");
-	exit_unless(open.mock.menus.empty(), "the inventory is still open after the teleport");
+	exit_unless(
+		open.mock.player->inventoryData.items.empty(),
+		"the scroll was not read");
+	exit_unless(
+		open.ctx.gameState->get_time() > timeBefore,
+		"reading the scroll spent no turn");
+	exit_unless(
+		open.mock.menus.empty(),
+		"the inventory is still open after the teleport");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
@@ -145,15 +161,22 @@ int scroll_row_y(const OpenInventory& open)
 
 	open.press(GameKey::ENTER);
 
-	exit_unless(open.mock.player->inventoryData.items.empty(), "the potion was not drunk");
-	exit_unless(open.ctx.gameState->get_time() > timeBefore, "drinking the potion spent no turn");
-	exit_unless(open.mock.menus.size() == 1, "the inventory closed after a healing potion");
+	exit_unless(
+		open.mock.player->inventoryData.items.empty(),
+		"the potion was not drunk");
+	exit_unless(
+		open.ctx.gameState->get_time() > timeBefore,
+		"drinking the potion spent no turn");
+	exit_unless(
+		open.mock.menus.size() == 1,
+		"the inventory closed after a healing potion");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
 // Right-click on the scroll's row and choose Use: the row menu closes, and so does the
 // inventory beneath it, on the next frame and without reading that frame's key.
-[[noreturn]] void using_the_teleport_scroll_from_the_row_menu_closes_the_inventory()
+[[noreturn]] void
+using_the_teleport_scroll_from_the_row_menu_closes_the_inventory()
 {
 	OpenInventory open{ "scroll_teleport" };
 	const int timeBefore = open.ctx.gameState->get_time();
@@ -161,21 +184,34 @@ int scroll_row_y(const OpenInventory& open)
 	SetMousePosition(HIDDEN_WINDOW_WIDTH / 2, scroll_row_y(open) + 1);
 
 	open.press(GameKey::MOUSE_RIGHT);
-	exit_unless(open.mock.menus.size() == 2, "the right-click opened no row menu");
+	exit_unless(
+		open.mock.menus.size() == 2,
+		"the right-click opened no row menu");
 
 	// The row menu's first entry is Use.
 	open.press(GameKey::ENTER);
-	exit_unless(open.mock.player->inventoryData.items.empty(), "the scroll was not read");
-	exit_unless(open.ctx.gameState->get_time() > timeBefore, "reading the scroll spent no turn");
+	exit_unless(
+		open.mock.player->inventoryData.items.empty(),
+		"the scroll was not read");
+	exit_unless(
+		open.ctx.gameState->get_time() > timeBefore,
+		"reading the scroll spent no turn");
 
 	// Enter on the frame after, with a potion now in the pack: the inventory closes
 	// without acting on it, so the potion is still there.
 	exit_unless(
-		InventoryOperations::add_item(open.mock.player->inventoryData, ItemCreator::create("health_potion", PLAYER_TILE, open.ctx)).has_value(),
+		InventoryOperations::add_item(
+			open.mock.player->inventoryData,
+			ItemCreator::create("health_potion", PLAYER_TILE, open.ctx))
+			.has_value(),
 		"the potion did not fit the pack");
 	open.press(GameKey::ENTER);
-	exit_unless(open.mock.menus.empty(), "the inventory is still open after the teleport");
-	exit_unless(open.mock.player->inventoryData.items.size() == 1, "the closing inventory acted on the next frame's key");
+	exit_unless(
+		open.mock.menus.empty(),
+		"the inventory is still open after the teleport");
+	exit_unless(
+		open.mock.player->inventoryData.items.size() == 1,
+		"the closing inventory acted on the next frame's key");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
@@ -187,8 +223,12 @@ int scroll_row_y(const OpenInventory& open)
 
 	open.press(GameKey::MOUSE_LEFT);
 
-	exit_unless(open.mock.player->inventoryData.items.empty(), "the click did not read the scroll");
-	exit_unless(open.mock.menus.empty(), "the inventory is still open after the teleport");
+	exit_unless(
+		open.mock.player->inventoryData.items.empty(),
+		"the click did not read the scroll");
+	exit_unless(
+		open.mock.menus.empty(),
+		"the inventory is still open after the teleport");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
@@ -201,8 +241,12 @@ int scroll_row_y(const OpenInventory& open)
 	open.ctx.inputSystem->queue_key(GameKey::NONE, 'a');
 	open.run_one_frame();
 
-	exit_unless(open.mock.player->inventoryData.items.empty(), "the letter did not read the scroll");
-	exit_unless(open.mock.menus.empty(), "the inventory is still open after the teleport");
+	exit_unless(
+		open.mock.player->inventoryData.items.empty(),
+		"the letter did not read the scroll");
+	exit_unless(
+		open.mock.menus.empty(),
+		"the inventory is still open after the teleport");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
@@ -228,9 +272,15 @@ void reading_closes_the_inventory(const char* scrollKey)
 
 	open.press(GameKey::ENTER);
 
-	exit_unless(open.mock.player->inventoryData.items.empty(), "the scroll was not read");
-	exit_unless(open.ctx.gameState->get_time() > timeBefore, "reading the scroll spent no turn");
-	exit_unless(open.mock.menus.empty(), "the inventory is still open after the scroll was read");
+	exit_unless(
+		open.mock.player->inventoryData.items.empty(),
+		"the scroll was not read");
+	exit_unless(
+		open.ctx.gameState->get_time() > timeBefore,
+		"reading the scroll spent no turn");
+	exit_unless(
+		open.mock.menus.empty(),
+		"the inventory is still open after the scroll was read");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
@@ -255,8 +305,12 @@ void reading_closes_the_inventory(const char* scrollKey)
 
 	open.press(GameKey::ENTER);
 
-	exit_unless(open.mock.player->inventoryData.items.empty(), "the lightning scroll was not read");
-	exit_unless(open.mock.menus.empty(), "the inventory is still open after the lightning struck");
+	exit_unless(
+		open.mock.player->inventoryData.items.empty(),
+		"the lightning scroll was not read");
+	exit_unless(
+		open.mock.menus.empty(),
+		"the inventory is still open after the lightning struck");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
@@ -269,31 +323,46 @@ void reading_closes_the_inventory(const char* scrollKey)
 
 	open.press(GameKey::ENTER);
 
-	exit_unless(open.mock.player->inventoryData.items.size() == 1, "the lightning scroll was spent on nothing");
-	exit_unless(open.ctx.gameState->get_time() == timeBefore, "a scroll that was not read spent a turn");
-	exit_unless(open.mock.menus.size() == 1, "the inventory closed though nothing was read");
+	exit_unless(
+		open.mock.player->inventoryData.items.size() == 1,
+		"the lightning scroll was spent on nothing");
+	exit_unless(
+		open.ctx.gameState->get_time() == timeBefore,
+		"a scroll that was not read spent a turn");
+	exit_unless(
+		open.mock.menus.size() == 1,
+		"the inventory closed though nothing was read");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
 // Confusion is aimed at a tile: Enter opens the targeting cursor over the inventory, the
 // cursor moves to the empty tile beside the player, and Enter there reads the scroll.
 // When the cursor closes, the inventory goes with it rather than coming back.
-[[noreturn]] void aiming_the_confusion_scroll_closes_the_inventory_when_targeting_ends()
+[[noreturn]] void
+aiming_the_confusion_scroll_closes_the_inventory_when_targeting_ends()
 {
 	OpenInventory open{ "scroll_confusion" };
 	const int timeBefore = open.ctx.gameState->get_time();
 
 	open.press(GameKey::ENTER);
-	exit_unless(open.mock.menus.size() == 2, "Enter on the confusion scroll opened no targeting cursor");
+	exit_unless(
+		open.mock.menus.size() == 2,
+		"Enter on the confusion scroll opened no targeting cursor");
 
 	open.press(GameKey::RIGHT);
 	open.press(GameKey::ENTER);
-	exit_unless(open.mock.player->inventoryData.items.empty(), "the confusion scroll was not read");
-	exit_unless(open.ctx.gameState->get_time() > timeBefore, "reading the confusion scroll spent no turn");
+	exit_unless(
+		open.mock.player->inventoryData.items.empty(),
+		"the confusion scroll was not read");
+	exit_unless(
+		open.ctx.gameState->get_time() > timeBefore,
+		"reading the confusion scroll spent no turn");
 
 	// The frame after the cursor closes: the inventory beneath it closes without showing.
 	open.press(GameKey::NONE);
-	exit_unless(open.mock.menus.empty(), "the inventory came back after the scroll was aimed");
+	exit_unless(
+		open.mock.menus.empty(),
+		"the inventory came back after the scroll was aimed");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
@@ -305,71 +374,91 @@ void reading_closes_the_inventory(const char* scrollKey)
 	const int timeBefore = open.ctx.gameState->get_time();
 
 	open.press(GameKey::ENTER);
-	exit_unless(open.mock.menus.size() == 2, "Enter on the fireball scroll opened no targeting cursor");
+	exit_unless(
+		open.mock.menus.size() == 2,
+		"Enter on the fireball scroll opened no targeting cursor");
 
 	open.press(GameKey::ESCAPE);
-	exit_unless(open.mock.player->inventoryData.items.size() == 1, "a cancelled fireball spent the scroll");
-	exit_unless(open.ctx.gameState->get_time() == timeBefore, "a cancelled fireball spent a turn");
+	exit_unless(
+		open.mock.player->inventoryData.items.size() == 1,
+		"a cancelled fireball spent the scroll");
+	exit_unless(
+		open.ctx.gameState->get_time() == timeBefore,
+		"a cancelled fireball spent a turn");
 
 	open.press(GameKey::NONE);
-	exit_unless(open.mock.menus.empty(), "the inventory came back after the fireball was cancelled");
+	exit_unless(
+		open.mock.menus.empty(),
+		"the inventory came back after the fireball was cancelled");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 } // namespace
 
 TEST(InventoryCloseAfterUseTest, ReadingTheTeleportScrollClosesTheInventory)
 {
-	const int childExitCode = exit_code_in_child(&reading_the_teleport_scroll_closes_the_inventory);
+	const int childExitCode =
+		exit_code_in_child(&reading_the_teleport_scroll_closes_the_inventory);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 
 TEST(InventoryCloseAfterUseTest, DrinkingAHealingPotionLeavesTheInventoryOpen)
 {
-	const int childExitCode = exit_code_in_child(&drinking_a_healing_potion_leaves_the_inventory_open);
+	const int childExitCode = exit_code_in_child(
+		&drinking_a_healing_potion_leaves_the_inventory_open);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 
-TEST(InventoryCloseAfterUseTest, UsingTheTeleportScrollFromTheRowMenuClosesTheInventory)
+TEST(
+	InventoryCloseAfterUseTest,
+	UsingTheTeleportScrollFromTheRowMenuClosesTheInventory)
 {
-	const int childExitCode = exit_code_in_child(&using_the_teleport_scroll_from_the_row_menu_closes_the_inventory);
+	const int childExitCode = exit_code_in_child(
+		&using_the_teleport_scroll_from_the_row_menu_closes_the_inventory);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 
 TEST(InventoryCloseAfterUseTest, ClickingTheTeleportScrollClosesTheInventory)
 {
-	const int childExitCode = exit_code_in_child(&clicking_the_teleport_scroll_closes_the_inventory);
+	const int childExitCode =
+		exit_code_in_child(&clicking_the_teleport_scroll_closes_the_inventory);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 
 TEST(InventoryCloseAfterUseTest, TheTeleportScrollLetterClosesTheInventory)
 {
-	const int childExitCode = exit_code_in_child(&the_teleport_scroll_letter_closes_the_inventory);
+	const int childExitCode =
+		exit_code_in_child(&the_teleport_scroll_letter_closes_the_inventory);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 
 // The item's own answer, with no renderer, so it runs where the tests above skip.
@@ -381,68 +470,84 @@ TEST(InventoryCloseAfterUseTest, OnlyTheTeleportScrollSaysItMovesItsUser)
 
 TEST(InventoryCloseAfterUseTest, ReadingTheSleepScrollClosesTheInventory)
 {
-	const int childExitCode = exit_code_in_child(&reading_the_sleep_scroll_closes_the_inventory);
+	const int childExitCode =
+		exit_code_in_child(&reading_the_sleep_scroll_closes_the_inventory);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 
 TEST(InventoryCloseAfterUseTest, ReadingTheHoldPersonScrollClosesTheInventory)
 {
-	const int childExitCode = exit_code_in_child(&reading_the_hold_person_scroll_closes_the_inventory);
+	const int childExitCode = exit_code_in_child(
+		&reading_the_hold_person_scroll_closes_the_inventory);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 
 TEST(InventoryCloseAfterUseTest, LightningWithATargetClosesTheInventory)
 {
-	const int childExitCode = exit_code_in_child(&lightning_with_a_target_closes_the_inventory);
+	const int childExitCode =
+		exit_code_in_child(&lightning_with_a_target_closes_the_inventory);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 
-TEST(InventoryCloseAfterUseTest, LightningWithNothingInRangeLeavesTheInventoryOpen)
+TEST(
+	InventoryCloseAfterUseTest,
+	LightningWithNothingInRangeLeavesTheInventoryOpen)
 {
-	const int childExitCode = exit_code_in_child(&lightning_with_nothing_in_range_leaves_the_inventory_open);
+	const int childExitCode = exit_code_in_child(
+		&lightning_with_nothing_in_range_leaves_the_inventory_open);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 
-TEST(InventoryCloseAfterUseTest, AimingTheConfusionScrollClosesTheInventoryWhenTargetingEnds)
+TEST(
+	InventoryCloseAfterUseTest,
+	AimingTheConfusionScrollClosesTheInventoryWhenTargetingEnds)
 {
-	const int childExitCode = exit_code_in_child(&aiming_the_confusion_scroll_closes_the_inventory_when_targeting_ends);
+	const int childExitCode = exit_code_in_child(
+		&aiming_the_confusion_scroll_closes_the_inventory_when_targeting_ends);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 
 TEST(InventoryCloseAfterUseTest, CancellingTheFireballCursorClosesTheInventory)
 {
-	const int childExitCode = exit_code_in_child(&cancelling_the_fireball_cursor_closes_the_inventory);
+	const int childExitCode = exit_code_in_child(
+		&cancelling_the_fireball_cursor_closes_the_inventory);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 
 // The items' own answers, with no renderer, so they run where the tests above skip. Every
@@ -451,15 +556,17 @@ TEST(InventoryCloseAfterUseTest, EveryTargetedScrollSaysItTargetsCreatures)
 {
 	MockGameContext mock{};
 	GameContext ctx = mock.to_game_context();
-	for (const char* scrollKey : {
-			 "scroll_confusion",
-			 "scroll_fireball",
-			 "scroll_hold_person",
-			 "scroll_lightning",
-			 "scroll_sleep",
-		 })
+	for (
+		const char* scrollKey : {
+			"scroll_confusion",
+			"scroll_fireball",
+			"scroll_hold_person",
+			"scroll_lightning",
+			"scroll_sleep",
+		})
 	{
-		const auto scroll = ItemCreator::create(scrollKey, Vector2D{ 0, 0 }, ctx);
+		const auto scroll =
+			ItemCreator::create(scrollKey, Vector2D{ 0, 0 }, ctx);
 		EXPECT_TRUE(targets_creatures(*scroll->behavior)) << scrollKey;
 		EXPECT_FALSE(moves_its_user(*scroll->behavior)) << scrollKey;
 	}
@@ -473,17 +580,20 @@ TEST(InventoryCloseAfterUseTest, OnlyTheScrollsAimedAtATileHandOverToTargeting)
 	GameContext ctx = mock.to_game_context();
 	for (const char* scrollKey : { "scroll_confusion", "scroll_fireball" })
 	{
-		const auto scroll = ItemCreator::create(scrollKey, Vector2D{ 0, 0 }, ctx);
+		const auto scroll =
+			ItemCreator::create(scrollKey, Vector2D{ 0, 0 }, ctx);
 		EXPECT_TRUE(hands_over_to_targeting(*scroll->behavior)) << scrollKey;
 	}
-	for (const char* scrollKey : {
-			 "scroll_hold_person",
-			 "scroll_lightning",
-			 "scroll_sleep",
-			 "scroll_teleport",
-		 })
+	for (
+		const char* scrollKey : {
+			"scroll_hold_person",
+			"scroll_lightning",
+			"scroll_sleep",
+			"scroll_teleport",
+		})
 	{
-		const auto scroll = ItemCreator::create(scrollKey, Vector2D{ 0, 0 }, ctx);
+		const auto scroll =
+			ItemCreator::create(scrollKey, Vector2D{ 0, 0 }, ctx);
 		EXPECT_FALSE(hands_over_to_targeting(*scroll->behavior)) << scrollKey;
 	}
 }

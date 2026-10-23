@@ -71,7 +71,8 @@ protected:
 	Creature& standing_at(Vector2D where, Attitude attitude)
 	{
 		auto creature = std::make_unique<Creature>(
-			where, ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK });
+			where,
+			ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK });
 		creature->healthPool = std::make_unique<HealthPool>(8);
 		creature->set_attitude(attitude);
 		Creature* placed = creature.get();
@@ -83,10 +84,15 @@ protected:
 	// as a vector of coloured runs, so the words have to be joined before searching.
 	bool said_anything_about(std::string_view wanted) const
 	{
-		for (size_t index = 0; index < ctx.messageSystem->get_stored_message_count(); ++index)
+		for (
+			size_t index = 0;
+			index < ctx.messageSystem->get_stored_message_count();
+			++index)
 		{
 			std::string whole;
-			for (const LogMessage& run : ctx.messageSystem->get_attack_message_at(index))
+			for (
+				const LogMessage& run :
+				ctx.messageSystem->get_attack_message_at(index))
 			{
 				whole += run.text;
 			}
@@ -111,16 +117,20 @@ TEST_F(PlayerRestTest, AtFullHealthRestingIsRefused)
 	player->healthPool->set_hp(player->get_max_hp());
 
 	EXPECT_FALSE(player->rest(ctx));
-	EXPECT_TRUE(said_anything_about("already at full health")) << "the refusal did not say the player was unhurt";
+	EXPECT_TRUE(said_anything_about("already at full health"))
+		<< "the refusal did not say the player was unhurt";
 }
 
 // The edge of the danger zone is inside it.
 TEST_F(PlayerRestTest, AHostileAtTheEdgeOfTheRadiusBlocksTheRest)
 {
-	standing_at(Vector2D{ THE_PLAYERS_TILE.x + REST_DANGER_RADIUS, THE_PLAYERS_TILE.y }, Attitude::HOSTILE);
+	standing_at(
+		Vector2D{ THE_PLAYERS_TILE.x + REST_DANGER_RADIUS, THE_PLAYERS_TILE.y },
+		Attitude::HOSTILE);
 
 	EXPECT_FALSE(player->rest(ctx));
-	EXPECT_TRUE(said_anything_about("enemies nearby")) << "a hostile at the edge of the radius did not stop the rest";
+	EXPECT_TRUE(said_anything_about("enemies nearby"))
+		<< "a hostile at the edge of the radius did not stop the rest";
 }
 
 // Six tiles is far enough away to rest. This one is written in absolute tiles rather
@@ -130,11 +140,15 @@ TEST_F(PlayerRestTest, AHostileAtTheEdgeOfTheRadiusBlocksTheRest)
 // rest.
 TEST_F(PlayerRestTest, AHostileSixTilesAwayDoesNotBlockTheRest)
 {
-	standing_at(Vector2D{ THE_PLAYERS_TILE.x + 6, THE_PLAYERS_TILE.y }, Attitude::HOSTILE);
+	standing_at(
+		Vector2D{ THE_PLAYERS_TILE.x + 6, THE_PLAYERS_TILE.y },
+		Attitude::HOSTILE);
 
 	EXPECT_FALSE(player->rest(ctx));
-	EXPECT_FALSE(said_anything_about("enemies nearby")) << "a hostile outside the radius stopped the rest";
-	EXPECT_TRUE(said_anything_about("too hungry")) << "the scan did not run to the end";
+	EXPECT_FALSE(said_anything_about("enemies nearby"))
+		<< "a hostile outside the radius stopped the rest";
+	EXPECT_TRUE(said_anything_about("too hungry"))
+		<< "the scan did not run to the end";
 }
 
 // The zone is a square, not a circle: this creature is REST_DANGER_RADIUS away on
@@ -149,26 +163,35 @@ TEST_F(PlayerRestTest, AHostileOnTheDiagonalBlocksAtTheSameRange)
 		Attitude::HOSTILE);
 
 	EXPECT_FALSE(player->rest(ctx));
-	EXPECT_TRUE(said_anything_about("enemies nearby")) << "the danger zone was measured as a circle rather than a square";
+	EXPECT_TRUE(said_anything_about("enemies nearby"))
+		<< "the danger zone was measured as a circle rather than a square";
 }
 
 // A corpse is not a threat. It stays in the list until the loop sweeps it.
 TEST_F(PlayerRestTest, ADeadHostileDoesNotBlockTheRest)
 {
-	Creature& orc = standing_at(Vector2D{ THE_PLAYERS_TILE.x + 1, THE_PLAYERS_TILE.y }, Attitude::HOSTILE);
+	Creature& orc = standing_at(
+		Vector2D{ THE_PLAYERS_TILE.x + 1, THE_PLAYERS_TILE.y },
+		Attitude::HOSTILE);
 	orc.healthPool->set_hp(0);
 
 	EXPECT_FALSE(player->rest(ctx));
-	EXPECT_FALSE(said_anything_about("enemies nearby")) << "a dead creature was counted as a threat";
-	EXPECT_TRUE(said_anything_about("too hungry")) << "the scan did not run to the end";
+	EXPECT_FALSE(said_anything_about("enemies nearby"))
+		<< "a dead creature was counted as a threat";
+	EXPECT_TRUE(said_anything_about("too hungry"))
+		<< "the scan did not run to the end";
 }
 
 // This is what lets a player rest inside a shop with the shopkeeper beside them.
 TEST_F(PlayerRestTest, APeacefulCreatureStandingAdjacentDoesNotBlockTheRest)
 {
-	standing_at(Vector2D{ THE_PLAYERS_TILE.x + 1, THE_PLAYERS_TILE.y }, Attitude::PEACEFUL);
+	standing_at(
+		Vector2D{ THE_PLAYERS_TILE.x + 1, THE_PLAYERS_TILE.y },
+		Attitude::PEACEFUL);
 
 	EXPECT_FALSE(player->rest(ctx));
-	EXPECT_FALSE(said_anything_about("enemies nearby")) << "a peaceful creature was counted as a threat";
-	EXPECT_TRUE(said_anything_about("too hungry")) << "the scan did not run to the end";
+	EXPECT_FALSE(said_anything_about("enemies nearby"))
+		<< "a peaceful creature was counted as a threat";
+	EXPECT_TRUE(said_anything_about("too hungry"))
+		<< "the scan did not run to the end";
 }

@@ -66,13 +66,15 @@ TEST_F(WeaponDamageRegistryTest, EveryWeaponInTheDataHasItsDamage)
 	std::string unarmed;
 	for (const std::string& key : items.get_all_keys())
 	{
-		if (items.get_params(key).pickableType == PickableType::WEAPON && !WeaponDamageRegistry::is_registered(key))
+		if (items.get_params(key).pickableType == PickableType::WEAPON &&
+			!WeaponDamageRegistry::is_registered(key))
 		{
 			unarmed += " " + key;
 		}
 	}
 
-	EXPECT_TRUE(unarmed.empty()) << "weapons that would hit for a fist:" << unarmed;
+	EXPECT_TRUE(unarmed.empty())
+		<< "weapons that would hit for a fist:" << unarmed;
 }
 
 // The book names no plain crossbow: its Crossbow row heads hand, light and heavy, each
@@ -85,8 +87,10 @@ TEST_F(WeaponDamageRegistryTest, TheCrossbowThatSpawnsIsTheLightCrossbow)
 	items.load(Paths::ITEMS);
 	const std::vector<std::string> keys = items.get_all_keys();
 
-	EXPECT_EQ(std::ranges::find(keys, "crossbow"), keys.end()) << "the crossbow the book does not name is back";
-	EXPECT_GT(items.get_params("light_crossbow").baseWeight, 0) << "no crossbow reaches a floor any more";
+	EXPECT_EQ(std::ranges::find(keys, "crossbow"), keys.end())
+		<< "the crossbow the book does not name is back";
+	EXPECT_GT(items.get_params("light_crossbow").baseWeight, 0)
+		<< "no crossbow reaches a floor any more";
 }
 
 // Registration Status
@@ -175,7 +179,8 @@ TEST_F(WeaponDamageRegistryTest, Regression_UniqueWeaponDamage)
 {
 	DamageInfo dagger = WeaponDamageRegistry::get_damage_info("dagger");
 	DamageInfo longsword = WeaponDamageRegistry::get_damage_info("long_sword");
-	DamageInfo greatsword = WeaponDamageRegistry::get_damage_info("great_sword");
+	DamageInfo greatsword =
+		WeaponDamageRegistry::get_damage_info("great_sword");
 
 	EXPECT_LT(dagger.maxDamage, longsword.maxDamage);
 	EXPECT_LT(longsword.maxDamage, greatsword.maxDamage);
@@ -193,7 +198,8 @@ TEST_F(WeaponDamageRegistryTest, ADD2E_Compliance_WarHammer)
 
 TEST_F(WeaponDamageRegistryTest, ADD2E_Compliance_TwoHandedSword)
 {
-	DamageInfo greatsword = WeaponDamageRegistry::get_damage_info("great_sword");
+	DamageInfo greatsword =
+		WeaponDamageRegistry::get_damage_info("great_sword");
 
 	EXPECT_EQ(greatsword.minDamage, 1);
 	EXPECT_EQ(greatsword.maxDamage, 10);
@@ -210,10 +216,12 @@ TEST_F(WeaponDamageRegistryTest, Performance_FastLookup)
 	}
 
 	auto end = std::chrono::high_resolution_clock::now();
-	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+	auto duration =
+		std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
 	EXPECT_LT(duration.count(), 100)
-		<< "Weapon lookups too slow: " << duration.count() << "ms for 10k lookups";
+		<< "Weapon lookups too slow: " << duration.count()
+		<< "ms for 10k lookups";
 }
 
 // A bow or a crossbow does no damage of its own in the book: the ammunition does, and the
@@ -241,7 +249,8 @@ TEST_F(WeaponDamageRegistryTest, EveryRangedWeaponCarriesItsBasicAmmunition)
 
 	for (const Ranged& ranged : rangedWeapons)
 	{
-		const DamageInfo info = WeaponDamageRegistry::get_damage_info(ranged.weapon);
+		const DamageInfo info =
+			WeaponDamageRegistry::get_damage_info(ranged.weapon);
 		EXPECT_EQ(info.displayRoll, ranged.damage)
 			<< ranged.weapon << " does not do the damage of " << ranged.round;
 	}

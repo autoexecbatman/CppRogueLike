@@ -19,7 +19,9 @@
 // A normal being pays what the action says and nothing is scaled away.
 TEST(TurnScheduleTest, ANormalSpeedPaysTheBaseCostUnchanged)
 {
-	EXPECT_EQ(scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND), TIME_UNITS_PER_ROUND);
+	EXPECT_EQ(
+		scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND),
+		TIME_UNITS_PER_ROUND);
 	EXPECT_EQ(scaled_cost(60, TIME_UNITS_PER_ROUND), 60);
 	EXPECT_EQ(scaled_cost(1, TIME_UNITS_PER_ROUND), 1);
 }
@@ -28,7 +30,9 @@ TEST(TurnScheduleTest, ANormalSpeedPaysTheBaseCostUnchanged)
 // act twice while an ordinary creature acts once.
 TEST(TurnScheduleTest, HalfTheDelayHalvesWhatAnActionCosts)
 {
-	EXPECT_EQ(scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND / 2), TIME_UNITS_PER_ROUND / 2);
+	EXPECT_EQ(
+		scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND / 2),
+		TIME_UNITS_PER_ROUND / 2);
 	EXPECT_EQ(scaled_cost(120, 60), 60);
 }
 
@@ -36,7 +40,9 @@ TEST(TurnScheduleTest, HalfTheDelayHalvesWhatAnActionCosts)
 // not. The same expression covers both directions, which is why this order was chosen.
 TEST(TurnScheduleTest, TwiceTheDelayDoublesWhatAnActionCosts)
 {
-	EXPECT_EQ(scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND * 2), TIME_UNITS_PER_ROUND * 2);
+	EXPECT_EQ(
+		scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND * 2),
+		TIME_UNITS_PER_ROUND * 2);
 	EXPECT_EQ(scaled_cost(120, 240), 240);
 }
 
@@ -56,7 +62,9 @@ TEST(TurnScheduleTest, MoreDelayNeverCostsLessTime)
 	for (int actionDelay = 2; actionDelay <= 400; ++actionDelay)
 	{
 		const int cost = scaled_cost(TIME_UNITS_PER_ROUND, actionDelay);
-		EXPECT_GE(cost, previous) << "delay " << actionDelay << " cost less than delay " << actionDelay - 1;
+		EXPECT_GE(cost, previous)
+			<< "delay " << actionDelay << " cost less than delay "
+			<< actionDelay - 1;
 		previous = cost;
 	}
 }
@@ -68,7 +76,9 @@ TEST(TurnScheduleTest, MoreDelayNeverCostsLessTime)
 TEST(TurnScheduleTest, ADeeplyOvershotBeingHasNoActionsRatherThanNegativeOnes)
 {
 	EXPECT_EQ(actions_before(5000, 10, TIME_UNITS_PER_ROUND), 0);
-	EXPECT_EQ(actions_before(TIME_UNITS_PER_ROUND * 50, 1, TIME_UNITS_PER_ROUND), 0);
+	EXPECT_EQ(
+		actions_before(TIME_UNITS_PER_ROUND * 50, 1, TIME_UNITS_PER_ROUND),
+		0);
 	EXPECT_EQ(actions_before(1, 1, 0), 0);
 }
 
@@ -87,7 +97,8 @@ TEST(TurnScheduleTest, RoundsFinishedIsNotTheRoundInProgress)
 	// The two differ by exactly one at every point, which is the whole relation.
 	for (int units = 0; units <= TIME_UNITS_PER_ROUND * 5; ++units)
 	{
-		EXPECT_EQ(round_number_at(units), rounds_completed_at(units) + 1) << "at " << units;
+		EXPECT_EQ(round_number_at(units), rounds_completed_at(units) + 1)
+			<< "at " << units;
 	}
 }
 
@@ -108,7 +119,8 @@ TEST(TurnScheduleTest, EveryPointInsideARoundReadsAsThatRound)
 {
 	for (int offset = 0; offset < TIME_UNITS_PER_ROUND; ++offset)
 	{
-		EXPECT_EQ(round_number_at(TIME_UNITS_PER_ROUND * 4 + offset), 5) << "offset " << offset;
+		EXPECT_EQ(round_number_at(TIME_UNITS_PER_ROUND * 4 + offset), 5)
+			<< "offset " << offset;
 	}
 }
 
@@ -126,10 +138,12 @@ TEST(TurnScheduleTest, AnOrdinaryBeingActsOncePerRound)
 // it chooses what to spend each on - the schedule does not care which.
 TEST(TurnScheduleTest, AFasterBeingActsSeveralTimesInOneRound)
 {
-	const int halfARound = scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND / 2);
+	const int halfARound =
+		scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND / 2);
 	EXPECT_EQ(actions_before(0, halfARound, TIME_UNITS_PER_ROUND), 2);
 
-	const int quarterOfARound = scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND / 4);
+	const int quarterOfARound =
+		scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND / 4);
 	EXPECT_EQ(actions_before(0, quarterOfARound, TIME_UNITS_PER_ROUND), 4);
 }
 
@@ -137,17 +151,22 @@ TEST(TurnScheduleTest, AFasterBeingActsSeveralTimesInOneRound)
 // after - which is a skipped turn with nothing anywhere saying "skip".
 TEST(TurnScheduleTest, ASlowerBeingSkipsTheWindowItHasOvershot)
 {
-	const int twoRounds = scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND * 2);
+	const int twoRounds =
+		scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND * 2);
 	ASSERT_EQ(twoRounds, TIME_UNITS_PER_ROUND * 2);
 
 	// It is standing at the start, so it acts once in the first round.
 	EXPECT_EQ(actions_before(0, twoRounds, TIME_UNITS_PER_ROUND), 1);
 
 	// That action put it two rounds out, so the second round holds nothing for it.
-	EXPECT_EQ(actions_before(twoRounds, twoRounds, TIME_UNITS_PER_ROUND * 2), 0);
+	EXPECT_EQ(
+		actions_before(twoRounds, twoRounds, TIME_UNITS_PER_ROUND * 2),
+		0);
 
 	// And the third round holds its next action.
-	EXPECT_EQ(actions_before(twoRounds, twoRounds, TIME_UNITS_PER_ROUND * 3), 1);
+	EXPECT_EQ(
+		actions_before(twoRounds, twoRounds, TIME_UNITS_PER_ROUND * 3),
+		1);
 }
 
 // A being standing exactly on the limit has not reached it yet, so it does not act.
@@ -166,8 +185,12 @@ TEST(TurnScheduleTest, ActionsInASpanFollowTheCostDividingIt)
 	for (int rounds = 1; rounds <= 10; ++rounds)
 	{
 		const int limit = TIME_UNITS_PER_ROUND * rounds;
-		EXPECT_EQ(actions_before(0, TIME_UNITS_PER_ROUND, limit), rounds) << rounds << " rounds, normal";
-		EXPECT_EQ(actions_before(0, TIME_UNITS_PER_ROUND / 2, limit), rounds * 2) << rounds << " rounds, double";
+		EXPECT_EQ(actions_before(0, TIME_UNITS_PER_ROUND, limit), rounds)
+			<< rounds << " rounds, normal";
+		EXPECT_EQ(
+			actions_before(0, TIME_UNITS_PER_ROUND / 2, limit),
+			rounds * 2)
+			<< rounds << " rounds, double";
 	}
 }
 
@@ -176,7 +199,9 @@ TEST(TurnScheduleTest, ActionsInASpanFollowTheCostDividingIt)
 TEST(TurnScheduleTest, ADurationBecomesTheReadingItEndsAt)
 {
 	EXPECT_EQ(expiry_time(0, 3), TIME_UNITS_PER_ROUND * 3);
-	EXPECT_EQ(expiry_time(TIME_UNITS_PER_ROUND * 5, 3), TIME_UNITS_PER_ROUND * 8)
+	EXPECT_EQ(
+		expiry_time(TIME_UNITS_PER_ROUND * 5, 3),
+		TIME_UNITS_PER_ROUND * 8)
 		<< "a duration granted five rounds in ends three rounds after that";
 }
 
@@ -195,11 +220,15 @@ TEST(TurnScheduleTest, ADurationOfNoRoundsIsAlreadyOver)
 // creatures that use it elsewhere.
 TEST(TurnScheduleTest, ABiggerDelayCostsMoreTime)
 {
-	const int ordinary = scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND);
-	const int halfPace = scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND * 2);
-	const int doublePace = scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND / 2);
+	const int ordinary =
+		scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND);
+	const int halfPace =
+		scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND * 2);
+	const int doublePace =
+		scaled_cost(TIME_UNITS_PER_ROUND, TIME_UNITS_PER_ROUND / 2);
 
-	EXPECT_EQ(ordinary, TIME_UNITS_PER_ROUND) << "a delay of one round did not cost one round";
+	EXPECT_EQ(ordinary, TIME_UNITS_PER_ROUND)
+		<< "a delay of one round did not cost one round";
 	EXPECT_GT(halfPace, ordinary) << "twice the delay did not take longer";
 	EXPECT_LT(doublePace, ordinary) << "half the delay did not act sooner";
 }

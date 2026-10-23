@@ -55,7 +55,9 @@ protected:
 		auto item = ItemCreator::create(itemKey, Vector2D{ 0, 0 }, ctx);
 		EXPECT_TRUE(item);
 		Item& held = *item;
-		EXPECT_TRUE(InventoryOperations::add_item(player.inventoryData, std::move(item)).has_value());
+		EXPECT_TRUE(
+			InventoryOperations::add_item(player.inventoryData, std::move(item))
+				.has_value());
 		return held;
 	}
 
@@ -65,7 +67,11 @@ protected:
 		auto item = ItemCreator::create(itemKey, Vector2D{ 0, 0 }, ctx);
 		EXPECT_TRUE(item);
 		Item& held = *item;
-		EXPECT_TRUE(InventoryOperations::add_item(shop.get_shop_inventory(), std::move(item)).has_value());
+		EXPECT_TRUE(
+			InventoryOperations::add_item(
+				shop.get_shop_inventory(),
+				std::move(item))
+				.has_value());
 		return held;
 	}
 
@@ -75,9 +81,10 @@ protected:
 		CreatureInventory& shelves = shop.get_shop_inventory();
 		while (!InventoryOperations::is_inventory_full(shelves))
 		{
-			ASSERT_TRUE(InventoryOperations::add_item(
-				shelves,
-				ItemCreator::create("health_potion", Vector2D{ 0, 0 }, ctx))
+			ASSERT_TRUE(
+				InventoryOperations::add_item(
+					shelves,
+					ItemCreator::create("health_potion", Vector2D{ 0, 0 }, ctx))
 					.has_value());
 		}
 	}
@@ -122,15 +129,19 @@ TEST_F(ShopTransactionTest, APurchaseHandsOverTheShelvedItemAndPaysTheOwner)
 	const int buyerGoldBefore = player.get_gold();
 	const std::size_t stockBefore = shop.get_shop_inventory().items.size();
 
-	const bool bought = shop.process_player_purchase(ctx, onShelf, player, owner);
+	const bool bought =
+		shop.process_player_purchase(ctx, onShelf, player, owner);
 
 	ASSERT_TRUE(bought);
-	ASSERT_EQ(player.inventoryData.items.size(), 1u) << "the price was paid and nothing was handed over";
+	ASSERT_EQ(player.inventoryData.items.size(), 1u)
+		<< "the price was paid and nothing was handed over";
 	EXPECT_EQ(player.inventoryData.items.front().get(), &onShelf)
 		<< "the pack must hold the shelved item itself, not a copy of some of its fields";
-	EXPECT_EQ(shop.get_shop_inventory().items.size(), stockBefore - 1) << "the item left the shelf";
+	EXPECT_EQ(shop.get_shop_inventory().items.size(), stockBefore - 1)
+		<< "the item left the shelf";
 	EXPECT_EQ(player.get_gold(), buyerGoldBefore - price) << "the buyer paid";
-	EXPECT_EQ(owner.get_gold(), price) << "the price went to the shopkeeper rather than vanishing";
+	EXPECT_EQ(owner.get_gold(), price)
+		<< "the price went to the shopkeeper rather than vanishing";
 }
 
 // The key is what the damage registry reads, so a bought weapon without one hits for
@@ -152,14 +163,17 @@ TEST_F(ShopTransactionTest, AnUnaffordablePurchaseMovesNothing)
 {
 	Item& onShelf = shelve("long_sword");
 	player.adjust_gold(-player.get_gold());
-	ASSERT_GT(shop.get_buy_price(onShelf), 0) << "a free item cannot be unaffordable";
+	ASSERT_GT(shop.get_buy_price(onShelf), 0)
+		<< "a free item cannot be unaffordable";
 	const std::size_t stockBefore = shop.get_shop_inventory().items.size();
 
-	const bool bought = shop.process_player_purchase(ctx, onShelf, player, owner);
+	const bool bought =
+		shop.process_player_purchase(ctx, onShelf, player, owner);
 
 	EXPECT_FALSE(bought);
 	EXPECT_TRUE(player.inventoryData.items.empty());
-	EXPECT_EQ(shop.get_shop_inventory().items.size(), stockBefore) << "the item stays on the shelf";
+	EXPECT_EQ(shop.get_shop_inventory().items.size(), stockBefore)
+		<< "the item stays on the shelf";
 	EXPECT_EQ(owner.get_gold(), 0);
 }
 
@@ -170,24 +184,29 @@ TEST_F(ShopTransactionTest, AnUnaffordablePurchaseMovesNothing)
 TEST_F(ShopTransactionTest, APurchaseTooHeavyToCarryMovesNothing)
 {
 	Item& onShelf = shelve("long_sword");
-	onShelf.enhancement.weight = InventoryOperations::get_max_weight(player, *ctx.dataManager) + 1;
+	onShelf.enhancement.weight =
+		InventoryOperations::get_max_weight(player, *ctx.dataManager) + 1;
 	player.adjust_gold(shop.get_buy_price(onShelf));
 	const int buyerGoldBefore = player.get_gold();
 	const std::size_t stockBefore = shop.get_shop_inventory().items.size();
 
-	const bool bought = shop.process_player_purchase(ctx, onShelf, player, owner);
+	const bool bought =
+		shop.process_player_purchase(ctx, onShelf, player, owner);
 
 	EXPECT_FALSE(bought) << "a purchase over the carry limit went through";
 	EXPECT_TRUE(player.inventoryData.items.empty());
-	EXPECT_EQ(shop.get_shop_inventory().items.size(), stockBefore) << "the item stays on the shelf";
-	EXPECT_EQ(player.get_gold(), buyerGoldBefore) << "nothing is paid for a purchase that did not happen";
+	EXPECT_EQ(shop.get_shop_inventory().items.size(), stockBefore)
+		<< "the item stays on the shelf";
+	EXPECT_EQ(player.get_gold(), buyerGoldBefore)
+		<< "nothing is paid for a purchase that did not happen";
 }
 
 // The boundary: exactly at the limit is carryable, one over is not.
 TEST_F(ShopTransactionTest, APurchaseExactlyAtTheCarryLimitGoesThrough)
 {
 	Item& onShelf = shelve("long_sword");
-	onShelf.enhancement.weight = InventoryOperations::get_max_weight(player, *ctx.dataManager);
+	onShelf.enhancement.weight =
+		InventoryOperations::get_max_weight(player, *ctx.dataManager);
 	player.adjust_gold(shop.get_buy_price(onShelf));
 
 	EXPECT_TRUE(shop.process_player_purchase(ctx, onShelf, player, owner))
@@ -210,8 +229,10 @@ TEST_F(ShopTransactionTest, ASaleShelvesTheItemAndTheOwnerPays)
 	EXPECT_TRUE(player.inventoryData.items.empty()) << "the item left the pack";
 	EXPECT_EQ(shop.get_shop_inventory().items.size(), stockBefore + 1)
 		<< "the item must reach the shelves the buy menu reads";
-	EXPECT_EQ(player.get_gold(), sellerGoldBefore + price) << "the seller was paid";
-	EXPECT_EQ(owner.get_gold(), 0) << "the shopkeeper paid, rather than the gold appearing from nowhere";
+	EXPECT_EQ(player.get_gold(), sellerGoldBefore + price)
+		<< "the seller was paid";
+	EXPECT_EQ(owner.get_gold(), 0)
+		<< "the shopkeeper paid, rather than the gold appearing from nowhere";
 }
 
 // A shop with no room refuses before anything moves. It used to pay, take the item out
@@ -227,8 +248,10 @@ TEST_F(ShopTransactionTest, ASaleToFullShelvesMovesNothing)
 	const bool sold = shop.process_player_sale(ctx, toSell, player, owner);
 
 	EXPECT_FALSE(sold);
-	EXPECT_EQ(player.inventoryData.items.size(), 1u) << "the item stays in the pack";
-	EXPECT_EQ(player.get_gold(), sellerGoldBefore) << "nothing is paid for a sale that did not happen";
+	EXPECT_EQ(player.inventoryData.items.size(), 1u)
+		<< "the item stays in the pack";
+	EXPECT_EQ(player.get_gold(), sellerGoldBefore)
+		<< "nothing is paid for a sale that did not happen";
 	EXPECT_EQ(owner.get_gold(), ownerGoldBefore);
 }
 
@@ -236,7 +259,8 @@ TEST_F(ShopTransactionTest, ASaleToFullShelvesMovesNothing)
 TEST_F(ShopTransactionTest, ASaleTheOwnerCannotAffordMovesNothing)
 {
 	Item& toSell = give_seller("health_potion");
-	ASSERT_GT(shop.get_sell_price(toSell), 0) << "a free item cannot be unaffordable";
+	ASSERT_GT(shop.get_sell_price(toSell), 0)
+		<< "a free item cannot be unaffordable";
 	ASSERT_EQ(owner.get_gold(), 0);
 	const int sellerGoldBefore = player.get_gold();
 	const std::size_t stockBefore = shop.get_shop_inventory().items.size();
@@ -244,7 +268,8 @@ TEST_F(ShopTransactionTest, ASaleTheOwnerCannotAffordMovesNothing)
 	const bool sold = shop.process_player_sale(ctx, toSell, player, owner);
 
 	EXPECT_FALSE(sold);
-	EXPECT_EQ(player.inventoryData.items.size(), 1u) << "the item stays in the pack";
+	EXPECT_EQ(player.inventoryData.items.size(), 1u)
+		<< "the item stays in the pack";
 	EXPECT_EQ(shop.get_shop_inventory().items.size(), stockBefore);
 	EXPECT_EQ(player.get_gold(), sellerGoldBefore);
 }

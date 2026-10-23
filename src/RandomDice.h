@@ -27,8 +27,8 @@ public:
 	// A seed is always named, so nothing draws from a generator nobody chose.
 	RandomDice() = delete;
 
-	explicit RandomDice(unsigned int seed) noexcept
-		: generator(seed)
+	explicit RandomDice(unsigned int seed) noexcept :
+		generator(seed)
 	{
 	}
 
@@ -74,7 +74,9 @@ public:
 			}
 			// A queued value must be one this die can make; the range is known only now, when something rolls.
 			// Queue HIGHEST to mean the top of the range by name.
-			assert(value >= min && value <= max && "a scripted roll is outside the range the die was asked for");
+			assert(
+				value >= min && value <= max &&
+				"a scripted roll is outside the range the die was asked for");
 			return value;
 		}
 #endif

@@ -37,7 +37,9 @@ protected:
 	// A bare item of the given weight; nothing else about it matters to the rule.
 	static std::unique_ptr<Item> weighing(int weight)
 	{
-		auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "stone", ColorPairId::WHITE_BLACK });
+		auto item = std::make_unique<Item>(
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "stone", ColorPairId::WHITE_BLACK });
 		item->enhancement.weight = weight;
 		return item;
 	}
@@ -52,33 +54,57 @@ protected:
 
 TEST_F(CarryWeightTest, AnItemExactlyAtTheLimitFits)
 {
-	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
+	const int limit =
+		InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
 	const auto item = weighing(limit);
 
-	EXPECT_TRUE(InventoryOperations::is_within_weight_limit(*item, carrier, *ctx.dataManager));
+	EXPECT_TRUE(
+		InventoryOperations::is_within_weight_limit(
+			*item,
+			carrier,
+			*ctx.dataManager));
 }
 
 TEST_F(CarryWeightTest, AnItemOneOverTheLimitDoesNot)
 {
-	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
+	const int limit =
+		InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
 	const auto item = weighing(limit + 1);
 
-	EXPECT_FALSE(InventoryOperations::is_within_weight_limit(*item, carrier, *ctx.dataManager));
+	EXPECT_FALSE(
+		InventoryOperations::is_within_weight_limit(
+			*item,
+			carrier,
+			*ctx.dataManager));
 }
 
 TEST_F(CarryWeightTest, WhatIsAlreadyCarriedCountsAgainstTheLimit)
 {
-	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
-	ASSERT_TRUE(InventoryOperations::add_item(carrier.inventoryData, weighing(limit - 5)).has_value());
+	const int limit =
+		InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
+	ASSERT_TRUE(
+		InventoryOperations::add_item(
+			carrier.inventoryData,
+			weighing(limit - 5))
+			.has_value());
 
-	EXPECT_TRUE(InventoryOperations::is_within_weight_limit(*weighing(5), carrier, *ctx.dataManager));
-	EXPECT_FALSE(InventoryOperations::is_within_weight_limit(*weighing(6), carrier, *ctx.dataManager))
+	EXPECT_TRUE(
+		InventoryOperations::is_within_weight_limit(
+			*weighing(5),
+			carrier,
+			*ctx.dataManager));
+	EXPECT_FALSE(
+		InventoryOperations::is_within_weight_limit(
+			*weighing(6),
+			carrier,
+			*ctx.dataManager))
 		<< "the pack's own weight must count, not only the new item's";
 }
 
 TEST_F(CarryWeightTest, TheCheckedAddRefusesAnItemOverTheLimit)
 {
-	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
+	const int limit =
+		InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
 
 	const auto refused = InventoryOperations::add_item_to_inventory(
 		carrier.inventoryData,
@@ -88,7 +114,8 @@ TEST_F(CarryWeightTest, TheCheckedAddRefusesAnItemOverTheLimit)
 
 	ASSERT_FALSE(refused.has_value());
 	EXPECT_EQ(refused.error(), InventoryError::CAPACITY_EXCEEDED);
-	EXPECT_TRUE(carrier.inventoryData.items.empty()) << "a refused item must not be kept";
+	EXPECT_TRUE(carrier.inventoryData.items.empty())
+		<< "a refused item must not be kept";
 }
 
 // The book totals "the pounds of gear carried by the creature or character" and draws
@@ -97,12 +124,17 @@ TEST_F(CarryWeightTest, TheCheckedAddRefusesAnItemOverTheLimit)
 TEST_F(CarryWeightTest, WhatIsWornCountsAgainstTheLimit)
 {
 	carrier.set_body_plan(mock.body_plans.get("humanoid"));
-	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
+	const int limit =
+		InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
 	carrier.wear(weighing(limit + 1), EquipmentSlot::BODY);
 
 	EXPECT_TRUE(InventoryOperations::is_overloaded(carrier, *ctx.dataManager))
 		<< "armour heavier than the carrier weighed nothing once it was worn";
-	EXPECT_FALSE(InventoryOperations::is_within_weight_limit(*weighing(1), carrier, *ctx.dataManager))
+	EXPECT_FALSE(
+		InventoryOperations::is_within_weight_limit(
+			*weighing(1),
+			carrier,
+			*ctx.dataManager))
 		<< "a creature already over its limit in worn gear could still fill its pack";
 }
 
@@ -111,12 +143,21 @@ TEST_F(CarryWeightTest, WhatIsWornCountsAgainstTheLimit)
 TEST_F(CarryWeightTest, ThePackAndTheBodyAreOneLoad)
 {
 	carrier.set_body_plan(mock.body_plans.get("humanoid"));
-	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
+	const int limit =
+		InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
 	const int worn = limit / 2;
 	carrier.wear(weighing(worn), EquipmentSlot::BODY);
 
-	EXPECT_TRUE(InventoryOperations::is_within_weight_limit(*weighing(limit - worn), carrier, *ctx.dataManager));
-	EXPECT_FALSE(InventoryOperations::is_within_weight_limit(*weighing(limit - worn + 1), carrier, *ctx.dataManager))
+	EXPECT_TRUE(
+		InventoryOperations::is_within_weight_limit(
+			*weighing(limit - worn),
+			carrier,
+			*ctx.dataManager));
+	EXPECT_FALSE(
+		InventoryOperations::is_within_weight_limit(
+			*weighing(limit - worn + 1),
+			carrier,
+			*ctx.dataManager))
 		<< "the worn half of the load did not count";
 }
 
@@ -128,9 +169,12 @@ TEST_F(CarryWeightTest, ACharacterCarriesTheBooksFivePoundsOfClothing)
 {
 	carrier.set_creature_class(CreatureClass::ROGUE);
 
-	EXPECT_EQ(InventoryOperations::get_total_weight(carrier), 5) << "an empty character still wears clothes";
+	EXPECT_EQ(InventoryOperations::get_total_weight(carrier), 5)
+		<< "an empty character still wears clothes";
 
-	ASSERT_TRUE(InventoryOperations::add_item(carrier.inventoryData, weighing(10)).has_value());
+	ASSERT_TRUE(
+		InventoryOperations::add_item(carrier.inventoryData, weighing(10))
+			.has_value());
 
 	EXPECT_EQ(InventoryOperations::get_total_weight(carrier), 15);
 }
@@ -143,7 +187,9 @@ TEST_F(CarryWeightTest, AMonsterWearsNoClothing)
 
 	EXPECT_EQ(InventoryOperations::get_total_weight(carrier), 0);
 
-	ASSERT_TRUE(InventoryOperations::add_item(carrier.inventoryData, weighing(10)).has_value());
+	ASSERT_TRUE(
+		InventoryOperations::add_item(carrier.inventoryData, weighing(10))
+			.has_value());
 
 	EXPECT_EQ(InventoryOperations::get_total_weight(carrier), 10);
 }
@@ -153,10 +199,19 @@ TEST_F(CarryWeightTest, AMonsterWearsNoClothing)
 TEST_F(CarryWeightTest, TheClothingAllowanceCountsAgainstTheLimit)
 {
 	carrier.set_creature_class(CreatureClass::CLERIC);
-	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
+	const int limit =
+		InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
 
-	EXPECT_TRUE(InventoryOperations::is_within_weight_limit(*weighing(limit - 5), carrier, *ctx.dataManager));
-	EXPECT_FALSE(InventoryOperations::is_within_weight_limit(*weighing(limit - 4), carrier, *ctx.dataManager));
+	EXPECT_TRUE(
+		InventoryOperations::is_within_weight_limit(
+			*weighing(limit - 5),
+			carrier,
+			*ctx.dataManager));
+	EXPECT_FALSE(
+		InventoryOperations::is_within_weight_limit(
+			*weighing(limit - 4),
+			carrier,
+			*ctx.dataManager));
 }
 
 // A thousand coins weigh one pound - the owner's ruling, 2026-10-03. The archive
@@ -168,13 +223,15 @@ TEST_F(CarryWeightTest, AThousandCoinsWeighOnePound)
 	carrier.set_creature_class(CreatureClass::MONSTER);
 
 	carrier.set_gold(999);
-	EXPECT_EQ(InventoryOperations::get_total_weight(carrier), 0) << "a purse under a thousand is pocket change";
+	EXPECT_EQ(InventoryOperations::get_total_weight(carrier), 0)
+		<< "a purse under a thousand is pocket change";
 
 	carrier.set_gold(1000);
 	EXPECT_EQ(InventoryOperations::get_total_weight(carrier), 1);
 
 	carrier.set_gold(2999);
-	EXPECT_EQ(InventoryOperations::get_total_weight(carrier), 2) << "the part-thousand must not round up";
+	EXPECT_EQ(InventoryOperations::get_total_weight(carrier), 2)
+		<< "the part-thousand must not round up";
 }
 
 // The purse is carried, so it takes room from the pack like any other load. At
@@ -182,11 +239,20 @@ TEST_F(CarryWeightTest, AThousandCoinsWeighOnePound)
 TEST_F(CarryWeightTest, APurseTakesRoomFromThePack)
 {
 	carrier.set_creature_class(CreatureClass::MONSTER);
-	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
+	const int limit =
+		InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
 	carrier.set_gold(10000);
 
-	EXPECT_TRUE(InventoryOperations::is_within_weight_limit(*weighing(limit - 10), carrier, *ctx.dataManager));
-	EXPECT_FALSE(InventoryOperations::is_within_weight_limit(*weighing(limit - 9), carrier, *ctx.dataManager))
+	EXPECT_TRUE(
+		InventoryOperations::is_within_weight_limit(
+			*weighing(limit - 10),
+			carrier,
+			*ctx.dataManager));
+	EXPECT_FALSE(
+		InventoryOperations::is_within_weight_limit(
+			*weighing(limit - 9),
+			carrier,
+			*ctx.dataManager))
 		<< "ten pounds of coin left the whole limit free";
 }
 
@@ -195,7 +261,8 @@ TEST_F(CarryWeightTest, APurseTakesRoomFromThePack)
 TEST_F(CarryWeightTest, EnoughCoinOverloadsACarrierOnItsOwn)
 {
 	carrier.set_creature_class(CreatureClass::MONSTER);
-	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
+	const int limit =
+		InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
 	carrier.set_gold((limit + 1) * 1000);
 
 	EXPECT_TRUE(InventoryOperations::is_overloaded(carrier, *ctx.dataManager))
@@ -207,7 +274,9 @@ TEST_F(CarryWeightTest, ThePurseIsPartOfACharactersOneLoad)
 {
 	carrier.set_creature_class(CreatureClass::ROGUE);
 	carrier.set_gold(3000);
-	ASSERT_TRUE(InventoryOperations::add_item(carrier.inventoryData, weighing(10)).has_value());
+	ASSERT_TRUE(
+		InventoryOperations::add_item(carrier.inventoryData, weighing(10))
+			.has_value());
 
 	// Five pounds of clothing, ten in the pack, three of coin.
 	EXPECT_EQ(InventoryOperations::get_total_weight(carrier), 18);

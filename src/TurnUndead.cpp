@@ -15,7 +15,8 @@ namespace
 // which this game has no class for yet.
 bool can_turn_undead(const Creature& creature)
 {
-	return creature.is_player() && creature.get_creature_class() == CreatureClass::CLERIC;
+	return creature.is_player() &&
+		creature.get_creature_class() == CreatureClass::CLERIC;
 }
 } // namespace
 
@@ -70,7 +71,8 @@ TurnUndeadReport turn_undead(Creature& priest, GameContext& ctx)
 		candidates.push_back(creature.get());
 	}
 
-	std::ranges::sort(candidates,
+	std::ranges::sort(
+		candidates,
 		[](const Creature* left, const Creature* right)
 		{ return left->get_hit_dice() < right->get_hit_dice(); });
 
@@ -78,11 +80,15 @@ TurnUndeadReport turn_undead(Creature& priest, GameContext& ctx)
 
 	for (Creature* undead : candidates)
 	{
-		const TurningResult result = look_up_turning(undead->get_hit_dice(), priest.get_creature_level());
+		const TurningResult result = look_up_turning(
+			undead->get_hit_dice(),
+			priest.get_creature_level());
 
 		// Beyond this priest's power, or the roll fell short: no effect, and it
 		// does not consume one of the 2d6.
-		if (result.outcome == TurningOutcome::BEYOND_POWER || (result.outcome == TurningOutcome::ROLL_REQUIRED && report.roll < result.rollNeeded))
+		if (result.outcome == TurningOutcome::BEYOND_POWER ||
+			(result.outcome == TurningOutcome::ROLL_REQUIRED &&
+				report.roll < result.rollNeeded))
 		{
 			report.resisted.push_back(undead);
 			continue;
@@ -98,7 +104,10 @@ TurnUndeadReport turn_undead(Creature& priest, GameContext& ctx)
 
 		if (result.outcome == TurningOutcome::DESTROYED)
 		{
-			undead->take_damage_and_check_death(undead->get_hp(), ctx, DamageType::MAGIC);
+			undead->take_damage_and_check_death(
+				undead->get_hp(),
+				ctx,
+				DamageType::MAGIC);
 			report.destroyed.push_back(undead);
 			continue;
 		}

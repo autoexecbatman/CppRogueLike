@@ -42,7 +42,8 @@ TileType parse_tile_type(std::string_view name)
 		return TileType::CORRIDOR;
 	}
 
-	throw std::runtime_error(std::format("TileConfig: unknown tile type '{}'", name));
+	throw std::runtime_error(
+		std::format("TileConfig: unknown tile type '{}'", name));
 }
 
 // The state that lets a creature cross a tile it would otherwise be stopped by.
@@ -53,7 +54,8 @@ ActorState parse_bypass_state(std::string_view name)
 		return ActorState::CAN_SWIM;
 	}
 
-	throw std::runtime_error(std::format("TileConfig: unknown bypass state '{}'", name));
+	throw std::runtime_error(
+		std::format("TileConfig: unknown bypass state '{}'", name));
 }
 
 TileColor parse_color(const json& value)
@@ -77,7 +79,8 @@ TileDefinition parse_tile_definition(const json& value)
 	if (value.contains("bypass_state"))
 	{
 		definition.hasBypassState = true;
-		definition.bypassState = parse_bypass_state(value.at("bypass_state").get<std::string>());
+		definition.bypassState =
+			parse_bypass_state(value.at("bypass_state").get<std::string>());
 	}
 	if (value.contains("entry_message"))
 	{
@@ -85,7 +88,8 @@ TileDefinition parse_tile_definition(const json& value)
 	}
 	if (value.contains("blocked_message"))
 	{
-		definition.blockedMessage = value.at("blocked_message").get<std::string>();
+		definition.blockedMessage =
+			value.at("blocked_message").get<std::string>();
 	}
 
 	definition.minimapVisible = parse_color(value.at("minimap_visible"));
@@ -101,9 +105,13 @@ TileRef TileConfig::get(std::string_view key) const
 {
 	if (!tiles.contains(std::string(key)))
 	{
-		fprintf(stderr, "ERROR: TileConfig::get -- unknown key '%s'\n", std::string(key).c_str());
+		fprintf(
+			stderr,
+			"ERROR: TileConfig::get -- unknown key '%s'\n",
+			std::string(key).c_str());
 		fflush(stderr);
-		throw std::runtime_error(std::format("TileConfig::get -- unknown key '{}'", key));
+		throw std::runtime_error(
+			std::format("TileConfig::get -- unknown key '{}'", key));
 	}
 	return tiles.at(std::string(key));
 }
@@ -112,7 +120,8 @@ AutotileGroup TileConfig::get_autotile(std::string_view key) const
 {
 	if (!autotileGroups.contains(std::string(key)))
 	{
-		throw std::runtime_error(std::format("TileConfig::get_autotile -- unknown key '{}'", key));
+		throw std::runtime_error(
+			std::format("TileConfig::get_autotile -- unknown key '{}'", key));
 	}
 	return autotileGroups.at(std::string(key));
 }
@@ -121,7 +130,10 @@ WallAutotileGroup TileConfig::get_wall_autotile(std::string_view key) const
 {
 	if (!wallAutotileGroups.contains(std::string(key)))
 	{
-		throw std::runtime_error(std::format("TileConfig::get_wall_autotile -- unknown key '{}'", key));
+		throw std::runtime_error(
+			std::format(
+				"TileConfig::get_wall_autotile -- unknown key '{}'",
+				key));
 	}
 	return wallAutotileGroups.at(std::string(key));
 }
@@ -131,9 +143,10 @@ const TileDefinition& TileConfig::get_tile_definition(TileType tileType) const
 	const auto found = tileDefinitions.find(tileType);
 	if (found == tileDefinitions.end())
 	{
-		throw std::runtime_error(std::format(
-			"TileConfig: no definition for tile type {} -- add it to tile_config.json",
-			static_cast<int>(tileType)));
+		throw std::runtime_error(
+			std::format(
+				"TileConfig: no definition for tile type {} -- add it to tile_config.json",
+				static_cast<int>(tileType)));
 	}
 
 	return found->second;
@@ -146,7 +159,10 @@ void TileConfig::load(std::string_view path)
 
 	if (!configFile.is_open())
 	{
-		throw std::runtime_error(std::format("TileConfig::load -- cannot open '{}' -- tile config JSON is required", resolved.string()));
+		throw std::runtime_error(
+			std::format(
+				"TileConfig::load -- cannot open '{}' -- tile config JSON is required",
+				resolved.string()));
 	}
 
 	const json root = json::parse(configFile);
@@ -159,7 +175,8 @@ void TileConfig::load(std::string_view path)
 
 	for (const auto& [key, record] : root.at("autotile_groups").items())
 	{
-		const TileSheet sheet = static_cast<TileSheet>(record.at("sheet").get<int>());
+		const TileSheet sheet =
+			static_cast<TileSheet>(record.at("sheet").get<int>());
 		autotileGroups[key] = AutotileGroup{
 			sheet,
 			record.at("origin_col").get<int>(),
@@ -169,7 +186,8 @@ void TileConfig::load(std::string_view path)
 
 	for (const auto& [key, record] : root.at("wall_autotile_groups").items())
 	{
-		const TileSheet sheet = static_cast<TileSheet>(record.at("sheet").get<int>());
+		const TileSheet sheet =
+			static_cast<TileSheet>(record.at("sheet").get<int>());
 		wallAutotileGroups[key] = WallAutotileGroup{
 			sheet,
 			record.at("origin_col").get<int>(),

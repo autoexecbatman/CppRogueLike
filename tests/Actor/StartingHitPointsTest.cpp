@@ -77,7 +77,8 @@ TEST_F(StartingHitPointsTest, EachClassIsBuiltAsTheClassChosen)
 {
 	for (const CreatureClass creatureClass : ALL_PLAYER_CLASS)
 	{
-		EXPECT_EQ(built_class(creatureClass), creatureClass) << encode_creature_class(creatureClass);
+		EXPECT_EQ(built_class(creatureClass), creatureClass)
+			<< encode_creature_class(creatureClass);
 	}
 }
 
@@ -102,12 +103,15 @@ TEST_F(StartingHitPointsTest, EachClassRollsItsOwnDieOnTopOfTwenty)
 		int highest = 0;
 		for (unsigned int seed = 1; seed <= CHARACTERS_PER_CLASS; ++seed)
 		{
-			const int hitPoints = starting_hit_points(expected.creatureClass, seed);
+			const int hitPoints =
+				starting_hit_points(expected.creatureClass, seed);
 			lowest = std::min(lowest, hitPoints);
 			highest = std::max(highest, hitPoints);
 		}
 
-		EXPECT_EQ(lowest, CUSHION + 1) << encode_creature_class(expected.creatureClass);
-		EXPECT_EQ(highest, CUSHION + expected.die) << encode_creature_class(expected.creatureClass);
+		EXPECT_EQ(lowest, CUSHION + 1)
+			<< encode_creature_class(expected.creatureClass);
+		EXPECT_EQ(highest, CUSHION + expected.die)
+			<< encode_creature_class(expected.creatureClass);
 	}
 }

@@ -57,7 +57,9 @@ TEST(AbilityAllocationTextTest, AnUnmodifiedAbilityPrintsNoRacialHalf)
 
 // The cursor is the first character of the line, so the marker moves with it and
 // the columns do not.
-TEST(AbilityAllocationTextTest, TheCursorMarkerIsTheFirstCharacterAndShiftsNothing)
+TEST(
+	AbilityAllocationTextTest,
+	TheCursorMarkerIsTheFirstCharacterAndShiftsNothing)
 {
 	const AbilityAllocation allocation{
 		ROLLED_POOL,
@@ -65,12 +67,18 @@ TEST(AbilityAllocationTextTest, TheCursorMarkerIsTheFirstCharacterAndShiftsNothi
 		HUMAN,
 	};
 
-	const std::string away = ability_row_line(allocation, Ability::CONSTITUTION, Ability::STRENGTH);
-	const std::string on = ability_row_line(allocation, Ability::CONSTITUTION, Ability::CONSTITUTION);
+	const std::string away =
+		ability_row_line(allocation, Ability::CONSTITUTION, Ability::STRENGTH);
+	const std::string on = ability_row_line(
+		allocation,
+		Ability::CONSTITUTION,
+		Ability::CONSTITUTION);
 
 	EXPECT_EQ(on, "> Constitution   8");
-	EXPECT_EQ(away.size(), on.size()) << "the marker changed the width of the row";
-	EXPECT_EQ(away.substr(1), on.substr(1)) << "only the first character may differ";
+	EXPECT_EQ(away.size(), on.size())
+		<< "the marker changed the width of the row";
+	EXPECT_EQ(away.substr(1), on.substr(1))
+		<< "only the first character may differ";
 }
 
 // Where the race does something the line shows all three numbers: what the dice
@@ -147,7 +155,9 @@ TEST(AbilityAllocationTextTest, AnEmptyPoolSaysSoRatherThanPrintingNothing)
 
 // The status line names Table 13's row, and names it on the score the race will
 // leave rather than on the dice: a halfling fighter at the starting 8 reads 7.
-TEST(AbilityAllocationTextTest, TheStatusLineNamesTheUnmetMinimumThenReportsReady)
+TEST(
+	AbilityAllocationTextTest,
+	TheStatusLineNamesTheUnmetMinimumThenReportsReady)
 {
 	AbilityAllocation allocation{
 		ROLLED_POOL,
@@ -181,6 +191,8 @@ TEST(AbilityAllocationTextTest, TheLastSpendableDigitIsTheLastDieRolled)
 {
 	const int lastDigit = '1' + METHOD_SIX_DICE - 1;
 
-	EXPECT_EQ(die_index_for_character(lastDigit), static_cast<std::size_t>(METHOD_SIX_DICE - 1));
+	EXPECT_EQ(
+		die_index_for_character(lastDigit),
+		static_cast<std::size_t>(METHOD_SIX_DICE - 1));
 	EXPECT_FALSE(die_index_for_character(lastDigit + 1).has_value());
 }

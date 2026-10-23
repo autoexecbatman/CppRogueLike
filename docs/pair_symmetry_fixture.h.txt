@@ -1,0 +1,22 @@
+// Fixture header for pair_symmetry.py --self-test, copied to a .h before it is
+// read. The unpaired-verb check must report save_report_card and nothing else.
+class Ledger
+{
+private:
+	std::optional<std::string> saveError{};
+
+public:
+	// Const, with its brace on the next line, so it cannot write.
+	[[nodiscard]] const std::optional<std::string>& save_error() const noexcept
+	{
+		return saveError;
+	}
+
+	// Const, with its parameters wrapped, so it cannot write.
+	[[nodiscard]] bool save_file_exists(
+		const std::string& directory,
+		const std::string& name) const;
+
+	// A writer whose reader nothing declares.
+	void save_report_card(std::string& out);
+};

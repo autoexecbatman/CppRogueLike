@@ -12,12 +12,13 @@
 
 #include "StartupSteps.h"
 
-std::optional<StartupRefusal> run_startup_steps(std::span<const StartupStep> steps, std::ostream& log)
+std::optional<StartupRefusal> run_startup_steps(
+	std::span<const StartupStep> steps,
+	std::ostream& log)
 {
 	for (const StartupStep& step : steps)
 	{
-		log << "STARTUP: " << step.name << '\n'
-			<< std::flush;
+		log << "STARTUP: " << step.name << '\n' << std::flush;
 		// A std::exception is bad data refusing the step; anything else is a fault and escapes.
 		try
 		{
@@ -25,7 +26,8 @@ std::optional<StartupRefusal> run_startup_steps(std::span<const StartupStep> ste
 		}
 		catch (const std::exception& refusal)
 		{
-			log << "STARTUP: " << step.name << " failed: " << refusal.what() << '\n'
+			log << "STARTUP: " << step.name << " failed: " << refusal.what()
+				<< '\n'
 				<< std::flush;
 			return StartupRefusal{ step.name, refusal.what() };
 		}
@@ -35,7 +37,10 @@ std::optional<StartupRefusal> run_startup_steps(std::span<const StartupStep> ste
 
 std::string startup_refusal_line(const StartupRefusal& refusal)
 {
-	return std::format("Could not start: {} failed: {}", refusal.step, refusal.reason);
+	return std::format(
+		"Could not start: {} failed: {}",
+		refusal.step,
+		refusal.reason);
 }
 
 void report_startup_refusal(const StartupRefusal& refusal)

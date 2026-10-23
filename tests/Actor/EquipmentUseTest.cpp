@@ -57,7 +57,12 @@ protected:
 	{
 		auto item = ItemCreator::create(key, player->position, ctx);
 		Item* carried = item.get();
-		[[maybe_unused]] const auto added = InventoryOperations::add_item_to_inventory(player->inventoryData, std::move(item), *player, *ctx.dataManager);
+		[[maybe_unused]] const auto added =
+			InventoryOperations::add_item_to_inventory(
+				player->inventoryData,
+				std::move(item),
+				*player,
+				*ctx.dataManager);
 		use_item(*carried->behavior, *carried, *player, ctx);
 		Item* worn = player->get_equipped_item(slot);
 		EXPECT_EQ(worn, carried) << key << " was not put on";
@@ -70,9 +75,15 @@ protected:
 	{
 		auto item = ItemCreator::create(key, player->position, ctx);
 		Item* carried = item.get();
-		[[maybe_unused]] const auto added = InventoryOperations::add_item_to_inventory(player->inventoryData, std::move(item), *player, *ctx.dataManager);
+		[[maybe_unused]] const auto added =
+			InventoryOperations::add_item_to_inventory(
+				player->inventoryData,
+				std::move(item),
+				*player,
+				*ctx.dataManager);
 		use_item(*carried->behavior, *carried, *player, ctx);
-		EXPECT_EQ(player->get_equipped_item(slot), carried) << key << " was not put on";
+		EXPECT_EQ(player->get_equipped_item(slot), carried)
+			<< key << " was not put on";
 		return *carried;
 	}
 
@@ -89,18 +100,22 @@ protected:
 	// Uses a worn cursed item again and checks that nothing happened.
 	void expect_nothing_happens(Item& item, EquipmentSlot slot)
 	{
-		EXPECT_FALSE(use_item(*item.behavior, item, *player, ctx)) << item.actorData.name << ": a failed removal spent a turn";
-		EXPECT_EQ(player->get_equipped_item(slot), &item) << item.actorData.name << " came off";
+		EXPECT_FALSE(use_item(*item.behavior, item, *player, ctx))
+			<< item.actorData.name << ": a failed removal spent a turn";
+		EXPECT_EQ(player->get_equipped_item(slot), &item)
+			<< item.actorData.name << " came off";
 	}
 
 	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 0, 0 }) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ 0, 0 }) };
 };
 
 TEST_F(EquipmentUseTest, ACursedRingThatWillNotComeOffCostsNothing)
 {
-	Item& ring = wear_cursed("ring_of_protection_plus_1", EquipmentSlot::RIGHT_RING);
+	Item& ring =
+		wear_cursed("ring_of_protection_plus_1", EquipmentSlot::RIGHT_RING);
 
 	expect_nothing_happens(ring, EquipmentSlot::RIGHT_RING);
 }
@@ -132,10 +147,12 @@ TEST_F(EquipmentUseTest, AnItemTakenOffGoesBackToThePackAndLeavesItsSlot)
 {
 	Item& armor = wear("leather_armor", EquipmentSlot::BODY);
 
-	ASSERT_FALSE(pack_holds(armor)) << "a worn item is owned by its slot, not by the pack";
+	ASSERT_FALSE(pack_holds(armor))
+		<< "a worn item is owned by its slot, not by the pack";
 
 	ASSERT_TRUE(player->unequip_item(EquipmentSlot::BODY, ctx));
 
 	EXPECT_TRUE(pack_holds(armor)) << "it did not come back to the pack";
-	EXPECT_EQ(player->get_equipped_item(EquipmentSlot::BODY), nullptr) << "the slot still holds what was taken off";
+	EXPECT_EQ(player->get_equipped_item(EquipmentSlot::BODY), nullptr)
+		<< "the slot still holds what was taken off";
 }

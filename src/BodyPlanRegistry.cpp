@@ -15,7 +15,9 @@ void BodyPlanRegistry::load(std::string_view path)
 	if (!file.is_open())
 	{
 		throw std::runtime_error(
-			std::format("BodyPlanRegistry::load -- cannot open '{}'", resolved.string()));
+			std::format(
+				"BodyPlanRegistry::load -- cannot open '{}'",
+				resolved.string()));
 	}
 
 	nlohmann::json root = nlohmann::json::parse(file);
@@ -34,7 +36,8 @@ void BodyPlanRegistry::load(std::string_view path)
 	}
 }
 
-const std::vector<EquipmentSlot>& BodyPlanRegistry::get(std::string_view name) const
+const std::vector<EquipmentSlot>& BodyPlanRegistry::get(
+	std::string_view name) const
 {
 	auto found = plans.find(std::string{ name });
 	if (found == plans.end())

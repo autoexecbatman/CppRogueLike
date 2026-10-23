@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/MonsterAbilityTables.cpp",
-      "original": "\t\t? *printedStrength\n",
-      "mutated": "\t\t? MonsterStrength{ printedStrength->score, 0 }\n",
+      "original": "\tconst MonsterStrength strength = printedStrength.has_value() ?\n\t\t*printedStrength",
+      "mutated": "\tconst MonsterStrength strength = printedStrength.has_value() ?MonsterStrength{ printedStrength->score, 0 }",
       "catches": "a printed 18/00 built as a plain 18"
     },
     {
@@ -27,14 +27,14 @@
     },
     {
       "file": "src/MonsterAbilityTables.cpp",
-      "original": "\t\t: monster_strength_score(roll_dice(&dice, MONSTER_ABILITY_DICE), size);\n",
-      "mutated": "\t\t: monster_strength_score(roll_dice(&dice, MONSTER_ABILITY_DICE), CreatureSize::MEDIUM);\n",
+      "original": "\t\t*printedStrength :\n\t\tmonster_strength_score(roll_dice(&dice, MONSTER_ABILITY_DICE), size);\n",
+      "mutated": "\t\t*printedStrength :\n\t\tmonster_strength_score(roll_dice(&dice, MONSTER_ABILITY_DICE),CreatureSize::MEDIUM);\n",
       "catches": "Table 6 read from the man-sized column whatever the monster's size"
     },
     {
       "file": "src/MonsterAbilityTables.cpp",
-      "original": "\tconst MonsterStrength strength = printedStrength.has_value()\n",
-      "mutated": "\tconst MonsterStrength strength = printedStrength.has_value() && false\n",
+      "original": "\tconst MonsterStrength strength = printedStrength.has_value()",
+      "mutated": "\tconst MonsterStrength strength = printedStrength.has_value() && false",
       "catches": "a printed Strength ignored and Table 6 rolled instead, spending a die"
     },
     {

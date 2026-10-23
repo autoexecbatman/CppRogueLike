@@ -55,7 +55,8 @@ TEST(Thac0ProgressionTest, EveryFighterLevelIsAnImprovement)
 {
 	for (int level = 2; level <= 20; ++level)
 	{
-		EXPECT_TRUE(LevelUpSystem::thac0_improves_at(CreatureClass::FIGHTER, level))
+		EXPECT_TRUE(
+			LevelUpSystem::thac0_improves_at(CreatureClass::FIGHTER, level))
 			<< "level " << level;
 	}
 }
@@ -79,8 +80,8 @@ TEST(Thac0ProgressionTest, ClericImprovesTwoPointsEveryThirdLevel)
 	EXPECT_TRUE(LevelUpSystem::thac0_improves_at(CreatureClass::CLERIC, 4));
 
 	EXPECT_EQ(
-		LevelUpSystem::thac0_for_level(CreatureClass::CLERIC, 3)
-			- LevelUpSystem::thac0_for_level(CreatureClass::CLERIC, 4),
+		LevelUpSystem::thac0_for_level(CreatureClass::CLERIC, 3) -
+			LevelUpSystem::thac0_for_level(CreatureClass::CLERIC, 4),
 		2);
 }
 
@@ -96,13 +97,14 @@ TEST(Thac0ProgressionTest, RogueImprovesEverySecondLevel)
 // First level is where a character starts, so nothing improved to reach it.
 TEST(Thac0ProgressionTest, FirstLevelIsNotAnImprovement)
 {
-	for (const auto creatureClass : {
-			 CreatureClass::FIGHTER,
-			 CreatureClass::ROGUE,
-			 CreatureClass::CLERIC,
-			 CreatureClass::WIZARD,
-			 CreatureClass::MONSTER,
-		 })
+	for (
+		const auto creatureClass : {
+			CreatureClass::FIGHTER,
+			CreatureClass::ROGUE,
+			CreatureClass::CLERIC,
+			CreatureClass::WIZARD,
+			CreatureClass::MONSTER,
+		})
 	{
 		EXPECT_FALSE(LevelUpSystem::thac0_improves_at(creatureClass, 1));
 	}

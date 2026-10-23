@@ -39,7 +39,7 @@
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\tif (source == SpellSource::MEMORIZED && spell_fizzles(caster, *ctx.dataManager, *ctx.dice))",
+      "original": "\tif (source == SpellSource::MEMORIZED &&\n\t\tspell_fizzles(caster, *ctx.dataManager, *ctx.dice))",
       "mutated": "\tif (spell_fizzles(caster, *ctx.dataManager, *ctx.dice))",
       "catches": "a ring's spell failed by the priest's Wisdom, when it is not the priest's spell"
     },

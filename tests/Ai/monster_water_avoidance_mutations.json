@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/AiMonster.cpp",
-      "original": "\tconst Pathfinding::Mobility mobility = Pathfinding::mobility_of(owner, *ctx.tileConfig);\n\n\t// The cost map ignores",
-      "mutated": "\tconst Pathfinding::Mobility mobility = Pathfinding::mobility_of(*ctx.player(), *ctx.tileConfig);\n\n\t// The cost map ignores",
+      "original": "\tconst Pathfinding::Mobility mobility =\n\t\tPathfinding::mobility_of(owner, *ctx.tileConfig);\n\n\t// The cost map ignores",
+      "mutated": "\tconst Pathfinding::Mobility mobility =\n\t\tPathfinding::mobility_of(*ctx.player(), *ctx.tileConfig);\n\n\t// The cost map ignores",
       "catches": "the hunt planned for some other creature's legs"
     },
     {
       "file": "src/AiMonster.cpp",
-      "original": "\tstd::optional<Vector2D> nextStep = route.size() >= 2 ? std::optional<Vector2D>{ route[1] } : std::nullopt;",
-      "mutated": "\tstd::optional<Vector2D> nextStep = std::nullopt;",
+      "original": "\tstd::optional<Vector2D> nextStep =\n\t\troute.size() >= 2 ? std::optional<Vector2D>{ route[1] } : std::nullopt;",
+      "mutated": "\tstd::optional<Vector2D> nextStep =std::nullopt;",
       "catches": "the hunt ignoring the route round a crowd, which paces at a dead end beside it"
     },
     {
@@ -33,13 +33,13 @@
     },
     {
       "file": "src/AiMonster.cpp",
-      "original": "*candidateCost < bestCost && ctx.map->get_actor(candidate, ctx) == nullptr",
-      "mutated": "*candidateCost <= bestCost && ctx.map->get_actor(candidate, ctx) == nullptr",
+      "original": "*candidateCost < bestCost &&\n\t\t\t\tctx.map->get_actor(candidate, ctx) == nullptr",
+      "mutated": "*candidateCost <= bestCost &&\n\t\t\t\tctx.map->get_actor(candidate, ctx) == nullptr",
       "catches": "a hunter behind a crowd stepping sideways to a tile no nearer, which the next turn can undo"
     },
     {
       "file": "src/AiMonster.cpp",
-      "original": "*candidateCost < bestCost && ctx.map->get_actor(candidate, ctx) == nullptr",
+      "original": "*candidateCost < bestCost &&\n\t\t\t\tctx.map->get_actor(candidate, ctx) == nullptr",
       "mutated": "*candidateCost < bestCost",
       "catches": "a hunter behind a crowd choosing a tile a creature stands on and losing its turn"
     },
@@ -51,7 +51,7 @@
     },
     {
       "file": "src/AiMonster.cpp",
-      "original": "\tPathfinding::step(owner, owner.position + Vector2D{ deltaCol, deltaRow }, ctx);",
+      "original": "\tPathfinding::step(\n\t\towner,\n\t\towner.position + Vector2D{ deltaCol, deltaRow },\n\t\tctx);",
       "mutated": "\towner.position = owner.position + Vector2D{ deltaCol, deltaRow };",
       "catches": "random drift written straight onto the position, the path an unaware monster takes into a pool"
     },

@@ -12,10 +12,7 @@ protected:
 	MockGameContext mock;
 	GameContext ctx{};
 
-	void SetUp() override
-	{
-		ctx = mock.to_game_context();
-	}
+	void SetUp() override { ctx = mock.to_game_context(); }
 };
 
 // AD&D 2e invariant: a monster's effective level equals its Hit Dice count.
@@ -24,20 +21,26 @@ TEST_F(MonsterCreatorTest, MonsterLevelEqualsHitDice)
 {
 	const MonsterParams& params = mock.monsterRegistry.get_params("troll");
 	GameContext ctx = mock.to_game_context();
-	auto creature = MonsterCreator::create(Vector2D(0, 0), MonsterId::TROLL, ctx);
+	auto creature =
+		MonsterCreator::create(Vector2D(0, 0), MonsterId::TROLL, ctx);
 
 	ASSERT_NE(creature, nullptr);
-	EXPECT_EQ(creature->get_creature_level(), highest_count(params.hitDice).count);
+	EXPECT_EQ(
+		creature->get_creature_level(),
+		highest_count(params.hitDice).count);
 }
 
 TEST_F(MonsterCreatorTest, WeakMonsterLevelIsAtLeastOne)
 {
 	const MonsterParams& params = mock.monsterRegistry.get_params("goblin");
 	GameContext ctx = mock.to_game_context();
-	auto creature = MonsterCreator::create(Vector2D(0, 0), MonsterId::GOBLIN, ctx);
+	auto creature =
+		MonsterCreator::create(Vector2D(0, 0), MonsterId::GOBLIN, ctx);
 
 	ASSERT_NE(creature, nullptr);
-	EXPECT_EQ(creature->get_creature_level(), highest_count(params.hitDice).count);
+	EXPECT_EQ(
+		creature->get_creature_level(),
+		highest_count(params.hitDice).count);
 	EXPECT_GE(creature->get_creature_level(), 1);
 }
 
@@ -52,7 +55,8 @@ TEST_F(MonsterCreatorTest, EquipmentThatDoesNotFitItsSlotIsRefused)
 	params.equipment.push_back({ EquipmentSlot::MISSILE_WEAPON, "dagger" });
 
 	EXPECT_THROW(
-		[[maybe_unused]] const auto refused = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx),
+		[[maybe_unused]] const auto refused =
+			MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx),
 		std::runtime_error);
 }
 
@@ -60,9 +64,17 @@ TEST_F(MonsterCreatorTest, EquipmentThatDoesNotFitItsSlotIsRefused)
 // it, so the rule refuses nothing the game ships.
 TEST_F(MonsterCreatorTest, EveryAuthoredMonsterArmsItself)
 {
-	for (const std::string& key : { "goblin", "orc", "archer", "mage", "ogre", "kobold" })
+	for (
+		const std::string& key :
+		{ "goblin", "orc", "archer", "mage", "ogre", "kobold" })
 	{
 		const MonsterParams& params = mock.monsterRegistry.get_params(key);
-		EXPECT_NO_THROW([[maybe_unused]] const auto armed = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx)) << key;
+		EXPECT_NO_THROW(
+			[[maybe_unused]] const auto armed =
+				MonsterCreator::create_from_params(
+					Vector2D{ 0, 0 },
+					params,
+					ctx))
+			<< key;
 	}
 }

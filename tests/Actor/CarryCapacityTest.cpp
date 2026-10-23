@@ -26,10 +26,7 @@
 class CarryCapacityTest : public ::testing::Test
 {
 protected:
-	void SetUp() override
-	{
-		ctx = mock.to_game_context();
-	}
+	void SetUp() override { ctx = mock.to_game_context(); }
 
 	// The capacity of a carrier at this Strength, with no exceptional percentile.
 	int capacity_at(int strength)
@@ -71,10 +68,14 @@ TEST_F(CarryCapacityTest, ExceptionalStrengthIsAnsweredFromItsOwnBand)
 
 	// Table 47's four exceptional rows: 18/01-50 is 280, and 18/00 is 480.
 	carrier.set_exceptional_strength(50);
-	EXPECT_EQ(InventoryOperations::get_max_weight(carrier, *ctx.dataManager), 280);
+	EXPECT_EQ(
+		InventoryOperations::get_max_weight(carrier, *ctx.dataManager),
+		280);
 
 	carrier.set_exceptional_strength(100);
-	EXPECT_EQ(InventoryOperations::get_max_weight(carrier, *ctx.dataManager), 480);
+	EXPECT_EQ(
+		InventoryOperations::get_max_weight(carrier, *ctx.dataManager),
+		480);
 }
 
 TEST_F(CarryCapacityTest, GiantStrengthCarriesWhatTableOnePrints)

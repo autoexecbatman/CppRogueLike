@@ -43,7 +43,8 @@ TEST(DrowningTest, BreathIsAThirdOfConstitutionRoundedUp)
 {
 	EXPECT_EQ(breath_rounds(18), 6);
 	EXPECT_EQ(breath_rounds(15), 5);
-	EXPECT_EQ(breath_rounds(14), 5) << "4.67 rounds up to 5, it does not truncate to 4";
+	EXPECT_EQ(breath_rounds(14), 5)
+		<< "4.67 rounds up to 5, it does not truncate to 4";
 	EXPECT_EQ(breath_rounds(13), 5) << "4.33 rounds up to 5";
 	EXPECT_EQ(breath_rounds(12), 4);
 }
@@ -55,7 +56,8 @@ TEST(DrowningTest, EveryoneGetsAtLeastOneRound)
 	EXPECT_EQ(breath_rounds(3), 1) << "a third of 3 is 1 anyway";
 	EXPECT_EQ(breath_rounds(2), 1) << "a third of 2 rounds up to 1";
 	EXPECT_EQ(breath_rounds(1), 1);
-	EXPECT_EQ(breath_rounds(0), 1) << "the floor holds even where the table does not reach";
+	EXPECT_EQ(breath_rounds(0), 1)
+		<< "the floor holds even where the table does not reach";
 }
 
 // The first check past the allowance is unmodified, and each one after is two worse.
@@ -73,7 +75,9 @@ TEST(DrowningTest, ThePenaltyAccumulatesByTwoEveryRound)
 {
 	for (int round = 1; round <= 10; ++round)
 	{
-		EXPECT_EQ(breath_check_penalty(round) - breath_check_penalty(round - 1), -2)
+		EXPECT_EQ(
+			breath_check_penalty(round) - breath_check_penalty(round - 1),
+			-2)
 			<< "between round " << round - 1 << " and " << round;
 	}
 }
@@ -113,8 +117,14 @@ protected:
 	// A swimmer standing in the one water tile, able to be there and still breathing air.
 	Creature& swimmer_in_water(int constitution)
 	{
-		auto creature = std::make_unique<Creature>(Vector2D{ 5, 5 }, ActorData{ TileRef{}, "diver", ColorPairId::WHITE_BLACK });
-		creature->set_corpse("test remains", 0, "It is test remains.", CorpseEdibility::EDIBLE);
+		auto creature = std::make_unique<Creature>(
+			Vector2D{ 5, 5 },
+			ActorData{ TileRef{}, "diver", ColorPairId::WHITE_BLACK });
+		creature->set_corpse(
+			"test remains",
+			0,
+			"It is test remains.",
+			CorpseEdibility::EDIBLE);
 		creature->experienceReward = std::make_unique<ExperienceReward>(0);
 		creature->armorClass = std::make_unique<ArmorClass>(10);
 		creature->healthPool = std::make_unique<HealthPool>(30);
@@ -152,12 +162,16 @@ TEST_F(DrowningInWaterTest, BeingInWaterStartsTheBreath)
 {
 	Creature& diver = swimmer_in_water(15);
 
-	ASSERT_FALSE(diver.get_air_until_time().has_value()) << "nothing is held before a round runs";
+	ASSERT_FALSE(diver.get_air_until_time().has_value())
+		<< "nothing is held before a round runs";
 
 	round_passes();
 
-	ASSERT_TRUE(diver.get_air_until_time().has_value()) << "a creature in water is holding its breath";
-	EXPECT_EQ(*diver.get_air_until_time(), TIME_UNITS_PER_ROUND * (1 + breath_rounds(15)))
+	ASSERT_TRUE(diver.get_air_until_time().has_value())
+		<< "a creature in water is holding its breath";
+	EXPECT_EQ(
+		*diver.get_air_until_time(),
+		TIME_UNITS_PER_ROUND * (1 + breath_rounds(15)))
 		<< "five rounds of air from the round it was found in";
 }
 
@@ -172,7 +186,8 @@ TEST_F(DrowningInWaterTest, SurfacingClearsTheBreath)
 	diver.position = Vector2D{ 2, 2 };
 	round_passes();
 
-	EXPECT_FALSE(diver.get_air_until_time().has_value()) << "it surfaced and is still holding its breath";
+	EXPECT_FALSE(diver.get_air_until_time().has_value())
+		<< "it surfaced and is still holding its breath";
 }
 
 // Past the allowance the checks begin, and a failed one drowns. Constitution 3 buys the
@@ -182,7 +197,8 @@ TEST_F(DrowningInWaterTest, AFailedCheckDrowns)
 	Creature& diver = swimmer_in_water(3);
 
 	round_passes(); // the gulp of air, and Constitution 3 buys only the floor of one round
-	EXPECT_FALSE(diver.is_dead()) << "the first round underwater is the breath, not a check";
+	EXPECT_FALSE(diver.is_dead())
+		<< "the first round underwater is the breath, not a check";
 	ASSERT_TRUE(diver.get_air_until_time().has_value());
 	EXPECT_EQ(*diver.get_air_until_time(), TIME_UNITS_PER_ROUND * 2);
 
@@ -205,7 +221,8 @@ TEST_F(DrowningInWaterTest, APassedCheckCostsNothing)
 	mock.dice.set_next_roll(1);
 	round_passes();
 
-	EXPECT_FALSE(diver.is_dead()) << "a 1 against a Constitution of 18 is a made check";
+	EXPECT_FALSE(diver.is_dead())
+		<< "a 1 against a Constitution of 18 is a made check";
 }
 
 // The helm, which is the whole point. "The possessor is able to see and breathe
@@ -214,23 +231,27 @@ TEST_F(DrowningInWaterTest, APassedCheckCostsNothing)
 TEST_F(DrowningInWaterTest, TheHelmOfUnderwaterActionMeansNoBreathAtAll)
 {
 	Creature& diver = swimmer_in_water(3);
-	auto helm = std::make_unique<Item>(Vector2D{}, ActorData{
-													   TileRef{},
-													   "helm of underwater action",
-													   ColorPairId::CYAN_BLACK,
-												   });
+	auto helm = std::make_unique<Item>(
+		Vector2D{},
+		ActorData{
+			TileRef{},
+			"helm of underwater action",
+			ColorPairId::CYAN_BLACK,
+		});
 	helm->itemKey = "helm_of_underwater_action";
 	helm->behavior = MagicalHelm{ MagicalEffect::UNDERWATER_ACTION, 0 };
 	diver.equippedItems.emplace_back(std::move(helm), EquipmentSlot::HEAD);
 
-	ASSERT_FALSE(diver.needs_air_underwater()) << "the helm keeps a globe of air about the head";
+	ASSERT_FALSE(diver.needs_air_underwater())
+		<< "the helm keeps a globe of air about the head";
 
 	for (int round = 0; round < 10; ++round)
 	{
 		round_passes();
 	}
 
-	EXPECT_FALSE(diver.get_air_until_time().has_value()) << "it never started holding a breath";
+	EXPECT_FALSE(diver.get_air_until_time().has_value())
+		<< "it never started holding a breath";
 	EXPECT_FALSE(diver.is_dead()) << "ten rounds under and the helm still held";
 }
 
@@ -247,7 +268,8 @@ TEST_F(DrowningInWaterTest, SomethingThatLivesInWaterNeverHoldsItsBreath)
 	}
 
 	EXPECT_FALSE(fish.get_air_until_time().has_value());
-	EXPECT_FALSE(fish.is_dead()) << "a water dweller drowned in its own element";
+	EXPECT_FALSE(fish.is_dead())
+		<< "a water dweller drowned in its own element";
 }
 
 // A flying creature over water is not in it. The Monstrous Manual gives a bat
@@ -263,7 +285,8 @@ TEST_F(DrowningInWaterTest, AFlyingCreatureOverWaterHoldsNoBreath)
 		round_passes();
 	}
 
-	EXPECT_FALSE(bat.get_air_until_time().has_value()) << "a flier took a breath it had no need of";
+	EXPECT_FALSE(bat.get_air_until_time().has_value())
+		<< "a flier took a breath it had no need of";
 	EXPECT_FALSE(bat.is_dead()) << "a bat drowned flying over a puddle";
 }
 
@@ -274,7 +297,8 @@ TEST_F(DrowningInWaterTest, FlyingIsNotSwimming)
 	Creature& flier = swimmer_in_water(12);
 	flier.add_state(ActorState::CAN_FLY);
 
-	EXPECT_FALSE(flier.has_state(ActorState::CAN_SWIM)) << "flight was granted as swimming";
+	EXPECT_FALSE(flier.has_state(ActorState::CAN_SWIM))
+		<< "flight was granted as swimming";
 }
 
 // The data has to say so, or the capability is one nothing in the game ever carries.
@@ -282,13 +306,18 @@ TEST_F(DrowningInWaterTest, FlyingIsNotSwimming)
 TEST_F(DrowningInWaterTest, ABatBuiltFromTheDataFliesAndAGoblinDoesNot)
 {
 	const auto bat = MonsterCreator::create_from_params(
-		Vector2D{ 5, 5 }, ctx.monsterRegistry->get_params("bat"), ctx);
+		Vector2D{ 5, 5 },
+		ctx.monsterRegistry->get_params("bat"),
+		ctx);
 	const auto goblin = MonsterCreator::create_from_params(
-		Vector2D{ 6, 6 }, ctx.monsterRegistry->get_params("goblin"), ctx);
+		Vector2D{ 6, 6 },
+		ctx.monsterRegistry->get_params("goblin"),
+		ctx);
 
 	ASSERT_NE(bat, nullptr);
 	ASSERT_NE(goblin, nullptr);
-	EXPECT_TRUE(bat->is_flying()) << "the bat does not fly, so it drowns in a puddle";
+	EXPECT_TRUE(bat->is_flying())
+		<< "the bat does not fly, so it drowns in a puddle";
 	EXPECT_FALSE(goblin->is_flying()) << "a goblin was given wings";
 }
 
@@ -311,7 +340,8 @@ TEST_F(DrowningInWaterTest, ABreathAlreadyHeldSurvivesASave)
 	};
 	restored.load(saved);
 
-	EXPECT_EQ(restored.get_air_until_time(), heldUntil) << "the diver surfaced and took a fresh breath across the save";
+	EXPECT_EQ(restored.get_air_until_time(), heldUntil)
+		<< "the diver surfaced and took a fresh breath across the save";
 }
 
 // A creature on dry land writes no breath at all, so the common case costs the save
@@ -344,7 +374,8 @@ TEST_F(DrowningInWaterTest, ARollEqualToTheConstitutionIsAMadeCheck)
 	mock.dice.set_next_roll(10);
 	round_passes(); // the first check, unmodified, against exactly 10
 
-	EXPECT_FALSE(creatures.empty()) << "a 10 against a Constitution of 10 drowned the diver";
+	EXPECT_FALSE(creatures.empty())
+		<< "a 10 against a Constitution of 10 drowned the diver";
 }
 
 // The penalty accumulates, so the same roll that passes the first check fails a later
@@ -360,16 +391,19 @@ TEST_F(DrowningInWaterTest, TheOddsWorsenUntilEvenTheBestRollFails)
 	// fails against 3 - 4, so the diver lasts exactly two checks however well it rolls.
 	mock.dice.set_next_roll(1);
 	round_passes();
-	ASSERT_FALSE(creatures.empty()) << "the first check is unmodified and a 1 makes it";
+	ASSERT_FALSE(creatures.empty())
+		<< "the first check is unmodified and a 1 makes it";
 
 	mock.dice.set_next_roll(1);
 	round_passes();
-	ASSERT_FALSE(creatures.empty()) << "the second is at -2 and a 1 still makes it";
+	ASSERT_FALSE(creatures.empty())
+		<< "the second is at -2 and a 1 still makes it";
 
 	mock.dice.set_next_roll(1);
 	round_passes();
 
-	EXPECT_TRUE(creatures.empty()) << "the third is at -4, which no roll can make";
+	EXPECT_TRUE(creatures.empty())
+		<< "the third is at -4, which no roll can make";
 }
 
 // The helm on its own is enough to get into the water, as the gauntlets are. Without
@@ -380,16 +414,19 @@ TEST_F(DrowningInWaterTest, TheHelmAloneCarriesAWearerIntoWater)
 	Creature& diver = swimmer_in_water(10);
 	ASSERT_FALSE(diver.has_bypass(ActorState::CAN_SWIM)) << "nothing worn yet";
 
-	auto helm = std::make_unique<Item>(Vector2D{}, ActorData{
-													   TileRef{},
-													   "helm of underwater action",
-													   ColorPairId::CYAN_BLACK,
-												   });
+	auto helm = std::make_unique<Item>(
+		Vector2D{},
+		ActorData{
+			TileRef{},
+			"helm of underwater action",
+			ColorPairId::CYAN_BLACK,
+		});
 	helm->itemKey = "helm_of_underwater_action";
 	helm->behavior = MagicalHelm{ MagicalEffect::UNDERWATER_ACTION, 0 };
 	diver.equippedItems.emplace_back(std::move(helm), EquipmentSlot::HEAD);
 
-	EXPECT_TRUE(diver.has_bypass(ActorState::CAN_SWIM)) << "the helm did not carry its wearer into the water";
+	EXPECT_TRUE(diver.has_bypass(ActorState::CAN_SWIM))
+		<< "the helm did not carry its wearer into the water";
 }
 
 // A creature in water when a seven-round action begins takes its gulp in the first
@@ -404,7 +441,9 @@ TEST_F(DrowningInWaterTest, AGulpTakenInsideALongActionCountsFromItsOwnRound)
 
 	one_action_of(7);
 
-	EXPECT_EQ(diver.get_air_until_time(), std::optional<int>{ (1 + breath_rounds(15)) * TIME_UNITS_PER_ROUND })
+	EXPECT_EQ(
+		diver.get_air_until_time(),
+		std::optional<int>{ (1 + breath_rounds(15)) * TIME_UNITS_PER_ROUND })
 		<< "the breath was taken at the action's end";
 }
 
@@ -426,8 +465,10 @@ TEST_F(DrowningInWaterTest, EachRoundOfALongActionChecksAtItsOwnPenalty)
 
 	one_action_of(4);
 
-	EXPECT_TRUE(creatures.empty()) << "the fourth check, at -6, did not drown it";
-	EXPECT_EQ(mock.dice.d20(), UNTOUCHED) << "the checks were not the four the rounds call for";
+	EXPECT_TRUE(creatures.empty())
+		<< "the fourth check, at -6, did not drown it";
+	EXPECT_EQ(mock.dice.d20(), UNTOUCHED)
+		<< "the checks were not the four the rounds call for";
 }
 
 // end of file: DrowningTest.cpp

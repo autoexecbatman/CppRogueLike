@@ -51,7 +51,7 @@
     },
     {
       "file": "src/PlayerController.cpp",
-      "original": "\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, \"This lock is too difficult for you until you have learned more.\", MessageCompletion::FINISHED);\n",
+      "original": "\t\tctx.messageSystem->message(\n\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\"This lock is too difficult for you until you have learned more.\",\n\t\t\tMessageCompletion::FINISHED);\n",
       "mutated": "",
       "catches": "a refused pick saying nothing"
     },
@@ -75,14 +75,14 @@
     },
     {
       "file": "src/Map.cpp",
-      "original": "\t\ttiles.back().lockPickFailedAtLevel = tileJson.at(\"lockPickFailedAtLevel\").get<int>();\n",
+      "original": "\t\ttiles.back().lockPickFailedAtLevel =\n\t\t\ttileJson.at(\"lockPickFailedAtLevel\").get<int>();\n",
       "mutated": "",
       "catches": "a failed pick dropped on load"
     },
     {
       "file": "src/Map.cpp",
-      "original": "\t\ttiles.back().lockPickFailedAtLevel = tileJson.at(\"lockPickFailedAtLevel\").get<int>();\n",
-      "mutated": "\t\ttiles.back().lockPickFailedAtLevel = tileJson.value(\"lockPickFailedAtLevel\", 0);\n",
+      "original": "\t\ttiles.back().lockPickFailedAtLevel =\n\t\t\ttileJson.at(\"lockPickFailedAtLevel\").get<int>();\n",
+      "mutated": "\t\ttiles.back().lockPickFailedAtLevel =\n\t\t\ttileJson.value(\"lockPickFailedAtLevel\", 0);\n",
       "catches": "a tile without its failed-pick level loaded as never instead of refused"
     }
   ]

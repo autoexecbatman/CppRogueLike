@@ -65,7 +65,9 @@ void MenuSell::populate_items(std::span<std::unique_ptr<Item>> items)
 
 	for (const auto& item : items)
 	{
-		assert(item && "populate_items: the pack holds a null where an item should be");
+		assert(
+			item &&
+			"populate_items: the pack holds a null where an item should be");
 
 		std::string itemName = item->get_name();
 
@@ -75,7 +77,10 @@ void MenuSell::populate_items(std::span<std::unique_ptr<Item>> items)
 		// The gold figures line up by padding the name out to a fixed column. A name
 		// long enough to reach it keeps one space, so the two never run together.
 		const size_t totalWidth = 28;
-		const size_t padding = totalWidth > (itemName.length() + goldText.length()) ? totalWidth - itemName.length() - goldText.length() : 1;
+		const size_t padding =
+			totalWidth > (itemName.length() + goldText.length()) ?
+			totalWidth - itemName.length() - goldText.length() :
+			1;
 
 		menuItems.push_back(itemName + std::string(padding, ' ') + goldText);
 	}
@@ -101,29 +106,41 @@ void MenuSell::menu_print_state(size_t state)
 void MenuSell::handle_sell(Creature& seller, GameContext& ctx)
 {
 	if (InventoryOperations::is_inventory_empty(seller.inventoryData) ||
-		currentState >= InventoryOperations::get_item_count(seller.inventoryData))
+		currentState >=
+			InventoryOperations::get_item_count(seller.inventoryData))
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Invalid selection.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"Invalid selection.",
+			MessageCompletion::FINISHED);
 		return;
 	}
 
-	Item* item = InventoryOperations::get_item_at(seller.inventoryData, currentState);
+	Item* item =
+		InventoryOperations::get_item_at(seller.inventoryData, currentState);
 	assert(item && "MenuSell: the pack holds a null item");
 
 	// The shop decides and reports; this menu only keeps its cursor inside the pack.
-	if (shopkeeper.shop->process_player_sale(ctx, *item, seller, shopkeeper) && currentState >= InventoryOperations::get_item_count(seller.inventoryData) && !InventoryOperations::is_inventory_empty(seller.inventoryData))
+	if (shopkeeper.shop->process_player_sale(ctx, *item, seller, shopkeeper) &&
+		currentState >=
+			InventoryOperations::get_item_count(seller.inventoryData) &&
+		!InventoryOperations::is_inventory_empty(seller.inventoryData))
 	{
-		currentState = InventoryOperations::get_item_count(seller.inventoryData) - 1;
+		currentState =
+			InventoryOperations::get_item_count(seller.inventoryData) - 1;
 	}
 }
 
-MenuSell::MenuSell(Creature& shopkeeper, Creature& player, GameContext& ctx)
-	: player(player), shopkeeper(shopkeeper)
+MenuSell::MenuSell(Creature& shopkeeper, Creature& player, GameContext& ctx) :
+	player(player),
+	shopkeeper(shopkeeper)
 {
 	assert(ctx.renderer && "MenuSell: renderer required before construction");
 	// Every way into the trade menu requires a shop, so there is always one to sell to.
 	assert(shopkeeper.shop && "MenuSell opened on a creature with no shop");
-	menuHeight = static_cast<size_t>(ctx.renderer->get_viewport_rows() - ctx.renderer->get_gui_reserve_rows());
+	menuHeight = static_cast<size_t>(
+		ctx.renderer->get_viewport_rows() -
+		ctx.renderer->get_gui_reserve_rows());
 	menuWidth = static_cast<size_t>(ctx.renderer->get_viewport_cols());
 
 	populate_items(player.inventoryData.items);
@@ -199,13 +216,17 @@ void MenuSell::on_key(GameContext& ctx)
 	}
 	else if (lastKey == GameKey::ENTER)
 	{
-		if (!InventoryOperations::is_inventory_empty(player.inventoryData) && !menuItems.empty())
+		if (!InventoryOperations::is_inventory_empty(player.inventoryData) &&
+			!menuItems.empty())
 		{
 			handle_sell(player, ctx);
 		}
 		else
 		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "No items to sell.", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"No items to sell.",
+				MessageCompletion::FINISHED);
 		}
 	}
 	else if (lastKey == GameKey::ESCAPE)

@@ -69,8 +69,8 @@
     },
     {
       "file": "src/Map.cpp",
-      "original": "\t\t\t!can_place_at(itemPos, ctx))",
-      "mutated": "\t\t\t!is_unobstructed(itemPos, ctx))",
+      "original": "\t\twhile (itemTries < MAX_ITEM_TRIES && !can_place_at(itemPos, ctx))",
+      "mutated": "\t\twhile (itemTries < MAX_ITEM_TRIES && !is_unobstructed(itemPos, ctx))",
       "catches": "room items placed wherever the tile is clear, water included"
     },
     {
@@ -81,8 +81,8 @@
     },
     {
       "file": "src/Map.cpp",
-      "original": "\t\t!can_place_at(pos, ctx))\n\t{\n\t\tpos.x = ctx.dice->roll",
-      "mutated": "\t\t!is_unobstructed(pos, ctx))\n\t{\n\t\tpos.x = ctx.dice->roll",
+      "original": "\twhile (playerTries < MAX_PLAYER_TRIES && !can_place_at(pos, ctx))\n\t{\n\t\tpos.x = ctx.dice->roll",
+      "mutated": "\twhile (playerTries < MAX_PLAYER_TRIES && !is_unobstructed(pos, ctx))\n\t{\n\t\tpos.x = ctx.dice->roll",
       "catches": "the player started standing in water"
     }
   ]

@@ -33,7 +33,7 @@
     },
     {
       "file": "src/HungerSystem.cpp",
-      "original": "\tif (source.contains(\"lastNotifiedState\"))\n\t{\n\t\trun.lastNotifiedState = static_cast<HungerState>(source[\"lastNotifiedState\"].get<int>());\n\t}",
+      "original": "\tif (source.contains(\"lastNotifiedState\"))\n\t{\n\t\trun.lastNotifiedState =\n\t\t\tstatic_cast<HungerState>(source[\"lastNotifiedState\"].get<int>());\n\t}",
       "mutated": "\trun.lastNotifiedState = static_cast<HungerState>(source.at(\"lastNotifiedState\").get<int>());",
       "catches": "a system that never announced refused on load, though its writer leaves the field out"
     },

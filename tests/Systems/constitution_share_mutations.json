@@ -33,8 +33,8 @@
     },
     {
       "file": "src/HealthPool.cpp",
-      "original": "\t: hpBase(hpMax),\n",
-      "mutated": "\t: hpBase(0),\n",
+      "original": "HealthPool::HealthPool(int hpMax) :\n\thpBase(hpMax),\n",
+      "mutated": "HealthPool::HealthPool(int hpMax) :\n\thpBase(0),\n",
       "catches": "a body built owing its whole pool to Constitution"
     }
   ]

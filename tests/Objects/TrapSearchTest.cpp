@@ -67,8 +67,11 @@ protected:
 	void become_thief()
 	{
 		become(CreatureClass::ROGUE, PlayerRaceState::HUMAN);
-		searcher.thiefSkillPoints.at(thief_skill_index(ThiefSkill::FIND_REMOVE_TRAPS)) = 40;
-		ASSERT_EQ(searcher.thief_skill(ThiefSkill::FIND_REMOVE_TRAPS), THIEF_SKILL);
+		searcher.thiefSkillPoints.at(
+			thief_skill_index(ThiefSkill::FIND_REMOVE_TRAPS)) = 40;
+		ASSERT_EQ(
+			searcher.thief_skill(ThiefSkill::FIND_REMOVE_TRAPS),
+			THIEF_SKILL);
 	}
 
 	void become_dwarf_fighter()
@@ -78,16 +81,22 @@ protected:
 
 	Trap& place(TrapType kind, Vector2D position)
 	{
-		mock.traps.push_back(std::make_unique<Trap>(position, kind, mock.tile_config));
+		mock.traps.push_back(
+			std::make_unique<Trap>(position, kind, mock.tile_config));
 		return *mock.traps.back();
 	}
 
 	std::string all_message_text() const
 	{
 		std::string joined;
-		for (size_t index = 0; index < ctx.messageSystem->get_stored_message_count(); ++index)
+		for (
+			size_t index = 0;
+			index < ctx.messageSystem->get_stored_message_count();
+			++index)
 		{
-			for (const auto& part : ctx.messageSystem->get_attack_message_at(index))
+			for (
+				const auto& part :
+				ctx.messageSystem->get_attack_message_at(index))
 			{
 				joined += part.text;
 			}
@@ -97,7 +106,8 @@ protected:
 
 	static bool is_found(const Trap& trap)
 	{
-		return trap.get_state() == TrapState::DETECTED && !trap.has_state(ActorState::IS_INVISIBLE);
+		return trap.get_state() == TrapState::DETECTED &&
+			!trap.has_state(ActorState::IS_INVISIBLE);
 	}
 
 	MockGameContext mock{};
@@ -114,10 +124,16 @@ TEST_F(TrapSearchTest, AThiefFindsAnAdjacentDartTrapAtItsOwnPercentage)
 	mock.dice.set_next_roll(THIEF_SKILL);
 	mock.dice.set_next_roll(7);
 
-	EXPECT_EQ(TrapSearch::search_around(searcher, ctx), std::optional<int>{ 7 });
+	EXPECT_EQ(
+		TrapSearch::search_around(searcher, ctx),
+		std::optional<int>{ 7 });
 	EXPECT_TRUE(is_found(dart));
-	EXPECT_NE(all_message_text().find("You find a hidden dart trap."), std::string::npos) << all_message_text();
-	EXPECT_EQ(all_message_text().find("You find no traps."), std::string::npos) << all_message_text();
+	EXPECT_NE(
+		all_message_text().find("You find a hidden dart trap."),
+		std::string::npos)
+		<< all_message_text();
+	EXPECT_EQ(all_message_text().find("You find no traps."), std::string::npos)
+		<< all_message_text();
 }
 
 // One over the percentage misses, the trap stays hidden, and the time is spent anyway.
@@ -128,10 +144,13 @@ TEST_F(TrapSearchTest, OneOverTheThiefsPercentageMisses)
 	mock.dice.set_next_roll(THIEF_SKILL + 1);
 	mock.dice.set_next_roll(3);
 
-	EXPECT_EQ(TrapSearch::search_around(searcher, ctx), std::optional<int>{ 3 });
+	EXPECT_EQ(
+		TrapSearch::search_around(searcher, ctx),
+		std::optional<int>{ 3 });
 	EXPECT_EQ(arrow.get_state(), TrapState::HIDDEN);
 	EXPECT_TRUE(arrow.has_state(ActorState::IS_INVISIBLE));
-	EXPECT_NE(all_message_text().find("You find no traps."), std::string::npos) << all_message_text();
+	EXPECT_NE(all_message_text().find("You find no traps."), std::string::npos)
+		<< all_message_text();
 }
 
 // "Only small traps can be found in this way": a pit is not the thief's to find.
@@ -143,7 +162,8 @@ TEST_F(TrapSearchTest, AThiefCannotFindAPit)
 	mock.dice.set_next_roll(4);
 
 	ASSERT_TRUE(TrapSearch::search_around(searcher, ctx).has_value());
-	EXPECT_EQ(pit.get_state(), TrapState::HIDDEN) << "a thief's roll found a pit";
+	EXPECT_EQ(pit.get_state(), TrapState::HIDDEN)
+		<< "a thief's roll found a pit";
 }
 
 // A dwarf finds a pit on 1-3 on 1d6, and a dwarf's look takes one round.
@@ -153,9 +173,14 @@ TEST_F(TrapSearchTest, ThreeOnTheDieFindsAPitForADwarf)
 	const Trap& pit = place(TrapType::PIT, ADJACENT_TILE);
 	mock.dice.set_next_roll(3);
 
-	EXPECT_EQ(TrapSearch::search_around(searcher, ctx), std::optional<int>{ 1 });
+	EXPECT_EQ(
+		TrapSearch::search_around(searcher, ctx),
+		std::optional<int>{ 1 });
 	EXPECT_TRUE(is_found(pit));
-	EXPECT_NE(all_message_text().find("You find a hidden pit trap."), std::string::npos) << all_message_text();
+	EXPECT_NE(
+		all_message_text().find("You find a hidden pit trap."),
+		std::string::npos)
+		<< all_message_text();
 }
 
 TEST_F(TrapSearchTest, FourOnTheDieMissesAPit)
@@ -164,7 +189,9 @@ TEST_F(TrapSearchTest, FourOnTheDieMissesAPit)
 	const Trap& pit = place(TrapType::PIT, ADJACENT_TILE);
 	mock.dice.set_next_roll(4);
 
-	EXPECT_EQ(TrapSearch::search_around(searcher, ctx), std::optional<int>{ 1 });
+	EXPECT_EQ(
+		TrapSearch::search_around(searcher, ctx),
+		std::optional<int>{ 1 });
 	EXPECT_EQ(pit.get_state(), TrapState::HIDDEN);
 }
 
@@ -176,7 +203,8 @@ TEST_F(TrapSearchTest, ADwarfCannotFindADartTrap)
 	mock.dice.set_next_roll(1);
 
 	ASSERT_TRUE(TrapSearch::search_around(searcher, ctx).has_value());
-	EXPECT_EQ(dart.get_state(), TrapState::HIDDEN) << "a dwarf's roll found a dart trap";
+	EXPECT_EQ(dart.get_state(), TrapState::HIDDEN)
+		<< "a dwarf's roll found a dart trap";
 }
 
 // A dwarf thief looks for both kinds, each with its own roll in trap order, and takes
@@ -191,7 +219,9 @@ TEST_F(TrapSearchTest, ADwarfThiefLooksForBothKindsAndTakesTheThiefsTime)
 	mock.dice.set_next_roll(1);
 	mock.dice.set_next_roll(9);
 
-	EXPECT_EQ(TrapSearch::search_around(searcher, ctx), std::optional<int>{ 9 });
+	EXPECT_EQ(
+		TrapSearch::search_around(searcher, ctx),
+		std::optional<int>{ 9 });
 	EXPECT_TRUE(is_found(pit));
 	EXPECT_TRUE(is_found(dart));
 }
@@ -204,18 +234,26 @@ TEST_F(TrapSearchTest, ATrapIsSearchedOncePerLevel)
 	const Trap& dart = place(TrapType::DART, ADJACENT_TILE);
 	mock.dice.set_next_roll(90);
 	mock.dice.set_next_roll(5);
-	ASSERT_EQ(TrapSearch::search_around(searcher, ctx), std::optional<int>{ 5 });
+	ASSERT_EQ(
+		TrapSearch::search_around(searcher, ctx),
+		std::optional<int>{ 5 });
 
 	// A certain find is queued and must not be reached; the time die takes it.
 	mock.dice.set_next_roll(1);
-	EXPECT_EQ(TrapSearch::search_around(searcher, ctx), std::optional<int>{ 1 });
-	EXPECT_EQ(dart.get_state(), TrapState::HIDDEN) << "the same level searched the same trap twice";
+	EXPECT_EQ(
+		TrapSearch::search_around(searcher, ctx),
+		std::optional<int>{ 1 });
+	EXPECT_EQ(dart.get_state(), TrapState::HIDDEN)
+		<< "the same level searched the same trap twice";
 
 	searcher.set_creature_level(2);
 	mock.dice.set_next_roll(1);
 	mock.dice.set_next_roll(6);
-	EXPECT_EQ(TrapSearch::search_around(searcher, ctx), std::optional<int>{ 6 });
-	EXPECT_TRUE(is_found(dart)) << "a level gained is what buys the next search";
+	EXPECT_EQ(
+		TrapSearch::search_around(searcher, ctx),
+		std::optional<int>{ 6 });
+	EXPECT_TRUE(is_found(dart))
+		<< "a level gained is what buys the next search";
 }
 
 // The search reaches the eight tiles around the searcher and no further.
@@ -227,7 +265,8 @@ TEST_F(TrapSearchTest, ATrapTwoTilesAwayIsNotSearched)
 	mock.dice.set_next_roll(4);
 
 	ASSERT_TRUE(TrapSearch::search_around(searcher, ctx).has_value());
-	EXPECT_EQ(far.get_state(), TrapState::HIDDEN) << "a trap two tiles away was searched";
+	EXPECT_EQ(far.get_state(), TrapState::HIDDEN)
+		<< "a trap two tiles away was searched";
 }
 
 // Anyone who can find no kind of trap is told so and spends no turn.
@@ -238,7 +277,10 @@ TEST_F(TrapSearchTest, AHumanFighterCannotSearchAndSpendsNoTurn)
 
 	EXPECT_EQ(TrapSearch::search_around(searcher, ctx), std::nullopt);
 	EXPECT_EQ(dart.get_state(), TrapState::HIDDEN);
-	EXPECT_NE(all_message_text().find("You don't know how to look for traps."), std::string::npos) << all_message_text();
+	EXPECT_NE(
+		all_message_text().find("You don't know how to look for traps."),
+		std::string::npos)
+		<< all_message_text();
 }
 
 // end of file: TrapSearchTest.cpp

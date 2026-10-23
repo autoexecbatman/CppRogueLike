@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/AttackRate.h",
-      "original": "\tconst int cost = static_cast<int>(static_cast<float>(TIME_UNITS_PER_ROUND) / attacksPerRound);",
-      "mutated": "\tconst int cost = static_cast<int>(static_cast<float>(TIME_UNITS_PER_ROUND) * attacksPerRound);",
+      "original": "\tconst int cost = static_cast<int>(\n\t\tstatic_cast<float>(TIME_UNITS_PER_ROUND) / attacksPerRound);",
+      "mutated": "\tconst int cost = static_cast<int>(\n\t\tstatic_cast<float>(TIME_UNITS_PER_ROUND)* attacksPerRound);",
       "catches": "the rate multiplying rather than dividing, so a faster attacker pays more and 13th level halves a fighter's output"
     },
     {
       "file": "src/AttackRate.h",
-      "original": "\tconst int cost = static_cast<int>(static_cast<float>(TIME_UNITS_PER_ROUND) / attacksPerRound);",
-      "mutated": "\tconst int cost = TIME_UNITS_PER_ROUND;",
+      "original": "\tconst int cost = static_cast<int>(\n\t\tstatic_cast<float>(TIME_UNITS_PER_ROUND) / attacksPerRound);",
+      "mutated": "\tconst int cost =TIME_UNITS_PER_ROUND;",
       "catches": "every rate costing a whole round, so Table 58 buys nothing at any level"
     },
     {

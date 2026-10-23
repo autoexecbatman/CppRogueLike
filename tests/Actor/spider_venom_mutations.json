@@ -39,26 +39,26 @@
     },
     {
       "file": "src/AiWebSpinner.cpp",
-      "original": "\tif (SavingThrows::is_made(target, SavingThrow::PARALYZATION_POISON_DEATH, constitutionAdjustment, ctx))",
+      "original": "\tif (SavingThrows::is_made(\n\t\t\ttarget,\n\t\t\tSavingThrow::PARALYZATION_POISON_DEATH,\n\t\t\tconstitutionAdjustment,\n\t\t\tctx))",
       "mutated": "\tif (true)",
       "catches": "a venom nobody can fail to save against"
     },
     {
       "file": "src/AiWebSpinner.cpp",
-      "original": "\tif (SavingThrows::is_made(target, SavingThrow::PARALYZATION_POISON_DEATH, constitutionAdjustment, ctx))",
+      "original": "\tif (SavingThrows::is_made(\n\t\t\ttarget,\n\t\t\tSavingThrow::PARALYZATION_POISON_DEATH,\n\t\t\tconstitutionAdjustment,\n\t\t\tctx))",
       "mutated": "\tif (false)",
       "catches": "a venom with no saving throw at all, which is what it had"
     },
     {
       "file": "src/AiWebSpinner.cpp",
-      "original": "\tconst int constitutionAdjustment = ctx.dataManager->constitution_for(target.get_constitution()).PoisonSave;",
-      "mutated": "\tconst int constitutionAdjustment = 0;",
+      "original": "\tconst int constitutionAdjustment =\n\t\tctx.dataManager->constitution_for(target.get_constitution()).PoisonSave;",
+      "mutated": "\tconst int constitutionAdjustment =0;",
       "catches": "the Constitution table's poison adjustment left out of the save"
     },
     {
       "file": "src/AiWebSpinner.cpp",
-      "original": "\ttarget.take_damage_and_check_death(target.get_hp(), ctx, DamageType::POISON);",
-      "mutated": "\ttarget.take_damage_and_check_death(1, ctx, DamageType::POISON);",
+      "original": "\ttarget.take_damage_and_check_death(\n\t\ttarget.get_hp(),\n\t\tctx,\n\t\tDamageType::POISON);",
+      "mutated": "\ttarget.take_damage_and_check_death(1,\n\t\tctx,\n\t\tDamageType::POISON);",
       "catches": "a Type F poison that wounds instead of killing"
     }
   ]

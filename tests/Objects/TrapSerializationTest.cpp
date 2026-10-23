@@ -48,7 +48,8 @@ protected:
 		finder.set_dexterity(13);
 		finder.lifespan->race = PlayerRaceState::DWARF;
 		finder.set_creature_level(1);
-		finder.thiefSkillPoints.at(thief_skill_index(ThiefSkill::FIND_REMOVE_TRAPS)) = 40;
+		finder.thiefSkillPoints.at(
+			thief_skill_index(ThiefSkill::FIND_REMOVE_TRAPS)) = 40;
 	}
 
 	std::unique_ptr<Trap> built(Vector2D position, TrapType type)
@@ -82,7 +83,8 @@ TEST_F(TrapSerializationTest, EveryTrapComesBackWhereItWas)
 	std::vector<std::unique_ptr<Trap>> restored;
 	load_traps(level, restored, *ctx.tileConfig);
 
-	ASSERT_EQ(restored.size(), 2u) << "the level came back with a different number of traps";
+	ASSERT_EQ(restored.size(), 2u)
+		<< "the level came back with a different number of traps";
 	EXPECT_EQ(restored.at(0)->position, (Vector2D{ 4, 3 }));
 	EXPECT_EQ(restored.at(1)->position, (Vector2D{ 9, 7 }));
 	EXPECT_EQ(restored.at(0)->get_type(), TrapType::PIT);
@@ -105,8 +107,10 @@ TEST_F(TrapSerializationTest, WhatThePlayerHasFoundStaysFound)
 	load_traps(level, restored, *ctx.tileConfig);
 
 	ASSERT_EQ(restored.size(), 2u);
-	EXPECT_EQ(restored.at(0)->get_state(), TrapState::DETECTED) << "a found trap was hidden again";
-	EXPECT_EQ(restored.at(1)->get_state(), TrapState::HIDDEN) << "an unfound trap was revealed";
+	EXPECT_EQ(restored.at(0)->get_state(), TrapState::DETECTED)
+		<< "a found trap was hidden again";
+	EXPECT_EQ(restored.at(1)->get_state(), TrapState::HIDDEN)
+		<< "an unfound trap was revealed";
 }
 
 // Visibility follows from the state rather than being stored, so a restored trap is
@@ -126,8 +130,10 @@ TEST_F(TrapSerializationTest, VisibilityIsDerivedFromTheStateOnLoad)
 	load_traps(level, restored, *ctx.tileConfig);
 
 	ASSERT_EQ(restored.size(), 2u);
-	EXPECT_FALSE(restored.at(0)->has_state(ActorState::IS_INVISIBLE)) << "a found trap came back invisible";
-	EXPECT_TRUE(restored.at(1)->has_state(ActorState::IS_INVISIBLE)) << "a hidden trap came back visible";
+	EXPECT_FALSE(restored.at(0)->has_state(ActorState::IS_INVISIBLE))
+		<< "a found trap came back invisible";
+	EXPECT_TRUE(restored.at(1)->has_state(ActorState::IS_INVISIBLE))
+		<< "a hidden trap came back visible";
 }
 
 // A search missed at this level is not handed back by reloading: the trap remembers the
@@ -146,7 +152,9 @@ TEST_F(TrapSerializationTest, AMissedSearchIsNotHandedBackByReloading)
 
 	ASSERT_EQ(restored.size(), 1u);
 	mock.dice.set_next_roll(1);
-	EXPECT_EQ(restored.at(0)->search(finder, ctx), TrapSearchResult::ALREADY_SEARCHED);
+	EXPECT_EQ(
+		restored.at(0)->search(finder, ctx),
+		TrapSearchResult::ALREADY_SEARCHED);
 	EXPECT_EQ(restored.at(0)->get_state(), TrapState::HIDDEN);
 }
 
@@ -162,7 +170,8 @@ TEST_F(TrapSerializationTest, LoadingReplacesTheTrapsAlreadyThere)
 
 	load_traps(emptyLevel, stale, *ctx.tileConfig);
 
-	EXPECT_TRUE(stale.empty()) << "the previous level's traps survived the load";
+	EXPECT_TRUE(stale.empty())
+		<< "the previous level's traps survived the load";
 }
 
 // save_traps always writes "traps" as an array, so a document without it, or with
@@ -187,7 +196,8 @@ TEST_F(TrapSerializationTest, ADocumentWithoutATrapListIsRefused)
 	const std::string missing = refusal_of(json::object());
 	EXPECT_NE(missing.find("traps"), std::string::npos) << missing;
 
-	const std::string notAList = refusal_of(json{ { "traps", json::object() } });
+	const std::string notAList =
+		refusal_of(json{ { "traps", json::object() } });
 	EXPECT_NE(notAList.find("traps"), std::string::npos) << notAList;
 }
 

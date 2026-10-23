@@ -81,16 +81,20 @@ protected:
 // Every cell the game loads, for the scores it has, is the book's.
 TEST_F(DexterityTableTest, EveryRowMatchesTableTwo)
 {
-	const std::vector<DexterityAttributes>& loaded = game.dataManager.get_dexterity_attributes();
+	const std::vector<DexterityAttributes>& loaded =
+		game.dataManager.get_dexterity_attributes();
 	ASSERT_GE(loaded.size(), TABLE_TWO.size());
 
 	for (const TableTwoRow& expected : TABLE_TWO)
 	{
 		const DexterityAttributes& row = loaded.at(expected.score - 1);
 		EXPECT_EQ(row.Dex, expected.score);
-		EXPECT_EQ(row.ReactionAdj, expected.reaction) << "reaction adjustment at Dexterity " << expected.score;
-		EXPECT_EQ(row.MissileAttackAdj, expected.missile) << "missile adjustment at Dexterity " << expected.score;
-		EXPECT_EQ(row.DefensiveAdj, expected.defensive) << "defensive adjustment at Dexterity " << expected.score;
+		EXPECT_EQ(row.ReactionAdj, expected.reaction)
+			<< "reaction adjustment at Dexterity " << expected.score;
+		EXPECT_EQ(row.MissileAttackAdj, expected.missile)
+			<< "missile adjustment at Dexterity " << expected.score;
+		EXPECT_EQ(row.DefensiveAdj, expected.defensive)
+			<< "defensive adjustment at Dexterity " << expected.score;
 	}
 }
 
@@ -146,5 +150,6 @@ TEST_F(DexterityTableTest, DexteritySevenLeavesArmourClassAlone)
 
 	fighter.update_armor_class(ctx);
 
-	EXPECT_EQ(fighter.get_armor_class(), 10) << "Dexterity 7 carries no defensive adjustment";
+	EXPECT_EQ(fighter.get_armor_class(), 10)
+		<< "Dexterity 7 carries no defensive adjustment";
 }

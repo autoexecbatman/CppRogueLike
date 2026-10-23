@@ -117,11 +117,13 @@ TEST_F(SpiderStatBlockTest, EachSpiderCarriesItsColumnOfTheBook)
 {
 	for (const BookSpider& book : BOOK_SPIDERS)
 	{
-		const MonsterParams& spider = monsters.get_params(std::string{ book.key });
+		const MonsterParams& spider =
+			monsters.get_params(std::string{ book.key });
 		EXPECT_EQ(spider.ac, book.armorClass) << book.key;
 		ASSERT_EQ(spider.hitDice.counts.size(), 1u) << book.key;
 		EXPECT_EQ(spider.hitDice.sides, 8) << book.key;
-		EXPECT_EQ(spider.hitDice.counts.front().count, book.hitDiceCount) << book.key;
+		EXPECT_EQ(spider.hitDice.counts.front().count, book.hitDiceCount)
+			<< book.key;
 		EXPECT_EQ(spider.hitDice.bonus, book.hitDiceBonus) << book.key;
 		EXPECT_EQ(spider.thaco, book.thaco) << book.key;
 		EXPECT_EQ(spider.damage.displayRoll, book.damage) << book.key;
@@ -145,11 +147,16 @@ TEST_F(SpiderStatBlockTest, TheHairySpidersBiteIsExactlyOne)
 
 // Spiders walk on water and cross webs, theirs or another's, and each kind is built with
 // the Ai that carries its poison.
-TEST_F(SpiderStatBlockTest, ASpiderBuiltFromDataWalksWebsSwimsAndCarriesItsPoison)
+TEST_F(
+	SpiderStatBlockTest,
+	ASpiderBuiltFromDataWalksWebsSwimsAndCarriesItsPoison)
 {
 	for (const BookSpider& book : BOOK_SPIDERS)
 	{
-		const auto spider = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, monsters.get_params(std::string{ book.key }), ctx);
+		const auto spider = MonsterCreator::create_from_params(
+			Vector2D{ 0, 0 },
+			monsters.get_params(std::string{ book.key }),
+			ctx);
 
 		EXPECT_TRUE(spider->has_state(ActorState::CAN_WALK_WEBS)) << book.key;
 		EXPECT_TRUE(spider->has_state(ActorState::CAN_SWIM)) << book.key;

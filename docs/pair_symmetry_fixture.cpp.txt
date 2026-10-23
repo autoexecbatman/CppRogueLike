@@ -1,0 +1,52 @@
+// Fixture for pair_symmetry.py --self-test. FIXTURE_READERS in pair_symmetry.py
+// names what the disagreeing-readers check must report here: widgetSlot
+// asserted twice, once on one line and once wrapped; gadgetSlot asserted only
+// wrapped; each guarded twice and reached through by arrow.
+
+void assert_widget_on_one_line(Panel& panel)
+{
+	assert(panel.widgetSlot && "assert_widget_on_one_line: no widget");
+	panel.widgetSlot->draw();
+}
+
+void assert_widget_wrapped(Panel& panel)
+{
+	assert(
+		panel.widgetSlot &&
+		"assert_widget_wrapped: no widget");
+	panel.widgetSlot->draw();
+}
+
+void assert_gadget_wrapped(Panel& panel)
+{
+	assert(
+		panel.gadgetSlot &&
+		"assert_gadget_wrapped: no gadget");
+	panel.gadgetSlot->draw();
+}
+
+void guard_both(Panel& panel)
+{
+	if (!panel.widgetSlot)
+	{
+		return;
+	}
+	if (!panel.gadgetSlot)
+	{
+		return;
+	}
+	panel.widgetSlot->draw();
+	panel.gadgetSlot->draw();
+}
+
+void guard_both_again(Panel& panel)
+{
+	if (panel.widgetSlot && panel.gadgetSlot)
+	{
+		panel.widgetSlot->draw();
+	}
+	if (panel.gadgetSlot != nullptr)
+	{
+		panel.gadgetSlot->draw();
+	}
+}

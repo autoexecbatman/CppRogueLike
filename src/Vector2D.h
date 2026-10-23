@@ -21,8 +21,11 @@ struct Vector2D
 	~Vector2D() = default;
 
 	// Custom constructor for convenience
-	constexpr Vector2D(int x_val, int y_val) noexcept
-		: x(x_val), y(y_val) {}
+	constexpr Vector2D(int x_val, int y_val) noexcept :
+		x(x_val),
+		y(y_val)
+	{
+	}
 
 	// operator overloads
 
@@ -89,15 +92,17 @@ struct Vector2D
 	}
 
 	// for bool conversion
-	explicit operator bool() const noexcept
-	{
-		return y != 0 || x != 0;
-	}
+	explicit operator bool() const noexcept { return y != 0 || x != 0; }
 
 	// for std::cout
-	friend std::ostream& operator<<(std::ostream& stream, const Vector2D& position)
+	friend std::ostream& operator<<(
+		std::ostream& stream,
+		const Vector2D& position)
 	{
-		stream << std::format("Vector2D: {{y: {}, x: {}}}", position.y, position.x);
+		stream << std::format(
+			"Vector2D: {{y: {}, x: {}}}",
+			position.y,
+			position.x);
 		return stream;
 	}
 

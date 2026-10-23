@@ -27,8 +27,8 @@
     },
     {
       "file": "src/Renderer.h",
-      "original": "\t\treturn (offsetFromFirstRow - (UI_TEXT_ROW_PITCH - 1)) / UI_TEXT_ROW_PITCH;\n",
-      "mutated": "\t\treturn offsetFromFirstRow / UI_TEXT_ROW_PITCH;\n",
+      "original": "\t\treturn (offsetFromFirstRow - (UI_TEXT_ROW_PITCH - 1)) /\n\t\t\tUI_TEXT_ROW_PITCH;\n",
+      "mutated": "\t\treturn offsetFromFirstRow /\n\t\t\tUI_TEXT_ROW_PITCH;\n",
       "catches": "truncation instead of floor, so a pixel just above the first row reads as being inside it"
     },
     {

@@ -43,10 +43,7 @@ constexpr Vector2D SOMEWHERE{ 3, 4 };
 class InventoryPersistenceTest : public ::testing::Test
 {
 protected:
-	void SetUp() override
-	{
-		ctx = mock.to_game_context();
-	}
+	void SetUp() override { ctx = mock.to_game_context(); }
 
 	// Puts one item of the given kind in the pack and reports whether it went in.
 	bool stock(CreatureInventory& pack, std::string_view key)
@@ -89,8 +86,10 @@ TEST_F(InventoryPersistenceTest, ARoundTripReturnsEveryItem)
 	CreatureInventory restored{ 1 };
 	InventoryOperations::load_inventory(restored, record);
 
-	EXPECT_EQ(restored.items.size(), saved) << "the load returned a different number of items than the save wrote";
-	EXPECT_EQ(restored.capacity, PACK_CAPACITY) << "the capacity did not survive the round trip";
+	EXPECT_EQ(restored.items.size(), saved)
+		<< "the load returned a different number of items than the save wrote";
+	EXPECT_EQ(restored.capacity, PACK_CAPACITY)
+		<< "the capacity did not survive the round trip";
 }
 
 // An empty inventory is a legal state, not a missing one - a creature that carries
@@ -105,7 +104,8 @@ TEST_F(InventoryPersistenceTest, AnEmptyInventoryRoundTrips)
 	CreatureInventory restored{ 1 };
 	InventoryOperations::load_inventory(restored, record);
 
-	EXPECT_TRUE(record["inventory"].is_array()) << "an empty inventory wrote something other than an empty array";
+	EXPECT_TRUE(record["inventory"].is_array())
+		<< "an empty inventory wrote something other than an empty array";
 	EXPECT_EQ(restored.items.size(), 0u);
 	EXPECT_EQ(restored.capacity, PACK_CAPACITY);
 }

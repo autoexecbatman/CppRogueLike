@@ -37,7 +37,10 @@ protected:
 
 	bool equip(std::string_view key, EquipmentSlot slot)
 	{
-		return player->equip_item(ItemCreator::create(key, Vector2D{ 0, 0 }, ctx), slot, ctx);
+		return player->equip_item(
+			ItemCreator::create(key, Vector2D{ 0, 0 }, ctx),
+			slot,
+			ctx);
 	}
 
 	MockGameContext mock{};
@@ -99,7 +102,9 @@ TEST_F(RangedWeaponTest, AMonsterAnswersFromItsOwnSlot)
 	archer.set_body_plan({ EquipmentSlot::MISSILE_WEAPON });
 	EXPECT_FALSE(archer.has_ranged_weapon());
 
-	archer.wear(ItemCreator::create("short_bow", Vector2D{ 1, 1 }, ctx), EquipmentSlot::MISSILE_WEAPON);
+	archer.wear(
+		ItemCreator::create("short_bow", Vector2D{ 1, 1 }, ctx),
+		EquipmentSlot::MISSILE_WEAPON);
 
 	EXPECT_TRUE(archer.has_ranged_weapon());
 }
@@ -116,7 +121,9 @@ TEST_F(RangedWeaponTest, AMeleeWeaponWornInTheMissileSlotIsStillNotRanged)
 	confused.healthPool = std::make_unique<HealthPool>(10);
 	confused.set_body_plan({ EquipmentSlot::MISSILE_WEAPON });
 
-	confused.wear(ItemCreator::create("dagger", Vector2D{ 1, 1 }, ctx), EquipmentSlot::MISSILE_WEAPON);
+	confused.wear(
+		ItemCreator::create("dagger", Vector2D{ 1, 1 }, ctx),
+		EquipmentSlot::MISSILE_WEAPON);
 
 	EXPECT_FALSE(confused.has_ranged_weapon())
 		<< "the slot was read but what sits in it was not";

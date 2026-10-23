@@ -45,7 +45,7 @@
     },
     {
       "file": "src/DataManager.cpp",
-      "original": "\t\tthrow std::runtime_error(std::format(\"DataManager: cannot open {}, so its ability table cannot be read\", filename));",
+      "original": "\t\tthrow std::runtime_error(\n\t\t\tstd::format(\n\t\t\t\t\"DataManager: cannot open {}, so its ability table cannot be read\",\n\t\t\t\tfilename));",
       "mutated": "\t\treturn nlohmann::json::array();",
       "catches": "a missing table file loaded as an empty table, the silent failure the first ability lookup trips over"
     },

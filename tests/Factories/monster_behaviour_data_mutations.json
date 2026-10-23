@@ -111,13 +111,13 @@
     },
     {
       "file": "src/AiShopkeeper.cpp",
-      "original": "\tShopkeeperFactory::open_shop(owner, ctx.levelManager->get_dungeon_level(), ctx);\n",
+      "original": "\tShopkeeperFactory::open_shop(\n\t\towner,\n\t\tctx.levelManager->get_dungeon_level(),\n\t\tctx);\n",
       "mutated": "\t;\n",
       "catches": "a shopkeeper built with no shop"
     },
     {
       "file": "src/Ai.h",
-      "original": "\treturn std::ranges::find(AUTHORABLE_AI_TYPES, type) != AUTHORABLE_AI_TYPES.end();\n",
+      "original": "\treturn std::ranges::find(AUTHORABLE_AI_TYPES, type) !=\n\t\tAUTHORABLE_AI_TYPES.end();\n",
       "mutated": "\treturn true;\n",
       "catches": "the Confused Ai counted as authorable"
     },

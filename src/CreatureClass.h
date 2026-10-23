@@ -38,7 +38,8 @@ enum class CreatureClass
 //
 // Example:
 //   encode_creature_class(CreatureClass::CLERIC);  // -> "cleric"
-[[nodiscard]] inline constexpr std::string_view encode_creature_class(CreatureClass creatureClass)
+[[nodiscard]] inline constexpr std::string_view encode_creature_class(
+	CreatureClass creatureClass)
 {
 	switch (creatureClass)
 	{
@@ -110,5 +111,6 @@ enum class CreatureClass
 //   is_warrior(CreatureClass::WIZARD);   // -> false
 [[nodiscard]] inline constexpr bool is_warrior(CreatureClass creatureClass)
 {
-	return creatureClass == CreatureClass::FIGHTER || creatureClass == CreatureClass::MONSTER;
+	return creatureClass == CreatureClass::FIGHTER ||
+		creatureClass == CreatureClass::MONSTER;
 }

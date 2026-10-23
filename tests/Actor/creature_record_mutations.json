@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/Creature.cpp",
-      "original": "\t\thealthPool = std::make_unique<HealthPool>(healthJson.at(\"hpMax\").get<int>());",
+      "original": "\t\thealthPool =\n\t\t\tstd::make_unique<HealthPool>(healthJson.at(\"hpMax\").get<int>());",
       "mutated": "\t\tif (!healthPool) { return; }\n\t\thealthPool->set_max_hp(healthJson.at(\"hpMax\").get<int>());",
       "catches": "a saved pool filled in only if the object already had one, so a loaded monster has none"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tcreatureClass = parse_creature_class(source.at(\"creatureClass\").get<std::string>());",
-      "mutated": "\tcreatureClass = source.contains(\"creatureClass\") ? parse_creature_class(source.at(\"creatureClass\").get<std::string>()) : CreatureClass::MONSTER;",
+      "original": "\tcreatureClass =\n\t\tparse_creature_class(source.at(\"creatureClass\").get<std::string>());",
+      "mutated": "\tcreatureClass =source.contains(\"creatureClass\") ? parse_creature_class(source.at(\"creatureClass\").get<std::string>()) : CreatureClass::MONSTER;",
       "catches": "a record without its class loading as a monster, with a monster's hit dice and THAC0"
     },
     {
@@ -33,7 +33,7 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tInventoryOperations::load_inventory(inventoryData, source.at(\"inventoryData\"));",
+      "original": "\tInventoryOperations::load_inventory(\n\t\tinventoryData,\n\t\tsource.at(\"inventoryData\"));",
       "mutated": "\tif (source.contains(\"inventoryData\")) { InventoryOperations::load_inventory(inventoryData, source.at(\"inventoryData\")); }",
       "catches": "a record without its inventory loading as an empty pack"
     },

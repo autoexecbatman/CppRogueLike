@@ -30,12 +30,15 @@ inline void expect_lasts_exactly(
 	ASSERT_GT(rounds, 0) << "a buff lasting no rounds is already over";
 
 	// The last round it covers, part of a round included.
-	const int lastRoundCovered = currentTime + (rounds - 1) * TIME_UNITS_PER_ROUND;
+	const int lastRoundCovered =
+		currentTime + (rounds - 1) * TIME_UNITS_PER_ROUND;
 	buffs.update_creature_buffs(creature, lastRoundCovered);
-	EXPECT_TRUE(buffs.has_buff(creature, type)) << "gone before " << rounds << " rounds had run";
+	EXPECT_TRUE(buffs.has_buff(creature, type))
+		<< "gone before " << rounds << " rounds had run";
 
 	// One round further is past its end.
 	const int pastTheEnd = currentTime + rounds * TIME_UNITS_PER_ROUND;
 	buffs.update_creature_buffs(creature, pastTheEnd);
-	EXPECT_FALSE(buffs.has_buff(creature, type)) << "still in force after " << rounds << " rounds";
+	EXPECT_FALSE(buffs.has_buff(creature, type))
+		<< "still in force after " << rounds << " rounds";
 }

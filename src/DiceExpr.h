@@ -37,9 +37,15 @@ struct DiceExpr
 	int bonus{ 0 };
 
 	// The least and the most the expression can roll.
-	[[nodiscard]] constexpr int min_total() const noexcept { return num + bonus; }
+	[[nodiscard]] constexpr int min_total() const noexcept
+	{
+		return num + bonus;
+	}
 
-	[[nodiscard]] constexpr int max_total() const noexcept { return num * sides + bonus; }
+	[[nodiscard]] constexpr int max_total() const noexcept
+	{
+		return num * sides + bonus;
+	}
 };
 
 // Reads "<count>d<sides>", optionally followed by "+<bonus>" or "-<bonus>", or
@@ -54,7 +60,8 @@ inline DiceExpr parse_dice_expression(std::string_view text)
 {
 	const auto fail = [text]()
 	{
-		throw std::invalid_argument("not a dice expression: " + std::string(text));
+		throw std::invalid_argument(
+			"not a dice expression: " + std::string(text));
 	};
 
 	DiceExpr expr{};
@@ -71,7 +78,8 @@ inline DiceExpr parse_dice_expression(std::string_view text)
 		}
 		return DiceExpr{ 0, 0, expr.num };
 	}
-	if (result.ec != std::errc{} || result.ptr == end || *result.ptr != 'd' || expr.num <= 0)
+	if (result.ec != std::errc{} || result.ptr == end || *result.ptr != 'd' ||
+		expr.num <= 0)
 	{
 		fail();
 	}
@@ -124,7 +132,8 @@ inline std::string to_text(const DiceExpr& expr)
 	{
 		return std::to_string(expr.bonus);
 	}
-	std::string text = std::to_string(expr.num) + "d" + std::to_string(expr.sides);
+	std::string text =
+		std::to_string(expr.num) + "d" + std::to_string(expr.sides);
 	if (expr.bonus > 0)
 	{
 		text += "+" + std::to_string(expr.bonus);

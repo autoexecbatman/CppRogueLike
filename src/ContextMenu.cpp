@@ -17,10 +17,12 @@ ContextMenu::ContextMenu(
 	int anchor_col,
 	int anchor_row,
 	std::function<void(int, GameContext&)> callback,
-	GameContext& ctx)
-	: menuOptions(std::move(options)), onSelect(std::move(callback))
+	GameContext& ctx) :
+	menuOptions(std::move(options)),
+	onSelect(std::move(callback))
 {
-	assert(ctx.renderer && "ContextMenu: renderer required before construction");
+	assert(
+		ctx.renderer && "ContextMenu: renderer required before construction");
 	const int tileSize = ctx.renderer->get_tile_size();
 
 	// Measured, not counted. As a character count this was at least 14, which
@@ -33,7 +35,9 @@ ContextMenu::ContextMenu(
 
 	int width = panel_tiles_for_text_width(widestText, tileSize);
 	int height = panel_tiles_for_text_rows(
-		static_cast<int>(menuOptions.size()), tileSize, ctx.renderer->get_font_size());
+		static_cast<int>(menuOptions.size()),
+		tileSize,
+		ctx.renderer->get_font_size());
 
 	int viewportCols = ctx.renderer->get_viewport_cols();
 	int viewportRows = ctx.renderer->get_viewport_rows();
@@ -54,13 +58,18 @@ void ContextMenu::draw_content()
 	menu_draw_box();
 	menu_draw_title("Action", ColorPairId::WHITE_BLACK);
 
-	for (int optionIndex = 0; optionIndex < static_cast<int>(menuOptions.size()); ++optionIndex)
+	for (
+		int optionIndex = 0; optionIndex < static_cast<int>(menuOptions.size());
+		++optionIndex)
 	{
 		if (optionIndex == selectedIndex)
 		{
 			menu_highlight_on();
 		}
-		menu_print(1, optionIndex, menuOptions[static_cast<size_t>(optionIndex)]);
+		menu_print(
+			1,
+			optionIndex,
+			menuOptions[static_cast<size_t>(optionIndex)]);
 		if (optionIndex == selectedIndex)
 		{
 			menu_highlight_off();
@@ -122,7 +131,10 @@ void ContextMenu::menu(GameContext& ctx)
 		// Options are menu_print rows a pitch apart and the title sits on the frame, so the row under
 		// the pointer is the option, with no offset.
 		::Vector2 rawMouse = GetMousePosition();
-		int relRow = panel_text_row_at_y(static_cast<int>(menuStartY) * tileSize, tileSize, static_cast<int>(rawMouse.y));
+		int relRow = panel_text_row_at_y(
+			static_cast<int>(menuStartY) * tileSize,
+			tileSize,
+			static_cast<int>(rawMouse.y));
 		if (relRow >= 0 && relRow < static_cast<int>(menuOptions.size()))
 		{
 			sel = relRow;
@@ -143,7 +155,9 @@ void ContextMenu::menu(GameContext& ctx)
 	}
 
 	// --- Render phase ---
-	assert(ctx.renderingManager && "ContextMenu::menu: called without a renderingManager");
+	assert(
+		ctx.renderingManager &&
+		"ContextMenu::menu: called without a renderingManager");
 	ctx.renderingManager->render(ctx);
 	if (ctx.gui->guiInit)
 	{

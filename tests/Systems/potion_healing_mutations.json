@@ -39,14 +39,14 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tconsumable.amount = parse_dice_expression(source.at(\"amount\").get<std::string>());\n",
-      "mutated": "\t\tconsumable.amount = DiceExpr{ 0, 0, 10 };\n",
+      "original": "\t\tconsumable.amount =\n\t\t\tparse_dice_expression(source.at(\"amount\").get<std::string>());\n",
+      "mutated": "\t\tconsumable.amount =DiceExpr{ 0, 0, 10 };\n",
       "catches": "a loaded potion's dice replaced by the old fixed ten"
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\tparams.consumableAmount = parse_dice_expression(required_field(record, key, \"consumableAmount\").get<std::string>());\n",
-      "mutated": "\tparams.consumableAmount = DiceExpr{ 0, 0, 10 };\n",
+      "original": "\tparams.consumableAmount = parse_dice_expression(\n\t\trequired_field(record, key, \"consumableAmount\").get<std::string>());\n",
+      "mutated": "\tparams.consumableAmount =DiceExpr{ 0, 0, 10 };\n",
       "catches": "the data's dice never read, every potion pouring one fixed figure"
     },
     {

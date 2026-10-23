@@ -44,8 +44,14 @@ protected:
 	// which is the row a turning attempt reads.
 	Creature& add_undead(int hitDice, Vector2D position)
 	{
-		auto undead = std::make_unique<Creature>(position, ActorData{ TileRef{}, "skeleton", ColorPairId::WHITE_BLACK });
-		undead->set_corpse("test remains", 0, "It is test remains.", CorpseEdibility::EDIBLE);
+		auto undead = std::make_unique<Creature>(
+			position,
+			ActorData{ TileRef{}, "skeleton", ColorPairId::WHITE_BLACK });
+		undead->set_corpse(
+			"test remains",
+			0,
+			"It is test remains.",
+			CorpseEdibility::EDIBLE);
 		undead->healthPool = std::make_unique<HealthPool>(8);
 
 		// Every creature the game builds has one; die() reads it for the kill reward.
@@ -58,8 +64,14 @@ protected:
 
 	Creature& add_living(Vector2D position)
 	{
-		auto living = std::make_unique<Creature>(position, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
-		living->set_corpse("test remains", 0, "It is test remains.", CorpseEdibility::EDIBLE);
+		auto living = std::make_unique<Creature>(
+			position,
+			ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
+		living->set_corpse(
+			"test remains",
+			0,
+			"It is test remains.",
+			CorpseEdibility::EDIBLE);
 		living->healthPool = std::make_unique<HealthPool>(8);
 		creatures.push_back(std::move(living));
 		return *creatures.back();
@@ -77,7 +89,8 @@ protected:
 
 	MockGameContext mock{};
 	GameContext ctx{};
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 5, 5 }) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ 5, 5 }) };
 	std::vector<std::unique_ptr<Creature>> creatures{};
 };
 
@@ -191,7 +204,8 @@ TEST_F(TurnUndeadTest, TheTwoDSixCapLimitsHowManyAreAffected)
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
 	EXPECT_EQ(report.destroyed.size(), 2u) << "the 2d6 cap did not bind";
-	EXPECT_EQ(report.resisted.size(), 2u) << "the undead past the cap were not left alone";
+	EXPECT_EQ(report.resisted.size(), 2u)
+		<< "the undead past the cap were not left alone";
 }
 
 // "If the undead are a mixed group, the lowest Hit Dice creatures are turned
@@ -209,8 +223,10 @@ TEST_F(TurnUndeadTest, TheWeakestAreAffectedFirstWhenTheCapBinds)
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
 	ASSERT_EQ(report.destroyed.size(), 2u);
-	EXPECT_EQ(report.destroyed.at(0), &firstSkeleton) << "the tougher undead was taken first";
-	EXPECT_EQ(report.destroyed.at(1), &secondSkeleton) << "the tougher undead was taken first";
+	EXPECT_EQ(report.destroyed.at(0), &firstSkeleton)
+		<< "the tougher undead was taken first";
+	EXPECT_EQ(report.destroyed.at(1), &secondSkeleton)
+		<< "the tougher undead was taken first";
 	ASSERT_EQ(report.resisted.size(), 1u);
 	EXPECT_EQ(report.resisted.front(), &wight);
 }
@@ -225,7 +241,8 @@ TEST_F(TurnUndeadTest, UndeadAtTheEdgeOfRangeIsAffected)
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
 	ASSERT_EQ(report.destroyed.size(), 1u);
-	EXPECT_EQ(report.destroyed.front(), &skeleton) << "the edge of the range was treated as outside it";
+	EXPECT_EQ(report.destroyed.front(), &skeleton)
+		<< "the edge of the range was treated as outside it";
 }
 
 // A body on the floor is not turned again, and does not spend one of the 2d6. Two
@@ -241,7 +258,8 @@ TEST_F(TurnUndeadTest, AlreadyDeadUndeadAreSkipped)
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
-	ASSERT_EQ(report.destroyed.size(), 2u) << "a corpse was counted against the cap";
+	ASSERT_EQ(report.destroyed.size(), 2u)
+		<< "a corpse was counted against the cap";
 	EXPECT_EQ(report.destroyed.at(0), &firstStanding);
 	EXPECT_EQ(report.destroyed.at(1), &secondStanding);
 }
@@ -255,7 +273,8 @@ TEST_F(TurnUndeadTest, ARollEqualToTheNumberNeededSucceeds)
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
-	ASSERT_EQ(report.turned.size(), 1u) << "meeting the number was read as falling short";
+	ASSERT_EQ(report.turned.size(), 1u)
+		<< "meeting the number was read as falling short";
 	EXPECT_EQ(report.turned.front(), &wight);
 }
 
@@ -264,12 +283,14 @@ TEST_F(TurnUndeadTest, ARollEqualToTheNumberNeededSucceeds)
 // undead on an axis cannot tell the two apart.
 TEST_F(TurnUndeadTest, AnUndeadOnTheDiagonalIsReachedAtTheSameRange)
 {
-	Creature& skeleton = add_undead(1, Vector2D{ 5 + TURN_UNDEAD_RANGE, 5 + TURN_UNDEAD_RANGE });
+	Creature& skeleton =
+		add_undead(1, Vector2D{ 5 + TURN_UNDEAD_RANGE, 5 + TURN_UNDEAD_RANGE });
 	script_attempt(20, 3, 3); // the d20, then 2d6 of 6
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
-	ASSERT_EQ(report.destroyed.size(), 1u) << "the reach was measured as a circle rather than a square";
+	ASSERT_EQ(report.destroyed.size(), 1u)
+		<< "the reach was measured as a circle rather than a square";
 	EXPECT_EQ(report.destroyed.front(), &skeleton);
 }
 
@@ -284,7 +305,8 @@ TEST_F(TurnUndeadTest, AnUndeadFiveTilesAwayIsOutOfReach)
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
-	EXPECT_TRUE(report.destroyed.empty()) << "an undead five tiles away was reached";
+	EXPECT_TRUE(report.destroyed.empty())
+		<< "an undead five tiles away was reached";
 	EXPECT_TRUE(report.turned.empty());
 }
 
@@ -311,7 +333,8 @@ TEST_F(TurnUndeadTest, AWallBetweenPriestAndUndeadDoesNotStopTheTurning)
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
-	ASSERT_EQ(report.destroyed.size(), 1u) << "a wall stopped a turn, which is a rule change rather than a repair";
+	ASSERT_EQ(report.destroyed.size(), 1u)
+		<< "a wall stopped a turn, which is a rule change rather than a repair";
 	EXPECT_EQ(report.destroyed.front(), &skeleton);
 }
 
@@ -333,7 +356,8 @@ TEST_F(TurnUndeadTest, TheCapReachesTwelveBecauseItIsTwoDice)
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
-	EXPECT_EQ(report.destroyed.size(), 12u) << "two sixes affected fewer than twelve undead";
+	EXPECT_EQ(report.destroyed.size(), 12u)
+		<< "two sixes affected fewer than twelve undead";
 }
 
 // The other end of the same rule: two ones are two, never one, so a cap of one is a
@@ -349,7 +373,8 @@ TEST_F(TurnUndeadTest, TheCapStartsAtTwoBecauseItIsTwoDice)
 
 	const TurnUndeadReport report = turn_undead(*player, ctx);
 
-	EXPECT_EQ(report.destroyed.size(), 2u) << "two ones did not affect exactly two undead";
+	EXPECT_EQ(report.destroyed.size(), 2u)
+		<< "two ones did not affect exactly two undead";
 }
 
 // The dice the book prints, asserted in absolute terms. Every case above scripts the
@@ -358,8 +383,10 @@ TEST_F(TurnUndeadTest, TheCapStartsAtTwoBecauseItIsTwoDice)
 // "2d6 undead are affected" is the whole source for both numbers.
 TEST(TurnUndeadDiceTest, TheCapIsTwoSixSidedDice)
 {
-	EXPECT_EQ(TURN_UNDEAD_DICE_COUNT, 2) << "the book affects 2d6 undead, not another count";
-	EXPECT_EQ(TURN_UNDEAD_DICE_SIDES, 6) << "the book affects 2d6 undead, not another die";
+	EXPECT_EQ(TURN_UNDEAD_DICE_COUNT, 2)
+		<< "the book affects 2d6 undead, not another count";
+	EXPECT_EQ(TURN_UNDEAD_DICE_SIDES, 6)
+		<< "the book affects 2d6 undead, not another die";
 }
 
 // What the two dice can actually produce, drawn rather than scripted, because the

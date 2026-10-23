@@ -37,7 +37,10 @@ protected:
 	//   menu_row_at(300, 200, 5);   // -> 1
 	//   menu_row_at(900, 200, 5);   // -> nothing, right of the panel
 	//   menu_row_at(300, 40, 5);    // -> nothing, on the frame above row 0
-	[[nodiscard]] std::optional<size_t> menu_row_at(int pixelX, int pixelY, size_t rowCount) const;
+	[[nodiscard]] std::optional<size_t> menu_row_at(
+		int pixelX,
+		int pixelY,
+		size_t rowCount) const;
 
 	// True only on a frame where the pointer actually moved. A menu that re-seats its
 	// cursor from a stationary pointer overwrites it every frame, and the arrow keys then
@@ -61,7 +64,12 @@ public:
 	BaseMenu(BaseMenu&&) = delete;
 	BaseMenu& operator=(BaseMenu&&) = delete;
 
-	void menu_new(size_t width, size_t height, size_t startX, size_t startY, GameContext& ctx);
+	void menu_new(
+		size_t width,
+		size_t height,
+		size_t startX,
+		size_t startY,
+		GameContext& ctx);
 	// Draws text at a tile column and a text row inside the menu. Row 0 sits just
 	// below the top border. Rows run on a pixel pitch rather than the tile grid,
 	// so a menu holds the same lines however far the map is zoomed.

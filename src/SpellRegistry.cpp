@@ -43,12 +43,15 @@ constexpr auto BUILTIN_SPELLS = std::to_array<BuiltinSpell>({
 });
 
 // Every builtin holding its effect and no data yet.
-std::map<std::string, SpellDefinition, std::less<>> builtin_spells_with_effects()
+std::map<std::string, SpellDefinition, std::less<>>
+builtin_spells_with_effects()
 {
 	std::map<std::string, SpellDefinition, std::less<>> spells{};
 	for (const BuiltinSpell& builtin : BUILTIN_SPELLS)
 	{
-		spells.emplace(std::string{ builtin.key }, SpellDefinition{ .effect_type = builtin.effect });
+		spells.emplace(
+			std::string{ builtin.key },
+			SpellDefinition{ .effect_type = builtin.effect });
 	}
 	return spells;
 }
@@ -68,7 +71,8 @@ SpellClass parse_class(std::string_view text)
 		return SpellClass::BOTH;
 	}
 
-	throw std::runtime_error(std::format("SpellRegistry: unknown spell class '{}'", text));
+	throw std::runtime_error(
+		std::format("SpellRegistry: unknown spell class '{}'", text));
 }
 
 std::string encode_class(SpellClass spellClass)
@@ -150,7 +154,8 @@ SpellEffectType parse_effect_type(std::string_view text)
 		return SpellEffectType::NONE;
 	}
 
-	throw std::runtime_error(std::format("SpellRegistry: unknown spell effect '{}'", text));
+	throw std::runtime_error(
+		std::format("SpellRegistry: unknown spell effect '{}'", text));
 }
 
 std::string encode_effect_type(SpellEffectType effect)
@@ -235,8 +240,8 @@ std::string encode_effect_type(SpellEffectType effect)
 }
 } // namespace
 
-SpellRegistry::SpellRegistry()
-	: builtinSpells{ builtin_spells_with_effects() }
+SpellRegistry::SpellRegistry() :
+	builtinSpells{ builtin_spells_with_effects() }
 {
 }
 
@@ -247,7 +252,9 @@ void SpellRegistry::load(std::string_view path)
 	if (!file.is_open())
 	{
 		throw std::runtime_error(
-			std::format("SpellRegistry::load -- cannot open '{}'", resolved.string()));
+			std::format(
+				"SpellRegistry::load -- cannot open '{}'",
+				resolved.string()));
 	}
 
 	const nlohmann::json root = nlohmann::json::parse(file);
@@ -262,13 +269,17 @@ void SpellRegistry::load(std::string_view path)
 		if (!root.contains(key))
 		{
 			throw std::runtime_error(
-				std::format("SpellRegistry::load -- '{}' has no record for builtin spell '{}'", resolved.string(), key));
+				std::format(
+					"SpellRegistry::load -- '{}' has no record for builtin spell '{}'",
+					resolved.string(),
+					key));
 		}
 		const nlohmann::json& record = root.at(key);
 		SpellDefinition& definition = builtinSpells.at(key);
 		definition.name = record.at("name").get<std::string>();
 		definition.level = record.at("level").get<int>();
-		definition.spellClass = parse_class(record.at("class").get<std::string>());
+		definition.spellClass =
+			parse_class(record.at("class").get<std::string>());
 		definition.description = record.at("description").get<std::string>();
 	}
 
@@ -283,11 +294,13 @@ void SpellRegistry::load(std::string_view path)
 		SpellDefinition definition;
 		definition.name = record.at("name").get<std::string>();
 		definition.level = record.at("level").get<int>();
-		definition.spellClass = parse_class(record.at("class").get<std::string>());
+		definition.spellClass =
+			parse_class(record.at("class").get<std::string>());
 		definition.description = record.at("description").get<std::string>();
 		if (record.contains("effect"))
 		{
-			definition.effect_type = parse_effect_type(record.at("effect").get<std::string>());
+			definition.effect_type =
+				parse_effect_type(record.at("effect").get<std::string>());
 		}
 		customSpells[key] = std::move(definition);
 	}
@@ -327,13 +340,17 @@ void SpellRegistry::save(std::string_view path) const
 	if (!file.is_open())
 	{
 		throw std::runtime_error(
-			std::format("SpellRegistry::save -- cannot open '{}' for writing", resolved.string()));
+			std::format(
+				"SpellRegistry::save -- cannot open '{}' for writing",
+				resolved.string()));
 	}
 	file << root.dump(4);
 	if (file.fail())
 	{
 		throw std::runtime_error(
-			std::format("SpellRegistry::save -- write failed for '{}'", resolved.string()));
+			std::format(
+				"SpellRegistry::save -- write failed for '{}'",
+				resolved.string()));
 	}
 }
 
@@ -363,10 +380,13 @@ const SpellDefinition& SpellRegistry::get_by_key(std::string_view key) const
 		return customSpells.at(std::string{ key });
 	}
 
-	throw std::out_of_range(std::format("SpellRegistry::get_by_key -- unknown key '{}'", key));
+	throw std::out_of_range(
+		std::format("SpellRegistry::get_by_key -- unknown key '{}'", key));
 }
 
-void SpellRegistry::set_by_key(std::string_view key, const SpellDefinition& definition)
+void SpellRegistry::set_by_key(
+	std::string_view key,
+	const SpellDefinition& definition)
 {
 	if (builtinSpells.contains(key))
 	{
@@ -379,7 +399,8 @@ void SpellRegistry::set_by_key(std::string_view key, const SpellDefinition& defi
 		return;
 	}
 
-	throw std::out_of_range(std::format("SpellRegistry::set_by_key -- unknown key '{}'", key));
+	throw std::out_of_range(
+		std::format("SpellRegistry::set_by_key -- unknown key '{}'", key));
 }
 
 std::string SpellRegistry::add_custom(SpellDefinition definition)
@@ -395,7 +416,8 @@ std::string SpellRegistry::add_custom(SpellDefinition definition)
 			}
 			else
 			{
-				key += static_cast<char>(std::tolower(static_cast<unsigned char>(character)));
+				key += static_cast<char>(
+					std::tolower(static_cast<unsigned char>(character)));
 			}
 		}
 
@@ -407,7 +429,8 @@ std::string SpellRegistry::add_custom(SpellDefinition definition)
 		return is_builtin_key(key) || customSpells.contains(key);
 	};
 
-	const std::string base = normalize(definition.name.empty() ? "new_spell" : definition.name);
+	const std::string base =
+		normalize(definition.name.empty() ? "new_spell" : definition.name);
 	std::string key = base;
 	if (has_key(key))
 	{
@@ -430,12 +453,16 @@ void SpellRegistry::remove_custom(std::string_view key)
 	if (is_builtin_key(key))
 	{
 		throw std::invalid_argument(
-			std::format("SpellRegistry::remove_custom -- '{}' is a built-in spell and cannot be removed", key));
+			std::format(
+				"SpellRegistry::remove_custom -- '{}' is a built-in spell and cannot be removed",
+				key));
 	}
 	if (!customSpells.erase(std::string{ key }))
 	{
 		throw std::out_of_range(
-			std::format("SpellRegistry::remove_custom -- unknown key '{}'", key));
+			std::format(
+				"SpellRegistry::remove_custom -- unknown key '{}'",
+				key));
 	}
 }
 
@@ -444,13 +471,19 @@ bool SpellRegistry::is_builtin_key(std::string_view key) const
 	return builtinSpells.contains(key);
 }
 
-std::vector<std::string> SpellRegistry::get_available_spells(CasterClass casterClass, int maxSpellLevel) const
+std::vector<std::string> SpellRegistry::get_available_spells(
+	CasterClass casterClass,
+	int maxSpellLevel) const
 {
-	const SpellClass targetClass = (casterClass == CasterClass::CLERIC) ? SpellClass::CLERIC : SpellClass::WIZARD;
+	const SpellClass targetClass = (casterClass == CasterClass::CLERIC) ?
+		SpellClass::CLERIC :
+		SpellClass::WIZARD;
 
-	auto is_available = [targetClass, maxSpellLevel](const SpellDefinition& definition) -> bool
+	auto is_available = [targetClass, maxSpellLevel](
+							const SpellDefinition& definition) -> bool
 	{
-		const bool isOfTheClass = definition.spellClass == targetClass || definition.spellClass == SpellClass::BOTH;
+		const bool isOfTheClass = definition.spellClass == targetClass ||
+			definition.spellClass == SpellClass::BOTH;
 		return isOfTheClass && definition.level <= maxSpellLevel;
 	};
 

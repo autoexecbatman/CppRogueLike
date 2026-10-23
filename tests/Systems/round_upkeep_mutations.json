@@ -51,20 +51,20 @@
     },
     {
       "file": "src/GameLoopCoordinator.cpp",
-      "original": "thisRound <= roundsFinished; ++thisRound",
-      "mutated": "thisRound < roundsFinished; ++thisRound",
+      "original": "thisRound <= roundsFinished;\n\t\t++thisRound",
+      "mutated": "thisRound < roundsFinished;\n\t\t++thisRound",
       "catches": "an action of several rounds paying one round short"
     },
     {
       "file": "src/GameLoopCoordinator.cpp",
-      "original": "thisRound <= roundsFinished; ++thisRound",
-      "mutated": "thisRound <= roundsFinished + 1; ++thisRound",
+      "original": "thisRound <= roundsFinished;\n\t\t++thisRound",
+      "mutated": "thisRound <= roundsFinished + 1;\n\t\t++thisRound",
       "catches": "every action paying one round more than it took"
     },
     {
       "file": "src/GameLoopCoordinator.cpp",
-      "original": "for (int thisRound = ctx.gameState->get_rounds_run() + 1;",
-      "mutated": "for (int thisRound = ctx.gameState->get_rounds_run() + 2;",
+      "original": "for (\n\t\tint thisRound = ctx.gameState->get_rounds_run() + 1;",
+      "mutated": "for (\n\t\tint thisRound = ctx.gameState->get_rounds_run() +2;",
       "catches": "the first owed round skipped"
     },
     {

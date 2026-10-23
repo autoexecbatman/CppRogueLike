@@ -40,10 +40,16 @@ constexpr int CORRIDOR_ROW = 5;
 const Vector2D START{ 4, CORRIDOR_ROW };
 const Vector2D DOOR{ 5, CORRIDOR_ROW };
 
-const std::string FORCED{ "You force the door open! The crash echoes down the corridor." };
+const std::string FORCED{
+	"You force the door open! The crash echoes down the corridor."
+};
 const std::string HELD{ "You slam into the door but it holds." };
-const std::string TOO_WEAK{ "The door is locked. You are not strong enough to force it." };
-const std::string ALREADY_FAILED{ "You have already failed to force this door." };
+const std::string TOO_WEAK{
+	"The door is locked. You are not strong enough to force it."
+};
+const std::string ALREADY_FAILED{
+	"You have already failed to force this door."
+};
 // A queued value no attempt in these tests is meant to read, so reading it back proves
 // nothing rolled.
 constexpr int UNREAD_D20 = 13;
@@ -88,10 +94,12 @@ protected:
 	// the queued d20 is still the next one.
 	void expect_refused_without_a_roll(int timeBefore)
 	{
-		EXPECT_EQ(ctx.gameState->get_time(), timeBefore) << "a refused attempt spent time";
+		EXPECT_EQ(ctx.gameState->get_time(), timeBefore)
+			<< "a refused attempt spent time";
 		EXPECT_TRUE(ctx.map->is_door_locked(DOOR));
 		EXPECT_EQ(ctx.player()->position, START);
-		EXPECT_EQ(mock.dice.d20(), UNREAD_D20) << "a refused attempt rolled the d20";
+		EXPECT_EQ(mock.dice.d20(), UNREAD_D20)
+			<< "a refused attempt rolled the d20";
 	}
 
 	MockGameContext mock{};
@@ -108,17 +116,27 @@ TEST_F(DoorForcingTest, ARowWithNoLockedDoorChanceIsRefusedWithoutARoll)
 		int exceptional{ 0 };
 	};
 
-	for (const Character character : { Character{ 17, 0 }, Character{ 18, 90 }, Character{ 18, 0 } })
+	for (
+		const Character character :
+		{ Character{ 17, 0 }, Character{ 18, 90 }, Character{ 18, 0 } })
 	{
-		become(CreatureClass::FIGHTER, character.strength, character.exceptional);
+		become(
+			CreatureClass::FIGHTER,
+			character.strength,
+			character.exceptional);
 		mock.dice.set_next_roll(UNREAD_D20);
 		const int timeBefore = ctx.gameState->get_time();
 
 		walk_into_the_door();
 
-		SCOPED_TRACE(std::format("Strength {}/{}", character.strength, character.exceptional));
+		SCOPED_TRACE(
+			std::format(
+				"Strength {}/{}",
+				character.strength,
+				character.exceptional));
 		EXPECT_EQ(ctx.messageSystem->get_current_message(), TOO_WEAK);
-		EXPECT_FALSE(ctx.map->has_resisted_forcing(DOOR)) << "a refusal used up the attempt";
+		EXPECT_FALSE(ctx.map->has_resisted_forcing(DOOR))
+			<< "a refusal used up the attempt";
 		expect_refused_without_a_roll(timeBefore);
 	}
 }
@@ -132,7 +150,8 @@ TEST_F(DoorForcingTest, EighteenNinetyOneOpensOnAThree)
 
 	walk_into_the_door();
 
-	EXPECT_EQ(ctx.map->get_tile_type(DOOR), TileType::OPEN_DOOR) << "a forced door is open, not torn out";
+	EXPECT_EQ(ctx.map->get_tile_type(DOOR), TileType::OPEN_DOOR)
+		<< "a forced door is open, not torn out";
 	EXPECT_FALSE(ctx.map->is_door_locked(DOOR));
 	EXPECT_EQ(ctx.messageSystem->get_current_message(), FORCED);
 	EXPECT_EQ(ctx.gameState->get_time(), timeBefore + TIME_UNITS_PER_ROUND);
@@ -187,10 +206,15 @@ TEST_F(DoorForcingTest, EighteenHundredFailsOnASevenAndMayNotTryAgain)
 
 	// The book limits forcing, not keys.
 	Player& player = ctx.player_concrete();
-	ASSERT_TRUE(InventoryOperations::add_item(player.inventoryData, ItemCreator::create("dungeon_key", START, ctx)).has_value());
+	ASSERT_TRUE(
+		InventoryOperations::add_item(
+			player.inventoryData,
+			ItemCreator::create("dungeon_key", START, ctx))
+			.has_value());
 	walk_into_the_door();
 
-	EXPECT_EQ(ctx.map->get_tile_type(DOOR), TileType::OPEN_DOOR) << "a key did not open a door that resisted forcing";
+	EXPECT_EQ(ctx.map->get_tile_type(DOOR), TileType::OPEN_DOOR)
+		<< "a key did not open a door that resisted forcing";
 }
 
 // The table decides, not the class: a cleric of Strength 19, 16(8), opens on an 8.

@@ -49,7 +49,8 @@ protected:
 	{
 		for (const auto& item : ctx.floorInventory->items)
 		{
-			if (item && item->behavior && std::holds_alternative<Gold>(*item->behavior))
+			if (item && item->behavior &&
+				std::holds_alternative<Gold>(*item->behavior))
 			{
 				return item.get();
 			}
@@ -65,10 +66,12 @@ TEST_F(TreasureGoldTest, ATreasurePileIsWorthWhatItPaysOut)
 	const Item* gold = find_gold();
 	ASSERT_NE(gold, nullptr) << "generate_treasure always places gold";
 	const int paidOut = std::get<Gold>(*gold->behavior).amount;
-	ASSERT_GT(paidOut, 1) << "the rolled amount must exceed the default value for this to discriminate";
+	ASSERT_GT(paidOut, 1)
+		<< "the rolled amount must exceed the default value for this to discriminate";
 
 	EXPECT_EQ(gold->get_value(), paidOut)
-		<< "the pile pays out " << paidOut << " but is valued at " << gold->get_value();
+		<< "the pile pays out " << paidOut << " but is valued at "
+		<< gold->get_value();
 }
 
 TEST_F(TreasureGoldTest, ATreasurePileIsTheSameItemAsAFloorPile)
@@ -80,9 +83,14 @@ TEST_F(TreasureGoldTest, ATreasurePileIsTheSameItemAsAFloorPile)
 
 	// A hand-built item has none of these, so each one says the pile came through the
 	// registry rather than being assembled at the call site.
-	EXPECT_EQ(gold->itemKey, "gold_coin") << "a pile with no key cannot be identified on load";
-	EXPECT_EQ(gold->itemClass, mock.itemRegistry.get_params("gold_coin").itemClass);
-	EXPECT_EQ(gold->actorData.name, std::string(mock.itemRegistry.get_params("gold_coin").name));
+	EXPECT_EQ(gold->itemKey, "gold_coin")
+		<< "a pile with no key cannot be identified on load";
+	EXPECT_EQ(
+		gold->itemClass,
+		mock.itemRegistry.get_params("gold_coin").itemClass);
+	EXPECT_EQ(
+		gold->actorData.name,
+		std::string(mock.itemRegistry.get_params("gold_coin").name));
 }
 
 // A pile weighs what its coins weigh, at the owner's thousand to the pound. The
@@ -90,9 +98,13 @@ TEST_F(TreasureGoldTest, ATreasurePileIsTheSameItemAsAFloorPile)
 // item whose weight is a function of what it holds.
 TEST_F(TreasureGoldTest, APileWeighsWhatItsCoinsWeigh)
 {
-	const auto light = ItemCreator::create_with_gold_amount(Vector2D{ 10, 10 }, 999, ctx);
-	EXPECT_EQ(light->enhancement.weight, 0) << "a purse under a thousand is pocket change";
+	const auto light =
+		ItemCreator::create_with_gold_amount(Vector2D{ 10, 10 }, 999, ctx);
+	EXPECT_EQ(light->enhancement.weight, 0)
+		<< "a purse under a thousand is pocket change";
 
-	const auto heavy = ItemCreator::create_with_gold_amount(Vector2D{ 10, 10 }, 7500, ctx);
-	EXPECT_EQ(heavy->enhancement.weight, 7) << "the part-thousand must not round up";
+	const auto heavy =
+		ItemCreator::create_with_gold_amount(Vector2D{ 10, 10 }, 7500, ctx);
+	EXPECT_EQ(heavy->enhancement.weight, 7)
+		<< "the part-thousand must not round up";
 }

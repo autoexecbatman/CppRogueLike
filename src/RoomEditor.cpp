@@ -52,7 +52,9 @@ namespace
 //   picker_sheet_name(TileSheet::SHEET_DECOR0);   // -> "Decor0"
 std::string picker_sheet_name(TileSheet sheet)
 {
-	for (size_t sheetIndex = 0; sheetIndex < std::size(PICKER_SHEETS); ++sheetIndex)
+	for (
+		size_t sheetIndex = 0; sheetIndex < std::size(PICKER_SHEETS);
+		++sheetIndex)
 	{
 		if (PICKER_SHEETS[sheetIndex] == sheet)
 		{
@@ -84,7 +86,8 @@ PrefabListRows prefab_list_rows(const Renderer& renderer)
 {
 	const int tileSize = renderer.get_tile_size();
 	const int panelY = TOP_H_TILES * tileSize;
-	const int panelH = renderer.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
+	const int panelH =
+		renderer.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
 	return PrefabListRows{ panelY, panelH, renderer.get_font_size() };
 }
 
@@ -104,8 +107,8 @@ CanvasGrid canvas_grid(const Renderer& renderer, int panX, int panY)
 // Prefab list rows
 // ---------------------------------------------------------------------------
 
-PrefabListRows::PrefabListRows(int panelTop, int panelHeight, int fontSize)
-	: rowHeight{ fontSize + 4 }
+PrefabListRows::PrefabListRows(int panelTop, int panelHeight, int fontSize) :
+	rowHeight{ fontSize + 4 }
 {
 	// The "SAVED PREFABS" header takes one row and a 4-pixel gap above the first prefab.
 	const int headerHeight = rowHeight + 4;
@@ -169,10 +172,10 @@ std::optional<int> parse_typed_size(std::string_view typed)
 	return value;
 }
 
-CanvasGrid::CanvasGrid(int gridOriginX, int gridOriginY, int cellSize)
-	: originX{ gridOriginX },
-	  originY{ gridOriginY },
-	  tileSize{ cellSize }
+CanvasGrid::CanvasGrid(int gridOriginX, int gridOriginY, int cellSize) :
+	originX{ gridOriginX },
+	originY{ gridOriginY },
+	tileSize{ cellSize }
 {
 	assert(tileSize > 0 && "CanvasGrid: a cell has no size");
 }
@@ -212,8 +215,9 @@ int CanvasGrid::row_at(int pixelY) const
 // Lifecycle
 // ---------------------------------------------------------------------------
 
-RoomEditor::RoomEditor(PrefabLibrary& prefabLibrary, Palette& editedPalette)
-	: library(prefabLibrary), palette(editedPalette)
+RoomEditor::RoomEditor(PrefabLibrary& prefabLibrary, Palette& editedPalette) :
+	library(prefabLibrary),
+	palette(editedPalette)
 {
 	// A canvas from the start, so an editor ticked before enter draws an empty room.
 	new_canvas(canvasWidth, canvasHeight);
@@ -275,7 +279,9 @@ void RoomEditor::new_canvas(int width, int height)
 void RoomEditor::do_save(const std::string& name)
 {
 	Prefab prefab;
-	prefab.name = name.empty() ? std::format("prefab_{}x{}", canvasWidth, canvasHeight) : name;
+	prefab.name = name.empty() ?
+		std::format("prefab_{}x{}", canvasWidth, canvasHeight) :
+		name;
 	prefab.depthMin = depthMin;
 	prefab.depthMax = depthMax;
 	prefab.weight = weight;
@@ -289,15 +295,16 @@ void RoomEditor::do_save(const std::string& name)
 		rowStr.reserve(canvasWidth);
 		for (int col = 0; col < canvasWidth; ++col)
 		{
-			char decorChar = (row < static_cast<int>(decorCanvas.size()) &&
-								 col < static_cast<int>(decorCanvas[row].size()))
-				? decorCanvas[row][col]
-				: ' ';
+			char decorChar =
+				(row < static_cast<int>(decorCanvas.size()) &&
+					col < static_cast<int>(decorCanvas[row].size())) ?
+				decorCanvas[row][col] :
+				' ';
 
 			char baseChar = (row < static_cast<int>(canvas.size()) &&
-								col < static_cast<int>(canvas[row].size()))
-				? canvas[row][col]
-				: '.';
+								col < static_cast<int>(canvas[row].size())) ?
+				canvas[row][col] :
+				'.';
 
 			rowStr += (decorChar != ' ') ? decorChar : baseChar;
 		}
@@ -327,19 +334,24 @@ void RoomEditor::do_load(size_t prefabIndex)
 	weight = prefab.weight;
 
 	canvasHeight = static_cast<int>(prefab.rows.size());
-	canvasWidth = canvasHeight > 0 ? static_cast<int>(prefab.rows[0].size()) : 0;
+	canvasWidth =
+		canvasHeight > 0 ? static_cast<int>(prefab.rows[0].size()) : 0;
 	canvas.assign(canvasHeight, std::string(canvasWidth, '.'));
 	decorCanvas.assign(canvasHeight, std::string(canvasWidth, ' '));
 
 	auto is_structural_sym = [](char symbol) -> bool
 	{
-		return symbol == '#' || symbol == '.' || symbol == ',' || symbol == '+' || symbol == '~';
+		return symbol == '#' || symbol == '.' || symbol == ',' ||
+			symbol == '+' || symbol == '~';
 	};
 
 	for (int row = 0; row < canvasHeight; ++row)
 	{
 		const std::string& srcRow = prefab.rows[row];
-		for (int col = 0; col < static_cast<int>(srcRow.size()) && col < canvasWidth; ++col)
+		for (
+			int col = 0;
+			col < static_cast<int>(srcRow.size()) && col < canvasWidth;
+			++col)
 		{
 			char symbol = srcRow[col];
 			if (is_structural_sym(symbol))
@@ -435,7 +447,13 @@ void RoomEditor::commit_symbol_tile(char symbol, TileRef tile)
 	}
 	if (save_palette() == SaveOutcome::SAVED)
 	{
-		set_status(std::format("'{}' -> tile ({},{}) sheet {}", symbol, tile.col, tile.row, picker_sheet_name(tile.sheet)));
+		set_status(
+			std::format(
+				"'{}' -> tile ({},{}) sheet {}",
+				symbol,
+				tile.col,
+				tile.row,
+				picker_sheet_name(tile.sheet)));
 	}
 }
 
@@ -506,12 +524,15 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 	}
 
 	// Palette navigation. The rows always begin with the structural symbols, so both wraps have a last entry.
-	static_assert(!STRUCTURAL_SYMBOLS.empty(), "RoomEditor: the palette's wrapping navigation needs a row");
+	static_assert(
+		!STRUCTURAL_SYMBOLS.empty(),
+		"RoomEditor: the palette's wrapping navigation needs a row");
 	const std::vector<SymbolRow> symbolRows = palette.symbol_rows();
 
 	if (IsKeyPressed(KEY_UP))
 	{
-		paletteIndex = paletteIndex == 0 ? symbolRows.size() - 1 : paletteIndex - 1;
+		paletteIndex =
+			paletteIndex == 0 ? symbolRows.size() - 1 : paletteIndex - 1;
 	}
 	if (IsKeyPressed(KEY_DOWN))
 	{
@@ -587,8 +608,10 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 		else
 		{
 			::Vector2 mousePosition = GetMousePosition();
-			panX = panStartX - static_cast<int>(mousePosition.x - panMouseStartX);
-			panY = panStartY - static_cast<int>(mousePosition.y - panMouseStartY);
+			panX =
+				panStartX - static_cast<int>(mousePosition.x - panMouseStartX);
+			panY =
+				panStartY - static_cast<int>(mousePosition.y - panMouseStartY);
 		}
 	}
 	else
@@ -603,10 +626,16 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 		::Vector2 mousePosition = GetMousePosition();
 		int delta = (wheel > 0.0f) ? -1 : 1;
 
-		auto is_mouse_over_left_panel = [this, &renderer, tileSize, &mousePosition]()
+		auto is_mouse_over_left_panel =
+			[this, &renderer, tileSize, &mousePosition]()
 		{
-			const std::optional<size_t> entryUnderMouse = screen_to_palette_index(renderer, static_cast<int>(mousePosition.x), static_cast<int>(mousePosition.y));
-			return entryUnderMouse.has_value() || static_cast<int>(mousePosition.x) < LEFT_W_TILES * tileSize;
+			const std::optional<size_t> entryUnderMouse =
+				screen_to_palette_index(
+					renderer,
+					static_cast<int>(mousePosition.x),
+					static_cast<int>(mousePosition.y));
+			return entryUnderMouse.has_value() ||
+				static_cast<int>(mousePosition.x) < LEFT_W_TILES * tileSize;
 		};
 
 		if (is_mouse_over_left_panel())
@@ -619,7 +648,9 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 			const size_t count = library.all().size();
 			const size_t lastPrefab = count == 0 ? 0 : count - 1;
 			// A delete can leave the scroll past the shortened list; any notch then brings it back to the last row.
-			listScroll = listScroll > lastPrefab ? lastPrefab : step_within(listScroll, delta, lastPrefab);
+			listScroll = listScroll > lastPrefab ?
+				lastPrefab :
+				step_within(listScroll, delta, lastPrefab);
 		}
 	}
 
@@ -629,7 +660,10 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 		::Vector2 mousePosition = GetMousePosition();
 
 		// Left panel -- select palette symbol
-		auto palIdx = screen_to_palette_index(renderer, static_cast<int>(mousePosition.x), static_cast<int>(mousePosition.y));
+		auto palIdx = screen_to_palette_index(
+			renderer,
+			static_cast<int>(mousePosition.x),
+			static_cast<int>(mousePosition.y));
 		if (palIdx)
 		{
 			paletteIndex = *palIdx;
@@ -637,11 +671,15 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 		}
 
 		// Canvas
-		if (const std::optional<CanvasCell> cell = screen_to_canvas(renderer, static_cast<int>(mousePosition.x), static_cast<int>(mousePosition.y)))
+		if (const std::optional<CanvasCell> cell = screen_to_canvas(
+				renderer,
+				static_cast<int>(mousePosition.x),
+				static_cast<int>(mousePosition.y)))
 		{
 			char symbol = selected_sym();
-			bool structural = (symbol == '#' || symbol == '.' || symbol == ',' ||
-				symbol == '+' || symbol == '~');
+			bool structural =
+				(symbol == '#' || symbol == '.' || symbol == ',' ||
+					symbol == '+' || symbol == '~');
 			if (structural)
 			{
 				canvas[cell->row][cell->col] = symbol;
@@ -657,7 +695,10 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 		}
 
 		// Right panel list
-		auto listIdx = screen_to_list_index(renderer, static_cast<int>(mousePosition.x), static_cast<int>(mousePosition.y));
+		auto listIdx = screen_to_list_index(
+			renderer,
+			static_cast<int>(mousePosition.x),
+			static_cast<int>(mousePosition.y));
 		if (listIdx)
 		{
 			listSelected = *listIdx;
@@ -669,7 +710,10 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 	if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
 	{
 		::Vector2 mousePosition = GetMousePosition();
-		if (const std::optional<CanvasCell> cell = screen_to_canvas(renderer, static_cast<int>(mousePosition.x), static_cast<int>(mousePosition.y)))
+		if (const std::optional<CanvasCell> cell = screen_to_canvas(
+				renderer,
+				static_cast<int>(mousePosition.x),
+				static_cast<int>(mousePosition.y)))
 		{
 			// First erase decor overlay; if already empty, erase the base tile.
 			if (decorCanvas[cell->row][cell->col] != ' ')
@@ -678,7 +722,9 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 			}
 			else
 			{
-				bool onBorder = (cell->col == 0 || cell->col == canvasWidth - 1 || cell->row == 0 || cell->row == canvasHeight - 1);
+				bool onBorder =
+					(cell->col == 0 || cell->col == canvasWidth - 1 ||
+						cell->row == 0 || cell->row == canvasHeight - 1);
 				canvas[cell->row][cell->col] = onBorder ? '#' : '.';
 			}
 		}
@@ -709,7 +755,11 @@ void RoomEditor::handle_input_text()
 			const std::optional<int> typedWidth = parse_typed_size(inputBuffer);
 			if (!typedWidth)
 			{
-				set_status(std::format("Width '{}' is not a number -- kept {}", inputBuffer, canvasWidth));
+				set_status(
+					std::format(
+						"Width '{}' is not a number -- kept {}",
+						inputBuffer,
+						canvasWidth));
 			}
 			pendingWidth = std::clamp(typedWidth.value_or(canvasWidth), 3, 60);
 			mode = EditorMode::INPUT_HEIGHT;
@@ -717,12 +767,19 @@ void RoomEditor::handle_input_text()
 		}
 		else if (mode == EditorMode::INPUT_HEIGHT)
 		{
-			const std::optional<int> typedHeight = parse_typed_size(inputBuffer);
+			const std::optional<int> typedHeight =
+				parse_typed_size(inputBuffer);
 			if (!typedHeight)
 			{
-				set_status(std::format("Height '{}' is not a number -- kept {}", inputBuffer, canvasHeight));
+				set_status(
+					std::format(
+						"Height '{}' is not a number -- kept {}",
+						inputBuffer,
+						canvasHeight));
 			}
-			new_canvas(pendingWidth, std::clamp(typedHeight.value_or(canvasHeight), 3, 40));
+			new_canvas(
+				pendingWidth,
+				std::clamp(typedHeight.value_or(canvasHeight), 3, 40));
 			mode = EditorMode::NORMAL;
 			inputBuffer.clear();
 		}
@@ -739,7 +796,9 @@ void RoomEditor::handle_input_text()
 				const std::vector<SymbolRow> symbolRows = palette.symbol_rows();
 				if (paletteIndex < symbolRows.size())
 				{
-					commit_symbol_label(symbolRows[paletteIndex].symbol, inputBuffer);
+					commit_symbol_label(
+						symbolRows[paletteIndex].symbol,
+						inputBuffer);
 				}
 			}
 			mode = EditorMode::NORMAL;
@@ -755,11 +814,13 @@ void RoomEditor::handle_input_text()
 		bool accept = false;
 		if (mode == EditorMode::INPUT_WIDTH || mode == EditorMode::INPUT_HEIGHT)
 		{
-			accept = (pressed >= '0' && pressed <= '9') && inputBuffer.size() < 3;
+			accept =
+				(pressed >= '0' && pressed <= '9') && inputBuffer.size() < 3;
 		}
 		else
 		{
-			accept = (pressed >= 32 && pressed <= 126) && inputBuffer.size() < 40;
+			accept =
+				(pressed >= 32 && pressed <= 126) && inputBuffer.size() < 40;
 		}
 		// INPUT_LABEL uses the same printable-character rule as INPUT_NAME
 
@@ -785,8 +846,10 @@ std::optional<RoomEditor::CanvasCell> RoomEditor::screen_to_canvas(
 	int tileSize = renderer.get_tile_size();
 	int areaX = LEFT_W_TILES * tileSize;
 	int areaY = TOP_H_TILES * tileSize;
-	int areaW = renderer.get_screen_width() - (LEFT_W_TILES + RIGHT_W_TILES) * tileSize;
-	int areaH = renderer.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
+	int areaW =
+		renderer.get_screen_width() - (LEFT_W_TILES + RIGHT_W_TILES) * tileSize;
+	int areaH =
+		renderer.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
 
 	if (mousePx < areaX || mousePx >= areaX + areaW)
 	{
@@ -815,7 +878,10 @@ std::optional<RoomEditor::CanvasCell> RoomEditor::screen_to_canvas(
 }
 
 // Returns prefab list index from screen pixel in right panel. Returns nullopt if outside panel.
-std::optional<size_t> RoomEditor::screen_to_list_index(const Renderer& renderer, int mousePx, int mousePy) const
+std::optional<size_t> RoomEditor::screen_to_list_index(
+	const Renderer& renderer,
+	int mousePx,
+	int mousePy) const
 {
 	int tileSize = renderer.get_tile_size();
 	int panelX = renderer.get_screen_width() - RIGHT_W_TILES * tileSize;
@@ -826,7 +892,8 @@ std::optional<size_t> RoomEditor::screen_to_list_index(const Renderer& renderer,
 	}
 
 	// The rows the draw places; slot_at rejects the header and the strip below the last whole row.
-	const std::optional<size_t> slot = prefab_list_rows(renderer).slot_at(mousePy);
+	const std::optional<size_t> slot =
+		prefab_list_rows(renderer).slot_at(mousePy);
 	if (!slot)
 	{
 		return std::nullopt;
@@ -842,12 +909,16 @@ std::optional<size_t> RoomEditor::screen_to_list_index(const Renderer& renderer,
 }
 
 // Returns palette index from screen pixel in left panel. Returns nullopt if outside panel.
-std::optional<size_t> RoomEditor::screen_to_palette_index(const Renderer& renderer, int mousePx, int mousePy) const
+std::optional<size_t> RoomEditor::screen_to_palette_index(
+	const Renderer& renderer,
+	int mousePx,
+	int mousePy) const
 {
 	int tileSize = renderer.get_tile_size();
 	int panelW = LEFT_W_TILES * tileSize;
 	int panelY = TOP_H_TILES * tileSize;
-	int panelH = renderer.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
+	int panelH =
+		renderer.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
 
 	if (mousePx < 0 || mousePx >= panelW)
 	{
@@ -862,7 +933,8 @@ std::optional<size_t> RoomEditor::screen_to_palette_index(const Renderer& render
 	const size_t slot = whole_rows_within(mousePy - panelY, tileSize);
 
 	// The strip scrolls only to keep the selected entry on its last visible slot.
-	const size_t scrollStart = paletteIndex >= maxVisible ? paletteIndex - maxVisible + 1 : 0;
+	const size_t scrollStart =
+		paletteIndex >= maxVisible ? paletteIndex - maxVisible + 1 : 0;
 
 	const size_t paletteEntryIndex = scrollStart + slot;
 	if (paletteEntryIndex >= palette.symbol_rows().size() || slot >= maxVisible)
@@ -930,7 +1002,8 @@ int RoomEditor::canvas_wall_mask(int col, int row) const
 {
 	auto is_wall = [&](int wallCol, int wallRow)
 	{
-		if (wallRow < 0 || wallRow >= canvasHeight || wallCol < 0 || wallCol >= canvasWidth)
+		if (wallRow < 0 || wallRow >= canvasHeight || wallCol < 0 ||
+			wallCol >= canvasWidth)
 		{
 			return false; // OOB = void, not wall -- prevents T-junctions on border
 		}
@@ -942,7 +1015,8 @@ int RoomEditor::canvas_wall_mask(int col, int row) const
 	bool hasSouth = is_wall(col, row + 1);
 	bool hasWest = is_wall(col - 1, row);
 
-	return (hasNorth ? 8 : 0) | (hasEast ? 4 : 0) | (hasSouth ? 2 : 0) | (hasWest ? 1 : 0);
+	return (hasNorth ? 8 : 0) | (hasEast ? 4 : 0) | (hasSouth ? 2 : 0) |
+		(hasWest ? 1 : 0);
 }
 
 // Position-aware tile that resolves wall/floor auto-tiling.
@@ -952,14 +1026,17 @@ TileRef RoomEditor::canvas_tile_id(int col, int row) const
 
 	if (symbol == '#' && tileConfig)
 	{
-		return Autotile::wall_resolve_mask(tileConfig->get_wall_autotile("WALL_AUTOTILE_STONE"), canvas_wall_mask(col, row));
+		return Autotile::wall_resolve_mask(
+			tileConfig->get_wall_autotile("WALL_AUTOTILE_STONE"),
+			canvas_wall_mask(col, row));
 	}
 
 	if (symbol == '.' && tileConfig)
 	{
 		auto is_floor = [&](int floorCol, int floorRow) -> bool
 		{
-			if (floorRow < 0 || floorRow >= canvasHeight || floorCol < 0 || floorCol >= canvasWidth)
+			if (floorRow < 0 || floorRow >= canvasHeight || floorCol < 0 ||
+				floorCol >= canvasWidth)
 			{
 				return false;
 			}
@@ -1008,7 +1085,12 @@ void RoomEditor::render_top_bar(const Renderer& renderer) const
 	int screenWidth = renderer.get_screen_width();
 
 	DrawRectangle(0, 0, screenWidth, tileSize, Color{ 20, 20, 30, 240 });
-	DrawLine(0, tileSize - 1, screenWidth, tileSize - 1, Color{ 80, 80, 120, 255 });
+	DrawLine(
+		0,
+		tileSize - 1,
+		screenWidth,
+		tileSize - 1,
+		Color{ 80, 80, 120, 255 });
 
 	bool savedFlash = (GetTime() - statusTime) < 3.0;
 
@@ -1022,11 +1104,13 @@ void RoomEditor::render_top_bar(const Renderer& renderer) const
 		weight,
 		savedFlash ? std::format("  --  {}", statusMsg) : "");
 
-	Color titleCol = savedFlash
-		? Color{ 100, 255, 140, 255 }
-		: Color{ 200, 200, 255, 255 };
+	Color titleCol =
+		savedFlash ? Color{ 100, 255, 140, 255 } : Color{ 200, 200, 255, 255 };
 
-	renderer.draw_text_color(Vector2D{ 8, (tileSize - renderer.get_font_size()) / 2 }, title, titleCol);
+	renderer.draw_text_color(
+		Vector2D{ 8, (tileSize - renderer.get_font_size()) / 2 },
+		title,
+		titleCol);
 }
 
 void RoomEditor::render_left_panel(const Renderer& renderer) const
@@ -1034,18 +1118,28 @@ void RoomEditor::render_left_panel(const Renderer& renderer) const
 	int tileSize = renderer.get_tile_size();
 	int panelW = LEFT_W_TILES * tileSize;
 	int panelY = TOP_H_TILES * tileSize;
-	int panelH = renderer.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
+	int panelH =
+		renderer.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
 
 	DrawRectangle(0, panelY, panelW, panelH, Color{ 15, 15, 22, 230 });
-	DrawLine(panelW - 1, panelY, panelW - 1, panelY + panelH, Color{ 70, 70, 110, 255 });
+	DrawLine(
+		panelW - 1,
+		panelY,
+		panelW - 1,
+		panelY + panelH,
+		Color{ 70, 70, 110, 255 });
 
 	const std::vector<SymbolRow> symbolRows = palette.symbol_rows();
 	const size_t maxVisible = whole_rows_within(panelH, tileSize);
 
 	// Scroll to keep selected entry visible
-	const size_t scrollStart = paletteIndex >= maxVisible ? paletteIndex - maxVisible + 1 : 0;
+	const size_t scrollStart =
+		paletteIndex >= maxVisible ? paletteIndex - maxVisible + 1 : 0;
 
-	for (size_t slot = 0; slot < maxVisible && scrollStart + slot < symbolRows.size(); ++slot)
+	for (
+		size_t slot = 0;
+		slot < maxVisible && scrollStart + slot < symbolRows.size();
+		++slot)
 	{
 		const size_t paletteEntryIndex = scrollStart + slot;
 		int slotPixelY = panelY + static_cast<int>(slot) * tileSize;
@@ -1055,12 +1149,18 @@ void RoomEditor::render_left_panel(const Renderer& renderer) const
 
 		if (selected)
 		{
-			DrawRectangle(0, slotPixelY, panelW, tileSize, Color{ 60, 60, 100, 200 });
+			DrawRectangle(
+				0,
+				slotPixelY,
+				panelW,
+				tileSize,
+				Color{ 60, 60, 100, 200 });
 		}
 
 		TileRef tile = symbol_tile_id(symbol);
-		bool isStructural = (symbol == '#' || symbol == '.' || symbol == ',' ||
-			symbol == '+' || symbol == '~');
+		bool isStructural =
+			(symbol == '#' || symbol == '.' || symbol == ',' || symbol == '+' ||
+				symbol == '~');
 
 		if (isStructural)
 		{
@@ -1095,12 +1195,22 @@ void RoomEditor::render_left_panel(const Renderer& renderer) const
 				{
 					block = Color{ 50, 50, 50, 255 };
 				}
-				DrawRectangle(4, slotPixelY + 4, tileSize - 8, tileSize - 8, block);
+				DrawRectangle(
+					4,
+					slotPixelY + 4,
+					tileSize - 8,
+					tileSize - 8,
+					block);
 			}
 		}
 		else
 		{
-			DrawRectangle(2, slotPixelY, tileSize, tileSize, Color{ 70, 58, 42, 255 });
+			DrawRectangle(
+				2,
+				slotPixelY,
+				tileSize,
+				tileSize,
+				Color{ 70, 58, 42, 255 });
 			if (tile.is_valid())
 			{
 				renderer.draw_tile_screen(Vector2D{ 2, slotPixelY }, tile);
@@ -1108,20 +1218,25 @@ void RoomEditor::render_left_panel(const Renderer& renderer) const
 		}
 
 		// Label
-		Color labelCol = selected
-			? Color{ 255, 255, 100, 255 }
-			: Color{ 180, 180, 200, 200 };
+		Color labelCol = selected ? Color{ 255, 255, 100, 255 } :
+									Color{ 180, 180, 200, 200 };
 
-		renderer.draw_text_color(Vector2D{
-									 tileSize + 4,
-									 slotPixelY + (tileSize - renderer.get_font_size()) / 2,
-								 },
+		renderer.draw_text_color(
+			Vector2D{
+				tileSize + 4,
+				slotPixelY + (tileSize - renderer.get_font_size()) / 2,
+			},
 			symbolRows[paletteEntryIndex].label,
 			labelCol);
 
 		if (selected)
 		{
-			DrawRectangleLines(1, slotPixelY + 1, panelW - 2, tileSize - 2, Color{ 200, 200, 100, 180 });
+			DrawRectangleLines(
+				1,
+				slotPixelY + 1,
+				panelW - 2,
+				tileSize - 2,
+				Color{ 200, 200, 100, 180 });
 		}
 	}
 }
@@ -1131,8 +1246,10 @@ void RoomEditor::render_canvas(const Renderer& renderer) const
 	int tileSize = renderer.get_tile_size();
 	int areaX = LEFT_W_TILES * tileSize;
 	int areaY = TOP_H_TILES * tileSize;
-	int areaW = renderer.get_screen_width() - (LEFT_W_TILES + RIGHT_W_TILES) * tileSize;
-	int areaH = renderer.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
+	int areaW =
+		renderer.get_screen_width() - (LEFT_W_TILES + RIGHT_W_TILES) * tileSize;
+	int areaH =
+		renderer.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
 
 	// Dark canvas background
 	DrawRectangle(areaX, areaY, areaW, areaH, Color{ 8, 8, 12, 255 });
@@ -1159,30 +1276,45 @@ void RoomEditor::render_canvas(const Renderer& renderer) const
 			TileRef baseTile = canvas_tile_id(col, row);
 			if (baseTile.is_valid())
 			{
-				renderer.draw_tile_screen(Vector2D{ cellPixelX, cellPixelY }, baseTile);
+				renderer.draw_tile_screen(
+					Vector2D{ cellPixelX, cellPixelY },
+					baseTile);
 			}
 			else
 			{
-				DrawRectangle(cellPixelX, cellPixelY, tileSize, tileSize, FLOOR_BG);
+				DrawRectangle(
+					cellPixelX,
+					cellPixelY,
+					tileSize,
+					tileSize,
+					FLOOR_BG);
 			}
 
 			// Decor layer -- additively blended so black sprite pixels
 			// are transparent and the base tile shows through underneath.
-			char decorSym = (row < static_cast<int>(decorCanvas.size()) &&
-								col < static_cast<int>(decorCanvas[row].size()))
-				? decorCanvas[row][col]
-				: ' ';
+			char decorSym =
+				(row < static_cast<int>(decorCanvas.size()) &&
+					col < static_cast<int>(decorCanvas[row].size())) ?
+				decorCanvas[row][col] :
+				' ';
 
 			if (decorSym != ' ')
 			{
 				TileRef decorTile = symbol_tile_id(decorSym);
 				if (decorTile.is_valid())
 				{
-					renderer.draw_tile_screen(Vector2D{ cellPixelX, cellPixelY }, decorTile);
+					renderer.draw_tile_screen(
+						Vector2D{ cellPixelX, cellPixelY },
+						decorTile);
 				}
 			}
 
-			DrawRectangleLines(cellPixelX, cellPixelY, tileSize, tileSize, GRID_COLOR);
+			DrawRectangleLines(
+				cellPixelX,
+				cellPixelY,
+				tileSize,
+				tileSize,
+				GRID_COLOR);
 		}
 	}
 
@@ -1190,11 +1322,19 @@ void RoomEditor::render_canvas(const Renderer& renderer) const
 
 	// Panel borders
 	DrawLine(areaX, areaY, areaX, areaY + areaH, Color{ 70, 70, 110, 255 });
-	DrawLine(areaX + areaW, areaY, areaX + areaW, areaY + areaH, Color{ 70, 70, 110, 255 });
+	DrawLine(
+		areaX + areaW,
+		areaY,
+		areaX + areaW,
+		areaY + areaH,
+		Color{ 70, 70, 110, 255 });
 
 	// Canvas size label in top-left corner of canvas area
 	std::string dimLabel = std::format("{}x{}", canvasWidth, canvasHeight);
-	renderer.draw_text_color(Vector2D{ areaX + 4, areaY + 4 }, dimLabel, Color{ 100, 100, 140, 160 });
+	renderer.draw_text_color(
+		Vector2D{ areaX + 4, areaY + 4 },
+		dimLabel,
+		Color{ 100, 100, 140, 160 });
 }
 
 void RoomEditor::render_right_panel(const Renderer& renderer) const
@@ -1202,19 +1342,31 @@ void RoomEditor::render_right_panel(const Renderer& renderer) const
 	int tileSize = renderer.get_tile_size();
 	int panelX = renderer.get_screen_width() - RIGHT_W_TILES * tileSize;
 	int panelY = TOP_H_TILES * tileSize;
-	int panelH = renderer.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
+	int panelH =
+		renderer.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
 	int panelW = RIGHT_W_TILES * tileSize;
 
 	DrawRectangle(panelX, panelY, panelW, panelH, Color{ 15, 15, 22, 230 });
-	DrawLine(panelX, panelY, panelX, panelY + panelH, Color{ 70, 70, 110, 255 });
+	DrawLine(
+		panelX,
+		panelY,
+		panelX,
+		panelY + panelH,
+		Color{ 70, 70, 110, 255 });
 
 	// Header
-	renderer.draw_text_color(Vector2D{ panelX + 6, panelY + 4 }, "SAVED PREFABS", Color{ 160, 160, 220, 255 });
+	renderer.draw_text_color(
+		Vector2D{ panelX + 6, panelY + 4 },
+		"SAVED PREFABS",
+		Color{ 160, 160, 220, 255 });
 
 	const PrefabListRows rows = prefab_list_rows(renderer);
 	const auto& all = library.all();
 
-	for (size_t slot = 0; slot < rows.visible_rows() && listScroll + slot < all.size(); ++slot)
+	for (
+		size_t slot = 0;
+		slot < rows.visible_rows() && listScroll + slot < all.size();
+		++slot)
 	{
 		const size_t listIndex = listScroll + slot;
 		int rowPixelY = rows.row_top(slot);
@@ -1223,24 +1375,37 @@ void RoomEditor::render_right_panel(const Renderer& renderer) const
 
 		if (selected)
 		{
-			DrawRectangle(panelX, rowPixelY, panelW, rows.row_height(), Color{ 50, 50, 90, 200 });
+			DrawRectangle(
+				panelX,
+				rowPixelY,
+				panelW,
+				rows.row_height(),
+				Color{ 50, 50, 90, 200 });
 		}
 
 		const Prefab& prefab = all[listIndex];
-		std::string label = std::format("{}  {}x{}", prefab.name, prefab.width(), prefab.height());
+		std::string label = std::format(
+			"{}  {}x{}",
+			prefab.name,
+			prefab.width(),
+			prefab.height());
 
-		Color entryCol = selected
-			? Color{ 255, 255, 100, 255 }
-			: Color{ 160, 160, 200, 200 };
+		Color entryCol = selected ? Color{ 255, 255, 100, 255 } :
+									Color{ 160, 160, 200, 200 };
 
-		renderer.draw_text_color(Vector2D{ panelX + 6, rowPixelY + 2 }, label, entryCol);
+		renderer.draw_text_color(
+			Vector2D{ panelX + 6, rowPixelY + 2 },
+			label,
+			entryCol);
 	}
 
 	// Empty state
 	if (all.empty())
 	{
 		renderer.draw_text_color(
-			Vector2D{ panelX + 6, rows.row_top(0) + 4 }, "No prefabs yet.", Color{ 100, 100, 120, 150 });
+			Vector2D{ panelX + 6, rows.row_top(0) + 4 },
+			"No prefabs yet.",
+			Color{ 100, 100, 120, 150 });
 	}
 
 	// Workflow guidance -- drawn in the bottom portion of the right panel
@@ -1248,17 +1413,33 @@ void RoomEditor::render_right_panel(const Renderer& renderer) const
 	int guideY = rows.guide_top();
 	int guideH = panelY + panelH - guideY;
 
-	DrawLine(panelX, guideY, panelX + panelW, guideY, Color{ 60, 60, 100, 200 });
-	DrawRectangle(panelX, guideY + 1, panelW, guideH - 1, Color{ 10, 10, 18, 200 });
+	DrawLine(
+		panelX,
+		guideY,
+		panelX + panelW,
+		guideY,
+		Color{ 60, 60, 100, 200 });
+	DrawRectangle(
+		panelX,
+		guideY + 1,
+		panelW,
+		guideH - 1,
+		Color{ 10, 10, 18, 200 });
 
-	renderer.draw_text_color(Vector2D{ panelX + 6, guideY + 4 }, "HOW IT WORKS", Color{ 140, 140, 220, 255 });
+	renderer.draw_text_color(
+		Vector2D{ panelX + 6, guideY + 4 },
+		"HOW IT WORKS",
+		Color{ 140, 140, 220, 255 });
 
 	Color guideCol{ 120, 120, 160, 200 };
 	int guideTextY = guideY + fontH + 6;
 
 	for (const char* line : GUIDE)
 	{
-		renderer.draw_text_color(Vector2D{ panelX + 6, guideTextY }, line, guideCol);
+		renderer.draw_text_color(
+			Vector2D{ panelX + 6, guideTextY },
+			line,
+			guideCol);
 		guideTextY += fontH;
 	}
 }
@@ -1275,7 +1456,10 @@ void RoomEditor::render_bottom_bar(const Renderer& renderer) const
 	std::string_view controls =
 		"L=paint  R=erase  Mid=pan  Up/Dn=pal  +/-=zoom  F2=tile  F3=label  Ctrl+S=save  Esc=exit";
 
-	renderer.draw_text_color(Vector2D{ 8, barY + (tileSize - renderer.get_font_size()) / 2 }, controls, Color{ 140, 140, 180, 220 });
+	renderer.draw_text_color(
+		Vector2D{ 8, barY + (tileSize - renderer.get_font_size()) / 2 },
+		controls,
+		Color{ 140, 140, 180, 220 });
 }
 
 void RoomEditor::render_input_overlay(const Renderer& renderer) const
@@ -1289,11 +1473,17 @@ void RoomEditor::render_input_overlay(const Renderer& renderer) const
 	std::string prompt;
 	if (mode == EditorMode::INPUT_WIDTH)
 	{
-		prompt = std::format("New canvas width (current {}): {}_", canvasWidth, inputBuffer);
+		prompt = std::format(
+			"New canvas width (current {}): {}_",
+			canvasWidth,
+			inputBuffer);
 	}
 	else if (mode == EditorMode::INPUT_HEIGHT)
 	{
-		prompt = std::format("New canvas height (current {}): {}_", canvasHeight, inputBuffer);
+		prompt = std::format(
+			"New canvas height (current {}): {}_",
+			canvasHeight,
+			inputBuffer);
 	}
 	else if (mode == EditorMode::INPUT_NAME)
 	{
@@ -1313,7 +1503,10 @@ void RoomEditor::render_input_overlay(const Renderer& renderer) const
 
 	DrawRectangle(boxX, boxY, boxW, boxH, Color{ 20, 20, 35, 240 });
 	DrawRectangleLines(boxX, boxY, boxW, boxH, Color{ 120, 120, 200, 255 });
-	renderer.draw_text_color(Vector2D{ boxX + 16, boxY + 10 }, prompt, Color{ 220, 220, 255, 255 });
+	renderer.draw_text_color(
+		Vector2D{ boxX + 16, boxY + 10 },
+		prompt,
+		Color{ 220, 220, 255, 255 });
 }
 
 // ---------------------------------------------------------------------------
@@ -1336,7 +1529,9 @@ void RoomEditor::handle_input_picker(GameContext& ctx)
 	if (IsKeyPressed(KEY_TAB))
 	{
 		int dir = (IsKeyDown(KEY_LEFT_SHIFT)) ? -1 : 1;
-		pickerSheetListIndex = (pickerSheetListIndex + PICKER_SHEET_COUNT + dir) % PICKER_SHEET_COUNT;
+		pickerSheetListIndex =
+			(pickerSheetListIndex + PICKER_SHEET_COUNT + dir) %
+			PICKER_SHEET_COUNT;
 		pickerCol = 0;
 		pickerRow = 0;
 		return;
@@ -1364,7 +1559,9 @@ void RoomEditor::handle_input_picker(GameContext& ctx)
 		const std::vector<SymbolRow> symbolRows = palette.symbol_rows();
 		if (paletteIndex < symbolRows.size())
 		{
-			commit_symbol_tile(symbolRows[paletteIndex].symbol, TileRef{ sheetId, pickerCol, pickerRow });
+			commit_symbol_tile(
+				symbolRows[paletteIndex].symbol,
+				TileRef{ sheetId, pickerCol, pickerRow });
 		}
 		mode = EditorMode::NORMAL;
 	}
@@ -1392,7 +1589,12 @@ void RoomEditor::render_tile_picker(const Renderer& renderer) const
 	int offY = 48; // leave room for top info bar
 
 	// Background for grid area
-	DrawRectangle(offX - 2, offY - 2, gridW + 4, gridH + 4, Color{ 10, 10, 18, 255 });
+	DrawRectangle(
+		offX - 2,
+		offY - 2,
+		gridW + 4,
+		gridH + 4,
+		Color{ 10, 10, 18, 255 });
 
 	// Draw every tile in the sheet at PICK_TS size
 	for (int row = 0; row < rows; ++row)
@@ -1404,14 +1606,27 @@ void RoomEditor::render_tile_picker(const Renderer& renderer) const
 			TileRef tileRef{ sheetId, col, row };
 
 			// Dark bg so decor tiles are visible
-			DrawRectangle(cellPixelX, cellPixelY, PICK_TS, PICK_TS, Color{ 20, 16, 12, 255 });
+			DrawRectangle(
+				cellPixelX,
+				cellPixelY,
+				PICK_TS,
+				PICK_TS,
+				Color{ 20, 16, 12, 255 });
 
-			renderer.draw_tile_screen_sized(Vector2D{ cellPixelX, cellPixelY }, tileRef, PICK_TS);
+			renderer.draw_tile_screen_sized(
+				Vector2D{ cellPixelX, cellPixelY },
+				tileRef,
+				PICK_TS);
 
 			// Selected cell highlight
 			if (col == pickerCol && row == pickerRow)
 			{
-				DrawRectangleLines(cellPixelX, cellPixelY, PICK_TS, PICK_TS, Color{ 255, 230, 50, 255 });
+				DrawRectangleLines(
+					cellPixelX,
+					cellPixelY,
+					PICK_TS,
+					PICK_TS,
+					Color{ 255, 230, 50, 255 });
 			}
 		}
 	}
@@ -1422,7 +1637,8 @@ void RoomEditor::render_tile_picker(const Renderer& renderer) const
 	if (paletteIndex < symbolRows.size())
 	{
 		char symbol = symbolRows[paletteIndex].symbol;
-		symInfo = std::format("Assigning tile for '{}' ({})",
+		symInfo = std::format(
+			"Assigning tile for '{}' ({})",
 			symbol,
 			palette.symbol_label(symbol));
 	}
@@ -1437,13 +1653,20 @@ void RoomEditor::render_tile_picker(const Renderer& renderer) const
 		pickerRow);
 
 	DrawRectangle(0, 0, screenWidth, 40, Color{ 20, 20, 35, 240 });
-	renderer.draw_text_color(Vector2D{ 8, 10 }, header, Color{ 220, 220, 255, 255 });
+	renderer.draw_text_color(
+		Vector2D{ 8, 10 },
+		header,
+		Color{ 220, 220, 255, 255 });
 
 	// Sheet name label centered below grid
 	int nameY = offY + gridH + 8;
-	std::string sheetLabel = std::format("Sheet: {}  ({} cols x {} rows)",
+	std::string sheetLabel = std::format(
+		"Sheet: {}  ({} cols x {} rows)",
 		PICKER_SHEET_NAMES[pickerSheetListIndex],
 		cols,
 		rows);
-	renderer.draw_text_color(Vector2D{ offX, nameY }, sheetLabel, Color{ 160, 160, 220, 200 });
+	renderer.draw_text_color(
+		Vector2D{ offX, nameY },
+		sheetLabel,
+		Color{ 160, 160, 220, 200 });
 }

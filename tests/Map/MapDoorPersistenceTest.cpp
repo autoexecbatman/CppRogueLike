@@ -94,7 +94,9 @@ TEST_F(MapDoorPersistenceTest, ClosedAndOpenDoorsKeepTheirStateThroughASave)
 }
 
 // A failed attempt at forcing survives a save, so a load does not give the attempt back.
-TEST_F(MapDoorPersistenceTest, ADoorThatResistedForcingStillHasAfterASaveAndALoad)
+TEST_F(
+	MapDoorPersistenceTest,
+	ADoorThatResistedForcingStillHasAfterASaveAndALoad)
 {
 	original.mark_resisted_forcing(LOCKED_DOOR);
 
@@ -141,7 +143,8 @@ TEST_F(MapDoorPersistenceTest, AFreshlyCarvedExitIsStillACorridorAfterALoad)
 	Map fresh{ DOOR_MAP_WIDTH, DOOR_MAP_HEIGHT };
 	fresh.load(saved);
 
-	EXPECT_EQ(fresh.get_tile_type(gap), TileType::CORRIDOR) << "the door pass ran on a load";
+	EXPECT_EQ(fresh.get_tile_type(gap), TileType::CORRIDOR)
+		<< "the door pass ran on a load";
 }
 
 // Saving the loaded map writes what it was loaded from, door states included.
@@ -175,7 +178,10 @@ TEST_F(MapDoorPersistenceTest, ATileWithoutItsDoorStateIsRefused)
 	}
 	catch (const nlohmann::json::exception& refusal)
 	{
-		EXPECT_NE(std::string(refusal.what()).find("doorState"), std::string::npos) << refusal.what();
+		EXPECT_NE(
+			std::string(refusal.what()).find("doorState"),
+			std::string::npos)
+			<< refusal.what();
 	}
 }
 
@@ -197,7 +203,10 @@ TEST_F(MapDoorPersistenceTest, ATileWithoutItsFailedPickLevelIsRefused)
 	}
 	catch (const nlohmann::json::exception& refusal)
 	{
-		EXPECT_NE(std::string(refusal.what()).find("lockPickFailedAtLevel"), std::string::npos) << refusal.what();
+		EXPECT_NE(
+			std::string(refusal.what()).find("lockPickFailedAtLevel"),
+			std::string::npos)
+			<< refusal.what();
 	}
 }
 
@@ -225,9 +234,11 @@ TEST_F(MapDoorPersistenceTest, EveryDoorStateBelowTheFirstRefusedOneRoundTrips)
 
 		nlohmann::json savedAgain;
 		fresh.save(savedAgain);
-		EXPECT_EQ(savedAgain.at("tiles").at(0).at("doorState"), state) << "door state " << state << " loaded as another";
+		EXPECT_EQ(savedAgain.at("tiles").at(0).at("doorState"), state)
+			<< "door state " << state << " loaded as another";
 	}
-	ASSERT_TRUE(firstRefused.has_value()) << "no door state below " << SEARCH_CEILING << " was refused";
+	ASSERT_TRUE(firstRefused.has_value())
+		<< "no door state below " << SEARCH_CEILING << " was refused";
 	EXPECT_GT(*firstRefused, 0) << "not even the first door state loaded";
 
 	// The refusal names the value, past the last and below the first alike.
@@ -246,8 +257,12 @@ TEST_F(MapDoorPersistenceTest, EveryDoorStateBelowTheFirstRefusedOneRoundTrips)
 		catch (const std::runtime_error& refusal)
 		{
 			const std::string reason = refusal.what();
-			EXPECT_NE(reason.find(std::format("door state {} ", corrupt)), std::string::npos) << reason;
-			EXPECT_NE(reason.find("is not a DoorState"), std::string::npos) << reason;
+			EXPECT_NE(
+				reason.find(std::format("door state {} ", corrupt)),
+				std::string::npos)
+				<< reason;
+			EXPECT_NE(reason.find("is not a DoorState"), std::string::npos)
+				<< reason;
 		}
 	}
 }

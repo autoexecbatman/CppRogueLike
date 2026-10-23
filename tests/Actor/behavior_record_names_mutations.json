@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/Pickable.cpp",
-      "original": "\tconst PickableType type = parse_pickable_type(source.at(\"type\").get<std::string>());",
-      "mutated": "\tconst PickableType type = PickableType::WEAPON;",
+      "original": "\tconst PickableType type =\n\t\tparse_pickable_type(source.at(\"type\").get<std::string>());",
+      "mutated": "\tconst PickableType type =PickableType::WEAPON;",
       "catches": "the record's name never read, so every behaviour loads as a weapon"
     },
     {
@@ -33,8 +33,8 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "consumable.buffType = parse_buff_type(source.at(\"buffType\").get<std::string>());",
-      "mutated": "consumable.buffType = BuffType::NONE;",
+      "original": "consumable.buffType =\n\t\t\tparse_buff_type(source.at(\"buffType\").get<std::string>());",
+      "mutated": "consumable.buffType =BuffType::NONE;",
       "catches": "a potion's buff dropped on the way back in"
     },
     {
@@ -51,7 +51,7 @@
     },
     {
       "file": "src/Pickable.h",
-      "original": "\tthrow std::runtime_error(std::format(\"unknown consumable effect '{}'\", name));",
+      "original": "\tthrow std::runtime_error(\n\t\tstd::format(\"unknown consumable effect '{}'\", name));",
       "mutated": "\treturn ConsumableEffect::NONE;",
       "catches": "an effect this build cannot place becoming none in silence"
     }

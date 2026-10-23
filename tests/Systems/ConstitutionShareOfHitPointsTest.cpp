@@ -101,23 +101,30 @@ protected:
 
 // A body as built owes nothing to Constitution: the pool starts with its base
 // equal to its maximum.
-TEST_F(ConstitutionShareOfHitPointsTest, AFreshCharacterOwesNothingToConstitution)
+TEST_F(
+	ConstitutionShareOfHitPointsTest,
+	AFreshCharacterOwesNothingToConstitution)
 {
 	EXPECT_EQ(constitution_share(), 0);
 }
 
 // The level-up adds the roll to base and the roll plus the adjustment to the
 // maximum, so the share grows by the adjustment and by nothing else.
-TEST_F(ConstitutionShareOfHitPointsTest, EachLevelAddsOnlyItsAdjustmentToTheShare)
+TEST_F(
+	ConstitutionShareOfHitPointsTest,
+	EachLevelAddsOnlyItsAdjustmentToTheShare)
 {
 	player->set_constitution(CONSTITUTION_THAT_GIVES_TWO);
 
 	gain_a_level(2);
-	EXPECT_EQ(constitution_share(), BONUS_PER_DIE_AT_SIXTEEN) << "one level's worth";
-	EXPECT_EQ(player->get_hp_base(), STARTING_HP + HIT_DIE_ROLL) << "base carries the die alone";
+	EXPECT_EQ(constitution_share(), BONUS_PER_DIE_AT_SIXTEEN)
+		<< "one level's worth";
+	EXPECT_EQ(player->get_hp_base(), STARTING_HP + HIT_DIE_ROLL)
+		<< "base carries the die alone";
 
 	gain_a_level(3);
-	EXPECT_EQ(constitution_share(), BONUS_PER_DIE_AT_SIXTEEN * 2) << "two levels' worth";
+	EXPECT_EQ(constitution_share(), BONUS_PER_DIE_AT_SIXTEEN * 2)
+		<< "two levels' worth";
 	EXPECT_EQ(player->get_hp_base(), STARTING_HP + HIT_DIE_ROLL * 2);
 }
 
@@ -125,14 +132,17 @@ TEST_F(ConstitutionShareOfHitPointsTest, EachLevelAddsOnlyItsAdjustmentToTheShar
 // share has to stay at zero however many levels are gained. A level-up that
 // stopped feeding base would show up here as hit points attributed to a
 // Constitution that grants none.
-TEST_F(ConstitutionShareOfHitPointsTest, AScoreTheTableGivesNothingLeavesTheShareEmpty)
+TEST_F(
+	ConstitutionShareOfHitPointsTest,
+	AScoreTheTableGivesNothingLeavesTheShareEmpty)
 {
 	player->set_constitution(CONSTITUTION_THAT_GIVES_NOTHING);
 
 	gain_a_level(2);
 	gain_a_level(3);
 
-	EXPECT_EQ(constitution_share(), 0) << "hit points reported as Constitution that it never granted";
+	EXPECT_EQ(constitution_share(), 0)
+		<< "hit points reported as Constitution that it never granted";
 	EXPECT_EQ(player->get_max_hp(), player->get_hp_base());
 }
 

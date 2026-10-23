@@ -36,8 +36,20 @@ private:
 	void assign_tile(TileRef tile, MonsterRegistry& monsters);
 
 	void draw_header(const Renderer& renderer);
-	void draw_list(const Renderer& renderer, const MonsterRegistry& monsters, int listX, int listY, int listWidth, int listHeight);
-	void draw_browser(const Renderer& renderer, MonsterRegistry& monsters, int panelX, int panelY, int browserWidth, int browserHeight);
+	void draw_list(
+		const Renderer& renderer,
+		const MonsterRegistry& monsters,
+		int listX,
+		int listY,
+		int listWidth,
+		int listHeight);
+	void draw_browser(
+		const Renderer& renderer,
+		MonsterRegistry& monsters,
+		int panelX,
+		int panelY,
+		int browserWidth,
+		int browserHeight);
 	void draw_hint_bar(const Renderer& renderer) const;
 	// Tab, Up, Down and Ctrl+S. Up and Down move within a screen of `visibleRows`, the rows draw_list draws.
 	void handle_keyboard(size_t visibleRows);
@@ -65,11 +77,17 @@ private:
 	}
 
 public:
-	void toggle(ContentRegistry& registry, MonsterRegistry& monsters, const ItemRegistry& items);
+	void toggle(
+		ContentRegistry& registry,
+		MonsterRegistry& monsters,
+		const ItemRegistry& items);
 
 	void set_char_input(int character) noexcept { bufferedChar = character; }
 
-	void update_and_render(const Renderer& renderer, ContentRegistry& registry, MonsterRegistry& monsters);
+	void update_and_render(
+		const Renderer& renderer,
+		ContentRegistry& registry,
+		MonsterRegistry& monsters);
 
 	[[nodiscard]] bool is_active() const { return active; }
 };

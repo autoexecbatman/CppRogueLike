@@ -44,7 +44,10 @@ protected:
 
 	std::unique_ptr<Item> the_gauntlets()
 	{
-		return ItemCreator::create("gauntlets_of_swimming_and_climbing", Vector2D{ 0, 0 }, ctx);
+		return ItemCreator::create(
+			"gauntlets_of_swimming_and_climbing",
+			Vector2D{ 0, 0 },
+			ctx);
 	}
 
 	MockGameContext mock{};
@@ -63,7 +66,8 @@ TEST_F(SwimmingGauntletsTest, TheyGrantNoStrength)
 	const Gauntlets* worn = std::get_if<Gauntlets>(&*gauntlets->behavior);
 	ASSERT_NE(worn, nullptr);
 
-	EXPECT_EQ(worn->strBonus, 0) << "the book's entry says nothing about Strength";
+	EXPECT_EQ(worn->strBonus, 0)
+		<< "the book's entry says nothing about Strength";
 	EXPECT_EQ(worn->dexBonus, 0);
 	EXPECT_EQ(worn->conBonus, 0);
 }
@@ -99,7 +103,8 @@ TEST_F(SwimmingGauntletsTest, TheWearerCrossesWaterAndStopsWhenTheyComeOff)
 	swimmer.wear(the_gauntlets(), EquipmentSlot::GAUNTLETS);
 
 	EXPECT_TRUE(swimmer.has_bypass(ActorState::CAN_SWIM));
-	EXPECT_FALSE(swimmer.has_state(ActorState::CAN_SWIM)) << "a worn source is asked, never copied";
+	EXPECT_FALSE(swimmer.has_state(ActorState::CAN_SWIM))
+		<< "a worn source is asked, never copied";
 
 	// Taking them off is removing the entry, which is what Player::unequip_item does.
 	// Creature::unequip only clears a flag and has no caller in src.
@@ -123,14 +128,17 @@ TEST_F(SwimmingGauntletsTest, TheyGrantSwimmingAndNothingElse)
 	};
 	spider.add_state(ActorState::CAN_SWIM);
 
-	EXPECT_TRUE(spider.has_bypass(ActorState::CAN_SWIM)) << "a creature's own state still answers";
+	EXPECT_TRUE(spider.has_bypass(ActorState::CAN_SWIM))
+		<< "a creature's own state still answers";
 }
 
 // Another effect-bearing item worn in the same slot grants no swimming: the effect is
 // compared, not merely found. Gauntlets of ogre power set Strength and nothing else.
 TEST_F(SwimmingGauntletsTest, AnItemWithADifferentEffectGrantsNoSwimming)
 {
-	swimmer.wear(ItemCreator::create("gauntlets_of_ogre_power", Vector2D{ 0, 0 }, ctx), EquipmentSlot::GAUNTLETS);
+	swimmer.wear(
+		ItemCreator::create("gauntlets_of_ogre_power", Vector2D{ 0, 0 }, ctx),
+		EquipmentSlot::GAUNTLETS);
 
 	EXPECT_FALSE(swimmer.wears_item_with(MagicalEffect::SWIMMING));
 	EXPECT_FALSE(swimmer.has_bypass(ActorState::CAN_SWIM));

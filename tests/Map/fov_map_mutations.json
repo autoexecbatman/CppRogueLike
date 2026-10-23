@@ -27,13 +27,13 @@
     },
     {
       "file": "src/FovMap.cpp",
-      "original": "\t\t\tif (in_bounds(col, row) && colOffset * colOffset + rowOffset * rowOffset <= radius * radius)\n",
-      "mutated": "\t\t\tif (in_bounds(col, row) && colOffset * colOffset + rowOffset * rowOffset <= radius * radius * 2)\n",
+      "original": "\t\t\tif (in_bounds(col, row) &&\n\t\t\t\tcolOffset * colOffset + rowOffset * rowOffset <=\n\t\t\t\t\tradius * radius)\n",
+      "mutated": "\t\t\tif (in_bounds(col, row) &&\n\t\t\t\tcolOffset * colOffset + rowOffset * rowOffset <=\n\t\t\t\t\tradius * radius * 2)\n",
       "catches": "sight reaching in a square rather than a circle, lighting the corners"
     },
     {
       "file": "src/FovMap.cpp",
-      "original": "\t\t\telse if (!in_bounds(col, row) || !cells[cell_index(col, row)].transparent)\n\t\t\t{\n\t\t\t\tblocked = true;\n",
+      "original": "\t\t\telse if (\n\t\t\t\t!in_bounds(col, row) ||\n\t\t\t\t!cells[cell_index(col, row)].transparent)\n\t\t\t{\n\t\t\t\tblocked = true;\n",
       "mutated": "\t\t\telse if (false)\n\t\t\t{\n\t\t\t\tblocked = true;\n",
       "catches": "nothing ever casting a shadow, so a wall is seen through"
     },

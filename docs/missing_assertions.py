@@ -11,6 +11,7 @@ Three checks, each a different shape of the same gap. They report and never gate
     python docs/missing_assertions.py --owned           # loops over owned elements
     python docs/missing_assertions.py --documented      # preconditions in prose only
     python docs/missing_assertions.py --pointers        # pointer parameters
+    python docs/missing_assertions.py --self-test       # the fixture's loops
 
 CHECK ONE - owned element. A range-based loop that reaches an element of a container
 the code owns without asserting it first. This is the rule CLAUDE.md states outright
@@ -61,6 +62,18 @@ were. "assert" joined KEYWORDS in the same change: a probe whose only body line 
 assert under a precondition comment had that line read as a function named assert once
 before and zero times after. That reading never produced a finding, since no sibling
 holds Class::assert, so the printed report is the same either way.
+
+A WRAPPED ASSERT, 2026-10-23. An 80-column format wraps a long assert, and the
+element it names then sits on a line after the one that opens it, so check one
+read 20 loops as unasserted. An assert is now read through the line where its
+parentheses close. docs/missing_assertions_fixture.cpp.txt holds one loop each
+way, a wrapped assert on another name, and one whose message holds a
+parenthesis; --self-test fails on a missing or an extra finding, and failed on
+the wrapped loops before the join existed. The plan in
+docs/missing_assertions_mutations.json breaks the join three ways through
+mutate.py, and --self-test caught all three.
+Across src/, the report on the wrapped tree equals the report at the commit
+before the wrap, apart from the line a finding quotes.
 """
 
 import argparse
@@ -99,6 +112,11 @@ PRECONDITION = re.compile(
 # "-e.vel_y * e.turbulence" matched the first draft and was reported as a dereference,
 # which is how two of this checker's first five findings turned out to be its own bugs.
 STAR_OPENS = r"(?:^|[=,(\[;{}&|!?:<>+\-*/%]|\breturn\b)\s*"
+
+# Each loop the owned-element check must name ends in "// REPORT"; any other
+# finding in it, or a missing one, fails --self-test.
+FIXTURE = (pathlib.Path(__file__).resolve().parent
+           / "missing_assertions_fixture.cpp.txt")
 
 LOOK_BACK = 6
 MAX_BODY = 160
@@ -148,6 +166,39 @@ def dereferences(code, name):
         or re.search(STAR_OPENS + r"\*\s*" + escaped + r"\.\w+", code))
 
 
+def statement_at(lines, index):
+    """The code of lines[index], joined through the line where its parentheses
+    close when it opens an assert.
+
+    The formatter wraps a long assert over several lines, and the assert names
+    its subject on a line after the one that opens it. A parenthesis inside a
+    string literal is not counted.
+
+    Example:
+        statement_at(["assert(", "\\tcreature &&", "\\t\\"no entry\\");"], 0)
+        # -> 'assert( \\tcreature && \\t"no entry");'
+        statement_at(["creature->render(ctx);"], 0)
+        # -> 'creature->render(ctx);'
+    """
+    code = strip_comment(lines[index])
+    if not re.match(r"\s*assert\s*\(", code):
+        return code
+    joined = code
+    last = index
+    while paren_depth(joined) > 0 and last + 1 < len(lines):
+        last += 1
+        joined += " " + strip_comment(lines[last])
+    return joined
+
+
+def paren_depth(code):
+    """Open parentheses less closed ones, outside string and character
+    literals."""
+    without_literals = re.sub(
+        r'"(?:[^"\\]|\\.)*"|\'(?:[^\'\\]|\\.)*\'', "", code)
+    return without_literals.count("(") - without_literals.count(")")
+
+
 def asserts_on(code, name):
     return bool(re.search(r"(?<![A-Za-z_])assert\s*\([^)]*\b" + re.escape(name) + r"\b", code))
 
@@ -179,7 +230,7 @@ def owned_element_loops(files):
             if guards(body_text(lines, start, stop), name):
                 continue
             for offset in range(start + 1, stop):
-                inner = strip_comment(lines[offset])
+                inner = statement_at(lines, offset)
                 if asserts_on(inner, name):
                     break
                 if dereferences(inner, name):
@@ -288,13 +339,40 @@ def pointer_parameters(files):
     return findings
 
 
+def self_test():
+    """Runs the owned-element check on the fixture and returns 0 when it names
+    exactly the lines marked REPORT, 1 otherwise.
+
+    Example:
+        self_test()
+        # prints "self-test: 3 of 3 loops, none missed, none extra" -> 0
+    """
+    lines = read_lines(FIXTURE)
+    wanted = {number for number, line in enumerate(lines, 1)
+              if line.rstrip().endswith("// REPORT")}
+    reported = {number
+                for _, number, _, _, _ in owned_element_loops([FIXTURE])}
+    missed = sorted(wanted - reported)
+    extra = sorted(reported - wanted)
+    if missed or extra:
+        print(f"self-test FAILED: missed lines {missed}, extra lines {extra}")
+        return 1
+    print(f"self-test: {len(reported)} of {len(wanted)} loops, "
+          "none missed, none extra")
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--self-test", action="store_true",
+                        help="check the fixture's exact findings")
     parser.add_argument("--owned", action="store_true", help="only the owned-element check")
     parser.add_argument("--documented", action="store_true", help="only the documented-precondition check")
     parser.add_argument("--pointers", action="store_true", help="only the pointer-parameter check")
     parser.add_argument("--root", default="src", help="directory to read (default src)")
     arguments = parser.parse_args()
+    if arguments.self_test:
+        return self_test()
 
     root = pathlib.Path(arguments.root)
     if not root.is_dir():

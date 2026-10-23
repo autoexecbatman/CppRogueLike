@@ -57,8 +57,8 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": "\t\tctx.buffSystem->add_buff_until_broken(*this, BuffType::HIDDEN_IN_SHADOWS);\n\t}\n\tctx.messageSystem->message(ColorPairId::CYAN_BLACK, \"You melt into the shadows...\", MessageCompletion::FINISHED);\n\treturn HideAttempt::ATTEMPTED;",
-      "mutated": "\t\tctx.buffSystem->add_buff_until_broken(*this, BuffType::HIDDEN_IN_SHADOWS);\n\t\tctx.messageSystem->message(ColorPairId::CYAN_BLACK, \"You melt into the shadows...\", MessageCompletion::FINISHED);\n\t\treturn HideAttempt::ATTEMPTED;\n\t}\n\tctx.messageSystem->message(ColorPairId::RED_BLACK, \"You fail to hide.\", MessageCompletion::FINISHED);\n\treturn HideAttempt::WATCHED;",
+      "original": "\t\tctx.buffSystem->add_buff_until_broken(\n\t\t\t*this,\n\t\t\tBuffType::HIDDEN_IN_SHADOWS);\n\t}\n\tctx.messageSystem->message(\n\t\tColorPairId::CYAN_BLACK,\n\t\t\"You melt into the shadows...\",\n\t\tMessageCompletion::FINISHED);\n\treturn HideAttempt::ATTEMPTED;",
+      "mutated": "\t\tctx.buffSystem->add_buff_until_broken(\n\t\t\t*this,\n\t\t\tBuffType::HIDDEN_IN_SHADOWS);\tctx.messageSystem->message(ColorPairId::CYAN_BLACK, \"You melt into the shadows...\", MessageCompletion::FINISHED);\n\t\treturn HideAttempt::ATTEMPTED;\n\t}\n\tctx.messageSystem->message(ColorPairId::RED_BLACK, \"You fail to hide.\", MessageCompletion::FINISHED);\n\treturn HideAttempt::WATCHED;",
       "catches": "the roll's result told to the player, which the book keeps secret"
     },
     {
@@ -93,13 +93,13 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": "\t\tctx.buffSystem->add_buff_until_broken(*this, BuffType::HIDDEN_IN_SHADOWS);",
+      "original": "\t\tctx.buffSystem->add_buff_until_broken(\n\t\t\t*this,\n\t\t\tBuffType::HIDDEN_IN_SHADOWS);",
       "mutated": "\t\tctx.buffSystem->add_buff(*this, BuffType::HIDDEN_IN_SHADOWS, 0, 10 + get_creature_level() * 2, BuffApplication::ADD, ctx.gameState->get_time());",
       "catches": "the invented duration coming back"
     },
     {
       "file": "src/Player.cpp",
-      "original": "\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, \"You leave the shadows.\", MessageCompletion::FINISHED);",
+      "original": "\tctx.messageSystem->message(\n\t\tColorPairId::WHITE_BLACK,\n\t\t\"You leave the shadows.\",\n\t\tMessageCompletion::FINISHED);",
       "mutated": "\tif (is_invisible())\n\t{\n\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, \"You leave the shadows.\", MessageCompletion::FINISHED);\n\t}",
       "catches": "the leaving line printed only for a roll that worked, which leaks it"
     },

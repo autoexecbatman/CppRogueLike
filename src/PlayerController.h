@@ -81,7 +81,9 @@ private:
 	void confirm_attack_on_peaceful(Creature& target, GameContext& ctx);
 	void strike(Creature& target, GameContext& ctx);
 	Vector2D handle_direction_input(int dirKey, GameContext& ctx);
-	bool resolve_mouse_world_tile(GameContext& ctx, Vector2D& out_world_tile) const;
+	bool resolve_mouse_world_tile(
+		GameContext& ctx,
+		Vector2D& out_world_tile) const;
 	void flush_fov(GameContext& ctx);
 	bool is_mouse_pending_cancelled(GameContext& ctx) const;
 	bool handle_mouse_path(GameContext& ctx);
@@ -108,7 +110,8 @@ private:
 	//
 	// Example, the entry for a dagger two tiles away:
 	//   actions.push_back({ "Pick up dagger", walk_to_pick_up_command(tile) });
-	std::function<void(GameContext&)> walk_to_pick_up_command(Vector2D worldTile);
+	std::function<void(GameContext&)> walk_to_pick_up_command(
+		Vector2D worldTile);
 	// The command a context menu runs to open or close the door on worldTile:
 	// at once when the player stands beside it, after a walk to its approach
 	// otherwise.
@@ -119,7 +122,9 @@ private:
 	std::function<void(GameContext&)> work_the_door_command(
 		Vector2D worldTile,
 		PendingDoorAction doorAction);
-	Vector2D find_door_approach(Vector2D doorTile, const GameContext& ctx) const;
+	Vector2D find_door_approach(
+		Vector2D doorTile,
+		const GameContext& ctx) const;
 	// Four-branch locked-door resolution: key, Open Locks, force by Table 1, blocked.
 	// A pick takes 1d10 rounds and is tried once per lock per level; a refused pick goes on to
 	// forcing in the same bump. Forcing is tried once per door, and only on a Strength row that
@@ -140,7 +145,13 @@ public:
 	void save(json& savedState) override;
 	void display_inventory(GameContext& ctx);
 
-	void apply_confusion(int durationRounds, int currentTime) { confusionEndTime = expiry_time(currentTime, durationRounds); }
+	void apply_confusion(int durationRounds, int currentTime)
+	{
+		confusionEndTime = expiry_time(currentTime, durationRounds);
+	}
 
-	[[nodiscard]] bool is_confused(int currentTime) const { return confusionEndTime.has_value() && currentTime < *confusionEndTime; }
+	[[nodiscard]] bool is_confused(int currentTime) const
+	{
+		return confusionEndTime.has_value() && currentTime < *confusionEndTime;
+	}
 };

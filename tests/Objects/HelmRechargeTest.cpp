@@ -71,18 +71,26 @@ void dress_bare_player(MockGameContext& mock, GameContext& ctx)
 }
 
 // Puts an item from the item data on the player, and returns it as worn.
-Item& wear(std::string_view itemKey, EquipmentSlot slot, Player& player, GameContext& ctx)
+Item& wear(
+	std::string_view itemKey,
+	EquipmentSlot slot,
+	Player& player,
+	GameContext& ctx)
 {
-	auto item = ItemCreator::create(std::string{ itemKey }, player.position, ctx);
+	auto item =
+		ItemCreator::create(std::string{ itemKey }, player.position, ctx);
 	Item* worn = item.get();
-	[[maybe_unused]] const bool equipped = player.equip_item(std::move(item), slot, ctx);
+	[[maybe_unused]] const bool equipped =
+		player.equip_item(std::move(item), slot, ctx);
 	return *worn;
 }
 
 // Whether the cast menu would offer this spell at this moment.
 bool offers(std::string_view spellKey, const Player& player, int now)
 {
-	for (const SpellSystem::ItemGrantedSpell& granted : SpellSystem::get_item_granted_spells(player, now))
+	for (
+		const SpellSystem::ItemGrantedSpell& granted :
+		SpellSystem::get_item_granted_spells(player, now))
 	{
 		if (granted.key == spellKey)
 		{
@@ -113,76 +121,100 @@ protected:
 
 TEST_F(HelmRechargeTest, AnUnusedHelmOffersItsTeleport)
 {
-	Item& helm = wear("helm_of_teleportation", EquipmentSlot::HEAD, player(), ctx);
+	Item& helm =
+		wear("helm_of_teleportation", EquipmentSlot::HEAD, player(), ctx);
 
 	EXPECT_TRUE(is_helm_ready(helm, TIME_OF_USE));
-	EXPECT_TRUE(offers("teleport", player(), TIME_OF_USE)) << "a helm never used did not offer its teleport";
+	EXPECT_TRUE(offers("teleport", player(), TIME_OF_USE))
+		<< "a helm never used did not offer its teleport";
 }
 
 TEST_F(HelmRechargeTest, AUsedHelmOffersNothingForADay)
 {
-	Item& helm = wear("helm_of_teleportation", EquipmentSlot::HEAD, player(), ctx);
+	Item& helm =
+		wear("helm_of_teleportation", EquipmentSlot::HEAD, player(), ctx);
 
 	record_helm_use(helm, TIME_OF_USE);
 
-	EXPECT_FALSE(is_helm_ready(helm, TIME_OF_USE)) << "the helm was ready again the moment it was used";
-	EXPECT_FALSE(offers("teleport", player(), TIME_OF_USE)) << "the menu offered a teleport the helm had just spent";
-	EXPECT_FALSE(offers("teleport", player(), TIME_OF_USE + DAY_IN_TIME_UNITS - 1)) << "the helm recharged before a day had passed";
+	EXPECT_FALSE(is_helm_ready(helm, TIME_OF_USE))
+		<< "the helm was ready again the moment it was used";
+	EXPECT_FALSE(offers("teleport", player(), TIME_OF_USE))
+		<< "the menu offered a teleport the helm had just spent";
+	EXPECT_FALSE(
+		offers("teleport", player(), TIME_OF_USE + DAY_IN_TIME_UNITS - 1))
+		<< "the helm recharged before a day had passed";
 }
 
 TEST_F(HelmRechargeTest, AUsedHelmIsOfferedAgainADayLater)
 {
-	Item& helm = wear("helm_of_teleportation", EquipmentSlot::HEAD, player(), ctx);
+	Item& helm =
+		wear("helm_of_teleportation", EquipmentSlot::HEAD, player(), ctx);
 
 	record_helm_use(helm, TIME_OF_USE);
 
 	EXPECT_TRUE(is_helm_ready(helm, TIME_OF_USE + DAY_IN_TIME_UNITS));
-	EXPECT_TRUE(offers("teleport", player(), TIME_OF_USE + DAY_IN_TIME_UNITS)) << "the helm had not recharged a day after its use";
+	EXPECT_TRUE(offers("teleport", player(), TIME_OF_USE + DAY_IN_TIME_UNITS))
+		<< "the helm had not recharged a day after its use";
 }
 
 TEST_F(HelmRechargeTest, AHelmWithoutTheDailyPowerIsNeverReady)
 {
 	Item& helm = wear("helm_of_brilliance", EquipmentSlot::HEAD, player(), ctx);
 
-	EXPECT_FALSE(is_helm_ready(helm, TIME_OF_USE)) << "a helm of brilliance answered as though it had a daily teleport";
+	EXPECT_FALSE(is_helm_ready(helm, TIME_OF_USE))
+		<< "a helm of brilliance answered as though it had a daily teleport";
 }
 
 TEST_F(HelmRechargeTest, TheHelmsTeleportIsOfferedAsADailyPower)
 {
-	[[maybe_unused]] Item& helm = wear("helm_of_teleportation", EquipmentSlot::HEAD, player(), ctx);
+	[[maybe_unused]] Item& helm =
+		wear("helm_of_teleportation", EquipmentSlot::HEAD, player(), ctx);
 
-	const std::vector<SpellSystem::ItemGrantedSpell> granted = SpellSystem::get_item_granted_spells(player(), TIME_OF_USE);
+	const std::vector<SpellSystem::ItemGrantedSpell> granted =
+		SpellSystem::get_item_granted_spells(player(), TIME_OF_USE);
 
 	ASSERT_EQ(granted.size(), 1u);
-	EXPECT_EQ(granted.front().power, SpellSystem::ItemPower::CAST_SPELL_ONCE_A_DAY);
+	EXPECT_EQ(
+		granted.front().power,
+		SpellSystem::ItemPower::CAST_SPELL_ONCE_A_DAY);
 }
 
 TEST_F(HelmRechargeTest, AUsedHelmSurvivesASave)
 {
-	Item& helm = wear("helm_of_teleportation", EquipmentSlot::HEAD, player(), ctx);
+	Item& helm =
+		wear("helm_of_teleportation", EquipmentSlot::HEAD, player(), ctx);
 	record_helm_use(helm, TIME_OF_USE);
 	json record;
 	save_behavior(*helm.behavior, record);
 
 	const ItemBehavior loaded = load_behavior(record);
 
-	EXPECT_EQ(std::get<MagicalHelm>(loaded).rechargedAt, TIME_OF_USE + DAY_IN_TIME_UNITS) << "the save lost when the helm recharges";
+	EXPECT_EQ(
+		std::get<MagicalHelm>(loaded).rechargedAt,
+		TIME_OF_USE + DAY_IN_TIME_UNITS)
+		<< "the save lost when the helm recharges";
 }
 
 TEST_F(HelmRechargeTest, AHelmRecordWithoutItsRechargeIsRefused)
 {
 	json record;
-	save_behavior(MagicalHelm{ MagicalEffect::TELEPORTATION, 0, HelmCommand::DORMANT }, record);
+	save_behavior(
+		MagicalHelm{ MagicalEffect::TELEPORTATION, 0, HelmCommand::DORMANT },
+		record);
 	record.erase("rechargedAt");
 
-	EXPECT_THROW((void)load_behavior(record), std::exception) << "a helm record missing its recharge time loaded with a default";
+	EXPECT_THROW((void)load_behavior(record), std::exception)
+		<< "a helm record missing its recharge time loaded with a default";
 }
 
 namespace
 {
 
 // Shift+C, then the first entry's letter, in one frame.
-void choose_first_entry_from_the_cast_menu(MockGameContext& mock, GameContext& ctx, HiddenRenderer& hidden)
+void choose_first_entry_from_the_cast_menu(
+	MockGameContext& mock,
+	GameContext& ctx,
+	HiddenRenderer& hidden)
 {
 	mock.menus.push_back(std::make_unique<MenuSpellCast>(*mock.player, ctx));
 	ctx.inputSystem->queue_key(GameKey::NONE, 'a');
@@ -203,14 +235,22 @@ void choose_first_entry_from_the_cast_menu(MockGameContext& mock, GameContext& c
 	mock.map.init_tiles();
 	mock.map.set_tile(LANDING_TILE, TileType::FLOOR);
 	dress_bare_player(mock, ctx);
-	Item& helm = wear("helm_of_teleportation", EquipmentSlot::HEAD, *mock.player, ctx);
+	Item& helm =
+		wear("helm_of_teleportation", EquipmentSlot::HEAD, *mock.player, ctx);
 	ctx.gameState->set_time(TIME_OF_USE);
 
 	choose_first_entry_from_the_cast_menu(mock, ctx, hidden);
 
-	exit_unless(ctx.gameState->get_time() > TIME_OF_USE, "teleporting from the helm spent no turn");
-	exit_unless(std::get<MagicalHelm>(*helm.behavior).rechargedAt == TIME_OF_USE + DAY_IN_TIME_UNITS, "the helm's use was not recorded at the moment of use");
-	exit_unless(!offers("teleport", *mock.player, ctx.gameState->get_time()), "the menu offers the helm's teleport again straight after its use");
+	exit_unless(
+		ctx.gameState->get_time() > TIME_OF_USE,
+		"teleporting from the helm spent no turn");
+	exit_unless(
+		std::get<MagicalHelm>(*helm.behavior).rechargedAt ==
+			TIME_OF_USE + DAY_IN_TIME_UNITS,
+		"the helm's use was not recorded at the moment of use");
+	exit_unless(
+		!offers("teleport", *mock.player, ctx.gameState->get_time()),
+		"the menu offers the helm's teleport again straight after its use");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
@@ -227,14 +267,18 @@ void choose_first_entry_from_the_cast_menu(MockGameContext& mock, GameContext& c
 	mock.map.init_tiles();
 	mock.map.set_tile(LANDING_TILE, TileType::FLOOR);
 	dress_bare_player(mock, ctx);
-	Item& helm = wear("helm_of_teleportation", EquipmentSlot::HEAD, *mock.player, ctx);
+	Item& helm =
+		wear("helm_of_teleportation", EquipmentSlot::HEAD, *mock.player, ctx);
 	record_helm_use(helm, TIME_OF_USE);
 	const int aDayLater = TIME_OF_USE + DAY_IN_TIME_UNITS;
 	ctx.gameState->set_time(aDayLater);
 
 	choose_first_entry_from_the_cast_menu(mock, ctx, hidden);
 
-	exit_unless(std::get<MagicalHelm>(*helm.behavior).rechargedAt == aDayLater + DAY_IN_TIME_UNITS, "the menu a day later did not cast the helm's teleport");
+	exit_unless(
+		std::get<MagicalHelm>(*helm.behavior).rechargedAt ==
+			aDayLater + DAY_IN_TIME_UNITS,
+		"the menu a day later did not cast the helm's teleport");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
@@ -248,13 +292,21 @@ void choose_first_entry_from_the_cast_menu(MockGameContext& mock, GameContext& c
 	BuffSystem buffs{};
 	ctx.buffSystem = &buffs;
 	dress_bare_player(mock, ctx);
-	[[maybe_unused]] Item& ring = wear("ring_of_invisibility", EquipmentSlot::LEFT_RING, *mock.player, ctx);
+	[[maybe_unused]] Item& ring = wear(
+		"ring_of_invisibility",
+		EquipmentSlot::LEFT_RING,
+		*mock.player,
+		ctx);
 	ctx.gameState->set_time(TIME_OF_USE);
 
 	choose_first_entry_from_the_cast_menu(mock, ctx, hidden);
 
-	exit_unless(mock.player->has_state(ActorState::IS_INVISIBLE), "casting from the ring did not make its wearer invisible");
-	exit_unless(offers("invisibility", *mock.player, ctx.gameState->get_time()), "the ring was not offered again after its cast");
+	exit_unless(
+		mock.player->has_state(ActorState::IS_INVISIBLE),
+		"casting from the ring did not make its wearer invisible");
+	exit_unless(
+		offers("invisibility", *mock.player, ctx.gameState->get_time()),
+		"the ring was not offered again after its cast");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
@@ -262,33 +314,39 @@ void choose_first_entry_from_the_cast_menu(MockGameContext& mock, GameContext& c
 
 TEST(HelmRechargeMenuTest, TeleportingFromTheCastMenuSpendsTheHelm)
 {
-	const int childExitCode = exit_code_in_child(&teleporting_from_the_cast_menu_spends_the_helm);
+	const int childExitCode =
+		exit_code_in_child(&teleporting_from_the_cast_menu_spends_the_helm);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 
 TEST(HelmRechargeMenuTest, TheMenuOffersTheHelmAgainADayAfterItsUse)
 {
-	const int childExitCode = exit_code_in_child(&the_menu_offers_the_helm_again_a_day_after_its_use);
+	const int childExitCode =
+		exit_code_in_child(&the_menu_offers_the_helm_again_a_day_after_its_use);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 
 TEST(HelmRechargeMenuTest, TheRingIsOfferedAgainAfterItsCast)
 {
-	const int childExitCode = exit_code_in_child(&the_ring_is_offered_again_after_its_cast);
+	const int childExitCode =
+		exit_code_in_child(&the_ring_is_offered_again_after_its_cast);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }

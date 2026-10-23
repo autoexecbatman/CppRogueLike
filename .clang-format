@@ -14,10 +14,19 @@ AlignConsecutiveDeclarations: false
 AlignConsecutiveAssignments: false
 AlignOperands: false
 AlignTrailingComments: false
-AlignAfterOpenBracket: DontAlign
+# false, not AlwaysBreak: version 22 reads AlwaysBreak as true plus three of the
+# breaks below, and true aligns each continuation under its bracket with spaces.
+AlignAfterOpenBracket: false
+BreakAfterOpenBracketFunction: true
+BreakAfterOpenBracketIf: true
+BreakAfterOpenBracketLoop: true
+BreakAfterOpenBracketSwitch: true
 
 BinPackParameters: false
 BinPackArguments: false
+# One argument and one parameter per line once a call or a signature wraps.
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
 
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortFunctionsOnASingleLine: Inline
@@ -25,14 +34,29 @@ AllowShortLambdasOnASingleLine: Inline
 AllowShortBlocksOnASingleLine: Never
 
 PointerAlignment: Left
-ColumnLimit: 0
+# The owner, 2026-10-22: "80 for code and comments; comments as files are
+# touched".
+ColumnLimit: 80
+# Off: reflowing merged one Example line into the next.
+ReflowComments: false
+# Off: splitting a message broke the greps and probe anchors that find it.
+BreakStringLiterals: false
+# Each continuation starts on the indent, so none is padded with spaces.
+BreakConstructorInitializers: AfterColon
+PackConstructorInitializers: Never
+BreakInheritanceList: AfterColon
+BreakBeforeTernaryOperators: false
+# A template's header keeps a line of its own above what it declares.
+BreakTemplateDeclarations: Yes
 
+# A braced list that wraps breaks one element per line only when it ends in a
+# trailing comma.
 Cpp11BracedListStyle: false
 SpaceBeforeCpp11BracedList: false
 SpacesInContainerLiterals: true
 # Braces on every if/for/while body. This does NOT brace a case body -
 # no clang-format option does; see issues/0097.
 InsertBraces: true
-# A blank line between definitions, one-line accessors included. The owner's ruling,
-# 2026-10-17: "Formatter."
+# A blank line between definitions, one-line accessors included. The owner's
+# ruling, 2026-10-17: "Formatter."
 SeparateDefinitionBlocks: Always

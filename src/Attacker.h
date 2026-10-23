@@ -65,7 +65,9 @@ protected:
 	// Example, armour class 6 of which Dexterity 18 gives 4:
 	//   armor_class_attacked(player, ctx);   // -> 6
 	//   armor_class_attacked(player, ctx);   // -> 10 while the player is IS_SURPRISED
-	[[nodiscard]] int armor_class_attacked(const Creature& target, GameContext& ctx) const;
+	[[nodiscard]] int armor_class_attacked(
+		const Creature& target,
+		GameContext& ctx) const;
 
 	// The d20 an attack needs. strengthHit is the part of Strength's hit adjustment
 	// this attack takes, which AttackStrength::adjustment decides.
@@ -112,12 +114,18 @@ public:
 	// kind says which way the attack is being made; it decides which weapon is
 	// used and whether the missile to-hit adjustment applies. What comes back is
 	// what the attack did, which a bite carrying poison reads before injecting it.
-	virtual AttackResult attack(Creature& target, AttackKind kind, GameContext& ctx) = 0;
+	virtual AttackResult attack(
+		Creature& target,
+		AttackKind kind,
+		GameContext& ctx) = 0;
 
 	// DamageInfo accessors - valid for MonsterAttacker; PlayerAttacker leaves this empty.
 	const DamageInfo& get_damage_info() const noexcept { return damageInfo; }
 
-	void set_damage_info(const DamageInfo& damage) noexcept { damageInfo = damage; }
+	void set_damage_info(const DamageInfo& damage) noexcept
+	{
+		damageInfo = damage;
+	}
 
 	// Serializes damageInfo - used by MonsterAttacker. PlayerAttacker overrides with no-ops.
 	void load(const json& source) override;

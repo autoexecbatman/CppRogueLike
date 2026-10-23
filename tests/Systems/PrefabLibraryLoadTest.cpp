@@ -31,14 +31,13 @@ class PrefabLibraryLoadTest : public ::testing::Test
 protected:
 	void SetUp() override
 	{
-		const std::string testName = ::testing::UnitTest::GetInstance()->current_test_info()->name();
-		scratch = std::filesystem::temp_directory_path() / ("prefab_library_" + testName + ".json");
+		const std::string testName =
+			::testing::UnitTest::GetInstance()->current_test_info()->name();
+		scratch = std::filesystem::temp_directory_path() /
+			("prefab_library_" + testName + ".json");
 	}
 
-	void TearDown() override
-	{
-		std::filesystem::remove(scratch);
-	}
+	void TearDown() override { std::filesystem::remove(scratch); }
 
 	static nlohmann::json read_json(std::string_view path)
 	{
@@ -86,7 +85,9 @@ TEST_F(PrefabLibraryLoadTest, TheRealFileLoadsWhole)
 // Every required prefab field, removed from the first record, is named in the refusal.
 TEST_F(PrefabLibraryLoadTest, APrefabMissingAFieldIsRefusedByName)
 {
-	for (const char* field : { "name", "depth_min", "depth_max", "weight", "rows" })
+	for (
+		const char* field :
+		{ "name", "depth_min", "depth_max", "weight", "rows" })
 	{
 		nlohmann::json document = read_json(Paths::PREFABS);
 		document.at("prefabs").at(0).erase(field);
@@ -98,7 +99,8 @@ TEST_F(PrefabLibraryLoadTest, APrefabMissingAFieldIsRefusedByName)
 		};
 		const std::string refusal = refusal_of(load_scratch_prefabs);
 
-		EXPECT_NE(refusal.find(field), std::string::npos) << "refusal does not name " << field << ": " << refusal;
+		EXPECT_NE(refusal.find(field), std::string::npos)
+			<< "refusal does not name " << field << ": " << refusal;
 	}
 }
 
@@ -107,7 +109,8 @@ TEST_F(PrefabLibraryLoadTest, APrefabWithNoRowsIsRefusedByName)
 {
 	nlohmann::json document = read_json(Paths::PREFABS);
 	document.at("prefabs").at(0)["rows"] = nlohmann::json::array();
-	const std::string name = document.at("prefabs").at(0).at("name").get<std::string>();
+	const std::string name =
+		document.at("prefabs").at(0).at("name").get<std::string>();
 	write_scratch(document);
 
 	const auto load_scratch_prefabs = [&]()
@@ -176,7 +179,8 @@ TEST_F(PrefabLibraryLoadTest, ARefusedFileLeavesTheLoadedPrefabs)
 	{
 		library.load(scratch.string());
 	};
-	[[maybe_unused]] const std::string refusal = refusal_of(load_scratch_prefabs);
+	[[maybe_unused]] const std::string refusal =
+		refusal_of(load_scratch_prefabs);
 
 	EXPECT_EQ(library.all().size(), loaded);
 }
@@ -186,7 +190,8 @@ TEST_F(PrefabLibraryLoadTest, ARefusedFileLeavesTheLoadedPrefabs)
 TEST_F(PrefabLibraryLoadTest, ASaveThatCannotBeWrittenIsRefused)
 {
 	library.load(Paths::PREFABS);
-	const std::filesystem::path directory = std::filesystem::temp_directory_path();
+	const std::filesystem::path directory =
+		std::filesystem::temp_directory_path();
 	const auto save_to_directory = [&]()
 	{
 		library.save(directory.string());
@@ -210,8 +215,12 @@ TEST_F(PrefabLibraryLoadTest, SavedPrefabsLoadBackTheSame)
 	for (size_t index = 0; index < library.all().size(); ++index)
 	{
 		EXPECT_EQ(reloaded.all()[index].name, library.all()[index].name);
-		EXPECT_EQ(reloaded.all()[index].depthMin, library.all()[index].depthMin);
-		EXPECT_EQ(reloaded.all()[index].depthMax, library.all()[index].depthMax);
+		EXPECT_EQ(
+			reloaded.all()[index].depthMin,
+			library.all()[index].depthMin);
+		EXPECT_EQ(
+			reloaded.all()[index].depthMax,
+			library.all()[index].depthMax);
 		EXPECT_EQ(reloaded.all()[index].weight, library.all()[index].weight);
 		EXPECT_EQ(reloaded.all()[index].rows, library.all()[index].rows);
 	}

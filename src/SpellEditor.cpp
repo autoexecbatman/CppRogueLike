@@ -133,7 +133,9 @@ void SpellEditor::enter(const SpellRegistry& spells)
 
 void SpellEditor::exit(GameContext& ctx)
 {
-	assert(ctx.spellRegistry && "SpellEditor::exit: called without a spellRegistry");
+	assert(
+		ctx.spellRegistry &&
+		"SpellEditor::exit: called without a spellRegistry");
 
 	commit_working(*ctx.spellRegistry);
 	active = false;
@@ -180,7 +182,9 @@ void SpellEditor::commit_working(SpellRegistry& spells)
 
 void SpellEditor::handle_input(GameContext& ctx)
 {
-	assert(ctx.spellRegistry && "SpellEditor::handle_input: called without a spellRegistry");
+	assert(
+		ctx.spellRegistry &&
+		"SpellEditor::handle_input: called without a spellRegistry");
 
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
 
@@ -216,7 +220,9 @@ void SpellEditor::handle_input(GameContext& ctx)
 
 void SpellEditor::handle_normal(const GameContext& ctx)
 {
-	assert(ctx.spellRegistry && "SpellEditor::handle_normal: called without a spellRegistry");
+	assert(
+		ctx.spellRegistry &&
+		"SpellEditor::handle_normal: called without a spellRegistry");
 
 	SpellRegistry& spells = *ctx.spellRegistry;
 	const int bodyHeight = body_height(*ctx.renderer);
@@ -232,7 +238,9 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 		if (mouse.x < LIST_WIDTH)
 		{
 			focus = 0;
-			const std::optional<size_t> row = listCursor.row_under(whole_rows_within(pixelsBelowTop, ITEM_HEIGHT), visibleListRows);
+			const std::optional<size_t> row = listCursor.row_under(
+				whole_rows_within(pixelsBelowTop, ITEM_HEIGHT),
+				visibleListRows);
 			if (row && *row != listCursor.current_row())
 			{
 				commit_working(spells);
@@ -243,7 +251,9 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 		else
 		{
 			focus = 1;
-			const std::optional<size_t> field = fieldCursor.row_under(whole_rows_within(pixelsBelowTop, FIELD_HEIGHT), visibleFields);
+			const std::optional<size_t> field = fieldCursor.row_under(
+				whole_rows_within(pixelsBelowTop, FIELD_HEIGHT),
+				visibleFields);
 			if (field)
 			{
 				fieldCursor.select(*field);
@@ -274,7 +284,9 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 			load_working(spells);
 		}
 		// A screen too short for one row has nowhere to scroll the cursor to.
-		else if (IsKeyPressed(KEY_DOWN) && listCursor.can_move_down() && visibleListRows > 0)
+		else if (
+			IsKeyPressed(KEY_DOWN) && listCursor.can_move_down() &&
+			visibleListRows > 0)
 		{
 			commit_working(spells);
 			listCursor.move_down(visibleListRows);
@@ -324,7 +336,9 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 	{
 		fieldCursor.move_up();
 	}
-	else if (IsKeyPressed(KEY_DOWN) && fieldCursor.can_move_down() && visibleFields > 0)
+	else if (
+		IsKeyPressed(KEY_DOWN) && fieldCursor.can_move_down() &&
+		visibleFields > 0)
 	{
 		fieldCursor.move_down(visibleFields);
 	}
@@ -394,7 +408,9 @@ void SpellEditor::handle_edit_string()
 
 void SpellEditor::render(const GameContext& ctx) const
 {
-	assert(ctx.spellRegistry && "SpellEditor::render: called without a spellRegistry");
+	assert(
+		ctx.spellRegistry &&
+		"SpellEditor::render: called without a spellRegistry");
 
 	const Renderer& renderer = *ctx.renderer;
 	int screenWidth = renderer.get_screen_width();
@@ -412,8 +428,12 @@ void SpellEditor::render_header(const Renderer& renderer) const
 {
 	int screenWidth = renderer.get_screen_width();
 	DrawRectangle(0, 0, screenWidth, HEADER_HEIGHT, Color{ 20, 20, 40, 255 });
-	renderer.draw_text_color(Vector2D{ 8, 6 }, "SPELL EDITOR", Color{ 180, 255, 180, 255 });
-	renderer.draw_text_color(Vector2D{ 8, 26 },
+	renderer.draw_text_color(
+		Vector2D{ 8, 6 },
+		"SPELL EDITOR",
+		Color{ 180, 255, 180, 255 });
+	renderer.draw_text_color(
+		Vector2D{ 8, 26 },
 		"Tab:switch focus  Up/Down:navigate  Left/Right:adjust  Enter:edit/cycle  Ctrl+S:save  Esc:exit",
 		Color{ 130, 130, 100, 255 });
 }
@@ -423,13 +443,20 @@ int SpellEditor::body_height(const Renderer& renderer)
 	return renderer.get_screen_height() - HEADER_HEIGHT - HINT_HEIGHT;
 }
 
-void SpellEditor::render_list(const Renderer& renderer, const SpellRegistry& spells) const
+void SpellEditor::render_list(
+	const Renderer& renderer,
+	const SpellRegistry& spells) const
 {
 	int bodyY = HEADER_HEIGHT;
 	int bodyHeight = body_height(renderer);
 
 	DrawRectangle(0, bodyY, LIST_WIDTH, bodyHeight, Color{ 10, 10, 20, 255 });
-	DrawLine(LIST_WIDTH, bodyY, LIST_WIDTH, bodyY + bodyHeight, Color{ 80, 80, 120, 255 });
+	DrawLine(
+		LIST_WIDTH,
+		bodyY,
+		LIST_WIDTH,
+		bodyY + bodyHeight,
+		Color{ 80, 80, 120, 255 });
 
 	const size_t visibleCount = whole_rows_within(bodyHeight, ITEM_HEIGHT);
 	const size_t scroll = listCursor.first_visible(visibleCount);
@@ -445,7 +472,8 @@ void SpellEditor::render_list(const Renderer& renderer, const SpellRegistry& spe
 		}
 
 		bool isSelected = (spellIndex == listCursor.current_row());
-		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH && mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
+		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH &&
+			mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
 		if (isSelected && focus == 0)
@@ -467,26 +495,36 @@ void SpellEditor::render_list(const Renderer& renderer, const SpellRegistry& spe
 		}
 
 		// Show spell class indicator
-		const SpellDefinition& definition = isSelected
-			? working
-			: spells.get_by_key(keys[spellIndex]);
+		const SpellDefinition& definition =
+			isSelected ? working : spells.get_by_key(keys[spellIndex]);
 
 		const bool isCustom = !spells.is_builtin_key(keys[spellIndex]);
 
-		Color classColour = (definition.spellClass == SpellClass::CLERIC)
-			? Color{ 100, 220, 255, 255 }
-			: Color{ 255, 160, 80, 255 };
+		Color classColour = (definition.spellClass == SpellClass::CLERIC) ?
+			Color{ 100, 220, 255, 255 } :
+			Color{ 255, 160, 80, 255 };
 
-		std::string label = std::format("[{}] {}{}", definition.level, definition.name, isCustom ? " *" : "");
+		std::string label = std::format(
+			"[{}] {}{}",
+			definition.level,
+			definition.name,
+			isCustom ? " *" : "");
 		constexpr Color SELECTED_TEXT{ 180, 255, 180, 255 };
 		constexpr Color PLAIN_TEXT{ 200, 200, 200, 255 };
 		Color textColor = isSelected ? SELECTED_TEXT : PLAIN_TEXT;
 
-		renderer.draw_text_color(Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - 16) / 2 }, label, textColor);
+		renderer.draw_text_color(
+			Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - 16) / 2 },
+			label,
+			textColor);
 
 		// Class dot on right edge
-		const char* classTag = (definition.spellClass == SpellClass::CLERIC) ? "C" : "W";
-		renderer.draw_text_color(Vector2D{ LIST_WIDTH - 20, itemY + (ITEM_HEIGHT - 16) / 2 }, classTag, classColour);
+		const char* classTag =
+			(definition.spellClass == SpellClass::CLERIC) ? "C" : "W";
+		renderer.draw_text_color(
+			Vector2D{ LIST_WIDTH - 20, itemY + (ITEM_HEIGHT - 16) / 2 },
+			classTag,
+			classColour);
 	}
 }
 
@@ -498,14 +536,21 @@ void SpellEditor::render_fields(const Renderer& renderer) const
 	int fieldsWidth = screenWidth - LIST_WIDTH;
 	int fieldsHeight = body_height(renderer);
 
-	DrawRectangle(panelX, panelY, fieldsWidth, fieldsHeight, Color{ 8, 8, 16, 255 });
+	DrawRectangle(
+		panelX,
+		panelY,
+		fieldsWidth,
+		fieldsHeight,
+		Color{ 8, 8, 16, 255 });
 
 	::Vector2 mouse = GetMousePosition();
 
-	const size_t scroll = fieldCursor.first_visible(whole_rows_within(fieldsHeight, FIELD_HEIGHT));
+	const size_t scroll = fieldCursor.first_visible(
+		whole_rows_within(fieldsHeight, FIELD_HEIGHT));
 	for (size_t fieldIndex = scroll; fieldIndex < FIELD_COUNT; ++fieldIndex)
 	{
-		int itemY = panelY + static_cast<int>(fieldIndex - scroll) * FIELD_HEIGHT;
+		int itemY =
+			panelY + static_cast<int>(fieldIndex - scroll) * FIELD_HEIGHT;
 		if (itemY + FIELD_HEIGHT > panelY + fieldsHeight)
 		{
 			break;
@@ -513,7 +558,8 @@ void SpellEditor::render_fields(const Renderer& renderer) const
 
 		FieldId fieldId = static_cast<FieldId>(fieldIndex);
 		bool isSelected = (fieldIndex == fieldCursor.current_row());
-		bool hovered = mouse.x >= panelX && mouse.x < screenWidth && mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
+		bool hovered = mouse.x >= panelX && mouse.x < screenWidth &&
+			mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
 		if (isSelected && focus == 1)
@@ -534,10 +580,15 @@ void SpellEditor::render_fields(const Renderer& renderer) const
 			DrawRectangle(panelX, itemY, fieldsWidth, FIELD_HEIGHT, bgColor);
 		}
 
-		Color labelColor = isSelected ? Color{ 180, 255, 180, 255 } : Color{ 150, 150, 150, 255 };
-		Color valueColor = isSelected ? Color{ 255, 255, 200, 255 } : Color{ 200, 200, 200, 255 };
+		Color labelColor = isSelected ? Color{ 180, 255, 180, 255 } :
+										Color{ 150, 150, 150, 255 };
+		Color valueColor = isSelected ? Color{ 255, 255, 200, 255 } :
+										Color{ 200, 200, 200, 255 };
 
-		renderer.draw_text_color(Vector2D{ panelX + 12, itemY + (FIELD_HEIGHT - 16) / 2 }, field_label(fieldId), labelColor);
+		renderer.draw_text_color(
+			Vector2D{ panelX + 12, itemY + (FIELD_HEIGHT - 16) / 2 },
+			field_label(fieldId),
+			labelColor);
 
 		std::string valueText;
 		if (isSelected && mode == Mode::EDIT_STRING)
@@ -550,7 +601,10 @@ void SpellEditor::render_fields(const Renderer& renderer) const
 		}
 
 		int valuePixelX = screenWidth - renderer.measure_text(valueText) - 16;
-		renderer.draw_text_color(Vector2D{ valuePixelX, itemY + (FIELD_HEIGHT - 16) / 2 }, valueText, valueColor);
+		renderer.draw_text_color(
+			Vector2D{ valuePixelX, itemY + (FIELD_HEIGHT - 16) / 2 },
+			valueText,
+			valueColor);
 	}
 }
 
@@ -575,11 +629,13 @@ void SpellEditor::render_hint(const Renderer& renderer) const
 	}
 	else if (focus == 0)
 	{
-		hintText = "[LIST] Up/Down:navigate  A:add new  Del:remove custom  Enter:edit fields  Tab:switch  Ctrl+S:save  Esc:exit";
+		hintText =
+			"[LIST] Up/Down:navigate  A:add new  Del:remove custom  Enter:edit fields  Tab:switch  Ctrl+S:save  Esc:exit";
 	}
 	else
 	{
-		hintText = "[FIELDS] Up/Down:navigate  Left/Right:adjust  Enter:edit/cycle  Tab:switch  Ctrl+S:save  Esc:exit";
+		hintText =
+			"[FIELDS] Up/Down:navigate  Left/Right:adjust  Enter:edit/cycle  Tab:switch  Ctrl+S:save  Esc:exit";
 	}
 
 	constexpr Color SAVED_HINT{ 100, 255, 100, 255 };
@@ -596,7 +652,8 @@ const std::string& SpellEditor::current_key() const
 {
 	if (keys.empty())
 	{
-		throw std::out_of_range("SpellEditor::current_key -- key list is empty");
+		throw std::out_of_range(
+			"SpellEditor::current_key -- key list is empty");
 	}
 	return keys[listCursor.current_row()];
 }

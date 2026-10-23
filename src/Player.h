@@ -49,7 +49,10 @@ public:
 	std::unique_ptr<PlayerController> controller;
 
 	Player(Vector2D position);
-	Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext& ctx);
+	Player(
+		Vector2D position,
+		const PlayerBlueprint& blueprint,
+		GameContext& ctx);
 	void roll_new_character(GameContext& ctx);
 
 	// Tile config key for this character's sprite, e.g.
@@ -76,7 +79,9 @@ public:
 	// Example, a halfling:
 	//   show_racial_adjustments(pay_racial_adjustments(), ctx); // a popup listing -1 Strength, +1 Dexterity
 	//   show_racial_adjustments({}, ctx); // a human: no popup
-	void show_racial_adjustments(std::vector<std::string> bonusLines, GameContext& ctx);
+	void show_racial_adjustments(
+		std::vector<std::string> bonusLines,
+		GameContext& ctx);
 	void equip_class_starting_gear(GameContext& ctx);
 	void calculate_thaco();
 
@@ -156,7 +161,8 @@ public:
 	//   player.thief_skill(ThiefSkill::OPEN_LOCKS);   // -> 30
 	// The same rogue wearing plate mail:
 	//   player.thief_skill(ThiefSkill::OPEN_LOCKS);   // -> nullopt
-	[[nodiscard]] std::optional<int> thief_skill(ThiefSkill skill) const noexcept;
+	[[nodiscard]] std::optional<int> thief_skill(
+		ThiefSkill skill) const noexcept;
 
 	// Display interface overrides
 	std::string get_class_display_name() const;
@@ -246,7 +252,8 @@ inline constexpr std::array<CreatureClass, 4> ALL_PLAYER_CLASS{
 // Example:
 //   racial_ability_modifiers(PlayerRaceState::HALFLING);   // -> { -1, 1, 0, 0, 0, 0 }
 //   racial_ability_modifiers(PlayerRaceState::HUMAN);      // -> all zero
-[[nodiscard]] std::array<int, ABILITY_COUNT> racial_ability_modifiers(PlayerRaceState race);
+[[nodiscard]] std::array<int, ABILITY_COUNT> racial_ability_modifiers(
+	PlayerRaceState race);
 
 // Player's Handbook Table 27, Thieving Skill Racial Adjustments (PDF page 85), in
 // ALL_THIEF_SKILL order. A human takes none. It lives here rather than in
@@ -255,4 +262,5 @@ inline constexpr std::array<CreatureClass, 4> ALL_PLAYER_CLASS{
 // Example:
 //   thief_skill_racial_adjustments(PlayerRaceState::DWARF);
 //   // -> { 0, 10, 15, 0, 0, 0, -10, -5 }, being Open Locks +10 and Climb Walls -10
-[[nodiscard]] std::array<int, THIEF_SKILL_COUNT> thief_skill_racial_adjustments(PlayerRaceState race);
+[[nodiscard]] std::array<int, THIEF_SKILL_COUNT> thief_skill_racial_adjustments(
+	PlayerRaceState race);

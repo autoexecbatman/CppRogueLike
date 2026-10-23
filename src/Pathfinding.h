@@ -55,7 +55,8 @@ public:
 	explicit Mobility(std::set<TileType> enterableTypes);
 
 	[[nodiscard]] bool contains(TileType tileType) const noexcept;
-	[[nodiscard]] bool operator==(const Mobility& other) const noexcept = default;
+	[[nodiscard]] bool operator==(
+		const Mobility& other) const noexcept = default;
 };
 
 // What one step did. A creature that opened a door or was stopped by what lies on the
@@ -71,16 +72,24 @@ enum class StepResult
 // The creature's mobility: every tile type tile_config.json does not mark as blocking,
 // each blocking type whose bypass state the creature has from itself or what it wears,
 // and the shut door when its body plan has a hand slot.
-[[nodiscard]] Mobility mobility_of(const Creature& creature, const TileConfig& tileConfig);
+[[nodiscard]] Mobility mobility_of(
+	const Creature& creature,
+	const TileConfig& tileConfig);
 
 // What entering that tile costs a creature of that mobility: 1, or 2 for a shut door.
 // nullopt for a tile off the map, a type outside the mobility, a locked door or a tile a
 // decoration stands on. Creatures, traps and webs are no part of the price.
-[[nodiscard]] std::optional<int> step_cost(Vector2D position, const Mobility& mobility, const GameContext& ctx);
+[[nodiscard]] std::optional<int> step_cost(
+	Vector2D position,
+	const Mobility& mobility,
+	const GameContext& ctx);
 
 // Whether the creature may stand on that tile now: priced for its mobility, not a shut
 // door, and no creature on it.
-[[nodiscard]] bool can_enter(const Creature& creature, Vector2D position, const GameContext& ctx);
+[[nodiscard]] bool can_enter(
+	const Creature& creature,
+	Vector2D position,
+	const GameContext& ctx);
 
 // The creature's step onto an adjacent tile. A shut door it may open is opened instead
 // of entered. Otherwise every trap and web on the tile has its say, and the creature
@@ -105,7 +114,10 @@ private:
 
 	std::vector<CostMap> costMaps{};
 
-	const CostMap& cost_map(Vector2D goal, const Mobility& mobility, const GameContext& ctx);
+	const CostMap& cost_map(
+		Vector2D goal,
+		const Mobility& mobility,
+		const GameContext& ctx);
 
 public:
 	// The cost of the cheapest way from a tile to the goal for that mobility, or nullopt
@@ -113,7 +125,11 @@ public:
 	// with no target, so it prices every tile. A map is flooded on first request and
 	// reused while the goal, the level and the game clock are unchanged, so each monster
 	// window floods once per mobility.
-	[[nodiscard]] std::optional<int> cost_to(Vector2D goal, Vector2D from, const Mobility& mobility, const GameContext& ctx);
+	[[nodiscard]] std::optional<int> cost_to(
+		Vector2D goal,
+		Vector2D from,
+		const Mobility& mobility,
+		const GameContext& ctx);
 
 	// The cheapest route from start to goal, both included, for that mobility, found by A*:
 	// a diagonal costs its price times sqrt 2, and the Chebyshev distance to the goal is
@@ -121,7 +137,11 @@ public:
 	// creature stands on are avoided, except the goal. The goal may be any shut door,
 	// locked or not, because walking to a door is how its lock is reached, and any
 	// decoration, because the last step bumps it. Empty when the goal cannot be reached.
-	[[nodiscard]] std::vector<Vector2D> find_route(Vector2D start, Vector2D goal, const Mobility& mobility, const GameContext& ctx) const;
+	[[nodiscard]] std::vector<Vector2D> find_route(
+		Vector2D start,
+		Vector2D goal,
+		const Mobility& mobility,
+		const GameContext& ctx) const;
 };
 
 } // namespace Pathfinding

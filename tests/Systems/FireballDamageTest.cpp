@@ -47,10 +47,12 @@ protected:
 	Creature& add_creature(int column)
 	{
 		auto creature = std::make_unique<Creature>(
-			Vector2D{ column, 5 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
+			Vector2D{ column, 5 },
+			ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
 		creature->healthPool = std::make_unique<HealthPool>(STARTING_HP);
 		creature->set_strength(10);
-		creature->set_body_plan({ EquipmentSlot::RIGHT_RING, EquipmentSlot::HEAD });
+		creature->set_body_plan(
+			{ EquipmentSlot::RIGHT_RING, EquipmentSlot::HEAD });
 		creature->armorClass = std::make_unique<ArmorClass>(10);
 		creature->experienceReward = std::make_unique<ExperienceReward>(0);
 		creatures.push_back(std::move(creature));
@@ -84,7 +86,8 @@ protected:
 	GameContext ctx{};
 	BuffSystem buffs{};
 	// Outside every burst below, unless a test moves it in.
-	std::unique_ptr<Player> caster{ std::make_unique<Player>(Vector2D{ 20, 5 }) };
+	std::unique_ptr<Player> caster{ std::make_unique<Player>(
+		Vector2D{ 20, 5 }) };
 	std::vector<std::unique_ptr<Creature>> creatures{};
 };
 
@@ -93,7 +96,13 @@ TEST_F(FireballDamageTest, APotionOfFireResistanceTakesTwoOffEveryDie)
 {
 	Creature& resistant = add_creature(3);
 	Creature& exposed = add_creature(4);
-	buffs.add_buff(resistant, BuffType::FIRE_RESISTANCE, 1, 10, BuffApplication::ADD, ctx.gameState->get_time());
+	buffs.add_buff(
+		resistant,
+		BuffType::FIRE_RESISTANCE,
+		1,
+		10,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 	force_max_dice_then_saves({ 1, 1 });
 
 	const auto burst = burst_at(Vector2D{ 3, 5 });
@@ -141,7 +150,8 @@ TEST_F(FireballDamageTest, TenDiceIsTheCeiling)
 		mock.dice.set_next_roll(1);
 	}
 
-	const auto burst = SpellSystem::burst_fireball(Vector2D{ 3, 5 }, 20, RADIUS, ctx);
+	const auto burst =
+		SpellSystem::burst_fireball(Vector2D{ 3, 5 }, 20, RADIUS, ctx);
 
 	EXPECT_EQ(burst.diceCount, 10);
 	EXPECT_EQ(burst.totalDamage, 10);
@@ -157,7 +167,9 @@ TEST_F(FireballDamageTest, TenDiceIsTheCeiling)
 TEST_F(FireballDamageTest, ARingOfFireResistanceTakesTwoOffEveryDie)
 {
 	Creature& wearer = add_creature(3);
-	wearer.wear(ItemCreator::create("ring_of_fire_resistance", Vector2D{ 3, 5 }, ctx), EquipmentSlot::RIGHT_RING);
+	wearer.wear(
+		ItemCreator::create("ring_of_fire_resistance", Vector2D{ 3, 5 }, ctx),
+		EquipmentSlot::RIGHT_RING);
 	force_max_dice_then_saves({ 1 });
 
 	burst_at(Vector2D{ 3, 5 });
@@ -170,7 +182,9 @@ TEST_F(FireballDamageTest, ARingOfFireResistanceTakesTwoOffEveryDie)
 TEST_F(FireballDamageTest, TheHelmOfBrillianceTakesFourOffEveryDie)
 {
 	Creature& wearer = add_creature(3);
-	wearer.wear(ItemCreator::create("helm_of_brilliance", Vector2D{ 3, 5 }, ctx), EquipmentSlot::HEAD);
+	wearer.wear(
+		ItemCreator::create("helm_of_brilliance", Vector2D{ 3, 5 }, ctx),
+		EquipmentSlot::HEAD);
 	// A dormant helm protects from nothing, so its word is learned and spoken first.
 	Item& helm = *wearer.get_equipped_item(EquipmentSlot::HEAD);
 	helm.identify_type();
@@ -186,7 +200,9 @@ TEST_F(FireballDamageTest, TheHelmOfBrillianceTakesFourOffEveryDie)
 TEST_F(FireballDamageTest, ADieNeverGoesBelowOne)
 {
 	Creature& wearer = add_creature(3);
-	wearer.wear(ItemCreator::create("ring_of_fire_resistance", Vector2D{ 3, 5 }, ctx), EquipmentSlot::RIGHT_RING);
+	wearer.wear(
+		ItemCreator::create("ring_of_fire_resistance", Vector2D{ 3, 5 }, ctx),
+		EquipmentSlot::RIGHT_RING);
 	for (int die = 0; die < CASTER_LEVEL; ++die)
 	{
 		mock.dice.set_next_roll(1);
@@ -204,7 +220,9 @@ TEST_F(FireballDamageTest, ARingAddsFourToTheSave)
 {
 	Creature& wearer = add_creature(3);
 	Creature& bare = add_creature(4);
-	wearer.wear(ItemCreator::create("ring_of_fire_resistance", Vector2D{ 3, 5 }, ctx), EquipmentSlot::RIGHT_RING);
+	wearer.wear(
+		ItemCreator::create("ring_of_fire_resistance", Vector2D{ 3, 5 }, ctx),
+		EquipmentSlot::RIGHT_RING);
 	force_max_dice_then_saves({ 13, 13 });
 
 	burst_at(Vector2D{ 3, 5 });
@@ -229,7 +247,11 @@ TEST_F(FireballDamageTest, TheScrollBurstRollsSixDice)
 		mock.dice.set_next_roll(6);
 	}
 
-	const auto burst = SpellSystem::burst_fireball(Vector2D{ 3, 5 }, SpellSystem::SCROLL_FIREBALL_CASTER_LEVEL, RADIUS, ctx);
+	const auto burst = SpellSystem::burst_fireball(
+		Vector2D{ 3, 5 },
+		SpellSystem::SCROLL_FIREBALL_CASTER_LEVEL,
+		RADIUS,
+		ctx);
 
 	EXPECT_EQ(burst.diceCount, 6);
 	EXPECT_EQ(burst.totalDamage, 36);

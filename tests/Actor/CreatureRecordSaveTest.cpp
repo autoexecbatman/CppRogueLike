@@ -43,15 +43,14 @@ constexpr int SCRIPTED_ROLLS = 400;
 class CreatureRecordSaveTest : public ::testing::Test
 {
 protected:
-	void SetUp() override
-	{
-		ctx = mock.to_game_context();
-	}
+	void SetUp() override { ctx = mock.to_game_context(); }
 
 	// A creature with nothing set, as a load starts from.
 	static std::unique_ptr<Creature> blank()
 	{
-		return std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+		return std::make_unique<Creature>(
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
 	}
 
 	// What a fresh creature reads back from the save the given one writes.
@@ -71,7 +70,10 @@ protected:
 		{
 			mock.dice.set_next_roll(RandomDice::HIGHEST);
 		}
-		return MonsterCreator::create_from_params(Vector2D{ 0, 0 }, mock.monsterRegistry.get_params(key), ctx);
+		return MonsterCreator::create_from_params(
+			Vector2D{ 0, 0 },
+			mock.monsterRegistry.get_params(key),
+			ctx);
 	}
 
 	MockGameContext mock{};
@@ -124,19 +126,22 @@ TEST_F(CreatureRecordSaveTest, ABodyPlanSurvivesASave)
 
 	EXPECT_TRUE(loaded->has_slot(EquipmentSlot::RIGHT_HAND));
 	EXPECT_TRUE(loaded->has_slot(EquipmentSlot::LEFT_HAND));
-	EXPECT_FALSE(loaded->has_slot(EquipmentSlot::BODY)) << "a hands-only creature came back with a body slot";
+	EXPECT_FALSE(loaded->has_slot(EquipmentSlot::BODY))
+		<< "a hands-only creature came back with a body slot";
 }
 
 // The goblin's record arms it with a short sword in its right hand.
 TEST_F(CreatureRecordSaveTest, AMonstersWeaponSurvivesASave)
 {
 	std::unique_ptr<Creature> goblin = build("goblin");
-	ASSERT_NE(goblin->get_equipped_item(EquipmentSlot::RIGHT_HAND), nullptr) << "the goblin was built unarmed";
+	ASSERT_NE(goblin->get_equipped_item(EquipmentSlot::RIGHT_HAND), nullptr)
+		<< "the goblin was built unarmed";
 
 	const std::unique_ptr<Creature> loaded = saved_and_loaded(*goblin);
 
 	const Item* weapon = loaded->get_equipped_item(EquipmentSlot::RIGHT_HAND);
-	ASSERT_NE(weapon, nullptr) << "the loaded goblin has nothing in its right hand";
+	ASSERT_NE(weapon, nullptr)
+		<< "the loaded goblin has nothing in its right hand";
 	EXPECT_EQ(weapon->itemKey, "short_sword");
 }
 
@@ -148,10 +153,15 @@ TEST_F(CreatureRecordSaveTest, AShopkeeperIsStillItselfAfterASave)
 
 	const std::unique_ptr<Creature> loaded = saved_and_loaded(*shopkeeper);
 
-	EXPECT_EQ(loaded->get_attitude(), Attitude::PEACEFUL) << "the loaded shopkeeper turned hostile";
-	EXPECT_FALSE(loaded->is_displaceable()) << "the loaded shopkeeper can be shoved aside";
-	EXPECT_EQ(loaded->get_corpse_weight(), mock.monsterRegistry.get_params("shopkeeper").corpseWeight);
-	EXPECT_TRUE(loaded->has_slot(EquipmentSlot::BODY)) << "the loaded shopkeeper has no humanoid slots";
+	EXPECT_EQ(loaded->get_attitude(), Attitude::PEACEFUL)
+		<< "the loaded shopkeeper turned hostile";
+	EXPECT_FALSE(loaded->is_displaceable())
+		<< "the loaded shopkeeper can be shoved aside";
+	EXPECT_EQ(
+		loaded->get_corpse_weight(),
+		mock.monsterRegistry.get_params("shopkeeper").corpseWeight);
+	EXPECT_TRUE(loaded->has_slot(EquipmentSlot::BODY))
+		<< "the loaded shopkeeper has no humanoid slots";
 	const Item* dagger = loaded->get_equipped_item(EquipmentSlot::RIGHT_HAND);
 	ASSERT_NE(dagger, nullptr) << "the loaded shopkeeper lost its dagger";
 	EXPECT_EQ(dagger->itemKey, "dagger");
@@ -184,7 +194,8 @@ TEST_F(CreatureRecordSaveTest, APlayersBodyPlanIsTheOneItsSaveHeld)
 	loaded.load(record);
 
 	EXPECT_TRUE(loaded.has_slot(EquipmentSlot::RIGHT_HAND));
-	EXPECT_FALSE(loaded.has_slot(EquipmentSlot::BODY)) << "the loaded player has a body slot its save did not hold";
+	EXPECT_FALSE(loaded.has_slot(EquipmentSlot::BODY))
+		<< "the loaded player has a body slot its save did not hold";
 }
 
 // end of file: CreatureRecordSaveTest.cpp

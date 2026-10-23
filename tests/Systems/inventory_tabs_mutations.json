@@ -27,7 +27,7 @@
     },
     {
       "file": "src/InventoryUI.cpp",
-      "original": "\t\tif (pixelX >= box.pixelX - TAB_HIT_PADDING && pixelX < box.pixelX + box.width + TAB_HIT_PADDING)",
+      "original": "\t\tif (pixelX >= box.pixelX - TAB_HIT_PADDING &&\n\t\t\tpixelX < box.pixelX + box.width + TAB_HIT_PADDING)",
       "mutated": "\t\tif (true)",
       "catches": "the across test gone, so every click on the tab row answers Equipment whatever it was aimed at"
     },

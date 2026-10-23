@@ -73,10 +73,13 @@ protected:
 		return item;
 	}
 
-	std::unique_ptr<Item> create_item_with_both_bonuses(int str_bonus, int dex_bonus)
+	std::unique_ptr<Item> create_item_with_both_bonuses(
+		int str_bonus,
+		int dex_bonus)
 	{
 		auto item = std::make_unique<Item>(Vector2D{}, ActorData{});
-		item->actorData.name = "Test Item +" + std::to_string(str_bonus) + " STR +" + std::to_string(dex_bonus) + " DEX";
+		item->actorData.name = "Test Item +" + std::to_string(str_bonus) +
+			" STR +" + std::to_string(dex_bonus) + " DEX";
 		item->actorData.tile = TileRef{};
 		item->enhancement.strengthBonus = str_bonus;
 		item->enhancement.dexterityBonus = dex_bonus;

@@ -27,8 +27,8 @@
     },
     {
       "file": "src/Vision.cpp",
-      "original": "\t\t? TORCH_SIGHT_RADIUS\n\t\t: FOV_RADIUS;",
-      "mutated": "\t\t? FOV_RADIUS\n\t\t: FOV_RADIUS;",
+      "original": "\t\tInventoryOperations::is_carrying(viewer.inventoryData, TORCH_ITEM_KEY) ?\n\t\tTORCH_SIGHT_RADIUS :\n\t\tFOV_RADIUS;",
+      "mutated": "\t\tInventoryOperations::is_carrying(viewer.inventoryData, TORCH_ITEM_KEY) ?FOV_RADIUS :\n\t\tFOV_RADIUS;",
       "catches": "the torch branch answering the base radius, which is the defect this fixed"
     },
     {

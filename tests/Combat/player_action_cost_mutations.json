@@ -21,14 +21,14 @@
     },
     {
       "file": "src/PlayerTurn.cpp",
-      "original": "\tadvance_player_and_open_turn(ctx, scaled_cost(baseCost, ctx.player()->get_action_delay()));",
-      "mutated": "\tadvance_player_and_open_turn(ctx, baseCost);",
+      "original": "\tadvance_player_and_open_turn(\n\t\tctx,\n\t\tscaled_cost(baseCost, ctx.player()->get_action_delay()));",
+      "mutated": "\tadvance_player_and_open_turn(\n\t\tctx,baseCost);",
       "catches": "the player's own action delay ignored, so haste and slow reach every creature except the one holding them"
     },
     {
       "file": "src/PlayerTurn.cpp",
-      "original": "\tadvance_player_and_open_turn(ctx, scaled_cost(baseCost, ctx.player()->get_action_delay()));",
-      "mutated": "\tadvance_player_and_open_turn(ctx, scaled_cost(TIME_UNITS_PER_ROUND, ctx.player()->get_action_delay()));",
+      "original": "\tadvance_player_and_open_turn(\n\t\tctx,\n\t\tscaled_cost(baseCost, ctx.player()->get_action_delay()));",
+      "mutated": "\tadvance_player_and_open_turn(\n\t\tctx,\n\t\tscaled_cost(TIME_UNITS_PER_ROUND, ctx.player()->get_action_delay()));",
       "catches": "every action charged as a whole round, which is the state this funnel exists to leave behind"
     },
     {

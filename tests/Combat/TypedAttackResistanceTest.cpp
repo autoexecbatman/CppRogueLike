@@ -64,7 +64,9 @@ protected:
 	// A monster whose natural attack is the given damage, strong enough to hit.
 	std::unique_ptr<Creature> monster_with(DamageInfo attack)
 	{
-		auto monster = std::make_unique<Creature>(Vector2D{ 0, 1 }, ActorData{ TileRef{}, "beast", ColorPairId::WHITE_BLACK });
+		auto monster = std::make_unique<Creature>(
+			Vector2D{ 0, 1 },
+			ActorData{ TileRef{}, "beast", ColorPairId::WHITE_BLACK });
 		monster->experienceReward = std::make_unique<ExperienceReward>(0);
 		monster->set_dr(0);
 		monster->set_thaco(19);
@@ -80,7 +82,10 @@ protected:
 
 	void wear(std::string_view key, EquipmentSlot slot)
 	{
-		player->equip_item(ItemCreator::create(key, Vector2D{ 0, 0 }, ctx), slot, ctx);
+		player->equip_item(
+			ItemCreator::create(key, Vector2D{ 0, 0 }, ctx),
+			slot,
+			ctx);
 	}
 
 	// The helm of brilliance on the head, identified and spoken to: only then does it protect.
@@ -122,7 +127,8 @@ TEST_F(TypedAttackResistanceTest, ARingTakesTwoOffAFireBite)
 	auto wolf = monster_with(DamageInfo{ "1d6", DamageType::FIRE });
 	force_hit_then_dice({ 6 });
 
-	EXPECT_EQ(hp_lost_after(*wolf), 4) << "the ring was worn and the bite landed whole";
+	EXPECT_EQ(hp_lost_after(*wolf), 4)
+		<< "the ring was worn and the bite landed whole";
 }
 
 // An ice wolf's bite through a ring of warmth: 6 becomes 5.

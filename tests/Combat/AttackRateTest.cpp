@@ -56,9 +56,12 @@ TEST(AttackRateTest, EachRatePaysOutWhatTheBookPrintsOverTwoRounds)
 {
 	const int twoRounds = TIME_UNITS_PER_ROUND * 2;
 
-	EXPECT_EQ(actions_before(0, attack_cost(1.0f), twoRounds), 2) << "one a round";
-	EXPECT_EQ(actions_before(0, attack_cost(1.5f), twoRounds), 3) << "three in two rounds";
-	EXPECT_EQ(actions_before(0, attack_cost(2.0f), twoRounds), 4) << "two a round";
+	EXPECT_EQ(actions_before(0, attack_cost(1.0f), twoRounds), 2)
+		<< "one a round";
+	EXPECT_EQ(actions_before(0, attack_cost(1.5f), twoRounds), 3)
+		<< "three in two rounds";
+	EXPECT_EQ(actions_before(0, attack_cost(2.0f), twoRounds), 4)
+		<< "two a round";
 }
 
 // And over a longer span, so a rate that is slightly wrong per round shows up as a
@@ -103,7 +106,8 @@ protected:
 
 	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 0, 0 }) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ 0, 0 }) };
 };
 
 // A 7th-level fighter's swing takes two thirds of a round off the clock, where an

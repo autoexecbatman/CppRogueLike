@@ -67,7 +67,8 @@ constexpr std::array<TableFortySevenRow, 21> TABLE_FORTY_SEVEN{ {
 } };
 
 // The last exceptional band, 18/00, which the game stores as a percentile of 100.
-constexpr TableFortySevenRow EIGHTEEN_HUNDRED{ 18, 100, 335, 374, 413, 452, 480 };
+constexpr TableFortySevenRow
+	EIGHTEEN_HUNDRED{ 18, 100, 335, 374, 413, 452, 480 };
 } // namespace
 
 class EncumbranceBandTest : public ::testing::Test
@@ -81,12 +82,19 @@ TEST_F(EncumbranceBandTest, EveryRowTheBookPrintsCarriesItsFourBoundaries)
 {
 	const auto check = [this](const TableFortySevenRow& expected)
 	{
-		const StrengthAttributes row = mock.data_manager.strength_for(expected.strength, expected.exceptional);
-		ASSERT_TRUE(row.encumbrance.has_value()) << "Strength " << expected.strength << "/" << expected.exceptional;
-		EXPECT_EQ(row.encumbrance->unencumberedTo, expected.unencumberedTo) << expected.strength;
-		EXPECT_EQ(row.encumbrance->lightTo, expected.lightTo) << expected.strength;
-		EXPECT_EQ(row.encumbrance->moderateTo, expected.moderateTo) << expected.strength;
-		EXPECT_EQ(row.encumbrance->heavyTo, expected.heavyTo) << expected.strength;
+		const StrengthAttributes row = mock.data_manager.strength_for(
+			expected.strength,
+			expected.exceptional);
+		ASSERT_TRUE(row.encumbrance.has_value())
+			<< "Strength " << expected.strength << "/" << expected.exceptional;
+		EXPECT_EQ(row.encumbrance->unencumberedTo, expected.unencumberedTo)
+			<< expected.strength;
+		EXPECT_EQ(row.encumbrance->lightTo, expected.lightTo)
+			<< expected.strength;
+		EXPECT_EQ(row.encumbrance->moderateTo, expected.moderateTo)
+			<< expected.strength;
+		EXPECT_EQ(row.encumbrance->heavyTo, expected.heavyTo)
+			<< expected.strength;
 		EXPECT_EQ(row.maxCarried, expected.maxCarried) << expected.strength;
 	};
 
@@ -129,10 +137,13 @@ TEST_F(EncumbranceBandTest, TheMaximumIsTheLastPoundOfSevere)
 TEST_F(EncumbranceBandTest, ExceptionalStrengthReadsItsOwnBands)
 {
 	const StrengthAttributes plain = mock.data_manager.strength_for(18, 0);
-	const StrengthAttributes exceptional = mock.data_manager.strength_for(18, 100);
+	const StrengthAttributes exceptional =
+		mock.data_manager.strength_for(18, 100);
 
 	EXPECT_EQ(encumbrance_band(240, plain), EncumbranceBand::SEVERE);
-	EXPECT_EQ(encumbrance_band(240, exceptional), EncumbranceBand::UNENCUMBERED);
+	EXPECT_EQ(
+		encumbrance_band(240, exceptional),
+		EncumbranceBand::UNENCUMBERED);
 }
 
 // Table 47's band columns start at Strength 2 and stop at 18/00. A score outside that
@@ -146,14 +157,17 @@ TEST_F(EncumbranceBandTest, AScoreTheTableDoesNotPrintHasNoGradedBand)
 	{
 		const StrengthAttributes row = mock.data_manager.strength_for(score, 0);
 		EXPECT_FALSE(row.encumbrance.has_value()) << "Strength " << score;
-		EXPECT_FALSE(encumbrance_band(2, row).has_value()) << "Strength " << score;
+		EXPECT_FALSE(encumbrance_band(2, row).has_value())
+			<< "Strength " << score;
 	}
 }
 
 // The names the panel prints are the book's own words.
 TEST_F(EncumbranceBandTest, TheNamesAreTheOnesTheTablePrints)
 {
-	EXPECT_EQ(encumbrance_band_name(EncumbranceBand::UNENCUMBERED), "Unencumbered");
+	EXPECT_EQ(
+		encumbrance_band_name(EncumbranceBand::UNENCUMBERED),
+		"Unencumbered");
 	EXPECT_EQ(encumbrance_band_name(EncumbranceBand::LIGHT), "Light");
 	EXPECT_EQ(encumbrance_band_name(EncumbranceBand::MODERATE), "Moderate");
 	EXPECT_EQ(encumbrance_band_name(EncumbranceBand::HEAVY), "Heavy");
@@ -166,12 +180,18 @@ TEST_F(EncumbranceBandTest, EveryRowsBoundariesRiseToItsMaximum)
 {
 	for (const TableFortySevenRow& expected : TABLE_FORTY_SEVEN)
 	{
-		const StrengthAttributes row = mock.data_manager.strength_for(expected.strength, expected.exceptional);
+		const StrengthAttributes row = mock.data_manager.strength_for(
+			expected.strength,
+			expected.exceptional);
 		ASSERT_TRUE(row.encumbrance.has_value());
-		EXPECT_LT(row.encumbrance->unencumberedTo, row.encumbrance->lightTo) << expected.strength;
-		EXPECT_LT(row.encumbrance->lightTo, row.encumbrance->moderateTo) << expected.strength;
-		EXPECT_LT(row.encumbrance->moderateTo, row.encumbrance->heavyTo) << expected.strength;
-		EXPECT_LT(row.encumbrance->heavyTo, row.maxCarried) << expected.strength;
+		EXPECT_LT(row.encumbrance->unencumberedTo, row.encumbrance->lightTo)
+			<< expected.strength;
+		EXPECT_LT(row.encumbrance->lightTo, row.encumbrance->moderateTo)
+			<< expected.strength;
+		EXPECT_LT(row.encumbrance->moderateTo, row.encumbrance->heavyTo)
+			<< expected.strength;
+		EXPECT_LT(row.encumbrance->heavyTo, row.maxCarried)
+			<< expected.strength;
 	}
 }
 
@@ -201,7 +221,13 @@ TEST_F(EncumbranceBandTest, TheBandAgreesWithTheCarryingRuleOnEveryScore)
 	for (const int score : { 1, 2, 10, 18, 19, 25 })
 	{
 		const StrengthAttributes row = mock.data_manager.strength_for(score, 0);
-		EXPECT_EQ(encumbrance_band(row.maxCarried + 1, row), EncumbranceBand::OVERLOADED) << "Strength " << score;
-		EXPECT_NE(encumbrance_band(row.maxCarried, row), EncumbranceBand::OVERLOADED) << "Strength " << score;
+		EXPECT_EQ(
+			encumbrance_band(row.maxCarried + 1, row),
+			EncumbranceBand::OVERLOADED)
+			<< "Strength " << score;
+		EXPECT_NE(
+			encumbrance_band(row.maxCarried, row),
+			EncumbranceBand::OVERLOADED)
+			<< "Strength " << score;
 	}
 }

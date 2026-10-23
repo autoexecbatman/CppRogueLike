@@ -64,7 +64,8 @@ void BuffSystem::sync_states(Creature& creature) noexcept
 		auto grants_state = [state](const Buff& buff)
 		{
 			const auto effect = buff_state_effects.find(buff.type);
-			return effect != buff_state_effects.end() && effect->second == state;
+			return effect != buff_state_effects.end() &&
+				effect->second == state;
 		};
 
 		// A state two buffs map to is visited twice; both visits give the same answer.
@@ -87,7 +88,9 @@ void BuffSystem::sync_states(Creature& creature) noexcept
 // Example:
 //   later_ending(360, 960);            // -> 960
 //   later_ending(360, std::nullopt);   // -> nullopt, lasting wins
-static std::optional<int> later_ending(std::optional<int> first, std::optional<int> second) noexcept
+static std::optional<int> later_ending(
+	std::optional<int> first,
+	std::optional<int> second) noexcept
 {
 	if (!first.has_value() || !second.has_value())
 	{
@@ -101,7 +104,12 @@ static std::optional<int> later_ending(std::optional<int> first, std::optional<i
 // Example:
 //   grant_buff(cleric, BuffType::BLESS, 0, 360, BuffApplication::ADD);            // blessed until 360
 //   grant_buff(cleric, BuffType::BLESS, 0, std::nullopt, BuffApplication::ADD);   // now until broken
-static void grant_buff(Creature& creature, BuffType type, int value, std::optional<int> expiry, BuffApplication application) noexcept
+static void grant_buff(
+	Creature& creature,
+	BuffType type,
+	int value,
+	std::optional<int> expiry,
+	BuffApplication application) noexcept
 {
 	// Find if buff already exists
 	auto matches_type = [type](const Buff& buff)
@@ -145,13 +153,26 @@ static void grant_buff(Creature& creature, BuffType type, int value, std::option
 	BuffSystem::sync_states(creature);
 }
 
-void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int durationRounds, BuffApplication application, int currentTime) noexcept
+void BuffSystem::add_buff(
+	Creature& creature,
+	BuffType type,
+	int value,
+	int durationRounds,
+	BuffApplication application,
+	int currentTime) noexcept
 {
 	// When this casting runs out, worked once and stored, so nothing counts it down.
-	grant_buff(creature, type, value, expiry_time(currentTime, durationRounds), application);
+	grant_buff(
+		creature,
+		type,
+		value,
+		expiry_time(currentTime, durationRounds),
+		application);
 }
 
-void BuffSystem::add_buff_until_broken(Creature& creature, BuffType type) noexcept
+void BuffSystem::add_buff_until_broken(
+	Creature& creature,
+	BuffType type) noexcept
 {
 	grant_buff(creature, type, 0, std::nullopt, BuffApplication::ADD);
 }
@@ -168,7 +189,9 @@ void BuffSystem::remove_buff(Creature& creature, BuffType type) noexcept
 	sync_states(creature);
 }
 
-void BuffSystem::update_creature_buffs(Creature& creature, int currentTime) noexcept
+void BuffSystem::update_creature_buffs(
+	Creature& creature,
+	int currentTime) noexcept
 {
 	// A buff the clock has reached or passed is over. Asked rather than counted, so the
 	// answer is the same however many times a creature is driven in one round.
@@ -183,7 +206,9 @@ void BuffSystem::update_creature_buffs(Creature& creature, int currentTime) noex
 	sync_states(creature);
 }
 
-int BuffSystem::get_buff_value(const Creature& creature, BuffType type) const noexcept
+int BuffSystem::get_buff_value(
+	const Creature& creature,
+	BuffType type) const noexcept
 {
 	auto matches_type = [type](const Buff& buff)
 	{
@@ -193,7 +218,9 @@ int BuffSystem::get_buff_value(const Creature& creature, BuffType type) const no
 	return found != creature.activeBuffs.end() ? found->value : 0;
 }
 
-bool BuffSystem::has_buff(const Creature& creature, BuffType type) const noexcept
+bool BuffSystem::has_buff(
+	const Creature& creature,
+	BuffType type) const noexcept
 {
 	auto matches_type = [type](const Buff& buff)
 	{
@@ -212,7 +239,9 @@ int BuffSystem::calculate_ac_bonus(const Creature& creature) const noexcept
 		return ac_affecting_buffs.contains(buff.type);
 	};
 
-	for (const auto& buff : creature.activeBuffs | std::views::filter(is_ac_affecting))
+	for (
+		const auto& buff :
+		creature.activeBuffs | std::views::filter(is_ac_affecting))
 	{
 		total -= buff.value;
 	}
@@ -229,7 +258,9 @@ int BuffSystem::calculate_ac_bonus(const Creature& creature) const noexcept
 // Example:
 //   calculate_ward_penalty(goblin, wardedCleric);  // -> -2, goblin is evil
 //   calculate_ward_penalty(knight, wardedCleric);  // -> 0, knight is not
-int BuffSystem::calculate_ward_penalty(const Creature& attacker, const Creature& target) const noexcept
+int BuffSystem::calculate_ward_penalty(
+	const Creature& attacker,
+	const Creature& target) const noexcept
 {
 	if (!attacker.is_evil())
 	{
@@ -247,7 +278,10 @@ int BuffSystem::calculate_ward_penalty(const Creature& attacker, const Creature&
 	return 0;
 }
 
-bool BuffSystem::is_turned_away_by_sanctuary(const Creature& attacker, Creature& warded, GameContext& ctx)
+bool BuffSystem::is_turned_away_by_sanctuary(
+	const Creature& attacker,
+	Creature& warded,
+	GameContext& ctx)
 {
 	auto is_sanctuary = [](const Buff& buff)
 	{
@@ -264,19 +298,23 @@ bool BuffSystem::is_turned_away_by_sanctuary(const Creature& attacker, Creature&
 	{
 		return save.opponent == attacker.uniqueId;
 	};
-	const auto recorded = std::ranges::find_if(casting->opponentSaves, is_this_attacker);
+	const auto recorded =
+		std::ranges::find_if(casting->opponentSaves, is_this_attacker);
 	if (recorded != casting->opponentSaves.end())
 	{
 		return !recorded->isMade;
 	}
 
 	// The first attempt rolls, once, and the casting keeps the result.
-	const bool isMade = SavingThrows::is_made(attacker, SavingThrow::SPELL, 0, ctx);
+	const bool isMade =
+		SavingThrows::is_made(attacker, SavingThrow::SPELL, 0, ctx);
 	casting->opponentSaves.push_back(OpponentSave{ attacker.uniqueId, isMade });
 	return !isMade;
 }
 
-bool BuffSystem::ignores_warded_creature(const Creature& attacker, const Creature& warded) const noexcept
+bool BuffSystem::ignores_warded_creature(
+	const Creature& attacker,
+	const Creature& warded) const noexcept
 {
 	auto is_sanctuary = [](const Buff& buff)
 	{
@@ -292,7 +330,9 @@ bool BuffSystem::ignores_warded_creature(const Creature& attacker, const Creatur
 	{
 		return save.opponent == attacker.uniqueId && !save.isMade;
 	};
-	return std::ranges::any_of(casting->opponentSaves, is_this_attacker_failing);
+	return std::ranges::any_of(
+		casting->opponentSaves,
+		is_this_attacker_failing);
 }
 
 int BuffSystem::calculate_hit_modifier(const Creature& creature) const noexcept
@@ -312,7 +352,8 @@ int BuffSystem::calculate_hit_modifier(const Creature& creature) const noexcept
 	return total;
 }
 
-std::vector<BuffType> BuffSystem::remove_buffs_broken_by_attacking(Creature& creature) noexcept
+std::vector<BuffType> BuffSystem::remove_buffs_broken_by_attacking(
+	Creature& creature) noexcept
 {
 	// AD&D 2e: Remove all buffs that break when attacking (e.g., Invisibility, Sanctuary)
 	auto is_broken_by_attack = [](const Buff& buff)
@@ -322,7 +363,9 @@ std::vector<BuffType> BuffSystem::remove_buffs_broken_by_attacking(Creature& cre
 
 	// Collect buffs to remove first to avoid iterator invalidation
 	std::vector<BuffType> buffs_to_remove;
-	for (const auto& buff : creature.activeBuffs | std::views::filter(is_broken_by_attack))
+	for (
+		const auto& buff :
+		creature.activeBuffs | std::views::filter(is_broken_by_attack))
 	{
 		buffs_to_remove.push_back(buff.type);
 	}

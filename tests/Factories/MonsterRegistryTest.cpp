@@ -31,7 +31,8 @@ TEST(MonsterRegistryTest, AnEditToOneRegistryDoesNotReachAnother)
 	first.set_params("goblin", sharpened);
 
 	EXPECT_EQ(first.get_params("goblin").thaco, shippedThaco - 5);
-	EXPECT_EQ(second.get_params("goblin").thaco, shippedThaco) << "an edit to one registry reached another";
+	EXPECT_EQ(second.get_params("goblin").thaco, shippedThaco)
+		<< "an edit to one registry reached another";
 }
 
 // A monster added to one registry is listed by that registry alone.
@@ -42,11 +43,14 @@ TEST(MonsterRegistryTest, ACustomMonsterBelongsToTheRegistryItWasAddedTo)
 	first.load(Paths::MONSTERS);
 	second.load(Paths::MONSTERS);
 
-	const std::string key = first.add_custom(MonsterParams{ .name = "Registry Beast" });
+	const std::string key =
+		first.add_custom(MonsterParams{ .name = "Registry Beast" });
 
-	EXPECT_EQ(key, "registry_beast") << "the key is the name, lower case, spaces as underscores";
+	EXPECT_EQ(key, "registry_beast")
+		<< "the key is the name, lower case, spaces as underscores";
 	EXPECT_TRUE(std::ranges::contains(first.get_all_keys(), key));
-	EXPECT_FALSE(std::ranges::contains(second.get_all_keys(), key)) << "a custom monster reached another registry";
+	EXPECT_FALSE(std::ranges::contains(second.get_all_keys(), key))
+		<< "a custom monster reached another registry";
 }
 
 // A name already taken - by a custom monster or a standard one - is
@@ -55,9 +59,15 @@ TEST(MonsterRegistryTest, ATakenNameIsNumbered)
 {
 	MonsterRegistry monsters{};
 
-	EXPECT_EQ(monsters.add_custom(MonsterParams{ .name = "Registry Beast" }), "registry_beast");
-	EXPECT_EQ(monsters.add_custom(MonsterParams{ .name = "Registry Beast" }), "registry_beast_2");
-	EXPECT_EQ(monsters.add_custom(MonsterParams{ .name = "Goblin" }), "goblin_2");
+	EXPECT_EQ(
+		monsters.add_custom(MonsterParams{ .name = "Registry Beast" }),
+		"registry_beast");
+	EXPECT_EQ(
+		monsters.add_custom(MonsterParams{ .name = "Registry Beast" }),
+		"registry_beast_2");
+	EXPECT_EQ(
+		monsters.add_custom(MonsterParams{ .name = "Goblin" }),
+		"goblin_2");
 	EXPECT_EQ(monsters.add_custom(MonsterParams{ .name = "Mimic" }), "mimic_2");
 }
 
@@ -75,9 +85,11 @@ TEST(MonsterRegistryTest, ABuiltinCannotBeRemoved)
 TEST(MonsterRegistryTest, ALoadReplacesTheCustomMonstersItHeld)
 {
 	MonsterRegistry monsters{};
-	const std::string key = monsters.add_custom(MonsterParams{ .name = "Registry Beast" });
+	const std::string key =
+		monsters.add_custom(MonsterParams{ .name = "Registry Beast" });
 
 	monsters.load(Paths::MONSTERS);
 
-	EXPECT_FALSE(std::ranges::contains(monsters.get_all_keys(), key)) << "a custom monster survived a load";
+	EXPECT_FALSE(std::ranges::contains(monsters.get_all_keys(), key))
+		<< "a custom monster survived a load";
 }

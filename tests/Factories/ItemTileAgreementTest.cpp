@@ -29,14 +29,17 @@ TEST(ItemTileAgreementTest, EveryShippedItemHasATileAndEveryTileAnItem)
 
 	const std::vector<std::string> keys = items.get_all_keys();
 	const std::set<std::string> itemKeys(keys.begin(), keys.end());
-	ASSERT_FALSE(itemKeys.empty()) << "no items loaded; the comparison would pass vacuously";
+	ASSERT_FALSE(itemKeys.empty())
+		<< "no items loaded; the comparison would pass vacuously";
 
 	for (const std::string& key : itemKeys)
 	{
-		EXPECT_TRUE(tiles.all_tiles().contains(key)) << "item '" << key << "' has no tile";
+		EXPECT_TRUE(tiles.all_tiles().contains(key))
+			<< "item '" << key << "' has no tile";
 	}
 	for (const auto& [key, tile] : tiles.all_tiles())
 	{
-		EXPECT_TRUE(itemKeys.contains(key)) << "tile '" << key << "' belongs to no item";
+		EXPECT_TRUE(itemKeys.contains(key))
+			<< "tile '" << key << "' belongs to no item";
 	}
 }

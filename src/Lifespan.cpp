@@ -163,7 +163,10 @@ std::string_view age_category_name(AgeCategory category)
 	return "youth";
 }
 
-int ageing_change(const Lifespan& lifespan, Ability ability, int exceptionalStrength)
+int ageing_change(
+	const Lifespan& lifespan,
+	Ability ability,
+	int exceptionalStrength)
 {
 	// The body follows everything it has been through; the mind only what time has given it.
 	const int physical = lifespan.physical_age();
@@ -185,8 +188,10 @@ int ageing_change(const Lifespan& lifespan, Ability ability, int exceptionalStre
 	{
 		// Exceptional Strength is spent first: half instead of the point, then all of it and one point instead of two.
 		const bool isExceptional = exceptionalStrength > 0;
-		change -= body_reached(AgeCategory::MIDDLE_AGE) && !isExceptional ? 1 : 0;
-		change -= body_reached(AgeCategory::OLD_AGE) ? (isExceptional ? 1 : 2) : 0;
+		change -=
+			body_reached(AgeCategory::MIDDLE_AGE) && !isExceptional ? 1 : 0;
+		change -=
+			body_reached(AgeCategory::OLD_AGE) ? (isExceptional ? 1 : 2) : 0;
 		change -= body_reached(AgeCategory::VENERABLE) ? 1 : 0;
 		break;
 	}
@@ -226,7 +231,8 @@ int ageing_change(const Lifespan& lifespan, Ability ability, int exceptionalStre
 
 int aged_exceptional_strength(const Lifespan& lifespan, int exceptionalStrength)
 {
-	const AgeCategory band = age_category(lifespan.physical_age(), lifespan.race);
+	const AgeCategory band =
+		age_category(lifespan.physical_age(), lifespan.race);
 	if (band >= AgeCategory::OLD_AGE)
 	{
 		return 0;
@@ -244,8 +250,10 @@ Lifespan roll_lifespan(PlayerRaceState race, RandomDice& dice)
 	assert(row && "roll_lifespan: a character created with no race");
 
 	// The starting age first, then the hidden maximum, in Table 11's column order.
-	const int startingAge = row->startingBase + roll_dice(&dice, row->startingVariable);
-	const int maximumAge = row->maximumBase + roll_dice(&dice, row->maximumVariable);
+	const int startingAge =
+		row->startingBase + roll_dice(&dice, row->startingVariable);
+	const int maximumAge =
+		row->maximumBase + roll_dice(&dice, row->maximumVariable);
 	return Lifespan{ race, startingAge, maximumAge, 0, 0 };
 }
 

@@ -28,10 +28,12 @@ inline constexpr std::array<HandRequirement, 3> ALL_HAND_REQUIREMENT = {
 //
 // Example:
 //   next_hand_requirement(HandRequirement::ONE_HANDED);   // -> HandRequirement::TWO_HANDED
-[[nodiscard]] inline HandRequirement next_hand_requirement(HandRequirement value)
+[[nodiscard]] inline HandRequirement next_hand_requirement(
+	HandRequirement value)
 {
 	const auto found = std::ranges::find(ALL_HAND_REQUIREMENT, value);
-	if (found == ALL_HAND_REQUIREMENT.end() || found + 1 == ALL_HAND_REQUIREMENT.end())
+	if (found == ALL_HAND_REQUIREMENT.end() ||
+		found + 1 == ALL_HAND_REQUIREMENT.end())
 	{
 		return ALL_HAND_REQUIREMENT.front();
 	}
@@ -111,7 +113,8 @@ inline HandRequirement parse_hand_requirement(std::string_view name)
 		return HandRequirement::OFF_HAND_ONLY;
 	}
 
-	throw std::runtime_error(std::format("unknown hand_requirement '{}'", name));
+	throw std::runtime_error(
+		std::format("unknown hand_requirement '{}'", name));
 }
 
 inline std::string_view encode_weapon_size(WeaponSize weaponSize)

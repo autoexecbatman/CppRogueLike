@@ -38,10 +38,7 @@ constexpr Vector2D SAVED_DIRECTION{ 1, -1 };
 class ActorLoadTest : public ::testing::Test
 {
 protected:
-	void SetUp() override
-	{
-		ctx = mock.to_game_context();
-	}
+	void SetUp() override { ctx = mock.to_game_context(); }
 
 	// An item from the item data, saved through its own writer.
 	nlohmann::json saved_item(bool withState)
@@ -76,19 +73,22 @@ TEST_F(ActorLoadTest, ARoundTripKeepsPositionDirectionAndStates)
 
 	EXPECT_EQ(loaded->position, SAVED_POSITION);
 	EXPECT_EQ(loaded->direction, SAVED_DIRECTION);
-	EXPECT_TRUE(loaded->has_state(ActorState::BLOCKS)) << "the saved state was lost";
+	EXPECT_TRUE(loaded->has_state(ActorState::BLOCKS))
+		<< "the saved state was lost";
 }
 
 TEST_F(ActorLoadTest, AnActorWithNoStatesRoundTripsWithNone)
 {
 	const nlohmann::json record = saved_item(false);
-	ASSERT_TRUE(record.at("states").is_null()) << "the writer no longer saves an empty state list as null, so this pin pins nothing";
+	ASSERT_TRUE(record.at("states").is_null())
+		<< "the writer no longer saves an empty state list as null, so this pin pins nothing";
 	auto loaded = blank_item();
 	loaded->add_state(ActorState::BLOCKS);
 
 	loaded->load(record);
 
-	EXPECT_TRUE(loaded->states.empty()) << "an actor saved with no states loaded with some";
+	EXPECT_TRUE(loaded->states.empty())
+		<< "an actor saved with no states loaded with some";
 }
 
 TEST_F(ActorLoadTest, APositionWithoutItsXIsRefused)
@@ -97,7 +97,8 @@ TEST_F(ActorLoadTest, APositionWithoutItsXIsRefused)
 	record.at("position").erase("x");
 	auto loaded = blank_item();
 
-	EXPECT_THROW(loaded->load(record), std::exception) << "a position without x loaded";
+	EXPECT_THROW(loaded->load(record), std::exception)
+		<< "a position without x loaded";
 }
 
 TEST_F(ActorLoadTest, ADirectionWithoutItsYIsRefused)
@@ -106,11 +107,14 @@ TEST_F(ActorLoadTest, ADirectionWithoutItsYIsRefused)
 	record.at("direction").erase("y");
 	auto loaded = blank_item();
 
-	EXPECT_THROW(loaded->load(record), std::exception) << "a direction without y loaded";
+	EXPECT_THROW(loaded->load(record), std::exception)
+		<< "a direction without y loaded";
 }
 
 // The same item, once per key Actor::save always writes.
-class ActorLoadKeyTest : public ActorLoadTest, public ::testing::WithParamInterface<std::string_view>
+class ActorLoadKeyTest :
+	public ActorLoadTest,
+	public ::testing::WithParamInterface<std::string_view>
 {
 };
 
@@ -118,15 +122,19 @@ TEST_P(ActorLoadKeyTest, ARecordMissingTheKeyIsRefused)
 {
 	const std::string key{ GetParam() };
 	nlohmann::json record = saved_item(true);
-	ASSERT_TRUE(record.contains(key)) << std::format("the writer did not write \"{}\", so erasing it proves nothing", key);
+	ASSERT_TRUE(record.contains(key)) << std::format(
+		"the writer did not write \"{}\", so erasing it proves nothing",
+		key);
 	record.erase(key);
 	auto loaded = blank_item();
 
-	EXPECT_THROW(loaded->load(record), std::exception) << "a record without \"" << key << "\" loaded";
+	EXPECT_THROW(loaded->load(record), std::exception)
+		<< "a record without \"" << key << "\" loaded";
 }
 
 // Each case is named for its key, so a failure says which one without reading the output.
-const auto name_for_actor_key = [](const ::testing::TestParamInfo<std::string_view>& info)
+const auto name_for_actor_key =
+	[](const ::testing::TestParamInfo<std::string_view>& info)
 {
 	return std::string{ info.param };
 };

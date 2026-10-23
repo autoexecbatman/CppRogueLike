@@ -27,7 +27,8 @@ public:
 	// Forgets an item's sprite, for when the item itself is removed. Throws
 	// std::out_of_range for a key holding no sprite.
 	void remove_tile(std::string_view key);
-	[[nodiscard]] const std::unordered_map<std::string, TileRef>& all_tiles() const;
+	[[nodiscard]] const std::unordered_map<std::string, TileRef>& all_tiles()
+		const;
 };
 
 // end of file: ContentRegistry.h

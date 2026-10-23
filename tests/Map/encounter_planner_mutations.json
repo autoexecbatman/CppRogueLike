@@ -21,8 +21,8 @@
     },
     {
       "file": "src/EncounterPlanner.cpp",
-      "original": "\t\treturn static_cast<int>(dungeonLevel * BASE_XP_PER_LEVEL * DANGER_MULTIPLIER);\n",
-      "mutated": "\t\treturn static_cast<int>(dungeonLevel * BASE_XP_PER_LEVEL * STANDARD_MULTIPLIER);\n",
+      "original": "\t\treturn static_cast<int>(\n\t\t\tdungeonLevel * BASE_XP_PER_LEVEL * DANGER_MULTIPLIER);\n",
+      "mutated": "\t\treturn static_cast<int>(\n\t\t\tdungeonLevel * BASE_XP_PER_LEVEL *STANDARD_MULTIPLIER);\n",
       "catches": "a danger room worth no more than an ordinary one"
     },
     {

@@ -34,7 +34,8 @@ bool offers(const std::vector<std::string>& labels, const std::string& wanted)
 
 TEST(InventoryContextActionsTest, ABackpackItemCanBeUsedOrDropped)
 {
-	const auto labels = InventoryActions::labels_for_row(InventoryScreen::BACKPACK, true);
+	const auto labels =
+		InventoryActions::labels_for_row(InventoryScreen::BACKPACK, true);
 
 	EXPECT_TRUE(offers(labels, "Use"));
 	EXPECT_TRUE(offers(labels, "Drop"));
@@ -42,19 +43,23 @@ TEST(InventoryContextActionsTest, ABackpackItemCanBeUsedOrDropped)
 
 TEST(InventoryContextActionsTest, AWornItemCanBeTakenOffOrDropped)
 {
-	const auto labels = InventoryActions::labels_for_row(InventoryScreen::EQUIPMENT, true);
+	const auto labels =
+		InventoryActions::labels_for_row(InventoryScreen::EQUIPMENT, true);
 
 	EXPECT_TRUE(offers(labels, "Unequip"));
 	EXPECT_TRUE(offers(labels, "Drop"));
-	EXPECT_FALSE(offers(labels, "Use")) << "a worn item was offered Use, which equips it again";
+	EXPECT_FALSE(offers(labels, "Use"))
+		<< "a worn item was offered Use, which equips it again";
 }
 
 TEST(InventoryContextActionsTest, AnEmptySlotOffersToBrowseWhatFitsIt)
 {
-	const auto labels = InventoryActions::labels_for_row(InventoryScreen::EQUIPMENT, false);
+	const auto labels =
+		InventoryActions::labels_for_row(InventoryScreen::EQUIPMENT, false);
 
 	EXPECT_TRUE(offers(labels, "Browse"));
-	EXPECT_FALSE(offers(labels, "Drop")) << "an empty slot offered to drop what it does not hold";
+	EXPECT_FALSE(offers(labels, "Drop"))
+		<< "an empty slot offered to drop what it does not hold";
 	EXPECT_FALSE(offers(labels, "Unequip"));
 }
 
@@ -62,26 +67,33 @@ TEST(InventoryContextActionsTest, ARowHoldingNothingOffersNothingAtAll)
 {
 	// A category heading in the backpack list. The map's context menu skips opening when
 	// there is nothing actionable, and this follows it: empty means no menu.
-	EXPECT_TRUE(InventoryActions::labels_for_row(InventoryScreen::BACKPACK, false).empty());
-	EXPECT_TRUE(InventoryActions::labels_for_row(InventoryScreen::USABLES, false).empty());
+	EXPECT_TRUE(
+		InventoryActions::labels_for_row(InventoryScreen::BACKPACK, false)
+			.empty());
+	EXPECT_TRUE(
+		InventoryActions::labels_for_row(InventoryScreen::USABLES, false)
+			.empty());
 }
 
 TEST(InventoryContextActionsTest, EveryMenuOfferedCanBeDismissed)
 {
 	// Without Cancel the only way out of an opened menu is ESC, which a player who
 	// reached it with the mouse has no reason to look for.
-	for (const auto screen : {
-			 InventoryScreen::EQUIPMENT,
-			 InventoryScreen::BACKPACK,
-			 InventoryScreen::USABLES,
-		 })
+	for (
+		const auto screen : {
+			InventoryScreen::EQUIPMENT,
+			InventoryScreen::BACKPACK,
+			InventoryScreen::USABLES,
+		})
 	{
 		for (const bool holdsItem : { true, false })
 		{
-			const auto labels = InventoryActions::labels_for_row(screen, holdsItem);
+			const auto labels =
+				InventoryActions::labels_for_row(screen, holdsItem);
 			if (!labels.empty())
 			{
-				EXPECT_EQ(labels.back(), "Cancel") << "a menu was offered with no way to dismiss it";
+				EXPECT_EQ(labels.back(), "Cancel")
+					<< "a menu was offered with no way to dismiss it";
 			}
 		}
 	}

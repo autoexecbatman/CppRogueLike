@@ -27,8 +27,8 @@
     },
     {
       "file": "src/CreatureManager.cpp",
-      "original": "\t\t\tcreature->set_next_action_time(creature->get_next_action_time() + cost);",
-      "mutated": "\t\t\tcreature->set_next_action_time(creature->get_next_action_time());",
+      "original": "\t\t\tcreature->set_next_action_time(\n\t\t\t\tcreature->get_next_action_time() + cost);",
+      "mutated": "\t\t\tcreature->set_next_action_time(\n\t\t\t\tcreature->get_next_action_time());",
       "catches": "a creature never advancing on the clock, so it stays due and acts every window for the rest of the game"
     },
     {

@@ -29,7 +29,10 @@ protected:
 
 	std::unique_ptr<ShopKeeper> create_test_shop()
 	{
-		auto shop = std::make_unique<ShopKeeper>(ShopType::WEAPON_SHOP, ShopQuality::GOOD, game.dice);
+		auto shop = std::make_unique<ShopKeeper>(
+			ShopType::WEAPON_SHOP,
+			ShopQuality::GOOD,
+			game.dice);
 		shop->generate_initial_inventory(1, ctx);
 		return shop;
 	}
@@ -37,7 +40,10 @@ protected:
 
 TEST_F(ShopKeeperSerializationTest, BasicFields_SaveLoad_RoundTrip)
 {
-	ShopKeeper original(ShopType::ARMOR_SHOP, ShopQuality::EXCELLENT, game.dice);
+	ShopKeeper original(
+		ShopType::ARMOR_SHOP,
+		ShopQuality::EXCELLENT,
+		game.dice);
 
 	json j;
 	original.save(j);
@@ -92,7 +98,8 @@ TEST_F(ShopKeeperSerializationTest, AllShopTypes_SaveLoad)
 
 		auto loaded = ShopKeeper::create(j);
 
-		ASSERT_NE(loaded, nullptr) << "Failed to load shop type " << static_cast<int>(type);
+		ASSERT_NE(loaded, nullptr)
+			<< "Failed to load shop type " << static_cast<int>(type);
 		EXPECT_EQ(loaded->get_shop_type(), type);
 	}
 }
@@ -116,7 +123,8 @@ TEST_F(ShopKeeperSerializationTest, AllQualities_SaveLoad)
 
 		auto loaded = ShopKeeper::create(j);
 
-		ASSERT_NE(loaded, nullptr) << "Failed to load shop quality " << static_cast<int>(quality);
+		ASSERT_NE(loaded, nullptr)
+			<< "Failed to load shop quality " << static_cast<int>(quality);
 		EXPECT_EQ(loaded->get_shop_quality(), quality);
 	}
 }
@@ -138,7 +146,10 @@ TEST_F(ShopKeeperSerializationTest, EmptyInventory_HandledGracefully)
 
 TEST_F(ShopKeeperSerializationTest, CustomPricing_Preserved)
 {
-	ShopKeeper original(ShopType::GENERAL_STORE, ShopQuality::AVERAGE, game.dice);
+	ShopKeeper original(
+		ShopType::GENERAL_STORE,
+		ShopQuality::AVERAGE,
+		game.dice);
 	original.set_markup_percent(200);
 	original.set_sellback_percent(30);
 
@@ -159,8 +170,10 @@ TEST_F(ShopKeeperSerializationTest, AShopRecordWithoutItsShelvesIsRefused)
 	auto original = create_test_shop();
 	json saved;
 	original->save(saved);
-	ASSERT_TRUE(saved.contains("shop_inventory")) << "the saver no longer writes the shelves";
+	ASSERT_TRUE(saved.contains("shop_inventory"))
+		<< "the saver no longer writes the shelves";
 
 	saved.erase("shop_inventory");
-	EXPECT_ANY_THROW(ShopKeeper::create(saved)) << "a shop with no shelves loaded quietly";
+	EXPECT_ANY_THROW(ShopKeeper::create(saved))
+		<< "a shop with no shelves loaded quietly";
 }

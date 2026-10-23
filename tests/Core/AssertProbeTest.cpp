@@ -103,7 +103,8 @@ protected:
 		// Said out loud rather than passed silently: with the assertions
 		// compiled out there is nothing here to fire, and a green run would
 		// claim otherwise.
-		GTEST_SKIP() << "assertions are compiled out under NDEBUG; these probes can prove nothing in this build";
+		GTEST_SKIP()
+			<< "assertions are compiled out under NDEBUG; these probes can prove nothing in this build";
 #endif
 		// The mock loads content, so a probe dies on the invariant it names rather
 		// than on a missing file, which aborts with the wrong message.
@@ -112,16 +113,20 @@ protected:
 
 	static std::unique_ptr<Creature> make_creature()
 	{
-		return std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK });
+		return std::make_unique<Creature>(
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK });
 	}
 
 	static std::unique_ptr<Item> make_item(std::string_view name)
 	{
-		return std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{
-															TileRef{},
-															std::string(name),
-															ColorPairId::WHITE_BLACK,
-														});
+		return std::make_unique<Item>(
+			Vector2D{ 0, 0 },
+			ActorData{
+				TileRef{},
+				std::string(name),
+				ColorPairId::WHITE_BLACK,
+			});
 	}
 
 	// The goblin carries a short sword, so this one call reaches both of
@@ -130,7 +135,10 @@ protected:
 	void build_a_goblin()
 	{
 		[[maybe_unused]] const std::unique_ptr<Creature> built =
-			MonsterCreator::create_from_params(Vector2D{ 0, 0 }, mock.monsterRegistry.get_params("goblin"), ctx);
+			MonsterCreator::create_from_params(
+				Vector2D{ 0, 0 },
+				mock.monsterRegistry.get_params("goblin"),
+				ctx);
 	}
 };
 
@@ -141,7 +149,9 @@ TEST_F(AssertProbeDeathTest, WearingNothingAborts)
 	std::unique_ptr<Creature> creature = make_creature();
 	creature->set_body_plan({ EquipmentSlot::RIGHT_HAND });
 
-	EXPECT_DEATH(creature->wear(nullptr, EquipmentSlot::RIGHT_HAND), "wear called with no item");
+	EXPECT_DEATH(
+		creature->wear(nullptr, EquipmentSlot::RIGHT_HAND),
+		"wear called with no item");
 }
 
 // Every caller of the weapon damage table guards on is_weapon() first, and a test
@@ -150,9 +160,13 @@ TEST_F(AssertProbeDeathTest, WearingNothingAborts)
 // back to is what a Release build should still draw rather than crash on; the
 // assertion is what stops a Debug build from drawing a longsword as a fist and
 // saying nothing.
-TEST_F(AssertProbeDeathTest, AskingTheWeaponTableForSomethingThatIsNotAWeaponAborts)
+TEST_F(
+	AssertProbeDeathTest,
+	AskingTheWeaponTableForSomethingThatIsNotAWeaponAborts)
 {
-	EXPECT_DEATH(WeaponDamageRegistry::get_damage_info("health_potion"), "no damage of its own");
+	EXPECT_DEATH(
+		WeaponDamageRegistry::get_damage_info("health_potion"),
+		"no damage of its own");
 }
 
 // A body plan is the set of slots a creature has at all. Wearing into one it
@@ -162,7 +176,9 @@ TEST_F(AssertProbeDeathTest, WearingIntoASlotTheBodyLacksAborts)
 	std::unique_ptr<Creature> creature = make_creature();
 	creature->set_body_plan({ EquipmentSlot::RIGHT_HAND });
 
-	EXPECT_DEATH(creature->wear(make_item("chain mail"), EquipmentSlot::BODY), "a slot this body does not have");
+	EXPECT_DEATH(
+		creature->wear(make_item("chain mail"), EquipmentSlot::BODY),
+		"a slot this body does not have");
 }
 
 // Hit dice are rolled from dice with a floor above zero, so a roll at or below
@@ -184,12 +200,16 @@ TEST_F(AssertProbeDeathTest, AttackingWithNoStrengthAborts)
 {
 	std::unique_ptr<Creature> attacker = make_creature();
 	attacker->healthPool = std::make_unique<HealthPool>(10);
-	attacker->attacker = std::make_unique<MonsterAttacker>(*attacker, DamageInfo{ "1d4", DamageType::PHYSICAL });
+	attacker->attacker = std::make_unique<MonsterAttacker>(
+		*attacker,
+		DamageInfo{ "1d4", DamageType::PHYSICAL });
 
 	std::unique_ptr<Creature> target = make_creature();
 	target->healthPool = std::make_unique<HealthPool>(10);
 
-	EXPECT_DEATH(attacker->attacker->attack(*target, AttackKind::MELEE, ctx), "attacked with no Strength");
+	EXPECT_DEATH(
+		attacker->attacker->attack(*target, AttackKind::MELEE, ctx),
+		"attacked with no Strength");
 }
 
 // The pack owns every entry it holds, and dying dereferences each one to drop it.
@@ -210,7 +230,9 @@ TEST_F(AssertProbeDeathTest, DroppingAPackHoldingNothingAborts)
 	creature->experienceReward = std::make_unique<ExperienceReward>(5);
 	creature->inventoryData.items.push_back(nullptr);
 
-	EXPECT_DEATH(creature->die(ctx), "a pack holds nothing where an item should be");
+	EXPECT_DEATH(
+		creature->die(ctx),
+		"a pack holds nothing where an item should be");
 }
 
 // Fire and cold are resisted per die before they land, so a plain total of
@@ -221,7 +243,9 @@ TEST_F(AssertProbeDeathTest, TakingFireAsAPlainTotalAborts)
 	std::unique_ptr<Creature> creature = make_creature();
 	creature->set_hit_dice(10);
 
-	EXPECT_DEATH(creature->take_damage_and_check_death(5, ctx, DamageType::FIRE), "arrive as ResistedDamage");
+	EXPECT_DEATH(
+		creature->take_damage_and_check_death(5, ctx, DamageType::FIRE),
+		"arrive as ResistedDamage");
 }
 
 // Floating text is always wired in a running game, so a context without it is a fault and
@@ -232,7 +256,9 @@ TEST_F(AssertProbeDeathTest, TakingDamageWithNoFloatingTextAborts)
 	creature->set_hit_dice(10);
 	ctx.floatingText = nullptr;
 
-	EXPECT_DEATH(creature->take_damage_and_check_death(2, ctx, DamageType::PHYSICAL), "with no floating text");
+	EXPECT_DEATH(
+		creature->take_damage_and_check_death(2, ctx, DamageType::PHYSICAL),
+		"with no floating text");
 }
 
 // Every monster's body comes from the registry. Without one it would be built
@@ -241,7 +267,9 @@ TEST_F(AssertProbeDeathTest, BuildingAMonsterWithNoBodyPlanRegistryAborts)
 {
 	ctx.bodyPlanRegistry = nullptr;
 
-	EXPECT_DEATH(build_a_goblin(), "create_from_params called without a bodyPlanRegistry");
+	EXPECT_DEATH(
+		build_a_goblin(),
+		"create_from_params called without a bodyPlanRegistry");
 }
 
 // What a monster carries is a real item, made through the same registry the
@@ -250,7 +278,9 @@ TEST_F(AssertProbeDeathTest, BuildingAMonsterWithNoContentRegistryAborts)
 {
 	ctx.contentRegistry = nullptr;
 
-	EXPECT_DEATH(build_a_goblin(), "create_from_params called without a contentRegistry");
+	EXPECT_DEATH(
+		build_a_goblin(),
+		"create_from_params called without a contentRegistry");
 }
 
 // A shopkeeper's shop is chosen for the level it stands on, so one built with no level
@@ -261,7 +291,9 @@ TEST_F(AssertProbeDeathTest, AShopkeeperBuiltWithNoLevelManagerAborts)
 	const std::unique_ptr<Ai> ai = Ai::make(AiType::SHOPKEEPER);
 	ctx.levelManager = nullptr;
 
-	EXPECT_DEATH(ai->on_created(*shopkeeper, ctx), "AiShopkeeper::on_created: called without a levelManager");
+	EXPECT_DEATH(
+		ai->on_created(*shopkeeper, ctx),
+		"AiShopkeeper::on_created: called without a levelManager");
 }
 
 // Death pays experience to the player, so a context holding no player has
@@ -282,7 +314,14 @@ TEST_F(AssertProbeDeathTest, CastingWithoutACallbackAborts)
 {
 	std::unique_ptr<Creature> caster = make_creature();
 
-	EXPECT_DEATH(SpellSystem::cast_spell_by_key("sleep", *caster, SpellSource::MEMORIZED, {}, ctx), "cast_spell_by_key requires a callback");
+	EXPECT_DEATH(
+		SpellSystem::cast_spell_by_key(
+			"sleep",
+			*caster,
+			SpellSource::MEMORIZED,
+			{},
+			ctx),
+		"cast_spell_by_key requires a callback");
 }
 
 // Regeneration counts rounds that have run, from 1. Round 0 is divisible by every
@@ -291,7 +330,9 @@ TEST_F(AssertProbeDeathTest, RegeneratingBeforeARoundHasRunAborts)
 {
 	std::unique_ptr<Creature> creature = make_creature();
 
-	EXPECT_DEATH(creature->regenerate_from_constitution(0, mock.data_manager), "called before a round has run");
+	EXPECT_DEATH(
+		creature->regenerate_from_constitution(0, mock.data_manager),
+		"called before a round has run");
 }
 
 // A ring of regeneration counts rounds the same way, and round 0 would heal every wearer.
@@ -299,7 +340,9 @@ TEST_F(AssertProbeDeathTest, RegeneratingFromARingBeforeARoundHasRunAborts)
 {
 	std::unique_ptr<Creature> creature = make_creature();
 
-	EXPECT_DEATH(creature->regenerate_from_ring(0), "regenerate_from_ring called before a round has run");
+	EXPECT_DEATH(
+		creature->regenerate_from_ring(0),
+		"regenerate_from_ring called before a round has run");
 }
 
 // Fire and acid damage is part of the damage taken, so it can never exceed it. A pool
@@ -309,7 +352,9 @@ TEST_F(AssertProbeDeathTest, RegeneratingWithMoreFireAndAcidThanDamageAborts)
 	HealthPool pool{ 20 };
 	pool.set_unregenerable_damage(5);
 
-	EXPECT_DEATH([[maybe_unused]] const int healed = pool.regenerate(1), "more fire and acid damage than damage");
+	EXPECT_DEATH(
+		[[maybe_unused]] const int healed = pool.regenerate(1),
+		"more fire and acid damage than damage");
 }
 
 // Turning walks the whole creature list looking for undead, and the list owns
@@ -326,7 +371,9 @@ TEST_F(AssertProbeDeathTest, TurningWithANullInTheCreatureListAborts)
 	creatures.push_back(nullptr);
 	ctx.creatures = &creatures;
 
-	EXPECT_DEATH([[maybe_unused]] const TurnUndeadReport report = turn_undead(*priest, ctx),
+	EXPECT_DEATH(
+		[[maybe_unused]] const TurnUndeadReport report =
+			turn_undead(*priest, ctx),
 		"turn_undead: creatures list holds a null entry");
 }
 
@@ -343,7 +390,13 @@ TEST_F(AssertProbeDeathTest, SleepingWithANullInTheCreatureListAborts)
 	creatures.push_back(nullptr);
 	ctx.creatures = &creatures;
 
-	EXPECT_DEATH(SpellSystem::cast_spell_by_key("sleep", *caster, SpellSource::MEMORIZED, ignoreCompletion, ctx),
+	EXPECT_DEATH(
+		SpellSystem::cast_spell_by_key(
+			"sleep",
+			*caster,
+			SpellSource::MEMORIZED,
+			ignoreCompletion,
+			ctx),
 		"cast_sleep: creatures list holds a null entry");
 }
 
@@ -364,7 +417,9 @@ TEST_F(AssertProbeDeathTest, LoadingAPlayerRecordMissingItsHealthPoolAborts)
 
 	Player loaded{ Vector2D{ 1, 1 } };
 
-	EXPECT_DEATH(loaded.load(record), "Player::load finished with a player the game cannot run");
+	EXPECT_DEATH(
+		loaded.load(record),
+		"Player::load finished with a player the game cannot run");
 }
 
 // Fireball walks every creature on the level to find what the burst touches. The
@@ -376,7 +431,9 @@ TEST_F(AssertProbeDeathTest, BurstingAFireballWithANullInTheCreatureListAborts)
 	creatures.push_back(nullptr);
 	ctx.creatures = &creatures;
 
-	EXPECT_DEATH([[maybe_unused]] const auto burst = SpellSystem::burst_fireball(Vector2D{ 5, 5 }, 3, 2, ctx),
+	EXPECT_DEATH(
+		[[maybe_unused]] const auto burst =
+			SpellSystem::burst_fireball(Vector2D{ 5, 5 }, 3, 2, ctx),
 		"burst_fireball: creatures list holds a null entry");
 }
 
@@ -386,12 +443,16 @@ TEST_F(AssertProbeDeathTest, BurstingAFireballWithNoPlayerAborts)
 	std::vector<std::unique_ptr<Creature>> creatures{};
 	ctx.creatures = &creatures;
 
-	EXPECT_DEATH([[maybe_unused]] const auto burst = SpellSystem::burst_fireball(Vector2D{ 5, 5 }, 3, 2, ctx),
+	EXPECT_DEATH(
+		[[maybe_unused]] const auto burst =
+			SpellSystem::burst_fireball(Vector2D{ 5, 5 }, 3, 2, ctx),
 		"burst_fireball: called without a player");
 }
 
 // Magic missile gathers its targets from the whole list before it fires any.
-TEST_F(AssertProbeDeathTest, CastingMagicMissileWithANullInTheCreatureListAborts)
+TEST_F(
+	AssertProbeDeathTest,
+	CastingMagicMissileWithANullInTheCreatureListAborts)
 {
 	std::unique_ptr<Creature> caster = make_creature();
 
@@ -402,7 +463,13 @@ TEST_F(AssertProbeDeathTest, CastingMagicMissileWithANullInTheCreatureListAborts
 	const auto ignoreCompletion = [](GameContext& completedCtx) {
 	};
 
-	EXPECT_DEATH(SpellSystem::cast_spell_by_key("magic_missile", *caster, SpellSource::MEMORIZED, ignoreCompletion, ctx),
+	EXPECT_DEATH(
+		SpellSystem::cast_spell_by_key(
+			"magic_missile",
+			*caster,
+			SpellSource::MEMORIZED,
+			ignoreCompletion,
+			ctx),
 		"cast_magic_missile: creatures list holds a null entry");
 }
 
@@ -418,7 +485,13 @@ TEST_F(AssertProbeDeathTest, CastingHoldPersonWithANullInTheCreatureListAborts)
 	const auto ignoreCompletion = [](GameContext& completedCtx) {
 	};
 
-	EXPECT_DEATH(SpellSystem::cast_spell_by_key("hold_person", *caster, SpellSource::MEMORIZED, ignoreCompletion, ctx),
+	EXPECT_DEATH(
+		SpellSystem::cast_spell_by_key(
+			"hold_person",
+			*caster,
+			SpellSource::MEMORIZED,
+			ignoreCompletion,
+			ctx),
 		"cast_hold_person: creatures list holds a null entry");
 }
 
@@ -433,7 +506,8 @@ TEST_F(AssertProbeDeathTest, SavingAnInventoryHoldingANullAborts)
 
 	nlohmann::json record;
 
-	EXPECT_DEATH(InventoryOperations::save_inventory(pack, record),
+	EXPECT_DEATH(
+		InventoryOperations::save_inventory(pack, record),
 		"save_inventory: inventory holds a null where an item should be");
 }
 
@@ -448,7 +522,9 @@ TEST_F(AssertProbeDeathTest, IdentifyingAPackHoldingANullAborts)
 	std::unique_ptr<Item> scrollItem = make_item("identify scroll");
 	IdentifyScroll behavior{};
 
-	EXPECT_DEATH([[maybe_unused]] const bool spent = use(behavior, *scrollItem, *wearer, ctx),
+	EXPECT_DEATH(
+		[[maybe_unused]] const bool spent =
+			use(behavior, *scrollItem, *wearer, ctx),
 		"identify scroll: the pack holds a null where an item should be");
 }
 
@@ -463,7 +539,9 @@ TEST_F(AssertProbeDeathTest, FindingADecorationWithANullInTheListAborts)
 	decorations.push_back(nullptr);
 	ctx.decorations = &decorations;
 
-	EXPECT_DEATH([[maybe_unused]] const Decoration* found = map.find_decoration_at(Vector2D{ 1, 1 }, ctx),
+	EXPECT_DEATH(
+		[[maybe_unused]] const Decoration* found =
+			map.find_decoration_at(Vector2D{ 1, 1 }, ctx),
 		"find_decoration_at: the decoration list holds a null entry");
 }
 
@@ -474,7 +552,9 @@ TEST_F(AssertProbeDeathTest, FindingADecorationWithNoListAborts)
 	Map map{ 20, 20 };
 	ctx.decorations = nullptr;
 
-	EXPECT_DEATH([[maybe_unused]] const Decoration* found = map.find_decoration_at(Vector2D{ 1, 1 }, ctx),
+	EXPECT_DEATH(
+		[[maybe_unused]] const Decoration* found =
+			map.find_decoration_at(Vector2D{ 1, 1 }, ctx),
 		"find_decoration_at: called without decorations");
 }
 
@@ -485,7 +565,8 @@ TEST_F(AssertProbeDeathTest, FindingADecorationWithNoListAborts)
 TEST_F(AssertProbeDeathTest, AnEquipmentEntryBuiltWithNoItemAborts)
 {
 	// Parenthesised whole: the brace list holds a comma, and EXPECT_DEATH is a macro.
-	EXPECT_DEATH((EquippedItem{ nullptr, EquipmentSlot::RIGHT_HAND }),
+	EXPECT_DEATH(
+		(EquippedItem{ nullptr, EquipmentSlot::RIGHT_HAND }),
 		"an equipment slot is built around the item in it");
 }
 
@@ -504,7 +585,8 @@ TEST_F(AssertProbeDeathTest, RestingWithANullInTheCreatureListAborts)
 	creatures.push_back(nullptr);
 	ctx.creatures = &creatures;
 
-	EXPECT_DEATH([[maybe_unused]] const bool rested = player->rest(ctx),
+	EXPECT_DEATH(
+		[[maybe_unused]] const bool rested = player->rest(ctx),
 		"Player::rest: creatures list holds a null entry");
 }
 
@@ -523,7 +605,9 @@ TEST_F(AssertProbeDeathTest, AcquiringATargetWithANullInTheCreatureListAborts)
 
 	const TargetingSystem targeting{};
 
-	EXPECT_DEATH([[maybe_unused]] const TargetResult result = targeting.acquire_nearest(ctx, *attacker, 10),
+	EXPECT_DEATH(
+		[[maybe_unused]] const TargetResult result =
+			targeting.acquire_nearest(ctx, *attacker, 10),
 		"target_auto_nearest: creatures list holds a null entry");
 }
 
@@ -559,7 +643,9 @@ TEST_F(AssertProbeDeathTest, AMimicBuiltWithNoItemRegistryAborts)
 	const std::unique_ptr<Ai> ai = Ai::make(AiType::MIMIC);
 	ctx.itemRegistry = nullptr;
 
-	EXPECT_DEATH(ai->on_created(*mimic, ctx), "AiMimic::on_created: called without an itemRegistry");
+	EXPECT_DEATH(
+		ai->on_created(*mimic, ctx),
+		"AiMimic::on_created: called without an itemRegistry");
 }
 
 // The floor list owns every item lying in the dungeon, so a null in it is a fault. A step
@@ -577,7 +663,9 @@ TEST_F(AssertProbeDeathTest, SteppingOntoAFloorHoldingANullAborts)
 	ctx.inputSystem->poll();
 	ctx.inputHandler->key_listen(*ctx.inputSystem);
 
-	EXPECT_DEATH(ctx.player_concrete().controller->update(ctx), "look_on_floor: the floor holds a null");
+	EXPECT_DEATH(
+		ctx.player_concrete().controller->update(ctx),
+		"look_on_floor: the floor holds a null");
 }
 
 // A door is locked only on a room's wall ring, by the treasure room's pass, so a locked
@@ -586,14 +674,18 @@ TEST_F(AssertProbeDeathTest, OpeningARoomWithALockedDoorOnItsFloorAborts)
 {
 	MapWithProbeDoors map{ 20, 20 };
 	map.init_tiles();
-	std::vector<DungeonRoom> rooms{ DungeonRoom{ .col = 2, .row = 2, .width = 5, .height = 4 } };
+	std::vector<DungeonRoom> rooms{
+		DungeonRoom{ .col = 2, .row = 2, .width = 5, .height = 4 }
+	};
 	// Inside the room's floor, which runs over columns 2-6 and rows 2-5.
 	map.set_door(Vector2D{ 4, 3 });
 	ASSERT_TRUE(map.lock_door(Vector2D{ 4, 3 }));
 	ctx.rooms = &rooms;
 
 	// From a door on the room's top wall, so the room is found and its ring scanned.
-	EXPECT_DEATH(map.open_all_room_doors(Vector2D{ 4, 1 }, ctx), "a locked door inside a room's floor");
+	EXPECT_DEATH(
+		map.open_all_room_doors(Vector2D{ 4, 1 }, ctx),
+		"a locked door inside a room's floor");
 }
 
 // Forcing is refused before a roll once a door has resisted, and only a locked door is
@@ -604,7 +696,9 @@ TEST_F(AssertProbeDeathTest, MarkingAnUnlockedDoorAsResistedAborts)
 	map.init_tiles();
 	map.set_door(Vector2D{ 4, 3 });
 
-	EXPECT_DEATH(map.mark_resisted_forcing(Vector2D{ 4, 3 }), "the door is not locked, or has already resisted");
+	EXPECT_DEATH(
+		map.mark_resisted_forcing(Vector2D{ 4, 3 }),
+		"the door is not locked, or has already resisted");
 }
 
 // Only a locked door is picked, so recording a failed pick on an unlocked one is a
@@ -615,7 +709,9 @@ TEST_F(AssertProbeDeathTest, MarkingAFailedPickOnAnUnlockedDoorAborts)
 	map.init_tiles();
 	map.set_door(Vector2D{ 4, 3 });
 
-	EXPECT_DEATH(map.mark_lock_pick_failed(Vector2D{ 4, 3 }, 1), "Map::mark_lock_pick_failed: the door is not locked");
+	EXPECT_DEATH(
+		map.mark_lock_pick_failed(Vector2D{ 4, 3 }, 1),
+		"Map::mark_lock_pick_failed: the door is not locked");
 }
 
 // A pick is refused until the level is higher than the one it failed at, so a failure
@@ -628,7 +724,9 @@ TEST_F(AssertProbeDeathTest, MarkingAFailedPickAtALevelNotHigherAborts)
 	ASSERT_TRUE(map.lock_door(Vector2D{ 4, 3 }));
 	map.mark_lock_pick_failed(Vector2D{ 4, 3 }, 2);
 
-	EXPECT_DEATH(map.mark_lock_pick_failed(Vector2D{ 4, 3 }, 2), "the level is not higher than the one recorded");
+	EXPECT_DEATH(
+		map.mark_lock_pick_failed(Vector2D{ 4, 3 }, 2),
+		"the level is not higher than the one recorded");
 }
 
 // Every way into the sell menu comes from a shopkeeper, so a creature with no shop is a
@@ -636,7 +734,8 @@ TEST_F(AssertProbeDeathTest, MarkingAFailedPickAtALevelNotHigherAborts)
 // probe opens a hidden renderer first; where none can open, it skips with the reason.
 TEST_F(AssertProbeDeathTest, OpeningTheSellMenuOnACreatureWithNoShopAborts)
 {
-	if (exit_code_in_child(&open_and_close_hidden_renderer) == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
+	if (exit_code_in_child(&open_and_close_hidden_renderer) ==
+		HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
@@ -649,14 +748,17 @@ TEST_F(AssertProbeDeathTest, OpeningTheSellMenuOnACreatureWithNoShopAborts)
 		auto shopless = make_creature();
 		MenuSell menu{ *shopless, seller, ctx };
 	};
-	EXPECT_DEATH(open_the_menu_on_a_creature_with_no_shop(), "MenuSell opened on a creature with no shop");
+	EXPECT_DEATH(
+		open_the_menu_on_a_creature_with_no_shop(),
+		"MenuSell opened on a creature with no shop");
 }
 
 // Game::tick opens the one frame of a tick, so a second open is a menu or a view that
 // still frames itself. The first open needs a window, so the probe opens a hidden one.
 TEST_F(AssertProbeDeathTest, OpeningAFrameInsideAnOpenFrameAborts)
 {
-	if (exit_code_in_child(&open_and_close_hidden_renderer) == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
+	if (exit_code_in_child(&open_and_close_hidden_renderer) ==
+		HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
@@ -667,7 +769,9 @@ TEST_F(AssertProbeDeathTest, OpeningAFrameInsideAnOpenFrameAborts)
 		hidden.renderer.begin_frame();
 		hidden.renderer.begin_frame();
 	};
-	EXPECT_DEATH(open_the_frame_twice(), "begin_frame: a frame is already open");
+	EXPECT_DEATH(
+		open_the_frame_twice(),
+		"begin_frame: a frame is already open");
 }
 
 // A close with no frame open is a second close in one tick, or a close by something
@@ -684,24 +788,32 @@ TEST_F(AssertProbeDeathTest, ALostRunWithALivingPlayerAborts)
 {
 	mock.player = std::make_unique<Player>(Vector2D{ 4, 5 });
 	mock.player->healthPool = std::make_unique<HealthPool>(10);
-	ASSERT_FALSE(ctx.player()->is_dead()) << "the mock's player starts dead, so nothing here is being measured";
+	ASSERT_FALSE(ctx.player()->is_dead())
+		<< "the mock's player starts dead, so nothing here is being measured";
 	ctx.gameState->set_run_outcome(RunOutcome::DEFEAT);
-	EXPECT_DEATH(ctx.gameLoopCoordinator->open_end_of_run_screen(ctx), "open_end_of_run_screen: the run is lost while the player still has hit points");
+	EXPECT_DEATH(
+		ctx.gameLoopCoordinator->open_end_of_run_screen(ctx),
+		"open_end_of_run_screen: the run is lost while the player still has hit points");
 }
 
 // Game::tick opens an end screen only when the outcome was decided during the tick, so
 // a call with the run still undecided is a caller that skipped that check.
 TEST_F(AssertProbeDeathTest, OpeningAnEndScreenOnARunThatHasNotEndedAborts)
 {
-	ASSERT_EQ(ctx.gameState->get_run_outcome(), RunOutcome::UNDECIDED) << "the mock's run has already ended, so nothing here is being measured";
-	EXPECT_DEATH(ctx.gameLoopCoordinator->open_end_of_run_screen(ctx), "open_end_of_run_screen: the run has not ended");
+	ASSERT_EQ(ctx.gameState->get_run_outcome(), RunOutcome::UNDECIDED)
+		<< "the mock's run has already ended, so nothing here is being measured";
+	EXPECT_DEATH(
+		ctx.gameLoopCoordinator->open_end_of_run_screen(ctx),
+		"open_end_of_run_screen: the run has not ended");
 }
 
 // A list with no rows has no current row, so reading one is a caller that skipped is_empty().
 TEST_F(AssertProbeDeathTest, ReadingTheCurrentRowOfAnEmptyListAborts)
 {
 	const ListCursor cursor{};
-	EXPECT_DEATH([[maybe_unused]] const size_t row = cursor.current_row(), "current_row: the list is empty");
+	EXPECT_DEATH(
+		[[maybe_unused]] const size_t row = cursor.current_row(),
+		"current_row: the list is empty");
 }
 
 // Stepping down from the last row is a caller that skipped can_move_down().
@@ -717,19 +829,25 @@ TEST_F(AssertProbeDeathTest, SelectingARowPastTheEndAborts)
 {
 	ListCursor cursor{};
 	cursor.reset(10);
-	EXPECT_DEATH(cursor.select(10), "select: the row is past the end of the list");
+	EXPECT_DEATH(
+		cursor.select(10),
+		"select: the row is past the end of the list");
 }
 
 // A value already above its bound has no clamped step to take.
 TEST_F(AssertProbeDeathTest, SteppingAValueAboveItsBoundAborts)
 {
-	EXPECT_DEATH([[maybe_unused]] const size_t stepped = step_within(10, 1, 9), "step_within: value is above its own bound");
+	EXPECT_DEATH(
+		[[maybe_unused]] const size_t stepped = step_within(10, 1, 9),
+		"step_within: value is above its own bound");
 }
 
 // A row with no height divides by zero, so the layout that passed it is broken.
 TEST_F(AssertProbeDeathTest, CountingRowsOfNoHeightAborts)
 {
-	EXPECT_DEATH([[maybe_unused]] const size_t rows = whole_rows_within(90, 0), "whole_rows_within: a row has no height");
+	EXPECT_DEATH(
+		[[maybe_unused]] const size_t rows = whole_rows_within(90, 0),
+		"whole_rows_within: a row has no height");
 }
 
 // The Constitution table lives in the data manager, so a creature asked to bring its
@@ -739,11 +857,15 @@ TEST_F(AssertProbeDeathTest, UpdatingAConstitutionBonusWithNoDataManagerAborts)
 	std::unique_ptr<Creature> creature = make_creature();
 	ctx.dataManager = nullptr;
 
-	EXPECT_DEATH(creature->update_constitution_bonus(ctx), "update_constitution_bonus: called without a dataManager");
+	EXPECT_DEATH(
+		creature->update_constitution_bonus(ctx),
+		"update_constitution_bonus: called without a dataManager");
 }
 
 // A canvas cell with no size divides by zero, so the layout that passed it is broken.
 TEST_F(AssertProbeDeathTest, ACanvasGridOfNoCellSizeAborts)
 {
-	EXPECT_DEATH([[maybe_unused]] const CanvasGrid grid(0, 0, 0), "CanvasGrid: a cell has no size");
+	EXPECT_DEATH(
+		[[maybe_unused]] const CanvasGrid grid(0, 0, 0),
+		"CanvasGrid: a cell has no size");
 }

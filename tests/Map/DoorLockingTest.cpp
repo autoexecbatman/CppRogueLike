@@ -81,7 +81,8 @@ TEST_F(DoorLockingTest, LockingRefusesWhatItCannotLock)
 	ASSERT_TRUE(map.lock_door(DOORWAY));
 
 	EXPECT_FALSE(map.lock_door(DOORWAY)) << "a door already locked";
-	EXPECT_FALSE(map.lock_door(PLAIN_FLOOR)) << "a stretch of floor is not a door";
+	EXPECT_FALSE(map.lock_door(PLAIN_FLOOR))
+		<< "a stretch of floor is not a door";
 	EXPECT_FALSE(map.is_door_locked(PLAIN_FLOOR));
 }
 
@@ -105,7 +106,8 @@ TEST_F(DoorLockingTest, LockingRefusesADoorThatResistedForcing)
 	map.mark_resisted_forcing(DOORWAY);
 
 	EXPECT_FALSE(map.lock_door(DOORWAY));
-	EXPECT_TRUE(map.has_resisted_forcing(DOORWAY)) << "the refused lock forgot the failed attempt";
+	EXPECT_TRUE(map.has_resisted_forcing(DOORWAY))
+		<< "the refused lock forgot the failed attempt";
 }
 
 // Table 1 limits forcing, not keys: unlocking it leaves an ordinary closed door.
@@ -123,14 +125,16 @@ TEST_F(DoorLockingTest, UnlockingOpensTheLockOfADoorThatResistedForcing)
 TEST_F(DoorLockingTest, ALockRemembersTheLevelItsPickFailedAt)
 {
 	ASSERT_TRUE(map.lock_door(DOORWAY));
-	EXPECT_EQ(map.lock_pick_failed_at_level(DOORWAY), 0) << "a lock never tried";
+	EXPECT_EQ(map.lock_pick_failed_at_level(DOORWAY), 0)
+		<< "a lock never tried";
 
 	map.mark_lock_pick_failed(DOORWAY, 3);
 
 	EXPECT_EQ(map.lock_pick_failed_at_level(DOORWAY), 3);
 	EXPECT_TRUE(map.is_door_locked(DOORWAY));
 	EXPECT_EQ(map.lock_pick_failed_at_level(PLAIN_FLOOR), 0);
-	EXPECT_EQ(map.lock_pick_failed_at_level(Vector2D{ -1, -1 }), 0) << "off the map";
+	EXPECT_EQ(map.lock_pick_failed_at_level(Vector2D{ -1, -1 }), 0)
+		<< "off the map";
 }
 
 // A door can have resisted forcing and a pick at once; neither mark hides the other.
@@ -152,7 +156,8 @@ TEST_F(DoorLockingTest, ACorridorThroughAShutDoorLeavesItShut)
 	map.dig_corridor(Vector2D{ 2, DOORWAY.y }, Vector2D{ 9, DOORWAY.y });
 
 	EXPECT_EQ(map.get_tile_type(DOORWAY), TileType::CLOSED_DOOR);
-	EXPECT_TRUE(map.is_wall(DOORWAY)) << "the corridor opened the door in the grid alone";
+	EXPECT_TRUE(map.is_wall(DOORWAY))
+		<< "the corridor opened the door in the grid alone";
 }
 
 // end of file: DoorLockingTest.cpp

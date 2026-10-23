@@ -66,7 +66,8 @@ inline constexpr int HIDDEN_RENDERER_FONT_FELL_BACK = 42;
 inline constexpr int HIDDEN_RENDERER_EXPECTATION_FAILED = 43;
 
 // What a test says when it skips for the missing driver.
-inline constexpr std::string_view NO_OPENGL_DRIVER_REASON = "no OpenGL driver on this machine (GLFW error 65542, API unavailable), so a raylib window cannot open";
+inline constexpr std::string_view NO_OPENGL_DRIVER_REASON =
+	"no OpenGL driver on this machine (GLFW error 65542, API unavailable), so a raylib window cannot open";
 
 // The window's size: twenty tiles by fourteen at the game's 64-pixel tiles, enough for
 // every menu to lay out. Hidden, so nothing appears on the desktop.
@@ -107,7 +108,11 @@ inline void exit_unless(bool holds, std::string_view what)
 {
 	if (!holds)
 	{
-		std::fprintf(stdout, "child check failed: %.*s\n", static_cast<int>(what.size()), what.data());
+		std::fprintf(
+			stdout,
+			"child check failed: %.*s\n",
+			static_cast<int>(what.size()),
+			what.data());
 		std::fflush(stdout);
 		std::_Exit(HIDDEN_RENDERER_EXPECTATION_FAILED);
 	}
@@ -130,20 +135,26 @@ public:
 	{
 		SetTraceLogCallback(exit_on_missing_opengl);
 		SetConfigFlags(FLAG_WINDOW_HIDDEN);
-		InitWindow(HIDDEN_WINDOW_WIDTH, HIDDEN_WINDOW_HEIGHT, "hidden renderer");
+		InitWindow(
+			HIDDEN_WINDOW_WIDTH,
+			HIDDEN_WINDOW_HEIGHT,
+			"hidden renderer");
 		if (!IsWindowReady())
 		{
 			std::_Exit(HIDDEN_RENDERER_WINDOW_NOT_READY);
 		}
 
-		renderer.load_font(Paths::resolve(Paths::DAWNLIKE_FONT).string(), HIDDEN_RENDERER_FONT_SIZE);
+		renderer.load_font(
+			Paths::resolve(Paths::DAWNLIKE_FONT).string(),
+			HIDDEN_RENDERER_FONT_SIZE);
 		renderer.load_dawnlike(Paths::resolve(Paths::DAWNLIKE_DIR).string());
 		// The viewport is read from the window, as Renderer::init does after opening its own.
 		renderer.update_viewport();
 
 		// measure_text falls back to raylib's default font when the game font did not
 		// load, so a measure equal to the default's means the game font is not in use.
-		if (renderer.measure_text("Hello") == MeasureText("Hello", HIDDEN_RENDERER_FONT_SIZE))
+		if (renderer.measure_text("Hello") ==
+			MeasureText("Hello", HIDDEN_RENDERER_FONT_SIZE))
 		{
 			std::_Exit(HIDDEN_RENDERER_FONT_FELL_BACK);
 		}
@@ -182,8 +193,8 @@ private:
 	int* exitCode{ nullptr };
 
 public:
-	explicit RecordExitCode(int* destination)
-		: exitCode(destination)
+	explicit RecordExitCode(int* destination) :
+		exitCode(destination)
 	{
 	}
 

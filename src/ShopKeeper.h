@@ -46,12 +46,24 @@ private:
 	void generate_shop_name(RandomDice& dice);
 
 	// Random item generation methods
-	std::unique_ptr<Item> generate_random_item_by_type(int dungeonLevel, GameContext& ctx);
-	std::unique_ptr<Item> generate_random_weapon(int dungeonLevel, GameContext& ctx);
-	std::unique_ptr<Item> generate_random_armor(int dungeonLevel, GameContext& ctx);
-	std::unique_ptr<Item> generate_random_potion(int dungeonLevel, GameContext& ctx);
-	std::unique_ptr<Item> generate_random_scroll(int dungeonLevel, GameContext& ctx);
-	std::unique_ptr<Item> generate_random_misc_item(int dungeonLevel, GameContext& ctx);
+	std::unique_ptr<Item> generate_random_item_by_type(
+		int dungeonLevel,
+		GameContext& ctx);
+	std::unique_ptr<Item> generate_random_weapon(
+		int dungeonLevel,
+		GameContext& ctx);
+	std::unique_ptr<Item> generate_random_armor(
+		int dungeonLevel,
+		GameContext& ctx);
+	std::unique_ptr<Item> generate_random_potion(
+		int dungeonLevel,
+		GameContext& ctx);
+	std::unique_ptr<Item> generate_random_scroll(
+		int dungeonLevel,
+		GameContext& ctx);
+	std::unique_ptr<Item> generate_random_misc_item(
+		int dungeonLevel,
+		GameContext& ctx);
 
 public:
 	ShopKeeper(ShopType type, ShopQuality quality, RandomDice& dice);
@@ -79,7 +91,10 @@ public:
 
 	CreatureInventory& get_shop_inventory() noexcept { return shopInventory; }
 
-	const CreatureInventory& get_shop_inventory() const noexcept { return shopInventory; }
+	const CreatureInventory& get_shop_inventory() const noexcept
+	{
+		return shopInventory;
+	}
 
 	int get_markup_percent() const noexcept { return markupPercent; }
 
@@ -108,7 +123,11 @@ public:
 	// Example:
 	//   shop.process_player_purchase(ctx, sword, player, shopkeeper);   // -> true, sword in pack
 	//   shop.process_player_purchase(ctx, sword, brokePlayer, shopkeeper);  // -> false
-	bool process_player_purchase(GameContext& ctx, Item& item, Creature& buyer, Creature& owner);
+	bool process_player_purchase(
+		GameContext& ctx,
+		Item& item,
+		Creature& buyer,
+		Creature& owner);
 	// Buys an item from the seller's pack onto these shelves, paid for by the owner - the
 	// shopkeeper creature, whose purse is the shop's. Refuses, moving nothing, when the
 	// shelves are full or the owner cannot pay. Answers whether the sale happened.
@@ -116,7 +135,11 @@ public:
 	// Example:
 	//   shop.process_player_sale(ctx, potion, player, shopkeeper);   // -> true, potion shelved
 	//   shop.process_player_sale(ctx, potion, player, brokeKeeper);  // -> false, nothing moved
-	bool process_player_sale(GameContext& ctx, Item& item, Creature& seller, Creature& owner);
+	bool process_player_sale(
+		GameContext& ctx,
+		Item& item,
+		Creature& seller,
+		Creature& owner);
 
 	// Static utility function for creating random shopkeepers
 };

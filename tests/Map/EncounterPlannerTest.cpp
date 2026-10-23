@@ -38,7 +38,9 @@ constexpr int CAP = 10;
 
 // What the selection actually spent, so a budget claim is about money and not
 // about how many keys came back.
-int spent(const std::vector<std::string>& selected, const std::vector<MonsterCandidate>& candidates)
+int spent(
+	const std::vector<std::string>& selected,
+	const std::vector<MonsterCandidate>& candidates)
 {
 	int total = 0;
 	for (const std::string& key : selected)
@@ -72,7 +74,8 @@ TEST_F(EncounterPlannerTest, ABudgetGrowsWithTheDepth)
 {
 	const int shallow = encounter_budget(RoomType::STANDARD, SHALLOW);
 
-	ASSERT_GT(shallow, 0) << "a standard room at the first level is worth nothing to fill";
+	ASSERT_GT(shallow, 0)
+		<< "a standard room at the first level is worth nothing to fill";
 	EXPECT_EQ(encounter_budget(RoomType::STANDARD, DEEP), shallow * DEEP);
 }
 
@@ -84,7 +87,8 @@ TEST_F(EncounterPlannerTest, ADangerRoomIsWorthMostAndATreasureRoomSitsBetween)
 	const int treasure = encounter_budget(RoomType::TREASURE, DEEP);
 
 	EXPECT_GT(danger, treasure) << "a danger room is not the most dangerous";
-	EXPECT_GT(treasure, standard) << "a treasure room is not guarded more than an ordinary one";
+	EXPECT_GT(treasure, standard)
+		<< "a treasure room is not guarded more than an ordinary one";
 }
 
 // The budget is a ceiling, not a target: whatever is chosen has to fit inside it.
@@ -97,9 +101,11 @@ TEST_F(EncounterPlannerTest, ASelectionNeverSpendsPastItsBudget)
 	};
 	const int budget = 100;
 
-	const std::vector<std::string> selected = select_encounter(candidates, budget, CAP, dice);
+	const std::vector<std::string> selected =
+		select_encounter(candidates, budget, CAP, dice);
 
-	EXPECT_LE(spent(selected, candidates), budget) << "the room cost more than it was worth";
+	EXPECT_LE(spent(selected, candidates), budget)
+		<< "the room cost more than it was worth";
 }
 
 // And the cap is a ceiling too, however much money is left.
@@ -108,9 +114,11 @@ TEST_F(EncounterPlannerTest, ASelectionNeverReturnsPastItsCap)
 	const std::vector<MonsterCandidate> candidates{ { "cheap", 1 } };
 	constexpr int smallCap = 3;
 
-	const std::vector<std::string> selected = select_encounter(candidates, 10000, smallCap, dice);
+	const std::vector<std::string> selected =
+		select_encounter(candidates, 10000, smallCap, dice);
 
-	EXPECT_EQ(selected.size(), static_cast<size_t>(smallCap)) << "a huge purse ignored the cap";
+	EXPECT_EQ(selected.size(), static_cast<size_t>(smallCap))
+		<< "a huge purse ignored the cap";
 }
 
 // The cap binds the first pass too. With more affordable kinds than the room may
@@ -125,7 +133,8 @@ TEST_F(EncounterPlannerTest, TheCapBindsWhileTakingOneOfEachKind)
 	}
 	constexpr int smallCap = 3;
 
-	const std::vector<std::string> selected = select_encounter(manyKinds, 10000, smallCap, dice);
+	const std::vector<std::string> selected =
+		select_encounter(manyKinds, 10000, smallCap, dice);
 
 	EXPECT_EQ(selected.size(), static_cast<size_t>(smallCap))
 		<< "one of each kind was taken without counting them against the cap";
@@ -141,12 +150,14 @@ TEST_F(EncounterPlannerTest, EveryAffordableKindAppearsWhenTheBudgetAllowsIt)
 		{ "c", 30 },
 	};
 
-	const std::vector<std::string> selected = select_encounter(candidates, 60, CAP, dice);
+	const std::vector<std::string> selected =
+		select_encounter(candidates, 60, CAP, dice);
 
 	for (const MonsterCandidate& candidate : candidates)
 	{
 		EXPECT_NE(std::ranges::find(selected, candidate.key), selected.end())
-			<< candidate.key << " was left out of a budget that covered every kind";
+			<< candidate.key
+			<< " was left out of a budget that covered every kind";
 	}
 }
 
@@ -158,7 +169,8 @@ TEST_F(EncounterPlannerTest, NothingAffordableMeansAnEmptyRoom)
 	EXPECT_TRUE(select_encounter(none, 500, CAP, dice).empty());
 
 	const std::vector<MonsterCandidate> tooDear{ { "dear", 500 } };
-	EXPECT_TRUE(select_encounter(tooDear, 499, CAP, dice).empty()) << "something was bought without the money for it";
+	EXPECT_TRUE(select_encounter(tooDear, 499, CAP, dice).empty())
+		<< "something was bought without the money for it";
 }
 
 // Once every kind has been taken, what is left is spent on more of them.
@@ -166,9 +178,11 @@ TEST_F(EncounterPlannerTest, LeftoverBudgetBuysMoreOfWhatIsAffordable)
 {
 	const std::vector<MonsterCandidate> candidates{ { "cheap", 10 } };
 
-	const std::vector<std::string> selected = select_encounter(candidates, 45, CAP, dice);
+	const std::vector<std::string> selected =
+		select_encounter(candidates, 45, CAP, dice);
 
-	EXPECT_EQ(selected.size(), 4u) << "forty-five bought other than four at ten apiece";
+	EXPECT_EQ(selected.size(), 4u)
+		<< "forty-five bought other than four at ten apiece";
 	EXPECT_LE(spent(selected, candidates), 45);
 }
 

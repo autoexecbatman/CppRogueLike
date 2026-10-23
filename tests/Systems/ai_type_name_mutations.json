@@ -33,20 +33,20 @@
     },
     {
       "file": "src/Ai.cpp",
-      "original": "\tstd::unique_ptr<Ai> ai = make(parse_ai_type(source.at(\"type\").get<std::string>()));",
-      "mutated": "\tstd::unique_ptr<Ai> ai = make(AiType::MONSTER);",
+      "original": "\tstd::unique_ptr<Ai> ai =\n\t\tmake(parse_ai_type(source.at(\"type\").get<std::string>()));",
+      "mutated": "\tstd::unique_ptr<Ai> ai =\n\t\tmake(AiType::MONSTER);",
       "catches": "the saved name never read, so every creature loads as a plain monster"
     },
     {
       "file": "src/AiWebSpinner.h",
-      "original": "\t[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::WEB_SPINNER; }",
-      "mutated": "\t[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::SPIDER; }",
+      "original": "\t[[nodiscard]] AiType get_ai_type() const noexcept override\n\t{\n\t\treturn AiType::WEB_SPINNER;\n\t}",
+      "mutated": "\t[[nodiscard]] AiType get_ai_type() const noexcept override\n\t{\n\t\treturn AiType::SPIDER;\n\t}",
       "catches": "a web spinner calling itself a plain spider, which its save would then write"
     },
     {
       "file": "src/AiMimic.h",
-      "original": "\t[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::MIMIC; }",
-      "mutated": "\t[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::MONSTER; }",
+      "original": "\t[[nodiscard]] AiType get_ai_type() const noexcept override\n\t{\n\t\treturn AiType::MIMIC;\n\t}",
+      "mutated": "\t[[nodiscard]] AiType get_ai_type() const noexcept override\n\t{\n\t\treturn AiType::MONSTER;\n\t}",
       "catches": "a mimic saved as a plain monster, which is what this file was written for"
     }
   ]

@@ -39,7 +39,9 @@ namespace
 constexpr int CONSTITUTION_BONUS_PER_DIE = 4;
 constexpr int HIT_DIE_ROLLED = 1;
 
-bool lists(const std::vector<MonsterPercentage>& distribution, std::string_view name)
+bool lists(
+	const std::vector<MonsterPercentage>& distribution,
+	std::string_view name)
 {
 	auto is_named = [name](const MonsterPercentage& entry)
 	{
@@ -52,15 +54,14 @@ bool lists(const std::vector<MonsterPercentage>& distribution, std::string_view 
 class MimicStatBlockTest : public ::testing::Test
 {
 protected:
-	void SetUp() override
-	{
-		ctx = mock.to_game_context();
-	}
+	void SetUp() override { ctx = mock.to_game_context(); }
 
 	// The six scores, then how many hit dice, then a 1 on each of them.
 	void script_a_mimic_of(int hitDice)
 	{
-		for (const int roll : { 3, 3, 3, 3, 3, 3, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1 })
+		for (
+			const int roll :
+			{ 3, 3, 3, 3, 3, 3, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1 })
 		{
 			mock.dice.set_next_roll(roll);
 		}
@@ -74,7 +75,10 @@ protected:
 	// A mimic built from its record, as the spawn table builds one.
 	std::unique_ptr<Creature> build_a_mimic()
 	{
-		return MonsterCreator::create_from_params(Vector2D{ 0, 0 }, mock.monsterRegistry.get_params("mimic"), ctx);
+		return MonsterCreator::create_from_params(
+			Vector2D{ 0, 0 },
+			mock.monsterRegistry.get_params("mimic"),
+			ctx);
 	}
 
 	MockGameContext mock{};
@@ -87,7 +91,9 @@ TEST_F(MimicStatBlockTest, NineHitDiceMakeANinthLevelMimicWorthTwoThousand)
 	const auto mimic = build_a_mimic();
 
 	EXPECT_EQ(mimic->get_creature_level(), 9);
-	EXPECT_EQ(mimic->get_max_hp(), 9 * (HIT_DIE_ROLLED + CONSTITUTION_BONUS_PER_DIE));
+	EXPECT_EQ(
+		mimic->get_max_hp(),
+		9 * (HIT_DIE_ROLLED + CONSTITUTION_BONUS_PER_DIE));
 	EXPECT_EQ(mimic->get_xp(), 2000);
 }
 
@@ -97,7 +103,9 @@ TEST_F(MimicStatBlockTest, TenHitDiceMakeATenthLevelMimicWorthThreeThousand)
 	const auto mimic = build_a_mimic();
 
 	EXPECT_EQ(mimic->get_creature_level(), 10);
-	EXPECT_EQ(mimic->get_max_hp(), 10 * (HIT_DIE_ROLLED + CONSTITUTION_BONUS_PER_DIE));
+	EXPECT_EQ(
+		mimic->get_max_hp(),
+		10 * (HIT_DIE_ROLLED + CONSTITUTION_BONUS_PER_DIE));
 	EXPECT_EQ(mimic->get_xp(), 3000);
 }
 
@@ -120,8 +128,12 @@ TEST_F(MimicStatBlockTest, ItsMoraleIsChampion)
 
 TEST_F(MimicStatBlockTest, ItFirstAppearsAtDepthSix)
 {
-	EXPECT_FALSE(lists(MonsterFactory::get_current_distribution(5, mock.monsterRegistry), "mimic"));
-	EXPECT_TRUE(lists(MonsterFactory::get_current_distribution(6, mock.monsterRegistry), "mimic"));
+	EXPECT_FALSE(lists(
+		MonsterFactory::get_current_distribution(5, mock.monsterRegistry),
+		"mimic"));
+	EXPECT_TRUE(lists(
+		MonsterFactory::get_current_distribution(6, mock.monsterRegistry),
+		"mimic"));
 }
 
 // Built from data, it is already disguised when it first stands on the map: it wears one
@@ -134,13 +146,17 @@ TEST_F(MimicStatBlockTest, ItIsBuiltWearingADisguise)
 
 	ASSERT_TRUE(mimic->ai);
 	EXPECT_EQ(mimic->ai->get_ai_type(), AiType::MIMIC);
-	const std::vector<Disguise> disguises = Appearance::build_mimic_list(*ctx.contentRegistry, *ctx.itemRegistry);
+	const std::vector<Disguise> disguises =
+		Appearance::build_mimic_list(*ctx.contentRegistry, *ctx.itemRegistry);
 	const auto wears = [&mimic](const Disguise& disguise)
 	{
 		return disguise.name == mimic->actorData.name;
 	};
-	EXPECT_TRUE(std::ranges::any_of(disguises, wears)) << "the mimic stands as \"" << mimic->actorData.name << "\", which is no disguise";
-	EXPECT_FALSE(mimic->has_state(ActorState::BLOCKS)) << "a disguised mimic blocks like a creature";
+	EXPECT_TRUE(std::ranges::any_of(disguises, wears))
+		<< "the mimic stands as \"" << mimic->actorData.name
+		<< "\", which is no disguise";
+	EXPECT_FALSE(mimic->has_state(ActorState::BLOCKS))
+		<< "a disguised mimic blocks like a creature";
 }
 
 // end of file: MimicStatBlockTest.cpp

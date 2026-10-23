@@ -58,10 +58,12 @@ inline constexpr std::array<IntelligenceRating, 11> ALL_INTELLIGENCE_RATING = {
 // Example:
 //   next_intelligence_rating(IntelligenceRating::NON); // -> IntelligenceRating::ANIMAL
 //   next_intelligence_rating(IntelligenceRating::GODLIKE); // -> IntelligenceRating::NON
-[[nodiscard]] inline IntelligenceRating next_intelligence_rating(IntelligenceRating value)
+[[nodiscard]] inline IntelligenceRating next_intelligence_rating(
+	IntelligenceRating value)
 {
 	const auto found = std::ranges::find(ALL_INTELLIGENCE_RATING, value);
-	if (found == ALL_INTELLIGENCE_RATING.end() || found + 1 == ALL_INTELLIGENCE_RATING.end())
+	if (found == ALL_INTELLIGENCE_RATING.end() ||
+		found + 1 == ALL_INTELLIGENCE_RATING.end())
 	{
 		return ALL_INTELLIGENCE_RATING.front();
 	}
@@ -72,7 +74,8 @@ inline constexpr std::array<IntelligenceRating, 11> ALL_INTELLIGENCE_RATING = {
 //
 // Example:
 //   encode_intelligence_rating(IntelligenceRating::SUPRA_GENIUS); // -> "supra_genius"
-[[nodiscard]] inline std::string_view encode_intelligence_rating(IntelligenceRating rating)
+[[nodiscard]] inline std::string_view encode_intelligence_rating(
+	IntelligenceRating rating)
 {
 	switch (rating)
 	{
@@ -141,7 +144,8 @@ inline constexpr std::array<IntelligenceRating, 11> ALL_INTELLIGENCE_RATING = {
 // Example:
 //   parse_intelligence_rating("genius"); // -> IntelligenceRating::GENIUS
 //   parse_intelligence_rating("brilliant"); // throws std::runtime_error
-[[nodiscard]] inline IntelligenceRating parse_intelligence_rating(std::string_view name)
+[[nodiscard]] inline IntelligenceRating parse_intelligence_rating(
+	std::string_view name)
 {
 	const auto named = [name](IntelligenceRating rating)
 	{
@@ -152,7 +156,8 @@ inline constexpr std::array<IntelligenceRating, 11> ALL_INTELLIGENCE_RATING = {
 	const auto found = std::ranges::find_if(ALL_INTELLIGENCE_RATING, named);
 	if (found == ALL_INTELLIGENCE_RATING.end())
 	{
-		throw std::runtime_error(std::format("unknown intelligence rating '{}'", name));
+		throw std::runtime_error(
+			std::format("unknown intelligence rating '{}'", name));
 	}
 	return *found;
 }

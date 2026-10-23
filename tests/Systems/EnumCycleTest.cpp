@@ -46,7 +46,10 @@ namespace
 // Walks the cycle from the first value and requires it to visit every value the list
 // declares, in that order, and then wrap.
 template <typename EnumType, std::size_t Count, typename Next>
-void expect_cycle_covers(const std::array<EnumType, Count>& all, Next next, std::string_view label)
+void expect_cycle_covers(
+	const std::array<EnumType, Count>& all,
+	Next next,
+	std::string_view label)
 {
 	ASSERT_GT(all.size(), 1u) << label << ": a list of one cannot show a cycle";
 
@@ -64,12 +67,15 @@ void expect_cycle_covers(const std::array<EnumType, Count>& all, Next next, std:
 // The list is the enum's own order, so its index is its value. An enumerator inserted
 // anywhere but the end shifts every later entry and fails here.
 template <typename EnumType, std::size_t Count>
-void expect_list_matches_enum(const std::array<EnumType, Count>& all, std::string_view label)
+void expect_list_matches_enum(
+	const std::array<EnumType, Count>& all,
+	std::string_view label)
 {
 	for (std::size_t index = 0; index < all.size(); ++index)
 	{
 		EXPECT_EQ(all[index], static_cast<EnumType>(index))
-			<< label << ": entry " << index << " is not the value with that number";
+			<< label << ": entry " << index
+			<< " is not the value with that number";
 	}
 }
 
@@ -79,17 +85,35 @@ TEST(EnumCycleTest, EveryCycleCoversItsEnumAndWraps)
 {
 	expect_cycle_covers(ALL_ITEM_CLASS, next_item_class, "ItemClass");
 	expect_cycle_covers(ALL_PICKABLE_TYPE, next_pickable_type, "PickableType");
-	expect_cycle_covers(ALL_CONSUMABLE_EFFECT, next_consumable_effect, "ConsumableEffect");
+	expect_cycle_covers(
+		ALL_CONSUMABLE_EFFECT,
+		next_consumable_effect,
+		"ConsumableEffect");
 	expect_cycle_covers(ALL_BUFF_TYPE, next_buff_type, "BuffType");
 	expect_cycle_covers(ALL_TARGET_MODE, next_target_mode, "TargetMode");
-	expect_cycle_covers(ALL_SCROLL_ANIMATION, next_scroll_animation, "ScrollAnimation");
-	expect_cycle_covers(ALL_HAND_REQUIREMENT, next_hand_requirement, "HandRequirement");
+	expect_cycle_covers(
+		ALL_SCROLL_ANIMATION,
+		next_scroll_animation,
+		"ScrollAnimation");
+	expect_cycle_covers(
+		ALL_HAND_REQUIREMENT,
+		next_hand_requirement,
+		"HandRequirement");
 	expect_cycle_covers(ALL_WEAPON_SIZE, next_weapon_size, "WeaponSize");
 	expect_cycle_covers(ALL_CREATURE_SIZE, next_creature_size, "CreatureSize");
-	expect_cycle_covers(ALL_INTELLIGENCE_RATING, next_intelligence_rating, "IntelligenceRating");
-	expect_cycle_covers(ALL_MAGICAL_EFFECT, next_magical_effect, "MagicalEffect");
+	expect_cycle_covers(
+		ALL_INTELLIGENCE_RATING,
+		next_intelligence_rating,
+		"IntelligenceRating");
+	expect_cycle_covers(
+		ALL_MAGICAL_EFFECT,
+		next_magical_effect,
+		"MagicalEffect");
 	expect_cycle_covers(ALL_ATTITUDE, next_attitude, "Attitude");
-	expect_cycle_covers(AUTHORABLE_AI_TYPES, next_authorable_ai_type, "authorable AiType");
+	expect_cycle_covers(
+		AUTHORABLE_AI_TYPES,
+		next_authorable_ai_type,
+		"authorable AiType");
 	// ColorPairId is not in EveryListIsTheEnumsOwnOrder below because its values
 	// start at one; Colors.h asserts that ordering at compile time instead.
 	expect_cycle_covers(ALL_COLOR_PAIR, next_color_pair, "ColorPairId");
@@ -115,7 +139,9 @@ TEST(EnumCycleTest, EveryListIsTheEnumsOwnOrder)
 // rather than only on the mechanism that replaced it.
 TEST(EnumCycleTest, TheValuesTheStaleCountsCutOffAreReachable)
 {
-	const std::set<PickableType> pickables(ALL_PICKABLE_TYPE.begin(), ALL_PICKABLE_TYPE.end());
+	const std::set<PickableType> pickables(
+		ALL_PICKABLE_TYPE.begin(),
+		ALL_PICKABLE_TYPE.end());
 	EXPECT_TRUE(pickables.contains(PickableType::IDENTIFY_SCROLL));
 	EXPECT_TRUE(pickables.contains(PickableType::DUNGEON_KEY));
 

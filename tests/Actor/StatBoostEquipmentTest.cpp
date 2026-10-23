@@ -69,10 +69,16 @@ protected:
 	{
 		auto item = ItemCreator::create(key, player->position, ctx);
 		Item* carried = item.get();
-		[[maybe_unused]] const auto added = InventoryOperations::add_item_to_inventory(player->inventoryData, std::move(item), *player, *ctx.dataManager);
+		[[maybe_unused]] const auto added =
+			InventoryOperations::add_item_to_inventory(
+				player->inventoryData,
+				std::move(item),
+				*player,
+				*ctx.dataManager);
 		ASSERT_TRUE(added.has_value()) << key << " did not fit in the pack";
 		use_item(*carried->behavior, *carried, *player, ctx);
-		ASSERT_NE(player->get_equipped_item(slot_of(key)), nullptr) << key << " was not put on";
+		ASSERT_NE(player->get_equipped_item(slot_of(key)), nullptr)
+			<< key << " was not put on";
 	}
 
 	// An adding item, built here because the data holds none: every Strength item it
@@ -82,7 +88,8 @@ protected:
 	void put_on_adding_gauntlets(int strengthBonus)
 	{
 		put_on("gauntlets_of_swimming_and_climbing");
-		player->get_equipped_item(EquipmentSlot::GAUNTLETS)->behavior = Gauntlets{ .strBonus = strengthBonus };
+		player->get_equipped_item(EquipmentSlot::GAUNTLETS)->behavior =
+			Gauntlets{ .strBonus = strengthBonus };
 	}
 
 	// Takes off whatever is in the slot, as the equipment screen does.
@@ -108,7 +115,8 @@ protected:
 
 	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 0, 0 }) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ 0, 0 }) };
 };
 
 // An item that adds Strength adds it once, not once per query.
@@ -117,7 +125,8 @@ TEST_F(StatBoostEquipmentTest, AnAddingItemAddsOnce)
 	put_on_adding_gauntlets(2);
 
 	EXPECT_EQ(player->get_strength(), BASE_STRENGTH + 2);
-	EXPECT_EQ(player->get_strength(), BASE_STRENGTH + 2) << "asking twice added twice";
+	EXPECT_EQ(player->get_strength(), BASE_STRENGTH + 2)
+		<< "asking twice added twice";
 }
 
 // Taking it off returns exactly what it gave.
@@ -139,7 +148,8 @@ TEST_F(StatBoostEquipmentTest, RemovingASettingItemRestoresTheScore)
 
 	take_off(EquipmentSlot::GAUNTLETS);
 
-	EXPECT_EQ(player->get_strength(), BASE_STRENGTH) << "Strength kept the gauntlets' 18 after they came off";
+	EXPECT_EQ(player->get_strength(), BASE_STRENGTH)
+		<< "Strength kept the gauntlets' 18 after they came off";
 }
 
 // Setting to 18 does nothing for a creature already at 19.
@@ -169,7 +179,13 @@ TEST_F(StatBoostEquipmentTest, TwoSettingItemsComeOffInEitherOrder)
 // A buff that ends while gauntlets are worn does not leave its value behind in the score.
 TEST_F(StatBoostEquipmentTest, ABuffIsNotAbsorbedByEquipment)
 {
-	ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, 19, 10, BuffApplication::SET, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(
+		*player,
+		BuffType::STRENGTH,
+		19,
+		10,
+		BuffApplication::SET,
+		ctx.gameState->get_time());
 	put_on_adding_gauntlets(2);
 	ASSERT_EQ(player->get_strength(), 21) << "the buff's 19, plus 2";
 
@@ -184,9 +200,16 @@ TEST_F(StatBoostEquipmentTest, AGirdleTakesNoBonusFromABuff)
 {
 	put_on("girdle_of_hill_giant_strength");
 
-	ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, 1, 10, BuffApplication::ADD, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(
+		*player,
+		BuffType::STRENGTH,
+		1,
+		10,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 
-	EXPECT_EQ(player->get_strength(), 19) << "a buff's +1 was added to the girdle's 19";
+	EXPECT_EQ(player->get_strength(), 19)
+		<< "a buff's +1 was added to the girdle's 19";
 }
 
 // Nor does another worn item: an adding pair of gauntlets raises the wearer's own
@@ -196,7 +219,8 @@ TEST_F(StatBoostEquipmentTest, AGirdleTakesNoBonusFromAnotherWornItem)
 	put_on("girdle_of_hill_giant_strength");
 	put_on_adding_gauntlets(2);
 
-	EXPECT_EQ(player->get_strength(), 19) << "the gauntlets' +2 was added to the girdle's 19";
+	EXPECT_EQ(player->get_strength(), 19)
+		<< "the gauntlets' +2 was added to the girdle's 19";
 }
 
 // The book removes bonuses only, so a penalty still lowers the girdle's 19.
@@ -204,7 +228,13 @@ TEST_F(StatBoostEquipmentTest, APenaltyStillLowersAGirdlesStrength)
 {
 	put_on("girdle_of_hill_giant_strength");
 
-	ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, -1, 10, BuffApplication::ADD, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(
+		*player,
+		BuffType::STRENGTH,
+		-1,
+		10,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 
 	EXPECT_EQ(player->get_strength(), 18);
 }
@@ -214,7 +244,13 @@ TEST_F(StatBoostEquipmentTest, AGirdleLeavesOtherAbilitiesTheirBonuses)
 {
 	put_on("girdle_of_hill_giant_strength");
 
-	ctx.buffSystem->add_buff(*player, BuffType::DEXTERITY, 1, 10, BuffApplication::ADD, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(
+		*player,
+		BuffType::DEXTERITY,
+		1,
+		10,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 
 	EXPECT_EQ(player->get_dexterity(), 11);
 }
@@ -227,7 +263,8 @@ TEST_F(StatBoostEquipmentTest, AGirdleThatSetsNoStrengthLeavesTheBonuses)
 	put_on("girdle_of_hill_giant_strength");
 
 	// Made a girdle of dwarvenkind, which the data does not hold.
-	player->get_equipped_item(EquipmentSlot::GIRDLE)->behavior = Girdle{ .conBonus = 1 };
+	player->get_equipped_item(EquipmentSlot::GIRDLE)->behavior =
+		Girdle{ .conBonus = 1 };
 
 	EXPECT_EQ(player->get_strength(), BASE_STRENGTH + 2);
 }
@@ -239,13 +276,17 @@ TEST_F(StatBoostEquipmentTest, OgreGauntletsGiveEighteenHundred)
 
 	EXPECT_EQ(player->get_strength(), 18);
 	EXPECT_EQ(player->get_exceptional_strength(), 100);
-	const StrengthAttributes row = game.dataManager.strength_for(player->get_strength(), player->get_exceptional_strength());
+	const StrengthAttributes row = game.dataManager.strength_for(
+		player->get_strength(),
+		player->get_exceptional_strength());
 	EXPECT_EQ(row.hitProb, 3);
 	EXPECT_EQ(row.dmgAdj, 6);
 }
 
 // A fighter's own 18/50 is back when the gauntlets come off.
-TEST_F(StatBoostEquipmentTest, RemovingOgreGauntletsGivesBackTheWearersOwnPercentile)
+TEST_F(
+	StatBoostEquipmentTest,
+	RemovingOgreGauntletsGivesBackTheWearersOwnPercentile)
 {
 	player->set_strength(18);
 	player->set_exceptional_strength(50);
@@ -284,15 +325,19 @@ TEST_F(StatBoostEquipmentTest, WornOgreGauntletsSurviveASaveAndALoad)
 
 // Cursed gauntlets of fumbling will not come off: using them again uses no turn, they stay
 // on, and their -2 Dexterity stays with them.
-TEST_F(StatBoostEquipmentTest, CursedGauntletsThatWillNotComeOffKeepTheirPenalty)
+TEST_F(
+	StatBoostEquipmentTest,
+	CursedGauntletsThatWillNotComeOffKeepTheirPenalty)
 {
 	put_on("gauntlets_of_fumbling");
 	Item* gauntlets = player->get_equipped_item(EquipmentSlot::GAUNTLETS);
 	gauntlets->enhancement.blessing = BlessingStatus::CURSED;
 
-	EXPECT_FALSE(use_item(*gauntlets->behavior, *gauntlets, *player, ctx)) << "a failed removal used a turn";
+	EXPECT_FALSE(use_item(*gauntlets->behavior, *gauntlets, *player, ctx))
+		<< "a failed removal used a turn";
 	EXPECT_EQ(player->get_equipped_item(EquipmentSlot::GAUNTLETS), gauntlets);
-	EXPECT_EQ(player->get_dexterity(), 8) << "the curse's -2 was lifted while the gauntlets stayed on";
+	EXPECT_EQ(player->get_dexterity(), 8)
+		<< "the curse's -2 was lifted while the gauntlets stayed on";
 }
 
 namespace
@@ -303,7 +348,8 @@ void load_pack(Player& player, int weight, GameContext& ctx)
 {
 	auto burden = ItemCreator::create("dagger", player.position, ctx);
 	burden->enhancement.weight = weight;
-	[[maybe_unused]] const auto added = InventoryOperations::add_item(player.inventoryData, std::move(burden));
+	[[maybe_unused]] const auto added =
+		InventoryOperations::add_item(player.inventoryData, std::move(burden));
 	ASSERT_TRUE(added.has_value());
 }
 
@@ -326,7 +372,8 @@ TEST_F(StatBoostEquipmentTest, AGirdleTakenOffUnderTooHeavyALoadIsSetDown)
 	// Filled to exactly what this player could carry unaided, so the girdle's own pound
 	// is one too many the moment its giant Strength stops counting. Taken before it goes
 	// on, because wearing it is what raises the capacity.
-	const int unaidedCapacity = InventoryOperations::get_max_weight(*player, *ctx.dataManager);
+	const int unaidedCapacity =
+		InventoryOperations::get_max_weight(*player, *ctx.dataManager);
 	put_on("girdle_of_hill_giant_strength");
 	const Item* girdle = player->get_equipped_item(EquipmentSlot::GIRDLE);
 	load_pack(*player, unaidedCapacity, ctx);
@@ -336,7 +383,8 @@ TEST_F(StatBoostEquipmentTest, AGirdleTakenOffUnderTooHeavyALoadIsSetDown)
 	EXPECT_TRUE(player->unequip_item(EquipmentSlot::GIRDLE, ctx));
 
 	EXPECT_EQ(player->get_equipped_item(EquipmentSlot::GIRDLE), nullptr);
-	EXPECT_TRUE(is_on_floor(*ctx.floorInventory, girdle, player->position)) << "the girdle was destroyed";
+	EXPECT_TRUE(is_on_floor(*ctx.floorInventory, girdle, player->position))
+		<< "the girdle was destroyed";
 }
 
 // A full pack refuses whatever the weight: the item goes to the floor.
@@ -351,7 +399,8 @@ TEST_F(StatBoostEquipmentTest, AnItemTakenOffIntoAFullPackIsSetDown)
 
 	EXPECT_TRUE(player->unequip_item(EquipmentSlot::GAUNTLETS, ctx));
 
-	EXPECT_TRUE(is_on_floor(*ctx.floorInventory, gauntlets, player->position)) << "the gauntlets were destroyed";
+	EXPECT_TRUE(is_on_floor(*ctx.floorInventory, gauntlets, player->position))
+		<< "the gauntlets were destroyed";
 }
 
 // A full pack over a floor already holding a thousand items: the floor has no limit, so
@@ -367,12 +416,14 @@ TEST_F(StatBoostEquipmentTest, AnItemTakenOffOverACrowdedFloorStillLands)
 	constexpr int ITEMS_ALREADY_THERE = 1000;
 	for (int already = 0; already < ITEMS_ALREADY_THERE; ++already)
 	{
-		ctx.floorInventory->items.push_back(ItemCreator::create("dagger", player->position, ctx));
+		ctx.floorInventory->items.push_back(
+			ItemCreator::create("dagger", player->position, ctx));
 	}
 
 	EXPECT_TRUE(player->unequip_item(EquipmentSlot::GAUNTLETS, ctx));
 
-	EXPECT_TRUE(is_on_floor(*ctx.floorInventory, gauntlets, player->position)) << "a crowded floor destroyed the gauntlets";
+	EXPECT_TRUE(is_on_floor(*ctx.floorInventory, gauntlets, player->position))
+		<< "a crowded floor destroyed the gauntlets";
 	EXPECT_EQ(player->get_strength(), BASE_STRENGTH);
 }
 
@@ -386,7 +437,12 @@ TEST_F(StatBoostEquipmentTest, AMonsterWearingAGirdleHasItsStrength)
 	ogre.set_strength(BASE_STRENGTH);
 	ogre.set_body_plan({ EquipmentSlot::GIRDLE });
 
-	ogre.wear(ItemCreator::create("girdle_of_hill_giant_strength", ogre.position, ctx), EquipmentSlot::GIRDLE);
+	ogre.wear(
+		ItemCreator::create(
+			"girdle_of_hill_giant_strength",
+			ogre.position,
+			ctx),
+		EquipmentSlot::GIRDLE);
 
 	EXPECT_EQ(ogre.get_strength(), 19);
 }
@@ -395,9 +451,15 @@ TEST_F(StatBoostEquipmentTest, AMonsterWearingAGirdleHasItsStrength)
 // rather than adding it: 19, where an addition to the wearer's 12 would make 31.
 TEST_F(StatBoostEquipmentTest, APotionOfGiantStrengthSetsStrength)
 {
-	auto item = ItemCreator::create("potion_of_giant_strength", player->position, ctx);
+	auto item =
+		ItemCreator::create("potion_of_giant_strength", player->position, ctx);
 	Item* carried = item.get();
-	[[maybe_unused]] const auto added = InventoryOperations::add_item_to_inventory(player->inventoryData, std::move(item), *player, *ctx.dataManager);
+	[[maybe_unused]] const auto added =
+		InventoryOperations::add_item_to_inventory(
+			player->inventoryData,
+			std::move(item),
+			*player,
+			*ctx.dataManager);
 	ASSERT_TRUE(added.has_value()) << "the potion did not fit in the pack";
 
 	use_item(*carried->behavior, *carried, *player, ctx);

@@ -43,11 +43,15 @@ protected:
 		archer.experienceReward = std::make_unique<ExperienceReward>(0);
 		archer.healthPool = std::make_unique<HealthPool>(10);
 		archer.armorClass = std::make_unique<ArmorClass>(10);
-		archer.attacker = std::make_unique<MonsterAttacker>(archer, DamageInfo{ "1d4", DamageType::PHYSICAL });
+		archer.attacker = std::make_unique<MonsterAttacker>(
+			archer,
+			DamageInfo{ "1d4", DamageType::PHYSICAL });
 		archer.set_thaco(20);
 		archer.set_strength(10);
 		archer.set_body_plan({ EquipmentSlot::MISSILE_WEAPON });
-		archer.wear(ItemCreator::create("sling", archer.position, ctx), EquipmentSlot::MISSILE_WEAPON);
+		archer.wear(
+			ItemCreator::create("sling", archer.position, ctx),
+			EquipmentSlot::MISSILE_WEAPON);
 
 		target.experienceReward = std::make_unique<ExperienceReward>(0);
 		target.healthPool = std::make_unique<HealthPool>(100);
@@ -69,9 +73,15 @@ protected:
 // Each outcome earns its own picture, and only a landed attack draws blood.
 TEST_F(RangedShotTest, OnlyALandedShotBleeds)
 {
-	EXPECT_EQ(RangedShot::impact_of(AttackResult::LANDED), ShotImpact::MISSILE_AND_BLOOD);
-	EXPECT_EQ(RangedShot::impact_of(AttackResult::MISSED), ShotImpact::MISSILE) << "a miss drew blood";
-	EXPECT_EQ(RangedShot::impact_of(AttackResult::PREVENTED), ShotImpact::NOTHING) << "a shot never loosed was drawn";
+	EXPECT_EQ(
+		RangedShot::impact_of(AttackResult::LANDED),
+		ShotImpact::MISSILE_AND_BLOOD);
+	EXPECT_EQ(RangedShot::impact_of(AttackResult::MISSED), ShotImpact::MISSILE)
+		<< "a miss drew blood";
+	EXPECT_EQ(
+		RangedShot::impact_of(AttackResult::PREVENTED),
+		ShotImpact::NOTHING)
+		<< "a shot never loosed was drawn";
 }
 
 // A shot that is rolled flies, hit or miss.
@@ -84,7 +94,8 @@ TEST_F(RangedShotTest, ARolledShotLoosesAMissile)
 	mock.dice.set_next_roll(2);
 	EXPECT_EQ(RangedShot::fire(archer, target, ctx), AttackResult::MISSED);
 
-	EXPECT_TRUE(ctx.animSystem->has_active_entries()) << "a missed shot drew no missile";
+	EXPECT_TRUE(ctx.animSystem->has_active_entries())
+		<< "a missed shot drew no missile";
 }
 
 // A target already dead is shot at in vain: nothing is rolled, so nothing flies.
@@ -96,7 +107,8 @@ TEST_F(RangedShotTest, AShotNeverLoosedDrawsNothing)
 
 	EXPECT_EQ(RangedShot::fire(archer, target, ctx), AttackResult::PREVENTED);
 
-	EXPECT_FALSE(ctx.animSystem->has_active_entries()) << "a shot that was never loosed was drawn";
+	EXPECT_FALSE(ctx.animSystem->has_active_entries())
+		<< "a shot that was never loosed was drawn";
 }
 
 // end of file: RangedShotTest.cpp

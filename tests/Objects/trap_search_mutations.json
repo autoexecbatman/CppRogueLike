@@ -51,8 +51,8 @@
     },
     {
       "file": "src/Trap.cpp",
-      "original": "trap->position.chebyshev_distance_to(searcher.position) != SEARCH_REACH",
-      "mutated": "trap->position.chebyshev_distance_to(searcher.position) > SEARCH_REACH + 1",
+      "original": "trap->position.chebyshev_distance_to(searcher.position) !=\n\t\t\t\tSEARCH_REACH",
+      "mutated": "trap->position.chebyshev_distance_to(searcher.position)> SEARCH_REACH + 1",
       "catches": "a search reaching two tiles"
     },
     {

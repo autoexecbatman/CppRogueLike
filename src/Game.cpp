@@ -3,8 +3,7 @@
 // Single source of truth: build context from owned systems
 [[nodiscard]] GameContext Game::context() noexcept
 {
-	return GameContext{
-		// Core game world
+	return GameContext{ // Core game world
 		.map = &map,
 		.gui = &gui,
 		.playerOwner = &player,
@@ -104,7 +103,8 @@ bool Game::tick(int& loopNum)
 	else
 #endif
 	{
-		gameState.set_window_state(menus.empty() ? WindowState::GAME : WindowState::MENU);
+		gameState.set_window_state(
+			menus.empty() ? WindowState::GAME : WindowState::MENU);
 	}
 
 	auto ctx = context();
@@ -162,7 +162,8 @@ bool Game::tick(int& loopNum)
 
 	// A run that ended during this tick, in a menu or in play, takes the screen now:
 	// whatever was open goes, and the end screen draws from the next tick.
-	if (outcomeBefore == RunOutcome::UNDECIDED && gameState.get_run_outcome() != RunOutcome::UNDECIDED)
+	if (outcomeBefore == RunOutcome::UNDECIDED &&
+		gameState.get_run_outcome() != RunOutcome::UNDECIDED)
 	{
 		menus.clear();
 		gameLoopCoordinator.open_end_of_run_screen(ctx);

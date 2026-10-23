@@ -51,15 +51,14 @@ int main()
 	}
 	catch (const std::exception& error)
 	{
-		const std::string warning = std::format("Warning: Could not open debug file: {}", error.what());
+		const std::string warning =
+			std::format("Warning: Could not open debug file: {}", error.what());
 		std::cerr << warning << std::endl;
 	}
 
-	std::clog << "STARTUP: Opened debug log\n"
-			  << std::flush;
+	std::clog << "STARTUP: Opened debug log\n" << std::flush;
 
-	std::clog << "STARTUP: Creating Game\n"
-			  << std::flush;
+	std::clog << "STARTUP: Creating Game\n" << std::flush;
 	// Game owns everything including Renderer and InputSystem
 	auto game = std::make_unique<Game>(std::random_device{}());
 
@@ -126,7 +125,8 @@ int main()
 		{ "Loading palette", load_palette },
 		{ "Loading prefabs", load_prefabs },
 	};
-	const std::optional<StartupRefusal> refusal = run_startup_steps(startupSteps, std::clog);
+	const std::optional<StartupRefusal> refusal =
+		run_startup_steps(startupSteps, std::clog);
 	if (refusal)
 	{
 		report_startup_refusal(*refusal);
@@ -162,7 +162,9 @@ int main()
 		}
 		catch (const std::exception& error)
 		{
-			const std::string warning = std::format("Warning: Exception closing debug file: {}", error.what());
+			const std::string warning = std::format(
+				"Warning: Exception closing debug file: {}",
+				error.what());
 			std::cerr << warning << std::endl;
 		}
 	}

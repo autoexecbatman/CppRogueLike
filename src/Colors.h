@@ -138,7 +138,8 @@ inline constexpr std::size_t COLOR_PAIR_TABLE_SIZE = ALL_COLOR_PAIR.size() + 1;
 //
 // Example:
 //   color_pair_name(ColorPairId::YELLOW_BLACK);   // -> "yellow_black"
-[[nodiscard]] inline constexpr std::string_view color_pair_name(ColorPairId pair)
+[[nodiscard]] inline constexpr std::string_view color_pair_name(
+	ColorPairId pair)
 {
 	switch (pair)
 	{

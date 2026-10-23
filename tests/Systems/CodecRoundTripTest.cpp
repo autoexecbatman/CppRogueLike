@@ -49,12 +49,17 @@ namespace
 {
 // Encodes to a string and parses it back; the value must survive the trip.
 template <typename EnumType, typename Encode, typename Parse>
-void expect_round_trip(EnumType value, Encode encode, Parse parse, const char* label)
+void expect_round_trip(
+	EnumType value,
+	Encode encode,
+	Parse parse,
+	const char* label)
 {
 	const std::string_view encoded = encode(value);
 
 	EXPECT_NE(encoded, "") << label << ": encoded to an empty string";
-	EXPECT_EQ(parse(encoded), value) << label << ": '" << encoded << "' did not parse back";
+	EXPECT_EQ(parse(encoded), value)
+		<< label << ": '" << encoded << "' did not parse back";
 }
 } // namespace
 
@@ -64,7 +69,11 @@ TEST(CodecRoundTripTest, TargetModeSurvivesEncoding)
 
 	for (const auto mode : modes)
 	{
-		expect_round_trip(mode, encode_target_mode, parse_target_mode, "TargetMode");
+		expect_round_trip(
+			mode,
+			encode_target_mode,
+			parse_target_mode,
+			"TargetMode");
 	}
 }
 
@@ -74,7 +83,11 @@ TEST(CodecRoundTripTest, ScrollAnimationSurvivesEncoding)
 
 	for (const auto animation : animations)
 	{
-		expect_round_trip(animation, encode_scroll_animation, parse_scroll_animation, "ScrollAnimation");
+		expect_round_trip(
+			animation,
+			encode_scroll_animation,
+			parse_scroll_animation,
+			"ScrollAnimation");
 	}
 }
 
@@ -84,7 +97,11 @@ TEST(CodecRoundTripTest, HandRequirementSurvivesEncoding)
 
 	for (const auto requirement : requirements)
 	{
-		expect_round_trip(requirement, encode_hand_requirement, parse_hand_requirement, "HandRequirement");
+		expect_round_trip(
+			requirement,
+			encode_hand_requirement,
+			parse_hand_requirement,
+			"HandRequirement");
 	}
 }
 
@@ -94,7 +111,11 @@ TEST(CodecRoundTripTest, WeaponSizeSurvivesEncoding)
 
 	for (const auto size : sizes)
 	{
-		expect_round_trip(size, encode_weapon_size, parse_weapon_size, "WeaponSize");
+		expect_round_trip(
+			size,
+			encode_weapon_size,
+			parse_weapon_size,
+			"WeaponSize");
 	}
 }
 
@@ -102,7 +123,11 @@ TEST(CodecRoundTripTest, CreatureSizeSurvivesEncoding)
 {
 	for (const auto size : ALL_CREATURE_SIZE)
 	{
-		expect_round_trip(size, encode_creature_size, parse_creature_size, "CreatureSize");
+		expect_round_trip(
+			size,
+			encode_creature_size,
+			parse_creature_size,
+			"CreatureSize");
 	}
 }
 
@@ -110,7 +135,11 @@ TEST(CodecRoundTripTest, IntelligenceRatingSurvivesEncoding)
 {
 	for (const auto rating : ALL_INTELLIGENCE_RATING)
 	{
-		expect_round_trip(rating, encode_intelligence_rating, parse_intelligence_rating, "IntelligenceRating");
+		expect_round_trip(
+			rating,
+			encode_intelligence_rating,
+			parse_intelligence_rating,
+			"IntelligenceRating");
 	}
 }
 
@@ -130,7 +159,11 @@ TEST(CodecRoundTripTest, ItemClassSurvivesEncoding)
 
 	for (const auto value : values)
 	{
-		expect_round_trip(value, encode_item_class, parse_item_class, "ItemClass");
+		expect_round_trip(
+			value,
+			encode_item_class,
+			parse_item_class,
+			"ItemClass");
 	}
 }
 
@@ -140,7 +173,11 @@ TEST(CodecRoundTripTest, PickableTypeSurvivesEncoding)
 
 	for (const auto value : values)
 	{
-		expect_round_trip(value, encode_pickable_type, parse_pickable_type, "PickableType");
+		expect_round_trip(
+			value,
+			encode_pickable_type,
+			parse_pickable_type,
+			"PickableType");
 	}
 }
 
@@ -150,7 +187,11 @@ TEST(CodecRoundTripTest, MagicalEffectSurvivesEncoding)
 
 	for (const auto value : values)
 	{
-		expect_round_trip(value, encode_magical_effect, parse_magical_effect, "MagicalEffect");
+		expect_round_trip(
+			value,
+			encode_magical_effect,
+			parse_magical_effect,
+			"MagicalEffect");
 	}
 }
 
@@ -160,7 +201,11 @@ TEST(CodecRoundTripTest, HelmCommandSurvivesEncoding)
 
 	for (const auto value : values)
 	{
-		expect_round_trip(value, encode_helm_command, parse_helm_command, "HelmCommand");
+		expect_round_trip(
+			value,
+			encode_helm_command,
+			parse_helm_command,
+			"HelmCommand");
 	}
 }
 
@@ -171,7 +216,11 @@ TEST(CodecRoundTripTest, ConsumableEffectSurvivesEncoding)
 
 	for (const auto effect : effects)
 	{
-		expect_round_trip(effect, encode_consumable_effect, parse_consumable_effect, "ConsumableEffect");
+		expect_round_trip(
+			effect,
+			encode_consumable_effect,
+			parse_consumable_effect,
+			"ConsumableEffect");
 	}
 }
 
@@ -201,7 +250,11 @@ TEST(CodecRoundTripTest, AttitudeSurvivesEncoding)
 {
 	for (const auto attitude : ALL_ATTITUDE)
 	{
-		expect_round_trip(attitude, encode_attitude, parse_attitude, "Attitude");
+		expect_round_trip(
+			attitude,
+			encode_attitude,
+			parse_attitude,
+			"Attitude");
 	}
 }
 
@@ -214,7 +267,8 @@ TEST(CodecRoundTripTest, OnlyAConfusedAiIsNotAuthorable)
 		EXPECT_TRUE(is_authorable_ai_type(kind)) << encode_ai_type(kind);
 		EXPECT_NE(kind, AiType::CONFUSED_MONSTER);
 	}
-	EXPECT_EQ(AUTHORABLE_AI_TYPES.size(), 7u) << "every AiType but CONFUSED_MONSTER";
+	EXPECT_EQ(AUTHORABLE_AI_TYPES.size(), 7u)
+		<< "every AiType but CONFUSED_MONSTER";
 }
 
 // Where a creature stands on the law/chaos axis, and on the good/evil one. Two axes
@@ -256,7 +310,11 @@ TEST(CodecRoundTripTest, CreatureClassSurvivesEncoding)
 
 	for (const auto creatureClass : classes)
 	{
-		expect_round_trip(creatureClass, encode_creature_class, parse_creature_class, "CreatureClass");
+		expect_round_trip(
+			creatureClass,
+			encode_creature_class,
+			parse_creature_class,
+			"CreatureClass");
 	}
 }
 
@@ -276,7 +334,11 @@ TEST(CodecRoundTripTest, DamageTypeSurvivesEncoding)
 
 	for (const auto type : types)
 	{
-		expect_round_trip(type, damage_type_name, parse_damage_type, "DamageType");
+		expect_round_trip(
+			type,
+			damage_type_name,
+			parse_damage_type,
+			"DamageType");
 	}
 }
 
@@ -285,7 +347,11 @@ TEST(CodecRoundTripTest, ColorPairSurvivesEncoding)
 {
 	for (const ColorPairId pair : ALL_COLOR_PAIR)
 	{
-		expect_round_trip(pair, color_pair_name, parse_color_pair, "ColorPairId");
+		expect_round_trip(
+			pair,
+			color_pair_name,
+			parse_color_pair,
+			"ColorPairId");
 	}
 }
 
@@ -298,19 +364,29 @@ TEST(CodecRoundTripTest, UnknownStringsThrow)
 	EXPECT_THROW((void)parse_morality("saintly"), std::runtime_error);
 	EXPECT_THROW((void)parse_creature_class("bard"), std::runtime_error);
 	EXPECT_THROW((void)parse_target_mode("not_a_mode"), std::runtime_error);
-	EXPECT_THROW((void)parse_scroll_animation("not_an_animation"), std::runtime_error);
-	EXPECT_THROW((void)parse_hand_requirement("not_a_requirement"), std::runtime_error);
+	EXPECT_THROW(
+		(void)parse_scroll_animation("not_an_animation"),
+		std::runtime_error);
+	EXPECT_THROW(
+		(void)parse_hand_requirement("not_a_requirement"),
+		std::runtime_error);
 	EXPECT_THROW((void)parse_weapon_size("not_a_size"), std::runtime_error);
 	EXPECT_THROW((void)parse_creature_size("enormous"), std::runtime_error);
-	EXPECT_THROW((void)parse_intelligence_rating("brilliant"), std::runtime_error);
+	EXPECT_THROW(
+		(void)parse_intelligence_rating("brilliant"),
+		std::runtime_error);
 	EXPECT_THROW((void)parse_buff_type("not_a_buff"), std::runtime_error);
 	EXPECT_THROW((void)parse_helm_command("awake"), std::runtime_error);
 	EXPECT_THROW((void)parse_item_class("not_a_class"), std::runtime_error);
 	EXPECT_THROW((void)parse_pickable_type("not_a_type"), std::runtime_error);
-	EXPECT_THROW((void)parse_magical_effect("not_an_effect"), std::runtime_error);
+	EXPECT_THROW(
+		(void)parse_magical_effect("not_an_effect"),
+		std::runtime_error);
 	EXPECT_THROW((void)parse_ai_type("not_an_ai"), std::runtime_error);
 	EXPECT_THROW((void)parse_attitude("grumpy"), std::runtime_error);
-	EXPECT_THROW((void)parse_consumable_effect("not_an_effect"), std::runtime_error);
+	EXPECT_THROW(
+		(void)parse_consumable_effect("not_an_effect"),
+		std::runtime_error);
 }
 
 // Added 2026-10-01, after docs/pair_symmetry.py reported equipment_slot as the one
@@ -323,7 +399,8 @@ TEST(CodecRoundTripTest, EveryEquipmentSlotRoundTrips)
 		const EquipmentSlot slot = static_cast<EquipmentSlot>(index);
 
 		EXPECT_EQ(parse_equipment_slot(encode_equipment_slot(slot)), slot)
-			<< "slot " << index << " did not survive a round trip through its JSON spelling";
+			<< "slot " << index
+			<< " did not survive a round trip through its JSON spelling";
 	}
 }
 
@@ -337,7 +414,8 @@ TEST(CodecRoundTripTest, NoTwoEquipmentSlotsShareASpelling)
 	std::vector<std::string_view> spellings;
 	for (int index = 0; index <= static_cast<int>(EquipmentSlot::NONE); ++index)
 	{
-		spellings.push_back(encode_equipment_slot(static_cast<EquipmentSlot>(index)));
+		spellings.push_back(
+			encode_equipment_slot(static_cast<EquipmentSlot>(index)));
 	}
 	const size_t written = spellings.size();
 
@@ -345,14 +423,17 @@ TEST(CodecRoundTripTest, NoTwoEquipmentSlotsShareASpelling)
 	const auto duplicates = std::ranges::unique(spellings);
 	spellings.erase(duplicates.begin(), duplicates.end());
 
-	EXPECT_EQ(spellings.size(), written) << "two equipment slots encode to the same string";
+	EXPECT_EQ(spellings.size(), written)
+		<< "two equipment slots encode to the same string";
 }
 
 // Every item sprite in the shipped content file survives a save and a load through the
 // tile codec: same keys, same sheet, column and row.
 TEST(CodecRoundTripTest, EveryItemSpriteSurvivesASaveAndALoad)
 {
-	const std::filesystem::path scratch = std::filesystem::temp_directory_path() / "codec_round_trip_item_tiles.json";
+	const std::filesystem::path scratch =
+		std::filesystem::temp_directory_path() /
+		"codec_round_trip_item_tiles.json";
 	ContentRegistry shipped{};
 	ContentRegistryIO::load(shipped, Paths::CONTENT_TILES);
 	ASSERT_FALSE(shipped.all_tiles().empty());
@@ -366,12 +447,14 @@ TEST(CodecRoundTripTest, EveryItemSpriteSurvivesASaveAndALoad)
 
 	// Both sides went through one reader, so they are also checked against the file's own records.
 	std::ifstream shippedFile(Paths::resolve(Paths::CONTENT_TILES));
-	const nlohmann::json records = nlohmann::json::parse(shippedFile).at("items");
+	const nlohmann::json records =
+		nlohmann::json::parse(shippedFile).at("items");
 	ASSERT_EQ(records.size(), shipped.all_tiles().size());
 	for (const auto& [key, record] : records.items())
 	{
 		const TileRef tile = shipped.get_tile(key);
-		EXPECT_EQ(static_cast<int>(tile.sheet), record.at("sheet").get<int>()) << key;
+		EXPECT_EQ(static_cast<int>(tile.sheet), record.at("sheet").get<int>())
+			<< key;
 		EXPECT_EQ(tile.col, record.at("col").get<int>()) << key;
 		EXPECT_EQ(tile.row, record.at("row").get<int>()) << key;
 	}

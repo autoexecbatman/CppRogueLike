@@ -51,8 +51,9 @@
 // a slot that lost what it was carrying. Asserted here, at the single site every
 // entry passes through - wear, equip_item, the put-back in unequip_item and the load
 // path all reach it - rather than at each of the readers that dereference it.
-EquippedItem::EquippedItem(std::unique_ptr<Item> worn, EquipmentSlot wornIn)
-	: item(std::move(worn)), slot(wornIn)
+EquippedItem::EquippedItem(std::unique_ptr<Item> worn, EquipmentSlot wornIn) :
+	item(std::move(worn)),
+	slot(wornIn)
 {
 	assert(item && "an equipment slot is built around the item in it");
 }
@@ -95,7 +96,9 @@ struct WornAbilityEffect
 	int add{ 0 };
 };
 
-WornAbilityEffect worn_ability_effect(const Item& item, BuffType ability) noexcept
+WornAbilityEffect worn_ability_effect(
+	const Item& item,
+	BuffType ability) noexcept
 {
 	WornAbilityEffect effect{};
 
@@ -117,7 +120,10 @@ WornAbilityEffect worn_ability_effect(const Item& item, BuffType ability) noexce
 	auto from_stat_boost = [ability, &effect](const auto& boost)
 	{
 		using BoostType = std::decay_t<decltype(boost)>;
-		if constexpr (std::is_same_v<BoostType, JewelryAmulet> || std::is_same_v<BoostType, Gauntlets> || std::is_same_v<BoostType, Girdle>)
+		if constexpr (
+			std::is_same_v<BoostType, JewelryAmulet> ||
+			std::is_same_v<BoostType, Gauntlets> ||
+			std::is_same_v<BoostType, Girdle>)
 		{
 			int amount = 0;
 			switch (ability)
@@ -179,8 +185,10 @@ WornAbilityEffect worn_ability_effect(const Item& item, BuffType ability) noexce
 //   is_giant_strength_girdle(gauntletsOfOgrePower); // -> false, gauntlets
 bool is_giant_strength_girdle(const Item& item) noexcept
 {
-	const Girdle* girdle = item.behavior ? std::get_if<Girdle>(&*item.behavior) : nullptr;
-	return girdle != nullptr && girdle->application == BuffApplication::SET && girdle->strBonus > 0;
+	const Girdle* girdle =
+		item.behavior ? std::get_if<Girdle>(&*item.behavior) : nullptr;
+	return girdle != nullptr && girdle->application == BuffApplication::SET &&
+		girdle->strBonus > 0;
 }
 
 // The item's gauntlets if they set Strength, as gauntlets of ogre power do, or null.
@@ -190,8 +198,13 @@ bool is_giant_strength_girdle(const Item& item) noexcept
 //   strength_setting_gauntlets(gauntletsOfSwimmingAndClimbing); // -> nullptr, they add
 const Gauntlets* strength_setting_gauntlets(const Item& item) noexcept
 {
-	const Gauntlets* gauntlets = item.behavior ? std::get_if<Gauntlets>(&*item.behavior) : nullptr;
-	return gauntlets != nullptr && gauntlets->application == BuffApplication::SET && gauntlets->strBonus > 0 ? gauntlets : nullptr;
+	const Gauntlets* gauntlets =
+		item.behavior ? std::get_if<Gauntlets>(&*item.behavior) : nullptr;
+	return gauntlets != nullptr &&
+			gauntlets->application == BuffApplication::SET &&
+			gauntlets->strBonus > 0 ?
+		gauntlets :
+		nullptr;
 }
 } // namespace
 
@@ -221,7 +234,8 @@ void Creature::load(const json& source)
 	corpseName = source.at("corpseName").get<std::string>();
 	corpseNutrition = source.at("corpseNutrition").get<int>();
 	corpseTaste = source.at("corpseTaste").get<std::string>();
-	corpseEdibility = corpse_edibility_from_record(source.at("corpseEdible").get<bool>());
+	corpseEdibility =
+		corpse_edibility_from_record(source.at("corpseEdible").get<bool>());
 	bodyPlan.clear();
 	for (const auto& slotName : source.at("bodyPlan"))
 	{
@@ -238,7 +252,8 @@ void Creature::load(const json& source)
 	webStuckTurns = source.at("webStuckTurns").get<int>();
 	webStrength = source.at("webStrength").get<int>();
 	// trappingWeb stays empty: webs are spell tiles, which the save does not hold (issues/0167).
-	creatureClass = parse_creature_class(source.at("creatureClass").get<std::string>());
+	creatureClass =
+		parse_creature_class(source.at("creatureClass").get<std::string>());
 	hitDie = source.at("hitDie").get<int>();
 	attacksPerRound = source.at("attacksPerRound").get<float>();
 	actionDelay = source.at("actionDelay").get<int>();
@@ -247,7 +262,8 @@ void Creature::load(const json& source)
 	lifespan.reset();
 	if (!lifespanRecord.is_null())
 	{
-		const PlayerRaceState race = static_cast<PlayerRaceState>(lifespanRecord.at("race").get<int>());
+		const PlayerRaceState race =
+			static_cast<PlayerRaceState>(lifespanRecord.at("race").get<int>());
 		lifespan = Lifespan{
 			race,
 			lifespanRecord.at("startingAge").get<int>(),
@@ -268,7 +284,8 @@ void Creature::load(const json& source)
 		PendingPoison dose{};
 		dose.roundsUntilOnset = poisonJson.at("roundsUntilOnset").get<int>();
 		dose.damage = poisonJson.at("damage").get<int>();
-		dose.effect = parse_buff_type(poisonJson.at("effect").get<std::string>());
+		dose.effect =
+			parse_buff_type(poisonJson.at("effect").get<std::string>());
 		dose.effectValue = poisonJson.at("effectValue").get<int>();
 		dose.effectRounds = poisonJson.at("effectRounds").get<int>();
 		pendingPoison = dose;
@@ -283,18 +300,21 @@ void Creature::load(const json& source)
 	if (source.contains("healthPool"))
 	{
 		const auto& healthJson = source.at("healthPool");
-		healthPool = std::make_unique<HealthPool>(healthJson.at("hpMax").get<int>());
+		healthPool =
+			std::make_unique<HealthPool>(healthJson.at("hpMax").get<int>());
 		healthPool->set_hp(healthJson.at("hp").get<int>());
 		healthPool->set_hp_base(healthJson.at("hpBase").get<int>());
 		healthPool->set_temp_hp(healthJson.at("tempHp").get<int>());
-		healthPool->set_unregenerable_damage(healthJson.at("unregenerableDamage").get<int>());
+		healthPool->set_unregenerable_damage(
+			healthJson.at("unregenerableDamage").get<int>());
 	}
 	// Load constitution tracker state; the score inside is saved only once one is recorded.
 	{
 		const auto& constJson = source.at("constitutionTracker");
 		if (constJson.contains("lastConstitution"))
 		{
-			constitutionTracker->set_last_constitution(constJson.at("lastConstitution").get<int>());
+			constitutionTracker->set_last_constitution(
+				constJson.at("lastConstitution").get<int>());
 		}
 	}
 	// Load experience reward
@@ -309,14 +329,17 @@ void Creature::load(const json& source)
 		const auto& acJson = source["armorClass"];
 		armorClass = std::make_unique<ArmorClass>(10);
 		armorClass->set_armor_class(acJson.at("armorClass").get<int>());
-		armorClass->set_base_armor_class(acJson.at("baseArmorClass").get<int>());
+		armorClass->set_base_armor_class(
+			acJson.at("baseArmorClass").get<int>());
 	}
 	if (source.contains("ai"))
 	{
 		ai = Ai::create(source["ai"]);
 	}
 	inventoryData = CreatureInventory(50); // Default capacity
-	InventoryOperations::load_inventory(inventoryData, source.at("inventoryData"));
+	InventoryOperations::load_inventory(
+		inventoryData,
+		source.at("inventoryData"));
 	if (source.contains("shop"))
 	{
 		shop = ShopKeeper::create(source["shop"]);
@@ -331,13 +354,17 @@ void Creature::load(const json& source)
 			buff.type = parse_buff_type(buffJson.at("type").get<std::string>());
 			buff.value = buffJson.at("value").get<int>();
 			const json& expiry = buffJson.at("expiryTime");
-			buff.expiryTime = expiry.is_null() ? std::nullopt : std::optional<int>{ expiry.get<int>() };
-			buff.application = parse_buff_application(buffJson.at("application").get<std::string>());
+			buff.expiryTime = expiry.is_null() ?
+				std::nullopt :
+				std::optional<int>{ expiry.get<int>() };
+			buff.application = parse_buff_application(
+				buffJson.at("application").get<std::string>());
 			for (const auto& saveJson : buffJson.at("opponentSaves"))
 			{
-				buff.opponentSaves.push_back(OpponentSave{
-					saveJson.at("opponent").get<UniqueId::IdType>(),
-					saveJson.at("isMade").get<bool>() });
+				buff.opponentSaves.push_back(
+					OpponentSave{
+						saveJson.at("opponent").get<UniqueId::IdType>(),
+						saveJson.at("isMade").get<bool>() });
 			}
 			activeBuffs.push_back(buff);
 		}
@@ -349,8 +376,11 @@ void Creature::load(const json& source)
 	equippedItems.clear();
 	for (const auto& itemEntry : source.at("equippedItems"))
 	{
-		const EquipmentSlot slot = parse_equipment_slot(itemEntry.at("slot").get<std::string>());
-		auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
+		const EquipmentSlot slot =
+			parse_equipment_slot(itemEntry.at("slot").get<std::string>());
+		auto item = std::make_unique<Item>(
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
 		item->load(itemEntry.at("item"));
 		equippedItems.emplace_back(std::move(item), slot);
 	}
@@ -408,15 +438,15 @@ void Creature::save(json& output)
 	output["hitDie"] = hitDie;
 	output["attacksPerRound"] = attacksPerRound;
 	output["actionDelay"] = actionDelay;
-	output["lifespan"] = lifespan.has_value()
-		? json{
-			  { "race", static_cast<int>(lifespan->race) },
-			  { "startingAge", lifespan->startingAge },
-			  { "maximumAge", lifespan->maximumAge },
-			  { "yearsLived", lifespan->yearsLived },
-			  { "magicalYears", lifespan->magicalYears },
-		  }
-		: json(nullptr);
+	output["lifespan"] = lifespan.has_value() ?
+		json{
+			{ "race", static_cast<int>(lifespan->race) },
+			{ "startingAge", lifespan->startingAge },
+			{ "maximumAge", lifespan->maximumAge },
+			{ "yearsLived", lifespan->yearsLived },
+			{ "magicalYears", lifespan->magicalYears },
+		} :
+		json(nullptr);
 	output["spellcasting"] = encode_spellcasting(spellcasting);
 	output["nextActionTime"] = nextActionTime;
 	output["dr"] = damageResistance;
@@ -450,12 +480,14 @@ void Creature::save(json& output)
 		healthJson["hp"] = healthPool->get_hp();
 		healthJson["hpBase"] = healthPool->get_hp_base();
 		healthJson["tempHp"] = healthPool->get_temp_hp();
-		healthJson["unregenerableDamage"] = healthPool->get_unregenerable_damage();
+		healthJson["unregenerableDamage"] =
+			healthPool->get_unregenerable_damage();
 		output["healthPool"] = healthJson;
 	}
 	// Save constitution tracker state
 	json constJson;
-	if (const auto lastConstitution = get_last_constitution(); lastConstitution.has_value())
+	if (const auto lastConstitution = get_last_constitution();
+		lastConstitution.has_value())
 	{
 		constJson["lastConstitution"] = *lastConstitution;
 	}
@@ -499,15 +531,18 @@ void Creature::save(json& output)
 		json buffJson;
 		buffJson["type"] = encode_buff_type(buff.type);
 		buffJson["value"] = buff.value;
-		buffJson["expiryTime"] = buff.expiryTime.has_value() ? json(*buff.expiryTime) : json(nullptr);
+		buffJson["expiryTime"] = buff.expiryTime.has_value() ?
+			json(*buff.expiryTime) :
+			json(nullptr);
 		buffJson["application"] = encode_buff_application(buff.application);
 		json savesJson = json::array();
 		for (const OpponentSave& save : buff.opponentSaves)
 		{
-			savesJson.push_back(json{
-				{ "opponent", save.opponent },
-				{ "isMade", save.isMade },
-			});
+			savesJson.push_back(
+				json{
+					{ "opponent", save.opponent },
+					{ "isMade", save.isMade },
+				});
 		}
 		buffJson["opponentSaves"] = savesJson;
 		buffsJson.push_back(buffJson);
@@ -517,27 +552,36 @@ void Creature::save(json& output)
 	json equippedJson = json::array();
 	for (const EquippedItem& equipped : equippedItems)
 	{
-		assert(equipped.item && "Creature::save: an equipment entry holds no item");
+		assert(
+			equipped.item &&
+			"Creature::save: an equipment entry holds no item");
 		json itemJson;
 		equipped.item->save(itemJson);
-		equippedJson.push_back(json{
-			{ "slot", encode_equipment_slot(equipped.slot) },
-			{ "item", itemJson },
-		});
+		equippedJson.push_back(
+			json{
+				{ "slot", encode_equipment_slot(equipped.slot) },
+				{ "item", itemJson },
+			});
 	}
 	output["equippedItems"] = equippedJson;
 }
 
 void Creature::update_creature_state(GameContext& ctx)
 {
-	assert(ctx.tileConfig && "Creature::update_creature_state: called without a tileConfig");
+	assert(
+		ctx.tileConfig &&
+		"Creature::update_creature_state: called without a tileConfig");
 	if (!invisibleTile.is_valid())
 	{
 		invisibleTile = ctx.tileConfig->get("TILE_INVISIBLE");
 	}
 
-	assert(ctx.buffSystem && "update_creature_state: a creature was updated with no buff system");
-	assert(ctx.gameState && "update_creature_state: a creature was updated with no clock to read its buffs against");
+	assert(
+		ctx.buffSystem &&
+		"update_creature_state: a creature was updated with no buff system");
+	assert(
+		ctx.gameState &&
+		"update_creature_state: a creature was updated with no clock to read its buffs against");
 
 	// It reads the clock rather than counting, so running it once per action costs
 	// nothing: a creature acting twice in a round reaches the same answer twice.
@@ -562,14 +606,15 @@ void Creature::update_armor_class(GameContext& ctx)
 		return;
 	}
 
-	ctx.messageSystem->log(std::format(
-		"Armor Class updated: {} -> {} (Base: {}, Dex: {:+}, Equipment: {:+}, Temp: {:+})",
-		breakdown.previous,
-		breakdown.total,
-		breakdown.base,
-		breakdown.dexterity,
-		breakdown.equipment,
-		breakdown.temporary));
+	ctx.messageSystem->log(
+		std::format(
+			"Armor Class updated: {} -> {} (Base: {}, Dex: {:+}, Equipment: {:+}, Temp: {:+})",
+			breakdown.previous,
+			breakdown.total,
+			breakdown.base,
+			breakdown.dexterity,
+			breakdown.equipment,
+			breakdown.temporary));
 
 	// Name each contributing item, skipping the slots that gave nothing.
 	const ArmorClassSource sources[] = {
@@ -582,7 +627,8 @@ void Creature::update_armor_class(GameContext& ctx)
 	{
 		if (!source.name.empty())
 		{
-			ctx.messageSystem->log(std::format("  {:+} from {}", source.bonus, source.name));
+			ctx.messageSystem->log(
+				std::format("  {:+} from {}", source.bonus, source.name));
 		}
 	}
 }
@@ -665,7 +711,9 @@ void Creature::adjust_ability(Ability ability, int delta) noexcept
 
 void Creature::set_hit_dice(int hitPoints)
 {
-	assert(hitPoints > 0 && "Creature::set_hit_dice called with a roll at or below zero");
+	assert(
+		hitPoints > 0 &&
+		"Creature::set_hit_dice called with a roll at or below zero");
 	healthPool = std::make_unique<HealthPool>(hitPoints);
 
 	// Recorded now, so the first tick finds nothing to apply.
@@ -674,9 +722,13 @@ void Creature::set_hit_dice(int hitPoints)
 
 void Creature::update_constitution_bonus(GameContext& ctx)
 {
-	assert(ctx.dataManager && "Creature::update_constitution_bonus: called without a dataManager");
+	assert(
+		ctx.dataManager &&
+		"Creature::update_constitution_bonus: called without a dataManager");
 	const std::optional<int> oldCon = get_last_constitution();
-	const auto result = constitutionTracker->apply_constitution_changes(*this, *ctx.dataManager);
+	const auto result = constitutionTracker->apply_constitution_changes(
+		*this,
+		*ctx.dataManager);
 
 	if (result.hpDifference == 0)
 	{
@@ -692,14 +744,24 @@ void Creature::update_constitution_bonus(GameContext& ctx)
 	{
 		if (result.hpDifference > 0)
 		{
-			ctx.messageSystem->message(ColorPairId::GREEN_BLACK,
-				std::format("Constitution increased from {} to {}! You gain {} hit points.", *oldCon, get_constitution(), result.hpDifference),
+			ctx.messageSystem->message(
+				ColorPairId::GREEN_BLACK,
+				std::format(
+					"Constitution increased from {} to {}! You gain {} hit points.",
+					*oldCon,
+					get_constitution(),
+					result.hpDifference),
 				MessageCompletion::FINISHED);
 		}
 		else
 		{
-			ctx.messageSystem->message(ColorPairId::RED_BLACK,
-				std::format("Constitution decreased from {} to {}! You lose {} hit points.", *oldCon, get_constitution(), -result.hpDifference),
+			ctx.messageSystem->message(
+				ColorPairId::RED_BLACK,
+				std::format(
+					"Constitution decreased from {} to {}! You lose {} hit points.",
+					*oldCon,
+					get_constitution(),
+					-result.hpDifference),
 				MessageCompletion::FINISHED);
 		}
 	}
@@ -709,11 +771,15 @@ void Creature::update_constitution_bonus(GameContext& ctx)
 		set_hp(0);
 		if (is_player())
 		{
-			ctx.messageSystem->message(ColorPairId::RED_BLACK, "Your life force has been drained beyond recovery. You die!", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::RED_BLACK,
+				"Your life force has been drained beyond recovery. You die!",
+				MessageCompletion::FINISHED);
 		}
 		else
 		{
-			ctx.messageSystem->log(std::format("{} dies from stat drain.", get_name()));
+			ctx.messageSystem->log(
+				std::format("{} dies from stat drain.", get_name()));
 		}
 		die(ctx);
 	}
@@ -721,20 +787,27 @@ void Creature::update_constitution_bonus(GameContext& ctx)
 
 // Applies damage and shows the number floating off the creature.
 //
-void Creature::regenerate_from_constitution(int roundsElapsed, const DataManager& dataManager)
+void Creature::regenerate_from_constitution(
+	int roundsElapsed,
+	const DataManager& dataManager)
 {
-	assert(roundsElapsed > 0 && "Creature::regenerate_from_constitution called before a round has run");
+	assert(
+		roundsElapsed > 0 &&
+		"Creature::regenerate_from_constitution called before a round has run");
 
 	// Every creature mends by Constitution, monsters included (DMG, Ability Scores for Monsters);
 	// the column holds 0 below Constitution 20, the book's "Nil".
-	const int turnsBetweenPoints = dataManager.constitution_for(get_constitution()).Regeneration;
+	const int turnsBetweenPoints =
+		dataManager.constitution_for(get_constitution()).Regeneration;
 	if (turnsBetweenPoints == 0)
 	{
 		return;
 	}
 
 	// A point each time the listed number of turns has run, reckoned in rounds.
-	if (roundsElapsed % (turnsBetweenPoints * GameBalance::Time::ROUNDS_PER_TURN) == 0)
+	if (roundsElapsed %
+			(turnsBetweenPoints * GameBalance::Time::ROUNDS_PER_TURN) ==
+		0)
 	{
 		[[maybe_unused]] const int healed = healthPool->regenerate(1);
 	}
@@ -768,11 +841,23 @@ void Creature::tick_poison(int roundEndTime, GameContext& ctx)
 	// A poison that debilitates leaves its condition behind; one that wounds does not.
 	if (effect != BuffType::NONE)
 	{
-		ctx.buffSystem->add_buff(*this, effect, effectValue, effectRounds, BuffApplication::ADD, roundEndTime);
+		ctx.buffSystem->add_buff(
+			*this,
+			effect,
+			effectValue,
+			effectRounds,
+			BuffApplication::ADD,
+			roundEndTime);
 
 		// The onset is a round after the bite, so it is announced when it arrives.
-		ctx.messageSystem->message(actorData.color, actorData.name, MessageCompletion::CONTINUED);
-		ctx.messageSystem->message(ColorPairId::WHITE_RED, " is weakened by the venom!", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			actorData.color,
+			actorData.name,
+			MessageCompletion::CONTINUED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_RED,
+			" is weakened by the venom!",
+			MessageCompletion::FINISHED);
 	}
 
 	if (damage <= 0)
@@ -780,14 +865,22 @@ void Creature::tick_poison(int roundEndTime, GameContext& ctx)
 		return;
 	}
 
-	ctx.messageSystem->message(actorData.color, actorData.name, MessageCompletion::CONTINUED);
-	ctx.messageSystem->message(ColorPairId::WHITE_RED, " is racked by the venom!", MessageCompletion::FINISHED);
+	ctx.messageSystem->message(
+		actorData.color,
+		actorData.name,
+		MessageCompletion::CONTINUED);
+	ctx.messageSystem->message(
+		ColorPairId::WHITE_RED,
+		" is racked by the venom!",
+		MessageCompletion::FINISHED);
 	take_damage_and_check_death(damage, ctx, DamageType::POISON);
 }
 
 void Creature::regenerate_from_ring(int roundsElapsed)
 {
-	assert(roundsElapsed > 0 && "Creature::regenerate_from_ring called before a round has run");
+	assert(
+		roundsElapsed > 0 &&
+		"Creature::regenerate_from_ring called before a round has run");
 
 	if (is_dead() || !wears_ring_of(MagicalEffect::REGENERATION))
 	{
@@ -805,16 +898,25 @@ void Creature::regenerate_from_ring(int roundsElapsed)
 // looks; this states who was hurt and joins the two.
 int Creature::take_damage(int damage, GameContext& ctx, DamageType damageType)
 {
-	assert(damageType != DamageType::FIRE && damageType != DamageType::COLD && "Creature::take_damage: fire and cold arrive as ResistedDamage from DamageResolver::reduce_dice");
+	assert(
+		damageType != DamageType::FIRE && damageType != DamageType::COLD &&
+		"Creature::take_damage: fire and cold arrive as ResistedDamage from DamageResolver::reduce_dice");
 	return take_damage_hit_points(damage, ctx, damageType);
 }
 
-int Creature::take_damage(const DamageResolver::ResistedDamage& damage, GameContext& ctx)
+int Creature::take_damage(
+	const DamageResolver::ResistedDamage& damage,
+	GameContext& ctx)
 {
-	return take_damage_hit_points(damage.hit_points(), ctx, damage.damage_type());
+	return take_damage_hit_points(
+		damage.hit_points(),
+		ctx,
+		damage.damage_type());
 }
 
-void Creature::take_damage_and_check_death(const DamageResolver::ResistedDamage& damage, GameContext& ctx)
+void Creature::take_damage_and_check_death(
+	const DamageResolver::ResistedDamage& damage,
+	GameContext& ctx)
 {
 	take_damage(damage, ctx);
 	if (is_dead())
@@ -823,11 +925,17 @@ void Creature::take_damage_and_check_death(const DamageResolver::ResistedDamage&
 	}
 }
 
-int Creature::take_damage_hit_points(int damage, GameContext& ctx, DamageType damageType)
+int Creature::take_damage_hit_points(
+	int damage,
+	GameContext& ctx,
+	DamageType damageType)
 {
-	const int actualDamage = healthPool->take_damage(*this, damage, ctx, damageType);
+	const int actualDamage =
+		healthPool->take_damage(*this, damage, ctx, damageType);
 
-	assert(ctx.floatingText && "take_damage_hit_points: damage was taken with no floating text to show it");
+	assert(
+		ctx.floatingText &&
+		"take_damage_hit_points: damage was taken with no floating text to show it");
 	ctx.floatingText->spawn_damage(
 		position,
 		actualDamage,
@@ -836,7 +944,10 @@ int Creature::take_damage_hit_points(int damage, GameContext& ctx, DamageType da
 	return actualDamage;
 }
 
-void Creature::take_damage_and_check_death(int damage, GameContext& ctx, DamageType damageType)
+void Creature::take_damage_and_check_death(
+	int damage,
+	GameContext& ctx,
+	DamageType damageType)
 {
 	take_damage(damage, ctx, damageType);
 	if (is_dead())
@@ -863,12 +974,15 @@ void Creature::update(GameContext& ctx)
 void Creature::update_awareness(const GameContext& ctx)
 {
 	assert(ctx.map && "Creature::update_awareness: called without a map");
-	assert(ctx.gameState && "update_awareness: a creature looked for the player with no clock to remember by");
+	assert(
+		ctx.gameState &&
+		"update_awareness: a creature looked for the player with no clock to remember by");
 
 	// An invisible player is not seen even in plain line of sight.
 	if (ctx.map->is_in_fov(position) && !ctx.player()->is_invisible())
 	{
-		awareUntilTime = expiry_time(ctx.gameState->get_time(), AWARENESS_ROUNDS);
+		awareUntilTime =
+			expiry_time(ctx.gameState->get_time(), AWARENESS_ROUNDS);
 	}
 }
 
@@ -893,7 +1007,9 @@ bool Creature::has_slot(EquipmentSlot slot) const noexcept
 void Creature::wear(std::unique_ptr<Item> item, EquipmentSlot slot)
 {
 	assert(item && "Creature::wear called with no item");
-	assert(has_slot(slot) && "Creature::wear called with a slot this body does not have");
+	assert(
+		has_slot(slot) &&
+		"Creature::wear called with a slot this body does not have");
 
 	equippedItems.push_back(EquippedItem(std::move(item), slot));
 }
@@ -932,10 +1048,14 @@ int Creature::worn_resistance_strength(DamageType damageType) const noexcept
 	{
 		const Item& item = *equipped.item;
 		// An item's effect and its enhancement are two claims; the larger stands.
-		greatest = std::max(greatest, item.get_enhancement().resistance_strength(damageType));
+		greatest = std::max(
+			greatest,
+			item.get_enhancement().resistance_strength(damageType));
 		if (item.behavior)
 		{
-			greatest = std::max(greatest, get_item_resistance_strength(*item.behavior, damageType));
+			greatest = std::max(
+				greatest,
+				get_item_resistance_strength(*item.behavior, damageType));
 		}
 	}
 	return greatest;
@@ -1104,7 +1224,8 @@ bool Creature::wears_item_with(MagicalEffect effect) const noexcept
 
 		const auto matches = [effect](const auto& behavior)
 		{
-			if constexpr (GrantsMagicalEffect<std::remove_cvref_t<decltype(behavior)>>)
+			if constexpr (
+				GrantsMagicalEffect<std::remove_cvref_t<decltype(behavior)>>)
 			{
 				return behavior.effect == effect;
 			}
@@ -1136,7 +1257,8 @@ bool Creature::needs_air_underwater() const noexcept
 void Creature::tick_breath(int roundEndTime, GameContext& ctx)
 {
 	assert(ctx.map && "tick_breath: a round ran with no map to stand on");
-	assert(ctx.dice && "tick_breath: a round ran with no dice to check against");
+	assert(
+		ctx.dice && "tick_breath: a round ran with no dice to check against");
 
 	// Dry ground, flight over water, water breathing or the helm: no breath is held, and any held is over.
 	if (!ctx.map->is_water(position) || is_flying() || !needs_air_underwater())
@@ -1148,7 +1270,8 @@ void Creature::tick_breath(int roundEndTime, GameContext& ctx)
 	// The round it is first found in water is the gulp of air.
 	if (!airUntilTime.has_value())
 	{
-		airUntilTime = expiry_time(roundEndTime, breath_rounds(get_constitution()));
+		airUntilTime =
+			expiry_time(roundEndTime, breath_rounds(get_constitution()));
 		return;
 	}
 
@@ -1167,8 +1290,12 @@ void Creature::tick_breath(int roundEndTime, GameContext& ctx)
 		return;
 	}
 
-	ctx.messageSystem->append_message_part(actorData.color, std::format("{}", actorData.name));
-	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " cannot hold out any longer and drowns!\n");
+	ctx.messageSystem->append_message_part(
+		actorData.color,
+		std::format("{}", actorData.name));
+	ctx.messageSystem->append_message_part(
+		ColorPairId::WHITE_BLACK,
+		" cannot hold out any longer and drowns!\n");
 	ctx.messageSystem->finalize_message();
 
 	// die() reads the health pool rather than emptying it, so drowning empties it first.
@@ -1189,7 +1316,8 @@ bool Creature::has_bypass(ActorState state) const noexcept
 
 	// Either item carries a wearer across water: the gauntlets of swimming, and the
 	// helm of underwater action, which also keeps the air on once they are in.
-	return wears_item_with(MagicalEffect::SWIMMING) || wears_item_with(MagicalEffect::UNDERWATER_ACTION);
+	return wears_item_with(MagicalEffect::SWIMMING) ||
+		wears_item_with(MagicalEffect::UNDERWATER_ACTION);
 }
 
 bool Creature::wears_ring_of(MagicalEffect effect) const noexcept
@@ -1197,10 +1325,13 @@ bool Creature::wears_ring_of(MagicalEffect effect) const noexcept
 	auto holds_ring_of_effect = [this, effect](EquipmentSlot hand)
 	{
 		const Item* ring = get_equipped_item(hand);
-		const MagicalRing* magicalRing = ring && ring->behavior ? std::get_if<MagicalRing>(&*ring->behavior) : nullptr;
+		const MagicalRing* magicalRing = ring && ring->behavior ?
+			std::get_if<MagicalRing>(&*ring->behavior) :
+			nullptr;
 		return magicalRing != nullptr && magicalRing->effect == effect;
 	};
-	return holds_ring_of_effect(EquipmentSlot::RIGHT_RING) || holds_ring_of_effect(EquipmentSlot::LEFT_RING);
+	return holds_ring_of_effect(EquipmentSlot::RIGHT_RING) ||
+		holds_ring_of_effect(EquipmentSlot::LEFT_RING);
 }
 
 // Binds this creature into a web. The caller decides what is announced.
@@ -1226,7 +1357,8 @@ WebEscape Creature::try_break_web(GameContext& ctx)
 	assert(ctx.dice && "Creature::try_break_web: called without dice");
 
 	// Stronger creatures tear loose more often; stronger webs hold better.
-	const int breakChance = std::max(10, 20 + (get_strength() * 5) - (webStrength * 10));
+	const int breakChance =
+		std::max(10, 20 + (get_strength() * 5) - (webStrength * 10));
 
 	if (ctx.dice->d100() <= breakChance)
 	{
@@ -1261,18 +1393,24 @@ void Creature::release_from_web()
 
 void Creature::apply_confusion(int durationRounds, int currentTime)
 {
-	ai = std::make_unique<AiMonsterConfused>(expiry_time(currentTime, durationRounds), std::move(ai));
+	ai = std::make_unique<AiMonsterConfused>(
+		expiry_time(currentTime, durationRounds),
+		std::move(ai));
 }
 
 void Creature::drop(Item& item, GameContext& ctx)
 {
-	assert(ctx.floorInventory && "Creature::drop: called without a floorInventory");
+	assert(
+		ctx.floorInventory &&
+		"Creature::drop: called without a floorInventory");
 
 	[[maybe_unused]] auto is_null = [](const auto& invItem)
 	{
 		return !invItem;
 	};
-	assert(std::ranges::none_of(inventoryData.items, is_null) && "Creature::drop: the pack holds a null item");
+	assert(
+		std::ranges::none_of(inventoryData.items, is_null) &&
+		"Creature::drop: the pack holds a null item");
 
 	auto matches_item = [&item](const auto& invItem)
 	{
@@ -1290,10 +1428,16 @@ void Creature::drop(Item& item, GameContext& ctx)
 	foundPtr->position = position;
 	InventoryOperations::add_item(*ctx.floorInventory, std::move(foundPtr));
 	InventoryOperations::optimize_inventory_storage(inventoryData);
-	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You dropped the item.", MessageCompletion::FINISHED);
+	ctx.messageSystem->message(
+		ColorPairId::WHITE_BLACK,
+		"You dropped the item.",
+		MessageCompletion::FINISHED);
 }
 
-bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameContext& ctx)
+bool Creature::equip_item(
+	std::unique_ptr<Item> item,
+	EquipmentSlot slot,
+	GameContext& ctx)
 {
 	if (!item)
 	{
@@ -1308,15 +1452,27 @@ bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCo
 	{
 		if (ctx.messageSystem->is_debug_mode())
 		{
-			ctx.messageSystem->log("DEBUG: can_equip failed for " + item->get_name());
-			ctx.messageSystem->log("DEBUG: Item class: " + std::to_string(static_cast<int>(item->itemClass)));
-			ctx.messageSystem->log("DEBUG: Is armor: " + std::string(item->is_armor() ? "true" : "false"));
-			ctx.messageSystem->log("DEBUG: Slot: " + std::to_string(static_cast<int>(slot)));
-			ctx.messageSystem->log("DEBUG: equip_item failed - can_equip returned false for " + item->get_name() + " in slot " + std::to_string(static_cast<int>(slot)));
+			ctx.messageSystem->log(
+				"DEBUG: can_equip failed for " + item->get_name());
+			ctx.messageSystem->log(
+				"DEBUG: Item class: " +
+				std::to_string(static_cast<int>(item->itemClass)));
+			ctx.messageSystem->log(
+				"DEBUG: Is armor: " +
+				std::string(item->is_armor() ? "true" : "false"));
+			ctx.messageSystem->log(
+				"DEBUG: Slot: " + std::to_string(static_cast<int>(slot)));
+			ctx.messageSystem->log(
+				"DEBUG: equip_item failed - can_equip returned false for " +
+				item->get_name() + " in slot " +
+				std::to_string(static_cast<int>(slot)));
 		}
 		// Back to the pack it came out of: carrying it again adds no weight, so no weight gate
-		[[maybe_unused]] const auto pickUpItemResult = InventoryOperations::add_item(inventoryData, std::move(item));
-		assert(pickUpItemResult.has_value() && "Creature::equip_item: an item the slot refused could not go back to the pack");
+		[[maybe_unused]] const auto pickUpItemResult =
+			InventoryOperations::add_item(inventoryData, std::move(item));
+		assert(
+			pickUpItemResult.has_value() &&
+			"Creature::equip_item: an item the slot refused could not go back to the pack");
 		return false;
 	}
 
@@ -1326,11 +1482,16 @@ bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCo
 	{
 		ctx.messageSystem->message(
 			ColorPairId::WHITE_BLACK,
-			std::format("You are not strong enough to draw the {}.", item->get_name()),
+			std::format(
+				"You are not strong enough to draw the {}.",
+				item->get_name()),
 			MessageCompletion::FINISHED);
 		// Back to the pack it came out of, as for a slot that refuses it
-		[[maybe_unused]] const auto returnedToPack = InventoryOperations::add_item(inventoryData, std::move(item));
-		assert(returnedToPack.has_value() && "Creature::equip_item: a bow too strong to draw could not go back to the pack");
+		[[maybe_unused]] const auto returnedToPack =
+			InventoryOperations::add_item(inventoryData, std::move(item));
+		assert(
+			returnedToPack.has_value() &&
+			"Creature::equip_item: a bow too strong to draw could not go back to the pack");
 		return false;
 	}
 
@@ -1344,7 +1505,10 @@ bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCo
 		{
 			// Two-handed weapon - also unequip left hand
 			unequip_item(EquipmentSlot::LEFT_HAND, ctx);
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You grip the " + item->get_name() + " with both hands.", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"You grip the " + item->get_name() + " with both hands.",
+				MessageCompletion::FINISHED);
 		}
 	}
 
@@ -1352,17 +1516,25 @@ bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCo
 	equippedItems.emplace_back(std::move(item), slot);
 
 	// Log weapon equip
-	if (slot == EquipmentSlot::RIGHT_HAND && equippedItems.back().item->is_weapon())
+	if (slot == EquipmentSlot::RIGHT_HAND &&
+		equippedItems.back().item->is_weapon())
 	{
-		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(equippedItems.back().item->itemKey);
-		ctx.messageSystem->log("Equipped " + equippedItems.back().item->get_name() + " - damage: " + weaponDamage);
+		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(
+			equippedItems.back().item->itemKey);
+		ctx.messageSystem->log(
+			"Equipped " + equippedItems.back().item->get_name() +
+			" - damage: " + weaponDamage);
 	}
 
 	// Update armor class if armor or shield was equipped
 	if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
 	{
 		update_armor_class(ctx);
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Your armor class is now " + std::to_string(get_armor_class()) + ".", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"Your armor class is now " + std::to_string(get_armor_class()) +
+				".",
+			MessageCompletion::FINISHED);
 	}
 
 	return true;
@@ -1370,8 +1542,12 @@ bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCo
 
 bool Creature::unequip_item(EquipmentSlot slot, GameContext& ctx)
 {
-	assert(ctx.dataManager && "Creature::unequip_item: called without a dataManager");
-	assert(ctx.floorInventory && "Creature::unequip_item: called without a floorInventory");
+	assert(
+		ctx.dataManager &&
+		"Creature::unequip_item: called without a dataManager");
+	assert(
+		ctx.floorInventory &&
+		"Creature::unequip_item: called without a floorInventory");
 
 	// erase after move requires iterator; find_if + erase is the correct C++23 pattern here
 	auto found = std::ranges::find_if(equippedItems, matches_slot(slot));
@@ -1384,7 +1560,9 @@ bool Creature::unequip_item(EquipmentSlot slot, GameContext& ctx)
 		{
 			ctx.messageSystem->message(
 				ColorPairId::RED_BLACK,
-				std::format("The {} is cursed and cannot be removed!", found->item->get_name()),
+				std::format(
+					"The {} is cursed and cannot be removed!",
+					found->item->get_name()),
 				MessageCompletion::FINISHED);
 			return false;
 		}
@@ -1399,28 +1577,48 @@ bool Creature::unequip_item(EquipmentSlot slot, GameContext& ctx)
 
 		// The pack takes it if it has room and weight to spare; otherwise it drops at the wearer's feet,
 		// since taking off a Strength item can lower the limit, and the floor always has room.
-		const bool fitsInPack = !InventoryOperations::is_inventory_full(inventoryData) && InventoryOperations::is_within_weight_limit(*removed, *this, *ctx.dataManager);
+		const bool fitsInPack =
+			!InventoryOperations::is_inventory_full(inventoryData) &&
+			InventoryOperations::is_within_weight_limit(
+				*removed,
+				*this,
+				*ctx.dataManager);
 
 		if (fitsInPack)
 		{
-			[[maybe_unused]] const auto packed = InventoryOperations::add_item_to_inventory(inventoryData, std::move(removed), *this, *ctx.dataManager);
-			assert(packed.has_value() && "Creature::unequip_item: the pack refused an item checked to fit");
+			[[maybe_unused]] const auto packed =
+				InventoryOperations::add_item_to_inventory(
+					inventoryData,
+					std::move(removed),
+					*this,
+					*ctx.dataManager);
+			assert(
+				packed.has_value() &&
+				"Creature::unequip_item: the pack refused an item checked to fit");
 		}
 		else
 		{
 			ctx.messageSystem->message(
 				ColorPairId::WHITE_BLACK,
-				std::format("You cannot carry the {} as well, and set it down.", removed->get_name()),
+				std::format(
+					"You cannot carry the {} as well, and set it down.",
+					removed->get_name()),
 				MessageCompletion::FINISHED);
 			removed->position = position;
-			InventoryOperations::add_item(*ctx.floorInventory, std::move(removed));
+			InventoryOperations::add_item(
+				*ctx.floorInventory,
+				std::move(removed));
 		}
 
 		// Any worn item can carry armour class, so it is recomputed whatever slot was emptied.
 		update_armor_class(ctx);
 		if (get_armor_class() != armorClassBefore)
 		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Your armor class is now " + std::to_string(get_armor_class()) + ".", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"Your armor class is now " + std::to_string(get_armor_class()) +
+					".",
+				MessageCompletion::FINISHED);
 		}
 
 		return true;
@@ -1476,7 +1674,8 @@ bool Creature::toggle_armor(uint64_t itemUniqueId, GameContext& ctx)
 	}
 	else
 	{
-		auto result = InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
+		auto result =
+			InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
 		if (result.has_value())
 		{
 			return equip_item(std::move(*result), EquipmentSlot::BODY, ctx);
@@ -1494,27 +1693,35 @@ bool Creature::toggle_shield(uint64_t itemUniqueId, GameContext& ctx)
 	}
 	else
 	{
-		auto result = InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
+		auto result =
+			InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
 		if (result.has_value())
 		{
-			return equip_item(std::move(*result), EquipmentSlot::LEFT_HAND, ctx);
+			return equip_item(
+				std::move(*result),
+				EquipmentSlot::LEFT_HAND,
+				ctx);
 		}
 		return false;
 	}
 }
 
 // Clean Weapon Equipment System using Unique IDs
-bool Creature::toggle_weapon(uint64_t itemUniqueId, EquipmentSlot preferredSlot, GameContext& ctx)
+bool Creature::toggle_weapon(
+	uint64_t itemUniqueId,
+	EquipmentSlot preferredSlot,
+	GameContext& ctx)
 {
 	// Check if weapon is already equipped
 	if (is_item_equipped(itemUniqueId))
 	{
 		// Find which slot and unequip
-		for (auto slot : {
-				 EquipmentSlot::RIGHT_HAND,
-				 EquipmentSlot::LEFT_HAND,
-				 EquipmentSlot::MISSILE_WEAPON,
-			 })
+		for (
+			auto slot : {
+				EquipmentSlot::RIGHT_HAND,
+				EquipmentSlot::LEFT_HAND,
+				EquipmentSlot::MISSILE_WEAPON,
+			})
 		{
 			Item* equipped = get_equipped_item(slot);
 			if (equipped && equipped->uniqueId == itemUniqueId)
@@ -1526,15 +1733,18 @@ bool Creature::toggle_weapon(uint64_t itemUniqueId, EquipmentSlot preferredSlot,
 	else
 	{
 		// Take the item out of the pack; an id the pack does not hold equips nothing.
-		auto result = InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
+		auto result =
+			InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
 		if (result.has_value())
 		{
 			auto itemToEquip = std::move(*result);
 
 			// A ranged weapon goes to the missile slot whichever hand was asked for.
-			const EquipmentSlot targetSlot = ItemClassificationUtils::is_ranged_weapon(itemToEquip->itemClass)
-				? EquipmentSlot::MISSILE_WEAPON
-				: preferredSlot;
+			const EquipmentSlot targetSlot =
+				ItemClassificationUtils::is_ranged_weapon(
+					itemToEquip->itemClass) ?
+				EquipmentSlot::MISSILE_WEAPON :
+				preferredSlot;
 
 			return equip_item(std::move(itemToEquip), targetSlot, ctx);
 		}
@@ -1542,7 +1752,10 @@ bool Creature::toggle_weapon(uint64_t itemUniqueId, EquipmentSlot preferredSlot,
 	return false;
 }
 
-bool Creature::toggle_equipment(uint64_t itemUniqueId, EquipmentSlot slot, GameContext& ctx)
+bool Creature::toggle_equipment(
+	uint64_t itemUniqueId,
+	EquipmentSlot slot,
+	GameContext& ctx)
 {
 	// Check if item is already equipped
 	if (is_item_equipped(itemUniqueId))
@@ -1552,7 +1765,8 @@ bool Creature::toggle_equipment(uint64_t itemUniqueId, EquipmentSlot slot, GameC
 	}
 	else
 	{
-		auto result = InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
+		auto result =
+			InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
 		if (result.has_value())
 		{
 			return equip_item(std::move(*result), slot, ctx);
@@ -1582,19 +1796,32 @@ ColorPairId Creature::get_display_color() const noexcept
 void Creature::die(GameContext& ctx)
 {
 	assert(ctx.tileConfig && "Creature::die: called without a tileConfig");
-	assert(ctx.floorInventory && "Creature::die: called without a floorInventory");
+	assert(
+		ctx.floorInventory && "Creature::die: called without a floorInventory");
 
 	// Monster death: message, reward, animation, drop items, create corpse
-	ctx.messageSystem->append_message_part(actorData.color, std::format("{}", actorData.name));
-	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " is dead.\n");
+	ctx.messageSystem->append_message_part(
+		actorData.color,
+		std::format("{}", actorData.name));
+	ctx.messageSystem->append_message_part(
+		ColorPairId::WHITE_BLACK,
+		" is dead.\n");
 	ctx.messageSystem->finalize_message();
 
-	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "You get ");
-	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, std::format("{}", get_xp()));
-	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " experience points.\n");
+	ctx.messageSystem->append_message_part(
+		ColorPairId::WHITE_BLACK,
+		"You get ");
+	ctx.messageSystem->append_message_part(
+		ColorPairId::YELLOW_BLACK,
+		std::format("{}", get_xp()));
+	ctx.messageSystem->append_message_part(
+		ColorPairId::WHITE_BLACK,
+		" experience points.\n");
 	ctx.messageSystem->finalize_message();
 
-	assert(ctx.player() != nullptr && "Creature::die requires a live player in context");
+	assert(
+		ctx.player() != nullptr &&
+		"Creature::die requires a live player in context");
 	ctx.player_concrete().on_kill_reward(get_xp(), ctx);
 
 	assert(ctx.animSystem && "Creature::die: called without an animSystem");
@@ -1604,7 +1831,9 @@ void Creature::die(GameContext& ctx)
 	{
 		return !carried;
 	};
-	assert(std::ranges::none_of(inventoryData.items, is_nothing) && "a pack holds nothing where an item should be");
+	assert(
+		std::ranges::none_of(inventoryData.items, is_nothing) &&
+		"a pack holds nothing where an item should be");
 	for (auto& item : inventoryData.items)
 	{
 		item->position = position;
@@ -1615,34 +1844,46 @@ void Creature::die(GameContext& ctx)
 	// What it wore falls with it, no longer worn. The floor has no limit, so nothing is lost.
 	for (EquippedItem& equipped : equippedItems)
 	{
-		assert(equipped.item && "Creature::die: an equipment entry holds no item");
+		assert(
+			equipped.item && "Creature::die: an equipment entry holds no item");
 		equipped.item->position = position;
-		InventoryOperations::add_item(*ctx.floorInventory, std::move(equipped.item));
+		InventoryOperations::add_item(
+			*ctx.floorInventory,
+			std::move(equipped.item));
 	}
 	equippedItems.clear();
 
 	// Create a corpse on the floor in place of the creature, as its record describes it.
-	assert(!corpseName.empty() && "Creature::die: the creature was given no corpse to leave");
+	assert(
+		!corpseName.empty() &&
+		"Creature::die: the creature was given no corpse to leave");
 	auto corpse = std::make_unique<Item>(position, actorData);
 	corpse->actorData.name = corpseName;
 	corpse->actorData.tile = ctx.tileConfig->get("TILE_CORPSE");
 	corpse->enhancement.weight = get_corpse_weight();
-	corpse->behavior = CorpseFood{ corpseNutrition, corpseTaste, corpseEdibility };
+	corpse->behavior =
+		CorpseFood{ corpseNutrition, corpseTaste, corpseEdibility };
 	InventoryOperations::add_item(*ctx.floorInventory, std::move(corpse));
 }
 
 int Creature::get_exceptional_strength() const noexcept
 {
 	// The creature's own percentile, after what age has taken from it.
-	int exceptional = lifespan ? aged_exceptional_strength(*lifespan, exceptionalStrength) : exceptionalStrength;
+	int exceptional = lifespan ?
+		aged_exceptional_strength(*lifespan, exceptionalStrength) :
+		exceptionalStrength;
 
 	// A worn item that sets Strength to 18 brings its own percentile; the higher counts.
 	auto from_setting_item = [&exceptional](const auto& boost)
 	{
 		using BoostType = std::decay_t<decltype(boost)>;
-		if constexpr (std::is_same_v<BoostType, JewelryAmulet> || std::is_same_v<BoostType, Gauntlets> || std::is_same_v<BoostType, Girdle>)
+		if constexpr (
+			std::is_same_v<BoostType, JewelryAmulet> ||
+			std::is_same_v<BoostType, Gauntlets> ||
+			std::is_same_v<BoostType, Girdle>)
 		{
-			if (boost.application == BuffApplication::SET && boost.strBonus == 18)
+			if (boost.application == BuffApplication::SET &&
+				boost.strBonus == 18)
 			{
 				exceptional = std::max(exceptional, boost.exceptionalStrength);
 			}
@@ -1650,7 +1891,9 @@ int Creature::get_exceptional_strength() const noexcept
 	};
 	for (const EquippedItem& worn : equippedItems)
 	{
-		assert(worn.item && "get_exceptional_strength: an equipment slot holds a null item");
+		assert(
+			worn.item &&
+			"get_exceptional_strength: an equipment slot holds a null item");
 		if (worn.item->behavior)
 		{
 			std::visit(from_setting_item, *worn.item->behavior);
@@ -1665,8 +1908,11 @@ const Gauntlets* Creature::get_gauntlets_beside_girdle() const noexcept
 	const Gauntlets* strengthGauntlets = nullptr;
 	for (const EquippedItem& worn : equippedItems)
 	{
-		assert(worn.item && "get_gauntlets_beside_girdle: an equipment slot holds a null item");
-		wearsGiantStrength = wearsGiantStrength || is_giant_strength_girdle(*worn.item);
+		assert(
+			worn.item &&
+			"get_gauntlets_beside_girdle: an equipment slot holds a null item");
+		wearsGiantStrength =
+			wearsGiantStrength || is_giant_strength_girdle(*worn.item);
 		if (const Gauntlets* gauntlets = strength_setting_gauntlets(*worn.item))
 		{
 			strengthGauntlets = gauntlets;
@@ -1687,7 +1933,10 @@ void announce_new_band(AgeCategory before, AgeCategory after, GameContext& ctx)
 	{
 		return;
 	}
-	ctx.messageSystem->message(ColorPairId::YELLOW_BLACK, std::format("You feel the years: {}.", age_category_name(after)), MessageCompletion::FINISHED);
+	ctx.messageSystem->message(
+		ColorPairId::YELLOW_BLACK,
+		std::format("You feel the years: {}.", age_category_name(after)),
+		MessageCompletion::FINISHED);
 }
 
 // The ability score a buff type raises or lowers, or nothing for a buff that is not one.
@@ -1727,29 +1976,47 @@ std::optional<Ability> ability_of_buff(BuffType type)
 
 void Creature::add_magical_years(int years, GameContext& ctx)
 {
-	assert(lifespan && "add_magical_years: a creature with no lifespan was aged");
-	assert(ctx.messageSystem && "add_magical_years: called without a messageSystem");
+	assert(
+		lifespan && "add_magical_years: a creature with no lifespan was aged");
+	assert(
+		ctx.messageSystem &&
+		"add_magical_years: called without a messageSystem");
 
 	// The band is read on both sides of the change, so nothing stores it.
-	const AgeCategory before = age_category(lifespan->physical_age(), lifespan->race);
+	const AgeCategory before =
+		age_category(lifespan->physical_age(), lifespan->race);
 	lifespan->magicalYears += years;
-	announce_new_band(before, age_category(lifespan->physical_age(), lifespan->race), ctx);
+	announce_new_band(
+		before,
+		age_category(lifespan->physical_age(), lifespan->race),
+		ctx);
 }
 
 void Creature::pass_a_year(GameContext& ctx)
 {
-	assert(lifespan && "pass_a_year: a year passed for a creature with no lifespan");
-	assert(lifespan->race != PlayerRaceState::NONE && "pass_a_year: a year passed for a character with no race");
+	assert(
+		lifespan &&
+		"pass_a_year: a year passed for a creature with no lifespan");
+	assert(
+		lifespan->race != PlayerRaceState::NONE &&
+		"pass_a_year: a year passed for a character with no race");
 	assert(ctx.messageSystem && "pass_a_year: called without a messageSystem");
 
-	const AgeCategory before = age_category(lifespan->physical_age(), lifespan->race);
+	const AgeCategory before =
+		age_category(lifespan->physical_age(), lifespan->race);
 	++lifespan->yearsLived;
-	announce_new_band(before, age_category(lifespan->physical_age(), lifespan->race), ctx);
+	announce_new_band(
+		before,
+		age_category(lifespan->physical_age(), lifespan->race),
+		ctx);
 
 	// Only time spends the life span, so the natural age is the one that reaches it.
 	if (lifespan->natural_age() >= lifespan->maximumAge)
 	{
-		ctx.messageSystem->message(ColorPairId::RED_BLACK, "You die of old age.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::RED_BLACK,
+			"You die of old age.",
+			MessageCompletion::FINISHED);
 		die(ctx);
 	}
 }
@@ -1767,7 +2034,9 @@ int Creature::get_action_delay() const noexcept
 
 	// Twice the actions in the same time is half the time each.
 	const int hastedDelay = actionDelay / 2;
-	assert(hastedDelay >= 1 && "get_action_delay: a base delay too small to halve");
+	assert(
+		hastedDelay >= 1 &&
+		"get_action_delay: a base delay too small to halve");
 	return hastedDelay;
 }
 
@@ -1777,7 +2046,9 @@ int Creature::get_action_delay() const noexcept
 // its Strength "is not cumulative with normal or magical Strength bonuses" (DMG, PDF page
 // 966). Nothing is written back, so what is removed takes exactly its own contribution
 // with it.
-int Creature::calculate_effective_stat(int base_value, BuffType type) const noexcept
+int Creature::calculate_effective_stat(
+	int base_value,
+	BuffType type) const noexcept
 {
 	auto matchesType = [type](const Buff& activeBuff)
 	{
@@ -1816,11 +2087,14 @@ int Creature::calculate_effective_stat(int base_value, BuffType type) const noex
 	bool wearsGiantStrength = false;
 	for (const EquippedItem& worn : equippedItems)
 	{
-		assert(worn.item && "calculate_effective_stat: an equipment slot holds a null item");
+		assert(
+			worn.item &&
+			"calculate_effective_stat: an equipment slot holds a null item");
 		const WornAbilityEffect effect = worn_ability_effect(*worn.item, type);
 		highestSet = std::max(highestSet, effect.setTo);
 		count_addition(effect.add);
-		wearsGiantStrength = wearsGiantStrength || is_giant_strength_girdle(*worn.item);
+		wearsGiantStrength =
+			wearsGiantStrength || is_giant_strength_girdle(*worn.item);
 	}
 
 	// Ageing counts as an addition, read from the lifespan on every call.
@@ -1828,13 +2102,15 @@ int Creature::calculate_effective_stat(int base_value, BuffType type) const noex
 	{
 		if (const std::optional<Ability> ability = ability_of_buff(type))
 		{
-			count_addition(ageing_change(*lifespan, *ability, exceptionalStrength));
+			count_addition(
+				ageing_change(*lifespan, *ability, exceptionalStrength));
 		}
 	}
 
 	// AD&D 2e: SET effects replace base (if higher), ADD effects stack
 	// Example: base=14, SET=18, ADD=+2 -> MAX(14,18) + 2 = 20
-	int effectiveBase = (highestSet > 0) ? std::max(base_value, highestSet) : base_value;
+	int effectiveBase =
+		(highestSet > 0) ? std::max(base_value, highestSet) : base_value;
 	// A girdle of giant strength refuses the bonuses and keeps the penalties.
 	const bool takesBonuses = type != BuffType::STRENGTH || !wearsGiantStrength;
 	return effectiveBase + (takesBonuses ? bonuses : 0) + penalties;

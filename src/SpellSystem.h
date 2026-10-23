@@ -63,12 +63,18 @@ std::vector<int> progression_slots(CasterClass classState, int level);
 // Example:
 //   bonus_priest_spells(15, dataManager);   // -> { 2, 1 }, two 1st and one 2nd
 //   bonus_priest_spells(12, dataManager);   // -> { }, nothing below 13
-std::vector<int> bonus_priest_spells(int wisdom, const DataManager& dataManager);
+std::vector<int> bonus_priest_spells(
+	int wisdom,
+	const DataManager& dataManager);
 
 // What this caster actually memorises: the progression table, plus a priest's
 // Wisdom bonus where there is a row for it, and without the sixth and seventh
 // rows unless Table 24's footnotes are satisfied - Wisdom 17 and 18.
-std::vector<int> get_spell_slots(CasterClass classState, int level, int wisdom, const DataManager& dataManager);
+std::vector<int> get_spell_slots(
+	CasterClass classState,
+	int level,
+	int wisdom,
+	const DataManager& dataManager);
 
 // The highest spell level this caster can reach at that experience level, which
 // is how many rows of slots the table hands it. Everything that tells the player
@@ -79,7 +85,11 @@ std::vector<int> get_spell_slots(CasterClass classState, int level, int wisdom, 
 //   highest_spell_level(CasterClass::WIZARD, 11);   // -> 5, 11th grants no new level
 //   highest_spell_level(CasterClass::WIZARD, 12);   // -> 6
 //   highest_spell_level(CasterClass::NONE, 10);     // -> 0
-[[nodiscard]] int highest_spell_level(CasterClass classState, int level, int wisdom, const DataManager& dataManager);
+[[nodiscard]] int highest_spell_level(
+	CasterClass classState,
+	int level,
+	int wisdom,
+	const DataManager& dataManager);
 
 // Cast a spell by string key (works for builtin and custom spells), read from
 // ctx.spellRegistry. onSuccess is called when the spell takes effect:
@@ -118,7 +128,11 @@ void cast_spell_at(
 //   can_aim_at(SpellEffectType::FIREBALL, lich, playerFourTilesAway, ctx);   // -> true
 //   can_aim_at(SpellEffectType::FIREBALL, lich, playerTwoTilesAway, ctx);    // -> false
 //   can_aim_at(SpellEffectType::SLEEP, lich, playerFourTilesAway, ctx);      // -> false
-[[nodiscard]] bool can_aim_at(SpellEffectType effect, const Creature& caster, const Creature& target, GameContext& ctx);
+[[nodiscard]] bool can_aim_at(
+	SpellEffectType effect,
+	const Creature& caster,
+	const Creature& target,
+	GameContext& ctx);
 
 // The spell list a creature casts from: its record's training when it has one, otherwise
 // its class's.
@@ -156,7 +170,10 @@ void cast_spell_at(
 //
 // Example:
 //   memorize_spells(lich, spells, dataManager);   // lich.spellcasting.memorizedSpells -> eight keys
-void memorize_spells(Creature& caster, const SpellRegistry& spells, const DataManager& dataManager);
+void memorize_spells(
+	Creature& caster,
+	const SpellRegistry& spells,
+	const DataManager& dataManager);
 
 // What Table 5 gives this caster's Wisdom as a percentage chance that any one of
 // its spells fizzles. Zero for anyone but a priest, and for a priest of Wisdom 13
@@ -164,11 +181,16 @@ void memorize_spells(Creature& caster, const SpellRegistry& spells, const DataMa
 //
 // Example:
 //   spell_failure_chance(priestOfWisdomNine, dataManager);   // -> 20
-[[nodiscard]] int spell_failure_chance(const Creature& caster, const DataManager& dataManager);
+[[nodiscard]] int spell_failure_chance(
+	const Creature& caster,
+	const DataManager& dataManager);
 
 // Rolls percentile dice against that chance, and answers whether this casting is
 // lost. A caster with no chance to fail is not made to roll.
-[[nodiscard]] bool spell_fizzles(const Creature& caster, const DataManager& dataManager, RandomDice& dice);
+[[nodiscard]] bool spell_fizzles(
+	const Creature& caster,
+	const DataManager& dataManager,
+	RandomDice& dice);
 
 // What choosing an item's entry in the cast menu does: cast the spell it grants, or
 // speak the word that wakes it.
@@ -190,7 +212,9 @@ struct ItemGrantedSpell
 
 // What the player's worn items let them cast at game time `now`. A helm of teleportation
 // is listed only while is_helm_ready says its day has passed; the ring is always listed.
-std::vector<ItemGrantedSpell> get_item_granted_spells(const Player& player, int now);
+std::vector<ItemGrantedSpell> get_item_granted_spells(
+	const Player& player,
+	int now);
 
 // Whether a burst reached the player, so a caller animates the hit the burst dealt.
 enum class PlayerReach
@@ -219,11 +243,18 @@ struct FireballBurst
 // Example, caster level 3, one goblin adjacent, dice forced to 6, 6, 6 and a save of 1:
 //   burst_fireball(center, 3, 2, ctx);   // -> { 3, 18, 1, OUTSIDE }, goblin takes 18
 //   // the same with the player beside the goblin -> { 3, 18, 2, STRUCK }
-FireballBurst burst_fireball(Vector2D center, int casterLevel, int radius, GameContext& ctx);
+FireballBurst burst_fireball(
+	Vector2D center,
+	int casterLevel,
+	int radius,
+	GameContext& ctx);
 
 // Burns one creature with an already-rolled burst: its save with its fire
 // resistance's bonus, the dice reduced per die, half on a save.
-void burn_with_fireball(Creature& target, const FireballBurst& burst, GameContext& ctx);
+void burn_with_fireball(
+	Creature& target,
+	const FireballBurst& burst,
+	GameContext& ctx);
 
 // The level a spell read from a scroll is cast at. Dungeon Master's Guide:
 // "typically one level higher than that required to cast the spell, but

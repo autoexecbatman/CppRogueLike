@@ -25,9 +25,16 @@ private:
 	DamageType type{ DamageType::PHYSICAL };
 	int hitPoints{ 0 };
 
-	ResistedDamage(DamageType damageType, int points) : type(damageType), hitPoints(points) {}
+	ResistedDamage(DamageType damageType, int points) :
+		type(damageType),
+		hitPoints(points)
+	{
+	}
 
-	friend ResistedDamage reduce_dice(const std::vector<int>& dice, DamageType damageType, int strength);
+	friend ResistedDamage reduce_dice(
+		const std::vector<int>& dice,
+		DamageType damageType,
+		int strength);
 
 public:
 	[[nodiscard]] DamageType damage_type() const noexcept { return type; }
@@ -35,7 +42,10 @@ public:
 	[[nodiscard]] int hit_points() const noexcept { return hitPoints; }
 
 	// The same resisted damage at a different number, never below zero.
-	[[nodiscard]] ResistedDamage at(int points) const noexcept { return ResistedDamage{ type, points < 0 ? 0 : points }; }
+	[[nodiscard]] ResistedDamage at(int points) const noexcept
+	{
+		return ResistedDamage{ type, points < 0 ? 0 : points };
+	}
 };
 
 // How strongly a creature resists fire or cold, in rings: 0 for none, 1 for
@@ -48,7 +58,10 @@ public:
 // Example, wearing a ring of fire resistance:
 //   resistance_strength(DamageType::FIRE, wearer, ctx);   // -> 1
 //   resistance_strength(DamageType::COLD, wearer, ctx);   // -> 0
-int resistance_strength(DamageType damageType, const Creature& owner, GameContext& ctx);
+int resistance_strength(
+	DamageType damageType,
+	const Creature& owner,
+	GameContext& ctx);
 
 // The bonus a resisting creature adds to its saving throw against magical
 // fire or cold. Ring of Fire Resistance: "saved against with a +4 bonus to
@@ -58,7 +71,10 @@ int resistance_strength(DamageType damageType, const Creature& owner, GameContex
 // Example:
 //   save_bonus_against(DamageType::FIRE, ringWearer, ctx);   // -> 4
 //   save_bonus_against(DamageType::FIRE, helmWearer, ctx);   // -> 8
-int save_bonus_against(DamageType damageType, const Creature& owner, GameContext& ctx);
+int save_bonus_against(
+	DamageType damageType,
+	const Creature& owner,
+	GameContext& ctx);
 
 // The hit points a run of damage dice deals through a resistance of the given
 // strength: fire dice "are calculated at -2 per die, but each die is never
@@ -68,7 +84,10 @@ int save_bonus_against(DamageType damageType, const Creature& owner, GameContext
 // Example:
 //   reduce_dice({ 6, 6, 6 }, DamageType::FIRE, 1).hit_points();   // -> 12, three fours
 //   reduce_dice({ 1, 1, 1 }, DamageType::FIRE, 2).hit_points();   // -> 3, never below one
-ResistedDamage reduce_dice(const std::vector<int>& dice, DamageType damageType, int strength);
+ResistedDamage reduce_dice(
+	const std::vector<int>& dice,
+	DamageType damageType,
+	int strength);
 
 // Applies the percentage resistance buffs the book has not been read for -
 // lightning and poison. Fire and cold pass through unchanged: their

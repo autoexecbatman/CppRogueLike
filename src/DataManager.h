@@ -26,10 +26,13 @@ class MessageSystem;
 //   dexterity_row_from(row).DefensiveAdj;   // -> -3
 //   dexterity_row_from(json{ {"Dex",17} }); // -> throws: no key "ReactionAdj"
 [[nodiscard]] StrengthAttributes strength_row_from(const nlohmann::json& item);
-[[nodiscard]] DexterityAttributes dexterity_row_from(const nlohmann::json& item);
-[[nodiscard]] ConstitutionAttributes constitution_row_from(const nlohmann::json& item);
+[[nodiscard]] DexterityAttributes dexterity_row_from(
+	const nlohmann::json& item);
+[[nodiscard]] ConstitutionAttributes constitution_row_from(
+	const nlohmann::json& item);
 [[nodiscard]] CharismaAttributes charisma_row_from(const nlohmann::json& item);
-[[nodiscard]] IntelligenceAttributes intelligence_row_from(const nlohmann::json& item);
+[[nodiscard]] IntelligenceAttributes intelligence_row_from(
+	const nlohmann::json& item);
 [[nodiscard]] WisdomAttributes wisdom_row_from(const nlohmann::json& item);
 
 class DataManager
@@ -45,29 +48,61 @@ private:
 	std::vector<WisdomAttributes> wisdomAttributes{};
 
 	// Simple JSON loading functions
-	std::vector<StrengthAttributes> load_strength(const std::string& filename, MessageSystem& message_system);
-	std::vector<DexterityAttributes> load_dexterity(const std::string& filename, MessageSystem& message_system);
-	std::vector<ConstitutionAttributes> load_constitution(const std::string& filename, MessageSystem& message_system);
-	std::vector<CharismaAttributes> load_charisma(const std::string& filename, MessageSystem& message_system);
-	std::vector<IntelligenceAttributes> load_intelligence(const std::string& filename, MessageSystem& message_system);
-	std::vector<WisdomAttributes> load_wisdom(const std::string& filename, MessageSystem& message_system);
+	std::vector<StrengthAttributes> load_strength(
+		const std::string& filename,
+		MessageSystem& message_system);
+	std::vector<DexterityAttributes> load_dexterity(
+		const std::string& filename,
+		MessageSystem& message_system);
+	std::vector<ConstitutionAttributes> load_constitution(
+		const std::string& filename,
+		MessageSystem& message_system);
+	std::vector<CharismaAttributes> load_charisma(
+		const std::string& filename,
+		MessageSystem& message_system);
+	std::vector<IntelligenceAttributes> load_intelligence(
+		const std::string& filename,
+		MessageSystem& message_system);
+	std::vector<WisdomAttributes> load_wisdom(
+		const std::string& filename,
+		MessageSystem& message_system);
 
 public:
 	// Load all game data
 	void load_all_data(MessageSystem& message_system);
 
 	// Accessors for loaded data
-	const std::vector<StrengthAttributes>& get_strength_attributes() const { return strengthAttributes; }
+	const std::vector<StrengthAttributes>& get_strength_attributes() const
+	{
+		return strengthAttributes;
+	}
 
-	const std::vector<DexterityAttributes>& get_dexterity_attributes() const { return dexterityAttributes; }
+	const std::vector<DexterityAttributes>& get_dexterity_attributes() const
+	{
+		return dexterityAttributes;
+	}
 
-	const std::vector<ConstitutionAttributes>& get_constitution_attributes() const { return constitutionAttributes; }
+	const std::vector<ConstitutionAttributes>& get_constitution_attributes()
+		const
+	{
+		return constitutionAttributes;
+	}
 
-	const std::vector<CharismaAttributes>& get_charisma_attributes() const { return charismaAttributes; }
+	const std::vector<CharismaAttributes>& get_charisma_attributes() const
+	{
+		return charismaAttributes;
+	}
 
-	const std::vector<IntelligenceAttributes>& get_intelligence_attributes() const { return intelligenceAttributes; }
+	const std::vector<IntelligenceAttributes>& get_intelligence_attributes()
+		const
+	{
+		return intelligenceAttributes;
+	}
 
-	const std::vector<WisdomAttributes>& get_wisdom_attributes() const { return wisdomAttributes; }
+	const std::vector<WisdomAttributes>& get_wisdom_attributes() const
+	{
+		return wisdomAttributes;
+	}
 
 	// The Table 2 row a Dexterity score reads. A score past the table's end - which no
 	// ability reaches, the books capping every score at 25 - reads its last row; a score
@@ -95,7 +130,9 @@ public:
 	//   dataManager.strength_for(18, 76).dmgAdj;    // -> 4, 18/76-90
 	//   dataManager.strength_for(18, 100).hitProb;  // -> 3, 18/00
 	//   dataManager.strength_for(19, 100).dmgAdj;   // -> 7, the percentile ignored
-	[[nodiscard]] StrengthAttributes strength_for(int score, int exceptional) const;
+	[[nodiscard]] StrengthAttributes strength_for(
+		int score,
+		int exceptional) const;
 
 	// The Table 3 row a Constitution score reads, with the same edges as dexterity_for.
 	// Its hit point column is the warrior's; constitution_hit_point_adjustment caps it for
@@ -115,5 +152,7 @@ public:
 	//   dataManager.constitution_hit_point_adjustment(17, CreatureClass::FIGHTER); // -> 3
 	//   dataManager.constitution_hit_point_adjustment(17, CreatureClass::WIZARD); // -> 2
 	//   dataManager.constitution_hit_point_adjustment(3, CreatureClass::WIZARD); // -> -2
-	[[nodiscard]] int constitution_hit_point_adjustment(int score, CreatureClass creatureClass) const;
+	[[nodiscard]] int constitution_hit_point_adjustment(
+		int score,
+		CreatureClass creatureClass) const;
 };

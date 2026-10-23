@@ -113,7 +113,10 @@ const Row& row_at(CreatureClass creatureClass, int level)
 
 } // namespace
 
-int SavingThrows::target(CreatureClass creatureClass, int level, SavingThrow category)
+int SavingThrows::target(
+	CreatureClass creatureClass,
+	int level,
+	SavingThrow category)
 {
 	return row_at(creatureClass, level).targets[static_cast<size_t>(category)];
 }
@@ -124,9 +127,16 @@ bool SavingThrows::improves_at(CreatureClass creatureClass, int level)
 	return &row_at(creatureClass, level) != &row_at(creatureClass, level - 1);
 }
 
-bool SavingThrows::is_made(const Creature& saver, SavingThrow category, int modifier, GameContext& ctx)
+bool SavingThrows::is_made(
+	const Creature& saver,
+	SavingThrow category,
+	int modifier,
+	GameContext& ctx)
 {
 	assert(ctx.dice && "SavingThrows::is_made called without dice");
-	const int needed = target(saver.get_creature_class(), saver.get_creature_level(), category);
+	const int needed = target(
+		saver.get_creature_class(),
+		saver.get_creature_level(),
+		category);
 	return ctx.dice->d20() + modifier >= needed;
 }

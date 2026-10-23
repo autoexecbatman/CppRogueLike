@@ -93,11 +93,16 @@ protected:
 		make_combatant(*player);
 		player->attacker = std::make_unique<PlayerAttacker>(*player);
 		make_combatant(hunter);
-		hunter.attacker = std::make_unique<MonsterAttacker>(hunter, DamageInfo{ "1d4", DamageType::PHYSICAL });
+		hunter.attacker = std::make_unique<MonsterAttacker>(
+			hunter,
+			DamageInfo{ "1d4", DamageType::PHYSICAL });
 		hunter.set_natural_attack("fist");
-		hunter.set_body_plan({ EquipmentSlot::RIGHT_HAND, EquipmentSlot::MISSILE_WEAPON });
+		hunter.set_body_plan(
+			{ EquipmentSlot::RIGHT_HAND, EquipmentSlot::MISSILE_WEAPON });
 		make_combatant(decoy);
-		decoy.attacker = std::make_unique<MonsterAttacker>(decoy, DamageInfo{ "1d4", DamageType::PHYSICAL });
+		decoy.attacker = std::make_unique<MonsterAttacker>(
+			decoy,
+			DamageInfo{ "1d4", DamageType::PHYSICAL });
 
 		ctx = game.context();
 		ctx.playerOwner = &player;
@@ -146,8 +151,10 @@ TEST_F(AttackTargetTest, AMeleeHunterStrikesTheCreatureItWasHanded)
 
 	ai.move_or_attack(hunter, decoy, ctx);
 
-	EXPECT_LT(decoy.get_hp(), STARTING_HP) << "the creature handed over was not struck";
-	EXPECT_EQ(player->get_hp(), STARTING_HP) << "the player was struck from eight tiles away";
+	EXPECT_LT(decoy.get_hp(), STARTING_HP)
+		<< "the creature handed over was not struck";
+	EXPECT_EQ(player->get_hp(), STARTING_HP)
+		<< "the player was struck from eight tiles away";
 }
 
 TEST_F(AttackTargetTest, ASpiderBitesTheCreatureItWasHanded)
@@ -156,18 +163,24 @@ TEST_F(AttackTargetTest, ASpiderBitesTheCreatureItWasHanded)
 
 	ai.move_or_attack(hunter, decoy, ctx);
 
-	EXPECT_LT(decoy.get_hp(), STARTING_HP) << "the creature handed over was not bitten";
-	EXPECT_EQ(player->get_hp(), STARTING_HP) << "the player was bitten from eight tiles away";
+	EXPECT_LT(decoy.get_hp(), STARTING_HP)
+		<< "the creature handed over was not bitten";
+	EXPECT_EQ(player->get_hp(), STARTING_HP)
+		<< "the player was bitten from eight tiles away";
 }
 
 TEST_F(AttackTargetTest, ARangedHunterShootsTheCreatureItWasHanded)
 {
 	RangedHunter ai{};
-	hunter.wear(ItemCreator::create("long_bow", hunter.position, ctx), EquipmentSlot::MISSILE_WEAPON);
+	hunter.wear(
+		ItemCreator::create("long_bow", hunter.position, ctx),
+		EquipmentSlot::MISSILE_WEAPON);
 	decoy.position = DISTANT_DECOY_TILE;
 
 	ai.move_or_attack(hunter, decoy, ctx);
 
-	EXPECT_LT(decoy.get_hp(), STARTING_HP) << "the creature handed over was not shot";
-	EXPECT_EQ(player->get_hp(), STARTING_HP) << "the player was shot from eight tiles away";
+	EXPECT_LT(decoy.get_hp(), STARTING_HP)
+		<< "the creature handed over was not shot";
+	EXPECT_EQ(player->get_hp(), STARTING_HP)
+		<< "the player was shot from eight tiles away";
 }

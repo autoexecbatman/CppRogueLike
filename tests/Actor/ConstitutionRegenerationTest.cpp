@@ -37,15 +37,18 @@ constexpr int ROUNDS_WATCHED = 120;
 class ConstitutionRegenerationTest : public ::testing::Test
 {
 protected:
-	void SetUp() override
-	{
-		ctx = mock.to_game_context();
-	}
+	void SetUp() override { ctx = mock.to_game_context(); }
 
 	// A creature of this class and Constitution with maxHp hit points, down to hp.
-	std::unique_ptr<Creature> make_creature(CreatureClass creatureClass, int constitution, int maxHp, int hp)
+	std::unique_ptr<Creature> make_creature(
+		CreatureClass creatureClass,
+		int constitution,
+		int maxHp,
+		int hp)
 	{
-		auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "hero", ColorPairId::WHITE_BLACK });
+		auto creature = std::make_unique<Creature>(
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "hero", ColorPairId::WHITE_BLACK });
 		creature->healthPool = std::make_unique<HealthPool>(maxHp);
 		creature->set_creature_class(creatureClass);
 		creature->set_constitution(constitution);
@@ -90,11 +93,17 @@ TEST_F(ConstitutionRegenerationTest, EachScoreHealsAPointEveryListedTurn)
 	{
 		const int roundsBetweenPoints = row.turnsBetweenPoints * 10;
 
-		auto early = make_creature(CreatureClass::FIGHTER, row.constitution, 200, 100);
-		EXPECT_EQ(regenerate_through(*early, roundsBetweenPoints - 1), 0) << "Constitution " << row.constitution;
+		auto early =
+			make_creature(CreatureClass::FIGHTER, row.constitution, 200, 100);
+		EXPECT_EQ(regenerate_through(*early, roundsBetweenPoints - 1), 0)
+			<< "Constitution " << row.constitution;
 
-		auto watched = make_creature(CreatureClass::FIGHTER, row.constitution, 200, 100);
-		EXPECT_EQ(regenerate_through(*watched, ROUNDS_WATCHED), ROUNDS_WATCHED / roundsBetweenPoints) << "Constitution " << row.constitution;
+		auto watched =
+			make_creature(CreatureClass::FIGHTER, row.constitution, 200, 100);
+		EXPECT_EQ(
+			regenerate_through(*watched, ROUNDS_WATCHED),
+			ROUNDS_WATCHED / roundsBetweenPoints)
+			<< "Constitution " << row.constitution;
 	}
 }
 
@@ -118,7 +127,9 @@ TEST_F(ConstitutionRegenerationTest, AMonsterMendsLikeAnyoneElse)
 	auto monster = make_creature(CreatureClass::MONSTER, 25, 200, 100);
 	auto fighter = make_creature(CreatureClass::FIGHTER, 25, 200, 100);
 
-	EXPECT_EQ(regenerate_through(*monster, ROUNDS_WATCHED), regenerate_through(*fighter, ROUNDS_WATCHED))
+	EXPECT_EQ(
+		regenerate_through(*monster, ROUNDS_WATCHED),
+		regenerate_through(*fighter, ROUNDS_WATCHED))
 		<< "a monster with the same Constitution mended a different amount";
 }
 
@@ -136,7 +147,9 @@ TEST_F(ConstitutionRegenerationTest, FireAndAcidAreNotRegenerated)
 {
 	auto character = make_creature(CreatureClass::FIGHTER, 25, 20, 20);
 	character->take_damage(6, ctx, DamageType::ACID);
-	character->take_damage(DamageResolver::reduce_dice({ 4 }, DamageType::FIRE, 0), ctx);
+	character->take_damage(
+		DamageResolver::reduce_dice({ 4 }, DamageType::FIRE, 0),
+		ctx);
 	character->take_damage(5, ctx, DamageType::PHYSICAL);
 	ASSERT_EQ(character->get_hp(), 5);
 

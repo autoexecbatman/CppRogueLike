@@ -66,6 +66,8 @@ Creature* GameContext::player() const
 //       && "GameContext: no player in context"
 Player& GameContext::player_concrete() const
 {
-	assert(playerOwner != nullptr && playerOwner->get() != nullptr && "GameContext: no player in context");
+	assert(
+		playerOwner != nullptr && playerOwner->get() != nullptr &&
+		"GameContext: no player in context");
 	return **playerOwner;
 }

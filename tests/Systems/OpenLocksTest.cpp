@@ -48,9 +48,15 @@ const Vector2D DOOR{ 5, CORRIDOR_ROW };
 
 const std::string PICKED{ "You pick the lock." };
 const std::string FAILED{ "You fail to pick the lock." };
-const std::string TOO_DIFFICULT{ "This lock is too difficult for you until you have learned more." };
-const std::string FORCED{ "You force the door open! The crash echoes down the corridor." };
-const std::string TOO_WEAK{ "The door is locked. You are not strong enough to force it." };
+const std::string TOO_DIFFICULT{
+	"This lock is too difficult for you until you have learned more."
+};
+const std::string FORCED{
+	"You force the door open! The crash echoes down the corridor."
+};
+const std::string TOO_WEAK{
+	"The door is locked. You are not strong enough to force it."
+};
 // A queued value no refused attempt is meant to read, so reading it back proves nothing rolled.
 constexpr int UNREAD_ROLL = 13;
 // Points put into Open Locks, enough that the chance is above every d10 these tests queue,
@@ -77,13 +83,16 @@ protected:
 		thief.lifespan->race = PlayerRaceState::HUMAN;
 		thief.set_dexterity(13);
 		thief.set_creature_level(1);
-		thief.thiefSkillPoints.at(thief_skill_index(ThiefSkill::OPEN_LOCKS)) = OPEN_LOCKS_POINTS;
+		thief.thiefSkillPoints.at(thief_skill_index(ThiefSkill::OPEN_LOCKS)) =
+			OPEN_LOCKS_POINTS;
 		// Strength 17 prints no locked-door chance, so a thief refused a pick cannot force either.
 		set_strength(17, 0);
-		const std::optional<int> skill = thief.thief_skill(ThiefSkill::OPEN_LOCKS);
+		const std::optional<int> skill =
+			thief.thief_skill(ThiefSkill::OPEN_LOCKS);
 		ASSERT_TRUE(skill.has_value());
 		openLocksChance = *skill;
-		ASSERT_GT(openLocksChance, 10) << "a chance a d10 could reach hides a d100 read in the d10's place";
+		ASSERT_GT(openLocksChance, 10)
+			<< "a chance a d10 could reach hides a d100 read in the d10's place";
 		// An ordinary pace charges the rounds as they are.
 		ASSERT_EQ(thief.get_action_delay(), TIME_UNITS_PER_ROUND);
 	}
@@ -118,10 +127,15 @@ protected:
 	size_t times_said(std::string_view wanted) const
 	{
 		size_t count = 0;
-		for (size_t index = 0; index < ctx.messageSystem->get_stored_message_count(); ++index)
+		for (
+			size_t index = 0;
+			index < ctx.messageSystem->get_stored_message_count();
+			++index)
 		{
 			std::string whole;
-			for (const LogMessage& part : ctx.messageSystem->get_attack_message_at(index))
+			for (
+				const LogMessage& part :
+				ctx.messageSystem->get_attack_message_at(index))
 			{
 				whole += part.text;
 			}
@@ -162,7 +176,8 @@ TEST_F(OpenLocksTest, ASuccessfulPickTakesTheDTensRoundsAndOpensTheDoor)
 	EXPECT_EQ(ctx.messageSystem->get_current_message(), PICKED);
 	EXPECT_EQ(ctx.map->get_tile_type(DOOR), TileType::OPEN_DOOR);
 	EXPECT_FALSE(ctx.map->is_door_locked(DOOR));
-	EXPECT_EQ(ctx.map->lock_pick_failed_at_level(DOOR), 0) << "a success was recorded as a failure";
+	EXPECT_EQ(ctx.map->lock_pick_failed_at_level(DOOR), 0)
+		<< "a success was recorded as a failure";
 	EXPECT_EQ(ctx.gameState->get_time(), timeBefore + 4 * TIME_UNITS_PER_ROUND);
 }
 
@@ -178,7 +193,8 @@ TEST_F(OpenLocksTest, ASecondPickAtTheSameLevelIsRefusedWithoutARoll)
 
 	EXPECT_EQ(times_said(TOO_DIFFICULT), 1u);
 	EXPECT_EQ(ctx.messageSystem->get_current_message(), TOO_WEAK);
-	EXPECT_EQ(ctx.gameState->get_time(), timeBefore) << "a refused pick spent time";
+	EXPECT_EQ(ctx.gameState->get_time(), timeBefore)
+		<< "a refused pick spent time";
 	EXPECT_TRUE(ctx.map->is_door_locked(DOOR));
 	EXPECT_EQ(ctx.player()->position, START);
 	EXPECT_EQ(ctx.map->lock_pick_failed_at_level(DOOR), 1);

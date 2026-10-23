@@ -81,8 +81,8 @@
     },
     {
       "file": "src/ListCursor.cpp",
-      "original": "firstVisible = step_within(first_visible(visibleRows), steps, max_first_visible(visibleRows));",
-      "mutated": "firstVisible = step_within(firstVisible, steps, max_first_visible(visibleRows));",
+      "original": "firstVisible = step_within(\n\t\tfirst_visible(visibleRows),\n\t\tsteps,\n\t\tmax_first_visible(visibleRows));",
+      "mutated": "firstVisible = step_within(\n\t\tfirstVisible,\n\t\tsteps,\n\t\tmax_first_visible(visibleRows));",
       "catches": "the wheel starts from the stale stored scroll after a shrink, so a notch back moves nothing (Release) or aborts on step_within's bound (Debug)"
     },
     {

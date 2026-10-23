@@ -14,10 +14,10 @@
 #include "UniqueId.h"
 #include "Vector2D.h"
 
-Actor::Actor(Vector2D position, ActorData data)
-	: position(position),
-	  actorData(data),
-	  uniqueId(UniqueId::Generator::generate())
+Actor::Actor(Vector2D position, ActorData data) :
+	position(position),
+	actorData(data),
+	uniqueId(UniqueId::Generator::generate())
 {
 }
 
@@ -33,11 +33,9 @@ void Actor::add_state(ActorState state) noexcept
 
 void Actor::remove_state(ActorState state) noexcept
 {
-	std::erase_if(states,
-		[state](ActorState existing)
-		{
-			return existing == state;
-		});
+	std::erase_if(
+		states,
+		[state](ActorState existing) { return existing == state; });
 }
 
 void Actor::load(const json& source)
@@ -49,7 +47,8 @@ void Actor::load(const json& source)
 	direction.y = source.at("direction").at("y").get<int>();
 	actorData.tile = TileRefJson::parse_tile(source.at("actorData").at("tile"));
 	actorData.name = source.at("actorData").at("name").get<std::string>();
-	actorData.color = parse_color_pair(source.at("actorData").at("color").get<std::string>());
+	actorData.color =
+		parse_color_pair(source.at("actorData").at("color").get<std::string>());
 	uniqueId = source.at("uniqueId").get<UniqueId::IdType>();
 
 	// Clear existing states before loading saved states
@@ -98,7 +97,10 @@ void Actor::render(const GameContext& ctx) const noexcept
 	{
 		// Now it naturally resolves whether it's an Actor, Creature, or Item
 		TileRef displayTile = get_display_tile();
-		ctx.renderer->draw_tile(position, displayTile, Color{ 255, 255, 255, 255 });
+		ctx.renderer->draw_tile(
+			position,
+			displayTile,
+			Color{ 255, 255, 255, 255 });
 	}
 }
 
@@ -113,6 +115,7 @@ bool Actor::is_visible(const GameContext& ctx) const noexcept
 		return false;
 	}
 
-	const bool isRemembered = !has_state(ActorState::FOV_ONLY) && ctx.map->is_explored(position);
+	const bool isRemembered =
+		!has_state(ActorState::FOV_ONLY) && ctx.map->is_explored(position);
 	return isRemembered || ctx.map->is_in_fov(position);
 }

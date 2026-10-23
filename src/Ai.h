@@ -94,7 +94,8 @@ inline constexpr std::array<AiType, 7> AUTHORABLE_AI_TYPES = {
 //   is_authorable_ai_type(AiType::CONFUSED_MONSTER); // -> false
 [[nodiscard]] inline bool is_authorable_ai_type(AiType type)
 {
-	return std::ranges::find(AUTHORABLE_AI_TYPES, type) != AUTHORABLE_AI_TYPES.end();
+	return std::ranges::find(AUTHORABLE_AI_TYPES, type) !=
+		AUTHORABLE_AI_TYPES.end();
 }
 
 // The next authorable Ai in that order, wrapping at the end; the monster editor's cycle.
@@ -105,7 +106,8 @@ inline constexpr std::array<AiType, 7> AUTHORABLE_AI_TYPES = {
 [[nodiscard]] inline AiType next_authorable_ai_type(AiType type)
 {
 	const auto found = std::ranges::find(AUTHORABLE_AI_TYPES, type);
-	if (found == AUTHORABLE_AI_TYPES.end() || found + 1 == AUTHORABLE_AI_TYPES.end())
+	if (found == AUTHORABLE_AI_TYPES.end() ||
+		found + 1 == AUTHORABLE_AI_TYPES.end())
 	{
 		return AUTHORABLE_AI_TYPES.front();
 	}
@@ -180,7 +182,11 @@ public:
 	//
 	// Example:
 	//   ai.on_created(mimic, ctx); // a mimic puts on its first disguise and stops blocking
-	virtual void on_created([[maybe_unused]] Creature& owner, [[maybe_unused]] GameContext& ctx) {}
+	virtual void on_created(
+		[[maybe_unused]] Creature& owner,
+		[[maybe_unused]] GameContext& ctx)
+	{
+	}
 
 	// A fresh Ai of this kind, as a monster built from its record gets it; nothing is
 	// restored into it.

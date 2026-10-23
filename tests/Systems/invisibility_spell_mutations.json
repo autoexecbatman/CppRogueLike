@@ -33,14 +33,14 @@
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \"You fade from view.\");",
-      "mutated": "\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \"You fade from view for 20 turns.\");",
+      "original": "\tctx.messageSystem->append_message_part(\n\t\tColorPairId::WHITE_BLACK,\n\t\t\"You fade from view.\");",
+      "mutated": "\tctx.messageSystem->append_message_part(\n\t\tColorPairId::WHITE_BLACK,\n\t\t\"You fade from view for 20 turns.\");",
       "catches": "the casting still promising the old twenty"
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\t\tconst BuffType granted = source == SpellSource::ITEM ? BuffType::ITEM_INVISIBILITY : BuffType::INVISIBILITY;\n",
-      "mutated": "\t\tconst BuffType granted = source == SpellSource::ITEM ? BuffType::ITEM_INVISIBILITY : BuffType::ITEM_INVISIBILITY;\n",
+      "original": "\t\tconst BuffType granted = source == SpellSource::ITEM ?\n\t\t\tBuffType::ITEM_INVISIBILITY :\n\t\t\tBuffType::INVISIBILITY;\n",
+      "mutated": "\t\tconst BuffType granted = source == SpellSource::ITEM ?\n\t\t\tBuffType::ITEM_INVISIBILITY :\n\t\t\tBuffType::ITEM_INVISIBILITY;\n",
       "catches": "the wizard's casting from memory granted as an item's, which a ring's removal would end"
     }
   ]

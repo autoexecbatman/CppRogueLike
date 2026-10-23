@@ -158,7 +158,8 @@ ItemBehavior create_behavior(const ItemParams& params)
 	default:
 	{
 		throw std::runtime_error(
-			std::format("ItemCreator: unhandled pickable_type {}",
+			std::format(
+				"ItemCreator: unhandled pickable_type {}",
 				static_cast<int>(params.pickableType)));
 	}
 	}
@@ -166,7 +167,11 @@ ItemBehavior create_behavior(const ItemParams& params)
 
 // An item built from params: its behaviour, key, class, value, carry weight and the
 // tile the content registry holds for its key.
-std::unique_ptr<Item> make_item(std::string_view key, const ItemParams& params, Vector2D pos, ContentRegistry& tiles)
+std::unique_ptr<Item> make_item(
+	std::string_view key,
+	const ItemParams& params,
+	Vector2D pos,
+	ContentRegistry& tiles)
 {
 	TileRef tile = tiles.get_tile(key);
 	auto item = std::make_unique<Item>(
@@ -187,18 +192,36 @@ std::unique_ptr<Item> make_item(std::string_view key, const ItemParams& params, 
 // Public API
 // ---------------------------------------------------------------------------
 
-std::unique_ptr<Item> ItemCreator::create(std::string_view key, Vector2D pos, GameContext& ctx)
+std::unique_ptr<Item> ItemCreator::create(
+	std::string_view key,
+	Vector2D pos,
+	GameContext& ctx)
 {
-	assert(ctx.contentRegistry && "ItemCreator::create: called without a contentRegistry");
-	assert(ctx.itemRegistry && "ItemCreator::create: called without an itemRegistry");
+	assert(
+		ctx.contentRegistry &&
+		"ItemCreator::create: called without a contentRegistry");
+	assert(
+		ctx.itemRegistry &&
+		"ItemCreator::create: called without an itemRegistry");
 
-	return make_item(key, ctx.itemRegistry->get_params(key), pos, *ctx.contentRegistry);
+	return make_item(
+		key,
+		ctx.itemRegistry->get_params(key),
+		pos,
+		*ctx.contentRegistry);
 }
 
-std::unique_ptr<Item> ItemCreator::create_with_gold_amount(Vector2D pos, int goldAmount, GameContext& ctx)
+std::unique_ptr<Item> ItemCreator::create_with_gold_amount(
+	Vector2D pos,
+	int goldAmount,
+	GameContext& ctx)
 {
-	assert(ctx.contentRegistry && "ItemCreator::create_with_gold_amount: called without a contentRegistry");
-	assert(ctx.itemRegistry && "ItemCreator::create_with_gold_amount: called without an itemRegistry");
+	assert(
+		ctx.contentRegistry &&
+		"ItemCreator::create_with_gold_amount: called without a contentRegistry");
+	assert(
+		ctx.itemRegistry &&
+		"ItemCreator::create_with_gold_amount: called without an itemRegistry");
 
 	const ItemParams& params = ctx.itemRegistry->get_params("gold_coin");
 	TileRef tile = ctx.contentRegistry->get_tile("gold_coin");
@@ -233,8 +256,12 @@ std::unique_ptr<Item> ItemCreator::create_random_of_category(
 	GameContext& ctx,
 	int dungeonLevel)
 {
-	assert(ctx.itemRegistry && "ItemCreator::create_random_of_category: called without an itemRegistry");
-	assert(ctx.dice && "ItemCreator::create_random_of_category: called without dice");
+	assert(
+		ctx.itemRegistry &&
+		"ItemCreator::create_random_of_category: called without an itemRegistry");
+	assert(
+		ctx.dice &&
+		"ItemCreator::create_random_of_category: called without dice");
 
 	struct Candidate
 	{
@@ -262,8 +289,10 @@ std::unique_ptr<Item> ItemCreator::create_random_of_category(
 			continue;
 		}
 
-		const float levelFactor = 1.0f + (params.levelScaling * static_cast<float>(dungeonLevel - 1));
-		const int weight = std::max(1, static_cast<int>(params.baseWeight * levelFactor));
+		const float levelFactor =
+			1.0f + (params.levelScaling * static_cast<float>(dungeonLevel - 1));
+		const int weight =
+			std::max(1, static_cast<int>(params.baseWeight * levelFactor));
 		candidates.push_back({ key, weight });
 		totalWeight += weight;
 	}

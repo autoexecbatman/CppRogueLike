@@ -36,15 +36,25 @@ namespace ItemFactory
 {
 // Places a gold pile worth 10 to 20 gold per dungeon level per quality at position,
 // then one to five items near it, more and deeper-level ones for higher quality (1 to 3).
-void generate_treasure(Vector2D position, int dungeonLevel, int quality, GameContext& ctx);
+void generate_treasure(
+	Vector2D position,
+	int dungeonLevel,
+	int quality,
+	GameContext& ctx);
 
 // Each entry's chance at dungeonLevel, from the registry as it stands; an entry that
 // cannot appear there is left out.
-[[nodiscard]] std::vector<ItemPercentage> get_current_distribution(int dungeonLevel, const ItemRegistry& items);
+[[nodiscard]] std::vector<ItemPercentage> get_current_distribution(
+	int dungeonLevel,
+	const ItemRegistry& items);
 
 // Places one item of category at position, drawn by weight from ctx.itemRegistry for
 // dungeonLevel. Logs and places nothing when none of the category can appear.
-void spawn_item_of_category(Vector2D position, int dungeonLevel, const std::string& category, GameContext& ctx);
+void spawn_item_of_category(
+	Vector2D position,
+	int dungeonLevel,
+	const std::string& category,
+	GameContext& ctx);
 
 // Places one item of any category at position, drawn by weight from ctx.itemRegistry
 // for dungeonLevel. Logs and places nothing when no item can appear.

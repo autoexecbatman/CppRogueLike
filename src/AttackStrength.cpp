@@ -15,7 +15,9 @@ AttackStrength::Adjustment AttackStrength::adjustment(
 	AttackKind kind,
 	const Item* missileWeapon)
 {
-	const StrengthAttributes row = dataManager.strength_for(attacker.get_strength(), attacker.get_exceptional_strength());
+	const StrengthAttributes row = dataManager.strength_for(
+		attacker.get_strength(),
+		attacker.get_exceptional_strength());
 
 	// A swing, and a missile thrown by hand or by nature, carries the arm's whole strength.
 	Adjustment wholeRow{ row.hitProb, row.dmgAdj };
@@ -23,7 +25,9 @@ AttackStrength::Adjustment AttackStrength::adjustment(
 	// Ogre gauntlets beside a girdle of giant strength add their own row to such a blow.
 	if (const Gauntlets* gauntlets = attacker.get_gauntlets_beside_girdle())
 	{
-		const StrengthAttributes hands = dataManager.strength_for(gauntlets->strBonus, gauntlets->exceptionalStrength);
+		const StrengthAttributes hands = dataManager.strength_for(
+			gauntlets->strBonus,
+			gauntlets->exceptionalStrength);
 		wholeRow.hit += hands.hitProb;
 		wholeRow.damage += hands.dmgAdj;
 	}
@@ -40,7 +44,8 @@ AttackStrength::Adjustment AttackStrength::adjustment(
 		// A bow made for an arm gives that arm's row; can_draw stops a weaker arm before here.
 		if (const int rating = strength_rating_of(*missileWeapon); rating > 0)
 		{
-			const StrengthAttributes madeFor = dataManager.strength_for(rating, 0);
+			const StrengthAttributes madeFor =
+				dataManager.strength_for(rating, 0);
 			return Adjustment{ madeFor.hitProb, madeFor.dmgAdj };
 		}
 

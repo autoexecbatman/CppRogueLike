@@ -1,0 +1,28 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "python",
+    "docs/pair_symmetry.py",
+    "--self-test"
+  ],
+  "mutations": [
+    {
+      "file": "docs/pair_symmetry.py",
+      "original": "                statement = statement_at(lines, index)",
+      "mutated": "                statement = code",
+      "catches": "a wrapped assert read as its first line: gadgetSlot's assert is not counted"
+    },
+    {
+      "file": "docs/pair_symmetry.py",
+      "original": "                       + r\"\\s*\\(([^)]*)\\)\\s*([^;{]*)(?:[;{]|$)\")",
+      "mutated": "                       + r\"\\s*\\(([^)]*)\\)\\s*([^;{]*)[;{]\")",
+      "catches": "a brace on the next line refused: save_error reports as a writer"
+    },
+    {
+      "file": "docs/pair_symmetry.py",
+      "original": "            while paren_depth(code) > 0 and last + 1 < len(lines):",
+      "mutated": "            while False and last + 1 < len(lines):",
+      "catches": "wrapped parameters not joined: save_file_exists reports as a writer"
+    }
+  ]
+}

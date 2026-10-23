@@ -44,8 +44,10 @@ TEST_F(DamageInfoTest, RollDamage_RespectsMinMax)
 	for (int i = 0; i < 1000; ++i)
 	{
 		int damage = longsword.roll_damage(&dice);
-		EXPECT_GE(damage, longsword.minDamage) << "Damage below minimum on roll " << i;
-		EXPECT_LE(damage, longsword.maxDamage) << "Damage above maximum on roll " << i;
+		EXPECT_GE(damage, longsword.minDamage)
+			<< "Damage below minimum on roll " << i;
+		EXPECT_LE(damage, longsword.maxDamage)
+			<< "Damage above maximum on roll " << i;
 	}
 }
 
@@ -158,11 +160,17 @@ TEST_F(DamageInfoTest, IsValid_EdgeCases)
 	EXPECT_TRUE(DamageInfo("1", DamageType::PHYSICAL).is_valid());
 	EXPECT_TRUE(DamageInfo("1d4", DamageType::PHYSICAL).is_valid());
 	// No dice to roll
-	EXPECT_THROW(DamageInfo("0d5", DamageType::PHYSICAL), std::invalid_argument);
+	EXPECT_THROW(
+		DamageInfo("0d5", DamageType::PHYSICAL),
+		std::invalid_argument);
 	// No sides
-	EXPECT_THROW(DamageInfo("5d0", DamageType::PHYSICAL), std::invalid_argument);
+	EXPECT_THROW(
+		DamageInfo("5d0", DamageType::PHYSICAL),
+		std::invalid_argument);
 	// A negative count
-	EXPECT_THROW(DamageInfo("-1d5", DamageType::PHYSICAL), std::invalid_argument);
+	EXPECT_THROW(
+		DamageInfo("-1d5", DamageType::PHYSICAL),
+		std::invalid_argument);
 }
 
 // Display
@@ -250,7 +258,8 @@ TEST_F(DamageInfoTest, EdgeCase_MassiveEnhancementStack)
 
 	EXPECT_EQ(weapon.minDamage, 16); // 1 + (1+2+3+4+5)
 	EXPECT_EQ(weapon.maxDamage, 19); // 4 + (1+2+3+4+5)
-	EXPECT_EQ(weapon.displayRoll, "1d4+15") << "five bonuses are one sum, not five of them";
+	EXPECT_EQ(weapon.displayRoll, "1d4+15")
+		<< "five bonuses are one sum, not five of them";
 	EXPECT_NO_THROW(parse_dice_expression(weapon.displayRoll));
 }
 
@@ -327,5 +336,6 @@ TEST(DamageTypeNameTest, CyclingVisitsEveryTypeAndWraps)
 	}
 
 	EXPECT_EQ(seen.size(), 7u) << "a type the editor cannot reach";
-	EXPECT_EQ(type, DamageType::PHYSICAL) << "the cycle does not come back round";
+	EXPECT_EQ(type, DamageType::PHYSICAL)
+		<< "the cycle does not come back round";
 }

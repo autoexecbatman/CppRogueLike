@@ -21,8 +21,8 @@
     },
     {
       "file": "src/DataManager.cpp",
-      "original": "\treturn band.exceptionalFrom <= exceptional && exceptional <= band.exceptionalTo;",
-      "mutated": "\treturn band.exceptionalFrom <= exceptional;",
+      "original": "return band.exceptionalFrom <= exceptional &&\n\t\t\texceptional <= band.exceptionalTo;",
+      "mutated": "return band.exceptionalFrom <= exceptional;",
       "catches": "every percentile read as the 18/01-50 band"
     },
     {
@@ -39,13 +39,13 @@
     },
     {
       "file": "src/AttackStrength.cpp",
-      "original": "\tconst StrengthAttributes row = dataManager.strength_for(attacker.get_strength(), attacker.get_exceptional_strength());",
-      "mutated": "\tconst StrengthAttributes row = dataManager.strength_for(attacker.get_strength(), 0);",
+      "original": "\tconst StrengthAttributes row = dataManager.strength_for(\n\t\tattacker.get_strength(),\n\t\tattacker.get_exceptional_strength());",
+      "mutated": "\tconst StrengthAttributes row = dataManager.strength_for(\n\t\tattacker.get_strength(),0);",
       "catches": "exceptional Strength left out of the damage"
     },
     {
       "file": "src/Player.cpp",
-      "original": " && get_race() != PlayerRaceState::HALFLING",
+      "original": "&&\n\t\tget_race() != PlayerRaceState::HALFLING",
       "mutated": "",
       "catches": "a halfling fighter rolling exceptional Strength"
     },

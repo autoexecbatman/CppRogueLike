@@ -21,20 +21,20 @@
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\tparams.itemClass = parse_item_class(required_field(record, key, \"itemClass\").get<std::string>());",
-      "mutated": "\tparams.itemClass = parse_item_class(record.value(\"itemClass\", std::string{ \"unknown\" }));",
+      "original": "\tparams.itemClass = parse_item_class(\n\t\trequired_field(record, key, \"itemClass\").get<std::string>());",
+      "mutated": "\tparams.itemClass = parse_item_class(\n\t\trecord.value(\"itemClass\", std::string{ \"unknown\" }));",
       "catches": "one text field back to a silent default"
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\t\t\t\"ItemRegistry::load -- item '{}' is missing required field '{}'\",\n\t\t\titemKey,\n\t\t\tfield));",
-      "mutated": "\t\t\t\"ItemRegistry::load -- a record is missing a required field\"));",
+      "original": "\t\t\t\t\"ItemRegistry::load -- item '{}' is missing required field '{}'\",\n\t\t\t\titemKey,\n\t\t\t\tfield));",
+      "mutated": "\t\t\t\t\"ItemRegistry::load -- a record is missing a required field\"));",
       "catches": "a refusal that names neither the record nor the field, useless across a file of them"
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\t\t\t\"ItemRegistry::load -- item '{}' is missing required field '{}'\",\n\t\t\titemKey,\n\t\t\tfield));",
-      "mutated": "\t\t\t\"ItemRegistry::load -- item '{}' is missing required field '{}'\",\n\t\t\tfield,\n\t\t\titemKey));",
+      "original": "\t\t\t\t\"ItemRegistry::load -- item '{}' is missing required field '{}'\",\n\t\t\t\titemKey,\n\t\t\t\tfield));",
+      "mutated": "\t\t\t\t\"ItemRegistry::load -- item '{}' is missing required field '{}'\",field,\n\t\t\titemKey));",
       "catches": "the record and the field reported the wrong way round"
     },
     {

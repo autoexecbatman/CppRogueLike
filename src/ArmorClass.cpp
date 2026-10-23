@@ -9,9 +9,9 @@
 #include "GameContext.h"
 #include "Pickable.h"
 
-ArmorClass::ArmorClass(int baseAC)
-	: armorClass(baseAC),
-	  baseArmorClass(baseAC)
+ArmorClass::ArmorClass(int baseAC) :
+	armorClass(baseAC),
+	baseArmorClass(baseAC)
 {
 }
 
@@ -35,7 +35,8 @@ ArmorClassBreakdown ArmorClass::update(Creature& owner, GameContext& ctx)
 	breakdown.dexterity = calculate_dexterity_ac_bonus(owner, ctx);
 	breakdown.equipment = calculate_equipment_ac_bonus(owner, breakdown);
 	breakdown.temporary = ctx.buffSystem->calculate_ac_bonus(owner);
-	breakdown.total = breakdown.base + breakdown.dexterity + breakdown.equipment + breakdown.temporary;
+	breakdown.total = breakdown.base + breakdown.dexterity +
+		breakdown.equipment + breakdown.temporary;
 	breakdown.changed = (breakdown.previous != breakdown.total);
 
 	if (breakdown.changed)
@@ -46,24 +47,32 @@ ArmorClassBreakdown ArmorClass::update(Creature& owner, GameContext& ctx)
 	return breakdown;
 }
 
-int ArmorClass::without_dexterity_bonus(const Creature& owner, GameContext& ctx) const
+int ArmorClass::without_dexterity_bonus(
+	const Creature& owner,
+	GameContext& ctx) const
 {
 	// A bonus counts downward, so only a negative adjustment is taken back out.
 	return armorClass - std::min(0, calculate_dexterity_ac_bonus(owner, ctx));
 }
 
-[[nodiscard]] int ArmorClass::calculate_dexterity_ac_bonus(const Creature& owner, GameContext& ctx) const
+[[nodiscard]] int ArmorClass::calculate_dexterity_ac_bonus(
+	const Creature& owner,
+	GameContext& ctx) const
 {
 	return ctx.dataManager->dexterity_for(owner.get_dexterity()).DefensiveAdj;
 }
 
-[[nodiscard]] int ArmorClass::calculate_equipment_ac_bonus(const Creature& owner, ArmorClassBreakdown& breakdown) const
+[[nodiscard]] int ArmorClass::calculate_equipment_ac_bonus(
+	const Creature& owner,
+	ArmorClassBreakdown& breakdown) const
 {
 	int totalBonus = 0;
 
 	if (Item* equippedArmor = owner.get_equipped_item(EquipmentSlot::BODY))
 	{
-		int armorBonus = equippedArmor->behavior ? get_item_ac_bonus(*equippedArmor->behavior) : 0;
+		int armorBonus = equippedArmor->behavior ?
+			get_item_ac_bonus(*equippedArmor->behavior) :
+			0;
 
 		if (equippedArmor->get_enhancement().blessing == BlessingStatus::CURSED)
 		{
@@ -78,11 +87,15 @@ int ArmorClass::without_dexterity_bonus(const Creature& owner, GameContext& ctx)
 		}
 	}
 
-	if (Item* equippedShield = owner.get_equipped_item(EquipmentSlot::LEFT_HAND))
+	if (Item* equippedShield =
+			owner.get_equipped_item(EquipmentSlot::LEFT_HAND))
 	{
-		int shieldBonus = equippedShield->behavior ? get_item_ac_bonus(*equippedShield->behavior) : 0;
+		int shieldBonus = equippedShield->behavior ?
+			get_item_ac_bonus(*equippedShield->behavior) :
+			0;
 
-		if (equippedShield->get_enhancement().blessing == BlessingStatus::CURSED)
+		if (equippedShield->get_enhancement().blessing ==
+			BlessingStatus::CURSED)
 		{
 			shieldBonus += 1;
 		}
@@ -99,11 +112,15 @@ int ArmorClass::without_dexterity_bonus(const Creature& owner, GameContext& ctx)
 	int bestRingBonus = 0;
 	const Item* bestRing = nullptr;
 
-	for (const auto slot : { EquipmentSlot::RIGHT_RING, EquipmentSlot::LEFT_RING })
+	for (
+		const auto slot :
+		{ EquipmentSlot::RIGHT_RING, EquipmentSlot::LEFT_RING })
 	{
 		if (Item* equippedRing = owner.get_equipped_item(slot))
 		{
-			const int ringBonus = equippedRing->behavior ? get_item_ac_bonus(*equippedRing->behavior) : 0;
+			const int ringBonus = equippedRing->behavior ?
+				get_item_ac_bonus(*equippedRing->behavior) :
+				0;
 			if (ringBonus < bestRingBonus)
 			{
 				bestRingBonus = ringBonus;
@@ -121,7 +138,9 @@ int ArmorClass::without_dexterity_bonus(const Creature& owner, GameContext& ctx)
 
 	if (Item* equippedHelm = owner.get_equipped_item(EquipmentSlot::HEAD))
 	{
-		const int helmBonus = equippedHelm->behavior ? get_item_ac_bonus(*equippedHelm->behavior) : 0;
+		const int helmBonus = equippedHelm->behavior ?
+			get_item_ac_bonus(*equippedHelm->behavior) :
+			0;
 		if (helmBonus < 0)
 		{
 			totalBonus += helmBonus;

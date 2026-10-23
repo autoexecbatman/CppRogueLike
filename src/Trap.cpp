@@ -77,9 +77,9 @@ bool rolls_trap_found(bool isPit, std::optional<int> skill, RandomDice& dice)
 }
 } // namespace
 
-Trap::Trap(Vector2D position, TrapType trapType, const TileConfig& tileConfig)
-	: TileFeature(position, ActorData{}),
-	  type(trapType)
+Trap::Trap(Vector2D position, TrapType trapType, const TileConfig& tileConfig) :
+	TileFeature(position, ActorData{}),
+	type(trapType)
 {
 	// Damage dice, name and both tiles by type; a hidden trap carries IS_INVISIBLE and draws nothing.
 	std::string trapName;
@@ -139,7 +139,8 @@ DisarmResult Trap::attempt_disarm(Player& creature, GameContext& ctx)
 	}
 
 	// Find/Remove Traps is the thief's alone, and a score of nothing counts as no skill.
-	const std::optional<int> skill = creature.thief_skill(ThiefSkill::FIND_REMOVE_TRAPS);
+	const std::optional<int> skill =
+		creature.thief_skill(ThiefSkill::FIND_REMOVE_TRAPS);
 	if (!skill.has_value() || skill.value() <= 0)
 	{
 		return DisarmResult::NO_SKILL;
@@ -200,14 +201,29 @@ EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 	const int damage = roll_damage(*ctx.dice);
 
 	// Apply damage to creature
-	assert(ctx.messageSystem && "Trap::on_creature_enter: called without a messageSystem");
+	assert(
+		ctx.messageSystem &&
+		"Trap::on_creature_enter: called without a messageSystem");
 	if (creature.is_player())
 	{
-		ctx.messageSystem->message(ColorPairId::RED_BLACK, std::format("You trigger the {} and take {} damage!", actorData.name, damage), MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::RED_BLACK,
+			std::format(
+				"You trigger the {} and take {} damage!",
+				actorData.name,
+				damage),
+			MessageCompletion::FINISHED);
 	}
 	else if (ctx.map->is_in_fov(creature.position))
 	{
-		ctx.messageSystem->message(ColorPairId::RED_BLACK, std::format("The {} triggers the {} and takes {} damage!", creature.actorData.name, actorData.name, damage), MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::RED_BLACK,
+			std::format(
+				"The {} triggers the {} and takes {} damage!",
+				creature.actorData.name,
+				actorData.name,
+				damage),
+			MessageCompletion::FINISHED);
 	}
 
 	creature.take_damage_and_check_death(damage, ctx, DamageType::PHYSICAL);
@@ -216,10 +232,15 @@ EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 	if (ctx.dice->d2() == 1)
 	{
 		destroy();
-		assert(ctx.messageSystem && "Trap::on_creature_enter: no messageSystem when the trap broke");
+		assert(
+			ctx.messageSystem &&
+			"Trap::on_creature_enter: no messageSystem when the trap broke");
 		if (creature.is_player() || ctx.map->is_in_fov(position))
 		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "The trap is destroyed.", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"The trap is destroyed.",
+				MessageCompletion::FINISHED);
 		}
 	}
 
@@ -240,7 +261,8 @@ TrapSearchResult Trap::search(Player& searcher, GameContext& ctx)
 	// A pit is the dwarf's to find and the small traps the thief's; neither finds the
 	// other's kind.
 	const bool isPit = (type == TrapType::PIT);
-	const std::optional<int> skill = searcher.thief_skill(ThiefSkill::FIND_REMOVE_TRAPS);
+	const std::optional<int> skill =
+		searcher.thief_skill(ThiefSkill::FIND_REMOVE_TRAPS);
 	const bool canFind = isPit ? is_dwarf(searcher) : has_find_traps(skill);
 	if (!canFind)
 	{
@@ -268,36 +290,51 @@ TrapSearchResult Trap::search(Player& searcher, GameContext& ctx)
 
 std::optional<int> TrapSearch::search_around(Player& searcher, GameContext& ctx)
 {
-	assert(ctx.messageSystem && "TrapSearch::search_around: called without a messageSystem");
+	assert(
+		ctx.messageSystem &&
+		"TrapSearch::search_around: called without a messageSystem");
 	assert(ctx.traps && "TrapSearch::search_around: called without traps");
 	assert(ctx.dice && "TrapSearch::search_around: called without dice");
 
 	// A character with no way to find any trap is told so, and loses no time on it.
-	const bool isThief = has_find_traps(searcher.thief_skill(ThiefSkill::FIND_REMOVE_TRAPS));
+	const bool isThief =
+		has_find_traps(searcher.thief_skill(ThiefSkill::FIND_REMOVE_TRAPS));
 	if (!isThief && !is_dwarf(searcher))
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You don't know how to look for traps.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"You don't know how to look for traps.",
+			MessageCompletion::FINISHED);
 		return std::nullopt;
 	}
 
 	bool isAnyFound{ false };
 	for (const auto& trap : *ctx.traps)
 	{
-		assert(trap && "TrapSearch::search_around: traps list holds a null entry");
-		if (trap->is_destroyed() || trap->position.chebyshev_distance_to(searcher.position) != SEARCH_REACH)
+		assert(
+			trap && "TrapSearch::search_around: traps list holds a null entry");
+		if (trap->is_destroyed() ||
+			trap->position.chebyshev_distance_to(searcher.position) !=
+				SEARCH_REACH)
 		{
 			continue;
 		}
 		if (trap->search(searcher, ctx) == TrapSearchResult::FOUND)
 		{
 			isAnyFound = true;
-			ctx.messageSystem->message(ColorPairId::YELLOW_BLACK, std::format("You find a hidden {}.", trap->actorData.name), MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::YELLOW_BLACK,
+				std::format("You find a hidden {}.", trap->actorData.name),
+				MessageCompletion::FINISHED);
 		}
 	}
 
 	if (!isAnyFound)
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You find no traps.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"You find no traps.",
+			MessageCompletion::FINISHED);
 	}
 
 	// The thief's 1d10 rounds whenever the thief's skill was part of the look, else the
@@ -305,14 +342,20 @@ std::optional<int> TrapSearch::search_around(Player& searcher, GameContext& ctx)
 	return isThief ? ctx.dice->d10() : DWARF_SEARCH_ROUNDS;
 }
 
-std::optional<int> TrapDisarm::disarm_at(Player& thief, Vector2D target, GameContext& ctx)
+std::optional<int> TrapDisarm::disarm_at(
+	Player& thief,
+	Vector2D target,
+	GameContext& ctx)
 {
-	assert(ctx.messageSystem && "TrapDisarm::disarm_at: called without a messageSystem");
+	assert(
+		ctx.messageSystem &&
+		"TrapDisarm::disarm_at: called without a messageSystem");
 	assert(ctx.traps && "TrapDisarm::disarm_at: called without traps");
 	assert(ctx.dice && "TrapDisarm::disarm_at: called without dice");
 
 	// The live trap on the target tile, if there is one.
-	const auto is_live_trap_at_target = [target](const std::unique_ptr<Trap>& trap)
+	const auto is_live_trap_at_target = [target](
+											const std::unique_ptr<Trap>& trap)
 	{
 		assert(trap && "TrapDisarm::disarm_at: traps list holds a null entry");
 		return !trap->is_destroyed() && trap->position == target;
@@ -320,7 +363,10 @@ std::optional<int> TrapDisarm::disarm_at(Player& thief, Vector2D target, GameCon
 	const auto found = std::ranges::find_if(*ctx.traps, is_live_trap_at_target);
 	if (found == ctx.traps->end())
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "There is no trap there.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"There is no trap there.",
+			MessageCompletion::FINISHED);
 		return std::nullopt;
 	}
 
@@ -329,42 +375,66 @@ std::optional<int> TrapDisarm::disarm_at(Player& thief, Vector2D target, GameCon
 	{
 	case DisarmResult::NOT_DISARMABLE:
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "There is no trap there.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"There is no trap there.",
+			MessageCompletion::FINISHED);
 		return std::nullopt;
 	}
 	case DisarmResult::NOT_VISIBLE:
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You don't see a trap there.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"You don't see a trap there.",
+			MessageCompletion::FINISHED);
 		return std::nullopt;
 	}
 	case DisarmResult::ALREADY_DISARMED:
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "That trap is already disarmed.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"That trap is already disarmed.",
+			MessageCompletion::FINISHED);
 		return std::nullopt;
 	}
 	case DisarmResult::NO_SKILL:
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You cannot work a trap.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"You cannot work a trap.",
+			MessageCompletion::FINISHED);
 		return std::nullopt;
 	}
 	case DisarmResult::ALREADY_TRIED:
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "This trap stays beyond you until you gain a level.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"This trap stays beyond you until you gain a level.",
+			MessageCompletion::FINISHED);
 		return std::nullopt;
 	}
 	case DisarmResult::BEYOND_SKILL:
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "This trap is beyond you.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"This trap is beyond you.",
+			MessageCompletion::FINISHED);
 		return roll_disarm_rounds(*ctx.dice);
 	}
 	case DisarmResult::DISARMED:
 	{
-		ctx.messageSystem->message(ColorPairId::GREEN_BLACK, "You successfully disarm the trap.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::GREEN_BLACK,
+			"You successfully disarm the trap.",
+			MessageCompletion::FINISHED);
 		return roll_disarm_rounds(*ctx.dice);
 	}
 	case DisarmResult::TRIGGERED:
 	{
-		ctx.messageSystem->message(ColorPairId::RED_BLACK, "You trigger the trap while attempting to disarm it!", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::RED_BLACK,
+			"You trigger the trap while attempting to disarm it!",
+			MessageCompletion::FINISHED);
 		return roll_disarm_rounds(*ctx.dice);
 	}
 	}
@@ -409,7 +479,8 @@ void Trap::apply_state_appearance()
 {
 	// Hidden is the only state that draws nothing; sprung and defused show the second
 	// face. Derived rather than saved, so the picture cannot disagree with the state.
-	const bool spent = (state == TrapState::TRIGGERED || state == TrapState::DISARMED);
+	const bool spent =
+		(state == TrapState::TRIGGERED || state == TrapState::DISARMED);
 	actorData.tile = spent ? sprungTile : armedTile;
 
 	if (state == TrapState::HIDDEN)

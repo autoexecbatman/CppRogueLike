@@ -47,7 +47,9 @@ TEST_F(StrengthLineTest, AnOrdinaryScorePrintsItsOwnRow)
 {
 	const auto player = at_strength(17, 0);
 
-	EXPECT_EQ(CharacterSheetText::strength_line(*player, mock.data_manager), "STR: 17  (+1 hit, +1 dmg)");
+	EXPECT_EQ(
+		CharacterSheetText::strength_line(*player, mock.data_manager),
+		"STR: 17  (+1 hit, +1 dmg)");
 }
 
 // Eighteen without a percentile is its own row, and is not the same as 18/01-50.
@@ -55,7 +57,9 @@ TEST_F(StrengthLineTest, EighteenWithoutAPercentileIsItsOwnRow)
 {
 	const auto player = at_strength(18, 0);
 
-	EXPECT_EQ(CharacterSheetText::strength_line(*player, mock.data_manager), "STR: 18  (+1 hit, +2 dmg)");
+	EXPECT_EQ(
+		CharacterSheetText::strength_line(*player, mock.data_manager),
+		"STR: 18  (+1 hit, +2 dmg)");
 }
 
 // Exceptional Strength prints the way the book writes it, and takes the band's row:
@@ -64,7 +68,9 @@ TEST_F(StrengthLineTest, ExceptionalStrengthPrintsAsTheBookWritesIt)
 {
 	const auto player = at_strength(18, 76);
 
-	EXPECT_EQ(CharacterSheetText::strength_line(*player, mock.data_manager), "STR: 18/76  (+2 hit, +4 dmg)");
+	EXPECT_EQ(
+		CharacterSheetText::strength_line(*player, mock.data_manager),
+		"STR: 18/76  (+2 hit, +4 dmg)");
 }
 
 // A percentile of 100 is written 18/00 rather than 18/100, and is the top row.
@@ -72,7 +78,9 @@ TEST_F(StrengthLineTest, APercentileOfAHundredIsWrittenAsZeroZero)
 {
 	const auto player = at_strength(18, 100);
 
-	EXPECT_EQ(CharacterSheetText::strength_line(*player, mock.data_manager), "STR: 18/00  (+3 hit, +6 dmg)");
+	EXPECT_EQ(
+		CharacterSheetText::strength_line(*player, mock.data_manager),
+		"STR: 18/00  (+3 hit, +6 dmg)");
 }
 
 // A single-digit score is padded to the width the column reserves, so the bracket that
@@ -81,7 +89,9 @@ TEST_F(StrengthLineTest, ASingleDigitScoreIsPaddedToTheColumnWidth)
 {
 	const auto player = at_strength(9, 0);
 
-	EXPECT_EQ(CharacterSheetText::strength_line(*player, mock.data_manager), "STR:  9  (+0 hit, +0 dmg)");
+	EXPECT_EQ(
+		CharacterSheetText::strength_line(*player, mock.data_manager),
+		"STR:  9  (+0 hit, +0 dmg)");
 }
 
 // The weakest score the book prints carries penalties rather than bonuses, and the
@@ -90,7 +100,9 @@ TEST_F(StrengthLineTest, APenaltyShowsItsSign)
 {
 	const auto player = at_strength(3, 0);
 
-	EXPECT_EQ(CharacterSheetText::strength_line(*player, mock.data_manager), "STR:  3  (-3 hit, -1 dmg)");
+	EXPECT_EQ(
+		CharacterSheetText::strength_line(*player, mock.data_manager),
+		"STR:  3  (-3 hit, -1 dmg)");
 }
 
 // end of file: StrengthLineTest.cpp

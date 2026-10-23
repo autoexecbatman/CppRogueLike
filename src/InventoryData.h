@@ -41,8 +41,8 @@ struct CreatureInventory
 	std::vector<std::unique_ptr<Item>> items;
 	size_t capacity{ 0 };
 
-	explicit CreatureInventory(size_t initialCapacity)
-		: capacity(initialCapacity)
+	explicit CreatureInventory(size_t initialCapacity) :
+		capacity(initialCapacity)
 	{
 		items.reserve(initialCapacity);
 	}

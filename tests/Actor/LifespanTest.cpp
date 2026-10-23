@@ -75,10 +75,14 @@ TEST(LifespanTest, TheThresholdsAreTable12AsPrinted)
 	for (const PrintedRow& printed : TABLE_12)
 	{
 		const auto row = lifespan_table(printed.race);
-		ASSERT_TRUE(row.has_value()) << "no row for race " << static_cast<int>(printed.race);
-		EXPECT_EQ(row->middleAge, printed.middleAge) << "race " << static_cast<int>(printed.race);
-		EXPECT_EQ(row->oldAge, printed.oldAge) << "race " << static_cast<int>(printed.race);
-		EXPECT_EQ(row->venerableAge, printed.venerableAge) << "race " << static_cast<int>(printed.race);
+		ASSERT_TRUE(row.has_value())
+			<< "no row for race " << static_cast<int>(printed.race);
+		EXPECT_EQ(row->middleAge, printed.middleAge)
+			<< "race " << static_cast<int>(printed.race);
+		EXPECT_EQ(row->oldAge, printed.oldAge)
+			<< "race " << static_cast<int>(printed.race);
+		EXPECT_EQ(row->venerableAge, printed.venerableAge)
+			<< "race " << static_cast<int>(printed.race);
 	}
 }
 
@@ -94,10 +98,14 @@ TEST(LifespanTest, ARaceWithNoRowNeverAges)
 TEST(LifespanTest, AHumansBandsFollowTheTable)
 {
 	EXPECT_EQ(age_category(44, PlayerRaceState::HUMAN), AgeCategory::YOUNG);
-	EXPECT_EQ(age_category(45, PlayerRaceState::HUMAN), AgeCategory::MIDDLE_AGE);
+	EXPECT_EQ(
+		age_category(45, PlayerRaceState::HUMAN),
+		AgeCategory::MIDDLE_AGE);
 	EXPECT_EQ(age_category(60, PlayerRaceState::HUMAN), AgeCategory::OLD_AGE);
 	EXPECT_EQ(age_category(90, PlayerRaceState::HUMAN), AgeCategory::VENERABLE);
-	EXPECT_EQ(age_category(62, PlayerRaceState::HALFELF), AgeCategory::MIDDLE_AGE);
+	EXPECT_EQ(
+		age_category(62, PlayerRaceState::HALFELF),
+		AgeCategory::MIDDLE_AGE);
 	EXPECT_EQ(age_category(61, PlayerRaceState::HALFELF), AgeCategory::YOUNG);
 	EXPECT_EQ(age_category_name(AgeCategory::OLD_AGE), "old age");
 }
@@ -106,7 +114,8 @@ TEST(LifespanTest, AHumanOf44HasNoChange)
 {
 	for (const Ability ability : ALL_ABILITY)
 	{
-		EXPECT_EQ(ageing_change(human(44, 0), ability, 0), 0) << "ability " << ability_index(ability);
+		EXPECT_EQ(ageing_change(human(44, 0), ability, 0), 0)
+			<< "ability " << ability_index(ability);
 	}
 }
 
@@ -207,7 +216,9 @@ TEST(LifespanTest, ElvesAndDwarvesStartAtTheirOwnAges)
 
 	RandomDice dwarfLeast{ TEST_DICE_SEED };
 	script_dice(dwarfLeast, 7, 1);
-	EXPECT_EQ(roll_lifespan(PlayerRaceState::DWARF, dwarfLeast).startingAge, 45);
+	EXPECT_EQ(
+		roll_lifespan(PlayerRaceState::DWARF, dwarfLeast).startingAge,
+		45);
 
 	RandomDice dwarfMost{ TEST_DICE_SEED };
 	script_dice(dwarfMost, 5, 6);

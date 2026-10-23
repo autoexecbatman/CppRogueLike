@@ -15,19 +15,19 @@
   "mutations": [
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\t\tconst BuffType granted = source == SpellSource::ITEM ? BuffType::ITEM_INVISIBILITY : BuffType::INVISIBILITY;\n",
-      "mutated": "\t\tconst BuffType granted = source != SpellSource::ITEM ? BuffType::ITEM_INVISIBILITY : BuffType::INVISIBILITY;\n",
+      "original": "\t\tconst BuffType granted = source == SpellSource::ITEM ?\n\t\t\tBuffType::ITEM_INVISIBILITY :\n\t\t\tBuffType::INVISIBILITY;\n",
+      "mutated": "\t\tconst BuffType granted = source!= SpellSource::ITEM ?\n\t\t\tBuffType::ITEM_INVISIBILITY :\n\t\t\tBuffType::INVISIBILITY;\n",
       "catches": "a casting through the ring granting the spell's buff, so the ring cannot tell its own invisibility apart"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\t\t\tctx.buffSystem->remove_buff(wearer, BuffType::ITEM_INVISIBILITY);\n",
-      "mutated": "\t\t\t\tctx.buffSystem->remove_buff(wearer, BuffType::INVISIBILITY);\n",
+      "original": "\t\t\t\tctx.buffSystem->remove_buff(\n\t\t\t\t\twearer,\n\t\t\t\t\tBuffType::ITEM_INVISIBILITY);\n",
+      "mutated": "\t\t\t\tctx.buffSystem->remove_buff(\n\t\t\t\t\twearer,\n\t\t\t\t\tBuffType::INVISIBILITY);\n",
       "catches": "taking the ring off ending the spell's invisibility instead of its own"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": " && !wearer.wears_ring_of(MagicalEffect::INVISIBILITY))\n",
+      "original": "&&\n\t\t\t\t!wearer.wears_ring_of(MagicalEffect::INVISIBILITY))\n",
       "mutated": ")\n",
       "catches": "one ring coming off ending the invisibility a second worn ring still grants"
     },

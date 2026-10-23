@@ -31,7 +31,8 @@ TEST(RaceDisplayNameTest, NoTwoRacesShareAName)
 	for (const PlayerRaceState race : ALL_PLAYER_RACE)
 	{
 		const std::string name{ race_display_name(race) };
-		EXPECT_TRUE(seen.insert(name).second) << "'" << name << "' names more than one race";
+		EXPECT_TRUE(seen.insert(name).second)
+			<< "'" << name << "' names more than one race";
 	}
 }
 
@@ -40,7 +41,8 @@ TEST(RaceDisplayNameTest, NoRaceIsNameless)
 {
 	for (const PlayerRaceState race : ALL_PLAYER_RACE)
 	{
-		EXPECT_FALSE(race_display_name(race).empty()) << "a race the menu offers has no name to offer";
+		EXPECT_FALSE(race_display_name(race).empty())
+			<< "a race the menu offers has no name to offer";
 	}
 }
 

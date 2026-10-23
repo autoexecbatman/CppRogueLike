@@ -52,31 +52,36 @@ protected:
 	// A ring of invisibility from the data, carried in the pack.
 	Item& carry_a_ring()
 	{
-		auto ring = ItemCreator::create("ring_of_invisibility", wearer().position, ctx);
+		auto ring =
+			ItemCreator::create("ring_of_invisibility", wearer().position, ctx);
 		Item* carried = ring.get();
-		[[maybe_unused]] const auto added = InventoryOperations::add_item_to_inventory(wearer().inventoryData, std::move(ring), wearer(), *ctx.dataManager);
+		[[maybe_unused]] const auto added =
+			InventoryOperations::add_item_to_inventory(
+				wearer().inventoryData,
+				std::move(ring),
+				wearer(),
+				*ctx.dataManager);
 		EXPECT_TRUE(added.has_value()) << "the ring did not fit in the pack";
 		return *carried;
 	}
 
 	// Puts the ring on, or takes it off if it is worn, as the inventory screen does.
-	void use(Item& ring)
-	{
-		use_item(*ring.behavior, ring, wearer(), ctx);
-	}
+	void use(Item& ring) { use_item(*ring.behavior, ring, wearer(), ctx); }
 
 	// Casts invisibility the way the spell menu casts it from the given source.
 	void cast_invisibility(SpellSource source)
 	{
 		const auto casting_spent = [](GameContext& completedCtx) {
 		};
-		SpellSystem::cast_spell_by_key("invisibility", wearer(), source, casting_spent, ctx);
+		SpellSystem::cast_spell_by_key(
+			"invisibility",
+			wearer(),
+			source,
+			casting_spent,
+			ctx);
 	}
 
-	Player& wearer()
-	{
-		return ctx.player_concrete();
-	}
+	Player& wearer() { return ctx.player_concrete(); }
 
 	MockGameContext mock{};
 	GameContext ctx{ mock.to_game_context() };
@@ -87,11 +92,18 @@ TEST_F(RingInvisibilityTest, TakingTheRingOffLeavesASpellsInvisibility)
 {
 	Item& ring = carry_a_ring();
 	use(ring);
-	ctx.buffSystem->add_buff(wearer(), BuffType::INVISIBILITY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(
+		wearer(),
+		BuffType::INVISIBILITY,
+		0,
+		10,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 
 	use(ring);
 
-	EXPECT_TRUE(wearer().is_invisible()) << "taking the ring off ended invisibility it did not grant";
+	EXPECT_TRUE(wearer().is_invisible())
+		<< "taking the ring off ended invisibility it did not grant";
 }
 
 // The ring's invisibility is its own grant, apart from the spell's.
@@ -118,7 +130,8 @@ TEST_F(RingInvisibilityTest, ASecondRingStillWornKeepsTheInvisibility)
 
 	use(first);
 
-	EXPECT_TRUE(wearer().is_invisible()) << "one ring came off and the other still grants it";
+	EXPECT_TRUE(wearer().is_invisible())
+		<< "one ring came off and the other still grants it";
 }
 
 // The ring's own invisibility ends when the ring comes off.
@@ -141,8 +154,11 @@ TEST_F(RingInvisibilityTest, WornPastAnHourItLastsUntilTheRingComesOff)
 	use(ring);
 	cast_invisibility(SpellSource::ITEM);
 
-	ctx.buffSystem->update_creature_buffs(wearer(), expiry_time(0, ROUNDS_IN_AN_HOUR + 1));
-	ASSERT_TRUE(wearer().is_invisible()) << "worn past an hour, the ring's invisibility ran out";
+	ctx.buffSystem->update_creature_buffs(
+		wearer(),
+		expiry_time(0, ROUNDS_IN_AN_HOUR + 1));
+	ASSERT_TRUE(wearer().is_invisible())
+		<< "worn past an hour, the ring's invisibility ran out";
 
 	use(ring);
 

@@ -66,9 +66,12 @@ TEST_F(Vector2DTest, ChebyshevCountsEightWaySteps)
 {
 	const Vector2D origin(0, 0);
 
-	EXPECT_EQ(origin.chebyshev_distance_to(Vector2D(3, 3)), 3) << "a diagonal is one step per cell";
-	EXPECT_EQ(origin.chebyshev_distance_to(Vector2D(3, 5)), 5) << "the longer side decides";
-	EXPECT_EQ(origin.chebyshev_distance_to(Vector2D(-4, 2)), 4) << "direction does not matter";
+	EXPECT_EQ(origin.chebyshev_distance_to(Vector2D(3, 3)), 3)
+		<< "a diagonal is one step per cell";
+	EXPECT_EQ(origin.chebyshev_distance_to(Vector2D(3, 5)), 5)
+		<< "the longer side decides";
+	EXPECT_EQ(origin.chebyshev_distance_to(Vector2D(-4, 2)), 4)
+		<< "direction does not matter";
 	EXPECT_EQ(origin.chebyshev_distance_to(origin), 0);
 }
 
@@ -76,7 +79,8 @@ TEST_F(Vector2DTest, ManhattanCountsFourWaySteps)
 {
 	const Vector2D origin(0, 0);
 
-	EXPECT_EQ(origin.manhattan_distance_to(Vector2D(3, 3)), 6) << "a diagonal is two steps per cell";
+	EXPECT_EQ(origin.manhattan_distance_to(Vector2D(3, 3)), 6)
+		<< "a diagonal is two steps per cell";
 	EXPECT_EQ(origin.manhattan_distance_to(Vector2D(3, 5)), 8);
 	EXPECT_EQ(origin.manhattan_distance_to(Vector2D(-4, 2)), 6);
 	EXPECT_EQ(origin.manhattan_distance_to(origin), 0);
@@ -90,14 +94,19 @@ TEST_F(Vector2DTest, TheTwoAgreeInLineAndPartOnTheDiagonal)
 	const Vector2D alongARow(6, 0);
 	const Vector2D onTheDiagonal(6, 6);
 
-	EXPECT_EQ(origin.chebyshev_distance_to(alongARow), origin.manhattan_distance_to(alongARow));
-	EXPECT_LT(origin.chebyshev_distance_to(onTheDiagonal), origin.manhattan_distance_to(onTheDiagonal));
+	EXPECT_EQ(
+		origin.chebyshev_distance_to(alongARow),
+		origin.manhattan_distance_to(alongARow));
+	EXPECT_LT(
+		origin.chebyshev_distance_to(onTheDiagonal),
+		origin.manhattan_distance_to(onTheDiagonal));
 }
 
 TEST_F(Vector2DTest, StraightLineDistanceIsEuclidean)
 {
 	const Vector2D origin(0, 0);
 
-	EXPECT_FLOAT_EQ(origin.distance_to(Vector2D(3, 4)), 5.0f) << "the three-four-five triangle";
+	EXPECT_FLOAT_EQ(origin.distance_to(Vector2D(3, 4)), 5.0f)
+		<< "the three-four-five triangle";
 	EXPECT_FLOAT_EQ(origin.distance_to(origin), 0.0f);
 }

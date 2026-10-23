@@ -21,7 +21,9 @@ namespace CharacterSheetText
 // Example:
 //   strength_line(fighter, dataManager);   // Str 18/76 -> "STR: 18/76  (+2 hit, +4 dmg)"
 //   strength_line(wizard, dataManager);    // Str 9     -> "STR:  9  (+0 hit, +0 dmg)"
-[[nodiscard]] std::string strength_line(const Player& player, const DataManager& dataManager);
+[[nodiscard]] std::string strength_line(
+	const Player& player,
+	const DataManager& dataManager);
 
 // The attribute panel's Constitution line: the score and the hit points it adds to
 // each level's die. Once the creature's next level no longer takes that adjustment
@@ -30,7 +32,9 @@ namespace CharacterSheetText
 // Example:
 //   constitution_line(wizard, dataManager);    // 3rd level, Con 17 -> "CON: 17  (+2 HP/level)"
 //   constitution_line(fighter, dataManager);   // 12th level, Con 17 -> "CON: 17  (+3 HP/level through level 9)"
-[[nodiscard]] std::string constitution_line(const Creature& creature, const DataManager& dataManager);
+[[nodiscard]] std::string constitution_line(
+	const Creature& creature,
+	const DataManager& dataManager);
 
 } // namespace CharacterSheetText
 

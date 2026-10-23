@@ -474,7 +474,9 @@ void ItemEnhancement::apply_enhancement_effects()
 }
 
 // Random generation methods
-ItemEnhancement ItemEnhancement::generate_random_enhancement(MagicalPrefixes magicalPrefixes, RandomDice& dice)
+ItemEnhancement ItemEnhancement::generate_random_enhancement(
+	MagicalPrefixes magicalPrefixes,
+	RandomDice& dice)
 {
 	ItemEnhancement enhancement;
 
@@ -535,7 +537,9 @@ void ItemEnhancement::strip_magical_prefix()
 	}
 }
 
-ItemEnhancement ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes magicalPrefixes, RandomDice& dice)
+ItemEnhancement ItemEnhancement::generate_weapon_enhancement(
+	MagicalPrefixes magicalPrefixes,
+	RandomDice& dice)
 {
 	ItemEnhancement enhancement;
 
@@ -558,7 +562,9 @@ ItemEnhancement ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes mag
 	return enhancement;
 }
 
-ItemEnhancement ItemEnhancement::generate_armor_enhancement(MagicalPrefixes magicalPrefixes, RandomDice& dice)
+ItemEnhancement ItemEnhancement::generate_armor_enhancement(
+	MagicalPrefixes magicalPrefixes,
+	RandomDice& dice)
 {
 	ItemEnhancement enhancement;
 
@@ -596,7 +602,8 @@ PrefixType ItemEnhancement::get_random_weapon_prefix(RandomDice& dice)
 		PrefixType::CURSED,
 	};
 
-	return weapon_prefixes[dice.roll(0, static_cast<int>(std::size(weapon_prefixes)) - 1)];
+	return weapon_prefixes[dice
+			.roll(0, static_cast<int>(std::size(weapon_prefixes)) - 1)];
 }
 
 PrefixType ItemEnhancement::get_random_armor_prefix(RandomDice& dice)
@@ -612,7 +619,8 @@ PrefixType ItemEnhancement::get_random_armor_prefix(RandomDice& dice)
 		PrefixType::RUSTED,
 	};
 
-	return armor_prefixes[dice.roll(0, static_cast<int>(std::size(armor_prefixes)) - 1)];
+	return armor_prefixes[dice
+			.roll(0, static_cast<int>(std::size(armor_prefixes)) - 1)];
 }
 
 PrefixType ItemEnhancement::get_random_universal_prefix(RandomDice& dice)
@@ -626,7 +634,8 @@ PrefixType ItemEnhancement::get_random_universal_prefix(RandomDice& dice)
 		PrefixType::CRACKED,
 	};
 
-	return universal_prefixes[dice.roll(0, static_cast<int>(std::size(universal_prefixes)) - 1)];
+	return universal_prefixes[dice
+			.roll(0, static_cast<int>(std::size(universal_prefixes)) - 1)];
 }
 
 SuffixType ItemEnhancement::get_random_combat_suffix(RandomDice& dice)
@@ -640,16 +649,21 @@ SuffixType ItemEnhancement::get_random_combat_suffix(RandomDice& dice)
 		SuffixType::OF_THE_EAGLE,
 	};
 
-	return combat_suffixes[dice.roll(0, static_cast<int>(std::size(combat_suffixes)) - 1)];
+	return combat_suffixes[dice
+			.roll(0, static_cast<int>(std::size(combat_suffixes)) - 1)];
 }
 
 SuffixType ItemEnhancement::get_random_resistance_suffix(RandomDice& dice)
 {
 	static const SuffixType resistance_suffixes[] = {
-		SuffixType::OF_FIRE_RESISTANCE, SuffixType::OF_COLD_RESISTANCE, SuffixType::OF_LIGHTNING_RESISTANCE, SuffixType::OF_POISON_RESISTANCE
+		SuffixType::OF_FIRE_RESISTANCE,
+		SuffixType::OF_COLD_RESISTANCE,
+		SuffixType::OF_LIGHTNING_RESISTANCE,
+		SuffixType::OF_POISON_RESISTANCE
 	};
 
-	return resistance_suffixes[dice.roll(0, static_cast<int>(std::size(resistance_suffixes)) - 1)];
+	return resistance_suffixes[dice
+			.roll(0, static_cast<int>(std::size(resistance_suffixes)) - 1)];
 }
 
 SuffixType ItemEnhancement::get_random_special_suffix(RandomDice& dice)
@@ -665,5 +679,6 @@ SuffixType ItemEnhancement::get_random_special_suffix(RandomDice& dice)
 		SuffixType::OF_BRITTLENESS,
 	};
 
-	return special_suffixes[dice.roll(0, static_cast<int>(std::size(special_suffixes)) - 1)];
+	return special_suffixes[dice
+			.roll(0, static_cast<int>(std::size(special_suffixes)) - 1)];
 }

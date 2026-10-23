@@ -223,7 +223,8 @@ enum class BuffApplication
 //
 // Example:
 //   encode_buff_application(BuffApplication::SET);   // -> "set"
-inline constexpr std::string_view encode_buff_application(BuffApplication application)
+inline constexpr std::string_view encode_buff_application(
+	BuffApplication application)
 {
 	switch (application)
 	{
@@ -256,7 +257,8 @@ inline BuffApplication parse_buff_application(std::string_view name)
 		return BuffApplication::SET;
 	}
 
-	throw std::runtime_error(std::format("unknown buff application '{}'", name));
+	throw std::runtime_error(
+		std::format("unknown buff application '{}'", name));
 }
 
 // One opponent's saving throw against a casting, kept so it is rolled once.

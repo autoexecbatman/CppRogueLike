@@ -101,22 +101,37 @@ TEST_F(DurationScheduleTest, SpeedDoesNotChangeHowLongABuffLasts)
 	Creature& ordinary = placed(TIME_UNITS_PER_ROUND);
 	Creature& quickling = placed(TIME_UNITS_PER_ROUND / 2);
 
-	buffs.add_buff(ordinary, BuffType::BLESS, 0, BLESS_ROUNDS, BuffApplication::ADD, ctx.gameState->get_time());
-	buffs.add_buff(quickling, BuffType::BLESS, 0, BLESS_ROUNDS, BuffApplication::ADD, ctx.gameState->get_time());
+	buffs.add_buff(
+		ordinary,
+		BuffType::BLESS,
+		0,
+		BLESS_ROUNDS,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
+	buffs.add_buff(
+		quickling,
+		BuffType::BLESS,
+		0,
+		BLESS_ROUNDS,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 
 	for (int round = 1; round < BLESS_ROUNDS; ++round)
 	{
 		run_round(round);
 
-		EXPECT_TRUE(buffs.has_buff(ordinary, BuffType::BLESS)) << "round " << round;
+		EXPECT_TRUE(buffs.has_buff(ordinary, BuffType::BLESS))
+			<< "round " << round;
 		EXPECT_TRUE(buffs.has_buff(quickling, BuffType::BLESS))
-			<< "the quickling's blessing ran out in round " << round << " of " << BLESS_ROUNDS;
+			<< "the quickling's blessing ran out in round " << round << " of "
+			<< BLESS_ROUNDS;
 	}
 
 	run_round(BLESS_ROUNDS);
 
 	EXPECT_FALSE(buffs.has_buff(ordinary, BuffType::BLESS));
-	EXPECT_FALSE(buffs.has_buff(quickling, BuffType::BLESS)) << "the quickling's blessing outstayed its rounds";
+	EXPECT_FALSE(buffs.has_buff(quickling, BuffType::BLESS))
+		<< "the quickling's blessing outstayed its rounds";
 }
 
 // The quickling really did act twice in each window, which is what makes the case above
@@ -141,12 +156,19 @@ TEST_F(DurationScheduleTest, ABuffRunsFromTheReadingItWasGrantedAt)
 
 	const int granted = 9;
 	ctx.gameState->set_time(TIME_UNITS_PER_ROUND * granted);
-	buffs.add_buff(subject, BuffType::BLESS, 0, BLESS_ROUNDS, BuffApplication::ADD, ctx.gameState->get_time());
+	buffs.add_buff(
+		subject,
+		BuffType::BLESS,
+		0,
+		BLESS_ROUNDS,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 
 	for (int round = granted + 1; round < granted + BLESS_ROUNDS; ++round)
 	{
 		run_round(round);
-		EXPECT_TRUE(buffs.has_buff(subject, BuffType::BLESS)) << "round " << round;
+		EXPECT_TRUE(buffs.has_buff(subject, BuffType::BLESS))
+			<< "round " << round;
 	}
 
 	run_round(granted + BLESS_ROUNDS);
@@ -163,7 +185,8 @@ TEST_F(DurationScheduleTest, AWeakerSecondCastingCanOnlyLengthenTheOneRunning)
 	buffs.add_buff(subject, BuffType::SHIELD, 4, 10, BuffApplication::ADD, 0);
 	buffs.add_buff(subject, BuffType::SHIELD, 1, 2, BuffApplication::ADD, 0);
 
-	EXPECT_EQ(buffs.get_buff_value(subject, BuffType::SHIELD), 4) << "the weaker casting lowered the bonus";
+	EXPECT_EQ(buffs.get_buff_value(subject, BuffType::SHIELD), 4)
+		<< "the weaker casting lowered the bonus";
 	// The shorter casting must not cut the longer one short.
 	expect_lasts_exactly(buffs, subject, BuffType::SHIELD, 0, 10);
 }
@@ -174,7 +197,13 @@ TEST_F(DurationScheduleTest, AFastCreatureKeepsItsBuffForEveryRoundOfIt)
 {
 	Creature& quickling = placed(TIME_UNITS_PER_ROUND / 2);
 
-	buffs.add_buff(quickling, BuffType::BLESS, 0, BLESS_ROUNDS, BuffApplication::ADD, 0);
+	buffs.add_buff(
+		quickling,
+		BuffType::BLESS,
+		0,
+		BLESS_ROUNDS,
+		BuffApplication::ADD,
+		0);
 
 	for (int halfRound = 1; halfRound < BLESS_ROUNDS * 2; ++halfRound)
 	{
@@ -182,7 +211,8 @@ TEST_F(DurationScheduleTest, AFastCreatureKeepsItsBuffForEveryRoundOfIt)
 		ctx.gameState->set_time(currentTime);
 		manager.update_creatures(creatures, ctx);
 
-		ASSERT_TRUE(buffs.has_buff(quickling, BuffType::BLESS)) << "gone at " << currentTime;
+		ASSERT_TRUE(buffs.has_buff(quickling, BuffType::BLESS))
+			<< "gone at " << currentTime;
 	}
 }
 
@@ -208,15 +238,19 @@ TEST_F(DurationScheduleTest, SpeedDoesNotChangeHowLongConfusionLasts)
 	{
 		run_round(round);
 
-		EXPECT_EQ(ordinary.ai->get_ai_type(), AiType::CONFUSED_MONSTER) << "round " << round;
+		EXPECT_EQ(ordinary.ai->get_ai_type(), AiType::CONFUSED_MONSTER)
+			<< "round " << round;
 		EXPECT_EQ(quickling.ai->get_ai_type(), AiType::CONFUSED_MONSTER)
-			<< "the quickling's head cleared in round " << round << " of " << CONFUSION_ROUNDS;
+			<< "the quickling's head cleared in round " << round << " of "
+			<< CONFUSION_ROUNDS;
 	}
 
 	run_round(CONFUSION_ROUNDS);
 
-	EXPECT_EQ(ordinary.ai->get_ai_type(), AiType::MONSTER) << "the confusion outstayed its rounds";
-	EXPECT_EQ(quickling.ai->get_ai_type(), AiType::MONSTER) << "the confusion outstayed its rounds";
+	EXPECT_EQ(ordinary.ai->get_ai_type(), AiType::MONSTER)
+		<< "the confusion outstayed its rounds";
+	EXPECT_EQ(quickling.ai->get_ai_type(), AiType::MONSTER)
+		<< "the confusion outstayed its rounds";
 }
 
 // A buff lasting until broken has no ending for a timed casting folded into it to move
@@ -227,15 +261,31 @@ TEST_F(DurationScheduleTest, ALastingBuffKeepsLastingWhateverIsFoldedIntoIt)
 	Creature& timedFirst = placed(TIME_UNITS_PER_ROUND);
 
 	buffs.add_buff_until_broken(lastingFirst, BuffType::BLESS);
-	buffs.add_buff(lastingFirst, BuffType::BLESS, 0, BLESS_ROUNDS, BuffApplication::ADD, 0);
-	buffs.add_buff(timedFirst, BuffType::BLESS, 0, BLESS_ROUNDS, BuffApplication::ADD, 0);
+	buffs.add_buff(
+		lastingFirst,
+		BuffType::BLESS,
+		0,
+		BLESS_ROUNDS,
+		BuffApplication::ADD,
+		0);
+	buffs.add_buff(
+		timedFirst,
+		BuffType::BLESS,
+		0,
+		BLESS_ROUNDS,
+		BuffApplication::ADD,
+		0);
 	buffs.add_buff_until_broken(timedFirst, BuffType::BLESS);
 
-	buffs.update_creature_buffs(lastingFirst, expiry_time(0, BLESS_ROUNDS * 100));
+	buffs.update_creature_buffs(
+		lastingFirst,
+		expiry_time(0, BLESS_ROUNDS * 100));
 	buffs.update_creature_buffs(timedFirst, expiry_time(0, BLESS_ROUNDS * 100));
 
-	EXPECT_TRUE(buffs.has_buff(lastingFirst, BuffType::BLESS)) << "a timed casting gave the lasting one an ending";
-	EXPECT_TRUE(buffs.has_buff(timedFirst, BuffType::BLESS)) << "the lasting grant kept the timed casting's ending";
+	EXPECT_TRUE(buffs.has_buff(lastingFirst, BuffType::BLESS))
+		<< "a timed casting gave the lasting one an ending";
+	EXPECT_TRUE(buffs.has_buff(timedFirst, BuffType::BLESS))
+		<< "the lasting grant kept the timed casting's ending";
 }
 
 // end of file: DurationScheduleTest.cpp

@@ -41,7 +41,8 @@ protected:
 		creature_base = std::make_unique<Creature>(
 			Vector2D{ 1, 1 },
 			ActorData{ TileRef{}, "test_creature", ColorPairId::WHITE_BLACK });
-		creature_base->experienceReward = std::make_unique<ExperienceReward>(50);
+		creature_base->experienceReward =
+			std::make_unique<ExperienceReward>(50);
 		creature_base->set_dr(2);
 		creature_base->set_thaco(19);
 		creature_base->armorClass = std::make_unique<ArmorClass>(7);
@@ -56,7 +57,9 @@ protected:
 // Player display accessors - read directly off the concrete Player.
 // ----------------------------------------------------------------------------
 
-TEST_F(PlayerVirtualInterfaceTest, Player_GetClassDisplayName_ReturnsPlayerClass)
+TEST_F(
+	PlayerVirtualInterfaceTest,
+	Player_GetClassDisplayName_ReturnsPlayerClass)
 {
 	player->set_creature_class(CreatureClass::FIGHTER);
 

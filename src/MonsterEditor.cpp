@@ -45,7 +45,8 @@ namespace
 {
 int picker_tile_size(const Renderer& renderer, int sheetIndex)
 {
-	const int cellSize = renderer.get_sheet_cell_size(static_cast<TileSheet>(sheetIndex));
+	const int cellSize =
+		renderer.get_sheet_cell_size(static_cast<TileSheet>(sheetIndex));
 	return cellSize * std::max(1, PICKER_TILE_TARGET / cellSize);
 }
 } // namespace
@@ -109,7 +110,8 @@ std::string prettify_key(std::string_view key)
 		}
 		else if (capNext)
 		{
-			result += static_cast<char>(std::toupper(static_cast<unsigned char>(character)));
+			result += static_cast<char>(
+				std::toupper(static_cast<unsigned char>(character)));
 			capNext = false;
 		}
 		else
@@ -144,7 +146,9 @@ void MonsterEditor::enter(const MonsterRegistry& monsters)
 
 void MonsterEditor::exit(GameContext& ctx)
 {
-	assert(ctx.monsterRegistry && "MonsterEditor::exit: called without a monsterRegistry");
+	assert(
+		ctx.monsterRegistry &&
+		"MonsterEditor::exit: called without a monsterRegistry");
 
 	commit_working(*ctx.monsterRegistry);
 	active = false;
@@ -193,7 +197,9 @@ void MonsterEditor::commit_working(MonsterRegistry& monsters)
 
 void MonsterEditor::handle_input(GameContext& ctx)
 {
-	assert(ctx.monsterRegistry && "MonsterEditor::handle_input: called without a monsterRegistry");
+	assert(
+		ctx.monsterRegistry &&
+		"MonsterEditor::handle_input: called without a monsterRegistry");
 
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
 
@@ -233,7 +239,9 @@ void MonsterEditor::handle_input(GameContext& ctx)
 
 void MonsterEditor::handle_normal(const GameContext& ctx)
 {
-	assert(ctx.monsterRegistry && "MonsterEditor::handle_normal: called without a monsterRegistry");
+	assert(
+		ctx.monsterRegistry &&
+		"MonsterEditor::handle_normal: called without a monsterRegistry");
 
 	MonsterRegistry& monsters = *ctx.monsterRegistry;
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
@@ -252,7 +260,9 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 		if (mouse.x < LIST_WIDTH)
 		{
 			focus = 0;
-			const std::optional<size_t> row = listCursor.row_under(whole_rows_within(pixelsBelowTop, ITEM_HEIGHT), visibleListRows);
+			const std::optional<size_t> row = listCursor.row_under(
+				whole_rows_within(pixelsBelowTop, ITEM_HEIGHT),
+				visibleListRows);
 			if (row && *row != listCursor.current_row())
 			{
 				commit_working(monsters);
@@ -263,7 +273,9 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 		else if (mode == Mode::NORMAL)
 		{
 			focus = 1;
-			const std::optional<size_t> field = fieldCursor.row_under(whole_rows_within(pixelsBelowTop, FIELD_HEIGHT), visibleFields);
+			const std::optional<size_t> field = fieldCursor.row_under(
+				whole_rows_within(pixelsBelowTop, FIELD_HEIGHT),
+				visibleFields);
 			if (field)
 			{
 				fieldCursor.select(*field);
@@ -295,7 +307,9 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 			load_working(monsters);
 		}
 		// A screen too short for one row has nowhere to scroll the cursor to.
-		else if (IsKeyPressed(KEY_DOWN) && listCursor.can_move_down() && visibleListRows > 0)
+		else if (
+			IsKeyPressed(KEY_DOWN) && listCursor.can_move_down() &&
+			visibleListRows > 0)
 		{
 			commit_working(monsters);
 			listCursor.move_down(visibleListRows);
@@ -312,13 +326,15 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 			defaults.name = "New Monster";
 			defaults.corpseName = "dead monster";
 			defaults.corpseNutrition = 40;
-			defaults.corpseTaste = "It tastes like nothing you have eaten before.";
+			defaults.corpseTaste =
+				"It tastes like nothing you have eaten before.";
 			defaults.hitDice = MonsterHitDice{ 8, 0, { { 1, 1 } } };
 			defaults.thaco = 20;
 			defaults.ac = 10;
 			defaults.strength = std::nullopt;
 			defaults.naturalAttack = "claws";
-			defaults.damage = DamageInfo{ DiceExpr{ 1, 4, 0 }, DamageType::PHYSICAL };
+			defaults.damage =
+				DamageInfo{ DiceExpr{ 1, 4, 0 }, DamageType::PHYSICAL };
 			defaults.baseWeight = 10;
 			defaults.levelMinimum = 1;
 			defaults.levelMaximum = 5;
@@ -354,7 +370,9 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 	{
 		fieldCursor.move_up();
 	}
-	else if (IsKeyPressed(KEY_DOWN) && fieldCursor.can_move_down() && visibleFields > 0)
+	else if (
+		IsKeyPressed(KEY_DOWN) && fieldCursor.can_move_down() &&
+		visibleFields > 0)
 	{
 		fieldCursor.move_down(visibleFields);
 	}
@@ -469,7 +487,8 @@ void MonsterEditor::handle_picker(const Renderer& renderer)
 		return;
 	}
 
-	int sheetRows = renderer.get_sheet_rows(static_cast<TileSheet>(pickerSheet));
+	int sheetRows =
+		renderer.get_sheet_rows(static_cast<TileSheet>(pickerSheet));
 	::Vector2 mouse = GetMousePosition();
 	bool isMouseInPicker = mouse.x >= LIST_WIDTH;
 
@@ -490,13 +509,17 @@ void MonsterEditor::handle_picker(const Renderer& renderer)
 	if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && isMouseInPicker)
 	{
 		const int pickerTileSize = picker_tile_size(renderer, pickerSheet);
-		int col = static_cast<int>(mouse.x - LIST_WIDTH - PICKER_PAD) / (pickerTileSize + 2);
-		int row = pickerScroll + static_cast<int>(mouse.y - gridY) / (pickerTileSize + 2);
-		int sheetColumns = renderer.get_sheet_cols(static_cast<TileSheet>(pickerSheet));
+		int col = static_cast<int>(mouse.x - LIST_WIDTH - PICKER_PAD) /
+			(pickerTileSize + 2);
+		int row = pickerScroll +
+			static_cast<int>(mouse.y - gridY) / (pickerTileSize + 2);
+		int sheetColumns =
+			renderer.get_sheet_cols(static_cast<TileSheet>(pickerSheet));
 
 		if (col >= 0 && col < sheetColumns && row >= 0 && row < sheetRows)
 		{
-			working.symbol = TileRef{ static_cast<TileSheet>(pickerSheet), col, row };
+			working.symbol =
+				TileRef{ static_cast<TileSheet>(pickerSheet), col, row };
 			mode = Mode::NORMAL;
 		}
 	}
@@ -508,7 +531,9 @@ void MonsterEditor::handle_picker(const Renderer& renderer)
 
 void MonsterEditor::render(const GameContext& ctx) const
 {
-	assert(ctx.monsterRegistry && "MonsterEditor::render: called without a monsterRegistry");
+	assert(
+		ctx.monsterRegistry &&
+		"MonsterEditor::render: called without a monsterRegistry");
 
 	const Renderer& renderer = *ctx.renderer;
 	int screenWidth = renderer.get_screen_width();
@@ -535,8 +560,12 @@ void MonsterEditor::render_header(const Renderer& renderer) const
 {
 	int screenWidth = renderer.get_screen_width();
 	DrawRectangle(0, 0, screenWidth, HEADER_HEIGHT, Color{ 20, 20, 40, 255 });
-	renderer.draw_text_color(Vector2D{ 8, 6 }, "MONSTER EDITOR", Color{ 255, 255, 180, 255 });
-	renderer.draw_text_color(Vector2D{ 8, 26 },
+	renderer.draw_text_color(
+		Vector2D{ 8, 6 },
+		"MONSTER EDITOR",
+		Color{ 255, 255, 180, 255 });
+	renderer.draw_text_color(
+		Vector2D{ 8, 26 },
 		"Tab:switch focus  Left/Right:adjust  Enter:edit  F2:tile  Ctrl+S:save  Esc:exit",
 		Color{ 130, 130, 100, 255 });
 }
@@ -546,22 +575,32 @@ int MonsterEditor::body_height(const Renderer& renderer)
 	return renderer.get_screen_height() - HEADER_HEIGHT - HINT_HEIGHT;
 }
 
-void MonsterEditor::render_list(const Renderer& renderer, const MonsterRegistry& monsters) const
+void MonsterEditor::render_list(
+	const Renderer& renderer,
+	const MonsterRegistry& monsters) const
 {
 	int bodyY = HEADER_HEIGHT;
 	int bodyHeight = body_height(renderer);
 
 	DrawRectangle(0, bodyY, LIST_WIDTH, bodyHeight, Color{ 10, 10, 20, 255 });
-	DrawLine(LIST_WIDTH, bodyY, LIST_WIDTH, bodyY + bodyHeight, Color{ 80, 80, 120, 255 });
+	DrawLine(
+		LIST_WIDTH,
+		bodyY,
+		LIST_WIDTH,
+		bodyY + bodyHeight,
+		Color{ 80, 80, 120, 255 });
 
 	const size_t visibleCount = whole_rows_within(bodyHeight, ITEM_HEIGHT);
 	const size_t scroll = listCursor.first_visible(visibleCount);
 
 	::Vector2 mouse = GetMousePosition();
 
-	for (size_t monsterIndex = scroll; monsterIndex < keys.size(); ++monsterIndex)
+	for (
+		size_t monsterIndex = scroll; monsterIndex < keys.size();
+		++monsterIndex)
 	{
-		int itemY = bodyY + static_cast<int>(monsterIndex - scroll) * ITEM_HEIGHT;
+		int itemY =
+			bodyY + static_cast<int>(monsterIndex - scroll) * ITEM_HEIGHT;
 		if (itemY + ITEM_HEIGHT > bodyY + bodyHeight)
 		{
 			break;
@@ -570,17 +609,25 @@ void MonsterEditor::render_list(const Renderer& renderer, const MonsterRegistry&
 		// Section separators
 		if (monsterIndex > scroll)
 		{
-			const bool previousIsBuiltin = monsters.is_builtin(keys[monsterIndex - 1]);
-			const bool currentIsCustom = !monsters.is_builtin(keys[monsterIndex]);
+			const bool previousIsBuiltin =
+				monsters.is_builtin(keys[monsterIndex - 1]);
+			const bool currentIsCustom =
+				!monsters.is_builtin(keys[monsterIndex]);
 
 			if (previousIsBuiltin && currentIsCustom)
 			{
-				DrawLine(LIST_PAD, itemY, LIST_WIDTH - LIST_PAD, itemY, Color{ 70, 70, 70, 200 });
+				DrawLine(
+					LIST_PAD,
+					itemY,
+					LIST_WIDTH - LIST_PAD,
+					itemY,
+					Color{ 70, 70, 70, 200 });
 			}
 		}
 
 		bool isSelected = (monsterIndex == listCursor.current_row());
-		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH && mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
+		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH &&
+			mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
 		if (isSelected && focus == 0)
@@ -601,14 +648,18 @@ void MonsterEditor::render_list(const Renderer& renderer, const MonsterRegistry&
 			DrawRectangle(0, itemY, LIST_WIDTH, ITEM_HEIGHT, bgColor);
 		}
 
-		const TileRef tile = isSelected ? working.symbol : monsters.get_tile(keys[monsterIndex]);
-		renderer.draw_tile_screen_sized(Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - LIST_TILE_SIZE) / 2 }, tile, LIST_TILE_SIZE);
+		const TileRef tile =
+			isSelected ? working.symbol : monsters.get_tile(keys[monsterIndex]);
+		renderer.draw_tile_screen_sized(
+			Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - LIST_TILE_SIZE) / 2 },
+			tile,
+			LIST_TILE_SIZE);
 
 		const bool isCustom = !monsters.is_builtin(keys[monsterIndex]);
 
-		std::string displayName = isSelected
-			? working.name
-			: monsters.get_params(keys[monsterIndex]).name;
+		std::string displayName = isSelected ?
+			working.name :
+			monsters.get_params(keys[monsterIndex]).name;
 		if (displayName.empty())
 		{
 			displayName = prettify_key(keys[monsterIndex]);
@@ -622,10 +673,11 @@ void MonsterEditor::render_list(const Renderer& renderer, const MonsterRegistry&
 		constexpr Color PLAIN_TEXT{ 200, 200, 200, 255 };
 		const Color textColor = isSelected ? SELECTED_TEXT : PLAIN_TEXT;
 
-		renderer.draw_text_color(Vector2D{
-									 LIST_PAD + LIST_TILE_SIZE + 4,
-									 itemY + (ITEM_HEIGHT - 16) / 2,
-								 },
+		renderer.draw_text_color(
+			Vector2D{
+				LIST_PAD + LIST_TILE_SIZE + 4,
+				itemY + (ITEM_HEIGHT - 16) / 2,
+			},
 			displayName,
 			textColor);
 	}
@@ -639,7 +691,12 @@ void MonsterEditor::render_fields(const Renderer& renderer) const
 	int fieldsWidth = screenWidth - LIST_WIDTH;
 	int fieldsHeight = body_height(renderer);
 
-	DrawRectangle(panelX, panelY, fieldsWidth, fieldsHeight, Color{ 8, 8, 16, 255 });
+	DrawRectangle(
+		panelX,
+		panelY,
+		fieldsWidth,
+		fieldsHeight,
+		Color{ 8, 8, 16, 255 });
 
 	const size_t visible = whole_rows_within(fieldsHeight, FIELD_HEIGHT);
 	const size_t scroll = fieldCursor.first_visible(visible);
@@ -648,7 +705,8 @@ void MonsterEditor::render_fields(const Renderer& renderer) const
 
 	for (size_t fieldIndex = scroll; fieldIndex < FIELD_COUNT; ++fieldIndex)
 	{
-		int itemY = panelY + static_cast<int>(fieldIndex - scroll) * FIELD_HEIGHT;
+		int itemY =
+			panelY + static_cast<int>(fieldIndex - scroll) * FIELD_HEIGHT;
 		if (itemY + FIELD_HEIGHT > panelY + fieldsHeight)
 		{
 			break;
@@ -656,7 +714,8 @@ void MonsterEditor::render_fields(const Renderer& renderer) const
 
 		FieldId fieldId = static_cast<FieldId>(fieldIndex);
 		bool isSelected = (fieldIndex == fieldCursor.current_row());
-		bool hovered = mouse.x >= panelX && mouse.x < screenWidth && mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
+		bool hovered = mouse.x >= panelX && mouse.x < screenWidth &&
+			mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
 		if (isSelected && focus == 1)
@@ -677,22 +736,33 @@ void MonsterEditor::render_fields(const Renderer& renderer) const
 			DrawRectangle(panelX, itemY, fieldsWidth, FIELD_HEIGHT, bgColor);
 		}
 
-		Color labelColor = isSelected ? Color{ 255, 220, 80, 255 } : Color{ 150, 150, 150, 255 };
-		Color valueColor = isSelected ? Color{ 255, 255, 200, 255 } : Color{ 200, 200, 200, 255 };
+		Color labelColor = isSelected ? Color{ 255, 220, 80, 255 } :
+										Color{ 150, 150, 150, 255 };
+		Color valueColor = isSelected ? Color{ 255, 255, 200, 255 } :
+										Color{ 200, 200, 200, 255 };
 
-		renderer.draw_text_color(Vector2D{ panelX + 12, itemY + (FIELD_HEIGHT - 16) / 2 }, field_label(fieldId), labelColor);
+		renderer.draw_text_color(
+			Vector2D{ panelX + 12, itemY + (FIELD_HEIGHT - 16) / 2 },
+			field_label(fieldId),
+			labelColor);
 
 		if (fieldId == FieldId::TILE)
 		{
-			renderer.draw_tile_screen_sized(Vector2D{
-												screenWidth - LIST_TILE_SIZE - 12,
-												itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2,
-											},
+			renderer.draw_tile_screen_sized(
+				Vector2D{
+					screenWidth - LIST_TILE_SIZE - 12,
+					itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2,
+				},
 				working.symbol,
 				LIST_TILE_SIZE);
 			if (isSelected)
 			{
-				DrawRectangleLines(screenWidth - LIST_TILE_SIZE - 12, itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2, LIST_TILE_SIZE, LIST_TILE_SIZE, Color{ 255, 255, 0, 255 });
+				DrawRectangleLines(
+					screenWidth - LIST_TILE_SIZE - 12,
+					itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2,
+					LIST_TILE_SIZE,
+					LIST_TILE_SIZE,
+					Color{ 255, 255, 0, 255 });
 			}
 		}
 		else
@@ -706,8 +776,12 @@ void MonsterEditor::render_fields(const Renderer& renderer) const
 			{
 				valueText = field_value(fieldId);
 			}
-			int valuePixelX = screenWidth - renderer.measure_text(valueText) - 16;
-			renderer.draw_text_color(Vector2D{ valuePixelX, itemY + (FIELD_HEIGHT - 16) / 2 }, valueText, valueColor);
+			int valuePixelX =
+				screenWidth - renderer.measure_text(valueText) - 16;
+			renderer.draw_text_color(
+				Vector2D{ valuePixelX, itemY + (FIELD_HEIGHT - 16) / 2 },
+				valueText,
+				valueColor);
 		}
 	}
 }
@@ -720,21 +794,36 @@ void MonsterEditor::render_picker(const Renderer& renderer) const
 	int bodyY = HEADER_HEIGHT;
 	int bodyHeight = body_height(renderer);
 
-	DrawRectangle(panelX, bodyY, panelWidth, bodyHeight, Color{ 8, 8, 24, 255 });
+	DrawRectangle(
+		panelX,
+		bodyY,
+		panelWidth,
+		bodyHeight,
+		Color{ 8, 8, 24, 255 });
 
-	DrawRectangle(panelX, bodyY, panelWidth, PICKER_SUB_HEADER_HEIGHT, Color{ 15, 15, 40, 255 });
+	DrawRectangle(
+		panelX,
+		bodyY,
+		panelWidth,
+		PICKER_SUB_HEADER_HEIGHT,
+		Color{ 15, 15, 40, 255 });
 	int totalSheets = renderer.get_loaded_sheet_count();
 	std::string header = std::format(
 		"Sheet: {} ({}/{})  --  Left/Right:change  Esc/F2:back",
 		renderer.get_sheet_name(static_cast<TileSheet>(pickerSheet)),
 		pickerSheet + 1,
 		totalSheets);
-	renderer.draw_text_color(Vector2D{ panelX + PICKER_PAD, bodyY + 6 }, header, Color{ 200, 200, 120, 255 });
+	renderer.draw_text_color(
+		Vector2D{ panelX + PICKER_PAD, bodyY + 6 },
+		header,
+		Color{ 200, 200, 120, 255 });
 
 	int gridY = bodyY + PICKER_SUB_HEADER_HEIGHT;
 	int gridHeight = bodyHeight - PICKER_SUB_HEADER_HEIGHT;
-	int sheetColumns = renderer.get_sheet_cols(static_cast<TileSheet>(pickerSheet));
-	int sheetRows = renderer.get_sheet_rows(static_cast<TileSheet>(pickerSheet));
+	int sheetColumns =
+		renderer.get_sheet_cols(static_cast<TileSheet>(pickerSheet));
+	int sheetRows =
+		renderer.get_sheet_rows(static_cast<TileSheet>(pickerSheet));
 	const int pickerTileSize = picker_tile_size(renderer, pickerSheet);
 
 	::Vector2 mouse = GetMousePosition();
@@ -755,22 +844,42 @@ void MonsterEditor::render_picker(const Renderer& renderer) const
 			TileRef tile{ static_cast<TileSheet>(pickerSheet), col, row };
 
 			bool isCurrentTile = (tile == working.symbol);
-			bool hovered = mouse.x >= cellPixelX && mouse.x < cellPixelX + pickerTileSize && mouse.y >= cellPixelY && mouse.y < cellPixelY + pickerTileSize;
+			bool hovered = mouse.x >= cellPixelX &&
+				mouse.x < cellPixelX + pickerTileSize &&
+				mouse.y >= cellPixelY && mouse.y < cellPixelY + pickerTileSize;
 
 			if (isCurrentTile)
 			{
-				DrawRectangle(cellPixelX, cellPixelY, pickerTileSize, pickerTileSize, Color{ 60, 60, 0, 220 });
+				DrawRectangle(
+					cellPixelX,
+					cellPixelY,
+					pickerTileSize,
+					pickerTileSize,
+					Color{ 60, 60, 0, 220 });
 			}
 			else if (hovered)
 			{
-				DrawRectangle(cellPixelX, cellPixelY, pickerTileSize, pickerTileSize, Color{ 40, 40, 20, 160 });
+				DrawRectangle(
+					cellPixelX,
+					cellPixelY,
+					pickerTileSize,
+					pickerTileSize,
+					Color{ 40, 40, 20, 160 });
 			}
 
-			renderer.draw_tile_screen_sized(Vector2D{ cellPixelX, cellPixelY }, tile, pickerTileSize);
+			renderer.draw_tile_screen_sized(
+				Vector2D{ cellPixelX, cellPixelY },
+				tile,
+				pickerTileSize);
 
 			if (isCurrentTile)
 			{
-				DrawRectangleLines(cellPixelX, cellPixelY, pickerTileSize, pickerTileSize, Color{ 255, 255, 0, 255 });
+				DrawRectangleLines(
+					cellPixelX,
+					cellPixelY,
+					pickerTileSize,
+					pickerTileSize,
+					Color{ 255, 255, 0, 255 });
 			}
 		}
 	}
@@ -799,15 +908,18 @@ void MonsterEditor::render_hint(const Renderer& renderer) const
 	}
 	else if (mode == Mode::TILE_PICKER)
 	{
-		hintText = "Tile Picker  --  Left/Right:sheet  Click:assign  Esc/F2:back";
+		hintText =
+			"Tile Picker  --  Left/Right:sheet  Click:assign  Esc/F2:back";
 	}
 	else if (focus == 0)
 	{
-		hintText = "[LIST] Up/Down:navigate  A:add new  Del:remove custom  Enter:edit fields  Tab:switch  Ctrl+S:save  Esc:exit";
+		hintText =
+			"[LIST] Up/Down:navigate  A:add new  Del:remove custom  Enter:edit fields  Tab:switch  Ctrl+S:save  Esc:exit";
 	}
 	else
 	{
-		hintText = "[FIELDS] Up/Down:navigate  Left/Right:adjust  Enter:edit  F2:tile  Tab:switch  Ctrl+S:save  Esc:exit";
+		hintText =
+			"[FIELDS] Up/Down:navigate  Left/Right:adjust  Enter:edit  F2:tile  Tab:switch  Ctrl+S:save  Esc:exit";
 	}
 
 	constexpr Color SAVED_HINT{ 100, 255, 100, 255 };
@@ -824,7 +936,8 @@ const std::string& MonsterEditor::current_key() const
 {
 	if (keys.empty())
 	{
-		throw std::out_of_range("MonsterEditor::current_key -- key list is empty");
+		throw std::out_of_range(
+			"MonsterEditor::current_key -- key list is empty");
 	}
 	return keys[listCursor.current_row()];
 }
@@ -841,7 +954,8 @@ std::string MonsterEditor::field_label(FieldId field) const
 
 void MonsterEditor::set_damage_dice(int num, int sides, int bonus)
 {
-	working.damage = DamageInfo{ DiceExpr{ num, sides, bonus }, working.damage.damageType };
+	working.damage =
+		DamageInfo{ DiceExpr{ num, sides, bonus }, working.damage.damageType };
 }
 
 std::string MonsterEditor::field_value(FieldId field) const
@@ -884,7 +998,9 @@ std::string MonsterEditor::field_value(FieldId field) const
 	}
 	case FieldId::XP_COUNT:
 	{
-		return std::format("{} HD", working.hitDice.counts.at(selectedXpCount).count);
+		return std::format(
+			"{} HD",
+			working.hitDice.counts.at(selectedXpCount).count);
 	}
 	case FieldId::XP:
 	{
@@ -900,7 +1016,9 @@ std::string MonsterEditor::field_value(FieldId field) const
 	}
 	case FieldId::STR_SCORE:
 	{
-		return working.strength.has_value() ? std::format("{}", working.strength->score) : "-";
+		return working.strength.has_value() ?
+			std::format("{}", working.strength->score) :
+			"-";
 	}
 	case FieldId::STR_EXCEPTIONAL:
 	{
@@ -922,7 +1040,10 @@ std::string MonsterEditor::field_value(FieldId field) const
 		{
 			return std::format("{} (18/00)", strength.exceptional);
 		}
-		return std::format("{} (18/{:02})", strength.exceptional, strength.exceptional);
+		return std::format(
+			"{} (18/{:02})",
+			strength.exceptional,
+			strength.exceptional);
 	}
 	case FieldId::WEAPON:
 	{
@@ -986,11 +1107,16 @@ std::string MonsterEditor::field_value(FieldId field) const
 	}
 	case FieldId::CASTER_CLASS:
 	{
-		return working.spellcasterTraining.has_value() ? std::string(encode_caster_class(working.spellcasterTraining->casterClass)) : "none";
+		return working.spellcasterTraining.has_value() ?
+			std::string(
+				encode_caster_class(working.spellcasterTraining->casterClass)) :
+			"none";
 	}
 	case FieldId::CASTER_LEVEL:
 	{
-		return working.spellcasterTraining.has_value() ? std::format("{}", working.spellcasterTraining->casterLevel) : "-";
+		return working.spellcasterTraining.has_value() ?
+			std::format("{}", working.spellcasterTraining->casterLevel) :
+			"-";
 	}
 	case FieldId::INNATE_POWER:
 	{
@@ -998,15 +1124,23 @@ std::string MonsterEditor::field_value(FieldId field) const
 		{
 			return "none";
 		}
-		return std::format("{} of {}", selectedPower + 1, working.innatePowers.size());
+		return std::format(
+			"{} of {}",
+			selectedPower + 1,
+			working.innatePowers.size());
 	}
 	case FieldId::INNATE_SPELL:
 	{
-		return working.innatePowers.empty() ? "" : working.innatePowers.at(selectedPower).spell;
+		return working.innatePowers.empty() ?
+			"" :
+			working.innatePowers.at(selectedPower).spell;
 	}
 	case FieldId::INNATE_FREQUENCY:
 	{
-		return working.innatePowers.empty() ? "-" : std::string(encode_power_frequency(working.innatePowers.at(selectedPower).frequency));
+		return working.innatePowers.empty() ?
+			"-" :
+			std::string(encode_power_frequency(
+				working.innatePowers.at(selectedPower).frequency));
 	}
 	case FieldId::CORPSE_EDIBLE:
 	{
@@ -1041,17 +1175,27 @@ void MonsterEditor::field_adjust(FieldId field, int delta)
 	{
 	case FieldId::HD_LOWEST:
 	{
-		working.hitDice = with_lowest_count(working.hitDice, working.hitDice.counts.front().count + delta);
+		working.hitDice = with_lowest_count(
+			working.hitDice,
+			working.hitDice.counts.front().count + delta);
 		// The range may have shrunk under the selected count.
-		selectedXpCount = std::min(selectedXpCount, working.hitDice.counts.size() - 1);
-		assert(is_valid_monster_hit_dice(working.hitDice) && "MonsterEditor: the lowest count left hit dice the loader refuses");
+		selectedXpCount =
+			std::min(selectedXpCount, working.hitDice.counts.size() - 1);
+		assert(
+			is_valid_monster_hit_dice(working.hitDice) &&
+			"MonsterEditor: the lowest count left hit dice the loader refuses");
 		break;
 	}
 	case FieldId::HD_HIGHEST:
 	{
-		working.hitDice = with_highest_count(working.hitDice, highest_count(working.hitDice).count + delta);
-		selectedXpCount = std::min(selectedXpCount, working.hitDice.counts.size() - 1);
-		assert(is_valid_monster_hit_dice(working.hitDice) && "MonsterEditor: the highest count left hit dice the loader refuses");
+		working.hitDice = with_highest_count(
+			working.hitDice,
+			highest_count(working.hitDice).count + delta);
+		selectedXpCount =
+			std::min(selectedXpCount, working.hitDice.counts.size() - 1);
+		assert(
+			is_valid_monster_hit_dice(working.hitDice) &&
+			"MonsterEditor: the highest count left hit dice the loader refuses");
 		break;
 	}
 	case FieldId::HD_SIDES:
@@ -1061,7 +1205,8 @@ void MonsterEditor::field_adjust(FieldId field, int delta)
 	}
 	case FieldId::HD_BONUS:
 	{
-		working.hitDice.bonus = clamp_val(working.hitDice.bonus, delta, -99, 99);
+		working.hitDice.bonus =
+			clamp_val(working.hitDice.bonus, delta, -99, 99);
 		break;
 	}
 	case FieldId::XP_COUNT:
@@ -1071,7 +1216,8 @@ void MonsterEditor::field_adjust(FieldId field, int delta)
 		{
 			--selectedXpCount;
 		}
-		else if (delta > 0 && selectedXpCount + 1 < working.hitDice.counts.size())
+		else if (
+			delta > 0 && selectedXpCount + 1 < working.hitDice.counts.size())
 		{
 			++selectedXpCount;
 		}
@@ -1091,41 +1237,63 @@ void MonsterEditor::field_adjust(FieldId field, int delta)
 			break;
 		}
 		MonsterStrength& strength = *working.strength;
-		strength.score = clamp_val(strength.score, delta, MONSTER_STRENGTH_SCORE_MINIMUM, MONSTER_STRENGTH_SCORE_MAXIMUM);
+		strength.score = clamp_val(
+			strength.score,
+			delta,
+			MONSTER_STRENGTH_SCORE_MINIMUM,
+			MONSTER_STRENGTH_SCORE_MAXIMUM);
 		// A percentile rides only on an 18, so leaving 18 drops it rather than writing what the loader refuses.
 		if (strength.score != MONSTER_STRENGTH_EXCEPTIONAL_SCORE)
 		{
 			strength.exceptional = MONSTER_STRENGTH_EXCEPTIONAL_NONE;
 		}
-		assert(is_valid_monster_strength(strength) && "MonsterEditor: the Strength score left a Strength the loader refuses");
+		assert(
+			is_valid_monster_strength(strength) &&
+			"MonsterEditor: the Strength score left a Strength the loader refuses");
 		break;
 	}
 	case FieldId::STR_EXCEPTIONAL:
 	{
-		if (!working.strength.has_value() || working.strength->score != MONSTER_STRENGTH_EXCEPTIONAL_SCORE)
+		if (!working.strength.has_value() ||
+			working.strength->score != MONSTER_STRENGTH_EXCEPTIONAL_SCORE)
 		{
 			break;
 		}
 		MonsterStrength& strength = *working.strength;
-		strength.exceptional = clamp_val(strength.exceptional, delta, MONSTER_STRENGTH_EXCEPTIONAL_NONE, MONSTER_STRENGTH_EXCEPTIONAL_MAXIMUM);
-		assert(is_valid_monster_strength(strength) && "MonsterEditor: the percentile left a Strength the loader refuses");
+		strength.exceptional = clamp_val(
+			strength.exceptional,
+			delta,
+			MONSTER_STRENGTH_EXCEPTIONAL_NONE,
+			MONSTER_STRENGTH_EXCEPTIONAL_MAXIMUM);
+		assert(
+			is_valid_monster_strength(strength) &&
+			"MonsterEditor: the percentile left a Strength the loader refuses");
 		break;
 	}
 	// The dice are the record: every change rebuilds the damage, so its text and
 	// its range follow rather than being edited into disagreement.
 	case FieldId::DMG_NUM:
 	{
-		set_damage_dice(clamp_val(working.damage.dice.num, delta, 1, 99), working.damage.dice.sides, working.damage.dice.bonus);
+		set_damage_dice(
+			clamp_val(working.damage.dice.num, delta, 1, 99),
+			working.damage.dice.sides,
+			working.damage.dice.bonus);
 		break;
 	}
 	case FieldId::DMG_SIDES:
 	{
-		set_damage_dice(working.damage.dice.num, clamp_val(working.damage.dice.sides, delta, 2, 20), working.damage.dice.bonus);
+		set_damage_dice(
+			working.damage.dice.num,
+			clamp_val(working.damage.dice.sides, delta, 2, 20),
+			working.damage.dice.bonus);
 		break;
 	}
 	case FieldId::DMG_BONUS:
 	{
-		set_damage_dice(working.damage.dice.num, working.damage.dice.sides, clamp_val(working.damage.dice.bonus, delta, -99, 99));
+		set_damage_dice(
+			working.damage.dice.num,
+			working.damage.dice.sides,
+			clamp_val(working.damage.dice.bonus, delta, -99, 99));
 		break;
 	}
 	case FieldId::CASTER_LEVEL:
@@ -1133,7 +1301,11 @@ void MonsterEditor::field_adjust(FieldId field, int delta)
 		// A monster that memorizes nothing has no level to adjust; the tables print 1st to 20th.
 		if (working.spellcasterTraining.has_value())
 		{
-			working.spellcasterTraining->casterLevel = clamp_val(working.spellcasterTraining->casterLevel, delta, 1, 20);
+			working.spellcasterTraining->casterLevel = clamp_val(
+				working.spellcasterTraining->casterLevel,
+				delta,
+				1,
+				20);
 		}
 		break;
 	}
@@ -1185,7 +1357,9 @@ void MonsterEditor::field_toggle(FieldId field)
 	}
 	else if (field == FieldId::CORPSE_EDIBLE)
 	{
-		working.corpseEdibility = is_corpse_edible(working.corpseEdibility) ? CorpseEdibility::INEDIBLE : CorpseEdibility::EDIBLE;
+		working.corpseEdibility = is_corpse_edible(working.corpseEdibility) ?
+			CorpseEdibility::INEDIBLE :
+			CorpseEdibility::EDIBLE;
 	}
 	else if (field == FieldId::ETHICS)
 	{
@@ -1232,9 +1406,11 @@ void MonsterEditor::field_toggle(FieldId field)
 		// None, then a 1st-level wizard, then a priest at the same level, then none again.
 		if (!working.spellcasterTraining.has_value())
 		{
-			working.spellcasterTraining = SpellcasterTraining{ CasterClass::WIZARD, 1 };
+			working.spellcasterTraining =
+				SpellcasterTraining{ CasterClass::WIZARD, 1 };
 		}
-		else if (working.spellcasterTraining->casterClass == CasterClass::WIZARD)
+		else if (
+			working.spellcasterTraining->casterClass == CasterClass::WIZARD)
 		{
 			working.spellcasterTraining->casterClass = CasterClass::CLERIC;
 		}
@@ -1297,17 +1473,20 @@ void MonsterEditor::field_set_string(FieldId field, std::string newValue)
 		{
 			if (!newValue.empty())
 			{
-				working.innatePowers.push_back(InnatePower{
-					std::move(newValue),
-					PowerFrequency::AT_WILL,
-					0,
-				});
+				working.innatePowers.push_back(
+					InnatePower{
+						std::move(newValue),
+						PowerFrequency::AT_WILL,
+						0,
+					});
 				selectedPower = 0;
 			}
 		}
 		else if (newValue.empty())
 		{
-			working.innatePowers.erase(working.innatePowers.begin() + static_cast<std::ptrdiff_t>(selectedPower));
+			working.innatePowers.erase(
+				working.innatePowers.begin() +
+				static_cast<std::ptrdiff_t>(selectedPower));
 			selectedPower = selectedPower > 0 ? selectedPower - 1 : 0;
 		}
 		else

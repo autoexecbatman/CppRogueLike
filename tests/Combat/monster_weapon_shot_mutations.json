@@ -27,19 +27,19 @@
     },
     {
       "file": "src/MonsterAttacker.cpp",
-      "original": "weapon_hit_modifier(missileWeapon), missileWeapon->actorData.name, kind, ctx);",
-      "mutated": "weapon_hit_modifier(missileWeapon), owner.get_attack_name(), kind, ctx);",
+      "original": "weapon_hit_modifier(missileWeapon),\n\t\t\tmissileWeapon->actorData.name,\n\t\t\tkind,\n\t\t\tctx);",
+      "mutated": "weapon_hit_modifier(missileWeapon),owner.get_attack_name(),\n\t\t\tkind,\n\t\t\tctx);",
       "catches": "a monster's shot named for its fist"
     },
     {
       "file": "src/MonsterAttacker.cpp",
-      "original": "\treturn perform_single_attack(owner, target, get_damage_info(), 0, owner.get_attack_name(), kind, ctx);",
-      "mutated": "\treturn perform_single_attack(owner, target, weapon_damage(owner.get_equipped_item(EquipmentSlot::RIGHT_HAND)), 0, owner.get_attack_name(), kind, ctx);",
+      "original": "\treturn perform_single_attack(\n\t\towner,\n\t\ttarget,\n\t\tget_damage_info(),\n\t\t0,\n\t\towner.get_attack_name(),\n\t\tkind,\n\t\tctx);",
+      "mutated": "\treturn perform_single_attack(\n\t\towner,\n\t\ttarget,weapon_damage(owner.get_equipped_item(EquipmentSlot::RIGHT_HAND)),\n\t\t0,\n\t\towner.get_attack_name(),\n\t\tkind,\n\t\tctx);",
       "catches": "a monster's melee strike changed to its weapon's dice, which is 0318's question"
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\t\tconst ItemEnhancement* enhancement = weapon->is_enhanced() ? &weapon->get_enhancement() : nullptr;\n\t\treturn WeaponDamageRegistry::get_enhanced_damage_info(weapon->itemKey, enhancement);",
+      "original": "\t\tconst ItemEnhancement* enhancement =\n\t\t\tweapon->is_enhanced() ? &weapon->get_enhancement() : nullptr;\n\t\treturn WeaponDamageRegistry::get_enhanced_damage_info(\n\t\t\tweapon->itemKey,\n\t\t\tenhancement);",
       "mutated": "\t\treturn WeaponDamageRegistry::get_damage_info(weapon->itemKey);",
       "catches": "an enhanced weapon's damage bonus dropped"
     },

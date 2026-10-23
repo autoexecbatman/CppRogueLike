@@ -106,15 +106,18 @@ std::vector<int> roll_method_six_pool(RandomDice& dice)
 AbilityAllocation::AbilityAllocation(
 	std::vector<int> rolledPool,
 	CreatureClass forClass,
-	std::array<int, ABILITY_COUNT> raceModifier)
-	: unplaced(std::move(rolledPool)), racialModifier(raceModifier), creatureClass(forClass)
+	std::array<int, ABILITY_COUNT> raceModifier) :
+	unplaced(std::move(rolledPool)),
+	racialModifier(raceModifier),
+	creatureClass(forClass)
 {
 }
 
 int AbilityAllocation::allocated(Ability ability) const
 {
 	const std::vector<int>& dice = placed.at(ability_index(ability));
-	return METHOD_SIX_STARTING_SCORE + std::accumulate(dice.begin(), dice.end(), 0);
+	return METHOD_SIX_STARTING_SCORE +
+		std::accumulate(dice.begin(), dice.end(), 0);
 }
 
 int AbilityAllocation::score(Ability ability) const
@@ -135,7 +138,9 @@ bool AbilityAllocation::can_spend(Ability ability, std::size_t dieIndex) const
 
 void AbilityAllocation::spend(Ability ability, std::size_t dieIndex)
 {
-	assert(can_spend(ability, dieIndex) && "AbilityAllocation::spend called with a die that does not fit");
+	assert(
+		can_spend(ability, dieIndex) &&
+		"AbilityAllocation::spend called with a die that does not fit");
 
 	placed.at(ability_index(ability)).push_back(unplaced.at(dieIndex));
 	unplaced.erase(unplaced.begin() + static_cast<std::ptrdiff_t>(dieIndex));
@@ -148,7 +153,9 @@ bool AbilityAllocation::has_placed(Ability ability) const
 
 void AbilityAllocation::take_back(Ability ability)
 {
-	assert(has_placed(ability) && "AbilityAllocation::take_back called on an ability holding no dice");
+	assert(
+		has_placed(ability) &&
+		"AbilityAllocation::take_back called on an ability holding no dice");
 
 	std::vector<int>& dice = placed.at(ability_index(ability));
 	unplaced.push_back(dice.back());
@@ -157,7 +164,8 @@ void AbilityAllocation::take_back(Ability ability)
 
 std::optional<ClassMinimum> AbilityAllocation::unmet_minimum() const
 {
-	const std::optional<ClassMinimum> required = class_ability_minimum(creatureClass);
+	const std::optional<ClassMinimum> required =
+		class_ability_minimum(creatureClass);
 	if (!required.has_value() || score(required->ability) >= required->score)
 	{
 		return std::nullopt;

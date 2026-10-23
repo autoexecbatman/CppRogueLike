@@ -50,13 +50,17 @@ protected:
 	{
 		auto item = ItemCreator::create(itemKey, Vector2D{ 0, 0 }, ctx);
 		ASSERT_NE(item, nullptr) << itemKey << " is not in the item registry";
-		ASSERT_TRUE(item->behavior.has_value()) << itemKey << " has no behaviour to use";
+		ASSERT_TRUE(item->behavior.has_value())
+			<< itemKey << " has no behaviour to use";
 
 		Item& placed = *item;
-		const auto packed = InventoryOperations::add_item(wearer.inventoryData, std::move(item));
+		const auto packed = InventoryOperations::add_item(
+			wearer.inventoryData,
+			std::move(item));
 		ASSERT_TRUE(packed.has_value());
 
-		EXPECT_TRUE(use_item(*placed.behavior, placed, wearer, ctx)) << "wearing " << itemKey << " was refused";
+		EXPECT_TRUE(use_item(*placed.behavior, placed, wearer, ctx))
+			<< "wearing " << itemKey << " was refused";
 	}
 
 	EquipmentSlot slot_in_the_data(const std::string& itemKey) const
@@ -76,8 +80,12 @@ TEST_F(WornSlotTest, TheDataNamesASlotForEveryWornKind)
 {
 	EXPECT_EQ(slot_in_the_data("cloak_of_protection"), EquipmentSlot::CLOAK);
 	EXPECT_EQ(slot_in_the_data("boots_of_speed"), EquipmentSlot::BOOTS);
-	EXPECT_EQ(slot_in_the_data("gauntlets_of_ogre_power"), EquipmentSlot::GAUNTLETS);
-	EXPECT_EQ(slot_in_the_data("girdle_of_hill_giant_strength"), EquipmentSlot::GIRDLE);
+	EXPECT_EQ(
+		slot_in_the_data("gauntlets_of_ogre_power"),
+		EquipmentSlot::GAUNTLETS);
+	EXPECT_EQ(
+		slot_in_the_data("girdle_of_hill_giant_strength"),
+		EquipmentSlot::GIRDLE);
 	EXPECT_EQ(slot_in_the_data("amulet_of_health"), EquipmentSlot::NECK);
 	EXPECT_EQ(slot_in_the_data("helm_of_telepathy"), EquipmentSlot::HEAD);
 }
@@ -93,9 +101,11 @@ TEST_F(WornSlotTest, ACloakIsWornOnTheShoulders)
 	wear_from_the_pack("cloak_of_protection");
 
 	Item* onTheShoulders = wearer.get_equipped_item(EquipmentSlot::CLOAK);
-	ASSERT_NE(onTheShoulders, nullptr) << "the cloak slot is still empty after putting a cloak on";
+	ASSERT_NE(onTheShoulders, nullptr)
+		<< "the cloak slot is still empty after putting a cloak on";
 	EXPECT_EQ(onTheShoulders->actorData.name, "cloak of protection");
-	EXPECT_EQ(wearer.get_equipped_item(EquipmentSlot::GAUNTLETS), nullptr) << "the cloak went onto the hands";
+	EXPECT_EQ(wearer.get_equipped_item(EquipmentSlot::GAUNTLETS), nullptr)
+		<< "the cloak went onto the hands";
 }
 
 TEST_F(WornSlotTest, BootsAreWornOnTheFeet)
@@ -103,8 +113,10 @@ TEST_F(WornSlotTest, BootsAreWornOnTheFeet)
 	wear_from_the_pack("boots_of_speed");
 
 	Item* onTheFeet = wearer.get_equipped_item(EquipmentSlot::BOOTS);
-	ASSERT_NE(onTheFeet, nullptr) << "the boots slot is still empty after putting boots on";
-	EXPECT_EQ(wearer.get_equipped_item(EquipmentSlot::GAUNTLETS), nullptr) << "the boots went onto the hands";
+	ASSERT_NE(onTheFeet, nullptr)
+		<< "the boots slot is still empty after putting boots on";
+	EXPECT_EQ(wearer.get_equipped_item(EquipmentSlot::GAUNTLETS), nullptr)
+		<< "the boots went onto the hands";
 }
 
 TEST_F(WornSlotTest, GauntletsStillGoOnTheHands)
@@ -133,6 +145,8 @@ TEST_F(WornSlotTest, AWornItemIsNeverLostBetweenThePackAndTheSlot)
 	// empty, so it was gone from everything the player could see.
 	wear_from_the_pack("cloak_of_protection");
 
-	EXPECT_EQ(InventoryOperations::get_item_count(wearer.inventoryData), 0u) << "it never left the pack";
-	EXPECT_NE(wearer.get_equipped_item(EquipmentSlot::CLOAK), nullptr) << "it left the pack and reached no slot";
+	EXPECT_EQ(InventoryOperations::get_item_count(wearer.inventoryData), 0u)
+		<< "it never left the pack";
+	EXPECT_NE(wearer.get_equipped_item(EquipmentSlot::CLOAK), nullptr)
+		<< "it left the pack and reached no slot";
 }

@@ -105,10 +105,7 @@ protected:
 		return DungeonRoom{ col, row, w, h };
 	}
 
-	void place_door(Vector2D pos)
-	{
-		map->set_tile(pos, TileType::CLOSED_DOOR);
-	}
+	void place_door(Vector2D pos) { map->set_tile(pos, TileType::CLOSED_DOOR); }
 
 	void place_corridor(Vector2D pos)
 	{
@@ -357,7 +354,8 @@ TEST(StairRoomNotLocked, StairsAreNeverAdjacentToLockedDoor)
 
 	const Vector2D stairsPos = stairs->position;
 	ASSERT_TRUE(map->is_in_bounds(stairsPos))
-		<< "Stairs at (" << stairsPos.x << "," << stairsPos.y << ") out of bounds";
+		<< "Stairs at (" << stairsPos.x << "," << stairsPos.y
+		<< ") out of bounds";
 
 	for (const Vector2D dir : { DIR_N, DIR_S, DIR_E, DIR_W })
 	{
@@ -368,6 +366,7 @@ TEST(StairRoomNotLocked, StairsAreNeverAdjacentToLockedDoor)
 		}
 		EXPECT_FALSE(map->is_door_locked(neighbour))
 			<< "Locked door at (" << neighbour.x << "," << neighbour.y
-			<< ") adjacent to stairs at (" << stairsPos.x << "," << stairsPos.y << ")";
+			<< ") adjacent to stairs at (" << stairsPos.x << "," << stairsPos.y
+			<< ")";
 	}
 }

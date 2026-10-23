@@ -60,8 +60,13 @@ struct Tile
 	// The player's experience level when they last failed to pick this lock, or 0 for never.
 	int lockPickFailedAtLevel{ 0 };
 
-	Tile(Vector2D pos, TileType type)
-		: position(pos), type(type), explored(false), doorState(DoorState::OPEN) {}
+	Tile(Vector2D pos, TileType type) :
+		position(pos),
+		type(type),
+		explored(false),
+		doorState(DoorState::OPEN)
+	{
+	}
 };
 
 //==Map==
@@ -72,7 +77,8 @@ class Map : public Persistent
 private:
 	int mapWidth{};
 	int mapHeight{};
-	static constexpr std::array<Vector2D, 8> DIRS = { DIR_N, DIR_NE, DIR_E, DIR_SE, DIR_S, DIR_SW, DIR_W, DIR_NW };
+	static constexpr std::array<Vector2D, 8>
+		DIRS = { DIR_N, DIR_NE, DIR_E, DIR_SE, DIR_S, DIR_SW, DIR_W, DIR_NW };
 
 	Vector2D get_map_size() const noexcept
 	{
@@ -93,7 +99,10 @@ private:
 	void spawn_player(const DungeonRoom& room, GameContext& ctx);
 	void generate_rooms(GameContext& ctx);
 
-	bool is_floor(Vector2D pos) const noexcept { return get_tile_type(pos) == TileType::FLOOR; }
+	bool is_floor(Vector2D pos) const noexcept
+	{
+		return get_tile_type(pos) == TileType::FLOOR;
+	}
 
 	void set_explored(Vector2D pos); // set the tile as explored
 	void post_process_doors();
@@ -186,7 +195,11 @@ public:
 
 	long get_seed() const noexcept { return seed; }
 
-	bool is_in_bounds(Vector2D pos) const noexcept { return pos.x >= 0 && pos.x < mapWidth && pos.y >= 0 && pos.y < mapHeight; }
+	bool is_in_bounds(Vector2D pos) const noexcept
+	{
+		return pos.x >= 0 && pos.x < mapWidth && pos.y >= 0 &&
+			pos.y < mapHeight;
+	}
 
 	static std::vector<Vector2D> bresenham_line(Vector2D from, Vector2D to);
 
@@ -252,7 +265,9 @@ public:
 	//   find_decoration_at(tile, ctx);   // -> the barrel
 	//   barrel->isBroken = true;
 	//   find_decoration_at(tile, ctx);   // -> nullptr
-	Decoration* find_decoration_at(Vector2D pos, const GameContext& ctx) const noexcept;
+	Decoration* find_decoration_at(
+		Vector2D pos,
+		const GameContext& ctx) const noexcept;
 	bool is_door(Vector2D pos) const noexcept;
 	bool is_open_door(Vector2D pos) const noexcept;
 	bool is_wall(Vector2D pos) const noexcept;

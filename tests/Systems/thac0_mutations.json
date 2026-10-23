@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "return thac0_for_level(creatureClass, level) < thac0_for_level(creatureClass, level - 1);",
-      "mutated": "return thac0_for_level(creatureClass, level) <= thac0_for_level(creatureClass, level - 1);",
+      "original": "return thac0_for_level(creatureClass, level) <\n\t\tthac0_for_level(creatureClass, level - 1);",
+      "mutated": "return thac0_for_level(creatureClass, level) <=\n\t\tthac0_for_level(creatureClass, level - 1);",
       "catches": "a level the table does not move on reported as an improvement"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "return thac0_for_level(creatureClass, level) < thac0_for_level(creatureClass, level - 1);",
-      "mutated": "return thac0_for_level(creatureClass, level) < thac0_for_level(creatureClass, level);",
+      "original": "return thac0_for_level(creatureClass, level) <\n\t\tthac0_for_level(creatureClass, level - 1);",
+      "mutated": "return thac0_for_level(creatureClass, level) <\n\t\tthac0_for_level(creatureClass, level);",
       "catches": "an improvement compared against its own level, so no level ever improves"
     },
     {

@@ -41,8 +41,11 @@ TEST(PanelRowGeometryTest, ARowsTopPixelMapsBackToThatRow)
 			for (int row = 0; row < 12; ++row)
 			{
 				const int topPixel = panel_text_row_y(panelTop, tileSize, row);
-				EXPECT_EQ(panel_text_row_at_y(panelTop, tileSize, topPixel), row)
-					<< "tile " << tileSize << ", panel top " << panelTop << ", row " << row;
+				EXPECT_EQ(
+					panel_text_row_at_y(panelTop, tileSize, topPixel),
+					row)
+					<< "tile " << tileSize << ", panel top " << panelTop
+					<< ", row " << row;
 			}
 		}
 	}
@@ -58,8 +61,11 @@ TEST(PanelRowGeometryTest, EveryPixelInsideARowMapsToThatRow)
 			const int topPixel = panel_text_row_y(0, tileSize, row);
 			for (int offset = 0; offset < UI_TEXT_ROW_PITCH; ++offset)
 			{
-				EXPECT_EQ(panel_text_row_at_y(0, tileSize, topPixel + offset), row)
-					<< "tile " << tileSize << ", row " << row << ", " << offset << " pixels down";
+				EXPECT_EQ(
+					panel_text_row_at_y(0, tileSize, topPixel + offset),
+					row)
+					<< "tile " << tileSize << ", row " << row << ", " << offset
+					<< " pixels down";
 			}
 		}
 	}
@@ -75,9 +81,11 @@ TEST(PanelRowGeometryTest, APixelAboveTheFirstRowIsNegative)
 		const int firstRowTop = panel_text_row_y(0, tileSize, 0);
 
 		EXPECT_LT(panel_text_row_at_y(0, tileSize, firstRowTop - 1), 0)
-			<< "the pixel one above the first row read as being inside it, at tile " << tileSize;
+			<< "the pixel one above the first row read as being inside it, at tile "
+			<< tileSize;
 		EXPECT_LT(panel_text_row_at_y(0, tileSize, 0), 0)
-			<< "the top of the panel frame read as a text row, at tile " << tileSize;
+			<< "the top of the panel frame read as a text row, at tile "
+			<< tileSize;
 	}
 }
 

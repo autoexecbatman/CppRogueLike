@@ -51,20 +51,20 @@
     },
     {
       "file": "src/Lifespan.cpp",
-      "original": "\tconst int startingAge = row->startingBase + roll_dice(&dice, row->startingVariable);",
-      "mutated": "\tconst int startingAge = row->startingBase;",
+      "original": "\tconst int startingAge =\n\t\trow->startingBase + roll_dice(&dice, row->startingVariable);",
+      "mutated": "\tconst int startingAge =\n\t\trow->startingBase;",
       "catches": "the starting age's die never rolled"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\t\tcount_addition(ageing_change(*lifespan, *ability, exceptionalStrength));",
+      "original": "\t\t\tcount_addition(\n\t\t\t\tageing_change(*lifespan, *ability, exceptionalStrength));",
       "mutated": "",
       "catches": "the ability scores never reading the age"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tint exceptional = lifespan ? aged_exceptional_strength(*lifespan, exceptionalStrength) : exceptionalStrength;",
-      "mutated": "\tint exceptional = exceptionalStrength;",
+      "original": "\tint exceptional = lifespan ?\n\t\taged_exceptional_strength(*lifespan, exceptionalStrength) :\n\t\texceptionalStrength;",
+      "mutated": "\tint exceptional =exceptionalStrength;",
       "catches": "the exceptional percentile never reading the age"
     },
     {
@@ -75,8 +75,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tctx.messageSystem->message(ColorPairId::RED_BLACK, \"You die of old age.\", MessageCompletion::FINISHED);\n\t\tdie(ctx);\n",
-      "mutated": "\t\tctx.messageSystem->message(ColorPairId::RED_BLACK, \"You die of old age.\", MessageCompletion::FINISHED);\n",
+      "original": "\t\tctx.messageSystem->message(\n\t\t\tColorPairId::RED_BLACK,\n\t\t\t\"You die of old age.\",\n\t\t\tMessageCompletion::FINISHED);\n\t\tdie(ctx);\n",
+      "mutated": "\t\tctx.messageSystem->message(\n\t\t\tColorPairId::RED_BLACK,\n\t\t\t\"You die of old age.\",\n\t\t\tMessageCompletion::FINISHED);\n",
       "catches": "reaching the maximum age and living on"
     },
     {
@@ -93,8 +93,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\t\t  { \"magicalYears\", lifespan->magicalYears },\n",
-      "mutated": "\t\t\t  { \"magicalYears\",0 },\n",
+      "original": "\t\t\t{ \"magicalYears\", lifespan->magicalYears },\n",
+      "mutated": "\t\t\t{ \"magicalYears\",0 },\n",
       "catches": "a save losing the years magic added"
     },
     {
@@ -105,7 +105,7 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": "\t\tthrow std::runtime_error(\"Player::load: a player record with no lifespan\");",
+      "original": "\t\tthrow std::runtime_error(\n\t\t\t\"Player::load: a player record with no lifespan\");",
       "mutated": "",
       "catches": "a player loaded with no lifespan, which every race read then trips on"
     },

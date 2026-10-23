@@ -43,32 +43,38 @@ protected:
 	{
 		items.load("data/content/items.json");
 		items.load_enhanced_rules("data/content/enhanced_rules.json");
-		roundTrip = std::filesystem::temp_directory_path() / "items_roundtrip.json";
+		roundTrip =
+			std::filesystem::temp_directory_path() / "items_roundtrip.json";
 	}
 
-	void TearDown() override
-	{
-		std::filesystem::remove(roundTrip);
-	}
+	void TearDown() override { std::filesystem::remove(roundTrip); }
 };
 
 // Every field ItemParams declares, named one at a time, so a lost key fails pointing at
 // the field rather than at a count.
-void expect_same_item(const std::string& key, const ItemParams& before, const ItemParams& after)
+void expect_same_item(
+	const std::string& key,
+	const ItemParams& before,
+	const ItemParams& after)
 {
 	EXPECT_EQ(before.name, after.name) << key << ".name";
 	EXPECT_EQ(before.category, after.category) << key << ".category";
 	EXPECT_EQ(before.color, after.color) << key << ".color";
 	EXPECT_EQ(before.itemClass, after.itemClass) << key << ".itemClass";
 	EXPECT_EQ(before.value, after.value) << key << ".value";
-	EXPECT_EQ(before.pickableType, after.pickableType) << key << ".pickableType";
+	EXPECT_EQ(before.pickableType, after.pickableType)
+		<< key << ".pickableType";
 
-	EXPECT_EQ(to_text(before.consumableAmount), to_text(after.consumableAmount)) << key << ".consumableAmount";
+	EXPECT_EQ(to_text(before.consumableAmount), to_text(after.consumableAmount))
+		<< key << ".consumableAmount";
 	EXPECT_EQ(before.range, after.range) << key << ".range";
 	EXPECT_EQ(before.damage, after.damage) << key << ".damage";
-	EXPECT_EQ(before.confuseTurns, after.confuseTurns) << key << ".confuseTurns";
-	EXPECT_EQ(to_text(before.duration), to_text(after.duration)) << key << ".duration";
-	EXPECT_EQ(before.durationUnit, after.durationUnit) << key << ".durationUnit";
+	EXPECT_EQ(before.confuseTurns, after.confuseTurns)
+		<< key << ".confuseTurns";
+	EXPECT_EQ(to_text(before.duration), to_text(after.duration))
+		<< key << ".duration";
+	EXPECT_EQ(before.durationUnit, after.durationUnit)
+		<< key << ".durationUnit";
 
 	EXPECT_EQ(before.effect, after.effect) << key << ".effect";
 	EXPECT_EQ(before.effectBonus, after.effectBonus) << key << ".effectBonus";
@@ -80,26 +86,34 @@ void expect_same_item(const std::string& key, const ItemParams& before, const It
 	EXPECT_EQ(before.wisBonus, after.wisBonus) << key << ".wisBonus";
 	EXPECT_EQ(before.chaBonus, after.chaBonus) << key << ".chaBonus";
 	EXPECT_EQ(before.application, after.application) << key << ".application";
-	EXPECT_EQ(before.exceptionalStrength, after.exceptionalStrength) << key << ".exceptionalStrength";
+	EXPECT_EQ(before.exceptionalStrength, after.exceptionalStrength)
+		<< key << ".exceptionalStrength";
 
-	EXPECT_EQ(before.nutritionValue, after.nutritionValue) << key << ".nutritionValue";
+	EXPECT_EQ(before.nutritionValue, after.nutritionValue)
+		<< key << ".nutritionValue";
 	EXPECT_EQ(before.acBonus, after.acBonus) << key << ".acBonus";
 
 	EXPECT_EQ(before.ranged, after.ranged) << key << ".ranged";
-	EXPECT_EQ(before.handRequirement, after.handRequirement) << key << ".handRequirement";
+	EXPECT_EQ(before.handRequirement, after.handRequirement)
+		<< key << ".handRequirement";
 	EXPECT_EQ(before.weaponSize, after.weaponSize) << key << ".weaponSize";
-	EXPECT_EQ(before.strengthRating, after.strengthRating) << key << ".strengthRating";
+	EXPECT_EQ(before.strengthRating, after.strengthRating)
+		<< key << ".strengthRating";
 
-	EXPECT_EQ(before.consumableEffect, after.consumableEffect) << key << ".consumableEffect";
-	EXPECT_EQ(before.consumableBuffType, after.consumableBuffType) << key << ".consumableBuffType";
+	EXPECT_EQ(before.consumableEffect, after.consumableEffect)
+		<< key << ".consumableEffect";
+	EXPECT_EQ(before.consumableBuffType, after.consumableBuffType)
+		<< key << ".consumableBuffType";
 	EXPECT_EQ(before.targetMode, after.targetMode) << key << ".targetMode";
-	EXPECT_EQ(before.scrollAnimation, after.scrollAnimation) << key << ".scrollAnimation";
+	EXPECT_EQ(before.scrollAnimation, after.scrollAnimation)
+		<< key << ".scrollAnimation";
 
 	EXPECT_EQ(before.baseWeight, after.baseWeight) << key << ".baseWeight";
 	EXPECT_EQ(before.weight, after.weight) << key << ".weight";
 	EXPECT_EQ(before.levelMin, after.levelMin) << key << ".levelMin";
 	EXPECT_EQ(before.levelMax, after.levelMax) << key << ".levelMax";
-	EXPECT_FLOAT_EQ(before.levelScaling, after.levelScaling) << key << ".levelScaling";
+	EXPECT_FLOAT_EQ(before.levelScaling, after.levelScaling)
+		<< key << ".levelScaling";
 }
 
 TEST_F(ItemRoundTripTest, EveryPersistedFieldSurvivesASave)
@@ -109,7 +123,8 @@ TEST_F(ItemRoundTripTest, EveryPersistedFieldSurvivesASave)
 	{
 		before.emplace(key, items.get_params(key));
 	}
-	ASSERT_FALSE(before.empty()) << "no items loaded; the test would pass vacuously";
+	ASSERT_FALSE(before.empty())
+		<< "no items loaded; the test would pass vacuously";
 
 	items.save(roundTrip.string());
 	items.load(roundTrip.string());
@@ -131,8 +146,10 @@ std::string load_without_field(
 	std::ifstream source(Paths::resolve(Paths::ITEMS));
 	EXPECT_TRUE(source.is_open()) << "cannot read the real items file";
 	nlohmann::json root = nlohmann::json::parse(source);
-	EXPECT_TRUE(root.contains(itemKey)) << itemKey << " must exist to be damaged";
-	EXPECT_TRUE(root[itemKey].contains(field)) << itemKey << " has no " << field << " to remove";
+	EXPECT_TRUE(root.contains(itemKey))
+		<< itemKey << " must exist to be damaged";
+	EXPECT_TRUE(root[itemKey].contains(field))
+		<< itemKey << " has no " << field << " to remove";
 	root[itemKey].erase(field);
 
 	std::ofstream damaged(destination);
@@ -164,29 +181,34 @@ TEST_F(ItemRoundTripTest, EveryFieldOfARecordIsRequired)
 	std::ifstream source(Paths::resolve(Paths::ITEMS));
 	ASSERT_TRUE(source.is_open()) << "cannot read the real items file";
 	const nlohmann::json root = nlohmann::json::parse(source);
-	ASSERT_TRUE(root.contains("health_potion")) << "health_potion must exist to be damaged";
+	ASSERT_TRUE(root.contains("health_potion"))
+		<< "health_potion must exist to be damaged";
 
 	std::set<std::string> fields;
 	for (const auto& [field, unused] : root.at("health_potion").items())
 	{
 		fields.insert(field);
 	}
-	ASSERT_FALSE(fields.empty()) << "no fields to remove; the test would pass vacuously";
+	ASSERT_FALSE(fields.empty())
+		<< "no fields to remove; the test would pass vacuously";
 
 	for (const std::string& field : fields)
 	{
-		const std::string refusal = load_without_field(items, roundTrip, "health_potion", field);
+		const std::string refusal =
+			load_without_field(items, roundTrip, "health_potion", field);
 
 		const std::size_t namesRecord = refusal.find("health_potion");
 		const std::size_t namesField = refusal.find(field);
 		EXPECT_NE(namesRecord, std::string::npos)
-			<< "the refusal must name the record, since 98 of them load: " << refusal;
+			<< "the refusal must name the record, since 98 of them load: "
+			<< refusal;
 		EXPECT_NE(namesField, std::string::npos)
 			<< "the refusal must name " << field << ": " << refusal;
 		// Both names present in either order reads as a sentence about the wrong thing,
 		// so the record has to come first.
 		EXPECT_LT(namesRecord, namesField)
-			<< "the refusal names " << field << " before the record it belongs to: " << refusal;
+			<< "the refusal names " << field
+			<< " before the record it belongs to: " << refusal;
 	}
 }
 
@@ -245,8 +267,12 @@ TEST_F(ItemRoundTripTest, ExactlyTheGiantAndOgreStrengthItemsSetTheirScore)
 
 	for (const auto& [key, record] : root.items())
 	{
-		ASSERT_TRUE(record.contains("application")) << key << " names no application";
-		EXPECT_EQ(record.at("application"), setting.contains(key) ? "set" : "add") << key;
+		ASSERT_TRUE(record.contains("application"))
+			<< key << " names no application";
+		EXPECT_EQ(
+			record.at("application"),
+			setting.contains(key) ? "set" : "add")
+			<< key;
 	}
 }
 

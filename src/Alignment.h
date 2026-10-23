@@ -97,7 +97,8 @@ enum class Morality
 //
 // Example:
 //   encode_morality(Morality::EVIL);  // -> "evil"
-[[nodiscard]] inline constexpr std::string_view encode_morality(Morality morality)
+[[nodiscard]] inline constexpr std::string_view encode_morality(
+	Morality morality)
 {
 	switch (morality)
 	{

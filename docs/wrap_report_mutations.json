@@ -113,6 +113,12 @@
       "original": "    \"ColumnLimit\": \"80\",",
       "mutated": "    \"ColumnLimit\": \"120\",",
       "catches": "the limit itself moved"
+    },
+    {
+      "file": "docs/wrap_report.py",
+      "original": "        today_path.write_text(pre_limit_config(today), encoding=\"utf-8\")",
+      "mutated": "        today_path.write_text(today, encoding=\"utf-8\")",
+      "catches": "the fixture's baseline taken from today's file, which once the limit lands formats it as PROPOSED does"
     }
   ]
 }

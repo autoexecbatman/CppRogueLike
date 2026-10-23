@@ -21,14 +21,14 @@
     },
     {
       "file": "src/RandomDice.h",
-      "original": "\t\t\tassert(value >= min && value <= max && \"a scripted roll is outside the range the die was asked for\");",
+      "original": "\t\t\tassert(\n\t\t\t\tvalue >= min && value <= max &&\n\t\t\t\t\"a scripted roll is outside the range the die was asked for\");",
       "mutated": "",
       "catches": "the guard gone, which is the defect: a test scripts a roll no die could make and passes"
     },
     {
       "file": "src/RandomDice.h",
-      "original": "\t\t\tassert(value >= min && value <= max && \"a scripted roll is outside the range the die was asked for\");",
-      "mutated": "\t\t\tassert(value >= min && \"a scripted roll is outside the range the die was asked for\");",
+      "original": "\t\t\tassert(\n\t\t\t\tvalue >= min && value <= max &&\n\t\t\t\t\"a scripted roll is outside the range the die was asked for\");",
+      "mutated": "\t\t\tassert(\n\t\t\t\tvalue >= min &&\"a scripted roll is outside the range the die was asked for\");",
       "catches": "only the bottom of the range checked, so a 5 on a d4 still passes"
     },
     {
@@ -39,8 +39,8 @@
     },
     {
       "file": "src/RandomDice.h",
-      "original": "\t\t\tassert(value >= min && value <= max && \"a scripted roll is outside the range the die was asked for\");",
-      "mutated": "\t\t\tassert(value <= max && \"a scripted roll is outside the range the die was asked for\");",
+      "original": "\t\t\tassert(\n\t\t\t\tvalue >= min && value <= max &&\n\t\t\t\t\"a scripted roll is outside the range the die was asked for\");",
+      "mutated": "\t\t\tassert(\n\t\t\t\tvalue<= max &&\n\t\t\t\t\"a scripted roll is outside the range the die was asked for\");",
       "catches": "only the top of the range checked, so a zero on a d20 still passes"
     }
   ]

@@ -37,7 +37,9 @@ TEST(PrefabListRowsTest, TheListEndsAtTheGuideBox)
 {
 	EXPECT_EQ(rows.guide_top(), 496);
 	EXPECT_EQ(rows.visible_rows(), 20u);
-	EXPECT_LE(rows.row_top(rows.visible_rows() - 1) + rows.row_height(), rows.guide_top());
+	EXPECT_LE(
+		rows.row_top(rows.visible_rows() - 1) + rows.row_height(),
+		rows.guide_top());
 }
 
 // The first and last pixel of every drawn row select that row.
@@ -45,8 +47,14 @@ TEST(PrefabListRowsTest, EveryPixelOfADrawnRowSelectsThatRow)
 {
 	for (size_t slot = 0; slot < 20; ++slot)
 	{
-		EXPECT_EQ(rows.slot_at(88 + static_cast<int>(slot) * 20), std::optional<size_t>{ slot }) << "slot " << slot;
-		EXPECT_EQ(rows.slot_at(107 + static_cast<int>(slot) * 20), std::optional<size_t>{ slot }) << "slot " << slot;
+		EXPECT_EQ(
+			rows.slot_at(88 + static_cast<int>(slot) * 20),
+			std::optional<size_t>{ slot })
+			<< "slot " << slot;
+		EXPECT_EQ(
+			rows.slot_at(107 + static_cast<int>(slot) * 20),
+			std::optional<size_t>{ slot })
+			<< "slot " << slot;
 	}
 }
 

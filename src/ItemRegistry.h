@@ -203,11 +203,17 @@ public:
 	void set_params(std::string_view key, const ItemParams& params);
 
 	// Renames and recategorises an item. Throws std::out_of_range if key is unknown.
-	void set_name_category(std::string_view key, std::string name, std::string category);
+	void set_name_category(
+		std::string_view key,
+		std::string name,
+		std::string category);
 
 	// Adds a user-created item under a key made from its name, numbered past any key
 	// already taken, and returns that key.
-	[[nodiscard]] std::string add_custom(std::string name, std::string category, ItemParams params);
+	[[nodiscard]] std::string add_custom(
+		std::string name,
+		std::string category,
+		ItemParams params);
 
 	// Removes a user-created item. Throws std::logic_error for a shipped item and
 	// std::out_of_range for an unknown key.
@@ -221,5 +227,6 @@ public:
 	void load_enhanced_rules(std::string_view path);
 
 	// The enhanced spawn rules.
-	[[nodiscard]] std::span<const EnhancedItemSpawnRule> get_enhanced_rules() const;
+	[[nodiscard]] std::span<const EnhancedItemSpawnRule> get_enhanced_rules()
+		const;
 };

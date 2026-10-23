@@ -15,19 +15,48 @@ touched". So the code is what a reformat moves, and the comment lines over
 edited.
 
 PROPOSED, and what each option is for. Each was falsified by running the
-report without it, 2026-10-22, on src/ and tests/ at 2924acbb:
+report without it, 2026-10-23, on src/ and tests/ at 2901573d, where the
+full set gives 3226 statements and no padded line:
 
-    ColumnLimit 80                      3389 statements; 429 without it
-    AlignAfterOpenBracket AlwaysBreak   break after (; 2347 without it
-    AllowAllArgumentsOnNextLine false   one argument per line; 2734 without
+    ColumnLimit 80
+        the limit; 393 statements without it
+    AlignAfterOpenBracket false
+        no continuation lined up under its bracket; 119 padded lines in
+        28 files without it
+    BreakAfterOpenBracketFunction true
+        a call or signature that wraps breaks after (; 1806 statements
+        without it
+    BreakAfterOpenBracketIf true
+        the same for a condition; 57 lines in 9 files change without it
+    BreakAfterOpenBracketLoop true
+        the same for a loop header; 73 padded lines in 10 files without it
+    BreakAfterOpenBracketSwitch true
+        the same for a switch; no switch here wraps, so nothing changes
+        without it, and a planted long switch condition shows it acting
+    AllowAllArgumentsOnNextLine false
+        one argument per line; 2586 statements without it
     AllowAllParametersOfDeclarationOnNextLine false
-                                        one parameter per line; 3005 without
-    ReflowComments false                without it, examples are merged into
-                                        the next line: the guard stops on
-                                        AbilityAllocation.cpp
-    BreakStringLiterals false           without it, "a" "b" splits literals
-                                        a grep looks for: the guard stops on
-                                        AiMimic.cpp
+        one parameter per line; 2814 statements without it
+    ReflowComments false
+        without it, examples are merged into the next line: the guard
+        stops on AbilityAllocation.cpp
+    BreakStringLiterals false
+        without it, "a" "b" splits literals a grep looks for: the guard
+        stops on AiMimic.cpp
+    BreakConstructorInitializers AfterColon
+        initializers start on the indent; 82 padded lines in 33 files
+        without it
+    PackConstructorInitializers Never
+        one initializer per line; 171 lines in 38 files change without it
+    BreakInheritanceList AfterColon
+        base classes start on the indent; 4 padded lines in 4 files
+        without it
+    BreakBeforeTernaryOperators false
+        a wrapped ternary breaks after ? and :; 61 padded lines in 16
+        files without it
+    BreakTemplateDeclarations Yes
+        a template header keeps its own line; without it 8 headers join
+        what they declare, 24 lines in 7 files
 
 HOW A STATEMENT IS FOLLOWED. The two formats differ only in whitespace, so
 the text without whitespace is identical on both sides, and a character
@@ -37,23 +66,24 @@ parentheses or at a block's brace; an initializer's braces, a preprocessor
 line and an access label end nothing. One counts when it had 1 or 2 lines
 and has 3 or more, and its line is given in the checkout file.
 
-Example, at 2924acbb (the head of each section):
+Example, at 2901573d (the head of each section):
 
     $ python docs/wrap_report.py
-    58 of 533 files differ from today's own format; their lines below are
+    7 of 533 files differ from today's own format; their lines below are
     mapped back to the checkout
-    STATEMENTS SPREAD OVER 3 OR MORE LINES: 3389 in 381 of 533 files
-       1041   30.7%  call
-        578   17.1%  test assertion
-    COMMENT LINES OVER 80, rewrapped as their files are touched: 5366 in
-    450 files, 525 of them example lines
+    STATEMENTS SPREAD OVER 3 OR MORE LINES: 3226 in 374 of 533 files
+        982   30.4%  call
+        572   17.7%  test assertion
+    COMMENT LINES OVER 80, rewrapped as their files are touched: 5358 in
+    449 files, 525 of them example lines
 
 FALSIFIED, 2026-10-22. docs/wrap_report_fixture.cpp.txt plants one
 statement of each class and two long comment lines, each named by a marker,
 and --self-test fails on a missing or an extra finding. Its red run, before
 the analysis existed, missed all of them. docs/wrap_report_mutations.json
 breaks the rules in turn through mutate.py, and --self-test failed on all
-18: a ; in a for header ending a statement, an initializer read as a block,
+19: the fixture formatted against today's file instead of the pre-limit
+one, a ; in a for header ending a statement, an initializer read as a block,
 a label or a preprocessor line heading a statement, the trailing-comment
 rule off, two-line wraps counted, a comment line counted into a statement,
 each class's rule off, a comment just over the limit or an example line
@@ -89,11 +119,26 @@ LIMIT = 80
 TAB_WIDTH = 4
 PROPOSED = {
     "ColumnLimit": "80",
-    "AlignAfterOpenBracket": "AlwaysBreak",
+    "AlignAfterOpenBracket": "false",
+    "BreakAfterOpenBracketFunction": "true",
+    "BreakAfterOpenBracketIf": "true",
+    "BreakAfterOpenBracketLoop": "true",
+    "BreakAfterOpenBracketSwitch": "true",
     "AllowAllArgumentsOnNextLine": "false",
     "AllowAllParametersOfDeclarationOnNextLine": "false",
     "ReflowComments": "false",
     "BreakStringLiterals": "false",
+    "BreakConstructorInitializers": "AfterColon",
+    "PackConstructorInitializers": "Never",
+    "BreakInheritanceList": "AfterColon",
+    "BreakBeforeTernaryOperators": "false",
+    "BreakTemplateDeclarations": "Yes",
+}
+# The two values today's file held before the limit; every other PROPOSED
+# key was absent, so the style's default applied.
+PRE_LIMIT = {
+    "ColumnLimit": "0",
+    "AlignAfterOpenBracket": "DontAlign",
 }
 
 
@@ -104,6 +149,15 @@ def proposed_config(today, without):
     lines = [line for line in today.splitlines()
              if line.split(":")[0].strip() not in PROPOSED]
     lines += [f"{key}: {value}" for key, value in kept.items()]
+    return "\n".join(lines) + "\n"
+
+
+def pre_limit_config(today):
+    """Today's .clang-format text as it was before the 80-column limit:
+    every PROPOSED key taken out and PRE_LIMIT put back."""
+    lines = [line for line in today.splitlines()
+             if line.split(":")[0].strip() not in PROPOSED]
+    lines += [f"{key}: {value}" for key, value in PRE_LIMIT.items()]
     return "\n".join(lines) + "\n"
 
 
@@ -327,13 +381,15 @@ def expected_findings(text):
 
 
 def self_test():
-    """Formats the fixture both ways; 0 when it reports exactly its markers."""
+    """Formats the fixture before the limit and with PROPOSED; 0 when it
+    reports exactly its markers. The baseline is the pre-limit file, because
+    once the limit lands today's file formats the fixture as PROPOSED does."""
     today = (ROOT / ".clang-format").read_text(encoding="utf-8")
     text = FIXTURE.read_text(encoding="utf-8")
     with tempfile.TemporaryDirectory() as folder:
         today_path = pathlib.Path(folder) / "today.clang-format"
         proposed_path = pathlib.Path(folder) / "proposed.clang-format"
-        today_path.write_text(today, encoding="utf-8")
+        today_path.write_text(pre_limit_config(today), encoding="utf-8")
         proposed_path.write_text(proposed_config(today, []), encoding="utf-8")
         before = formatted(FIXTURE, today_path, "fixture.cpp")
         after = formatted(FIXTURE, proposed_path, "fixture.cpp")

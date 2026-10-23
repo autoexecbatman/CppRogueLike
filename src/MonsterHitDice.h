@@ -51,9 +51,11 @@ struct MonsterHitDice
 //   is_valid_monster_hit_dice({ 8, 0, { { 9, 2000 }, { 10, 3000 } } }); // -> true
 //   is_valid_monster_hit_dice({ 8, 0, { { 9, 2000 }, { 11, 3000 } } }); // -> false, a gap
 //   is_valid_monster_hit_dice({ 8, 0, {} }); // -> false, no count
-[[nodiscard]] inline bool is_valid_monster_hit_dice(const MonsterHitDice& hitDice)
+[[nodiscard]] inline bool is_valid_monster_hit_dice(
+	const MonsterHitDice& hitDice)
 {
-	if (hitDice.counts.empty() || hitDice.sides < 1 || hitDice.counts.front().count < MONSTER_HIT_DICE_LOWEST_COUNT)
+	if (hitDice.counts.empty() || hitDice.sides < 1 ||
+		hitDice.counts.front().count < MONSTER_HIT_DICE_LOWEST_COUNT)
 	{
 		return false;
 	}
@@ -61,7 +63,8 @@ struct MonsterHitDice
 	{
 		// Each count is worth something or nothing, and follows the one before by exactly one.
 		const HitDiceCount& entry = hitDice.counts.at(index);
-		const bool followsByOne = index == 0 || entry.count == hitDice.counts.at(index - 1).count + 1;
+		const bool followsByOne =
+			index == 0 || entry.count == hitDice.counts.at(index - 1).count + 1;
 		if (entry.xp < 0 || !followsByOne)
 		{
 			return false;
@@ -83,7 +86,8 @@ struct MonsterHitDice
 //
 // Example:
 //   highest_count(MonsterHitDice{ 8, 0, { { 9, 2000 }, { 10, 3000 } } }); // -> { 10, 3000 }
-[[nodiscard]] inline const HitDiceCount& highest_count(const MonsterHitDice& hitDice)
+[[nodiscard]] inline const HitDiceCount& highest_count(
+	const MonsterHitDice& hitDice)
 {
 	assert(!hitDice.counts.empty() && "highest_count: hit dice with no count");
 	return hitDice.counts.back();
@@ -94,14 +98,18 @@ struct MonsterHitDice
 //
 // Example:
 //   count_entry(MonsterHitDice{ 8, 0, { { 9, 2000 }, { 10, 3000 } } }, 9).xp; // -> 2000
-[[nodiscard]] inline const HitDiceCount& count_entry(const MonsterHitDice& hitDice, int count)
+[[nodiscard]] inline const HitDiceCount& count_entry(
+	const MonsterHitDice& hitDice,
+	int count)
 {
 	const auto isThatCount = [count](const HitDiceCount& entry)
 	{
 		return entry.count == count;
 	};
 	const auto found = std::ranges::find_if(hitDice.counts, isThatCount);
-	assert(found != hitDice.counts.end() && "count_entry: a count these hit dice do not hold");
+	assert(
+		found != hitDice.counts.end() &&
+		"count_entry: a count these hit dice do not hold");
 	return *found;
 }
 
@@ -112,9 +120,14 @@ struct MonsterHitDice
 // Example:
 //   with_lowest_count(MonsterHitDice{ 8, 0, { { 9, 2000 }, { 10, 3000 } } }, 8); // -> { { 8, 2000 }, { 9, 2000 }, { 10, 3000 } }
 //   with_lowest_count(MonsterHitDice{ 8, 0, { { 9, 2000 }, { 10, 3000 } } }, 12); // -> { { 10, 3000 } }, clamped to the highest
-[[nodiscard]] inline MonsterHitDice with_lowest_count(MonsterHitDice hitDice, int lowest)
+[[nodiscard]] inline MonsterHitDice with_lowest_count(
+	MonsterHitDice hitDice,
+	int lowest)
 {
-	const int target = std::clamp(lowest, MONSTER_HIT_DICE_LOWEST_COUNT, highest_count(hitDice).count);
+	const int target = std::clamp(
+		lowest,
+		MONSTER_HIT_DICE_LOWEST_COUNT,
+		highest_count(hitDice).count);
 	// Drop counts below the new lowest, then add any the range now reaches down to.
 	while (hitDice.counts.front().count < target)
 	{
@@ -137,9 +150,14 @@ struct MonsterHitDice
 // Example:
 //   with_highest_count(MonsterHitDice{ 8, 0, { { 9, 2000 } } }, 10); // -> { { 9, 2000 }, { 10, 2000 } }
 //   with_highest_count(MonsterHitDice{ 8, 0, { { 9, 2000 }, { 10, 3000 } } }, 1); // -> { { 9, 2000 } }, clamped to the lowest
-[[nodiscard]] inline MonsterHitDice with_highest_count(MonsterHitDice hitDice, int highest)
+[[nodiscard]] inline MonsterHitDice with_highest_count(
+	MonsterHitDice hitDice,
+	int highest)
 {
-	const int target = std::clamp(highest, hitDice.counts.front().count, MONSTER_HIT_DICE_HIGHEST_COUNT);
+	const int target = std::clamp(
+		highest,
+		hitDice.counts.front().count,
+		MONSTER_HIT_DICE_HIGHEST_COUNT);
 	// Drop counts above the new highest, then add any the range now reaches up to.
 	while (highest_count(hitDice).count > target)
 	{

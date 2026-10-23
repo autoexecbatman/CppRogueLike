@@ -8,46 +8,51 @@
 #include "src/UniqueId.h"
 
 // Test fixture for UniqueId tests
-class UniqueIdTest : public ::testing::Test {
+class UniqueIdTest : public ::testing::Test
+{
 protected:
-    void SetUp() override {
-        // Reset the ID generator before each test
-        UniqueId::Generator::set_next_id(1);
-    }
+	void SetUp() override
+	{
+		// Reset the ID generator before each test
+		UniqueId::Generator::set_next_id(1);
+	}
 };
 
-TEST_F(UniqueIdTest, SingleThreadedIdGeneration) {
-    using namespace UniqueId;
+TEST_F(UniqueIdTest, SingleThreadedIdGeneration)
+{
+	using namespace UniqueId;
 
-    IdType id = Generator::generate();
-    EXPECT_EQ(id, 1) << "Initial ID should be 1";
+	IdType id = Generator::generate();
+	EXPECT_EQ(id, 1) << "Initial ID should be 1";
 
-    id = Generator::generate();
-    EXPECT_EQ(id, 2) << "Second call to generate should return 2";
+	id = Generator::generate();
+	EXPECT_EQ(id, 2) << "Second call to generate should return 2";
 
-    id = Generator::generate();
-    EXPECT_EQ(id, 3) << "Third call to generate should return 3";
+	id = Generator::generate();
+	EXPECT_EQ(id, 3) << "Third call to generate should return 3";
 }
 
-TEST_F(UniqueIdTest, IdsAreUnique) {
-    using namespace UniqueId;
+TEST_F(UniqueIdTest, IdsAreUnique)
+{
+	using namespace UniqueId;
 
-    IdType id1 = Generator::generate();
-    IdType id2 = Generator::generate();
-    IdType id3 = Generator::generate();
+	IdType id1 = Generator::generate();
+	IdType id2 = Generator::generate();
+	IdType id3 = Generator::generate();
 
-    EXPECT_NE(id1, id2);
-    EXPECT_NE(id2, id3);
-    EXPECT_NE(id1, id3);
+	EXPECT_NE(id1, id2);
+	EXPECT_NE(id2, id3);
+	EXPECT_NE(id1, id3);
 }
 
-TEST_F(UniqueIdTest, IdsAreIncremental) {
-    using namespace UniqueId;
+TEST_F(UniqueIdTest, IdsAreIncremental)
+{
+	using namespace UniqueId;
 
-    IdType id1 = Generator::generate();
-    IdType id2 = Generator::generate();
+	IdType id1 = Generator::generate();
+	IdType id2 = Generator::generate();
 
-    EXPECT_EQ(id2, id1 + 1) << "IDs should be incremental";
+	EXPECT_EQ(id2, id1 + 1) << "IDs should be incremental";
 }
 
 // The counter has to cross a save, or the next object created after a load takes an
@@ -72,9 +77,12 @@ TEST_F(UniqueIdTest, TheCounterSurvivesASave)
 	load(saved);
 
 	const IdType afterLoad = Generator::generate();
-	EXPECT_GT(afterLoad, first) << "a new object took an id a loaded actor already holds";
-	EXPECT_GT(afterLoad, second) << "a new object took an id a loaded actor already holds";
-	EXPECT_GE(afterLoad, 4u) << "the counter resumed below where the session left it";
+	EXPECT_GT(afterLoad, first)
+		<< "a new object took an id a loaded actor already holds";
+	EXPECT_GT(afterLoad, second)
+		<< "a new object took an id a loaded actor already holds";
+	EXPECT_GE(afterLoad, 4u)
+		<< "the counter resumed below where the session left it";
 }
 
 // save always writes the counter, so a record without it is damaged: the load refuses it
@@ -88,9 +96,11 @@ TEST_F(UniqueIdTest, ASaveWithoutTheCounterIsRefusedAndLeavesItAlone)
 	const IdType before = Generator::peek_next_id();
 
 	const nlohmann::json empty = nlohmann::json::object();
-	EXPECT_THROW(load(empty), std::exception) << "a record without the counter loaded";
+	EXPECT_THROW(load(empty), std::exception)
+		<< "a record without the counter loaded";
 
-	EXPECT_EQ(Generator::peek_next_id(), before) << "a refused record moved the counter";
+	EXPECT_EQ(Generator::peek_next_id(), before)
+		<< "a refused record moved the counter";
 }
 
 // Nothing may ever be issued the id that means "no id". This is why the counter
@@ -149,5 +159,6 @@ TEST_F(UniqueIdTest, SettingTheCounterPutsItExactlyThere)
 	Generator::set_next_id(somewhereElse);
 
 	EXPECT_EQ(Generator::peek_next_id(), somewhereElse);
-	EXPECT_EQ(Generator::generate(), somewhereElse) << "the counter reported one value and issued another";
+	EXPECT_EQ(Generator::generate(), somewhereElse)
+		<< "the counter reported one value and issued another";
 }

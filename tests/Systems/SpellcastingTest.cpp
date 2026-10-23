@@ -60,15 +60,9 @@ using Keys = std::vector<std::string>;
 class SpellcastingTest : public ::testing::Test
 {
 protected:
-	void SetUp() override
-	{
-		ctx = mock.to_game_context();
-	}
+	void SetUp() override { ctx = mock.to_game_context(); }
 
-	void TearDown() override
-	{
-		std::filesystem::remove(edited);
-	}
+	void TearDown() override { std::filesystem::remove(edited); }
 
 	// The real monsters.json with one record changed by edit, written beside the temp files.
 	template <typename Edit>
@@ -83,20 +77,30 @@ protected:
 
 	std::unique_ptr<Creature> build(const std::string& key)
 	{
-		return MonsterCreator::create_from_params(Vector2D{ 0, 0 }, mock.monsterRegistry.get_params(key), ctx);
+		return MonsterCreator::create_from_params(
+			Vector2D{ 0, 0 },
+			mock.monsterRegistry.get_params(key),
+			ctx);
 	}
 
 	MockGameContext mock{};
 	GameContext ctx{};
-	std::filesystem::path edited{ std::filesystem::temp_directory_path() / "monsters_spellcasting.json" };
+	std::filesystem::path edited{ std::filesystem::temp_directory_path() /
+		"monsters_spellcasting.json" };
 };
 
-TEST_F(SpellcastingTest, FrequenciesAndCasterClassesAreWrittenByNameAndUnknownNamesAreRefused)
+TEST_F(
+	SpellcastingTest,
+	FrequenciesAndCasterClassesAreWrittenByNameAndUnknownNamesAreRefused)
 {
 	EXPECT_EQ(encode_power_frequency(PowerFrequency::AT_WILL), "at_will");
-	EXPECT_EQ(encode_power_frequency(PowerFrequency::ONCE_PER_DAY), "once_per_day");
+	EXPECT_EQ(
+		encode_power_frequency(PowerFrequency::ONCE_PER_DAY),
+		"once_per_day");
 	EXPECT_EQ(parse_power_frequency("at_will"), PowerFrequency::AT_WILL);
-	EXPECT_EQ(parse_power_frequency("once_per_day"), PowerFrequency::ONCE_PER_DAY);
+	EXPECT_EQ(
+		parse_power_frequency("once_per_day"),
+		PowerFrequency::ONCE_PER_DAY);
 	EXPECT_THROW((void)parse_power_frequency("weekly"), std::runtime_error);
 
 	EXPECT_EQ(encode_caster_class(CasterClass::WIZARD), "wizard");
@@ -135,14 +139,19 @@ TEST_F(SpellcastingTest, AnAtWillPowerIsNeverSpentAndADailyOneWaitsADay)
 	EXPECT_TRUE(is_power_ready(daily, 600 + DAY_IN_TIME_UNITS));
 }
 
-TEST_F(SpellcastingTest, ASaveKeepsTheMemorizedCopiesTheTrainingAndEachPowersClock)
+TEST_F(
+	SpellcastingTest,
+	ASaveKeepsTheMemorizedCopiesTheTrainingAndEachPowersClock)
 {
 	Spellcasting original{};
 	original.memorizedSpells = { "fireball", "fireball" };
 	original.training = SpellcasterTraining{ CasterClass::WIZARD, 18 };
-	original.innatePowers = { InnatePower{ "fireball", PowerFrequency::ONCE_PER_DAY, 5000 } };
+	original.innatePowers = {
+		InnatePower{ "fireball", PowerFrequency::ONCE_PER_DAY, 5000 }
+	};
 
-	const Spellcasting loaded = parse_spellcasting(encode_spellcasting(original));
+	const Spellcasting loaded =
+		parse_spellcasting(encode_spellcasting(original));
 
 	EXPECT_EQ(loaded.memorizedSpells, original.memorizedSpells);
 	ASSERT_TRUE(loaded.training.has_value());
@@ -150,10 +159,13 @@ TEST_F(SpellcastingTest, ASaveKeepsTheMemorizedCopiesTheTrainingAndEachPowersClo
 	EXPECT_EQ(loaded.training->casterLevel, 18);
 	ASSERT_EQ(loaded.innatePowers.size(), 1u);
 	EXPECT_EQ(loaded.innatePowers.front().spell, "fireball");
-	EXPECT_EQ(loaded.innatePowers.front().frequency, PowerFrequency::ONCE_PER_DAY);
+	EXPECT_EQ(
+		loaded.innatePowers.front().frequency,
+		PowerFrequency::ONCE_PER_DAY);
 	EXPECT_EQ(loaded.innatePowers.front().readyAgainAt, 5000);
 
-	const Spellcasting none = parse_spellcasting(encode_spellcasting(Spellcasting{}));
+	const Spellcasting none =
+		parse_spellcasting(encode_spellcasting(Spellcasting{}));
 	EXPECT_TRUE(none.memorizedSpells.empty());
 	EXPECT_FALSE(none.training.has_value());
 	EXPECT_TRUE(none.innatePowers.empty());
@@ -166,14 +178,21 @@ TEST_F(SpellcastingTest, ASaveMissingAnyPartIsRefused)
 	{
 		nlohmann::json damaged = whole;
 		damaged.erase(field);
-		EXPECT_ANY_THROW((void)parse_spellcasting(damaged)) << "a save without " << field << " loaded";
+		EXPECT_ANY_THROW((void)parse_spellcasting(damaged))
+			<< "a save without " << field << " loaded";
 	}
 }
 
 // Table 21 and today's fill: one slot, the first 1st-level wizard spell.
 TEST_F(SpellcastingTest, AFirstLevelWizardMemorizesMagicMissile)
 {
-	EXPECT_EQ(SpellSystem::spells_to_memorize(CasterClass::WIZARD, 1, 10, mock.spellRegistry, mock.data_manager),
+	EXPECT_EQ(
+		SpellSystem::spells_to_memorize(
+			CasterClass::WIZARD,
+			1,
+			10,
+			mock.spellRegistry,
+			mock.data_manager),
 		(Keys{ "magic_missile" }));
 }
 
@@ -181,7 +200,13 @@ TEST_F(SpellcastingTest, AFirstLevelWizardMemorizesMagicMissile)
 // the eight is memorized once, lowest level first.
 TEST_F(SpellcastingTest, AnEighteenthLevelWizardMemorizesEveryWizardSpellOnce)
 {
-	EXPECT_EQ(SpellSystem::spells_to_memorize(CasterClass::WIZARD, 18, 10, mock.spellRegistry, mock.data_manager),
+	EXPECT_EQ(
+		SpellSystem::spells_to_memorize(
+			CasterClass::WIZARD,
+			18,
+			10,
+			mock.spellRegistry,
+			mock.data_manager),
 		(Keys{
 			"magic_missile",
 			"shield",
@@ -198,7 +223,13 @@ TEST_F(SpellcastingTest, AnEighteenthLevelWizardMemorizesEveryWizardSpellOnce)
 // Wisdom 18's two bonus 1st-level slots reach the fourth.
 TEST_F(SpellcastingTest, APriestsWisdomAddsTheBonusSlotsToTheFill)
 {
-	EXPECT_EQ(SpellSystem::spells_to_memorize(CasterClass::CLERIC, 5, 10, mock.spellRegistry, mock.data_manager),
+	EXPECT_EQ(
+		SpellSystem::spells_to_memorize(
+			CasterClass::CLERIC,
+			5,
+			10,
+			mock.spellRegistry,
+			mock.data_manager),
 		(Keys{
 			"cure_light_wounds",
 			"bless",
@@ -206,7 +237,13 @@ TEST_F(SpellcastingTest, APriestsWisdomAddsTheBonusSlotsToTheFill)
 			"hold_person",
 			"silence",
 		}));
-	EXPECT_EQ(SpellSystem::spells_to_memorize(CasterClass::CLERIC, 5, 18, mock.spellRegistry, mock.data_manager),
+	EXPECT_EQ(
+		SpellSystem::spells_to_memorize(
+			CasterClass::CLERIC,
+			5,
+			18,
+			mock.spellRegistry,
+			mock.data_manager),
 		(Keys{
 			"cure_light_wounds",
 			"bless",
@@ -215,11 +252,20 @@ TEST_F(SpellcastingTest, APriestsWisdomAddsTheBonusSlotsToTheFill)
 			"hold_person",
 			"silence",
 		}));
-	EXPECT_TRUE(SpellSystem::spells_to_memorize(CasterClass::NONE, 9, 18, mock.spellRegistry, mock.data_manager).empty());
+	EXPECT_TRUE(
+		SpellSystem::spells_to_memorize(
+			CasterClass::NONE,
+			9,
+			18,
+			mock.spellRegistry,
+			mock.data_manager)
+			.empty());
 }
 
 // The player's class and level are its own; a monster's training overrides its Hit Dice.
-TEST_F(SpellcastingTest, ACasterCastsAtItsTrainingWhenItHasOneAndItsLevelOtherwise)
+TEST_F(
+	SpellcastingTest,
+	ACasterCastsAtItsTrainingWhenItHasOneAndItsLevelOtherwise)
 {
 	Player wizard{ Vector2D{ 1, 1 } };
 	wizard.set_creature_class(CreatureClass::WIZARD);
@@ -254,10 +300,12 @@ TEST_F(SpellcastingTest, AClericTrainedMonsterFizzlesByTableFive)
 		ActorData{ TileRef{}, "shaman", ColorPairId::WHITE_BLACK },
 	};
 	shaman.set_wisdom(9);
-	shaman.spellcasting.training = SpellcasterTraining{ CasterClass::CLERIC, 5 };
+	shaman.spellcasting.training =
+		SpellcasterTraining{ CasterClass::CLERIC, 5 };
 	EXPECT_EQ(SpellSystem::spell_failure_chance(shaman, mock.data_manager), 20);
 
-	shaman.spellcasting.training = SpellcasterTraining{ CasterClass::WIZARD, 5 };
+	shaman.spellcasting.training =
+		SpellcasterTraining{ CasterClass::WIZARD, 5 };
 	EXPECT_EQ(SpellSystem::spell_failure_chance(shaman, mock.data_manager), 0);
 }
 
@@ -282,9 +330,13 @@ TEST_F(SpellcastingTest, AMonsterMemorizesAtItsTrainingLevelAndNotItsHitDice)
 		ActorData{ TileRef{}, "conjurer", ColorPairId::WHITE_BLACK },
 	};
 	conjurer.set_creature_level(5);
-	conjurer.spellcasting.training = SpellcasterTraining{ CasterClass::WIZARD, 1 };
+	conjurer.spellcasting.training =
+		SpellcasterTraining{ CasterClass::WIZARD, 1 };
 
-	SpellSystem::memorize_spells(conjurer, mock.spellRegistry, mock.data_manager);
+	SpellSystem::memorize_spells(
+		conjurer,
+		mock.spellRegistry,
+		mock.data_manager);
 
 	EXPECT_EQ(conjurer.spellcasting.memorizedSpells, (Keys{ "magic_missile" }));
 }
@@ -302,7 +354,8 @@ TEST_F(SpellcastingTest, TheRecordsStateTheLichTheMageAndThePitFiend)
 	EXPECT_EQ(mage.spellcasterTraining->casterClass, CasterClass::WIZARD);
 	EXPECT_EQ(mage.spellcasterTraining->casterLevel, 1);
 
-	const MonsterParams& pitFiend = mock.monsterRegistry.get_params("pit_fiend");
+	const MonsterParams& pitFiend =
+		mock.monsterRegistry.get_params("pit_fiend");
 	EXPECT_FALSE(pitFiend.spellcasterTraining.has_value());
 	ASSERT_EQ(pitFiend.innatePowers.size(), 1u);
 	EXPECT_EQ(pitFiend.innatePowers.front().spell, "fireball");
@@ -318,7 +371,8 @@ TEST_F(SpellcastingTest, AMonsterIsBuiltWithItsCastingAndMemorizesAtSpawn)
 {
 	const std::unique_ptr<Creature> lich = build("lich");
 	EXPECT_EQ(SpellSystem::caster_level(*lich), 18);
-	EXPECT_EQ(lich->spellcasting.memorizedSpells,
+	EXPECT_EQ(
+		lich->spellcasting.memorizedSpells,
 		(Keys{
 			"magic_missile",
 			"shield",
@@ -345,17 +399,22 @@ TEST_F(SpellcastingTest, ARecordMissingItsCastingFieldsIsRefused)
 	MonsterRegistry monsters{};
 	for (const char* field : { "spellcasting", "innate_powers" })
 	{
-		write_edited_monsters([field](nlohmann::json& root)
-			{ root.at("goblin").erase(field); });
-		EXPECT_ANY_THROW(monsters.load(edited.string())) << "a goblin with no " << field << " loaded";
+		write_edited_monsters(
+			[field](nlohmann::json& root) { root.at("goblin").erase(field); });
+		EXPECT_ANY_THROW(monsters.load(edited.string()))
+			<< "a goblin with no " << field << " loaded";
 	}
 }
 
 TEST_F(SpellcastingTest, ARecordNamingAnUnknownFrequencyOrCasterClassIsRefused)
 {
 	MonsterRegistry monsters{};
-	write_edited_monsters([](nlohmann::json& root)
-		{ root.at("pit_fiend").at("innate_powers").at(0)["frequency"] = "weekly"; });
+	write_edited_monsters(
+		[](nlohmann::json& root)
+		{
+			root.at("pit_fiend").at("innate_powers").at(0)["frequency"] =
+				"weekly";
+		});
 	EXPECT_THROW(monsters.load(edited.string()), std::runtime_error);
 
 	write_edited_monsters([](nlohmann::json& root)
@@ -364,15 +423,24 @@ TEST_F(SpellcastingTest, ARecordNamingAnUnknownFrequencyOrCasterClassIsRefused)
 }
 
 // Every power in the shipped data names a spell the game has; a renamed one is refused.
-TEST_F(SpellcastingTest, APowerNamingAnUnknownSpellIsRefusedOnceBothRegistriesLoad)
+TEST_F(
+	SpellcastingTest,
+	APowerNamingAnUnknownSpellIsRefusedOnceBothRegistriesLoad)
 {
-	EXPECT_NO_THROW(mock.monsterRegistry.refuse_unknown_spells(mock.spellRegistry));
+	EXPECT_NO_THROW(
+		mock.monsterRegistry.refuse_unknown_spells(mock.spellRegistry));
 
 	MonsterRegistry monsters{};
-	write_edited_monsters([](nlohmann::json& root)
-		{ root.at("pit_fiend").at("innate_powers").at(0)["spell"] = "hellfire"; });
+	write_edited_monsters(
+		[](nlohmann::json& root)
+		{
+			root.at("pit_fiend").at("innate_powers").at(0)["spell"] =
+				"hellfire";
+		});
 	monsters.load(edited.string());
-	EXPECT_THROW(monsters.refuse_unknown_spells(mock.spellRegistry), std::runtime_error);
+	EXPECT_THROW(
+		monsters.refuse_unknown_spells(mock.spellRegistry),
+		std::runtime_error);
 }
 
 // The creature's save carries its casting, so a spent copy stays spent across a load.
@@ -424,7 +492,9 @@ namespace
 	ctx.menuManager->handle_menus(*ctx.menus, ctx);
 	hidden.renderer.end_frame();
 
-	exit_unless(wizard.spellcasting.memorizedSpells == Keys{ "shield" }, "casting one shield did not leave exactly the other");
+	exit_unless(
+		wizard.spellcasting.memorizedSpells == Keys{ "shield" },
+		"casting one shield did not leave exactly the other");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
@@ -432,13 +502,15 @@ namespace
 
 TEST(SpellcastingMenuTest, CastingFromTheMenuSpendsOneCopy)
 {
-	const int childExitCode = exit_code_in_child(&casting_from_the_menu_spends_one_copy);
+	const int childExitCode =
+		exit_code_in_child(&casting_from_the_menu_spends_one_copy);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 
 // end of file: SpellcastingTest.cpp

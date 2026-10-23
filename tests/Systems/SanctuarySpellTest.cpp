@@ -68,12 +68,20 @@ protected:
 
 		goblin = &add_creature("goblin", 4);
 		orc = &add_creature("orc", 6);
-		buffs.add_buff(*goblin, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
+		buffs.add_buff(
+			*goblin,
+			BuffType::SANCTUARY,
+			0,
+			10,
+			BuffApplication::ADD,
+			ctx.gameState->get_time());
 	}
 
 	Creature& add_creature(const char* name, int column)
 	{
-		auto creature = std::make_unique<Creature>(Vector2D{ column, 5 }, ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK });
+		auto creature = std::make_unique<Creature>(
+			Vector2D{ column, 5 },
+			ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK });
 		creature->healthPool = std::make_unique<HealthPool>(STARTING_HP);
 		creature->experienceReward = std::make_unique<ExperienceReward>(0);
 		creature->ai = std::make_unique<AiMonster>();
@@ -94,7 +102,12 @@ protected:
 	{
 		const auto ignore_completion = [](GameContext& completedCtx) {
 		};
-		SpellSystem::cast_spell_by_key(key, *caster, SpellSource::MEMORIZED, ignore_completion, ctx);
+		SpellSystem::cast_spell_by_key(
+			key,
+			*caster,
+			SpellSource::MEMORIZED,
+			ignore_completion,
+			ctx);
 	}
 
 	static int hp_lost(const Creature& creature)
@@ -108,7 +121,8 @@ protected:
 	GameContext ctx{};
 	BuffSystem buffs{};
 	Map map{ 20, 20 };
-	std::unique_ptr<Player> caster{ std::make_unique<Player>(Vector2D{ 2, 5 }) };
+	std::unique_ptr<Player> caster{ std::make_unique<Player>(
+		Vector2D{ 2, 5 }) };
 	std::vector<std::unique_ptr<Creature>> creatures{};
 	Creature* goblin{ nullptr };
 	Creature* orc{ nullptr };
@@ -118,7 +132,10 @@ protected:
 // makes it, and a 1st-level caster fires one missile.
 TEST_F(SanctuarySpellTest, TheScriptedRollsMeanWhatTheTestsSay)
 {
-	const int needed = SavingThrows::target(caster->get_creature_class(), caster->get_creature_level(), SavingThrow::SPELL);
+	const int needed = SavingThrows::target(
+		caster->get_creature_class(),
+		caster->get_creature_level(),
+		SavingThrow::SPELL);
 	EXPECT_GT(needed, 1);
 	EXPECT_LE(needed, 20);
 }
@@ -131,8 +148,10 @@ TEST_F(SanctuarySpellTest, AMissilePassesOverAWardedCreature)
 
 	cast("magic_missile");
 
-	EXPECT_EQ(hp_lost(*goblin), 0) << "the missile struck a creature the caster ignores";
-	EXPECT_EQ(hp_lost(*orc), 4) << "the missile was not sent on to the next nearest";
+	EXPECT_EQ(hp_lost(*goblin), 0)
+		<< "the missile struck a creature the caster ignores";
+	EXPECT_EQ(hp_lost(*orc), 4)
+		<< "the missile was not sent on to the next nearest";
 }
 
 // A caster that saves strikes the warded goblin as usual.
@@ -153,8 +172,10 @@ TEST_F(SanctuarySpellTest, HoldPersonSelectsPastAWardedCreature)
 
 	cast("hold_person");
 
-	EXPECT_FALSE(goblin->has_state(ActorState::IS_HELD)) << "held a creature the caster ignores";
-	EXPECT_TRUE(orc->has_state(ActorState::IS_HELD)) << "the hold was not sent on to another";
+	EXPECT_FALSE(goblin->has_state(ActorState::IS_HELD))
+		<< "held a creature the caster ignores";
+	EXPECT_TRUE(orc->has_state(ActorState::IS_HELD))
+		<< "the hold was not sent on to another";
 }
 
 // The lightning scroll's target is the nearest creature the reader may strike.
@@ -166,7 +187,8 @@ TEST_F(SanctuarySpellTest, TheNearestTargetIsOneTheReaderMayStrike)
 	const TargetResult result = targeting.acquire_nearest(ctx, *caster, 10);
 
 	ASSERT_TRUE(result.success);
-	EXPECT_EQ(result.creatures.front(), orc) << "chose a creature the reader ignores";
+	EXPECT_EQ(result.creatures.front(), orc)
+		<< "chose a creature the reader ignores";
 }
 
 // A reader that saves may take the warded goblin, the nearest.
@@ -202,8 +224,11 @@ TEST_F(SanctuarySpellTest, AConfusionScrollAimedAtAWardedCreatureIsKept)
 	const Ai* before = goblin->ai.get();
 	script({ 1 });
 
-	EXPECT_EQ(read_confusion_at(*caster, goblin->position, 5, ctx), ScrollReading::KEPT);
-	EXPECT_EQ(goblin->ai.get(), before) << "a creature the reader ignores was confused";
+	EXPECT_EQ(
+		read_confusion_at(*caster, goblin->position, 5, ctx),
+		ScrollReading::KEPT);
+	EXPECT_EQ(goblin->ai.get(), before)
+		<< "a creature the reader ignores was confused";
 }
 
 // Sanctuary itself lasts "2 rds. + 1 rd./level" (PHB page 436): three rounds at 1st
@@ -212,12 +237,22 @@ TEST_F(SanctuarySpellTest, SanctuaryLastsTwoRoundsPlusOnePerLevel)
 {
 	cast("sanctuary");
 	// 1st level: 2 + 1.
-	expect_lasts_exactly(buffs, *caster, BuffType::SANCTUARY, ctx.gameState->get_time(), 3);
+	expect_lasts_exactly(
+		buffs,
+		*caster,
+		BuffType::SANCTUARY,
+		ctx.gameState->get_time(),
+		3);
 
 	caster->set_creature_level(5);
 	cast("sanctuary");
 	// 5th level: 2 + 5.
-	expect_lasts_exactly(buffs, *caster, BuffType::SANCTUARY, ctx.gameState->get_time(), 7);
+	expect_lasts_exactly(
+		buffs,
+		*caster,
+		BuffType::SANCTUARY,
+		ctx.gameState->get_time(),
+		7);
 }
 
 // Aimed at the unwarded orc, it is read, and the orc is confused.
@@ -225,6 +260,8 @@ TEST_F(SanctuarySpellTest, AConfusionScrollAimedAtAnUnwardedCreatureIsRead)
 {
 	const Ai* before = orc->ai.get();
 
-	EXPECT_EQ(read_confusion_at(*caster, orc->position, 5, ctx), ScrollReading::SPENT);
+	EXPECT_EQ(
+		read_confusion_at(*caster, orc->position, 5, ctx),
+		ScrollReading::SPENT);
 	EXPECT_NE(orc->ai.get(), before) << "the orc was not confused";
 }

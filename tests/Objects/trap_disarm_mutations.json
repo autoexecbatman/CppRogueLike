@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/Trap.cpp",
-      "original": "\tconst std::optional<int> skill = creature.thief_skill(ThiefSkill::FIND_REMOVE_TRAPS);",
-      "mutated": "\tconst std::optional<int> skill = creature.thief_skill(ThiefSkill::OPEN_LOCKS);",
+      "original": "\tconst std::optional<int> skill =\n\t\tcreature.thief_skill(ThiefSkill::FIND_REMOVE_TRAPS);",
+      "mutated": "\tconst std::optional<int> skill =\n\t\tcreature.thief_skill(ThiefSkill::OPEN_LOCKS);",
       "catches": "a trap rolled against the wrong one of the eight thief skills"
     },
     {
@@ -87,8 +87,8 @@
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\tconst bool spent = (state == TrapState::TRIGGERED || state == TrapState::DISARMED);",
-      "mutated": "\tconst bool spent = (state == TrapState::TRIGGERED);",
+      "original": "\tconst bool spent =\n\t\t(state == TrapState::TRIGGERED || state == TrapState::DISARMED);",
+      "mutated": "\tconst bool spent =\n\t\t(state == TrapState::TRIGGERED);",
       "catches": "a defused trap drawn as though it were still armed"
     },
     {

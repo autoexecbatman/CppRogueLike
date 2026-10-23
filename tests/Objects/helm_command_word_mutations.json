@@ -15,38 +15,38 @@
   "mutations": [
     {
       "file": "src/Pickable.cpp",
-      "original": "\treturn helm.effect != MagicalEffect::BRILLIANCE || helm.command == HelmCommand::EMPOWERED;",
+      "original": "\treturn helm.effect != MagicalEffect::BRILLIANCE ||\n\t\thelm.command == HelmCommand::EMPOWERED;",
       "mutated": "\treturn true;",
       "catches": "a helm of brilliance that protects before its word is spoken"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\t\t{ return is_helm_working(magicalHelm) ? MagicalEffectUtils::get_ac_bonus(magicalHelm.effect, magicalHelm.bonus) : 0; },",
-      "mutated": "\t\t\t{ return MagicalEffectUtils::get_ac_bonus(magicalHelm.effect, magicalHelm.bonus); },",
+      "original": "\t\t\t{\n\t\t\t\treturn is_helm_working(magicalHelm) ?\n\t\t\t\t\tMagicalEffectUtils::get_ac_bonus(\n\t\t\t\t\t\tmagicalHelm.effect,\n\t\t\t\t\t\tmagicalHelm.bonus) :\n\t\t\t\t\t0;\n\t\t\t},",
+      "mutated": "\t\t\t{\n\t\t\t\treturn MagicalEffectUtils::get_ac_bonus(magicalHelm.effect, magicalHelm.bonus);\n\t\t\t},",
       "catches": "a dormant helm's armour still counting"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\t\t{ return is_helm_working(helm) ? percent_if(helm.effect, helm.bonus) : 0; },",
-      "mutated": "\t\t\t{ return percent_if(helm.effect, helm.bonus); },",
+      "original": "\t\t\t{\n\t\t\t\treturn is_helm_working(helm) ?\n\t\t\t\t\tpercent_if(helm.effect, helm.bonus) :\n\t\t\t\t\t0;\n\t\t\t},",
+      "mutated": "\t\t\t{\n\t\t\t\treturn percent_if(helm.effect, helm.bonus);\n\t\t\t},",
       "catches": "a dormant helm's fire protection still counting"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\treturn helm && helm->effect == MagicalEffect::BRILLIANCE && item.is_type_identified() && helm->command == HelmCommand::DORMANT;",
-      "mutated": "\treturn helm && helm->effect == MagicalEffect::BRILLIANCE && helm->command == HelmCommand::DORMANT;",
+      "original": "\treturn helm && helm->effect == MagicalEffect::BRILLIANCE &&\n\t\titem.is_type_identified() && helm->command == HelmCommand::DORMANT;",
+      "mutated": "\treturn helm && helm->effect == MagicalEffect::BRILLIANCE &&helm->command == HelmCommand::DORMANT;",
       "catches": "an unidentified helm offering a word nobody has learned"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\treturn helm && helm->effect == MagicalEffect::BRILLIANCE && item.is_type_identified() && helm->command == HelmCommand::DORMANT;",
-      "mutated": "\treturn helm && helm->effect == MagicalEffect::BRILLIANCE && item.is_type_identified();",
+      "original": "\treturn helm && helm->effect == MagicalEffect::BRILLIANCE &&\n\t\titem.is_type_identified() && helm->command == HelmCommand::DORMANT;",
+      "mutated": "\treturn helm && helm->effect == MagicalEffect::BRILLIANCE &&\n\t\titem.is_type_identified();",
       "catches": "a helm already spoken to offering its word again"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\treturn helm && helm->effect == MagicalEffect::BRILLIANCE && item.is_type_identified() && helm->command == HelmCommand::DORMANT;",
-      "mutated": "\treturn helm && item.is_type_identified() && helm->command == HelmCommand::DORMANT;",
+      "original": "\treturn helm && helm->effect == MagicalEffect::BRILLIANCE &&\n\t\titem.is_type_identified() && helm->command == HelmCommand::DORMANT;",
+      "mutated": "\treturn helm &&item.is_type_identified() && helm->command == HelmCommand::DORMANT;",
       "catches": "a helm of teleportation offering a command word it does not have"
     },
     {
@@ -81,8 +81,8 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tmagicalHelm.command = parse_helm_command(source.at(\"command\").get<std::string>());",
-      "mutated": "\t\tmagicalHelm.command = HelmCommand::DORMANT;",
+      "original": "\t\tmagicalHelm.command =\n\t\t\tparse_helm_command(source.at(\"command\").get<std::string>());",
+      "mutated": "\t\tmagicalHelm.command =HelmCommand::DORMANT;",
       "catches": "a load forgetting the spoken word, and taking a record without one"
     },
     {

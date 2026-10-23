@@ -21,8 +21,8 @@
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "\t\t.effectRounds = ctx.dice->d4() + 1,\n\t});",
-      "mutated": "\t\t.effectRounds = ctx.dice->d4(),\n\t});",
+      "original": "\t\t\t.effectRounds = ctx.dice->d4() + 1,\n\t\t});",
+      "mutated": "\t\t\t.effectRounds = ctx.dice->d4(),\n\t\t});",
       "catches": "1d4 rounds where the book prints 1d4+1"
     },
     {
@@ -39,7 +39,7 @@
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "\tif (SavingThrows::is_made(target, SavingThrow::PARALYZATION_POISON_DEATH, HAIRY_SPIDER_SAVE_BONUS + constitutionAdjustment, ctx))",
+      "original": "\tif (SavingThrows::is_made(\n\t\t\ttarget,\n\t\t\tSavingThrow::PARALYZATION_POISON_DEATH,\n\t\t\tHAIRY_SPIDER_SAVE_BONUS + constitutionAdjustment,\n\t\t\tctx))",
       "mutated": "\tif (false)",
       "catches": "the saving throw skipped, so every bite that lands poisons"
     },
@@ -63,25 +63,25 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tctx.buffSystem->add_buff(*this, effect, effectValue, effectRounds, BuffApplication::ADD, roundEndTime);\n",
+      "original": "\t\tctx.buffSystem->add_buff(\n\t\t\t*this,\n\t\t\teffect,\n\t\t\teffectValue,\n\t\t\teffectRounds,\n\t\t\tBuffApplication::ADD,\n\t\t\troundEndTime);\n",
       "mutated": "",
       "catches": "a dose that carries a condition landing as nothing at all"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tctx.messageSystem->message(ColorPairId::WHITE_RED, \" is weakened by the venom!\", MessageCompletion::FINISHED);\n",
+      "original": "\t\tctx.messageSystem->message(\n\t\t\tColorPairId::WHITE_RED,\n\t\t\t\" is weakened by the venom!\",\n\t\t\tMessageCompletion::FINISHED);\n",
       "mutated": "",
       "catches": "the onset arriving in silence, which is the whole of what a venom taking no hit points looks like"
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "\tctx.messageSystem->message(ColorPairId::WHITE_RED, \" injects a weak poison that will take hold!\", MessageCompletion::FINISHED);\n",
+      "original": "\tctx.messageSystem->message(\n\t\tColorPairId::WHITE_RED,\n\t\t\" injects a weak poison that will take hold!\",\n\t\tMessageCompletion::FINISHED);\n",
       "mutated": "",
       "catches": "a bite that poisons without a word"
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, \" injects a weak poison, and it does not take hold.\", MessageCompletion::FINISHED);\n",
+      "original": "\t\tctx.messageSystem->message(\n\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\" injects a weak poison, and it does not take hold.\",\n\t\t\tMessageCompletion::FINISHED);\n",
       "mutated": "",
       "catches": "a save that is made leaving the bite unexplained"
     }

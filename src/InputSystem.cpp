@@ -12,8 +12,7 @@ constexpr double REPEAT_INTERVAL = 0.10; // seconds between repeat fires
 
 // The keys poll() reads, in priority order when two arrive in one frame. A case in its
 // switch whose key is missing here never fires.
-constexpr std::array POLLED_KEYS{
-	// Control
+constexpr std::array POLLED_KEYS{ // Control
 	KEY_ENTER,
 	KEY_ESCAPE,
 	KEY_TAB,
@@ -107,7 +106,9 @@ consteval bool polls_every_letter()
 }
 } // namespace InputPolling
 
-static_assert(InputPolling::polls_every_letter(), "POLLED_KEYS is missing a letter, which the web build can then never type");
+static_assert(
+	InputPolling::polls_every_letter(),
+	"POLLED_KEYS is missing a letter, which the web build can then never type");
 
 #ifdef TESTING_MODE
 void InputSystem::queue_key(GameKey key, int character)
@@ -158,7 +159,8 @@ void InputSystem::poll()
 		if (IsKeyDown(heldRaylibKey))
 		{
 			double now = GetTime();
-			if (now - holdStart >= REPEAT_DELAY && now - lastRepeat >= REPEAT_INTERVAL)
+			if (now - holdStart >= REPEAT_DELAY &&
+				now - lastRepeat >= REPEAT_INTERVAL)
 			{
 				currentKey = heldGameKey;
 				charInput = heldCharInput;
@@ -178,7 +180,8 @@ void InputSystem::poll()
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
 	bool alt = IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT);
 
-	auto register_key = [&](int raylibKey, GameKey gameKey, int character, bool repeatable)
+	auto register_key =
+		[&](int raylibKey, GameKey gameKey, int character, bool repeatable)
 	{
 		currentKey = gameKey;
 		charInput = character;
@@ -712,7 +715,10 @@ Vector2D InputSystem::get_mouse_tile(int tileSize) const
 	};
 }
 
-Vector2D InputSystem::get_mouse_world_tile(int camX, int camY, int tileSize) const
+Vector2D InputSystem::get_mouse_world_tile(
+	int camX,
+	int camY,
+	int tileSize) const
 {
 	if (tileSize <= 0)
 	{

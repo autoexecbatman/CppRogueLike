@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/Game.cpp",
-      "original": "\tif (outcomeBefore == RunOutcome::UNDECIDED && gameState.get_run_outcome() != RunOutcome::UNDECIDED)\n",
+      "original": "\tif (outcomeBefore == RunOutcome::UNDECIDED &&\n\t\tgameState.get_run_outcome() != RunOutcome::UNDECIDED)\n",
       "mutated": "\tif (gameState.get_run_outcome() != RunOutcome::UNDECIDED)\n",
       "catches": "the end screen reopened on every tick the run stays ended, replacing the death screen with itself"
     },
     {
       "file": "src/Game.cpp",
-      "original": "\tif (outcomeBefore == RunOutcome::UNDECIDED && gameState.get_run_outcome() != RunOutcome::UNDECIDED)\n",
-      "mutated": "\tif (outcomeBefore == RunOutcome::UNDECIDED && gameState.get_run_outcome() == RunOutcome::DEFEAT)\n",
+      "original": "\tif (outcomeBefore == RunOutcome::UNDECIDED &&\n\t\tgameState.get_run_outcome() != RunOutcome::UNDECIDED)\n",
+      "mutated": "\tif (outcomeBefore == RunOutcome::UNDECIDED &&\n\t\tgameState.get_run_outcome()== RunOutcome::DEFEAT)\n",
       "catches": "a win under a menu leaving the menus open, as a death once did"
     },
     {

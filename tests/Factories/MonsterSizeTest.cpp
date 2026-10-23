@@ -93,9 +93,11 @@ TEST(MonsterSizeTest, EveryMonsterCarriesTheSizeItsBookEntryPrints)
 
 	for (const BookSize& book : BOOK_SIZES)
 	{
-		EXPECT_EQ(monsters.get_params(std::string{ book.key }).size, book.size) << book.key;
+		EXPECT_EQ(monsters.get_params(std::string{ book.key }).size, book.size)
+			<< book.key;
 	}
-	EXPECT_EQ(std::size(BOOK_SIZES), monsters.get_all_keys().size()) << "a monster in the data is missing from the book's table";
+	EXPECT_EQ(std::size(BOOK_SIZES), monsters.get_all_keys().size())
+		<< "a monster in the data is missing from the book's table";
 }
 
 // end of file: MonsterSizeTest.cpp

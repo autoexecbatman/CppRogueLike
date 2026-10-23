@@ -23,15 +23,19 @@
 
 TEST(HeadlessRendererTest, AHiddenWindowComesUpAndTheFontMeasuresText)
 {
-	const int childExitCode = exit_code_in_child(&open_and_close_hidden_renderer);
+	const int childExitCode =
+		exit_code_in_child(&open_and_close_hidden_renderer);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	ASSERT_NE(childExitCode, HIDDEN_RENDERER_WINDOW_NOT_READY) << "a hidden raylib window could not be opened, with an OpenGL driver present";
-	ASSERT_NE(childExitCode, HIDDEN_RENDERER_FONT_FELL_BACK) << "the game font did not load in a hidden window; the measure is raylib's default font";
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the probe ended abnormally; its log is in the child's output above";
+	ASSERT_NE(childExitCode, HIDDEN_RENDERER_WINDOW_NOT_READY)
+		<< "a hidden raylib window could not be opened, with an OpenGL driver present";
+	ASSERT_NE(childExitCode, HIDDEN_RENDERER_FONT_FELL_BACK)
+		<< "the game font did not load in a hidden window; the measure is raylib's default font";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the probe ended abnormally; its log is in the child's output above";
 }
 
 // end of file: HeadlessRendererTest.cpp

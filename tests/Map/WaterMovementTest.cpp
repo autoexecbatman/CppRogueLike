@@ -37,7 +37,8 @@ protected:
 	MockGameContext mock{};
 	GameContext ctx{};
 	Map map{ 20, 20 };
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 1, 1 }) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ 1, 1 }) };
 	std::vector<std::unique_ptr<Creature>> creatures{};
 	Creature swimmer{
 		Vector2D{ 2, 2 },

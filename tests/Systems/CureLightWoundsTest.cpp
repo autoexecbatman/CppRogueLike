@@ -77,7 +77,12 @@ protected:
 	{
 		const auto ignore_completion = [](GameContext& completedCtx) {
 		};
-		SpellSystem::cast_spell_by_key("cure_light_wounds", *caster, SpellSource::MEMORIZED, ignore_completion, ctx);
+		SpellSystem::cast_spell_by_key(
+			"cure_light_wounds",
+			*caster,
+			SpellSource::MEMORIZED,
+			ignore_completion,
+			ctx);
 	}
 
 	// Every part of every finalized message, joined. What the spell healed is
@@ -85,9 +90,14 @@ protected:
 	std::string all_message_text() const
 	{
 		std::string joined;
-		for (size_t index = 0; index < ctx.messageSystem->get_stored_message_count(); ++index)
+		for (
+			size_t index = 0;
+			index < ctx.messageSystem->get_stored_message_count();
+			++index)
 		{
-			for (const auto& part : ctx.messageSystem->get_attack_message_at(index))
+			for (
+				const auto& part :
+				ctx.messageSystem->get_attack_message_at(index))
 			{
 				joined += part.text;
 			}
@@ -97,7 +107,8 @@ protected:
 
 	MockGameContext mock{};
 	GameContext ctx{};
-	std::unique_ptr<Player> caster{ std::make_unique<Player>(Vector2D{ 2, 5 }) };
+	std::unique_ptr<Player> caster{ std::make_unique<Player>(
+		Vector2D{ 2, 5 }) };
 };
 
 // "causes 1d8 points of... damage to the creature's body to be healed" - with
@@ -134,7 +145,8 @@ TEST_F(CureLightWoundsTest, TheMessageReportsWhatLandedRatherThanWhatWasRolled)
 
 	cast();
 
-	EXPECT_NE(all_message_text().find("+2 HP"), std::string::npos) << "the message claims more than the body took";
+	EXPECT_NE(all_message_text().find("+2 HP"), std::string::npos)
+		<< "the message claims more than the body took";
 	EXPECT_EQ(all_message_text().find("+8 HP"), std::string::npos);
 }
 

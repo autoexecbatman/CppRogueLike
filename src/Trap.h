@@ -94,7 +94,9 @@ public:
 	// springs, on the player and a monster alike, with no roll to notice it: only a
 	// search finds a trap. A disarmed one is walked over. Springing deals the damage
 	// dice and stops the move.
-	EntryResult on_creature_enter(Creature& creature, GameContext& ctx) override;
+	EntryResult on_creature_enter(
+		Creature& creature,
+		GameContext& ctx) override;
 
 	// One search of this trap by this character, once per experience level per trap.
 	// A pit is a stonework trap, found by a dwarf on 1-3 on 1d6 (PHB page 44); a dart or
@@ -165,7 +167,9 @@ namespace TrapSearch
 //   TrapSearch::search_around(dwarf, ctx);   // no roll        -> 1; "You find no traps."
 // A human fighter:
 //   TrapSearch::search_around(fighter, ctx); // no roll        -> nullopt
-[[nodiscard]] std::optional<int> search_around(Player& searcher, GameContext& ctx);
+[[nodiscard]] std::optional<int> search_around(
+	Player& searcher,
+	GameContext& ctx);
 
 } // namespace TrapSearch
 
@@ -183,7 +187,10 @@ namespace TrapDisarm
 //   TrapDisarm::disarm_at(thief, eastTile, ctx);   // no roll        -> nullopt; "That trap is already disarmed."
 // Facing bare floor:
 //   TrapDisarm::disarm_at(thief, westTile, ctx);   // no roll        -> nullopt; "There is no trap there."
-[[nodiscard]] std::optional<int> disarm_at(Player& thief, Vector2D target, GameContext& ctx);
+[[nodiscard]] std::optional<int> disarm_at(
+	Player& thief,
+	Vector2D target,
+	GameContext& ctx);
 
 } // namespace TrapDisarm
 

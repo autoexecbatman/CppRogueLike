@@ -199,7 +199,8 @@ public:
 	void refuse_unknown_spells(const SpellRegistry& spells) const;
 
 	// Every standard monster's parameters, by id - what the spawn table is drawn from.
-	[[nodiscard]] const std::unordered_map<MonsterId, MonsterParams>& get_standard_monsters() const;
+	[[nodiscard]] const std::unordered_map<MonsterId, MonsterParams>&
+	get_standard_monsters() const;
 
 	// A standard monster's tile; no tile for one never loaded.
 	[[nodiscard]] TileRef get_tile(MonsterId id) const;

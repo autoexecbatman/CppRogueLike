@@ -24,7 +24,9 @@ class MenuSpellCast : public BaseMenu
 
 	// One spell's row, as drawn. The constructor measures these to size the box, so
 	// the text that sets the width is the text that goes in it.
-	[[nodiscard]] std::string spell_line(size_t index, const SpellRegistry& spells) const;
+	[[nodiscard]] std::string spell_line(
+		size_t index,
+		const SpellRegistry& spells) const;
 
 public:
 	MenuSpellCast(Player& player, GameContext& ctx);

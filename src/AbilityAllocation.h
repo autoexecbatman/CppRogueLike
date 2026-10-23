@@ -107,7 +107,8 @@ struct ClassMinimum
 // Example:
 //   class_ability_minimum(CreatureClass::CLERIC)->score;   // -> 9
 //   class_ability_minimum(CreatureClass::MONSTER);         // -> nullopt
-[[nodiscard]] std::optional<ClassMinimum> class_ability_minimum(CreatureClass creatureClass);
+[[nodiscard]] std::optional<ClassMinimum> class_ability_minimum(
+	CreatureClass creatureClass);
 
 // The score every ability starts Method VI at.
 inline constexpr int METHOD_SIX_STARTING_SCORE = 8;
@@ -153,7 +154,10 @@ public:
 	[[nodiscard]] int score(Ability ability) const;
 
 	// The dice still to be placed.
-	[[nodiscard]] const std::vector<int>& pool() const noexcept { return unplaced; }
+	[[nodiscard]] const std::vector<int>& pool() const noexcept
+	{
+		return unplaced;
+	}
 
 	// Whether that die may go on that ability: the index must name a die still in
 	// the pool, and a whole die that would carry the allocation past 18 cannot be

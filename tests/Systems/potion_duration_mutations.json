@@ -15,26 +15,26 @@
   "mutations": [
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tconst int durationRounds = rounds_in(roll_dice(ctx.dice, consumable.duration), consumable.durationUnit);\n",
-      "mutated": "\t\tconst int durationRounds = rounds_in(consumable.duration.min_total(), consumable.durationUnit);\n",
+      "original": "\t\tconst int durationRounds = rounds_in(\n\t\t\troll_dice(ctx.dice, consumable.duration),\n\t\t\tconsumable.durationUnit);\n",
+      "mutated": "\t\tconst int durationRounds = rounds_in(consumable.duration.min_total(),\n\t\t\tconsumable.durationUnit);\n",
       "catches": "a potion always lasting the least of its roll, which is what the fixed figures were"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tconst int durationRounds = rounds_in(roll_dice(ctx.dice, consumable.duration), consumable.durationUnit);\n",
+      "original": "\t\tconst int durationRounds = rounds_in(\n\t\t\troll_dice(ctx.dice, consumable.duration),\n\t\t\tconsumable.durationUnit);\n",
       "mutated": "\t\tconst int durationRounds = roll_dice(ctx.dice, consumable.duration);\n",
       "catches": "a potion's unit ignored, so its turns are read as rounds"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tconst int durationRounds = rounds_in(roll_dice(ctx.dice, targetScroll.duration), targetScroll.durationUnit);\n",
+      "original": "\t\tconst int durationRounds = rounds_in(\n\t\t\troll_dice(ctx.dice, targetScroll.duration),\n\t\t\ttargetScroll.durationUnit);\n",
       "mutated": "\t\tconst int durationRounds = roll_dice(ctx.dice, targetScroll.duration);\n",
       "catches": "a scroll's unit ignored, so a scroll authored in turns lasts that many rounds"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tconst int durationRounds = rounds_in(roll_dice(ctx.dice, targetScroll.duration), targetScroll.durationUnit);\n",
-      "mutated": "\t\tconst int durationRounds = rounds_in(roll_dice(ctx.dice, targetScroll.duration), DurationUnit::TURNS);\n",
+      "original": "\t\tconst int durationRounds = rounds_in(\n\t\t\troll_dice(ctx.dice, targetScroll.duration),\n\t\t\ttargetScroll.durationUnit);\n",
+      "mutated": "\t\tconst int durationRounds = rounds_in(\n\t\t\troll_dice(ctx.dice, targetScroll.duration),DurationUnit::TURNS);\n",
       "catches": "every scroll read as turns, so sleep lasts fifty rounds"
     },
     {
@@ -81,38 +81,38 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tconsumable.duration = parse_dice_expression(source.at(\"duration\").get<std::string>());\n",
-      "mutated": "\t\tconsumable.duration = DiceExpr{ 0, 0, 3 };\n",
+      "original": "\t\tconsumable.duration =\n\t\t\tparse_dice_expression(source.at(\"duration\").get<std::string>());\n",
+      "mutated": "\t\tconsumable.duration =DiceExpr{ 0, 0, 3 };\n",
       "catches": "a loaded potion's dice replaced by a fixed figure"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tconsumable.durationUnit = parse_duration_unit(source.at(\"durationUnit\").get<std::string>());\n",
-      "mutated": "\t\tconsumable.durationUnit = DurationUnit::ROUNDS;\n",
+      "original": "\t\tconsumable.durationUnit =\n\t\t\tparse_duration_unit(source.at(\"durationUnit\").get<std::string>());\n",
+      "mutated": "\t\tconsumable.durationUnit =DurationUnit::ROUNDS;\n",
       "catches": "a loaded potion's unit dropped"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\ttargetedScroll.duration = parse_dice_expression(source.at(\"duration\").get<std::string>());\n",
-      "mutated": "\t\ttargetedScroll.duration = DiceExpr{};\n",
+      "original": "\t\ttargetedScroll.duration =\n\t\t\tparse_dice_expression(source.at(\"duration\").get<std::string>());\n",
+      "mutated": "\t\ttargetedScroll.duration =DiceExpr{};\n",
       "catches": "a loaded scroll's duration dropped"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\ttargetedScroll.durationUnit = parse_duration_unit(source.at(\"durationUnit\").get<std::string>());\n",
-      "mutated": "\t\ttargetedScroll.durationUnit = DurationUnit::ROUNDS;\n",
+      "original": "\t\ttargetedScroll.durationUnit =\n\t\t\tparse_duration_unit(source.at(\"durationUnit\").get<std::string>());\n",
+      "mutated": "\t\ttargetedScroll.durationUnit =DurationUnit::ROUNDS;\n",
       "catches": "a loaded scroll's unit dropped"
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\tparams.duration = parse_dice_expression(required_field(record, key, \"duration\").get<std::string>());\n",
-      "mutated": "\tparams.duration = DiceExpr{ 0, 0, 3 };\n",
+      "original": "\tparams.duration = parse_dice_expression(\n\t\trequired_field(record, key, \"duration\").get<std::string>());\n",
+      "mutated": "\tparams.duration =DiceExpr{ 0, 0, 3 };\n",
       "catches": "the data's dice never read, every item lasting one fixed figure"
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\tparams.durationUnit = parse_duration_unit(required_field(record, key, \"durationUnit\").get<std::string>());\n",
-      "mutated": "\tparams.durationUnit = parse_duration_unit(record.value(\"durationUnit\", std::string{ \"rounds\" }));\n",
+      "original": "\tparams.durationUnit = parse_duration_unit(\n\t\trequired_field(record, key, \"durationUnit\").get<std::string>());\n",
+      "mutated": "\tparams.durationUnit = parse_duration_unit(\n\t\trecord.value(\"durationUnit\", std::string{ \"rounds\" }));\n",
       "catches": "a record missing its unit read as rounds instead of refused"
     },
     {

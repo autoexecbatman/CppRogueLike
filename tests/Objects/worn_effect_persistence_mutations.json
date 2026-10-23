@@ -27,8 +27,8 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\tstatBoost.effect = parse_magical_effect(source.at(\"effect\").get<std::string>());",
-      "mutated": "\tstatBoost.effect = MagicalEffect::NONE;",
+      "original": "\tstatBoost.effect =\n\t\tparse_magical_effect(source.at(\"effect\").get<std::string>());",
+      "mutated": "\tstatBoost.effect =MagicalEffect::NONE;",
       "catches": "the field written and then thrown away on the way back in"
     },
     {
@@ -39,8 +39,8 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\t\t\toutput[\"type\"] = encode_pickable_type(PickableType::MAGICAL_HELM);\n\t\t\t\toutput[\"effect\"] = encode_magical_effect(magicalHelm.effect);",
-      "mutated": "\t\t\t\toutput[\"type\"] = encode_pickable_type(PickableType::MAGICAL_HELM);",
+      "original": "\t\t\t\toutput[\"type\"] =\n\t\t\t\t\tencode_pickable_type(PickableType::MAGICAL_HELM);\n\t\t\t\toutput[\"effect\"] = encode_magical_effect(magicalHelm.effect);",
+      "mutated": "\t\t\t\toutput[\"type\"] =\n\t\t\t\t\tencode_pickable_type(PickableType::MAGICAL_HELM);",
       "catches": "the helm losing what it already kept, so a fix to the other three cannot break the two that were right"
     }
   ]

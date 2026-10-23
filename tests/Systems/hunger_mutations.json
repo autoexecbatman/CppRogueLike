@@ -39,8 +39,8 @@
     },
     {
       "file": "src/HungerSystem.cpp",
-      "original": "\treturn std::clamp(1.0f - static_cast<float>(run.hungerValue) / static_cast<float>(run.hungerMax), 0.0f, 1.0f);\n",
-      "mutated": "\treturn std::clamp(static_cast<float>(run.hungerValue) / static_cast<float>(run.hungerMax), 0.0f, 1.0f);\n",
+      "original": "\treturn std::clamp(\n\t\t1.0f -\n\t\t\tstatic_cast<float>(run.hungerValue) /\n\t\t\t\tstatic_cast<float>(run.hungerMax),\n\t\t0.0f,\n\t\t1.0f);\n",
+      "mutated": "\treturn std::clamp(static_cast<float>(run.hungerValue) /\n\t\t\t\tstatic_cast<float>(run.hungerMax),\n\t\t0.0f,\n\t\t1.0f);\n",
       "catches": "the meter reading hunger where it should read fullness, which is the defect the HUD shipped"
     },
     {
@@ -63,8 +63,8 @@
     },
     {
       "file": "src/HungerSystem.cpp",
-      "original": "\t\t\tctx.player()->take_damage_and_check_death(1, ctx, DamageType::PHYSICAL);\n",
-      "mutated": "\t\t\tctx.player()->take_damage_and_check_death(0, ctx, DamageType::PHYSICAL);\n",
+      "original": "\t\t\tctx.player()->take_damage_and_check_death(\n\t\t\t\t1,\n\t\t\t\tctx,\n\t\t\t\tDamageType::PHYSICAL);\n",
+      "mutated": "\t\t\tctx.player()->take_damage_and_check_death(0,\n\t\t\t\tctx,\n\t\t\t\tDamageType::PHYSICAL);\n",
       "catches": "starving costing nothing on the turn its roll calls for a point"
     },
     {

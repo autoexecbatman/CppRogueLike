@@ -25,7 +25,10 @@ namespace Wording
 // Example:
 //   counted(1, "item", "items"); // -> "1 item"
 //   counted(2, "item", "items"); // -> "2 items"
-[[nodiscard]] std::string counted(int count, std::string_view singular, std::string_view plural);
+[[nodiscard]] std::string counted(
+	int count,
+	std::string_view singular,
+	std::string_view plural);
 
 // How long something lasts, in rounds, the unit every effect's duration is kept in. Every
 // message that states a duration words it here, so the unit is decided once.

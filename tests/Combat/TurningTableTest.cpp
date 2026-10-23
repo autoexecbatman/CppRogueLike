@@ -277,12 +277,15 @@ TEST(TurningTableTest, EveryCellMatchesThePrintedTable)
 
 			for (int level = span.firstLevel; level <= span.lastLevel; ++level)
 			{
-				const TurningResult actual = look_up_turning(row.hitDice, level);
+				const TurningResult actual =
+					look_up_turning(row.hitDice, level);
 
 				EXPECT_EQ(actual.outcome, expected.outcome)
-					<< row.hitDice << " HD against a level " << level << " priest: the book prints " << printed;
+					<< row.hitDice << " HD against a level " << level
+					<< " priest: the book prints " << printed;
 				EXPECT_EQ(actual.rollNeeded, expected.rollNeeded)
-					<< row.hitDice << " HD against a level " << level << " priest: the book prints " << printed;
+					<< row.hitDice << " HD against a level " << level
+					<< " priest: the book prints " << printed;
 			}
 		}
 	}
@@ -298,7 +301,8 @@ TEST(TurningTableTest, ReproducesTheBooksWorkedExample)
 	constexpr int roll = 12;
 
 	const TurningResult skeleton = look_up_turning(1, gorusLevel);
-	EXPECT_EQ(skeleton.outcome, TurningOutcome::DESTROYED) << "skeletons are destroyed";
+	EXPECT_EQ(skeleton.outcome, TurningOutcome::DESTROYED)
+		<< "skeletons are destroyed";
 
 	const TurningResult wight = look_up_turning(5, gorusLevel);
 	EXPECT_EQ(wight.outcome, TurningOutcome::ROLL_REQUIRED);
@@ -323,8 +327,10 @@ TEST(TurningTableTest, NovicePriestNeedsTenAgainstASkeleton)
 // A dash in the book means the attempt is not possible at all.
 TEST(TurningTableTest, WeakPriestCannotTouchPowerfulUndead)
 {
-	EXPECT_EQ(look_up_turning(11, 1).outcome, TurningOutcome::BEYOND_POWER) << "lich vs level 1";
-	EXPECT_EQ(look_up_turning(6, 2).outcome, TurningOutcome::BEYOND_POWER) << "6 HD vs level 2";
+	EXPECT_EQ(look_up_turning(11, 1).outcome, TurningOutcome::BEYOND_POWER)
+		<< "lich vs level 1";
+	EXPECT_EQ(look_up_turning(6, 2).outcome, TurningOutcome::BEYOND_POWER)
+		<< "6 HD vs level 2";
 }
 
 // Turning improves monotonically with level: a priest never does worse against
@@ -357,12 +363,17 @@ TEST(TurningTableTest, TurningNeverWorsensWithLevel)
 		return 0;
 	};
 
-	for (int hitDice = TURNING_MIN_HIT_DICE; hitDice <= TURNING_MAX_HIT_DICE; ++hitDice)
+	for (
+		int hitDice = TURNING_MIN_HIT_DICE; hitDice <= TURNING_MAX_HIT_DICE;
+		++hitDice)
 	{
 		for (int level = 1; level < TURNING_MAX_PRIEST_LEVEL; ++level)
 		{
-			EXPECT_LE(rank(look_up_turning(hitDice, level)), rank(look_up_turning(hitDice, level + 1)))
-				<< "got worse at " << hitDice << " HD going from level " << level << " to " << level + 1;
+			EXPECT_LE(
+				rank(look_up_turning(hitDice, level)),
+				rank(look_up_turning(hitDice, level + 1)))
+				<< "got worse at " << hitDice << " HD going from level "
+				<< level << " to " << level + 1;
 		}
 	}
 }
@@ -372,16 +383,19 @@ TEST(TurningTableTest, TougherUndeadAreNeverEasier)
 {
 	for (int level = 1; level <= TURNING_MAX_PRIEST_LEVEL; ++level)
 	{
-		for (int hitDice = TURNING_MIN_HIT_DICE; hitDice < TURNING_MAX_HIT_DICE; ++hitDice)
+		for (
+			int hitDice = TURNING_MIN_HIT_DICE; hitDice < TURNING_MAX_HIT_DICE;
+			++hitDice)
 		{
 			const TurningResult easier = look_up_turning(hitDice, level);
 			const TurningResult harder = look_up_turning(hitDice + 1, level);
 
-			if (easier.outcome == TurningOutcome::ROLL_REQUIRED
-				&& harder.outcome == TurningOutcome::ROLL_REQUIRED)
+			if (easier.outcome == TurningOutcome::ROLL_REQUIRED &&
+				harder.outcome == TurningOutcome::ROLL_REQUIRED)
 			{
 				EXPECT_LE(easier.rollNeeded, harder.rollNeeded)
-					<< hitDice + 1 << " HD was easier than " << hitDice << " at level " << level;
+					<< hitDice + 1 << " HD was easier than " << hitDice
+					<< " at level " << level;
 			}
 		}
 	}
@@ -390,9 +404,13 @@ TEST(TurningTableTest, TougherUndeadAreNeverEasier)
 // Beyond the table's edges the book's "11+ HD" and "14+" columns take over.
 TEST(TurningTableTest, BeyondTheTableEdgesClamp)
 {
-	EXPECT_EQ(look_up_turning(40, 14).rollNeeded, look_up_turning(11, 14).rollNeeded)
+	EXPECT_EQ(
+		look_up_turning(40, 14).rollNeeded,
+		look_up_turning(11, 14).rollNeeded)
 		<< "a 40 HD undead turns as the hardest row";
-	EXPECT_EQ(look_up_turning(11, 99).rollNeeded, look_up_turning(11, 14).rollNeeded)
+	EXPECT_EQ(
+		look_up_turning(11, 99).rollNeeded,
+		look_up_turning(11, 14).rollNeeded)
 		<< "a level 99 priest turns as the last column";
 	EXPECT_EQ(look_up_turning(1, 0).outcome, TurningOutcome::BEYOND_POWER)
 		<< "level 0 can turn nothing";

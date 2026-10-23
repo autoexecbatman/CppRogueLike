@@ -74,7 +74,9 @@ protected:
 		spinner.experienceReward = std::make_unique<ExperienceReward>(0);
 		spinner.healthPool = std::make_unique<HealthPool>(10);
 		spinner.armorClass = std::make_unique<ArmorClass>(5);
-		spinner.attacker = std::make_unique<MonsterAttacker>(spinner, DamageInfo{ "1d4", DamageType::PHYSICAL });
+		spinner.attacker = std::make_unique<MonsterAttacker>(
+			spinner,
+			DamageInfo{ "1d4", DamageType::PHYSICAL });
 		spinner.set_dr(0);
 		spinner.set_thaco(20);
 		spinner.set_strength(8);
@@ -101,15 +103,17 @@ protected:
 	// The roll this player needs against the venom, with its Constitution adjustment.
 	int venom_save_target()
 	{
-		const int constitutionBonus = game.dataManager.constitution_for(player->get_constitution()).PoisonSave;
-		const int baseTarget = SavingThrows::target(player->get_creature_class(), player->get_creature_level(), SavingThrow::PARALYZATION_POISON_DEATH);
+		const int constitutionBonus =
+			game.dataManager.constitution_for(player->get_constitution())
+				.PoisonSave;
+		const int baseTarget = SavingThrows::target(
+			player->get_creature_class(),
+			player->get_creature_level(),
+			SavingThrow::PARALYZATION_POISON_DEATH);
 		return baseTarget - constitutionBonus;
 	}
 
-	void one_turn()
-	{
-		spinner.ai->update(spinner, ctx);
-	}
+	void one_turn() { spinner.ai->update(spinner, ctx); }
 
 	static constexpr int STARTING_HP = 100;
 	static constexpr int BITE_DIE = 4;
@@ -117,7 +121,8 @@ protected:
 	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
 	Map map{ 20, 20 };
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 4, 5 }) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ 4, 5 }) };
 	Creature spinner{
 		Vector2D{ 5, 5 },
 		ActorData{ TileRef{}, "web weaver", ColorPairId::WHITE_BLACK },
@@ -131,7 +136,8 @@ TEST_F(SpiderVenomTest, AFailedSaveAgainstTheVenomKills)
 
 	one_turn();
 
-	EXPECT_TRUE(player->is_dead()) << "the venom of a Type F poison did not kill";
+	EXPECT_TRUE(player->is_dead())
+		<< "the venom of a Type F poison did not kill";
 	EXPECT_EQ(player->get_hp(), 0);
 }
 
@@ -143,7 +149,8 @@ TEST_F(SpiderVenomTest, AMadeSaveAgainstTheVenomTakesNothing)
 	one_turn();
 
 	EXPECT_FALSE(player->is_dead());
-	EXPECT_EQ(STARTING_HP - player->get_hp(), BITE_DIE) << "the venom was felt through a made save";
+	EXPECT_EQ(STARTING_HP - player->get_hp(), BITE_DIE)
+		<< "the venom was felt through a made save";
 }
 
 // Injected by the bite: one that misses injects nothing, so the 1 queued for a save that
@@ -170,7 +177,8 @@ TEST_F(SpiderVenomTest, TheVenomSaveTakesTheConstitutionAdjustment)
 
 	one_turn();
 
-	EXPECT_FALSE(player->is_dead()) << "the Constitution adjustment was left out of the save";
+	EXPECT_FALSE(player->is_dead())
+		<< "the Constitution adjustment was left out of the save";
 }
 
 // The same roll from a Constitution 10 victim, which gets no adjustment, is a failure.

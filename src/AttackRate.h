@@ -34,8 +34,11 @@
 //   attack_cost(2.0f);   // -> 60
 [[nodiscard]] constexpr int attack_cost(float attacksPerRound)
 {
-	assert(attacksPerRound > 0.0f && "attack_cost: a creature that never attacks has no attack to cost");
+	assert(
+		attacksPerRound > 0.0f &&
+		"attack_cost: a creature that never attacks has no attack to cost");
 
-	const int cost = static_cast<int>(static_cast<float>(TIME_UNITS_PER_ROUND) / attacksPerRound);
+	const int cost = static_cast<int>(
+		static_cast<float>(TIME_UNITS_PER_ROUND) / attacksPerRound);
 	return cost >= 1 ? cost : 1;
 }

@@ -149,7 +149,8 @@ struct MockGameContext
 		// the game aborts on its first map, and a loader that opens nothing returns quietly.
 		palette.load(Paths::TILE_CONFIG);
 		prefabLibrary.load(Paths::PREFABS);
-		assert(prefabLibrary.count() > 0 && "MockGameContext: no prefabs loaded");
+		assert(
+			prefabLibrary.count() > 0 && "MockGameContext: no prefabs loaded");
 	}
 
 	GameContext to_game_context()

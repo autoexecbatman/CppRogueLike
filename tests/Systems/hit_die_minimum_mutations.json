@@ -15,20 +15,20 @@
   "mutations": [
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "\tconst int dieValue = std::max(rolledDie, dataManager.constitution_for(constitution).hitDieMinimum);",
-      "mutated": "\tconst int dieValue = rolledDie;",
+      "original": "\tconst int dieValue = std::max(\n\t\trolledDie,\n\t\tdataManager.constitution_for(constitution).hitDieMinimum);",
+      "mutated": "\tconst int dieValue =rolledDie;",
       "catches": "a low roll at Constitution 20 and up left as rolled"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "\tconst int dieValue = std::max(rolledDie, dataManager.constitution_for(constitution).hitDieMinimum);",
-      "mutated": "\tconst int dieValue = dataManager.constitution_for(constitution).hitDieMinimum;",
+      "original": "\tconst int dieValue = std::max(\n\t\trolledDie,\n\t\tdataManager.constitution_for(constitution).hitDieMinimum);",
+      "mutated": "\tconst int dieValue =dataManager.constitution_for(constitution).hitDieMinimum;",
       "catches": "the minimum replacing the roll instead of raising a low one"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "\t\t: LevelUpSystem::HitDieValue{\n\t\t\t  progression.flatGain,\n\t\t\t  0,\n\t\t\t  progression.flatGain,\n\t\t  };",
-      "mutated": "\t\t: LevelUpSystem::hit_die_value(progression.flatGain, owner.get_creature_class(), owner.get_constitution(), *ctx->dataManager);",
+      "original": "\t\t\t*ctx.dataManager) :\n\t\tLevelUpSystem::HitDieValue{\n\t\t\tprogression.flatGain,\n\t\t\t0,\n\t\t\tprogression.flatGain,\n\t\t};",
+      "mutated": "\t\t\t*ctx.dataManager) :\n\t\tLevelUpSystem::hit_die_value(progression.flatGain, owner.get_creature_class(), owner.get_constitution(), *ctx->dataManager);",
       "catches": "a flat gain raised and adjusted as though it were a rolled die"
     },
     {

@@ -49,7 +49,10 @@ namespace SavingThrows
 // Example:
 //   target(CreatureClass::FIGHTER, 1, SavingThrow::SPELL);   // -> 17
 //   target(CreatureClass::WIZARD, 1, SavingThrow::SPELL);    // -> 12
-[[nodiscard]] int target(CreatureClass creatureClass, int level, SavingThrow category);
+[[nodiscard]] int target(
+	CreatureClass creatureClass,
+	int level,
+	SavingThrow category);
 
 // Whether reaching this level moves the class onto a better row of the
 // table. Derived from the rows rather than from a list of levels, so it
@@ -68,5 +71,9 @@ namespace SavingThrows
 // Example, a 1st-level fighter resisting a spell, needing 17:
 //   is_made(fighter, SavingThrow::SPELL, 0, ctx);   // -> true on a 17 or better
 //   is_made(fighter, SavingThrow::SPELL, 4, ctx);   // -> true on a 13 or better
-[[nodiscard]] bool is_made(const Creature& saver, SavingThrow category, int modifier, GameContext& ctx);
+[[nodiscard]] bool is_made(
+	const Creature& saver,
+	SavingThrow category,
+	int modifier,
+	GameContext& ctx);
 } // namespace SavingThrows

@@ -60,7 +60,8 @@ struct GameContext;
 // Example, a halfling fighter who has spent nothing, then one who has met the row:
 //   allocation_status_line(fresh);   // -> "Needs Strength 9"
 //   allocation_status_line(ready);   // -> "Ready."
-[[nodiscard]] std::string allocation_status_line(const AbilityAllocation& allocation);
+[[nodiscard]] std::string allocation_status_line(
+	const AbilityAllocation& allocation);
 
 // Which die of the pool a typed character names, counting from '1'. Method VI rolls
 // METHOD_SIX_DICE of them, so a digit past the last and anything that is not one of

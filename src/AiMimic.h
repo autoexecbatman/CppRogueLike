@@ -26,7 +26,9 @@ struct Disguise
 // Single source of truth: called when a mimic is built AND as lazy init after load.
 namespace Appearance
 {
-[[nodiscard]] std::vector<Disguise> build_mimic_list(ContentRegistry& tiles, const ItemRegistry& items);
+[[nodiscard]] std::vector<Disguise> build_mimic_list(
+	ContentRegistry& tiles,
+	const ItemRegistry& items);
 } // namespace Appearance
 
 class AiMimic : public AiMonster
@@ -51,7 +53,10 @@ private:
 	void check_revealing(Creature& owner, GameContext& ctx);
 	void change_disguise(Creature& owner, GameContext& ctx);
 
-	void apply_item_bonus(Creature& owner, ItemClass itemClass, GameContext& ctx);
+	void apply_item_bonus(
+		Creature& owner,
+		ItemClass itemClass,
+		GameContext& ctx);
 	void boost_health(Creature& owner, int amount, GameContext& ctx);
 	void boost_defense(Creature& owner, int amount, int maxDR);
 	void boost_attack(Creature& owner, GameContext& ctx);
@@ -72,7 +77,10 @@ public:
 	//   mimic.ai->on_created(mimic, ctx); // mimic.actorData.name -> "Gold coin", say
 	void on_created(Creature& owner, GameContext& ctx) override;
 
-	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::MIMIC; }
+	[[nodiscard]] AiType get_ai_type() const noexcept override
+	{
+		return AiType::MIMIC;
+	}
 
 	void load(const json& source) override;
 	void save(json& output) override;

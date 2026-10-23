@@ -87,7 +87,10 @@ std::string value_and_weight(const Item& item)
 {
 	if (item.get_value() > 0)
 	{
-		return std::format(" ({} gp, {} lb)", item.get_value(), item.enhancement.weight);
+		return std::format(
+			" ({} gp, {} lb)",
+			item.get_value(),
+			item.enhancement.weight);
 	}
 	return std::format(" ({} lb)", item.enhancement.weight);
 }
@@ -113,7 +116,10 @@ std::array<TabBox, 3> tab_boxes(const Renderer& renderer)
 	return boxes;
 }
 
-std::optional<InventoryScreen> tab_at(int pixelX, int pixelY, const Renderer& renderer)
+std::optional<InventoryScreen> tab_at(
+	int pixelX,
+	int pixelY,
+	const Renderer& renderer)
 {
 	const int tileSize = renderer.get_tile_size();
 	if (panel_text_row_at_y(0, tileSize, pixelY) != TAB_ROW)
@@ -123,7 +129,8 @@ std::optional<InventoryScreen> tab_at(int pixelX, int pixelY, const Renderer& re
 
 	for (const TabBox& box : tab_boxes(renderer))
 	{
-		if (pixelX >= box.pixelX - TAB_HIT_PADDING && pixelX < box.pixelX + box.width + TAB_HIT_PADDING)
+		if (pixelX >= box.pixelX - TAB_HIT_PADDING &&
+			pixelX < box.pixelX + box.width + TAB_HIT_PADDING)
 		{
 			return box.screen;
 		}
@@ -151,7 +158,9 @@ InventoryScreen next_screen(InventoryScreen screen)
 	return InventoryScreen::EQUIPMENT;
 }
 
-std::vector<std::string> labels_for_row(InventoryScreen screen, bool rowHoldsItem)
+std::vector<std::string> labels_for_row(
+	InventoryScreen screen,
+	bool rowHoldsItem)
 {
 	if (screen == InventoryScreen::EQUIPMENT)
 	{
@@ -197,7 +206,8 @@ static std::string slot_symbol_key(EquipmentSlot slot)
 	std::string name{ encode_equipment_slot(slot) };
 	for (char& letter : name)
 	{
-		letter = static_cast<char>(std::toupper(static_cast<unsigned char>(letter)));
+		letter =
+			static_cast<char>(std::toupper(static_cast<unsigned char>(letter)));
 	}
 	return "TILE_SLOT_" + name;
 }
@@ -214,7 +224,9 @@ static int row_at_y(int tileSize, int screenY)
 static int detail_bar_top_row(const Renderer& renderer)
 {
 	const int rowsThatFit = panel_text_rows_that_fit(
-		renderer.get_screen_height(), renderer.get_tile_size(), renderer.get_font_size());
+		renderer.get_screen_height(),
+		renderer.get_tile_size(),
+		renderer.get_font_size());
 	return rowsThatFit - DETAIL_BAR_ROWS;
 }
 
@@ -235,8 +247,12 @@ int InventoryUI::screen_rows(GameContext& ctx) const
 
 void InventoryUI::draw_frame(GameContext& ctx)
 {
-	assert(ctx.dataManager && "InventoryUI::draw_frame: called without a dataManager");
-	assert(ctx.tileConfig && "InventoryUI::draw_frame: called without a tileConfig");
+	assert(
+		ctx.dataManager &&
+		"InventoryUI::draw_frame: called without a dataManager");
+	assert(
+		ctx.tileConfig &&
+		"InventoryUI::draw_frame: called without a tileConfig");
 	assert(ctx.renderer && "InventoryUI::draw_frame called without a renderer");
 
 	int tileSize = ctx.renderer->get_tile_size();
@@ -245,23 +261,35 @@ void InventoryUI::draw_frame(GameContext& ctx)
 	int screenH = ctx.renderer->get_screen_height();
 	int fontOff = (tileSize - ctx.renderer->get_font_size()) / 2;
 
-	ctx.renderer->draw_frame_pixels(Vector2D{ 0, 0 }, screenW, screenH, *ctx.tileConfig);
+	ctx.renderer->draw_frame_pixels(
+		Vector2D{ 0, 0 },
+		screenW,
+		screenH,
+		*ctx.tileConfig);
 
 	std::string_view title = "INVENTORY";
 	int titleW = ctx.renderer->measure_text(title);
 	int titleX = (screenW - titleW) / 2;
-	ctx.renderer->draw_text(Vector2D{ titleX, fontOff }, title, ColorPairId::YELLOW_BLACK);
+	ctx.renderer->draw_text(
+		Vector2D{ titleX, fontOff },
+		title,
+		ColorPairId::YELLOW_BLACK);
 
 	CloseButtonArea closeBtn = CloseButtonArea(*ctx.renderer, vcols);
-	ctx.renderer->draw_text(Vector2D{ closeBtn.get_x(), closeBtn.get_y() }, "[X]", ColorPairId::RED_BLACK);
+	ctx.renderer->draw_text(
+		Vector2D{ closeBtn.get_x(), closeBtn.get_y() },
+		"[X]",
+		ColorPairId::RED_BLACK);
 
 	// What the character carries, and the band Table 47 puts that load in.
 	const int currentWeight = InventoryOperations::get_total_weight(playerRef);
-	const int maxWeight = InventoryOperations::get_max_weight(playerRef, *ctx.dataManager);
+	const int maxWeight =
+		InventoryOperations::get_max_weight(playerRef, *ctx.dataManager);
 	const StrengthAttributes strengthRow = ctx.dataManager->strength_for(
 		playerRef.get_strength(),
 		playerRef.get_exceptional_strength());
-	const std::optional<EncumbranceBand> band = encumbrance_band(currentWeight, strengthRow);
+	const std::optional<EncumbranceBand> band =
+		encumbrance_band(currentWeight, strengthRow);
 
 	// Where Table 47 prints no bands the line shows the load alone. Overloaded still shows,
 	// from the maximum column every row has, as render_tab_bar's banner does.
@@ -291,9 +319,13 @@ void InventoryUI::draw_frame(GameContext& ctx)
 		return ColorPairId::WHITE_BLACK;
 	};
 
-	const std::string weightInfo = band.has_value()
-		? std::format("Weight: {}/{} [{}]", currentWeight, maxWeight, encumbrance_band_name(*band))
-		: std::format("Weight: {}/{}", currentWeight, maxWeight);
+	const std::string weightInfo = band.has_value() ?
+		std::format(
+			"Weight: {}/{} [{}]",
+			currentWeight,
+			maxWeight,
+			encumbrance_band_name(*band)) :
+		std::format("Weight: {}/{}", currentWeight, maxWeight);
 	ctx.renderer->draw_text(
 		Vector2D{ tileSize, fontOff },
 		weightInfo,
@@ -303,31 +335,42 @@ void InventoryUI::draw_frame(GameContext& ctx)
 // Draw a full-width white highlight bar at the given tile row.
 void InventoryUI::draw_highlight_row(int row, GameContext& ctx)
 {
-	assert(ctx.renderer && "InventoryUI::draw_highlight_row called without a renderer");
+	assert(
+		ctx.renderer &&
+		"InventoryUI::draw_highlight_row called without a renderer");
 
 	int tileSize = ctx.renderer->get_tile_size();
 	int barX = tileSize;
 	int barW = ctx.renderer->get_screen_width() - 2 * tileSize;
 
 	ColorPair pair = ctx.renderer->get_color_pair(ColorPairId::BLACK_WHITE);
-	DrawRectangle(barX, row_top_y(tileSize, row), barW, UI_TEXT_ROW_PITCH, pair.background);
+	DrawRectangle(
+		barX,
+		row_top_y(tileSize, row),
+		barW,
+		UI_TEXT_ROW_PITCH,
+		pair.background);
 }
 
-InventoryUI::InventoryUI(Player& player, InventoryScreen startScreen, GameContext& ctx)
-	: activeScreen(startScreen),
-	  equipmentCursor(0),
-	  listCursor(0),
-	  scrollOffset(0),
-	  filterMode(false),
-	  filterSlot(EquipmentSlot::NONE),
-	  playerRef(player)
+InventoryUI::InventoryUI(
+	Player& player,
+	InventoryScreen startScreen,
+	GameContext& ctx) :
+	activeScreen(startScreen),
+	equipmentCursor(0),
+	listCursor(0),
+	scrollOffset(0),
+	filterMode(false),
+	filterSlot(EquipmentSlot::NONE),
+	playerRef(player)
 {
 	rebuild_item_list(player, ctx);
 }
 
 void InventoryUI::menu(GameContext& ctx)
 {
-	assert(ctx.inputSystem && "InventoryUI::menu: called without an inputSystem");
+	assert(
+		ctx.inputSystem && "InventoryUI::menu: called without an inputSystem");
 
 	// Closed by a use chosen from the row menu while it was on top: no key is read and
 	// nothing drawn, and MenuManager removes the screen after this frame.
@@ -385,7 +428,9 @@ void InventoryUI::rebuild_item_list(const Player& player, GameContext& ctx)
 	std::vector<Item*> items;
 	for (const auto& item : player.inventoryData.items)
 	{
-		assert(item && "rebuild_item_list: the pack holds a null where an item should be");
+		assert(
+			item &&
+			"rebuild_item_list: the pack holds a null where an item should be");
 
 		// A worn item is on the Equipment screen, so the backpack skips it. Matched by unique id,
 		// since the pack and the slots can hold two of the same kind.
@@ -405,7 +450,8 @@ void InventoryUI::rebuild_item_list(const Player& player, GameContext& ctx)
 
 		ItemCategory effectiveCat = get_effective_category(*item);
 
-		if (activeScreen == InventoryScreen::USABLES && !is_usable_category(effectiveCat))
+		if (activeScreen == InventoryScreen::USABLES &&
+			!is_usable_category(effectiveCat))
 		{
 			continue;
 		}
@@ -413,9 +459,11 @@ void InventoryUI::rebuild_item_list(const Player& player, GameContext& ctx)
 		items.push_back(item.get());
 	}
 
-	const auto& categories = (activeScreen == InventoryScreen::USABLES)
-		? std::vector<ItemCategory>(USABLE_CATEGORIES.begin(), USABLE_CATEGORIES.end())
-		: std::vector<ItemCategory>(CATEGORY_ORDER.begin(), CATEGORY_ORDER.end());
+	const auto& categories = (activeScreen == InventoryScreen::USABLES) ?
+		std::vector<ItemCategory>(
+			USABLE_CATEGORIES.begin(),
+			USABLE_CATEGORIES.end()) :
+		std::vector<ItemCategory>(CATEGORY_ORDER.begin(), CATEGORY_ORDER.end());
 
 	for (ItemCategory cat : categories)
 	{
@@ -470,7 +518,8 @@ void InventoryUI::rebuild_item_list(const Player& player, GameContext& ctx)
 		{
 			listCursor = 0;
 		}
-		if (listEntries[listCursor].kind == BackpackEntry::Kind::CATEGORY_HEADER)
+		if (listEntries[listCursor].kind ==
+			BackpackEntry::Kind::CATEGORY_HEADER)
 		{
 			auto next = get_next_item_index(listCursor, 1);
 			if (next)
@@ -495,9 +544,14 @@ void InventoryUI::rebuild_item_list(const Player& player, GameContext& ctx)
 	}
 }
 
-bool InventoryUI::item_fits_slot(const Item& item, EquipmentSlot slot, const GameContext& ctx) const
+bool InventoryUI::item_fits_slot(
+	const Item& item,
+	EquipmentSlot slot,
+	const GameContext& ctx) const
 {
-	assert(ctx.itemRegistry && "item_fits_slot: no item registry to ask where an item is worn");
+	assert(
+		ctx.itemRegistry &&
+		"item_fits_slot: no item registry to ask where an item is worn");
 
 	// A worn item names its slot in the data, and that is the whole answer.
 	const ItemParams* params = ctx.itemRegistry->find_params(item.itemKey);
@@ -532,7 +586,8 @@ bool InventoryUI::item_fits_slot(const Item& item, EquipmentSlot slot, const Gam
 	}
 	case EquipmentSlot::LEFT_HAND:
 	{
-		return item.is_shield() || (item.is_weapon() && !item.is_ranged_weapon());
+		return item.is_shield() ||
+			(item.is_weapon() && !item.is_ranged_weapon());
 	}
 	case EquipmentSlot::RIGHT_RING:
 	case EquipmentSlot::LEFT_RING:
@@ -580,7 +635,9 @@ ItemCategory InventoryUI::get_effective_category(const Item& item) const
 
 void InventoryUI::render_tab_bar(GameContext& ctx)
 {
-	assert(ctx.dataManager && "InventoryUI::render_tab_bar: called without a dataManager");
+	assert(
+		ctx.dataManager &&
+		"InventoryUI::render_tab_bar: called without a dataManager");
 
 	int tileSize = ctx.renderer->get_tile_size();
 	int fontSize = ctx.renderer->get_font_size();
@@ -594,25 +651,43 @@ void InventoryUI::render_tab_bar(GameContext& ctx)
 		std::string_view warning = "OVERLOADED! You can pick nothing up.";
 		int warningW = ctx.renderer->measure_text(warning);
 		int warningX = (screen_cols(ctx) * tileSize - warningW) / 2;
-		ctx.renderer->draw_text(Vector2D{ warningX, fontOff }, warning, ColorPairId::RED_BLACK);
+		ctx.renderer->draw_text(
+			Vector2D{ warningX, fontOff },
+			warning,
+			ColorPairId::RED_BLACK);
 	}
 
 	int tabY = row_top_y(tileSize, TAB_ROW);
-	for (const InventoryActions::TabBox& tab : InventoryActions::tab_boxes(*ctx.renderer))
+	for (
+		const InventoryActions::TabBox& tab :
+		InventoryActions::tab_boxes(*ctx.renderer))
 	{
-		const ColorPairId colorPair = (tab.screen == activeScreen) ? ColorPairId::BLACK_WHITE : ColorPairId::WHITE_BLACK;
+		const ColorPairId colorPair = (tab.screen == activeScreen) ?
+			ColorPairId::BLACK_WHITE :
+			ColorPairId::WHITE_BLACK;
 
 		if (tab.screen == activeScreen)
 		{
-			ColorPair pair = ctx.renderer->get_color_pair(ColorPairId::BLACK_WHITE);
-			DrawRectangle(tab.pixelX - TAB_HIT_PADDING, tabY, tab.width + TAB_HIT_PADDING * 2, UI_TEXT_ROW_PITCH, pair.background);
+			ColorPair pair =
+				ctx.renderer->get_color_pair(ColorPairId::BLACK_WHITE);
+			DrawRectangle(
+				tab.pixelX - TAB_HIT_PADDING,
+				tabY,
+				tab.width + TAB_HIT_PADDING * 2,
+				UI_TEXT_ROW_PITCH,
+				pair.background);
 		}
 
-		ctx.renderer->draw_text(Vector2D{ tab.pixelX, row_text_y(tileSize, fontSize, TAB_ROW) }, tab.text, colorPair);
+		ctx.renderer->draw_text(
+			Vector2D{ tab.pixelX, row_text_y(tileSize, fontSize, TAB_ROW) },
+			tab.text,
+			colorPair);
 	}
 }
 
-void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx)
+void InventoryUI::render_equipment_screen(
+	const Player& player,
+	GameContext& ctx)
 {
 	int tileSize = ctx.renderer->get_tile_size();
 	int fontSize = ctx.renderer->get_font_size();
@@ -628,7 +703,8 @@ void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx
 			draw_highlight_row(row, ctx);
 		}
 
-		const ColorPairId rowColor = isCursorRow ? ColorPairId::BLACK_WHITE : ColorPairId::WHITE_BLACK;
+		const ColorPairId rowColor =
+			isCursorRow ? ColorPairId::BLACK_WHITE : ColorPairId::WHITE_BLACK;
 
 		const std::string slotLabel = std::format("{:<14}", slotInfo.label);
 
@@ -667,7 +743,9 @@ void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx
 		else
 		{
 			// The slot's symbol, dimmed: an empty row names its slot twice, and the filled rows stay brightest.
-			assert(ctx.tileConfig && "render_equipment_screen: no tileConfig to read slot symbols from");
+			assert(
+				ctx.tileConfig &&
+				"render_equipment_screen: no tileConfig to read slot symbols from");
 			ctx.renderer->draw_tile_screen_color_sized(
 				Vector2D{
 					ROW_TEXT_X,
@@ -680,7 +758,8 @@ void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx
 			line = slotLabel;
 		}
 
-		const ColorPairId textColor = (equipped || isCursorRow) ? rowColor : ColorPairId::BLUE_BLACK;
+		const ColorPairId textColor =
+			(equipped || isCursorRow) ? rowColor : ColorPairId::BLUE_BLACK;
 		ctx.renderer->draw_text(
 			Vector2D{
 				ROW_TEXT_X + ROW_ICON_SIZE + ROW_ICON_GAP,
@@ -693,8 +772,12 @@ void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx
 	if (filterMode)
 	{
 		int filterY = FIRST_CONTENT_ROW + SLOT_COUNT + 1;
-		std::string filterText = std::format("FILTER: {}", SLOT_TABLE[equipmentCursor].label);
-		ctx.renderer->draw_text(Vector2D{ 3 * tileSize, row_text_y(tileSize, fontSize, filterY) }, filterText, ColorPairId::YELLOW_BLACK);
+		std::string filterText =
+			std::format("FILTER: {}", SLOT_TABLE[equipmentCursor].label);
+		ctx.renderer->draw_text(
+			Vector2D{ 3 * tileSize, row_text_y(tileSize, fontSize, filterY) },
+			filterText,
+			ColorPairId::YELLOW_BLACK);
 	}
 }
 
@@ -716,10 +799,11 @@ void InventoryUI::render_item_list_screen(GameContext& ctx)
 		{
 			msg = "No items fit this slot.";
 		}
-		ctx.renderer->draw_text(Vector2D{
-									3 * tileSize,
-									row_text_y(tileSize, fontSize, startY + 1),
-								},
+		ctx.renderer->draw_text(
+			Vector2D{
+				3 * tileSize,
+				row_text_y(tileSize, fontSize, startY + 1),
+			},
 			msg,
 			ColorPairId::WHITE_BLACK);
 		return;
@@ -728,7 +812,11 @@ void InventoryUI::render_item_list_screen(GameContext& ctx)
 	char nextLetter = 'a';
 	int row = startY;
 
-	for (int entryIndex = scrollOffset; entryIndex < static_cast<int>(listEntries.size()) && (row - startY) < contentHeight; ++entryIndex)
+	for (
+		int entryIndex = scrollOffset;
+		entryIndex < static_cast<int>(listEntries.size()) &&
+		(row - startY) < contentHeight;
+		++entryIndex)
 	{
 		const auto& entry = listEntries[entryIndex];
 		bool isCursorRow = (entryIndex == listCursor);
@@ -740,13 +828,21 @@ void InventoryUI::render_item_list_screen(GameContext& ctx)
 
 		if (entry.kind == BackpackEntry::Kind::CATEGORY_HEADER)
 		{
-			const ColorPairId headerColor = isCursorRow ? ColorPairId::BLACK_WHITE : ColorPairId::YELLOW_BLACK;
-			ctx.renderer->draw_text(Vector2D{ 3 * tileSize, row_text_y(tileSize, fontSize, row) }, entry.headerText, headerColor);
+			const ColorPairId headerColor = isCursorRow ?
+				ColorPairId::BLACK_WHITE :
+				ColorPairId::YELLOW_BLACK;
+			ctx.renderer->draw_text(
+				Vector2D{ 3 * tileSize, row_text_y(tileSize, fontSize, row) },
+				entry.headerText,
+				headerColor);
 		}
 		else if (entry.item)
 		{
 			char letter = (nextLetter <= 'z') ? nextLetter++ : ' ';
-			std::string line = std::format("{}) {}", letter, std::string(entry.item->get_name()));
+			std::string line = std::format(
+				"{}) {}",
+				letter,
+				std::string(entry.item->get_name()));
 
 			std::string stats;
 			if (entry.item->is_weapon())
@@ -764,8 +860,13 @@ void InventoryUI::render_item_list_screen(GameContext& ctx)
 
 			line += InventoryActions::value_and_weight(*entry.item);
 
-			const ColorPairId itemColor = isCursorRow ? ColorPairId::BLACK_WHITE : entry.item->actorData.color;
-			ctx.renderer->draw_text(Vector2D{ 3 * tileSize, row_text_y(tileSize, fontSize, row) }, line, itemColor);
+			const ColorPairId itemColor = isCursorRow ?
+				ColorPairId::BLACK_WHITE :
+				entry.item->actorData.color;
+			ctx.renderer->draw_text(
+				Vector2D{ 3 * tileSize, row_text_y(tileSize, fontSize, row) },
+				line,
+				itemColor);
 		}
 
 		row++;
@@ -775,14 +876,18 @@ void InventoryUI::render_item_list_screen(GameContext& ctx)
 	int arrowX = screen_cols(ctx) * tileSize - 4 * tileSize;
 	if (scrollOffset > 0)
 	{
-		ctx.renderer->draw_text(Vector2D{ arrowX, row_text_y(tileSize, fontSize, startY) }, "^^^", ColorPairId::CYAN_BLACK);
+		ctx.renderer->draw_text(
+			Vector2D{ arrowX, row_text_y(tileSize, fontSize, startY) },
+			"^^^",
+			ColorPairId::CYAN_BLACK);
 	}
 	if (scrollOffset + contentHeight < totalEntries)
 	{
-		ctx.renderer->draw_text(Vector2D{
-									arrowX,
-									row_text_y(tileSize, fontSize, startY + contentHeight - 1),
-								},
+		ctx.renderer->draw_text(
+			Vector2D{
+				arrowX,
+				row_text_y(tileSize, fontSize, startY + contentHeight - 1),
+			},
 			"vvv",
 			ColorPairId::CYAN_BLACK);
 	}
@@ -798,7 +903,8 @@ void InventoryUI::render_detail_bar(const Player& player, GameContext& ctx)
 
 	if (!selectedItem && activeScreen == InventoryScreen::EQUIPMENT)
 	{
-		selectedItem = player.get_equipped_item(SLOT_TABLE[equipmentCursor].slot);
+		selectedItem =
+			player.get_equipped_item(SLOT_TABLE[equipmentCursor].slot);
 	}
 
 	if (selectedItem)
@@ -826,7 +932,10 @@ void InventoryUI::render_detail_bar(const Player& player, GameContext& ctx)
 			nameLine += "  " + valueStr;
 		}
 
-		ctx.renderer->draw_text(Vector2D{ tileSize, row_text_y(tileSize, fontSize, detailY) }, nameLine, selectedItem->actorData.color);
+		ctx.renderer->draw_text(
+			Vector2D{ tileSize, row_text_y(tileSize, fontSize, detailY) },
+			nameLine,
+			selectedItem->actorData.color);
 
 		std::string enhStr = format_enhancement_info(*selectedItem);
 		std::string statStr = format_stat_bonus_info(*selectedItem);
@@ -845,22 +954,24 @@ void InventoryUI::render_detail_bar(const Player& player, GameContext& ctx)
 		}
 		if (!line2.empty())
 		{
-			ctx.renderer->draw_text(Vector2D{
-										tileSize,
-										row_text_y(tileSize, fontSize, detailY + 1),
-									},
+			ctx.renderer->draw_text(
+				Vector2D{
+					tileSize,
+					row_text_y(tileSize, fontSize, detailY + 1),
+				},
 				line2,
 				ColorPairId::WHITE_BLACK);
 		}
 	}
 
-	const char* keybinds = (activeScreen == InventoryScreen::EQUIPMENT)
-		? "[Enter] Unequip/Browse  [d] Drop  [Left/Right] Switch  [ESC] Close"
-		: "[Enter] Use/Equip  [d] Drop  [a-z] Quick Use  [Left/Right] Switch  [ESC] Close";
+	const char* keybinds = (activeScreen == InventoryScreen::EQUIPMENT) ?
+		"[Enter] Unequip/Browse  [d] Drop  [Left/Right] Switch  [ESC] Close" :
+		"[Enter] Use/Equip  [d] Drop  [a-z] Quick Use  [Left/Right] Switch  [ESC] Close";
 
 	// The keybind line is the widest thing on the screen, so it starts one tile in
 	// and is cut to what the panel actually holds rather than running under the frame.
-	const int keybindWidth = ctx.renderer->get_screen_width() - 2 * tileSize - PANEL_EDGE_CLEARANCE;
+	const int keybindWidth =
+		ctx.renderer->get_screen_width() - 2 * tileSize - PANEL_EDGE_CLEARANCE;
 	ctx.renderer->draw_text(
 		Vector2D{
 			tileSize,
@@ -879,7 +990,8 @@ std::string InventoryUI::format_weapon_info(const Item& item) const
 	DamageInfo damage = WeaponDamageRegistry::get_enhanced_damage_info(
 		item.itemKey,
 		&item.get_enhancement());
-	const Weapon* weapon = item.behavior ? std::get_if<Weapon>(&*item.behavior) : nullptr;
+	const Weapon* weapon =
+		item.behavior ? std::get_if<Weapon>(&*item.behavior) : nullptr;
 	bool ranged = weapon && weapon->is_ranged();
 	return std::format("[{} {}]", damage.displayRoll, ranged ? "rng" : "dmg");
 }
@@ -912,7 +1024,10 @@ std::string InventoryUI::format_stat_bonus_info(const Item& item) const
 	auto extract_stats = [&](const auto& statBoost) -> bool
 	{
 		using BoostType = std::decay_t<decltype(statBoost)>;
-		if constexpr (std::is_same_v<BoostType, JewelryAmulet> || std::is_same_v<BoostType, Gauntlets> || std::is_same_v<BoostType, Girdle>)
+		if constexpr (
+			std::is_same_v<BoostType, JewelryAmulet> ||
+			std::is_same_v<BoostType, Gauntlets> ||
+			std::is_same_v<BoostType, Girdle>)
 		{
 			str_b = statBoost.strBonus;
 			dex_b = statBoost.dexBonus;
@@ -995,7 +1110,10 @@ std::string InventoryUI::format_value_info(const Item& item) const
 	const int value = item.get_value();
 	if (value > 0)
 	{
-		return std::format("Value: {} gp   Weight: {} lb", value, item.enhancement.weight);
+		return std::format(
+			"Value: {} gp   Weight: {} lb",
+			value,
+			item.enhancement.weight);
 	}
 	return std::format("Weight: {} lb", item.enhancement.weight);
 }
@@ -1069,7 +1187,9 @@ std::string InventoryUI::get_category_name(ItemCategory cat) const
 
 bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 {
-	assert(ctx.inputSystem && "InventoryUI::handle_input: called without an inputSystem");
+	assert(
+		ctx.inputSystem &&
+		"InventoryUI::handle_input: called without an inputSystem");
 
 	GameKey key = ctx.inputSystem->get_key();
 
@@ -1091,7 +1211,9 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 		else
 		{
 			int entryIdx = (mouseRow - FIRST_CONTENT_ROW) + scrollOffset;
-			if (entryIdx >= 0 && entryIdx < static_cast<int>(listEntries.size()) && listEntries[entryIdx].kind == BackpackEntry::Kind::ITEM)
+			if (entryIdx >= 0 &&
+				entryIdx < static_cast<int>(listEntries.size()) &&
+				listEntries[entryIdx].kind == BackpackEntry::Kind::ITEM)
 			{
 				listCursor = entryIdx;
 			}
@@ -1109,7 +1231,10 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 			activeScreen = InventoryScreen::EQUIPMENT;
 			return true;
 		}
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Inventory closed.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"Inventory closed.",
+			MessageCompletion::FINISHED);
 		return false;
 	}
 
@@ -1164,7 +1289,9 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 
 	case GameKey::MOUSE_RIGHT:
 	{
-		assert(ctx.renderer && "InventoryUI::handle_input MOUSE_RIGHT called without a renderer");
+		assert(
+			ctx.renderer &&
+			"InventoryUI::handle_input MOUSE_RIGHT called without a renderer");
 
 		const int tileSize = ctx.renderer->get_tile_size();
 		const ::Vector2 rawMouse = GetMousePosition();
@@ -1184,7 +1311,9 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 
 	case GameKey::MOUSE_LEFT:
 	{
-		assert(ctx.renderer && "InventoryUI::handle_input MOUSE_LEFT called without a renderer");
+		assert(
+			ctx.renderer &&
+			"InventoryUI::handle_input MOUSE_LEFT called without a renderer");
 
 		int tileSize = ctx.renderer->get_tile_size();
 		::Vector2 rawMouse = GetMousePosition();
@@ -1194,22 +1323,34 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 
 		// Click outside the panel = close. The panel is the screen, so this is a
 		// pixel test rather than a tile one.
-		if (mousePixelX < 0 || mousePixelX >= ctx.renderer->get_screen_width() || mousePixelY < 0 || mousePixelY >= ctx.renderer->get_screen_height())
+		if (mousePixelX < 0 ||
+			mousePixelX >= ctx.renderer->get_screen_width() ||
+			mousePixelY < 0 || mousePixelY >= ctx.renderer->get_screen_height())
 		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Inventory closed.", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"Inventory closed.",
+				MessageCompletion::FINISHED);
 			return false;
 		}
 
 		// Close button [X]
-		if (CloseButtonArea(*ctx.renderer, screen_cols(ctx)).contains(mousePixelX, mousePixelY))
+		if (CloseButtonArea(*ctx.renderer, screen_cols(ctx))
+				.contains(mousePixelX, mousePixelY))
 		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Inventory closed.", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"Inventory closed.",
+				MessageCompletion::FINISHED);
 			return false;
 		}
 
 		// The tab bar. Its geometry is tab_boxes, the same thing the drawing walks, so a
 		// tab cannot be painted in one place and clicked in another.
-		if (const auto clickedTab = InventoryActions::tab_at(mousePixelX, mousePixelY, *ctx.renderer))
+		if (const auto clickedTab = InventoryActions::tab_at(
+				mousePixelX,
+				mousePixelY,
+				*ctx.renderer))
 		{
 			switch_to_screen(*clickedTab);
 			return true;
@@ -1234,10 +1375,12 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 		else
 		{
 			int entryIdx = (mouseRow - FIRST_CONTENT_ROW) + scrollOffset;
-			if (entryIdx >= 0 && entryIdx < static_cast<int>(listEntries.size()))
+			if (entryIdx >= 0 &&
+				entryIdx < static_cast<int>(listEntries.size()))
 			{
 				listCursor = entryIdx;
-				if (listEntries[entryIdx].kind == BackpackEntry::Kind::ITEM && handle_enter_item(player, ctx) == AfterUse::CLOSES)
+				if (listEntries[entryIdx].kind == BackpackEntry::Kind::ITEM &&
+					handle_enter_item(player, ctx) == AfterUse::CLOSES)
 				{
 					return false;
 				}
@@ -1251,18 +1394,23 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 	{
 		// Letter shortcuts for Backpack/Usables screens
 		int charInput = ctx.inputSystem->get_char_input();
-		if (activeScreen != InventoryScreen::EQUIPMENT && charInput >= 'a' && charInput <= 'z')
+		if (activeScreen != InventoryScreen::EQUIPMENT && charInput >= 'a' &&
+			charInput <= 'z')
 		{
 			int letterIndex = charInput - 'a';
 			int itemCount = 0;
-			for (int entryIndex = 0; entryIndex < static_cast<int>(listEntries.size()); ++entryIndex)
+			for (
+				int entryIndex = 0;
+				entryIndex < static_cast<int>(listEntries.size());
+				++entryIndex)
 			{
 				if (listEntries[entryIndex].kind == BackpackEntry::Kind::ITEM)
 				{
 					if (itemCount == letterIndex)
 					{
 						listCursor = entryIndex;
-						return handle_enter_item(player, ctx) == AfterUse::STAYS_OPEN;
+						return handle_enter_item(player, ctx) ==
+							AfterUse::STAYS_OPEN;
 					}
 					itemCount++;
 				}
@@ -1352,7 +1500,9 @@ void InventoryUI::handle_enter_equipment(Player& player, GameContext& ctx)
 	}
 }
 
-InventoryUI::AfterUse InventoryUI::handle_enter_item(Player& player, GameContext& ctx)
+InventoryUI::AfterUse InventoryUI::handle_enter_item(
+	Player& player,
+	GameContext& ctx)
 {
 	if (listCursor < 0 || listCursor >= static_cast<int>(listEntries.size()))
 	{
@@ -1372,10 +1522,13 @@ InventoryUI::AfterUse InventoryUI::handle_enter_item(Player& player, GameContext
 	}
 
 	// Asked before the use, which destroys a scroll and its behaviour with it.
-	const bool playsOutOnTheMap = moves_its_user(*selectedItem->behavior) || targets_creatures(*selectedItem->behavior);
-	const bool handsOverToTargeting = hands_over_to_targeting(*selectedItem->behavior);
+	const bool playsOutOnTheMap = moves_its_user(*selectedItem->behavior) ||
+		targets_creatures(*selectedItem->behavior);
+	const bool handsOverToTargeting =
+		hands_over_to_targeting(*selectedItem->behavior);
 
-	bool itemUsed = use_item(*selectedItem->behavior, *selectedItem, player, ctx);
+	bool itemUsed =
+		use_item(*selectedItem->behavior, *selectedItem, player, ctx);
 
 	// The targeting cursor now on top finishes this use, so the screen beneath it goes when
 	// the cursor closes, whether the scroll was aimed or the cursor cancelled.
@@ -1437,19 +1590,23 @@ void InventoryUI::open_row_menu(Player& player, int mouseRow, GameContext& ctx)
 		{
 			return;
 		}
-		rowHoldsItem = player.get_equipped_item(SLOT_TABLE[rowIndex].slot) != nullptr;
+		rowHoldsItem =
+			player.get_equipped_item(SLOT_TABLE[rowIndex].slot) != nullptr;
 	}
 	else
 	{
 		const int entryIndex = rowIndex + scrollOffset;
-		if (entryIndex < 0 || entryIndex >= static_cast<int>(listEntries.size()))
+		if (entryIndex < 0 ||
+			entryIndex >= static_cast<int>(listEntries.size()))
 		{
 			return;
 		}
-		rowHoldsItem = listEntries[entryIndex].kind == BackpackEntry::Kind::ITEM;
+		rowHoldsItem =
+			listEntries[entryIndex].kind == BackpackEntry::Kind::ITEM;
 	}
 
-	std::vector<std::string> labels = InventoryActions::labels_for_row(activeScreen, rowHoldsItem);
+	std::vector<std::string> labels =
+		InventoryActions::labels_for_row(activeScreen, rowHoldsItem);
 	if (labels.empty())
 	{
 		return;
@@ -1481,19 +1638,22 @@ void InventoryUI::open_row_menu(Player& player, int mouseRow, GameContext& ctx)
 		{
 			handle_enter_equipment(player, menuCtx);
 		}
-		else if (chosen == "Use" && handle_enter_item(player, menuCtx) == AfterUse::CLOSES)
+		else if (
+			chosen == "Use" &&
+			handle_enter_item(player, menuCtx) == AfterUse::CLOSES)
 		{
 			// This menu is on top, so the inventory closes on its own next frame.
 			menu_set_run_false();
 		}
 	};
 
-	ctx.menus->push_back(std::make_unique<ContextMenu>(
-		std::move(labels),
-		CONTEXT_MENU_ANCHOR_COL,
-		mouseRow,
-		std::move(on_select),
-		ctx));
+	ctx.menus->push_back(
+		std::make_unique<ContextMenu>(
+			std::move(labels),
+			CONTEXT_MENU_ANCHOR_COL,
+			mouseRow,
+			std::move(on_select),
+			ctx));
 }
 
 void InventoryUI::handle_drop(Player& player, GameContext& ctx)
@@ -1504,7 +1664,10 @@ void InventoryUI::handle_drop(Player& player, GameContext& ctx)
 		Item* equipped = player.get_equipped_item(slot);
 		if (!equipped)
 		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Nothing to drop.", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"Nothing to drop.",
+				MessageCompletion::FINISHED);
 			return;
 		}
 
@@ -1516,7 +1679,8 @@ void InventoryUI::handle_drop(Player& player, GameContext& ctx)
 		{
 			return owned && owned->uniqueId == itemId;
 		};
-		auto found = std::ranges::find_if(player.inventoryData.items, find_by_id);
+		auto found =
+			std::ranges::find_if(player.inventoryData.items, find_by_id);
 		if (found != player.inventoryData.items.end())
 		{
 			player.drop(**found, ctx);
@@ -1528,7 +1692,8 @@ void InventoryUI::handle_drop(Player& player, GameContext& ctx)
 	}
 	else
 	{
-		if (listCursor < 0 || listCursor >= static_cast<int>(listEntries.size()))
+		if (listCursor < 0 ||
+			listCursor >= static_cast<int>(listEntries.size()))
 		{
 			return;
 		}
@@ -1552,7 +1717,9 @@ void InventoryUI::handle_drop(Player& player, GameContext& ctx)
 // Helpers
 // ============================================================
 
-std::optional<int> InventoryUI::get_next_item_index(int from, int direction) const
+std::optional<int> InventoryUI::get_next_item_index(
+	int from,
+	int direction) const
 {
 	int idx = from + direction;
 	while (idx >= 0 && idx < static_cast<int>(listEntries.size()))
@@ -1573,7 +1740,8 @@ Item* InventoryUI::get_selected_item() const
 		return nullptr;
 	}
 
-	if (listCursor >= 0 && listCursor < static_cast<int>(listEntries.size()) && listEntries[listCursor].kind == BackpackEntry::Kind::ITEM)
+	if (listCursor >= 0 && listCursor < static_cast<int>(listEntries.size()) &&
+		listEntries[listCursor].kind == BackpackEntry::Kind::ITEM)
 	{
 		return listEntries[listCursor].item;
 	}

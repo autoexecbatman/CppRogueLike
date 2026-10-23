@@ -204,11 +204,15 @@ protected:
 	// A 1d4 attacker from THAC0 20 with the given Strength, and a target at armour class 10.
 	std::unique_ptr<Creature> brute_with(int strength, int exceptional)
 	{
-		auto brute = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "brute", ColorPairId::WHITE_BLACK });
+		auto brute = std::make_unique<Creature>(
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "brute", ColorPairId::WHITE_BLACK });
 		brute->experienceReward = std::make_unique<ExperienceReward>(0);
 		brute->healthPool = std::make_unique<HealthPool>(STARTING_HP);
 		brute->armorClass = std::make_unique<ArmorClass>(10);
-		brute->attacker = std::make_unique<MonsterAttacker>(*brute, DamageInfo{ "1d4", DamageType::PHYSICAL });
+		brute->attacker = std::make_unique<MonsterAttacker>(
+			*brute,
+			DamageInfo{ "1d4", DamageType::PHYSICAL });
 		brute->set_thaco(20);
 		brute->set_dr(0);
 		brute->set_dexterity(10);
@@ -238,11 +242,16 @@ TEST_F(AbilityTableTest, StrengthRowsMatchTableOne)
 {
 	for (const StrengthRow& expected : TABLE_ONE)
 	{
-		const StrengthAttributes row = game.dataManager.strength_for(expected.score, 0);
-		EXPECT_EQ(row.hitProb, expected.hit) << "hit at Strength " << expected.score;
-		EXPECT_EQ(row.dmgAdj, expected.damage) << "damage at Strength " << expected.score;
-		EXPECT_EQ(row.wgtAllow, expected.weightAllowance) << "weight allowance at Strength " << expected.score;
-		EXPECT_EQ(row.maxPress, expected.maximumPress) << "maximum press at Strength " << expected.score;
+		const StrengthAttributes row =
+			game.dataManager.strength_for(expected.score, 0);
+		EXPECT_EQ(row.hitProb, expected.hit)
+			<< "hit at Strength " << expected.score;
+		EXPECT_EQ(row.dmgAdj, expected.damage)
+			<< "damage at Strength " << expected.score;
+		EXPECT_EQ(row.wgtAllow, expected.weightAllowance)
+			<< "weight allowance at Strength " << expected.score;
+		EXPECT_EQ(row.maxPress, expected.maximumPress)
+			<< "maximum press at Strength " << expected.score;
 	}
 }
 
@@ -253,11 +262,15 @@ TEST_F(AbilityTableTest, ExceptionalBandsMatchTableOne)
 	{
 		for (const int percentile : { expected.from, expected.to })
 		{
-			const StrengthAttributes row = game.dataManager.strength_for(18, percentile);
+			const StrengthAttributes row =
+				game.dataManager.strength_for(18, percentile);
 			EXPECT_EQ(row.hitProb, expected.hit) << "hit at 18/" << percentile;
-			EXPECT_EQ(row.dmgAdj, expected.damage) << "damage at 18/" << percentile;
-			EXPECT_EQ(row.wgtAllow, expected.weightAllowance) << "weight allowance at 18/" << percentile;
-			EXPECT_EQ(row.maxPress, expected.maximumPress) << "maximum press at 18/" << percentile;
+			EXPECT_EQ(row.dmgAdj, expected.damage)
+				<< "damage at 18/" << percentile;
+			EXPECT_EQ(row.wgtAllow, expected.weightAllowance)
+				<< "weight allowance at 18/" << percentile;
+			EXPECT_EQ(row.maxPress, expected.maximumPress)
+				<< "maximum press at 18/" << percentile;
 		}
 	}
 }
@@ -267,8 +280,11 @@ TEST_F(AbilityTableTest, LockedDoorChancesMatchTableOne)
 {
 	for (const LockedDoorChance& expected : TABLE_ONE_LOCKED_DOORS)
 	{
-		const StrengthAttributes row = game.dataManager.strength_for(expected.score, expected.exceptional);
-		EXPECT_EQ(row.lockedDoors, expected.chance) << "locked doors at " << expected.score << "/" << expected.exceptional;
+		const StrengthAttributes row =
+			game.dataManager.strength_for(expected.score, expected.exceptional);
+		EXPECT_EQ(row.lockedDoors, expected.chance)
+			<< "locked doors at " << expected.score << "/"
+			<< expected.exceptional;
 	}
 }
 
@@ -284,12 +300,18 @@ TEST_F(AbilityTableTest, ConstitutionRowsMatchTableThree)
 {
 	for (const ConstitutionRow& expected : TABLE_THREE)
 	{
-		const ConstitutionAttributes row = game.dataManager.constitution_for(expected.score);
-		EXPECT_EQ(row.HPAdj, expected.hitPoints) << "hit points at Constitution " << expected.score;
-		EXPECT_EQ(row.SystemShock, expected.systemShock) << "system shock at Constitution " << expected.score;
-		EXPECT_EQ(row.ResurrectionSurvival, expected.resurrection) << "resurrection at Constitution " << expected.score;
-		EXPECT_EQ(row.PoisonSave, expected.poisonSave) << "poison save at Constitution " << expected.score;
-		EXPECT_EQ(row.Regeneration, expected.regenerationTurns) << "regeneration at Constitution " << expected.score;
+		const ConstitutionAttributes row =
+			game.dataManager.constitution_for(expected.score);
+		EXPECT_EQ(row.HPAdj, expected.hitPoints)
+			<< "hit points at Constitution " << expected.score;
+		EXPECT_EQ(row.SystemShock, expected.systemShock)
+			<< "system shock at Constitution " << expected.score;
+		EXPECT_EQ(row.ResurrectionSurvival, expected.resurrection)
+			<< "resurrection at Constitution " << expected.score;
+		EXPECT_EQ(row.PoisonSave, expected.poisonSave)
+			<< "poison save at Constitution " << expected.score;
+		EXPECT_EQ(row.Regeneration, expected.regenerationTurns)
+			<< "regeneration at Constitution " << expected.score;
 	}
 }
 
@@ -324,7 +346,8 @@ TEST_F(AbilityTableTest, StrengthPastTheTableStillAttacks)
 
 	brute->attacker->attack(*target, AttackKind::MELEE, ctx);
 
-	EXPECT_EQ(STARTING_HP - target->get_hp(), 18) << "an attacker past Strength 25 never swung";
+	EXPECT_EQ(STARTING_HP - target->get_hp(), 18)
+		<< "an attacker past Strength 25 never swung";
 }
 
 // A warrior's hit point bonus at Constitution 20 is +5, where the table used to end at 19.
@@ -335,7 +358,9 @@ TEST_F(AbilityTableTest, ConstitutionTwentyKeepsAWarriorsHitPointBonus)
 	dwarf->set_constitution(20);
 	ConstitutionTracker tracker{};
 
-	EXPECT_EQ(tracker.apply_constitution_changes(*dwarf, *ctx.dataManager).newBonus, 5);
+	EXPECT_EQ(
+		tracker.apply_constitution_changes(*dwarf, *ctx.dataManager).newBonus,
+		5);
 }
 
 // The tracker records the score it applied, so asking again with nothing changed
@@ -346,9 +371,11 @@ TEST_F(AbilityTableTest, ASecondApplicationWithNothingChangedReportsNothing)
 	dwarf->set_creature_class(CreatureClass::FIGHTER);
 	dwarf->set_constitution(20);
 	ConstitutionTracker tracker{};
-	ASSERT_TRUE(tracker.apply_constitution_changes(*dwarf, *ctx.dataManager).firstApplication);
+	ASSERT_TRUE(tracker.apply_constitution_changes(*dwarf, *ctx.dataManager)
+			.firstApplication);
 
-	const auto again = tracker.apply_constitution_changes(*dwarf, *ctx.dataManager);
+	const auto again =
+		tracker.apply_constitution_changes(*dwarf, *ctx.dataManager);
 
 	EXPECT_FALSE(again.firstApplication);
 	EXPECT_EQ(again.hpDifference, 0);

@@ -16,10 +16,7 @@
 class TileDefinitionTest : public ::testing::Test
 {
 protected:
-	void SetUp() override
-	{
-		config.load("data/tiles/tile_config.json");
-	}
+	void SetUp() override { config.load("data/tiles/tile_config.json"); }
 
 	TileConfig config{};
 };
@@ -28,17 +25,19 @@ protected:
 // the replacement for five silent default cases.
 TEST_F(TileDefinitionTest, EveryTileTypeHasADefinition)
 {
-	for (const auto tileType : {
-			 TileType::FLOOR,
-			 TileType::WALL,
-			 TileType::WATER,
-			 TileType::CLOSED_DOOR,
-			 TileType::OPEN_DOOR,
-			 TileType::CORRIDOR,
-		 })
+	for (
+		const auto tileType : {
+			TileType::FLOOR,
+			TileType::WALL,
+			TileType::WATER,
+			TileType::CLOSED_DOOR,
+			TileType::OPEN_DOOR,
+			TileType::CORRIDOR,
+		})
 	{
 		EXPECT_NO_THROW((void)config.get_tile_definition(tileType))
-			<< "tile type " << static_cast<int>(tileType) << " has no entry in tile_config.json";
+			<< "tile type " << static_cast<int>(tileType)
+			<< " has no entry in tile_config.json";
 	}
 }
 
@@ -64,49 +63,57 @@ TEST_F(TileDefinitionTest, WaterBlocksUnlessTheCreatureCanSwim)
 // Open ground is passable and unremarkable.
 TEST_F(TileDefinitionTest, OpenGroundIsPassableAndSilent)
 {
-	for (const auto tileType : { TileType::FLOOR, TileType::CORRIDOR, TileType::OPEN_DOOR })
+	for (
+		const auto tileType :
+		{ TileType::FLOOR, TileType::CORRIDOR, TileType::OPEN_DOOR })
 	{
 		const TileDefinition& definition = config.get_tile_definition(tileType);
 
 		EXPECT_FALSE(definition.blocksMovement);
-		EXPECT_TRUE(definition.entryMessage.empty()) << definition.displayName << " announces itself";
+		EXPECT_TRUE(definition.entryMessage.empty())
+			<< definition.displayName << " announces itself";
 	}
 }
 
 // Every tile is nameable, since the hover tooltip reads this.
 TEST_F(TileDefinitionTest, EveryTileHasADisplayName)
 {
-	for (const auto tileType : {
-			 TileType::FLOOR,
-			 TileType::WALL,
-			 TileType::WATER,
-			 TileType::CLOSED_DOOR,
-			 TileType::OPEN_DOOR,
-			 TileType::CORRIDOR,
-		 })
+	for (
+		const auto tileType : {
+			TileType::FLOOR,
+			TileType::WALL,
+			TileType::WATER,
+			TileType::CLOSED_DOOR,
+			TileType::OPEN_DOOR,
+			TileType::CORRIDOR,
+		})
 	{
 		const TileDefinition& definition = config.get_tile_definition(tileType);
 
 		EXPECT_FALSE(definition.displayName.empty());
-		EXPECT_NE(definition.displayName, "Unknown") << "left at the struct default";
+		EXPECT_NE(definition.displayName, "Unknown")
+			<< "left at the struct default";
 	}
 }
 
 // A minimap colour must be authored, or the tile draws as transparent black.
 TEST_F(TileDefinitionTest, EveryTileHasMinimapColours)
 {
-	for (const auto tileType : {
-			 TileType::FLOOR,
-			 TileType::WALL,
-			 TileType::WATER,
-			 TileType::CLOSED_DOOR,
-			 TileType::OPEN_DOOR,
-			 TileType::CORRIDOR,
-		 })
+	for (
+		const auto tileType : {
+			TileType::FLOOR,
+			TileType::WALL,
+			TileType::WATER,
+			TileType::CLOSED_DOOR,
+			TileType::OPEN_DOOR,
+			TileType::CORRIDOR,
+		})
 	{
 		const TileDefinition& definition = config.get_tile_definition(tileType);
 
-		EXPECT_GT(definition.minimapVisible.alpha, 0) << definition.displayName << " is invisible in view";
-		EXPECT_GT(definition.minimapRemembered.alpha, 0) << definition.displayName << " is invisible from memory";
+		EXPECT_GT(definition.minimapVisible.alpha, 0)
+			<< definition.displayName << " is invisible in view";
+		EXPECT_GT(definition.minimapRemembered.alpha, 0)
+			<< definition.displayName << " is invisible from memory";
 	}
 }

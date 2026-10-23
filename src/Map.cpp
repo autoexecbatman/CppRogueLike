@@ -92,17 +92,18 @@ std::optional<DoorState> door_state_from(int saved)
 } // namespace
 
 //====
-Map::Map(int mapWidth, int mapHeight)
-	: mapWidth(mapWidth),
-	  mapHeight(mapHeight),
-	  fovMap(std::make_unique<FovMap>(mapWidth, mapHeight)),
-	  seed(0)
+Map::Map(int mapWidth, int mapHeight) :
+	mapWidth(mapWidth),
+	mapHeight(mapHeight),
+	fovMap(std::make_unique<FovMap>(mapWidth, mapHeight)),
+	seed(0)
 {
 }
 
 bool Map::in_bounds(Vector2D pos) const noexcept
 {
-	bool result = pos.y >= 0 && pos.y < mapHeight && pos.x >= 0 && pos.x < mapWidth;
+	bool result =
+		pos.y >= 0 && pos.y < mapHeight && pos.x >= 0 && pos.x < mapWidth;
 	// Logging moved to callers that have GameContext access
 	return result;
 }
@@ -133,7 +134,9 @@ void Map::init(GameContext& ctx)
 
 	init_tiles(); // resets tiles + fovMap to all-walls
 	assert(ctx.messageSystem && "Map::init: called without a messageSystem");
-	ctx.messageSystem->log("Map::init: " + std::to_string(mapWidth) + "x" + std::to_string(mapHeight) + " tile grid reset");
+	ctx.messageSystem->log(
+		"Map::init: " + std::to_string(mapWidth) + "x" +
+		std::to_string(mapHeight) + " tile grid reset");
 	assert(ctx.dice && "Map::init: called without dice");
 	seed = ctx.dice->roll(0, std::numeric_limits<int>::max());
 	mapRng = RandomDice{ static_cast<unsigned int>(seed) };
@@ -142,7 +145,9 @@ void Map::init(GameContext& ctx)
 	// stamps inside create_room land in the correct DecorEditor bucket.
 	assert(ctx.levelManager && "Map::init: called without a levelManager");
 	assert(ctx.decorEditor && "Map::init: called without a decorEditor");
-	ctx.decorEditor->set_active_map(seed, ctx.levelManager->get_dungeon_level());
+	ctx.decorEditor->set_active_map(
+		seed,
+		ctx.levelManager->get_dungeon_level());
 
 	generate_rooms(ctx);
 
@@ -150,7 +155,10 @@ void Map::init(GameContext& ctx)
 
 	if (ctx.levelManager->get_dungeon_level() >= 1)
 	{
-		TreasureRoom::maybe_create(ctx.levelManager->get_dungeon_level(), mapRng, ctx);
+		TreasureRoom::maybe_create(
+			ctx.levelManager->get_dungeon_level(),
+			mapRng,
+			ctx);
 	}
 	place_amulet(ctx);
 
@@ -191,14 +199,21 @@ void Map::load(const json& source)
 		tiles.back().explored = explored;
 		// A door state read from disk is a boundary, so a value no DoorState has is refused.
 		const int savedDoorState = tileJson.at("doorState").get<int>();
-		const std::optional<DoorState> doorState = door_state_from(savedDoorState);
+		const std::optional<DoorState> doorState =
+			door_state_from(savedDoorState);
 		if (!doorState)
 		{
-			throw std::runtime_error(std::format("Map::load: door state {} at {},{} is not a DoorState", savedDoorState, position.x, position.y));
+			throw std::runtime_error(
+				std::format(
+					"Map::load: door state {} at {},{} is not a DoorState",
+					savedDoorState,
+					position.x,
+					position.y));
 		}
 		// Doors are read back as saved, never placed again: later passes may have left corridor where a door would go.
 		tiles.back().doorState = *doorState;
-		tiles.back().lockPickFailedAtLevel = tileJson.at("lockPickFailedAtLevel").get<int>();
+		tiles.back().lockPickFailedAtLevel =
+			tileJson.at("lockPickFailedAtLevel").get<int>();
 	}
 
 	fovMap = std::make_unique<FovMap>(mapWidth, mapHeight);
@@ -207,7 +222,10 @@ void Map::load(const json& source)
 	// Rebuild FOV grid from loaded tile data.
 	for (const auto& tile : tiles)
 	{
-		fovMap->set_properties(tile.position.x, tile.position.y, fov_properties_for(tile.type));
+		fovMap->set_properties(
+			tile.position.x,
+			tile.position.y,
+			fov_properties_for(tile.type));
 	}
 
 	// Note: Logging requires GameContext access - moved to caller
@@ -300,14 +318,16 @@ bool Map::has_wall_border() const noexcept
 	// Top and bottom rows, then the left and right columns.
 	for (int col = 0; col < mapWidth; ++col)
 	{
-		if (get_tile_type(Vector2D{ col, 0 }) != TileType::WALL || get_tile_type(Vector2D{ col, mapHeight - 1 }) != TileType::WALL)
+		if (get_tile_type(Vector2D{ col, 0 }) != TileType::WALL ||
+			get_tile_type(Vector2D{ col, mapHeight - 1 }) != TileType::WALL)
 		{
 			return false;
 		}
 	}
 	for (int row = 0; row < mapHeight; ++row)
 	{
-		if (get_tile_type(Vector2D{ 0, row }) != TileType::WALL || get_tile_type(Vector2D{ mapWidth - 1, row }) != TileType::WALL)
+		if (get_tile_type(Vector2D{ 0, row }) != TileType::WALL ||
+			get_tile_type(Vector2D{ mapWidth - 1, row }) != TileType::WALL)
 		{
 			return false;
 		}
@@ -374,7 +394,8 @@ void Map::describe_tile(TileType tileType, GameContext& ctx)
 {
 	assert(ctx.tileConfig && "Map::describe_tile: called without a tileConfig");
 
-	const TileDefinition& definition = ctx.tileConfig->get_tile_definition(tileType);
+	const TileDefinition& definition =
+		ctx.tileConfig->get_tile_definition(tileType);
 
 	// Most ground is unremarkable and says nothing.
 	if (definition.entryMessage.empty())
@@ -382,18 +403,29 @@ void Map::describe_tile(TileType tileType, GameContext& ctx)
 		return;
 	}
 
-	assert(ctx.messageSystem && "Map::describe_tile: called without a messageSystem");
+	assert(
+		ctx.messageSystem &&
+		"Map::describe_tile: called without a messageSystem");
 	ctx.messageSystem->log(definition.entryMessage);
-	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, definition.entryMessage, MessageCompletion::FINISHED);
+	ctx.messageSystem->message(
+		ColorPairId::WHITE_BLACK,
+		definition.entryMessage,
+		MessageCompletion::FINISHED);
 }
 
-Decoration* Map::find_decoration_at(Vector2D pos, const GameContext& ctx) const noexcept
+Decoration* Map::find_decoration_at(
+	Vector2D pos,
+	const GameContext& ctx) const noexcept
 {
-	assert(ctx.decorations && "Map::find_decoration_at: called without decorations");
+	assert(
+		ctx.decorations &&
+		"Map::find_decoration_at: called without decorations");
 
 	for (auto& decoration : *ctx.decorations)
 	{
-		assert(decoration && "find_decoration_at: the decoration list holds a null entry");
+		assert(
+			decoration &&
+			"find_decoration_at: the decoration list holds a null entry");
 
 		if (!decoration->isBroken && decoration->position == pos)
 		{
@@ -406,7 +438,9 @@ Decoration* Map::find_decoration_at(Vector2D pos, const GameContext& ctx) const 
 
 void Map::compute_fov(GameContext& ctx)
 {
-	assert(ctx.messageSystem && "Map::compute_fov: called without a messageSystem");
+	assert(
+		ctx.messageSystem &&
+		"Map::compute_fov: called without a messageSystem");
 	ctx.messageSystem->log("...Computing FOV...");
 
 	assert(ctx.player() && "Map::compute_fov called without player");
@@ -415,7 +449,10 @@ void Map::compute_fov(GameContext& ctx)
 		ctx.player()->position.y >= 0 && ctx.player()->position.y < mapHeight &&
 		"Map::compute_fov: player position out of map bounds");
 
-	fovMap->compute_fov(ctx.player()->position.x, ctx.player()->position.y, Vision::sight_radius(*ctx.player()));
+	fovMap->compute_fov(
+		ctx.player()->position.x,
+		ctx.player()->position.y,
+		Vision::sight_radius(*ctx.player()));
 }
 
 void Map::update()
@@ -443,7 +480,8 @@ void Map::render(const GameContext& ctx) const
 	int cameraX = ctx.renderer->get_camera_x();
 	int cameraY = ctx.renderer->get_camera_y();
 	int visibleCols = ctx.renderer->get_viewport_cols();
-	int visibleRows = ctx.renderer->get_viewport_rows() - ctx.renderer->get_gui_reserve_rows();
+	int visibleRows = ctx.renderer->get_viewport_rows() -
+		ctx.renderer->get_gui_reserve_rows();
 
 	int startCol = std::max(0, cameraX / tileSize);
 	int startRow = std::max(0, cameraY / tileSize);
@@ -500,10 +538,13 @@ void Map::render(const GameContext& ctx) const
 			return false;
 		}
 		TileType tileType = get_tile_type(pos);
-		return tileType == TileType::FLOOR || tileType == TileType::CORRIDOR || tileType == TileType::OPEN_DOOR || tileType == TileType::WATER;
+		return tileType == TileType::FLOOR || tileType == TileType::CORRIDOR ||
+			tileType == TileType::OPEN_DOOR || tileType == TileType::WATER;
 	};
 
-	const std::array<Vector2D, 8> allDirs = { { DIR_NW, DIR_N, DIR_NE, DIR_W, DIR_E, DIR_SW, DIR_S, DIR_SE } };
+	const std::array<Vector2D, 8> allDirs = {
+		{ DIR_NW, DIR_N, DIR_NE, DIR_W, DIR_E, DIR_SW, DIR_S, DIR_SE }
+	};
 
 	// A border wall is a wall/door with at least one walkable tile
 	// in its 8 neighbors. Only border walls form the visible room outline.
@@ -532,7 +573,8 @@ void Map::render(const GameContext& ctx) const
 	auto decor_hash = [&](int tileY, int tileX, int salt) -> unsigned int
 	{
 		unsigned int hashValue = static_cast<unsigned int>(
-			tileY * 7919 + tileX * 6271 + static_cast<int>(seed) * 1013 + salt * 3571);
+			tileY * 7919 + tileX * 6271 + static_cast<int>(seed) * 1013 +
+			salt * 3571);
 		hashValue ^= hashValue >> 16;
 		hashValue *= 0x45d9f3bU;
 		hashValue ^= hashValue >> 16;
@@ -565,7 +607,8 @@ void Map::render(const GameContext& ctx) const
 			return TileRef{};
 		}
 
-		int zone = static_cast<int>(decor_hash(pos.y / 20, pos.x / 20, 199) % 5);
+		int zone =
+			static_cast<int>(decor_hash(pos.y / 20, pos.x / 20, 199) % 5);
 		const auto& tileConfig = *ctx.tileConfig;
 		if (zone == zoneChapel)
 		{
@@ -587,9 +630,8 @@ void Map::render(const GameContext& ctx) const
 			// In FOV: full colour. Explored but not visible: a neutral memory tint, since it multiplies
 			// with the warm memory light quad and only darkness should separate the two.
 			bool inFov = is_in_fov(pos);
-			Color tint = inFov
-				? Color{ 255, 255, 255, 255 }
-				: Color{ 92, 92, 96, 255 };
+			Color tint =
+				inFov ? Color{ 255, 255, 255, 255 } : Color{ 92, 92, 96, 255 };
 
 			TileType type = get_tile_type(pos);
 			TileRef tileRef{};
@@ -695,7 +737,8 @@ void Map::render(const GameContext& ctx) const
 			// Decorations: hand-placed overrides take priority over procedural.
 			{
 #ifndef __EMSCRIPTEN__
-				TileRef decorRef = ctx.decorEditor->get_override(Vector2D{ col, row });
+				TileRef decorRef =
+					ctx.decorEditor->get_override(Vector2D{ col, row });
 #else
 				TileRef decorRef = resolve_decor(pos, type);
 #endif
@@ -705,7 +748,10 @@ void Map::render(const GameContext& ctx) const
 				}
 				if (decorRef.is_valid())
 				{
-					ctx.renderer->draw_tile(Vector2D{ col, row }, decorRef, tint);
+					ctx.renderer->draw_tile(
+						Vector2D{ col, row },
+						decorRef,
+						tint);
 				}
 			}
 		}
@@ -722,7 +768,10 @@ void Map::add_item(Vector2D pos, GameContext& ctx)
 
 	// Draw a random item from the registry for this level
 	assert(ctx.levelManager && "Map::add_item: called without a levelManager");
-	ItemFactory::spawn_random_item(pos, ctx.levelManager->get_dungeon_level(), ctx);
+	ItemFactory::spawn_random_item(
+		pos,
+		ctx.levelManager->get_dungeon_level(),
+		ctx);
 }
 
 void Map::dig(Vector2D begin, Vector2D end)
@@ -770,11 +819,17 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 
 	if (horizontal_first)
 	{
-		for (int col = std::min(beginCol, endCol); col <= std::max(beginCol, endCol); ++col)
+		for (
+			int col = std::min(beginCol, endCol);
+			col <= std::max(beginCol, endCol);
+			++col)
 		{
 			dig_one(Vector2D{ col, beginRow });
 		}
-		for (int row = std::min(beginRow, endRow); row <= std::max(beginRow, endRow); ++row)
+		for (
+			int row = std::min(beginRow, endRow);
+			row <= std::max(beginRow, endRow);
+			++row)
 		{
 			if (row == beginRow)
 			{
@@ -785,11 +840,17 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 	}
 	else
 	{
-		for (int row = std::min(beginRow, endRow); row <= std::max(beginRow, endRow); ++row)
+		for (
+			int row = std::min(beginRow, endRow);
+			row <= std::max(beginRow, endRow);
+			++row)
 		{
 			dig_one(Vector2D{ beginCol, row });
 		}
-		for (int col = std::min(beginCol, endCol); col <= std::max(beginCol, endCol); ++col)
+		for (
+			int col = std::min(beginCol, endCol);
+			col <= std::max(beginCol, endCol);
+			++col)
 		{
 			if (col == beginCol)
 			{
@@ -812,7 +873,8 @@ int Map::exit_column(const DungeonRoom& room, int interiorRow) const
 			{
 				continue;
 			}
-			if (get_tile_type(Vector2D{ column, interiorRow }) != TileType::WALL)
+			if (get_tile_type(Vector2D{ column, interiorRow }) !=
+				TileType::WALL)
 			{
 				return column;
 			}
@@ -834,7 +896,8 @@ int Map::exit_row(const DungeonRoom& room, int interiorColumn) const
 			{
 				continue;
 			}
-			if (get_tile_type(Vector2D{ interiorColumn, row }) != TileType::WALL)
+			if (get_tile_type(Vector2D{ interiorColumn, row }) !=
+				TileType::WALL)
 			{
 				return row;
 			}
@@ -851,10 +914,11 @@ bool Map::room_layout_is_sound(const DungeonRoom& room) const
 	{
 		for (int taken = 0; taken < cells; ++taken)
 		{
-			if (get_tile_type(Vector2D{
-					from.x + step.x * taken,
-					from.y + step.y * taken,
-				}) != TileType::WALL)
+			if (get_tile_type(
+					Vector2D{
+						from.x + step.x * taken,
+						from.y + step.y * taken,
+					}) != TileType::WALL)
 			{
 				return true;
 			}
@@ -862,11 +926,24 @@ bool Map::room_layout_is_sound(const DungeonRoom& room) const
 		return false;
 	};
 
-	const bool isTopOpen = edge_has_floor(Vector2D{ room.col, room.row }, Vector2D{ 1, 0 }, room.width);
-	const bool isBottomOpen = edge_has_floor(Vector2D{ room.col, room.row_end() }, Vector2D{ 1, 0 }, room.width);
-	const bool isLeftOpen = edge_has_floor(Vector2D{ room.col, room.row }, Vector2D{ 0, 1 }, room.height);
-	const bool isRightOpen = edge_has_floor(Vector2D{ room.col_end(), room.row }, Vector2D{ 0, 1 }, room.height);
-	const bool everyEdgeIsOpen = isTopOpen && isBottomOpen && isLeftOpen && isRightOpen;
+	const bool isTopOpen = edge_has_floor(
+		Vector2D{ room.col, room.row },
+		Vector2D{ 1, 0 },
+		room.width);
+	const bool isBottomOpen = edge_has_floor(
+		Vector2D{ room.col, room.row_end() },
+		Vector2D{ 1, 0 },
+		room.width);
+	const bool isLeftOpen = edge_has_floor(
+		Vector2D{ room.col, room.row },
+		Vector2D{ 0, 1 },
+		room.height);
+	const bool isRightOpen = edge_has_floor(
+		Vector2D{ room.col_end(), room.row },
+		Vector2D{ 0, 1 },
+		room.height);
+	const bool everyEdgeIsOpen =
+		isTopOpen && isBottomOpen && isLeftOpen && isRightOpen;
 
 	return everyEdgeIsOpen && room_interior_is_one_piece(room);
 }
@@ -962,10 +1039,12 @@ void Map::set_tile(Vector2D pos, TileType newType)
 void Map::apply_room_shape(const DungeonRoom& room)
 {
 	// Before dig() the centre is still wall, and every wall_back below would change nothing.
-	assert(!is_wall(Vector2D{
-			   room.col + room.width / 2,
-			   room.row + room.height / 2,
-		   }) &&
+	assert(
+		!is_wall(
+			Vector2D{
+				room.col + room.width / 2,
+				room.row + room.height / 2,
+			}) &&
 		"apply_room_shape: the room has not been dug yet, so shaping it does nothing");
 
 	auto wall_back = [&](int col, int row)
@@ -1064,8 +1143,10 @@ void Map::apply_room_shape(const DungeonRoom& room)
 		{
 			for (int col = room.col; col <= room.col_end(); ++col)
 			{
-				const bool inRowBand = (row >= rowBandStart && row <= rowBandEnd);
-				const bool inColBand = (col >= colBandStart && col <= colBandEnd);
+				const bool inRowBand =
+					(row >= rowBandStart && row <= rowBandEnd);
+				const bool inColBand =
+					(col >= colBandStart && col <= colBandEnd);
 				if (!inRowBand && !inColBand)
 				{
 					wall_back(col, row);
@@ -1084,7 +1165,9 @@ void Map::apply_room_shape(const DungeonRoom& room)
 			wall_back(room.col + pillarOffset, room.row + pillarOffset);
 			wall_back(room.col_end() - pillarOffset, room.row + pillarOffset);
 			wall_back(room.col + pillarOffset, room.row_end() - pillarOffset);
-			wall_back(room.col_end() - pillarOffset, room.row_end() - pillarOffset);
+			wall_back(
+				room.col_end() - pillarOffset,
+				room.row_end() - pillarOffset);
 		}
 		break;
 	}
@@ -1096,7 +1179,8 @@ void Map::create_room(const DungeonRoom& room, bool first, GameContext& ctx)
 	assert(ctx.rooms && "Map::create_room: called without rooms");
 	ctx.rooms->push_back(room);
 
-	dig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });
+	dig(Vector2D{ room.col, room.row },
+		Vector2D{ room.col_end(), room.row_end() });
 
 	// Carve shape: wall back cells excluded by the chosen RoomShape.
 	// Must run after dig() and before any spawning so all tile checks see correct state.
@@ -1104,20 +1188,26 @@ void Map::create_room(const DungeonRoom& room, bool first, GameContext& ctx)
 
 	// Stamp prefab decorations before water so water can see occupied tiles.
 	assert(ctx.decorEditor && "Map::create_room: called without a decorEditor");
-	assert(ctx.prefabLibrary && "Map::create_room: called without a prefabLibrary");
+	assert(
+		ctx.prefabLibrary &&
+		"Map::create_room: called without a prefabLibrary");
 	assert(ctx.palette && "Map::create_room: called without a palette");
-	ctx.prefabLibrary->apply_to_room(*ctx.palette, room, *ctx.decorEditor, *this);
+	ctx.prefabLibrary
+		->apply_to_room(*ctx.palette, room, *ctx.decorEditor, *this);
 
 	// Richest layout first, giving a layer up only when it fails: shape over prefab, prefab alone, plain box.
 	// A dug rectangle is whole with floor on every edge, so the last always succeeds.
 	if (!room_layout_is_sound(room))
 	{
-		dig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });
-		ctx.prefabLibrary->apply_to_room(*ctx.palette, room, *ctx.decorEditor, *this);
+		dig(Vector2D{ room.col, room.row },
+			Vector2D{ room.col_end(), room.row_end() });
+		ctx.prefabLibrary
+			->apply_to_room(*ctx.palette, room, *ctx.decorEditor, *this);
 
 		if (!room_layout_is_sound(room))
 		{
-			dig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });
+			dig(Vector2D{ room.col, room.row },
+				Vector2D{ room.col_end(), room.row_end() });
 		}
 	}
 
@@ -1127,7 +1217,8 @@ void Map::create_room(const DungeonRoom& room, bool first, GameContext& ctx)
 	{
 		for (int col = room.col; col <= room.col_end(); ++col)
 		{
-			TileRef overrideTile = ctx.decorEditor->get_override(Vector2D{ col, row });
+			TileRef overrideTile =
+				ctx.decorEditor->get_override(Vector2D{ col, row });
 			if (!overrideTile.is_valid())
 			{
 				continue;
@@ -1208,7 +1299,8 @@ void Map::spawn_traps(const DungeonRoom& room, GameContext& ctx)
 			TrapType::DART,
 			TrapType::ARROW,
 		};
-		const TrapType trapType = trapTypes[static_cast<size_t>(ctx.dice->roll(1, static_cast<int>(trapTypes.size())) - 1)];
+		const TrapType trapType = trapTypes[static_cast<size_t>(
+			ctx.dice->roll(1, static_cast<int>(trapTypes.size())) - 1)];
 
 		auto trap = std::make_unique<Trap>(trapPos, trapType, *ctx.tileConfig);
 		ctx.traps->push_back(std::move(trap));
@@ -1235,7 +1327,9 @@ void Map::spawn_water(const DungeonRoom& room, GameContext& ctx)
 					continue;
 				}
 				// Never place water on a decorated tile.
-				assert(ctx.decorEditor && "Map::spawn_water: called without a decorEditor");
+				assert(
+					ctx.decorEditor &&
+					"Map::spawn_water: called without a decorEditor");
 				if (ctx.decorEditor->get_override(waterPos).is_valid())
 				{
 					continue;
@@ -1257,7 +1351,9 @@ bool Map::would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const
 
 	// Get surrounding positions
 	std::vector<Vector2D> adjacent = {
-		{ waterPos.x - 1, waterPos.y - 1 }, { waterPos.x, waterPos.y - 1 }, { waterPos.x + 1, waterPos.y - 1 }, // Top row    (NW, N, NE)
+		{ waterPos.x - 1, waterPos.y - 1 },
+		{ waterPos.x, waterPos.y - 1 },
+		{ waterPos.x + 1, waterPos.y - 1 }, // Top row    (NW, N, NE)
 		{ waterPos.x - 1, waterPos.y },
 		{ waterPos.x + 1, waterPos.y }, // Middle row (W, E)
 		{ waterPos.x - 1, waterPos.y + 1 },
@@ -1297,13 +1393,15 @@ bool Map::would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const
 	};
 
 	// Check horizontal corridor pattern: W-F-W (wall-floor-wall)
-	if (isWallOrOOB({ waterPos.x - 1, waterPos.y }) && isWallOrOOB({ waterPos.x + 1, waterPos.y }))
+	if (isWallOrOOB({ waterPos.x - 1, waterPos.y }) &&
+		isWallOrOOB({ waterPos.x + 1, waterPos.y }))
 	{
 		return true; // Would block horizontal passage
 	}
 
 	// Check vertical corridor pattern: wall above and below (W/F/W)
-	if (isWallOrOOB({ waterPos.x, waterPos.y - 1 }) && isWallOrOOB({ waterPos.x, waterPos.y + 1 }))
+	if (isWallOrOOB({ waterPos.x, waterPos.y - 1 }) &&
+		isWallOrOOB({ waterPos.x, waterPos.y + 1 }))
 	{
 		return true; // Would block vertical passage
 	}
@@ -1347,8 +1445,10 @@ bool Map::would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const
 	{
 		// Check if walls are opposite each other (forming a corridor)
 		bool hasOppositeWalls =
-			(isWallOrOOB({ waterPos.x, waterPos.y - 1 }) && isWallOrOOB({ waterPos.x, waterPos.y + 1 })) ||
-			(isWallOrOOB({ waterPos.x - 1, waterPos.y }) && isWallOrOOB({ waterPos.x + 1, waterPos.y }));
+			(isWallOrOOB({ waterPos.x, waterPos.y - 1 }) &&
+				isWallOrOOB({ waterPos.x, waterPos.y + 1 })) ||
+			(isWallOrOOB({ waterPos.x - 1, waterPos.y }) &&
+				isWallOrOOB({ waterPos.x + 1, waterPos.y }));
 
 		if (hasOppositeWalls)
 		{
@@ -1358,7 +1458,8 @@ bool Map::would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const
 
 	// ENTRANCE PATTERN 5: Room boundary positions
 	// If this floor tile is on the edge of the room, it might be where a corridor connects
-	assert(ctx.rooms && "Map::would_water_block_entrance: called without rooms");
+	assert(
+		ctx.rooms && "Map::would_water_block_entrance: called without rooms");
 	for (const DungeonRoom& room : *ctx.rooms)
 	{
 		if (!room.contains(waterPos.x, waterPos.y))
@@ -1367,9 +1468,9 @@ bool Map::would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const
 		}
 
 		// On the floor perimeter -- corridor likely connects here.
-		const bool on_edge =
-			waterPos.x == room.col || waterPos.x == room.col_end() ||
-			waterPos.y == room.row || waterPos.y == room.row_end();
+		const bool on_edge = waterPos.x == room.col ||
+			waterPos.x == room.col_end() || waterPos.y == room.row ||
+			waterPos.y == room.row_end();
 
 		if (on_edge && adjacentWalls >= 1 && adjacentFloors >= 1)
 		{
@@ -1394,8 +1495,7 @@ void Map::spawn_items(const DungeonRoom& room, GameContext& ctx)
 		};
 		constexpr int MAX_ITEM_TRIES = 20;
 		int itemTries = 0;
-		while (itemTries < MAX_ITEM_TRIES &&
-			!can_place_at(itemPos, ctx))
+		while (itemTries < MAX_ITEM_TRIES && !can_place_at(itemPos, ctx))
 		{
 			itemPos.x = ctx.dice->roll(room.col, room.col_end());
 			itemPos.y = ctx.dice->roll(room.row, room.row_end());
@@ -1458,8 +1558,7 @@ void Map::spawn_player(const DungeonRoom& room, GameContext& ctx)
 	};
 	constexpr int MAX_PLAYER_TRIES = 50;
 	int playerTries = 0;
-	while (playerTries < MAX_PLAYER_TRIES &&
-		!can_place_at(pos, ctx))
+	while (playerTries < MAX_PLAYER_TRIES && !can_place_at(pos, ctx))
 	{
 		pos.x = ctx.dice->roll(room.col, room.col_end());
 		pos.y = ctx.dice->roll(room.row, room.row_end());
@@ -1471,7 +1570,9 @@ void Map::spawn_player(const DungeonRoom& room, GameContext& ctx)
 void Map::place_stairs(GameContext& ctx)
 {
 	assert(ctx.stairs && "Map::place_stairs called without stairs");
-	assert(ctx.rooms && !ctx.rooms->empty() && "Map::place_stairs called without rooms");
+	assert(
+		ctx.rooms && !ctx.rooms->empty() &&
+		"Map::place_stairs called without rooms");
 	assert(ctx.dice && "Map::place_stairs called without dice");
 
 	// BFS from room[0] to find the deepest room - forces player to explore
@@ -1497,8 +1598,8 @@ void Map::place_stairs(GameContext& ctx)
 		}
 	}
 
-	const int deepestIndex = static_cast<int>(
-		std::ranges::max_element(depth) - depth.begin());
+	const int deepestIndex =
+		static_cast<int>(std::ranges::max_element(depth) - depth.begin());
 
 	const DungeonRoom& room = rooms[deepestIndex];
 	Vector2D stairsPos{
@@ -1557,15 +1658,23 @@ bool Map::can_place_at(Vector2D pos, const GameContext& ctx) const noexcept
 void Map::add_monster(Vector2D pos, GameContext& ctx) const
 {
 	// Use the monster factory to create a monster appropriate for the current dungeon level
-	assert(ctx.levelManager && "Map::add_monster: called without a levelManager");
-	MonsterFactory::spawn_random_monster(pos, ctx.levelManager->get_dungeon_level(), ctx);
+	assert(
+		ctx.levelManager && "Map::add_monster: called without a levelManager");
+	MonsterFactory::spawn_random_monster(
+		pos,
+		ctx.levelManager->get_dungeon_level(),
+		ctx);
 
 	// Log the spawn for debugging
 	Creature* monster = get_actor(pos, ctx);
-	assert(ctx.messageSystem && "Map::add_monster: called without a messageSystem");
+	assert(
+		ctx.messageSystem &&
+		"Map::add_monster: called without a messageSystem");
 	if (monster)
 	{
-		ctx.messageSystem->log("Spawned " + monster->actorData.name + " at level " + std::to_string(ctx.levelManager->get_dungeon_level()));
+		ctx.messageSystem->log(
+			"Spawned " + monster->actorData.name + " at level " +
+			std::to_string(ctx.levelManager->get_dungeon_level()));
 	}
 }
 
@@ -1623,7 +1732,9 @@ void Map::regenerate(GameContext& ctx)
 	// clear the actors container except the player and the stairs
 	assert(ctx.creatures && "Map::regenerate: called without creatures");
 	ctx.creatures->clear();
-	assert(ctx.floorInventory && "Map::regenerate: called without a floorInventory");
+	assert(
+		ctx.floorInventory &&
+		"Map::regenerate: called without a floorInventory");
 	ctx.floorInventory->items.clear();
 	assert(ctx.rooms && "Map::regenerate: called without rooms");
 	ctx.rooms->clear(); // we clear the room coordinates
@@ -1684,7 +1795,8 @@ bool Map::has_los(Vector2D from, Vector2D to) const noexcept
 	for (const auto& pos : bresenham_line(from, to))
 	{
 		// Skip endpoints
-		if ((pos.x != from.x || pos.y != from.y) && (pos.x != to.x || pos.y != to.y))
+		if ((pos.x != from.x || pos.y != from.y) &&
+			(pos.x != to.x || pos.y != to.y))
 		{
 			if (is_wall(pos))
 			{
@@ -1743,7 +1855,9 @@ bool Map::open_door(Vector2D pos, GameContext& ctx)
 		tiles[tileIndex].doorState = DoorState::OPEN;
 	}
 
-	if (ctx.player() && ctx.player()->get_tile_distance(pos) <= Vision::sight_radius(*ctx.player()))
+	if (ctx.player() &&
+		ctx.player()->get_tile_distance(pos) <=
+			Vision::sight_radius(*ctx.player()))
 	{
 		compute_fov(ctx);
 	}
@@ -1771,12 +1885,16 @@ bool Map::close_door(Vector2D pos, GameContext& ctx)
 	}
 
 	// Check if there's a floor item on the door tile
-	assert(ctx.floorInventory && "Map::close_door: called without a floorInventory");
+	assert(
+		ctx.floorInventory &&
+		"Map::close_door: called without a floorInventory");
 	[[maybe_unused]] auto is_null = [](const auto& entry)
 	{
 		return !entry;
 	};
-	assert(std::ranges::none_of(ctx.floorInventory->items, is_null) && "Map::close_door: the floor holds a null item");
+	assert(
+		std::ranges::none_of(ctx.floorInventory->items, is_null) &&
+		"Map::close_door: the floor holds a null item");
 	auto has_item_at_pos = [&pos](const std::unique_ptr<Item>& item)
 	{
 		return item->position == pos;
@@ -1796,7 +1914,9 @@ bool Map::close_door(Vector2D pos, GameContext& ctx)
 		tiles[tileIndex].doorState = DoorState::CLOSED_UNLOCKED;
 	}
 
-	if (ctx.player() && ctx.player()->get_tile_distance(pos) <= Vision::sight_radius(*ctx.player()))
+	if (ctx.player() &&
+		ctx.player()->get_tile_distance(pos) <=
+			Vision::sight_radius(*ctx.player()))
 	{
 		compute_fov(ctx);
 	}
@@ -1899,7 +2019,9 @@ void Map::open_all_room_doors(Vector2D doorPos, GameContext& ctx)
 				}
 				// Doors are locked only on a room's wall ring, so the floor this scan crosses
 				// never holds one.
-				assert(!room.contains(col, row) && "open_all_room_doors: a locked door inside a room's floor");
+				assert(
+					!room.contains(col, row) &&
+					"open_all_room_doors: a locked door inside a room's floor");
 
 				auto opens_this_room = [&]()
 				{
@@ -1964,9 +2086,12 @@ bool Map::has_resisted_forcing(Vector2D pos) const noexcept
 
 void Map::mark_resisted_forcing(Vector2D pos)
 {
-	assert(in_bounds(pos) && "Map::mark_resisted_forcing: a position off the map");
+	assert(
+		in_bounds(pos) && "Map::mark_resisted_forcing: a position off the map");
 	DoorState& doorState = tiles[get_index(pos)].doorState;
-	assert(doorState == DoorState::CLOSED_LOCKED && "Map::mark_resisted_forcing: the door is not locked, or has already resisted");
+	assert(
+		doorState == DoorState::CLOSED_LOCKED &&
+		"Map::mark_resisted_forcing: the door is not locked, or has already resisted");
 	doorState = DoorState::CLOSED_LOCKED_FORCE_FAILED;
 }
 
@@ -1988,16 +2113,23 @@ int Map::lock_pick_failed_at_level(Vector2D pos) const noexcept
 
 void Map::mark_lock_pick_failed(Vector2D pos, int level)
 {
-	assert(in_bounds(pos) && "Map::mark_lock_pick_failed: a position off the map");
+	assert(
+		in_bounds(pos) && "Map::mark_lock_pick_failed: a position off the map");
 	Tile& tile = tiles[get_index(pos)];
-	assert(is_door_locked(pos) && "Map::mark_lock_pick_failed: the door is not locked");
-	assert(level > tile.lockPickFailedAtLevel && "Map::mark_lock_pick_failed: the level is not higher than the one recorded");
+	assert(
+		is_door_locked(pos) &&
+		"Map::mark_lock_pick_failed: the door is not locked");
+	assert(
+		level > tile.lockPickFailedAtLevel &&
+		"Map::mark_lock_pick_failed: the level is not higher than the one recorded");
 	tile.lockPickFailedAtLevel = level;
 }
 
 void Map::place_amulet(GameContext& ctx)
 {
-	assert(ctx.floorInventory && "Map::place_amulet: called without a floorInventory");
+	assert(
+		ctx.floorInventory &&
+		"Map::place_amulet: called without a floorInventory");
 
 	// Only place the amulet on the final level
 	assert(ctx.levelManager && "Map::place_amulet called without levelManager");
@@ -2008,7 +2140,8 @@ void Map::place_amulet(GameContext& ctx)
 	if (ctx.levelManager->get_dungeon_level() == FINAL_DUNGEON_LEVEL)
 	{
 		// Choose a random room for the amulet
-		const int index = ctx.dice->roll(0, static_cast<int>(ctx.rooms->size()) - 1);
+		const int index =
+			ctx.dice->roll(0, static_cast<int>(ctx.rooms->size()) - 1);
 		const DungeonRoom& room = ctx.rooms->at(index);
 
 		// Somewhere reachable without water: the amulet is placed once, and a character who
@@ -2024,14 +2157,23 @@ void Map::place_amulet(GameContext& ctx)
 		}
 
 		// Create and place the amulet
-		InventoryOperations::add_item(*ctx.floorInventory, ItemCreator::create("amulet_of_yendor", amuletPos, ctx));
+		InventoryOperations::add_item(
+			*ctx.floorInventory,
+			ItemCreator::create("amulet_of_yendor", amuletPos, ctx));
 
 		// Log the placement (debug info)
-		assert(ctx.messageSystem && "Map::place_amulet: called without a messageSystem");
-		ctx.messageSystem->log("Placed Amulet of Yendor at " + std::to_string(amuletPos.x) + "," + std::to_string(amuletPos.y));
+		assert(
+			ctx.messageSystem &&
+			"Map::place_amulet: called without a messageSystem");
+		ctx.messageSystem->log(
+			"Placed Amulet of Yendor at " + std::to_string(amuletPos.x) + "," +
+			std::to_string(amuletPos.y));
 
 		// Add a hint message
-		ctx.messageSystem->message(ColorPairId::RED_YELLOW, "You sense a powerful artifact somewhere on this level...", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::RED_YELLOW,
+			"You sense a powerful artifact somewhere on this level...",
+			MessageCompletion::FINISHED);
 	}
 }
 
@@ -2039,7 +2181,9 @@ void Map::post_process_doors()
 {
 	auto isRoom = [this](Vector2D pos)
 	{
-		return in_bounds(pos) && (get_tile_type(pos) == TileType::FLOOR || get_tile_type(pos) == TileType::WATER);
+		return in_bounds(pos) &&
+			(get_tile_type(pos) == TileType::FLOOR ||
+				get_tile_type(pos) == TileType::WATER);
 	};
 	auto isWall = [this](Vector2D pos)
 	{
@@ -2091,7 +2235,8 @@ void Map::post_process_doors()
 
 					// Original: RRR/WCC/WWW
 					if (isRoom(upLeft) && isRoom(up) && isRoom(upRight) &&
-						isWall(left) && get_tile_type(right) == TileType::CORRIDOR &&
+						isWall(left) &&
+						get_tile_type(right) == TileType::CORRIDOR &&
 						isWall(downLeft) && isWall(down) && isWall(downRight))
 					{
 						shouldExclude = true;
@@ -2099,23 +2244,28 @@ void Map::post_process_doors()
 
 					// 90 degree rotation: WWR/CWR/CWR
 					if (isWall(upLeft) && isWall(up) && isRoom(upRight) &&
-						get_tile_type(left) == TileType::CORRIDOR && isRoom(right) &&
-						get_tile_type(downLeft) == TileType::CORRIDOR && isWall(down) && isRoom(downRight))
+						get_tile_type(left) == TileType::CORRIDOR &&
+						isRoom(right) &&
+						get_tile_type(downLeft) == TileType::CORRIDOR &&
+						isWall(down) && isRoom(downRight))
 					{
 						shouldExclude = true;
 					}
 
 					// 180 degree rotation: WWW/CCW/RRR
 					if (isWall(upLeft) && isWall(up) && isWall(upRight) &&
-						get_tile_type(left) == TileType::CORRIDOR && isWall(right) &&
-						isRoom(downLeft) && isRoom(down) && isRoom(downRight))
+						get_tile_type(left) == TileType::CORRIDOR &&
+						isWall(right) && isRoom(downLeft) && isRoom(down) &&
+						isRoom(downRight))
 					{
 						shouldExclude = true;
 					}
 
 					// 270 degree rotation: RWC/RWC/RWW
-					if (isRoom(upLeft) && isWall(up) && get_tile_type(upRight) == TileType::CORRIDOR &&
-						isRoom(left) && get_tile_type(right) == TileType::CORRIDOR &&
+					if (isRoom(upLeft) && isWall(up) &&
+						get_tile_type(upRight) == TileType::CORRIDOR &&
+						isRoom(left) &&
+						get_tile_type(right) == TileType::CORRIDOR &&
 						isRoom(downLeft) && isWall(down) && isWall(downRight))
 					{
 						shouldExclude = true;
@@ -2123,15 +2273,19 @@ void Map::post_process_doors()
 
 					// Exclude WRR/WCC/WWC pattern
 					if (isWall(upLeft) && isRoom(up) && isRoom(upRight) &&
-						isWall(left) && get_tile_type(right) == TileType::CORRIDOR &&
-						isWall(downLeft) && isWall(down) && get_tile_type(downRight) == TileType::CORRIDOR)
+						isWall(left) &&
+						get_tile_type(right) == TileType::CORRIDOR &&
+						isWall(downLeft) && isWall(down) &&
+						get_tile_type(downRight) == TileType::CORRIDOR)
 					{
 						shouldExclude = true;
 					}
 
 					// Exclude WRw/WCC/WWW pattern (where w = water)
-					if (isWall(upLeft) && isRoom(up) && get_tile_type(upRight) == TileType::WATER &&
-						isWall(left) && get_tile_type(right) == TileType::CORRIDOR &&
+					if (isWall(upLeft) && isRoom(up) &&
+						get_tile_type(upRight) == TileType::WATER &&
+						isWall(left) &&
+						get_tile_type(right) == TileType::CORRIDOR &&
 						isWall(downLeft) && isWall(down) && isWall(downRight))
 					{
 						shouldExclude = true;
@@ -2143,8 +2297,9 @@ void Map::post_process_doors()
 					}
 
 					// Check for WCW/RDW/RWW pattern (move door UP)
-					if (isWall(upLeft) && get_tile_type(up) == TileType::CORRIDOR && isWall(upRight) &&
-						isRoom(left) && isWall(right) &&
+					if (isWall(upLeft) &&
+						get_tile_type(up) == TileType::CORRIDOR &&
+						isWall(upRight) && isRoom(left) && isWall(right) &&
 						isRoom(downLeft) && isWall(down) && isWall(downRight))
 					{
 						// Move door UP
@@ -2152,20 +2307,25 @@ void Map::post_process_doors()
 						set_door(upPos);
 					}
 					// Check for W.w/CDW/WWW pattern (move door UP) - where . = water or corridor
-					else if (isWall(upLeft) &&
-						(get_tile_type(up) == TileType::WATER || get_tile_type(up) == TileType::CORRIDOR) &&
+					else if (
+						isWall(upLeft) &&
+						(get_tile_type(up) == TileType::WATER ||
+							get_tile_type(up) == TileType::CORRIDOR) &&
 						get_tile_type(upRight) == TileType::WATER &&
-						get_tile_type(left) == TileType::CORRIDOR && isWall(right) &&
-						isWall(downLeft) && isWall(down) && isWall(downRight))
+						get_tile_type(left) == TileType::CORRIDOR &&
+						isWall(right) && isWall(downLeft) && isWall(down) &&
+						isWall(downRight))
 					{
 						// Move door UP
 						Vector2D upPos = { pos.x, pos.y - 1 };
 						set_door(upPos);
 					}
 					// Check for Z-pattern: WRR/CCW/WWW (move door left)
-					else if (isWall(upLeft) && isRoom(up) && isRoom(upRight) &&
-						get_tile_type(left) == TileType::CORRIDOR && isWall(right) &&
-						isWall(downLeft) && isWall(down) && isWall(downRight))
+					else if (
+						isWall(upLeft) && isRoom(up) && isRoom(upRight) &&
+						get_tile_type(left) == TileType::CORRIDOR &&
+						isWall(right) && isWall(downLeft) && isWall(down) &&
+						isWall(downRight))
 					{
 						// Move door LEFT
 						Vector2D leftPos = { pos.x - 1, pos.y };
@@ -2190,17 +2350,26 @@ void Map::place_from_graph(
 	const std::vector<DungeonRoom>& rooms,
 	GameContext& ctx)
 {
-	assert(ctx.messageSystem && "Map::place_from_graph: called without a messageSystem");
-	ctx.messageSystem->log("place_from_graph: Starting with " + std::to_string(rooms.size()) + " rooms");
+	assert(
+		ctx.messageSystem &&
+		"Map::place_from_graph: called without a messageSystem");
+	ctx.messageSystem->log(
+		"place_from_graph: Starting with " + std::to_string(rooms.size()) +
+		" rooms");
 
 	// Step 1: Create all rooms (dig them, spawn water/items/player)
-	for (int roomIndex = 0; roomIndex < static_cast<int>(rooms.size()); ++roomIndex)
+	for (
+		int roomIndex = 0; roomIndex < static_cast<int>(rooms.size());
+		++roomIndex)
 	{
 		create_room(rooms[roomIndex], roomIndex == 0, ctx);
 	}
 
-	assert(ctx.messageSystem && "Map::place_from_graph: no messageSystem once the rooms were created");
-	ctx.messageSystem->log("place_from_graph: Rooms created, now connecting with corridors");
+	assert(
+		ctx.messageSystem &&
+		"Map::place_from_graph: no messageSystem once the rooms were created");
+	ctx.messageSystem->log(
+		"place_from_graph: Rooms created, now connecting with corridors");
 
 	// Step 2: Connect adjacent rooms with corridors (from graph edges)
 	std::set<std::pair<int, int>> dug_edges;
@@ -2212,7 +2381,9 @@ void Map::place_from_graph(
 		for (int b_idx : room.adjacentRoomIndices)
 		{
 			// Avoid digging the same corridor twice
-			std::pair<int, int> edge_forward(std::min(a_idx, b_idx), std::max(a_idx, b_idx));
+			std::pair<int, int> edge_forward(
+				std::min(a_idx, b_idx),
+				std::max(a_idx, b_idx));
 			if (dug_edges.count(edge_forward))
 			{
 				continue;
@@ -2234,9 +2405,13 @@ void Map::place_from_graph(
 				const int mid = (adjacent.bottom_wall() + room.top_wall()) / 2;
 				const int aCol = exit_column(room, room.row);
 				const int bCol = exit_column(adjacent, adjacent.row_end());
-				dig_corridor(Vector2D{ aCol, room.top_wall() }, Vector2D{ aCol, mid });
+				dig_corridor(
+					Vector2D{ aCol, room.top_wall() },
+					Vector2D{ aCol, mid });
 				dig_corridor(Vector2D{ aCol, mid }, Vector2D{ bCol, mid });
-				dig_corridor(Vector2D{ bCol, mid }, Vector2D{ bCol, adjacent.bottom_wall() });
+				dig_corridor(
+					Vector2D{ bCol, mid },
+					Vector2D{ bCol, adjacent.bottom_wall() });
 			}
 			else if (a_right)
 			{
@@ -2244,9 +2419,13 @@ void Map::place_from_graph(
 				const int mid = (adjacent.right_wall() + room.left_wall()) / 2;
 				const int aRow = exit_row(room, room.col);
 				const int bRow = exit_row(adjacent, adjacent.col_end());
-				dig_corridor(Vector2D{ room.left_wall(), aRow }, Vector2D{ mid, aRow });
+				dig_corridor(
+					Vector2D{ room.left_wall(), aRow },
+					Vector2D{ mid, aRow });
 				dig_corridor(Vector2D{ mid, aRow }, Vector2D{ mid, bRow });
-				dig_corridor(Vector2D{ mid, bRow }, Vector2D{ adjacent.right_wall(), bRow });
+				dig_corridor(
+					Vector2D{ mid, bRow },
+					Vector2D{ adjacent.right_wall(), bRow });
 			}
 			else if (a_above)
 			{
@@ -2254,9 +2433,13 @@ void Map::place_from_graph(
 				const int mid = (room.bottom_wall() + adjacent.top_wall()) / 2;
 				const int aCol = exit_column(room, room.row_end());
 				const int bCol = exit_column(adjacent, adjacent.row);
-				dig_corridor(Vector2D{ aCol, room.bottom_wall() }, Vector2D{ aCol, mid });
+				dig_corridor(
+					Vector2D{ aCol, room.bottom_wall() },
+					Vector2D{ aCol, mid });
 				dig_corridor(Vector2D{ aCol, mid }, Vector2D{ bCol, mid });
-				dig_corridor(Vector2D{ bCol, mid }, Vector2D{ bCol, adjacent.top_wall() });
+				dig_corridor(
+					Vector2D{ bCol, mid },
+					Vector2D{ bCol, adjacent.top_wall() });
 			}
 			else if (a_left)
 			{
@@ -2264,9 +2447,13 @@ void Map::place_from_graph(
 				const int mid = (room.right_wall() + adjacent.left_wall()) / 2;
 				const int aRow = exit_row(room, room.col_end());
 				const int bRow = exit_row(adjacent, adjacent.col);
-				dig_corridor(Vector2D{ room.right_wall(), aRow }, Vector2D{ mid, aRow });
+				dig_corridor(
+					Vector2D{ room.right_wall(), aRow },
+					Vector2D{ mid, aRow });
 				dig_corridor(Vector2D{ mid, aRow }, Vector2D{ mid, bRow });
-				dig_corridor(Vector2D{ mid, bRow }, Vector2D{ adjacent.left_wall(), bRow });
+				dig_corridor(
+					Vector2D{ mid, bRow },
+					Vector2D{ adjacent.left_wall(), bRow });
 			}
 			else
 			{
@@ -2278,8 +2465,12 @@ void Map::place_from_graph(
 		}
 	}
 
-	assert(ctx.messageSystem && "Map::place_from_graph: no messageSystem once the corridors were dug");
-	ctx.messageSystem->log("place_from_graph: Finished. Dug " + std::to_string(dug_edges.size()) + " edges");
+	assert(
+		ctx.messageSystem &&
+		"Map::place_from_graph: no messageSystem once the corridors were dug");
+	ctx.messageSystem->log(
+		"place_from_graph: Finished. Dug " + std::to_string(dug_edges.size()) +
+		" edges");
 }
 
 // end of file: Map.cpp

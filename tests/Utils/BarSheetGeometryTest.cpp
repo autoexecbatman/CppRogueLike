@@ -28,17 +28,21 @@ class BarSheet
 private:
 	Image image{};
 
-	[[nodiscard]] bool is_painted(int cellCol, int cellRow, int col, int row) const
+	[[nodiscard]] bool is_painted(int cellCol, int cellRow, int col, int row)
+		const
 	{
 		const Color pixel = GetImageColor(
-			image, cellCol * GUI_BARS_CELL_SIZE + col, cellRow * GUI_BARS_CELL_SIZE + row);
+			image,
+			cellCol * GUI_BARS_CELL_SIZE + col,
+			cellRow * GUI_BARS_CELL_SIZE + row);
 		return pixel.a > 127;
 	}
 
 public:
 	BarSheet()
 	{
-		const std::string path = Paths::resolve("DawnLike/GUI/Bars.png").string();
+		const std::string path =
+			Paths::resolve("DawnLike/GUI/Bars.png").string();
 		image = LoadImage(path.c_str());
 	}
 
@@ -62,7 +66,9 @@ public:
 	[[nodiscard]] int height() const { return image.height; }
 
 	// Left to right: whether each column of the cell paints anything at all.
-	[[nodiscard]] std::vector<bool> painted_columns(int cellCol, int cellRow) const
+	[[nodiscard]] std::vector<bool> painted_columns(
+		int cellCol,
+		int cellRow) const
 	{
 		std::vector<bool> columns(GUI_BARS_CELL_SIZE, false);
 		for (int col = 0; col < GUI_BARS_CELL_SIZE; ++col)
@@ -129,8 +135,12 @@ TEST(BarSheetGeometryTest, EachEndPlateIsAsWideAsTheTroughIsInset)
 
 	// A plate wider than the inset covers fill the inset was meant to clear, which is
 	// how a bar with a few percent left draws as an empty one.
-	EXPECT_EQ(count_painted(sheet.painted_columns(CAP_LEFT_COL, CAP_LEFT_ROW)), GUI_BAR_PLATE_WIDTH);
-	EXPECT_EQ(count_painted(sheet.painted_columns(CAP_RIGHT_COL, CAP_RIGHT_ROW)), GUI_BAR_PLATE_WIDTH);
+	EXPECT_EQ(
+		count_painted(sheet.painted_columns(CAP_LEFT_COL, CAP_LEFT_ROW)),
+		GUI_BAR_PLATE_WIDTH);
+	EXPECT_EQ(
+		count_painted(sheet.painted_columns(CAP_RIGHT_COL, CAP_RIGHT_ROW)),
+		GUI_BAR_PLATE_WIDTH);
 }
 
 TEST(BarSheetGeometryTest, EachEndPlateSitsAgainstItsOwnEndOfTheCell)
@@ -140,15 +150,19 @@ TEST(BarSheetGeometryTest, EachEndPlateSitsAgainstItsOwnEndOfTheCell)
 
 	// The two cells are drawn at the two ends of the bar at their own size, so the rest
 	// of each cell has to be clear or a plate stands over the trough beside it.
-	const std::vector<bool> leftPlate = sheet.painted_columns(CAP_LEFT_COL, CAP_LEFT_ROW);
-	const std::vector<bool> rightPlate = sheet.painted_columns(CAP_RIGHT_COL, CAP_RIGHT_ROW);
+	const std::vector<bool> leftPlate =
+		sheet.painted_columns(CAP_LEFT_COL, CAP_LEFT_ROW);
+	const std::vector<bool> rightPlate =
+		sheet.painted_columns(CAP_RIGHT_COL, CAP_RIGHT_ROW);
 	EXPECT_TRUE(leftPlate.front());
 	EXPECT_FALSE(leftPlate.back());
 	EXPECT_FALSE(rightPlate.front());
 	EXPECT_TRUE(rightPlate.back());
 }
 
-TEST(BarSheetGeometryTest, TheFillPaintsEveryRowTheRimLeavesClearBetweenItsRails)
+TEST(
+	BarSheetGeometryTest,
+	TheFillPaintsEveryRowTheRimLeavesClearBetweenItsRails)
 {
 	const BarSheet sheet;
 	ASSERT_TRUE(sheet.is_loaded()) << "DawnLike/GUI/Bars.png did not load";
@@ -163,8 +177,10 @@ TEST(BarSheetGeometryTest, TheFillPaintsEveryRowTheRimLeavesClearBetweenItsRails
 	// Between the rails is the trough, and it is clear so the fill drawn under the rim
 	// shows through it. Every one of those rows has to be painted in the fill, or a bar
 	// has a hole through it at that height.
-	const int firstInterior = static_cast<int>(std::distance(rimRows.begin(), topRail)) + 1;
-	const int lastInterior = GUI_BARS_CELL_SIZE - 1 - static_cast<int>(std::distance(rimRows.rbegin(), bottomRail)) - 1;
+	const int firstInterior =
+		static_cast<int>(std::distance(rimRows.begin(), topRail)) + 1;
+	const int lastInterior = GUI_BARS_CELL_SIZE - 1 -
+		static_cast<int>(std::distance(rimRows.rbegin(), bottomRail)) - 1;
 
 	int clearInteriorRows = 0;
 	for (int row = firstInterior; row <= lastInterior; ++row)
@@ -172,8 +188,11 @@ TEST(BarSheetGeometryTest, TheFillPaintsEveryRowTheRimLeavesClearBetweenItsRails
 		if (!rimRows[row])
 		{
 			++clearInteriorRows;
-			EXPECT_TRUE(fillRows[row]) << std::format("the rim is clear at row {} and the fill paints nothing there", row);
+			EXPECT_TRUE(fillRows[row]) << std::format(
+				"the rim is clear at row {} and the fill paints nothing there",
+				row);
 		}
 	}
-	EXPECT_GT(clearInteriorRows, 0) << "the rim is opaque from rail to rail, so no fill can show";
+	EXPECT_GT(clearInteriorRows, 0)
+		<< "the rim is opaque from rail to rail, so no fill can show";
 }

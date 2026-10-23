@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\tconst std::size_t row = std::min(static_cast<std::size_t>(level), table.size()) - 1;",
-      "mutated": "\tconst std::size_t row = std::min(static_cast<std::size_t>(level), std::size_t{ 10 }) - 1;",
+      "original": "\tconst std::size_t row =\n\t\tstd::min(static_cast<std::size_t>(level), table.size()) - 1;",
+      "mutated": "\tconst std::size_t row =\n\t\tstd::min(static_cast<std::size_t>(level),std::size_t{ 10 }) - 1;",
       "catches": "the table clamped at 10th again, which is the row it used to stop at"
     },
     {
@@ -27,7 +27,7 @@
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\treturn static_cast<int>(get_spell_slots(classState, level, wisdom, dataManager).size());",
+      "original": "\treturn static_cast<int>(\n\t\tget_spell_slots(classState, level, wisdom, dataManager).size());",
       "mutated": "\treturn static_cast<int>(progression_slots(classState, level).size());",
       "catches": "the reach read off the printed table, ignoring the Wisdom the footnotes need"
     },
@@ -81,8 +81,8 @@
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "\tif (reachNow <= SpellSystem::highest_spell_level(casterClass, newLevel - 1, wisdom, *ctx.dataManager))",
-      "mutated": "\tif (reachNow < SpellSystem::highest_spell_level(casterClass, newLevel - 1, wisdom, *ctx.dataManager))",
+      "original": "\tif (reachNow <= SpellSystem::highest_spell_level(\n\t\t\t\t\t\tcasterClass,\n\t\t\t\t\t\tnewLevel - 1,\n\t\t\t\t\t\twisdom,\n\t\t\t\t\t\t*ctx.dataManager))",
+      "mutated": "\tif (reachNow < SpellSystem::highest_spell_level(\n\t\t\t\t\t\tcasterClass,\n\t\t\t\t\t\tnewLevel - 1,\n\t\t\t\t\t\twisdom,\n\t\t\t\t\t\t*ctx.dataManager))",
       "catches": "a level that opened nothing announcing a spell level all the same"
     },
     {

@@ -39,7 +39,9 @@ protected:
 	// A creature with the parts a save writes, named so a load can be told apart.
 	static std::unique_ptr<Creature> creature_named(const std::string& name)
 	{
-		auto creature = std::make_unique<Creature>(Vector2D{ 3, 3 }, ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK });
+		auto creature = std::make_unique<Creature>(
+			Vector2D{ 3, 3 },
+			ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK });
 		creature->experienceReward = std::make_unique<ExperienceReward>(0);
 		creature->armorClass = std::make_unique<ArmorClass>(10);
 		creature->healthPool = std::make_unique<HealthPool>(6);
@@ -48,7 +50,9 @@ protected:
 	}
 
 	// What load_rooms threw for `record`, or a failure if it threw nothing.
-	static std::string refusal_of_rooms(const json& record, std::vector<DungeonRoom>& level)
+	static std::string refusal_of_rooms(
+		const json& record,
+		std::vector<DungeonRoom>& level)
 	{
 		try
 		{
@@ -63,7 +67,9 @@ protected:
 	}
 
 	// What load_creatures threw for `record`, or a failure if it threw nothing.
-	static std::string refusal_of_creatures(const json& record, std::vector<std::unique_ptr<Creature>>& level)
+	static std::string refusal_of_creatures(
+		const json& record,
+		std::vector<std::unique_ptr<Creature>>& level)
 	{
 		try
 		{
@@ -89,7 +95,9 @@ protected:
 
 	// A decoration with every field set away from its default, so a field the load
 	// forgets reads back wrong.
-	static std::unique_ptr<Decoration> barrel_at(Vector2D where, int hitPointsLeft)
+	static std::unique_ptr<Decoration> barrel_at(
+		Vector2D where,
+		int hitPointsLeft)
 	{
 		auto barrel = std::make_unique<Decoration>();
 		barrel->position = where;
@@ -122,7 +130,8 @@ TEST_F(LevelLoadTest, LoadingCreaturesReplacesTheAbandonedLevels)
 	level.push_back(creature_named("goblin"));
 	load_creatures(record, level);
 
-	ASSERT_EQ(level.size(), 2u) << "the abandoned level's goblin is still there";
+	ASSERT_EQ(level.size(), 2u)
+		<< "the abandoned level's goblin is still there";
 	EXPECT_EQ(level.at(0)->actorData.name, "orc");
 	EXPECT_EQ(level.at(1)->actorData.name, "kobold");
 }
@@ -149,7 +158,8 @@ TEST_F(LevelLoadTest, ADocumentWithoutACreatureListIsRefused)
 	const std::string missing = refusal_of_creatures(json::object(), level);
 	EXPECT_NE(missing.find("creatures"), std::string::npos) << missing;
 
-	const std::string notAList = refusal_of_creatures(json{ { "creatures", json::object() } }, level);
+	const std::string notAList =
+		refusal_of_creatures(json{ { "creatures", json::object() } }, level);
 	EXPECT_NE(notAList.find("creatures"), std::string::npos) << notAList;
 }
 
@@ -158,18 +168,20 @@ TEST_F(LevelLoadTest, LoadingRoomsReplacesTheAbandonedLevels)
 {
 	json record{};
 	record["rooms"] = json::array();
-	record["rooms"].push_back({
-		{ "col", 20 },
-		{ "row", 2 },
-		{ "width", 4 },
-		{ "height", 3 },
-		{ "type", 0 },
-	});
+	record["rooms"].push_back(
+		{
+			{ "col", 20 },
+			{ "row", 2 },
+			{ "width", 4 },
+			{ "height", 3 },
+			{ "type", 0 },
+		});
 
 	std::vector<DungeonRoom> level{ room_at(1), room_at(9) };
 	load_rooms(record, level);
 
-	ASSERT_EQ(level.size(), 1u) << "the abandoned level's rooms are still there";
+	ASSERT_EQ(level.size(), 1u)
+		<< "the abandoned level's rooms are still there";
 	EXPECT_EQ(level.at(0).col, 20);
 }
 
@@ -189,11 +201,16 @@ TEST_F(LevelLoadTest, SavedRoomsComeBackWithEveryField)
 	ASSERT_EQ(level.size(), 2u);
 	for (size_t roomIndex = 0; roomIndex < saved.size(); ++roomIndex)
 	{
-		EXPECT_EQ(level.at(roomIndex).col, saved.at(roomIndex).col) << roomIndex;
-		EXPECT_EQ(level.at(roomIndex).row, saved.at(roomIndex).row) << roomIndex;
-		EXPECT_EQ(level.at(roomIndex).width, saved.at(roomIndex).width) << roomIndex;
-		EXPECT_EQ(level.at(roomIndex).height, saved.at(roomIndex).height) << roomIndex;
-		EXPECT_EQ(level.at(roomIndex).type, saved.at(roomIndex).type) << roomIndex;
+		EXPECT_EQ(level.at(roomIndex).col, saved.at(roomIndex).col)
+			<< roomIndex;
+		EXPECT_EQ(level.at(roomIndex).row, saved.at(roomIndex).row)
+			<< roomIndex;
+		EXPECT_EQ(level.at(roomIndex).width, saved.at(roomIndex).width)
+			<< roomIndex;
+		EXPECT_EQ(level.at(roomIndex).height, saved.at(roomIndex).height)
+			<< roomIndex;
+		EXPECT_EQ(level.at(roomIndex).type, saved.at(roomIndex).type)
+			<< roomIndex;
 	}
 }
 
@@ -222,7 +239,8 @@ TEST_F(LevelLoadTest, ARoomMissingAFieldIsRefusedByName)
 		std::vector<DungeonRoom> level{};
 		const std::string refusal = refusal_of_rooms(record, level);
 
-		EXPECT_NE(refusal.find(field), std::string::npos) << "refusal does not name " << field << ": " << refusal;
+		EXPECT_NE(refusal.find(field), std::string::npos)
+			<< "refusal does not name " << field << ": " << refusal;
 	}
 }
 
@@ -245,16 +263,21 @@ TEST_F(LevelLoadTest, EveryRoomTypeBelowTheFirstRefusedOneRoundTrips)
 		}
 		catch (const std::exception& refusal)
 		{
-			EXPECT_NE(std::string(refusal.what()).find(std::to_string(type)), std::string::npos) << refusal.what();
+			EXPECT_NE(
+				std::string(refusal.what()).find(std::to_string(type)),
+				std::string::npos)
+				<< refusal.what();
 			firstRefused = type;
 			break;
 		}
 
 		json savedAgain{};
 		save_rooms(level, savedAgain);
-		EXPECT_EQ(savedAgain.at("rooms").at(0).at("type"), type) << "room type " << type << " loaded as another";
+		EXPECT_EQ(savedAgain.at("rooms").at(0).at("type"), type)
+			<< "room type " << type << " loaded as another";
 	}
-	ASSERT_TRUE(firstRefused.has_value()) << "no room type below " << SEARCH_CEILING << " was refused";
+	ASSERT_TRUE(firstRefused.has_value())
+		<< "no room type below " << SEARCH_CEILING << " was refused";
 	EXPECT_GT(*firstRefused, 0) << "not even the first room type loaded";
 
 	json record{};
@@ -262,7 +285,8 @@ TEST_F(LevelLoadTest, EveryRoomTypeBelowTheFirstRefusedOneRoundTrips)
 	record.at("rooms").at(0)["type"] = -1;
 	std::vector<DungeonRoom> level{};
 	const std::string refusal = refusal_of_rooms(record, level);
-	EXPECT_NE(refusal.find("-1"), std::string::npos) << "refusal does not name -1: " << refusal;
+	EXPECT_NE(refusal.find("-1"), std::string::npos)
+		<< "refusal does not name -1: " << refusal;
 }
 
 // The save always writes "rooms" as an array, so a document without it, or with
@@ -274,7 +298,8 @@ TEST_F(LevelLoadTest, ADocumentWithoutARoomListIsRefused)
 	const std::string missing = refusal_of_rooms(json::object(), level);
 	EXPECT_NE(missing.find("rooms"), std::string::npos) << missing;
 
-	const std::string notAList = refusal_of_rooms(json{ { "rooms", json::object() } }, level);
+	const std::string notAList =
+		refusal_of_rooms(json{ { "rooms", json::object() } }, level);
 	EXPECT_NE(notAList.find("rooms"), std::string::npos) << notAList;
 }
 
@@ -314,7 +339,8 @@ TEST_F(LevelLoadTest, LoadingDecorationsReplacesTheAbandonedLevels)
 	level.push_back(barrel_at(Vector2D{ 11, 2 }, 2));
 	load_decorations(record, level);
 
-	ASSERT_EQ(level.size(), 1u) << "the abandoned level's decoration is still there, or the saved one is missing";
+	ASSERT_EQ(level.size(), 1u)
+		<< "the abandoned level's decoration is still there, or the saved one is missing";
 	EXPECT_EQ(level.at(0)->position, (Vector2D{ 5, 7 }));
 }
 

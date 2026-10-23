@@ -80,7 +80,8 @@ inline constexpr std::array<PickableType, 17> ALL_PICKABLE_TYPE = {
 [[nodiscard]] inline PickableType next_pickable_type(PickableType value)
 {
 	const auto found = std::ranges::find(ALL_PICKABLE_TYPE, value);
-	if (found == ALL_PICKABLE_TYPE.end() || found + 1 == ALL_PICKABLE_TYPE.end())
+	if (found == ALL_PICKABLE_TYPE.end() ||
+		found + 1 == ALL_PICKABLE_TYPE.end())
 	{
 		return ALL_PICKABLE_TYPE.front();
 	}
@@ -109,10 +110,12 @@ inline constexpr std::array<ConsumableEffect, 4> ALL_CONSUMABLE_EFFECT = {
 //
 // Example:
 //   next_consumable_effect(ConsumableEffect::NONE);   // -> ConsumableEffect::HEAL
-[[nodiscard]] inline ConsumableEffect next_consumable_effect(ConsumableEffect value)
+[[nodiscard]] inline ConsumableEffect next_consumable_effect(
+	ConsumableEffect value)
 {
 	const auto found = std::ranges::find(ALL_CONSUMABLE_EFFECT, value);
-	if (found == ALL_CONSUMABLE_EFFECT.end() || found + 1 == ALL_CONSUMABLE_EFFECT.end())
+	if (found == ALL_CONSUMABLE_EFFECT.end() ||
+		found + 1 == ALL_CONSUMABLE_EFFECT.end())
 	{
 		return ALL_CONSUMABLE_EFFECT.front();
 	}
@@ -123,7 +126,8 @@ inline constexpr std::array<ConsumableEffect, 4> ALL_CONSUMABLE_EFFECT = {
 //
 // Example:
 //   encode_consumable_effect(ConsumableEffect::ADD_BUFF); // -> "add_buff"
-inline std::string_view encode_consumable_effect(ConsumableEffect consumableEffect)
+inline std::string_view encode_consumable_effect(
+	ConsumableEffect consumableEffect)
 {
 	switch (consumableEffect)
 	{
@@ -172,7 +176,8 @@ inline ConsumableEffect parse_consumable_effect(std::string_view name)
 		return ConsumableEffect::FAIL;
 	}
 
-	throw std::runtime_error(std::format("unknown consumable effect '{}'", name));
+	throw std::runtime_error(
+		std::format("unknown consumable effect '{}'", name));
 }
 
 // Whether a helm that answers to a command word has been spoken to since it went on.
@@ -319,13 +324,22 @@ struct Weapon
 
 	bool is_ranged() const noexcept { return ranged; }
 
-	bool is_two_handed() const noexcept { return handRequirement == HandRequirement::TWO_HANDED; }
+	bool is_two_handed() const noexcept
+	{
+		return handRequirement == HandRequirement::TWO_HANDED;
+	}
 
 	WeaponSize get_weapon_size() const noexcept { return weaponSize; }
 
-	HandRequirement get_hand_requirement() const noexcept { return handRequirement; }
+	HandRequirement get_hand_requirement() const noexcept
+	{
+		return handRequirement;
+	}
 
-	bool can_be_off_hand() const noexcept { return weaponSize <= WeaponSize::SMALL; }
+	bool can_be_off_hand() const noexcept
+	{
+		return weaponSize <= WeaponSize::SMALL;
+	}
 
 	bool validate_dual_wield(const Item* mainHand, const Item* offHand) const;
 	EquipmentSlot get_preferred_slot(const Creature* wearer) const;
@@ -541,19 +555,51 @@ using ItemBehavior = std::variant<
 
 // ========== use() overloads - one per behavior type ==========
 
-bool use(Consumable& consumable, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(
+	Consumable& consumable,
+	Item& owner,
+	Creature& wearer,
+	GameContext& ctx);
 bool use(Weapon& weapon, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Shield& shield, Item& owner, Creature& wearer, GameContext& ctx);
-bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContext& ctx);
-bool use(Teleporter& teleporter, Item& owner, Creature& wearer, GameContext& ctx);
-bool use(IdentifyScroll& identifyScroll, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(
+	TargetedScroll& targetScroll,
+	Item& owner,
+	Creature& wearer,
+	GameContext& ctx);
+bool use(
+	Teleporter& teleporter,
+	Item& owner,
+	Creature& wearer,
+	GameContext& ctx);
+bool use(
+	IdentifyScroll& identifyScroll,
+	Item& owner,
+	Creature& wearer,
+	GameContext& ctx);
 bool use(Gold& gold, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Food& food, Item& owner, Creature& wearer, GameContext& ctx);
-bool use(CorpseFood& corpseFood, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(
+	CorpseFood& corpseFood,
+	Item& owner,
+	Creature& wearer,
+	GameContext& ctx);
 bool use(Armor& armor, Item& item, Creature& wearer, GameContext& ctx);
-bool use(MagicalHelm& magicalHelm, Item& owner, Creature& wearer, GameContext& ctx);
-bool use(MagicalRing& magicalRing, Item& owner, Creature& wearer, GameContext& ctx);
-bool use(JewelryAmulet& jewelryAmulet, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(
+	MagicalHelm& magicalHelm,
+	Item& owner,
+	Creature& wearer,
+	GameContext& ctx);
+bool use(
+	MagicalRing& magicalRing,
+	Item& owner,
+	Creature& wearer,
+	GameContext& ctx);
+bool use(
+	JewelryAmulet& jewelryAmulet,
+	Item& owner,
+	Creature& wearer,
+	GameContext& ctx);
 bool use(Gauntlets& gauntlets, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Girdle& girdle, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Amulet& amulet, Item& owner, Creature& wearer, GameContext& ctx);
@@ -574,11 +620,19 @@ enum class ScrollReading
 // Example, a goblin on the tile, then a warded one the reader fails to save against:
 //   read_confusion_at(player, goblinTile, 8, ctx);   // -> ScrollReading::SPENT, goblin confused
 //   read_confusion_at(player, wardedTile, 8, ctx);   // -> ScrollReading::KEPT, untouched
-ScrollReading read_confusion_at(const Creature& reader, Vector2D tile, int turns, GameContext& ctx);
+ScrollReading read_confusion_at(
+	const Creature& reader,
+	Vector2D tile,
+	int turns,
+	GameContext& ctx);
 
 // ========== Variant-level dispatchers ==========
 
-bool use_item(ItemBehavior& behavior, Item& owner, Creature& wearer, GameContext& ctx);
+bool use_item(
+	ItemBehavior& behavior,
+	Item& owner,
+	Creature& wearer,
+	GameContext& ctx);
 int get_item_ac_bonus(const ItemBehavior& behavior) noexcept;
 
 // Whether using this item puts its user somewhere else. Asked before the use, because the
@@ -614,7 +668,9 @@ bool hands_over_to_targeting(const ItemBehavior& behavior) noexcept;
 // Example:
 //   get_item_resistance_strength(MagicalRing{ MagicalEffect::FIRE_RESISTANCE, 1 }, DamageType::FIRE);  // -> 1
 //   get_item_resistance_strength(MagicalRing{ MagicalEffect::FIRE_RESISTANCE, 1 }, DamageType::COLD);  // -> 0
-int get_item_resistance_strength(const ItemBehavior& behavior, DamageType damageType) noexcept;
+int get_item_resistance_strength(
+	const ItemBehavior& behavior,
+	DamageType damageType) noexcept;
 
 // Serialization
 void save_behavior(const ItemBehavior& behavior, json& output);

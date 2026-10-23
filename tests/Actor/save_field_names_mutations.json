@@ -15,20 +15,20 @@
   "mutations": [
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\t\t\toutput[\"handRequirement\"] = encode_hand_requirement(weapon.handRequirement);",
+      "original": "\t\t\t\toutput[\"handRequirement\"] =\n\t\t\t\t\tencode_hand_requirement(weapon.handRequirement);",
       "mutated": "\t\t\t\toutput[\"handReq\"] = static_cast<int>(weapon.handRequirement);",
       "catches": "the saver and the loader naming the field differently again"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tweapon.handRequirement = parse_hand_requirement(source.at(\"handRequirement\").get<std::string>());",
-      "mutated": "\t\tweapon.handRequirement = HandRequirement::ONE_HANDED;",
+      "original": "\t\tweapon.handRequirement = parse_hand_requirement(\n\t\t\tsource.at(\"handRequirement\").get<std::string>());",
+      "mutated": "\t\tweapon.handRequirement =HandRequirement::ONE_HANDED;",
       "catches": "a saved weapon's hand requirement thrown away on load"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\ttargetedScroll.scrollAnimation = parse_scroll_animation(source.at(\"scrollAnimation\").get<std::string>());",
-      "mutated": "\t\ttargetedScroll.scrollAnimation = static_cast<ScrollAnimation>(source.value(\"animation\", 0));",
+      "original": "\t\ttargetedScroll.scrollAnimation = parse_scroll_animation(\n\t\t\tsource.at(\"scrollAnimation\").get<std::string>());",
+      "mutated": "\t\ttargetedScroll.scrollAnimation =static_cast<ScrollAnimation>(source.value(\"animation\", 0));",
       "catches": "a scroll's animation read under a name nothing writes, defaulted quietly"
     },
     {
@@ -45,14 +45,14 @@
     },
     {
       "file": "src/PlayerController.cpp",
-      "original": "\tsavedState[\"confusionEndTime\"] = confusionEndTime.has_value() ? json(*confusionEndTime) : json(nullptr);",
-      "mutated": "\tsavedState[\"confusionEndTime\"] = json(nullptr);",
+      "original": "\tsavedState[\"confusionEndTime\"] =\n\t\tconfusionEndTime.has_value() ? json(*confusionEndTime) : json(nullptr);",
+      "mutated": "\tsavedState[\"confusionEndTime\"] =json(nullptr);",
       "catches": "a save that drops the confusion, so reloading frees a confused player on the next action"
     },
     {
       "file": "src/PlayerController.cpp",
-      "original": "\tconfusionEndTime = endTime.is_null() ? std::nullopt : std::optional<int>{ endTime.get<int>() };",
-      "mutated": "\tconfusionEndTime = endTime.is_null() ? std::nullopt : std::optional<int>{};",
+      "original": "\tconfusionEndTime = endTime.is_null() ?\n\t\tstd::nullopt :\n\t\tstd::optional<int>{ endTime.get<int>() };",
+      "mutated": "\tconfusionEndTime = endTime.is_null() ?\n\t\tstd::nullopt :\n\t\tstd::optional<int>{};",
       "catches": "a load that drops the confusion, which reads to the next action as the spell having run out"
     },
     {

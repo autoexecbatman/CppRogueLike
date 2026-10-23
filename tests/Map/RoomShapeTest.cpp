@@ -120,7 +120,11 @@ int walls_inside_box(const Map& map, const DungeonRoom& room)
 
 // Whether the given edge line of the room holds any floor. `alongRow` true reads the row
 // `line` across the room's columns; false reads the column `line` down its rows.
-bool edge_has_floor(const Map& map, const DungeonRoom& room, int line, bool alongRow)
+bool edge_has_floor(
+	const Map& map,
+	const DungeonRoom& room,
+	int line,
+	bool alongRow)
 {
 	if (alongRow)
 	{
@@ -284,11 +288,18 @@ TEST_F(RoomShapeTest, EveryRoomKeepsTheShapeItWasGiven)
 			if (!map.room_interior_is_one_piece(room))
 			{
 				std::string picture;
-				for (int pictureRow = room.top_wall(); pictureRow <= room.bottom_wall(); ++pictureRow)
+				for (
+					int pictureRow = room.top_wall();
+					pictureRow <= room.bottom_wall();
+					++pictureRow)
 				{
-					for (int pictureCol = room.left_wall(); pictureCol <= room.right_wall(); ++pictureCol)
+					for (
+						int pictureCol = room.left_wall();
+						pictureCol <= room.right_wall();
+						++pictureCol)
 					{
-						picture += picture_glyph(map.get_tile_type(Vector2D{ pictureCol, pictureRow }));
+						picture += picture_glyph(map.get_tile_type(
+							Vector2D{ pictureCol, pictureRow }));
 					}
 					picture += '\n';
 				}
@@ -317,8 +328,8 @@ TEST_F(RoomShapeTest, EveryRoomKeepsTheShapeItWasGiven)
 			else
 			{
 				ASSERT_GT(walls, 0)
-					<< shape_name(room.shape) << " at " << room.col << "," << room.row
-					<< " " << room.width << "x" << room.height
+					<< shape_name(room.shape) << " at " << room.col << ","
+					<< room.row << " " << room.width << "x" << room.height
 					<< " was carved as a plain rectangle - something wrote over its shape";
 			}
 		}
@@ -368,7 +379,8 @@ TEST_F(RoomShapeTest, ACrossThePrefabBreaksIsCarvedAsThePrefabAlone)
 
 	for (const DungeonRoom& room : breakingRooms)
 	{
-		ASSERT_GT(interior_wall_count_of(room.prefabName), 0) << "prefab '" << room.prefabName << "' is not in the library";
+		ASSERT_GT(interior_wall_count_of(room.prefabName), 0)
+			<< "prefab '" << room.prefabName << "' is not in the library";
 		MapThatCarvesRooms map{ MAP_WIDTH, MAP_HEIGHT };
 		map.init_tiles();
 		ctx.map = &map;
@@ -377,9 +389,11 @@ TEST_F(RoomShapeTest, ACrossThePrefabBreaksIsCarvedAsThePrefabAlone)
 		map.create_room(room, false, ctx);
 
 		EXPECT_TRUE(map.room_layout_is_sound(room))
-			<< "a cross under prefab '" << room.prefabName << "' was left split or with an edge no corridor can enter";
+			<< "a cross under prefab '" << room.prefabName
+			<< "' was left split or with an edge no corridor can enter";
 		EXPECT_GT(walls_inside_box(map, room), 0)
-			<< "prefab '" << room.prefabName << "' was dropped along with the shape";
+			<< "prefab '" << room.prefabName
+			<< "' was dropped along with the shape";
 	}
 }
 
@@ -416,8 +430,10 @@ TEST_F(RoomShapeTest, APrefabThatSplitsTheRoomByItselfLeavesAPlainBox)
 
 	map.create_room(room, false, ctx);
 
-	EXPECT_TRUE(map.room_layout_is_sound(room)) << "the room was left split by its prefab's wall";
-	EXPECT_EQ(walls_inside_box(map, room), 0) << "the plain box still holds walls";
+	EXPECT_TRUE(map.room_layout_is_sound(room))
+		<< "the room was left split by its prefab's wall";
+	EXPECT_EQ(walls_inside_box(map, room), 0)
+		<< "the plain box still holds walls";
 }
 
 TEST_F(RoomShapeTest, EveryCorridorOpensOntoTheRoomsFloor)
@@ -431,7 +447,8 @@ TEST_F(RoomShapeTest, EveryCorridorOpensOntoTheRoomsFloor)
 		{
 			for (int neighbour : room.adjacentRoomIndices)
 			{
-				const DungeonRoom& other = rooms[static_cast<size_t>(neighbour)];
+				const DungeonRoom& other =
+					rooms[static_cast<size_t>(neighbour)];
 
 				// Map::place_from_graph aims the corridor at this room's centre column
 				// or centre row, depending on which side the neighbour lies. This is the
@@ -439,11 +456,13 @@ TEST_F(RoomShapeTest, EveryCorridorOpensOntoTheRoomsFloor)
 				Vector2D justInside{ -1, -1 };
 				if (room.top_wall() > other.bottom_wall())
 				{
-					justInside = Vector2D{ map.exit_column(room, room.row), room.row };
+					justInside =
+						Vector2D{ map.exit_column(room, room.row), room.row };
 				}
 				else if (room.left_wall() > other.right_wall())
 				{
-					justInside = Vector2D{ room.col, map.exit_row(room, room.col) };
+					justInside =
+						Vector2D{ room.col, map.exit_row(room, room.col) };
 				}
 				else if (room.bottom_wall() < other.top_wall())
 				{
@@ -488,9 +507,9 @@ TEST_F(RoomShapeTest, RoomsNeverShareGround)
 			{
 				const DungeonRoom& one = rooms[first];
 				const DungeonRoom& two = rooms[second];
-				const bool overlap =
-					one.col <= two.col_end() && two.col <= one.col_end() &&
-					one.row <= two.row_end() && two.row <= one.row_end();
+				const bool overlap = one.col <= two.col_end() &&
+					two.col <= one.col_end() && one.row <= two.row_end() &&
+					two.row <= one.row_end();
 				ASSERT_FALSE(overlap)
 					<< "rooms at " << one.col << "," << one.row << " and "
 					<< two.col << "," << two.row << " share floor";
@@ -520,7 +539,8 @@ TEST_F(RoomShapeTest, APrefabRoomKeepsTheWallsItsPrefabDraws)
 			}
 			EXPECT_GT(walls_inside_box(map, room), 0)
 				<< "the room at " << room.col << "," << room.row
-				<< " lost every wall its prefab '" << room.prefabName << "' draws";
+				<< " lost every wall its prefab '" << room.prefabName
+				<< "' draws";
 		}
 	}
 }
@@ -545,23 +565,32 @@ TEST_F(RoomShapeTest, APrefabsDecorationsAreThePalettesTiles)
 				}
 				for (size_t row = 0; row < prefab.rows.size(); ++row)
 				{
-					for (size_t column = 0; column < prefab.rows[row].size(); ++column)
+					for (
+						size_t column = 0; column < prefab.rows[row].size();
+						++column)
 					{
-						const TileRef expected = palette.resolve_decor(prefab.rows[row][column]);
-						const Vector2D cell{ room.left_wall() + static_cast<int>(column), room.top_wall() + static_cast<int>(row) };
+						const TileRef expected =
+							palette.resolve_decor(prefab.rows[row][column]);
+						const Vector2D cell{ room.left_wall() +
+								static_cast<int>(column),
+							room.top_wall() + static_cast<int>(row) };
 						const TileRef placed = decorEditor.get_override(cell);
 						if (!expected.is_valid() || !placed.is_valid())
 						{
 							continue;
 						}
-						EXPECT_EQ(placed, expected) << "prefab '" << prefab.name << "' symbol '" << prefab.rows[row][column] << "'";
+						EXPECT_EQ(placed, expected)
+							<< "prefab '" << prefab.name << "' symbol '"
+							<< prefab.rows[row][column] << "'";
 						++stamped;
 					}
 				}
 			}
 		}
 	}
-	EXPECT_GT(stamped, 0) << std::format("no prefab decoration was stamped in {} dungeons", DUNGEONS);
+	EXPECT_GT(stamped, 0) << std::format(
+		"no prefab decoration was stamped in {} dungeons",
+		DUNGEONS);
 }
 
 // Every generated dungeon, saved and loaded into a fresh map, has the same tiles and the same
@@ -584,8 +613,10 @@ TEST_F(RoomShapeTest, EveryDoorKeepsItsStateThroughASave)
 			for (int col = 0; col < MAP_WIDTH; ++col)
 			{
 				const Vector2D cell{ col, row };
-				EXPECT_EQ(fresh.get_tile_type(cell), map.get_tile_type(cell)) << "seed " << seed << " at " << col << "," << row;
-				EXPECT_EQ(fresh.is_door_locked(cell), map.is_door_locked(cell)) << "seed " << seed << " at " << col << "," << row;
+				EXPECT_EQ(fresh.get_tile_type(cell), map.get_tile_type(cell))
+					<< "seed " << seed << " at " << col << "," << row;
+				EXPECT_EQ(fresh.is_door_locked(cell), map.is_door_locked(cell))
+					<< "seed " << seed << " at " << col << "," << row;
 				lockedDoors += map.is_door_locked(cell) ? 1 : 0;
 			}
 		}
@@ -593,7 +624,9 @@ TEST_F(RoomShapeTest, EveryDoorKeepsItsStateThroughASave)
 		fresh.save(savedAgain);
 		EXPECT_EQ(savedAgain, saved) << "seed " << seed;
 	}
-	EXPECT_GT(lockedDoors, 0) << std::format("no treasure room locked a door in {} dungeons, so no lock was saved", DUNGEONS);
+	EXPECT_GT(lockedDoors, 0) << std::format(
+		"no treasure room locked a door in {} dungeons, so no lock was saved",
+		DUNGEONS);
 }
 
 TEST_F(RoomShapeTest, AnExitCellIsWalkableWheneverItsEdgeHasFloor)
@@ -609,31 +642,45 @@ TEST_F(RoomShapeTest, AnExitCellIsWalkableWheneverItsEdgeHasFloor)
 		{
 			if (edge_has_floor(map, room, room.row, true))
 			{
-				EXPECT_NE(map.get_tile_type(Vector2D{ map.exit_column(room, room.row), room.row }), TileType::WALL)
-					<< "top edge of the room at " << room.col << "," << room.row;
+				EXPECT_NE(
+					map.get_tile_type(
+						Vector2D{ map.exit_column(room, room.row), room.row }),
+					TileType::WALL)
+					<< "top edge of the room at " << room.col << ","
+					<< room.row;
 			}
 			if (edge_has_floor(map, room, room.row_end(), true))
 			{
-				EXPECT_NE(map.get_tile_type(Vector2D{
-							  map.exit_column(room, room.row_end()),
-							  room.row_end(),
-						  }),
+				EXPECT_NE(
+					map.get_tile_type(
+						Vector2D{
+							map.exit_column(room, room.row_end()),
+							room.row_end(),
+						}),
 					TileType::WALL)
-					<< "bottom edge of the room at " << room.col << "," << room.row;
+					<< "bottom edge of the room at " << room.col << ","
+					<< room.row;
 			}
 			if (edge_has_floor(map, room, room.col, false))
 			{
-				EXPECT_NE(map.get_tile_type(Vector2D{ room.col, map.exit_row(room, room.col) }), TileType::WALL)
-					<< "left edge of the room at " << room.col << "," << room.row;
+				EXPECT_NE(
+					map.get_tile_type(
+						Vector2D{ room.col, map.exit_row(room, room.col) }),
+					TileType::WALL)
+					<< "left edge of the room at " << room.col << ","
+					<< room.row;
 			}
 			if (edge_has_floor(map, room, room.col_end(), false))
 			{
-				EXPECT_NE(map.get_tile_type(Vector2D{
-							  room.col_end(),
-							  map.exit_row(room, room.col_end()),
-						  }),
+				EXPECT_NE(
+					map.get_tile_type(
+						Vector2D{
+							room.col_end(),
+							map.exit_row(room, room.col_end()),
+						}),
 					TileType::WALL)
-					<< "right edge of the room at " << room.col << "," << room.row;
+					<< "right edge of the room at " << room.col << ","
+					<< room.row;
 			}
 		}
 	}
@@ -658,7 +705,8 @@ TEST_F(RoomShapeTest, AnExitCellStepsAsideWhenTheCentreIsWalled)
 	map.set_tile(Vector2D{ room.center_col(), room.row }, TileType::WALL);
 
 	const int chosen = map.exit_column(room, room.row);
-	EXPECT_NE(chosen, room.center_col()) << "the exit stayed on the walled centre column";
+	EXPECT_NE(chosen, room.center_col())
+		<< "the exit stayed on the walled centre column";
 	EXPECT_EQ(map.get_tile_type(Vector2D{ chosen, room.row }), TileType::FLOOR)
 		<< "the exit column " << chosen << " is not floor";
 }

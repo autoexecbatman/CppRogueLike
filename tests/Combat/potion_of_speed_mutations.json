@@ -39,8 +39,8 @@
     },
     {
       "file": "src/Creature.h",
-      "original": "\t[[nodiscard]] int get_unhasted_action_delay() const noexcept { return actionDelay; }",
-      "mutated": "\t[[nodiscard]] int get_unhasted_action_delay() const noexcept { return get_action_delay(); }",
+      "original": "\t[[nodiscard]] int get_unhasted_action_delay() const noexcept\n\t{\n\t\treturn actionDelay;\n\t}",
+      "mutated": "\t[[nodiscard]] int get_unhasted_action_delay() const noexcept\n\t{\n\t\treturn get_action_delay();\n\t}",
       "catches": "the unhasted delay answered with the hasted one"
     },
     {
@@ -51,8 +51,8 @@
     },
     {
       "file": "src/PlayerTurn.cpp",
-      "original": "\tadvance_player_and_open_turn(ctx, scaled_cost(TIME_UNITS_PER_ROUND, ctx.player()->get_unhasted_action_delay()));",
-      "mutated": "\tadvance_player_and_open_turn(ctx, scaled_cost(TIME_UNITS_PER_ROUND, ctx.player()->get_action_delay()));",
+      "original": "\tadvance_player_and_open_turn(\n\t\tctx,\n\t\tscaled_cost(\n\t\t\tTIME_UNITS_PER_ROUND,\n\t\t\tctx.player()->get_unhasted_action_delay()));",
+      "mutated": "\tadvance_player_and_open_turn(\n\t\tctx,\n\t\tscaled_cost(\n\t\t\tTIME_UNITS_PER_ROUND,\n\t\t\tctx.player()->get_action_delay()));",
       "catches": "a spellcasting priced on the hasted delay, which the book says it is not"
     },
     {

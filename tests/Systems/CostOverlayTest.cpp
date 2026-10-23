@@ -10,7 +10,6 @@
 
 #include <gtest/gtest.h>
 
-
 #include <raylib.h>
 
 #include "src/CostOverlay.h"

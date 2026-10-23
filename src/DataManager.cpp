@@ -94,7 +94,10 @@ nlohmann::json read_table(const std::string& filename)
 	std::ifstream file(filename);
 	if (!file.is_open())
 	{
-		throw std::runtime_error(std::format("DataManager: cannot open {}, so its ability table cannot be read", filename));
+		throw std::runtime_error(
+			std::format(
+				"DataManager: cannot open {}, so its ability table cannot be read",
+				filename));
 	}
 
 	nlohmann::json table;
@@ -160,7 +163,8 @@ ConstitutionAttributes constitution_row_from(const nlohmann::json& item)
 	constitution.HPAdj = item.at("HPAdj").get<int>();
 	constitution.hitDieMinimum = item.at("hitDieMinimum").get<int>();
 	constitution.SystemShock = item.at("SystemShock").get<int>();
-	constitution.ResurrectionSurvival = item.at("ResurrectionSurvival").get<int>();
+	constitution.ResurrectionSurvival =
+		item.at("ResurrectionSurvival").get<int>();
 	constitution.PoisonSave = item.at("PoisonSave").get<int>();
 	constitution.Regeneration = item.at("Regeneration").get<int>();
 	return constitution;
@@ -205,19 +209,33 @@ void DataManager::load_all_data(MessageSystem& message_system)
 
 	// The 18/xx bands are kept apart, so the plain rows stay indexed by score. Assigned
 	// rather than appended, so a second load replaces the first.
-	std::vector<StrengthAttributes> strengthRows = load_strength(Paths::resolve(Paths::STRENGTH_TABLE).string(), message_system);
+	std::vector<StrengthAttributes> strengthRows = load_strength(
+		Paths::resolve(Paths::STRENGTH_TABLE).string(),
+		message_system);
 	auto is_exceptional_band = [](const StrengthAttributes& row)
 	{
 		return row.exceptionalFrom > 0;
 	};
-	exceptionalStrengthBands = strengthRows | std::views::filter(is_exceptional_band) | std::ranges::to<std::vector>();
+	exceptionalStrengthBands = strengthRows |
+		std::views::filter(is_exceptional_band) |
+		std::ranges::to<std::vector>();
 	std::erase_if(strengthRows, is_exceptional_band);
 	strengthAttributes = std::move(strengthRows);
-	dexterityAttributes = load_dexterity(Paths::resolve(Paths::DEXTERITY_TABLE).string(), message_system);
-	constitutionAttributes = load_constitution(Paths::resolve(Paths::CONSTITUTION_TABLE).string(), message_system);
-	charismaAttributes = load_charisma(Paths::resolve(Paths::CHARISMA_TABLE).string(), message_system);
-	intelligenceAttributes = load_intelligence(Paths::resolve(Paths::INTELLIGENCE_TABLE).string(), message_system);
-	wisdomAttributes = load_wisdom(Paths::resolve(Paths::WISDOM_TABLE).string(), message_system);
+	dexterityAttributes = load_dexterity(
+		Paths::resolve(Paths::DEXTERITY_TABLE).string(),
+		message_system);
+	constitutionAttributes = load_constitution(
+		Paths::resolve(Paths::CONSTITUTION_TABLE).string(),
+		message_system);
+	charismaAttributes = load_charisma(
+		Paths::resolve(Paths::CHARISMA_TABLE).string(),
+		message_system);
+	intelligenceAttributes = load_intelligence(
+		Paths::resolve(Paths::INTELLIGENCE_TABLE).string(),
+		message_system);
+	wisdomAttributes = load_wisdom(
+		Paths::resolve(Paths::WISDOM_TABLE).string(),
+		message_system);
 
 	message_system.log("DataManager: All game data loaded successfully");
 }
@@ -242,10 +260,13 @@ StrengthAttributes DataManager::strength_for(int score, int exceptional) const
 
 	auto holds = [exceptional](const StrengthAttributes& band)
 	{
-		return band.exceptionalFrom <= exceptional && exceptional <= band.exceptionalTo;
+		return band.exceptionalFrom <= exceptional &&
+			exceptional <= band.exceptionalTo;
 	};
 	const auto band = std::ranges::find_if(exceptionalStrengthBands, holds);
-	assert(band != exceptionalStrengthBands.end() && "exceptional Strength outside 1-100");
+	assert(
+		band != exceptionalStrengthBands.end() &&
+		"exceptional Strength outside 1-100");
 	return *band;
 }
 
@@ -254,7 +275,9 @@ ConstitutionAttributes DataManager::constitution_for(int score) const
 	return row_for(constitutionAttributes, score);
 }
 
-int DataManager::constitution_hit_point_adjustment(int score, CreatureClass creatureClass) const
+int DataManager::constitution_hit_point_adjustment(
+	int score,
+	CreatureClass creatureClass) const
 {
 	const int tableAdjustment = constitution_for(score).HPAdj;
 
@@ -267,7 +290,9 @@ int DataManager::constitution_hit_point_adjustment(int score, CreatureClass crea
 	return std::min(tableAdjustment, NON_WARRIOR_BONUS_CAP);
 }
 
-std::vector<StrengthAttributes> DataManager::load_strength(const std::string& filename, MessageSystem& message_system)
+std::vector<StrengthAttributes> DataManager::load_strength(
+	const std::string& filename,
+	MessageSystem& message_system)
 {
 	const nlohmann::json table = read_table(filename);
 
@@ -277,11 +302,14 @@ std::vector<StrengthAttributes> DataManager::load_strength(const std::string& fi
 		data.push_back(strength_row_from(item));
 	}
 
-	message_system.log(std::format("DataManager: Loaded {} strength attributes", data.size()));
+	message_system.log(
+		std::format("DataManager: Loaded {} strength attributes", data.size()));
 	return data;
 }
 
-std::vector<DexterityAttributes> DataManager::load_dexterity(const std::string& filename, MessageSystem& message_system)
+std::vector<DexterityAttributes> DataManager::load_dexterity(
+	const std::string& filename,
+	MessageSystem& message_system)
 {
 	const nlohmann::json table = read_table(filename);
 
@@ -291,11 +319,16 @@ std::vector<DexterityAttributes> DataManager::load_dexterity(const std::string& 
 		data.push_back(dexterity_row_from(item));
 	}
 
-	message_system.log(std::format("DataManager: Loaded {} dexterity attributes", data.size()));
+	message_system.log(
+		std::format(
+			"DataManager: Loaded {} dexterity attributes",
+			data.size()));
 	return data;
 }
 
-std::vector<ConstitutionAttributes> DataManager::load_constitution(const std::string& filename, MessageSystem& message_system)
+std::vector<ConstitutionAttributes> DataManager::load_constitution(
+	const std::string& filename,
+	MessageSystem& message_system)
 {
 	const nlohmann::json table = read_table(filename);
 
@@ -305,11 +338,16 @@ std::vector<ConstitutionAttributes> DataManager::load_constitution(const std::st
 		data.push_back(constitution_row_from(item));
 	}
 
-	message_system.log(std::format("DataManager: Loaded {} constitution attributes", data.size()));
+	message_system.log(
+		std::format(
+			"DataManager: Loaded {} constitution attributes",
+			data.size()));
 	return data;
 }
 
-std::vector<CharismaAttributes> DataManager::load_charisma(const std::string& filename, MessageSystem& message_system)
+std::vector<CharismaAttributes> DataManager::load_charisma(
+	const std::string& filename,
+	MessageSystem& message_system)
 {
 	const nlohmann::json table = read_table(filename);
 
@@ -319,11 +357,14 @@ std::vector<CharismaAttributes> DataManager::load_charisma(const std::string& fi
 		data.push_back(charisma_row_from(item));
 	}
 
-	message_system.log(std::format("DataManager: Loaded {} charisma attributes", data.size()));
+	message_system.log(
+		std::format("DataManager: Loaded {} charisma attributes", data.size()));
 	return data;
 }
 
-std::vector<IntelligenceAttributes> DataManager::load_intelligence(const std::string& filename, MessageSystem& message_system)
+std::vector<IntelligenceAttributes> DataManager::load_intelligence(
+	const std::string& filename,
+	MessageSystem& message_system)
 {
 	const nlohmann::json table = read_table(filename);
 
@@ -333,11 +374,16 @@ std::vector<IntelligenceAttributes> DataManager::load_intelligence(const std::st
 		data.push_back(intelligence_row_from(item));
 	}
 
-	message_system.log(std::format("DataManager: Loaded {} intelligence attributes", data.size()));
+	message_system.log(
+		std::format(
+			"DataManager: Loaded {} intelligence attributes",
+			data.size()));
 	return data;
 }
 
-std::vector<WisdomAttributes> DataManager::load_wisdom(const std::string& filename, MessageSystem& message_system)
+std::vector<WisdomAttributes> DataManager::load_wisdom(
+	const std::string& filename,
+	MessageSystem& message_system)
 {
 	const nlohmann::json table = read_table(filename);
 
@@ -347,7 +393,8 @@ std::vector<WisdomAttributes> DataManager::load_wisdom(const std::string& filena
 		data.push_back(wisdom_row_from(item));
 	}
 
-	message_system.log(std::format("DataManager: Loaded {} wisdom attributes", data.size()));
+	message_system.log(
+		std::format("DataManager: Loaded {} wisdom attributes", data.size()));
 	return data;
 }
 

@@ -21,7 +21,7 @@
     },
     {
       "file": "src/CreatureClass.h",
-      "original": "\treturn creatureClass == CreatureClass::FIGHTER || creatureClass == CreatureClass::MONSTER;",
+      "original": "\treturn creatureClass == CreatureClass::FIGHTER ||\n\t\tcreatureClass == CreatureClass::MONSTER;",
       "mutated": "\treturn creatureClass == CreatureClass::FIGHTER;",
       "catches": "a monster capped at the non-warrior +2 instead of reading the warrior column"
     },

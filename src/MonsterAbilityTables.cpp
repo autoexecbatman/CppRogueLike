@@ -27,16 +27,23 @@ void roll_monster_ability_scores(
 {
 	// One 3d6 per score, in the book's order: Strength, Dexterity, Constitution,
 	// Intelligence, Wisdom, Charisma. A printed Strength takes no die.
-	const MonsterStrength strength = printedStrength.has_value()
-		? *printedStrength
-		: monster_strength_score(roll_dice(&dice, MONSTER_ABILITY_DICE), size);
+	const MonsterStrength strength = printedStrength.has_value() ?
+		*printedStrength :
+		monster_strength_score(roll_dice(&dice, MONSTER_ABILITY_DICE), size);
 	creature.set_strength(strength.score);
 	creature.set_exceptional_strength(strength.exceptional);
-	creature.set_dexterity(monster_dexterity_score(roll_dice(&dice, MONSTER_ABILITY_DICE), size));
-	creature.set_constitution(monster_constitution_score(roll_dice(&dice, MONSTER_ABILITY_DICE), size));
-	creature.set_intelligence(monster_intelligence_score(roll_dice(&dice, MONSTER_ABILITY_DICE), rating));
-	creature.set_wisdom(monster_wisdom_score(roll_dice(&dice, MONSTER_ABILITY_DICE), rating));
-	creature.set_charisma(monster_charisma_score(roll_dice(&dice, MONSTER_ABILITY_DICE), rating));
+	creature.set_dexterity(
+		monster_dexterity_score(roll_dice(&dice, MONSTER_ABILITY_DICE), size));
+	creature.set_constitution(monster_constitution_score(
+		roll_dice(&dice, MONSTER_ABILITY_DICE),
+		size));
+	creature.set_intelligence(monster_intelligence_score(
+		roll_dice(&dice, MONSTER_ABILITY_DICE),
+		rating));
+	creature.set_wisdom(
+		monster_wisdom_score(roll_dice(&dice, MONSTER_ABILITY_DICE), rating));
+	creature.set_charisma(
+		monster_charisma_score(roll_dice(&dice, MONSTER_ABILITY_DICE), rating));
 }
 
 // end of file: MonsterAbilityTables.cpp

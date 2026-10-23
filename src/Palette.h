@@ -171,13 +171,18 @@ public:
 	// Example:
 	//   palette.set_symbol_label('W', "Spider web");   // -> APPLIED
 	//   palette.set_symbol_label('W', "");             // -> EMPTY_LABEL
-	[[nodiscard]] PaletteEdit set_symbol_label(char symbol, std::string_view label);
+	[[nodiscard]] PaletteEdit set_symbol_label(
+		char symbol,
+		std::string_view label);
 
 	// Every entry, in file order.
 	//
 	// Example:
 	//   palette.entries().front().label;   // -> "Cobweb" in the shipped palette
-	[[nodiscard]] const std::vector<PaletteEntry>& entries() const noexcept { return paletteEntries; }
+	[[nodiscard]] const std::vector<PaletteEntry>& entries() const noexcept
+	{
+		return paletteEntries;
+	}
 
 	// The symbols a prefab may use: the five structural ones, then each entry that has a
 	// symbol, in file order. Built on each call from the entries, so it is never stale.

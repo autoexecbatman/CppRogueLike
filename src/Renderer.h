@@ -92,7 +92,10 @@ inline constexpr int GUI_FRAME_RULE_WIDTH_DEPTH = 30;
 //
 //   panel_text_row_y(0, 64, 0);    // -> 64,  first row under the top edge
 //   panel_text_row_y(0, 64, 10);   // -> 384, still on a 896-pixel screen
-[[nodiscard]] inline constexpr int panel_text_row_y(int panelTopY, int tileSize, int row)
+[[nodiscard]] inline constexpr int panel_text_row_y(
+	int panelTopY,
+	int tileSize,
+	int row)
 {
 	return panelTopY + tileSize + row * UI_TEXT_ROW_PITCH;
 }
@@ -116,12 +119,16 @@ inline constexpr int GUI_FRAME_RULE_WIDTH_DEPTH = 30;
 //   panel_text_row_at_y(0, 64, 160);   // -> 3
 //   panel_text_row_at_y(0, 64, 191);   // -> 3,  still inside row 3
 //   panel_text_row_at_y(0, 64, 63);    // -> -1, on the frame, not in a row
-[[nodiscard]] inline constexpr int panel_text_row_at_y(int panelTopY, int tileSize, int screenY)
+[[nodiscard]] inline constexpr int panel_text_row_at_y(
+	int panelTopY,
+	int tileSize,
+	int screenY)
 {
 	const int offsetFromFirstRow = screenY - panelTopY - tileSize;
 	if (offsetFromFirstRow < 0)
 	{
-		return (offsetFromFirstRow - (UI_TEXT_ROW_PITCH - 1)) / UI_TEXT_ROW_PITCH;
+		return (offsetFromFirstRow - (UI_TEXT_ROW_PITCH - 1)) /
+			UI_TEXT_ROW_PITCH;
 	}
 	return offsetFromFirstRow / UI_TEXT_ROW_PITCH;
 }
@@ -132,7 +139,10 @@ inline constexpr int GUI_FRAME_RULE_WIDTH_DEPTH = 30;
 // Example:
 //
 //   panel_text_rows_that_fit(896, 64, 14);  // -> 24
-[[nodiscard]] inline constexpr int panel_text_rows_that_fit(int panelHeightPixels, int tileSize, int fontSize)
+[[nodiscard]] inline constexpr int panel_text_rows_that_fit(
+	int panelHeightPixels,
+	int tileSize,
+	int fontSize)
 {
 	const int usablePixels = panelHeightPixels - 2 * tileSize - fontSize;
 	return usablePixels < 0 ? 0 : usablePixels / UI_TEXT_ROW_PITCH + 1;
@@ -146,9 +156,13 @@ inline constexpr int GUI_FRAME_RULE_WIDTH_DEPTH = 30;
 // Example:
 //
 //   panel_tiles_for_text_rows(11, 64, 14);   // -> 8
-[[nodiscard]] inline constexpr int panel_tiles_for_text_rows(int rows, int tileSize, int fontSize)
+[[nodiscard]] inline constexpr int panel_tiles_for_text_rows(
+	int rows,
+	int tileSize,
+	int fontSize)
 {
-	const int neededPixels = 2 * tileSize + (rows - 1) * UI_TEXT_ROW_PITCH + fontSize;
+	const int neededPixels =
+		2 * tileSize + (rows - 1) * UI_TEXT_ROW_PITCH + fontSize;
 	return (neededPixels + tileSize - 1) / tileSize;
 }
 
@@ -160,7 +174,9 @@ inline constexpr int GUI_FRAME_RULE_WIDTH_DEPTH = 30;
 // Example:
 //
 //   panel_tiles_for_text_width(487, 64);     // -> 10
-[[nodiscard]] inline constexpr int panel_tiles_for_text_width(int textWidthPixels, int tileSize)
+[[nodiscard]] inline constexpr int panel_tiles_for_text_width(
+	int textWidthPixels,
+	int tileSize)
 {
 	const int neededPixels = 2 * tileSize + textWidthPixels;
 	return (neededPixels + tileSize - 1) / tileSize;
@@ -183,7 +199,9 @@ inline constexpr int GUI_FRAME_RULE_WIDTH_DEPTH = 30;
 {
 	// The frame's two rules, then the rows between them; the last row needs only the font's height.
 	// The rules are reserved as drawn, since a whole tile at each end wastes two rows at 64px.
-	const int neededPixels = gui_frame_top_rule(tileSize) + GUI_TEXT_TOP_INSET + (GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH + fontSize + gui_frame_bottom_rule(tileSize);
+	const int neededPixels = gui_frame_top_rule(tileSize) + GUI_TEXT_TOP_INSET +
+		(GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH + fontSize +
+		gui_frame_bottom_rule(tileSize);
 	return (neededPixels + tileSize - 1) / tileSize;
 }
 
@@ -235,7 +253,8 @@ class Renderer
 	RenderTexture2D lightMask{};
 	bool lightMaskLoaded{ false };
 
-	std::array<SpriteSheet, static_cast<std::size_t>(TileSheet::COUNT)> sheets{};
+	std::array<SpriteSheet, static_cast<std::size_t>(TileSheet::COUNT)>
+		sheets{};
 	bool sheetsLoaded{ false };
 
 	Font gameFont{};
@@ -251,8 +270,17 @@ class Renderer
 	std::array<ColorPair, COLOR_PAIR_TABLE_SIZE> colorPairs{};
 
 	void init_color_pairs();
-	void load_sheet(TileSheet id, std::string_view name, std::string_view path0, std::string_view path1, int cellSize);
-	void load_sheet_static(TileSheet id, std::string_view name, std::string_view path, int cellSize);
+	void load_sheet(
+		TileSheet id,
+		std::string_view name,
+		std::string_view path0,
+		std::string_view path1,
+		int cellSize);
+	void load_sheet_static(
+		TileSheet id,
+		std::string_view name,
+		std::string_view path,
+		int cellSize);
 
 public:
 	Renderer() = default;
@@ -290,14 +318,26 @@ public:
 	// World-space tile drawing (camera offset applied)
 	void draw_tile(Vector2D gridPos, TileRef tile, Color tint) const;
 	// World-space tile drawing with a sub-tile pixel offset (e.g. open doors pushed to side)
-	void draw_tile_offset(Vector2D gridPos, int pixelOffsetX, int pixelOffsetY, TileRef tile, Color tint) const;
+	void draw_tile_offset(
+		Vector2D gridPos,
+		int pixelOffsetX,
+		int pixelOffsetY,
+		TileRef tile,
+		Color tint) const;
 	// World-space, always frame0 (no animation)
 	void draw_tile_static(Vector2D gridPos, TileRef tile, Color tint) const;
 
 	// Screen-space drawing (no camera offset)
 	void draw_tile_screen(Vector2D screenPos, TileRef tile) const;
-	void draw_tile_screen_color(Vector2D screenPos, TileRef tile, Color tint) const;
-	void draw_tile_screen_color_sized(Vector2D screenPos, int size, TileRef tile, Color tint) const;
+	void draw_tile_screen_color(
+		Vector2D screenPos,
+		TileRef tile,
+		Color tint) const;
+	void draw_tile_screen_color_sized(
+		Vector2D screenPos,
+		int size,
+		TileRef tile,
+		Color tint) const;
 	// One tile stretched to fill a rectangle, in a tint. The HUD's bars use it: their
 	// height is a text row and their width is whatever the panel leaves, so a bar's art
 	// is drawn at its own height and stretched across.
@@ -309,22 +349,43 @@ public:
 		Color tint) const;
 
 	// Screen-space drawing at an explicit pixel size (used by tile picker).
-	void draw_tile_screen_sized(Vector2D screenPos, TileRef tile, int displaySize) const;
-	void draw_text(Vector2D screenPos, std::string_view text, ColorPairId colorPair) const;
-	void draw_text_color(Vector2D screenPos, std::string_view text, Color color) const;
+	void draw_tile_screen_sized(
+		Vector2D screenPos,
+		TileRef tile,
+		int displaySize) const;
+	void draw_text(
+		Vector2D screenPos,
+		std::string_view text,
+		ColorPairId colorPair) const;
+	void draw_text_color(
+		Vector2D screenPos,
+		std::string_view text,
+		Color color) const;
 
 	// Draw a DawnLike-tiled frame with dark background fill.
 	// screenPos = top-left in pixels; wTiles/hTiles = dimensions in tiles.
-	void draw_frame(Vector2D screenPos, int wTiles, int hTiles, const TileConfig& tileConfig) const;
+	void draw_frame(
+		Vector2D screenPos,
+		int wTiles,
+		int hTiles,
+		const TileConfig& tileConfig) const;
 
 	// The same frame fitted to a pixel rectangle rather than a whole number of
 	// tiles. The four border tiles are set against the edges and the runs between
 	// them are tiled, so the frame closes on any rectangle. Whole tiles rarely fill
 	// the screen - at a 96-pixel tile they stop 32 pixels short of 1280x896 - and a
 	// frame counted in tiles then leaves an unpainted strip along two edges.
-	void draw_frame_pixels(Vector2D screenPos, int widthPixels, int heightPixels, const TileConfig& tileConfig) const;
+	void draw_frame_pixels(
+		Vector2D screenPos,
+		int widthPixels,
+		int heightPixels,
+		const TileConfig& tileConfig) const;
 
-	void set_camera_center(int world_tile_x, int world_tile_y, int map_w, int map_h);
+	void set_camera_center(
+		int world_tile_x,
+		int world_tile_y,
+		int map_w,
+		int map_h);
 	void update_viewport();
 	void zoom_in();
 	void zoom_out();
@@ -362,7 +423,9 @@ public:
 	// The cut lands on a space, so a caller that needs the tail of a string rather
 	// than its head - an input field showing what was just typed - wants to limit
 	// what it accepts instead of truncating what it draws.
-	[[nodiscard]] std::string fit_text_to_width(std::string_view text, int maxWidth) const;
+	[[nodiscard]] std::string fit_text_to_width(
+		std::string_view text,
+		int maxWidth) const;
 
 	[[nodiscard]] bool is_initialized() const { return initialized; }
 
@@ -372,7 +435,10 @@ public:
 
 	// Tile rows the HUD needs at the current zoom. Everything that splits the
 	// screen between map and HUD asks this rather than assuming a number.
-	[[nodiscard]] int get_gui_reserve_rows() const { return gui_reserve_rows(tileSize, fontSize); }
+	[[nodiscard]] int get_gui_reserve_rows() const
+	{
+		return gui_reserve_rows(tileSize, fontSize);
+	}
 
 	[[nodiscard]] int get_viewport_cols() const { return viewportCols; }
 

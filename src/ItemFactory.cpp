@@ -38,19 +38,35 @@ struct ItemType
 };
 
 // Places one enhanced item drawn from a rule's pool at position.
-void place_enhanced_item(const EnhancedItemSpawnRule& rule, Vector2D position, GameContext& ctx)
+void place_enhanced_item(
+	const EnhancedItemSpawnRule& rule,
+	Vector2D position,
+	GameContext& ctx)
 {
-	assert(ctx.floorInventory && "place_enhanced_item: called without a floorInventory");
+	assert(
+		ctx.floorInventory &&
+		"place_enhanced_item: called without a floorInventory");
 	assert(ctx.dice && "place_enhanced_item: called without dice");
 
-	const int poolIndex = ctx.dice->roll(0, static_cast<int>(rule.itemPool.size()) - 1);
+	const int poolIndex =
+		ctx.dice->roll(0, static_cast<int>(rule.itemPool.size()) - 1);
 	const std::string_view baseKey = rule.itemPool[poolIndex];
-	const ItemEnhancement enhancement = (rule.enhancementCategory == EnhancedItemCategory::WEAPON)
-		? ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, *ctx.dice)
-		: ItemEnhancement::generate_armor_enhancement(MagicalPrefixes::ALLOWED, *ctx.dice);
+	const ItemEnhancement enhancement =
+		(rule.enhancementCategory == EnhancedItemCategory::WEAPON) ?
+		ItemEnhancement::generate_weapon_enhancement(
+			MagicalPrefixes::ALLOWED,
+			*ctx.dice) :
+		ItemEnhancement::generate_armor_enhancement(
+			MagicalPrefixes::ALLOWED,
+			*ctx.dice);
 	InventoryOperations::add_item(
 		*ctx.floorInventory,
-		ItemCreator::create_with_enhancement(baseKey, position, enhancement.prefix, enhancement.suffix, ctx));
+		ItemCreator::create_with_enhancement(
+			baseKey,
+			position,
+			enhancement.prefix,
+			enhancement.suffix,
+			ctx));
 }
 
 // The spawn table as the registry holds it now: every item with a spawn weight, in key
@@ -70,9 +86,13 @@ std::vector<ItemType> spawn_table(const ItemRegistry& items)
 		// A floor pile of gold is rolled for the level rather than worth its record.
 		auto place_gold = [](Vector2D pos, GameContext& ctx)
 		{
-			assert(ctx.levelManager && "spawn_table place_gold: called without a levelManager");
+			assert(
+				ctx.levelManager &&
+				"spawn_table place_gold: called without a levelManager");
 			assert(ctx.dice && "ItemFactory place_gold: called without dice");
-			assert(ctx.floorInventory && "ItemFactory place_gold: called without a floorInventory");
+			assert(
+				ctx.floorInventory &&
+				"ItemFactory place_gold: called without a floorInventory");
 
 			const int level = ctx.levelManager->get_dungeon_level();
 			const int amount = ctx.dice->roll(level * 3, level * 10);
@@ -82,7 +102,9 @@ std::vector<ItemType> spawn_table(const ItemRegistry& items)
 		};
 		auto place_item = [key](Vector2D pos, GameContext& ctx)
 		{
-			assert(ctx.floorInventory && "ItemFactory place_item: called without a floorInventory");
+			assert(
+				ctx.floorInventory &&
+				"ItemFactory place_item: called without a floorInventory");
 
 			InventoryOperations::add_item(
 				*ctx.floorInventory,
@@ -97,9 +119,9 @@ std::vector<ItemType> spawn_table(const ItemRegistry& items)
 				.levelMaximum = params.levelMax,
 				.levelScaling = params.levelScaling,
 				.category = std::string{ params.category },
-				.createFunc = (key == "gold_coin")
-					? std::function<void(Vector2D, GameContext&)>{ place_gold }
-					: std::function<void(Vector2D, GameContext&)>{ place_item },
+				.createFunc = (key == "gold_coin") ?
+					std::function<void(Vector2D, GameContext&)>{ place_gold } :
+					std::function<void(Vector2D, GameContext&)>{ place_item },
 			});
 	}
 
@@ -114,9 +136,7 @@ std::vector<ItemType> spawn_table(const ItemRegistry& items)
 				.levelScaling = rule.levelScaling,
 				.category = rule.category,
 				.createFunc = [rule](Vector2D pos, GameContext& ctx)
-				{
-					place_enhanced_item(rule, pos, ctx);
-				},
+				{ place_enhanced_item(rule, pos, ctx); },
 			});
 	}
 
@@ -127,7 +147,8 @@ std::vector<ItemType> spawn_table(const ItemRegistry& items)
 // scaled by level and never below 1.
 int calculate_weight(const ItemType& item, int dungeonLevel)
 {
-	if (dungeonLevel < item.levelMinimum || (item.levelMaximum > 0 && dungeonLevel > item.levelMaximum))
+	if (dungeonLevel < item.levelMinimum ||
+		(item.levelMaximum > 0 && dungeonLevel > item.levelMaximum))
 	{
 		return 0;
 	}
@@ -139,7 +160,11 @@ int calculate_weight(const ItemType& item, int dungeonLevel)
 }
 
 // Draws one entry of candidates by weight and places it; false when none can appear.
-bool place_one_of(const std::vector<const ItemType*>& candidates, Vector2D position, int dungeonLevel, GameContext& ctx)
+bool place_one_of(
+	const std::vector<const ItemType*>& candidates,
+	Vector2D position,
+	int dungeonLevel,
+	GameContext& ctx)
 {
 	assert(ctx.dice && "place_one_of: called without dice");
 
@@ -174,9 +199,15 @@ bool place_one_of(const std::vector<const ItemType*>& candidates, Vector2D posit
 }
 } // namespace
 
-void ItemFactory::generate_treasure(Vector2D position, int dungeonLevel, int quality, GameContext& ctx)
+void ItemFactory::generate_treasure(
+	Vector2D position,
+	int dungeonLevel,
+	int quality,
+	GameContext& ctx)
 {
-	assert(ctx.floorInventory && "ItemFactory::generate_treasure: called without a floorInventory");
+	assert(
+		ctx.floorInventory &&
+		"ItemFactory::generate_treasure: called without a floorInventory");
 	assert(ctx.map && "ItemFactory::generate_treasure: called without a map");
 	assert(ctx.dice && "ItemFactory::generate_treasure: called without dice");
 
@@ -220,7 +251,8 @@ void ItemFactory::generate_treasure(Vector2D position, int dungeonLevel, int qua
 
 	// Through the registry, so a treasure pile is the same item as a floor pile: one
 	// number for what it pays and what it is worth, and a tile the item data owns.
-	auto goldPile = ItemCreator::create_with_gold_amount(position, goldAmount, ctx);
+	auto goldPile =
+		ItemCreator::create_with_gold_amount(position, goldAmount, ctx);
 	InventoryOperations::add_item(*ctx.floorInventory, std::move(goldPile));
 
 	// Generate other random items
@@ -246,12 +278,20 @@ void ItemFactory::generate_treasure(Vector2D position, int dungeonLevel, int qua
 			if (effectiveLevel >= 8 && ctx.dice->d100() <= 10)
 			{
 				// 10% chance for Amulet at high enough level
-				spawn_item_of_category(itemPos, effectiveLevel, "artifact", ctx);
+				spawn_item_of_category(
+					itemPos,
+					effectiveLevel,
+					"artifact",
+					ctx);
 			}
 			else
 			{
 				// High quality weapons
-				spawn_item_of_category(itemPos, effectiveLevel + 2, "weapon", ctx);
+				spawn_item_of_category(
+					itemPos,
+					effectiveLevel + 2,
+					"weapon",
+					ctx);
 			}
 		}
 		else if (roll <= 25)
@@ -276,11 +316,14 @@ void ItemFactory::generate_treasure(Vector2D position, int dungeonLevel, int qua
 		}
 	}
 
-	ctx.messageSystem->log("Generated treasure of quality " + std::to_string(quality) +
-		" with " + std::to_string(itemCount + 1) + " items including gold");
+	ctx.messageSystem->log(
+		"Generated treasure of quality " + std::to_string(quality) + " with " +
+		std::to_string(itemCount + 1) + " items including gold");
 }
 
-std::vector<ItemPercentage> ItemFactory::get_current_distribution(int dungeonLevel, const ItemRegistry& items)
+std::vector<ItemPercentage> ItemFactory::get_current_distribution(
+	int dungeonLevel,
+	const ItemRegistry& items)
 {
 	const std::vector<ItemType> table = spawn_table(items);
 	std::vector<ItemPercentage> distribution;
@@ -299,21 +342,29 @@ std::vector<ItemPercentage> ItemFactory::get_current_distribution(int dungeonLev
 	{
 		if (weights[index] > 0)
 		{
-			const float percentage = static_cast<float>(weights[index]) / totalWeight * 100.0f;
-			distribution.push_back(ItemPercentage{
-				table[index].name,
-				table[index].category,
-				percentage,
-			});
+			const float percentage =
+				static_cast<float>(weights[index]) / totalWeight * 100.0f;
+			distribution.push_back(
+				ItemPercentage{
+					table[index].name,
+					table[index].category,
+					percentage,
+				});
 		}
 	}
 
 	return distribution;
 }
 
-void ItemFactory::spawn_item_of_category(Vector2D position, int dungeonLevel, const std::string& category, GameContext& ctx)
+void ItemFactory::spawn_item_of_category(
+	Vector2D position,
+	int dungeonLevel,
+	const std::string& category,
+	GameContext& ctx)
 {
-	assert(ctx.itemRegistry && "ItemFactory::spawn_item_of_category: called without an itemRegistry");
+	assert(
+		ctx.itemRegistry &&
+		"ItemFactory::spawn_item_of_category: called without an itemRegistry");
 
 	const std::vector<ItemType> table = spawn_table(*ctx.itemRegistry);
 
@@ -334,13 +385,20 @@ void ItemFactory::spawn_item_of_category(Vector2D position, int dungeonLevel, co
 
 	if (!place_one_of(candidates, position, dungeonLevel, ctx))
 	{
-		ctx.messageSystem->log("No valid items in category " + category + " for this dungeon level!");
+		ctx.messageSystem->log(
+			"No valid items in category " + category +
+			" for this dungeon level!");
 	}
 }
 
-void ItemFactory::spawn_random_item(Vector2D position, int dungeonLevel, GameContext& ctx)
+void ItemFactory::spawn_random_item(
+	Vector2D position,
+	int dungeonLevel,
+	GameContext& ctx)
 {
-	assert(ctx.itemRegistry && "ItemFactory::spawn_random_item: called without an itemRegistry");
+	assert(
+		ctx.itemRegistry &&
+		"ItemFactory::spawn_random_item: called without an itemRegistry");
 
 	const std::vector<ItemType> table = spawn_table(*ctx.itemRegistry);
 
@@ -356,16 +414,25 @@ void ItemFactory::spawn_random_item(Vector2D position, int dungeonLevel, GameCon
 	}
 }
 
-void ItemFactory::spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx)
+void ItemFactory::spawn_all_enhanced_items_debug(
+	Vector2D position,
+	GameContext& ctx)
 {
-	assert(ctx.itemRegistry && "ItemFactory::spawn_all_enhanced_items_debug: called without an itemRegistry");
+	assert(
+		ctx.itemRegistry &&
+		"ItemFactory::spawn_all_enhanced_items_debug: called without an itemRegistry");
 
 	ctx.messageSystem->log("DEBUG: Spawning enhanced items from all rules");
 
-	for (const EnhancedItemSpawnRule& rule : ctx.itemRegistry->get_enhanced_rules())
+	for (
+		const EnhancedItemSpawnRule& rule :
+		ctx.itemRegistry->get_enhanced_rules())
 	{
 		place_enhanced_item(rule, position, ctx);
 	}
 
-	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "DEBUG: Spawned enhanced items", MessageCompletion::FINISHED);
+	ctx.messageSystem->message(
+		ColorPairId::WHITE_BLACK,
+		"DEBUG: Spawned enhanced items",
+		MessageCompletion::FINISHED);
 }

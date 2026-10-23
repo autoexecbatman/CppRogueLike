@@ -37,24 +37,30 @@
 #include "WeaponDamageRegistry.h"
 
 // OCP: Data-driven buff break messaging - player notifications when buffs end from attacking
-static const std::unordered_map<BuffType, std::string_view> BUFF_BREAK_MESSAGES = {
-	{ BuffType::INVISIBILITY, "Your invisibility fades as you attack!" },
-	{
-		BuffType::ITEM_INVISIBILITY,
-		"Your invisibility fades as you attack!",
-	},
-	{ BuffType::SANCTUARY, "Your sanctuary is broken by your aggression!" },
-};
+static const std::unordered_map<BuffType, std::string_view>
+	BUFF_BREAK_MESSAGES = {
+		{ BuffType::INVISIBILITY, "Your invisibility fades as you attack!" },
+		{
+			BuffType::ITEM_INVISIBILITY,
+			"Your invisibility fades as you attack!",
+		},
+		{ BuffType::SANCTUARY, "Your sanctuary is broken by your aggression!" },
+	};
 
-Attacker::Attacker(const DamageInfo& damage)
-	: damageInfo(damage) {}
+Attacker::Attacker(const DamageInfo& damage) :
+	damageInfo(damage)
+{
+}
 
 DamageInfo Attacker::weapon_damage(const Item* weapon)
 {
 	if (weapon && weapon->is_weapon())
 	{
-		const ItemEnhancement* enhancement = weapon->is_enhanced() ? &weapon->get_enhancement() : nullptr;
-		return WeaponDamageRegistry::get_enhanced_damage_info(weapon->itemKey, enhancement);
+		const ItemEnhancement* enhancement =
+			weapon->is_enhanced() ? &weapon->get_enhancement() : nullptr;
+		return WeaponDamageRegistry::get_enhanced_damage_info(
+			weapon->itemKey,
+			enhancement);
 	}
 	return WeaponDamageRegistry::get_unarmed_damage_info();
 }
@@ -83,7 +89,9 @@ AttackResult Attacker::perform_single_attack(
 	AttackKind kind,
 	GameContext& ctx)
 {
-	assert(ctx.dataManager && "Attacker::perform_single_attack: called without a dataManager");
+	assert(
+		ctx.dataManager &&
+		"Attacker::perform_single_attack: called without a dataManager");
 	assert(ctx.dice && "Attacker::perform_single_attack: called without dice");
 
 	// Shopkeeper interaction, melee only: the shop component is what marks a trader.
@@ -101,22 +109,38 @@ AttackResult Attacker::perform_single_attack(
 	// in a round, and the second finds it gone.
 	if (target.is_dead())
 	{
-		ctx.messageSystem->append_message_part(owner.actorData.color, owner.actorData.name);
-		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " attacks ");
-		ctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);
-		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " in vain.");
+		ctx.messageSystem->append_message_part(
+			owner.actorData.color,
+			owner.actorData.name);
+		ctx.messageSystem->append_message_part(
+			ColorPairId::WHITE_BLACK,
+			" attacks ");
+		ctx.messageSystem->append_message_part(
+			target.actorData.color,
+			target.actorData.name);
+		ctx.messageSystem->append_message_part(
+			ColorPairId::WHITE_BLACK,
+			" in vain.");
 		ctx.messageSystem->finalize_message();
 		return AttackResult::PREVENTED;
 	}
 
 	// A bow made for a stronger arm than this one is not drawn at all, so nothing is rolled
 	// against it - not the attack, and not a Sanctuary save the target's ward would ask.
-	const Item* missileWeapon = kind == AttackKind::RANGED ? owner.get_equipped_item(EquipmentSlot::MISSILE_WEAPON) : nullptr;
+	const Item* missileWeapon = kind == AttackKind::RANGED ?
+		owner.get_equipped_item(EquipmentSlot::MISSILE_WEAPON) :
+		nullptr;
 	if (missileWeapon && !can_draw(owner, *missileWeapon))
 	{
-		ctx.messageSystem->append_message_part(owner.actorData.color, owner.actorData.name);
-		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " is not strong enough to draw the ");
-		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, missileWeapon->actorData.name);
+		ctx.messageSystem->append_message_part(
+			owner.actorData.color,
+			owner.actorData.name);
+		ctx.messageSystem->append_message_part(
+			ColorPairId::WHITE_BLACK,
+			" is not strong enough to draw the ");
+		ctx.messageSystem->append_message_part(
+			ColorPairId::WHITE_BLACK,
+			missileWeapon->actorData.name);
 		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ".");
 		ctx.messageSystem->finalize_message();
 		return AttackResult::PREVENTED;
@@ -126,40 +150,62 @@ AttackResult Attacker::perform_single_attack(
 	// target's casting makes no attack on it (PHB page 436).
 	if (ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))
 	{
-		ctx.messageSystem->append_message_part(owner.actorData.color, owner.actorData.name);
-		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " cannot bring itself to attack ");
-		ctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);
+		ctx.messageSystem->append_message_part(
+			owner.actorData.color,
+			owner.actorData.name);
+		ctx.messageSystem->append_message_part(
+			ColorPairId::WHITE_BLACK,
+			" cannot bring itself to attack ");
+		ctx.messageSystem->append_message_part(
+			target.actorData.color,
+			target.actorData.name);
 		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ".");
 		ctx.messageSystem->finalize_message();
 		return AttackResult::PREVENTED;
 	}
 
 	// The part of the attacker's Table 1 row this attack takes, by what fires it.
-	const AttackStrength::Adjustment strengthOnAttack = AttackStrength::adjustment(
-		*ctx.dataManager,
-		owner,
-		kind,
-		missileWeapon);
+	const AttackStrength::Adjustment strengthOnAttack =
+		AttackStrength::adjustment(
+			*ctx.dataManager,
+			owner,
+			kind,
+			missileWeapon);
 
 	const int attackRoll = ctx.dice->d20();
 
 	// A die at a time: fire and cold are resisted per die, and the roll's bonus is not a die.
 	// A bite offers no saving throw, so a ring's save bonus adds nothing here.
 	const std::vector<int> dice = roll_each_die(ctx.dice, attackDamage.dice);
-	const int strength = DamageResolver::resistance_strength(attackDamage.damageType, target, ctx);
-	const DamageResolver::ResistedDamage reduced = DamageResolver::reduce_dice(dice, attackDamage.damageType, strength);
+	const int strength = DamageResolver::resistance_strength(
+		attackDamage.damageType,
+		target,
+		ctx);
+	const DamageResolver::ResistedDamage reduced =
+		DamageResolver::reduce_dice(dice, attackDamage.damageType, strength);
 	const int damageRoll = reduced.hit_points() + attackDamage.dice.bonus;
 
 	// Calculate backstab and to-hit roll
 	const BackstabInfo backstab = calculate_backstab_bonus(owner);
-	const int rollNeeded = calculate_to_hit_roll(owner, target, attackPenalty, strengthOnAttack.hit, backstab, kind, ctx);
+	const int rollNeeded = calculate_to_hit_roll(
+		owner,
+		target,
+		attackPenalty,
+		strengthOnAttack.hit,
+		backstab,
+		kind,
+		ctx);
 	const bool isHit = (attackRoll >= rollNeeded);
 
 	if (isHit)
 	{
 		// A blow that lands always tells: "regardless of subtractions, a successful attack
 		// roll can never cause less than 1 point of damage" (Player's Handbook, PDF page 29).
-		const int baseDamage = calculate_damage_with_backstab(damageRoll, strengthOnAttack.damage, backstab, ctx);
+		const int baseDamage = calculate_damage_with_backstab(
+			damageRoll,
+			strengthOnAttack.damage,
+			backstab,
+			ctx);
 		const int finalDamage = std::max(1, baseDamage - target.get_dr());
 
 		log_attack_hit(
@@ -176,7 +222,9 @@ AttackResult Attacker::perform_single_attack(
 			handName,
 			ctx);
 
-		assert(ctx.animSystem && "Attacker::perform_single_attack: called without an animSystem");
+		assert(
+			ctx.animSystem &&
+			"Attacker::perform_single_attack: called without an animSystem");
 		ctx.animSystem->spawn_melee_hit(target.position);
 		// The reduced roll, carried on to the number the bonus, strength and damage
 		// reduction made of it.
@@ -195,7 +243,8 @@ AttackResult Attacker::perform_single_attack(
 	}
 
 	// AD&D 2e: Remove buffs that break when attacking (Invisibility, Sanctuary, etc.) - OCP compliant
-	const auto broken_buffs = ctx.buffSystem->remove_buffs_broken_by_attacking(owner);
+	const auto broken_buffs =
+		ctx.buffSystem->remove_buffs_broken_by_attacking(owner);
 
 	// Show player notification for broken buffs
 	if (owner.is_player())
@@ -221,7 +270,8 @@ AttackResult Attacker::perform_single_attack(
 	return isHit ? AttackResult::LANDED : AttackResult::MISSED;
 }
 
-BackstabInfo Attacker::calculate_backstab_bonus(const Creature& owner) const noexcept
+BackstabInfo Attacker::calculate_backstab_bonus(
+	const Creature& owner) const noexcept
 {
 	// AD&D 2e: Invisibility grants backstab - +4 to hit, rogues get damage multiplier
 	if (!owner.is_invisible())
@@ -237,7 +287,8 @@ BackstabInfo Attacker::calculate_backstab_bonus(const Creature& owner) const noe
 	// Backstab is a rogue ability, so the attacker's class decides it.
 	if (owner.get_creature_class() == CreatureClass::ROGUE)
 	{
-		info.damageMultiplier = LevelUpSystem::calculate_backstab_multiplier(owner.get_creature_level());
+		info.damageMultiplier = LevelUpSystem::calculate_backstab_multiplier(
+			owner.get_creature_level());
 	}
 
 	return info;
@@ -252,7 +303,9 @@ int Attacker::calculate_to_hit_roll(
 	AttackKind kind,
 	GameContext& ctx) const noexcept
 {
-	assert(ctx.dataManager && "Attacker::calculate_to_hit_roll: called without a dataManager");
+	assert(
+		ctx.dataManager &&
+		"Attacker::calculate_to_hit_roll: called without a dataManager");
 
 	// AD&D 2e: THAC0 - AC = roll needed
 	int rollNeeded = attacker.get_thaco() - armor_class_attacked(target, ctx);
@@ -267,15 +320,18 @@ int Attacker::calculate_to_hit_roll(
 	// A missile attack takes the dexterity missile adjustment; a swing does not.
 	if (kind == AttackKind::RANGED)
 	{
-		const int missileAdjustment = ctx.dataManager->dexterity_for(attacker.get_dexterity()).MissileAttackAdj;
+		const int missileAdjustment =
+			ctx.dataManager->dexterity_for(attacker.get_dexterity())
+				.MissileAttackAdj;
 		hitModifier += missileAdjustment;
 
 		if (missileAdjustment != 0)
 		{
-			ctx.messageSystem->log(std::format(
-				"Ranged modifier: {} from DEX {}",
-				missileAdjustment,
-				attacker.get_dexterity()));
+			ctx.messageSystem->log(
+				std::format(
+					"Ranged modifier: {} from DEX {}",
+					missileAdjustment,
+					attacker.get_dexterity()));
 		}
 	}
 
@@ -324,32 +380,49 @@ void Attacker::log_attack_hit(
 	std::string_view handName,
 	GameContext& ctx) const noexcept
 {
-	ctx.messageSystem->append_message_part(attacker.actorData.color, attacker.actorData.name);
-	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format(" ({}) rolls ", handName));
-	ctx.messageSystem->append_message_part(ColorPairId::GREEN_BLACK, std::format("{}", attackRoll));
+	ctx.messageSystem->append_message_part(
+		attacker.actorData.color,
+		attacker.actorData.name);
+	ctx.messageSystem->append_message_part(
+		ColorPairId::WHITE_BLACK,
+		std::format(" ({}) rolls ", handName));
+	ctx.messageSystem->append_message_part(
+		ColorPairId::GREEN_BLACK,
+		std::format("{}", attackRoll));
 	if (attackPenalty != 0)
 	{
-		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format(" ({:+})", attackPenalty));
+		ctx.messageSystem->append_message_part(
+			ColorPairId::WHITE_BLACK,
+			std::format(" ({:+})", attackPenalty));
 	}
-	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format(" vs {}", rollNeeded));
+	ctx.messageSystem->append_message_part(
+		ColorPairId::WHITE_BLACK,
+		std::format(" vs {}", rollNeeded));
 	ctx.messageSystem->append_message_part(ColorPairId::GREEN_BLACK, ". Hit! ");
-	ctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);
+	ctx.messageSystem->append_message_part(
+		target.actorData.color,
+		target.actorData.name);
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " takes ");
-	ctx.messageSystem->append_message_part(ColorPairId::RED_BLACK, std::format("{}", finalDamage));
-	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format(" dmg ({}).", attackDamage.displayRoll));
+	ctx.messageSystem->append_message_part(
+		ColorPairId::RED_BLACK,
+		std::format("{}", finalDamage));
+	ctx.messageSystem->append_message_part(
+		ColorPairId::WHITE_BLACK,
+		std::format(" dmg ({}).", attackDamage.displayRoll));
 	ctx.messageSystem->finalize_message();
 
-	ctx.messageSystem->log(std::format(
-		"HIT ({}): {} rolled {} vs {} | {} ({}) + {} str - {} DR = {} dmg",
-		handName,
-		attacker.actorData.name,
-		attackRoll,
-		rollNeeded,
-		damageRoll,
-		attackDamage.get_damage_range(),
-		strengthBonus,
-		dr,
-		finalDamage));
+	ctx.messageSystem->log(
+		std::format(
+			"HIT ({}): {} rolled {} vs {} | {} ({}) + {} str - {} DR = {} dmg",
+			handName,
+			attacker.actorData.name,
+			attackRoll,
+			rollNeeded,
+			damageRoll,
+			attackDamage.get_damage_range(),
+			strengthBonus,
+			dr,
+			finalDamage));
 }
 
 void Attacker::log_attack_miss(
@@ -361,31 +434,48 @@ void Attacker::log_attack_miss(
 	std::string_view handName,
 	GameContext& ctx) const noexcept
 {
-	ctx.messageSystem->append_message_part(attacker.actorData.color, attacker.actorData.name);
-	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format(" ({}) rolls ", handName));
-	ctx.messageSystem->append_message_part(ColorPairId::RED_BLACK, std::format("{}", attackRoll));
+	ctx.messageSystem->append_message_part(
+		attacker.actorData.color,
+		attacker.actorData.name);
+	ctx.messageSystem->append_message_part(
+		ColorPairId::WHITE_BLACK,
+		std::format(" ({}) rolls ", handName));
+	ctx.messageSystem->append_message_part(
+		ColorPairId::RED_BLACK,
+		std::format("{}", attackRoll));
 	if (attackPenalty != 0)
 	{
-		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format(" ({:+})", attackPenalty));
+		ctx.messageSystem->append_message_part(
+			ColorPairId::WHITE_BLACK,
+			std::format(" ({:+})", attackPenalty));
 	}
-	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format(" vs {}", rollNeeded));
+	ctx.messageSystem->append_message_part(
+		ColorPairId::WHITE_BLACK,
+		std::format(" vs {}", rollNeeded));
 	ctx.messageSystem->append_message_part(ColorPairId::RED_BLACK, ". Miss! ");
-	ctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);
-	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " is unharmed.");
+	ctx.messageSystem->append_message_part(
+		target.actorData.color,
+		target.actorData.name);
+	ctx.messageSystem->append_message_part(
+		ColorPairId::WHITE_BLACK,
+		" is unharmed.");
 	ctx.messageSystem->finalize_message();
 
-	ctx.messageSystem->log(std::format(
-		"MISS ({}): {} rolled {} vs {} (THAC0:{}, AC:{}, Penalty:{})",
-		handName,
-		attacker.actorData.name,
-		attackRoll,
-		rollNeeded,
-		attacker.get_thaco(),
-		armor_class_attacked(target, ctx),
-		attackPenalty));
+	ctx.messageSystem->log(
+		std::format(
+			"MISS ({}): {} rolled {} vs {} (THAC0:{}, AC:{}, Penalty:{})",
+			handName,
+			attacker.actorData.name,
+			attackRoll,
+			rollNeeded,
+			attacker.get_thaco(),
+			armor_class_attacked(target, ctx),
+			attackPenalty));
 }
 
-int Attacker::armor_class_attacked(const Creature& target, GameContext& ctx) const
+int Attacker::armor_class_attacked(
+	const Creature& target,
+	GameContext& ctx) const
 {
 	// Surprise costs the defender any Dexterity bonus for the instant it lasts.
 	if (target.has_state(ActorState::IS_SURPRISED))
@@ -432,14 +522,18 @@ ShotImpact RangedShot::impact_of(AttackResult result) noexcept
 	std::unreachable();
 }
 
-AttackResult RangedShot::fire(Creature& shooter, Creature& target, GameContext& ctx)
+AttackResult RangedShot::fire(
+	Creature& shooter,
+	Creature& target,
+	GameContext& ctx)
 {
 	assert(shooter.attacker && "RangedShot::fire: the shooter has no attacker");
 	assert(ctx.animSystem && "RangedShot::fire: called without an animSystem");
 	assert(ctx.tileConfig && "RangedShot::fire: called without a tileConfig");
 
 	// The attack resolves as the missile leaves, so its messages print before it lands.
-	const AttackResult result = shooter.attacker->attack(target, AttackKind::RANGED, ctx);
+	const AttackResult result =
+		shooter.attacker->attack(target, AttackKind::RANGED, ctx);
 	const ShotImpact impact = impact_of(result);
 	if (impact == ShotImpact::NOTHING)
 	{

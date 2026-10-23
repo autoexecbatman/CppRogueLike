@@ -38,15 +38,18 @@
 
 // Windows marks a file read-only only once every write bit is gone.
 constexpr std::filesystem::perms WRITE_PERMISSIONS =
-	std::filesystem::perms::owner_write | std::filesystem::perms::group_write | std::filesystem::perms::others_write;
+	std::filesystem::perms::owner_write | std::filesystem::perms::group_write |
+	std::filesystem::perms::others_write;
 
 class PaletteTest : public ::testing::Test
 {
 protected:
 	void SetUp() override
 	{
-		const std::string testName = ::testing::UnitTest::GetInstance()->current_test_info()->name();
-		scratch = std::filesystem::temp_directory_path() / ("palette_" + testName + ".json");
+		const std::string testName =
+			::testing::UnitTest::GetInstance()->current_test_info()->name();
+		scratch = std::filesystem::temp_directory_path() /
+			("palette_" + testName + ".json");
 		real = read_json(Paths::TILE_CONFIG);
 	}
 
@@ -55,7 +58,10 @@ protected:
 		// A read-only file cannot be removed on Windows, so its write permission comes back first.
 		if (std::filesystem::exists(scratch))
 		{
-			std::filesystem::permissions(scratch, WRITE_PERMISSIONS, std::filesystem::perm_options::add);
+			std::filesystem::permissions(
+				scratch,
+				WRITE_PERMISSIONS,
+				std::filesystem::perm_options::add);
 			std::filesystem::remove(scratch);
 		}
 	}
@@ -76,7 +82,9 @@ protected:
 	[[nodiscard]] std::string scratch_bytes() const
 	{
 		std::ifstream source(scratch, std::ios::binary);
-		return std::string(std::istreambuf_iterator<char>(source), std::istreambuf_iterator<char>());
+		return std::string(
+			std::istreambuf_iterator<char>(source),
+			std::istreambuf_iterator<char>());
 	}
 
 	// Loads a copy of the real file, so save() writes the scratch file and never data/.
@@ -142,7 +150,8 @@ protected:
 			bool isTaken = false;
 			for (const nlohmann::json& entry : real.at("palette"))
 			{
-				isTaken = isTaken || TileRefJson::parse_tile(entry) == candidate;
+				isTaken =
+					isTaken || TileRefJson::parse_tile(entry) == candidate;
 			}
 			if (!isTaken)
 			{
@@ -196,11 +205,19 @@ TEST_F(PaletteTest, EveryRealEntryLoadsInOrder)
 	load_real_copy();
 
 	ASSERT_EQ(palette.entries().size(), real.at("palette").size());
-	for (size_t entryIndex = 0; entryIndex < palette.entries().size(); ++entryIndex)
+	for (
+		size_t entryIndex = 0; entryIndex < palette.entries().size();
+		++entryIndex)
 	{
 		const nlohmann::json& entry = real.at("palette").at(entryIndex);
-		EXPECT_EQ(palette.entries()[entryIndex].tile, TileRefJson::parse_tile(entry)) << entryIndex;
-		EXPECT_EQ(palette.entries()[entryIndex].label, entry.at("label").get<std::string>()) << entryIndex;
+		EXPECT_EQ(
+			palette.entries()[entryIndex].tile,
+			TileRefJson::parse_tile(entry))
+			<< entryIndex;
+		EXPECT_EQ(
+			palette.entries()[entryIndex].label,
+			entry.at("label").get<std::string>())
+			<< entryIndex;
 	}
 }
 
@@ -210,10 +227,17 @@ TEST_F(PaletteTest, AnEntryMissingAFieldIsRefusedByName)
 {
 	std::optional<size_t> symbolledIndex{};
 	std::optional<size_t> unsymbolledIndex{};
-	for (size_t entryIndex = 0; entryIndex < real.at("palette").size(); ++entryIndex)
+	for (
+		size_t entryIndex = 0; entryIndex < real.at("palette").size();
+		++entryIndex)
 	{
-		const bool hasSymbol = !real.at("palette").at(entryIndex).at("symbol").get<std::string>().empty();
-		std::optional<size_t>& found = hasSymbol ? symbolledIndex : unsymbolledIndex;
+		const bool hasSymbol = !real.at("palette")
+									.at(entryIndex)
+									.at("symbol")
+									.get<std::string>()
+									.empty();
+		std::optional<size_t>& found =
+			hasSymbol ? symbolledIndex : unsymbolledIndex;
 		found = found.value_or(entryIndex);
 	}
 	ASSERT_TRUE(symbolledIndex.has_value());
@@ -234,7 +258,8 @@ TEST_F(PaletteTest, AnEntryMissingAFieldIsRefusedByName)
 			const std::string refusal = refusal_of(load_scratch_palette);
 
 			EXPECT_NE(refusal.find(field), std::string::npos)
-				<< "entry " << entryIndex << ": refusal does not name " << field << ": " << refusal;
+				<< "entry " << entryIndex << ": refusal does not name " << field
+				<< ": " << refusal;
 		}
 	}
 }
@@ -248,7 +273,8 @@ TEST_F(PaletteTest, AMissingFileOrListIsRefused)
 	};
 
 	const std::string missingFile = refusal_of(load_scratch_palette);
-	EXPECT_NE(missingFile.find(scratch.filename().string()), std::string::npos) << missingFile;
+	EXPECT_NE(missingFile.find(scratch.filename().string()), std::string::npos)
+		<< missingFile;
 
 	nlohmann::json document = real;
 	document.erase("palette");
@@ -291,7 +317,9 @@ TEST_F(PaletteTest, AFileBreakingAnInvariantIsRefusedByEntry)
 		palette.load(scratch.string());
 	};
 
-	for (const nlohmann::json& broken : { duplicateSymbol, duplicateTile, structural })
+	for (
+		const nlohmann::json& broken :
+		{ duplicateSymbol, duplicateTile, structural })
 	{
 		write_palette(broken);
 		const std::string refusal = refusal_of(load_scratch_palette);
@@ -318,7 +346,8 @@ TEST_F(PaletteTest, SavingWhereThereIsNoFileIsRefusedAndCreatesNothing)
 	};
 	const std::string refusal = refusal_of(save_palette);
 
-	EXPECT_NE(refusal.find(scratch.filename().string()), std::string::npos) << refusal;
+	EXPECT_NE(refusal.find(scratch.filename().string()), std::string::npos)
+		<< refusal;
 	EXPECT_NE(refusal.find("cannot open"), std::string::npos) << refusal;
 	EXPECT_FALSE(std::filesystem::exists(scratch));
 }
@@ -337,7 +366,8 @@ TEST_F(PaletteTest, SavingOverAFileThatDoesNotParseLeavesIt)
 	};
 	const std::string refusal = refusal_of(save_palette);
 
-	EXPECT_NE(refusal.find(scratch.filename().string()), std::string::npos) << refusal;
+	EXPECT_NE(refusal.find(scratch.filename().string()), std::string::npos)
+		<< refusal;
 	EXPECT_EQ(scratch_bytes(), before);
 }
 
@@ -347,7 +377,10 @@ TEST_F(PaletteTest, SavingOverAReadOnlyFileIsRefused)
 	load_real_copy();
 	write_palette(nlohmann::json::array());
 	const std::string before = scratch_bytes();
-	std::filesystem::permissions(scratch, WRITE_PERMISSIONS, std::filesystem::perm_options::remove);
+	std::filesystem::permissions(
+		scratch,
+		WRITE_PERMISSIONS,
+		std::filesystem::perm_options::remove);
 
 	const auto save_palette = [&]()
 	{
@@ -355,7 +388,8 @@ TEST_F(PaletteTest, SavingOverAReadOnlyFileIsRefused)
 	};
 	const std::string refusal = refusal_of(save_palette);
 
-	EXPECT_NE(refusal.find(scratch.filename().string()), std::string::npos) << refusal;
+	EXPECT_NE(refusal.find(scratch.filename().string()), std::string::npos)
+		<< refusal;
 	EXPECT_NE(refusal.find("for writing"), std::string::npos) << refusal;
 	EXPECT_EQ(scratch_bytes(), before);
 }
@@ -391,7 +425,9 @@ TEST_F(PaletteTest, ALabelEditedBySymbolSurvivesASaveAndReload)
 	const char symbol = symbol_of(symbolled_entries().at(0));
 	load_real_copy();
 
-	ASSERT_EQ(palette.set_symbol_label(symbol, "Renamed in a test"), PaletteEdit::APPLIED);
+	ASSERT_EQ(
+		palette.set_symbol_label(symbol, "Renamed in a test"),
+		PaletteEdit::APPLIED);
 	palette.save();
 
 	Palette reloaded;
@@ -423,7 +459,9 @@ TEST_F(PaletteTest, AddingByTileAppendsAndUpdatingChangesInPlace)
 	const TileRef added = unused_tile();
 	const char newSymbol = unused_symbol();
 
-	ASSERT_EQ(palette.add_or_update(added, "Added", newSymbol), PaletteEdit::APPLIED);
+	ASSERT_EQ(
+		palette.add_or_update(added, "Added", newSymbol),
+		PaletteEdit::APPLIED);
 	ASSERT_EQ(palette.add_or_update(first, "Updated", 0), PaletteEdit::APPLIED);
 
 	ASSERT_EQ(palette.entries().size(), count + 1);
@@ -441,8 +479,17 @@ TEST_F(PaletteTest, AnEntryMayKeepItsOwnSymbol)
 	const nlohmann::json entry = symbolled_entries().at(0);
 	load_real_copy();
 
-	EXPECT_EQ(palette.add_or_update(TileRefJson::parse_tile(entry), "Same symbol", symbol_of(entry)), PaletteEdit::APPLIED);
-	EXPECT_EQ(palette.set_symbol_tile(symbol_of(entry), TileRefJson::parse_tile(entry)), PaletteEdit::APPLIED);
+	EXPECT_EQ(
+		palette.add_or_update(
+			TileRefJson::parse_tile(entry),
+			"Same symbol",
+			symbol_of(entry)),
+		PaletteEdit::APPLIED);
+	EXPECT_EQ(
+		palette.set_symbol_tile(
+			symbol_of(entry),
+			TileRefJson::parse_tile(entry)),
+		PaletteEdit::APPLIED);
 }
 
 // Removing a tile takes its entry out; a tile the palette does not hold changes nothing.
@@ -475,16 +522,36 @@ TEST_F(PaletteTest, AnEditBreakingAnInvariantIsRefusedAndChangesNothing)
 	load_real_copy();
 	const std::vector<PaletteEntry> before = palette.entries();
 
-	EXPECT_EQ(palette.add_or_update(secondTile, "Clash", firstSymbol), PaletteEdit::DUPLICATE_SYMBOL);
-	EXPECT_EQ(palette.add_or_update(unused_tile(), "Clash", firstSymbol), PaletteEdit::DUPLICATE_SYMBOL);
-	EXPECT_EQ(palette.set_symbol_tile(firstSymbol, secondTile), PaletteEdit::DUPLICATE_TILE);
-	EXPECT_EQ(palette.add_or_update(unused_tile(), "Wall again", '#'), PaletteEdit::STRUCTURAL_SYMBOL);
-	EXPECT_EQ(palette.set_symbol_label('~', "Lake"), PaletteEdit::STRUCTURAL_SYMBOL);
-	EXPECT_EQ(palette.set_symbol_tile('+', unused_tile()), PaletteEdit::STRUCTURAL_SYMBOL);
-	EXPECT_EQ(palette.set_symbol_label(unused_symbol(), "Nobody"), PaletteEdit::UNKNOWN_SYMBOL);
-	EXPECT_EQ(palette.set_symbol_tile(unused_symbol(), unused_tile()), PaletteEdit::UNKNOWN_SYMBOL);
-	EXPECT_EQ(palette.add_or_update(unused_tile(), "", 0), PaletteEdit::EMPTY_LABEL);
-	EXPECT_EQ(palette.set_symbol_label(firstSymbol, ""), PaletteEdit::EMPTY_LABEL);
+	EXPECT_EQ(
+		palette.add_or_update(secondTile, "Clash", firstSymbol),
+		PaletteEdit::DUPLICATE_SYMBOL);
+	EXPECT_EQ(
+		palette.add_or_update(unused_tile(), "Clash", firstSymbol),
+		PaletteEdit::DUPLICATE_SYMBOL);
+	EXPECT_EQ(
+		palette.set_symbol_tile(firstSymbol, secondTile),
+		PaletteEdit::DUPLICATE_TILE);
+	EXPECT_EQ(
+		palette.add_or_update(unused_tile(), "Wall again", '#'),
+		PaletteEdit::STRUCTURAL_SYMBOL);
+	EXPECT_EQ(
+		palette.set_symbol_label('~', "Lake"),
+		PaletteEdit::STRUCTURAL_SYMBOL);
+	EXPECT_EQ(
+		palette.set_symbol_tile('+', unused_tile()),
+		PaletteEdit::STRUCTURAL_SYMBOL);
+	EXPECT_EQ(
+		palette.set_symbol_label(unused_symbol(), "Nobody"),
+		PaletteEdit::UNKNOWN_SYMBOL);
+	EXPECT_EQ(
+		palette.set_symbol_tile(unused_symbol(), unused_tile()),
+		PaletteEdit::UNKNOWN_SYMBOL);
+	EXPECT_EQ(
+		palette.add_or_update(unused_tile(), "", 0),
+		PaletteEdit::EMPTY_LABEL);
+	EXPECT_EQ(
+		palette.set_symbol_label(firstSymbol, ""),
+		PaletteEdit::EMPTY_LABEL);
 
 	EXPECT_EQ(palette.entries(), before);
 }
@@ -504,7 +571,10 @@ TEST_F(PaletteTest, EveryRefusalHasItsOwnSentence)
 		EXPECT_FALSE(palette_edit_refusal(refusals[outer]).empty()) << outer;
 		for (size_t inner = outer + 1; inner < refusals.size(); ++inner)
 		{
-			EXPECT_NE(palette_edit_refusal(refusals[outer]), palette_edit_refusal(refusals[inner])) << outer << " " << inner;
+			EXPECT_NE(
+				palette_edit_refusal(refusals[outer]),
+				palette_edit_refusal(refusals[inner]))
+				<< outer << " " << inner;
 		}
 	}
 }
@@ -532,7 +602,9 @@ TEST_F(PaletteTest, SymbolRowsAreTheStructuralFiveThenEachSymbolledEntry)
 	{
 		const SymbolRow& row = rows[STRUCTURAL_SYMBOLS.size() + entryIndex];
 		EXPECT_EQ(row.symbol, symbol_of(symbolled[entryIndex]));
-		EXPECT_EQ(row.label, symbolled[entryIndex].at("label").get<std::string>());
+		EXPECT_EQ(
+			row.label,
+			symbolled[entryIndex].at("label").get<std::string>());
 	}
 }
 
@@ -544,8 +616,12 @@ TEST_F(PaletteTest, ASymbolResolvesToItsEntryAndOthersToNoTile)
 	const char unknown = unused_symbol();
 	load_real_copy();
 
-	EXPECT_EQ(palette.resolve_decor(symbol_of(entry)), TileRefJson::parse_tile(entry));
-	EXPECT_EQ(palette.symbol_label(symbol_of(entry)), entry.at("label").get<std::string>());
+	EXPECT_EQ(
+		palette.resolve_decor(symbol_of(entry)),
+		TileRefJson::parse_tile(entry));
+	EXPECT_EQ(
+		palette.symbol_label(symbol_of(entry)),
+		entry.at("label").get<std::string>());
 
 	EXPECT_FALSE(palette.resolve_decor('#').is_valid());
 	EXPECT_EQ(palette.symbol_label('#'), "Wall");
@@ -569,7 +645,10 @@ TEST_F(PaletteTest, AReportedRefusalStaysUntilASaveSucceeds)
 	write_scratch("{ not json");
 	editor.save_palette_reporting();
 	ASSERT_TRUE(editor.save_error().has_value());
-	EXPECT_NE(editor.save_error()->find(scratch.filename().string()), std::string::npos) << *editor.save_error();
+	EXPECT_NE(
+		editor.save_error()->find(scratch.filename().string()),
+		std::string::npos)
+		<< *editor.save_error();
 
 	write_scratch(real.dump(2));
 	editor.save_palette_reporting();

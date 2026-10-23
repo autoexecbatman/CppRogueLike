@@ -53,7 +53,8 @@ int DamageResolver::apply_resistances(
 	{
 		return damage;
 	}
-	const int resistancePercent = ctx.buffSystem->get_buff_value(owner, resistanceBuff);
+	const int resistancePercent =
+		ctx.buffSystem->get_buff_value(owner, resistanceBuff);
 	if (resistancePercent <= 0)
 	{
 		return damage;
@@ -64,18 +65,22 @@ int DamageResolver::apply_resistances(
 	damage -= damageReduced;
 	damage = std::max(0, damage);
 
-	ctx.messageSystem->log(std::format(
-		"You resisted {} {} damage! ({}% resistance, {} -> {})",
-		damageReduced,
-		damage_type_name(damageType),
-		resistancePercent,
-		originalDamage,
-		damage));
+	ctx.messageSystem->log(
+		std::format(
+			"You resisted {} {} damage! ({}% resistance, {} -> {})",
+			damageReduced,
+			damage_type_name(damageType),
+			resistancePercent,
+			originalDamage,
+			damage));
 
 	return damage;
 }
 
-int DamageResolver::resistance_strength(DamageType damageType, const Creature& owner, GameContext& ctx)
+int DamageResolver::resistance_strength(
+	DamageType damageType,
+	const Creature& owner,
+	GameContext& ctx)
 {
 	if (damageType != DamageType::FIRE && damageType != DamageType::COLD)
 	{
@@ -83,13 +88,16 @@ int DamageResolver::resistance_strength(DamageType damageType, const Creature& o
 	}
 	// A potion is a ring's worth for its duration; the buff value is its strength.
 	const BuffType resistanceBuff = damageResistanceBuffs.at(damageType);
-	const int drunk = ctx.buffSystem->has_buff(owner, resistanceBuff)
-		? ctx.buffSystem->get_buff_value(owner, resistanceBuff)
-		: 0;
+	const int drunk = ctx.buffSystem->has_buff(owner, resistanceBuff) ?
+		ctx.buffSystem->get_buff_value(owner, resistanceBuff) :
+		0;
 	return std::max(drunk, owner.worn_resistance_strength(damageType));
 }
 
-int DamageResolver::save_bonus_against(DamageType damageType, const Creature& owner, GameContext& ctx)
+int DamageResolver::save_bonus_against(
+	DamageType damageType,
+	const Creature& owner,
+	GameContext& ctx)
 {
 	const int strength = resistance_strength(damageType, owner, ctx);
 	switch (damageType)
@@ -109,7 +117,10 @@ int DamageResolver::save_bonus_against(DamageType damageType, const Creature& ow
 	}
 }
 
-DamageResolver::ResistedDamage DamageResolver::reduce_dice(const std::vector<int>& dice, DamageType damageType, int strength)
+DamageResolver::ResistedDamage DamageResolver::reduce_dice(
+	const std::vector<int>& dice,
+	DamageType damageType,
+	int strength)
 {
 	int perDie = 0;
 	switch (damageType)

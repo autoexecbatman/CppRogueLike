@@ -28,14 +28,12 @@ protected:
 
 	// Rolls are consumed in order by RandomDice's fixed-roll queue, so each
 	// test states exactly the rolls the code under test will draw.
-	void force_next_roll(int value)
-	{
-		mock.dice.set_next_roll(value);
-	}
+	void force_next_roll(int value) { mock.dice.set_next_roll(value); }
 
 	MockGameContext mock{};
 	GameContext ctx{};
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 5, 5 }) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ 5, 5 }) };
 	Web web{ Vector2D{ 5, 5 }, 2, mock.tile_config };
 };
 
@@ -62,7 +60,10 @@ TEST_F(WebTest, CreatureThatWalksWebsIsUnaffected)
 // A ring of free action tears the web: the wearer passes, unbound, and the web is gone.
 TEST_F(WebTest, ARingOfFreeActionTearsTheWeb)
 {
-	ASSERT_TRUE(player->equip_item(ItemCreator::create("ring_of_free_action", player->position, ctx), EquipmentSlot::LEFT_RING, ctx));
+	ASSERT_TRUE(player->equip_item(
+		ItemCreator::create("ring_of_free_action", player->position, ctx),
+		EquipmentSlot::LEFT_RING,
+		ctx));
 
 	EXPECT_EQ(web.on_creature_enter(*player, ctx), EntryResult::AFFECTED);
 	EXPECT_FALSE(player->is_webbed());

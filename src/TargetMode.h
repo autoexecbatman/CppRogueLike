@@ -57,10 +57,12 @@ inline constexpr std::array<ScrollAnimation, 3> ALL_SCROLL_ANIMATION = {
 //
 // Example:
 //   next_scroll_animation(ScrollAnimation::NONE);   // -> ScrollAnimation::LIGHTNING
-[[nodiscard]] inline ScrollAnimation next_scroll_animation(ScrollAnimation value)
+[[nodiscard]] inline ScrollAnimation next_scroll_animation(
+	ScrollAnimation value)
 {
 	const auto found = std::ranges::find(ALL_SCROLL_ANIMATION, value);
-	if (found == ALL_SCROLL_ANIMATION.end() || found + 1 == ALL_SCROLL_ANIMATION.end())
+	if (found == ALL_SCROLL_ANIMATION.end() ||
+		found + 1 == ALL_SCROLL_ANIMATION.end())
 	{
 		return ALL_SCROLL_ANIMATION.front();
 	}
@@ -106,7 +108,8 @@ inline ScrollAnimation parse_scroll_animation(std::string_view name)
 		return ScrollAnimation::EXPLOSION;
 	}
 
-	throw std::runtime_error(std::format("unknown scroll_animation '{}'", name));
+	throw std::runtime_error(
+		std::format("unknown scroll_animation '{}'", name));
 }
 
 inline std::string_view encode_target_mode(TargetMode targetMode)

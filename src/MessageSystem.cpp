@@ -12,7 +12,10 @@ void MessageSystem::begin_run()
 	run = RunState{};
 }
 
-void MessageSystem::message(ColorPairId color, std::string_view text, MessageCompletion completion)
+void MessageSystem::message(
+	ColorPairId color,
+	std::string_view text,
+	MessageCompletion completion)
 {
 	// Store message in system
 	run.messageToDisplay = text;
@@ -32,10 +35,13 @@ void MessageSystem::message(ColorPairId color, std::string_view text, MessageCom
 	}
 
 	log("Stored message: '" + run.messageToDisplay + "'");
-	log(std::string{ "Stored message color: " } + std::string{ color_pair_name(run.messageColor) });
+	log(std::string{ "Stored message color: " } +
+		std::string{ color_pair_name(run.messageColor) });
 }
 
-void MessageSystem::append_message_part(ColorPairId color, std::string_view text)
+void MessageSystem::append_message_part(
+	ColorPairId color,
+	std::string_view text)
 {
 	run.attackMessageParts.push_back({ color, std::string(text) });
 }

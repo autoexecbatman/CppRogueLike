@@ -52,7 +52,8 @@ inline constexpr std::array<CreatureSize, 6> ALL_CREATURE_SIZE = {
 [[nodiscard]] inline CreatureSize next_creature_size(CreatureSize value)
 {
 	const auto found = std::ranges::find(ALL_CREATURE_SIZE, value);
-	if (found == ALL_CREATURE_SIZE.end() || found + 1 == ALL_CREATURE_SIZE.end())
+	if (found == ALL_CREATURE_SIZE.end() ||
+		found + 1 == ALL_CREATURE_SIZE.end())
 	{
 		return ALL_CREATURE_SIZE.front();
 	}
@@ -118,7 +119,8 @@ inline constexpr std::array<CreatureSize, 6> ALL_CREATURE_SIZE = {
 	const auto found = std::ranges::find_if(ALL_CREATURE_SIZE, named);
 	if (found == ALL_CREATURE_SIZE.end())
 	{
-		throw std::runtime_error(std::format("unknown creature size '{}'", name));
+		throw std::runtime_error(
+			std::format("unknown creature size '{}'", name));
 	}
 	return *found;
 }

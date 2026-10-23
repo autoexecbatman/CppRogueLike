@@ -39,8 +39,8 @@
     },
     {
       "file": "src/Map.cpp",
-      "original": "\t\tfovMap->set_properties(tile.position.x, tile.position.y, fov_properties_for(tile.type));\n\t}\n\n\t// Note: Logging",
-      "mutated": "\t\tfovMap->set_properties(tile.position.x, tile.position.y, fov_properties_for(tile.type));\n\t}\n\tpost_process_doors();\n\n\t// Note: Logging",
+      "original": "\t\tfovMap->set_properties(\n\t\t\ttile.position.x,\n\t\t\ttile.position.y,\n\t\t\tfov_properties_for(tile.type));\n\t}\n\n\t// Note: Logging",
+      "mutated": "\t\tfovMap->set_properties(\n\t\t\ttile.position.x,\n\t\t\ttile.position.y,\n\t\t\tfov_properties_for(tile.type));\n\t}\n\tpost_process_doors();\n\t// Note: Logging",
       "catches": "doors placed again on load, adding a door where a later pass left corridor"
     },
     {

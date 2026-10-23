@@ -54,11 +54,12 @@ protected:
 	Creature& add_creature(int hitDice, int column, bool undead)
 	{
 		auto creature = std::make_unique<Creature>(
-			Vector2D{ column, 5 }, ActorData{
-									   TileRef{},
-									   undead ? "skeleton" : "goblin",
-									   ColorPairId::WHITE_BLACK,
-								   });
+			Vector2D{ column, 5 },
+			ActorData{
+				TileRef{},
+				undead ? "skeleton" : "goblin",
+				ColorPairId::WHITE_BLACK,
+			});
 		creature->healthPool = std::make_unique<HealthPool>(8);
 		creature->experienceReward = std::make_unique<ExperienceReward>(0);
 		creature->set_creature_level(hitDice);
@@ -81,14 +82,20 @@ protected:
 	{
 		const auto ignore_completion = [](GameContext& completedCtx) {
 		};
-		SpellSystem::cast_spell_by_key("sleep", *caster, SpellSource::MEMORIZED, ignore_completion, ctx);
+		SpellSystem::cast_spell_by_key(
+			"sleep",
+			*caster,
+			SpellSource::MEMORIZED,
+			ignore_completion,
+			ctx);
 	}
 
 	MockGameContext mock{};
 	GameContext ctx{};
 	BuffSystem buffs{};
 	Map map{ 20, 20 };
-	std::unique_ptr<Player> caster{ std::make_unique<Player>(Vector2D{ 2, 5 }) };
+	std::unique_ptr<Player> caster{ std::make_unique<Player>(
+		Vector2D{ 2, 5 }) };
 	std::vector<std::unique_ptr<Creature>> creatures{};
 };
 
@@ -134,8 +141,10 @@ TEST_F(SleepSpellTest, WeakestAreAffectedFirst)
 
 	cast_sleep();
 
-	EXPECT_TRUE(weak.has_state(ActorState::IS_SLEEPING)) << "the weakest must be reached first";
-	EXPECT_FALSE(strong.has_state(ActorState::IS_SLEEPING)) << "the budget could not cover it";
+	EXPECT_TRUE(weak.has_state(ActorState::IS_SLEEPING))
+		<< "the weakest must be reached first";
+	EXPECT_FALSE(strong.has_state(ActorState::IS_SLEEPING))
+		<< "the budget could not cover it";
 }
 
 // Partial effects are ignored: a creature the budget cannot cover stays awake.
@@ -160,7 +169,12 @@ TEST_F(SleepSpellTest, DurationScalesWithCasterLevel)
 
 	ASSERT_TRUE(goblin.has_state(ActorState::IS_SLEEPING));
 	// 3rd level caster: 5 rounds per level.
-	expect_lasts_exactly(buffs, goblin, BuffType::SLEEP, ctx.gameState->get_time(), 15);
+	expect_lasts_exactly(
+		buffs,
+		goblin,
+		BuffType::SLEEP,
+		ctx.gameState->get_time(),
+		15);
 }
 
 // A higher-level caster puts them under for longer.
@@ -173,7 +187,12 @@ TEST_F(SleepSpellTest, HigherLevelCasterSleepsThemLonger)
 	cast_sleep();
 
 	ASSERT_TRUE(goblin.has_state(ActorState::IS_SLEEPING));
-	expect_lasts_exactly(buffs, goblin, BuffType::SLEEP, ctx.gameState->get_time(), 35);
+	expect_lasts_exactly(
+		buffs,
+		goblin,
+		BuffType::SLEEP,
+		ctx.gameState->get_time(),
+		35);
 }
 
 // The dice the book prints, in absolute terms. Every case above scripts its dice, and
@@ -182,8 +201,10 @@ TEST_F(SleepSpellTest, HigherLevelCasterSleepsThemLonger)
 // for both numbers.
 TEST(SleepSpellDiceTest, TheBudgetIsTwoFourSidedDice)
 {
-	EXPECT_EQ(Spells::SLEEP_HIT_DICE_COUNT, 2) << "the book affects 2d4 Hit Dice, not another count";
-	EXPECT_EQ(Spells::SLEEP_HIT_DICE_SIDES, 4) << "the book affects 2d4 Hit Dice, not another die";
+	EXPECT_EQ(Spells::SLEEP_HIT_DICE_COUNT, 2)
+		<< "the book affects 2d4 Hit Dice, not another count";
+	EXPECT_EQ(Spells::SLEEP_HIT_DICE_SIDES, 4)
+		<< "the book affects 2d4 Hit Dice, not another die";
 }
 
 // What the two dice can produce, drawn rather than scripted, because the range a die
@@ -206,5 +227,6 @@ TEST(SleepSpellDiceTest, TwoDiceReachBothEndsOfTheirRange)
 	}
 
 	EXPECT_EQ(lowest, 2) << "the lowest two four-sided dice can show is two";
-	EXPECT_EQ(highest, 8) << "the highest two four-sided dice can show is eight";
+	EXPECT_EQ(highest, 8)
+		<< "the highest two four-sided dice can show is eight";
 }

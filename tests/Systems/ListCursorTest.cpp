@@ -97,12 +97,14 @@ TEST(ListCursorTest, TheWheelStopsAtTheLastScreenfulAndAtTheTop)
 	cursor.scroll_by(100, 3);
 	EXPECT_EQ(cursor.first_visible(3), 7u);
 	cursor.scroll_by(-1, 3);
-	EXPECT_EQ(cursor.first_visible(3), 6u) << "one notch back from the bottom moves at once";
+	EXPECT_EQ(cursor.first_visible(3), 6u)
+		<< "one notch back from the bottom moves at once";
 	cursor.scroll_by(-100, 3);
 	EXPECT_EQ(cursor.first_visible(3), 0u);
 	cursor.scroll_by(2, 20);
 	EXPECT_EQ(cursor.first_visible(20), 0u);
-	EXPECT_EQ(cursor.current_row(), 0u) << "the wheel moves the screen, not the cursor";
+	EXPECT_EQ(cursor.current_row(), 0u)
+		<< "the wheel moves the screen, not the cursor";
 }
 
 // Deleting the current last row leaves the row above it current.
@@ -143,7 +145,8 @@ TEST(ListCursorTest, ShrinkingToEmptyAndResettingAfterAShrink)
 	EXPECT_FALSE(cursor.is_empty());
 	EXPECT_EQ(cursor.current_row(), 0u);
 	EXPECT_EQ(cursor.first_visible(1), 0u);
-	EXPECT_TRUE(cursor.can_move_down()) << "three rows, so row 0 has a row below it";
+	EXPECT_TRUE(cursor.can_move_down())
+		<< "three rows, so row 0 has a row below it";
 }
 
 // A click maps a drawn place to its row, and a place below the last row to nothing.

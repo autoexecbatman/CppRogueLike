@@ -136,7 +136,13 @@ public:
 	void apply_enhancement_effects();
 
 	// Enhancement generation
-	static ItemEnhancement generate_random_enhancement(MagicalPrefixes magicalPrefixes, RandomDice& dice);
-	static ItemEnhancement generate_weapon_enhancement(MagicalPrefixes magicalPrefixes, RandomDice& dice);
-	static ItemEnhancement generate_armor_enhancement(MagicalPrefixes magicalPrefixes, RandomDice& dice);
+	static ItemEnhancement generate_random_enhancement(
+		MagicalPrefixes magicalPrefixes,
+		RandomDice& dice);
+	static ItemEnhancement generate_weapon_enhancement(
+		MagicalPrefixes magicalPrefixes,
+		RandomDice& dice);
+	static ItemEnhancement generate_armor_enhancement(
+		MagicalPrefixes magicalPrefixes,
+		RandomDice& dice);
 };

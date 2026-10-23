@@ -27,7 +27,7 @@
     },
     {
       "file": "src/MonsterRegistry.cpp",
-      "original": "key_to_standard_id(key).has_value() || customMonsters.contains(key)",
+      "original": "key_to_standard_id(key).has_value() ||\n\t\t\tcustomMonsters.contains(key)",
       "mutated": "customMonsters.contains(key)",
       "catches": "a standard monster's key handed to a custom monster"
     },

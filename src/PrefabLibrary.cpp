@@ -106,7 +106,10 @@ void PrefabLibrary::load(std::string_view path)
 	std::ifstream prefabsFile(resolved);
 	if (!prefabsFile.is_open())
 	{
-		throw std::runtime_error(std::format("PrefabLibrary::load -- cannot open '{}'", resolved.string()));
+		throw std::runtime_error(
+			std::format(
+				"PrefabLibrary::load -- cannot open '{}'",
+				resolved.string()));
 	}
 
 	const json prefabsDocument = json::parse(prefabsFile);
@@ -124,7 +127,10 @@ void PrefabLibrary::load(std::string_view path)
 
 		if (prefab.rows.empty())
 		{
-			throw std::runtime_error(std::format("PrefabLibrary::load -- prefab '{}' has no rows", prefab.name));
+			throw std::runtime_error(
+				std::format(
+					"PrefabLibrary::load -- prefab '{}' has no rows",
+					prefab.name));
 		}
 		loaded.push_back(std::move(prefab));
 	}
@@ -152,13 +158,19 @@ void PrefabLibrary::save(std::string_view path) const
 	std::ofstream out(resolved);
 	if (!out.is_open())
 	{
-		throw std::runtime_error(std::format("PrefabLibrary::save -- cannot write '{}'", resolved.string()));
+		throw std::runtime_error(
+			std::format(
+				"PrefabLibrary::save -- cannot write '{}'",
+				resolved.string()));
 	}
 	out << prefabsDocument.dump(2);
 	out.flush();
 	if (!out)
 	{
-		throw std::runtime_error(std::format("PrefabLibrary::save -- cannot write '{}'; the write failed", resolved.string()));
+		throw std::runtime_error(
+			std::format(
+				"PrefabLibrary::save -- cannot write '{}'; the write failed",
+				resolved.string()));
 	}
 }
 
@@ -181,8 +193,9 @@ void PrefabLibrary::add_or_replace(Prefab prefab)
 
 void PrefabLibrary::remove(const std::string& name)
 {
-	std::erase_if(prefabs, [&](const Prefab& prefab)
-		{ return prefab.name == name; });
+	std::erase_if(
+		prefabs,
+		[&](const Prefab& prefab) { return prefab.name == name; });
 }
 
 // ---------------------------------------------------------------------------
@@ -201,7 +214,8 @@ void PrefabLibrary::apply_to_room(
 	{
 		return;
 	}
-	const std::optional<size_t> prefabIndex = find_prefab_index(prefabs, room.prefabName);
+	const std::optional<size_t> prefabIndex =
+		find_prefab_index(prefabs, room.prefabName);
 	if (!prefabIndex)
 	{
 		return;

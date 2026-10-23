@@ -11,20 +11,30 @@
 #include "MonsterFactory.h"
 #include "Renderer.h"
 
-BalanceViewer::BalanceViewer(int dungeonLevel, GameContext& ctx)
-	: dungeonLevel(dungeonLevel)
+BalanceViewer::BalanceViewer(int dungeonLevel, GameContext& ctx) :
+	dungeonLevel(dungeonLevel)
 {
-	assert(ctx.itemRegistry && "BalanceViewer::BalanceViewer: called without an itemRegistry");
-	assert(ctx.monsterRegistry && "BalanceViewer::BalanceViewer: called without a monsterRegistry");
+	assert(
+		ctx.itemRegistry &&
+		"BalanceViewer::BalanceViewer: called without an itemRegistry");
+	assert(
+		ctx.monsterRegistry &&
+		"BalanceViewer::BalanceViewer: called without a monsterRegistry");
 
-	monsterDist = MonsterFactory::get_current_distribution(dungeonLevel, *ctx.monsterRegistry);
-	itemDist = ItemFactory::get_current_distribution(dungeonLevel, *ctx.itemRegistry);
+	monsterDist = MonsterFactory::get_current_distribution(
+		dungeonLevel,
+		*ctx.monsterRegistry);
+	itemDist =
+		ItemFactory::get_current_distribution(dungeonLevel, *ctx.itemRegistry);
 }
 
 void BalanceViewer::menu(GameContext& ctx)
 {
-	assert(ctx.inputSystem && "BalanceViewer::menu: called without an inputSystem");
-	assert(ctx.tileConfig && "BalanceViewer::menu: called without a tileConfig");
+	assert(
+		ctx.inputSystem &&
+		"BalanceViewer::menu: called without an inputSystem");
+	assert(
+		ctx.tileConfig && "BalanceViewer::menu: called without a tileConfig");
 
 	ctx.inputSystem->poll();
 	GameKey key = ctx.inputSystem->get_key();
@@ -41,15 +51,22 @@ void BalanceViewer::menu(GameContext& ctx)
 
 	ctx.renderer->draw_frame(Vector2D{ 0, 0 }, vcols, vrows, *ctx.tileConfig);
 
-	std::string title = std::format("BALANCE VIEWER  --  Dungeon Level {}", dungeonLevel);
+	std::string title =
+		std::format("BALANCE VIEWER  --  Dungeon Level {}", dungeonLevel);
 	int titleW = ctx.renderer->measure_text(title);
 	int titleX = (vcols * tileSize - titleW) / 2;
-	ctx.renderer->draw_text(Vector2D{ titleX, fontOff }, title, ColorPairId::YELLOW_BLACK);
+	ctx.renderer->draw_text(
+		Vector2D{ titleX, fontOff },
+		title,
+		ColorPairId::YELLOW_BLACK);
 
 	std::string_view hint = "[ESC] or [SPACE] to close";
 	int hintW = ctx.renderer->measure_text(hint);
 	int hintX = (vcols * tileSize - hintW) / 2;
-	ctx.renderer->draw_text(Vector2D{ hintX, (vrows - 1) * tileSize + fontOff }, hint, ColorPairId::CYAN_BLACK);
+	ctx.renderer->draw_text(
+		Vector2D{ hintX, (vrows - 1) * tileSize + fontOff },
+		hint,
+		ColorPairId::CYAN_BLACK);
 
 	// Left column: monsters. Right column: items.
 	const int halfCols = vcols / 2;
@@ -70,7 +87,10 @@ void BalanceViewer::draw_column(
 	int pixelX = startCol * tileSize + tileSize;
 	int row = 2;
 
-	ctx.renderer->draw_text(Vector2D{ pixelX, row * tileSize + fontOff }, header, ColorPairId::GREEN_BLACK);
+	ctx.renderer->draw_text(
+		Vector2D{ pixelX, row * tileSize + fontOff },
+		header,
+		ColorPairId::GREEN_BLACK);
 	++row;
 
 	for (const auto& entry : dist)
@@ -80,8 +100,12 @@ void BalanceViewer::draw_column(
 			break;
 		}
 
-		std::string line = std::format("{}  {:.1f}%", entry.name, entry.percentage);
-		ctx.renderer->draw_text(Vector2D{ pixelX, row * tileSize + fontOff }, line, ColorPairId::WHITE_BLACK);
+		std::string line =
+			std::format("{}  {:.1f}%", entry.name, entry.percentage);
+		ctx.renderer->draw_text(
+			Vector2D{ pixelX, row * tileSize + fontOff },
+			line,
+			ColorPairId::WHITE_BLACK);
 		++row;
 	}
 }
@@ -99,7 +123,10 @@ void BalanceViewer::draw_item_column(
 	int pixelX = startCol * tileSize + tileSize;
 	int row = 2;
 
-	ctx.renderer->draw_text(Vector2D{ pixelX, row * tileSize + fontOff }, header, ColorPairId::GREEN_BLACK);
+	ctx.renderer->draw_text(
+		Vector2D{ pixelX, row * tileSize + fontOff },
+		header,
+		ColorPairId::GREEN_BLACK);
 	++row;
 
 	for (const auto& entry : dist)
@@ -109,8 +136,15 @@ void BalanceViewer::draw_item_column(
 			break;
 		}
 
-		std::string line = std::format("{:<24} {:5.1f}%  {}", entry.name, entry.percentage, entry.category);
-		ctx.renderer->draw_text(Vector2D{ pixelX, row * tileSize + fontOff }, line, ColorPairId::WHITE_BLACK);
+		std::string line = std::format(
+			"{:<24} {:5.1f}%  {}",
+			entry.name,
+			entry.percentage,
+			entry.category);
+		ctx.renderer->draw_text(
+			Vector2D{ pixelX, row * tileSize + fontOff },
+			line,
+			ColorPairId::WHITE_BLACK);
 		++row;
 	}
 }

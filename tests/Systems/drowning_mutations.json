@@ -39,8 +39,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tairUntilTime = expiry_time(roundEndTime, breath_rounds(get_constitution()));",
-      "mutated": "\t\tairUntilTime = expiry_time(roundEndTime, breath_rounds(get_constitution()) * 2);",
+      "original": "\t\tairUntilTime =\n\t\t\texpiry_time(roundEndTime, breath_rounds(get_constitution()));",
+      "mutated": "\t\tairUntilTime =\n\t\t\texpiry_time(roundEndTime, breath_rounds(get_constitution()) * 2);",
       "catches": "twice the air the Constitution buys"
     },
     {

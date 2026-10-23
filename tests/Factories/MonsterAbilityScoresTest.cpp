@@ -56,7 +56,10 @@ protected:
 
 	// A goblin record of the caller's size, rating and Strength, carrying nothing, so the
 	// only dice rolled before its hit dice are its ability scores'.
-	MonsterParams params_with(CreatureSize size, IntelligenceRating rating, std::optional<MonsterStrength> strength)
+	MonsterParams params_with(
+		CreatureSize size,
+		IntelligenceRating rating,
+		std::optional<MonsterStrength> strength)
 	{
 		MonsterParams params = mock.monsterRegistry.get_params("goblin");
 		params.equipment.clear();
@@ -74,36 +77,55 @@ protected:
 
 // A printed Strength rolls no die, so the first three are Dexterity's. Tiny reads Tables 7
 // and 8's first column; Low is Tables 9 to 11's third.
-TEST_F(MonsterAbilityScoresTest, ATinyLowMonsterReadsEachTableAndRollsNoStrengthDie)
+TEST_F(
+	MonsterAbilityScoresTest,
+	ATinyLowMonsterReadsEachTableAndRollsNoStrengthDie)
 {
-	const MonsterParams params = params_with(CreatureSize::TINY, IntelligenceRating::LOW, MonsterStrength{ 10, 0 });
+	const MonsterParams params = params_with(
+		CreatureSize::TINY,
+		IntelligenceRating::LOW,
+		MonsterStrength{ 10, 0 });
 	force_rolls({ 1, 1, 1, 6, 6, 6, 1, 1, 1, 6, 6, 6, 6, 6, 6 });
 
-	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
+	const auto monster =
+		MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
 	EXPECT_EQ(monster->get_strength(), 10) << "the printed Strength";
-	EXPECT_EQ(monster->get_dexterity(), 13) << "Table 7, a 3 in the tiny column";
-	EXPECT_EQ(monster->get_constitution(), 15) << "Table 8, an 18 in the tiny column";
-	EXPECT_EQ(monster->get_intelligence(), 3) << "Table 9, a 3 in the Low column";
+	EXPECT_EQ(monster->get_dexterity(), 13)
+		<< "Table 7, a 3 in the tiny column";
+	EXPECT_EQ(monster->get_constitution(), 15)
+		<< "Table 8, an 18 in the tiny column";
+	EXPECT_EQ(monster->get_intelligence(), 3)
+		<< "Table 9, a 3 in the Low column";
 	EXPECT_EQ(monster->get_wisdom(), 9) << "Table 10, an 18 in the Low column";
-	EXPECT_EQ(monster->get_charisma(), 9) << "Table 11, an 18 in the Low column";
+	EXPECT_EQ(monster->get_charisma(), 9)
+		<< "Table 11, an 18 in the Low column";
 }
 
 // With no printed Strength the first three dice are Table 6's. A non-intelligent creature
 // has Intelligence 0 and reads Wisdom and Charisma from the Animal column.
-TEST_F(MonsterAbilityScoresTest, ALargeNonIntelligentMonsterReadsEachTableInTheBooksOrder)
+TEST_F(
+	MonsterAbilityScoresTest,
+	ALargeNonIntelligentMonsterReadsEachTableInTheBooksOrder)
 {
-	const MonsterParams params = params_with(CreatureSize::LARGE, IntelligenceRating::NON, std::nullopt);
+	const MonsterParams params =
+		params_with(CreatureSize::LARGE, IntelligenceRating::NON, std::nullopt);
 	force_rolls({ 1, 1, 1, 6, 6, 6, 1, 1, 1, 3, 3, 3, 6, 6, 6, 6, 6, 6 });
 
-	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
+	const auto monster =
+		MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
-	EXPECT_EQ(monster->get_strength(), 13) << "Table 6, a 3 in the large column";
-	EXPECT_EQ(monster->get_dexterity(), 19) << "Table 7, an 18 in the large column";
-	EXPECT_EQ(monster->get_constitution(), 9) << "Table 8, a 3 in the large column";
+	EXPECT_EQ(monster->get_strength(), 13)
+		<< "Table 6, a 3 in the large column";
+	EXPECT_EQ(monster->get_dexterity(), 19)
+		<< "Table 7, an 18 in the large column";
+	EXPECT_EQ(monster->get_constitution(), 9)
+		<< "Table 8, a 3 in the large column";
 	EXPECT_EQ(monster->get_intelligence(), 0) << "Non- (0), whatever it rolls";
-	EXPECT_EQ(monster->get_wisdom(), 5) << "Table 10, an 18 in the Animal column";
-	EXPECT_EQ(monster->get_charisma(), 3) << "Table 11, an 18 in the Animal column";
+	EXPECT_EQ(monster->get_wisdom(), 5)
+		<< "Table 10, an 18 in the Animal column";
+	EXPECT_EQ(monster->get_charisma(), 3)
+		<< "Table 11, an 18 in the Animal column";
 }
 
 // Issue 0199's own success line: the scores come from the tables, so no record writes dice
@@ -115,9 +137,12 @@ TEST_F(MonsterAbilityScoresTest, NoRecordCarriesAbilityDice)
 
 	for (const auto& [key, record] : root.items())
 	{
-		for (const std::string_view diceKey : { "str", "dex", "int", "wis", "cha" })
+		for (
+			const std::string_view diceKey :
+			{ "str", "dex", "int", "wis", "cha" })
 		{
-			EXPECT_FALSE(record.contains(diceKey)) << key << " still carries \"" << diceKey << "\" dice";
+			EXPECT_FALSE(record.contains(diceKey))
+				<< key << " still carries \"" << diceKey << "\" dice";
 		}
 	}
 }

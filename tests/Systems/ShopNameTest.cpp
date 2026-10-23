@@ -55,23 +55,27 @@ TEST_F(ShopNameTest, TheSameRollNamesTheSameShop)
 	const std::string again = name_drawn_at(3, ShopType::WEAPON_SHOP);
 
 	EXPECT_FALSE(first.empty()) << "a shop was built without a name";
-	EXPECT_EQ(first, again) << "the same roll gave two names, so the roll is not what decides";
+	EXPECT_EQ(first, again)
+		<< "the same roll gave two names, so the roll is not what decides";
 }
 
 // And a different roll has to reach a different name, or the first pair agreeing
 // would show only that the list has one entry.
 TEST_F(ShopNameTest, ADifferentRollNamesADifferentShop)
 {
-	EXPECT_NE(name_drawn_at(FIRST_NAME_INDEX, ShopType::WEAPON_SHOP),
+	EXPECT_NE(
+		name_drawn_at(FIRST_NAME_INDEX, ShopType::WEAPON_SHOP),
 		name_drawn_at(LAST_NAME_INDEX, ShopType::WEAPON_SHOP));
 }
 
 // Each type draws from its own list, so two types on the same roll differ.
 TEST_F(ShopNameTest, EachTypeDrawsFromItsOwnList)
 {
-	EXPECT_NE(name_drawn_at(FIRST_NAME_INDEX, ShopType::WEAPON_SHOP),
+	EXPECT_NE(
+		name_drawn_at(FIRST_NAME_INDEX, ShopType::WEAPON_SHOP),
 		name_drawn_at(FIRST_NAME_INDEX, ShopType::ARMOR_SHOP));
-	EXPECT_NE(name_drawn_at(FIRST_NAME_INDEX, ShopType::POTION_SHOP),
+	EXPECT_NE(
+		name_drawn_at(FIRST_NAME_INDEX, ShopType::POTION_SHOP),
 		name_drawn_at(FIRST_NAME_INDEX, ShopType::SCROLL_SHOP));
 }
 

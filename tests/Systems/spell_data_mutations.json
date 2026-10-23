@@ -15,26 +15,26 @@
   "mutations": [
     {
       "file": "src/SpellRegistry.cpp",
-      "original": "\t\t\tthrow std::runtime_error(\n\t\t\t\tstd::format(\"SpellRegistry::load -- '{}' has no record for builtin spell '{}'\", resolved.string(), key));",
+      "original": "\t\t\tthrow std::runtime_error(\n\t\t\t\tstd::format(\n\t\t\t\t\t\"SpellRegistry::load -- '{}' has no record for builtin spell '{}'\",\n\t\t\t\t\tresolved.string(),\n\t\t\t\t\tkey));",
       "mutated": "\t\t\tcontinue;",
       "catches": "a data file missing a builtin spell loaded silently"
     },
     {
       "file": "src/SpellRegistry.cpp",
-      "original": "\tthrow std::runtime_error(std::format(\"SpellRegistry: unknown spell class '{}'\", text));",
+      "original": "\tthrow std::runtime_error(\n\t\tstd::format(\"SpellRegistry: unknown spell class '{}'\", text));",
       "mutated": "\treturn SpellClass::BOTH;",
       "catches": "an unknown spell class turned into a default"
     },
     {
       "file": "src/SpellRegistry.cpp",
-      "original": "\tthrow std::runtime_error(std::format(\"SpellRegistry: unknown spell effect '{}'\", text));",
+      "original": "\tthrow std::runtime_error(\n\t\tstd::format(\"SpellRegistry: unknown spell effect '{}'\", text));",
       "mutated": "\treturn SpellEffectType::NONE;",
       "catches": "an unknown spell effect turned into a default"
     },
     {
       "file": "src/SpellRegistry.cpp",
-      "original": "\t\tspells.emplace(std::string{ builtin.key }, SpellDefinition{ .effect_type = builtin.effect });",
-      "mutated": "\t\tspells.emplace(std::string{ builtin.key }, SpellDefinition{});",
+      "original": "\t\tspells.emplace(\n\t\t\tstd::string{ builtin.key },\n\t\t\tSpellDefinition{ .effect_type = builtin.effect });",
+      "mutated": "\t\tspells.emplace(\n\t\t\tstd::string{ builtin.key },\n\t\t\tSpellDefinition{});",
       "catches": "a registry built without the builtins' compiled-in effects"
     },
     {
@@ -57,7 +57,7 @@
     },
     {
       "file": "src/SpellRegistry.cpp",
-      "original": "definition.spellClass == targetClass || definition.spellClass == SpellClass::BOTH;",
+      "original": "definition.spellClass == targetClass ||\n\t\t\tdefinition.spellClass == SpellClass::BOTH;",
       "mutated": "definition.spellClass == targetClass;",
       "catches": "a spell of both classes offered to neither"
     },

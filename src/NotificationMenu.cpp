@@ -13,10 +13,13 @@ static constexpr std::string_view PROMPT{ "[ press any key ]" };
 NotificationMenu::NotificationMenu(
 	std::string title,
 	std::vector<std::string> lines,
-	GameContext& ctx)
-	: title{ std::move(title) }, lines{ std::move(lines) }
+	GameContext& ctx) :
+	title{ std::move(title) },
+	lines{ std::move(lines) }
 {
-	assert(ctx.renderer && "NotificationMenu: renderer required before construction");
+	assert(
+		ctx.renderer &&
+		"NotificationMenu: renderer required before construction");
 	const int tileSize = ctx.renderer->get_tile_size();
 	const int fontSize = ctx.renderer->get_font_size();
 
@@ -30,8 +33,10 @@ NotificationMenu::NotificationMenu(
 
 	// One row per line, then the prompt row.
 	const int rowCount = static_cast<int>(this->lines.size()) + 1;
-	menuWidth = static_cast<size_t>(panel_tiles_for_text_width(widestText, tileSize));
-	menuHeight = static_cast<size_t>(panel_tiles_for_text_rows(rowCount, tileSize, fontSize));
+	menuWidth =
+		static_cast<size_t>(panel_tiles_for_text_width(widestText, tileSize));
+	menuHeight = static_cast<size_t>(
+		panel_tiles_for_text_rows(rowCount, tileSize, fontSize));
 
 	int vcols = ctx.renderer->get_viewport_cols();
 	int vrows = ctx.renderer->get_viewport_rows();

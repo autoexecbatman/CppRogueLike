@@ -45,7 +45,9 @@ std::vector<DeclaredPath> declared_paths()
 	std::ifstream header(Paths::resolve("src/Paths.h"));
 	// A custom delimiter, because the pattern itself contains the )" that would
 	// otherwise close the raw string.
-	const std::regex declaration{ R"REGEX(inline\s+constexpr\s+std::string_view\s+(\w+)\s*=\s*"([^"]*)")REGEX" };
+	const std::regex declaration{
+		R"REGEX(inline\s+constexpr\s+std::string_view\s+(\w+)\s*=\s*"([^"]*)")REGEX"
+	};
 
 	std::string line;
 	while (std::getline(header, line))
@@ -63,7 +65,9 @@ std::vector<DeclaredPath> declared_paths()
 // filesystem took it. Asking the platform beats listing the characters it
 // reserves, because the list differs per platform and this has to hold on the
 // one the game ships from.
-bool is_creatable(const std::string& relative, const std::filesystem::path& sandbox)
+bool is_creatable(
+	const std::string& relative,
+	const std::filesystem::path& sandbox)
 {
 	const std::filesystem::path target = sandbox / relative;
 	std::error_code problem;
@@ -86,7 +90,8 @@ class PathsTest : public ::testing::Test
 protected:
 	void SetUp() override
 	{
-		sandbox = std::filesystem::temp_directory_path() / "cpprogue_paths_test";
+		sandbox =
+			std::filesystem::temp_directory_path() / "cpprogue_paths_test";
 		std::filesystem::remove_all(sandbox);
 		std::filesystem::create_directories(sandbox);
 	}
@@ -106,8 +111,10 @@ TEST_F(PathsTest, TheHeaderDeclaresPathsToCheck)
 {
 	const std::vector<DeclaredPath> paths = declared_paths();
 
-	ASSERT_FALSE(paths.empty()) << "no constants were read out of src/Paths.h, so every case below is vacuous";
-	EXPECT_GT(paths.size(), 5u) << "far fewer constants than Paths.h declares; the pattern stopped matching";
+	ASSERT_FALSE(paths.empty())
+		<< "no constants were read out of src/Paths.h, so every case below is vacuous";
+	EXPECT_GT(paths.size(), 5u)
+		<< "far fewer constants than Paths.h declares; the pattern stopped matching";
 }
 
 // A name the platform refuses is a file the game can never write.
@@ -129,11 +136,13 @@ TEST_F(PathsTest, TheSaveFileAndItsTemporaryAreBothCreatable)
 {
 	const std::filesystem::path save{ std::string(Paths::SAVE_FILE) };
 
-	EXPECT_TRUE(is_creatable(std::string(Paths::SAVE_FILE), sandbox)) << "the game cannot write its save file";
+	EXPECT_TRUE(is_creatable(std::string(Paths::SAVE_FILE), sandbox))
+		<< "the game cannot write its save file";
 
 	std::filesystem::path temporary = save;
 	temporary.replace_extension(".tmp");
-	EXPECT_TRUE(is_creatable(temporary.generic_string(), sandbox)) << "the game cannot write the temporary it saves through";
+	EXPECT_TRUE(is_creatable(temporary.generic_string(), sandbox))
+		<< "the game cannot write the temporary it saves through";
 }
 
 // end of file: PathsTest.cpp

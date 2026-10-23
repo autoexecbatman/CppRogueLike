@@ -55,10 +55,12 @@ std::vector<std::filesystem::path> every_plan()
 	{
 		return plans;
 	}
-	for (const auto& entry : std::filesystem::recursive_directory_iterator(root))
+	for (
+		const auto& entry : std::filesystem::recursive_directory_iterator(root))
 	{
 		const std::string name = entry.path().filename().string();
-		if (entry.is_regular_file() && name.contains("mutations") && entry.path().extension() == ".json")
+		if (entry.is_regular_file() && name.contains("mutations") &&
+			entry.path().extension() == ".json")
 		{
 			plans.push_back(entry.path());
 		}
@@ -79,7 +81,8 @@ std::string source_as_the_tool_reads_it(const std::filesystem::path& path)
 	folded.reserve(raw.size());
 	for (size_t index = 0; index < raw.size(); ++index)
 	{
-		if (raw[index] == '\r' && index + 1 < raw.size() && raw[index + 1] == '\n')
+		if (raw[index] == '\r' && index + 1 < raw.size() &&
+			raw[index + 1] == '\n')
 		{
 			continue;
 		}
@@ -132,18 +135,22 @@ TEST(MutationPlanTest, EveryAnchorAppearsExactlyOnceInItsFile)
 		for (const auto& mutation : plan.at("mutations"))
 		{
 			const std::string file = mutation.at("file").get<std::string>();
-			const std::string anchor = mutation.at("original").get<std::string>();
-			const std::string source = source_as_the_tool_reads_it(Paths::resolve(file));
+			const std::string anchor =
+				mutation.at("original").get<std::string>();
+			const std::string source =
+				source_as_the_tool_reads_it(Paths::resolve(file));
 
 			size_t occurrences = 0;
-			for (size_t at = source.find(anchor); at != std::string::npos; at = source.find(anchor, at + 1))
+			for (
+				size_t at = source.find(anchor); at != std::string::npos;
+				at = source.find(anchor, at + 1))
 			{
 				++occurrences;
 			}
 			EXPECT_EQ(occurrences, 1u)
 				<< planPath.filename().string() << " -> " << file
-				<< ": the fragment starting \"" << anchor.substr(0, 60) << "\" appears "
-				<< occurrences << " times";
+				<< ": the fragment starting \"" << anchor.substr(0, 60)
+				<< "\" appears " << occurrences << " times";
 		}
 	}
 }
@@ -161,7 +168,8 @@ TEST(MutationPlanTest, EveryFilterNamesASuiteThatExists)
 		json plan;
 		planFile >> plan;
 
-		const std::string command = plan.at("test_command").back().get<std::string>();
+		const std::string command =
+			plan.at("test_command").back().get<std::string>();
 		const std::string flag = "--gtest_filter=";
 		const size_t at = command.find(flag);
 		if (at == std::string::npos)
@@ -176,7 +184,9 @@ TEST(MutationPlanTest, EveryFilterNamesASuiteThatExists)
 		while (start <= filter.size())
 		{
 			const size_t stop = filter.find(':', start);
-			const std::string pattern = filter.substr(start, stop == std::string::npos ? std::string::npos : stop - start);
+			const std::string pattern = filter.substr(
+				start,
+				stop == std::string::npos ? std::string::npos : stop - start);
 			start = stop == std::string::npos ? filter.size() + 1 : stop + 1;
 
 			if (pattern.empty() || pattern.front() == '-')
@@ -195,10 +205,11 @@ TEST(MutationPlanTest, EveryFilterNamesASuiteThatExists)
 
 			// A pattern may name a fixture's prefix rather than the whole suite.
 			const auto names_this_suite = naming_a_prefix_of(suite);
-			const bool known = suites.contains(suite) || std::ranges::any_of(suites, names_this_suite);
+			const bool known = suites.contains(suite) ||
+				std::ranges::any_of(suites, names_this_suite);
 			EXPECT_TRUE(known)
-				<< planPath.filename().string() << ": the filter names '" << pattern
-				<< "', which matches no test suite in this binary";
+				<< planPath.filename().string() << ": the filter names '"
+				<< pattern << "', which matches no test suite in this binary";
 		}
 	}
 }
@@ -230,14 +241,19 @@ TEST(MutationPlanTest, EveryPlanRunsTheSuiteThroughRunSuite)
 		json plan;
 		planFile >> plan;
 
-		const std::vector<std::string> command = plan.at("test_command").get<std::vector<std::string>>();
+		const std::vector<std::string> command =
+			plan.at("test_command").get<std::vector<std::string>>();
 		const bool isCall = command.size() == prefix.size() + 3 &&
-			std::ranges::equal(command | std::views::take(prefix.size()), prefix) &&
-			(command.at(prefix.size()) == "Debug" || command.at(prefix.size()) == "Release") &&
+			std::ranges::equal(
+				command | std::views::take(prefix.size()),
+				prefix) &&
+			(command.at(prefix.size()) == "Debug" ||
+				command.at(prefix.size()) == "Release") &&
 			command.at(prefix.size() + 1) == "-Filter" &&
 			command.back().starts_with("--gtest_filter=");
 		EXPECT_TRUE(isCall)
-			<< planPath.filename().string() << ": the test_command is not a call to tests/run_suite.ps1 "
+			<< planPath.filename().string()
+			<< ": the test_command is not a call to tests/run_suite.ps1 "
 			<< "with -Configuration Debug or Release and -Filter --gtest_filter=...";
 	}
 }

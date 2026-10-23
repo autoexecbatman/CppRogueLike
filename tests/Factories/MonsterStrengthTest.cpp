@@ -95,10 +95,7 @@ protected:
 		ctx.levelManager = &levelManager;
 	}
 
-	void TearDown() override
-	{
-		std::filesystem::remove(edited);
-	}
+	void TearDown() override { std::filesystem::remove(edited); }
 
 	void force_rolls(std::initializer_list<int> rolls)
 	{
@@ -110,7 +107,9 @@ protected:
 
 	// A goblin of the caller's size and Strength carrying nothing, so the dice rolled are its
 	// Strength's 3d6 if it has none, then its Dexterity's, then its Constitution's.
-	MonsterParams params_with(CreatureSize size, std::optional<MonsterStrength> strength)
+	MonsterParams params_with(
+		CreatureSize size,
+		std::optional<MonsterStrength> strength)
 	{
 		MonsterParams params = mock.monsterRegistry.get_params("goblin");
 		params.equipment.clear();
@@ -141,15 +140,18 @@ protected:
 	GameContext ctx{};
 	DataManager dataManager{};
 	LevelManager levelManager{};
-	std::filesystem::path edited{ std::filesystem::temp_directory_path() / "monsters_strength.json" };
+	std::filesystem::path edited{ std::filesystem::temp_directory_path() /
+		"monsters_strength.json" };
 };
 
 TEST_F(MonsterStrengthTest, EachMonsterWhoseEntryPrintsAStrengthCarriesIt)
 {
 	for (const BookStrength& book : BOOK_STRENGTHS)
 	{
-		const std::optional<MonsterStrength>& held = monsters.get_params(std::string{ book.key }).strength;
-		ASSERT_TRUE(held.has_value()) << book.key << " carries no Strength, so it would roll Table 6";
+		const std::optional<MonsterStrength>& held =
+			monsters.get_params(std::string{ book.key }).strength;
+		ASSERT_TRUE(held.has_value())
+			<< book.key << " carries no Strength, so it would roll Table 6";
 		EXPECT_EQ(held->score, book.strength.score) << book.key;
 		EXPECT_EQ(held->exceptional, book.strength.exceptional) << book.key;
 	}
@@ -161,7 +163,8 @@ TEST_F(MonsterStrengthTest, EveryOtherMonsterRollsTable6)
 	{
 		if (!prints_a_strength(key))
 		{
-			EXPECT_FALSE(monsters.get_params(key).strength.has_value()) << key << " carries a Strength its entry does not print";
+			EXPECT_FALSE(monsters.get_params(key).strength.has_value())
+				<< key << " carries a Strength its entry does not print";
 		}
 	}
 }
@@ -170,8 +173,11 @@ TEST_F(MonsterStrengthTest, EachOfTheSixDealsTheBooksBaseDice)
 {
 	for (const BookStrength& book : BOOK_STRENGTHS)
 	{
-		EXPECT_EQ(monsters.get_params(std::string{ book.key }).damage.displayRoll, book.baseDamage)
-			<< book.key << " deals other dice than its entry prints, or keeps its Strength bonus in them";
+		EXPECT_EQ(
+			monsters.get_params(std::string{ book.key }).damage.displayRoll,
+			book.baseDamage)
+			<< book.key
+			<< " deals other dice than its entry prints, or keeps its Strength bonus in them";
 	}
 }
 
@@ -181,7 +187,8 @@ TEST_F(MonsterStrengthTest, AMonsterWithNoStrengthOfItsOwnRollsTable6BySize)
 	const MonsterParams params = params_with(CreatureSize::LARGE, std::nullopt);
 	force_rolls({ 4, 4, 5 });
 
-	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
+	const auto monster =
+		MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
 	EXPECT_EQ(monster->get_strength(), 18);
 	EXPECT_EQ(monster->get_exceptional_strength(), 51);
@@ -190,16 +197,21 @@ TEST_F(MonsterStrengthTest, AMonsterWithNoStrengthOfItsOwnRollsTable6BySize)
 // The printed Strength is the monster's, and it rolls nothing for it: the first three
 // dice are its Dexterity's and the next three its Constitution's, 17 for a man-sized
 // creature reading 18 on Table 8.
-TEST_F(MonsterStrengthTest, AMonsterWithAStrengthOfItsOwnKeepsItAndRollsNoDieForIt)
+TEST_F(
+	MonsterStrengthTest,
+	AMonsterWithAStrengthOfItsOwnKeepsItAndRollsNoDieForIt)
 {
-	const MonsterParams params = params_with(CreatureSize::MEDIUM, MonsterStrength{ 18, 100 });
+	const MonsterParams params =
+		params_with(CreatureSize::MEDIUM, MonsterStrength{ 18, 100 });
 	force_rolls({ 3, 3, 3, 6, 6, 5 });
 
-	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
+	const auto monster =
+		MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
 	EXPECT_EQ(monster->get_strength(), 18);
 	EXPECT_EQ(monster->get_exceptional_strength(), 100);
-	EXPECT_EQ(monster->get_constitution(), 18) << "a die was rolled for a Strength the record already holds";
+	EXPECT_EQ(monster->get_constitution(), 18)
+		<< "a die was rolled for a Strength the record already holds";
 }
 
 // The key is required: a record without it is unfinished rather than a Table 6 monster.
@@ -216,27 +228,45 @@ TEST_F(MonsterStrengthTest, ARecordWithoutAStrengthKeyIsRefused)
 // A percentile rides only on an 18.
 TEST_F(MonsterStrengthTest, APercentileBesideAScoreOtherThan18IsRefused)
 {
-	EXPECT_THROW(monsters.load(with_orc_strength({ { "score", 17 }, { "exceptional", 50 } })), std::runtime_error);
-	EXPECT_THROW(monsters.load(with_orc_strength({ { "score", 19 }, { "exceptional", 1 } })), std::runtime_error);
+	EXPECT_THROW(
+		monsters.load(
+			with_orc_strength({ { "score", 17 }, { "exceptional", 50 } })),
+		std::runtime_error);
+	EXPECT_THROW(
+		monsters.load(
+			with_orc_strength({ { "score", 19 }, { "exceptional", 1 } })),
+		std::runtime_error);
 }
 
 TEST_F(MonsterStrengthTest, AScoreWithNoStrengthRowIsRefused)
 {
-	EXPECT_THROW(monsters.load(with_orc_strength({ { "score", 26 }, { "exceptional", 0 } })), std::runtime_error);
-	EXPECT_THROW(monsters.load(with_orc_strength({ { "score", 0 }, { "exceptional", 0 } })), std::runtime_error);
+	EXPECT_THROW(
+		monsters.load(
+			with_orc_strength({ { "score", 26 }, { "exceptional", 0 } })),
+		std::runtime_error);
+	EXPECT_THROW(
+		monsters.load(
+			with_orc_strength({ { "score", 0 }, { "exceptional", 0 } })),
+		std::runtime_error);
 }
 
 TEST_F(MonsterStrengthTest, APercentileAbove100IsRefused)
 {
-	EXPECT_THROW(monsters.load(with_orc_strength({ { "score", 18 }, { "exceptional", 101 } })), std::runtime_error);
+	EXPECT_THROW(
+		monsters.load(
+			with_orc_strength({ { "score", 18 }, { "exceptional", 101 } })),
+		std::runtime_error);
 }
 
 // The edges the refusals sit beside load.
 TEST_F(MonsterStrengthTest, The18_00And25AndAPlainScoreLoad)
 {
-	EXPECT_NO_THROW(monsters.load(with_orc_strength({ { "score", 18 }, { "exceptional", 100 } })));
-	EXPECT_NO_THROW(monsters.load(with_orc_strength({ { "score", 25 }, { "exceptional", 0 } })));
-	EXPECT_NO_THROW(monsters.load(with_orc_strength({ { "score", 1 }, { "exceptional", 0 } })));
+	EXPECT_NO_THROW(monsters.load(
+		with_orc_strength({ { "score", 18 }, { "exceptional", 100 } })));
+	EXPECT_NO_THROW(monsters.load(
+		with_orc_strength({ { "score", 25 }, { "exceptional", 0 } })));
+	EXPECT_NO_THROW(monsters.load(
+		with_orc_strength({ { "score", 1 }, { "exceptional", 0 } })));
 	EXPECT_NO_THROW(monsters.load(with_orc_strength(nullptr)));
 }
 

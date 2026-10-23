@@ -96,7 +96,8 @@ protected:
 
 	MockGameContext mock{};
 	GameContext ctx{};
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 1, 1 }) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ 1, 1 }) };
 	bool wroteSentinel{ false };
 };
 
@@ -132,7 +133,8 @@ TEST_F(PlayerDeathTest, BurningToDeathAndSpendingTheActionKeepsTheDefeat)
 		.struck = 0,
 	};
 	SpellSystem::burn_with_fireball(*player, burst, ctx);
-	ASSERT_TRUE(player->is_dead()) << "the burn did not kill, so nothing here is being measured";
+	ASSERT_TRUE(player->is_dead())
+		<< "the burn did not kill, so nothing here is being measured";
 	spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 
 	EXPECT_EQ(ctx.gameState->get_run_outcome(), RunOutcome::DEFEAT)
@@ -149,11 +151,13 @@ TEST_F(PlayerDeathTest, DyingLeavesTheSaveFileAlone)
 			Paths::resolve(Paths::SAVE_FILE).string());
 	}
 	place_sentinel_save();
-	ASSERT_TRUE(wroteSentinel) << "could not write the stand-in save, so nothing here is being measured";
+	ASSERT_TRUE(wroteSentinel)
+		<< "could not write the stand-in save, so nothing here is being measured";
 
 	player->die(ctx);
 
 	ASSERT_TRUE(std::filesystem::exists(Paths::resolve(Paths::SAVE_FILE)))
 		<< "Player::die deleted the save file; permadeath housekeeping belongs in the game loop";
-	EXPECT_EQ(save_contents(), SENTINEL_SAVE) << "the save survived but its contents were rewritten";
+	EXPECT_EQ(save_contents(), SENTINEL_SAVE)
+		<< "the save survived but its contents were rewritten";
 }

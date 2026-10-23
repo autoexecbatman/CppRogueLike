@@ -19,10 +19,7 @@ protected:
 	// the rolls it wants. Left out of test mode except where a test asks for it.
 	RandomDice dice{ TEST_DICE_SEED };
 
-	void SetUp() override
-	{
-		defaultEnhancement = ItemEnhancement{};
-	}
+	void SetUp() override { defaultEnhancement = ItemEnhancement{}; }
 
 	void TearDown() override
 	{
@@ -285,21 +282,31 @@ TEST_F(EnhancementSystemTest, ScriptedRollsDetermineTheDraw)
 
 	dice.set_next_roll(10);
 	dice.set_next_roll(4);
-	const ItemEnhancement firstDraw = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, dice);
+	const ItemEnhancement firstDraw =
+		ItemEnhancement::generate_weapon_enhancement(
+			MagicalPrefixes::ALLOWED,
+			dice);
 	const PrefixType first = firstDraw.prefix;
 
 	dice.set_next_roll(10);
 	dice.set_next_roll(4);
-	const ItemEnhancement againDraw = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, dice);
+	const ItemEnhancement againDraw =
+		ItemEnhancement::generate_weapon_enhancement(
+			MagicalPrefixes::ALLOWED,
+			dice);
 	const PrefixType again = againDraw.prefix;
 
-	EXPECT_EQ(first, again) << "the same script gave two different draws, so the rolls are not what decides";
+	EXPECT_EQ(first, again)
+		<< "the same script gave two different draws, so the rolls are not what decides";
 
 	// A different index has to reach a different prefix, or the first pair agreeing
 	// would prove only that the pool has one entry.
 	dice.set_next_roll(10);
 	dice.set_next_roll(0);
-	const ItemEnhancement otherDraw = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, dice);
+	const ItemEnhancement otherDraw =
+		ItemEnhancement::generate_weapon_enhancement(
+			MagicalPrefixes::ALLOWED,
+			dice);
 	const PrefixType other = otherDraw.prefix;
 
 	EXPECT_NE(first, other) << "the index roll did not choose the prefix";
@@ -313,10 +320,14 @@ TEST_F(EnhancementSystemTest, TheIndexRollPicksOutOfTheWeaponPool)
 	dice.set_next_roll(10);
 	dice.set_next_roll(4);
 
-	const ItemEnhancement enhancement = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, dice);
+	const ItemEnhancement enhancement =
+		ItemEnhancement::generate_weapon_enhancement(
+			MagicalPrefixes::ALLOWED,
+			dice);
 
 	EXPECT_EQ(enhancement.prefix, PrefixType::FLAMING);
-	EXPECT_EQ(enhancement.suffix, SuffixType::NONE) << "a roll of 10 is outside the suffix band";
+	EXPECT_EQ(enhancement.suffix, SuffixType::NONE)
+		<< "a roll of 10 is outside the suffix band";
 }
 
 // The span the index is drawn over, which a scripted roll cannot see: in test
@@ -333,11 +344,15 @@ TEST_F(EnhancementSystemTest, EveryEntryOfTheWeaponPoolIsReachable)
 	bool sawLastEntry = false;
 	for (int draw = 0; draw < DRAWS && !sawLastEntry; ++draw)
 	{
-		const ItemEnhancement drawn = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, seeded);
+		const ItemEnhancement drawn =
+			ItemEnhancement::generate_weapon_enhancement(
+				MagicalPrefixes::ALLOWED,
+				seeded);
 		sawLastEntry = drawn.prefix == PrefixType::CURSED;
 	}
 
-	EXPECT_TRUE(sawLastEntry) << "the last of the nine weapon prefixes is out of reach";
+	EXPECT_TRUE(sawLastEntry)
+		<< "the last of the nine weapon prefixes is out of reach";
 }
 
 // The shop's ordinary equipment asks for no magical prefixes. Every pool holds
@@ -354,25 +369,36 @@ TEST_F(EnhancementSystemTest, ExcludingMagicalPrefixesExcludesThemFromEveryPool)
 
 	auto is_magical = [](PrefixType prefix)
 	{
-		return prefix == PrefixType::FLAMING || prefix == PrefixType::FROST || prefix == PrefixType::SHOCK || prefix == PrefixType::MAGICAL;
+		return prefix == PrefixType::FLAMING || prefix == PrefixType::FROST ||
+			prefix == PrefixType::SHOCK || prefix == PrefixType::MAGICAL;
 	};
 
 	int magicalWeapons = 0;
 	int magicalArmor = 0;
 	for (int draw = 0; draw < DRAWS; ++draw)
 	{
-		if (is_magical(ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::EXCLUDED, dice).prefix))
+		if (is_magical(
+				ItemEnhancement::generate_weapon_enhancement(
+					MagicalPrefixes::EXCLUDED,
+					dice)
+					.prefix))
 		{
 			++magicalWeapons;
 		}
-		if (is_magical(ItemEnhancement::generate_armor_enhancement(MagicalPrefixes::EXCLUDED, dice).prefix))
+		if (is_magical(
+				ItemEnhancement::generate_armor_enhancement(
+					MagicalPrefixes::EXCLUDED,
+					dice)
+					.prefix))
 		{
 			++magicalArmor;
 		}
 	}
 
-	EXPECT_EQ(magicalWeapons, 0) << "a weapon drew FLAMING, FROST or SHOCK when the caller excluded them";
-	EXPECT_EQ(magicalArmor, 0) << "armour drew MAGICAL when the caller excluded it";
+	EXPECT_EQ(magicalWeapons, 0)
+		<< "a weapon drew FLAMING, FROST or SHOCK when the caller excluded them";
+	EXPECT_EQ(magicalArmor, 0)
+		<< "armour drew MAGICAL when the caller excluded it";
 }
 
 // The counterpart, so the exclusion is shown to be doing something rather than
@@ -384,15 +410,20 @@ TEST_F(EnhancementSystemTest, AllowingMagicalPrefixesStillDrawsThem)
 	int magical = 0;
 	for (int draw = 0; draw < DRAWS; ++draw)
 	{
-		const ItemEnhancement drawn = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, dice);
+		const ItemEnhancement drawn =
+			ItemEnhancement::generate_weapon_enhancement(
+				MagicalPrefixes::ALLOWED,
+				dice);
 		const PrefixType prefix = drawn.prefix;
-		if (prefix == PrefixType::FLAMING || prefix == PrefixType::FROST || prefix == PrefixType::SHOCK)
+		if (prefix == PrefixType::FLAMING || prefix == PrefixType::FROST ||
+			prefix == PrefixType::SHOCK)
 		{
 			++magical;
 		}
 	}
 
-	EXPECT_GT(magical, 0) << "the weapon pool never produced a magical prefix at all";
+	EXPECT_GT(magical, 0)
+		<< "the weapon pool never produced a magical prefix at all";
 }
 
 // The general generator, which the shop calls for anything neither weapon nor
@@ -430,10 +461,19 @@ TEST_F(EnhancementSystemTest, TheBandRollDecidesWhatIsDrawn)
 			dice.set_next_roll(0);
 		}
 
-		const ItemEnhancement enhancement = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, dice);
+		const ItemEnhancement enhancement =
+			ItemEnhancement::generate_random_enhancement(
+				MagicalPrefixes::ALLOWED,
+				dice);
 
-		EXPECT_EQ(enhancement.prefix, bandCase.drawsPrefix ? PrefixType::BLESSED : PrefixType::NONE) << "band roll " << bandCase.bandRoll;
-		EXPECT_EQ(enhancement.suffix, bandCase.drawsSuffix ? SuffixType::OF_SPEED : SuffixType::NONE) << "band roll " << bandCase.bandRoll;
+		EXPECT_EQ(
+			enhancement.prefix,
+			bandCase.drawsPrefix ? PrefixType::BLESSED : PrefixType::NONE)
+			<< "band roll " << bandCase.bandRoll;
+		EXPECT_EQ(
+			enhancement.suffix,
+			bandCase.drawsSuffix ? SuffixType::OF_SPEED : SuffixType::NONE)
+			<< "band roll " << bandCase.bandRoll;
 	}
 }
 
@@ -444,7 +484,10 @@ TEST_F(EnhancementSystemTest, TheBothBandDrawsThePrefixFirst)
 	dice.set_next_roll(1);
 	dice.set_next_roll(2);
 
-	const ItemEnhancement enhancement = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, dice);
+	const ItemEnhancement enhancement =
+		ItemEnhancement::generate_random_enhancement(
+			MagicalPrefixes::ALLOWED,
+			dice);
 
 	EXPECT_EQ(enhancement.prefix, PrefixType::CURSED);
 	EXPECT_EQ(enhancement.suffix, SuffixType::OF_MAGIC);
@@ -455,12 +498,18 @@ TEST_F(EnhancementSystemTest, TheIndexRollPicksOutOfTheUniversalPool)
 {
 	dice.set_next_roll(10);
 	dice.set_next_roll(0);
-	const ItemEnhancement firstDraw = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, dice);
+	const ItemEnhancement firstDraw =
+		ItemEnhancement::generate_random_enhancement(
+			MagicalPrefixes::ALLOWED,
+			dice);
 	const PrefixType first = firstDraw.prefix;
 
 	dice.set_next_roll(10);
 	dice.set_next_roll(3);
-	const ItemEnhancement fourthDraw = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, dice);
+	const ItemEnhancement fourthDraw =
+		ItemEnhancement::generate_random_enhancement(
+			MagicalPrefixes::ALLOWED,
+			dice);
 	const PrefixType fourth = fourthDraw.prefix;
 
 	EXPECT_EQ(first, PrefixType::BLESSED);
@@ -473,7 +522,10 @@ TEST_F(EnhancementSystemTest, TheIndexRollPicksOutOfTheSpecialSuffixPool)
 	dice.set_next_roll(40);
 	dice.set_next_roll(0);
 
-	const ItemEnhancement enhancement = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, dice);
+	const ItemEnhancement enhancement =
+		ItemEnhancement::generate_random_enhancement(
+			MagicalPrefixes::ALLOWED,
+			dice);
 
 	EXPECT_EQ(enhancement.prefix, PrefixType::NONE);
 	EXPECT_EQ(enhancement.suffix, SuffixType::OF_SPEED);
@@ -481,16 +533,24 @@ TEST_F(EnhancementSystemTest, TheIndexRollPicksOutOfTheSpecialSuffixPool)
 
 // MAGICAL is the universal pool's one magical prefix; the same rolls keep it when
 // allowed and lose it when the shop excludes magic.
-TEST_F(EnhancementSystemTest, ExcludingMagicalPrefixesStripsMagicalFromTheGeneralPool)
+TEST_F(
+	EnhancementSystemTest,
+	ExcludingMagicalPrefixesStripsMagicalFromTheGeneralPool)
 {
 	dice.set_next_roll(10);
 	dice.set_next_roll(3);
-	const ItemEnhancement allowedDraw = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, dice);
+	const ItemEnhancement allowedDraw =
+		ItemEnhancement::generate_random_enhancement(
+			MagicalPrefixes::ALLOWED,
+			dice);
 	const PrefixType allowed = allowedDraw.prefix;
 
 	dice.set_next_roll(10);
 	dice.set_next_roll(3);
-	const PrefixType excluded = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::EXCLUDED, dice).prefix;
+	const PrefixType excluded = ItemEnhancement::generate_random_enhancement(
+		MagicalPrefixes::EXCLUDED,
+		dice)
+									.prefix;
 
 	EXPECT_EQ(allowed, PrefixType::MAGICAL);
 	EXPECT_EQ(excluded, PrefixType::NONE);
@@ -510,13 +570,20 @@ TEST_F(EnhancementSystemTest, EveryEntryOfTheGeneralPoolsIsReachable)
 	bool sawLastSuffix = false;
 	for (int draw = 0; draw < DRAWS; ++draw)
 	{
-		const ItemEnhancement enhancement = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, seeded);
-		sawLastPrefix = sawLastPrefix || enhancement.prefix == PrefixType::CRACKED;
-		sawLastSuffix = sawLastSuffix || enhancement.suffix == SuffixType::OF_BRITTLENESS;
+		const ItemEnhancement enhancement =
+			ItemEnhancement::generate_random_enhancement(
+				MagicalPrefixes::ALLOWED,
+				seeded);
+		sawLastPrefix =
+			sawLastPrefix || enhancement.prefix == PrefixType::CRACKED;
+		sawLastSuffix =
+			sawLastSuffix || enhancement.suffix == SuffixType::OF_BRITTLENESS;
 	}
 
-	EXPECT_TRUE(sawLastPrefix) << "CRACKED, the last universal prefix, is out of reach";
-	EXPECT_TRUE(sawLastSuffix) << "OF_BRITTLENESS, the last special suffix, is out of reach";
+	EXPECT_TRUE(sawLastPrefix)
+		<< "CRACKED, the last universal prefix, is out of reach";
+	EXPECT_TRUE(sawLastSuffix)
+		<< "OF_BRITTLENESS, the last special suffix, is out of reach";
 }
 
 // ----------------------------------------------------------------------------
@@ -619,7 +686,8 @@ TEST_F(EnhancementSystemTest, WeaponDamageRegistry_AppliesEnhancement)
 
 	DamageInfo baseDamage = WeaponDamageRegistry::get_damage_info("long_sword");
 	DamageInfo enhancedDamage = WeaponDamageRegistry::get_enhanced_damage_info(
-		"long_sword", &enhancement);
+		"long_sword",
+		&enhancement);
 
 	EXPECT_EQ(enhancedDamage.minDamage, baseDamage.minDamage + 3);
 	EXPECT_EQ(enhancedDamage.maxDamage, baseDamage.maxDamage + 3);
@@ -628,8 +696,8 @@ TEST_F(EnhancementSystemTest, WeaponDamageRegistry_AppliesEnhancement)
 TEST_F(EnhancementSystemTest, WeaponDamageRegistry_NullEnhancement_ReturnsBase)
 {
 	DamageInfo baseDamage = WeaponDamageRegistry::get_damage_info("dagger");
-	DamageInfo withNull = WeaponDamageRegistry::get_enhanced_damage_info(
-		"dagger", nullptr);
+	DamageInfo withNull =
+		WeaponDamageRegistry::get_enhanced_damage_info("dagger", nullptr);
 
 	EXPECT_EQ(withNull.minDamage, baseDamage.minDamage);
 	EXPECT_EQ(withNull.maxDamage, baseDamage.maxDamage);

@@ -80,7 +80,9 @@ protected:
 		monster.experienceReward = std::make_unique<ExperienceReward>(0);
 		monster.healthPool = std::make_unique<HealthPool>(STARTING_HP);
 		monster.armorClass = std::make_unique<ArmorClass>(10);
-		monster.attacker = std::make_unique<MonsterAttacker>(monster, DamageInfo{ "1d4", DamageType::PHYSICAL });
+		monster.attacker = std::make_unique<MonsterAttacker>(
+			monster,
+			DamageInfo{ "1d4", DamageType::PHYSICAL });
 		monster.set_dr(0);
 		monster.set_thaco(20);
 		monster.set_strength(8);
@@ -90,12 +92,21 @@ protected:
 
 	void cast_sanctuary(Creature& warded)
 	{
-		ctx.buffSystem->add_buff(warded, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
+		ctx.buffSystem->add_buff(
+			warded,
+			BuffType::SANCTUARY,
+			0,
+			10,
+			BuffApplication::ADD,
+			ctx.gameState->get_time());
 	}
 
 	bool turned_away_from_player(const Creature& attacker)
 	{
-		return ctx.buffSystem->is_turned_away_by_sanctuary(attacker, *player, ctx);
+		return ctx.buffSystem->is_turned_away_by_sanctuary(
+			attacker,
+			*player,
+			ctx);
 	}
 
 	// Queues rolls in the order the game asks for them.
@@ -116,7 +127,8 @@ protected:
 
 	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 4, 5 }) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ 4, 5 }) };
 	Creature goblin{
 		Vector2D{ 5, 5 },
 		ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK },
@@ -131,8 +143,14 @@ protected:
 // hits armour class 10, 20 makes the save, and 1 fails it.
 TEST_F(SanctuarySaveTest, TheScriptedRollsMeanWhatTheTestsSay)
 {
-	const int monsterNeeds = SavingThrows::target(goblin.get_creature_class(), goblin.get_creature_level(), SavingThrow::SPELL);
-	const int playerNeeds = SavingThrows::target(player->get_creature_class(), player->get_creature_level(), SavingThrow::SPELL);
+	const int monsterNeeds = SavingThrows::target(
+		goblin.get_creature_class(),
+		goblin.get_creature_level(),
+		SavingThrow::SPELL);
+	const int playerNeeds = SavingThrows::target(
+		player->get_creature_class(),
+		player->get_creature_level(),
+		SavingThrow::SPELL);
 	EXPECT_GT(monsterNeeds, 12);
 	EXPECT_GT(playerNeeds, 12);
 	EXPECT_LE(monsterNeeds, 20);
@@ -146,7 +164,8 @@ TEST_F(SanctuarySaveTest, AFailedSaveHoldsForTheCasting)
 	script({ 1, 20 });
 
 	EXPECT_TRUE(turned_away_from_player(goblin));
-	EXPECT_TRUE(turned_away_from_player(goblin)) << "the goblin saved again against one casting";
+	EXPECT_TRUE(turned_away_from_player(goblin))
+		<< "the goblin saved again against one casting";
 }
 
 // Made on a 20, the goblin is never turned away; a second save would take the 1 and fail.
@@ -156,7 +175,8 @@ TEST_F(SanctuarySaveTest, AMadeSaveHoldsForTheCasting)
 	script({ 20, 1 });
 
 	EXPECT_FALSE(turned_away_from_player(goblin));
-	EXPECT_FALSE(turned_away_from_player(goblin)) << "the goblin saved again against one casting";
+	EXPECT_FALSE(turned_away_from_player(goblin))
+		<< "the goblin saved again against one casting";
 }
 
 // Each attacker rolls its own save and keeps its own result.
@@ -167,8 +187,10 @@ TEST_F(SanctuarySaveTest, EachAttackerKeepsItsOwnSave)
 
 	EXPECT_TRUE(turned_away_from_player(goblin));
 	EXPECT_FALSE(turned_away_from_player(orc));
-	EXPECT_TRUE(turned_away_from_player(goblin)) << "the goblin's failure was not kept";
-	EXPECT_FALSE(turned_away_from_player(orc)) << "the orc's success was not kept";
+	EXPECT_TRUE(turned_away_from_player(goblin))
+		<< "the goblin's failure was not kept";
+	EXPECT_FALSE(turned_away_from_player(orc))
+		<< "the orc's success was not kept";
 }
 
 // When the casting ends its record ends with it: the next casting is met with a fresh save.
@@ -181,7 +203,8 @@ TEST_F(SanctuarySaveTest, ANewCastingIsMetWithAFreshSave)
 	ctx.buffSystem->remove_buff(*player, BuffType::SANCTUARY);
 	cast_sanctuary(*player);
 
-	EXPECT_FALSE(turned_away_from_player(goblin)) << "a failure against the last casting held against this one";
+	EXPECT_FALSE(turned_away_from_player(goblin))
+		<< "a failure against the last casting held against this one";
 }
 
 // A casting over a running one is still a new casting, and a save is good only against
@@ -194,7 +217,8 @@ TEST_F(SanctuarySaveTest, ACastingOverARunningOneIsMetWithAFreshSave)
 
 	cast_sanctuary(*player);
 
-	EXPECT_FALSE(turned_away_from_player(goblin)) << "a failure against the last casting held against this one";
+	EXPECT_FALSE(turned_away_from_player(goblin))
+		<< "a failure against the last casting held against this one";
 }
 
 // It cuts both ways: the goblin that made its save rolls again, and fails.
@@ -206,7 +230,8 @@ TEST_F(SanctuarySaveTest, ACastingOverARunningOneUndoesAMadeSave)
 
 	cast_sanctuary(*player);
 
-	EXPECT_TRUE(turned_away_from_player(goblin)) << "a success against the last casting held against this one";
+	EXPECT_TRUE(turned_away_from_player(goblin))
+		<< "a success against the last casting held against this one";
 }
 
 // Another spell is not a new casting of this one: a bless leaves the saves standing.
@@ -216,9 +241,16 @@ TEST_F(SanctuarySaveTest, AnotherBuffLeavesTheSanctuaryRecordAlone)
 	script({ 1, 20 });
 	ASSERT_TRUE(turned_away_from_player(goblin));
 
-	ctx.buffSystem->add_buff(*player, BuffType::BLESS, 1, 10, BuffApplication::ADD, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(
+		*player,
+		BuffType::BLESS,
+		1,
+		10,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 
-	EXPECT_TRUE(turned_away_from_player(goblin)) << "a bless wiped the sanctuary's record";
+	EXPECT_TRUE(turned_away_from_player(goblin))
+		<< "a bless wiped the sanctuary's record";
 }
 
 // Without Sanctuary nobody is turned away, and the 1 queued for a save is never read.
@@ -245,7 +277,8 @@ TEST_F(SanctuarySaveTest, TheRecordSurvivesASaveAndALoad)
 	player = std::move(loaded);
 	script({ 20 });
 
-	EXPECT_TRUE(turned_away_from_player(goblin)) << "the goblin's failed save was lost in the load";
+	EXPECT_TRUE(turned_away_from_player(goblin))
+		<< "the goblin's failed save was lost in the load";
 }
 
 // A monster attacking the warded player: the save's 12 fails, and a sure hit behind it
@@ -266,7 +299,9 @@ TEST_F(SanctuarySaveTest, AWardedPlayerTurnsAMonstersShotAway)
 	// A shot is made with a missile weapon, so this goblin carries a sling.
 	game.itemRegistry.load(Paths::ITEMS);
 	goblin.set_body_plan({ EquipmentSlot::MISSILE_WEAPON });
-	goblin.wear(ItemCreator::create("sling", goblin.position, ctx), EquipmentSlot::MISSILE_WEAPON);
+	goblin.wear(
+		ItemCreator::create("sling", goblin.position, ctx),
+		EquipmentSlot::MISSILE_WEAPON);
 	cast_sanctuary(*player);
 	script({ 12, 20, 4 });
 
@@ -284,7 +319,8 @@ TEST_F(SanctuarySaveTest, AttackingBreaksTheAttackersOwnSanctuary)
 
 	player->attacker->attack(goblin, AttackKind::MELEE, ctx);
 
-	EXPECT_FALSE(ctx.buffSystem->has_buff(*player, BuffType::SANCTUARY)) << "the player attacked and stayed warded";
+	EXPECT_FALSE(ctx.buffSystem->has_buff(*player, BuffType::SANCTUARY))
+		<< "the player attacked and stayed warded";
 }
 
 // The player attacking a warded monster is held to the same save.
@@ -295,7 +331,8 @@ TEST_F(SanctuarySaveTest, AWardedMonsterTurnsThePlayersAttackAway)
 
 	player->attacker->attack(goblin, AttackKind::MELEE, ctx);
 
-	EXPECT_EQ(hp_lost(goblin), 0) << "the player struck a warded goblin through a failed save";
+	EXPECT_EQ(hp_lost(goblin), 0)
+		<< "the player struck a warded goblin through a failed save";
 }
 
 // So is one monster attacking another - a confused one, say.
@@ -306,7 +343,8 @@ TEST_F(SanctuarySaveTest, AWardedMonsterTurnsAnotherMonstersAttackAway)
 
 	orc.attacker->attack(goblin, AttackKind::MELEE, ctx);
 
-	EXPECT_EQ(hp_lost(goblin), 0) << "the orc struck a warded goblin through a failed save";
+	EXPECT_EQ(hp_lost(goblin), 0)
+		<< "the orc struck a warded goblin through a failed save";
 }
 
 // A made save, and the attack goes ahead as usual: a hit, and the die shows four.
@@ -327,5 +365,6 @@ TEST_F(SanctuarySaveTest, AnUnwardedTargetCostsNoSave)
 
 	orc.attacker->attack(goblin, AttackKind::MELEE, ctx);
 
-	EXPECT_EQ(hp_lost(goblin), 4) << "a save was rolled against a target without sanctuary";
+	EXPECT_EQ(hp_lost(goblin), 4)
+		<< "a save was rolled against a target without sanctuary";
 }

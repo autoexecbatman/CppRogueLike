@@ -29,7 +29,8 @@ namespace
 
 // Every move is to one of these. A diagonal is legal by design and costs what a
 // cardinal step does.
-constexpr std::array<Vector2D, 8> NEIGHBOURS{ DIR_N, DIR_S, DIR_W, DIR_E, DIR_NW, DIR_NE, DIR_SW, DIR_SE };
+constexpr std::array<Vector2D, 8>
+	NEIGHBOURS{ DIR_N, DIR_S, DIR_W, DIR_E, DIR_NW, DIR_NE, DIR_SW, DIR_SE };
 
 constexpr int STEP_COST = 1;
 // A shut door takes one turn to open and one to pass.
@@ -48,7 +49,8 @@ struct Frontier
 	}
 };
 
-using FrontierQueue = std::priority_queue<Frontier, std::vector<Frontier>, std::greater<Frontier>>;
+using FrontierQueue = std::
+	priority_queue<Frontier, std::vector<Frontier>, std::greater<Frontier>>;
 
 // Where a tile sits in a grid stored row after row.
 //
@@ -56,7 +58,8 @@ using FrontierQueue = std::priority_queue<Frontier, std::vector<Frontier>, std::
 //   index_of(Vector2D{ 3, 2 }, 20); // -> 43
 size_t index_of(Vector2D position, int width)
 {
-	return static_cast<size_t>(position.y) * static_cast<size_t>(width) + static_cast<size_t>(position.x);
+	return static_cast<size_t>(position.y) * static_cast<size_t>(width) +
+		static_cast<size_t>(position.x);
 }
 
 // Lets every trap and web on the tile act on the creature entering it, until one stops
@@ -65,10 +68,15 @@ size_t index_of(Vector2D position, int width)
 // Example, a goblin stepping onto a hidden dart trap and then onto bare floor:
 //   enter_features(goblin, trapTile, ctx);  // -> EntryResult::BLOCKED, the dart springs
 //   enter_features(goblin, floorTile, ctx); // -> EntryResult::UNAFFECTED
-EntryResult enter_features(Creature& creature, Vector2D destination, GameContext& ctx)
+EntryResult enter_features(
+	Creature& creature,
+	Vector2D destination,
+	GameContext& ctx)
 {
 	assert(ctx.traps && "step: a creature moved on a level with no trap list");
-	assert(ctx.spellTiles && "step: a creature moved on a level with no spell tile list");
+	assert(
+		ctx.spellTiles &&
+		"step: a creature moved on a level with no spell tile list");
 
 	bool stopped = false;
 	const auto enter_all = [&](auto& features)
@@ -77,12 +85,14 @@ EntryResult enter_features(Creature& creature, Vector2D destination, GameContext
 		{
 			assert(feature && "step: a floor container holds a null entry");
 
-			if (stopped || feature->is_destroyed() || feature->position != destination)
+			if (stopped || feature->is_destroyed() ||
+				feature->position != destination)
 			{
 				continue;
 			}
 
-			if (feature->on_creature_enter(creature, ctx) == EntryResult::BLOCKED)
+			if (feature->on_creature_enter(creature, ctx) ==
+				EntryResult::BLOCKED)
 			{
 				stopped = true;
 			}
@@ -96,8 +106,8 @@ EntryResult enter_features(Creature& creature, Vector2D destination, GameContext
 
 } // namespace
 
-Mobility::Mobility(std::set<TileType> enterableTypes)
-	: enterable(std::move(enterableTypes))
+Mobility::Mobility(std::set<TileType> enterableTypes) :
+	enterable(std::move(enterableTypes))
 {
 }
 
@@ -114,7 +124,8 @@ Mobility mobility_of(const Creature& creature, const TileConfig& tileConfig)
 	// carries a creature through it anyway.
 	for (const auto& [tileType, definition] : tileConfig.get_tile_definitions())
 	{
-		const bool isBypassed = definition.hasBypassState && creature.has_bypass(definition.bypassState);
+		const bool isBypassed = definition.hasBypassState &&
+			creature.has_bypass(definition.bypassState);
 		if (!definition.blocksMovement || isBypassed)
 		{
 			enterable.insert(tileType);
@@ -122,7 +133,8 @@ Mobility mobility_of(const Creature& creature, const TileConfig& tileConfig)
 	}
 
 	// A door is opened by hand, and the body plan is what says a creature has one.
-	if (creature.has_slot(EquipmentSlot::RIGHT_HAND) || creature.has_slot(EquipmentSlot::LEFT_HAND))
+	if (creature.has_slot(EquipmentSlot::RIGHT_HAND) ||
+		creature.has_slot(EquipmentSlot::LEFT_HAND))
 	{
 		enterable.insert(TileType::CLOSED_DOOR);
 	}
@@ -130,7 +142,10 @@ Mobility mobility_of(const Creature& creature, const TileConfig& tileConfig)
 	return Mobility{ std::move(enterable) };
 }
 
-std::optional<int> step_cost(Vector2D position, const Mobility& mobility, const GameContext& ctx)
+std::optional<int> step_cost(
+	Vector2D position,
+	const Mobility& mobility,
+	const GameContext& ctx)
 {
 	assert(ctx.map && "step_cost: a tile was priced with no map");
 	const Map& map = *ctx.map;
@@ -160,26 +175,36 @@ std::optional<int> step_cost(Vector2D position, const Mobility& mobility, const 
 	return tileType == TileType::CLOSED_DOOR ? SHUT_DOOR_COST : STEP_COST;
 }
 
-bool can_enter(const Creature& creature, Vector2D position, const GameContext& ctx)
+bool can_enter(
+	const Creature& creature,
+	Vector2D position,
+	const GameContext& ctx)
 {
 	assert(ctx.map && "Pathfinding::can_enter: called without a map");
-	assert(ctx.tileConfig && "can_enter: asked with no tile configuration loaded");
+	assert(
+		ctx.tileConfig && "can_enter: asked with no tile configuration loaded");
 
 	if (!step_cost(position, mobility_of(creature, *ctx.tileConfig), ctx))
 	{
 		return false;
 	}
 
-	return ctx.map->get_tile_type(position) != TileType::CLOSED_DOOR && ctx.map->get_actor(position, ctx) == nullptr;
+	return ctx.map->get_tile_type(position) != TileType::CLOSED_DOOR &&
+		ctx.map->get_actor(position, ctx) == nullptr;
 }
 
 StepResult step(Creature& creature, Vector2D destination, GameContext& ctx)
 {
 	assert(ctx.map && "Pathfinding::step: called without a map");
-	assert(creature.position.chebyshev_distance_to(destination) == 1 && "step: the destination is not a neighbouring tile");
-	assert(ctx.tileConfig && "step: a creature moved with no tile configuration loaded");
+	assert(
+		creature.position.chebyshev_distance_to(destination) == 1 &&
+		"step: the destination is not a neighbouring tile");
+	assert(
+		ctx.tileConfig &&
+		"step: a creature moved with no tile configuration loaded");
 
-	if (!step_cost(destination, mobility_of(creature, *ctx.tileConfig), ctx) || ctx.map->get_actor(destination, ctx) != nullptr)
+	if (!step_cost(destination, mobility_of(creature, *ctx.tileConfig), ctx) ||
+		ctx.map->get_actor(destination, ctx) != nullptr)
 	{
 		return StepResult::REFUSED;
 	}
@@ -187,7 +212,8 @@ StepResult step(Creature& creature, Vector2D destination, GameContext& ctx)
 	// Priced means unlocked and the creature has hands, so the door opens.
 	if (ctx.map->get_tile_type(destination) == TileType::CLOSED_DOOR)
 	{
-		[[maybe_unused]] const bool opened = ctx.map->open_door(destination, ctx);
+		[[maybe_unused]] const bool opened =
+			ctx.map->open_door(destination, ctx);
 		assert(opened && "step: a priced shut door refused to open");
 		return StepResult::OPENED_DOOR;
 	}
@@ -201,10 +227,15 @@ StepResult step(Creature& creature, Vector2D destination, GameContext& ctx)
 	return StepResult::MOVED;
 }
 
-const Pathfinder::CostMap& Pathfinder::cost_map(Vector2D goal, const Mobility& mobility, const GameContext& ctx)
+const Pathfinder::CostMap& Pathfinder::cost_map(
+	Vector2D goal,
+	const Mobility& mobility,
+	const GameContext& ctx)
 {
 	assert(ctx.map && "cost_to: a cost map was asked for with no map");
-	assert(ctx.gameState && "cost_to: a cost map was asked for with no clock to date it by");
+	assert(
+		ctx.gameState &&
+		"cost_to: a cost map was asked for with no clock to date it by");
 	const Map& map = *ctx.map;
 	const int clock = ctx.gameState->get_time();
 	const long levelSeed = map.get_seed();
@@ -215,7 +246,9 @@ const Pathfinder::CostMap& Pathfinder::cost_map(Vector2D goal, const Mobility& m
 		return costMap.mobility == mobility;
 	};
 	auto found = std::ranges::find_if(costMaps, is_same_mobility);
-	if (found != costMaps.end() && found->goal == goal && found->clock == clock && found->levelSeed == levelSeed && found->width == map.get_width())
+	if (found != costMaps.end() && found->goal == goal &&
+		found->clock == clock && found->levelSeed == levelSeed &&
+		found->width == map.get_width())
 	{
 		return *found;
 	}
@@ -230,7 +263,10 @@ const Pathfinder::CostMap& Pathfinder::cost_map(Vector2D goal, const Mobility& m
 	costMap.clock = clock;
 	costMap.levelSeed = levelSeed;
 	costMap.width = map.get_width();
-	costMap.costs.assign(static_cast<size_t>(map.get_width()) * static_cast<size_t>(map.get_height()), UNREACHED);
+	costMap.costs.assign(
+		static_cast<size_t>(map.get_width()) *
+			static_cast<size_t>(map.get_height()),
+		UNREACHED);
 
 	if (!map.is_in_bounds(goal))
 	{
@@ -247,7 +283,8 @@ const Pathfinder::CostMap& Pathfinder::cost_map(Vector2D goal, const Mobility& m
 		const Frontier top = frontier.top();
 		frontier.pop();
 
-		const int reached = costMap.costs[index_of(top.position, costMap.width)];
+		const int reached =
+			costMap.costs[index_of(top.position, costMap.width)];
 		if (static_cast<double>(reached) < top.priority)
 		{
 			continue;
@@ -275,7 +312,11 @@ const Pathfinder::CostMap& Pathfinder::cost_map(Vector2D goal, const Mobility& m
 	return costMap;
 }
 
-std::optional<int> Pathfinder::cost_to(Vector2D goal, Vector2D from, const Mobility& mobility, const GameContext& ctx)
+std::optional<int> Pathfinder::cost_to(
+	Vector2D goal,
+	Vector2D from,
+	const Mobility& mobility,
+	const GameContext& ctx)
 {
 	assert(ctx.map && "Pathfinder::cost_to: called without a map");
 
@@ -294,11 +335,16 @@ std::optional<int> Pathfinder::cost_to(Vector2D goal, Vector2D from, const Mobil
 	return cost;
 }
 
-std::vector<Vector2D> Pathfinder::find_route(Vector2D start, Vector2D goal, const Mobility& mobility, const GameContext& ctx) const
+std::vector<Vector2D> Pathfinder::find_route(
+	Vector2D start,
+	Vector2D goal,
+	const Mobility& mobility,
+	const GameContext& ctx) const
 {
 	assert(ctx.map && "find_route: a route was asked for with no map");
 	const Map& map = *ctx.map;
-	assert(map.is_in_bounds(start) && "find_route: the route starts off the map");
+	assert(
+		map.is_in_bounds(start) && "find_route: the route starts off the map");
 
 	if (!map.is_in_bounds(goal))
 	{
@@ -306,7 +352,8 @@ std::vector<Vector2D> Pathfinder::find_route(Vector2D start, Vector2D goal, cons
 	}
 
 	const int width = map.get_width();
-	const size_t cellCount = static_cast<size_t>(width) * static_cast<size_t>(map.get_height());
+	const size_t cellCount =
+		static_cast<size_t>(width) * static_cast<size_t>(map.get_height());
 	constexpr double UNSEEN = std::numeric_limits<double>::infinity();
 	std::vector<double> costSoFar(cellCount, UNSEEN);
 	std::vector<std::optional<Vector2D>> cameFrom(cellCount, std::nullopt);
@@ -321,7 +368,8 @@ std::vector<Vector2D> Pathfinder::find_route(Vector2D start, Vector2D goal, cons
 			{
 				return static_cast<double>(SHUT_DOOR_COST);
 			}
-			if (map.find_decoration_at(goal, ctx) != nullptr && mobility.contains(map.get_tile_type(goal)))
+			if (map.find_decoration_at(goal, ctx) != nullptr &&
+				mobility.contains(map.get_tile_type(goal)))
 			{
 				return static_cast<double>(STEP_COST);
 			}
@@ -376,14 +424,17 @@ std::vector<Vector2D> Pathfinder::find_route(Vector2D start, Vector2D goal, cons
 			// A diagonal is weighted by its length so the route drawn on screen runs
 			// straight; the step count is the same either way.
 			const bool isDiagonal = delta.x != 0 && delta.y != 0;
-			const double stepPrice = isDiagonal ? *price * std::numbers::sqrt2 : *price;
-			const double newCost = costSoFar[index_of(current, width)] + stepPrice;
+			const double stepPrice =
+				isDiagonal ? *price * std::numbers::sqrt2 : *price;
+			const double newCost =
+				costSoFar[index_of(current, width)] + stepPrice;
 			const size_t nextIndex = index_of(next, width);
 			if (newCost < costSoFar[nextIndex])
 			{
 				costSoFar[nextIndex] = newCost;
 				cameFrom[nextIndex] = current;
-				const double heuristic = static_cast<double>(next.chebyshev_distance_to(goal));
+				const double heuristic =
+					static_cast<double>(next.chebyshev_distance_to(goal));
 				frontier.push(Frontier{ newCost + heuristic, next });
 			}
 		}

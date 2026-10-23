@@ -70,8 +70,8 @@ private:
 	bool destroyed{ false };
 
 public:
-	TileFeature(Vector2D position, ActorData data)
-		: Actor(position, data) {};
+	TileFeature(Vector2D position, ActorData data) :
+		Actor(position, data) {};
 
 	// Marks this feature for removal at the next turn boundary. A feature may
 	// destroy itself from inside on_creature_enter, so the entry stays alive and
@@ -87,5 +87,7 @@ public:
 	// Acts on a creature entering this feature's tile, once per entry, before
 	// the move is committed. Implementors roll their own saving throws here, so
 	// the call changes state and must not be made twice for one entry.
-	virtual EntryResult on_creature_enter(Creature& creature, GameContext& ctx) = 0;
+	virtual EntryResult on_creature_enter(
+		Creature& creature,
+		GameContext& ctx) = 0;
 };

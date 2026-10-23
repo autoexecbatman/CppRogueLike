@@ -57,14 +57,14 @@
     },
     {
       "file": "src/InventoryOperations.cpp",
-      "original": "\tint total = (owner.get_creature_class() == CreatureClass::MONSTER) ? 0 : CLOTHING_POUNDS;",
-      "mutated": "\tint total = CLOTHING_POUNDS;",
+      "original": "\tint total = (owner.get_creature_class() == CreatureClass::MONSTER) ?\n\t\t0 :\n\t\tCLOTHING_POUNDS;",
+      "mutated": "\tint total =CLOTHING_POUNDS;",
       "catches": "a creature dressed by a rule written for characters"
     },
     {
       "file": "src/InventoryOperations.cpp",
-      "original": "\tint total = (owner.get_creature_class() == CreatureClass::MONSTER) ? 0 : CLOTHING_POUNDS;",
-      "mutated": "\tint total = 0;",
+      "original": "\tint total = (owner.get_creature_class() == CreatureClass::MONSTER) ?\n\t\t0 :\n\t\tCLOTHING_POUNDS;",
+      "mutated": "\tint total =0;",
       "catches": "the allowance dropped, which leaves every character five pounds light"
     }
   ]

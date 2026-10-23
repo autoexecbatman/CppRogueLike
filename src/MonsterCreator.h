@@ -17,10 +17,16 @@ struct GameContext;
 namespace MonsterCreator
 {
 // A standard monster at pos, built from ctx.monsterRegistry's parameters for it.
-[[nodiscard]] std::unique_ptr<Creature> create(Vector2D pos, MonsterId id, GameContext& ctx);
+[[nodiscard]] std::unique_ptr<Creature> create(
+	Vector2D pos,
+	MonsterId id,
+	GameContext& ctx);
 
 // A monster at pos built from params. An item it cannot carry in the slot the params
 // name throws, naming the monster, the item and the slot.
-[[nodiscard]] std::unique_ptr<Creature> create_from_params(Vector2D pos, const MonsterParams& params, GameContext& ctx);
+[[nodiscard]] std::unique_ptr<Creature> create_from_params(
+	Vector2D pos,
+	const MonsterParams& params,
+	GameContext& ctx);
 
 } // namespace MonsterCreator

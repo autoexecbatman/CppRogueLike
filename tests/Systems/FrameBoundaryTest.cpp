@@ -45,11 +45,12 @@ constexpr unsigned int AUTOMATION_MOUSE_BUTTON_DOWN = 6;
 //   IsKeyPressed(KEY_ESCAPE); // -> true until a frame ends
 void press_key(int raylibKey)
 {
-	PlayAutomationEvent(AutomationEvent{
-		.frame = 0,
-		.type = AUTOMATION_KEY_DOWN,
-		.params = { raylibKey, 0, 0, 0 },
-	});
+	PlayAutomationEvent(
+		AutomationEvent{
+			.frame = 0,
+			.type = AUTOMATION_KEY_DOWN,
+			.params = { raylibKey, 0, 0, 0 },
+		});
 }
 
 // Presses a mouse button as the mouse would.
@@ -59,11 +60,12 @@ void press_key(int raylibKey)
 //   IsMouseButtonPressed(MOUSE_BUTTON_LEFT); // -> true until a frame ends
 void press_mouse_button(int raylibButton)
 {
-	PlayAutomationEvent(AutomationEvent{
-		.frame = 0,
-		.type = AUTOMATION_MOUSE_BUTTON_DOWN,
-		.params = { raylibButton, 0, 0, 0 },
-	});
+	PlayAutomationEvent(
+		AutomationEvent{
+			.frame = 0,
+			.type = AUTOMATION_MOUSE_BUTTON_DOWN,
+			.params = { raylibButton, 0, 0, 0 },
+		});
 }
 
 // The character sheet closes on Escape without drawing; the tick still ends its frame,
@@ -76,13 +78,19 @@ void press_mouse_button(int raylibButton)
 	game.menus.push_back(std::make_unique<CharacterSheetUI>(reader));
 
 	press_key(KEY_ESCAPE);
-	exit_unless(IsKeyPressed(KEY_ESCAPE), "the played Escape did not register as a press, so this test measures nothing");
+	exit_unless(
+		IsKeyPressed(KEY_ESCAPE),
+		"the played Escape did not register as a press, so this test measures nothing");
 
 	int loopNum{ 0 };
 	game.tick(loopNum);
 
-	exit_unless(game.menus.empty(), "the character sheet did not close on Escape");
-	exit_unless(!IsKeyPressed(KEY_ESCAPE), "Escape is still a press after the tick that read it, so the next reader takes it again");
+	exit_unless(
+		game.menus.empty(),
+		"the character sheet did not close on Escape");
+	exit_unless(
+		!IsKeyPressed(KEY_ESCAPE),
+		"Escape is still a press after the tick that read it, so the next reader takes it again");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 
@@ -113,41 +121,57 @@ struct ChoiceRecorder
 	GameContext ctx = game.context();
 	bool chosen{ false };
 	const ChoiceRecorder record_choice{ chosen };
-	game.menus.push_back(std::make_unique<ContextMenu>(std::vector<std::string>{ "Use" }, 1, 1, record_choice, ctx));
+	game.menus.push_back(
+		std::make_unique<ContextMenu>(
+			std::vector<std::string>{ "Use" },
+			1,
+			1,
+			record_choice,
+			ctx));
 
 	press_mouse_button(MOUSE_BUTTON_LEFT);
-	exit_unless(IsMouseButtonPressed(MOUSE_BUTTON_LEFT), "the played click did not register as a press, so this test measures nothing");
+	exit_unless(
+		IsMouseButtonPressed(MOUSE_BUTTON_LEFT),
+		"the played click did not register as a press, so this test measures nothing");
 
 	int loopNum{ 0 };
 	game.tick(loopNum);
 
 	exit_unless(chosen, "the click did not reach the context menu");
-	exit_unless(game.menus.empty(), "the context menu did not close on the click");
-	exit_unless(!IsMouseButtonPressed(MOUSE_BUTTON_LEFT), "the click is still a press after the tick that read it, so the next reader takes it again");
+	exit_unless(
+		game.menus.empty(),
+		"the context menu did not close on the click");
+	exit_unless(
+		!IsMouseButtonPressed(MOUSE_BUTTON_LEFT),
+		"the click is still a press after the tick that read it, so the next reader takes it again");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 } // namespace
 
 TEST(FrameBoundaryTest, AKeyThatClosesAMenuIsSpentByTheTick)
 {
-	const int childExitCode = exit_code_in_child(&escape_closing_the_sheet_is_spent_by_the_tick);
+	const int childExitCode =
+		exit_code_in_child(&escape_closing_the_sheet_is_spent_by_the_tick);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 
 TEST(FrameBoundaryTest, AClickThatClosesAMenuIsSpentByTheTick)
 {
-	const int childExitCode = exit_code_in_child(&a_click_closing_the_context_menu_is_spent_by_the_tick);
+	const int childExitCode = exit_code_in_child(
+		&a_click_closing_the_context_menu_is_spent_by_the_tick);
 
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 
 // end of file: FrameBoundaryTest.cpp

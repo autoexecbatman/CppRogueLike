@@ -49,7 +49,9 @@ struct StartupRefusal
 //   run_startup_steps(steps, log);   // all ran -> nullopt, log "STARTUP: first\n..."
 //   run_startup_steps(steps, log);   // second threw "key 'tiles' not found"
 //                                    // -> { "Loading tile config", "key 'tiles' not found" }
-[[nodiscard]] std::optional<StartupRefusal> run_startup_steps(std::span<const StartupStep> steps, std::ostream& log);
+[[nodiscard]] std::optional<StartupRefusal> run_startup_steps(
+	std::span<const StartupStep> steps,
+	std::ostream& log);
 
 // The line a refusal is reported with, naming the step and its reason.
 //

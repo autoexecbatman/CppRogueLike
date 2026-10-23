@@ -21,7 +21,10 @@ protected:
 	bool webLaid{ false }; // Tracks if this spider has created a web
 
 	// Specialized spider movement pattern that prefers walls and corners
-	void move_or_attack(Creature& owner, Creature& target, GameContext& ctx) override;
+	void move_or_attack(
+		Creature& owner,
+		Creature& target,
+		GameContext& ctx) override;
 
 	// One round of the spider's attacks: its bite, and the venom a bite that lands injects.
 	//
@@ -32,10 +35,16 @@ protected:
 	// What this spider's venom does to a victim its bite has just landed on. This one
 	// is the Monstrous Manual's hairy spider, whose weak poison penalises rather than
 	// wounds; the kinds with a Table 51 poison override it.
-	virtual void inject_venom(Creature& owner, Creature& target, GameContext& ctx);
+	virtual void inject_venom(
+		Creature& owner,
+		Creature& target,
+		GameContext& ctx);
 
 	// Find the best ambush position near walls. Returns nullopt when no valid position exists.
-	std::optional<Vector2D> find_ambush_position(Creature& owner, Vector2D targetPosition, GameContext& ctx);
+	std::optional<Vector2D> find_ambush_position(
+		Creature& owner,
+		Vector2D targetPosition,
+		GameContext& ctx);
 
 	// Check if a position is a good ambush spot (near walls)
 	bool is_good_ambush_spot(Vector2D position, GameContext& ctx);
@@ -43,7 +52,10 @@ protected:
 public:
 	void update(Creature& owner, GameContext& ctx) override;
 
-	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::SPIDER; }
+	[[nodiscard]] AiType get_ai_type() const noexcept override
+	{
+		return AiType::SPIDER;
+	}
 
 	void move_toward_player(Creature& owner, GameContext& ctx);
 	void random_move(Creature& owner, GameContext& ctx);

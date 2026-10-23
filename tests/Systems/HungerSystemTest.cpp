@@ -249,10 +249,7 @@ protected:
 		player->experienceReward = std::make_unique<ExperienceReward>(0);
 	}
 
-	void force_next_roll(int value)
-	{
-		mock.dice.set_next_roll(value);
-	}
+	void force_next_roll(int value) { mock.dice.set_next_roll(value); }
 
 	// Drives the counter into a state without going through increase_hunger, which
 	// would announce every threshold it crossed on the way.
@@ -264,7 +261,8 @@ protected:
 	MockGameContext mock{};
 	GameContext ctx{};
 	HungerSystem hunger{};
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 5, 5 }) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ 5, 5 }) };
 };
 
 // The first thing hunger costs: one point, on the roll that calls for it.
@@ -276,54 +274,62 @@ protected:
 TEST_F(HungerDamageTest, StarvingTakesAPointOnTheTurnTheRollCallsForIt)
 {
 	starve_to(850);
-	ASSERT_EQ(hunger.get_hunger_state(), HungerState::STARVING) << "the fixture did not reach STARVING";
+	ASSERT_EQ(hunger.get_hunger_state(), HungerState::STARVING)
+		<< "the fixture did not reach STARVING";
 	const int before = player->get_hp();
 	force_next_roll(6); // the d6: no flavour line
 	force_next_roll(1); // the d20: the point of damage
 
 	hunger.apply_hunger_effects(ctx);
 
-	EXPECT_EQ(player->get_hp(), before - 1) << "starving did not cost the point it rolls for";
+	EXPECT_EQ(player->get_hp(), before - 1)
+		<< "starving did not cost the point it rolls for";
 }
 
 // And costs nothing on the turns it does not.
 TEST_F(HungerDamageTest, StarvingCostsNothingOnATurnTheRollSpares)
 {
 	starve_to(850);
-	ASSERT_EQ(hunger.get_hunger_state(), HungerState::STARVING) << "the fixture did not reach STARVING";
+	ASSERT_EQ(hunger.get_hunger_state(), HungerState::STARVING)
+		<< "the fixture did not reach STARVING";
 	const int before = player->get_hp();
 	force_next_roll(6); // the d6: no flavour line
 	force_next_roll(2); // the d20: spared
 
 	hunger.apply_hunger_effects(ctx);
 
-	EXPECT_EQ(player->get_hp(), before) << "starving took damage on a turn its roll spared";
+	EXPECT_EQ(player->get_hp(), before)
+		<< "starving took damage on a turn its roll spared";
 }
 
 // Dying has no roll to survive.
 TEST_F(HungerDamageTest, DyingTakesAPointEveryTurn)
 {
 	starve_to(1000);
-	ASSERT_EQ(hunger.get_hunger_state(), HungerState::DYING) << "the fixture did not reach DYING";
+	ASSERT_EQ(hunger.get_hunger_state(), HungerState::DYING)
+		<< "the fixture did not reach DYING";
 	const int before = player->get_hp();
 
 	hunger.apply_hunger_effects(ctx);
 	hunger.apply_hunger_effects(ctx);
 
-	EXPECT_EQ(player->get_hp(), before - 2) << "dying skipped a turn, so it has a roll it should not have";
+	EXPECT_EQ(player->get_hp(), before - 2)
+		<< "dying skipped a turn, so it has a roll it should not have";
 }
 
 // The states above STARVING reach the player's text and never their hit points.
 TEST_F(HungerDamageTest, BeingMerelyHungryCostsNoHitPoints)
 {
 	starve_to(650);
-	ASSERT_EQ(hunger.get_hunger_state(), HungerState::HUNGRY) << "the fixture did not reach HUNGRY";
+	ASSERT_EQ(hunger.get_hunger_state(), HungerState::HUNGRY)
+		<< "the fixture did not reach HUNGRY";
 	const int before = player->get_hp();
 	force_next_roll(1);
 
 	hunger.apply_hunger_effects(ctx);
 
-	EXPECT_EQ(player->get_hp(), before) << "hunger short of starvation took hit points";
+	EXPECT_EQ(player->get_hp(), before)
+		<< "hunger short of starvation took hit points";
 }
 
 // A system that never announced a state saves no lastNotifiedState, and that record loads.
@@ -331,7 +337,8 @@ TEST_F(HungerSystemTest, ARecordWithNothingAnnouncedLoads)
 {
 	nlohmann::json saved;
 	hunger.save(saved);
-	ASSERT_FALSE(saved.contains("lastNotifiedState")) << "the writer saved an announcement, so this pin pins nothing";
+	ASSERT_FALSE(saved.contains("lastNotifiedState"))
+		<< "the writer saved an announcement, so this pin pins nothing";
 
 	HungerSystem loaded{};
 	loaded.load(saved);
@@ -340,7 +347,9 @@ TEST_F(HungerSystemTest, ARecordWithNothingAnnouncedLoads)
 }
 
 // The same system, once per field HungerSystem::save always writes.
-class HungerSystemFieldTest : public HungerSystemTest, public ::testing::WithParamInterface<std::string_view>
+class HungerSystemFieldTest :
+	public HungerSystemTest,
+	public ::testing::WithParamInterface<std::string_view>
 {
 };
 
@@ -350,16 +359,20 @@ TEST_P(HungerSystemFieldTest, ARecordMissingTheFieldIsRefused)
 	hunger.increase_hunger(ctx, 1);
 	nlohmann::json saved;
 	hunger.save(saved);
-	ASSERT_TRUE(saved.contains(field)) << std::format("the writer did not write \"{}\", so erasing it proves nothing", field);
+	ASSERT_TRUE(saved.contains(field)) << std::format(
+		"the writer did not write \"{}\", so erasing it proves nothing",
+		field);
 	saved.erase(field);
 
 	HungerSystem loaded{};
 
-	EXPECT_THROW(loaded.load(saved), std::exception) << "a record without \"" << field << "\" loaded";
+	EXPECT_THROW(loaded.load(saved), std::exception)
+		<< "a record without \"" << field << "\" loaded";
 }
 
 // Each case is named for its field, so a failure says which one without reading the output.
-const auto name_for_hunger_field = [](const ::testing::TestParamInfo<std::string_view>& info)
+const auto name_for_hunger_field =
+	[](const ::testing::TestParamInfo<std::string_view>& info)
 {
 	return std::string{ info.param };
 };

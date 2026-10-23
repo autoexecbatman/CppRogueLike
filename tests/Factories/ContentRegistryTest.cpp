@@ -18,14 +18,17 @@
 TEST(ContentRegistryTest, ARemovedTileIsGone)
 {
 	ContentRegistry tiles{};
-	tiles.set_tile("registry_trinket", TileRef{ TileSheet::SHEET_POTION, 1, 2 });
+	tiles.set_tile(
+		"registry_trinket",
+		TileRef{ TileSheet::SHEET_POTION, 1, 2 });
 	tiles.set_tile("health_potion", TileRef{ TileSheet::SHEET_POTION, 0, 0 });
 
 	tiles.remove_tile("registry_trinket");
 
 	EXPECT_FALSE(tiles.all_tiles().contains("registry_trinket"));
 	EXPECT_EQ(tiles.get_tile("registry_trinket"), TileRef{});
-	EXPECT_TRUE(tiles.all_tiles().contains("health_potion")) << "removing one sprite removed another";
+	EXPECT_TRUE(tiles.all_tiles().contains("health_potion"))
+		<< "removing one sprite removed another";
 }
 
 // Removing a sprite nobody assigned throws rather than passing silently.

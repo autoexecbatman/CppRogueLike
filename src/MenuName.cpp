@@ -28,8 +28,10 @@ MenuName::MenuName(GameContext& ctx)
 	const int viewportCols = ctx.renderer->get_viewport_cols();
 	const int viewportRows = ctx.renderer->get_viewport_rows();
 
-	const int width = std::min(MENU_MAX_W_TILES, viewportCols - MENU_MARGIN_TILES * 2);
-	assert(width > 0 && "MenuName: viewport is too narrow to hold the name box");
+	const int width =
+		std::min(MENU_MAX_W_TILES, viewportCols - MENU_MARGIN_TILES * 2);
+	assert(
+		width > 0 && "MenuName: viewport is too narrow to hold the name box");
 
 	menu_new(
 		width,
@@ -53,12 +55,18 @@ void MenuName::draw_name_screen()
 	assert(renderer && "MenuName::draw_name_screen called before menu_new");
 	const int tileSize = renderer->get_tile_size();
 	const int textX = (static_cast<int>(menuStartX) + 1) * tileSize;
-	const int firstRowY = static_cast<int>(menuStartY) * tileSize + tileSize + TEXT_TOP_INSET;
+	const int firstRowY =
+		static_cast<int>(menuStartY) * tileSize + tileSize + TEXT_TOP_INSET;
 
-	renderer->draw_text(Vector2D{ textX, firstRowY }, "Name: " + inputText + "_", ColorPairId::WHITE_BLACK);
+	renderer->draw_text(
+		Vector2D{ textX, firstRowY },
+		"Name: " + inputText + "_",
+		ColorPairId::WHITE_BLACK);
 	renderer->draw_text(
 		Vector2D{ textX, firstRowY + TEXT_ROW_PITCH },
-		renderer->fit_text_to_width("[Enter] Confirm  [Esc] Skip", interior_width()),
+		renderer->fit_text_to_width(
+			"[Enter] Confirm  [Esc] Skip",
+			interior_width()),
 		ColorPairId::CYAN_BLACK);
 }
 
@@ -66,8 +74,12 @@ void MenuName::menu(GameContext& ctx)
 {
 	assert(ctx.menuManager && "MenuName::menu: called without a menuManager");
 	assert(ctx.stateManager && "MenuName::menu: called without a stateManager");
-	assert(ctx.playerBlueprint && "MenuName::menu: called without a playerBlueprint");
-	assert(ctx.renderingManager && "MenuName::menu: called without a renderingManager");
+	assert(
+		ctx.playerBlueprint &&
+		"MenuName::menu: called without a playerBlueprint");
+	assert(
+		ctx.renderingManager &&
+		"MenuName::menu: called without a renderingManager");
 
 	if (!initialized)
 	{
@@ -85,7 +97,8 @@ void MenuName::menu(GameContext& ctx)
 		// The field stops at the edge of its box rather than at a character count,
 		// so a wide name cannot draw past the frame.
 		const std::string candidate = inputText + static_cast<char>(charInput);
-		if (renderer->measure_text("Name: " + candidate + "_") <= interior_width())
+		if (renderer->measure_text("Name: " + candidate + "_") <=
+			interior_width())
 		{
 			inputText = candidate;
 		}
@@ -104,7 +117,8 @@ void MenuName::menu(GameContext& ctx)
 
 		case GameKey::ENTER:
 		{
-			ctx.playerBlueprint->name = inputText.empty() ? "Player" : inputText;
+			ctx.playerBlueprint->name =
+				inputText.empty() ? "Player" : inputText;
 			menu_set_run_false();
 			break;
 		}

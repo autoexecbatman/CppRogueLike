@@ -56,11 +56,16 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 				.levelMinimum = params.levelMinimum,
 				.levelMaximum = params.levelMaximum,
 				.levelScaling = params.levelScaling,
-				.createFunc = [id](Vector2D pos, GameContext& ctx)
+				.createFunc =
+					[id](Vector2D pos, GameContext& ctx)
 				{
-					assert(ctx.creatureManager && "spawn_table createFunc[id]: called without a creatureManager");
+					assert(
+						ctx.creatureManager &&
+						"spawn_table createFunc[id]: called without a creatureManager");
 
-					ctx.creatureManager->add_creature(MonsterCreator::create(pos, id, ctx), ctx);
+					ctx.creatureManager->add_creature(
+						MonsterCreator::create(pos, id, ctx),
+						ctx);
 				},
 			});
 	}
@@ -80,13 +85,21 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 				.levelMinimum = params.levelMinimum,
 				.levelMaximum = params.levelMaximum,
 				.levelScaling = params.levelScaling,
-				.createFunc = [key](Vector2D pos, GameContext& ctx)
+				.createFunc =
+					[key](Vector2D pos, GameContext& ctx)
 				{
-					assert(ctx.creatureManager && "spawn_table createFunc[key]: called without a creatureManager");
-					assert(ctx.monsterRegistry && "spawn_table createFunc[key]: called without a monsterRegistry");
+					assert(
+						ctx.creatureManager &&
+						"spawn_table createFunc[key]: called without a creatureManager");
+					assert(
+						ctx.monsterRegistry &&
+						"spawn_table createFunc[key]: called without a monsterRegistry");
 
 					ctx.creatureManager->add_creature(
-						MonsterCreator::create_from_params(pos, ctx.monsterRegistry->get_params(key), ctx),
+						MonsterCreator::create_from_params(
+							pos,
+							ctx.monsterRegistry->get_params(key),
+							ctx),
 						ctx);
 				},
 			});
@@ -94,7 +107,8 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 
 	// The shopkeeper: its record's weight, but a draw spawns one only when the level's
 	// shop roll passes, and a goblin otherwise.
-	const MonsterParams& shopkeeper = monsters.get_standard_monsters().at(MonsterId::SHOPKEEPER);
+	const MonsterParams& shopkeeper =
+		monsters.get_standard_monsters().at(MonsterId::SHOPKEEPER);
 	table.push_back(
 		{
 			.name = shopkeeper.name,
@@ -102,21 +116,35 @@ std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 			.levelMinimum = shopkeeper.levelMinimum,
 			.levelMaximum = shopkeeper.levelMaximum,
 			.levelScaling = shopkeeper.levelScaling,
-			.createFunc = [](Vector2D pos, GameContext& ctx)
+			.createFunc =
+				[](Vector2D pos, GameContext& ctx)
 			{
-				assert(ctx.levelManager && "spawn_table Shopkeeper createFunc: called without a levelManager");
-				assert(ctx.creatureManager && "spawn_table Shopkeeper createFunc: called without a creatureManager");
+				assert(
+					ctx.levelManager &&
+					"spawn_table Shopkeeper createFunc: called without a levelManager");
+				assert(
+					ctx.creatureManager &&
+					"spawn_table Shopkeeper createFunc: called without a creatureManager");
 
 				const int dungeonLevel = ctx.levelManager->get_dungeon_level();
-				if (ShopkeeperFactory::should_spawn_shopkeeper(dungeonLevel, ctx))
+				if (ShopkeeperFactory::should_spawn_shopkeeper(
+						dungeonLevel,
+						ctx))
 				{
-					ctx.creatureManager->add_creature(MonsterCreator::create(pos, MonsterId::SHOPKEEPER, ctx), ctx);
-					ctx.messageSystem->log("Shopkeeper spawned at level " + std::to_string(dungeonLevel));
+					ctx.creatureManager->add_creature(
+						MonsterCreator::create(pos, MonsterId::SHOPKEEPER, ctx),
+						ctx);
+					ctx.messageSystem->log(
+						"Shopkeeper spawned at level " +
+						std::to_string(dungeonLevel));
 				}
 				else
 				{
-					ctx.creatureManager->add_creature(MonsterCreator::create(pos, MonsterId::GOBLIN, ctx), ctx);
-					ctx.messageSystem->log("Shopkeeper spawn failed, spawned Goblin instead");
+					ctx.creatureManager->add_creature(
+						MonsterCreator::create(pos, MonsterId::GOBLIN, ctx),
+						ctx);
+					ctx.messageSystem->log(
+						"Shopkeeper spawn failed, spawned Goblin instead");
 				}
 			},
 		});
@@ -147,21 +175,32 @@ int calculate_weight(const MonsterType& monster, int dungeonLevel)
 		return 0;
 	}
 
-	if (!is_within_levels(dungeonLevel, monster.levelMinimum, monster.levelMaximum))
+	if (!is_within_levels(
+			dungeonLevel,
+			monster.levelMinimum,
+			monster.levelMaximum))
 	{
 		return 0;
 	}
 
-	const float levelFactor = 1.0f + (monster.levelScaling * (dungeonLevel - 1));
+	const float levelFactor =
+		1.0f + (monster.levelScaling * (dungeonLevel - 1));
 	const int weight = static_cast<int>(monster.baseWeight * levelFactor);
 	return std::max(1, weight);
 }
 } // namespace
 
-void MonsterFactory::spawn_random_monster(Vector2D position, int dungeonLevel, GameContext& ctx)
+void MonsterFactory::spawn_random_monster(
+	Vector2D position,
+	int dungeonLevel,
+	GameContext& ctx)
 {
-	assert(ctx.monsterRegistry && "MonsterFactory::spawn_random_monster: called without a monsterRegistry");
-	assert(ctx.dice && "MonsterFactory::spawn_random_monster: called without dice");
+	assert(
+		ctx.monsterRegistry &&
+		"MonsterFactory::spawn_random_monster: called without a monsterRegistry");
+	assert(
+		ctx.dice &&
+		"MonsterFactory::spawn_random_monster: called without dice");
 
 	const std::vector<MonsterType> table = spawn_table(*ctx.monsterRegistry);
 
@@ -195,7 +234,9 @@ void MonsterFactory::spawn_random_monster(Vector2D position, int dungeonLevel, G
 	}
 }
 
-std::vector<MonsterPercentage> MonsterFactory::get_current_distribution(int dungeonLevel, const MonsterRegistry& monsters)
+std::vector<MonsterPercentage> MonsterFactory::get_current_distribution(
+	int dungeonLevel,
+	const MonsterRegistry& monsters)
 {
 	const std::vector<MonsterType> table = spawn_table(monsters);
 	std::vector<MonsterPercentage> distribution;
@@ -214,7 +255,8 @@ std::vector<MonsterPercentage> MonsterFactory::get_current_distribution(int dung
 	{
 		if (weights[index] > 0)
 		{
-			const float percentage = static_cast<float>(weights[index]) / totalWeight * 100.0f;
+			const float percentage =
+				static_cast<float>(weights[index]) / totalWeight * 100.0f;
 			distribution.push_back({ table[index].name, percentage });
 		}
 	}

@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/RoomEditor.cpp",
-      "original": ": rowHeight{ fontSize + 4 }",
-      "mutated": ": rowHeight{ fontSize + 2 }",
+      "original": ":\n\trowHeight{ fontSize + 4 }",
+      "mutated": ":\n\trowHeight{ fontSize +2 }",
       "catches": "a row pitch other than the one the list is drawn at, which was the defect in 0286"
     },
     {

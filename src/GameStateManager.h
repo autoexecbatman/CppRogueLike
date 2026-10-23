@@ -37,7 +37,10 @@ void save_traps(const std::vector<std::unique_ptr<Trap>>& traps, json& output);
 // Example:
 //   load_traps(level, traps, tiles);             // both back, states and attempts intact
 //   load_traps(json::object(), traps, tiles);    // throws: key 'traps' not found
-void load_traps(const json& source, std::vector<std::unique_ptr<Trap>>& traps, const TileConfig& tileConfig);
+void load_traps(
+	const json& source,
+	std::vector<std::unique_ptr<Trap>>& traps,
+	const TileConfig& tileConfig);
 
 // Reads every creature in j["creatures"] into the level, replacing whatever it held. The
 // list is required: a missing "creatures" throws json::out_of_range, and one that is not
@@ -46,7 +49,9 @@ void load_traps(const json& source, std::vector<std::unique_ptr<Trap>>& traps, c
 // Example, a level abandoned with one goblin, loaded from a save of two:
 //   load_creatures(saved, creatures);            // creatures.size() -> 2, the saved two
 //   load_creatures(json::object(), creatures);   // throws: key 'creatures' not found
-void load_creatures(const json& source, std::vector<std::unique_ptr<Creature>>& creatures);
+void load_creatures(
+	const json& source,
+	std::vector<std::unique_ptr<Creature>>& creatures);
 
 // Writes every room on the level into j["rooms"]: an array even when there are none, and
 // every room's col, row, width, height and type.
@@ -71,8 +76,12 @@ void load_rooms(const json& source, std::vector<DungeonRoom>& rooms);
 // Example, a barrel at 1 of its 2 hit points and an editor-stamped pillar:
 //   save_decorations(decorations, level);   // level["decorations"] is an array of two
 //   load_decorations(level, decorations);   // both back, the barrel still at 1
-void save_decorations(const std::vector<std::unique_ptr<Decoration>>& decorations, json& output);
-void load_decorations(const json& source, std::vector<std::unique_ptr<Decoration>>& decorations);
+void save_decorations(
+	const std::vector<std::unique_ptr<Decoration>>& decorations,
+	json& output);
+void load_decorations(
+	const json& source,
+	std::vector<std::unique_ptr<Decoration>>& decorations);
 
 // What became of a Load Game: the game is running, there was no save to read, or the
 // loaders refused the save - deleted, or still on disk because the delete failed.

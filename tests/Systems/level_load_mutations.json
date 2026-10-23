@@ -93,7 +93,7 @@
     },
     {
       "file": "src/GameStateManager.cpp",
-      "original": "\t\t\tthrow std::runtime_error(std::format(\"load_rooms: room type {} is not a RoomType\", savedType));\n",
+      "original": "\t\t\tthrow std::runtime_error(\n\t\t\t\tstd::format(\n\t\t\t\t\t\"load_rooms: room type {} is not a RoomType\",\n\t\t\t\t\tsavedType));\n",
       "mutated": "\t\t\tcontinue;\n",
       "catches": "a room no RoomType names skipped instead of refused"
     },

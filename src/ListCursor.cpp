@@ -7,10 +7,7 @@
 #include <algorithm>
 #include <cassert>
 
-size_t step_within(
-	size_t value,
-	int steps,
-	size_t highest)
+size_t step_within(size_t value, int steps, size_t highest)
 {
 	assert(value <= highest && "step_within: value is above its own bound");
 	if (steps >= 0)
@@ -24,9 +21,7 @@ size_t step_within(
 	return magnitude >= value ? 0 : value - magnitude;
 }
 
-size_t whole_rows_within(
-	int pixels,
-	int rowHeight)
+size_t whole_rows_within(int pixels, int rowHeight)
 {
 	assert(rowHeight > 0 && "whole_rows_within: a row has no height");
 	// A negative extent holds no rows; it is refused before the cast, where it would wrap.
@@ -114,12 +109,13 @@ void ListCursor::select(size_t row)
 	current = row;
 }
 
-void ListCursor::scroll_by(
-	int steps,
-	size_t visibleRows)
+void ListCursor::scroll_by(int steps, size_t visibleRows)
 {
 	// Start from the screen as drawn, which is what makes a notch back from the bottom move at once.
-	firstVisible = step_within(first_visible(visibleRows), steps, max_first_visible(visibleRows));
+	firstVisible = step_within(
+		first_visible(visibleRows),
+		steps,
+		max_first_visible(visibleRows));
 }
 
 void ListCursor::set_row_count(size_t rows)

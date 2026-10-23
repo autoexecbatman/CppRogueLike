@@ -32,19 +32,23 @@ protected:
 	// An item carrying the given registry key and nothing else of interest.
 	static std::unique_ptr<Item> keyed(std::string_view itemKey)
 	{
-		auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{
-																 TileRef{},
-																 std::string{ itemKey },
-																 ColorPairId::WHITE_BLACK,
-															 });
+		auto item = std::make_unique<Item>(
+			Vector2D{ 0, 0 },
+			ActorData{
+				TileRef{},
+				std::string{ itemKey },
+				ColorPairId::WHITE_BLACK,
+			});
 		item->itemKey = itemKey;
 		return item;
 	}
 
 	void pack(std::string_view itemKey)
 	{
-		const auto added = InventoryOperations::add_item(viewer.inventoryData, keyed(itemKey));
-		ASSERT_TRUE(added.has_value()) << "the fixture could not put " << itemKey << " in the pack";
+		const auto added =
+			InventoryOperations::add_item(viewer.inventoryData, keyed(itemKey));
+		ASSERT_TRUE(added.has_value())
+			<< "the fixture could not put " << itemKey << " in the pack";
 	}
 
 	MockGameContext mock{};
@@ -88,9 +92,15 @@ TEST_F(TorchSightTest, ASecondTorchDoesNotStack)
 
 TEST_F(TorchSightTest, ThePredicateReadsTheRegistryKey)
 {
-	EXPECT_FALSE(InventoryOperations::is_carrying(viewer.inventoryData, Vision::TORCH_ITEM_KEY));
+	EXPECT_FALSE(
+		InventoryOperations::is_carrying(
+			viewer.inventoryData,
+			Vision::TORCH_ITEM_KEY));
 	pack(Vision::TORCH_ITEM_KEY);
-	EXPECT_TRUE(InventoryOperations::is_carrying(viewer.inventoryData, Vision::TORCH_ITEM_KEY));
+	EXPECT_TRUE(
+		InventoryOperations::is_carrying(
+			viewer.inventoryData,
+			Vision::TORCH_ITEM_KEY));
 }
 
 TEST_F(TorchSightTest, TheKeyNamesAnItemThatActuallyExists)
@@ -101,7 +111,8 @@ TEST_F(TorchSightTest, TheKeyNamesAnItemThatActuallyExists)
 	// an unknown key, so this asks the registry rather than the test.
 	auto look_up_the_torch = [this]()
 	{
-		[[maybe_unused]] const ItemParams& params = ctx.itemRegistry->get_params(Vision::TORCH_ITEM_KEY);
+		[[maybe_unused]] const ItemParams& params =
+			ctx.itemRegistry->get_params(Vision::TORCH_ITEM_KEY);
 	};
 
 	EXPECT_NO_THROW(look_up_the_torch())

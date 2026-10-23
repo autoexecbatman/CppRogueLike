@@ -75,8 +75,8 @@
     },
     {
       "file": "src/MonsterHitDice.h",
-      "original": "\tconst int target = std::clamp(lowest, MONSTER_HIT_DICE_LOWEST_COUNT, highest_count(hitDice).count);\n",
-      "mutated": "\tconst int target = std::clamp(lowest, 0, highest_count(hitDice).count);\n",
+      "original": "\tconst int target = std::clamp(\n\t\tlowest,\n\t\tMONSTER_HIT_DICE_LOWEST_COUNT,\n\t\thighest_count(hitDice).count);\n",
+      "mutated": "\tconst int target = std::clamp(\n\t\tlowest,0,\n\t\thighest_count(hitDice).count);\n",
       "catches": "the editor lowering a range to count 0"
     },
     {
@@ -87,14 +87,14 @@
     },
     {
       "file": "src/MonsterCreator.cpp",
-      "original": "\tconst int count = params.hitDice.counts.size() == 1\n",
-      "mutated": "\tconst int count = false\n",
+      "original": "\tconst int count = params.hitDice.counts.size() == 1",
+      "mutated": "\tconst int count =false",
       "catches": "a one-count monster that spends a die choosing its count"
     },
     {
       "file": "src/MonsterCreator.cpp",
-      "original": "\t\t: ctx.dice->roll(lowest.count, highest_count(params.hitDice).count);\n",
-      "mutated": "\t\t: lowest.count;\n",
+      "original": "\t\tlowest.count :\n\t\tctx.dice->roll(lowest.count, highest_count(params.hitDice).count);\n",
+      "mutated": "\t\tlowest.count :lowest.count;\n",
       "catches": "a range that always takes its lowest count"
     },
     {

@@ -22,9 +22,10 @@ void load(ContentRegistry& reg, std::string_view path)
 	std::ifstream tilesFile(resolved);
 	if (!tilesFile.is_open())
 	{
-		throw std::runtime_error(std::format(
-			"ContentRegistryIO::load -- cannot open '{}' -- JSON tile data is required",
-			resolved.string()));
+		throw std::runtime_error(
+			std::format(
+				"ContentRegistryIO::load -- cannot open '{}' -- JSON tile data is required",
+				resolved.string()));
 	}
 
 	nlohmann::json root = nlohmann::json::parse(tilesFile);
@@ -55,16 +56,18 @@ void save(const ContentRegistry& reg, std::string_view path)
 	std::ofstream tilesFile(resolved);
 	if (!tilesFile.is_open())
 	{
-		throw std::runtime_error(std::format(
-			"ContentRegistryIO::save -- cannot open '{}' for writing",
-			resolved.string()));
+		throw std::runtime_error(
+			std::format(
+				"ContentRegistryIO::save -- cannot open '{}' for writing",
+				resolved.string()));
 	}
 	tilesFile << root.dump(4);
 	if (tilesFile.fail())
 	{
-		throw std::runtime_error(std::format(
-			"ContentRegistryIO::save -- write failed for '{}'",
-			resolved.string()));
+		throw std::runtime_error(
+			std::format(
+				"ContentRegistryIO::save -- write failed for '{}'",
+				resolved.string()));
 	}
 }
 

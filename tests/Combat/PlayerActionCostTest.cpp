@@ -40,7 +40,8 @@ protected:
 
 	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 0, 0 }) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ 0, 0 }) };
 };
 
 // An ordinary player pays an action's stated cost, and the turn opens. The second

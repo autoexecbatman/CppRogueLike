@@ -9,11 +9,15 @@
 
 #include "FovMap.h"
 
-FovMap::FovMap(int gridWidth, int gridHeight)
-	: width(gridWidth), height(gridHeight)
+FovMap::FovMap(int gridWidth, int gridHeight) :
+	width(gridWidth),
+	height(gridHeight)
 {
-	assert(gridWidth >= 0 && gridHeight >= 0 && "FovMap: a grid side is negative");
-	cells.resize(static_cast<std::size_t>(gridWidth) * static_cast<std::size_t>(gridHeight));
+	assert(
+		gridWidth >= 0 && gridHeight >= 0 && "FovMap: a grid side is negative");
+	cells.resize(
+		static_cast<std::size_t>(gridWidth) *
+		static_cast<std::size_t>(gridHeight));
 }
 
 void FovMap::set_properties(int col, int row, FovProperties properties) noexcept
@@ -55,8 +59,11 @@ bool FovMap::in_bounds(int col, int row) const noexcept
 
 std::size_t FovMap::cell_index(int col, int row) const noexcept
 {
-	assert(in_bounds(col, row) && "FovMap::cell_index: the caller did not check in_bounds");
-	return static_cast<std::size_t>(row) * static_cast<std::size_t>(width) + static_cast<std::size_t>(col);
+	assert(
+		in_bounds(col, row) &&
+		"FovMap::cell_index: the caller did not check in_bounds");
+	return static_cast<std::size_t>(row) * static_cast<std::size_t>(width) +
+		static_cast<std::size_t>(col);
 }
 
 void FovMap::compute_fov(int col, int row, int radius)
@@ -114,8 +121,10 @@ void FovMap::scan_octant(
 
 		for (int colOffset = -depth; colOffset <= 0; ++colOffset)
 		{
-			float leftSlope = (static_cast<float>(colOffset) - 0.5f) / (static_cast<float>(rowOffset) + 0.5f);
-			float rightSlope = (static_cast<float>(colOffset) + 0.5f) / (static_cast<float>(rowOffset) - 0.5f);
+			float leftSlope = (static_cast<float>(colOffset) - 0.5f) /
+				(static_cast<float>(rowOffset) + 0.5f);
+			float rightSlope = (static_cast<float>(colOffset) + 0.5f) /
+				(static_cast<float>(rowOffset) - 0.5f);
 
 			if (start < rightSlope)
 			{
@@ -127,17 +136,22 @@ void FovMap::scan_octant(
 				break;
 			}
 
-			const int col = originCol + colOffset * transform.colPerColOffset + rowOffset * transform.colPerRowOffset;
-			const int row = originRow + colOffset * transform.rowPerColOffset + rowOffset * transform.rowPerRowOffset;
+			const int col = originCol + colOffset * transform.colPerColOffset +
+				rowOffset * transform.colPerRowOffset;
+			const int row = originRow + colOffset * transform.rowPerColOffset +
+				rowOffset * transform.rowPerRowOffset;
 
-			if (in_bounds(col, row) && colOffset * colOffset + rowOffset * rowOffset <= radius * radius)
+			if (in_bounds(col, row) &&
+				colOffset * colOffset + rowOffset * rowOffset <=
+					radius * radius)
 			{
 				cells[cell_index(col, row)].visible = true;
 			}
 
 			if (blocked)
 			{
-				if (!in_bounds(col, row) || !cells[cell_index(col, row)].transparent)
+				if (!in_bounds(col, row) ||
+					!cells[cell_index(col, row)].transparent)
 				{
 					nextStart = rightSlope;
 				}
@@ -147,12 +161,21 @@ void FovMap::scan_octant(
 					start = nextStart;
 				}
 			}
-			else if (!in_bounds(col, row) || !cells[cell_index(col, row)].transparent)
+			else if (
+				!in_bounds(col, row) ||
+				!cells[cell_index(col, row)].transparent)
 			{
 				blocked = true;
 				if (depth < radius)
 				{
-					scan_octant(originCol, originRow, radius, depth + 1, start, leftSlope, transform);
+					scan_octant(
+						originCol,
+						originRow,
+						radius,
+						depth + 1,
+						start,
+						leftSlope,
+						transform);
 				}
 				nextStart = rightSlope;
 			}

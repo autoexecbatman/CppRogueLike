@@ -27,8 +27,8 @@
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\tgrant_buff(creature, type, value, expiry_time(currentTime, durationRounds), application);",
-      "mutated": "\tgrant_buff(creature, type, value, expiry_time(0, durationRounds), application);",
+      "original": "\tgrant_buff(\n\t\tcreature,\n\t\ttype,\n\t\tvalue,\n\t\texpiry_time(currentTime, durationRounds),\n\t\tapplication);",
+      "mutated": "\tgrant_buff(\n\t\tcreature,\n\t\ttype,\n\t\tvalue,\n\t\texpiry_time(0, durationRounds),\n\t\tapplication);",
       "catches": "a spell cast mid-game expiring relative to the start of it, so it lands already over"
     },
     {
@@ -51,8 +51,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tai = std::make_unique<AiMonsterConfused>(expiry_time(currentTime, durationRounds), std::move(ai));",
-      "mutated": "\tai = std::make_unique<AiMonsterConfused>(expiry_time(currentTime, durationRounds * 2), std::move(ai));",
+      "original": "\tai = std::make_unique<AiMonsterConfused>(\n\t\texpiry_time(currentTime, durationRounds),\n\t\tstd::move(ai));",
+      "mutated": "\tai = std::make_unique<AiMonsterConfused>(\n\t\texpiry_time(currentTime, durationRounds * 2),\n\t\tstd::move(ai));",
       "catches": "a confusion lasting twice the rounds it was given"
     },
     {

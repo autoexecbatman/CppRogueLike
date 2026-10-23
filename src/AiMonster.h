@@ -14,12 +14,18 @@ private:
 	void decide_action(Creature& owner, GameContext& ctx);
 
 protected:
-	virtual void move_or_attack(Creature& owner, Creature& target, GameContext& ctx);
+	virtual void move_or_attack(
+		Creature& owner,
+		Creature& target,
+		GameContext& ctx);
 
 public:
 	void update(Creature& owner, GameContext& ctx) override;
 
-	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::MONSTER; }
+	[[nodiscard]] AiType get_ai_type() const noexcept override
+	{
+		return AiType::MONSTER;
+	}
 
 	void load(const json& source) override;
 	void save(json& output) override;

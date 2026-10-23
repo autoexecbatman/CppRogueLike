@@ -39,7 +39,9 @@ namespace InventoryActions
 //   labels_for_row(InventoryScreen::EQUIPMENT, true);    // -> Unequip, Drop, Cancel
 //   labels_for_row(InventoryScreen::EQUIPMENT, false);   // -> Browse, Cancel
 //   labels_for_row(InventoryScreen::BACKPACK, false);    // -> {}, a category heading
-[[nodiscard]] std::vector<std::string> labels_for_row(InventoryScreen screen, bool rowHoldsItem);
+[[nodiscard]] std::vector<std::string> labels_for_row(
+	InventoryScreen screen,
+	bool rowHoldsItem);
 
 // Where one pane tab sits on the tab row.
 struct TabBox
@@ -60,7 +62,10 @@ struct TabBox
 // Example:
 //   tab_at(middleOfTheBackpackTab, tabRowY, renderer);   // -> BACKPACK
 //   tab_at(middleOfTheBackpackTab, aContentRowY, r);     // -> nothing, wrong row
-[[nodiscard]] std::optional<InventoryScreen> tab_at(int pixelX, int pixelY, const Renderer& renderer);
+[[nodiscard]] std::optional<InventoryScreen> tab_at(
+	int pixelX,
+	int pixelY,
+	const Renderer& renderer);
 
 // The pane after this one, wrapping. Tab steps through the panes with the keyboard the
 // way clicking steps through them with the mouse.
@@ -184,7 +189,10 @@ private:
 	void rebuild_item_list(const Player& player, GameContext& ctx);
 	// Whether this item may go in this slot. A worn item names its slot in the data and
 	// that answer is the only one; the kinds that name none are sorted by what they are.
-	bool item_fits_slot(const Item& item, EquipmentSlot slot, const GameContext& ctx) const;
+	bool item_fits_slot(
+		const Item& item,
+		EquipmentSlot slot,
+		const GameContext& ctx) const;
 	bool is_usable_category(ItemCategory cat) const;
 
 	// Rendering (all use Renderer via GameContext)

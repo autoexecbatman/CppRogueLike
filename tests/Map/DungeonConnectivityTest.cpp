@@ -85,7 +85,8 @@ protected:
 		prefabs.load(Paths::PREFABS);
 		// A loader that silently opens nothing leaves this suite measuring a generator
 		// no player runs - the failure that kept CI red for 38 pushes, one layer down.
-		ASSERT_GT(prefabs.count(), 0) << "no prefabs loaded; every room would be a bare box";
+		ASSERT_GT(prefabs.count(), 0)
+			<< "no prefabs loaded; every room would be a bare box";
 
 		player = std::make_unique<Player>(Vector2D{ 1, 1 });
 		player->experienceReward = std::make_unique<ExperienceReward>(0);
@@ -123,10 +124,7 @@ protected:
 
 	// Where the player actually stands. A room's centre is geometry, not floor - the moat
 	// prefab puts a wall block straight through the middle of its room.
-	Vector2D player_start() const
-	{
-		return player->position;
-	}
+	Vector2D player_start() const { return player->position; }
 
 	MockGameContext mock{};
 	GameContext ctx{};
@@ -156,7 +154,8 @@ TEST_F(DungeonConnectivityTest, EveryCarvedTileIsReachableFromTheEntrance)
 		ASSERT_FALSE(rooms.empty()) << "the generator produced no rooms at all";
 
 		const int stranded = map.count_unreachable_tiles(player_start());
-		ASSERT_GE(stranded, 0) << "the player was left standing somewhere that is not a tile";
+		ASSERT_GE(stranded, 0)
+			<< "the player was left standing somewhere that is not a tile";
 
 		if (stranded > 0)
 		{
@@ -166,7 +165,8 @@ TEST_F(DungeonConnectivityTest, EveryCarvedTileIsReachableFromTheEntrance)
 	}
 
 	EXPECT_EQ(strandedMaps, 0)
-		<< strandedMaps << " of " << DUNGEONS << " dungeons sealed carved tiles inside rock; "
+		<< strandedMaps << " of " << DUNGEONS
+		<< " dungeons sealed carved tiles inside rock; "
 		<< "the worst left " << worstStranded << " of them";
 }
 
@@ -190,12 +190,17 @@ TEST_F(DungeonConnectivityTest, WaterOnlyEverReplacesFloorTheRoomCarved)
 					continue;
 				}
 				const bool walledIn =
-					map.get_tile_type(Vector2D{ col + 1, row }) == TileType::WALL &&
-					map.get_tile_type(Vector2D{ col - 1, row }) == TileType::WALL &&
-					map.get_tile_type(Vector2D{ col, row + 1 }) == TileType::WALL &&
-					map.get_tile_type(Vector2D{ col, row - 1 }) == TileType::WALL;
+					map.get_tile_type(Vector2D{ col + 1, row }) ==
+						TileType::WALL &&
+					map.get_tile_type(Vector2D{ col - 1, row }) ==
+						TileType::WALL &&
+					map.get_tile_type(Vector2D{ col, row + 1 }) ==
+						TileType::WALL &&
+					map.get_tile_type(Vector2D{ col, row - 1 }) ==
+						TileType::WALL;
 				ASSERT_FALSE(walledIn)
-					<< "water at " << col << "," << row << " is sealed in rock on all four sides";
+					<< "water at " << col << "," << row
+					<< " is sealed in rock on all four sides";
 			}
 		}
 	}
@@ -237,7 +242,8 @@ TEST_F(DungeonConnectivityTest, EveryTileACostMapReachesLeadsDownToTheGoal)
 				for (int col = 1; col < MAP_WIDTH - 1; ++col)
 				{
 					const Vector2D tile{ col, row };
-					const std::optional<int> cost = mock.pathfinder.cost_to(goal, tile, mobility, ctx);
+					const std::optional<int> cost =
+						mock.pathfinder.cost_to(goal, tile, mobility, ctx);
 					if (!cost || tile == goal)
 					{
 						continue;
@@ -253,8 +259,12 @@ TEST_F(DungeonConnectivityTest, EveryTileACostMapReachesLeadsDownToTheGoal)
 						for (int colStep = -1; colStep <= 1; ++colStep)
 						{
 							const Vector2D next{ col + colStep, row + rowStep };
-							const std::optional<int> nextCost = mock.pathfinder.cost_to(goal, next, mobility, ctx);
-							const bool isEnterable = next == goal || Pathfinding::step_cost(next, mobility, ctx).has_value();
+							const std::optional<int> nextCost =
+								mock.pathfinder
+									.cost_to(goal, next, mobility, ctx);
+							const bool isEnterable = next == goal ||
+								Pathfinding::step_cost(next, mobility, ctx)
+									.has_value();
 							if (nextCost && *nextCost < *cost && isEnterable)
 							{
 								hasWayDown = true;
@@ -270,8 +280,10 @@ TEST_F(DungeonConnectivityTest, EveryTileACostMapReachesLeadsDownToTheGoal)
 		}
 	}
 
-	EXPECT_EQ(unenterable, 0) << "a cost map reached tiles its own mobility may not enter";
-	EXPECT_EQ(deadEnds, 0) << "a cost map left tiles with no way down a monster may take";
+	EXPECT_EQ(unenterable, 0)
+		<< "a cost map reached tiles its own mobility may not enter";
+	EXPECT_EQ(deadEnds, 0)
+		<< "a cost map left tiles with no way down a monster may take";
 }
 
 // Nothing a level is generated with stands in water, because the character a game starts
@@ -302,7 +314,8 @@ TEST_F(DungeonConnectivityTest, NothingIsGeneratedStandingInWater)
 		wetPlayers += map.is_water(player_start()) ? 1 : 0;
 	}
 
-	EXPECT_EQ(wetBarrels, 0) << "barrels generated in water across " << DUNGEONS << " dungeons";
+	EXPECT_EQ(wetBarrels, 0)
+		<< "barrels generated in water across " << DUNGEONS << " dungeons";
 	EXPECT_EQ(wetItems, 0) << "items generated in water";
 	EXPECT_EQ(wetStairs, 0) << "stairs generated in water";
 	EXPECT_EQ(wetPlayers, 0) << "a player started in water";
@@ -326,7 +339,8 @@ TEST_F(DungeonConnectivityTest, EveryDungeonIsRingedByWall)
 	{
 		Map map{ MAP_WIDTH, MAP_HEIGHT };
 		generate_into(map, seed);
-		ASSERT_TRUE(map.has_wall_border()) << "seed " << seed << " carved into the map's edge";
+		ASSERT_TRUE(map.has_wall_border())
+			<< "seed " << seed << " carved into the map's edge";
 	}
 }
 
@@ -344,11 +358,12 @@ TEST_F(DungeonConnectivityTest, FloorOnAnyEdgeBreaksTheRing)
 	{
 		Map map{ MAP_WIDTH, MAP_HEIGHT };
 		map.init_tiles();
-		ASSERT_TRUE(map.has_wall_border()) << "a map of solid rock is ringed by wall";
+		ASSERT_TRUE(map.has_wall_border())
+			<< "a map of solid rock is ringed by wall";
 
 		map.set_tile(edgeTile, TileType::FLOOR);
-		EXPECT_FALSE(map.has_wall_border())
-			<< "floor at (" << edgeTile.x << "," << edgeTile.y << ") was not seen";
+		EXPECT_FALSE(map.has_wall_border()) << "floor at (" << edgeTile.x << ","
+											<< edgeTile.y << ") was not seen";
 	}
 }
 

@@ -172,8 +172,14 @@ struct DamageInfo
 	DamageType damageType; // Type of damage for resistance calculations
 
 	// Constructors
-	DamageInfo()
-		: dice{ 1, 2, 0 }, minDamage(1), maxDamage(2), displayRoll("1d2"), damageType(DamageType::PHYSICAL) {}
+	DamageInfo() :
+		dice{ 1, 2, 0 },
+		minDamage(1),
+		maxDamage(2),
+		displayRoll("1d2"),
+		damageType(DamageType::PHYSICAL)
+	{
+	}
 
 	// From the dice alone: the display and the range are derived, so there is no
 	// second copy of either to disagree. This is what an editor holds - dice -
@@ -182,8 +188,12 @@ struct DamageInfo
 	// Example:
 	//   DamageInfo{ DiceExpr{ 2, 4, 0 }, DamageType::FIRE }.displayRoll;   // -> "2d4"
 	//   DamageInfo{ DiceExpr{ 2, 4, 0 }, DamageType::FIRE }.maxDamage;     // -> 8
-	DamageInfo(const DiceExpr& rolled, DamageType type)
-		: dice(rolled), minDamage(dice.min_total()), maxDamage(dice.max_total()), displayRoll(to_text(dice)), damageType(type)
+	DamageInfo(const DiceExpr& rolled, DamageType type) :
+		dice(rolled),
+		minDamage(dice.min_total()),
+		maxDamage(dice.max_total()),
+		displayRoll(to_text(dice)),
+		damageType(type)
 	{
 	}
 
@@ -192,8 +202,8 @@ struct DamageInfo
 	// Example:
 	//   DamageInfo{ "2d4", DamageType::FIRE }.minDamage;   // -> 2
 	//   DamageInfo{ "2d4", DamageType::FIRE }.maxDamage;   // -> 8
-	DamageInfo(const std::string& display, DamageType type)
-		: DamageInfo(parse_dice_expression(display), type)
+	DamageInfo(const std::string& display, DamageType type) :
+		DamageInfo(parse_dice_expression(display), type)
 	{
 	}
 
@@ -203,10 +213,7 @@ struct DamageInfo
 	// Example, dice forced to 6 and 6:
 	//   DamageInfo{ "2d6", DamageType::PHYSICAL }.roll_damage(&rng);   // -> 12
 	//   DamageInfo{ "5", DamageType::PHYSICAL }.roll_damage(&rng);     // -> 5
-	int roll_damage(RandomDice* rng) const
-	{
-		return roll_dice(rng, dice);
-	}
+	int roll_damage(RandomDice* rng) const { return roll_dice(rng, dice); }
 
 	int get_average_damage() const { return (minDamage + maxDamage) / 2; }
 
@@ -221,7 +228,10 @@ struct DamageInfo
 	//   sword.with_enhancement(2).with_enhancement(3).displayRoll;   // -> "1d8+5"
 	[[nodiscard]] DamageInfo with_enhancement(int damage_bonus) const
 	{
-		return DamageInfo{ DiceExpr{ dice.num, dice.sides, dice.bonus + damage_bonus }, damageType };
+		return DamageInfo{
+			DiceExpr{ dice.num, dice.sides, dice.bonus + damage_bonus },
+			damageType
+		};
 	}
 
 	// Utility functions

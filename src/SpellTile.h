@@ -26,6 +26,8 @@
 class SpellTile : public TileFeature
 {
 public:
-	SpellTile(Vector2D position, ActorData data)
-		: TileFeature(position, data) {}
+	SpellTile(Vector2D position, ActorData data) :
+		TileFeature(position, data)
+	{
+	}
 };

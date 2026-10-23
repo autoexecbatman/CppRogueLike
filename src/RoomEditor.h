@@ -228,8 +228,14 @@ private:
 		const Renderer& renderer,
 		int mousePx,
 		int mousePy) const;
-	[[nodiscard]] std::optional<size_t> screen_to_list_index(const Renderer& renderer, int mousePx, int mousePy) const;
-	[[nodiscard]] std::optional<size_t> screen_to_palette_index(const Renderer& renderer, int mousePx, int mousePy) const;
+	[[nodiscard]] std::optional<size_t> screen_to_list_index(
+		const Renderer& renderer,
+		int mousePx,
+		int mousePy) const;
+	[[nodiscard]] std::optional<size_t> screen_to_palette_index(
+		const Renderer& renderer,
+		int mousePx,
+		int mousePy) const;
 	[[nodiscard]] TileRef symbol_tile_id(char symbol) const;
 	[[nodiscard]] TileRef canvas_tile_id(int col, int row) const;
 	[[nodiscard]] int canvas_wall_mask(int col, int row) const;
@@ -272,5 +278,8 @@ public:
 	void commit_symbol_tile(char symbol, TileRef tile);
 
 	// The status line's text, the last thing an action reported.
-	[[nodiscard]] const std::string& status() const noexcept { return statusMsg; }
+	[[nodiscard]] const std::string& status() const noexcept
+	{
+		return statusMsg;
+	}
 };

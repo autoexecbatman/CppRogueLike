@@ -93,10 +93,7 @@ const std::vector<std::vector<int>> PRIEST_TABLE_24 = {
 class SpellProgressionTest : public ::testing::Test
 {
 protected:
-	void SetUp() override
-	{
-		dataManager.load_all_data(messages);
-	}
+	void SetUp() override { dataManager.load_all_data(messages); }
 
 	static constexpr int UNGATED_WISDOM = 18;
 
@@ -108,7 +105,8 @@ TEST_F(SpellProgressionTest, TheWizardTableIsTableTwentyOneToTwentiethLevel)
 {
 	for (int level = 1; level <= 20; ++level)
 	{
-		EXPECT_EQ(SpellSystem::progression_slots(CasterClass::WIZARD, level),
+		EXPECT_EQ(
+			SpellSystem::progression_slots(CasterClass::WIZARD, level),
 			WIZARD_TABLE_21.at(static_cast<std::size_t>(level) - 1))
 			<< "wizard level " << level;
 	}
@@ -118,7 +116,8 @@ TEST_F(SpellProgressionTest, ThePriestTableIsTableTwentyFourToTwentiethLevel)
 {
 	for (int level = 1; level <= 20; ++level)
 	{
-		EXPECT_EQ(SpellSystem::progression_slots(CasterClass::CLERIC, level),
+		EXPECT_EQ(
+			SpellSystem::progression_slots(CasterClass::CLERIC, level),
 			PRIEST_TABLE_24.at(static_cast<std::size_t>(level) - 1))
 			<< "priest level " << level;
 	}
@@ -130,11 +129,23 @@ TEST_F(SpellProgressionTest, TheHighestSpellLevelIsWhatTheTableGrants)
 {
 	for (int level = 1; level <= 20; ++level)
 	{
-		EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, level, UNGATED_WISDOM, dataManager),
-			static_cast<int>(WIZARD_TABLE_21.at(static_cast<std::size_t>(level) - 1).size()))
+		EXPECT_EQ(
+			SpellSystem::highest_spell_level(
+				CasterClass::WIZARD,
+				level,
+				UNGATED_WISDOM,
+				dataManager),
+			static_cast<int>(
+				WIZARD_TABLE_21.at(static_cast<std::size_t>(level) - 1).size()))
 			<< "wizard level " << level;
-		EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::CLERIC, level, UNGATED_WISDOM, dataManager),
-			static_cast<int>(PRIEST_TABLE_24.at(static_cast<std::size_t>(level) - 1).size()))
+		EXPECT_EQ(
+			SpellSystem::highest_spell_level(
+				CasterClass::CLERIC,
+				level,
+				UNGATED_WISDOM,
+				dataManager),
+			static_cast<int>(
+				PRIEST_TABLE_24.at(static_cast<std::size_t>(level) - 1).size()))
 			<< "priest level " << level;
 	}
 }
@@ -144,23 +155,79 @@ TEST_F(SpellProgressionTest, TheHighestSpellLevelIsWhatTheTableGrants)
 // there - a seventh at 13th where the book gives it at 14th, and so on.
 TEST_F(SpellProgressionTest, AWizardReachesSixthLevelSpellsAtTwelfthNotEleventh)
 {
-	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, 10, UNGATED_WISDOM, dataManager), 5);
-	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, 11, UNGATED_WISDOM, dataManager), 5) << "11th grants no new level";
-	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, 12, UNGATED_WISDOM, dataManager), 6);
-	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, 13, UNGATED_WISDOM, dataManager), 6) << "13th grants no new level";
-	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, 14, UNGATED_WISDOM, dataManager), 7);
+	EXPECT_EQ(
+		SpellSystem::highest_spell_level(
+			CasterClass::WIZARD,
+			10,
+			UNGATED_WISDOM,
+			dataManager),
+		5);
+	EXPECT_EQ(
+		SpellSystem::highest_spell_level(
+			CasterClass::WIZARD,
+			11,
+			UNGATED_WISDOM,
+			dataManager),
+		5)
+		<< "11th grants no new level";
+	EXPECT_EQ(
+		SpellSystem::highest_spell_level(
+			CasterClass::WIZARD,
+			12,
+			UNGATED_WISDOM,
+			dataManager),
+		6);
+	EXPECT_EQ(
+		SpellSystem::highest_spell_level(
+			CasterClass::WIZARD,
+			13,
+			UNGATED_WISDOM,
+			dataManager),
+		6)
+		<< "13th grants no new level";
+	EXPECT_EQ(
+		SpellSystem::highest_spell_level(
+			CasterClass::WIZARD,
+			14,
+			UNGATED_WISDOM,
+			dataManager),
+		7);
 }
 
 // A caster past the table's last row keeps what 20th level gave it rather than
 // growing forever, and a non-caster has nothing at any level.
 TEST_F(SpellProgressionTest, PastTwentiethTheTableHoldsAndANonCasterHasNothing)
 {
-	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, 25, UNGATED_WISDOM, dataManager),
-		SpellSystem::highest_spell_level(CasterClass::WIZARD, 20, UNGATED_WISDOM, dataManager));
-	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::CLERIC, 25, UNGATED_WISDOM, dataManager),
-		SpellSystem::highest_spell_level(CasterClass::CLERIC, 20, UNGATED_WISDOM, dataManager));
+	EXPECT_EQ(
+		SpellSystem::highest_spell_level(
+			CasterClass::WIZARD,
+			25,
+			UNGATED_WISDOM,
+			dataManager),
+		SpellSystem::highest_spell_level(
+			CasterClass::WIZARD,
+			20,
+			UNGATED_WISDOM,
+			dataManager));
+	EXPECT_EQ(
+		SpellSystem::highest_spell_level(
+			CasterClass::CLERIC,
+			25,
+			UNGATED_WISDOM,
+			dataManager),
+		SpellSystem::highest_spell_level(
+			CasterClass::CLERIC,
+			20,
+			UNGATED_WISDOM,
+			dataManager));
 
-	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::NONE, 10, UNGATED_WISDOM, dataManager), 0);
+	EXPECT_EQ(
+		SpellSystem::highest_spell_level(
+			CasterClass::NONE,
+			10,
+			UNGATED_WISDOM,
+			dataManager),
+		0);
 	EXPECT_TRUE(SpellSystem::progression_slots(CasterClass::NONE, 10).empty());
 }
 
@@ -183,7 +250,10 @@ protected:
 	}
 
 	// Wisdom matters to a priest: Table 24's sixth and seventh rows are footnoted.
-	int announced_level_at(CreatureClass creatureClass, int newLevel, int wisdom)
+	int announced_level_at(
+		CreatureClass creatureClass,
+		int newLevel,
+		int wisdom)
 	{
 		Creature caster{
 			Vector2D{ 0, 0 },
@@ -199,7 +269,10 @@ protected:
 		const std::size_t before = mock.messages.get_stored_message_count();
 		LevelUpSystem::apply_level_up_benefits(caster, newLevel, ctx);
 
-		for (std::size_t index = before; index < mock.messages.get_stored_message_count(); ++index)
+		for (
+			std::size_t index = before;
+			index < mock.messages.get_stored_message_count();
+			++index)
 		{
 			const auto& parts = mock.messages.get_attack_message_at(index);
 			bool isSpellMessage = false;
@@ -217,7 +290,8 @@ protected:
 			for (const auto& part : parts)
 			{
 				const std::string& text = part.text;
-				if (!text.empty() && std::isdigit(static_cast<unsigned char>(text.front())))
+				if (!text.empty() &&
+					std::isdigit(static_cast<unsigned char>(text.front())))
 				{
 					return std::stoi(text);
 				}
@@ -227,7 +301,10 @@ protected:
 	}
 
 	// Whether any message this level-up produced contains that text.
-	bool said(CreatureClass creatureClass, int newLevel, std::string_view fragment)
+	bool said(
+		CreatureClass creatureClass,
+		int newLevel,
+		std::string_view fragment)
 	{
 		Creature caster{
 			Vector2D{ 0, 0 },
@@ -243,7 +320,10 @@ protected:
 		const std::size_t before = mock.messages.get_stored_message_count();
 		LevelUpSystem::apply_level_up_benefits(caster, newLevel, ctx);
 
-		for (std::size_t index = before; index < mock.messages.get_stored_message_count(); ++index)
+		for (
+			std::size_t index = before;
+			index < mock.messages.get_stored_message_count();
+			++index)
 		{
 			for (const auto& part : mock.messages.get_attack_message_at(index))
 			{
@@ -266,9 +346,11 @@ protected:
 // formula this replaced announced one at every odd level for ever.
 TEST_F(SpellAnnouncementTest, AWizardIsToldOnlyWhenTheTableOpensALevel)
 {
-	EXPECT_EQ(announced_level_at(CreatureClass::WIZARD, 11), 0) << "11th opens nothing";
+	EXPECT_EQ(announced_level_at(CreatureClass::WIZARD, 11), 0)
+		<< "11th opens nothing";
 	EXPECT_EQ(announced_level_at(CreatureClass::WIZARD, 12), 6);
-	EXPECT_EQ(announced_level_at(CreatureClass::WIZARD, 13), 0) << "13th opens nothing";
+	EXPECT_EQ(announced_level_at(CreatureClass::WIZARD, 13), 0)
+		<< "13th opens nothing";
 	EXPECT_EQ(announced_level_at(CreatureClass::WIZARD, 14), 7);
 }
 
@@ -276,7 +358,8 @@ TEST_F(SpellAnnouncementTest, AWizardIsToldOnlyWhenTheTableOpensALevel)
 TEST_F(SpellAnnouncementTest, AClericIsToldOnTheLevelsTableTwentyFourOpens)
 {
 	EXPECT_EQ(announced_level_at(CreatureClass::CLERIC, 11), 6);
-	EXPECT_EQ(announced_level_at(CreatureClass::CLERIC, 12), 0) << "12th opens nothing";
+	EXPECT_EQ(announced_level_at(CreatureClass::CLERIC, 12), 0)
+		<< "12th opens nothing";
 	EXPECT_EQ(announced_level_at(CreatureClass::CLERIC, 14), 7);
 }
 
@@ -284,9 +367,11 @@ TEST_F(SpellAnnouncementTest, AClericIsToldOnTheLevelsTableTwentyFourOpens)
 // about them however high its level goes.
 TEST_F(SpellAnnouncementTest, APriestTooUnwiseForASpellLevelIsNotToldAboutIt)
 {
-	EXPECT_EQ(announced_level_at(CreatureClass::CLERIC, 11, 16), 0) << "the sixth needs Wisdom 17";
+	EXPECT_EQ(announced_level_at(CreatureClass::CLERIC, 11, 16), 0)
+		<< "the sixth needs Wisdom 17";
 	EXPECT_EQ(announced_level_at(CreatureClass::CLERIC, 11, 17), 6);
-	EXPECT_EQ(announced_level_at(CreatureClass::CLERIC, 14, 17), 0) << "the seventh needs Wisdom 18";
+	EXPECT_EQ(announced_level_at(CreatureClass::CLERIC, 14, 17), 0)
+		<< "the seventh needs Wisdom 18";
 	EXPECT_EQ(announced_level_at(CreatureClass::CLERIC, 14, 18), 7);
 }
 
@@ -296,7 +381,8 @@ TEST_F(SpellAnnouncementTest, AFighterIsNeverToldAboutSpells)
 {
 	for (const int level : { 3, 6, 9, 12 })
 	{
-		EXPECT_EQ(announced_level_at(CreatureClass::FIGHTER, level), 0) << "level " << level;
+		EXPECT_EQ(announced_level_at(CreatureClass::FIGHTER, level), 0)
+			<< "level " << level;
 	}
 }
 
@@ -307,9 +393,12 @@ TEST_F(SpellAnnouncementTest, NoLevelClaimsAnImprovementThatDidNotHappen)
 {
 	for (const int level : { 2, 3, 6, 9, 12 })
 	{
-		EXPECT_FALSE(said(CreatureClass::FIGHTER, level, "martial prowess")) << "level " << level;
-		EXPECT_FALSE(said(CreatureClass::CLERIC, level, "divine power")) << "level " << level;
-		EXPECT_FALSE(said(CreatureClass::WIZARD, level, "arcane knowledge")) << "level " << level;
+		EXPECT_FALSE(said(CreatureClass::FIGHTER, level, "martial prowess"))
+			<< "level " << level;
+		EXPECT_FALSE(said(CreatureClass::CLERIC, level, "divine power"))
+			<< "level " << level;
+		EXPECT_FALSE(said(CreatureClass::WIZARD, level, "arcane knowledge"))
+			<< "level " << level;
 	}
 }
 
@@ -323,10 +412,7 @@ TEST_F(SpellAnnouncementTest, NoLevelClaimsAnImprovementThatDidNotHappen)
 class PriestSpellsTest : public ::testing::Test
 {
 protected:
-	void SetUp() override
-	{
-		dataManager.load_all_data(messages);
-	}
+	void SetUp() override { dataManager.load_all_data(messages); }
 
 	DataManager dataManager{};
 	MessageSystem messages{};
@@ -336,7 +422,8 @@ protected:
 // cumulative: at Wisdom 15 the two 1st-level bonuses come from rows 13 and 14.
 TEST_F(PriestSpellsTest, WisdomFifteenGivesTwoFirstLevelBonusesAndOneSecond)
 {
-	const std::vector<int> bonus = SpellSystem::bonus_priest_spells(15, dataManager);
+	const std::vector<int> bonus =
+		SpellSystem::bonus_priest_spells(15, dataManager);
 
 	ASSERT_GE(bonus.size(), 2u);
 	EXPECT_EQ(bonus.at(0), 2) << "two 1st-level bonus spells";
@@ -345,15 +432,28 @@ TEST_F(PriestSpellsTest, WisdomFifteenGivesTwoFirstLevelBonusesAndOneSecond)
 
 TEST_F(PriestSpellsTest, BonusSpellsAccumulateRowByRow)
 {
-	EXPECT_TRUE(SpellSystem::bonus_priest_spells(12, dataManager).empty()) << "nothing below 13";
-	EXPECT_EQ(SpellSystem::bonus_priest_spells(13, dataManager), (std::vector<int>{ 1 }));
-	EXPECT_EQ(SpellSystem::bonus_priest_spells(14, dataManager), (std::vector<int>{ 2 }));
-	EXPECT_EQ(SpellSystem::bonus_priest_spells(16, dataManager), (std::vector<int>{ 2, 2 }));
-	EXPECT_EQ(SpellSystem::bonus_priest_spells(17, dataManager), (std::vector<int>{ 2, 2, 1 }));
-	EXPECT_EQ(SpellSystem::bonus_priest_spells(18, dataManager), (std::vector<int>{ 2, 2, 1, 1 }));
+	EXPECT_TRUE(SpellSystem::bonus_priest_spells(12, dataManager).empty())
+		<< "nothing below 13";
+	EXPECT_EQ(
+		SpellSystem::bonus_priest_spells(13, dataManager),
+		(std::vector<int>{ 1 }));
+	EXPECT_EQ(
+		SpellSystem::bonus_priest_spells(14, dataManager),
+		(std::vector<int>{ 2 }));
+	EXPECT_EQ(
+		SpellSystem::bonus_priest_spells(16, dataManager),
+		(std::vector<int>{ 2, 2 }));
+	EXPECT_EQ(
+		SpellSystem::bonus_priest_spells(17, dataManager),
+		(std::vector<int>{ 2, 2, 1 }));
+	EXPECT_EQ(
+		SpellSystem::bonus_priest_spells(18, dataManager),
+		(std::vector<int>{ 2, 2, 1, 1 }));
 
 	// Row 19 adds a 1st and a 3rd, which is the row a single integer could not carry.
-	EXPECT_EQ(SpellSystem::bonus_priest_spells(19, dataManager), (std::vector<int>{ 3, 2, 2, 1 }));
+	EXPECT_EQ(
+		SpellSystem::bonus_priest_spells(19, dataManager),
+		(std::vector<int>{ 3, 2, 2, 1 }));
 }
 
 // "these spells are available only when the priest is entitled to spells of the
@@ -361,10 +461,13 @@ TEST_F(PriestSpellsTest, BonusSpellsAccumulateRowByRow)
 // has nowhere to go.
 TEST_F(PriestSpellsTest, ABonusNeedsARowToLandOn)
 {
-	const std::vector<int> atFirst = SpellSystem::get_spell_slots(CasterClass::CLERIC, 1, 18, dataManager);
+	const std::vector<int> atFirst =
+		SpellSystem::get_spell_slots(CasterClass::CLERIC, 1, 18, dataManager);
 
-	ASSERT_EQ(atFirst.size(), 1u) << "1st level grants one row, whatever the Wisdom";
-	EXPECT_EQ(atFirst.at(0), 1 + 2) << "one from Table 24, two 1st-level bonuses";
+	ASSERT_EQ(atFirst.size(), 1u)
+		<< "1st level grants one row, whatever the Wisdom";
+	EXPECT_EQ(atFirst.at(0), 1 + 2)
+		<< "one from Table 24, two 1st-level bonuses";
 }
 
 // Table 24's footnotes: the sixth column is usable only with Wisdom 17 or greater,
@@ -372,23 +475,37 @@ TEST_F(PriestSpellsTest, ABonusNeedsARowToLandOn)
 TEST_F(PriestSpellsTest, TheSixthAndSeventhRowsNeedWisdomSeventeenAndEighteen)
 {
 	// 11th level is where Table 24 first prints a sixth-level slot.
-	EXPECT_EQ(SpellSystem::get_spell_slots(CasterClass::CLERIC, 11, 16, dataManager).size(), 5u)
+	EXPECT_EQ(
+		SpellSystem::get_spell_slots(CasterClass::CLERIC, 11, 16, dataManager)
+			.size(),
+		5u)
 		<< "Wisdom 16 cannot reach the sixth";
-	EXPECT_EQ(SpellSystem::get_spell_slots(CasterClass::CLERIC, 11, 17, dataManager).size(), 6u);
+	EXPECT_EQ(
+		SpellSystem::get_spell_slots(CasterClass::CLERIC, 11, 17, dataManager)
+			.size(),
+		6u);
 
 	// 14th is where the seventh first appears.
-	EXPECT_EQ(SpellSystem::get_spell_slots(CasterClass::CLERIC, 14, 17, dataManager).size(), 6u)
+	EXPECT_EQ(
+		SpellSystem::get_spell_slots(CasterClass::CLERIC, 14, 17, dataManager)
+			.size(),
+		6u)
 		<< "Wisdom 17 cannot reach the seventh";
-	EXPECT_EQ(SpellSystem::get_spell_slots(CasterClass::CLERIC, 14, 18, dataManager).size(), 7u);
+	EXPECT_EQ(
+		SpellSystem::get_spell_slots(CasterClass::CLERIC, 14, 18, dataManager)
+			.size(),
+		7u);
 }
 
 // A wizard's spells are not a priest's: Table 5 says bonus spells are for "a priest
 // (and only a priest)", and no footnote gates a wizard's rows.
 TEST_F(PriestSpellsTest, AWizardTakesNoWisdomBonusAndNoWisdomGate)
 {
-	EXPECT_EQ(SpellSystem::get_spell_slots(CasterClass::WIZARD, 12, 18, dataManager),
+	EXPECT_EQ(
+		SpellSystem::get_spell_slots(CasterClass::WIZARD, 12, 18, dataManager),
 		SpellSystem::progression_slots(CasterClass::WIZARD, 12));
-	EXPECT_EQ(SpellSystem::get_spell_slots(CasterClass::WIZARD, 12, 9, dataManager),
+	EXPECT_EQ(
+		SpellSystem::get_spell_slots(CasterClass::WIZARD, 12, 9, dataManager),
 		SpellSystem::progression_slots(CasterClass::WIZARD, 12));
 }
 

@@ -15,19 +15,19 @@
   "mutations": [
     {
       "file": "src/Creature.cpp",
-      "original": " && InventoryOperations::is_within_weight_limit(*removed, *this, *ctx.dataManager);",
+      "original": "&&\n\t\t\tInventoryOperations::is_within_weight_limit(\n\t\t\t\t*removed,\n\t\t\t\t*this,\n\t\t\t\t*ctx.dataManager);",
       "mutated": ";",
       "catches": "a pack too heavy for the item still chosen for it"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "const bool fitsInPack = !InventoryOperations::is_inventory_full(inventoryData) && ",
-      "mutated": "const bool fitsInPack = true && ",
+      "original": "const bool fitsInPack =\n\t\t\t!InventoryOperations::is_inventory_full(inventoryData) &&",
+      "mutated": "const bool fitsInPack =true &&",
       "catches": "a full pack still chosen for the item"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\t\tInventoryOperations::add_item(*ctx.floorInventory, std::move(removed));\n",
+      "original": "\t\t\tInventoryOperations::add_item(\n\t\t\t\t*ctx.floorInventory,\n\t\t\t\tstd::move(removed));\n",
       "mutated": "",
       "catches": "an item taken off into a full pack that never reaches the floor, destroyed"
     },

@@ -93,7 +93,9 @@ protected:
 				{
 					continue;
 				}
-				auto orc = std::make_unique<Creature>(here, ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK });
+				auto orc = std::make_unique<Creature>(
+					here,
+					ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK });
 				orc->healthPool = std::make_unique<HealthPool>(8);
 				creatures.push_back(std::move(orc));
 			}
@@ -103,10 +105,15 @@ protected:
 	// Whether any stored message holds the given text, its coloured runs joined.
 	bool said_anything_about(std::string_view wanted) const
 	{
-		for (size_t index = 0; index < ctx.messageSystem->get_stored_message_count(); ++index)
+		for (
+			size_t index = 0;
+			index < ctx.messageSystem->get_stored_message_count();
+			++index)
 		{
 			std::string whole;
-			for (const LogMessage& run : ctx.messageSystem->get_attack_message_at(index))
+			for (
+				const LogMessage& run :
+				ctx.messageSystem->get_attack_message_at(index))
 			{
 				whole += run.text;
 			}
@@ -123,7 +130,9 @@ protected:
 	{
 		auto scroll = ItemCreator::create("scroll_teleport", PLAYER_TILE, ctx);
 		Item* held = scroll.get();
-		[[maybe_unused]] const auto added = InventoryOperations::add_item(player->inventoryData, std::move(scroll));
+		[[maybe_unused]] const auto added = InventoryOperations::add_item(
+			player->inventoryData,
+			std::move(scroll));
 		Teleporter behavior{};
 		return use(behavior, *held, *player, ctx);
 	}
@@ -143,9 +152,11 @@ TEST_F(TeleportLandingTest, TheOneFreeFloorTileIsTheOneOffered)
 
 	for (int draw = 0; draw < DRAWS; ++draw)
 	{
-		const std::optional<Vector2D> landing = SpawnUtils::find_random_floor_tile(ctx);
+		const std::optional<Vector2D> landing =
+			SpawnUtils::find_random_floor_tile(ctx);
 		ASSERT_TRUE(landing.has_value()) << "the free tile was never offered";
-		ASSERT_EQ(*landing, LAST_FREE_TILE) << "draw " << draw << " offered a taken tile";
+		ASSERT_EQ(*landing, LAST_FREE_TILE)
+			<< "draw " << draw << " offered a taken tile";
 	}
 }
 
@@ -161,9 +172,12 @@ TEST_F(TeleportLandingTest, AFullLevelOffersNowhere)
 TEST_F(TeleportLandingTest, ACorridorIsNoLanding)
 {
 	crowd_the_room(std::nullopt);
-	map.set_tile(Vector2D{ ROOM_COL + ROOM_SIZE, ROOM_ROW }, TileType::CORRIDOR);
+	map.set_tile(
+		Vector2D{ ROOM_COL + ROOM_SIZE, ROOM_ROW },
+		TileType::CORRIDOR);
 
-	EXPECT_FALSE(SpawnUtils::find_random_floor_tile(ctx).has_value()) << "the corridor was offered";
+	EXPECT_FALSE(SpawnUtils::find_random_floor_tile(ctx).has_value())
+		<< "the corridor was offered";
 }
 
 // Water is no landing for a creature that cannot swim.
@@ -185,14 +199,18 @@ TEST_F(TeleportLandingTest, AFloodedLevelOffersNowhere)
 }
 
 // The scroll on a full level: the reader stays, is told, and the scroll is spent.
-TEST_F(TeleportLandingTest, AScrollWithNowhereToLandLeavesTheReaderWhereTheyStand)
+TEST_F(
+	TeleportLandingTest,
+	AScrollWithNowhereToLandLeavesTheReaderWhereTheyStand)
 {
 	crowd_the_room(std::nullopt);
 
 	const bool spent = read_teleport_scroll();
 
-	EXPECT_EQ(player->position, PLAYER_TILE) << "the reader was moved with nowhere to go";
-	EXPECT_TRUE(said_anything_about("nowhere to take you")) << "the scroll failed without a word";
+	EXPECT_EQ(player->position, PLAYER_TILE)
+		<< "the reader was moved with nowhere to go";
+	EXPECT_TRUE(said_anything_about("nowhere to take you"))
+		<< "the scroll failed without a word";
 	EXPECT_TRUE(spent) << "reading the scroll is the cost, landing or not";
 }
 
@@ -208,7 +226,9 @@ TEST_F(TeleportLandingTest, AScrollWithSomewhereToLandMovesTheReaderThere)
 
 // The spell on a full level: the caster stays, is told, and the casting is spent, as
 // Knock's is with no door in reach. The completion callback runs only for a spent casting.
-TEST_F(TeleportLandingTest, TheSpellWithNowhereToLandLeavesTheCasterWhereTheyStand)
+TEST_F(
+	TeleportLandingTest,
+	TheSpellWithNowhereToLandLeavesTheCasterWhereTheyStand)
 {
 	crowd_the_room(std::nullopt);
 	int castingsSpent = 0;
@@ -217,10 +237,17 @@ TEST_F(TeleportLandingTest, TheSpellWithNowhereToLandLeavesTheCasterWhereTheySta
 		++castingsSpent;
 	};
 
-	SpellSystem::cast_spell_by_key("teleport", *player, SpellSource::MEMORIZED, count_the_casting, ctx);
+	SpellSystem::cast_spell_by_key(
+		"teleport",
+		*player,
+		SpellSource::MEMORIZED,
+		count_the_casting,
+		ctx);
 
-	EXPECT_EQ(player->position, PLAYER_TILE) << "the caster was moved with nowhere to go";
-	EXPECT_TRUE(said_anything_about("nowhere to take you")) << "the spell failed without a word";
+	EXPECT_EQ(player->position, PLAYER_TILE)
+		<< "the caster was moved with nowhere to go";
+	EXPECT_TRUE(said_anything_about("nowhere to take you"))
+		<< "the spell failed without a word";
 	EXPECT_EQ(castingsSpent, 1) << "a casting with nowhere to go was not spent";
 }
 

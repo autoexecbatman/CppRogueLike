@@ -84,7 +84,9 @@ bool is_reachable_without_locked_doors(
 			return true;
 		}
 
-		for (Vector2D dir : { DIR_N, DIR_S, DIR_E, DIR_W, DIR_NE, DIR_NW, DIR_SE, DIR_SW })
+		for (
+			Vector2D dir :
+			{ DIR_N, DIR_S, DIR_E, DIR_W, DIR_NE, DIR_NW, DIR_SE, DIR_SW })
 		{
 			const Vector2D next = current + dir;
 			if (!was_visited(next) && can_traverse(next))
@@ -131,12 +133,21 @@ int TreasureRoom::count_entrances(const Map& map, const DungeonRoom& room)
 void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 {
 	assert(ctx.stairs && "TreasureRoom::setup_guard: called without stairs");
-	assert(ctx.dataManager && "TreasureRoom::setup_guard: called without a dataManager");
-	assert(ctx.creatureManager && "TreasureRoom::setup_guard: called without a creatureManager");
-	assert(ctx.monsterRegistry && "TreasureRoom::setup_guard: called without a monsterRegistry");
+	assert(
+		ctx.dataManager &&
+		"TreasureRoom::setup_guard: called without a dataManager");
+	assert(
+		ctx.creatureManager &&
+		"TreasureRoom::setup_guard: called without a creatureManager");
+	assert(
+		ctx.monsterRegistry &&
+		"TreasureRoom::setup_guard: called without a monsterRegistry");
 	assert(ctx.map && "TreasureRoom::setup_guard called without a map");
-	assert(ctx.contentRegistry && "TreasureRoom::setup_guard called without contentRegistry");
-	assert(ctx.creatures && "TreasureRoom::setup_guard called without creatures");
+	assert(
+		ctx.contentRegistry &&
+		"TreasureRoom::setup_guard called without contentRegistry");
+	assert(
+		ctx.creatures && "TreasureRoom::setup_guard called without creatures");
 	assert(ctx.dice && "TreasureRoom::setup_guard called without dice");
 	assert(ctx.player() && "TreasureRoom::setup_guard called without player");
 
@@ -279,12 +290,16 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 
 	for (const DoorCandidate& doorCandidate : candidates)
 	{
-		if (!is_reachable_without_locked_doors(doorCandidate.spawnPos, ctx.stairs->position, *ctx.map))
+		if (!is_reachable_without_locked_doors(
+				doorCandidate.spawnPos,
+				ctx.stairs->position,
+				*ctx.map))
 		{
 			continue; // dead-end pocket - skip
 		}
 
-		const int dist = doorCandidate.spawnPos.manhattan_distance_to(playerPos);
+		const int dist =
+			doorCandidate.spawnPos.manhattan_distance_to(playerPos);
 		if (dist < bestDist)
 		{
 			bestDist = dist;
@@ -301,7 +316,10 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 	}
 
 	assert(
-		is_reachable_without_locked_doors(best->spawnPos, ctx.stairs->position, *ctx.map) &&
+		is_reachable_without_locked_doors(
+			best->spawnPos,
+			ctx.stairs->position,
+			*ctx.map) &&
 		"TreasureRoom::setup_guard: reachability filter passed but assert disagrees");
 
 	auto jailer = MonsterCreator::create_from_params(
@@ -310,8 +328,15 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 		ctx);
 
 	auto key = ItemCreator::create("dungeon_key", best->spawnPos, ctx);
-	[[maybe_unused]] const auto giveKeyToJailerResult = InventoryOperations::add_item_to_inventory(jailer->inventoryData, std::move(key), *jailer, *ctx.dataManager);
-	assert(giveKeyToJailerResult.has_value() && "TreasureRoom::setup_guard: the jailer could not carry its key");
+	[[maybe_unused]] const auto giveKeyToJailerResult =
+		InventoryOperations::add_item_to_inventory(
+			jailer->inventoryData,
+			std::move(key),
+			*jailer,
+			*ctx.dataManager);
+	assert(
+		giveKeyToJailerResult.has_value() &&
+		"TreasureRoom::setup_guard: the jailer could not carry its key");
 
 	ctx.creatureManager->add_creature(std::move(jailer), ctx);
 }
@@ -322,10 +347,15 @@ void TreasureRoom::create(
 	RandomDice& generationRng,
 	GameContext& ctx)
 {
-	assert(ctx.creatureManager && "TreasureRoom::create: called without a creatureManager");
-	assert(ctx.monsterRegistry && "TreasureRoom::create: called without a monsterRegistry");
+	assert(
+		ctx.creatureManager &&
+		"TreasureRoom::create: called without a creatureManager");
+	assert(
+		ctx.monsterRegistry &&
+		"TreasureRoom::create: called without a monsterRegistry");
 	assert(ctx.map && "TreasureRoom::create called without a map");
-	assert(ctx.levelManager && "TreasureRoom::create called without levelManager");
+	assert(
+		ctx.levelManager && "TreasureRoom::create called without levelManager");
 	assert(ctx.dice && "TreasureRoom::create called without dice");
 
 	// Drain the pools on the vault floor, so the treasure and its warden stand dry.
@@ -345,14 +375,20 @@ void TreasureRoom::create(
 	const Vector2D center{ room.center_col(), room.center_row() };
 
 	// Generate treasure at the center of the room
-	ItemFactory::generate_treasure(center, ctx.levelManager->get_dungeon_level(), quality, ctx);
+	ItemFactory::generate_treasure(
+		center,
+		ctx.levelManager->get_dungeon_level(),
+		quality,
+		ctx);
 
 	// Spawn the Dungeon Warden - the named boss guarding the vault.
 	// Try the room center first, then spiral outward to find a free tile.
 	{
 		std::optional<Vector2D> wardenPos;
 		constexpr int MAX_WARDEN_TRIES = 50;
-		for (int attempt = 0; attempt < MAX_WARDEN_TRIES && !wardenPos; ++attempt)
+		for (
+			int attempt = 0; attempt < MAX_WARDEN_TRIES && !wardenPos;
+			++attempt)
 		{
 			Vector2D candidate{
 				ctx.dice->roll(room.col, room.col_end()),
@@ -365,10 +401,15 @@ void TreasureRoom::create(
 		}
 		if (wardenPos)
 		{
-			MonsterParams wardenParams = ctx.monsterRegistry->get_params("dungeon_warden");
-			wardenParams.name = DungeonNames::generate_warden_name(generationRng);
+			MonsterParams wardenParams =
+				ctx.monsterRegistry->get_params("dungeon_warden");
+			wardenParams.name =
+				DungeonNames::generate_warden_name(generationRng);
 			ctx.creatureManager->add_creature(
-				MonsterCreator::create_from_params(*wardenPos, wardenParams, ctx),
+				MonsterCreator::create_from_params(
+					*wardenPos,
+					wardenParams,
+					ctx),
 				ctx);
 		}
 	}
@@ -423,17 +464,23 @@ void TreasureRoom::create(
 
 	setup_guard(room, ctx);
 
-	assert(ctx.messageSystem && "TreasureRoom::create: called without a messageSystem");
-	ctx.messageSystem->log(std::format(
-		"Created treasure room at ({},{}) size {}x{} quality {}",
-		room.col,
-		room.row,
-		room.width,
-		room.height,
-		quality));
+	assert(
+		ctx.messageSystem &&
+		"TreasureRoom::create: called without a messageSystem");
+	ctx.messageSystem->log(
+		std::format(
+			"Created treasure room at ({},{}) size {}x{} quality {}",
+			room.col,
+			room.row,
+			room.width,
+			room.height,
+			quality));
 }
 
-bool TreasureRoom::maybe_create(int dungeonLevel, RandomDice& generationRng, GameContext& ctx)
+bool TreasureRoom::maybe_create(
+	int dungeonLevel,
+	RandomDice& generationRng,
+	GameContext& ctx)
 {
 	assert(ctx.map && "TreasureRoom::maybe_create called without a map");
 	assert(ctx.dice && "TreasureRoom::maybe_create called without dice");
@@ -456,7 +503,9 @@ bool TreasureRoom::maybe_create(int dungeonLevel, RandomDice& generationRng, Gam
 
 	auto is_valid_treasure_room = [&](int roomIndex) -> bool
 	{
-		assert(ctx.stairs != nullptr && "TreasureRoom::maybe_create: called without stairs");
+		assert(
+			ctx.stairs != nullptr &&
+			"TreasureRoom::maybe_create: called without stairs");
 		const DungeonRoom& room = ctx.rooms->at(roomIndex);
 		if (room.contains(ctx.stairs->position.x, ctx.stairs->position.y))
 		{
@@ -465,14 +514,18 @@ bool TreasureRoom::maybe_create(int dungeonLevel, RandomDice& generationRng, Gam
 		return count_entrances(*ctx.map, room) == 1;
 	};
 
-	auto singleEntranceIndices = std::views::iota(1, static_cast<int>(ctx.rooms->size())) | std::views::filter(is_valid_treasure_room) | std::ranges::to<std::vector>();
+	auto singleEntranceIndices =
+		std::views::iota(1, static_cast<int>(ctx.rooms->size())) |
+		std::views::filter(is_valid_treasure_room) |
+		std::ranges::to<std::vector>();
 
 	if (singleEntranceIndices.empty())
 	{
 		return false;
 	}
 
-	const int pick = ctx.dice->roll(0, static_cast<int>(singleEntranceIndices.size()) - 1);
+	const int pick =
+		ctx.dice->roll(0, static_cast<int>(singleEntranceIndices.size()) - 1);
 	const DungeonRoom& room = ctx.rooms->at(singleEntranceIndices[pick]);
 
 	// Determine the quality of the treasure room based on dungeon level and luck

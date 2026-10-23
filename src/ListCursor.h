@@ -40,10 +40,7 @@
 //   step_within(2, 5, 9);    // -> 7
 //   step_within(8, 5, 9);    // -> 9, stopped at the bound
 //   step_within(10, 1, 9);   // aborts: "step_within: value is above its own bound"
-[[nodiscard]] size_t step_within(
-	size_t value,
-	int steps,
-	size_t highest);
+[[nodiscard]] size_t step_within(size_t value, int steps, size_t highest);
 
 // How many whole rows of `rowHeight` pixels fit in `pixels`: 0 when not even one fits,
 // including a negative extent. It is also the row a pixel falls in, counted from 0, for a
@@ -54,9 +51,7 @@
 //   whole_rows_within(89, 30);   // -> 2, the third row is cut off
 //   whole_rows_within(-5, 30);   // -> 0
 //   whole_rows_within(90, 0);    // aborts: "whole_rows_within: a row has no height"
-[[nodiscard]] size_t whole_rows_within(
-	int pixels,
-	int rowHeight);
+[[nodiscard]] size_t whole_rows_within(int pixels, int rowHeight);
 
 // One list's current row and first drawn row; the file block above shows it in use.
 class ListCursor
@@ -167,9 +162,7 @@ public:
 	//   // 10 rows
 	//   scroll_by(100, 3);         // -> first_visible(3) 7
 	//   scroll_by(-100, 3);        // -> first_visible(3) 0
-	void scroll_by(
-		int steps,
-		size_t visibleRows);
+	void scroll_by(int steps, size_t visibleRows);
 
 	// Takes a new row count after an add or a delete, keeping the current row and the
 	// scroll position where they were unless the list no longer reaches them.

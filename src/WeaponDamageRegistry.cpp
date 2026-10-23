@@ -8,10 +8,12 @@
 #include "ItemEnhancements.h"
 #include "WeaponDamageRegistry.h"
 
-const std::unordered_map<std::string, DamageInfo> WeaponDamageRegistry::weaponDamageMap =
-	WeaponDamageRegistry::create_weapon_damage_map();
+const std::unordered_map<std::string, DamageInfo>
+	WeaponDamageRegistry::weaponDamageMap =
+		WeaponDamageRegistry::create_weapon_damage_map();
 
-std::unordered_map<std::string, DamageInfo> WeaponDamageRegistry::create_weapon_damage_map()
+std::unordered_map<std::string, DamageInfo> WeaponDamageRegistry::
+	create_weapon_damage_map()
 {
 	return {
 		// Melee Weapons - AD&D 2e damage values
@@ -44,12 +46,15 @@ std::unordered_map<std::string, DamageInfo> WeaponDamageRegistry::create_weapon_
 	};
 }
 
-DamageInfo WeaponDamageRegistry::get_damage_info(std::string_view weaponKey) noexcept
+DamageInfo WeaponDamageRegistry::get_damage_info(
+	std::string_view weaponKey) noexcept
 {
 	const auto found = weaponDamageMap.find(std::string{ weaponKey });
 
 	// Callers ask is_weapon() first and a test walks the data, so a missing key means the two disagree.
-	assert(found != weaponDamageMap.end() && "get_damage_info: asked for a key the weapon table has no damage of its own for");
+	assert(
+		found != weaponDamageMap.end() &&
+		"get_damage_info: asked for a key the weapon table has no damage of its own for");
 
 	// What a Release build draws rather than crashing on a path the character sheet
 	// and the inventory both call to paint themselves.
@@ -61,7 +66,9 @@ DamageInfo WeaponDamageRegistry::get_damage_info(std::string_view weaponKey) noe
 	return found->second;
 }
 
-DamageInfo WeaponDamageRegistry::get_enhanced_damage_info(std::string_view weaponKey, const ItemEnhancement* enhancement) noexcept
+DamageInfo WeaponDamageRegistry::get_enhanced_damage_info(
+	std::string_view weaponKey,
+	const ItemEnhancement* enhancement) noexcept
 {
 	DamageInfo baseDamage = get_damage_info(weaponKey);
 
@@ -73,7 +80,8 @@ DamageInfo WeaponDamageRegistry::get_enhanced_damage_info(std::string_view weapo
 	return baseDamage;
 }
 
-std::string WeaponDamageRegistry::get_damage_roll(std::string_view weaponKey) noexcept
+std::string WeaponDamageRegistry::get_damage_roll(
+	std::string_view weaponKey) noexcept
 {
 	return get_damage_info(weaponKey).displayRoll;
 }

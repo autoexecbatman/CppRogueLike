@@ -117,7 +117,9 @@ enum class DurationUnit
 //   scaled_cost(180, 120);   // -> 180, a move that takes half again as long
 [[nodiscard]] constexpr int scaled_cost(int baseCost, int actionDelay)
 {
-	assert(actionDelay >= 1 && "scaled_cost: a delay of zero would act without end");
+	assert(
+		actionDelay >= 1 &&
+		"scaled_cost: a delay of zero would act without end");
 	assert(baseCost >= 0 && "scaled_cost: an action cannot give time back");
 
 	return baseCost * actionDelay / TIME_UNITS_PER_ROUND;
@@ -141,9 +143,13 @@ enum class DurationUnit
 //   actions_before(0, 25, 100);    // -> 4, four times as fast
 //   actions_before(0, 200, 100);   // -> 1, slow, and it has now overshot
 //   actions_before(200, 200, 200); // -> 0, the overshot being skips this one
-[[nodiscard]] constexpr int actions_before(int nextActionTime, int actionCost, int clockLimit)
+[[nodiscard]] constexpr int actions_before(
+	int nextActionTime,
+	int actionCost,
+	int clockLimit)
 {
-	assert(actionCost >= 1 && "actions_before: a free action would act forever");
+	assert(
+		actionCost >= 1 && "actions_before: a free action would act forever");
 
 	// Already standing at or past the limit, so this window holds nothing for it.
 	const int remaining = clockLimit - nextActionTime;
@@ -169,7 +175,9 @@ enum class DurationUnit
 //   rounds_completed_at(250);   // -> 2
 [[nodiscard]] constexpr int rounds_completed_at(int timeUnits)
 {
-	assert(timeUnits >= 0 && "rounds_completed_at: the clock starts at zero and only rises");
+	assert(
+		timeUnits >= 0 &&
+		"rounds_completed_at: the clock starts at zero and only rises");
 
 	return timeUnits / TIME_UNITS_PER_ROUND;
 }
@@ -184,7 +192,9 @@ enum class DurationUnit
 //   round_number_at(250);   // -> 3
 [[nodiscard]] constexpr int round_number_at(int timeUnits)
 {
-	assert(timeUnits >= 0 && "round_number_at: the clock starts at zero and only rises");
+	assert(
+		timeUnits >= 0 &&
+		"round_number_at: the clock starts at zero and only rises");
 
 	return timeUnits / TIME_UNITS_PER_ROUND + 1;
 }
@@ -203,8 +213,11 @@ enum class DurationUnit
 //   expiry_time(0, 0);     // -> 0, over the moment it was granted
 [[nodiscard]] constexpr int expiry_time(int currentTime, int durationRounds)
 {
-	assert(currentTime >= 0 && "expiry_time: the clock starts at zero and only rises");
-	assert(durationRounds >= 0 && "expiry_time: a duration cannot run backwards");
+	assert(
+		currentTime >= 0 &&
+		"expiry_time: the clock starts at zero and only rises");
+	assert(
+		durationRounds >= 0 && "expiry_time: a duration cannot run backwards");
 
 	return currentTime + durationRounds * TIME_UNITS_PER_ROUND;
 }

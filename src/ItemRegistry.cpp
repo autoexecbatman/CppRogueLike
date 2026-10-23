@@ -38,7 +38,8 @@ std::string normalize_key(std::string_view raw)
 		}
 		else
 		{
-			key += static_cast<char>(std::tolower(static_cast<unsigned char>(character)));
+			key += static_cast<char>(
+				std::tolower(static_cast<unsigned char>(character)));
 		}
 	}
 	return key;
@@ -66,7 +67,8 @@ EnhancedItemCategory parse_enhancement_category(std::string_view name)
 		return EnhancedItemCategory::ARMOR;
 	}
 
-	throw std::runtime_error(std::format("ItemRegistry: unknown enhancement_category '{}'", name));
+	throw std::runtime_error(
+		std::format("ItemRegistry: unknown enhancement_category '{}'", name));
 }
 
 // ---------------------------------------------------------------------------
@@ -81,7 +83,8 @@ nlohmann::json encode_item(const ItemParams& params)
 	record["itemClass"] = encode_item_class(params.itemClass);
 	record["value"] = params.value;
 	record["pickableType"] = encode_pickable_type(params.pickableType);
-	record["equipmentSlot"] = std::string{ encode_equipment_slot(params.equipmentSlot) };
+	record["equipmentSlot"] =
+		std::string{ encode_equipment_slot(params.equipmentSlot) };
 	record["baseWeight"] = params.baseWeight;
 	record["weight"] = params.weight;
 	record["levelMin"] = params.levelMin;
@@ -110,7 +113,8 @@ nlohmann::json encode_item(const ItemParams& params)
 	record["handRequirement"] = encode_hand_requirement(params.handRequirement);
 	record["weaponSize"] = encode_weapon_size(params.weaponSize);
 	record["strengthRating"] = params.strengthRating;
-	record["consumableEffect"] = encode_consumable_effect(params.consumableEffect);
+	record["consumableEffect"] =
+		encode_consumable_effect(params.consumableEffect);
 	record["consumableBuff"] = encode_buff_type(params.consumableBuffType);
 	record["targetMode"] = encode_target_mode(params.targetMode);
 	record["scrollAnimation"] = encode_scroll_animation(params.scrollAnimation);
@@ -135,10 +139,11 @@ const nlohmann::json& required_field(
 	const auto found = record.find(field);
 	if (found == record.end())
 	{
-		throw std::runtime_error(std::format(
-			"ItemRegistry::load -- item '{}' is missing required field '{}'",
-			itemKey,
-			field));
+		throw std::runtime_error(
+			std::format(
+				"ItemRegistry::load -- item '{}' is missing required field '{}'",
+				itemKey,
+				field));
 	}
 	return *found;
 }
@@ -147,25 +152,34 @@ ItemParams parse_item(const std::string& key, const nlohmann::json& record)
 {
 	ItemParams params;
 	params.name = required_field(record, key, "name").get<std::string>();
-	params.category = required_field(record, key, "category").get<std::string>();
-	params.color = parse_color_pair(required_field(record, key, "color").get<std::string>());
-	params.itemClass = parse_item_class(required_field(record, key, "itemClass").get<std::string>());
+	params.category =
+		required_field(record, key, "category").get<std::string>();
+	params.color = parse_color_pair(
+		required_field(record, key, "color").get<std::string>());
+	params.itemClass = parse_item_class(
+		required_field(record, key, "itemClass").get<std::string>());
 	params.value = required_field(record, key, "value");
-	params.pickableType = parse_pickable_type(required_field(record, key, "pickableType").get<std::string>());
-	params.equipmentSlot = parse_equipment_slot(required_field(record, key, "equipmentSlot").get<std::string>());
+	params.pickableType = parse_pickable_type(
+		required_field(record, key, "pickableType").get<std::string>());
+	params.equipmentSlot = parse_equipment_slot(
+		required_field(record, key, "equipmentSlot").get<std::string>());
 	params.baseWeight = required_field(record, key, "baseWeight");
 	params.weight = required_field(record, key, "weight");
 	params.levelMin = required_field(record, key, "levelMin");
 	params.levelMax = required_field(record, key, "levelMax");
 	params.levelScaling = required_field(record, key, "levelScaling");
-	params.consumableAmount = parse_dice_expression(required_field(record, key, "consumableAmount").get<std::string>());
+	params.consumableAmount = parse_dice_expression(
+		required_field(record, key, "consumableAmount").get<std::string>());
 	params.range = required_field(record, key, "range");
 	params.damage = required_field(record, key, "damage");
 	params.confuseTurns = required_field(record, key, "confuseTurns");
-	params.duration = parse_dice_expression(required_field(record, key, "duration").get<std::string>());
-	params.durationUnit = parse_duration_unit(required_field(record, key, "durationUnit").get<std::string>());
+	params.duration = parse_dice_expression(
+		required_field(record, key, "duration").get<std::string>());
+	params.durationUnit = parse_duration_unit(
+		required_field(record, key, "durationUnit").get<std::string>());
 	params.agesYears = required_field(record, key, "agesYears");
-	params.effect = parse_magical_effect(required_field(record, key, "effect").get<std::string>());
+	params.effect = parse_magical_effect(
+		required_field(record, key, "effect").get<std::string>());
 	params.effectBonus = required_field(record, key, "effectBonus");
 	params.strBonus = required_field(record, key, "strBonus");
 	params.dexBonus = required_field(record, key, "dexBonus");
@@ -173,18 +187,26 @@ ItemParams parse_item(const std::string& key, const nlohmann::json& record)
 	params.intBonus = required_field(record, key, "intBonus");
 	params.wisBonus = required_field(record, key, "wisBonus");
 	params.chaBonus = required_field(record, key, "chaBonus");
-	params.application = parse_buff_application(required_field(record, key, "application").get<std::string>());
-	params.exceptionalStrength = required_field(record, key, "exceptionalStrength");
+	params.application = parse_buff_application(
+		required_field(record, key, "application").get<std::string>());
+	params.exceptionalStrength =
+		required_field(record, key, "exceptionalStrength");
 	params.nutritionValue = required_field(record, key, "nutritionValue");
 	params.acBonus = required_field(record, key, "acBonus");
 	params.ranged = required_field(record, key, "ranged");
-	params.handRequirement = parse_hand_requirement(required_field(record, key, "handRequirement").get<std::string>());
-	params.weaponSize = parse_weapon_size(required_field(record, key, "weaponSize").get<std::string>());
+	params.handRequirement = parse_hand_requirement(
+		required_field(record, key, "handRequirement").get<std::string>());
+	params.weaponSize = parse_weapon_size(
+		required_field(record, key, "weaponSize").get<std::string>());
 	params.strengthRating = required_field(record, key, "strengthRating");
-	params.consumableEffect = parse_consumable_effect(required_field(record, key, "consumableEffect").get<std::string>());
-	params.consumableBuffType = parse_buff_type(required_field(record, key, "consumableBuff").get<std::string>());
-	params.targetMode = parse_target_mode(required_field(record, key, "targetMode").get<std::string>());
-	params.scrollAnimation = parse_scroll_animation(required_field(record, key, "scrollAnimation").get<std::string>());
+	params.consumableEffect = parse_consumable_effect(
+		required_field(record, key, "consumableEffect").get<std::string>());
+	params.consumableBuffType = parse_buff_type(
+		required_field(record, key, "consumableBuff").get<std::string>());
+	params.targetMode = parse_target_mode(
+		required_field(record, key, "targetMode").get<std::string>());
+	params.scrollAnimation = parse_scroll_animation(
+		required_field(record, key, "scrollAnimation").get<std::string>());
 
 	return params;
 }
@@ -198,7 +220,9 @@ void ItemRegistry::load(std::string_view path)
 	if (!file.is_open())
 	{
 		throw std::runtime_error(
-			std::format("ItemRegistry::load -- cannot open '{}'", resolved.string()));
+			std::format(
+				"ItemRegistry::load -- cannot open '{}'",
+				resolved.string()));
 	}
 
 	const nlohmann::json root = nlohmann::json::parse(file);
@@ -227,13 +251,17 @@ void ItemRegistry::save(std::string_view path) const
 	if (!file.is_open())
 	{
 		throw std::runtime_error(
-			std::format("ItemRegistry::save -- cannot open '{}' for writing", resolved.string()));
+			std::format(
+				"ItemRegistry::save -- cannot open '{}' for writing",
+				resolved.string()));
 	}
 	file << root.dump(4);
 	if (file.fail())
 	{
 		throw std::runtime_error(
-			std::format("ItemRegistry::save -- write failed for '{}'", resolved.string()));
+			std::format(
+				"ItemRegistry::save -- write failed for '{}'",
+				resolved.string()));
 	}
 }
 
@@ -281,19 +309,27 @@ void ItemRegistry::set_params(std::string_view key, const ItemParams& params)
 	found->second = std::move(replacement);
 }
 
-void ItemRegistry::set_name_category(std::string_view key, std::string name, std::string category)
+void ItemRegistry::set_name_category(
+	std::string_view key,
+	std::string name,
+	std::string category)
 {
 	const auto found = entries.find(key);
 	if (found == entries.end())
 	{
 		throw std::out_of_range(
-			std::format("ItemRegistry::set_name_category -- unknown key '{}'", key));
+			std::format(
+				"ItemRegistry::set_name_category -- unknown key '{}'",
+				key));
 	}
 	found->second.name = std::move(name);
 	found->second.category = std::move(category);
 }
 
-std::string ItemRegistry::add_custom(std::string name, std::string category, ItemParams params)
+std::string ItemRegistry::add_custom(
+	std::string name,
+	std::string category,
+	ItemParams params)
 {
 	const std::string base = normalize_key(name.empty() ? "new_item" : name);
 	std::string key = base;
@@ -321,12 +357,16 @@ void ItemRegistry::remove_custom(std::string_view key)
 	if (is_builtin_key(key))
 	{
 		throw std::logic_error(
-			std::format("ItemRegistry::remove_custom -- '{}' is a built-in item", key));
+			std::format(
+				"ItemRegistry::remove_custom -- '{}' is a built-in item",
+				key));
 	}
 	if (entries.erase(std::string{ key }) == 0)
 	{
 		throw std::out_of_range(
-			std::format("ItemRegistry::remove_custom -- unknown key '{}'", key));
+			std::format(
+				"ItemRegistry::remove_custom -- unknown key '{}'",
+				key));
 	}
 }
 
@@ -342,7 +382,9 @@ void ItemRegistry::load_enhanced_rules(std::string_view path)
 	if (!file.is_open())
 	{
 		throw std::runtime_error(
-			std::format("ItemRegistry::load_enhanced_rules -- cannot open '{}'", resolved.string()));
+			std::format(
+				"ItemRegistry::load_enhanced_rules -- cannot open '{}'",
+				resolved.string()));
 	}
 
 	const nlohmann::json root = nlohmann::json::parse(file);

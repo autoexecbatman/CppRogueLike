@@ -36,7 +36,13 @@ public:
 	//   add_buff(cleric, BuffType::BLESS, 0, 3, BuffApplication::ADD, 0);
 	//   update_creature_buffs(cleric, 359);   // has_buff(cleric, BuffType::BLESS) -> true, the last of it
 	//   update_creature_buffs(cleric, 360);   // has_buff(cleric, BuffType::BLESS) -> false, three rounds run
-	void add_buff(Creature& creature, BuffType type, int value, int durationRounds, BuffApplication application, int currentTime) noexcept;
+	void add_buff(
+		Creature& creature,
+		BuffType type,
+		int value,
+		int durationRounds,
+		BuffApplication application,
+		int currentTime) noexcept;
 
 	// Grants a buff with no duration: it lasts until something breaks it. A casting
 	// of the same type already running is made lasting too, its value kept.
@@ -65,7 +71,9 @@ public:
 	// Penalty an attacker suffers from the target's own wards. Reads both
 	// creatures because the penalty depends on who is swinging: Protection
 	// from Evil bites only evil attackers.
-	int calculate_ward_penalty(const Creature& attacker, const Creature& target) const noexcept;
+	int calculate_ward_penalty(
+		const Creature& attacker,
+		const Creature& target) const noexcept;
 
 	// Whether the warded creature's Sanctuary turns this attacker away. PHB page 436:
 	// an opponent attempting to attack saves against the spell; made, it "is
@@ -77,7 +85,10 @@ public:
 	//   is_turned_away_by_sanctuary(goblin, player, ctx);   // -> true, and recorded
 	//   is_turned_away_by_sanctuary(goblin, player, ctx);   // -> true, no roll
 	//   is_turned_away_by_sanctuary(orc, player, ctx);      // -> false for this casting
-	bool is_turned_away_by_sanctuary(const Creature& attacker, Creature& warded, GameContext& ctx);
+	bool is_turned_away_by_sanctuary(
+		const Creature& attacker,
+		Creature& warded,
+		GameContext& ctx);
 
 	// Whether this attacker has already lost track of the warded creature: a Sanctuary
 	// casting on `warded` holding a save this attacker failed. Asks the record and
@@ -90,6 +101,9 @@ public:
 	//   ignores_warded_creature(goblin, player);  // -> true, and no roll was made
 	//   ignores_warded_creature(orc, player);     // -> false, it may still hunt
 	//   ignores_warded_creature(kobold, player);  // -> false, it has never attacked
-	bool ignores_warded_creature(const Creature& attacker, const Creature& warded) const noexcept;
-	std::vector<BuffType> remove_buffs_broken_by_attacking(Creature& creature) noexcept;
+	bool ignores_warded_creature(
+		const Creature& attacker,
+		const Creature& warded) const noexcept;
+	std::vector<BuffType> remove_buffs_broken_by_attacking(
+		Creature& creature) noexcept;
 };

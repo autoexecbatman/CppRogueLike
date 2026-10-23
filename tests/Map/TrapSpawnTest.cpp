@@ -100,7 +100,8 @@ TEST_F(TrapSpawnTest, ASpawnedTrapLandsInTheTrapContainer)
 
 	map->spawn_traps(room, ctx);
 
-	ASSERT_EQ(traps.size(), 1u) << "the trap never reached the container the game reads";
+	ASSERT_EQ(traps.size(), 1u)
+		<< "the trap never reached the container the game reads";
 	EXPECT_EQ(traps[0]->position.x, ROOM_COL + 2);
 	EXPECT_EQ(traps[0]->position.y, ROOM_ROW + 2);
 	EXPECT_EQ(traps[0]->get_type(), TrapType::PIT);
@@ -125,7 +126,8 @@ TEST_F(TrapSpawnTest, EachTypeRollNamesItsTrap)
 		map->spawn_traps(room, ctx);
 
 		ASSERT_EQ(traps.size(), 1u);
-		EXPECT_EQ(traps[0]->get_type(), expected[face - 1]) << "type roll " << face;
+		EXPECT_EQ(traps[0]->get_type(), expected[face - 1])
+			<< "type roll " << face;
 	}
 }
 
@@ -139,7 +141,8 @@ TEST_F(TrapSpawnTest, SpawningATrapLeavesTheSpellTilesAlone)
 
 	map->spawn_traps(room, ctx);
 
-	EXPECT_TRUE(spellTiles.empty()) << "a trap was put in the spell tile container";
+	EXPECT_TRUE(spellTiles.empty())
+		<< "a trap was put in the spell tile container";
 }
 
 // Seven rooms in ten carry no traps at all, and that path must leave the container empty

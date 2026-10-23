@@ -37,7 +37,9 @@ namespace
 }
 
 // The index of the entry carrying `symbol`, if one does; a symbol of 0 is carried by none.
-[[nodiscard]] std::optional<size_t> find_symbol(const std::vector<PaletteEntry>& entries, char symbol)
+[[nodiscard]] std::optional<size_t> find_symbol(
+	const std::vector<PaletteEntry>& entries,
+	char symbol)
 {
 	if (symbol == 0)
 	{
@@ -54,7 +56,9 @@ namespace
 }
 
 // The index of the entry showing `tile`, if one does.
-[[nodiscard]] std::optional<size_t> find_tile(const std::vector<PaletteEntry>& entries, TileRef tile)
+[[nodiscard]] std::optional<size_t> find_tile(
+	const std::vector<PaletteEntry>& entries,
+	TileRef tile)
 {
 	for (size_t entryIndex = 0; entryIndex < entries.size(); ++entryIndex)
 	{
@@ -99,7 +103,8 @@ void to_json(json& output, const PaletteEntry& entry)
 {
 	output = TileRefJson::encode_tile(entry.tile);
 	output["label"] = entry.label;
-	output["symbol"] = entry.symbol ? std::string(1, entry.symbol) : std::string{};
+	output["symbol"] =
+		entry.symbol ? std::string(1, entry.symbol) : std::string{};
 }
 
 void from_json(const json& source, PaletteEntry& entry)
@@ -116,7 +121,8 @@ std::string_view palette_edit_refusal(PaletteEdit edit)
 	{
 	case PaletteEdit::APPLIED:
 	{
-		assert(false && "palette_edit_refusal: an applied edit is not a refusal");
+		assert(
+			false && "palette_edit_refusal: an applied edit is not a refusal");
 		return "";
 	}
 
@@ -155,20 +161,23 @@ void Palette::load(std::string_view path)
 	std::ifstream paletteFile(resolved);
 	if (!paletteFile.is_open())
 	{
-		throw std::runtime_error(std::format(
-			"Palette::load -- cannot open '{}' -- the palette is required",
-			resolved.string()));
+		throw std::runtime_error(
+			std::format(
+				"Palette::load -- cannot open '{}' -- the palette is required",
+				resolved.string()));
 	}
 
 	// Read into a local, so a refused file leaves the palette that was loaded before it.
 	const json document = json::parse(paletteFile);
-	const std::vector<PaletteEntry> loaded = document.at("palette").get<std::vector<PaletteEntry>>();
+	const std::vector<PaletteEntry> loaded =
+		document.at("palette").get<std::vector<PaletteEntry>>();
 
 	// Each entry is checked against the ones before it, so a refusal names the later of two clashing entries.
 	std::vector<PaletteEntry> accepted;
 	for (const PaletteEntry& entry : loaded)
 	{
-		PaletteEdit refusal = edit_refusal(accepted, std::nullopt, entry.label, entry.symbol);
+		PaletteEdit refusal =
+			edit_refusal(accepted, std::nullopt, entry.label, entry.symbol);
 		if (refusal == PaletteEdit::APPLIED && find_tile(accepted, entry.tile))
 		{
 			refusal = PaletteEdit::DUPLICATE_TILE;
@@ -180,14 +189,15 @@ void Palette::load(std::string_view path)
 			{
 				shownLabel = "<empty label>";
 			}
-			throw std::runtime_error(std::format(
-				"Palette::load -- '{}' entry '{}' (sheet {} col {} row {}) is refused: {}",
-				resolved.string(),
-				shownLabel,
-				static_cast<int>(entry.tile.sheet),
-				entry.tile.col,
-				entry.tile.row,
-				palette_edit_refusal(refusal)));
+			throw std::runtime_error(
+				std::format(
+					"Palette::load -- '{}' entry '{}' (sheet {} col {} row {}) is refused: {}",
+					resolved.string(),
+					shownLabel,
+					static_cast<int>(entry.tile.sheet),
+					entry.tile.col,
+					entry.tile.row,
+					palette_edit_refusal(refusal)));
 		}
 		accepted.push_back(entry);
 	}
@@ -199,7 +209,9 @@ void Palette::load(std::string_view path)
 
 void Palette::save() const
 {
-	assert(!sourcePath.empty() && "Palette::save: called before a load named the file");
+	assert(
+		!sourcePath.empty() &&
+		"Palette::save: called before a load named the file");
 
 	const auto resolved = Paths::resolve(sourcePath);
 
@@ -207,9 +219,10 @@ void Palette::save() const
 	std::ifstream existingFile(resolved);
 	if (!existingFile.is_open())
 	{
-		throw std::runtime_error(std::format(
-			"Palette::save -- cannot open '{}' to keep its other sections",
-			resolved.string()));
+		throw std::runtime_error(
+			std::format(
+				"Palette::save -- cannot open '{}' to keep its other sections",
+				resolved.string()));
 	}
 	json document;
 	try
@@ -218,10 +231,11 @@ void Palette::save() const
 	}
 	catch (const json::parse_error& error)
 	{
-		throw std::runtime_error(std::format(
-			"Palette::save -- '{}' does not parse: {}",
-			resolved.string(),
-			error.what()));
+		throw std::runtime_error(
+			std::format(
+				"Palette::save -- '{}' does not parse: {}",
+				resolved.string(),
+				error.what()));
 	}
 	existingFile.close();
 
@@ -230,17 +244,19 @@ void Palette::save() const
 	std::ofstream out(resolved);
 	if (!out.is_open())
 	{
-		throw std::runtime_error(std::format(
-			"Palette::save -- cannot open '{}' for writing",
-			resolved.string()));
+		throw std::runtime_error(
+			std::format(
+				"Palette::save -- cannot open '{}' for writing",
+				resolved.string()));
 	}
 	out << document.dump(4);
 	out.flush();
 	if (out.fail())
 	{
-		throw std::runtime_error(std::format(
-			"Palette::save -- write failed for '{}'",
-			resolved.string()));
+		throw std::runtime_error(
+			std::format(
+				"Palette::save -- write failed for '{}'",
+				resolved.string()));
 	}
 	std::clog << std::format("[Palette] saved: {}\n", resolved.string());
 }
@@ -253,7 +269,8 @@ PaletteEdit Palette::add_or_update(
 	assert(tile.is_valid() && "Palette::add_or_update: an entry needs a tile");
 
 	const std::optional<size_t> ownIndex = find(tile);
-	const PaletteEdit refusal = edit_refusal(paletteEntries, ownIndex, label, symbol);
+	const PaletteEdit refusal =
+		edit_refusal(paletteEntries, ownIndex, label, symbol);
 	if (refusal != PaletteEdit::APPLIED)
 	{
 		return refusal;
@@ -266,7 +283,8 @@ PaletteEdit Palette::add_or_update(
 	}
 	else
 	{
-		paletteEntries.push_back(PaletteEntry{ tile, std::string(label), symbol });
+		paletteEntries.push_back(
+			PaletteEntry{ tile, std::string(label), symbol });
 	}
 	return PaletteEdit::APPLIED;
 }
@@ -287,7 +305,8 @@ std::optional<size_t> Palette::find(TileRef tile) const
 
 PaletteEdit Palette::set_symbol_tile(char symbol, TileRef tile)
 {
-	assert(tile.is_valid() && "Palette::set_symbol_tile: an entry needs a tile");
+	assert(
+		tile.is_valid() && "Palette::set_symbol_tile: an entry needs a tile");
 
 	if (is_structural(symbol))
 	{
@@ -333,7 +352,8 @@ std::vector<SymbolRow> Palette::symbol_rows() const
 	std::vector<SymbolRow> rows;
 	for (const StructuralSymbol& structural : STRUCTURAL_SYMBOLS)
 	{
-		rows.push_back(SymbolRow{ structural.symbol, std::string(structural.label) });
+		rows.push_back(
+			SymbolRow{ structural.symbol, std::string(structural.label) });
 	}
 	for (const PaletteEntry& entry : paletteEntries)
 	{

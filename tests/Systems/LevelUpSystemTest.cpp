@@ -85,9 +85,14 @@ TEST_F(LevelUpSystemTest, WizardLevelUpHPGainWithConBonus)
 	int expectedBonus = 0;
 	if (!game.dataManager.get_constitution_attributes().empty())
 	{
-		if (player->get_constitution() <= static_cast<int>(game.dataManager.get_constitution_attributes().size()))
+		if (player->get_constitution() <=
+			static_cast<int>(
+				game.dataManager.get_constitution_attributes().size()))
 		{
-			expectedBonus = game.dataManager.get_constitution_attributes()[player->get_constitution() - 1].HPAdj;
+			expectedBonus = game.dataManager
+								.get_constitution_attributes()
+									[player->get_constitution() - 1]
+								.HPAdj;
 		}
 	}
 
@@ -151,10 +156,14 @@ TEST_F(LevelUpSystemTest, ALevelRaisesNoAbilityScore)
 			LevelUpSystem::apply_level_up_benefits(*player, level, ctx);
 		}
 
-		EXPECT_EQ(player->get_strength(), 15) << "class " << static_cast<int>(creatureClass);
-		EXPECT_EQ(player->get_dexterity(), 15) << "class " << static_cast<int>(creatureClass);
-		EXPECT_EQ(player->get_wisdom(), 15) << "class " << static_cast<int>(creatureClass);
-		EXPECT_EQ(player->get_intelligence(), 15) << "class " << static_cast<int>(creatureClass);
+		EXPECT_EQ(player->get_strength(), 15)
+			<< "class " << static_cast<int>(creatureClass);
+		EXPECT_EQ(player->get_dexterity(), 15)
+			<< "class " << static_cast<int>(creatureClass);
+		EXPECT_EQ(player->get_wisdom(), 15)
+			<< "class " << static_cast<int>(creatureClass);
+		EXPECT_EQ(player->get_intelligence(), 15)
+			<< "class " << static_cast<int>(creatureClass);
 	}
 }
 
@@ -164,12 +173,19 @@ TEST_F(LevelUpSystemTest, AStrengthBuffIsNotKeptByALevel)
 	player->set_creature_class(CreatureClass::FIGHTER);
 	player->set_hit_die(10);
 	player->set_strength(15);
-	ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, 19, 10, BuffApplication::SET, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(
+		*player,
+		BuffType::STRENGTH,
+		19,
+		10,
+		BuffApplication::SET,
+		ctx.gameState->get_time());
 
 	LevelUpSystem::apply_level_up_benefits(*player, 4, ctx);
 	ctx.buffSystem->remove_buff(*player, BuffType::STRENGTH);
 
-	EXPECT_EQ(player->get_strength(), 15) << "the level kept the potion's Strength";
+	EXPECT_EQ(player->get_strength(), 15)
+		<< "the level kept the potion's Strength";
 }
 
 TEST_F(LevelUpSystemTest, FighterTHAC0Improvement)

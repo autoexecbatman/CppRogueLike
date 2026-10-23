@@ -14,14 +14,20 @@ protected:
 	int maxRangeDistance{ 5 }; // Maximum range for ranged attacks
 	int optimalDistance{ 3 }; // Preferred distance for ranged attackers
 
-	void move_or_attack(Creature& owner, Creature& target, GameContext& ctx) override;
+	void move_or_attack(
+		Creature& owner,
+		Creature& target,
+		GameContext& ctx) override;
 	bool try_ranged_attack(Creature& owner, Creature& target, GameContext& ctx);
 
 public:
 	void update(Creature& owner, GameContext& ctx) override;
 
 	// The name its save carries, so a load builds a ranged Ai and not a melee one.
-	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::RANGED_MONSTER; }
+	[[nodiscard]] AiType get_ai_type() const noexcept override
+	{
+		return AiType::RANGED_MONSTER;
+	}
 
 	void load(const json& source) override;
 	void save(json& output) override;

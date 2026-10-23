@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/ShopKeeper.cpp",
-      "original": "\t\tshopName = weapon_names[dice.roll(0, static_cast<int>(weapon_names.size()) - 1)];\n",
+      "original": "\t\tshopName = weapon_names[dice\n\t\t\t\t.roll(0, static_cast<int>(weapon_names.size()) - 1)];\n",
       "mutated": "\t\tshopName = weapon_names[0];\n",
       "catches": "the name stopped being a draw, so every weapon shop in the dungeon carries one name"
     },
     {
       "file": "src/ShopKeeper.cpp",
-      "original": "\t\tshopName = armor_names[dice.roll(0, static_cast<int>(armor_names.size()) - 1)];\n",
-      "mutated": "\t\tshopName = weapon_names[dice.roll(0, static_cast<int>(weapon_names.size()) - 1)];\n",
+      "original": "\t\tshopName =\n\t\t\tarmor_names[dice.roll(0, static_cast<int>(armor_names.size()) - 1)];\n",
+      "mutated": "\t\tshopName =weapon_names[dice.roll(0, static_cast<int>(weapon_names.size()) - 1)];\n",
       "catches": "an armourer named from the weaponsmith's list"
     },
     {

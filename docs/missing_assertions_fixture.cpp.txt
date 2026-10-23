@@ -1,0 +1,67 @@
+// Fixture for missing_assertions.py --self-test. Each loop reaches an owned
+// element; a REPORT line is one the owned-element check must name, and no other
+// line here may be named.
+
+void one_line_assert(const GameContext& ctx)
+{
+	for (const auto& creature : *ctx.creatures)
+	{
+		assert(creature && "one_line_assert: creatures holds a null entry");
+		creature->render(ctx);
+	}
+}
+
+void wrapped_assert(const GameContext& ctx)
+{
+	for (const auto& creature : *ctx.creatures)
+	{
+		assert(
+			creature &&
+			"wrapped_assert: creatures holds a null entry");
+		creature->render(ctx);
+	}
+}
+
+void no_assert(const GameContext& ctx)
+{
+	for (const auto& creature : *ctx.creatures)
+	{
+		creature->render(ctx); // REPORT
+	}
+}
+
+void wrapped_assert_on_another_name(const GameContext& ctx)
+{
+	for (const auto& item : *ctx.items)
+	{
+		assert(
+			ctx.player() &&
+			"wrapped_assert_on_another_name: called with no player");
+		item->use(ctx); // REPORT
+	}
+}
+
+// The parenthesis in the message must not keep the assert open past its line.
+void wrapped_assert_with_a_parenthesis_in_its_message(const GameContext& ctx)
+{
+	for (const auto& item : *ctx.items)
+	{
+		assert(
+			ctx.player() &&
+			"wrapped_assert_with_a_parenthesis_in_its_message: no player (");
+		item->use(ctx); // REPORT
+		assert(item && "an assert after the use does not excuse it");
+	}
+}
+
+// Read as the one-line form reads it: an assert naming the element counts.
+void wrapped_assert_through_the_element(const GameContext& ctx)
+{
+	for (const auto& item : *ctx.items)
+	{
+		assert(
+			item->owner &&
+			"wrapped_assert_through_the_element: an item with no owner");
+		item->use(ctx);
+	}
+}

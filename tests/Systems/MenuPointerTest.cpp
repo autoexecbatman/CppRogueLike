@@ -50,7 +50,12 @@ protected:
 		ctx.inputSystem = &input;
 
 		// Four tiles in, three down, eight wide and six tall.
-		probe.menu_new(PANEL_TILES_WIDE, PANEL_TILES_TALL, PANEL_COL, PANEL_ROW, ctx);
+		probe.menu_new(
+			PANEL_TILES_WIDE,
+			PANEL_TILES_TALL,
+			PANEL_COL,
+			PANEL_ROW,
+			ctx);
 		tileSize = renderer.get_tile_size();
 	}
 
@@ -80,20 +85,27 @@ TEST_F(MenuPointerTest, APointerOnARowAnswersThatRow)
 {
 	for (size_t row = 0; row < ROWS; ++row)
 	{
-		const auto answer = probe.row_at(inside_x(), middle_of_row(static_cast<int>(row)), ROWS);
-		ASSERT_TRUE(answer.has_value()) << "row " << row << " was not reachable";
+		const auto answer = probe.row_at(
+			inside_x(),
+			middle_of_row(static_cast<int>(row)),
+			ROWS);
+		ASSERT_TRUE(answer.has_value())
+			<< "row " << row << " was not reachable";
 		EXPECT_EQ(*answer, row);
 	}
 }
 
 TEST_F(MenuPointerTest, APointerAboveTheFirstRowIsOnTheFrame)
 {
-	EXPECT_FALSE(probe.row_at(inside_x(), PANEL_ROW * tileSize, ROWS).has_value());
+	EXPECT_FALSE(
+		probe.row_at(inside_x(), PANEL_ROW * tileSize, ROWS).has_value());
 }
 
 TEST_F(MenuPointerTest, APointerBelowTheLastRowAnswersNothing)
 {
-	EXPECT_FALSE(probe.row_at(inside_x(), middle_of_row(static_cast<int>(ROWS)), ROWS).has_value());
+	EXPECT_FALSE(
+		probe.row_at(inside_x(), middle_of_row(static_cast<int>(ROWS)), ROWS)
+			.has_value());
 }
 
 TEST_F(MenuPointerTest, APointerRightOfThePanelAnswersNothing)
@@ -102,8 +114,10 @@ TEST_F(MenuPointerTest, APointerRightOfThePanelAnswersNothing)
 	// click level with a row but well past the panel's right edge used to fire it.
 	const int pastTheRightEdge = (PANEL_COL + PANEL_TILES_WIDE + 3) * tileSize;
 
-	EXPECT_FALSE(probe.row_at(pastTheRightEdge, middle_of_row(1), ROWS).has_value())
-		<< "a click " << pastTheRightEdge << " pixels across hit a menu that ends at "
+	EXPECT_FALSE(
+		probe.row_at(pastTheRightEdge, middle_of_row(1), ROWS).has_value())
+		<< "a click " << pastTheRightEdge
+		<< " pixels across hit a menu that ends at "
 		<< (PANEL_COL + PANEL_TILES_WIDE) * tileSize;
 }
 

@@ -82,9 +82,11 @@ TEST_F(TrapDamageTest, AHiddenTrapSpringsOnThePlayerWithNoRollToNoticeIt)
 
 	const EntryResult entered = pit.on_creature_enter(victim, ctx);
 
-	EXPECT_EQ(entered, EntryResult::BLOCKED) << "the victim is in the pit, not past it";
+	EXPECT_EQ(entered, EntryResult::BLOCKED)
+		<< "the victim is in the pit, not past it";
 	EXPECT_EQ(pit.get_state(), TrapState::TRIGGERED);
-	EXPECT_EQ(before - victim.get_hp(), 12) << "a hidden pit springs: 2d6 at six and six";
+	EXPECT_EQ(before - victim.get_hp(), 12)
+		<< "a hidden pit springs: 2d6 at six and six";
 }
 
 TEST_F(TrapDamageTest, AKnownTrapSpringsWithoutARollToNoticeIt)
@@ -102,6 +104,6 @@ TEST_F(TrapDamageTest, AKnownTrapSpringsWithoutARollToNoticeIt)
 	const EntryResult entered = pit.on_creature_enter(victim, ctx);
 
 	EXPECT_EQ(entered, EntryResult::BLOCKED);
-	EXPECT_EQ(before - victim.get_hp(), 12) << "walking onto a known trap sets it off";
+	EXPECT_EQ(before - victim.get_hp(), 12)
+		<< "walking onto a known trap sets it off";
 }
-

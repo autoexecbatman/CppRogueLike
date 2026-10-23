@@ -18,19 +18,37 @@ namespace
 {
 
 // "The lich casts Magic Missile!", before the spell's own lines.
-void announce_cast(const Creature& caster, std::string_view key, GameContext& ctx)
+void announce_cast(
+	const Creature& caster,
+	std::string_view key,
+	GameContext& ctx)
 {
-	ctx.messageSystem->message(caster.actorData.color, caster.actorData.name, MessageCompletion::CONTINUED);
-	ctx.messageSystem->message(ColorPairId::WHITE_RED, std::format(" casts {}!", ctx.spellRegistry->get_by_key(key).name), MessageCompletion::FINISHED);
+	ctx.messageSystem->message(
+		caster.actorData.color,
+		caster.actorData.name,
+		MessageCompletion::CONTINUED);
+	ctx.messageSystem->message(
+		ColorPairId::WHITE_RED,
+		std::format(" casts {}!", ctx.spellRegistry->get_by_key(key).name),
+		MessageCompletion::FINISHED);
 }
 
 } // namespace
 
-MonsterCast MonsterSpellcasting::try_cast_at(Creature& caster, Creature& target, GameContext& ctx)
+MonsterCast MonsterSpellcasting::try_cast_at(
+	Creature& caster,
+	Creature& target,
+	GameContext& ctx)
 {
-	assert(ctx.spellRegistry && "MonsterSpellcasting::try_cast_at: called without a spellRegistry");
-	assert(ctx.gameState && "MonsterSpellcasting::try_cast_at: called without a gameState");
-	assert(ctx.messageSystem && "MonsterSpellcasting::try_cast_at: called without a messageSystem");
+	assert(
+		ctx.spellRegistry &&
+		"MonsterSpellcasting::try_cast_at: called without a spellRegistry");
+	assert(
+		ctx.gameState &&
+		"MonsterSpellcasting::try_cast_at: called without a gameState");
+	assert(
+		ctx.messageSystem &&
+		"MonsterSpellcasting::try_cast_at: called without a messageSystem");
 
 	// Silence stops every spell, so a silenced monster acts as one with none.
 	if (caster.has_state(ActorState::IS_SILENCED))
@@ -40,7 +58,11 @@ MonsterCast MonsterSpellcasting::try_cast_at(Creature& caster, Creature& target,
 
 	const auto can_aim = [&caster, &target, &ctx](std::string_view key)
 	{
-		return SpellSystem::can_aim_at(ctx.spellRegistry->get_by_key(key).effect_type, caster, target, ctx);
+		return SpellSystem::can_aim_at(
+			ctx.spellRegistry->get_by_key(key).effect_type,
+			caster,
+			target,
+			ctx);
 	};
 
 	for (const std::string& memorized : caster.spellcasting.memorizedSpells)
@@ -51,12 +73,19 @@ MonsterCast MonsterSpellcasting::try_cast_at(Creature& caster, Creature& target,
 		}
 		// A copy, because spending the spell erases the entry this loop is reading.
 		const std::string key = memorized;
-		const auto spend_the_copy = [&caster, key]([[maybe_unused]] GameContext& spentCtx)
+		const auto spend_the_copy = [&caster, key](
+										[[maybe_unused]] GameContext& spentCtx)
 		{
 			spend_memorized(caster.spellcasting, key);
 		};
 		announce_cast(caster, key, ctx);
-		SpellSystem::cast_spell_at(key, caster, SpellSource::MEMORIZED, target, spend_the_copy, ctx);
+		SpellSystem::cast_spell_at(
+			key,
+			caster,
+			SpellSource::MEMORIZED,
+			target,
+			spend_the_copy,
+			ctx);
 		return MonsterCast::CAST;
 	}
 
@@ -67,12 +96,19 @@ MonsterCast MonsterSpellcasting::try_cast_at(Creature& caster, Creature& target,
 		{
 			continue;
 		}
-		const auto record_the_use = [&power, now]([[maybe_unused]] GameContext& usedCtx)
+		const auto record_the_use = [&power, now](
+										[[maybe_unused]] GameContext& usedCtx)
 		{
 			record_power_use(power, now);
 		};
 		announce_cast(caster, power.spell, ctx);
-		SpellSystem::cast_spell_at(power.spell, caster, SpellSource::INNATE, target, record_the_use, ctx);
+		SpellSystem::cast_spell_at(
+			power.spell,
+			caster,
+			SpellSource::INNATE,
+			target,
+			record_the_use,
+			ctx);
 		return MonsterCast::CAST;
 	}
 

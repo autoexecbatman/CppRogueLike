@@ -37,13 +37,11 @@ protected:
 	void SetUp() override
 	{
 		spells.load("data/content/spells.json");
-		roundTrip = std::filesystem::temp_directory_path() / "spells_roundtrip.json";
+		roundTrip =
+			std::filesystem::temp_directory_path() / "spells_roundtrip.json";
 	}
 
-	void TearDown() override
-	{
-		std::filesystem::remove(roundTrip);
-	}
+	void TearDown() override { std::filesystem::remove(roundTrip); }
 };
 
 // Every spell keeps its class and its effect across a save. A codec pair that disagrees
@@ -60,9 +58,12 @@ TEST_F(SpellCodecRoundTripTest, ClassAndEffectSurviveASave)
 	for (const std::string& key : spells.get_all_keys())
 	{
 		const SpellDefinition& definition = spells.get_by_key(key);
-		before.emplace(key, Encoded{ definition.spellClass, definition.effect_type });
+		before.emplace(
+			key,
+			Encoded{ definition.spellClass, definition.effect_type });
 	}
-	ASSERT_FALSE(before.empty()) << "no spells loaded; the check would be vacuous";
+	ASSERT_FALSE(before.empty())
+		<< "no spells loaded; the check would be vacuous";
 
 	spells.save(roundTrip.string());
 	spells.load(roundTrip.string());
@@ -70,8 +71,10 @@ TEST_F(SpellCodecRoundTripTest, ClassAndEffectSurviveASave)
 	for (const auto& [key, encoded] : before)
 	{
 		const SpellDefinition& reloaded = spells.get_by_key(key);
-		EXPECT_EQ(reloaded.spellClass, encoded.spellClass) << key << ".spellClass";
-		EXPECT_EQ(reloaded.effect_type, encoded.effect) << key << ".effect_type";
+		EXPECT_EQ(reloaded.spellClass, encoded.spellClass)
+			<< key << ".spellClass";
+		EXPECT_EQ(reloaded.effect_type, encoded.effect)
+			<< key << ".effect_type";
 	}
 }
 
@@ -93,6 +96,7 @@ TEST_F(SpellCodecRoundTripTest, TheRestOfTheDefinitionSurvivesToo)
 		const SpellDefinition& reloaded = spells.get_by_key(key);
 		EXPECT_EQ(reloaded.name, definition.name) << key << ".name";
 		EXPECT_EQ(reloaded.level, definition.level) << key << ".level";
-		EXPECT_EQ(reloaded.description, definition.description) << key << ".description";
+		EXPECT_EQ(reloaded.description, definition.description)
+			<< key << ".description";
 	}
 }

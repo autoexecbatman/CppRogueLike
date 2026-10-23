@@ -21,8 +21,8 @@
     },
     {
       "file": "src/Palette.cpp",
-      "original": "output[\"symbol\"] = entry.symbol ? std::string(1, entry.symbol) : std::string{};",
-      "mutated": "output[\"symbol\"] = std::string{};",
+      "original": "output[\"symbol\"] =\n\t\tentry.symbol ? std::string(1, entry.symbol) : std::string{};",
+      "mutated": "output[\"symbol\"] =std::string{};",
       "catches": "a palette entry written without its symbol, so prefabs stop mapping that character"
     },
     {
@@ -153,7 +153,7 @@
     },
     {
       "file": "src/Palette.cpp",
-      "original": "\t\tpaletteEntries.push_back(PaletteEntry{ tile, std::string(label), symbol });\n",
+      "original": "\t\tpaletteEntries.push_back(\n\t\t\tPaletteEntry{ tile, std::string(label), symbol });\n",
       "mutated": "",
       "catches": "a new tile named and never added"
     },
@@ -183,8 +183,8 @@
     },
     {
       "file": "src/RoomEditor.cpp",
-      "original": "\tif (save_palette() == SaveOutcome::SAVED)\n\t{\n\t\tset_status(std::format(\"'{}' -> tile",
-      "mutated": "\tif (true)\n\t{\n\t\tset_status(std::format(\"'{}' -> tile",
+      "original": "\tif (save_palette() == SaveOutcome::SAVED)\n\t{\n\t\tset_status(\n\t\t\tstd::format(\n\t\t\t\t\"'{}' -> tile",
+      "mutated": "\tif (true)\n\t{\n\t\tset_status(\n\t\t\tstd::format(\n\t\t\t\t\"'{}' -> tile",
       "catches": "a tile pick reported after a save that failed"
     },
     {

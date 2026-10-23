@@ -45,14 +45,14 @@
     },
     {
       "file": "src/StartupSteps.cpp",
-      "original": "\t\t\tlog << \"STARTUP: \" << step.name << \" failed: \" << refusal.what() << '\\n'",
+      "original": "\t\t\tlog << \"STARTUP: \" << step.name << \" failed: \" << refusal.what()\n\t\t\t\t<< '\\n'",
       "mutated": "\t\t\tlog",
       "catches": "a refusal left out of the log"
     },
     {
       "file": "src/StartupSteps.cpp",
-      "original": "\treturn std::format(\"Could not start: {} failed: {}\", refusal.step, refusal.reason);",
-      "mutated": "\treturn std::format(\"Could not start: {}\", refusal.reason);",
+      "original": "\treturn std::format(\n\t\t\"Could not start: {} failed: {}\",\n\t\trefusal.step,\n\t\trefusal.reason);",
+      "mutated": "\treturn std::format(\n\t\t\"Could not start: {}\",\n\t\trefusal.reason);",
       "catches": "the player's line not naming the step that failed"
     }
   ]

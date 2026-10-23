@@ -32,7 +32,10 @@ struct Prefab
 	// ASCII rows; all rows must be the same length
 	std::vector<std::string> rows;
 
-	int width() const { return rows.empty() ? 0 : static_cast<int>(rows[0].size()); }
+	int width() const
+	{
+		return rows.empty() ? 0 : static_cast<int>(rows[0].size());
+	}
 
 	int height() const { return static_cast<int>(rows.size()); }
 };

@@ -47,7 +47,9 @@ class Player;
 //   thief_skill_allocation_for(rogue, 1).score(ThiefSkill::MOVE_SILENTLY);  // -> 25
 // The same character once its kit has put leather on it:
 //   thief_skill_allocation_for(rogue, 1).score(ThiefSkill::MOVE_SILENTLY);  // -> 15
-[[nodiscard]] ThiefSkillAllocation thief_skill_allocation_for(const Player& character, int level);
+[[nodiscard]] ThiefSkillAllocation thief_skill_allocation_for(
+	const Player& character,
+	int level);
 
 // Opens the screen a thief spends this level's discretionary points on, reading
 // the race, the Dexterity and the armour off the character rather than predicting
@@ -58,7 +60,10 @@ class Player;
 //   push_thief_skill_allocation(player, 1, ctx);   // 60 points, read in leather
 // A fighter reaching 4th level:
 //   push_thief_skill_allocation(player, 4, ctx);   // no screen, nothing to spend
-void push_thief_skill_allocation(Player& character, int level, GameContext& ctx);
+void push_thief_skill_allocation(
+	Player& character,
+	int level,
+	GameContext& ctx);
 
 // What the screen holds between keys: the skill the cursor is on, and the points as
 // they are placed so far.
@@ -78,13 +83,16 @@ struct ThiefSkillScreenState
 //   after_thief_skill_key(GameKey::RIGHT, screen); // 1 point on Pick Pockets, 59 left
 //   after_thief_skill_key(GameKey::SPACE, screen); // 30 on Pick Pockets, the limit
 //   after_thief_skill_key(GameKey::LEFT, screen); // nothing placed, so nothing changes
-[[nodiscard]] ThiefSkillScreenState after_thief_skill_key(GameKey key, ThiefSkillScreenState screen);
+[[nodiscard]] ThiefSkillScreenState after_thief_skill_key(
+	GameKey key,
+	ThiefSkillScreenState screen);
 
 class MenuThiefSkills : public BaseMenu
 {
 private:
 	ThiefSkillScreenState screen;
-	std::function<void(std::array<int, THIEF_SKILL_COUNT>, GameContext&)> onAccept;
+	std::function<void(std::array<int, THIEF_SKILL_COUNT>, GameContext&)>
+		onAccept;
 
 	void draw_allocation_screen();
 
@@ -106,7 +114,8 @@ public:
 	MenuThiefSkills(
 		GameContext& ctx,
 		ThiefSkillAllocation startingAllocation,
-		std::function<void(std::array<int, THIEF_SKILL_COUNT>, GameContext&)> acceptCallback);
+		std::function<void(std::array<int, THIEF_SKILL_COUNT>, GameContext&)>
+			acceptCallback);
 	MenuThiefSkills(const MenuThiefSkills&) = delete;
 	MenuThiefSkills& operator=(const MenuThiefSkills&) = delete;
 	MenuThiefSkills(MenuThiefSkills&&) = delete;

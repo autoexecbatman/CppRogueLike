@@ -109,7 +109,9 @@ json saved_pack_of_two_items()
 	{
 		[[maybe_unused]] const auto added = InventoryOperations::add_item(
 			pack,
-			std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK }));
+			std::make_unique<Item>(
+				Vector2D{ 0, 0 },
+				ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK }));
 	}
 	json saved;
 	InventoryOperations::save_inventory(pack, saved);
@@ -125,12 +127,15 @@ TEST(SaveFieldNamesTest, AnInventoryRefusesARecordMissingItsCapacityOrItems)
 		json missingOne = saved_pack_of_two_items();
 		missingOne.erase(key);
 		CreatureInventory loaded{ 1 };
-		EXPECT_ANY_THROW(InventoryOperations::load_inventory(loaded, missingOne))
+		EXPECT_ANY_THROW(
+			InventoryOperations::load_inventory(loaded, missingOne))
 			<< "an inventory record without \"" << key << "\" loaded quietly";
 	}
 }
 
-TEST(SaveFieldNamesTest, ABrokenItemStopsTheInventoryLoadingRatherThanShorteningIt)
+TEST(
+	SaveFieldNamesTest,
+	ABrokenItemStopsTheInventoryLoadingRatherThanShorteningIt)
 {
 	// The second item's record loses a field Item::save always writes. A loader that
 	// caught the error would hand back a pack holding one stone and say nothing.

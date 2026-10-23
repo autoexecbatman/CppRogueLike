@@ -153,10 +153,11 @@ MonsterHitDice parse_hit_dice(const nlohmann::json& record)
 	};
 	for (const nlohmann::json& entry : record.at("counts"))
 	{
-		hitDice.counts.push_back(HitDiceCount{
-			entry.at("count").get<int>(),
-			entry.at("xp").get<int>(),
-		});
+		hitDice.counts.push_back(
+			HitDiceCount{
+				entry.at("count").get<int>(),
+				entry.at("xp").get<int>(),
+			});
 	}
 	if (!is_valid_monster_hit_dice(hitDice))
 	{
@@ -206,13 +207,14 @@ std::optional<MonsterStrength> parse_strength(const nlohmann::json& record)
 	};
 	if (!is_valid_monster_strength(strength))
 	{
-		throw std::runtime_error(std::format(
-			"MonsterRegistry -- Strength {}/{} is not one the book can write: the score runs {} to {}, and a percentile from 1 to {} rides only on an 18",
-			strength.score,
-			strength.exceptional,
-			MONSTER_STRENGTH_SCORE_MINIMUM,
-			MONSTER_STRENGTH_SCORE_MAXIMUM,
-			MONSTER_STRENGTH_EXCEPTIONAL_MAXIMUM));
+		throw std::runtime_error(
+			std::format(
+				"MonsterRegistry -- Strength {}/{} is not one the book can write: the score runs {} to {}, and a percentile from 1 to {} rides only on an 18",
+				strength.score,
+				strength.exceptional,
+				MONSTER_STRENGTH_SCORE_MINIMUM,
+				MONSTER_STRENGTH_SCORE_MAXIMUM,
+				MONSTER_STRENGTH_EXCEPTIONAL_MAXIMUM));
 	}
 	return strength;
 }
@@ -244,7 +246,8 @@ nlohmann::json encode_damage(const DamageInfo& damage)
 
 // Reads the slots a creature starts filled. An unknown slot name or a missing
 // field throws, so a typo fails at load rather than leaving a monster unarmed.
-std::vector<MonsterParams::StartingItem> parse_equipment(const nlohmann::json& entries)
+std::vector<MonsterParams::StartingItem> parse_equipment(
+	const nlohmann::json& entries)
 {
 	std::vector<MonsterParams::StartingItem> equipment;
 	equipment.reserve(entries.size());
@@ -253,23 +256,26 @@ std::vector<MonsterParams::StartingItem> parse_equipment(const nlohmann::json& e
 	{
 		MonsterParams::StartingItem carried;
 		carried.itemKey = entry.at("item").get<std::string>();
-		carried.slot = parse_equipment_slot(entry.at("slot").get<std::string>());
+		carried.slot =
+			parse_equipment_slot(entry.at("slot").get<std::string>());
 		equipment.push_back(std::move(carried));
 	}
 
 	return equipment;
 }
 
-nlohmann::json encode_equipment(const std::vector<MonsterParams::StartingItem>& equipment)
+nlohmann::json encode_equipment(
+	const std::vector<MonsterParams::StartingItem>& equipment)
 {
 	nlohmann::json entries = nlohmann::json::array();
 
 	for (const MonsterParams::StartingItem& carried : equipment)
 	{
-		entries.push_back(nlohmann::json{
-			{ "item", carried.itemKey },
-			{ "slot", encode_equipment_slot(carried.slot) },
-		});
+		entries.push_back(
+			nlohmann::json{
+				{ "item", carried.itemKey },
+				{ "slot", encode_equipment_slot(carried.slot) },
+			});
 	}
 
 	return entries;
@@ -294,7 +300,10 @@ std::optional<SpellcasterTraining> parse_training(const nlohmann::json& record)
 	};
 	if (training.casterLevel < 1)
 	{
-		throw std::runtime_error(std::format("MonsterRegistry -- a caster level of {}; a caster is at least 1st level", training.casterLevel));
+		throw std::runtime_error(
+			std::format(
+				"MonsterRegistry -- a caster level of {}; a caster is at least 1st level",
+				training.casterLevel));
 	}
 	return training;
 }
@@ -303,7 +312,8 @@ std::optional<SpellcasterTraining> parse_training(const nlohmann::json& record)
 //
 // Example:
 //   encode_training(SpellcasterTraining{ CasterClass::WIZARD, 1 });   // -> { "caster_class": "wizard", "caster_level": 1 }
-nlohmann::json encode_training(const std::optional<SpellcasterTraining>& training)
+nlohmann::json encode_training(
+	const std::optional<SpellcasterTraining>& training)
 {
 	if (!training.has_value())
 	{
@@ -325,11 +335,12 @@ std::vector<InnatePower> parse_innate_powers(const nlohmann::json& entries)
 	std::vector<InnatePower> powers;
 	for (const nlohmann::json& entry : entries)
 	{
-		powers.push_back(InnatePower{
-			entry.at("spell").get<std::string>(),
-			parse_power_frequency(entry.at("frequency").get<std::string>()),
-			0,
-		});
+		powers.push_back(
+			InnatePower{
+				entry.at("spell").get<std::string>(),
+				parse_power_frequency(entry.at("frequency").get<std::string>()),
+				0,
+			});
 	}
 	return powers;
 }
@@ -340,10 +351,11 @@ nlohmann::json encode_innate_powers(const std::vector<InnatePower>& powers)
 	nlohmann::json entries = nlohmann::json::array();
 	for (const InnatePower& power : powers)
 	{
-		entries.push_back(nlohmann::json{
-			{ "spell", power.spell },
-			{ "frequency", encode_power_frequency(power.frequency) },
-		});
+		entries.push_back(
+			nlohmann::json{
+				{ "spell", power.spell },
+				{ "frequency", encode_power_frequency(power.frequency) },
+			});
 	}
 	return entries;
 }
@@ -368,11 +380,13 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 	params.corpseWeight = entry.at("corpse_weight").get<int>();
 	params.corpseNutrition = entry.at("corpse_nutrition").get<int>();
 	params.corpseTaste = entry.at("corpse_taste").get<std::string>();
-	params.corpseEdibility = corpse_edibility_from_record(entry.at("corpse_edible").get<bool>());
+	params.corpseEdibility =
+		corpse_edibility_from_record(entry.at("corpse_edible").get<bool>());
 	// Required: the book prints a size for every monster, and the ability scores are read by it.
 	params.size = parse_creature_size(entry.at("size").get<std::string>());
 	// Required for the same reason: Intelligence, Wisdom and Charisma are read by it.
-	params.intelligence = parse_intelligence_rating(entry.at("intelligence").get<std::string>());
+	params.intelligence =
+		parse_intelligence_rating(entry.at("intelligence").get<std::string>());
 	// Required: null is a monster whose entry prints no Strength, which a missing key is not.
 	params.strength = parse_strength(entry.at("strength"));
 	params.naturalAttack = entry.at("natural_attack").get<std::string>();
@@ -382,16 +396,18 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 	params.bodyPlanName = entry.at("body").get<std::string>();
 	if (params.bodyPlanName.empty())
 	{
-		throw std::runtime_error("MonsterRegistry -- a monster names no body; use \"beast\" for one that wears nothing");
+		throw std::runtime_error(
+			"MonsterRegistry -- a monster names no body; use \"beast\" for one that wears nothing");
 	}
 	params.damage = parse_damage(entry.at("damage"));
 	// Named by the Ai's save name; a Confused Ai wraps another and is never authored.
 	params.aiType = parse_ai_type(entry.at("ai").get<std::string>());
 	if (!is_authorable_ai_type(params.aiType))
 	{
-		throw std::runtime_error(std::format(
-			"MonsterRegistry -- a monster's ai '{}' is not one a record may name",
-			encode_ai_type(params.aiType)));
+		throw std::runtime_error(
+			std::format(
+				"MonsterRegistry -- a monster's ai '{}' is not one a record may name",
+				encode_ai_type(params.aiType)));
 	}
 	params.canSwim = entry.at("can_swim").get<bool>();
 	params.canFly = entry.at("can_fly").get<bool>();
@@ -482,7 +498,8 @@ std::string normalize_key(std::string_view name)
 		}
 		else
 		{
-			key += static_cast<char>(std::tolower(static_cast<unsigned char>(character)));
+			key += static_cast<char>(
+				std::tolower(static_cast<unsigned char>(character)));
 		}
 	}
 
@@ -500,7 +517,9 @@ void MonsterRegistry::load(std::string_view path)
 	if (!file.is_open())
 	{
 		throw std::runtime_error(
-			std::format("MonsterRegistry::load -- cannot open '{}'", resolved.string()));
+			std::format(
+				"MonsterRegistry::load -- cannot open '{}'",
+				resolved.string()));
 	}
 
 	const nlohmann::json root = nlohmann::json::parse(file);
@@ -522,7 +541,9 @@ void MonsterRegistry::load(std::string_view path)
 		if (!root.contains(key))
 		{
 			throw std::runtime_error(
-				std::format("MonsterRegistry::load -- missing entry '{}'", key));
+				std::format(
+					"MonsterRegistry::load -- missing entry '{}'",
+					key));
 		}
 		MonsterParams& params = standardMonsters[id];
 		params = parse_full_params(root.at(key));
@@ -568,7 +589,11 @@ void MonsterRegistry::refuse_unknown_spells(const SpellRegistry& spells) const
 		{
 			if (std::ranges::find(spellKeys, power.spell) == spellKeys.end())
 			{
-				throw std::runtime_error(std::format("MonsterRegistry -- {} has an innate power naming the unknown spell '{}'", key, power.spell));
+				throw std::runtime_error(
+					std::format(
+						"MonsterRegistry -- {} has an innate power naming the unknown spell '{}'",
+						key,
+						power.spell));
 			}
 		}
 	}
@@ -585,7 +610,8 @@ void MonsterRegistry::save(std::string_view path) const
 	{
 		if (standardMonsters.contains(id))
 		{
-			root[std::string{ monster_key(id) }] = encode_full_params(standardMonsters.at(id));
+			root[std::string{ monster_key(id) }] =
+				encode_full_params(standardMonsters.at(id));
 		}
 	}
 
@@ -598,17 +624,22 @@ void MonsterRegistry::save(std::string_view path) const
 	if (!file.is_open())
 	{
 		throw std::runtime_error(
-			std::format("MonsterRegistry::save -- cannot open '{}' for writing", resolved.string()));
+			std::format(
+				"MonsterRegistry::save -- cannot open '{}' for writing",
+				resolved.string()));
 	}
 	file << root.dump(4);
 	if (file.fail())
 	{
 		throw std::runtime_error(
-			std::format("MonsterRegistry::save -- write failed for '{}'", resolved.string()));
+			std::format(
+				"MonsterRegistry::save -- write failed for '{}'",
+				resolved.string()));
 	}
 }
 
-const std::unordered_map<MonsterId, MonsterParams>& MonsterRegistry::get_standard_monsters() const
+const std::unordered_map<MonsterId, MonsterParams>& MonsterRegistry::
+	get_standard_monsters() const
 {
 	return standardMonsters;
 }
@@ -653,7 +684,10 @@ const MonsterParams& MonsterRegistry::get_params(std::string_view key) const
 	{
 		if (!standardMonsters.contains(*id))
 		{
-			throw std::out_of_range(std::format("MonsterRegistry::get_params -- '{}' not in registry", key));
+			throw std::out_of_range(
+				std::format(
+					"MonsterRegistry::get_params -- '{}' not in registry",
+					key));
 		}
 
 		return standardMonsters.at(*id);
@@ -664,10 +698,13 @@ const MonsterParams& MonsterRegistry::get_params(std::string_view key) const
 		return customMonsters.at(std::string{ key });
 	}
 
-	throw std::out_of_range(std::format("MonsterRegistry::get_params -- unknown key '{}'", key));
+	throw std::out_of_range(
+		std::format("MonsterRegistry::get_params -- unknown key '{}'", key));
 }
 
-void MonsterRegistry::set_params(std::string_view key, const MonsterParams& params)
+void MonsterRegistry::set_params(
+	std::string_view key,
+	const MonsterParams& params)
 {
 	if (const std::optional<MonsterId> id = key_to_standard_id(key))
 	{
@@ -681,7 +718,8 @@ void MonsterRegistry::set_params(std::string_view key, const MonsterParams& para
 		return;
 	}
 
-	throw std::out_of_range(std::format("MonsterRegistry::set_params -- unknown key '{}'", key));
+	throw std::out_of_range(
+		std::format("MonsterRegistry::set_params -- unknown key '{}'", key));
 }
 
 TileRef MonsterRegistry::get_tile(std::string_view key) const
@@ -713,17 +751,20 @@ void MonsterRegistry::set_tile(std::string_view key, TileRef tile)
 		return;
 	}
 
-	throw std::out_of_range(std::format("MonsterRegistry::set_tile -- unknown key '{}'", key));
+	throw std::out_of_range(
+		std::format("MonsterRegistry::set_tile -- unknown key '{}'", key));
 }
 
 std::string MonsterRegistry::add_custom(MonsterParams params)
 {
 	auto is_taken = [this](std::string_view key) -> bool
 	{
-		return key_to_standard_id(key).has_value() || customMonsters.contains(key);
+		return key_to_standard_id(key).has_value() ||
+			customMonsters.contains(key);
 	};
 
-	const std::string base = normalize_key(params.name.empty() ? "new_monster" : params.name);
+	const std::string base =
+		normalize_key(params.name.empty() ? "new_monster" : params.name);
 	std::string key = base;
 	if (is_taken(key))
 	{
@@ -746,13 +787,17 @@ void MonsterRegistry::remove_custom(std::string_view key)
 	if (key_to_standard_id(key))
 	{
 		throw std::invalid_argument(
-			std::format("MonsterRegistry::remove_custom -- '{}' is a built-in monster and cannot be removed", key));
+			std::format(
+				"MonsterRegistry::remove_custom -- '{}' is a built-in monster and cannot be removed",
+				key));
 	}
 
 	if (!customMonsters.erase(std::string{ key }))
 	{
 		throw std::out_of_range(
-			std::format("MonsterRegistry::remove_custom -- unknown key '{}'", key));
+			std::format(
+				"MonsterRegistry::remove_custom -- unknown key '{}'",
+				key));
 	}
 }
 

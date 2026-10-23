@@ -134,7 +134,9 @@ private:
 	// Example:
 	//   body_height(renderer);   // a 900-pixel screen -> 824, after a 48 header and a 28 hint bar
 	[[nodiscard]] static int body_height(const Renderer& renderer);
-	void render_list(const Renderer& renderer, const MonsterRegistry& monsters) const;
+	void render_list(
+		const Renderer& renderer,
+		const MonsterRegistry& monsters) const;
 	void render_fields(const Renderer& renderer) const;
 	void render_picker(const Renderer& renderer) const;
 	void render_hint(const Renderer& renderer) const;

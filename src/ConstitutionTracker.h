@@ -22,7 +22,10 @@ public:
 	ConstitutionTracker& operator=(const ConstitutionTracker&) = delete;
 	ConstitutionTracker& operator=(ConstitutionTracker&&) = delete;
 
-	[[nodiscard]] std::optional<int> get_last_constitution() const noexcept { return lastConstitution; }
+	[[nodiscard]] std::optional<int> get_last_constitution() const noexcept
+	{
+		return lastConstitution;
+	}
 
 	void set_last_constitution(int value) noexcept { lastConstitution = value; }
 

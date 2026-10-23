@@ -39,14 +39,14 @@
     },
     {
       "file": "src/Spellcasting.cpp",
-      "original": "\t\t\tpower.at(\"readyAgainAt\").get<int>(),\n\t\t});",
-      "mutated": "\t\t\t0,\n\t\t});",
+      "original": "\t\t\t\tpower.at(\"readyAgainAt\").get<int>(),\n\t\t\t});",
+      "mutated": "\t\t\t\t0,\n\t\t\t});",
       "catches": "a save losing when a spent daily power comes back"
     },
     {
       "file": "src/Spellcasting.cpp",
-      "original": "\tspellcasting.memorizedSpells = record.at(\"memorizedSpells\").get<std::vector<std::string>>();",
-      "mutated": "\tspellcasting.memorizedSpells = record.value(\"memorizedSpells\", std::vector<std::string>{});",
+      "original": "\tspellcasting.memorizedSpells =\n\t\trecord.at(\"memorizedSpells\").get<std::vector<std::string>>();",
+      "mutated": "\tspellcasting.memorizedSpells =\n\t\trecord.value(\"memorizedSpells\", std::vector<std::string>{});",
       "catches": "a save with no memorized spells loading as an empty mind"
     },
     {
@@ -75,13 +75,13 @@
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\t\treturn distance <= fireball_range(caster_level(caster)) && distance > FIREBALL_RADIUS;",
-      "mutated": "\t\treturn distance > FIREBALL_RADIUS;",
+      "original": "\t\treturn distance <= fireball_range(caster_level(caster)) &&\n\t\t\tdistance > FIREBALL_RADIUS;",
+      "mutated": "\t\treturn distance> FIREBALL_RADIUS;",
       "catches": "a fireball cast at a player beyond its range"
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\t\treturn distance <= fireball_range(caster_level(caster)) && distance > FIREBALL_RADIUS;",
+      "original": "\t\treturn distance <= fireball_range(caster_level(caster)) &&\n\t\t\tdistance > FIREBALL_RADIUS;",
       "mutated": "\t\treturn distance <= fireball_range(caster_level(caster));",
       "catches": "a caster bursting a fireball it stands inside"
     },
@@ -99,8 +99,8 @@
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\tcaster.spellcasting.memorizedSpells = spells_to_memorize(caster_class(caster), caster_level(caster), caster.get_wisdom(), spells, dataManager);",
-      "mutated": "\tcaster.spellcasting.memorizedSpells = spells_to_memorize(caster_class(caster), caster.get_creature_level(), caster.get_wisdom(), spells, dataManager);",
+      "original": "\tcaster.spellcasting.memorizedSpells = spells_to_memorize(\n\t\tcaster_class(caster),\n\t\tcaster_level(caster),\n\t\tcaster.get_wisdom(),\n\t\tspells,\n\t\tdataManager);",
+      "mutated": "\tcaster.spellcasting.memorizedSpells = spells_to_memorize(\n\t\tcaster_class(caster),\n\t\tcaster.get_creature_level(),\n\t\tcaster.get_wisdom(),\n\t\tspells,\n\t\tdataManager);",
       "catches": "the fill reading the creature level instead of the caster level"
     },
     {
@@ -129,19 +129,19 @@
     },
     {
       "file": "src/AiMonster.cpp",
-      "original": "\t\tif (MonsterSpellcasting::try_cast_at(owner, *ctx.player(), ctx) == MonsterCast::NOTHING_CAST)",
+      "original": "\t\tif (MonsterSpellcasting::try_cast_at(owner, *ctx.player(), ctx) ==\n\t\t\tMonsterCast::NOTHING_CAST)",
       "mutated": "\t\tif (true)",
       "catches": "a perceived monster that never casts"
     },
     {
       "file": "src/AiMonsterRanged.cpp",
-      "original": "\t\tif (MonsterSpellcasting::try_cast_at(owner, *ctx.player(), ctx) == MonsterCast::NOTHING_CAST)",
+      "original": "\t\tif (MonsterSpellcasting::try_cast_at(owner, *ctx.player(), ctx) ==\n\t\t\tMonsterCast::NOTHING_CAST)",
       "mutated": "\t\tif (true)",
       "catches": "a ranged monster that never casts"
     },
     {
       "file": "src/MonsterCreator.cpp",
-      "original": "\tSpellSystem::memorize_spells(*creature, *ctx.spellRegistry, *ctx.dataManager);",
+      "original": "\tSpellSystem::memorize_spells(\n\t\t*creature,\n\t\t*ctx.spellRegistry,\n\t\t*ctx.dataManager);",
       "mutated": "\t(void)ctx.spellRegistry;",
       "catches": "a monster spawned with nothing memorized"
     },

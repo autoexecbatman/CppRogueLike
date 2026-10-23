@@ -83,7 +83,9 @@ protected:
 		goblin.experienceReward = std::make_unique<ExperienceReward>(0);
 		goblin.healthPool = std::make_unique<HealthPool>(STARTING_HP);
 		goblin.armorClass = std::make_unique<ArmorClass>(10);
-		goblin.attacker = std::make_unique<MonsterAttacker>(goblin, DamageInfo{ "1d4", DamageType::PHYSICAL });
+		goblin.attacker = std::make_unique<MonsterAttacker>(
+			goblin,
+			DamageInfo{ "1d4", DamageType::PHYSICAL });
 		goblin.set_dr(0);
 		goblin.set_thaco(20);
 		goblin.set_strength(8);
@@ -134,7 +136,8 @@ protected:
 	Game game{ TEST_DICE_SEED };
 	GameContext ctx{};
 	Map map{ 20, 20 };
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ PLAYER_COLUMN, CORRIDOR_ROW }) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ PLAYER_COLUMN, CORRIDOR_ROW }) };
 	std::vector<std::unique_ptr<Creature>> creatures{};
 	Creature goblin{
 		Vector2D{ GOBLIN_START_COLUMN, CORRIDOR_ROW },
@@ -145,7 +148,8 @@ protected:
 // The whole report: a monster walks into water it cannot swim and drowns there.
 TEST_F(MonsterWaterAvoidanceTest, AMonsterThatCannotSwimNeverStandsInWater)
 {
-	ASSERT_FALSE(goblin.has_state(ActorState::CAN_SWIM)) << "the goblin under test must not be a swimmer";
+	ASSERT_FALSE(goblin.has_state(ActorState::CAN_SWIM))
+		<< "the goblin under test must not be a swimmer";
 
 	for (const Vector2D& standing : walk_the_goblin())
 	{
@@ -187,7 +191,8 @@ TEST_F(MonsterWaterAvoidanceTest, DriftingDoesNotCarryAMonsterIntoWater)
 	constexpr int DRIFTER_COLUMN = 15;
 	map.set_tile(Vector2D{ POOL_COLUMN, CORRIDOR_ROW }, TileType::WATER);
 	goblin.position = Vector2D{ DRIFTER_COLUMN, CORRIDOR_ROW };
-	ASSERT_FALSE(map.is_in_fov(goblin.position)) << "an unseen drifter is the point; a seen one hunts instead";
+	ASSERT_FALSE(map.is_in_fov(goblin.position))
+		<< "an unseen drifter is the point; a seen one hunts instead";
 
 	// Queued in the order decide_action reads them. The fixture builds its own Game, so
 	// the queue starts empty and nothing has to clear it first - measured, the drift
@@ -200,8 +205,10 @@ TEST_F(MonsterWaterAvoidanceTest, DriftingDoesNotCarryAMonsterIntoWater)
 	goblin.ai->update(goblin, ctx);
 
 	EXPECT_FALSE(map.is_water(goblin.position))
-		<< "the goblin drifted into water at (" << goblin.position.x << "," << goblin.position.y << ")";
-	EXPECT_EQ(goblin.position.x, DRIFTER_COLUMN) << "the step into the pool was refused, so it stands where it stood";
+		<< "the goblin drifted into water at (" << goblin.position.x << ","
+		<< goblin.position.y << ")";
+	EXPECT_EQ(goblin.position.x, DRIFTER_COLUMN)
+		<< "the step into the pool was refused, so it stands where it stood";
 }
 
 // The same drift carries a swimmer in, so what holds the goblin is the swim rule rather
@@ -221,7 +228,8 @@ TEST_F(MonsterWaterAvoidanceTest, TheSameDriftCarriesASwimmerIn)
 
 	goblin.ai->update(goblin, ctx);
 
-	EXPECT_EQ(goblin.position.x, POOL_COLUMN) << "a swimmer takes the step the goblin was refused";
+	EXPECT_EQ(goblin.position.x, POOL_COLUMN)
+		<< "a swimmer takes the step the goblin was refused";
 	EXPECT_TRUE(map.is_water(goblin.position));
 }
 
@@ -273,7 +281,9 @@ protected:
 		goblin.experienceReward = std::make_unique<ExperienceReward>(0);
 		goblin.healthPool = std::make_unique<HealthPool>(STARTING_HP);
 		goblin.armorClass = std::make_unique<ArmorClass>(10);
-		goblin.attacker = std::make_unique<MonsterAttacker>(goblin, DamageInfo{ "1d4", DamageType::PHYSICAL });
+		goblin.attacker = std::make_unique<MonsterAttacker>(
+			goblin,
+			DamageInfo{ "1d4", DamageType::PHYSICAL });
 		goblin.set_dr(0);
 		goblin.set_thaco(20);
 		goblin.set_strength(8);
@@ -328,18 +338,23 @@ protected:
 // and never attacks.
 TEST_F(MonsterWaterDetourTest, AMonsterWalksRoundAPuddleInsteadOfStoppingAtIt)
 {
-	ASSERT_FALSE(goblin.has_state(ActorState::CAN_SWIM)) << "the goblin under test must not be a swimmer";
-	ASSERT_EQ(distance_to_player(), 3) << "the fixture should start the goblin three tiles out";
-	ASSERT_TRUE(map.is_in_fov(goblin.position)) << "an aware goblin hunts; an unseen one drifts on a die instead";
+	ASSERT_FALSE(goblin.has_state(ActorState::CAN_SWIM))
+		<< "the goblin under test must not be a swimmer";
+	ASSERT_EQ(distance_to_player(), 3)
+		<< "the fixture should start the goblin three tiles out";
+	ASSERT_TRUE(map.is_in_fov(goblin.position))
+		<< "an aware goblin hunts; an unseen one drifts on a die instead";
 
 	for (int round = 0; round < ROUNDS; ++round)
 	{
 		goblin.ai->update(goblin, ctx);
 		EXPECT_FALSE(map.is_water(goblin.position))
-			<< "round " << round << ": the goblin stood in water at (" << goblin.position.x << "," << goblin.position.y << ")";
+			<< "round " << round << ": the goblin stood in water at ("
+			<< goblin.position.x << "," << goblin.position.y << ")";
 	}
 
 	EXPECT_LE(distance_to_player(), 1)
-		<< "the goblin held at (" << goblin.position.x << "," << goblin.position.y
-		<< "), " << distance_to_player() << " tiles out, because the only nearer tile was the water";
+		<< "the goblin held at (" << goblin.position.x << ","
+		<< goblin.position.y << "), " << distance_to_player()
+		<< " tiles out, because the only nearer tile was the water";
 }

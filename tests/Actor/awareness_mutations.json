@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tawareUntilTime = expiry_time(ctx.gameState->get_time(), AWARENESS_ROUNDS);",
-      "mutated": "\t\tawareUntilTime = ctx.gameState->get_time();",
+      "original": "\t\tawareUntilTime =\n\t\t\texpiry_time(ctx.gameState->get_time(), AWARENESS_ROUNDS);",
+      "mutated": "\t\tawareUntilTime =ctx.gameState->get_time();",
       "catches": "a memory that ends the instant it is formed, so nothing ever hunts a player out of sight"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tawareUntilTime = expiry_time(ctx.gameState->get_time(), AWARENESS_ROUNDS);",
-      "mutated": "\t\tawareUntilTime = expiry_time(0, AWARENESS_ROUNDS);",
+      "original": "\t\tawareUntilTime =\n\t\t\texpiry_time(ctx.gameState->get_time(), AWARENESS_ROUNDS);",
+      "mutated": "\t\tawareUntilTime =\n\t\t\texpiry_time(0, AWARENESS_ROUNDS);",
       "catches": "a memory measured from the start of the game, so a creature deep in a run forgets the moment it looks"
     },
     {
@@ -33,8 +33,8 @@
     },
     {
       "file": "src/Creature.h",
-      "original": "\t[[nodiscard]] bool is_aware(int currentTime) const noexcept { return currentTime < awareUntilTime; }",
-      "mutated": "\t[[nodiscard]] bool is_aware(int currentTime) const noexcept { return currentTime <= awareUntilTime; }",
+      "original": "\t[[nodiscard]] bool is_aware(int currentTime) const noexcept\n\t{\n\t\treturn currentTime < awareUntilTime;\n\t}",
+      "mutated": "\t[[nodiscard]] bool is_aware(int currentTime) const noexcept\n\t{\n\t\treturn currentTime <= awareUntilTime;\n\t}",
       "catches": "a memory lasting one reading past the round it was booked to end in"
     },
     {

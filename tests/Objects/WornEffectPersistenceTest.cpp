@@ -45,7 +45,8 @@ ItemBehavior round_trip(const ItemBehavior& behavior)
 	json record;
 	save_behavior(behavior, record);
 	const std::optional<ItemBehavior> loaded = load_behavior(record);
-	EXPECT_TRUE(loaded.has_value()) << "the record did not read back as a behaviour at all";
+	EXPECT_TRUE(loaded.has_value())
+		<< "the record did not read back as a behaviour at all";
 	return loaded.value_or(behavior);
 }
 } // namespace
@@ -63,7 +64,8 @@ TEST(WornEffectPersistenceTest, GauntletsKeepTheirEffect)
 	ASSERT_TRUE(std::holds_alternative<Gauntlets>(reloaded));
 	EXPECT_EQ(std::get<Gauntlets>(reloaded).effect, MagicalEffect::SWIMMING)
 		<< "the gauntlets of swimming came back as plain gauntlets";
-	EXPECT_EQ(std::get<Gauntlets>(reloaded).strBonus, 3) << "the ability bonus was already saved and must stay saved";
+	EXPECT_EQ(std::get<Gauntlets>(reloaded).strBonus, 3)
+		<< "the ability bonus was already saved and must stay saved";
 }
 
 // The amulet of ogre power carries protection in the data, so an amulet is the second
@@ -77,8 +79,11 @@ TEST(WornEffectPersistenceTest, AnAmuletKeepsItsEffectAndItsBonus)
 	const ItemBehavior reloaded = round_trip(ItemBehavior{ worn });
 
 	ASSERT_TRUE(std::holds_alternative<JewelryAmulet>(reloaded));
-	EXPECT_EQ(std::get<JewelryAmulet>(reloaded).effect, MagicalEffect::PROTECTION);
-	EXPECT_EQ(std::get<JewelryAmulet>(reloaded).bonus, 1) << "a protection of +1 came back as +0";
+	EXPECT_EQ(
+		std::get<JewelryAmulet>(reloaded).effect,
+		MagicalEffect::PROTECTION);
+	EXPECT_EQ(std::get<JewelryAmulet>(reloaded).bonus, 1)
+		<< "a protection of +1 came back as +0";
 }
 
 // No girdle in the data carries an effect today. It goes through the same helper, so
@@ -104,14 +109,18 @@ TEST(WornEffectPersistenceTest, AHelmAndARingKeepWhatTheyAlreadyKept)
 	helm.effect = MagicalEffect::UNDERWATER_ACTION;
 	const ItemBehavior reloadedHelm = round_trip(ItemBehavior{ helm });
 	ASSERT_TRUE(std::holds_alternative<MagicalHelm>(reloadedHelm));
-	EXPECT_EQ(std::get<MagicalHelm>(reloadedHelm).effect, MagicalEffect::UNDERWATER_ACTION);
+	EXPECT_EQ(
+		std::get<MagicalHelm>(reloadedHelm).effect,
+		MagicalEffect::UNDERWATER_ACTION);
 
 	MagicalRing ring{};
 	ring.effect = MagicalEffect::FREE_ACTION;
 	ring.bonus = 1;
 	const ItemBehavior reloadedRing = round_trip(ItemBehavior{ ring });
 	ASSERT_TRUE(std::holds_alternative<MagicalRing>(reloadedRing));
-	EXPECT_EQ(std::get<MagicalRing>(reloadedRing).effect, MagicalEffect::FREE_ACTION);
+	EXPECT_EQ(
+		std::get<MagicalRing>(reloadedRing).effect,
+		MagicalEffect::FREE_ACTION);
 	EXPECT_EQ(std::get<MagicalRing>(reloadedRing).bonus, 1);
 }
 
@@ -129,7 +138,9 @@ TEST(WornEffectPersistenceTest, AReloadedWearerStillCrossesWater)
 	Gauntlets worn{};
 	worn.effect = MagicalEffect::SWIMMING;
 
-	auto gauntlets = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "gauntlets", ColorPairId::WHITE_BLACK });
+	auto gauntlets = std::make_unique<Item>(
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "gauntlets", ColorPairId::WHITE_BLACK });
 	gauntlets->behavior = round_trip(ItemBehavior{ worn });
 	wearer.wear(std::move(gauntlets), EquipmentSlot::GAUNTLETS);
 

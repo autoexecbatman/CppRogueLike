@@ -64,10 +64,7 @@ void expect_scores(const Creature& creature, const AbilityScores& printed)
 class MimicSpiderShopkeeperAbilityTest : public ::testing::Test
 {
 protected:
-	void SetUp() override
-	{
-		ctx = mock.to_game_context();
-	}
+	void SetUp() override { ctx = mock.to_game_context(); }
 
 	// Every die from here on at its highest.
 	void script_highest()
@@ -81,7 +78,10 @@ protected:
 	// The monster built from its record, as the spawn table builds one.
 	std::unique_ptr<Creature> build(std::string_view key)
 	{
-		return MonsterCreator::create_from_params(Vector2D{ 0, 0 }, mock.monsterRegistry.get_params(key), ctx);
+		return MonsterCreator::create_from_params(
+			Vector2D{ 0, 0 },
+			mock.monsterRegistry.get_params(key),
+			ctx);
 	}
 
 	MockGameContext mock{};
@@ -89,7 +89,9 @@ protected:
 };
 
 // Table 6 large 20, 7 large 19, 8 large 21; Tables 9 to 11 Semi- 6, 6, 6.
-TEST_F(MimicSpiderShopkeeperAbilityTest, AMimicReadsTheLargeAndSemiIntelligentColumns)
+TEST_F(
+	MimicSpiderShopkeeperAbilityTest,
+	AMimicReadsTheLargeAndSemiIntelligentColumns)
 {
 	script_highest();
 	const auto mimic = build("mimic");
@@ -121,7 +123,9 @@ TEST_F(MimicSpiderShopkeeperAbilityTest, ASmallSpiderReadsTheTinyAndLowColumns)
 }
 
 // The huge spider: man-sized 18, 21, 19; Animal 4, 5, 3.
-TEST_F(MimicSpiderShopkeeperAbilityTest, AGiantSpiderReadsTheManSizedAndAnimalColumns)
+TEST_F(
+	MimicSpiderShopkeeperAbilityTest,
+	AGiantSpiderReadsTheManSizedAndAnimalColumns)
 {
 	script_highest();
 	const auto spider = build("spider_giant");
@@ -139,7 +143,9 @@ TEST_F(MimicSpiderShopkeeperAbilityTest, AWebSpinnerReadsTheLargeAndLowColumns)
 }
 
 // A human: man-sized 18, 21, 19; Average 13, 12, 12.
-TEST_F(MimicSpiderShopkeeperAbilityTest, AShopkeeperReadsTheManSizedAndAverageColumns)
+TEST_F(
+	MimicSpiderShopkeeperAbilityTest,
+	AShopkeeperReadsTheManSizedAndAverageColumns)
 {
 	script_highest();
 	const auto shopkeeper = build("shopkeeper");

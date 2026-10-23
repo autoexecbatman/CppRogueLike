@@ -40,7 +40,11 @@ void Minimap::render(const GameContext& ctx) const
 	int screenH = renderer.get_screen_height();
 
 	// The largest whole number of pixels a tile can take inside the overlay's share, so every cell matches.
-	const int tilePx = std::max(1, std::min(screenW * MAX_WIDTH_PERCENT / 100 / mapW, screenH * MAX_HEIGHT_PERCENT / 100 / mapH));
+	const int tilePx = std::max(
+		1,
+		std::min(
+			screenW * MAX_WIDTH_PERCENT / 100 / mapW,
+			screenH * MAX_HEIGHT_PERCENT / 100 / mapH));
 
 	int panelW = mapW * tilePx;
 	int panelH = mapH * tilePx;
@@ -48,8 +52,18 @@ void Minimap::render(const GameContext& ctx) const
 	int originY = PADDING;
 
 	// Opaque, with an edge: a translucent backdrop vanishes against unexplored map and leaves no bounds.
-	DrawRectangle(originX - BORDER, originY - BORDER, panelW + 2 * BORDER, panelH + 2 * BORDER, Color{ 20, 12, 28, 255 });
-	DrawRectangleLines(originX - BORDER, originY - BORDER, panelW + 2 * BORDER, panelH + 2 * BORDER, Color{ 120, 120, 150, 255 });
+	DrawRectangle(
+		originX - BORDER,
+		originY - BORDER,
+		panelW + 2 * BORDER,
+		panelH + 2 * BORDER,
+		Color{ 20, 12, 28, 255 });
+	DrawRectangleLines(
+		originX - BORDER,
+		originY - BORDER,
+		panelW + 2 * BORDER,
+		panelH + 2 * BORDER,
+		Color{ 120, 120, 150, 255 });
 
 	for (int row = 0; row < mapH; ++row)
 	{
@@ -64,8 +78,10 @@ void Minimap::render(const GameContext& ctx) const
 			bool inFov = map.is_in_fov(pos);
 			Color cellColor{};
 
-			const TileDefinition& definition = ctx.tileConfig->get_tile_definition(map.get_tile_type(pos));
-			const TileColor& authored = inFov ? definition.minimapVisible : definition.minimapRemembered;
+			const TileDefinition& definition =
+				ctx.tileConfig->get_tile_definition(map.get_tile_type(pos));
+			const TileColor& authored = inFov ? definition.minimapVisible :
+												definition.minimapRemembered;
 			cellColor = Color{
 				static_cast<unsigned char>(authored.red),
 				static_cast<unsigned char>(authored.green),
@@ -73,7 +89,12 @@ void Minimap::render(const GameContext& ctx) const
 				static_cast<unsigned char>(authored.alpha),
 			};
 
-			DrawRectangle(originX + col * tilePx, originY + row * tilePx, tilePx, tilePx, cellColor);
+			DrawRectangle(
+				originX + col * tilePx,
+				originY + row * tilePx,
+				tilePx,
+				tilePx,
+				cellColor);
 		}
 	}
 

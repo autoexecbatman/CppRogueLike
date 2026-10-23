@@ -51,13 +51,13 @@
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": "\tif (creature.has_slot(EquipmentSlot::RIGHT_HAND) || creature.has_slot(EquipmentSlot::LEFT_HAND))",
+      "original": "\tif (creature.has_slot(EquipmentSlot::RIGHT_HAND) ||\n\t\tcreature.has_slot(EquipmentSlot::LEFT_HAND))",
       "mutated": "\tif (true)",
       "catches": "a wolf opening doors"
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": "\t\tconst bool isBypassed = definition.hasBypassState && creature.has_bypass(definition.bypassState);",
+      "original": "\t\tconst bool isBypassed = definition.hasBypassState &&\n\t\t\tcreature.has_bypass(definition.bypassState);",
       "mutated": "\t\tconst bool isBypassed = definition.hasBypassState;",
       "catches": "every creature swimming"
     },
@@ -69,7 +69,7 @@
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": "\treturn ctx.map->get_tile_type(position) != TileType::CLOSED_DOOR && ctx.map->get_actor(position, ctx) == nullptr;",
+      "original": "\treturn ctx.map->get_tile_type(position) != TileType::CLOSED_DOOR &&\n\t\tctx.map->get_actor(position, ctx) == nullptr;",
       "mutated": "\treturn ctx.map->get_actor(position, ctx) == nullptr;",
       "catches": "a shut door reported as somewhere to stand"
     },
@@ -81,7 +81,7 @@
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": " || ctx.map->get_actor(destination, ctx) != nullptr)\n\t{\n\t\treturn StepResult::REFUSED;",
+      "original": "||\n\t\tctx.map->get_actor(destination, ctx) != nullptr)\n\t{\n\t\treturn StepResult::REFUSED;",
       "mutated": ")\n\t{\n\t\treturn StepResult::REFUSED;",
       "catches": "a step onto a tile another creature stands on"
     },
@@ -93,13 +93,13 @@
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": " && found->clock == clock",
+      "original": "&&\n\t\tfound->clock == clock",
       "mutated": "",
       "catches": "a cost map kept after the clock moved, so a door opened last window stays shut in it"
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": "found->goal == goal && ",
+      "original": "found->goal == goal &&",
       "mutated": "",
       "catches": "a cost map kept for the wrong goal"
     },
@@ -117,7 +117,7 @@
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": "\t\t\tif (map.find_decoration_at(goal, ctx) != nullptr && mobility.contains(map.get_tile_type(goal)))",
+      "original": "\t\t\tif (map.find_decoration_at(goal, ctx) != nullptr &&\n\t\t\t\tmobility.contains(map.get_tile_type(goal)))",
       "mutated": "\t\t\tif (false)",
       "catches": "the walk to a barrel refused, so a click can never break one"
     }

@@ -61,7 +61,9 @@ protected:
 		player->set_dexterity(10);
 		ctx.playerOwner = &player;
 
-		target = std::make_unique<Creature>(Vector2D{ 0, 1 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
+		target = std::make_unique<Creature>(
+			Vector2D{ 0, 1 },
+			ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
 		target->experienceReward = std::make_unique<ExperienceReward>(0);
 		target->armorClass = std::make_unique<ArmorClass>(10);
 		target->healthPool = std::make_unique<HealthPool>(STARTING_HP);
@@ -75,7 +77,11 @@ protected:
 	}
 
 	// The player at this Strength, holding the weapon in the slot.
-	void arm_player(int strength, int exceptional, std::string_view key, EquipmentSlot slot)
+	void arm_player(
+		int strength,
+		int exceptional,
+		std::string_view key,
+		EquipmentSlot slot)
 	{
 		player->set_strength(strength);
 		player->set_exceptional_strength(exceptional);
@@ -86,13 +92,24 @@ protected:
 	void wear_girdle_and_gauntlets()
 	{
 		player->set_strength(12);
-		ASSERT_TRUE(player->equip_item(weapon("girdle_of_hill_giant_strength"), EquipmentSlot::GIRDLE, ctx));
-		ASSERT_TRUE(player->equip_item(weapon("gauntlets_of_ogre_power"), EquipmentSlot::GAUNTLETS, ctx));
-		ASSERT_EQ(player->get_strength(), 19) << "the girdle's 19 did not decide the score";
+		ASSERT_TRUE(player->equip_item(
+			weapon("girdle_of_hill_giant_strength"),
+			EquipmentSlot::GIRDLE,
+			ctx));
+		ASSERT_TRUE(player->equip_item(
+			weapon("gauntlets_of_ogre_power"),
+			EquipmentSlot::GAUNTLETS,
+			ctx));
+		ASSERT_EQ(player->get_strength(), 19)
+			<< "the girdle's 19 did not decide the score";
 	}
 
 	// Hit points the target lost to one attack whose d20 and damage die are scripted.
-	int damage_from(Creature& attacker, Creature& defender, AttackKind kind, int d20)
+	int damage_from(
+		Creature& attacker,
+		Creature& defender,
+		AttackKind kind,
+		int d20)
 	{
 		const int before = defender.get_hp();
 		mock.dice.set_next_d20(d20);
@@ -175,12 +192,14 @@ TEST_F(AttackStrengthTest, EachSourceTakesItsPartOfTheRow)
 		};
 		attacker.set_strength(expected.strength);
 		attacker.set_exceptional_strength(expected.exceptional);
-		const std::unique_ptr<Item> fired = expected.weaponKey.empty() ? nullptr : weapon(expected.weaponKey);
-		const AttackStrength::Adjustment adjustment = AttackStrength::adjustment(
-			mock.data_manager,
-			attacker,
-			expected.kind,
-			fired.get());
+		const std::unique_ptr<Item> fired =
+			expected.weaponKey.empty() ? nullptr : weapon(expected.weaponKey);
+		const AttackStrength::Adjustment adjustment =
+			AttackStrength::adjustment(
+				mock.data_manager,
+				attacker,
+				expected.kind,
+				fired.get());
 
 		EXPECT_EQ(adjustment.hit, expected.hit) << expected.source;
 		EXPECT_EQ(adjustment.damage, expected.damage) << expected.source;
@@ -213,11 +232,12 @@ TEST_F(AttackStrengthTest, OgreGauntletsBesideAGirdleAddTheirOwnRow)
 
 	for (const Case& expected : FROM_PAGES_964_AND_966)
 	{
-		const AttackStrength::Adjustment adjustment = AttackStrength::adjustment(
-			mock.data_manager,
-			*player,
-			expected.kind,
-			expected.fired);
+		const AttackStrength::Adjustment adjustment =
+			AttackStrength::adjustment(
+				mock.data_manager,
+				*player,
+				expected.kind,
+				expected.fired);
 
 		EXPECT_EQ(adjustment.hit, expected.hit) << expected.source;
 		EXPECT_EQ(adjustment.damage, expected.damage) << expected.source;
@@ -229,7 +249,10 @@ TEST_F(AttackStrengthTest, OgreGauntletsBesideAGirdleAddTheirOwnRow)
 TEST_F(AttackStrengthTest, AGirdleOrOgreGauntletsAloneGiveOnlyTheirOwnRow)
 {
 	player->set_strength(12);
-	ASSERT_TRUE(player->equip_item(weapon("girdle_of_hill_giant_strength"), EquipmentSlot::GIRDLE, ctx));
+	ASSERT_TRUE(player->equip_item(
+		weapon("girdle_of_hill_giant_strength"),
+		EquipmentSlot::GIRDLE,
+		ctx));
 	const AttackStrength::Adjustment girdleAlone = AttackStrength::adjustment(
 		mock.data_manager,
 		*player,
@@ -239,12 +262,16 @@ TEST_F(AttackStrengthTest, AGirdleOrOgreGauntletsAloneGiveOnlyTheirOwnRow)
 	EXPECT_EQ(girdleAlone.damage, 7);
 
 	ASSERT_TRUE(player->unequip_item(EquipmentSlot::GIRDLE, ctx));
-	ASSERT_TRUE(player->equip_item(weapon("gauntlets_of_ogre_power"), EquipmentSlot::GAUNTLETS, ctx));
-	const AttackStrength::Adjustment gauntletsAlone = AttackStrength::adjustment(
-		mock.data_manager,
-		*player,
-		AttackKind::MELEE,
-		nullptr);
+	ASSERT_TRUE(player->equip_item(
+		weapon("gauntlets_of_ogre_power"),
+		EquipmentSlot::GAUNTLETS,
+		ctx));
+	const AttackStrength::Adjustment gauntletsAlone =
+		AttackStrength::adjustment(
+			mock.data_manager,
+			*player,
+			AttackKind::MELEE,
+			nullptr);
 	EXPECT_EQ(gauntletsAlone.hit, 3);
 	EXPECT_EQ(gauntletsAlone.damage, 6);
 }
@@ -255,9 +282,16 @@ TEST_F(AttackStrengthTest, AGirdleOrOgreGauntletsAloneGiveOnlyTheirOwnRow)
 TEST_F(AttackStrengthTest, OtherGauntletsBesideAGirdleAddNothing)
 {
 	player->set_strength(12);
-	ASSERT_TRUE(player->equip_item(weapon("girdle_of_hill_giant_strength"), EquipmentSlot::GIRDLE, ctx));
-	ASSERT_TRUE(player->equip_item(weapon("gauntlets_of_swimming_and_climbing"), EquipmentSlot::GAUNTLETS, ctx));
-	player->get_equipped_item(EquipmentSlot::GAUNTLETS)->behavior = Gauntlets{ .strBonus = 2 };
+	ASSERT_TRUE(player->equip_item(
+		weapon("girdle_of_hill_giant_strength"),
+		EquipmentSlot::GIRDLE,
+		ctx));
+	ASSERT_TRUE(player->equip_item(
+		weapon("gauntlets_of_swimming_and_climbing"),
+		EquipmentSlot::GAUNTLETS,
+		ctx));
+	player->get_equipped_item(EquipmentSlot::GAUNTLETS)->behavior =
+		Gauntlets{ .strBonus = 2 };
 
 	const AttackStrength::Adjustment swing = AttackStrength::adjustment(
 		mock.data_manager,
@@ -274,10 +308,14 @@ TEST_F(AttackStrengthTest, OtherGauntletsBesideAGirdleAddNothing)
 TEST_F(AttackStrengthTest, ASwingInOgreGauntletsAndAGirdleTakesBoth)
 {
 	wear_girdle_and_gauntlets();
-	ASSERT_TRUE(player->equip_item(weapon("long_sword"), EquipmentSlot::RIGHT_HAND, ctx));
+	ASSERT_TRUE(player
+			->equip_item(weapon("long_sword"), EquipmentSlot::RIGHT_HAND, ctx));
 
-	EXPECT_EQ(damage_from(*player, *target, AttackKind::MELEE, 3), 0) << "a 3 hit";
-	EXPECT_EQ(damage_from(*player, *target, AttackKind::MELEE, 4), DIE_ROLLED + 13);
+	EXPECT_EQ(damage_from(*player, *target, AttackKind::MELEE, 3), 0)
+		<< "a 3 hit";
+	EXPECT_EQ(
+		damage_from(*player, *target, AttackKind::MELEE, 4),
+		DIE_ROLLED + 13);
 }
 
 // The sling is its own class now, not a bow that would take the bow's penalty.
@@ -303,8 +341,11 @@ TEST_F(AttackStrengthTest, ACompositeArrowTakesTheRowItIsMadeFor)
 {
 	arm_player(18, 100, "composite_bow", EquipmentSlot::MISSILE_WEAPON);
 
-	EXPECT_EQ(damage_from(*player, *target, AttackKind::RANGED, 8), 0) << "an 8 hit";
-	EXPECT_EQ(damage_from(*player, *target, AttackKind::RANGED, 9), DIE_ROLLED + 2);
+	EXPECT_EQ(damage_from(*player, *target, AttackKind::RANGED, 8), 0)
+		<< "an 8 hit";
+	EXPECT_EQ(
+		damage_from(*player, *target, AttackKind::RANGED, 9),
+		DIE_ROLLED + 2);
 }
 
 // "Requires: 18 Strength": a 17 cannot draw it, and says so; it stays in the pack.
@@ -312,16 +353,25 @@ TEST_F(AttackStrengthTest, AnArmBelowTheRatingCannotDrawIt)
 {
 	player->set_strength(17);
 
-	EXPECT_FALSE(player->equip_item(weapon("composite_bow"), EquipmentSlot::MISSILE_WEAPON, ctx));
-	EXPECT_EQ(player->get_equipped_item(EquipmentSlot::MISSILE_WEAPON), nullptr);
-	EXPECT_EQ(player->inventoryData.items.size(), 1u) << "the bow left the pack";
+	EXPECT_FALSE(player->equip_item(
+		weapon("composite_bow"),
+		EquipmentSlot::MISSILE_WEAPON,
+		ctx));
+	EXPECT_EQ(
+		player->get_equipped_item(EquipmentSlot::MISSILE_WEAPON),
+		nullptr);
+	EXPECT_EQ(player->inventoryData.items.size(), 1u)
+		<< "the bow left the pack";
 
 	bool refused = false;
-	for (size_t index = 0; index < mock.messages.get_stored_message_count(); ++index)
+	for (
+		size_t index = 0; index < mock.messages.get_stored_message_count();
+		++index)
 	{
 		for (const auto& part : mock.messages.get_attack_message_at(index))
 		{
-			refused = refused || part.text.find("not strong enough") != std::string::npos;
+			refused = refused ||
+				part.text.find("not strong enough") != std::string::npos;
 		}
 	}
 	EXPECT_TRUE(refused) << "the refusal said nothing";
@@ -332,7 +382,10 @@ TEST_F(AttackStrengthTest, AnArmAtTheRatingCanDrawIt)
 {
 	player->set_strength(18);
 
-	EXPECT_TRUE(player->equip_item(weapon("composite_bow"), EquipmentSlot::MISSILE_WEAPON, ctx));
+	EXPECT_TRUE(player->equip_item(
+		weapon("composite_bow"),
+		EquipmentSlot::MISSILE_WEAPON,
+		ctx));
 }
 
 // "Strength 18 to use it" - the owner's ruling for the composite bow, and to use is not
@@ -341,11 +394,19 @@ TEST_F(AttackStrengthTest, AnArmAtTheRatingCanDrawIt)
 TEST_F(AttackStrengthTest, AnArmThatLosesItsStrengthCannotDrawTheBowItHolds)
 {
 	player->set_strength(12);
-	ASSERT_TRUE(player->equip_item(weapon("girdle_of_hill_giant_strength"), EquipmentSlot::GIRDLE, ctx));
-	ASSERT_EQ(player->get_strength(), 19) << "the girdle did not raise Strength";
-	ASSERT_TRUE(player->equip_item(weapon("composite_bow"), EquipmentSlot::MISSILE_WEAPON, ctx));
+	ASSERT_TRUE(player->equip_item(
+		weapon("girdle_of_hill_giant_strength"),
+		EquipmentSlot::GIRDLE,
+		ctx));
+	ASSERT_EQ(player->get_strength(), 19)
+		<< "the girdle did not raise Strength";
+	ASSERT_TRUE(player->equip_item(
+		weapon("composite_bow"),
+		EquipmentSlot::MISSILE_WEAPON,
+		ctx));
 	ASSERT_TRUE(player->unequip_item(EquipmentSlot::GIRDLE, ctx));
-	ASSERT_EQ(player->get_strength(), 12) << "taking the girdle off did not lower Strength";
+	ASSERT_EQ(player->get_strength(), 12)
+		<< "taking the girdle off did not lower Strength";
 
 	EXPECT_EQ(damage_from(*player, *target, AttackKind::RANGED, 20), 0)
 		<< "a Strength 12 arm drew a bow made for 18";
@@ -361,7 +422,9 @@ TEST_F(AttackStrengthTest, AMonsterTooWeakForItsBowDrawsNothing)
 	archer.experienceReward = std::make_unique<ExperienceReward>(0);
 	archer.armorClass = std::make_unique<ArmorClass>(10);
 	archer.healthPool = std::make_unique<HealthPool>(STARTING_HP);
-	archer.attacker = std::make_unique<MonsterAttacker>(archer, DamageInfo{ "1d6", DamageType::PHYSICAL });
+	archer.attacker = std::make_unique<MonsterAttacker>(
+		archer,
+		DamageInfo{ "1d6", DamageType::PHYSICAL });
 	archer.set_thaco(20);
 	archer.set_strength(12);
 	archer.set_dexterity(10);
@@ -392,10 +455,15 @@ TEST_F(AttackStrengthTest, TheRatingSurvivesASave)
 TEST_F(AttackStrengthTest, AStrongArchersArrowCarriesNoStrength)
 {
 	arm_player(18, 100, "long_bow", EquipmentSlot::MISSILE_WEAPON);
-	ASSERT_TRUE(player->equip_item(weapon("long_sword"), EquipmentSlot::RIGHT_HAND, ctx));
+	ASSERT_TRUE(player
+			->equip_item(weapon("long_sword"), EquipmentSlot::RIGHT_HAND, ctx));
 
-	EXPECT_EQ(damage_from(*player, *target, AttackKind::RANGED, 20), DIE_ROLLED);
-	EXPECT_EQ(damage_from(*player, *target, AttackKind::MELEE, 20), DIE_ROLLED + 6);
+	EXPECT_EQ(
+		damage_from(*player, *target, AttackKind::RANGED, 20),
+		DIE_ROLLED);
+	EXPECT_EQ(
+		damage_from(*player, *target, AttackKind::MELEE, 20),
+		DIE_ROLLED + 6);
 }
 
 // A Strength 3 archer needs 13 where 10 would do, and takes a point off the arrow.
@@ -403,8 +471,11 @@ TEST_F(AttackStrengthTest, AWeakArchersPenaltyReachesTheRollAndTheDamage)
 {
 	arm_player(3, 0, "long_bow", EquipmentSlot::MISSILE_WEAPON);
 
-	EXPECT_EQ(damage_from(*player, *target, AttackKind::RANGED, 12), 0) << "a 12 hit through the -3";
-	EXPECT_EQ(damage_from(*player, *target, AttackKind::RANGED, 13), DIE_ROLLED - 1);
+	EXPECT_EQ(damage_from(*player, *target, AttackKind::RANGED, 12), 0)
+		<< "a 12 hit through the -3";
+	EXPECT_EQ(
+		damage_from(*player, *target, AttackKind::RANGED, 13),
+		DIE_ROLLED - 1);
 }
 
 // A crossbow shoots the same for a weak arm as a strong one.
@@ -412,7 +483,9 @@ TEST_F(AttackStrengthTest, ACrossbowIgnoresAWeakArm)
 {
 	arm_player(3, 0, "light_crossbow", EquipmentSlot::MISSILE_WEAPON);
 
-	EXPECT_EQ(damage_from(*player, *target, AttackKind::RANGED, 10), DIE_ROLLED);
+	EXPECT_EQ(
+		damage_from(*player, *target, AttackKind::RANGED, 10),
+		DIE_ROLLED);
 }
 
 // A monster's bow is read from its own missile slot, so the rule reaches it too.
@@ -425,7 +498,9 @@ TEST_F(AttackStrengthTest, AMonsterArcherFollowsTheSameRule)
 	archer.experienceReward = std::make_unique<ExperienceReward>(0);
 	archer.armorClass = std::make_unique<ArmorClass>(10);
 	archer.healthPool = std::make_unique<HealthPool>(STARTING_HP);
-	archer.attacker = std::make_unique<MonsterAttacker>(archer, DamageInfo{ "1d6", DamageType::PHYSICAL });
+	archer.attacker = std::make_unique<MonsterAttacker>(
+		archer,
+		DamageInfo{ "1d6", DamageType::PHYSICAL });
 	archer.set_thaco(20);
 	archer.set_strength(18);
 	archer.set_exceptional_strength(100);

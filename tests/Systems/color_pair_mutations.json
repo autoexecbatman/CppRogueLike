@@ -45,14 +45,14 @@
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\tparams.color = parse_color_pair(required_field(record, key, \"color\").get<std::string>());",
-      "mutated": "\tparams.color = ColorPairId::WHITE_BLACK;",
+      "original": "\tparams.color = parse_color_pair(\n\t\trequired_field(record, key, \"color\").get<std::string>());",
+      "mutated": "\tparams.color =ColorPairId::WHITE_BLACK;",
       "catches": "the colour in the record never read at all"
     },
     {
       "file": "src/Actor.cpp",
-      "original": "\tactorData.color = parse_color_pair(source.at(\"actorData\").at(\"color\").get<std::string>());",
-      "mutated": "\tactorData.color = ColorPairId::WHITE_BLACK;",
+      "original": "\tactorData.color =\n\t\tparse_color_pair(source.at(\"actorData\").at(\"color\").get<std::string>());",
+      "mutated": "\tactorData.color =ColorPairId::WHITE_BLACK;",
       "catches": "a saved colour not read back, so every loaded actor turns white"
     },
     {

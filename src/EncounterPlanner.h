@@ -38,7 +38,9 @@ std::vector<std::string> select_encounter(
 //
 // Example, a registry holding a monster of 9 or 10 hit dice worth 2,000 or 3,000:
 //   encounter_candidates(monsters, 1); // -> includes { "ranged_count_beast", 3000 }, the worst roll
-std::vector<MonsterCandidate> encounter_candidates(const MonsterRegistry& monsters, int dungeonLevel);
+std::vector<MonsterCandidate> encounter_candidates(
+	const MonsterRegistry& monsters,
+	int dungeonLevel);
 
 // Plan and spawn an encounter for the given room.
 // Budget is derived from room type and dungeon level.

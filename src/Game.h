@@ -65,8 +65,8 @@ struct Game
 	// Example:
 	//   Game game{ std::random_device{}() };   // a different game every run
 	//   Game game{ TEST_DICE_SEED };            // the same rolls every run
-	explicit Game(unsigned int diceSeed)
-		: dice(diceSeed)
+	explicit Game(unsigned int diceSeed) :
+		dice(diceSeed)
 	{
 	}
 
@@ -126,7 +126,8 @@ struct Game
 	// Game world
 	Map map{ get_map_width(), get_map_height() };
 	Gui gui{};
-	std::unique_ptr<Stairs> stairs{ std::make_unique<Stairs>(Vector2D{ 0, 0 }) };
+	std::unique_ptr<Stairs> stairs{ std::make_unique<Stairs>(
+		Vector2D{ 0, 0 }) };
 	std::unique_ptr<Player> player{ nullptr };
 
 	std::vector<DungeonRoom> rooms{};

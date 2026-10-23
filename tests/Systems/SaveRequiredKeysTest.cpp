@@ -89,7 +89,8 @@ protected:
 		game.playerBlueprint.creatureClass = CreatureClass::FIGHTER;
 		game.playerBlueprint.playerRaceState = PlayerRaceState::HUMAN;
 		game.stateManager.init_new_game(ctx);
-		ctx.gameState->advance_clock(ROUNDS_BEFORE_SAVING * TIME_UNITS_PER_ROUND);
+		ctx.gameState->advance_clock(
+			ROUNDS_BEFORE_SAVING * TIME_UNITS_PER_ROUND);
 		savedTime = ctx.gameState->get_time();
 		game.stateManager.save_game(ctx);
 		wroteSave = save_exists();
@@ -104,7 +105,9 @@ protected:
 			std::ifstream in{ savePath };
 			in >> saveDocument;
 		}
-		ASSERT_TRUE(saveDocument.contains(std::string{ key })) << "the writer did not write \"" << key << "\", so erasing it proves nothing";
+		ASSERT_TRUE(saveDocument.contains(std::string{ key }))
+			<< "the writer did not write \"" << key
+			<< "\", so erasing it proves nothing";
 		saveDocument.erase(std::string{ key });
 		std::ofstream out{ savePath };
 		out << saveDocument.dump(4);
@@ -119,7 +122,8 @@ protected:
 			std::ifstream in{ savePath };
 			in >> saveDocument;
 		}
-		ASSERT_TRUE(saveDocument.at("player").contains("position")) << "the player was saved without a position, so erasing it proves nothing";
+		ASSERT_TRUE(saveDocument.at("player").contains("position"))
+			<< "the player was saved without a position, so erasing it proves nothing";
 		saveDocument.at("player").erase("position");
 		std::ofstream out{ savePath };
 		out << saveDocument.dump(4);
@@ -134,7 +138,8 @@ protected:
 			std::ifstream in{ savePath };
 			in >> saveDocument;
 		}
-		saveDocument.at("nextUniqueId") = saveDocument.at("player").at("uniqueId");
+		saveDocument.at("nextUniqueId") =
+			saveDocument.at("player").at("uniqueId");
 		std::ofstream out{ savePath };
 		out << saveDocument.dump(4);
 	}
@@ -150,11 +155,13 @@ protected:
 		}
 		for (const auto& creature : *ctx.creatures)
 		{
-			assert(creature && "held_ids: the creature list holds a null entry");
+			assert(
+				creature && "held_ids: the creature list holds a null entry");
 			ids.insert(creature->uniqueId);
 			for (const auto& item : creature->inventoryData.items)
 			{
-				assert(item && "held_ids: a creature's pack holds a null entry");
+				assert(
+					item && "held_ids: a creature's pack holds a null entry");
 				ids.insert(item->uniqueId);
 			}
 		}
@@ -178,7 +185,9 @@ protected:
 };
 
 // The same game, once per key the writer always writes.
-class SaveRequiredKeysTest : public SaveRequiredKeysFixture, public ::testing::WithParamInterface<std::string_view>
+class SaveRequiredKeysTest :
+	public SaveRequiredKeysFixture,
+	public ::testing::WithParamInterface<std::string_view>
 {
 };
 
@@ -186,34 +195,43 @@ class SaveRequiredKeysTest : public SaveRequiredKeysFixture, public ::testing::W
 TEST_F(SaveRequiredKeysFixture, AnUntouchedSaveLoadsWithItsClock)
 {
 	save_a_game_in_progress();
-	ASSERT_TRUE(wroteSave) << "the game could not be saved, so nothing here is being measured";
+	ASSERT_TRUE(wroteSave)
+		<< "the game could not be saved, so nothing here is being measured";
 
 	const LoadOutcome outcome = game.stateManager.load_all(ctx);
 
 	EXPECT_EQ(outcome.kind, LoadOutcomeKind::LOADED) << outcome.reason;
-	EXPECT_EQ(ctx.gameState->get_time(), savedTime) << "the loaded game did not keep its saved clock";
+	EXPECT_EQ(ctx.gameState->get_time(), savedTime)
+		<< "the loaded game did not keep its saved clock";
 }
 
 // One level down: Actor::load's keys are required too, and the whole load refuses.
 TEST_F(SaveRequiredKeysFixture, ASaveWhosePlayerHasNoPositionIsRefused)
 {
 	save_a_game_in_progress();
-	ASSERT_TRUE(wroteSave) << "the game could not be saved, so nothing here is being measured";
+	ASSERT_TRUE(wroteSave)
+		<< "the game could not be saved, so nothing here is being measured";
 	erase_the_players_position();
 
 	const LoadOutcome outcome = game.stateManager.load_all(ctx);
 
-	EXPECT_EQ(outcome.kind, LoadOutcomeKind::REFUSED) << "a player without a position was not refused";
-	EXPECT_NE(outcome.reason.find("position"), std::string::npos) << "the reason does not name the missing key: " << outcome.reason;
-	EXPECT_FALSE(save_exists()) << "the refused save was kept; the owner's ruling is to delete it";
+	EXPECT_EQ(outcome.kind, LoadOutcomeKind::REFUSED)
+		<< "a player without a position was not refused";
+	EXPECT_NE(outcome.reason.find("position"), std::string::npos)
+		<< "the reason does not name the missing key: " << outcome.reason;
+	EXPECT_FALSE(save_exists())
+		<< "the refused save was kept; the owner's ruling is to delete it";
 }
 
 // A saved counter behind an id the save holds is not trusted: the load issued ids of its own
 // while building the actors, and the counter resumes past those.
-TEST_F(SaveRequiredKeysFixture, AnObjectMadeAfterLoadingASaveWithAStaleCounterTakesAnUnheldId)
+TEST_F(
+	SaveRequiredKeysFixture,
+	AnObjectMadeAfterLoadingASaveWithAStaleCounterTakesAnUnheldId)
 {
 	save_a_game_in_progress();
-	ASSERT_TRUE(wroteSave) << "the game could not be saved, so nothing here is being measured";
+	ASSERT_TRUE(wroteSave)
+		<< "the game could not be saved, so nothing here is being measured";
 	set_the_saved_counter_to_the_players_id();
 
 	const LoadOutcome outcome = game.stateManager.load_all(ctx);
@@ -221,25 +239,32 @@ TEST_F(SaveRequiredKeysFixture, AnObjectMadeAfterLoadingASaveWithAStaleCounterTa
 	const std::unordered_set<UniqueId::IdType> held = held_ids();
 	const auto made = ItemCreator::create("dagger", Vector2D{ 0, 0 }, ctx);
 
-	EXPECT_FALSE(held.contains(made->uniqueId)) << "an object made after the load took id " << made->uniqueId << ", which a loaded object already holds";
+	EXPECT_FALSE(held.contains(made->uniqueId))
+		<< "an object made after the load took id " << made->uniqueId
+		<< ", which a loaded object already holds";
 }
 
 TEST_P(SaveRequiredKeysTest, ASaveMissingTheKeyIsRefusedNamingItAndDeleted)
 {
 	const std::string_view key = GetParam();
 	save_a_game_in_progress();
-	ASSERT_TRUE(wroteSave) << "the game could not be saved, so nothing here is being measured";
+	ASSERT_TRUE(wroteSave)
+		<< "the game could not be saved, so nothing here is being measured";
 	erase_from_the_save(key);
 
 	const LoadOutcome outcome = game.stateManager.load_all(ctx);
 
-	EXPECT_EQ(outcome.kind, LoadOutcomeKind::REFUSED) << "a save without \"" << key << "\" was not refused";
-	EXPECT_NE(outcome.reason.find(key), std::string::npos) << "the reason does not name the missing key: " << outcome.reason;
-	EXPECT_FALSE(save_exists()) << "the refused save was kept; the owner's ruling is to delete it";
+	EXPECT_EQ(outcome.kind, LoadOutcomeKind::REFUSED)
+		<< "a save without \"" << key << "\" was not refused";
+	EXPECT_NE(outcome.reason.find(key), std::string::npos)
+		<< "the reason does not name the missing key: " << outcome.reason;
+	EXPECT_FALSE(save_exists())
+		<< "the refused save was kept; the owner's ruling is to delete it";
 }
 
 // Each case is named for its key, so a failure says which one without reading the output.
-const auto name_for_key = [](const ::testing::TestParamInfo<std::string_view>& info)
+const auto name_for_key =
+	[](const ::testing::TestParamInfo<std::string_view>& info)
 {
 	return std::string{ info.param };
 };
@@ -247,5 +272,12 @@ const auto name_for_key = [](const ::testing::TestParamInfo<std::string_view>& i
 INSTANTIATE_TEST_SUITE_P(
 	EveryKeyTheWriterAlwaysWrites,
 	SaveRequiredKeysTest,
-	::testing::Values("player", "stairs", "gui", "hunger_system", "time", "roundsRun", "nextUniqueId"),
+	::testing::Values(
+		"player",
+		"stairs",
+		"gui",
+		"hunger_system",
+		"time",
+		"roundsRun",
+		"nextUniqueId"),
 	name_for_key);

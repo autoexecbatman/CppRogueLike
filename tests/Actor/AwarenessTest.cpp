@@ -52,12 +52,16 @@ protected:
 	// after a number of calls, so passing time is what these cases do between checks.
 	[[nodiscard]] int now() const { return ctx.gameState->get_time(); }
 
-	void let_rounds_pass(int count) { ctx.gameState->advance_clock(TIME_UNITS_PER_ROUND * count); }
+	void let_rounds_pass(int count)
+	{
+		ctx.gameState->advance_clock(TIME_UNITS_PER_ROUND * count);
+	}
 
 	MockGameContext mock{};
 	GameContext ctx{};
 	Map map{ 20, 20 };
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 4, 5 }) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ 4, 5 }) };
 	Creature monster{
 		Vector2D{ 5, 5 },
 		ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK },
@@ -92,7 +96,8 @@ TEST_F(AwarenessTest, AwarenessHoldsForItsRoundsThenEnds)
 	for (int round = 1; round < AWARENESS_ROUNDS; ++round)
 	{
 		let_rounds_pass(1);
-		EXPECT_TRUE(monster.is_aware(now())) << "still tracking in round " << round;
+		EXPECT_TRUE(monster.is_aware(now()))
+			<< "still tracking in round " << round;
 	}
 
 	let_rounds_pass(1);
@@ -127,7 +132,8 @@ TEST_F(AwarenessTest, SpeedDoesNotChangeHowLongAMemoryLasts)
 
 		EXPECT_TRUE(monster.is_aware(now())) << "round " << round;
 		EXPECT_TRUE(quickling.is_aware(now()))
-			<< "the quickling forgot the player in round " << round << " of " << AWARENESS_ROUNDS;
+			<< "the quickling forgot the player in round " << round << " of "
+			<< AWARENESS_ROUNDS;
 	}
 
 	ctx.gameState->set_time(TIME_UNITS_PER_ROUND * AWARENESS_ROUNDS);
@@ -135,7 +141,8 @@ TEST_F(AwarenessTest, SpeedDoesNotChangeHowLongAMemoryLasts)
 	quickling.update_awareness(ctx);
 
 	EXPECT_FALSE(monster.is_aware(now()));
-	EXPECT_FALSE(quickling.is_aware(now())) << "the memory outstayed the rounds it names";
+	EXPECT_FALSE(quickling.is_aware(now()))
+		<< "the memory outstayed the rounds it names";
 }
 
 // The memory is three rounds, said in rounds rather than in terms of the constant.
@@ -149,10 +156,12 @@ TEST_F(AwarenessTest, TheMemoryIsThreeRounds)
 	make_hidden();
 
 	let_rounds_pass(2);
-	EXPECT_TRUE(monster.is_aware(now())) << "the memory was gone before its third round";
+	EXPECT_TRUE(monster.is_aware(now()))
+		<< "the memory was gone before its third round";
 
 	let_rounds_pass(1);
-	EXPECT_FALSE(monster.is_aware(now())) << "the memory outlasted its third round";
+	EXPECT_FALSE(monster.is_aware(now()))
+		<< "the memory outlasted its third round";
 }
 
 // An invisible player is never seen, whatever the line of sight says.
@@ -184,6 +193,7 @@ TEST_F(AwarenessTest, RegainsFullMemoryAfterLongAbsence)
 	for (int round = 1; round < AWARENESS_ROUNDS; ++round)
 	{
 		let_rounds_pass(1);
-		EXPECT_TRUE(monster.is_aware(now())) << "still tracking in round " << round;
+		EXPECT_TRUE(monster.is_aware(now()))
+			<< "still tracking in round " << round;
 	}
 }

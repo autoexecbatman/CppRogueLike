@@ -68,7 +68,8 @@ TEST_F(DecorationLookupTest, ADecorationOnAnotherTileIsNotFound)
 {
 	standing_at(ANOTHER_TILE);
 
-	EXPECT_EQ(map.find_decoration_at(THE_TILE, ctx), nullptr) << "a decoration was found on a tile it is not on";
+	EXPECT_EQ(map.find_decoration_at(THE_TILE, ctx), nullptr)
+		<< "a decoration was found on a tile it is not on";
 }
 
 // A broken decoration stays in the list until the loop sweeps it, so the lookup has
@@ -78,7 +79,8 @@ TEST_F(DecorationLookupTest, ABrokenDecorationIsNotFound)
 	Decoration& barrel = standing_at(THE_TILE);
 	barrel.isBroken = true;
 
-	EXPECT_EQ(map.find_decoration_at(THE_TILE, ctx), nullptr) << "a broken decoration was reported as standing";
+	EXPECT_EQ(map.find_decoration_at(THE_TILE, ctx), nullptr)
+		<< "a broken decoration was reported as standing";
 }
 
 // The first unbroken one wins, so a broken barrel does not hide a whole one beneath it.

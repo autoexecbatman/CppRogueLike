@@ -24,13 +24,24 @@ void RenderingManager::render(GameContext& ctx) const
 
 void RenderingManager::render_world(const GameContext& ctx) const
 {
-	assert(ctx.minimap && "RenderingManager::render_world: called without a minimap");
-	assert(ctx.costOverlay && "RenderingManager::render_world: called without a costOverlay");
+	assert(
+		ctx.minimap &&
+		"RenderingManager::render_world: called without a minimap");
+	assert(
+		ctx.costOverlay &&
+		"RenderingManager::render_world: called without a costOverlay");
 	assert(ctx.traps && "RenderingManager::render_world: called without traps");
-	assert(ctx.stairs && "RenderingManager::render_world: called without stairs");
-	assert(ctx.spellTiles && "RenderingManager::render_world: called without spellTiles");
-	assert(ctx.creatures && "RenderingManager::render_world: called without creatures");
-	assert(ctx.floorInventory && "RenderingManager::render_world: called without a floorInventory");
+	assert(
+		ctx.stairs && "RenderingManager::render_world: called without stairs");
+	assert(
+		ctx.spellTiles &&
+		"RenderingManager::render_world: called without spellTiles");
+	assert(
+		ctx.creatures &&
+		"RenderingManager::render_world: called without creatures");
+	assert(
+		ctx.floorInventory &&
+		"RenderingManager::render_world: called without a floorInventory");
 	assert(ctx.map && "RenderingManager::render_world: called without a map");
 
 	ctx.map->render(ctx);
@@ -45,7 +56,9 @@ void RenderingManager::render_world(const GameContext& ctx) const
 	render_creatures(*ctx.creatures, ctx);
 	ctx.player()->render(ctx);
 
-	assert(ctx.decorations && "RenderingManager::render_world: called without decorations");
+	assert(
+		ctx.decorations &&
+		"RenderingManager::render_world: called without decorations");
 	render_decorations(*ctx.decorations, ctx);
 
 	apply_lighting(ctx);
@@ -57,16 +70,21 @@ void RenderingManager::render_world(const GameContext& ctx) const
 	ctx.minimap->render(ctx);
 }
 
-void RenderingManager::render_creatures(std::span<const std::unique_ptr<Creature>> creatures, const GameContext& ctx) const
+void RenderingManager::render_creatures(
+	std::span<const std::unique_ptr<Creature>> creatures,
+	const GameContext& ctx) const
 {
 	for (const auto& creature : creatures)
 	{
-		assert(creature && "render_creatures: creatures list holds a null entry");
+		assert(
+			creature && "render_creatures: creatures list holds a null entry");
 		creature->render(ctx);
 	}
 }
 
-void RenderingManager::render_items(std::span<const std::unique_ptr<Item>> items, const GameContext& ctx) const
+void RenderingManager::render_items(
+	std::span<const std::unique_ptr<Item>> items,
+	const GameContext& ctx) const
 {
 	for (const auto& item : items)
 	{
@@ -93,7 +111,9 @@ void RenderingManager::restore_game_display() const
 
 void RenderingManager::restore_screen(GameContext& ctx) const
 {
-	assert(ctx.gui != nullptr && "RenderingManager::restore_screen: called without a gui");
+	assert(
+		ctx.gui != nullptr &&
+		"RenderingManager::restore_screen: called without a gui");
 
 	render(ctx);
 	ctx.gui->gui_render(ctx);
@@ -121,10 +141,15 @@ void RenderingManager::apply_lighting(const GameContext& ctx) const
 	// read apart by brightness rather than by hue.
 	static constexpr Color exploredMemoryLight = { 150, 152, 158, 255 };
 
-	auto lerp_channel = [](unsigned char fromChannel, unsigned char toChannel, float fraction) -> unsigned char
+	auto lerp_channel = [](unsigned char fromChannel,
+							unsigned char toChannel,
+							float fraction) -> unsigned char
 	{
 		return static_cast<unsigned char>(
-			static_cast<float>(fromChannel) + fraction * (static_cast<float>(toChannel) - static_cast<float>(fromChannel)));
+			static_cast<float>(fromChannel) +
+			fraction *
+				(static_cast<float>(toChannel) -
+					static_cast<float>(fromChannel)));
 	};
 
 	renderer.begin_light_mask();
@@ -140,12 +165,16 @@ void RenderingManager::apply_lighting(const GameContext& ctx) const
 				{
 					int screenX = tileX * tileSize - cameraX;
 					int screenY = tileY * tileSize - cameraY;
-					renderer.add_light_quad(screenX, screenY, exploredMemoryLight);
+					renderer.add_light_quad(
+						screenX,
+						screenY,
+						exploredMemoryLight);
 				}
 				continue;
 			}
 
-			float distanceTiles = static_cast<float>(tilePos.distance_to(ctx.player()->position));
+			float distanceTiles =
+				static_cast<float>(tilePos.distance_to(ctx.player()->position));
 			float falloff = std::min(distanceTiles / torchRadiusTiles, 1.0f);
 
 			Color litColor{
@@ -168,14 +197,18 @@ void RenderingManager::render_decorations(
 	std::span<const std::unique_ptr<Decoration>> decorations,
 	const GameContext& ctx) const
 {
-	assert(ctx.map && "RenderingManager::render_decorations: called without a map");
+	assert(
+		ctx.map &&
+		"RenderingManager::render_decorations: called without a map");
 	if (!ctx.renderer)
 	{
 		return;
 	}
 	for (const auto& decor : decorations)
 	{
-		assert(decor && "render_decorations: the decoration list holds a null entry");
+		assert(
+			decor &&
+			"render_decorations: the decoration list holds a null entry");
 
 		if (decor->isBroken)
 		{
@@ -185,13 +218,18 @@ void RenderingManager::render_decorations(
 		{
 			continue;
 		}
-		ctx.renderer->draw_tile_static(decor->position, decor->tile, Color{ 255, 255, 255, 255 });
+		ctx.renderer->draw_tile_static(
+			decor->position,
+			decor->tile,
+			Color{ 255, 255, 255, 255 });
 	}
 }
 
 void RenderingManager::render_mouse_path_overlay(const GameContext& ctx) const
 {
-	assert(ctx.mousePathOverlay && "RenderingManager::render_mouse_path_overlay: called without a mousePathOverlay");
+	assert(
+		ctx.mousePathOverlay &&
+		"RenderingManager::render_mouse_path_overlay: called without a mousePathOverlay");
 
 	if (!ctx.renderer || ctx.mousePathOverlay->empty())
 	{
@@ -223,8 +261,10 @@ void RenderingManager::render_mouse_path_overlay(const GameContext& ctx) const
 		Vector2D lineStart = screen_centre(nodeIndex);
 		Vector2D lineEnd = screen_centre(nodeIndex + 1);
 
-		float progress = static_cast<float>(nodeIndex) / static_cast<float>(lastIdx);
-		unsigned char alpha = static_cast<unsigned char>(55 + static_cast<int>(80.0f * progress));
+		float progress =
+			static_cast<float>(nodeIndex) / static_cast<float>(lastIdx);
+		unsigned char alpha =
+			static_cast<unsigned char>(55 + static_cast<int>(80.0f * progress));
 		Color lineColor = { 220, 220, 220, alpha };
 
 		DrawLineEx(
@@ -242,8 +282,10 @@ void RenderingManager::render_mouse_path_overlay(const GameContext& ctx) const
 	{
 		Vector2D centre = screen_centre(nodeIndex);
 
-		float progress = static_cast<float>(nodeIndex) / static_cast<float>(lastIdx);
-		unsigned char alpha = static_cast<unsigned char>(80 + static_cast<int>(120.0f * progress));
+		float progress =
+			static_cast<float>(nodeIndex) / static_cast<float>(lastIdx);
+		unsigned char alpha = static_cast<unsigned char>(
+			80 + static_cast<int>(120.0f * progress));
 
 		if (nodeIndex == lastIdx)
 		{
@@ -255,13 +297,25 @@ void RenderingManager::render_mouse_path_overlay(const GameContext& ctx) const
 				static_cast<unsigned char>(alpha),
 			};
 			Color destRing = { 255, 255, 255, 200 };
-			DrawCircle(centre.x, centre.y, static_cast<float>(destRadius), destFill);
-			DrawCircleLines(centre.x, centre.y, static_cast<float>(destRadius + 2), destRing);
+			DrawCircle(
+				centre.x,
+				centre.y,
+				static_cast<float>(destRadius),
+				destFill);
+			DrawCircleLines(
+				centre.x,
+				centre.y,
+				static_cast<float>(destRadius + 2),
+				destRing);
 		}
 		else
 		{
 			Color nodeColor = { 210, 210, 210, alpha };
-			DrawCircle(centre.x, centre.y, static_cast<float>(dotRadius), nodeColor);
+			DrawCircle(
+				centre.x,
+				centre.y,
+				static_cast<float>(dotRadius),
+				nodeColor);
 		}
 	}
 }

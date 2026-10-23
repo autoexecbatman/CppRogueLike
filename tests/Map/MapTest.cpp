@@ -126,8 +126,12 @@ TEST_F(MapTest, GetTileType_OutOfBounds_ReturnsWall)
 {
 	EXPECT_EQ(map->get_tile_type(Vector2D{ 0, -1 }), TileType::WALL);
 	EXPECT_EQ(map->get_tile_type(Vector2D{ -1, 0 }), TileType::WALL);
-	EXPECT_EQ(map->get_tile_type(Vector2D{ 0, TEST_MAP_HEIGHT }), TileType::WALL);
-	EXPECT_EQ(map->get_tile_type(Vector2D{ TEST_MAP_WIDTH, 0 }), TileType::WALL);
+	EXPECT_EQ(
+		map->get_tile_type(Vector2D{ 0, TEST_MAP_HEIGHT }),
+		TileType::WALL);
+	EXPECT_EQ(
+		map->get_tile_type(Vector2D{ TEST_MAP_WIDTH, 0 }),
+		TileType::WALL);
 	EXPECT_EQ(map->get_tile_type(Vector2D{ 999, 999 }), TileType::WALL);
 }
 
@@ -277,7 +281,8 @@ TEST_F(MapTest, IsWall_SyncedBySetTile)
 
 	// Reverting to WALL must make it non-walkable again.
 	map->set_tile(pos, TileType::WALL);
-	EXPECT_TRUE(map->is_wall(pos)) << "set_tile to WALL must mark tile non-walkable";
+	EXPECT_TRUE(map->is_wall(pos))
+		<< "set_tile to WALL must mark tile non-walkable";
 }
 
 // ----------------------------------------------------------------------------
@@ -307,8 +312,12 @@ TEST_F(MapTest, GetIndex_OutOfBounds_Throws)
 {
 	EXPECT_THROW(map->get_index(Vector2D{ 0, -1 }), std::out_of_range);
 	EXPECT_THROW(map->get_index(Vector2D{ -1, 0 }), std::out_of_range);
-	EXPECT_THROW(map->get_index(Vector2D{ 0, TEST_MAP_HEIGHT }), std::out_of_range);
-	EXPECT_THROW(map->get_index(Vector2D{ TEST_MAP_WIDTH, 0 }), std::out_of_range);
+	EXPECT_THROW(
+		map->get_index(Vector2D{ 0, TEST_MAP_HEIGHT }),
+		std::out_of_range);
+	EXPECT_THROW(
+		map->get_index(Vector2D{ TEST_MAP_WIDTH, 0 }),
+		std::out_of_range);
 }
 
 // ----------------------------------------------------------------------------
@@ -410,14 +419,16 @@ TEST_F(MapTest, SingleTileMap)
 TEST_F(MapTest, LargeCoordinates_HandledGracefully)
 {
 	// Very large coordinates should not crash
-	EXPECT_NO_THROW(map->get_tile_type(Vector2D{
-		std::numeric_limits<int>::max(),
-		std::numeric_limits<int>::max(),
-	}));
-	EXPECT_NO_THROW(map->get_tile_type(Vector2D{
-		std::numeric_limits<int>::min(),
-		std::numeric_limits<int>::min(),
-	}));
+	EXPECT_NO_THROW(map->get_tile_type(
+		Vector2D{
+			std::numeric_limits<int>::max(),
+			std::numeric_limits<int>::max(),
+		}));
+	EXPECT_NO_THROW(map->get_tile_type(
+		Vector2D{
+			std::numeric_limits<int>::min(),
+			std::numeric_limits<int>::min(),
+		}));
 }
 
 // ----------------------------------------------------------------------------
@@ -451,7 +462,8 @@ TEST_F(MapTest, Reveal_MarksAllExplored)
 	// Check a few positions
 	EXPECT_TRUE(map->is_explored(Vector2D{ 1, 1 }));
 	EXPECT_TRUE(map->is_explored(Vector2D{ 5, 5 }));
-	EXPECT_TRUE(map->is_explored(Vector2D{ TEST_MAP_WIDTH - 2, TEST_MAP_HEIGHT - 2 }));
+	EXPECT_TRUE(
+		map->is_explored(Vector2D{ TEST_MAP_WIDTH - 2, TEST_MAP_HEIGHT - 2 }));
 }
 
 // ----------------------------------------------------------------------------
@@ -488,7 +500,8 @@ TEST_F(MapTest, WaterIsCrossedByWhateverGrantsSwimming)
 		Vector2D{ 3, 4 },
 		ActorData{ TileRef{}, "wader", ColorPairId::WHITE_BLACK },
 	};
-	EXPECT_FALSE(Pathfinding::can_enter(wader, pool, ctx)) << "water stopped nobody";
+	EXPECT_FALSE(Pathfinding::can_enter(wader, pool, ctx))
+		<< "water stopped nobody";
 
 	Creature spider{
 		Vector2D{ 3, 4 },
@@ -501,7 +514,9 @@ TEST_F(MapTest, WaterIsCrossedByWhateverGrantsSwimming)
 	// Player::equip_item's business, not the map's.
 	auto gauntlets = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});
 	gauntlets->behavior = Gauntlets{ .effect = MagicalEffect::SWIMMING };
-	wader.equippedItems.emplace_back(std::move(gauntlets), EquipmentSlot::GAUNTLETS);
+	wader.equippedItems.emplace_back(
+		std::move(gauntlets),
+		EquipmentSlot::GAUNTLETS);
 
 	EXPECT_TRUE(Pathfinding::can_enter(wader, pool, ctx))
 		<< "the map asked the creature's own states and not what it wears";

@@ -105,7 +105,8 @@ enum class ThiefArmor
 // Example:
 //   thief_armor_column("studded_leather");   // -> ThiefArmor::HIDE_OR_STUDDED_LEATHER
 //   thief_armor_column("plate_mail");        // -> nullopt, no column
-[[nodiscard]] std::optional<ThiefArmor> thief_armor_column(std::string_view armorItemKey);
+[[nodiscard]] std::optional<ThiefArmor> thief_armor_column(
+	std::string_view armorItemKey);
 
 // The percentage no skill passes: "no skill can be raised above 95 percent,
 // including all adjustments for Dexterity, race, and armor."
@@ -127,14 +128,18 @@ inline constexpr int THIEF_SKILL_MAXIMUM = 95;
 // Example:
 //   thief_skill_dexterity_adjustment(ThiefSkill::OPEN_LOCKS, 18);    // -> 15
 //   thief_skill_dexterity_adjustment(ThiefSkill::DETECT_NOISE, 18);  // -> 0
-[[nodiscard]] int thief_skill_dexterity_adjustment(ThiefSkill skill, int dexterity);
+[[nodiscard]] int thief_skill_dexterity_adjustment(
+	ThiefSkill skill,
+	int dexterity);
 
 // Table 29's column for the armour worn.
 //
 // Example:
 //   thief_skill_armor_adjustment(ThiefSkill::MOVE_SILENTLY, ThiefArmor::NONE);      // -> 10
 //   thief_skill_armor_adjustment(ThiefSkill::MOVE_SILENTLY, ThiefArmor::LEATHER);   // -> 0
-[[nodiscard]] int thief_skill_armor_adjustment(ThiefSkill skill, ThiefArmor armor);
+[[nodiscard]] int thief_skill_armor_adjustment(
+	ThiefSkill skill,
+	ThiefArmor armor);
 
 // The percentage a thief rolls against: the base, the three adjustments and the
 // points spent, held between 0 and 95. A score the adjustments push below zero

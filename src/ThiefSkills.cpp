@@ -7,48 +7,52 @@
 namespace
 {
 // Table 26, Thieving Skill Base Scores, in ALL_THIEF_SKILL order.
-constexpr std::array<int, THIEF_SKILL_COUNT> BASE_SCORE{ 15, 10, 5, 10, 5, 15, 60, 0 };
+constexpr std::array<int, THIEF_SKILL_COUNT>
+	BASE_SCORE{ 15, 10, 5, 10, 5, 15, 60, 0 };
 
 // The Dexterity rows Table 28 prints. A score outside them reads the nearest end.
 constexpr int LOWEST_PRINTED_DEXTERITY = 9;
 constexpr int HIGHEST_PRINTED_DEXTERITY = 19;
-constexpr std::size_t DEXTERITY_ROWS = HIGHEST_PRINTED_DEXTERITY - LOWEST_PRINTED_DEXTERITY + 1;
+constexpr std::size_t DEXTERITY_ROWS =
+	HIGHEST_PRINTED_DEXTERITY - LOWEST_PRINTED_DEXTERITY + 1;
 
 // Table 28, Thieving Skill Dexterity Adjustments. Only the first five skills have
 // a column; Detect Noise, Climb Walls and Read Languages are printed nowhere in it.
 constexpr std::size_t DEXTERITY_COLUMNS = 5;
-constexpr std::array<std::array<int, DEXTERITY_COLUMNS>, DEXTERITY_ROWS> DEXTERITY_ADJUSTMENT{ {
-	// Pick Pockets, Open Locks, Find/Remove Traps, Move Silently, Hide in
-	// Shadows
-	{ -15, -10, -10, -20, -10 }, //  9
-	{ -10, -5, -10, -15, -5 }, // 10
-	{ -5, 0, -5, -10, 0 }, // 11
-	{ 0, 0, 0, -5, 0 }, // 12
-	{ 0, 0, 0, 0, 0 }, // 13
-	{ 0, 0, 0, 0, 0 }, // 14
-	{ 0, 0, 0, 0, 0 }, // 15
-	{ 0, 5, 0, 0, 0 }, // 16
-	{ 5, 10, 0, 5, 5 }, // 17
-	{ 10, 15, 5, 10, 10 }, // 18
-	{ 15, 20, 10, 15, 15 } // 19
-} };
+constexpr std::array<std::array<int, DEXTERITY_COLUMNS>, DEXTERITY_ROWS>
+	DEXTERITY_ADJUSTMENT{ {
+		// Pick Pockets, Open Locks, Find/Remove Traps, Move Silently, Hide in
+		// Shadows
+		{ -15, -10, -10, -20, -10 }, //  9
+		{ -10, -5, -10, -15, -5 }, // 10
+		{ -5, 0, -5, -10, 0 }, // 11
+		{ 0, 0, 0, -5, 0 }, // 12
+		{ 0, 0, 0, 0, 0 }, // 13
+		{ 0, 0, 0, 0, 0 }, // 14
+		{ 0, 0, 0, 0, 0 }, // 15
+		{ 0, 5, 0, 0, 0 }, // 16
+		{ 5, 10, 0, 5, 5 }, // 17
+		{ 10, 15, 5, 10, 10 }, // 18
+		{ 15, 20, 10, 15, 15 } // 19
+	} };
 
 // Table 29, Thieving Skill Armor Adjustments, one row per skill. Leather is the
 // column of zeroes the base scores already assume, so it is not printed in the
 // book; every other column is measured against it.
 constexpr std::size_t ARMOR_COLUMNS = 5;
-constexpr std::array<std::array<int, ARMOR_COLUMNS>, THIEF_SKILL_COUNT> ARMOR_ADJUSTMENT{ {
-	// none, leather, padded or elven chain, hide or studded leather, chain
-	// or ring mail
-	{ 5, 0, -20, -30, -25 }, // Pick Pockets
-	{ 0, 0, -5, -10, -10 }, // Open Locks
-	{ 0, 0, -5, -10, -10 }, // Find/Remove Traps
-	{ 10, 0, -10, -20, -15 }, // Move Silently
-	{ 5, 0, -10, -20, -15 }, // Hide in Shadows
-	{ 0, 0, -5, -10, -5 }, // Detect Noise
-	{ 10, 0, -20, -30, -25 }, // Climb Walls
-	{ 0, 0, 0, 0, 0 } // Read Languages
-} };
+constexpr std::array<std::array<int, ARMOR_COLUMNS>, THIEF_SKILL_COUNT>
+	ARMOR_ADJUSTMENT{ {
+		// none, leather, padded or elven chain, hide or studded leather, chain
+		// or ring mail
+		{ 5, 0, -20, -30, -25 }, // Pick Pockets
+		{ 0, 0, -5, -10, -10 }, // Open Locks
+		{ 0, 0, -5, -10, -10 }, // Find/Remove Traps
+		{ 10, 0, -10, -20, -15 }, // Move Silently
+		{ 5, 0, -10, -20, -15 }, // Hide in Shadows
+		{ 0, 0, -5, -10, -5 }, // Detect Noise
+		{ 10, 0, -20, -30, -25 }, // Climb Walls
+		{ 0, 0, 0, 0, 0 } // Read Languages
+	} };
 
 // One armour of the game's data read into one of Table 29's columns.
 struct ArmorColumnEntry
@@ -153,7 +157,10 @@ ThiefSkill previous_thief_skill(ThiefSkill skill)
 std::optional<ThiefArmor> thief_armor_column(std::string_view armorItemKey)
 {
 	// A key the table does not name is armour Table 29 prints no column for.
-	const auto found = std::ranges::find(ARMOR_COLUMN_BY_KEY, armorItemKey, &ArmorColumnEntry::itemKey);
+	const auto found = std::ranges::find(
+		ARMOR_COLUMN_BY_KEY,
+		armorItemKey,
+		&ArmorColumnEntry::itemKey);
 	if (found == ARMOR_COLUMN_BY_KEY.end())
 	{
 		return std::nullopt;
@@ -177,14 +184,19 @@ int thief_skill_dexterity_adjustment(ThiefSkill skill, int dexterity)
 
 	// The book prints 9 through 19; magic reaches past both ends, and the row at
 	// the end it passed is the last thing the table says.
-	const int clamped = std::clamp(dexterity, LOWEST_PRINTED_DEXTERITY, HIGHEST_PRINTED_DEXTERITY);
-	const std::size_t row = static_cast<std::size_t>(clamped - LOWEST_PRINTED_DEXTERITY);
+	const int clamped = std::clamp(
+		dexterity,
+		LOWEST_PRINTED_DEXTERITY,
+		HIGHEST_PRINTED_DEXTERITY);
+	const std::size_t row =
+		static_cast<std::size_t>(clamped - LOWEST_PRINTED_DEXTERITY);
 	return DEXTERITY_ADJUSTMENT.at(row).at(column.value());
 }
 
 int thief_skill_armor_adjustment(ThiefSkill skill, ThiefArmor armor)
 {
-	return ARMOR_ADJUSTMENT.at(thief_skill_index(skill)).at(static_cast<std::size_t>(armor));
+	return ARMOR_ADJUSTMENT.at(thief_skill_index(skill))
+		.at(static_cast<std::size_t>(armor));
 }
 
 int thief_skill_score(
@@ -195,7 +207,9 @@ int thief_skill_score(
 	int pointsSpent)
 {
 	// The base, then the three tables, then what the player bought.
-	const int total = thief_skill_base(skill) + racialAdjustment + thief_skill_dexterity_adjustment(skill, dexterity) + thief_skill_armor_adjustment(skill, armor) + pointsSpent;
+	const int total = thief_skill_base(skill) + racialAdjustment +
+		thief_skill_dexterity_adjustment(skill, dexterity) +
+		thief_skill_armor_adjustment(skill, armor) + pointsSpent;
 
 	// A skill the adjustments push below zero is one the thief does not yet have.
 	return std::clamp(total, 0, THIEF_SKILL_MAXIMUM);
@@ -216,11 +230,20 @@ ThiefSkillAllocation::ThiefSkillAllocation(
 	ThiefSkillGrant grant,
 	std::array<int, THIEF_SKILL_COUNT> raceAdjustment,
 	int characterDexterity,
-	ThiefArmor wornArmor)
-	: alreadySpent{ pointsAlreadySpent }, racialAdjustment{ raceAdjustment }, dexterity{ characterDexterity }, armor{ wornArmor }, remaining{ grant.points }, perSkillLimit{ grant.perSkillLimit }
+	ThiefArmor wornArmor) :
+	alreadySpent{ pointsAlreadySpent },
+	racialAdjustment{ raceAdjustment },
+	dexterity{ characterDexterity },
+	armor{ wornArmor },
+	remaining{ grant.points },
+	perSkillLimit{ grant.perSkillLimit }
 {
-	assert(grant.points >= 0 && "ThiefSkillAllocation: a grant cannot be negative");
-	assert(grant.perSkillLimit >= 0 && "ThiefSkillAllocation: a per-skill limit cannot be negative");
+	assert(
+		grant.points >= 0 &&
+		"ThiefSkillAllocation: a grant cannot be negative");
+	assert(
+		grant.perSkillLimit >= 0 &&
+		"ThiefSkillAllocation: a per-skill limit cannot be negative");
 }
 
 int ThiefSkillAllocation::assigned_to(ThiefSkill skill) const
@@ -259,7 +282,9 @@ bool ThiefSkillAllocation::can_assign(ThiefSkill skill) const
 
 void ThiefSkillAllocation::assign(ThiefSkill skill)
 {
-	assert(can_assign(skill) && "ThiefSkillAllocation::assign called where can_assign is false");
+	assert(
+		can_assign(skill) &&
+		"ThiefSkillAllocation::assign called where can_assign is false");
 
 	++assigned.at(thief_skill_index(skill));
 	--remaining;
@@ -273,7 +298,9 @@ bool ThiefSkillAllocation::can_take_back(ThiefSkill skill) const
 
 void ThiefSkillAllocation::take_back(ThiefSkill skill)
 {
-	assert(can_take_back(skill) && "ThiefSkillAllocation::take_back called where can_take_back is false");
+	assert(
+		can_take_back(skill) &&
+		"ThiefSkillAllocation::take_back called where can_take_back is false");
 
 	--assigned.at(thief_skill_index(skill));
 	++remaining;

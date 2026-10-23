@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/InventoryOperations.cpp",
-      "original": "\treturn get_total_weight(owner) + item.enhancement.weight <= get_max_weight(owner, dataManager);",
-      "mutated": "\treturn get_total_weight(owner) + item.enhancement.weight < get_max_weight(owner, dataManager);",
+      "original": "\treturn get_total_weight(owner) + item.enhancement.weight <=\n\t\tget_max_weight(owner, dataManager);",
+      "mutated": "\treturn get_total_weight(owner) + item.enhancement.weight <\n\t\tget_max_weight(owner, dataManager);",
       "catches": "an item that fits exactly being refused"
     },
     {
       "file": "src/InventoryOperations.cpp",
-      "original": "\treturn get_total_weight(owner) + item.enhancement.weight <= get_max_weight(owner, dataManager);",
-      "mutated": "\treturn item.enhancement.weight <= get_max_weight(owner, dataManager);",
+      "original": "\treturn get_total_weight(owner) + item.enhancement.weight <=\n\t\tget_max_weight(owner, dataManager);",
+      "mutated": "\treturn item.enhancement.weight <=\n\t\tget_max_weight(owner, dataManager);",
       "catches": "the pack's own weight ignored, so a full pack keeps accepting"
     },
     {

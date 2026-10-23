@@ -39,7 +39,9 @@ protected:
 		character.set_creature_class(creatureClass);
 		character.set_creature_level(level);
 		character.set_constitution(CONSTITUTION);
-		return CharacterSheetText::constitution_line(character, mock.data_manager);
+		return CharacterSheetText::constitution_line(
+			character,
+			mock.data_manager);
 	}
 
 	MockGameContext mock{};
@@ -54,11 +56,23 @@ TEST_F(CharacterSheetTextTest, BeforeTheDiceStopTheBonusIsPerLevel)
 }
 
 // Once the next level rolls none, the line names the last level that took the bonus.
-TEST_F(CharacterSheetTextTest, OnceTheDiceStopTheLineNamesTheLastLevelThatTookIt)
+TEST_F(
+	CharacterSheetTextTest,
+	OnceTheDiceStopTheLineNamesTheLastLevelThatTookIt)
 {
-	EXPECT_EQ(line_for(CreatureClass::FIGHTER, 9), "CON: 17  (+3 HP/level through level 9)");
-	EXPECT_EQ(line_for(CreatureClass::FIGHTER, 12), "CON: 17  (+3 HP/level through level 9)");
-	EXPECT_EQ(line_for(CreatureClass::CLERIC, 12), "CON: 17  (+2 HP/level through level 9)");
-	EXPECT_EQ(line_for(CreatureClass::ROGUE, 12), "CON: 17  (+2 HP/level through level 10)");
-	EXPECT_EQ(line_for(CreatureClass::WIZARD, 10), "CON: 17  (+2 HP/level through level 10)");
+	EXPECT_EQ(
+		line_for(CreatureClass::FIGHTER, 9),
+		"CON: 17  (+3 HP/level through level 9)");
+	EXPECT_EQ(
+		line_for(CreatureClass::FIGHTER, 12),
+		"CON: 17  (+3 HP/level through level 9)");
+	EXPECT_EQ(
+		line_for(CreatureClass::CLERIC, 12),
+		"CON: 17  (+2 HP/level through level 9)");
+	EXPECT_EQ(
+		line_for(CreatureClass::ROGUE, 12),
+		"CON: 17  (+2 HP/level through level 10)");
+	EXPECT_EQ(
+		line_for(CreatureClass::WIZARD, 10),
+		"CON: 17  (+2 HP/level through level 10)");
 }

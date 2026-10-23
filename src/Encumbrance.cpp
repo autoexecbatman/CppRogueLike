@@ -34,7 +34,9 @@ std::string_view encumbrance_band_name(EncumbranceBand band)
 	return "Unencumbered";
 }
 
-std::optional<EncumbranceBand> encumbrance_band(int carriedPounds, const StrengthAttributes& row)
+std::optional<EncumbranceBand> encumbrance_band(
+	int carriedPounds,
+	const StrengthAttributes& row)
 {
 	// Past the Max. Carried Weight the character cannot move at all. The table prints
 	// that column on every row, so this answers at a Strength whose bands are blank.

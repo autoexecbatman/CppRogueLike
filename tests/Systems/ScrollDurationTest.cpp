@@ -61,20 +61,24 @@ protected:
 			mock.map.set_tile(Vector2D{ column, 5 }, TileType::FLOOR);
 		}
 
-		auto goblin = std::make_unique<Creature>(Vector2D{ 5, 5 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
+		auto goblin = std::make_unique<Creature>(
+			Vector2D{ 5, 5 },
+			ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
 		goblin->healthPool = std::make_unique<HealthPool>(10);
 		goblin->armorClass = std::make_unique<ArmorClass>(10);
 		target = goblin.get();
 		mock.creatures.push_back(std::move(goblin));
 
 		mock.map.compute_fov(ctx);
-		ASSERT_TRUE(mock.map.is_in_fov(target->position)) << "the goblin is not in view of the reader";
+		ASSERT_TRUE(mock.map.is_in_fov(target->position))
+			<< "the goblin is not in view of the reader";
 	}
 
 	// Reads the scroll with the goblin's save failed, and returns the effect it grants.
 	BuffType read(Item& scroll)
 	{
-		const BuffType granted = std::get<TargetedScroll>(*scroll.behavior).buffType;
+		const BuffType granted =
+			std::get<TargetedScroll>(*scroll.behavior).buffType;
 		mock.dice.set_next_roll(FAILED_SAVE);
 		use_item(*scroll.behavior, scroll, *mock.player, ctx);
 		return granted;
@@ -94,7 +98,8 @@ protected:
 
 TEST_F(ScrollDurationTest, SleepLastsItsFiveRounds)
 {
-	auto scroll = ItemCreator::create("scroll_sleep", mock.player->position, ctx);
+	auto scroll =
+		ItemCreator::create("scroll_sleep", mock.player->position, ctx);
 	const BuffType granted = read(*scroll);
 
 	EXPECT_TRUE(lasts_to(granted, 4));
@@ -103,7 +108,8 @@ TEST_F(ScrollDurationTest, SleepLastsItsFiveRounds)
 
 TEST_F(ScrollDurationTest, HoldPersonLastsItsEightRounds)
 {
-	auto scroll = ItemCreator::create("scroll_hold_person", mock.player->position, ctx);
+	auto scroll =
+		ItemCreator::create("scroll_hold_person", mock.player->position, ctx);
 	const BuffType granted = read(*scroll);
 
 	EXPECT_TRUE(lasts_to(granted, 7));
@@ -113,7 +119,8 @@ TEST_F(ScrollDurationTest, HoldPersonLastsItsEightRounds)
 // The same scroll authored in turns: two turns are twenty rounds, not two.
 TEST_F(ScrollDurationTest, AScrollAuthoredInTurnsLastsTenRoundsATurn)
 {
-	auto scroll = ItemCreator::create("scroll_sleep", mock.player->position, ctx);
+	auto scroll =
+		ItemCreator::create("scroll_sleep", mock.player->position, ctx);
 	TargetedScroll& sleep = std::get<TargetedScroll>(*scroll->behavior);
 	sleep.duration = DiceExpr{ 0, 0, 2 };
 	sleep.durationUnit = DurationUnit::TURNS;

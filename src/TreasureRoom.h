@@ -33,7 +33,10 @@ namespace TreasureRoom
 //
 // Example:
 //   TreasureRoom::maybe_create(1, mapRng, ctx);   // -> false, roll missed
-bool maybe_create(int dungeonLevel, RandomDice& generationRng, GameContext& ctx);
+bool maybe_create(
+	int dungeonLevel,
+	RandomDice& generationRng,
+	GameContext& ctx);
 
 // Turns one room into a treasure room: floors it, puts a hoard of the given
 // quality at its centre, spawns the named warden and its escort, then calls

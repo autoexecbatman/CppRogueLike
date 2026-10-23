@@ -65,16 +65,22 @@ protected:
 	{
 		auto item = ItemCreator::create(key, player->position, ctx);
 		Item* carried = item.get();
-		[[maybe_unused]] const auto added = InventoryOperations::add_item_to_inventory(
-			player->inventoryData, std::move(item), *player, *ctx.dataManager);
+		[[maybe_unused]] const auto added =
+			InventoryOperations::add_item_to_inventory(
+				player->inventoryData,
+				std::move(item),
+				*player,
+				*ctx.dataManager);
 		ASSERT_TRUE(added.has_value()) << key << " did not fit in the pack";
 		use_item(*carried->behavior, *carried, *player, ctx);
-		ASSERT_NE(player->get_equipped_item(EquipmentSlot::BODY), nullptr) << key << " was not put on";
+		ASSERT_NE(player->get_equipped_item(EquipmentSlot::BODY), nullptr)
+			<< key << " was not put on";
 	}
 
 	Game game{ TEST_DICE_SEED };
 	GameContext ctx;
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 0, 0 }) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ 0, 0 }) };
 };
 
 // Base 10, dwarf +10, Dexterity 17 +10, leather 0, nothing spent.
@@ -122,7 +128,8 @@ TEST_F(ThiefSkillCharacterTest, ArmorOffTheTableLeavesNoSkillAtAll)
 	EXPECT_FALSE(player->thief_armor().has_value());
 	for (const ThiefSkill skill : ALL_THIEF_SKILL)
 	{
-		EXPECT_FALSE(player->thief_skill(skill).has_value()) << thief_skill_name(skill);
+		EXPECT_FALSE(player->thief_skill(skill).has_value())
+			<< thief_skill_name(skill);
 	}
 }
 
@@ -132,7 +139,8 @@ TEST_F(ThiefSkillCharacterTest, OnlyARogueHasThiefSkillsAtAll)
 
 	for (const ThiefSkill skill : ALL_THIEF_SKILL)
 	{
-		EXPECT_FALSE(player->thief_skill(skill).has_value()) << thief_skill_name(skill);
+		EXPECT_FALSE(player->thief_skill(skill).has_value())
+			<< thief_skill_name(skill);
 	}
 }
 
@@ -141,7 +149,8 @@ TEST_F(ThiefSkillCharacterTest, OnlyARogueHasThiefSkillsAtAll)
 TEST_F(ThiefSkillCharacterTest, ALevelOnItsOwnRaisesNoSkill)
 {
 	wear("leather_armor");
-	const int atFirstLevel = player->thief_skill(ThiefSkill::OPEN_LOCKS).value();
+	const int atFirstLevel =
+		player->thief_skill(ThiefSkill::OPEN_LOCKS).value();
 
 	player->set_creature_level(5);
 
@@ -164,7 +173,8 @@ TEST_F(ThiefSkillCharacterTest, ADexterityPastTheTableStillAnswers)
 
 TEST_F(ThiefSkillCharacterTest, ThePointsThePlayerSpentSurviveASave)
 {
-	player->thiefSkillPoints.at(thief_skill_index(ThiefSkill::HIDE_IN_SHADOWS)) = 22;
+	player->thiefSkillPoints.at(
+		thief_skill_index(ThiefSkill::HIDE_IN_SHADOWS)) = 22;
 	player->thiefSkillPoints.at(thief_skill_index(ThiefSkill::OPEN_LOCKS)) = 8;
 
 	nlohmann::json saved;
@@ -173,8 +183,14 @@ TEST_F(ThiefSkillCharacterTest, ThePointsThePlayerSpentSurviveASave)
 	auto reloaded = std::make_unique<Player>(Vector2D{ 0, 0 });
 	reloaded->load(saved);
 
-	EXPECT_EQ(reloaded->thiefSkillPoints.at(thief_skill_index(ThiefSkill::HIDE_IN_SHADOWS)), 22);
-	EXPECT_EQ(reloaded->thiefSkillPoints.at(thief_skill_index(ThiefSkill::OPEN_LOCKS)), 8);
+	EXPECT_EQ(
+		reloaded->thiefSkillPoints.at(
+			thief_skill_index(ThiefSkill::HIDE_IN_SHADOWS)),
+		22);
+	EXPECT_EQ(
+		reloaded->thiefSkillPoints.at(
+			thief_skill_index(ThiefSkill::OPEN_LOCKS)),
+		8);
 	EXPECT_EQ(reloaded->thief_skill(ThiefSkill::OPEN_LOCKS), 38);
 }
 

@@ -27,7 +27,8 @@ namespace InventoryOperations
 // Both FloorInventory and CreatureInventory share the same data shape.
 // This concept gates shared operations. Weight-gated add is CreatureInventory-only.
 template <typename Inventory>
-concept AnyInventory = std::same_as<Inventory, FloorInventory> || std::same_as<Inventory, CreatureInventory>;
+concept AnyInventory = std::same_as<Inventory, FloorInventory> ||
+	std::same_as<Inventory, CreatureInventory>;
 
 // ===== CORE OPERATIONS =====
 // Non-template - defined in InventoryOperations.cpp
@@ -38,7 +39,9 @@ void add_item(FloorInventory& inventory, std::unique_ptr<Item> item);
 
 // Add to creature backpack. Capacity check only - no weight gate.
 // Use for initialization (starting gear, load). Weight gate lives in add_item_to_inventory.
-InventoryResult<bool> add_item(CreatureInventory& inventory, std::unique_ptr<Item> item);
+InventoryResult<bool> add_item(
+	CreatureInventory& inventory,
+	std::unique_ptr<Item> item);
 
 // Add to creature backpack with STR-based weight enforcement.
 InventoryResult<bool> add_item_to_inventory(
@@ -48,15 +51,25 @@ InventoryResult<bool> add_item_to_inventory(
 	const DataManager& dataManager);
 
 // Remove from floor
-InventoryResult<std::unique_ptr<Item>> remove_item(FloorInventory& inventory, const Item& item);
-InventoryResult<std::unique_ptr<Item>> remove_item_at(FloorInventory& inventory, size_t index);
+InventoryResult<std::unique_ptr<Item>> remove_item(
+	FloorInventory& inventory,
+	const Item& item);
+InventoryResult<std::unique_ptr<Item>> remove_item_at(
+	FloorInventory& inventory,
+	size_t index);
 
 // Remove from creature backpack
-InventoryResult<std::unique_ptr<Item>> remove_item(CreatureInventory& inventory, const Item& item);
-InventoryResult<std::unique_ptr<Item>> remove_item_at(CreatureInventory& inventory, size_t index);
+InventoryResult<std::unique_ptr<Item>> remove_item(
+	CreatureInventory& inventory,
+	const Item& item);
+InventoryResult<std::unique_ptr<Item>> remove_item_at(
+	CreatureInventory& inventory,
+	size_t index);
 
 // Remove from creature backpack by id
-InventoryResult<std::unique_ptr<Item>> remove_item_by_id(CreatureInventory& inventory, uint64_t uniqueId);
+InventoryResult<std::unique_ptr<Item>> remove_item_by_id(
+	CreatureInventory& inventory,
+	uint64_t uniqueId);
 
 // What a purse of the given size weighs, in pounds, at a thousand coins to the pound.
 // The part-thousand is dropped, so small change weighs nothing and every further
@@ -95,7 +108,9 @@ int get_total_weight(const Creature& owner) noexcept;
 // Example:
 //   get_max_weight(strengthTenCarrier, dataManager);   // -> 110
 //   get_max_weight(hillGiantGirdled, dataManager);     // -> 640, at Strength 19
-int get_max_weight(const Creature& owner, const DataManager& dataManager) noexcept;
+int get_max_weight(
+	const Creature& owner,
+	const DataManager& dataManager) noexcept;
 
 // Whether the owner is carrying more than its Max. Carried Weight, worn gear
 // included. Being over it stops the owner picking anything else up; this game has no
@@ -107,7 +122,9 @@ int get_max_weight(const Creature& owner, const DataManager& dataManager) noexce
 //   carrier.wear(weighing(limit + 1), EquipmentSlot::BODY);  // worn, not packed
 //   is_overloaded(carrier, dataManager);                     // -> true
 //   is_within_weight_limit(*weighing(1), carrier, dataManager);  // -> false, nothing more fits
-bool is_overloaded(const Creature& owner, const DataManager& dataManager) noexcept;
+bool is_overloaded(
+	const Creature& owner,
+	const DataManager& dataManager) noexcept;
 
 // Whether this item can go into the pack without taking what the owner carries past
 // its strength-based limit. The one statement of that rule: adding, picking up
@@ -128,7 +145,9 @@ bool is_within_weight_limit(
 // Example:
 //   is_carrying(emptyPack, "torch");        // -> false
 //   is_carrying(packHoldingATorch, "torch"); // -> true
-[[nodiscard]] bool is_carrying(const CreatureInventory& inventory, std::string_view itemKey) noexcept;
+[[nodiscard]] bool is_carrying(
+	const CreatureInventory& inventory,
+	std::string_view itemKey) noexcept;
 
 // Every floor item standing on one tile, in the order the floor holds them. Empty
 // when the tile is bare. The floor keeps ownership; these are borrowed views, so a
@@ -137,16 +156,22 @@ bool is_within_weight_limit(
 // Example:
 //   items_at(floor, bareTile);          // -> {}
 //   items_at(floor, tileUnderTheHeap);  // -> three items, topmost of the heap first
-[[nodiscard]] std::vector<Item*> items_at(FloorInventory& inventory, Vector2D position);
+[[nodiscard]] std::vector<Item*> items_at(
+	FloorInventory& inventory,
+	Vector2D position);
 
 // The floor item carrying this id, or null once it is gone. A menu that offers a
 // choice of floor items outlives the frame that built it, so it holds ids and asks
 // here when the choice lands rather than keeping a pointer that may have dangled.
-Item* find_item_by_id(FloorInventory& inventory, UniqueId::IdType uniqueId) noexcept;
+Item* find_item_by_id(
+	FloorInventory& inventory,
+	UniqueId::IdType uniqueId) noexcept;
 
 // id-based search - creature backpack only
 Item* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept;
-const Item* find_item_by_id(const CreatureInventory& inventory, uint64_t uniqueId) noexcept;
+const Item* find_item_by_id(
+	const CreatureInventory& inventory,
+	uint64_t uniqueId) noexcept;
 
 // ===== CAPACITY MANAGEMENT =====
 
@@ -172,7 +197,9 @@ inline size_t get_remaining_space(const CreatureInventory& inventory) noexcept
 	return inventory.capacity - inventory.items.size();
 }
 
-inline void set_inventory_capacity(CreatureInventory& inventory, size_t newCapacity)
+inline void set_inventory_capacity(
+	CreatureInventory& inventory,
+	size_t newCapacity)
 {
 	if (newCapacity < inventory.items.size())
 	{
@@ -188,31 +215,35 @@ inline void set_inventory_capacity(CreatureInventory& inventory, size_t newCapac
 template <AnyInventory Inventory>
 Item* get_item_at(Inventory& inventory, size_t index) noexcept
 {
-	return index < inventory.items.size() ? inventory.items[index].get() : nullptr;
+	return index < inventory.items.size() ? inventory.items[index].get() :
+											nullptr;
 }
 
 template <AnyInventory Inventory>
 const Item* get_item_at(const Inventory& inventory, size_t index) noexcept
 {
-	return index < inventory.items.size() ? inventory.items[index].get() : nullptr;
+	return index < inventory.items.size() ? inventory.items[index].get() :
+											nullptr;
 }
 
 // ===== SEARCH OPERATIONS =====
 
 template <AnyInventory Inventory>
-const Item* find_item_by_name(const Inventory& inventory, std::string_view name) noexcept
+const Item* find_item_by_name(
+	const Inventory& inventory,
+	std::string_view name) noexcept
 {
 	[[maybe_unused]] auto is_null = [](const auto& item)
 	{
 		return !item;
 	};
-	assert(std::ranges::none_of(inventory.items, is_null) && "InventoryOperations::find_item_by_name: the inventory holds a null item");
+	assert(
+		std::ranges::none_of(inventory.items, is_null) &&
+		"InventoryOperations::find_item_by_name: the inventory holds a null item");
 
-	auto found = std::ranges::find_if(inventory.items,
-		[name](const auto& item)
-		{
-			return item->actorData.name == name;
-		});
+	auto found = std::ranges::find_if(
+		inventory.items,
+		[name](const auto& item) { return item->actorData.name == name; });
 
 	return found != inventory.items.end() ? found->get() : nullptr;
 }
@@ -220,11 +251,9 @@ const Item* find_item_by_name(const Inventory& inventory, std::string_view name)
 template <AnyInventory Inventory>
 bool contains_item(const Inventory& inventory, const Item& item) noexcept
 {
-	return std::ranges::any_of(inventory.items,
-		[&item](const auto& storedItem)
-		{
-			return storedItem.get() == &item;
-		});
+	return std::ranges::any_of(
+		inventory.items,
+		[&item](const auto& storedItem) { return storedItem.get() == &item; });
 }
 
 // ===== PERSISTENCE =====
@@ -275,7 +304,9 @@ void save_inventory(const Inventory& inventory, nlohmann::json& output)
 
 	for (const auto& item : inventory.items)
 	{
-		assert(item && "save_inventory: inventory holds a null where an item should be");
+		assert(
+			item &&
+			"save_inventory: inventory holds a null where an item should be");
 
 		nlohmann::json itemJson;
 		item->save(itemJson);
@@ -299,8 +330,7 @@ inline std::string get_inventory_debug_info(const CreatureInventory& inventory)
 template <AnyInventory Inventory>
 void optimize_inventory_storage(Inventory& inventory)
 {
-	std::erase_if(inventory.items, [](const auto& item)
-		{ return !item; });
+	std::erase_if(inventory.items, [](const auto& item) { return !item; });
 
 	if (inventory.items.size() * 4 < inventory.items.capacity())
 	{

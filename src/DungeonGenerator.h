@@ -30,8 +30,7 @@ private:
 
 	// Phase 1: Prim's MST - guarantees full connectivity, no cycles.
 	// Room types must be assigned after this and before add_extra_corridors.
-	void connect_spanning_tree(
-		std::vector<DungeonRoom>& rooms) const;
+	void connect_spanning_tree(std::vector<DungeonRoom>& rooms) const;
 
 	// Phase 2: extra short-range corridors to create loop paths.
 	// Does not affect leaf detection - run after room type assignment.

@@ -64,17 +64,20 @@ protected:
 // Told level 20 while the context's manager still says 1, the shop stocks for 20.
 TEST_F(ShopStockLevelTest, StocksForTheLevelItIsTold)
 {
-	ASSERT_EQ(levelManager.get_dungeon_level(), 1) << "the manager must disagree with the level the shop is told";
+	ASSERT_EQ(levelManager.get_dungeon_level(), 1)
+		<< "the manager must disagree with the level the shop is told";
 	ShopKeeper shop{ ShopType::ARMOR_SHOP, ShopQuality::AVERAGE, mock.dice };
 	force_three_last_candidates();
 
 	shop.generate_initial_inventory(20, ctx);
 
-	EXPECT_EQ(stocked_keys(shop), (std::vector<std::string>{
-									  "splint_mail",
-									  "splint_mail",
-									  "splint_mail",
-								  }))
+	EXPECT_EQ(
+		stocked_keys(shop),
+		(std::vector<std::string>{
+			"splint_mail",
+			"splint_mail",
+			"splint_mail",
+		}))
 		<< "the stock was drawn at the manager's level, not the one the shop was told";
 }
 
@@ -86,11 +89,13 @@ TEST_F(ShopStockLevelTest, StocksForLevelOneWhenToldOne)
 
 	shop.generate_initial_inventory(1, ctx);
 
-	EXPECT_EQ(stocked_keys(shop), (std::vector<std::string>{
-									  "studded_leather",
-									  "studded_leather",
-									  "studded_leather",
-								  }));
+	EXPECT_EQ(
+		stocked_keys(shop),
+		(std::vector<std::string>{
+			"studded_leather",
+			"studded_leather",
+			"studded_leather",
+		}));
 }
 
 // Being told the level is the whole of it: no level manager is consulted.

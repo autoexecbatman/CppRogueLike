@@ -21,7 +21,7 @@
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\t\tauto grants_state = [state](const Buff& buff)\n\t\t{\n\t\t\tconst auto effect = buff_state_effects.find(buff.type);\n\t\t\treturn effect != buff_state_effects.end() && effect->second == state;\n\t\t};\n",
+      "original": "\t\tauto grants_state = [state](const Buff& buff)\n\t\t{\n\t\t\tconst auto effect = buff_state_effects.find(buff.type);\n\t\t\treturn effect != buff_state_effects.end() &&\n\t\t\t\teffect->second == state;\n\t\t};\n",
       "mutated": "\t\tauto grants_state = [buffType](const Buff& buff)\n\t\t{\n\t\t\treturn buff.type == buffType;\n\t\t};\n",
       "catches": "a state asked of one buff type, so a second buff granting it is not seen"
     },

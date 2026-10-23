@@ -40,17 +40,19 @@ constexpr int ROUNDS_IN_A_DAY = HOURS_IN_A_DAY * MINUTES_IN_AN_HOUR;
 class InvisibilitySpellTest : public ::testing::Test
 {
 protected:
-	void SetUp() override
-	{
-		ctx = mock.to_game_context();
-	}
+	void SetUp() override { ctx = mock.to_game_context(); }
 
 	// The wizard's own casting, from memory; only a priest's spell can fizzle.
 	void cast_invisibility()
 	{
 		const auto casting_spent = [](GameContext& completedCtx) {
 		};
-		SpellSystem::cast_spell_by_key("invisibility", wizard, SpellSource::MEMORIZED, casting_spent, ctx);
+		SpellSystem::cast_spell_by_key(
+			"invisibility",
+			wizard,
+			SpellSource::MEMORIZED,
+			casting_spent,
+			ctx);
 	}
 
 	// Whether the wizard is still invisible once the clock reads `rounds` after the casting.
@@ -63,10 +65,15 @@ protected:
 	// Whether any stored message holds the given text, its coloured runs joined.
 	bool said(std::string_view wanted) const
 	{
-		for (size_t index = 0; index < ctx.messageSystem->get_stored_message_count(); ++index)
+		for (
+			size_t index = 0;
+			index < ctx.messageSystem->get_stored_message_count();
+			++index)
 		{
 			std::string whole;
-			for (const LogMessage& run : ctx.messageSystem->get_attack_message_at(index))
+			for (
+				const LogMessage& run :
+				ctx.messageSystem->get_attack_message_at(index))
 			{
 				whole += run.text;
 			}
@@ -100,8 +107,10 @@ TEST_F(InvisibilitySpellTest, ItLastsADayAndNoLonger)
 {
 	cast_invisibility();
 
-	EXPECT_TRUE(is_invisible_after(ROUNDS_IN_A_DAY - 1)) << "gone before the day was out";
-	EXPECT_FALSE(is_invisible_after(ROUNDS_IN_A_DAY)) << "still invisible after a full day";
+	EXPECT_TRUE(is_invisible_after(ROUNDS_IN_A_DAY - 1))
+		<< "gone before the day was out";
+	EXPECT_FALSE(is_invisible_after(ROUNDS_IN_A_DAY))
+		<< "still invisible after a full day";
 }
 
 // Cast from memory it is the spell's own invisibility, which no ring's removal ends.

@@ -24,15 +24,18 @@ inline constexpr std::string_view MONSTERS = "data/content/monsters.json";
 inline constexpr std::string_view SPELLS = "data/content/spells.json";
 inline constexpr std::string_view BODY_PLANS = "data/content/body_plans.json";
 inline constexpr std::string_view ITEMS = "data/content/items.json";
-inline constexpr std::string_view ENHANCED_RULES = "data/content/enhanced_rules.json";
+inline constexpr std::string_view ENHANCED_RULES =
+	"data/content/enhanced_rules.json";
 inline constexpr std::string_view TILE_CONFIG = "data/tiles/tile_config.json";
 
 // The printed AD&D 2e ability tables, kept beside the source they were transcribed for.
 inline constexpr std::string_view STRENGTH_TABLE = "src/json/strength.json";
 inline constexpr std::string_view DEXTERITY_TABLE = "src/json/dexterity.json";
-inline constexpr std::string_view CONSTITUTION_TABLE = "src/json/constitution.json";
+inline constexpr std::string_view CONSTITUTION_TABLE =
+	"src/json/constitution.json";
 inline constexpr std::string_view CHARISMA_TABLE = "src/json/charisma.json";
-inline constexpr std::string_view INTELLIGENCE_TABLE = "src/json/intelligence.json";
+inline constexpr std::string_view INTELLIGENCE_TABLE =
+	"src/json/intelligence.json";
 inline constexpr std::string_view WISDOM_TABLE = "src/json/wisdom.json";
 
 // Walks upward from cwd until a directory containing "data/" is found,

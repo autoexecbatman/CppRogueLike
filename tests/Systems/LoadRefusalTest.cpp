@@ -55,7 +55,8 @@ void run_one_menu_frame(Game& game, GameContext& ctx, HiddenRenderer& hidden)
 }
 
 // Load Game on a refused save shows the refusal, and a key returns to a main menu alone.
-[[noreturn]] void load_game_on_a_refused_save_reports_it_and_returns_to_the_menu()
+[[noreturn]] void
+load_game_on_a_refused_save_reports_it_and_returns_to_the_menu()
 {
 	HiddenRenderer hidden{};
 	Game game{ TEST_DICE_SEED };
@@ -72,14 +73,26 @@ void run_one_menu_frame(Game& game, GameContext& ctx, HiddenRenderer& hidden)
 	ctx.inputSystem->queue_key(GameKey::ENTER, 0);
 	run_one_menu_frame(game, ctx, hidden);
 
-	exit_unless(!std::filesystem::exists(Paths::resolve(Paths::SAVE_FILE)), "the refused save was not deleted");
-	exit_unless(!game.menuManager.is_game_initialized(), "the refused load left the game marked running");
-	exit_unless(!game.menus.empty() && typeid(*game.menus.back()) == typeid(NotificationMenu), "no notice of the refusal is on top of the stack");
+	exit_unless(
+		!std::filesystem::exists(Paths::resolve(Paths::SAVE_FILE)),
+		"the refused save was not deleted");
+	exit_unless(
+		!game.menuManager.is_game_initialized(),
+		"the refused load left the game marked running");
+	exit_unless(
+		!game.menus.empty() &&
+			typeid(*game.menus.back()) == typeid(NotificationMenu),
+		"no notice of the refusal is on top of the stack");
 	ctx.inputSystem->queue_key(GameKey::ENTER, 0);
 	run_one_menu_frame(game, ctx, hidden);
 
-	exit_unless(game.menus.size() == 1, "closing the notice left more than the main menu on the stack");
-	exit_unless(typeid(*game.menus.back()) == typeid(ListMenu) && game.menus.back()->run, "closing the notice did not leave a running main menu");
+	exit_unless(
+		game.menus.size() == 1,
+		"closing the notice left more than the main menu on the stack");
+	exit_unless(
+		typeid(*game.menus.back()) == typeid(ListMenu) &&
+			game.menus.back()->run,
+		"closing the notice did not leave a running main menu");
 	std::_Exit(HIDDEN_RENDERER_PASSED);
 }
 } // namespace
@@ -131,30 +144,40 @@ protected:
 	bool wroteStandIn{ false };
 };
 
-TEST_F(LoadRefusalTest, AnUnparseableSaveIsRefusedDeletedAndLeavesTheGameUninitialized)
+TEST_F(
+	LoadRefusalTest,
+	AnUnparseableSaveIsRefusedDeletedAndLeavesTheGameUninitialized)
 {
 	place_save("LoadRefusalTest stand-in - not json");
-	ASSERT_TRUE(wroteStandIn) << "could not write the stand-in save, so nothing here is being measured";
+	ASSERT_TRUE(wroteStandIn)
+		<< "could not write the stand-in save, so nothing here is being measured";
 
 	const LoadOutcome outcome = game.stateManager.load_all(ctx);
 
 	EXPECT_EQ(outcome.kind, LoadOutcomeKind::REFUSED);
-	EXPECT_FALSE(outcome.reason.empty()) << "a refusal must carry the loader's reason for the player";
-	EXPECT_FALSE(save_exists()) << "the refused save was kept; the owner's ruling is to delete it";
-	EXPECT_FALSE(game.menuManager.is_game_initialized()) << "a refused load left the game marked running";
+	EXPECT_FALSE(outcome.reason.empty())
+		<< "a refusal must carry the loader's reason for the player";
+	EXPECT_FALSE(save_exists())
+		<< "the refused save was kept; the owner's ruling is to delete it";
+	EXPECT_FALSE(game.menuManager.is_game_initialized())
+		<< "a refused load left the game marked running";
 }
 
 TEST_F(LoadRefusalTest, ASaveMissingItsMapIsRefusedAndItsReasonNamesTheKey)
 {
 	place_save("{}");
-	ASSERT_TRUE(wroteStandIn) << "could not write the stand-in save, so nothing here is being measured";
+	ASSERT_TRUE(wroteStandIn)
+		<< "could not write the stand-in save, so nothing here is being measured";
 
 	const LoadOutcome outcome = game.stateManager.load_all(ctx);
 
 	EXPECT_EQ(outcome.kind, LoadOutcomeKind::REFUSED);
-	EXPECT_NE(outcome.reason.find("not found"), std::string::npos) << "the reason was: " << outcome.reason;
-	EXPECT_FALSE(save_exists()) << "the refused save was kept; the owner's ruling is to delete it";
-	EXPECT_FALSE(game.menuManager.is_game_initialized()) << "a refused load left the game marked running";
+	EXPECT_NE(outcome.reason.find("not found"), std::string::npos)
+		<< "the reason was: " << outcome.reason;
+	EXPECT_FALSE(save_exists())
+		<< "the refused save was kept; the owner's ruling is to delete it";
+	EXPECT_FALSE(game.menuManager.is_game_initialized())
+		<< "a refused load left the game marked running";
 }
 
 // Windows refuses to delete a file another handle holds open, which is a delete failing at run
@@ -162,19 +185,24 @@ TEST_F(LoadRefusalTest, ASaveMissingItsMapIsRefusedAndItsReasonNamesTheKey)
 TEST_F(LoadRefusalTest, ARefusedSaveThatCannotBeDeletedIsKeptAndSaysSo)
 {
 	place_save("{}");
-	ASSERT_TRUE(wroteStandIn) << "could not write the stand-in save, so nothing here is being measured";
+	ASSERT_TRUE(wroteStandIn)
+		<< "could not write the stand-in save, so nothing here is being measured";
 
 	LoadOutcome outcome{};
 	{
 		std::ofstream holder{ Paths::resolve(Paths::SAVE_FILE), std::ios::app };
-		ASSERT_TRUE(holder.is_open()) << "could not hold the save open, so the delete cannot be made to fail";
+		ASSERT_TRUE(holder.is_open())
+			<< "could not hold the save open, so the delete cannot be made to fail";
 		outcome = game.stateManager.load_all(ctx);
 	}
 
 	EXPECT_EQ(outcome.kind, LoadOutcomeKind::REFUSED_AND_KEPT);
-	EXPECT_FALSE(outcome.reason.empty()) << "a refusal must carry the loader's reason for the player";
-	EXPECT_TRUE(save_exists()) << "the delete was expected to fail while the file is held open";
-	EXPECT_FALSE(game.menuManager.is_game_initialized()) << "a refused load left the game marked running";
+	EXPECT_FALSE(outcome.reason.empty())
+		<< "a refusal must carry the loader's reason for the player";
+	EXPECT_TRUE(save_exists())
+		<< "the delete was expected to fail while the file is held open";
+	EXPECT_FALSE(game.menuManager.is_game_initialized())
+		<< "a refused load left the game marked running";
 }
 
 // Runs in a child with a hidden window, so it skips where no OpenGL driver exists (issues/0211).
@@ -187,7 +215,8 @@ TEST(LoadRefusalMenuTest, LoadGameOnARefusedSaveReportsItAndReturnsToTheMenu)
 			Paths::resolve(Paths::SAVE_FILE).string());
 	}
 
-	const int childExitCode = exit_code_in_child(&load_game_on_a_refused_save_reports_it_and_returns_to_the_menu);
+	const int childExitCode = exit_code_in_child(
+		&load_game_on_a_refused_save_reports_it_and_returns_to_the_menu);
 
 	// The stand-in is this test's own; a child that stopped early may have left it.
 	std::error_code ignored;
@@ -196,7 +225,8 @@ TEST(LoadRefusalMenuTest, LoadGameOnARefusedSaveReportsItAndReturnsToTheMenu)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
 	}
-	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED) << "the child's check that failed is in its output above";
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 
 TEST_F(LoadRefusalTest, AMissingSaveIsReportedAndLeavesTheGameUninitialized)
@@ -205,5 +235,6 @@ TEST_F(LoadRefusalTest, AMissingSaveIsReportedAndLeavesTheGameUninitialized)
 
 	EXPECT_EQ(outcome.kind, LoadOutcomeKind::NO_SAVE);
 	EXPECT_TRUE(outcome.reason.empty());
-	EXPECT_FALSE(game.menuManager.is_game_initialized()) << "a load with nothing to read left the game marked running";
+	EXPECT_FALSE(game.menuManager.is_game_initialized())
+		<< "a load with nothing to read left the game marked running";
 }

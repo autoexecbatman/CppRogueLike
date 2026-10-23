@@ -3,5 +3,7 @@
 #include "Colors.h"
 #include "Vector2D.h"
 
-Stairs::Stairs(Vector2D position)
-	: Actor(position, ActorData{ TileRef{}, "stairs", ColorPairId::WHITE_BLACK }) {}
+Stairs::Stairs(Vector2D position) :
+	Actor(position, ActorData{ TileRef{}, "stairs", ColorPairId::WHITE_BLACK })
+{
+}

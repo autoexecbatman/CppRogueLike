@@ -53,7 +53,9 @@ protected:
 	// Queues a data-built monster's dice in the order it rolls them: Dexterity's 3d6, then
 	// the Constitution the test names, then Intelligence, Wisdom and Charisma's 3d6 each,
 	// then the hit dice the test names. The scores the test does not name roll 3s.
-	void force_constitution_and_hit_dice(std::initializer_list<int> constitution, std::initializer_list<int> hitDice)
+	void force_constitution_and_hit_dice(
+		std::initializer_list<int> constitution,
+		std::initializer_list<int> hitDice)
 	{
 		force_rolls({ 3, 3, 3 });
 		force_rolls(constitution);
@@ -66,7 +68,10 @@ protected:
 	// A monster built from its record in monsters.json, as the spawn table builds one.
 	std::unique_ptr<Creature> build(std::string_view key)
 	{
-		return MonsterCreator::create_from_params(Vector2D{ 0, 0 }, mock.monsterRegistry.get_params(key), ctx);
+		return MonsterCreator::create_from_params(
+			Vector2D{ 0, 0 },
+			mock.monsterRegistry.get_params(key),
+			ctx);
 	}
 
 	MonsterParams params_with(CreatureSize size, DiceExpr hitDice)
@@ -94,10 +99,12 @@ protected:
 // would be 21, and with no adjustment 15.
 TEST_F(MonsterHitDiceTest, AMonsterAddsItsConstitutionToEveryHitDie)
 {
-	const MonsterParams params = params_with(CreatureSize::MEDIUM, DiceExpr{ 3, 8, 0 });
+	const MonsterParams params =
+		params_with(CreatureSize::MEDIUM, DiceExpr{ 3, 8, 0 });
 	force_constitution_and_hit_dice({ 6, 6, 5 }, { 5, 5, 5 });
 
-	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
+	const auto monster =
+		MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
 	ASSERT_EQ(monster->get_constitution(), 18);
 	EXPECT_EQ(monster->get_max_hp(), 27);
@@ -108,10 +115,12 @@ TEST_F(MonsterHitDiceTest, AMonsterAddsItsConstitutionToEveryHitDie)
 // with Constitution 18 are 9 apiece, and the 4 is added once.
 TEST_F(MonsterHitDiceTest, TheFlatBonusOnHitDiceTakesNoAdjustment)
 {
-	const MonsterParams params = params_with(CreatureSize::MEDIUM, DiceExpr{ 2, 8, 4 });
+	const MonsterParams params =
+		params_with(CreatureSize::MEDIUM, DiceExpr{ 2, 8, 4 });
 	force_constitution_and_hit_dice({ 6, 6, 5 }, { 5, 5 });
 
-	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
+	const auto monster =
+		MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
 	EXPECT_EQ(monster->get_max_hp(), 22);
 }
@@ -121,10 +130,12 @@ TEST_F(MonsterHitDiceTest, TheFlatBonusOnHitDiceTakesNoAdjustment)
 // than at 0 and -1. Without the floor the three dice would come to 2.
 TEST_F(MonsterHitDiceTest, NoHitDieOfAMonsterYieldsLessThanOne)
 {
-	const MonsterParams params = params_with(CreatureSize::TINY, DiceExpr{ 3, 8, 0 });
+	const MonsterParams params =
+		params_with(CreatureSize::TINY, DiceExpr{ 3, 8, 0 });
 	force_constitution_and_hit_dice({ 1, 1, 1 }, { 1, 2, 5 });
 
-	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
+	const auto monster =
+		MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
 	ASSERT_EQ(monster->get_constitution(), 3);
 	EXPECT_EQ(monster->get_max_hp(), 5);
@@ -136,10 +147,12 @@ TEST_F(MonsterHitDiceTest, NoHitDieOfAMonsterYieldsLessThanOne)
 // worth 14. Without the footnote the pair would come to 21.
 TEST_F(MonsterHitDiceTest, AMonsterOfTwentyOneCountsALowRollAsThree)
 {
-	const MonsterParams params = params_with(CreatureSize::LARGE, DiceExpr{ 2, 8, 0 });
+	const MonsterParams params =
+		params_with(CreatureSize::LARGE, DiceExpr{ 2, 8, 0 });
 	force_constitution_and_hit_dice({ 6, 6, 6 }, { 1, 8 });
 
-	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
+	const auto monster =
+		MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
 	EXPECT_EQ(monster->get_max_hp(), 23);
 }
@@ -148,9 +161,11 @@ TEST_F(MonsterHitDiceTest, AMonsterOfTwentyOneCountsALowRollAsThree)
 // of upkeep finds the score already accounted for and moves nothing.
 TEST_F(MonsterHitDiceTest, AMonsterKeepsWhatItWasMadeWith)
 {
-	const MonsterParams params = params_with(CreatureSize::MEDIUM, DiceExpr{ 3, 8, 0 });
+	const MonsterParams params =
+		params_with(CreatureSize::MEDIUM, DiceExpr{ 3, 8, 0 });
 	force_constitution_and_hit_dice({ 6, 6, 5 }, { 5, 5, 5 });
-	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
+	const auto monster =
+		MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 	ASSERT_EQ(monster->get_max_hp(), 27);
 
 	monster->update_constitution_bonus(ctx);
@@ -184,7 +199,8 @@ TEST_F(MonsterHitDiceTest, AMonstersChangedScoreMovesByItsHitDice)
 // added once to the total: 3 x (4 + 4) + 3.
 TEST_F(MonsterHitDiceTest, AWebWeaverTakesItsConstitutionOnEachHitDie)
 {
-	force_rolls({ 3, 3, 3, 3, 3, 3, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4 });
+	force_rolls(
+		{ 3, 3, 3, 3, 3, 3, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4 });
 	const auto weaver = build("spider_weaver");
 
 	ASSERT_EQ(weaver->get_constitution(), 18);
@@ -209,36 +225,37 @@ TEST_F(MonsterHitDiceTest, ASmallSpiderTakesItsConstitutionPenalty)
 // then 9 or 10 hit dice and a d8 for each. A score of 18 adds 4 to every one of them.
 TEST_F(MonsterHitDiceTest, AMimicTakesItsConstitutionOnEveryHitDie)
 {
-	force_rolls({
-		3,
-		3,
-		3,
-		3,
-		3,
-		3,
-		5,
-		5,
-		5,
-		1,
-		1,
-		1,
-		1,
-		1,
-		1,
-		1,
-		1,
-		1,
-		9,
-		1,
-		1,
-		1,
-		1,
-		1,
-		1,
-		1,
-		1,
-		1,
-	});
+	force_rolls(
+		{
+			3,
+			3,
+			3,
+			3,
+			3,
+			3,
+			5,
+			5,
+			5,
+			1,
+			1,
+			1,
+			1,
+			1,
+			1,
+			1,
+			1,
+			1,
+			9,
+			1,
+			1,
+			1,
+			1,
+			1,
+			1,
+			1,
+			1,
+			1,
+		});
 	const auto mimic = build("mimic");
 
 	ASSERT_EQ(mimic->get_constitution(), 18);

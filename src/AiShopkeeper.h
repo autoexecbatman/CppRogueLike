@@ -10,7 +10,10 @@ class AiShopkeeper : public Ai
 private:
 	void update(Creature& owner, GameContext& ctx) override;
 
-	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::SHOPKEEPER; }
+	[[nodiscard]] AiType get_ai_type() const noexcept override
+	{
+		return AiType::SHOPKEEPER;
+	}
 
 	// Opens its shop, of a kind and quality chosen for the current dungeon level, and
 	// stocks it.

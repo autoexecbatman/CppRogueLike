@@ -16,6 +16,7 @@ things that are already named, and reading settles the rest.
     python docs/pair_symmetry.py --verbs         # only the unpaired-verb check
     python docs/pair_symmetry.py --guards        # only the guarded-but-unasserted check
     python docs/pair_symmetry.py --min-guards 3  # raise the bar on the second check
+    python docs/pair_symmetry.py --self-test     # the fixtures' exact findings
 
 Output is a report, never a gate. Both counts are far from zero and a failing exit
 would be ignored within a day.
@@ -60,6 +61,20 @@ GameContext&, so its signature says it can write. Exempting GameContext& would l
 real save_X(ctx) with no loader. register_key is expected: bindings are registered once
 at start and never removed, which is a design state rather than a missing half.
 
+A WRAPPED ASSERT OR DECLARATION, 2026-10-23. An 80-column format wraps a long
+assert, which then names its member on a later line, and moves a body's brace
+off its declaration's line. Check two now reads an assert through the line
+where its parentheses close, and check one reads a header declaration the same
+way, ending at a ;, a { or the end of the line. The fixtures,
+docs/pair_symmetry_fixture.cpp.txt and docs/pair_symmetry_fixture.h.txt, hold
+each shape; --self-test fails on a
+missing or an extra finding, and failed on all three shapes before the change.
+docs/pair_symmetry_mutations.json undoes each part through mutate.py, and
+--self-test caught all three. Across src/, the report on the wrapped tree
+equals the report on the commit before the wrap. That report counts one more
+assert of row than the old reader did, because an assert wrapped before the
+format was missed before.
+
 Neither check reads a build. Both read src/*.cpp and src/*.h as text.
 """
 
@@ -67,7 +82,10 @@ import argparse
 import pathlib
 import re
 import sys
+import tempfile
 from collections import defaultdict
+
+from missing_assertions import paren_depth, statement_at
 
 # Verb pairs worth checking, as (writer, reader) and checked in that direction only.
 # A writer with no reader is data written and never read back, which is a real defect.
@@ -111,6 +129,18 @@ GUARD_PATTERNS = [
 # Proof the guarded thing is a pointer rather than a bool flag.
 POINTER_USE = r"\b{}\s*->"
 
+# What the disagreeing-readers check must report on the fixture, as member:
+# (assert sites, guard sites); any other finding, or a missing one, fails
+# --self-test.
+FIXTURE = (pathlib.Path(__file__).resolve().parent
+           / "pair_symmetry_fixture.cpp.txt")
+FIXTURE_READERS = {"widgetSlot": (2, 2), "gadgetSlot": (1, 2)}
+# The writers the unpaired-verb check must report on the fixture header, which
+# is copied to a .h first because only headers are read for declarations.
+FIXTURE_HEADER = (pathlib.Path(__file__).resolve().parent
+                  / "pair_symmetry_fixture.h.txt")
+FIXTURE_WRITERS = {"save_report_card"}
+
 
 def source_files(root):
     """Every C++ source and header directly in src/, which is flat by design."""
@@ -139,15 +169,29 @@ def collect_function_names(files):
 
 def header_declarations(files, name):
     """Every header line declaring name, as (before the name, parameters, after the list)."""
-    shape = re.compile(r"^\s*(?:\[\[nodiscard\]\]\s*)?([^;(){}]*?)\b" + re.escape(name) + r"\s*\(([^)]*)\)\s*([^;{]*)[;{]")
+    # The body's brace may sit on the next line, and the parameters may wrap, so
+    # a declaration is read through the line where its parentheses close.
+    shape = re.compile(r"^\s*(?:\[\[nodiscard\]\]\s*)?([^;(){}]*?)\b"
+                       + re.escape(name)
+                       + r"\s*\(([^)]*)\)\s*([^;{]*)(?:[;{]|$)")
+    opens = re.compile(r"\b" + re.escape(name) + r"\s*\(")
     found = []
     for path in files:
         if path.suffix != ".h":
             continue
-        for line in read_lines(path):
-            match = shape.match(strip_comment(line))
+        lines = read_lines(path)
+        for index, line in enumerate(lines):
+            code = strip_comment(line)
+            if not opens.search(code):
+                continue
+            last = index
+            while paren_depth(code) > 0 and last + 1 < len(lines):
+                last += 1
+                code += " " + strip_comment(lines[last])
+            match = shape.match(code)
             if match:
-                found.append((match.group(1), match.group(2), match.group(3)))
+                found.append(
+                    (match.group(1), match.group(2), match.group(3).strip()))
     return found
 
 
@@ -213,10 +257,16 @@ def disagreeing_readers(files, minimum_guards):
     asserts = defaultdict(list)
 
     for path in files:
-        for number, line in enumerate(read_lines(path), 1):
+        lines = read_lines(path)
+        for index, line in enumerate(lines):
+            number = index + 1
             code = strip_comment(line)
             if re.match(r"\s*assert\s*\(", code):
-                for expression in re.findall(r"[A-Za-z_][\w.]*(?:->[\w.]+)*", code):
+                # A wrapped assert names its subject on a later line.
+                statement = statement_at(lines, index)
+                expressions = re.findall(
+                    r"[A-Za-z_][\w.]*(?:->[\w.]+)*", statement)
+                for expression in expressions:
                     member = re.split(r"\.|->", expression)[-1]
                     if len(member) >= 3:
                         asserts[member].append(f"{path.name}:{number}")
@@ -243,13 +293,43 @@ def disagreeing_readers(files, minimum_guards):
     return sorted(findings, reverse=True)
 
 
+def self_test():
+    """Runs both checks on the fixtures and returns 0 when they report exactly
+    FIXTURE_READERS and FIXTURE_WRITERS, 1 otherwise.
+
+    Example:
+        self_test()
+        # prints "self-test: 2 of 2 members, counts exact; 1 of 1 writers" -> 0
+    """
+    findings = disagreeing_readers([FIXTURE], 2)
+    reported = {member: (len(assert_sites), len(guard_sites))
+                for _, member, guard_sites, assert_sites in findings}
+    with tempfile.TemporaryDirectory() as folder:
+        header = pathlib.Path(folder) / "pair_symmetry_fixture.h"
+        header.write_text(FIXTURE_HEADER.read_text(encoding="utf-8"),
+                          encoding="utf-8")
+        verbs = unpaired_verbs(collect_function_names([header]), [header])
+        writers = {name for name, _, _, _ in verbs}
+    if reported != FIXTURE_READERS or writers != FIXTURE_WRITERS:
+        print(f"self-test FAILED: wanted {FIXTURE_READERS} and "
+              f"{FIXTURE_WRITERS}, reported {reported} and {writers}")
+        return 1
+    print(f"self-test: {len(reported)} of {len(FIXTURE_READERS)} members, "
+          f"counts exact; {len(writers)} of {len(FIXTURE_WRITERS)} writers")
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--self-test", action="store_true",
+                        help="check the fixtures' exact findings")
     parser.add_argument("--verbs", action="store_true", help="only the unpaired-verb check")
     parser.add_argument("--guards", action="store_true", help="only the disagreeing-readers check")
     parser.add_argument("--min-guards", type=int, default=2, help="guard sites before reporting (default 2)")
     parser.add_argument("--root", default="src", help="directory to read (default src)")
     arguments = parser.parse_args()
+    if arguments.self_test:
+        return self_test()
 
     root = pathlib.Path(arguments.root)
     if not root.is_dir():

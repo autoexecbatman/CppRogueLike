@@ -16,7 +16,10 @@ private:
 	std::unique_ptr<Ai> oldAi;
 
 	[[nodiscard]] Vector2D get_random_direction(GameContext& ctx) const;
-	void attempt_move(Creature& owner, const Vector2D& destination, GameContext& ctx);
+	void attempt_move(
+		Creature& owner,
+		const Vector2D& destination,
+		GameContext& ctx);
 	void restore_original_ai(Creature& owner);
 
 public:
@@ -33,7 +36,10 @@ public:
 
 	void update(Creature& owner, GameContext& ctx) override;
 
-	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::CONFUSED_MONSTER; }
+	[[nodiscard]] AiType get_ai_type() const noexcept override
+	{
+		return AiType::CONFUSED_MONSTER;
+	}
 
 	void load(const json& source) override;
 	void save(json& output) override;

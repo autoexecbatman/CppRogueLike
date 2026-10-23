@@ -14,7 +14,9 @@ namespace SpellAnimations
 
 void animate_lightning(Vector2D from, Vector2D to, GameContext& ctx)
 {
-	assert(ctx.animSystem && "SpellAnimations::animate_lightning: called without an animSystem");
+	assert(
+		ctx.animSystem &&
+		"SpellAnimations::animate_lightning: called without an animSystem");
 	if (!ctx.renderer)
 	{
 		return;
@@ -28,7 +30,9 @@ void animate_lightning(Vector2D from, Vector2D to, GameContext& ctx)
 
 void animate_explosion(Vector2D center, int radius, GameContext& ctx)
 {
-	assert(ctx.animSystem && "SpellAnimations::animate_explosion: called without an animSystem");
+	assert(
+		ctx.animSystem &&
+		"SpellAnimations::animate_explosion: called without an animSystem");
 	if (!ctx.renderer)
 	{
 		return;
@@ -47,20 +51,26 @@ void animate_explosion(Vector2D center, int radius, GameContext& ctx)
 
 void animate_creature_hit(Vector2D position, GameContext& ctx)
 {
-	assert(ctx.animSystem && "SpellAnimations::animate_creature_hit: called without an animSystem");
+	assert(
+		ctx.animSystem &&
+		"SpellAnimations::animate_creature_hit: called without an animSystem");
 
 	ctx.animSystem->spawn_blood_burst(position, 4);
 }
 
 void animate_magic_missile(Vector2D from, Vector2D to, GameContext& ctx)
 {
-	assert(ctx.animSystem && "SpellAnimations::animate_magic_missile: called without an animSystem");
+	assert(
+		ctx.animSystem &&
+		"SpellAnimations::animate_magic_missile: called without an animSystem");
 
 	TileRef missileTile = ctx.animSystem->get_missile_tile();
 
 	auto onArrive = [to, &ctx]()
 	{
-		assert(ctx.animSystem && "SpellAnimations::animate_magic_missile: a missile arrived without an animSystem");
+		assert(
+			ctx.animSystem &&
+			"SpellAnimations::animate_magic_missile: a missile arrived without an animSystem");
 		ctx.animSystem->spawn_blood_burst(to, 4);
 	};
 

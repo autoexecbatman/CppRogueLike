@@ -83,12 +83,22 @@ constexpr std::array NOT_HELD_IN_A_HAND{
 TEST(EquipHandTest, TheFourGroupsAreTheWholeEnum)
 {
 	std::vector<ItemClass> grouped;
-	grouped.insert(grouped.end(), ONE_HANDED_WEAPONS.begin(), ONE_HANDED_WEAPONS.end());
-	grouped.insert(grouped.end(), TWO_HANDED_WEAPONS.begin(), TWO_HANDED_WEAPONS.end());
+	grouped.insert(
+		grouped.end(),
+		ONE_HANDED_WEAPONS.begin(),
+		ONE_HANDED_WEAPONS.end());
+	grouped.insert(
+		grouped.end(),
+		TWO_HANDED_WEAPONS.begin(),
+		TWO_HANDED_WEAPONS.end());
 	grouped.insert(grouped.end(), SHIELDS.begin(), SHIELDS.end());
-	grouped.insert(grouped.end(), NOT_HELD_IN_A_HAND.begin(), NOT_HELD_IN_A_HAND.end());
+	grouped.insert(
+		grouped.end(),
+		NOT_HELD_IN_A_HAND.begin(),
+		NOT_HELD_IN_A_HAND.end());
 
-	ASSERT_EQ(grouped.size(), ALL_ITEM_CLASS.size()) << "an item class was added and no hand rule was decided for it";
+	ASSERT_EQ(grouped.size(), ALL_ITEM_CLASS.size())
+		<< "an item class was added and no hand rule was decided for it";
 
 	for (const ItemClass itemClass : ALL_ITEM_CLASS)
 	{
@@ -111,7 +121,8 @@ TEST(EquipHandTest, ATwoHandedWeaponGoesInTheMainHandOnly)
 	for (const ItemClass weapon : TWO_HANDED_WEAPONS)
 	{
 		EXPECT_TRUE(right_hand_takes(weapon));
-		EXPECT_FALSE(left_hand_takes(weapon)) << "a two-handed weapon was allowed in the off-hand";
+		EXPECT_FALSE(left_hand_takes(weapon))
+			<< "a two-handed weapon was allowed in the off-hand";
 	}
 }
 

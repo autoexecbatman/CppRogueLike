@@ -58,39 +58,43 @@ inline constexpr int TURNING_MAX_PRIEST_LEVEL = 14;
 // The lowest priest level each printed column covers, in the book's column order:
 // "1" through "9", then "10-11", "12-13" and "14+". This is the only place the
 // headings are written down.
-inline constexpr std::array<int, TURNING_PRINTED_COLUMNS> TURNING_COLUMN_FIRST_LEVEL = {
-	1,
-	2,
-	3,
-	4,
-	5,
-	6,
-	7,
-	8,
-	9,
-	10,
-	12,
-	TURNING_MAX_PRIEST_LEVEL,
-};
+inline constexpr std::array<int, TURNING_PRINTED_COLUMNS>
+	TURNING_COLUMN_FIRST_LEVEL = {
+		1,
+		2,
+		3,
+		4,
+		5,
+		6,
+		7,
+		8,
+		9,
+		10,
+		12,
+		TURNING_MAX_PRIEST_LEVEL,
+	};
 
 // Rows are undead hit dice 1 through 11, the book's rows that name a number
 // rather than a creature. "D*" turns an extra 2d4 of the type, which this does
 // not distinguish.
-inline constexpr std::array<std::array<int, TURNING_PRINTED_COLUMNS>, TURNING_MAX_HIT_DICE> TURNING_TABLE = { {
-	// Twelve values a row, in the book's column order: levels 1 to 9, then
-	// 10-11, 12-13 and 14+.
-	/*  1 HD */ { 10, 7, 4, -2, -2, -3, -3, -3, -3, -3, -3, -3 },
-	/*  2 HD */ { 16, 13, 10, 7, 4, -2, -2, -3, -3, -3, -3, -3 },
-	/*  3 HD */ { 19, 16, 13, 10, 7, 4, -2, -2, -3, -3, -3, -3 },
-	/*  4 HD */ { 19, 16, 13, 10, 7, 4, -2, -2, -3, -3, -3, -3 },
-	/*  5 HD */ { 20, 19, 16, 13, 10, 7, 4, -2, -2, -3, -3, -3 },
-	/*  6 HD */ { -1, -1, 20, 19, 16, 13, 10, 7, 4, -2, -2, -3 },
-	/*  7 HD */ { -1, -1, -1, 20, 19, 16, 13, 10, 7, 4, -2, -2 },
-	/*  8 HD */ { -1, -1, -1, -1, 20, 19, 16, 13, 10, 7, 4, -2 },
-	/*  9 HD */ { -1, -1, -1, -1, -1, 20, 19, 16, 13, 10, 7, 4 },
-	/* 10 HD */ { -1, -1, -1, -1, -1, -1, 20, 19, 16, 13, 10, 7 },
-	/* 11 HD */ { -1, -1, -1, -1, -1, -1, -1, 20, 19, 16, 13, 10 },
-} };
+inline constexpr std::array<
+	std::array<int, TURNING_PRINTED_COLUMNS>,
+	TURNING_MAX_HIT_DICE>
+	TURNING_TABLE = { {
+		// Twelve values a row, in the book's column order: levels 1 to 9, then
+		// 10-11, 12-13 and 14+.
+		/*  1 HD */ { 10, 7, 4, -2, -2, -3, -3, -3, -3, -3, -3, -3 },
+		/*  2 HD */ { 16, 13, 10, 7, 4, -2, -2, -3, -3, -3, -3, -3 },
+		/*  3 HD */ { 19, 16, 13, 10, 7, 4, -2, -2, -3, -3, -3, -3 },
+		/*  4 HD */ { 19, 16, 13, 10, 7, 4, -2, -2, -3, -3, -3, -3 },
+		/*  5 HD */ { 20, 19, 16, 13, 10, 7, 4, -2, -2, -3, -3, -3 },
+		/*  6 HD */ { -1, -1, 20, 19, 16, 13, 10, 7, 4, -2, -2, -3 },
+		/*  7 HD */ { -1, -1, -1, 20, 19, 16, 13, 10, 7, 4, -2, -2 },
+		/*  8 HD */ { -1, -1, -1, -1, 20, 19, 16, 13, 10, 7, 4, -2 },
+		/*  9 HD */ { -1, -1, -1, -1, -1, 20, 19, 16, 13, 10, 7, 4 },
+		/* 10 HD */ { -1, -1, -1, -1, -1, -1, 20, 19, 16, 13, 10, 7 },
+		/* 11 HD */ { -1, -1, -1, -1, -1, -1, -1, 20, 19, 16, 13, 10 },
+	} };
 
 // The column a priest of this level reads: the last heading their level has
 // reached. A level past "14+" stays in that column, which is what the "+" means.
@@ -103,7 +107,9 @@ inline constexpr std::array<std::array<int, TURNING_PRINTED_COLUMNS>, TURNING_MA
 {
 	std::size_t column = 0;
 
-	for (std::size_t candidate = 0; candidate < TURNING_PRINTED_COLUMNS; ++candidate)
+	for (
+		std::size_t candidate = 0; candidate < TURNING_PRINTED_COLUMNS;
+		++candidate)
 	{
 		if (TURNING_COLUMN_FIRST_LEVEL[candidate] <= priestLevel)
 		{
@@ -124,7 +130,9 @@ inline constexpr std::array<std::array<int, TURNING_PRINTED_COLUMNS>, TURNING_MA
 //   look_up_turning(2, 1).rollNeeded;  // -> 16, a novice priest against a ghoul
 //   look_up_turning(11, 3).outcome;    // -> BEYOND_POWER, a lich is out of reach
 //   look_up_turning(9, 13).rollNeeded; // -> 7, the same as at 12th: one column, two levels
-[[nodiscard]] constexpr TurningResult look_up_turning(int undeadHitDice, int priestLevel)
+[[nodiscard]] constexpr TurningResult look_up_turning(
+	int undeadHitDice,
+	int priestLevel)
 {
 	if (priestLevel < 1)
 	{
@@ -132,9 +140,10 @@ inline constexpr std::array<std::array<int, TURNING_PRINTED_COLUMNS>, TURNING_MA
 	}
 
 	// The book's last row absorbs everything tougher than it.
-	const int row = (undeadHitDice < TURNING_MIN_HIT_DICE)
-		? TURNING_MIN_HIT_DICE
-		: (undeadHitDice > TURNING_MAX_HIT_DICE ? TURNING_MAX_HIT_DICE : undeadHitDice);
+	const int row = (undeadHitDice < TURNING_MIN_HIT_DICE) ?
+		TURNING_MIN_HIT_DICE :
+		(undeadHitDice > TURNING_MAX_HIT_DICE ? TURNING_MAX_HIT_DICE :
+												undeadHitDice);
 
 	const auto& tableRow = TURNING_TABLE[static_cast<std::size_t>(row - 1)];
 	const int entry = tableRow[turning_column_for_level(priestLevel)];
@@ -171,9 +180,12 @@ inline constexpr std::array<std::array<int, TURNING_PRINTED_COLUMNS>, TURNING_MA
 {
 	int highest = 0;
 
-	for (int hitDice = TURNING_MIN_HIT_DICE; hitDice <= TURNING_MAX_HIT_DICE; ++hitDice)
+	for (
+		int hitDice = TURNING_MIN_HIT_DICE; hitDice <= TURNING_MAX_HIT_DICE;
+		++hitDice)
 	{
-		if (look_up_turning(hitDice, priestLevel).outcome != TurningOutcome::BEYOND_POWER)
+		if (look_up_turning(hitDice, priestLevel).outcome !=
+			TurningOutcome::BEYOND_POWER)
 		{
 			highest = hitDice;
 		}

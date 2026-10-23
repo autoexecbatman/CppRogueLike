@@ -28,8 +28,10 @@ void expect_row(int roll, std::array<int, 10> printed)
 {
 	for (std::size_t column = 0; column < printed.size(); ++column)
 	{
-		const IntelligenceRating rating = ALL_INTELLIGENCE_RATING.at(column + 1);
-		EXPECT_EQ(monster_wisdom_score(roll, rating), printed.at(column)) << "roll " << roll << ", " << encode_intelligence_rating(rating);
+		const IntelligenceRating rating =
+			ALL_INTELLIGENCE_RATING.at(column + 1);
+		EXPECT_EQ(monster_wisdom_score(roll, rating), printed.at(column))
+			<< "roll " << roll << ", " << encode_intelligence_rating(rating);
 	}
 }
 } // namespace

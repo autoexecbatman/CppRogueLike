@@ -22,7 +22,8 @@ enum class CorpseEdibility
 //
 // Example:
 //   corpse_edibility_from_record(false);  // -> CorpseEdibility::INEDIBLE
-[[nodiscard]] inline constexpr CorpseEdibility corpse_edibility_from_record(bool isEdible) noexcept
+[[nodiscard]] inline constexpr CorpseEdibility corpse_edibility_from_record(
+	bool isEdible) noexcept
 {
 	return isEdible ? CorpseEdibility::EDIBLE : CorpseEdibility::INEDIBLE;
 }
@@ -31,7 +32,8 @@ enum class CorpseEdibility
 //
 // Example:
 //   is_corpse_edible(CorpseEdibility::EDIBLE);  // -> true
-[[nodiscard]] inline constexpr bool is_corpse_edible(CorpseEdibility edibility) noexcept
+[[nodiscard]] inline constexpr bool is_corpse_edible(
+	CorpseEdibility edibility) noexcept
 {
 	return edibility == CorpseEdibility::EDIBLE;
 }

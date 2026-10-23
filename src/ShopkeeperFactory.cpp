@@ -10,9 +10,13 @@
 #include "ShopKeeper.h"
 #include "ShopkeeperFactory.h"
 
-bool ShopkeeperFactory::should_spawn_shopkeeper(int dungeonLevel, GameContext& ctx)
+bool ShopkeeperFactory::should_spawn_shopkeeper(
+	int dungeonLevel,
+	GameContext& ctx)
 {
-	assert(ctx.dice && "ShopkeeperFactory::should_spawn_shopkeeper: called without dice");
+	assert(
+		ctx.dice &&
+		"ShopkeeperFactory::should_spawn_shopkeeper: called without dice");
 
 	// Base 8% chance, increases by 2% per level, cap at 20%
 	int shopkeeperChance = 8 + (dungeonLevel * 2);
@@ -21,22 +25,34 @@ bool ShopkeeperFactory::should_spawn_shopkeeper(int dungeonLevel, GameContext& c
 	return ctx.dice->d100() <= shopkeeperChance;
 }
 
-void ShopkeeperFactory::open_shop(Creature& shopkeeper, int dungeonLevel, GameContext& ctx)
+void ShopkeeperFactory::open_shop(
+	Creature& shopkeeper,
+	int dungeonLevel,
+	GameContext& ctx)
 {
 	assert(ctx.dice && "ShopkeeperFactory::open_shop: called without dice");
 
 	// Create shop component with level-appropriate configuration
 	ShopType shopType = select_shop_type_for_level(dungeonLevel, ctx);
 	ShopQuality shopQuality = select_shop_quality_for_level(dungeonLevel, ctx);
-	shopkeeper.shop = std::make_unique<ShopKeeper>(shopType, shopQuality, *ctx.dice);
+	shopkeeper.shop =
+		std::make_unique<ShopKeeper>(shopType, shopQuality, *ctx.dice);
 	shopkeeper.shop->generate_initial_inventory(dungeonLevel, ctx);
 
-	ctx.messageSystem->log(std::format("Created shopkeeper: {} (Level {})", shopkeeper.shop->get_shop_name(), dungeonLevel));
+	ctx.messageSystem->log(
+		std::format(
+			"Created shopkeeper: {} (Level {})",
+			shopkeeper.shop->get_shop_name(),
+			dungeonLevel));
 }
 
-ShopType ShopkeeperFactory::select_shop_type_for_level(int dungeonLevel, GameContext& ctx)
+ShopType ShopkeeperFactory::select_shop_type_for_level(
+	int dungeonLevel,
+	GameContext& ctx)
 {
-	assert(ctx.dice && "ShopkeeperFactory::select_shop_type_for_level: called without dice");
+	assert(
+		ctx.dice &&
+		"ShopkeeperFactory::select_shop_type_for_level: called without dice");
 
 	// Early levels favor general stores, deeper levels get specialized shops
 	if (dungeonLevel <= 2)
@@ -88,9 +104,13 @@ ShopType ShopkeeperFactory::select_shop_type_for_level(int dungeonLevel, GameCon
 	}
 }
 
-ShopQuality ShopkeeperFactory::select_shop_quality_for_level(int dungeonLevel, GameContext& ctx)
+ShopQuality ShopkeeperFactory::select_shop_quality_for_level(
+	int dungeonLevel,
+	GameContext& ctx)
 {
-	assert(ctx.dice && "ShopkeeperFactory::select_shop_quality_for_level: called without dice");
+	assert(
+		ctx.dice &&
+		"ShopkeeperFactory::select_shop_quality_for_level: called without dice");
 
 	// Quality improves with dungeon depth
 	int qualityRoll = ctx.dice->d100();

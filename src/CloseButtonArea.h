@@ -19,7 +19,8 @@ public:
 
 	bool contains(int pointX, int pointY) const
 	{
-		return pointX >= pixelX && pointX < pixelX + width && pointY >= pixelY && pointY < pixelY + height;
+		return pointX >= pixelX && pointX < pixelX + width &&
+			pointY >= pixelY && pointY < pixelY + height;
 	}
 
 	int get_x() const { return pixelX; }

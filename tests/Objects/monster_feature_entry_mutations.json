@@ -21,8 +21,8 @@
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\tif (creature.is_player())\n\t{\n\t\tctx.messageSystem->message(ColorPairId::RED_BLACK, std::format(\"You trigger",
-      "mutated": "\tif (true)\n\t{\n\t\tctx.messageSystem->message(ColorPairId::RED_BLACK, std::format(\"You trigger",
+      "original": "\tif (creature.is_player())\n\t{\n\t\tctx.messageSystem->message(\n\t\t\tColorPairId::RED_BLACK,\n\t\t\tstd::format(\n\t\t\t\t\"You trigger",
+      "mutated": "\tif (true)\n\t{\n\t\tctx.messageSystem->message(\n\t\t\tColorPairId::RED_BLACK,\n\t\t\tstd::format(\n\t\t\t\t\"You trigger",
       "catches": "a monster's trap told to the player in the second person"
     },
     {
@@ -33,8 +33,8 @@
     },
     {
       "file": "src/Web.cpp",
-      "original": "\tconst bool isSeen = creature.is_player() || ctx.map->is_in_fov(creature.position);",
-      "mutated": "\tconst bool isSeen = true;",
+      "original": "\tconst bool isSeen =\n\t\tcreature.is_player() || ctx.map->is_in_fov(creature.position);",
+      "mutated": "\tconst bool isSeen =true;",
       "catches": "a web catching an unseen monster announced"
     },
     {
@@ -63,14 +63,14 @@
     },
     {
       "file": "src/Trap.cpp",
-      "original": "std::format(\"You trigger the {} and take {} damage!\", actorData.name, damage)",
-      "mutated": "std::format(\"You trigger the {} and take {} damage!\", \"pit\", damage)",
+      "original": "std::format(\n\t\t\t\t\"You trigger the {} and take {} damage!\",\n\t\t\t\tactorData.name,\n\t\t\t\tdamage)",
+      "mutated": "std::format(\n\t\t\t\t\"You trigger the {} and take {} damage!\",\"pit\",\n\t\t\t\tdamage)",
       "catches": "the player's sprung-trap message naming the trap with its own literal, the second name 0273 removed"
     },
     {
       "file": "src/Trap.cpp",
-      "original": "creature.actorData.name, actorData.name, damage)",
-      "mutated": "creature.actorData.name, \"pit\", damage)",
+      "original": "creature.actorData.name,\n\t\t\t\tactorData.name,\n\t\t\t\tdamage)",
+      "mutated": "creature.actorData.name,\"pit\",\n\t\t\t\tdamage)",
       "catches": "a watched monster's sprung-trap message naming the trap with its own literal"
     },
     {

@@ -36,17 +36,20 @@ namespace
 constexpr std::array<int, THIEF_SKILL_COUNT> NO_RACE{ 0, 0, 0, 0, 0, 0, 0, 0 };
 
 // Table 27's dwarf column, in ALL_THIEF_SKILL order.
-constexpr std::array<int, THIEF_SKILL_COUNT> DWARF{ 0, 10, 15, 0, 0, 0, -10, -5 };
+constexpr std::array<int, THIEF_SKILL_COUNT>
+	DWARF{ 0, 10, 15, 0, 0, 0, -10, -5 };
 
 // Table 27's halfling column.
-constexpr std::array<int, THIEF_SKILL_COUNT> HALFLING{ 5, 5, 5, 10, 15, 5, -15, -5 };
+constexpr std::array<int, THIEF_SKILL_COUNT>
+	HALFLING{ 5, 5, 5, 10, 15, 5, -15, -5 };
 
 ThiefSkillAllocation first_level(
 	std::array<int, THIEF_SKILL_COUNT> race,
 	int dexterity,
 	ThiefArmor armor)
 {
-	constexpr std::array<int, THIEF_SKILL_COUNT> NOTHING_SPENT{ 0, 0, 0, 0, 0, 0, 0, 0 };
+	constexpr std::array<int, THIEF_SKILL_COUNT>
+		NOTHING_SPENT{ 0, 0, 0, 0, 0, 0, 0, 0 };
 	return ThiefSkillAllocation{
 		NOTHING_SPENT,
 		thief_skill_grant_at_level(1),
@@ -75,29 +78,68 @@ TEST(ThiefSkillsTest, TableTwentySixGivesEachSkillItsBaseScore)
 // Read Languages are printed nowhere in it.
 TEST(ThiefSkillsTest, TableTwentyEightAdjustsFiveSkillsAndLeavesThreeAlone)
 {
-	EXPECT_EQ(thief_skill_dexterity_adjustment(ThiefSkill::PICK_POCKETS, 9), -15);
+	EXPECT_EQ(
+		thief_skill_dexterity_adjustment(ThiefSkill::PICK_POCKETS, 9),
+		-15);
 	EXPECT_EQ(thief_skill_dexterity_adjustment(ThiefSkill::OPEN_LOCKS, 9), -10);
-	EXPECT_EQ(thief_skill_dexterity_adjustment(ThiefSkill::FIND_REMOVE_TRAPS, 9), -10);
-	EXPECT_EQ(thief_skill_dexterity_adjustment(ThiefSkill::MOVE_SILENTLY, 9), -20);
-	EXPECT_EQ(thief_skill_dexterity_adjustment(ThiefSkill::HIDE_IN_SHADOWS, 9), -10);
+	EXPECT_EQ(
+		thief_skill_dexterity_adjustment(ThiefSkill::FIND_REMOVE_TRAPS, 9),
+		-10);
+	EXPECT_EQ(
+		thief_skill_dexterity_adjustment(ThiefSkill::MOVE_SILENTLY, 9),
+		-20);
+	EXPECT_EQ(
+		thief_skill_dexterity_adjustment(ThiefSkill::HIDE_IN_SHADOWS, 9),
+		-10);
 
-	EXPECT_EQ(thief_skill_dexterity_adjustment(ThiefSkill::PICK_POCKETS, 12), 0);
+	EXPECT_EQ(
+		thief_skill_dexterity_adjustment(ThiefSkill::PICK_POCKETS, 12),
+		0);
 	EXPECT_EQ(thief_skill_dexterity_adjustment(ThiefSkill::OPEN_LOCKS, 12), 0);
-	EXPECT_EQ(thief_skill_dexterity_adjustment(ThiefSkill::FIND_REMOVE_TRAPS, 12), 0);
-	EXPECT_EQ(thief_skill_dexterity_adjustment(ThiefSkill::MOVE_SILENTLY, 12), -5);
-	EXPECT_EQ(thief_skill_dexterity_adjustment(ThiefSkill::HIDE_IN_SHADOWS, 12), 0);
+	EXPECT_EQ(
+		thief_skill_dexterity_adjustment(ThiefSkill::FIND_REMOVE_TRAPS, 12),
+		0);
+	EXPECT_EQ(
+		thief_skill_dexterity_adjustment(ThiefSkill::MOVE_SILENTLY, 12),
+		-5);
+	EXPECT_EQ(
+		thief_skill_dexterity_adjustment(ThiefSkill::HIDE_IN_SHADOWS, 12),
+		0);
 
-	EXPECT_EQ(thief_skill_dexterity_adjustment(ThiefSkill::PICK_POCKETS, 19), 15);
+	EXPECT_EQ(
+		thief_skill_dexterity_adjustment(ThiefSkill::PICK_POCKETS, 19),
+		15);
 	EXPECT_EQ(thief_skill_dexterity_adjustment(ThiefSkill::OPEN_LOCKS, 19), 20);
-	EXPECT_EQ(thief_skill_dexterity_adjustment(ThiefSkill::FIND_REMOVE_TRAPS, 19), 10);
-	EXPECT_EQ(thief_skill_dexterity_adjustment(ThiefSkill::MOVE_SILENTLY, 19), 15);
-	EXPECT_EQ(thief_skill_dexterity_adjustment(ThiefSkill::HIDE_IN_SHADOWS, 19), 15);
+	EXPECT_EQ(
+		thief_skill_dexterity_adjustment(ThiefSkill::FIND_REMOVE_TRAPS, 19),
+		10);
+	EXPECT_EQ(
+		thief_skill_dexterity_adjustment(ThiefSkill::MOVE_SILENTLY, 19),
+		15);
+	EXPECT_EQ(
+		thief_skill_dexterity_adjustment(ThiefSkill::HIDE_IN_SHADOWS, 19),
+		15);
 
 	for (int dexterity = 9; dexterity <= 19; ++dexterity)
 	{
-		EXPECT_EQ(thief_skill_dexterity_adjustment(ThiefSkill::DETECT_NOISE, dexterity), 0) << dexterity;
-		EXPECT_EQ(thief_skill_dexterity_adjustment(ThiefSkill::CLIMB_WALLS, dexterity), 0) << dexterity;
-		EXPECT_EQ(thief_skill_dexterity_adjustment(ThiefSkill::READ_LANGUAGES, dexterity), 0) << dexterity;
+		EXPECT_EQ(
+			thief_skill_dexterity_adjustment(
+				ThiefSkill::DETECT_NOISE,
+				dexterity),
+			0)
+			<< dexterity;
+		EXPECT_EQ(
+			thief_skill_dexterity_adjustment(
+				ThiefSkill::CLIMB_WALLS,
+				dexterity),
+			0)
+			<< dexterity;
+		EXPECT_EQ(
+			thief_skill_dexterity_adjustment(
+				ThiefSkill::READ_LANGUAGES,
+				dexterity),
+			0)
+			<< dexterity;
 	}
 }
 
@@ -123,7 +165,9 @@ TEST(ThiefSkillsTest, ADexterityOffTheTableReadsTheNearestPrintedRow)
 	EXPECT_EQ(thief_skill_dexterity_adjustment(ThiefSkill::OPEN_LOCKS, 25), 20);
 
 	// Row 9's Move Silently is -20, and 1 is below it.
-	EXPECT_EQ(thief_skill_dexterity_adjustment(ThiefSkill::MOVE_SILENTLY, 1), -20);
+	EXPECT_EQ(
+		thief_skill_dexterity_adjustment(ThiefSkill::MOVE_SILENTLY, 1),
+		-20);
 }
 
 // Table 29. Leather is the base scores' own assumption, so it adjusts nothing;
@@ -132,40 +176,103 @@ TEST(ThiefSkillsTest, TableTwentyNineAdjustsForWhatIsWorn)
 {
 	for (const ThiefSkill skill : ALL_THIEF_SKILL)
 	{
-		EXPECT_EQ(thief_skill_armor_adjustment(skill, ThiefArmor::LEATHER), 0) << thief_skill_name(skill);
+		EXPECT_EQ(thief_skill_armor_adjustment(skill, ThiefArmor::LEATHER), 0)
+			<< thief_skill_name(skill);
 	}
 
-	EXPECT_EQ(thief_skill_armor_adjustment(ThiefSkill::PICK_POCKETS, ThiefArmor::NONE), 5);
-	EXPECT_EQ(thief_skill_armor_adjustment(ThiefSkill::MOVE_SILENTLY, ThiefArmor::NONE), 10);
-	EXPECT_EQ(thief_skill_armor_adjustment(ThiefSkill::HIDE_IN_SHADOWS, ThiefArmor::NONE), 5);
-	EXPECT_EQ(thief_skill_armor_adjustment(ThiefSkill::CLIMB_WALLS, ThiefArmor::NONE), 10);
-	EXPECT_EQ(thief_skill_armor_adjustment(ThiefSkill::OPEN_LOCKS, ThiefArmor::NONE), 0);
+	EXPECT_EQ(
+		thief_skill_armor_adjustment(
+			ThiefSkill::PICK_POCKETS,
+			ThiefArmor::NONE),
+		5);
+	EXPECT_EQ(
+		thief_skill_armor_adjustment(
+			ThiefSkill::MOVE_SILENTLY,
+			ThiefArmor::NONE),
+		10);
+	EXPECT_EQ(
+		thief_skill_armor_adjustment(
+			ThiefSkill::HIDE_IN_SHADOWS,
+			ThiefArmor::NONE),
+		5);
+	EXPECT_EQ(
+		thief_skill_armor_adjustment(ThiefSkill::CLIMB_WALLS, ThiefArmor::NONE),
+		10);
+	EXPECT_EQ(
+		thief_skill_armor_adjustment(ThiefSkill::OPEN_LOCKS, ThiefArmor::NONE),
+		0);
 
-	EXPECT_EQ(thief_skill_armor_adjustment(ThiefSkill::PICK_POCKETS, ThiefArmor::PADDED_OR_ELVEN_CHAIN), -20);
-	EXPECT_EQ(thief_skill_armor_adjustment(ThiefSkill::OPEN_LOCKS, ThiefArmor::PADDED_OR_ELVEN_CHAIN), -5);
-	EXPECT_EQ(thief_skill_armor_adjustment(ThiefSkill::CLIMB_WALLS, ThiefArmor::PADDED_OR_ELVEN_CHAIN), -20);
+	EXPECT_EQ(
+		thief_skill_armor_adjustment(
+			ThiefSkill::PICK_POCKETS,
+			ThiefArmor::PADDED_OR_ELVEN_CHAIN),
+		-20);
+	EXPECT_EQ(
+		thief_skill_armor_adjustment(
+			ThiefSkill::OPEN_LOCKS,
+			ThiefArmor::PADDED_OR_ELVEN_CHAIN),
+		-5);
+	EXPECT_EQ(
+		thief_skill_armor_adjustment(
+			ThiefSkill::CLIMB_WALLS,
+			ThiefArmor::PADDED_OR_ELVEN_CHAIN),
+		-20);
 
-	EXPECT_EQ(thief_skill_armor_adjustment(ThiefSkill::PICK_POCKETS, ThiefArmor::HIDE_OR_STUDDED_LEATHER), -30);
-	EXPECT_EQ(thief_skill_armor_adjustment(ThiefSkill::DETECT_NOISE, ThiefArmor::HIDE_OR_STUDDED_LEATHER), -10);
+	EXPECT_EQ(
+		thief_skill_armor_adjustment(
+			ThiefSkill::PICK_POCKETS,
+			ThiefArmor::HIDE_OR_STUDDED_LEATHER),
+		-30);
+	EXPECT_EQ(
+		thief_skill_armor_adjustment(
+			ThiefSkill::DETECT_NOISE,
+			ThiefArmor::HIDE_OR_STUDDED_LEATHER),
+		-10);
 
 	// Chain is kinder than studded leather on five of the eight, which is the
 	// table's own shape rather than a transcription slip.
-	EXPECT_EQ(thief_skill_armor_adjustment(ThiefSkill::PICK_POCKETS, ThiefArmor::CHAIN_OR_RING_MAIL), -25);
-	EXPECT_EQ(thief_skill_armor_adjustment(ThiefSkill::MOVE_SILENTLY, ThiefArmor::CHAIN_OR_RING_MAIL), -15);
-	EXPECT_EQ(thief_skill_armor_adjustment(ThiefSkill::DETECT_NOISE, ThiefArmor::CHAIN_OR_RING_MAIL), -5);
+	EXPECT_EQ(
+		thief_skill_armor_adjustment(
+			ThiefSkill::PICK_POCKETS,
+			ThiefArmor::CHAIN_OR_RING_MAIL),
+		-25);
+	EXPECT_EQ(
+		thief_skill_armor_adjustment(
+			ThiefSkill::MOVE_SILENTLY,
+			ThiefArmor::CHAIN_OR_RING_MAIL),
+		-15);
+	EXPECT_EQ(
+		thief_skill_armor_adjustment(
+			ThiefSkill::DETECT_NOISE,
+			ThiefArmor::CHAIN_OR_RING_MAIL),
+		-5);
 
 	// Read Languages is the one row the whole table leaves alone.
-	EXPECT_EQ(thief_skill_armor_adjustment(ThiefSkill::READ_LANGUAGES, ThiefArmor::NONE), 0);
-	EXPECT_EQ(thief_skill_armor_adjustment(ThiefSkill::READ_LANGUAGES, ThiefArmor::CHAIN_OR_RING_MAIL), 0);
+	EXPECT_EQ(
+		thief_skill_armor_adjustment(
+			ThiefSkill::READ_LANGUAGES,
+			ThiefArmor::NONE),
+		0);
+	EXPECT_EQ(
+		thief_skill_armor_adjustment(
+			ThiefSkill::READ_LANGUAGES,
+			ThiefArmor::CHAIN_OR_RING_MAIL),
+		0);
 }
 
 // The armour the game ships, read into Table 29's columns by its item key.
 TEST(ThiefSkillsTest, EachArmorTheDataShipsFindsItsColumn)
 {
 	EXPECT_EQ(thief_armor_column("leather_armor"), ThiefArmor::LEATHER);
-	EXPECT_EQ(thief_armor_column("padded_armor"), ThiefArmor::PADDED_OR_ELVEN_CHAIN);
-	EXPECT_EQ(thief_armor_column("studded_leather"), ThiefArmor::HIDE_OR_STUDDED_LEATHER);
-	EXPECT_EQ(thief_armor_column("hide_armor"), ThiefArmor::HIDE_OR_STUDDED_LEATHER);
+	EXPECT_EQ(
+		thief_armor_column("padded_armor"),
+		ThiefArmor::PADDED_OR_ELVEN_CHAIN);
+	EXPECT_EQ(
+		thief_armor_column("studded_leather"),
+		ThiefArmor::HIDE_OR_STUDDED_LEATHER);
+	EXPECT_EQ(
+		thief_armor_column("hide_armor"),
+		ThiefArmor::HIDE_OR_STUDDED_LEATHER);
 	EXPECT_EQ(thief_armor_column("chain_mail"), ThiefArmor::CHAIN_OR_RING_MAIL);
 	EXPECT_EQ(thief_armor_column("ring_mail"), ThiefArmor::CHAIN_OR_RING_MAIL);
 
@@ -206,11 +313,13 @@ TEST(ThiefSkillsTest, EveryArmorTheDataShipsIsAnsweredForByTableTwentyNine)
 			continue;
 		}
 
-		const bool bookGivesAColumn = std::ranges::find(WITH_A_COLUMN, key) != WITH_A_COLUMN.end();
+		const bool bookGivesAColumn =
+			std::ranges::find(WITH_A_COLUMN, key) != WITH_A_COLUMN.end();
 		if (bookGivesAColumn)
 		{
 			++found;
-			EXPECT_TRUE(thief_armor_column(key).has_value()) << key << " lost its Table 29 column";
+			EXPECT_TRUE(thief_armor_column(key).has_value())
+				<< key << " lost its Table 29 column";
 		}
 		else
 		{
@@ -228,19 +337,42 @@ TEST(ThiefSkillsTest, AScoreIsTheBaseAndEveryAdjustmentAndThePointsSpent)
 {
 	// A halfling thief, Dexterity 17, in leather, 20 points on Hide in Shadows:
 	// base 5, halfling +15, Dexterity +5, leather 0, points 20.
-	EXPECT_EQ(thief_skill_score(ThiefSkill::HIDE_IN_SHADOWS, 15, 17, ThiefArmor::LEATHER, 20), 45);
+	EXPECT_EQ(
+		thief_skill_score(
+			ThiefSkill::HIDE_IN_SHADOWS,
+			15,
+			17,
+			ThiefArmor::LEATHER,
+			20),
+		45);
 
 	// The same halfling wearing nothing gains Table 29's +5.
-	EXPECT_EQ(thief_skill_score(ThiefSkill::HIDE_IN_SHADOWS, 15, 17, ThiefArmor::NONE, 20), 50);
+	EXPECT_EQ(
+		thief_skill_score(
+			ThiefSkill::HIDE_IN_SHADOWS,
+			15,
+			17,
+			ThiefArmor::NONE,
+			20),
+		50);
 
 	// A dwarf opening a lock: base 10, dwarf +10, Dexterity 17 +10, leather 0.
-	EXPECT_EQ(thief_skill_score(ThiefSkill::OPEN_LOCKS, 10, 17, ThiefArmor::LEATHER, 0), 30);
+	EXPECT_EQ(
+		thief_skill_score(
+			ThiefSkill::OPEN_LOCKS,
+			10,
+			17,
+			ThiefArmor::LEATHER,
+			0),
+		30);
 }
 
 // "no skill can be raised above 95 percent, including all adjustments".
 TEST(ThiefSkillsTest, NoScoreRisesAboveNinetyFive)
 {
-	EXPECT_EQ(thief_skill_score(ThiefSkill::CLIMB_WALLS, 0, 13, ThiefArmor::NONE, 60), 95);
+	EXPECT_EQ(
+		thief_skill_score(ThiefSkill::CLIMB_WALLS, 0, 13, ThiefArmor::NONE, 60),
+		95);
 }
 
 // "the character must spend points raising his skill percentage to at least 1%
@@ -248,10 +380,24 @@ TEST(ThiefSkillsTest, NoScoreRisesAboveNinetyFive)
 TEST(ThiefSkillsTest, AdjustmentsBelowZeroLeaveNoSkillAtAll)
 {
 	// An elf, Dexterity 9, in chain: base 10, elf -5, Dexterity -10, chain -10.
-	EXPECT_EQ(thief_skill_score(ThiefSkill::OPEN_LOCKS, -5, 9, ThiefArmor::CHAIN_OR_RING_MAIL, 0), 0);
+	EXPECT_EQ(
+		thief_skill_score(
+			ThiefSkill::OPEN_LOCKS,
+			-5,
+			9,
+			ThiefArmor::CHAIN_OR_RING_MAIL,
+			0),
+		0);
 
 	// Twenty points buys it back up above nothing.
-	EXPECT_EQ(thief_skill_score(ThiefSkill::OPEN_LOCKS, -5, 9, ThiefArmor::CHAIN_OR_RING_MAIL, 20), 5);
+	EXPECT_EQ(
+		thief_skill_score(
+			ThiefSkill::OPEN_LOCKS,
+			-5,
+			9,
+			ThiefArmor::CHAIN_OR_RING_MAIL,
+			20),
+		5);
 }
 
 // "all thieves at 1st level receive 60 discretionary percentage points... Each
@@ -270,7 +416,8 @@ TEST(ThiefSkillsTest, TheGrantIsSixtyAtFirstLevelAndThirtyAfterwards)
 
 TEST(ThiefSkillsTest, AFreshAllocationHoldsTheWholeGrantAndNothingIsAssigned)
 {
-	const ThiefSkillAllocation allocation = first_level(NO_RACE, 13, ThiefArmor::NONE);
+	const ThiefSkillAllocation allocation =
+		first_level(NO_RACE, 13, ThiefArmor::NONE);
 
 	EXPECT_EQ(allocation.remaining_points(), 60);
 	for (const ThiefSkill skill : ALL_THIEF_SKILL)
@@ -281,7 +428,8 @@ TEST(ThiefSkillsTest, AFreshAllocationHoldsTheWholeGrantAndNothingIsAssigned)
 
 TEST(ThiefSkillsTest, AssigningAPointTakesItFromThePoolAndRaisesTheScore)
 {
-	ThiefSkillAllocation allocation = first_level(NO_RACE, 13, ThiefArmor::LEATHER);
+	ThiefSkillAllocation allocation =
+		first_level(NO_RACE, 13, ThiefArmor::LEATHER);
 
 	const int before = allocation.score(ThiefSkill::OPEN_LOCKS);
 	ASSERT_TRUE(allocation.can_assign(ThiefSkill::OPEN_LOCKS));
@@ -295,11 +443,13 @@ TEST(ThiefSkillsTest, AssigningAPointTakesItFromThePoolAndRaisesTheScore)
 // "No more than 30 points can be assigned to any single skill."
 TEST(ThiefSkillsTest, AtFirstLevelNoSkillTakesMoreThanThirtyOfTheSixty)
 {
-	ThiefSkillAllocation allocation = first_level(NO_RACE, 13, ThiefArmor::LEATHER);
+	ThiefSkillAllocation allocation =
+		first_level(NO_RACE, 13, ThiefArmor::LEATHER);
 
 	for (int point = 0; point < 30; ++point)
 	{
-		ASSERT_TRUE(allocation.can_assign(ThiefSkill::FIND_REMOVE_TRAPS)) << point;
+		ASSERT_TRUE(allocation.can_assign(ThiefSkill::FIND_REMOVE_TRAPS))
+			<< point;
 		allocation.assign(ThiefSkill::FIND_REMOVE_TRAPS);
 	}
 
@@ -315,7 +465,8 @@ TEST(ThiefSkillsTest, AtFirstLevelNoSkillTakesMoreThanThirtyOfTheSixty)
 // limit is on this grant, not on what the skill already carries.
 TEST(ThiefSkillsTest, ALaterGrantPutsNoMoreThanFifteenOnASkillAlreadyBought)
 {
-	constexpr std::array<int, THIEF_SKILL_COUNT> ALREADY{ 0, 30, 0, 0, 0, 0, 0, 0 };
+	constexpr std::array<int, THIEF_SKILL_COUNT>
+		ALREADY{ 0, 30, 0, 0, 0, 0, 0, 0 };
 	ThiefSkillAllocation allocation{
 		ALREADY,
 		thief_skill_grant_at_level(2),
@@ -332,7 +483,9 @@ TEST(ThiefSkillsTest, ALaterGrantPutsNoMoreThanFifteenOnASkillAlreadyBought)
 
 	EXPECT_FALSE(allocation.can_assign(ThiefSkill::OPEN_LOCKS));
 	EXPECT_EQ(allocation.assigned_to(ThiefSkill::OPEN_LOCKS), 15);
-	EXPECT_EQ(allocation.total_points().at(thief_skill_index(ThiefSkill::OPEN_LOCKS)), 45);
+	EXPECT_EQ(
+		allocation.total_points().at(thief_skill_index(ThiefSkill::OPEN_LOCKS)),
+		45);
 	EXPECT_EQ(allocation.score(ThiefSkill::OPEN_LOCKS), 55);
 }
 
@@ -340,7 +493,8 @@ TEST(ThiefSkillsTest, ALaterGrantPutsNoMoreThanFifteenOnASkillAlreadyBought)
 // refuses it: 95 is the ceiling "including all adjustments".
 TEST(ThiefSkillsTest, NoPointIsTakenOnceTheScoreStandsAtNinetyFive)
 {
-	constexpr std::array<int, THIEF_SKILL_COUNT> ALREADY{ 0, 0, 0, 0, 0, 0, 25, 0 };
+	constexpr std::array<int, THIEF_SKILL_COUNT>
+		ALREADY{ 0, 0, 0, 0, 0, 0, 25, 0 };
 	ThiefSkillAllocation allocation{
 		ALREADY,
 		thief_skill_grant_at_level(2),
@@ -357,7 +511,8 @@ TEST(ThiefSkillsTest, NoPointIsTakenOnceTheScoreStandsAtNinetyFive)
 
 TEST(ThiefSkillsTest, APointComesBackAndEarlierLevelsPointsDoNot)
 {
-	constexpr std::array<int, THIEF_SKILL_COUNT> ALREADY{ 0, 0, 0, 7, 0, 0, 0, 0 };
+	constexpr std::array<int, THIEF_SKILL_COUNT>
+		ALREADY{ 0, 0, 0, 7, 0, 0, 0, 0 };
 	ThiefSkillAllocation allocation{
 		ALREADY,
 		thief_skill_grant_at_level(3),
@@ -374,7 +529,10 @@ TEST(ThiefSkillsTest, APointComesBackAndEarlierLevelsPointsDoNot)
 
 	EXPECT_EQ(allocation.assigned_to(ThiefSkill::MOVE_SILENTLY), 0);
 	EXPECT_EQ(allocation.remaining_points(), 30);
-	EXPECT_EQ(allocation.total_points().at(thief_skill_index(ThiefSkill::MOVE_SILENTLY)), 7);
+	EXPECT_EQ(
+		allocation.total_points().at(
+			thief_skill_index(ThiefSkill::MOVE_SILENTLY)),
+		7);
 	EXPECT_FALSE(allocation.can_take_back(ThiefSkill::MOVE_SILENTLY));
 }
 
@@ -382,12 +540,14 @@ TEST(ThiefSkillsTest, APointComesBackAndEarlierLevelsPointsDoNot)
 // +15 on traps and his -10 on walls without the player adding anything.
 TEST(ThiefSkillsTest, TheAllocationCarriesTheRacialColumnIntoEveryScore)
 {
-	const ThiefSkillAllocation dwarf = first_level(DWARF, 13, ThiefArmor::LEATHER);
+	const ThiefSkillAllocation dwarf =
+		first_level(DWARF, 13, ThiefArmor::LEATHER);
 	EXPECT_EQ(dwarf.score(ThiefSkill::FIND_REMOVE_TRAPS), 20);
 	EXPECT_EQ(dwarf.score(ThiefSkill::CLIMB_WALLS), 50);
 	EXPECT_EQ(dwarf.score(ThiefSkill::READ_LANGUAGES), 0);
 
-	const ThiefSkillAllocation halfling = first_level(HALFLING, 13, ThiefArmor::LEATHER);
+	const ThiefSkillAllocation halfling =
+		first_level(HALFLING, 13, ThiefArmor::LEATHER);
 	EXPECT_EQ(halfling.score(ThiefSkill::HIDE_IN_SHADOWS), 20);
 	EXPECT_EQ(halfling.score(ThiefSkill::CLIMB_WALLS), 45);
 }
@@ -402,8 +562,12 @@ TEST(ThiefSkillsTest, TheNamesAndTheCursorCoverAllEight)
 	}
 	EXPECT_EQ(walked, ThiefSkill::PICK_POCKETS);
 
-	EXPECT_EQ(previous_thief_skill(ThiefSkill::PICK_POCKETS), ThiefSkill::READ_LANGUAGES);
-	EXPECT_EQ(next_thief_skill(ThiefSkill::READ_LANGUAGES), ThiefSkill::PICK_POCKETS);
+	EXPECT_EQ(
+		previous_thief_skill(ThiefSkill::PICK_POCKETS),
+		ThiefSkill::READ_LANGUAGES);
+	EXPECT_EQ(
+		next_thief_skill(ThiefSkill::READ_LANGUAGES),
+		ThiefSkill::PICK_POCKETS);
 }
 
 // end of file: ThiefSkillsTest.cpp

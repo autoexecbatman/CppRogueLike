@@ -43,11 +43,17 @@ struct MonsterStrength
 //   is_valid_monster_strength(MonsterStrength{ 22, 0 }); // -> true
 //   is_valid_monster_strength(MonsterStrength{ 19, 50 }); // -> false, no percentile above 18
 //   is_valid_monster_strength(MonsterStrength{ 26, 0 }); // -> false, no row
-[[nodiscard]] constexpr bool is_valid_monster_strength(MonsterStrength strength) noexcept
+[[nodiscard]] constexpr bool is_valid_monster_strength(
+	MonsterStrength strength) noexcept
 {
-	const bool hasRow = strength.score >= MONSTER_STRENGTH_SCORE_MINIMUM && strength.score <= MONSTER_STRENGTH_SCORE_MAXIMUM;
-	const bool percentileInRange = strength.exceptional >= MONSTER_STRENGTH_EXCEPTIONAL_NONE && strength.exceptional <= MONSTER_STRENGTH_EXCEPTIONAL_MAXIMUM;
-	const bool percentileOnAnEighteen = strength.exceptional == MONSTER_STRENGTH_EXCEPTIONAL_NONE || strength.score == MONSTER_STRENGTH_EXCEPTIONAL_SCORE;
+	const bool hasRow = strength.score >= MONSTER_STRENGTH_SCORE_MINIMUM &&
+		strength.score <= MONSTER_STRENGTH_SCORE_MAXIMUM;
+	const bool percentileInRange =
+		strength.exceptional >= MONSTER_STRENGTH_EXCEPTIONAL_NONE &&
+		strength.exceptional <= MONSTER_STRENGTH_EXCEPTIONAL_MAXIMUM;
+	const bool percentileOnAnEighteen =
+		strength.exceptional == MONSTER_STRENGTH_EXCEPTIONAL_NONE ||
+		strength.score == MONSTER_STRENGTH_EXCEPTIONAL_SCORE;
 	return hasRow && percentileInRange && percentileOnAnEighteen;
 }
 

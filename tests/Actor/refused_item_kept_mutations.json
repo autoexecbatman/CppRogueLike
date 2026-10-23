@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/Creature.cpp",
-      "original": "[[maybe_unused]] const auto pickUpItemResult = InventoryOperations::add_item(inventoryData, std::move(item));",
-      "mutated": "[[maybe_unused]] const auto pickUpItemResult = InventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this, *ctx.dataManager);",
+      "original": "[[maybe_unused]] const auto pickUpItemResult =\n\t\t\tInventoryOperations::add_item(inventoryData, std::move(item));",
+      "mutated": "[[maybe_unused]] const auto pickUpItemResult =\n\t\t\tInventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this, *ctx.dataManager);",
       "catches": "an item a slot refuses sent back through the weight gate, which destroys it on an overloaded carrier"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "[[maybe_unused]] const auto returnedToPack = InventoryOperations::add_item(inventoryData, std::move(item));",
-      "mutated": "[[maybe_unused]] const auto returnedToPack = InventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this, *ctx.dataManager);",
+      "original": "[[maybe_unused]] const auto returnedToPack =\n\t\t\tInventoryOperations::add_item(inventoryData, std::move(item));",
+      "mutated": "[[maybe_unused]] const auto returnedToPack =\n\t\t\tInventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this, *ctx.dataManager);",
       "catches": "a bow too strong to draw sent back through the weight gate, which destroys it on an overloaded carrier"
     },
     {

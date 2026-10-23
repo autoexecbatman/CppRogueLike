@@ -42,7 +42,8 @@ AbilityAllocation with_pool(std::vector<int> pool, CreatureClass forClass)
 // "Each ability starts with a score of 8."
 TEST(AbilityAllocationTest, EveryAbilityStartsAtEight)
 {
-	const AbilityAllocation allocation = with_pool({ 4, 4, 2, 1, 6, 3, 5 }, CreatureClass::FIGHTER);
+	const AbilityAllocation allocation =
+		with_pool({ 4, 4, 2, 1, 6, 3, 5 }, CreatureClass::FIGHTER);
 
 	for (const Ability ability : ALL_ABILITY)
 	{
@@ -69,7 +70,8 @@ TEST(AbilityAllocationTest, AWholeDieLandsOnOneAbility)
 // "You can add as many dice as you want to any ability."
 TEST(AbilityAllocationTest, SeveralDiceMayLandOnOneAbility)
 {
-	AbilityAllocation allocation = with_pool({ 4, 3, 2 }, CreatureClass::FIGHTER);
+	AbilityAllocation allocation =
+		with_pool({ 4, 3, 2 }, CreatureClass::FIGHTER);
 
 	allocation.spend(Ability::STRENGTH, 0);
 	allocation.spend(Ability::STRENGTH, 0);
@@ -83,26 +85,32 @@ TEST(AbilityAllocationTest, SeveralDiceMayLandOnOneAbility)
 // cannot go there at all - the book gives no way to spend part of one.
 TEST(AbilityAllocationTest, ADieThatWouldPassEighteenCannotBeSpentThere)
 {
-	AbilityAllocation allocation = with_pool({ 6, 6, 2 }, CreatureClass::FIGHTER);
+	AbilityAllocation allocation =
+		with_pool({ 6, 6, 2 }, CreatureClass::FIGHTER);
 	allocation.spend(Ability::STRENGTH, 0);
 	ASSERT_EQ(allocation.allocated(Ability::STRENGTH), 14);
 
-	EXPECT_FALSE(allocation.can_spend(Ability::STRENGTH, 0)) << "a 6 would make 20";
-	EXPECT_TRUE(allocation.can_spend(Ability::STRENGTH, 1)) << "a 2 makes exactly 16";
-	EXPECT_TRUE(allocation.can_spend(Ability::DEXTERITY, 0)) << "the 6 still fits elsewhere";
+	EXPECT_FALSE(allocation.can_spend(Ability::STRENGTH, 0))
+		<< "a 6 would make 20";
+	EXPECT_TRUE(allocation.can_spend(Ability::STRENGTH, 1))
+		<< "a 2 makes exactly 16";
+	EXPECT_TRUE(allocation.can_spend(Ability::DEXTERITY, 0))
+		<< "the 6 still fits elsewhere";
 }
 
 // "If you cannot make an 18 by exact count on the dice, you cannot have an 18 score."
 // A pool of 3s reaches 17 and stops: no combination sums to the 10 an 18 needs.
 TEST(AbilityAllocationTest, AnEighteenNeedsAnExactCount)
 {
-	AbilityAllocation allocation = with_pool({ 3, 3, 3, 3 }, CreatureClass::WIZARD);
+	AbilityAllocation allocation =
+		with_pool({ 3, 3, 3, 3 }, CreatureClass::WIZARD);
 	allocation.spend(Ability::INTELLIGENCE, 0);
 	allocation.spend(Ability::INTELLIGENCE, 0);
 	allocation.spend(Ability::INTELLIGENCE, 0);
 	ASSERT_EQ(allocation.allocated(Ability::INTELLIGENCE), 17);
 
-	EXPECT_FALSE(allocation.can_spend(Ability::INTELLIGENCE, 0)) << "the fourth 3 would make 20";
+	EXPECT_FALSE(allocation.can_spend(Ability::INTELLIGENCE, 0))
+		<< "the fourth 3 would make 20";
 	EXPECT_EQ(allocation.allocated(Ability::INTELLIGENCE), 17);
 }
 
@@ -130,14 +138,16 @@ TEST(AbilityAllocationTest, ADieTakenBackReturnsToThePoolAsItself)
 	ASSERT_TRUE(allocation.has_placed(Ability::STRENGTH));
 	allocation.take_back(Ability::STRENGTH);
 
-	EXPECT_EQ(allocation.allocated(Ability::STRENGTH), 13) << "the last die placed is the one that leaves";
+	EXPECT_EQ(allocation.allocated(Ability::STRENGTH), 13)
+		<< "the last die placed is the one that leaves";
 	ASSERT_EQ(allocation.pool().size(), 1u);
 	EXPECT_EQ(allocation.pool().front(), 2);
 }
 
 TEST(AbilityAllocationTest, AnAbilityWithNoDiceHasNothingToTakeBack)
 {
-	const AbilityAllocation allocation = with_pool({ 5 }, CreatureClass::FIGHTER);
+	const AbilityAllocation allocation =
+		with_pool({ 5 }, CreatureClass::FIGHTER);
 
 	EXPECT_FALSE(allocation.has_placed(Ability::STRENGTH));
 }
@@ -161,10 +171,18 @@ TEST(AbilityAllocationTest, AFighterIsShortUntilItsStrengthMeetsTableThirteen)
 // Each class reads its own row, and nothing else stops it being accepted.
 TEST(AbilityAllocationTest, EachClassIsJudgedOnTheAbilityItsRowNames)
 {
-	EXPECT_EQ(class_ability_minimum(CreatureClass::FIGHTER)->ability, Ability::STRENGTH);
-	EXPECT_EQ(class_ability_minimum(CreatureClass::ROGUE)->ability, Ability::DEXTERITY);
-	EXPECT_EQ(class_ability_minimum(CreatureClass::CLERIC)->ability, Ability::WISDOM);
-	EXPECT_EQ(class_ability_minimum(CreatureClass::WIZARD)->ability, Ability::INTELLIGENCE);
+	EXPECT_EQ(
+		class_ability_minimum(CreatureClass::FIGHTER)->ability,
+		Ability::STRENGTH);
+	EXPECT_EQ(
+		class_ability_minimum(CreatureClass::ROGUE)->ability,
+		Ability::DEXTERITY);
+	EXPECT_EQ(
+		class_ability_minimum(CreatureClass::CLERIC)->ability,
+		Ability::WISDOM);
+	EXPECT_EQ(
+		class_ability_minimum(CreatureClass::WIZARD)->ability,
+		Ability::INTELLIGENCE);
 	EXPECT_EQ(class_ability_minimum(CreatureClass::FIGHTER)->score, 9);
 	EXPECT_FALSE(class_ability_minimum(CreatureClass::MONSTER).has_value());
 }
@@ -172,7 +190,8 @@ TEST(AbilityAllocationTest, EachClassIsJudgedOnTheAbilityItsRowNames)
 // A monster has no row in Table 13, so an allocation for one is never short.
 TEST(AbilityAllocationTest, AClassWithNoRowIsNeverShort)
 {
-	const AbilityAllocation allocation = with_pool({ 1 }, CreatureClass::MONSTER);
+	const AbilityAllocation allocation =
+		with_pool({ 1 }, CreatureClass::MONSTER);
 
 	EXPECT_FALSE(allocation.unmet_minimum().has_value());
 }
@@ -189,10 +208,14 @@ TEST(AbilityAllocationTest, ARaceIsShownAndJudgedButNotAllocated)
 	};
 	halflingFighter.spend(Ability::STRENGTH, 0);
 
-	EXPECT_EQ(halflingFighter.allocated(Ability::STRENGTH), 9) << "the race is not spent from the pool";
-	EXPECT_EQ(halflingFighter.score(Ability::STRENGTH), 8) << "the player reads what it will have";
-	EXPECT_EQ(halflingFighter.score(Ability::DEXTERITY), 9) << "and what the race gives it";
-	EXPECT_TRUE(halflingFighter.unmet_minimum().has_value()) << "9 allocated is 8 played";
+	EXPECT_EQ(halflingFighter.allocated(Ability::STRENGTH), 9)
+		<< "the race is not spent from the pool";
+	EXPECT_EQ(halflingFighter.score(Ability::STRENGTH), 8)
+		<< "the player reads what it will have";
+	EXPECT_EQ(halflingFighter.score(Ability::DEXTERITY), 9)
+		<< "and what the race gives it";
+	EXPECT_TRUE(halflingFighter.unmet_minimum().has_value())
+		<< "9 allocated is 8 played";
 
 	halflingFighter.spend(Ability::STRENGTH, 0);
 
@@ -211,7 +234,8 @@ TEST(AbilityAllocationTest, TheScoresHandedOnAreTheAllocatedOnes)
 	};
 	halflingFighter.spend(Ability::STRENGTH, 0);
 
-	const std::array<int, ABILITY_COUNT> scores = halflingFighter.allocated_scores();
+	const std::array<int, ABILITY_COUNT> scores =
+		halflingFighter.allocated_scores();
 
 	EXPECT_EQ(scores.at(ability_index(Ability::STRENGTH)), 12);
 	EXPECT_EQ(scores.at(ability_index(Ability::DEXTERITY)), 8);
@@ -253,12 +277,14 @@ TEST(AbilityAllocationTest, TheAbilityListIsWalkedInBothDirectionsAndWraps)
 // however small.
 TEST(AbilityAllocationTest, NothingGoesOnAnAbilityAlreadyAtEighteen)
 {
-	AbilityAllocation allocation = with_pool({ 6, 4, 1 }, CreatureClass::FIGHTER);
+	AbilityAllocation allocation =
+		with_pool({ 6, 4, 1 }, CreatureClass::FIGHTER);
 	allocation.spend(Ability::STRENGTH, 0);
 	allocation.spend(Ability::STRENGTH, 0);
 	ASSERT_EQ(allocation.allocated(Ability::STRENGTH), ABILITY_MAXIMUM);
 
-	EXPECT_FALSE(allocation.can_spend(Ability::STRENGTH, 0)) << "even a 1 would make 19";
+	EXPECT_FALSE(allocation.can_spend(Ability::STRENGTH, 0))
+		<< "even a 1 would make 19";
 	EXPECT_TRUE(allocation.can_spend(Ability::DEXTERITY, 0));
 }
 
@@ -266,7 +292,8 @@ TEST(AbilityAllocationTest, NothingGoesOnAnAbilityAlreadyAtEighteen)
 // the end of the pool is an ordinary keystroke rather than an impossible one.
 TEST(AbilityAllocationTest, ADigitPastTheEndOfThePoolSpendsNothing)
 {
-	const AbilityAllocation allocation = with_pool({ 5, 2 }, CreatureClass::FIGHTER);
+	const AbilityAllocation allocation =
+		with_pool({ 5, 2 }, CreatureClass::FIGHTER);
 
 	EXPECT_FALSE(allocation.can_spend(Ability::STRENGTH, 2));
 	EXPECT_FALSE(allocation.can_spend(Ability::STRENGTH, 6));

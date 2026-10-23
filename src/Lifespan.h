@@ -116,14 +116,19 @@ struct Lifespan
 // Example, a human of natural age 60 with no exceptional Strength:
 //   ageing_change(lifespan, Ability::STRENGTH, 0);   // -> -3
 //   ageing_change(lifespan, Ability::WISDOM, 0);     // -> 2
-[[nodiscard]] int ageing_change(const Lifespan& lifespan, Ability ability, int exceptionalStrength);
+[[nodiscard]] int ageing_change(
+	const Lifespan& lifespan,
+	Ability ability,
+	int exceptionalStrength);
 
 // The exceptional Strength percentile ageing leaves: half at middle age, none from old age.
 //
 // Example, an 18/50 human:
 //   aged_exceptional_strength(lifespanAt45, 50);   // -> 25
 //   aged_exceptional_strength(lifespanAt60, 50);   // -> 0
-[[nodiscard]] int aged_exceptional_strength(const Lifespan& lifespan, int exceptionalStrength);
+[[nodiscard]] int aged_exceptional_strength(
+	const Lifespan& lifespan,
+	int exceptionalStrength);
 
 // A new character's lifespan, rolled from the race's row of Table 11 with nothing lived.
 // Refuses PlayerRaceState::NONE, which no character is created with.

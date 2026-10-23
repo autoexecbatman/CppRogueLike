@@ -55,9 +55,11 @@ TEST_F(InventoryTabsTest, EveryTabIsReachableByPointer)
 	// because no tab was reachable and the screen already starts on Equipment.
 	for (const auto& box : InventoryActions::tab_boxes(renderer))
 	{
-		const auto hit = InventoryActions::tab_at(middle_of(box), tab_row_y(), renderer);
+		const auto hit =
+			InventoryActions::tab_at(middle_of(box), tab_row_y(), renderer);
 
-		ASSERT_TRUE(hit.has_value()) << "a tab could not be clicked at its own middle";
+		ASSERT_TRUE(hit.has_value())
+			<< "a tab could not be clicked at its own middle";
 		EXPECT_EQ(*hit, box.screen);
 	}
 }
@@ -65,9 +67,12 @@ TEST_F(InventoryTabsTest, EveryTabIsReachableByPointer)
 TEST_F(InventoryTabsTest, APointerOffTheTabRowHitsNoTab)
 {
 	const auto boxes = InventoryActions::tab_boxes(renderer);
-	const int contentRowY = panel_text_row_y(0, renderer.get_tile_size(), FIRST_CONTENT_ROW) + 2;
+	const int contentRowY =
+		panel_text_row_y(0, renderer.get_tile_size(), FIRST_CONTENT_ROW) + 2;
 
-	EXPECT_FALSE(InventoryActions::tab_at(middle_of(boxes[1]), contentRowY, renderer).has_value())
+	EXPECT_FALSE(
+		InventoryActions::tab_at(middle_of(boxes[1]), contentRowY, renderer)
+			.has_value())
 		<< "a click on a slot row switched panes";
 }
 
@@ -76,7 +81,9 @@ TEST_F(InventoryTabsTest, APointerPastTheLastTabHitsNoTab)
 	const auto boxes = InventoryActions::tab_boxes(renderer);
 	const int pastTheEnd = boxes[2].pixelX + boxes[2].width + 200;
 
-	EXPECT_FALSE(InventoryActions::tab_at(pastTheEnd, tab_row_y(), renderer).has_value());
+	EXPECT_FALSE(
+		InventoryActions::tab_at(pastTheEnd, tab_row_y(), renderer)
+			.has_value());
 }
 
 TEST_F(InventoryTabsTest, TabStepsThroughEveryPaneAndComesBack)

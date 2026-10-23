@@ -73,7 +73,8 @@ protected:
 	// The player as a human of this natural age, living to `maximumAge`.
 	void make_human(int naturalAge, int maximumAge)
 	{
-		player->lifespan = Lifespan{ PlayerRaceState::HUMAN, naturalAge, maximumAge, 0, 0 };
+		player->lifespan =
+			Lifespan{ PlayerRaceState::HUMAN, naturalAge, maximumAge, 0, 0 };
 	}
 
 	// Runs the upkeep for the one round numbered `round`, as though every round before it had run.
@@ -88,9 +89,14 @@ protected:
 	std::string all_message_text() const
 	{
 		std::string joined;
-		for (size_t index = 0; index < ctx.messageSystem->get_stored_message_count(); ++index)
+		for (
+			size_t index = 0;
+			index < ctx.messageSystem->get_stored_message_count();
+			++index)
 		{
-			for (const auto& part : ctx.messageSystem->get_attack_message_at(index))
+			for (
+				const auto& part :
+				ctx.messageSystem->get_attack_message_at(index))
 			{
 				joined += part.text;
 			}
@@ -182,7 +188,10 @@ TEST_F(CharacterAgeingTest, MagicalYearsAreAddedAndCrossingABandSaysSo)
 	player->add_magical_years(1, ctx);
 
 	EXPECT_EQ(player->lifespan->magicalYears, 1);
-	EXPECT_NE(all_message_text().find("You feel the years: middle age."), std::string::npos) << all_message_text();
+	EXPECT_NE(
+		all_message_text().find("You feel the years: middle age."),
+		std::string::npos)
+		<< all_message_text();
 }
 
 TEST_F(CharacterAgeingTest, MagicalYearsWithinABandSayNothing)
@@ -191,7 +200,8 @@ TEST_F(CharacterAgeingTest, MagicalYearsWithinABandSayNothing)
 
 	player->add_magical_years(1, ctx);
 
-	EXPECT_EQ(all_message_text().find("You feel the years"), std::string::npos) << all_message_text();
+	EXPECT_EQ(all_message_text().find("You feel the years"), std::string::npos)
+		<< all_message_text();
 }
 
 TEST_F(CharacterAgeingTest, TheRoundBeforeAYearAddsNone)
@@ -219,7 +229,10 @@ TEST_F(CharacterAgeingTest, AYearThatReachesMiddleAgeSaysSo)
 
 	run_round(ROUNDS_IN_A_YEAR);
 
-	EXPECT_NE(all_message_text().find("You feel the years: middle age."), std::string::npos) << all_message_text();
+	EXPECT_NE(
+		all_message_text().find("You feel the years: middle age."),
+		std::string::npos)
+		<< all_message_text();
 }
 
 // The owner's ruling: "Dies of old age", at the year that brings the natural age to the maximum.
@@ -230,7 +243,8 @@ TEST_F(CharacterAgeingTest, TheYearThatReachesTheMaximumKills)
 	run_round(ROUNDS_IN_A_YEAR);
 
 	EXPECT_EQ(ctx.gameState->get_run_outcome(), RunOutcome::DEFEAT);
-	EXPECT_NE(all_message_text().find("You die of old age."), std::string::npos) << all_message_text();
+	EXPECT_NE(all_message_text().find("You die of old age."), std::string::npos)
+		<< all_message_text();
 }
 
 TEST_F(CharacterAgeingTest, AYearShortOfTheMaximumLives)
@@ -275,12 +289,15 @@ TEST_F(CharacterAgeingTest, ALifespanMissingAFieldIsRefused)
 	nlohmann::json saved;
 	player->save(saved);
 
-	for (const char* field : { "race", "startingAge", "maximumAge", "yearsLived", "magicalYears" })
+	for (
+		const char* field :
+		{ "race", "startingAge", "maximumAge", "yearsLived", "magicalYears" })
 	{
 		nlohmann::json damaged = saved;
 		damaged.at("lifespan").erase(field);
 		auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
-		EXPECT_ANY_THROW(loaded->load(damaged)) << "a lifespan without " << field << " loaded";
+		EXPECT_ANY_THROW(loaded->load(damaged))
+			<< "a lifespan without " << field << " loaded";
 	}
 }
 
@@ -325,8 +342,10 @@ TEST_F(CharacterAgeingTest, ANewGameRollsTheLifespanForTheChosenRace)
 	blueprint.playerRaceState = PlayerRaceState::HUMAN;
 	blueprint.abilityScores.fill(12);
 	player = std::make_unique<Player>(Vector2D{ 1, 1 }, blueprint, ctx);
-	ASSERT_EQ(player->get_race(), PlayerRaceState::HUMAN) << "the blueprint's race did not reach the lifespan";
-	ASSERT_EQ(player->lifespan->startingAge, 0) << "the ages were rolled before the game started";
+	ASSERT_EQ(player->get_race(), PlayerRaceState::HUMAN)
+		<< "the blueprint's race did not reach the lifespan";
+	ASSERT_EQ(player->lifespan->startingAge, 0)
+		<< "the ages were rolled before the game started";
 
 	player->on_new_game_start(ctx);
 

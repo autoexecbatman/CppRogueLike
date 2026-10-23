@@ -73,6 +73,7 @@ struct DungeonRoom
 	// True if (tileCol, tileRow) lies inside the floor area
 	[[nodiscard]] bool contains(int tileCol, int tileRow) const
 	{
-		return tileCol >= col && tileCol <= col_end() && tileRow >= row && tileRow <= row_end();
+		return tileCol >= col && tileCol <= col_end() && tileRow >= row &&
+			tileRow <= row_end();
 	}
 };

@@ -86,14 +86,16 @@ static const std::unordered_map<Controls, Vector2D>& direction_map()
 	return moves;
 }
 
-PlayerController::PlayerController(Player& owner)
-	: playerOwner(owner)
+PlayerController::PlayerController(Player& owner) :
+	playerOwner(owner)
 {
 }
 
 void PlayerController::update(GameContext& ctx)
 {
-	assert(ctx.inputHandler && "PlayerController::update: called without an inputHandler");
+	assert(
+		ctx.inputHandler &&
+		"PlayerController::update: called without an inputHandler");
 	assert(ctx.map && "PlayerController::update: called without a map");
 	assert(ctx.dice && "PlayerController::update: called without dice");
 
@@ -106,17 +108,26 @@ void PlayerController::update(GameContext& ctx)
 		{
 		case WebEscape::BROKE_FREE:
 		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You break free from the web!", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"You break free from the web!",
+				MessageCompletion::FINISHED);
 			break;
 		}
 		case WebEscape::STRUGGLED_FREE:
 		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You finally break free from the web!", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"You finally break free from the web!",
+				MessageCompletion::FINISHED);
 			break;
 		}
 		case WebEscape::STILL_STUCK:
 		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You're still stuck in the web.", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"You're still stuck in the web.",
+				MessageCompletion::FINISHED);
 			spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 			return;
 		}
@@ -133,7 +144,8 @@ void PlayerController::update(GameContext& ctx)
 		return;
 	}
 
-	const Controls key = static_cast<Controls>(ctx.inputHandler->get_current_key());
+	const Controls key =
+		static_cast<Controls>(ctx.inputHandler->get_current_key());
 	Vector2D moveVector{ 0, 0 };
 
 	// A pending confusion is either still in force or has ended since the player last acted.
@@ -142,7 +154,10 @@ void PlayerController::update(GameContext& ctx)
 		if (!is_confused(ctx.gameState->get_time()))
 		{
 			confusionEndTime.reset();
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Your mind clears.", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"Your mind clears.",
+				MessageCompletion::FINISHED);
 		}
 		else
 		{
@@ -160,12 +175,18 @@ void PlayerController::update(GameContext& ctx)
 				};
 				moveVector = allDirections[ctx.dice->roll(0, 7)];
 
-				ctx.messageSystem->message(ColorPairId::WHITE_GREEN, "You stumble around in confusion!", MessageCompletion::FINISHED);
+				ctx.messageSystem->message(
+					ColorPairId::WHITE_GREEN,
+					"You stumble around in confusion!",
+					MessageCompletion::FINISHED);
 				spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 			}
 			else
 			{
-				ctx.messageSystem->message(ColorPairId::WHITE_GREEN, "You struggle to control your movements...", MessageCompletion::FINISHED);
+				ctx.messageSystem->message(
+					ColorPairId::WHITE_GREEN,
+					"You struggle to control your movements...",
+					MessageCompletion::FINISHED);
 
 				const auto& moves = direction_map();
 				if (moves.contains(key))
@@ -195,7 +216,9 @@ void PlayerController::update(GameContext& ctx)
 	if (isWaiting)
 	{
 		isWaiting = false;
-		ctx.map->describe_tile(ctx.map->get_tile_type(playerOwner.position), ctx);
+		ctx.map->describe_tile(
+			ctx.map->get_tile_type(playerOwner.position),
+			ctx);
 		look_on_floor(playerOwner.position, ctx);
 	}
 
@@ -217,12 +240,15 @@ void PlayerController::update(GameContext& ctx)
 void PlayerController::load(const json& savedState)
 {
 	const json& endTime = savedState.at("confusionEndTime");
-	confusionEndTime = endTime.is_null() ? std::nullopt : std::optional<int>{ endTime.get<int>() };
+	confusionEndTime = endTime.is_null() ?
+		std::nullopt :
+		std::optional<int>{ endTime.get<int>() };
 }
 
 void PlayerController::save(json& savedState)
 {
-	savedState["confusionEndTime"] = confusionEndTime.has_value() ? json(*confusionEndTime) : json(nullptr);
+	savedState["confusionEndTime"] =
+		confusionEndTime.has_value() ? json(*confusionEndTime) : json(nullptr);
 }
 
 void PlayerController::move(Vector2D target)
@@ -239,7 +265,11 @@ void PlayerController::pick_item(GameContext& ctx)
 
 void PlayerController::drop_item(GameContext& ctx)
 {
-	ctx.menus->push_back(std::make_unique<InventoryUI>(playerOwner, InventoryScreen::BACKPACK, ctx));
+	ctx.menus->push_back(
+		std::make_unique<InventoryUI>(
+			playerOwner,
+			InventoryScreen::BACKPACK,
+			ctx));
 }
 
 bool PlayerController::is_pickable_at_position(const Actor& actor) const
@@ -249,7 +279,11 @@ bool PlayerController::is_pickable_at_position(const Actor& actor) const
 
 void PlayerController::display_inventory(GameContext& ctx)
 {
-	ctx.menus->push_back(std::make_unique<InventoryUI>(playerOwner, InventoryScreen::EQUIPMENT, ctx));
+	ctx.menus->push_back(
+		std::make_unique<InventoryUI>(
+			playerOwner,
+			InventoryScreen::EQUIPMENT,
+			ctx));
 }
 
 Item* PlayerController::chose_from_inventory(int ascii, GameContext& ctx)
@@ -270,13 +304,16 @@ Item* PlayerController::chose_from_inventory(int ascii, GameContext& ctx)
 	}
 	else
 	{
-		throw std::logic_error("PlayerController::chose_from_inventory -- called on player with empty inventory");
+		throw std::logic_error(
+			"PlayerController::chose_from_inventory -- called on player with empty inventory");
 	}
 }
 
 void PlayerController::look_on_floor(Vector2D target, GameContext& ctx)
 {
-	assert(ctx.floorInventory && "PlayerController::look_on_floor: called without a floorInventory");
+	assert(
+		ctx.floorInventory &&
+		"PlayerController::look_on_floor: called without a floorInventory");
 
 	if (ctx.floorInventory->items.empty())
 	{
@@ -285,25 +322,34 @@ void PlayerController::look_on_floor(Vector2D target, GameContext& ctx)
 
 	for (const auto& floorItem : ctx.floorInventory->items)
 	{
-		assert(floorItem && "look_on_floor: the floor holds a null where an item should be");
+		assert(
+			floorItem &&
+			"look_on_floor: the floor holds a null where an item should be");
 
 		if (floorItem->position == target)
 		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "There's a " + floorItem->get_name() + " here", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"There's a " + floorItem->get_name() + " here",
+				MessageCompletion::FINISHED);
 		}
 	}
 }
 
 bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 {
-	assert(ctx.creatures && "PlayerController::look_to_attack: called without creatures");
+	assert(
+		ctx.creatures &&
+		"PlayerController::look_to_attack: called without creatures");
 
 	for (const auto& creature : *ctx.creatures)
 	{
 		assert(creature != nullptr && "null creature in creatures list");
 		if (!creature->is_dead() && creature->position == target)
 		{
-			assert(creature->ai != nullptr && "living creature at target has no AI");
+			assert(
+				creature->ai != nullptr &&
+				"living creature at target has no AI");
 
 			// Bumping anything the player would not attack outright resolves as
 			// an interaction rather than a swing.
@@ -320,7 +366,9 @@ bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 	}
 
 	assert(ctx.map && "PlayerController::look_to_attack: called without a map");
-	assert(ctx.decorations && "PlayerController::look_to_attack: called without decorations");
+	assert(
+		ctx.decorations &&
+		"PlayerController::look_to_attack: called without decorations");
 	auto* decor = ctx.map->find_decoration_at(target, ctx);
 	if (decor && !decor->isBroken)
 	{
@@ -328,7 +376,9 @@ bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 		if (decor->hp <= 0)
 		{
 			decor->isBroken = true;
-			assert(ctx.decorEditor && "PlayerController::look_to_attack: called without a decorEditor");
+			assert(
+				ctx.decorEditor &&
+				"PlayerController::look_to_attack: called without a decorEditor");
 			ctx.decorEditor->erase(decor->position);
 
 			ctx.messageSystem->message(
@@ -404,24 +454,39 @@ void PlayerController::swap_places_with(Creature& target, GameContext& ctx)
 // spends the turn only when an attempt was actually made.
 void PlayerController::attempt_turn_undead(GameContext& ctx)
 {
-	assert(ctx.creatureManager && "PlayerController::attempt_turn_undead: called without a creatureManager");
-	assert(ctx.creatures && "PlayerController::attempt_turn_undead: called without creatures");
+	assert(
+		ctx.creatureManager &&
+		"PlayerController::attempt_turn_undead: called without a creatureManager");
+	assert(
+		ctx.creatures &&
+		"PlayerController::attempt_turn_undead: called without creatures");
 
-	const Turning::TurnUndeadReport report = Turning::turn_undead(playerOwner, ctx);
+	const Turning::TurnUndeadReport report =
+		Turning::turn_undead(playerOwner, ctx);
 
 	if (!report.attempted)
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You have no deity to channel.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"You have no deity to channel.",
+			MessageCompletion::FINISHED);
 		return;
 	}
 
-	if (report.turned.empty() && report.destroyed.empty() && report.resisted.empty())
+	if (report.turned.empty() && report.destroyed.empty() &&
+		report.resisted.empty())
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You hold up your holy symbol, but nothing stirs.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"You hold up your holy symbol, but nothing stirs.",
+			MessageCompletion::FINISHED);
 		return;
 	}
 
-	ctx.messageSystem->message(ColorPairId::YELLOW_BLACK, "You raise your holy symbol!", MessageCompletion::FINISHED);
+	ctx.messageSystem->message(
+		ColorPairId::YELLOW_BLACK,
+		"You raise your holy symbol!",
+		MessageCompletion::FINISHED);
 
 	for (const Creature* destroyed : report.destroyed)
 	{
@@ -456,7 +521,9 @@ void PlayerController::attempt_turn_undead(GameContext& ctx)
 //
 // Turning on the peaceable is the player's choice, so it is never silent: the
 // prompt is the guard, and the alignment shift is the cost.
-void PlayerController::confirm_attack_on_peaceful(Creature& target, GameContext& ctx)
+void PlayerController::confirm_attack_on_peaceful(
+	Creature& target,
+	GameContext& ctx)
 {
 	std::vector<MenuEntry> entries{};
 
@@ -489,12 +556,13 @@ void PlayerController::confirm_attack_on_peaceful(Creature& target, GameContext&
 	entries.push_back({ "Yes, attack", 'y', attackCommand });
 	entries.push_back({ "No", 'n', cancelCommand });
 
-	ctx.menus->push_back(std::make_unique<ListMenu>(
-		std::format("Really attack the {}?", target.actorData.name),
-		std::move(entries),
-		std::function<void(GameContext&)>{},
-		std::function<void(GameContext&)>{},
-		ctx));
+	ctx.menus->push_back(
+		std::make_unique<ListMenu>(
+			std::format("Really attack the {}?", target.actorData.name),
+			std::move(entries),
+			std::function<void(GameContext&)>{},
+			std::function<void(GameContext&)>{},
+			ctx));
 }
 
 // Resolves one round of the player's melee against a target, including the
@@ -504,8 +572,11 @@ void PlayerController::confirm_attack_on_peaceful(Creature& target, GameContext&
 //   strike(goblin, ctx); // one swing, or two at 2.0 attacks per round
 void PlayerController::strike(Creature& target, GameContext& ctx)
 {
-	assert(ctx.creatureManager && "PlayerController::strike: called without a creatureManager");
-	assert(ctx.creatures && "PlayerController::strike: called without creatures");
+	assert(
+		ctx.creatureManager &&
+		"PlayerController::strike: called without a creatureManager");
+	assert(
+		ctx.creatures && "PlayerController::strike: called without creatures");
 	assert(playerOwner.attacker && "strike: the player swung with no attacker");
 
 	// One swing, priced by the rate, so a faster attacker comes round sooner (Table 58).
@@ -514,9 +585,13 @@ void PlayerController::strike(Creature& target, GameContext& ctx)
 	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
 }
 
-bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext& ctx)
+bool PlayerController::look_to_move(
+	const Vector2D& targetPosition,
+	GameContext& ctx)
 {
-	assert(ctx.tileConfig && "PlayerController::look_to_move: called without a tileConfig");
+	assert(
+		ctx.tileConfig &&
+		"PlayerController::look_to_move: called without a tileConfig");
 	assert(ctx.map && "PlayerController::look_to_move: called without a map");
 
 	if (ctx.map->get_actor(targetPosition, ctx) != nullptr)
@@ -568,7 +643,10 @@ bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext&
 		if (!blockedMessage.empty())
 		{
 			ctx.messageSystem->log(blockedMessage);
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, blockedMessage, MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				blockedMessage,
+				MessageCompletion::FINISHED);
 		}
 		break;
 	}
@@ -591,10 +669,16 @@ bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext&
 	return false;
 }
 
-bool PlayerController::resolve_mouse_world_tile(GameContext& ctx, Vector2D& out_world_tile) const
+bool PlayerController::resolve_mouse_world_tile(
+	GameContext& ctx,
+	Vector2D& out_world_tile) const
 {
-	assert(ctx.map && "PlayerController::resolve_mouse_world_tile: called without a map");
-	assert(ctx.inputSystem && "PlayerController::resolve_mouse_world_tile: called without an inputSystem");
+	assert(
+		ctx.map &&
+		"PlayerController::resolve_mouse_world_tile: called without a map");
+	assert(
+		ctx.inputSystem &&
+		"PlayerController::resolve_mouse_world_tile: called without an inputSystem");
 	if (!ctx.renderer)
 	{
 		return false;
@@ -627,18 +711,27 @@ void PlayerController::flush_fov(GameContext& ctx)
 
 bool PlayerController::is_mouse_pending_cancelled(GameContext& ctx) const
 {
-	assert(ctx.inputHandler && "PlayerController::is_mouse_pending_cancelled: called without an inputHandler");
+	assert(
+		ctx.inputHandler &&
+		"PlayerController::is_mouse_pending_cancelled: called without an inputHandler");
 
-	const Controls key = static_cast<Controls>(ctx.inputHandler->get_current_key());
+	const Controls key =
+		static_cast<Controls>(ctx.inputHandler->get_current_key());
 	const auto& moves = direction_map();
 	bool isMovement = moves.contains(key);
-	bool isAction = (key == Controls::ESCAPE || key == Controls::WAIT || key == Controls::PICK);
+	bool isAction =
+		(key == Controls::ESCAPE || key == Controls::WAIT ||
+			key == Controls::PICK);
 	return isMovement || isAction;
 }
 
-Vector2D PlayerController::find_door_approach(Vector2D doorTile, const GameContext& ctx) const
+Vector2D PlayerController::find_door_approach(
+	Vector2D doorTile,
+	const GameContext& ctx) const
 {
-	assert(ctx.map && "PlayerController::find_door_approach: called without a map");
+	assert(
+		ctx.map &&
+		"PlayerController::find_door_approach: called without a map");
 
 	const std::array<Vector2D, 4> dirs{
 		Vector2D{ 0, -1 },
@@ -656,7 +749,8 @@ Vector2D PlayerController::find_door_approach(Vector2D doorTile, const GameConte
 			continue;
 		}
 
-		int dist = std::abs(adj.x - ctx.player()->position.x) + std::abs(adj.y - ctx.player()->position.y);
+		int dist = std::abs(adj.x - ctx.player()->position.x) +
+			std::abs(adj.y - ctx.player()->position.y);
 		if (dist < bestDist)
 		{
 			bestDist = dist;
@@ -668,14 +762,20 @@ Vector2D PlayerController::find_door_approach(Vector2D doorTile, const GameConte
 
 bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 {
-	assert(ctx.map && "PlayerController::resolve_locked_door: called without a map");
-	assert(ctx.dice && "PlayerController::resolve_locked_door: called without dice");
+	assert(
+		ctx.map &&
+		"PlayerController::resolve_locked_door: called without a map");
+	assert(
+		ctx.dice &&
+		"PlayerController::resolve_locked_door: called without dice");
 
 	// Branch 1: player carries a dungeon key -- consume it, unlock, open.
 	Item* keyItem = nullptr;
 	for (const auto& item : playerOwner.inventoryData.items)
 	{
-		assert(item && "PlayerController::resolve_locked_door: the pack holds a null item");
+		assert(
+			item &&
+			"PlayerController::resolve_locked_door: the pack holds a null item");
 		if (item->itemKey == "dungeon_key")
 		{
 			keyItem = item.get();
@@ -685,17 +785,26 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 
 	if (keyItem != nullptr)
 	{
-		[[maybe_unused]] const auto consumeUnlockResult = InventoryOperations::remove_item(playerOwner.inventoryData, *keyItem);
-		assert(consumeUnlockResult.has_value() && "PlayerController::resolve_locked_door: the key found in the pack could not be taken from it");
+		[[maybe_unused]] const auto consumeUnlockResult =
+			InventoryOperations::remove_item(
+				playerOwner.inventoryData,
+				*keyItem);
+		assert(
+			consumeUnlockResult.has_value() &&
+			"PlayerController::resolve_locked_door: the key found in the pack could not be taken from it");
 		ctx.map->open_all_room_doors(doorPos, ctx);
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You use the key. The lock turns.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"You use the key. The lock turns.",
+			MessageCompletion::FINISHED);
 		spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 		return true;
 	}
 
 	// Branch 2: Rogue -- Open Locks percentage roll (PHB Tables 26 to 29), once per lock per
 	// level. A score of zero, or armour the book gives no column, means no skill.
-	const int openLocksChance = playerOwner.thief_skill(ThiefSkill::OPEN_LOCKS).value_or(0);
+	const int openLocksChance =
+		playerOwner.thief_skill(ThiefSkill::OPEN_LOCKS).value_or(0);
 	if (openLocksChance > 0)
 	{
 		const int level = playerOwner.get_creature_level();
@@ -707,30 +816,46 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 			{
 				ctx.map->unlock_door(doorPos);
 				ctx.map->open_door(doorPos, ctx);
-				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You pick the lock.", MessageCompletion::FINISHED);
+				ctx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					"You pick the lock.",
+					MessageCompletion::FINISHED);
 			}
 			else
 			{
 				ctx.map->mark_lock_pick_failed(doorPos, level);
-				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You fail to pick the lock.", MessageCompletion::FINISHED);
+				ctx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					"You fail to pick the lock.",
+					MessageCompletion::FINISHED);
 			}
 			spend_player_action(ctx, rounds * TIME_UNITS_PER_ROUND);
 			return true;
 		}
 
 		// Refused without a roll or a round, and the bump goes on to forcing.
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "This lock is too difficult for you until you have learned more.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"This lock is too difficult for you until you have learned more.",
+			MessageCompletion::FINISHED);
 	}
 
 	// Branch 3: force it, once per door, by Table 1's parenthesised Open Doors figure.
 	if (ctx.map->has_resisted_forcing(doorPos))
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You have already failed to force this door.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"You have already failed to force this door.",
+			MessageCompletion::FINISHED);
 		return false;
 	}
 
-	assert(ctx.dataManager && "PlayerController::resolve_locked_door: called without a dataManager");
-	const StrengthAttributes strengthRow = ctx.dataManager->strength_for(playerOwner.get_strength(), playerOwner.get_exceptional_strength());
+	assert(
+		ctx.dataManager &&
+		"PlayerController::resolve_locked_door: called without a dataManager");
+	const StrengthAttributes strengthRow = ctx.dataManager->strength_for(
+		playerOwner.get_strength(),
+		playerOwner.get_exceptional_strength());
 	const int lockedDoorChance = strengthRow.lockedDoors;
 	if (lockedDoorChance > 0)
 	{
@@ -738,19 +863,28 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 		{
 			ctx.map->unlock_door(doorPos);
 			ctx.map->open_door(doorPos, ctx);
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You force the door open! The crash echoes down the corridor.", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"You force the door open! The crash echoes down the corridor.",
+				MessageCompletion::FINISHED);
 		}
 		else
 		{
 			ctx.map->mark_resisted_forcing(doorPos);
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You slam into the door but it holds.", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"You slam into the door but it holds.",
+				MessageCompletion::FINISHED);
 		}
 		spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 		return true;
 	}
 
 	// Branch 4: a Strength row that prints no locked-door chance.
-	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "The door is locked. You are not strong enough to force it.", MessageCompletion::FINISHED);
+	ctx.messageSystem->message(
+		ColorPairId::WHITE_BLACK,
+		"The door is locked. You are not strong enough to force it.",
+		MessageCompletion::FINISHED);
 	return false;
 }
 
@@ -761,17 +895,25 @@ void PlayerController::begin_path_walk(
 	PendingDoorAction doorAction,
 	GameContext& ctx)
 {
-	assert(ctx.mousePathOverlay && "PlayerController::begin_path_walk: called without a mousePathOverlay");
+	assert(
+		ctx.mousePathOverlay &&
+		"PlayerController::begin_path_walk: called without a mousePathOverlay");
 
 	if (mode == MouseMode::IDLE)
 	{
-		throw std::logic_error("PlayerController::begin_path_walk -- mode must not be IDLE");
+		throw std::logic_error(
+			"PlayerController::begin_path_walk -- mode must not be IDLE");
 	}
 
-	assert(ctx.map && "PlayerController::begin_path_walk: called without a map");
-	assert(ctx.pathfinder && "PlayerController::begin_path_walk: called without a pathfinder");
+	assert(
+		ctx.map && "PlayerController::begin_path_walk: called without a map");
+	assert(
+		ctx.pathfinder &&
+		"PlayerController::begin_path_walk: called without a pathfinder");
 
-	assert(ctx.tileConfig && "begin_path_walk: a route was planned with no tile configuration");
+	assert(
+		ctx.tileConfig &&
+		"begin_path_walk: a route was planned with no tile configuration");
 	auto path = ctx.pathfinder->find_route(
 		ctx.player()->position,
 		walkDest,
@@ -791,8 +933,11 @@ void PlayerController::begin_path_walk(
 
 bool PlayerController::execute_arrival(GameContext& ctx)
 {
-	assert(ctx.levelManager && "PlayerController::execute_arrival: called without a levelManager");
-	assert(ctx.map && "PlayerController::execute_arrival: called without a map");
+	assert(
+		ctx.levelManager &&
+		"PlayerController::execute_arrival: called without a levelManager");
+	assert(
+		ctx.map && "PlayerController::execute_arrival: called without a map");
 
 	switch (mouseMode)
 	{
@@ -808,7 +953,8 @@ bool PlayerController::execute_arrival(GameContext& ctx)
 	{
 		if (mouseDoorTarget.x == -1)
 		{
-			throw std::logic_error("PlayerController::execute_arrival -- WALK_TO_DOOR reached without a valid mouseDoorTarget");
+			throw std::logic_error(
+				"PlayerController::execute_arrival -- WALK_TO_DOOR reached without a valid mouseDoorTarget");
 		}
 
 		if (mouseDoorAction == PendingDoorAction::OPEN)
@@ -826,7 +972,9 @@ bool PlayerController::execute_arrival(GameContext& ctx)
 
 	case MouseMode::WALK_TO_STAIRS:
 	{
-		assert(ctx.stairs && "PlayerController::execute_arrival: called without stairs");
+		assert(
+			ctx.stairs &&
+			"PlayerController::execute_arrival: called without stairs");
 		if (ctx.stairs->position == playerOwner.position)
 		{
 			ctx.levelManager->advance_to_next_level(ctx);
@@ -844,8 +992,11 @@ bool PlayerController::execute_arrival(GameContext& ctx)
 
 bool PlayerController::handle_mouse_path(GameContext& ctx)
 {
-	assert(ctx.mousePathOverlay && "PlayerController::handle_mouse_path: called without a mousePathOverlay");
-	assert(ctx.map && "PlayerController::handle_mouse_path: called without a map");
+	assert(
+		ctx.mousePathOverlay &&
+		"PlayerController::handle_mouse_path: called without a mousePathOverlay");
+	assert(
+		ctx.map && "PlayerController::handle_mouse_path: called without a map");
 
 	if (mouseMode == MouseMode::IDLE)
 	{
@@ -859,7 +1010,9 @@ bool PlayerController::handle_mouse_path(GameContext& ctx)
 		return false;
 	}
 
-	while (!ctx.mousePathOverlay->empty() && ctx.mousePathOverlay->front() == playerOwner.position)
+	while (
+		!ctx.mousePathOverlay->empty() &&
+		ctx.mousePathOverlay->front() == playerOwner.position)
 	{
 		ctx.mousePathOverlay->erase(ctx.mousePathOverlay->begin());
 	}
@@ -873,7 +1026,8 @@ bool PlayerController::handle_mouse_path(GameContext& ctx)
 
 	Vector2D next = ctx.mousePathOverlay->front();
 	Vector2D prevPos = playerOwner.position;
-	const bool isShutDoorAhead = ctx.map->get_tile_type(next) == TileType::CLOSED_DOOR;
+	const bool isShutDoorAhead =
+		ctx.map->get_tile_type(next) == TileType::CLOSED_DOOR;
 	look_to_move(next, ctx);
 	look_to_attack(next, ctx);
 	look_on_floor(next, ctx);
@@ -886,7 +1040,8 @@ bool PlayerController::handle_mouse_path(GameContext& ctx)
 
 	// A door the route runs through is opened on one turn and walked on the next, so
 	// standing still after opening it is progress rather than an obstacle.
-	const bool isDoorOpenedOnTheWay = isShutDoorAhead && ctx.map->is_open_door(next);
+	const bool isDoorOpenedOnTheWay =
+		isShutDoorAhead && ctx.map->is_open_door(next);
 	if (playerOwner.position == prevPos && !isDoorOpenedOnTheWay)
 	{
 		ctx.mousePathOverlay->clear();
@@ -909,9 +1064,14 @@ bool PlayerController::handle_mouse_path(GameContext& ctx)
 
 void PlayerController::handle_left_click(GameContext& ctx)
 {
-	assert(ctx.levelManager && "PlayerController::handle_left_click: called without a levelManager");
-	assert(ctx.floorInventory && "PlayerController::handle_left_click: called without a floorInventory");
-	assert(ctx.map && "PlayerController::handle_left_click: called without a map");
+	assert(
+		ctx.levelManager &&
+		"PlayerController::handle_left_click: called without a levelManager");
+	assert(
+		ctx.floorInventory &&
+		"PlayerController::handle_left_click: called without a floorInventory");
+	assert(
+		ctx.map && "PlayerController::handle_left_click: called without a map");
 
 	Vector2D world_tile;
 	if (!resolve_mouse_world_tile(ctx, world_tile))
@@ -921,7 +1081,9 @@ void PlayerController::handle_left_click(GameContext& ctx)
 
 	if (world_tile == playerOwner.position)
 	{
-		assert(ctx.stairs && "PlayerController::handle_left_click: a click on the player came without stairs");
+		assert(
+			ctx.stairs &&
+			"PlayerController::handle_left_click: a click on the player came without stairs");
 		if (ctx.stairs->position == playerOwner.position)
 		{
 			ctx.levelManager->advance_to_next_level(ctx);
@@ -949,7 +1111,9 @@ void PlayerController::handle_left_click(GameContext& ctx)
 	}
 
 	MouseMode mode = MouseMode::WALK;
-	assert(ctx.stairs && "PlayerController::handle_left_click: a click away from the player came without stairs");
+	assert(
+		ctx.stairs &&
+		"PlayerController::handle_left_click: a click away from the player came without stairs");
 	if (ctx.stairs->position == world_tile)
 	{
 		mode = MouseMode::WALK_TO_STAIRS;
@@ -958,7 +1122,9 @@ void PlayerController::handle_left_click(GameContext& ctx)
 	{
 		for (const auto& item : ctx.floorInventory->items)
 		{
-			assert(item && "handle_left_click: the floor holds a null where an item should be");
+			assert(
+				item &&
+				"handle_left_click: the floor holds a null where an item should be");
 
 			if (item->position == world_tile)
 			{
@@ -972,8 +1138,12 @@ void PlayerController::handle_left_click(GameContext& ctx)
 
 void PlayerController::handle_right_click(GameContext& ctx)
 {
-	assert(ctx.floorInventory && "PlayerController::handle_right_click: called without a floorInventory");
-	assert(ctx.map && "PlayerController::handle_right_click: called without a map");
+	assert(
+		ctx.floorInventory &&
+		"PlayerController::handle_right_click: called without a floorInventory");
+	assert(
+		ctx.map &&
+		"PlayerController::handle_right_click: called without a map");
 
 	Vector2D world_tile;
 	if (!resolve_mouse_world_tile(ctx, world_tile))
@@ -984,8 +1154,10 @@ void PlayerController::handle_right_click(GameContext& ctx)
 	int tileSize = ctx.renderer->get_tile_size();
 	// The screen column is the drawn position divided down, as the tile renderer does;
 	// the camera is not tile-aligned, so dividing it separately is off by one.
-	int anchor_col = (world_tile.x * tileSize - ctx.renderer->get_camera_x()) / tileSize;
-	int anchor_row = (world_tile.y * tileSize - ctx.renderer->get_camera_y()) / tileSize;
+	int anchor_col =
+		(world_tile.x * tileSize - ctx.renderer->get_camera_x()) / tileSize;
+	int anchor_row =
+		(world_tile.y * tileSize - ctx.renderer->get_camera_y()) / tileSize;
 
 	std::vector<ContextAction> actions;
 
@@ -999,7 +1171,9 @@ void PlayerController::handle_right_click(GameContext& ctx)
 		};
 		const auto open_character_sheet = [this](GameContext& actionCtx)
 		{
-			actionCtx.displayManager->display_character_sheet(playerOwner, actionCtx);
+			actionCtx.displayManager->display_character_sheet(
+				playerOwner,
+				actionCtx);
 		};
 		const auto rest_here = [this](GameContext& actionCtx)
 		{
@@ -1021,7 +1195,9 @@ void PlayerController::handle_right_click(GameContext& ctx)
 	// Floor item at tile
 	for (auto& item : ctx.floorInventory->items)
 	{
-		assert(item && "handle_right_click: the floor holds a null where an item should be");
+		assert(
+			item &&
+			"handle_right_click: the floor holds a null where an item should be");
 
 		if (item->position == world_tile)
 		{
@@ -1037,16 +1213,20 @@ void PlayerController::handle_right_click(GameContext& ctx)
 	if (hasDoor)
 	{
 		bool doorIsOpen = ctx.map->is_open_door(world_tile);
-		PendingDoorAction doorAction = doorIsOpen ? PendingDoorAction::CLOSE : PendingDoorAction::OPEN;
+		PendingDoorAction doorAction =
+			doorIsOpen ? PendingDoorAction::CLOSE : PendingDoorAction::OPEN;
 		std::string doorLabel = doorIsOpen ? "Close door" : "Open door";
 
 		// Beside the door it is worked at once; further off, the player walks up to it first.
-		const auto work_the_door = work_the_door_command(world_tile, doorAction);
+		const auto work_the_door =
+			work_the_door_command(world_tile, doorAction);
 		actions.push_back({ doorLabel, work_the_door });
 	}
 
 	// Stairs at tile
-	assert(ctx.stairs && "PlayerController::handle_right_click: called without stairs");
+	assert(
+		ctx.stairs &&
+		"PlayerController::handle_right_click: called without stairs");
 	if (ctx.stairs->position == world_tile)
 	{
 		const auto walk_to_stairs = [this, world_tile](GameContext& actionCtx)
@@ -1067,7 +1247,8 @@ void PlayerController::handle_right_click(GameContext& ctx)
 	{
 		if (playerOwner.position.chebyshev_distance_to(world_tile) <= 1)
 		{
-			const std::string monsterName = creature->actorData.name.substr(0, 16);
+			const std::string monsterName =
+				creature->actorData.name.substr(0, 16);
 			const auto attack_it = [this, world_tile](GameContext& actionCtx)
 			{
 				Vector2D target = world_tile;
@@ -1080,7 +1261,8 @@ void PlayerController::handle_right_click(GameContext& ctx)
 	}
 
 	// Walk here -- any non-player walkable tile with no creature
-	if (!isPlayerTile && Pathfinding::can_enter(playerOwner, world_tile, ctx) && creature == nullptr)
+	if (!isPlayerTile && Pathfinding::can_enter(playerOwner, world_tile, ctx) &&
+		creature == nullptr)
 	{
 		const auto walk_here = [this, world_tile](GameContext& actionCtx)
 		{
@@ -1112,7 +1294,8 @@ void PlayerController::handle_right_click(GameContext& ctx)
 		labels.push_back(action.label);
 	}
 
-	auto on_select = [actions = std::move(actions)](int selected, GameContext& selectCtx)
+	auto on_select =
+		[actions = std::move(actions)](int selected, GameContext& selectCtx)
 	{
 		if (selected >= 0 && selected < static_cast<int>(actions.size()))
 		{
@@ -1120,11 +1303,17 @@ void PlayerController::handle_right_click(GameContext& ctx)
 		}
 	};
 
-	ctx.menus->push_back(std::make_unique<ContextMenu>(
-		std::move(labels), anchor_col, anchor_row, std::move(on_select), ctx));
+	ctx.menus->push_back(
+		std::make_unique<ContextMenu>(
+			std::move(labels),
+			anchor_col,
+			anchor_row,
+			std::move(on_select),
+			ctx));
 }
 
-std::function<void(GameContext&)> PlayerController::walk_to_pick_up_command(Vector2D worldTile)
+std::function<void(GameContext&)> PlayerController::walk_to_pick_up_command(
+	Vector2D worldTile)
 {
 	return [this, worldTile](GameContext& actionCtx)
 	{
@@ -1160,7 +1349,12 @@ std::function<void(GameContext&)> PlayerController::work_the_door_command(
 			const Vector2D approach = find_door_approach(worldTile, actionCtx);
 			if (approach.x != -1)
 			{
-				begin_path_walk(approach, worldTile, MouseMode::WALK_TO_DOOR, doorAction, actionCtx);
+				begin_path_walk(
+					approach,
+					worldTile,
+					MouseMode::WALK_TO_DOOR,
+					doorAction,
+					actionCtx);
 			}
 		}
 	};
@@ -1168,13 +1362,26 @@ std::function<void(GameContext&)> PlayerController::work_the_door_command(
 
 void PlayerController::call_action(Controls key, GameContext& ctx)
 {
-	assert(ctx.dataManager && "PlayerController::call_action: called without a dataManager");
-	assert(ctx.costOverlay && "PlayerController::call_action: called without a costOverlay");
-	assert(ctx.displayManager && "PlayerController::call_action: called without a displayManager");
-	assert(ctx.stairs && "PlayerController::call_action: called without stairs");
-	assert(ctx.targeting && "PlayerController::call_action: called without a targeting");
-	assert(ctx.levelManager && "PlayerController::call_action: called without a levelManager");
-	assert(ctx.creatureManager && "PlayerController::call_action: called without a creatureManager");
+	assert(
+		ctx.dataManager &&
+		"PlayerController::call_action: called without a dataManager");
+	assert(
+		ctx.costOverlay &&
+		"PlayerController::call_action: called without a costOverlay");
+	assert(
+		ctx.displayManager &&
+		"PlayerController::call_action: called without a displayManager");
+	assert(
+		ctx.stairs && "PlayerController::call_action: called without stairs");
+	assert(
+		ctx.targeting &&
+		"PlayerController::call_action: called without a targeting");
+	assert(
+		ctx.levelManager &&
+		"PlayerController::call_action: called without a levelManager");
+	assert(
+		ctx.creatureManager &&
+		"PlayerController::call_action: called without a creatureManager");
 	assert(ctx.map && "PlayerController::call_action: called without a map");
 
 	switch (key)
@@ -1220,14 +1427,21 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 
 	case Controls::USE:
 	{
-		ctx.menus->push_back(std::make_unique<InventoryUI>(playerOwner, InventoryScreen::USABLES, ctx));
+		ctx.menus->push_back(
+			std::make_unique<InventoryUI>(
+				playerOwner,
+				InventoryScreen::USABLES,
+				ctx));
 		break;
 	}
 
 	case Controls::QUIT:
 	{
 		ctx.gameState->set_run(false);
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You quit the game ! Press any key ...", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"You quit the game ! Press any key ...",
+			MessageCompletion::FINISHED);
 		break;
 	}
 
@@ -1288,32 +1502,44 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 	{
 		ItemFactory::spawn_all_enhanced_items_debug(playerOwner.position, ctx);
 		// Weight-gated: an overloaded player is refused and told, since a debug key must not abort.
-		const auto debugSpawnBowResult = InventoryOperations::add_item_to_inventory(
-			playerOwner.inventoryData,
-			ItemCreator::create("long_bow", playerOwner.position, ctx),
-			playerOwner,
-			*ctx.dataManager);
+		const auto debugSpawnBowResult =
+			InventoryOperations::add_item_to_inventory(
+				playerOwner.inventoryData,
+				ItemCreator::create("long_bow", playerOwner.position, ctx),
+				playerOwner,
+				*ctx.dataManager);
 		if (debugSpawnBowResult.has_value())
 		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "DEBUG: Long bow added to inventory.", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"DEBUG: Long bow added to inventory.",
+				MessageCompletion::FINISHED);
 		}
 		else
 		{
 			// The reason comes from the error the add already produced, so the message
 			// cannot drift from what actually refused it.
-			const std::string refusal = (debugSpawnBowResult.error() == InventoryError::FULL)
-				? "the pack is full"
-				: "it is too heavy to carry";
-			ctx.messageSystem->message(ColorPairId::WHITE_RED, "DEBUG: the long bow was refused - " + refusal + ".", MessageCompletion::FINISHED);
+			const std::string refusal =
+				(debugSpawnBowResult.error() == InventoryError::FULL) ?
+				"the pack is full" :
+				"it is too heavy to carry";
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_RED,
+				"DEBUG: the long bow was refused - " + refusal + ".",
+				MessageCompletion::FINISHED);
 		}
 
-		std::vector<std::string>& memorized = playerOwner.spellcasting.memorizedSpells;
+		std::vector<std::string>& memorized =
+			playerOwner.spellcasting.memorizedSpells;
 		memorized.push_back("magic_missile");
 		memorized.push_back("magic_missile");
 		memorized.push_back("sleep");
 		memorized.push_back("web");
 		memorized.push_back("teleport");
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "DEBUG: Spells added -- press Shift+C to cast.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"DEBUG: Spells added -- press Shift+C to cast.",
+			MessageCompletion::FINISHED);
 
 		// Spawn a shopkeeper on the first walkable adjacent tile, and say so when all four are wall.
 		const std::array<Vector2D, 4> cardinals{
@@ -1328,15 +1554,26 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 			Vector2D spawnPos = playerOwner.position + offset;
 			if (ctx.map->can_place_at(spawnPos, ctx))
 			{
-				ctx.creatureManager->add_creature(MonsterCreator::create(spawnPos, MonsterId::SHOPKEEPER, ctx), ctx);
-				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "DEBUG: Shopkeeper spawned.", MessageCompletion::FINISHED);
+				ctx.creatureManager->add_creature(
+					MonsterCreator::create(
+						spawnPos,
+						MonsterId::SHOPKEEPER,
+						ctx),
+					ctx);
+				ctx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					"DEBUG: Shopkeeper spawned.",
+					MessageCompletion::FINISHED);
 				shopkeeperSpawned = true;
 				break;
 			}
 		}
 		if (!shopkeeperSpawned)
 		{
-			ctx.messageSystem->message(ColorPairId::WHITE_RED, "DEBUG: no walkable tile beside the player to spawn a shopkeeper on.", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_RED,
+				"DEBUG: no walkable tile beside the player to spawn a shopkeeper on.",
+				MessageCompletion::FINISHED);
 		}
 		break;
 	}
@@ -1350,21 +1587,30 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 
 	case Controls::OPEN_DOOR:
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Which direction? (use arrow keys)", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"Which direction? (use arrow keys)",
+			MessageCompletion::FINISHED);
 		pendingDoorAction = PendingDoorAction::OPEN;
 		break;
 	}
 
 	case Controls::CLOSE_DOOR:
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Which direction? (use arrow keys)", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"Which direction? (use arrow keys)",
+			MessageCompletion::FINISHED);
 		pendingDoorAction = PendingDoorAction::CLOSE;
 		break;
 	}
 
 	case Controls::DISARM:
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Which direction? (use arrow keys)", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"Which direction? (use arrow keys)",
+			MessageCompletion::FINISHED);
 		pendingDoorAction = PendingDoorAction::DISARM;
 		break;
 	}
@@ -1373,7 +1619,8 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 	{
 		// A character who cannot look for traps is told so and loses no time; a search
 		// costs every round it took.
-		const std::optional<int> rounds = TrapSearch::search_around(playerOwner, ctx);
+		const std::optional<int> rounds =
+			TrapSearch::search_around(playerOwner, ctx);
 		if (rounds.has_value())
 		{
 			spend_player_action(ctx, rounds.value() * TIME_UNITS_PER_ROUND);
@@ -1425,8 +1672,12 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 
 bool PlayerController::resolve_pending_door(GameContext& ctx)
 {
-	assert(ctx.inputHandler && "PlayerController::resolve_pending_door: called without an inputHandler");
-	assert(ctx.map && "PlayerController::resolve_pending_door: called without a map");
+	assert(
+		ctx.inputHandler &&
+		"PlayerController::resolve_pending_door: called without an inputHandler");
+	assert(
+		ctx.map &&
+		"PlayerController::resolve_pending_door: called without a map");
 
 	if (pendingDoorAction == PendingDoorAction::NONE)
 	{
@@ -1436,7 +1687,10 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 	int dirKey = ctx.inputHandler->get_current_key();
 	if (dirKey == 27)
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Cancelled.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"Cancelled.",
+			MessageCompletion::FINISHED);
 		pendingDoorAction = PendingDoorAction::NONE;
 		return true;
 	}
@@ -1448,7 +1702,10 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 	Vector2D doorPos = handle_direction_input(dirKey, ctx);
 	if (doorPos.x == 0 && doorPos.y == 0)
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Invalid direction.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"Invalid direction.",
+			MessageCompletion::FINISHED);
 		pendingDoorAction = PendingDoorAction::NONE;
 		return true;
 	}
@@ -1457,7 +1714,8 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 	// check rather than refused by it.
 	if (pendingDoorAction == PendingDoorAction::DISARM)
 	{
-		const std::optional<int> rounds = TrapDisarm::disarm_at(playerOwner, doorPos, ctx);
+		const std::optional<int> rounds =
+			TrapDisarm::disarm_at(playerOwner, doorPos, ctx);
 		if (rounds.has_value())
 		{
 			spend_player_action(ctx, rounds.value() * TIME_UNITS_PER_ROUND);
@@ -1468,7 +1726,10 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 
 	if (!ctx.map->is_door(doorPos))
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "There is no door there.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"There is no door there.",
+			MessageCompletion::FINISHED);
 		pendingDoorAction = PendingDoorAction::NONE;
 		return true;
 	}
@@ -1479,12 +1740,18 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 		{
 			if (ctx.map->open_door(doorPos, ctx))
 			{
-				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You open the door.", MessageCompletion::FINISHED);
+				ctx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					"You open the door.",
+					MessageCompletion::FINISHED);
 				spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 			}
 			else
 			{
-				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "The door is already open.", MessageCompletion::FINISHED);
+				ctx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					"The door is already open.",
+					MessageCompletion::FINISHED);
 			}
 		}
 		else
@@ -1496,16 +1763,25 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 	{
 		if (ctx.map->close_door(doorPos, ctx))
 		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You close the door.", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"You close the door.",
+				MessageCompletion::FINISHED);
 			spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 		}
 		else if (ctx.map->get_actor(doorPos, ctx) != nullptr)
 		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Something is blocking the door.", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"Something is blocking the door.",
+				MessageCompletion::FINISHED);
 		}
 		else
 		{
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "The door is already closed.", MessageCompletion::FINISHED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"The door is already closed.",
+				MessageCompletion::FINISHED);
 		}
 	}
 
@@ -1515,7 +1791,9 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 
 Vector2D PlayerController::handle_direction_input(int dirKey, GameContext& ctx)
 {
-	assert(ctx.map && "PlayerController::handle_direction_input: called without a map");
+	assert(
+		ctx.map &&
+		"PlayerController::handle_direction_input: called without a map");
 
 	const auto& moves = direction_map();
 	const auto controlKey = static_cast<Controls>(dirKey);

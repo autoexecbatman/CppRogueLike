@@ -45,14 +45,14 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tInventoryOperations::add_item(*ctx.floorInventory, std::move(equipped.item));\n",
+      "original": "\t\tInventoryOperations::add_item(\n\t\t\t*ctx.floorInventory,\n\t\t\tstd::move(equipped.item));\n",
       "mutated": "",
       "catches": "a monster's worn gear destroyed with it, the defect issue 0070 closed"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tInventoryOperations::add_item(*ctx.floorInventory, std::move(equipped.item));\n\t}\n\tequippedItems.clear();\n",
-      "mutated": "\t\tInventoryOperations::add_item(*ctx.floorInventory, std::move(equipped.item));\n\t}\n",
+      "original": "\t\tInventoryOperations::add_item(\n\t\t\t*ctx.floorInventory,\n\t\t\tstd::move(equipped.item));\n\t}\n\tequippedItems.clear();\n",
+      "mutated": "\t\tInventoryOperations::add_item(\n\t\t\t*ctx.floorInventory,\n\t\t\tstd::move(equipped.item));\n\t}\n",
       "catches": "a dead creature still wearing the gear it dropped"
     },
     {

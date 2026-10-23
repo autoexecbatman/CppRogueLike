@@ -37,17 +37,17 @@ protected:
 
 	void SetUp() override
 	{
-		damaged = std::filesystem::temp_directory_path() / "enhanced_rules_damaged.json";
+		damaged = std::filesystem::temp_directory_path() /
+			"enhanced_rules_damaged.json";
 	}
 
-	void TearDown() override
-	{
-		std::filesystem::remove(damaged);
-	}
+	void TearDown() override { std::filesystem::remove(damaged); }
 
 	// Writes the real rules to the temporary path with one edit applied to the first
 	// record, and returns what loading it threw.
-	std::string load_with_first_rule(const std::string& field, const nlohmann::json& value)
+	std::string load_with_first_rule(
+		const std::string& field,
+		const nlohmann::json& value)
 	{
 		std::ifstream source(Paths::resolve(Paths::ENHANCED_RULES));
 		EXPECT_TRUE(source.is_open()) << "cannot read the real enhanced rules";
@@ -74,7 +74,9 @@ protected:
 		{
 			return refusal.what();
 		}
-		ADD_FAILURE() << std::format("loading a rule with {} damaged threw nothing", field);
+		ADD_FAILURE() << std::format(
+			"loading a rule with {} damaged threw nothing",
+			field);
 		return {};
 	}
 };
@@ -90,8 +92,11 @@ TEST_F(EnhancedRulesLoadTest, AFileThatWillNotOpenIsRefused)
 	}
 	catch (const std::runtime_error& refusal)
 	{
-		EXPECT_NE(std::string(refusal.what()).find("no_such_rules.json"), std::string::npos)
-			<< "the refusal must name the path it could not open: " << refusal.what();
+		EXPECT_NE(
+			std::string(refusal.what()).find("no_such_rules.json"),
+			std::string::npos)
+			<< "the refusal must name the path it could not open: "
+			<< refusal.what();
 	}
 }
 
@@ -99,7 +104,8 @@ TEST_F(EnhancedRulesLoadTest, AnUnknownEnhancementCategoryIsRefused)
 {
 	// The old ternary read "weapon" and called everything else ARMOR, so a typo became
 	// a silently different rule rather than an error.
-	const std::string refusal = load_with_first_rule("enhancement_category", "wepaon");
+	const std::string refusal =
+		load_with_first_rule("enhancement_category", "wepaon");
 
 	EXPECT_NE(refusal.find("wepaon"), std::string::npos)
 		<< "the refusal must name the value it did not recognise: " << refusal;
@@ -108,9 +114,11 @@ TEST_F(EnhancedRulesLoadTest, AnUnknownEnhancementCategoryIsRefused)
 TEST_F(EnhancedRulesLoadTest, ARuleMissingAFieldIsRefused)
 {
 	// level_maximum was the one field read with a default, and every record carries it.
-	const std::string refusal = load_with_first_rule("level_maximum", nlohmann::json{});
+	const std::string refusal =
+		load_with_first_rule("level_maximum", nlohmann::json{});
 
-	EXPECT_FALSE(refusal.empty()) << "a rule missing level_maximum must be refused";
+	EXPECT_FALSE(refusal.empty())
+		<< "a rule missing level_maximum must be refused";
 }
 
 TEST_F(EnhancedRulesLoadTest, TheRealFileLoadsWithoutThrowing)
@@ -132,7 +140,10 @@ TEST_F(EnhancedRulesLoadTest, AMissingItemFileIsRefused)
 	}
 	catch (const std::runtime_error& refusal)
 	{
-		EXPECT_NE(std::string(refusal.what()).find("no_such_items.json"), std::string::npos)
-			<< "the refusal must name the path it could not open: " << refusal.what();
+		EXPECT_NE(
+			std::string(refusal.what()).find("no_such_items.json"),
+			std::string::npos)
+			<< "the refusal must name the path it could not open: "
+			<< refusal.what();
 	}
 }

@@ -82,7 +82,8 @@ TEST_F(SpellFailureTest, WisdomThirteenAndAboveNeverFizzles)
 	for (const int wisdom : { 13, 14, 16, 18 })
 	{
 		priest.set_wisdom(wisdom);
-		EXPECT_EQ(SpellSystem::spell_failure_chance(priest, dataManager), 0) << "Wisdom " << wisdom;
+		EXPECT_EQ(SpellSystem::spell_failure_chance(priest, dataManager), 0)
+			<< "Wisdom " << wisdom;
 	}
 }
 
@@ -139,7 +140,12 @@ TEST_F(SpellFailureTest, AFizzledSpellIsSpentAndDoesNothing)
 	// 20 is at the chance, so it fizzles; cure light wounds would otherwise heal 1d8
 	// and its die is left unscripted, so a spell that landed would roll a real one.
 	mock.dice.set_next_roll(20);
-	SpellSystem::cast_spell_by_key("cure_light_wounds", priest, SpellSource::MEMORIZED, onCastComplete, ctx);
+	SpellSystem::cast_spell_by_key(
+		"cure_light_wounds",
+		priest,
+		SpellSource::MEMORIZED,
+		onCastComplete,
+		ctx);
 
 	EXPECT_TRUE(spent) << "the spell is expended even though it did nothing";
 	EXPECT_EQ(priest.get_hp(), 10) << "and it healed nothing";
@@ -160,7 +166,12 @@ TEST_F(SpellFailureTest, ASpellThatDoesNotFizzleLands)
 	// 21 is past the chance, then the healing die.
 	mock.dice.set_next_roll(21);
 	mock.dice.set_next_roll(5);
-	SpellSystem::cast_spell_by_key("cure_light_wounds", priest, SpellSource::MEMORIZED, onCastComplete, ctx);
+	SpellSystem::cast_spell_by_key(
+		"cure_light_wounds",
+		priest,
+		SpellSource::MEMORIZED,
+		onCastComplete,
+		ctx);
 
 	EXPECT_TRUE(spent);
 	EXPECT_EQ(priest.get_hp(), 15) << "1d8 showing five";
@@ -182,7 +193,12 @@ TEST_F(SpellFailureTest, AnItemsSpellDoesNotFizzle)
 	// A 1 would fizzle any memorised casting; here it is the healing die instead,
 	// because the item's spell never asks whether the priest's Wisdom failed it.
 	mock.dice.set_next_roll(1);
-	SpellSystem::cast_spell_by_key("cure_light_wounds", priest, SpellSource::ITEM, onCastComplete, ctx);
+	SpellSystem::cast_spell_by_key(
+		"cure_light_wounds",
+		priest,
+		SpellSource::ITEM,
+		onCastComplete,
+		ctx);
 
 	EXPECT_TRUE(spent);
 	EXPECT_EQ(priest.get_hp(), 11) << "1d8 showing one";

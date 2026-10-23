@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "\tconst int adjustment = dataManager.constitution_hit_point_adjustment(constitution, creatureClass);",
+      "original": "\tconst int adjustment = dataManager.constitution_hit_point_adjustment(\n\t\tconstitution,\n\t\tcreatureClass);",
       "mutated": "\tconst int adjustment = dataManager.constitution_for(constitution).HPAdj;",
       "catches": "the warrior column read for every class again"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "\tconst int adjustment = dataManager.constitution_hit_point_adjustment(constitution, creatureClass);",
-      "mutated": "\tconst int adjustment = dataManager.constitution_hit_point_adjustment(constitution, CreatureClass::WIZARD);",
+      "original": "\tconst int adjustment = dataManager.constitution_hit_point_adjustment(\n\t\tconstitution,\n\t\tcreatureClass);",
+      "mutated": "\tconst int adjustment = dataManager.constitution_hit_point_adjustment(\n\t\tconstitution,CreatureClass::WIZARD);",
       "catches": "the die asking for a class other than its owner's"
     },
     {

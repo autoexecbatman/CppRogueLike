@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/MonsterCreator.cpp",
-      "original": "\troll_monster_ability_scores(*creature, params.size, params.intelligence, params.strength, *ctx.dice);",
-      "mutated": "\troll_monster_ability_scores(*creature, CreatureSize::MEDIUM, params.intelligence, params.strength, *ctx.dice);",
+      "original": "\troll_monster_ability_scores(\n\t\t*creature,\n\t\tparams.size,\n\t\tparams.intelligence,\n\t\tparams.strength,\n\t\t*ctx.dice);",
+      "mutated": "\troll_monster_ability_scores(\n\t\t*creature,CreatureSize::MEDIUM,\n\t\tparams.intelligence,\n\t\tparams.strength,\n\t\t*ctx.dice);",
       "catches": "a monster's size ignored, every one read in the man-sized column"
     },
     {
       "file": "src/MonsterAbilityTables.h",
-      "original": "\tconst auto row = static_cast<std::size_t>(roll - MONSTER_ABILITY_ROLL_MINIMUM);",
-      "mutated": "\tconst auto row = static_cast<std::size_t>(roll - MONSTER_ABILITY_ROLL_MINIMUM) + 1;",
+      "original": "\tconst auto row =\n\t\tstatic_cast<std::size_t>(roll - MONSTER_ABILITY_ROLL_MINIMUM);",
+      "mutated": "\tconst auto row =\n\t\tstatic_cast<std::size_t>(roll - MONSTER_ABILITY_ROLL_MINIMUM) + 1;",
       "catches": "the table read one row low"
     },
     {

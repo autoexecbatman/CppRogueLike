@@ -37,9 +37,12 @@ protected:
 		bodyPlans.load("data/content/body_plans.json");
 	}
 
-	static const MonsterParams::StartingItem* find_slot(const MonsterParams& params, EquipmentSlot slot)
+	static const MonsterParams::StartingItem* find_slot(
+		const MonsterParams& params,
+		EquipmentSlot slot)
 	{
-		auto match = std::ranges::find_if(params.equipment,
+		auto match = std::ranges::find_if(
+			params.equipment,
 			[slot](const MonsterParams::StartingItem& entry)
 			{ return entry.slot == slot; });
 		return match == params.equipment.end() ? nullptr : &*match;
@@ -52,7 +55,8 @@ TEST_F(MonsterEquipmentTest, WieldingMonsterCarriesAnItemKey)
 {
 	const MonsterParams& orc = monsters.get_params("orc");
 
-	const MonsterParams::StartingItem* mainHand = find_slot(orc, EquipmentSlot::RIGHT_HAND);
+	const MonsterParams::StartingItem* mainHand =
+		find_slot(orc, EquipmentSlot::RIGHT_HAND);
 	ASSERT_NE(mainHand, nullptr);
 	EXPECT_EQ(mainHand->itemKey, "long_sword");
 	EXPECT_TRUE(orc.naturalAttack.empty());
@@ -77,8 +81,9 @@ TEST_F(MonsterEquipmentTest, MisspelledWeaponsResolveToRealKeys)
 	ASSERT_NE(bow, nullptr);
 	EXPECT_EQ(bow->itemKey, "long_bow");
 
-	const MonsterParams::StartingItem* blade =
-		find_slot(monsters.get_params("dungeon_warden"), EquipmentSlot::RIGHT_HAND);
+	const MonsterParams::StartingItem* blade = find_slot(
+		monsters.get_params("dungeon_warden"),
+		EquipmentSlot::RIGHT_HAND);
 	ASSERT_NE(blade, nullptr);
 	EXPECT_EQ(blade->itemKey, "long_sword");
 }
@@ -88,7 +93,9 @@ TEST_F(MonsterEquipmentTest, MisspelledWeaponsResolveToRealKeys)
 TEST_F(MonsterEquipmentTest, EveryStartingItemKeyIsKnown)
 {
 	const std::vector<std::string> allItemKeys = items.get_all_keys();
-	const std::set<std::string> knownItemKeys(allItemKeys.begin(), allItemKeys.end());
+	const std::set<std::string> knownItemKeys(
+		allItemKeys.begin(),
+		allItemKeys.end());
 
 	for (const std::string& key : monsters.get_all_keys())
 	{
@@ -110,11 +117,16 @@ TEST_F(MonsterEquipmentTest, BodyPlanCoversEveryCarriedSlot)
 	for (const std::string& key : monsters.get_all_keys())
 	{
 		const MonsterParams& params = monsters.get_params(key);
-		const std::vector<EquipmentSlot>& plan = bodyPlans.get(params.bodyPlanName);
+		const std::vector<EquipmentSlot>& plan =
+			bodyPlans.get(params.bodyPlanName);
 		for (const MonsterParams::StartingItem& carried : params.equipment)
 		{
-			const bool planned = std::ranges::find(plan, carried.slot) != plan.end();
-			EXPECT_TRUE(planned) << std::format("{} carries {} in a slot its body does not have", key, carried.itemKey);
+			const bool planned =
+				std::ranges::find(plan, carried.slot) != plan.end();
+			EXPECT_TRUE(planned) << std::format(
+				"{} carries {} in a slot its body does not have",
+				key,
+				carried.itemKey);
 		}
 	}
 }
@@ -122,8 +134,10 @@ TEST_F(MonsterEquipmentTest, BodyPlanCoversEveryCarriedSlot)
 // The wolf wears nothing, and nothing in the data pretends otherwise.
 TEST_F(MonsterEquipmentTest, BeastHasNoSlots)
 {
-	EXPECT_TRUE(bodyPlans.get(monsters.get_params("wolf").bodyPlanName).empty());
-	EXPECT_FALSE(bodyPlans.get(monsters.get_params("orc").bodyPlanName).empty());
+	EXPECT_TRUE(
+		bodyPlans.get(monsters.get_params("wolf").bodyPlanName).empty());
+	EXPECT_FALSE(
+		bodyPlans.get(monsters.get_params("orc").bodyPlanName).empty());
 }
 
 // Eleven monsters share one humanoid body rather than eleven copies of the
@@ -170,24 +184,34 @@ TEST_F(MonsterEquipmentTest, AMonsterWithNoBodyIsRefused)
 // animals have neither.
 TEST_F(MonsterEquipmentTest, ClawedCreaturesHaveHandsAndBeastsDoNot)
 {
-	for (const std::string_view handed : {
-			 "troll",
-			 "ghoul",
-			 "wight",
-			 "shadow",
-			 "wraith",
-			 "gargoyle",
-			 "pit_fiend",
-			 "golem_stone",
-		 })
+	for (
+		const std::string_view handed : {
+			"troll",
+			"ghoul",
+			"wight",
+			"shadow",
+			"wraith",
+			"gargoyle",
+			"pit_fiend",
+			"golem_stone",
+		})
 	{
-		const std::vector<EquipmentSlot>& plan = bodyPlans.get(monsters.get_params(handed).bodyPlanName);
-		EXPECT_NE(std::ranges::find(plan, EquipmentSlot::RIGHT_HAND), plan.end()) << handed << " has no hands";
-		EXPECT_EQ(std::ranges::find(plan, EquipmentSlot::BODY), plan.end()) << handed << " has a wardrobe";
+		const std::vector<EquipmentSlot>& plan =
+			bodyPlans.get(monsters.get_params(handed).bodyPlanName);
+		EXPECT_NE(
+			std::ranges::find(plan, EquipmentSlot::RIGHT_HAND),
+			plan.end())
+			<< handed << " has no hands";
+		EXPECT_EQ(std::ranges::find(plan, EquipmentSlot::BODY), plan.end())
+			<< handed << " has a wardrobe";
 	}
-	for (const std::string_view beast : { "wolf", "rat", "giant_snake", "bat", "dragon" })
+	for (
+		const std::string_view beast :
+		{ "wolf", "rat", "giant_snake", "bat", "dragon" })
 	{
-		EXPECT_TRUE(bodyPlans.get(monsters.get_params(beast).bodyPlanName).empty()) << beast << " has slots";
+		EXPECT_TRUE(
+			bodyPlans.get(monsters.get_params(beast).bodyPlanName).empty())
+			<< beast << " has slots";
 	}
 }
 
@@ -195,8 +219,12 @@ TEST_F(MonsterEquipmentTest, ClawedCreaturesHaveHandsAndBeastsDoNot)
 // simply wears nothing.
 TEST_F(MonsterEquipmentTest, UnknownBodyTemplateIsRefused)
 {
-	EXPECT_THROW([[maybe_unused]] const auto& misspelled = bodyPlans.get("humaniod"), std::runtime_error);
-	EXPECT_THROW([[maybe_unused]] const auto& unnamed = bodyPlans.get(""), std::runtime_error);
+	EXPECT_THROW(
+		[[maybe_unused]] const auto& misspelled = bodyPlans.get("humaniod"),
+		std::runtime_error);
+	EXPECT_THROW(
+		[[maybe_unused]] const auto& unnamed = bodyPlans.get(""),
+		std::runtime_error);
 }
 
 // The saver rebuilds the file from scratch, so anything it does not write is
@@ -241,7 +269,8 @@ TEST_F(MonsterEquipmentTest, MedusaHasNoHeadSlot)
 // so it has hands and no wardrobe.
 TEST_F(MonsterEquipmentTest, StoneGolemHasHandsAndWearsNothing)
 {
-	const std::vector<EquipmentSlot>& plan = bodyPlans.get(monsters.get_params("golem_stone").bodyPlanName);
+	const std::vector<EquipmentSlot>& plan =
+		bodyPlans.get(monsters.get_params("golem_stone").bodyPlanName);
 
 	EXPECT_EQ(plan.size(), 2u);
 	EXPECT_NE(std::ranges::find(plan, EquipmentSlot::LEFT_HAND), plan.end());

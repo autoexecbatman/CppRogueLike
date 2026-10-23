@@ -53,18 +53,26 @@ TEST(StartupStepsTest, EveryStepRunsInOrderAndNothingIsRefused)
 	const std::optional<StartupRefusal> refusal = run_startup_steps(steps, log);
 
 	EXPECT_FALSE(refusal.has_value());
-	EXPECT_EQ(order.names, (std::vector<std::string>{ "first", "second", "third" }));
+	EXPECT_EQ(
+		order.names,
+		(std::vector<std::string>{ "first", "second", "third" }));
 }
 
 TEST(StartupStepsTest, EachStepIsLoggedByNameBeforeItRuns)
 {
 	RunOrder order{};
-	const std::vector<StartupStep> steps{ recording_step("Loading tile config", order), recording_step("Loading spells", order) };
+	const std::vector<StartupStep> steps{
+		recording_step("Loading tile config", order),
+		recording_step("Loading spells", order)
+	};
 	std::ostringstream log{};
 
-	[[maybe_unused]] const std::optional<StartupRefusal> refusal = run_startup_steps(steps, log);
+	[[maybe_unused]] const std::optional<StartupRefusal> refusal =
+		run_startup_steps(steps, log);
 
-	EXPECT_EQ(log.str(), "STARTUP: Loading tile config\nSTARTUP: Loading spells\n");
+	EXPECT_EQ(
+		log.str(),
+		"STARTUP: Loading tile config\nSTARTUP: Loading spells\n");
 }
 
 TEST(StartupStepsTest, AThrowingStepStopsStartupAndIsNamedWithItsReason)
@@ -86,8 +94,11 @@ TEST(StartupStepsTest, AThrowingStepStopsStartupAndIsNamedWithItsReason)
 	ASSERT_TRUE(refusal.has_value()) << "a step that threw was not reported";
 	EXPECT_EQ(refusal->step, "Loading tile config");
 	EXPECT_EQ(refusal->reason, "key 'tiles' not found");
-	EXPECT_EQ(order.names, (std::vector<std::string>{ "first" })) << "a step after the refusal still ran";
-	EXPECT_EQ(log.str(), "STARTUP: first\nSTARTUP: Loading tile config\nSTARTUP: Loading tile config failed: key 'tiles' not found\n");
+	EXPECT_EQ(order.names, (std::vector<std::string>{ "first" }))
+		<< "a step after the refusal still ran";
+	EXPECT_EQ(
+		log.str(),
+		"STARTUP: first\nSTARTUP: Loading tile config\nSTARTUP: Loading tile config failed: key 'tiles' not found\n");
 }
 
 TEST(StartupStepsTest, TheRefusalLineNamesTheStepAndTheReason)
@@ -97,7 +108,9 @@ TEST(StartupStepsTest, TheRefusalLineNamesTheStepAndTheReason)
 		"key 'tiles' not found",
 	};
 
-	EXPECT_EQ(startup_refusal_line(refusal), "Could not start: Loading tile config failed: key 'tiles' not found");
+	EXPECT_EQ(
+		startup_refusal_line(refusal),
+		"Could not start: Loading tile config failed: key 'tiles' not found");
 }
 
 // Only a std::exception is a refusal; anything else is a fault, and escapes to end the program.
@@ -115,5 +128,6 @@ TEST(StartupStepsTest, AThrowThatIsNotAStdExceptionEscapes)
 	};
 	std::ostringstream log{};
 
-	EXPECT_THROW((void)run_startup_steps(steps, log), int) << "a fault was swallowed as though it were a refusal";
+	EXPECT_THROW((void)run_startup_steps(steps, log), int)
+		<< "a fault was swallowed as though it were a refusal";
 }

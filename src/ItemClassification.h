@@ -121,16 +121,11 @@ ItemCategory get_category(ItemClass itemClass);
 // Type checking functions - now simple and clean
 inline bool is_weapon(ItemClass itemClass)
 {
-	return itemClass == ItemClass::DAGGER ||
-		itemClass == ItemClass::SWORD ||
-		itemClass == ItemClass::GREAT_SWORD ||
-		itemClass == ItemClass::AXE ||
-		itemClass == ItemClass::HAMMER ||
-		itemClass == ItemClass::MACE ||
-		itemClass == ItemClass::STAFF ||
-		itemClass == ItemClass::BOW ||
-		itemClass == ItemClass::CROSSBOW ||
-		itemClass == ItemClass::SLING;
+	return itemClass == ItemClass::DAGGER || itemClass == ItemClass::SWORD ||
+		itemClass == ItemClass::GREAT_SWORD || itemClass == ItemClass::AXE ||
+		itemClass == ItemClass::HAMMER || itemClass == ItemClass::MACE ||
+		itemClass == ItemClass::STAFF || itemClass == ItemClass::BOW ||
+		itemClass == ItemClass::CROSSBOW || itemClass == ItemClass::SLING;
 }
 
 inline bool is_armor(ItemClass itemClass)
@@ -212,7 +207,8 @@ inline bool is_jewelry(ItemClass itemClass)
 // Ranged weapon checking
 inline bool is_ranged_weapon(ItemClass itemClass)
 {
-	return itemClass == ItemClass::BOW || itemClass == ItemClass::CROSSBOW || itemClass == ItemClass::SLING;
+	return itemClass == ItemClass::BOW || itemClass == ItemClass::CROSSBOW ||
+		itemClass == ItemClass::SLING;
 }
 
 // Equipment slot detection

@@ -51,14 +51,14 @@
     },
     {
       "file": "src/ItemEnhancements.cpp",
-      "original": "\treturn special_suffixes[dice.roll(0, static_cast<int>(std::size(special_suffixes)) - 1)];",
-      "mutated": "\treturn special_suffixes[dice.roll(0, static_cast<int>(std::size(special_suffixes)) - 2)];",
+      "original": "\treturn special_suffixes[dice\n\t\t\t.roll(0, static_cast<int>(std::size(special_suffixes)) - 1)];",
+      "mutated": "\treturn special_suffixes[dice\n\t\t\t.roll(0, static_cast<int>(std::size(special_suffixes)) -2)];",
       "catches": "the special-suffix range one short, so OF_BRITTLENESS is never drawn"
     },
     {
       "file": "src/ItemEnhancements.cpp",
-      "original": "\treturn universal_prefixes[dice.roll(0, static_cast<int>(std::size(universal_prefixes)) - 1)];",
-      "mutated": "\treturn universal_prefixes[dice.roll(0, static_cast<int>(std::size(universal_prefixes)) - 2)];",
+      "original": "\treturn universal_prefixes[dice\n\t\t\t.roll(0, static_cast<int>(std::size(universal_prefixes)) - 1)];",
+      "mutated": "\treturn universal_prefixes[dice\n\t\t\t.roll(0, static_cast<int>(std::size(universal_prefixes)) -2)];",
       "catches": "the universal range one short, so CRACKED is never drawn"
     }
   ]

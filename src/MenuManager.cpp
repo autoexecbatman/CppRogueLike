@@ -7,7 +7,9 @@
 #include "MenuManager.h"
 #include "RenderingManager.h"
 
-void MenuManager::handle_menus(std::deque<std::unique_ptr<BaseMenu>>& menus, GameContext& ctx)
+void MenuManager::handle_menus(
+	std::deque<std::unique_ptr<BaseMenu>>& menus,
+	GameContext& ctx)
 {
 	if (!menus.empty())
 	{
@@ -41,14 +43,17 @@ void MenuManager::handle_menus(std::deque<std::unique_ptr<BaseMenu>>& menus, Gam
 	}
 }
 
-bool MenuManager::has_active_menus(const std::deque<std::unique_ptr<BaseMenu>>& menus) const noexcept
+bool MenuManager::has_active_menus(
+	const std::deque<std::unique_ptr<BaseMenu>>& menus) const noexcept
 {
 	return !menus.empty();
 }
 
 void MenuManager::restore_game_display(GameContext& ctx)
 {
-	assert(ctx.renderingManager && "MenuManager::restore_game_display: called without a renderingManager");
+	assert(
+		ctx.renderingManager &&
+		"MenuManager::restore_game_display: called without a renderingManager");
 
 	ctx.renderingManager->restore_game_display();
 }

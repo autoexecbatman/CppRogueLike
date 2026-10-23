@@ -179,16 +179,22 @@ constexpr BookRating BOOK_RATINGS[] = {
 };
 } // namespace
 
-TEST(MonsterIntelligenceRatingTest, EveryMonsterCarriesTheRatingItsBookEntryPrints)
+TEST(
+	MonsterIntelligenceRatingTest,
+	EveryMonsterCarriesTheRatingItsBookEntryPrints)
 {
 	MonsterRegistry monsters{};
 	monsters.load(Paths::MONSTERS);
 
 	for (const BookRating& book : BOOK_RATINGS)
 	{
-		EXPECT_EQ(monsters.get_params(std::string{ book.key }).intelligence, book.rating) << book.key;
+		EXPECT_EQ(
+			monsters.get_params(std::string{ book.key }).intelligence,
+			book.rating)
+			<< book.key;
 	}
-	EXPECT_EQ(std::size(BOOK_RATINGS), monsters.get_all_keys().size()) << "a monster in the data is missing from the book's table";
+	EXPECT_EQ(std::size(BOOK_RATINGS), monsters.get_all_keys().size())
+		<< "a monster in the data is missing from the book's table";
 }
 
 // end of file: MonsterIntelligenceRatingTest.cpp

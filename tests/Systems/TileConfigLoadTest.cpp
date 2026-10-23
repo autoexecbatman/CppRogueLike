@@ -40,15 +40,14 @@ protected:
 	void SetUp() override
 	{
 		// A parameterised case's name holds a slash, which would make the file a path.
-		std::string testName = ::testing::UnitTest::GetInstance()->current_test_info()->name();
+		std::string testName =
+			::testing::UnitTest::GetInstance()->current_test_info()->name();
 		std::ranges::replace(testName, '/', '_');
-		scratch = std::filesystem::temp_directory_path() / ("tile_config_" + testName + ".json");
+		scratch = std::filesystem::temp_directory_path() /
+			("tile_config_" + testName + ".json");
 	}
 
-	void TearDown() override
-	{
-		std::filesystem::remove(scratch);
-	}
+	void TearDown() override { std::filesystem::remove(scratch); }
 
 	static nlohmann::json read_real_config()
 	{
@@ -59,7 +58,9 @@ protected:
 
 	// Removes `field` from the first record of `section`, writes the result, and returns
 	// what loading it threw.
-	std::string refusal_without(const std::string& section, const std::string& field)
+	std::string refusal_without(
+		const std::string& section,
+		const std::string& field)
 	{
 		nlohmann::json document = read_real_config();
 		document.at(section).begin()->erase(field);
@@ -85,7 +86,9 @@ protected:
 	std::string refusal_without_section(const std::string& section)
 	{
 		nlohmann::json document = read_real_config();
-		EXPECT_TRUE(document.contains(section)) << "the shipped config has no " << section << ", so erasing it proves nothing";
+		EXPECT_TRUE(document.contains(section))
+			<< "the shipped config has no " << section
+			<< ", so erasing it proves nothing";
 		document.erase(section);
 		{
 			std::ofstream out(scratch);
@@ -115,7 +118,8 @@ TEST_F(TileConfigLoadTest, ATileMissingAFieldIsRefusedByName)
 	{
 		const std::string refusal = refusal_without("tiles", field);
 
-		EXPECT_NE(refusal.find(field), std::string::npos) << "refusal does not name " << field << ": " << refusal;
+		EXPECT_NE(refusal.find(field), std::string::npos)
+			<< "refusal does not name " << field << ": " << refusal;
 	}
 }
 
@@ -129,13 +133,16 @@ TEST_F(TileConfigLoadTest, AnAutotileGroupMissingAFieldIsRefusedByName)
 			const std::string refusal = refusal_without(section, field);
 
 			EXPECT_NE(refusal.find(field), std::string::npos)
-				<< section << ": refusal does not name " << field << ": " << refusal;
+				<< section << ": refusal does not name " << field << ": "
+				<< refusal;
 		}
 	}
 }
 
 // The same file, once per section the loader reads: every one is required.
-class TileConfigSectionTest : public TileConfigLoadTest, public ::testing::WithParamInterface<std::string_view>
+class TileConfigSectionTest :
+	public TileConfigLoadTest,
+	public ::testing::WithParamInterface<std::string_view>
 {
 };
 
@@ -145,11 +152,13 @@ TEST_P(TileConfigSectionTest, AConfigMissingTheSectionIsRefusedByName)
 
 	const std::string refusal = refusal_without_section(section);
 
-	EXPECT_NE(refusal.find(section), std::string::npos) << "refusal does not name " << section << ": " << refusal;
+	EXPECT_NE(refusal.find(section), std::string::npos)
+		<< "refusal does not name " << section << ": " << refusal;
 }
 
 // Each case is named for its section, so a failure says which one without reading the output.
-const auto name_for_section = [](const ::testing::TestParamInfo<std::string_view>& info)
+const auto name_for_section =
+	[](const ::testing::TestParamInfo<std::string_view>& info)
 {
 	return std::string{ info.param };
 };
@@ -157,5 +166,9 @@ const auto name_for_section = [](const ::testing::TestParamInfo<std::string_view
 INSTANTIATE_TEST_SUITE_P(
 	EverySectionTheLoaderReads,
 	TileConfigSectionTest,
-	::testing::Values("tiles", "autotile_groups", "wall_autotile_groups", "tile_types"),
+	::testing::Values(
+		"tiles",
+		"autotile_groups",
+		"wall_autotile_groups",
+		"tile_types"),
 	name_for_section);

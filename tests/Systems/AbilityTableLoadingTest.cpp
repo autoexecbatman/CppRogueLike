@@ -145,7 +145,8 @@ TEST(AbilityTableLoadingTest, ACompleteDexterityRowParses)
 
 TEST(AbilityTableLoadingTest, ACompleteConstitutionRowParses)
 {
-	const ConstitutionAttributes row = constitution_row_from(constitution_seventeen());
+	const ConstitutionAttributes row =
+		constitution_row_from(constitution_seventeen());
 
 	EXPECT_EQ(row.Con, 17);
 	EXPECT_EQ(row.HPAdj, 3);
@@ -165,7 +166,8 @@ TEST(AbilityTableLoadingTest, ACompleteCharismaRowParses)
 
 TEST(AbilityTableLoadingTest, ACompleteIntelligenceRowParses)
 {
-	const IntelligenceAttributes row = intelligence_row_from(intelligence_seventeen());
+	const IntelligenceAttributes row =
+		intelligence_row_from(intelligence_seventeen());
 
 	EXPECT_EQ(row.Int, 17);
 	EXPECT_EQ(row.NumberOfLanguages, 6);
@@ -190,7 +192,9 @@ TEST(AbilityTableLoadingTest, AStrengthRowMissingItsHitBonusIsRefused)
 	json row = strength_seventeen();
 	row.erase("Hit");
 
-	EXPECT_THROW([[maybe_unused]] const auto parsed = strength_row_from(row), nlohmann::json::out_of_range)
+	EXPECT_THROW(
+		[[maybe_unused]] const auto parsed = strength_row_from(row),
+		nlohmann::json::out_of_range)
 		<< "a Strength row with no hit bonus loaded as a zero instead of being refused";
 }
 
@@ -204,29 +208,41 @@ TEST(AbilityTableLoadingTest, AStrengthRowMissingItsLockedDoorChanceIsRefused)
 	try
 	{
 		[[maybe_unused]] const auto parsed = strength_row_from(row);
-		ADD_FAILURE() << "a Strength row with no locked-door chance loaded as a zero instead of being refused";
+		ADD_FAILURE()
+			<< "a Strength row with no locked-door chance loaded as a zero instead of being refused";
 	}
 	catch (const nlohmann::json::out_of_range& refusal)
 	{
-		EXPECT_NE(std::string(refusal.what()).find("LockedDoors"), std::string::npos) << refusal.what();
+		EXPECT_NE(
+			std::string(refusal.what()).find("LockedDoors"),
+			std::string::npos)
+			<< refusal.what();
 	}
 }
 
-TEST(AbilityTableLoadingTest, ADexterityRowMissingItsDefensiveAdjustmentIsRefused)
+TEST(
+	AbilityTableLoadingTest,
+	ADexterityRowMissingItsDefensiveAdjustmentIsRefused)
 {
 	json row = dexterity_seventeen();
 	row.erase("DefensiveAdj");
 
-	EXPECT_THROW([[maybe_unused]] const auto parsed = dexterity_row_from(row), nlohmann::json::out_of_range)
+	EXPECT_THROW(
+		[[maybe_unused]] const auto parsed = dexterity_row_from(row),
+		nlohmann::json::out_of_range)
 		<< "a Dexterity row with no defensive adjustment loaded as a zero, which reads as armour class 0";
 }
 
-TEST(AbilityTableLoadingTest, AConstitutionRowMissingItsHitPointAdjustmentIsRefused)
+TEST(
+	AbilityTableLoadingTest,
+	AConstitutionRowMissingItsHitPointAdjustmentIsRefused)
 {
 	json row = constitution_seventeen();
 	row.erase("HPAdj");
 
-	EXPECT_THROW([[maybe_unused]] const auto parsed = constitution_row_from(row), nlohmann::json::out_of_range)
+	EXPECT_THROW(
+		[[maybe_unused]] const auto parsed = constitution_row_from(row),
+		nlohmann::json::out_of_range)
 		<< "a Constitution row with no hit point adjustment loaded as a zero";
 }
 
@@ -235,16 +251,22 @@ TEST(AbilityTableLoadingTest, ACharismaRowMissingItsLoyaltyIsRefused)
 	json row = charisma_seventeen();
 	row.erase("Loyalty");
 
-	EXPECT_THROW([[maybe_unused]] const auto parsed = charisma_row_from(row), nlohmann::json::out_of_range)
+	EXPECT_THROW(
+		[[maybe_unused]] const auto parsed = charisma_row_from(row),
+		nlohmann::json::out_of_range)
 		<< "a Charisma row with no loyalty base loaded as a zero";
 }
 
-TEST(AbilityTableLoadingTest, AnIntelligenceRowMissingItsSpellLearningChanceIsRefused)
+TEST(
+	AbilityTableLoadingTest,
+	AnIntelligenceRowMissingItsSpellLearningChanceIsRefused)
 {
 	json row = intelligence_seventeen();
 	row.erase("ChanceToLearnSpell");
 
-	EXPECT_THROW([[maybe_unused]] const auto parsed = intelligence_row_from(row), nlohmann::json::out_of_range)
+	EXPECT_THROW(
+		[[maybe_unused]] const auto parsed = intelligence_row_from(row),
+		nlohmann::json::out_of_range)
 		<< "an Intelligence row with no chance to learn a spell loaded as a zero, so every spell fails";
 }
 
@@ -253,7 +275,9 @@ TEST(AbilityTableLoadingTest, AWisdomRowMissingItsSpellFailureChanceIsRefused)
 	json row = wisdom_seventeen();
 	row.erase("ChanceOfSpellFailure");
 
-	EXPECT_THROW([[maybe_unused]] const auto parsed = wisdom_row_from(row), nlohmann::json::out_of_range)
+	EXPECT_THROW(
+		[[maybe_unused]] const auto parsed = wisdom_row_from(row),
+		nlohmann::json::out_of_range)
 		<< "a Wisdom row with no spell failure chance loaded as a zero, which is the best possible roll";
 }
 
@@ -277,16 +301,13 @@ private:
 	std::filesystem::path previous{};
 
 public:
-	explicit WorkingDirectoryScope(const std::filesystem::path& target)
-		: previous(std::filesystem::current_path())
+	explicit WorkingDirectoryScope(const std::filesystem::path& target) :
+		previous(std::filesystem::current_path())
 	{
 		std::filesystem::current_path(target);
 	}
 
-	~WorkingDirectoryScope()
-	{
-		std::filesystem::current_path(previous);
-	}
+	~WorkingDirectoryScope() { std::filesystem::current_path(previous); }
 
 	WorkingDirectoryScope(const WorkingDirectoryScope&) = delete;
 	WorkingDirectoryScope& operator=(const WorkingDirectoryScope&) = delete;
@@ -299,7 +320,8 @@ public:
 // than handing back empty tables for the first ability lookup to trip over.
 TEST(AbilityTableLoadingTest, AMissingTableFileStopsTheLoad)
 {
-	const std::filesystem::path emptyDirectory = std::filesystem::temp_directory_path() / "roguelike_no_ability_tables";
+	const std::filesystem::path emptyDirectory =
+		std::filesystem::temp_directory_path() / "roguelike_no_ability_tables";
 	std::filesystem::create_directories(emptyDirectory);
 	DataManager dataManager{};
 	MessageSystem messages{};
@@ -317,7 +339,8 @@ TEST(AbilityTableLoadingTest, AMissingTableFileStopsTheLoad)
 TEST(AbilityTableLoadingTest, TheTablesLoadFromAnyDirectoryInsideTheRepository)
 {
 	const std::filesystem::path deepInside = Paths::resolve("tests/Map");
-	ASSERT_TRUE(std::filesystem::is_directory(deepInside)) << deepInside.string();
+	ASSERT_TRUE(std::filesystem::is_directory(deepInside))
+		<< deepInside.string();
 	DataManager dataManager{};
 	MessageSystem messages{};
 
@@ -326,5 +349,6 @@ TEST(AbilityTableLoadingTest, TheTablesLoadFromAnyDirectoryInsideTheRepository)
 		EXPECT_NO_THROW(dataManager.load_all_data(messages));
 	}
 
-	EXPECT_FALSE(dataManager.get_wisdom_attributes().empty()) << "the Wisdom table came back empty";
+	EXPECT_FALSE(dataManager.get_wisdom_attributes().empty())
+		<< "the Wisdom table came back empty";
 }

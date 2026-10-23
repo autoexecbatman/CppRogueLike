@@ -295,7 +295,12 @@ void Renderer::shutdown()
 	}
 }
 
-void Renderer::load_sheet(TileSheet id, std::string_view name, std::string_view path0, std::string_view path1, int cellSize)
+void Renderer::load_sheet(
+	TileSheet id,
+	std::string_view name,
+	std::string_view path0,
+	std::string_view path1,
+	int cellSize)
 {
 	auto& sheet = sheets[sheet_idx(id)];
 	sheet.name = name;
@@ -308,7 +313,11 @@ void Renderer::load_sheet(TileSheet id, std::string_view name, std::string_view 
 	sheet.loaded = (sheet.frame0.id > 0);
 }
 
-void Renderer::load_sheet_static(TileSheet id, std::string_view name, std::string_view path, int cellSize)
+void Renderer::load_sheet_static(
+	TileSheet id,
+	std::string_view name,
+	std::string_view path,
+	int cellSize)
 {
 	auto& sheet = sheets[sheet_idx(id)];
 	sheet.name = name;
@@ -391,9 +400,16 @@ void Renderer::load_dawnlike(std::string_view basePath)
 	{
 		if (source.frames == SheetFrames::ANIMATED)
 		{
-			const std::string frame0Path = std::format("{}{}0.png", base, source.path);
-			const std::string frame1Path = std::format("{}{}1.png", base, source.path);
-			load_sheet(source.id, source.name, frame0Path, frame1Path, source.cellSize);
+			const std::string frame0Path =
+				std::format("{}{}0.png", base, source.path);
+			const std::string frame1Path =
+				std::format("{}{}1.png", base, source.path);
+			load_sheet(
+				source.id,
+				source.name,
+				frame0Path,
+				frame1Path,
+				source.cellSize);
 		}
 		else
 		{
@@ -432,8 +448,10 @@ void Renderer::begin_frame()
 	if (magnitude > 0.01f)
 	{
 		float time = static_cast<float>(GetTime());
-		shakeOffset.x = static_cast<int>(std::sin(time * 57.3f) * magnitude * 8.0f);
-		shakeOffset.y = static_cast<int>(std::cos(time * 43.1f) * magnitude * 8.0f);
+		shakeOffset.x =
+			static_cast<int>(std::sin(time * 57.3f) * magnitude * 8.0f);
+		shakeOffset.y =
+			static_cast<int>(std::cos(time * 43.1f) * magnitude * 8.0f);
 	}
 	else
 	{
@@ -501,15 +519,21 @@ void Renderer::apply_light_mask()
 
 void Renderer::draw_tile(Vector2D gridPos, TileRef tile, Color tint) const
 {
-	assert(sheetsLoaded && "Renderer::draw_tile: called before load_dawnlike loaded the sheets");
+	assert(
+		sheetsLoaded &&
+		"Renderer::draw_tile: called before load_dawnlike loaded the sheets");
 	if (!tile.is_valid())
 	{
 		return;
 	}
 
-	assert(sheet_idx(tile.sheet) < sheets.size() && "Renderer::draw_tile: the tile names a sheet past the end of the table");
+	assert(
+		sheet_idx(tile.sheet) < sheets.size() &&
+		"Renderer::draw_tile: the tile names a sheet past the end of the table");
 	const SpriteSheet& sheet = sheets[sheet_idx(tile.sheet)];
-	assert(sheet.loaded && sheet.tilesPerRow > 0 && "Renderer::draw_tile: the tile's sheet was never loaded");
+	assert(
+		sheet.loaded && sheet.tilesPerRow > 0 &&
+		"Renderer::draw_tile: the tile's sheet was never loaded");
 
 	// Screen position with camera offset
 	float destX = static_cast<float>(gridPos.x * tileSize - camera.x);
@@ -517,15 +541,16 @@ void Renderer::draw_tile(Vector2D gridPos, TileRef tile, Color tint) const
 
 	// Cull tiles outside the visible area
 	float tileSizeFloat = static_cast<float>(tileSize);
-	if (destX + tileSizeFloat < 0.0f || destX >= static_cast<float>(screenWidth) ||
-		destY + tileSizeFloat < 0.0f || destY >= static_cast<float>(screenHeight))
+	if (destX + tileSizeFloat < 0.0f ||
+		destX >= static_cast<float>(screenWidth) ||
+		destY + tileSizeFloat < 0.0f ||
+		destY >= static_cast<float>(screenHeight))
 	{
 		return;
 	}
 
-	const Texture2D& texture = (sheet.animated && currentAnimFrame == 1)
-		? sheet.frame1
-		: sheet.frame0;
+	const Texture2D& texture =
+		(sheet.animated && currentAnimFrame == 1) ? sheet.frame1 : sheet.frame0;
 
 	Rectangle srcRect = {
 		static_cast<float>(tile.col * sheet.cellSize),
@@ -540,31 +565,45 @@ void Renderer::draw_tile(Vector2D gridPos, TileRef tile, Color tint) const
 	DrawTexturePro(texture, srcRect, destRect, { 0.0f, 0.0f }, 0.0f, tint);
 }
 
-void Renderer::draw_tile_offset(Vector2D gridPos, int pixelOffsetX, int pixelOffsetY, TileRef tile, Color tint) const
+void Renderer::draw_tile_offset(
+	Vector2D gridPos,
+	int pixelOffsetX,
+	int pixelOffsetY,
+	TileRef tile,
+	Color tint) const
 {
-	assert(sheetsLoaded && "Renderer::draw_tile_offset: called before load_dawnlike loaded the sheets");
+	assert(
+		sheetsLoaded &&
+		"Renderer::draw_tile_offset: called before load_dawnlike loaded the sheets");
 	if (!tile.is_valid())
 	{
 		return;
 	}
 
-	assert(sheet_idx(tile.sheet) < sheets.size() && "Renderer::draw_tile_offset: the tile names a sheet past the end of the table");
+	assert(
+		sheet_idx(tile.sheet) < sheets.size() &&
+		"Renderer::draw_tile_offset: the tile names a sheet past the end of the table");
 	const SpriteSheet& sheet = sheets[sheet_idx(tile.sheet)];
-	assert(sheet.loaded && sheet.tilesPerRow > 0 && "Renderer::draw_tile_offset: the tile's sheet was never loaded");
+	assert(
+		sheet.loaded && sheet.tilesPerRow > 0 &&
+		"Renderer::draw_tile_offset: the tile's sheet was never loaded");
 
-	float destX = static_cast<float>(gridPos.x * tileSize - camera.x + pixelOffsetX);
-	float destY = static_cast<float>(gridPos.y * tileSize - camera.y + pixelOffsetY);
+	float destX =
+		static_cast<float>(gridPos.x * tileSize - camera.x + pixelOffsetX);
+	float destY =
+		static_cast<float>(gridPos.y * tileSize - camera.y + pixelOffsetY);
 
 	float tileSizeFloat = static_cast<float>(tileSize);
-	if (destX + tileSizeFloat < 0.0f || destX >= static_cast<float>(screenWidth) ||
-		destY + tileSizeFloat < 0.0f || destY >= static_cast<float>(screenHeight))
+	if (destX + tileSizeFloat < 0.0f ||
+		destX >= static_cast<float>(screenWidth) ||
+		destY + tileSizeFloat < 0.0f ||
+		destY >= static_cast<float>(screenHeight))
 	{
 		return;
 	}
 
-	const Texture2D& texture = (sheet.animated && currentAnimFrame == 1)
-		? sheet.frame1
-		: sheet.frame0;
+	const Texture2D& texture =
+		(sheet.animated && currentAnimFrame == 1) ? sheet.frame1 : sheet.frame0;
 
 	Rectangle srcRect = {
 		static_cast<float>(tile.col * sheet.cellSize),
@@ -578,24 +617,35 @@ void Renderer::draw_tile_offset(Vector2D gridPos, int pixelOffsetX, int pixelOff
 	DrawTexturePro(texture, srcRect, destRect, { 0.0f, 0.0f }, 0.0f, tint);
 }
 
-void Renderer::draw_tile_static(Vector2D gridPos, TileRef tile, Color tint) const
+void Renderer::draw_tile_static(
+	Vector2D gridPos,
+	TileRef tile,
+	Color tint) const
 {
-	assert(sheetsLoaded && "Renderer::draw_tile_static: called before load_dawnlike loaded the sheets");
+	assert(
+		sheetsLoaded &&
+		"Renderer::draw_tile_static: called before load_dawnlike loaded the sheets");
 	if (!tile.is_valid())
 	{
 		return;
 	}
 
-	assert(sheet_idx(tile.sheet) < sheets.size() && "Renderer::draw_tile_static: the tile names a sheet past the end of the table");
+	assert(
+		sheet_idx(tile.sheet) < sheets.size() &&
+		"Renderer::draw_tile_static: the tile names a sheet past the end of the table");
 	const SpriteSheet& sheet = sheets[sheet_idx(tile.sheet)];
-	assert(sheet.loaded && sheet.tilesPerRow > 0 && "Renderer::draw_tile_static: the tile's sheet was never loaded");
+	assert(
+		sheet.loaded && sheet.tilesPerRow > 0 &&
+		"Renderer::draw_tile_static: the tile's sheet was never loaded");
 
 	float destX = static_cast<float>(gridPos.x * tileSize - camera.x);
 	float destY = static_cast<float>(gridPos.y * tileSize - camera.y);
 
 	float tileSizeFloat = static_cast<float>(tileSize);
-	if (destX + tileSizeFloat < 0.0f || destX >= static_cast<float>(screenWidth) ||
-		destY + tileSizeFloat < 0.0f || destY >= static_cast<float>(screenHeight))
+	if (destX + tileSizeFloat < 0.0f ||
+		destX >= static_cast<float>(screenWidth) ||
+		destY + tileSizeFloat < 0.0f ||
+		destY >= static_cast<float>(screenHeight))
 	{
 		return;
 	}
@@ -614,19 +664,24 @@ void Renderer::draw_tile_static(Vector2D gridPos, TileRef tile, Color tint) cons
 
 void Renderer::draw_tile_screen(Vector2D screenPos, TileRef tile) const
 {
-	assert(sheetsLoaded && "Renderer::draw_tile_screen: called before load_dawnlike loaded the sheets");
+	assert(
+		sheetsLoaded &&
+		"Renderer::draw_tile_screen: called before load_dawnlike loaded the sheets");
 	if (!tile.is_valid())
 	{
 		return;
 	}
 
-	assert(sheet_idx(tile.sheet) < sheets.size() && "Renderer::draw_tile_screen: the tile names a sheet past the end of the table");
+	assert(
+		sheet_idx(tile.sheet) < sheets.size() &&
+		"Renderer::draw_tile_screen: the tile names a sheet past the end of the table");
 	const SpriteSheet& sheet = sheets[sheet_idx(tile.sheet)];
-	assert(sheet.loaded && sheet.tilesPerRow > 0 && "Renderer::draw_tile_screen: the tile's sheet was never loaded");
+	assert(
+		sheet.loaded && sheet.tilesPerRow > 0 &&
+		"Renderer::draw_tile_screen: the tile's sheet was never loaded");
 
-	const Texture2D& texture = (sheet.animated && currentAnimFrame == 1)
-		? sheet.frame1
-		: sheet.frame0;
+	const Texture2D& texture =
+		(sheet.animated && currentAnimFrame == 1) ? sheet.frame1 : sheet.frame0;
 
 	Rectangle srcRect = {
 		static_cast<float>(tile.col * sheet.cellSize),
@@ -646,21 +701,29 @@ void Renderer::draw_tile_screen(Vector2D screenPos, TileRef tile) const
 	DrawTexturePro(texture, srcRect, destRect, { 0.0f, 0.0f }, 0.0f, RL_WHITE);
 }
 
-void Renderer::draw_tile_screen_color(Vector2D screenPos, TileRef tile, Color tint) const
+void Renderer::draw_tile_screen_color(
+	Vector2D screenPos,
+	TileRef tile,
+	Color tint) const
 {
-	assert(sheetsLoaded && "Renderer::draw_tile_screen_color: called before load_dawnlike loaded the sheets");
+	assert(
+		sheetsLoaded &&
+		"Renderer::draw_tile_screen_color: called before load_dawnlike loaded the sheets");
 	if (!tile.is_valid())
 	{
 		return;
 	}
 
-	assert(sheet_idx(tile.sheet) < sheets.size() && "Renderer::draw_tile_screen_color: the tile names a sheet past the end of the table");
+	assert(
+		sheet_idx(tile.sheet) < sheets.size() &&
+		"Renderer::draw_tile_screen_color: the tile names a sheet past the end of the table");
 	const SpriteSheet& sheet = sheets[sheet_idx(tile.sheet)];
-	assert(sheet.loaded && sheet.tilesPerRow > 0 && "Renderer::draw_tile_screen_color: the tile's sheet was never loaded");
+	assert(
+		sheet.loaded && sheet.tilesPerRow > 0 &&
+		"Renderer::draw_tile_screen_color: the tile's sheet was never loaded");
 
-	const Texture2D& texture = (sheet.animated && currentAnimFrame == 1)
-		? sheet.frame1
-		: sheet.frame0;
+	const Texture2D& texture =
+		(sheet.animated && currentAnimFrame == 1) ? sheet.frame1 : sheet.frame0;
 
 	Rectangle srcRect = {
 		static_cast<float>(tile.col * sheet.cellSize),
@@ -680,21 +743,30 @@ void Renderer::draw_tile_screen_color(Vector2D screenPos, TileRef tile, Color ti
 	DrawTexturePro(texture, srcRect, destRect, { 0.0f, 0.0f }, 0.0f, tint);
 }
 
-void Renderer::draw_tile_screen_color_sized(Vector2D screenPos, int size, TileRef tile, Color tint) const
+void Renderer::draw_tile_screen_color_sized(
+	Vector2D screenPos,
+	int size,
+	TileRef tile,
+	Color tint) const
 {
-	assert(sheetsLoaded && "Renderer::draw_tile_screen_color_sized: called before load_dawnlike loaded the sheets");
+	assert(
+		sheetsLoaded &&
+		"Renderer::draw_tile_screen_color_sized: called before load_dawnlike loaded the sheets");
 	if (!tile.is_valid())
 	{
 		return;
 	}
 
-	assert(sheet_idx(tile.sheet) < sheets.size() && "Renderer::draw_tile_screen_color_sized: the tile names a sheet past the end of the table");
+	assert(
+		sheet_idx(tile.sheet) < sheets.size() &&
+		"Renderer::draw_tile_screen_color_sized: the tile names a sheet past the end of the table");
 	const SpriteSheet& sheet = sheets[sheet_idx(tile.sheet)];
-	assert(sheet.loaded && sheet.tilesPerRow > 0 && "Renderer::draw_tile_screen_color_sized: the tile's sheet was never loaded");
+	assert(
+		sheet.loaded && sheet.tilesPerRow > 0 &&
+		"Renderer::draw_tile_screen_color_sized: the tile's sheet was never loaded");
 
-	const Texture2D& texture = (sheet.animated && currentAnimFrame == 1)
-		? sheet.frame1
-		: sheet.frame0;
+	const Texture2D& texture =
+		(sheet.animated && currentAnimFrame == 1) ? sheet.frame1 : sheet.frame0;
 
 	Rectangle srcRect = {
 		static_cast<float>(tile.col * sheet.cellSize),
@@ -721,19 +793,24 @@ void Renderer::draw_tile_screen_color_rect(
 	TileRef tile,
 	Color tint) const
 {
-	assert(sheetsLoaded && "Renderer::draw_tile_screen_color_rect: called before load_dawnlike loaded the sheets");
+	assert(
+		sheetsLoaded &&
+		"Renderer::draw_tile_screen_color_rect: called before load_dawnlike loaded the sheets");
 	if (!tile.is_valid() || width <= 0 || height <= 0)
 	{
 		return;
 	}
 
-	assert(sheet_idx(tile.sheet) < sheets.size() && "Renderer::draw_tile_screen_color_rect: the tile names a sheet past the end of the table");
+	assert(
+		sheet_idx(tile.sheet) < sheets.size() &&
+		"Renderer::draw_tile_screen_color_rect: the tile names a sheet past the end of the table");
 	const SpriteSheet& sheet = sheets[sheet_idx(tile.sheet)];
-	assert(sheet.loaded && sheet.tilesPerRow > 0 && "Renderer::draw_tile_screen_color_rect: the tile's sheet was never loaded");
+	assert(
+		sheet.loaded && sheet.tilesPerRow > 0 &&
+		"Renderer::draw_tile_screen_color_rect: the tile's sheet was never loaded");
 
-	const Texture2D& texture = (sheet.animated && currentAnimFrame == 1)
-		? sheet.frame1
-		: sheet.frame0;
+	const Texture2D& texture =
+		(sheet.animated && currentAnimFrame == 1) ? sheet.frame1 : sheet.frame0;
 
 	Rectangle srcRect = {
 		static_cast<float>(tile.col * sheet.cellSize),
@@ -752,21 +829,29 @@ void Renderer::draw_tile_screen_color_rect(
 	DrawTexturePro(texture, srcRect, destRect, { 0.0f, 0.0f }, 0.0f, tint);
 }
 
-void Renderer::draw_tile_screen_sized(Vector2D screenPos, TileRef tile, int displaySize) const
+void Renderer::draw_tile_screen_sized(
+	Vector2D screenPos,
+	TileRef tile,
+	int displaySize) const
 {
-	assert(sheetsLoaded && "Renderer::draw_tile_screen_sized: called before load_dawnlike loaded the sheets");
+	assert(
+		sheetsLoaded &&
+		"Renderer::draw_tile_screen_sized: called before load_dawnlike loaded the sheets");
 	if (!tile.is_valid())
 	{
 		return;
 	}
 
-	assert(sheet_idx(tile.sheet) < sheets.size() && "Renderer::draw_tile_screen_sized: the tile names a sheet past the end of the table");
+	assert(
+		sheet_idx(tile.sheet) < sheets.size() &&
+		"Renderer::draw_tile_screen_sized: the tile names a sheet past the end of the table");
 	const SpriteSheet& sheet = sheets[sheet_idx(tile.sheet)];
-	assert(sheet.loaded && sheet.tilesPerRow > 0 && "Renderer::draw_tile_screen_sized: the tile's sheet was never loaded");
+	assert(
+		sheet.loaded && sheet.tilesPerRow > 0 &&
+		"Renderer::draw_tile_screen_sized: the tile's sheet was never loaded");
 
-	const Texture2D& texture = (sheet.animated && currentAnimFrame == 1)
-		? sheet.frame1
-		: sheet.frame0;
+	const Texture2D& texture =
+		(sheet.animated && currentAnimFrame == 1) ? sheet.frame1 : sheet.frame0;
 
 	Rectangle srcRect = {
 		static_cast<float>(tile.col * sheet.cellSize),
@@ -786,7 +871,10 @@ void Renderer::draw_tile_screen_sized(Vector2D screenPos, TileRef tile, int disp
 	DrawTexturePro(texture, srcRect, destRect, { 0.0f, 0.0f }, 0.0f, RL_WHITE);
 }
 
-void Renderer::draw_text(Vector2D screenPos, std::string_view text, ColorPairId colorPair) const
+void Renderer::draw_text(
+	Vector2D screenPos,
+	std::string_view text,
+	ColorPairId colorPair) const
 {
 	ColorPair pair = get_color_pair(colorPair);
 	std::string textStr(text);
@@ -797,15 +885,29 @@ void Renderer::draw_text(Vector2D screenPos, std::string_view text, ColorPairId 
 			static_cast<float>(screenPos.x),
 			static_cast<float>(screenPos.y),
 		};
-		DrawTextEx(gameFont, textStr.c_str(), pos, static_cast<float>(fontSize), 1.0f, pair.foreground);
+		DrawTextEx(
+			gameFont,
+			textStr.c_str(),
+			pos,
+			static_cast<float>(fontSize),
+			1.0f,
+			pair.foreground);
 	}
 	else
 	{
-		DrawText(textStr.c_str(), screenPos.x, screenPos.y, fontSize, pair.foreground);
+		DrawText(
+			textStr.c_str(),
+			screenPos.x,
+			screenPos.y,
+			fontSize,
+			pair.foreground);
 	}
 }
 
-void Renderer::draw_text_color(Vector2D screenPos, std::string_view text, Color color) const
+void Renderer::draw_text_color(
+	Vector2D screenPos,
+	std::string_view text,
+	Color color) const
 {
 	std::string textStr(text);
 
@@ -815,7 +917,13 @@ void Renderer::draw_text_color(Vector2D screenPos, std::string_view text, Color 
 			static_cast<float>(screenPos.x),
 			static_cast<float>(screenPos.y),
 		};
-		DrawTextEx(gameFont, textStr.c_str(), pos, static_cast<float>(fontSize), 1.0f, color);
+		DrawTextEx(
+			gameFont,
+			textStr.c_str(),
+			pos,
+			static_cast<float>(fontSize),
+			1.0f,
+			color);
 	}
 	else
 	{
@@ -851,53 +959,85 @@ void Renderer::zoom_out()
 	}
 }
 
-void Renderer::draw_frame(Vector2D screenPos, int wTiles, int hTiles, const TileConfig& tileConfig) const
+void Renderer::draw_frame(
+	Vector2D screenPos,
+	int wTiles,
+	int hTiles,
+	const TileConfig& tileConfig) const
 {
-	assert(sheetsLoaded && "Renderer::draw_frame called before sheets are loaded");
+	assert(
+		sheetsLoaded && "Renderer::draw_frame called before sheets are loaded");
 
-	DrawRectangle(screenPos.x, screenPos.y, wTiles * tileSize, hTiles * tileSize, FRAME_FILL);
+	DrawRectangle(
+		screenPos.x,
+		screenPos.y,
+		wTiles * tileSize,
+		hTiles * tileSize,
+		FRAME_FILL);
 
 	// Top border
 	draw_tile_screen(screenPos, tileConfig.get("GUI_FRAME_TL"));
 	for (int col = 1; col < wTiles - 1; ++col)
 	{
-		draw_tile_screen(Vector2D{ screenPos.x + col * tileSize, screenPos.y }, tileConfig.get("GUI_FRAME_T"));
+		draw_tile_screen(
+			Vector2D{ screenPos.x + col * tileSize, screenPos.y },
+			tileConfig.get("GUI_FRAME_T"));
 	}
-	draw_tile_screen(Vector2D{ screenPos.x + (wTiles - 1) * tileSize, screenPos.y }, tileConfig.get("GUI_FRAME_TR"));
+	draw_tile_screen(
+		Vector2D{ screenPos.x + (wTiles - 1) * tileSize, screenPos.y },
+		tileConfig.get("GUI_FRAME_TR"));
 
 	// Left and right borders
 	for (int row = 1; row < hTiles - 1; ++row)
 	{
-		draw_tile_screen(Vector2D{ screenPos.x, screenPos.y + row * tileSize }, tileConfig.get("GUI_FRAME_L"));
-		draw_tile_screen(Vector2D{
-							 screenPos.x + (wTiles - 1) * tileSize,
-							 screenPos.y + row * tileSize,
-						 },
+		draw_tile_screen(
+			Vector2D{ screenPos.x, screenPos.y + row * tileSize },
+			tileConfig.get("GUI_FRAME_L"));
+		draw_tile_screen(
+			Vector2D{
+				screenPos.x + (wTiles - 1) * tileSize,
+				screenPos.y + row * tileSize,
+			},
 			tileConfig.get("GUI_FRAME_R"));
 	}
 
 	// Bottom border
-	draw_tile_screen(Vector2D{ screenPos.x, screenPos.y + (hTiles - 1) * tileSize }, tileConfig.get("GUI_FRAME_BL"));
+	draw_tile_screen(
+		Vector2D{ screenPos.x, screenPos.y + (hTiles - 1) * tileSize },
+		tileConfig.get("GUI_FRAME_BL"));
 	for (int col = 1; col < wTiles - 1; ++col)
 	{
-		draw_tile_screen(Vector2D{
-							 screenPos.x + col * tileSize,
-							 screenPos.y + (hTiles - 1) * tileSize,
-						 },
+		draw_tile_screen(
+			Vector2D{
+				screenPos.x + col * tileSize,
+				screenPos.y + (hTiles - 1) * tileSize,
+			},
 			tileConfig.get("GUI_FRAME_B"));
 	}
-	draw_tile_screen(Vector2D{
-						 screenPos.x + (wTiles - 1) * tileSize,
-						 screenPos.y + (hTiles - 1) * tileSize,
-					 },
+	draw_tile_screen(
+		Vector2D{
+			screenPos.x + (wTiles - 1) * tileSize,
+			screenPos.y + (hTiles - 1) * tileSize,
+		},
 		tileConfig.get("GUI_FRAME_BR"));
 }
 
-void Renderer::draw_frame_pixels(Vector2D screenPos, int widthPixels, int heightPixels, const TileConfig& tileConfig) const
+void Renderer::draw_frame_pixels(
+	Vector2D screenPos,
+	int widthPixels,
+	int heightPixels,
+	const TileConfig& tileConfig) const
 {
-	assert(sheetsLoaded && "Renderer::draw_frame_pixels called before sheets are loaded");
+	assert(
+		sheetsLoaded &&
+		"Renderer::draw_frame_pixels called before sheets are loaded");
 
-	DrawRectangle(screenPos.x, screenPos.y, widthPixels, heightPixels, FRAME_FILL);
+	DrawRectangle(
+		screenPos.x,
+		screenPos.y,
+		widthPixels,
+		heightPixels,
+		FRAME_FILL);
 
 	// The far edges are placed against the rectangle rather than on the tile grid,
 	// so the frame closes on a rectangle the tile size does not divide.
@@ -906,25 +1046,47 @@ void Renderer::draw_frame_pixels(Vector2D screenPos, int widthPixels, int height
 
 	// The runs first and the corners over them: a run's last tile overlaps into the corner cell,
 	// and a rail drawn over a corner cuts the ornament off a heavier frame.
-	for (int pixelX = screenPos.x + tileSize; pixelX < rightX; pixelX += tileSize)
+	for (
+		int pixelX = screenPos.x + tileSize; pixelX < rightX;
+		pixelX += tileSize)
 	{
-		draw_tile_screen(Vector2D{ pixelX, screenPos.y }, tileConfig.get("GUI_FRAME_T"));
-		draw_tile_screen(Vector2D{ pixelX, bottomY }, tileConfig.get("GUI_FRAME_B"));
+		draw_tile_screen(
+			Vector2D{ pixelX, screenPos.y },
+			tileConfig.get("GUI_FRAME_T"));
+		draw_tile_screen(
+			Vector2D{ pixelX, bottomY },
+			tileConfig.get("GUI_FRAME_B"));
 	}
 
-	for (int pixelY = screenPos.y + tileSize; pixelY < bottomY; pixelY += tileSize)
+	for (
+		int pixelY = screenPos.y + tileSize; pixelY < bottomY;
+		pixelY += tileSize)
 	{
-		draw_tile_screen(Vector2D{ screenPos.x, pixelY }, tileConfig.get("GUI_FRAME_L"));
-		draw_tile_screen(Vector2D{ rightX, pixelY }, tileConfig.get("GUI_FRAME_R"));
+		draw_tile_screen(
+			Vector2D{ screenPos.x, pixelY },
+			tileConfig.get("GUI_FRAME_L"));
+		draw_tile_screen(
+			Vector2D{ rightX, pixelY },
+			tileConfig.get("GUI_FRAME_R"));
 	}
 
 	draw_tile_screen(screenPos, tileConfig.get("GUI_FRAME_TL"));
-	draw_tile_screen(Vector2D{ rightX, screenPos.y }, tileConfig.get("GUI_FRAME_TR"));
-	draw_tile_screen(Vector2D{ screenPos.x, bottomY }, tileConfig.get("GUI_FRAME_BL"));
-	draw_tile_screen(Vector2D{ rightX, bottomY }, tileConfig.get("GUI_FRAME_BR"));
+	draw_tile_screen(
+		Vector2D{ rightX, screenPos.y },
+		tileConfig.get("GUI_FRAME_TR"));
+	draw_tile_screen(
+		Vector2D{ screenPos.x, bottomY },
+		tileConfig.get("GUI_FRAME_BL"));
+	draw_tile_screen(
+		Vector2D{ rightX, bottomY },
+		tileConfig.get("GUI_FRAME_BR"));
 }
 
-void Renderer::set_camera_center(int world_tile_x, int world_tile_y, int map_w, int map_h)
+void Renderer::set_camera_center(
+	int world_tile_x,
+	int world_tile_y,
+	int map_w,
+	int map_h)
 {
 	int map_viewport_rows = viewportRows - get_gui_reserve_rows();
 	int viewport_px_w = viewportCols * tileSize;
@@ -959,7 +1121,9 @@ ScreenMetrics Renderer::metrics() const
 	};
 }
 
-std::string Renderer::fit_text_to_width(std::string_view text, int maxWidth) const
+std::string Renderer::fit_text_to_width(
+	std::string_view text,
+	int maxWidth) const
 {
 	if (measure_text(text) <= maxWidth)
 	{
@@ -986,7 +1150,11 @@ int Renderer::measure_text(std::string_view text) const
 	std::string text_str(text);
 	if (fontLoaded)
 	{
-		Vector2 size = MeasureTextEx(gameFont, text_str.c_str(), static_cast<float>(fontSize), 1.0f);
+		Vector2 size = MeasureTextEx(
+			gameFont,
+			text_str.c_str(),
+			static_cast<float>(fontSize),
+			1.0f);
 		return static_cast<int>(size.x);
 	}
 	return MeasureText(text_str.c_str(), fontSize);
@@ -999,7 +1167,8 @@ void Renderer::init_color_pairs()
 
 	for (std::size_t index = 0; index < ALL_COLOR_PAIR.size(); ++index)
 	{
-		colorPairs.at(color_pair_index(ALL_COLOR_PAIR.at(index))) = PAIR_COLORS.at(index);
+		colorPairs.at(color_pair_index(ALL_COLOR_PAIR.at(index))) =
+			PAIR_COLORS.at(index);
 	}
 }
 

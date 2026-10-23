@@ -27,8 +27,8 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tidentifiedCount > 0\n",
-      "mutated": "\t\tidentifiedCount >= 0\n",
+      "original": "\t\tidentifiedCount > 0",
+      "mutated": "\t\tidentifiedCount >= 0",
       "catches": "a pack that was already known told that items were identified anyway"
     },
     {

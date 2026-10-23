@@ -27,18 +27,27 @@ void DisplayManager::display_help(GameContext& ctx) const
 	// off its own binding, so this screen cannot fall out of step with the game.
 	for (const auto& named : NAMED_COMMANDS)
 	{
-		lines.push_back(std::format("{:<15} {}", named.description, named.keys));
+		lines.push_back(
+			std::format("{:<15} {}", named.description, named.keys));
 	}
 
 	for (const auto& command : CHARACTER_COMMANDS)
 	{
-		lines.push_back(std::format("{:<15} {}", command.description, command_key(command.control)));
+		lines.push_back(
+			std::format(
+				"{:<15} {}",
+				command.description,
+				command_key(command.control)));
 	}
 
-	ctx.menus->push_back(std::make_unique<NotificationMenu>("CONTROLS", std::move(lines), ctx));
+	ctx.menus->push_back(
+		std::make_unique<NotificationMenu>("CONTROLS", std::move(lines), ctx));
 }
 
-void DisplayManager::display_levelup(Player& player, int xpLevel, GameContext& ctx) const
+void DisplayManager::display_levelup(
+	Player& player,
+	int xpLevel,
+	GameContext& ctx) const
 {
 	// Apply all level up benefits through the new LevelUpSystem
 	LevelUpSystem::apply_level_up_benefits(player, xpLevel, ctx);
@@ -51,14 +60,18 @@ void DisplayManager::display_levelup(Player& player, int xpLevel, GameContext& c
 	ctx.menus->push_back(std::make_unique<LevelUpUI>(player, xpLevel));
 }
 
-void DisplayManager::display_character_sheet(const Player& player, GameContext& ctx) const noexcept
+void DisplayManager::display_character_sheet(
+	const Player& player,
+	GameContext& ctx) const noexcept
 {
 	ctx.menus->push_back(std::make_unique<CharacterSheetUI>(player));
 }
 
 void DisplayManager::display_balance_viewer(GameContext& ctx) const
 {
-	assert(ctx.levelManager && "DisplayManager::display_balance_viewer: called without a levelManager");
+	assert(
+		ctx.levelManager &&
+		"DisplayManager::display_balance_viewer: called without a levelManager");
 
 	const int level = ctx.levelManager->get_dungeon_level();
 	ctx.menus->push_back(std::make_unique<BalanceViewer>(level, ctx));

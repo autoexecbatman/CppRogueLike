@@ -133,10 +133,13 @@ void InputHandler::key_listen(InputSystem& input) noexcept
 
 bool InputHandler::mouse_moved() const noexcept
 {
-	return lastMousePos.x != currentMousePos.x || lastMousePos.y != currentMousePos.y;
+	return lastMousePos.x != currentMousePos.x ||
+		lastMousePos.y != currentMousePos.y;
 }
 
-Vector2D InputHandler::get_mouse_position(InputSystem& input, int tile_size) noexcept
+Vector2D InputHandler::get_mouse_position(
+	InputSystem& input,
+	int tile_size) noexcept
 {
 	lastMousePos = currentMousePos;
 	currentMousePos = input.get_mouse_tile(tile_size);

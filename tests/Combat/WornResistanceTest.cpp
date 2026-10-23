@@ -49,7 +49,10 @@ protected:
 
 	void wear(std::string_view key, EquipmentSlot slot)
 	{
-		player->equip_item(ItemCreator::create(key, Vector2D{ 0, 0 }, ctx), slot, ctx);
+		player->equip_item(
+			ItemCreator::create(key, Vector2D{ 0, 0 }, ctx),
+			slot,
+			ctx);
 	}
 
 	// The helm of brilliance on the head, identified and spoken to: only then does it protect.
@@ -76,9 +79,21 @@ protected:
 		return item;
 	}
 
-	int fire_strength() { return DamageResolver::resistance_strength(DamageType::FIRE, *player, ctx); }
+	int fire_strength()
+	{
+		return DamageResolver::resistance_strength(
+			DamageType::FIRE,
+			*player,
+			ctx);
+	}
 
-	int cold_strength() { return DamageResolver::resistance_strength(DamageType::COLD, *player, ctx); }
+	int cold_strength()
+	{
+		return DamageResolver::resistance_strength(
+			DamageType::COLD,
+			*player,
+			ctx);
+	}
 
 	MockGameContext mock{};
 	GameContext ctx{};
@@ -125,7 +140,13 @@ TEST_F(WornResistanceTest, TheHelmOfBrillianceIsTwoRings)
 TEST_F(WornResistanceTest, ARingAndAPotionAreOneRing)
 {
 	wear("ring_of_fire_resistance", EquipmentSlot::RIGHT_RING);
-	buffs.add_buff(*player, BuffType::FIRE_RESISTANCE, 1, 10, BuffApplication::ADD, ctx.gameState->get_time());
+	buffs.add_buff(
+		*player,
+		BuffType::FIRE_RESISTANCE,
+		1,
+		10,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 
 	EXPECT_EQ(fire_strength(), 1);
 }
@@ -134,7 +155,13 @@ TEST_F(WornResistanceTest, ARingAndAPotionAreOneRing)
 TEST_F(WornResistanceTest, TheHelmCannotBeAugmented)
 {
 	wear_spoken_helm_of_brilliance();
-	buffs.add_buff(*player, BuffType::FIRE_RESISTANCE, 1, 10, BuffApplication::ADD, ctx.gameState->get_time());
+	buffs.add_buff(
+		*player,
+		BuffType::FIRE_RESISTANCE,
+		1,
+		10,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 
 	EXPECT_EQ(fire_strength(), 2);
 }
@@ -142,7 +169,10 @@ TEST_F(WornResistanceTest, TheHelmCannotBeAugmented)
 // The game's own enhancement of fire resistance is read as a ring's worth.
 TEST_F(WornResistanceTest, AWornEnhancementIsOneRing)
 {
-	player->equip_item(sword_of_fire_resistance(), EquipmentSlot::RIGHT_HAND, ctx);
+	player->equip_item(
+		sword_of_fire_resistance(),
+		EquipmentSlot::RIGHT_HAND,
+		ctx);
 
 	EXPECT_EQ(fire_strength(), 1);
 }
@@ -153,9 +183,15 @@ TEST_F(WornResistanceTest, SaveBonusesFollowTheTwoEntries)
 	wear("ring_of_fire_resistance", EquipmentSlot::RIGHT_RING);
 	wear("ring_of_cold_resistance", EquipmentSlot::LEFT_RING);
 
-	EXPECT_EQ(DamageResolver::save_bonus_against(DamageType::FIRE, *player, ctx), 4);
-	EXPECT_EQ(DamageResolver::save_bonus_against(DamageType::COLD, *player, ctx), 2);
-	EXPECT_EQ(DamageResolver::save_bonus_against(DamageType::LIGHTNING, *player, ctx), 0);
+	EXPECT_EQ(
+		DamageResolver::save_bonus_against(DamageType::FIRE, *player, ctx),
+		4);
+	EXPECT_EQ(
+		DamageResolver::save_bonus_against(DamageType::COLD, *player, ctx),
+		2);
+	EXPECT_EQ(
+		DamageResolver::save_bonus_against(DamageType::LIGHTNING, *player, ctx),
+		0);
 }
 
 // The helm's save bonus is the double ring's: +8.
@@ -163,26 +199,50 @@ TEST_F(WornResistanceTest, TheHelmSavesAtPlusEight)
 {
 	wear_spoken_helm_of_brilliance();
 
-	EXPECT_EQ(DamageResolver::save_bonus_against(DamageType::FIRE, *player, ctx), 8);
+	EXPECT_EQ(
+		DamageResolver::save_bonus_against(DamageType::FIRE, *player, ctx),
+		8);
 }
 
 // The per-die arithmetic, on the resolver alone.
 TEST(ReduceDiceTest, FireTakesTwoPerRingOffEveryDieAndNeverBelowOne)
 {
-	EXPECT_EQ(DamageResolver::reduce_dice({ 6, 6, 6 }, DamageType::FIRE, 0).hit_points(), 18);
-	EXPECT_EQ(DamageResolver::reduce_dice({ 6, 6, 6 }, DamageType::FIRE, 1).hit_points(), 12);
-	EXPECT_EQ(DamageResolver::reduce_dice({ 6, 6, 6 }, DamageType::FIRE, 2).hit_points(), 6);
-	EXPECT_EQ(DamageResolver::reduce_dice({ 1, 2, 3 }, DamageType::FIRE, 1).hit_points(), 3) << "1, 1 and 1: a die never goes below one";
+	EXPECT_EQ(
+		DamageResolver::reduce_dice({ 6, 6, 6 }, DamageType::FIRE, 0)
+			.hit_points(),
+		18);
+	EXPECT_EQ(
+		DamageResolver::reduce_dice({ 6, 6, 6 }, DamageType::FIRE, 1)
+			.hit_points(),
+		12);
+	EXPECT_EQ(
+		DamageResolver::reduce_dice({ 6, 6, 6 }, DamageType::FIRE, 2)
+			.hit_points(),
+		6);
+	EXPECT_EQ(
+		DamageResolver::reduce_dice({ 1, 2, 3 }, DamageType::FIRE, 1)
+			.hit_points(),
+		3)
+		<< "1, 1 and 1: a die never goes below one";
 }
 
 TEST(ReduceDiceTest, ColdTakesOnePerRingOffEveryDie)
 {
-	EXPECT_EQ(DamageResolver::reduce_dice({ 6, 6, 6 }, DamageType::COLD, 1).hit_points(), 15);
-	EXPECT_EQ(DamageResolver::reduce_dice({ 1, 1, 1 }, DamageType::COLD, 1).hit_points(), 3);
+	EXPECT_EQ(
+		DamageResolver::reduce_dice({ 6, 6, 6 }, DamageType::COLD, 1)
+			.hit_points(),
+		15);
+	EXPECT_EQ(
+		DamageResolver::reduce_dice({ 1, 1, 1 }, DamageType::COLD, 1)
+			.hit_points(),
+		3);
 }
 
 // A type the book was not read for is summed as rolled, whatever the strength.
 TEST(ReduceDiceTest, OtherTypesAreSummedAsRolled)
 {
-	EXPECT_EQ(DamageResolver::reduce_dice({ 6, 6, 6 }, DamageType::LIGHTNING, 2).hit_points(), 18);
+	EXPECT_EQ(
+		DamageResolver::reduce_dice({ 6, 6, 6 }, DamageType::LIGHTNING, 2)
+			.hit_points(),
+		18);
 }

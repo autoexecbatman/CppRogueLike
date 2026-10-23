@@ -18,14 +18,14 @@
 
 TEST(PickableAcBonus, Armor_ReturnsArmorClass)
 {
-    const ItemBehavior behavior = Armor{ 5 };
-    EXPECT_EQ(get_item_ac_bonus(behavior), 5);
+	const ItemBehavior behavior = Armor{ 5 };
+	EXPECT_EQ(get_item_ac_bonus(behavior), 5);
 }
 
 TEST(PickableAcBonus, Armor_ZeroArmorClass_ReturnsZero)
 {
-    const ItemBehavior behavior = Armor{ 0 };
-    EXPECT_EQ(get_item_ac_bonus(behavior), 0);
+	const ItemBehavior behavior = Armor{ 0 };
+	EXPECT_EQ(get_item_ac_bonus(behavior), 0);
 }
 
 TEST(PickableAcBonus, Shield_ReturnsMinusOne)
@@ -40,7 +40,8 @@ TEST(PickableAcBonus, Shield_ReturnsMinusOne)
 // code keeps beside it.
 TEST(PickableAcBonus, MagicalHelm_Brilliance_IsWorthItsOwnBonus)
 {
-	const ItemBehavior asTheBookRatesIt = MagicalHelm{ MagicalEffect::BRILLIANCE, 2, HelmCommand::EMPOWERED };
+	const ItemBehavior asTheBookRatesIt =
+		MagicalHelm{ MagicalEffect::BRILLIANCE, 2, HelmCommand::EMPOWERED };
 	EXPECT_EQ(get_item_ac_bonus(asTheBookRatesIt), -2);
 }
 
@@ -48,7 +49,8 @@ TEST(PickableAcBonus, MagicalHelm_Brilliance_ReadsTheBonusRatherThanAConstant)
 {
 	// A different bonus must give a different answer, or the helm is carrying a number
 	// the data cannot change - which is how it came to be worth +4.
-	const ItemBehavior enchantedFurther = MagicalHelm{ MagicalEffect::BRILLIANCE, 3, HelmCommand::EMPOWERED };
+	const ItemBehavior enchantedFurther =
+		MagicalHelm{ MagicalEffect::BRILLIANCE, 3, HelmCommand::EMPOWERED };
 	EXPECT_EQ(get_item_ac_bonus(enchantedFurther), -3);
 }
 
@@ -60,8 +62,10 @@ TEST(PickableAcBonus, MagicalHelm_Brilliance_MatchesTheItemTheGameShips)
 	nlohmann::json items;
 	file >> items;
 
-	const int shippedBonus = items.at("helm_of_brilliance").at("effectBonus").get<int>();
-	EXPECT_EQ(shippedBonus, 2) << "the shipped helm is no longer the book's +2 helm";
+	const int shippedBonus =
+		items.at("helm_of_brilliance").at("effectBonus").get<int>();
+	EXPECT_EQ(shippedBonus, 2)
+		<< "the shipped helm is no longer the book's +2 helm";
 
 	const ItemBehavior behavior = MagicalHelm{
 		MagicalEffect::BRILLIANCE,
@@ -74,32 +78,33 @@ TEST(PickableAcBonus, MagicalHelm_Brilliance_MatchesTheItemTheGameShips)
 // Until its command word is spoken the helm is "nothing more than an ordinary piece of armor".
 TEST(PickableAcBonus, MagicalHelm_Brilliance_IsWorthNothingDormant)
 {
-	const ItemBehavior unspoken = MagicalHelm{ MagicalEffect::BRILLIANCE, 2, HelmCommand::DORMANT };
+	const ItemBehavior unspoken =
+		MagicalHelm{ MagicalEffect::BRILLIANCE, 2, HelmCommand::DORMANT };
 	EXPECT_EQ(get_item_ac_bonus(unspoken), 0);
 }
 
 TEST(PickableAcBonus, MagicalHelm_Protection_ReturnsNegativeBonus)
 {
-    const ItemBehavior behavior = MagicalHelm{ MagicalEffect::PROTECTION, 3 };
-    EXPECT_EQ(get_item_ac_bonus(behavior), -3);
+	const ItemBehavior behavior = MagicalHelm{ MagicalEffect::PROTECTION, 3 };
+	EXPECT_EQ(get_item_ac_bonus(behavior), -3);
 }
 
 TEST(PickableAcBonus, MagicalHelm_NoEffect_ReturnsZero)
 {
-    const ItemBehavior behavior = MagicalHelm{ MagicalEffect::NONE, 0 };
-    EXPECT_EQ(get_item_ac_bonus(behavior), 0);
+	const ItemBehavior behavior = MagicalHelm{ MagicalEffect::NONE, 0 };
+	EXPECT_EQ(get_item_ac_bonus(behavior), 0);
 }
 
 TEST(PickableAcBonus, MagicalRing_Protection_ReturnsMinusOne)
 {
-    const ItemBehavior behavior = MagicalRing{ MagicalEffect::PROTECTION, 0 };
-    EXPECT_EQ(get_item_ac_bonus(behavior), -1);
+	const ItemBehavior behavior = MagicalRing{ MagicalEffect::PROTECTION, 0 };
+	EXPECT_EQ(get_item_ac_bonus(behavior), -1);
 }
 
 TEST(PickableAcBonus, MagicalRing_NoEffect_ReturnsZero)
 {
-    const ItemBehavior behavior = MagicalRing{ MagicalEffect::NONE, 0 };
-    EXPECT_EQ(get_item_ac_bonus(behavior), 0);
+	const ItemBehavior behavior = MagicalRing{ MagicalEffect::NONE, 0 };
+	EXPECT_EQ(get_item_ac_bonus(behavior), 0);
 }
 
 // ============================================================================
@@ -108,66 +113,66 @@ TEST(PickableAcBonus, MagicalRing_NoEffect_ReturnsZero)
 
 TEST(PickableAcBonus, Consumable_ReturnsZero)
 {
-    const ItemBehavior behavior = Consumable{};
-    EXPECT_EQ(get_item_ac_bonus(behavior), 0);
+	const ItemBehavior behavior = Consumable{};
+	EXPECT_EQ(get_item_ac_bonus(behavior), 0);
 }
 
 TEST(PickableAcBonus, Weapon_ReturnsZero)
 {
-    const ItemBehavior behavior = Weapon{};
-    EXPECT_EQ(get_item_ac_bonus(behavior), 0);
+	const ItemBehavior behavior = Weapon{};
+	EXPECT_EQ(get_item_ac_bonus(behavior), 0);
 }
 
 TEST(PickableAcBonus, TargetedScroll_ReturnsZero)
 {
-    const ItemBehavior behavior = TargetedScroll{};
-    EXPECT_EQ(get_item_ac_bonus(behavior), 0);
+	const ItemBehavior behavior = TargetedScroll{};
+	EXPECT_EQ(get_item_ac_bonus(behavior), 0);
 }
 
 TEST(PickableAcBonus, Teleporter_ReturnsZero)
 {
-    const ItemBehavior behavior = Teleporter{};
-    EXPECT_EQ(get_item_ac_bonus(behavior), 0);
+	const ItemBehavior behavior = Teleporter{};
+	EXPECT_EQ(get_item_ac_bonus(behavior), 0);
 }
 
 TEST(PickableAcBonus, Gold_ReturnsZero)
 {
-    const ItemBehavior behavior = Gold{};
-    EXPECT_EQ(get_item_ac_bonus(behavior), 0);
+	const ItemBehavior behavior = Gold{};
+	EXPECT_EQ(get_item_ac_bonus(behavior), 0);
 }
 
 TEST(PickableAcBonus, Food_ReturnsZero)
 {
-    const ItemBehavior behavior = Food{};
-    EXPECT_EQ(get_item_ac_bonus(behavior), 0);
+	const ItemBehavior behavior = Food{};
+	EXPECT_EQ(get_item_ac_bonus(behavior), 0);
 }
 
 TEST(PickableAcBonus, CorpseFood_ReturnsZero)
 {
-    const ItemBehavior behavior = CorpseFood{};
-    EXPECT_EQ(get_item_ac_bonus(behavior), 0);
+	const ItemBehavior behavior = CorpseFood{};
+	EXPECT_EQ(get_item_ac_bonus(behavior), 0);
 }
 
 TEST(PickableAcBonus, JewelryAmulet_ReturnsZero)
 {
-    const ItemBehavior behavior = JewelryAmulet{};
-    EXPECT_EQ(get_item_ac_bonus(behavior), 0);
+	const ItemBehavior behavior = JewelryAmulet{};
+	EXPECT_EQ(get_item_ac_bonus(behavior), 0);
 }
 
 TEST(PickableAcBonus, Gauntlets_ReturnsZero)
 {
-    const ItemBehavior behavior = Gauntlets{};
-    EXPECT_EQ(get_item_ac_bonus(behavior), 0);
+	const ItemBehavior behavior = Gauntlets{};
+	EXPECT_EQ(get_item_ac_bonus(behavior), 0);
 }
 
 TEST(PickableAcBonus, Girdle_ReturnsZero)
 {
-    const ItemBehavior behavior = Girdle{};
-    EXPECT_EQ(get_item_ac_bonus(behavior), 0);
+	const ItemBehavior behavior = Girdle{};
+	EXPECT_EQ(get_item_ac_bonus(behavior), 0);
 }
 
 TEST(PickableAcBonus, Amulet_ReturnsZero)
 {
-    const ItemBehavior behavior = Amulet{};
-    EXPECT_EQ(get_item_ac_bonus(behavior), 0);
+	const ItemBehavior behavior = Amulet{};
+	EXPECT_EQ(get_item_ac_bonus(behavior), 0);
 }

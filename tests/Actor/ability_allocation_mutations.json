@@ -81,7 +81,7 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": "\t\tset_ability(ability, blueprint.abilityScores.at(ability_index(ability)));",
+      "original": "\t\tset_ability(\n\t\t\tability,\n\t\t\tblueprint.abilityScores.at(ability_index(ability)));",
       "mutated": "",
       "catches": "the allocated scores never reaching the character that was built from them"
     }

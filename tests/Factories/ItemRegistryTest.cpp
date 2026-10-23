@@ -32,7 +32,8 @@ TEST(ItemRegistryTest, AnEditToOneRegistryDoesNotReachAnother)
 	first.set_params("health_potion", dearer);
 
 	EXPECT_EQ(first.get_params("health_potion").value, shippedValue + 500);
-	EXPECT_EQ(second.get_params("health_potion").value, shippedValue) << "an edit to one registry reached another";
+	EXPECT_EQ(second.get_params("health_potion").value, shippedValue)
+		<< "an edit to one registry reached another";
 }
 
 // An item added to one registry is listed by that registry alone, under its own name.
@@ -43,13 +44,16 @@ TEST(ItemRegistryTest, ACustomItemBelongsToTheRegistryItWasAddedTo)
 	first.load(Paths::ITEMS);
 	second.load(Paths::ITEMS);
 
-	const std::string key = first.add_custom("Registry Trinket", "potion", ItemParams{});
+	const std::string key =
+		first.add_custom("Registry Trinket", "potion", ItemParams{});
 
-	EXPECT_EQ(key, "registry_trinket") << "the key is the name, lower case, spaces as underscores";
+	EXPECT_EQ(key, "registry_trinket")
+		<< "the key is the name, lower case, spaces as underscores";
 	EXPECT_EQ(first.get_params(key).name, "Registry Trinket");
 	EXPECT_EQ(first.get_params(key).category, "potion");
 	EXPECT_TRUE(std::ranges::contains(first.get_all_keys(), key));
-	EXPECT_FALSE(std::ranges::contains(second.get_all_keys(), key)) << "a custom item reached another registry";
+	EXPECT_FALSE(std::ranges::contains(second.get_all_keys(), key))
+		<< "a custom item reached another registry";
 }
 
 // A name already taken - by a custom item or a shipped one - is numbered from 2.
@@ -58,9 +62,15 @@ TEST(ItemRegistryTest, ATakenNameIsNumbered)
 	ItemRegistry items{};
 	items.load(Paths::ITEMS);
 
-	EXPECT_EQ(items.add_custom("Registry Trinket", "potion", ItemParams{}), "registry_trinket");
-	EXPECT_EQ(items.add_custom("Registry Trinket", "potion", ItemParams{}), "registry_trinket_2");
-	EXPECT_EQ(items.add_custom("Health Potion", "potion", ItemParams{}), "health_potion_2");
+	EXPECT_EQ(
+		items.add_custom("Registry Trinket", "potion", ItemParams{}),
+		"registry_trinket");
+	EXPECT_EQ(
+		items.add_custom("Registry Trinket", "potion", ItemParams{}),
+		"registry_trinket_2");
+	EXPECT_EQ(
+		items.add_custom("Health Potion", "potion", ItemParams{}),
+		"health_potion_2");
 }
 
 // Only a custom item can be removed; a key nobody holds is an error too.
@@ -78,11 +88,13 @@ TEST(ItemRegistryTest, ALoadReplacesTheCustomItemsItHeld)
 {
 	ItemRegistry items{};
 	items.load(Paths::ITEMS);
-	const std::string key = items.add_custom("Registry Trinket", "potion", ItemParams{});
+	const std::string key =
+		items.add_custom("Registry Trinket", "potion", ItemParams{});
 
 	items.load(Paths::ITEMS);
 
-	EXPECT_FALSE(std::ranges::contains(items.get_all_keys(), key)) << "a custom item survived a load";
+	EXPECT_FALSE(std::ranges::contains(items.get_all_keys(), key))
+		<< "a custom item survived a load";
 }
 
 // An item's name and category are strings its params own, so a copy of them outlives the
@@ -100,7 +112,10 @@ TEST(ItemRegistryTest, AParamsCopyKeepsItsNameAfterAReload)
 	ItemRegistry items{};
 	items.load(Paths::ITEMS);
 	// Longer than any short-string buffer, so the name lives on the heap the load frees.
-	const std::string key = items.add_custom("Registry Trinket Of Some Length", "potion", ItemParams{});
+	const std::string key = items.add_custom(
+		"Registry Trinket Of Some Length",
+		"potion",
+		ItemParams{});
 	const ItemParams copied = items.get_params(key);
 
 	items.load(Paths::ITEMS);

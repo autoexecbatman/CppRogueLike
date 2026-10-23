@@ -30,7 +30,9 @@ constexpr int STATUS_ROW = 9;
 constexpr int FIRST_HINT_ROW = 10;
 } // namespace
 
-ThiefSkillAllocation thief_skill_allocation_for(const Player& character, int level)
+ThiefSkillAllocation thief_skill_allocation_for(
+	const Player& character,
+	int level)
 {
 	return ThiefSkillAllocation{
 		character.thiefSkillPoints,
@@ -52,19 +54,27 @@ void push_thief_skill_allocation(Player& character, int level, GameContext& ctx)
 	}
 
 	// Read now, so the screen shows what the character is wearing at this moment.
-	ThiefSkillAllocation allocation = thief_skill_allocation_for(character, level);
+	ThiefSkillAllocation allocation =
+		thief_skill_allocation_for(character, level);
 
 	// Reached through the context's own handle rather than captured, so a screen
 	// still open when the player is replaced writes to whoever the player is then.
-	const auto keep_the_points = [](std::array<int, THIEF_SKILL_COUNT> points, GameContext& context)
+	const auto keep_the_points =
+		[](std::array<int, THIEF_SKILL_COUNT> points, GameContext& context)
 	{
 		context.player_concrete().thiefSkillPoints = points;
 	};
 
-	ctx.menus->push_back(std::make_unique<MenuThiefSkills>(ctx, std::move(allocation), keep_the_points));
+	ctx.menus->push_back(
+		std::make_unique<MenuThiefSkills>(
+			ctx,
+			std::move(allocation),
+			keep_the_points));
 }
 
-ThiefSkillScreenState after_thief_skill_key(GameKey key, ThiefSkillScreenState screen)
+ThiefSkillScreenState after_thief_skill_key(
+	GameKey key,
+	ThiefSkillScreenState screen)
 {
 	switch (key)
 	{
@@ -122,21 +132,25 @@ ThiefSkillScreenState after_thief_skill_key(GameKey key, ThiefSkillScreenState s
 MenuThiefSkills::MenuThiefSkills(
 	GameContext& ctx,
 	ThiefSkillAllocation startingAllocation,
-	std::function<void(std::array<int, THIEF_SKILL_COUNT>, GameContext&)> acceptCallback)
-	: screen{
-		  .cursor = ThiefSkill::PICK_POCKETS,
-		  .allocation = std::move(startingAllocation),
-	  },
-	  onAccept{ std::move(acceptCallback) }
+	std::function<void(std::array<int, THIEF_SKILL_COUNT>, GameContext&)>
+		acceptCallback) :
+	screen{
+		.cursor = ThiefSkill::PICK_POCKETS,
+		.allocation = std::move(startingAllocation),
+	},
+	onAccept{ std::move(acceptCallback) }
 {
-	assert(ctx.renderer && "MenuThiefSkills requires a renderer to size its box");
+	assert(
+		ctx.renderer && "MenuThiefSkills requires a renderer to size its box");
 	assert(onAccept && "MenuThiefSkills requires somewhere to put the result");
 
 	const int viewportCols = ctx.renderer->get_viewport_cols();
 	const int viewportRows = ctx.renderer->get_viewport_rows();
 
-	const int width = std::min(MENU_MAX_WIDTH_TILES, viewportCols - MENU_MARGIN_TILES * 2);
-	assert(width > 0 && "MenuThiefSkills: viewport is too narrow to hold the box");
+	const int width =
+		std::min(MENU_MAX_WIDTH_TILES, viewportCols - MENU_MARGIN_TILES * 2);
+	assert(
+		width > 0 && "MenuThiefSkills: viewport is too narrow to hold the box");
 
 	menu_new(
 		width,
@@ -160,7 +174,11 @@ std::string MenuThiefSkills::row_for(ThiefSkill skill) const
 	// nobody has touched yet is eight plain numbers.
 	if (assigned == 0)
 	{
-		return std::format("{} {:<15}{:>3}%", marker, thief_skill_name(skill), screen.allocation.score(skill));
+		return std::format(
+			"{} {:<15}{:>3}%",
+			marker,
+			thief_skill_name(skill),
+			screen.allocation.score(skill));
 	}
 	return std::format(
 		"{} {:<15}{:>3}% +{}",
@@ -189,12 +207,18 @@ void MenuThiefSkills::draw_allocation_screen()
 	menu_draw_box();
 	menu_draw_title("THIEF SKILLS", ColorPairId::YELLOW_BLACK);
 
-	assert(renderer && "MenuThiefSkills::draw_allocation_screen called before menu_new");
+	assert(
+		renderer &&
+		"MenuThiefSkills::draw_allocation_screen called before menu_new");
 	const int tileSize = renderer->get_tile_size();
 	const int textX = (static_cast<int>(menuStartX) + 1) * tileSize;
-	const int firstRowY = static_cast<int>(menuStartY) * tileSize + tileSize + TEXT_TOP_INSET;
+	const int firstRowY =
+		static_cast<int>(menuStartY) * tileSize + tileSize + TEXT_TOP_INSET;
 
-	const auto draw_row = [this, textX, firstRowY](int row, const std::string& text, ColorPairId colorPair)
+	const auto draw_row =
+		[this,
+			textX,
+			firstRowY](int row, const std::string& text, ColorPairId colorPair)
 	{
 		renderer->draw_text(
 			Vector2D{ textX, firstRowY + row * TEXT_ROW_PITCH },
@@ -205,7 +229,9 @@ void MenuThiefSkills::draw_allocation_screen()
 	int row = FIRST_SKILL_ROW;
 	for (const ThiefSkill skill : ALL_THIEF_SKILL)
 	{
-		const ColorPairId colorPair = (skill == screen.cursor) ? ColorPairId::YELLOW_BLACK : ColorPairId::WHITE_BLACK;
+		const ColorPairId colorPair = (skill == screen.cursor) ?
+			ColorPairId::YELLOW_BLACK :
+			ColorPairId::WHITE_BLACK;
 		draw_row(row, row_for(skill), colorPair);
 		++row;
 	}
@@ -213,9 +239,18 @@ void MenuThiefSkills::draw_allocation_screen()
 	draw_row(POOL_ROW, pool_line(), ColorPairId::WHITE_BLACK);
 
 	const bool allSpent = screen.allocation.remaining_points() == 0;
-	draw_row(STATUS_ROW, status_line(), allSpent ? ColorPairId::GREEN_BLACK : ColorPairId::RED_BLACK);
-	draw_row(FIRST_HINT_ROW, "[up/down] skill   [left/right] one point", ColorPairId::CYAN_BLACK);
-	draw_row(FIRST_HINT_ROW + 1, "[space] fill it   [Enter] done", ColorPairId::CYAN_BLACK);
+	draw_row(
+		STATUS_ROW,
+		status_line(),
+		allSpent ? ColorPairId::GREEN_BLACK : ColorPairId::RED_BLACK);
+	draw_row(
+		FIRST_HINT_ROW,
+		"[up/down] skill   [left/right] one point",
+		ColorPairId::CYAN_BLACK);
+	draw_row(
+		FIRST_HINT_ROW + 1,
+		"[space] fill it   [Enter] done",
+		ColorPairId::CYAN_BLACK);
 }
 
 void MenuThiefSkills::menu(GameContext& ctx)

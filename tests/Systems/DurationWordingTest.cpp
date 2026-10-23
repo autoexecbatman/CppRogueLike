@@ -64,7 +64,9 @@ protected:
 		caster->position = Vector2D{ 2, 5 };
 		map.compute_fov(ctx);
 
-		auto orc = std::make_unique<Creature>(Vector2D{ 3, 5 }, ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK });
+		auto orc = std::make_unique<Creature>(
+			Vector2D{ 3, 5 },
+			ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK });
 		orc->healthPool = std::make_unique<HealthPool>(20);
 		orc->experienceReward = std::make_unique<ExperienceReward>(0);
 		orc->ai = std::make_unique<AiMonster>();
@@ -83,13 +85,19 @@ protected:
 	{
 		const auto ignore_completion = [](GameContext& completedCtx) {
 		};
-		SpellSystem::cast_spell_by_key(key, *caster, SpellSource::MEMORIZED, ignore_completion, ctx);
+		SpellSystem::cast_spell_by_key(
+			key,
+			*caster,
+			SpellSource::MEMORIZED,
+			ignore_completion,
+			ctx);
 	}
 
 	// Feeds the open targeting menu one key per frame, as the game loop would.
 	void target_with(std::initializer_list<GameKey> keys)
 	{
-		ASSERT_FALSE(ctx.menus->empty()) << "the spell opened no targeting menu";
+		ASSERT_FALSE(ctx.menus->empty())
+			<< "the spell opened no targeting menu";
 		for (const GameKey key : keys)
 		{
 			ctx.inputSystem->queue_key(key, 0);
@@ -101,9 +109,14 @@ protected:
 	std::string all_message_text() const
 	{
 		std::string joined;
-		for (size_t index = 0; index < ctx.messageSystem->get_stored_message_count(); ++index)
+		for (
+			size_t index = 0;
+			index < ctx.messageSystem->get_stored_message_count();
+			++index)
 		{
-			for (const auto& part : ctx.messageSystem->get_attack_message_at(index))
+			for (
+				const auto& part :
+				ctx.messageSystem->get_attack_message_at(index))
 			{
 				joined += part.text;
 			}
@@ -115,15 +128,18 @@ protected:
 	void expect_rounds(const std::string& count)
 	{
 		const std::string text = all_message_text();
-		EXPECT_NE(text.find(count), std::string::npos) << "expected \"" << count << "\" in: " << text;
-		EXPECT_EQ(text.find("turn"), std::string::npos) << "a round count named as turns: " << text;
+		EXPECT_NE(text.find(count), std::string::npos)
+			<< "expected \"" << count << "\" in: " << text;
+		EXPECT_EQ(text.find("turn"), std::string::npos)
+			<< "a round count named as turns: " << text;
 	}
 
 	MockGameContext mock{};
 	GameContext ctx{};
 	BuffSystem buffs{};
 	Map map{ 20, 20 };
-	std::unique_ptr<Player> caster{ std::make_unique<Player>(Vector2D{ 2, 5 }) };
+	std::unique_ptr<Player> caster{ std::make_unique<Player>(
+		Vector2D{ 2, 5 }) };
 	std::vector<std::unique_ptr<Creature>> creatures{};
 };
 
@@ -145,7 +161,8 @@ TEST_F(DurationWordingTest, ABuffPotionNamesItsRounds)
 
 	// The potion is in no pack, so nothing is used up and use() answers false; the buff and
 	// its message come first.
-	[[maybe_unused]] const bool consumed = use(consumable, potion, *caster, ctx);
+	[[maybe_unused]] const bool consumed =
+		use(consumable, potion, *caster, ctx);
 
 	expect_rounds("30 rounds");
 }

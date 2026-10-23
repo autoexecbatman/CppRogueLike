@@ -38,20 +38,27 @@ constexpr int FIRST_HINT_ROW = 9;
 constexpr int FIRST_DIE_CHARACTER = '1';
 } // namespace
 
-MenuAbilityScores::MenuAbilityScores(GameContext& ctx)
-	: allocation(
-		  roll_method_six_pool(*ctx.dice),
-		  ctx.playerBlueprint->creatureClass,
-		  racial_ability_modifiers(ctx.playerBlueprint->playerRaceState))
+MenuAbilityScores::MenuAbilityScores(GameContext& ctx) :
+	allocation(
+		roll_method_six_pool(*ctx.dice),
+		ctx.playerBlueprint->creatureClass,
+		racial_ability_modifiers(ctx.playerBlueprint->playerRaceState))
 {
-	assert(ctx.renderer && "MenuAbilityScores requires a renderer to size its box");
-	assert(ctx.playerBlueprint && "MenuAbilityScores requires the blueprint the menus fill");
+	assert(
+		ctx.renderer &&
+		"MenuAbilityScores requires a renderer to size its box");
+	assert(
+		ctx.playerBlueprint &&
+		"MenuAbilityScores requires the blueprint the menus fill");
 
 	const int viewportCols = ctx.renderer->get_viewport_cols();
 	const int viewportRows = ctx.renderer->get_viewport_rows();
 
-	const int width = std::min(MENU_MAX_WIDTH_TILES, viewportCols - MENU_MARGIN_TILES * 2);
-	assert(width > 0 && "MenuAbilityScores: viewport is too narrow to hold the box");
+	const int width =
+		std::min(MENU_MAX_WIDTH_TILES, viewportCols - MENU_MARGIN_TILES * 2);
+	assert(
+		width > 0 &&
+		"MenuAbilityScores: viewport is too narrow to hold the box");
 
 	menu_new(
 		width,
@@ -78,7 +85,10 @@ std::optional<std::size_t> die_index_for_character(int charInput)
 	return static_cast<std::size_t>(dieNumber);
 }
 
-std::string ability_row_line(const AbilityAllocation& allocation, Ability ability, Ability cursor)
+std::string ability_row_line(
+	const AbilityAllocation& allocation,
+	Ability ability,
+	Ability cursor)
 {
 	const int allocated = allocation.allocated(ability);
 	const int modifier = allocation.score(ability) - allocated;
@@ -87,7 +97,11 @@ std::string ability_row_line(const AbilityAllocation& allocation, Ability abilit
 	// The race is shown only where it does something, so five of six lines stay quiet.
 	if (modifier == 0)
 	{
-		return std::format("{} {:<13}{:>3}", marker, ability_name(ability), allocated);
+		return std::format(
+			"{} {:<13}{:>3}",
+			marker,
+			ability_name(ability),
+			allocated);
 	}
 	return std::format(
 		"{} {:<13}{:>3} {:+} = {}",
@@ -120,7 +134,10 @@ std::string allocation_status_line(const AbilityAllocation& allocation)
 	{
 		return "Ready.";
 	}
-	return std::format("Needs {} {}", ability_name(shortfall->ability), shortfall->score);
+	return std::format(
+		"Needs {} {}",
+		ability_name(shortfall->ability),
+		shortfall->score);
 }
 
 void MenuAbilityScores::draw_allocation_screen()
@@ -128,12 +145,18 @@ void MenuAbilityScores::draw_allocation_screen()
 	menu_draw_box();
 	menu_draw_title("ABILITY SCORES", ColorPairId::YELLOW_BLACK);
 
-	assert(renderer && "MenuAbilityScores::draw_allocation_screen called before menu_new");
+	assert(
+		renderer &&
+		"MenuAbilityScores::draw_allocation_screen called before menu_new");
 	const int tileSize = renderer->get_tile_size();
 	const int textX = (static_cast<int>(menuStartX) + 1) * tileSize;
-	const int firstRowY = static_cast<int>(menuStartY) * tileSize + tileSize + TEXT_TOP_INSET;
+	const int firstRowY =
+		static_cast<int>(menuStartY) * tileSize + tileSize + TEXT_TOP_INSET;
 
-	const auto draw_row = [this, textX, firstRowY](int row, const std::string& text, ColorPairId colorPair)
+	const auto draw_row =
+		[this,
+			textX,
+			firstRowY](int row, const std::string& text, ColorPairId colorPair)
 	{
 		renderer->draw_text(
 			Vector2D{ textX, firstRowY + row * TEXT_ROW_PITCH },
@@ -144,7 +167,9 @@ void MenuAbilityScores::draw_allocation_screen()
 	int row = FIRST_ABILITY_ROW;
 	for (const Ability ability : ALL_ABILITY)
 	{
-		const ColorPairId colorPair = (ability == cursor) ? ColorPairId::YELLOW_BLACK : ColorPairId::WHITE_BLACK;
+		const ColorPairId colorPair = (ability == cursor) ?
+			ColorPairId::YELLOW_BLACK :
+			ColorPairId::WHITE_BLACK;
 		draw_row(row, ability_row_line(allocation, ability, cursor), colorPair);
 		++row;
 	}
@@ -152,14 +177,25 @@ void MenuAbilityScores::draw_allocation_screen()
 	draw_row(POOL_ROW, dice_pool_line(allocation), ColorPairId::WHITE_BLACK);
 
 	const bool ready = !allocation.unmet_minimum().has_value();
-	draw_row(STATUS_ROW, allocation_status_line(allocation), ready ? ColorPairId::GREEN_BLACK : ColorPairId::RED_BLACK);
-	draw_row(FIRST_HINT_ROW, "[up/down] choose an ability   [1-7] spend that die", ColorPairId::CYAN_BLACK);
-	draw_row(FIRST_HINT_ROW + 1, "[backspace] take a die back   [Enter] done", ColorPairId::CYAN_BLACK);
+	draw_row(
+		STATUS_ROW,
+		allocation_status_line(allocation),
+		ready ? ColorPairId::GREEN_BLACK : ColorPairId::RED_BLACK);
+	draw_row(
+		FIRST_HINT_ROW,
+		"[up/down] choose an ability   [1-7] spend that die",
+		ColorPairId::CYAN_BLACK);
+	draw_row(
+		FIRST_HINT_ROW + 1,
+		"[backspace] take a die back   [Enter] done",
+		ColorPairId::CYAN_BLACK);
 }
 
 void MenuAbilityScores::menu(GameContext& ctx)
 {
-	assert(ctx.playerBlueprint && "MenuAbilityScores::menu: called without a playerBlueprint");
+	assert(
+		ctx.playerBlueprint &&
+		"MenuAbilityScores::menu: called without a playerBlueprint");
 	assert(inputSystem && "MenuAbilityScores::menu called before menu_new");
 	inputSystem->poll();
 
@@ -167,7 +203,8 @@ void MenuAbilityScores::menu(GameContext& ctx)
 	const GameKey gameKey = inputSystem->get_key();
 
 	// A digit names a die of the pool, which is the only thing a number means here.
-	const std::optional<std::size_t> dieIndex = die_index_for_character(charInput);
+	const std::optional<std::size_t> dieIndex =
+		die_index_for_character(charInput);
 	if (dieIndex.has_value())
 	{
 		if (allocation.can_spend(cursor, *dieIndex))
@@ -207,7 +244,8 @@ void MenuAbilityScores::menu(GameContext& ctx)
 			// book leaves spending every die to the player.
 			if (!allocation.unmet_minimum().has_value())
 			{
-				ctx.playerBlueprint->abilityScores = allocation.allocated_scores();
+				ctx.playerBlueprint->abilityScores =
+					allocation.allocated_scores();
 				menu_set_run_false();
 				ctx.menus->push_back(std::make_unique<MenuName>(ctx));
 			}

@@ -38,7 +38,8 @@ std::vector<std::unique_ptr<Ai>> one_of_each_saving_kind()
 	std::vector<std::unique_ptr<Ai>> kinds;
 	kinds.push_back(Ai::make(AiType::RANGED_MONSTER));
 	// The shape Creature::apply_confusion makes: wrapped around the creature's own mind.
-	kinds.push_back(std::make_unique<AiMonsterConfused>(5, std::make_unique<AiMonster>()));
+	kinds.push_back(
+		std::make_unique<AiMonsterConfused>(5, std::make_unique<AiMonster>()));
 	kinds.push_back(Ai::make(AiType::MIMIC));
 	kinds.push_back(Ai::make(AiType::SPIDER));
 	kinds.push_back(Ai::make(AiType::GIANT_SPIDER));
@@ -81,12 +82,16 @@ TEST(AiRecordRefusalTest, EveryFieldASaveWritesIsRequired)
 			}
 			catch (const json::exception& refusal)
 			{
-				EXPECT_NE(std::string(refusal.what()).find(key), std::string::npos)
-					<< kind << " refused a record without " << key << " but named something else: " << refusal.what();
+				EXPECT_NE(
+					std::string(refusal.what()).find(key),
+					std::string::npos)
+					<< kind << " refused a record without " << key
+					<< " but named something else: " << refusal.what();
 			}
 		}
 	}
-	EXPECT_EQ(rows, 16u) << "the saves wrote a different set of fields than the ones counted when this was written";
+	EXPECT_EQ(rows, 16u)
+		<< "the saves wrote a different set of fields than the ones counted when this was written";
 }
 
 // The control: a whole record loads, and saves back exactly as it was.
@@ -97,7 +102,8 @@ TEST(AiRecordRefusalTest, ACompleteRecordStillLoads)
 		assert(ai && "one_of_each_saving_kind: built a null Ai");
 		const json record = saved_record(*ai);
 		const std::unique_ptr<Ai> loaded = Ai::create(record);
-		EXPECT_EQ(saved_record(*loaded), record) << record.at("type").get<std::string>() << " came back different";
+		EXPECT_EQ(saved_record(*loaded), record)
+			<< record.at("type").get<std::string>() << " came back different";
 	}
 }
 
@@ -106,11 +112,13 @@ TEST(AiRecordRefusalTest, ACompleteRecordStillLoads)
 TEST(AiRecordRefusalTest, AMimicWithNoChangeBookedLoads)
 {
 	const json record = saved_record(*Ai::make(AiType::MIMIC));
-	ASSERT_FALSE(record.contains("disguiseChangeTime")) << "a fresh mimic already booked a change";
+	ASSERT_FALSE(record.contains("disguiseChangeTime"))
+		<< "a fresh mimic already booked a change";
 
 	const std::unique_ptr<Ai> loaded = Ai::create(record);
 
-	EXPECT_FALSE(saved_record(*loaded).contains("disguiseChangeTime")) << "the load invented a booked change";
+	EXPECT_FALSE(saved_record(*loaded).contains("disguiseChangeTime"))
+		<< "the load invented a booked change";
 }
 
 // end of file: AiRecordRefusalTest.cpp

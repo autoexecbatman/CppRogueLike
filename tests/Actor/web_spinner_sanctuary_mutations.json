@@ -27,8 +27,8 @@
     },
     {
       "file": "src/AiWebSpinner.cpp",
-      "original": "\tconst bool hasLostTrack = ctx.buffSystem->ignores_warded_creature(owner, *ctx.player());",
-      "mutated": "\tconst bool hasLostTrack = false;",
+      "original": "\tconst bool hasLostTrack =\n\t\tctx.buffSystem->ignores_warded_creature(owner, *ctx.player());",
+      "mutated": "\tconst bool hasLostTrack =false;",
       "catches": "a spinner that never loses track of a warded player"
     },
     {
@@ -51,14 +51,14 @@
     },
     {
       "file": "src/AiWebSpinner.cpp",
-      "original": "\tconst bool hasLostTrack = ctx.buffSystem->ignores_warded_creature(owner, *ctx.player());",
-      "mutated": "\tconst bool hasLostTrack = ctx.buffSystem->is_turned_away_by_sanctuary(owner, *ctx.player(), ctx);",
+      "original": "\tconst bool hasLostTrack =\n\t\tctx.buffSystem->ignores_warded_creature(owner, *ctx.player());",
+      "mutated": "\tconst bool hasLostTrack =\n\t\tctx.buffSystem->is_turned_away_by_sanctuary(owner, *ctx.player(), ctx);",
       "catches": "a Sanctuary save rolled to decide on a web, which is no attack"
     },
     {
       "file": "src/AiWebSpinner.cpp",
-      "original": "\tif (quarry && owner.get_tile_distance(*quarry) <= 1 && ctx.map->is_in_fov(owner.position))",
-      "mutated": "\tif (owner.get_tile_distance(ctx.player()->position) <= 1 && ctx.map->is_in_fov(owner.position))",
+      "original": "\tif (quarry && owner.get_tile_distance(*quarry) <= 1 &&\n\t\tctx.map->is_in_fov(owner.position))",
+      "mutated": "\tif (owner.get_tile_distance(ctx.player()->position) <= 1 &&\n\t\tctx.map->is_in_fov(owner.position))",
       "catches": "a bite tried, and turned away, at a player the spinner has lost"
     }
   ]

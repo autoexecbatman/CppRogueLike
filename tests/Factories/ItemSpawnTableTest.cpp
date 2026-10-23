@@ -28,7 +28,9 @@ namespace
 constexpr int DUNGEON_LEVEL = 1;
 
 // Whether a distribution lists an entry by name.
-bool lists(const std::vector<ItemPercentage>& distribution, std::string_view name)
+bool lists(
+	const std::vector<ItemPercentage>& distribution,
+	std::string_view name)
 {
 	auto is_named = [name](const ItemPercentage& entry)
 	{
@@ -45,7 +47,8 @@ std::string first_drawable(const ItemRegistry& items, int dungeonLevel)
 	for (const std::string& key : items.get_all_keys())
 	{
 		const ItemParams& params = items.get_params(key);
-		const bool admitsLevel = params.levelMin <= dungeonLevel && (params.levelMax == 0 || dungeonLevel <= params.levelMax);
+		const bool admitsLevel = params.levelMin <= dungeonLevel &&
+			(params.levelMax == 0 || dungeonLevel <= params.levelMax);
 		if (params.baseWeight > 0 && admitsLevel)
 		{
 			return key;
@@ -63,15 +66,20 @@ TEST(ItemSpawnTableTest, TheDistributionIsTheRegistrysAsItStandsNow)
 	items.load(Paths::ITEMS);
 	items.load_enhanced_rules(Paths::ENHANCED_RULES);
 	const std::string target = first_drawable(items, DUNGEON_LEVEL);
-	ASSERT_FALSE(target.empty()) << "no item is drawable at this level to silence";
+	ASSERT_FALSE(target.empty())
+		<< "no item is drawable at this level to silence";
 	const std::string name{ items.get_params(target).name };
-	ASSERT_TRUE(lists(ItemFactory::get_current_distribution(DUNGEON_LEVEL, items), name));
+	ASSERT_TRUE(lists(
+		ItemFactory::get_current_distribution(DUNGEON_LEVEL, items),
+		name));
 
 	ItemParams silenced = items.get_params(target);
 	silenced.baseWeight = 0;
 	items.set_params(target, silenced);
 
-	EXPECT_FALSE(lists(ItemFactory::get_current_distribution(DUNGEON_LEVEL, items), name))
+	EXPECT_FALSE(lists(
+		ItemFactory::get_current_distribution(DUNGEON_LEVEL, items),
+		name))
 		<< "silencing " << target << " never reached the distribution";
 }
 
@@ -81,9 +89,14 @@ TEST(ItemSpawnTableTest, ACustomItemJoinsTheTable)
 	ItemRegistry items{};
 	items.load(Paths::ITEMS);
 
-	[[maybe_unused]] const std::string key = items.add_custom("Registry Trinket", "potion", ItemParams{ .baseWeight = 10, .levelMin = 1 });
+	[[maybe_unused]] const std::string key = items.add_custom(
+		"Registry Trinket",
+		"potion",
+		ItemParams{ .baseWeight = 10, .levelMin = 1 });
 
-	EXPECT_TRUE(lists(ItemFactory::get_current_distribution(DUNGEON_LEVEL, items), "Registry Trinket"));
+	EXPECT_TRUE(lists(
+		ItemFactory::get_current_distribution(DUNGEON_LEVEL, items),
+		"Registry Trinket"));
 }
 
 // A spawn draws from the registry in the ctx it is given. Two contexts, each with every
@@ -106,9 +119,15 @@ TEST(ItemSpawnTableTest, ASpawnDrawsFromTheRegistryInCtx)
 		}
 		mock.dice.set_next_roll(1);
 
-		ItemFactory::spawn_item_of_category(Vector2D{ 1, 1 }, DUNGEON_LEVEL, "potion", ctx);
+		ItemFactory::spawn_item_of_category(
+			Vector2D{ 1, 1 },
+			DUNGEON_LEVEL,
+			"potion",
+			ctx);
 
-		return mock.inventory.items.size() == 1 ? mock.inventory.items.front()->itemKey : std::string{ "placed nothing, or more than one" };
+		return mock.inventory.items.size() == 1 ?
+			mock.inventory.items.front()->itemKey :
+			std::string{ "placed nothing, or more than one" };
 	};
 
 	EXPECT_EQ(spawn_with_only("health_potion"), "health_potion");

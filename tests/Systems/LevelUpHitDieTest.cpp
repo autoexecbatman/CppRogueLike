@@ -72,7 +72,8 @@ protected:
 
 	Game game{ TEST_DICE_SEED };
 	GameContext ctx{};
-	std::unique_ptr<Player> fighter{ std::make_unique<Player>(Vector2D{ 0, 0 }) };
+	std::unique_ptr<Player> fighter{ std::make_unique<Player>(
+		Vector2D{ 0, 0 }) };
 };
 
 // A d12 rolls from 1 to 12, so some of 200 rolls land above 8.
@@ -81,7 +82,8 @@ TEST_F(LevelUpHitDieTest, ATwelveSidedHitDieRollsTwelveSided)
 	const std::multiset<int> rolled = rolls_on_a_hit_die_of(12);
 
 	EXPECT_LE(*rolled.rbegin(), 12);
-	EXPECT_GT(*rolled.rbegin(), 8) << "200 rolls on a d12 never passed 8, which is a d8";
+	EXPECT_GT(*rolled.rbegin(), 8)
+		<< "200 rolls on a d12 never passed 8, which is a d8";
 }
 
 // A d2 rolls 1 or 2, and 200 rolls show both.
@@ -90,5 +92,6 @@ TEST_F(LevelUpHitDieTest, ATwoSidedHitDieRollsTwoSided)
 	const std::multiset<int> rolled = rolls_on_a_hit_die_of(2);
 
 	EXPECT_EQ(*rolled.begin(), 1);
-	EXPECT_EQ(*rolled.rbegin(), 2) << "a roll outside 1 to 2 came from another die";
+	EXPECT_EQ(*rolled.rbegin(), 2)
+		<< "a roll outside 1 to 2 came from another die";
 }

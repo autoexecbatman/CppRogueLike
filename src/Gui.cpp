@@ -123,21 +123,25 @@ static int hud_frame_text_right(int panelWidth, int tileSize)
 // panel's contents that far above the panel's own floor.
 static int hud_base_y(const Renderer& renderer)
 {
-	return renderer.get_screen_height() - renderer.get_gui_reserve_rows() * renderer.get_tile_size();
+	return renderer.get_screen_height() -
+		renderer.get_gui_reserve_rows() * renderer.get_tile_size();
 }
 
 // Top edge of one HUD text row, counting from zero below the frame's rule. The rule is
 // what the text has to clear; the rest of the edge tile is transparent.
 static int hud_text_row_y(int baseY, int tileSize, int row)
 {
-	return baseY + gui_frame_top_rule(tileSize) + GUI_TEXT_TOP_INSET + row * UI_TEXT_ROW_PITCH;
+	return baseY + gui_frame_top_rule(tileSize) + GUI_TEXT_TOP_INSET +
+		row * UI_TEXT_ROW_PITCH;
 }
 
 // How many text rows fit in the panel. The last row needs only the height of the
 // font, not a whole pitch, which is why it is added back on.
 static int hud_text_row_count(int tileSize, int fontSize)
 {
-	const int contentHeight = gui_reserve_rows(tileSize, fontSize) * tileSize - gui_frame_top_rule(tileSize) - gui_frame_bottom_rule(tileSize) - GUI_TEXT_TOP_INSET - fontSize;
+	const int contentHeight = gui_reserve_rows(tileSize, fontSize) * tileSize -
+		gui_frame_top_rule(tileSize) - gui_frame_bottom_rule(tileSize) -
+		GUI_TEXT_TOP_INSET - fontSize;
 	return contentHeight / UI_TEXT_ROW_PITCH + 1;
 }
 
@@ -154,24 +158,47 @@ static void draw_hud_bar(
 	Color fillTint)
 {
 	assert(ctx.tileConfig && "draw_hud_bar: called without a tileConfig");
-	assert(width > 2 * GUI_BAR_PLATE_WIDTH && "a bar narrower than its two end plates has no trough");
+	assert(
+		width > 2 * GUI_BAR_PLATE_WIDTH &&
+		"a bar narrower than its two end plates has no trough");
 
 	const TileConfig& tileConfig = *ctx.tileConfig;
 
 	// The trough runs between the opaque end plates, so the last few percent stays in sight.
 	const Vector2D troughPos{ pos.x + GUI_BAR_PLATE_WIDTH, pos.y };
 	const int troughWidth = width - 2 * GUI_BAR_PLATE_WIDTH;
-	DrawRectangle(troughPos.x, troughPos.y, troughWidth, GUI_BAR_HEIGHT, GUI_BAR_CHANNEL);
+	DrawRectangle(
+		troughPos.x,
+		troughPos.y,
+		troughWidth,
+		GUI_BAR_HEIGHT,
+		GUI_BAR_CHANNEL);
 
-	const int filledWidth = static_cast<int>(static_cast<float>(troughWidth) * ratio);
-	ctx.renderer->draw_tile_screen_color_rect(troughPos, filledWidth, GUI_BAR_HEIGHT, tileConfig.get("GUI_BAR_FILL"), fillTint);
+	const int filledWidth =
+		static_cast<int>(static_cast<float>(troughWidth) * ratio);
+	ctx.renderer->draw_tile_screen_color_rect(
+		troughPos,
+		filledWidth,
+		GUI_BAR_HEIGHT,
+		tileConfig.get("GUI_BAR_FILL"),
+		fillTint);
 
 	// The rim is stretched the length of the bar and the plates are drawn at their own
 	// size, which is why every piece of ornament is on a plate and the rim carries none.
-	ctx.renderer->draw_tile_screen_color_rect(pos, width, GUI_BAR_HEIGHT, tileConfig.get("GUI_BAR_RIM"), GUI_UNTINTED);
-	ctx.renderer->draw_tile_screen_sized(pos, tileConfig.get("GUI_BAR_CAP_L"), GUI_BARS_CELL_SIZE);
+	ctx.renderer->draw_tile_screen_color_rect(
+		pos,
+		width,
+		GUI_BAR_HEIGHT,
+		tileConfig.get("GUI_BAR_RIM"),
+		GUI_UNTINTED);
 	ctx.renderer->draw_tile_screen_sized(
-		Vector2D{ pos.x + width - GUI_BARS_CELL_SIZE, pos.y }, tileConfig.get("GUI_BAR_CAP_R"), GUI_BARS_CELL_SIZE);
+		pos,
+		tileConfig.get("GUI_BAR_CAP_L"),
+		GUI_BARS_CELL_SIZE);
+	ctx.renderer->draw_tile_screen_sized(
+		Vector2D{ pos.x + width - GUI_BARS_CELL_SIZE, pos.y },
+		tileConfig.get("GUI_BAR_CAP_R"),
+		GUI_BARS_CELL_SIZE);
 }
 
 // A bar's reading, centred on it and never left of it. The shadow under the text is what
@@ -186,8 +213,12 @@ static void draw_bar_reading(
 {
 	const int textWidth = ctx.renderer->measure_text(reading);
 	const int textX = barPos.x + std::max(0, (barWidth - textWidth) / 2);
-	const int textY = barPos.y + (GUI_BAR_HEIGHT - ctx.renderer->get_font_size()) / 2;
-	ctx.renderer->draw_text_color(Vector2D{ textX + 1, textY + 1 }, reading, GUI_TEXT_SHADOW);
+	const int textY =
+		barPos.y + (GUI_BAR_HEIGHT - ctx.renderer->get_font_size()) / 2;
+	ctx.renderer->draw_text_color(
+		Vector2D{ textX + 1, textY + 1 },
+		reading,
+		GUI_TEXT_SHADOW);
 	ctx.renderer->draw_text(Vector2D{ textX, textY }, reading, readingColor);
 }
 
@@ -220,7 +251,9 @@ static LogCursor draw_log_part(
 	std::string remainingText(part.text);
 	while (!remainingText.empty() && cursor.row < panel.rowCount)
 	{
-		const std::string shown = renderer.fit_text_to_width(remainingText, panel.rightEdge - cursor.pixelX);
+		const std::string shown = renderer.fit_text_to_width(
+			remainingText,
+			panel.rightEdge - cursor.pixelX);
 
 		// Nothing readable fits in what is left of this row: start the next one.
 		// Squeezing a two-letter fragment in first is what splits words.
@@ -302,18 +335,28 @@ void Gui::gui_render(const GameContext& ctx)
 
 	// ---- Top border row (TL + T... + TR) ----------------------------------
 	const auto& tileConfig = *ctx.tileConfig;
-	ctx.renderer->draw_tile_screen(Vector2D{ 0, baseY }, tileConfig.get("GUI_FRAME_TL"));
+	ctx.renderer->draw_tile_screen(
+		Vector2D{ 0, baseY },
+		tileConfig.get("GUI_FRAME_TL"));
 	for (int col = tileSize; col < rightEdgeX; col += tileSize)
 	{
-		ctx.renderer->draw_tile_screen(Vector2D{ col, baseY }, tileConfig.get("GUI_FRAME_T"));
+		ctx.renderer->draw_tile_screen(
+			Vector2D{ col, baseY },
+			tileConfig.get("GUI_FRAME_T"));
 	}
-	ctx.renderer->draw_tile_screen(Vector2D{ rightEdgeX, baseY }, tileConfig.get("GUI_FRAME_TR"));
+	ctx.renderer->draw_tile_screen(
+		Vector2D{ rightEdgeX, baseY },
+		tileConfig.get("GUI_FRAME_TR"));
 
 	// ---- Left and right outer edges ---------------------------------------
 	for (int row = 1; row < reserveRows; ++row)
 	{
-		ctx.renderer->draw_tile_screen(Vector2D{ 0, baseY + row * tileSize }, tileConfig.get("GUI_FRAME_L"));
-		ctx.renderer->draw_tile_screen(Vector2D{ rightEdgeX, baseY + row * tileSize }, tileConfig.get("GUI_FRAME_R"));
+		ctx.renderer->draw_tile_screen(
+			Vector2D{ 0, baseY + row * tileSize },
+			tileConfig.get("GUI_FRAME_L"));
+		ctx.renderer->draw_tile_screen(
+			Vector2D{ rightEdgeX, baseY + row * tileSize },
+			tileConfig.get("GUI_FRAME_R"));
 	}
 
 	// ---- Bottom edge -------------------------------------------------------
@@ -321,18 +364,27 @@ void Gui::gui_render(const GameContext& ctx)
 	const int bottomY = baseY + (reserveRows - 1) * tileSize;
 	for (int col = tileSize; col < rightEdgeX; col += tileSize)
 	{
-		ctx.renderer->draw_tile_screen(Vector2D{ col, bottomY }, tileConfig.get("GUI_FRAME_B"));
+		ctx.renderer->draw_tile_screen(
+			Vector2D{ col, bottomY },
+			tileConfig.get("GUI_FRAME_B"));
 	}
-	ctx.renderer->draw_tile_screen(Vector2D{ 0, bottomY }, tileConfig.get("GUI_FRAME_BL"));
-	ctx.renderer->draw_tile_screen(Vector2D{ rightEdgeX, bottomY }, tileConfig.get("GUI_FRAME_BR"));
+	ctx.renderer->draw_tile_screen(
+		Vector2D{ 0, bottomY },
+		tileConfig.get("GUI_FRAME_BL"));
+	ctx.renderer->draw_tile_screen(
+		Vector2D{ rightEdgeX, bottomY },
+		tileConfig.get("GUI_FRAME_BR"));
 
 	// ---- The two internal dividers ----------------------------------------
 	// Each rail spans the interior between the two rules, so it covers every text row.
 	const int interiorTop = baseY + gui_frame_top_rule(tileSize);
-	const int interiorBottom = baseY + reserveRows * tileSize - gui_frame_bottom_rule(tileSize);
+	const int interiorBottom =
+		baseY + reserveRows * tileSize - gui_frame_bottom_rule(tileSize);
 	for (const int dividerX : { div1, div2 })
 	{
-		ctx.renderer->draw_tile_screen(Vector2D{ dividerX, baseY }, tileConfig.get("GUI_FRAME_T"));
+		ctx.renderer->draw_tile_screen(
+			Vector2D{ dividerX, baseY },
+			tileConfig.get("GUI_FRAME_T"));
 		for (int railY = interiorTop; railY < interiorBottom; railY += tileSize)
 		{
 			// The last tile is pulled up to sit flush on the bottom rule.
@@ -374,13 +426,17 @@ void Gui::render_hp_bar(const GameContext& ctx)
 	}
 
 	const float ratio = std::clamp(
-		static_cast<float>(hp) / static_cast<float>(maxHp), 0.0f, 1.0f);
+		static_cast<float>(hp) / static_cast<float>(maxHp),
+		0.0f,
+		1.0f);
 
 	const int rowY = hud_text_row_y(baseY, tileSize, 0);
 
 	// Heart icon in the first column, sized to the row rather than to a map tile.
 	ctx.renderer->draw_tile_screen_sized(
-		Vector2D{ hud_panel_left_margin(tileSize), rowY }, ctx.tileConfig->get("GUI_ICON_HEART"), GUI_ICON_SIZE);
+		Vector2D{ hud_panel_left_margin(tileSize), rowY },
+		ctx.tileConfig->get("GUI_ICON_HEART"),
+		GUI_ICON_SIZE);
 
 	// Bar fills what is left of the panel, starting clear of the icon.
 	const int barX = hud_panel_left_margin(tileSize) + GUI_ICON_SIZE + 8;
@@ -389,29 +445,42 @@ void Gui::render_hp_bar(const GameContext& ctx)
 	Color filled;
 	if (ratio > 0.5f)
 	{
-		filled = ctx.renderer->get_color_pair(ColorPairId::GREEN_BLACK).foreground;
+		filled =
+			ctx.renderer->get_color_pair(ColorPairId::GREEN_BLACK).foreground;
 	}
 	else if (ratio > 0.25f)
 	{
-		filled = ctx.renderer->get_color_pair(ColorPairId::YELLOW_BLACK).foreground;
+		filled =
+			ctx.renderer->get_color_pair(ColorPairId::YELLOW_BLACK).foreground;
 	}
 	else
 	{
-		filled = ctx.renderer->get_color_pair(ColorPairId::RED_BLACK).foreground;
+		filled =
+			ctx.renderer->get_color_pair(ColorPairId::RED_BLACK).foreground;
 	}
 
 	const Vector2D barPos{ barX, rowY };
 	draw_hud_bar(ctx, barPos, barW, ratio, filled);
 
 	// No "HP" prefix: the heart icon already says it, and at three digits a prefix overruns the divider.
-	draw_bar_reading(ctx, barPos, barW, std::format("{}/{}", hp, maxHp), ColorPairId::WHITE_BLACK);
+	draw_bar_reading(
+		ctx,
+		barPos,
+		barW,
+		std::format("{}/{}", hp, maxHp),
+		ColorPairId::WHITE_BLACK);
 }
 
 void Gui::render_hunger_status(const GameContext& ctx)
 {
-	assert(ctx.hungerSystem && "Gui::render_hunger_status: called without a hungerSystem");
-	assert(ctx.tileConfig && "Gui::render_hunger_status: called without a tileConfig");
-	assert(ctx.renderer && "Gui::render_hunger_status called without a renderer");
+	assert(
+		ctx.hungerSystem &&
+		"Gui::render_hunger_status: called without a hungerSystem");
+	assert(
+		ctx.tileConfig &&
+		"Gui::render_hunger_status: called without a tileConfig");
+	assert(
+		ctx.renderer && "Gui::render_hunger_status called without a renderer");
 
 	const int tileSize = ctx.renderer->get_tile_size();
 	const int panelWidth = ctx.renderer->get_screen_width();
@@ -434,13 +503,16 @@ void Gui::render_hunger_status(const GameContext& ctx)
 
 	// Food icon in the first column, on the same pitch as the heart above it.
 	ctx.renderer->draw_tile_screen_sized(
-		Vector2D{ hud_panel_left_margin(tileSize), rowY }, ctx.tileConfig->get("GUI_ICON_FOOD"), GUI_ICON_SIZE);
+		Vector2D{ hud_panel_left_margin(tileSize), rowY },
+		ctx.tileConfig->get("GUI_ICON_FOOD"),
+		GUI_ICON_SIZE);
 
 	// Bar fills what is left of the panel, starting clear of the icon.
 	const int barX = hud_panel_left_margin(tileSize) + GUI_ICON_SIZE + 8;
 	const int barW = hud_panel_text_right(div1) - barX;
 
-	const Color filled = ctx.renderer->get_color_pair(ColorPairId::YELLOW_BLACK).foreground;
+	const Color filled =
+		ctx.renderer->get_color_pair(ColorPairId::YELLOW_BLACK).foreground;
 	const Vector2D barPos{ barX, rowY };
 	draw_hud_bar(ctx, barPos, barW, ratio, filled);
 
@@ -457,8 +529,10 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 	const int tileSize = ctx.renderer->get_tile_size();
 	const int panelWidth = ctx.renderer->get_screen_width();
 	const int baseY = hud_base_y(*ctx.renderer);
-	const int statsX = hud_panel_text_left(hud_divider1_x(panelWidth), tileSize);
-	const int statsWidth = hud_panel_text_right(hud_divider2_x(panelWidth)) - statsX;
+	const int statsX =
+		hud_panel_text_left(hud_divider1_x(panelWidth), tileSize);
+	const int statsWidth =
+		hud_panel_text_right(hud_divider2_x(panelWidth)) - statsX;
 
 	if (ctx.player()->actorData.name.empty())
 	{
@@ -470,21 +544,41 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 
 	// One stat a row, the label on the left edge and the value on the right,
 	// so every value ends on the same pixel and the numbers read as one column.
-	auto draw_stat = [&](int row, std::string_view label, const std::string& value)
+	auto draw_stat =
+		[&](int row, std::string_view label, const std::string& value)
 	{
 		const int pixelY = hud_text_row_y(baseY, tileSize, row);
-		ctx.renderer->draw_text(Vector2D{ statsX, pixelY }, label, ColorPairId::WHITE_BLACK);
+		ctx.renderer->draw_text(
+			Vector2D{ statsX, pixelY },
+			label,
+			ColorPairId::WHITE_BLACK);
 		const int valueWidth = ctx.renderer->measure_text(value);
-		ctx.renderer->draw_text(Vector2D{ statsX + statsWidth - valueWidth, pixelY }, value, ColorPairId::WHITE_BLACK);
+		ctx.renderer->draw_text(
+			Vector2D{ statsX + statsWidth - valueWidth, pixelY },
+			value,
+			ColorPairId::WHITE_BLACK);
 	};
 
 	// Rows 1 and 2: who this is. Both run the full width and carry no value.
-	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 0) }, ctx.renderer->fit_text_to_width(ctx.player()->actorData.name, statsWidth), ColorPairId::YELLOW_BLACK);
-	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 1) }, ctx.renderer->fit_text_to_width(ctx.player_concrete().get_class_display_name(), statsWidth), ColorPairId::YELLOW_BLACK);
+	ctx.renderer->draw_text(
+		Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 0) },
+		ctx.renderer->fit_text_to_width(
+			ctx.player()->actorData.name,
+			statsWidth),
+		ColorPairId::YELLOW_BLACK);
+	ctx.renderer->draw_text(
+		Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 1) },
+		ctx.renderer->fit_text_to_width(
+			ctx.player_concrete().get_class_display_name(),
+			statsWidth),
+		ColorPairId::YELLOW_BLACK);
 
 	// Rows 3 and 4: the attack numbers. THAC0 is what a d20 must meet to hit Armour
 	// Class 0, which is the whole of 2e attack resolution.
-	draw_stat(2, "Level", std::format("{}", ctx.player()->get_creature_level()));
+	draw_stat(
+		2,
+		"Level",
+		std::format("{}", ctx.player()->get_creature_level()));
 	draw_stat(3, "THAC0", std::format("{}", ctx.player()->get_thaco()));
 
 	// Rows 5 and 6: what stops a hit landing, and what it costs when one does.
@@ -492,8 +586,14 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 	draw_stat(5, "DR", std::format("{}", ctx.player()->get_dr()));
 
 	// Rows 7 and 8: what this character swings, and what it is carrying.
-	draw_stat(6, "Attack", std::string{ ctx.player_concrete().get_equipped_weapon_damage_roll() });
-	draw_stat(7, "Gold", std::format("{} gp", ctx.player_concrete().get_gold()));
+	draw_stat(
+		6,
+		"Attack",
+		std::string{ ctx.player_concrete().get_equipped_weapon_damage_roll() });
+	draw_stat(
+		7,
+		"Gold",
+		std::format("{} gp", ctx.player_concrete().get_gold()));
 }
 
 // ---------------------------------------------------------------------------
@@ -532,7 +632,8 @@ void Gui::gui_print_log(const GameContext& ctx)
 
 		const std::vector<LogMessage>& parts =
 			ctx.messageSystem->get_attack_message_at(
-				ctx.messageSystem->get_stored_message_count() - 1 - messageIndex);
+				ctx.messageSystem->get_stored_message_count() - 1 -
+				messageIndex);
 
 		for (const LogMessage& part : parts)
 		{
@@ -550,14 +651,20 @@ void Gui::gui_print_log(const GameContext& ctx)
 // ---------------------------------------------------------------------------
 void Gui::render_player_status(const GameContext& ctx)
 {
-	assert(ctx.renderer && "Gui::render_player_status called without a renderer");
+	assert(
+		ctx.renderer && "Gui::render_player_status called without a renderer");
 
 	const int tileSize = ctx.renderer->get_tile_size();
 	const int baseY = hud_base_y(*ctx.renderer);
 
-	assert(ctx.player_concrete().controller && "Gui::render_player_status: the player has no controller");
-	assert(ctx.gameState && "Gui::render_player_status: called without a clock to read the confusion against");
-	if (ctx.player_concrete().controller->is_confused(ctx.gameState->get_time()))
+	assert(
+		ctx.player_concrete().controller &&
+		"Gui::render_player_status: the player has no controller");
+	assert(
+		ctx.gameState &&
+		"Gui::render_player_status: called without a clock to read the confusion against");
+	if (ctx.player_concrete().controller->is_confused(
+			ctx.gameState->get_time()))
 	{
 		ctx.renderer->draw_text(
 			Vector2D{
@@ -571,12 +678,8 @@ void Gui::render_player_status(const GameContext& ctx)
 
 // The interface is redrawn from game state every frame, so it holds nothing
 // of its own to persist.
-void Gui::save([[maybe_unused]] json& savedState)
-{
-}
+void Gui::save([[maybe_unused]] json& savedState) {}
 
-void Gui::load([[maybe_unused]] const json& savedState)
-{
-}
+void Gui::load([[maybe_unused]] const json& savedState) {}
 
 // end of file: Gui.cpp

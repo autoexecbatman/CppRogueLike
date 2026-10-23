@@ -16,8 +16,11 @@ ListMenu::ListMenu(
 	std::vector<MenuEntry> entries,
 	std::function<void(GameContext&)> onEscape,
 	std::function<void(GameContext&)> onFrame,
-	GameContext& ctx)
-	: title{ std::move(title) }, entries{ std::move(entries) }, onEscape{ std::move(onEscape) }, onFrame{ std::move(onFrame) }
+	GameContext& ctx) :
+	title{ std::move(title) },
+	entries{ std::move(entries) },
+	onEscape{ std::move(onEscape) },
+	onFrame{ std::move(onFrame) }
 {
 	assert(ctx.renderer && "ListMenu: renderer required before construction");
 	const int tileSize = ctx.renderer->get_tile_size();
@@ -28,12 +31,16 @@ ListMenu::ListMenu(
 	int widestText = ctx.renderer->measure_text(this->title);
 	for (const auto& entry : this->entries)
 	{
-		widestText = std::max(widestText, ctx.renderer->measure_text(entry.label));
+		widestText =
+			std::max(widestText, ctx.renderer->measure_text(entry.label));
 	}
 
-	menuWidth = static_cast<size_t>(panel_tiles_for_text_width(widestText, tileSize));
-	menuHeight = static_cast<size_t>(
-		panel_tiles_for_text_rows(static_cast<int>(this->entries.size()), tileSize, fontSize));
+	menuWidth =
+		static_cast<size_t>(panel_tiles_for_text_width(widestText, tileSize));
+	menuHeight = static_cast<size_t>(panel_tiles_for_text_rows(
+		static_cast<int>(this->entries.size()),
+		tileSize,
+		fontSize));
 
 	int vcols = ctx.renderer->get_viewport_cols();
 	int vrows = ctx.renderer->get_viewport_rows();
@@ -98,7 +105,8 @@ void ListMenu::on_key(GameContext& ctx)
 		// Hotkey match, case-insensitive so 'M' and 'm' both work.
 		for (auto& entry : entries)
 		{
-			if (entry.hotkey != 0 && std::tolower(lastChar) == std::tolower(entry.hotkey))
+			if (entry.hotkey != 0 &&
+				std::tolower(lastChar) == std::tolower(entry.hotkey))
 			{
 				menu_set_run_false();
 				if (entry.command)
@@ -124,7 +132,10 @@ void ListMenu::menu(GameContext& ctx)
 	if (menu_pointer_moved())
 	{
 		const ::Vector2 pointer = GetMousePosition();
-		const auto hovered = menu_row_at(static_cast<int>(pointer.x), static_cast<int>(pointer.y), entries.size());
+		const auto hovered = menu_row_at(
+			static_cast<int>(pointer.x),
+			static_cast<int>(pointer.y),
+			entries.size());
 		if (hovered)
 		{
 			cursorIndex = *hovered;
@@ -136,7 +147,10 @@ void ListMenu::menu(GameContext& ctx)
 	if (menu_left_clicked())
 	{
 		const ::Vector2 pointer = GetMousePosition();
-		const auto clicked = menu_row_at(static_cast<int>(pointer.x), static_cast<int>(pointer.y), entries.size());
+		const auto clicked = menu_row_at(
+			static_cast<int>(pointer.x),
+			static_cast<int>(pointer.y),
+			entries.size());
 		if (clicked)
 		{
 			menu_set_run_false();

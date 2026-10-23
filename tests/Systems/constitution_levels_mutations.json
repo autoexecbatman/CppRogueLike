@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "\treturn level <= LevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
-      "mutated": "\treturn level < LevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
+      "original": "\treturn level <=\n\t\tLevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
+      "mutated": "\treturn level <\n\t\tLevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
       "catches": "the adjustment ending a level before the last rolled die"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "\treturn level <= LevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
-      "mutated": "\treturn level <= LevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel + 1;",
+      "original": "\treturn level <=\n\t\tLevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
+      "mutated": "\treturn level <=\n\t\tLevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel + 1;",
       "catches": "the adjustment running a level past the last rolled die"
     },
     {
@@ -45,8 +45,8 @@
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "\tconst bool stillRollsDice = LevelUpSystem::takes_constitution_adjustment_at(owner.get_creature_class(), newLevel);",
-      "mutated": "\tconst bool stillRollsDice = LevelUpSystem::takes_constitution_adjustment_at(owner.get_creature_class(), newLevel - 1);",
+      "original": "\tconst bool stillRollsDice = LevelUpSystem::takes_constitution_adjustment_at(\n\t\towner.get_creature_class(),\n\t\tnewLevel);",
+      "mutated": "\tconst bool stillRollsDice = LevelUpSystem::takes_constitution_adjustment_at(\n\t\towner.get_creature_class(),\n\t\tnewLevel - 1);",
       "catches": "level-up asking about the level it is leaving"
     },
     {
@@ -57,8 +57,8 @@
     },
     {
       "file": "src/ConstitutionTracker.cpp",
-      "original": "LevelUpSystem::levels_taking_constitution_adjustment(owner.get_creature_class(), owner.get_creature_level());",
-      "mutated": "LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::FIGHTER, owner.get_creature_level());",
+      "original": "LevelUpSystem::levels_taking_constitution_adjustment(\n\t\towner.get_creature_class(),\n\t\towner.get_creature_level());",
+      "mutated": "LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::FIGHTER,\n\t\towner.get_creature_level());",
       "catches": "the tracker asking about a class other than the owner's"
     }
   ]

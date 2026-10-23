@@ -51,7 +51,7 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tgreatest = std::max(greatest, item.get_enhancement().resistance_strength(damageType));\n",
+      "original": "\t\tgreatest = std::max(\n\t\t\tgreatest,\n\t\t\titem.get_enhancement().resistance_strength(damageType));\n",
       "mutated": "",
       "catches": "a worn enhancement ignored"
     }

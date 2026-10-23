@@ -58,7 +58,8 @@ inline constexpr std::array<MagicalEffect, 13> ALL_MAGICAL_EFFECT = {
 [[nodiscard]] inline MagicalEffect next_magical_effect(MagicalEffect value)
 {
 	const auto found = std::ranges::find(ALL_MAGICAL_EFFECT, value);
-	if (found == ALL_MAGICAL_EFFECT.end() || found + 1 == ALL_MAGICAL_EFFECT.end())
+	if (found == ALL_MAGICAL_EFFECT.end() ||
+		found + 1 == ALL_MAGICAL_EFFECT.end())
 	{
 		return ALL_MAGICAL_EFFECT.front();
 	}

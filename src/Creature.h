@@ -189,8 +189,10 @@ public:
 	// innate powers. Empty for a creature that casts nothing.
 	Spellcasting spellcasting{};
 
-	Creature(Vector2D position, ActorData data)
-		: Actor(position, data), constitutionTracker(std::make_unique<ConstitutionTracker>()), inventoryData(CreatureInventory(50))
+	Creature(Vector2D position, ActorData data) :
+		Actor(position, data),
+		constitutionTracker(std::make_unique<ConstitutionTracker>()),
+		inventoryData(CreatureInventory(50))
 	{
 		add_state(ActorState::BLOCKS);
 		/*add_state(ActorState::FOV_ONLY);*/
@@ -211,7 +213,10 @@ public:
 	virtual void update(GameContext& ctx);
 
 	// Const-correct getter methods - return effective values (AD&D 2e: MAX(base, SET) + ADD)
-	int get_strength() const noexcept { return calculate_effective_stat(baseStrength, BuffType::STRENGTH); }
+	int get_strength() const noexcept
+	{
+		return calculate_effective_stat(baseStrength, BuffType::STRENGTH);
+	}
 
 	// Percentile of exceptional Strength, 1-100 with 100 as 18/00, or 0 for none: the
 	// creature's own, or a worn item's that sets Strength to 18/xx if that is higher. The
@@ -233,15 +238,34 @@ public:
 	//   fighter.get_gauntlets_beside_girdle(); // -> the gauntlets, 18 and a percentile of 100
 	const Gauntlets* get_gauntlets_beside_girdle() const noexcept;
 
-	int get_dexterity() const noexcept { return calculate_effective_stat(baseDexterity, BuffType::DEXTERITY); }
+	int get_dexterity() const noexcept
+	{
+		return calculate_effective_stat(baseDexterity, BuffType::DEXTERITY);
+	}
 
-	int get_constitution() const noexcept { return calculate_effective_stat(baseConstitution, BuffType::CONSTITUTION); }
+	int get_constitution() const noexcept
+	{
+		return calculate_effective_stat(
+			baseConstitution,
+			BuffType::CONSTITUTION);
+	}
 
-	int get_intelligence() const noexcept { return calculate_effective_stat(baseIntelligence, BuffType::INTELLIGENCE); }
+	int get_intelligence() const noexcept
+	{
+		return calculate_effective_stat(
+			baseIntelligence,
+			BuffType::INTELLIGENCE);
+	}
 
-	int get_wisdom() const noexcept { return calculate_effective_stat(baseWisdom, BuffType::WISDOM); }
+	int get_wisdom() const noexcept
+	{
+		return calculate_effective_stat(baseWisdom, BuffType::WISDOM);
+	}
 
-	int get_charisma() const noexcept { return calculate_effective_stat(baseCharisma, BuffType::CHARISMA); }
+	int get_charisma() const noexcept
+	{
+		return calculate_effective_stat(baseCharisma, BuffType::CHARISMA);
+	}
 
 	int get_creature_level() const noexcept { return creatureLevel; }
 
@@ -249,12 +273,18 @@ public:
 
 	const std::string& get_gender() const noexcept { return gender; }
 
-	const std::string& get_natural_attack() const noexcept { return naturalAttack; }
+	const std::string& get_natural_attack() const noexcept
+	{
+		return naturalAttack;
+	}
 
 	// Setter methods - modify base stats
 	void set_strength(int value) noexcept { baseStrength = value; }
 
-	void set_exceptional_strength(int percentile) noexcept { exceptionalStrength = percentile; }
+	void set_exceptional_strength(int percentile) noexcept
+	{
+		exceptionalStrength = percentile;
+	}
 
 	void set_dexterity(int value) noexcept { baseDexterity = value; }
 
@@ -270,9 +300,15 @@ public:
 
 	void set_gold(int value) noexcept { gold = value; }
 
-	void set_gender(const std::string& new_gender) noexcept { gender = new_gender; }
+	void set_gender(const std::string& new_gender) noexcept
+	{
+		gender = new_gender;
+	}
 
-	void set_natural_attack(const std::string& attack) noexcept { naturalAttack = attack; }
+	void set_natural_attack(const std::string& attack) noexcept
+	{
+		naturalAttack = attack;
+	}
 
 	// Modifier methods for increment/decrement operations - modify base stats
 	void adjust_strength(int delta) noexcept { baseStrength += delta; }
@@ -302,7 +338,10 @@ public:
 	void adjust_level(int delta) noexcept { creatureLevel += delta; }
 
 	// Experience reward
-	[[nodiscard]] int get_xp() const noexcept { return experienceReward->get_xp(); }
+	[[nodiscard]] int get_xp() const noexcept
+	{
+		return experienceReward->get_xp();
+	}
 
 	void set_xp(int value) noexcept { experienceReward->set_xp(value); }
 
@@ -314,7 +353,10 @@ public:
 
 	float get_attacks_per_round() const noexcept { return attacksPerRound; }
 
-	void set_creature_class(CreatureClass newClass) noexcept { creatureClass = newClass; }
+	void set_creature_class(CreatureClass newClass) noexcept
+	{
+		creatureClass = newClass;
+	}
 
 	void set_hit_die(int newHitDie) noexcept { hitDie = newHitDie; }
 
@@ -332,7 +374,10 @@ public:
 	[[nodiscard]] int get_action_delay() const noexcept;
 
 	// The delay with no haste applied: what is saved, and what a spellcasting costs.
-	[[nodiscard]] int get_unhasted_action_delay() const noexcept { return actionDelay; }
+	[[nodiscard]] int get_unhasted_action_delay() const noexcept
+	{
+		return actionDelay;
+	}
 
 	void set_action_delay(int timeUnits) noexcept { actionDelay = timeUnits; }
 
@@ -351,9 +396,15 @@ public:
 	void pass_a_year(GameContext& ctx);
 
 	// The point on the shared clock at which this creature acts next.
-	[[nodiscard]] int get_next_action_time() const noexcept { return nextActionTime; }
+	[[nodiscard]] int get_next_action_time() const noexcept
+	{
+		return nextActionTime;
+	}
 
-	void set_next_action_time(int timeUnits) noexcept { nextActionTime = timeUnits; }
+	void set_next_action_time(int timeUnits) noexcept
+	{
+		nextActionTime = timeUnits;
+	}
 
 	// How many actions this creature is due before the clock reaches that point.
 	// Zero when it has already overshot, which is a skipped turn and needs nothing
@@ -385,15 +436,31 @@ public:
 	void set_corpse_weight(int value) noexcept { corpseWeight = value; }
 
 	// The body this creature leaves when it dies: its name, its nutrition and its taste.
-	[[nodiscard]] const std::string& get_corpse_name() const noexcept { return corpseName; }
+	[[nodiscard]] const std::string& get_corpse_name() const noexcept
+	{
+		return corpseName;
+	}
 
-	[[nodiscard]] int get_corpse_nutrition() const noexcept { return corpseNutrition; }
+	[[nodiscard]] int get_corpse_nutrition() const noexcept
+	{
+		return corpseNutrition;
+	}
 
-	[[nodiscard]] const std::string& get_corpse_taste() const noexcept { return corpseTaste; }
+	[[nodiscard]] const std::string& get_corpse_taste() const noexcept
+	{
+		return corpseTaste;
+	}
 
-	[[nodiscard]] CorpseEdibility get_corpse_edibility() const noexcept { return corpseEdibility; }
+	[[nodiscard]] CorpseEdibility get_corpse_edibility() const noexcept
+	{
+		return corpseEdibility;
+	}
 
-	void set_corpse(std::string name, int nutrition, std::string taste, CorpseEdibility edibility)
+	void set_corpse(
+		std::string name,
+		int nutrition,
+		std::string taste,
+		CorpseEdibility edibility)
 	{
 		corpseName = std::move(name);
 		corpseNutrition = nutrition;
@@ -407,7 +474,10 @@ public:
 
 	void drop(Item& item, GameContext& ctx);
 
-	bool is_invisible() const noexcept { return has_state(ActorState::IS_INVISIBLE); }
+	bool is_invisible() const noexcept
+	{
+		return has_state(ActorState::IS_INVISIBLE);
+	}
 
 	// Equipment query. Read by ArmorClass, Web and targeting, each of which
 	// runs for any creature.
@@ -450,7 +520,9 @@ public:
 	// Example:
 	//   creature.can_equip(bow, EquipmentSlot::MISSILE_WEAPON);     // -> true
 	//   creature.can_equip(dagger, EquipmentSlot::MISSILE_WEAPON);  // -> false
-	[[nodiscard]] bool can_equip(const Item& item, EquipmentSlot slot) const noexcept;
+	[[nodiscard]] bool can_equip(
+		const Item& item,
+		EquipmentSlot slot) const noexcept;
 
 	[[nodiscard]] bool has_ranged_weapon() const noexcept;
 
@@ -462,21 +534,31 @@ public:
 	// Example, wearing a ring of fire resistance:
 	//   worn_resistance_strength(DamageType::FIRE);   // -> 1
 	//   worn_resistance_strength(DamageType::COLD);   // -> 0
-	[[nodiscard]] int worn_resistance_strength(DamageType damageType) const noexcept;
+	[[nodiscard]] int worn_resistance_strength(
+		DamageType damageType) const noexcept;
 
 	// Puts an item into one of this creature's slots and takes ownership of
 	// it. The slot must be one the body plan grants: wearing boots on a wolf
 	// is a data error, not a runtime outcome.
 	void wear(std::unique_ptr<Item> item, EquipmentSlot slot);
-	bool equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameContext& ctx);
+	bool equip_item(
+		std::unique_ptr<Item> item,
+		EquipmentSlot slot,
+		GameContext& ctx);
 	bool unequip_item(EquipmentSlot slot, GameContext& ctx);
 	bool is_slot_occupied(EquipmentSlot slot) const noexcept;
 	bool is_item_equipped(uint64_t itemUniqueId) const noexcept;
 	bool is_dual_wielding() const noexcept;
 	bool toggle_armor(uint64_t itemUniqueId, GameContext& ctx);
 	bool toggle_shield(uint64_t itemUniqueId, GameContext& ctx);
-	bool toggle_weapon(uint64_t itemUniqueId, EquipmentSlot preferredSlot, GameContext& ctx);
-	bool toggle_equipment(uint64_t itemUniqueId, EquipmentSlot slot, GameContext& ctx);
+	bool toggle_weapon(
+		uint64_t itemUniqueId,
+		EquipmentSlot preferredSlot,
+		GameContext& ctx);
+	bool toggle_equipment(
+		uint64_t itemUniqueId,
+		EquipmentSlot slot,
+		GameContext& ctx);
 
 	// What this creature strikes with: the weapon in its main hand, or the
 	// attack its body provides when no slot holds one. "unarmed" when it has
@@ -508,9 +590,15 @@ public:
 	[[nodiscard]] int get_hit_dice() const noexcept { return creatureLevel; }
 
 	// The reading this creature runs out of air at, if it is holding its breath.
-	[[nodiscard]] std::optional<int> get_air_until_time() const noexcept { return airUntilTime; }
+	[[nodiscard]] std::optional<int> get_air_until_time() const noexcept
+	{
+		return airUntilTime;
+	}
 
-	void set_air_until_time(std::optional<int> reading) noexcept { airUntilTime = reading; }
+	void set_air_until_time(std::optional<int> reading) noexcept
+	{
+		airUntilTime = reading;
+	}
 
 	// Whether this creature has to breathe at all while in water. A creature that lives
 	// there does not, and nor does one wearing a helm of underwater action, which keeps
@@ -524,7 +612,10 @@ public:
 	// Example:
 	//   bat.is_flying();      // -> true
 	//   goblin.is_flying();   // -> false
-	[[nodiscard]] bool is_flying() const noexcept { return has_state(ActorState::CAN_FLY); }
+	[[nodiscard]] bool is_flying() const noexcept
+	{
+		return has_state(ActorState::CAN_FLY);
+	}
 
 	// One round of holding a breath. A creature found in water takes a gulp of air that
 	// lasts breath_rounds of its Constitution; past that it rolls a Constitution check
@@ -537,7 +628,10 @@ public:
 
 	// Whether this creature still remembers the player at `currentTime`. A memory the
 	// clock has passed is gone, so nothing has to run it down.
-	[[nodiscard]] bool is_aware(int currentTime) const noexcept { return currentTime < awareUntilTime; }
+	[[nodiscard]] bool is_aware(int currentTime) const noexcept
+	{
+		return currentTime < awareUntilTime;
+	}
 
 	// Refreshes the memory when the player is in sight, booking it AWARENESS_ROUNDS
 	// ahead of the clock. Losing sight does nothing at all: the memory ends when the
@@ -563,7 +657,10 @@ public:
 	// Example:
 	//   goblin.set_morality(Morality::EVIL);
 	//   goblin.is_evil(); // -> true
-	[[nodiscard]] bool is_evil() const noexcept { return morality == Morality::EVIL; }
+	[[nodiscard]] bool is_evil() const noexcept
+	{
+		return morality == Morality::EVIL;
+	}
 
 	[[nodiscard]] Attitude get_attitude() const noexcept { return attitude; }
 
@@ -582,13 +679,25 @@ public:
 	WebEscape try_break_web(GameContext& ctx);
 
 	// Armor Class accessors
-	[[nodiscard]] int get_armor_class() const noexcept { return armorClass->get_armor_class(); }
+	[[nodiscard]] int get_armor_class() const noexcept
+	{
+		return armorClass->get_armor_class();
+	}
 
-	[[nodiscard]] int get_base_armor_class() const noexcept { return armorClass->get_base_armor_class(); }
+	[[nodiscard]] int get_base_armor_class() const noexcept
+	{
+		return armorClass->get_base_armor_class();
+	}
 
-	void set_armor_class(int value) noexcept { armorClass->set_armor_class(value); }
+	void set_armor_class(int value) noexcept
+	{
+		armorClass->set_armor_class(value);
+	}
 
-	void set_base_armor_class(int value) noexcept { armorClass->set_base_armor_class(value); }
+	void set_base_armor_class(int value) noexcept
+	{
+		armorClass->set_base_armor_class(value);
+	}
 
 	void update_armor_class(GameContext& ctx);
 
@@ -600,20 +709,38 @@ public:
 	// Refuses a roll at or below zero.
 	void set_hit_dice(int hitPoints);
 
-	[[nodiscard]] bool is_dead() const noexcept { return healthPool->is_dead(); }
+	[[nodiscard]] bool is_dead() const noexcept
+	{
+		return healthPool->is_dead();
+	}
 
 	[[nodiscard]] int get_hp() const noexcept { return healthPool->get_hp(); }
 
-	[[nodiscard]] int get_max_hp() const noexcept { return healthPool->get_max_hp(); }
+	[[nodiscard]] int get_max_hp() const noexcept
+	{
+		return healthPool->get_max_hp();
+	}
 
-	[[nodiscard]] int get_hp_base() const noexcept { return healthPool->get_hp_base(); }
+	[[nodiscard]] int get_hp_base() const noexcept
+	{
+		return healthPool->get_hp_base();
+	}
 
-	[[nodiscard]] int get_temp_hp() const noexcept { return healthPool->get_temp_hp(); }
+	[[nodiscard]] int get_temp_hp() const noexcept
+	{
+		return healthPool->get_temp_hp();
+	}
 
-	[[nodiscard]] int get_effective_hp() const noexcept { return healthPool->get_effective_hp(); }
+	[[nodiscard]] int get_effective_hp() const noexcept
+	{
+		return healthPool->get_effective_hp();
+	}
 
 	// The fire and acid part of the damage taken, which Constitution regeneration cannot heal.
-	[[nodiscard]] int get_unregenerable_damage() const noexcept { return healthPool->get_unregenerable_damage(); }
+	[[nodiscard]] int get_unregenerable_damage() const noexcept
+	{
+		return healthPool->get_unregenerable_damage();
+	}
 
 	void set_hp(int value) noexcept { healthPool->set_hp(value); }
 
@@ -628,21 +755,37 @@ public:
 	int heal(int hpToHeal) { return healthPool->heal(hpToHeal); }
 
 	// The one body both damage paths share, once the type has been vetted.
-	int take_damage_hit_points(int damage, GameContext& ctx, DamageType damageType);
+	int take_damage_hit_points(
+		int damage,
+		GameContext& ctx,
+		DamageType damageType);
 
 	// A hit as a plain total, for the types that are not resisted per die.
 	// Refuses fire and cold: those arrive as ResistedDamage from
 	// DamageResolver::reduce_dice, so a producer cannot skip the reduction.
 	int take_damage(int damage, GameContext& ctx, DamageType damageType);
-	void take_damage_and_check_death(int damage, GameContext& ctx, DamageType damageType);
+	void take_damage_and_check_death(
+		int damage,
+		GameContext& ctx,
+		DamageType damageType);
 	// A hit whose dice have been reduced by this creature's resistance.
-	int take_damage(const DamageResolver::ResistedDamage& damage, GameContext& ctx);
-	void take_damage_and_check_death(const DamageResolver::ResistedDamage& damage, GameContext& ctx);
+	int take_damage(
+		const DamageResolver::ResistedDamage& damage,
+		GameContext& ctx);
+	void take_damage_and_check_death(
+		const DamageResolver::ResistedDamage& damage,
+		GameContext& ctx);
 
 	// Constitution tracking accessors
-	[[nodiscard]] std::optional<int> get_last_constitution() const noexcept { return constitutionTracker->get_last_constitution(); }
+	[[nodiscard]] std::optional<int> get_last_constitution() const noexcept
+	{
+		return constitutionTracker->get_last_constitution();
+	}
 
-	void set_last_constitution(int value) noexcept { constitutionTracker->set_last_constitution(value); }
+	void set_last_constitution(int value) noexcept
+	{
+		constitutionTracker->set_last_constitution(value);
+	}
 
 	void update_constitution_bonus(GameContext& ctx);
 
@@ -653,7 +796,9 @@ public:
 	// Example, a fighter at Constitution 25, one turn between points:
 	//   fighter.regenerate_from_constitution(10, dataManager);   // heals 1
 	//   fighter.regenerate_from_constitution(11, dataManager);   // heals nothing
-	void regenerate_from_constitution(int roundsElapsed, const DataManager& dataManager);
+	void regenerate_from_constitution(
+		int roundsElapsed,
+		const DataManager& dataManager);
 
 	// A ring of regeneration "restores one point of damage per turn" while worn (DMG, PDF
 	// page 910): a point each time a turn of rounds has run, fire and acid wounds included,
@@ -665,7 +810,11 @@ public:
 	void regenerate_from_ring(int roundsElapsed);
 
 	// Poison at work in this creature, or nothing.
-	[[nodiscard]] std::optional<PendingPoison> get_pending_poison() const noexcept { return pendingPoison; }
+	[[nodiscard]] std::optional<PendingPoison> get_pending_poison()
+		const noexcept
+	{
+		return pendingPoison;
+	}
 
 	// Takes a dose: damage that lands once roundsUntilOnset rounds have run. A creature
 	// carries one dose, so a second replaces the first.

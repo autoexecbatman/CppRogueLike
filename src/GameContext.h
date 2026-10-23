@@ -142,7 +142,10 @@ public:
 
 	GameStatus get_game_status() const noexcept { return gameStatus; }
 
-	void set_game_status(GameStatus newStatus) noexcept { gameStatus = newStatus; }
+	void set_game_status(GameStatus newStatus) noexcept
+	{
+		gameStatus = newStatus;
+	}
 
 	// Written by the end of a run - Player::die for DEFEAT, the Amulet of Yendor for
 	// VICTORY - and set back to UNDECIDED only by begin_run.
@@ -171,7 +174,10 @@ public:
 
 	WindowState get_window_state() const noexcept { return windowState; }
 
-	void set_window_state(WindowState newState) noexcept { windowState = newState; }
+	void set_window_state(WindowState newState) noexcept
+	{
+		windowState = newState;
+	}
 };
 
 // Data collected by character creation menus before Player is constructed.

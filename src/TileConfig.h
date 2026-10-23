@@ -36,12 +36,15 @@ struct WallAutotileGroup
 // ---------------------------------------------------------------------------
 namespace Autotile
 {
-constexpr TileRef resolve(AutotileGroup group, bool north, bool east, bool south, bool west)
+constexpr TileRef resolve(
+	AutotileGroup group,
+	bool north,
+	bool east,
+	bool south,
+	bool west)
 {
-	int col_offset = (!west && east) ? 0 : (west && !east) ? 2
-														   : 1;
-	int row_offset = (!north && south) ? 0 : (north && !south) ? 2
-															   : 1;
+	int col_offset = (!west && east) ? 0 : (west && !east) ? 2 : 1;
+	int row_offset = (!north && south) ? 0 : (north && !south) ? 2 : 1;
 	return TileRef{
 		group.sheet,
 		group.origin_col + col_offset,
@@ -79,9 +82,15 @@ inline constexpr TileOffset WALL_TABLE[16] = {
 	{ 4, 1 }, // 15: NESW  Center (fully surrounded)
 };
 
-constexpr TileRef wall_resolve(WallAutotileGroup group, bool north, bool east, bool south, bool west)
+constexpr TileRef wall_resolve(
+	WallAutotileGroup group,
+	bool north,
+	bool east,
+	bool south,
+	bool west)
 {
-	int mask = (north ? 8 : 0) | (east ? 4 : 0) | (south ? 2 : 0) | (west ? 1 : 0);
+	int mask =
+		(north ? 8 : 0) | (east ? 4 : 0) | (south ? 2 : 0) | (west ? 1 : 0);
 	auto offset = WALL_TABLE[mask];
 	return TileRef{
 		group.sheet,
@@ -118,7 +127,8 @@ private:
 public:
 	[[nodiscard]] TileRef get(std::string_view key) const;
 	[[nodiscard]] AutotileGroup get_autotile(std::string_view key) const;
-	[[nodiscard]] WallAutotileGroup get_wall_autotile(std::string_view key) const;
+	[[nodiscard]] WallAutotileGroup get_wall_autotile(
+		std::string_view key) const;
 
 	// What a tile type does: whether it blocks, what bypasses it, what it says,
 	// and how it draws on the minimap. Throws when the type has no entry, since
@@ -128,14 +138,16 @@ public:
 	//   const TileDefinition& water = config.get_tile_definition(TileType::WATER);
 	//   water.blocksMovement;  // -> true
 	//   water.bypassState;     // -> ActorState::CAN_SWIM
-	[[nodiscard]] const TileDefinition& get_tile_definition(TileType tileType) const;
+	[[nodiscard]] const TileDefinition& get_tile_definition(
+		TileType tileType) const;
 
 	// Every authored tile type with its definition, for a question asked of all of them -
 	// which ones a creature may enter.
 	//
 	// Example:
 	//   config.get_tile_definitions().size();  // -> 6, one per TileType in tile_config.json
-	[[nodiscard]] const std::unordered_map<TileType, TileDefinition>& get_tile_definitions() const noexcept
+	[[nodiscard]] const std::unordered_map<TileType, TileDefinition>&
+	get_tile_definitions() const noexcept
 	{
 		return tileDefinitions;
 	}

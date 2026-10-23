@@ -17,8 +17,13 @@ constexpr int MIN_DIRECTION = -1;
 constexpr int MAX_DIRECTION = 1;
 
 //==ConfusedMonsterAi==
-AiMonsterConfused::AiMonsterConfused(int confusionEndTime, std::unique_ptr<Ai> oldAi) noexcept
-	: confusionEndTime{ confusionEndTime }, oldAi{ std::move(oldAi) } {}
+AiMonsterConfused::AiMonsterConfused(
+	int confusionEndTime,
+	std::unique_ptr<Ai> oldAi) noexcept :
+	confusionEndTime{ confusionEndTime },
+	oldAi{ std::move(oldAi) }
+{
+}
 
 void AiMonsterConfused::update(Creature& owner, GameContext& ctx)
 {
@@ -39,7 +44,8 @@ void AiMonsterConfused::update(Creature& owner, GameContext& ctx)
 	}
 }
 
-[[nodiscard]] Vector2D AiMonsterConfused::get_random_direction(GameContext& ctx) const
+[[nodiscard]] Vector2D AiMonsterConfused::get_random_direction(
+	GameContext& ctx) const
 {
 	return Vector2D{
 		ctx.dice->roll(MIN_DIRECTION, MAX_DIRECTION),
@@ -47,7 +53,10 @@ void AiMonsterConfused::update(Creature& owner, GameContext& ctx)
 	};
 }
 
-void AiMonsterConfused::attempt_move(Creature& owner, const Vector2D& destination, GameContext& ctx)
+void AiMonsterConfused::attempt_move(
+	Creature& owner,
+	const Vector2D& destination,
+	GameContext& ctx)
 {
 	assert(ctx.map && "AiMonsterConfused::attempt_move: called without a map");
 
@@ -65,7 +74,9 @@ void AiMonsterConfused::attempt_move(Creature& owner, const Vector2D& destinatio
 
 void AiMonsterConfused::restore_original_ai(Creature& owner)
 {
-	assert(oldAi && "AiMonsterConfused::restore_original_ai: a confused mind wraps no mind to return to");
+	assert(
+		oldAi &&
+		"AiMonsterConfused::restore_original_ai: a confused mind wraps no mind to return to");
 	// Destroys this object, whose oldAi has just been moved out.
 	owner.ai = std::move(oldAi);
 }
@@ -82,7 +93,9 @@ void AiMonsterConfused::save(json& output)
 	output["type"] = encode_ai_type(get_ai_type());
 	output["confusionEndTime"] = confusionEndTime;
 
-	assert(oldAi && "AiMonsterConfused::save: a confused mind wraps no mind to return to");
+	assert(
+		oldAi &&
+		"AiMonsterConfused::save: a confused mind wraps no mind to return to");
 	json oldAiJson;
 	oldAi->save(oldAiJson);
 	output["oldAi"] = oldAiJson;

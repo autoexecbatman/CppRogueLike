@@ -27,7 +27,9 @@ namespace
 {
 std::unique_ptr<Item> an_item(int value, int weight)
 {
-	auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "thing", ColorPairId::WHITE_BLACK });
+	auto item = std::make_unique<Item>(
+		Vector2D{ 0, 0 },
+		ActorData{ TileRef{}, "thing", ColorPairId::WHITE_BLACK });
 	item->set_value(value);
 	item->enhancement.weight = weight;
 	return item;
@@ -36,7 +38,9 @@ std::unique_ptr<Item> an_item(int value, int weight)
 
 TEST(ItemRowTextTest, SomethingWorthBuyingShowsBothNumbers)
 {
-	EXPECT_EQ(InventoryActions::value_and_weight(*an_item(5, 15)), " (5 gp, 15 lb)");
+	EXPECT_EQ(
+		InventoryActions::value_and_weight(*an_item(5, 15)),
+		" (5 gp, 15 lb)");
 }
 
 TEST(ItemRowTextTest, SomethingWorthlessStillShowsItsWeight)
@@ -49,7 +53,9 @@ TEST(ItemRowTextTest, SomethingWorthlessStillShowsItsWeight)
 TEST(ItemRowTextTest, SomethingWeightlessStillSaysSo)
 {
 	// Zero is an answer. A blank reads as a row that failed to say.
-	EXPECT_EQ(InventoryActions::value_and_weight(*an_item(2, 0)), " (2 gp, 0 lb)");
+	EXPECT_EQ(
+		InventoryActions::value_and_weight(*an_item(2, 0)),
+		" (2 gp, 0 lb)");
 }
 
 TEST(ItemRowTextTest, TheTextBeginsWithASpaceSoItAppends)

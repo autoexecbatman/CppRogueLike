@@ -44,11 +44,13 @@ TEST_F(AlignmentTest, AxesAreIndependent)
 	creature.set_ethics(Ethics::CHAOTIC);
 
 	EXPECT_EQ(creature.get_ethics(), Ethics::CHAOTIC);
-	EXPECT_EQ(creature.get_morality(), Morality::NEUTRAL) << "morality moved with ethics";
+	EXPECT_EQ(creature.get_morality(), Morality::NEUTRAL)
+		<< "morality moved with ethics";
 
 	creature.set_morality(Morality::GOOD);
 
-	EXPECT_EQ(creature.get_ethics(), Ethics::CHAOTIC) << "ethics moved with morality";
+	EXPECT_EQ(creature.get_ethics(), Ethics::CHAOTIC)
+		<< "ethics moved with morality";
 	EXPECT_EQ(creature.get_morality(), Morality::GOOD);
 }
 
@@ -113,8 +115,10 @@ TEST(AlignmentDataTest, EveryMonsterCarriesTheAlignmentItsEntryGives)
 	for (const auto& [key, ethics, morality] : fromTheBook)
 	{
 		const MonsterParams& params = monsters.get_params(key);
-		EXPECT_EQ(params.ethics, ethics) << key << " is on the wrong side of law and chaos";
-		EXPECT_EQ(params.morality, morality) << key << " is on the wrong side of good and evil";
+		EXPECT_EQ(params.ethics, ethics)
+			<< key << " is on the wrong side of law and chaos";
+		EXPECT_EQ(params.morality, morality)
+			<< key << " is on the wrong side of good and evil";
 	}
 }
 
@@ -144,7 +148,8 @@ TEST(AlignmentDataTest, InventedMonstersTakeTheirClosestEntrysAlignment)
 TEST(AlignmentDataTest, EveryParsedRecordCarriesBothAxes)
 {
 	std::ifstream file(Paths::resolve(Paths::MONSTERS));
-	ASSERT_TRUE(file.is_open()) << "monsters.json did not open; the case measures nothing";
+	ASSERT_TRUE(file.is_open())
+		<< "monsters.json did not open; the case measures nothing";
 
 	nlohmann::json content;
 	file >> content;
@@ -153,7 +158,8 @@ TEST(AlignmentDataTest, EveryParsedRecordCarriesBothAxes)
 	for (const auto& [key, record] : content.items())
 	{
 		EXPECT_TRUE(record.contains("ethics")) << key << " carries no ethics";
-		EXPECT_TRUE(record.contains("morality")) << key << " carries no morality";
+		EXPECT_TRUE(record.contains("morality"))
+			<< key << " carries no morality";
 		++checked;
 	}
 	EXPECT_GT(checked, 0) << "no record was checked; the case measures nothing";
@@ -167,14 +173,17 @@ TEST(AlignmentDataTest, TheDungeonHoldsMonstersProtectionFromEvilWardsAgainst)
 	monsters.load("data/content/monsters.json");
 
 	int evil = 0;
-	for (const std::string& key : { "goblin", "orc", "kobold", "troll", "ogre", "vampire" })
+	for (
+		const std::string& key :
+		{ "goblin", "orc", "kobold", "troll", "ogre", "vampire" })
 	{
 		if (monsters.get_params(key).morality == Morality::EVIL)
 		{
 			++evil;
 		}
 	}
-	EXPECT_EQ(evil, 6) << "the commonest dungeon monsters are not evil, so the ward does nothing";
+	EXPECT_EQ(evil, 6)
+		<< "the commonest dungeon monsters are not evil, so the ward does nothing";
 }
 
 // The spiders and the mimic carry their Monstrous Manual entry's alignment in their
@@ -187,28 +196,37 @@ TEST(AlignmentCodeBuiltTest, TheSpidersAndTheMimicCarryTheirEntrysAlignment)
 	GameContext ctx = mock.to_game_context();
 	const auto build = [&mock, &ctx](std::string_view key)
 	{
-		return MonsterCreator::create_from_params(Vector2D{ 1, 1 }, mock.monsterRegistry.get_params(key), ctx);
+		return MonsterCreator::create_from_params(
+			Vector2D{ 1, 1 },
+			mock.monsterRegistry.get_params(key),
+			ctx);
 	};
 
 	const auto hairy = build("spider_small");
 	EXPECT_EQ(hairy->get_ethics(), Ethics::NEUTRAL);
-	EXPECT_EQ(hairy->get_morality(), Morality::EVIL) << "the hairy spider is neutral evil";
+	EXPECT_EQ(hairy->get_morality(), Morality::EVIL)
+		<< "the hairy spider is neutral evil";
 
 	const auto huge = build("spider_giant");
 	EXPECT_EQ(huge->get_ethics(), Ethics::NEUTRAL);
-	EXPECT_EQ(huge->get_morality(), Morality::NEUTRAL) << "the huge spider is neutral";
+	EXPECT_EQ(huge->get_morality(), Morality::NEUTRAL)
+		<< "the huge spider is neutral";
 
 	const auto giant = build("spider_weaver");
 	EXPECT_EQ(giant->get_ethics(), Ethics::CHAOTIC);
-	EXPECT_EQ(giant->get_morality(), Morality::EVIL) << "the giant spider is chaotic evil";
+	EXPECT_EQ(giant->get_morality(), Morality::EVIL)
+		<< "the giant spider is chaotic evil";
 
 	const auto killer = build("mimic");
 	EXPECT_EQ(killer->get_ethics(), Ethics::NEUTRAL);
-	EXPECT_EQ(killer->get_morality(), Morality::EVIL) << "the killer mimic is neutral (evil)";
+	EXPECT_EQ(killer->get_morality(), Morality::EVIL)
+		<< "the killer mimic is neutral (evil)";
 
-	const MonsterParams& shopkeeper = mock.monsterRegistry.get_params("shopkeeper");
+	const MonsterParams& shopkeeper =
+		mock.monsterRegistry.get_params("shopkeeper");
 	EXPECT_EQ(shopkeeper.ethics, Ethics::NEUTRAL);
-	EXPECT_EQ(shopkeeper.morality, Morality::NEUTRAL) << "the shopkeeper is true neutral";
+	EXPECT_EQ(shopkeeper.morality, Morality::NEUTRAL)
+		<< "the shopkeeper is true neutral";
 }
 
 // A record that names no alignment is an unfinished record, refused rather than handed a
@@ -222,7 +240,8 @@ TEST(AlignmentDataTest, ARecordWithNoAlignmentIsRefused)
 	file >> content;
 	content.at("goblin").erase("ethics");
 
-	const std::filesystem::path damaged = std::filesystem::temp_directory_path() / "monsters_no_alignment.json";
+	const std::filesystem::path damaged =
+		std::filesystem::temp_directory_path() / "monsters_no_alignment.json";
 	std::ofstream out(damaged);
 	out << content.dump(2);
 	out.close();

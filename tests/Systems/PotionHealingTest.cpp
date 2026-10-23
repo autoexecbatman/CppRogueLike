@@ -59,7 +59,9 @@ protected:
 		auto created = ItemCreator::create(key, drinker().position, ctx);
 		Item& potion = *created;
 		// Placed as starting gear is, past the weight gate a fixture's Strength 0 would shut.
-		[[maybe_unused]] const auto added = InventoryOperations::add_item(drinker().inventoryData, std::move(created));
+		[[maybe_unused]] const auto added = InventoryOperations::add_item(
+			drinker().inventoryData,
+			std::move(created));
 		EXPECT_TRUE(added.has_value()) << "the potion did not fit in the pack";
 
 		for (const int face : faces)
@@ -77,10 +79,7 @@ protected:
 		return drinker().get_hp() - 1;
 	}
 
-	Player& drinker()
-	{
-		return ctx.player_concrete();
-	}
+	Player& drinker() { return ctx.player_concrete(); }
 
 	MockGameContext mock{};
 	GameContext ctx{ mock.to_game_context() };

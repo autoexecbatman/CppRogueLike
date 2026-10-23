@@ -25,16 +25,31 @@ struct GameContext;
 namespace ItemCreator
 {
 // The item a key names, at pos. Throws std::out_of_range if the key is unknown.
-[[nodiscard]] std::unique_ptr<Item> create(std::string_view key, Vector2D pos, GameContext& ctx);
+[[nodiscard]] std::unique_ptr<Item> create(
+	std::string_view key,
+	Vector2D pos,
+	GameContext& ctx);
 
 // A pile of gold at pos, paying and worth goldAmount. Throws if the registry has no
 // gold_coin.
-[[nodiscard]] std::unique_ptr<Item> create_with_gold_amount(Vector2D pos, int goldAmount, GameContext& ctx);
+[[nodiscard]] std::unique_ptr<Item> create_with_gold_amount(
+	Vector2D pos,
+	int goldAmount,
+	GameContext& ctx);
 
 // The item a key names, at pos, with an enhancement's prefix and suffix applied.
-[[nodiscard]] std::unique_ptr<Item> create_with_enhancement(std::string_view key, Vector2D pos, PrefixType prefix, SuffixType suffix, GameContext& ctx);
+[[nodiscard]] std::unique_ptr<Item> create_with_enhancement(
+	std::string_view key,
+	Vector2D pos,
+	PrefixType prefix,
+	SuffixType suffix,
+	GameContext& ctx);
 
 // One item of a category drawn by spawn weight at dungeonLevel, or nullptr when none of
 // the category can appear there.
-[[nodiscard]] std::unique_ptr<Item> create_random_of_category(std::string_view category, Vector2D pos, GameContext& ctx, int dungeonLevel);
+[[nodiscard]] std::unique_ptr<Item> create_random_of_category(
+	std::string_view category,
+	Vector2D pos,
+	GameContext& ctx,
+	int dungeonLevel);
 } // namespace ItemCreator

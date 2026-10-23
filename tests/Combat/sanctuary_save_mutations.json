@@ -63,31 +63,31 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\t\t\tbuff.opponentSaves.push_back(OpponentSave{",
-      "mutated": "\t\t\t\tstatic_cast<void>(OpponentSave{",
+      "original": "\t\t\t\tbuff.opponentSaves.push_back(\n\t\t\t\t\tOpponentSave{",
+      "mutated": "\t\t\t\tstatic_cast<void>(\n\t\t\t\t\tOpponentSave{",
       "catches": "the record read from the saved game and dropped"
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\tif (ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))\n\t{\n\t\tctx.messageSystem->append_message_part(owner.actorData.color, owner.actorData.name);",
-      "mutated": "\tif (false)\n\t{\n\t\tctx.messageSystem->append_message_part(owner.actorData.color, owner.actorData.name);",
+      "original": "\tif (ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))\n\t{\n\t\tctx.messageSystem->append_message_part(\n\t\t\towner.actorData.color,\n\t\t\towner.actorData.name);",
+      "mutated": "\tif (false)\n\t{\n\t\tctx.messageSystem->append_message_part(\n\t\t\towner.actorData.color,\n\t\t\towner.actorData.name);",
       "catches": "an attack that never asks the target's Sanctuary"
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\t\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \" cannot bring itself to attack \");\n\t\tctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);\n\t\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \".\");\n\t\tctx.messageSystem->finalize_message();\n\t\treturn AttackResult::PREVENTED;",
-      "mutated": "\t\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \" cannot bring itself to attack \");\n\t\tctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);\n\t\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \".\");\n\t\tctx.messageSystem->finalize_message();\n\t\tstatic_cast<void>(kind);",
+      "original": "\t\tctx.messageSystem->append_message_part(\n\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\" cannot bring itself to attack \");\n\t\tctx.messageSystem->append_message_part(\n\t\t\ttarget.actorData.color,\n\t\t\ttarget.actorData.name);\n\t\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \".\");\n\t\tctx.messageSystem->finalize_message();\n\t\treturn AttackResult::PREVENTED;",
+      "mutated": "\t\tctx.messageSystem->append_message_part(\n\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\" cannot bring itself to attack \");\n\t\tctx.messageSystem->append_message_part(\n\t\t\ttarget.actorData.color,\n\t\t\ttarget.actorData.name);\n\t\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \".\");\n\t\tctx.messageSystem->finalize_message();static_cast<void>(kind);",
       "catches": "an attack turned away by Sanctuary that lands anyway"
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\tif (ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))\n\t{\n\t\tctx.messageSystem->append_message_part(owner.actorData.color, owner.actorData.name);",
-      "mutated": "\tif (kind == AttackKind::MELEE && ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))\n\t{\n\t\tctx.messageSystem->append_message_part(owner.actorData.color, owner.actorData.name);",
+      "original": "\tif (ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))\n\t{\n\t\tctx.messageSystem->append_message_part(\n\t\t\towner.actorData.color,\n\t\t\towner.actorData.name);",
+      "mutated": "\tif (kind == AttackKind::MELEE && ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))\n\t{\n\t\tctx.messageSystem->append_message_part(\n\t\t\towner.actorData.color,\n\t\t\towner.actorData.name);",
       "catches": "only a melee attack asking the target's Sanctuary"
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\tconst auto broken_buffs = ctx.buffSystem->remove_buffs_broken_by_attacking(owner);",
+      "original": "\tconst auto broken_buffs =\n\t\tctx.buffSystem->remove_buffs_broken_by_attacking(owner);",
       "mutated": "\tconst std::vector<BuffType> broken_buffs{};",
       "catches": "an attacker keeping its own Sanctuary after it attacks"
     }

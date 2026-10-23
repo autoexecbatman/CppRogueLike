@@ -79,7 +79,9 @@ protected:
 		goblin.experienceReward = std::make_unique<ExperienceReward>(0);
 		goblin.healthPool = std::make_unique<HealthPool>(STARTING_HP);
 		goblin.armorClass = std::make_unique<ArmorClass>(10);
-		goblin.attacker = std::make_unique<MonsterAttacker>(goblin, DamageInfo{ "1d4", DamageType::PHYSICAL });
+		goblin.attacker = std::make_unique<MonsterAttacker>(
+			goblin,
+			DamageInfo{ "1d4", DamageType::PHYSICAL });
 		goblin.set_dr(0);
 		goblin.set_thaco(20);
 		goblin.set_strength(8);
@@ -146,7 +148,8 @@ protected:
 	{
 		script(rolls);
 		goblin.attacker->attack(*player, AttackKind::MELEE, ctx);
-		ASSERT_EQ(player->get_hp(), STARTING_HP) << "the save was skipped and the blow landed";
+		ASSERT_EQ(player->get_hp(), STARTING_HP)
+			<< "the save was skipped and the blow landed";
 	}
 
 	int goblin_distance_to_player() const
@@ -158,7 +161,8 @@ protected:
 	GameContext ctx;
 	Map map{ 20, 20 };
 	std::vector<std::unique_ptr<Creature>> creatures{};
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ PLAYER_COLUMN, CORRIDOR_ROW }) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(
+		Vector2D{ PLAYER_COLUMN, CORRIDOR_ROW }) };
 	Creature goblin{
 		Vector2D{ GOBLIN_START_COLUMN, CORRIDOR_ROW },
 		ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK },
@@ -167,7 +171,13 @@ protected:
 
 TEST_F(SanctuaryPursuitTest, AMonsterThatFailedItsSaveStopsClosingIn)
 {
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(
+		*player,
+		BuffType::SANCTUARY,
+		0,
+		10,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 	fail_the_save_with({ 12, 20, 4 });
 	const int distanceBefore = goblin_distance_to_player();
 
@@ -188,7 +198,13 @@ TEST_F(SanctuaryPursuitTest, AMonsterThatMadeItsSaveKeepsHunting)
 {
 	// The other half of the rule: a made save leaves the opponent unaffected, so it must
 	// still come. Without this the fix could be "no monster ever pursues" and pass.
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(
+		*player,
+		BuffType::SANCTUARY,
+		0,
+		10,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 	script({ 20, 20, 4 });
 	goblin.attacker->attack(*player, AttackKind::MELEE, ctx);
 	const int distanceBefore = goblin_distance_to_player();
@@ -207,7 +223,13 @@ TEST_F(SanctuaryPursuitTest, AMonsterThatNeverAttackedIsNotTurnedAway)
 {
 	// "Those not attempting to attack the subject remain unaffected": reading the record
 	// must not roll a save, so a monster that has never swung still hunts.
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(
+		*player,
+		BuffType::SANCTUARY,
+		0,
+		10,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 	const int distanceBefore = goblin_distance_to_player();
 
 	script_idle_rolls(120);
@@ -226,9 +248,16 @@ TEST_F(SanctuaryPursuitTest, AMonsterThatLostTrackStopsAnnouncingItEveryRound)
 	// used to walk up and swing anyway, and every round the log said so - Attacker prints
 	// "cannot bring itself to attack" whenever a turned-away swing is made. Once it stops
 	// hunting there is no swing to turn away, so the line stops too.
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(
+		*player,
+		BuffType::SANCTUARY,
+		0,
+		10,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 	fail_the_save_with({ 12, 20, 4 });
-	const size_t messagesAfterTheOneRefusal = game.messageSystem.get_stored_message_count();
+	const size_t messagesAfterTheOneRefusal =
+		game.messageSystem.get_stored_message_count();
 
 	script_idle_rolls(120);
 	for (int round = 0; round < 4; ++round)
@@ -236,7 +265,9 @@ TEST_F(SanctuaryPursuitTest, AMonsterThatLostTrackStopsAnnouncingItEveryRound)
 		goblin.ai->update(goblin, ctx);
 	}
 
-	EXPECT_EQ(game.messageSystem.get_stored_message_count(), messagesAfterTheOneRefusal)
+	EXPECT_EQ(
+		game.messageSystem.get_stored_message_count(),
+		messagesAfterTheOneRefusal)
 		<< "the goblin kept swinging at a creature it had lost track of, once a round";
 }
 
@@ -245,9 +276,16 @@ TEST_F(SanctuaryPursuitTest, ARangedMonsterThatLostTrackStopsShootingToo)
 	// The same rule reaches every opponent, so the archer's own update is gated as well.
 	// At this distance it shoots rather than closes, so the shot is what must stop.
 	goblin.ai = std::make_unique<AiMonsterRanged>();
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(
+		*player,
+		BuffType::SANCTUARY,
+		0,
+		10,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 	fail_the_save_with({ 12, 20, 4 });
-	const size_t messagesAfterTheOneRefusal = game.messageSystem.get_stored_message_count();
+	const size_t messagesAfterTheOneRefusal =
+		game.messageSystem.get_stored_message_count();
 
 	script_idle_rolls(120);
 	for (int round = 0; round < 4; ++round)
@@ -255,7 +293,9 @@ TEST_F(SanctuaryPursuitTest, ARangedMonsterThatLostTrackStopsShootingToo)
 		goblin.ai->update(goblin, ctx);
 	}
 
-	EXPECT_EQ(game.messageSystem.get_stored_message_count(), messagesAfterTheOneRefusal)
+	EXPECT_EQ(
+		game.messageSystem.get_stored_message_count(),
+		messagesAfterTheOneRefusal)
 		<< "the archer kept loosing arrows at a creature it had lost track of";
 }
 
@@ -264,7 +304,13 @@ TEST_F(SanctuaryPursuitTest, AWebSpinnerThatLostTrackStopsClosingIn)
 	// The spinner has its own update and so its own gate. Having failed its save it never
 	// bites, so nothing here depends on venom - only on whether it walks toward the player.
 	goblin.ai = std::make_unique<AiWebSpinner>();
-	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, BuffApplication::ADD, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(
+		*player,
+		BuffType::SANCTUARY,
+		0,
+		10,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 	// The spinner's second roll is the d100 for whether it spins a web, and spinning
 	// needs a tile this fixture does not load. The top of the die is over the chance.
 	fail_the_save_with({ 12, RandomDice::HIGHEST });

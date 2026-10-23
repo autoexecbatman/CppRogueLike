@@ -50,10 +50,7 @@ protected:
 		ctx.levelManager = &levelManager;
 	}
 
-	void TearDown() override
-	{
-		std::filesystem::remove(edited);
-	}
+	void TearDown() override { std::filesystem::remove(edited); }
 
 	void force_rolls(std::initializer_list<int> rolls)
 	{
@@ -93,7 +90,10 @@ protected:
 		return edited.string();
 	}
 
-	static nlohmann::json hit_dice(int sides, int bonus, std::initializer_list<HitDiceCount> counts)
+	static nlohmann::json hit_dice(
+		int sides,
+		int bonus,
+		std::initializer_list<HitDiceCount> counts)
 	{
 		nlohmann::json entries = nlohmann::json::array();
 		for (const HitDiceCount& entry : counts)
@@ -112,39 +112,54 @@ protected:
 	GameContext ctx{};
 	DataManager dataManager{};
 	LevelManager levelManager{};
-	std::filesystem::path edited{ std::filesystem::temp_directory_path() / "monsters_hit_dice.json" };
+	std::filesystem::path edited{ std::filesystem::temp_directory_path() /
+		"monsters_hit_dice.json" };
 };
 
 TEST_F(MonsterHitDiceCountsTest, NoCountIsRefused)
 {
-	EXPECT_THROW(monsters.load(with_orc_hit_dice(hit_dice(8, 0, {}))), std::runtime_error);
+	EXPECT_THROW(
+		monsters.load(with_orc_hit_dice(hit_dice(8, 0, {}))),
+		std::runtime_error);
 }
 
 TEST_F(MonsterHitDiceCountsTest, AGapBetweenCountsIsRefused)
 {
-	EXPECT_THROW(monsters.load(with_orc_hit_dice(hit_dice(8, 0, { { 9, 2000 }, { 11, 3000 } }))), std::runtime_error);
+	EXPECT_THROW(
+		monsters.load(
+			with_orc_hit_dice(hit_dice(8, 0, { { 9, 2000 }, { 11, 3000 } }))),
+		std::runtime_error);
 }
 
 TEST_F(MonsterHitDiceCountsTest, DescendingCountsAreRefused)
 {
-	EXPECT_THROW(monsters.load(with_orc_hit_dice(hit_dice(8, 0, { { 10, 3000 }, { 9, 2000 } }))), std::runtime_error);
+	EXPECT_THROW(
+		monsters.load(
+			with_orc_hit_dice(hit_dice(8, 0, { { 10, 3000 }, { 9, 2000 } }))),
+		std::runtime_error);
 }
 
 // The count is the creature's level, and the book's below-one dice are count 1 with a
 // negative bonus.
 TEST_F(MonsterHitDiceCountsTest, ACountOfZeroIsRefused)
 {
-	EXPECT_THROW(monsters.load(with_orc_hit_dice(hit_dice(8, 0, { { 0, 10 } }))), std::runtime_error);
+	EXPECT_THROW(
+		monsters.load(with_orc_hit_dice(hit_dice(8, 0, { { 0, 10 } }))),
+		std::runtime_error);
 }
 
 TEST_F(MonsterHitDiceCountsTest, NegativeExperienceIsRefused)
 {
-	EXPECT_THROW(monsters.load(with_orc_hit_dice(hit_dice(8, 0, { { 1, -1 } }))), std::runtime_error);
+	EXPECT_THROW(
+		monsters.load(with_orc_hit_dice(hit_dice(8, 0, { { 1, -1 } }))),
+		std::runtime_error);
 }
 
 TEST_F(MonsterHitDiceCountsTest, ADieOfNoSidesIsRefused)
 {
-	EXPECT_THROW(monsters.load(with_orc_hit_dice(hit_dice(0, 0, { { 1, 10 } }))), std::runtime_error);
+	EXPECT_THROW(
+		monsters.load(with_orc_hit_dice(hit_dice(0, 0, { { 1, 10 } }))),
+		std::runtime_error);
 }
 
 TEST_F(MonsterHitDiceCountsTest, ARecordWithoutHitDiceIsRefused)
@@ -163,9 +178,12 @@ TEST_F(MonsterHitDiceCountsTest, ARecordWithoutHitDiceIsRefused)
 // the mimic's two counts.
 TEST_F(MonsterHitDiceCountsTest, TheEdgesOfEachRuleLoad)
 {
-	EXPECT_NO_THROW(monsters.load(with_orc_hit_dice(hit_dice(1, 99, { { 1, 0 } }))));
-	EXPECT_NO_THROW(monsters.load(with_orc_hit_dice(hit_dice(8, -1, { { 1, 65 } }))));
-	EXPECT_NO_THROW(monsters.load(with_orc_hit_dice(hit_dice(8, 0, { { 9, 2000 }, { 10, 3000 } }))));
+	EXPECT_NO_THROW(
+		monsters.load(with_orc_hit_dice(hit_dice(1, 99, { { 1, 0 } }))));
+	EXPECT_NO_THROW(
+		monsters.load(with_orc_hit_dice(hit_dice(8, -1, { { 1, 65 } }))));
+	EXPECT_NO_THROW(monsters.load(
+		with_orc_hit_dice(hit_dice(8, 0, { { 9, 2000 }, { 10, 3000 } }))));
 }
 
 // The file's numbers survive the load: the dragon's 15d8 at 12,000 (Red Dragon p1240 and its
@@ -184,25 +202,30 @@ TEST_F(MonsterHitDiceCountsTest, ARecordsHitDiceAreRead)
 // Two d8 at 5, each +4 for Constitution 18, are 18.
 TEST_F(MonsterHitDiceCountsTest, AOneCountMonsterSpendsNoDieChoosingItsCount)
 {
-	const MonsterParams params = params_with(MonsterHitDice{ 8, 0, { { 2, 40 } } });
+	const MonsterParams params =
+		params_with(MonsterHitDice{ 8, 0, { { 2, 40 } } });
 	force_ability_scores();
 	force_rolls({ 5, 5 });
 
-	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
+	const auto monster =
+		MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
 	EXPECT_EQ(monster->get_creature_level(), 2);
-	EXPECT_EQ(monster->get_max_hp(), 18) << "a die was spent before the hit dice";
+	EXPECT_EQ(monster->get_max_hp(), 18)
+		<< "a die was spent before the hit dice";
 	EXPECT_EQ(monster->experienceReward->get_xp(), 40);
 }
 
 // The mimic's two counts, rolling 10: level 10, ten d8 at 1 each +4 for 50, and 3,000.
 TEST_F(MonsterHitDiceCountsTest, ARolledCountSetsTheLevelHitPointsAndExperience)
 {
-	const MonsterParams params = params_with(MonsterHitDice{ 8, 0, { { 9, 2000 }, { 10, 3000 } } });
+	const MonsterParams params =
+		params_with(MonsterHitDice{ 8, 0, { { 9, 2000 }, { 10, 3000 } } });
 	force_ability_scores();
 	force_rolls({ 10, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 });
 
-	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
+	const auto monster =
+		MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
 	EXPECT_EQ(monster->get_creature_level(), 10);
 	EXPECT_EQ(monster->get_max_hp(), 50);
@@ -212,11 +235,13 @@ TEST_F(MonsterHitDiceCountsTest, ARolledCountSetsTheLevelHitPointsAndExperience)
 // Rolling 9: nine dice for 45, and 2,000.
 TEST_F(MonsterHitDiceCountsTest, TheLowerCountIsWorthItsOwnExperience)
 {
-	const MonsterParams params = params_with(MonsterHitDice{ 8, 0, { { 9, 2000 }, { 10, 3000 } } });
+	const MonsterParams params =
+		params_with(MonsterHitDice{ 8, 0, { { 9, 2000 }, { 10, 3000 } } });
 	force_ability_scores();
 	force_rolls({ 9, 1, 1, 1, 1, 1, 1, 1, 1, 1 });
 
-	const auto monster = MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
+	const auto monster =
+		MonsterCreator::create_from_params(Vector2D{ 0, 0 }, params, ctx);
 
 	EXPECT_EQ(monster->get_creature_level(), 9);
 	EXPECT_EQ(monster->get_max_hp(), 45);
@@ -224,7 +249,9 @@ TEST_F(MonsterHitDiceCountsTest, TheLowerCountIsWorthItsOwnExperience)
 }
 
 // A budget pays for the worst roll, so a monster of 9 or 10 hit dice costs 3,000.
-TEST_F(MonsterHitDiceCountsTest, AnEncounterBudgetPaysTheHighestCountsExperience)
+TEST_F(
+	MonsterHitDiceCountsTest,
+	AnEncounterBudgetPaysTheHighestCountsExperience)
 {
 	MonsterParams ranged = monsters.get_params("orc");
 	ranged.name = "Ranged Count Beast";
@@ -233,21 +260,25 @@ TEST_F(MonsterHitDiceCountsTest, AnEncounterBudgetPaysTheHighestCountsExperience
 	ranged.levelMaximum = 0;
 	const std::string key = monsters.add_custom(ranged);
 
-	const std::vector<MonsterCandidate> candidates = encounter_candidates(monsters, 1);
+	const std::vector<MonsterCandidate> candidates =
+		encounter_candidates(monsters, 1);
 
 	const auto isTheBeast = [&key](const MonsterCandidate& candidate)
 	{
 		return candidate.key == key;
 	};
 	const auto found = std::ranges::find_if(candidates, isTheBeast);
-	ASSERT_NE(found, candidates.end()) << "the two-count monster was not a candidate";
+	ASSERT_NE(found, candidates.end())
+		<< "the two-count monster was not a candidate";
 	EXPECT_EQ(found->xpCost, 3000);
 }
 
 // The editor widens a range at its bottom: the new counts are worth the old lowest's.
 TEST(MonsterHitDiceRangeTest, LoweringTheLowestCountAddsCountsWorthTheOldLowest)
 {
-	const MonsterHitDice widened = with_lowest_count(MonsterHitDice{ 8, 0, { { 9, 2000 }, { 10, 3000 } } }, 7);
+	const MonsterHitDice widened = with_lowest_count(
+		MonsterHitDice{ 8, 0, { { 9, 2000 }, { 10, 3000 } } },
+		7);
 
 	ASSERT_EQ(widened.counts.size(), 4u);
 	EXPECT_EQ(widened.counts.at(0).count, 7);
@@ -258,9 +289,13 @@ TEST(MonsterHitDiceRangeTest, LoweringTheLowestCountAddsCountsWorthTheOldLowest)
 	EXPECT_TRUE(is_valid_monster_hit_dice(widened));
 }
 
-TEST(MonsterHitDiceRangeTest, RaisingTheLowestCountDropsCountsAndStopsAtTheHighest)
+TEST(
+	MonsterHitDiceRangeTest,
+	RaisingTheLowestCountDropsCountsAndStopsAtTheHighest)
 {
-	const MonsterHitDice narrowed = with_lowest_count(MonsterHitDice{ 8, 0, { { 9, 2000 }, { 10, 3000 } } }, 12);
+	const MonsterHitDice narrowed = with_lowest_count(
+		MonsterHitDice{ 8, 0, { { 9, 2000 }, { 10, 3000 } } },
+		12);
 
 	ASSERT_EQ(narrowed.counts.size(), 1u);
 	EXPECT_EQ(narrowed.counts.front().count, 10);
@@ -269,16 +304,20 @@ TEST(MonsterHitDiceRangeTest, RaisingTheLowestCountDropsCountsAndStopsAtTheHighe
 
 TEST(MonsterHitDiceRangeTest, TheLowestCountStopsAtOne)
 {
-	const MonsterHitDice floored = with_lowest_count(MonsterHitDice{ 8, 0, { { 2, 40 } } }, -3);
+	const MonsterHitDice floored =
+		with_lowest_count(MonsterHitDice{ 8, 0, { { 2, 40 } } }, -3);
 
 	ASSERT_EQ(floored.counts.size(), 2u);
 	EXPECT_EQ(floored.counts.front().count, 1);
 	EXPECT_EQ(floored.counts.front().xp, 40);
 }
 
-TEST(MonsterHitDiceRangeTest, RaisingTheHighestCountAddsCountsWorthTheOldHighest)
+TEST(
+	MonsterHitDiceRangeTest,
+	RaisingTheHighestCountAddsCountsWorthTheOldHighest)
 {
-	const MonsterHitDice widened = with_highest_count(MonsterHitDice{ 8, 0, { { 9, 2000 } } }, 11);
+	const MonsterHitDice widened =
+		with_highest_count(MonsterHitDice{ 8, 0, { { 9, 2000 } } }, 11);
 
 	ASSERT_EQ(widened.counts.size(), 3u);
 	EXPECT_EQ(widened.counts.at(1).count, 10);
@@ -287,9 +326,13 @@ TEST(MonsterHitDiceRangeTest, RaisingTheHighestCountAddsCountsWorthTheOldHighest
 	EXPECT_TRUE(is_valid_monster_hit_dice(widened));
 }
 
-TEST(MonsterHitDiceRangeTest, LoweringTheHighestCountDropsCountsAndStopsAtTheLowest)
+TEST(
+	MonsterHitDiceRangeTest,
+	LoweringTheHighestCountDropsCountsAndStopsAtTheLowest)
 {
-	const MonsterHitDice narrowed = with_highest_count(MonsterHitDice{ 8, 0, { { 9, 2000 }, { 10, 3000 } } }, 1);
+	const MonsterHitDice narrowed = with_highest_count(
+		MonsterHitDice{ 8, 0, { { 9, 2000 }, { 10, 3000 } } },
+		1);
 
 	ASSERT_EQ(narrowed.counts.size(), 1u);
 	EXPECT_EQ(narrowed.counts.front().count, 9);
@@ -298,7 +341,8 @@ TEST(MonsterHitDiceRangeTest, LoweringTheHighestCountDropsCountsAndStopsAtTheLow
 
 TEST(MonsterHitDiceRangeTest, TheHighestCountStopsAtNinetyNine)
 {
-	const MonsterHitDice capped = with_highest_count(MonsterHitDice{ 8, 0, { { 98, 10 } } }, 120);
+	const MonsterHitDice capped =
+		with_highest_count(MonsterHitDice{ 8, 0, { { 98, 10 } } }, 120);
 
 	ASSERT_EQ(capped.counts.size(), 2u);
 	EXPECT_EQ(capped.counts.back().count, 99);

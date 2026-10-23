@@ -36,7 +36,10 @@ namespace
 // in a test's hidden window):
 //   wrap_to_width("[json.exception.out_of_range.403] key 'map_width' not found", 513, renderer);
 //   // -> { "[json.exception.out_of_range.403] key", "'map_width' not found" }
-std::vector<std::string> wrap_to_width(std::string_view text, int maxWidth, const Renderer& renderer)
+std::vector<std::string> wrap_to_width(
+	std::string_view text,
+	int maxWidth,
+	const Renderer& renderer)
 {
 	std::vector<std::string> rows;
 	while (!text.empty())
@@ -46,7 +49,10 @@ std::vector<std::string> wrap_to_width(std::string_view text, int maxWidth, cons
 		if (row.empty())
 		{
 			const size_t wordEnd = text.find(' ');
-			row = std::string{ text.substr(0, wordEnd == std::string_view::npos ? text.size() : wordEnd + 1) };
+			row = std::string{ text.substr(
+				0,
+				wordEnd == std::string_view::npos ? text.size() :
+													wordEnd + 1) };
 		}
 		text.remove_prefix(row.size());
 		// The space a row was cut at belongs to neither row.
@@ -98,15 +104,24 @@ void report_unloaded_game(const LoadOutcome& outcome, GameContext& ctx)
 {
 	assert(ctx.renderer && "report_unloaded_game: called without a renderer");
 
-	const bool refused = outcome.kind == LoadOutcomeKind::REFUSED || outcome.kind == LoadOutcomeKind::REFUSED_AND_KEPT;
+	const bool refused = outcome.kind == LoadOutcomeKind::REFUSED ||
+		outcome.kind == LoadOutcomeKind::REFUSED_AND_KEPT;
 	const std::string headline{ unloaded_game_headline(outcome.kind) };
 	std::vector<std::string> lines{ headline };
 	if (refused)
 	{
 		lines.push_back("");
-		std::ranges::move(wrap_to_width(outcome.reason, ctx.renderer->measure_text(headline), *ctx.renderer), std::back_inserter(lines));
+		std::ranges::move(
+			wrap_to_width(
+				outcome.reason,
+				ctx.renderer->measure_text(headline),
+				*ctx.renderer),
+			std::back_inserter(lines));
 	}
-	auto notice = std::make_unique<NotificationMenu>(refused ? "SAVE CANNOT BE READ" : "NO SAVE FOUND", std::move(lines), ctx);
+	auto notice = std::make_unique<NotificationMenu>(
+		refused ? "SAVE CANNOT BE READ" : "NO SAVE FOUND",
+		std::move(lines),
+		ctx);
 	// The stack is replaced, as the death screen does, so no menu of the abandoned load survives.
 	const auto return_to_main_menu = [](GameContext& closeCtx)
 	{
@@ -124,7 +139,9 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
 
 	auto newGameCommand = [](GameContext& ctx)
 	{
-		assert(ctx.menuManager && "make_main_menu newGameCommand: called without a menuManager");
+		assert(
+			ctx.menuManager &&
+			"make_main_menu newGameCommand: called without a menuManager");
 
 		ctx.menuManager->set_game_initialized(false);
 		ctx.menus->push_back(make_gender_menu(ctx));
@@ -135,7 +152,9 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
 	{
 		auto loadGameCommand = [](GameContext& ctx)
 		{
-			assert(ctx.stateManager && "make_main_menu loadGameCommand: called without a stateManager");
+			assert(
+				ctx.stateManager &&
+				"make_main_menu loadGameCommand: called without a stateManager");
 
 			const LoadOutcome outcome = ctx.stateManager->load_all(ctx);
 			if (outcome.kind != LoadOutcomeKind::LOADED)
@@ -155,7 +174,9 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
 #ifndef __EMSCRIPTEN__
 	auto roomEditorCommand = [](GameContext& ctx)
 	{
-		assert(ctx.roomEditor && "make_main_menu roomEditorCommand: called without a roomEditor");
+		assert(
+			ctx.roomEditor &&
+			"make_main_menu roomEditorCommand: called without a roomEditor");
 
 		ctx.roomEditor->enter();
 	};
@@ -163,8 +184,12 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
 
 	auto monsterEditorCommand = [](GameContext& ctx)
 	{
-		assert(ctx.monsterEditor && "make_main_menu monsterEditorCommand: called without a monsterEditor");
-		assert(ctx.monsterRegistry && "make_main_menu monsterEditorCommand: called without a monsterRegistry");
+		assert(
+			ctx.monsterEditor &&
+			"make_main_menu monsterEditorCommand: called without a monsterEditor");
+		assert(
+			ctx.monsterRegistry &&
+			"make_main_menu monsterEditorCommand: called without a monsterRegistry");
 
 		ctx.monsterEditor->enter(*ctx.monsterRegistry);
 	};
@@ -172,8 +197,12 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
 
 	auto spellEditorCommand = [](GameContext& ctx)
 	{
-		assert(ctx.spellEditor && "make_main_menu spellEditorCommand: called without a spellEditor");
-		assert(ctx.spellRegistry && "make_main_menu spellEditorCommand: called without a spellRegistry");
+		assert(
+			ctx.spellEditor &&
+			"make_main_menu spellEditorCommand: called without a spellEditor");
+		assert(
+			ctx.spellRegistry &&
+			"make_main_menu spellEditorCommand: called without a spellRegistry");
 
 		ctx.spellEditor->enter(*ctx.spellRegistry);
 	};
@@ -181,7 +210,9 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
 
 	auto itemEditorCommand = [](GameContext& ctx)
 	{
-		assert(ctx.itemEditor && "make_main_menu itemEditorCommand: called without an itemEditor");
+		assert(
+			ctx.itemEditor &&
+			"make_main_menu itemEditorCommand: called without an itemEditor");
 
 		ctx.itemEditor->enter(ctx);
 	};
@@ -209,8 +240,12 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
 	{
 		onFrame = [](GameContext& ctx)
 		{
-			assert(ctx.menuManager && "make_main_menu onFrame: called without a menuManager");
-			assert(ctx.renderingManager && "make_main_menu onFrame: called without a renderingManager");
+			assert(
+				ctx.menuManager &&
+				"make_main_menu onFrame: called without a menuManager");
+			assert(
+				ctx.renderingManager &&
+				"make_main_menu onFrame: called without a renderingManager");
 			assert(ctx.gui && "make_main_menu onFrame: called without a gui");
 
 			if (ctx.menuManager->is_game_initialized())

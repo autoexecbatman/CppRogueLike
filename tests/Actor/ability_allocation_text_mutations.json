@@ -39,7 +39,7 @@
     },
     {
       "file": "src/MenuAbilityScores.cpp",
-      "original": "\tif (modifier == 0)\n\t{\n\t\treturn std::format(\"{} {:<13}{:>3}\", marker, ability_name(ability), allocated);\n\t}\n",
+      "original": "\tif (modifier == 0)\n\t{\n\t\treturn std::format(\n\t\t\t\"{} {:<13}{:>3}\",\n\t\t\tmarker,\n\t\t\tability_name(ability),\n\t\t\tallocated);\n\t}\n",
       "mutated": "",
       "catches": "a human reading +0 = 8 on all six lines instead of staying quiet"
     },
@@ -57,8 +57,8 @@
     },
     {
       "file": "src/MenuAbilityScores.cpp",
-      "original": "\treturn std::format(\"Needs {} {}\", ability_name(shortfall->ability), shortfall->score);",
-      "mutated": "\treturn \"Ready.\";",
+      "original": "\treturn std::format(\n\t\t\"Needs {} {}\",\n\t\tability_name(shortfall->ability),\n\t\tshortfall->score);",
+      "mutated": "\treturn\"Ready.\";",
       "catches": "a screen that cannot be accepted telling the player it can"
     },
     {

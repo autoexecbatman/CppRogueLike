@@ -15,25 +15,25 @@
   "mutations": [
     {
       "file": "src/Player.cpp",
-      "original": "GameBalance::Leveling::HitPoints::STARTING_CUSHION + ctx.dice->roll(1, get_hit_die());",
-      "mutated": "GameBalance::Leveling::HitPoints::STARTING_CUSHION + ctx.dice->d10();",
+      "original": "GameBalance::Leveling::HitPoints::STARTING_CUSHION +\n\t\tctx.dice->roll(1, get_hit_die());",
+      "mutated": "GameBalance::Leveling::HitPoints::STARTING_CUSHION +\n\t\tctx.dice->d10();",
       "catches": "every class rolling the fighter's d10 again"
     },
     {
       "file": "src/Player.cpp",
-      "original": "GameBalance::Leveling::HitPoints::STARTING_CUSHION + ctx.dice->roll(1, get_hit_die());",
-      "mutated": "GameBalance::Leveling::HitPoints::STARTING_CUSHION + get_hit_die();",
+      "original": "GameBalance::Leveling::HitPoints::STARTING_CUSHION +\n\t\tctx.dice->roll(1, get_hit_die());",
+      "mutated": "GameBalance::Leveling::HitPoints::STARTING_CUSHION +get_hit_die();",
       "catches": "the die's maximum taken in place of a roll, the reading the owner rejected"
     },
     {
       "file": "src/Player.cpp",
-      "original": "GameBalance::Leveling::HitPoints::STARTING_CUSHION + ctx.dice->roll(1, get_hit_die());",
-      "mutated": "GameBalance::Leveling::HitPoints::STARTING_CUSHION + ctx.dice->roll(1, get_hit_die() - 1);",
+      "original": "GameBalance::Leveling::HitPoints::STARTING_CUSHION +\n\t\tctx.dice->roll(1, get_hit_die());",
+      "mutated": "GameBalance::Leveling::HitPoints::STARTING_CUSHION +\n\t\tctx.dice->roll(1, get_hit_die() - 1);",
       "catches": "a die one face short"
     },
     {
       "file": "src/Player.cpp",
-      "original": "GameBalance::Leveling::HitPoints::STARTING_CUSHION + ctx.dice->roll(1, get_hit_die());",
+      "original": "GameBalance::Leveling::HitPoints::STARTING_CUSHION +\n\t\tctx.dice->roll(1, get_hit_die());",
       "mutated": "ctx.dice->roll(1, get_hit_die());",
       "catches": "the cushion lost, the book's 1st level alone"
     },

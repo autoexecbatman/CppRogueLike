@@ -161,7 +161,10 @@ TEST_F(ItemWeightTest, EveryWeightTheBookPrintsIsTheWeightTheDataCarries)
 {
 	for (const BookWeight& expected : TABLE_FORTY_FOUR)
 	{
-		EXPECT_EQ(mock.itemRegistry.get_params(expected.key).weight, expected.pounds) << expected.key;
+		EXPECT_EQ(
+			mock.itemRegistry.get_params(expected.key).weight,
+			expected.pounds)
+			<< expected.key;
 	}
 }
 
@@ -169,7 +172,10 @@ TEST_F(ItemWeightTest, TheToolsTheBookWeighsCarryItsNumbers)
 {
 	for (const BookWeight& expected : MISCELLANEOUS_EQUIPMENT)
 	{
-		EXPECT_EQ(mock.itemRegistry.get_params(expected.key).weight, expected.pounds) << expected.key;
+		EXPECT_EQ(
+			mock.itemRegistry.get_params(expected.key).weight,
+			expected.pounds)
+			<< expected.key;
 	}
 }
 
@@ -177,7 +183,10 @@ TEST_F(ItemWeightTest, AWeaponTheBookLacksWeighsWhatTheNearestRowDoes)
 {
 	for (const BookWeight& expected : MATCHED_TO_THE_NEAREST_ROW)
 	{
-		EXPECT_EQ(mock.itemRegistry.get_params(expected.key).weight, expected.pounds) << expected.key;
+		EXPECT_EQ(
+			mock.itemRegistry.get_params(expected.key).weight,
+			expected.pounds)
+			<< expected.key;
 	}
 }
 
@@ -192,7 +201,8 @@ TEST_F(ItemWeightTest, AClassTheBookLeavesOutWeighsOneAnswerThroughout)
 		{
 			return entry.itemClass == params.itemClass;
 		};
-		const auto found = std::ranges::find_if(MATCHED_BY_CLASS, matches_class);
+		const auto found =
+			std::ranges::find_if(MATCHED_BY_CLASS, matches_class);
 		if (found == MATCHED_BY_CLASS.end())
 		{
 			continue;
@@ -216,8 +226,11 @@ TEST_F(ItemWeightTest, OnlyTheBooksNegligibleItemsWeighNothing)
 			continue;
 		}
 
-		const bool negligible = std::ranges::find(WEIGHS_NOTHING, key) != WEIGHS_NOTHING.end();
-		EXPECT_TRUE(negligible) << key << " weighs nothing and is not one of the book's negligible items";
+		const bool negligible =
+			std::ranges::find(WEIGHS_NOTHING, key) != WEIGHS_NOTHING.end();
+		EXPECT_TRUE(negligible)
+			<< key
+			<< " weighs nothing and is not one of the book's negligible items";
 	}
 }
 
@@ -227,10 +240,13 @@ TEST_F(ItemWeightTest, OnlyTheBooksNegligibleItemsWeighNothing)
 TEST_F(ItemWeightTest, WeightIsNotTheSpawnRarity)
 {
 	const ItemParams& plateMail = mock.itemRegistry.get_params("plate_mail");
-	const ItemParams& healthPotion = mock.itemRegistry.get_params("health_potion");
+	const ItemParams& healthPotion =
+		mock.itemRegistry.get_params("health_potion");
 
-	EXPECT_GT(plateMail.weight, healthPotion.weight) << "plate mail must outweigh a potion";
-	EXPECT_LT(plateMail.baseWeight, healthPotion.baseWeight) << "a potion must be commoner than plate mail";
+	EXPECT_GT(plateMail.weight, healthPotion.weight)
+		<< "plate mail must outweigh a potion";
+	EXPECT_LT(plateMail.baseWeight, healthPotion.baseWeight)
+		<< "a potion must be commoner than plate mail";
 }
 
 // The data has to reach the item, or the table above is a description of a file
@@ -238,7 +254,8 @@ TEST_F(ItemWeightTest, WeightIsNotTheSpawnRarity)
 TEST_F(ItemWeightTest, ACreatedItemCarriesItsRecordsWeight)
 {
 	GameContext ctx = mock.to_game_context();
-	const auto plateMail = ItemCreator::create("plate_mail", Vector2D{ 0, 0 }, ctx);
+	const auto plateMail =
+		ItemCreator::create("plate_mail", Vector2D{ 0, 0 }, ctx);
 	const auto dagger = ItemCreator::create("dagger", Vector2D{ 0, 0 }, ctx);
 
 	ASSERT_TRUE(plateMail);

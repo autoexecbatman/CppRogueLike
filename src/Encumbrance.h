@@ -75,6 +75,8 @@ inline constexpr std::array<EncumbranceBand, 6> ALL_ENCUMBRANCE_BAND{
 // Example, Strength 1, whose bands are blank and whose maximum is 3:
 //   encumbrance_band(2, weakest); // -> nullopt, a load with no name
 //   encumbrance_band(4, weakest); // -> OVERLOADED
-[[nodiscard]] std::optional<EncumbranceBand> encumbrance_band(int carriedPounds, const StrengthAttributes& row);
+[[nodiscard]] std::optional<EncumbranceBand> encumbrance_band(
+	int carriedPounds,
+	const StrengthAttributes& row);
 
 // end of file: Encumbrance.h

@@ -157,7 +157,9 @@ TEST(BehaviorRecordTest, EveryEnumInTheRecordIsANameNotANumber)
 		{
 			if (is_enum_field(key))
 			{
-				EXPECT_TRUE(value.is_string()) << "a " << named.name << " saved \"" << key << "\" as a number";
+				EXPECT_TRUE(value.is_string())
+					<< "a " << named.name << " saved \"" << key
+					<< "\" as a number";
 			}
 		}
 	}
@@ -167,7 +169,9 @@ TEST(BehaviorRecordTest, EveryEnumInTheRecordIsANameNotANumber)
 // the number happens to land on.
 TEST(BehaviorRecordTest, AnUnknownBehaviourNameIsRefused)
 {
-	EXPECT_THROW((void)load_behavior(json{ { "type", "wand_of_wonder" } }), std::runtime_error);
+	EXPECT_THROW(
+		(void)load_behavior(json{ { "type", "wand_of_wonder" } }),
+		std::runtime_error);
 }
 
 // And one with no name at all, by the field read itself.
@@ -193,7 +197,8 @@ TEST(BehaviorRecordTest, EveryFieldASaveWritesIsRequiredToLoad)
 			json missingOne = saved;
 			missingOne.erase(key);
 			EXPECT_ANY_THROW(load_behavior(missingOne))
-				<< "a " << named.name << " record without \"" << key << "\" loaded quietly";
+				<< "a " << named.name << " record without \"" << key
+				<< "\" loaded quietly";
 		}
 	}
 }
@@ -218,14 +223,15 @@ TEST(BehaviorRecordTest, EveryBehaviourComesBackAsItsOwnKind)
 TEST(BehaviorRecordTest, APotionsRecordNamesItsEffectAndItsBuff)
 {
 	json saved;
-	save_behavior(Consumable{
-					  ConsumableEffect::ADD_BUFF,
-					  DiceExpr{ 0, 0, 7 },
-					  DiceExpr{ 0, 0, 3 },
-					  DurationUnit::TURNS,
-					  BuffType::SANCTUARY,
-					  BuffApplication::SET,
-				  },
+	save_behavior(
+		Consumable{
+			ConsumableEffect::ADD_BUFF,
+			DiceExpr{ 0, 0, 7 },
+			DiceExpr{ 0, 0, 3 },
+			DurationUnit::TURNS,
+			BuffType::SANCTUARY,
+			BuffApplication::SET,
+		},
 		saved);
 
 	EXPECT_EQ(saved.at("type"), "consumable");
@@ -244,7 +250,8 @@ TEST(BehaviorRecordTest, EveryFieldSurvivesARoundTrip)
 		save_behavior(load_behavior(saved), savedAgain);
 
 		EXPECT_EQ(savedAgain, saved)
-			<< "a " << named.name << " came back different: a field was read under another name, or not at all";
+			<< "a " << named.name
+			<< " came back different: a field was read under another name, or not at all";
 	}
 }
 
@@ -252,28 +259,32 @@ TEST(BehaviorRecordTest, EveryFieldSurvivesARoundTrip)
 TEST(BehaviorRecordTest, APotionsRecordNamesWhetherItSetsOrAdds)
 {
 	json setting;
-	save_behavior(Consumable{
-					  ConsumableEffect::ADD_BUFF,
-					  DiceExpr{ 0, 0, 19 },
-					  DiceExpr{ 0, 0, 3 },
-					  DurationUnit::TURNS,
-					  BuffType::STRENGTH,
-					  BuffApplication::SET,
-				  },
+	save_behavior(
+		Consumable{
+			ConsumableEffect::ADD_BUFF,
+			DiceExpr{ 0, 0, 19 },
+			DiceExpr{ 0, 0, 3 },
+			DurationUnit::TURNS,
+			BuffType::STRENGTH,
+			BuffApplication::SET,
+		},
 		setting);
 	json adding;
-	save_behavior(Consumable{
-					  ConsumableEffect::ADD_BUFF,
-					  DiceExpr{ 0, 0, 1 },
-					  DiceExpr{ 0, 0, 3 },
-					  DurationUnit::TURNS,
-					  BuffType::STRENGTH,
-					  BuffApplication::ADD,
-				  },
+	save_behavior(
+		Consumable{
+			ConsumableEffect::ADD_BUFF,
+			DiceExpr{ 0, 0, 1 },
+			DiceExpr{ 0, 0, 3 },
+			DurationUnit::TURNS,
+			BuffType::STRENGTH,
+			BuffApplication::ADD,
+		},
 		adding);
 
-	ASSERT_TRUE(setting.contains("application")) << "a setting potion saved no application";
-	ASSERT_TRUE(adding.contains("application")) << "an adding potion saved no application";
+	ASSERT_TRUE(setting.contains("application"))
+		<< "a setting potion saved no application";
+	ASSERT_TRUE(adding.contains("application"))
+		<< "an adding potion saved no application";
 	EXPECT_EQ(setting.at("application"), "set");
 	EXPECT_EQ(adding.at("application"), "add");
 }
@@ -282,14 +293,15 @@ TEST(BehaviorRecordTest, APotionsRecordNamesWhetherItSetsOrAdds)
 TEST(BehaviorRecordTest, APotionWithAnUnknownApplicationIsRefused)
 {
 	json saved;
-	save_behavior(Consumable{
-					  ConsumableEffect::ADD_BUFF,
-					  DiceExpr{ 0, 0, 19 },
-					  DiceExpr{ 0, 0, 3 },
-					  DurationUnit::TURNS,
-					  BuffType::STRENGTH,
-					  BuffApplication::SET,
-				  },
+	save_behavior(
+		Consumable{
+			ConsumableEffect::ADD_BUFF,
+			DiceExpr{ 0, 0, 19 },
+			DiceExpr{ 0, 0, 3 },
+			DurationUnit::TURNS,
+			BuffType::STRENGTH,
+			BuffApplication::SET,
+		},
 		saved);
 	saved["application"] = "sideways";
 
@@ -300,26 +312,28 @@ TEST(BehaviorRecordTest, APotionWithAnUnknownApplicationIsRefused)
 TEST(BehaviorRecordTest, ADurationsUnitIsNamedAndAnUnknownOneIsRefused)
 {
 	json potion;
-	save_behavior(Consumable{
-					  ConsumableEffect::ADD_BUFF,
-					  DiceExpr{ 0, 0, 1 },
-					  DiceExpr{ 1, 4, 2 },
-					  DurationUnit::TURNS,
-					  BuffType::INVISIBILITY,
-					  BuffApplication::ADD,
-				  },
+	save_behavior(
+		Consumable{
+			ConsumableEffect::ADD_BUFF,
+			DiceExpr{ 0, 0, 1 },
+			DiceExpr{ 1, 4, 2 },
+			DurationUnit::TURNS,
+			BuffType::INVISIBILITY,
+			BuffApplication::ADD,
+		},
 		potion);
 	json scroll;
-	save_behavior(TargetedScroll{
-					  TargetMode::FOV_BUFF,
-					  ScrollAnimation::NONE,
-					  0,
-					  0,
-					  0,
-					  BuffType::SLEEP,
-					  DiceExpr{ 0, 0, 5 },
-					  DurationUnit::ROUNDS,
-				  },
+	save_behavior(
+		TargetedScroll{
+			TargetMode::FOV_BUFF,
+			ScrollAnimation::NONE,
+			0,
+			0,
+			0,
+			BuffType::SLEEP,
+			DiceExpr{ 0, 0, 5 },
+			DurationUnit::ROUNDS,
+		},
 		scroll);
 
 	EXPECT_EQ(potion.at("durationUnit"), "turns");
@@ -344,8 +358,10 @@ TEST(BehaviorRecordTest, AStatBoostRecordNamesWhetherItSetsOrAdds)
 	json savedAdding;
 	save_behavior(adding, savedAdding);
 
-	ASSERT_TRUE(savedSetting.contains("application")) << "a setting girdle saved no application";
-	ASSERT_TRUE(savedAdding.contains("application")) << "adding gauntlets saved no application";
+	ASSERT_TRUE(savedSetting.contains("application"))
+		<< "a setting girdle saved no application";
+	ASSERT_TRUE(savedAdding.contains("application"))
+		<< "adding gauntlets saved no application";
 	EXPECT_EQ(savedSetting.at("application"), "set");
 	EXPECT_EQ(savedAdding.at("application"), "add");
 }

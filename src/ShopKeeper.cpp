@@ -20,8 +20,9 @@
 
 using namespace InventoryOperations;
 
-ShopKeeper::ShopKeeper(ShopType type, ShopQuality quality, RandomDice& dice)
-	: shopType(type), shopQuality(quality)
+ShopKeeper::ShopKeeper(ShopType type, ShopQuality quality, RandomDice& dice) :
+	shopType(type),
+	shopQuality(quality)
 {
 	// Set pricing based on quality
 	switch (quality)
@@ -70,7 +71,9 @@ int ShopKeeper::get_sell_price(const Item& item) const
 
 void ShopKeeper::generate_initial_inventory(int dungeonLevel, GameContext& ctx)
 {
-	assert(ctx.dice && "ShopKeeper::generate_initial_inventory: called without dice");
+	assert(
+		ctx.dice &&
+		"ShopKeeper::generate_initial_inventory: called without dice");
 
 	shopInventory.items.clear();
 
@@ -79,19 +82,27 @@ void ShopKeeper::generate_initial_inventory(int dungeonLevel, GameContext& ctx)
 
 	for (int itemIndex = 0; itemIndex < item_count; itemIndex++)
 	{
-		std::unique_ptr<Item> item = generate_random_item_by_type(dungeonLevel, ctx);
+		std::unique_ptr<Item> item =
+			generate_random_item_by_type(dungeonLevel, ctx);
 		if (item)
 		{
 			// At most seven items into fifty slots, so stocking cannot overflow.
-			[[maybe_unused]] const auto stocked = add_item(shopInventory, std::move(item));
-			assert(stocked.has_value() && "ShopKeeper::generate_initial_inventory: stocking overflowed the shelves");
+			[[maybe_unused]] const auto stocked =
+				add_item(shopInventory, std::move(item));
+			assert(
+				stocked.has_value() &&
+				"ShopKeeper::generate_initial_inventory: stocking overflowed the shelves");
 		}
 	}
 }
 
-std::unique_ptr<Item> ShopKeeper::generate_random_item_by_type(int dungeonLevel, GameContext& ctx)
+std::unique_ptr<Item> ShopKeeper::generate_random_item_by_type(
+	int dungeonLevel,
+	GameContext& ctx)
 {
-	assert(ctx.dice && "ShopKeeper::generate_random_item_by_type: called without dice");
+	assert(
+		ctx.dice &&
+		"ShopKeeper::generate_random_item_by_type: called without dice");
 
 	switch (shopType)
 	{
@@ -142,11 +153,18 @@ std::unique_ptr<Item> ShopKeeper::generate_random_item_by_type(int dungeonLevel,
 	return nullptr;
 }
 
-std::unique_ptr<Item> ShopKeeper::generate_random_weapon(int dungeonLevel, GameContext& ctx)
+std::unique_ptr<Item> ShopKeeper::generate_random_weapon(
+	int dungeonLevel,
+	GameContext& ctx)
 {
-	assert(ctx.dice && "ShopKeeper::generate_random_weapon: called without dice");
+	assert(
+		ctx.dice && "ShopKeeper::generate_random_weapon: called without dice");
 
-	auto item = ItemCreator::create_random_of_category("weapon", { 0, 0 }, ctx, dungeonLevel);
+	auto item = ItemCreator::create_random_of_category(
+		"weapon",
+		{ 0, 0 },
+		ctx,
+		dungeonLevel);
 
 	if (item && ctx.dice->roll(1, 100) <= 40)
 	{
@@ -156,11 +174,18 @@ std::unique_ptr<Item> ShopKeeper::generate_random_weapon(int dungeonLevel, GameC
 	return item;
 }
 
-std::unique_ptr<Item> ShopKeeper::generate_random_armor(int dungeonLevel, GameContext& ctx)
+std::unique_ptr<Item> ShopKeeper::generate_random_armor(
+	int dungeonLevel,
+	GameContext& ctx)
 {
-	assert(ctx.dice && "ShopKeeper::generate_random_armor: called without dice");
+	assert(
+		ctx.dice && "ShopKeeper::generate_random_armor: called without dice");
 
-	auto item = ItemCreator::create_random_of_category("armor", { 0, 0 }, ctx, dungeonLevel);
+	auto item = ItemCreator::create_random_of_category(
+		"armor",
+		{ 0, 0 },
+		ctx,
+		dungeonLevel);
 
 	if (item && ctx.dice->roll(1, 100) <= 35)
 	{
@@ -170,19 +195,35 @@ std::unique_ptr<Item> ShopKeeper::generate_random_armor(int dungeonLevel, GameCo
 	return item;
 }
 
-std::unique_ptr<Item> ShopKeeper::generate_random_potion(int dungeonLevel, GameContext& ctx)
+std::unique_ptr<Item> ShopKeeper::generate_random_potion(
+	int dungeonLevel,
+	GameContext& ctx)
 {
-	return ItemCreator::create_random_of_category("potion", { 0, 0 }, ctx, dungeonLevel);
+	return ItemCreator::create_random_of_category(
+		"potion",
+		{ 0, 0 },
+		ctx,
+		dungeonLevel);
 }
 
-std::unique_ptr<Item> ShopKeeper::generate_random_scroll(int dungeonLevel, GameContext& ctx)
+std::unique_ptr<Item> ShopKeeper::generate_random_scroll(
+	int dungeonLevel,
+	GameContext& ctx)
 {
-	return ItemCreator::create_random_of_category("scroll", { 0, 0 }, ctx, dungeonLevel);
+	return ItemCreator::create_random_of_category(
+		"scroll",
+		{ 0, 0 },
+		ctx,
+		dungeonLevel);
 }
 
-std::unique_ptr<Item> ShopKeeper::generate_random_misc_item(int dungeonLevel, GameContext& ctx)
+std::unique_ptr<Item> ShopKeeper::generate_random_misc_item(
+	int dungeonLevel,
+	GameContext& ctx)
 {
-	assert(ctx.dice && "ShopKeeper::generate_random_misc_item: called without dice");
+	assert(
+		ctx.dice &&
+		"ShopKeeper::generate_random_misc_item: called without dice");
 
 	Vector2D shop_pos{ 0, 0 };
 
@@ -192,17 +233,29 @@ std::unique_ptr<Item> ShopKeeper::generate_random_misc_item(int dungeonLevel, Ga
 	{
 	case 0:
 	{
-		item = ItemCreator::create_random_of_category("weapon", shop_pos, ctx, dungeonLevel);
+		item = ItemCreator::create_random_of_category(
+			"weapon",
+			shop_pos,
+			ctx,
+			dungeonLevel);
 		break;
 	}
 	case 1:
 	{
-		item = ItemCreator::create_random_of_category("armor", shop_pos, ctx, dungeonLevel);
+		item = ItemCreator::create_random_of_category(
+			"armor",
+			shop_pos,
+			ctx,
+			dungeonLevel);
 		break;
 	}
 	case 2:
 	{
-		item = ItemCreator::create_random_of_category("potion", shop_pos, ctx, dungeonLevel);
+		item = ItemCreator::create_random_of_category(
+			"potion",
+			shop_pos,
+			ctx,
+			dungeonLevel);
 		break;
 	}
 	case 3:
@@ -220,16 +273,24 @@ std::unique_ptr<Item> ShopKeeper::generate_random_misc_item(int dungeonLevel, Ga
 	{
 		if (ctx.dice->roll(1, 100) <= 15)
 		{
-			item->generate_random_enhancement(MagicalPrefixes::EXCLUDED, *ctx.dice);
+			item->generate_random_enhancement(
+				MagicalPrefixes::EXCLUDED,
+				*ctx.dice);
 		}
 	}
 
 	return item;
 }
 
-bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature& buyer, Creature& owner)
+bool ShopKeeper::process_player_purchase(
+	GameContext& ctx,
+	Item& item,
+	Creature& buyer,
+	Creature& owner)
 {
-	assert(ctx.dataManager && "ShopKeeper::process_player_purchase: called without a dataManager");
+	assert(
+		ctx.dataManager &&
+		"ShopKeeper::process_player_purchase: called without a dataManager");
 
 	const int price = get_buy_price(item);
 
@@ -237,43 +298,70 @@ bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature&
 	// the pack and both purses as they were.
 	if (buyer.get_gold() < price)
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_RED, "You don't have enough gold!", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_RED,
+			"You don't have enough gold!",
+			MessageCompletion::FINISHED);
 		return false;
 	}
 	if (is_inventory_full(buyer.inventoryData))
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_RED, "Your inventory is full!", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_RED,
+			"Your inventory is full!",
+			MessageCompletion::FINISHED);
 		return false;
 	}
 	if (!is_within_weight_limit(item, buyer, *ctx.dataManager))
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_RED, "Too heavy to carry.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_RED,
+			"Too heavy to carry.",
+			MessageCompletion::FINISHED);
 		return false;
 	}
 
 	// The buy menu offers only what is on these shelves, so the item is always found.
 	auto taken = remove_item(shopInventory, item);
-	assert(taken.has_value() && "process_player_purchase called with an item not on the shelves");
+	assert(
+		taken.has_value() &&
+		"process_player_purchase called with an item not on the shelves");
 
 	// The item itself moves, key and enhancement with it; room and weight were checked above, so the add cannot fail.
-	[[maybe_unused]] const auto handedOver = add_item_to_inventory(buyer.inventoryData, std::move(*taken), buyer, *ctx.dataManager);
-	assert(handedOver.has_value() && "ShopKeeper::process_player_purchase: the buyer's pack refused an item checked to fit");
+	[[maybe_unused]] const auto handedOver = add_item_to_inventory(
+		buyer.inventoryData,
+		std::move(*taken),
+		buyer,
+		*ctx.dataManager);
+	assert(
+		handedOver.has_value() &&
+		"ShopKeeper::process_player_purchase: the buyer's pack refused an item checked to fit");
 
 	buyer.adjust_gold(-price);
 	owner.adjust_gold(price);
 
-	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "You bought ");
+	ctx.messageSystem->append_message_part(
+		ColorPairId::WHITE_BLACK,
+		"You bought ");
 	// Use enhanced name
-	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, item.get_name());
+	ctx.messageSystem->append_message_part(
+		ColorPairId::YELLOW_BLACK,
+		item.get_name());
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " for ");
-	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, std::to_string(price));
+	ctx.messageSystem->append_message_part(
+		ColorPairId::YELLOW_BLACK,
+		std::to_string(price));
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " gold.");
 	ctx.messageSystem->finalize_message();
 
 	return true;
 }
 
-bool ShopKeeper::process_player_sale(GameContext& ctx, Item& item, Creature& seller, Creature& owner)
+bool ShopKeeper::process_player_sale(
+	GameContext& ctx,
+	Item& item,
+	Creature& seller,
+	Creature& owner)
 {
 	const int price = get_sell_price(item);
 
@@ -281,32 +369,49 @@ bool ShopKeeper::process_player_sale(GameContext& ctx, Item& item, Creature& sel
 	// shelves and both purses as they were.
 	if (is_inventory_full(shopInventory))
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_RED, "Shopkeeper's inventory is full.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_RED,
+			"Shopkeeper's inventory is full.",
+			MessageCompletion::FINISHED);
 		return false;
 	}
 	if (owner.get_gold() < price)
 	{
-		ctx.messageSystem->message(ColorPairId::WHITE_RED, "Shopkeeper does not have enough gold to buy the item.", MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_RED,
+			"Shopkeeper does not have enough gold to buy the item.",
+			MessageCompletion::FINISHED);
 		return false;
 	}
 
 	// The sell menu offers only what is in the pack, so the item is always found.
 	auto removed = remove_item(seller.inventoryData, item);
-	assert(removed.has_value() && "process_player_sale called with an item the seller does not hold");
+	assert(
+		removed.has_value() &&
+		"process_player_sale called with an item the seller does not hold");
 
 	// Room was checked above, so shelving cannot fail. The item lives on in the shop,
 	// which keeps the reference valid for the message below.
-	[[maybe_unused]] const auto shelved = add_item(shopInventory, std::move(*removed));
-	assert(shelved.has_value() && "ShopKeeper::process_player_sale: the shelves refused an item checked to fit");
+	[[maybe_unused]] const auto shelved =
+		add_item(shopInventory, std::move(*removed));
+	assert(
+		shelved.has_value() &&
+		"ShopKeeper::process_player_sale: the shelves refused an item checked to fit");
 
 	owner.adjust_gold(-price);
 	seller.adjust_gold(price);
 
-	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "You sold ");
+	ctx.messageSystem->append_message_part(
+		ColorPairId::WHITE_BLACK,
+		"You sold ");
 	// Use enhanced name
-	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, item.get_name());
+	ctx.messageSystem->append_message_part(
+		ColorPairId::YELLOW_BLACK,
+		item.get_name());
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " for ");
-	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, std::to_string(price));
+	ctx.messageSystem->append_message_part(
+		ColorPairId::YELLOW_BLACK,
+		std::to_string(price));
 	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " gold.");
 	ctx.messageSystem->finalize_message();
 
@@ -374,27 +479,32 @@ void ShopKeeper::generate_shop_name(RandomDice& dice)
 	{
 	case ShopType::WEAPON_SHOP:
 	{
-		shopName = weapon_names[dice.roll(0, static_cast<int>(weapon_names.size()) - 1)];
+		shopName = weapon_names[dice
+				.roll(0, static_cast<int>(weapon_names.size()) - 1)];
 		break;
 	}
 	case ShopType::ARMOR_SHOP:
 	{
-		shopName = armor_names[dice.roll(0, static_cast<int>(armor_names.size()) - 1)];
+		shopName =
+			armor_names[dice.roll(0, static_cast<int>(armor_names.size()) - 1)];
 		break;
 	}
 	case ShopType::POTION_SHOP:
 	{
-		shopName = potion_names[dice.roll(0, static_cast<int>(potion_names.size()) - 1)];
+		shopName = potion_names[dice
+				.roll(0, static_cast<int>(potion_names.size()) - 1)];
 		break;
 	}
 	case ShopType::SCROLL_SHOP:
 	{
-		shopName = scroll_names[dice.roll(0, static_cast<int>(scroll_names.size()) - 1)];
+		shopName = scroll_names[dice
+				.roll(0, static_cast<int>(scroll_names.size()) - 1)];
 		break;
 	}
 	case ShopType::GENERAL_STORE:
 	{
-		shopName = general_names[dice.roll(0, static_cast<int>(general_names.size()) - 1)];
+		shopName = general_names[dice
+				.roll(0, static_cast<int>(general_names.size()) - 1)];
 		break;
 	}
 	default:
@@ -422,7 +532,8 @@ void ShopKeeper::save(json& output)
 void ShopKeeper::load(const json& source)
 {
 	shopType = static_cast<ShopType>(source.at("shop_type").get<int>());
-	shopQuality = static_cast<ShopQuality>(source.at("shop_quality").get<int>());
+	shopQuality =
+		static_cast<ShopQuality>(source.at("shop_quality").get<int>());
 	shopName = source.at("shop_name").get<std::string>();
 	markupPercent = source.at("markup_percent").get<int>();
 	sellbackPercent = source.at("sellback_percent").get<int>();

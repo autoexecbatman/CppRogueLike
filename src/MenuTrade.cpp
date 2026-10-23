@@ -18,13 +18,15 @@ MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx)
 
 	auto buyCommand = [&shopkeeper](GameContext& ctx)
 	{
-		ctx.menus->push_back(std::make_unique<MenuBuy>(ctx, *ctx.player(), shopkeeper));
+		ctx.menus->push_back(
+			std::make_unique<MenuBuy>(ctx, *ctx.player(), shopkeeper));
 	};
 	entries.push_back({ "Buy", 0, buyCommand });
 
 	auto sellCommand = [&shopkeeper, &player](GameContext& ctx)
 	{
-		ctx.menus->push_back(std::make_unique<MenuSell>(shopkeeper, player, ctx));
+		ctx.menus->push_back(
+			std::make_unique<MenuSell>(shopkeeper, player, ctx));
 	};
 	entries.push_back({ "Sell", 0, sellCommand });
 
@@ -34,12 +36,15 @@ MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx)
 	int widestText = ctx.renderer->measure_text("TRADE");
 	for (const auto& entry : entries)
 	{
-		widestText = std::max(widestText, ctx.renderer->measure_text(entry.label));
+		widestText =
+			std::max(widestText, ctx.renderer->measure_text(entry.label));
 	}
 
 	width = panel_tiles_for_text_width(widestText, tileSize);
 	height = panel_tiles_for_text_rows(
-		static_cast<int>(entries.size()), tileSize, ctx.renderer->get_font_size());
+		static_cast<int>(entries.size()),
+		tileSize,
+		ctx.renderer->get_font_size());
 	startY = (ctx.renderer->get_viewport_rows() - height) / 2;
 	startX = (ctx.renderer->get_viewport_cols() - width) / 2;
 	menu_new(width, height, startX, startY, ctx);

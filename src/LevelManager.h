@@ -23,7 +23,10 @@ public:
 	// Level state
 	int get_dungeon_level() const noexcept { return dungeon_level; }
 
-	int get_shopkeepers_count() const noexcept { return shopkeepers_on_current_level; }
+	int get_shopkeepers_count() const noexcept
+	{
+		return shopkeepers_on_current_level;
+	}
 
 	// Level management
 	void advance_to_next_level(GameContext& ctx);

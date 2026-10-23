@@ -50,7 +50,8 @@ private:
 
 	std::string activeKey{};
 
-	std::unordered_map<std::string, std::unordered_map<uint32_t, TileRef>> allOverrides{};
+	std::unordered_map<std::string, std::unordered_map<uint32_t, TileRef>>
+		allOverrides{};
 
 	// Sheet browser state
 	bool isBrowserOpen{ false };
@@ -76,11 +77,13 @@ private:
 	// low half. Columns wrap at 65536, which no map approaches.
 	[[nodiscard]] static uint32_t make_key(Vector2D worldPosition) noexcept
 	{
-		return (static_cast<uint32_t>(worldPosition.y) << 16) | static_cast<uint32_t>(worldPosition.x & 0xFFFF);
+		return (static_cast<uint32_t>(worldPosition.y) << 16) |
+			static_cast<uint32_t>(worldPosition.x & 0xFFFF);
 	}
 
 	[[nodiscard]] std::unordered_map<uint32_t, TileRef>& current_map();
-	[[nodiscard]] const std::unordered_map<uint32_t, TileRef>& current_map() const;
+	[[nodiscard]] const std::unordered_map<uint32_t, TileRef>& current_map()
+		const;
 
 	// Normal editor overlay
 	void draw_cursor(const Renderer& renderer, Vector2D worldPosition) const;
@@ -102,7 +105,10 @@ public:
 
 	void toggle();
 
-	void set_char_input(int character) noexcept { bufferedCharacter = character; }
+	void set_char_input(int character) noexcept
+	{
+		bufferedCharacter = character;
+	}
 
 	void cycle_next();
 	void cycle_prev();
@@ -118,7 +124,10 @@ public:
 	void save_palette_reporting();
 
 	// Why the last reported save was refused, or nothing once one succeeds.
-	[[nodiscard]] const std::optional<std::string>& save_error() const noexcept { return saveError; }
+	[[nodiscard]] const std::optional<std::string>& save_error() const noexcept
+	{
+		return saveError;
+	}
 
 	// Called every render frame while active.
 	void update_and_render(const Renderer& renderer);

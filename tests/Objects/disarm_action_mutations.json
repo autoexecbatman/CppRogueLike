@@ -33,44 +33,44 @@
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\"This trap stays beyond you until you gain a level.\", MessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
-      "mutated": "\"This trap stays beyond you until you gain a level.\", MessageCompletion::FINISHED);\n\t\treturn roll_disarm_rounds(*ctx.dice);",
+      "original": "\"This trap stays beyond you until you gain a level.\",\n\t\t\tMessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
+      "mutated": "\"This trap stays beyond you until you gain a level.\",\n\t\t\tMessageCompletion::FINISHED);\n\t\treturn roll_disarm_rounds(*ctx.dice);",
       "catches": "a spent attempt taking time"
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\"You cannot work a trap.\", MessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
-      "mutated": "\"You cannot work a trap.\", MessageCompletion::FINISHED);\n\t\treturn roll_disarm_rounds(*ctx.dice);",
+      "original": "\"You cannot work a trap.\",\n\t\t\tMessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
+      "mutated": "\"You cannot work a trap.\",\n\t\t\tMessageCompletion::FINISHED);\n\t\treturn roll_disarm_rounds(*ctx.dice);",
       "catches": "a character with no skill taking time to be refused"
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\"You don't see a trap there.\", MessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
-      "mutated": "\"You don't see a trap there.\", MessageCompletion::FINISHED);\n\t\treturn roll_disarm_rounds(*ctx.dice);",
+      "original": "\"You don't see a trap there.\",\n\t\t\tMessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
+      "mutated": "\"You don't see a trap there.\",\n\t\t\tMessageCompletion::FINISHED);\n\t\treturn roll_disarm_rounds(*ctx.dice);",
       "catches": "a hidden trap taking time to be refused"
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\"That trap is already disarmed.\", MessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
-      "mutated": "\"That trap is already disarmed.\", MessageCompletion::FINISHED);\n\t\treturn roll_disarm_rounds(*ctx.dice);",
+      "original": "\"That trap is already disarmed.\",\n\t\t\tMessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
+      "mutated": "\"That trap is already disarmed.\",\n\t\t\tMessageCompletion::FINISHED);\n\t\treturn roll_disarm_rounds(*ctx.dice);",
       "catches": "a disarmed trap taking time to be refused"
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\tif (found == ctx.traps->end())\n\t{\n\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, \"There is no trap there.\", MessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
-      "mutated": "\tif (found == ctx.traps->end())\n\t{\n\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, \"There is no trap there.\", MessageCompletion::FINISHED);\n\t\treturn roll_disarm_rounds(*ctx.dice);",
+      "original": "\tif (found == ctx.traps->end())\n\t{\n\t\tctx.messageSystem->message(\n\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\"There is no trap there.\",\n\t\t\tMessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
+      "mutated": "\tif (found == ctx.traps->end())\n\t{\n\t\tctx.messageSystem->message(\n\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\"There is no trap there.\",\n\t\t\tMessageCompletion::FINISHED);\n\t\treturn roll_disarm_rounds(*ctx.dice);",
       "catches": "bare floor taking time to be refused"
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\"This trap is beyond you.\", MessageCompletion::FINISHED);\n\t\treturn roll_disarm_rounds(*ctx.dice);",
-      "mutated": "\"This trap is beyond you.\", MessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
+      "original": "\"This trap is beyond you.\",\n\t\t\tMessageCompletion::FINISHED);\n\t\treturn roll_disarm_rounds(*ctx.dice);",
+      "mutated": "\"This trap is beyond you.\",\n\t\t\tMessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
       "catches": "a rolled failure taking no time"
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\"You trigger the trap while attempting to disarm it!\", MessageCompletion::FINISHED);\n\t\treturn roll_disarm_rounds(*ctx.dice);",
-      "mutated": "\"You trigger the trap while attempting to disarm it!\", MessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
+      "original": "\"You trigger the trap while attempting to disarm it!\",\n\t\t\tMessageCompletion::FINISHED);\n\t\treturn roll_disarm_rounds(*ctx.dice);",
+      "mutated": "\"You trigger the trap while attempting to disarm it!\",\n\t\t\tMessageCompletion::FINISHED);\n\t\treturn std::nullopt;",
       "catches": "the 96 accident taking no time"
     },
     {

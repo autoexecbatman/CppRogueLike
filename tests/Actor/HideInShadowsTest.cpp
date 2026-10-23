@@ -75,14 +75,17 @@ protected:
 	// Hide in Shadows is base 5, so this is what the character rolls against.
 	void buy_hide_in_shadows(int points)
 	{
-		thief->thiefSkillPoints.at(thief_skill_index(ThiefSkill::HIDE_IN_SHADOWS)) = points;
+		thief->thiefSkillPoints.at(
+			thief_skill_index(ThiefSkill::HIDE_IN_SHADOWS)) = points;
 	}
 
 	// A monster in the corridor. Awareness is granted by the creature's own look,
 	// so one that has not been given a look has not noticed the thief.
 	Creature& add_monster_at(Vector2D where)
 	{
-		auto monster = std::make_unique<Creature>(where, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
+		auto monster = std::make_unique<Creature>(
+			where,
+			ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
 		monster->healthPool = std::make_unique<HealthPool>(8);
 		Creature& placed = *monster;
 		creatures.push_back(std::move(monster));
@@ -103,10 +106,15 @@ protected:
 	size_t times_said(std::string_view wanted) const
 	{
 		size_t count = 0;
-		for (size_t index = 0; index < ctx.messageSystem->get_stored_message_count(); ++index)
+		for (
+			size_t index = 0;
+			index < ctx.messageSystem->get_stored_message_count();
+			++index)
 		{
 			std::string whole;
-			for (const LogMessage& run : ctx.messageSystem->get_attack_message_at(index))
+			for (
+				const LogMessage& run :
+				ctx.messageSystem->get_attack_message_at(index))
 			{
 				whole += run.text;
 			}
@@ -206,7 +214,8 @@ TEST_F(HideInShadowsTest, AWatchingCreatureRefusesTheAttemptWithoutARoll)
 	buy_hide_in_shadows(40);
 	Creature& guard = add_monster_at(Vector2D{ 4, 5 });
 	everyone_looks();
-	ASSERT_TRUE(guard.is_aware(ctx.gameState->get_time())) << "the guard is standing two tiles away in an open corridor";
+	ASSERT_TRUE(guard.is_aware(ctx.gameState->get_time()))
+		<< "the guard is standing two tiles away in an open corridor";
 
 	mock.dice.set_next_roll(1);
 	EXPECT_EQ(thief->attempt_hide(ctx), Player::HideAttempt::WATCHED);
@@ -225,8 +234,10 @@ TEST_F(HideInShadowsTest, AHunterThatHasLostSightIsStillWatching)
 	// The thief backs away down the corridor; the guard keeps its memory a while.
 	thief->position = Vector2D{ 18, 5 };
 	map.compute_fov(ctx);
-	ASSERT_FALSE(map.is_in_fov(guard.position)) << "the thief cannot see the guard any more";
-	ASSERT_TRUE(guard.is_aware(ctx.gameState->get_time())) << "and the guard has not forgotten him";
+	ASSERT_FALSE(map.is_in_fov(guard.position))
+		<< "the thief cannot see the guard any more";
+	ASSERT_TRUE(guard.is_aware(ctx.gameState->get_time()))
+		<< "and the guard has not forgotten him";
 
 	mock.dice.set_next_roll(1);
 	EXPECT_EQ(thief->attempt_hide(ctx), Player::HideAttempt::WATCHED);
@@ -239,8 +250,10 @@ TEST_F(HideInShadowsTest, ACreatureThatHasNotNoticedTheThiefIsNoBarrier)
 	buy_hide_in_shadows(40);
 	const Creature& unnoticing = add_monster_at(Vector2D{ 4, 5 });
 	map.compute_fov(ctx);
-	ASSERT_TRUE(map.is_in_fov(unnoticing.position)) << "the thief can see it plainly";
-	ASSERT_FALSE(unnoticing.is_aware(ctx.gameState->get_time())) << "and it has not noticed him";
+	ASSERT_TRUE(map.is_in_fov(unnoticing.position))
+		<< "the thief can see it plainly";
+	ASSERT_FALSE(unnoticing.is_aware(ctx.gameState->get_time()))
+		<< "and it has not noticed him";
 
 	mock.dice.set_next_roll(1);
 	EXPECT_EQ(thief->attempt_hide(ctx), Player::HideAttempt::ATTEMPTED);
@@ -284,7 +297,8 @@ TEST_F(HideInShadowsTest, AStepOffTheHidingSquareEndsTheHide)
 	thief->position = Vector2D{ 3, 5 };
 	thief->leave_shadows_if_moved(ctx);
 
-	EXPECT_FALSE(thief->is_invisible()) << "a thief who moved is no longer hidden";
+	EXPECT_FALSE(thief->is_invisible())
+		<< "a thief who moved is no longer hidden";
 	EXPECT_FALSE(thief->is_in_shadows()) << "and no longer believes he is";
 }
 
@@ -309,9 +323,12 @@ TEST_F(HideInShadowsTest, AHideOutlastsTheOldInventedDuration)
 	hide_with_roll(1);
 
 	const int oldCapRounds = 10 + thief->get_creature_level() * 2;
-	ctx.buffSystem->update_creature_buffs(*thief, expiry_time(ctx.gameState->get_time(), oldCapRounds + 5));
+	ctx.buffSystem->update_creature_buffs(
+		*thief,
+		expiry_time(ctx.gameState->get_time(), oldCapRounds + 5));
 
-	EXPECT_TRUE(thief->is_invisible()) << "a hide has no clock; only moving or attacking ends it";
+	EXPECT_TRUE(thief->is_invisible())
+		<< "a hide has no clock; only moving or attacking ends it";
 }
 
 // The spell is not the hide: PHB page 291 lets an invisible creature "open doors, talk,
@@ -321,7 +338,13 @@ TEST_F(HideInShadowsTest, SpellInvisibilitySurvivesTheStepThatEndsAHide)
 	buy_hide_in_shadows(40);
 	// The hide comes first, because an invisible thief's try is refused as already hidden.
 	hide_with_roll(100);
-	ctx.buffSystem->add_buff(*thief, BuffType::INVISIBILITY, 0, 20, BuffApplication::ADD, ctx.gameState->get_time());
+	ctx.buffSystem->add_buff(
+		*thief,
+		BuffType::INVISIBILITY,
+		0,
+		20,
+		BuffApplication::ADD,
+		ctx.gameState->get_time());
 
 	thief->position = Vector2D{ 3, 5 };
 	thief->leave_shadows_if_moved(ctx);
@@ -380,7 +403,8 @@ TEST_F(HideInShadowsTest, AnAttackSaysTheSameWhicheverWayTheRollWent)
 		thief->attacker->attack(target, AttackKind::MELEE, ctx);
 		EXPECT_FALSE(thief->is_in_shadows()) << "roll " << roll;
 		EXPECT_FALSE(thief->is_invisible()) << "roll " << roll;
-		EXPECT_EQ(times_said("Your invisibility fades"), fadedBefore) << "roll " << roll;
+		EXPECT_EQ(times_said("Your invisibility fades"), fadedBefore)
+			<< "roll " << roll;
 		return times_said("You leave the shadows.") - leftBefore;
 	};
 
@@ -404,7 +428,8 @@ TEST_F(HideInShadowsTest, AHideSurvivesASaveAndLoad)
 	EXPECT_TRUE(loaded.is_invisible());
 	EXPECT_TRUE(loaded.is_in_shadows());
 	loaded.leave_shadows_if_moved(ctx);
-	EXPECT_TRUE(loaded.is_in_shadows()) << "the spot came back with the player, so he has not moved";
+	EXPECT_TRUE(loaded.is_in_shadows())
+		<< "the spot came back with the player, so he has not moved";
 }
 
 // A thief saved out of the shadows loads out of them, even into a player that
@@ -420,7 +445,8 @@ TEST_F(HideInShadowsTest, AThiefSavedInTheOpenLoadsInTheOpen)
 
 	Player loaded{ Vector2D{ 0, 0 } };
 	loaded.load(hidden);
-	ASSERT_TRUE(loaded.is_in_shadows()) << "the loaded player has to start hidden, or the second load proves nothing";
+	ASSERT_TRUE(loaded.is_in_shadows())
+		<< "the loaded player has to start hidden, or the second load proves nothing";
 	loaded.load(inTheOpen);
 
 	EXPECT_FALSE(loaded.is_in_shadows());

@@ -32,8 +32,10 @@ void expect_row(int roll, std::array<int, 10> printed)
 {
 	for (std::size_t column = 0; column < printed.size(); ++column)
 	{
-		const IntelligenceRating rating = ALL_INTELLIGENCE_RATING.at(column + 1);
-		EXPECT_EQ(monster_intelligence_score(roll, rating), printed.at(column)) << "roll " << roll << ", " << encode_intelligence_rating(rating);
+		const IntelligenceRating rating =
+			ALL_INTELLIGENCE_RATING.at(column + 1);
+		EXPECT_EQ(monster_intelligence_score(roll, rating), printed.at(column))
+			<< "roll " << roll << ", " << encode_intelligence_rating(rating);
 	}
 }
 } // namespace
@@ -64,7 +66,8 @@ TEST(MonsterIntelligenceTableTest, ANonIntelligentCreatureHasIntelligenceZero)
 {
 	for (int roll = 3; roll <= 18; ++roll)
 	{
-		EXPECT_EQ(monster_intelligence_score(roll, IntelligenceRating::NON), 0) << "roll " << roll;
+		EXPECT_EQ(monster_intelligence_score(roll, IntelligenceRating::NON), 0)
+			<< "roll " << roll;
 	}
 }
 

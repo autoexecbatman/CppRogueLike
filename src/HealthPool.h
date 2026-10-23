@@ -37,7 +37,10 @@ public:
 	[[nodiscard]] int get_effective_hp() const noexcept { return hp + tempHp; }
 
 	// The fire and acid part of the damage taken, which only heal() can mend.
-	[[nodiscard]] int get_unregenerable_damage() const noexcept { return unregenerableDamage; }
+	[[nodiscard]] int get_unregenerable_damage() const noexcept
+	{
+		return unregenerableDamage;
+	}
 
 	[[nodiscard]] bool is_dead() const noexcept { return hp <= 0; }
 
@@ -53,10 +56,17 @@ public:
 	void add_temp_hp(int amount) noexcept { tempHp += amount; }
 
 	// Restores the saved fire and acid damage; a load writes it after hp and hpMax.
-	void set_unregenerable_damage(int value) noexcept { unregenerableDamage = value; }
+	void set_unregenerable_damage(int value) noexcept
+	{
+		unregenerableDamage = value;
+	}
 
 	// Action methods
-	int take_damage(Creature& owner, int damage, GameContext& ctx, DamageType damageType);
+	int take_damage(
+		Creature& owner,
+		int damage,
+		GameContext& ctx,
+		DamageType damageType);
 
 	// Heals up to hpToHeal and returns what it healed. Any healing but regeneration
 	// takes the fire and acid damage first, so what is left is what regeneration can reach.

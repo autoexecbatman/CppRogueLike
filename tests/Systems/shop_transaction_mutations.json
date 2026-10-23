@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/ShopKeeper.cpp",
-      "original": "\t\t\t[[maybe_unused]] const auto stocked = add_item(shopInventory, std::move(item));\n\t\t\tassert(stocked.has_value() && \"ShopKeeper::generate_initial_inventory: stocking overflowed the shelves\");",
-      "mutated": "\t\t\tassert(add_item(shopInventory, std::move(item)).has_value() && \"ShopKeeper::generate_initial_inventory: stocking overflowed the shelves\");",
+      "original": "\t\t\t[[maybe_unused]] const auto stocked =\n\t\t\t\tadd_item(shopInventory, std::move(item));\n\t\t\tassert(\n\t\t\t\tstocked.has_value() &&\n\t\t\t\t\"ShopKeeper::generate_initial_inventory: stocking overflowed the shelves\");",
+      "mutated": "\t\t\tassert(add_item(shopInventory, std::move(item)).has_value() &&\n\t\t\t\t\"ShopKeeper::generate_initial_inventory: stocking overflowed the shelves\");",
       "catches": "stocking back inside the assert, so the shipped shop sells nothing"
     },
     {
       "file": "src/ShopKeeper.cpp",
-      "original": "\t[[maybe_unused]] const auto handedOver = add_item_to_inventory(buyer.inventoryData, std::move(*taken), buyer, *ctx.dataManager);\n\tassert(handedOver.has_value() && \"ShopKeeper::process_player_purchase: the buyer's pack refused an item checked to fit\");",
-      "mutated": "\tassert(add_item_to_inventory(buyer.inventoryData, std::move(*taken), buyer, *ctx.dataManager).has_value() && \"ShopKeeper::process_player_purchase: the buyer's pack refused an item checked to fit\");",
+      "original": "\t[[maybe_unused]] const auto handedOver = add_item_to_inventory(\n\t\tbuyer.inventoryData,\n\t\tstd::move(*taken),\n\t\tbuyer,\n\t\t*ctx.dataManager);\n\tassert(\n\t\thandedOver.has_value() &&\n\t\t\"ShopKeeper::process_player_purchase: the buyer's pack refused an item checked to fit\");",
+      "mutated": "\tassert(add_item_to_inventory(buyer.inventoryData, std::move(*taken), buyer, *ctx.dataManager).has_value() &&\n\t\t\"ShopKeeper::process_player_purchase: the buyer's pack refused an item checked to fit\");",
       "catches": "the purchase back inside the assert, taking the gold and handing over nothing"
     },
     {
@@ -33,13 +33,13 @@
     },
     {
       "file": "src/ShopKeeper.cpp",
-      "original": "\t[[maybe_unused]] const auto shelved = add_item(shopInventory, std::move(*removed));\n\tassert(shelved.has_value() && \"ShopKeeper::process_player_sale: the shelves refused an item checked to fit\");",
-      "mutated": "\tassert(add_item(shopInventory, std::move(*removed)).has_value() && \"ShopKeeper::process_player_sale: the shelves refused an item checked to fit\");",
+      "original": "\t[[maybe_unused]] const auto shelved =\n\t\tadd_item(shopInventory, std::move(*removed));\n\tassert(\n\t\tshelved.has_value() &&\n\t\t\"ShopKeeper::process_player_sale: the shelves refused an item checked to fit\");",
+      "mutated": "\tassert(add_item(shopInventory, std::move(*removed)).has_value() &&\n\t\t\"ShopKeeper::process_player_sale: the shelves refused an item checked to fit\");",
       "catches": "shelving back inside the assert, so a shipped sale shelves nothing"
     },
     {
       "file": "src/ShopKeeper.cpp",
-      "original": "\tif (is_inventory_full(shopInventory))\n\t{\n\t\tctx.messageSystem->message(ColorPairId::WHITE_RED, \"Shopkeeper's inventory is full.\", MessageCompletion::FINISHED);\n\t\treturn false;\n\t}",
+      "original": "\tif (is_inventory_full(shopInventory))\n\t{\n\t\tctx.messageSystem->message(\n\t\t\tColorPairId::WHITE_RED,\n\t\t\t\"Shopkeeper's inventory is full.\",\n\t\t\tMessageCompletion::FINISHED);\n\t\treturn false;\n\t}",
       "mutated": "",
       "catches": "a sale to full shelves going ahead, which takes the item and cannot shelve it"
     },

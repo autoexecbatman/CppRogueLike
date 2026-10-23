@@ -23,8 +23,11 @@ void expect_row(int roll, std::array<int, 6> printed)
 {
 	for (std::size_t column = 0; column < ALL_CREATURE_SIZE.size(); ++column)
 	{
-		const auto read = monster_dexterity_score(roll, ALL_CREATURE_SIZE.at(column));
-		EXPECT_EQ(read, printed.at(column)) << "roll " << roll << ", " << encode_creature_size(ALL_CREATURE_SIZE.at(column));
+		const auto read =
+			monster_dexterity_score(roll, ALL_CREATURE_SIZE.at(column));
+		EXPECT_EQ(read, printed.at(column))
+			<< "roll " << roll << ", "
+			<< encode_creature_size(ALL_CREATURE_SIZE.at(column));
 	}
 }
 } // namespace

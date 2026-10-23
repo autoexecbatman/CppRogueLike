@@ -45,13 +45,17 @@ protected:
 		player->set_strength(10);
 		player->set_dexterity(10);
 
-		monster = std::make_unique<Creature>(Vector2D{ 0, 1 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
+		monster = std::make_unique<Creature>(
+			Vector2D{ 0, 1 },
+			ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
 		monster->experienceReward = std::make_unique<ExperienceReward>(50);
 		monster->set_dr(0);
 		monster->set_thaco(19);
 		monster->armorClass = std::make_unique<ArmorClass>(10);
 		monster->healthPool = std::make_unique<HealthPool>(100);
-		monster->attacker = std::make_unique<MonsterAttacker>(*monster, DamageInfo{ "1d6", DamageType::PHYSICAL });
+		monster->attacker = std::make_unique<MonsterAttacker>(
+			*monster,
+			DamageInfo{ "1d6", DamageType::PHYSICAL });
 		monster->set_strength(8);
 		monster->set_dexterity(10);
 		monster->set_natural_attack("claws");
@@ -74,9 +78,14 @@ protected:
 	// prints, and they are not the same string. Built without a key, the weapon looked
 	// armed and did a fist's damage - which these cases could not see, because they read
 	// the name out of the message and never the damage.
-	std::unique_ptr<Item> make_weapon(const std::string& itemKey, const std::string& name, ItemClass itemClass)
+	std::unique_ptr<Item> make_weapon(
+		const std::string& itemKey,
+		const std::string& name,
+		ItemClass itemClass)
 	{
-		auto weapon = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK });
+		auto weapon = std::make_unique<Item>(
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK });
 		weapon->itemKey = itemKey;
 		weapon->itemClass = itemClass;
 		weapon->behavior = Weapon{};
@@ -85,8 +94,14 @@ protected:
 
 	void arm_with_sword_and_bow()
 	{
-		player->equip_item(make_weapon("long_sword", "long sword", ItemClass::SWORD), EquipmentSlot::RIGHT_HAND, ctx);
-		player->equip_item(make_weapon("long_bow", "long bow", ItemClass::BOW), EquipmentSlot::MISSILE_WEAPON, ctx);
+		player->equip_item(
+			make_weapon("long_sword", "long sword", ItemClass::SWORD),
+			EquipmentSlot::RIGHT_HAND,
+			ctx);
+		player->equip_item(
+			make_weapon("long_bow", "long bow", ItemClass::BOW),
+			EquipmentSlot::MISSILE_WEAPON,
+			ctx);
 	}
 
 	// Every part of every finalized attack message, joined. The weapon an attack
@@ -94,9 +109,14 @@ protected:
 	std::string all_attack_text() const
 	{
 		std::string joined;
-		for (size_t index = 0; index < ctx.messageSystem->get_stored_message_count(); ++index)
+		for (
+			size_t index = 0;
+			index < ctx.messageSystem->get_stored_message_count();
+			++index)
 		{
-			for (const auto& part : ctx.messageSystem->get_attack_message_at(index))
+			for (
+				const auto& part :
+				ctx.messageSystem->get_attack_message_at(index))
 			{
 				joined += part.text;
 			}

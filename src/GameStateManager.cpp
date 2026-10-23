@@ -47,13 +47,14 @@ void save_rooms(const std::vector<DungeonRoom>& rooms, json& output)
 	output["rooms"] = json::array();
 	for (const auto& room : rooms)
 	{
-		output["rooms"].push_back({
-			{ "col", room.col },
-			{ "row", room.row },
-			{ "width", room.width },
-			{ "height", room.height },
-			{ "type", static_cast<int>(room.type) },
-		});
+		output["rooms"].push_back(
+			{
+				{ "col", room.col },
+				{ "row", room.row },
+				{ "width", room.width },
+				{ "height", room.height },
+				{ "type", static_cast<int>(room.type) },
+			});
 	}
 }
 
@@ -90,7 +91,10 @@ void load_rooms(const json& source, std::vector<DungeonRoom>& rooms)
 	const json& roomRecords = source.at("rooms");
 	if (!roomRecords.is_array())
 	{
-		throw std::runtime_error(std::format("load_rooms: \"rooms\" is {}, not an array", roomRecords.type_name()));
+		throw std::runtime_error(
+			std::format(
+				"load_rooms: \"rooms\" is {}, not an array",
+				roomRecords.type_name()));
 	}
 
 	for (const auto& roomRecord : roomRecords)
@@ -100,7 +104,10 @@ void load_rooms(const json& source, std::vector<DungeonRoom>& rooms)
 		const std::optional<RoomType> type = room_type_from(savedType);
 		if (!type)
 		{
-			throw std::runtime_error(std::format("load_rooms: room type {} is not a RoomType", savedType));
+			throw std::runtime_error(
+				std::format(
+					"load_rooms: room type {} is not a RoomType",
+					savedType));
 		}
 
 		DungeonRoom room;
@@ -128,7 +135,9 @@ namespace
 //
 //   save_creatures({}, level);          // an empty level is legal
 //   level["creatures"].size();          // -> 0
-void save_creatures(const std::vector<std::unique_ptr<Creature>>& creatures, json& output)
+void save_creatures(
+	const std::vector<std::unique_ptr<Creature>>& creatures,
+	json& output)
 {
 	output["creatures"] = json::array();
 	for (const auto& creature : creatures)
@@ -152,7 +161,10 @@ void save_creatures(const std::vector<std::unique_ptr<Creature>>& creatures, jso
 //   ctx.gameState->get_rounds_run();               // -> 0, so the next round is fed
 //   ctx.hungerSystem->get_hunger_value();          // -> 0, a fresh game's hunger
 //   ctx.messageSystem->get_stored_message_count(); // -> 0, the last run's log is gone
-void start_fresh_run(HungerSystem& hungerSystem, MessageSystem& messageSystem, GameState& gameState)
+void start_fresh_run(
+	HungerSystem& hungerSystem,
+	MessageSystem& messageSystem,
+	GameState& gameState)
 {
 	hungerSystem.begin_run();
 	messageSystem.begin_run();
@@ -162,7 +174,9 @@ void start_fresh_run(HungerSystem& hungerSystem, MessageSystem& messageSystem, G
 
 } // namespace
 
-void load_creatures(const json& source, std::vector<std::unique_ptr<Creature>>& creatures)
+void load_creatures(
+	const json& source,
+	std::vector<std::unique_ptr<Creature>>& creatures)
 {
 	// Replace rather than append, as every loader of a level container does.
 	creatures.clear();
@@ -170,23 +184,32 @@ void load_creatures(const json& source, std::vector<std::unique_ptr<Creature>>& 
 	const json& creatureRecords = source.at("creatures");
 	if (!creatureRecords.is_array())
 	{
-		throw std::runtime_error(std::format("load_creatures: \"creatures\" is {}, not an array", creatureRecords.type_name()));
+		throw std::runtime_error(
+			std::format(
+				"load_creatures: \"creatures\" is {}, not an array",
+				creatureRecords.type_name()));
 	}
 
 	for (const auto& creatureData : creatureRecords)
 	{
-		auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "Unnamed", ColorPairId::WHITE_BLACK });
+		auto creature = std::make_unique<Creature>(
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "Unnamed", ColorPairId::WHITE_BLACK });
 		creature->load(creatureData);
 		creatures.push_back(std::move(creature));
 	}
 }
 
-void save_decorations(const std::vector<std::unique_ptr<Decoration>>& decorations, json& output)
+void save_decorations(
+	const std::vector<std::unique_ptr<Decoration>>& decorations,
+	json& output)
 {
 	output["decorations"] = json::array();
 	for (const auto& decoration : decorations)
 	{
-		assert(decoration && "save_decorations: the decoration list holds a null entry");
+		assert(
+			decoration &&
+			"save_decorations: the decoration list holds a null entry");
 		const nlohmann::json position{
 			{ "x", decoration->position.x },
 			{ "y", decoration->position.y },
@@ -203,7 +226,9 @@ void save_decorations(const std::vector<std::unique_ptr<Decoration>>& decoration
 	}
 }
 
-void load_decorations(const json& source, std::vector<std::unique_ptr<Decoration>>& decorations)
+void load_decorations(
+	const json& source,
+	std::vector<std::unique_ptr<Decoration>>& decorations)
 {
 	// Replace rather than append, as every loader of a level container does.
 	decorations.clear();
@@ -236,7 +261,10 @@ void save_traps(const std::vector<std::unique_ptr<Trap>>& traps, json& output)
 	}
 }
 
-void load_traps(const json& source, std::vector<std::unique_ptr<Trap>>& traps, const TileConfig& tileConfig)
+void load_traps(
+	const json& source,
+	std::vector<std::unique_ptr<Trap>>& traps,
+	const TileConfig& tileConfig)
 {
 	// Replace rather than append: a load during play would otherwise leave the
 	// abandoned level's traps on the new map, at the tiles they had there.
@@ -245,7 +273,10 @@ void load_traps(const json& source, std::vector<std::unique_ptr<Trap>>& traps, c
 	const json& trapRecords = source.at("traps");
 	if (!trapRecords.is_array())
 	{
-		throw std::runtime_error(std::format("load_traps: \"traps\" is {}, not an array", trapRecords.type_name()));
+		throw std::runtime_error(
+			std::format(
+				"load_traps: \"traps\" is {}, not an array",
+				trapRecords.type_name()));
 	}
 
 	for (const auto& trapJson : trapRecords)
@@ -261,16 +292,36 @@ void load_traps(const json& source, std::vector<std::unique_ptr<Trap>>& traps, c
 
 void GameStateManager::init_new_game(GameContext& ctx)
 {
-	assert(ctx.bodyPlanRegistry && "GameStateManager::init_new_game: called without a bodyPlanRegistry");
-	assert(ctx.contentRegistry && "GameStateManager::init_new_game: called without a contentRegistry");
-	assert(ctx.dataManager != nullptr && "GameStateManager::init_new_game: called without a dataManager");
-	assert(ctx.messageSystem != nullptr && "GameStateManager::init_new_game: called without a messageSystem");
-	assert(ctx.levelManager != nullptr && "GameStateManager::init_new_game: called without a levelManager");
-	assert(ctx.gameState != nullptr && "GameStateManager::init_new_game: called without a gameState");
-	assert(ctx.map != nullptr && "GameStateManager::init_new_game: called without a map");
-	assert(ctx.playerOwner != nullptr && "GameStateManager::init_new_game: called without a playerOwner");
-	assert(ctx.tileConfig != nullptr && "GameStateManager::init_new_game: called without a tileConfig");
-	assert(ctx.hungerSystem != nullptr && "GameStateManager::init_new_game: called without a hungerSystem");
+	assert(
+		ctx.bodyPlanRegistry &&
+		"GameStateManager::init_new_game: called without a bodyPlanRegistry");
+	assert(
+		ctx.contentRegistry &&
+		"GameStateManager::init_new_game: called without a contentRegistry");
+	assert(
+		ctx.dataManager != nullptr &&
+		"GameStateManager::init_new_game: called without a dataManager");
+	assert(
+		ctx.messageSystem != nullptr &&
+		"GameStateManager::init_new_game: called without a messageSystem");
+	assert(
+		ctx.levelManager != nullptr &&
+		"GameStateManager::init_new_game: called without a levelManager");
+	assert(
+		ctx.gameState != nullptr &&
+		"GameStateManager::init_new_game: called without a gameState");
+	assert(
+		ctx.map != nullptr &&
+		"GameStateManager::init_new_game: called without a map");
+	assert(
+		ctx.playerOwner != nullptr &&
+		"GameStateManager::init_new_game: called without a playerOwner");
+	assert(
+		ctx.tileConfig != nullptr &&
+		"GameStateManager::init_new_game: called without a tileConfig");
+	assert(
+		ctx.hungerSystem != nullptr &&
+		"GameStateManager::init_new_game: called without a hungerSystem");
 
 	start_fresh_run(*ctx.hungerSystem, *ctx.messageSystem, *ctx.gameState);
 
@@ -280,11 +331,15 @@ void GameStateManager::init_new_game(GameContext& ctx)
 	ctx.levelManager->reset_to_first_level();
 	ctx.gameState->set_is_loaded_game(false);
 
-	assert(ctx.playerBlueprint != nullptr && "GameStateManager::init_new_game: called without a playerBlueprint");
-	*ctx.playerOwner = std::make_unique<Player>(Vector2D{ 0, 0 }, *ctx.playerBlueprint, ctx);
+	assert(
+		ctx.playerBlueprint != nullptr &&
+		"GameStateManager::init_new_game: called without a playerBlueprint");
+	*ctx.playerOwner =
+		std::make_unique<Player>(Vector2D{ 0, 0 }, *ctx.playerBlueprint, ctx);
 	ctx.player()->set_body_plan(ctx.bodyPlanRegistry->get("humanoid"));
 	*ctx.playerBlueprint = PlayerBlueprint{};
-	ctx.player()->actorData.tile = ctx.tileConfig->get(ctx.player_concrete().sprite_tile_key());
+	ctx.player()->actorData.tile =
+		ctx.tileConfig->get(ctx.player_concrete().sprite_tile_key());
 
 	ctx.map->regenerate(ctx);
 
@@ -294,14 +349,30 @@ void GameStateManager::init_new_game(GameContext& ctx)
 
 LoadOutcome GameStateManager::load_all(GameContext& ctx)
 {
-	assert(ctx.contentRegistry && "GameStateManager::load_all: called without a contentRegistry");
-	assert(ctx.menuManager != nullptr && "GameStateManager::load_all: called without a menuManager");
-	assert(ctx.dataManager != nullptr && "GameStateManager::load_all: called without a dataManager");
-	assert(ctx.messageSystem != nullptr && "GameStateManager::load_all: called without a messageSystem");
-	assert(ctx.gameState != nullptr && "GameStateManager::load_all: called without a gameState");
-	assert(ctx.playerOwner != nullptr && "GameStateManager::load_all: called without a playerOwner");
-	assert(ctx.tileConfig != nullptr && "GameStateManager::load_all: called without a tileConfig");
-	assert(ctx.hungerSystem != nullptr && "GameStateManager::load_all: called without a hungerSystem");
+	assert(
+		ctx.contentRegistry &&
+		"GameStateManager::load_all: called without a contentRegistry");
+	assert(
+		ctx.menuManager != nullptr &&
+		"GameStateManager::load_all: called without a menuManager");
+	assert(
+		ctx.dataManager != nullptr &&
+		"GameStateManager::load_all: called without a dataManager");
+	assert(
+		ctx.messageSystem != nullptr &&
+		"GameStateManager::load_all: called without a messageSystem");
+	assert(
+		ctx.gameState != nullptr &&
+		"GameStateManager::load_all: called without a gameState");
+	assert(
+		ctx.playerOwner != nullptr &&
+		"GameStateManager::load_all: called without a playerOwner");
+	assert(
+		ctx.tileConfig != nullptr &&
+		"GameStateManager::load_all: called without a tileConfig");
+	assert(
+		ctx.hungerSystem != nullptr &&
+		"GameStateManager::load_all: called without a hungerSystem");
 
 	// Before the save is read, so what it holds is what the loaded game keeps.
 	start_fresh_run(*ctx.hungerSystem, *ctx.messageSystem, *ctx.gameState);
@@ -326,38 +397,64 @@ LoadOutcome GameStateManager::load_all(GameContext& ctx)
 		// A delete can fail at run time - a locked or read-only file - so it is reported, never asserted.
 		if (!delete_save_file())
 		{
-			ctx.messageSystem->log(std::format("Load refused, save could not be deleted: {}", refusal.what()));
+			ctx.messageSystem->log(
+				std::format(
+					"Load refused, save could not be deleted: {}",
+					refusal.what()));
 			return LoadOutcome{
 				LoadOutcomeKind::REFUSED_AND_KEPT,
 				refusal.what(),
 			};
 		}
-		ctx.messageSystem->log(std::format("Load refused, save deleted: {}", refusal.what()));
+		ctx.messageSystem->log(
+			std::format("Load refused, save deleted: {}", refusal.what()));
 		return LoadOutcome{ LoadOutcomeKind::REFUSED, refusal.what() };
 	}
 	ctx.menuManager->set_game_initialized(true);
 
 	// load_game restores the creature class, so the class sprite is only known now.
-	ctx.player()->actorData.tile = ctx.tileConfig->get(ctx.player_concrete().sprite_tile_key());
+	ctx.player()->actorData.tile =
+		ctx.tileConfig->get(ctx.player_concrete().sprite_tile_key());
 
 	ctx.gameState->set_is_loaded_game(true);
 	ctx.gameState->begin_run();
-	ctx.messageSystem->log("GameStatus set to STARTUP after loading for FOV computation");
+	ctx.messageSystem->log(
+		"GameStatus set to STARTUP after loading for FOV computation");
 	return LoadOutcome{ LoadOutcomeKind::LOADED, "" };
 }
 
 void GameStateManager::save_game(GameContext& ctx)
 {
-	assert(ctx.map != nullptr && "GameStateManager::save_game: called without a map");
-	assert(ctx.rooms != nullptr && "GameStateManager::save_game: called without rooms");
-	assert(ctx.player() != nullptr && "GameStateManager::save_game: called without a player");
-	assert(ctx.stairs != nullptr && "GameStateManager::save_game: called without stairs");
-	assert(ctx.creatures != nullptr && "GameStateManager::save_game: called without creatures");
-	assert(ctx.floorInventory != nullptr && "GameStateManager::save_game: called without a floorInventory");
-	assert(ctx.gui != nullptr && "GameStateManager::save_game: called without a gui");
-	assert(ctx.hungerSystem != nullptr && "GameStateManager::save_game: called without a hungerSystem");
-	assert(ctx.levelManager != nullptr && "GameStateManager::save_game: called without a levelManager");
-	assert(ctx.gameState != nullptr && "GameStateManager::save_game: called without a gameState");
+	assert(
+		ctx.map != nullptr &&
+		"GameStateManager::save_game: called without a map");
+	assert(
+		ctx.rooms != nullptr &&
+		"GameStateManager::save_game: called without rooms");
+	assert(
+		ctx.player() != nullptr &&
+		"GameStateManager::save_game: called without a player");
+	assert(
+		ctx.stairs != nullptr &&
+		"GameStateManager::save_game: called without stairs");
+	assert(
+		ctx.creatures != nullptr &&
+		"GameStateManager::save_game: called without creatures");
+	assert(
+		ctx.floorInventory != nullptr &&
+		"GameStateManager::save_game: called without a floorInventory");
+	assert(
+		ctx.gui != nullptr &&
+		"GameStateManager::save_game: called without a gui");
+	assert(
+		ctx.hungerSystem != nullptr &&
+		"GameStateManager::save_game: called without a hungerSystem");
+	assert(
+		ctx.levelManager != nullptr &&
+		"GameStateManager::save_game: called without a levelManager");
+	assert(
+		ctx.gameState != nullptr &&
+		"GameStateManager::save_game: called without a gameState");
 
 	auto save_path = Paths::resolve(Paths::SAVE_FILE);
 	std::filesystem::create_directories(save_path.parent_path());
@@ -377,9 +474,13 @@ void GameStateManager::save_game(GameContext& ctx)
 		ctx.map->save(saveDocument);
 		save_rooms(*ctx.rooms, saveDocument);
 
-		assert(ctx.traps && "save_game: the level was saved with no trap container");
+		assert(
+			ctx.traps &&
+			"save_game: the level was saved with no trap container");
 		save_traps(*ctx.traps, saveDocument);
-		assert(ctx.decorations && "save_game: the level was saved with no decoration container");
+		assert(
+			ctx.decorations &&
+			"save_game: the level was saved with no decoration container");
 		save_decorations(*ctx.decorations, saveDocument);
 
 		json playerJson;
@@ -416,16 +517,36 @@ void GameStateManager::save_game(GameContext& ctx)
 
 bool GameStateManager::load_game(GameContext& ctx)
 {
-	assert(ctx.map != nullptr && "GameStateManager::load_game: called without a map");
-	assert(ctx.rooms != nullptr && "GameStateManager::load_game: called without rooms");
-	assert(ctx.player() != nullptr && "GameStateManager::load_game: called without a player");
-	assert(ctx.stairs != nullptr && "GameStateManager::load_game: called without stairs");
-	assert(ctx.creatures != nullptr && "GameStateManager::load_game: called without creatures");
-	assert(ctx.floorInventory != nullptr && "GameStateManager::load_game: called without a floorInventory");
-	assert(ctx.gui != nullptr && "GameStateManager::load_game: called without a gui");
-	assert(ctx.hungerSystem != nullptr && "GameStateManager::load_game: called without a hungerSystem");
-	assert(ctx.levelManager != nullptr && "GameStateManager::load_game: called without a levelManager");
-	assert(ctx.gameState != nullptr && "GameStateManager::load_game: called without a gameState");
+	assert(
+		ctx.map != nullptr &&
+		"GameStateManager::load_game: called without a map");
+	assert(
+		ctx.rooms != nullptr &&
+		"GameStateManager::load_game: called without rooms");
+	assert(
+		ctx.player() != nullptr &&
+		"GameStateManager::load_game: called without a player");
+	assert(
+		ctx.stairs != nullptr &&
+		"GameStateManager::load_game: called without stairs");
+	assert(
+		ctx.creatures != nullptr &&
+		"GameStateManager::load_game: called without creatures");
+	assert(
+		ctx.floorInventory != nullptr &&
+		"GameStateManager::load_game: called without a floorInventory");
+	assert(
+		ctx.gui != nullptr &&
+		"GameStateManager::load_game: called without a gui");
+	assert(
+		ctx.hungerSystem != nullptr &&
+		"GameStateManager::load_game: called without a hungerSystem");
+	assert(
+		ctx.levelManager != nullptr &&
+		"GameStateManager::load_game: called without a levelManager");
+	assert(
+		ctx.gameState != nullptr &&
+		"GameStateManager::load_game: called without a gameState");
 
 	std::ifstream file(Paths::resolve(Paths::SAVE_FILE));
 	if (!file.is_open())
@@ -440,14 +561,20 @@ bool GameStateManager::load_game(GameContext& ctx)
 	load_rooms(saveDocument, *ctx.rooms);
 
 	assert(ctx.traps && "load_game: a level was loaded with no trap container");
-	assert(ctx.tileConfig && "load_game: a trap cannot be rebuilt without the tile table");
+	assert(
+		ctx.tileConfig &&
+		"load_game: a trap cannot be rebuilt without the tile table");
 	load_traps(saveDocument, *ctx.traps, *ctx.tileConfig);
-	assert(ctx.decorations && "load_game: a level was loaded with no decoration container");
+	assert(
+		ctx.decorations &&
+		"load_game: a level was loaded with no decoration container");
 	load_decorations(saveDocument, *ctx.decorations);
 
 	// Spell tiles are not saved, so a load clears them: the abandoned level's would
 	// otherwise stay at their old coordinates, which a fresh launch never shows.
-	assert(ctx.spellTiles && "load_game: a level was loaded with no spell tile container");
+	assert(
+		ctx.spellTiles &&
+		"load_game: a level was loaded with no spell tile container");
 	ctx.spellTiles->clear();
 
 	// save_game always writes each key read with at() here, so a save without one is damaged and refused.

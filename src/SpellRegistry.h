@@ -120,5 +120,7 @@ public:
 
 	// Every spell of the caster's class or of both classes, at or below a spell level:
 	// builtins in their fixed order, then custom spells.
-	[[nodiscard]] std::vector<std::string> get_available_spells(CasterClass casterClass, int maxSpellLevel) const;
+	[[nodiscard]] std::vector<std::string> get_available_spells(
+		CasterClass casterClass,
+		int maxSpellLevel) const;
 };

@@ -23,18 +23,32 @@ void advance_player_and_open_turn(GameContext& ctx, int timeUnits)
 
 void spend_player_action(GameContext& ctx, int baseCost)
 {
-	assert(ctx.player() && "spend_player_action: an action was spent with no player");
-	assert(ctx.gameState && "spend_player_action: an action was spent with no game state");
+	assert(
+		ctx.player() &&
+		"spend_player_action: an action was spent with no player");
+	assert(
+		ctx.gameState &&
+		"spend_player_action: an action was spent with no game state");
 
-	advance_player_and_open_turn(ctx, scaled_cost(baseCost, ctx.player()->get_action_delay()));
+	advance_player_and_open_turn(
+		ctx,
+		scaled_cost(baseCost, ctx.player()->get_action_delay()));
 }
 
 void spend_player_spellcasting(GameContext& ctx)
 {
-	assert(ctx.player() && "spend_player_spellcasting: a spell was cast with no player");
-	assert(ctx.gameState && "spend_player_spellcasting: a spell was cast with no game state");
+	assert(
+		ctx.player() &&
+		"spend_player_spellcasting: a spell was cast with no player");
+	assert(
+		ctx.gameState &&
+		"spend_player_spellcasting: a spell was cast with no game state");
 
-	advance_player_and_open_turn(ctx, scaled_cost(TIME_UNITS_PER_ROUND, ctx.player()->get_unhasted_action_delay()));
+	advance_player_and_open_turn(
+		ctx,
+		scaled_cost(
+			TIME_UNITS_PER_ROUND,
+			ctx.player()->get_unhasted_action_delay()));
 }
 
 // end of file: PlayerTurn.cpp

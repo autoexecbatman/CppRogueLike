@@ -10,8 +10,10 @@ private:
 	int xp{};
 
 public:
-	explicit ExperienceReward(int xpValue) noexcept
-		: xp(xpValue) {}
+	explicit ExperienceReward(int xpValue) noexcept :
+		xp(xpValue)
+	{
+	}
 
 	[[nodiscard]] int get_xp() const noexcept { return xp; }
 

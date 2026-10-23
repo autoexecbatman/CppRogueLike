@@ -34,7 +34,8 @@ TEST(ColorPairTest, TheTableHasASlotForEveryPair)
 {
 	for (const ColorPairId pair : ALL_COLOR_PAIR)
 	{
-		EXPECT_LT(color_pair_index(pair), COLOR_PAIR_TABLE_SIZE) << color_pair_name(pair);
+		EXPECT_LT(color_pair_index(pair), COLOR_PAIR_TABLE_SIZE)
+			<< color_pair_name(pair);
 	}
 
 	// Slot zero belongs to no pair, which is the one place the offset shows.
@@ -63,11 +64,13 @@ TEST(ColorPairTest, EveryColourTheDataShipsNamesAPair)
 				continue;
 			}
 			const std::string named = record.at("color").get<std::string>();
-			EXPECT_NO_THROW((void)parse_color_pair(named)) << key << " carries '" << named << "'";
+			EXPECT_NO_THROW((void)parse_color_pair(named))
+				<< key << " carries '" << named << "'";
 			++checked;
 		}
 
-		EXPECT_GT(checked, 0) << file << " carried no colours at all, so this checked nothing";
+		EXPECT_GT(checked, 0)
+			<< file << " carried no colours at all, so this checked nothing";
 	}
 }
 

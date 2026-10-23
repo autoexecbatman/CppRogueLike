@@ -27,7 +27,8 @@ TEST(ClassDisplayNameTest, NoTwoClassesShareAName)
 	for (const CreatureClass creatureClass : ALL_PLAYER_CLASS)
 	{
 		const std::string name{ class_display_name(creatureClass) };
-		EXPECT_TRUE(seen.insert(name).second) << "'" << name << "' names more than one class";
+		EXPECT_TRUE(seen.insert(name).second)
+			<< "'" << name << "' names more than one class";
 	}
 }
 
@@ -46,7 +47,8 @@ TEST(ClassDisplayNameTest, AMonsterIsNotOneOfTheChoices)
 {
 	for (const CreatureClass creatureClass : ALL_PLAYER_CLASS)
 	{
-		EXPECT_NE(creatureClass, CreatureClass::MONSTER) << "the class menu offers the monster's class";
+		EXPECT_NE(creatureClass, CreatureClass::MONSTER)
+			<< "the class menu offers the monster's class";
 	}
 }
 

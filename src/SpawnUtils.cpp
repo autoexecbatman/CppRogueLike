@@ -21,7 +21,9 @@ constexpr int MAP_EDGE_MARGIN = 2;
 // One pass over the room rather than a sampling loop, so an empty answer means the room
 // is full rather than that a search gave up. A room is at most 14 by 9, which bounds
 // this at 126 tests.
-std::vector<Vector2D> free_tiles_in(const DungeonRoom& room, const GameContext& ctx)
+std::vector<Vector2D> free_tiles_in(
+	const DungeonRoom& room,
+	const GameContext& ctx)
 {
 	assert(ctx.map && "SpawnUtils::free_tiles_in: called without a map");
 
@@ -46,7 +48,9 @@ std::vector<Vector2D> free_tiles_in(const DungeonRoom& room, const GameContext& 
 // Example:
 //   pick_one({ Vector2D{ 4, 4 } }, ctx); // -> (4,4)
 //   pick_one({}, ctx); // -> nullopt
-std::optional<Vector2D> pick_one(const std::vector<Vector2D>& candidates, GameContext& ctx)
+std::optional<Vector2D> pick_one(
+	const std::vector<Vector2D>& candidates,
+	GameContext& ctx)
 {
 	assert(ctx.dice && "SpawnUtils::pick_one: called without dice");
 
@@ -65,19 +69,30 @@ std::optional<Vector2D> pick_one(const std::vector<Vector2D>& candidates, GameCo
 // a full or flooded level answers nothing instead of the search running forever.
 std::optional<Vector2D> find_random_floor_tile(GameContext& ctx)
 {
-	assert(ctx.map && "SpawnUtils::find_random_floor_tile: called without a map");
-	assert(ctx.dice && "SpawnUtils::find_random_floor_tile: called without dice");
+	assert(
+		ctx.map && "SpawnUtils::find_random_floor_tile: called without a map");
+	assert(
+		ctx.dice && "SpawnUtils::find_random_floor_tile: called without dice");
 	// can_place_at asks get_actor, which walks the creature list without checking it.
-	assert(ctx.creatures && "SpawnUtils::find_random_floor_tile: called without creatures");
+	assert(
+		ctx.creatures &&
+		"SpawnUtils::find_random_floor_tile: called without creatures");
 
 	// Floor only, so a corridor or an open doorway is never a landing.
 	std::vector<Vector2D> free{};
-	for (int row = MAP_EDGE_MARGIN; row <= ctx.map->get_height() - MAP_EDGE_MARGIN; ++row)
+	for (
+		int row = MAP_EDGE_MARGIN;
+		row <= ctx.map->get_height() - MAP_EDGE_MARGIN;
+		++row)
 	{
-		for (int column = MAP_EDGE_MARGIN; column <= ctx.map->get_width() - MAP_EDGE_MARGIN; ++column)
+		for (
+			int column = MAP_EDGE_MARGIN;
+			column <= ctx.map->get_width() - MAP_EDGE_MARGIN;
+			++column)
 		{
 			const Vector2D here{ column, row };
-			if (ctx.map->get_tile_type(here) == TileType::FLOOR && ctx.map->can_place_at(here, ctx))
+			if (ctx.map->get_tile_type(here) == TileType::FLOOR &&
+				ctx.map->can_place_at(here, ctx))
 			{
 				free.push_back(here);
 			}
@@ -92,10 +107,16 @@ std::optional<Vector2D> find_random_floor_tile(GameContext& ctx)
 // The free tiles are enumerated and one is chosen, so nullopt is an answer rather than a
 // search giving up, and there is no draw budget to pick. What makes a tile usable is
 // Map::can_place_at, which is also what excludes water.
-std::optional<Vector2D> find_random_room_position(const DungeonRoom& room, GameContext& ctx)
+std::optional<Vector2D> find_random_room_position(
+	const DungeonRoom& room,
+	GameContext& ctx)
 {
-	assert(ctx.map && "SpawnUtils::find_random_room_position: called without a map");
-	assert(ctx.dice && "SpawnUtils::find_random_room_position: called without dice");
+	assert(
+		ctx.map &&
+		"SpawnUtils::find_random_room_position: called without a map");
+	assert(
+		ctx.dice &&
+		"SpawnUtils::find_random_room_position: called without dice");
 
 	return pick_one(free_tiles_in(room, ctx), ctx);
 }

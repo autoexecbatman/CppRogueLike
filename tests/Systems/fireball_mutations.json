@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\tconst DamageResolver::ResistedDamage dealt = saved ? reduced.at(reduced.hit_points() / 2) : reduced;",
-      "mutated": "\tconst DamageResolver::ResistedDamage dealt = reduced;",
+      "original": "\tconst DamageResolver::ResistedDamage dealt =\n\t\tsaved ? reduced.at(reduced.hit_points() / 2) : reduced;",
+      "mutated": "\tconst DamageResolver::ResistedDamage dealt =reduced;",
       "catches": "a made save no longer halving the burn"
     },
     {
@@ -69,19 +69,19 @@
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "if (!player->is_dead() && player->get_tile_distance(center) <= static_cast<double>(radius))",
+      "original": "if (!player->is_dead() &&\n\t\tplayer->get_tile_distance(center) <= static_cast<double>(radius))",
       "mutated": "if (false)",
       "catches": "the burst passing over the player inside its radius"
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "if (!player->is_dead() && player->get_tile_distance(center) <= static_cast<double>(radius))",
-      "mutated": "if (!player->is_dead() && player->get_tile_distance(center) <= static_cast<double>(radius) + 1.0)",
+      "original": "if (!player->is_dead() &&\n\t\tplayer->get_tile_distance(center) <= static_cast<double>(radius))",
+      "mutated": "if (!player->is_dead() &&\n\t\tplayer->get_tile_distance(center) <= static_cast<double>(radius) + 1.0)",
       "catches": "the burst reaching the player one tile past its radius"
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "if (!player->is_dead() && player->get_tile_distance(center) <= static_cast<double>(radius))",
+      "original": "if (!player->is_dead() &&\n\t\tplayer->get_tile_distance(center) <= static_cast<double>(radius))",
       "mutated": "if (player->get_tile_distance(center) <= static_cast<double>(radius))",
       "catches": "the burst burning and counting a dead player"
     },

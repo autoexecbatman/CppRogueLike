@@ -15,19 +15,19 @@
   "mutations": [
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\t\tthrow std::runtime_error(\n\t\t\tstd::format(\"ItemRegistry::load -- cannot open '{}'\", resolved.string()));",
+      "original": "\t\tthrow std::runtime_error(\n\t\t\tstd::format(\n\t\t\t\t\"ItemRegistry::load -- cannot open '{}'\",\n\t\t\t\tresolved.string()));",
       "mutated": "\t\treturn;",
       "catches": "a missing items file loading nothing and saying nothing, as before"
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\t\tthrow std::runtime_error(\n\t\t\tstd::format(\"ItemRegistry::load_enhanced_rules -- cannot open '{}'\", resolved.string()));",
+      "original": "\t\tthrow std::runtime_error(\n\t\t\tstd::format(\n\t\t\t\t\"ItemRegistry::load_enhanced_rules -- cannot open '{}'\",\n\t\t\t\tresolved.string()));",
       "mutated": "\t\treturn;",
       "catches": "a missing rules file leaving no enhanced items and saying nothing"
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\tthrow std::runtime_error(std::format(\"ItemRegistry: unknown enhancement_category '{}'\", name));",
+      "original": "\tthrow std::runtime_error(\n\t\tstd::format(\"ItemRegistry: unknown enhancement_category '{}'\", name));",
       "mutated": "\treturn EnhancedItemCategory::ARMOR;",
       "catches": "the old ternary restored, so a typo becomes armour"
     },

@@ -99,7 +99,8 @@ protected:
 		map->set_tile(Vector2D{ DRY_COL, DRY_ROW }, TileType::FLOOR);
 
 		rooms.clear();
-		rooms.push_back(DungeonRoom{ ROOM_COL, ROOM_ROW, ROOM_WIDTH, ROOM_HEIGHT });
+		rooms.push_back(
+			DungeonRoom{ ROOM_COL, ROOM_ROW, ROOM_WIDTH, ROOM_HEIGHT });
 	}
 
 	// Where the amulet ended up, read back off the floor rather than off the call.
@@ -107,7 +108,8 @@ protected:
 	{
 		for (const auto& item : mock.inventory.items)
 		{
-			if (item && item->actorData.name.find("Amulet") != std::string::npos)
+			if (item &&
+				item->actorData.name.find("Amulet") != std::string::npos)
 			{
 				return item->position;
 			}
@@ -137,10 +139,14 @@ TEST_F(AmuletPlacementTest, TheAmuletIsNeverPlacedInWater)
 		map->place_amulet(ctx);
 
 		const Vector2D placed = amulet_position();
-		ASSERT_NE(placed.x, -1) << "attempt " << attempt << ": no amulet was placed at all";
+		ASSERT_NE(placed.x, -1)
+			<< "attempt " << attempt << ": no amulet was placed at all";
 		EXPECT_FALSE(map->is_water(placed))
-			<< "attempt " << attempt << ": the amulet is in water at (" << placed.x << "," << placed.y << ")";
-		EXPECT_EQ(placed.x, DRY_COL) << "attempt " << attempt << ": the only dry tile is the only legal one";
+			<< "attempt " << attempt << ": the amulet is in water at ("
+			<< placed.x << "," << placed.y << ")";
+		EXPECT_EQ(placed.x, DRY_COL)
+			<< "attempt " << attempt
+			<< ": the only dry tile is the only legal one";
 		EXPECT_EQ(placed.y, DRY_ROW);
 	}
 }
