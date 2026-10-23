@@ -22,7 +22,7 @@
     {
       "file": "src/AttackStrength.cpp",
       "original": "\t\t\tconst StrengthAttributes madeFor =\n\t\t\t\tdataManager.strength_for(rating, 0);",
-      "mutated": "\t\t\tconst StrengthAttributes madeFor =\n\t\t\t\tdataManager.strength_for(strength, exceptionalStrength);",
+      "mutated": "\t\t\tconst StrengthAttributes madeFor =\n\t\t\t\tdataManager.strength_for(attacker.get_strength(), attacker.get_exceptional_strength());",
       "catches": "a made bow giving the wielder's row rather than the row it is made for"
     },
     {

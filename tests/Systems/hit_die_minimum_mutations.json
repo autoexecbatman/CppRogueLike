@@ -28,7 +28,7 @@
     {
       "file": "src/LevelUpSystem.cpp",
       "original": "\t\t\t*ctx.dataManager) :\n\t\tLevelUpSystem::HitDieValue{\n\t\t\tprogression.flatGain,\n\t\t\t0,\n\t\t\tprogression.flatGain,\n\t\t};",
-      "mutated": "\t\t\t*ctx.dataManager) :\n\t\tLevelUpSystem::hit_die_value(progression.flatGain, owner.get_creature_class(), owner.get_constitution(), *ctx->dataManager);",
+      "mutated": "\t\t\t*ctx.dataManager) :\n\t\tLevelUpSystem::hit_die_value(progression.flatGain, owner.get_creature_class(), owner.get_constitution(), *ctx.dataManager);",
       "catches": "a flat gain raised and adjusted as though it were a rolled die"
     },
     {

@@ -33,8 +33,8 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": "\t\treturn !creature->is_dead() && creature->is_aware(currentTime);",
-      "mutated": "\t\treturn !creature->is_dead() && ctx.map->is_in_fov(creature->position);",
+      "original": "\tconst auto is_watching = watching_at(currentTime);",
+      "mutated": "\tconst auto is_watching = [&ctx](const std::unique_ptr<Creature>& creature)\n\t{\n\t\treturn !creature->is_dead() && creature->is_visible(ctx);\n\t};",
       "catches": "the old question - whether the thief can see it - back in place of the book's"
     },
     {
