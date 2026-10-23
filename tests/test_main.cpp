@@ -2,6 +2,8 @@
 
 #include <cstdio>
 
+#include "tests/mocks/FailedParts.h"
+
 #ifdef _MSC_VER
 #include <crtdbg.h>
 #endif
@@ -23,5 +25,20 @@ int main(int argc, char** argv)
 	setvbuf(stdout, nullptr, _IONBF, 0);
 
 	::testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
+	const int runResult = RUN_ALL_TESTS();
+
+	// A death-test child that ends as its statement means never returns here,
+	// so a failed return is a crash or a check failed before the statement.
+	if (!GTEST_FLAG_GET(internal_run_death_test).empty() && runResult != 0)
+	{
+		std::fprintf(
+			stderr,
+			"the death-test child returned from RUN_ALL_TESTS with %d: it "
+			"never reached its exit\n",
+			runResult);
+		write_failed_parts_of_the_run();
+		// The parent reads a pipe, so nothing written may stay buffered.
+		std::fflush(stderr);
+	}
+	return runResult;
 }

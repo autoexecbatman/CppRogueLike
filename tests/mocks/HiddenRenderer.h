@@ -40,7 +40,9 @@
 //
 // A failing code shows the child's stderr in the parent's failure: an
 // exit_unless message, an assert's text, or a GoogleTest expectation made in
-// the child, which finish_the_child writes there.
+// the child, which finish_the_child writes there. A child that crashes, or
+// fails a check before its call, never reaches finish_the_child; test_main
+// writes what that child recorded instead.
 //
 // An assertion probe opens a renderer in a first child with
 // open_and_close_hidden_renderer to learn whether it can, and only then expects
@@ -62,6 +64,7 @@
 
 #include "src/Paths.h"
 #include "src/Renderer.h"
+#include "tests/mocks/FailedParts.h"
 
 // What a child reports. Distinct from 0 and 1, which a child's test runner
 // returns, and from 3, which an abort gives; so PASSED comes only from
@@ -149,26 +152,9 @@ inline void exit_unless(bool holds, std::string_view what)
 	const ::testing::TestInfo* test =
 		::testing::UnitTest::GetInstance()->current_test_info();
 	assert(test != nullptr && "finish_the_child called outside a test");
-	const ::testing::TestResult& result = *test->result();
-	bool anyFailed = false;
-	for (int partIndex = 0; partIndex < result.total_part_count(); ++partIndex)
-	{
-		const ::testing::TestPartResult& part =
-			result.GetTestPartResult(partIndex);
-		if (part.failed())
-		{
-			// file_name() is null for a part recorded without a location.
-			std::fprintf(
-				stderr,
-				"%s:%d: %s\n",
-				part.file_name() != nullptr ? part.file_name() : "(no file)",
-				part.line_number(),
-				part.message());
-			anyFailed = true;
-		}
-	}
+	const int failedParts = write_failed_parts(*test->result());
 	std::fflush(stderr);
-	if (anyFailed)
+	if (failedParts > 0)
 	{
 		std::_Exit(HIDDEN_RENDERER_EXPECTATION_FAILED);
 	}

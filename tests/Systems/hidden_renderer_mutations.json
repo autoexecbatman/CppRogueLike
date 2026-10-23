@@ -21,12 +21,6 @@
         },
         {
             "file": "tests/mocks/HiddenRenderer.h",
-            "original": "inline constexpr int HIDDEN_RENDERER_PASSED = 44;",
-            "mutated": "inline constexpr int HIDDEN_RENDERER_PASSED = 1;",
-            "catches": "a pass that a child whose re-run failed a check also gives"
-        },
-        {
-            "file": "tests/mocks/HiddenRenderer.h",
             "original": "\tEXPECT_NE(childExitCode, 0) << CHILD_NEVER_RAN_ITS_BODY_REASON;\n",
             "mutated": "",
             "catches": "a child that never ran its body accepted wherever the caller only checks for a missing driver"
@@ -57,14 +51,14 @@
         },
         {
             "file": "tests/mocks/HiddenRenderer.h",
-            "original": "\tif (anyFailed)\n\t{\n\t\tstd::_Exit(HIDDEN_RENDERER_EXPECTATION_FAILED);\n\t}\n\tstd::_Exit(HIDDEN_RENDERER_PASSED);",
+            "original": "\tif (failedParts > 0)\n\t{\n\t\tstd::_Exit(HIDDEN_RENDERER_EXPECTATION_FAILED);\n\t}\n\tstd::_Exit(HIDDEN_RENDERER_PASSED);",
             "mutated": "\tstd::_Exit(HIDDEN_RENDERER_PASSED);",
             "catches": "a child whose own expectation failed reported as a pass"
         },
         {
-            "file": "tests/mocks/HiddenRenderer.h",
-            "original": "\t\t\t\tpart.message());",
-            "mutated": "\t\t\t\t\"\");",
+            "file": "tests/mocks/FailedParts.h",
+            "original": "\t\t\tpart.message());",
+            "mutated": "\t\t\t\"\");",
             "catches": "a child's failed expectation reported without its text"
         },
         {
@@ -72,6 +66,30 @@
             "original": "\t\t\tstderr,\n\t\t\t\"child check failed: %.*s\\n\",",
             "mutated": "\t\t\tstdout,\n\t\t\t\"child check failed: %.*s\\n\",",
             "catches": "an exit_unless message written where the parent's failure does not carry it"
+        },
+        {
+            "file": "tests/test_main.cpp",
+            "original": "\t\twrite_failed_parts_of_the_run();",
+            "mutated": "",
+            "catches": "a child that crashed or failed before its call fails with only the never-reached line"
+        },
+        {
+            "file": "tests/test_main.cpp",
+            "original": "\tif (!GTEST_FLAG_GET(internal_run_death_test).empty() && runResult != 0)",
+            "mutated": "\tif (!GTEST_FLAG_GET(internal_run_death_test).empty() && runResult == 0)",
+            "catches": "a child that crashed or failed before its call fails with no text"
+        },
+        {
+            "file": "tests/test_main.cpp",
+            "original": "\tif (!GTEST_FLAG_GET(internal_run_death_test).empty() && runResult != 0)",
+            "mutated": "\tif (GTEST_FLAG_GET(internal_run_death_test).empty() && runResult != 0)",
+            "catches": "the child-only line written by a failing plain run, and never by a child"
+        },
+        {
+            "file": "tests/test_main.cpp",
+            "original": "\tif (!GTEST_FLAG_GET(internal_run_death_test).empty() && runResult != 0)",
+            "mutated": "\tif (runResult != 0)",
+            "catches": "the child-only line written by a failing plain run as well as by a child"
         }
     ]
 }
