@@ -42,6 +42,7 @@ private:
 	enum class FieldId : int
 	{
 		NAME = 0,
+		APPEARANCE,
 		CATEGORY,
 		ITEM_CLASS,
 		PICKABLE_TYPE,
@@ -154,6 +155,12 @@ public:
 	// number's member and bounds.
 	static constexpr std::array<Descriptor, FIELD_COUNT> FIELDS{ {
 		Descriptor{ FieldId::NAME, FieldKind::TEXT, "Name", std::nullopt },
+		Descriptor{
+			FieldId::APPEARANCE,
+			FieldKind::TEXT,
+			"Appearance",
+			std::nullopt,
+		},
 		Descriptor{
 			FieldId::CATEGORY,
 			FieldKind::TEXT,

@@ -1,0 +1,77 @@
+{
+    "cwd": "E:/repo/C++RogueLike",
+    "test_command": [
+        "powershell",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tests/run_suite.ps1",
+        "-Configuration",
+        "Debug",
+        "-Filter",
+        "--gtest_filter=ItemAppearanceTest.*:ItemRegistryTest.*:ItemNameMessageTest.*:EditorFieldTest.*:EquipmentUseTest.*"
+    ],
+    "mutations": [
+        {
+            "file": "src/Item.cpp",
+            "original": "\t\tis_type_identified() ? actorData.name : appearance;",
+            "mutated": "\t\tactorData.name;",
+            "catches": "an unidentified item named by its true name"
+        },
+        {
+            "file": "src/Item.cpp",
+            "original": "\tActor(position, data),\n\tappearance(data.name)",
+            "mutated": "\tActor(position, data),\n\tappearance()",
+            "catches": "an item built without a record called nothing"
+        },
+        {
+            "file": "src/Item.cpp",
+            "original": "\tappearance = source.at(\"appearance\").get<std::string>();\n",
+            "mutated": "",
+            "catches": "a loaded item that loses its appearance and so its disguise"
+        },
+        {
+            "file": "src/Item.cpp",
+            "original": "\toutput[\"appearance\"] = appearance;\n",
+            "mutated": "",
+            "catches": "a saved item written without its appearance, so its load is refused"
+        },
+        {
+            "file": "src/ItemCreator.cpp",
+            "original": "\titem->itemKey = std::string{ key };\n\titem->appearance = params.appearance;",
+            "mutated": "\titem->itemKey = std::string{ key };",
+            "catches": "an item made from the data that ignores its record's appearance"
+        },
+        {
+            "file": "src/ItemRegistry.cpp",
+            "original": "\trecord[\"appearance\"] = std::string{ params.appearance };\n",
+            "mutated": "",
+            "catches": "the editor's save dropping appearance, so the next load refuses the file"
+        },
+        {
+            "file": "src/ItemRegistry.cpp",
+            "original": "\tparams.appearance =\n\t\trequired_field(record, key, \"appearance\").get<std::string>();\n",
+            "mutated": "",
+            "catches": "a record's appearance never read"
+        },
+        {
+            "file": "src/ItemRegistry.cpp",
+            "original": "\tparams.appearance = name;\n",
+            "mutated": "",
+            "catches": "a custom item from the editor with no appearance"
+        },
+        {
+            "file": "src/ArmorClass.cpp",
+            "original": "\t\tbreakdown.ring = { bestRing->get_name(), bestRingBonus };",
+            "mutated": "\t\tbreakdown.ring = { bestRing->actorData.name, bestRingBonus };",
+            "catches": "the armour class breakdown naming a worn ring by its true name"
+        },
+        {
+            "file": "src/Player.cpp",
+            "original": "\titem->identify_all();\n\treturn item;\n",
+            "mutated": "\treturn item;\n",
+            "catches": "a starting kit's scroll shown by its appearance to the character who packed it"
+        }
+    ]
+}

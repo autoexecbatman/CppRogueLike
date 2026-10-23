@@ -32,6 +32,7 @@
 #include <optional>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include "Actor.h"
@@ -171,6 +172,22 @@ auto watching_at(int currentTime)
 		assert(creature && "attempt_hide: creatures list holds a null entry");
 		return !creature->is_dead() && creature->is_aware(currentTime);
 	};
+}
+
+// An item for a class's starting kit, identified: a character knows what they
+// packed, so its true name shows from the start.
+//
+// Example:
+//   known_kit_item("scroll_fireball", position, ctx)->get_name();
+//   // -> "scroll of fireball", where one found later shows its appearance
+std::unique_ptr<Item> known_kit_item(
+	std::string_view key,
+	Vector2D position,
+	GameContext& ctx)
+{
+	auto item = ItemCreator::create(key, position, ctx);
+	item->identify_all();
+	return item;
 }
 
 } // namespace
@@ -398,32 +415,32 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		int startingGold = goldRoll * 10;
 		set_gold(startingGold);
 		equip_item(
-			ItemCreator::create("plate_mail", position, ctx),
+			known_kit_item("plate_mail", position, ctx),
 			EquipmentSlot::BODY,
 			ctx);
 		equip_item(
-			ItemCreator::create("long_sword", position, ctx),
+			known_kit_item("long_sword", position, ctx),
 			EquipmentSlot::RIGHT_HAND,
 			ctx);
 		equip_item(
-			ItemCreator::create("medium_shield", position, ctx),
+			known_kit_item("medium_shield", position, ctx),
 			EquipmentSlot::LEFT_HAND,
 			ctx);
 		equip_item(
-			ItemCreator::create("long_bow", position, ctx),
+			known_kit_item("long_bow", position, ctx),
 			EquipmentSlot::MISSILE_WEAPON,
 			ctx);
 		[[maybe_unused]] const auto grantFireballResult =
 			InventoryOperations::add_item(
 				inventoryData,
-				ItemCreator::create("scroll_fireball", position, ctx));
+				known_kit_item("scroll_fireball", position, ctx));
 		assert(
 			grantFireballResult.has_value() &&
 			"Player::equip_class_starting_gear: a fighter's fireball scroll did not fit the pack");
 		[[maybe_unused]] const auto grantIdentifyScrollResult =
 			InventoryOperations::add_item(
 				inventoryData,
-				ItemCreator::create("identify_scroll", position, ctx));
+				known_kit_item("identify_scroll", position, ctx));
 		assert(
 			grantIdentifyScrollResult.has_value() &&
 			"Player::equip_class_starting_gear: a fighter's identify scroll did not fit the pack");
@@ -439,17 +456,17 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		int startingGold = (ctx.dice->d6() + ctx.dice->d6()) * 10;
 		set_gold(startingGold);
 		equip_item(
-			ItemCreator::create("leather_armor", position, ctx),
+			known_kit_item("leather_armor", position, ctx),
 			EquipmentSlot::BODY,
 			ctx);
 		equip_item(
-			ItemCreator::create("dagger", position, ctx),
+			known_kit_item("dagger", position, ctx),
 			EquipmentSlot::RIGHT_HAND,
 			ctx);
 		[[maybe_unused]] const auto grantIdentifyScrollResult =
 			InventoryOperations::add_item(
 				inventoryData,
-				ItemCreator::create("identify_scroll", position, ctx));
+				known_kit_item("identify_scroll", position, ctx));
 		assert(
 			grantIdentifyScrollResult.has_value() &&
 			"Player::equip_class_starting_gear: a rogue's identify scroll did not fit the pack");
@@ -466,35 +483,35 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 			(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()) * 10;
 		set_gold(startingGold);
 		equip_item(
-			ItemCreator::create("chain_mail", position, ctx),
+			known_kit_item("chain_mail", position, ctx),
 			EquipmentSlot::BODY,
 			ctx);
 		equip_item(
-			ItemCreator::create("mace", position, ctx),
+			known_kit_item("mace", position, ctx),
 			EquipmentSlot::RIGHT_HAND,
 			ctx);
 		equip_item(
-			ItemCreator::create("medium_shield", position, ctx),
+			known_kit_item("medium_shield", position, ctx),
 			EquipmentSlot::LEFT_HAND,
 			ctx);
 		[[maybe_unused]] const auto grantHealthPotionResult =
 			InventoryOperations::add_item(
 				inventoryData,
-				ItemCreator::create("health_potion", position, ctx));
+				known_kit_item("health_potion", position, ctx));
 		assert(
 			grantHealthPotionResult.has_value() &&
 			"Player::equip_class_starting_gear: a cleric's health potion did not fit the pack");
 		[[maybe_unused]] const auto grantHoldPersonResult =
 			InventoryOperations::add_item(
 				inventoryData,
-				ItemCreator::create("scroll_hold_person", position, ctx));
+				known_kit_item("scroll_hold_person", position, ctx));
 		assert(
 			grantHoldPersonResult.has_value() &&
 			"Player::equip_class_starting_gear: a cleric's hold person scroll did not fit the pack");
 		[[maybe_unused]] const auto grantIdentifyScrollResult =
 			InventoryOperations::add_item(
 				inventoryData,
-				ItemCreator::create("identify_scroll", position, ctx));
+				known_kit_item("identify_scroll", position, ctx));
 		assert(
 			grantIdentifyScrollResult.has_value() &&
 			"Player::equip_class_starting_gear: a cleric's identify scroll did not fit the pack");
@@ -511,34 +528,34 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		int startingGold = (ctx.dice->d4() + ctx.dice->d4()) * 10;
 		set_gold(startingGold);
 		equip_item(
-			ItemCreator::create("staff", position, ctx),
+			known_kit_item("staff", position, ctx),
 			EquipmentSlot::RIGHT_HAND,
 			ctx);
 		[[maybe_unused]] const auto grantFireballResult =
 			InventoryOperations::add_item(
 				inventoryData,
-				ItemCreator::create("scroll_fireball", position, ctx));
+				known_kit_item("scroll_fireball", position, ctx));
 		assert(
 			grantFireballResult.has_value() &&
 			"Player::equip_class_starting_gear: a wizard's fireball scroll did not fit the pack");
 		[[maybe_unused]] const auto grantLightningResult =
 			InventoryOperations::add_item(
 				inventoryData,
-				ItemCreator::create("scroll_lightning", position, ctx));
+				known_kit_item("scroll_lightning", position, ctx));
 		assert(
 			grantLightningResult.has_value() &&
 			"Player::equip_class_starting_gear: a wizard's lightning scroll did not fit the pack");
 		[[maybe_unused]] const auto grantSleepResult =
 			InventoryOperations::add_item(
 				inventoryData,
-				ItemCreator::create("scroll_sleep", position, ctx));
+				known_kit_item("scroll_sleep", position, ctx));
 		assert(
 			grantSleepResult.has_value() &&
 			"Player::equip_class_starting_gear: a wizard's sleep scroll did not fit the pack");
 		[[maybe_unused]] const auto grantIdentifyScrollResult =
 			InventoryOperations::add_item(
 				inventoryData,
-				ItemCreator::create("identify_scroll", position, ctx));
+				known_kit_item("identify_scroll", position, ctx));
 		assert(
 			grantIdentifyScrollResult.has_value() &&
 			"Player::equip_class_starting_gear: a wizard's identify scroll did not fit the pack");

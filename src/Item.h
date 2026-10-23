@@ -22,7 +22,8 @@ public:
 	void load(const json& source) override;
 	void save(json& output) override;
 
-	// The name the player sees; identified parts by name, unknown ones as "?".
+	// The name the player sees: its appearance until its type is identified;
+	// identified enhancement parts by name, unknown ones as "?".
 	[[nodiscard]] std::string get_name() const;
 
 	const std::string& get_base_name() const noexcept { return actorData.name; }
@@ -83,6 +84,8 @@ public:
 	void set_value(int newValue) noexcept { baseValue = newValue; }
 
 	std::string itemKey; // JSON registry key
+	// What the item is called until its type is identified.
+	std::string appearance{};
 	ItemClass itemClass{ ItemClass::UNKNOWN }; // Item category classification
 	ItemEnhancement enhancement; // Enhancement data
 	ItemIdentificationStatus identification; // Identification tracking

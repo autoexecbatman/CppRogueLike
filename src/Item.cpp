@@ -146,17 +146,20 @@ std::optional<BlessingStatus> blessing_status_from(int saved)
 }
 } // namespace
 
+// An item built here looks like what it is; ItemCreator gives one made from
+// the data its record's appearance.
 Item::Item(Vector2D position, ActorData data) :
-	Actor(position, data) {
-		// ItemClass should be set by ItemCreator, not by fragile string
-		// matching
-	};
+	Actor(position, data),
+	appearance(data.name)
+{
+}
 
 void Item::load(const json& source)
 {
 	Actor::load(source); // Call base class load
 	baseValue = source.at("baseValue").get<int>();
 	itemKey = source.at("itemKey").get<std::string>();
+	appearance = source.at("appearance").get<std::string>();
 	itemClass = saved_enum_field(
 		source,
 		"Item::load",
@@ -226,6 +229,7 @@ void Item::save(json& output)
 	Actor::save(output); // Call base class save
 	output["baseValue"] = baseValue;
 	output["itemKey"] = itemKey;
+	output["appearance"] = appearance;
 	output["itemClass"] = static_cast<int>(itemClass);
 
 	// Save enhancement data
@@ -267,20 +271,24 @@ void Item::save(json& output)
 	}
 }
 
-// The name the player sees: identified enhancement parts by name, unknown ones
-// as "?", and a known blessing or curse appended. Built per call and returned by
+// The name the player sees: its appearance until its type is identified and
+// its true name after, identified enhancement parts by name, unknown ones as
+// "?", and a known blessing or curse appended. Built per call and returned by
 // value, so two names held at once are two strings.
 //
-// Example, a long sword with the SHARP prefix:
-//   sword.get_name();   // -> "? long sword", enhancement not yet identified
-//   sword.identify_enhancement();
-//   sword.get_name();   // -> "Sharp long sword"
-//   // cursed, with its blessing identified -> "Sharp long sword (cursed)"
+// Example:
+//   helm.get_name();    // -> "helm", a helm of brilliance not yet identified
+//   helm.identify_all();
+//   helm.get_name();    // -> "helm of brilliance"
+//   // a long sword with the SHARP prefix -> "? long sword", then once its
+//   // enhancement is identified "Sharp long sword", cursed "(cursed)" added
 std::string Item::get_name() const
 {
+	const std::string& baseName =
+		is_type_identified() ? actorData.name : appearance;
 	if (!is_enhanced())
 	{
-		return actorData.name;
+		return baseName;
 	}
 
 	std::string displayName{};
@@ -300,8 +308,7 @@ std::string Item::get_name() const
 		}
 	}
 
-	// Base name
-	displayName += actorData.name;
+	displayName += baseName;
 
 	// Build suffix
 	if (identification.identifiedEnhancement &&

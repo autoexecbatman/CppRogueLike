@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <string_view>
 
 class Creature;
 struct GameContext;
@@ -10,7 +9,7 @@ struct GameContext;
 // slot contributed nothing, so a reader can skip it without a second flag.
 struct ArmorClassSource
 {
-	std::string_view name{};
+	std::string name{};
 	int bonus{ 0 };
 };
 

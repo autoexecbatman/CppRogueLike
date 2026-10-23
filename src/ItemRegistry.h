@@ -43,6 +43,9 @@ struct ItemParams
 	// Display & Classification
 	// The name every menu shows.
 	std::string name{};
+	// What it is called until its type is identified; equal to name for an item
+	// that does not disguise itself.
+	std::string appearance{};
 	// The colour pair it is drawn in.
 	ColorPairId color{ ColorPairId::WHITE_BLACK };
 	// What kind of item it is, for identification and a mimic's disguise.
@@ -209,7 +212,7 @@ public:
 		std::string category);
 
 	// Adds a user-created item under a key made from its name, numbered past any key
-	// already taken, and returns that key.
+	// already taken, and returns that key. Its appearance starts as its name.
 	[[nodiscard]] std::string add_custom(
 		std::string name,
 		std::string category,

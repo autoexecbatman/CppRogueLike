@@ -62,6 +62,7 @@ protected:
 		enhancement.prefix = prefix;
 		enhancement.blessing = blessing;
 		item->apply_enhancement(enhancement);
+		item->identify_type();
 		item->identify_enhancement();
 		item->identify_buc();
 		return item;

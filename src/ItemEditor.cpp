@@ -943,6 +943,10 @@ std::string ItemEditor::field_value(FieldId field) const
 	{
 		return working.name;
 	}
+	case FieldId::APPEARANCE:
+	{
+		return working.appearance;
+	}
 	case FieldId::CATEGORY:
 	{
 		return working.category;
@@ -1207,6 +1211,11 @@ void ItemEditor::field_set_string(FieldId field, std::string newValue)
 	case FieldId::NAME:
 	{
 		working.name = std::move(newValue);
+		break;
+	}
+	case FieldId::APPEARANCE:
+	{
+		working.appearance = std::move(newValue);
 		break;
 	}
 	case FieldId::CATEGORY:

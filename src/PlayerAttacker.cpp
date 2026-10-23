@@ -35,7 +35,7 @@ AttackResult PlayerAttacker::attack(
 			owner.get_equipped_item(EquipmentSlot::RIGHT_HAND);
 		const DamageInfo mainDamage = weapon_damage(mainWeapon);
 		const std::string mainName =
-			mainWeapon ? mainWeapon->actorData.name : "unarmed";
+			mainWeapon ? mainWeapon->get_name() : "unarmed";
 
 		const AttackResult mainHand = perform_single_attack(
 			owner,
@@ -68,7 +68,7 @@ AttackResult PlayerAttacker::attack(
 	}
 
 	const Item* weapon = owner.get_equipped_item(weapon_slot_for(kind));
-	const std::string weaponName = weapon ? weapon->actorData.name : "unarmed";
+	const std::string weaponName = weapon ? weapon->get_name() : "unarmed";
 	return perform_single_attack(
 		owner,
 		target,

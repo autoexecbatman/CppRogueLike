@@ -31,7 +31,7 @@ AttackResult MonsterAttacker::attack(
 			target,
 			weapon_damage(missileWeapon),
 			weapon_hit_modifier(missileWeapon),
-			missileWeapon->actorData.name,
+			missileWeapon->get_name(),
 			kind,
 			ctx);
 	}

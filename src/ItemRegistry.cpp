@@ -78,6 +78,7 @@ nlohmann::json encode_item(const ItemParams& params)
 {
 	nlohmann::json record;
 	record["name"] = std::string{ params.name };
+	record["appearance"] = std::string{ params.appearance };
 	record["category"] = std::string{ params.category };
 	record["color"] = color_pair_name(params.color);
 	record["itemClass"] = encode_item_class(params.itemClass);
@@ -152,6 +153,8 @@ ItemParams parse_item(const std::string& key, const nlohmann::json& record)
 {
 	ItemParams params;
 	params.name = required_field(record, key, "name").get<std::string>();
+	params.appearance =
+		required_field(record, key, "appearance").get<std::string>();
 	params.category =
 		required_field(record, key, "category").get<std::string>();
 	params.color = parse_color_pair(
@@ -345,6 +348,8 @@ std::string ItemRegistry::add_custom(
 		}
 	}
 
+	// A new item looks like itself until its appearance is authored.
+	params.appearance = name;
 	params.name = std::move(name);
 	params.category = std::move(category);
 	entries[key] = std::move(params);

@@ -27,7 +27,7 @@
     },
     {
       "file": "src/MonsterAttacker.cpp",
-      "original": "weapon_hit_modifier(missileWeapon),\n\t\t\tmissileWeapon->actorData.name,\n\t\t\tkind,\n\t\t\tctx);",
+      "original": "weapon_hit_modifier(missileWeapon),\n\t\t\tmissileWeapon->get_name(),\n\t\t\tkind,\n\t\t\tctx);",
       "mutated": "weapon_hit_modifier(missileWeapon),owner.get_attack_name(),\n\t\t\tkind,\n\t\t\tctx);",
       "catches": "a monster's shot named for its fist"
     },

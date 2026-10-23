@@ -140,7 +140,7 @@ AttackResult Attacker::perform_single_attack(
 			" is not strong enough to draw the ");
 		ctx.messageSystem->append_message_part(
 			ColorPairId::WHITE_BLACK,
-			missileWeapon->actorData.name);
+			missileWeapon->get_name());
 		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ".");
 		ctx.messageSystem->finalize_message();
 		return AttackResult::PREVENTED;

@@ -179,6 +179,7 @@ std::unique_ptr<Item> make_item(
 		ActorData{ tile, std::string{ params.name }, params.color });
 	item->behavior = create_behavior(params);
 	item->itemKey = std::string{ key };
+	item->appearance = params.appearance;
 	item->itemClass = params.itemClass;
 	item->set_value(params.value);
 	// What it costs to carry, which is a different question from how often it appears.
@@ -230,6 +231,7 @@ std::unique_ptr<Item> ItemCreator::create_with_gold_amount(
 		ActorData{ tile, std::string{ params.name }, params.color });
 	item->behavior = Gold{ goldAmount };
 	item->itemKey = "gold_coin";
+	item->appearance = params.appearance;
 	item->itemClass = params.itemClass;
 	item->set_value(goldAmount);
 	// A pile weighs what its coins weigh, by the purse's own rule, so a hoard reads the same on the floor as in hand.

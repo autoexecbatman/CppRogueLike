@@ -83,7 +83,7 @@ int ArmorClass::without_dexterity_bonus(
 		{
 			totalBonus += armorBonus;
 
-			breakdown.armor = { equippedArmor->actorData.name, armorBonus };
+			breakdown.armor = { equippedArmor->get_name(), armorBonus };
 		}
 	}
 
@@ -104,7 +104,7 @@ int ArmorClass::without_dexterity_bonus(
 		{
 			totalBonus += shieldBonus;
 
-			breakdown.shield = { equippedShield->actorData.name, shieldBonus };
+			breakdown.shield = { equippedShield->get_name(), shieldBonus };
 		}
 	}
 
@@ -133,7 +133,7 @@ int ArmorClass::without_dexterity_bonus(
 	{
 		totalBonus += bestRingBonus;
 
-		breakdown.ring = { bestRing->actorData.name, bestRingBonus };
+		breakdown.ring = { bestRing->get_name(), bestRingBonus };
 	}
 
 	if (Item* equippedHelm = owner.get_equipped_item(EquipmentSlot::HEAD))
@@ -145,7 +145,7 @@ int ArmorClass::without_dexterity_bonus(
 		{
 			totalBonus += helmBonus;
 
-			breakdown.helm = { equippedHelm->actorData.name, helmBonus };
+			breakdown.helm = { equippedHelm->get_name(), helmBonus };
 		}
 	}
 
