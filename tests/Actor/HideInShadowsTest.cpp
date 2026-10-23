@@ -126,11 +126,25 @@ protected:
 		return count;
 	}
 
-	// One hide with the secret roll forced, which must reach the roll.
-	void hide_with_roll(int roll)
+	// One hide with the secret roll forced, answering what attempt_hide said.
+	// The caller asserts ATTEMPTED, so a refused try stops the test before the
+	// unspent roll can reach some later die.
+	[[nodiscard]] Player::HideAttempt hide_with_roll(int roll)
 	{
 		mock.dice.set_next_roll(roll);
-		ASSERT_EQ(thief->attempt_hide(ctx), Player::HideAttempt::ATTEMPTED);
+		return thief->attempt_hide(ctx);
+	}
+
+	// A blow at a creature in reach that no blow can kill, so what the strike
+	// does to the hide cannot depend on whether the swing lands.
+	void strike_a_sturdy_target()
+	{
+		Creature& target = add_monster_at(Vector2D{ 3, 5 });
+		target.healthPool = std::make_unique<HealthPool>(1000);
+		target.armorClass = std::make_unique<ArmorClass>(10);
+		// A test creature's Strength starts at zero, which no swing accepts.
+		thief->set_strength(10);
+		thief->attacker->attack(target, AttackKind::MELEE, ctx);
 	}
 
 	MockGameContext mock{};
@@ -291,7 +305,7 @@ TEST_F(HideInShadowsTest, AThiefAlreadyInTheShadowsDoesNotTryAgain)
 TEST_F(HideInShadowsTest, AStepOffTheHidingSquareEndsTheHide)
 {
 	buy_hide_in_shadows(40);
-	hide_with_roll(1);
+	ASSERT_EQ(hide_with_roll(1), Player::HideAttempt::ATTEMPTED);
 	ASSERT_TRUE(thief->is_invisible());
 
 	thief->position = Vector2D{ 3, 5 };
@@ -306,7 +320,7 @@ TEST_F(HideInShadowsTest, AStepOffTheHidingSquareEndsTheHide)
 TEST_F(HideInShadowsTest, AThiefWhoStaysPutStaysHidden)
 {
 	buy_hide_in_shadows(40);
-	hide_with_roll(1);
+	ASSERT_EQ(hide_with_roll(1), Player::HideAttempt::ATTEMPTED);
 
 	thief->leave_shadows_if_moved(ctx);
 
@@ -320,7 +334,7 @@ TEST_F(HideInShadowsTest, AThiefWhoStaysPutStaysHidden)
 TEST_F(HideInShadowsTest, AHideOutlastsTheOldInventedDuration)
 {
 	buy_hide_in_shadows(40);
-	hide_with_roll(1);
+	ASSERT_EQ(hide_with_roll(1), Player::HideAttempt::ATTEMPTED);
 
 	const int oldCapRounds = 10 + thief->get_creature_level() * 2;
 	ctx.buffSystem->update_creature_buffs(
@@ -337,7 +351,7 @@ TEST_F(HideInShadowsTest, SpellInvisibilitySurvivesTheStepThatEndsAHide)
 {
 	buy_hide_in_shadows(40);
 	// The hide comes first, because an invisible thief's try is refused as already hidden.
-	hide_with_roll(100);
+	ASSERT_EQ(hide_with_roll(100), Player::HideAttempt::ATTEMPTED);
 	ctx.buffSystem->add_buff(
 		*thief,
 		BuffType::INVISIBILITY,
@@ -358,7 +372,7 @@ TEST_F(HideInShadowsTest, SpellInvisibilitySurvivesTheStepThatEndsAHide)
 TEST_F(HideInShadowsTest, AFailedHideIsAlreadyHiddenToo)
 {
 	buy_hide_in_shadows(40);
-	hide_with_roll(100);
+	ASSERT_EQ(hide_with_roll(100), Player::HideAttempt::ATTEMPTED);
 	ASSERT_FALSE(thief->is_invisible()) << "the roll failed";
 
 	// A certain success is queued and must not be reached.
@@ -366,57 +380,67 @@ TEST_F(HideInShadowsTest, AFailedHideIsAlreadyHiddenToo)
 	EXPECT_EQ(thief->attempt_hide(ctx), Player::HideAttempt::ALREADY_HIDDEN);
 }
 
-// Stepping out says one line, and the same line whichever way the secret roll went.
-TEST_F(HideInShadowsTest, AStepSaysTheSameWhicheverWayTheRollWent)
+// Stepping out says one line, the same whichever way the secret roll went. Each
+// roll has a test of its own, so neither depends on the other's thief.
+TEST_F(HideInShadowsTest, AStepFromAWorkingHideSaysOneLine)
 {
 	buy_hide_in_shadows(40);
-	const auto lines_on_stepping_out_after = [this](int roll)
-	{
-		thief->position = Vector2D{ 2, 5 };
-		hide_with_roll(roll);
-		const size_t before = times_said("You leave the shadows.");
-		thief->position = Vector2D{ 3, 5 };
-		thief->leave_shadows_if_moved(ctx);
-		return times_said("You leave the shadows.") - before;
-	};
+	ASSERT_EQ(hide_with_roll(1), Player::HideAttempt::ATTEMPTED);
 
-	EXPECT_EQ(lines_on_stepping_out_after(1), 1u) << "a hide that worked";
-	EXPECT_EQ(lines_on_stepping_out_after(100), 1u) << "a hide that did not";
+	thief->position = Vector2D{ 3, 5 };
+	thief->leave_shadows_if_moved(ctx);
+
+	EXPECT_EQ(times_said("You leave the shadows."), 1u);
 }
 
-// Striking from the shadows ends the hide and says so, again the same either way. The
-// spell's "Your invisibility fades" line would be printed only for a roll that worked.
-TEST_F(HideInShadowsTest, AnAttackSaysTheSameWhicheverWayTheRollWent)
+TEST_F(HideInShadowsTest, AStepFromAFailedHideSaysOneLine)
 {
 	buy_hide_in_shadows(40);
-	Creature& target = add_monster_at(Vector2D{ 3, 5 });
-	target.healthPool = std::make_unique<HealthPool>(1000);
-	target.armorClass = std::make_unique<ArmorClass>(10);
-	// A test creature's Strength starts at zero, which no swing accepts.
-	thief->set_strength(10);
+	ASSERT_EQ(hide_with_roll(100), Player::HideAttempt::ATTEMPTED);
 
-	const auto lines_on_attacking_after = [this, &target](int roll)
-	{
-		hide_with_roll(roll);
-		const size_t leftBefore = times_said("You leave the shadows.");
-		const size_t fadedBefore = times_said("Your invisibility fades");
-		thief->attacker->attack(target, AttackKind::MELEE, ctx);
-		EXPECT_FALSE(thief->is_in_shadows()) << "roll " << roll;
-		EXPECT_FALSE(thief->is_invisible()) << "roll " << roll;
-		EXPECT_EQ(times_said("Your invisibility fades"), fadedBefore)
-			<< "roll " << roll;
-		return times_said("You leave the shadows.") - leftBefore;
-	};
+	thief->position = Vector2D{ 3, 5 };
+	thief->leave_shadows_if_moved(ctx);
 
-	EXPECT_EQ(lines_on_attacking_after(1), 1u) << "a hide that worked";
-	EXPECT_EQ(lines_on_attacking_after(100), 1u) << "a hide that did not";
+	EXPECT_EQ(times_said("You leave the shadows."), 1u);
+}
+
+// Striking from the shadows ends the hide and says so, the same whichever way
+// the secret roll went, since the thief always thinks he is hidden. The
+// spell's "Your invisibility fades" line would be printed only for a roll
+// that worked.
+TEST_F(HideInShadowsTest, AStrikeFromAWorkingHideLeavesTheShadows)
+{
+	buy_hide_in_shadows(40);
+	ASSERT_EQ(hide_with_roll(1), Player::HideAttempt::ATTEMPTED);
+
+	strike_a_sturdy_target();
+
+	EXPECT_FALSE(thief->is_in_shadows());
+	EXPECT_FALSE(ctx.buffSystem->has_buff(*thief, BuffType::HIDDEN_IN_SHADOWS));
+	EXPECT_FALSE(thief->is_invisible());
+	EXPECT_EQ(times_said("You leave the shadows."), 1u);
+	EXPECT_EQ(times_said("Your invisibility fades"), 0u);
+}
+
+TEST_F(HideInShadowsTest, AStrikeFromAFailedHideLeavesTheShadows)
+{
+	buy_hide_in_shadows(40);
+	ASSERT_EQ(hide_with_roll(100), Player::HideAttempt::ATTEMPTED);
+
+	strike_a_sturdy_target();
+
+	EXPECT_FALSE(thief->is_in_shadows());
+	EXPECT_FALSE(ctx.buffSystem->has_buff(*thief, BuffType::HIDDEN_IN_SHADOWS));
+	EXPECT_FALSE(thief->is_invisible());
+	EXPECT_EQ(times_said("You leave the shadows."), 1u);
+	EXPECT_EQ(times_said("Your invisibility fades"), 0u);
 }
 
 // A saved hide is still a hide when the game is loaded, on the same square.
 TEST_F(HideInShadowsTest, AHideSurvivesASaveAndLoad)
 {
 	buy_hide_in_shadows(40);
-	hide_with_roll(1);
+	ASSERT_EQ(hide_with_roll(1), Player::HideAttempt::ATTEMPTED);
 
 	nlohmann::json record;
 	thief->save(record);
@@ -439,7 +463,7 @@ TEST_F(HideInShadowsTest, AThiefSavedInTheOpenLoadsInTheOpen)
 	nlohmann::json inTheOpen;
 	thief->save(inTheOpen);
 	buy_hide_in_shadows(40);
-	hide_with_roll(1);
+	ASSERT_EQ(hide_with_roll(1), Player::HideAttempt::ATTEMPTED);
 	nlohmann::json hidden;
 	thief->save(hidden);
 
