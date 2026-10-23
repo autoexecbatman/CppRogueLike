@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cassert>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -10,9 +11,43 @@
 #include "Map.h"
 #include "Persistent.h"
 #include "Renderer.h"
+#include "SavedEnum.h"
 #include "TileRefJson.h"
 #include "UniqueId.h"
 #include "Vector2D.h"
+
+namespace
+{
+// The ActorState a saved integer names, or nullopt for one no state has.
+// The switch has no default, so a state added without a case here is a compile
+// error (C4062, -Wswitch).
+//
+// Example:
+//   actor_state_from(10);    // -> ActorState::IS_SURPRISED
+//   actor_state_from(11);    // -> nullopt
+std::optional<ActorState> actor_state_from(int saved)
+{
+	const ActorState candidate = static_cast<ActorState>(saved);
+	switch (candidate)
+	{
+	case ActorState::BLOCKS:
+	case ActorState::FOV_ONLY:
+	case ActorState::CAN_SWIM:
+	case ActorState::CAN_FLY:
+	case ActorState::IS_INVISIBLE:
+	case ActorState::IS_SLEEPING:
+	case ActorState::IS_HELD:
+	case ActorState::IS_SILENCED:
+	case ActorState::IS_FLEEING:
+	case ActorState::CAN_WALK_WEBS:
+	case ActorState::IS_SURPRISED:
+	{
+		return candidate;
+	}
+	}
+	return std::nullopt;
+}
+} // namespace
 
 Actor::Actor(Vector2D position, ActorData data) :
 	position(position),
@@ -57,7 +92,12 @@ void Actor::load(const json& source)
 	// An actor with no states was saved with null here, which iterates as empty.
 	for (const auto& state : source.at("states"))
 	{
-		states.push_back(state);
+		states.push_back(saved_enum_value(
+			state,
+			"Actor::load",
+			"states",
+			"ActorState",
+			&actor_state_from));
 	}
 }
 

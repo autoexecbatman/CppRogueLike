@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/Creature.h"
 #include "src/CreatureClass.h"
@@ -544,6 +545,34 @@ TEST_F(EnumLoadRefusalTest, TheLastTileSheetStillLoads)
 	};
 
 	EXPECT_EQ(TileRefJson::parse_tile(record).sheet, TileSheet::SHEET_BARS);
+}
+
+TEST_F(EnumLoadRefusalTest, AnActorStateNoActorStateNamesIsRefused)
+{
+	json saved = saved_item();
+	const int bad = one_past(ActorState::IS_SURPRISED);
+	saved.at("states") = json::array({ bad });
+	const auto load_it = [this, &saved]()
+	{
+		[[maybe_unused]] const json again = item_reloaded(saved);
+	};
+
+	EXPECT_EQ(
+		what_loading_threw(load_it),
+		std::format("Actor::load: states {} is not a valid ActorState", bad));
+}
+
+TEST_F(EnumLoadRefusalTest, TheLastActorStateStillLoads)
+{
+	json saved = saved_item();
+	saved.at("states") =
+		json::array({ static_cast<int>(ActorState::IS_SURPRISED) });
+
+	const json again = item_reloaded(saved);
+
+	EXPECT_EQ(
+		again.at("states"),
+		json::array({ static_cast<int>(ActorState::IS_SURPRISED) }));
 }
 
 // end of file: EnumLoadRefusalTest.cpp

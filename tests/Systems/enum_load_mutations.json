@@ -80,6 +80,12 @@
             "catches": "a saved shop_quality no ShopQuality has loads"
         },
         {
+            "file": "src/Actor.cpp",
+            "original": "\tcase ActorState::IS_SURPRISED:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
+            "mutated": "\tcase ActorState::IS_SURPRISED:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "catches": "a saved state no ActorState has loads"
+        },
+        {
             "file": "src/TileRefJson.cpp",
             "original": "\tif (0 <= saved && saved < static_cast<int>(TileSheet::COUNT))",
             "mutated": "\tif (0 <= saved && saved <= static_cast<int>(TileSheet::COUNT))",
@@ -105,8 +111,8 @@
         },
         {
             "file": "src/SavedEnum.h",
-            "original": "\tif (!value)",
-            "mutated": "\tif (value)",
+            "original": "\tif (!enumerator)",
+            "mutated": "\tif (enumerator)",
             "catches": "every saved enum refused, so nothing with an enum field loads"
         }
     ]

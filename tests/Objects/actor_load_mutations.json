@@ -63,7 +63,7 @@
     },
     {
       "file": "src/Actor.cpp",
-      "original": "\t\tstates.push_back(state);",
+      "original": "\t\tstates.push_back(saved_enum_value(\n\t\t\tstate,\n\t\t\t\"Actor::load\",\n\t\t\t\"states\",\n\t\t\t\"ActorState\",\n\t\t\t&actor_state_from));",
       "mutated": "\t\tstates.push_back(ActorState::FOV_ONLY);",
       "catches": "the saved states replaced on load"
     }
