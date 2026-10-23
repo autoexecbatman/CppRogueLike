@@ -57,8 +57,8 @@
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\t\t\tresolve_fireball(aimed->target.position, caster_level(caster), ctx);",
-      "mutated": "\t\t\tresolve_fireball(caster.position, caster_level(caster), ctx);",
+      "original": "\t\t\tresolve_fireball(\n\t\t\t\taimed->target.position,",
+      "mutated": "\t\t\tresolve_fireball(\n\t\t\t\tcaster.position,",
       "catches": "a monster's fireball bursting on itself"
     },
     {

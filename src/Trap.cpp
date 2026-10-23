@@ -226,7 +226,12 @@ EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 			MessageCompletion::FINISHED);
 	}
 
-	creature.take_damage_and_check_death(damage, ctx, DamageType::PHYSICAL);
+	// A dungeon's trap: nobody set it, so nobody dealt the blow.
+	creature.take_damage_and_check_death(
+		damage,
+		ctx,
+		DamageType::PHYSICAL,
+		DamageSource::NO_ATTACKER);
 
 	// 50% chance trap is destroyed after triggering
 	if (ctx.dice->d2() == 1)

@@ -132,7 +132,7 @@ TEST_F(PlayerDeathTest, BurningToDeathAndSpendingTheActionKeepsTheDefeat)
 		.totalDamage = 60,
 		.struck = 0,
 	};
-	SpellSystem::burn_with_fireball(*player, burst, ctx);
+	SpellSystem::burn_with_fireball(*player, burst, DamageSource::PLAYER, ctx);
 	ASSERT_TRUE(player->is_dead())
 		<< "the burn did not kill, so nothing here is being measured";
 	spend_player_action(ctx, TIME_UNITS_PER_ROUND);

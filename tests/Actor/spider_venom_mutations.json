@@ -57,8 +57,8 @@
     },
     {
       "file": "src/AiWebSpinner.cpp",
-      "original": "\ttarget.take_damage_and_check_death(\n\t\ttarget.get_hp(),\n\t\tctx,\n\t\tDamageType::POISON);",
-      "mutated": "\ttarget.take_damage_and_check_death(1,\n\t\tctx,\n\t\tDamageType::POISON);",
+      "original": "\ttarget.take_damage_and_check_death(\n\t\ttarget.get_hp(),\n\t\tctx,\n\t\tDamageType::POISON,\n\t\towner.as_damage_source());",
+      "mutated": "\ttarget.take_damage_and_check_death(\n\t\t1,\n\t\tctx,\n\t\tDamageType::POISON,\n\t\towner.as_damage_source());",
       "catches": "a Type F poison that wounds instead of killing"
     }
   ]

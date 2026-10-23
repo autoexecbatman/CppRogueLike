@@ -873,7 +873,12 @@ void Creature::tick_poison(int roundEndTime, GameContext& ctx)
 		ColorPairId::WHITE_RED,
 		" is racked by the venom!",
 		MessageCompletion::FINISHED);
-	take_damage_and_check_death(damage, ctx, DamageType::POISON);
+	// The dose records no dealer, since only monsters poison.
+	take_damage_and_check_death(
+		damage,
+		ctx,
+		DamageType::POISON,
+		DamageSource::NO_ATTACKER);
 }
 
 void Creature::regenerate_from_ring(int roundsElapsed)
@@ -916,12 +921,13 @@ int Creature::take_damage(
 
 void Creature::take_damage_and_check_death(
 	const DamageResolver::ResistedDamage& damage,
-	GameContext& ctx)
+	GameContext& ctx,
+	DamageSource source)
 {
 	take_damage(damage, ctx);
 	if (is_dead())
 	{
-		die(ctx);
+		die_dealt_by(source, ctx);
 	}
 }
 
@@ -947,13 +953,44 @@ int Creature::take_damage_hit_points(
 void Creature::take_damage_and_check_death(
 	int damage,
 	GameContext& ctx,
-	DamageType damageType)
+	DamageType damageType,
+	DamageSource source)
 {
 	take_damage(damage, ctx, damageType);
 	if (is_dead())
 	{
-		die(ctx);
+		die_dealt_by(source, ctx);
 	}
+}
+
+void Creature::die_dealt_by(DamageSource source, GameContext& ctx)
+{
+	die(ctx);
+	// A death the player dealt anyone else is the player's victory over a foe.
+	if (source == DamageSource::PLAYER && !is_player())
+	{
+		award_kill_to_player(ctx);
+	}
+}
+
+void Creature::award_kill_to_player(GameContext& ctx)
+{
+	assert(
+		ctx.player() != nullptr &&
+		"Creature::award_kill_to_player requires a live player in context");
+
+	ctx.messageSystem->append_message_part(
+		ColorPairId::WHITE_BLACK,
+		"You get ");
+	ctx.messageSystem->append_message_part(
+		ColorPairId::YELLOW_BLACK,
+		std::format("{}", get_xp()));
+	ctx.messageSystem->append_message_part(
+		ColorPairId::WHITE_BLACK,
+		" experience points.\n");
+	ctx.messageSystem->finalize_message();
+
+	ctx.player_concrete().on_kill_reward(get_xp(), ctx);
 }
 
 // the actor update -- monsters only; Player overrides this
@@ -1799,7 +1836,7 @@ void Creature::die(GameContext& ctx)
 	assert(
 		ctx.floorInventory && "Creature::die: called without a floorInventory");
 
-	// Monster death: message, reward, animation, drop items, create corpse
+	// Monster death: message, animation, drop items, create corpse
 	ctx.messageSystem->append_message_part(
 		actorData.color,
 		std::format("{}", actorData.name));
@@ -1807,22 +1844,6 @@ void Creature::die(GameContext& ctx)
 		ColorPairId::WHITE_BLACK,
 		" is dead.\n");
 	ctx.messageSystem->finalize_message();
-
-	ctx.messageSystem->append_message_part(
-		ColorPairId::WHITE_BLACK,
-		"You get ");
-	ctx.messageSystem->append_message_part(
-		ColorPairId::YELLOW_BLACK,
-		std::format("{}", get_xp()));
-	ctx.messageSystem->append_message_part(
-		ColorPairId::WHITE_BLACK,
-		" experience points.\n");
-	ctx.messageSystem->finalize_message();
-
-	assert(
-		ctx.player() != nullptr &&
-		"Creature::die requires a live player in context");
-	ctx.player_concrete().on_kill_reward(get_xp(), ctx);
 
 	assert(ctx.animSystem && "Creature::die: called without an animSystem");
 	ctx.animSystem->spawn_death(position);

@@ -224,7 +224,8 @@ void HungerSystem::apply_hunger_effects(GameContext& ctx)
 			ctx.player()->take_damage_and_check_death(
 				1,
 				ctx,
-				DamageType::PHYSICAL);
+				DamageType::PHYSICAL,
+				DamageSource::NO_ATTACKER);
 			ctx.messageSystem->append_message_part(
 				get_hunger_color(),
 				"You're starving!");
@@ -240,7 +241,11 @@ void HungerSystem::apply_hunger_effects(GameContext& ctx)
 			"You are dying from starvation!");
 		ctx.messageSystem->finalize_message();
 		// Every turn now, with no roll to survive.
-		ctx.player()->take_damage_and_check_death(1, ctx, DamageType::PHYSICAL);
+		ctx.player()->take_damage_and_check_death(
+			1,
+			ctx,
+			DamageType::PHYSICAL,
+			DamageSource::NO_ATTACKER);
 		break;
 	}
 	}

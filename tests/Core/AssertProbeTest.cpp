@@ -244,7 +244,11 @@ TEST_F(AssertProbeDeathTest, TakingFireAsAPlainTotalAborts)
 	creature->set_hit_dice(10);
 
 	EXPECT_DEATH(
-		creature->take_damage_and_check_death(5, ctx, DamageType::FIRE),
+		creature->take_damage_and_check_death(
+			5,
+			ctx,
+			DamageType::FIRE,
+			DamageSource::NO_ATTACKER),
 		"arrive as ResistedDamage");
 }
 
@@ -257,7 +261,11 @@ TEST_F(AssertProbeDeathTest, TakingDamageWithNoFloatingTextAborts)
 	ctx.floatingText = nullptr;
 
 	EXPECT_DEATH(
-		creature->take_damage_and_check_death(2, ctx, DamageType::PHYSICAL),
+		creature->take_damage_and_check_death(
+			2,
+			ctx,
+			DamageType::PHYSICAL,
+			DamageSource::NO_ATTACKER),
 		"with no floating text");
 }
 
@@ -296,14 +304,23 @@ TEST_F(AssertProbeDeathTest, AShopkeeperBuiltWithNoLevelManagerAborts)
 		"AiShopkeeper::on_created: called without a levelManager");
 }
 
-// Death pays experience to the player, so a context holding no player has
-// nobody to pay. This path runs on every kill in the game.
+// A kill the player dealt pays the player, so a context holding no player has
+// nobody to pay. This path runs on every kill the player makes.
 TEST_F(AssertProbeDeathTest, KillingACreatureWithNoPlayerInContextAborts)
 {
 	std::unique_ptr<Creature> creature = make_creature();
 	creature->experienceReward = std::make_unique<ExperienceReward>(10);
+	// Enough body for die() to finish, so the blow reaches the payment.
+	creature->healthPool = std::make_unique<HealthPool>(1);
+	creature->set_corpse("dead orc", 0, "", CorpseEdibility::EDIBLE);
 
-	EXPECT_DEATH(creature->die(ctx), "requires a live player in context");
+	EXPECT_DEATH(
+		creature->take_damage_and_check_death(
+			1,
+			ctx,
+			DamageType::PHYSICAL,
+			DamageSource::PLAYER),
+		"award_kill_to_player requires a live player in context");
 }
 
 // Every spell effect that lands calls onSuccess, at four sites and sometimes a turn
@@ -432,8 +449,12 @@ TEST_F(AssertProbeDeathTest, BurstingAFireballWithANullInTheCreatureListAborts)
 	ctx.creatures = &creatures;
 
 	EXPECT_DEATH(
-		[[maybe_unused]] const auto burst =
-			SpellSystem::burst_fireball(Vector2D{ 5, 5 }, 3, 2, ctx),
+		[[maybe_unused]] const auto burst = SpellSystem::burst_fireball(
+			Vector2D{ 5, 5 },
+			3,
+			2,
+			DamageSource::MONSTER,
+			ctx),
 		"burst_fireball: creatures list holds a null entry");
 }
 
@@ -444,8 +465,12 @@ TEST_F(AssertProbeDeathTest, BurstingAFireballWithNoPlayerAborts)
 	ctx.creatures = &creatures;
 
 	EXPECT_DEATH(
-		[[maybe_unused]] const auto burst =
-			SpellSystem::burst_fireball(Vector2D{ 5, 5 }, 3, 2, ctx),
+		[[maybe_unused]] const auto burst = SpellSystem::burst_fireball(
+			Vector2D{ 5, 5 },
+			3,
+			2,
+			DamageSource::MONSTER,
+			ctx),
 		"burst_fireball: called without a player");
 }
 

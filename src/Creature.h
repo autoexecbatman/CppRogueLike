@@ -19,6 +19,7 @@
 #include "CreatureClass.h"
 #include "DamageInfo.h"
 #include "DamageResolver.h"
+#include "DamageSource.h"
 #include "EquipmentSlot.h"
 #include "ExperienceReward.h"
 #include "GameContext.h"
@@ -166,6 +167,18 @@ private:
 	int calculate_effective_stat(int base_value, BuffType type) const noexcept;
 
 	void release_from_web();
+
+	// The death the damage caused, and the player paid for it when the player
+	// dealt it to a creature other than the player.
+	//
+	// Example, a goblin whose last hit point a blow took:
+	//   die_dealt_by(DamageSource::PLAYER, ctx); // dies; the player is paid
+	//   die_dealt_by(DamageSource::MONSTER, ctx); // dies; nobody is paid
+	void die_dealt_by(DamageSource source, GameContext& ctx);
+
+	// "You get N experience points.", then the experience and one kill to the
+	// player. Requires a player in ctx.
+	void award_kill_to_player(GameContext& ctx);
 
 protected:
 	// Shared per-turn logic (buffs, armor, constitution) used by both
@@ -764,17 +777,32 @@ public:
 	// Refuses fire and cold: those arrive as ResistedDamage from
 	// DamageResolver::reduce_dice, so a producer cannot skip the reduction.
 	int take_damage(int damage, GameContext& ctx, DamageType damageType);
+	// The hit, then the death if it killed: the creature dies, and when the
+	// player dealt it to anyone else the player is paid for the kill.
 	void take_damage_and_check_death(
 		int damage,
 		GameContext& ctx,
-		DamageType damageType);
+		DamageType damageType,
+		DamageSource source);
 	// A hit whose dice have been reduced by this creature's resistance.
 	int take_damage(
 		const DamageResolver::ResistedDamage& damage,
 		GameContext& ctx);
 	void take_damage_and_check_death(
 		const DamageResolver::ResistedDamage& damage,
-		GameContext& ctx);
+		GameContext& ctx,
+		DamageSource source);
+
+	// Who this creature is as a dealer of damage: PLAYER for the player,
+	// MONSTER for every other creature.
+	//
+	// Example:
+	//   player->as_damage_source(); // -> DamageSource::PLAYER
+	//   goblin.as_damage_source(); // -> DamageSource::MONSTER
+	[[nodiscard]] DamageSource as_damage_source() const noexcept
+	{
+		return is_player() ? DamageSource::PLAYER : DamageSource::MONSTER;
+	}
 
 	// Constitution tracking accessors
 	[[nodiscard]] std::optional<int> get_last_constitution() const noexcept
@@ -830,7 +858,9 @@ public:
 
 	// Lifecycle hooks - Player overrides; monsters no-op
 	// Called when a creature dies - Player saves/defeats; a monster drops its pack and what it
-	// wore where it fell, and leaves a corpse
+	// wore where it fell, and leaves a corpse.
+	// Pays nobody: the kill's credit is take_damage_and_check_death's, which
+	// knows who dealt it.
 	virtual void die(GameContext& ctx);
 
 	TileRef get_display_tile() const noexcept override;

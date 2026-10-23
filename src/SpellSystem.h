@@ -18,6 +18,7 @@ enum class SpellSource
 	INNATE,
 };
 
+#include "DamageSource.h"
 #include "SpellRegistry.h"
 #include "Vector2D.h"
 
@@ -239,14 +240,18 @@ struct FireballBurst
 // resistance's bonus added, takes the dice reduced per die by that resistance,
 // and half of that on a save. Public so a test can reach the burst without
 // driving the targeting menu that precedes it in play, and so the scroll can cast it.
+// The source is the caster's, so a death in the burst pays the player only for
+// the player's own fireball.
 //
 // Example, caster level 3, one goblin adjacent, dice forced to 6, 6, 6 and a save of 1:
-//   burst_fireball(center, 3, 2, ctx);   // -> { 3, 18, 1, OUTSIDE }, goblin takes 18
+//   burst_fireball(center, 3, 2, DamageSource::PLAYER, ctx);
+//   // -> { 3, 18, 1, OUTSIDE }, goblin takes 18
 //   // the same with the player beside the goblin -> { 3, 18, 2, STRUCK }
 FireballBurst burst_fireball(
 	Vector2D center,
 	int casterLevel,
 	int radius,
+	DamageSource source,
 	GameContext& ctx);
 
 // Burns one creature with an already-rolled burst: its save with its fire
@@ -254,6 +259,7 @@ FireballBurst burst_fireball(
 void burn_with_fireball(
 	Creature& target,
 	const FireballBurst& burst,
+	DamageSource source,
 	GameContext& ctx);
 
 // The level a spell read from a scroll is cast at. Dungeon Master's Guide:

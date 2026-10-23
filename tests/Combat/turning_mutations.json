@@ -87,8 +87,8 @@
     },
     {
       "file": "src/TurnUndead.cpp",
-      "original": "\t\t\tundead->take_damage_and_check_death(\n\t\t\t\tundead->get_hp(),\n\t\t\t\tctx,\n\t\t\t\tDamageType::MAGIC);\n",
-      "mutated": "\t\t\tundead->take_damage_and_check_death(1,\n\t\t\t\tctx,\n\t\t\t\tDamageType::MAGIC);\n",
+      "original": "\t\t\tundead->take_damage_and_check_death(\n\t\t\t\tundead->get_hp(),\n\t\t\t\tctx,\n\t\t\t\tDamageType::MAGIC,\n\t\t\t\tpriest.as_damage_source());\n",
+      "mutated": "\t\t\tundead->take_damage_and_check_death(\n\t\t\t\t1,\n\t\t\t\tctx,\n\t\t\t\tDamageType::MAGIC,\n\t\t\t\tpriest.as_damage_source());\n",
       "catches": "a \"D\" result grazing the undead rather than destroying it"
     },
     {

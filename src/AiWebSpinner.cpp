@@ -139,7 +139,8 @@ void AiWebSpinner::inject_venom(
 	target.take_damage_and_check_death(
 		target.get_hp(),
 		ctx,
-		DamageType::POISON);
+		DamageType::POISON,
+		owner.as_damage_source());
 }
 
 bool AiWebSpinner::should_create_web(

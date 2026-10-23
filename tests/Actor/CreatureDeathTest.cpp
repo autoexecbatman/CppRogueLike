@@ -4,8 +4,8 @@
 // Creature::die is the death every monster in the game actually goes through:
 // combat reaches it through take_damage_and_check_death, and Player overrides it
 // with the defeat screen. What it does, in order: says the creature is dead,
-// hands its experience to the player, drops what it was carrying and what it wore
-// onto the floor where it fell, and leaves a corpse in its place.
+// drops what it was carrying and what it wore onto the floor where it fell, and
+// leaves a corpse in its place. Paying the player is not part of it.
 //
 // It is reached here by calling die(). src/DeathHandler.cpp held a second copy of
 // this body that nothing constructed, and testing that copy is what this file did
@@ -118,15 +118,17 @@ protected:
 	std::unique_ptr<Creature> monster;
 };
 
-// The reward for the kill reaches the player.
-TEST_F(CreatureDeathTest, TheKillerIsPaidTheExperience)
+// Dying pays nobody: who dealt the death decides the credit, and die() does
+// not know. KillCreditTest pins who is paid.
+TEST_F(CreatureDeathTest, DyingItselfPaysNobody)
 {
-	const int before = player->get_xp();
+	const int xpBefore = player->get_xp();
+	const int killsBefore = player->get_kill_count();
 
 	kill_it();
 
-	EXPECT_EQ(player->get_xp(), before + MONSTER_XP)
-		<< "the kill paid other than the monster's worth";
+	EXPECT_EQ(player->get_xp(), xpBefore) << "die() paid the player itself";
+	EXPECT_EQ(player->get_kill_count(), killsBefore);
 }
 
 // What it carried falls where it fell, so it can be picked up.

@@ -100,7 +100,7 @@ $probes = @(
     @{
         test   = "AssertProbeDeathTest.KillingACreatureWithNoPlayerInContextAborts"
         file   = "src/Creature.cpp"
-        anchor = 'assert(ctx.player() != nullptr && "Creature::die requires a live player in context");'
+        anchor = 'assert(ctx.player() != nullptr && "Creature::award_kill_to_player requires a live player in context");'
     },
     @{
         test   = "AssertProbeDeathTest.CastingWithoutACallbackAborts"

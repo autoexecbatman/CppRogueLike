@@ -357,7 +357,7 @@ TEST_F(RoundUpkeepTest, RegenerationLandsOnceOnItsRoundInsideALongAction)
 
 // A creature that dies on round 3 of 7 is gone before round 4. Its air runs out at the
 // action's end, so each round it is fed is one breath check: the first three pass, and
-// a fourth would drown it again - a second death and a second reward.
+// a fourth would drown it again - a second death.
 TEST_F(RoundUpkeepTest, ACreatureThatDiesMidActionIsNotFedTheRoundsAfter)
 {
 	map.set_tile(Vector2D{ 5, 5 }, TileType::WATER);
@@ -373,7 +373,16 @@ TEST_F(RoundUpkeepTest, ACreatureThatDiesMidActionIsNotFedTheRoundsAfter)
 	spend_one_action_of(7);
 
 	EXPECT_TRUE(creatures.empty()) << "the dead diver is still on the level";
-	EXPECT_EQ(player->get_kill_count(), 1) << "the diver died more than once";
+	// Each death says so once, so counting those lines counts deaths.
+	const std::string text = all_message_text();
+	size_t deaths = 0;
+	size_t found = text.find(" is dead");
+	while (found != std::string::npos)
+	{
+		++deaths;
+		found = text.find(" is dead", found + 1);
+	}
+	EXPECT_EQ(deaths, 1u) << "the diver died other than once: " << text;
 	EXPECT_EQ(all_message_text().find("drowns"), std::string::npos)
 		<< all_message_text();
 }

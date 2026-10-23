@@ -74,7 +74,12 @@ protected:
 
 	SpellSystem::FireballBurst burst_at(Vector2D center)
 	{
-		return SpellSystem::burst_fireball(center, CASTER_LEVEL, RADIUS, ctx);
+		return SpellSystem::burst_fireball(
+			center,
+			CASTER_LEVEL,
+			RADIUS,
+			DamageSource::PLAYER,
+			ctx);
 	}
 
 	static constexpr int CASTER_LEVEL = 3;
@@ -150,8 +155,12 @@ TEST_F(FireballDamageTest, TenDiceIsTheCeiling)
 		mock.dice.set_next_roll(1);
 	}
 
-	const auto burst =
-		SpellSystem::burst_fireball(Vector2D{ 3, 5 }, 20, RADIUS, ctx);
+	const auto burst = SpellSystem::burst_fireball(
+		Vector2D{ 3, 5 },
+		20,
+		RADIUS,
+		DamageSource::PLAYER,
+		ctx);
 
 	EXPECT_EQ(burst.diceCount, 10);
 	EXPECT_EQ(burst.totalDamage, 10);
@@ -251,6 +260,7 @@ TEST_F(FireballDamageTest, TheScrollBurstRollsSixDice)
 		Vector2D{ 3, 5 },
 		SpellSystem::SCROLL_FIREBALL_CASTER_LEVEL,
 		RADIUS,
+		DamageSource::PLAYER,
 		ctx);
 
 	EXPECT_EQ(burst.diceCount, 6);

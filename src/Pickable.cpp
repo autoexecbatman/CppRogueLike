@@ -559,7 +559,8 @@ bool use(
 		target->take_damage_and_check_death(
 			targetScroll.damage,
 			ctx,
-			DamageType::LIGHTNING);
+			DamageType::LIGHTNING,
+			wearer.as_damage_source());
 		ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
 		return consume_item(owner, wearer);
 	}
@@ -571,9 +572,11 @@ bool use(
 	int scrollRange = targetScroll.range;
 	int confuseTurns = targetScroll.confuseTurns;
 	TargetMode mode = targetScroll.targetMode;
+	// Copied for the burst's credit, which is decided when the cursor confirms.
+	const DamageSource source = wearer.as_damage_source();
 
 	auto onTarget =
-		[mode, aoeRadius, scrollRange, confuseTurns, &owner, &wearer](
+		[mode, aoeRadius, scrollRange, confuseTurns, source, &owner, &wearer](
 			bool confirmed,
 			Vector2D targetPos,
 			GameContext& innerCtx) mutable
@@ -597,6 +600,7 @@ bool use(
 					targetPos,
 					SpellSystem::SCROLL_FIREBALL_CASTER_LEVEL,
 					aoeRadius,
+					source,
 					innerCtx);
 			innerCtx.messageSystem->message(
 				ColorPairId::WHITE_BLACK,

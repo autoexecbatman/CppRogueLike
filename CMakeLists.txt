@@ -404,6 +404,7 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/AttackRate.h
     ${PROJECT_SOURCE_DIR}/TurnSchedule.h
     ${PROJECT_SOURCE_DIR}/DamageInfo.h
+    ${PROJECT_SOURCE_DIR}/DamageSource.h
     ${PROJECT_SOURCE_DIR}/Drowning.h
     ${PROJECT_SOURCE_DIR}/ArmorClass.cpp
     ${PROJECT_SOURCE_DIR}/ArmorClass.h

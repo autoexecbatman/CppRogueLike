@@ -68,7 +68,7 @@ protected:
 		player->armorClass = std::make_unique<ArmorClass>(10);
 		player->experienceReward = std::make_unique<ExperienceReward>(0);
 		player->set_creature_level(1);
-		// A monster's death credits the player (issues/0347), which levels by its class.
+		// A player always has a class; a kill that pays reads its table.
 		player->set_creature_class(CreatureClass::FIGHTER);
 
 		map.init_tiles();
@@ -345,6 +345,9 @@ TEST_F(MonsterSpellcastingTest, AMonstersCastLeavesItsDeadForTheSweep)
 	EXPECT_TRUE(goblin.is_dead());
 	EXPECT_EQ(creatures.size(), 2u)
 		<< "the cast swept the list the creature loop is walking";
+	// A monster's victory is not the player's, so nothing is paid for it.
+	EXPECT_EQ(player->get_xp(), 0) << "the pit fiend's kill paid the player";
+	EXPECT_EQ(player->get_kill_count(), 0);
 }
 
 // The perceived arm casts before it closes in: the lich stays put and the player is struck.

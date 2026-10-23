@@ -63,8 +63,8 @@
     },
     {
       "file": "src/HungerSystem.cpp",
-      "original": "\t\t\tctx.player()->take_damage_and_check_death(\n\t\t\t\t1,\n\t\t\t\tctx,\n\t\t\t\tDamageType::PHYSICAL);\n",
-      "mutated": "\t\t\tctx.player()->take_damage_and_check_death(0,\n\t\t\t\tctx,\n\t\t\t\tDamageType::PHYSICAL);\n",
+      "original": "\t\t\tctx.player()->take_damage_and_check_death(\n\t\t\t\t1,\n\t\t\t\tctx,\n\t\t\t\tDamageType::PHYSICAL,\n\t\t\t\tDamageSource::NO_ATTACKER);\n",
+      "mutated": "\t\t\tctx.player()->take_damage_and_check_death(\n\t\t\t\t0,\n\t\t\t\tctx,\n\t\t\t\tDamageType::PHYSICAL,\n\t\t\t\tDamageSource::NO_ATTACKER);\n",
       "catches": "starving costing nothing on the turn its roll calls for a point"
     },
     {
@@ -75,7 +75,7 @@
     },
     {
       "file": "src/HungerSystem.cpp",
-      "original": "\t\tctx.player()->take_damage_and_check_death(1, ctx, DamageType::PHYSICAL);\n\t\tbreak;\n",
+      "original": "\t\tctx.player()->take_damage_and_check_death(\n\t\t\t1,\n\t\t\tctx,\n\t\t\tDamageType::PHYSICAL,\n\t\t\tDamageSource::NO_ATTACKER);\n\t\tbreak;\n",
       "mutated": "\t\tbreak;\n",
       "catches": "dying stopping short of killing, so starvation never finishes"
     }

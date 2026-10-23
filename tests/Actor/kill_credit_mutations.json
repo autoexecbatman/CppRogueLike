@@ -1,0 +1,113 @@
+{
+    "cwd": "E:/repo/C++RogueLike",
+    "test_command": [
+        "powershell",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tests/run_suite.ps1",
+        "-Configuration",
+        "Debug",
+        "-Filter",
+        "--gtest_filter=KillCreditTest.*:KillCreditCursorTest.*:MonsterSpellcastingTest.*:CreatureDeathTest.*:SpiderVenomTest.*:WebSpinnerSanctuaryTest.*"
+    ],
+    "mutations": [
+        {
+            "file": "src/Creature.cpp",
+            "original": "\tif (source == DamageSource::PLAYER && !is_player())",
+            "mutated": "\tif (source != DamageSource::NO_ATTACKER && !is_player())",
+            "catches": "a monster's kill paid to the player because it had an attacker"
+        },
+        {
+            "file": "src/Creature.cpp",
+            "original": "\tif (source == DamageSource::PLAYER && !is_player())",
+            "mutated": "\tif (source == DamageSource::PLAYER)",
+            "catches": "the player paid for their own death"
+        },
+        {
+            "file": "src/Creature.h",
+            "original": "\t\treturn is_player() ? DamageSource::PLAYER : DamageSource::MONSTER;",
+            "mutated": "\t\treturn DamageSource::PLAYER;",
+            "catches": "every creature dealing damage as though it were the player"
+        },
+        {
+            "file": "src/Attacker.cpp",
+            "original": "\t\t\towner.as_damage_source());",
+            "mutated": "\t\t\tDamageSource::MONSTER);",
+            "catches": "the player's blow dealt as a monster's, so it pays nothing"
+        },
+        {
+            "file": "src/Creature.cpp",
+            "original": "\t\tDamageType::POISON,\n\t\tDamageSource::NO_ATTACKER);",
+            "mutated": "\t\tDamageType::POISON,\n\t\tDamageSource::PLAYER);",
+            "catches": "a poisoned death paid to the player"
+        },
+        {
+            "file": "src/Pickable.cpp",
+            "original": "\t\t\twearer.as_damage_source());",
+            "mutated": "\t\t\tDamageSource::MONSTER);",
+            "catches": "the player's lightning scroll dealt as a monster's"
+        },
+        {
+            "file": "src/Pickable.cpp",
+            "original": "\tconst DamageSource source = wearer.as_damage_source();",
+            "mutated": "\tconst DamageSource source = DamageSource::MONSTER;",
+            "catches": "the player's fireball scroll dealt as a monster's"
+        },
+        {
+            "file": "src/SpellSystem.cpp",
+            "original": "\t\t\t\tcaster.as_damage_source(),\n",
+            "mutated": "\t\t\t\tDamageSource::PLAYER,\n",
+            "catches": "a monster's aimed fireball paid to the player"
+        },
+        {
+            "file": "src/SpellSystem.cpp",
+            "original": "\tconst DamageSource source = caster.as_damage_source();",
+            "mutated": "\tconst DamageSource source = DamageSource::MONSTER;",
+            "catches": "the player's fireball through the cursor dealt as a monster's"
+        },
+        {
+            "file": "src/SpellSystem.cpp",
+            "original": "\t\tresolve_fireball(center, casterLevel, source, innerCtx);",
+            "mutated": "\t\tresolve_fireball(center, casterLevel, DamageSource::MONSTER, innerCtx);",
+            "catches": "the cursor's captured source dropped on the way to the burst"
+        },
+        {
+            "file": "src/SpellSystem.cpp",
+            "original": "\t\tburst_fireball(center, casterLevel, FIREBALL_RADIUS, source, ctx);",
+            "mutated": "\t\tburst_fireball(center, casterLevel, FIREBALL_RADIUS, DamageSource::PLAYER, ctx);",
+            "catches": "the resolved fireball's source dropped on the way to the burst"
+        },
+        {
+            "file": "src/SpellSystem.cpp",
+            "original": "\t\t\tcaster.as_damage_source());",
+            "mutated": "\t\t\tDamageSource::PLAYER);",
+            "catches": "a monster's magic missile paid to the player"
+        },
+        {
+            "file": "src/SpellSystem.cpp",
+            "original": "\t\tburn_with_fireball(*creature, burst, source, ctx);",
+            "mutated": "\t\tburn_with_fireball(*creature, burst, DamageSource::PLAYER, ctx);",
+            "catches": "a burst's creatures burned as the player's whoever cast it"
+        },
+        {
+            "file": "src/SpellSystem.cpp",
+            "original": "\ttarget.take_damage_and_check_death(dealt, ctx, source);",
+            "mutated": "\ttarget.take_damage_and_check_death(dealt, ctx, DamageSource::PLAYER);",
+            "catches": "a fireball's burn dealt as the player's whoever cast it"
+        },
+        {
+            "file": "src/Trap.cpp",
+            "original": "\t\tDamageType::PHYSICAL,\n\t\tDamageSource::NO_ATTACKER);",
+            "mutated": "\t\tDamageType::PHYSICAL,\n\t\tDamageSource::PLAYER);",
+            "catches": "a dungeon trap's kill paid to the player"
+        },
+        {
+            "file": "src/TurnUndead.cpp",
+            "original": "\t\t\t\tpriest.as_damage_source());",
+            "mutated": "\t\t\t\tDamageSource::MONSTER);",
+            "catches": "the player's turning dealt as a monster's, so it pays nothing"
+        }
+    ]
+}

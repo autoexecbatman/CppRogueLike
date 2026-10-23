@@ -107,7 +107,8 @@ TurnUndeadReport turn_undead(Creature& priest, GameContext& ctx)
 			undead->take_damage_and_check_death(
 				undead->get_hp(),
 				ctx,
-				DamageType::MAGIC);
+				DamageType::MAGIC,
+				priest.as_damage_source());
 			report.destroyed.push_back(undead);
 			continue;
 		}

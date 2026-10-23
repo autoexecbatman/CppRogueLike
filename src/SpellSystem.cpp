@@ -284,8 +284,13 @@ void cast_fireball(
 // Leaves the dead to the caller.
 //
 // Example, caster level 13 on the player's tile:
-//   resolve_fireball(player.position, 13, ctx);   // 10d6, the dice cap, "Fireball! 10d6 = ..."
-void resolve_fireball(Vector2D center, int casterLevel, GameContext& ctx);
+//   resolve_fireball(player.position, 13, DamageSource::PLAYER, ctx);
+//   // 10d6, the dice cap, "Fireball! 10d6 = ..."
+void resolve_fireball(
+	Vector2D center,
+	int casterLevel,
+	DamageSource source,
+	GameContext& ctx);
 
 void dispatch_effect(
 	SpellEffectType effect,
@@ -308,7 +313,11 @@ void dispatch_effect(
 		}
 		else
 		{
-			resolve_fireball(aimed->target.position, caster_level(caster), ctx);
+			resolve_fireball(
+				aimed->target.position,
+				caster_level(caster),
+				caster.as_damage_source(),
+				ctx);
 		}
 		onSuccess(ctx);
 		return;
@@ -703,8 +712,10 @@ void cast_fireball(
 	GameContext& ctx)
 {
 	const int casterLevel = caster_level(caster);
+	// Copied: the caster may die before the cursor confirms.
+	const DamageSource source = caster.as_damage_source();
 
-	auto onTarget = [casterLevel, onSuccess = std::move(onSuccess)](
+	auto onTarget = [casterLevel, source, onSuccess = std::move(onSuccess)](
 						bool confirmed,
 						Vector2D center,
 						GameContext& innerCtx) mutable
@@ -718,7 +729,7 @@ void cast_fireball(
 			return;
 		}
 
-		resolve_fireball(center, casterLevel, innerCtx);
+		resolve_fireball(center, casterLevel, source, innerCtx);
 		innerCtx.creatureManager->cleanup_dead_creatures(*innerCtx.creatures);
 		onSuccess(innerCtx);
 	};
@@ -731,12 +742,16 @@ void cast_fireball(
 			ctx));
 }
 
-void resolve_fireball(Vector2D center, int casterLevel, GameContext& ctx)
+void resolve_fireball(
+	Vector2D center,
+	int casterLevel,
+	DamageSource source,
+	GameContext& ctx)
 {
 	SpellAnimations::animate_explosion(center, FIREBALL_RADIUS, ctx);
 
 	const FireballBurst burst =
-		burst_fireball(center, casterLevel, FIREBALL_RADIUS, ctx);
+		burst_fireball(center, casterLevel, FIREBALL_RADIUS, source, ctx);
 
 	ctx.messageSystem->append_message_part(
 		ColorPairId::YELLOW_BLACK,
@@ -852,7 +867,11 @@ void resolve_magic_missile(
 		totalDamage += damage;
 		damagePerTarget[target] += damage;
 
-		target->take_damage_and_check_death(damage, ctx, DamageType::MAGIC);
+		target->take_damage_and_check_death(
+			damage,
+			ctx,
+			DamageType::MAGIC,
+			caster.as_damage_source());
 	}
 
 	// Message
@@ -1419,6 +1438,7 @@ SpellSystem::FireballBurst SpellSystem::burst_fireball(
 	Vector2D center,
 	int casterLevel,
 	int radius,
+	DamageSource source,
 	GameContext& ctx)
 {
 	assert(
@@ -1448,7 +1468,7 @@ SpellSystem::FireballBurst SpellSystem::burst_fireball(
 			continue;
 		}
 
-		burn_with_fireball(*creature, burst, ctx);
+		burn_with_fireball(*creature, burst, source, ctx);
 		++burst.struck;
 	}
 
@@ -1458,7 +1478,7 @@ SpellSystem::FireballBurst SpellSystem::burst_fireball(
 	if (!player->is_dead() &&
 		player->get_tile_distance(center) <= static_cast<double>(radius))
 	{
-		burn_with_fireball(*player, burst, ctx);
+		burn_with_fireball(*player, burst, source, ctx);
 		++burst.struck;
 		burst.playerReach = PlayerReach::STRUCK;
 	}
@@ -1469,6 +1489,7 @@ SpellSystem::FireballBurst SpellSystem::burst_fireball(
 void SpellSystem::burn_with_fireball(
 	Creature& target,
 	const FireballBurst& burst,
+	DamageSource source,
 	GameContext& ctx)
 {
 	const int strength =
@@ -1485,7 +1506,7 @@ void SpellSystem::burn_with_fireball(
 		DamageResolver::reduce_dice(burst.dice, DamageType::FIRE, strength);
 	const DamageResolver::ResistedDamage dealt =
 		saved ? reduced.at(reduced.hit_points() / 2) : reduced;
-	target.take_damage_and_check_death(dealt, ctx);
+	target.take_damage_and_check_death(dealt, ctx, source);
 }
 
 void SpellSystem::cast_spell_at(
