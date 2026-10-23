@@ -59,10 +59,12 @@ protected:
 
 	// Finds the trap the way the game does, rather than through a test-only setter: a
 	// search rolling 1, which finds a pit on 1d6 and a small trap on d100.
-	void find(Trap& trap)
+	// It answers what the search said; the caller asserts FOUND, so a search
+	// that did not roll stops the test before its 1 reaches another die.
+	[[nodiscard]] TrapSearchResult find(Trap& trap)
 	{
 		mock.dice.set_next_roll(1);
-		ASSERT_EQ(trap.search(finder, ctx), TrapSearchResult::FOUND);
+		return trap.search(finder, ctx);
 	}
 
 	MockGameContext mock{};
@@ -98,7 +100,7 @@ TEST_F(TrapSerializationTest, WhatThePlayerHasFoundStaysFound)
 	std::vector<std::unique_ptr<Trap>> traps;
 	traps.push_back(built(Vector2D{ 2, 2 }, TrapType::ARROW));
 	traps.push_back(built(Vector2D{ 5, 5 }, TrapType::PIT));
-	find(*traps.at(0));
+	ASSERT_EQ(find(*traps.at(0)), TrapSearchResult::FOUND);
 
 	json level;
 	save_traps(traps, level);
@@ -121,7 +123,7 @@ TEST_F(TrapSerializationTest, VisibilityIsDerivedFromTheStateOnLoad)
 	std::vector<std::unique_ptr<Trap>> traps;
 	traps.push_back(built(Vector2D{ 2, 2 }, TrapType::ARROW));
 	traps.push_back(built(Vector2D{ 5, 5 }, TrapType::PIT));
-	find(*traps.at(0));
+	ASSERT_EQ(find(*traps.at(0)), TrapSearchResult::FOUND);
 
 	json level;
 	save_traps(traps, level);

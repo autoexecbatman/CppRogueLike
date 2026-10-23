@@ -39,11 +39,13 @@ protected:
 
 	// Finds the pit the way the game does, with a dwarf's search rolling a 1 on 1d6, so
 	// the trap is known and unsprung when the test proper begins.
-	void find(Trap& pit)
+	// It answers what the search said; the caller asserts FOUND, so a search
+	// that did not roll stops the test before its 1 reaches another die.
+	[[nodiscard]] TrapSearchResult find(Trap& pit)
 	{
 		victim.lifespan->race = PlayerRaceState::DWARF;
 		mock.dice.set_next_roll(1);
-		ASSERT_EQ(pit.search(victim, ctx), TrapSearchResult::FOUND);
+		return pit.search(victim, ctx);
 	}
 
 	MockGameContext mock{};
@@ -92,7 +94,7 @@ TEST_F(TrapDamageTest, AHiddenTrapSpringsOnThePlayerWithNoRollToNoticeIt)
 TEST_F(TrapDamageTest, AKnownTrapSpringsWithoutARollToNoticeIt)
 {
 	Trap pit{ Vector2D{ 5, 5 }, TrapType::PIT, mock.tile_config };
-	ASSERT_NO_FATAL_FAILURE(find(pit));
+	ASSERT_EQ(find(pit), TrapSearchResult::FOUND);
 
 	// Stepping onto the known pit: the dice are six and six and the coin keeps it. A
 	// roll to notice it here would take the first six and the damage would not be twelve.

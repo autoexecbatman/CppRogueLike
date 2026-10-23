@@ -26,6 +26,7 @@
 #include "src/AiWebSpinner.h"
 #include "src/ArmorClass.h"
 #include "src/AttackKind.h"
+#include "src/AttackResult.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
 #include "src/Colors.h"
@@ -144,12 +145,17 @@ protected:
 	// same sequence for every creature: the goblin reads two more d20s, while the web
 	// spinner reads a d100 for whether it spins a web and then a pattern. So the caller
 	// scripts its own rolls instead of sharing values that land on different dice.
-	void fail_the_save_with(std::initializer_list<int> rolls)
+	// It answers what the attack did; the caller asserts PREVENTED, so a save
+	// that was skipped stops the test before its rolls reach another die.
+	[[nodiscard]] AttackResult fail_the_save_with(
+		std::initializer_list<int> rolls)
 	{
 		script(rolls);
-		goblin.attacker->attack(*player, AttackKind::MELEE, ctx);
-		ASSERT_EQ(player->get_hp(), STARTING_HP)
+		const AttackResult result =
+			goblin.attacker->attack(*player, AttackKind::MELEE, ctx);
+		EXPECT_EQ(player->get_hp(), STARTING_HP)
 			<< "the save was skipped and the blow landed";
+		return result;
 	}
 
 	int goblin_distance_to_player() const
@@ -178,7 +184,7 @@ TEST_F(SanctuaryPursuitTest, AMonsterThatFailedItsSaveStopsClosingIn)
 		10,
 		BuffApplication::ADD,
 		ctx.gameState->get_time());
-	fail_the_save_with({ 12, 20, 4 });
+	ASSERT_EQ(fail_the_save_with({ 12, 20, 4 }), AttackResult::PREVENTED);
 	const int distanceBefore = goblin_distance_to_player();
 
 	// Whatever the monster does instead of hunting reads dice. Idling rolls a d20 and
@@ -255,7 +261,7 @@ TEST_F(SanctuaryPursuitTest, AMonsterThatLostTrackStopsAnnouncingItEveryRound)
 		10,
 		BuffApplication::ADD,
 		ctx.gameState->get_time());
-	fail_the_save_with({ 12, 20, 4 });
+	ASSERT_EQ(fail_the_save_with({ 12, 20, 4 }), AttackResult::PREVENTED);
 	const size_t messagesAfterTheOneRefusal =
 		game.messageSystem.get_stored_message_count();
 
@@ -283,7 +289,7 @@ TEST_F(SanctuaryPursuitTest, ARangedMonsterThatLostTrackStopsShootingToo)
 		10,
 		BuffApplication::ADD,
 		ctx.gameState->get_time());
-	fail_the_save_with({ 12, 20, 4 });
+	ASSERT_EQ(fail_the_save_with({ 12, 20, 4 }), AttackResult::PREVENTED);
 	const size_t messagesAfterTheOneRefusal =
 		game.messageSystem.get_stored_message_count();
 
@@ -313,7 +319,9 @@ TEST_F(SanctuaryPursuitTest, AWebSpinnerThatLostTrackStopsClosingIn)
 		ctx.gameState->get_time());
 	// The spinner's second roll is the d100 for whether it spins a web, and spinning
 	// needs a tile this fixture does not load. The top of the die is over the chance.
-	fail_the_save_with({ 12, RandomDice::HIGHEST });
+	ASSERT_EQ(
+		fail_the_save_with({ 12, RandomDice::HIGHEST }),
+		AttackResult::PREVENTED);
 	const int distanceBefore = goblin_distance_to_player();
 
 	script_idle_rolls(120);

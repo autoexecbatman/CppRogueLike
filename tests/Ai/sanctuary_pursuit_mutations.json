@@ -42,6 +42,12 @@
       "original": "\t\treturn save.opponent == attacker.uniqueId && !save.isMade;",
       "mutated": "\t\treturn save.opponent == attacker.uniqueId;",
       "catches": "an attacker that made its save being treated as having lost track"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\t\t\t\" cannot bring itself to attack \");\n\t\tctx.messageSystem->append_message_part(\n\t\t\ttarget.actorData.color,\n\t\t\ttarget.actorData.name);\n\t\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \".\");\n\t\tctx.messageSystem->finalize_message();\n\t\treturn AttackResult::PREVENTED;",
+      "mutated": "\t\t\t\" cannot bring itself to attack \");\n\t\tctx.messageSystem->append_message_part(\n\t\t\ttarget.actorData.color,\n\t\t\ttarget.actorData.name);\n\t\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \".\");\n\t\tctx.messageSystem->finalize_message();\n\t\treturn AttackResult::MISSED;",
+      "catches": "a ward that turns the attacker away reporting the swing as a miss, which the hit points alone cannot tell from a refusal"
     }
   ]
 }
