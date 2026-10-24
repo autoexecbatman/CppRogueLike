@@ -13,6 +13,7 @@
 #include "GameContext.h"
 #include "ItemEditor.h"
 #include "Menu.h"
+#include "MonsterEditor.h"
 #include "RecordEditor.h"
 #include "Renderer.h"
 #include "TileRef.h"
@@ -828,3 +829,4 @@ typename RecordEditor<Model>::FieldId RecordEditor<Model>::current_field() const
 }
 
 template class RecordEditor<ItemEditorModel>;
+template class RecordEditor<MonsterEditorModel>;

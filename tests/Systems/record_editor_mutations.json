@@ -10,7 +10,7 @@
         "-Configuration",
         "Debug",
         "-Filter",
-        "--gtest_filter=RecordEditorTest*:EditorFieldTest.*"
+        "--gtest_filter=RecordEditor*:EditorFieldTest.*"
     ],
     "mutations": [
         {
@@ -144,6 +144,36 @@
             "original": "\treturn item_registry(ctx).is_builtin_key(key);",
             "mutated": "\treturn false;",
             "catches": "every item treated as custom"
+        },
+        {
+            "file": "src/MonsterEditor.cpp",
+            "original": "\tworking = monster_registry(ctx).get_params(key);",
+            "mutated": "",
+            "catches": "a selected monster's fields never loaded"
+        },
+        {
+            "file": "src/MonsterEditor.cpp",
+            "original": "\tselectedXpCount = 0;\n\tselectedPower = 0;",
+            "mutated": "\tselectedPower = 0;",
+            "catches": "another monster keeping the last one's hit dice count"
+        },
+        {
+            "file": "src/MonsterEditor.cpp",
+            "original": "\tmonster_registry(ctx).set_params(key, working);",
+            "mutated": "",
+            "catches": "a committed monster never written to the registry"
+        },
+        {
+            "file": "src/MonsterEditor.cpp",
+            "original": "\tmonster_registry(ctx).remove_custom(key);",
+            "mutated": "",
+            "catches": "a removed custom monster left in the registry"
+        },
+        {
+            "file": "src/MonsterEditor.cpp",
+            "original": "\treturn monster_registry(ctx).is_builtin(key);",
+            "mutated": "\treturn false;",
+            "catches": "every monster treated as custom"
         }
     ]
 }

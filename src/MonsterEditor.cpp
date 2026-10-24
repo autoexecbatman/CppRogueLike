@@ -1,58 +1,44 @@
 // file: MonsterEditor.cpp
 #include <algorithm>
 #include <cassert>
+#include <cctype>
 #include <cstddef>
 #include <format>
 #include <optional>
-#include <stdexcept>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
-
-#include <raylib.h>
 
 #include "Ai.h"
 #include "Attitude.h"
 #include "DiceExpr.h"
 #include "GameContext.h"
 #include "IntelligenceRating.h"
-#include "Menu.h"
 #include "MonsterEditor.h"
 #include "MonsterRegistry.h"
 #include "MonsterStrength.h"
 #include "Paths.h"
-#include "Renderer.h"
-#include "SpellRegistry.h"
 #include "Spellcasting.h"
 
-constexpr int LIST_WIDTH = 220;
-constexpr int HEADER_HEIGHT = 48;
-constexpr int HINT_HEIGHT = 28;
-constexpr int FIELD_HEIGHT = 26;
-constexpr int ITEM_HEIGHT = 30;
-constexpr int LIST_TILE_SIZE = 22;
-constexpr int LIST_PAD = 6;
-constexpr int PICKER_PAD = 10;
-constexpr int PICKER_SUB_HEADER_HEIGHT = 28;
-constexpr int PICKER_TILE_TARGET = 64; // drawn cell size the grid aims for
-
 static_assert(
-	is_well_formed_table(MonsterEditor::FIELDS),
-	"MonsterEditor::FIELDS is out of order or misplaces a plain number");
+	is_well_formed_table(MonsterEditorModel::FIELDS),
+	"MonsterEditorModel::FIELDS is out of order or misplaces a plain number");
 
-// Largest integer multiple of the sheet's own cell size that fits the target,
-// so a 16-pixel tile draws at 4x and a 64-pixel tile at 1x - never blurred.
 namespace
 {
-int picker_tile_size(const Renderer& renderer, int sheetIndex)
+
+// The monster registry the editor edits, which every caller requires.
+//
+// Example:
+//   monster_registry(ctx).get_all_keys().front();   // -> "goblin"
+MonsterRegistry& monster_registry(const GameContext& ctx)
 {
-	const int cellSize =
-		renderer.get_sheet_cell_size(static_cast<TileSheet>(sheetIndex));
-	return cellSize * std::max(1, PICKER_TILE_TARGET / cellSize);
+	assert(
+		ctx.monsterRegistry &&
+		"MonsterEditorModel: called without a monsterRegistry");
+	return *ctx.monsterRegistry;
 }
-} // namespace
-
-namespace
-{
 
 // Alignment fields cycle through their axis rather than being typed, so each
 // press moves one step and wraps at the end. The names come from Alignment.h,
@@ -125,840 +111,100 @@ std::string prettify_key(std::string_view key)
 } // namespace
 
 // ---------------------------------------------------------------------------
-// Lifecycle
+// Records
 // ---------------------------------------------------------------------------
 
-void MonsterEditor::enter(const MonsterRegistry& monsters)
+std::vector<std::string> MonsterEditorModel::keys(const GameContext& ctx) const
 {
-	active = true;
-	mode = Mode::NORMAL;
-	focus = 0;
-
-	keys = monsters.get_all_keys();
-
-	listCursor.reset(keys.size());
-	fieldCursor.reset(FIELD_COUNT);
-	pickerSheet = 0;
-	pickerScroll = 0;
-
-	load_working(monsters);
+	return monster_registry(ctx).get_all_keys();
 }
 
-void MonsterEditor::exit(GameContext& ctx)
+void MonsterEditorModel::load(const GameContext& ctx, std::string_view key)
 {
-	assert(
-		ctx.monsterRegistry &&
-		"MonsterEditor::exit: called without a monsterRegistry");
-
-	commit_working(*ctx.monsterRegistry);
-	active = false;
-	ctx.menus->push_back(make_main_menu(true, ctx));
-}
-
-void MonsterEditor::tick(GameContext& ctx)
-{
-	handle_input(ctx);
-
-	render(ctx);
-}
-
-// ---------------------------------------------------------------------------
-// Working copy
-// ---------------------------------------------------------------------------
-
-void MonsterEditor::load_working(const MonsterRegistry& monsters)
-{
-	if (keys.empty())
-	{
-		return;
-	}
-
-	const std::string& key = current_key();
-	working = monsters.get_params(key);
+	working = monster_registry(ctx).get_params(key);
 	selectedXpCount = 0;
 	selectedPower = 0;
-	fieldCursor.reset(FIELD_COUNT);
-	mode = Mode::NORMAL;
-	editBuffer.clear();
 }
 
-void MonsterEditor::commit_working(MonsterRegistry& monsters)
+void MonsterEditorModel::commit(GameContext& ctx, std::string_view key) const
 {
-	if (keys.empty())
-	{
-		return;
-	}
-	monsters.set_params(current_key(), working);
+	monster_registry(ctx).set_params(key, working);
+}
+
+void MonsterEditorModel::save(GameContext& ctx) const
+{
+	monster_registry(ctx).save(Paths::MONSTERS);
+}
+
+std::string MonsterEditorModel::add_record(GameContext& ctx) const
+{
+	MonsterParams defaults;
+	defaults.name = "New Monster";
+	defaults.corpseName = "dead monster";
+	defaults.corpseNutrition = 40;
+	defaults.corpseTaste = "It tastes like nothing you have eaten before.";
+	defaults.hitDice = MonsterHitDice{ 8, 0, { { 1, 1 } } };
+	defaults.thaco = 20;
+	defaults.ac = 10;
+	defaults.strength = std::nullopt;
+	defaults.naturalAttack = "claws";
+	defaults.damage = DamageInfo{ DiceExpr{ 1, 4, 0 }, DamageType::PHYSICAL };
+	defaults.baseWeight = 10;
+	defaults.levelMinimum = 1;
+	defaults.levelMaximum = 5;
+	return monster_registry(ctx).add_custom(std::move(defaults));
+}
+
+void MonsterEditorModel::remove_record(
+	GameContext& ctx,
+	std::string_view key) const
+{
+	monster_registry(ctx).remove_custom(key);
+}
+
+bool MonsterEditorModel::is_builtin(
+	const GameContext& ctx,
+	std::string_view key) const
+{
+	return monster_registry(ctx).is_builtin(key);
+}
+
+std::string MonsterEditorModel::row_label(
+	const GameContext& ctx,
+	std::string_view key) const
+{
+	const std::string& name = monster_registry(ctx).get_params(key).name;
+	return name.empty() ? prettify_key(key) : name;
+}
+
+std::string MonsterEditorModel::working_row_label(std::string_view key) const
+{
+	return working.name.empty() ? prettify_key(key) : working.name;
+}
+
+TileRef MonsterEditorModel::row_tile(
+	const GameContext& ctx,
+	std::string_view key) const
+{
+	return monster_registry(ctx).get_tile(key);
 }
 
 // ---------------------------------------------------------------------------
-// Input
+// Fields
 // ---------------------------------------------------------------------------
 
-void MonsterEditor::handle_input(GameContext& ctx)
-{
-	assert(
-		ctx.monsterRegistry &&
-		"MonsterEditor::handle_input: called without a monsterRegistry");
-
-	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
-
-	if (IsKeyPressed(KEY_ESCAPE))
-	{
-		exit(ctx);
-		return;
-	}
-
-	if (ctrl && IsKeyPressed(KEY_S))
-	{
-		commit_working(*ctx.monsterRegistry);
-		ctx.monsterRegistry->save(Paths::MONSTERS);
-		lastSaveTime = GetTime();
-		return;
-	}
-
-	if (IsKeyPressed(KEY_TAB))
-	{
-		focus = 1 - focus;
-		return;
-	}
-
-	if (mode == Mode::NORMAL)
-	{
-		handle_normal(ctx);
-	}
-	else if (mode == Mode::EDIT_STRING)
-	{
-		handle_edit_string();
-	}
-	else if (mode == Mode::TILE_PICKER)
-	{
-		handle_picker(*ctx.renderer);
-	}
-}
-
-void MonsterEditor::handle_normal(const GameContext& ctx)
-{
-	assert(
-		ctx.monsterRegistry &&
-		"MonsterEditor::handle_normal: called without a monsterRegistry");
-
-	MonsterRegistry& monsters = *ctx.monsterRegistry;
-	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
-	const Renderer& renderer = *ctx.renderer;
-	int bodyHeight = body_height(renderer);
-	const size_t visibleListRows = whole_rows_within(bodyHeight, ITEM_HEIGHT);
-	const size_t visibleFields = whole_rows_within(bodyHeight, FIELD_HEIGHT);
-
-	::Vector2 mouse = GetMousePosition();
-	bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
-
-	// Mouse: click selects panel and item. A click in the header is on neither panel.
-	if (clicked && mouse.y >= HEADER_HEIGHT)
-	{
-		const int pixelsBelowTop = static_cast<int>(mouse.y) - HEADER_HEIGHT;
-		if (mouse.x < LIST_WIDTH)
-		{
-			focus = 0;
-			const std::optional<size_t> row = listCursor.row_under(
-				whole_rows_within(pixelsBelowTop, ITEM_HEIGHT),
-				visibleListRows);
-			if (row && *row != listCursor.current_row())
-			{
-				commit_working(monsters);
-				listCursor.select(*row);
-				load_working(monsters);
-			}
-		}
-		else if (mode == Mode::NORMAL)
-		{
-			focus = 1;
-			const std::optional<size_t> field = fieldCursor.row_under(
-				whole_rows_within(pixelsBelowTop, FIELD_HEIGHT),
-				visibleFields);
-			if (field)
-			{
-				fieldCursor.select(*field);
-			}
-		}
-	}
-
-	// Mouse wheel scrolling
-	float wheel = GetMouseWheelMove();
-	if (wheel != 0.0f)
-	{
-		if (mouse.x < LIST_WIDTH)
-		{
-			listCursor.scroll_by(-static_cast<int>(wheel), visibleListRows);
-		}
-		else
-		{
-			fieldCursor.scroll_by(-static_cast<int>(wheel), visibleFields);
-		}
-	}
-
-	// Keyboard: list panel
-	if (focus == 0)
-	{
-		if (IsKeyPressed(KEY_UP) && listCursor.can_move_up())
-		{
-			commit_working(monsters);
-			listCursor.move_up();
-			load_working(monsters);
-		}
-		// A screen too short for one row has nowhere to scroll the cursor to.
-		else if (
-			IsKeyPressed(KEY_DOWN) && listCursor.can_move_down() &&
-			visibleListRows > 0)
-		{
-			commit_working(monsters);
-			listCursor.move_down(visibleListRows);
-			load_working(monsters);
-		}
-		else if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_RIGHT))
-		{
-			focus = 1;
-		}
-		else if (IsKeyPressed(KEY_A))
-		{
-			commit_working(monsters);
-			MonsterParams defaults;
-			defaults.name = "New Monster";
-			defaults.corpseName = "dead monster";
-			defaults.corpseNutrition = 40;
-			defaults.corpseTaste =
-				"It tastes like nothing you have eaten before.";
-			defaults.hitDice = MonsterHitDice{ 8, 0, { { 1, 1 } } };
-			defaults.thaco = 20;
-			defaults.ac = 10;
-			defaults.strength = std::nullopt;
-			defaults.naturalAttack = "claws";
-			defaults.damage =
-				DamageInfo{ DiceExpr{ 1, 4, 0 }, DamageType::PHYSICAL };
-			defaults.baseWeight = 10;
-			defaults.levelMinimum = 1;
-			defaults.levelMaximum = 5;
-			const std::string newKey = monsters.add_custom(std::move(defaults));
-			keys = monsters.get_all_keys();
-			listCursor.set_row_count(keys.size());
-			for (size_t keyIndex = 0; keyIndex < keys.size(); ++keyIndex)
-			{
-				if (keys[keyIndex] == newKey)
-				{
-					listCursor.select(keyIndex);
-					break;
-				}
-			}
-			load_working(monsters);
-			focus = 1;
-		}
-		else if (IsKeyPressed(KEY_DELETE))
-		{
-			if (!monsters.is_builtin(current_key()))
-			{
-				monsters.remove_custom(current_key());
-				keys = monsters.get_all_keys();
-				listCursor.set_row_count(keys.size());
-				load_working(monsters);
-			}
-		}
-		return;
-	}
-
-	// Keyboard: field panel
-	if (IsKeyPressed(KEY_UP) && fieldCursor.can_move_up())
-	{
-		fieldCursor.move_up();
-	}
-	else if (
-		IsKeyPressed(KEY_DOWN) && fieldCursor.can_move_down() &&
-		visibleFields > 0)
-	{
-		fieldCursor.move_down(visibleFields);
-	}
-	else if (IsKeyPressed(KEY_LEFT) && focus == 0)
-	{
-		focus = 0;
-	}
-
-	FieldId fieldId = current_field();
-
-	const FieldKind kind = descriptor_of(FIELDS, fieldId).kind;
-
-	const bool isPickerKey = IsKeyPressed(KEY_F2);
-	const bool isTileField = kind == FieldKind::TILE;
-	const bool isTileChosen = isTileField && IsKeyPressed(KEY_ENTER);
-	if (isPickerKey || isTileChosen)
-	{
-		mode = Mode::TILE_PICKER;
-		return;
-	}
-
-	if (IsKeyPressed(KEY_ENTER))
-	{
-		if (kind == FieldKind::TEXT)
-		{
-			editBuffer = field_value(fieldId);
-			mode = Mode::EDIT_STRING;
-		}
-		else if (kind == FieldKind::TOGGLE)
-		{
-			field_toggle(fieldId);
-		}
-		return;
-	}
-
-	if (kind == FieldKind::ADJUST)
-	{
-		int delta = ctrl ? 10 : 1;
-		if (IsKeyPressed(KEY_LEFT))
-		{
-			field_adjust(fieldId, -delta);
-		}
-		else if (IsKeyPressed(KEY_RIGHT))
-		{
-			field_adjust(fieldId, delta);
-		}
-	}
-}
-
-void MonsterEditor::handle_edit_string()
-{
-	int pressed = GetCharPressed();
-	while (pressed != 0)
-	{
-		if (pressed >= 32 && pressed < 127)
-		{
-			editBuffer += static_cast<char>(pressed);
-		}
-		pressed = GetCharPressed();
-	}
-
-	if (IsKeyPressed(KEY_BACKSPACE) && !editBuffer.empty())
-	{
-		editBuffer.pop_back();
-	}
-
-	if (IsKeyPressed(KEY_ENTER))
-	{
-		field_set_string(current_field(), editBuffer);
-		mode = Mode::NORMAL;
-	}
-
-	if (IsKeyPressed(KEY_ESCAPE))
-	{
-		mode = Mode::NORMAL;
-	}
-}
-
-void MonsterEditor::handle_picker(const Renderer& renderer)
-{
-	int totalSheets = renderer.get_loaded_sheet_count();
-
-	auto advance_sheet = [&](int dir)
-	{
-		for (int sheetsTried = 0; sheetsTried < totalSheets; ++sheetsTried)
-		{
-			pickerSheet = (pickerSheet + dir + totalSheets) % totalSheets;
-			if (renderer.sheet_is_loaded(static_cast<TileSheet>(pickerSheet)))
-			{
-				break;
-			}
-		}
-		pickerScroll = 0;
-	};
-
-	if (!renderer.sheet_is_loaded(static_cast<TileSheet>(pickerSheet)))
-	{
-		advance_sheet(1);
-	}
-
-	if (IsKeyPressed(KEY_LEFT))
-	{
-		advance_sheet(-1);
-	}
-	if (IsKeyPressed(KEY_RIGHT))
-	{
-		advance_sheet(1);
-	}
-	if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_F2))
-	{
-		mode = Mode::NORMAL;
-		return;
-	}
-
-	int sheetRows =
-		renderer.get_sheet_rows(static_cast<TileSheet>(pickerSheet));
-	::Vector2 mouse = GetMousePosition();
-	bool isMouseInPicker = mouse.x >= LIST_WIDTH;
-
-	if (isMouseInPicker)
-	{
-		float wheel = GetMouseWheelMove();
-		if (wheel != 0.0f)
-		{
-			pickerScroll = std::clamp(
-				pickerScroll - static_cast<int>(wheel),
-				0,
-				std::max(0, sheetRows - 1));
-		}
-	}
-
-	int gridY = HEADER_HEIGHT + PICKER_SUB_HEADER_HEIGHT;
-
-	if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && isMouseInPicker)
-	{
-		const int pickerTileSize = picker_tile_size(renderer, pickerSheet);
-		int col = static_cast<int>(mouse.x - LIST_WIDTH - PICKER_PAD) /
-			(pickerTileSize + 2);
-		int row = pickerScroll +
-			static_cast<int>(mouse.y - gridY) / (pickerTileSize + 2);
-		int sheetColumns =
-			renderer.get_sheet_cols(static_cast<TileSheet>(pickerSheet));
-
-		if (col >= 0 && col < sheetColumns && row >= 0 && row < sheetRows)
-		{
-			working.symbol =
-				TileRef{ static_cast<TileSheet>(pickerSheet), col, row };
-			mode = Mode::NORMAL;
-		}
-	}
-}
-
-// ---------------------------------------------------------------------------
-// Rendering
-// ---------------------------------------------------------------------------
-
-void MonsterEditor::render(const GameContext& ctx) const
-{
-	assert(
-		ctx.monsterRegistry &&
-		"MonsterEditor::render: called without a monsterRegistry");
-
-	const Renderer& renderer = *ctx.renderer;
-	int screenWidth = renderer.get_screen_width();
-	int screenHeight = renderer.get_screen_height();
-
-	DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 0, 0, 0, 255 });
-
-	render_header(renderer);
-	render_list(renderer, *ctx.monsterRegistry);
-
-	if (mode == Mode::TILE_PICKER)
-	{
-		render_picker(renderer);
-	}
-	else
-	{
-		render_fields(renderer);
-	}
-
-	render_hint(renderer);
-}
-
-void MonsterEditor::render_header(const Renderer& renderer) const
-{
-	int screenWidth = renderer.get_screen_width();
-	DrawRectangle(0, 0, screenWidth, HEADER_HEIGHT, Color{ 20, 20, 40, 255 });
-	renderer.draw_text_color(
-		Vector2D{ 8, 6 },
-		"MONSTER EDITOR",
-		Color{ 255, 255, 180, 255 });
-	renderer.draw_text_color(
-		Vector2D{ 8, 26 },
-		"Tab:switch focus  Left/Right:adjust  Enter:edit  F2:tile  Ctrl+S:save  Esc:exit",
-		Color{ 130, 130, 100, 255 });
-}
-
-int MonsterEditor::body_height(const Renderer& renderer)
-{
-	return renderer.get_screen_height() - HEADER_HEIGHT - HINT_HEIGHT;
-}
-
-void MonsterEditor::render_list(
-	const Renderer& renderer,
-	const MonsterRegistry& monsters) const
-{
-	int bodyY = HEADER_HEIGHT;
-	int bodyHeight = body_height(renderer);
-
-	DrawRectangle(0, bodyY, LIST_WIDTH, bodyHeight, Color{ 10, 10, 20, 255 });
-	DrawLine(
-		LIST_WIDTH,
-		bodyY,
-		LIST_WIDTH,
-		bodyY + bodyHeight,
-		Color{ 80, 80, 120, 255 });
-
-	const size_t visibleCount = whole_rows_within(bodyHeight, ITEM_HEIGHT);
-	const size_t scroll = listCursor.first_visible(visibleCount);
-
-	::Vector2 mouse = GetMousePosition();
-
-	for (
-		size_t monsterIndex = scroll; monsterIndex < keys.size();
-		++monsterIndex)
-	{
-		int itemY =
-			bodyY + static_cast<int>(monsterIndex - scroll) * ITEM_HEIGHT;
-		if (itemY + ITEM_HEIGHT > bodyY + bodyHeight)
-		{
-			break;
-		}
-
-		// Section separators
-		if (monsterIndex > scroll)
-		{
-			const bool previousIsBuiltin =
-				monsters.is_builtin(keys[monsterIndex - 1]);
-			const bool currentIsCustom =
-				!monsters.is_builtin(keys[monsterIndex]);
-
-			if (previousIsBuiltin && currentIsCustom)
-			{
-				DrawLine(
-					LIST_PAD,
-					itemY,
-					LIST_WIDTH - LIST_PAD,
-					itemY,
-					Color{ 70, 70, 70, 200 });
-			}
-		}
-
-		bool isSelected = (monsterIndex == listCursor.current_row());
-		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH &&
-			mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
-
-		Color bgColor{ 0, 0, 0, 0 };
-		if (isSelected && focus == 0)
-		{
-			bgColor = Color{ 60, 60, 0, 200 };
-		}
-		else if (isSelected)
-		{
-			bgColor = Color{ 40, 40, 0, 150 };
-		}
-		else if (hovered)
-		{
-			bgColor = Color{ 30, 30, 30, 160 };
-		}
-
-		if (bgColor.a > 0)
-		{
-			DrawRectangle(0, itemY, LIST_WIDTH, ITEM_HEIGHT, bgColor);
-		}
-
-		const TileRef tile =
-			isSelected ? working.symbol : monsters.get_tile(keys[monsterIndex]);
-		renderer.draw_tile_screen_sized(
-			Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - LIST_TILE_SIZE) / 2 },
-			tile,
-			LIST_TILE_SIZE);
-
-		const bool isCustom = !monsters.is_builtin(keys[monsterIndex]);
-
-		std::string displayName = isSelected ?
-			working.name :
-			monsters.get_params(keys[monsterIndex]).name;
-		if (displayName.empty())
-		{
-			displayName = prettify_key(keys[monsterIndex]);
-		}
-		if (isCustom)
-		{
-			displayName += " *";
-		}
-
-		constexpr Color SELECTED_TEXT{ 255, 255, 100, 255 };
-		constexpr Color PLAIN_TEXT{ 200, 200, 200, 255 };
-		const Color textColor = isSelected ? SELECTED_TEXT : PLAIN_TEXT;
-
-		renderer.draw_text_color(
-			Vector2D{
-				LIST_PAD + LIST_TILE_SIZE + 4,
-				itemY + (ITEM_HEIGHT - 16) / 2,
-			},
-			displayName,
-			textColor);
-	}
-}
-
-void MonsterEditor::render_fields(const Renderer& renderer) const
-{
-	int screenWidth = renderer.get_screen_width();
-	int panelX = LIST_WIDTH;
-	int panelY = HEADER_HEIGHT;
-	int fieldsWidth = screenWidth - LIST_WIDTH;
-	int fieldsHeight = body_height(renderer);
-
-	DrawRectangle(
-		panelX,
-		panelY,
-		fieldsWidth,
-		fieldsHeight,
-		Color{ 8, 8, 16, 255 });
-
-	const size_t visible = whole_rows_within(fieldsHeight, FIELD_HEIGHT);
-	const size_t scroll = fieldCursor.first_visible(visible);
-
-	::Vector2 mouse = GetMousePosition();
-
-	for (size_t fieldIndex = scroll; fieldIndex < FIELD_COUNT; ++fieldIndex)
-	{
-		int itemY =
-			panelY + static_cast<int>(fieldIndex - scroll) * FIELD_HEIGHT;
-		if (itemY + FIELD_HEIGHT > panelY + fieldsHeight)
-		{
-			break;
-		}
-
-		FieldId fieldId = static_cast<FieldId>(fieldIndex);
-		bool isSelected = (fieldIndex == fieldCursor.current_row());
-		bool hovered = mouse.x >= panelX && mouse.x < screenWidth &&
-			mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
-
-		Color bgColor{ 0, 0, 0, 0 };
-		if (isSelected && focus == 1)
-		{
-			bgColor = Color{ 60, 60, 0, 200 };
-		}
-		else if (isSelected)
-		{
-			bgColor = Color{ 40, 40, 0, 140 };
-		}
-		else if (hovered)
-		{
-			bgColor = Color{ 20, 20, 10, 120 };
-		}
-
-		if (bgColor.a > 0)
-		{
-			DrawRectangle(panelX, itemY, fieldsWidth, FIELD_HEIGHT, bgColor);
-		}
-
-		Color labelColor = isSelected ? Color{ 255, 220, 80, 255 } :
-										Color{ 150, 150, 150, 255 };
-		Color valueColor = isSelected ? Color{ 255, 255, 200, 255 } :
-										Color{ 200, 200, 200, 255 };
-
-		renderer.draw_text_color(
-			Vector2D{ panelX + 12, itemY + (FIELD_HEIGHT - 16) / 2 },
-			field_label(fieldId),
-			labelColor);
-
-		if (fieldId == FieldId::TILE)
-		{
-			renderer.draw_tile_screen_sized(
-				Vector2D{
-					screenWidth - LIST_TILE_SIZE - 12,
-					itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2,
-				},
-				working.symbol,
-				LIST_TILE_SIZE);
-			if (isSelected)
-			{
-				DrawRectangleLines(
-					screenWidth - LIST_TILE_SIZE - 12,
-					itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2,
-					LIST_TILE_SIZE,
-					LIST_TILE_SIZE,
-					Color{ 255, 255, 0, 255 });
-			}
-		}
-		else
-		{
-			std::string valueText;
-			if (isSelected && mode == Mode::EDIT_STRING)
-			{
-				valueText = editBuffer + "_";
-			}
-			else
-			{
-				valueText = field_value(fieldId);
-			}
-			int valuePixelX =
-				screenWidth - renderer.measure_text(valueText) - 16;
-			renderer.draw_text_color(
-				Vector2D{ valuePixelX, itemY + (FIELD_HEIGHT - 16) / 2 },
-				valueText,
-				valueColor);
-		}
-	}
-}
-
-void MonsterEditor::render_picker(const Renderer& renderer) const
-{
-	int screenWidth = renderer.get_screen_width();
-	int panelX = LIST_WIDTH;
-	int panelWidth = screenWidth - LIST_WIDTH;
-	int bodyY = HEADER_HEIGHT;
-	int bodyHeight = body_height(renderer);
-
-	DrawRectangle(
-		panelX,
-		bodyY,
-		panelWidth,
-		bodyHeight,
-		Color{ 8, 8, 24, 255 });
-
-	DrawRectangle(
-		panelX,
-		bodyY,
-		panelWidth,
-		PICKER_SUB_HEADER_HEIGHT,
-		Color{ 15, 15, 40, 255 });
-	int totalSheets = renderer.get_loaded_sheet_count();
-	std::string header = std::format(
-		"Sheet: {} ({}/{})  --  Left/Right:change  Esc/F2:back",
-		renderer.get_sheet_name(static_cast<TileSheet>(pickerSheet)),
-		pickerSheet + 1,
-		totalSheets);
-	renderer.draw_text_color(
-		Vector2D{ panelX + PICKER_PAD, bodyY + 6 },
-		header,
-		Color{ 200, 200, 120, 255 });
-
-	int gridY = bodyY + PICKER_SUB_HEADER_HEIGHT;
-	int gridHeight = bodyHeight - PICKER_SUB_HEADER_HEIGHT;
-	int sheetColumns =
-		renderer.get_sheet_cols(static_cast<TileSheet>(pickerSheet));
-	int sheetRows =
-		renderer.get_sheet_rows(static_cast<TileSheet>(pickerSheet));
-	const int pickerTileSize = picker_tile_size(renderer, pickerSheet);
-
-	::Vector2 mouse = GetMousePosition();
-
-	BeginScissorMode(panelX, gridY, panelWidth, gridHeight);
-
-	for (int row = pickerScroll; row < sheetRows; ++row)
-	{
-		int cellPixelY = gridY + (row - pickerScroll) * (pickerTileSize + 2);
-		if (cellPixelY >= gridY + gridHeight)
-		{
-			break;
-		}
-
-		for (int col = 0; col < sheetColumns; ++col)
-		{
-			int cellPixelX = panelX + PICKER_PAD + col * (pickerTileSize + 2);
-			TileRef tile{ static_cast<TileSheet>(pickerSheet), col, row };
-
-			bool isCurrentTile = (tile == working.symbol);
-			bool hovered = mouse.x >= cellPixelX &&
-				mouse.x < cellPixelX + pickerTileSize &&
-				mouse.y >= cellPixelY && mouse.y < cellPixelY + pickerTileSize;
-
-			if (isCurrentTile)
-			{
-				DrawRectangle(
-					cellPixelX,
-					cellPixelY,
-					pickerTileSize,
-					pickerTileSize,
-					Color{ 60, 60, 0, 220 });
-			}
-			else if (hovered)
-			{
-				DrawRectangle(
-					cellPixelX,
-					cellPixelY,
-					pickerTileSize,
-					pickerTileSize,
-					Color{ 40, 40, 20, 160 });
-			}
-
-			renderer.draw_tile_screen_sized(
-				Vector2D{ cellPixelX, cellPixelY },
-				tile,
-				pickerTileSize);
-
-			if (isCurrentTile)
-			{
-				DrawRectangleLines(
-					cellPixelX,
-					cellPixelY,
-					pickerTileSize,
-					pickerTileSize,
-					Color{ 255, 255, 0, 255 });
-			}
-		}
-	}
-
-	EndScissorMode();
-}
-
-void MonsterEditor::render_hint(const Renderer& renderer) const
-{
-	int screenWidth = renderer.get_screen_width();
-	int screenHeight = renderer.get_screen_height();
-	int hintY = screenHeight - HINT_HEIGHT;
-
-	DrawRectangle(0, hintY, screenWidth, HINT_HEIGHT, Color{ 20, 20, 40, 255 });
-
-	std::string hintText;
-	bool isSaveRecent = (GetTime() - lastSaveTime) < 2.0;
-
-	if (isSaveRecent)
-	{
-		hintText = "Saved!";
-	}
-	else if (mode == Mode::EDIT_STRING)
-	{
-		hintText = "Typing  --  Enter:confirm  Esc:cancel";
-	}
-	else if (mode == Mode::TILE_PICKER)
-	{
-		hintText =
-			"Tile Picker  --  Left/Right:sheet  Click:assign  Esc/F2:back";
-	}
-	else if (focus == 0)
-	{
-		hintText =
-			"[LIST] Up/Down:navigate  A:add new  Del:remove custom  Enter:edit fields  Tab:switch  Ctrl+S:save  Esc:exit";
-	}
-	else
-	{
-		hintText =
-			"[FIELDS] Up/Down:navigate  Left/Right:adjust  Enter:edit  F2:tile  Tab:switch  Ctrl+S:save  Esc:exit";
-	}
-
-	constexpr Color SAVED_HINT{ 100, 255, 100, 255 };
-	constexpr Color PLAIN_HINT{ 160, 160, 120, 255 };
-	Color hintColor = isSaveRecent ? SAVED_HINT : PLAIN_HINT;
-	renderer.draw_text_color(Vector2D{ 8, hintY + 6 }, hintText, hintColor);
-}
-
-// ---------------------------------------------------------------------------
-// Field accessors
-// ---------------------------------------------------------------------------
-
-const std::string& MonsterEditor::current_key() const
-{
-	if (keys.empty())
-	{
-		throw std::out_of_range(
-			"MonsterEditor::current_key -- key list is empty");
-	}
-	return keys[listCursor.current_row()];
-}
-
-MonsterEditor::FieldId MonsterEditor::current_field() const
-{
-	return static_cast<FieldId>(fieldCursor.current_row());
-}
-
-std::string MonsterEditor::field_label(FieldId field) const
+std::string MonsterEditorModel::field_label(FieldId field) const
 {
 	return std::string{ descriptor_of(FIELDS, field).label };
 }
 
-void MonsterEditor::set_damage_dice(int num, int sides, int bonus)
+void MonsterEditorModel::set_damage_dice(int num, int sides, int bonus)
 {
 	working.damage =
 		DamageInfo{ DiceExpr{ num, sides, bonus }, working.damage.damageType };
 }
 
-std::string MonsterEditor::field_value(FieldId field) const
+std::string MonsterEditorModel::field_value(FieldId field) const
 {
 	const Descriptor& descriptor = descriptor_of(FIELDS, field);
 	if (descriptor.plain.has_value())
@@ -1152,12 +398,14 @@ std::string MonsterEditor::field_value(FieldId field) const
 	}
 	default:
 	{
-		refuse_misrouted_field(descriptor.label, "MonsterEditor::field_value");
+		refuse_misrouted_field(
+			descriptor.label,
+			"MonsterEditorModel::field_value");
 	}
 	}
 }
 
-void MonsterEditor::field_adjust(FieldId field, int delta)
+void MonsterEditorModel::field_adjust(FieldId field, int delta)
 {
 	const Descriptor& descriptor = descriptor_of(FIELDS, field);
 	if (descriptor.plain.has_value())
@@ -1324,12 +572,14 @@ void MonsterEditor::field_adjust(FieldId field, int delta)
 	}
 	default:
 	{
-		refuse_misrouted_field(descriptor.label, "MonsterEditor::field_adjust");
+		refuse_misrouted_field(
+			descriptor.label,
+			"MonsterEditorModel::field_adjust");
 	}
 	}
 }
 
-void MonsterEditor::field_toggle(FieldId field)
+void MonsterEditorModel::field_toggle(FieldId field)
 {
 	if (field == FieldId::AI_TYPE)
 	{
@@ -1439,11 +689,11 @@ void MonsterEditor::field_toggle(FieldId field)
 	{
 		refuse_misrouted_field(
 			descriptor_of(FIELDS, field).label,
-			"MonsterEditor::field_toggle");
+			"MonsterEditorModel::field_toggle");
 	}
 }
 
-void MonsterEditor::field_set_string(FieldId field, std::string newValue)
+void MonsterEditorModel::field_set_string(FieldId field, std::string newValue)
 {
 	switch (field)
 	{
@@ -1499,7 +749,7 @@ void MonsterEditor::field_set_string(FieldId field, std::string newValue)
 	{
 		refuse_misrouted_field(
 			descriptor_of(FIELDS, field).label,
-			"MonsterEditor::field_set_string");
+			"MonsterEditorModel::field_set_string");
 	}
 	}
 }

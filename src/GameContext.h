@@ -49,7 +49,8 @@ template <typename Model>
 class RecordEditor;
 class ItemEditorModel;
 using ItemEditor = RecordEditor<ItemEditorModel>;
-class MonsterEditor;
+class MonsterEditorModel;
+using MonsterEditor = RecordEditor<MonsterEditorModel>;
 class SpellEditor;
 #endif
 class Stairs;

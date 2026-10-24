@@ -1,42 +1,53 @@
 // file: MonsterEditor.h
 #pragma once
 
-// Full-screen in-game monster data editor.
-// Entered from main menu ("Monster Editor" option).
-// Edits the MonsterRegistry in ctx and saves it to data/content/monsters.json.
+// The monster editor: the shared RecordEditor frame over MonsterEditorModel,
+// which knows monsters. Entered from the main menu ("Monster Editor"); edits
+// the MonsterRegistry in ctx and saves it to data/content/monsters.json. The
+// controls are the frame's, in RecordEditor.h.
 //
-// Controls:
-//   Tab              -- switch focus: list panel <-> field panel
-//   Up / Down        -- navigate monster list or field list
-//   Left / Right     -- adjust integer field value (+/-1)
-//   Ctrl+Left/Right  -- adjust integer field value (+/-10)
-//   Enter            -- edit string field / toggle bool / open tile picker
-//   F2               -- open tile picker for current monster tile
-//   Ctrl+S           -- save monsters.json
-//   Esc              -- commit edits and exit to main menu
+// Usage:
+//
+//   MonsterEditor editor{};   // RecordEditor<MonsterEditorModel>
+//   editor.enter(ctx);        // needs ctx.monsterRegistry
+//   editor.tick(ctx);         // one frame
+//   editor.current_key();     // -> "goblin", the first standard monster
+//   using Field = MonsterEditorModel::FieldId;
+//   editor.record_model().field_value(Field::THACO);   // -> "20"
 
 #include <array>
+#include <cstddef>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "EditorField.h"
-#include "ListCursor.h"
 #include "MonsterRegistry.h"
+#include "RecordEditor.h"
+#include "TileRef.h"
 
 struct GameContext;
-class Renderer;
 
-class MonsterEditor
+// What the monster editor knows about monsters: the fields, how each is shown
+// and changed, and how monsters are read from and written to the registry.
+class MonsterEditorModel
 {
 private:
-	enum class Mode
-	{
-		NORMAL,
-		EDIT_STRING,
-		TILE_PICKER
-	};
+	// The selected monster as it is being edited; its tile is its symbol.
+	MonsterParams working{};
 
+	// Which of the working monster's hit dice counts the XP field edits.
+	size_t selectedXpCount{ 0 };
+
+	// Which of the working monster's innate powers the spell and frequency
+	// fields edit.
+	size_t selectedPower{ 0 };
+
+	// Rebuilds the working damage from dice, so its text and its range follow.
+	void set_damage_dice(int num, int sides, int bonus);
+
+public:
 	enum class FieldId
 	{
 		NAME,
@@ -88,73 +99,9 @@ private:
 	// One field's entry in FIELDS.
 	using Descriptor = FieldDescriptor<FieldId, MonsterParams>;
 
-	static constexpr size_t FIELD_COUNT = static_cast<size_t>(FieldId::COUNT);
+	static constexpr std::size_t FIELD_COUNT =
+		static_cast<std::size_t>(FieldId::COUNT);
 
-	bool active{ false };
-	Mode mode{ Mode::NORMAL };
-	int focus{ 0 }; // 0 = list panel, 1 = field panel
-
-	// Monster list (string keys: builtins, then custom)
-	std::vector<std::string> keys;
-	ListCursor listCursor{};
-
-	// Working copy of selected monster's params
-	MonsterParams working{};
-
-	// Which of the working monster's hit dice counts the XP field edits.
-	size_t selectedXpCount{ 0 };
-
-	// Which of the working monster's innate powers the spell and frequency fields edit.
-	size_t selectedPower{ 0 };
-
-	// Field navigation
-	ListCursor fieldCursor{};
-	std::string editBuffer;
-
-	// Tile picker state
-	int pickerSheet{ 0 };
-	int pickerScroll{ 0 };
-
-	// Status feedback
-	double lastSaveTime{ -100.0 };
-
-	void load_working(const MonsterRegistry& monsters);
-	void commit_working(MonsterRegistry& monsters);
-
-	void handle_input(GameContext& ctx);
-	void handle_normal(const GameContext& ctx);
-	void handle_edit_string();
-	void handle_picker(const Renderer& renderer);
-
-	void render(const GameContext& ctx) const;
-	void render_header(const Renderer& renderer) const;
-	// The height of the panels between the header and the hint bar. Input and drawing both
-	// read it, so a click and the row drawn under it come from one row count.
-	//
-	// Example:
-	//   body_height(renderer);   // a 900-pixel screen -> 824, after a 48 header and a 28 hint bar
-	[[nodiscard]] static int body_height(const Renderer& renderer);
-	void render_list(
-		const Renderer& renderer,
-		const MonsterRegistry& monsters) const;
-	void render_fields(const Renderer& renderer) const;
-	void render_picker(const Renderer& renderer) const;
-	void render_hint(const Renderer& renderer) const;
-
-	[[nodiscard]] const std::string& current_key() const;
-	[[nodiscard]] FieldId current_field() const;
-
-	[[nodiscard]] std::string field_label(FieldId field) const;
-	// Rebuilds the working damage from dice, so its text and its range follow.
-	void set_damage_dice(int num, int sides, int bonus);
-
-	[[nodiscard]] std::string field_value(FieldId field) const;
-
-	void field_adjust(FieldId field, int delta);
-	void field_toggle(FieldId field);
-	void field_set_string(FieldId field, std::string newValue);
-
-public:
 	// Every field, in FieldId order: how it is edited, its label, and a plain
 	// number's member and bounds.
 	static constexpr std::array<Descriptor, FIELD_COUNT> FIELDS{ {
@@ -381,9 +328,87 @@ public:
 		Descriptor{ FieldId::TILE, FieldKind::TILE, "Tile", std::nullopt },
 	} };
 
-	void enter(const MonsterRegistry& monsters);
-	void exit(GameContext& ctx);
-	void tick(GameContext& ctx);
+	// The monster editor's colours and words.
+	static constexpr EditorLook LOOK{
+		.title = "MONSTER EDITOR",
+		.headerHint =
+			"Tab:switch focus  Left/Right:adjust  Enter:edit  F2:tile  Ctrl+S:save  Esc:exit",
+		.listHint =
+			"[LIST] Up/Down:navigate  A:add new  Del:remove custom  Enter:edit fields  Tab:switch  Ctrl+S:save  Esc:exit",
+		.fieldsHint =
+			"[FIELDS] Up/Down:navigate  Left/Right:adjust  Enter:edit  F2:tile  Tab:switch  Ctrl+S:save  Esc:exit",
+		.headerBackground = Color{ 20, 20, 40, 255 },
+		.titleText = Color{ 255, 255, 180, 255 },
+		.headerHintText = Color{ 130, 130, 100, 255 },
+		.listBackground = Color{ 10, 10, 20, 255 },
+		.panelDivider = Color{ 80, 80, 120, 255 },
+		.listRowFocused = Color{ 60, 60, 0, 200 },
+		.listRowSelected = Color{ 40, 40, 0, 150 },
+		.listRowHovered = Color{ 30, 30, 30, 160 },
+		.listTextSelected = Color{ 255, 255, 100, 255 },
+		.listTextPlain = Color{ 200, 200, 200, 255 },
+		.fieldsBackground = Color{ 8, 8, 16, 255 },
+		.fieldRowFocused = Color{ 60, 60, 0, 200 },
+		.fieldRowSelected = Color{ 40, 40, 0, 140 },
+		.fieldRowHovered = Color{ 20, 20, 10, 120 },
+		.labelSelected = Color{ 255, 220, 80, 255 },
+		.labelPlain = Color{ 150, 150, 150, 255 },
+		.valueSelected = Color{ 255, 255, 200, 255 },
+		.valuePlain = Color{ 200, 200, 200, 255 },
+		.tileOutline = Color{ 255, 255, 0, 255 },
+		.pickerBackground = Color{ 8, 8, 24, 255 },
+		.pickerSubHeader = Color{ 15, 15, 40, 255 },
+		.pickerHeaderText = Color{ 200, 200, 120, 255 },
+		.pickerCurrent = Color{ 60, 60, 0, 220 },
+		.pickerHovered = Color{ 40, 40, 20, 160 },
+		.hintBackground = Color{ 20, 20, 40, 255 },
+		.savedHint = Color{ 100, 255, 100, 255 },
+		.plainHint = Color{ 160, 160, 120, 255 },
+	};
 
-	[[nodiscard]] bool is_active() const { return active; }
+	// Every monster's key: the standard ones in their fixed order, then the
+	// custom ones in key order.
+	[[nodiscard]] std::vector<std::string> keys(const GameContext& ctx) const;
+	// Makes the monster under key the working copy, with its first hit dice
+	// count and first innate power selected.
+	void load(const GameContext& ctx, std::string_view key);
+	// Writes the working copy, tile included, back under key.
+	void commit(GameContext& ctx, std::string_view key) const;
+	// Writes monsters.json.
+	void save(GameContext& ctx) const;
+	// Adds a new monster with a weak melee creature's defaults and returns its
+	// key.
+	[[nodiscard]] std::string add_record(GameContext& ctx) const;
+	// Removes a custom monster. The frame refuses a standard one.
+	void remove_record(GameContext& ctx, std::string_view key) const;
+	// Whether the monster is a standard one, so it cannot be removed.
+	[[nodiscard]] bool is_builtin(
+		const GameContext& ctx,
+		std::string_view key) const;
+
+	// The list's text for a monster that is not selected: its name, or its key
+	// made readable when it has none.
+	[[nodiscard]] std::string row_label(
+		const GameContext& ctx,
+		std::string_view key) const;
+	// The list's text for the selected monster, from the working copy.
+	[[nodiscard]] std::string working_row_label(std::string_view key) const;
+	// The tile the list shows for a monster that is not selected.
+	[[nodiscard]] TileRef row_tile(
+		const GameContext& ctx,
+		std::string_view key) const;
+
+	[[nodiscard]] TileRef working_tile() const { return working.symbol; }
+
+	void set_working_tile(TileRef tile) { working.symbol = tile; }
+
+	[[nodiscard]] std::string field_label(FieldId field) const;
+	[[nodiscard]] std::string field_value(FieldId field) const;
+	void field_adjust(FieldId field, int delta);
+	void field_toggle(FieldId field);
+	void field_set_string(FieldId field, std::string newValue);
 };
+
+// The monster editor itself; its members are defined in RecordEditor.cpp.
+using MonsterEditor = RecordEditor<MonsterEditorModel>;
+extern template class RecordEditor<MonsterEditorModel>;

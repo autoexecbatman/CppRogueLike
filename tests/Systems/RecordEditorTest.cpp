@@ -27,6 +27,7 @@
 #include "src/EditorField.h"
 #include "src/EditorInput.h"
 #include "src/ItemEditor.h"
+#include "src/MonsterEditor.h"
 #include "src/RecordEditor.h"
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"
@@ -141,7 +142,7 @@ template <typename Model>
 	editor.enter(ctx);
 	const std::optional<size_t> field = first_plain_number<Model>();
 	exit_unless(field.has_value(), "the model has no plain number");
-	const auto fieldId = static_cast<typename Model::FieldId>(*field);
+	const auto fieldId = Model::FIELDS.at(*field).field;
 	editor.handle_input(click_at(field_row(*field)), ctx);
 	editor.handle_input(
 		frame({ EditorKey::RIGHT }, { EditorKey::CONTROL }),
@@ -165,8 +166,6 @@ template <typename Model>
 class RecordEditorTest : public ::testing::Test
 {
 protected:
-	using FieldId = typename Model::FieldId;
-
 	void SetUp() override
 	{
 		ctx = mock.to_game_context();
@@ -178,7 +177,7 @@ protected:
 	// The selected record's field n as the editor shows it.
 	std::string shown(size_t field) const
 	{
-		return editor.record_model().field_value(static_cast<FieldId>(field));
+		return editor.record_model().field_value(Model::FIELDS.at(field).field);
 	}
 
 	MockGameContext mock{};
@@ -187,7 +186,7 @@ protected:
 	std::vector<std::string> keys{};
 };
 
-using EditorModels = ::testing::Types<ItemEditorModel>;
+using EditorModels = ::testing::Types<ItemEditorModel, MonsterEditorModel>;
 TYPED_TEST_SUITE(RecordEditorTest, EditorModels);
 
 TYPED_TEST(RecordEditorTest, AClickOnAListRowSelectsThatRecord)
@@ -240,11 +239,10 @@ TYPED_TEST(RecordEditorTest, TabMovesFocusToTheFieldsAndBack)
 
 TYPED_TEST(RecordEditorTest, DownInTheFieldsMovesTheFieldCursor)
 {
-	using FieldId = typename TestFixture::FieldId;
 	this->editor.handle_input(frame({ EditorKey::TAB }, {}), this->ctx);
 	this->editor.handle_input(frame({ EditorKey::DOWN }, {}), this->ctx);
 
-	EXPECT_EQ(this->editor.current_field(), static_cast<FieldId>(1));
+	EXPECT_EQ(this->editor.current_field(), TypeParam::FIELDS.at(1).field);
 }
 
 TYPED_TEST(RecordEditorTest, ACtrlArrowStepsAPlainNumberByTenAndABareOneByOne)
@@ -313,7 +311,8 @@ TYPED_TEST(RecordEditorTest, AddSelectsTheNewRecordAndFocusesItsFields)
 }
 
 // Shipped records come first and custom ones after, so the line between them
-// is drawn once, above the first custom record, however many follow it.
+// is drawn once, above the first custom record, however many follow it. A
+// Model may ship custom records of its own, so the rows are read from it.
 TYPED_TEST(RecordEditorTest, CustomRecordsAreListedLastWithOneDividerAboveThem)
 {
 	auto divider_rows = [this]()
@@ -329,8 +328,6 @@ TYPED_TEST(RecordEditorTest, CustomRecordsAreListedLastWithOneDividerAboveThem)
 		}
 		return rows;
 	};
-	EXPECT_TRUE(divider_rows().empty()) << "a divider with no custom record";
-
 	this->editor.handle_input(frame({ EditorKey::ADD }, {}), this->ctx);
 	const std::string first = this->editor.current_key();
 	this->editor.handle_input(frame({ EditorKey::TAB }, {}), this->ctx);
@@ -343,12 +340,19 @@ TYPED_TEST(RecordEditorTest, CustomRecordsAreListedLastWithOneDividerAboveThem)
 		std::ranges::count(after, first) +
 			std::ranges::count(after, this->editor.current_key()),
 		2);
-	EXPECT_FALSE(
-		this->editor.record_model().is_builtin(this->ctx, after.back()));
-	EXPECT_FALSE(this->editor.record_model().is_builtin(
-		this->ctx,
-		after[after.size() - 2]));
-	EXPECT_EQ(divider_rows(), std::vector<size_t>{ this->keys.size() });
+	std::vector<size_t> customRows{};
+	for (size_t row = 0; row < after.size(); ++row)
+	{
+		if (!this->editor.record_model().is_builtin(this->ctx, after[row]))
+		{
+			customRows.push_back(row);
+		}
+	}
+	ASSERT_GE(customRows.size(), 2u) << "the two added records are custom";
+	ASSERT_GT(customRows.front(), 0u) << "no shipped record before them";
+	// Every row from the first custom one to the end is custom.
+	EXPECT_EQ(customRows.size(), after.size() - customRows.front());
+	EXPECT_EQ(divider_rows(), std::vector<size_t>{ customRows.front() });
 }
 
 TYPED_TEST(RecordEditorTest, DeleteRemovesACustomRecordAndKeepsAShippedOne)
@@ -365,6 +369,43 @@ TYPED_TEST(RecordEditorTest, DeleteRemovesACustomRecordAndKeepsAShippedOne)
 		this->editor.record_model().keys(this->ctx);
 	EXPECT_EQ(std::ranges::count(after, added), 0);
 	EXPECT_EQ(after.size(), this->keys.size());
+}
+
+// The XP field edits one hit dice count of the selected monster. Choosing
+// another monster selects its first count, so a mimic's second count is not
+// carried to a goblin that has one.
+TEST(RecordEditorMonsterTest, ChoosingAnotherMonsterSelectsItsFirstHitDiceCount)
+{
+	using Field = MonsterEditorModel::FieldId;
+	MockGameContext mock{};
+	GameContext ctx = mock.to_game_context();
+	MonsterEditor editor{};
+	editor.enter(ctx);
+	const std::vector<std::string> keys = editor.record_model().keys(ctx);
+	const auto mimic = std::ranges::find(keys, "mimic");
+	ASSERT_NE(mimic, keys.end()) << "the shipped monsters have no mimic";
+	const auto row_of = [](Field field)
+	{
+		const auto is_field = [field](const auto& descriptor)
+		{
+			return descriptor.field == field;
+		};
+		return static_cast<size_t>(
+			std::ranges::find_if(MonsterEditorModel::FIELDS, is_field) -
+			MonsterEditorModel::FIELDS.begin());
+	};
+	editor.handle_input(
+		click_at(list_row(static_cast<size_t>(mimic - keys.begin()))),
+		ctx);
+	editor.handle_input(click_at(field_row(row_of(Field::XP_COUNT))), ctx);
+	editor.handle_input(frame({ EditorKey::RIGHT }, {}), ctx);
+	ASSERT_EQ(editor.record_model().field_value(Field::XP_COUNT), "10 HD");
+
+	editor.handle_input(click_at(list_row(0)), ctx);
+
+	EXPECT_EQ(editor.current_key(), "goblin");
+	EXPECT_EQ(editor.record_model().field_value(Field::XP_COUNT), "1 HD");
+	EXPECT_EQ(editor.record_model().field_value(Field::XP), "105");
 }
 
 // end of file: RecordEditorTest.cpp

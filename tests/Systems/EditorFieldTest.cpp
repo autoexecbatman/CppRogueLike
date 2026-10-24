@@ -397,7 +397,7 @@ TEST(EditorFieldTest, TheMonsterEditorsFieldsAreTheOldCodesKindsAndLabels)
 {
 	expect_kinds_and_labels(
 		"MonsterEditor",
-		MonsterEditor::FIELDS,
+		MonsterEditorModel::FIELDS,
 		std::span{ MONSTER_FIELDS_AT_HEAD });
 }
 
@@ -421,7 +421,7 @@ TEST(EditorFieldTest, TheMonsterEditorsPlainNumbersShowAndStepAsTheOldCodeDid)
 {
 	expect_plain_numbers<MonsterParams>(
 		"MonsterEditor",
-		MonsterEditor::FIELDS,
+		MonsterEditorModel::FIELDS,
 		std::span{ MONSTER_PLAIN_AT_HEAD });
 }
 

@@ -187,11 +187,8 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
 		assert(
 			ctx.monsterEditor &&
 			"make_main_menu monsterEditorCommand: called without a monsterEditor");
-		assert(
-			ctx.monsterRegistry &&
-			"make_main_menu monsterEditorCommand: called without a monsterRegistry");
 
-		ctx.monsterEditor->enter(*ctx.monsterRegistry);
+		ctx.monsterEditor->enter(ctx);
 	};
 	entries.push_back({ "Monster Editor", 'm', monsterEditorCommand });
 
