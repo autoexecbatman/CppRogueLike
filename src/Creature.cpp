@@ -1237,6 +1237,24 @@ bool Creature::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 		break;
 	}
 
+	case EquipmentSlot::BOOTS:
+	{
+		if (!item.is_boots())
+		{
+			return false;
+		}
+		break;
+	}
+
+	case EquipmentSlot::CLOAK:
+	{
+		if (!item.is_cloak())
+		{
+			return false;
+		}
+		break;
+	}
+
 	case EquipmentSlot::GIRDLE:
 	{
 		if (!item.is_girdle())
@@ -1257,7 +1275,8 @@ bool Creature::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 
 	default:
 	{
-		// Other slots (CLOAK, BRACERS, BOOTS, MISSILES) - no items defined yet
+		// Bracers and ammunition have no item class to check against yet, and
+		// NONE names no slot.
 		break;
 	}
 	}

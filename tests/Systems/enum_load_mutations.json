@@ -39,9 +39,9 @@
         },
         {
             "file": "src/Item.cpp",
-            "original": "\tcase ItemClass::QUEST_ITEM:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
-            "mutated": "\tcase ItemClass::QUEST_ITEM:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
-            "catches": "a saved itemClass no ItemClass has loads"
+            "original": "\titemClass = parse_item_class(source.at(\"itemClass\").get<std::string>());",
+            "mutated": "\titemClass = ItemClass::UNKNOWN;",
+            "catches": "a saved itemClass no class names loads"
         },
         {
             "file": "src/Item.cpp",

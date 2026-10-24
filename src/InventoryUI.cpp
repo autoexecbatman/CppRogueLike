@@ -489,7 +489,8 @@ void InventoryUI::rebuild_item_list(const Player& player, GameContext& ctx)
 		BackpackEntry header;
 		header.kind = BackpackEntry::Kind::CATEGORY_HEADER;
 		header.category = cat;
-		header.headerText = std::format("-- {} --", get_category_name(cat));
+		header.headerText =
+			std::format("-- {} --", InventoryActions::category_name(cat));
 		header.item = nullptr;
 		listEntries.push_back(std::move(header));
 
@@ -1118,7 +1119,7 @@ std::string InventoryUI::format_value_info(const Item& item) const
 	return std::format("Weight: {} lb", item.enhancement.weight);
 }
 
-std::string InventoryUI::get_category_name(ItemCategory cat) const
+std::string InventoryActions::category_name(ItemCategory cat)
 {
 	switch (cat)
 	{
@@ -1141,6 +1142,14 @@ std::string InventoryUI::get_category_name(ItemCategory cat) const
 	case ItemCategory::GAUNTLETS:
 	{
 		return "Gauntlets";
+	}
+	case ItemCategory::BOOTS:
+	{
+		return "Boots";
+	}
+	case ItemCategory::CLOAK:
+	{
+		return "Cloaks";
 	}
 	case ItemCategory::GIRDLE:
 	{

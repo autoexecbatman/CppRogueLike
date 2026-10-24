@@ -1,0 +1,101 @@
+{
+    "cwd": "E:/repo/C++RogueLike",
+    "test_command": [
+        "powershell",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tests/run_suite.ps1",
+        "-Configuration",
+        "Debug",
+        "-Filter",
+        "--gtest_filter=BootsAndCloaksTest.*:EquipHandTest.*:EnumLoadRefusalTest.*:CodecRoundTripTest.*:EnumCycleTest.*:ItemAppearanceTest.*"
+    ],
+    "mutations": [
+        {
+            "file": "src/ItemClassification.h",
+            "original": "\t\t{ ItemClass::BOOTS, \"boots\", ItemCategory::BOOTS },",
+            "mutated": "\t\t{ ItemClass::BOOTS, \"boots\", ItemCategory::GAUNTLETS },",
+            "catches": "boots listed under the gauntlets heading"
+        },
+        {
+            "file": "src/ItemClassification.h",
+            "original": "\t\t{ ItemClass::CLOAK, \"cloak\", ItemCategory::CLOAK },",
+            "mutated": "\t\t{ ItemClass::CLOAK, \"cloak\", ItemCategory::GAUNTLETS },",
+            "catches": "cloaks listed under the gauntlets heading"
+        },
+        {
+            "file": "src/ItemClassification.cpp",
+            "original": "\treturn item_class_record(itemClass).category;",
+            "mutated": "\treturn ItemCategory::UNKNOWN;",
+            "catches": "every item listed under Other"
+        },
+        {
+            "file": "src/ItemClassification.h",
+            "original": "\treturn itemClass == ItemClass::BOOTS;",
+            "mutated": "\treturn itemClass == ItemClass::GAUNTLETS;",
+            "catches": "the boots slot taking gauntlets and refusing boots"
+        },
+        {
+            "file": "src/ItemClassification.h",
+            "original": "\treturn itemClass == ItemClass::CLOAK;",
+            "mutated": "\treturn itemClass == ItemClass::BOOTS;",
+            "catches": "the cloak slot taking boots and refusing a cloak"
+        },
+        {
+            "file": "src/Creature.cpp",
+            "original": "\t\tif (!item.is_boots())",
+            "mutated": "\t\tif (false)",
+            "catches": "the boots slot taking anything"
+        },
+        {
+            "file": "src/Creature.cpp",
+            "original": "\t\tif (!item.is_cloak())",
+            "mutated": "\t\tif (false)",
+            "catches": "the cloak slot taking anything"
+        },
+        {
+            "file": "src/InventoryUI.cpp",
+            "original": "\t\treturn \"Boots\";",
+            "mutated": "\t\treturn \"Gauntlets\";",
+            "catches": "boots headed as gauntlets in the backpack"
+        },
+        {
+            "file": "src/InventoryUI.cpp",
+            "original": "\t\treturn \"Cloaks\";",
+            "mutated": "\t\treturn \"Other\";",
+            "catches": "cloaks headed as Other in the backpack"
+        },
+        {
+            "file": "src/InventoryUI.h",
+            "original": "\tItemCategory::GAUNTLETS,\n\tItemCategory::BOOTS,\n",
+            "mutated": "\tItemCategory::GAUNTLETS,\n",
+            "catches": "boots given no place in the backpack's order"
+        },
+        {
+            "file": "src/InventoryUI.h",
+            "original": "\tItemCategory::BOOTS,\n\tItemCategory::CLOAK,\n",
+            "mutated": "\tItemCategory::BOOTS,\n",
+            "catches": "cloaks given no place in the backpack's order"
+        },
+        {
+            "file": "src/Item.cpp",
+            "original": "\toutput[\"itemClass\"] = std::string{ encode_item_class(itemClass) };",
+            "mutated": "\toutput[\"itemClass\"] = static_cast<int>(itemClass);",
+            "catches": "an item's class saved as a number that shifts when a class is added"
+        },
+        {
+            "file": "data/content/items.json",
+            "original": "    \"boots_of_speed\": {\n        \"acBonus\": 0,\n        \"agesYears\": 0,\n        \"appearance\": \"boots\",\n        \"application\": \"add\",\n        \"baseWeight\": 1,\n        \"weight\": 1,\n        \"category\": \"\",\n        \"chaBonus\": 0,\n        \"color\": \"green_black\",\n        \"conBonus\": 0,\n        \"confuseTurns\": 0,\n        \"consumableAmount\": \"0\",\n        \"consumableBuff\": \"none\",\n        \"consumableEffect\": \"none\",\n        \"damage\": 0,\n        \"dexBonus\": 2,\n        \"duration\": \"0\",\n        \"durationUnit\": \"rounds\",\n        \"effect\": \"none\",\n        \"effectBonus\": 0,\n        \"equipmentSlot\": \"boots\",\n        \"exceptionalStrength\": 0,\n        \"handRequirement\": \"one_handed\",\n        \"intBonus\": 0,\n        \"itemClass\": \"boots\",",
+            "mutated": "    \"boots_of_speed\": {\n        \"acBonus\": 0,\n        \"agesYears\": 0,\n        \"appearance\": \"boots\",\n        \"application\": \"add\",\n        \"baseWeight\": 1,\n        \"weight\": 1,\n        \"category\": \"\",\n        \"chaBonus\": 0,\n        \"color\": \"green_black\",\n        \"conBonus\": 0,\n        \"confuseTurns\": 0,\n        \"consumableAmount\": \"0\",\n        \"consumableBuff\": \"none\",\n        \"consumableEffect\": \"none\",\n        \"damage\": 0,\n        \"dexBonus\": 2,\n        \"duration\": \"0\",\n        \"durationUnit\": \"rounds\",\n        \"effect\": \"none\",\n        \"effectBonus\": 0,\n        \"equipmentSlot\": \"boots\",\n        \"exceptionalStrength\": 0,\n        \"handRequirement\": \"one_handed\",\n        \"intBonus\": 0,\n        \"itemClass\": \"gauntlets\",",
+            "catches": "boots of speed filed as gauntlets"
+        },
+        {
+            "file": "data/content/items.json",
+            "original": "    \"cloak_of_protection\": {\n        \"acBonus\": 0,\n        \"agesYears\": 0,\n        \"appearance\": \"cloak\",\n        \"application\": \"add\",\n        \"baseWeight\": 1,\n        \"weight\": 1,\n        \"category\": \"\",\n        \"chaBonus\": 0,\n        \"color\": \"cyan_black\",\n        \"conBonus\": 0,\n        \"confuseTurns\": 0,\n        \"consumableAmount\": \"0\",\n        \"consumableBuff\": \"none\",\n        \"consumableEffect\": \"none\",\n        \"damage\": 0,\n        \"dexBonus\": 0,\n        \"duration\": \"0\",\n        \"durationUnit\": \"rounds\",\n        \"effect\": \"protection\",\n        \"effectBonus\": 1,\n        \"equipmentSlot\": \"cloak\",\n        \"exceptionalStrength\": 0,\n        \"handRequirement\": \"one_handed\",\n        \"intBonus\": 0,\n        \"itemClass\": \"cloak\",",
+            "mutated": "    \"cloak_of_protection\": {\n        \"acBonus\": 0,\n        \"agesYears\": 0,\n        \"appearance\": \"cloak\",\n        \"application\": \"add\",\n        \"baseWeight\": 1,\n        \"weight\": 1,\n        \"category\": \"\",\n        \"chaBonus\": 0,\n        \"color\": \"cyan_black\",\n        \"conBonus\": 0,\n        \"confuseTurns\": 0,\n        \"consumableAmount\": \"0\",\n        \"consumableBuff\": \"none\",\n        \"consumableEffect\": \"none\",\n        \"damage\": 0,\n        \"dexBonus\": 0,\n        \"duration\": \"0\",\n        \"durationUnit\": \"rounds\",\n        \"effect\": \"protection\",\n        \"effectBonus\": 1,\n        \"equipmentSlot\": \"cloak\",\n        \"exceptionalStrength\": 0,\n        \"handRequirement\": \"one_handed\",\n        \"intBonus\": 0,\n        \"itemClass\": \"gauntlets\",",
+            "catches": "a cloak of protection filed as gauntlets"
+        }
+    ]
+}

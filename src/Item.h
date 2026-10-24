@@ -124,6 +124,16 @@ public:
 		return ItemClassificationUtils::is_gauntlets(itemClass);
 	}
 
+	bool is_boots() const noexcept
+	{
+		return ItemClassificationUtils::is_boots(itemClass);
+	}
+
+	bool is_cloak() const noexcept
+	{
+		return ItemClassificationUtils::is_cloak(itemClass);
+	}
+
 	bool is_girdle() const noexcept
 	{
 		return ItemClassificationUtils::is_girdle(itemClass);

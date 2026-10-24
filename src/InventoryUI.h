@@ -88,6 +88,13 @@ struct TabBox
 //   value_and_weight(aCorpse);        // -> " (8 lb)", worth nothing
 [[nodiscard]] std::string value_and_weight(const Item& item);
 
+// The heading the backpack lists a category under.
+//
+// Example:
+//   category_name(ItemCategory::BOOTS);     // -> "Boots"
+//   category_name(ItemCategory::UNKNOWN);   // -> "Other"
+[[nodiscard]] std::string category_name(ItemCategory cat);
+
 } // namespace InventoryActions
 
 struct BackpackEntry
@@ -140,7 +147,7 @@ inline constexpr std::array<SlotDisplayInfo, SLOT_COUNT> SLOT_TABLE{ {
 	{ EquipmentSlot::TOOL, "Tool" },
 } };
 
-inline constexpr std::array<ItemCategory, 13> CATEGORY_ORDER{ {
+inline constexpr std::array<ItemCategory, 15> CATEGORY_ORDER{ {
 	ItemCategory::CONSUMABLE,
 	ItemCategory::SCROLL,
 	ItemCategory::WEAPON,
@@ -148,6 +155,8 @@ inline constexpr std::array<ItemCategory, 13> CATEGORY_ORDER{ {
 	ItemCategory::HELMET,
 	ItemCategory::SHIELD,
 	ItemCategory::GAUNTLETS,
+	ItemCategory::BOOTS,
+	ItemCategory::CLOAK,
 	ItemCategory::GIRDLE,
 	ItemCategory::JEWELRY,
 	ItemCategory::TOOL,
@@ -207,7 +216,6 @@ private:
 	std::string format_stat_bonus_info(const Item& item) const;
 	std::string format_enhancement_info(const Item& item) const;
 	std::string format_value_info(const Item& item) const;
-	std::string get_category_name(ItemCategory cat) const;
 	ItemCategory get_effective_category(const Item& item) const;
 
 	// Input handling (uses InputSystem via GameContext)

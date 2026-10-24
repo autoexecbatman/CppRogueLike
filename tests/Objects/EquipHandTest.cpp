@@ -69,6 +69,8 @@ constexpr std::array NOT_HELD_IN_A_HAND{
 	ItemClass::RING,
 	ItemClass::AMULET,
 	ItemClass::GAUNTLETS,
+	ItemClass::BOOTS,
+	ItemClass::CLOAK,
 	ItemClass::GIRDLE,
 	ItemClass::POTION,
 	ItemClass::SCROLL,

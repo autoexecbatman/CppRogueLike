@@ -35,7 +35,6 @@
 #include "src/HealthPool.h"
 #include "src/HungerSystem.h"
 #include "src/Item.h"
-#include "src/ItemClassification.h"
 #include "src/ItemEnhancements.h"
 #include "src/ItemIdentification.h"
 #include "src/Lifespan.h"
@@ -59,7 +58,7 @@ namespace
 //
 // Example:
 //   what_loading_threw(load_a_good_record); // -> ""
-//   what_loading_threw(load_a_bad_record); // -> "Item::load: itemClass 25 ..."
+//   what_loading_threw(load_a_bad_record); // -> "Item::load: prefix 17 ..."
 template <typename Load>
 std::string what_loading_threw(Load load)
 {
@@ -297,19 +296,17 @@ TEST_F(EnumLoadRefusalTest, TheLastHungerStateStillLoads)
 		static_cast<int>(HungerState::DYING));
 }
 
+// An item's class is saved by its key, so the refusal names the key.
 TEST_F(EnumLoadRefusalTest, AnItemClassNoItemClassNamesIsRefused)
 {
 	json saved = saved_item();
-	const int bad = one_past(ItemClass::QUEST_ITEM);
-	saved.at("itemClass") = bad;
+	saved.at("itemClass") = "sandals";
 	const auto load_it = [this, &saved]()
 	{
 		[[maybe_unused]] const json again = item_reloaded(saved);
 	};
 
-	EXPECT_EQ(
-		what_loading_threw(load_it),
-		std::format("Item::load: itemClass {} is not a valid ItemClass", bad));
+	EXPECT_EQ(what_loading_threw(load_it), "unknown item_class 'sandals'");
 }
 
 TEST_F(EnumLoadRefusalTest, APrefixNoPrefixTypeNamesIsRefused)
@@ -362,7 +359,7 @@ TEST_F(EnumLoadRefusalTest, ABlessingNoBlessingStatusNamesIsRefused)
 TEST_F(EnumLoadRefusalTest, TheLastOfEachItemEnumStillLoads)
 {
 	json saved = saved_item();
-	saved.at("itemClass") = static_cast<int>(ItemClass::QUEST_ITEM);
+	saved.at("itemClass") = "quest_item";
 	saved.at("enhancement").at("prefix") =
 		static_cast<int>(PrefixType::CRACKED);
 	saved.at("enhancement").at("suffix") =

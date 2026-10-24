@@ -1,54 +1,12 @@
 #include <optional>
+#include <string>
 
 #include "Item.h"
+#include "ItemClassification.h"
 #include "SavedEnum.h"
 
 namespace
 {
-// The ItemClass a saved integer names, or nullopt for one no class has.
-// The switch has no default, so a class added without a case here is a compile
-// error (C4062, -Wswitch).
-//
-// Example:
-//   item_class_from(1);     // -> ItemClass::DAGGER
-//   item_class_from(25);    // -> nullopt
-std::optional<ItemClass> item_class_from(int saved)
-{
-	const ItemClass candidate = static_cast<ItemClass>(saved);
-	switch (candidate)
-	{
-	case ItemClass::UNKNOWN:
-	case ItemClass::DAGGER:
-	case ItemClass::SWORD:
-	case ItemClass::GREAT_SWORD:
-	case ItemClass::AXE:
-	case ItemClass::HAMMER:
-	case ItemClass::MACE:
-	case ItemClass::STAFF:
-	case ItemClass::BOW:
-	case ItemClass::CROSSBOW:
-	case ItemClass::SLING:
-	case ItemClass::ARMOR:
-	case ItemClass::SHIELD:
-	case ItemClass::HELMET:
-	case ItemClass::RING:
-	case ItemClass::AMULET:
-	case ItemClass::GAUNTLETS:
-	case ItemClass::GIRDLE:
-	case ItemClass::POTION:
-	case ItemClass::SCROLL:
-	case ItemClass::FOOD:
-	case ItemClass::GOLD_COIN:
-	case ItemClass::GEM:
-	case ItemClass::TOOL:
-	case ItemClass::QUEST_ITEM:
-	{
-		return candidate;
-	}
-	}
-	return std::nullopt;
-}
-
 // The PrefixType a saved integer names, or nullopt for one no prefix has.
 // The switch has no default, so a prefix added without a case here is a compile
 // error (C4062, -Wswitch).
@@ -160,12 +118,7 @@ void Item::load(const json& source)
 	baseValue = source.at("baseValue").get<int>();
 	itemKey = source.at("itemKey").get<std::string>();
 	appearance = source.at("appearance").get<std::string>();
-	itemClass = saved_enum_field(
-		source,
-		"Item::load",
-		"itemClass",
-		"ItemClass",
-		&item_class_from);
+	itemClass = parse_item_class(source.at("itemClass").get<std::string>());
 
 	// Load enhancement data
 	{
@@ -230,7 +183,7 @@ void Item::save(json& output)
 	output["baseValue"] = baseValue;
 	output["itemKey"] = itemKey;
 	output["appearance"] = appearance;
-	output["itemClass"] = static_cast<int>(itemClass);
+	output["itemClass"] = std::string{ encode_item_class(itemClass) };
 
 	// Save enhancement data
 	json enh;
