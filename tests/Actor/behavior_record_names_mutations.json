@@ -21,9 +21,9 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\toutput[\"type\"] = encode_pickable_type(type);",
+      "original": "\toutput[\"type\"] = encode_pickable_type(pickable_type_of(behavior));",
       "mutated": "\toutput[\"type\"] = encode_pickable_type(PickableType::GAUNTLETS);",
-      "catches": "a girdle or an amulet saved as gauntlets, all three sharing one saver"
+      "catches": "every behaviour saved under one name, so a girdle or an amulet loads as gauntlets"
     },
     {
       "file": "src/Pickable.cpp",

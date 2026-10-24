@@ -3,12 +3,14 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cstddef>
 
 #include <format>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 
+#include <type_traits>
 #include <variant>
 
 #include "BuffType.h"
@@ -50,43 +52,6 @@ enum class PickableType
 	IDENTIFY_SCROLL,
 	DUNGEON_KEY,
 };
-
-// Every PickableType, in the order the enum declares them, so a cycle through the
-// editor's field reaches all of them and adding one is a single edit here.
-inline constexpr std::array<PickableType, 17> ALL_PICKABLE_TYPE = {
-	PickableType::TARGETED_SCROLL,
-	PickableType::TELEPORTER,
-	PickableType::WEAPON,
-	PickableType::SHIELD,
-	PickableType::CONSUMABLE,
-	PickableType::GOLD_COIN,
-	PickableType::FOOD,
-	PickableType::CORPSE_FOOD,
-	PickableType::ARMOR,
-	PickableType::MAGICAL_HELM,
-	PickableType::MAGICAL_RING,
-	PickableType::JEWELRY_AMULET,
-	PickableType::GAUNTLETS,
-	PickableType::GIRDLE,
-	PickableType::QUEST_ITEM,
-	PickableType::IDENTIFY_SCROLL,
-	PickableType::DUNGEON_KEY,
-};
-
-// The next PickableType in that order, wrapping at the end.
-//
-// Example:
-//   next_pickable_type(PickableType::TARGETED_SCROLL);   // -> PickableType::TELEPORTER
-[[nodiscard]] inline PickableType next_pickable_type(PickableType value)
-{
-	const auto found = std::ranges::find(ALL_PICKABLE_TYPE, value);
-	if (found == ALL_PICKABLE_TYPE.end() ||
-		found + 1 == ALL_PICKABLE_TYPE.end())
-	{
-		return ALL_PICKABLE_TYPE.front();
-	}
-	return *(found + 1);
-}
 
 // Effect type for Consumable
 enum class ConsumableEffect
@@ -553,6 +518,257 @@ using ItemBehavior = std::variant<
 	Amulet,
 	DungeonKey>;
 
+// ========== PickableType: names and alternatives ==========
+
+// The position of Alternative among a variant's alternatives, or their count
+// when it is none of them.
+//
+// Example:
+//   index_among<Weapon>(std::type_identity<ItemBehavior>{});   // -> 1
+template <typename Alternative, typename... Alternatives>
+consteval std::size_t index_among(
+	std::type_identity<std::variant<Alternatives...>>)
+{
+	constexpr std::array<bool, sizeof...(Alternatives)> isAlternative{
+		std::is_same_v<Alternative, Alternatives>...
+	};
+	return static_cast<std::size_t>(
+		std::ranges::find(isAlternative, true) - isAlternative.begin());
+}
+
+// The position of Alternative among ItemBehavior's alternatives.
+//
+// Example:
+//   alternative_index<Consumable>();   // -> 0, the variant's first
+template <typename Alternative>
+consteval std::size_t alternative_index()
+{
+	return index_among<Alternative>(std::type_identity<ItemBehavior>{});
+}
+
+// One PickableType: the name item records and saves carry, and the ItemBehavior
+// alternative an item of that type holds.
+struct PickableTypeRecord
+{
+	PickableType type{ PickableType::WEAPON };
+	std::string_view key{};
+	std::size_t alternative{ 0 };
+};
+
+// Every PickableType, one row each, in enum order. The editor cycles in this
+// order; encode, parse and pickable_type_of read it.
+inline constexpr std::array PICKABLE_TYPE_TABLE{
+	PickableTypeRecord{
+		PickableType::TARGETED_SCROLL,
+		"targeted_scroll",
+		alternative_index<TargetedScroll>(),
+	},
+	PickableTypeRecord{
+		PickableType::TELEPORTER,
+		"teleporter",
+		alternative_index<Teleporter>(),
+	},
+	PickableTypeRecord{
+		PickableType::WEAPON,
+		"weapon",
+		alternative_index<Weapon>(),
+	},
+	PickableTypeRecord{
+		PickableType::SHIELD,
+		"shield",
+		alternative_index<Shield>(),
+	},
+	PickableTypeRecord{
+		PickableType::CONSUMABLE,
+		"consumable",
+		alternative_index<Consumable>(),
+	},
+	PickableTypeRecord{
+		PickableType::GOLD_COIN,
+		"gold_coin",
+		alternative_index<Gold>(),
+	},
+	PickableTypeRecord{
+		PickableType::FOOD,
+		"food",
+		alternative_index<Food>(),
+	},
+	PickableTypeRecord{
+		PickableType::CORPSE_FOOD,
+		"corpse_food",
+		alternative_index<CorpseFood>(),
+	},
+	PickableTypeRecord{
+		PickableType::ARMOR,
+		"armor",
+		alternative_index<Armor>(),
+	},
+	PickableTypeRecord{
+		PickableType::MAGICAL_HELM,
+		"magical_helm",
+		alternative_index<MagicalHelm>(),
+	},
+	PickableTypeRecord{
+		PickableType::MAGICAL_RING,
+		"magical_ring",
+		alternative_index<MagicalRing>(),
+	},
+	PickableTypeRecord{
+		PickableType::JEWELRY_AMULET,
+		"jewelry_amulet",
+		alternative_index<JewelryAmulet>(),
+	},
+	PickableTypeRecord{
+		PickableType::GAUNTLETS,
+		"gauntlets",
+		alternative_index<Gauntlets>(),
+	},
+	PickableTypeRecord{
+		PickableType::GIRDLE,
+		"girdle",
+		alternative_index<Girdle>(),
+	},
+	PickableTypeRecord{
+		PickableType::QUEST_ITEM,
+		"quest_item",
+		alternative_index<Amulet>(),
+	},
+	PickableTypeRecord{
+		PickableType::IDENTIFY_SCROLL,
+		"identify_scroll",
+		alternative_index<IdentifyScroll>(),
+	},
+	PickableTypeRecord{
+		PickableType::DUNGEON_KEY,
+		"dungeon_key",
+		alternative_index<DungeonKey>(),
+	},
+};
+
+// Whether the table has one row per alternative, row i naming enumerator i
+// with a key, and each alternative held by exactly one row.
+//
+// Example:
+//   is_pickable_type_table_well_formed();   // -> true
+//   // a row missing or two rows on one alternative -> false
+[[nodiscard]] consteval bool is_pickable_type_table_well_formed()
+{
+	constexpr std::size_t alternatives = std::variant_size_v<ItemBehavior>;
+	if (PICKABLE_TYPE_TABLE.size() != alternatives)
+	{
+		return false;
+	}
+	std::array<bool, alternatives> isHeld{};
+	for (std::size_t row = 0; row < PICKABLE_TYPE_TABLE.size(); ++row)
+	{
+		const PickableTypeRecord& record = PICKABLE_TYPE_TABLE[row];
+		const bool isInOrder = record.type == static_cast<PickableType>(row);
+		const bool isNew =
+			record.alternative < alternatives && !isHeld[record.alternative];
+		if (!isInOrder || record.key.empty() || !isNew)
+		{
+			return false;
+		}
+		isHeld[record.alternative] = true;
+	}
+	return true;
+}
+
+static_assert(
+	is_pickable_type_table_well_formed(),
+	"PICKABLE_TYPE_TABLE needs one row per ItemBehavior alternative, in "
+	"PickableType order");
+
+// The table's row for a type. Throws std::out_of_range for a value no
+// enumerator names.
+//
+// Example:
+//   pickable_type_record(PickableType::QUEST_ITEM).key;   // -> "quest_item"
+[[nodiscard]] constexpr const PickableTypeRecord& pickable_type_record(
+	PickableType type)
+{
+	return PICKABLE_TYPE_TABLE.at(static_cast<std::size_t>(type));
+}
+
+// Every PickableType, in the table's order.
+//
+// Example:
+//   all_pickable_types().front();   // -> PickableType::TARGETED_SCROLL
+[[nodiscard]] constexpr std::array<PickableType, PICKABLE_TYPE_TABLE.size()>
+all_pickable_types()
+{
+	std::array<PickableType, PICKABLE_TYPE_TABLE.size()> types{};
+	for (std::size_t row = 0; row < PICKABLE_TYPE_TABLE.size(); ++row)
+	{
+		types[row] = PICKABLE_TYPE_TABLE[row].type;
+	}
+	return types;
+}
+
+inline constexpr auto ALL_PICKABLE_TYPE = all_pickable_types();
+
+// The next PickableType in the table's order, wrapping at the end.
+//
+// Example:
+//   next_pickable_type(PickableType::TARGETED_SCROLL);
+//   // -> PickableType::TELEPORTER
+[[nodiscard]] inline PickableType next_pickable_type(PickableType value)
+{
+	const auto found = std::ranges::find(ALL_PICKABLE_TYPE, value);
+	if (found == ALL_PICKABLE_TYPE.end() ||
+		found + 1 == ALL_PICKABLE_TYPE.end())
+	{
+		return ALL_PICKABLE_TYPE.front();
+	}
+	return *(found + 1);
+}
+
+// The name a type is written as in items.json and in saves.
+//
+// Example:
+//   encode_pickable_type(PickableType::GOLD_COIN);   // -> "gold_coin"
+[[nodiscard]] inline std::string_view encode_pickable_type(
+	PickableType pickableType)
+{
+	return pickable_type_record(pickableType).key;
+}
+
+// The type a name stands for. Throws std::runtime_error for a name no row
+// carries.
+//
+// Example:
+//   parse_pickable_type("gold_coin");   // -> PickableType::GOLD_COIN
+//   parse_pickable_type("gold");   // throws: unknown pickable_type 'gold'
+[[nodiscard]] inline PickableType parse_pickable_type(std::string_view name)
+{
+	const auto found =
+		std::ranges::find(PICKABLE_TYPE_TABLE, name, &PickableTypeRecord::key);
+	if (found == PICKABLE_TYPE_TABLE.end())
+	{
+		throw std::runtime_error(
+			std::format("unknown pickable_type '{}'", name));
+	}
+	return found->type;
+}
+
+// The type of the behaviour an item holds, from the alternative it is.
+//
+// Example:
+//   pickable_type_of(ItemBehavior{ Amulet{} });
+//   // -> PickableType::QUEST_ITEM
+[[nodiscard]] inline PickableType pickable_type_of(const ItemBehavior& behavior)
+{
+	const auto holds_it = [&behavior](const PickableTypeRecord& record)
+	{
+		return record.alternative == behavior.index();
+	};
+	const auto found = std::ranges::find_if(PICKABLE_TYPE_TABLE, holds_it);
+	assert(
+		found != PICKABLE_TYPE_TABLE.end() &&
+		"pickable_type_of: an ItemBehavior alternative with no table row");
+	return found->type;
+}
+
 // ========== use() overloads - one per behavior type ==========
 
 bool use(
@@ -675,171 +891,3 @@ int get_item_resistance_strength(
 // Serialization
 void save_behavior(const ItemBehavior& behavior, json& output);
 ItemBehavior load_behavior(const json& source);
-
-inline std::string_view encode_pickable_type(PickableType pickableType)
-{
-	switch (pickableType)
-	{
-
-	case PickableType::TARGETED_SCROLL:
-	{
-		return "targeted_scroll";
-	}
-
-	case PickableType::TELEPORTER:
-	{
-		return "teleporter";
-	}
-
-	case PickableType::IDENTIFY_SCROLL:
-	{
-		return "identify_scroll";
-	}
-
-	case PickableType::WEAPON:
-	{
-		return "weapon";
-	}
-
-	case PickableType::SHIELD:
-	{
-		return "shield";
-	}
-
-	case PickableType::CONSUMABLE:
-	{
-		return "consumable";
-	}
-
-	case PickableType::GOLD_COIN:
-	{
-		return "gold_coin";
-	}
-
-	case PickableType::FOOD:
-	{
-		return "food";
-	}
-
-	case PickableType::CORPSE_FOOD:
-	{
-		return "corpse_food";
-	}
-
-	case PickableType::ARMOR:
-	{
-		return "armor";
-	}
-
-	case PickableType::MAGICAL_HELM:
-	{
-		return "magical_helm";
-	}
-
-	case PickableType::MAGICAL_RING:
-	{
-		return "magical_ring";
-	}
-
-	case PickableType::JEWELRY_AMULET:
-	{
-		return "jewelry_amulet";
-	}
-
-	case PickableType::GAUNTLETS:
-	{
-		return "gauntlets";
-	}
-
-	case PickableType::GIRDLE:
-	{
-		return "girdle";
-	}
-
-	case PickableType::QUEST_ITEM:
-	{
-		return "quest_item";
-	}
-
-	case PickableType::DUNGEON_KEY:
-	{
-		return "dungeon_key";
-	}
-	}
-
-	return "weapon";
-}
-
-inline PickableType parse_pickable_type(std::string_view name)
-{
-	if (name == "targeted_scroll")
-	{
-		return PickableType::TARGETED_SCROLL;
-	}
-	if (name == "teleporter")
-	{
-		return PickableType::TELEPORTER;
-	}
-	if (name == "identify_scroll")
-	{
-		return PickableType::IDENTIFY_SCROLL;
-	}
-	if (name == "weapon")
-	{
-		return PickableType::WEAPON;
-	}
-	if (name == "shield")
-	{
-		return PickableType::SHIELD;
-	}
-	if (name == "consumable")
-	{
-		return PickableType::CONSUMABLE;
-	}
-	if (name == "gold_coin")
-	{
-		return PickableType::GOLD_COIN;
-	}
-	if (name == "food")
-	{
-		return PickableType::FOOD;
-	}
-	if (name == "corpse_food")
-	{
-		return PickableType::CORPSE_FOOD;
-	}
-	if (name == "armor")
-	{
-		return PickableType::ARMOR;
-	}
-	if (name == "magical_helm")
-	{
-		return PickableType::MAGICAL_HELM;
-	}
-	if (name == "magical_ring")
-	{
-		return PickableType::MAGICAL_RING;
-	}
-	if (name == "jewelry_amulet")
-	{
-		return PickableType::JEWELRY_AMULET;
-	}
-	if (name == "gauntlets")
-	{
-		return PickableType::GAUNTLETS;
-	}
-	if (name == "girdle")
-	{
-		return PickableType::GIRDLE;
-	}
-	if (name == "quest_item")
-	{
-		return PickableType::QUEST_ITEM;
-	}
-	if (name == "dungeon_key")
-	{
-		return PickableType::DUNGEON_KEY;
-	}
-
-	throw std::runtime_error(std::format("unknown pickable_type '{}'", name));
-}

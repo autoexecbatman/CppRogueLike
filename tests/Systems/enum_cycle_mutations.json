@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/Pickable.h",
-      "original": "\tPickableType::QUEST_ITEM,\n\tPickableType::IDENTIFY_SCROLL,\n\tPickableType::DUNGEON_KEY,",
-      "mutated": "\tPickableType::QUEST_ITEM,",
+      "original": "\tfor (std::size_t row = 0; row < PICKABLE_TYPE_TABLE.size(); ++row)\n\t{\n\t\ttypes[row] = PICKABLE_TYPE_TABLE[row].type;",
+      "mutated": "\tfor (std::size_t row = 0; row < PICKABLE_TYPE_TABLE.size() - 2; ++row)\n\t{\n\t\ttypes[row] = PICKABLE_TYPE_TABLE[row].type;",
       "catches": "the two pickable types the stale count cut off dropping out of the list again"
     },
     {

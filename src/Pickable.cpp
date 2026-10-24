@@ -78,12 +78,8 @@ bool consume_item(Item& owner, Creature& wearer)
 
 // Shared save for stat-boost equipment (Gauntlets, Girdle, JewelryAmulet)
 template <typename StatBoost>
-void save_stat_boost(
-	const StatBoost& statBoost,
-	PickableType type,
-	json& output)
+void save_stat_boost(const StatBoost& statBoost, json& output)
 {
-	output["type"] = encode_pickable_type(type);
 	output["strBonus"] = statBoost.strBonus;
 	output["dexBonus"] = statBoost.dexBonus;
 	output["conBonus"] = statBoost.conBonus;
@@ -1119,11 +1115,11 @@ int get_item_resistance_strength(
 
 void save_behavior(const ItemBehavior& behavior, json& output)
 {
+	output["type"] = encode_pickable_type(pickable_type_of(behavior));
 	std::visit(
 		VariantVisitor{
 			[&output](const Consumable& consumable)
 			{
-				output["type"] = encode_pickable_type(PickableType::CONSUMABLE);
 				output["effect"] = encode_consumable_effect(consumable.effect);
 				output["amount"] = to_text(consumable.amount);
 				output["duration"] = to_text(consumable.duration);
@@ -1136,19 +1132,15 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 			},
 			[&output](const Weapon& weapon)
 			{
-				output["type"] = encode_pickable_type(PickableType::WEAPON);
 				output["ranged"] = weapon.ranged;
 				output["handRequirement"] =
 					encode_hand_requirement(weapon.handRequirement);
 				output["weaponSize"] = encode_weapon_size(weapon.weaponSize);
 				output["strengthRating"] = weapon.strengthRating;
 			},
-			[&output]([[maybe_unused]] const Shield& shield)
-			{ output["type"] = encode_pickable_type(PickableType::SHIELD); },
+			[]([[maybe_unused]] const Shield& shield) {},
 			[&output](const TargetedScroll& targetedScroll)
 			{
-				output["type"] =
-					encode_pickable_type(PickableType::TARGETED_SCROLL);
 				output["targetMode"] =
 					encode_target_mode(targetedScroll.targetMode);
 				output["scrollAnimation"] =
@@ -1161,42 +1153,21 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 				output["durationUnit"] =
 					encode_duration_unit(targetedScroll.durationUnit);
 			},
-			[&output]([[maybe_unused]] const Teleporter& teleporter)
-			{
-				output["type"] = encode_pickable_type(PickableType::TELEPORTER);
-			},
-			[&output]([[maybe_unused]] const IdentifyScroll& identifyScroll)
-			{
-				output["type"] =
-					encode_pickable_type(PickableType::IDENTIFY_SCROLL);
-			},
-			[&output](const Gold& gold)
-			{
-				output["type"] = encode_pickable_type(PickableType::GOLD_COIN);
-				output["amount"] = gold.amount;
-			},
+			[]([[maybe_unused]] const Teleporter& teleporter) {},
+			[]([[maybe_unused]] const IdentifyScroll& identifyScroll) {},
+			[&output](const Gold& gold) { output["amount"] = gold.amount; },
 			[&output](const Food& food)
-			{
-				output["type"] = encode_pickable_type(PickableType::FOOD);
-				output["nutritionValue"] = food.nutritionValue;
-			},
+			{ output["nutritionValue"] = food.nutritionValue; },
 			[&output](const CorpseFood& corpseFood)
 			{
-				output["type"] =
-					encode_pickable_type(PickableType::CORPSE_FOOD);
 				output["nutritionValue"] = corpseFood.nutritionValue;
 				output["taste"] = corpseFood.taste;
 				output["edible"] = is_corpse_edible(corpseFood.edibility);
 			},
 			[&output](const Armor& armor)
-			{
-				output["type"] = encode_pickable_type(PickableType::ARMOR);
-				output["armorClass"] = armor.armorClass;
-			},
+			{ output["armorClass"] = armor.armorClass; },
 			[&output](const MagicalHelm& magicalHelm)
 			{
-				output["type"] =
-					encode_pickable_type(PickableType::MAGICAL_HELM);
 				output["effect"] = encode_magical_effect(magicalHelm.effect);
 				output["bonus"] = magicalHelm.bonus;
 				output["command"] = encode_helm_command(magicalHelm.command);
@@ -1204,31 +1175,17 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 			},
 			[&output](const MagicalRing& magicalRing)
 			{
-				output["type"] =
-					encode_pickable_type(PickableType::MAGICAL_RING);
 				output["effect"] = encode_magical_effect(magicalRing.effect);
 				output["bonus"] = magicalRing.bonus;
 			},
 			[&output](const JewelryAmulet& jewelryAmulet)
-			{
-				save_stat_boost(
-					jewelryAmulet,
-					PickableType::JEWELRY_AMULET,
-					output);
-			},
+			{ save_stat_boost(jewelryAmulet, output); },
 			[&output](const Gauntlets& gauntlets)
-			{ save_stat_boost(gauntlets, PickableType::GAUNTLETS, output); },
+			{ save_stat_boost(gauntlets, output); },
 			[&output](const Girdle& girdle)
-			{ save_stat_boost(girdle, PickableType::GIRDLE, output); },
-			[&output]([[maybe_unused]] const Amulet& amulet)
-			{
-				output["type"] = encode_pickable_type(PickableType::QUEST_ITEM);
-			},
-			[&output]([[maybe_unused]] const DungeonKey& dungeonKey)
-			{
-				output["type"] =
-					encode_pickable_type(PickableType::DUNGEON_KEY);
-			},
+			{ save_stat_boost(girdle, output); },
+			[]([[maybe_unused]] const Amulet& amulet) {},
+			[]([[maybe_unused]] const DungeonKey& dungeonKey) {},
 		},
 		behavior);
 }
@@ -1388,13 +1345,8 @@ ItemBehavior load_behavior(const json& source)
 	{
 		return DungeonKey{};
 	}
+	}
 
-	default:
-	{
-		throw std::runtime_error(
-			std::format(
-				"no loader for behaviour '{}'",
-				encode_pickable_type(type)));
-	}
-	}
+	// Every enumerator has its arm above, so only a value none names is here.
+	throw std::logic_error("load_behavior: a PickableType no enumerator names");
 }

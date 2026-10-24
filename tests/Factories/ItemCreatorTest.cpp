@@ -1,7 +1,9 @@
 #include "src/ItemCreator.h"
 #include "src/DiceExpr.h"
 #include "src/Item.h"
+#include "src/ItemRegistry.h"
 #include "src/Paths.h"
+#include "src/Pickable.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 #include <gtest/gtest.h>
@@ -10,6 +12,8 @@
 
 #include <filesystem>
 #include <fstream>
+#include <stdexcept>
+#include <string>
 
 class ItemCreatorTest : public ::testing::Test
 {
@@ -27,6 +31,19 @@ TEST_F(ItemCreatorTest, CreateHealthPotion)
 	EXPECT_TRUE(item->behavior.has_value());
 	EXPECT_EQ(item->get_value(), 50);
 	EXPECT_EQ(item->itemClass, ItemClass::POTION);
+}
+
+// A corpse is made by Creature::die from the creature that died, so an item
+// record naming corpse_food is refused rather than built.
+TEST_F(ItemCreatorTest, ARecordNamingACorpseIsRefused)
+{
+	ItemParams params{};
+	params.pickableType = PickableType::CORPSE_FOOD;
+	const std::string key =
+		ctx.itemRegistry->add_custom("Odd Corpse", "food", params);
+	Vector2D pos(0, 0);
+
+	EXPECT_THROW((void)ItemCreator::create(key, pos, ctx), std::runtime_error);
 }
 
 TEST_F(ItemCreatorTest, CreateScrollLightning)

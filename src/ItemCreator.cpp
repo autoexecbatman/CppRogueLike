@@ -155,14 +155,19 @@ ItemBehavior create_behavior(const ItemParams& params)
 		return DungeonKey{};
 	}
 
-	default:
+	// Corpses are made by Creature::die, not from an item record.
+	case PickableType::CORPSE_FOOD:
 	{
 		throw std::runtime_error(
 			std::format(
 				"ItemCreator: unhandled pickable_type {}",
-				static_cast<int>(params.pickableType)));
+				encode_pickable_type(params.pickableType)));
 	}
 	}
+
+	// Every enumerator has its arm above, so only a value none names is here.
+	throw std::logic_error(
+		"create_behavior: a PickableType no enumerator names");
 }
 
 // An item built from params: its behaviour, key, class, value, carry weight and the

@@ -1,0 +1,53 @@
+{
+    "cwd": "E:/repo/C++RogueLike",
+    "test_command": [
+        "powershell",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tests/run_suite.ps1",
+        "-Configuration",
+        "Debug",
+        "-Filter",
+        "--gtest_filter=CodecRoundTripTest.*:EnumCycleTest.*:BehaviorRecordTest.*:ItemCreatorTest.*"
+    ],
+    "mutations": [
+        {
+            "file": "src/Pickable.h",
+            "original": "\t\t\"gold_coin\",\n",
+            "mutated": "\t\t\"gold\",\n",
+            "catches": "a type written under a name no record uses"
+        },
+        {
+            "file": "src/Pickable.h",
+            "original": "\t\treturn record.alternative == behavior.index();",
+            "mutated": "\t\treturn record.alternative == 0;",
+            "catches": "every behaviour given the first alternative's type"
+        },
+        {
+            "file": "src/Pickable.h",
+            "original": "\t\tthrow std::runtime_error(\n\t\t\tstd::format(\"unknown pickable_type '{}'\", name));",
+            "mutated": "\t\treturn PickableType::WEAPON;",
+            "catches": "an unknown type read as a weapon in silence"
+        },
+        {
+            "file": "src/Pickable.h",
+            "original": "\treturn pickable_type_record(pickableType).key;",
+            "mutated": "\treturn PICKABLE_TYPE_TABLE.front().key;",
+            "catches": "every type written under the first row's name"
+        },
+        {
+            "file": "src/Pickable.cpp",
+            "original": "\toutput[\"type\"] = encode_pickable_type(pickable_type_of(behavior));",
+            "mutated": "",
+            "catches": "a behaviour saved with no type name"
+        },
+        {
+            "file": "src/ItemCreator.cpp",
+            "original": "\tcase PickableType::CORPSE_FOOD:\n\t{\n\t\tthrow std::runtime_error(\n\t\t\tstd::format(\n\t\t\t\t\"ItemCreator: unhandled pickable_type {}\",\n\t\t\t\tencode_pickable_type(params.pickableType)));\n\t}",
+            "mutated": "\tcase PickableType::CORPSE_FOOD:\n\t{\n\t\treturn CorpseFood{};\n\t}",
+            "catches": "an item record naming a corpse built instead of refused"
+        }
+    ]
+}

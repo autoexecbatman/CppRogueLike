@@ -23,7 +23,11 @@
 #include <array>
 #include <filesystem>
 #include <fstream>
+#include <set>
+#include <string>
 #include <string_view>
+#include <utility>
+#include <variant>
 #include <vector>
 
 #include "src/Ai.h"
@@ -178,6 +182,118 @@ TEST(CodecRoundTripTest, PickableTypeSurvivesEncoding)
 			encode_pickable_type,
 			parse_pickable_type,
 			"PickableType");
+	}
+}
+
+// The names items.json and saves carry, in PickableType order. They are the
+// file format, so they are written out here rather than read from the table.
+constexpr std::array<std::string_view, 17> PICKABLE_TYPE_KEYS = {
+	"targeted_scroll",
+	"teleporter",
+	"weapon",
+	"shield",
+	"consumable",
+	"gold_coin",
+	"food",
+	"corpse_food",
+	"armor",
+	"magical_helm",
+	"magical_ring",
+	"jewelry_amulet",
+	"gauntlets",
+	"girdle",
+	"quest_item",
+	"identify_scroll",
+	"dungeon_key",
+};
+
+TEST(CodecRoundTripTest, EveryPickableTypeIsWrittenAsItsRecordName)
+{
+	ASSERT_EQ(ALL_PICKABLE_TYPE.size(), PICKABLE_TYPE_KEYS.size());
+	for (std::size_t row = 0; row < PICKABLE_TYPE_KEYS.size(); ++row)
+	{
+		EXPECT_EQ(
+			encode_pickable_type(ALL_PICKABLE_TYPE[row]),
+			PICKABLE_TYPE_KEYS[row])
+			<< "row " << row;
+	}
+}
+
+// Every type an item record names has a row, and the only row no record uses
+// is the corpse, which Creature::die makes rather than items.json.
+TEST(CodecRoundTripTest, TheShippedItemsNameOnlyKnownPickableTypes)
+{
+	std::ifstream file(Paths::resolve(Paths::ITEMS));
+	ASSERT_TRUE(file.is_open()) << "items.json did not open";
+	nlohmann::json items;
+	file >> items;
+
+	std::set<std::string> named{};
+	for (const auto& [key, record] : items.items())
+	{
+		const std::string type = record.at("pickableType").get<std::string>();
+		EXPECT_NO_THROW((void)parse_pickable_type(type)) << key;
+		named.insert(type);
+	}
+	std::set<std::string> unnamed{};
+	for (const std::string_view key : PICKABLE_TYPE_KEYS)
+	{
+		if (!named.contains(std::string{ key }))
+		{
+			unnamed.insert(std::string{ key });
+		}
+	}
+	EXPECT_EQ(unnamed, std::set<std::string>{ "corpse_food" });
+}
+
+// The name each ItemBehavior alternative is saved under, in the variant's
+// order.
+constexpr std::array<std::string_view, 17> SAVED_NAME_BY_ALTERNATIVE = {
+	"consumable",
+	"weapon",
+	"shield",
+	"targeted_scroll",
+	"teleporter",
+	"identify_scroll",
+	"gold_coin",
+	"food",
+	"corpse_food",
+	"armor",
+	"magical_helm",
+	"magical_ring",
+	"jewelry_amulet",
+	"gauntlets",
+	"girdle",
+	"quest_item",
+	"dungeon_key",
+};
+
+// One default behaviour of every alternative, in the variant's order.
+template <std::size_t... Index>
+std::vector<ItemBehavior> one_of_each_alternative(std::index_sequence<Index...>)
+{
+	return { ItemBehavior{ std::in_place_index<Index> }... };
+}
+
+// Every alternative knows its type, is saved under that type's name and loads
+// back as the same alternative.
+TEST(CodecRoundTripTest, EveryBehaviourIsSavedUnderItsOwnType)
+{
+	constexpr std::size_t count = std::variant_size_v<ItemBehavior>;
+	ASSERT_EQ(count, SAVED_NAME_BY_ALTERNATIVE.size());
+	const std::vector<ItemBehavior> behaviors =
+		one_of_each_alternative(std::make_index_sequence<count>{});
+	for (const ItemBehavior& behavior : behaviors)
+	{
+		const std::string_view expected =
+			SAVED_NAME_BY_ALTERNATIVE[behavior.index()];
+		EXPECT_EQ(pickable_type_of(behavior), parse_pickable_type(expected))
+			<< expected;
+
+		nlohmann::json saved;
+		save_behavior(behavior, saved);
+		EXPECT_EQ(saved.at("type").get<std::string>(), expected);
+		EXPECT_EQ(load_behavior(saved).index(), behavior.index()) << expected;
 	}
 }
 
