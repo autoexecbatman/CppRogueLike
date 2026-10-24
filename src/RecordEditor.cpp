@@ -16,6 +16,7 @@
 #include "MonsterEditor.h"
 #include "RecordEditor.h"
 #include "Renderer.h"
+#include "SpellEditor.h"
 #include "TileRef.h"
 
 using namespace EditorLayout;
@@ -162,6 +163,9 @@ void RecordEditor<Model>::handle_input(
 	else if (mode == EditorMode::TILE_PICKER)
 	{
 		assert(
+			HAS_TILES &&
+			"RecordEditor::handle_input: a picker opened for records without tiles");
+		assert(
 			ctx.renderer &&
 			"RecordEditor::handle_input: the tile picker needs a renderer");
 		handle_picker(input, *ctx.renderer);
@@ -288,7 +292,9 @@ void RecordEditor<Model>::handle_normal(
 
 	const bool isTileChosen =
 		kind == FieldKind::TILE && input.is_pressed(EditorKey::ENTER);
-	if (input.is_pressed(EditorKey::PICKER) || isTileChosen)
+	const bool isPickerAsked =
+		input.is_pressed(EditorKey::PICKER) || isTileChosen;
+	if (HAS_TILES && isPickerAsked)
 	{
 		mode = EditorMode::TILE_PICKER;
 		return;
@@ -301,14 +307,14 @@ void RecordEditor<Model>::handle_normal(
 			editBuffer = model.field_value(fieldId);
 			mode = EditorMode::EDIT_STRING;
 		}
-		else if (kind == FieldKind::TOGGLE)
+		else if (kind == FieldKind::TOGGLE || kind == FieldKind::CYCLE)
 		{
 			model.field_toggle(fieldId);
 		}
 		return;
 	}
 
-	if (kind == FieldKind::ADJUST)
+	if (kind == FieldKind::ADJUST || kind == FieldKind::CYCLE)
 	{
 		const int delta = input.is_held(EditorKey::CONTROL) ? 10 : 1;
 		if (input.is_pressed(EditorKey::LEFT))
@@ -410,8 +416,11 @@ void RecordEditor<Model>::handle_picker(
 
 		if (col >= 0 && col < sheetColumns && row >= 0 && row < sheetRows)
 		{
-			model.set_working_tile(
-				TileRef{ static_cast<TileSheet>(pickerSheet), col, row });
+			if constexpr (HAS_TILES)
+			{
+				model.set_working_tile(
+					TileRef{ static_cast<TileSheet>(pickerSheet), col, row });
+			}
 			mode = EditorMode::NORMAL;
 		}
 	}
@@ -526,12 +535,17 @@ void RecordEditor<Model>::render_list(
 		}
 
 		const std::string& key = keys[rowIndex];
-		const TileRef tile =
-			isSelected ? model.working_tile() : model.row_tile(ctx, key);
-		renderer.draw_tile_screen_sized(
-			Vector2D{ LIST_PAD, rowY + (ITEM_HEIGHT - LIST_TILE_SIZE) / 2 },
-			tile,
-			LIST_TILE_SIZE);
+		int labelX = LIST_PAD;
+		if constexpr (HAS_TILES)
+		{
+			const TileRef tile =
+				isSelected ? model.working_tile() : model.row_tile(ctx, key);
+			renderer.draw_tile_screen_sized(
+				Vector2D{ LIST_PAD, rowY + (ITEM_HEIGHT - LIST_TILE_SIZE) / 2 },
+				tile,
+				LIST_TILE_SIZE);
+			labelX = LIST_PAD + LIST_TILE_SIZE + 4;
+		}
 
 		std::string label{};
 		if (isSelected)
@@ -548,12 +562,19 @@ void RecordEditor<Model>::render_list(
 		}
 
 		renderer.draw_text_color(
-			Vector2D{
-				LIST_PAD + LIST_TILE_SIZE + 4,
-				rowY + (ITEM_HEIGHT - 16) / 2,
-			},
+			Vector2D{ labelX, rowY + (ITEM_HEIGHT - 16) / 2 },
 			label,
 			isSelected ? look.listTextSelected : look.listTextPlain);
+
+		const std::optional<RowTag> tag =
+			isSelected ? model.working_row_tag() : model.row_tag(ctx, key);
+		if (tag)
+		{
+			renderer.draw_text_color(
+				Vector2D{ LIST_WIDTH - 20, rowY + (ITEM_HEIGHT - 16) / 2 },
+				tag->text,
+				tag->colour);
+		}
 	}
 }
 
@@ -628,7 +649,7 @@ void RecordEditor<Model>::render_fields(
 			};
 			renderer.draw_tile_screen_sized(
 				tileAt,
-				model.working_tile(),
+				working_tile(),
 				LIST_TILE_SIZE);
 			if (isSelected)
 			{
@@ -695,7 +716,7 @@ void RecordEditor<Model>::render_picker(
 		renderer.get_sheet_rows(static_cast<TileSheet>(pickerSheet));
 	const int pickerTileSize = picker_tile_size(renderer, pickerSheet);
 	const Vector2D mouse = input.mouse;
-	const TileRef currentTile = model.working_tile();
+	const TileRef currentTile = working_tile();
 
 	BeginScissorMode(panelX, gridY, panelWidth, gridHeight);
 
@@ -823,6 +844,19 @@ bool RecordEditor<Model>::has_divider_above(
 }
 
 template <typename Model>
+TileRef RecordEditor<Model>::working_tile() const
+{
+	if constexpr (HAS_TILES)
+	{
+		return model.working_tile();
+	}
+	else
+	{
+		return TileRef{};
+	}
+}
+
+template <typename Model>
 typename RecordEditor<Model>::FieldId RecordEditor<Model>::current_field() const
 {
 	return Model::FIELDS.at(fieldCursor.current_row()).field;
@@ -830,3 +864,4 @@ typename RecordEditor<Model>::FieldId RecordEditor<Model>::current_field() const
 
 template class RecordEditor<ItemEditorModel>;
 template class RecordEditor<MonsterEditorModel>;
+template class RecordEditor<SpellEditorModel>;

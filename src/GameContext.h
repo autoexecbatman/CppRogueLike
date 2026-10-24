@@ -51,7 +51,8 @@ class ItemEditorModel;
 using ItemEditor = RecordEditor<ItemEditorModel>;
 class MonsterEditorModel;
 using MonsterEditor = RecordEditor<MonsterEditorModel>;
-class SpellEditor;
+class SpellEditorModel;
+using SpellEditor = RecordEditor<SpellEditorModel>;
 #endif
 class Stairs;
 class TileFeature;

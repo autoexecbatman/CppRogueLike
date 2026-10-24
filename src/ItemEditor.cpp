@@ -193,6 +193,18 @@ TileRef ItemEditorModel::row_tile(
 	return ctx.contentRegistry ? ctx.contentRegistry->get_tile(key) : TileRef{};
 }
 
+std::optional<RowTag> ItemEditorModel::row_tag(
+	[[maybe_unused]] const GameContext& ctx,
+	[[maybe_unused]] std::string_view key) const
+{
+	return std::nullopt;
+}
+
+std::optional<RowTag> ItemEditorModel::working_row_tag() const
+{
+	return std::nullopt;
+}
+
 // ---------------------------------------------------------------------------
 // Fields
 // ---------------------------------------------------------------------------

@@ -26,9 +26,9 @@
 // Controls:
 //   Tab              switch focus between the list and the fields
 //   Up / Down        move through the list or the fields
-//   Left / Right     step a number; Ctrl steps it by ten
+//   Left / Right     step a number or a cycled choice; Ctrl steps by ten
 //   Enter            type into a text field, step a choice, or open the picker
-//   F2               open the tile picker
+//   F2               open the tile picker, where records have tiles
 //   A / Delete       add a record, remove a custom one (list focused)
 //   Ctrl+S           save
 //   Esc              commit the record and leave
@@ -37,14 +37,17 @@
 // once per Model; a new editor adds its line there.
 
 #include <cstddef>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
 
 #include <raylib.h>
 
+#include "EditorField.h"
 #include "EditorInput.h"
 #include "ListCursor.h"
+#include "TileRef.h"
 
 struct GameContext;
 class Renderer;
@@ -135,12 +138,23 @@ struct EditorLook
 	Color plainHint{};
 };
 
+// A short mark a list row carries at its right edge, such as a spell's class.
+struct RowTag
+{
+	std::string_view text{};
+	Color colour{};
+};
+
 // The shared editor frame over one Model; see the file comment for use.
 template <typename Model>
 class RecordEditor
 {
 private:
 	using FieldId = typename Model::FieldId;
+
+	// A Model with a TILE field has a tile picker and a tile column in its
+	// list; one without has neither, and supplies no tile functions.
+	static constexpr bool HAS_TILES = has_tile_field(Model::FIELDS);
 
 	// The record type's own knowledge: its fields, colours and registry.
 	Model model{};
@@ -179,6 +193,9 @@ private:
 		const EditorInput& input,
 		const Renderer& renderer) const;
 	void render_hint(const Renderer& renderer) const;
+
+	// The selected record's tile, or no tile for a Model without tiles.
+	[[nodiscard]] TileRef working_tile() const;
 
 public:
 	// Lists every record and selects the first. Requires the Model's registry

@@ -421,6 +421,12 @@ public:
 
 	[[nodiscard]] TileRef working_tile() const { return workingTile; }
 
+	// No item carries a tag in the list.
+	[[nodiscard]] std::optional<RowTag> row_tag(
+		const GameContext& ctx,
+		std::string_view key) const;
+	[[nodiscard]] std::optional<RowTag> working_row_tag() const;
+
 	void set_working_tile(TileRef tile) { workingTile = tile; }
 
 	[[nodiscard]] std::string field_label(FieldId field) const;

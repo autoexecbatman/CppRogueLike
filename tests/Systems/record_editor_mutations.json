@@ -174,6 +174,66 @@
             "original": "\treturn monster_registry(ctx).is_builtin(key);",
             "mutated": "\treturn false;",
             "catches": "every monster treated as custom"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\tif (HAS_TILES && isPickerAsked)",
+            "mutated": "\tif (isPickerAsked)",
+            "catches": "F2 opening a picker for records without tiles"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\t\telse if (kind == FieldKind::TOGGLE || kind == FieldKind::CYCLE)",
+            "mutated": "\t\telse if (kind == FieldKind::TOGGLE)",
+            "catches": "Enter not stepping a cycled field"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\tif (kind == FieldKind::ADJUST || kind == FieldKind::CYCLE)",
+            "mutated": "\tif (kind == FieldKind::ADJUST)",
+            "catches": "the arrows not stepping a cycled field"
+        },
+        {
+            "file": "src/EditorField.h",
+            "original": "\t\treturn entry.kind == FieldKind::TILE;",
+            "mutated": "\t\treturn false;",
+            "catches": "a table with a tile field read as having none"
+        },
+        {
+            "file": "src/SpellEditor.cpp",
+            "original": "\tworking = spell_registry(ctx).get_by_key(key);",
+            "mutated": "",
+            "catches": "a selected spell's fields never loaded"
+        },
+        {
+            "file": "src/SpellEditor.cpp",
+            "original": "\tspell_registry(ctx).set_by_key(key, working);",
+            "mutated": "",
+            "catches": "a committed spell never written to the registry"
+        },
+        {
+            "file": "src/SpellEditor.cpp",
+            "original": "\tspell_registry(ctx).remove_custom(key);",
+            "mutated": "",
+            "catches": "a removed custom spell left in the registry"
+        },
+        {
+            "file": "src/SpellEditor.cpp",
+            "original": "\treturn spell_registry(ctx).is_builtin_key(key);",
+            "mutated": "\treturn false;",
+            "catches": "every spell treated as custom"
+        },
+        {
+            "file": "src/SpellEditor.cpp",
+            "original": "\tif (spellClass == SpellClass::CLERIC)",
+            "mutated": "\tif (false)",
+            "catches": "a cleric spell marked as a wizard's"
+        },
+        {
+            "file": "src/SpellEditor.cpp",
+            "original": "\treturn class_tag(working.spellClass);",
+            "mutated": "\treturn std::nullopt;",
+            "catches": "the selected spell's row losing its class mark"
         }
     ]
 }

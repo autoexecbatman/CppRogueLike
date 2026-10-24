@@ -189,6 +189,18 @@ TileRef MonsterEditorModel::row_tile(
 	return monster_registry(ctx).get_tile(key);
 }
 
+std::optional<RowTag> MonsterEditorModel::row_tag(
+	[[maybe_unused]] const GameContext& ctx,
+	[[maybe_unused]] std::string_view key) const
+{
+	return std::nullopt;
+}
+
+std::optional<RowTag> MonsterEditorModel::working_row_tag() const
+{
+	return std::nullopt;
+}
+
 // ---------------------------------------------------------------------------
 // Fields
 // ---------------------------------------------------------------------------

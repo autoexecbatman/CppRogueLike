@@ -45,6 +45,8 @@ enum class FieldKind
 	TOGGLE,
 	// The arrows step it down and up.
 	ADJUST,
+	// Enter steps it to its next value, and the arrows step it either way.
+	CYCLE,
 	// Enter opens the tile picker.
 	TILE
 };
@@ -107,6 +109,23 @@ consteval bool is_well_formed_table(
 		}
 	}
 	return true;
+}
+
+// Whether a table holds a TILE field, which is what gives an editor its tile
+// picker and its list's tile column.
+//
+// Example:
+//   has_tile_field(ItemEditorModel::FIELDS);    // -> true
+//   has_tile_field(SpellEditorModel::FIELDS);   // -> false
+template <typename Field, typename Record, std::size_t Count>
+consteval bool has_tile_field(
+	const std::array<FieldDescriptor<Field, Record>, Count>& table)
+{
+	const auto is_tile = [](const FieldDescriptor<Field, Record>& entry)
+	{
+		return entry.kind == FieldKind::TILE;
+	};
+	return std::ranges::any_of(table, is_tile);
 }
 
 // The descriptor for one field, which a well-formed table holds at the

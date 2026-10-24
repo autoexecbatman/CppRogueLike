@@ -9,7 +9,8 @@
 // the TILE field for the kinds. It read field_adjust and field_value for the
 // plain numbers: a case is plain when adjust is one clamped write and value
 // prints that same direct member. So a row is what that commit's own code did,
-// and a table that drifts from it fails here.
+// and a table that drifts from it fails here. The spell's Effect is CYCLE, the
+// kind that names what its code did: Enter and the arrows both stepped it.
 //
 // Run it:
 //
@@ -210,7 +211,7 @@ const ExpectedField SPELL_FIELDS_AT_HEAD[] = {
 	ExpectedField{ 0, "NAME", FieldKind::TEXT, "Name" },
 	ExpectedField{ 1, "LEVEL", FieldKind::ADJUST, "Level" },
 	ExpectedField{ 2, "CLASS", FieldKind::TOGGLE, "Class" },
-	ExpectedField{ 3, "EFFECT_TYPE", FieldKind::TOGGLE, "Effect" },
+	ExpectedField{ 3, "EFFECT_TYPE", FieldKind::CYCLE, "Effect" },
 	ExpectedField{ 4, "DESCRIPTION", FieldKind::TEXT, "Description" },
 };
 
@@ -405,7 +406,7 @@ TEST(EditorFieldTest, TheSpellEditorsFieldsAreTheOldCodesKindsAndLabels)
 {
 	expect_kinds_and_labels(
 		"SpellEditor",
-		SpellEditor::FIELDS,
+		SpellEditorModel::FIELDS,
 		std::span{ SPELL_FIELDS_AT_HEAD });
 }
 

@@ -21,6 +21,7 @@
 #include <set>
 #include <string>
 #include <system_error>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -29,6 +30,8 @@
 #include "src/ItemEditor.h"
 #include "src/MonsterEditor.h"
 #include "src/RecordEditor.h"
+#include "src/SpellEditor.h"
+#include "src/SpellRegistry.h"
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"
 
@@ -128,6 +131,18 @@ std::optional<size_t> first_plain_number()
 	return static_cast<size_t>(found - Model::FIELDS.begin());
 }
 
+// A field's row in a Model's table, found by its id.
+template <typename Model>
+size_t row_of(typename Model::FieldId field)
+{
+	const auto is_field = [field](const auto& descriptor)
+	{
+		return descriptor.field == field;
+	};
+	return static_cast<size_t>(
+		std::ranges::find_if(Model::FIELDS, is_field) - Model::FIELDS.begin());
+}
+
 // Esc after a Ctrl+Right leaves the editor and opens the main menu, and the
 // record it held is committed, so the editor opened again shows the stepped
 // number. Runs in a HiddenRenderer child.
@@ -186,7 +201,8 @@ protected:
 	std::vector<std::string> keys{};
 };
 
-using EditorModels = ::testing::Types<ItemEditorModel, MonsterEditorModel>;
+using EditorModels =
+	::testing::Types<ItemEditorModel, MonsterEditorModel, SpellEditorModel>;
 TYPED_TEST_SUITE(RecordEditorTest, EditorModels);
 
 TYPED_TEST(RecordEditorTest, AClickOnAListRowSelectsThatRecord)
@@ -371,6 +387,42 @@ TYPED_TEST(RecordEditorTest, DeleteRemovesACustomRecordAndKeepsAShippedOne)
 	EXPECT_EQ(after.size(), this->keys.size());
 }
 
+// F2 opens the tile picker for items and monsters, which have tiles, and
+// leaves a spell, which has none, in the field list.
+TYPED_TEST(RecordEditorTest, F2OpensThePickerOnlyForRecordsWithTiles)
+{
+	constexpr bool hasTiles = !std::is_same_v<TypeParam, SpellEditorModel>;
+	this->editor.handle_input(frame({ EditorKey::TAB }, {}), this->ctx);
+	this->editor.handle_input(frame({ EditorKey::PICKER }, {}), this->ctx);
+
+	const EditorMode expected =
+		hasTiles ? EditorMode::TILE_PICKER : EditorMode::NORMAL;
+	EXPECT_EQ(this->editor.editor_mode(), expected);
+}
+
+// A spell row carries its class, "C" for a cleric spell and "W" otherwise;
+// an item or a monster row carries no tag.
+TYPED_TEST(RecordEditorTest, OnlyASpellRowCarriesItsClass)
+{
+	constexpr bool isSpell = std::is_same_v<TypeParam, SpellEditorModel>;
+	for (const std::string& key : this->keys)
+	{
+		const std::optional<RowTag> tag =
+			this->editor.record_model().row_tag(this->ctx, key);
+		ASSERT_EQ(tag.has_value(), isSpell) << key;
+		if constexpr (isSpell)
+		{
+			const bool isCleric =
+				this->ctx.spellRegistry->get_by_key(key).spellClass ==
+				SpellClass::CLERIC;
+			EXPECT_EQ(tag->text, isCleric ? "C" : "W") << key;
+		}
+	}
+	EXPECT_EQ(
+		this->editor.record_model().working_row_tag().has_value(),
+		isSpell);
+}
+
 // The XP field edits one hit dice count of the selected monster. Choosing
 // another monster selects its first count, so a mimic's second count is not
 // carried to a goblin that has one.
@@ -384,20 +436,12 @@ TEST(RecordEditorMonsterTest, ChoosingAnotherMonsterSelectsItsFirstHitDiceCount)
 	const std::vector<std::string> keys = editor.record_model().keys(ctx);
 	const auto mimic = std::ranges::find(keys, "mimic");
 	ASSERT_NE(mimic, keys.end()) << "the shipped monsters have no mimic";
-	const auto row_of = [](Field field)
-	{
-		const auto is_field = [field](const auto& descriptor)
-		{
-			return descriptor.field == field;
-		};
-		return static_cast<size_t>(
-			std::ranges::find_if(MonsterEditorModel::FIELDS, is_field) -
-			MonsterEditorModel::FIELDS.begin());
-	};
 	editor.handle_input(
 		click_at(list_row(static_cast<size_t>(mimic - keys.begin()))),
 		ctx);
-	editor.handle_input(click_at(field_row(row_of(Field::XP_COUNT))), ctx);
+	editor.handle_input(
+		click_at(field_row(row_of<MonsterEditorModel>(Field::XP_COUNT))),
+		ctx);
 	editor.handle_input(frame({ EditorKey::RIGHT }, {}), ctx);
 	ASSERT_EQ(editor.record_model().field_value(Field::XP_COUNT), "10 HD");
 
@@ -406,6 +450,52 @@ TEST(RecordEditorMonsterTest, ChoosingAnotherMonsterSelectsItsFirstHitDiceCount)
 	EXPECT_EQ(editor.current_key(), "goblin");
 	EXPECT_EQ(editor.record_model().field_value(Field::XP_COUNT), "1 HD");
 	EXPECT_EQ(editor.record_model().field_value(Field::XP), "105");
+}
+
+// The Effect is cycled: Right and Enter step it forward, Left steps it back.
+TEST(RecordEditorSpellTest, TheArrowsAndEnterStepTheEffect)
+{
+	using Field = SpellEditorModel::FieldId;
+	MockGameContext mock{};
+	GameContext ctx = mock.to_game_context();
+	SpellEditor editor{};
+	editor.enter(ctx);
+	editor.handle_input(
+		click_at(field_row(row_of<SpellEditorModel>(Field::EFFECT_TYPE))),
+		ctx);
+	const std::string first =
+		editor.record_model().field_value(Field::EFFECT_TYPE);
+
+	editor.handle_input(frame({ EditorKey::RIGHT }, {}), ctx);
+	const std::string second =
+		editor.record_model().field_value(Field::EFFECT_TYPE);
+	EXPECT_NE(second, first);
+	editor.handle_input(frame({ EditorKey::LEFT }, {}), ctx);
+	EXPECT_EQ(editor.record_model().field_value(Field::EFFECT_TYPE), first);
+	editor.handle_input(frame({ EditorKey::ENTER }, {}), ctx);
+	EXPECT_EQ(editor.record_model().field_value(Field::EFFECT_TYPE), second);
+}
+
+// The Class is toggled by Enter alone; the arrows leave it as it is.
+TEST(RecordEditorSpellTest, TheArrowsLeaveTheClassAsItIs)
+{
+	using Field = SpellEditorModel::FieldId;
+	MockGameContext mock{};
+	GameContext ctx = mock.to_game_context();
+	SpellEditor editor{};
+	editor.enter(ctx);
+	editor.handle_input(
+		click_at(field_row(row_of<SpellEditorModel>(Field::CLASS))),
+		ctx);
+	const std::string before = editor.record_model().field_value(Field::CLASS);
+
+	editor.handle_input(frame({ EditorKey::RIGHT }, {}), ctx);
+	editor.handle_input(
+		frame({ EditorKey::LEFT }, { EditorKey::CONTROL }),
+		ctx);
+	EXPECT_EQ(editor.record_model().field_value(Field::CLASS), before);
+	editor.handle_input(frame({ EditorKey::ENTER }, {}), ctx);
+	EXPECT_NE(editor.record_model().field_value(Field::CLASS), before);
 }
 
 // end of file: RecordEditorTest.cpp

@@ -197,11 +197,8 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
 		assert(
 			ctx.spellEditor &&
 			"make_main_menu spellEditorCommand: called without a spellEditor");
-		assert(
-			ctx.spellRegistry &&
-			"make_main_menu spellEditorCommand: called without a spellRegistry");
 
-		ctx.spellEditor->enter(*ctx.spellRegistry);
+		ctx.spellEditor->enter(ctx);
 	};
 	entries.push_back({ "Spell Editor", 'p', spellEditorCommand });
 
