@@ -349,6 +349,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/DecorEditor.h
     ${PROJECT_SOURCE_DIR}/EditorField.cpp
     ${PROJECT_SOURCE_DIR}/EditorField.h
+    ${PROJECT_SOURCE_DIR}/EditorInput.cpp
+    ${PROJECT_SOURCE_DIR}/EditorInput.h
     ${PROJECT_SOURCE_DIR}/ItemEditor.cpp
     ${PROJECT_SOURCE_DIR}/ItemEditor.h
     ${PROJECT_SOURCE_DIR}/ListCursor.cpp
@@ -359,6 +361,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Palette.h
     ${PROJECT_SOURCE_DIR}/PrefabLibrary.cpp
     ${PROJECT_SOURCE_DIR}/PrefabLibrary.h
+    ${PROJECT_SOURCE_DIR}/RecordEditor.cpp
+    ${PROJECT_SOURCE_DIR}/RecordEditor.h
     ${PROJECT_SOURCE_DIR}/RoomEditor.cpp
     ${PROJECT_SOURCE_DIR}/RoomEditor.h
     ${PROJECT_SOURCE_DIR}/SpellEditor.cpp

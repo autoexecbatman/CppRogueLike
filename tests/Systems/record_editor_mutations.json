@@ -1,0 +1,149 @@
+{
+    "cwd": "E:/repo/C++RogueLike",
+    "test_command": [
+        "powershell",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tests/run_suite.ps1",
+        "-Configuration",
+        "Debug",
+        "-Filter",
+        "--gtest_filter=RecordEditorTest*:EditorFieldTest.*"
+    ],
+    "mutations": [
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\tif (input.is_pressed(EditorKey::CLICK) && mouse.y >= HEADER_HEIGHT)",
+            "mutated": "\tif (input.is_pressed(EditorKey::CLICK))",
+            "catches": "a click in the header picking the first list row"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\t\t\tif (row && *row != listCursor.current_row())",
+            "mutated": "\t\t\tif (false)",
+            "catches": "a click on a list row selecting nothing"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\t\tfocus = other_panel(focus);",
+            "mutated": "\t\tfocus = EditorFocus::FIELDS;",
+            "catches": "Tab moving focus to the fields and never back"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\t\t\tlistCursor.move_down(visibleListRows);",
+            "mutated": "",
+            "catches": "Down in the list not moving to the next record"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\t\tfieldCursor.move_down(visibleFields);",
+            "mutated": "",
+            "catches": "Down in the fields not moving the field cursor"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\t\tconst int delta = input.is_held(EditorKey::CONTROL) ? 10 : 1;",
+            "mutated": "\t\tconst int delta = 1;",
+            "catches": "Ctrl stepping a number by one"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\t\t\tmode = EditorMode::EDIT_STRING;",
+            "mutated": "",
+            "catches": "Enter on a text field not starting to type"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\teditBuffer += input.typed;",
+            "mutated": "",
+            "catches": "typed characters never reaching the field"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\t\teditBuffer.pop_back();",
+            "mutated": "",
+            "catches": "Backspace not removing the last character"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\t\tmodel.field_set_string(current_field(), editBuffer);",
+            "mutated": "",
+            "catches": "Enter after typing not setting the field"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\t\texit(ctx);\n\t\treturn;",
+            "mutated": "\t\treturn;",
+            "catches": "Esc not leaving the editor"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\tcommit_working(ctx);\n\tactive = false;",
+            "mutated": "\tactive = false;",
+            "catches": "leaving without committing the record"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\t\t\tlistCursor.select(static_cast<size_t>(found - keys.begin()));",
+            "mutated": "",
+            "catches": "an added record left unselected"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\t\t\tload_working(ctx);\n\t\t\tfocus = EditorFocus::FIELDS;\n\t\t}\n\t\telse if (input.is_pressed(EditorKey::REMOVE))",
+            "mutated": "\t\t\tload_working(ctx);\n\t\t}\n\t\telse if (input.is_pressed(EditorKey::REMOVE))",
+            "catches": "adding a record leaving focus on the list"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\t\t\tif (!model.is_builtin(ctx, current_key()))",
+            "mutated": "\t\t\tif (true)",
+            "catches": "Delete removing a shipped record"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\tmodel.load(ctx, current_key());",
+            "mutated": "",
+            "catches": "a selected record's fields never loaded"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\t\tmodel.is_builtin(ctx, keys[row - 1]) &&\n",
+            "mutated": "",
+            "catches": "a divider above every custom record, not only the first"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\t\t!model.is_builtin(ctx, keys[row]);",
+            "mutated": "\t\ttrue;",
+            "catches": "a divider above every record that follows a shipped one"
+        },
+        {
+            "file": "src/ItemEditor.cpp",
+            "original": "\tstd::ranges::stable_partition(keys, is_shipped);",
+            "mutated": "",
+            "catches": "custom items listed among the shipped ones"
+        },
+        {
+            "file": "src/ItemEditor.cpp",
+            "original": "\titems.set_params(key, working);",
+            "mutated": "",
+            "catches": "a committed item's numbers never written to the registry"
+        },
+        {
+            "file": "src/ItemEditor.cpp",
+            "original": "\titem_registry(ctx).remove_custom(key);",
+            "mutated": "",
+            "catches": "a removed custom item left in the registry"
+        },
+        {
+            "file": "src/ItemEditor.cpp",
+            "original": "\treturn item_registry(ctx).is_builtin_key(key);",
+            "mutated": "\treturn false;",
+            "catches": "every item treated as custom"
+        }
+    ]
+}

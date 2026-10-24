@@ -45,7 +45,10 @@ class PrefabLibrary;
 #ifndef __EMSCRIPTEN__
 class ContentEditor;
 class RoomEditor;
-class ItemEditor;
+template <typename Model>
+class RecordEditor;
+class ItemEditorModel;
+using ItemEditor = RecordEditor<ItemEditorModel>;
 class MonsterEditor;
 class SpellEditor;
 #endif

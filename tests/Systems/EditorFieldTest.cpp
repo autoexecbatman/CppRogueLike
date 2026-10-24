@@ -389,7 +389,7 @@ TEST(EditorFieldTest, TheItemEditorsFieldsAreTheOldCodesKindsAndLabels)
 {
 	expect_kinds_and_labels(
 		"ItemEditor",
-		ItemEditor::FIELDS,
+		ItemEditorModel::FIELDS,
 		std::span{ ITEM_FIELDS_AT_HEAD });
 }
 
@@ -413,7 +413,7 @@ TEST(EditorFieldTest, TheItemEditorsPlainNumbersShowAndStepAsTheOldCodeDid)
 {
 	expect_plain_numbers<ItemParams>(
 		"ItemEditor",
-		ItemEditor::FIELDS,
+		ItemEditorModel::FIELDS,
 		std::span{ ITEM_PLAIN_AT_HEAD });
 }
 
@@ -430,8 +430,8 @@ TEST(EditorFieldTest, TheMonsterEditorsPlainNumbersShowAndStepAsTheOldCodeDid)
 TEST(EditorFieldDeathTest, AMisroutedFieldAbortsNamingItsLabelAndThePath)
 {
 	EXPECT_DEATH(
-		refuse_misrouted_field("Value", "ItemEditor::field_adjust"),
-		"ItemEditor::field_adjust has no case for the field 'Value'");
+		refuse_misrouted_field("Value", "ItemEditorModel::field_adjust"),
+		"ItemEditorModel::field_adjust has no case for the field 'Value'");
 }
 
 // end of file: EditorFieldTest.cpp

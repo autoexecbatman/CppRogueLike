@@ -157,8 +157,9 @@ void adjust_plain(const PlainNumber<Record>& plain, Record& record, int delta)
 // wrongly marked descriptor fails at its first use.
 //
 // Example:
-//   refuse_misrouted_field("Value", "ItemEditor::field_adjust");
-//   // stderr: "ItemEditor::field_adjust has no case for the field 'Value'"
+//   refuse_misrouted_field("Value", "ItemEditorModel::field_adjust");
+//   // stderr: "ItemEditorModel::field_adjust has no case for the field
+//   // 'Value'"
 [[noreturn]] void refuse_misrouted_field(
 	std::string_view label,
 	std::string_view path);

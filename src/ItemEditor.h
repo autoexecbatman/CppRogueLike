@@ -1,44 +1,44 @@
 // file: ItemEditor.h
 #pragma once
 
-// Full-screen in-game item data editor.
-// Entered from main menu ("Item Editor" option).
-// Edits the ItemRegistry in ctx and saves it to data/content/items.json.
+// The item editor: the shared RecordEditor frame over ItemEditorModel, which
+// knows items. Entered from the main menu ("Item Editor"); edits the
+// ItemRegistry in ctx and saves it to data/content/items.json, with each item's
+// tile in the ContentRegistry. The controls are the frame's, in RecordEditor.h.
 //
-// Controls:
-//   Tab              -- switch focus: list panel <-> field panel
-//   Up / Down        -- navigate item list or field list
-//   Left / Right     -- adjust integer field value (+/-1)
-//   Ctrl+Left/Right  -- adjust integer field value (+/-10)
-//   Enter            -- edit string field / toggle enum / open tile picker
-//   F2               -- open tile picker for current item tile
-//   Ctrl+S           -- save items.json
-//   Esc              -- commit edits and exit to main menu
+// Usage:
+//
+//   ItemEditor editor{};     // RecordEditor<ItemEditorModel>
+//   editor.enter(ctx);       // needs ctx.itemRegistry and ctx.contentRegistry
+//   editor.tick(ctx);        // one frame
+//   editor.current_key();    // -> "amulet_of_health", the first item
+//   using Field = ItemEditorModel::FieldId;
+//   editor.record_model().field_value(Field::VALUE);   // -> "200"
 
 #include <array>
+#include <cstddef>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "EditorField.h"
 #include "ItemRegistry.h"
-#include "ListCursor.h"
+#include "RecordEditor.h"
 #include "TileRef.h"
 
 struct GameContext;
-class ContentRegistry;
-class Renderer;
 
-class ItemEditor
+// What the item editor knows about items: the fields, how each is shown and
+// changed, and how items are read from and written to the registries.
+class ItemEditorModel
 {
 private:
-	enum class Mode
-	{
-		NORMAL,
-		EDIT_STRING,
-		TILE_PICKER
-	};
+	// The selected item as it is being edited, and its tile.
+	ItemParams working{};
+	TileRef workingTile{};
 
+public:
 	enum class FieldId : int
 	{
 		NAME = 0,
@@ -93,64 +93,9 @@ private:
 	// One field's entry in FIELDS.
 	using Descriptor = FieldDescriptor<FieldId, ItemParams>;
 
-	static constexpr size_t FIELD_COUNT = static_cast<size_t>(FieldId::COUNT);
+	static constexpr std::size_t FIELD_COUNT =
+		static_cast<std::size_t>(FieldId::COUNT);
 
-	ContentRegistry* contentRegistry{ nullptr };
-	bool active{ false };
-	Mode mode{ Mode::NORMAL };
-	int focus{ 0 }; // 0 = list panel, 1 = field panel
-
-	// Item list (all registered keys)
-	std::vector<std::string> keys;
-	ListCursor listCursor{};
-
-	// Working copy of selected item
-	ItemParams working{};
-	TileRef workingTile{};
-
-	// Field navigation
-	ListCursor fieldCursor{};
-	std::string editBuffer;
-
-	// Tile picker state
-	int pickerSheet{ 0 };
-	int pickerScroll{ 0 };
-
-	// Status feedback
-	double lastSaveTime{ -100.0 };
-
-	void load_working(const ItemRegistry& items);
-	void commit_working(ItemRegistry& items);
-
-	void handle_input(GameContext& ctx);
-	void handle_normal(const GameContext& ctx);
-	void handle_edit_string();
-	void handle_picker(const Renderer& renderer);
-
-	void render(const GameContext& ctx) const;
-	void render_header(const Renderer& renderer) const;
-	// The height of the panels between the header and the hint bar. Input and drawing both
-	// read it, so a click and the row drawn under it come from one row count.
-	//
-	// Example:
-	//   body_height(renderer);   // a 900-pixel screen -> 824, after a 48 header and a 28 hint bar
-	[[nodiscard]] static int body_height(const Renderer& renderer);
-	void render_list(const Renderer& renderer, const ItemRegistry& items) const;
-	void render_fields(const Renderer& renderer) const;
-	void render_picker(const Renderer& renderer) const;
-	void render_hint(const Renderer& renderer) const;
-
-	[[nodiscard]] const std::string& current_key() const;
-	[[nodiscard]] FieldId current_field() const;
-
-	[[nodiscard]] std::string field_label(FieldId field) const;
-	[[nodiscard]] std::string field_value(FieldId field) const;
-
-	void field_adjust(FieldId field, int delta);
-	void field_toggle(FieldId field);
-	void field_set_string(FieldId field, std::string newValue);
-
-public:
 	// Every field, in FieldId order: how it is edited, its label, and a plain
 	// number's member and bounds.
 	static constexpr std::array<Descriptor, FIELD_COUNT> FIELDS{ {
@@ -407,9 +352,84 @@ public:
 		Descriptor{ FieldId::TILE, FieldKind::TILE, "Tile", std::nullopt },
 	} };
 
-	void enter(GameContext& ctx);
-	void exit(GameContext& ctx);
-	void tick(GameContext& ctx);
+	// The item editor's colours and words.
+	static constexpr EditorLook LOOK{
+		.title = "ITEM EDITOR",
+		.headerHint =
+			"Tab:switch focus  Left/Right:adjust  Enter:edit  F2:tile  Ctrl+S:save  Esc:exit",
+		.listHint =
+			"[LIST] Up/Down:navigate  A:add new  Del:remove custom  Enter:edit fields  Tab:switch  Ctrl+S:save  Esc:exit",
+		.fieldsHint =
+			"[FIELDS] Up/Down:navigate  Left/Right:adjust  Enter:edit/toggle  F2:tile  Tab:switch  Ctrl+S:save  Esc:exit",
+		.headerBackground = Color{ 0, 20, 40, 255 },
+		.titleText = Color{ 180, 255, 180, 255 },
+		.headerHintText = Color{ 100, 130, 100, 255 },
+		.listBackground = Color{ 5, 10, 5, 255 },
+		.panelDivider = Color{ 80, 120, 80, 255 },
+		.listRowFocused = Color{ 0, 60, 0, 200 },
+		.listRowSelected = Color{ 0, 40, 0, 150 },
+		.listRowHovered = Color{ 20, 30, 20, 160 },
+		.listTextSelected = Color{ 150, 255, 150, 255 },
+		.listTextPlain = Color{ 200, 200, 200, 255 },
+		.fieldsBackground = Color{ 5, 8, 5, 255 },
+		.fieldRowFocused = Color{ 0, 60, 0, 200 },
+		.fieldRowSelected = Color{ 0, 40, 0, 140 },
+		.fieldRowHovered = Color{ 10, 20, 10, 120 },
+		.labelSelected = Color{ 150, 255, 150, 255 },
+		.labelPlain = Color{ 150, 150, 150, 255 },
+		.valueSelected = Color{ 220, 255, 220, 255 },
+		.valuePlain = Color{ 200, 200, 200, 255 },
+		.tileOutline = Color{ 0, 255, 100, 255 },
+		.pickerBackground = Color{ 5, 8, 24, 255 },
+		.pickerSubHeader = Color{ 8, 15, 40, 255 },
+		.pickerHeaderText = Color{ 120, 200, 200, 255 },
+		.pickerCurrent = Color{ 0, 60, 0, 220 },
+		.pickerHovered = Color{ 20, 40, 20, 160 },
+		.hintBackground = Color{ 0, 20, 40, 255 },
+		.savedHint = Color{ 100, 255, 100, 255 },
+		.plainHint = Color{ 120, 160, 120, 255 },
+	};
 
-	[[nodiscard]] bool is_active() const { return active; }
+	// Every item's key: the shipped ones in key order, then the custom ones.
+	[[nodiscard]] std::vector<std::string> keys(const GameContext& ctx) const;
+	// Makes the item under key the working copy, with its tile.
+	void load(const GameContext& ctx, std::string_view key);
+	// Writes the working copy and its tile back under key.
+	void commit(GameContext& ctx, std::string_view key) const;
+	// Writes items.json and the tile file.
+	void save(GameContext& ctx) const;
+	// Adds a new item with a weapon's defaults and returns its key.
+	[[nodiscard]] std::string add_record(GameContext& ctx) const;
+	// Removes a custom item and its tile. The frame refuses a shipped one.
+	void remove_record(GameContext& ctx, std::string_view key) const;
+	// Whether items.json shipped the item, so it cannot be removed.
+	[[nodiscard]] bool is_builtin(
+		const GameContext& ctx,
+		std::string_view key) const;
+
+	// The list's text for an item that is not selected: its name, or its key
+	// made readable when it has none.
+	[[nodiscard]] std::string row_label(
+		const GameContext& ctx,
+		std::string_view key) const;
+	// The list's text for the selected item, from the working copy.
+	[[nodiscard]] std::string working_row_label(std::string_view key) const;
+	// The tile the list shows for an item that is not selected.
+	[[nodiscard]] TileRef row_tile(
+		const GameContext& ctx,
+		std::string_view key) const;
+
+	[[nodiscard]] TileRef working_tile() const { return workingTile; }
+
+	void set_working_tile(TileRef tile) { workingTile = tile; }
+
+	[[nodiscard]] std::string field_label(FieldId field) const;
+	[[nodiscard]] std::string field_value(FieldId field) const;
+	void field_adjust(FieldId field, int delta);
+	void field_toggle(FieldId field);
+	void field_set_string(FieldId field, std::string newValue);
 };
+
+// The item editor itself; its members are defined in RecordEditor.cpp.
+using ItemEditor = RecordEditor<ItemEditorModel>;
+extern template class RecordEditor<ItemEditorModel>;

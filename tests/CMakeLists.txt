@@ -229,6 +229,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellcastingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/MonsterSpellcastingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EditorFieldTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/RecordEditorTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ScriptedInputTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/DoorForcingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/OpenLocksTest.cpp
@@ -360,11 +361,13 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/ContentEditor.cpp
     ${PARENT_SOURCE_DIR}/DecorEditor.cpp
     ${PARENT_SOURCE_DIR}/EditorField.cpp
+    ${PARENT_SOURCE_DIR}/EditorInput.cpp
     ${PARENT_SOURCE_DIR}/ItemEditor.cpp
     ${PARENT_SOURCE_DIR}/ListCursor.cpp
     ${PARENT_SOURCE_DIR}/MonsterEditor.cpp
     ${PARENT_SOURCE_DIR}/Palette.cpp
     ${PARENT_SOURCE_DIR}/PrefabLibrary.cpp
+    ${PARENT_SOURCE_DIR}/RecordEditor.cpp
     ${PARENT_SOURCE_DIR}/RoomEditor.cpp
     ${PARENT_SOURCE_DIR}/SpellEditor.cpp
     ${PARENT_SOURCE_DIR}/DataManager.cpp
