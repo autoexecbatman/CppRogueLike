@@ -25,8 +25,11 @@
 #include "RoomEditor.h"
 #include "TileConfig.h"
 
+namespace
+{
+
 // Sheets available in the picker, in Tab-cycle order.
-static constexpr TileSheet PICKER_SHEETS[] = {
+constexpr TileSheet PICKER_SHEETS[] = {
 	TileSheet::SHEET_DECOR0,
 	TileSheet::SHEET_DECOR1,
 	TileSheet::SHEET_FLOOR,
@@ -34,9 +37,9 @@ static constexpr TileSheet PICKER_SHEETS[] = {
 	TileSheet::SHEET_TILE,
 };
 
-static constexpr int PICKER_SHEET_COUNT = 5;
+constexpr int PICKER_SHEET_COUNT = 5;
 
-static constexpr std::string_view PICKER_SHEET_NAMES[] = {
+constexpr std::string_view PICKER_SHEET_NAMES[] = {
 	"Decor0",
 	"Decor1",
 	"Floor",
@@ -44,8 +47,6 @@ static constexpr std::string_view PICKER_SHEET_NAMES[] = {
 	"Tile",
 };
 
-namespace
-{
 // The picker's name for a sheet, or its number for a sheet the picker does not offer.
 //
 // Example:
@@ -101,6 +102,7 @@ CanvasGrid canvas_grid(const Renderer& renderer, int panX, int panY)
 		tileSize,
 	};
 }
+
 } // namespace
 
 // ---------------------------------------------------------------------------

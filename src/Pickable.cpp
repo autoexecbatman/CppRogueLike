@@ -1063,9 +1063,12 @@ bool hands_over_to_targeting(const ItemBehavior& behavior) noexcept
 			scroll->targetMode == TargetMode::PICK_TILE_AOE);
 }
 
+namespace
+{
+
 // The damage type a resistance effect answers for; empty for an effect that
 // resists nothing.
-static std::optional<DamageType> resisted_type(MagicalEffect effect) noexcept
+std::optional<DamageType> resisted_type(MagicalEffect effect) noexcept
 {
 	switch (effect)
 	{
@@ -1084,6 +1087,8 @@ static std::optional<DamageType> resisted_type(MagicalEffect effect) noexcept
 	}
 	}
 }
+
+} // namespace
 
 int get_item_resistance_strength(
 	const ItemBehavior& behavior,

@@ -19,16 +19,16 @@ using json = nlohmann::json;
 
 namespace
 {
+
 	// Thresholds for different hunger states
 	constexpr int WELL_FED_THRESHOLD{ 200 };
 	constexpr int SATIATED_THRESHOLD{ 400 };
 	constexpr int HUNGRY_THRESHOLD{ 700 };
 	constexpr int STARVING_THRESHOLD{ 900 };
-}
 
 // The only place a counter becomes a state. Bounds ascend, so the first one that
 // holds is the answer.
-static HungerState hunger_state_for(int hungerValue)
+HungerState hunger_state_for(int hungerValue)
 {
 	if (hungerValue <= WELL_FED_THRESHOLD)
 	{
@@ -52,6 +52,8 @@ static HungerState hunger_state_for(int hungerValue)
 
 	return HungerState::DYING;
 }
+
+} // namespace
 
 void HungerSystem::begin_run()
 {

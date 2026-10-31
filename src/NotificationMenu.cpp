@@ -7,8 +7,13 @@
 #include "NotificationMenu.h"
 #include "Renderer.h"
 
+namespace
+{
+
 // The row every notification ends with, and part of what sets the menu's width.
-static constexpr std::string_view PROMPT{ "[ press any key ]" };
+constexpr std::string_view PROMPT{ "[ press any key ]" };
+
+} // namespace
 
 NotificationMenu::NotificationMenu(
 	std::string title,

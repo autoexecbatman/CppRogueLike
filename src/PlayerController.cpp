@@ -63,16 +63,16 @@
 // ---------------------------------------------------------------------------
 namespace
 {
+
 struct ContextAction
 {
 	std::string label{};
 	std::function<void(GameContext&)> execute{};
 };
-} // namespace
 
 // Direction table -- static const, not a mutable global
 // ---------------------------------------------------------------------------
-static const std::unordered_map<Controls, Vector2D>& direction_map()
+const std::unordered_map<Controls, Vector2D>& direction_map()
 {
 	static const std::unordered_map<Controls, Vector2D> moves = {
 		{ Controls::UP_ARROW, DIR_N },
@@ -86,6 +86,8 @@ static const std::unordered_map<Controls, Vector2D>& direction_map()
 	};
 	return moves;
 }
+
+} // namespace
 
 PlayerController::PlayerController(Player& owner) :
 	playerOwner(owner)

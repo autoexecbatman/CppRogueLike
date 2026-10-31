@@ -203,10 +203,13 @@ constexpr int ROW_ICON_INSET = 2;
 // sword at a fifth of its brightness is a sword-shaped socket.
 constexpr Color EMPTY_SLOT_TINT{ 120, 120, 145, 255 };
 
+namespace
+{
+
 // The tile_config key naming the symbol for a slot. encode_equipment_slot spells the
 // slot in lower case and the keys are upper, so this is the one place that converts
 // between them; getting it wrong throws on an unknown key rather than drawing nothing.
-static std::string slot_symbol_key(EquipmentSlot slot)
+std::string slot_symbol_key(EquipmentSlot slot)
 {
 	std::string name{ encode_equipment_slot(slot) };
 	for (char& letter : name)
@@ -219,14 +222,14 @@ static std::string slot_symbol_key(EquipmentSlot slot)
 
 constexpr int CONTEXT_MENU_ANCHOR_COL = 6;
 
-static int row_at_y(int tileSize, int screenY)
+int row_at_y(int tileSize, int screenY)
 {
 	return panel_text_row_at_y(0, tileSize, screenY);
 }
 
 // First row of the detail bar, measured back from the bottom of the screen. The
 // content above it gets whatever is left, which is what the list scrolls within.
-static int detail_bar_top_row(const Renderer& renderer)
+int detail_bar_top_row(const Renderer& renderer)
 {
 	const int rowsThatFit = panel_text_rows_that_fit(
 		renderer.get_screen_height(),
@@ -235,10 +238,12 @@ static int detail_bar_top_row(const Renderer& renderer)
 	return rowsThatFit - DETAIL_BAR_ROWS;
 }
 
-static int list_content_rows(const Renderer& renderer)
+int list_content_rows(const Renderer& renderer)
 {
 	return detail_bar_top_row(renderer) - FIRST_CONTENT_ROW;
 }
+
+} // namespace
 
 int InventoryUI::screen_cols(GameContext& ctx) const
 {

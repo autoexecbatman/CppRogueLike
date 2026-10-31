@@ -11,9 +11,12 @@
 #include "SavingThrow.h"
 #include "TurnSchedule.h"
 
+namespace
+{
+
 // The state each buff imposes. A creature's copy of these states is written only by
 // BuffSystem::sync_states, so two buffs granting one state cannot clear each other.
-static const std::unordered_map<BuffType, ActorState> buff_state_effects = {
+const std::unordered_map<BuffType, ActorState> buff_state_effects = {
 	{ BuffType::INVISIBILITY, ActorState::IS_INVISIBLE },
 	{ BuffType::HIDDEN_IN_SHADOWS, ActorState::IS_INVISIBLE },
 	{ BuffType::ITEM_INVISIBILITY, ActorState::IS_INVISIBLE },
@@ -25,7 +28,7 @@ static const std::unordered_map<BuffType, ActorState> buff_state_effects = {
 
 // OCP: Data-driven AC calculation - BuffTypes that affect armor class
 // AD&D 2e: Lower AC = better defense, so buff values are negated when calculating AC
-static const std::unordered_set<BuffType> ac_affecting_buffs = {
+const std::unordered_set<BuffType> ac_affecting_buffs = {
 	BuffType::SHIELD,
 	BuffType::HAIRY_SPIDER_VENOM,
 	// Future extensions: BuffType::ARMOR, BuffType::PROTECTION_FROM_EVIL, etc.
@@ -33,7 +36,7 @@ static const std::unordered_set<BuffType> ac_affecting_buffs = {
 
 // OCP: Data-driven combat mechanics - Buffs that break when attacking
 // AD&D 2e: Invisibility ends when you attack
-static const std::unordered_set<BuffType> buffs_broken_by_attacking = {
+const std::unordered_set<BuffType> buffs_broken_by_attacking = {
 	BuffType::INVISIBILITY,
 	BuffType::SANCTUARY,
 	BuffType::HIDDEN_IN_SHADOWS,
@@ -42,11 +45,13 @@ static const std::unordered_set<BuffType> buffs_broken_by_attacking = {
 
 // OCP: Data-driven hit calculation - BuffTypes that modify to-hit rolls
 // AD&D 2e: Bless gives +1 to hit, future buffs may give other bonuses
-static const std::unordered_map<BuffType, int> buff_hit_modifiers = {
+const std::unordered_map<BuffType, int> buff_hit_modifiers = {
 	{ BuffType::BLESS, 1 },
 	{ BuffType::HAIRY_SPIDER_VENOM, -HAIRY_SPIDER_VENOM_PENALTY },
 	// Future extensions: {BuffType::PRAYER, 1}, {BuffType::CURSE, -1}, etc.
 };
+
+} // namespace
 
 bool BuffSystem::is_buff_imposed(ActorState state) noexcept
 {
@@ -83,12 +88,15 @@ void BuffSystem::sync_states(Creature& creature) noexcept
 	}
 }
 
+namespace
+{
+
 // The later of two endings, where none is an ending that never comes.
 //
 // Example:
 //   later_ending(360, 960);            // -> 960
 //   later_ending(360, std::nullopt);   // -> nullopt, lasting wins
-static std::optional<int> later_ending(
+std::optional<int> later_ending(
 	std::optional<int> first,
 	std::optional<int> second) noexcept
 {
@@ -104,7 +112,7 @@ static std::optional<int> later_ending(
 // Example:
 //   grant_buff(cleric, BuffType::BLESS, 0, 360, BuffApplication::ADD);            // blessed until 360
 //   grant_buff(cleric, BuffType::BLESS, 0, std::nullopt, BuffApplication::ADD);   // now until broken
-static void grant_buff(
+void grant_buff(
 	Creature& creature,
 	BuffType type,
 	int value,
@@ -152,6 +160,8 @@ static void grant_buff(
 
 	BuffSystem::sync_states(creature);
 }
+
+} // namespace
 
 void BuffSystem::add_buff(
 	Creature& creature,

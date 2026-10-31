@@ -30,17 +30,18 @@ constexpr Color RL_BLUE = { 0, 121, 241, 255 };
 constexpr Color RL_YELLOW = { 253, 249, 0, 255 };
 constexpr Color RL_MAGENTA = { 255, 0, 255, 255 };
 
+namespace
+{
+
 // What a frame paints behind its border tiles. This is the colour the GUI_FRAME_*
 // sprites fill their own 56-pixel bodies with, measured off a render: while the
 // two differed, every border tile read as a band across the panel it enclosed.
 // One name, so a frame cannot disagree with its own art.
-static constexpr Color FRAME_FILL{ 20, 12, 28, 255 };
+constexpr Color FRAME_FILL{ 20, 12, 28, 255 };
 
 // Each pair's two colours, in ALL_COLOR_PAIR's order, so the name and the colours
 // are one row rather than a constant here and an index there. Adding a pair to the
 // enum without a colour here fails the static_assert below.
-namespace
-{
 constexpr Color PAIR_CYAN{ 0, 255, 255, 255 };
 constexpr Color PAIR_BROWN{ 128, 77, 0, 255 };
 constexpr Color PAIR_DIM_GREEN{ 0, 102, 0, 255 };

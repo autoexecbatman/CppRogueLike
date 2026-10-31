@@ -26,6 +26,7 @@
 
 namespace
 {
+
 	// Configuration constants (NOT serialized - same for all mimics)
 	constexpr int DISGUISE_CHANGE_RATE = 200;
 	constexpr int CONSUMPTION_COOLDOWN_TURNS = 3;
@@ -38,7 +39,6 @@ namespace
 	constexpr int HEALTH_BONUS = 1;
 	constexpr int DR_BONUS = 1;
 	constexpr int CONFUSION_BONUS = 1;
-}
 
 // OCP-compliant: data-driven item bonus mapping
 enum class MimicBonusType
@@ -51,7 +51,7 @@ enum class MimicBonusType
 	NONE
 };
 
-static const std::unordered_map<ItemClass, MimicBonusType> item_bonus_map = {
+const std::unordered_map<ItemClass, MimicBonusType> item_bonus_map = {
 	{ ItemClass::POTION, MimicBonusType::HEALTH },
 	{ ItemClass::FOOD, MimicBonusType::HEALTH },
 	{ ItemClass::SCROLL, MimicBonusType::CONFUSION },
@@ -68,6 +68,8 @@ static const std::unordered_map<ItemClass, MimicBonusType> item_bonus_map = {
 	{ ItemClass::CROSSBOW, MimicBonusType::ATTACK },
 	{ ItemClass::SLING, MimicBonusType::ATTACK },
 };
+
+} // namespace
 
 // Single source of truth: which item appearances a mimic can adopt.
 // Called by on_created when a mimic is built, and as lazy init after load.
