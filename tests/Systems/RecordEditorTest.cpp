@@ -2,10 +2,14 @@
 // The shared editor frame, driven through EditorInput snapshots once for each
 // editor's Model: a click selects a list row, Tab and the arrows move the
 // cursors, Ctrl steps a number by ten, Enter types into a text field, A and
-// Delete add and remove a custom record, and Esc commits and leaves. Every
-// expected value is read from the Model's own field table and bounds.
+// Delete add and remove a custom record, and Esc commits and leaves. While a
+// field is being typed into or the tile picker is open, Esc only cancels and
+// Tab and Ctrl+S do nothing. Every expected value is read from the Model's
+// own field table and bounds.
 //
-// No test presses Ctrl+S: saving writes the real data files.
+// Saving writes the data files Paths::resolve finds. The one test that
+// presses Ctrl+S first moves its child into a probe folder with an empty
+// data/content, and checks the redirect before any key.
 //
 // Run it:
 //
@@ -17,6 +21,7 @@
 #include <algorithm>
 #include <charconv>
 #include <cstddef>
+#include <filesystem>
 #include <optional>
 #include <set>
 #include <string>
@@ -29,6 +34,7 @@
 #include "src/EditorInput.h"
 #include "src/ItemEditor.h"
 #include "src/MonsterEditor.h"
+#include "src/Paths.h"
 #include "src/RecordEditor.h"
 #include "src/SpellEditor.h"
 #include "src/SpellRegistry.h"
@@ -176,6 +182,142 @@ namespace
 			"the stepped number was not committed");
 		finish_the_child();
 	}
+
+	// Every field of the selected record as the editor shows it, in table
+	// order.
+	template <typename Model>
+	std::vector<std::string> field_values(const Model& model)
+	{
+		std::vector<std::string> values{};
+		for (const auto& descriptor : Model::FIELDS)
+		{
+			values.push_back(model.field_value(descriptor.field));
+		}
+		return values;
+	}
+
+	// Esc while typing discards the text and returns to the fields: the editor
+	// stays open and the field keeps its value. A second Esc leaves. Runs in a
+	// HiddenRenderer child, because an Esc that leaves opens the main menu.
+	template <typename Model>
+	[[noreturn]] void escape_while_typing_cancels()
+	{
+		HiddenRenderer hidden{};
+		MockGameContext mock{};
+		GameContext ctx = mock.to_game_context();
+		ctx.renderer = &hidden.renderer;
+		RecordEditor<Model> editor{};
+		editor.enter(ctx);
+		const std::optional<size_t> field =
+			first_field_of_kind<Model>(FieldKind::TEXT);
+		exit_unless(field.has_value(), "the model has no text field");
+		const auto fieldId = Model::FIELDS.at(*field).field;
+		editor.handle_input(click_at(field_row(*field)), ctx);
+		const std::string before = editor.record_model().field_value(fieldId);
+		editor.handle_input(frame({ EditorKey::ENTER }, {}), ctx);
+		EditorInput typing = frame({}, {});
+		typing.typed = "Qz";
+		editor.handle_input(typing, ctx);
+
+		editor.handle_input(frame({ EditorKey::ESCAPE }, {}), ctx);
+
+		exit_unless(editor.is_active(), "Esc while typing left the editor");
+		exit_unless(mock.menus.empty(), "Esc while typing opened a menu");
+		exit_unless(
+			editor.editor_mode() == EditorMode::NORMAL,
+			"Esc while typing kept typing");
+		exit_unless(
+			editor.record_model().field_value(fieldId) == before,
+			"Esc while typing kept the typed text");
+		editor.handle_input(frame({ EditorKey::ESCAPE }, {}), ctx);
+		exit_unless(
+			!editor.is_active(),
+			"the second Esc left the editor active");
+		exit_unless(
+			mock.menus.size() == 1,
+			"the second Esc opened no main menu");
+		finish_the_child();
+	}
+
+	// Esc in the tile picker returns to the fields with the record unchanged,
+	// and the editor stays open. Runs in a HiddenRenderer child: the picker
+	// reads the renderer's sheets, and an Esc that leaves opens the main menu.
+	template <typename Model>
+	[[noreturn]] void escape_in_the_picker_returns()
+	{
+		HiddenRenderer hidden{};
+		MockGameContext mock{};
+		GameContext ctx = mock.to_game_context();
+		ctx.renderer = &hidden.renderer;
+		RecordEditor<Model> editor{};
+		editor.enter(ctx);
+		editor.handle_input(frame({ EditorKey::TAB }, {}), ctx);
+		const std::vector<std::string> before =
+			field_values(editor.record_model());
+		editor.handle_input(frame({ EditorKey::PICKER }, {}), ctx);
+		exit_unless(
+			editor.editor_mode() == EditorMode::TILE_PICKER,
+			"F2 opened no picker");
+
+		editor.handle_input(frame({ EditorKey::ESCAPE }, {}), ctx);
+
+		exit_unless(editor.is_active(), "Esc in the picker left the editor");
+		exit_unless(mock.menus.empty(), "Esc in the picker opened a menu");
+		exit_unless(
+			editor.editor_mode() == EditorMode::NORMAL,
+			"Esc in the picker kept the picker open");
+		exit_unless(
+			field_values(editor.record_model()) == before,
+			"Esc in the picker changed the record");
+		finish_the_child();
+	}
+
+	// Ctrl+S while typing saves nothing and keeps the typing. Saving writes
+	// wherever Paths::resolve finds data/, so the child first moves into a
+	// probe folder holding an empty data/content, and stops before any key
+	// unless the items file would land there. The real data files are never
+	// reachable.
+	template <typename Model>
+	[[noreturn]] void ctrl_s_while_typing_saves_nothing()
+	{
+		HiddenRenderer hidden{};
+		MockGameContext mock{};
+		GameContext ctx = mock.to_game_context();
+		ctx.renderer = &hidden.renderer;
+		RecordEditor<Model> editor{};
+		editor.enter(ctx);
+		const std::filesystem::path probe =
+			std::filesystem::temp_directory_path() / "record_editor_save_probe";
+		const std::filesystem::path content = probe / "data" / "content";
+		std::filesystem::remove_all(probe);
+		std::filesystem::create_directories(content);
+		std::filesystem::current_path(probe);
+		exit_unless(
+			std::filesystem::equivalent(
+				Paths::resolve(Paths::ITEMS).parent_path(),
+				content),
+			"a save would not land in the probe folder");
+		const std::optional<size_t> field =
+			first_field_of_kind<Model>(FieldKind::TEXT);
+		exit_unless(field.has_value(), "the model has no text field");
+		editor.handle_input(click_at(field_row(*field)), ctx);
+		editor.handle_input(frame({ EditorKey::ENTER }, {}), ctx);
+		EditorInput typing = frame({}, {});
+		typing.typed = "Qz";
+		editor.handle_input(typing, ctx);
+
+		editor.handle_input(
+			frame({ EditorKey::SAVE }, { EditorKey::CONTROL }),
+			ctx);
+
+		exit_unless(
+			editor.editor_mode() == EditorMode::EDIT_STRING,
+			"Ctrl+S ended the typing");
+		exit_unless(
+			std::filesystem::is_empty(content),
+			"Ctrl+S while typing saved");
+		finish_the_child();
+	}
 } // namespace
 
 template <typename Model>
@@ -307,6 +449,65 @@ TYPED_TEST(RecordEditorTest, EscapeCommitsTheRecordAndLeaves)
 	// Leaving opens the main menu, which needs a window, so it runs in a child.
 	const int childExitCode =
 		exit_code_in_child(&escape_commits_and_leaves<TypeParam>);
+	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
+	{
+		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
+	}
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED);
+}
+
+TYPED_TEST(RecordEditorTest, EscWhileTypingCancelsTheEditAndStays)
+{
+	const int childExitCode =
+		exit_code_in_child(&escape_while_typing_cancels<TypeParam>);
+	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
+	{
+		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
+	}
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED);
+}
+
+TYPED_TEST(RecordEditorTest, EscInThePickerReturnsToTheFieldsAndStays)
+{
+	if constexpr (std::is_same_v<TypeParam, SpellEditorModel>)
+	{
+		GTEST_SKIP() << "spells have no tile picker";
+	}
+	const int childExitCode =
+		exit_code_in_child(&escape_in_the_picker_returns<TypeParam>);
+	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
+	{
+		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
+	}
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED);
+}
+
+TYPED_TEST(RecordEditorTest, TabWhileTypingKeepsFocus)
+{
+	const std::optional<size_t> field =
+		first_field_of_kind<TypeParam>(FieldKind::TEXT);
+	ASSERT_TRUE(field.has_value()) << "the model has no text field";
+	this->editor.handle_input(click_at(field_row(*field)), this->ctx);
+	this->editor.handle_input(frame({ EditorKey::ENTER }, {}), this->ctx);
+	EditorInput typing = frame({}, {});
+	typing.typed = "Qz";
+	this->editor.handle_input(typing, this->ctx);
+	ASSERT_EQ(this->editor.editor_focus(), EditorFocus::FIELDS);
+	const auto typedInto = this->editor.current_field();
+
+	this->editor.handle_input(frame({ EditorKey::TAB }, {}), this->ctx);
+
+	EXPECT_EQ(this->editor.editor_focus(), EditorFocus::FIELDS);
+	EXPECT_EQ(this->editor.editor_mode(), EditorMode::EDIT_STRING);
+	EXPECT_EQ(this->editor.current_field(), typedInto);
+}
+
+TYPED_TEST(RecordEditorTest, CtrlSWhileTypingDoesNotSave)
+{
+	// Saving needs the window's clock, and the child moves its working
+	// folder into a probe, so this runs in a child.
+	const int childExitCode =
+		exit_code_in_child(&ctrl_s_while_typing_saves_nothing<TypeParam>);
 	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
 	{
 		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;

@@ -133,6 +133,25 @@ void RecordEditor<Model>::handle_input(
 	const EditorInput& input,
 	GameContext& ctx)
 {
+	// Typing and the picker own every key, Esc included, so Esc cancels them.
+	if (mode == EditorMode::EDIT_STRING)
+	{
+		handle_edit_string(input);
+		return;
+	}
+
+	if (mode == EditorMode::TILE_PICKER)
+	{
+		assert(
+			HAS_TILES &&
+			"RecordEditor::handle_input: a picker opened for records without tiles");
+		assert(
+			ctx.renderer &&
+			"RecordEditor::handle_input: the tile picker needs a renderer");
+		handle_picker(input, *ctx.renderer);
+		return;
+	}
+
 	if (input.is_pressed(EditorKey::ESCAPE))
 	{
 		exit(ctx);
@@ -153,24 +172,7 @@ void RecordEditor<Model>::handle_input(
 		return;
 	}
 
-	if (mode == EditorMode::NORMAL)
-	{
-		handle_normal(input, ctx);
-	}
-	else if (mode == EditorMode::EDIT_STRING)
-	{
-		handle_edit_string(input);
-	}
-	else if (mode == EditorMode::TILE_PICKER)
-	{
-		assert(
-			HAS_TILES &&
-			"RecordEditor::handle_input: a picker opened for records without tiles");
-		assert(
-			ctx.renderer &&
-			"RecordEditor::handle_input: the tile picker needs a renderer");
-		handle_picker(input, *ctx.renderer);
-	}
+	handle_normal(input, ctx);
 }
 
 template <typename Model>

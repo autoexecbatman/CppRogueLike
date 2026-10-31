@@ -33,6 +33,9 @@
 //   Ctrl+S           save
 //   Esc              commit the record and leave
 //
+// While a field is being typed into or the picker is open, Esc only cancels
+// it, and Tab and Ctrl+S do nothing.
+//
 // The member definitions are in RecordEditor.cpp, which instantiates the frame
 // once per Model; a new editor adds its line there.
 

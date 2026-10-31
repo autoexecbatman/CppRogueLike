@@ -234,6 +234,42 @@
             "original": "\treturn class_tag(working.spellClass);",
             "mutated": "\treturn std::nullopt;",
             "catches": "the selected spell's row losing its class mark"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\tif (mode == EditorMode::EDIT_STRING)\n\t{\n\t\thandle_edit_string(input);\n\t\treturn;",
+            "mutated": "\tif (mode == EditorMode::EDIT_STRING && !input.is_pressed(EditorKey::ESCAPE))\n\t{\n\t\thandle_edit_string(input);\n\t\treturn;",
+            "catches": "Esc while typing reaching the global keys and leaving"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\tif (mode == EditorMode::EDIT_STRING)\n\t{\n\t\thandle_edit_string(input);\n\t\treturn;",
+            "mutated": "\tif (mode == EditorMode::EDIT_STRING && !input.is_pressed(EditorKey::TAB))\n\t{\n\t\thandle_edit_string(input);\n\t\treturn;",
+            "catches": "Tab while typing moving focus to the list"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\tif (mode == EditorMode::EDIT_STRING)\n\t{\n\t\thandle_edit_string(input);\n\t\treturn;",
+            "mutated": "\tif (mode == EditorMode::EDIT_STRING && !input.is_pressed(EditorKey::SAVE))\n\t{\n\t\thandle_edit_string(input);\n\t\treturn;",
+            "catches": "Ctrl+S while typing saving the record"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\tif (input.is_pressed(EditorKey::ESCAPE))\n\t{\n\t\tmode = EditorMode::NORMAL;\n\t}\n}\n\ntemplate <typename Model>\nvoid RecordEditor<Model>::handle_picker(",
+            "mutated": "\tif (input.is_pressed(EditorKey::ESCAPE))\n\t{\n\t\tmode = EditorMode::EDIT_STRING;\n\t}\n}\n\ntemplate <typename Model>\nvoid RecordEditor<Model>::handle_picker(",
+            "catches": "Esc while typing leaving the typing open"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\tif (input.is_pressed(EditorKey::ESCAPE))\n\t{\n\t\tmode = EditorMode::NORMAL;\n\t}\n}\n\ntemplate <typename Model>\nvoid RecordEditor<Model>::handle_picker(",
+            "mutated": "\tif (input.is_pressed(EditorKey::ESCAPE))\n\t{\n\t\tmodel.field_set_string(current_field(), editBuffer);\n\t\tmode = EditorMode::NORMAL;\n\t}\n}\n\ntemplate <typename Model>\nvoid RecordEditor<Model>::handle_picker(",
+            "catches": "Esc while typing writing the typed text into the field"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\tif (input.is_pressed(EditorKey::ESCAPE) ||\n\t\tinput.is_pressed(EditorKey::PICKER))",
+            "mutated": "\tif (input.is_pressed(EditorKey::PICKER))",
+            "catches": "Esc in the picker leaving the picker open"
         }
     ]
 }
