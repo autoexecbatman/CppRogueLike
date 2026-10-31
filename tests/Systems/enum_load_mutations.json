@@ -45,18 +45,6 @@
         },
         {
             "file": "src/Item.cpp",
-            "original": "\t\tif (saved < 0 || saved >= static_cast<int>(PREFIX_COUNT))\n\t\t{\n\t\t\treturn std::nullopt;\n\t\t}",
-            "mutated": "\t\tif (saved < 0 || saved >= static_cast<int>(PREFIX_COUNT))\n\t\t{\n\t\t\treturn static_cast<PrefixType>(saved);\n\t\t}",
-            "catches": "a saved prefix no PrefixType has loads"
-        },
-        {
-            "file": "src/Item.cpp",
-            "original": "\t\tif (saved < 0 || saved >= static_cast<int>(SUFFIX_COUNT))\n\t\t{\n\t\t\treturn std::nullopt;\n\t\t}",
-            "mutated": "\t\tif (saved < 0 || saved >= static_cast<int>(SUFFIX_COUNT))\n\t\t{\n\t\t\treturn static_cast<SuffixType>(saved);\n\t\t}",
-            "catches": "a saved suffix no SuffixType has loads"
-        },
-        {
-            "file": "src/Item.cpp",
             "original": "\t\tcase BlessingStatus::CURSED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
             "mutated": "\t\tcase BlessingStatus::CURSED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
             "catches": "a saved blessing no BlessingStatus has loads"
@@ -114,6 +102,30 @@
             "original": "\tif (!enumerator)",
             "mutated": "\tif (enumerator)",
             "catches": "every saved enum refused, so nothing with an enum field loads"
+        },
+        {
+            "file": "src/ItemEnhancements.h",
+            "original": "\t\tthrow std::runtime_error(std::format(\"unknown prefix '{}'\", key));",
+            "mutated": "\t\treturn PrefixType::NONE;",
+            "catches": "a saved prefix no row names loads as no prefix"
+        },
+        {
+            "file": "src/Item.cpp",
+            "original": "\tenh[\"prefix\"] = std::string{ encode_prefix(enhancement.prefix) };",
+            "mutated": "\tenh[\"prefix\"] = enhancement.get_prefix_name();",
+            "catches": "a prefix saved under its display name rather than its key"
+        },
+        {
+            "file": "src/ItemEnhancements.h",
+            "original": "\t\t\"sharp\",\n",
+            "mutated": "\t\t\"sharpp\",\n",
+            "catches": "one row's key misspelled, so its saves no longer match"
+        },
+        {
+            "file": "src/Item.cpp",
+            "original": "parse_suffix(enh.at(\"suffix\")",
+            "mutated": "parse_suffix(enh.at(\"prefix\")",
+            "catches": "the suffix read from the prefix's field"
         }
     ]
 }

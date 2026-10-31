@@ -1,7 +1,10 @@
 #pragma once
 
+#include <algorithm>
 #include <array>
+#include <format>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -138,6 +141,8 @@ struct PrefixRecord
 {
 	// The prefix this row is for.
 	PrefixType type{ PrefixType::NONE };
+	// What a save writes for it.
+	std::string_view key{};
 	// The word shown before an item's name; empty for NONE.
 	std::string_view name{};
 	// What the prefix does to an enhancement.
@@ -149,6 +154,8 @@ struct SuffixRecord
 {
 	// The suffix this row is for.
 	SuffixType type{ SuffixType::NONE };
+	// What a save writes for it.
+	std::string_view key{};
 	// The words shown after an item's name; empty for NONE.
 	std::string_view name{};
 	// What the suffix does to an enhancement.
@@ -166,11 +173,13 @@ inline constexpr std::size_t SUFFIX_COUNT =
 inline constexpr std::array<PrefixRecord, PREFIX_COUNT> PREFIX_TABLE{ {
 	PrefixRecord{
 		PrefixType::NONE,
+		"none",
 		"",
 		EnhancementEffect{},
 	},
 	PrefixRecord{
 		PrefixType::SHARP,
+		"sharp",
 		"Sharp",
 		EnhancementEffect{
 			.damage = 1,
@@ -179,6 +188,7 @@ inline constexpr std::array<PrefixRecord, PREFIX_COUNT> PREFIX_TABLE{ {
 	},
 	PrefixRecord{
 		PrefixType::KEEN,
+		"keen",
 		"Keen",
 		EnhancementEffect{
 			.damage = 2,
@@ -187,6 +197,7 @@ inline constexpr std::array<PrefixRecord, PREFIX_COUNT> PREFIX_TABLE{ {
 	},
 	PrefixRecord{
 		PrefixType::MASTERWORK,
+		"masterwork",
 		"Masterwork",
 		EnhancementEffect{
 			.toHit = 1,
@@ -195,6 +206,7 @@ inline constexpr std::array<PrefixRecord, PREFIX_COUNT> PREFIX_TABLE{ {
 	},
 	PrefixRecord{
 		PrefixType::BLESSED,
+		"blessed",
 		"Blessed",
 		EnhancementEffect{
 			.damage = 1,
@@ -205,6 +217,7 @@ inline constexpr std::array<PrefixRecord, PREFIX_COUNT> PREFIX_TABLE{ {
 	},
 	PrefixRecord{
 		PrefixType::FLAMING,
+		"flaming",
 		"Flaming",
 		EnhancementEffect{
 			.damage = 2,
@@ -215,6 +228,7 @@ inline constexpr std::array<PrefixRecord, PREFIX_COUNT> PREFIX_TABLE{ {
 	},
 	PrefixRecord{
 		PrefixType::FROST,
+		"frost",
 		"Frost",
 		EnhancementEffect{
 			.damage = 2,
@@ -225,6 +239,7 @@ inline constexpr std::array<PrefixRecord, PREFIX_COUNT> PREFIX_TABLE{ {
 	},
 	PrefixRecord{
 		PrefixType::SHOCK,
+		"shock",
 		"Shock",
 		EnhancementEffect{
 			.damage = 2,
@@ -235,6 +250,7 @@ inline constexpr std::array<PrefixRecord, PREFIX_COUNT> PREFIX_TABLE{ {
 	},
 	PrefixRecord{
 		PrefixType::REINFORCED,
+		"reinforced",
 		"Reinforced",
 		EnhancementEffect{
 			.ac = 1,
@@ -243,6 +259,7 @@ inline constexpr std::array<PrefixRecord, PREFIX_COUNT> PREFIX_TABLE{ {
 	},
 	PrefixRecord{
 		PrefixType::STUDDED,
+		"studded",
 		"Studded",
 		EnhancementEffect{
 			.ac = 1,
@@ -251,6 +268,7 @@ inline constexpr std::array<PrefixRecord, PREFIX_COUNT> PREFIX_TABLE{ {
 	},
 	PrefixRecord{
 		PrefixType::ELVEN,
+		"elven",
 		"Elven",
 		EnhancementEffect{
 			.ac = 2,
@@ -260,6 +278,7 @@ inline constexpr std::array<PrefixRecord, PREFIX_COUNT> PREFIX_TABLE{ {
 	},
 	PrefixRecord{
 		PrefixType::DWARVEN,
+		"dwarven",
 		"Dwarven",
 		EnhancementEffect{
 			.ac = 3,
@@ -269,6 +288,7 @@ inline constexpr std::array<PrefixRecord, PREFIX_COUNT> PREFIX_TABLE{ {
 	},
 	PrefixRecord{
 		PrefixType::MAGICAL,
+		"magical",
 		"Magical",
 		EnhancementEffect{
 			.ac = 1,
@@ -278,6 +298,7 @@ inline constexpr std::array<PrefixRecord, PREFIX_COUNT> PREFIX_TABLE{ {
 	},
 	PrefixRecord{
 		PrefixType::CURSED,
+		"cursed",
 		"Cursed",
 		EnhancementEffect{
 			.blessing = BlessingStatus::CURSED,
@@ -287,6 +308,7 @@ inline constexpr std::array<PrefixRecord, PREFIX_COUNT> PREFIX_TABLE{ {
 	},
 	PrefixRecord{
 		PrefixType::ANCIENT,
+		"ancient",
 		"Ancient",
 		EnhancementEffect{
 			.value = 500,
@@ -294,6 +316,7 @@ inline constexpr std::array<PrefixRecord, PREFIX_COUNT> PREFIX_TABLE{ {
 	},
 	PrefixRecord{
 		PrefixType::RUSTED,
+		"rusted",
 		"Rusted",
 		EnhancementEffect{
 			.damage = -1,
@@ -304,6 +327,7 @@ inline constexpr std::array<PrefixRecord, PREFIX_COUNT> PREFIX_TABLE{ {
 	},
 	PrefixRecord{
 		PrefixType::CRACKED,
+		"cracked",
 		"Cracked",
 		EnhancementEffect{
 			.valueChange = ValueChange::SET,
@@ -316,11 +340,13 @@ inline constexpr std::array<PrefixRecord, PREFIX_COUNT> PREFIX_TABLE{ {
 inline constexpr std::array<SuffixRecord, SUFFIX_COUNT> SUFFIX_TABLE{ {
 	SuffixRecord{
 		SuffixType::NONE,
+		"none",
 		"",
 		EnhancementEffect{},
 	},
 	SuffixRecord{
 		SuffixType::OF_SLAYING,
+		"of_slaying",
 		"of Slaying",
 		EnhancementEffect{
 			.damage = 3,
@@ -329,6 +355,7 @@ inline constexpr std::array<SuffixRecord, SUFFIX_COUNT> SUFFIX_TABLE{ {
 	},
 	SuffixRecord{
 		SuffixType::OF_ACCURACY,
+		"of_accuracy",
 		"of Accuracy",
 		EnhancementEffect{
 			.toHit = 2,
@@ -337,6 +364,7 @@ inline constexpr std::array<SuffixRecord, SUFFIX_COUNT> SUFFIX_TABLE{ {
 	},
 	SuffixRecord{
 		SuffixType::OF_PROTECTION,
+		"of_protection",
 		"of Protection",
 		EnhancementEffect{
 			.ac = 2,
@@ -345,6 +373,7 @@ inline constexpr std::array<SuffixRecord, SUFFIX_COUNT> SUFFIX_TABLE{ {
 	},
 	SuffixRecord{
 		SuffixType::OF_POWER,
+		"of_power",
 		"of Power",
 		EnhancementEffect{
 			.strength = 1,
@@ -355,6 +384,7 @@ inline constexpr std::array<SuffixRecord, SUFFIX_COUNT> SUFFIX_TABLE{ {
 	},
 	SuffixRecord{
 		SuffixType::OF_FIRE_RESISTANCE,
+		"of_fire_resistance",
 		"of Fire Resistance",
 		EnhancementEffect{
 			.fireResistance = 50,
@@ -363,6 +393,7 @@ inline constexpr std::array<SuffixRecord, SUFFIX_COUNT> SUFFIX_TABLE{ {
 	},
 	SuffixRecord{
 		SuffixType::OF_COLD_RESISTANCE,
+		"of_cold_resistance",
 		"of Cold Resistance",
 		EnhancementEffect{
 			.coldResistance = 50,
@@ -371,6 +402,7 @@ inline constexpr std::array<SuffixRecord, SUFFIX_COUNT> SUFFIX_TABLE{ {
 	},
 	SuffixRecord{
 		SuffixType::OF_LIGHTNING_RESISTANCE,
+		"of_lightning_resistance",
 		"of Lightning Resistance",
 		EnhancementEffect{
 			.lightningResistance = 50,
@@ -379,6 +411,7 @@ inline constexpr std::array<SuffixRecord, SUFFIX_COUNT> SUFFIX_TABLE{ {
 	},
 	SuffixRecord{
 		SuffixType::OF_POISON_RESISTANCE,
+		"of_poison_resistance",
 		"of Poison Resistance",
 		EnhancementEffect{
 			.poisonResistance = 50,
@@ -387,6 +420,7 @@ inline constexpr std::array<SuffixRecord, SUFFIX_COUNT> SUFFIX_TABLE{ {
 	},
 	SuffixRecord{
 		SuffixType::OF_SPEED,
+		"of_speed",
 		"of Speed",
 		EnhancementEffect{
 			.speed = 2,
@@ -395,6 +429,7 @@ inline constexpr std::array<SuffixRecord, SUFFIX_COUNT> SUFFIX_TABLE{ {
 	},
 	SuffixRecord{
 		SuffixType::OF_STEALTH,
+		"of_stealth",
 		"of Stealth",
 		EnhancementEffect{
 			.stealth = 3,
@@ -403,6 +438,7 @@ inline constexpr std::array<SuffixRecord, SUFFIX_COUNT> SUFFIX_TABLE{ {
 	},
 	SuffixRecord{
 		SuffixType::OF_MAGIC,
+		"of_magic",
 		"of Magic",
 		EnhancementEffect{
 			.intelligence = 1,
@@ -412,6 +448,7 @@ inline constexpr std::array<SuffixRecord, SUFFIX_COUNT> SUFFIX_TABLE{ {
 	},
 	SuffixRecord{
 		SuffixType::OF_HEALTH,
+		"of_health",
 		"of Health",
 		EnhancementEffect{
 			.hp = 15,
@@ -420,6 +457,7 @@ inline constexpr std::array<SuffixRecord, SUFFIX_COUNT> SUFFIX_TABLE{ {
 	},
 	SuffixRecord{
 		SuffixType::OF_THE_EAGLE,
+		"of_the_eagle",
 		"of the Eagle",
 		EnhancementEffect{
 			.dexterity = 2,
@@ -428,6 +466,7 @@ inline constexpr std::array<SuffixRecord, SUFFIX_COUNT> SUFFIX_TABLE{ {
 	},
 	SuffixRecord{
 		SuffixType::OF_THE_BEAR,
+		"of_the_bear",
 		"of the Bear",
 		EnhancementEffect{
 			.strength = 2,
@@ -436,6 +475,7 @@ inline constexpr std::array<SuffixRecord, SUFFIX_COUNT> SUFFIX_TABLE{ {
 	},
 	SuffixRecord{
 		SuffixType::OF_THE_OWL,
+		"of_the_owl",
 		"of the Owl",
 		EnhancementEffect{
 			.intelligence = 2,
@@ -444,6 +484,7 @@ inline constexpr std::array<SuffixRecord, SUFFIX_COUNT> SUFFIX_TABLE{ {
 	},
 	SuffixRecord{
 		SuffixType::OF_WEAKNESS,
+		"of_weakness",
 		"of Weakness",
 		EnhancementEffect{
 			.strength = -1,
@@ -454,6 +495,7 @@ inline constexpr std::array<SuffixRecord, SUFFIX_COUNT> SUFFIX_TABLE{ {
 	},
 	SuffixRecord{
 		SuffixType::OF_SLOWNESS,
+		"of_slowness",
 		"of Slowness",
 		EnhancementEffect{
 			.speed = -2,
@@ -464,6 +506,7 @@ inline constexpr std::array<SuffixRecord, SUFFIX_COUNT> SUFFIX_TABLE{ {
 	},
 	SuffixRecord{
 		SuffixType::OF_BRITTLENESS,
+		"of_brittleness",
 		"of Brittleness",
 		EnhancementEffect{
 			.blessing = BlessingStatus::CURSED,
@@ -473,8 +516,8 @@ inline constexpr std::array<SuffixRecord, SUFFIX_COUNT> SUFFIX_TABLE{ {
 	},
 } };
 
-// Whether a table has row i naming enumerator i, with a name on every row but
-// NONE's.
+// Whether a table has row i naming enumerator i, with a key on every row and a
+// name on every row but NONE's.
 //
 // Example:
 //   is_enhancement_table_in_enum_order(PREFIX_TABLE);   // -> true
@@ -487,8 +530,9 @@ template <typename Record, std::size_t Count>
 	for (std::size_t row = 0; row < Count; ++row)
 	{
 		const bool isInOrder = table[row].type == static_cast<Type>(row);
+		const bool isKeyed = !table[row].key.empty();
 		const bool isNamed = (row == 0) == table[row].name.empty();
-		if (!isInOrder || !isNamed)
+		if (!isInOrder || !isKeyed || !isNamed)
 		{
 			return false;
 		}
@@ -517,6 +561,50 @@ static_assert(
 [[nodiscard]] constexpr const SuffixRecord& suffix_record(SuffixType suffix)
 {
 	return SUFFIX_TABLE.at(static_cast<std::size_t>(suffix));
+}
+
+// The key a prefix or a suffix is saved under: its enumerator in snake_case.
+//
+// Example:
+//   encode_prefix(PrefixType::KEEN);             // -> "keen"
+//   encode_suffix(SuffixType::OF_THE_OWL);       // -> "of_the_owl"
+[[nodiscard]] constexpr std::string_view encode_prefix(PrefixType prefix)
+{
+	return prefix_record(prefix).key;
+}
+
+// The suffix half of encode_prefix above.
+[[nodiscard]] constexpr std::string_view encode_suffix(SuffixType suffix)
+{
+	return suffix_record(suffix).key;
+}
+
+// The prefix or suffix a saved key names. Throws std::runtime_error for a key
+// no row has.
+//
+// Example:
+//   parse_prefix("keen");         // -> PrefixType::KEEN
+//   parse_prefix("blunt");        // throws "unknown prefix 'blunt'"
+//   parse_suffix("of_sandals");   // throws "unknown suffix 'of_sandals'"
+[[nodiscard]] inline PrefixType parse_prefix(std::string_view key)
+{
+	const auto found = std::ranges::find(PREFIX_TABLE, key, &PrefixRecord::key);
+	if (found == PREFIX_TABLE.end())
+	{
+		throw std::runtime_error(std::format("unknown prefix '{}'", key));
+	}
+	return found->type;
+}
+
+// The suffix half of parse_prefix above.
+[[nodiscard]] inline SuffixType parse_suffix(std::string_view key)
+{
+	const auto found = std::ranges::find(SUFFIX_TABLE, key, &SuffixRecord::key);
+	if (found == SUFFIX_TABLE.end())
+	{
+		throw std::runtime_error(std::format("unknown suffix '{}'", key));
+	}
+	return found->type;
 }
 
 struct ItemEnhancement

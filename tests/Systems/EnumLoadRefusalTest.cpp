@@ -18,12 +18,15 @@
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
+#include <array>
+#include <cstddef>
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "src/Actor.h"
@@ -54,12 +57,13 @@ using json = nlohmann::json;
 
 namespace
 {
-	// What a load threw as a std::runtime_error, or empty when it loaded.
+	// What a load threw, or empty when it loaded. Any std::exception is read,
+	// so a record of the wrong type fails on the message rather than escaping.
 	//
 	// Example:
 	//   what_loading_threw(load_a_good_record); // -> ""
 	//   what_loading_threw(load_a_bad_record);
-	//   // -> "Item::load: prefix 17 ..."
+	//   // -> "unknown prefix 'blunt'"
 	template <typename Load>
 	std::string what_loading_threw(Load load)
 	{
@@ -67,12 +71,56 @@ namespace
 		{
 			load();
 		}
-		catch (const std::runtime_error& refusal)
+		catch (const std::exception& refusal)
 		{
 			return refusal.what();
 		}
 		return {};
 	}
+
+	// Every prefix's and suffix's key in a save, in enum order: the
+	// enumerator's name in snake_case.
+	const auto PREFIX_KEYS = std::to_array<std::string_view>({
+		"none",
+		"sharp",
+		"keen",
+		"masterwork",
+		"blessed",
+		"flaming",
+		"frost",
+		"shock",
+		"reinforced",
+		"studded",
+		"elven",
+		"dwarven",
+		"magical",
+		"cursed",
+		"ancient",
+		"rusted",
+		"cracked",
+	});
+
+	const auto SUFFIX_KEYS = std::to_array<std::string_view>({
+		"none",
+		"of_slaying",
+		"of_accuracy",
+		"of_protection",
+		"of_power",
+		"of_fire_resistance",
+		"of_cold_resistance",
+		"of_lightning_resistance",
+		"of_poison_resistance",
+		"of_speed",
+		"of_stealth",
+		"of_magic",
+		"of_health",
+		"of_the_eagle",
+		"of_the_bear",
+		"of_the_owl",
+		"of_weakness",
+		"of_slowness",
+		"of_brittleness",
+	});
 
 	// One past an enum's last enumerator, as a saved number.
 	template <typename Enum>
@@ -310,34 +358,100 @@ TEST_F(EnumLoadRefusalTest, AnItemClassNoItemClassNamesIsRefused)
 	EXPECT_EQ(what_loading_threw(load_it), "unknown item_class 'sandals'");
 }
 
+// A prefix and a suffix are saved by their keys, so the refusal names the key.
 TEST_F(EnumLoadRefusalTest, APrefixNoPrefixTypeNamesIsRefused)
 {
 	json saved = saved_item();
-	const int bad = one_past(PrefixType::CRACKED);
-	saved.at("enhancement").at("prefix") = bad;
+	saved.at("enhancement").at("prefix") = "blunt";
 	const auto load_it = [this, &saved]()
 	{
 		[[maybe_unused]] const json again = item_reloaded(saved);
 	};
 
-	EXPECT_EQ(
-		what_loading_threw(load_it),
-		std::format("Item::load: prefix {} is not a valid PrefixType", bad));
+	EXPECT_EQ(what_loading_threw(load_it), "unknown prefix 'blunt'");
 }
 
 TEST_F(EnumLoadRefusalTest, ASuffixNoSuffixTypeNamesIsRefused)
 {
 	json saved = saved_item();
-	const int bad = one_past(SuffixType::OF_BRITTLENESS);
-	saved.at("enhancement").at("suffix") = bad;
+	saved.at("enhancement").at("suffix") = "of_sandals";
 	const auto load_it = [this, &saved]()
 	{
 		[[maybe_unused]] const json again = item_reloaded(saved);
 	};
 
-	EXPECT_EQ(
-		what_loading_threw(load_it),
-		std::format("Item::load: suffix {} is not a valid SuffixType", bad));
+	EXPECT_EQ(what_loading_threw(load_it), "unknown suffix 'of_sandals'");
+}
+
+TEST_F(EnumLoadRefusalTest, EverySavedPrefixIsItsKey)
+{
+	ASSERT_EQ(std::size(PREFIX_KEYS), PREFIX_TABLE.size());
+	for (std::size_t row = 0; row < PREFIX_TABLE.size(); ++row)
+	{
+		Item item{
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "test", ColorPairId::WHITE_BLACK },
+		};
+		item.enhancement.prefix = PREFIX_TABLE[row].type;
+		json saved;
+
+		item.save(saved);
+
+		EXPECT_EQ(saved.at("enhancement").at("prefix"), json(PREFIX_KEYS[row]))
+			<< "row " << row;
+	}
+}
+
+TEST_F(EnumLoadRefusalTest, EverySavedSuffixIsItsKey)
+{
+	ASSERT_EQ(std::size(SUFFIX_KEYS), SUFFIX_TABLE.size());
+	for (std::size_t row = 0; row < SUFFIX_TABLE.size(); ++row)
+	{
+		Item item{
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "test", ColorPairId::WHITE_BLACK },
+		};
+		item.enhancement.suffix = SUFFIX_TABLE[row].type;
+		json saved;
+
+		item.save(saved);
+
+		EXPECT_EQ(saved.at("enhancement").at("suffix"), json(SUFFIX_KEYS[row]))
+			<< "row " << row;
+	}
+}
+
+// Each key loads as its own row, so no two keys are swapped on the way in.
+TEST_F(EnumLoadRefusalTest, AKeyLoadsItsOwnRow)
+{
+	for (std::size_t row = 0; row < PREFIX_TABLE.size(); ++row)
+	{
+		json saved = saved_item();
+		saved.at("enhancement").at("prefix") = PREFIX_KEYS[row];
+		Item loaded{
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK },
+		};
+
+		ASSERT_NO_THROW(loaded.load(saved)) << "prefix row " << row;
+
+		EXPECT_EQ(loaded.enhancement.prefix, PREFIX_TABLE[row].type)
+			<< "prefix row " << row;
+	}
+	for (std::size_t row = 0; row < SUFFIX_TABLE.size(); ++row)
+	{
+		json saved = saved_item();
+		saved.at("enhancement").at("suffix") = SUFFIX_KEYS[row];
+		Item loaded{
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK },
+		};
+
+		ASSERT_NO_THROW(loaded.load(saved)) << "suffix row " << row;
+
+		EXPECT_EQ(loaded.enhancement.suffix, SUFFIX_TABLE[row].type)
+			<< "suffix row " << row;
+	}
 }
 
 TEST_F(EnumLoadRefusalTest, ABlessingNoBlessingStatusNamesIsRefused)
@@ -361,10 +475,8 @@ TEST_F(EnumLoadRefusalTest, TheLastOfEachItemEnumStillLoads)
 {
 	json saved = saved_item();
 	saved.at("itemClass") = "quest_item";
-	saved.at("enhancement").at("prefix") =
-		static_cast<int>(PrefixType::CRACKED);
-	saved.at("enhancement").at("suffix") =
-		static_cast<int>(SuffixType::OF_BRITTLENESS);
+	saved.at("enhancement").at("prefix") = "cracked";
+	saved.at("enhancement").at("suffix") = "of_brittleness";
 	saved.at("enhancement").at("blessing") =
 		static_cast<int>(BlessingStatus::CURSED);
 

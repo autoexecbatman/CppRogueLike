@@ -1,4 +1,3 @@
-#include <cstddef>
 #include <optional>
 #include <string>
 
@@ -8,34 +7,6 @@
 
 namespace
 {
-	// The PrefixType a saved integer names, or nullopt for one no prefix has.
-	//
-	// Example:
-	//   prefix_type_from(1);     // -> PrefixType::SHARP
-	//   prefix_type_from(17);    // -> nullopt
-	std::optional<PrefixType> prefix_type_from(int saved)
-	{
-		if (saved < 0 || saved >= static_cast<int>(PREFIX_COUNT))
-		{
-			return std::nullopt;
-		}
-		return PREFIX_TABLE[static_cast<std::size_t>(saved)].type;
-	}
-
-	// The SuffixType a saved integer names, or nullopt for one no suffix has.
-	//
-	// Example:
-	//   suffix_type_from(1);     // -> SuffixType::OF_SLAYING
-	//   suffix_type_from(19);    // -> nullopt
-	std::optional<SuffixType> suffix_type_from(int saved)
-	{
-		if (saved < 0 || saved >= static_cast<int>(SUFFIX_COUNT))
-		{
-			return std::nullopt;
-		}
-		return SUFFIX_TABLE[static_cast<std::size_t>(saved)].type;
-	}
-
 	// The BlessingStatus a saved integer names, or nullopt for one no status
 	// has. The switch has no default, so a status added without a case here is
 	// a compile error (C4062, -Wswitch).
@@ -78,18 +49,8 @@ void Item::load(const json& source)
 	// Load enhancement data
 	{
 		const auto& enh = source.at("enhancement");
-		enhancement.prefix = saved_enum_field(
-			enh,
-			"Item::load",
-			"prefix",
-			"PrefixType",
-			&prefix_type_from);
-		enhancement.suffix = saved_enum_field(
-			enh,
-			"Item::load",
-			"suffix",
-			"SuffixType",
-			&suffix_type_from);
+		enhancement.prefix = parse_prefix(enh.at("prefix").get<std::string>());
+		enhancement.suffix = parse_suffix(enh.at("suffix").get<std::string>());
 		enhancement.damageBonus = enh.at("damageBonus").get<int>();
 		enhancement.toHitBonus = enh.at("toHitBonus").get<int>();
 		enhancement.acBonus = enh.at("acBonus").get<int>();
@@ -142,8 +103,8 @@ void Item::save(json& output)
 
 	// Save enhancement data
 	json enh;
-	enh["prefix"] = static_cast<int>(enhancement.prefix);
-	enh["suffix"] = static_cast<int>(enhancement.suffix);
+	enh["prefix"] = std::string{ encode_prefix(enhancement.prefix) };
+	enh["suffix"] = std::string{ encode_suffix(enhancement.suffix) };
 	enh["damageBonus"] = enhancement.damageBonus;
 	enh["toHitBonus"] = enhancement.toHitBonus;
 	enh["acBonus"] = enhancement.acBonus;
