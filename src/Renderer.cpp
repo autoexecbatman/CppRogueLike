@@ -118,13 +118,25 @@ constexpr auto ALL = std::to_array<SheetSource>({
 
 	// Characters (all animated with 0/1 pairs)
 	{ SHEET_PLAYER0, "Player0", "Characters/Player", 64, ANIMATED },
-	{ SHEET_HUMANOID0, "Humanoid0", "Characters/Humanoid", 64, ANIMATED },
+	{
+		SHEET_HUMANOID0,
+		"Humanoid0",
+		"Characters/Humanoid",
+		64,
+		ANIMATED,
+	},
 	{ SHEET_REPTILE0, "Reptile0", "Characters/Reptile", 64, ANIMATED },
 	{ SHEET_PEST0, "Pest0", "Characters/Pest", 64, ANIMATED },
 	{ SHEET_DOG0, "Dog0", "Characters/Dog", 64, ANIMATED },
 	{ SHEET_AVIAN0, "Avian0", "Characters/Avian", 64, ANIMATED },
 	{ SHEET_UNDEAD0, "Undead0", "Characters/Undead", 64, ANIMATED },
-	{ SHEET_QUADRAPED0, "Quadraped0", "Characters/Quadraped", 16, ANIMATED },
+	{
+		SHEET_QUADRAPED0,
+		"Quadraped0",
+		"Characters/Quadraped",
+		16,
+		ANIMATED,
+	},
 	{ SHEET_DEMON0, "Demon0", "Characters/Demon", 64, ANIMATED },
 	{ SHEET_MISC0, "Misc0", "Characters/Misc", 64, ANIMATED },
 
@@ -168,7 +180,13 @@ constexpr auto ALL = std::to_array<SheetSource>({
 	{ SHEET_CAT0, "Cat0", "Characters/Cat", 16, ANIMATED },
 	{ SHEET_RODENT0, "Rodent0", "Characters/Rodent", 16, ANIMATED },
 	{ SHEET_PLANT0, "Plant0", "Characters/Plant", 16, ANIMATED },
-	{ SHEET_ELEMENTAL0, "Elemental0", "Characters/Elemental", 16, ANIMATED },
+	{
+		SHEET_ELEMENTAL0,
+		"Elemental0",
+		"Characters/Elemental",
+		16,
+		ANIMATED,
+	},
 	{ SHEET_AQUATIC0, "Aquatic0", "Characters/Aquatic", 16, ANIMATED },
 
 	// Further object sheets

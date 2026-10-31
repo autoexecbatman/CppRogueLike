@@ -14,6 +14,7 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <array>
 #include <string>
 #include <string_view>
@@ -55,187 +56,91 @@ struct PrintedRow
 	std::array<std::string_view, PRINTED_COLUMNS> cells{};
 };
 
+// One printed row's twelve cells from its two halves, levels 1 to 7 and 8
+// to 14+, in the order the page prints them.
+constexpr std::array<std::string_view, PRINTED_COLUMNS> cells_of(
+	const std::array<std::string_view, 7>& levelsOneToSeven,
+	const std::array<std::string_view, 5>& levelsEightUp)
+{
+	std::array<std::string_view, PRINTED_COLUMNS> cells{};
+	// The first seven columns, then the five after them.
+	std::ranges::copy(levelsOneToSeven, cells.begin());
+	std::ranges::copy(levelsEightUp, cells.begin() + 7);
+	return cells;
+}
+
 // Transcribed from the page. The book's "D*" turns an extra 2d4 creatures of the
 // type, which the lookup does not distinguish, so it is written here as the "D"
 // it is read as. Its "Zombie", "Ghast" and "Special" rows name a creature rather
 // than a number and have no place in a table indexed by hit dice.
 constexpr std::array<PrintedRow, 11> PRINTED_TABLE = { {
-	// priest level:      1     2     3     4     5     6     7     8     9  10-11 12-13   14+
-	{ 1, { { "10", "7", "4", "T", "T", "D", "D", "D", "D", "D", "D", "D" } } },
+	// Each row: hit dice, the cells for priest levels 1 to 7, then the
+	// cells for 8, 9, 10-11, 12-13 and 14+.
+	{
+		1,
+		cells_of(
+			{ "10", "7", "4", "T", "T", "D", "D" },
+			{ "D", "D", "D", "D", "D" }),
+	},
 	{
 		2,
-		{ { "16", "13", "10", "7", "4", "T", "T", "D", "D", "D", "D", "D" } },
+		cells_of(
+			{ "16", "13", "10", "7", "4", "T", "T" },
+			{ "D", "D", "D", "D", "D" }),
 	},
 	{
 		3,
-		{
-			{
-				"19",
-				"16",
-				"13",
-				"10",
-				"7",
-				"4",
-				"T",
-				"T",
-				"D",
-				"D",
-				"D",
-				"D",
-			},
-		},
+		cells_of(
+			{ "19", "16", "13", "10", "7", "4", "T" },
+			{ "T", "D", "D", "D", "D" }),
 	},
 	{
 		4,
-		{
-			{
-				"19",
-				"16",
-				"13",
-				"10",
-				"7",
-				"4",
-				"T",
-				"T",
-				"D",
-				"D",
-				"D",
-				"D",
-			},
-		},
+		cells_of(
+			{ "19", "16", "13", "10", "7", "4", "T" },
+			{ "T", "D", "D", "D", "D" }),
 	},
 	{
 		5,
-		{
-			{
-				"20",
-				"19",
-				"16",
-				"13",
-				"10",
-				"7",
-				"4",
-				"T",
-				"T",
-				"D",
-				"D",
-				"D",
-			},
-		},
+		cells_of(
+			{ "20", "19", "16", "13", "10", "7", "4" },
+			{ "T", "T", "D", "D", "D" }),
 	},
 	{
 		6,
-		{
-			{
-				"--",
-				"--",
-				"20",
-				"19",
-				"16",
-				"13",
-				"10",
-				"7",
-				"4",
-				"T",
-				"T",
-				"D",
-			},
-		},
+		cells_of(
+			{ "--", "--", "20", "19", "16", "13", "10" },
+			{ "7", "4", "T", "T", "D" }),
 	},
 	{
 		7,
-		{
-			{
-				"--",
-				"--",
-				"--",
-				"20",
-				"19",
-				"16",
-				"13",
-				"10",
-				"7",
-				"4",
-				"T",
-				"T",
-			},
-		},
+		cells_of(
+			{ "--", "--", "--", "20", "19", "16", "13" },
+			{ "10", "7", "4", "T", "T" }),
 	},
 	{
 		8,
-		{
-			{
-				"--",
-				"--",
-				"--",
-				"--",
-				"20",
-				"19",
-				"16",
-				"13",
-				"10",
-				"7",
-				"4",
-				"T",
-			},
-		},
+		cells_of(
+			{ "--", "--", "--", "--", "20", "19", "16" },
+			{ "13", "10", "7", "4", "T" }),
 	},
 	{
 		9,
-		{
-			{
-				"--",
-				"--",
-				"--",
-				"--",
-				"--",
-				"20",
-				"19",
-				"16",
-				"13",
-				"10",
-				"7",
-				"4",
-			},
-		},
+		cells_of(
+			{ "--", "--", "--", "--", "--", "20", "19" },
+			{ "16", "13", "10", "7", "4" }),
 	},
 	{
 		10,
-		{
-			{
-				"--",
-				"--",
-				"--",
-				"--",
-				"--",
-				"--",
-				"20",
-				"19",
-				"16",
-				"13",
-				"10",
-				"7",
-			},
-		},
+		cells_of(
+			{ "--", "--", "--", "--", "--", "--", "20" },
+			{ "19", "16", "13", "10", "7" }),
 	},
 	{
 		11,
-		{
-			{
-				"--",
-				"--",
-				"--",
-				"--",
-				"--",
-				"--",
-				"--",
-				"20",
-				"19",
-				"16",
-				"13",
-				"10",
-			},
-		},
+		cells_of(
+			{ "--", "--", "--", "--", "--", "--", "--" },
+			{ "20", "19", "16", "13", "10" }),
 	},
 } };
 

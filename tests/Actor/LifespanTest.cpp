@@ -31,7 +31,13 @@ namespace
 // A human of the given ages, living to 100 so nothing here dies.
 Lifespan human(int naturalAge, int magicalYears)
 {
-	return Lifespan{ PlayerRaceState::HUMAN, naturalAge, 100, 0, magicalYears };
+	return Lifespan{
+		PlayerRaceState::HUMAN,
+		naturalAge,
+		100,
+		0,
+		magicalYears,
+	};
 }
 
 // Scripts every die of a roll to the same face.

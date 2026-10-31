@@ -44,7 +44,10 @@ constexpr BookSize BOOK_SIZES[] = {
 	{ "fire_wolf", CreatureSize::MEDIUM }, // Hell Hound p1544
 	{ "gargoyle", CreatureSize::MEDIUM }, // Gargoyle p1393, Gargoyle column
 	{ "ghoul", CreatureSize::MEDIUM }, // Ghoul p1406, Ghoul column
-	{ "giant_centipede", CreatureSize::TINY }, // Centipede p1173, Giant column
+	{
+		"giant_centipede",
+		CreatureSize::TINY,
+	}, // Centipede p1173, Giant column
 	{ "giant_rat", CreatureSize::TINY }, // Rat p1812, Rat (Giant) column
 	{
 		"giant_snake",
@@ -68,7 +71,10 @@ constexpr BookSize BOOK_SIZES[] = {
 	{ "ogre", CreatureSize::LARGE }, // Ogre p1750, Ogre column
 	{ "orc", CreatureSize::MEDIUM }, // Orc p1769, Orc column
 	{ "pit_fiend", CreatureSize::LARGE }, // Baatezu p1101, Pit Fiend column
-	{ "rat", CreatureSize::TINY }, // Rat p1812: closest, the giant rat's column
+	{
+		"rat",
+		CreatureSize::TINY,
+	}, // Rat p1812: closest, the giant rat's column
 	{ "shadow", CreatureSize::MEDIUM }, // Shadow p1841
 	{ "shopkeeper", CreatureSize::MEDIUM }, // no entry: a human, man-sized
 	{ "skeleton", CreatureSize::MEDIUM }, // Skeleton p1849, Skeleton column

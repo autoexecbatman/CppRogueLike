@@ -96,7 +96,10 @@ constexpr BookRating BOOK_RATINGS[] = {
 		IntelligenceRating::NON,
 	}, // Golem, Greater p1491, Stone column: Non- (0)
 	{ "harpy", IntelligenceRating::LOW }, // Harpy p1537: Low (5-7)
-	{ "hill_giant", IntelligenceRating::LOW }, // Giant, Hill p1431: Low (5-7)
+	{
+		"hill_giant",
+		IntelligenceRating::LOW,
+	}, // Giant, Hill p1431: Low (5-7)
 	{
 		"hobgoblin",
 		IntelligenceRating::AVERAGE,
@@ -136,7 +139,10 @@ constexpr BookRating BOOK_RATINGS[] = {
 		IntelligenceRating::ANIMAL,
 	}, // Rat p1812, Rat (Giant) column, the rat's value: Animal (1)
 	{ "shadow", IntelligenceRating::LOW }, // Shadow p1841: Low (5-7)
-	{ "shopkeeper", IntelligenceRating::AVERAGE }, // no entry: a human, Average
+	{
+		"shopkeeper",
+		IntelligenceRating::AVERAGE,
+	}, // no entry: a human, Average
 	{
 		"skeleton",
 		IntelligenceRating::NON,

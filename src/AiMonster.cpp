@@ -19,8 +19,16 @@
 
 namespace
 {
-constexpr std::array<Vector2D, 8>
-	NEIGHBORS = { DIR_N, DIR_S, DIR_W, DIR_E, DIR_NW, DIR_NE, DIR_SW, DIR_SE };
+constexpr std::array<Vector2D, 8> NEIGHBORS = {
+	DIR_N,
+	DIR_S,
+	DIR_W,
+	DIR_E,
+	DIR_NW,
+	DIR_NE,
+	DIR_SW,
+	DIR_SE,
+};
 
 // AD&D 2e: Move away from player, up the cost map this creature would descend to reach it.
 void flee(Creature& owner, GameContext& ctx)

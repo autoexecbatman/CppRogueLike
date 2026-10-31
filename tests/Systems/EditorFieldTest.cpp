@@ -73,7 +73,12 @@ const ExpectedField ITEM_FIELDS_AT_HEAD[] = {
 	ExpectedField{ 8, "WEIGHT", FieldKind::ADJUST, "Carry Weight" },
 	ExpectedField{ 9, "LEVEL_MIN", FieldKind::ADJUST, "Level Min" },
 	ExpectedField{ 10, "LEVEL_MAX", FieldKind::ADJUST, "Level Max" },
-	ExpectedField{ 11, "LEVEL_SCALING", FieldKind::ADJUST, "Level Scaling" },
+	ExpectedField{
+		11,
+		"LEVEL_SCALING",
+		FieldKind::ADJUST,
+		"Level Scaling",
+	},
 	ExpectedField{
 		12,
 		"CONSUMABLE_EFFECT",
@@ -104,10 +109,30 @@ const ExpectedField ITEM_FIELDS_AT_HEAD[] = {
 		FieldKind::ADJUST,
 		"Amount Bonus",
 	},
-	ExpectedField{ 17, "DURATION_DICE", FieldKind::ADJUST, "Duration Dice" },
-	ExpectedField{ 18, "DURATION_SIDES", FieldKind::ADJUST, "Duration Sides" },
-	ExpectedField{ 19, "DURATION_BONUS", FieldKind::ADJUST, "Duration Bonus" },
-	ExpectedField{ 20, "DURATION_UNIT", FieldKind::TOGGLE, "Duration Unit" },
+	ExpectedField{
+		17,
+		"DURATION_DICE",
+		FieldKind::ADJUST,
+		"Duration Dice",
+	},
+	ExpectedField{
+		18,
+		"DURATION_SIDES",
+		FieldKind::ADJUST,
+		"Duration Sides",
+	},
+	ExpectedField{
+		19,
+		"DURATION_BONUS",
+		FieldKind::ADJUST,
+		"Duration Bonus",
+	},
+	ExpectedField{
+		20,
+		"DURATION_UNIT",
+		FieldKind::TOGGLE,
+		"Duration Unit",
+	},
 	ExpectedField{
 		21,
 		"AGES_YEARS",
@@ -115,10 +140,20 @@ const ExpectedField ITEM_FIELDS_AT_HEAD[] = {
 		"Ages Drinker (years)",
 	},
 	ExpectedField{ 22, "TARGET_MODE", FieldKind::TOGGLE, "Target Mode" },
-	ExpectedField{ 23, "SCROLL_ANIM", FieldKind::TOGGLE, "Scroll Animation" },
+	ExpectedField{
+		23,
+		"SCROLL_ANIM",
+		FieldKind::TOGGLE,
+		"Scroll Animation",
+	},
 	ExpectedField{ 24, "RANGE", FieldKind::ADJUST, "Range" },
 	ExpectedField{ 25, "DAMAGE", FieldKind::ADJUST, "Damage" },
-	ExpectedField{ 26, "CONFUSE_TURNS", FieldKind::ADJUST, "Confuse Turns" },
+	ExpectedField{
+		26,
+		"CONFUSE_TURNS",
+		FieldKind::ADJUST,
+		"Confuse Turns",
+	},
 	ExpectedField{ 27, "RANGED", FieldKind::TOGGLE, "Ranged" },
 	ExpectedField{
 		28,
@@ -127,7 +162,12 @@ const ExpectedField ITEM_FIELDS_AT_HEAD[] = {
 		"Hand Requirement",
 	},
 	ExpectedField{ 29, "WEAPON_SIZE", FieldKind::TOGGLE, "Weapon Size" },
-	ExpectedField{ 30, "STRENGTH_RATING", FieldKind::ADJUST, "Made For STR" },
+	ExpectedField{
+		30,
+		"STRENGTH_RATING",
+		FieldKind::ADJUST,
+		"Made For STR",
+	},
 	ExpectedField{ 31, "AC_BONUS", FieldKind::ADJUST, "AC Bonus" },
 	ExpectedField{ 32, "EFFECT", FieldKind::TOGGLE, "Effect" },
 	ExpectedField{ 33, "EFFECT_BONUS", FieldKind::ADJUST, "Effect Bonus" },
@@ -367,7 +407,10 @@ constexpr SampleTable SAMPLE_TABLE{ { SAMPLE_FIRST, SAMPLE_SECOND } };
 constexpr SampleTable SWAPPED{ { SAMPLE_SECOND, SAMPLE_FIRST } };
 // The missing last entry is default-built, so it reads as FIRST.
 constexpr SampleTable MISSING_LAST{ { SAMPLE_FIRST } };
-constexpr SampleTable PLAIN_ON_TOGGLE{ { TOGGLE_WITH_PLAIN, SAMPLE_SECOND } };
+constexpr SampleTable PLAIN_ON_TOGGLE{ {
+	TOGGLE_WITH_PLAIN,
+	SAMPLE_SECOND,
+} };
 constexpr SampleTable BOUNDS_REVERSED{ { REVERSED_BOUNDS, SAMPLE_SECOND } };
 
 static_assert(is_well_formed_table(SAMPLE_TABLE));

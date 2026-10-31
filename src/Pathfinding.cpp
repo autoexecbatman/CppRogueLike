@@ -29,8 +29,16 @@ namespace Pathfinding
 
 		// Every move is to one of these. A diagonal is legal by design and
 		// costs what a cardinal step does.
-		constexpr std::array<Vector2D, 8>
-			NEIGHBOURS{ DIR_N, DIR_S, DIR_W, DIR_E, DIR_NW, DIR_NE, DIR_SW, DIR_SE };
+		constexpr std::array<Vector2D, 8> NEIGHBOURS{
+			DIR_N,
+			DIR_S,
+			DIR_W,
+			DIR_E,
+			DIR_NW,
+			DIR_NE,
+			DIR_SW,
+			DIR_SE,
+		};
 
 		constexpr int STEP_COST = 1;
 		// A shut door takes one turn to open and one to pass.

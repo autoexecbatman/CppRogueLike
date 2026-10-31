@@ -275,7 +275,11 @@ AttackResult::AttackResult Attacker::perform_single_attack(
 		}
 	}
 
-	return isHit ? AttackResult::AttackResult::LANDED : AttackResult::AttackResult::MISSED;
+	if (isHit)
+	{
+		return AttackResult::AttackResult::LANDED;
+	}
+	return AttackResult::AttackResult::MISSED;
 }
 
 BackstabInfo Attacker::calculate_backstab_bonus(

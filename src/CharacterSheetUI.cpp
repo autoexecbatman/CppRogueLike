@@ -177,9 +177,10 @@ void display_combat_stats(const Player& player, GameContext& ctx, int& row)
 		ColorPairId::YELLOW_BLACK);
 	row++;
 
-	const ColorPairId hpColor = (hp > maxHp / 2) ?
-		ColorPairId::GREEN_BLACK :
-		(hp > maxHp / 4 ? ColorPairId::YELLOW_BLACK : ColorPairId::RED_BLACK);
+	const ColorPairId woundedColor =
+		hp > maxHp / 4 ? ColorPairId::YELLOW_BLACK : ColorPairId::RED_BLACK;
+	const ColorPairId hpColor =
+		hp > maxHp / 2 ? ColorPairId::GREEN_BLACK : woundedColor;
 
 	ctx.renderer->draw_text(
 		Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },

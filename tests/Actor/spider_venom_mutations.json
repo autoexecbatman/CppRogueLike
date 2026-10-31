@@ -27,13 +27,13 @@
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\treturn isHit ? AttackResult::AttackResult::LANDED : AttackResult::AttackResult::MISSED;",
+      "original": "\tif (isHit)\n\t{\n\t\treturn AttackResult::AttackResult::LANDED;\n\t}\n\treturn AttackResult::AttackResult::MISSED;",
       "mutated": "\treturn AttackResult::AttackResult::LANDED;",
       "catches": "every attack reported as a hit, so a missed bite injects"
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\treturn isHit ? AttackResult::AttackResult::LANDED : AttackResult::AttackResult::MISSED;",
+      "original": "\tif (isHit)\n\t{\n\t\treturn AttackResult::AttackResult::LANDED;\n\t}\n\treturn AttackResult::AttackResult::MISSED;",
       "mutated": "\treturn AttackResult::AttackResult::MISSED;",
       "catches": "every attack reported as a miss, so no bite ever injects"
     },

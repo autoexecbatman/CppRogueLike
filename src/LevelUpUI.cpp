@@ -163,7 +163,10 @@ void draw_level_benefits(
 			if (spellLevel <= 9)
 			{
 				ctx.renderer->draw_text(
-					Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) },
+					Vector2D{
+						tileSize,
+						panel_text_row_y(0, tileSize, row),
+					},
 					std::format(
 						"Special: Level {} spells now available",
 						spellLevel),
