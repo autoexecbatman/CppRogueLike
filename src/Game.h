@@ -149,5 +149,16 @@ struct Game
 	[[nodiscard]] GameContext context() noexcept;
 	bool tick(int& loopNum);
 	void init_world();
+	// Loads the shipped item tiles into contentRegistry. Startup calls it with
+	// the other registries, before the main menu, so an editor opened from the
+	// menu sees every tile and its save writes them back.
+	//
+	// Example:
+	//     Game game{ TEST_DICE_SEED };
+	//     game.load_item_tiles();
+	//     game.contentRegistry.all_tiles().size();  // 97, all of tiles.json
+	//
+	// Throws std::runtime_error when tiles.json cannot be opened.
+	void load_item_tiles();
 	void shutdown();
 };

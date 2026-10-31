@@ -1,4 +1,6 @@
 #include "Game.h"
+#include "ContentRegistryIO.h"
+#include "Paths.h"
 #include "Stairs.h"
 
 // Single source of truth: build context from owned systems
@@ -172,6 +174,11 @@ bool Game::tick(int& loopNum)
 
 	++loopNum;
 	return gameState.get_run();
+}
+
+void Game::load_item_tiles()
+{
+	ContentRegistryIO::load(contentRegistry, Paths::CONTENT_TILES);
 }
 
 // Set tile refs for tile features constructed before tile_config was loaded.

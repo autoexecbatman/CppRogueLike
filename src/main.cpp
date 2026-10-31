@@ -84,6 +84,10 @@ int main()
 		game->itemRegistry.load(Paths::ITEMS);
 		game->itemRegistry.load_enhanced_rules(Paths::ENHANCED_RULES);
 	};
+	const auto load_item_tiles = [&game]()
+	{
+		game->load_item_tiles();
+	};
 	const auto init_world = [&game]()
 	{
 		game->init_world();
@@ -118,6 +122,7 @@ int main()
 		{ "Loading spells", load_spells },
 		{ "Loading monsters", load_monsters },
 		{ "Loading items", load_items },
+		{ "Loading item tiles", load_item_tiles },
 		{ "Initializing world", init_world },
 		{ "Initializing renderer", init_renderer },
 		{ "Loading Dawnlike tileset", load_tileset },

@@ -17,7 +17,6 @@
 #include "Actor.h"
 #include "BodyPlanRegistry.h"
 #include "Colors.h"
-#include "ContentRegistryIO.h"
 #include "DataManager.h"
 #include "Decoration.h"
 #include "DungeonRoom.h"
@@ -336,9 +335,6 @@ void GameStateManager::init_new_game(GameContext& ctx)
 		ctx.bodyPlanRegistry &&
 		"GameStateManager::init_new_game: called without a bodyPlanRegistry");
 	assert(
-		ctx.contentRegistry &&
-		"GameStateManager::init_new_game: called without a contentRegistry");
-	assert(
 		ctx.dataManager != nullptr &&
 		"GameStateManager::init_new_game: called without a dataManager");
 	assert(
@@ -365,7 +361,6 @@ void GameStateManager::init_new_game(GameContext& ctx)
 
 	start_fresh_run(*ctx.hungerSystem, *ctx.messageSystem, *ctx.gameState);
 
-	ContentRegistryIO::load(*ctx.contentRegistry, Paths::CONTENT_TILES);
 	ctx.dataManager->load_all_data(*ctx.messageSystem);
 
 	ctx.levelManager->reset_to_first_level();
@@ -389,9 +384,6 @@ void GameStateManager::init_new_game(GameContext& ctx)
 
 LoadOutcome GameStateManager::load_all(GameContext& ctx)
 {
-	assert(
-		ctx.contentRegistry &&
-		"GameStateManager::load_all: called without a contentRegistry");
 	assert(
 		ctx.menuManager != nullptr &&
 		"GameStateManager::load_all: called without a menuManager");
@@ -417,7 +409,6 @@ LoadOutcome GameStateManager::load_all(GameContext& ctx)
 	// Before the save is read, so what it holds is what the loaded game keeps.
 	start_fresh_run(*ctx.hungerSystem, *ctx.messageSystem, *ctx.gameState);
 
-	ContentRegistryIO::load(*ctx.contentRegistry, Paths::CONTENT_TILES);
 	ctx.menuManager->set_game_initialized(false);
 	ctx.dataManager->load_all_data(*ctx.messageSystem);
 
