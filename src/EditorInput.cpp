@@ -1,5 +1,6 @@
 // file: EditorInput.cpp
 #include <array>
+#include <string_view>
 
 #include <raylib.h>
 
@@ -74,5 +75,13 @@ EditorInput read_editor_input(const Renderer& renderer)
 
 	input.screenWidth = renderer.get_screen_width();
 	input.screenHeight = renderer.get_screen_height();
+
+	// The list sizes itself in the font it draws with; the renderer outlives
+	// the frame this input serves.
+	const auto measure_in_game_font = [&renderer](std::string_view text)
+	{
+		return renderer.measure_text(text);
+	};
+	input.measure = measure_in_game_font;
 	return input;
 }

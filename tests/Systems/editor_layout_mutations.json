@@ -1,0 +1,95 @@
+{
+    "cwd": "E:/repo/C++RogueLike",
+    "test_command": [
+        "powershell",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tests/run_suite.ps1",
+        "-Configuration",
+        "Debug",
+        "-Filter",
+        "--gtest_filter=EditorLayoutTest.*:RecordEditor*"
+    ],
+    "mutations": [
+        {
+            "file": "src/RecordEditor.h",
+            "original": "\t\treturn std::min(\n\t\t\tLIST_PAD + tileColumn + widestLabel + tagColumn + LIST_PAD,\n\t\t\tscreenWidth / 2);",
+            "mutated": "\t\treturn std::max(\n\t\t\tLIST_PAD + tileColumn + widestLabel + tagColumn + LIST_PAD,\n\t\t\tscreenWidth / 2);",
+            "catches": "the list no longer capped at half the screen"
+        },
+        {
+            "file": "src/RecordEditor.h",
+            "original": "\t\tLIST_PAD + tileColumn + widestLabel + tagColumn + LIST_PAD,",
+            "mutated": "\t\ttileColumn + widestLabel + tagColumn + LIST_PAD,",
+            "catches": "a pad dropped from the list's width"
+        },
+        {
+            "file": "src/RecordEditor.h",
+            "original": "\treturn widestTag > 0 ? widestTag + LIST_PAD : 0;",
+            "mutated": "\treturn widestTag + LIST_PAD;",
+            "catches": "a tag column kept for a list without tags"
+        },
+        {
+            "file": "src/RecordEditor.h",
+            "original": "\treturn listWidth - tagColumn;",
+            "mutated": "\treturn listWidth - 20;",
+            "catches": "the tag drawn at the old fixed offset"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\t\tif (measure(cut) <= maxWidth)\n\t\t{\n\t\t\treturn cut;\n\t\t}",
+            "mutated": "\t\tif (measure(cut) <= maxWidth)\n\t\t{\n\t\t\treturn std::string{ label.substr(0, length) } + \"...\";\n\t\t}",
+            "catches": "fitted_label cutting one character too few"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\tif (measure(label) <= maxWidth)\n\t{\n\t\treturn std::string{ label };\n\t}",
+            "mutated": "\tif (measure(label) < maxWidth)\n\t{\n\t\treturn std::string{ label };\n\t}",
+            "catches": "a label of exactly the room cut instead of kept"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\t\t\treturn cut;\n\t\t}\n\t}\n\treturn \"\";\n}",
+            "mutated": "\t\t\treturn cut;\n\t\t}\n\t}\n\treturn \"...\";\n}",
+            "catches": "the dots drawn where not even they fit"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\t\tif (mouse.x < listWidth)\n\t\t{\n\t\t\tfocus = EditorFocus::LIST;",
+            "mutated": "\t\tif (mouse.x < 220)\n\t\t{\n\t\t\tfocus = EditorFocus::LIST;",
+            "catches": "a click hit-tested against the old fixed width of 220"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\tconst int tileColumn = HAS_TILES ? LIST_TILE_COLUMN : 0;",
+            "mutated": "\tconst int tileColumn = 0;",
+            "catches": "the list's width leaving out the tile column"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\t\tlabel += \" *\";\n\t}\n\treturn label;",
+            "mutated": "\t}\n\treturn label;",
+            "catches": "a custom record's label measured without its \" *\""
+        },
+        {
+            "file": "src/EditorInput.cpp",
+            "original": "\tinput.measure = measure_in_game_font;\n",
+            "mutated": "",
+            "catches": "the real input left without a measure"
+        },
+        {
+            "file": "src/RecordEditor.h",
+            "original": "\treturn bandTop + (bandHeight - lineHeight) / 2;",
+            "mutated": "\treturn bandTop + (bandHeight - lineHeight);",
+            "catches": "a line set at the band's bottom rather than centred"
+        },
+        {
+            "file": "src/RecordEditor.h",
+            "original": "\treturn bandTop + (bandHeight - lineHeight) / 2;",
+            "mutated": "\treturn bandTop + 6;",
+            "catches": "the hint drawn at the old fixed 6-pixel offset, whatever the font"
+        }
+    ]
+}

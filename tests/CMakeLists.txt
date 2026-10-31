@@ -244,6 +244,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/NoEffectSpellTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ItemTileStartupTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/RendererSizeTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EditorLayoutTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/InventoryPersistenceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/HungerSystemTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/LoadRefusalTest.cpp

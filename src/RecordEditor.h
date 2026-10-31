@@ -40,7 +40,9 @@
 // The member definitions are in RecordEditor.cpp, which instantiates the frame
 // once per Model; a new editor adds its line there.
 
+#include <algorithm>
 #include <cstddef>
+#include <functional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -76,12 +78,13 @@ enum class EditorFocus
 // Where the frame draws, in pixels.
 namespace EditorLayout
 {
-	inline constexpr int LIST_WIDTH = 220;
 	inline constexpr int HEADER_HEIGHT = 48;
 	inline constexpr int HINT_HEIGHT = 28;
 	inline constexpr int FIELD_HEIGHT = 26;
 	inline constexpr int ITEM_HEIGHT = 30;
 	inline constexpr int LIST_TILE_SIZE = 22;
+	// The width a list row's tile takes, with the gap before its label.
+	inline constexpr int LIST_TILE_COLUMN = LIST_TILE_SIZE + 4;
 	inline constexpr int LIST_PAD = 6;
 	inline constexpr int PICKER_PAD = 10;
 	inline constexpr int PICKER_SUB_HEADER_HEIGHT = 28;
@@ -98,6 +101,70 @@ namespace EditorLayout
 	{
 		return screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
 	}
+
+	// The list panel's width: a pad, the tile column, the widest label, the tag
+	// column and a pad. It is at most half the screen, because the field
+	// panel's right-aligned values need the other half.
+	//
+	// Example:
+	//   list_panel_width(200, 26, 30, 1920);   // -> 268
+	//   list_panel_width(2000, 0, 0, 1920);    // -> 960, half the screen
+	[[nodiscard]] constexpr int list_panel_width(
+		int widestLabel,
+		int tileColumn,
+		int tagColumn,
+		int screenWidth)
+	{
+		return std::min(
+			LIST_PAD + tileColumn + widestLabel + tagColumn + LIST_PAD,
+			screenWidth / 2);
+	}
+
+	// The width the list keeps for row tags: the widest tag and a pad, or none
+	// when no row has a tag.
+	//
+	// Example:
+	//   tag_column(10);   // -> 16
+	//   tag_column(0);    // -> 0
+	[[nodiscard]] constexpr int tag_column(int widestTag)
+	{
+		return widestTag > 0 ? widestTag + LIST_PAD : 0;
+	}
+
+	// Where a row's tag starts: the tag column's left edge, inside the list.
+	//
+	// Example:
+	//   tag_left(218, 14);   // -> 204
+	[[nodiscard]] constexpr int tag_left(int listWidth, int tagColumn)
+	{
+		return listWidth - tagColumn;
+	}
+
+	// Where a line of text starts so that it sits centred in a band. A line
+	// taller than the band overhangs it equally above and below.
+	//
+	// Example:
+	//   centred_text_top(1033, 28, 30);   // -> 1032, a 30-pixel line in 28
+	//   centred_text_top(0, 30, 16);      // -> 7
+	[[nodiscard]] constexpr int centred_text_top(
+		int bandTop,
+		int bandHeight,
+		int lineHeight)
+	{
+		return bandTop + (bandHeight - lineHeight) / 2;
+	}
+
+	// The label if it fits maxWidth, otherwise its longest prefix followed by
+	// "..." that fits, and "" when not even "..." fits.
+	//
+	// Example, measuring 8 pixels a character:
+	//   fitted_label("Bless", 80, measure);                  // -> "Bless"
+	//   fitted_label("Protection From Evil", 80, measure);   // -> "Protect..."
+	//   fitted_label("Bless", 20, measure);                  // -> ""
+	[[nodiscard]] std::string fitted_label(
+		std::string_view label,
+		int maxWidth,
+		const std::function<int(std::string_view)>& measure);
 } // namespace EditorLayout
 
 // An editor's colours and the words on its header and hint bar.
@@ -184,18 +251,38 @@ private:
 
 	void handle_normal(const EditorInput& input, GameContext& ctx);
 	void handle_edit_string(const EditorInput& input);
-	void handle_picker(const EditorInput& input, const Renderer& renderer);
+	void handle_picker(
+		const EditorInput& input,
+		const Renderer& renderer,
+		int listWidth);
 
 	void render(const EditorInput& input, const GameContext& ctx) const;
 	void render_header(const Renderer& renderer) const;
-	void render_list(const EditorInput& input, const GameContext& ctx) const;
+	void render_list(
+		const EditorInput& input,
+		const GameContext& ctx,
+		int listWidth) const;
 	void render_fields(
 		const EditorInput& input,
-		const Renderer& renderer) const;
+		const Renderer& renderer,
+		int listWidth) const;
 	void render_picker(
 		const EditorInput& input,
-		const Renderer& renderer) const;
+		const Renderer& renderer,
+		int listWidth) const;
 	void render_hint(const Renderer& renderer) const;
+
+	// Row's label as the list draws it: the working record's for the
+	// selected row, with " *" after a custom record.
+	[[nodiscard]] std::string row_label_as_drawn(
+		const GameContext& ctx,
+		size_t row) const;
+
+	// The widest row tag as the list draws it, in pixels; 0 when no row
+	// has one. Requires input.measure.
+	[[nodiscard]] int widest_tag(
+		const EditorInput& input,
+		const GameContext& ctx) const;
 
 	// The selected record's tile, or no tile for a Model without tiles.
 	[[nodiscard]] TileRef working_tile() const;
@@ -221,6 +308,16 @@ public:
 	[[nodiscard]] const std::string& current_key() const;
 	// The field the cursor is on, as the Model's table names that row.
 	[[nodiscard]] FieldId current_field() const;
+
+	// The list panel's width this frame, from the widest label and tag as
+	// the list draws them. Requires input.measure.
+	//
+	// Example, measuring 8 pixels a character:
+	//   spells.list_width(input, ctx);   // -> 218
+	//   // the widest label, "[1] Protection From Evil", is 192 of it
+	[[nodiscard]] int list_width(
+		const EditorInput& input,
+		const GameContext& ctx) const;
 
 	// The Model, for reading the working record's fields.
 	[[nodiscard]] const Model& record_model() const { return model; }

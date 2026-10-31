@@ -21,6 +21,27 @@
 
 using namespace EditorLayout;
 
+std::string EditorLayout::fitted_label(
+	std::string_view label,
+	int maxWidth,
+	const std::function<int(std::string_view)>& measure)
+{
+	if (measure(label) <= maxWidth)
+	{
+		return std::string{ label };
+	}
+	// Longest prefix first, so the first that fits is the one kept.
+	for (size_t length = label.size(); length > 0; --length)
+	{
+		std::string cut = std::string{ label.substr(0, length - 1) } + "...";
+		if (measure(cut) <= maxWidth)
+		{
+			return cut;
+		}
+	}
+	return "";
+}
+
 namespace
 {
 	// The line drawn where the shipped records end and the custom ones begin.
@@ -148,7 +169,7 @@ void RecordEditor<Model>::handle_input(
 		assert(
 			ctx.renderer &&
 			"RecordEditor::handle_input: the tile picker needs a renderer");
-		handle_picker(input, *ctx.renderer);
+		handle_picker(input, *ctx.renderer, list_width(input, ctx));
 		return;
 	}
 
@@ -184,12 +205,13 @@ void RecordEditor<Model>::handle_normal(
 	const size_t visibleListRows = whole_rows_within(bodyHeight, ITEM_HEIGHT);
 	const size_t visibleFields = whole_rows_within(bodyHeight, FIELD_HEIGHT);
 	const Vector2D mouse = input.mouse;
+	const int listWidth = list_width(input, ctx);
 
 	// A click in the header is on neither panel.
 	if (input.is_pressed(EditorKey::CLICK) && mouse.y >= HEADER_HEIGHT)
 	{
 		const int pixelsBelowTop = mouse.y - HEADER_HEIGHT;
-		if (mouse.x < LIST_WIDTH)
+		if (mouse.x < listWidth)
 		{
 			focus = EditorFocus::LIST;
 			const std::optional<size_t> row = listCursor.row_under(
@@ -217,7 +239,7 @@ void RecordEditor<Model>::handle_normal(
 
 	if (input.wheel != 0)
 	{
-		if (mouse.x < LIST_WIDTH)
+		if (mouse.x < listWidth)
 		{
 			listCursor.scroll_by(-input.wheel, visibleListRows);
 		}
@@ -362,7 +384,8 @@ void RecordEditor<Model>::handle_edit_string(const EditorInput& input)
 template <typename Model>
 void RecordEditor<Model>::handle_picker(
 	const EditorInput& input,
-	const Renderer& renderer)
+	const Renderer& renderer,
+	int listWidth)
 {
 	const int totalSheets = renderer.get_loaded_sheet_count();
 
@@ -402,7 +425,7 @@ void RecordEditor<Model>::handle_picker(
 	const int sheetRows =
 		renderer.get_sheet_rows(static_cast<TileSheet>(pickerSheet));
 	const Vector2D mouse = input.mouse;
-	const bool isMouseInPicker = mouse.x >= LIST_WIDTH;
+	const bool isMouseInPicker = mouse.x >= listWidth;
 
 	if (isMouseInPicker && input.wheel != 0)
 	{
@@ -418,7 +441,7 @@ void RecordEditor<Model>::handle_picker(
 	{
 		const int pickerTileSize = picker_tile_size(renderer, pickerSheet);
 		const int col =
-			(mouse.x - LIST_WIDTH - PICKER_PAD) / (pickerTileSize + 2);
+			(mouse.x - listWidth - PICKER_PAD) / (pickerTileSize + 2);
 		const int row = pickerScroll + (mouse.y - gridY) / (pickerTileSize + 2);
 		const int sheetColumns =
 			renderer.get_sheet_cols(static_cast<TileSheet>(pickerSheet));
@@ -450,16 +473,18 @@ void RecordEditor<Model>::render(
 
 	DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 0, 0, 0, 255 });
 
+	// One width serves the list and the panel beside it.
+	const int listWidth = list_width(input, ctx);
 	render_header(renderer);
-	render_list(input, ctx);
+	render_list(input, ctx, listWidth);
 
 	if (mode == EditorMode::TILE_PICKER)
 	{
-		render_picker(input, renderer);
+		render_picker(input, renderer, listWidth);
 	}
 	else
 	{
-		render_fields(input, renderer);
+		render_fields(input, renderer, listWidth);
 	}
 
 	render_hint(renderer);
@@ -481,22 +506,24 @@ void RecordEditor<Model>::render_header(const Renderer& renderer) const
 template <typename Model>
 void RecordEditor<Model>::render_list(
 	const EditorInput& input,
-	const GameContext& ctx) const
+	const GameContext& ctx,
+	int listWidth) const
 {
 	const EditorLook& look = Model::LOOK;
 	const Renderer& renderer = *ctx.renderer;
 	const int bodyY = HEADER_HEIGHT;
 	const int bodyHeight = body_height(renderer.get_screen_height());
 
-	DrawRectangle(0, bodyY, LIST_WIDTH, bodyHeight, look.listBackground);
+	DrawRectangle(0, bodyY, listWidth, bodyHeight, look.listBackground);
 	DrawLine(
-		LIST_WIDTH,
+		listWidth,
 		bodyY,
-		LIST_WIDTH,
+		listWidth,
 		bodyY + bodyHeight,
 		look.panelDivider);
 
 	const size_t visibleCount = whole_rows_within(bodyHeight, ITEM_HEIGHT);
+	const int tagColumn = tag_column(widest_tag(input, ctx));
 	const size_t scroll = listCursor.first_visible(visibleCount);
 	const Vector2D mouse = input.mouse;
 
@@ -515,13 +542,13 @@ void RecordEditor<Model>::render_list(
 			DrawLine(
 				LIST_PAD,
 				rowY,
-				LIST_WIDTH - LIST_PAD,
+				listWidth - LIST_PAD,
 				rowY,
 				CUSTOM_DIVIDER);
 		}
 
 		const bool isSelected = (rowIndex == listCursor.current_row());
-		const bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH &&
+		const bool hovered = mouse.x >= 0 && mouse.x < listWidth &&
 			mouse.y >= rowY && mouse.y < rowY + ITEM_HEIGHT;
 
 		Color background{ 0, 0, 0, 0 };
@@ -540,7 +567,7 @@ void RecordEditor<Model>::render_list(
 
 		if (background.a > 0)
 		{
-			DrawRectangle(0, rowY, LIST_WIDTH, ITEM_HEIGHT, background);
+			DrawRectangle(0, rowY, listWidth, ITEM_HEIGHT, background);
 		}
 
 		const std::string& key = keys[rowIndex];
@@ -553,23 +580,14 @@ void RecordEditor<Model>::render_list(
 				Vector2D{ LIST_PAD, rowY + (ITEM_HEIGHT - LIST_TILE_SIZE) / 2 },
 				tile,
 				LIST_TILE_SIZE);
-			labelX = LIST_PAD + LIST_TILE_SIZE + 4;
+			labelX = LIST_PAD + LIST_TILE_COLUMN;
 		}
 
-		std::string label{};
-		if (isSelected)
-		{
-			label = model.working_row_label(key);
-		}
-		else
-		{
-			label = model.row_label(ctx, key);
-		}
-		if (!model.is_builtin(ctx, key))
-		{
-			label += " *";
-		}
-
+		// Only a label past the cap is cut; it stops short of the tag.
+		const std::string label = fitted_label(
+			row_label_as_drawn(ctx, rowIndex),
+			listWidth - labelX - tagColumn - LIST_PAD,
+			input.measure);
 		renderer.draw_text_color(
 			Vector2D{ labelX, rowY + (ITEM_HEIGHT - 16) / 2 },
 			label,
@@ -580,7 +598,10 @@ void RecordEditor<Model>::render_list(
 		if (tag)
 		{
 			renderer.draw_text_color(
-				Vector2D{ LIST_WIDTH - 20, rowY + (ITEM_HEIGHT - 16) / 2 },
+				Vector2D{
+					tag_left(listWidth, tagColumn),
+					rowY + (ITEM_HEIGHT - 16) / 2,
+				},
 				tag->text,
 				tag->colour);
 		}
@@ -590,13 +611,14 @@ void RecordEditor<Model>::render_list(
 template <typename Model>
 void RecordEditor<Model>::render_fields(
 	const EditorInput& input,
-	const Renderer& renderer) const
+	const Renderer& renderer,
+	int listWidth) const
 {
 	const EditorLook& look = Model::LOOK;
 	const int screenWidth = renderer.get_screen_width();
-	const int panelX = LIST_WIDTH;
+	const int panelX = listWidth;
 	const int panelY = HEADER_HEIGHT;
-	const int fieldsWidth = screenWidth - LIST_WIDTH;
+	const int fieldsWidth = screenWidth - listWidth;
 	const int fieldsHeight = body_height(renderer.get_screen_height());
 
 	DrawRectangle(
@@ -693,12 +715,13 @@ void RecordEditor<Model>::render_fields(
 template <typename Model>
 void RecordEditor<Model>::render_picker(
 	const EditorInput& input,
-	const Renderer& renderer) const
+	const Renderer& renderer,
+	int listWidth) const
 {
 	const EditorLook& look = Model::LOOK;
 	const int screenWidth = renderer.get_screen_width();
-	const int panelX = LIST_WIDTH;
-	const int panelWidth = screenWidth - LIST_WIDTH;
+	const int panelX = listWidth;
+	const int panelWidth = screenWidth - listWidth;
 	const int bodyY = HEADER_HEIGHT;
 	const int bodyHeight = body_height(renderer.get_screen_height());
 
@@ -833,8 +856,12 @@ void RecordEditor<Model>::render_hint(const Renderer& renderer) const
 		hintText = look.fieldsHint;
 	}
 
+	// The font sets the line's height, so the line is centred on it.
 	renderer.draw_text_color(
-		Vector2D{ 8, hintY + 6 },
+		Vector2D{
+			8,
+			centred_text_top(hintY, HINT_HEIGHT, renderer.get_font_size()),
+		},
 		hintText,
 		isSaveRecent ? look.savedHint : look.plainHint);
 }
@@ -881,6 +908,67 @@ template <typename Model>
 typename RecordEditor<Model>::FieldId RecordEditor<Model>::current_field() const
 {
 	return Model::FIELDS.at(fieldCursor.current_row()).field;
+}
+
+template <typename Model>
+std::string RecordEditor<Model>::row_label_as_drawn(
+	const GameContext& ctx,
+	size_t row) const
+{
+	const std::string& key = keys.at(row);
+	std::string label = row == listCursor.current_row() ?
+		model.working_row_label(key) :
+		model.row_label(ctx, key);
+	if (!model.is_builtin(ctx, key))
+	{
+		label += " *";
+	}
+	return label;
+}
+
+template <typename Model>
+int RecordEditor<Model>::widest_tag(
+	const EditorInput& input,
+	const GameContext& ctx) const
+{
+	assert(
+		input.measure &&
+		"RecordEditor::widest_tag: an EditorInput without a measure");
+	int widest = 0;
+	for (size_t row = 0; row < keys.size(); ++row)
+	{
+		// The selected row shows the working record, as render_list draws it.
+		const std::optional<RowTag> tag = row == listCursor.current_row() ?
+			model.working_row_tag() :
+			model.row_tag(ctx, keys[row]);
+		if (tag)
+		{
+			widest = std::max(widest, input.measure(tag->text));
+		}
+	}
+	return widest;
+}
+
+template <typename Model>
+int RecordEditor<Model>::list_width(
+	const EditorInput& input,
+	const GameContext& ctx) const
+{
+	assert(
+		input.measure &&
+		"RecordEditor::list_width: an EditorInput without a measure");
+	int widestLabel = 0;
+	for (size_t row = 0; row < keys.size(); ++row)
+	{
+		widestLabel =
+			std::max(widestLabel, input.measure(row_label_as_drawn(ctx, row)));
+	}
+	const int tileColumn = HAS_TILES ? LIST_TILE_COLUMN : 0;
+	return list_panel_width(
+		widestLabel,
+		tileColumn,
+		tag_column(widest_tag(input, ctx)),
+		input.screenWidth);
 }
 
 template class RecordEditor<ItemEditorModel>;

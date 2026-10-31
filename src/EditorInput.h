@@ -16,12 +16,15 @@
 //   input.pressed = { EditorKey::RIGHT };   // keys that went down this frame
 //   input.held = { EditorKey::CONTROL };    // keys held down, pressed or not
 //   input.screenHeight = 900;               // the window's height in pixels
+//   input.measure = eight_per_character;    // text width; the list needs it
 //   input.is_pressed(EditorKey::RIGHT);     // -> true
 //   input.is_held(EditorKey::CONTROL);      // -> true
 //   input.is_pressed(EditorKey::LEFT);      // -> false
 
+#include <functional>
 #include <set>
 #include <string>
+#include <string_view>
 
 #include "Vector2D.h"
 
@@ -70,6 +73,9 @@ struct EditorInput
 	int screenWidth{ 0 };
 	// The window's height in pixels.
 	int screenHeight{ 0 };
+	// A text's width in pixels, in the font the editor draws with. The list
+	// panel sizes itself with it.
+	std::function<int(std::string_view)> measure{};
 
 	// Whether the key went down this frame.
 	//

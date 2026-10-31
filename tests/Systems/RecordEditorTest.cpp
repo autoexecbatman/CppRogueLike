@@ -25,6 +25,7 @@
 #include <optional>
 #include <set>
 #include <string>
+#include <string_view>
 #include <system_error>
 #include <type_traits>
 #include <utility>
@@ -46,6 +47,13 @@ namespace
 	// The height the tests give the window: tall enough that every row a test
 	// reaches is on screen.
 	constexpr int SCREEN_HEIGHT = 900;
+	constexpr int SCREEN_WIDTH = 1280;
+
+	// A stand-in font: every character is 8 pixels wide.
+	int eight_per_character(std::string_view text)
+	{
+		return static_cast<int>(text.size()) * 8;
+	}
 
 	// One frame's input with these keys pressed and these held.
 	//
@@ -58,8 +66,9 @@ namespace
 		EditorInput input{};
 		input.pressed = std::move(pressed);
 		input.held = std::move(held);
-		input.screenWidth = 1280;
+		input.screenWidth = SCREEN_WIDTH;
 		input.screenHeight = SCREEN_HEIGHT;
+		input.measure = &eight_per_character;
 		return input;
 	}
 
@@ -82,11 +91,12 @@ namespace
 		};
 	}
 
-	// The middle of field row n, counted from the top of the field panel.
+	// The middle of field row n, counted from the top of the field panel, at
+	// the screen's right side, where no list reaches.
 	Vector2D field_row(size_t row)
 	{
 		return Vector2D{
-			EditorLayout::LIST_WIDTH + 40,
+			SCREEN_WIDTH - 40,
 			EditorLayout::HEADER_HEIGHT +
 				static_cast<int>(row) * EditorLayout::FIELD_HEIGHT +
 				EditorLayout::FIELD_HEIGHT / 2,
@@ -723,6 +733,93 @@ TEST(RecordEditorSpellTest, ABuiltinSpellsEffectIgnoresEveryEditKey)
 		SpellEffectType::KNOCK);
 }
 
+// The spell list is as wide as its widest label and its class tag, each
+// measured as drawn: a pad, no tile column, the label, the tag and its pad,
+// and a pad.
+TEST(RecordEditorSpellTest, TheListIsAsWideAsItsWidestLabelAndTag)
+{
+	MockGameContext mock{};
+	GameContext ctx = mock.to_game_context();
+	SpellEditor editor{};
+	editor.enter(ctx);
+	int widestLabel = 0;
+	for (const std::string& key : ctx.spellRegistry->get_all_keys())
+	{
+		const SpellDefinition& spell = ctx.spellRegistry->get_by_key(key);
+		std::string label =
+			"[" + std::to_string(spell.level) + "] " + spell.name;
+		if (!ctx.spellRegistry->is_builtin_key(key))
+		{
+			label += " *";
+		}
+		widestLabel = std::max(widestLabel, eight_per_character(label));
+	}
+	const int classTag = eight_per_character("C");
+
+	EXPECT_EQ(
+		editor.list_width(frame({}, {}), ctx),
+		EditorLayout::LIST_PAD + widestLabel + classTag +
+			EditorLayout::LIST_PAD + EditorLayout::LIST_PAD);
+}
+
+// An item list keeps a tile column: with a custom item named wider than any
+// other, the list is a pad, the tile column, that name with its " *", and a
+// pad, as items carry no tag.
+TEST(RecordEditorItemTest, TheListMakesRoomForTheTileColumn)
+{
+	using Field = ItemEditorModel::FieldId;
+	MockGameContext mock{};
+	GameContext ctx = mock.to_game_context();
+	ItemEditor editor{};
+	editor.enter(ctx);
+	editor.handle_input(frame({ EditorKey::ADD }, {}), ctx);
+	editor.handle_input(
+		click_at(field_row(row_of<ItemEditorModel>(Field::NAME))),
+		ctx);
+	editor.handle_input(frame({ EditorKey::ENTER }, {}), ctx);
+	EditorInput typing = frame({}, {});
+	typing.typed = std::string(50, 'W');
+	editor.handle_input(typing, ctx);
+	editor.handle_input(frame({ EditorKey::ENTER }, {}), ctx);
+	const std::string name = editor.record_model().field_value(Field::NAME);
+	const int customLabel = eight_per_character(name + " *");
+
+	EXPECT_EQ(
+		editor.list_width(frame({}, {}), ctx),
+		EditorLayout::LIST_PAD + EditorLayout::LIST_TILE_COLUMN + customLabel +
+			EditorLayout::LIST_PAD);
+}
+
+// A custom record's label is measured as drawn, " *" included: with a custom
+// spell named wider than any other, the list is a pad, "[level] name *", the
+// class tag and its pad, and a pad.
+TEST(RecordEditorSpellTest, TheListMakesRoomForACustomRecordsMark)
+{
+	using Field = SpellEditorModel::FieldId;
+	MockGameContext mock{};
+	GameContext ctx = mock.to_game_context();
+	SpellEditor editor{};
+	editor.enter(ctx);
+	editor.handle_input(frame({ EditorKey::ADD }, {}), ctx);
+	editor.handle_input(
+		click_at(field_row(row_of<SpellEditorModel>(Field::NAME))),
+		ctx);
+	editor.handle_input(frame({ EditorKey::ENTER }, {}), ctx);
+	EditorInput typing = frame({}, {});
+	typing.typed = std::string(50, 'W');
+	editor.handle_input(typing, ctx);
+	editor.handle_input(frame({ EditorKey::ENTER }, {}), ctx);
+	const std::string label = "[" +
+		editor.record_model().field_value(Field::LEVEL) + "] " +
+		editor.record_model().field_value(Field::NAME) + " *";
+	const int classTag = eight_per_character("C");
+
+	EXPECT_EQ(
+		editor.list_width(frame({}, {}), ctx),
+		EditorLayout::LIST_PAD + eight_per_character(label) + classTag +
+			EditorLayout::LIST_PAD + EditorLayout::LIST_PAD);
+}
+
 // Only a builtin spell's Effect is fixed: its other fields are edited as
 // any spell's are, and a custom spell's Effect is edited too.
 TEST(RecordEditorSpellTest, OnlyABuiltinSpellsEffectIsReadOnly)
@@ -738,6 +835,30 @@ TEST(RecordEditorSpellTest, OnlyABuiltinSpellsEffectIsReadOnly)
 	const std::string custom = model.add_record(ctx);
 	model.load(ctx, custom);
 	EXPECT_FALSE(model.is_read_only(Field::EFFECT_TYPE));
+}
+
+// The list ends where its width says: a click on its last pixel selects a
+// row, and a click one pixel further is in the fields.
+TYPED_TEST(
+	RecordEditorTest,
+	AClickOnTheListsLastPixelIsInTheListAndNextInTheFields)
+{
+	const int listWidth = this->editor.list_width(frame({}, {}), this->ctx);
+	ASSERT_GT(listWidth, EditorLayout::LIST_PAD * 2) << "no list to click";
+	this->editor.handle_input(frame({ EditorKey::TAB }, {}), this->ctx);
+	ASSERT_EQ(this->editor.editor_focus(), EditorFocus::FIELDS);
+
+	this->editor.handle_input(
+		click_at(Vector2D{ listWidth - 1, list_row(2).y }),
+		this->ctx);
+	EXPECT_EQ(this->editor.editor_focus(), EditorFocus::LIST);
+	EXPECT_EQ(this->editor.current_key(), this->keys[2]);
+
+	this->editor.handle_input(
+		click_at(Vector2D{ listWidth, field_row(1).y }),
+		this->ctx);
+	EXPECT_EQ(this->editor.editor_focus(), EditorFocus::FIELDS);
+	EXPECT_EQ(this->editor.current_key(), this->keys[2]);
 }
 
 // Items and monsters save every field of every record, shipped or not, so
