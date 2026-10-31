@@ -34,8 +34,9 @@
 
 namespace
 {
-// An hour of rounds, from the book's round of about a minute (PHB, PDF page 184).
-constexpr int ROUNDS_IN_AN_HOUR = 60;
+	// An hour of rounds, from the book's round of about a minute (PHB, PDF page
+	// 184).
+	constexpr int ROUNDS_IN_AN_HOUR = 60;
 } // namespace
 
 class RingInvisibilityTest : public ::testing::Test

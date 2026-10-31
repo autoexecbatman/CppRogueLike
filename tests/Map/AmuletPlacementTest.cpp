@@ -36,20 +36,21 @@
 namespace
 {
 
-constexpr int FIXTURE_WIDTH = 30;
-constexpr int FIXTURE_HEIGHT = 20;
+	constexpr int FIXTURE_WIDTH = 30;
+	constexpr int FIXTURE_HEIGHT = 20;
 
-// A room whose floor is water except for one dry tile. Every attempt that reads the
-// water as placeable lands in it, so one call is enough to show the defect and the
-// repeats are there to make a pass mean something rather than to catch a rare case.
-constexpr int ROOM_COL = 2;
-constexpr int ROOM_ROW = 2;
-constexpr int ROOM_WIDTH = 8;
-constexpr int ROOM_HEIGHT = 6;
-constexpr int DRY_COL = 5;
-constexpr int DRY_ROW = 4;
+	// A room whose floor is water except for one dry tile. Every attempt that
+	// reads the water as placeable lands in it, so one call is enough to show
+	// the defect and the repeats are there to make a pass mean something rather
+	// than to catch a rare case.
+	constexpr int ROOM_COL = 2;
+	constexpr int ROOM_ROW = 2;
+	constexpr int ROOM_WIDTH = 8;
+	constexpr int ROOM_HEIGHT = 6;
+	constexpr int DRY_COL = 5;
+	constexpr int DRY_ROW = 4;
 
-constexpr int ATTEMPTS = 30;
+	constexpr int ATTEMPTS = 30;
 
 } // namespace
 

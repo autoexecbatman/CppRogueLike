@@ -51,9 +51,9 @@
 
 namespace
 {
-constexpr int GOBLIN_XP = 15;
-constexpr int PLAYER_HP = 200;
-constexpr Vector2D BESIDE_THE_PLAYER{ 3, 5 };
+	constexpr int GOBLIN_XP = 15;
+	constexpr int PLAYER_HP = 200;
+	constexpr Vector2D BESIDE_THE_PLAYER{ 3, 5 };
 } // namespace
 
 class KillCreditTest : public ::testing::Test
@@ -140,8 +140,8 @@ protected:
 
 namespace
 {
-// A spell's completion that the tests have no use for.
-void ignore_completion(GameContext&) {}
+	// A spell's completion that the tests have no use for.
+	void ignore_completion(GameContext&) {}
 } // namespace
 
 // A monster's spell is not the player's victory, so it pays the player nothing.
@@ -338,149 +338,153 @@ TEST_F(KillCreditTest, ThePlayerKilledByTheirOwnFireballIsNotPaidForThemselves)
 
 namespace
 {
-// The goblin the cursor is walked onto, east of the player and outside a spell
-// fireball's two-tile burst around it.
-constexpr int GOBLIN_TILES_EAST = 4;
+	// The goblin the cursor is walked onto, east of the player and outside a
+	// spell fireball's two-tile burst around it.
+	constexpr int GOBLIN_TILES_EAST = 4;
 
-// A hidden renderer and the mock's context, a row of floor in view, the
-// player at its west end and a one-hit-point goblin GOBLIN_TILES_EAST along
-// it, for the fireballs aimed through the targeting cursor, which needs a
-// renderer.
-class AimedKill
-{
-public:
-	HiddenRenderer hidden{};
-	MockGameContext mock{};
-	GameContext ctx{};
-
-	AimedKill()
+	// A hidden renderer and the mock's context, a row of floor in view, the
+	// player at its west end and a one-hit-point goblin GOBLIN_TILES_EAST along
+	// it, for the fireballs aimed through the targeting cursor, which needs a
+	// renderer.
+	class AimedKill
 	{
-		ctx = mock.to_game_context();
-		ctx.renderer = &hidden.renderer;
+	public:
+		HiddenRenderer hidden{};
+		MockGameContext mock{};
+		GameContext ctx{};
 
-		mock.map.init_tiles();
-		for (int col = 1; col < 15; ++col)
+		AimedKill()
 		{
-			mock.map.set_tile(Vector2D{ col, 5 }, TileType::FLOOR);
+			ctx = mock.to_game_context();
+			ctx.renderer = &hidden.renderer;
+
+			mock.map.init_tiles();
+			for (int col = 1; col < 15; ++col)
+			{
+				mock.map.set_tile(Vector2D{ col, 5 }, TileType::FLOOR);
+			}
+			mock.player = std::make_unique<Player>(Vector2D{ 2, 5 });
+			Player& player = *mock.player;
+			player.healthPool = std::make_unique<HealthPool>(PLAYER_HP);
+			player.armorClass = std::make_unique<ArmorClass>(10);
+			player.experienceReward = std::make_unique<ExperienceReward>(0);
+			player.set_creature_level(5);
+			player.set_creature_class(CreatureClass::FIGHTER);
+			player.set_strength(18);
+			mock.map.compute_fov(ctx);
+
+			auto goblin = std::make_unique<Creature>(
+				Vector2D{ 2 + GOBLIN_TILES_EAST, 5 },
+				ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
+			goblin->healthPool = std::make_unique<HealthPool>(1);
+			goblin->armorClass = std::make_unique<ArmorClass>(10);
+			goblin->experienceReward =
+				std::make_unique<ExperienceReward>(GOBLIN_XP);
+			goblin->set_corpse("dead goblin", 0, "", CorpseEdibility::EDIBLE);
+			mock.creatures.push_back(std::move(goblin));
 		}
-		mock.player = std::make_unique<Player>(Vector2D{ 2, 5 });
-		Player& player = *mock.player;
-		player.healthPool = std::make_unique<HealthPool>(PLAYER_HP);
-		player.armorClass = std::make_unique<ArmorClass>(10);
-		player.experienceReward = std::make_unique<ExperienceReward>(0);
-		player.set_creature_level(5);
-		player.set_creature_class(CreatureClass::FIGHTER);
-		player.set_strength(18);
-		mock.map.compute_fov(ctx);
 
-		auto goblin = std::make_unique<Creature>(
-			Vector2D{ 2 + GOBLIN_TILES_EAST, 5 },
-			ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
-		goblin->healthPool = std::make_unique<HealthPool>(1);
-		goblin->armorClass = std::make_unique<ArmorClass>(10);
-		goblin->experienceReward =
-			std::make_unique<ExperienceReward>(GOBLIN_XP);
-		goblin->set_corpse("dead goblin", 0, "", CorpseEdibility::EDIBLE);
-		mock.creatures.push_back(std::move(goblin));
-	}
-
-	// One frame of the menu stack with a key pressed, as the game loop runs it.
-	void press(GameKey key)
-	{
-		ctx.inputSystem->queue_key(key, 0);
-		hidden.renderer.begin_frame();
-		ctx.menuManager->handle_menus(*ctx.menus, ctx);
-		hidden.renderer.end_frame();
-	}
-
-	// The cursor walked from the player onto the goblin, the burst confirmed.
-	void aim_at_the_goblin_and_confirm()
-	{
-		for (int step = 0; step < GOBLIN_TILES_EAST; ++step)
+		// One frame of the menu stack with a key pressed, as the game loop runs
+		// it.
+		void press(GameKey key)
 		{
-			press(GameKey::RIGHT);
+			ctx.inputSystem->queue_key(key, 0);
+			hidden.renderer.begin_frame();
+			ctx.menuManager->handle_menus(*ctx.menus, ctx);
+			hidden.renderer.end_frame();
 		}
-		press(GameKey::ENTER);
-	}
 
-	// The goblin is dead, or already swept away by the cast's own cleanup.
-	bool is_the_goblin_dead() const
-	{
-		auto is_alive = [](const std::unique_ptr<Creature>& creature)
+		// The cursor walked from the player onto the goblin, the burst
+		// confirmed.
+		void aim_at_the_goblin_and_confirm()
 		{
-			return !creature->is_dead();
-		};
-		return std::ranges::none_of(mock.creatures, is_alive);
-	}
+			for (int step = 0; step < GOBLIN_TILES_EAST; ++step)
+			{
+				press(GameKey::RIGHT);
+			}
+			press(GameKey::ENTER);
+		}
 
-	// The player was paid the goblin's worth, once.
-	void expect_the_player_paid_for_one_goblin() const
+		// The goblin is dead, or already swept away by the cast's own cleanup.
+		bool is_the_goblin_dead() const
+		{
+			auto is_alive = [](const std::unique_ptr<Creature>& creature)
+			{
+				return !creature->is_dead();
+			};
+			return std::ranges::none_of(mock.creatures, is_alive);
+		}
+
+		// The player was paid the goblin's worth, once.
+		void expect_the_player_paid_for_one_goblin() const
+		{
+			exit_unless(
+				is_the_goblin_dead(),
+				"the fireball did not kill the goblin");
+			exit_unless(
+				mock.player->get_xp() == GOBLIN_XP,
+				"the player was not paid the goblin's experience");
+			exit_unless(
+				mock.player->get_kill_count() == 1,
+				"the goblin was not counted as the player's kill");
+		}
+	};
+
+	// The fireball scroll the player reads, aimed through the cursor.
+	//
+	// Example:
+	//   exit_code_in_child(&the_players_fireball_scroll_pays); // -> 44
+	[[noreturn]] void the_players_fireball_scroll_pays()
 	{
+		AimedKill aimed{};
+		Player& player = *aimed.mock.player;
+		auto scroll =
+			ItemCreator::create("scroll_fireball", player.position, aimed.ctx);
+		Item& read = *scroll;
 		exit_unless(
-			is_the_goblin_dead(),
-			"the fireball did not kill the goblin");
+			InventoryOperations::add_item(
+				player.inventoryData,
+				std::move(scroll))
+				.has_value(),
+			"the scroll did not fit the pack");
+		exit_unless(read.behavior.has_value(), "the scroll has no behaviour");
+
+		use_item(*read.behavior, read, player, aimed.ctx);
 		exit_unless(
-			mock.player->get_xp() == GOBLIN_XP,
-			"the player was not paid the goblin's experience");
-		exit_unless(
-			mock.player->get_kill_count() == 1,
-			"the goblin was not counted as the player's kill");
+			aimed.mock.menus.size() == 1,
+			"reading the fireball scroll opened no targeting cursor");
+		aimed.aim_at_the_goblin_and_confirm();
+
+		aimed.expect_the_player_paid_for_one_goblin();
+		finish_the_child();
 	}
-};
 
-// The fireball scroll the player reads, aimed through the cursor.
-//
-// Example:
-//   exit_code_in_child(&the_players_fireball_scroll_pays); // -> 44
-[[noreturn]] void the_players_fireball_scroll_pays()
-{
-	AimedKill aimed{};
-	Player& player = *aimed.mock.player;
-	auto scroll =
-		ItemCreator::create("scroll_fireball", player.position, aimed.ctx);
-	Item& read = *scroll;
-	exit_unless(
-		InventoryOperations::add_item(player.inventoryData, std::move(scroll))
-			.has_value(),
-		"the scroll did not fit the pack");
-	exit_unless(read.behavior.has_value(), "the scroll has no behaviour");
+	// The player's own fireball spell, aimed through the cursor.
+	//
+	// Example:
+	//   exit_code_in_child(&the_players_fireball_spell_pays); // -> 44
+	[[noreturn]] void the_players_fireball_spell_pays()
+	{
+		AimedKill aimed{};
+		Player& player = *aimed.mock.player;
+		player.spellcasting.training =
+			SpellcasterTraining{ CasterClass::WIZARD, 5 };
+		player.spellcasting.memorizedSpells = { "fireball" };
 
-	use_item(*read.behavior, read, player, aimed.ctx);
-	exit_unless(
-		aimed.mock.menus.size() == 1,
-		"reading the fireball scroll opened no targeting cursor");
-	aimed.aim_at_the_goblin_and_confirm();
+		SpellSystem::cast_spell_by_key(
+			"fireball",
+			player,
+			SpellSource::MEMORIZED,
+			&ignore_completion,
+			aimed.ctx);
+		exit_unless(
+			aimed.mock.menus.size() == 1,
+			"casting fireball opened no targeting cursor");
+		aimed.aim_at_the_goblin_and_confirm();
 
-	aimed.expect_the_player_paid_for_one_goblin();
-	finish_the_child();
-}
-
-// The player's own fireball spell, aimed through the cursor.
-//
-// Example:
-//   exit_code_in_child(&the_players_fireball_spell_pays); // -> 44
-[[noreturn]] void the_players_fireball_spell_pays()
-{
-	AimedKill aimed{};
-	Player& player = *aimed.mock.player;
-	player.spellcasting.training =
-		SpellcasterTraining{ CasterClass::WIZARD, 5 };
-	player.spellcasting.memorizedSpells = { "fireball" };
-
-	SpellSystem::cast_spell_by_key(
-		"fireball",
-		player,
-		SpellSource::MEMORIZED,
-		&ignore_completion,
-		aimed.ctx);
-	exit_unless(
-		aimed.mock.menus.size() == 1,
-		"casting fireball opened no targeting cursor");
-	aimed.aim_at_the_goblin_and_confirm();
-
-	aimed.expect_the_player_paid_for_one_goblin();
-	finish_the_child();
-}
+		aimed.expect_the_player_paid_for_one_goblin();
+		finish_the_child();
+	}
 } // namespace
 
 TEST(KillCreditCursorTest, AGoblinThePlayersFireballScrollKillsPaysItsWorth)

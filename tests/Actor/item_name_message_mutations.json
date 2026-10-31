@@ -27,8 +27,8 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "ctx.messageSystem->message(\n\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\"You put on the \" + item.get_name() + \".\",\n\t\t\t\tMessageCompletion::FINISHED);",
-      "mutated": "ctx.messageSystem->message(\n\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\"You put on the \" + item.actorData.name + \".\",\n\t\t\t\tMessageCompletion::FINISHED);",
+      "original": "\tctx.messageSystem->message(\n\t\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\t\"You put on the \" + item.get_name() + \".\",\n\t\t\t\t\tMessageCompletion::FINISHED);",
+      "mutated": "\tctx.messageSystem->message(\n\t\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\t\"You put on the \" + item.actorData.name + \".\",\n\t\t\t\t\tMessageCompletion::FINISHED);",
       "catches": "the ring's put-on message naming the bare base name"
     },
     {

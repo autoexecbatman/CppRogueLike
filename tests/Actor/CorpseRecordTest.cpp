@@ -44,51 +44,55 @@
 
 namespace
 {
-constexpr std::string_view FIXTURE_NAME = "rubble of a fixture";
-constexpr int FIXTURE_NUTRITION = 37;
-constexpr std::string_view FIXTURE_TASTE = "It tastes of the fixture.";
-constexpr std::string_view FIXTURE_REFUSAL = "The fixture is not for eating.";
-constexpr Vector2D WHERE_IT_FELL{ 7, 9 };
+	constexpr std::string_view FIXTURE_NAME = "rubble of a fixture";
+	constexpr int FIXTURE_NUTRITION = 37;
+	constexpr std::string_view FIXTURE_TASTE = "It tastes of the fixture.";
+	constexpr std::string_view FIXTURE_REFUSAL =
+		"The fixture is not for eating.";
+	constexpr Vector2D WHERE_IT_FELL{ 7, 9 };
 
-// The weight every record held before its corpse was weighed, 28 of them at once.
-constexpr int PLACEHOLDER_CORPSE_WEIGHT = 100;
+	// The weight every record held before its corpse was weighed, 28 of them at
+	// once.
+	constexpr int PLACEHOLDER_CORPSE_WEIGHT = 100;
 
-// A size's corpse weight in pounds, as ruled 2026-10-18 for every record that had none.
-int ruled_corpse_weight(CreatureSize size)
-{
-	switch (size)
+	// A size's corpse weight in pounds, as ruled 2026-10-18 for every record
+	// that had none.
+	int ruled_corpse_weight(CreatureSize size)
 	{
-	case CreatureSize::TINY:
-	{
-		return 5;
+		switch (size)
+		{
+		case CreatureSize::TINY:
+		{
+			return 5;
+		}
+		case CreatureSize::SMALL:
+		{
+			return 50;
+		}
+		case CreatureSize::MEDIUM:
+		{
+			return 150;
+		}
+		case CreatureSize::LARGE:
+		{
+			return 400;
+		}
+		case CreatureSize::HUGE_SIZE:
+		{
+			return 1500;
+		}
+		case CreatureSize::GARGANTUAN:
+		{
+			return 3000;
+		}
+		}
+		std::unreachable();
 	}
-	case CreatureSize::SMALL:
-	{
-		return 50;
-	}
-	case CreatureSize::MEDIUM:
-	{
-		return 150;
-	}
-	case CreatureSize::LARGE:
-	{
-		return 400;
-	}
-	case CreatureSize::HUGE_SIZE:
-	{
-		return 1500;
-	}
-	case CreatureSize::GARGANTUAN:
-	{
-		return 3000;
-	}
-	}
-	std::unreachable();
-}
 
-// How far an authored weight may sit from its size's: the dragon, gargantuan at 600
-// against 3000, is the widest, so five is the least factor that admits every record.
-constexpr int SIZE_BAND_FACTOR = 5;
+	// How far an authored weight may sit from its size's: the dragon,
+	// gargantuan at 600 against 3000, is the widest, so five is the least
+	// factor that admits every record.
+	constexpr int SIZE_BAND_FACTOR = 5;
 } // namespace
 
 class CorpseRecordTest : public ::testing::Test

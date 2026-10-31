@@ -37,144 +37,145 @@
 
 namespace
 {
-// The height the tests give the window: tall enough that every row a test
-// reaches is on screen.
-constexpr int SCREEN_HEIGHT = 900;
+	// The height the tests give the window: tall enough that every row a test
+	// reaches is on screen.
+	constexpr int SCREEN_HEIGHT = 900;
 
-// One frame's input with these keys pressed and these held.
-//
-// Example:
-//   const EditorInput step =
-//       frame({ EditorKey::RIGHT }, { EditorKey::CONTROL });
-//   step.is_held(EditorKey::CONTROL);   // -> true
-EditorInput frame(std::set<EditorKey> pressed, std::set<EditorKey> held)
-{
-	EditorInput input{};
-	input.pressed = std::move(pressed);
-	input.held = std::move(held);
-	input.screenWidth = 1280;
-	input.screenHeight = SCREEN_HEIGHT;
-	return input;
-}
-
-// A click at a screen point.
-EditorInput click_at(Vector2D point)
-{
-	EditorInput input = frame({ EditorKey::CLICK }, {});
-	input.mouse = point;
-	return input;
-}
-
-// The middle of list row n, counted from the top of the list panel.
-Vector2D list_row(size_t row)
-{
-	return Vector2D{
-		EditorLayout::LIST_PAD,
-		EditorLayout::HEADER_HEIGHT +
-			static_cast<int>(row) * EditorLayout::ITEM_HEIGHT +
-			EditorLayout::ITEM_HEIGHT / 2,
-	};
-}
-
-// The middle of field row n, counted from the top of the field panel.
-Vector2D field_row(size_t row)
-{
-	return Vector2D{
-		EditorLayout::LIST_WIDTH + 40,
-		EditorLayout::HEADER_HEIGHT +
-			static_cast<int>(row) * EditorLayout::FIELD_HEIGHT +
-			EditorLayout::FIELD_HEIGHT / 2,
-	};
-}
-
-// The integer a plain number field shows.
-int shown_number(const std::string& text)
-{
-	int value = 0;
-	const auto [end, error] =
-		std::from_chars(text.data(), text.data() + text.size(), value);
-	EXPECT_EQ(error, std::errc{}) << "not a number: \"" << text << "\"";
-	EXPECT_EQ(end, text.data() + text.size())
-		<< "not a number: \"" << text << "\"";
-	return value;
-}
-
-// The first field of a kind in a Model's table, by position.
-template <typename Model>
-std::optional<size_t> first_field_of_kind(FieldKind kind)
-{
-	const auto is_of_kind = [kind](const auto& descriptor)
+	// One frame's input with these keys pressed and these held.
+	//
+	// Example:
+	//   const EditorInput step =
+	//       frame({ EditorKey::RIGHT }, { EditorKey::CONTROL });
+	//   step.is_held(EditorKey::CONTROL);   // -> true
+	EditorInput frame(std::set<EditorKey> pressed, std::set<EditorKey> held)
 	{
-		return descriptor.kind == kind;
-	};
-	const auto found = std::ranges::find_if(Model::FIELDS, is_of_kind);
-	if (found == Model::FIELDS.end())
-	{
-		return std::nullopt;
+		EditorInput input{};
+		input.pressed = std::move(pressed);
+		input.held = std::move(held);
+		input.screenWidth = 1280;
+		input.screenHeight = SCREEN_HEIGHT;
+		return input;
 	}
-	return static_cast<size_t>(found - Model::FIELDS.begin());
-}
 
-// The first plain number field in a Model's table, by position.
-template <typename Model>
-std::optional<size_t> first_plain_number()
-{
-	const auto is_plain_number = [](const auto& descriptor)
+	// A click at a screen point.
+	EditorInput click_at(Vector2D point)
 	{
-		return descriptor.plain.has_value();
-	};
-	const auto found = std::ranges::find_if(Model::FIELDS, is_plain_number);
-	if (found == Model::FIELDS.end())
-	{
-		return std::nullopt;
+		EditorInput input = frame({ EditorKey::CLICK }, {});
+		input.mouse = point;
+		return input;
 	}
-	return static_cast<size_t>(found - Model::FIELDS.begin());
-}
 
-// A field's row in a Model's table, found by its id.
-template <typename Model>
-size_t row_of(typename Model::FieldId field)
-{
-	const auto is_field = [field](const auto& descriptor)
+	// The middle of list row n, counted from the top of the list panel.
+	Vector2D list_row(size_t row)
 	{
-		return descriptor.field == field;
-	};
-	return static_cast<size_t>(
-		std::ranges::find_if(Model::FIELDS, is_field) - Model::FIELDS.begin());
-}
+		return Vector2D{
+			EditorLayout::LIST_PAD,
+			EditorLayout::HEADER_HEIGHT +
+				static_cast<int>(row) * EditorLayout::ITEM_HEIGHT +
+				EditorLayout::ITEM_HEIGHT / 2,
+		};
+	}
 
-// Esc after a Ctrl+Right leaves the editor and opens the main menu, and the
-// record it held is committed, so the editor opened again shows the stepped
-// number. Runs in a HiddenRenderer child.
-template <typename Model>
-[[noreturn]] void escape_commits_and_leaves()
-{
-	HiddenRenderer hidden{};
-	MockGameContext mock{};
-	GameContext ctx = mock.to_game_context();
-	ctx.renderer = &hidden.renderer;
-	RecordEditor<Model> editor{};
-	editor.enter(ctx);
-	const std::optional<size_t> field = first_plain_number<Model>();
-	exit_unless(field.has_value(), "the model has no plain number");
-	const auto fieldId = Model::FIELDS.at(*field).field;
-	editor.handle_input(click_at(field_row(*field)), ctx);
-	editor.handle_input(
-		frame({ EditorKey::RIGHT }, { EditorKey::CONTROL }),
-		ctx);
-	const std::string edited = editor.record_model().field_value(fieldId);
+	// The middle of field row n, counted from the top of the field panel.
+	Vector2D field_row(size_t row)
+	{
+		return Vector2D{
+			EditorLayout::LIST_WIDTH + 40,
+			EditorLayout::HEADER_HEIGHT +
+				static_cast<int>(row) * EditorLayout::FIELD_HEIGHT +
+				EditorLayout::FIELD_HEIGHT / 2,
+		};
+	}
 
-	editor.handle_input(frame({ EditorKey::ESCAPE }, {}), ctx);
+	// The integer a plain number field shows.
+	int shown_number(const std::string& text)
+	{
+		int value = 0;
+		const auto [end, error] =
+			std::from_chars(text.data(), text.data() + text.size(), value);
+		EXPECT_EQ(error, std::errc{}) << "not a number: \"" << text << "\"";
+		EXPECT_EQ(end, text.data() + text.size())
+			<< "not a number: \"" << text << "\"";
+		return value;
+	}
 
-	exit_unless(!editor.is_active(), "Esc left the editor active");
-	exit_unless(mock.menus.size() == 1, "Esc opened no main menu");
-	RecordEditor<Model> reopened{};
-	reopened.enter(ctx);
-	exit_unless(
-		reopened.record_model().field_value(fieldId) == edited,
-		"the stepped number was not committed");
-	finish_the_child();
-}
+	// The first field of a kind in a Model's table, by position.
+	template <typename Model>
+	std::optional<size_t> first_field_of_kind(FieldKind kind)
+	{
+		const auto is_of_kind = [kind](const auto& descriptor)
+		{
+			return descriptor.kind == kind;
+		};
+		const auto found = std::ranges::find_if(Model::FIELDS, is_of_kind);
+		if (found == Model::FIELDS.end())
+		{
+			return std::nullopt;
+		}
+		return static_cast<size_t>(found - Model::FIELDS.begin());
+	}
+
+	// The first plain number field in a Model's table, by position.
+	template <typename Model>
+	std::optional<size_t> first_plain_number()
+	{
+		const auto is_plain_number = [](const auto& descriptor)
+		{
+			return descriptor.plain.has_value();
+		};
+		const auto found = std::ranges::find_if(Model::FIELDS, is_plain_number);
+		if (found == Model::FIELDS.end())
+		{
+			return std::nullopt;
+		}
+		return static_cast<size_t>(found - Model::FIELDS.begin());
+	}
+
+	// A field's row in a Model's table, found by its id.
+	template <typename Model>
+	size_t row_of(typename Model::FieldId field)
+	{
+		const auto is_field = [field](const auto& descriptor)
+		{
+			return descriptor.field == field;
+		};
+		return static_cast<size_t>(
+			std::ranges::find_if(Model::FIELDS, is_field) -
+			Model::FIELDS.begin());
+	}
+
+	// Esc after a Ctrl+Right leaves the editor and opens the main menu, and the
+	// record it held is committed, so the editor opened again shows the stepped
+	// number. Runs in a HiddenRenderer child.
+	template <typename Model>
+	[[noreturn]] void escape_commits_and_leaves()
+	{
+		HiddenRenderer hidden{};
+		MockGameContext mock{};
+		GameContext ctx = mock.to_game_context();
+		ctx.renderer = &hidden.renderer;
+		RecordEditor<Model> editor{};
+		editor.enter(ctx);
+		const std::optional<size_t> field = first_plain_number<Model>();
+		exit_unless(field.has_value(), "the model has no plain number");
+		const auto fieldId = Model::FIELDS.at(*field).field;
+		editor.handle_input(click_at(field_row(*field)), ctx);
+		editor.handle_input(
+			frame({ EditorKey::RIGHT }, { EditorKey::CONTROL }),
+			ctx);
+		const std::string edited = editor.record_model().field_value(fieldId);
+
+		editor.handle_input(frame({ EditorKey::ESCAPE }, {}), ctx);
+
+		exit_unless(!editor.is_active(), "Esc left the editor active");
+		exit_unless(mock.menus.size() == 1, "Esc opened no main menu");
+		RecordEditor<Model> reopened{};
+		reopened.enter(ctx);
+		exit_unless(
+			reopened.record_model().field_value(fieldId) == edited,
+			"the stepped number was not committed");
+		finish_the_child();
+	}
 } // namespace
 
 template <typename Model>

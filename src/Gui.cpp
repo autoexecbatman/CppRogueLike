@@ -58,242 +58,259 @@ constexpr Color GUI_PANEL_BACKGROUND{ 20, 12, 28, 255 };
 namespace
 {
 
-// ---------------------------------------------------------------------------
-// HUD column layout, as fractions of the screen width:
-//   Bar panel  : frame's left rule .. divider 1
-//   Stat panel : divider 1 .. divider 2
-//   Log panel  : divider 2 .. frame's right rule
-// ---------------------------------------------------------------------------
-// Both dividers are pixel positions proportional to the screen, not tile columns.
-// A column-aligned divider can only move in whole tiles, which is coarser than the
-// difference between a stats panel that fits its longest line and one that does
-// not. Each of the first two panels gets what its widest content needs and the log
-// gets the remainder, because it is the panel that runs out of room first.
-//
-// Sized against the font's advance, which is the load size in main.cpp and nothing
-// in the font file, so a change there is what makes these fractions wrong. Measure
-// the advance rather than the ink: the ink of the last glyph stops short of its own
-// advance, and fit_text_to_width counts the advance.
-//   bars  - an icon at the left margin, then a bar running to the divider with its
-//           own reading centred on it, which is the part that overruns if it narrows
-//   stats - one stat a row, its label at the left edge and its value flush right
-// Both panels hold only what the character sheet does not: the sheet carries the
-// name, race, gold and all six ability scores in more detail than this ever did.
-int hud_divider1_x(int panelWidth)
-{
-	return panelWidth * 15 / 100;
-}
-
-// The stat panel is as wide as its longest label-and-value line, which is Gold carrying
-// a six-figure purse: that line and the clearance either side of it are what this
-// fraction has to cover, and it is measured against a render rather than assumed. Every
-// pixel beyond it belongs to the log, which is the panel that runs out of room first.
-int hud_divider2_x(int panelWidth)
-{
-	return panelWidth * 33 / 100;
-}
-
-// Left margin inside the first panel, clear of the frame's left rule.
-int hud_panel_left_margin(int tileSize)
-{
-	return gui_frame_rule_width(tileSize) + GUI_TEXT_CLEARANCE;
-}
-
-// Left edge of the text in the panel that starts at this divider. A divider's rule
-// paints to the right of the line it is aimed at, so the text clears the whole of it.
-int hud_panel_text_left(int dividerX, int tileSize)
-{
-	return dividerX + gui_frame_rule_width(tileSize) + GUI_TEXT_CLEARANCE;
-}
-
-// Right edge of the text in the panel that ends at this divider.
-int hud_panel_text_right(int dividerX)
-{
-	return dividerX - GUI_TEXT_CLEARANCE;
-}
-
-// Right edge of the last panel, which ends at the frame's own rule rather than at
-// a divider. That rule sits near the far side of its tile, so the panel reaches
-// most of a tile further right than the tile's left edge suggests.
-int hud_frame_text_right(int panelWidth, int tileSize)
-{
-	return panelWidth - gui_frame_rule_width(tileSize) - GUI_TEXT_CLEARANCE;
-}
-
-// Top edge of the HUD panel. Measured up from the bottom of the screen rather than
-// down the tile grid: whole tile rows rarely reach the bottom exactly - at a
-// 96-pixel tile they stop 32 pixels short - and counting down the grid put the
-// panel's contents that far above the panel's own floor.
-int hud_base_y(const Renderer& renderer)
-{
-	return renderer.get_screen_height() -
-		renderer.get_gui_reserve_rows() * renderer.get_tile_size();
-}
-
-// Top edge of one HUD text row, counting from zero below the frame's rule. The rule is
-// what the text has to clear; the rest of the edge tile is transparent.
-int hud_text_row_y(int baseY, int tileSize, int row)
-{
-	return baseY + gui_frame_top_rule(tileSize) + GUI_TEXT_TOP_INSET +
-		row * UI_TEXT_ROW_PITCH;
-}
-
-// How many text rows fit in the panel. The last row needs only the height of the
-// font, not a whole pitch, which is why it is added back on.
-int hud_text_row_count(int tileSize, int fontSize)
-{
-	const int contentHeight = gui_reserve_rows(tileSize, fontSize) * tileSize -
-		gui_frame_top_rule(tileSize) - gui_frame_bottom_rule(tileSize) -
-		GUI_TEXT_TOP_INSET - fontSize;
-	return contentHeight / UI_TEXT_ROW_PITCH + 1;
-}
-
-// A bar in its trough: the dark channel, the fill over the share the bar has, the rim
-// over both, then an end plate at each end. The rim's rails are opaque and cover the
-// fill's top and bottom edges, so how deep they are stays the art's business and no
-// number here describes them. The rim is stretched to the bar's width and the plates
-// are not, which is why the ornament is on the plates.
-void draw_hud_bar(
-	const GameContext& ctx,
-	Vector2D pos,
-	int width,
-	float ratio,
-	Color fillTint)
-{
-	assert(ctx.tileConfig && "draw_hud_bar: called without a tileConfig");
-	assert(
-		width > 2 * GUI_BAR_PLATE_WIDTH &&
-		"a bar narrower than its two end plates has no trough");
-
-	const TileConfig& tileConfig = *ctx.tileConfig;
-
-	// The trough runs between the opaque end plates, so the last few percent stays in sight.
-	const Vector2D troughPos{ pos.x + GUI_BAR_PLATE_WIDTH, pos.y };
-	const int troughWidth = width - 2 * GUI_BAR_PLATE_WIDTH;
-	DrawRectangle(
-		troughPos.x,
-		troughPos.y,
-		troughWidth,
-		GUI_BAR_HEIGHT,
-		GUI_BAR_CHANNEL);
-
-	const int filledWidth =
-		static_cast<int>(static_cast<float>(troughWidth) * ratio);
-	ctx.renderer->draw_tile_screen_color_rect(
-		troughPos,
-		filledWidth,
-		GUI_BAR_HEIGHT,
-		tileConfig.get("GUI_BAR_FILL"),
-		fillTint);
-
-	// The rim is stretched the length of the bar and the plates are drawn at their own
-	// size, which is why every piece of ornament is on a plate and the rim carries none.
-	ctx.renderer->draw_tile_screen_color_rect(
-		pos,
-		width,
-		GUI_BAR_HEIGHT,
-		tileConfig.get("GUI_BAR_RIM"),
-		GUI_UNTINTED);
-	ctx.renderer->draw_tile_screen_sized(
-		pos,
-		tileConfig.get("GUI_BAR_CAP_L"),
-		GUI_BARS_CELL_SIZE);
-	ctx.renderer->draw_tile_screen_sized(
-		Vector2D{ pos.x + width - GUI_BARS_CELL_SIZE, pos.y },
-		tileConfig.get("GUI_BAR_CAP_R"),
-		GUI_BARS_CELL_SIZE);
-}
-
-// A bar's reading, centred on it and never left of it. The shadow under the text is what
-// keeps it legible: the fill behind it is green, yellow or red by turns, and white on
-// yellow is the pair that fails.
-void draw_bar_reading(
-	const GameContext& ctx,
-	Vector2D barPos,
-	int barWidth,
-	std::string_view reading,
-	ColorPairId readingColor)
-{
-	const int textWidth = ctx.renderer->measure_text(reading);
-	const int textX = barPos.x + std::max(0, (barWidth - textWidth) / 2);
-	const int textY =
-		barPos.y + (GUI_BAR_HEIGHT - ctx.renderer->get_font_size()) / 2;
-	ctx.renderer->draw_text_color(
-		Vector2D{ textX + 1, textY + 1 },
-		reading,
-		GUI_TEXT_SHADOW);
-	ctx.renderer->draw_text(Vector2D{ textX, textY }, reading, readingColor);
-}
-
-// The rectangle log text is laid out in. Pixels across, rows down.
-struct LogPanel
-{
-	int leftEdge{ 0 };
-	int rightEdge{ 0 };
-	int baseY{ 0 };
-	int tileSize{ 0 };
-	int rowCount{ 0 };
-};
-
-// Where the next piece of log text goes.
-struct LogCursor
-{
-	int pixelX{ 0 };
-	int row{ 0 };
-};
-
-// Draws one coloured part of a message, wrapping onto further rows when it
-// reaches the panel edge, and returns where the next part starts. Stops at the
-// last row rather than drawing past the panel.
-LogCursor draw_log_part(
-	const Renderer& renderer,
-	const LogMessage& part,
-	LogCursor cursor,
-	const LogPanel& panel)
-{
-	std::string remainingText(part.text);
-	while (!remainingText.empty() && cursor.row < panel.rowCount)
+	// -------------------------------------------------------------------------
+	// HUD column layout, as fractions of the screen width:
+	//   Bar panel  : frame's left rule .. divider 1
+	//   Stat panel : divider 1 .. divider 2
+	//   Log panel  : divider 2 .. frame's right rule
+	// -------------------------------------------------------------------------
+	// Both dividers are pixel positions proportional to the screen, not tile
+	// columns. A column-aligned divider can only move in whole tiles, which is
+	// coarser than the difference between a stats panel that fits its longest
+	// line and one that does not. Each of the first two panels gets what its
+	// widest content needs and the log gets the remainder, because it is the
+	// panel that runs out of room first.
+	//
+	// Sized against the font's advance, which is the load size in main.cpp and
+	// nothing in the font file, so a change there is what makes these fractions
+	// wrong. Measure the advance rather than the ink: the ink of the last glyph
+	// stops short of its own advance, and fit_text_to_width counts the advance.
+	//   bars  - an icon at the left margin, then a bar running to the divider
+	//           with its own reading centred on it, which is the part that
+	//           overruns if it narrows
+	//   stats - one stat a row, its label at the left edge and its value
+	//           flush right
+	// Both panels hold only what the character sheet does not: the sheet
+	// carries the name, race, gold and all six ability scores in more detail
+	// than this ever did.
+	int hud_divider1_x(int panelWidth)
 	{
-		const std::string shown = renderer.fit_text_to_width(
-			remainingText,
-			panel.rightEdge - cursor.pixelX);
+		return panelWidth * 15 / 100;
+	}
 
-		// Nothing readable fits in what is left of this row: start the next one.
-		// Squeezing a two-letter fragment in first is what splits words.
-		if (shown.empty())
+	// The stat panel is as wide as its longest label-and-value line, which is
+	// Gold carrying a six-figure purse: that line and the clearance either side
+	// of it are what this fraction has to cover, and it is measured against a
+	// render rather than assumed. Every pixel beyond it belongs to the log,
+	// which is the panel that runs out of room first.
+	int hud_divider2_x(int panelWidth)
+	{
+		return panelWidth * 33 / 100;
+	}
+
+	// Left margin inside the first panel, clear of the frame's left rule.
+	int hud_panel_left_margin(int tileSize)
+	{
+		return gui_frame_rule_width(tileSize) + GUI_TEXT_CLEARANCE;
+	}
+
+	// Left edge of the text in the panel that starts at this divider. A
+	// divider's rule paints to the right of the line it is aimed at, so the
+	// text clears the whole of it.
+	int hud_panel_text_left(int dividerX, int tileSize)
+	{
+		return dividerX + gui_frame_rule_width(tileSize) + GUI_TEXT_CLEARANCE;
+	}
+
+	// Right edge of the text in the panel that ends at this divider.
+	int hud_panel_text_right(int dividerX)
+	{
+		return dividerX - GUI_TEXT_CLEARANCE;
+	}
+
+	// Right edge of the last panel, which ends at the frame's own rule rather
+	// than at a divider. That rule sits near the far side of its tile, so the
+	// panel reaches most of a tile further right than the tile's left edge
+	// suggests.
+	int hud_frame_text_right(int panelWidth, int tileSize)
+	{
+		return panelWidth - gui_frame_rule_width(tileSize) - GUI_TEXT_CLEARANCE;
+	}
+
+	// Top edge of the HUD panel. Measured up from the bottom of the screen
+	// rather than down the tile grid: whole tile rows rarely reach the bottom
+	// exactly - at a 96-pixel tile they stop 32 pixels short - and counting
+	// down the grid put the panel's contents that far above the panel's own
+	// floor.
+	int hud_base_y(const Renderer& renderer)
+	{
+		return renderer.get_screen_height() -
+			renderer.get_gui_reserve_rows() * renderer.get_tile_size();
+	}
+
+	// Top edge of one HUD text row, counting from zero below the frame's rule.
+	// The rule is what the text has to clear; the rest of the edge tile is
+	// transparent.
+	int hud_text_row_y(int baseY, int tileSize, int row)
+	{
+		return baseY + gui_frame_top_rule(tileSize) + GUI_TEXT_TOP_INSET +
+			row * UI_TEXT_ROW_PITCH;
+	}
+
+	// How many text rows fit in the panel. The last row needs only the height
+	// of the font, not a whole pitch, which is why it is added back on.
+	int hud_text_row_count(int tileSize, int fontSize)
+	{
+		const int contentHeight =
+			gui_reserve_rows(tileSize, fontSize) * tileSize -
+			gui_frame_top_rule(tileSize) - gui_frame_bottom_rule(tileSize) -
+			GUI_TEXT_TOP_INSET - fontSize;
+		return contentHeight / UI_TEXT_ROW_PITCH + 1;
+	}
+
+	// A bar in its trough: the dark channel, the fill over the share the bar
+	// has, the rim over both, then an end plate at each end. The rim's rails
+	// are opaque and cover the fill's top and bottom edges, so how deep they
+	// are stays the art's business and no number here describes them. The rim
+	// is stretched to the bar's width and the plates are not, which is why the
+	// ornament is on the plates.
+	void draw_hud_bar(
+		const GameContext& ctx,
+		Vector2D pos,
+		int width,
+		float ratio,
+		Color fillTint)
+	{
+		assert(ctx.tileConfig && "draw_hud_bar: called without a tileConfig");
+		assert(
+			width > 2 * GUI_BAR_PLATE_WIDTH &&
+			"a bar narrower than its two end plates has no trough");
+
+		const TileConfig& tileConfig = *ctx.tileConfig;
+
+		// The trough runs between the opaque end plates, so the last few
+		// percent stays in sight.
+		const Vector2D troughPos{ pos.x + GUI_BAR_PLATE_WIDTH, pos.y };
+		const int troughWidth = width - 2 * GUI_BAR_PLATE_WIDTH;
+		DrawRectangle(
+			troughPos.x,
+			troughPos.y,
+			troughWidth,
+			GUI_BAR_HEIGHT,
+			GUI_BAR_CHANNEL);
+
+		const int filledWidth =
+			static_cast<int>(static_cast<float>(troughWidth) * ratio);
+		ctx.renderer->draw_tile_screen_color_rect(
+			troughPos,
+			filledWidth,
+			GUI_BAR_HEIGHT,
+			tileConfig.get("GUI_BAR_FILL"),
+			fillTint);
+
+		// The rim is stretched the length of the bar and the plates are drawn
+		// at their own size, which is why every piece of ornament is on a plate
+		// and the rim carries none.
+		ctx.renderer->draw_tile_screen_color_rect(
+			pos,
+			width,
+			GUI_BAR_HEIGHT,
+			tileConfig.get("GUI_BAR_RIM"),
+			GUI_UNTINTED);
+		ctx.renderer->draw_tile_screen_sized(
+			pos,
+			tileConfig.get("GUI_BAR_CAP_L"),
+			GUI_BARS_CELL_SIZE);
+		ctx.renderer->draw_tile_screen_sized(
+			Vector2D{ pos.x + width - GUI_BARS_CELL_SIZE, pos.y },
+			tileConfig.get("GUI_BAR_CAP_R"),
+			GUI_BARS_CELL_SIZE);
+	}
+
+	// A bar's reading, centred on it and never left of it. The shadow under the
+	// text is what keeps it legible: the fill behind it is green, yellow or red
+	// by turns, and white on yellow is the pair that fails.
+	void draw_bar_reading(
+		const GameContext& ctx,
+		Vector2D barPos,
+		int barWidth,
+		std::string_view reading,
+		ColorPairId readingColor)
+	{
+		const int textWidth = ctx.renderer->measure_text(reading);
+		const int textX = barPos.x + std::max(0, (barWidth - textWidth) / 2);
+		const int textY =
+			barPos.y + (GUI_BAR_HEIGHT - ctx.renderer->get_font_size()) / 2;
+		ctx.renderer->draw_text_color(
+			Vector2D{ textX + 1, textY + 1 },
+			reading,
+			GUI_TEXT_SHADOW);
+		ctx.renderer->draw_text(
+			Vector2D{ textX, textY },
+			reading,
+			readingColor);
+	}
+
+	// The rectangle log text is laid out in. Pixels across, rows down.
+	struct LogPanel
+	{
+		int leftEdge{ 0 };
+		int rightEdge{ 0 };
+		int baseY{ 0 };
+		int tileSize{ 0 };
+		int rowCount{ 0 };
+	};
+
+	// Where the next piece of log text goes.
+	struct LogCursor
+	{
+		int pixelX{ 0 };
+		int row{ 0 };
+	};
+
+	// Draws one coloured part of a message, wrapping onto further rows when it
+	// reaches the panel edge, and returns where the next part starts. Stops at
+	// the last row rather than drawing past the panel.
+	LogCursor draw_log_part(
+		const Renderer& renderer,
+		const LogMessage& part,
+		LogCursor cursor,
+		const LogPanel& panel)
+	{
+		std::string remainingText(part.text);
+		while (!remainingText.empty() && cursor.row < panel.rowCount)
 		{
+			const std::string shown = renderer.fit_text_to_width(
+				remainingText,
+				panel.rightEdge - cursor.pixelX);
+
+			// Nothing readable fits in what is left of this row: start the next
+			// one. Squeezing a two-letter fragment in first is what splits
+			// words.
+			if (shown.empty())
+			{
+				cursor.pixelX = panel.leftEdge;
+				cursor.row++;
+				continue;
+			}
+
+			renderer.draw_text(
+				Vector2D{
+					cursor.pixelX,
+					hud_text_row_y(panel.baseY, panel.tileSize, cursor.row),
+				},
+				shown,
+				part.color);
+			remainingText.erase(0, shown.size());
+
+			// The part ended on this row, so the next part starts beside it.
+			if (remainingText.empty())
+			{
+				cursor.pixelX += renderer.measure_text(shown);
+				break;
+			}
+
+			// The part was cut, so the rest of it continues on the next row,
+			// without carrying the space the cut was made at.
 			cursor.pixelX = panel.leftEdge;
 			cursor.row++;
-			continue;
+			while (!remainingText.empty() && remainingText.front() == ' ')
+			{
+				remainingText.erase(0, 1);
+			}
 		}
-
-		renderer.draw_text(
-			Vector2D{
-				cursor.pixelX,
-				hud_text_row_y(panel.baseY, panel.tileSize, cursor.row),
-			},
-			shown,
-			part.color);
-		remainingText.erase(0, shown.size());
-
-		// The part ended on this row, so the next part starts beside it.
-		if (remainingText.empty())
-		{
-			cursor.pixelX += renderer.measure_text(shown);
-			break;
-		}
-
-		// The part was cut, so the rest of it continues on the next row, without
-		// carrying the space the cut was made at.
-		cursor.pixelX = panel.leftEdge;
-		cursor.row++;
-		while (!remainingText.empty() && remainingText.front() == ' ')
-		{
-			remainingText.erase(0, 1);
-		}
+		return cursor;
 	}
-	return cursor;
-}
 
 } // namespace
 

@@ -48,16 +48,17 @@
 namespace
 {
 
-constexpr int STARTING_HP = 100;
-constexpr int TOO_WEAK_TO_DRAW = 12;
-constexpr int STRONG_ENOUGH_TO_DRAW = 18;
+	constexpr int STARTING_HP = 100;
+	constexpr int TOO_WEAK_TO_DRAW = 12;
+	constexpr int STRONG_ENOUGH_TO_DRAW = 18;
 
-// Within the player's field of view and inside the archer's range of 2 to 5, so the
-// ranged branch is the one deciding; adjacent is the melee branch's distance.
-constexpr int PLAYER_COLUMN = 4;
-constexpr int IN_RANGE_COLUMN = 7;
-constexpr int ADJACENT_COLUMN = 5;
-constexpr int CORRIDOR_ROW = 5;
+	// Within the player's field of view and inside the archer's range of 2 to
+	// 5, so the ranged branch is the one deciding; adjacent is the melee
+	// branch's distance.
+	constexpr int PLAYER_COLUMN = 4;
+	constexpr int IN_RANGE_COLUMN = 7;
+	constexpr int ADJACENT_COLUMN = 5;
+	constexpr int CORRIDOR_ROW = 5;
 
 } // namespace
 

@@ -28,268 +28,284 @@
 namespace
 {
 
-// Strength as the book writes it: 18/76, 18/00 for a percentile of 100, a plain score otherwise.
-//
-// Example:
-//   strength_text(player);   // -> "18/76", "18/00" or "17"
-std::string strength_text(const Player& player)
-{
-	const int exceptional = player.get_exceptional_strength();
-	if (player.get_strength() != 18 || exceptional < 1)
+	// Strength as the book writes it: 18/76, 18/00 for a percentile of 100, a
+	// plain score otherwise.
+	//
+	// Example:
+	//   strength_text(player);   // -> "18/76", "18/00" or "17"
+	std::string strength_text(const Player& player)
 	{
-		return std::format("{}", player.get_strength());
+		const int exceptional = player.get_exceptional_strength();
+		if (player.get_strength() != 18 || exceptional < 1)
+		{
+			return std::format("{}", player.get_strength());
+		}
+		return std::format("18/{:02d}", exceptional % 100);
 	}
-	return std::format("18/{:02d}", exceptional % 100);
-}
 
-// Defined with the other private helpers below.
-std::string strength_text(const Player& player);
+	// Defined with the other private helpers below.
+	std::string strength_text(const Player& player);
 } // namespace
 
 namespace CharacterSheetText
 {
 
-std::string strength_line(const Player& player, const DataManager& dataManager)
-{
-	// What Strength gives a swing, as the attack itself reads it - weaponless melee,
-	// so the row is Table 1's and nothing a weapon does is folded in.
-	const AttackStrength::Adjustment swing = AttackStrength::adjustment(
-		dataManager,
-		player,
-		AttackKind::AttackKind::MELEE,
-		nullptr);
+	std::string strength_line(
+		const Player& player,
+		const DataManager& dataManager)
+	{
+		// What Strength gives a swing, as the attack itself reads it -
+		// weaponless melee, so the row is Table 1's and nothing a weapon does
+		// is folded in.
+		const AttackStrength::Adjustment swing = AttackStrength::adjustment(
+			dataManager,
+			player,
+			AttackKind::AttackKind::MELEE,
+			nullptr);
 
-	return std::format(
-		"STR: {:>2}  ({:+d} hit, {:+d} dmg)",
-		strength_text(player),
-		swing.hit,
-		swing.damage);
-}
+		return std::format(
+			"STR: {:>2}  ({:+d} hit, {:+d} dmg)",
+			strength_text(player),
+			swing.hit,
+			swing.damage);
+	}
 
 } // namespace CharacterSheetText
 
 namespace
 {
 
-void display_basic_info(const Player& player, GameContext& ctx, int& row)
-{
-	int tileSize = ctx.renderer->get_tile_size();
-	int pixelX = tileSize;
-
-	std::string line = std::format(
-		"Name: {}   Class: {}   Race: {}   Level: {}",
-		player.get_name(),
-		player.get_class_display_name(),
-		player.get_race_display_name(),
-		player.get_creature_level());
-	ctx.renderer->draw_text(
-		Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
-		line,
-		ColorPairId::WHITE_BLACK);
-	row += 2;
-}
-
-void display_experience_info(const Player& player, GameContext& ctx, int& row)
-{
-	int tileSize = ctx.renderer->get_tile_size();
-	int pixelX = tileSize;
-
-	int currentXP = player.get_xp();
-	int nextLevelXP = player.get_next_level_xp();
-	int xpNeeded = nextLevelXP - currentXP;
-
-	ctx.renderer->draw_text(
-		Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
-		std::format(
-			"XP: {} / {}   (Need: {})",
-			currentXP,
-			nextLevelXP,
-			xpNeeded),
-		ColorPairId::CYAN_BLACK);
-	row += 2;
-}
-
-void display_attributes(const Player& player, GameContext& ctx, int& row)
-{
-	assert(
-		ctx.dataManager && "display_attributes: called without a dataManager");
-
-	int tileSize = ctx.renderer->get_tile_size();
-	int pixelX = tileSize;
-
-	const DexterityAttributes dexterityRow =
-		ctx.dataManager->dexterity_for(player.get_dexterity());
-	const int missileAdj = dexterityRow.MissileAttackAdj;
-	const int defensiveAdj = dexterityRow.DefensiveAdj;
-
-	ctx.renderer->draw_text(
-		Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
-		"--- ATTRIBUTES ---",
-		ColorPairId::YELLOW_BLACK);
-	row++;
-
-	ctx.renderer->draw_text(
-		Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
-		CharacterSheetText::strength_line(player, *ctx.dataManager),
-		ColorPairId::WHITE_BLACK);
-	row++;
-
-	ctx.renderer->draw_text(
-		Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
-		std::format(
-			"DEX: {:2d}  ({:+d} missile, {:+d} defensive)",
-			player.get_dexterity(),
-			missileAdj,
-			defensiveAdj),
-		ColorPairId::WHITE_BLACK);
-	row++;
-
-	ctx.renderer->draw_text(
-		Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
-		CharacterSheetText::constitution_line(player, *ctx.dataManager),
-		ColorPairId::WHITE_BLACK);
-	row++;
-
-	ctx.renderer->draw_text(
-		Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
-		std::format(
-			"INT: {:2d}   WIS: {:2d}   CHA: {:2d}",
-			player.get_intelligence(),
-			player.get_wisdom(),
-			player.get_charisma()),
-		ColorPairId::WHITE_BLACK);
-	row += 2;
-}
-
-void display_combat_stats(const Player& player, GameContext& ctx, int& row)
-{
-	int tileSize = ctx.renderer->get_tile_size();
-	int pixelX = tileSize;
-
-	int hp = player.get_hp();
-	int maxHp = player.get_max_hp();
-	int baseHP = player.get_hp_base();
-	int conBonusTotal = maxHp - baseHP;
-
-	ctx.renderer->draw_text(
-		Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
-		"--- COMBAT ---",
-		ColorPairId::YELLOW_BLACK);
-	row++;
-
-	const ColorPairId woundedColor =
-		hp > maxHp / 4 ? ColorPairId::YELLOW_BLACK : ColorPairId::RED_BLACK;
-	const ColorPairId hpColor =
-		hp > maxHp / 2 ? ColorPairId::GREEN_BLACK : woundedColor;
-
-	ctx.renderer->draw_text(
-		Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
-		std::format(
-			"HP: {} / {}  (Base: {}, Con Bonus: {:+d})",
-			hp,
-			maxHp,
-			baseHP,
-			conBonusTotal),
-		hpColor);
-	row++;
-
-	ctx.renderer->draw_text(
-		Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
-		std::format(
-			"THAC0: {}   AC: {}   DR: {}",
-			player.get_thaco(),
-			player.get_armor_class(),
-			player.get_dr()),
-		ColorPairId::WHITE_BLACK);
-	row += 2;
-}
-
-void display_equipment_info(const Player& player, GameContext& ctx, int& row)
-{
-	assert(
-		ctx.dataManager &&
-		"display_equipment_info: called without a dataManager");
-
-	int tileSize = ctx.renderer->get_tile_size();
-	int pixelX = tileSize;
-
-	auto* equippedWeapon = player.get_equipped_item(EquipmentSlot::RIGHT_HAND);
-
-	std::string damageDisplay;
-	if (equippedWeapon && equippedWeapon->is_weapon())
+	void display_basic_info(const Player& player, GameContext& ctx, int& row)
 	{
-		const ItemEnhancement* enh = equippedWeapon->is_enhanced() ?
-			&equippedWeapon->get_enhancement() :
-			nullptr;
-		damageDisplay = WeaponDamageRegistry::get_enhanced_damage_info(
-			equippedWeapon->itemKey,
-			enh)
-							.displayRoll;
-	}
-	else
-	{
-		damageDisplay =
-			WeaponDamageRegistry::get_unarmed_damage_info().displayRoll;
+		int tileSize = ctx.renderer->get_tile_size();
+		int pixelX = tileSize;
+
+		std::string line = std::format(
+			"Name: {}   Class: {}   Race: {}   Level: {}",
+			player.get_name(),
+			player.get_class_display_name(),
+			player.get_race_display_name(),
+			player.get_creature_level());
+		ctx.renderer->draw_text(
+			Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
+			line,
+			ColorPairId::WHITE_BLACK);
+		row += 2;
 	}
 
-	const AttackStrength::Adjustment swing = AttackStrength::adjustment(
-		*ctx.dataManager,
-		player,
-		AttackKind::AttackKind::MELEE,
-		nullptr);
-	const int strDmgMod = swing.damage;
+	void display_experience_info(
+		const Player& player,
+		GameContext& ctx,
+		int& row)
+	{
+		int tileSize = ctx.renderer->get_tile_size();
+		int pixelX = tileSize;
 
-	ctx.renderer->draw_text(
-		Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
-		"--- EQUIPMENT ---",
-		ColorPairId::YELLOW_BLACK);
-	row++;
+		int currentXP = player.get_xp();
+		int nextLevelXP = player.get_next_level_xp();
+		int xpNeeded = nextLevelXP - currentXP;
 
-	std::string weaponName =
-		equippedWeapon ? std::string(equippedWeapon->get_name()) : "(unarmed)";
+		ctx.renderer->draw_text(
+			Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
+			std::format(
+				"XP: {} / {}   (Need: {})",
+				currentXP,
+				nextLevelXP,
+				xpNeeded),
+			ColorPairId::CYAN_BLACK);
+		row += 2;
+	}
 
-	ctx.renderer->draw_text(
-		Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
-		std::format(
-			"Weapon: {}   Damage: {}  (STR bonus: {:+d})",
-			weaponName,
-			damageDisplay,
-			strDmgMod),
-		ColorPairId::WHITE_BLACK);
-	row += 2;
-}
+	void display_attributes(const Player& player, GameContext& ctx, int& row)
+	{
+		assert(
+			ctx.dataManager &&
+			"display_attributes: called without a dataManager");
 
-void display_right_panel_info(const Player& player, GameContext& ctx, int& row)
-{
-	assert(
-		ctx.hungerSystem &&
-		"display_right_panel_info: called without a hungerSystem");
-	assert(
-		player.lifespan &&
-		"display_right_panel_info: a player with no lifespan");
+		int tileSize = ctx.renderer->get_tile_size();
+		int pixelX = tileSize;
 
-	int tileSize = ctx.renderer->get_tile_size();
-	int pixelX = tileSize;
+		const DexterityAttributes dexterityRow =
+			ctx.dataManager->dexterity_for(player.get_dexterity());
+		const int missileAdj = dexterityRow.MissileAttackAdj;
+		const int defensiveAdj = dexterityRow.DefensiveAdj;
 
-	std::string hungerStr = ctx.hungerSystem->get_hunger_state_string();
+		ctx.renderer->draw_text(
+			Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
+			"--- ATTRIBUTES ---",
+			ColorPairId::YELLOW_BLACK);
+		row++;
 
-	ctx.renderer->draw_text(
-		Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
-		"--- OTHER ---",
-		ColorPairId::YELLOW_BLACK);
-	row++;
+		ctx.renderer->draw_text(
+			Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
+			CharacterSheetText::strength_line(player, *ctx.dataManager),
+			ColorPairId::WHITE_BLACK);
+		row++;
 
-	ctx.renderer->draw_text(
-		Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
-		std::format(
-			"Gender: {}   Age: {}   Gold: {} gp   Hunger: {}",
-			player.get_gender(),
-			player.lifespan->physical_age(),
-			player.get_gold(),
-			hungerStr),
-		ColorPairId::WHITE_BLACK);
-	row += 2;
-}
+		ctx.renderer->draw_text(
+			Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
+			std::format(
+				"DEX: {:2d}  ({:+d} missile, {:+d} defensive)",
+				player.get_dexterity(),
+				missileAdj,
+				defensiveAdj),
+			ColorPairId::WHITE_BLACK);
+		row++;
+
+		ctx.renderer->draw_text(
+			Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
+			CharacterSheetText::constitution_line(player, *ctx.dataManager),
+			ColorPairId::WHITE_BLACK);
+		row++;
+
+		ctx.renderer->draw_text(
+			Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
+			std::format(
+				"INT: {:2d}   WIS: {:2d}   CHA: {:2d}",
+				player.get_intelligence(),
+				player.get_wisdom(),
+				player.get_charisma()),
+			ColorPairId::WHITE_BLACK);
+		row += 2;
+	}
+
+	void display_combat_stats(const Player& player, GameContext& ctx, int& row)
+	{
+		int tileSize = ctx.renderer->get_tile_size();
+		int pixelX = tileSize;
+
+		int hp = player.get_hp();
+		int maxHp = player.get_max_hp();
+		int baseHP = player.get_hp_base();
+		int conBonusTotal = maxHp - baseHP;
+
+		ctx.renderer->draw_text(
+			Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
+			"--- COMBAT ---",
+			ColorPairId::YELLOW_BLACK);
+		row++;
+
+		const ColorPairId woundedColor =
+			hp > maxHp / 4 ? ColorPairId::YELLOW_BLACK : ColorPairId::RED_BLACK;
+		const ColorPairId hpColor =
+			hp > maxHp / 2 ? ColorPairId::GREEN_BLACK : woundedColor;
+
+		ctx.renderer->draw_text(
+			Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
+			std::format(
+				"HP: {} / {}  (Base: {}, Con Bonus: {:+d})",
+				hp,
+				maxHp,
+				baseHP,
+				conBonusTotal),
+			hpColor);
+		row++;
+
+		ctx.renderer->draw_text(
+			Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
+			std::format(
+				"THAC0: {}   AC: {}   DR: {}",
+				player.get_thaco(),
+				player.get_armor_class(),
+				player.get_dr()),
+			ColorPairId::WHITE_BLACK);
+		row += 2;
+	}
+
+	void display_equipment_info(
+		const Player& player,
+		GameContext& ctx,
+		int& row)
+	{
+		assert(
+			ctx.dataManager &&
+			"display_equipment_info: called without a dataManager");
+
+		int tileSize = ctx.renderer->get_tile_size();
+		int pixelX = tileSize;
+
+		auto* equippedWeapon =
+			player.get_equipped_item(EquipmentSlot::RIGHT_HAND);
+
+		std::string damageDisplay;
+		if (equippedWeapon && equippedWeapon->is_weapon())
+		{
+			const ItemEnhancement* enh = equippedWeapon->is_enhanced() ?
+				&equippedWeapon->get_enhancement() :
+				nullptr;
+			damageDisplay = WeaponDamageRegistry::get_enhanced_damage_info(
+				equippedWeapon->itemKey,
+				enh)
+								.displayRoll;
+		}
+		else
+		{
+			damageDisplay =
+				WeaponDamageRegistry::get_unarmed_damage_info().displayRoll;
+		}
+
+		const AttackStrength::Adjustment swing = AttackStrength::adjustment(
+			*ctx.dataManager,
+			player,
+			AttackKind::AttackKind::MELEE,
+			nullptr);
+		const int strDmgMod = swing.damage;
+
+		ctx.renderer->draw_text(
+			Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
+			"--- EQUIPMENT ---",
+			ColorPairId::YELLOW_BLACK);
+		row++;
+
+		std::string weaponName = equippedWeapon ?
+			std::string(equippedWeapon->get_name()) :
+			"(unarmed)";
+
+		ctx.renderer->draw_text(
+			Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
+			std::format(
+				"Weapon: {}   Damage: {}  (STR bonus: {:+d})",
+				weaponName,
+				damageDisplay,
+				strDmgMod),
+			ColorPairId::WHITE_BLACK);
+		row += 2;
+	}
+
+	void display_right_panel_info(
+		const Player& player,
+		GameContext& ctx,
+		int& row)
+	{
+		assert(
+			ctx.hungerSystem &&
+			"display_right_panel_info: called without a hungerSystem");
+		assert(
+			player.lifespan &&
+			"display_right_panel_info: a player with no lifespan");
+
+		int tileSize = ctx.renderer->get_tile_size();
+		int pixelX = tileSize;
+
+		std::string hungerStr = ctx.hungerSystem->get_hunger_state_string();
+
+		ctx.renderer->draw_text(
+			Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
+			"--- OTHER ---",
+			ColorPairId::YELLOW_BLACK);
+		row++;
+
+		ctx.renderer->draw_text(
+			Vector2D{ pixelX, panel_text_row_y(0, tileSize, row) },
+			std::format(
+				"Gender: {}   Age: {}   Gold: {} gp   Hunger: {}",
+				player.get_gender(),
+				player.lifespan->physical_age(),
+				player.get_gold(),
+				hungerStr),
+			ColorPairId::WHITE_BLACK);
+		row += 2;
+	}
 
 } // anonymous namespace
 

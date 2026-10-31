@@ -26,9 +26,9 @@
 
 namespace
 {
-// The zooms the renderer actually offers, smallest to largest.
-constexpr int TILE_SIZES[] = { 16, 32, 48, 64, 96, 128 };
-constexpr int PANEL_TOPS[] = { 0, 64, 192 };
+	// The zooms the renderer actually offers, smallest to largest.
+	constexpr int TILE_SIZES[] = { 16, 32, 48, 64, 96, 128 };
+	constexpr int PANEL_TOPS[] = { 0, 64, 192 };
 } // namespace
 
 // The property: a pixel taken from a row maps back to that row.

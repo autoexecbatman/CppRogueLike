@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/SpawnUtils.cpp",
-      "original": "\tif (candidates.empty())\n\t{\n\t\treturn std::nullopt;\n\t}",
-      "mutated": "\tif (candidates.empty())\n\t{\n\t\treturn Vector2D{ 2, 2 };\n\t}",
+      "original": "if (candidates.empty())\n\t\t\t{\n\t\t\t\treturn std::nullopt;\n\t\t\t}",
+      "mutated": "\t\tif (candidates.empty())\n\t\t{\n\t\t\treturn Vector2D{ 2, 2 };\n\t\t}",
       "catches": "a full room answering with a tile it does not have, which is the whole point of the enumeration"
     },
     {

@@ -48,8 +48,8 @@
 namespace
 {
 
-constexpr int STARTING_HP = 20;
-constexpr int ROUNDS_IN_A_TURN = 10;
+	constexpr int STARTING_HP = 20;
+	constexpr int ROUNDS_IN_A_TURN = 10;
 
 } // namespace
 

@@ -31,10 +31,11 @@
 
 namespace
 {
-// A day in rounds, from the book: 24 hours, and a round of about one minute.
-constexpr int HOURS_IN_A_DAY = 24;
-constexpr int MINUTES_IN_AN_HOUR = 60;
-constexpr int ROUNDS_IN_A_DAY = HOURS_IN_A_DAY * MINUTES_IN_AN_HOUR;
+	// A day in rounds, from the book: 24 hours, and a round of about one
+	// minute.
+	constexpr int HOURS_IN_A_DAY = 24;
+	constexpr int MINUTES_IN_AN_HOUR = 60;
+	constexpr int ROUNDS_IN_A_DAY = HOURS_IN_A_DAY * MINUTES_IN_AN_HOUR;
 } // namespace
 
 class InvisibilitySpellTest : public ::testing::Test

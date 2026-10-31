@@ -28,44 +28,44 @@
 
 namespace
 {
-// A human of the given ages, living to 100 so nothing here dies.
-Lifespan human(int naturalAge, int magicalYears)
-{
-	return Lifespan{
-		PlayerRaceState::HUMAN,
-		naturalAge,
-		100,
-		0,
-		magicalYears,
-	};
-}
-
-// Scripts every die of a roll to the same face.
-void script_dice(RandomDice& dice, int count, int face)
-{
-	for (int die = 0; die < count; ++die)
+	// A human of the given ages, living to 100 so nothing here dies.
+	Lifespan human(int naturalAge, int magicalYears)
 	{
-		dice.set_next_roll(face);
+		return Lifespan{
+			PlayerRaceState::HUMAN,
+			naturalAge,
+			100,
+			0,
+			magicalYears,
+		};
 	}
-}
 
-struct PrintedRow
-{
-	PlayerRaceState race{ PlayerRaceState::NONE };
-	int middleAge{ 0 };
-	int oldAge{ 0 };
-	int venerableAge{ 0 };
-};
+	// Scripts every die of a roll to the same face.
+	void script_dice(RandomDice& dice, int count, int face)
+	{
+		for (int die = 0; die < count; ++die)
+		{
+			dice.set_next_roll(face);
+		}
+	}
 
-// Table 12 as printed.
-constexpr std::array<PrintedRow, 6> TABLE_12 = { {
-	{ PlayerRaceState::DWARF, 125, 167, 250 },
-	{ PlayerRaceState::ELF, 175, 233, 350 },
-	{ PlayerRaceState::GNOME, 100, 133, 200 },
-	{ PlayerRaceState::HALFELF, 62, 83, 125 },
-	{ PlayerRaceState::HALFLING, 50, 67, 100 },
-	{ PlayerRaceState::HUMAN, 45, 60, 90 },
-} };
+	struct PrintedRow
+	{
+		PlayerRaceState race{ PlayerRaceState::NONE };
+		int middleAge{ 0 };
+		int oldAge{ 0 };
+		int venerableAge{ 0 };
+	};
+
+	// Table 12 as printed.
+	constexpr std::array<PrintedRow, 6> TABLE_12 = { {
+		{ PlayerRaceState::DWARF, 125, 167, 250 },
+		{ PlayerRaceState::ELF, 175, 233, 350 },
+		{ PlayerRaceState::GNOME, 100, 133, 200 },
+		{ PlayerRaceState::HALFELF, 62, 83, 125 },
+		{ PlayerRaceState::HALFLING, 50, 67, 100 },
+		{ PlayerRaceState::HUMAN, 45, 60, 90 },
+	} };
 } // namespace
 
 TEST(LifespanTest, NaturalAgeIsTheStartPlusTheYearsLived)

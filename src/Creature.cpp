@@ -62,177 +62,186 @@ EquippedItem::EquippedItem(std::unique_ptr<Item> worn, EquipmentSlot wornIn) :
 // Equipment comparison predicates for DRY compliance
 namespace
 {
-constexpr auto matches_unique_id = [](uint64_t uniqueId)
-{
-	return [uniqueId](const EquippedItem& equipped)
+	constexpr auto matches_unique_id = [](uint64_t uniqueId)
 	{
-		return equipped.item->uniqueId == uniqueId;
+		return [uniqueId](const EquippedItem& equipped)
+		{
+			return equipped.item->uniqueId == uniqueId;
+		};
 	};
-};
 } // namespace
 
 namespace
 {
-// A behaviour that names a magical effect. Consumable carries an `effect` of its own
-// kind, so the type is part of the test rather than the member name alone.
-template <typename Behavior>
-concept GrantsMagicalEffect = requires(const Behavior& behavior) {
-	{ behavior.effect } -> std::same_as<const MagicalEffect&>;
-};
+	// A behaviour that names a magical effect. Consumable carries an `effect`
+	// of its own kind, so the type is part of the test rather than the member
+	// name alone.
+	template <typename Behavior>
+	concept GrantsMagicalEffect = requires(const Behavior& behavior) {
+		{ behavior.effect } -> std::same_as<const MagicalEffect&>;
+	};
 } // namespace
 
 namespace
 {
-// What one worn item does to one ability: a value it sets the score to, an amount it
-// adds, or neither. Ability-raising gauntlets, girdles and amulets set or add as their
-// data says; a worn item's Strength or Dexterity enhancement adds.
-//
-// Example, for Strength:
-//   worn_ability_effect(girdleOfHillGiantStrength, BuffType::STRENGTH);   // -> { 19, 0 }
-//   worn_ability_effect(swimmingGauntlets, BuffType::STRENGTH);           // -> { 0, 2 }
-//   worn_ability_effect(longSword, BuffType::STRENGTH);                   // -> { 0, 0 }
-struct WornAbilityEffect
-{
-	int setTo{ 0 };
-	int add{ 0 };
-};
-
-WornAbilityEffect worn_ability_effect(
-	const Item& item,
-	BuffType ability) noexcept
-{
-	WornAbilityEffect effect{};
-
-	// An enhancement's bonus adds; only Strength and Dexterity have ever applied.
-	if (ability == BuffType::STRENGTH)
+	// What one worn item does to one ability: a value it sets the score to, an
+	// amount it adds, or neither. Ability-raising gauntlets, girdles and
+	// amulets set or add as their data says; a worn item's Strength or
+	// Dexterity enhancement adds.
+	//
+	// Example, for Strength:
+	//   worn_ability_effect(girdleOfHillGiantStrength, BuffType::STRENGTH);
+	//   // -> { 19, 0 }
+	//   worn_ability_effect(swimmingGauntlets, BuffType::STRENGTH);
+	//   // -> { 0, 2 }
+	//   worn_ability_effect(longSword, BuffType::STRENGTH);
+	//   // -> { 0, 0 }
+	struct WornAbilityEffect
 	{
-		effect.add += item.get_enhancement().strengthBonus;
-	}
-	if (ability == BuffType::DEXTERITY)
-	{
-		effect.add += item.get_enhancement().dexterityBonus;
-	}
+		int setTo{ 0 };
+		int add{ 0 };
+	};
 
-	if (!item.behavior)
+	WornAbilityEffect worn_ability_effect(
+		const Item& item,
+		BuffType ability) noexcept
 	{
+		WornAbilityEffect effect{};
+
+		// An enhancement's bonus adds; only Strength and Dexterity have ever
+		// applied.
+		if (ability == BuffType::STRENGTH)
+		{
+			effect.add += item.get_enhancement().strengthBonus;
+		}
+		if (ability == BuffType::DEXTERITY)
+		{
+			effect.add += item.get_enhancement().dexterityBonus;
+		}
+
+		if (!item.behavior)
+		{
+			return effect;
+		}
+
+		auto from_stat_boost = [ability, &effect](const auto& boost)
+		{
+			using BoostType = std::decay_t<decltype(boost)>;
+			if constexpr (
+				std::is_same_v<BoostType, JewelryAmulet> ||
+				std::is_same_v<BoostType, Gauntlets> ||
+				std::is_same_v<BoostType, Girdle>)
+			{
+				int amount = 0;
+				switch (ability)
+				{
+				case BuffType::STRENGTH:
+				{
+					amount = boost.strBonus;
+					break;
+				}
+				case BuffType::DEXTERITY:
+				{
+					amount = boost.dexBonus;
+					break;
+				}
+				case BuffType::CONSTITUTION:
+				{
+					amount = boost.conBonus;
+					break;
+				}
+				case BuffType::INTELLIGENCE:
+				{
+					amount = boost.intBonus;
+					break;
+				}
+				case BuffType::WISDOM:
+				{
+					amount = boost.wisBonus;
+					break;
+				}
+				case BuffType::CHARISMA:
+				{
+					amount = boost.chaBonus;
+					break;
+				}
+				default:
+				{
+					break;
+				}
+				}
+
+				if (boost.application == BuffApplication::SET)
+				{
+					effect.setTo = amount;
+				}
+				else
+				{
+					effect.add += amount;
+				}
+			}
+		};
+		std::visit(from_stat_boost, *item.behavior);
 		return effect;
 	}
 
-	auto from_stat_boost = [ability, &effect](const auto& boost)
+	// Whether the item is a girdle of giant strength, which is the girdle that
+	// sets Strength.
+	//
+	// Example:
+	//   is_giant_strength_girdle(girdleOfHillGiantStrength); // -> true
+	//   is_giant_strength_girdle(gauntletsOfOgrePower); // -> false, gauntlets
+	bool is_giant_strength_girdle(const Item& item) noexcept
 	{
-		using BoostType = std::decay_t<decltype(boost)>;
-		if constexpr (
-			std::is_same_v<BoostType, JewelryAmulet> ||
-			std::is_same_v<BoostType, Gauntlets> ||
-			std::is_same_v<BoostType, Girdle>)
+		const Girdle* girdle =
+			item.behavior ? std::get_if<Girdle>(&*item.behavior) : nullptr;
+		return girdle != nullptr &&
+			girdle->application == BuffApplication::SET && girdle->strBonus > 0;
+	}
+
+	// The item's gauntlets if they set Strength, as gauntlets of ogre power do,
+	// or null.
+	//
+	// Example:
+	//   strength_setting_gauntlets(gauntletsOfOgrePower); // -> their Gauntlets
+	//   strength_setting_gauntlets(gauntletsOfSwimmingAndClimbing);
+	//   // -> nullptr, they add
+	const Gauntlets* strength_setting_gauntlets(const Item& item) noexcept
+	{
+		const Gauntlets* gauntlets =
+			item.behavior ? std::get_if<Gauntlets>(&*item.behavior) : nullptr;
+		return gauntlets != nullptr &&
+				gauntlets->application == BuffApplication::SET &&
+				gauntlets->strBonus > 0 ?
+			gauntlets :
+			nullptr;
+	}
+
+	// The PlayerRaceState a saved integer names, or nullopt for one no race
+	// has. The switch has no default, so a race added without a case here is a
+	// compile error (C4062, -Wswitch).
+	//
+	// Example:
+	//   player_race_from(3);    // -> PlayerRaceState::DWARF
+	//   player_race_from(7);    // -> nullopt
+	std::optional<PlayerRaceState> player_race_from(int saved)
+	{
+		const PlayerRaceState candidate = static_cast<PlayerRaceState>(saved);
+		switch (candidate)
 		{
-			int amount = 0;
-			switch (ability)
-			{
-			case BuffType::STRENGTH:
-			{
-				amount = boost.strBonus;
-				break;
-			}
-			case BuffType::DEXTERITY:
-			{
-				amount = boost.dexBonus;
-				break;
-			}
-			case BuffType::CONSTITUTION:
-			{
-				amount = boost.conBonus;
-				break;
-			}
-			case BuffType::INTELLIGENCE:
-			{
-				amount = boost.intBonus;
-				break;
-			}
-			case BuffType::WISDOM:
-			{
-				amount = boost.wisBonus;
-				break;
-			}
-			case BuffType::CHARISMA:
-			{
-				amount = boost.chaBonus;
-				break;
-			}
-			default:
-			{
-				break;
-			}
-			}
-
-			if (boost.application == BuffApplication::SET)
-			{
-				effect.setTo = amount;
-			}
-			else
-			{
-				effect.add += amount;
-			}
+		case PlayerRaceState::NONE:
+		case PlayerRaceState::HUMAN:
+		case PlayerRaceState::ELF:
+		case PlayerRaceState::DWARF:
+		case PlayerRaceState::HALFLING:
+		case PlayerRaceState::GNOME:
+		case PlayerRaceState::HALFELF:
+		{
+			return candidate;
 		}
-	};
-	std::visit(from_stat_boost, *item.behavior);
-	return effect;
-}
-
-// Whether the item is a girdle of giant strength, which is the girdle that sets Strength.
-//
-// Example:
-//   is_giant_strength_girdle(girdleOfHillGiantStrength); // -> true
-//   is_giant_strength_girdle(gauntletsOfOgrePower); // -> false, gauntlets
-bool is_giant_strength_girdle(const Item& item) noexcept
-{
-	const Girdle* girdle =
-		item.behavior ? std::get_if<Girdle>(&*item.behavior) : nullptr;
-	return girdle != nullptr && girdle->application == BuffApplication::SET &&
-		girdle->strBonus > 0;
-}
-
-// The item's gauntlets if they set Strength, as gauntlets of ogre power do, or null.
-//
-// Example:
-//   strength_setting_gauntlets(gauntletsOfOgrePower); // -> their Gauntlets
-//   strength_setting_gauntlets(gauntletsOfSwimmingAndClimbing); // -> nullptr, they add
-const Gauntlets* strength_setting_gauntlets(const Item& item) noexcept
-{
-	const Gauntlets* gauntlets =
-		item.behavior ? std::get_if<Gauntlets>(&*item.behavior) : nullptr;
-	return gauntlets != nullptr &&
-			gauntlets->application == BuffApplication::SET &&
-			gauntlets->strBonus > 0 ?
-		gauntlets :
-		nullptr;
-}
-
-// The PlayerRaceState a saved integer names, or nullopt for one no race has.
-// The switch has no default, so a race added without a case here is a compile
-// error (C4062, -Wswitch).
-//
-// Example:
-//   player_race_from(3);    // -> PlayerRaceState::DWARF
-//   player_race_from(7);    // -> nullopt
-std::optional<PlayerRaceState> player_race_from(int saved)
-{
-	const PlayerRaceState candidate = static_cast<PlayerRaceState>(saved);
-	switch (candidate)
-	{
-	case PlayerRaceState::NONE:
-	case PlayerRaceState::HUMAN:
-	case PlayerRaceState::ELF:
-	case PlayerRaceState::DWARF:
-	case PlayerRaceState::HALFLING:
-	case PlayerRaceState::GNOME:
-	case PlayerRaceState::HALFELF:
-	{
-		return candidate;
+		}
+		return std::nullopt;
 	}
-	}
-	return std::nullopt;
-}
 } // namespace
 
 //==Creature==
@@ -251,7 +260,8 @@ void Creature::load(const json& source)
 	gender = source.at("gender").get<std::string>();
 	naturalAttack = source.at("naturalAttack").get<std::string>();
 	ethics = Alignment::parse_ethics(source.at("ethics").get<std::string>());
-	morality = Alignment::parse_morality(source.at("morality").get<std::string>());
+	morality =
+		Alignment::parse_morality(source.at("morality").get<std::string>());
 	undead = source.at("undead").get<bool>();
 	awareUntilTime = source.at("awareUntilTime").get<int>();
 	attitude = parse_attitude(source.at("attitude").get<std::string>());
@@ -1993,55 +2003,60 @@ const Gauntlets* Creature::get_gauntlets_beside_girdle() const noexcept
 
 namespace
 {
-// Says so when an age has moved into a later band of Table 12.
-//
-// Example, a human going from 44 to 45:
-//   announce_new_band(AgeCategory::YOUNG, AgeCategory::MIDDLE_AGE, ctx);   // "You feel the years: middle age."
-void announce_new_band(AgeCategory before, AgeCategory after, GameContext& ctx)
-{
-	if (after <= before)
+	// Says so when an age has moved into a later band of Table 12.
+	//
+	// Example, a human going from 44 to 45:
+	//   announce_new_band(AgeCategory::YOUNG, AgeCategory::MIDDLE_AGE, ctx);
+	//   // "You feel the years: middle age."
+	void announce_new_band(
+		AgeCategory before,
+		AgeCategory after,
+		GameContext& ctx)
 	{
-		return;
+		if (after <= before)
+		{
+			return;
+		}
+		ctx.messageSystem->message(
+			ColorPairId::YELLOW_BLACK,
+			std::format("You feel the years: {}.", age_category_name(after)),
+			MessageCompletion::FINISHED);
 	}
-	ctx.messageSystem->message(
-		ColorPairId::YELLOW_BLACK,
-		std::format("You feel the years: {}.", age_category_name(after)),
-		MessageCompletion::FINISHED);
-}
 
-// The ability score a buff type raises or lowers, or nothing for a buff that is not one.
-//
-// Example:
-//   ability_of_buff(BuffType::WISDOM);   // -> Ability::WISDOM
-//   ability_of_buff(BuffType::SPEED);    // -> std::nullopt
-std::optional<Ability> ability_of_buff(BuffType type)
-{
-	if (type == BuffType::STRENGTH)
+	// The ability score a buff type raises or lowers, or nothing for a buff
+	// that is not one.
+	//
+	// Example:
+	//   ability_of_buff(BuffType::WISDOM);   // -> Ability::WISDOM
+	//   ability_of_buff(BuffType::SPEED);    // -> std::nullopt
+	std::optional<Ability> ability_of_buff(BuffType type)
 	{
-		return Ability::STRENGTH;
+		if (type == BuffType::STRENGTH)
+		{
+			return Ability::STRENGTH;
+		}
+		if (type == BuffType::DEXTERITY)
+		{
+			return Ability::DEXTERITY;
+		}
+		if (type == BuffType::CONSTITUTION)
+		{
+			return Ability::CONSTITUTION;
+		}
+		if (type == BuffType::INTELLIGENCE)
+		{
+			return Ability::INTELLIGENCE;
+		}
+		if (type == BuffType::WISDOM)
+		{
+			return Ability::WISDOM;
+		}
+		if (type == BuffType::CHARISMA)
+		{
+			return Ability::CHARISMA;
+		}
+		return std::nullopt;
 	}
-	if (type == BuffType::DEXTERITY)
-	{
-		return Ability::DEXTERITY;
-	}
-	if (type == BuffType::CONSTITUTION)
-	{
-		return Ability::CONSTITUTION;
-	}
-	if (type == BuffType::INTELLIGENCE)
-	{
-		return Ability::INTELLIGENCE;
-	}
-	if (type == BuffType::WISDOM)
-	{
-		return Ability::WISDOM;
-	}
-	if (type == BuffType::CHARISMA)
-	{
-		return Ability::CHARISMA;
-	}
-	return std::nullopt;
-}
 } // namespace
 
 void Creature::add_magical_years(int years, GameContext& ctx)

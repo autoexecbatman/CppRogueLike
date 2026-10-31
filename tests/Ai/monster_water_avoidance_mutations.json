@@ -51,8 +51,8 @@
     },
     {
       "file": "src/AiMonster.cpp",
-      "original": "\tPathfinding::step(\n\t\towner,\n\t\towner.position + Vector2D{ deltaCol, deltaRow },\n\t\tctx);",
-      "mutated": "\towner.position = owner.position + Vector2D{ deltaCol, deltaRow };",
+      "original": "\t\tPathfinding::step(\n\t\t\towner,\n\t\t\towner.position + Vector2D{ deltaCol, deltaRow },\n\t\t\tctx);",
+      "mutated": "\t\towner.position = owner.position + Vector2D{ deltaCol, deltaRow };",
       "catches": "random drift written straight onto the position, the path an unaware monster takes into a pool"
     },
     {

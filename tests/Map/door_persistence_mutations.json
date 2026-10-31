@@ -45,14 +45,14 @@
     },
     {
       "file": "src/Map.cpp",
-      "original": "\t}\n\treturn std::nullopt;\n}\n} // namespace",
-      "mutated": "\t}\n\treturn candidate;\n}\n} // namespace",
+      "original": "}\n\t\treturn std::nullopt;\n\t}\n} // namespace",
+      "mutated": "\t\t}\n\t\treturn candidate;\n\t}\n\t} // namespace",
       "catches": "a corrupt saved door state loaded as a state nothing handles"
     },
     {
       "file": "src/Map.cpp",
-      "original": "\tcase DoorState::CLOSED_LOCKED:\n\tcase DoorState::CLOSED_LOCKED_FORCE_FAILED:\n\t{\n\t\treturn candidate;\n\t}\n",
-      "mutated": "\tcase DoorState::CLOSED_LOCKED:\n\t{\n\t\treturn candidate;\n\t}\n\tcase DoorState::CLOSED_LOCKED_FORCE_FAILED:\n\t{\n\t\treturn DoorState::CLOSED_LOCKED;\n\t}\n",
+      "original": "\t\tcase DoorState::CLOSED_LOCKED:\n\t\tcase DoorState::CLOSED_LOCKED_FORCE_FAILED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n",
+      "mutated": "\t\tcase DoorState::CLOSED_LOCKED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\tcase DoorState::CLOSED_LOCKED_FORCE_FAILED:\n\t\t{\n\t\t\treturn DoorState::CLOSED_LOCKED;\n\t\t}\n",
       "catches": "a door that resisted forcing read back as only locked"
     }
   ]

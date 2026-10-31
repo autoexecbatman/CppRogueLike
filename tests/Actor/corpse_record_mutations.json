@@ -99,13 +99,13 @@
         },
         {
             "file": "src/MonsterRegistry.cpp",
-            "original": "\tparams.corpseEdibility =\n\t\tcorpse_edibility_from_record(entry.at(\"corpse_edible\").get<bool>());\n",
-            "mutated": "\tparams.corpseEdibility =\n\t\tcorpse_edibility_from_record(entry.value(\"corpse_edible\", true));\n",
+            "original": "\t\tparams.corpseEdibility =\n\t\t\tcorpse_edibility_from_record(entry.at(\"corpse_edible\").get<bool>());\n",
+            "mutated": "\t\tparams.corpseEdibility =\n\t\t\tcorpse_edibility_from_record(entry.value(\"corpse_edible\", true));\n",
             "catches": "a record without corpse_edible loading as edible"
         },
         {
             "file": "src/MonsterRegistry.cpp",
-            "original": "\tparams.corpseEdibility =\n\t\tcorpse_edibility_from_record(entry.at(\"corpse_edible\").get<bool>());\n",
+            "original": "\t\tparams.corpseEdibility =\n\t\t\tcorpse_edibility_from_record(entry.at(\"corpse_edible\").get<bool>());\n",
             "mutated": "",
             "catches": "every record's corpse edible whatever it says"
         },

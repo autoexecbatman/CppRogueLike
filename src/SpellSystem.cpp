@@ -70,1123 +70,1217 @@
 
 namespace
 {
-void animate_heal(const Vector2D& pos, GameContext& ctx)
-{
-	assert(ctx.tileConfig && "animate_heal: called without a tileConfig");
-	assert(
-		ctx.animSystem &&
-		"SpellSystem::animate_heal: called without an animSystem");
-
-	ctx.animSystem->spawn_effect(
-		pos,
-		ctx.tileConfig->get("TILE_EFFECT_HEAL"),
-		60,
-		220,
-		60,
-		0.5f);
-}
-
-// AD&D 2e: 1 missile at level 1, +1 every 2 levels, max 5
-int calculate_num_missiles(int casterLevel)
-{
-	return std::min(5, 1 + (casterLevel - 1) / 2);
-}
-
-// The spell list a class casts from; the classes that cast none answer NONE.
-CasterClass to_caster_class(CreatureClass creatureClass)
-{
-	switch (creatureClass)
+	void animate_heal(const Vector2D& pos, GameContext& ctx)
 	{
+		assert(ctx.tileConfig && "animate_heal: called without a tileConfig");
+		assert(
+			ctx.animSystem &&
+			"SpellSystem::animate_heal: called without an animSystem");
 
-	case CreatureClass::CLERIC:
-	{
-		return CasterClass::CLERIC;
+		ctx.animSystem->spawn_effect(
+			pos,
+			ctx.tileConfig->get("TILE_EFFECT_HEAL"),
+			60,
+			220,
+			60,
+			0.5f);
 	}
 
-	case CreatureClass::WIZARD:
+	// AD&D 2e: 1 missile at level 1, +1 every 2 levels, max 5
+	int calculate_num_missiles(int casterLevel)
 	{
-		return CasterClass::WIZARD;
+		return std::min(5, 1 + (casterLevel - 1) / 2);
 	}
 
-	case CreatureClass::FIGHTER:
-	case CreatureClass::ROGUE:
-	case CreatureClass::MONSTER:
+	// The spell list a class casts from; the classes that cast none answer
+	// NONE.
+	CasterClass to_caster_class(CreatureClass creatureClass)
 	{
-		return CasterClass::NONE;
+		switch (creatureClass)
+		{
+
+		case CreatureClass::CLERIC:
+		{
+			return CasterClass::CLERIC;
+		}
+
+		case CreatureClass::WIZARD:
+		{
+			return CasterClass::WIZARD;
+		}
+
+		case CreatureClass::FIGHTER:
+		case CreatureClass::ROGUE:
+		case CreatureClass::MONSTER:
+		{
+			return CasterClass::NONE;
+		}
+		}
+
+		std::unreachable();
 	}
-	}
 
-	std::unreachable();
-}
+	// Table 24's sixth and seventh columns are footnoted: a priest reaches them
+	// only at these Wisdom scores. The rows are counted from one, so the fifth
+	// column is five rows and the sixth is six.
+	constexpr std::size_t SIXTH_SPELL_LEVEL_ROW = 5;
+	constexpr std::size_t SEVENTH_SPELL_LEVEL_ROW = 6;
+	constexpr int WISDOM_FOR_SIXTH_LEVEL = 17;
+	constexpr int WISDOM_FOR_SEVENTH_LEVEL = 18;
 
-// Table 24's sixth and seventh columns are footnoted: a priest reaches them only at
-// these Wisdom scores. The rows are counted from one, so the fifth column is five
-// rows and the sixth is six.
-constexpr std::size_t SIXTH_SPELL_LEVEL_ROW = 5;
-constexpr std::size_t SEVENTH_SPELL_LEVEL_ROW = 6;
-constexpr int WISDOM_FOR_SIXTH_LEVEL = 17;
-constexpr int WISDOM_FOR_SEVENTH_LEVEL = 18;
-
-// The table's row for that level. A caster past the last printed row keeps what the
-// last row gave it, which is where the book stops rather than a number of our own.
-const std::vector<int>& row_for_level(
-	const std::vector<std::vector<int>>& table,
-	int level)
-{
-	static const std::vector<int> none{};
-	if (level < 1)
+	// The table's row for that level. A caster past the last printed row keeps
+	// what the last row gave it, which is where the book stops rather than a
+	// number of our own.
+	const std::vector<int>& row_for_level(
+		const std::vector<std::vector<int>>& table,
+		int level)
 	{
-		return none;
+		static const std::vector<int> none{};
+		if (level < 1)
+		{
+			return none;
+		}
+		const std::size_t row =
+			std::min(static_cast<std::size_t>(level), table.size()) - 1;
+		return table.at(row);
 	}
-	const std::size_t row =
-		std::min(static_cast<std::size_t>(level), table.size()) - 1;
-	return table.at(row);
-}
 } // namespace
 
 namespace Spells
 {
 
-int roll_sleep_hit_dice_budget(RandomDice& dice)
-{
-	// Each die on its own. roll() takes a range, so passing the count as its minimum
-	// gave a flat 2 to 4 rather than 2d4.
-	int total = 0;
-	for (int die = 0; die < SLEEP_HIT_DICE_COUNT; ++die)
+	int roll_sleep_hit_dice_budget(RandomDice& dice)
 	{
-		total += dice.roll(1, SLEEP_HIT_DICE_SIDES);
+		// Each die on its own. roll() takes a range, so passing the count as
+		// its minimum gave a flat 2 to 4 rather than 2d4.
+		int total = 0;
+		for (int die = 0; die < SLEEP_HIT_DICE_COUNT; ++die)
+		{
+			total += dice.roll(1, SLEEP_HIT_DICE_SIDES);
+		}
+		return total;
 	}
-	return total;
-}
 
 } // namespace Spells
 
 namespace SpellSystem
 {
-namespace
-{
-
-// The player's choice of target, made the way each spell has always made it.
-struct PlayerChooses
-{
-};
-
-// A target the caller names, which a monster's cast passes.
-struct AimedAt
-{
-	// The creature struck, or whose tile a burst centres on.
-	Creature& target;
-};
-
-// Who a spell lands on.
-using SpellTargets = std::variant<PlayerChooses, AimedAt>;
-
-// AD&D 2e: a fireball's 20-foot radius is two tiles, and its range ten tiles plus one a level.
-constexpr int FIREBALL_RADIUS = 2;
-
-// How far a caster of that level can place a fireball, in tiles.
-//
-// Example:
-//   fireball_range(18);   // -> 28
-int fireball_range(int casterLevel)
-{
-	return 10 + casterLevel;
-}
-
-// Reached only through cast_spell_by_key and cast_spell_at, so nothing outside this file can call them.
-void dispatch_effect(
-	SpellEffectType effect,
-	Creature& caster,
-	SpellSource source,
-	const SpellTargets& targets,
-	std::function<void(GameContext&)> onSuccess,
-	GameContext& ctx);
-
-// Every check a casting makes before its effect: silence, then a priest's fizzle. Shared by
-// both entry points, so a monster is refused and fizzles exactly as the player is.
-void cast_with_targets(
-	std::string_view key,
-	Creature& caster,
-	SpellSource source,
-	const SpellTargets& targets,
-	std::function<void(GameContext&)> onCastComplete,
-	GameContext& ctx);
-
-// Spell effect implementations (instant - return true on success)
-bool cast_cure_light_wounds(Creature& caster, GameContext& ctx);
-bool cast_bless(Creature& caster, GameContext& ctx);
-bool cast_sanctuary(Creature& caster, GameContext& ctx);
-bool cast_protection_from_evil(Creature& caster, GameContext& ctx);
-// The player's choice of missile targets: the living creatures in the player's field of
-// view, then fires at them. Refuses with a message and returns false when nothing is in sight.
-//
-// Example, caster level 3, one goblin in view:
-//   cast_magic_missile(caster, ctx);   // -> true, 2 missiles, both to the goblin
-//   cast_magic_missile(caster, ctx);   // -> false when no target is in view
-bool cast_magic_missile(Creature& caster, GameContext& ctx);
-// Fires one missile per two caster levels, five at most, at the targets nearest the caster
-// first. A target whose Sanctuary turns the caster away is skipped and the missile goes to
-// the next. Leaves the dead to the caller.
-//
-// Example, caster level 18, the player the one target:
-//   resolve_magic_missile(lich, { &player }, ctx);   // 5 missiles, all to the player
-void resolve_magic_missile(
-	Creature& caster,
-	std::vector<Creature*> targets,
-	GameContext& ctx);
-bool cast_shield(Creature& caster, GameContext& ctx);
-bool cast_sleep(Creature& caster, GameContext& ctx);
-// Makes the caster invisible for the spell's day, as the given buff, so a worn item's
-// grant can be ended apart from the spell's.
-bool cast_invisibility(Creature& caster, BuffType granted, GameContext& ctx);
-bool cast_teleport(Creature& caster, GameContext& ctx);
-bool cast_knock(Creature& caster, GameContext& ctx);
-// Paralyzes up to 1d4 humanoids in the caster's field of view for two rounds
-// per caster level. Each target saves versus spells, d20 at 15 or better, and a
-// save negates for that target only. The 1d4 is the cap on targets attempted,
-// not on targets held, so a roll of four against four saves holds nobody.
-//
-// Example, caster level 3, two orcs in view, 1d4 rolling 2, saves of 3 and 18:
-//   cast_hold_person(caster, ctx);   // -> true, the first orc held for 6 rounds
-bool cast_hold_person(Creature& caster, GameContext& ctx);
-
-// Targeted spell implementations - async via TargetingMenu; onSuccess fires on confirm
-// Opens a targeting cursor with a range of 5 plus the caster's level, and on
-// confirmation silences the one living creature standing on the chosen tile for
-// two rounds per caster level, preventing it from casting. Returns immediately:
-// the work happens when the menu resolves, and onSuccess fires only then. A
-// cancelled cursor says so and calls nothing.
-//
-// Example, caster level 3:
-//   cast_silence(caster, on_spell_spent, ctx);   // cursor opens, range 8
-//                                                // on confirm: 6 rounds, on cancel: nothing
-void cast_silence(
-	Creature& caster,
-	std::function<void(GameContext&)> onSuccess,
-	GameContext& ctx);
-// Opens a targeting cursor with a range of five times the caster's level, and on
-// confirmation entangles every living creature within two tiles of the chosen
-// centre for two rounds per caster level. Each saves versus paralyzation, d20 at
-// 10 or better, to escape. Returns immediately, as cast_silence does.
-//
-// Example, caster level 3, two goblins within the radius:
-//   cast_web(caster, on_spell_spent, ctx);   // cursor opens, range 15, radius 2
-//                                            // on confirm: each goblin rolls to escape
-void cast_web(
-	Creature& caster,
-	std::function<void(GameContext&)> onSuccess,
-	GameContext& ctx);
-void cast_fireball(
-	Creature& caster,
-	std::function<void(GameContext&)> onSuccess,
-	GameContext& ctx);
-// Bursts a fireball of the caster level on center: the animation, the burst and its message.
-// Leaves the dead to the caller.
-//
-// Example, caster level 13 on the player's tile:
-//   resolve_fireball(player.position, 13, DamageSource::PLAYER, ctx);
-//   // 10d6, the dice cap, "Fireball! 10d6 = ..."
-void resolve_fireball(
-	Vector2D center,
-	int casterLevel,
-	DamageSource source,
-	GameContext& ctx);
-
-void dispatch_effect(
-	SpellEffectType effect,
-	Creature& caster,
-	SpellSource source,
-	const SpellTargets& targets,
-	std::function<void(GameContext&)> onSuccess,
-	GameContext& ctx)
-{
-	// A named target skips the player's choice and lands at once.
-	if (const AimedAt* aimed = std::get_if<AimedAt>(&targets))
+	namespace
 	{
-		assert(
-			(effect == SpellEffectType::MAGIC_MISSILE ||
-				effect == SpellEffectType::FIREBALL) &&
-			"dispatch_effect: a spell that cannot be aimed was aimed");
-		if (effect == SpellEffectType::MAGIC_MISSILE)
+
+		// The player's choice of target, made the way each spell has always
+		// made it.
+		struct PlayerChooses
 		{
-			resolve_magic_missile(caster, { &aimed->target }, ctx);
-		}
-		else
+		};
+
+		// A target the caller names, which a monster's cast passes.
+		struct AimedAt
 		{
-			resolve_fireball(
-				aimed->target.position,
-				caster_level(caster),
-				caster.as_damage_source(),
-				ctx);
-		}
-		onSuccess(ctx);
-		return;
-	}
+			// The creature struck, or whose tile a burst centres on.
+			Creature& target;
+		};
 
-	// Targeted spells: async via TargetingMenu - onSuccess is forwarded into the callback
-	switch (effect)
-	{
+		// Who a spell lands on.
+		using SpellTargets = std::variant<PlayerChooses, AimedAt>;
 
-	case SpellEffectType::SILENCE:
-	{
-		cast_silence(caster, std::move(onSuccess), ctx);
-		return;
-	}
+		// AD&D 2e: a fireball's 20-foot radius is two tiles, and its range ten
+		// tiles plus one a level.
+		constexpr int FIREBALL_RADIUS = 2;
 
-	case SpellEffectType::WEB:
-	{
-		cast_web(caster, std::move(onSuccess), ctx);
-		return;
-	}
-
-	case SpellEffectType::FIREBALL:
-	{
-		cast_fireball(caster, std::move(onSuccess), ctx);
-		return;
-	}
-
-	default:
-	{
-		break;
-	}
-	}
-
-	// Instant spells: cast synchronously, call onSuccess if successful
-	bool result = false;
-	switch (effect)
-	{
-
-	case SpellEffectType::CURE_LIGHT_WOUNDS:
-	{
-		result = cast_cure_light_wounds(caster, ctx);
-		break;
-	}
-
-	case SpellEffectType::BLESS:
-	{
-		result = cast_bless(caster, ctx);
-		break;
-	}
-
-	case SpellEffectType::SANCTUARY:
-	{
-		result = cast_sanctuary(caster, ctx);
-		break;
-	}
-
-	case SpellEffectType::PROTECTION_FROM_EVIL:
-	{
-		result = cast_protection_from_evil(caster, ctx);
-		break;
-	}
-
-	case SpellEffectType::HOLD_PERSON:
-	{
-		result = cast_hold_person(caster, ctx);
-		break;
-	}
-
-	case SpellEffectType::MAGIC_MISSILE:
-	{
-		result = cast_magic_missile(caster, ctx);
-		break;
-	}
-
-	case SpellEffectType::SHIELD:
-	{
-		result = cast_shield(caster, ctx);
-		break;
-	}
-
-	case SpellEffectType::SLEEP:
-	{
-		result = cast_sleep(caster, ctx);
-		break;
-	}
-
-	case SpellEffectType::INVISIBILITY:
-	{
-		// An item's casting is the item's own buff, which taking the item off ends.
-		const BuffType granted = source == SpellSource::ITEM ?
-			BuffType::ITEM_INVISIBILITY :
-			BuffType::INVISIBILITY;
-		result = cast_invisibility(caster, granted, ctx);
-		break;
-	}
-
-	case SpellEffectType::TELEPORT:
-	{
-		result = cast_teleport(caster, ctx);
-		break;
-	}
-
-	case SpellEffectType::KNOCK:
-	{
-		result = cast_knock(caster, ctx);
-		break;
-	}
-
-	default:
-	{
-		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			"Spell not implemented yet.",
-			MessageCompletion::FINISHED);
-		break;
-	}
-	}
-
-	if (result)
-	{
-		onSuccess(ctx);
-	}
-}
-
-bool cast_cure_light_wounds(Creature& caster, GameContext& ctx)
-{
-	assert(
-		ctx.dice && "SpellSystem::cast_cure_light_wounds: called without dice");
-
-	animate_heal(caster.position, ctx);
-
-	// Magical healing, which reaches the fire and acid wounds regeneration cannot.
-	const int actualHealing = caster.heal(ctx.dice->roll(1, 8));
-
-	ctx.messageSystem->append_message_part(
-		ColorPairId::CYAN_BLACK,
-		"Cure Light Wounds! ");
-	ctx.messageSystem->append_message_part(
-		ColorPairId::GREEN_BLACK,
-		std::format("+{} HP", actualHealing));
-	ctx.messageSystem->finalize_message();
-
-	return true;
-}
-
-bool cast_bless(Creature& caster, GameContext& ctx)
-{
-	// AD&D 2e, PHB page 426: 6 rounds.
-	const int duration = 6;
-
-	ctx.buffSystem->add_buff(
-		caster,
-		BuffType::BLESS,
-		0,
-		duration,
-		BuffApplication::ADD,
-		ctx.gameState->get_time());
-	ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Bless! ");
-	ctx.messageSystem->append_message_part(
-		ColorPairId::WHITE_BLACK,
-		std::format("+1 to hit for {}.", Wording::rounds(duration)));
-	ctx.messageSystem->finalize_message();
-	return true;
-}
-
-// AD&D 2e, Player's Handbook page 277: evil creatures attacking the protected
-// suffer -2 on attack rolls. Duration is 2 rounds per caster level.
-//
-// Only the to-hit penalty is implemented. The spell's other two effects -
-// blocking mental control, and hedging out conjured creatures - have nothing
-// in this game to act on yet.
-bool cast_protection_from_evil(Creature& caster, GameContext& ctx)
-{
-	const int duration = 2 * caster_level(caster);
-
-	ctx.buffSystem->add_buff(
-		caster,
-		BuffType::PROTECTION_FROM_EVIL,
-		PROTECTION_FROM_EVIL_PENALTY,
-		duration,
-		BuffApplication::ADD,
-		ctx.gameState->get_time());
-
-	ctx.messageSystem->append_message_part(
-		ColorPairId::CYAN_BLACK,
-		"Protection From Evil! ");
-	ctx.messageSystem->append_message_part(
-		ColorPairId::WHITE_BLACK,
-		std::format(
-			"Evil creatures strike at {} against you for {}.",
-			PROTECTION_FROM_EVIL_PENALTY,
-			Wording::rounds(duration)));
-	ctx.messageSystem->finalize_message();
-	return true;
-}
-
-bool cast_sanctuary(Creature& caster, GameContext& ctx)
-{
-	// AD&D 2e, PHB page 436: 2 rounds + 1 round/level. Cancelled by attacking.
-	const int casterLevel = caster_level(caster);
-	const int duration = 2 + casterLevel;
-
-	ctx.buffSystem->add_buff(
-		caster,
-		BuffType::SANCTUARY,
-		0,
-		duration,
-		BuffApplication::ADD,
-		ctx.gameState->get_time());
-
-	ctx.messageSystem->append_message_part(
-		ColorPairId::CYAN_BLACK,
-		"Sanctuary! ");
-	ctx.messageSystem->append_message_part(
-		ColorPairId::WHITE_BLACK,
-		std::format(
-			"Divine protection shields you for {}.",
-			Wording::rounds(duration)));
-	ctx.messageSystem->finalize_message();
-	return true;
-}
-
-void cast_silence(
-	Creature& caster,
-	std::function<void(GameContext&)> onSuccess,
-	GameContext& ctx)
-{
-	// AD&D 2e: Duration 2 rounds/level. Targeted single creature. Prevents spellcasting.
-	int casterLevel = caster_level(caster);
-	int duration = 2 * casterLevel;
-	int range = 5 + casterLevel;
-
-	auto onTarget = [duration, onSuccess = std::move(onSuccess)](
-						bool confirmed,
-						Vector2D targetPos,
-						GameContext& innerCtx) mutable
-	{
-		if (!confirmed)
+		// How far a caster of that level can place a fireball, in tiles.
+		//
+		// Example:
+		//   fireball_range(18);   // -> 28
+		int fireball_range(int casterLevel)
 		{
-			innerCtx.messageSystem->message(
-				ColorPairId::WHITE_BLACK,
-				"Silence cancelled.",
-				MessageCompletion::FINISHED);
-			return;
+			return 10 + casterLevel;
 		}
 
-		Creature* target = nullptr;
-		for (const auto& creature : *innerCtx.creatures)
-		{
-			assert(
-				creature && "cast_silence: creatures list holds a null entry");
+		// Reached only through cast_spell_by_key and cast_spell_at, so nothing
+		// outside this file can call them.
+		void dispatch_effect(
+			SpellEffectType effect,
+			Creature& caster,
+			SpellSource source,
+			const SpellTargets& targets,
+			std::function<void(GameContext&)> onSuccess,
+			GameContext& ctx);
 
-			if (creature->position == targetPos && !creature->is_dead())
+		// Every check a casting makes before its effect: silence, then a
+		// priest's fizzle. Shared by both entry points, so a monster is refused
+		// and fizzles exactly as the player is.
+		void cast_with_targets(
+			std::string_view key,
+			Creature& caster,
+			SpellSource source,
+			const SpellTargets& targets,
+			std::function<void(GameContext&)> onCastComplete,
+			GameContext& ctx);
+
+		// Spell effect implementations (instant - return true on success)
+		bool cast_cure_light_wounds(Creature& caster, GameContext& ctx);
+		bool cast_bless(Creature& caster, GameContext& ctx);
+		bool cast_sanctuary(Creature& caster, GameContext& ctx);
+		bool cast_protection_from_evil(Creature& caster, GameContext& ctx);
+		// The player's choice of missile targets: the living creatures in the
+		// player's field of view, then fires at them. Refuses with a message
+		// and returns false when nothing is in sight.
+		//
+		// Example, caster level 3, one goblin in view:
+		//   cast_magic_missile(caster, ctx);
+		//   // -> true, 2 missiles, both to the goblin
+		//   cast_magic_missile(caster, ctx);
+		//   // -> false when no target is in view
+		bool cast_magic_missile(Creature& caster, GameContext& ctx);
+		// Fires one missile per two caster levels, five at most, at the targets
+		// nearest the caster first. A target whose Sanctuary turns the caster
+		// away is skipped and the missile goes to the next. Leaves the dead to
+		// the caller.
+		//
+		// Example, caster level 18, the player the one target:
+		//   resolve_magic_missile(lich, { &player }, ctx);
+		//   // 5 missiles, all to the player
+		void resolve_magic_missile(
+			Creature& caster,
+			std::vector<Creature*> targets,
+			GameContext& ctx);
+		bool cast_shield(Creature& caster, GameContext& ctx);
+		bool cast_sleep(Creature& caster, GameContext& ctx);
+		// Makes the caster invisible for the spell's day, as the given buff, so
+		// a worn item's grant can be ended apart from the spell's.
+		bool cast_invisibility(
+			Creature& caster,
+			BuffType granted,
+			GameContext& ctx);
+		bool cast_teleport(Creature& caster, GameContext& ctx);
+		bool cast_knock(Creature& caster, GameContext& ctx);
+		// Paralyzes up to 1d4 humanoids in the caster's field of view for two
+		// rounds per caster level. Each target saves versus spells, d20 at 15
+		// or better, and a save negates for that target only. The 1d4 is the
+		// cap on targets attempted, not on targets held, so a roll of four
+		// against four saves holds nobody.
+		//
+		// Example, caster level 3, two orcs in view, 1d4 rolling 2, saves of 3
+		// and 18:
+		//   cast_hold_person(caster, ctx);
+		//   // -> true, the first orc held for 6 rounds
+		bool cast_hold_person(Creature& caster, GameContext& ctx);
+
+		// Targeted spell implementations - async via TargetingMenu; onSuccess
+		// fires on confirm Opens a targeting cursor with a range of 5 plus the
+		// caster's level, and on confirmation silences the one living creature
+		// standing on the chosen tile for two rounds per caster level,
+		// preventing it from casting. Returns immediately: the work happens
+		// when the menu resolves, and onSuccess fires only then. A cancelled
+		// cursor says so and calls nothing.
+		//
+		// Example, caster level 3:
+		//   cast_silence(caster, on_spell_spent, ctx);
+		//   // cursor opens, range 8
+		//   // on confirm: 6 rounds, on cancel: nothing
+		void cast_silence(
+			Creature& caster,
+			std::function<void(GameContext&)> onSuccess,
+			GameContext& ctx);
+		// Opens a targeting cursor with a range of five times the caster's
+		// level, and on confirmation entangles every living creature within two
+		// tiles of the chosen centre for two rounds per caster level. Each
+		// saves versus paralyzation, d20 at 10 or better, to escape. Returns
+		// immediately, as cast_silence does.
+		//
+		// Example, caster level 3, two goblins within the radius:
+		//   cast_web(caster, on_spell_spent, ctx);
+		//   // cursor opens, range 15, radius 2
+		//   // on confirm: each goblin rolls to escape
+		void cast_web(
+			Creature& caster,
+			std::function<void(GameContext&)> onSuccess,
+			GameContext& ctx);
+		void cast_fireball(
+			Creature& caster,
+			std::function<void(GameContext&)> onSuccess,
+			GameContext& ctx);
+		// Bursts a fireball of the caster level on center: the animation, the
+		// burst and its message. Leaves the dead to the caller.
+		//
+		// Example, caster level 13 on the player's tile:
+		//   resolve_fireball(player.position, 13, DamageSource::PLAYER, ctx);
+		//   // 10d6, the dice cap, "Fireball! 10d6 = ..."
+		void resolve_fireball(
+			Vector2D center,
+			int casterLevel,
+			DamageSource source,
+			GameContext& ctx);
+
+		void dispatch_effect(
+			SpellEffectType effect,
+			Creature& caster,
+			SpellSource source,
+			const SpellTargets& targets,
+			std::function<void(GameContext&)> onSuccess,
+			GameContext& ctx)
+		{
+			// A named target skips the player's choice and lands at once.
+			if (const AimedAt* aimed = std::get_if<AimedAt>(&targets))
 			{
-				target = creature.get();
+				assert(
+					(effect == SpellEffectType::MAGIC_MISSILE ||
+						effect == SpellEffectType::FIREBALL) &&
+					"dispatch_effect: a spell that cannot be aimed was aimed");
+				if (effect == SpellEffectType::MAGIC_MISSILE)
+				{
+					resolve_magic_missile(caster, { &aimed->target }, ctx);
+				}
+				else
+				{
+					resolve_fireball(
+						aimed->target.position,
+						caster_level(caster),
+						caster.as_damage_source(),
+						ctx);
+				}
+				onSuccess(ctx);
+				return;
+			}
+
+			// Targeted spells: async via TargetingMenu - onSuccess is forwarded
+			// into the callback
+			switch (effect)
+			{
+
+			case SpellEffectType::SILENCE:
+			{
+				cast_silence(caster, std::move(onSuccess), ctx);
+				return;
+			}
+
+			case SpellEffectType::WEB:
+			{
+				cast_web(caster, std::move(onSuccess), ctx);
+				return;
+			}
+
+			case SpellEffectType::FIREBALL:
+			{
+				cast_fireball(caster, std::move(onSuccess), ctx);
+				return;
+			}
+
+			default:
+			{
 				break;
 			}
-		}
-
-		if (!target)
-		{
-			innerCtx.messageSystem->message(
-				ColorPairId::WHITE_BLACK,
-				"No creature at that location.",
-				MessageCompletion::FINISHED);
-			return;
-		}
-
-		innerCtx.buffSystem->add_buff(
-			*target,
-			BuffType::SILENCE,
-			0,
-			duration,
-			BuffApplication::ADD,
-			innerCtx.gameState->get_time());
-		SpellAnimations::animate_creature_hit(target->position, innerCtx);
-
-		innerCtx.messageSystem->append_message_part(
-			ColorPairId::CYAN_BLACK,
-			"Silence! ");
-		innerCtx.messageSystem->append_message_part(
-			ColorPairId::WHITE_BLACK,
-			std::format(
-				"{} is struck mute for {}.",
-				target->get_name(),
-				Wording::rounds(duration)));
-		innerCtx.messageSystem->finalize_message();
-
-		onSuccess(innerCtx);
-	};
-
-	ctx.menus->push_back(
-		std::make_unique<TargetingMenu>(range, 0, std::move(onTarget), ctx));
-}
-
-void cast_web(
-	Creature& caster,
-	std::function<void(GameContext&)> onSuccess,
-	GameContext& ctx)
-{
-	// AD&D 2e: Save vs. Paralyzation (d20 >= 10) or be entangled. Duration 2 rounds/level.
-	int casterLevel = caster_level(caster);
-	int range = 5 * casterLevel;
-	int radius = 2;
-	int duration = 2 * casterLevel;
-
-	auto onTarget = [radius, duration, onSuccess = std::move(onSuccess)](
-						bool confirmed,
-						Vector2D center,
-						GameContext& innerCtx) mutable
-	{
-		if (!confirmed)
-		{
-			innerCtx.messageSystem->message(
-				ColorPairId::WHITE_BLACK,
-				"Web cancelled.",
-				MessageCompletion::FINISHED);
-			return;
-		}
-
-		int affected = 0;
-		for (const auto& creature : *innerCtx.creatures)
-		{
-			assert(creature && "cast_web: creatures list holds a null entry");
-
-			if (creature->is_dead())
-			{
-				continue;
-			}
-			if (creature->get_tile_distance(center) > radius)
-			{
-				continue;
 			}
 
-			// AD&D 2e: a save versus paralyzation avoids the entanglement.
-			if (!SavingThrows::is_made(
-					*creature,
-					SavingThrow::PARALYZATION_POISON_DEATH,
-					0,
-					innerCtx))
+			// Instant spells: cast synchronously, call onSuccess if successful
+			bool result = false;
+			switch (effect)
 			{
+
+			case SpellEffectType::CURE_LIGHT_WOUNDS:
+			{
+				result = cast_cure_light_wounds(caster, ctx);
+				break;
+			}
+
+			case SpellEffectType::BLESS:
+			{
+				result = cast_bless(caster, ctx);
+				break;
+			}
+
+			case SpellEffectType::SANCTUARY:
+			{
+				result = cast_sanctuary(caster, ctx);
+				break;
+			}
+
+			case SpellEffectType::PROTECTION_FROM_EVIL:
+			{
+				result = cast_protection_from_evil(caster, ctx);
+				break;
+			}
+
+			case SpellEffectType::HOLD_PERSON:
+			{
+				result = cast_hold_person(caster, ctx);
+				break;
+			}
+
+			case SpellEffectType::MAGIC_MISSILE:
+			{
+				result = cast_magic_missile(caster, ctx);
+				break;
+			}
+
+			case SpellEffectType::SHIELD:
+			{
+				result = cast_shield(caster, ctx);
+				break;
+			}
+
+			case SpellEffectType::SLEEP:
+			{
+				result = cast_sleep(caster, ctx);
+				break;
+			}
+
+			case SpellEffectType::INVISIBILITY:
+			{
+				// An item's casting is the item's own buff, which taking the
+				// item off ends.
+				const BuffType granted = source == SpellSource::ITEM ?
+					BuffType::ITEM_INVISIBILITY :
+					BuffType::INVISIBILITY;
+				result = cast_invisibility(caster, granted, ctx);
+				break;
+			}
+
+			case SpellEffectType::TELEPORT:
+			{
+				result = cast_teleport(caster, ctx);
+				break;
+			}
+
+			case SpellEffectType::KNOCK:
+			{
+				result = cast_knock(caster, ctx);
+				break;
+			}
+
+			default:
+			{
+				ctx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					"Spell not implemented yet.",
+					MessageCompletion::FINISHED);
+				break;
+			}
+			}
+
+			if (result)
+			{
+				onSuccess(ctx);
+			}
+		}
+
+		bool cast_cure_light_wounds(Creature& caster, GameContext& ctx)
+		{
+			assert(
+				ctx.dice &&
+				"SpellSystem::cast_cure_light_wounds: called without dice");
+
+			animate_heal(caster.position, ctx);
+
+			// Magical healing, which reaches the fire and acid wounds
+			// regeneration cannot.
+			const int actualHealing = caster.heal(ctx.dice->roll(1, 8));
+
+			ctx.messageSystem->append_message_part(
+				ColorPairId::CYAN_BLACK,
+				"Cure Light Wounds! ");
+			ctx.messageSystem->append_message_part(
+				ColorPairId::GREEN_BLACK,
+				std::format("+{} HP", actualHealing));
+			ctx.messageSystem->finalize_message();
+
+			return true;
+		}
+
+		bool cast_bless(Creature& caster, GameContext& ctx)
+		{
+			// AD&D 2e, PHB page 426: 6 rounds.
+			const int duration = 6;
+
+			ctx.buffSystem->add_buff(
+				caster,
+				BuffType::BLESS,
+				0,
+				duration,
+				BuffApplication::ADD,
+				ctx.gameState->get_time());
+			ctx.messageSystem->append_message_part(
+				ColorPairId::CYAN_BLACK,
+				"Bless! ");
+			ctx.messageSystem->append_message_part(
+				ColorPairId::WHITE_BLACK,
+				std::format("+1 to hit for {}.", Wording::rounds(duration)));
+			ctx.messageSystem->finalize_message();
+			return true;
+		}
+
+		// AD&D 2e, Player's Handbook page 277: evil creatures attacking the
+		// protected suffer -2 on attack rolls. Duration is 2 rounds per caster
+		// level.
+		//
+		// Only the to-hit penalty is implemented. The spell's other two effects
+		// - blocking mental control, and hedging out conjured creatures - have
+		// nothing in this game to act on yet.
+		bool cast_protection_from_evil(Creature& caster, GameContext& ctx)
+		{
+			const int duration = 2 * caster_level(caster);
+
+			ctx.buffSystem->add_buff(
+				caster,
+				BuffType::PROTECTION_FROM_EVIL,
+				PROTECTION_FROM_EVIL_PENALTY,
+				duration,
+				BuffApplication::ADD,
+				ctx.gameState->get_time());
+
+			ctx.messageSystem->append_message_part(
+				ColorPairId::CYAN_BLACK,
+				"Protection From Evil! ");
+			ctx.messageSystem->append_message_part(
+				ColorPairId::WHITE_BLACK,
+				std::format(
+					"Evil creatures strike at {} against you for {}.",
+					PROTECTION_FROM_EVIL_PENALTY,
+					Wording::rounds(duration)));
+			ctx.messageSystem->finalize_message();
+			return true;
+		}
+
+		bool cast_sanctuary(Creature& caster, GameContext& ctx)
+		{
+			// AD&D 2e, PHB page 436: 2 rounds + 1 round/level. Cancelled by
+			// attacking.
+			const int casterLevel = caster_level(caster);
+			const int duration = 2 + casterLevel;
+
+			ctx.buffSystem->add_buff(
+				caster,
+				BuffType::SANCTUARY,
+				0,
+				duration,
+				BuffApplication::ADD,
+				ctx.gameState->get_time());
+
+			ctx.messageSystem->append_message_part(
+				ColorPairId::CYAN_BLACK,
+				"Sanctuary! ");
+			ctx.messageSystem->append_message_part(
+				ColorPairId::WHITE_BLACK,
+				std::format(
+					"Divine protection shields you for {}.",
+					Wording::rounds(duration)));
+			ctx.messageSystem->finalize_message();
+			return true;
+		}
+
+		void cast_silence(
+			Creature& caster,
+			std::function<void(GameContext&)> onSuccess,
+			GameContext& ctx)
+		{
+			// AD&D 2e: Duration 2 rounds/level. Targeted single creature.
+			// Prevents spellcasting.
+			int casterLevel = caster_level(caster);
+			int duration = 2 * casterLevel;
+			int range = 5 + casterLevel;
+
+			auto onTarget = [duration, onSuccess = std::move(onSuccess)](
+								bool confirmed,
+								Vector2D targetPos,
+								GameContext& innerCtx) mutable
+			{
+				if (!confirmed)
+				{
+					innerCtx.messageSystem->message(
+						ColorPairId::WHITE_BLACK,
+						"Silence cancelled.",
+						MessageCompletion::FINISHED);
+					return;
+				}
+
+				Creature* target = nullptr;
+				for (const auto& creature : *innerCtx.creatures)
+				{
+					assert(
+						creature &&
+						"cast_silence: creatures list holds a null entry");
+
+					if (creature->position == targetPos && !creature->is_dead())
+					{
+						target = creature.get();
+						break;
+					}
+				}
+
+				if (!target)
+				{
+					innerCtx.messageSystem->message(
+						ColorPairId::WHITE_BLACK,
+						"No creature at that location.",
+						MessageCompletion::FINISHED);
+					return;
+				}
+
 				innerCtx.buffSystem->add_buff(
-					*creature,
-					BuffType::WEBBED,
+					*target,
+					BuffType::SILENCE,
 					0,
 					duration,
 					BuffApplication::ADD,
 					innerCtx.gameState->get_time());
 				SpellAnimations::animate_creature_hit(
-					creature->position,
+					target->position,
 					innerCtx);
-				++affected;
-			}
+
+				innerCtx.messageSystem->append_message_part(
+					ColorPairId::CYAN_BLACK,
+					"Silence! ");
+				innerCtx.messageSystem->append_message_part(
+					ColorPairId::WHITE_BLACK,
+					std::format(
+						"{} is struck mute for {}.",
+						target->get_name(),
+						Wording::rounds(duration)));
+				innerCtx.messageSystem->finalize_message();
+
+				onSuccess(innerCtx);
+			};
+
+			ctx.menus->push_back(
+				std::make_unique<TargetingMenu>(
+					range,
+					0,
+					std::move(onTarget),
+					ctx));
 		}
 
-		if (affected > 0)
+		void cast_web(
+			Creature& caster,
+			std::function<void(GameContext&)> onSuccess,
+			GameContext& ctx)
 		{
-			innerCtx.messageSystem->append_message_part(
-				ColorPairId::CYAN_BLACK,
-				"Web! ");
-			innerCtx.messageSystem->append_message_part(
-				ColorPairId::WHITE_BLACK,
+			// AD&D 2e: Save vs. Paralyzation (d20 >= 10) or be entangled.
+			// Duration 2 rounds/level.
+			int casterLevel = caster_level(caster);
+			int range = 5 * casterLevel;
+			int radius = 2;
+			int duration = 2 * casterLevel;
+
+			auto onTarget =
+				[radius, duration, onSuccess = std::move(onSuccess)](
+					bool confirmed,
+					Vector2D center,
+					GameContext& innerCtx) mutable
+			{
+				if (!confirmed)
+				{
+					innerCtx.messageSystem->message(
+						ColorPairId::WHITE_BLACK,
+						"Web cancelled.",
+						MessageCompletion::FINISHED);
+					return;
+				}
+
+				int affected = 0;
+				for (const auto& creature : *innerCtx.creatures)
+				{
+					assert(
+						creature &&
+						"cast_web: creatures list holds a null entry");
+
+					if (creature->is_dead())
+					{
+						continue;
+					}
+					if (creature->get_tile_distance(center) > radius)
+					{
+						continue;
+					}
+
+					// AD&D 2e: a save versus paralyzation avoids the
+					// entanglement.
+					if (!SavingThrows::is_made(
+							*creature,
+							SavingThrow::PARALYZATION_POISON_DEATH,
+							0,
+							innerCtx))
+					{
+						innerCtx.buffSystem->add_buff(
+							*creature,
+							BuffType::WEBBED,
+							0,
+							duration,
+							BuffApplication::ADD,
+							innerCtx.gameState->get_time());
+						SpellAnimations::animate_creature_hit(
+							creature->position,
+							innerCtx);
+						++affected;
+					}
+				}
+
+				if (affected > 0)
+				{
+					innerCtx.messageSystem->append_message_part(
+						ColorPairId::CYAN_BLACK,
+						"Web! ");
+					innerCtx.messageSystem->append_message_part(
+						ColorPairId::WHITE_BLACK,
+						std::format(
+							"{} creature{} entangled for {}.",
+							affected,
+							affected == 1 ? " is" : "s are",
+							Wording::rounds(duration)));
+					innerCtx.messageSystem->finalize_message();
+				}
+				else
+				{
+					innerCtx.messageSystem->message(
+						ColorPairId::WHITE_BLACK,
+						"The webs spread but catch nothing.",
+						MessageCompletion::FINISHED);
+				}
+
+				onSuccess(innerCtx);
+			};
+
+			ctx.menus->push_back(
+				std::make_unique<TargetingMenu>(
+					range,
+					radius,
+					std::move(onTarget),
+					ctx));
+		}
+
+		void cast_fireball(
+			Creature& caster,
+			std::function<void(GameContext&)> onSuccess,
+			GameContext& ctx)
+		{
+			const int casterLevel = caster_level(caster);
+			// Copied: the caster may die before the cursor confirms.
+			const DamageSource source = caster.as_damage_source();
+
+			auto onTarget =
+				[casterLevel, source, onSuccess = std::move(onSuccess)](
+					bool confirmed,
+					Vector2D center,
+					GameContext& innerCtx) mutable
+			{
+				if (!confirmed)
+				{
+					innerCtx.messageSystem->message(
+						ColorPairId::WHITE_BLACK,
+						"Fireball cancelled.",
+						MessageCompletion::FINISHED);
+					return;
+				}
+
+				resolve_fireball(center, casterLevel, source, innerCtx);
+				innerCtx.creatureManager->cleanup_dead_creatures(
+					*innerCtx.creatures);
+				onSuccess(innerCtx);
+			};
+
+			ctx.menus->push_back(
+				std::make_unique<TargetingMenu>(
+					fireball_range(casterLevel),
+					FIREBALL_RADIUS,
+					std::move(onTarget),
+					ctx));
+		}
+
+		void resolve_fireball(
+			Vector2D center,
+			int casterLevel,
+			DamageSource source,
+			GameContext& ctx)
+		{
+			SpellAnimations::animate_explosion(center, FIREBALL_RADIUS, ctx);
+
+			const FireballBurst burst = burst_fireball(
+				center,
+				casterLevel,
+				FIREBALL_RADIUS,
+				source,
+				ctx);
+
+			ctx.messageSystem->append_message_part(
+				ColorPairId::YELLOW_BLACK,
+				"Fireball! ");
+			ctx.messageSystem->append_message_part(
+				ColorPairId::RED_BLACK,
 				std::format(
-					"{} creature{} entangled for {}.",
-					affected,
-					affected == 1 ? " is" : "s are",
-					Wording::rounds(duration)));
-			innerCtx.messageSystem->finalize_message();
-		}
-		else
-		{
-			innerCtx.messageSystem->message(
-				ColorPairId::WHITE_BLACK,
-				"The webs spread but catch nothing.",
-				MessageCompletion::FINISHED);
-		}
-
-		onSuccess(innerCtx);
-	};
-
-	ctx.menus->push_back(
-		std::make_unique<TargetingMenu>(
-			range,
-			radius,
-			std::move(onTarget),
-			ctx));
-}
-
-void cast_fireball(
-	Creature& caster,
-	std::function<void(GameContext&)> onSuccess,
-	GameContext& ctx)
-{
-	const int casterLevel = caster_level(caster);
-	// Copied: the caster may die before the cursor confirms.
-	const DamageSource source = caster.as_damage_source();
-
-	auto onTarget = [casterLevel, source, onSuccess = std::move(onSuccess)](
-						bool confirmed,
-						Vector2D center,
-						GameContext& innerCtx) mutable
-	{
-		if (!confirmed)
-		{
-			innerCtx.messageSystem->message(
-				ColorPairId::WHITE_BLACK,
-				"Fireball cancelled.",
-				MessageCompletion::FINISHED);
-			return;
-		}
-
-		resolve_fireball(center, casterLevel, source, innerCtx);
-		innerCtx.creatureManager->cleanup_dead_creatures(*innerCtx.creatures);
-		onSuccess(innerCtx);
-	};
-
-	ctx.menus->push_back(
-		std::make_unique<TargetingMenu>(
-			fireball_range(casterLevel),
-			FIREBALL_RADIUS,
-			std::move(onTarget),
-			ctx));
-}
-
-void resolve_fireball(
-	Vector2D center,
-	int casterLevel,
-	DamageSource source,
-	GameContext& ctx)
-{
-	SpellAnimations::animate_explosion(center, FIREBALL_RADIUS, ctx);
-
-	const FireballBurst burst =
-		burst_fireball(center, casterLevel, FIREBALL_RADIUS, source, ctx);
-
-	ctx.messageSystem->append_message_part(
-		ColorPairId::YELLOW_BLACK,
-		"Fireball! ");
-	ctx.messageSystem->append_message_part(
-		ColorPairId::RED_BLACK,
-		std::format("{}d6 = {} damage", burst.diceCount, burst.totalDamage));
-	if (burst.struck > 0)
-	{
-		ctx.messageSystem->append_message_part(
-			ColorPairId::WHITE_BLACK,
-			std::format(" ({} struck)", burst.struck));
-	}
-	ctx.messageSystem->finalize_message();
-}
-
-bool cast_magic_missile(Creature& caster, GameContext& ctx)
-{
-	assert(
-		ctx.creatureManager &&
-		"SpellSystem::cast_magic_missile: called without a creatureManager");
-	assert(
-		ctx.creatures &&
-		"SpellSystem::cast_magic_missile: called without creatures");
-	assert(ctx.map && "SpellSystem::cast_magic_missile: called without a map");
-	assert(ctx.dice && "SpellSystem::cast_magic_missile: called without dice");
-
-	// Find all valid targets in FOV
-	std::vector<Creature*> targets;
-	for (const auto& creature : *ctx.creatures)
-	{
-		assert(
-			creature &&
-			"cast_magic_missile: creatures list holds a null entry");
-
-		if (!creature->is_dead())
-		{
-			if (ctx.map->is_in_fov(creature->position))
+					"{}d6 = {} damage",
+					burst.diceCount,
+					burst.totalDamage));
+			if (burst.struck > 0)
 			{
-				targets.push_back(creature.get());
+				ctx.messageSystem->append_message_part(
+					ColorPairId::WHITE_BLACK,
+					std::format(" ({} struck)", burst.struck));
 			}
+			ctx.messageSystem->finalize_message();
 		}
-	}
 
-	if (targets.empty())
-	{
-		ctx.messageSystem->message(
-			ColorPairId::RED_BLACK,
-			"No valid target in sight!",
-			MessageCompletion::FINISHED);
-		return false;
-	}
-
-	resolve_magic_missile(caster, std::move(targets), ctx);
-	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
-	return true;
-}
-
-void resolve_magic_missile(
-	Creature& caster,
-	std::vector<Creature*> targets,
-	GameContext& ctx)
-{
-	assert(
-		ctx.dice && "SpellSystem::resolve_magic_missile: called without dice");
-	assert(
-		ctx.buffSystem &&
-		"SpellSystem::resolve_magic_missile: called without a buffSystem");
-
-	const int numMissiles = calculate_num_missiles(caster_level(caster));
-
-	// Sort by distance (nearest first)
-	std::sort(
-		targets.begin(),
-		targets.end(),
-		[&caster](Creature* left, Creature* right)
+		bool cast_magic_missile(Creature& caster, GameContext& ctx)
 		{
-			return caster.get_tile_distance(left->position) <
-				caster.get_tile_distance(right->position);
-		});
+			assert(
+				ctx.creatureManager &&
+				"SpellSystem::cast_magic_missile: called without a creatureManager");
+			assert(
+				ctx.creatures &&
+				"SpellSystem::cast_magic_missile: called without creatures");
+			assert(
+				ctx.map &&
+				"SpellSystem::cast_magic_missile: called without a map");
+			assert(
+				ctx.dice &&
+				"SpellSystem::cast_magic_missile: called without dice");
 
-	int totalDamage = 0;
-	std::unordered_map<Creature*, int> damagePerTarget;
-
-	// Fire missiles - distribute among targets, prioritizing nearest
-	for (int missileIndex = 0; missileIndex < numMissiles; ++missileIndex)
-	{
-		// Target nearest living enemy the caster may strike; one whose Sanctuary turns
-		// the caster away is ignored, and the missile goes to the next.
-		Creature* target = nullptr;
-		for (Creature* candidate : targets)
-		{
-			if (!candidate->is_dead() &&
-				!ctx.buffSystem
-					->is_turned_away_by_sanctuary(caster, *candidate, ctx))
+			// Find all valid targets in FOV
+			std::vector<Creature*> targets;
+			for (const auto& creature : *ctx.creatures)
 			{
-				target = candidate;
-				break;
+				assert(
+					creature &&
+					"cast_magic_missile: creatures list holds a null entry");
+
+				if (!creature->is_dead())
+				{
+					if (ctx.map->is_in_fov(creature->position))
+					{
+						targets.push_back(creature.get());
+					}
+				}
 			}
+
+			if (targets.empty())
+			{
+				ctx.messageSystem->message(
+					ColorPairId::RED_BLACK,
+					"No valid target in sight!",
+					MessageCompletion::FINISHED);
+				return false;
+			}
+
+			resolve_magic_missile(caster, std::move(targets), ctx);
+			ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
+			return true;
 		}
 
-		if (!target)
+		void resolve_magic_missile(
+			Creature& caster,
+			std::vector<Creature*> targets,
+			GameContext& ctx)
 		{
-			break;
+			assert(
+				ctx.dice &&
+				"SpellSystem::resolve_magic_missile: called without dice");
+			assert(
+				ctx.buffSystem &&
+				"SpellSystem::resolve_magic_missile: called without a buffSystem");
+
+			const int numMissiles =
+				calculate_num_missiles(caster_level(caster));
+
+			// Sort by distance (nearest first)
+			std::sort(
+				targets.begin(),
+				targets.end(),
+				[&caster](Creature* left, Creature* right)
+				{
+					return caster.get_tile_distance(left->position) <
+						caster.get_tile_distance(right->position);
+				});
+
+			int totalDamage = 0;
+			std::unordered_map<Creature*, int> damagePerTarget;
+
+			// Fire missiles - distribute among targets, prioritizing nearest
+			for (
+				int missileIndex = 0; missileIndex < numMissiles;
+				++missileIndex)
+			{
+				// Target nearest living enemy the caster may strike; one whose
+				// Sanctuary turns the caster away is ignored, and the missile
+				// goes to the next.
+				Creature* target = nullptr;
+				for (Creature* candidate : targets)
+				{
+					if (!candidate->is_dead() &&
+						!ctx.buffSystem->is_turned_away_by_sanctuary(
+							caster,
+							*candidate,
+							ctx))
+					{
+						target = candidate;
+						break;
+					}
+				}
+
+				if (!target)
+				{
+					break;
+				}
+
+				SpellAnimations::animate_magic_missile(
+					caster.position,
+					target->position,
+					ctx);
+
+				int damage = ctx.dice->roll(1, 4) + 1;
+				totalDamage += damage;
+				damagePerTarget[target] += damage;
+
+				target->take_damage_and_check_death(
+					damage,
+					ctx,
+					DamageType::MAGIC,
+					caster.as_damage_source());
+			}
+
+			// Message
+			ctx.messageSystem->append_message_part(
+				ColorPairId::CYAN_BLACK,
+				std::format("Magic Missile ({})! ", numMissiles));
+			ctx.messageSystem->append_message_part(
+				ColorPairId::WHITE_BLACK,
+				"Total ");
+			ctx.messageSystem->append_message_part(
+				ColorPairId::RED_BLACK,
+				std::format("{} damage!", totalDamage));
+			ctx.messageSystem->finalize_message();
 		}
 
-		SpellAnimations::animate_magic_missile(
-			caster.position,
-			target->position,
-			ctx);
-
-		int damage = ctx.dice->roll(1, 4) + 1;
-		totalDamage += damage;
-		damagePerTarget[target] += damage;
-
-		target->take_damage_and_check_death(
-			damage,
-			ctx,
-			DamageType::MAGIC,
-			caster.as_damage_source());
-	}
-
-	// Message
-	ctx.messageSystem->append_message_part(
-		ColorPairId::CYAN_BLACK,
-		std::format("Magic Missile ({})! ", numMissiles));
-	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "Total ");
-	ctx.messageSystem->append_message_part(
-		ColorPairId::RED_BLACK,
-		std::format("{} damage!", totalDamage));
-	ctx.messageSystem->finalize_message();
-}
-
-bool cast_shield(Creature& caster, GameContext& ctx)
-{
-	// A flat 5 rounds, where the book (PHB page 278) gives 5 rounds per level.
-	const int duration = 5;
-
-	// Spell: ADD +4 AC
-	ctx.buffSystem->add_buff(
-		caster,
-		BuffType::SHIELD,
-		4,
-		duration,
-		BuffApplication::ADD,
-		ctx.gameState->get_time());
-	ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Shield! ");
-	ctx.messageSystem->append_message_part(
-		ColorPairId::WHITE_BLACK,
-		std::format("+4 AC for {}.", Wording::rounds(duration)));
-	ctx.messageSystem->finalize_message();
-	return true;
-}
-
-bool cast_sleep(Creature& caster, GameContext& ctx)
-{
-	assert(
-		ctx.creatures && "SpellSystem::cast_sleep: called without creatures");
-	assert(ctx.map && "SpellSystem::cast_sleep: called without a map");
-	assert(ctx.dice && "SpellSystem::cast_sleep: called without dice");
-
-	// PHB p.279: 2d4 Hit Dice of monsters, fewest first, 5 rounds a level; undead and 4+3 HD are immune.
-	// Creatures here carry whole Hit Dice, so 4+3 becomes anything above four.
-	constexpr int SLEEP_MAX_HIT_DICE = 4;
-	constexpr int SLEEP_ROUNDS_PER_LEVEL = 5;
-
-	int hdBudget = Spells::roll_sleep_hit_dice_budget(*ctx.dice);
-	const int duration = SLEEP_ROUNDS_PER_LEVEL * caster_level(caster);
-
-	// Gather the eligible first: the budget is spent weakest-first, which the
-	// container's own order does not give.
-	std::vector<Creature*> sleepable{};
-	for (const auto& creature : *ctx.creatures)
-	{
-		assert(creature && "cast_sleep: creatures list holds a null entry");
-
-		if (creature->is_dead() || creature->is_undead())
+		bool cast_shield(Creature& caster, GameContext& ctx)
 		{
-			continue;
-		}
+			// A flat 5 rounds, where the book (PHB page 278) gives 5 rounds per
+			// level.
+			const int duration = 5;
 
-		if (creature->get_hit_dice() > SLEEP_MAX_HIT_DICE)
-		{
-			continue;
-		}
-
-		if (!ctx.map->is_in_fov(creature->position))
-		{
-			continue;
-		}
-
-		sleepable.push_back(creature.get());
-	}
-
-	std::ranges::sort(
-		sleepable,
-		[](const Creature* left, const Creature* right)
-		{ return left->get_hit_dice() < right->get_hit_dice(); });
-
-	int affected = 0;
-	for (Creature* creature : sleepable)
-	{
-		const int hitDice = creature->get_hit_dice();
-
-		// Partial effects are ignored: a creature the budget cannot cover whole
-		// is left awake, and the budget stops there.
-		if (hitDice > hdBudget)
-		{
-			break;
-		}
-
-		ctx.buffSystem->add_buff(
-			*creature,
-			BuffType::SLEEP,
-			0,
-			duration,
-			BuffApplication::ADD,
-			ctx.gameState->get_time());
-		hdBudget -= hitDice;
-		++affected;
-	}
-
-	if (affected > 0)
-	{
-		ctx.messageSystem->append_message_part(
-			ColorPairId::CYAN_BLACK,
-			"Sleep! ");
-		ctx.messageSystem->append_message_part(
-			ColorPairId::WHITE_BLACK,
-			std::format(
-				"{} put to sleep.",
-				Wording::counted(affected, "creature", "creatures")));
-		ctx.messageSystem->finalize_message();
-	}
-	else
-	{
-		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			"Sleep spell has no effect.",
-			MessageCompletion::FINISHED);
-	}
-
-	return true;
-}
-
-bool cast_hold_person(Creature& caster, GameContext& ctx)
-{
-	assert(
-		ctx.creatures &&
-		"SpellSystem::cast_hold_person: called without creatures");
-	assert(ctx.map && "SpellSystem::cast_hold_person: called without a map");
-	assert(ctx.dice && "SpellSystem::cast_hold_person: called without dice");
-
-	// AD&D 2e: paralyzes up to 1d4 humanoids in FOV; save vs. spells (d20 >= 15) negates
-	// Duration: 2 rounds per caster level
-	int casterLevel = caster_level(caster);
-	int duration = 2 * casterLevel;
-	int maxTargets = ctx.dice->roll(1, 4);
-	int affected = 0;
-
-	for (const auto& creature : *ctx.creatures)
-	{
-		if (affected >= maxTargets)
-		{
-			break;
-		}
-		assert(
-			creature && "cast_hold_person: creatures list holds a null entry");
-
-		if (creature->is_dead())
-		{
-			continue;
-		}
-		if (!ctx.map->is_in_fov(creature->position))
-		{
-			continue;
-		}
-
-		// The caster selects each person; one whose Sanctuary turns the caster away is
-		// not selected, and the hold goes to another (PHB page 309).
-		if (ctx.buffSystem->is_turned_away_by_sanctuary(caster, *creature, ctx))
-		{
-			continue;
-		}
-
-		if (!SavingThrows::is_made(*creature, SavingThrow::SPELL, 0, ctx))
-		{
+			// Spell: ADD +4 AC
 			ctx.buffSystem->add_buff(
-				*creature,
-				BuffType::HOLD_PERSON,
-				0,
+				caster,
+				BuffType::SHIELD,
+				4,
 				duration,
 				BuffApplication::ADD,
 				ctx.gameState->get_time());
-			++affected;
+			ctx.messageSystem->append_message_part(
+				ColorPairId::CYAN_BLACK,
+				"Shield! ");
+			ctx.messageSystem->append_message_part(
+				ColorPairId::WHITE_BLACK,
+				std::format("+4 AC for {}.", Wording::rounds(duration)));
+			ctx.messageSystem->finalize_message();
+			return true;
 		}
-	}
 
-	if (affected > 0)
-	{
-		ctx.messageSystem->append_message_part(
-			ColorPairId::CYAN_BLACK,
-			"Hold Person! ");
-		ctx.messageSystem->append_message_part(
-			ColorPairId::WHITE_BLACK,
-			std::format(
-				"{} paralyzed for {}.",
-				Wording::counted(affected, "creature", "creatures"),
-				Wording::rounds(duration)));
-		ctx.messageSystem->finalize_message();
-	}
-	else
-	{
-		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			"Hold Person has no effect.",
-			MessageCompletion::FINISHED);
-	}
-
-	return true;
-}
-
-// PHB page 291: the spell lasts "until the recipient attacks any creature, or until 24
-// hours have passed". The attack break is BuffSystem's; this is the day.
-inline constexpr int INVISIBILITY_SPELL_ROUNDS = 24 * ROUNDS_PER_HOUR;
-
-bool cast_invisibility(Creature& caster, BuffType granted, GameContext& ctx)
-{
-	ctx.buffSystem->add_buff(
-		caster,
-		granted,
-		0,
-		INVISIBILITY_SPELL_ROUNDS,
-		BuffApplication::ADD,
-		ctx.gameState->get_time());
-	ctx.messageSystem->append_message_part(
-		ColorPairId::CYAN_BLACK,
-		"Invisibility! ");
-	ctx.messageSystem->append_message_part(
-		ColorPairId::WHITE_BLACK,
-		"You fade from view.");
-	ctx.messageSystem->finalize_message();
-	return true;
-}
-
-bool cast_teleport(Creature& caster, GameContext& ctx)
-{
-	assert(ctx.map && "SpellSystem::cast_teleport: called without a map");
-
-	// The casting is spent with nowhere to go, as Knock's is with no door in reach.
-	const std::optional<Vector2D> landing =
-		SpawnUtils::find_random_floor_tile(ctx);
-	if (!landing)
-	{
-		ctx.messageSystem->append_message_part(
-			ColorPairId::MAGENTA_BLACK,
-			"Teleport! ");
-		ctx.messageSystem->append_message_part(
-			ColorPairId::WHITE_BLACK,
-			"The magic finds nowhere to take you.");
-		ctx.messageSystem->finalize_message();
-		return true;
-	}
-
-	caster.position = *landing;
-	ctx.map->compute_fov(ctx);
-
-	ctx.messageSystem->append_message_part(
-		ColorPairId::MAGENTA_BLACK,
-		"Teleport! ");
-	ctx.messageSystem->append_message_part(
-		ColorPairId::WHITE_BLACK,
-		"You feel disoriented as the world shifts around you!");
-	ctx.messageSystem->finalize_message();
-	return true;
-}
-
-bool cast_knock(Creature& caster, GameContext& ctx)
-{
-	assert(ctx.map && "SpellSystem::cast_knock: called without a map");
-
-	// AD&D 2e: Knock opens any locked door within range.
-	// Scan a 7-tile radius for the nearest locked door and open it.
-	constexpr int KNOCK_RADIUS = 7;
-
-	Vector2D nearest{ -1, -1 };
-	int bestDist = KNOCK_RADIUS + 1;
-
-	for (int deltaRow = -KNOCK_RADIUS; deltaRow <= KNOCK_RADIUS; ++deltaRow)
-	{
-		for (int deltaCol = -KNOCK_RADIUS; deltaCol <= KNOCK_RADIUS; ++deltaCol)
+		bool cast_sleep(Creature& caster, GameContext& ctx)
 		{
-			Vector2D candidate{
-				caster.position.x + deltaCol,
-				caster.position.y + deltaRow,
-			};
-			if (!ctx.map->is_in_bounds(candidate))
+			assert(
+				ctx.creatures &&
+				"SpellSystem::cast_sleep: called without creatures");
+			assert(ctx.map && "SpellSystem::cast_sleep: called without a map");
+			assert(ctx.dice && "SpellSystem::cast_sleep: called without dice");
+
+			// PHB p.279: 2d4 Hit Dice of monsters, fewest first, 5 rounds a
+			// level; undead and 4+3 HD are immune. Creatures here carry whole
+			// Hit Dice, so 4+3 becomes anything above four.
+			constexpr int SLEEP_MAX_HIT_DICE = 4;
+			constexpr int SLEEP_ROUNDS_PER_LEVEL = 5;
+
+			int hdBudget = Spells::roll_sleep_hit_dice_budget(*ctx.dice);
+			const int duration = SLEEP_ROUNDS_PER_LEVEL * caster_level(caster);
+
+			// Gather the eligible first: the budget is spent weakest-first,
+			// which the container's own order does not give.
+			std::vector<Creature*> sleepable{};
+			for (const auto& creature : *ctx.creatures)
 			{
-				continue;
-			}
-			if (ctx.map->is_door_locked(candidate))
-			{
-				int dist = std::abs(deltaCol) + std::abs(deltaRow);
-				if (dist < bestDist)
+				assert(
+					creature &&
+					"cast_sleep: creatures list holds a null entry");
+
+				if (creature->is_dead() || creature->is_undead())
 				{
-					bestDist = dist;
-					nearest = candidate;
+					continue;
+				}
+
+				if (creature->get_hit_dice() > SLEEP_MAX_HIT_DICE)
+				{
+					continue;
+				}
+
+				if (!ctx.map->is_in_fov(creature->position))
+				{
+					continue;
+				}
+
+				sleepable.push_back(creature.get());
+			}
+
+			std::ranges::sort(
+				sleepable,
+				[](const Creature* left, const Creature* right)
+				{ return left->get_hit_dice() < right->get_hit_dice(); });
+
+			int affected = 0;
+			for (Creature* creature : sleepable)
+			{
+				const int hitDice = creature->get_hit_dice();
+
+				// Partial effects are ignored: a creature the budget cannot
+				// cover whole is left awake, and the budget stops there.
+				if (hitDice > hdBudget)
+				{
+					break;
+				}
+
+				ctx.buffSystem->add_buff(
+					*creature,
+					BuffType::SLEEP,
+					0,
+					duration,
+					BuffApplication::ADD,
+					ctx.gameState->get_time());
+				hdBudget -= hitDice;
+				++affected;
+			}
+
+			if (affected > 0)
+			{
+				ctx.messageSystem->append_message_part(
+					ColorPairId::CYAN_BLACK,
+					"Sleep! ");
+				ctx.messageSystem->append_message_part(
+					ColorPairId::WHITE_BLACK,
+					std::format(
+						"{} put to sleep.",
+						Wording::counted(affected, "creature", "creatures")));
+				ctx.messageSystem->finalize_message();
+			}
+			else
+			{
+				ctx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					"Sleep spell has no effect.",
+					MessageCompletion::FINISHED);
+			}
+
+			return true;
+		}
+
+		bool cast_hold_person(Creature& caster, GameContext& ctx)
+		{
+			assert(
+				ctx.creatures &&
+				"SpellSystem::cast_hold_person: called without creatures");
+			assert(
+				ctx.map &&
+				"SpellSystem::cast_hold_person: called without a map");
+			assert(
+				ctx.dice &&
+				"SpellSystem::cast_hold_person: called without dice");
+
+			// AD&D 2e: paralyzes up to 1d4 humanoids in FOV; save vs. spells
+			// (d20 >= 15) negates Duration: 2 rounds per caster level
+			int casterLevel = caster_level(caster);
+			int duration = 2 * casterLevel;
+			int maxTargets = ctx.dice->roll(1, 4);
+			int affected = 0;
+
+			for (const auto& creature : *ctx.creatures)
+			{
+				if (affected >= maxTargets)
+				{
+					break;
+				}
+				assert(
+					creature &&
+					"cast_hold_person: creatures list holds a null entry");
+
+				if (creature->is_dead())
+				{
+					continue;
+				}
+				if (!ctx.map->is_in_fov(creature->position))
+				{
+					continue;
+				}
+
+				// The caster selects each person; one whose Sanctuary turns the
+				// caster away is not selected, and the hold goes to another
+				// (PHB page 309).
+				if (ctx.buffSystem
+						->is_turned_away_by_sanctuary(caster, *creature, ctx))
+				{
+					continue;
+				}
+
+				if (!SavingThrows::is_made(
+						*creature,
+						SavingThrow::SPELL,
+						0,
+						ctx))
+				{
+					ctx.buffSystem->add_buff(
+						*creature,
+						BuffType::HOLD_PERSON,
+						0,
+						duration,
+						BuffApplication::ADD,
+						ctx.gameState->get_time());
+					++affected;
 				}
 			}
+
+			if (affected > 0)
+			{
+				ctx.messageSystem->append_message_part(
+					ColorPairId::CYAN_BLACK,
+					"Hold Person! ");
+				ctx.messageSystem->append_message_part(
+					ColorPairId::WHITE_BLACK,
+					std::format(
+						"{} paralyzed for {}.",
+						Wording::counted(affected, "creature", "creatures"),
+						Wording::rounds(duration)));
+				ctx.messageSystem->finalize_message();
+			}
+			else
+			{
+				ctx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					"Hold Person has no effect.",
+					MessageCompletion::FINISHED);
+			}
+
+			return true;
 		}
-	}
 
-	if (nearest.x < 0)
-	{
-		ctx.messageSystem->append_message_part(
-			ColorPairId::CYAN_BLACK,
-			"Knock! ");
-		ctx.messageSystem->append_message_part(
-			ColorPairId::WHITE_BLACK,
-			"No locked doors are nearby.");
-		ctx.messageSystem->finalize_message();
-		return true; // Spell slot consumed even on miss - AD&D 2e rule
-	}
+		// PHB page 291: the spell lasts "until the recipient attacks any
+		// creature, or until 24 hours have passed". The attack break is
+		// BuffSystem's; this is the day.
+		inline constexpr int INVISIBILITY_SPELL_ROUNDS = 24 * ROUNDS_PER_HOUR;
 
-	ctx.map->unlock_door(nearest);
-	ctx.map->open_door(nearest, ctx);
-	ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, "Knock! ");
-	ctx.messageSystem->append_message_part(
-		ColorPairId::WHITE_BLACK,
-		"The lock clicks open.");
-	ctx.messageSystem->finalize_message();
-	return true;
-}
+		bool cast_invisibility(
+			Creature& caster,
+			BuffType granted,
+			GameContext& ctx)
+		{
+			ctx.buffSystem->add_buff(
+				caster,
+				granted,
+				0,
+				INVISIBILITY_SPELL_ROUNDS,
+				BuffApplication::ADD,
+				ctx.gameState->get_time());
+			ctx.messageSystem->append_message_part(
+				ColorPairId::CYAN_BLACK,
+				"Invisibility! ");
+			ctx.messageSystem->append_message_part(
+				ColorPairId::WHITE_BLACK,
+				"You fade from view.");
+			ctx.messageSystem->finalize_message();
+			return true;
+		}
 
-} // namespace
+		bool cast_teleport(Creature& caster, GameContext& ctx)
+		{
+			assert(
+				ctx.map && "SpellSystem::cast_teleport: called without a map");
+
+			// The casting is spent with nowhere to go, as Knock's is with no
+			// door in reach.
+			const std::optional<Vector2D> landing =
+				SpawnUtils::find_random_floor_tile(ctx);
+			if (!landing)
+			{
+				ctx.messageSystem->append_message_part(
+					ColorPairId::MAGENTA_BLACK,
+					"Teleport! ");
+				ctx.messageSystem->append_message_part(
+					ColorPairId::WHITE_BLACK,
+					"The magic finds nowhere to take you.");
+				ctx.messageSystem->finalize_message();
+				return true;
+			}
+
+			caster.position = *landing;
+			ctx.map->compute_fov(ctx);
+
+			ctx.messageSystem->append_message_part(
+				ColorPairId::MAGENTA_BLACK,
+				"Teleport! ");
+			ctx.messageSystem->append_message_part(
+				ColorPairId::WHITE_BLACK,
+				"You feel disoriented as the world shifts around you!");
+			ctx.messageSystem->finalize_message();
+			return true;
+		}
+
+		bool cast_knock(Creature& caster, GameContext& ctx)
+		{
+			assert(ctx.map && "SpellSystem::cast_knock: called without a map");
+
+			// AD&D 2e: Knock opens any locked door within range.
+			// Scan a 7-tile radius for the nearest locked door and open it.
+			constexpr int KNOCK_RADIUS = 7;
+
+			Vector2D nearest{ -1, -1 };
+			int bestDist = KNOCK_RADIUS + 1;
+
+			for (
+				int deltaRow = -KNOCK_RADIUS; deltaRow <= KNOCK_RADIUS;
+				++deltaRow)
+			{
+				for (
+					int deltaCol = -KNOCK_RADIUS; deltaCol <= KNOCK_RADIUS;
+					++deltaCol)
+				{
+					Vector2D candidate{
+						caster.position.x + deltaCol,
+						caster.position.y + deltaRow,
+					};
+					if (!ctx.map->is_in_bounds(candidate))
+					{
+						continue;
+					}
+					if (ctx.map->is_door_locked(candidate))
+					{
+						int dist = std::abs(deltaCol) + std::abs(deltaRow);
+						if (dist < bestDist)
+						{
+							bestDist = dist;
+							nearest = candidate;
+						}
+					}
+				}
+			}
+
+			if (nearest.x < 0)
+			{
+				ctx.messageSystem->append_message_part(
+					ColorPairId::CYAN_BLACK,
+					"Knock! ");
+				ctx.messageSystem->append_message_part(
+					ColorPairId::WHITE_BLACK,
+					"No locked doors are nearby.");
+				ctx.messageSystem->finalize_message();
+				return true; // Spell slot consumed even on miss - AD&D 2e rule
+			}
+
+			ctx.map->unlock_door(nearest);
+			ctx.map->open_door(nearest, ctx);
+			ctx.messageSystem->append_message_part(
+				ColorPairId::CYAN_BLACK,
+				"Knock! ");
+			ctx.messageSystem->append_message_part(
+				ColorPairId::WHITE_BLACK,
+				"The lock clicks open.");
+			ctx.messageSystem->finalize_message();
+			return true;
+		}
+
+	} // namespace
 } // namespace SpellSystem
 
 std::vector<int> SpellSystem::progression_slots(
@@ -1364,58 +1458,63 @@ bool SpellSystem::spell_fizzles(
 
 namespace SpellSystem
 {
-namespace
-{
-void cast_with_targets(
-	std::string_view key,
-	Creature& caster,
-	SpellSource source,
-	const SpellTargets& targets,
-	std::function<void(GameContext&)> onCastComplete,
-	GameContext& ctx)
-{
-	assert(
-		ctx.dataManager &&
-		"SpellSystem::cast_spell_by_key: called without a dataManager");
-	assert(
-		ctx.spellRegistry &&
-		"SpellSystem::cast_spell_by_key: called without a spellRegistry");
-	assert(ctx.dice && "SpellSystem::cast_spell_by_key: called without dice");
-
-	// Every successful effect calls this, sometimes a turn later; an empty one would throw far from its cause.
-	assert(onCastComplete && "cast_spell_by_key requires a callback");
-
-	if (caster.has_state(ActorState::IS_SILENCED))
+	namespace
 	{
-		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			"You are silenced and cannot cast spells!",
-			MessageCompletion::FINISHED);
-		return;
-	}
-	// A priest's own spell can fail on its Wisdom. The casting is over either way -
-	// the spell is expended - so the callback runs and only the effect is skipped.
-	if (source == SpellSource::MEMORIZED &&
-		spell_fizzles(caster, *ctx.dataManager, *ctx.dice))
-	{
-		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			"Your spell fizzles.",
-			MessageCompletion::FINISHED);
-		onCastComplete(ctx);
-		return;
-	}
+		void cast_with_targets(
+			std::string_view key,
+			Creature& caster,
+			SpellSource source,
+			const SpellTargets& targets,
+			std::function<void(GameContext&)> onCastComplete,
+			GameContext& ctx)
+		{
+			assert(
+				ctx.dataManager &&
+				"SpellSystem::cast_spell_by_key: called without a dataManager");
+			assert(
+				ctx.spellRegistry &&
+				"SpellSystem::cast_spell_by_key: called without a spellRegistry");
+			assert(
+				ctx.dice &&
+				"SpellSystem::cast_spell_by_key: called without dice");
 
-	const SpellDefinition& definition = ctx.spellRegistry->get_by_key(key);
-	dispatch_effect(
-		definition.effect_type,
-		caster,
-		source,
-		targets,
-		std::move(onCastComplete),
-		ctx);
-}
-} // namespace
+			// Every successful effect calls this, sometimes a turn later; an
+			// empty one would throw far from its cause.
+			assert(onCastComplete && "cast_spell_by_key requires a callback");
+
+			if (caster.has_state(ActorState::IS_SILENCED))
+			{
+				ctx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					"You are silenced and cannot cast spells!",
+					MessageCompletion::FINISHED);
+				return;
+			}
+			// A priest's own spell can fail on its Wisdom. The casting is over
+			// either way - the spell is expended - so the callback runs and
+			// only the effect is skipped.
+			if (source == SpellSource::MEMORIZED &&
+				spell_fizzles(caster, *ctx.dataManager, *ctx.dice))
+			{
+				ctx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					"Your spell fizzles.",
+					MessageCompletion::FINISHED);
+				onCastComplete(ctx);
+				return;
+			}
+
+			const SpellDefinition& definition =
+				ctx.spellRegistry->get_by_key(key);
+			dispatch_effect(
+				definition.effect_type,
+				caster,
+				source,
+				targets,
+				std::move(onCastComplete),
+				ctx);
+		}
+	} // namespace
 } // namespace SpellSystem
 
 void SpellSystem::cast_spell_by_key(

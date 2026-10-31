@@ -15,26 +15,26 @@
     "mutations": [
         {
             "file": "src/Creature.cpp",
-            "original": "\tcase PlayerRaceState::HALFELF:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
-            "mutated": "\tcase PlayerRaceState::HALFELF:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "original": "\t\tcase PlayerRaceState::HALFELF:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
+            "mutated": "\t\tcase PlayerRaceState::HALFELF:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
             "catches": "a saved race no PlayerRaceState has loads"
         },
         {
             "file": "src/GameStateManager.cpp",
-            "original": "\tcase TrapType::ARROW:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
-            "mutated": "\tcase TrapType::ARROW:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "original": "\t\tcase TrapType::ARROW:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
+            "mutated": "\t\tcase TrapType::ARROW:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
             "catches": "a saved trap type no TrapType has loads"
         },
         {
             "file": "src/Trap.cpp",
-            "original": "\tcase TrapState::DISARMED:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
-            "mutated": "\tcase TrapState::DISARMED:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "original": "\t\tcase TrapState::DISARMED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
+            "mutated": "\t\tcase TrapState::DISARMED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
             "catches": "a saved trap state no TrapState has loads"
         },
         {
             "file": "src/HungerSystem.cpp",
-            "original": "\tcase HungerState::DYING:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
-            "mutated": "\tcase HungerState::DYING:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "original": "\t\tcase HungerState::DYING:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
+            "mutated": "\t\tcase HungerState::DYING:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
             "catches": "a saved lastNotifiedState no HungerState has loads"
         },
         {
@@ -45,44 +45,44 @@
         },
         {
             "file": "src/Item.cpp",
-            "original": "\tcase PrefixType::CRACKED:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
-            "mutated": "\tcase PrefixType::CRACKED:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "original": "\t\tcase PrefixType::CRACKED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
+            "mutated": "\t\tcase PrefixType::CRACKED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
             "catches": "a saved prefix no PrefixType has loads"
         },
         {
             "file": "src/Item.cpp",
-            "original": "\tcase SuffixType::OF_BRITTLENESS:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
-            "mutated": "\tcase SuffixType::OF_BRITTLENESS:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "original": "\t\tcase SuffixType::OF_BRITTLENESS:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
+            "mutated": "\t\tcase SuffixType::OF_BRITTLENESS:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
             "catches": "a saved suffix no SuffixType has loads"
         },
         {
             "file": "src/Item.cpp",
-            "original": "\tcase BlessingStatus::CURSED:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
-            "mutated": "\tcase BlessingStatus::CURSED:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "original": "\t\tcase BlessingStatus::CURSED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
+            "mutated": "\t\tcase BlessingStatus::CURSED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
             "catches": "a saved blessing no BlessingStatus has loads"
         },
         {
             "file": "src/Map.cpp",
-            "original": "\tcase TileType::CORRIDOR:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
-            "mutated": "\tcase TileType::CORRIDOR:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "original": "\t\tcase TileType::CORRIDOR:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
+            "mutated": "\t\tcase TileType::CORRIDOR:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
             "catches": "a saved tile type no TileType has loads"
         },
         {
             "file": "src/ShopKeeper.cpp",
-            "original": "\tcase ShopType::ADVENTURING_GEAR:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
-            "mutated": "\tcase ShopType::ADVENTURING_GEAR:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "original": "\t\tcase ShopType::ADVENTURING_GEAR:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
+            "mutated": "\t\tcase ShopType::ADVENTURING_GEAR:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
             "catches": "a saved shop_type no ShopType has loads"
         },
         {
             "file": "src/ShopKeeper.cpp",
-            "original": "\tcase ShopQuality::EXCELLENT:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
-            "mutated": "\tcase ShopQuality::EXCELLENT:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "original": "\t\tcase ShopQuality::EXCELLENT:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
+            "mutated": "\t\tcase ShopQuality::EXCELLENT:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
             "catches": "a saved shop_quality no ShopQuality has loads"
         },
         {
             "file": "src/Actor.cpp",
-            "original": "\tcase ActorState::IS_SURPRISED:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn std::nullopt;",
-            "mutated": "\tcase ActorState::IS_SURPRISED:\n\t{\n\t\treturn candidate;\n\t}\n\t}\n\treturn candidate;",
+            "original": "\t\tcase ActorState::IS_SURPRISED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
+            "mutated": "\t\tcase ActorState::IS_SURPRISED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
             "catches": "a saved state no ActorState has loads"
         },
         {
@@ -93,8 +93,8 @@
         },
         {
             "file": "src/TileRefJson.cpp",
-            "original": "\t\t\t\"TileRefJson::parse_tile\",\n\t\t\t\"sheet\",\n\t\t\t\"TileSheet\",\n\t\t\t&tile_sheet_from),",
-            "mutated": "\t\t\t\"TileRefJson::parse_tile\",\n\t\t\t\"sheet\",\n\t\t\t\"TileSheet\",\n\t\t\t+[](int saved) { return std::optional<TileSheet>(static_cast<TileSheet>(saved)); }),",
+            "original": "\t\t\t\t\"TileRefJson::parse_tile\",\n\t\t\t\t\"sheet\",\n\t\t\t\t\"TileSheet\",\n\t\t\t\t&tile_sheet_from),",
+            "mutated": "\t\t\t\t\"TileRefJson::parse_tile\",\n\t\t\t\t\"sheet\",\n\t\t\t\t\"TileSheet\",\n\t\t\t\t+[](int saved) { return std::optional<TileSheet>(static_cast<TileSheet>(saved)); }),",
             "catches": "parse_tile loads a sheet no TileSheet has, though the range check stands"
         },
         {

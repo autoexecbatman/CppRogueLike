@@ -35,24 +35,24 @@
 
 namespace
 {
-// A row of floor with the player on it and a locked door one step east.
-constexpr int CORRIDOR_ROW = 5;
-const Vector2D START{ 4, CORRIDOR_ROW };
-const Vector2D DOOR{ 5, CORRIDOR_ROW };
+	// A row of floor with the player on it and a locked door one step east.
+	constexpr int CORRIDOR_ROW = 5;
+	const Vector2D START{ 4, CORRIDOR_ROW };
+	const Vector2D DOOR{ 5, CORRIDOR_ROW };
 
-const std::string FORCED{
-	"You force the door open! The crash echoes down the corridor."
-};
-const std::string HELD{ "You slam into the door but it holds." };
-const std::string TOO_WEAK{
-	"The door is locked. You are not strong enough to force it."
-};
-const std::string ALREADY_FAILED{
-	"You have already failed to force this door."
-};
-// A queued value no attempt in these tests is meant to read, so reading it back proves
-// nothing rolled.
-constexpr int UNREAD_D20 = 13;
+	const std::string FORCED{
+		"You force the door open! The crash echoes down the corridor."
+	};
+	const std::string HELD{ "You slam into the door but it holds." };
+	const std::string TOO_WEAK{
+		"The door is locked. You are not strong enough to force it."
+	};
+	const std::string ALREADY_FAILED{
+		"You have already failed to force this door."
+	};
+	// A queued value no attempt in these tests is meant to read, so reading it
+	// back proves nothing rolled.
+	constexpr int UNREAD_D20 = 13;
 } // namespace
 
 class DoorForcingTest : public ::testing::Test

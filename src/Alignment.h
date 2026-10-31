@@ -179,4 +179,4 @@ namespace Alignment
 	}
 
 	// TODO: shift_toward_lawful, shift_toward_good, shift_toward_evil
-	} // namespace Alignment
+} // namespace Alignment

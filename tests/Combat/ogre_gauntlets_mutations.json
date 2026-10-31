@@ -51,8 +51,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\treturn gauntlets != nullptr &&\n\t\t\tgauntlets->application == BuffApplication::SET &&\n\t\t\tgauntlets->strBonus > 0 ?\n\t\tgauntlets :\n\t\tnullptr;",
-      "mutated": "\treturn gauntlets;",
+      "original": "\t\treturn gauntlets != nullptr &&\n\t\t\t\tgauntlets->application == BuffApplication::SET &&\n\t\t\t\tgauntlets->strBonus > 0 ?\n\t\t\tgauntlets :\n\t\t\tnullptr;",
+      "mutated": "\t\treturn gauntlets;",
       "catches": "any gauntlets counted beside the girdle, swimming and climbing included"
     }
   ]

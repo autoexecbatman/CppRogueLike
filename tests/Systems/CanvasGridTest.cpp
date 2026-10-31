@@ -18,7 +18,7 @@
 
 namespace
 {
-const CanvasGrid grid{ 140, 60, 32 };
+	const CanvasGrid grid{ 140, 60, 32 };
 }
 
 // Cells are drawn one tile apart from the origin.

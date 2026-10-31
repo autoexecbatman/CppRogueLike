@@ -35,12 +35,12 @@
 
 namespace
 {
-// A room small enough that a water-filled one leaves only a couple of dry tiles, so a
-// picker that ignores water lands on one almost every draw.
-constexpr int ROOM_COL = 2;
-constexpr int ROOM_ROW = 2;
-constexpr int ROOM_SIZE = 4;
-constexpr int DRAWS = 200;
+	// A room small enough that a water-filled one leaves only a couple of dry
+	// tiles, so a picker that ignores water lands on one almost every draw.
+	constexpr int ROOM_COL = 2;
+	constexpr int ROOM_ROW = 2;
+	constexpr int ROOM_SIZE = 4;
+	constexpr int DRAWS = 200;
 } // namespace
 
 class WaterSpawnTest : public ::testing::Test

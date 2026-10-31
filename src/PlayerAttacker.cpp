@@ -48,7 +48,8 @@ AttackResult::AttackResult PlayerAttacker::attack(
 
 		// The off hand swings only while the target is still up, so a main hand that
 		// killed outright reports for both.
-		AttackResult::AttackResult offHand = AttackResult::AttackResult::PREVENTED;
+		AttackResult::AttackResult offHand =
+			AttackResult::AttackResult::PREVENTED;
 		if (!target.is_dead())
 		{
 			const Item* offWeapon =

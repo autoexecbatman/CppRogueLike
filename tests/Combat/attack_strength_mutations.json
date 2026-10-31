@@ -69,8 +69,8 @@
     },
     {
       "file": "src/ItemClassification.h",
-      "original": "\treturn itemClass == ItemClass::BOW || itemClass == ItemClass::CROSSBOW ||\n\t\titemClass == ItemClass::SLING;",
-      "mutated": "\treturn itemClass == ItemClass::BOW || itemClass == ItemClass::CROSSBOW;",
+      "original": "return itemClass == ItemClass::BOW ||\n\t\t\titemClass == ItemClass::CROSSBOW || itemClass == ItemClass::SLING;",
+      "mutated": "\t\treturn itemClass == ItemClass::BOW || itemClass == ItemClass::CROSSBOW;",
       "catches": "a sling that cannot be fired"
     },
     {

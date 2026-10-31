@@ -17,13 +17,13 @@
 namespace
 {
 
-void expect_tint(Color actual, Color expected)
-{
-	EXPECT_EQ(actual.r, expected.r);
-	EXPECT_EQ(actual.g, expected.g);
-	EXPECT_EQ(actual.b, expected.b);
-	EXPECT_EQ(actual.a, expected.a);
-}
+	void expect_tint(Color actual, Color expected)
+	{
+		EXPECT_EQ(actual.r, expected.r);
+		EXPECT_EQ(actual.g, expected.g);
+		EXPECT_EQ(actual.b, expected.b);
+		EXPECT_EQ(actual.a, expected.a);
+	}
 
 } // namespace
 

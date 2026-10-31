@@ -28,85 +28,85 @@ static_assert(
 namespace
 {
 
-// The monster registry the editor edits, which every caller requires.
-//
-// Example:
-//   monster_registry(ctx).get_all_keys().front();   // -> "goblin"
-MonsterRegistry& monster_registry(const GameContext& ctx)
-{
-	assert(
-		ctx.monsterRegistry &&
-		"MonsterEditorModel: called without a monsterRegistry");
-	return *ctx.monsterRegistry;
-}
+	// The monster registry the editor edits, which every caller requires.
+	//
+	// Example:
+	//   monster_registry(ctx).get_all_keys().front();   // -> "goblin"
+	MonsterRegistry& monster_registry(const GameContext& ctx)
+	{
+		assert(
+			ctx.monsterRegistry &&
+			"MonsterEditorModel: called without a monsterRegistry");
+		return *ctx.monsterRegistry;
+	}
 
-// Alignment fields cycle through their axis rather than being typed, so each
-// press moves one step and wraps at the end. The names come from Alignment.h,
-// beside the enums, so the editor shows what a record carries.
-Alignment::Ethics next_ethics(Alignment::Ethics ethics)
-{
-	switch (ethics)
+	// Alignment fields cycle through their axis rather than being typed, so
+	// each press moves one step and wraps at the end. The names come from
+	// Alignment.h, beside the enums, so the editor shows what a record carries.
+	Alignment::Ethics next_ethics(Alignment::Ethics ethics)
 	{
-	case Alignment::Ethics::LAWFUL:
-	{
+		switch (ethics)
+		{
+		case Alignment::Ethics::LAWFUL:
+		{
+			return Alignment::Ethics::NEUTRAL;
+		}
+		case Alignment::Ethics::NEUTRAL:
+		{
+			return Alignment::Ethics::CHAOTIC;
+		}
+		case Alignment::Ethics::CHAOTIC:
+		{
+			return Alignment::Ethics::LAWFUL;
+		}
+		}
 		return Alignment::Ethics::NEUTRAL;
 	}
-	case Alignment::Ethics::NEUTRAL:
-	{
-		return Alignment::Ethics::CHAOTIC;
-	}
-	case Alignment::Ethics::CHAOTIC:
-	{
-		return Alignment::Ethics::LAWFUL;
-	}
-	}
-	return Alignment::Ethics::NEUTRAL;
-}
 
-Alignment::Morality next_morality(Alignment::Morality morality)
-{
-	switch (morality)
+	Alignment::Morality next_morality(Alignment::Morality morality)
 	{
-	case Alignment::Morality::GOOD:
-	{
+		switch (morality)
+		{
+		case Alignment::Morality::GOOD:
+		{
+			return Alignment::Morality::NEUTRAL;
+		}
+		case Alignment::Morality::NEUTRAL:
+		{
+			return Alignment::Morality::EVIL;
+		}
+		case Alignment::Morality::EVIL:
+		{
+			return Alignment::Morality::GOOD;
+		}
+		}
 		return Alignment::Morality::NEUTRAL;
 	}
-	case Alignment::Morality::NEUTRAL:
-	{
-		return Alignment::Morality::EVIL;
-	}
-	case Alignment::Morality::EVIL:
-	{
-		return Alignment::Morality::GOOD;
-	}
-	}
-	return Alignment::Morality::NEUTRAL;
-}
 
-std::string prettify_key(std::string_view key)
-{
-	std::string result;
-	bool capNext = true;
-	for (char character : key)
+	std::string prettify_key(std::string_view key)
 	{
-		if (character == '_')
+		std::string result;
+		bool capNext = true;
+		for (char character : key)
 		{
-			result += ' ';
-			capNext = true;
+			if (character == '_')
+			{
+				result += ' ';
+				capNext = true;
+			}
+			else if (capNext)
+			{
+				result += static_cast<char>(
+					std::toupper(static_cast<unsigned char>(character)));
+				capNext = false;
+			}
+			else
+			{
+				result += character;
+			}
 		}
-		else if (capNext)
-		{
-			result += static_cast<char>(
-				std::toupper(static_cast<unsigned char>(character)));
-			capNext = false;
-		}
-		else
-		{
-			result += character;
-		}
+		return result;
 	}
-	return result;
-}
 
 } // namespace
 

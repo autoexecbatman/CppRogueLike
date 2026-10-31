@@ -42,105 +42,106 @@ using json = nlohmann::json;
 namespace
 {
 
-struct NamedBehavior
-{
-	std::string name{};
-	ItemBehavior behavior{};
-};
-
-// A stat-boost item whose every field differs from its default.
-template <typename StatBoost>
-StatBoost unusual_stat_boost()
-{
-	StatBoost statBoost{};
-	statBoost.strBonus = 2;
-	statBoost.dexBonus = 1;
-	statBoost.conBonus = 3;
-	statBoost.intBonus = 1;
-	statBoost.wisBonus = 2;
-	statBoost.chaBonus = 1;
-	statBoost.application = BuffApplication::SET;
-	statBoost.exceptionalStrength = 50;
-	return statBoost;
-}
-
-// One of every behaviour that saves fields, each away from its defaults.
-std::vector<NamedBehavior> every_behavior_with_fields()
-{
-	return {
-		{
-			"consumable",
-			Consumable{
-				ConsumableEffect::ADD_BUFF,
-				DiceExpr{ 0, 0, 7 },
-				DiceExpr{ 0, 0, 3 },
-				DurationUnit::TURNS,
-				BuffType::SANCTUARY,
-				BuffApplication::SET,
-				2,
-			},
-		},
-		{
-			"weapon",
-			Weapon{
-				true,
-				HandRequirement::TWO_HANDED,
-				WeaponSize::LARGE,
-				18,
-			},
-		},
-		{
-			"targeted scroll",
-			TargetedScroll{
-				TargetMode::PICK_TILE_AOE,
-				ScrollAnimation::LIGHTNING,
-				5,
-				9,
-				2,
-				BuffType::SANCTUARY,
-				DiceExpr{ 1, 4, 2 },
-				DurationUnit::TURNS,
-			},
-		},
-		{ "gold", Gold{ 12 } },
-		{ "food", Food{ 30 } },
-		{ "corpse", CorpseFood{ 40 } },
-		{ "armor", Armor{ 4 } },
-		{
-			"magical helm",
-			MagicalHelm{
-				MagicalEffect::BRILLIANCE,
-				2,
-				HelmCommand::EMPOWERED,
-			},
-		},
-		{ "magical ring", MagicalRing{ MagicalEffect::PROTECTION, 1 } },
-		{ "gauntlets", unusual_stat_boost<Gauntlets>() },
-		{ "girdle", unusual_stat_boost<Girdle>() },
-		{ "jewelry amulet", unusual_stat_boost<JewelryAmulet>() },
+	struct NamedBehavior
+	{
+		std::string name{};
+		ItemBehavior behavior{};
 	};
-}
 
-// The fields of a behaviour record that carry an enum.
-constexpr std::array<std::string_view, 8> ENUM_FIELDS = {
-	"type",
-	"effect",
-	"buffType",
-	"application",
-	"handRequirement",
-	"weaponSize",
-	"targetMode",
-	"scrollAnimation",
-};
+	// A stat-boost item whose every field differs from its default.
+	template <typename StatBoost>
+	StatBoost unusual_stat_boost()
+	{
+		StatBoost statBoost{};
+		statBoost.strBonus = 2;
+		statBoost.dexBonus = 1;
+		statBoost.conBonus = 3;
+		statBoost.intBonus = 1;
+		statBoost.wisBonus = 2;
+		statBoost.chaBonus = 1;
+		statBoost.application = BuffApplication::SET;
+		statBoost.exceptionalStrength = 50;
+		return statBoost;
+	}
 
-// Whether a record's key is one of those. The array is a file-scope constant and this
-// takes no capture: MSVC 14.51 gives a lambda that captures a function-local constexpr
-// array its own copy, so ranges::find returns an iterator into one object while end()
-// names another, and the debug iterator check aborts the process on the mismatch.
-bool is_enum_field(std::string_view key)
-{
-	return std::ranges::find(ENUM_FIELDS, key) != ENUM_FIELDS.end();
-}
+	// One of every behaviour that saves fields, each away from its defaults.
+	std::vector<NamedBehavior> every_behavior_with_fields()
+	{
+		return {
+			{
+				"consumable",
+				Consumable{
+					ConsumableEffect::ADD_BUFF,
+					DiceExpr{ 0, 0, 7 },
+					DiceExpr{ 0, 0, 3 },
+					DurationUnit::TURNS,
+					BuffType::SANCTUARY,
+					BuffApplication::SET,
+					2,
+				},
+			},
+			{
+				"weapon",
+				Weapon{
+					true,
+					HandRequirement::TWO_HANDED,
+					WeaponSize::LARGE,
+					18,
+				},
+			},
+			{
+				"targeted scroll",
+				TargetedScroll{
+					TargetMode::PICK_TILE_AOE,
+					ScrollAnimation::LIGHTNING,
+					5,
+					9,
+					2,
+					BuffType::SANCTUARY,
+					DiceExpr{ 1, 4, 2 },
+					DurationUnit::TURNS,
+				},
+			},
+			{ "gold", Gold{ 12 } },
+			{ "food", Food{ 30 } },
+			{ "corpse", CorpseFood{ 40 } },
+			{ "armor", Armor{ 4 } },
+			{
+				"magical helm",
+				MagicalHelm{
+					MagicalEffect::BRILLIANCE,
+					2,
+					HelmCommand::EMPOWERED,
+				},
+			},
+			{ "magical ring", MagicalRing{ MagicalEffect::PROTECTION, 1 } },
+			{ "gauntlets", unusual_stat_boost<Gauntlets>() },
+			{ "girdle", unusual_stat_boost<Girdle>() },
+			{ "jewelry amulet", unusual_stat_boost<JewelryAmulet>() },
+		};
+	}
+
+	// The fields of a behaviour record that carry an enum.
+	constexpr std::array<std::string_view, 8> ENUM_FIELDS = {
+		"type",
+		"effect",
+		"buffType",
+		"application",
+		"handRequirement",
+		"weaponSize",
+		"targetMode",
+		"scrollAnimation",
+	};
+
+	// Whether a record's key is one of those. The array is a file-scope
+	// constant and this takes no capture: MSVC 14.51 gives a lambda that
+	// captures a function-local constexpr array its own copy, so ranges::find
+	// returns an iterator into one object while end() names another, and the
+	// debug iterator check aborts the process on the mismatch.
+	bool is_enum_field(std::string_view key)
+	{
+		return std::ranges::find(ENUM_FIELDS, key) != ENUM_FIELDS.end();
+	}
 
 } // namespace
 

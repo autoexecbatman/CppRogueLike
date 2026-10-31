@@ -42,15 +42,15 @@
 
 namespace
 {
-// More rolls than building a shopkeeper and stocking its shop makes.
-constexpr int SCRIPTED_ROLLS = 400;
+	// More rolls than building a shopkeeper and stocking its shop makes.
+	constexpr int SCRIPTED_ROLLS = 400;
 
-// A record key and the Ai it names.
-struct NamedAi
-{
-	std::string key{};
-	AiType type{ AiType::MONSTER };
-};
+	// A record key and the Ai it names.
+	struct NamedAi
+	{
+		std::string key{};
+		AiType type{ AiType::MONSTER };
+	};
 } // namespace
 
 class MonsterBehaviourDataTest : public ::testing::Test

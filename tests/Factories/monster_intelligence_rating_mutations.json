@@ -45,8 +45,8 @@
     },
     {
       "file": "src/MonsterRegistry.cpp",
-      "original": "\tparams.intelligence =\n\t\tparse_intelligence_rating(entry.at(\"intelligence\").get<std::string>());",
-      "mutated": "\tparams.intelligence =IntelligenceRating::AVERAGE;",
+      "original": "params.intelligence = parse_intelligence_rating(\n\t\t\tentry.at(\"intelligence\").get<std::string>());",
+      "mutated": "\t\tparams.intelligence =IntelligenceRating::AVERAGE;",
       "catches": "the rating never read from the record, every monster Average"
     },
     {

@@ -52,70 +52,75 @@
 namespace
 {
 
-// The armour class of a player wearing nothing.
-constexpr int BARE_ARMOR_CLASS = 10;
-// The helm is "armor of +2 value", which lowers armour class by two.
-constexpr int EMPOWERED_ARMOR_CLASS = 8;
-// "A double-strength fire resistance ring" is two rings' worth.
-constexpr int EMPOWERED_FIRE_STRENGTH = 2;
-// A creature built in a test has no Strength, and the pack is weight-gated by it.
-constexpr int CARRIER_STRENGTH = 18;
+	// The armour class of a player wearing nothing.
+	constexpr int BARE_ARMOR_CLASS = 10;
+	// The helm is "armor of +2 value", which lowers armour class by two.
+	constexpr int EMPOWERED_ARMOR_CLASS = 8;
+	// "A double-strength fire resistance ring" is two rings' worth.
+	constexpr int EMPOWERED_FIRE_STRENGTH = 2;
+	// A creature built in a test has no Strength, and the pack is weight-gated
+	// by it.
+	constexpr int CARRIER_STRENGTH = 18;
 
-// The player, wired into a context, with nothing worn and nothing in the pack.
-void dress_bare_player(MockGameContext& mock, GameContext& ctx)
-{
-	mock.player = std::make_unique<Player>(Vector2D{ 0, 0 });
-	Player& player = *mock.player;
-	player.experienceReward = std::make_unique<ExperienceReward>(0);
-	player.armorClass = std::make_unique<ArmorClass>(BARE_ARMOR_CLASS);
-	player.healthPool = std::make_unique<HealthPool>(20);
-	player.set_strength(CARRIER_STRENGTH);
-	ctx.playerOwner = &mock.player;
-}
-
-// The helm of brilliance from the item data, unidentified, in the player's pack.
-Item& carry_helm(Player& player, GameContext& ctx)
-{
-	auto helm = ItemCreator::create("helm_of_brilliance", player.position, ctx);
-	Item* carried = helm.get();
-	[[maybe_unused]] const auto added =
-		InventoryOperations::add_item(player.inventoryData, std::move(helm));
-	return *carried;
-}
-
-// The same helm with its type identified, which is how its word is learned.
-Item& carry_identified_helm(Player& player, GameContext& ctx)
-{
-	Item& helm = carry_helm(player, ctx);
-	helm.identify_type();
-	return helm;
-}
-
-// Puts on or takes off an item the way the inventory's use does.
-void use(Item& item, Player& player, GameContext& ctx)
-{
-	[[maybe_unused]] const bool used =
-		use_item(*item.behavior, item, player, ctx);
-}
-
-HelmCommand command_of(const Item& helm)
-{
-	return std::get<MagicalHelm>(*helm.behavior).command;
-}
-
-bool offers_the_word(const Player& player)
-{
-	for (
-		const SpellSystem::ItemGrantedSpell& granted :
-		SpellSystem::get_item_granted_spells(player, 0))
+	// The player, wired into a context, with nothing worn and nothing in the
+	// pack.
+	void dress_bare_player(MockGameContext& mock, GameContext& ctx)
 	{
-		if (granted.power == SpellSystem::ItemPower::SPEAK_COMMAND_WORD)
-		{
-			return true;
-		}
+		mock.player = std::make_unique<Player>(Vector2D{ 0, 0 });
+		Player& player = *mock.player;
+		player.experienceReward = std::make_unique<ExperienceReward>(0);
+		player.armorClass = std::make_unique<ArmorClass>(BARE_ARMOR_CLASS);
+		player.healthPool = std::make_unique<HealthPool>(20);
+		player.set_strength(CARRIER_STRENGTH);
+		ctx.playerOwner = &mock.player;
 	}
-	return false;
-}
+
+	// The helm of brilliance from the item data, unidentified, in the player's
+	// pack.
+	Item& carry_helm(Player& player, GameContext& ctx)
+	{
+		auto helm =
+			ItemCreator::create("helm_of_brilliance", player.position, ctx);
+		Item* carried = helm.get();
+		[[maybe_unused]] const auto added = InventoryOperations::add_item(
+			player.inventoryData,
+			std::move(helm));
+		return *carried;
+	}
+
+	// The same helm with its type identified, which is how its word is learned.
+	Item& carry_identified_helm(Player& player, GameContext& ctx)
+	{
+		Item& helm = carry_helm(player, ctx);
+		helm.identify_type();
+		return helm;
+	}
+
+	// Puts on or takes off an item the way the inventory's use does.
+	void use(Item& item, Player& player, GameContext& ctx)
+	{
+		[[maybe_unused]] const bool used =
+			use_item(*item.behavior, item, player, ctx);
+	}
+
+	HelmCommand command_of(const Item& helm)
+	{
+		return std::get<MagicalHelm>(*helm.behavior).command;
+	}
+
+	bool offers_the_word(const Player& player)
+	{
+		for (
+			const SpellSystem::ItemGrantedSpell& granted :
+			SpellSystem::get_item_granted_spells(player, 0))
+		{
+			if (granted.power == SpellSystem::ItemPower::SPEAK_COMMAND_WORD)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 
 } // namespace
 
@@ -294,35 +299,36 @@ TEST_F(HelmCommandWordTest, AHelmRecordWithoutItsCommandIsRefused)
 namespace
 {
 
-// Through the cast menu, as a player does it: Shift+C, then the word's letter. The word is
-// spoken and a turn is spent.
-[[noreturn]] void speaking_from_the_cast_menu_spends_a_turn()
-{
-	HiddenRenderer hidden{};
-	MockGameContext mock{};
-	GameContext ctx = mock.to_game_context();
-	ctx.renderer = &hidden.renderer;
-	BuffSystem buffs{};
-	ctx.buffSystem = &buffs;
-	dress_bare_player(mock, ctx);
-	Item& helm = carry_identified_helm(*mock.player, ctx);
-	use(helm, *mock.player, ctx);
-	const int timeBefore = ctx.gameState->get_time();
+	// Through the cast menu, as a player does it: Shift+C, then the word's
+	// letter. The word is spoken and a turn is spent.
+	[[noreturn]] void speaking_from_the_cast_menu_spends_a_turn()
+	{
+		HiddenRenderer hidden{};
+		MockGameContext mock{};
+		GameContext ctx = mock.to_game_context();
+		ctx.renderer = &hidden.renderer;
+		BuffSystem buffs{};
+		ctx.buffSystem = &buffs;
+		dress_bare_player(mock, ctx);
+		Item& helm = carry_identified_helm(*mock.player, ctx);
+		use(helm, *mock.player, ctx);
+		const int timeBefore = ctx.gameState->get_time();
 
-	mock.menus.push_back(std::make_unique<MenuSpellCast>(*mock.player, ctx));
-	ctx.inputSystem->queue_key(GameKey::NONE, 'a');
-	hidden.renderer.begin_frame();
-	ctx.menuManager->handle_menus(*ctx.menus, ctx);
-	hidden.renderer.end_frame();
+		mock.menus.push_back(
+			std::make_unique<MenuSpellCast>(*mock.player, ctx));
+		ctx.inputSystem->queue_key(GameKey::NONE, 'a');
+		hidden.renderer.begin_frame();
+		ctx.menuManager->handle_menus(*ctx.menus, ctx);
+		hidden.renderer.end_frame();
 
-	exit_unless(
-		command_of(helm) == HelmCommand::EMPOWERED,
-		"choosing the word from the cast menu did not speak it");
-	exit_unless(
-		ctx.gameState->get_time() > timeBefore,
-		"speaking the word spent no turn");
-	finish_the_child();
-}
+		exit_unless(
+			command_of(helm) == HelmCommand::EMPOWERED,
+			"choosing the word from the cast menu did not speak it");
+		exit_unless(
+			ctx.gameState->get_time() > timeBefore,
+			"speaking the word spent no turn");
+		finish_the_child();
+	}
 
 } // namespace
 

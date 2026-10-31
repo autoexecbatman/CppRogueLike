@@ -17,15 +17,15 @@
 namespace
 {
 
-unsigned char blend_channel(
-	unsigned char nearValue,
-	unsigned char farValue,
-	int cost,
-	int farthestCost)
-{
-	return static_cast<unsigned char>(
-		nearValue + (farValue - nearValue) * cost / farthestCost);
-}
+	unsigned char blend_channel(
+		unsigned char nearValue,
+		unsigned char farValue,
+		int cost,
+		int farthestCost)
+	{
+		return static_cast<unsigned char>(
+			nearValue + (farValue - nearValue) * cost / farthestCost);
+	}
 
 } // namespace
 
@@ -51,10 +51,26 @@ Color DebugUtils::dijkstra_cost_tint(int cost, int farthestCost)
 		return DebugUtils::COST_NEAR_TINT;
 	}
 	return Color{
-		blend_channel(DebugUtils::COST_NEAR_TINT.r, DebugUtils::COST_FAR_TINT.r, cost, farthestCost),
-		blend_channel(DebugUtils::COST_NEAR_TINT.g, DebugUtils::COST_FAR_TINT.g, cost, farthestCost),
-		blend_channel(DebugUtils::COST_NEAR_TINT.b, DebugUtils::COST_FAR_TINT.b, cost, farthestCost),
-		blend_channel(DebugUtils::COST_NEAR_TINT.a, DebugUtils::COST_FAR_TINT.a, cost, farthestCost),
+		blend_channel(
+			DebugUtils::COST_NEAR_TINT.r,
+			DebugUtils::COST_FAR_TINT.r,
+			cost,
+			farthestCost),
+		blend_channel(
+			DebugUtils::COST_NEAR_TINT.g,
+			DebugUtils::COST_FAR_TINT.g,
+			cost,
+			farthestCost),
+		blend_channel(
+			DebugUtils::COST_NEAR_TINT.b,
+			DebugUtils::COST_FAR_TINT.b,
+			cost,
+			farthestCost),
+		blend_channel(
+			DebugUtils::COST_NEAR_TINT.a,
+			DebugUtils::COST_FAR_TINT.a,
+			cost,
+			farthestCost),
 	};
 }
 

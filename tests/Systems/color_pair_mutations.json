@@ -45,8 +45,8 @@
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\tparams.color = parse_color_pair(\n\t\trequired_field(record, key, \"color\").get<std::string>());",
-      "mutated": "\tparams.color =ColorPairId::WHITE_BLACK;",
+      "original": "\t\tparams.color = parse_color_pair(\n\t\t\trequired_field(record, key, \"color\").get<std::string>());",
+      "mutated": "\t\tparams.color =ColorPairId::WHITE_BLACK;",
       "catches": "the colour in the record never read at all"
     },
     {

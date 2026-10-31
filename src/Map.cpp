@@ -48,74 +48,75 @@
 
 namespace
 {
-// Single source of truth for how each tile type maps onto the FOV grid.
-// Used by both set_tile (runtime mutations) and Map::load (FOV rebuild).
-FovProperties fov_properties_for(TileType type) noexcept
-{
-	switch (type)
+	// Single source of truth for how each tile type maps onto the FOV grid.
+	// Used by both set_tile (runtime mutations) and Map::load (FOV rebuild).
+	FovProperties fov_properties_for(TileType type) noexcept
 	{
-	case TileType::FLOOR:
-	case TileType::CORRIDOR:
-	case TileType::OPEN_DOOR:
-	case TileType::WATER:
-	{
-		return { true, true };
+		switch (type)
+		{
+		case TileType::FLOOR:
+		case TileType::CORRIDOR:
+		case TileType::OPEN_DOOR:
+		case TileType::WATER:
+		{
+			return { true, true };
+		}
+		case TileType::WALL:
+		case TileType::CLOSED_DOOR:
+		default:
+		{
+			return { false, false };
+		}
+		}
 	}
-	case TileType::WALL:
-	case TileType::CLOSED_DOOR:
-	default:
-	{
-		return { false, false };
-	}
-	}
-}
 
-// The DoorState a saved integer names, or nullopt for one no DoorState has.
-// The switch has no default, so a state added without a case here is a compile error (C4062, -Wswitch).
-//
-// Example:
-//   door_state_from(2);    // -> DoorState::CLOSED_LOCKED
-//   door_state_from(-1);   // -> nullopt
-std::optional<DoorState> door_state_from(int saved)
-{
-	const DoorState candidate = static_cast<DoorState>(saved);
-	switch (candidate)
+	// The DoorState a saved integer names, or nullopt for one no DoorState has.
+	// The switch has no default, so a state added without a case here is a
+	// compile error (C4062, -Wswitch).
+	//
+	// Example:
+	//   door_state_from(2);    // -> DoorState::CLOSED_LOCKED
+	//   door_state_from(-1);   // -> nullopt
+	std::optional<DoorState> door_state_from(int saved)
 	{
-	case DoorState::OPEN:
-	case DoorState::CLOSED_UNLOCKED:
-	case DoorState::CLOSED_LOCKED:
-	case DoorState::CLOSED_LOCKED_FORCE_FAILED:
-	{
-		return candidate;
+		const DoorState candidate = static_cast<DoorState>(saved);
+		switch (candidate)
+		{
+		case DoorState::OPEN:
+		case DoorState::CLOSED_UNLOCKED:
+		case DoorState::CLOSED_LOCKED:
+		case DoorState::CLOSED_LOCKED_FORCE_FAILED:
+		{
+			return candidate;
+		}
+		}
+		return std::nullopt;
 	}
-	}
-	return std::nullopt;
-}
 
-// The TileType a saved integer names, or nullopt for one no TileType has.
-// The switch has no default, so a type added without a case here is a compile
-// error (C4062, -Wswitch).
-//
-// Example:
-//   tile_type_from(1);    // -> TileType::WALL
-//   tile_type_from(6);    // -> nullopt
-std::optional<TileType> tile_type_from(int saved)
-{
-	const TileType candidate = static_cast<TileType>(saved);
-	switch (candidate)
+	// The TileType a saved integer names, or nullopt for one no TileType has.
+	// The switch has no default, so a type added without a case here is a
+	// compile error (C4062, -Wswitch).
+	//
+	// Example:
+	//   tile_type_from(1);    // -> TileType::WALL
+	//   tile_type_from(6);    // -> nullopt
+	std::optional<TileType> tile_type_from(int saved)
 	{
-	case TileType::FLOOR:
-	case TileType::WALL:
-	case TileType::WATER:
-	case TileType::CLOSED_DOOR:
-	case TileType::OPEN_DOOR:
-	case TileType::CORRIDOR:
-	{
-		return candidate;
+		const TileType candidate = static_cast<TileType>(saved);
+		switch (candidate)
+		{
+		case TileType::FLOOR:
+		case TileType::WALL:
+		case TileType::WATER:
+		case TileType::CLOSED_DOOR:
+		case TileType::OPEN_DOOR:
+		case TileType::CORRIDOR:
+		{
+			return candidate;
+		}
+		}
+		return std::nullopt;
 	}
-	}
-	return std::nullopt;
-}
 } // namespace
 
 //====

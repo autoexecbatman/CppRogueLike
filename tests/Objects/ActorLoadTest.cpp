@@ -30,9 +30,10 @@
 
 namespace
 {
-// Away from the origin and with x and y unequal, so a default or a swap cannot pass.
-constexpr Vector2D SAVED_POSITION{ 7, 3 };
-constexpr Vector2D SAVED_DIRECTION{ 1, -1 };
+	// Away from the origin and with x and y unequal, so a default or a swap
+	// cannot pass.
+	constexpr Vector2D SAVED_POSITION{ 7, 3 };
+	constexpr Vector2D SAVED_DIRECTION{ 1, -1 };
 } // namespace
 
 class ActorLoadTest : public ::testing::Test

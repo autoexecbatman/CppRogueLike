@@ -42,8 +42,8 @@
 
 namespace
 {
-const Vector2D EAST_OF_THIEF{ 6, 5 };
-const Vector2D WEST_OF_THIEF{ 4, 5 };
+	const Vector2D EAST_OF_THIEF{ 6, 5 };
+	const Vector2D WEST_OF_THIEF{ 4, 5 };
 } // namespace
 
 class TrapDisarmTest : public ::testing::Test

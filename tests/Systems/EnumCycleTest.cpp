@@ -43,41 +43,44 @@
 namespace
 {
 
-// Walks the cycle from the first value and requires it to visit every value the list
-// declares, in that order, and then wrap.
-template <typename EnumType, std::size_t Count, typename Next>
-void expect_cycle_covers(
-	const std::array<EnumType, Count>& all,
-	Next next,
-	std::string_view label)
-{
-	ASSERT_GT(all.size(), 1u) << label << ": a list of one cannot show a cycle";
-
-	EnumType value = all.front();
-	for (std::size_t step = 1; step < all.size(); ++step)
+	// Walks the cycle from the first value and requires it to visit every value
+	// the list declares, in that order, and then wrap.
+	template <typename EnumType, std::size_t Count, typename Next>
+	void expect_cycle_covers(
+		const std::array<EnumType, Count>& all,
+		Next next,
+		std::string_view label)
 	{
-		value = next(value);
-		EXPECT_EQ(value, all[step])
-			<< label << ": step " << step << " left the declared order";
+		ASSERT_GT(all.size(), 1u)
+			<< label << ": a list of one cannot show a cycle";
+
+		EnumType value = all.front();
+		for (std::size_t step = 1; step < all.size(); ++step)
+		{
+			value = next(value);
+			EXPECT_EQ(value, all[step])
+				<< label << ": step " << step << " left the declared order";
+		}
+
+		EXPECT_EQ(next(value), all.front())
+			<< label << ": the cycle did not wrap";
 	}
 
-	EXPECT_EQ(next(value), all.front()) << label << ": the cycle did not wrap";
-}
-
-// The list is the enum's own order, so its index is its value. An enumerator inserted
-// anywhere but the end shifts every later entry and fails here.
-template <typename EnumType, std::size_t Count>
-void expect_list_matches_enum(
-	const std::array<EnumType, Count>& all,
-	std::string_view label)
-{
-	for (std::size_t index = 0; index < all.size(); ++index)
+	// The list is the enum's own order, so its index is its value. An
+	// enumerator inserted anywhere but the end shifts every later entry and
+	// fails here.
+	template <typename EnumType, std::size_t Count>
+	void expect_list_matches_enum(
+		const std::array<EnumType, Count>& all,
+		std::string_view label)
 	{
-		EXPECT_EQ(all[index], static_cast<EnumType>(index))
-			<< label << ": entry " << index
-			<< " is not the value with that number";
+		for (std::size_t index = 0; index < all.size(); ++index)
+		{
+			EXPECT_EQ(all[index], static_cast<EnumType>(index))
+				<< label << ": entry " << index
+				<< " is not the value with that number";
+		}
 	}
-}
 
 } // namespace
 

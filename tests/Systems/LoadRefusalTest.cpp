@@ -36,65 +36,71 @@
 
 namespace
 {
-// Writes a save the loaders refuse where the game keeps its save.
-void place_refused_save()
-{
-	const auto savePath = Paths::resolve(Paths::SAVE_FILE);
-	std::error_code ignored;
-	std::filesystem::create_directories(savePath.parent_path(), ignored);
-	std::ofstream out{ savePath };
-	out << "{}";
-}
+	// Writes a save the loaders refuse where the game keeps its save.
+	void place_refused_save()
+	{
+		const auto savePath = Paths::resolve(Paths::SAVE_FILE);
+		std::error_code ignored;
+		std::filesystem::create_directories(savePath.parent_path(), ignored);
+		std::ofstream out{ savePath };
+		out << "{}";
+	}
 
-// One frame of the menu stack, opened and closed as Game::tick does around it.
-void run_one_menu_frame(Game& game, GameContext& ctx, HiddenRenderer& hidden)
-{
-	hidden.renderer.begin_frame();
-	game.menuManager.handle_menus(game.menus, ctx);
-	hidden.renderer.end_frame();
-}
+	// One frame of the menu stack, opened and closed as Game::tick does around
+	// it.
+	void run_one_menu_frame(
+		Game& game,
+		GameContext& ctx,
+		HiddenRenderer& hidden)
+	{
+		hidden.renderer.begin_frame();
+		game.menuManager.handle_menus(game.menus, ctx);
+		hidden.renderer.end_frame();
+	}
 
-// Load Game on a refused save shows the refusal, and a key returns to a main menu alone.
-[[noreturn]] void
-load_game_on_a_refused_save_reports_it_and_returns_to_the_menu()
-{
-	HiddenRenderer hidden{};
-	Game game{ TEST_DICE_SEED };
-	GameContext ctx = game.context();
-	ctx.renderer = &hidden.renderer;
-	game.tileConfig.load(Paths::TILE_CONFIG);
+	// Load Game on a refused save shows the refusal, and a key returns to a
+	// main menu alone.
+	[[noreturn]] void
+	load_game_on_a_refused_save_reports_it_and_returns_to_the_menu()
+	{
+		HiddenRenderer hidden{};
+		Game game{ TEST_DICE_SEED };
+		GameContext ctx = game.context();
+		ctx.renderer = &hidden.renderer;
+		game.tileConfig.load(Paths::TILE_CONFIG);
 
-	// Written here and not in the TEST body, which the child re-runs: a save there makes the child skip.
-	place_refused_save();
-	game.menus.push_back(make_main_menu(true, ctx));
-	// Load Game is the second entry, offered because the save exists.
-	ctx.inputSystem->queue_key(GameKey::DOWN, 0);
-	run_one_menu_frame(game, ctx, hidden);
-	ctx.inputSystem->queue_key(GameKey::ENTER, 0);
-	run_one_menu_frame(game, ctx, hidden);
+		// Written here and not in the TEST body, which the child re-runs: a
+		// save there makes the child skip.
+		place_refused_save();
+		game.menus.push_back(make_main_menu(true, ctx));
+		// Load Game is the second entry, offered because the save exists.
+		ctx.inputSystem->queue_key(GameKey::DOWN, 0);
+		run_one_menu_frame(game, ctx, hidden);
+		ctx.inputSystem->queue_key(GameKey::ENTER, 0);
+		run_one_menu_frame(game, ctx, hidden);
 
-	exit_unless(
-		!std::filesystem::exists(Paths::resolve(Paths::SAVE_FILE)),
-		"the refused save was not deleted");
-	exit_unless(
-		!game.menuManager.is_game_initialized(),
-		"the refused load left the game marked running");
-	exit_unless(
-		!game.menus.empty() &&
-			typeid(*game.menus.back()) == typeid(NotificationMenu),
-		"no notice of the refusal is on top of the stack");
-	ctx.inputSystem->queue_key(GameKey::ENTER, 0);
-	run_one_menu_frame(game, ctx, hidden);
+		exit_unless(
+			!std::filesystem::exists(Paths::resolve(Paths::SAVE_FILE)),
+			"the refused save was not deleted");
+		exit_unless(
+			!game.menuManager.is_game_initialized(),
+			"the refused load left the game marked running");
+		exit_unless(
+			!game.menus.empty() &&
+				typeid(*game.menus.back()) == typeid(NotificationMenu),
+			"no notice of the refusal is on top of the stack");
+		ctx.inputSystem->queue_key(GameKey::ENTER, 0);
+		run_one_menu_frame(game, ctx, hidden);
 
-	exit_unless(
-		game.menus.size() == 1,
-		"closing the notice left more than the main menu on the stack");
-	exit_unless(
-		typeid(*game.menus.back()) == typeid(ListMenu) &&
-			game.menus.back()->run,
-		"closing the notice did not leave a running main menu");
-	finish_the_child();
-}
+		exit_unless(
+			game.menus.size() == 1,
+			"closing the notice left more than the main menu on the stack");
+		exit_unless(
+			typeid(*game.menus.back()) == typeid(ListMenu) &&
+				game.menus.back()->run,
+			"closing the notice did not leave a running main menu");
+		finish_the_child();
+	}
 } // namespace
 
 class LoadRefusalTest : public ::testing::Test

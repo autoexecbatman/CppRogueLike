@@ -25,16 +25,16 @@
 namespace
 {
 
-constexpr int BASE_HP = 24;
-constexpr int BONUS_AT_15 = 1;
-constexpr int BONUS_AT_17 = 3;
-constexpr int BONUS_AT_18 = 4;
-constexpr int NON_WARRIOR_CAP = 2;
+	constexpr int BASE_HP = 24;
+	constexpr int BONUS_AT_15 = 1;
+	constexpr int BONUS_AT_17 = 3;
+	constexpr int BONUS_AT_18 = 4;
+	constexpr int NON_WARRIOR_CAP = 2;
 
-// The last level each class rolls a hit die, and so takes the bonus: Player's
-// Handbook Tables 14 and 20.
-constexpr int FIGHTER_LAST_ROLLED_LEVEL = 9;
-constexpr int WIZARD_LAST_ROLLED_LEVEL = 10;
+	// The last level each class rolls a hit die, and so takes the bonus:
+	// Player's Handbook Tables 14 and 20.
+	constexpr int FIGHTER_LAST_ROLLED_LEVEL = 9;
+	constexpr int WIZARD_LAST_ROLLED_LEVEL = 10;
 
 } // namespace
 

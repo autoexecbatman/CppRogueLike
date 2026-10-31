@@ -69,148 +69,157 @@
 namespace
 {
 
-bool consume_item(Item& owner, Creature& wearer)
-{
-	auto result = InventoryOperations::remove_item(wearer.inventoryData, owner);
-	return result.has_value();
-}
-
-// Shared save for stat-boost equipment (Gauntlets, Girdle, JewelryAmulet)
-template <typename StatBoost>
-void save_stat_boost(const StatBoost& statBoost, json& output)
-{
-	output["strBonus"] = statBoost.strBonus;
-	output["dexBonus"] = statBoost.dexBonus;
-	output["conBonus"] = statBoost.conBonus;
-	output["intBonus"] = statBoost.intBonus;
-	output["wisBonus"] = statBoost.wisBonus;
-	output["chaBonus"] = statBoost.chaBonus;
-	output["application"] = encode_buff_application(statBoost.application);
-	output["exceptionalStrength"] = statBoost.exceptionalStrength;
-	// Creature::wears_item_with reads this off any behaviour that has one.
-	output["effect"] = encode_magical_effect(statBoost.effect);
-	output["bonus"] = statBoost.bonus;
-}
-
-template <typename StatBoost>
-void load_stat_boost(StatBoost& statBoost, const json& source)
-{
-	statBoost.strBonus = source.at("strBonus").get<int>();
-	statBoost.dexBonus = source.at("dexBonus").get<int>();
-	statBoost.conBonus = source.at("conBonus").get<int>();
-	statBoost.intBonus = source.at("intBonus").get<int>();
-	statBoost.wisBonus = source.at("wisBonus").get<int>();
-	statBoost.chaBonus = source.at("chaBonus").get<int>();
-	statBoost.application =
-		parse_buff_application(source.at("application").get<std::string>());
-	statBoost.exceptionalStrength = source.at("exceptionalStrength").get<int>();
-	statBoost.effect =
-		parse_magical_effect(source.at("effect").get<std::string>());
-	statBoost.bonus = source.at("bonus").get<int>();
-}
-
-// Shared use() for stat-boost equipment (Gauntlets, Girdle, JewelryAmulet): puts the item
-// on, or takes it off. What it does to an ability is read from what is worn
-// (Creature::calculate_effective_stat), never written here. An item that could not be put
-// on or taken off - a cursed one that will not come off - uses no turn.
-//
-// Example:
-//   use_stat_boost(EquipmentSlot::GIRDLE, girdle, player, ctx);   // -> true, worn: Strength 19
-//   use_stat_boost(EquipmentSlot::GIRDLE, girdle, player, ctx);   // -> true, removed: Strength as before
-bool use_stat_boost(
-	EquipmentSlot slot,
-	Item& item,
-	Creature& wearer,
-	GameContext& ctx)
-{
-	const bool wasEquipped = wearer.is_item_equipped(item.uniqueId);
-	if (!wearer.toggle_equipment(item.uniqueId, slot, ctx))
+	bool consume_item(Item& owner, Creature& wearer)
 	{
-		return false;
+		auto result =
+			InventoryOperations::remove_item(wearer.inventoryData, owner);
+		return result.has_value();
 	}
 
-	wearer.update_armor_class(ctx);
-	ctx.messageSystem->message(
-		ColorPairId::WHITE_BLACK,
-		std::format(
-			"You {} the {}.",
-			wasEquipped ? "remove" : "put on",
-			item.get_name()),
-		MessageCompletion::FINISHED);
-	return true;
-}
-
-// Shared use() for magical equipment (MagicalHelm, MagicalRing)
-bool use_magical_equip(
-	MagicalEffect effect,
-	EquipmentSlot slot,
-	Item& item,
-	Creature& wearer,
-	GameContext& ctx)
-{
-	const bool wasEquipped = wearer.is_item_equipped(item.uniqueId);
-	EquipmentSlot targetSlot = slot;
-
-	// Rings: auto-choose open slot
-	if (slot == EquipmentSlot::RIGHT_RING && !wasEquipped)
+	// Shared save for stat-boost equipment (Gauntlets, Girdle, JewelryAmulet)
+	template <typename StatBoost>
+	void save_stat_boost(const StatBoost& statBoost, json& output)
 	{
-		if (wearer.is_slot_occupied(EquipmentSlot::RIGHT_RING))
-		{
-			targetSlot = EquipmentSlot::LEFT_RING;
-		}
+		output["strBonus"] = statBoost.strBonus;
+		output["dexBonus"] = statBoost.dexBonus;
+		output["conBonus"] = statBoost.conBonus;
+		output["intBonus"] = statBoost.intBonus;
+		output["wisBonus"] = statBoost.wisBonus;
+		output["chaBonus"] = statBoost.chaBonus;
+		output["application"] = encode_buff_application(statBoost.application);
+		output["exceptionalStrength"] = statBoost.exceptionalStrength;
+		// Creature::wears_item_with reads this off any behaviour that has one.
+		output["effect"] = encode_magical_effect(statBoost.effect);
+		output["bonus"] = statBoost.bonus;
 	}
 
-	const bool success =
-		wearer.toggle_equipment(item.uniqueId, targetSlot, ctx);
-	if (success)
+	template <typename StatBoost>
+	void load_stat_boost(StatBoost& statBoost, const json& source)
 	{
-		if (wasEquipped)
+		statBoost.strBonus = source.at("strBonus").get<int>();
+		statBoost.dexBonus = source.at("dexBonus").get<int>();
+		statBoost.conBonus = source.at("conBonus").get<int>();
+		statBoost.intBonus = source.at("intBonus").get<int>();
+		statBoost.wisBonus = source.at("wisBonus").get<int>();
+		statBoost.chaBonus = source.at("chaBonus").get<int>();
+		statBoost.application =
+			parse_buff_application(source.at("application").get<std::string>());
+		statBoost.exceptionalStrength =
+			source.at("exceptionalStrength").get<int>();
+		statBoost.effect =
+			parse_magical_effect(source.at("effect").get<std::string>());
+		statBoost.bonus = source.at("bonus").get<int>();
+	}
+
+	// Shared use() for stat-boost equipment (Gauntlets, Girdle, JewelryAmulet):
+	// puts the item on, or takes it off. What it does to an ability is read
+	// from what is worn (Creature::calculate_effective_stat), never written
+	// here. An item that could not be put on or taken off - a cursed one that
+	// will not come off - uses no turn.
+	//
+	// Example:
+	//   use_stat_boost(EquipmentSlot::GIRDLE, girdle, player, ctx);
+	//   // -> true, worn: Strength 19
+	//   use_stat_boost(EquipmentSlot::GIRDLE, girdle, player, ctx);
+	//   // -> true, removed: Strength as before
+	bool use_stat_boost(
+		EquipmentSlot slot,
+		Item& item,
+		Creature& wearer,
+		GameContext& ctx)
+	{
+		const bool wasEquipped = wearer.is_item_equipped(item.uniqueId);
+		if (!wearer.toggle_equipment(item.uniqueId, slot, ctx))
 		{
-			// The ring ends only its own invisibility, and not while another such ring is worn.
-			if (effect == MagicalEffect::INVISIBILITY &&
-				ctx.buffSystem->has_buff(wearer, BuffType::ITEM_INVISIBILITY) &&
-				!wearer.wears_ring_of(MagicalEffect::INVISIBILITY))
-			{
-				ctx.buffSystem->remove_buff(
-					wearer,
-					BuffType::ITEM_INVISIBILITY);
-				ctx.messageSystem->message(
-					ColorPairId::CYAN_BLACK,
-					"Your invisibility fades.",
-					MessageCompletion::FINISHED);
-			}
-			ctx.messageSystem->message(
-				ColorPairId::WHITE_BLACK,
-				"You remove the " + item.get_name() + ".",
-				MessageCompletion::FINISHED);
-		}
-		else
-		{
-			if (effect == MagicalEffect::INVISIBILITY)
-			{
-				ctx.messageSystem->message(
-					ColorPairId::CYAN_BLACK,
-					"The ring pulses with arcane power. Press Shift+C to cast.",
-					MessageCompletion::FINISHED);
-			}
-			ctx.messageSystem->message(
-				ColorPairId::WHITE_BLACK,
-				"You put on the " + item.get_name() + ".",
-				MessageCompletion::FINISHED);
+			return false;
 		}
 
-		if (MagicalEffectUtils::is_protection_effect(effect) ||
-			effect == MagicalEffect::BRILLIANCE)
-		{
-			wearer.update_armor_class(ctx);
-		}
-
+		wearer.update_armor_class(ctx);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			std::format(
+				"You {} the {}.",
+				wasEquipped ? "remove" : "put on",
+				item.get_name()),
+			MessageCompletion::FINISHED);
 		return true;
 	}
 
-	// Could not be put on or taken off - a cursed item that will not come off: no turn.
-	return false;
-}
+	// Shared use() for magical equipment (MagicalHelm, MagicalRing)
+	bool use_magical_equip(
+		MagicalEffect effect,
+		EquipmentSlot slot,
+		Item& item,
+		Creature& wearer,
+		GameContext& ctx)
+	{
+		const bool wasEquipped = wearer.is_item_equipped(item.uniqueId);
+		EquipmentSlot targetSlot = slot;
+
+		// Rings: auto-choose open slot
+		if (slot == EquipmentSlot::RIGHT_RING && !wasEquipped)
+		{
+			if (wearer.is_slot_occupied(EquipmentSlot::RIGHT_RING))
+			{
+				targetSlot = EquipmentSlot::LEFT_RING;
+			}
+		}
+
+		const bool success =
+			wearer.toggle_equipment(item.uniqueId, targetSlot, ctx);
+		if (success)
+		{
+			if (wasEquipped)
+			{
+				// The ring ends only its own invisibility, and not while
+				// another such ring is worn.
+				if (effect == MagicalEffect::INVISIBILITY &&
+					ctx.buffSystem->has_buff(
+						wearer,
+						BuffType::ITEM_INVISIBILITY) &&
+					!wearer.wears_ring_of(MagicalEffect::INVISIBILITY))
+				{
+					ctx.buffSystem->remove_buff(
+						wearer,
+						BuffType::ITEM_INVISIBILITY);
+					ctx.messageSystem->message(
+						ColorPairId::CYAN_BLACK,
+						"Your invisibility fades.",
+						MessageCompletion::FINISHED);
+				}
+				ctx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					"You remove the " + item.get_name() + ".",
+					MessageCompletion::FINISHED);
+			}
+			else
+			{
+				if (effect == MagicalEffect::INVISIBILITY)
+				{
+					ctx.messageSystem->message(
+						ColorPairId::CYAN_BLACK,
+						"The ring pulses with arcane power. Press Shift+C to cast.",
+						MessageCompletion::FINISHED);
+				}
+				ctx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					"You put on the " + item.get_name() + ".",
+					MessageCompletion::FINISHED);
+			}
+
+			if (MagicalEffectUtils::is_protection_effect(effect) ||
+				effect == MagicalEffect::BRILLIANCE)
+			{
+				wearer.update_armor_class(ctx);
+			}
+
+			return true;
+		}
+
+		// Could not be put on or taken off - a cursed item that will not come
+		// off: no turn.
+		return false;
+	}
 
 } // namespace
 
@@ -993,18 +1002,25 @@ bool use(
 namespace
 {
 
-// Whether a worn helm's powers count: a helm of brilliance's only once its word is spoken,
-// every other helm's as soon as it is on.
-//
-// Example:
-//   is_helm_working(MagicalHelm{ MagicalEffect::BRILLIANCE, 2, HelmCommand::DORMANT });    // -> false
-//   is_helm_working(MagicalHelm{ MagicalEffect::BRILLIANCE, 2, HelmCommand::EMPOWERED });  // -> true
-//   is_helm_working(MagicalHelm{ MagicalEffect::PROTECTION, 3, HelmCommand::DORMANT });    // -> true
-bool is_helm_working(const MagicalHelm& helm) noexcept
-{
-	return helm.effect != MagicalEffect::BRILLIANCE ||
-		helm.command == HelmCommand::EMPOWERED;
-}
+	// Whether a worn helm's powers count: a helm of brilliance's only once its
+	// word is spoken, every other helm's as soon as it is on.
+	//
+	// Example:
+	//   is_helm_working(
+	//       MagicalHelm{ MagicalEffect::BRILLIANCE, 2, HelmCommand::DORMANT });
+	//   // -> false
+	//   is_helm_working(
+	//       MagicalHelm{
+	//           MagicalEffect::BRILLIANCE, 2, HelmCommand::EMPOWERED });
+	//   // -> true
+	//   is_helm_working(
+	//       MagicalHelm{ MagicalEffect::PROTECTION, 3, HelmCommand::DORMANT });
+	//   // -> true
+	bool is_helm_working(const MagicalHelm& helm) noexcept
+	{
+		return helm.effect != MagicalEffect::BRILLIANCE ||
+			helm.command == HelmCommand::EMPOWERED;
+	}
 
 } // namespace
 
@@ -1066,27 +1082,27 @@ bool hands_over_to_targeting(const ItemBehavior& behavior) noexcept
 namespace
 {
 
-// The damage type a resistance effect answers for; empty for an effect that
-// resists nothing.
-std::optional<DamageType> resisted_type(MagicalEffect effect) noexcept
-{
-	switch (effect)
+	// The damage type a resistance effect answers for; empty for an effect that
+	// resists nothing.
+	std::optional<DamageType> resisted_type(MagicalEffect effect) noexcept
 	{
-	case MagicalEffect::FIRE_RESISTANCE:
-	case MagicalEffect::BRILLIANCE:
-	{
-		return DamageType::FIRE;
+		switch (effect)
+		{
+		case MagicalEffect::FIRE_RESISTANCE:
+		case MagicalEffect::BRILLIANCE:
+		{
+			return DamageType::FIRE;
+		}
+		case MagicalEffect::COLD_RESISTANCE:
+		{
+			return DamageType::COLD;
+		}
+		default:
+		{
+			return std::nullopt;
+		}
+		}
 	}
-	case MagicalEffect::COLD_RESISTANCE:
-	{
-		return DamageType::COLD;
-	}
-	default:
-	{
-		return std::nullopt;
-	}
-	}
-}
 
 } // namespace
 

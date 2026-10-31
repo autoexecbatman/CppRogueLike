@@ -27,9 +27,10 @@
 
 namespace
 {
-// A row of open floor with the player standing on it, room to step either way.
-constexpr int CORRIDOR_ROW = 5;
-const Vector2D START{ 4, CORRIDOR_ROW };
+	// A row of open floor with the player standing on it, room to step either
+	// way.
+	constexpr int CORRIDOR_ROW = 5;
+	const Vector2D START{ 4, CORRIDOR_ROW };
 } // namespace
 
 class ScriptedInputTest : public ::testing::Test

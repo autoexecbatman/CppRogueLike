@@ -23,33 +23,34 @@ using namespace EditorLayout;
 
 namespace
 {
-// The line drawn where the shipped records end and the custom ones begin.
-constexpr Color CUSTOM_DIVIDER{ 70, 70, 70, 200 };
+	// The line drawn where the shipped records end and the custom ones begin.
+	constexpr Color CUSTOM_DIVIDER{ 70, 70, 70, 200 };
 
-// Largest integer multiple of the sheet's own cell size that fits the target,
-// so a 16-pixel tile draws at 4x and a 64-pixel tile at 1x - never blurred.
-//
-// Example:
-//   picker_tile_size(renderer, 0);   // a 16-pixel sheet -> 64
-int picker_tile_size(const Renderer& renderer, int sheetIndex)
-{
-	const int cellSize =
-		renderer.get_sheet_cell_size(static_cast<TileSheet>(sheetIndex));
-	return cellSize * std::max(1, PICKER_TILE_TARGET / cellSize);
-}
-
-// The panel Tab moves focus to.
-//
-// Example:
-//   other_panel(EditorFocus::LIST);   // -> EditorFocus::FIELDS
-EditorFocus other_panel(EditorFocus current)
-{
-	if (current == EditorFocus::LIST)
+	// Largest integer multiple of the sheet's own cell size that fits the
+	// target, so a 16-pixel tile draws at 4x and a 64-pixel tile at 1x - never
+	// blurred.
+	//
+	// Example:
+	//   picker_tile_size(renderer, 0);   // a 16-pixel sheet -> 64
+	int picker_tile_size(const Renderer& renderer, int sheetIndex)
 	{
-		return EditorFocus::FIELDS;
+		const int cellSize =
+			renderer.get_sheet_cell_size(static_cast<TileSheet>(sheetIndex));
+		return cellSize * std::max(1, PICKER_TILE_TARGET / cellSize);
 	}
-	return EditorFocus::LIST;
-}
+
+	// The panel Tab moves focus to.
+	//
+	// Example:
+	//   other_panel(EditorFocus::LIST);   // -> EditorFocus::FIELDS
+	EditorFocus other_panel(EditorFocus current)
+	{
+		if (current == EditorFocus::LIST)
+		{
+			return EditorFocus::FIELDS;
+		}
+		return EditorFocus::LIST;
+	}
 } // namespace
 
 // ---------------------------------------------------------------------------

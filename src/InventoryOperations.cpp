@@ -16,348 +16,355 @@
 namespace InventoryOperations
 {
 
-// ===== CORE OPERATIONS =====
+	// ===== CORE OPERATIONS =====
 
-void add_item(FloorInventory& inventory, std::unique_ptr<Item> item)
-{
-	assert(item && "add_item: an empty item was put on the floor");
-
-	inventory.items.push_back(std::move(item));
-}
-
-InventoryResult<bool> add_item(
-	CreatureInventory& inventory,
-	std::unique_ptr<Item> item)
-{
-	if (!item)
+	void add_item(FloorInventory& inventory, std::unique_ptr<Item> item)
 	{
-		return std::unexpected(InventoryError::INVALID_ITEM);
+		assert(item && "add_item: an empty item was put on the floor");
+
+		inventory.items.push_back(std::move(item));
 	}
 
-	if (is_inventory_full(inventory))
+	InventoryResult<bool> add_item(
+		CreatureInventory& inventory,
+		std::unique_ptr<Item> item)
 	{
-		return std::unexpected(InventoryError::FULL);
-	}
-
-	inventory.items.push_back(std::move(item));
-
-	return true;
-}
-
-InventoryResult<bool> add_item_to_inventory(
-	CreatureInventory& inventory,
-	std::unique_ptr<Item> item,
-	const Creature& owner,
-	const DataManager& dataManager)
-{
-	if (!item)
-	{
-		return std::unexpected(InventoryError::INVALID_ITEM);
-	}
-
-	if (is_inventory_full(inventory))
-	{
-		return std::unexpected(InventoryError::FULL);
-	}
-
-	if (!is_within_weight_limit(*item, owner, dataManager))
-	{
-		return std::unexpected(InventoryError::CAPACITY_EXCEEDED);
-	}
-
-	inventory.items.push_back(std::move(item));
-
-	return true;
-}
-
-InventoryResult<std::unique_ptr<Item>> remove_item(
-	FloorInventory& inventory,
-	const Item& item)
-{
-	[[maybe_unused]] auto is_null = [](const auto& stored)
-	{
-		return !stored;
-	};
-	assert(
-		std::ranges::none_of(inventory.items, is_null) &&
-		"InventoryOperations::remove_item(FloorInventory): the floor holds a null item");
-
-	auto matches_item = [&item](const auto& stored)
-	{
-		return stored.get() == &item;
-	};
-	auto matches = inventory.items | std::views::filter(matches_item);
-
-	if (std::ranges::empty(matches))
-	{
-		return std::unexpected(InventoryError::ITEM_NOT_FOUND);
-	}
-
-	auto removedItem = std::move(matches.front());
-	optimize_inventory_storage(inventory);
-
-	return std::move(removedItem);
-}
-
-InventoryResult<std::unique_ptr<Item>> remove_item(
-	CreatureInventory& inventory,
-	const Item& item)
-{
-	[[maybe_unused]] auto is_null = [](const auto& stored)
-	{
-		return !stored;
-	};
-	assert(
-		std::ranges::none_of(inventory.items, is_null) &&
-		"InventoryOperations::remove_item(CreatureInventory): the pack holds a null item");
-
-	auto matches_item = [&item](const auto& stored)
-	{
-		return stored.get() == &item;
-	};
-	auto matches = inventory.items | std::views::filter(matches_item);
-
-	if (std::ranges::empty(matches))
-	{
-		return std::unexpected(InventoryError::ITEM_NOT_FOUND);
-	}
-
-	auto removedItem = std::move(matches.front());
-	optimize_inventory_storage(inventory);
-
-	return std::move(removedItem);
-}
-
-InventoryResult<std::unique_ptr<Item>> remove_item_at(
-	FloorInventory& inventory,
-	size_t index)
-{
-	if (index >= inventory.items.size())
-	{
-		return std::unexpected(InventoryError::ITEM_NOT_FOUND);
-	}
-
-	auto removedItem = std::move(inventory.items[index]);
-	inventory.items.erase(inventory.items.begin() + index);
-
-	optimize_inventory_storage(inventory);
-
-	return std::move(removedItem);
-}
-
-InventoryResult<std::unique_ptr<Item>> remove_item_at(
-	CreatureInventory& inventory,
-	size_t index)
-{
-	if (index >= inventory.items.size())
-	{
-		return std::unexpected(InventoryError::ITEM_NOT_FOUND);
-	}
-
-	auto removedItem = std::move(inventory.items[index]);
-	inventory.items.erase(inventory.items.begin() + index);
-
-	optimize_inventory_storage(inventory);
-
-	return std::move(removedItem);
-}
-
-InventoryResult<std::unique_ptr<Item>> remove_item_by_id(
-	CreatureInventory& inventory,
-	uint64_t uniqueId)
-{
-	[[maybe_unused]] auto is_null = [](const auto& item)
-	{
-		return !item;
-	};
-	assert(
-		std::ranges::none_of(inventory.items, is_null) &&
-		"InventoryOperations::remove_item_by_id: the pack holds a null item");
-
-	auto matches_id = [uniqueId](const auto& item)
-	{
-		return item->uniqueId == uniqueId;
-	};
-	auto matches = inventory.items | std::views::filter(matches_id);
-
-	if (std::ranges::empty(matches))
-	{
-		return std::unexpected(InventoryError::ITEM_NOT_FOUND);
-	}
-
-	auto removedItem = std::move(matches.front());
-	optimize_inventory_storage(inventory);
-
-	return std::move(removedItem);
-}
-
-// ===== CAPACITY MANAGEMENT =====
-
-namespace
-{
-// What the book allows for the clothes a character stands up in.
-constexpr int CLOTHING_POUNDS = 5;
-
-// The owner's rate, the archive printing none. See coin_weight's contract.
-constexpr int COINS_PER_POUND = 1000;
-} // namespace
-
-int coin_weight(int goldPieces) noexcept
-{
-	assert(
-		goldPieces >= 0 &&
-		"coin_weight: a purse cannot hold less than nothing");
-	return goldPieces / COINS_PER_POUND;
-}
-
-int get_total_weight(const Creature& owner) noexcept
-{
-	// "Add five pounds for clothing, if any is worn" (PHB, PDF page 160): a character starts from it, a monster from 0.
-	int total = (owner.get_creature_class() == CreatureClass::MONSTER) ?
-		0 :
-		CLOTHING_POUNDS;
-	for (const auto& item : owner.inventoryData.items)
-	{
-		assert(item && "the pack owns every entry it holds");
-		total += item->enhancement.weight;
-	}
-
-	// Worn gear is carried gear; only where it sits differs.
-	for (const EquippedItem& equipped : owner.equippedItems)
-	{
-		assert(equipped.item && "an equipment slot owns the item in it");
-		total += equipped.item->enhancement.weight;
-	}
-
-	// The purse is carried too. Gold never enters the pack - a pile picked up goes
-	// straight to the counter - so this is the only place its weight can be felt.
-	total += coin_weight(owner.get_gold());
-	return total;
-}
-
-int get_max_weight(
-	const Creature& owner,
-	const DataManager& dataManager) noexcept
-{
-	const StrengthAttributes row = dataManager.strength_for(
-		owner.get_strength(),
-		owner.get_exceptional_strength());
-	return row.maxCarried;
-}
-
-bool is_overloaded(
-	const Creature& owner,
-	const DataManager& dataManager) noexcept
-{
-	return get_total_weight(owner) > get_max_weight(owner, dataManager);
-}
-
-bool is_within_weight_limit(
-	const Item& item,
-	const Creature& owner,
-	const DataManager& dataManager) noexcept
-{
-	return get_total_weight(owner) + item.enhancement.weight <=
-		get_max_weight(owner, dataManager);
-}
-
-// ===== SEARCH OPERATIONS =====
-
-bool is_carrying(
-	const CreatureInventory& inventory,
-	std::string_view itemKey) noexcept
-{
-	[[maybe_unused]] auto is_null = [](const auto& item)
-	{
-		return !item;
-	};
-	assert(
-		std::ranges::none_of(inventory.items, is_null) &&
-		"InventoryOperations::is_carrying: the pack holds a null item");
-
-	auto has_key = [itemKey](const auto& item)
-	{
-		return item->itemKey == itemKey;
-	};
-
-	return std::ranges::any_of(inventory.items, has_key);
-}
-
-std::vector<Item*> items_at(FloorInventory& inventory, Vector2D position)
-{
-	[[maybe_unused]] auto is_null = [](const auto& item)
-	{
-		return !item;
-	};
-	assert(
-		std::ranges::none_of(inventory.items, is_null) &&
-		"InventoryOperations::items_at: the floor holds a null item");
-
-	std::vector<Item*> standing{};
-	for (const auto& item : inventory.items)
-	{
-		if (item->position == position)
+		if (!item)
 		{
-			standing.push_back(item.get());
+			return std::unexpected(InventoryError::INVALID_ITEM);
 		}
+
+		if (is_inventory_full(inventory))
+		{
+			return std::unexpected(InventoryError::FULL);
+		}
+
+		inventory.items.push_back(std::move(item));
+
+		return true;
 	}
-	return standing;
-}
 
-Item* find_item_by_id(
-	FloorInventory& inventory,
-	UniqueId::IdType uniqueId) noexcept
-{
-	[[maybe_unused]] auto is_null = [](const auto& item)
+	InventoryResult<bool> add_item_to_inventory(
+		CreatureInventory& inventory,
+		std::unique_ptr<Item> item,
+		const Creature& owner,
+		const DataManager& dataManager)
 	{
-		return !item;
-	};
-	assert(
-		std::ranges::none_of(inventory.items, is_null) &&
-		"InventoryOperations::find_item_by_id(FloorInventory): the floor holds a null item");
+		if (!item)
+		{
+			return std::unexpected(InventoryError::INVALID_ITEM);
+		}
 
-	auto has_id = [uniqueId](const auto& item)
+		if (is_inventory_full(inventory))
+		{
+			return std::unexpected(InventoryError::FULL);
+		}
+
+		if (!is_within_weight_limit(*item, owner, dataManager))
+		{
+			return std::unexpected(InventoryError::CAPACITY_EXCEEDED);
+		}
+
+		inventory.items.push_back(std::move(item));
+
+		return true;
+	}
+
+	InventoryResult<std::unique_ptr<Item>> remove_item(
+		FloorInventory& inventory,
+		const Item& item)
 	{
-		return item->uniqueId == uniqueId;
-	};
+		[[maybe_unused]] auto is_null = [](const auto& stored)
+		{
+			return !stored;
+		};
+		assert(
+			std::ranges::none_of(inventory.items, is_null) &&
+			"InventoryOperations::remove_item(FloorInventory): the floor holds a null item");
 
-	auto found = std::ranges::find_if(inventory.items, has_id);
-	return found != inventory.items.end() ? found->get() : nullptr;
-}
+		auto matches_item = [&item](const auto& stored)
+		{
+			return stored.get() == &item;
+		};
+		auto matches = inventory.items | std::views::filter(matches_item);
 
-Item* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept
-{
-	[[maybe_unused]] auto is_null = [](const auto& item)
+		if (std::ranges::empty(matches))
+		{
+			return std::unexpected(InventoryError::ITEM_NOT_FOUND);
+		}
+
+		auto removedItem = std::move(matches.front());
+		optimize_inventory_storage(inventory);
+
+		return std::move(removedItem);
+	}
+
+	InventoryResult<std::unique_ptr<Item>> remove_item(
+		CreatureInventory& inventory,
+		const Item& item)
 	{
-		return !item;
-	};
-	assert(
-		std::ranges::none_of(inventory.items, is_null) &&
-		"InventoryOperations::find_item_by_id(CreatureInventory): the pack holds a null item");
+		[[maybe_unused]] auto is_null = [](const auto& stored)
+		{
+			return !stored;
+		};
+		assert(
+			std::ranges::none_of(inventory.items, is_null) &&
+			"InventoryOperations::remove_item(CreatureInventory): the pack holds a null item");
 
-	auto found = std::ranges::find_if(
-		inventory.items,
-		[uniqueId](const auto& item) { return item->uniqueId == uniqueId; });
+		auto matches_item = [&item](const auto& stored)
+		{
+			return stored.get() == &item;
+		};
+		auto matches = inventory.items | std::views::filter(matches_item);
 
-	return found != inventory.items.end() ? found->get() : nullptr;
-}
+		if (std::ranges::empty(matches))
+		{
+			return std::unexpected(InventoryError::ITEM_NOT_FOUND);
+		}
 
-const Item* find_item_by_id(
-	const CreatureInventory& inventory,
-	uint64_t uniqueId) noexcept
-{
-	[[maybe_unused]] auto is_null = [](const auto& item)
+		auto removedItem = std::move(matches.front());
+		optimize_inventory_storage(inventory);
+
+		return std::move(removedItem);
+	}
+
+	InventoryResult<std::unique_ptr<Item>> remove_item_at(
+		FloorInventory& inventory,
+		size_t index)
 	{
-		return !item;
-	};
-	assert(
-		std::ranges::none_of(inventory.items, is_null) &&
-		"InventoryOperations::find_item_by_id(const CreatureInventory): the pack holds a null item");
+		if (index >= inventory.items.size())
+		{
+			return std::unexpected(InventoryError::ITEM_NOT_FOUND);
+		}
 
-	auto found = std::ranges::find_if(
-		inventory.items,
-		[uniqueId](const auto& item) { return item->uniqueId == uniqueId; });
+		auto removedItem = std::move(inventory.items[index]);
+		inventory.items.erase(inventory.items.begin() + index);
 
-	return found != inventory.items.end() ? found->get() : nullptr;
-}
+		optimize_inventory_storage(inventory);
+
+		return std::move(removedItem);
+	}
+
+	InventoryResult<std::unique_ptr<Item>> remove_item_at(
+		CreatureInventory& inventory,
+		size_t index)
+	{
+		if (index >= inventory.items.size())
+		{
+			return std::unexpected(InventoryError::ITEM_NOT_FOUND);
+		}
+
+		auto removedItem = std::move(inventory.items[index]);
+		inventory.items.erase(inventory.items.begin() + index);
+
+		optimize_inventory_storage(inventory);
+
+		return std::move(removedItem);
+	}
+
+	InventoryResult<std::unique_ptr<Item>> remove_item_by_id(
+		CreatureInventory& inventory,
+		uint64_t uniqueId)
+	{
+		[[maybe_unused]] auto is_null = [](const auto& item)
+		{
+			return !item;
+		};
+		assert(
+			std::ranges::none_of(inventory.items, is_null) &&
+			"InventoryOperations::remove_item_by_id: the pack holds a null item");
+
+		auto matches_id = [uniqueId](const auto& item)
+		{
+			return item->uniqueId == uniqueId;
+		};
+		auto matches = inventory.items | std::views::filter(matches_id);
+
+		if (std::ranges::empty(matches))
+		{
+			return std::unexpected(InventoryError::ITEM_NOT_FOUND);
+		}
+
+		auto removedItem = std::move(matches.front());
+		optimize_inventory_storage(inventory);
+
+		return std::move(removedItem);
+	}
+
+	// ===== CAPACITY MANAGEMENT =====
+
+	namespace
+	{
+		// What the book allows for the clothes a character stands up in.
+		constexpr int CLOTHING_POUNDS = 5;
+
+		// The owner's rate, the archive printing none. See coin_weight's
+		// contract.
+		constexpr int COINS_PER_POUND = 1000;
+	} // namespace
+
+	int coin_weight(int goldPieces) noexcept
+	{
+		assert(
+			goldPieces >= 0 &&
+			"coin_weight: a purse cannot hold less than nothing");
+		return goldPieces / COINS_PER_POUND;
+	}
+
+	int get_total_weight(const Creature& owner) noexcept
+	{
+		// "Add five pounds for clothing, if any is worn" (PHB, PDF page 160): a
+		// character starts from it, a monster from 0.
+		int total = (owner.get_creature_class() == CreatureClass::MONSTER) ?
+			0 :
+			CLOTHING_POUNDS;
+		for (const auto& item : owner.inventoryData.items)
+		{
+			assert(item && "the pack owns every entry it holds");
+			total += item->enhancement.weight;
+		}
+
+		// Worn gear is carried gear; only where it sits differs.
+		for (const EquippedItem& equipped : owner.equippedItems)
+		{
+			assert(equipped.item && "an equipment slot owns the item in it");
+			total += equipped.item->enhancement.weight;
+		}
+
+		// The purse is carried too. Gold never enters the pack - a pile picked
+		// up goes straight to the counter - so this is the only place its
+		// weight can be felt.
+		total += coin_weight(owner.get_gold());
+		return total;
+	}
+
+	int get_max_weight(
+		const Creature& owner,
+		const DataManager& dataManager) noexcept
+	{
+		const StrengthAttributes row = dataManager.strength_for(
+			owner.get_strength(),
+			owner.get_exceptional_strength());
+		return row.maxCarried;
+	}
+
+	bool is_overloaded(
+		const Creature& owner,
+		const DataManager& dataManager) noexcept
+	{
+		return get_total_weight(owner) > get_max_weight(owner, dataManager);
+	}
+
+	bool is_within_weight_limit(
+		const Item& item,
+		const Creature& owner,
+		const DataManager& dataManager) noexcept
+	{
+		return get_total_weight(owner) + item.enhancement.weight <=
+			get_max_weight(owner, dataManager);
+	}
+
+	// ===== SEARCH OPERATIONS =====
+
+	bool is_carrying(
+		const CreatureInventory& inventory,
+		std::string_view itemKey) noexcept
+	{
+		[[maybe_unused]] auto is_null = [](const auto& item)
+		{
+			return !item;
+		};
+		assert(
+			std::ranges::none_of(inventory.items, is_null) &&
+			"InventoryOperations::is_carrying: the pack holds a null item");
+
+		auto has_key = [itemKey](const auto& item)
+		{
+			return item->itemKey == itemKey;
+		};
+
+		return std::ranges::any_of(inventory.items, has_key);
+	}
+
+	std::vector<Item*> items_at(FloorInventory& inventory, Vector2D position)
+	{
+		[[maybe_unused]] auto is_null = [](const auto& item)
+		{
+			return !item;
+		};
+		assert(
+			std::ranges::none_of(inventory.items, is_null) &&
+			"InventoryOperations::items_at: the floor holds a null item");
+
+		std::vector<Item*> standing{};
+		for (const auto& item : inventory.items)
+		{
+			if (item->position == position)
+			{
+				standing.push_back(item.get());
+			}
+		}
+		return standing;
+	}
+
+	Item* find_item_by_id(
+		FloorInventory& inventory,
+		UniqueId::IdType uniqueId) noexcept
+	{
+		[[maybe_unused]] auto is_null = [](const auto& item)
+		{
+			return !item;
+		};
+		assert(
+			std::ranges::none_of(inventory.items, is_null) &&
+			"InventoryOperations::find_item_by_id(FloorInventory): the floor holds a null item");
+
+		auto has_id = [uniqueId](const auto& item)
+		{
+			return item->uniqueId == uniqueId;
+		};
+
+		auto found = std::ranges::find_if(inventory.items, has_id);
+		return found != inventory.items.end() ? found->get() : nullptr;
+	}
+
+	Item* find_item_by_id(
+		CreatureInventory& inventory,
+		uint64_t uniqueId) noexcept
+	{
+		[[maybe_unused]] auto is_null = [](const auto& item)
+		{
+			return !item;
+		};
+		assert(
+			std::ranges::none_of(inventory.items, is_null) &&
+			"InventoryOperations::find_item_by_id(CreatureInventory): the pack holds a null item");
+
+		auto found = std::ranges::find_if(
+			inventory.items,
+			[uniqueId](const auto& item)
+			{ return item->uniqueId == uniqueId; });
+
+		return found != inventory.items.end() ? found->get() : nullptr;
+	}
+
+	const Item* find_item_by_id(
+		const CreatureInventory& inventory,
+		uint64_t uniqueId) noexcept
+	{
+		[[maybe_unused]] auto is_null = [](const auto& item)
+		{
+			return !item;
+		};
+		assert(
+			std::ranges::none_of(inventory.items, is_null) &&
+			"InventoryOperations::find_item_by_id(const CreatureInventory): the pack holds a null item");
+
+		auto found = std::ranges::find_if(
+			inventory.items,
+			[uniqueId](const auto& item)
+			{ return item->uniqueId == uniqueId; });
+
+		return found != inventory.items.end() ? found->get() : nullptr;
+	}
 } // namespace InventoryOperations

@@ -45,8 +45,9 @@
 
 namespace
 {
-// Enough rounds that a clock loaded at its default cannot pass for the saved one.
-constexpr int ROUNDS_BEFORE_SAVING = 5;
+	// Enough rounds that a clock loaded at its default cannot pass for the
+	// saved one.
+	constexpr int ROUNDS_BEFORE_SAVING = 5;
 } // namespace
 
 // A game with its registries loaded, ready to start a run and save it.

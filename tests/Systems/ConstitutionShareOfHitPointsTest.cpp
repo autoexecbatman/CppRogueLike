@@ -40,14 +40,14 @@
 
 namespace
 {
-constexpr int STARTING_HP = 10;
-constexpr int FIGHTER_HIT_DIE = 10;
-// Table 3: +2 per die at 16, and every class gets it.
-constexpr int CONSTITUTION_THAT_GIVES_TWO = 16;
-constexpr int BONUS_PER_DIE_AT_SIXTEEN = 2;
-// Table 3 prints 0 from 7 through 14.
-constexpr int CONSTITUTION_THAT_GIVES_NOTHING = 10;
-constexpr int HIT_DIE_ROLL = 6;
+	constexpr int STARTING_HP = 10;
+	constexpr int FIGHTER_HIT_DIE = 10;
+	// Table 3: +2 per die at 16, and every class gets it.
+	constexpr int CONSTITUTION_THAT_GIVES_TWO = 16;
+	constexpr int BONUS_PER_DIE_AT_SIXTEEN = 2;
+	// Table 3 prints 0 from 7 through 14.
+	constexpr int CONSTITUTION_THAT_GIVES_NOTHING = 10;
+	constexpr int HIT_DIE_ROLL = 6;
 } // namespace
 
 class ConstitutionShareOfHitPointsTest : public ::testing::Test

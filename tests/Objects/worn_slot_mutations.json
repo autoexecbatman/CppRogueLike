@@ -27,8 +27,8 @@
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\tparams.equipmentSlot = parse_equipment_slot(\n\t\trequired_field(record, key, \"equipmentSlot\").get<std::string>());",
-      "mutated": "\tparams.equipmentSlot =EquipmentSlot::NONE;",
+      "original": "\t\tparams.equipmentSlot = parse_equipment_slot(\n\t\t\trequired_field(record, key, \"equipmentSlot\").get<std::string>());",
+      "mutated": "\t\tparams.equipmentSlot =EquipmentSlot::NONE;",
       "catches": "the field read off the data and thrown away, so no item names a slot at all"
     },
     {

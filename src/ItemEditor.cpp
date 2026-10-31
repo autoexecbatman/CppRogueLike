@@ -29,69 +29,71 @@ static_assert(
 namespace
 {
 
-// The item registry the editor edits, which every caller requires.
-//
-// Example:
-//   item_registry(ctx).get_all_keys().front();   // -> "amulet_of_health"
-ItemRegistry& item_registry(const GameContext& ctx)
-{
-	assert(
-		ctx.itemRegistry && "ItemEditorModel: called without an itemRegistry");
-	return *ctx.itemRegistry;
-}
-
-// A key made readable: underscores become spaces and each word is capitalised.
-//
-// Example:
-//   prettify_key("long_sword");   // -> "Long Sword"
-std::string prettify_key(std::string_view key)
-{
-	std::string result;
-	bool isWordStart = true;
-	for (char character : key)
+	// The item registry the editor edits, which every caller requires.
+	//
+	// Example:
+	//   item_registry(ctx).get_all_keys().front();   // -> "amulet_of_health"
+	ItemRegistry& item_registry(const GameContext& ctx)
 	{
-		if (character == '_')
-		{
-			result += ' ';
-			isWordStart = true;
-		}
-		else if (isWordStart)
-		{
-			result += static_cast<char>(
-				std::toupper(static_cast<unsigned char>(character)));
-			isWordStart = false;
-		}
-		else
-		{
-			result += character;
-		}
+		assert(
+			ctx.itemRegistry &&
+			"ItemEditorModel: called without an itemRegistry");
+		return *ctx.itemRegistry;
 	}
-	return result;
-}
 
-std::string_view consumable_effect_str(ConsumableEffect effect)
-{
-	switch (effect)
+	// A key made readable: underscores become spaces and each word is
+	// capitalised.
+	//
+	// Example:
+	//   prettify_key("long_sword");   // -> "Long Sword"
+	std::string prettify_key(std::string_view key)
 	{
-	case ConsumableEffect::NONE:
+		std::string result;
+		bool isWordStart = true;
+		for (char character : key)
+		{
+			if (character == '_')
+			{
+				result += ' ';
+				isWordStart = true;
+			}
+			else if (isWordStart)
+			{
+				result += static_cast<char>(
+					std::toupper(static_cast<unsigned char>(character)));
+				isWordStart = false;
+			}
+			else
+			{
+				result += character;
+			}
+		}
+		return result;
+	}
+
+	std::string_view consumable_effect_str(ConsumableEffect effect)
 	{
+		switch (effect)
+		{
+		case ConsumableEffect::NONE:
+		{
+			return "none";
+		}
+		case ConsumableEffect::HEAL:
+		{
+			return "heal";
+		}
+		case ConsumableEffect::ADD_BUFF:
+		{
+			return "add_buff";
+		}
+		case ConsumableEffect::FAIL:
+		{
+			return "fail";
+		}
+		}
 		return "none";
 	}
-	case ConsumableEffect::HEAL:
-	{
-		return "heal";
-	}
-	case ConsumableEffect::ADD_BUFF:
-	{
-		return "add_buff";
-	}
-	case ConsumableEffect::FAIL:
-	{
-		return "fail";
-	}
-	}
-	return "none";
-}
 
 } // namespace
 

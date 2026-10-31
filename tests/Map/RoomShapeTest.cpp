@@ -56,129 +56,132 @@
 namespace
 {
 
-constexpr int MAP_WIDTH = 120;
-constexpr int MAP_HEIGHT = 70;
+	constexpr int MAP_WIDTH = 120;
+	constexpr int MAP_HEIGHT = 70;
 
-// How many dungeons a case builds. The shape defect appeared in about one room in a
-// hundred, so a single map would have passed clean almost every time.
-// One dungeon per seed, from 1 to DUNGEONS, so a failure names the seed that reproduces it.
-constexpr unsigned int DUNGEONS = 40;
+	// How many dungeons a case builds. The shape defect appeared in about one
+	// room in a hundred, so a single map would have passed clean almost every
+	// time. One dungeon per seed, from 1 to DUNGEONS, so a failure names the
+	// seed that reproduces it.
+	constexpr unsigned int DUNGEONS = 40;
 
-const char* shape_name(RoomShape shape)
-{
-	switch (shape)
+	const char* shape_name(RoomShape shape)
 	{
-	case RoomShape::RECT:
-	{
-		return "RECT";
-	}
-	case RoomShape::L_SHAPE:
-	{
-		return "L_SHAPE";
-	}
-	case RoomShape::CHAMFERED:
-	{
-		return "CHAMFERED";
-	}
-	case RoomShape::CROSS:
-	{
-		return "CROSS";
-	}
-	case RoomShape::PILLARED:
-	{
-		return "PILLARED";
-	}
-	}
-	return "unnamed shape";
-}
-
-// A map whose room carving a test can call on one room at a time.
-class MapThatCarvesRooms : public Map
-{
-public:
-	using Map::create_room;
-	using Map::Map;
-};
-
-// Cells inside the room's own floor box that are wall. A shape carves these; a plain
-// rectangle has none.
-int walls_inside_box(const Map& map, const DungeonRoom& room)
-{
-	int walls = 0;
-	for (int row = room.row; row <= room.row_end(); ++row)
-	{
-		for (int col = room.col; col <= room.col_end(); ++col)
+		switch (shape)
 		{
-			if (map.get_tile_type(Vector2D{ col, row }) == TileType::WALL)
+		case RoomShape::RECT:
+		{
+			return "RECT";
+		}
+		case RoomShape::L_SHAPE:
+		{
+			return "L_SHAPE";
+		}
+		case RoomShape::CHAMFERED:
+		{
+			return "CHAMFERED";
+		}
+		case RoomShape::CROSS:
+		{
+			return "CROSS";
+		}
+		case RoomShape::PILLARED:
+		{
+			return "PILLARED";
+		}
+		}
+		return "unnamed shape";
+	}
+
+	// A map whose room carving a test can call on one room at a time.
+	class MapThatCarvesRooms : public Map
+	{
+	public:
+		using Map::create_room;
+		using Map::Map;
+	};
+
+	// Cells inside the room's own floor box that are wall. A shape carves
+	// these; a plain rectangle has none.
+	int walls_inside_box(const Map& map, const DungeonRoom& room)
+	{
+		int walls = 0;
+		for (int row = room.row; row <= room.row_end(); ++row)
+		{
+			for (int col = room.col; col <= room.col_end(); ++col)
 			{
-				++walls;
+				if (map.get_tile_type(Vector2D{ col, row }) == TileType::WALL)
+				{
+					++walls;
+				}
 			}
 		}
+		return walls;
 	}
-	return walls;
-}
 
-// Whether the given edge line of the room holds any floor. `alongRow` true reads the row
-// `line` across the room's columns; false reads the column `line` down its rows.
-bool edge_has_floor(
-	const Map& map,
-	const DungeonRoom& room,
-	int line,
-	bool alongRow)
-{
-	if (alongRow)
+	// Whether the given edge line of the room holds any floor. `alongRow` true
+	// reads the row `line` across the room's columns; false reads the column
+	// `line` down its rows.
+	bool edge_has_floor(
+		const Map& map,
+		const DungeonRoom& room,
+		int line,
+		bool alongRow)
 	{
-		for (int column = room.col; column <= room.col_end(); ++column)
+		if (alongRow)
 		{
-			if (map.get_tile_type(Vector2D{ column, line }) != TileType::WALL)
+			for (int column = room.col; column <= room.col_end(); ++column)
+			{
+				if (map.get_tile_type(Vector2D{ column, line }) !=
+					TileType::WALL)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		for (int row = room.row; row <= room.row_end(); ++row)
+		{
+			if (map.get_tile_type(Vector2D{ line, row }) != TileType::WALL)
 			{
 				return true;
 			}
 		}
 		return false;
 	}
-	for (int row = room.row; row <= room.row_end(); ++row)
+
+	// The character a room picture draws for one tile: wall, closed door,
+	// water, corridor, and floor for anything else.
+	//
+	// Example:
+	//   picture_glyph(TileType::WALL); // -> '#'
+	//   picture_glyph(TileType::FLOOR); // -> '.'
+	char picture_glyph(TileType type)
 	{
-		if (map.get_tile_type(Vector2D{ line, row }) != TileType::WALL)
+		switch (type)
 		{
-			return true;
+		case TileType::WALL:
+		{
+			return '#';
+		}
+		case TileType::CLOSED_DOOR:
+		{
+			return '+';
+		}
+		case TileType::WATER:
+		{
+			return '~';
+		}
+		case TileType::CORRIDOR:
+		{
+			return ',';
+		}
+		default:
+		{
+			return '.';
+		}
 		}
 	}
-	return false;
-}
-
-// The character a room picture draws for one tile: wall, closed door, water,
-// corridor, and floor for anything else.
-//
-// Example:
-//   picture_glyph(TileType::WALL); // -> '#'
-//   picture_glyph(TileType::FLOOR); // -> '.'
-char picture_glyph(TileType type)
-{
-	switch (type)
-	{
-	case TileType::WALL:
-	{
-		return '#';
-	}
-	case TileType::CLOSED_DOOR:
-	{
-		return '+';
-	}
-	case TileType::WATER:
-	{
-		return '~';
-	}
-	case TileType::CORRIDOR:
-	{
-		return ',';
-	}
-	default:
-	{
-		return '.';
-	}
-	}
-}
 
 } // namespace
 

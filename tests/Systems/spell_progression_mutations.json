@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\tconst std::size_t row =\n\t\tstd::min(static_cast<std::size_t>(level), table.size()) - 1;",
-      "mutated": "\tconst std::size_t row =\n\t\tstd::min(static_cast<std::size_t>(level),std::size_t{ 10 }) - 1;",
+      "original": "\t\tconst std::size_t row =\n\t\t\tstd::min(static_cast<std::size_t>(level), table.size()) - 1;",
+      "mutated": "\t\tconst std::size_t row =\n\t\t\tstd::min(static_cast<std::size_t>(level),std::size_t{ 10 }) - 1;",
       "catches": "the table clamped at 10th again, which is the row it used to stop at"
     },
     {
@@ -81,8 +81,8 @@
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "\tif (reachNow <= SpellSystem::highest_spell_level(\n\t\t\t\t\t\tcasterClass,\n\t\t\t\t\t\tnewLevel - 1,\n\t\t\t\t\t\twisdom,\n\t\t\t\t\t\t*ctx.dataManager))",
-      "mutated": "\tif (reachNow < SpellSystem::highest_spell_level(\n\t\t\t\t\t\tcasterClass,\n\t\t\t\t\t\tnewLevel - 1,\n\t\t\t\t\t\twisdom,\n\t\t\t\t\t\t*ctx.dataManager))",
+      "original": "\t\tif (reachNow <= SpellSystem::highest_spell_level(\n\t\t\t\t\t\t\tcasterClass,\n\t\t\t\t\t\t\tnewLevel - 1,\n\t\t\t\t\t\t\twisdom,\n\t\t\t\t\t\t\t*ctx.dataManager))",
+      "mutated": "\t\tif (reachNow < SpellSystem::highest_spell_level(\n\t\t\t\t\t\t\tcasterClass,\n\t\t\t\t\t\t\tnewLevel - 1,\n\t\t\t\t\t\t\twisdom,\n\t\t\t\t\t\t\t*ctx.dataManager))",
       "catches": "a level that opened nothing announcing a spell level all the same"
     },
     {

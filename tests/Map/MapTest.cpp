@@ -28,8 +28,8 @@
 
 namespace
 {
-constexpr int TEST_MAP_WIDTH = 20;
-constexpr int TEST_MAP_HEIGHT = 15;
+	constexpr int TEST_MAP_WIDTH = 20;
+	constexpr int TEST_MAP_HEIGHT = 15;
 } // namespace
 
 class MapTest : public ::testing::Test

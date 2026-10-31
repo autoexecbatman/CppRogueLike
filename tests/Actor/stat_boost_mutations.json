@@ -45,8 +45,8 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\tif (!wearer.toggle_equipment(item.uniqueId, slot, ctx))\n\t{\n\t\treturn false;\n\t}",
-      "mutated": "\tif (!wearer.toggle_equipment(item.uniqueId, slot, ctx))\n\t{\n\t\treturn true;\n\t}",
+      "original": "\t\tif (!wearer.toggle_equipment(item.uniqueId, slot, ctx))\n\t\t{\n\t\t\treturn false;\n\t\t}",
+      "mutated": "\t\tif (!wearer.toggle_equipment(item.uniqueId, slot, ctx))\n\t\t{\n\t\t\treturn true;\n\t\t}",
       "catches": "a failed removal using a turn"
     },
     {

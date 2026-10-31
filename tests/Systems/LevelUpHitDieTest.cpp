@@ -25,12 +25,14 @@
 
 namespace
 {
-// Level-ups measured per die. The chance that 200 real d12 rolls all land at 8 or under
-// is (8/12)^200, about 6e-36; that 200 d2 rolls all land on one face, about 1e-60.
-constexpr int LEVEL_UPS = 200;
-// Below 20, Table 3 floors a rolled hit die at 1 and nowhere higher, so any roll of 1 or
-// more is the gain itself; a roll of 0 would read as 1, which is why no test asks for one.
-constexpr int CONSTITUTION_WITH_NO_RAISED_FLOOR = 10;
+	// Level-ups measured per die. The chance that 200 real d12 rolls all land
+	// at 8 or under is (8/12)^200, about 6e-36; that 200 d2 rolls all land on
+	// one face, about 1e-60.
+	constexpr int LEVEL_UPS = 200;
+	// Below 20, Table 3 floors a rolled hit die at 1 and nowhere higher, so any
+	// roll of 1 or more is the gain itself; a roll of 0 would read as 1, which
+	// is why no test asks for one.
+	constexpr int CONSTITUTION_WITH_NO_RAISED_FLOOR = 10;
 } // namespace
 
 class LevelUpHitDieTest : public ::testing::Test

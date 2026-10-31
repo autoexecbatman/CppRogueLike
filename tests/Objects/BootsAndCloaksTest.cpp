@@ -35,16 +35,16 @@ using json = nlohmann::json;
 
 namespace
 {
-// The records items.json ships for each kind.
-constexpr std::array<std::string_view, 2> BOOT_KEYS{
-	"boots_of_elvenkind",
-	"boots_of_speed",
-};
-constexpr std::array<std::string_view, 3> CLOAK_KEYS{
-	"cloak_of_displacement",
-	"cloak_of_elvenkind",
-	"cloak_of_protection",
-};
+	// The records items.json ships for each kind.
+	constexpr std::array<std::string_view, 2> BOOT_KEYS{
+		"boots_of_elvenkind",
+		"boots_of_speed",
+	};
+	constexpr std::array<std::string_view, 3> CLOAK_KEYS{
+		"cloak_of_displacement",
+		"cloak_of_elvenkind",
+		"cloak_of_protection",
+	};
 } // namespace
 
 class BootsAndCloaksTest : public ::testing::Test

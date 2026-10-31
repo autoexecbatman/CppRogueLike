@@ -44,29 +44,30 @@ class Item;
 namespace AttackStrength
 {
 
-// What Strength adds to an attack's roll to hit and to its damage.
-struct Adjustment
-{
-	int hit{ 0 };
-	int damage{ 0 };
-};
+	// What Strength adds to an attack's roll to hit and to its damage.
+	struct Adjustment
+	{
+		int hit{ 0 };
+		int damage{ 0 };
+	};
 
-// The part of the attacker's Strength this attack takes, read from Table 1 at its score
-// and percentile, with the row of ogre gauntlets it wears beside a girdle of giant
-// strength. missileWeapon is what is fired on a ranged attack; with none, the attack is
-// natural or hurled and takes the whole row, as a swing does.
-//
-// Example, a Strength 3 archer:
-//   adjustment(
-//       dataManager, weakling, AttackKind::AttackKind::RANGED, &shortBow);
-//   // -> { -3, -1 }
-//   adjustment(
-//       dataManager, weakling, AttackKind::AttackKind::RANGED, &sling);
-//   // -> { 0, 0 }
-[[nodiscard]] Adjustment adjustment(
-	const DataManager& dataManager,
-	const Creature& attacker,
-	AttackKind::AttackKind kind,
-	const Item* missileWeapon);
+	// The part of the attacker's Strength this attack takes, read from Table 1
+	// at its score and percentile, with the row of ogre gauntlets it wears
+	// beside a girdle of giant strength. missileWeapon is what is fired on a
+	// ranged attack; with none, the attack is natural or hurled and takes the
+	// whole row, as a swing does.
+	//
+	// Example, a Strength 3 archer:
+	//   adjustment(
+	//       dataManager, weakling, AttackKind::AttackKind::RANGED, &shortBow);
+	//   // -> { -3, -1 }
+	//   adjustment(
+	//       dataManager, weakling, AttackKind::AttackKind::RANGED, &sling);
+	//   // -> { 0, 0 }
+	[[nodiscard]] Adjustment adjustment(
+		const DataManager& dataManager,
+		const Creature& attacker,
+		AttackKind::AttackKind kind,
+		const Item* missileWeapon);
 
 } // namespace AttackStrength

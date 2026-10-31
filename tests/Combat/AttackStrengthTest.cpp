@@ -39,8 +39,8 @@
 namespace
 {
 
-constexpr int STARTING_HP = 100;
-constexpr int DIE_ROLLED = 3;
+	constexpr int STARTING_HP = 100;
+	constexpr int DIE_ROLLED = 3;
 
 } // namespace
 

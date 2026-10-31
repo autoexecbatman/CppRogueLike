@@ -37,26 +37,27 @@
 
 namespace
 {
-constexpr int MAP_SIDE = 20;
+	constexpr int MAP_SIDE = 20;
 
-// The number of eight-way steps between two cells with nothing in the way.
-int chebyshev(Vector2D from, Vector2D to)
-{
-	return std::max(std::abs(from.x - to.x), std::abs(from.y - to.y));
-}
+	// The number of eight-way steps between two cells with nothing in the way.
+	int chebyshev(Vector2D from, Vector2D to)
+	{
+		return std::max(std::abs(from.x - to.x), std::abs(from.y - to.y));
+	}
 
-// A creature with what a move can touch: health for a trap, a dexterity for a web.
-std::unique_ptr<Creature> make_creature(const char* name)
-{
-	auto creature = std::make_unique<Creature>(
-		Vector2D{ 0, 0 },
-		ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK });
-	creature->experienceReward = std::make_unique<ExperienceReward>(0);
-	creature->healthPool = std::make_unique<HealthPool>(30);
-	creature->armorClass = std::make_unique<ArmorClass>(10);
-	creature->set_dexterity(10);
-	return creature;
-}
+	// A creature with what a move can touch: health for a trap, a dexterity for
+	// a web.
+	std::unique_ptr<Creature> make_creature(const char* name)
+	{
+		auto creature = std::make_unique<Creature>(
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK });
+		creature->experienceReward = std::make_unique<ExperienceReward>(0);
+		creature->healthPool = std::make_unique<HealthPool>(30);
+		creature->armorClass = std::make_unique<ArmorClass>(10);
+		creature->set_dexterity(10);
+		return creature;
+	}
 } // namespace
 
 class PathfindingTest : public ::testing::Test

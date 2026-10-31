@@ -26,37 +26,41 @@
 
 namespace
 {
-constexpr int DUNGEON_LEVEL = 1;
+	constexpr int DUNGEON_LEVEL = 1;
 
-// Whether a distribution lists a monster by name.
-bool lists(
-	const std::vector<MonsterPercentage>& distribution,
-	std::string_view name)
-{
-	auto is_named = [name](const MonsterPercentage& entry)
+	// Whether a distribution lists a monster by name.
+	bool lists(
+		const std::vector<MonsterPercentage>& distribution,
+		std::string_view name)
 	{
-		return entry.name == name;
-	};
-	return std::ranges::any_of(distribution, is_named);
-}
-
-// The first monster the registry draws at a level: positive weight, and a depth range
-// that admits the level, where a levelMaximum of 0 means no upper bound. Chosen from the
-// data, since a monster named by hand may not be drawn at that level at all.
-std::string first_drawable(const MonsterRegistry& monsters, int dungeonLevel)
-{
-	for (const std::string& key : monsters.get_all_keys())
-	{
-		const MonsterParams& params = monsters.get_params(key);
-		const bool admitsLevel = params.levelMinimum <= dungeonLevel &&
-			(params.levelMaximum == 0 || dungeonLevel <= params.levelMaximum);
-		if (params.baseWeight > 0 && admitsLevel)
+		auto is_named = [name](const MonsterPercentage& entry)
 		{
-			return key;
-		}
+			return entry.name == name;
+		};
+		return std::ranges::any_of(distribution, is_named);
 	}
-	return {};
-}
+
+	// The first monster the registry draws at a level: positive weight, and a
+	// depth range that admits the level, where a levelMaximum of 0 means no
+	// upper bound. Chosen from the data, since a monster named by hand may not
+	// be drawn at that level at all.
+	std::string first_drawable(
+		const MonsterRegistry& monsters,
+		int dungeonLevel)
+	{
+		for (const std::string& key : monsters.get_all_keys())
+		{
+			const MonsterParams& params = monsters.get_params(key);
+			const bool admitsLevel = params.levelMinimum <= dungeonLevel &&
+				(params.levelMaximum == 0 ||
+					dungeonLevel <= params.levelMaximum);
+			if (params.baseWeight > 0 && admitsLevel)
+			{
+				return key;
+			}
+		}
+		return {};
+	}
 } // namespace
 
 // Silencing a monster in the registry takes it out of the very next distribution, with

@@ -37,42 +37,45 @@
 
 namespace
 {
-constexpr std::string_view FIRST_RUN_LINE{ "first run marker line" };
-constexpr std::string_view FIRST_RUN_PART{ "first run unfinished part" };
-// HungerSystem's STARVING_THRESHOLD: the hunger a character who starved to death reached.
-constexpr int STARVING_HUNGER = 900;
-constexpr int FIRST_RUN_ROUNDS = 5;
+	constexpr std::string_view FIRST_RUN_LINE{ "first run marker line" };
+	constexpr std::string_view FIRST_RUN_PART{ "first run unfinished part" };
+	// HungerSystem's STARVING_THRESHOLD: the hunger a character who starved to
+	// death reached.
+	constexpr int STARVING_HUNGER = 900;
+	constexpr int FIRST_RUN_ROUNDS = 5;
 
-// Every line the HUD's panel and the death screen read, joined part by part, and the
-// line the screen shows as current.
-std::vector<std::string> every_line_on_screen(const MessageSystem& messages)
-{
-	std::vector<std::string> lines{ messages.get_current_message() };
-	for (size_t entry = 0; entry < messages.get_stored_message_count(); ++entry)
+	// Every line the HUD's panel and the death screen read, joined part by
+	// part, and the line the screen shows as current.
+	std::vector<std::string> every_line_on_screen(const MessageSystem& messages)
 	{
-		std::string line{};
-		for (const LogMessage& part : messages.get_attack_message_at(entry))
+		std::vector<std::string> lines{ messages.get_current_message() };
+		for (
+			size_t entry = 0; entry < messages.get_stored_message_count();
+			++entry)
 		{
-			line += part.text;
+			std::string line{};
+			for (const LogMessage& part : messages.get_attack_message_at(entry))
+			{
+				line += part.text;
+			}
+			lines.push_back(line);
 		}
-		lines.push_back(line);
+		return lines;
 	}
-	return lines;
-}
 
-bool is_any_line_holding(
-	const std::vector<std::string>& lines,
-	std::string_view text)
-{
-	for (const std::string& line : lines)
+	bool is_any_line_holding(
+		const std::vector<std::string>& lines,
+		std::string_view text)
 	{
-		if (line.find(text) != std::string::npos)
+		for (const std::string& line : lines)
 		{
-			return true;
+			if (line.find(text) != std::string::npos)
+			{
+				return true;
+			}
 		}
+		return false;
 	}
-	return false;
-}
 } // namespace
 
 class NewRunStateTest : public ::testing::Test

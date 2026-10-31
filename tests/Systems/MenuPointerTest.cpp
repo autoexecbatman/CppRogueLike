@@ -26,18 +26,22 @@
 
 namespace
 {
-// BaseMenu is abstract and menu_row_at is for derived menus, so the probe is one.
-// Nothing here draws; the geometry is answered from the menu's own box.
-class ProbeMenu : public BaseMenu
-{
-public:
-	void menu(GameContext&) override {}
-
-	std::optional<size_t> row_at(int pixelX, int pixelY, size_t rowCount) const
+	// BaseMenu is abstract and menu_row_at is for derived menus, so the probe
+	// is one. Nothing here draws; the geometry is answered from the menu's own
+	// box.
+	class ProbeMenu : public BaseMenu
 	{
-		return menu_row_at(pixelX, pixelY, rowCount);
-	}
-};
+	public:
+		void menu(GameContext&) override {}
+
+		std::optional<size_t> row_at(
+			int pixelX,
+			int pixelY,
+			size_t rowCount) const
+		{
+			return menu_row_at(pixelX, pixelY, rowCount);
+		}
+	};
 } // namespace
 
 class MenuPointerTest : public ::testing::Test

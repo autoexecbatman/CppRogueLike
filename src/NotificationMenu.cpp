@@ -10,8 +10,9 @@
 namespace
 {
 
-// The row every notification ends with, and part of what sets the menu's width.
-constexpr std::string_view PROMPT{ "[ press any key ]" };
+	// The row every notification ends with, and part of what sets the menu's
+	// width.
+	constexpr std::string_view PROMPT{ "[ press any key ]" };
 
 } // namespace
 

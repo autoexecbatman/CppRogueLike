@@ -22,175 +22,178 @@
 namespace
 {
 
-// ---------------------------------------------------------------------------
-// Behavior construction
-// ---------------------------------------------------------------------------
-template <typename Behavior>
-Behavior create_stat_behavior(const ItemParams& params)
-{
-	Behavior item;
-	item.strBonus = params.strBonus;
-	item.dexBonus = params.dexBonus;
-	item.conBonus = params.conBonus;
-	item.intBonus = params.intBonus;
-	item.wisBonus = params.wisBonus;
-	item.chaBonus = params.chaBonus;
-	item.effect = params.effect;
-	item.bonus = params.effectBonus;
-	item.application = params.application;
-	item.exceptionalStrength = params.exceptionalStrength;
-	return item;
-}
-
-ItemBehavior create_behavior(const ItemParams& params)
-{
-	switch (params.pickableType)
+	// -------------------------------------------------------------------------
+	// Behavior construction
+	// -------------------------------------------------------------------------
+	template <typename Behavior>
+	Behavior create_stat_behavior(const ItemParams& params)
 	{
-
-	case PickableType::CONSUMABLE:
-	{
-		return Consumable{
-			params.consumableEffect,
-			params.consumableAmount,
-			params.duration,
-			params.durationUnit,
-			params.consumableBuffType,
-			params.application,
-			params.agesYears,
-		};
+		Behavior item;
+		item.strBonus = params.strBonus;
+		item.dexBonus = params.dexBonus;
+		item.conBonus = params.conBonus;
+		item.intBonus = params.intBonus;
+		item.wisBonus = params.wisBonus;
+		item.chaBonus = params.chaBonus;
+		item.effect = params.effect;
+		item.bonus = params.effectBonus;
+		item.application = params.application;
+		item.exceptionalStrength = params.exceptionalStrength;
+		return item;
 	}
 
-	case PickableType::TARGETED_SCROLL:
+	ItemBehavior create_behavior(const ItemParams& params)
 	{
-		return TargetedScroll{
-			params.targetMode,
-			params.scrollAnimation,
-			params.range,
-			params.damage,
-			params.confuseTurns,
-			params.consumableBuffType,
-			params.duration,
-			params.durationUnit,
-		};
+		switch (params.pickableType)
+		{
+
+		case PickableType::CONSUMABLE:
+		{
+			return Consumable{
+				params.consumableEffect,
+				params.consumableAmount,
+				params.duration,
+				params.durationUnit,
+				params.consumableBuffType,
+				params.application,
+				params.agesYears,
+			};
+		}
+
+		case PickableType::TARGETED_SCROLL:
+		{
+			return TargetedScroll{
+				params.targetMode,
+				params.scrollAnimation,
+				params.range,
+				params.damage,
+				params.confuseTurns,
+				params.consumableBuffType,
+				params.duration,
+				params.durationUnit,
+			};
+		}
+
+		case PickableType::TELEPORTER:
+		{
+			return Teleporter{};
+		}
+
+		case PickableType::IDENTIFY_SCROLL:
+		{
+			return IdentifyScroll{};
+		}
+
+		case PickableType::WEAPON:
+		{
+			return Weapon{
+				params.ranged,
+				params.handRequirement,
+				params.weaponSize,
+				params.strengthRating,
+			};
+		}
+
+		case PickableType::SHIELD:
+		{
+			return Shield{};
+		}
+
+		case PickableType::ARMOR:
+		{
+			return Armor{ params.acBonus };
+		}
+
+		case PickableType::QUEST_ITEM:
+		{
+			return Amulet{};
+		}
+
+		case PickableType::MAGICAL_HELM:
+		{
+			return MagicalHelm{
+				params.effect,
+				params.effectBonus,
+				HelmCommand::DORMANT,
+			};
+		}
+
+		case PickableType::MAGICAL_RING:
+		{
+			return MagicalRing{ params.effect, params.effectBonus };
+		}
+
+		case PickableType::JEWELRY_AMULET:
+		{
+			return create_stat_behavior<JewelryAmulet>(params);
+		}
+
+		case PickableType::GAUNTLETS:
+		{
+			return create_stat_behavior<Gauntlets>(params);
+		}
+
+		case PickableType::GIRDLE:
+		{
+			return create_stat_behavior<Girdle>(params);
+		}
+
+		case PickableType::FOOD:
+		{
+			return Food{ params.nutritionValue };
+		}
+
+		case PickableType::GOLD_COIN:
+		{
+			// A gold item is worth what it is authored to be worth. A rolled
+			// pile is the exception and sets its own amount afterwards, in
+			// create_with_gold_amount.
+			return Gold{ params.value };
+		}
+
+		case PickableType::DUNGEON_KEY:
+		{
+			return DungeonKey{};
+		}
+
+		// Corpses are made by Creature::die, not from an item record.
+		case PickableType::CORPSE_FOOD:
+		{
+			throw std::runtime_error(
+				std::format(
+					"ItemCreator: unhandled pickable_type {}",
+					encode_pickable_type(params.pickableType)));
+		}
+		}
+
+		// Every enumerator has its arm above, so only a value none names is
+		// here.
+		throw std::logic_error(
+			"create_behavior: a PickableType no enumerator names");
 	}
 
-	case PickableType::TELEPORTER:
+	// An item built from params: its behaviour, key, class, value, carry weight
+	// and the tile the content registry holds for its key.
+	std::unique_ptr<Item> make_item(
+		std::string_view key,
+		const ItemParams& params,
+		Vector2D pos,
+		ContentRegistry& tiles)
 	{
-		return Teleporter{};
+		TileRef tile = tiles.get_tile(key);
+		auto item = std::make_unique<Item>(
+			pos,
+			ActorData{ tile, std::string{ params.name }, params.color });
+		item->behavior = create_behavior(params);
+		item->itemKey = std::string{ key };
+		item->appearance = params.appearance;
+		item->itemClass = params.itemClass;
+		item->set_value(params.value);
+		// What it costs to carry, which is a different question from how often
+		// it appears.
+		item->enhancement.weight = params.weight;
+		return item;
 	}
-
-	case PickableType::IDENTIFY_SCROLL:
-	{
-		return IdentifyScroll{};
-	}
-
-	case PickableType::WEAPON:
-	{
-		return Weapon{
-			params.ranged,
-			params.handRequirement,
-			params.weaponSize,
-			params.strengthRating,
-		};
-	}
-
-	case PickableType::SHIELD:
-	{
-		return Shield{};
-	}
-
-	case PickableType::ARMOR:
-	{
-		return Armor{ params.acBonus };
-	}
-
-	case PickableType::QUEST_ITEM:
-	{
-		return Amulet{};
-	}
-
-	case PickableType::MAGICAL_HELM:
-	{
-		return MagicalHelm{
-			params.effect,
-			params.effectBonus,
-			HelmCommand::DORMANT,
-		};
-	}
-
-	case PickableType::MAGICAL_RING:
-	{
-		return MagicalRing{ params.effect, params.effectBonus };
-	}
-
-	case PickableType::JEWELRY_AMULET:
-	{
-		return create_stat_behavior<JewelryAmulet>(params);
-	}
-
-	case PickableType::GAUNTLETS:
-	{
-		return create_stat_behavior<Gauntlets>(params);
-	}
-
-	case PickableType::GIRDLE:
-	{
-		return create_stat_behavior<Girdle>(params);
-	}
-
-	case PickableType::FOOD:
-	{
-		return Food{ params.nutritionValue };
-	}
-
-	case PickableType::GOLD_COIN:
-	{
-		// A gold item is worth what it is authored to be worth. A rolled pile is the
-		// exception and sets its own amount afterwards, in create_with_gold_amount.
-		return Gold{ params.value };
-	}
-
-	case PickableType::DUNGEON_KEY:
-	{
-		return DungeonKey{};
-	}
-
-	// Corpses are made by Creature::die, not from an item record.
-	case PickableType::CORPSE_FOOD:
-	{
-		throw std::runtime_error(
-			std::format(
-				"ItemCreator: unhandled pickable_type {}",
-				encode_pickable_type(params.pickableType)));
-	}
-	}
-
-	// Every enumerator has its arm above, so only a value none names is here.
-	throw std::logic_error(
-		"create_behavior: a PickableType no enumerator names");
-}
-
-// An item built from params: its behaviour, key, class, value, carry weight and the
-// tile the content registry holds for its key.
-std::unique_ptr<Item> make_item(
-	std::string_view key,
-	const ItemParams& params,
-	Vector2D pos,
-	ContentRegistry& tiles)
-{
-	TileRef tile = tiles.get_tile(key);
-	auto item = std::make_unique<Item>(
-		pos,
-		ActorData{ tile, std::string{ params.name }, params.color });
-	item->behavior = create_behavior(params);
-	item->itemKey = std::string{ key };
-	item->appearance = params.appearance;
-	item->itemClass = params.itemClass;
-	item->set_value(params.value);
-	// What it costs to carry, which is a different question from how often it appears.
-	item->enhancement.weight = params.weight;
-	return item;
-}
 
 } // namespace
 

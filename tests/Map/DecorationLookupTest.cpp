@@ -27,8 +27,8 @@
 
 namespace
 {
-constexpr Vector2D THE_TILE{ 5, 5 };
-constexpr Vector2D ANOTHER_TILE{ 9, 9 };
+	constexpr Vector2D THE_TILE{ 5, 5 };
+	constexpr Vector2D ANOTHER_TILE{ 9, 9 };
 } // namespace
 
 class DecorationLookupTest : public ::testing::Test

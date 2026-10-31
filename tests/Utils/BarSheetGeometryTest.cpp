@@ -20,104 +20,111 @@
 
 namespace
 {
-// One cell of the sheet, as which of its columns and rows paint anything. Loaded off
-// disk rather than through the renderer, which would want a window and a graphics
-// device for a question about pixels.
-class BarSheet
-{
-private:
-	Image image{};
-
-	[[nodiscard]] bool is_painted(int cellCol, int cellRow, int col, int row)
-		const
+	// One cell of the sheet, as which of its columns and rows paint anything.
+	// Loaded off disk rather than through the renderer, which would want a
+	// window and a graphics device for a question about pixels.
+	class BarSheet
 	{
-		const Color pixel = GetImageColor(
-			image,
-			cellCol * GUI_BARS_CELL_SIZE + col,
-			cellRow * GUI_BARS_CELL_SIZE + row);
-		return pixel.a > 127;
-	}
+	private:
+		Image image{};
 
-public:
-	BarSheet()
-	{
-		const std::string path =
-			Paths::resolve("DawnLike/GUI/Bars.png").string();
-		image = LoadImage(path.c_str());
-	}
-
-	~BarSheet()
-	{
-		if (image.data != nullptr)
+		[[nodiscard]] bool is_painted(
+			int cellCol,
+			int cellRow,
+			int col,
+			int row) const
 		{
-			UnloadImage(image);
+			const Color pixel = GetImageColor(
+				image,
+				cellCol * GUI_BARS_CELL_SIZE + col,
+				cellRow * GUI_BARS_CELL_SIZE + row);
+			return pixel.a > 127;
 		}
-	}
 
-	BarSheet(const BarSheet&) = delete;
-	BarSheet& operator=(const BarSheet&) = delete;
-	BarSheet(BarSheet&&) = delete;
-	BarSheet& operator=(BarSheet&&) = delete;
-
-	[[nodiscard]] bool is_loaded() const { return image.data != nullptr; }
-
-	[[nodiscard]] int width() const { return image.width; }
-
-	[[nodiscard]] int height() const { return image.height; }
-
-	// Left to right: whether each column of the cell paints anything at all.
-	[[nodiscard]] std::vector<bool> painted_columns(
-		int cellCol,
-		int cellRow) const
-	{
-		std::vector<bool> columns(GUI_BARS_CELL_SIZE, false);
-		for (int col = 0; col < GUI_BARS_CELL_SIZE; ++col)
+	public:
+		BarSheet()
 		{
-			for (int row = 0; row < GUI_BARS_CELL_SIZE; ++row)
+			const std::string path =
+				Paths::resolve("DawnLike/GUI/Bars.png").string();
+			image = LoadImage(path.c_str());
+		}
+
+		~BarSheet()
+		{
+			if (image.data != nullptr)
 			{
-				if (is_painted(cellCol, cellRow, col, row))
-				{
-					columns[col] = true;
-					break;
-				}
+				UnloadImage(image);
 			}
 		}
-		return columns;
-	}
 
-	// Top to bottom: whether each row of the cell paints anything at all.
-	[[nodiscard]] std::vector<bool> painted_rows(int cellCol, int cellRow) const
-	{
-		std::vector<bool> rows(GUI_BARS_CELL_SIZE, false);
-		for (int row = 0; row < GUI_BARS_CELL_SIZE; ++row)
+		BarSheet(const BarSheet&) = delete;
+		BarSheet& operator=(const BarSheet&) = delete;
+		BarSheet(BarSheet&&) = delete;
+		BarSheet& operator=(BarSheet&&) = delete;
+
+		[[nodiscard]] bool is_loaded() const { return image.data != nullptr; }
+
+		[[nodiscard]] int width() const { return image.width; }
+
+		[[nodiscard]] int height() const { return image.height; }
+
+		// Left to right: whether each column of the cell paints anything at
+		// all.
+		[[nodiscard]] std::vector<bool> painted_columns(
+			int cellCol,
+			int cellRow) const
 		{
+			std::vector<bool> columns(GUI_BARS_CELL_SIZE, false);
 			for (int col = 0; col < GUI_BARS_CELL_SIZE; ++col)
 			{
-				if (is_painted(cellCol, cellRow, col, row))
+				for (int row = 0; row < GUI_BARS_CELL_SIZE; ++row)
 				{
-					rows[row] = true;
-					break;
+					if (is_painted(cellCol, cellRow, col, row))
+					{
+						columns[col] = true;
+						break;
+					}
 				}
 			}
+			return columns;
 		}
-		return rows;
+
+		// Top to bottom: whether each row of the cell paints anything at all.
+		[[nodiscard]] std::vector<bool> painted_rows(
+			int cellCol,
+			int cellRow) const
+		{
+			std::vector<bool> rows(GUI_BARS_CELL_SIZE, false);
+			for (int row = 0; row < GUI_BARS_CELL_SIZE; ++row)
+			{
+				for (int col = 0; col < GUI_BARS_CELL_SIZE; ++col)
+				{
+					if (is_painted(cellCol, cellRow, col, row))
+					{
+						rows[row] = true;
+						break;
+					}
+				}
+			}
+			return rows;
+		}
+	};
+
+	// Where each piece sits on the sheet, as data/tiles/tile_config.json
+	// addresses them.
+	constexpr int RIM_COL = 0;
+	constexpr int RIM_ROW = 0;
+	constexpr int FILL_COL = 1;
+	constexpr int FILL_ROW = 0;
+	constexpr int CAP_LEFT_COL = 0;
+	constexpr int CAP_LEFT_ROW = 2;
+	constexpr int CAP_RIGHT_COL = 1;
+	constexpr int CAP_RIGHT_ROW = 2;
+
+	int count_painted(const std::vector<bool>& flags)
+	{
+		return static_cast<int>(std::count(flags.begin(), flags.end(), true));
 	}
-};
-
-// Where each piece sits on the sheet, as data/tiles/tile_config.json addresses them.
-constexpr int RIM_COL = 0;
-constexpr int RIM_ROW = 0;
-constexpr int FILL_COL = 1;
-constexpr int FILL_ROW = 0;
-constexpr int CAP_LEFT_COL = 0;
-constexpr int CAP_LEFT_ROW = 2;
-constexpr int CAP_RIGHT_COL = 1;
-constexpr int CAP_RIGHT_ROW = 2;
-
-int count_painted(const std::vector<bool>& flags)
-{
-	return static_cast<int>(std::count(flags.begin(), flags.end(), true));
-}
 } // namespace
 
 TEST(BarSheetGeometryTest, TheSheetIsTwoCellsAcrossAndThreeDown)

@@ -19,112 +19,112 @@ static_assert(
 namespace
 {
 
-// The spell registry the editor edits, which every caller requires.
-//
-// Example:
-//   spell_registry(ctx).get_all_keys().front();   // -> "cure_light_wounds"
-SpellRegistry& spell_registry(const GameContext& ctx)
-{
-	assert(
-		ctx.spellRegistry &&
-		"SpellEditorModel: called without a spellRegistry");
-	return *ctx.spellRegistry;
-}
+	// The spell registry the editor edits, which every caller requires.
+	//
+	// Example:
+	//   spell_registry(ctx).get_all_keys().front();   // -> "cure_light_wounds"
+	SpellRegistry& spell_registry(const GameContext& ctx)
+	{
+		assert(
+			ctx.spellRegistry &&
+			"SpellEditorModel: called without a spellRegistry");
+		return *ctx.spellRegistry;
+	}
 
-// The mark a spell's list row carries: "C" in blue for a cleric spell, "W" in
-// orange for a wizard spell or one both classes cast.
-//
-// Example:
-//   class_tag(SpellClass::CLERIC).text;   // -> "C"
-RowTag class_tag(SpellClass spellClass)
-{
-	if (spellClass == SpellClass::CLERIC)
+	// The mark a spell's list row carries: "C" in blue for a cleric spell, "W"
+	// in orange for a wizard spell or one both classes cast.
+	//
+	// Example:
+	//   class_tag(SpellClass::CLERIC).text;   // -> "C"
+	RowTag class_tag(SpellClass spellClass)
 	{
-		return RowTag{ "C", Color{ 100, 220, 255, 255 } };
+		if (spellClass == SpellClass::CLERIC)
+		{
+			return RowTag{ "C", Color{ 100, 220, 255, 255 } };
+		}
+		return RowTag{ "W", Color{ 255, 160, 80, 255 } };
 	}
-	return RowTag{ "W", Color{ 255, 160, 80, 255 } };
-}
 
-std::string effect_type_name(SpellEffectType effectType)
-{
-	switch (effectType)
+	std::string effect_type_name(SpellEffectType effectType)
 	{
-	case SpellEffectType::CURE_LIGHT_WOUNDS:
-	{
-		return "Cure Light Wounds";
+		switch (effectType)
+		{
+		case SpellEffectType::CURE_LIGHT_WOUNDS:
+		{
+			return "Cure Light Wounds";
+		}
+		case SpellEffectType::BLESS:
+		{
+			return "Bless";
+		}
+		case SpellEffectType::SANCTUARY:
+		{
+			return "Sanctuary";
+		}
+		case SpellEffectType::HOLD_PERSON:
+		{
+			return "Hold Person";
+		}
+		case SpellEffectType::SILENCE:
+		{
+			return "Silence";
+		}
+		case SpellEffectType::MAGIC_MISSILE:
+		{
+			return "Magic Missile";
+		}
+		case SpellEffectType::SHIELD:
+		{
+			return "Shield";
+		}
+		case SpellEffectType::SLEEP:
+		{
+			return "Sleep";
+		}
+		case SpellEffectType::INVISIBILITY:
+		{
+			return "Invisibility";
+		}
+		case SpellEffectType::WEB:
+		{
+			return "Web";
+		}
+		case SpellEffectType::FIREBALL:
+		{
+			return "Fireball";
+		}
+		case SpellEffectType::TELEPORT:
+		{
+			return "Teleport";
+		}
+		default:
+		{
+			return "None";
+		}
+		}
 	}
-	case SpellEffectType::BLESS:
-	{
-		return "Bless";
-	}
-	case SpellEffectType::SANCTUARY:
-	{
-		return "Sanctuary";
-	}
-	case SpellEffectType::HOLD_PERSON:
-	{
-		return "Hold Person";
-	}
-	case SpellEffectType::SILENCE:
-	{
-		return "Silence";
-	}
-	case SpellEffectType::MAGIC_MISSILE:
-	{
-		return "Magic Missile";
-	}
-	case SpellEffectType::SHIELD:
-	{
-		return "Shield";
-	}
-	case SpellEffectType::SLEEP:
-	{
-		return "Sleep";
-	}
-	case SpellEffectType::INVISIBILITY:
-	{
-		return "Invisibility";
-	}
-	case SpellEffectType::WEB:
-	{
-		return "Web";
-	}
-	case SpellEffectType::FIREBALL:
-	{
-		return "Fireball";
-	}
-	case SpellEffectType::TELEPORT:
-	{
-		return "Teleport";
-	}
-	default:
-	{
-		return "None";
-	}
-	}
-}
 
-SpellEffectType effect_type_next(SpellEffectType effectType)
-{
-	int value = static_cast<int>(effectType) + 1;
-	constexpr int LAST = static_cast<int>(SpellEffectType::NONE);
-	if (value > LAST)
+	SpellEffectType effect_type_next(SpellEffectType effectType)
 	{
-		value = 0;
+		int value = static_cast<int>(effectType) + 1;
+		constexpr int LAST = static_cast<int>(SpellEffectType::NONE);
+		if (value > LAST)
+		{
+			value = 0;
+		}
+		return static_cast<SpellEffectType>(value);
 	}
-	return static_cast<SpellEffectType>(value);
-}
 
-SpellEffectType effect_type_prev(SpellEffectType effectType)
-{
-	int value = static_cast<int>(effectType) - 1;
-	constexpr int LAST = static_cast<int>(SpellEffectType::NONE);
-	if (value < 0)
+	SpellEffectType effect_type_prev(SpellEffectType effectType)
 	{
-		value = LAST;
+		int value = static_cast<int>(effectType) - 1;
+		constexpr int LAST = static_cast<int>(SpellEffectType::NONE);
+		if (value < 0)
+		{
+			value = LAST;
+		}
+		return static_cast<SpellEffectType>(value);
 	}
-	return static_cast<SpellEffectType>(value);
-}
 
 } // namespace
 

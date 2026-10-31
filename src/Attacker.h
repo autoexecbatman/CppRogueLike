@@ -143,30 +143,32 @@ enum class ShotImpact
 namespace RangedShot
 {
 
-// The picture an attack's outcome earns: blood only where it landed, and no missile
-// where none was loosed.
-//
-// Example:
-//   RangedShot::impact_of(AttackResult::AttackResult::LANDED);
-//   // -> ShotImpact::MISSILE_AND_BLOOD
-//   RangedShot::impact_of(AttackResult::AttackResult::MISSED);
-//   // -> ShotImpact::MISSILE
-//   RangedShot::impact_of(AttackResult::AttackResult::PREVENTED);
-//   // -> ShotImpact::NOTHING
-[[nodiscard]] ShotImpact impact_of(AttackResult::AttackResult result) noexcept;
+	// The picture an attack's outcome earns: blood only where it landed, and no
+	// missile where none was loosed.
+	//
+	// Example:
+	//   RangedShot::impact_of(AttackResult::AttackResult::LANDED);
+	//   // -> ShotImpact::MISSILE_AND_BLOOD
+	//   RangedShot::impact_of(AttackResult::AttackResult::MISSED);
+	//   // -> ShotImpact::MISSILE
+	//   RangedShot::impact_of(AttackResult::AttackResult::PREVENTED);
+	//   // -> ShotImpact::NOTHING
+	[[nodiscard]] ShotImpact impact_of(
+		AttackResult::AttackResult result) noexcept;
 
-// One ranged attack by `shooter` at `target`, for the player and the monsters alike.
-// The attack resolves first, so its messages print as the missile leaves, and the
-// missile drawn after it is the one impact_of names. Refuses a shooter with no attacker.
-//
-// Example, an archer two squares from the player:
-//   RangedShot::fire(archer, player, ctx);
-//   // -> AttackResult::AttackResult::LANDED; a bolt, then blood
-//   RangedShot::fire(archer, corpse, ctx);
-//   // -> AttackResult::AttackResult::PREVENTED; nothing drawn
-AttackResult::AttackResult fire(
-	Creature& shooter,
-	Creature& target,
-	GameContext& ctx);
+	// One ranged attack by `shooter` at `target`, for the player and the
+	// monsters alike. The attack resolves first, so its messages print as the
+	// missile leaves, and the missile drawn after it is the one impact_of
+	// names. Refuses a shooter with no attacker.
+	//
+	// Example, an archer two squares from the player:
+	//   RangedShot::fire(archer, player, ctx);
+	//   // -> AttackResult::AttackResult::LANDED; a bolt, then blood
+	//   RangedShot::fire(archer, corpse, ctx);
+	//   // -> AttackResult::AttackResult::PREVENTED; nothing drawn
+	AttackResult::AttackResult fire(
+		Creature& shooter,
+		Creature& target,
+		GameContext& ctx);
 
 } // namespace RangedShot

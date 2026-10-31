@@ -64,28 +64,28 @@
 namespace
 {
 
-struct ContextAction
-{
-	std::string label{};
-	std::function<void(GameContext&)> execute{};
-};
-
-// Direction table -- static const, not a mutable global
-// ---------------------------------------------------------------------------
-const std::unordered_map<Controls, Vector2D>& direction_map()
-{
-	static const std::unordered_map<Controls, Vector2D> moves = {
-		{ Controls::UP_ARROW, DIR_N },
-		{ Controls::DOWN_ARROW, DIR_S },
-		{ Controls::LEFT_ARROW, DIR_W },
-		{ Controls::RIGHT_ARROW, DIR_E },
-		{ Controls::KP_NW, DIR_NW },
-		{ Controls::KP_NE, DIR_NE },
-		{ Controls::KP_SW, DIR_SW },
-		{ Controls::KP_SE, DIR_SE },
+	struct ContextAction
+	{
+		std::string label{};
+		std::function<void(GameContext&)> execute{};
 	};
-	return moves;
-}
+
+	// Direction table -- static const, not a mutable global
+	// -------------------------------------------------------------------------
+	const std::unordered_map<Controls, Vector2D>& direction_map()
+	{
+		static const std::unordered_map<Controls, Vector2D> moves = {
+			{ Controls::UP_ARROW, DIR_N },
+			{ Controls::DOWN_ARROW, DIR_S },
+			{ Controls::LEFT_ARROW, DIR_W },
+			{ Controls::RIGHT_ARROW, DIR_E },
+			{ Controls::KP_NW, DIR_NW },
+			{ Controls::KP_NE, DIR_NE },
+			{ Controls::KP_SW, DIR_SW },
+			{ Controls::KP_SE, DIR_SE },
+		};
+		return moves;
+	}
 
 } // namespace
 
@@ -584,7 +584,9 @@ void PlayerController::strike(Creature& target, GameContext& ctx)
 
 	// One swing, priced by the rate, so a faster attacker comes round sooner (Table 58).
 	playerOwner.attacker->attack(target, AttackKind::AttackKind::MELEE, ctx);
-	spend_player_action(ctx, AttackRate::attack_cost(playerOwner.get_attacks_per_round()));
+	spend_player_action(
+		ctx,
+		AttackRate::attack_cost(playerOwner.get_attacks_per_round()));
 	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
 }
 

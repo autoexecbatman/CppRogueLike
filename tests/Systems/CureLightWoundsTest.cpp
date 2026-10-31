@@ -39,14 +39,14 @@
 
 namespace
 {
-constexpr int MAX_HP = 20;
-// Table 5 gives a caster this wise no chance of failure, so the fizzle gate
-// short-circuits and consumes none of the rolls queued below.
-constexpr int WISDOM_THAT_NEVER_FIZZLES = 18;
-// Enough casts that a d8 shows both its ends; the seed makes it the same run
-// every time.
-constexpr int CASTS_FOR_THE_RANGE = 200;
-constexpr unsigned int RANGE_SEED = 20260928u;
+	constexpr int MAX_HP = 20;
+	// Table 5 gives a caster this wise no chance of failure, so the fizzle gate
+	// short-circuits and consumes none of the rolls queued below.
+	constexpr int WISDOM_THAT_NEVER_FIZZLES = 18;
+	// Enough casts that a d8 shows both its ends; the seed makes it the same
+	// run every time.
+	constexpr int CASTS_FOR_THE_RANGE = 200;
+	constexpr unsigned int RANGE_SEED = 20260928u;
 } // namespace
 
 class CureLightWoundsTest : public ::testing::Test

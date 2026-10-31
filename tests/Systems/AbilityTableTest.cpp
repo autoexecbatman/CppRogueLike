@@ -40,149 +40,152 @@
 
 namespace
 {
-// One plain row of Table 1: the score, hit, damage, weight allowance and maximum press.
-struct StrengthRow
-{
-	int score{ 0 };
-	int hit{ 0 };
-	int damage{ 0 };
-	int weightAllowance{ 0 };
-	int maximumPress{ 0 };
-};
+	// One plain row of Table 1: the score, hit, damage, weight allowance and
+	// maximum press.
+	struct StrengthRow
+	{
+		int score{ 0 };
+		int hit{ 0 };
+		int damage{ 0 };
+		int weightAllowance{ 0 };
+		int maximumPress{ 0 };
+	};
 
-// One exceptional band of Table 1: its percentile range and the same four columns.
-struct StrengthBand
-{
-	int from{ 0 };
-	int to{ 0 };
-	int hit{ 0 };
-	int damage{ 0 };
-	int weightAllowance{ 0 };
-	int maximumPress{ 0 };
-};
+	// One exceptional band of Table 1: its percentile range and the same four
+	// columns.
+	struct StrengthBand
+	{
+		int from{ 0 };
+		int to{ 0 };
+		int hit{ 0 };
+		int damage{ 0 };
+		int weightAllowance{ 0 };
+		int maximumPress{ 0 };
+	};
 
-// Table 1's parenthesised Open Doors figure for one score and percentile.
-struct LockedDoorChance
-{
-	int score{ 0 };
-	int exceptional{ 0 };
-	int chance{ 0 };
-};
+	// Table 1's parenthesised Open Doors figure for one score and percentile.
+	struct LockedDoorChance
+	{
+		int score{ 0 };
+		int exceptional{ 0 };
+		int chance{ 0 };
+	};
 
-// One row of Table 3.
-struct ConstitutionRow
-{
-	int score{ 0 };
-	int hitPoints{ 0 };
-	int systemShock{ 0 };
-	int resurrection{ 0 };
-	int poisonSave{ 0 };
-	int regenerationTurns{ 0 };
-};
+	// One row of Table 3.
+	struct ConstitutionRow
+	{
+		int score{ 0 };
+		int hitPoints{ 0 };
+		int systemShock{ 0 };
+		int resurrection{ 0 };
+		int poisonSave{ 0 };
+		int regenerationTurns{ 0 };
+	};
 
-const std::vector<StrengthRow> TABLE_ONE{
-	{ 1, -5, -4, 1, 3 },
-	{ 2, -3, -2, 1, 5 },
-	{ 3, -3, -1, 5, 10 },
-	{ 4, -2, -1, 10, 25 },
-	{ 5, -2, -1, 10, 25 },
-	{ 6, -1, 0, 20, 55 },
-	{ 7, -1, 0, 20, 55 },
-	{ 8, 0, 0, 35, 90 },
-	{ 9, 0, 0, 35, 90 },
-	{ 10, 0, 0, 40, 115 },
-	{ 11, 0, 0, 40, 115 },
-	{ 12, 0, 0, 45, 140 },
-	{ 13, 0, 0, 45, 140 },
-	{ 14, 0, 0, 55, 170 },
-	{ 15, 0, 0, 55, 170 },
-	{ 16, 0, 1, 70, 195 },
-	{ 17, 1, 1, 85, 220 },
-	{ 18, 1, 2, 110, 255 },
-	{ 19, 3, 7, 485, 640 },
-	{ 20, 3, 8, 535, 700 },
-	{ 21, 4, 9, 635, 810 },
-	{ 22, 4, 10, 785, 970 },
-	{ 23, 5, 11, 935, 1130 },
-	{ 24, 6, 12, 1235, 1440 },
-	{ 25, 7, 14, 1535, 1750 },
-};
+	const std::vector<StrengthRow> TABLE_ONE{
+		{ 1, -5, -4, 1, 3 },
+		{ 2, -3, -2, 1, 5 },
+		{ 3, -3, -1, 5, 10 },
+		{ 4, -2, -1, 10, 25 },
+		{ 5, -2, -1, 10, 25 },
+		{ 6, -1, 0, 20, 55 },
+		{ 7, -1, 0, 20, 55 },
+		{ 8, 0, 0, 35, 90 },
+		{ 9, 0, 0, 35, 90 },
+		{ 10, 0, 0, 40, 115 },
+		{ 11, 0, 0, 40, 115 },
+		{ 12, 0, 0, 45, 140 },
+		{ 13, 0, 0, 45, 140 },
+		{ 14, 0, 0, 55, 170 },
+		{ 15, 0, 0, 55, 170 },
+		{ 16, 0, 1, 70, 195 },
+		{ 17, 1, 1, 85, 220 },
+		{ 18, 1, 2, 110, 255 },
+		{ 19, 3, 7, 485, 640 },
+		{ 20, 3, 8, 535, 700 },
+		{ 21, 4, 9, 635, 810 },
+		{ 22, 4, 10, 785, 970 },
+		{ 23, 5, 11, 935, 1130 },
+		{ 24, 6, 12, 1235, 1440 },
+		{ 25, 7, 14, 1535, 1750 },
+	};
 
-const std::vector<StrengthBand> EXCEPTIONAL_BANDS{
-	{ 1, 50, 1, 3, 135, 280 },
-	{ 51, 75, 2, 3, 160, 305 },
-	{ 76, 90, 2, 4, 185, 330 },
-	{ 91, 99, 2, 5, 235, 380 },
-	{ 100, 100, 3, 6, 335, 480 },
-};
+	const std::vector<StrengthBand> EXCEPTIONAL_BANDS{
+		{ 1, 50, 1, 3, 135, 280 },
+		{ 51, 75, 2, 3, 160, 305 },
+		{ 76, 90, 2, 4, 185, 330 },
+		{ 91, 99, 2, 5, 235, 380 },
+		{ 100, 100, 3, 6, 335, 480 },
+	};
 
-// Every row from 1 to 18/76-90 prints no parenthesised figure. 18/91-99 prints 15(3),
-// 18/00 16(6), and 19 to 25 16(8), 17(10), 17(12), 18(14), 18(16), 19(17) and 19(18).
-// Each band is read at both ends of its percentile range.
-const std::vector<LockedDoorChance> TABLE_ONE_LOCKED_DOORS{
-	{ 1, 0, 0 },
-	{ 2, 0, 0 },
-	{ 3, 0, 0 },
-	{ 4, 0, 0 },
-	{ 5, 0, 0 },
-	{ 6, 0, 0 },
-	{ 7, 0, 0 },
-	{ 8, 0, 0 },
-	{ 9, 0, 0 },
-	{ 10, 0, 0 },
-	{ 11, 0, 0 },
-	{ 12, 0, 0 },
-	{ 13, 0, 0 },
-	{ 14, 0, 0 },
-	{ 15, 0, 0 },
-	{ 16, 0, 0 },
-	{ 17, 0, 0 },
-	{ 18, 0, 0 },
-	{ 18, 1, 0 },
-	{ 18, 50, 0 },
-	{ 18, 51, 0 },
-	{ 18, 75, 0 },
-	{ 18, 76, 0 },
-	{ 18, 90, 0 },
-	{ 18, 91, 3 },
-	{ 18, 99, 3 },
-	{ 18, 100, 6 },
-	{ 19, 0, 8 },
-	{ 20, 0, 10 },
-	{ 21, 0, 12 },
-	{ 22, 0, 14 },
-	{ 23, 0, 16 },
-	{ 24, 0, 17 },
-	{ 25, 0, 18 },
-};
+	// Every row from 1 to 18/76-90 prints no parenthesised figure. 18/91-99
+	// prints 15(3), 18/00 16(6), and 19 to 25 16(8), 17(10), 17(12), 18(14),
+	// 18(16), 19(17) and 19(18). Each band is read at both ends of its
+	// percentile range.
+	const std::vector<LockedDoorChance> TABLE_ONE_LOCKED_DOORS{
+		{ 1, 0, 0 },
+		{ 2, 0, 0 },
+		{ 3, 0, 0 },
+		{ 4, 0, 0 },
+		{ 5, 0, 0 },
+		{ 6, 0, 0 },
+		{ 7, 0, 0 },
+		{ 8, 0, 0 },
+		{ 9, 0, 0 },
+		{ 10, 0, 0 },
+		{ 11, 0, 0 },
+		{ 12, 0, 0 },
+		{ 13, 0, 0 },
+		{ 14, 0, 0 },
+		{ 15, 0, 0 },
+		{ 16, 0, 0 },
+		{ 17, 0, 0 },
+		{ 18, 0, 0 },
+		{ 18, 1, 0 },
+		{ 18, 50, 0 },
+		{ 18, 51, 0 },
+		{ 18, 75, 0 },
+		{ 18, 76, 0 },
+		{ 18, 90, 0 },
+		{ 18, 91, 3 },
+		{ 18, 99, 3 },
+		{ 18, 100, 6 },
+		{ 19, 0, 8 },
+		{ 20, 0, 10 },
+		{ 21, 0, 12 },
+		{ 22, 0, 14 },
+		{ 23, 0, 16 },
+		{ 24, 0, 17 },
+		{ 25, 0, 18 },
+	};
 
-const std::vector<ConstitutionRow> TABLE_THREE{
-	{ 1, -3, 25, 30, -2, 0 },
-	{ 2, -2, 30, 35, -1, 0 },
-	{ 3, -2, 35, 40, 0, 0 },
-	{ 4, -1, 40, 45, 0, 0 },
-	{ 5, -1, 45, 50, 0, 0 },
-	{ 6, -1, 50, 55, 0, 0 },
-	{ 7, 0, 55, 60, 0, 0 },
-	{ 8, 0, 60, 65, 0, 0 },
-	{ 9, 0, 65, 70, 0, 0 },
-	{ 10, 0, 70, 75, 0, 0 },
-	{ 11, 0, 75, 80, 0, 0 },
-	{ 12, 0, 80, 85, 0, 0 },
-	{ 13, 0, 85, 90, 0, 0 },
-	{ 14, 0, 88, 92, 0, 0 },
-	{ 15, 1, 90, 94, 0, 0 },
-	{ 16, 2, 95, 96, 0, 0 },
-	{ 17, 3, 97, 98, 0, 0 },
-	{ 18, 4, 99, 100, 0, 0 },
-	{ 19, 5, 99, 100, 1, 0 },
-	{ 20, 5, 99, 100, 1, 6 },
-	{ 21, 6, 99, 100, 2, 5 },
-	{ 22, 6, 99, 100, 2, 4 },
-	{ 23, 6, 99, 100, 3, 3 },
-	{ 24, 7, 99, 100, 3, 2 },
-	{ 25, 7, 100, 100, 4, 1 },
-};
+	const std::vector<ConstitutionRow> TABLE_THREE{
+		{ 1, -3, 25, 30, -2, 0 },
+		{ 2, -2, 30, 35, -1, 0 },
+		{ 3, -2, 35, 40, 0, 0 },
+		{ 4, -1, 40, 45, 0, 0 },
+		{ 5, -1, 45, 50, 0, 0 },
+		{ 6, -1, 50, 55, 0, 0 },
+		{ 7, 0, 55, 60, 0, 0 },
+		{ 8, 0, 60, 65, 0, 0 },
+		{ 9, 0, 65, 70, 0, 0 },
+		{ 10, 0, 70, 75, 0, 0 },
+		{ 11, 0, 75, 80, 0, 0 },
+		{ 12, 0, 80, 85, 0, 0 },
+		{ 13, 0, 85, 90, 0, 0 },
+		{ 14, 0, 88, 92, 0, 0 },
+		{ 15, 1, 90, 94, 0, 0 },
+		{ 16, 2, 95, 96, 0, 0 },
+		{ 17, 3, 97, 98, 0, 0 },
+		{ 18, 4, 99, 100, 0, 0 },
+		{ 19, 5, 99, 100, 1, 0 },
+		{ 20, 5, 99, 100, 1, 6 },
+		{ 21, 6, 99, 100, 2, 5 },
+		{ 22, 6, 99, 100, 2, 4 },
+		{ 23, 6, 99, 100, 3, 3 },
+		{ 24, 7, 99, 100, 3, 2 },
+		{ 25, 7, 100, 100, 4, 1 },
+	};
 } // namespace
 
 class AbilityTableTest : public ::testing::Test

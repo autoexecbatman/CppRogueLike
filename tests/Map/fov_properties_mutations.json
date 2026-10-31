@@ -39,8 +39,8 @@
     },
     {
       "file": "src/Map.cpp",
-      "original": "\tcase TileType::OPEN_DOOR:\n\tcase TileType::WATER:\n",
-      "mutated": "\tcase TileType::OPEN_DOOR:\n",
+      "original": "\t\tcase TileType::OPEN_DOOR:\n\t\tcase TileType::WATER:\n",
+      "mutated": "\t\tcase TileType::OPEN_DOOR:\n",
       "catches": "water a wall in the grid"
     },
     {

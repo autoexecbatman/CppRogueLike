@@ -33,31 +33,32 @@
 
 namespace
 {
-constexpr std::array<int, THIEF_SKILL_COUNT> NO_RACE{ 0, 0, 0, 0, 0, 0, 0, 0 };
-
-// Table 27's dwarf column, in ALL_THIEF_SKILL order.
-constexpr std::array<int, THIEF_SKILL_COUNT>
-	DWARF{ 0, 10, 15, 0, 0, 0, -10, -5 };
-
-// Table 27's halfling column.
-constexpr std::array<int, THIEF_SKILL_COUNT>
-	HALFLING{ 5, 5, 5, 10, 15, 5, -15, -5 };
-
-ThiefSkillAllocation first_level(
-	std::array<int, THIEF_SKILL_COUNT> race,
-	int dexterity,
-	ThiefArmor armor)
-{
 	constexpr std::array<int, THIEF_SKILL_COUNT>
-		NOTHING_SPENT{ 0, 0, 0, 0, 0, 0, 0, 0 };
-	return ThiefSkillAllocation{
-		NOTHING_SPENT,
-		thief_skill_grant_at_level(1),
-		race,
-		dexterity,
-		armor,
-	};
-}
+		NO_RACE{ 0, 0, 0, 0, 0, 0, 0, 0 };
+
+	// Table 27's dwarf column, in ALL_THIEF_SKILL order.
+	constexpr std::array<int, THIEF_SKILL_COUNT>
+		DWARF{ 0, 10, 15, 0, 0, 0, -10, -5 };
+
+	// Table 27's halfling column.
+	constexpr std::array<int, THIEF_SKILL_COUNT>
+		HALFLING{ 5, 5, 5, 10, 15, 5, -15, -5 };
+
+	ThiefSkillAllocation first_level(
+		std::array<int, THIEF_SKILL_COUNT> race,
+		int dexterity,
+		ThiefArmor armor)
+	{
+		constexpr std::array<int, THIEF_SKILL_COUNT>
+			NOTHING_SPENT{ 0, 0, 0, 0, 0, 0, 0, 0 };
+		return ThiefSkillAllocation{
+			NOTHING_SPENT,
+			thief_skill_grant_at_level(1),
+			race,
+			dexterity,
+			armor,
+		};
+	}
 } // namespace
 
 // Table 26, read straight down.

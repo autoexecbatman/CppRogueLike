@@ -41,62 +41,62 @@
 
 namespace
 {
-struct BookSpider
-{
-	std::string_view key{};
-	int armorClass{ 0 };
-	int hitDiceCount{ 0 };
-	int hitDiceBonus{ 0 };
-	int thaco{ 0 };
-	std::string_view damage{};
-	int morale{ 0 };
-	int xp{ 0 };
-	CreatureSize size{ CreatureSize::MEDIUM };
-	IntelligenceRating rating{ IntelligenceRating::AVERAGE };
-	AiType ai{ AiType::SPIDER };
-};
+	struct BookSpider
+	{
+		std::string_view key{};
+		int armorClass{ 0 };
+		int hitDiceCount{ 0 };
+		int hitDiceBonus{ 0 };
+		int thaco{ 0 };
+		std::string_view damage{};
+		int morale{ 0 };
+		int xp{ 0 };
+		CreatureSize size{ CreatureSize::MEDIUM };
+		IntelligenceRating rating{ IntelligenceRating::AVERAGE };
+		AiType ai{ AiType::SPIDER };
+	};
 
-constexpr BookSpider BOOK_SPIDERS[] = {
-	{
-		"spider_small",
-		8,
-		1,
-		-1,
-		20,
-		"1",
-		10,
-		65,
-		CreatureSize::TINY,
-		IntelligenceRating::LOW,
-		AiType::SPIDER,
-	},
-	{
-		"spider_giant",
-		6,
-		2,
-		2,
-		19,
-		"1d6",
-		8,
-		270,
-		CreatureSize::MEDIUM,
-		IntelligenceRating::ANIMAL,
-		AiType::GIANT_SPIDER,
-	},
-	{
-		"spider_weaver",
-		4,
-		3,
-		3,
-		17,
-		"1d8",
-		13,
-		420,
-		CreatureSize::LARGE,
-		IntelligenceRating::LOW,
-		AiType::WEB_SPINNER,
-	},
-};
+	constexpr BookSpider BOOK_SPIDERS[] = {
+		{
+			"spider_small",
+			8,
+			1,
+			-1,
+			20,
+			"1",
+			10,
+			65,
+			CreatureSize::TINY,
+			IntelligenceRating::LOW,
+			AiType::SPIDER,
+		},
+		{
+			"spider_giant",
+			6,
+			2,
+			2,
+			19,
+			"1d6",
+			8,
+			270,
+			CreatureSize::MEDIUM,
+			IntelligenceRating::ANIMAL,
+			AiType::GIANT_SPIDER,
+		},
+		{
+			"spider_weaver",
+			4,
+			3,
+			3,
+			17,
+			"1d8",
+			13,
+			420,
+			CreatureSize::LARGE,
+			IntelligenceRating::LOW,
+			AiType::WEB_SPINNER,
+		},
+	};
 } // namespace
 
 class SpiderStatBlockTest : public ::testing::Test

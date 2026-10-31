@@ -30,7 +30,7 @@
 namespace
 {
 
-constexpr int ROUNDS_WATCHED = 120;
+	constexpr int ROUNDS_WATCHED = 120;
 
 } // namespace
 

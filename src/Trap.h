@@ -146,51 +146,59 @@ public:
 namespace TrapSearch
 {
 
-// The search action: every live trap on the eight tiles around the searcher is
-// searched once, a "You find a hidden <trap>." for each one found, and "You find no
-// traps." when nothing was. Returns the rounds it took, or nullopt with "You don't
-// know how to look for traps." for a character who can find no kind of trap, who
-// spends no turn.
-//
-// Reach and the dwarf's time are this game's rules, stated deviations. The book puts
-// a dwarf's detection "within 10 feet" and gives it no time; this game states no
-// feet-per-tile scale to convert the distance with (Vision.h, where the torch's 15
-// feet is 6 tiles), so the search covers what a thief's touch covers, the adjacent
-// tiles, and one search action reaches one area. A dwarf's look takes 1 round. A
-// thief's is the book's 1d10 rounds, and a dwarf thief takes the thief's time.
-//
-// Every trap's roll is made before the 1d10 for the time.
-//
-// Example, a thief with Find/Remove Traps 45 beside a hidden dart trap:
-//   TrapSearch::search_around(thief, ctx);   // d100 40, d10 7 -> 7; the trap is found
-// A dwarf fighter beside nothing:
-//   TrapSearch::search_around(dwarf, ctx);   // no roll        -> 1; "You find no traps."
-// A human fighter:
-//   TrapSearch::search_around(fighter, ctx); // no roll        -> nullopt
-[[nodiscard]] std::optional<int> search_around(
-	Player& searcher,
-	GameContext& ctx);
+	// The search action: every live trap on the eight tiles around the searcher
+	// is searched once, a "You find a hidden <trap>." for each one found, and
+	// "You find no traps." when nothing was. Returns the rounds it took, or
+	// nullopt with "You don't know how to look for traps." for a character who
+	// can find no kind of trap, who spends no turn.
+	//
+	// Reach and the dwarf's time are this game's rules, stated deviations. The
+	// book puts a dwarf's detection "within 10 feet" and gives it no time; this
+	// game states no feet-per-tile scale to convert the distance with
+	// (Vision.h, where the torch's 15 feet is 6 tiles), so the search covers
+	// what a thief's touch covers, the adjacent tiles, and one search action
+	// reaches one area. A dwarf's look takes 1 round. A thief's is the book's
+	// 1d10 rounds, and a dwarf thief takes the thief's time.
+	//
+	// Every trap's roll is made before the 1d10 for the time.
+	//
+	// Example, a thief with Find/Remove Traps 45 beside a hidden dart trap:
+	//   TrapSearch::search_around(thief, ctx);
+	//   // d100 40, d10 7 -> 7; the trap is found
+	// A dwarf fighter beside nothing:
+	//   TrapSearch::search_around(dwarf, ctx);
+	//   // no roll        -> 1; "You find no traps."
+	// A human fighter:
+	//   TrapSearch::search_around(fighter, ctx); // no roll        -> nullopt
+	[[nodiscard]] std::optional<int> search_around(
+		Player& searcher,
+		GameContext& ctx);
 
 } // namespace TrapSearch
 
 namespace TrapDisarm
 {
 
-// The disarm action on one tile: works on the live trap there, says what came of it,
-// and returns the rounds it took, or nullopt for a refusal that made no roll - nothing
-// there, a trap not yet found, one already disarmed, no skill, or this level's attempt
-// already spent. An attempt that rolled, whatever it rolled, takes the book's 1d10
-// rounds (PHB page 87), rolled after the attempt.
-//
-// Example, a thief with Find/Remove Traps 45 facing a found dart trap to the east:
-//   TrapDisarm::disarm_at(thief, eastTile, ctx);   // d100 40, d10 7 -> 7; "You successfully disarm the trap."
-//   TrapDisarm::disarm_at(thief, eastTile, ctx);   // no roll        -> nullopt; "That trap is already disarmed."
-// Facing bare floor:
-//   TrapDisarm::disarm_at(thief, westTile, ctx);   // no roll        -> nullopt; "There is no trap there."
-[[nodiscard]] std::optional<int> disarm_at(
-	Player& thief,
-	Vector2D target,
-	GameContext& ctx);
+	// The disarm action on one tile: works on the live trap there, says what
+	// came of it, and returns the rounds it took, or nullopt for a refusal that
+	// made no roll - nothing there, a trap not yet found, one already disarmed,
+	// no skill, or this level's attempt already spent. An attempt that rolled,
+	// whatever it rolled, takes the book's 1d10 rounds (PHB page 87), rolled
+	// after the attempt.
+	//
+	// Example, a thief with Find/Remove Traps 45 facing a found dart trap to
+	// the east:
+	//   TrapDisarm::disarm_at(thief, eastTile, ctx);
+	//   // d100 40, d10 7 -> 7; "You successfully disarm the trap."
+	//   TrapDisarm::disarm_at(thief, eastTile, ctx);
+	//   // no roll        -> nullopt; "That trap is already disarmed."
+	// Facing bare floor:
+	//   TrapDisarm::disarm_at(thief, westTile, ctx);
+	//   // no roll        -> nullopt; "There is no trap there."
+	[[nodiscard]] std::optional<int> disarm_at(
+		Player& thief,
+		Vector2D target,
+		GameContext& ctx);
 
 } // namespace TrapDisarm
 

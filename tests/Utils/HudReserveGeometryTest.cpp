@@ -25,19 +25,21 @@
 
 namespace
 {
-// The zooms the renderer actually offers, smallest to largest.
-constexpr int TILE_SIZES[] = { 16, 32, 48, 64, 96, 128 };
+	// The zooms the renderer actually offers, smallest to largest.
+	constexpr int TILE_SIZES[] = { 16, 32, 48, 64, 96, 128 };
 
-// The font is loaded once at a fixed size and does not follow the zoom, so these
-// are sizes the HUD has shipped at rather than a function of the tile.
-constexpr int FONT_SIZES[] = { 14, 16, 30 };
+	// The font is loaded once at a fixed size and does not follow the zoom, so
+	// these are sizes the HUD has shipped at rather than a function of the
+	// tile.
+	constexpr int FONT_SIZES[] = { 14, 16, 30 };
 
-// Bottom of the last row of text the HUD lays out, measured from the panel's top.
-int last_text_row_bottom(int tileSize, int fontSize)
-{
-	return gui_frame_top_rule(tileSize) + GUI_TEXT_TOP_INSET +
-		(GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH + fontSize;
-}
+	// Bottom of the last row of text the HUD lays out, measured from the
+	// panel's top.
+	int last_text_row_bottom(int tileSize, int fontSize)
+	{
+		return gui_frame_top_rule(tileSize) + GUI_TEXT_TOP_INSET +
+			(GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH + fontSize;
+	}
 } // namespace
 
 // The property: every row the HUD claims to lay out lands above the bottom rule.

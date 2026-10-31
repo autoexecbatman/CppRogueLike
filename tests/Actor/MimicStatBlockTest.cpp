@@ -35,20 +35,21 @@
 
 namespace
 {
-// A large creature rolling 15 on Table 8 has Constitution 18, worth 4 a die.
-constexpr int CONSTITUTION_BONUS_PER_DIE = 4;
-constexpr int HIT_DIE_ROLLED = 1;
+	// A large creature rolling 15 on Table 8 has Constitution 18, worth 4 a
+	// die.
+	constexpr int CONSTITUTION_BONUS_PER_DIE = 4;
+	constexpr int HIT_DIE_ROLLED = 1;
 
-bool lists(
-	const std::vector<MonsterPercentage>& distribution,
-	std::string_view name)
-{
-	auto is_named = [name](const MonsterPercentage& entry)
+	bool lists(
+		const std::vector<MonsterPercentage>& distribution,
+		std::string_view name)
 	{
-		return entry.name == name;
-	};
-	return std::ranges::any_of(distribution, is_named);
-}
+		auto is_named = [name](const MonsterPercentage& entry)
+		{
+			return entry.name == name;
+		};
+		return std::ranges::any_of(distribution, is_named);
+	}
 } // namespace
 
 class MimicStatBlockTest : public ::testing::Test

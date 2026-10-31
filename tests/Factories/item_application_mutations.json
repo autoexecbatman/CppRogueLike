@@ -21,14 +21,14 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "girdle != nullptr && girdle->application == BuffApplication::SET &&\n\t\tgirdle->strBonus > 0;",
-      "mutated": "girdle != nullptr && girdle->application!= BuffApplication::SET &&\n\t\tgirdle->strBonus > 0;",
+      "original": "girdle != nullptr &&\n\t\t\tgirdle->application == BuffApplication::SET && girdle->strBonus > 0;",
+      "mutated": "girdle != nullptr && girdle->application!= BuffApplication::SET &&\n\t\t\tgirdle->strBonus > 0;",
       "catches": "an adding girdle taken for a girdle of giant strength"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "gauntlets != nullptr &&\n\t\t\tgauntlets->application == BuffApplication::SET &&\n\t\t\tgauntlets->strBonus > 0 ?\n\t\tgauntlets :\n\t\tnullptr;",
-      "mutated": "gauntlets != nullptr &&\n\t\t\tgauntlets->application!= BuffApplication::SET &&\n\t\t\tgauntlets->strBonus > 0 ?\n\t\tgauntlets :\n\t\tnullptr;",
+      "original": "gauntlets != nullptr &&\n\t\t\t\tgauntlets->application == BuffApplication::SET &&\n\t\t\t\tgauntlets->strBonus > 0 ?\n\t\t\tgauntlets :\n\t\t\tnullptr;",
+      "mutated": "gauntlets != nullptr &&\n\t\t\t\tgauntlets->application!= BuffApplication::SET &&\n\t\t\t\tgauntlets->strBonus > 0 ?\n\t\t\tgauntlets :\n\t\t\tnullptr;",
       "catches": "adding gauntlets taken for gauntlets of ogre power"
     },
     {
@@ -45,8 +45,8 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\tstatBoost.application =\n\t\tparse_buff_application(source.at(\"application\").get<std::string>());\n",
-      "mutated": "\tstatBoost.application =BuffApplication::ADD;\n",
+      "original": "\t\tstatBoost.application =\n\t\t\tparse_buff_application(source.at(\"application\").get<std::string>());\n",
+      "mutated": "\t\tstatBoost.application =BuffApplication::ADD;\n",
       "catches": "a loaded worn item losing whether it sets"
     },
     {
@@ -57,8 +57,8 @@
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\tparams.application = parse_buff_application(\n\t\trequired_field(record, key, \"application\").get<std::string>());\n",
-      "mutated": "\tparams.application =BuffApplication::ADD;\n",
+      "original": "\t\tparams.application = parse_buff_application(\n\t\t\trequired_field(record, key, \"application\").get<std::string>());\n",
+      "mutated": "\t\tparams.application =BuffApplication::ADD;\n",
       "catches": "the data's setting items loaded as adding, and an unknown name accepted"
     },
     {

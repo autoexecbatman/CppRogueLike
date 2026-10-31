@@ -32,17 +32,17 @@ struct MonsterPercentage
 
 namespace MonsterFactory
 {
-// Spawns one monster at position, onto ctx.creatures, drawn by weight from
-// ctx.monsterRegistry for dungeonLevel. Logs and spawns nothing when no monster can
-// appear at that level.
-void spawn_random_monster(
-	Vector2D position,
-	int dungeonLevel,
-	GameContext& ctx);
+	// Spawns one monster at position, onto ctx.creatures, drawn by weight from
+	// ctx.monsterRegistry for dungeonLevel. Logs and spawns nothing when no
+	// monster can appear at that level.
+	void spawn_random_monster(
+		Vector2D position,
+		int dungeonLevel,
+		GameContext& ctx);
 
-// Each monster's chance at dungeonLevel, from the registry as it stands; a monster that
-// cannot appear there is left out.
-[[nodiscard]] std::vector<MonsterPercentage> get_current_distribution(
-	int dungeonLevel,
-	const MonsterRegistry& monsters);
+	// Each monster's chance at dungeonLevel, from the registry as it stands; a
+	// monster that cannot appear there is left out.
+	[[nodiscard]] std::vector<MonsterPercentage> get_current_distribution(
+		int dungeonLevel,
+		const MonsterRegistry& monsters);
 } // namespace MonsterFactory

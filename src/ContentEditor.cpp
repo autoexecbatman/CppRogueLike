@@ -20,33 +20,34 @@
 namespace
 {
 
-struct MonsterEntry
-{
-	MonsterId id;
-	const char* name;
-};
+	struct MonsterEntry
+	{
+		MonsterId id;
+		const char* name;
+	};
 
-constexpr MonsterEntry MONSTER_TABLE[] = {
-	{ MonsterId::GOBLIN, "Goblin" },
-	{ MonsterId::ORC, "Orc" },
-	{ MonsterId::TROLL, "Troll" },
-	{ MonsterId::DRAGON, "Dragon" },
-	{ MonsterId::ARCHER, "Archer" },
-	{ MonsterId::MAGE, "Mage" },
-	{ MonsterId::WOLF, "Wolf" },
-	{ MonsterId::FIRE_WOLF, "Fire Wolf" },
-	{ MonsterId::ICE_WOLF, "Ice Wolf" },
-	{ MonsterId::BAT, "Bat" },
-	{ MonsterId::KOBOLD, "Kobold" },
-	{ MonsterId::MIMIC, "Mimic" },
-	{ MonsterId::SHOPKEEPER, "Shopkeeper" },
-	{ MonsterId::SPIDER_SMALL, "Spider (Small)" },
-	{ MonsterId::SPIDER_GIANT, "Spider (Giant)" },
-	{ MonsterId::SPIDER_WEAVER, "Spider (Weaver)" },
-};
+	constexpr MonsterEntry MONSTER_TABLE[] = {
+		{ MonsterId::GOBLIN, "Goblin" },
+		{ MonsterId::ORC, "Orc" },
+		{ MonsterId::TROLL, "Troll" },
+		{ MonsterId::DRAGON, "Dragon" },
+		{ MonsterId::ARCHER, "Archer" },
+		{ MonsterId::MAGE, "Mage" },
+		{ MonsterId::WOLF, "Wolf" },
+		{ MonsterId::FIRE_WOLF, "Fire Wolf" },
+		{ MonsterId::ICE_WOLF, "Ice Wolf" },
+		{ MonsterId::BAT, "Bat" },
+		{ MonsterId::KOBOLD, "Kobold" },
+		{ MonsterId::MIMIC, "Mimic" },
+		{ MonsterId::SHOPKEEPER, "Shopkeeper" },
+		{ MonsterId::SPIDER_SMALL, "Spider (Small)" },
+		{ MonsterId::SPIDER_GIANT, "Spider (Giant)" },
+		{ MonsterId::SPIDER_WEAVER, "Spider (Weaver)" },
+	};
 
-// The height of one entry row. The keyboard and the draw both count rows with it.
-constexpr int ITEM_H = 36;
+	// The height of one entry row. The keyboard and the draw both count rows
+	// with it.
+	constexpr int ITEM_H = 36;
 
 } // namespace
 

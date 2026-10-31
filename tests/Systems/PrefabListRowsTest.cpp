@@ -21,7 +21,7 @@
 
 namespace
 {
-const PrefabListRows rows{ 64, 600, 16 };
+	const PrefabListRows rows{ 64, 600, 16 };
 }
 
 // Rows sit below the header line, one font height plus four apart.

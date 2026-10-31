@@ -22,81 +22,86 @@ using json = nlohmann::json;
 
 namespace
 {
-// Whether `symbol` is one of the five structural symbols, which no entry may take.
-//
-// Example:
-//   is_structural('#');   // -> true
-//   is_structural('W');   // -> false
-[[nodiscard]] bool is_structural(char symbol)
-{
-	const auto has_symbol = [symbol](const StructuralSymbol& structural)
+	// Whether `symbol` is one of the five structural symbols, which no entry
+	// may take.
+	//
+	// Example:
+	//   is_structural('#');   // -> true
+	//   is_structural('W');   // -> false
+	[[nodiscard]] bool is_structural(char symbol)
 	{
-		return structural.symbol == symbol;
-	};
-	return std::ranges::any_of(STRUCTURAL_SYMBOLS, has_symbol);
-}
+		const auto has_symbol = [symbol](const StructuralSymbol& structural)
+		{
+			return structural.symbol == symbol;
+		};
+		return std::ranges::any_of(STRUCTURAL_SYMBOLS, has_symbol);
+	}
 
-// The index of the entry carrying `symbol`, if one does; a symbol of 0 is carried by none.
-[[nodiscard]] std::optional<size_t> find_symbol(
-	const std::vector<PaletteEntry>& entries,
-	char symbol)
-{
-	if (symbol == 0)
+	// The index of the entry carrying `symbol`, if one does; a symbol of 0 is
+	// carried by none.
+	[[nodiscard]] std::optional<size_t> find_symbol(
+		const std::vector<PaletteEntry>& entries,
+		char symbol)
 	{
+		if (symbol == 0)
+		{
+			return std::nullopt;
+		}
+		for (size_t entryIndex = 0; entryIndex < entries.size(); ++entryIndex)
+		{
+			if (entries[entryIndex].symbol == symbol)
+			{
+				return entryIndex;
+			}
+		}
 		return std::nullopt;
 	}
-	for (size_t entryIndex = 0; entryIndex < entries.size(); ++entryIndex)
-	{
-		if (entries[entryIndex].symbol == symbol)
-		{
-			return entryIndex;
-		}
-	}
-	return std::nullopt;
-}
 
-// The index of the entry showing `tile`, if one does.
-[[nodiscard]] std::optional<size_t> find_tile(
-	const std::vector<PaletteEntry>& entries,
-	TileRef tile)
-{
-	for (size_t entryIndex = 0; entryIndex < entries.size(); ++entryIndex)
+	// The index of the entry showing `tile`, if one does.
+	[[nodiscard]] std::optional<size_t> find_tile(
+		const std::vector<PaletteEntry>& entries,
+		TileRef tile)
 	{
-		if (entries[entryIndex].tile == tile)
+		for (size_t entryIndex = 0; entryIndex < entries.size(); ++entryIndex)
 		{
-			return entryIndex;
+			if (entries[entryIndex].tile == tile)
+			{
+				return entryIndex;
+			}
 		}
+		return std::nullopt;
 	}
-	return std::nullopt;
-}
 
-// Whether giving the entry at `ownIndex` this label and symbol would break an invariant,
-// and which; `ownIndex` is empty for an entry not yet in the palette.
-//
-// Example:
-//   edit_refusal(entries, std::nullopt, "Barrel", 'W');   // -> DUPLICATE_SYMBOL when an entry has 'W'
-//   edit_refusal(entries, 0, "Cobweb", 'W');              // -> APPLIED: entry 0 keeps its own 'W'
-[[nodiscard]] PaletteEdit edit_refusal(
-	const std::vector<PaletteEntry>& entries,
-	std::optional<size_t> ownIndex,
-	std::string_view label,
-	char symbol)
-{
-	if (label.empty())
+	// Whether giving the entry at `ownIndex` this label and symbol would break
+	// an invariant, and which; `ownIndex` is empty for an entry not yet in the
+	// palette.
+	//
+	// Example:
+	//   edit_refusal(entries, std::nullopt, "Barrel", 'W');
+	//   // -> DUPLICATE_SYMBOL when an entry has 'W'
+	//   edit_refusal(entries, 0, "Cobweb", 'W');
+	//   // -> APPLIED: entry 0 keeps its own 'W'
+	[[nodiscard]] PaletteEdit edit_refusal(
+		const std::vector<PaletteEntry>& entries,
+		std::optional<size_t> ownIndex,
+		std::string_view label,
+		char symbol)
 	{
-		return PaletteEdit::EMPTY_LABEL;
+		if (label.empty())
+		{
+			return PaletteEdit::EMPTY_LABEL;
+		}
+		if (is_structural(symbol))
+		{
+			return PaletteEdit::STRUCTURAL_SYMBOL;
+		}
+		const std::optional<size_t> holder = find_symbol(entries, symbol);
+		if (holder && holder != ownIndex)
+		{
+			return PaletteEdit::DUPLICATE_SYMBOL;
+		}
+		return PaletteEdit::APPLIED;
 	}
-	if (is_structural(symbol))
-	{
-		return PaletteEdit::STRUCTURAL_SYMBOL;
-	}
-	const std::optional<size_t> holder = find_symbol(entries, symbol);
-	if (holder && holder != ownIndex)
-	{
-		return PaletteEdit::DUPLICATE_SYMBOL;
-	}
-	return PaletteEdit::APPLIED;
-}
 } // namespace
 
 void to_json(json& output, const PaletteEntry& entry)

@@ -28,15 +28,15 @@
 
 namespace
 {
-constexpr std::array<int, ABILITY_COUNT> NO_RACE{ 0, 0, 0, 0, 0, 0 };
+	constexpr std::array<int, ABILITY_COUNT> NO_RACE{ 0, 0, 0, 0, 0, 0 };
 
-// A halfling pays a point of Strength for a point of Dexterity.
-constexpr std::array<int, ABILITY_COUNT> HALFLING{ -1, 1, 0, 0, 0, 0 };
+	// A halfling pays a point of Strength for a point of Dexterity.
+	constexpr std::array<int, ABILITY_COUNT> HALFLING{ -1, 1, 0, 0, 0, 0 };
 
-AbilityAllocation with_pool(std::vector<int> pool, CreatureClass forClass)
-{
-	return AbilityAllocation{ std::move(pool), forClass, NO_RACE };
-}
+	AbilityAllocation with_pool(std::vector<int> pool, CreatureClass forClass)
+	{
+		return AbilityAllocation{ std::move(pool), forClass, NO_RACE };
+	}
 } // namespace
 
 // "Each ability starts with a score of 8."

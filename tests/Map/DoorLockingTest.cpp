@@ -23,9 +23,9 @@
 
 namespace
 {
-constexpr int MAP_SIDE = 20;
-constexpr Vector2D DOORWAY{ 5, 7 };
-constexpr Vector2D PLAIN_FLOOR{ 8, 7 };
+	constexpr int MAP_SIDE = 20;
+	constexpr Vector2D DOORWAY{ 5, 7 };
+	constexpr Vector2D PLAIN_FLOOR{ 8, 7 };
 } // namespace
 
 // set_door and dig_corridor are protected, so the map is reached through a type that

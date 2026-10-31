@@ -69,20 +69,20 @@
     },
     {
       "file": "src/TileRefJson.cpp",
-      "original": "\t\trecord.at(\"col\").get<int>(),\n\t\trecord.at(\"row\").get<int>()",
-      "mutated": "\t\trecord.at(\"row\").get<int>(),\n\t\trecord.at(\"col\").get<int>()",
+      "original": "\t\t\trecord.at(\"col\").get<int>(),\n\t\t\trecord.at(\"row\").get<int>()",
+      "mutated": "\t\t\trecord.at(\"row\").get<int>(),\n\t\t\trecord.at(\"col\").get<int>()",
       "catches": "a tile read with its column and row swapped"
     },
     {
       "file": "src/GameStateManager.cpp",
-      "original": "\t}\n\treturn std::nullopt;\n}\n} // namespace\n\nvoid load_rooms(",
-      "mutated": "\t}\n\treturn RoomType::STANDARD;\n}\n} // namespace\n\nvoid load_rooms(",
+      "original": "}\n\t\treturn std::nullopt;\n\t}\n} // namespace\n\nvoid load_rooms(",
+      "mutated": "\t\t}\n\t\treturn RoomType::STANDARD;\n\t}\n\t} // namespace\n\n\tvoid load_rooms(",
       "catches": "a saved value no RoomType has loaded as a standard room instead of refused"
     },
     {
       "file": "src/GameStateManager.cpp",
-      "original": "\tcase RoomType::DANGER:\n\tcase RoomType::TREASURE:\n\t{\n\t\treturn candidate;\n\t}\n",
-      "mutated": "\tcase RoomType::DANGER:\n\t{\n\t\treturn candidate;\n\t}\n\tcase RoomType::TREASURE:\n\t{\n\t\treturn RoomType::STANDARD;\n\t}\n",
+      "original": "\t\tcase RoomType::DANGER:\n\t\tcase RoomType::TREASURE:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n",
+      "mutated": "\t\tcase RoomType::DANGER:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\tcase RoomType::TREASURE:\n\t\t{\n\t\t\treturn RoomType::STANDARD;\n\t\t}\n",
       "catches": "a saved treasure room read back as a standard one"
     },
     {

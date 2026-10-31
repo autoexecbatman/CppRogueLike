@@ -39,9 +39,10 @@
 
 namespace
 {
-// A year of the owner's calendar, in rounds, written out: 365 days of 24 hours of 60 rounds.
-constexpr int ROUNDS_IN_A_YEAR = 365 * 24 * 60;
-constexpr int BASE_SCORE = 16;
+	// A year of the owner's calendar, in rounds, written out: 365 days of 24
+	// hours of 60 rounds.
+	constexpr int ROUNDS_IN_A_YEAR = 365 * 24 * 60;
+	constexpr int BASE_SCORE = 16;
 } // namespace
 
 class CharacterAgeingTest : public ::testing::Test

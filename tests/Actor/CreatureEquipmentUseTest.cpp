@@ -34,8 +34,8 @@
 
 namespace
 {
-constexpr int ORC_MAX_HP = 20;
-constexpr int STRENGTH_ENOUGH_TO_CARRY = 16;
+	constexpr int ORC_MAX_HP = 20;
+	constexpr int STRENGTH_ENOUGH_TO_CARRY = 16;
 } // namespace
 
 class CreatureEquipmentUseTest : public ::testing::Test

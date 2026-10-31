@@ -53,57 +53,60 @@
 
 namespace
 {
-// The row a score reads from an ability table ordered by score from 1. Past the end it
-// is the last row, the books capping every ability at 25; below 1, a score a creature
-// was never given, it is a row of no adjustment.
-//
-// Example, with the Dexterity table's 25 rows:
-//   row_for(dexterity, 17).DefensiveAdj;   // -> -3
-//   row_for(dexterity, 26).DefensiveAdj;   // -> -6, the 25 row
-//   row_for(dexterity, 0).DefensiveAdj;    // -> 0
-template <typename Row>
-Row row_for(const std::vector<Row>& table, int score)
-{
-	assert(!table.empty() && "an ability table read before it was loaded");
-
-	if (score < 1)
+	// The row a score reads from an ability table ordered by score from 1. Past
+	// the end it is the last row, the books capping every ability at 25; below
+	// 1, a score a creature was never given, it is a row of no adjustment.
+	//
+	// Example, with the Dexterity table's 25 rows:
+	//   row_for(dexterity, 17).DefensiveAdj;   // -> -3
+	//   row_for(dexterity, 26).DefensiveAdj;   // -> -6, the 25 row
+	//   row_for(dexterity, 0).DefensiveAdj;    // -> 0
+	template <typename Row>
+	Row row_for(const std::vector<Row>& table, int score)
 	{
-		return Row{};
-	}
-	if (std::cmp_greater(score, table.size()))
-	{
-		return table.back();
-	}
-	return table.at(score - 1);
-}
+		assert(!table.empty() && "an ability table read before it was loaded");
 
-// Player's Handbook Table 3 grants more than +2 to warriors alone.
-constexpr int NON_WARRIOR_BONUS_CAP = 2;
+		if (score < 1)
+		{
+			return Row{};
+		}
+		if (std::cmp_greater(score, table.size()))
+		{
+			return table.back();
+		}
+		return table.at(score - 1);
+	}
+
+	// Player's Handbook Table 3 grants more than +2 to warriors alone.
+	constexpr int NON_WARRIOR_BONUS_CAP = 2;
 } // namespace
 
 namespace
 {
-// The whole of one table file. A file that cannot be opened stops the load, so a game
-// never runs on empty ability tables that only fail at the first lookup.
-//
-// Example:
-//   read_table(Paths::resolve(Paths::WISDOM_TABLE).string()); // -> the 25 Wisdom rows as JSON
-//   read_table("missing.json"); // throws std::runtime_error naming the file
-nlohmann::json read_table(const std::string& filename)
-{
-	std::ifstream file(filename);
-	if (!file.is_open())
+	// The whole of one table file. A file that cannot be opened stops the load,
+	// so a game never runs on empty ability tables that only fail at the first
+	// lookup.
+	//
+	// Example:
+	//   read_table(Paths::resolve(Paths::WISDOM_TABLE).string());
+	//   // -> the 25 Wisdom rows as JSON
+	//   read_table("missing.json");
+	//   // throws std::runtime_error naming the file
+	nlohmann::json read_table(const std::string& filename)
 	{
-		throw std::runtime_error(
-			std::format(
-				"DataManager: cannot open {}, so its ability table cannot be read",
-				filename));
-	}
+		std::ifstream file(filename);
+		if (!file.is_open())
+		{
+			throw std::runtime_error(
+				std::format(
+					"DataManager: cannot open {}, so its ability table cannot be read",
+					filename));
+		}
 
-	nlohmann::json table;
-	file >> table;
-	return table;
-}
+		nlohmann::json table;
+		file >> table;
+		return table;
+	}
 } // namespace
 
 // One row of each printed table, parsed. Lifted out of the loaders so a row can be

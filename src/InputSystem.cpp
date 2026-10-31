@@ -91,22 +91,24 @@ constexpr std::array POLLED_KEYS{ // Control
 
 namespace InputPolling
 {
-// Whether every letter is polled. The web build reads a typed letter from the polled key,
-// so a letter missing from the list can never be typed there.
-//
-// Example:
-//   polls_every_letter(); // -> true, KEY_A through KEY_Z are all in POLLED_KEYS
-consteval bool polls_every_letter()
-{
-	for (int letter = KEY_A; letter <= KEY_Z; ++letter)
+	// Whether every letter is polled. The web build reads a typed letter from
+	// the polled key, so a letter missing from the list can never be typed
+	// there.
+	//
+	// Example:
+	//   polls_every_letter();
+	//   // -> true, KEY_A through KEY_Z are all in POLLED_KEYS
+	consteval bool polls_every_letter()
 	{
-		if (std::ranges::find(POLLED_KEYS, letter) == POLLED_KEYS.end())
+		for (int letter = KEY_A; letter <= KEY_Z; ++letter)
 		{
-			return false;
+			if (std::ranges::find(POLLED_KEYS, letter) == POLLED_KEYS.end())
+			{
+				return false;
+			}
 		}
+		return true;
 	}
-	return true;
-}
 } // namespace InputPolling
 
 static_assert(

@@ -15,20 +15,20 @@
   "mutations": [
     {
       "file": "src/SpawnUtils.cpp",
-      "original": "ctx.map->get_tile_type(here) == TileType::FLOOR &&\n\t\t\t\tctx.map->can_place_at(here, ctx)",
+      "original": "ctx.map->get_tile_type(here) == TileType::FLOOR &&\n\t\t\t\t\tctx.map->can_place_at(here, ctx)",
       "mutated": "ctx.map->get_tile_type(here) == TileType::FLOOR",
       "catches": "a teleport landing on a creature's tile"
     },
     {
       "file": "src/SpawnUtils.cpp",
-      "original": "ctx.map->get_tile_type(here) == TileType::FLOOR &&\n\t\t\t\tctx.map->can_place_at(here, ctx)",
+      "original": "ctx.map->get_tile_type(here) == TileType::FLOOR &&\n\t\t\t\t\tctx.map->can_place_at(here, ctx)",
       "mutated": "ctx.map->can_place_at(here, ctx)",
       "catches": "any open tile offered, rock and water aside, instead of floor"
     },
     {
       "file": "src/SpawnUtils.cpp",
-      "original": "\tfor (\n\t\tint row = MAP_EDGE_MARGIN;\n\t\trow <= ctx.map->get_height() - MAP_EDGE_MARGIN;\n\t\t++row)",
-      "mutated": "\tfor (\n\t\tint row = MAP_EDGE_MARGIN + 3;\n\t\trow <= ctx.map->get_height() - MAP_EDGE_MARGIN;\n\t\t++row)",
+      "original": "\t\tfor (\n\t\t\tint row = MAP_EDGE_MARGIN;\n\t\t\trow <= ctx.map->get_height() - MAP_EDGE_MARGIN;\n\t\t\t++row)",
+      "mutated": "\t\tfor (\n\t\t\tint row = MAP_EDGE_MARGIN + 3;\n\t\t\trow <= ctx.map->get_height() - MAP_EDGE_MARGIN;\n\t\t\t++row)",
       "catches": "the top rows of the map never searched"
     },
     {
@@ -45,14 +45,14 @@
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\t\tctx.messageSystem->append_message_part(\n\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\"The magic finds nowhere to take you.\");\n",
+      "original": "ctx.messageSystem->append_message_part(\n\t\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\t\"The magic finds nowhere to take you.\");",
       "mutated": "",
       "catches": "the spell failing without a word"
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\t\tctx.messageSystem->append_message_part(\n\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\"The magic finds nowhere to take you.\");\n\t\tctx.messageSystem->finalize_message();\n\t\treturn true;",
-      "mutated": "\t\tctx.messageSystem->append_message_part(\n\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\"The magic finds nowhere to take you.\");\n\t\tctx.messageSystem->finalize_message();\n\t\treturn false;",
+      "original": "ctx.messageSystem->append_message_part(\n\t\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\t\"The magic finds nowhere to take you.\");\n\t\t\t\tctx.messageSystem->finalize_message();\n\t\t\t\treturn true;",
+      "mutated": "\t\t\tctx.messageSystem->append_message_part(\n\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\"The magic finds nowhere to take you.\");\n\t\t\tctx.messageSystem->finalize_message();\n\t\t\treturn false;",
       "catches": "a teleport casting with nowhere to go kept rather than spent"
     }
   ]

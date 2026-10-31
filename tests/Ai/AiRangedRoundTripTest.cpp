@@ -19,9 +19,9 @@
 
 namespace
 {
-// Not the defaults, so a load that ignored them could not pass by accident.
-constexpr int MAX_RANGE = 7;
-constexpr int OPTIMAL_DISTANCE = 4;
+	// Not the defaults, so a load that ignored them could not pass by accident.
+	constexpr int MAX_RANGE = 7;
+	constexpr int OPTIMAL_DISTANCE = 4;
 } // namespace
 
 TEST(AiRangedRoundTripTest, ARangedMonsterLoadsAsTheSameAiItSaved)

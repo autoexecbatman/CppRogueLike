@@ -23,17 +23,18 @@
 
 namespace
 {
-// The ratings the table prints a column for: every one after NON.
-void expect_row(int roll, std::array<int, 10> printed)
-{
-	for (std::size_t column = 0; column < printed.size(); ++column)
+	// The ratings the table prints a column for: every one after NON.
+	void expect_row(int roll, std::array<int, 10> printed)
 	{
-		const IntelligenceRating rating =
-			ALL_INTELLIGENCE_RATING.at(column + 1);
-		EXPECT_EQ(monster_wisdom_score(roll, rating), printed.at(column))
-			<< "roll " << roll << ", " << encode_intelligence_rating(rating);
+		for (std::size_t column = 0; column < printed.size(); ++column)
+		{
+			const IntelligenceRating rating =
+				ALL_INTELLIGENCE_RATING.at(column + 1);
+			EXPECT_EQ(monster_wisdom_score(roll, rating), printed.at(column))
+				<< "roll " << roll << ", "
+				<< encode_intelligence_rating(rating);
+		}
 	}
-}
 } // namespace
 
 // Every row the book prints, 3 to 18, with 9 to 12 as one row.

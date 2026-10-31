@@ -51,20 +51,20 @@
 
 namespace
 {
-// Encodes to a string and parses it back; the value must survive the trip.
-template <typename EnumType, typename Encode, typename Parse>
-void expect_round_trip(
-	EnumType value,
-	Encode encode,
-	Parse parse,
-	const char* label)
-{
-	const std::string_view encoded = encode(value);
+	// Encodes to a string and parses it back; the value must survive the trip.
+	template <typename EnumType, typename Encode, typename Parse>
+	void expect_round_trip(
+		EnumType value,
+		Encode encode,
+		Parse parse,
+		const char* label)
+	{
+		const std::string_view encoded = encode(value);
 
-	EXPECT_NE(encoded, "") << label << ": encoded to an empty string";
-	EXPECT_EQ(parse(encoded), value)
-		<< label << ": '" << encoded << "' did not parse back";
-}
+		EXPECT_NE(encoded, "") << label << ": encoded to an empty string";
+		EXPECT_EQ(parse(encoded), value)
+			<< label << ": '" << encoded << "' did not parse back";
+	}
 } // namespace
 
 TEST(CodecRoundTripTest, TargetModeSurvivesEncoding)

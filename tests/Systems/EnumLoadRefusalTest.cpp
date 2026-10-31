@@ -54,31 +54,32 @@ using json = nlohmann::json;
 
 namespace
 {
-// What a load threw as a std::runtime_error, or empty when it loaded.
-//
-// Example:
-//   what_loading_threw(load_a_good_record); // -> ""
-//   what_loading_threw(load_a_bad_record); // -> "Item::load: prefix 17 ..."
-template <typename Load>
-std::string what_loading_threw(Load load)
-{
-	try
+	// What a load threw as a std::runtime_error, or empty when it loaded.
+	//
+	// Example:
+	//   what_loading_threw(load_a_good_record); // -> ""
+	//   what_loading_threw(load_a_bad_record);
+	//   // -> "Item::load: prefix 17 ..."
+	template <typename Load>
+	std::string what_loading_threw(Load load)
 	{
-		load();
+		try
+		{
+			load();
+		}
+		catch (const std::runtime_error& refusal)
+		{
+			return refusal.what();
+		}
+		return {};
 	}
-	catch (const std::runtime_error& refusal)
-	{
-		return refusal.what();
-	}
-	return {};
-}
 
-// One past an enum's last enumerator, as a saved number.
-template <typename Enum>
-int one_past(Enum last)
-{
-	return static_cast<int>(last) + 1;
-}
+	// One past an enum's last enumerator, as a saved number.
+	template <typename Enum>
+	int one_past(Enum last)
+	{
+		return static_cast<int>(last) + 1;
+	}
 
 } // namespace
 

@@ -105,14 +105,14 @@
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\tparams.duration = parse_dice_expression(\n\t\trequired_field(record, key, \"duration\").get<std::string>());\n",
-      "mutated": "\tparams.duration =DiceExpr{ 0, 0, 3 };\n",
+      "original": "\t\tparams.duration = parse_dice_expression(\n\t\t\trequired_field(record, key, \"duration\").get<std::string>());\n",
+      "mutated": "\t\tparams.duration =DiceExpr{ 0, 0, 3 };\n",
       "catches": "the data's dice never read, every item lasting one fixed figure"
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\tparams.durationUnit = parse_duration_unit(\n\t\trequired_field(record, key, \"durationUnit\").get<std::string>());\n",
-      "mutated": "\tparams.durationUnit = parse_duration_unit(\n\t\trecord.value(\"durationUnit\", std::string{ \"rounds\" }));\n",
+      "original": "\t\tparams.durationUnit = parse_duration_unit(\n\t\t\trequired_field(record, key, \"durationUnit\").get<std::string>());\n",
+      "mutated": "\t\tparams.durationUnit = parse_duration_unit(\n\t\t\trecord.value(\"durationUnit\", std::string{ \"rounds\" }));\n",
       "catches": "a record missing its unit read as rounds instead of refused"
     },
     {
@@ -129,14 +129,14 @@
     },
     {
       "file": "src/ItemCreator.cpp",
-      "original": "\t\t\tparams.duration,\n\t\t\tparams.durationUnit,\n\t\t\tparams.consumableBuffType,\n",
-      "mutated": "\t\t\tparams.duration,DurationUnit::ROUNDS,\n\t\t\tparams.consumableBuffType,\n",
+      "original": "\t\t\t\tparams.duration,\n\t\t\t\tparams.durationUnit,\n\t\t\t\tparams.consumableBuffType,\n",
+      "mutated": "\t\t\t\tparams.duration,DurationUnit::ROUNDS,\n\t\t\t\tparams.consumableBuffType,\n",
       "catches": "a created potion losing its unit"
     },
     {
       "file": "src/ItemCreator.cpp",
-      "original": "\t\t\tparams.duration,\n\t\t\tparams.durationUnit,\n\t\t};\n",
-      "mutated": "\t\t\tparams.duration,DurationUnit::TURNS,\n\t\t};\n",
+      "original": "\t\t\t\tparams.duration,\n\t\t\t\tparams.durationUnit,\n\t\t\t};\n",
+      "mutated": "\t\t\t\tparams.duration,DurationUnit::TURNS,\n\t\t\t};\n",
       "catches": "a created scroll's unit replaced"
     }
   ]

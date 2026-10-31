@@ -35,13 +35,13 @@
 
 namespace
 {
-constexpr Vector2D SEARCHER_TILE{ 5, 5 };
-// Diagonal, so a reach that only looked straight ahead would miss it.
-constexpr Vector2D ADJACENT_TILE{ 6, 6 };
-constexpr Vector2D OTHER_ADJACENT_TILE{ 4, 5 };
-constexpr Vector2D TWO_TILES_AWAY{ 7, 5 };
-// Base 5 plus 40 bought.
-constexpr int THIEF_SKILL = 45;
+	constexpr Vector2D SEARCHER_TILE{ 5, 5 };
+	// Diagonal, so a reach that only looked straight ahead would miss it.
+	constexpr Vector2D ADJACENT_TILE{ 6, 6 };
+	constexpr Vector2D OTHER_ADJACENT_TILE{ 4, 5 };
+	constexpr Vector2D TWO_TILES_AWAY{ 7, 5 };
+	// Base 5 plus 40 bought.
+	constexpr int THIEF_SKILL = 45;
 } // namespace
 
 class TrapSearchTest : public ::testing::Test

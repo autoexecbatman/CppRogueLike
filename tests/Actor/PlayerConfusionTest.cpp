@@ -33,11 +33,13 @@
 
 namespace
 {
-// A row of open floor with the player standing on it, room to stumble either way.
-constexpr int CORRIDOR_ROW = 5;
-const Vector2D START{ 4, CORRIDOR_ROW };
-// The stumble's direction roll indexes N, S, W, E, NW, NE, SW, SE; 3 is east.
-constexpr int STUMBLE_EAST = 3;
+	// A row of open floor with the player standing on it, room to stumble
+	// either way.
+	constexpr int CORRIDOR_ROW = 5;
+	const Vector2D START{ 4, CORRIDOR_ROW };
+	// The stumble's direction roll indexes N, S, W, E, NW, NE, SW, SE; 3 is
+	// east.
+	constexpr int STUMBLE_EAST = 3;
 } // namespace
 
 class PlayerConfusionTest : public ::testing::Test

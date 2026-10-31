@@ -51,10 +51,10 @@
 
 namespace
 {
-// One day of the clock in time units, the helm's recharge.
-constexpr int DAY_IN_TIME_UNITS = ROUNDS_PER_DAY * TIME_UNITS_PER_ROUND;
+	// One day of the clock in time units, the helm's recharge.
+	constexpr int DAY_IN_TIME_UNITS = ROUNDS_PER_DAY * TIME_UNITS_PER_ROUND;
 
-using Keys = std::vector<std::string>;
+	using Keys = std::vector<std::string>;
 } // namespace
 
 class SpellcastingTest : public ::testing::Test
@@ -471,32 +471,32 @@ TEST_F(SpellcastingTest, ACreatureSavesItsCasting)
 namespace
 {
 
-// Casting one of two memorized shields from the cast menu leaves the other.
-[[noreturn]] void casting_from_the_menu_spends_one_copy()
-{
-	HiddenRenderer hidden{};
-	MockGameContext mock{};
-	GameContext ctx = mock.to_game_context();
-	ctx.renderer = &hidden.renderer;
-	mock.player = std::make_unique<Player>(Vector2D{ 2, 2 });
-	Player& wizard = *mock.player;
-	wizard.experienceReward = std::make_unique<ExperienceReward>(0);
-	wizard.armorClass = std::make_unique<ArmorClass>(10);
-	wizard.healthPool = std::make_unique<HealthPool>(20);
-	ctx.playerOwner = &mock.player;
-	wizard.spellcasting.memorizedSpells = { "shield", "shield" };
+	// Casting one of two memorized shields from the cast menu leaves the other.
+	[[noreturn]] void casting_from_the_menu_spends_one_copy()
+	{
+		HiddenRenderer hidden{};
+		MockGameContext mock{};
+		GameContext ctx = mock.to_game_context();
+		ctx.renderer = &hidden.renderer;
+		mock.player = std::make_unique<Player>(Vector2D{ 2, 2 });
+		Player& wizard = *mock.player;
+		wizard.experienceReward = std::make_unique<ExperienceReward>(0);
+		wizard.armorClass = std::make_unique<ArmorClass>(10);
+		wizard.healthPool = std::make_unique<HealthPool>(20);
+		ctx.playerOwner = &mock.player;
+		wizard.spellcasting.memorizedSpells = { "shield", "shield" };
 
-	mock.menus.push_back(std::make_unique<MenuSpellCast>(wizard, ctx));
-	ctx.inputSystem->queue_key(GameKey::NONE, 'a');
-	hidden.renderer.begin_frame();
-	ctx.menuManager->handle_menus(*ctx.menus, ctx);
-	hidden.renderer.end_frame();
+		mock.menus.push_back(std::make_unique<MenuSpellCast>(wizard, ctx));
+		ctx.inputSystem->queue_key(GameKey::NONE, 'a');
+		hidden.renderer.begin_frame();
+		ctx.menuManager->handle_menus(*ctx.menus, ctx);
+		hidden.renderer.end_frame();
 
-	exit_unless(
-		wizard.spellcasting.memorizedSpells == Keys{ "shield" },
-		"casting one shield did not leave exactly the other");
-	finish_the_child();
-}
+		exit_unless(
+			wizard.spellcasting.memorizedSpells == Keys{ "shield" },
+			"casting one shield did not leave exactly the other");
+		finish_the_child();
+	}
 
 } // namespace
 

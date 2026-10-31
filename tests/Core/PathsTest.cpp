@@ -31,58 +31,58 @@
 
 namespace
 {
-// One constant as the header declares it.
-struct DeclaredPath
-{
-	std::string name{};
-	std::string value{};
-};
-
-// Reads Paths.h and returns every string_view constant it declares.
-std::vector<DeclaredPath> declared_paths()
-{
-	std::vector<DeclaredPath> found;
-	std::ifstream header(Paths::resolve("src/Paths.h"));
-	// A custom delimiter, because the pattern itself contains the )" that would
-	// otherwise close the raw string.
-	const std::regex declaration{
-		R"REGEX(inline\s+constexpr\s+std::string_view\s+(\w+)\s*=\s*"([^"]*)")REGEX"
+	// One constant as the header declares it.
+	struct DeclaredPath
+	{
+		std::string name{};
+		std::string value{};
 	};
 
-	std::string line;
-	while (std::getline(header, line))
+	// Reads Paths.h and returns every string_view constant it declares.
+	std::vector<DeclaredPath> declared_paths()
 	{
-		std::smatch matched;
-		if (std::regex_search(line, matched, declaration))
+		std::vector<DeclaredPath> found;
+		std::ifstream header(Paths::resolve("src/Paths.h"));
+		// A custom delimiter, because the pattern itself contains the )" that
+		// would otherwise close the raw string.
+		const std::regex declaration{
+			R"REGEX(inline\s+constexpr\s+std::string_view\s+(\w+)\s*=\s*"([^"]*)")REGEX"
+		};
+
+		std::string line;
+		while (std::getline(header, line))
 		{
-			found.push_back({ matched[1].str(), matched[2].str() });
+			std::smatch matched;
+			if (std::regex_search(line, matched, declaration))
+			{
+				found.push_back({ matched[1].str(), matched[2].str() });
+			}
 		}
+		return found;
 	}
-	return found;
-}
 
-// Creates the name under a directory of its own and reports whether the
-// filesystem took it. Asking the platform beats listing the characters it
-// reserves, because the list differs per platform and this has to hold on the
-// one the game ships from.
-bool is_creatable(
-	const std::string& relative,
-	const std::filesystem::path& sandbox)
-{
-	const std::filesystem::path target = sandbox / relative;
-	std::error_code problem;
-	std::filesystem::create_directories(target.parent_path(), problem);
-	if (problem)
+	// Creates the name under a directory of its own and reports whether the
+	// filesystem took it. Asking the platform beats listing the characters it
+	// reserves, because the list differs per platform and this has to hold on
+	// the one the game ships from.
+	bool is_creatable(
+		const std::string& relative,
+		const std::filesystem::path& sandbox)
 	{
-		return false;
-	}
+		const std::filesystem::path target = sandbox / relative;
+		std::error_code problem;
+		std::filesystem::create_directories(target.parent_path(), problem);
+		if (problem)
+		{
+			return false;
+		}
 
-	std::ofstream probe(target);
-	const bool opened = probe.is_open();
-	probe.close();
-	std::filesystem::remove(target, problem);
-	return opened;
-}
+		std::ofstream probe(target);
+		const bool opened = probe.is_open();
+		probe.close();
+		std::filesystem::remove(target, problem);
+		return opened;
+	}
 } // namespace
 
 class PathsTest : public ::testing::Test

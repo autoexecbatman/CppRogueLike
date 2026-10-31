@@ -37,13 +37,13 @@
 
 namespace
 {
-// The dragon's record as the monster editor reads it from the data file.
-MonsterParams dragon_from_data()
-{
-	MonsterRegistry monsters{};
-	monsters.load(Paths::MONSTERS);
-	return monsters.get_params("dragon");
-}
+	// The dragon's record as the monster editor reads it from the data file.
+	MonsterParams dragon_from_data()
+	{
+		MonsterRegistry monsters{};
+		monsters.load(Paths::MONSTERS);
+		return monsters.get_params("dragon");
+	}
 } // namespace
 
 // 15 Hit Dice of eight sides, with nothing added: a juvenile's modifier is Nil.

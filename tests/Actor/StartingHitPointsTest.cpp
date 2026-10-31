@@ -30,8 +30,8 @@
 namespace
 {
 
-constexpr int CUSHION = 20;
-constexpr unsigned int CHARACTERS_PER_CLASS = 200;
+	constexpr int CUSHION = 20;
+	constexpr unsigned int CHARACTERS_PER_CLASS = 200;
 
 } // namespace
 

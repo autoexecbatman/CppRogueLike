@@ -24,9 +24,9 @@
 
 namespace
 {
-// Eight names per list, so this is the last of them.
-constexpr int LAST_NAME_INDEX = 7;
-constexpr int FIRST_NAME_INDEX = 0;
+	// Eight names per list, so this is the last of them.
+	constexpr int LAST_NAME_INDEX = 7;
+	constexpr int FIRST_NAME_INDEX = 0;
 } // namespace
 
 class ShopNameTest : public ::testing::Test

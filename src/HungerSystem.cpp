@@ -26,32 +26,32 @@ namespace
 	constexpr int HUNGRY_THRESHOLD{ 700 };
 	constexpr int STARVING_THRESHOLD{ 900 };
 
-// The only place a counter becomes a state. Bounds ascend, so the first one that
-// holds is the answer.
-HungerState hunger_state_for(int hungerValue)
-{
-	if (hungerValue <= WELL_FED_THRESHOLD)
+	// The only place a counter becomes a state. Bounds ascend, so the first one
+	// that holds is the answer.
+	HungerState hunger_state_for(int hungerValue)
 	{
-		return HungerState::WELL_FED;
-	}
+		if (hungerValue <= WELL_FED_THRESHOLD)
+		{
+			return HungerState::WELL_FED;
+		}
 
-	if (hungerValue <= SATIATED_THRESHOLD)
-	{
-		return HungerState::SATIATED;
-	}
+		if (hungerValue <= SATIATED_THRESHOLD)
+		{
+			return HungerState::SATIATED;
+		}
 
-	if (hungerValue <= HUNGRY_THRESHOLD)
-	{
-		return HungerState::HUNGRY;
-	}
+		if (hungerValue <= HUNGRY_THRESHOLD)
+		{
+			return HungerState::HUNGRY;
+		}
 
-	if (hungerValue <= STARVING_THRESHOLD)
-	{
-		return HungerState::STARVING;
-	}
+		if (hungerValue <= STARVING_THRESHOLD)
+		{
+			return HungerState::STARVING;
+		}
 
-	return HungerState::DYING;
-}
+		return HungerState::DYING;
+	}
 
 } // namespace
 
@@ -309,29 +309,29 @@ void HungerSystem::save(json& output) const
 
 namespace
 {
-// The HungerState a saved integer names, or nullopt for one no state has.
-// The switch has no default, so a state added without a case here is a compile
-// error (C4062, -Wswitch).
-//
-// Example:
-//   hunger_state_from(2);    // -> HungerState::HUNGRY
-//   hunger_state_from(5);    // -> nullopt
-std::optional<HungerState> hunger_state_from(int saved)
-{
-	const HungerState candidate = static_cast<HungerState>(saved);
-	switch (candidate)
+	// The HungerState a saved integer names, or nullopt for one no state has.
+	// The switch has no default, so a state added without a case here is a
+	// compile error (C4062, -Wswitch).
+	//
+	// Example:
+	//   hunger_state_from(2);    // -> HungerState::HUNGRY
+	//   hunger_state_from(5);    // -> nullopt
+	std::optional<HungerState> hunger_state_from(int saved)
 	{
-	case HungerState::WELL_FED:
-	case HungerState::SATIATED:
-	case HungerState::HUNGRY:
-	case HungerState::STARVING:
-	case HungerState::DYING:
-	{
-		return candidate;
+		const HungerState candidate = static_cast<HungerState>(saved);
+		switch (candidate)
+		{
+		case HungerState::WELL_FED:
+		case HungerState::SATIATED:
+		case HungerState::HUNGRY:
+		case HungerState::STARVING:
+		case HungerState::DYING:
+		{
+			return candidate;
+		}
+		}
+		return std::nullopt;
 	}
-	}
-	return std::nullopt;
-}
 } // namespace
 
 void HungerSystem::load(const json& source)

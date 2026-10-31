@@ -33,175 +33,178 @@ constexpr Color RL_MAGENTA = { 255, 0, 255, 255 };
 namespace
 {
 
-// What a frame paints behind its border tiles. This is the colour the GUI_FRAME_*
-// sprites fill their own 56-pixel bodies with, measured off a render: while the
-// two differed, every border tile read as a band across the panel it enclosed.
-// One name, so a frame cannot disagree with its own art.
-constexpr Color FRAME_FILL{ 20, 12, 28, 255 };
+	// What a frame paints behind its border tiles. This is the colour the
+	// GUI_FRAME_* sprites fill their own 56-pixel bodies with, measured off a
+	// render: while the two differed, every border tile read as a band across
+	// the panel it enclosed. One name, so a frame cannot disagree with its own
+	// art.
+	constexpr Color FRAME_FILL{ 20, 12, 28, 255 };
 
-// Each pair's two colours, in ALL_COLOR_PAIR's order, so the name and the colours
-// are one row rather than a constant here and an index there. Adding a pair to the
-// enum without a colour here fails the static_assert below.
-constexpr Color PAIR_CYAN{ 0, 255, 255, 255 };
-constexpr Color PAIR_BROWN{ 128, 77, 0, 255 };
-constexpr Color PAIR_DIM_GREEN{ 0, 102, 0, 255 };
+	// Each pair's two colours, in ALL_COLOR_PAIR's order, so the name and the
+	// colours are one row rather than a constant here and an index there.
+	// Adding a pair to the enum without a colour here fails the static_assert
+	// below.
+	constexpr Color PAIR_CYAN{ 0, 255, 255, 255 };
+	constexpr Color PAIR_BROWN{ 128, 77, 0, 255 };
+	constexpr Color PAIR_DIM_GREEN{ 0, 102, 0, 255 };
 
-constexpr std::array<ColorPair, ALL_COLOR_PAIR.size()> PAIR_COLORS = { {
-	{ RL_WHITE, RL_BLACK }, // WHITE_BLACK
-	{ RL_WHITE, RL_RED }, // WHITE_RED
-	{ RL_WHITE, RL_BLUE }, // WHITE_BLUE
-	{ RL_WHITE, PAIR_DIM_GREEN }, // WHITE_GREEN
-	{ RL_BLACK, RL_WHITE }, // BLACK_WHITE
-	{ RL_BLACK, RL_GREEN }, // BLACK_GREEN
-	{ RL_BLACK, RL_YELLOW }, // BLACK_YELLOW
-	{ RL_BLACK, RL_RED }, // BLACK_RED
-	{ RL_RED, RL_BLACK }, // RED_BLACK
-	{ RL_GREEN, RL_BLACK }, // GREEN_BLACK
-	{ RL_YELLOW, RL_BLACK }, // YELLOW_BLACK
-	{ RL_BLUE, RL_BLACK }, // BLUE_BLACK
-	{ PAIR_CYAN, RL_BLACK }, // CYAN_BLACK
-	{ RL_MAGENTA, RL_BLACK }, // MAGENTA_BLACK
-	{ PAIR_CYAN, RL_BLUE }, // CYAN_BLUE
-	{ RL_RED, RL_WHITE }, // RED_WHITE
-	{ RL_GREEN, RL_YELLOW }, // GREEN_YELLOW
-	{ RL_GREEN, RL_MAGENTA }, // GREEN_MAGENTA
-	{ RL_RED, RL_YELLOW }, // RED_YELLOW
-	{ RL_GREEN, RL_RED }, // GREEN_RED
-	{ PAIR_BROWN, RL_BLACK }, // BROWN_BLACK
-	{ PAIR_DIM_GREEN, RL_BLACK }, // DIM_GREEN_BLACK
-} };
+	constexpr std::array<ColorPair, ALL_COLOR_PAIR.size()> PAIR_COLORS = { {
+		{ RL_WHITE, RL_BLACK }, // WHITE_BLACK
+		{ RL_WHITE, RL_RED }, // WHITE_RED
+		{ RL_WHITE, RL_BLUE }, // WHITE_BLUE
+		{ RL_WHITE, PAIR_DIM_GREEN }, // WHITE_GREEN
+		{ RL_BLACK, RL_WHITE }, // BLACK_WHITE
+		{ RL_BLACK, RL_GREEN }, // BLACK_GREEN
+		{ RL_BLACK, RL_YELLOW }, // BLACK_YELLOW
+		{ RL_BLACK, RL_RED }, // BLACK_RED
+		{ RL_RED, RL_BLACK }, // RED_BLACK
+		{ RL_GREEN, RL_BLACK }, // GREEN_BLACK
+		{ RL_YELLOW, RL_BLACK }, // YELLOW_BLACK
+		{ RL_BLUE, RL_BLACK }, // BLUE_BLACK
+		{ PAIR_CYAN, RL_BLACK }, // CYAN_BLACK
+		{ RL_MAGENTA, RL_BLACK }, // MAGENTA_BLACK
+		{ PAIR_CYAN, RL_BLUE }, // CYAN_BLUE
+		{ RL_RED, RL_WHITE }, // RED_WHITE
+		{ RL_GREEN, RL_YELLOW }, // GREEN_YELLOW
+		{ RL_GREEN, RL_MAGENTA }, // GREEN_MAGENTA
+		{ RL_RED, RL_YELLOW }, // RED_YELLOW
+		{ RL_GREEN, RL_RED }, // GREEN_RED
+		{ PAIR_BROWN, RL_BLACK }, // BROWN_BLACK
+		{ PAIR_DIM_GREEN, RL_BLACK }, // DIM_GREEN_BLACK
+	} };
 
-static_assert(
-	PAIR_COLORS.size() == ALL_COLOR_PAIR.size(),
-	"every colour pair needs its two colours and no more");
-// Whether a sheet is one image, or two frames the renderer alternates between.
-enum class SheetFrames
-{
-	STATIC,
-	ANIMATED,
-};
-
-// One DawnLike sheet: the id it is drawn by, its name, and where its image
-// lives under the DawnLike folder. An animated sheet reads <path>0.png and
-// <path>1.png; a static one reads <path>.png.
-struct SheetSource
-{
-	// The id tiles name this sheet by.
-	TileSheet id{ TileSheet::SHEET_FLOOR };
-	// The sheet's own name, as the renderer reports it.
-	std::string_view name{};
-	// The image's path under DawnLike, with no frame digit or extension.
-	std::string_view path{};
-	// The side of one tile in the image, in pixels.
-	int cellSize{ 0 };
-	// One image, or two frames drawn in turn.
-	SheetFrames frames{ SheetFrames::STATIC };
-};
-
-// Every sheet load_dawnlike loads, in the order it loads them. A new sheet is a
-// new row. The enumerators are named bare only inside this namespace.
-namespace dawnlike_sheets
-{
-using enum TileSheet;
-using enum SheetFrames;
-
-constexpr auto ALL = std::to_array<SheetSource>({
-	// Objects
-	{ SHEET_FLOOR, "Floor", "Objects/Floor", 64, STATIC },
-	{ SHEET_WALL, "Wall", "Objects/Wall", 64, STATIC },
-	{ SHEET_DOOR0, "Door0", "Objects/Door0", 64, STATIC },
-	{ SHEET_DECOR0, "Decor0", "Objects/Decor0", 64, STATIC },
-	{ SHEET_EFFECT0, "Effect0", "Objects/Effect0", 64, STATIC },
-	{ SHEET_TILE, "Tile", "Objects/Tile", 64, STATIC },
-	{ SHEET_PIT0, "Pit0", "Objects/Pit", 64, ANIMATED },
-	{ SHEET_GUI0, "GUI0", "GUI/GUI", 16, ANIMATED },
-
-	// Characters (all animated with 0/1 pairs)
-	{ SHEET_PLAYER0, "Player0", "Characters/Player", 64, ANIMATED },
+	static_assert(
+		PAIR_COLORS.size() == ALL_COLOR_PAIR.size(),
+		"every colour pair needs its two colours and no more");
+	// Whether a sheet is one image, or two frames the renderer alternates
+	// between.
+	enum class SheetFrames
 	{
-		SHEET_HUMANOID0,
-		"Humanoid0",
-		"Characters/Humanoid",
-		64,
+		STATIC,
 		ANIMATED,
-	},
-	{ SHEET_REPTILE0, "Reptile0", "Characters/Reptile", 64, ANIMATED },
-	{ SHEET_PEST0, "Pest0", "Characters/Pest", 64, ANIMATED },
-	{ SHEET_DOG0, "Dog0", "Characters/Dog", 64, ANIMATED },
-	{ SHEET_AVIAN0, "Avian0", "Characters/Avian", 64, ANIMATED },
-	{ SHEET_UNDEAD0, "Undead0", "Characters/Undead", 64, ANIMATED },
+	};
+
+	// One DawnLike sheet: the id it is drawn by, its name, and where its image
+	// lives under the DawnLike folder. An animated sheet reads <path>0.png and
+	// <path>1.png; a static one reads <path>.png.
+	struct SheetSource
 	{
-		SHEET_QUADRAPED0,
-		"Quadraped0",
-		"Characters/Quadraped",
-		16,
-		ANIMATED,
-	},
-	{ SHEET_DEMON0, "Demon0", "Characters/Demon", 64, ANIMATED },
-	{ SHEET_MISC0, "Misc0", "Characters/Misc", 64, ANIMATED },
+		// The id tiles name this sheet by.
+		TileSheet id{ TileSheet::SHEET_FLOOR };
+		// The sheet's own name, as the renderer reports it.
+		std::string_view name{};
+		// The image's path under DawnLike, with no frame digit or extension.
+		std::string_view path{};
+		// The side of one tile in the image, in pixels.
+		int cellSize{ 0 };
+		// One image, or two frames drawn in turn.
+		SheetFrames frames{ SheetFrames::STATIC };
+	};
 
-	// Items (static -- no animation frames)
-	{ SHEET_POTION, "Potion", "Items/Potion", 16, STATIC },
-	{ SHEET_SCROLL, "Scroll", "Items/Scroll", 16, STATIC },
-	{ SHEET_SHORT_WEP, "ShortWep", "Items/ShortWep", 16, STATIC },
-	{ SHEET_MED_WEP, "MedWep", "Items/MedWep", 16, STATIC },
-	{ SHEET_LONG_WEP, "LongWep", "Items/LongWep", 16, STATIC },
-	{ SHEET_ARMOR, "Armor", "Items/Armor", 16, STATIC },
-	{ SHEET_SHIELD, "Shield", "Items/Shield", 16, STATIC },
-	{ SHEET_HAT, "Hat", "Items/Hat", 16, STATIC },
-	{ SHEET_RING, "Ring", "Items/Ring", 16, STATIC },
-	{ SHEET_AMULET_ITEM, "Amulet", "Items/Amulet", 64, STATIC },
-	{ SHEET_FOOD, "Food", "Items/Food", 16, STATIC },
-	{ SHEET_FLESH, "Flesh", "Items/Flesh", 64, STATIC },
-	{ SHEET_MONEY, "Money", "Items/Money", 64, STATIC },
-
-	// Item sheets
-	{ SHEET_AMMO, "Ammo", "Items/Ammo", 16, STATIC },
-	{ SHEET_WAND, "Wand", "Items/Wand", 16, STATIC },
-	{ SHEET_BOOK, "Book", "Items/Book", 16, STATIC },
-	{ SHEET_BOOT, "Boot", "Items/Boot", 16, STATIC },
-	{ SHEET_GLOVE, "Glove", "Items/Glove", 16, STATIC },
-	{ SHEET_KEY, "Key", "Items/Key", 16, STATIC },
-	{ SHEET_LIGHT, "Light", "Items/Light", 16, STATIC },
-	{ SHEET_TOOL, "Tool", "Items/Tool", 16, STATIC },
-	{ SHEET_ROCK, "Rock", "Items/Rock", 16, STATIC },
-	{ SHEET_MUSIC, "Music", "Items/Music", 16, STATIC },
-	{ SHEET_CHEST0, "Chest0", "Items/Chest", 64, ANIMATED },
-
-	// Generated item sheet: every item in items.json on one 64px grid, 8
-	// columns by 15 rows. Static, because items do not animate.
-	{ SHEET_ITEMS, "Items", "Items/Items", 64, STATIC },
-	{ SHEET_SLOTS, "Slots", "GUI/Slots", 64, STATIC },
-	{ SHEET_FRAME, "Frame", "GUI/Frame", 64, STATIC },
-	{ SHEET_BARS, "Bars", "GUI/Bars", GUI_BARS_CELL_SIZE, STATIC },
-
-	// Further character sheets
-	{ SHEET_SLIME0, "Slime0", "Characters/Slime", 16, ANIMATED },
-	{ SHEET_CAT0, "Cat0", "Characters/Cat", 16, ANIMATED },
-	{ SHEET_RODENT0, "Rodent0", "Characters/Rodent", 16, ANIMATED },
-	{ SHEET_PLANT0, "Plant0", "Characters/Plant", 16, ANIMATED },
+	// Every sheet load_dawnlike loads, in the order it loads them. A new sheet
+	// is a new row. The enumerators are named bare only inside this namespace.
+	namespace dawnlike_sheets
 	{
-		SHEET_ELEMENTAL0,
-		"Elemental0",
-		"Characters/Elemental",
-		16,
-		ANIMATED,
-	},
-	{ SHEET_AQUATIC0, "Aquatic0", "Characters/Aquatic", 16, ANIMATED },
+		using enum TileSheet;
+		using enum SheetFrames;
 
-	// Further object sheets
-	{ SHEET_ORE0, "Ore0", "Objects/Ore", 16, ANIMATED },
-	{ SHEET_HILL0, "Hill0", "Objects/Hill", 16, ANIMATED },
-	{ SHEET_TREE0, "Tree0", "Objects/Tree", 16, ANIMATED },
-	{ SHEET_GROUND0, "Ground0", "Objects/Ground", 16, ANIMATED },
-	// Generated trap art: three types at 64px, armed on row 0 and sprung on
-	// row 1. Static, since a trap does not animate and a generated second
-	// frame boils.
-	{ SHEET_TRAP0, "Trap0", "Objects/Trap0", 64, STATIC },
-	{ SHEET_FENCE, "Fence", "Objects/Fence", 16, STATIC },
-	{ SHEET_MAP0, "Map0", "Objects/Map", 16, ANIMATED },
-});
-} // namespace dawnlike_sheets
+		constexpr auto ALL = std::to_array<SheetSource>({
+			// Objects
+			{ SHEET_FLOOR, "Floor", "Objects/Floor", 64, STATIC },
+			{ SHEET_WALL, "Wall", "Objects/Wall", 64, STATIC },
+			{ SHEET_DOOR0, "Door0", "Objects/Door0", 64, STATIC },
+			{ SHEET_DECOR0, "Decor0", "Objects/Decor0", 64, STATIC },
+			{ SHEET_EFFECT0, "Effect0", "Objects/Effect0", 64, STATIC },
+			{ SHEET_TILE, "Tile", "Objects/Tile", 64, STATIC },
+			{ SHEET_PIT0, "Pit0", "Objects/Pit", 64, ANIMATED },
+			{ SHEET_GUI0, "GUI0", "GUI/GUI", 16, ANIMATED },
+
+			// Characters (all animated with 0/1 pairs)
+			{ SHEET_PLAYER0, "Player0", "Characters/Player", 64, ANIMATED },
+			{
+				SHEET_HUMANOID0,
+				"Humanoid0",
+				"Characters/Humanoid",
+				64,
+				ANIMATED,
+			},
+			{ SHEET_REPTILE0, "Reptile0", "Characters/Reptile", 64, ANIMATED },
+			{ SHEET_PEST0, "Pest0", "Characters/Pest", 64, ANIMATED },
+			{ SHEET_DOG0, "Dog0", "Characters/Dog", 64, ANIMATED },
+			{ SHEET_AVIAN0, "Avian0", "Characters/Avian", 64, ANIMATED },
+			{ SHEET_UNDEAD0, "Undead0", "Characters/Undead", 64, ANIMATED },
+			{
+				SHEET_QUADRAPED0,
+				"Quadraped0",
+				"Characters/Quadraped",
+				16,
+				ANIMATED,
+			},
+			{ SHEET_DEMON0, "Demon0", "Characters/Demon", 64, ANIMATED },
+			{ SHEET_MISC0, "Misc0", "Characters/Misc", 64, ANIMATED },
+
+			// Items (static -- no animation frames)
+			{ SHEET_POTION, "Potion", "Items/Potion", 16, STATIC },
+			{ SHEET_SCROLL, "Scroll", "Items/Scroll", 16, STATIC },
+			{ SHEET_SHORT_WEP, "ShortWep", "Items/ShortWep", 16, STATIC },
+			{ SHEET_MED_WEP, "MedWep", "Items/MedWep", 16, STATIC },
+			{ SHEET_LONG_WEP, "LongWep", "Items/LongWep", 16, STATIC },
+			{ SHEET_ARMOR, "Armor", "Items/Armor", 16, STATIC },
+			{ SHEET_SHIELD, "Shield", "Items/Shield", 16, STATIC },
+			{ SHEET_HAT, "Hat", "Items/Hat", 16, STATIC },
+			{ SHEET_RING, "Ring", "Items/Ring", 16, STATIC },
+			{ SHEET_AMULET_ITEM, "Amulet", "Items/Amulet", 64, STATIC },
+			{ SHEET_FOOD, "Food", "Items/Food", 16, STATIC },
+			{ SHEET_FLESH, "Flesh", "Items/Flesh", 64, STATIC },
+			{ SHEET_MONEY, "Money", "Items/Money", 64, STATIC },
+
+			// Item sheets
+			{ SHEET_AMMO, "Ammo", "Items/Ammo", 16, STATIC },
+			{ SHEET_WAND, "Wand", "Items/Wand", 16, STATIC },
+			{ SHEET_BOOK, "Book", "Items/Book", 16, STATIC },
+			{ SHEET_BOOT, "Boot", "Items/Boot", 16, STATIC },
+			{ SHEET_GLOVE, "Glove", "Items/Glove", 16, STATIC },
+			{ SHEET_KEY, "Key", "Items/Key", 16, STATIC },
+			{ SHEET_LIGHT, "Light", "Items/Light", 16, STATIC },
+			{ SHEET_TOOL, "Tool", "Items/Tool", 16, STATIC },
+			{ SHEET_ROCK, "Rock", "Items/Rock", 16, STATIC },
+			{ SHEET_MUSIC, "Music", "Items/Music", 16, STATIC },
+			{ SHEET_CHEST0, "Chest0", "Items/Chest", 64, ANIMATED },
+
+			// Generated item sheet: every item in items.json on one 64px grid,
+			// 8 columns by 15 rows. Static, because items do not animate.
+			{ SHEET_ITEMS, "Items", "Items/Items", 64, STATIC },
+			{ SHEET_SLOTS, "Slots", "GUI/Slots", 64, STATIC },
+			{ SHEET_FRAME, "Frame", "GUI/Frame", 64, STATIC },
+			{ SHEET_BARS, "Bars", "GUI/Bars", GUI_BARS_CELL_SIZE, STATIC },
+
+			// Further character sheets
+			{ SHEET_SLIME0, "Slime0", "Characters/Slime", 16, ANIMATED },
+			{ SHEET_CAT0, "Cat0", "Characters/Cat", 16, ANIMATED },
+			{ SHEET_RODENT0, "Rodent0", "Characters/Rodent", 16, ANIMATED },
+			{ SHEET_PLANT0, "Plant0", "Characters/Plant", 16, ANIMATED },
+			{
+				SHEET_ELEMENTAL0,
+				"Elemental0",
+				"Characters/Elemental",
+				16,
+				ANIMATED,
+			},
+			{ SHEET_AQUATIC0, "Aquatic0", "Characters/Aquatic", 16, ANIMATED },
+
+			// Further object sheets
+			{ SHEET_ORE0, "Ore0", "Objects/Ore", 16, ANIMATED },
+			{ SHEET_HILL0, "Hill0", "Objects/Hill", 16, ANIMATED },
+			{ SHEET_TREE0, "Tree0", "Objects/Tree", 16, ANIMATED },
+			{ SHEET_GROUND0, "Ground0", "Objects/Ground", 16, ANIMATED },
+			// Generated trap art: three types at 64px, armed on row 0 and
+			// sprung on row 1. Static, since a trap does not animate and a
+			// generated second frame boils.
+			{ SHEET_TRAP0, "Trap0", "Objects/Trap0", 64, STATIC },
+			{ SHEET_FENCE, "Fence", "Objects/Fence", 16, STATIC },
+			{ SHEET_MAP0, "Map0", "Objects/Map", 16, ANIMATED },
+		});
+	} // namespace dawnlike_sheets
 
 } // namespace
 

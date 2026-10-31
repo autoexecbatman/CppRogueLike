@@ -28,31 +28,35 @@
 namespace
 {
 
-// A mimic saves disguiseChangeTime only once it has booked a change, so its absence is a
-// real state: the next turn books one.
-const std::set<std::string> OPTIONAL_KEYS{ "disguiseChangeTime" };
+	// A mimic saves disguiseChangeTime only once it has booked a change, so its
+	// absence is a real state: the next turn books one.
+	const std::set<std::string> OPTIONAL_KEYS{ "disguiseChangeTime" };
 
-// One of each kind whose save writes more than its type, built the way the game builds it.
-std::vector<std::unique_ptr<Ai>> one_of_each_saving_kind()
-{
-	std::vector<std::unique_ptr<Ai>> kinds;
-	kinds.push_back(Ai::make(AiType::RANGED_MONSTER));
-	// The shape Creature::apply_confusion makes: wrapped around the creature's own mind.
-	kinds.push_back(
-		std::make_unique<AiMonsterConfused>(5, std::make_unique<AiMonster>()));
-	kinds.push_back(Ai::make(AiType::MIMIC));
-	kinds.push_back(Ai::make(AiType::SPIDER));
-	kinds.push_back(Ai::make(AiType::GIANT_SPIDER));
-	kinds.push_back(Ai::make(AiType::WEB_SPINNER));
-	return kinds;
-}
+	// One of each kind whose save writes more than its type, built the way the
+	// game builds it.
+	std::vector<std::unique_ptr<Ai>> one_of_each_saving_kind()
+	{
+		std::vector<std::unique_ptr<Ai>> kinds;
+		kinds.push_back(Ai::make(AiType::RANGED_MONSTER));
+		// The shape Creature::apply_confusion makes: wrapped around the
+		// creature's own mind.
+		kinds.push_back(
+			std::make_unique<AiMonsterConfused>(
+				5,
+				std::make_unique<AiMonster>()));
+		kinds.push_back(Ai::make(AiType::MIMIC));
+		kinds.push_back(Ai::make(AiType::SPIDER));
+		kinds.push_back(Ai::make(AiType::GIANT_SPIDER));
+		kinds.push_back(Ai::make(AiType::WEB_SPINNER));
+		return kinds;
+	}
 
-json saved_record(Ai& ai)
-{
-	json record;
-	ai.save(record);
-	return record;
-}
+	json saved_record(Ai& ai)
+	{
+		json record;
+		ai.save(record);
+		return record;
+	}
 
 } // namespace
 

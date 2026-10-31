@@ -45,8 +45,8 @@
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "\tconst bool stillRollsDice = LevelUpSystem::takes_constitution_adjustment_at(\n\t\towner.get_creature_class(),\n\t\tnewLevel);",
-      "mutated": "\tconst bool stillRollsDice = LevelUpSystem::takes_constitution_adjustment_at(\n\t\towner.get_creature_class(),\n\t\tnewLevel - 1);",
+      "original": "const bool stillRollsDice =\n\t\t\tLevelUpSystem::takes_constitution_adjustment_at(\n\t\t\t\towner.get_creature_class(),\n\t\t\t\tnewLevel);",
+      "mutated": "\t\tconst bool stillRollsDice = LevelUpSystem::takes_constitution_adjustment_at(\n\t\t\towner.get_creature_class(),\n\t\t\tnewLevel - 1);",
       "catches": "level-up asking about the level it is leaving"
     },
     {

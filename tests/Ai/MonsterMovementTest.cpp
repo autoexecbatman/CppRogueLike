@@ -38,23 +38,24 @@
 namespace
 {
 
-constexpr int STARTING_HP = 100;
-constexpr int CORRIDOR_ROW = 5;
-constexpr Vector2D PLAYER_TILE{ 3, CORRIDOR_ROW };
-constexpr Vector2D DOOR_TILE{ 7, CORRIDOR_ROW };
-// The tile on the monster's side of the door.
-constexpr Vector2D NEAR_SIDE_OF_DOOR{ 8, CORRIDOR_ROW };
-constexpr Vector2D MONSTER_START{ 12, CORRIDOR_ROW };
+	constexpr int STARTING_HP = 100;
+	constexpr int CORRIDOR_ROW = 5;
+	constexpr Vector2D PLAYER_TILE{ 3, CORRIDOR_ROW };
+	constexpr Vector2D DOOR_TILE{ 7, CORRIDOR_ROW };
+	// The tile on the monster's side of the door.
+	constexpr Vector2D NEAR_SIDE_OF_DOOR{ 8, CORRIDOR_ROW };
+	constexpr Vector2D MONSTER_START{ 12, CORRIDOR_ROW };
 
-// Many more turns than the walk needs, so a monster that has not arrived has stopped.
-constexpr int ROUNDS = 30;
+	// Many more turns than the walk needs, so a monster that has not arrived
+	// has stopped.
+	constexpr int ROUNDS = 30;
 
-// The hunting step, public for the test.
-class HuntingAi final : public AiMonster
-{
-public:
-	using AiMonster::move_or_attack;
-};
+	// The hunting step, public for the test.
+	class HuntingAi final : public AiMonster
+	{
+	public:
+		using AiMonster::move_or_attack;
+	};
 
 } // namespace
 

@@ -43,23 +43,25 @@
 namespace
 {
 
-constexpr int STARTING_HP = 100;
+	constexpr int STARTING_HP = 100;
 
-// One straight corridor with a single water tile in it. The player stands beyond the
-// water and the goblin starts on the dry side, so closing the distance means the flow
-// field's best next step is the water itself - which is the move that has to be refused.
-constexpr int CORRIDOR_ROW = 5;
-constexpr int PLAYER_COLUMN = 4;
-constexpr int WATER_COLUMN = 6;
-constexpr int BANK_COLUMN = 7; // the dry tile the goblin should stop on
-// Four tiles from the player, which is the unlit sight radius, so the goblin stands in
-// the player's field of view and update_awareness books it aware on its own turn. An
-// aware monster hunts with no die in the way, so nothing here depends on scripted rolls.
-constexpr int GOBLIN_START_COLUMN = 8;
+	// One straight corridor with a single water tile in it. The player stands
+	// beyond the water and the goblin starts on the dry side, so closing the
+	// distance means the flow field's best next step is the water itself -
+	// which is the move that has to be refused.
+	constexpr int CORRIDOR_ROW = 5;
+	constexpr int PLAYER_COLUMN = 4;
+	constexpr int WATER_COLUMN = 6;
+	constexpr int BANK_COLUMN = 7; // the dry tile the goblin should stop on
+	// Four tiles from the player, which is the unlit sight radius, so the
+	// goblin stands in the player's field of view and update_awareness books it
+	// aware on its own turn. An aware monster hunts with no die in the way, so
+	// nothing here depends on scripted rolls.
+	constexpr int GOBLIN_START_COLUMN = 8;
 
-// Far more turns than the one step to the bank needs, so a goblin that stops has
-// demonstrably stopped rather than been slow.
-constexpr int ROUNDS = 12;
+	// Far more turns than the one step to the bank needs, so a goblin that
+	// stops has demonstrably stopped rather than been slow.
+	constexpr int ROUNDS = 12;
 
 } // namespace
 
@@ -236,28 +238,30 @@ TEST_F(MonsterWaterAvoidanceTest, TheSameDriftCarriesASwimmerIn)
 namespace
 {
 
-// The room the second fixture carves, in map coordinates. One scattered water tile,
-// which is all Map::spawn_water ever makes: it flips a 5 percent coin per floor tile
-// independently, so a pool wide enough to need a detour is not what the generator
-// produces - a single tile beside the player is.
-//
-//   . . . . . G . . .      row 2, the goblin
-//   . . . . . . . . .      row 3
-//   . . . . . . ~ . .      row 4, the water
-//   . . . . . . . P .      row 5, the player
-//   . . . . . . . . .      row 6
-//
-// The goblin walks to row 3 and then wants the water, because the water is the only
-// tile nearer the player than the one it is standing on. Every dry tile beside it is
-// the same distance away, not nearer. So the question this fixture asks is whether a
-// creature will step sideways to get round a tile it may not enter.
-constexpr int ROOM_COL = 2;
-constexpr int ROOM_ROW = 2;
-constexpr int ROOM_COL_END = 10;
-constexpr int ROOM_ROW_END = 6;
-constexpr Vector2D POOL{ 8, 4 };
-constexpr Vector2D PLAYER_TILE{ 9, 5 };
-constexpr Vector2D GOBLIN_TILE{ 7, 2 };
+	// The room the second fixture carves, in map coordinates. One scattered
+	// water tile, which is all Map::spawn_water ever makes: it flips a 5
+	// percent coin per floor tile independently, so a pool wide enough to need
+	// a detour is not what the generator produces - a single tile beside the
+	// player is.
+	//
+	//   . . . . . G . . .      row 2, the goblin
+	//   . . . . . . . . .      row 3
+	//   . . . . . . ~ . .      row 4, the water
+	//   . . . . . . . P .      row 5, the player
+	//   . . . . . . . . .      row 6
+	//
+	// The goblin walks to row 3 and then wants the water, because the water is
+	// the only tile nearer the player than the one it is standing on. Every dry
+	// tile beside it is the same distance away, not nearer. So the question
+	// this fixture asks is whether a creature will step sideways to get round a
+	// tile it may not enter.
+	constexpr int ROOM_COL = 2;
+	constexpr int ROOM_ROW = 2;
+	constexpr int ROOM_COL_END = 10;
+	constexpr int ROOM_ROW_END = 6;
+	constexpr Vector2D POOL{ 8, 4 };
+	constexpr Vector2D PLAYER_TILE{ 9, 5 };
+	constexpr Vector2D GOBLIN_TILE{ 7, 2 };
 
 } // namespace
 

@@ -43,78 +43,81 @@
 namespace
 {
 
-using json = nlohmann::json;
+	using json = nlohmann::json;
 
-// Every plan under tests/, found rather than listed, so a new one is covered by being
-// written.
-std::vector<std::filesystem::path> every_plan()
-{
-	std::vector<std::filesystem::path> plans;
-	const std::filesystem::path root = Paths::resolve("tests");
-	if (!std::filesystem::is_directory(root))
+	// Every plan under tests/, found rather than listed, so a new one is
+	// covered by being written.
+	std::vector<std::filesystem::path> every_plan()
 	{
+		std::vector<std::filesystem::path> plans;
+		const std::filesystem::path root = Paths::resolve("tests");
+		if (!std::filesystem::is_directory(root))
+		{
+			return plans;
+		}
+		for (
+			const auto& entry :
+			std::filesystem::recursive_directory_iterator(root))
+		{
+			const std::string name = entry.path().filename().string();
+			if (entry.is_regular_file() && name.contains("mutations") &&
+				entry.path().extension() == ".json")
+			{
+				plans.push_back(entry.path());
+			}
+		}
 		return plans;
 	}
-	for (
-		const auto& entry : std::filesystem::recursive_directory_iterator(root))
+
+	// The file as mutate.py reads it: carriage returns folded away, so an
+	// anchor written with plain newlines matches a file the working tree keeps
+	// in CRLF.
+	std::string source_as_the_tool_reads_it(const std::filesystem::path& path)
 	{
-		const std::string name = entry.path().filename().string();
-		if (entry.is_regular_file() && name.contains("mutations") &&
-			entry.path().extension() == ".json")
+		std::ifstream file(path, std::ios::binary);
+		const std::string raw{
+			std::istreambuf_iterator<char>(file),
+			std::istreambuf_iterator<char>(),
+		};
+		std::string folded;
+		folded.reserve(raw.size());
+		for (size_t index = 0; index < raw.size(); ++index)
 		{
-			plans.push_back(entry.path());
+			if (raw[index] == '\r' && index + 1 < raw.size() &&
+				raw[index + 1] == '\n')
+			{
+				continue;
+			}
+			folded += raw[index];
 		}
+		return folded;
 	}
-	return plans;
-}
 
-// The file as mutate.py reads it: carriage returns folded away, so an anchor written with
-// plain newlines matches a file the working tree keeps in CRLF.
-std::string source_as_the_tool_reads_it(const std::filesystem::path& path)
-{
-	std::ifstream file(path, std::ios::binary);
-	const std::string raw{
-		std::istreambuf_iterator<char>(file),
-		std::istreambuf_iterator<char>(),
-	};
-	std::string folded;
-	folded.reserve(raw.size());
-	for (size_t index = 0; index < raw.size(); ++index)
+	// The suite names this binary actually registers.
+	std::set<std::string> registered_suites()
 	{
-		if (raw[index] == '\r' && index + 1 < raw.size() &&
-			raw[index + 1] == '\n')
+		std::set<std::string> names;
+		const ::testing::UnitTest& unitTest =
+			*::testing::UnitTest::GetInstance();
+		for (int index = 0; index < unitTest.total_test_suite_count(); ++index)
 		{
-			continue;
+			names.insert(unitTest.GetTestSuite(index)->name());
 		}
-		folded += raw[index];
+		return names;
 	}
-	return folded;
-}
 
-// The suite names this binary actually registers.
-std::set<std::string> registered_suites()
-{
-	std::set<std::string> names;
-	const ::testing::UnitTest& unitTest = *::testing::UnitTest::GetInstance();
-	for (int index = 0; index < unitTest.total_test_suite_count(); ++index)
+	// The test a registered suite name passes when it begins with suite, so a
+	// pattern naming a fixture's prefix still finds its suites.
+	//
+	// Example, with suite holding "DoorForcing":
+	//   naming_a_prefix_of(suite)("DoorForcingTest"); // -> true
+	auto naming_a_prefix_of(const std::string& suite)
 	{
-		names.insert(unitTest.GetTestSuite(index)->name());
+		return [&suite](const std::string& registered)
+		{
+			return registered.starts_with(suite);
+		};
 	}
-	return names;
-}
-
-// The test a registered suite name passes when it begins with suite, so a
-// pattern naming a fixture's prefix still finds its suites.
-//
-// Example, with suite holding "DoorForcing":
-//   naming_a_prefix_of(suite)("DoorForcingTest"); // -> true
-auto naming_a_prefix_of(const std::string& suite)
-{
-	return [&suite](const std::string& registered)
-	{
-		return registered.starts_with(suite);
-	};
-}
 
 } // namespace
 

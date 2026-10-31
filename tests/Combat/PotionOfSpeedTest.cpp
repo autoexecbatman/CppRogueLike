@@ -59,37 +59,39 @@
 
 namespace
 {
-// One ordinary action, and the hasted one: twice the actions is half the time each.
-constexpr int ORDINARY_DELAY = TIME_UNITS_PER_ROUND;
-constexpr int HASTED_DELAY = TIME_UNITS_PER_ROUND / 2;
-// A moment well into a game, so a cost measured from time zero cannot pass by accident.
-constexpr int TIME_OF_DRINKING = 5000;
-// The four dice of 5d4 at their least and their most: 5 and 20 rounds.
-constexpr int LOWEST_D4 = 1;
-constexpr int HIGHEST_D4 = 4;
-constexpr int DICE_IN_THE_DURATION = 5;
+	// One ordinary action, and the hasted one: twice the actions is half the
+	// time each.
+	constexpr int ORDINARY_DELAY = TIME_UNITS_PER_ROUND;
+	constexpr int HASTED_DELAY = TIME_UNITS_PER_ROUND / 2;
+	// A moment well into a game, so a cost measured from time zero cannot pass
+	// by accident.
+	constexpr int TIME_OF_DRINKING = 5000;
+	// The four dice of 5d4 at their least and their most: 5 and 20 rounds.
+	constexpr int LOWEST_D4 = 1;
+	constexpr int HIGHEST_D4 = 4;
+	constexpr int DICE_IN_THE_DURATION = 5;
 
-// The player, wired into a context, with nothing worn and nothing drunk.
-void make_player(MockGameContext& mock, GameContext& ctx)
-{
-	mock.player = std::make_unique<Player>(Vector2D{ 2, 2 });
-	Player& player = *mock.player;
-	player.experienceReward = std::make_unique<ExperienceReward>(0);
-	player.armorClass = std::make_unique<ArmorClass>(10);
-	player.healthPool = std::make_unique<HealthPool>(20);
-	player.set_strength(10);
-	player.set_dexterity(10);
-	ctx.playerOwner = &mock.player;
-}
+	// The player, wired into a context, with nothing worn and nothing drunk.
+	void make_player(MockGameContext& mock, GameContext& ctx)
+	{
+		mock.player = std::make_unique<Player>(Vector2D{ 2, 2 });
+		Player& player = *mock.player;
+		player.experienceReward = std::make_unique<ExperienceReward>(0);
+		player.armorClass = std::make_unique<ArmorClass>(10);
+		player.healthPool = std::make_unique<HealthPool>(20);
+		player.set_strength(10);
+		player.set_dexterity(10);
+		ctx.playerOwner = &mock.player;
+	}
 
-// A SPEED buff of the potion's kind, ending at the given clock reading.
-Buff speed_ending_at(int expiryTime)
-{
-	Buff speed{};
-	speed.type = BuffType::SPEED;
-	speed.expiryTime = expiryTime;
-	return speed;
-}
+	// A SPEED buff of the potion's kind, ending at the given clock reading.
+	Buff speed_ending_at(int expiryTime)
+	{
+		Buff speed{};
+		speed.type = BuffType::SPEED;
+		speed.expiryTime = expiryTime;
+		return speed;
+	}
 } // namespace
 
 class PotionOfSpeedTest : public ::testing::Test
@@ -289,45 +291,46 @@ TEST_F(PotionOfSpeedTest, DrinkingAgesTheDrinkerByAYear)
 namespace
 {
 
-// "This does not reduce spellcasting time": a hasted player casting from the ring pays a full round.
-[[noreturn]] void a_hasted_cast_costs_a_full_round()
-{
-	HiddenRenderer hidden{};
-	MockGameContext mock{};
-	GameContext ctx = mock.to_game_context();
-	ctx.renderer = &hidden.renderer;
-	make_player(mock, ctx);
-	Player& player = *mock.player;
-	auto ring =
-		ItemCreator::create("ring_of_invisibility", player.position, ctx);
-	[[maybe_unused]] const bool equipped =
-		player.equip_item(std::move(ring), EquipmentSlot::LEFT_RING, ctx);
-	ctx.gameState->set_time(TIME_OF_DRINKING);
-	ctx.buffSystem->add_buff(
-		player,
-		BuffType::SPEED,
-		0,
-		10,
-		BuffApplication::ADD,
-		TIME_OF_DRINKING);
-	exit_unless(
-		player.get_action_delay() == HASTED_DELAY,
-		"the player was not hasted before casting");
+	// "This does not reduce spellcasting time": a hasted player casting from
+	// the ring pays a full round.
+	[[noreturn]] void a_hasted_cast_costs_a_full_round()
+	{
+		HiddenRenderer hidden{};
+		MockGameContext mock{};
+		GameContext ctx = mock.to_game_context();
+		ctx.renderer = &hidden.renderer;
+		make_player(mock, ctx);
+		Player& player = *mock.player;
+		auto ring =
+			ItemCreator::create("ring_of_invisibility", player.position, ctx);
+		[[maybe_unused]] const bool equipped =
+			player.equip_item(std::move(ring), EquipmentSlot::LEFT_RING, ctx);
+		ctx.gameState->set_time(TIME_OF_DRINKING);
+		ctx.buffSystem->add_buff(
+			player,
+			BuffType::SPEED,
+			0,
+			10,
+			BuffApplication::ADD,
+			TIME_OF_DRINKING);
+		exit_unless(
+			player.get_action_delay() == HASTED_DELAY,
+			"the player was not hasted before casting");
 
-	mock.menus.push_back(std::make_unique<MenuSpellCast>(player, ctx));
-	ctx.inputSystem->queue_key(GameKey::NONE, 'a');
-	hidden.renderer.begin_frame();
-	ctx.menuManager->handle_menus(*ctx.menus, ctx);
-	hidden.renderer.end_frame();
+		mock.menus.push_back(std::make_unique<MenuSpellCast>(player, ctx));
+		ctx.inputSystem->queue_key(GameKey::NONE, 'a');
+		hidden.renderer.begin_frame();
+		ctx.menuManager->handle_menus(*ctx.menus, ctx);
+		hidden.renderer.end_frame();
 
-	exit_unless(
-		player.has_state(ActorState::IS_INVISIBLE),
-		"the ring's invisibility was not cast");
-	exit_unless(
-		ctx.gameState->get_time() == TIME_OF_DRINKING + ORDINARY_DELAY,
-		"a hasted casting did not cost a full round");
-	finish_the_child();
-}
+		exit_unless(
+			player.has_state(ActorState::IS_INVISIBLE),
+			"the ring's invisibility was not cast");
+		exit_unless(
+			ctx.gameState->get_time() == TIME_OF_DRINKING + ORDINARY_DELAY,
+			"a hasted casting did not cost a full round");
+		finish_the_child();
+	}
 
 } // namespace
 

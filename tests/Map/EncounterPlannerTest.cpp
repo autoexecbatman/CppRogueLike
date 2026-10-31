@@ -32,28 +32,28 @@
 
 namespace
 {
-constexpr int SHALLOW = 1;
-constexpr int DEEP = 4;
-constexpr int CAP = 10;
+	constexpr int SHALLOW = 1;
+	constexpr int DEEP = 4;
+	constexpr int CAP = 10;
 
-// What the selection actually spent, so a budget claim is about money and not
-// about how many keys came back.
-int spent(
-	const std::vector<std::string>& selected,
-	const std::vector<MonsterCandidate>& candidates)
-{
-	int total = 0;
-	for (const std::string& key : selected)
+	// What the selection actually spent, so a budget claim is about money and
+	// not about how many keys came back.
+	int spent(
+		const std::vector<std::string>& selected,
+		const std::vector<MonsterCandidate>& candidates)
 	{
-		auto matches = [&key](const MonsterCandidate& candidate)
+		int total = 0;
+		for (const std::string& key : selected)
 		{
-			return candidate.key == key;
-		};
-		const auto found = std::ranges::find_if(candidates, matches);
-		total += found->xpCost;
+			auto matches = [&key](const MonsterCandidate& candidate)
+			{
+				return candidate.key == key;
+			};
+			const auto found = std::ranges::find_if(candidates, matches);
+			total += found->xpCost;
+		}
+		return total;
 	}
-	return total;
-}
 } // namespace
 
 class EncounterPlannerTest : public ::testing::Test

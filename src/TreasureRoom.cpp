@@ -32,74 +32,74 @@
 
 namespace
 {
-// Whether `target` can be reached from `start` without crossing a locked
-// door or a wall. A jailer must spawn on the corridor side of the door it
-// guards, so a spawn that fails this is in a pocket of its own.
-bool is_reachable_without_locked_doors(
-	Vector2D start,
-	Vector2D target,
-	const Map& map)
-{
-	if (start == target)
+	// Whether `target` can be reached from `start` without crossing a locked
+	// door or a wall. A jailer must spawn on the corridor side of the door it
+	// guards, so a spawn that fails this is in a pocket of its own.
+	bool is_reachable_without_locked_doors(
+		Vector2D start,
+		Vector2D target,
+		const Map& map)
 	{
-		return true;
-	}
-
-	// Use a flat visited array sized to the known map extents.
-	const int width = map.get_width();
-	const int height = map.get_height();
-	std::vector<bool> visited(static_cast<size_t>(width) * height, false);
-
-	auto mark = [&](Vector2D pos)
-	{
-		visited[static_cast<size_t>(pos.y) * width + pos.x] = true;
-	};
-	auto was_visited = [&](Vector2D pos) -> bool
-	{
-		return visited[static_cast<size_t>(pos.y) * width + pos.x];
-	};
-	auto can_traverse = [&](Vector2D pos) -> bool
-	{
-		if (!map.is_in_bounds(pos))
-		{
-			return false;
-		}
-		if (map.is_door_locked(pos))
-		{
-			return false;
-		}
-		return map.get_tile_type(pos) != TileType::WALL;
-	};
-
-	std::queue<Vector2D> frontier;
-	frontier.push(start);
-	mark(start);
-
-	while (!frontier.empty())
-	{
-		const Vector2D current = frontier.front();
-		frontier.pop();
-
-		if (current == target)
+		if (start == target)
 		{
 			return true;
 		}
 
-		for (
-			Vector2D dir :
-			{ DIR_N, DIR_S, DIR_E, DIR_W, DIR_NE, DIR_NW, DIR_SE, DIR_SW })
+		// Use a flat visited array sized to the known map extents.
+		const int width = map.get_width();
+		const int height = map.get_height();
+		std::vector<bool> visited(static_cast<size_t>(width) * height, false);
+
+		auto mark = [&](Vector2D pos)
 		{
-			const Vector2D next = current + dir;
-			if (!was_visited(next) && can_traverse(next))
+			visited[static_cast<size_t>(pos.y) * width + pos.x] = true;
+		};
+		auto was_visited = [&](Vector2D pos) -> bool
+		{
+			return visited[static_cast<size_t>(pos.y) * width + pos.x];
+		};
+		auto can_traverse = [&](Vector2D pos) -> bool
+		{
+			if (!map.is_in_bounds(pos))
 			{
-				mark(next);
-				frontier.push(next);
+				return false;
+			}
+			if (map.is_door_locked(pos))
+			{
+				return false;
+			}
+			return map.get_tile_type(pos) != TileType::WALL;
+		};
+
+		std::queue<Vector2D> frontier;
+		frontier.push(start);
+		mark(start);
+
+		while (!frontier.empty())
+		{
+			const Vector2D current = frontier.front();
+			frontier.pop();
+
+			if (current == target)
+			{
+				return true;
+			}
+
+			for (
+				Vector2D dir :
+				{ DIR_N, DIR_S, DIR_E, DIR_W, DIR_NE, DIR_NW, DIR_SE, DIR_SW })
+			{
+				const Vector2D next = current + dir;
+				if (!was_visited(next) && can_traverse(next))
+				{
+					mark(next);
+					frontier.push(next);
+				}
 			}
 		}
-	}
 
-	return false;
-}
+		return false;
+	}
 } // namespace
 
 int TreasureRoom::count_entrances(const Map& map, const DungeonRoom& room)

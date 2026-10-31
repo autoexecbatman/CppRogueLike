@@ -63,49 +63,50 @@ void save_rooms(const std::vector<DungeonRoom>& rooms, json& output)
 
 namespace
 {
-// The RoomType a saved integer names, or nullopt for one no RoomType has.
-// The switch has no default, so a type added without a case here is a compile error (C4062, -Wswitch).
-//
-// Example:
-//   room_type_from(3);    // -> RoomType::TREASURE
-//   room_type_from(-1);   // -> nullopt
-std::optional<RoomType> room_type_from(int saved)
-{
-	const RoomType candidate = static_cast<RoomType>(saved);
-	switch (candidate)
+	// The RoomType a saved integer names, or nullopt for one no RoomType has.
+	// The switch has no default, so a type added without a case here is a
+	// compile error (C4062, -Wswitch).
+	//
+	// Example:
+	//   room_type_from(3);    // -> RoomType::TREASURE
+	//   room_type_from(-1);   // -> nullopt
+	std::optional<RoomType> room_type_from(int saved)
 	{
-	case RoomType::ENTRANCE:
-	case RoomType::STANDARD:
-	case RoomType::DANGER:
-	case RoomType::TREASURE:
-	{
-		return candidate;
+		const RoomType candidate = static_cast<RoomType>(saved);
+		switch (candidate)
+		{
+		case RoomType::ENTRANCE:
+		case RoomType::STANDARD:
+		case RoomType::DANGER:
+		case RoomType::TREASURE:
+		{
+			return candidate;
+		}
+		}
+		return std::nullopt;
 	}
-	}
-	return std::nullopt;
-}
 
-// The TrapType a saved integer names, or nullopt for one no TrapType has.
-// The switch has no default, so a type added without a case here is a compile
-// error (C4062, -Wswitch).
-//
-// Example:
-//   trap_type_from(1);    // -> TrapType::DART
-//   trap_type_from(3);    // -> nullopt
-std::optional<TrapType> trap_type_from(int saved)
-{
-	const TrapType candidate = static_cast<TrapType>(saved);
-	switch (candidate)
+	// The TrapType a saved integer names, or nullopt for one no TrapType has.
+	// The switch has no default, so a type added without a case here is a
+	// compile error (C4062, -Wswitch).
+	//
+	// Example:
+	//   trap_type_from(1);    // -> TrapType::DART
+	//   trap_type_from(3);    // -> nullopt
+	std::optional<TrapType> trap_type_from(int saved)
 	{
-	case TrapType::PIT:
-	case TrapType::DART:
-	case TrapType::ARROW:
-	{
-		return candidate;
+		const TrapType candidate = static_cast<TrapType>(saved);
+		switch (candidate)
+		{
+		case TrapType::PIT:
+		case TrapType::DART:
+		case TrapType::ARROW:
+		{
+			return candidate;
+		}
+		}
+		return std::nullopt;
 	}
-	}
-	return std::nullopt;
-}
 } // namespace
 
 void load_rooms(const json& source, std::vector<DungeonRoom>& rooms)
@@ -148,54 +149,63 @@ void load_rooms(const json& source, std::vector<DungeonRoom>& rooms)
 namespace
 {
 
-// Writes every creature on the level into j["creatures"], in the order the vector holds
-// them. The vector owns its entries, so a null one is a fault rather than an empty slot -
-// skipping it would drop a creature from the save without saying so.
-//
-// Example:
-//
-//   json level;
-//   save_creatures(creatures, level);   // creatures: vector<unique_ptr<Creature>>, 3 alive
-//   level["creatures"].size();          // -> 3
-//
-//   save_creatures({}, level);          // an empty level is legal
-//   level["creatures"].size();          // -> 0
-void save_creatures(
-	const std::vector<std::unique_ptr<Creature>>& creatures,
-	json& output)
-{
-	output["creatures"] = json::array();
-	for (const auto& creature : creatures)
+	// Writes every creature on the level into j["creatures"], in the order the
+	// vector holds them. The vector owns its entries, so a null one is a fault
+	// rather than an empty slot - skipping it would drop a creature from the
+	// save without saying so.
+	//
+	// Example:
+	//
+	//   json level;
+	//   save_creatures(creatures, level);
+	//   // creatures: vector<unique_ptr<Creature>>, 3 alive
+	//   level["creatures"].size();          // -> 3
+	//
+	//   save_creatures({}, level);          // an empty level is legal
+	//   level["creatures"].size();          // -> 0
+	void save_creatures(
+		const std::vector<std::unique_ptr<Creature>>& creatures,
+		json& output)
 	{
-		assert(creature && "save_creatures: creatures list holds a null entry");
+		output["creatures"] = json::array();
+		for (const auto& creature : creatures)
+		{
+			assert(
+				creature &&
+				"save_creatures: creatures list holds a null entry");
 
-		json creatureJson;
-		creature->save(creatureJson);
-		output["creatures"].push_back(creatureJson);
+			json creatureJson;
+			creature->save(creatureJson);
+			output["creatures"].push_back(creatureJson);
+		}
 	}
-}
 
-// Puts what a run owns back the way a fresh game has it, so nothing of the last run reaches
-// the next one. Both ways into a run call it first, and a load then writes the save over it.
-// The hunger and message systems each replace their own run state whole, which keeps their
-// settings out of it. GameState also holds session flags, so only its clock and the rounds
-// already run go back.
-//
-// Example, after a run of five rounds that ended starving with a line in the log:
-//   start_fresh_run(*ctx.hungerSystem, *ctx.messageSystem, *ctx.gameState);
-//   ctx.gameState->get_rounds_run();               // -> 0, so the next round is fed
-//   ctx.hungerSystem->get_hunger_value();          // -> 0, a fresh game's hunger
-//   ctx.messageSystem->get_stored_message_count(); // -> 0, the last run's log is gone
-void start_fresh_run(
-	HungerSystem& hungerSystem,
-	MessageSystem& messageSystem,
-	GameState& gameState)
-{
-	hungerSystem.begin_run();
-	messageSystem.begin_run();
-	gameState.set_time(0);
-	gameState.set_rounds_run(0);
-}
+	// Puts what a run owns back the way a fresh game has it, so nothing of the
+	// last run reaches the next one. Both ways into a run call it first, and a
+	// load then writes the save over it. The hunger and message systems each
+	// replace their own run state whole, which keeps their settings out of it.
+	// GameState also holds session flags, so only its clock and the rounds
+	// already run go back.
+	//
+	// Example, after a run of five rounds that ended starving with a line in
+	// the log:
+	//   start_fresh_run(*ctx.hungerSystem, *ctx.messageSystem, *ctx.gameState);
+	//   ctx.gameState->get_rounds_run();
+	//   // -> 0, so the next round is fed
+	//   ctx.hungerSystem->get_hunger_value();
+	//   // -> 0, a fresh game's hunger
+	//   ctx.messageSystem->get_stored_message_count();
+	//   // -> 0, the last run's log is gone
+	void start_fresh_run(
+		HungerSystem& hungerSystem,
+		MessageSystem& messageSystem,
+		GameState& gameState)
+	{
+		hungerSystem.begin_run();
+		messageSystem.begin_run();
+		gameState.set_time(0);
+		gameState.set_rounds_run(0);
+	}
 
 } // namespace
 

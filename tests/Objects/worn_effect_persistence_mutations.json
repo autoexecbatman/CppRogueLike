@@ -27,8 +27,8 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\tstatBoost.effect =\n\t\tparse_magical_effect(source.at(\"effect\").get<std::string>());",
-      "mutated": "\tstatBoost.effect =MagicalEffect::NONE;",
+      "original": "\t\tstatBoost.effect =\n\t\t\tparse_magical_effect(source.at(\"effect\").get<std::string>());",
+      "mutated": "\t\tstatBoost.effect =MagicalEffect::NONE;",
       "catches": "the field written and then thrown away on the way back in"
     },
     {

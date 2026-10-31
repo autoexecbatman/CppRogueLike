@@ -27,48 +27,49 @@
 
 namespace
 {
-// One printed row of Table 47: the score that reads it, the four boundaries and the
-// Max. Carried Weight the Severe band runs up to.
-struct TableFortySevenRow
-{
-	int strength{ 0 };
-	int exceptional{ 0 };
-	int unencumberedTo{ 0 };
-	int lightTo{ 0 };
-	int moderateTo{ 0 };
-	int heavyTo{ 0 };
-	int maxCarried{ 0 };
-};
+	// One printed row of Table 47: the score that reads it, the four boundaries
+	// and the Max. Carried Weight the Severe band runs up to.
+	struct TableFortySevenRow
+	{
+		int strength{ 0 };
+		int exceptional{ 0 };
+		int unencumberedTo{ 0 };
+		int lightTo{ 0 };
+		int moderateTo{ 0 };
+		int heavyTo{ 0 };
+		int maxCarried{ 0 };
+	};
 
-// Every row the table prints, with the book's ranges expanded to the scores that read
-// them: the "4-5" row is checked at 4 and at 5.
-constexpr std::array<TableFortySevenRow, 21> TABLE_FORTY_SEVEN{ {
-	{ 2, 0, 1, 2, 3, 4, 6 },
-	{ 3, 0, 5, 6, 7, 9, 10 },
-	{ 4, 0, 10, 13, 16, 19, 25 },
-	{ 5, 0, 10, 13, 16, 19, 25 },
-	{ 6, 0, 20, 29, 38, 46, 55 },
-	{ 7, 0, 20, 29, 38, 46, 55 },
-	{ 8, 0, 35, 50, 65, 80, 90 },
-	{ 9, 0, 35, 50, 65, 80, 90 },
-	{ 10, 0, 40, 58, 76, 96, 110 },
-	{ 11, 0, 40, 58, 76, 96, 110 },
-	{ 12, 0, 45, 69, 93, 117, 140 },
-	{ 13, 0, 45, 69, 93, 117, 140 },
-	{ 14, 0, 55, 85, 115, 145, 170 },
-	{ 15, 0, 55, 85, 115, 145, 170 },
-	{ 16, 0, 70, 100, 130, 160, 195 },
-	{ 17, 0, 85, 121, 157, 193, 220 },
-	{ 18, 0, 110, 149, 188, 227, 255 },
-	{ 18, 25, 135, 174, 213, 252, 280 },
-	{ 18, 60, 160, 199, 238, 277, 305 },
-	{ 18, 80, 185, 224, 263, 302, 330 },
-	{ 18, 95, 235, 274, 313, 352, 380 },
-} };
+	// Every row the table prints, with the book's ranges expanded to the scores
+	// that read them: the "4-5" row is checked at 4 and at 5.
+	constexpr std::array<TableFortySevenRow, 21> TABLE_FORTY_SEVEN{ {
+		{ 2, 0, 1, 2, 3, 4, 6 },
+		{ 3, 0, 5, 6, 7, 9, 10 },
+		{ 4, 0, 10, 13, 16, 19, 25 },
+		{ 5, 0, 10, 13, 16, 19, 25 },
+		{ 6, 0, 20, 29, 38, 46, 55 },
+		{ 7, 0, 20, 29, 38, 46, 55 },
+		{ 8, 0, 35, 50, 65, 80, 90 },
+		{ 9, 0, 35, 50, 65, 80, 90 },
+		{ 10, 0, 40, 58, 76, 96, 110 },
+		{ 11, 0, 40, 58, 76, 96, 110 },
+		{ 12, 0, 45, 69, 93, 117, 140 },
+		{ 13, 0, 45, 69, 93, 117, 140 },
+		{ 14, 0, 55, 85, 115, 145, 170 },
+		{ 15, 0, 55, 85, 115, 145, 170 },
+		{ 16, 0, 70, 100, 130, 160, 195 },
+		{ 17, 0, 85, 121, 157, 193, 220 },
+		{ 18, 0, 110, 149, 188, 227, 255 },
+		{ 18, 25, 135, 174, 213, 252, 280 },
+		{ 18, 60, 160, 199, 238, 277, 305 },
+		{ 18, 80, 185, 224, 263, 302, 330 },
+		{ 18, 95, 235, 274, 313, 352, 380 },
+	} };
 
-// The last exceptional band, 18/00, which the game stores as a percentile of 100.
-constexpr TableFortySevenRow
-	EIGHTEEN_HUNDRED{ 18, 100, 335, 374, 413, 452, 480 };
+	// The last exceptional band, 18/00, which the game stores as a percentile
+	// of 100.
+	constexpr TableFortySevenRow
+		EIGHTEEN_HUNDRED{ 18, 100, 335, 374, 413, 452, 480 };
 } // namespace
 
 class EncumbranceBandTest : public ::testing::Test

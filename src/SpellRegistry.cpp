@@ -17,227 +17,227 @@
 
 namespace
 {
-// A builtin spell's key and the effect compiled in for it.
-struct BuiltinSpell
-{
-	std::string_view key{};
-	SpellEffectType effect{ SpellEffectType::NONE };
-};
+	// A builtin spell's key and the effect compiled in for it.
+	struct BuiltinSpell
+	{
+		std::string_view key{};
+		SpellEffectType effect{ SpellEffectType::NONE };
+	};
 
-// Every builtin, in the order get_all_keys lists them.
-constexpr auto BUILTIN_SPELLS = std::to_array<BuiltinSpell>({
-	{ "cure_light_wounds", SpellEffectType::CURE_LIGHT_WOUNDS },
-	{ "bless", SpellEffectType::BLESS },
-	{ "sanctuary", SpellEffectType::SANCTUARY },
-	{ "protection_from_evil", SpellEffectType::PROTECTION_FROM_EVIL },
-	{ "hold_person", SpellEffectType::HOLD_PERSON },
-	{ "silence", SpellEffectType::SILENCE },
-	{ "magic_missile", SpellEffectType::MAGIC_MISSILE },
-	{ "shield", SpellEffectType::SHIELD },
-	{ "sleep", SpellEffectType::SLEEP },
-	{ "invisibility", SpellEffectType::INVISIBILITY },
-	{ "web", SpellEffectType::WEB },
-	{ "fireball", SpellEffectType::FIREBALL },
-	{ "teleport", SpellEffectType::TELEPORT },
-	{ "knock", SpellEffectType::KNOCK },
-});
+	// Every builtin, in the order get_all_keys lists them.
+	constexpr auto BUILTIN_SPELLS = std::to_array<BuiltinSpell>({
+		{ "cure_light_wounds", SpellEffectType::CURE_LIGHT_WOUNDS },
+		{ "bless", SpellEffectType::BLESS },
+		{ "sanctuary", SpellEffectType::SANCTUARY },
+		{ "protection_from_evil", SpellEffectType::PROTECTION_FROM_EVIL },
+		{ "hold_person", SpellEffectType::HOLD_PERSON },
+		{ "silence", SpellEffectType::SILENCE },
+		{ "magic_missile", SpellEffectType::MAGIC_MISSILE },
+		{ "shield", SpellEffectType::SHIELD },
+		{ "sleep", SpellEffectType::SLEEP },
+		{ "invisibility", SpellEffectType::INVISIBILITY },
+		{ "web", SpellEffectType::WEB },
+		{ "fireball", SpellEffectType::FIREBALL },
+		{ "teleport", SpellEffectType::TELEPORT },
+		{ "knock", SpellEffectType::KNOCK },
+	});
 
-// Every builtin holding its effect and no data yet.
-std::map<std::string, SpellDefinition, std::less<>>
-builtin_spells_with_effects()
-{
-	std::map<std::string, SpellDefinition, std::less<>> spells{};
-	for (const BuiltinSpell& builtin : BUILTIN_SPELLS)
+	// Every builtin holding its effect and no data yet.
+	std::map<std::string, SpellDefinition, std::less<>>
+	builtin_spells_with_effects()
 	{
-		spells.emplace(
-			std::string{ builtin.key },
-			SpellDefinition{ .effect_type = builtin.effect });
-	}
-	return spells;
-}
-
-SpellClass parse_class(std::string_view text)
-{
-	if (text == "cleric")
-	{
-		return SpellClass::CLERIC;
-	}
-	else if (text == "wizard")
-	{
-		return SpellClass::WIZARD;
-	}
-	else if (text == "both")
-	{
-		return SpellClass::BOTH;
+		std::map<std::string, SpellDefinition, std::less<>> spells{};
+		for (const BuiltinSpell& builtin : BUILTIN_SPELLS)
+		{
+			spells.emplace(
+				std::string{ builtin.key },
+				SpellDefinition{ .effect_type = builtin.effect });
+		}
+		return spells;
 	}
 
-	throw std::runtime_error(
-		std::format("SpellRegistry: unknown spell class '{}'", text));
-}
+	SpellClass parse_class(std::string_view text)
+	{
+		if (text == "cleric")
+		{
+			return SpellClass::CLERIC;
+		}
+		else if (text == "wizard")
+		{
+			return SpellClass::WIZARD;
+		}
+		else if (text == "both")
+		{
+			return SpellClass::BOTH;
+		}
 
-std::string encode_class(SpellClass spellClass)
-{
-	if (spellClass == SpellClass::CLERIC)
-	{
-		return "cleric";
-	}
-	else if (spellClass == SpellClass::WIZARD)
-	{
-		return "wizard";
-	}
-	else
-	{
-		return "both";
-	}
-}
-
-SpellEffectType parse_effect_type(std::string_view text)
-{
-	if (text == "cure_light_wounds")
-	{
-		return SpellEffectType::CURE_LIGHT_WOUNDS;
-	}
-	else if (text == "bless")
-	{
-		return SpellEffectType::BLESS;
-	}
-	else if (text == "protection_from_evil")
-	{
-		return SpellEffectType::PROTECTION_FROM_EVIL;
-	}
-	else if (text == "sanctuary")
-	{
-		return SpellEffectType::SANCTUARY;
-	}
-	else if (text == "hold_person")
-	{
-		return SpellEffectType::HOLD_PERSON;
-	}
-	else if (text == "silence")
-	{
-		return SpellEffectType::SILENCE;
-	}
-	else if (text == "magic_missile")
-	{
-		return SpellEffectType::MAGIC_MISSILE;
-	}
-	else if (text == "shield")
-	{
-		return SpellEffectType::SHIELD;
-	}
-	else if (text == "sleep")
-	{
-		return SpellEffectType::SLEEP;
-	}
-	else if (text == "invisibility")
-	{
-		return SpellEffectType::INVISIBILITY;
-	}
-	else if (text == "web")
-	{
-		return SpellEffectType::WEB;
-	}
-	else if (text == "fireball")
-	{
-		return SpellEffectType::FIREBALL;
-	}
-	else if (text == "teleport")
-	{
-		return SpellEffectType::TELEPORT;
-	}
-	else if (text == "knock")
-	{
-		return SpellEffectType::KNOCK;
-	}
-	else if (text == "none")
-	{
-		return SpellEffectType::NONE;
+		throw std::runtime_error(
+			std::format("SpellRegistry: unknown spell class '{}'", text));
 	}
 
-	throw std::runtime_error(
-		std::format("SpellRegistry: unknown spell effect '{}'", text));
-}
-
-std::string encode_effect_type(SpellEffectType effect)
-{
-	switch (effect)
+	std::string encode_class(SpellClass spellClass)
 	{
-	case SpellEffectType::CURE_LIGHT_WOUNDS:
-	{
-		return "cure_light_wounds";
+		if (spellClass == SpellClass::CLERIC)
+		{
+			return "cleric";
+		}
+		else if (spellClass == SpellClass::WIZARD)
+		{
+			return "wizard";
+		}
+		else
+		{
+			return "both";
+		}
 	}
 
-	case SpellEffectType::BLESS:
+	SpellEffectType parse_effect_type(std::string_view text)
 	{
-		return "bless";
+		if (text == "cure_light_wounds")
+		{
+			return SpellEffectType::CURE_LIGHT_WOUNDS;
+		}
+		else if (text == "bless")
+		{
+			return SpellEffectType::BLESS;
+		}
+		else if (text == "protection_from_evil")
+		{
+			return SpellEffectType::PROTECTION_FROM_EVIL;
+		}
+		else if (text == "sanctuary")
+		{
+			return SpellEffectType::SANCTUARY;
+		}
+		else if (text == "hold_person")
+		{
+			return SpellEffectType::HOLD_PERSON;
+		}
+		else if (text == "silence")
+		{
+			return SpellEffectType::SILENCE;
+		}
+		else if (text == "magic_missile")
+		{
+			return SpellEffectType::MAGIC_MISSILE;
+		}
+		else if (text == "shield")
+		{
+			return SpellEffectType::SHIELD;
+		}
+		else if (text == "sleep")
+		{
+			return SpellEffectType::SLEEP;
+		}
+		else if (text == "invisibility")
+		{
+			return SpellEffectType::INVISIBILITY;
+		}
+		else if (text == "web")
+		{
+			return SpellEffectType::WEB;
+		}
+		else if (text == "fireball")
+		{
+			return SpellEffectType::FIREBALL;
+		}
+		else if (text == "teleport")
+		{
+			return SpellEffectType::TELEPORT;
+		}
+		else if (text == "knock")
+		{
+			return SpellEffectType::KNOCK;
+		}
+		else if (text == "none")
+		{
+			return SpellEffectType::NONE;
+		}
+
+		throw std::runtime_error(
+			std::format("SpellRegistry: unknown spell effect '{}'", text));
 	}
 
-	case SpellEffectType::SANCTUARY:
+	std::string encode_effect_type(SpellEffectType effect)
 	{
-		return "sanctuary";
-	}
+		switch (effect)
+		{
+		case SpellEffectType::CURE_LIGHT_WOUNDS:
+		{
+			return "cure_light_wounds";
+		}
 
-	case SpellEffectType::PROTECTION_FROM_EVIL:
-	{
-		return "protection_from_evil";
-	}
+		case SpellEffectType::BLESS:
+		{
+			return "bless";
+		}
 
-	case SpellEffectType::HOLD_PERSON:
-	{
-		return "hold_person";
-	}
+		case SpellEffectType::SANCTUARY:
+		{
+			return "sanctuary";
+		}
 
-	case SpellEffectType::SILENCE:
-	{
-		return "silence";
-	}
+		case SpellEffectType::PROTECTION_FROM_EVIL:
+		{
+			return "protection_from_evil";
+		}
 
-	case SpellEffectType::MAGIC_MISSILE:
-	{
-		return "magic_missile";
-	}
+		case SpellEffectType::HOLD_PERSON:
+		{
+			return "hold_person";
+		}
 
-	case SpellEffectType::SHIELD:
-	{
-		return "shield";
-	}
+		case SpellEffectType::SILENCE:
+		{
+			return "silence";
+		}
 
-	case SpellEffectType::SLEEP:
-	{
-		return "sleep";
-	}
+		case SpellEffectType::MAGIC_MISSILE:
+		{
+			return "magic_missile";
+		}
 
-	case SpellEffectType::INVISIBILITY:
-	{
-		return "invisibility";
-	}
+		case SpellEffectType::SHIELD:
+		{
+			return "shield";
+		}
 
-	case SpellEffectType::WEB:
-	{
-		return "web";
-	}
+		case SpellEffectType::SLEEP:
+		{
+			return "sleep";
+		}
 
-	case SpellEffectType::FIREBALL:
-	{
-		return "fireball";
-	}
+		case SpellEffectType::INVISIBILITY:
+		{
+			return "invisibility";
+		}
 
-	case SpellEffectType::TELEPORT:
-	{
-		return "teleport";
-	}
+		case SpellEffectType::WEB:
+		{
+			return "web";
+		}
 
-	case SpellEffectType::KNOCK:
-	{
-		return "knock";
-	}
+		case SpellEffectType::FIREBALL:
+		{
+			return "fireball";
+		}
 
-	default:
-	{
-		return "none";
+		case SpellEffectType::TELEPORT:
+		{
+			return "teleport";
+		}
+
+		case SpellEffectType::KNOCK:
+		{
+			return "knock";
+		}
+
+		default:
+		{
+			return "none";
+		}
+		}
 	}
-	}
-}
 } // namespace
 
 SpellRegistry::SpellRegistry() :

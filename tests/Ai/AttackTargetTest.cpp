@@ -38,46 +38,48 @@
 namespace
 {
 
-constexpr int STARTING_HP = 100;
-constexpr int CORRIDOR_ROW = 5;
-// The player is 8 tiles from the hunter: out of reach of a blow, and out of a bow's 5.
-constexpr Vector2D PLAYER_TILE{ 2, CORRIDOR_ROW };
-constexpr Vector2D HUNTER_TILE{ 10, CORRIDOR_ROW };
-// Beside the hunter, for a blow.
-constexpr Vector2D ADJACENT_DECOY_TILE{ 11, CORRIDOR_ROW };
-// Three tiles off down the corridor, inside a bow's range and in plain sight.
-constexpr Vector2D DISTANT_DECOY_TILE{ 13, CORRIDOR_ROW };
+	constexpr int STARTING_HP = 100;
+	constexpr int CORRIDOR_ROW = 5;
+	// The player is 8 tiles from the hunter: out of reach of a blow, and out of
+	// a bow's 5.
+	constexpr Vector2D PLAYER_TILE{ 2, CORRIDOR_ROW };
+	constexpr Vector2D HUNTER_TILE{ 10, CORRIDOR_ROW };
+	// Beside the hunter, for a blow.
+	constexpr Vector2D ADJACENT_DECOY_TILE{ 11, CORRIDOR_ROW };
+	// Three tiles off down the corridor, inside a bow's range and in plain
+	// sight.
+	constexpr Vector2D DISTANT_DECOY_TILE{ 13, CORRIDOR_ROW };
 
-// The hunting steps, public for the test.
-class MeleeHunter final : public AiMonster
-{
-public:
-	using AiMonster::move_or_attack;
-};
+	// The hunting steps, public for the test.
+	class MeleeHunter final : public AiMonster
+	{
+	public:
+		using AiMonster::move_or_attack;
+	};
 
-class RangedHunter final : public AiMonsterRanged
-{
-public:
-	using AiMonsterRanged::move_or_attack;
-};
+	class RangedHunter final : public AiMonsterRanged
+	{
+	public:
+		using AiMonsterRanged::move_or_attack;
+	};
 
-class SpiderHunter final : public AiSpider
-{
-public:
-	using AiSpider::move_or_attack;
-};
+	class SpiderHunter final : public AiSpider
+	{
+	public:
+		using AiSpider::move_or_attack;
+	};
 
-// Gives a creature what a blow or a shot reads from it.
-void make_combatant(Creature& creature)
-{
-	creature.experienceReward = std::make_unique<ExperienceReward>(0);
-	creature.healthPool = std::make_unique<HealthPool>(STARTING_HP);
-	creature.armorClass = std::make_unique<ArmorClass>(10);
-	creature.set_dr(0);
-	creature.set_thaco(20);
-	creature.set_strength(10);
-	creature.set_dexterity(10);
-}
+	// Gives a creature what a blow or a shot reads from it.
+	void make_combatant(Creature& creature)
+	{
+		creature.experienceReward = std::make_unique<ExperienceReward>(0);
+		creature.healthPool = std::make_unique<HealthPool>(STARTING_HP);
+		creature.armorClass = std::make_unique<ArmorClass>(10);
+		creature.set_dr(0);
+		creature.set_thaco(20);
+		creature.set_strength(10);
+		creature.set_dexterity(10);
+	}
 
 } // namespace
 

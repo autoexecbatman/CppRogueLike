@@ -657,11 +657,17 @@ public:
 	//   creature.is_aware(360);           // -> false, three rounds later
 	void update_awareness(const GameContext& ctx);
 
-	[[nodiscard]] Alignment::Ethics get_ethics() const noexcept { return ethics; }
+	[[nodiscard]] Alignment::Ethics get_ethics() const noexcept
+	{
+		return ethics;
+	}
 
 	void set_ethics(Alignment::Ethics value) noexcept { ethics = value; }
 
-	[[nodiscard]] Alignment::Morality get_morality() const noexcept { return morality; }
+	[[nodiscard]] Alignment::Morality get_morality() const noexcept
+	{
+		return morality;
+	}
 
 	void set_morality(Alignment::Morality value) noexcept { morality = value; }
 

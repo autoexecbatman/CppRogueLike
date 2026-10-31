@@ -39,9 +39,9 @@
 namespace
 {
 
-// OCP: Data-driven buff break messaging - player notifications when buffs end from attacking
-const std::unordered_map<BuffType, std::string_view>
-	BUFF_BREAK_MESSAGES = {
+	// OCP: Data-driven buff break messaging - player notifications when buffs
+	// end from attacking
+	const std::unordered_map<BuffType, std::string_view> BUFF_BREAK_MESSAGES = {
 		{ BuffType::INVISIBILITY, "Your invisibility fades as you attack!" },
 		{
 			BuffType::ITEM_INVISIBILITY,

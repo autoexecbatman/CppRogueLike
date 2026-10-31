@@ -26,9 +26,9 @@ struct Disguise
 // Single source of truth: called when a mimic is built AND as lazy init after load.
 namespace Appearance
 {
-[[nodiscard]] std::vector<Disguise> build_mimic_list(
-	ContentRegistry& tiles,
-	const ItemRegistry& items);
+	[[nodiscard]] std::vector<Disguise> build_mimic_list(
+		ContentRegistry& tiles,
+		const ItemRegistry& items);
 } // namespace Appearance
 
 class AiMimic : public AiMonster

@@ -58,8 +58,10 @@ namespace Pathfinding
 			}
 		};
 
-		using FrontierQueue = std::
-			priority_queue<Frontier, std::vector<Frontier>, std::greater<Frontier>>;
+		using FrontierQueue = std::priority_queue<
+			Frontier,
+			std::vector<Frontier>,
+			std::greater<Frontier>>;
 
 		// Where a tile sits in a grid stored row after row.
 		//
@@ -67,7 +69,8 @@ namespace Pathfinding
 		//   index_of(Vector2D{ 3, 2 }, 20); // -> 43
 		size_t index_of(Vector2D position, int width)
 		{
-			return static_cast<size_t>(position.y) * static_cast<size_t>(width) +
+			return static_cast<size_t>(position.y) *
+				static_cast<size_t>(width) +
 				static_cast<size_t>(position.x);
 		}
 
@@ -84,7 +87,9 @@ namespace Pathfinding
 			Vector2D destination,
 			GameContext& ctx)
 		{
-			assert(ctx.traps && "step: a creature moved on a level with no trap list");
+			assert(
+				ctx.traps &&
+				"step: a creature moved on a level with no trap list");
 			assert(
 				ctx.spellTiles &&
 				"step: a creature moved on a level with no spell tile list");
@@ -94,7 +99,9 @@ namespace Pathfinding
 			{
 				for (const auto& feature : features)
 				{
-					assert(feature && "step: a floor container holds a null entry");
+					assert(
+						feature &&
+						"step: a floor container holds a null entry");
 
 					if (stopped || feature->is_destroyed() ||
 						feature->position != destination)
@@ -133,7 +140,9 @@ namespace Pathfinding
 
 		// What the ground demands is data: tile_config.json says what blocks
 		// and what carries a creature through it anyway.
-		for (const auto& [tileType, definition] : tileConfig.get_tile_definitions())
+		for (
+			const auto& [tileType, definition] :
+			tileConfig.get_tile_definitions())
 		{
 			const bool isBypassed = definition.hasBypassState &&
 				creature.has_bypass(definition.bypassState);
@@ -195,7 +204,8 @@ namespace Pathfinding
 	{
 		assert(ctx.map && "Pathfinding::can_enter: called without a map");
 		assert(
-			ctx.tileConfig && "can_enter: asked with no tile configuration loaded");
+			ctx.tileConfig &&
+			"can_enter: asked with no tile configuration loaded");
 
 		if (!step_cost(position, mobility_of(creature, *ctx.tileConfig), ctx))
 		{
@@ -216,7 +226,10 @@ namespace Pathfinding
 			ctx.tileConfig &&
 			"step: a creature moved with no tile configuration loaded");
 
-		if (!step_cost(destination, mobility_of(creature, *ctx.tileConfig), ctx) ||
+		if (!step_cost(
+				destination,
+				mobility_of(creature, *ctx.tileConfig),
+				ctx) ||
 			ctx.map->get_actor(destination, ctx) != nullptr)
 		{
 			return StepResult::REFUSED;
@@ -319,7 +332,8 @@ namespace Pathfinding
 				if (nextCost < costMap.costs[nextIndex])
 				{
 					costMap.costs[nextIndex] = nextCost;
-					frontier.push(Frontier{ static_cast<double>(nextCost), next });
+					frontier.push(
+						Frontier{ static_cast<double>(nextCost), next });
 				}
 			}
 		}
@@ -359,7 +373,8 @@ namespace Pathfinding
 		assert(ctx.map && "find_route: a route was asked for with no map");
 		const Map& map = *ctx.map;
 		assert(
-			map.is_in_bounds(start) && "find_route: the route starts off the map");
+			map.is_in_bounds(start) &&
+			"find_route: the route starts off the map");
 
 		if (!map.is_in_bounds(goal))
 		{
@@ -389,7 +404,8 @@ namespace Pathfinding
 				{
 					return static_cast<double>(STEP_COST);
 				}
-				const std::optional<int> goalPrice = step_cost(goal, mobility, ctx);
+				const std::optional<int> goalPrice =
+					step_cost(goal, mobility, ctx);
 				if (!goalPrice)
 				{
 					return std::nullopt;

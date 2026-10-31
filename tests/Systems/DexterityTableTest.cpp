@@ -27,42 +27,42 @@
 
 namespace
 {
-// One row of Table 2: the score and its three adjustments.
-struct TableTwoRow
-{
-	int score{ 0 };
-	int reaction{ 0 };
-	int missile{ 0 };
-	int defensive{ 0 };
-};
+	// One row of Table 2: the score and its three adjustments.
+	struct TableTwoRow
+	{
+		int score{ 0 };
+		int reaction{ 0 };
+		int missile{ 0 };
+		int defensive{ 0 };
+	};
 
-const std::vector<TableTwoRow> TABLE_TWO{
-	{ 1, -6, -6, 5 },
-	{ 2, -4, -4, 5 },
-	{ 3, -3, -3, 4 },
-	{ 4, -2, -2, 3 },
-	{ 5, -1, -1, 2 },
-	{ 6, 0, 0, 1 },
-	{ 7, 0, 0, 0 },
-	{ 8, 0, 0, 0 },
-	{ 9, 0, 0, 0 },
-	{ 10, 0, 0, 0 },
-	{ 11, 0, 0, 0 },
-	{ 12, 0, 0, 0 },
-	{ 13, 0, 0, 0 },
-	{ 14, 0, 0, 0 },
-	{ 15, 0, 0, -1 },
-	{ 16, 1, 1, -2 },
-	{ 17, 2, 2, -3 },
-	{ 18, 2, 2, -4 },
-	{ 19, 3, 3, -4 },
-	{ 20, 3, 3, -4 },
-	{ 21, 4, 4, -5 },
-	{ 22, 4, 4, -5 },
-	{ 23, 4, 4, -5 },
-	{ 24, 5, 5, -6 },
-	{ 25, 5, 5, -6 },
-};
+	const std::vector<TableTwoRow> TABLE_TWO{
+		{ 1, -6, -6, 5 },
+		{ 2, -4, -4, 5 },
+		{ 3, -3, -3, 4 },
+		{ 4, -2, -2, 3 },
+		{ 5, -1, -1, 2 },
+		{ 6, 0, 0, 1 },
+		{ 7, 0, 0, 0 },
+		{ 8, 0, 0, 0 },
+		{ 9, 0, 0, 0 },
+		{ 10, 0, 0, 0 },
+		{ 11, 0, 0, 0 },
+		{ 12, 0, 0, 0 },
+		{ 13, 0, 0, 0 },
+		{ 14, 0, 0, 0 },
+		{ 15, 0, 0, -1 },
+		{ 16, 1, 1, -2 },
+		{ 17, 2, 2, -3 },
+		{ 18, 2, 2, -4 },
+		{ 19, 3, 3, -4 },
+		{ 20, 3, 3, -4 },
+		{ 21, 4, 4, -5 },
+		{ 22, 4, 4, -5 },
+		{ 23, 4, 4, -5 },
+		{ 24, 5, 5, -6 },
+		{ 25, 5, 5, -6 },
+	};
 } // namespace
 
 class DexterityTableTest : public ::testing::Test

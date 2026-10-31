@@ -39,8 +39,8 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\tstatBoost.exceptionalStrength = source.at(\"exceptionalStrength\").get<int>();",
-      "mutated": "\tstatBoost.exceptionalStrength = 0;",
+      "original": "statBoost.exceptionalStrength =\n\t\t\tsource.at(\"exceptionalStrength\").get<int>();",
+      "mutated": "\t\tstatBoost.exceptionalStrength = 0;",
       "catches": "worn 18/00 lost when a game is loaded"
     },
     {

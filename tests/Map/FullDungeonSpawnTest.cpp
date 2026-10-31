@@ -38,9 +38,9 @@
 
 namespace
 {
-constexpr int ROOM_COL = 2;
-constexpr int ROOM_ROW = 2;
-constexpr int ROOM_SIZE = 3;
+	constexpr int ROOM_COL = 2;
+	constexpr int ROOM_ROW = 2;
+	constexpr int ROOM_SIZE = 3;
 } // namespace
 
 class FullDungeonSpawnTest : public ::testing::Test

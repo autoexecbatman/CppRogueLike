@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/Pickable.cpp",
-      "original": "\treturn helm.effect != MagicalEffect::BRILLIANCE ||\n\t\thelm.command == HelmCommand::EMPOWERED;",
-      "mutated": "\treturn true;",
+      "original": "\t\treturn helm.effect != MagicalEffect::BRILLIANCE ||\n\t\t\thelm.command == HelmCommand::EMPOWERED;",
+      "mutated": "\t\treturn true;",
       "catches": "a helm of brilliance that protects before its word is spoken"
     },
     {

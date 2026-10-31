@@ -18,19 +18,19 @@
 
 namespace
 {
-// A long sword carrying a prefix and a suffix, its enhancement identified.
-std::unique_ptr<Item> identified_sword(PrefixType prefix, SuffixType suffix)
-{
-	auto sword = std::make_unique<Item>(
-		Vector2D{ 0, 0 },
-		ActorData{ TileRef{}, "long sword", ColorPairId::WHITE_BLACK });
-	ItemEnhancement enhancement{};
-	enhancement.prefix = prefix;
-	enhancement.suffix = suffix;
-	sword->apply_enhancement(enhancement);
-	sword->identify_enhancement();
-	return sword;
-}
+	// A long sword carrying a prefix and a suffix, its enhancement identified.
+	std::unique_ptr<Item> identified_sword(PrefixType prefix, SuffixType suffix)
+	{
+		auto sword = std::make_unique<Item>(
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "long sword", ColorPairId::WHITE_BLACK });
+		ItemEnhancement enhancement{};
+		enhancement.prefix = prefix;
+		enhancement.suffix = suffix;
+		sword->apply_enhancement(enhancement);
+		sword->identify_enhancement();
+		return sword;
+	}
 } // namespace
 
 // Both names are taken before either is formatted, so each must be its own string.

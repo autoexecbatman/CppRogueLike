@@ -78,8 +78,8 @@
     },
     {
       "file": "src/Palette.cpp",
-      "original": "\tchar symbol)\n{\n\tif (label.empty())",
-      "mutated": "\tchar symbol)\n{\n\tif (false)",
+      "original": "\t\tchar symbol)\n\t{\n\t\tif (label.empty())",
+      "mutated": "\t\tchar symbol)\n\t{\n\t\tif (false)",
       "catches": "an entry added or loaded with an empty label"
     },
     {
@@ -96,14 +96,14 @@
     },
     {
       "file": "src/Palette.cpp",
-      "original": "if (holder && holder != ownIndex)\n\t{\n\t\treturn PaletteEdit::DUPLICATE_SYMBOL;",
-      "mutated": "if (holder)\n\t{\n\t\treturn PaletteEdit::DUPLICATE_SYMBOL;",
+      "original": "\tif (holder && holder != ownIndex)\n\t\t{\n\t\t\treturn PaletteEdit::DUPLICATE_SYMBOL;",
+      "mutated": "\tif (holder)\n\t\t{\n\t\t\treturn PaletteEdit::DUPLICATE_SYMBOL;",
       "catches": "an entry refused for keeping its own symbol"
     },
     {
       "file": "src/Palette.cpp",
-      "original": "if (holder && holder != ownIndex)\n\t{\n\t\treturn PaletteEdit::DUPLICATE_SYMBOL;",
-      "mutated": "if (false)\n\t{\n\t\treturn PaletteEdit::DUPLICATE_SYMBOL;",
+      "original": "\tif (holder && holder != ownIndex)\n\t\t{\n\t\t\treturn PaletteEdit::DUPLICATE_SYMBOL;",
+      "mutated": "\tif (false)\n\t\t{\n\t\t\treturn PaletteEdit::DUPLICATE_SYMBOL;",
       "catches": "two entries given one symbol, so prefab lookup depends on order"
     },
     {
@@ -120,8 +120,8 @@
     },
     {
       "file": "src/Palette.cpp",
-      "original": "\tif (symbol == 0)\n\t{\n\t\treturn std::nullopt;",
-      "mutated": "\tif (false)\n\t{\n\t\treturn std::nullopt;",
+      "original": "\t\tif (symbol == 0)\n\t\t{\n\t\t\treturn std::nullopt;",
+      "mutated": "\t\tif (false)\n\t\t{\n\t\t\treturn std::nullopt;",
       "catches": "entries without a symbol treated as sharing the symbol 0"
     },
     {

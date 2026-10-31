@@ -36,87 +36,87 @@ using json = nlohmann::json;
 
 namespace
 {
-// Strength 17, straight out of src/json/strength.json.
-json strength_seventeen()
-{
-	return json{
-		{ "Str", 17 },
-		{ "Hit", 1 },
-		{ "Dmg", 1 },
-		{ "Wgt", 85 },
-		{ "MaxPress", 220 },
-		{ "maxCarried", 220 },
-		{ "OpenDoors", 10 },
-		{ "LockedDoors", 0 },
-		{ "BB_LG", 13 },
-		{ "Notes", "" },
-		{
-			"encumbrance",
+	// Strength 17, straight out of src/json/strength.json.
+	json strength_seventeen()
+	{
+		return json{
+			{ "Str", 17 },
+			{ "Hit", 1 },
+			{ "Dmg", 1 },
+			{ "Wgt", 85 },
+			{ "MaxPress", 220 },
+			{ "maxCarried", 220 },
+			{ "OpenDoors", 10 },
+			{ "LockedDoors", 0 },
+			{ "BB_LG", 13 },
+			{ "Notes", "" },
 			{
-				{ "unencumberedTo", 85 },
-				{ "lightTo", 121 },
-				{ "moderateTo", 157 },
-				{ "heavyTo", 193 },
+				"encumbrance",
+				{
+					{ "unencumberedTo", 85 },
+					{ "lightTo", 121 },
+					{ "moderateTo", 157 },
+					{ "heavyTo", 193 },
+				},
 			},
-		},
-	};
-}
+		};
+	}
 
-json dexterity_seventeen()
-{
-	return json{
-		{ "Dex", 17 },
-		{ "ReactionAdj", 2 },
-		{ "MissileAttackAdj", 2 },
-		{ "DefensiveAdj", -3 },
-	};
-}
+	json dexterity_seventeen()
+	{
+		return json{
+			{ "Dex", 17 },
+			{ "ReactionAdj", 2 },
+			{ "MissileAttackAdj", 2 },
+			{ "DefensiveAdj", -3 },
+		};
+	}
 
-json constitution_seventeen()
-{
-	return json{
-		{ "Con", 17 },
-		{ "HPAdj", 3 },
-		{ "hitDieMinimum", 1 },
-		{ "SystemShock", 97 },
-		{ "ResurrectionSurvival", 98 },
-		{ "PoisonSave", 0 },
-		{ "Regeneration", 0 },
-	};
-}
+	json constitution_seventeen()
+	{
+		return json{
+			{ "Con", 17 },
+			{ "HPAdj", 3 },
+			{ "hitDieMinimum", 1 },
+			{ "SystemShock", 97 },
+			{ "ResurrectionSurvival", 98 },
+			{ "PoisonSave", 0 },
+			{ "Regeneration", 0 },
+		};
+	}
 
-json charisma_seventeen()
-{
-	return json{
-		{ "Cha", 17 },
-		{ "MaxHencmen", 10 },
-		{ "Loyalty", 6 },
-		{ "ReactionAdj", 6 },
-	};
-}
+	json charisma_seventeen()
+	{
+		return json{
+			{ "Cha", 17 },
+			{ "MaxHencmen", 10 },
+			{ "Loyalty", 6 },
+			{ "ReactionAdj", 6 },
+		};
+	}
 
-json intelligence_seventeen()
-{
-	return json{
-		{ "Int", 17 },
-		{ "NumberOfLanguages", 6 },
-		{ "SpellLevel", 8 },
-		{ "ChanceToLearnSpell", 75 },
-		{ "MaxNumberOfSpells", 14 },
-		{ "IllusionImmunity", 0 },
-	};
-}
+	json intelligence_seventeen()
+	{
+		return json{
+			{ "Int", 17 },
+			{ "NumberOfLanguages", 6 },
+			{ "SpellLevel", 8 },
+			{ "ChanceToLearnSpell", 75 },
+			{ "MaxNumberOfSpells", 14 },
+			{ "IllusionImmunity", 0 },
+		};
+	}
 
-json wisdom_seventeen()
-{
-	return json{
-		{ "Wis", 17 },
-		{ "MagicalDefenseAdj", 3 },
-		{ "ChanceOfSpellFailure", 0 },
-		{ "SpellImmunity", 0 },
-		{ "bonusSpells", json::array({ 3 }) },
-	};
-}
+	json wisdom_seventeen()
+	{
+		return json{
+			{ "Wis", 17 },
+			{ "MagicalDefenseAdj", 3 },
+			{ "ChanceOfSpellFailure", 0 },
+			{ "SpellImmunity", 0 },
+			{ "bonusSpells", json::array({ 3 }) },
+		};
+	}
 } // namespace
 
 // The happy path, one per table: a complete row comes back as the table prints it.
@@ -293,27 +293,28 @@ TEST(AbilityTableLoadingTest, APlainStrengthRowWithNoPercentileBandStillParses)
 
 namespace
 {
-// Moves the working directory for one test and puts it back however the test ends, so a
-// failed assertion cannot leave the rest of the suite reading from the wrong place.
-class WorkingDirectoryScope
-{
-private:
-	std::filesystem::path previous{};
-
-public:
-	explicit WorkingDirectoryScope(const std::filesystem::path& target) :
-		previous(std::filesystem::current_path())
+	// Moves the working directory for one test and puts it back however the
+	// test ends, so a failed assertion cannot leave the rest of the suite
+	// reading from the wrong place.
+	class WorkingDirectoryScope
 	{
-		std::filesystem::current_path(target);
-	}
+	private:
+		std::filesystem::path previous{};
 
-	~WorkingDirectoryScope() { std::filesystem::current_path(previous); }
+	public:
+		explicit WorkingDirectoryScope(const std::filesystem::path& target) :
+			previous(std::filesystem::current_path())
+		{
+			std::filesystem::current_path(target);
+		}
 
-	WorkingDirectoryScope(const WorkingDirectoryScope&) = delete;
-	WorkingDirectoryScope& operator=(const WorkingDirectoryScope&) = delete;
-	WorkingDirectoryScope(WorkingDirectoryScope&&) = delete;
-	WorkingDirectoryScope& operator=(WorkingDirectoryScope&&) = delete;
-};
+		~WorkingDirectoryScope() { std::filesystem::current_path(previous); }
+
+		WorkingDirectoryScope(const WorkingDirectoryScope&) = delete;
+		WorkingDirectoryScope& operator=(const WorkingDirectoryScope&) = delete;
+		WorkingDirectoryScope(WorkingDirectoryScope&&) = delete;
+		WorkingDirectoryScope& operator=(WorkingDirectoryScope&&) = delete;
+	};
 } // namespace
 
 // Run from a directory holding none of the six tables, the load refuses outright rather

@@ -19,174 +19,181 @@
 
 namespace
 {
-// One monster the table can draw, and the rule for its weight at a dungeon level.
-struct MonsterType
-{
-	std::string name{};
-	// Weight at the first level; 0 means never drawn at random (e.g. dungeon_jailer).
-	int baseWeight{ 0 };
-	int levelMinimum{ 1 };
-	// No maximum when 0.
-	int levelMaximum{ 0 };
-	// How much the weight grows per level past the first; negative shrinks it.
-	float levelScaling{ 0.0f };
-	std::function<void(Vector2D, GameContext&)> createFunc{};
-};
-
-// The spawn table as the registry holds it now: its standard monsters, then its
-// custom ones, then the shopkeeper behind its own gate.
-std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
-{
-	std::vector<MonsterType> table{};
-
-	// Registry-driven monsters: adding a new monster only requires a new entry
-	// in the registry - nothing here changes.
-	for (const auto& [id, params] : monsters.get_standard_monsters())
+	// One monster the table can draw, and the rule for its weight at a dungeon
+	// level.
+	struct MonsterType
 	{
-		// The shopkeeper is drawn only through its gated entry below.
-		if (id == MonsterId::SHOPKEEPER)
-		{
-			continue;
-		}
-		table.push_back(
-			{
-				.name = params.name,
-				.baseWeight = params.baseWeight,
-				.levelMinimum = params.levelMinimum,
-				.levelMaximum = params.levelMaximum,
-				.levelScaling = params.levelScaling,
-				.createFunc =
-					[id](Vector2D pos, GameContext& ctx)
-				{
-					assert(
-						ctx.creatureManager &&
-						"spawn_table createFunc[id]: called without a creatureManager");
-
-					ctx.creatureManager->add_creature(
-						MonsterCreator::create(pos, id, ctx),
-						ctx);
-				},
-			});
-	}
-
-	// Custom monsters - composed via editor, spawned from saved params
-	for (const std::string& key : monsters.get_all_keys())
-	{
-		if (monsters.is_builtin(key))
-		{
-			continue;
-		}
-		const MonsterParams& params = monsters.get_params(key);
-		table.push_back(
-			{
-				.name = params.name,
-				.baseWeight = params.baseWeight,
-				.levelMinimum = params.levelMinimum,
-				.levelMaximum = params.levelMaximum,
-				.levelScaling = params.levelScaling,
-				.createFunc =
-					[key](Vector2D pos, GameContext& ctx)
-				{
-					assert(
-						ctx.creatureManager &&
-						"spawn_table createFunc[key]: called without a creatureManager");
-					assert(
-						ctx.monsterRegistry &&
-						"spawn_table createFunc[key]: called without a monsterRegistry");
-
-					ctx.creatureManager->add_creature(
-						MonsterCreator::create_from_params(
-							pos,
-							ctx.monsterRegistry->get_params(key),
-							ctx),
-						ctx);
-				},
-			});
-	}
-
-	// The shopkeeper: its record's weight, but a draw spawns one only when the level's
-	// shop roll passes, and a goblin otherwise.
-	const MonsterParams& shopkeeper =
-		monsters.get_standard_monsters().at(MonsterId::SHOPKEEPER);
-	table.push_back(
-		{
-			.name = shopkeeper.name,
-			.baseWeight = shopkeeper.baseWeight,
-			.levelMinimum = shopkeeper.levelMinimum,
-			.levelMaximum = shopkeeper.levelMaximum,
-			.levelScaling = shopkeeper.levelScaling,
-			.createFunc =
-				[](Vector2D pos, GameContext& ctx)
-			{
-				assert(
-					ctx.levelManager &&
-					"spawn_table Shopkeeper createFunc: called without a levelManager");
-				assert(
-					ctx.creatureManager &&
-					"spawn_table Shopkeeper createFunc: called without a creatureManager");
-
-				const int dungeonLevel = ctx.levelManager->get_dungeon_level();
-				if (ShopkeeperFactory::should_spawn_shopkeeper(
-						dungeonLevel,
-						ctx))
-				{
-					ctx.creatureManager->add_creature(
-						MonsterCreator::create(pos, MonsterId::SHOPKEEPER, ctx),
-						ctx);
-					ctx.messageSystem->log(
-						"Shopkeeper spawned at level " +
-						std::to_string(dungeonLevel));
-				}
-				else
-				{
-					ctx.creatureManager->add_creature(
-						MonsterCreator::create(pos, MonsterId::GOBLIN, ctx),
-						ctx);
-					ctx.messageSystem->log(
-						"Shopkeeper spawn failed, spawned Goblin instead");
-				}
-			},
-		});
-
-	return table;
-}
-
-// A monster's weight at a dungeon level: 0 outside its levels or for a base weight of
-// 0, otherwise its base weight scaled by level and never below 1.
-int calculate_weight(const MonsterType& monster, int dungeonLevel)
-{
-	auto is_within_levels = [](int level, int minimum, int maximum)
-	{
-		if (level < minimum)
-		{
-			return false;
-		}
-		if (maximum > 0 && level > maximum)
-		{
-			return false;
-		}
-		return true;
+		std::string name{};
+		// Weight at the first level; 0 means never drawn at random (e.g.
+		// dungeon_jailer).
+		int baseWeight{ 0 };
+		int levelMinimum{ 1 };
+		// No maximum when 0.
+		int levelMaximum{ 0 };
+		// How much the weight grows per level past the first; negative shrinks
+		// it.
+		float levelScaling{ 0.0f };
+		std::function<void(Vector2D, GameContext&)> createFunc{};
 	};
 
-	// baseWeight == 0 means "never spawn randomly" (e.g. dungeon_jailer)
-	if (monster.baseWeight == 0)
+	// The spawn table as the registry holds it now: its standard monsters, then
+	// its custom ones, then the shopkeeper behind its own gate.
+	std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 	{
-		return 0;
+		std::vector<MonsterType> table{};
+
+		// Registry-driven monsters: adding a new monster only requires a new
+		// entry in the registry - nothing here changes.
+		for (const auto& [id, params] : monsters.get_standard_monsters())
+		{
+			// The shopkeeper is drawn only through its gated entry below.
+			if (id == MonsterId::SHOPKEEPER)
+			{
+				continue;
+			}
+			table.push_back(
+				{
+					.name = params.name,
+					.baseWeight = params.baseWeight,
+					.levelMinimum = params.levelMinimum,
+					.levelMaximum = params.levelMaximum,
+					.levelScaling = params.levelScaling,
+					.createFunc =
+						[id](Vector2D pos, GameContext& ctx)
+					{
+						assert(
+							ctx.creatureManager &&
+							"spawn_table createFunc[id]: called without a creatureManager");
+
+						ctx.creatureManager->add_creature(
+							MonsterCreator::create(pos, id, ctx),
+							ctx);
+					},
+				});
+		}
+
+		// Custom monsters - composed via editor, spawned from saved params
+		for (const std::string& key : monsters.get_all_keys())
+		{
+			if (monsters.is_builtin(key))
+			{
+				continue;
+			}
+			const MonsterParams& params = monsters.get_params(key);
+			table.push_back(
+				{
+					.name = params.name,
+					.baseWeight = params.baseWeight,
+					.levelMinimum = params.levelMinimum,
+					.levelMaximum = params.levelMaximum,
+					.levelScaling = params.levelScaling,
+					.createFunc =
+						[key](Vector2D pos, GameContext& ctx)
+					{
+						assert(
+							ctx.creatureManager &&
+							"spawn_table createFunc[key]: called without a creatureManager");
+						assert(
+							ctx.monsterRegistry &&
+							"spawn_table createFunc[key]: called without a monsterRegistry");
+
+						ctx.creatureManager->add_creature(
+							MonsterCreator::create_from_params(
+								pos,
+								ctx.monsterRegistry->get_params(key),
+								ctx),
+							ctx);
+					},
+				});
+		}
+
+		// The shopkeeper: its record's weight, but a draw spawns one only when
+		// the level's shop roll passes, and a goblin otherwise.
+		const MonsterParams& shopkeeper =
+			monsters.get_standard_monsters().at(MonsterId::SHOPKEEPER);
+		table.push_back(
+			{
+				.name = shopkeeper.name,
+				.baseWeight = shopkeeper.baseWeight,
+				.levelMinimum = shopkeeper.levelMinimum,
+				.levelMaximum = shopkeeper.levelMaximum,
+				.levelScaling = shopkeeper.levelScaling,
+				.createFunc =
+					[](Vector2D pos, GameContext& ctx)
+				{
+					assert(
+						ctx.levelManager &&
+						"spawn_table Shopkeeper createFunc: called without a levelManager");
+					assert(
+						ctx.creatureManager &&
+						"spawn_table Shopkeeper createFunc: called without a creatureManager");
+
+					const int dungeonLevel =
+						ctx.levelManager->get_dungeon_level();
+					if (ShopkeeperFactory::should_spawn_shopkeeper(
+							dungeonLevel,
+							ctx))
+					{
+						ctx.creatureManager->add_creature(
+							MonsterCreator::create(
+								pos,
+								MonsterId::SHOPKEEPER,
+								ctx),
+							ctx);
+						ctx.messageSystem->log(
+							"Shopkeeper spawned at level " +
+							std::to_string(dungeonLevel));
+					}
+					else
+					{
+						ctx.creatureManager->add_creature(
+							MonsterCreator::create(pos, MonsterId::GOBLIN, ctx),
+							ctx);
+						ctx.messageSystem->log(
+							"Shopkeeper spawn failed, spawned Goblin instead");
+					}
+				},
+			});
+
+		return table;
 	}
 
-	if (!is_within_levels(
-			dungeonLevel,
-			monster.levelMinimum,
-			monster.levelMaximum))
+	// A monster's weight at a dungeon level: 0 outside its levels or for a base
+	// weight of 0, otherwise its base weight scaled by level and never below 1.
+	int calculate_weight(const MonsterType& monster, int dungeonLevel)
 	{
-		return 0;
-	}
+		auto is_within_levels = [](int level, int minimum, int maximum)
+		{
+			if (level < minimum)
+			{
+				return false;
+			}
+			if (maximum > 0 && level > maximum)
+			{
+				return false;
+			}
+			return true;
+		};
 
-	const float levelFactor =
-		1.0f + (monster.levelScaling * (dungeonLevel - 1));
-	const int weight = static_cast<int>(monster.baseWeight * levelFactor);
-	return std::max(1, weight);
-}
+		// baseWeight == 0 means "never spawn randomly" (e.g. dungeon_jailer)
+		if (monster.baseWeight == 0)
+		{
+			return 0;
+		}
+
+		if (!is_within_levels(
+				dungeonLevel,
+				monster.levelMinimum,
+				monster.levelMaximum))
+		{
+			return 0;
+		}
+
+		const float levelFactor =
+			1.0f + (monster.levelScaling * (dungeonLevel - 1));
+		const int weight = static_cast<int>(monster.baseWeight * levelFactor);
+		return std::max(1, weight);
+	}
 } // namespace
 
 void MonsterFactory::spawn_random_monster(

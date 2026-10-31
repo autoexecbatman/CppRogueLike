@@ -57,8 +57,8 @@
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\tBuffType::SHIELD,\n\tBuffType::HAIRY_SPIDER_VENOM,",
-      "mutated": "\tBuffType::SHIELD,",
+      "original": "\t\tBuffType::SHIELD,\n\t\tBuffType::HAIRY_SPIDER_VENOM,",
+      "mutated": "\t\tBuffType::SHIELD,",
       "catches": "the venom reaching attack rolls and leaving armour class alone"
     },
     {

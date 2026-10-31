@@ -42,44 +42,47 @@
 
 namespace
 {
-struct BookStrength
-{
-	std::string_view key{};
-	MonsterStrength strength{};
-	std::string_view baseDamage{};
-};
-
-// Monstrous Manual, by PDF page in the local archive.
-constexpr BookStrength BOOK_STRENGTHS[] = {
-	// Baatezu p1103: "its incredible 18/00 Strength (+6 damage adjustment)". Its six
-	// attacks print as "1-4x2/1-6x2/2-12/2-8" on p1102; the one this game makes is the
-	// bite, 2-12.
-	{ "pit_fiend", { 18, 100 }, "2d6" },
-	// Vampire p1946: "a Strength score of 18/76, receiving a bonus of +2 to hit and +4 to
-	// damage"; p1945 prints "Damage/Attack: 5-10", which is 1d6 and that +4.
-	{ "vampire", { 18, 76 }, "1d6" },
-	// Giant, Hill p1432: "oversized clubs which do 2-12 +7 points of damage (double the
-	// damage of a man-sized club plus their strength bonus)". +7 is row 19.
-	{ "hill_giant", { 19, 0 }, "2d6" },
-	// Golem, Greater p1492: "Stone golems have a strength of 22"; "Damage/Attack: 3-24
-	// (3d8)" on the same page.
-	{ "golem_stone", { 22, 0 }, "3d8" },
-	// Bugbear p1148: "Damage/Attack: 2-8 (2d4) or by weapon" and "Special Attacks:
-	// Surprise, +2 to damage". +2 is row 18. It carries a morning star, also 2d4.
-	{ "bugbear", { 18, 0 }, "2d4" },
-	// Ogre p1751: "Damage/Attack: 1-10 (or by weapon +6)". +6 is 18/00. It carries a club,
-	// 1d6.
-	{ "ogre", { 18, 100 }, "1d6" },
-};
-
-bool prints_a_strength(std::string_view key)
-{
-	const auto isThisMonster = [key](const BookStrength& book)
+	struct BookStrength
 	{
-		return book.key == key;
+		std::string_view key{};
+		MonsterStrength strength{};
+		std::string_view baseDamage{};
 	};
-	return std::ranges::any_of(BOOK_STRENGTHS, isThisMonster);
-}
+
+	// Monstrous Manual, by PDF page in the local archive.
+	constexpr BookStrength BOOK_STRENGTHS[] = {
+		// Baatezu p1103: "its incredible 18/00 Strength (+6 damage
+		// adjustment)". Its six attacks print as "1-4x2/1-6x2/2-12/2-8" on
+		// p1102; the one this game makes is the bite, 2-12.
+		{ "pit_fiend", { 18, 100 }, "2d6" },
+		// Vampire p1946: "a Strength score of 18/76, receiving a bonus of +2 to
+		// hit and +4 to damage"; p1945 prints "Damage/Attack: 5-10", which is
+		// 1d6 and that +4.
+		{ "vampire", { 18, 76 }, "1d6" },
+		// Giant, Hill p1432: "oversized clubs which do 2-12 +7 points of damage
+		// (double the damage of a man-sized club plus their strength bonus)".
+		// +7 is row 19.
+		{ "hill_giant", { 19, 0 }, "2d6" },
+		// Golem, Greater p1492: "Stone golems have a strength of 22";
+		// "Damage/Attack: 3-24 (3d8)" on the same page.
+		{ "golem_stone", { 22, 0 }, "3d8" },
+		// Bugbear p1148: "Damage/Attack: 2-8 (2d4) or by weapon" and "Special
+		// Attacks: Surprise, +2 to damage". +2 is row 18. It carries a morning
+		// star, also 2d4.
+		{ "bugbear", { 18, 0 }, "2d4" },
+		// Ogre p1751: "Damage/Attack: 1-10 (or by weapon +6)". +6 is 18/00. It
+		// carries a club, 1d6.
+		{ "ogre", { 18, 100 }, "1d6" },
+	};
+
+	bool prints_a_strength(std::string_view key)
+	{
+		const auto isThisMonster = [key](const BookStrength& book)
+		{
+			return book.key == key;
+		};
+		return std::ranges::any_of(BOOK_STRENGTHS, isThisMonster);
+	}
 
 } // namespace
 

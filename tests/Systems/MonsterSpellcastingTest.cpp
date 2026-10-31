@@ -47,10 +47,10 @@
 
 namespace
 {
-using Keys = std::vector<std::string>;
+	using Keys = std::vector<std::string>;
 
-constexpr int PLAYER_HP = 200;
-constexpr int ONE_DAY = ROUNDS_PER_DAY * TIME_UNITS_PER_ROUND;
+	constexpr int PLAYER_HP = 200;
+	constexpr int ONE_DAY = ROUNDS_PER_DAY * TIME_UNITS_PER_ROUND;
 } // namespace
 
 class MonsterSpellcastingTest : public ::testing::Test

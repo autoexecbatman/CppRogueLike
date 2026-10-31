@@ -41,27 +41,29 @@
 
 namespace
 {
-// A row of floor with the thief on it and a locked door one step east.
-constexpr int CORRIDOR_ROW = 5;
-const Vector2D START{ 4, CORRIDOR_ROW };
-const Vector2D DOOR{ 5, CORRIDOR_ROW };
+	// A row of floor with the thief on it and a locked door one step east.
+	constexpr int CORRIDOR_ROW = 5;
+	const Vector2D START{ 4, CORRIDOR_ROW };
+	const Vector2D DOOR{ 5, CORRIDOR_ROW };
 
-const std::string PICKED{ "You pick the lock." };
-const std::string FAILED{ "You fail to pick the lock." };
-const std::string TOO_DIFFICULT{
-	"This lock is too difficult for you until you have learned more."
-};
-const std::string FORCED{
-	"You force the door open! The crash echoes down the corridor."
-};
-const std::string TOO_WEAK{
-	"The door is locked. You are not strong enough to force it."
-};
-// A queued value no refused attempt is meant to read, so reading it back proves nothing rolled.
-constexpr int UNREAD_ROLL = 13;
-// Points put into Open Locks, enough that the chance is above every d10 these tests queue,
-// so a d100 read where the d10 belongs would pick the lock and fail the test.
-constexpr int OPEN_LOCKS_POINTS = 30;
+	const std::string PICKED{ "You pick the lock." };
+	const std::string FAILED{ "You fail to pick the lock." };
+	const std::string TOO_DIFFICULT{
+		"This lock is too difficult for you until you have learned more."
+	};
+	const std::string FORCED{
+		"You force the door open! The crash echoes down the corridor."
+	};
+	const std::string TOO_WEAK{
+		"The door is locked. You are not strong enough to force it."
+	};
+	// A queued value no refused attempt is meant to read, so reading it back
+	// proves nothing rolled.
+	constexpr int UNREAD_ROLL = 13;
+	// Points put into Open Locks, enough that the chance is above every d10
+	// these tests queue, so a d100 read where the d10 belongs would pick the
+	// lock and fail the test.
+	constexpr int OPEN_LOCKS_POINTS = 30;
 } // namespace
 
 class OpenLocksTest : public ::testing::Test

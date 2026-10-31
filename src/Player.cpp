@@ -67,127 +67,129 @@
 // XP table helpers - pure functions, no state
 namespace
 {
-template <std::size_t TableSize>
-constexpr int calculate_xp_for_level(
-	int level,
-	const std::array<int, TableSize>& xpTable,
-	int linearProgression) noexcept
-{
-	if (level <= 0)
+	template <std::size_t TableSize>
+	constexpr int calculate_xp_for_level(
+		int level,
+		const std::array<int, TableSize>& xpTable,
+		int linearProgression) noexcept
 	{
-		return xpTable[0];
+		if (level <= 0)
+		{
+			return xpTable[0];
+		}
+
+		if (level < static_cast<int>(xpTable.size()))
+		{
+			return xpTable[level];
+		}
+
+		const int maxLevel = static_cast<int>(xpTable.size()) - 1;
+		return xpTable[maxLevel] + (level - maxLevel) * linearProgression;
 	}
 
-	if (level < static_cast<int>(xpTable.size()))
+	constexpr int calculate_fighter_xp(int level) noexcept
 	{
-		return xpTable[level];
+		constexpr std::array fighter_xp = {
+			0,
+			2000,
+			4000,
+			8000,
+			16000,
+			32000,
+			64000,
+			125000,
+			250000,
+			500000,
+			750000,
+		};
+		return calculate_xp_for_level(level, fighter_xp, 250000);
 	}
 
-	const int maxLevel = static_cast<int>(xpTable.size()) - 1;
-	return xpTable[maxLevel] + (level - maxLevel) * linearProgression;
-}
-
-constexpr int calculate_fighter_xp(int level) noexcept
-{
-	constexpr std::array fighter_xp = {
-		0,
-		2000,
-		4000,
-		8000,
-		16000,
-		32000,
-		64000,
-		125000,
-		250000,
-		500000,
-		750000,
-	};
-	return calculate_xp_for_level(level, fighter_xp, 250000);
-}
-
-constexpr int calculate_rogue_xp(int level) noexcept
-{
-	constexpr std::array rogue_xp = {
-		0,
-		1250,
-		2500,
-		5000,
-		10000,
-		20000,
-		40000,
-		70000,
-		110000,
-		160000,
-		220000,
-	};
-	return calculate_xp_for_level(level, rogue_xp, 60000);
-}
-
-constexpr int calculate_cleric_xp(int level) noexcept
-{
-	constexpr std::array cleric_xp = {
-		0,
-		1500,
-		3000,
-		6000,
-		13000,
-		27500,
-		55000,
-		110000,
-		225000,
-		450000,
-		675000,
-	};
-	return calculate_xp_for_level(level, cleric_xp, 225000);
-}
-
-constexpr int calculate_wizard_xp(int level) noexcept
-{
-	constexpr std::array wizard_xp = {
-		0,
-		2500,
-		5000,
-		10000,
-		20000,
-		40000,
-		60000,
-		90000,
-		135000,
-		250000,
-		375000,
-	};
-	return calculate_xp_for_level(level, wizard_xp, 125000);
-}
-
-// The test a creature passes when it watches for a thief at currentTime: it is
-// alive and aware. A dead creature watches for nothing.
-//
-// Example, with a guard aware of the thief:
-//   std::ranges::any_of(*ctx.creatures, watching_at(currentTime)); // -> true
-auto watching_at(int currentTime)
-{
-	return [currentTime](const std::unique_ptr<Creature>& creature)
+	constexpr int calculate_rogue_xp(int level) noexcept
 	{
-		assert(creature && "attempt_hide: creatures list holds a null entry");
-		return !creature->is_dead() && creature->is_aware(currentTime);
-	};
-}
+		constexpr std::array rogue_xp = {
+			0,
+			1250,
+			2500,
+			5000,
+			10000,
+			20000,
+			40000,
+			70000,
+			110000,
+			160000,
+			220000,
+		};
+		return calculate_xp_for_level(level, rogue_xp, 60000);
+	}
 
-// An item for a class's starting kit, identified: a character knows what they
-// packed, so its true name shows from the start.
-//
-// Example:
-//   known_kit_item("scroll_fireball", position, ctx)->get_name();
-//   // -> "scroll of fireball", where one found later shows its appearance
-std::unique_ptr<Item> known_kit_item(
-	std::string_view key,
-	Vector2D position,
-	GameContext& ctx)
-{
-	auto item = ItemCreator::create(key, position, ctx);
-	item->identify_all();
-	return item;
-}
+	constexpr int calculate_cleric_xp(int level) noexcept
+	{
+		constexpr std::array cleric_xp = {
+			0,
+			1500,
+			3000,
+			6000,
+			13000,
+			27500,
+			55000,
+			110000,
+			225000,
+			450000,
+			675000,
+		};
+		return calculate_xp_for_level(level, cleric_xp, 225000);
+	}
+
+	constexpr int calculate_wizard_xp(int level) noexcept
+	{
+		constexpr std::array wizard_xp = {
+			0,
+			2500,
+			5000,
+			10000,
+			20000,
+			40000,
+			60000,
+			90000,
+			135000,
+			250000,
+			375000,
+		};
+		return calculate_xp_for_level(level, wizard_xp, 125000);
+	}
+
+	// The test a creature passes when it watches for a thief at currentTime: it
+	// is alive and aware. A dead creature watches for nothing.
+	//
+	// Example, with a guard aware of the thief:
+	//   std::ranges::any_of(*ctx.creatures, watching_at(currentTime));
+	//   // -> true
+	auto watching_at(int currentTime)
+	{
+		return [currentTime](const std::unique_ptr<Creature>& creature)
+		{
+			assert(
+				creature && "attempt_hide: creatures list holds a null entry");
+			return !creature->is_dead() && creature->is_aware(currentTime);
+		};
+	}
+
+	// An item for a class's starting kit, identified: a character knows what
+	// they packed, so its true name shows from the start.
+	//
+	// Example:
+	//   known_kit_item("scroll_fireball", position, ctx)->get_name();
+	//   // -> "scroll of fireball", where one found later shows its appearance
+	std::unique_ptr<Item> known_kit_item(
+		std::string_view key,
+		Vector2D position,
+		GameContext& ctx)
+	{
+		auto item = ItemCreator::create(key, position, ctx);
+		item->identify_all();
+		return item;
+	}
 
 } // namespace
 

@@ -8,20 +8,21 @@
 
 namespace UniqueId
 {
-using json = nlohmann::json;
+	using json = nlohmann::json;
 
-// Start IDs at 1 (0 is reserved for INVALID_ID)
-std::atomic<IdType> Generator::nextId{ 1 };
+	// Start IDs at 1 (0 is reserved for INVALID_ID)
+	std::atomic<IdType> Generator::nextId{ 1 };
 
-void save(json& output)
-{
-	output["nextUniqueId"] = Generator::peek_next_id();
-}
+	void save(json& output)
+	{
+		output["nextUniqueId"] = Generator::peek_next_id();
+	}
 
-void load(const json& source)
-{
-	// Never backwards: loading in a running game finds the counter ahead, and objects in memory hold those ids.
-	const IdType stored = source.at("nextUniqueId").get<IdType>();
-	Generator::set_next_id(std::max(stored, Generator::peek_next_id()));
-}
+	void load(const json& source)
+	{
+		// Never backwards: loading in a running game finds the counter ahead,
+		// and objects in memory hold those ids.
+		const IdType stored = source.at("nextUniqueId").get<IdType>();
+		Generator::set_next_id(std::max(stored, Generator::peek_next_id()));
+	}
 } // namespace UniqueId

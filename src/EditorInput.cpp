@@ -8,28 +8,28 @@
 
 namespace
 {
-// One raylib key and the editor key it stands for.
-struct KeyBinding
-{
-	int raylibKey{ 0 };
-	EditorKey editorKey{ EditorKey::ESCAPE };
-};
+	// One raylib key and the editor key it stands for.
+	struct KeyBinding
+	{
+		int raylibKey{ 0 };
+		EditorKey editorKey{ EditorKey::ESCAPE };
+	};
 
-// Every key the editors read as pressed, in one list.
-constexpr std::array<KeyBinding, 12> PRESSED_KEYS{ {
-	{ KEY_ESCAPE, EditorKey::ESCAPE },
-	{ KEY_TAB, EditorKey::TAB },
-	{ KEY_ENTER, EditorKey::ENTER },
-	{ KEY_UP, EditorKey::UP },
-	{ KEY_DOWN, EditorKey::DOWN },
-	{ KEY_LEFT, EditorKey::LEFT },
-	{ KEY_RIGHT, EditorKey::RIGHT },
-	{ KEY_F2, EditorKey::PICKER },
-	{ KEY_A, EditorKey::ADD },
-	{ KEY_S, EditorKey::SAVE },
-	{ KEY_DELETE, EditorKey::REMOVE },
-	{ KEY_BACKSPACE, EditorKey::BACKSPACE },
-} };
+	// Every key the editors read as pressed, in one list.
+	constexpr std::array<KeyBinding, 12> PRESSED_KEYS{ {
+		{ KEY_ESCAPE, EditorKey::ESCAPE },
+		{ KEY_TAB, EditorKey::TAB },
+		{ KEY_ENTER, EditorKey::ENTER },
+		{ KEY_UP, EditorKey::UP },
+		{ KEY_DOWN, EditorKey::DOWN },
+		{ KEY_LEFT, EditorKey::LEFT },
+		{ KEY_RIGHT, EditorKey::RIGHT },
+		{ KEY_F2, EditorKey::PICKER },
+		{ KEY_A, EditorKey::ADD },
+		{ KEY_S, EditorKey::SAVE },
+		{ KEY_DELETE, EditorKey::REMOVE },
+		{ KEY_BACKSPACE, EditorKey::BACKSPACE },
+	} };
 } // namespace
 
 EditorInput read_editor_input(const Renderer& renderer)

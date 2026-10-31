@@ -36,11 +36,12 @@
 
 namespace
 {
-// The blessing every buff case here uses, in rounds, as a priest's Bless prints it.
-constexpr int BLESS_ROUNDS = 3;
+	// The blessing every buff case here uses, in rounds, as a priest's Bless
+	// prints it.
+	constexpr int BLESS_ROUNDS = 3;
 
-// How long the confusion case confuses for, in rounds.
-constexpr int CONFUSION_ROUNDS = 3;
+	// How long the confusion case confuses for, in rounds.
+	constexpr int CONFUSION_ROUNDS = 3;
 } // namespace
 
 class DurationScheduleTest : public ::testing::Test

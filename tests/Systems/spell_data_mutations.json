@@ -21,20 +21,20 @@
     },
     {
       "file": "src/SpellRegistry.cpp",
-      "original": "\tthrow std::runtime_error(\n\t\tstd::format(\"SpellRegistry: unknown spell class '{}'\", text));",
-      "mutated": "\treturn SpellClass::BOTH;",
+      "original": "\t\tthrow std::runtime_error(\n\t\t\tstd::format(\"SpellRegistry: unknown spell class '{}'\", text));",
+      "mutated": "\t\treturn SpellClass::BOTH;",
       "catches": "an unknown spell class turned into a default"
     },
     {
       "file": "src/SpellRegistry.cpp",
-      "original": "\tthrow std::runtime_error(\n\t\tstd::format(\"SpellRegistry: unknown spell effect '{}'\", text));",
-      "mutated": "\treturn SpellEffectType::NONE;",
+      "original": "\t\tthrow std::runtime_error(\n\t\t\tstd::format(\"SpellRegistry: unknown spell effect '{}'\", text));",
+      "mutated": "\t\treturn SpellEffectType::NONE;",
       "catches": "an unknown spell effect turned into a default"
     },
     {
       "file": "src/SpellRegistry.cpp",
-      "original": "\t\tspells.emplace(\n\t\t\tstd::string{ builtin.key },\n\t\t\tSpellDefinition{ .effect_type = builtin.effect });",
-      "mutated": "\t\tspells.emplace(\n\t\t\tstd::string{ builtin.key },\n\t\t\tSpellDefinition{});",
+      "original": "\t\t\tspells.emplace(\n\t\t\t\tstd::string{ builtin.key },\n\t\t\t\tSpellDefinition{ .effect_type = builtin.effect });",
+      "mutated": "\t\t\tspells.emplace(\n\t\t\t\tstd::string{ builtin.key },\n\t\t\t\tSpellDefinition{});",
       "catches": "a registry built without the builtins' compiled-in effects"
     },
     {

@@ -25,25 +25,25 @@
 
 namespace
 {
-constexpr int MAP_WIDTH = 30;
-constexpr int MAP_HEIGHT = 20;
+	constexpr int MAP_WIDTH = 30;
+	constexpr int MAP_HEIGHT = 20;
 
-// Room A's floor is columns 2-6 and rows 2-5, so its walls are column 1 and 7 and rows
-// 1 and 6. Room B's floor is columns 8-11 on the same rows, so its left wall is column
-// 7 as well: the two rooms share that column.
-const DungeonRoom ROOM_A{ .col = 2, .row = 2, .width = 5, .height = 4 };
-const DungeonRoom ROOM_B{ .col = 8, .row = 2, .width = 4, .height = 4 };
+	// Room A's floor is columns 2-6 and rows 2-5, so its walls are column 1 and
+	// 7 and rows 1 and 6. Room B's floor is columns 8-11 on the same rows, so
+	// its left wall is column 7 as well: the two rooms share that column.
+	const DungeonRoom ROOM_A{ .col = 2, .row = 2, .width = 5, .height = 4 };
+	const DungeonRoom ROOM_B{ .col = 8, .row = 2, .width = 4, .height = 4 };
 
-// On room A's top wall, above floor (4, 2).
-constexpr Vector2D A_NORTH_DOOR{ 4, 1 };
-// On room A's bottom wall, below floor (3, 5).
-constexpr Vector2D A_SOUTH_DOOR{ 3, 6 };
-// In the shared column, between A's floor (6, 3) and B's floor (8, 3).
-constexpr Vector2D SHARED_DOOR{ 7, 3 };
-// On room B's right wall (column 12), beside floor (11, 4).
-constexpr Vector2D B_EAST_DOOR{ 12, 4 };
-// Far from both rooms, so it belongs to neither.
-constexpr Vector2D LONE_DOOR{ 20, 15 };
+	// On room A's top wall, above floor (4, 2).
+	constexpr Vector2D A_NORTH_DOOR{ 4, 1 };
+	// On room A's bottom wall, below floor (3, 5).
+	constexpr Vector2D A_SOUTH_DOOR{ 3, 6 };
+	// In the shared column, between A's floor (6, 3) and B's floor (8, 3).
+	constexpr Vector2D SHARED_DOOR{ 7, 3 };
+	// On room B's right wall (column 12), beside floor (11, 4).
+	constexpr Vector2D B_EAST_DOOR{ 12, 4 };
+	// Far from both rooms, so it belongs to neither.
+	constexpr Vector2D LONE_DOOR{ 20, 15 };
 } // namespace
 
 // set_door is protected, so the map is reached through a type that exposes it.

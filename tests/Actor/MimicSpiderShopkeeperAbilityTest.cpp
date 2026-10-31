@@ -33,32 +33,34 @@
 
 namespace
 {
-// More rolls than building any of these makes, the shopkeeper's shop stock included, so
-// none falls back to a random one.
-constexpr int SCRIPTED_ROLLS = 400;
+	// More rolls than building any of these makes, the shopkeeper's shop stock
+	// included, so none falls back to a random one.
+	constexpr int SCRIPTED_ROLLS = 400;
 
-// The six scores the tables give, Strength as its score and percentile.
-struct AbilityScores
-{
-	int strength{ 0 };
-	int exceptionalStrength{ 0 };
-	int dexterity{ 0 };
-	int constitution{ 0 };
-	int intelligence{ 0 };
-	int wisdom{ 0 };
-	int charisma{ 0 };
-};
+	// The six scores the tables give, Strength as its score and percentile.
+	struct AbilityScores
+	{
+		int strength{ 0 };
+		int exceptionalStrength{ 0 };
+		int dexterity{ 0 };
+		int constitution{ 0 };
+		int intelligence{ 0 };
+		int wisdom{ 0 };
+		int charisma{ 0 };
+	};
 
-void expect_scores(const Creature& creature, const AbilityScores& printed)
-{
-	EXPECT_EQ(creature.get_strength(), printed.strength);
-	EXPECT_EQ(creature.get_exceptional_strength(), printed.exceptionalStrength);
-	EXPECT_EQ(creature.get_dexterity(), printed.dexterity);
-	EXPECT_EQ(creature.get_constitution(), printed.constitution);
-	EXPECT_EQ(creature.get_intelligence(), printed.intelligence);
-	EXPECT_EQ(creature.get_wisdom(), printed.wisdom);
-	EXPECT_EQ(creature.get_charisma(), printed.charisma);
-}
+	void expect_scores(const Creature& creature, const AbilityScores& printed)
+	{
+		EXPECT_EQ(creature.get_strength(), printed.strength);
+		EXPECT_EQ(
+			creature.get_exceptional_strength(),
+			printed.exceptionalStrength);
+		EXPECT_EQ(creature.get_dexterity(), printed.dexterity);
+		EXPECT_EQ(creature.get_constitution(), printed.constitution);
+		EXPECT_EQ(creature.get_intelligence(), printed.intelligence);
+		EXPECT_EQ(creature.get_wisdom(), printed.wisdom);
+		EXPECT_EQ(creature.get_charisma(), printed.charisma);
+	}
 } // namespace
 
 class MimicSpiderShopkeeperAbilityTest : public ::testing::Test

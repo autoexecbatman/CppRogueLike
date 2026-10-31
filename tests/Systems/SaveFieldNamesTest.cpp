@@ -100,23 +100,23 @@ TEST(SaveFieldNamesTest, ALevelManagerRefusesASaveMissingOnlyTheShopkeeperCount)
 namespace
 {
 
-// A saved pack holding two items, as save_inventory writes it. A pack, because only a
-// pack has a capacity to record; a floor has no limit.
-json saved_pack_of_two_items()
-{
-	CreatureInventory pack{ 10 };
-	for (const char* name : { "first stone", "second stone" })
+	// A saved pack holding two items, as save_inventory writes it. A pack,
+	// because only a pack has a capacity to record; a floor has no limit.
+	json saved_pack_of_two_items()
 	{
-		[[maybe_unused]] const auto added = InventoryOperations::add_item(
-			pack,
-			std::make_unique<Item>(
-				Vector2D{ 0, 0 },
-				ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK }));
+		CreatureInventory pack{ 10 };
+		for (const char* name : { "first stone", "second stone" })
+		{
+			[[maybe_unused]] const auto added = InventoryOperations::add_item(
+				pack,
+				std::make_unique<Item>(
+					Vector2D{ 0, 0 },
+					ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK }));
+		}
+		json saved;
+		InventoryOperations::save_inventory(pack, saved);
+		return saved;
 	}
-	json saved;
-	InventoryOperations::save_inventory(pack, saved);
-	return saved;
-}
 
 } // namespace
 

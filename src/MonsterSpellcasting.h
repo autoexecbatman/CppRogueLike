@@ -33,15 +33,20 @@ enum class MonsterCast
 namespace MonsterSpellcasting
 {
 
-// Casts the first ready candidate that reaches target, spending its memorized copy or
-// recording its innate use, and says whether it did.
-//
-// Example, a lich of wizard 18 with { magic_missile, fireball } memorized, four tiles from
-// the player in sight:
-//   try_cast_at(lich, player, ctx);   // -> CAST, five missiles; { fireball } left
-//   try_cast_at(lich, player, ctx);   // -> CAST, a 10d6 fireball on the player's tile
-//   try_cast_at(lich, player, ctx);   // -> NOTHING_CAST, nothing left
-MonsterCast try_cast_at(Creature& caster, Creature& target, GameContext& ctx);
+	// Casts the first ready candidate that reaches target, spending its
+	// memorized copy or recording its innate use, and says whether it did.
+	//
+	// Example, a lich of wizard 18 with { magic_missile, fireball } memorized,
+	// four tiles from the player in sight:
+	//   try_cast_at(lich, player, ctx);
+	//   // -> CAST, five missiles; { fireball } left
+	//   try_cast_at(lich, player, ctx);
+	//   // -> CAST, a 10d6 fireball on the player's tile
+	//   try_cast_at(lich, player, ctx);   // -> NOTHING_CAST, nothing left
+	MonsterCast try_cast_at(
+		Creature& caster,
+		Creature& target,
+		GameContext& ctx);
 
 } // namespace MonsterSpellcasting
 

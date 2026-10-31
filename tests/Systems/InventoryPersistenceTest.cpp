@@ -36,8 +36,8 @@ using json = nlohmann::json;
 
 namespace
 {
-constexpr size_t PACK_CAPACITY = 50;
-constexpr Vector2D SOMEWHERE{ 3, 4 };
+	constexpr size_t PACK_CAPACITY = 50;
+	constexpr Vector2D SOMEWHERE{ 3, 4 };
 } // namespace
 
 class InventoryPersistenceTest : public ::testing::Test

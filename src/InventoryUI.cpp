@@ -84,108 +84,109 @@ namespace
 	}
 } // namespace
 
-
 namespace InventoryActions
 {
 
-std::string value_and_weight(const Item& item)
-{
-	if (item.get_value() > 0)
+	std::string value_and_weight(const Item& item)
 	{
-		return std::format(
-			" ({} gp, {} lb)",
-			item.get_value(),
-			item.enhancement.weight);
+		if (item.get_value() > 0)
+		{
+			return std::format(
+				" ({} gp, {} lb)",
+				item.get_value(),
+				item.enhancement.weight);
+		}
+		return std::format(" ({} lb)", item.enhancement.weight);
 	}
-	return std::format(" ({} lb)", item.enhancement.weight);
-}
 
-std::array<TabBox, 3> tab_boxes(const Renderer& renderer)
-{
-	const int tileSize = renderer.get_tile_size();
-
-	std::array<TabBox, 3> boxes{ {
-		{ InventoryScreen::EQUIPMENT, "Equipment", 0, 0 },
-		{ InventoryScreen::BACKPACK, "Backpack", 0, 0 },
-		{ InventoryScreen::USABLES, "Usables", 0, 0 },
-	} };
-
-	// Two tiles in, then one tile of gap between tabs; widths are measured, never counted in characters.
-	int pixelX = 2 * tileSize;
-	for (TabBox& box : boxes)
+	std::array<TabBox, 3> tab_boxes(const Renderer& renderer)
 	{
-		box.width = renderer.measure_text(box.text);
-		box.pixelX = pixelX;
-		pixelX += box.width + tileSize;
+		const int tileSize = renderer.get_tile_size();
+
+		std::array<TabBox, 3> boxes{ {
+			{ InventoryScreen::EQUIPMENT, "Equipment", 0, 0 },
+			{ InventoryScreen::BACKPACK, "Backpack", 0, 0 },
+			{ InventoryScreen::USABLES, "Usables", 0, 0 },
+		} };
+
+		// Two tiles in, then one tile of gap between tabs; widths are measured,
+		// never counted in characters.
+		int pixelX = 2 * tileSize;
+		for (TabBox& box : boxes)
+		{
+			box.width = renderer.measure_text(box.text);
+			box.pixelX = pixelX;
+			pixelX += box.width + tileSize;
+		}
+		return boxes;
 	}
-	return boxes;
-}
 
-std::optional<InventoryScreen> tab_at(
-	int pixelX,
-	int pixelY,
-	const Renderer& renderer)
-{
-	const int tileSize = renderer.get_tile_size();
-	if (panel_text_row_at_y(0, tileSize, pixelY) != TAB_ROW)
+	std::optional<InventoryScreen> tab_at(
+		int pixelX,
+		int pixelY,
+		const Renderer& renderer)
 	{
+		const int tileSize = renderer.get_tile_size();
+		if (panel_text_row_at_y(0, tileSize, pixelY) != TAB_ROW)
+		{
+			return std::nullopt;
+		}
+
+		for (const TabBox& box : tab_boxes(renderer))
+		{
+			if (pixelX >= box.pixelX - TAB_HIT_PADDING &&
+				pixelX < box.pixelX + box.width + TAB_HIT_PADDING)
+			{
+				return box.screen;
+			}
+		}
 		return std::nullopt;
 	}
 
-	for (const TabBox& box : tab_boxes(renderer))
+	InventoryScreen next_screen(InventoryScreen screen)
 	{
-		if (pixelX >= box.pixelX - TAB_HIT_PADDING &&
-			pixelX < box.pixelX + box.width + TAB_HIT_PADDING)
+		switch (screen)
 		{
-			return box.screen;
+		case InventoryScreen::EQUIPMENT:
+		{
+			return InventoryScreen::BACKPACK;
 		}
-	}
-	return std::nullopt;
-}
-
-InventoryScreen next_screen(InventoryScreen screen)
-{
-	switch (screen)
-	{
-	case InventoryScreen::EQUIPMENT:
-	{
-		return InventoryScreen::BACKPACK;
-	}
-	case InventoryScreen::BACKPACK:
-	{
-		return InventoryScreen::USABLES;
-	}
-	case InventoryScreen::USABLES:
-	{
+		case InventoryScreen::BACKPACK:
+		{
+			return InventoryScreen::USABLES;
+		}
+		case InventoryScreen::USABLES:
+		{
+			return InventoryScreen::EQUIPMENT;
+		}
+		}
 		return InventoryScreen::EQUIPMENT;
 	}
-	}
-	return InventoryScreen::EQUIPMENT;
-}
 
-std::vector<std::string> labels_for_row(
-	InventoryScreen screen,
-	bool rowHoldsItem)
-{
-	if (screen == InventoryScreen::EQUIPMENT)
+	std::vector<std::string> labels_for_row(
+		InventoryScreen screen,
+		bool rowHoldsItem)
 	{
-		// An empty slot has one thing worth offering: what would fit it. That is already
-		// what Enter does there, which opens the backpack filtered to the slot.
+		if (screen == InventoryScreen::EQUIPMENT)
+		{
+			// An empty slot has one thing worth offering: what would fit it.
+			// That is already what Enter does there, which opens the backpack
+			// filtered to the slot.
+			if (!rowHoldsItem)
+			{
+				return { "Browse", "Cancel" };
+			}
+			return { "Unequip", "Drop", "Cancel" };
+		}
+
+		// A backpack or usables row that is a category heading rather than an
+		// item. Nothing applies, and the caller opens no menu at all.
 		if (!rowHoldsItem)
 		{
-			return { "Browse", "Cancel" };
+			return {};
 		}
-		return { "Unequip", "Drop", "Cancel" };
+		return { "Use", "Drop", "Cancel" };
 	}
-
-	// A backpack or usables row that is a category heading rather than an item. Nothing
-	// applies, and the caller opens no menu at all.
-	if (!rowHoldsItem)
-	{
-		return {};
-	}
-	return { "Use", "Drop", "Cancel" };
-}
 
 } // namespace InventoryActions
 
@@ -206,42 +207,44 @@ constexpr Color EMPTY_SLOT_TINT{ 120, 120, 145, 255 };
 namespace
 {
 
-// The tile_config key naming the symbol for a slot. encode_equipment_slot spells the
-// slot in lower case and the keys are upper, so this is the one place that converts
-// between them; getting it wrong throws on an unknown key rather than drawing nothing.
-std::string slot_symbol_key(EquipmentSlot slot)
-{
-	std::string name{ encode_equipment_slot(slot) };
-	for (char& letter : name)
+	// The tile_config key naming the symbol for a slot. encode_equipment_slot
+	// spells the slot in lower case and the keys are upper, so this is the one
+	// place that converts between them; getting it wrong throws on an unknown
+	// key rather than drawing nothing.
+	std::string slot_symbol_key(EquipmentSlot slot)
 	{
-		letter =
-			static_cast<char>(std::toupper(static_cast<unsigned char>(letter)));
+		std::string name{ encode_equipment_slot(slot) };
+		for (char& letter : name)
+		{
+			letter = static_cast<char>(
+				std::toupper(static_cast<unsigned char>(letter)));
+		}
+		return "TILE_SLOT_" + name;
 	}
-	return "TILE_SLOT_" + name;
-}
 
-constexpr int CONTEXT_MENU_ANCHOR_COL = 6;
+	constexpr int CONTEXT_MENU_ANCHOR_COL = 6;
 
-int row_at_y(int tileSize, int screenY)
-{
-	return panel_text_row_at_y(0, tileSize, screenY);
-}
+	int row_at_y(int tileSize, int screenY)
+	{
+		return panel_text_row_at_y(0, tileSize, screenY);
+	}
 
-// First row of the detail bar, measured back from the bottom of the screen. The
-// content above it gets whatever is left, which is what the list scrolls within.
-int detail_bar_top_row(const Renderer& renderer)
-{
-	const int rowsThatFit = panel_text_rows_that_fit(
-		renderer.get_screen_height(),
-		renderer.get_tile_size(),
-		renderer.get_font_size());
-	return rowsThatFit - DETAIL_BAR_ROWS;
-}
+	// First row of the detail bar, measured back from the bottom of the screen.
+	// The content above it gets whatever is left, which is what the list
+	// scrolls within.
+	int detail_bar_top_row(const Renderer& renderer)
+	{
+		const int rowsThatFit = panel_text_rows_that_fit(
+			renderer.get_screen_height(),
+			renderer.get_tile_size(),
+			renderer.get_font_size());
+		return rowsThatFit - DETAIL_BAR_ROWS;
+	}
 
-int list_content_rows(const Renderer& renderer)
-{
-	return detail_bar_top_row(renderer) - FIRST_CONTENT_ROW;
-}
+	int list_content_rows(const Renderer& renderer)
+	{
+		return detail_bar_top_row(renderer) - FIRST_CONTENT_ROW;
+	}
 
 } // namespace
 

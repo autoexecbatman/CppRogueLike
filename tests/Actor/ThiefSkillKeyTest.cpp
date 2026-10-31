@@ -22,35 +22,36 @@
 
 namespace
 {
-// Table 27 for a human is a row of zeroes, and Dexterity 13 sits in Table 28's flat
-// row, so neither moves a score here.
-constexpr std::array<int, THIEF_SKILL_COUNT> NO_RACIAL_ADJUSTMENT{};
-constexpr int UNADJUSTED_DEXTERITY = 13;
-constexpr std::array<int, THIEF_SKILL_COUNT> NOTHING_SPENT_YET{};
+	// Table 27 for a human is a row of zeroes, and Dexterity 13 sits in Table
+	// 28's flat row, so neither moves a score here.
+	constexpr std::array<int, THIEF_SKILL_COUNT> NO_RACIAL_ADJUSTMENT{};
+	constexpr int UNADJUSTED_DEXTERITY = 13;
+	constexpr std::array<int, THIEF_SKILL_COUNT> NOTHING_SPENT_YET{};
 
-// A thief at the given level with the screen opened on Pick Pockets. Leather is
-// Table 29's column of zeroes, the armour the base scores already assume.
-ThiefSkillScreenState screen_at_level(
-	int level,
-	std::array<int, THIEF_SKILL_COUNT> alreadySpent)
-{
-	return ThiefSkillScreenState{
-		.cursor = ThiefSkill::PICK_POCKETS,
-		.allocation =
-			ThiefSkillAllocation{
-				alreadySpent,
-				thief_skill_grant_at_level(level),
-				NO_RACIAL_ADJUSTMENT,
-				UNADJUSTED_DEXTERITY,
-				ThiefArmor::LEATHER,
-			},
-	};
-}
+	// A thief at the given level with the screen opened on Pick Pockets.
+	// Leather is Table 29's column of zeroes, the armour the base scores
+	// already assume.
+	ThiefSkillScreenState screen_at_level(
+		int level,
+		std::array<int, THIEF_SKILL_COUNT> alreadySpent)
+	{
+		return ThiefSkillScreenState{
+			.cursor = ThiefSkill::PICK_POCKETS,
+			.allocation =
+				ThiefSkillAllocation{
+					alreadySpent,
+					thief_skill_grant_at_level(level),
+					NO_RACIAL_ADJUSTMENT,
+					UNADJUSTED_DEXTERITY,
+					ThiefArmor::LEATHER,
+				},
+		};
+	}
 
-ThiefSkillScreenState first_level_screen()
-{
-	return screen_at_level(1, NOTHING_SPENT_YET);
-}
+	ThiefSkillScreenState first_level_screen()
+	{
+		return screen_at_level(1, NOTHING_SPENT_YET);
+	}
 } // namespace
 
 TEST(ThiefSkillKeyTest, DownMovesTheCursorToTheNextSkill)

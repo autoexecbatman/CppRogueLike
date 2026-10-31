@@ -72,7 +72,7 @@ class Player;
 
 namespace Pathfinding
 {
-class Pathfinder;
+	class Pathfinder;
 }
 
 // Where the turn is. Moving it on is routine, so nothing final is kept here.

@@ -39,13 +39,13 @@
     },
     {
       "file": "src/InventoryOperations.cpp",
-      "original": "\tfor (const EquippedItem& equipped : owner.equippedItems)\n\t{\n\t\tassert(equipped.item && \"an equipment slot owns the item in it\");\n\t\ttotal += equipped.item->enhancement.weight;\n\t}\n",
+      "original": "\t\tfor (const EquippedItem& equipped : owner.equippedItems)\n\t\t{\n\t\t\tassert(equipped.item && \"an equipment slot owns the item in it\");\n\t\t\ttotal += equipped.item->enhancement.weight;\n\t\t}\n",
       "mutated": "",
       "catches": "worn gear weighing nothing again, so armour is free once it is on"
     },
     {
       "file": "src/InventoryOperations.cpp",
-      "original": "\tfor (const auto& item : owner.inventoryData.items)\n\t{\n\t\tassert(item && \"the pack owns every entry it holds\");\n\t\ttotal += item->enhancement.weight;\n\t}\n",
+      "original": "\t\tfor (const auto& item : owner.inventoryData.items)\n\t\t{\n\t\t\tassert(item && \"the pack owns every entry it holds\");\n\t\t\ttotal += item->enhancement.weight;\n\t\t}\n",
       "mutated": "",
       "catches": "the pack dropping out of the load once the body was added to it"
     },
@@ -57,14 +57,14 @@
     },
     {
       "file": "src/InventoryOperations.cpp",
-      "original": "\tint total = (owner.get_creature_class() == CreatureClass::MONSTER) ?\n\t\t0 :\n\t\tCLOTHING_POUNDS;",
-      "mutated": "\tint total =CLOTHING_POUNDS;",
+      "original": "\t\tint total = (owner.get_creature_class() == CreatureClass::MONSTER) ?\n\t\t\t0 :\n\t\t\tCLOTHING_POUNDS;",
+      "mutated": "\t\tint total =CLOTHING_POUNDS;",
       "catches": "a creature dressed by a rule written for characters"
     },
     {
       "file": "src/InventoryOperations.cpp",
-      "original": "\tint total = (owner.get_creature_class() == CreatureClass::MONSTER) ?\n\t\t0 :\n\t\tCLOTHING_POUNDS;",
-      "mutated": "\tint total =0;",
+      "original": "\t\tint total = (owner.get_creature_class() == CreatureClass::MONSTER) ?\n\t\t\t0 :\n\t\t\tCLOTHING_POUNDS;",
+      "mutated": "\t\tint total =0;",
       "catches": "the allowance dropped, which leaves every character five pounds light"
     }
   ]

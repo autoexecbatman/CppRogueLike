@@ -22,7 +22,7 @@
 namespace
 {
 
-constexpr int CONSTITUTION = 17;
+	constexpr int CONSTITUTION = 17;
 
 } // namespace
 

@@ -40,34 +40,34 @@ namespace
 	constexpr int DR_BONUS = 1;
 	constexpr int CONFUSION_BONUS = 1;
 
-// OCP-compliant: data-driven item bonus mapping
-enum class MimicBonusType
-{
-	HEALTH,
-	CONFUSION,
-	ATTACK,
-	DEFENSE_GOLD,
-	DEFENSE_ARMOR,
-	NONE
-};
+	// OCP-compliant: data-driven item bonus mapping
+	enum class MimicBonusType
+	{
+		HEALTH,
+		CONFUSION,
+		ATTACK,
+		DEFENSE_GOLD,
+		DEFENSE_ARMOR,
+		NONE
+	};
 
-const std::unordered_map<ItemClass, MimicBonusType> item_bonus_map = {
-	{ ItemClass::POTION, MimicBonusType::HEALTH },
-	{ ItemClass::FOOD, MimicBonusType::HEALTH },
-	{ ItemClass::SCROLL, MimicBonusType::CONFUSION },
-	{ ItemClass::GOLD_COIN, MimicBonusType::DEFENSE_GOLD },
-	{ ItemClass::ARMOR, MimicBonusType::DEFENSE_ARMOR },
-	{ ItemClass::DAGGER, MimicBonusType::ATTACK },
-	{ ItemClass::SWORD, MimicBonusType::ATTACK },
-	{ ItemClass::GREAT_SWORD, MimicBonusType::ATTACK },
-	{ ItemClass::AXE, MimicBonusType::ATTACK },
-	{ ItemClass::HAMMER, MimicBonusType::ATTACK },
-	{ ItemClass::MACE, MimicBonusType::ATTACK },
-	{ ItemClass::STAFF, MimicBonusType::ATTACK },
-	{ ItemClass::BOW, MimicBonusType::ATTACK },
-	{ ItemClass::CROSSBOW, MimicBonusType::ATTACK },
-	{ ItemClass::SLING, MimicBonusType::ATTACK },
-};
+	const std::unordered_map<ItemClass, MimicBonusType> item_bonus_map = {
+		{ ItemClass::POTION, MimicBonusType::HEALTH },
+		{ ItemClass::FOOD, MimicBonusType::HEALTH },
+		{ ItemClass::SCROLL, MimicBonusType::CONFUSION },
+		{ ItemClass::GOLD_COIN, MimicBonusType::DEFENSE_GOLD },
+		{ ItemClass::ARMOR, MimicBonusType::DEFENSE_ARMOR },
+		{ ItemClass::DAGGER, MimicBonusType::ATTACK },
+		{ ItemClass::SWORD, MimicBonusType::ATTACK },
+		{ ItemClass::GREAT_SWORD, MimicBonusType::ATTACK },
+		{ ItemClass::AXE, MimicBonusType::ATTACK },
+		{ ItemClass::HAMMER, MimicBonusType::ATTACK },
+		{ ItemClass::MACE, MimicBonusType::ATTACK },
+		{ ItemClass::STAFF, MimicBonusType::ATTACK },
+		{ ItemClass::BOW, MimicBonusType::ATTACK },
+		{ ItemClass::CROSSBOW, MimicBonusType::ATTACK },
+		{ ItemClass::SLING, MimicBonusType::ATTACK },
+	};
 
 } // namespace
 

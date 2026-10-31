@@ -38,8 +38,9 @@
 
 namespace
 {
-// More than extra-healing's most, 27, so no heal is cut short by the maximum.
-constexpr int DRINKER_MAX_HP = 40;
+	// More than extra-healing's most, 27, so no heal is cut short by the
+	// maximum.
+	constexpr int DRINKER_MAX_HP = 40;
 } // namespace
 
 class PotionHealingTest : public ::testing::Test

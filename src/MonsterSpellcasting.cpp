@@ -17,21 +17,21 @@
 namespace
 {
 
-// "The lich casts Magic Missile!", before the spell's own lines.
-void announce_cast(
-	const Creature& caster,
-	std::string_view key,
-	GameContext& ctx)
-{
-	ctx.messageSystem->message(
-		caster.actorData.color,
-		caster.actorData.name,
-		MessageCompletion::CONTINUED);
-	ctx.messageSystem->message(
-		ColorPairId::WHITE_RED,
-		std::format(" casts {}!", ctx.spellRegistry->get_by_key(key).name),
-		MessageCompletion::FINISHED);
-}
+	// "The lich casts Magic Missile!", before the spell's own lines.
+	void announce_cast(
+		const Creature& caster,
+		std::string_view key,
+		GameContext& ctx)
+	{
+		ctx.messageSystem->message(
+			caster.actorData.color,
+			caster.actorData.name,
+			MessageCompletion::CONTINUED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_RED,
+			std::format(" casts {}!", ctx.spellRegistry->get_by_key(key).name),
+			MessageCompletion::FINISHED);
+	}
 
 } // namespace
 

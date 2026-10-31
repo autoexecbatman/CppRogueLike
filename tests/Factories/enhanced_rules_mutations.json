@@ -27,14 +27,14 @@
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\tthrow std::runtime_error(\n\t\tstd::format(\"ItemRegistry: unknown enhancement_category '{}'\", name));",
-      "mutated": "\treturn EnhancedItemCategory::ARMOR;",
+      "original": "throw std::runtime_error(\n\t\t\tstd::format(\n\t\t\t\t\"ItemRegistry: unknown enhancement_category '{}'\",\n\t\t\t\tname));",
+      "mutated": "\t\treturn EnhancedItemCategory::ARMOR;",
       "catches": "the old ternary restored, so a typo becomes armour"
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\tif (name == \"armor\")\n\t{\n\t\treturn EnhancedItemCategory::ARMOR;\n\t}",
-      "mutated": "\tif (name == \"armour\")\n\t{\n\t\treturn EnhancedItemCategory::ARMOR;\n\t}",
+      "original": "\t\tif (name == \"armor\")\n\t\t{\n\t\t\treturn EnhancedItemCategory::ARMOR;\n\t\t}",
+      "mutated": "\t\tif (name == \"armour\")\n\t\t{\n\t\t\treturn EnhancedItemCategory::ARMOR;\n\t\t}",
       "catches": "the spelling the data does not use, which would refuse every armour rule"
     },
     {

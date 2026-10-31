@@ -33,11 +33,11 @@
 namespace
 {
 
-// The clock reading `rounds` whole rounds after the start of the game.
-constexpr int at_round(int rounds)
-{
-	return rounds * TIME_UNITS_PER_ROUND;
-}
+	// The clock reading `rounds` whole rounds after the start of the game.
+	constexpr int at_round(int rounds)
+	{
+		return rounds * TIME_UNITS_PER_ROUND;
+	}
 
 } // namespace
 

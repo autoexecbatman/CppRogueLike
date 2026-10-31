@@ -36,8 +36,8 @@
 
 namespace
 {
-// More rolls than building a shopkeeper and stocking its shop makes.
-constexpr int SCRIPTED_ROLLS = 400;
+	// More rolls than building a shopkeeper and stocking its shop makes.
+	constexpr int SCRIPTED_ROLLS = 400;
 } // namespace
 
 class CreatureRecordSaveTest : public ::testing::Test

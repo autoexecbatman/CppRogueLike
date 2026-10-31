@@ -23,21 +23,21 @@
 
 namespace
 {
-// The order the steps ran in, by name.
-struct RunOrder
-{
-	std::vector<std::string> names{};
-};
-
-// A step that records its name when it runs.
-StartupStep recording_step(const std::string& name, RunOrder& order)
-{
-	const auto record_the_run = [name, &order]()
+	// The order the steps ran in, by name.
+	struct RunOrder
 	{
-		order.names.push_back(name);
+		std::vector<std::string> names{};
 	};
-	return StartupStep{ name, record_the_run };
-}
+
+	// A step that records its name when it runs.
+	StartupStep recording_step(const std::string& name, RunOrder& order)
+	{
+		const auto record_the_run = [name, &order]()
+		{
+			order.names.push_back(name);
+		};
+		return StartupStep{ name, record_the_run };
+	}
 } // namespace
 
 TEST(StartupStepsTest, EveryStepRunsInOrderAndNothingIsRefused)

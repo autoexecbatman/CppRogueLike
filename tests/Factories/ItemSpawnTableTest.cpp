@@ -25,37 +25,38 @@
 
 namespace
 {
-constexpr int DUNGEON_LEVEL = 1;
+	constexpr int DUNGEON_LEVEL = 1;
 
-// Whether a distribution lists an entry by name.
-bool lists(
-	const std::vector<ItemPercentage>& distribution,
-	std::string_view name)
-{
-	auto is_named = [name](const ItemPercentage& entry)
+	// Whether a distribution lists an entry by name.
+	bool lists(
+		const std::vector<ItemPercentage>& distribution,
+		std::string_view name)
 	{
-		return entry.name == name;
-	};
-	return std::ranges::any_of(distribution, is_named);
-}
-
-// The first item the registry draws at a level: positive weight, and a level range that
-// admits it, where a levelMax of 0 means no upper bound. Chosen from the data, since an
-// item named by hand may not be drawn at that level at all.
-std::string first_drawable(const ItemRegistry& items, int dungeonLevel)
-{
-	for (const std::string& key : items.get_all_keys())
-	{
-		const ItemParams& params = items.get_params(key);
-		const bool admitsLevel = params.levelMin <= dungeonLevel &&
-			(params.levelMax == 0 || dungeonLevel <= params.levelMax);
-		if (params.baseWeight > 0 && admitsLevel)
+		auto is_named = [name](const ItemPercentage& entry)
 		{
-			return key;
-		}
+			return entry.name == name;
+		};
+		return std::ranges::any_of(distribution, is_named);
 	}
-	return {};
-}
+
+	// The first item the registry draws at a level: positive weight, and a
+	// level range that admits it, where a levelMax of 0 means no upper bound.
+	// Chosen from the data, since an item named by hand may not be drawn at
+	// that level at all.
+	std::string first_drawable(const ItemRegistry& items, int dungeonLevel)
+	{
+		for (const std::string& key : items.get_all_keys())
+		{
+			const ItemParams& params = items.get_params(key);
+			const bool admitsLevel = params.levelMin <= dungeonLevel &&
+				(params.levelMax == 0 || dungeonLevel <= params.levelMax);
+			if (params.baseWeight > 0 && admitsLevel)
+			{
+				return key;
+			}
+		}
+		return {};
+	}
 } // namespace
 
 // Silencing an item in the registry takes it out of the very next distribution, with

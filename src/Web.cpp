@@ -15,28 +15,34 @@
 
 namespace
 {
-// Says one line about a creature entering a web, and only when isSeen is true:
-// playerLine when the creature is the player, watcherLine otherwise.
-//
-// Example, the player watching a rat walk in:
-//   narrate(isSeen, rat, ctx, color, "You are caught!", "The rat is caught!");
-//   // says "The rat is caught!"
-void narrate(
-	bool isSeen,
-	const Creature& creature,
-	GameContext& ctx,
-	ColorPairId color,
-	const std::string& playerLine,
-	const std::string& watcherLine)
-{
-	if (isSeen)
+	// Says one line about a creature entering a web, and only when isSeen is
+	// true: playerLine when the creature is the player, watcherLine otherwise.
+	//
+	// Example, the player watching a rat walk in:
+	//   narrate(
+	//       isSeen,
+	//       rat,
+	//       ctx,
+	//       color,
+	//       "You are caught!",
+	//       "The rat is caught!");
+	//   // says "The rat is caught!"
+	void narrate(
+		bool isSeen,
+		const Creature& creature,
+		GameContext& ctx,
+		ColorPairId color,
+		const std::string& playerLine,
+		const std::string& watcherLine)
 	{
-		ctx.messageSystem->message(
-			color,
-			creature.is_player() ? playerLine : watcherLine,
-			MessageCompletion::FINISHED);
+		if (isSeen)
+		{
+			ctx.messageSystem->message(
+				color,
+				creature.is_player() ? playerLine : watcherLine,
+				MessageCompletion::FINISHED);
+		}
 	}
-}
 } // namespace
 
 Web::Web(Vector2D position, int strength, const TileConfig& tileConfig) :

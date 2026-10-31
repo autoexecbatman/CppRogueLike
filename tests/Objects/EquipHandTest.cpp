@@ -31,55 +31,56 @@
 
 namespace
 {
-// Named here so each assertion reads as the claim it makes.
-bool right_hand_takes(ItemClass itemClass)
-{
-	return ItemClassificationUtils::can_equip_to_right_hand(itemClass);
-}
+	// Named here so each assertion reads as the claim it makes.
+	bool right_hand_takes(ItemClass itemClass)
+	{
+		return ItemClassificationUtils::can_equip_to_right_hand(itemClass);
+	}
 
-bool left_hand_takes(ItemClass itemClass)
-{
-	return ItemClassificationUtils::can_equip_to_left_hand(itemClass);
-}
+	bool left_hand_takes(ItemClass itemClass)
+	{
+		return ItemClassificationUtils::can_equip_to_left_hand(itemClass);
+	}
 
-// AXE is here because Table 44 gives a battle axe Size M at 7 lb: the book marks a
-// two-handed weapon with a "Two-handed" sub-row or Size L, and neither axe has one.
-constexpr std::array ONE_HANDED_WEAPONS{
-	ItemClass::DAGGER,
-	ItemClass::SWORD,
-	ItemClass::HAMMER,
-	ItemClass::MACE,
-	ItemClass::SLING,
-	ItemClass::AXE,
-};
+	// AXE is here because Table 44 gives a battle axe Size M at 7 lb: the book
+	// marks a two-handed weapon with a "Two-handed" sub-row or Size L, and
+	// neither axe has one.
+	constexpr std::array ONE_HANDED_WEAPONS{
+		ItemClass::DAGGER,
+		ItemClass::SWORD,
+		ItemClass::HAMMER,
+		ItemClass::MACE,
+		ItemClass::SLING,
+		ItemClass::AXE,
+	};
 
-constexpr std::array TWO_HANDED_WEAPONS{
-	ItemClass::GREAT_SWORD,
-	ItemClass::STAFF,
-	ItemClass::BOW,
-	ItemClass::CROSSBOW,
-};
+	constexpr std::array TWO_HANDED_WEAPONS{
+		ItemClass::GREAT_SWORD,
+		ItemClass::STAFF,
+		ItemClass::BOW,
+		ItemClass::CROSSBOW,
+	};
 
-constexpr std::array SHIELDS{ ItemClass::SHIELD };
+	constexpr std::array SHIELDS{ ItemClass::SHIELD };
 
-constexpr std::array NOT_HELD_IN_A_HAND{
-	ItemClass::UNKNOWN,
-	ItemClass::ARMOR,
-	ItemClass::HELMET,
-	ItemClass::RING,
-	ItemClass::AMULET,
-	ItemClass::GAUNTLETS,
-	ItemClass::BOOTS,
-	ItemClass::CLOAK,
-	ItemClass::GIRDLE,
-	ItemClass::POTION,
-	ItemClass::SCROLL,
-	ItemClass::FOOD,
-	ItemClass::GOLD_COIN,
-	ItemClass::GEM,
-	ItemClass::TOOL,
-	ItemClass::QUEST_ITEM,
-};
+	constexpr std::array NOT_HELD_IN_A_HAND{
+		ItemClass::UNKNOWN,
+		ItemClass::ARMOR,
+		ItemClass::HELMET,
+		ItemClass::RING,
+		ItemClass::AMULET,
+		ItemClass::GAUNTLETS,
+		ItemClass::BOOTS,
+		ItemClass::CLOAK,
+		ItemClass::GIRDLE,
+		ItemClass::POTION,
+		ItemClass::SCROLL,
+		ItemClass::FOOD,
+		ItemClass::GOLD_COIN,
+		ItemClass::GEM,
+		ItemClass::TOOL,
+		ItemClass::QUEST_ITEM,
+	};
 } // namespace
 
 TEST(EquipHandTest, TheFourGroupsAreTheWholeEnum)

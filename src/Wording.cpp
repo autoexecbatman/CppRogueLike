@@ -9,18 +9,20 @@
 namespace Wording
 {
 
-std::string counted(
-	int count,
-	std::string_view singular,
-	std::string_view plural)
-{
-	assert(count >= 0 && "Wording::counted: a message counted fewer than none");
-	return std::format("{} {}", count, count == 1 ? singular : plural);
-}
+	std::string counted(
+		int count,
+		std::string_view singular,
+		std::string_view plural)
+	{
+		assert(
+			count >= 0 &&
+			"Wording::counted: a message counted fewer than none");
+		return std::format("{} {}", count, count == 1 ? singular : plural);
+	}
 
-std::string rounds(int count)
-{
-	return counted(count, "round", "rounds");
-}
+	std::string rounds(int count)
+	{
+		return counted(count, "round", "rounds");
+	}
 
 } // namespace Wording

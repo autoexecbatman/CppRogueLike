@@ -22,9 +22,9 @@
 
 namespace
 {
-constexpr int GRID_SIDE = 40;
-constexpr int STANDING_AT = 20;
-constexpr int SIGHT = 5;
+	constexpr int GRID_SIDE = 40;
+	constexpr int STANDING_AT = 20;
+	constexpr int SIGHT = 5;
 } // namespace
 
 class FovMapTest : public ::testing::Test

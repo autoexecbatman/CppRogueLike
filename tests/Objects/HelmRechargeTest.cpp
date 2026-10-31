@@ -49,56 +49,59 @@
 namespace
 {
 
-// A day in the clock's units, from the book rather than from the code's constants: 24
-// hours of 60 one-minute rounds (PHB page 184), each round 120 time units.
-constexpr int DAY_IN_TIME_UNITS = 172800;
-// A moment well into a game, so a use at time zero cannot pass for no use at all.
-constexpr int TIME_OF_USE = 5000;
-// One tile of floor away from the player, so a teleport has somewhere to land.
-constexpr Vector2D LANDING_TILE{ 3, 3 };
+	// A day in the clock's units, from the book rather than from the code's
+	// constants: 24 hours of 60 one-minute rounds (PHB page 184), each round
+	// 120 time units.
+	constexpr int DAY_IN_TIME_UNITS = 172800;
+	// A moment well into a game, so a use at time zero cannot pass for no use
+	// at all.
+	constexpr int TIME_OF_USE = 5000;
+	// One tile of floor away from the player, so a teleport has somewhere to
+	// land.
+	constexpr Vector2D LANDING_TILE{ 3, 3 };
 
-// The player, wired into a context, with nothing worn.
-void dress_bare_player(MockGameContext& mock, GameContext& ctx)
-{
-	mock.player = std::make_unique<Player>(Vector2D{ 0, 0 });
-	Player& player = *mock.player;
-	player.experienceReward = std::make_unique<ExperienceReward>(0);
-	player.armorClass = std::make_unique<ArmorClass>(10);
-	player.healthPool = std::make_unique<HealthPool>(20);
-	player.set_strength(10);
-	player.set_dexterity(10);
-	ctx.playerOwner = &mock.player;
-}
-
-// Puts an item from the item data on the player, and returns it as worn.
-Item& wear(
-	std::string_view itemKey,
-	EquipmentSlot slot,
-	Player& player,
-	GameContext& ctx)
-{
-	auto item =
-		ItemCreator::create(std::string{ itemKey }, player.position, ctx);
-	Item* worn = item.get();
-	[[maybe_unused]] const bool equipped =
-		player.equip_item(std::move(item), slot, ctx);
-	return *worn;
-}
-
-// Whether the cast menu would offer this spell at this moment.
-bool offers(std::string_view spellKey, const Player& player, int now)
-{
-	for (
-		const SpellSystem::ItemGrantedSpell& granted :
-		SpellSystem::get_item_granted_spells(player, now))
+	// The player, wired into a context, with nothing worn.
+	void dress_bare_player(MockGameContext& mock, GameContext& ctx)
 	{
-		if (granted.key == spellKey)
-		{
-			return true;
-		}
+		mock.player = std::make_unique<Player>(Vector2D{ 0, 0 });
+		Player& player = *mock.player;
+		player.experienceReward = std::make_unique<ExperienceReward>(0);
+		player.armorClass = std::make_unique<ArmorClass>(10);
+		player.healthPool = std::make_unique<HealthPool>(20);
+		player.set_strength(10);
+		player.set_dexterity(10);
+		ctx.playerOwner = &mock.player;
 	}
-	return false;
-}
+
+	// Puts an item from the item data on the player, and returns it as worn.
+	Item& wear(
+		std::string_view itemKey,
+		EquipmentSlot slot,
+		Player& player,
+		GameContext& ctx)
+	{
+		auto item =
+			ItemCreator::create(std::string{ itemKey }, player.position, ctx);
+		Item* worn = item.get();
+		[[maybe_unused]] const bool equipped =
+			player.equip_item(std::move(item), slot, ctx);
+		return *worn;
+	}
+
+	// Whether the cast menu would offer this spell at this moment.
+	bool offers(std::string_view spellKey, const Player& player, int now)
+	{
+		for (
+			const SpellSystem::ItemGrantedSpell& granted :
+			SpellSystem::get_item_granted_spells(player, now))
+		{
+			if (granted.key == spellKey)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 
 } // namespace
 
@@ -210,105 +213,112 @@ TEST_F(HelmRechargeTest, AHelmRecordWithoutItsRechargeIsRefused)
 namespace
 {
 
-// Shift+C, then the first entry's letter, in one frame.
-void choose_first_entry_from_the_cast_menu(
-	MockGameContext& mock,
-	GameContext& ctx,
-	HiddenRenderer& hidden)
-{
-	mock.menus.push_back(std::make_unique<MenuSpellCast>(*mock.player, ctx));
-	ctx.inputSystem->queue_key(GameKey::NONE, 'a');
-	hidden.renderer.begin_frame();
-	ctx.menuManager->handle_menus(*ctx.menus, ctx);
-	hidden.renderer.end_frame();
-}
+	// Shift+C, then the first entry's letter, in one frame.
+	void choose_first_entry_from_the_cast_menu(
+		MockGameContext& mock,
+		GameContext& ctx,
+		HiddenRenderer& hidden)
+	{
+		mock.menus.push_back(
+			std::make_unique<MenuSpellCast>(*mock.player, ctx));
+		ctx.inputSystem->queue_key(GameKey::NONE, 'a');
+		hidden.renderer.begin_frame();
+		ctx.menuManager->handle_menus(*ctx.menus, ctx);
+		hidden.renderer.end_frame();
+	}
 
-// Teleporting through the helm from the cast menu spends its day.
-[[noreturn]] void teleporting_from_the_cast_menu_spends_the_helm()
-{
-	HiddenRenderer hidden{};
-	MockGameContext mock{};
-	GameContext ctx = mock.to_game_context();
-	ctx.renderer = &hidden.renderer;
-	BuffSystem buffs{};
-	ctx.buffSystem = &buffs;
-	mock.map.init_tiles();
-	mock.map.set_tile(LANDING_TILE, TileType::FLOOR);
-	dress_bare_player(mock, ctx);
-	Item& helm =
-		wear("helm_of_teleportation", EquipmentSlot::HEAD, *mock.player, ctx);
-	ctx.gameState->set_time(TIME_OF_USE);
+	// Teleporting through the helm from the cast menu spends its day.
+	[[noreturn]] void teleporting_from_the_cast_menu_spends_the_helm()
+	{
+		HiddenRenderer hidden{};
+		MockGameContext mock{};
+		GameContext ctx = mock.to_game_context();
+		ctx.renderer = &hidden.renderer;
+		BuffSystem buffs{};
+		ctx.buffSystem = &buffs;
+		mock.map.init_tiles();
+		mock.map.set_tile(LANDING_TILE, TileType::FLOOR);
+		dress_bare_player(mock, ctx);
+		Item& helm = wear(
+			"helm_of_teleportation",
+			EquipmentSlot::HEAD,
+			*mock.player,
+			ctx);
+		ctx.gameState->set_time(TIME_OF_USE);
 
-	choose_first_entry_from_the_cast_menu(mock, ctx, hidden);
+		choose_first_entry_from_the_cast_menu(mock, ctx, hidden);
 
-	exit_unless(
-		ctx.gameState->get_time() > TIME_OF_USE,
-		"teleporting from the helm spent no turn");
-	exit_unless(
-		std::get<MagicalHelm>(*helm.behavior).rechargedAt ==
-			TIME_OF_USE + DAY_IN_TIME_UNITS,
-		"the helm's use was not recorded at the moment of use");
-	exit_unless(
-		!offers("teleport", *mock.player, ctx.gameState->get_time()),
-		"the menu offers the helm's teleport again straight after its use");
-	finish_the_child();
-}
+		exit_unless(
+			ctx.gameState->get_time() > TIME_OF_USE,
+			"teleporting from the helm spent no turn");
+		exit_unless(
+			std::get<MagicalHelm>(*helm.behavior).rechargedAt ==
+				TIME_OF_USE + DAY_IN_TIME_UNITS,
+			"the helm's use was not recorded at the moment of use");
+		exit_unless(
+			!offers("teleport", *mock.player, ctx.gameState->get_time()),
+			"the menu offers the helm's teleport again straight after its use");
+		finish_the_child();
+	}
 
-// The menu lists as of the clock: a day after a use, it offers the helm and casting spends
-// the new day.
-[[noreturn]] void the_menu_offers_the_helm_again_a_day_after_its_use()
-{
-	HiddenRenderer hidden{};
-	MockGameContext mock{};
-	GameContext ctx = mock.to_game_context();
-	ctx.renderer = &hidden.renderer;
-	BuffSystem buffs{};
-	ctx.buffSystem = &buffs;
-	mock.map.init_tiles();
-	mock.map.set_tile(LANDING_TILE, TileType::FLOOR);
-	dress_bare_player(mock, ctx);
-	Item& helm =
-		wear("helm_of_teleportation", EquipmentSlot::HEAD, *mock.player, ctx);
-	record_helm_use(helm, TIME_OF_USE);
-	const int aDayLater = TIME_OF_USE + DAY_IN_TIME_UNITS;
-	ctx.gameState->set_time(aDayLater);
+	// The menu lists as of the clock: a day after a use, it offers the helm and
+	// casting spends the new day.
+	[[noreturn]] void the_menu_offers_the_helm_again_a_day_after_its_use()
+	{
+		HiddenRenderer hidden{};
+		MockGameContext mock{};
+		GameContext ctx = mock.to_game_context();
+		ctx.renderer = &hidden.renderer;
+		BuffSystem buffs{};
+		ctx.buffSystem = &buffs;
+		mock.map.init_tiles();
+		mock.map.set_tile(LANDING_TILE, TileType::FLOOR);
+		dress_bare_player(mock, ctx);
+		Item& helm = wear(
+			"helm_of_teleportation",
+			EquipmentSlot::HEAD,
+			*mock.player,
+			ctx);
+		record_helm_use(helm, TIME_OF_USE);
+		const int aDayLater = TIME_OF_USE + DAY_IN_TIME_UNITS;
+		ctx.gameState->set_time(aDayLater);
 
-	choose_first_entry_from_the_cast_menu(mock, ctx, hidden);
+		choose_first_entry_from_the_cast_menu(mock, ctx, hidden);
 
-	exit_unless(
-		std::get<MagicalHelm>(*helm.behavior).rechargedAt ==
-			aDayLater + DAY_IN_TIME_UNITS,
-		"the menu a day later did not cast the helm's teleport");
-	finish_the_child();
-}
+		exit_unless(
+			std::get<MagicalHelm>(*helm.behavior).rechargedAt ==
+				aDayLater + DAY_IN_TIME_UNITS,
+			"the menu a day later did not cast the helm's teleport");
+		finish_the_child();
+	}
 
-// The ring is at will: cast from the menu, it is offered again at once.
-[[noreturn]] void the_ring_is_offered_again_after_its_cast()
-{
-	HiddenRenderer hidden{};
-	MockGameContext mock{};
-	GameContext ctx = mock.to_game_context();
-	ctx.renderer = &hidden.renderer;
-	BuffSystem buffs{};
-	ctx.buffSystem = &buffs;
-	dress_bare_player(mock, ctx);
-	[[maybe_unused]] Item& ring = wear(
-		"ring_of_invisibility",
-		EquipmentSlot::LEFT_RING,
-		*mock.player,
-		ctx);
-	ctx.gameState->set_time(TIME_OF_USE);
+	// The ring is at will: cast from the menu, it is offered again at once.
+	[[noreturn]] void the_ring_is_offered_again_after_its_cast()
+	{
+		HiddenRenderer hidden{};
+		MockGameContext mock{};
+		GameContext ctx = mock.to_game_context();
+		ctx.renderer = &hidden.renderer;
+		BuffSystem buffs{};
+		ctx.buffSystem = &buffs;
+		dress_bare_player(mock, ctx);
+		[[maybe_unused]] Item& ring = wear(
+			"ring_of_invisibility",
+			EquipmentSlot::LEFT_RING,
+			*mock.player,
+			ctx);
+		ctx.gameState->set_time(TIME_OF_USE);
 
-	choose_first_entry_from_the_cast_menu(mock, ctx, hidden);
+		choose_first_entry_from_the_cast_menu(mock, ctx, hidden);
 
-	exit_unless(
-		mock.player->has_state(ActorState::IS_INVISIBLE),
-		"casting from the ring did not make its wearer invisible");
-	exit_unless(
-		offers("invisibility", *mock.player, ctx.gameState->get_time()),
-		"the ring was not offered again after its cast");
-	finish_the_child();
-}
+		exit_unless(
+			mock.player->has_state(ActorState::IS_INVISIBLE),
+			"casting from the ring did not make its wearer invisible");
+		exit_unless(
+			offers("invisibility", *mock.player, ctx.gameState->get_time()),
+			"the ring was not offered again after its cast");
+		finish_the_child();
+	}
 
 } // namespace
 

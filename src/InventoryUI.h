@@ -31,69 +31,77 @@ enum class InventoryScreen
 namespace InventoryActions
 {
 
-// The labels for a row, in the order shown. Empty when the row has nothing to act on,
-// and no menu is opened at all - the rule the map's context menu already follows.
-//
-// Example:
-//   labels_for_row(InventoryScreen::BACKPACK, true);     // -> Use, Drop, Cancel
-//   labels_for_row(InventoryScreen::EQUIPMENT, true);    // -> Unequip, Drop, Cancel
-//   labels_for_row(InventoryScreen::EQUIPMENT, false);   // -> Browse, Cancel
-//   labels_for_row(InventoryScreen::BACKPACK, false);    // -> {}, a category heading
-[[nodiscard]] std::vector<std::string> labels_for_row(
-	InventoryScreen screen,
-	bool rowHoldsItem);
+	// The labels for a row, in the order shown. Empty when the row has nothing
+	// to act on, and no menu is opened at all - the rule the map's context menu
+	// already follows.
+	//
+	// Example:
+	//   labels_for_row(InventoryScreen::BACKPACK, true);
+	//   // -> Use, Drop, Cancel
+	//   labels_for_row(InventoryScreen::EQUIPMENT, true);
+	//   // -> Unequip, Drop, Cancel
+	//   labels_for_row(InventoryScreen::EQUIPMENT, false);
+	//   // -> Browse, Cancel
+	//   labels_for_row(InventoryScreen::BACKPACK, false);
+	//   // -> {}, a category heading
+	[[nodiscard]] std::vector<std::string> labels_for_row(
+		InventoryScreen screen,
+		bool rowHoldsItem);
 
-// Where one pane tab sits on the tab row.
-struct TabBox
-{
-	InventoryScreen screen{ InventoryScreen::EQUIPMENT };
-	const char* text{ "" };
-	int pixelX{ 0 };
-	int width{ 0 };
-};
+	// Where one pane tab sits on the tab row.
+	struct TabBox
+	{
+		InventoryScreen screen{ InventoryScreen::EQUIPMENT };
+		const char* text{ "" };
+		int pixelX{ 0 };
+		int width{ 0 };
+	};
 
-// The three tabs, left to right. Drawing paints these and the click test reads these,
-// so the two cannot disagree about where a tab is - which they did: the hit test looked
-// on row 1 while TAB_ROW is 0, and no tab could be clicked at all.
-[[nodiscard]] std::array<TabBox, 3> tab_boxes(const Renderer& renderer);
+	// The three tabs, left to right. Drawing paints these and the click test
+	// reads these, so the two cannot disagree about where a tab is - which they
+	// did: the hit test looked on row 1 while TAB_ROW is 0, and no tab could be
+	// clicked at all.
+	[[nodiscard]] std::array<TabBox, 3> tab_boxes(const Renderer& renderer);
 
-// Which pane the pointer is over, or nothing when it is not on a tab.
-//
-// Example:
-//   tab_at(middleOfTheBackpackTab, tabRowY, renderer);   // -> BACKPACK
-//   tab_at(middleOfTheBackpackTab, aContentRowY, r);     // -> nothing, wrong row
-[[nodiscard]] std::optional<InventoryScreen> tab_at(
-	int pixelX,
-	int pixelY,
-	const Renderer& renderer);
+	// Which pane the pointer is over, or nothing when it is not on a tab.
+	//
+	// Example:
+	//   tab_at(middleOfTheBackpackTab, tabRowY, renderer);   // -> BACKPACK
+	//   tab_at(middleOfTheBackpackTab, aContentRowY, r);
+	//   // -> nothing, wrong row
+	[[nodiscard]] std::optional<InventoryScreen> tab_at(
+		int pixelX,
+		int pixelY,
+		const Renderer& renderer);
 
-// The pane after this one, wrapping. Tab steps through the panes with the keyboard the
-// way clicking steps through them with the mouse.
-//
-// Example:
-//   next_screen(InventoryScreen::EQUIPMENT);   // -> BACKPACK
-//   next_screen(InventoryScreen::USABLES);     // -> EQUIPMENT
-[[nodiscard]] InventoryScreen next_screen(InventoryScreen screen);
+	// The pane after this one, wrapping. Tab steps through the panes with the
+	// keyboard the way clicking steps through them with the mouse.
+	//
+	// Example:
+	//   next_screen(InventoryScreen::EQUIPMENT);   // -> BACKPACK
+	//   next_screen(InventoryScreen::USABLES);     // -> EQUIPMENT
+	[[nodiscard]] InventoryScreen next_screen(InventoryScreen screen);
 
-// What an item's row says about its worth and its weight, ready to append.
-//
-// One statement of it: the equipment screen and the backpack list describe the same
-// item, and until this existed each wrote its own and only one of them mentioned
-// weight. Weight is always shown, because the band at the top of the screen measures a
-// total against a carrying limit and a row with no weight on it cannot be checked
-// against that. Worth is shown only when there is any.
-//
-// Example:
-//   value_and_weight(leatherArmor);   // -> " (5 gp, 15 lb)"
-//   value_and_weight(aCorpse);        // -> " (8 lb)", worth nothing
-[[nodiscard]] std::string value_and_weight(const Item& item);
+	// What an item's row says about its worth and its weight, ready to append.
+	//
+	// One statement of it: the equipment screen and the backpack list describe
+	// the same item, and until this existed each wrote its own and only one of
+	// them mentioned weight. Weight is always shown, because the band at the
+	// top of the screen measures a total against a carrying limit and a row
+	// with no weight on it cannot be checked against that. Worth is shown only
+	// when there is any.
+	//
+	// Example:
+	//   value_and_weight(leatherArmor);   // -> " (5 gp, 15 lb)"
+	//   value_and_weight(aCorpse);        // -> " (8 lb)", worth nothing
+	[[nodiscard]] std::string value_and_weight(const Item& item);
 
-// The heading the backpack lists a category under.
-//
-// Example:
-//   category_name(ItemCategory::BOOTS);     // -> "Boots"
-//   category_name(ItemCategory::UNKNOWN);   // -> "Other"
-[[nodiscard]] std::string category_name(ItemCategory cat);
+	// The heading the backpack lists a category under.
+	//
+	// Example:
+	//   category_name(ItemCategory::BOOTS);     // -> "Boots"
+	//   category_name(ItemCategory::UNKNOWN);   // -> "Other"
+	[[nodiscard]] std::string category_name(ItemCategory cat);
 
 } // namespace InventoryActions
 

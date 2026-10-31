@@ -30,57 +30,57 @@ constexpr int SKIP_PCTG = 20; // percent of cells left empty for variety
 namespace
 {
 
-RoomShape pick_room_shape(int width, int height, RandomDice& rng)
-{
-	// Weighted table: { shape, weight, minWidth, minHeight }
-	struct ShapeEntry
+	RoomShape pick_room_shape(int width, int height, RandomDice& rng)
 	{
-		RoomShape shape;
-		int weight;
-		int minWidth;
-		int minHeight;
-	};
-
-	constexpr std::array<ShapeEntry, 5> table{
-		ShapeEntry{ RoomShape::RECT, 40, 0, 0 },
-		ShapeEntry{ RoomShape::CHAMFERED, 25, 6, 6 },
-		ShapeEntry{ RoomShape::L_SHAPE, 20, 9, 7 },
-		ShapeEntry{ RoomShape::PILLARED, 10, 8, 6 },
-		ShapeEntry{ RoomShape::CROSS, 5, 10, 7 },
-	};
-
-	// Build eligible entries for this room size.
-	int totalWeight = 0;
-	for (const auto& entry : table)
-	{
-		if (width >= entry.minWidth && height >= entry.minHeight)
+		// Weighted table: { shape, weight, minWidth, minHeight }
+		struct ShapeEntry
 		{
-			totalWeight += entry.weight;
-		}
-	}
+			RoomShape shape;
+			int weight;
+			int minWidth;
+			int minHeight;
+		};
 
-	if (totalWeight <= 0)
-	{
+		constexpr std::array<ShapeEntry, 5> table{
+			ShapeEntry{ RoomShape::RECT, 40, 0, 0 },
+			ShapeEntry{ RoomShape::CHAMFERED, 25, 6, 6 },
+			ShapeEntry{ RoomShape::L_SHAPE, 20, 9, 7 },
+			ShapeEntry{ RoomShape::PILLARED, 10, 8, 6 },
+			ShapeEntry{ RoomShape::CROSS, 5, 10, 7 },
+		};
+
+		// Build eligible entries for this room size.
+		int totalWeight = 0;
+		for (const auto& entry : table)
+		{
+			if (width >= entry.minWidth && height >= entry.minHeight)
+			{
+				totalWeight += entry.weight;
+			}
+		}
+
+		if (totalWeight <= 0)
+		{
+			return RoomShape::RECT;
+		}
+
+		int roll = rng.roll(1, totalWeight);
+		int accumulated = 0;
+		for (const auto& entry : table)
+		{
+			if (width < entry.minWidth || height < entry.minHeight)
+			{
+				continue;
+			}
+			accumulated += entry.weight;
+			if (roll <= accumulated)
+			{
+				return entry.shape;
+			}
+		}
+
 		return RoomShape::RECT;
 	}
-
-	int roll = rng.roll(1, totalWeight);
-	int accumulated = 0;
-	for (const auto& entry : table)
-	{
-		if (width < entry.minWidth || height < entry.minHeight)
-		{
-			continue;
-		}
-		accumulated += entry.weight;
-		if (roll <= accumulated)
-		{
-			return entry.shape;
-		}
-	}
-
-	return RoomShape::RECT;
-}
 
 } // namespace
 

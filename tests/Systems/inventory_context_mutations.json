@@ -27,8 +27,8 @@
     },
     {
       "file": "src/InventoryUI.cpp",
-      "original": "\tif (!rowHoldsItem)\n\t{\n\t\treturn {};\n\t}\n\treturn { \"Use\", \"Drop\", \"Cancel\" };",
-      "mutated": "\treturn { \"Use\", \"Drop\", \"Cancel\" };",
+      "original": "\t\tif (!rowHoldsItem)\n\t\t{\n\t\t\treturn {};\n\t\t}\n\t\treturn { \"Use\", \"Drop\", \"Cancel\" };",
+      "mutated": "\t\treturn { \"Use\", \"Drop\", \"Cancel\" };",
       "catches": "a category heading offered item actions, so a menu opens on a row that is not an item"
     },
     {

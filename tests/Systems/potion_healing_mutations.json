@@ -45,8 +45,8 @@
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\tparams.consumableAmount = parse_dice_expression(\n\t\trequired_field(record, key, \"consumableAmount\").get<std::string>());\n",
-      "mutated": "\tparams.consumableAmount =DiceExpr{ 0, 0, 10 };\n",
+      "original": "\t\tparams.consumableAmount = parse_dice_expression(\n\t\t\trequired_field(record, key, \"consumableAmount\").get<std::string>());\n",
+      "mutated": "\t\tparams.consumableAmount =DiceExpr{ 0, 0, 10 };\n",
       "catches": "the data's dice never read, every potion pouring one fixed figure"
     },
     {

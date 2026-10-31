@@ -72,28 +72,28 @@ enum class EditorFocus
 // Where the frame draws, in pixels.
 namespace EditorLayout
 {
-inline constexpr int LIST_WIDTH = 220;
-inline constexpr int HEADER_HEIGHT = 48;
-inline constexpr int HINT_HEIGHT = 28;
-inline constexpr int FIELD_HEIGHT = 26;
-inline constexpr int ITEM_HEIGHT = 30;
-inline constexpr int LIST_TILE_SIZE = 22;
-inline constexpr int LIST_PAD = 6;
-inline constexpr int PICKER_PAD = 10;
-inline constexpr int PICKER_SUB_HEADER_HEIGHT = 28;
-// The drawn cell size the picker's grid aims for.
-inline constexpr int PICKER_TILE_TARGET = 64;
+	inline constexpr int LIST_WIDTH = 220;
+	inline constexpr int HEADER_HEIGHT = 48;
+	inline constexpr int HINT_HEIGHT = 28;
+	inline constexpr int FIELD_HEIGHT = 26;
+	inline constexpr int ITEM_HEIGHT = 30;
+	inline constexpr int LIST_TILE_SIZE = 22;
+	inline constexpr int LIST_PAD = 6;
+	inline constexpr int PICKER_PAD = 10;
+	inline constexpr int PICKER_SUB_HEADER_HEIGHT = 28;
+	// The drawn cell size the picker's grid aims for.
+	inline constexpr int PICKER_TILE_TARGET = 64;
 
-// The height of the panels between the header and the hint bar. Input and
-// drawing both read it, so a click and the row drawn under it come from one
-// row count.
-//
-// Example:
-//   body_height(900);   // -> 824, after a 48 header and a 28 hint bar
-[[nodiscard]] constexpr int body_height(int screenHeight)
-{
-	return screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
-}
+	// The height of the panels between the header and the hint bar. Input and
+	// drawing both read it, so a click and the row drawn under it come from one
+	// row count.
+	//
+	// Example:
+	//   body_height(900);   // -> 824, after a 48 header and a 28 hint bar
+	[[nodiscard]] constexpr int body_height(int screenHeight)
+	{
+		return screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
+	}
 } // namespace EditorLayout
 
 // An editor's colours and the words on its header and hint bar.

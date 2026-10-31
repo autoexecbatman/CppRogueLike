@@ -38,10 +38,12 @@
 
 namespace
 {
-// The book's turn, in its rounds: "Ten combat rounds equal a turn" (PHB, PDF page 184).
-constexpr int ROUNDS_IN_A_TURN = 10;
-// The d20 that fails any saving throw, so every creature in view takes the effect.
-constexpr int FAILED_SAVE = 1;
+	// The book's turn, in its rounds: "Ten combat rounds equal a turn" (PHB,
+	// PDF page 184).
+	constexpr int ROUNDS_IN_A_TURN = 10;
+	// The d20 that fails any saving throw, so every creature in view takes the
+	// effect.
+	constexpr int FAILED_SAVE = 1;
 } // namespace
 
 class ScrollDurationTest : public ::testing::Test

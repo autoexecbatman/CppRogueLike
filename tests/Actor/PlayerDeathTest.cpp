@@ -36,9 +36,10 @@
 
 namespace
 {
-// Content chosen so a failure names itself in the diff rather than looking like
-// a real save that happened to survive.
-const std::string SENTINEL_SAVE = "PlayerDeathTest sentinel - not a real save";
+	// Content chosen so a failure names itself in the diff rather than looking
+	// like a real save that happened to survive.
+	const std::string SENTINEL_SAVE =
+		"PlayerDeathTest sentinel - not a real save";
 } // namespace
 
 class PlayerDeathTest : public ::testing::Test

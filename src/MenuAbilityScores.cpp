@@ -16,26 +16,28 @@
 
 namespace
 {
-// The box is sized to the viewport rather than fixed: a width in tiles that fits a
-// 1920 screen puts startX negative on a 1280 one and the left half is never drawn.
-constexpr int MENU_MARGIN_TILES = 2;
-constexpr int MENU_MAX_WIDTH_TILES = 20;
-constexpr int MENU_HEIGHT_TILES = 8;
+	// The box is sized to the viewport rather than fixed: a width in tiles that
+	// fits a 1920 screen puts startX negative on a 1280 one and the left half
+	// is never drawn.
+	constexpr int MENU_MARGIN_TILES = 2;
+	constexpr int MENU_MAX_WIDTH_TILES = 20;
+	constexpr int MENU_HEIGHT_TILES = 8;
 
-// Text rows are 32 pixels, not a whole 64-pixel tile: the font is 16.
-constexpr int TEXT_ROW_PITCH = 32;
-constexpr int TEXT_TOP_INSET = 6;
+	// Text rows are 32 pixels, not a whole 64-pixel tile: the font is 16.
+	constexpr int TEXT_ROW_PITCH = 32;
+	constexpr int TEXT_TOP_INSET = 6;
 
-// Rows, top to bottom: six abilities, a blank, the pool, the status, two hints.
-// The hints are two rows because one line of them does not fit the box's width and
-// fit_text_to_width cuts the last key off rather than wrapping it.
-constexpr int FIRST_ABILITY_ROW = 0;
-constexpr int POOL_ROW = 7;
-constexpr int STATUS_ROW = 8;
-constexpr int FIRST_HINT_ROW = 9;
+	// Rows, top to bottom: six abilities, a blank, the pool, the status, two
+	// hints. The hints are two rows because one line of them does not fit the
+	// box's width and fit_text_to_width cuts the last key off rather than
+	// wrapping it.
+	constexpr int FIRST_ABILITY_ROW = 0;
+	constexpr int POOL_ROW = 7;
+	constexpr int STATUS_ROW = 8;
+	constexpr int FIRST_HINT_ROW = 9;
 
-// The digits that spend a die. '1' takes the first die of the pool.
-constexpr int FIRST_DIE_CHARACTER = '1';
+	// The digits that spend a die. '1' takes the first die of the pool.
+	constexpr int FIRST_DIE_CHARACTER = '1';
 } // namespace
 
 MenuAbilityScores::MenuAbilityScores(GameContext& ctx) :

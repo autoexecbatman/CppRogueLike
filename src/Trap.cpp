@@ -25,80 +25,86 @@
 
 namespace
 {
-// The lowest d100 roll that sets a trap off on the thief working on it: the book
-// gives the accident a band of its own, 96 to 100, rather than making every
-// failure spring it.
-constexpr int ACCIDENTAL_TRIGGER = 96;
+	// The lowest d100 roll that sets a trap off on the thief working on it: the
+	// book gives the accident a band of its own, 96 to 100, rather than making
+	// every failure spring it.
+	constexpr int ACCIDENTAL_TRIGGER = 96;
 
-// A dwarf finds a pit on 1-3 on 1d6 (PHB page 44).
-constexpr int DWARF_PIT_FIND_CHANCE = 3;
+	// A dwarf finds a pit on 1-3 on 1d6 (PHB page 44).
+	constexpr int DWARF_PIT_FIND_CHANCE = 3;
 
-// A search covers the tiles touching the searcher, at Chebyshev distance one. A stated
-// deviation, with its reasons on TrapSearch::search_around.
-constexpr int SEARCH_REACH = 1;
+	// A search covers the tiles touching the searcher, at Chebyshev distance
+	// one. A stated deviation, with its reasons on TrapSearch::search_around.
+	constexpr int SEARCH_REACH = 1;
 
-// A dwarf's look takes one round, a stated deviation: the book gives it no time.
-constexpr int DWARF_SEARCH_ROUNDS = 1;
+	// A dwarf's look takes one round, a stated deviation: the book gives it no
+	// time.
+	constexpr int DWARF_SEARCH_ROUNDS = 1;
 
-// The rounds a disarm attempt took, rolled after the attempt itself: "This also requires
-// 1d10 rounds" (PHB page 87). Only an attempt that rolled takes them.
-int roll_disarm_rounds(RandomDice& dice)
-{
-	return dice.d10();
-}
-
-// Whether this character's racial sense finds stonework traps.
-bool is_dwarf(const Player& searcher)
-{
-	return searcher.get_race() == PlayerRaceState::DWARF;
-}
-
-// Whether a Find/Remove Traps score is one a thief can roll against. A score of
-// nothing is a skill not yet bought up to a usable percentage, which the book treats as
-// not having it.
-bool has_find_traps(std::optional<int> skill)
-{
-	return skill.has_value() && skill.value() > 0;
-}
-
-// Whether one search finds the trap: a dwarf's d6 against a pit, or a thief's
-// d100 against Find Traps. Only the branch taken rolls, and only a thief's
-// search reads the skill, which a dwarf may not have.
-//
-// Example:
-//   rolls_trap_found(true, std::nullopt, dice); // -> true on a d6 of 1 to 3
-//   rolls_trap_found(false, 40, dice); // -> true on a d100 of 1 to 40
-bool rolls_trap_found(bool isPit, std::optional<int> skill, RandomDice& dice)
-{
-	if (isPit)
+	// The rounds a disarm attempt took, rolled after the attempt itself: "This
+	// also requires 1d10 rounds" (PHB page 87). Only an attempt that rolled
+	// takes them.
+	int roll_disarm_rounds(RandomDice& dice)
 	{
-		return dice.d6() <= DWARF_PIT_FIND_CHANCE;
+		return dice.d10();
 	}
-	return dice.d100() <= skill.value();
-}
 
-// The TrapState a saved integer names, or nullopt for one no state has.
-// The switch has no default, so a state added without a case here is a compile
-// error (C4062, -Wswitch).
-//
-// Example:
-//   trap_state_from(1);    // -> TrapState::DETECTED
-//   trap_state_from(4);    // -> nullopt
-std::optional<TrapState> trap_state_from(int saved)
-{
-	const TrapState candidate = static_cast<TrapState>(saved);
-	switch (candidate)
+	// Whether this character's racial sense finds stonework traps.
+	bool is_dwarf(const Player& searcher)
 	{
-	case TrapState::HIDDEN:
-	case TrapState::DETECTED:
-	case TrapState::TRIGGERED:
-	case TrapState::DISARMED:
+		return searcher.get_race() == PlayerRaceState::DWARF;
+	}
+
+	// Whether a Find/Remove Traps score is one a thief can roll against. A
+	// score of nothing is a skill not yet bought up to a usable percentage,
+	// which the book treats as not having it.
+	bool has_find_traps(std::optional<int> skill)
 	{
-		return candidate;
+		return skill.has_value() && skill.value() > 0;
 	}
+
+	// Whether one search finds the trap: a dwarf's d6 against a pit, or a
+	// thief's d100 against Find Traps. Only the branch taken rolls, and only a
+	// thief's search reads the skill, which a dwarf may not have.
+	//
+	// Example:
+	//   rolls_trap_found(true, std::nullopt, dice);
+	//   // -> true on a d6 of 1 to 3
+	//   rolls_trap_found(false, 40, dice); // -> true on a d100 of 1 to 40
+	bool rolls_trap_found(
+		bool isPit,
+		std::optional<int> skill,
+		RandomDice& dice)
+	{
+		if (isPit)
+		{
+			return dice.d6() <= DWARF_PIT_FIND_CHANCE;
+		}
+		return dice.d100() <= skill.value();
 	}
-	return std::nullopt;
-}
+
+	// The TrapState a saved integer names, or nullopt for one no state has. The
+	// switch has no default, so a state added without a case here is a compile
+	// error (C4062, -Wswitch).
+	//
+	// Example:
+	//   trap_state_from(1);    // -> TrapState::DETECTED
+	//   trap_state_from(4);    // -> nullopt
+	std::optional<TrapState> trap_state_from(int saved)
+	{
+		const TrapState candidate = static_cast<TrapState>(saved);
+		switch (candidate)
+		{
+		case TrapState::HIDDEN:
+		case TrapState::DETECTED:
+		case TrapState::TRIGGERED:
+		case TrapState::DISARMED:
+		{
+			return candidate;
+		}
+		}
+		return std::nullopt;
+	}
 } // namespace
 
 Trap::Trap(Vector2D position, TrapType trapType, const TileConfig& tileConfig) :

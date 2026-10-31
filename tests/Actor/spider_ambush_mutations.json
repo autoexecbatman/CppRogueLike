@@ -39,26 +39,26 @@
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "\treturn ctx.dice->roll(1, 10) + reactionAdjustment <= SURPRISED_AT_OR_BELOW;",
-      "mutated": "\treturn true;",
+      "original": "return ctx.dice->roll(1, 10) + reactionAdjustment <=\n\t\t\tSURPRISED_AT_OR_BELOW;",
+      "mutated": "\t\treturn true;",
       "catches": "an ambush that always surprises"
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "\treturn ctx.dice->roll(1, 10) + reactionAdjustment <= SURPRISED_AT_OR_BELOW;",
-      "mutated": "\treturn false;",
+      "original": "return ctx.dice->roll(1, 10) + reactionAdjustment <=\n\t\t\tSURPRISED_AT_OR_BELOW;",
+      "mutated": "\t\treturn false;",
       "catches": "an ambush that never surprises"
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "\treturn ctx.dice->roll(1, 10) + reactionAdjustment <= SURPRISED_AT_OR_BELOW;",
-      "mutated": "\treturn ctx.dice->roll(1, 10) <= SURPRISED_AT_OR_BELOW;",
+      "original": "return ctx.dice->roll(1, 10) + reactionAdjustment <=\n\t\t\tSURPRISED_AT_OR_BELOW;",
+      "mutated": "\t\treturn ctx.dice->roll(1, 10) <= SURPRISED_AT_OR_BELOW;",
       "catches": "Dexterity ignored by the surprise roll"
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "\treturn ctx.dice->roll(1, 10) + reactionAdjustment <= SURPRISED_AT_OR_BELOW;",
-      "mutated": "\treturn ctx.dice->roll(1, 10) - reactionAdjustment <= SURPRISED_AT_OR_BELOW;",
+      "original": "return ctx.dice->roll(1, 10) + reactionAdjustment <=\n\t\t\tSURPRISED_AT_OR_BELOW;",
+      "mutated": "\t\treturn ctx.dice->roll(1, 10) - reactionAdjustment <= SURPRISED_AT_OR_BELOW;",
       "catches": "the reaction adjustment applied the wrong way round"
     },
     {

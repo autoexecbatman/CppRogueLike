@@ -37,16 +37,16 @@
 
 namespace
 {
-constexpr int CORRIDOR_ROW = 5;
-constexpr Vector2D PLAYER_TILE{ 2, CORRIDOR_ROW };
-// Three tiles from the player, well inside sight.
-constexpr Vector2D NEAR_TILE{ 5, CORRIDOR_ROW };
-constexpr Vector2D NEAR_FEATURE{ 6, CORRIDOR_ROW };
-// Fifteen tiles from the player, past sight.
-constexpr Vector2D FAR_TILE{ 17, CORRIDOR_ROW };
-constexpr Vector2D FAR_FEATURE{ 18, CORRIDOR_ROW };
-// A dart is 1d4; this is what the scripted die shows.
-constexpr int DART_ROLL = 3;
+	constexpr int CORRIDOR_ROW = 5;
+	constexpr Vector2D PLAYER_TILE{ 2, CORRIDOR_ROW };
+	// Three tiles from the player, well inside sight.
+	constexpr Vector2D NEAR_TILE{ 5, CORRIDOR_ROW };
+	constexpr Vector2D NEAR_FEATURE{ 6, CORRIDOR_ROW };
+	// Fifteen tiles from the player, past sight.
+	constexpr Vector2D FAR_TILE{ 17, CORRIDOR_ROW };
+	constexpr Vector2D FAR_FEATURE{ 18, CORRIDOR_ROW };
+	// A dart is 1d4; this is what the scripted die shows.
+	constexpr int DART_ROLL = 3;
 } // namespace
 
 class MonsterFeatureEntryTest : public ::testing::Test

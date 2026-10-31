@@ -40,8 +40,9 @@
 
 namespace
 {
-// The book's turn, in its rounds: "Ten combat rounds equal a turn" (PHB, PDF page 184).
-constexpr int ROUNDS_IN_A_TURN = 10;
+	// The book's turn, in its rounds: "Ten combat rounds equal a turn" (PHB,
+	// PDF page 184).
+	constexpr int ROUNDS_IN_A_TURN = 10;
 } // namespace
 
 class PotionDurationTest : public ::testing::Test

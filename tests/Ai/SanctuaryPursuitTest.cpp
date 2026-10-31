@@ -47,13 +47,14 @@
 namespace
 {
 
-constexpr int STARTING_HP = 100;
+	constexpr int STARTING_HP = 100;
 
-// Inside the player's field of view, so update_awareness makes the goblin aware on its
-// own turn, and far enough that three steps of closing in are unmistakable.
-constexpr int GOBLIN_START_COLUMN = 8;
-constexpr int PLAYER_COLUMN = 4;
-constexpr int CORRIDOR_ROW = 5;
+	// Inside the player's field of view, so update_awareness makes the goblin
+	// aware on its own turn, and far enough that three steps of closing in are
+	// unmistakable.
+	constexpr int GOBLIN_START_COLUMN = 8;
+	constexpr int PLAYER_COLUMN = 4;
+	constexpr int CORRIDOR_ROW = 5;
 
 } // namespace
 

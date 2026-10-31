@@ -34,13 +34,13 @@
 
 namespace
 {
-// Fixture map dimensions - single TU, no reason to be class members.
-constexpr int FIXTURE_W = 40;
-constexpr int FIXTURE_H = 25;
+	// Fixture map dimensions - single TU, no reason to be class members.
+	constexpr int FIXTURE_W = 40;
+	constexpr int FIXTURE_H = 25;
 
-// Integration test map dimensions.
-constexpr int STAIR_TEST_W = 120;
-constexpr int STAIR_TEST_H = 80;
+	// Integration test map dimensions.
+	constexpr int STAIR_TEST_W = 120;
+	constexpr int STAIR_TEST_H = 80;
 } // namespace
 
 // ----------------------------------------------------------------------------

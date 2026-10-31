@@ -13,21 +13,21 @@
 namespace
 {
 
-// The buff that resists each damage type. Types absent from the map have no
-// resistance buff: physical, acid and magic.
-const std::unordered_map<DamageType, BuffType> damageResistanceBuffs = {
-	{ DamageType::FIRE, BuffType::FIRE_RESISTANCE },
-	{ DamageType::COLD, BuffType::COLD_RESISTANCE },
-	{ DamageType::LIGHTNING, BuffType::LIGHTNING_RESISTANCE },
-	{ DamageType::POISON, BuffType::POISON_RESISTANCE },
-};
+	// The buff that resists each damage type. Types absent from the map have no
+	// resistance buff: physical, acid and magic.
+	const std::unordered_map<DamageType, BuffType> damageResistanceBuffs = {
+		{ DamageType::FIRE, BuffType::FIRE_RESISTANCE },
+		{ DamageType::COLD, BuffType::COLD_RESISTANCE },
+		{ DamageType::LIGHTNING, BuffType::LIGHTNING_RESISTANCE },
+		{ DamageType::POISON, BuffType::POISON_RESISTANCE },
+	};
 
-// Per ring of resistance strength, from the two Dungeon Master's Guide
-// entries: fire is -2 a die and +4 on the save, cold is -1 and +2.
-constexpr int FIRE_PER_DIE = 2;
-constexpr int FIRE_SAVE_BONUS = 4;
-constexpr int COLD_PER_DIE = 1;
-constexpr int COLD_SAVE_BONUS = 2;
+	// Per ring of resistance strength, from the two Dungeon Master's Guide
+	// entries: fire is -2 a die and +4 on the save, cold is -1 and +2.
+	constexpr int FIRE_PER_DIE = 2;
+	constexpr int FIRE_SAVE_BONUS = 4;
+	constexpr int COLD_PER_DIE = 1;
+	constexpr int COLD_SAVE_BONUS = 2;
 
 } // namespace
 

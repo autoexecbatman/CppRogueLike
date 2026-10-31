@@ -36,10 +36,11 @@
 
 namespace
 {
-// Windows marks a file read-only only once every write bit is gone.
-constexpr std::filesystem::perms ROOM_EDITOR_WRITE_PERMISSIONS =
-	std::filesystem::perms::owner_write | std::filesystem::perms::group_write |
-	std::filesystem::perms::others_write;
+	// Windows marks a file read-only only once every write bit is gone.
+	constexpr std::filesystem::perms ROOM_EDITOR_WRITE_PERMISSIONS =
+		std::filesystem::perms::owner_write |
+		std::filesystem::perms::group_write |
+		std::filesystem::perms::others_write;
 } // namespace
 
 class RoomEditorPaletteTest : public ::testing::Test

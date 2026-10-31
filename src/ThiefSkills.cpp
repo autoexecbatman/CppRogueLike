@@ -6,91 +6,95 @@
 
 namespace
 {
-// Table 26, Thieving Skill Base Scores, in ALL_THIEF_SKILL order.
-constexpr std::array<int, THIEF_SKILL_COUNT>
-	BASE_SCORE{ 15, 10, 5, 10, 5, 15, 60, 0 };
+	// Table 26, Thieving Skill Base Scores, in ALL_THIEF_SKILL order.
+	constexpr std::array<int, THIEF_SKILL_COUNT>
+		BASE_SCORE{ 15, 10, 5, 10, 5, 15, 60, 0 };
 
-// The Dexterity rows Table 28 prints. A score outside them reads the nearest end.
-constexpr int LOWEST_PRINTED_DEXTERITY = 9;
-constexpr int HIGHEST_PRINTED_DEXTERITY = 19;
-constexpr std::size_t DEXTERITY_ROWS =
-	HIGHEST_PRINTED_DEXTERITY - LOWEST_PRINTED_DEXTERITY + 1;
+	// The Dexterity rows Table 28 prints. A score outside them reads the
+	// nearest end.
+	constexpr int LOWEST_PRINTED_DEXTERITY = 9;
+	constexpr int HIGHEST_PRINTED_DEXTERITY = 19;
+	constexpr std::size_t DEXTERITY_ROWS =
+		HIGHEST_PRINTED_DEXTERITY - LOWEST_PRINTED_DEXTERITY + 1;
 
-// Table 28, Thieving Skill Dexterity Adjustments. Only the first five skills have
-// a column; Detect Noise, Climb Walls and Read Languages are printed nowhere in it.
-constexpr std::size_t DEXTERITY_COLUMNS = 5;
-constexpr std::array<std::array<int, DEXTERITY_COLUMNS>, DEXTERITY_ROWS>
-	DEXTERITY_ADJUSTMENT{ {
-		// Pick Pockets, Open Locks, Find/Remove Traps, Move Silently, Hide in
-		// Shadows
-		{ -15, -10, -10, -20, -10 }, //  9
-		{ -10, -5, -10, -15, -5 }, // 10
-		{ -5, 0, -5, -10, 0 }, // 11
-		{ 0, 0, 0, -5, 0 }, // 12
-		{ 0, 0, 0, 0, 0 }, // 13
-		{ 0, 0, 0, 0, 0 }, // 14
-		{ 0, 0, 0, 0, 0 }, // 15
-		{ 0, 5, 0, 0, 0 }, // 16
-		{ 5, 10, 0, 5, 5 }, // 17
-		{ 10, 15, 5, 10, 10 }, // 18
-		{ 15, 20, 10, 15, 15 } // 19
-	} };
+	// Table 28, Thieving Skill Dexterity Adjustments. Only the first five
+	// skills have a column; Detect Noise, Climb Walls and Read Languages are
+	// printed nowhere in it.
+	constexpr std::size_t DEXTERITY_COLUMNS = 5;
+	constexpr std::array<std::array<int, DEXTERITY_COLUMNS>, DEXTERITY_ROWS>
+		DEXTERITY_ADJUSTMENT{ {
+			// Pick Pockets, Open Locks, Find/Remove Traps, Move Silently, Hide
+			// in Shadows
+			{ -15, -10, -10, -20, -10 }, //  9
+			{ -10, -5, -10, -15, -5 }, // 10
+			{ -5, 0, -5, -10, 0 }, // 11
+			{ 0, 0, 0, -5, 0 }, // 12
+			{ 0, 0, 0, 0, 0 }, // 13
+			{ 0, 0, 0, 0, 0 }, // 14
+			{ 0, 0, 0, 0, 0 }, // 15
+			{ 0, 5, 0, 0, 0 }, // 16
+			{ 5, 10, 0, 5, 5 }, // 17
+			{ 10, 15, 5, 10, 10 }, // 18
+			{ 15, 20, 10, 15, 15 } // 19
+		} };
 
-// Table 29, Thieving Skill Armor Adjustments, one row per skill. Leather is the
-// column of zeroes the base scores already assume, so it is not printed in the
-// book; every other column is measured against it.
-constexpr std::size_t ARMOR_COLUMNS = 5;
-constexpr std::array<std::array<int, ARMOR_COLUMNS>, THIEF_SKILL_COUNT>
-	ARMOR_ADJUSTMENT{ {
-		// none, leather, padded or elven chain, hide or studded leather, chain
-		// or ring mail
-		{ 5, 0, -20, -30, -25 }, // Pick Pockets
-		{ 0, 0, -5, -10, -10 }, // Open Locks
-		{ 0, 0, -5, -10, -10 }, // Find/Remove Traps
-		{ 10, 0, -10, -20, -15 }, // Move Silently
-		{ 5, 0, -10, -20, -15 }, // Hide in Shadows
-		{ 0, 0, -5, -10, -5 }, // Detect Noise
-		{ 10, 0, -20, -30, -25 }, // Climb Walls
-		{ 0, 0, 0, 0, 0 } // Read Languages
-	} };
+	// Table 29, Thieving Skill Armor Adjustments, one row per skill. Leather is
+	// the column of zeroes the base scores already assume, so it is not printed
+	// in the book; every other column is measured against it.
+	constexpr std::size_t ARMOR_COLUMNS = 5;
+	constexpr std::array<std::array<int, ARMOR_COLUMNS>, THIEF_SKILL_COUNT>
+		ARMOR_ADJUSTMENT{ {
+			// none, leather, padded or elven chain, hide or studded leather,
+			// chain or ring mail
+			{ 5, 0, -20, -30, -25 }, // Pick Pockets
+			{ 0, 0, -5, -10, -10 }, // Open Locks
+			{ 0, 0, -5, -10, -10 }, // Find/Remove Traps
+			{ 10, 0, -10, -20, -15 }, // Move Silently
+			{ 5, 0, -10, -20, -15 }, // Hide in Shadows
+			{ 0, 0, -5, -10, -5 }, // Detect Noise
+			{ 10, 0, -20, -30, -25 }, // Climb Walls
+			{ 0, 0, 0, 0, 0 } // Read Languages
+		} };
 
-// One armour of the game's data read into one of Table 29's columns.
-struct ArmorColumnEntry
-{
-	std::string_view itemKey{};
-	ThiefArmor column{ ThiefArmor::LEATHER };
-};
-
-// Every armour the book gives a column to, by the key items.json holds it under.
-// Elven chain has no record yet; anything heavier than chain mail has no column,
-// which is also armour the book does not let a thief wear.
-constexpr std::array<ArmorColumnEntry, 6> ARMOR_COLUMN_BY_KEY{ {
-	{ "leather_armor", ThiefArmor::LEATHER },
-	{ "padded_armor", ThiefArmor::PADDED_OR_ELVEN_CHAIN },
-	{ "studded_leather", ThiefArmor::HIDE_OR_STUDDED_LEATHER },
-	{ "hide_armor", ThiefArmor::HIDE_OR_STUDDED_LEATHER },
-	{ "chain_mail", ThiefArmor::CHAIN_OR_RING_MAIL },
-	{ "ring_mail", ThiefArmor::CHAIN_OR_RING_MAIL },
-} };
-
-// The five with a Dexterity column are the first five of the enum, which is what
-// lets one index answer for both. Reordering the enum has to move the table too.
-static_assert(ALL_THIEF_SKILL.at(0) == ThiefSkill::PICK_POCKETS);
-static_assert(ALL_THIEF_SKILL.at(1) == ThiefSkill::OPEN_LOCKS);
-static_assert(ALL_THIEF_SKILL.at(2) == ThiefSkill::FIND_REMOVE_TRAPS);
-static_assert(ALL_THIEF_SKILL.at(3) == ThiefSkill::MOVE_SILENTLY);
-static_assert(ALL_THIEF_SKILL.at(4) == ThiefSkill::HIDE_IN_SHADOWS);
-
-// Which of Table 28's five columns a skill is in, or none of them.
-[[nodiscard]] std::optional<std::size_t> dexterity_column_of(ThiefSkill skill)
-{
-	const std::size_t index = thief_skill_index(skill);
-	if (index >= DEXTERITY_COLUMNS)
+	// One armour of the game's data read into one of Table 29's columns.
+	struct ArmorColumnEntry
 	{
-		return std::nullopt;
+		std::string_view itemKey{};
+		ThiefArmor column{ ThiefArmor::LEATHER };
+	};
+
+	// Every armour the book gives a column to, by the key items.json holds it
+	// under. Elven chain has no record yet; anything heavier than chain mail
+	// has no column, which is also armour the book does not let a thief wear.
+	constexpr std::array<ArmorColumnEntry, 6> ARMOR_COLUMN_BY_KEY{ {
+		{ "leather_armor", ThiefArmor::LEATHER },
+		{ "padded_armor", ThiefArmor::PADDED_OR_ELVEN_CHAIN },
+		{ "studded_leather", ThiefArmor::HIDE_OR_STUDDED_LEATHER },
+		{ "hide_armor", ThiefArmor::HIDE_OR_STUDDED_LEATHER },
+		{ "chain_mail", ThiefArmor::CHAIN_OR_RING_MAIL },
+		{ "ring_mail", ThiefArmor::CHAIN_OR_RING_MAIL },
+	} };
+
+	// The five with a Dexterity column are the first five of the enum, which is
+	// what lets one index answer for both. Reordering the enum has to move the
+	// table too.
+	static_assert(ALL_THIEF_SKILL.at(0) == ThiefSkill::PICK_POCKETS);
+	static_assert(ALL_THIEF_SKILL.at(1) == ThiefSkill::OPEN_LOCKS);
+	static_assert(ALL_THIEF_SKILL.at(2) == ThiefSkill::FIND_REMOVE_TRAPS);
+	static_assert(ALL_THIEF_SKILL.at(3) == ThiefSkill::MOVE_SILENTLY);
+	static_assert(ALL_THIEF_SKILL.at(4) == ThiefSkill::HIDE_IN_SHADOWS);
+
+	// Which of Table 28's five columns a skill is in, or none of them.
+	[[nodiscard]] std::optional<std::size_t> dexterity_column_of(
+		ThiefSkill skill)
+	{
+		const std::size_t index = thief_skill_index(skill);
+		if (index >= DEXTERITY_COLUMNS)
+		{
+			return std::nullopt;
+		}
+		return index;
 	}
-	return index;
-}
 } // namespace
 
 std::string_view thief_skill_name(ThiefSkill skill)

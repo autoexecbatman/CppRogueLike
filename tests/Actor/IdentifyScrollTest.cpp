@@ -31,7 +31,7 @@
 
 namespace
 {
-constexpr Vector2D ON_THE_FLOOR{ 2, 2 };
+	constexpr Vector2D ON_THE_FLOOR{ 2, 2 };
 } // namespace
 
 class IdentifyScrollTest : public ::testing::Test

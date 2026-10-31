@@ -57,8 +57,8 @@
     },
     {
       "file": "src/TurnUndead.cpp",
-      "original": "\t\tif (priest.get_tile_distance(creature->position) > TURN_UNDEAD_RANGE)\n",
-      "mutated": "\t\tif (priest.get_tile_distance(creature->position) >= TURN_UNDEAD_RANGE)\n",
+      "original": "if (priest.get_tile_distance(creature->position) >\n\t\t\t\tTURN_UNDEAD_RANGE)",
+      "mutated": "\t\t\tif (priest.get_tile_distance(creature->position) >= TURN_UNDEAD_RANGE)\n",
       "catches": "the far edge of the priest's reach treated as out of reach"
     },
     {
@@ -69,8 +69,8 @@
     },
     {
       "file": "src/TurnUndead.cpp",
-      "original": "||\n\t\t\t(result.outcome == TurningOutcome::ROLL_REQUIRED &&\n\t\t\t\treport.roll < result.rollNeeded))\n",
-      "mutated": "||\n\t\t\t(result.outcome == TurningOutcome::ROLL_REQUIRED &&\n\t\t\t\treport.roll <= result.rollNeeded))\n",
+      "original": "||\n\t\t\t\t(result.outcome == TurningOutcome::ROLL_REQUIRED &&\n\t\t\t\t\treport.roll < result.rollNeeded))\n",
+      "mutated": "||\n\t\t\t\t(result.outcome == TurningOutcome::ROLL_REQUIRED &&\n\t\t\t\t\treport.roll <= result.rollNeeded))\n",
       "catches": "a roll that equals the number needed read as falling short"
     },
     {
@@ -87,14 +87,14 @@
     },
     {
       "file": "src/TurnUndead.cpp",
-      "original": "\t\t\tundead->take_damage_and_check_death(\n\t\t\t\tundead->get_hp(),\n\t\t\t\tctx,\n\t\t\t\tDamageType::MAGIC,\n\t\t\t\tpriest.as_damage_source());\n",
-      "mutated": "\t\t\tundead->take_damage_and_check_death(\n\t\t\t\t1,\n\t\t\t\tctx,\n\t\t\t\tDamageType::MAGIC,\n\t\t\t\tpriest.as_damage_source());\n",
+      "original": "\t\t\t\tundead->take_damage_and_check_death(\n\t\t\t\t\tundead->get_hp(),\n\t\t\t\t\tctx,\n\t\t\t\t\tDamageType::MAGIC,\n\t\t\t\t\tpriest.as_damage_source());\n",
+      "mutated": "\t\t\t\tundead->take_damage_and_check_death(\n\t\t\t\t\t1,\n\t\t\t\t\tctx,\n\t\t\t\t\tDamageType::MAGIC,\n\t\t\t\t\tpriest.as_damage_source());\n",
       "catches": "a \"D\" result grazing the undead rather than destroying it"
     },
     {
       "file": "src/TurnUndead.cpp",
-      "original": "\t\tif (priest.get_tile_distance(creature->position) > TURN_UNDEAD_RANGE)\n",
-      "mutated": "\t\tif (priest.get_tile_distance(creature->position) >= TURN_UNDEAD_RANGE)\n",
+      "original": "if (priest.get_tile_distance(creature->position) >\n\t\t\t\tTURN_UNDEAD_RANGE)",
+      "mutated": "\t\t\tif (priest.get_tile_distance(creature->position) >= TURN_UNDEAD_RANGE)\n",
       "catches": "an undead at the far edge of the reach counted as outside it"
     },
     {

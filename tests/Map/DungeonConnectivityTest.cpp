@@ -61,13 +61,14 @@
 namespace
 {
 
-constexpr int MAP_WIDTH = 120;
-constexpr int MAP_HEIGHT = 70;
+	constexpr int MAP_WIDTH = 120;
+	constexpr int MAP_HEIGHT = 70;
 
-// How many dungeons a case builds. The defect this pins appeared in about a third of
-// maps, so one draw would have passed clean more often than not.
-// One dungeon per seed, from 1 to DUNGEONS, so a failure names the seed that reproduces it.
-constexpr unsigned int DUNGEONS = 60;
+	// How many dungeons a case builds. The defect this pins appeared in about a
+	// third of maps, so one draw would have passed clean more often than not.
+	// One dungeon per seed, from 1 to DUNGEONS, so a failure names the seed
+	// that reproduces it.
+	constexpr unsigned int DUNGEONS = 60;
 
 } // namespace
 

@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/InventoryOperations.h",
-      "original": "\tfor (const auto& itemJson : source.at(\"inventory\"))\n\t{\n\t\tauto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});\n\t\titem->load(itemJson);\n\t\tinventory.items.push_back(std::move(item));\n\t}",
-      "mutated": "\tfor (const auto& itemJson : source.at(\"inventory\"))\n\t{\n\t\tauto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});\n\t\ttry { item->load(itemJson); } catch (const std::exception&) { break; }\n\t\tinventory.items.push_back(std::move(item));\n\t}",
+      "original": "\t\tfor (const auto& itemJson : source.at(\"inventory\"))\n\t\t{\n\t\t\tauto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});\n\t\t\titem->load(itemJson);\n\t\t\tinventory.items.push_back(std::move(item));\n\t\t}",
+      "mutated": "\t\tfor (const auto& itemJson : source.at(\"inventory\"))\n\t\t{\n\t\t\tauto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});\n\t\t\ttry { item->load(itemJson); } catch (const std::exception&) { break; }\n\t\t\tinventory.items.push_back(std::move(item));\n\t\t}",
       "catches": "a broken item swallowed again, the inventory silently cut short at it"
     },
     {

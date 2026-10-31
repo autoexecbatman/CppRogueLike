@@ -28,16 +28,19 @@
 
 namespace
 {
-// The seven dice Method VI rolled, in the order they came up. Fixed rather than
-// rolled, so every line below is a statement about the format and not about luck.
-const std::vector<int> ROLLED_POOL{ 4, 4, 2, 1, 6, 3, 5 };
+	// The seven dice Method VI rolled, in the order they came up. Fixed rather
+	// than rolled, so every line below is a statement about the format and not
+	// about luck.
+	const std::vector<int> ROLLED_POOL{ 4, 4, 2, 1, 6, 3, 5 };
 
-// Table 2's halfling: -1 Strength, +1 Dexterity, and nothing else. The only race
-// here that touches Strength, which is what makes it the useful one to print.
-constexpr std::array<int, ABILITY_COUNT> HALFLING{ -1, 1, 0, 0, 0, 0 };
+	// Table 2's halfling: -1 Strength, +1 Dexterity, and nothing else. The only
+	// race here that touches Strength, which is what makes it the useful one to
+	// print.
+	constexpr std::array<int, ABILITY_COUNT> HALFLING{ -1, 1, 0, 0, 0, 0 };
 
-// A human, so that the quiet form of the row has something to be measured on.
-constexpr std::array<int, ABILITY_COUNT> HUMAN{ 0, 0, 0, 0, 0, 0 };
+	// A human, so that the quiet form of the row has something to be measured
+	// on.
+	constexpr std::array<int, ABILITY_COUNT> HUMAN{ 0, 0, 0, 0, 0, 0 };
 } // namespace
 
 // An ability no race touches prints its name and its allocation and stops: there is

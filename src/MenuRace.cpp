@@ -13,23 +13,24 @@
 
 namespace
 {
-// Which key picks a race. The key is the menu's own business; a race's name and its
-// ability adjustments are the race's, and both are read from it rather than written
-// here. Half-Elf takes no key, 'h' being the human's and 'e' the elf's.
-struct RaceChoice
-{
-	PlayerRaceState race;
-	char hotkey;
-};
+	// Which key picks a race. The key is the menu's own business; a race's name
+	// and its ability adjustments are the race's, and both are read from it
+	// rather than written here. Half-Elf takes no key, 'h' being the human's
+	// and 'e' the elf's.
+	struct RaceChoice
+	{
+		PlayerRaceState race;
+		char hotkey;
+	};
 
-constexpr std::array<RaceChoice, 6> RACE_CHOICES{
-	RaceChoice{ PlayerRaceState::HUMAN, 'h' },
-	RaceChoice{ PlayerRaceState::DWARF, 'd' },
-	RaceChoice{ PlayerRaceState::ELF, 'e' },
-	RaceChoice{ PlayerRaceState::GNOME, 'g' },
-	RaceChoice{ PlayerRaceState::HALFELF, 0 },
-	RaceChoice{ PlayerRaceState::HALFLING, 'l' }
-};
+	constexpr std::array<RaceChoice, 6> RACE_CHOICES{
+		RaceChoice{ PlayerRaceState::HUMAN, 'h' },
+		RaceChoice{ PlayerRaceState::DWARF, 'd' },
+		RaceChoice{ PlayerRaceState::ELF, 'e' },
+		RaceChoice{ PlayerRaceState::GNOME, 'g' },
+		RaceChoice{ PlayerRaceState::HALFELF, 0 },
+		RaceChoice{ PlayerRaceState::HALFLING, 'l' }
+	};
 } // namespace
 
 std::unique_ptr<BaseMenu> make_race_menu(GameContext& ctx)

@@ -13,12 +13,13 @@
 
 namespace
 {
-// The shop a trading creature owns. Every way into the trade menu requires one.
-ShopKeeper& shop_of(Creature& owner)
-{
-	assert(owner.shop && "MenuBuy opened on a creature with no shop");
-	return *owner.shop;
-}
+	// The shop a trading creature owns. Every way into the trade menu requires
+	// one.
+	ShopKeeper& shop_of(Creature& owner)
+	{
+		assert(owner.shop && "MenuBuy opened on a creature with no shop");
+		return *owner.shop;
+	}
 } // namespace
 
 void MenuBuy::populate_items()

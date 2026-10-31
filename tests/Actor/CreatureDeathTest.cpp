@@ -35,9 +35,9 @@
 
 namespace
 {
-constexpr int MONSTER_XP = 45;
-constexpr Vector2D WHERE_IT_FELL{ 7, 9 };
-constexpr Vector2D PICKED_UP_OVER_THERE{ 2, 2 };
+	constexpr int MONSTER_XP = 45;
+	constexpr Vector2D WHERE_IT_FELL{ 7, 9 };
+	constexpr Vector2D PICKED_UP_OVER_THERE{ 2, 2 };
 } // namespace
 
 class CreatureDeathTest : public ::testing::Test

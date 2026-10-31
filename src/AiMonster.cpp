@@ -19,166 +19,177 @@
 
 namespace
 {
-constexpr std::array<Vector2D, 8> NEIGHBORS = {
-	DIR_N,
-	DIR_S,
-	DIR_W,
-	DIR_E,
-	DIR_NW,
-	DIR_NE,
-	DIR_SW,
-	DIR_SE,
-};
-
-// AD&D 2e: Move away from player, up the cost map this creature would descend to reach it.
-void flee(Creature& owner, GameContext& ctx)
-{
-	assert(ctx.pathfinder && "flee: called without a pathfinder");
-	assert(ctx.tileConfig && "flee: called without a tileConfig");
-	assert(ctx.map && "flee: called without a map");
-
-	auto is_occupied = [&ctx](const Vector2D& pos)
-	{
-		return ctx.map->get_actor(pos, ctx) != nullptr;
+	constexpr std::array<Vector2D, 8> NEIGHBORS = {
+		DIR_N,
+		DIR_S,
+		DIR_W,
+		DIR_E,
+		DIR_NW,
+		DIR_NE,
+		DIR_SW,
+		DIR_SE,
 	};
 
-	const Vector2D quarry = ctx.player()->position;
-	const Pathfinding::Mobility mobility =
-		Pathfinding::mobility_of(owner, *ctx.tileConfig);
-	const std::optional<int> currentCost =
-		ctx.pathfinder->cost_to(quarry, owner.position, mobility, ctx);
-
-	// Disconnected tile (unreachable from player): costs are meaningless, hold position.
-	if (!currentCost)
+	// AD&D 2e: Move away from player, up the cost map this creature would
+	// descend to reach it.
+	void flee(Creature& owner, GameContext& ctx)
 	{
-		return;
-	}
+		assert(ctx.pathfinder && "flee: called without a pathfinder");
+		assert(ctx.tileConfig && "flee: called without a tileConfig");
+		assert(ctx.map && "flee: called without a map");
 
-	std::optional<Vector2D> bestStep;
-	// only accept tiles strictly further than current position
-	int bestCost = *currentCost;
-
-	// A tile this creature may not enter is one its own cost map never reached.
-	for (const Vector2D& delta : NEIGHBORS)
-	{
-		Vector2D candidate{
-			owner.position.x + delta.x,
-			owner.position.y + delta.y,
+		auto is_occupied = [&ctx](const Vector2D& pos)
+		{
+			return ctx.map->get_actor(pos, ctx) != nullptr;
 		};
-		const std::optional<int> candidateCost =
-			ctx.pathfinder->cost_to(quarry, candidate, mobility, ctx);
-		if (candidateCost && *candidateCost > bestCost &&
-			!is_occupied(candidate))
+
+		const Vector2D quarry = ctx.player()->position;
+		const Pathfinding::Mobility mobility =
+			Pathfinding::mobility_of(owner, *ctx.tileConfig);
+		const std::optional<int> currentCost =
+			ctx.pathfinder->cost_to(quarry, owner.position, mobility, ctx);
+
+		// Disconnected tile (unreachable from player): costs are meaningless,
+		// hold position.
+		if (!currentCost)
 		{
-			bestCost = *candidateCost;
-			bestStep = candidate;
+			return;
+		}
+
+		std::optional<Vector2D> bestStep;
+		// only accept tiles strictly further than current position
+		int bestCost = *currentCost;
+
+		// A tile this creature may not enter is one its own cost map never
+		// reached.
+		for (const Vector2D& delta : NEIGHBORS)
+		{
+			Vector2D candidate{
+				owner.position.x + delta.x,
+				owner.position.y + delta.y,
+			};
+			const std::optional<int> candidateCost =
+				ctx.pathfinder->cost_to(quarry, candidate, mobility, ctx);
+			if (candidateCost && *candidateCost > bestCost &&
+				!is_occupied(candidate))
+			{
+				bestCost = *candidateCost;
+				bestStep = candidate;
+			}
+		}
+
+		if (bestStep)
+		{
+			Pathfinding::step(owner, *bestStep, ctx);
+		}
+		else
+		{
+			// At escape apex - no tile further from player is available. AD&D
+			// 2e: fight back only if the threat is adjacent; otherwise hold
+			// ground.
+			if (owner.get_tile_distance(ctx.player()->position) <= 1)
+			{
+				owner.remove_state(ActorState::IS_FLEEING);
+				owner.attacker->attack(
+					*ctx.player(),
+					AttackKind::AttackKind::MELEE,
+					ctx);
+			}
+			// else: hold position, keep IS_FLEEING - player has not cornered us
+			// yet
 		}
 	}
 
-	if (bestStep)
+	// AD&D 2e: Roll 2d10 against morale score; set IS_FLEEING on failure.
+	void check_morale(Creature& owner, GameContext& ctx)
 	{
-		Pathfinding::step(owner, *bestStep, ctx);
-	}
-	else
-	{
-		// At escape apex - no tile further from player is available.
-		// AD&D 2e: fight back only if the threat is adjacent; otherwise hold ground.
-		if (owner.get_tile_distance(ctx.player()->position) <= 1)
+		assert(ctx.dice && "check_morale: called without dice");
+
+		if (owner.has_state(ActorState::IS_FLEEING))
 		{
-			owner.remove_state(ActorState::IS_FLEEING);
-			owner.attacker->attack(*ctx.player(), AttackKind::AttackKind::MELEE, ctx);
+			return;
 		}
-		// else: hold position, keep IS_FLEEING - player has not cornered us yet
-	}
-}
 
-// AD&D 2e: Roll 2d10 against morale score; set IS_FLEEING on failure.
-void check_morale(Creature& owner, GameContext& ctx)
-{
-	assert(ctx.dice && "check_morale: called without dice");
+		const int hp = owner.get_hp();
+		const int hpMax = owner.get_max_hp();
 
-	if (owner.has_state(ActorState::IS_FLEEING))
-	{
-		return;
-	}
-
-	const int hp = owner.get_hp();
-	const int hpMax = owner.get_max_hp();
-
-	if (hp * 2 > hpMax)
-	{
-		return;
-	}
-
-	const int moraleRoll = ctx.dice->roll(1, 10) + ctx.dice->roll(1, 10);
-	if (moraleRoll > owner.get_morale())
-	{
-		owner.add_state(ActorState::IS_FLEEING);
-	}
-}
-
-// One step of random drift. No-ops when the chosen tile is blocked or occupied.
-void random_wander(Creature& owner, GameContext& ctx)
-{
-	assert(ctx.dice && "random_wander: called without dice");
-
-	int deltaCol = ctx.dice->roll(-1, 1);
-	int deltaRow = ctx.dice->roll(-1, 1);
-	if (deltaCol == 0 && deltaRow == 0)
-	{
-		return;
-	}
-	Pathfinding::step(
-		owner,
-		owner.position + Vector2D{ deltaCol, deltaRow },
-		ctx);
-}
-
-// With no way through to the quarry, a creature still comes as close as the ground lets
-// it, so it waits at the bank of a moat rather than wherever it stood.
-void close_in_without_a_route(
-	Creature& owner,
-	Vector2D targetPosition,
-	const Pathfinding::Mobility& mobility,
-	GameContext& ctx)
-{
-	assert(ctx.map && "close_in_without_a_route: called without a map");
-
-	std::optional<Vector2D> bestStep;
-	int bestDistance = owner.get_tile_distance(targetPosition);
-
-	for (const Vector2D& delta : NEIGHBORS)
-	{
-		const Vector2D candidate = owner.position + delta;
-		if (!Pathfinding::step_cost(candidate, mobility, ctx) ||
-			ctx.map->get_actor(candidate, ctx) != nullptr)
+		if (hp * 2 > hpMax)
 		{
-			continue;
+			return;
 		}
-		const int distance = candidate.chebyshev_distance_to(targetPosition);
-		if (distance < bestDistance)
+
+		const int moraleRoll = ctx.dice->roll(1, 10) + ctx.dice->roll(1, 10);
+		if (moraleRoll > owner.get_morale())
 		{
-			bestDistance = distance;
-			bestStep = candidate;
+			owner.add_state(ActorState::IS_FLEEING);
 		}
 	}
 
-	if (bestStep)
+	// One step of random drift. No-ops when the chosen tile is blocked or
+	// occupied.
+	void random_wander(Creature& owner, GameContext& ctx)
 	{
-		Pathfinding::step(owner, *bestStep, ctx);
-	}
-}
+		assert(ctx.dice && "random_wander: called without dice");
 
-// Returns true when this creature must skip its turn entirely.
-bool cannot_act(Creature& owner)
-{
-	if (owner.ai == nullptr || owner.is_dead())
-	{
-		return true;
+		int deltaCol = ctx.dice->roll(-1, 1);
+		int deltaRow = ctx.dice->roll(-1, 1);
+		if (deltaCol == 0 && deltaRow == 0)
+		{
+			return;
+		}
+		Pathfinding::step(
+			owner,
+			owner.position + Vector2D{ deltaCol, deltaRow },
+			ctx);
 	}
-	return owner.has_state(ActorState::IS_SLEEPING) ||
-		owner.has_state(ActorState::IS_HELD);
-}
+
+	// With no way through to the quarry, a creature still comes as close as the
+	// ground lets it, so it waits at the bank of a moat rather than wherever it
+	// stood.
+	void close_in_without_a_route(
+		Creature& owner,
+		Vector2D targetPosition,
+		const Pathfinding::Mobility& mobility,
+		GameContext& ctx)
+	{
+		assert(ctx.map && "close_in_without_a_route: called without a map");
+
+		std::optional<Vector2D> bestStep;
+		int bestDistance = owner.get_tile_distance(targetPosition);
+
+		for (const Vector2D& delta : NEIGHBORS)
+		{
+			const Vector2D candidate = owner.position + delta;
+			if (!Pathfinding::step_cost(candidate, mobility, ctx) ||
+				ctx.map->get_actor(candidate, ctx) != nullptr)
+			{
+				continue;
+			}
+			const int distance =
+				candidate.chebyshev_distance_to(targetPosition);
+			if (distance < bestDistance)
+			{
+				bestDistance = distance;
+				bestStep = candidate;
+			}
+		}
+
+		if (bestStep)
+		{
+			Pathfinding::step(owner, *bestStep, ctx);
+		}
+	}
+
+	// Returns true when this creature must skip its turn entirely.
+	bool cannot_act(Creature& owner)
+	{
+		if (owner.ai == nullptr || owner.is_dead())
+		{
+			return true;
+		}
+		return owner.has_state(ActorState::IS_SLEEPING) ||
+			owner.has_state(ActorState::IS_HELD);
+	}
 } // namespace
 
 void AiMonster::move_or_attack(

@@ -25,194 +25,200 @@
 namespace
 {
 
-// A key from a display name: lower case, whitespace as underscores.
-std::string normalize_key(std::string_view raw)
-{
-	std::string key;
-	key.reserve(raw.size());
-	for (const char character : raw)
+	// A key from a display name: lower case, whitespace as underscores.
+	std::string normalize_key(std::string_view raw)
 	{
-		if (std::isspace(static_cast<unsigned char>(character)))
+		std::string key;
+		key.reserve(raw.size());
+		for (const char character : raw)
 		{
-			key += '_';
+			if (std::isspace(static_cast<unsigned char>(character)))
+			{
+				key += '_';
+			}
+			else
+			{
+				key += static_cast<char>(
+					std::tolower(static_cast<unsigned char>(character)));
+			}
 		}
-		else
+		return key;
+	}
+
+	// -------------------------------------------------------------------------
+	// Enum parse helpers
+	// -------------------------------------------------------------------------
+	// Which pool an enhanced spawn rule draws from. A rule naming anything else
+	// is a typo in enhanced_rules.json rather than a third pool, so it is
+	// refused by name instead of quietly becoming armour.
+	//
+	// Example:
+	//   parse_enhancement_category("weapon");
+	//   // -> EnhancedItemCategory::WEAPON
+	//   parse_enhancement_category("wepaon");
+	//   // throws: ItemRegistry: unknown enhancement_category 'wepaon'
+	EnhancedItemCategory parse_enhancement_category(std::string_view name)
+	{
+		if (name == "weapon")
 		{
-			key += static_cast<char>(
-				std::tolower(static_cast<unsigned char>(character)));
+			return EnhancedItemCategory::WEAPON;
 		}
-	}
-	return key;
-}
+		if (name == "armor")
+		{
+			return EnhancedItemCategory::ARMOR;
+		}
 
-// ---------------------------------------------------------------------------
-// Enum parse helpers
-// ---------------------------------------------------------------------------
-// Which pool an enhanced spawn rule draws from. A rule naming anything else is a typo
-// in enhanced_rules.json rather than a third pool, so it is refused by name instead of
-// quietly becoming armour.
-//
-// Example:
-//   parse_enhancement_category("weapon");   // -> EnhancedItemCategory::WEAPON
-//   parse_enhancement_category("wepaon");
-//   // throws: ItemRegistry: unknown enhancement_category 'wepaon'
-EnhancedItemCategory parse_enhancement_category(std::string_view name)
-{
-	if (name == "weapon")
-	{
-		return EnhancedItemCategory::WEAPON;
-	}
-	if (name == "armor")
-	{
-		return EnhancedItemCategory::ARMOR;
-	}
-
-	throw std::runtime_error(
-		std::format("ItemRegistry: unknown enhancement_category '{}'", name));
-}
-
-// ---------------------------------------------------------------------------
-// JSON encode / parse
-// ---------------------------------------------------------------------------
-nlohmann::json encode_item(const ItemParams& params)
-{
-	nlohmann::json record;
-	record["name"] = std::string{ params.name };
-	record["appearance"] = std::string{ params.appearance };
-	record["category"] = std::string{ params.category };
-	record["color"] = color_pair_name(params.color);
-	record["itemClass"] = encode_item_class(params.itemClass);
-	record["value"] = params.value;
-	record["pickableType"] = encode_pickable_type(params.pickableType);
-	record["equipmentSlot"] =
-		std::string{ encode_equipment_slot(params.equipmentSlot) };
-	record["baseWeight"] = params.baseWeight;
-	record["weight"] = params.weight;
-	record["levelMin"] = params.levelMin;
-	record["levelMax"] = params.levelMax;
-	record["levelScaling"] = params.levelScaling;
-	record["consumableAmount"] = to_text(params.consumableAmount);
-	record["range"] = params.range;
-	record["damage"] = params.damage;
-	record["confuseTurns"] = params.confuseTurns;
-	record["duration"] = to_text(params.duration);
-	record["durationUnit"] = encode_duration_unit(params.durationUnit);
-	record["agesYears"] = params.agesYears;
-	record["effect"] = encode_magical_effect(params.effect);
-	record["effectBonus"] = params.effectBonus;
-	record["strBonus"] = params.strBonus;
-	record["dexBonus"] = params.dexBonus;
-	record["conBonus"] = params.conBonus;
-	record["intBonus"] = params.intBonus;
-	record["wisBonus"] = params.wisBonus;
-	record["chaBonus"] = params.chaBonus;
-	record["application"] = encode_buff_application(params.application);
-	record["exceptionalStrength"] = params.exceptionalStrength;
-	record["nutritionValue"] = params.nutritionValue;
-	record["acBonus"] = params.acBonus;
-	record["ranged"] = params.ranged;
-	record["handRequirement"] = encode_hand_requirement(params.handRequirement);
-	record["weaponSize"] = encode_weapon_size(params.weaponSize);
-	record["strengthRating"] = params.strengthRating;
-	record["consumableEffect"] =
-		encode_consumable_effect(params.consumableEffect);
-	record["consumableBuff"] = encode_buff_type(params.consumableBuffType);
-	record["targetMode"] = encode_target_mode(params.targetMode);
-	record["scrollAnimation"] = encode_scroll_animation(params.scrollAnimation);
-
-	return record;
-}
-
-// Reads a field every item record carries. encode_item writes every field
-// unconditionally, so a record missing one is a corrupted or hand-edited file rather
-// than a shorter record - this names the item and the field instead of handing back a
-// default nobody authored.
-//
-// Example:
-//   required_field(record, "health_potion", "baseWeight");   // -> 50
-//   required_field(record, "health_potion", "weight");
-//   // throws: ItemRegistry::load -- item 'health_potion' is missing required field 'weight'
-const nlohmann::json& required_field(
-	const nlohmann::json& record,
-	const std::string& itemKey,
-	const std::string& field)
-{
-	const auto found = record.find(field);
-	if (found == record.end())
-	{
 		throw std::runtime_error(
 			std::format(
-				"ItemRegistry::load -- item '{}' is missing required field '{}'",
-				itemKey,
-				field));
+				"ItemRegistry: unknown enhancement_category '{}'",
+				name));
 	}
-	return *found;
-}
 
-ItemParams parse_item(const std::string& key, const nlohmann::json& record)
-{
-	ItemParams params;
-	params.name = required_field(record, key, "name").get<std::string>();
-	params.appearance =
-		required_field(record, key, "appearance").get<std::string>();
-	params.category =
-		required_field(record, key, "category").get<std::string>();
-	params.color = parse_color_pair(
-		required_field(record, key, "color").get<std::string>());
-	params.itemClass = parse_item_class(
-		required_field(record, key, "itemClass").get<std::string>());
-	params.value = required_field(record, key, "value");
-	params.pickableType = parse_pickable_type(
-		required_field(record, key, "pickableType").get<std::string>());
-	params.equipmentSlot = parse_equipment_slot(
-		required_field(record, key, "equipmentSlot").get<std::string>());
-	params.baseWeight = required_field(record, key, "baseWeight");
-	params.weight = required_field(record, key, "weight");
-	params.levelMin = required_field(record, key, "levelMin");
-	params.levelMax = required_field(record, key, "levelMax");
-	params.levelScaling = required_field(record, key, "levelScaling");
-	params.consumableAmount = parse_dice_expression(
-		required_field(record, key, "consumableAmount").get<std::string>());
-	params.range = required_field(record, key, "range");
-	params.damage = required_field(record, key, "damage");
-	params.confuseTurns = required_field(record, key, "confuseTurns");
-	params.duration = parse_dice_expression(
-		required_field(record, key, "duration").get<std::string>());
-	params.durationUnit = parse_duration_unit(
-		required_field(record, key, "durationUnit").get<std::string>());
-	params.agesYears = required_field(record, key, "agesYears");
-	params.effect = parse_magical_effect(
-		required_field(record, key, "effect").get<std::string>());
-	params.effectBonus = required_field(record, key, "effectBonus");
-	params.strBonus = required_field(record, key, "strBonus");
-	params.dexBonus = required_field(record, key, "dexBonus");
-	params.conBonus = required_field(record, key, "conBonus");
-	params.intBonus = required_field(record, key, "intBonus");
-	params.wisBonus = required_field(record, key, "wisBonus");
-	params.chaBonus = required_field(record, key, "chaBonus");
-	params.application = parse_buff_application(
-		required_field(record, key, "application").get<std::string>());
-	params.exceptionalStrength =
-		required_field(record, key, "exceptionalStrength");
-	params.nutritionValue = required_field(record, key, "nutritionValue");
-	params.acBonus = required_field(record, key, "acBonus");
-	params.ranged = required_field(record, key, "ranged");
-	params.handRequirement = parse_hand_requirement(
-		required_field(record, key, "handRequirement").get<std::string>());
-	params.weaponSize = parse_weapon_size(
-		required_field(record, key, "weaponSize").get<std::string>());
-	params.strengthRating = required_field(record, key, "strengthRating");
-	params.consumableEffect = parse_consumable_effect(
-		required_field(record, key, "consumableEffect").get<std::string>());
-	params.consumableBuffType = parse_buff_type(
-		required_field(record, key, "consumableBuff").get<std::string>());
-	params.targetMode = parse_target_mode(
-		required_field(record, key, "targetMode").get<std::string>());
-	params.scrollAnimation = parse_scroll_animation(
-		required_field(record, key, "scrollAnimation").get<std::string>());
+	// -------------------------------------------------------------------------
+	// JSON encode / parse
+	// -------------------------------------------------------------------------
+	nlohmann::json encode_item(const ItemParams& params)
+	{
+		nlohmann::json record;
+		record["name"] = std::string{ params.name };
+		record["appearance"] = std::string{ params.appearance };
+		record["category"] = std::string{ params.category };
+		record["color"] = color_pair_name(params.color);
+		record["itemClass"] = encode_item_class(params.itemClass);
+		record["value"] = params.value;
+		record["pickableType"] = encode_pickable_type(params.pickableType);
+		record["equipmentSlot"] =
+			std::string{ encode_equipment_slot(params.equipmentSlot) };
+		record["baseWeight"] = params.baseWeight;
+		record["weight"] = params.weight;
+		record["levelMin"] = params.levelMin;
+		record["levelMax"] = params.levelMax;
+		record["levelScaling"] = params.levelScaling;
+		record["consumableAmount"] = to_text(params.consumableAmount);
+		record["range"] = params.range;
+		record["damage"] = params.damage;
+		record["confuseTurns"] = params.confuseTurns;
+		record["duration"] = to_text(params.duration);
+		record["durationUnit"] = encode_duration_unit(params.durationUnit);
+		record["agesYears"] = params.agesYears;
+		record["effect"] = encode_magical_effect(params.effect);
+		record["effectBonus"] = params.effectBonus;
+		record["strBonus"] = params.strBonus;
+		record["dexBonus"] = params.dexBonus;
+		record["conBonus"] = params.conBonus;
+		record["intBonus"] = params.intBonus;
+		record["wisBonus"] = params.wisBonus;
+		record["chaBonus"] = params.chaBonus;
+		record["application"] = encode_buff_application(params.application);
+		record["exceptionalStrength"] = params.exceptionalStrength;
+		record["nutritionValue"] = params.nutritionValue;
+		record["acBonus"] = params.acBonus;
+		record["ranged"] = params.ranged;
+		record["handRequirement"] =
+			encode_hand_requirement(params.handRequirement);
+		record["weaponSize"] = encode_weapon_size(params.weaponSize);
+		record["strengthRating"] = params.strengthRating;
+		record["consumableEffect"] =
+			encode_consumable_effect(params.consumableEffect);
+		record["consumableBuff"] = encode_buff_type(params.consumableBuffType);
+		record["targetMode"] = encode_target_mode(params.targetMode);
+		record["scrollAnimation"] =
+			encode_scroll_animation(params.scrollAnimation);
 
-	return params;
-}
+		return record;
+	}
+
+	// Reads a field every item record carries. encode_item writes every field
+	// unconditionally, so a record missing one is a corrupted or hand-edited
+	// file rather than a shorter record - this names the item and the field
+	// instead of handing back a default nobody authored.
+	//
+	// Example:
+	//   required_field(record, "health_potion", "baseWeight");   // -> 50
+	//   required_field(record, "health_potion", "weight");
+	//   // throws: ItemRegistry::load -- item 'health_potion' is missing
+	//   // required field 'weight'
+	const nlohmann::json& required_field(
+		const nlohmann::json& record,
+		const std::string& itemKey,
+		const std::string& field)
+	{
+		const auto found = record.find(field);
+		if (found == record.end())
+		{
+			throw std::runtime_error(
+				std::format(
+					"ItemRegistry::load -- item '{}' is missing required field '{}'",
+					itemKey,
+					field));
+		}
+		return *found;
+	}
+
+	ItemParams parse_item(const std::string& key, const nlohmann::json& record)
+	{
+		ItemParams params;
+		params.name = required_field(record, key, "name").get<std::string>();
+		params.appearance =
+			required_field(record, key, "appearance").get<std::string>();
+		params.category =
+			required_field(record, key, "category").get<std::string>();
+		params.color = parse_color_pair(
+			required_field(record, key, "color").get<std::string>());
+		params.itemClass = parse_item_class(
+			required_field(record, key, "itemClass").get<std::string>());
+		params.value = required_field(record, key, "value");
+		params.pickableType = parse_pickable_type(
+			required_field(record, key, "pickableType").get<std::string>());
+		params.equipmentSlot = parse_equipment_slot(
+			required_field(record, key, "equipmentSlot").get<std::string>());
+		params.baseWeight = required_field(record, key, "baseWeight");
+		params.weight = required_field(record, key, "weight");
+		params.levelMin = required_field(record, key, "levelMin");
+		params.levelMax = required_field(record, key, "levelMax");
+		params.levelScaling = required_field(record, key, "levelScaling");
+		params.consumableAmount = parse_dice_expression(
+			required_field(record, key, "consumableAmount").get<std::string>());
+		params.range = required_field(record, key, "range");
+		params.damage = required_field(record, key, "damage");
+		params.confuseTurns = required_field(record, key, "confuseTurns");
+		params.duration = parse_dice_expression(
+			required_field(record, key, "duration").get<std::string>());
+		params.durationUnit = parse_duration_unit(
+			required_field(record, key, "durationUnit").get<std::string>());
+		params.agesYears = required_field(record, key, "agesYears");
+		params.effect = parse_magical_effect(
+			required_field(record, key, "effect").get<std::string>());
+		params.effectBonus = required_field(record, key, "effectBonus");
+		params.strBonus = required_field(record, key, "strBonus");
+		params.dexBonus = required_field(record, key, "dexBonus");
+		params.conBonus = required_field(record, key, "conBonus");
+		params.intBonus = required_field(record, key, "intBonus");
+		params.wisBonus = required_field(record, key, "wisBonus");
+		params.chaBonus = required_field(record, key, "chaBonus");
+		params.application = parse_buff_application(
+			required_field(record, key, "application").get<std::string>());
+		params.exceptionalStrength =
+			required_field(record, key, "exceptionalStrength");
+		params.nutritionValue = required_field(record, key, "nutritionValue");
+		params.acBonus = required_field(record, key, "acBonus");
+		params.ranged = required_field(record, key, "ranged");
+		params.handRequirement = parse_hand_requirement(
+			required_field(record, key, "handRequirement").get<std::string>());
+		params.weaponSize = parse_weapon_size(
+			required_field(record, key, "weaponSize").get<std::string>());
+		params.strengthRating = required_field(record, key, "strengthRating");
+		params.consumableEffect = parse_consumable_effect(
+			required_field(record, key, "consumableEffect").get<std::string>());
+		params.consumableBuffType = parse_buff_type(
+			required_field(record, key, "consumableBuff").get<std::string>());
+		params.targetMode = parse_target_mode(
+			required_field(record, key, "targetMode").get<std::string>());
+		params.scrollAnimation = parse_scroll_animation(
+			required_field(record, key, "scrollAnimation").get<std::string>());
+
+		return params;
+	}
 
 } // namespace
 

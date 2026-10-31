@@ -342,26 +342,31 @@ TEST_F(
 
 namespace
 {
-// Adds an item of the given weight to the pack past its weight limit, as starting gear or a
-// load is added, so the pack is as heavy as a test needs.
-void load_pack(Player& player, int weight, GameContext& ctx)
-{
-	auto burden = ItemCreator::create("dagger", player.position, ctx);
-	burden->enhancement.weight = weight;
-	[[maybe_unused]] const auto added =
-		InventoryOperations::add_item(player.inventoryData, std::move(burden));
-	ASSERT_TRUE(added.has_value());
-}
-
-// Whether the floor holds this item at the given tile.
-bool is_on_floor(const FloorInventory& floor, const Item* item, Vector2D tile)
-{
-	auto is_it = [item, tile](const std::unique_ptr<Item>& lying)
+	// Adds an item of the given weight to the pack past its weight limit, as
+	// starting gear or a load is added, so the pack is as heavy as a test
+	// needs.
+	void load_pack(Player& player, int weight, GameContext& ctx)
 	{
-		return lying.get() == item && lying->position == tile;
-	};
-	return std::ranges::any_of(floor.items, is_it);
-}
+		auto burden = ItemCreator::create("dagger", player.position, ctx);
+		burden->enhancement.weight = weight;
+		[[maybe_unused]] const auto added = InventoryOperations::add_item(
+			player.inventoryData,
+			std::move(burden));
+		ASSERT_TRUE(added.has_value());
+	}
+
+	// Whether the floor holds this item at the given tile.
+	bool is_on_floor(
+		const FloorInventory& floor,
+		const Item* item,
+		Vector2D tile)
+	{
+		auto is_it = [item, tile](const std::unique_ptr<Item>& lying)
+		{
+			return lying.get() == item && lying->position == tile;
+		};
+		return std::ranges::any_of(floor.items, is_it);
+	}
 
 } // namespace
 

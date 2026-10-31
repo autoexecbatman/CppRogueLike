@@ -258,48 +258,48 @@ struct DamageInfo
 // Common damage values for easy reference
 namespace DamageValues
 {
-inline DamageInfo Unarmed()
-{
-	return { "1d2", DamageType::PHYSICAL };
-}
+	inline DamageInfo Unarmed()
+	{
+		return { "1d2", DamageType::PHYSICAL };
+	}
 
-inline DamageInfo Dagger()
-{
-	return { "1d4", DamageType::PHYSICAL };
-}
+	inline DamageInfo Dagger()
+	{
+		return { "1d4", DamageType::PHYSICAL };
+	}
 
-inline DamageInfo ShortSword()
-{
-	return { "1d6", DamageType::PHYSICAL };
-}
+	inline DamageInfo ShortSword()
+	{
+		return { "1d6", DamageType::PHYSICAL };
+	}
 
-inline DamageInfo LongSword()
-{
-	return { "1d8", DamageType::PHYSICAL };
-}
+	inline DamageInfo LongSword()
+	{
+		return { "1d8", DamageType::PHYSICAL };
+	}
 
-inline DamageInfo GreatSword()
-{
-	return { "1d10", DamageType::PHYSICAL };
-}
+	inline DamageInfo GreatSword()
+	{
+		return { "1d10", DamageType::PHYSICAL };
+	}
 
-inline DamageInfo BattleAxe()
-{
-	return { "1d8", DamageType::PHYSICAL };
-}
+	inline DamageInfo BattleAxe()
+	{
+		return { "1d8", DamageType::PHYSICAL };
+	}
 
-inline DamageInfo WarHammer()
-{
-	return { "1d4+1", DamageType::PHYSICAL };
-}
+	inline DamageInfo WarHammer()
+	{
+		return { "1d4+1", DamageType::PHYSICAL };
+	}
 
-inline DamageInfo Staff()
-{
-	return { "1d6", DamageType::PHYSICAL };
-}
+	inline DamageInfo Staff()
+	{
+		return { "1d6", DamageType::PHYSICAL };
+	}
 
-inline DamageInfo LongBow()
-{
-	return { "1d6", DamageType::PHYSICAL };
-}
+	inline DamageInfo LongBow()
+	{
+		return { "1d6", DamageType::PHYSICAL };
+	}
 } // namespace DamageValues

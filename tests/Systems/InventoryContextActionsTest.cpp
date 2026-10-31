@@ -26,10 +26,12 @@
 
 namespace
 {
-bool offers(const std::vector<std::string>& labels, const std::string& wanted)
-{
-	return std::ranges::find(labels, wanted) != labels.end();
-}
+	bool offers(
+		const std::vector<std::string>& labels,
+		const std::string& wanted)
+	{
+		return std::ranges::find(labels, wanted) != labels.end();
+	}
 } // namespace
 
 TEST(InventoryContextActionsTest, ABackpackItemCanBeUsedOrDropped)

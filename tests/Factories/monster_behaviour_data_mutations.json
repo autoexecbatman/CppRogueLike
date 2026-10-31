@@ -39,8 +39,8 @@
     },
     {
       "file": "src/MonsterRegistry.cpp",
-      "original": "\tparams.attitude = parse_attitude(entry.at(\"attitude\").get<std::string>());\n",
-      "mutated": "\tparams.attitude = Attitude::HOSTILE;\n",
+      "original": "params.attitude =\n\t\t\tparse_attitude(entry.at(\"attitude\").get<std::string>());",
+      "mutated": "\t\tparams.attitude = Attitude::HOSTILE;\n",
       "catches": "attitude never read, so the shopkeeper is hostile"
     },
     {

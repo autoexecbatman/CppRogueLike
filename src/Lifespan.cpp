@@ -11,11 +11,11 @@
 
 namespace
 {
-// Whether the age has reached the band, so a band's change counts.
-bool has_reached(int age, PlayerRaceState race, AgeCategory band)
-{
-	return age_category(age, race) >= band;
-}
+	// Whether the age has reached the band, so a band's change counts.
+	bool has_reached(int age, PlayerRaceState race, AgeCategory band)
+	{
+		return age_category(age, race) >= band;
+	}
 } // namespace
 
 int Lifespan::natural_age() const noexcept

@@ -16,8 +16,9 @@
 
 namespace
 {
-// The colour of a refused save, in the info bar and the browser header alike.
-constexpr Color SAVE_FAILED_COLOR{ 255, 90, 90, 255 };
+	// The colour of a refused save, in the info bar and the browser header
+	// alike.
+	constexpr Color SAVE_FAILED_COLOR{ 255, 90, 90, 255 };
 } // namespace
 
 // ---------------------------------------------------------------------------

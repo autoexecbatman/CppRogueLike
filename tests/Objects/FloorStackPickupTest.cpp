@@ -35,9 +35,9 @@
 
 namespace
 {
-constexpr int STRONG_ENOUGH_TO_CARRY_ANYTHING = 18;
-const Vector2D UNDERFOOT{ 5, 5 };
-const Vector2D ELSEWHERE{ 9, 9 };
+	constexpr int STRONG_ENOUGH_TO_CARRY_ANYTHING = 18;
+	const Vector2D UNDERFOOT{ 5, 5 };
+	const Vector2D ELSEWHERE{ 9, 9 };
 } // namespace
 
 class FloorStackPickupTest : public ::testing::Test

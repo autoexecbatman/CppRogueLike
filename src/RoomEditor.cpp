@@ -28,80 +28,84 @@
 namespace
 {
 
-// Sheets available in the picker, in Tab-cycle order.
-constexpr TileSheet PICKER_SHEETS[] = {
-	TileSheet::SHEET_DECOR0,
-	TileSheet::SHEET_DECOR1,
-	TileSheet::SHEET_FLOOR,
-	TileSheet::SHEET_WALL,
-	TileSheet::SHEET_TILE,
-};
-
-constexpr int PICKER_SHEET_COUNT = 5;
-
-constexpr std::string_view PICKER_SHEET_NAMES[] = {
-	"Decor0",
-	"Decor1",
-	"Floor",
-	"Wall",
-	"Tile",
-};
-
-// The picker's name for a sheet, or its number for a sheet the picker does not offer.
-//
-// Example:
-//   picker_sheet_name(TileSheet::SHEET_DECOR0);   // -> "Decor0"
-std::string picker_sheet_name(TileSheet sheet)
-{
-	for (
-		size_t sheetIndex = 0; sheetIndex < std::size(PICKER_SHEETS);
-		++sheetIndex)
-	{
-		if (PICKER_SHEETS[sheetIndex] == sheet)
-		{
-			return std::string(PICKER_SHEET_NAMES[sheetIndex]);
-		}
-	}
-	return std::to_string(static_cast<int>(sheet));
-}
-
-// Layout (all in tiles; pixels = value * tile_size)
-constexpr int LEFT_W_TILES = 11;
-constexpr int RIGHT_W_TILES = 13;
-constexpr int TOP_H_TILES = 1;
-constexpr int BOT_H_TILES = 1;
-
-// The guide box's lines below its "HOW IT WORKS" heading; the box's height is derived from their count.
-constexpr const char* GUIDE[] = {
-	"[N]      new canvas",
-	"[Ctrl+S] name + save",
-	"[Enter]  load selected",
-	"[Del]    delete selected",
-	"Prefabs stamp decor",
-	"onto BSP rooms at",
-	"matching depth + size.",
-};
-
-// The prefab list's rows in the right panel at the renderer's current screen, tile and font size.
-PrefabListRows prefab_list_rows(const Renderer& renderer)
-{
-	const int tileSize = renderer.get_tile_size();
-	const int panelY = TOP_H_TILES * tileSize;
-	const int panelH =
-		renderer.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
-	return PrefabListRows{ panelY, panelH, renderer.get_font_size() };
-}
-
-// The canvas's cells at the renderer's current tile size, with cell (0, 0) moved by the pan.
-CanvasGrid canvas_grid(const Renderer& renderer, int panX, int panY)
-{
-	const int tileSize = renderer.get_tile_size();
-	return CanvasGrid{
-		LEFT_W_TILES * tileSize - panX,
-		TOP_H_TILES * tileSize - panY,
-		tileSize,
+	// Sheets available in the picker, in Tab-cycle order.
+	constexpr TileSheet PICKER_SHEETS[] = {
+		TileSheet::SHEET_DECOR0,
+		TileSheet::SHEET_DECOR1,
+		TileSheet::SHEET_FLOOR,
+		TileSheet::SHEET_WALL,
+		TileSheet::SHEET_TILE,
 	};
-}
+
+	constexpr int PICKER_SHEET_COUNT = 5;
+
+	constexpr std::string_view PICKER_SHEET_NAMES[] = {
+		"Decor0",
+		"Decor1",
+		"Floor",
+		"Wall",
+		"Tile",
+	};
+
+	// The picker's name for a sheet, or its number for a sheet the picker does
+	// not offer.
+	//
+	// Example:
+	//   picker_sheet_name(TileSheet::SHEET_DECOR0);   // -> "Decor0"
+	std::string picker_sheet_name(TileSheet sheet)
+	{
+		for (
+			size_t sheetIndex = 0; sheetIndex < std::size(PICKER_SHEETS);
+			++sheetIndex)
+		{
+			if (PICKER_SHEETS[sheetIndex] == sheet)
+			{
+				return std::string(PICKER_SHEET_NAMES[sheetIndex]);
+			}
+		}
+		return std::to_string(static_cast<int>(sheet));
+	}
+
+	// Layout (all in tiles; pixels = value * tile_size)
+	constexpr int LEFT_W_TILES = 11;
+	constexpr int RIGHT_W_TILES = 13;
+	constexpr int TOP_H_TILES = 1;
+	constexpr int BOT_H_TILES = 1;
+
+	// The guide box's lines below its "HOW IT WORKS" heading; the box's height
+	// is derived from their count.
+	constexpr const char* GUIDE[] = {
+		"[N]      new canvas",
+		"[Ctrl+S] name + save",
+		"[Enter]  load selected",
+		"[Del]    delete selected",
+		"Prefabs stamp decor",
+		"onto BSP rooms at",
+		"matching depth + size.",
+	};
+
+	// The prefab list's rows in the right panel at the renderer's current
+	// screen, tile and font size.
+	PrefabListRows prefab_list_rows(const Renderer& renderer)
+	{
+		const int tileSize = renderer.get_tile_size();
+		const int panelY = TOP_H_TILES * tileSize;
+		const int panelH = renderer.get_screen_height() -
+			(TOP_H_TILES + BOT_H_TILES) * tileSize;
+		return PrefabListRows{ panelY, panelH, renderer.get_font_size() };
+	}
+
+	// The canvas's cells at the renderer's current tile size, with cell (0, 0)
+	// moved by the pan.
+	CanvasGrid canvas_grid(const Renderer& renderer, int panX, int panY)
+	{
+		const int tileSize = renderer.get_tile_size();
+		return CanvasGrid{
+			LEFT_W_TILES * tileSize - panX,
+			TOP_H_TILES * tileSize - panY,
+			tileSize,
+		};
+	}
 
 } // namespace
 

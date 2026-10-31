@@ -26,20 +26,21 @@
 
 namespace
 {
-void expect_row(int roll, std::array<MonsterStrength, 6> printed)
-{
-	for (std::size_t column = 0; column < ALL_CREATURE_SIZE.size(); ++column)
+	void expect_row(int roll, std::array<MonsterStrength, 6> printed)
 	{
-		const auto read =
-			monster_strength_score(roll, ALL_CREATURE_SIZE.at(column));
-		EXPECT_EQ(read.score, printed.at(column).score)
-			<< "roll " << roll << ", "
-			<< encode_creature_size(ALL_CREATURE_SIZE.at(column));
-		EXPECT_EQ(read.exceptional, printed.at(column).exceptional)
-			<< "roll " << roll << ", "
-			<< encode_creature_size(ALL_CREATURE_SIZE.at(column));
+		for (
+			std::size_t column = 0; column < ALL_CREATURE_SIZE.size(); ++column)
+		{
+			const auto read =
+				monster_strength_score(roll, ALL_CREATURE_SIZE.at(column));
+			EXPECT_EQ(read.score, printed.at(column).score)
+				<< "roll " << roll << ", "
+				<< encode_creature_size(ALL_CREATURE_SIZE.at(column));
+			EXPECT_EQ(read.exceptional, printed.at(column).exceptional)
+				<< "roll " << roll << ", "
+				<< encode_creature_size(ALL_CREATURE_SIZE.at(column));
+		}
 	}
-}
 } // namespace
 
 // Every row the book prints, 3 to 18, with 9 to 12 as one row.

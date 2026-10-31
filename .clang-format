@@ -4,6 +4,7 @@ Language: Cpp
 UseTab: Always
 IndentWidth: 4
 TabWidth: 4
+NamespaceIndentation: All
 
 BreakBeforeBraces: Allman
 

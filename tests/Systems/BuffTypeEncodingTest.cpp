@@ -16,36 +16,36 @@
 
 namespace
 {
-struct EncodingCase
-{
-	BuffType type{ BuffType::NONE };
-	std::string_view expected{};
-};
+	struct EncodingCase
+	{
+		BuffType type{ BuffType::NONE };
+		std::string_view expected{};
+	};
 
-// Every BuffType and the string it must produce.
-constexpr std::array<EncodingCase, 21> ENCODINGS = { {
-	{ BuffType::NONE, "none" },
-	{ BuffType::INVISIBILITY, "invisibility" },
-	{ BuffType::BLESS, "bless" },
-	{ BuffType::SHIELD, "shield" },
-	{ BuffType::STRENGTH, "strength" },
-	{ BuffType::DEXTERITY, "dexterity" },
-	{ BuffType::CONSTITUTION, "constitution" },
-	{ BuffType::INTELLIGENCE, "intelligence" },
-	{ BuffType::WISDOM, "wisdom" },
-	{ BuffType::CHARISMA, "charisma" },
-	{ BuffType::SPEED, "speed" },
-	{ BuffType::FIRE_RESISTANCE, "fire_resistance" },
-	{ BuffType::COLD_RESISTANCE, "cold_resistance" },
-	{ BuffType::LIGHTNING_RESISTANCE, "lightning_resistance" },
-	{ BuffType::POISON_RESISTANCE, "poison_resistance" },
-	{ BuffType::SLEEP, "sleep" },
-	{ BuffType::HOLD_PERSON, "hold_person" },
-	{ BuffType::SANCTUARY, "sanctuary" },
-	{ BuffType::PROTECTION_FROM_EVIL, "protection_from_evil" },
-	{ BuffType::SILENCE, "silence" },
-	{ BuffType::WEBBED, "webbed" },
-} };
+	// Every BuffType and the string it must produce.
+	constexpr std::array<EncodingCase, 21> ENCODINGS = { {
+		{ BuffType::NONE, "none" },
+		{ BuffType::INVISIBILITY, "invisibility" },
+		{ BuffType::BLESS, "bless" },
+		{ BuffType::SHIELD, "shield" },
+		{ BuffType::STRENGTH, "strength" },
+		{ BuffType::DEXTERITY, "dexterity" },
+		{ BuffType::CONSTITUTION, "constitution" },
+		{ BuffType::INTELLIGENCE, "intelligence" },
+		{ BuffType::WISDOM, "wisdom" },
+		{ BuffType::CHARISMA, "charisma" },
+		{ BuffType::SPEED, "speed" },
+		{ BuffType::FIRE_RESISTANCE, "fire_resistance" },
+		{ BuffType::COLD_RESISTANCE, "cold_resistance" },
+		{ BuffType::LIGHTNING_RESISTANCE, "lightning_resistance" },
+		{ BuffType::POISON_RESISTANCE, "poison_resistance" },
+		{ BuffType::SLEEP, "sleep" },
+		{ BuffType::HOLD_PERSON, "hold_person" },
+		{ BuffType::SANCTUARY, "sanctuary" },
+		{ BuffType::PROTECTION_FROM_EVIL, "protection_from_evil" },
+		{ BuffType::SILENCE, "silence" },
+		{ BuffType::WEBBED, "webbed" },
+	} };
 } // namespace
 
 // Each buff type encodes to its documented string.

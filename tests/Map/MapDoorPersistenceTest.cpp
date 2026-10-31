@@ -28,19 +28,19 @@
 
 namespace
 {
-constexpr int DOOR_MAP_WIDTH = 12;
-constexpr int DOOR_MAP_HEIGHT = 9;
-const Vector2D LOCKED_DOOR{ 3, 4 };
-const Vector2D CLOSED_DOOR{ 6, 4 };
-const Vector2D OPEN_DOOR{ 9, 4 };
+	constexpr int DOOR_MAP_WIDTH = 12;
+	constexpr int DOOR_MAP_HEIGHT = 9;
+	const Vector2D LOCKED_DOOR{ 3, 4 };
+	const Vector2D CLOSED_DOOR{ 6, 4 };
+	const Vector2D OPEN_DOOR{ 9, 4 };
 
-// set_door is protected, so the fixture reaches it through this.
-class MapWithDoors : public Map
-{
-public:
-	using Map::Map;
-	using Map::set_door;
-};
+	// set_door is protected, so the fixture reaches it through this.
+	class MapWithDoors : public Map
+	{
+	public:
+		using Map::Map;
+		using Map::set_door;
+	};
 } // namespace
 
 class MapDoorPersistenceTest : public ::testing::Test

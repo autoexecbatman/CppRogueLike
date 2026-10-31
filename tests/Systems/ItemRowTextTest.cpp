@@ -25,15 +25,15 @@
 
 namespace
 {
-std::unique_ptr<Item> an_item(int value, int weight)
-{
-	auto item = std::make_unique<Item>(
-		Vector2D{ 0, 0 },
-		ActorData{ TileRef{}, "thing", ColorPairId::WHITE_BLACK });
-	item->set_value(value);
-	item->enhancement.weight = weight;
-	return item;
-}
+	std::unique_ptr<Item> an_item(int value, int weight)
+	{
+		auto item = std::make_unique<Item>(
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "thing", ColorPairId::WHITE_BLACK });
+		item->set_value(value);
+		item->enhancement.weight = weight;
+		return item;
+	}
 } // namespace
 
 TEST(ItemRowTextTest, SomethingWorthBuyingShowsBothNumbers)

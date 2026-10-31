@@ -44,9 +44,10 @@
 
 namespace
 {
-constexpr Vector2D THE_PLAYERS_TILE{ 10, 10 };
-// Past STARVING_THRESHOLD, so the scan that finds nothing ends in the hunger refusal.
-constexpr int ENOUGH_HUNGER_TO_STARVE = 950;
+	constexpr Vector2D THE_PLAYERS_TILE{ 10, 10 };
+	// Past STARVING_THRESHOLD, so the scan that finds nothing ends in the
+	// hunger refusal.
+	constexpr int ENOUGH_HUNGER_TO_STARVE = 950;
 } // namespace
 
 class PlayerRestTest : public ::testing::Test
