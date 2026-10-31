@@ -27,6 +27,12 @@ parse_tile, whose parameter is `record`, and compiles the copy in the original's
 expects exactly that one warning. Its first run read 0, and the fault was in this script: it
 kept only warnings whose path held /src/, and the copy lives elsewhere. A warning in the
 substituted file is now kept by name.
+
+FALSIFIED, 2026-10-31. The probe's site is found by PROBE_SIGNATURE with its indent stripped,
+because an anchor written with the indent stopped matching once the namespace bodies were
+indented. On the CppRL tree the self-test gives its 1 warning. With the probe changed to a
+name that shadows nothing, it fails with "expected one warning at line 29, got []". With the
+signature line deleted from TileRefJson.cpp, it fails naming the missing signature.
 """
 
 import argparse
@@ -36,15 +42,48 @@ import shlex
 import subprocess
 import sys
 import tempfile
+import typing
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DATABASE = ROOT / "build-web-warn" / "compile_commands.json"
 EXTRA = ["-fsyntax-only", "-Wno-everything", "-Wshadow"]
 
-# The self-test's planted shadow: a clean file, the line after which the probe goes, and the probe.
+# The self-test's planted shadow: a clean file, the function it goes into, and the probe.
 PROBE_SOURCE = "src/TileRefJson.cpp"
-PROBE_ANCHOR = "TileRef parse_tile(const json& record)\n{\n"
-PROBE_LINE = "\t{ const int record = 0; (void)record; } // planted by shadow_check.py --self-test\n"
+PROBE_SIGNATURE = "TileRef parse_tile(const json& record)"
+PROBE_LINE = "{ const int record = 0; (void)record; } // planted by shadow_check.py --self-test"
+
+
+class PlantedProbe(typing.NamedTuple):
+    """A copy of PROBE_SOURCE with PROBE_LINE in it, and the 1-based line it sits on."""
+
+    text: str
+    line: int
+
+
+def planted_copy(original):
+    """Returns original with PROBE_LINE as the first line of PROBE_SIGNATURE's body, or None.
+
+    The signature is matched with its indent stripped, since the formatter owns the indent,
+    and the probe takes the body brace's indent plus one tab. None means the signature is not
+    on exactly one line, or the line after it is not the body's opening brace.
+
+    Example:
+        planted_copy("\\tTileRef parse_tile(const json& record)\\n\\t{\\n\\t}\\n")
+        # -> PlantedProbe(text='\\tTileRef parse_tile(const json& record)\\n\\t{\\n
+        #    \\t\\t{ const int record = 0; (void)record; } // planted by ...\\n\\t}\\n', line=3)
+        planted_copy("int unrelated();\\n")   # -> None
+    """
+    newline = "\r\n" if "\r\n" in original else "\n"
+    lines = original.split(newline)
+    sites = [index for index, line in enumerate(lines) if line.strip() == PROBE_SIGNATURE]
+    if len(sites) != 1 or sites[0] + 1 >= len(lines) or lines[sites[0] + 1].strip() != "{":
+        return None
+    brace = lines[sites[0] + 1]
+    indent = brace[: len(brace) - len(brace.lstrip())]
+    lines.insert(sites[0] + 2, indent + "\t" + PROBE_LINE)
+    # The probe is the line after the brace; sites[0] is 0-based.
+    return PlantedProbe(newline.join(lines), sites[0] + 3)
 
 
 def normalise(path):
@@ -160,21 +199,20 @@ def self_test():
         self_test()   # prints "self-test: 1 warning, at the planted line" -> 0
     """
     original = (ROOT / PROBE_SOURCE).read_bytes().decode("utf-8")
-    newline = "\r\n" if "\r\n" in original else "\n"
-    anchor = PROBE_ANCHOR.replace("\n", newline)
-    if original.count(anchor) != 1:
-        print(f"self-test FAILED: the anchor occurs {original.count(anchor)} times in {PROBE_SOURCE}")
+    probe = planted_copy(original)
+    if probe is None:
+        print(f"self-test FAILED: {PROBE_SOURCE} has no single '{PROBE_SIGNATURE}' "
+              "with its body's brace on the next line")
         return 1
-    planted_line = original[: original.index(anchor) + len(anchor)].count(newline) + 1
 
     with tempfile.TemporaryDirectory() as scratch_directory:
         copy = pathlib.Path(scratch_directory) / "shadow_probe.cpp"
-        copy.write_bytes(original.replace(anchor, anchor + PROBE_LINE.replace("\n", newline), 1).encode("utf-8"))
+        copy.write_bytes(probe.text.encode("utf-8"))
         warnings = shadow_warnings(entries_for([PROBE_SOURCE], False)[0], copy)
 
-    expected = f"shadow_probe.cpp:{planted_line}:"
+    expected = f"shadow_probe.cpp:{probe.line}:"
     if len(warnings) != 1 or expected not in warnings[0]:
-        print(f"self-test FAILED: expected one warning at line {planted_line}, got {warnings}")
+        print(f"self-test FAILED: expected one warning at line {probe.line}, got {warnings}")
         return 1
     print("self-test: 1 warning, at the planted line")
     return 0
