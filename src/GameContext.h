@@ -10,6 +10,10 @@
 #include "CreatureClass.h"
 #include "InventoryData.h"
 #include "PlayerRaceState.h"
+#include "Vector2D.h"
+
+namespace CppRL
+{
 
 // Forward declarations
 struct Game;
@@ -65,7 +69,6 @@ class TileFeature;
 class Trap;
 class SpellTile;
 class BaseMenu;
-#include "Vector2D.h"
 struct DungeonRoom;
 class Renderer;
 class InputSystem;
@@ -313,3 +316,5 @@ struct GameContext
 	// Game state
 	GameState* gameState{ nullptr };
 };
+
+} // namespace CppRL

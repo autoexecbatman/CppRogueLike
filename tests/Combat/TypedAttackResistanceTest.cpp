@@ -39,6 +39,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 class TypedAttackResistanceTest : public ::testing::Test
 {
 protected:
@@ -116,7 +119,7 @@ protected:
 
 	int hp_lost_after(Creature& monster)
 	{
-		monster.attacker->attack(*player, AttackKind::AttackKind::MELEE, ctx);
+		monster.attacker->attack(*player, AttackKind::MELEE, ctx);
 		return STARTING_HP - player->get_hp();
 	}
 
@@ -187,3 +190,5 @@ TEST_F(TypedAttackResistanceTest, WithoutResistanceTheDiceLandAsRolled)
 
 	EXPECT_EQ(hp_lost_after(*chimera), 3);
 }
+
+} // namespace CppRL

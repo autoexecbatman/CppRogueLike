@@ -35,6 +35,9 @@
 #include "src/Player.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 class EquipmentUseTest : public ::testing::Test
 {
 protected:
@@ -158,3 +161,5 @@ TEST_F(EquipmentUseTest, AnItemTakenOffGoesBackToThePackAndLeavesItsSlot)
 	EXPECT_EQ(player->get_equipped_item(EquipmentSlot::BODY), nullptr)
 		<< "the slot still holds what was taken off";
 }
+
+} // namespace CppRL

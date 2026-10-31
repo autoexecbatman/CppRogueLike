@@ -27,6 +27,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// One row of Table 2: the score and its three adjustments.
@@ -155,3 +158,5 @@ TEST_F(DexterityTableTest, DexteritySevenLeavesArmourClassAlone)
 	EXPECT_EQ(fighter.get_armor_class(), 10)
 		<< "Dexterity 7 carries no defensive adjustment";
 }
+
+} // namespace CppRL

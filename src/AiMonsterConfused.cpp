@@ -13,6 +13,9 @@
 #include "RandomDice.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Lower end of each axis of a confused step: any neighbour, or none.
@@ -69,7 +72,7 @@ void AiMonsterConfused::attempt_move(
 	const auto& actor = ctx.map->get_actor(destination, ctx);
 	if (actor && owner.attacker)
 	{
-		owner.attacker->attack(*actor, AttackKind::AttackKind::MELEE, ctx);
+		owner.attacker->attack(*actor, AttackKind::MELEE, ctx);
 		return;
 	}
 
@@ -105,3 +108,5 @@ void AiMonsterConfused::save(json& output)
 	oldAi->save(oldAiJson);
 	output["oldAi"] = oldAiJson;
 }
+
+} // namespace CppRL

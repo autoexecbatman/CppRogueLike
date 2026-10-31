@@ -36,6 +36,9 @@
 #include "src/Paths.h"
 #include "src/TileConfig.h"
 
+namespace CppRL
+{
+
 class TileConfigLoadTest : public ::testing::Test
 {
 protected:
@@ -174,3 +177,5 @@ INSTANTIATE_TEST_SUITE_P(
 		"wall_autotile_groups",
 		"tile_types"),
 	name_for_section);
+
+} // namespace CppRL

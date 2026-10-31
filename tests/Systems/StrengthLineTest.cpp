@@ -23,6 +23,9 @@
 #include "src/Player.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class StrengthLineTest : public ::testing::Test
 {
 protected:
@@ -106,3 +109,5 @@ TEST_F(StrengthLineTest, APenaltyShowsItsSign)
 }
 
 // end of file: StrengthLineTest.cpp
+
+} // namespace CppRL

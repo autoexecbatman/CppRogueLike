@@ -2,6 +2,9 @@
 
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 class InputSystem;
 
 class InputHandler
@@ -40,3 +43,5 @@ public:
 
 	void clear_resize() noexcept { screenResized = false; }
 };
+
+} // namespace CppRL

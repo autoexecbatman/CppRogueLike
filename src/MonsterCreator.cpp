@@ -27,6 +27,9 @@
 #include "SpellSystem.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 std::unique_ptr<Creature> MonsterCreator::create_from_params(
 	Vector2D pos,
 	const MonsterParams& params,
@@ -178,3 +181,5 @@ std::unique_ptr<Creature> MonsterCreator::create(
 }
 
 // end of file: MonsterCreator.cpp
+
+} // namespace CppRL

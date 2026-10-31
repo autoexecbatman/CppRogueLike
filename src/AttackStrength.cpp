@@ -10,10 +10,13 @@
 #include "Pickable.h"
 #include "StrengthAttributes.h"
 
+namespace CppRL
+{
+
 AttackStrength::Adjustment AttackStrength::adjustment(
 	const DataManager& dataManager,
 	const Creature& attacker,
-	AttackKind::AttackKind kind,
+	AttackKind kind,
 	const Item* missileWeapon)
 {
 	const StrengthAttributes row = dataManager.strength_for(
@@ -33,7 +36,7 @@ AttackStrength::Adjustment AttackStrength::adjustment(
 		wholeRow.damage += hands.dmgAdj;
 	}
 
-	if (kind == AttackKind::AttackKind::MELEE || missileWeapon == nullptr)
+	if (kind == AttackKind::MELEE || missileWeapon == nullptr)
 	{
 		return wholeRow;
 	}
@@ -67,3 +70,5 @@ AttackStrength::Adjustment AttackStrength::adjustment(
 	}
 	}
 }
+
+} // namespace CppRL

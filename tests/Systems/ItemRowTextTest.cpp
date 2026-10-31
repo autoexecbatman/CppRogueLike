@@ -25,6 +25,9 @@
 #include "src/Item.h"
 #include "src/TileRef.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	std::unique_ptr<Item> an_item(int value, int weight)
@@ -69,3 +72,5 @@ TEST(ItemRowTextTest, TheTextBeginsWithASpaceSoItAppends)
 	ASSERT_FALSE(text.empty());
 	EXPECT_EQ(text.front(), ' ');
 }
+
+} // namespace CppRL

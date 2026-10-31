@@ -9,6 +9,9 @@
 #include <gtest/gtest.h>
 #include <stdexcept>
 
+namespace CppRL
+{
+
 class MonsterCreatorTest : public ::testing::Test
 {
 protected:
@@ -81,3 +84,5 @@ TEST_F(MonsterCreatorTest, EveryAuthoredMonsterArmsItself)
 			<< key;
 	}
 }
+
+} // namespace CppRL

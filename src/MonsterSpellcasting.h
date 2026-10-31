@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 // file: MonsterSpellcasting.h
 //
 // A monster's choice to cast instead of moving or striking. Its candidates are its memorized
@@ -51,3 +54,5 @@ namespace MonsterSpellcasting
 } // namespace MonsterSpellcasting
 
 // end of file: MonsterSpellcasting.h
+
+} // namespace CppRL

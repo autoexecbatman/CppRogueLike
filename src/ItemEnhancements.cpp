@@ -6,6 +6,9 @@
 #include "ItemEnhancements.h"
 #include "RandomDice.h"
 
+namespace CppRL
+{
+
 std::string ItemEnhancement::get_prefix_name() const
 {
 	return std::string{ prefix_record(prefix).name };
@@ -284,3 +287,5 @@ SuffixType ItemEnhancement::get_random_special_suffix(RandomDice& dice)
 	return special_suffixes[dice
 			.roll(0, static_cast<int>(std::size(special_suffixes)) - 1)];
 }
+
+} // namespace CppRL

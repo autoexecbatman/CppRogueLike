@@ -56,6 +56,9 @@
 #include "src/Trap.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 using json = nlohmann::json;
 
 namespace
@@ -689,3 +692,5 @@ TEST_F(EnumLoadRefusalTest, TheLastActorStateStillLoads)
 }
 
 // end of file: EnumLoadRefusalTest.cpp
+
+} // namespace CppRL

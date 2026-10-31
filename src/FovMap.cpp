@@ -9,6 +9,9 @@
 
 #include "FovMap.h"
 
+namespace CppRL
+{
+
 FovMap::FovMap(int gridWidth, int gridHeight) :
 	width(gridWidth),
 	height(gridHeight)
@@ -187,3 +190,5 @@ void FovMap::scan_octant(
 		}
 	}
 }
+
+} // namespace CppRL

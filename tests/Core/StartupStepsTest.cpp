@@ -21,6 +21,9 @@
 
 #include "src/StartupSteps.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The order the steps ran in, by name.
@@ -131,3 +134,5 @@ TEST(StartupStepsTest, AThrowThatIsNotAStdExceptionEscapes)
 	EXPECT_THROW((void)run_startup_steps(steps, log), int)
 		<< "a fault was swallowed as though it were a refusal";
 }
+
+} // namespace CppRL

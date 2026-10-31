@@ -5,6 +5,9 @@
 #include <optional>
 #include <string_view>
 
+namespace CppRL
+{
+
 std::string_view encumbrance_band_name(EncumbranceBand band)
 {
 	switch (band)
@@ -78,3 +81,5 @@ std::optional<EncumbranceBand> encumbrance_band(
 }
 
 // end of file: Encumbrance.cpp
+
+} // namespace CppRL

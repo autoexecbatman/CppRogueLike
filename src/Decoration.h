@@ -10,6 +10,9 @@
 #include "TileRef.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 struct Decoration
 {
 	Vector2D position{};
@@ -19,3 +22,5 @@ struct Decoration
 	std::string lootTableKey{}; // "" = drops nothing on break
 	bool isBroken{ false };
 };
+
+} // namespace CppRL

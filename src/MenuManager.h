@@ -3,6 +3,9 @@
 #include <deque>
 #include <memory>
 
+namespace CppRL
+{
+
 class BaseMenu;
 struct GameContext;
 
@@ -44,3 +47,5 @@ public:
 		shouldTakeInput = takeInput;
 	}
 };
+
+} // namespace CppRL

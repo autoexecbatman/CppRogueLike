@@ -27,6 +27,9 @@
 #include "src/CreatureClass.h"
 #include "src/MenuAbilityScores.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The seven dice Method VI rolled, in the order they came up. Fixed rather
@@ -200,3 +203,5 @@ TEST(AbilityAllocationTextTest, TheLastSpendableDigitIsTheLastDieRolled)
 		static_cast<std::size_t>(METHOD_SIX_DICE - 1));
 	EXPECT_FALSE(die_index_for_character(lastDigit + 1).has_value());
 }
+
+} // namespace CppRL

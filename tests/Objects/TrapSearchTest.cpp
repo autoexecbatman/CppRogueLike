@@ -35,6 +35,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr Vector2D SEARCHER_TILE{ 5, 5 };
@@ -286,3 +289,5 @@ TEST_F(TrapSearchTest, AHumanFighterCannotSearchAndSpendsNoTurn)
 }
 
 // end of file: TrapSearchTest.cpp
+
+} // namespace CppRL

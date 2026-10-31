@@ -54,6 +54,9 @@
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// One day of the clock in time units, the helm's recharge.
@@ -519,3 +522,5 @@ TEST(SpellcastingMenuTest, CastingFromTheMenuSpendsOneCopy)
 }
 
 // end of file: SpellcastingTest.cpp
+
+} // namespace CppRL

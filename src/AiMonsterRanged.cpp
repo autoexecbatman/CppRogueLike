@@ -18,6 +18,9 @@
 #include "Pickable.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -153,3 +156,5 @@ void AiMonsterRanged::save(json& output)
 	output["maxRangeDistance"] = maxRangeDistance;
 	output["optimalDistance"] = optimalDistance;
 }
+
+} // namespace CppRL

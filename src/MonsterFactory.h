@@ -5,6 +5,9 @@
 
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 // file: MonsterFactory.h
 //
 // Draws a random monster for a dungeon level. The table it draws from is derived from
@@ -46,3 +49,5 @@ namespace MonsterFactory
 		int dungeonLevel,
 		const MonsterRegistry& monsters);
 } // namespace MonsterFactory
+
+} // namespace CppRL

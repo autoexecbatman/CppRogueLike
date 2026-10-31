@@ -37,6 +37,9 @@
 #include "src/TileType.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// A room small enough that a water-filled one leaves only a couple of dry
@@ -149,3 +152,5 @@ TEST_F(WaterSpawnTest, NoSpawnTileIsEverWater)
 			<< position->x << "," << position->y;
 	}
 }
+
+} // namespace CppRL

@@ -24,6 +24,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr int MAP_WIDTH = 30;
@@ -126,3 +129,5 @@ TEST_F(RoomDoorsTest, ADoorOfNoRoomOpensAlone)
 }
 
 // end of file: RoomDoorsTest.cpp
+
+} // namespace CppRL

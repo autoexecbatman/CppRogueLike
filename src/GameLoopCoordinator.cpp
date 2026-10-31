@@ -44,6 +44,9 @@
 #include "TurnSchedule.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 // One pass of the game loop. The game is already initialised by the time this
 // runs: MenuName calls init_new_game once the blueprint is complete, and
 // load_all sets the initialised flag itself.
@@ -814,3 +817,5 @@ void GameLoopCoordinator::open_end_of_run_screen(GameContext& ctx)
 	}
 	}
 }
+
+} // namespace CppRL

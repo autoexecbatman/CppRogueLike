@@ -27,6 +27,9 @@
 #include "TurnSchedule.h"
 #include "Wording.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -525,3 +528,5 @@ void AiMimic::save(json& output)
 	output["confusionDuration"] = confusionDuration;
 	output["itemsConsumed"] = itemsConsumed;
 }
+
+} // namespace CppRL

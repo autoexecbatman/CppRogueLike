@@ -14,6 +14,9 @@
 
 #include "DungeonRoom.h"
 
+namespace CppRL
+{
+
 class Map;
 class PrefabLibrary;
 class RandomDice;
@@ -51,3 +54,5 @@ public:
 		GameContext& ctx,
 		Map& map) const;
 };
+
+} // namespace CppRL

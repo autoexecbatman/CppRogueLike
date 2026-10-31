@@ -7,6 +7,9 @@
 
 #include "DiceExpr.h"
 
+namespace CppRL
+{
+
 // file: MonsterHitDice.h
 //
 // A monster's hit dice as a Monstrous Manual entry prints them: the die and a bonus added
@@ -176,3 +179,5 @@ struct MonsterHitDice
 }
 
 // end of file: MonsterHitDice.h
+
+} // namespace CppRL

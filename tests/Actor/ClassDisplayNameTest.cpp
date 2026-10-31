@@ -20,6 +20,9 @@
 #include "src/CreatureClass.h"
 #include "src/Player.h"
 
+namespace CppRL
+{
+
 // Two classes sharing a name would show the player two choices they cannot tell apart.
 TEST(ClassDisplayNameTest, NoTwoClassesShareAName)
 {
@@ -53,3 +56,5 @@ TEST(ClassDisplayNameTest, AMonsterIsNotOneOfTheChoices)
 }
 
 // end of file: ClassDisplayNameTest.cpp
+
+} // namespace CppRL

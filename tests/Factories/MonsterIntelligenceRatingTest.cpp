@@ -33,6 +33,9 @@
 #include "src/MonsterRegistry.h"
 #include "src/Paths.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	struct BookRating
@@ -204,3 +207,5 @@ TEST(
 }
 
 // end of file: MonsterIntelligenceRatingTest.cpp
+
+} // namespace CppRL

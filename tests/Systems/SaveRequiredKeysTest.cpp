@@ -45,6 +45,9 @@
 #include "src/UniqueId.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Enough rounds that a clock loaded at its default cannot pass for the
@@ -284,3 +287,5 @@ INSTANTIATE_TEST_SUITE_P(
 		"roundsRun",
 		"nextUniqueId"),
 	name_for_key);
+
+} // namespace CppRL

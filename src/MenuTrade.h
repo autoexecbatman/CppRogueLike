@@ -6,6 +6,9 @@
 #include "BaseMenu.h"
 #include "MenuEntry.h"
 
+namespace CppRL
+{
+
 class Creature;
 struct GameContext;
 
@@ -39,3 +42,5 @@ public:
 	void on_key(GameContext& ctx) override;
 	void menu(GameContext& ctx) override;
 };
+
+} // namespace CppRL

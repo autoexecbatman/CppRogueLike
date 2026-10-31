@@ -31,6 +31,9 @@
 #include "src/TurnSchedule.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 // One attack a round costs a whole round, which is the floor the book prints for a
 // character and the cost every creature has until something raises its rate.
 TEST(AttackRateTest, ABaseRateCostsAWholeRound)
@@ -132,3 +135,5 @@ TEST_F(AttackChargeTest, AFasterAttackerSpendsLessOfTheClockPerSwing)
 	EXPECT_EQ(faster, TIME_UNITS_PER_ROUND * 2 / 3);
 	EXPECT_LT(faster, ordinary);
 }
+
+} // namespace CppRL

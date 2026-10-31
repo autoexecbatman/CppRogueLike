@@ -40,6 +40,9 @@
 #include "src/ThiefSkills.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 class ThiefSkillAllocationTest : public ::testing::Test
 {
 protected:
@@ -165,3 +168,5 @@ TEST_F(ThiefSkillAllocationTest, NoScreenOpensForACharacterWithNoThiefSkills)
 	EXPECT_EQ(ctx.menus->size(), before)
 		<< "a fighter was offered thief skill points";
 }
+
+} // namespace CppRL

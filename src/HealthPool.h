@@ -2,6 +2,9 @@
 
 #include <algorithm>
 
+namespace CppRL
+{
+
 class Creature;
 struct GameContext;
 enum class DamageType;
@@ -82,3 +85,5 @@ public:
 	//   pool.regenerate(10);   // -> 4, hp 14; the acid waits for other healing
 	[[nodiscard]] int regenerate(int points);
 };
+
+} // namespace CppRL

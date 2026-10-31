@@ -8,6 +8,9 @@
 #include "Renderer.h"
 #include "RenderingManager.h"
 
+namespace CppRL
+{
+
 AnimationBarrierMenu::AnimationBarrierMenu(GameContext& ctx)
 {
 	assert(ctx.renderer && "AnimationBarrierMenu constructed without renderer");
@@ -44,3 +47,5 @@ void AnimationBarrierMenu::menu(GameContext& ctx)
 		run = false;
 	}
 }
+
+} // namespace CppRL

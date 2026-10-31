@@ -37,6 +37,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// More rolls than building a shopkeeper and stocking its shop makes.
@@ -202,3 +205,5 @@ TEST_F(CreatureRecordSaveTest, APlayersBodyPlanIsTheOneItsSaveHeld)
 }
 
 // end of file: CreatureRecordSaveTest.cpp
+
+} // namespace CppRL

@@ -30,6 +30,9 @@
 #include "InputSystem.h"
 #include "ThiefSkills.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 class Player;
 
@@ -125,3 +128,5 @@ public:
 };
 
 // end of file: MenuThiefSkills.h
+
+} // namespace CppRL

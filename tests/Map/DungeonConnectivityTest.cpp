@@ -61,6 +61,9 @@
 #include "tests/mocks/MockGameContext.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -381,3 +384,5 @@ TEST_F(DungeonConnectivityTest, FloorJustInsideTheEdgeLeavesTheRingWhole)
 
 	EXPECT_TRUE(map.has_wall_border());
 }
+
+} // namespace CppRL

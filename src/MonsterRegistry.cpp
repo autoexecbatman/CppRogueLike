@@ -33,6 +33,9 @@
 #include "Spellcasting.h"
 #include "TileRefJson.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -851,3 +854,5 @@ bool MonsterRegistry::is_builtin(std::string_view key) const
 {
 	return key_to_standard_id(key).has_value();
 }
+
+} // namespace CppRL

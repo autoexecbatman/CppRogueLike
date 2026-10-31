@@ -38,6 +38,9 @@
 #include "src/TileType.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -189,3 +192,5 @@ TEST_F(AttackTargetTest, ARangedHunterShootsTheCreatureItWasHanded)
 	EXPECT_EQ(player->get_hp(), STARTING_HP)
 		<< "the player was shot from eight tiles away";
 }
+
+} // namespace CppRL

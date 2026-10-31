@@ -17,6 +17,9 @@
 #include "src/RandomDice.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 TEST(DiceExprTest, ReadsCountSidesAndAPositiveBonus)
 {
 	const DiceExpr expr = parse_dice_expression("1d4+1");
@@ -129,3 +132,5 @@ TEST(DiceExprTest, TextSurvivesARoundTrip)
 		EXPECT_EQ(read.bonus, expr.bonus) << to_text(expr);
 	}
 }
+
+} // namespace CppRL

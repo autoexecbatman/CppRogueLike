@@ -28,6 +28,9 @@
 #include "src/Trap.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class TrapDamageTest : public ::testing::Test
 {
 protected:
@@ -110,3 +113,5 @@ TEST_F(TrapDamageTest, AKnownTrapSpringsWithoutARollToNoticeIt)
 	EXPECT_EQ(before - victim.get_hp(), 12)
 		<< "walking onto a known trap sets it off";
 }
+
+} // namespace CppRL

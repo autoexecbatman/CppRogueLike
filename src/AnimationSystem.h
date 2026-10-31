@@ -8,6 +8,9 @@
 #include "TileRef.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 class Renderer;
 class TileConfig;
 
@@ -132,3 +135,5 @@ public:
 		return !entries.empty() || !projectiles.empty();
 	}
 };
+
+} // namespace CppRL

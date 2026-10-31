@@ -12,6 +12,9 @@
 #include "MessageSystem.h"
 #include "Player.h"
 
+namespace CppRL
+{
+
 void LevelManager::advance_to_next_level(GameContext& ctx)
 {
 	assert(
@@ -103,3 +106,5 @@ void LevelManager::heal_player_between_levels(GameContext& ctx) const
 			MessageCompletion::FINISHED);
 	}
 }
+
+} // namespace CppRL

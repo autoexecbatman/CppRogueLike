@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 // file: TileType.h
 //
 // The kind of ground a map cell is. Kept apart from Map so a definition table,
@@ -26,3 +29,5 @@ enum class TileType
 	CORRIDOR,
 	// Add more as needed...
 };
+
+} // namespace CppRL

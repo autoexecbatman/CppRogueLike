@@ -17,6 +17,9 @@
 #include "Persistent.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr std::array<Vector2D, 8> NEIGHBORS = {
@@ -90,10 +93,7 @@ namespace
 			if (owner.get_tile_distance(ctx.player()->position) <= 1)
 			{
 				owner.remove_state(ActorState::IS_FLEEING);
-				owner.attacker->attack(
-					*ctx.player(),
-					AttackKind::AttackKind::MELEE,
-					ctx);
+				owner.attacker->attack(*ctx.player(), AttackKind::MELEE, ctx);
 			}
 			// else: hold position, keep IS_FLEEING - player has not cornered us
 			// yet
@@ -213,7 +213,7 @@ void AiMonster::move_or_attack(
 	int distanceToTarget = owner.get_tile_distance(target.position);
 	if (distanceToTarget <= 1)
 	{
-		owner.attacker->attack(target, AttackKind::AttackKind::MELEE, ctx);
+		owner.attacker->attack(target, AttackKind::MELEE, ctx);
 		return;
 	}
 
@@ -381,3 +381,5 @@ void AiMonster::save(json& output)
 }
 
 // file: AiMonster.cpp
+
+} // namespace CppRL

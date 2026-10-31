@@ -34,6 +34,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// A row of floor with the player on it and a locked door one step east.
@@ -231,3 +234,5 @@ TEST_F(DoorForcingTest, AClericOfStrengthNineteenOpensOnAnEight)
 }
 
 // end of file: DoorForcingTest.cpp
+
+} // namespace CppRL

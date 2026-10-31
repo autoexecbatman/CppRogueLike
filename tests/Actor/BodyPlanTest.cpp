@@ -5,6 +5,9 @@
 
 #include <vector>
 
+namespace CppRL
+{
+
 // A body plan is the set of slots a creature has at all, which is a different
 // question from what is currently in them. It is authored per creature, so a
 // spider and a hobgoblin need not agree about what a body is.
@@ -60,3 +63,5 @@ TEST_F(BodyPlanTest, SettingAPlanReplacesTheOldOne)
 	EXPECT_FALSE(creature.has_slot(EquipmentSlot::RIGHT_HAND));
 	EXPECT_TRUE(creature.has_slot(EquipmentSlot::BOOTS));
 }
+
+} // namespace CppRL

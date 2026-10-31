@@ -36,6 +36,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class FireballDamageTest : public ::testing::Test
 {
 protected:
@@ -333,3 +336,5 @@ TEST_F(FireballDamageTest, ADeadPlayerIsNeitherBurnedNorCounted)
 	EXPECT_EQ(burst.struck, 0);
 	EXPECT_EQ(burst.playerReach, SpellSystem::PlayerReach::OUTSIDE);
 }
+
+} // namespace CppRL

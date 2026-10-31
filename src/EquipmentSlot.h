@@ -4,6 +4,9 @@
 #include <stdexcept>
 #include <string_view>
 
+namespace CppRL
+{
+
 // file: EquipmentSlot.h
 //
 // The places an item can sit on a creature, and the codec that moves a slot
@@ -123,3 +126,5 @@ inline EquipmentSlot parse_equipment_slot(std::string_view name)
 
 	throw std::runtime_error(std::format("unknown equipment slot '{}'", name));
 }
+
+} // namespace CppRL

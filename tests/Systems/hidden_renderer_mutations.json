@@ -69,7 +69,7 @@
         },
         {
             "file": "tests/test_main.cpp",
-            "original": "\t\twrite_failed_parts_of_the_run();",
+            "original": "\t\tCppRL::write_failed_parts_of_the_run();",
             "mutated": "",
             "catches": "a child that crashed or failed before its call fails with only the never-reached line"
         },

@@ -7,6 +7,9 @@
 
 #include "UniqueId.h"
 
+namespace CppRL
+{
+
 namespace UniqueId
 {
 	using json = nlohmann::json;
@@ -27,3 +30,5 @@ namespace UniqueId
 		Generator::set_next_id(std::max(stored, Generator::peek_next_id()));
 	}
 } // namespace UniqueId
+
+} // namespace CppRL

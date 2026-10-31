@@ -25,6 +25,9 @@
 #include "Trap.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 namespace Pathfinding
 {
 
@@ -492,3 +495,5 @@ namespace Pathfinding
 	}
 
 } // namespace Pathfinding
+
+} // namespace CppRL

@@ -19,6 +19,9 @@
 
 #include "src/RoomEditor.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	const PrefabListRows rows{ 64, 600, 16 };
@@ -73,3 +76,5 @@ TEST(PrefabListRowsTest, BelowTheLastWholeRowSelectsNothing)
 	EXPECT_EQ(rows.slot_at(500), std::nullopt);
 	EXPECT_EQ(rows.slot_at(663), std::nullopt);
 }
+
+} // namespace CppRL

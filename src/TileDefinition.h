@@ -4,6 +4,9 @@
 
 #include "Actor.h"
 
+namespace CppRL
+{
+
 // file: TileDefinition.h
 //
 // Everything a tile type does, in one place, loaded from
@@ -54,3 +57,5 @@ struct TileDefinition
 	TileColor minimapVisible{}; // drawn inside the field of view
 	TileColor minimapRemembered{}; // drawn from memory, outside it
 };
+
+} // namespace CppRL

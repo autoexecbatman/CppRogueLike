@@ -18,6 +18,9 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
+namespace CppRL
+{
+
 using json = nlohmann::json;
 
 // ============================================================================
@@ -368,3 +371,5 @@ TEST_F(PlayerSerializationTest, TheControllerCarriesTheConfusionsEndTime)
 	EXPECT_FALSE(restored.is_confused(TIME_UNITS_PER_ROUND * 3))
 		<< "and it ends on the third";
 }
+
+} // namespace CppRL

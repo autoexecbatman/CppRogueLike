@@ -42,6 +42,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -115,7 +118,7 @@ protected:
 	int damage_from(
 		Creature& attacker,
 		Creature& defender,
-		AttackKind::AttackKind kind,
+		AttackKind kind,
 		int d20)
 	{
 		const int before = defender.get_hp();
@@ -139,20 +142,20 @@ TEST_F(AttackStrengthTest, EachSourceTakesItsPartOfTheRow)
 		std::string_view source{};
 		int strength{ 0 };
 		int exceptional{ 0 };
-		AttackKind::AttackKind kind{ AttackKind::AttackKind::MELEE };
+		AttackKind kind{ AttackKind::MELEE };
 		std::string_view weaponKey{};
 		int hit{ 0 };
 		int damage{ 0 };
 	};
 
 	constexpr std::array<Case, 11> FROM_PAGE_181{ {
-		{ "a swing, 18/00", 18, 100, AttackKind::AttackKind::MELEE, "", 3, 6 },
-		{ "a swing, 3", 3, 0, AttackKind::AttackKind::MELEE, "", -3, -1 },
+		{ "a swing, 18/00", 18, 100, AttackKind::MELEE, "", 3, 6 },
+		{ "a swing, 3", 3, 0, AttackKind::MELEE, "", -3, -1 },
 		{
 			"a thrown or natural missile, 18/00",
 			18,
 			100,
-			AttackKind::AttackKind::RANGED,
+			AttackKind::RANGED,
 			"",
 			3,
 			6,
@@ -161,7 +164,7 @@ TEST_F(AttackStrengthTest, EachSourceTakesItsPartOfTheRow)
 			"a bow, 18/00",
 			18,
 			100,
-			AttackKind::AttackKind::RANGED,
+			AttackKind::RANGED,
 			"long_bow",
 			0,
 			0,
@@ -170,7 +173,7 @@ TEST_F(AttackStrengthTest, EachSourceTakesItsPartOfTheRow)
 			"a bow, 3",
 			3,
 			0,
-			AttackKind::AttackKind::RANGED,
+			AttackKind::RANGED,
 			"long_bow",
 			-3,
 			-1,
@@ -179,7 +182,7 @@ TEST_F(AttackStrengthTest, EachSourceTakesItsPartOfTheRow)
 			"a crossbow, 18/00",
 			18,
 			100,
-			AttackKind::AttackKind::RANGED,
+			AttackKind::RANGED,
 			"light_crossbow",
 			0,
 			0,
@@ -188,7 +191,7 @@ TEST_F(AttackStrengthTest, EachSourceTakesItsPartOfTheRow)
 			"a crossbow, 3",
 			3,
 			0,
-			AttackKind::AttackKind::RANGED,
+			AttackKind::RANGED,
 			"light_crossbow",
 			0,
 			0,
@@ -197,17 +200,17 @@ TEST_F(AttackStrengthTest, EachSourceTakesItsPartOfTheRow)
 			"a sling, 18/00",
 			18,
 			100,
-			AttackKind::AttackKind::RANGED,
+			AttackKind::RANGED,
 			"sling",
 			0,
 			0,
 		},
-		{ "a sling, 3", 3, 0, AttackKind::AttackKind::RANGED, "sling", 0, 0 },
+		{ "a sling, 3", 3, 0, AttackKind::RANGED, "sling", 0, 0 },
 		{
 			"a composite bow, 18",
 			18,
 			0,
-			AttackKind::AttackKind::RANGED,
+			AttackKind::RANGED,
 			"composite_bow",
 			1,
 			2,
@@ -216,7 +219,7 @@ TEST_F(AttackStrengthTest, EachSourceTakesItsPartOfTheRow)
 			"a composite bow, 18/00",
 			18,
 			100,
-			AttackKind::AttackKind::RANGED,
+			AttackKind::RANGED,
 			"composite_bow",
 			1,
 			2,
@@ -257,22 +260,22 @@ TEST_F(AttackStrengthTest, OgreGauntletsBesideAGirdleAddTheirOwnRow)
 	struct Case
 	{
 		std::string_view source{};
-		AttackKind::AttackKind kind{ AttackKind::AttackKind::MELEE };
+		AttackKind kind{ AttackKind::MELEE };
 		const Item* fired{ nullptr };
 		int hit{ 0 };
 		int damage{ 0 };
 	};
 
 	const std::array<Case, 3> FROM_PAGES_964_AND_966{ {
-		{ "a swing", AttackKind::AttackKind::MELEE, nullptr, 6, 13 },
+		{ "a swing", AttackKind::MELEE, nullptr, 6, 13 },
 		{
 			"a hurled or natural missile",
-			AttackKind::AttackKind::RANGED,
+			AttackKind::RANGED,
 			nullptr,
 			6,
 			13,
 		},
-		{ "a bow", AttackKind::AttackKind::RANGED, longBow.get(), 0, 0 },
+		{ "a bow", AttackKind::RANGED, longBow.get(), 0, 0 },
 	} };
 
 	for (const Case& expected : FROM_PAGES_964_AND_966)
@@ -301,7 +304,7 @@ TEST_F(AttackStrengthTest, AGirdleOrOgreGauntletsAloneGiveOnlyTheirOwnRow)
 	const AttackStrength::Adjustment girdleAlone = AttackStrength::adjustment(
 		mock.data_manager,
 		*player,
-		AttackKind::AttackKind::MELEE,
+		AttackKind::MELEE,
 		nullptr);
 	EXPECT_EQ(girdleAlone.hit, 3);
 	EXPECT_EQ(girdleAlone.damage, 7);
@@ -315,7 +318,7 @@ TEST_F(AttackStrengthTest, AGirdleOrOgreGauntletsAloneGiveOnlyTheirOwnRow)
 		AttackStrength::adjustment(
 			mock.data_manager,
 			*player,
-			AttackKind::AttackKind::MELEE,
+			AttackKind::MELEE,
 			nullptr);
 	EXPECT_EQ(gauntletsAlone.hit, 3);
 	EXPECT_EQ(gauntletsAlone.damage, 6);
@@ -341,7 +344,7 @@ TEST_F(AttackStrengthTest, OtherGauntletsBesideAGirdleAddNothing)
 	const AttackStrength::Adjustment swing = AttackStrength::adjustment(
 		mock.data_manager,
 		*player,
-		AttackKind::AttackKind::MELEE,
+		AttackKind::MELEE,
 		nullptr);
 
 	EXPECT_EQ(swing.hit, 3);
@@ -356,12 +359,10 @@ TEST_F(AttackStrengthTest, ASwingInOgreGauntletsAndAGirdleTakesBoth)
 	ASSERT_TRUE(player
 			->equip_item(weapon("long_sword"), EquipmentSlot::RIGHT_HAND, ctx));
 
-	EXPECT_EQ(
-		damage_from(*player, *target, AttackKind::AttackKind::MELEE, 3),
-		0)
+	EXPECT_EQ(damage_from(*player, *target, AttackKind::MELEE, 3), 0)
 		<< "a 3 hit";
 	EXPECT_EQ(
-		damage_from(*player, *target, AttackKind::AttackKind::MELEE, 4),
+		damage_from(*player, *target, AttackKind::MELEE, 4),
 		DIE_ROLLED + 13);
 }
 
@@ -388,12 +389,10 @@ TEST_F(AttackStrengthTest, ACompositeArrowTakesTheRowItIsMadeFor)
 {
 	arm_player(18, 100, "composite_bow", EquipmentSlot::MISSILE_WEAPON);
 
-	EXPECT_EQ(
-		damage_from(*player, *target, AttackKind::AttackKind::RANGED, 8),
-		0)
+	EXPECT_EQ(damage_from(*player, *target, AttackKind::RANGED, 8), 0)
 		<< "an 8 hit";
 	EXPECT_EQ(
-		damage_from(*player, *target, AttackKind::AttackKind::RANGED, 9),
+		damage_from(*player, *target, AttackKind::RANGED, 9),
 		DIE_ROLLED + 2);
 }
 
@@ -457,9 +456,7 @@ TEST_F(AttackStrengthTest, AnArmThatLosesItsStrengthCannotDrawTheBowItHolds)
 	ASSERT_EQ(player->get_strength(), 12)
 		<< "taking the girdle off did not lower Strength";
 
-	EXPECT_EQ(
-		damage_from(*player, *target, AttackKind::AttackKind::RANGED, 20),
-		0)
+	EXPECT_EQ(damage_from(*player, *target, AttackKind::RANGED, 20), 0)
 		<< "a Strength 12 arm drew a bow made for 18";
 }
 
@@ -482,9 +479,7 @@ TEST_F(AttackStrengthTest, AMonsterTooWeakForItsBowDrawsNothing)
 	archer.set_body_plan({ EquipmentSlot::MISSILE_WEAPON });
 	archer.wear(weapon("composite_bow"), EquipmentSlot::MISSILE_WEAPON);
 
-	EXPECT_EQ(
-		damage_from(archer, *player, AttackKind::AttackKind::RANGED, 20),
-		0)
+	EXPECT_EQ(damage_from(archer, *player, AttackKind::RANGED, 20), 0)
 		<< "a Strength 12 monster drew a bow made for 18";
 }
 
@@ -512,10 +507,10 @@ TEST_F(AttackStrengthTest, AStrongArchersArrowCarriesNoStrength)
 			->equip_item(weapon("long_sword"), EquipmentSlot::RIGHT_HAND, ctx));
 
 	EXPECT_EQ(
-		damage_from(*player, *target, AttackKind::AttackKind::RANGED, 20),
+		damage_from(*player, *target, AttackKind::RANGED, 20),
 		DIE_ROLLED);
 	EXPECT_EQ(
-		damage_from(*player, *target, AttackKind::AttackKind::MELEE, 20),
+		damage_from(*player, *target, AttackKind::MELEE, 20),
 		DIE_ROLLED + 6);
 }
 
@@ -524,12 +519,10 @@ TEST_F(AttackStrengthTest, AWeakArchersPenaltyReachesTheRollAndTheDamage)
 {
 	arm_player(3, 0, "long_bow", EquipmentSlot::MISSILE_WEAPON);
 
-	EXPECT_EQ(
-		damage_from(*player, *target, AttackKind::AttackKind::RANGED, 12),
-		0)
+	EXPECT_EQ(damage_from(*player, *target, AttackKind::RANGED, 12), 0)
 		<< "a 12 hit through the -3";
 	EXPECT_EQ(
-		damage_from(*player, *target, AttackKind::AttackKind::RANGED, 13),
+		damage_from(*player, *target, AttackKind::RANGED, 13),
 		DIE_ROLLED - 1);
 }
 
@@ -539,7 +532,7 @@ TEST_F(AttackStrengthTest, ACrossbowIgnoresAWeakArm)
 	arm_player(3, 0, "light_crossbow", EquipmentSlot::MISSILE_WEAPON);
 
 	EXPECT_EQ(
-		damage_from(*player, *target, AttackKind::AttackKind::RANGED, 10),
+		damage_from(*player, *target, AttackKind::RANGED, 10),
 		DIE_ROLLED);
 }
 
@@ -563,7 +556,7 @@ TEST_F(AttackStrengthTest, AMonsterArcherFollowsTheSameRule)
 	archer.set_body_plan({ EquipmentSlot::MISSILE_WEAPON });
 	archer.wear(weapon("long_bow"), EquipmentSlot::MISSILE_WEAPON);
 
-	EXPECT_EQ(
-		damage_from(archer, *player, AttackKind::AttackKind::RANGED, 20),
-		DIE_ROLLED);
+	EXPECT_EQ(damage_from(archer, *player, AttackKind::RANGED, 20), DIE_ROLLED);
 }
+
+} // namespace CppRL

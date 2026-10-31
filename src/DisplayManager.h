@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 class Player;
 struct GameContext;
 
@@ -14,3 +17,5 @@ public:
 		GameContext& ctx) const noexcept;
 	void display_balance_viewer(GameContext& ctx) const;
 };
+
+} // namespace CppRL

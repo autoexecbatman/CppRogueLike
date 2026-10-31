@@ -4,6 +4,9 @@
 
 #include "DamageInfo.h"
 
+namespace CppRL
+{
+
 class Creature;
 struct GameContext;
 
@@ -108,3 +111,5 @@ namespace DamageResolver
 	// first. Returns damage post-shield and updated tempHp value.
 	ShieldResult apply_temp_hp_shield(int damage, int tempHp);
 } // namespace DamageResolver
+
+} // namespace CppRL

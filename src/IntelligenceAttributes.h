@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 struct IntelligenceAttributes
 {
 	int Int{};
@@ -9,3 +12,5 @@ struct IntelligenceAttributes
 	int MaxNumberOfSpells{};
 	int IllusionImmunity{};
 };
+
+} // namespace CppRL

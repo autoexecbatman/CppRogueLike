@@ -34,6 +34,9 @@
 #include "tests/mocks/CountingAi.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class CreatureScheduleTest : public ::testing::Test
 {
 protected:
@@ -208,3 +211,5 @@ TEST_F(CreatureScheduleTest, TheCountsDoNotDriftOverTenRounds)
 
 	EXPECT_EQ(mind->updates, 20);
 }
+
+} // namespace CppRL

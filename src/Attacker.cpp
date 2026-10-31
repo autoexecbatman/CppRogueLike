@@ -40,6 +40,9 @@
 #include "Vector2D.h"
 #include "WeaponDamageRegistry.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -89,13 +92,13 @@ int Attacker::weapon_hit_modifier(const Item* weapon)
 	return enhancement.toHitBonus;
 }
 
-AttackResult::AttackResult Attacker::perform_single_attack(
+AttackResult Attacker::perform_single_attack(
 	Creature& owner,
 	Creature& target,
 	const DamageInfo& attackDamage,
 	int attackPenalty,
 	std::string_view handName,
-	AttackKind::AttackKind kind,
+	AttackKind kind,
 	GameContext& ctx)
 {
 	assert(
@@ -104,10 +107,10 @@ AttackResult::AttackResult Attacker::perform_single_attack(
 	assert(ctx.dice && "Attacker::perform_single_attack: called without dice");
 
 	// Shopkeeper interaction, melee only: the shop component is what marks a trader.
-	if (target.shop && kind == AttackKind::AttackKind::MELEE)
+	if (target.shop && kind == AttackKind::MELEE)
 	{
 		ctx.menus->push_back(std::make_unique<MenuTrade>(target, owner, ctx));
-		return AttackResult::AttackResult::PREVENTED;
+		return AttackResult::PREVENTED;
 	}
 
 	// Every path that builds a creature sets a Strength above zero and nothing in the
@@ -131,12 +134,12 @@ AttackResult::AttackResult Attacker::perform_single_attack(
 			ColorPairId::WHITE_BLACK,
 			" in vain.");
 		ctx.messageSystem->finalize_message();
-		return AttackResult::AttackResult::PREVENTED;
+		return AttackResult::PREVENTED;
 	}
 
 	// A bow made for a stronger arm than this one is not drawn at all, so nothing is rolled
 	// against it - not the attack, and not a Sanctuary save the target's ward would ask.
-	const Item* missileWeapon = kind == AttackKind::AttackKind::RANGED ?
+	const Item* missileWeapon = kind == AttackKind::RANGED ?
 		owner.get_equipped_item(EquipmentSlot::MISSILE_WEAPON) :
 		nullptr;
 	if (missileWeapon && !can_draw(owner, *missileWeapon))
@@ -152,7 +155,7 @@ AttackResult::AttackResult Attacker::perform_single_attack(
 			missileWeapon->get_name());
 		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ".");
 		ctx.messageSystem->finalize_message();
-		return AttackResult::AttackResult::PREVENTED;
+		return AttackResult::PREVENTED;
 	}
 
 	// Sanctuary wards whoever bears it: an attacker that fails its save against the
@@ -170,7 +173,7 @@ AttackResult::AttackResult Attacker::perform_single_attack(
 			target.actorData.name);
 		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ".");
 		ctx.messageSystem->finalize_message();
-		return AttackResult::AttackResult::PREVENTED;
+		return AttackResult::PREVENTED;
 	}
 
 	// The part of the attacker's Table 1 row this attack takes, by what fires it.
@@ -281,9 +284,9 @@ AttackResult::AttackResult Attacker::perform_single_attack(
 
 	if (isHit)
 	{
-		return AttackResult::AttackResult::LANDED;
+		return AttackResult::LANDED;
 	}
-	return AttackResult::AttackResult::MISSED;
+	return AttackResult::MISSED;
 }
 
 BackstabInfo Attacker::calculate_backstab_bonus(
@@ -316,7 +319,7 @@ int Attacker::calculate_to_hit_roll(
 	int attackPenalty,
 	int strengthHit,
 	const BackstabInfo& backstab,
-	AttackKind::AttackKind kind,
+	AttackKind kind,
 	GameContext& ctx) const noexcept
 {
 	assert(
@@ -334,7 +337,7 @@ int Attacker::calculate_to_hit_roll(
 	}
 
 	// A missile attack takes the dexterity missile adjustment; a swing does not.
-	if (kind == AttackKind::AttackKind::RANGED)
+	if (kind == AttackKind::RANGED)
 	{
 		const int missileAdjustment =
 			ctx.dataManager->dexterity_for(attacker.get_dexterity())
@@ -517,19 +520,19 @@ void Attacker::save(json& output)
 	output["damageInfo"]["type"] = damage_type_name(damageInfo.damageType);
 }
 
-ShotImpact RangedShot::impact_of(AttackResult::AttackResult result) noexcept
+ShotImpact RangedShot::impact_of(AttackResult result) noexcept
 {
 	switch (result)
 	{
-	case AttackResult::AttackResult::LANDED:
+	case AttackResult::LANDED:
 	{
 		return ShotImpact::MISSILE_AND_BLOOD;
 	}
-	case AttackResult::AttackResult::MISSED:
+	case AttackResult::MISSED:
 	{
 		return ShotImpact::MISSILE;
 	}
-	case AttackResult::AttackResult::PREVENTED:
+	case AttackResult::PREVENTED:
 	{
 		return ShotImpact::NOTHING;
 	}
@@ -538,7 +541,7 @@ ShotImpact RangedShot::impact_of(AttackResult::AttackResult result) noexcept
 	std::unreachable();
 }
 
-AttackResult::AttackResult RangedShot::fire(
+AttackResult RangedShot::fire(
 	Creature& shooter,
 	Creature& target,
 	GameContext& ctx)
@@ -548,8 +551,8 @@ AttackResult::AttackResult RangedShot::fire(
 	assert(ctx.tileConfig && "RangedShot::fire: called without a tileConfig");
 
 	// The attack resolves as the missile leaves, so its messages print before it lands.
-	const AttackResult::AttackResult result =
-		shooter.attacker->attack(target, AttackKind::AttackKind::RANGED, ctx);
+	const AttackResult result =
+		shooter.attacker->attack(target, AttackKind::RANGED, ctx);
 	const ShotImpact impact = impact_of(result);
 	if (impact == ShotImpact::NOTHING)
 	{
@@ -579,3 +582,5 @@ AttackResult::AttackResult RangedShot::fire(
 		on_arrive);
 	return result;
 }
+
+} // namespace CppRL

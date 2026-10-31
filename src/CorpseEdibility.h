@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 // file: CorpseEdibility.h
 //
 // Whether a monster's corpse can be eaten. A record states it as "corpse_edible", the
@@ -39,3 +42,5 @@ enum class CorpseEdibility
 }
 
 // end of file: CorpseEdibility.h
+
+} // namespace CppRL

@@ -20,6 +20,9 @@
 #include <nlohmann/json_fwd.hpp>
 #include <stdexcept>
 
+namespace CppRL
+{
+
 using json = nlohmann::json;
 
 // ============================================================================
@@ -464,3 +467,5 @@ TEST_F(CreatureSerializationTest, ACreatureWithNoDelaySetTakesAWholeRound)
 	EXPECT_EQ(fresh->get_action_delay(), TIME_UNITS_PER_ROUND);
 	EXPECT_EQ(fresh->get_next_action_time(), 0);
 }
+
+} // namespace CppRL

@@ -14,6 +14,9 @@
 #include "Paths.h"
 #include "TileRefJson.h"
 
+namespace CppRL
+{
+
 namespace ContentRegistryIO
 {
 
@@ -75,3 +78,5 @@ namespace ContentRegistryIO
 } // namespace ContentRegistryIO
 
 // end of file: ContentRegistryIO.cpp
+
+} // namespace CppRL

@@ -35,6 +35,9 @@
 #include "src/TileType.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -153,3 +156,5 @@ TEST_F(AmuletPlacementTest, TheAmuletIsNeverPlacedInWater)
 		EXPECT_EQ(placed.y, DRY_ROW);
 	}
 }
+
+} // namespace CppRL

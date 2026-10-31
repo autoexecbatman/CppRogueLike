@@ -11,6 +11,9 @@
 #include "Persistent.h"
 #include "TurnSchedule.h"
 
+namespace CppRL
+{
+
 class Player;
 class Item;
 struct Vector2D;
@@ -156,3 +159,5 @@ public:
 		return confusionEndTime.has_value() && currentTime < *confusionEndTime;
 	}
 };
+
+} // namespace CppRL

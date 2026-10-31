@@ -15,6 +15,9 @@
 #include "Persistent.h"
 #include "TileRef.h"
 
+namespace CppRL
+{
+
 namespace TileRefJson
 {
 
@@ -47,3 +50,5 @@ namespace TileRefJson
 	[[nodiscard]] json encode_tile(TileRef tile);
 
 } // namespace TileRefJson
+
+} // namespace CppRL

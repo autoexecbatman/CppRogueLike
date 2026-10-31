@@ -17,6 +17,9 @@
 #include "TileRef.h" // TileRef, held by value below
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 class Player;
 class RandomDice;
 // Taken by reference in the constructor and not kept, so its definition is not needed here.
@@ -203,3 +206,5 @@ namespace TrapDisarm
 } // namespace TrapDisarm
 
 // end of file: Trap.h
+
+} // namespace CppRL

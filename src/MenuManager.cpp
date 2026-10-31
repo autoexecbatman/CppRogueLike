@@ -7,6 +7,9 @@
 #include "MenuManager.h"
 #include "RenderingManager.h"
 
+namespace CppRL
+{
+
 void MenuManager::handle_menus(
 	std::deque<std::unique_ptr<BaseMenu>>& menus,
 	GameContext& ctx)
@@ -57,3 +60,5 @@ void MenuManager::restore_game_display(GameContext& ctx)
 
 	ctx.renderingManager->restore_game_display();
 }
+
+} // namespace CppRL

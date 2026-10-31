@@ -20,6 +20,9 @@
 #include "UniqueId.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 namespace InventoryOperations
 {
 
@@ -375,3 +378,5 @@ namespace InventoryOperations
 		return found != inventory.items.end() ? found->get() : nullptr;
 	}
 } // namespace InventoryOperations
+
+} // namespace CppRL

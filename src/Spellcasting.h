@@ -34,6 +34,9 @@
 
 #include "SpellRegistry.h"
 
+namespace CppRL
+{
+
 // How often an innate power can be used.
 enum class PowerFrequency
 {
@@ -138,3 +141,5 @@ void spend_memorized(Spellcasting& spellcasting, std::string_view key);
 [[nodiscard]] Spellcasting parse_spellcasting(const nlohmann::json& record);
 
 // end of file: Spellcasting.h
+
+} // namespace CppRL

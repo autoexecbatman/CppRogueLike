@@ -4,6 +4,9 @@
 #include <stdexcept>
 #include <string_view>
 
+namespace CppRL
+{
+
 // file: CreatureClass.h
 //
 // The AD&D 2e class a creature belongs to. Kept apart from Creature so a
@@ -114,3 +117,5 @@ enum class CreatureClass
 	return creatureClass == CreatureClass::FIGHTER ||
 		creatureClass == CreatureClass::MONSTER;
 }
+
+} // namespace CppRL

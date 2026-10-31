@@ -16,6 +16,9 @@
 #include <string>
 #include <string_view>
 
+namespace CppRL
+{
+
 namespace Wording
 {
 
@@ -40,3 +43,5 @@ namespace Wording
 	[[nodiscard]] std::string rounds(int count);
 
 } // namespace Wording
+
+} // namespace CppRL

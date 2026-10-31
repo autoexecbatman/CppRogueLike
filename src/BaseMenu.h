@@ -8,6 +8,9 @@
 #include "Colors.h"
 #include "InputSystem.h"
 
+namespace CppRL
+{
+
 class Renderer;
 class TileConfig;
 struct GameContext;
@@ -100,3 +103,5 @@ public:
 
 	virtual void on_key(GameContext& ctx);
 };
+
+} // namespace CppRL

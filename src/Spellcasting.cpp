@@ -15,6 +15,9 @@
 #include "Spellcasting.h"
 #include "TurnSchedule.h"
 
+namespace CppRL
+{
+
 std::string_view encode_power_frequency(PowerFrequency frequency)
 {
 	switch (frequency)
@@ -173,3 +176,5 @@ Spellcasting parse_spellcasting(const nlohmann::json& record)
 }
 
 // end of file: Spellcasting.cpp
+
+} // namespace CppRL

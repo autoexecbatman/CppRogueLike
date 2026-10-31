@@ -22,6 +22,9 @@
 #include "src/TileType.h"
 #include "src/Vector2D.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr int MAP_SIDE = 20;
@@ -162,3 +165,5 @@ TEST_F(DoorLockingTest, ACorridorThroughAShutDoorLeavesItShut)
 }
 
 // end of file: DoorLockingTest.cpp
+
+} // namespace CppRL

@@ -24,11 +24,14 @@
 #include "src/TileRef.h"
 #include "src/TileType.h"
 #include "src/TurnUndead.h"
-
-using namespace Turning;
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 #include "tests/mocks/TestDice.h"
+
+namespace CppRL
+{
+
+using namespace Turning;
 
 class TurnUndeadTest : public ::testing::Test
 {
@@ -423,3 +426,5 @@ TEST(TurnUndeadDiceTest, TwoDiceReachBothEndsOfTheirRange)
 	EXPECT_EQ(lowest, 2) << "the lowest two dice can show is two";
 	EXPECT_EQ(highest, 12) << "the highest two dice can show is twelve";
 }
+
+} // namespace CppRL

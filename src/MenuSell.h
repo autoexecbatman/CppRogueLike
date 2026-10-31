@@ -10,6 +10,9 @@
 #include "GameContext.h"
 #include "Item.h"
 
+namespace CppRL
+{
+
 class Player;
 
 class MenuSell : public BaseMenu
@@ -38,3 +41,5 @@ public:
 	void on_key(GameContext& ctx) override;
 	void menu(GameContext& ctx) override;
 };
+
+} // namespace CppRL

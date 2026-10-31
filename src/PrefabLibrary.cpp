@@ -24,6 +24,9 @@
 #include "TileRef.h"
 #include "TileType.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Resolves prefab name to index. Returns nullopt if not found.
@@ -242,3 +245,5 @@ void PrefabLibrary::apply_to_rooms(
 		apply_to_room(palette, room, editor, map);
 	}
 }
+
+} // namespace CppRL

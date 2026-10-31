@@ -31,6 +31,9 @@
 #include "src/SpellRegistry.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Every effect's key, in the order SpellEffectType declares them.
@@ -192,3 +195,5 @@ TEST_F(SpellEffectTableTest, TheEffectFieldCyclesThroughEveryEffectOnce)
 	EXPECT_EQ(model.field_value(Field::EFFECT_TYPE), "None")
 		<< "back from the first effect wraps to NONE";
 }
+
+} // namespace CppRL

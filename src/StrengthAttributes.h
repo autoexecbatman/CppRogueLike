@@ -3,6 +3,9 @@
 #include <optional>
 #include <string>
 
+namespace CppRL
+{
+
 // Table 47's four band boundaries: the heaviest load each named band still holds.
 // Severe runs from heavyTo + 1 up to the row's maxCarried, and anything past that is
 // more than the character can carry at all.
@@ -40,3 +43,5 @@ struct StrengthAttributes
 	// bands this game would have to invent.
 	std::optional<EncumbranceBands> encumbrance{};
 };
+
+} // namespace CppRL

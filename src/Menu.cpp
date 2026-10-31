@@ -30,6 +30,9 @@
 #include "SpellEditor.h"
 #endif
 
+namespace CppRL
+{
+
 namespace
 {
 	// Splits text into rows no wider than maxWidth pixels, each cut at a space
@@ -273,3 +276,5 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
 }
 
 // end of file: Menu.cpp
+
+} // namespace CppRL

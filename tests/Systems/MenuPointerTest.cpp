@@ -27,6 +27,9 @@
 #include "src/Renderer.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// BaseMenu is abstract and menu_row_at is for derived menus, so the probe
@@ -132,3 +135,5 @@ TEST_F(MenuPointerTest, APointerLeftOfThePanelAnswersNothing)
 {
 	EXPECT_FALSE(probe.row_at(0, middle_of_row(1), ROWS).has_value());
 }
+
+} // namespace CppRL

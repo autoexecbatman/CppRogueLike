@@ -7,6 +7,9 @@
 #include "BaseMenu.h"
 #include "SpellSystem.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 class Player;
 class SpellRegistry;
@@ -38,3 +41,5 @@ public:
 
 	void menu(GameContext& ctx) override;
 };
+
+} // namespace CppRL

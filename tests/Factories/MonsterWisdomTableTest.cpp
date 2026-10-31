@@ -22,6 +22,9 @@
 #include "src/IntelligenceRating.h"
 #include "src/MonsterAbilityTables.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The ratings the table prints a column for: every one after NON.
@@ -81,3 +84,5 @@ TEST(MonsterWisdomTableTest, ANonIntelligentCreatureReadsTheAnimalColumn)
 }
 
 // end of file: MonsterWisdomTableTest.cpp
+
+} // namespace CppRL

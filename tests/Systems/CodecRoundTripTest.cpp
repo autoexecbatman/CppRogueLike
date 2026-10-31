@@ -53,6 +53,9 @@
 #include "src/TileRef.h"
 #include "src/Weapons.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Encodes to a string and parses it back; the value must survive the trip.
@@ -597,3 +600,5 @@ TEST(CodecRoundTripTest, AnUnknownEquipmentSlotThrows)
 {
 	EXPECT_THROW((void)parse_equipment_slot("third_hand"), std::runtime_error);
 }
+
+} // namespace CppRL

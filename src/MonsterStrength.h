@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 // file: MonsterStrength.h
 //
 // A monster's Strength as the book writes it: a score, and at 18 the exceptional
@@ -58,3 +61,5 @@ struct MonsterStrength
 }
 
 // end of file: MonsterStrength.h
+
+} // namespace CppRL

@@ -40,6 +40,9 @@
 #include "src/TileRef.h"
 #include "src/TileRefJson.h"
 
+namespace CppRL
+{
+
 // Windows marks a file read-only only once every write bit is gone.
 constexpr std::filesystem::perms WRITE_PERMISSIONS =
 	std::filesystem::perms::owner_write | std::filesystem::perms::group_write |
@@ -658,3 +661,5 @@ TEST_F(PaletteTest, AReportedRefusalStaysUntilASaveSucceeds)
 	editor.save_palette_reporting();
 	EXPECT_FALSE(editor.save_error().has_value()) << *editor.save_error();
 }
+
+} // namespace CppRL

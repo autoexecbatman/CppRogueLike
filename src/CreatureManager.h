@@ -5,6 +5,9 @@
 #include <span>
 #include <vector>
 
+namespace CppRL
+{
+
 // Forward declarations
 class Creature;
 class Map;
@@ -57,3 +60,5 @@ public:
 		std::span<const std::unique_ptr<Creature>> creatures,
 		Vector2D pos) const noexcept;
 };
+
+} // namespace CppRL

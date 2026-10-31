@@ -13,6 +13,9 @@
 #include "src/Paths.h"
 #include "src/Pickable.h"
 
+namespace CppRL
+{
+
 // ============================================================================
 // AC-granting types -- must return correct non-zero values
 // ============================================================================
@@ -177,3 +180,5 @@ TEST(PickableAcBonus, Amulet_ReturnsZero)
 	const ItemBehavior behavior = Amulet{};
 	EXPECT_EQ(get_item_ac_bonus(behavior), 0);
 }
+
+} // namespace CppRL

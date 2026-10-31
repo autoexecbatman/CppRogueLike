@@ -1,4 +1,7 @@
 #pragma once
+
+namespace CppRL
+{
 // file: TileRef.h
 //
 // A reference to one DawnLike sprite: which sheet, and the column and row in it. Plain data,
@@ -126,3 +129,5 @@ struct TileRef
 		return sheet == other.sheet && col == other.col && row == other.row;
 	}
 };
+
+} // namespace CppRL

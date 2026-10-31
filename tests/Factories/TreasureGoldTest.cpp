@@ -28,6 +28,9 @@
 
 #include <variant>
 
+namespace CppRL
+{
+
 class TreasureGoldTest : public ::testing::Test
 {
 protected:
@@ -108,3 +111,5 @@ TEST_F(TreasureGoldTest, APileWeighsWhatItsCoinsWeigh)
 	EXPECT_EQ(heavy->enhancement.weight, 7)
 		<< "the part-thousand must not round up";
 }
+
+} // namespace CppRL

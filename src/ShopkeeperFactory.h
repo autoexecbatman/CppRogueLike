@@ -2,6 +2,9 @@
 
 #include "ShopKeeper.h"
 
+namespace CppRL
+{
+
 // Forward declarations
 class Creature;
 struct GameContext;
@@ -33,3 +36,5 @@ public:
 		int dungeonLevel,
 		GameContext& ctx);
 };
+
+} // namespace CppRL

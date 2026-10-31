@@ -8,6 +8,9 @@
 #include <optional>
 #include <string>
 
+namespace CppRL
+{
+
 struct GameContext;
 
 struct MenuEntry
@@ -16,3 +19,5 @@ struct MenuEntry
 	char hotkey{ 0 };
 	std::optional<std::function<void(GameContext&)>> command{};
 };
+
+} // namespace CppRL

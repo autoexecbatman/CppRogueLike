@@ -6,6 +6,9 @@
 #include <stdexcept>
 #include <string_view>
 
+namespace CppRL
+{
+
 // file: IntelligenceRating.h
 //
 // The Intelligence rating every Monstrous Manual stat block prints on its Intelligence
@@ -163,3 +166,5 @@ inline constexpr std::array<IntelligenceRating, 11> ALL_INTELLIGENCE_RATING = {
 }
 
 // end of file: IntelligenceRating.h
+
+} // namespace CppRL

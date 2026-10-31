@@ -6,6 +6,9 @@
 #include "PlayerTurn.h"
 #include "TurnSchedule.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Moves the player's place on the clock by this many time units and opens
@@ -55,3 +58,5 @@ void spend_player_spellcasting(GameContext& ctx)
 }
 
 // end of file: PlayerTurn.cpp
+
+} // namespace CppRL

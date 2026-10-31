@@ -18,6 +18,9 @@
 
 #include "tests/mocks/HiddenRenderer.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// A size no tile size divides, so a stale or rounded value cannot match it.
@@ -83,3 +86,5 @@ TEST(RendererSizeTest, TheRendererReportsTheWindowItHasNotTheOneAskedFor)
 	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
 		<< "the child's check that failed is in its output above";
 }
+
+} // namespace CppRL

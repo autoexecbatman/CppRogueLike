@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 struct CharismaAttributes
 {
 	int Cha{};
@@ -7,3 +10,5 @@ struct CharismaAttributes
 	int Loyalty{};
 	int ReactionAdj{};
 };
+
+} // namespace CppRL

@@ -35,6 +35,9 @@
 #include <stdexcept>
 #include <string>
 
+namespace CppRL
+{
+
 class MonsterRoundTripTest : public ::testing::Test
 {
 protected:
@@ -257,3 +260,5 @@ TEST_F(MonsterRoundTripTest, EveryPersistedFieldSurvivesASave)
 		expect_same_monster(key, original, monsters.get_params(key));
 	}
 }
+
+} // namespace CppRL

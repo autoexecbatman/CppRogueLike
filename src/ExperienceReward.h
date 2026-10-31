@@ -3,6 +3,9 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
+namespace CppRL
+{
+
 class ExperienceReward
 {
 private:
@@ -23,3 +26,5 @@ public:
 	void load(const nlohmann::json& source);
 	void save(nlohmann::json& output) const;
 };
+
+} // namespace CppRL

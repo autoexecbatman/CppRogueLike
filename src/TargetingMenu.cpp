@@ -16,6 +16,9 @@
 #include "TargetingSystem.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 TargetingMenu::TargetingMenu(
 	int maxRange,
 	int aoeRadius,
@@ -177,3 +180,5 @@ void TargetingMenu::draw_cursor(GameContext& ctx) const
 }
 
 // end of file: Systems/TargetingMenu.cpp
+
+} // namespace CppRL

@@ -21,6 +21,9 @@
 #include "ShopKeeper.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 using namespace InventoryOperations;
 
 ShopKeeper::ShopKeeper(ShopType type, ShopQuality quality, RandomDice& dice) :
@@ -612,3 +615,5 @@ std::unique_ptr<ShopKeeper> ShopKeeper::create(const json& source)
 	shopkeeper->load(source);
 	return shopkeeper;
 }
+
+} // namespace CppRL

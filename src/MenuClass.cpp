@@ -15,6 +15,9 @@
 #include "Player.h"
 #include "RandomDice.h"
 
+namespace CppRL
+{
+
 std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
 {
 	std::vector<MenuEntry> entries;
@@ -142,3 +145,5 @@ std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
 }
 
 // end of file: MenuClass.cpp
+
+} // namespace CppRL

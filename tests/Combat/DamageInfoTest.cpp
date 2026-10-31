@@ -7,6 +7,9 @@
 #include <set>
 #include <stdexcept>
 
+namespace CppRL
+{
+
 // ============================================================================
 // THE WIZARD'S DAMAGE SYSTEM TESTS
 // Testing core combat calculations - if these fail, combat is broken
@@ -340,3 +343,5 @@ TEST(DamageTypeNameTest, CyclingVisitsEveryTypeAndWraps)
 	EXPECT_EQ(type, DamageType::PHYSICAL)
 		<< "the cycle does not come back round";
 }
+
+} // namespace CppRL

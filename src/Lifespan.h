@@ -30,6 +30,9 @@
 #include "DiceExpr.h"
 #include "PlayerRaceState.h"
 
+namespace CppRL
+{
+
 class RandomDice;
 
 // The ageing bands of Table 12 (PHB, PDF page 51), youngest first.
@@ -138,3 +141,5 @@ struct Lifespan
 [[nodiscard]] Lifespan roll_lifespan(PlayerRaceState race, RandomDice& dice);
 
 // end of file: Lifespan.h
+
+} // namespace CppRL

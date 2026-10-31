@@ -17,6 +17,9 @@
 
 #include "src/RoomEditor.h"
 
+namespace CppRL
+{
+
 // A whole number reads as itself, including the bounds the prompts clamp to.
 TEST(TypedSizeTest, AWholeNumberReadsAsItself)
 {
@@ -44,3 +47,5 @@ TEST(TypedSizeTest, ANumberPastAnIntReadsAsNothing)
 {
 	EXPECT_EQ(parse_typed_size("99999999999"), std::nullopt);
 }
+
+} // namespace CppRL

@@ -23,6 +23,9 @@
 
 #include "Colors.h"
 
+namespace CppRL
+{
+
 struct LogMessage
 {
 	ColorPairId color{ ColorPairId::WHITE_BLACK };
@@ -30,3 +33,5 @@ struct LogMessage
 };
 
 // end of file: LogMessage.h
+
+} // namespace CppRL

@@ -20,6 +20,9 @@
 
 #include "src/FovMap.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr int GRID_SIDE = 40;
@@ -192,3 +195,5 @@ TEST_F(FovMapTest, SightReachesIntoEveryOctant)
 }
 
 // end of file: FovMapTest.cpp
+
+} // namespace CppRL

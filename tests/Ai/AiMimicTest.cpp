@@ -10,6 +10,9 @@
 #include "src/Ai.h"
 #include "src/AiMimic.h"
 
+namespace CppRL
+{
+
 using json = nlohmann::json;
 
 TEST(AiMimicTest, Save_WritesMimicType_NotMonsterType)
@@ -49,3 +52,5 @@ TEST(AiMimicTest, SaveLoad_RoundTrip_PreservesType)
 	loaded->save(j2);
 	EXPECT_EQ(j2["type"], "mimic") << "loaded AI must still be a mimic";
 }
+
+} // namespace CppRL

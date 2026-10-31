@@ -7,6 +7,9 @@
 #include <stdexcept>
 #include <string_view>
 
+namespace CppRL
+{
+
 enum class TargetMode : int
 {
 	AUTO_NEAREST,
@@ -162,3 +165,5 @@ inline TargetMode parse_target_mode(std::string_view name)
 
 	throw std::runtime_error(std::format("unknown target_mode '{}'", name));
 }
+
+} // namespace CppRL

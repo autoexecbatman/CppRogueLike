@@ -43,6 +43,9 @@
 #include "src/TileType.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -365,3 +368,5 @@ TEST_F(MonsterWaterDetourTest, AMonsterWalksRoundAPuddleInsteadOfStoppingAtIt)
 		<< goblin.position.y << "), " << distance_to_player()
 		<< " tiles out, because the only nearer tile was the water";
 }
+
+} // namespace CppRL

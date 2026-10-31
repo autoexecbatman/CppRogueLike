@@ -2,6 +2,9 @@
 #include <string>
 #include <vector>
 
+namespace CppRL
+{
+
 // file: DungeonRoom.h
 //
 // Single source of truth for a BSP-generated room's geometry.
@@ -77,3 +80,5 @@ struct DungeonRoom
 			tileRow <= row_end();
 	}
 };
+
+} // namespace CppRL

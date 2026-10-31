@@ -12,6 +12,9 @@
 
 #include "StartupSteps.h"
 
+namespace CppRL
+{
+
 std::optional<StartupRefusal> run_startup_steps(
 	std::span<const StartupStep> steps,
 	std::ostream& log)
@@ -74,3 +77,5 @@ void report_startup_refusal(const StartupRefusal& refusal)
 		line.c_str());
 #endif
 }
+
+} // namespace CppRL

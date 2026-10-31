@@ -7,6 +7,9 @@
 #include "LogMessage.h"
 #include "MessageSystem.h"
 
+namespace CppRL
+{
+
 MessageSystem::MessageSystem() = default;
 
 void MessageSystem::begin_run()
@@ -80,3 +83,5 @@ void MessageSystem::display_debug_messages() const noexcept
 	// Not yet ported from curses to Raylib; log() already streams to std::clog in debug mode.
 	log("display_debug_messages: debug viewer not yet implemented for Raylib");
 }
+
+} // namespace CppRL

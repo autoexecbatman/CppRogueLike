@@ -46,6 +46,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	const Vector2D EAST_OF_THIEF{ 6, 5 };
@@ -479,3 +482,5 @@ TEST_F(TrapDisarmTest, ADisarmedTrapIsRefusedWithoutAnAction)
 }
 
 // end of file: TrapDisarmTest.cpp
+
+} // namespace CppRL

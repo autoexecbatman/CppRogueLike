@@ -5,6 +5,9 @@
 #include "DungeonRoom.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 
 // Centralized spatial placement utilities.
@@ -24,3 +27,5 @@ namespace SpawnUtils
 		const DungeonRoom& room,
 		GameContext& ctx);
 } // namespace SpawnUtils
+
+} // namespace CppRL

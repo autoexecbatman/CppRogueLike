@@ -38,6 +38,9 @@
 #include "src/ThiefSkills.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 class ThiefSkillCharacterTest : public ::testing::Test
 {
 protected:
@@ -212,3 +215,5 @@ TEST_F(ThiefSkillCharacterTest, ASaveWithoutThePointsIsRefused)
 }
 
 // end of file: ThiefSkillCharacterTest.cpp
+
+} // namespace CppRL

@@ -36,6 +36,9 @@
 #include "src/MonsterRegistry.h"
 #include "src/Paths.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The dragon's record as the monster editor reads it from the data file.
@@ -108,3 +111,5 @@ TEST(DragonStatBlockTest, ItsOneAttackIsAPhysicalBite)
 }
 
 // end of file: DragonStatBlockTest.cpp
+
+} // namespace CppRL

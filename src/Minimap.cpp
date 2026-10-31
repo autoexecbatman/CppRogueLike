@@ -13,6 +13,9 @@
 #include "TileConfig.h"
 #include "TileDefinition.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// How much of the window the overlay may take across and down. The pixels
@@ -134,3 +137,5 @@ void Minimap::render(const GameContext& ctx) const
 		tilePx + 2,
 		Color{ 255, 255, 0, 255 });
 }
+
+} // namespace CppRL

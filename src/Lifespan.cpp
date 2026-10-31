@@ -9,6 +9,9 @@
 #include "PlayerRaceState.h"
 #include "RandomDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Whether the age has reached the band, so a band's change counts.
@@ -258,3 +261,5 @@ Lifespan roll_lifespan(PlayerRaceState race, RandomDice& dice)
 }
 
 // end of file: Lifespan.cpp
+
+} // namespace CppRL

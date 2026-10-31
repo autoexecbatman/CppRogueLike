@@ -39,6 +39,9 @@
 #include "src/Trap.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -383,3 +386,5 @@ TEST_F(MonsterMovementTest, AHunterBehindACreatureInACorridorWaits)
 }
 
 // end of file: MonsterMovementTest.cpp
+
+} // namespace CppRL

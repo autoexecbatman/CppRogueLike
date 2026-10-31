@@ -8,6 +8,9 @@
 #include "ContentRegistry.h"
 #include "TileRef.h"
 
+namespace CppRL
+{
+
 TileRef ContentRegistry::get_tile(std::string_view key) const
 {
 	return itemTiles.contains(std::string{ key }) ?
@@ -38,3 +41,5 @@ const std::unordered_map<std::string, TileRef>& ContentRegistry::all_tiles()
 }
 
 // end of file: ContentRegistry.cpp
+
+} // namespace CppRL

@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 // file: PlayerTurn.h
 //
 // The one place that says the player has spent an action. Before this existed, 33
@@ -45,3 +48,5 @@ void spend_player_action(GameContext& ctx, int baseCost);
 // Example, a hasted player of the ordinary delay at clock 5000:
 //   spend_player_spellcasting(ctx);   // clock -> 5120, where an action would reach 5060
 void spend_player_spellcasting(GameContext& ctx);
+
+} // namespace CppRL

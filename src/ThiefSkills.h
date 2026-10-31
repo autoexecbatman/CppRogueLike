@@ -33,6 +33,9 @@
 #include <optional>
 #include <string_view>
 
+namespace CppRL
+{
+
 // The eight, in the order Table 26 prints them.
 enum class ThiefSkill
 {
@@ -233,3 +236,5 @@ public:
 };
 
 // end of file: ThiefSkills.h
+
+} // namespace CppRL

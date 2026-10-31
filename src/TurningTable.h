@@ -3,6 +3,9 @@
 #include <array>
 #include <cstddef>
 
+namespace CppRL
+{
+
 // file: TurningTable.h
 //
 // AD&D 2e Table 61, "Turning Undead" (Player's Handbook page 208-209), and the
@@ -193,3 +196,5 @@ inline constexpr std::array<
 
 	return highest;
 }
+
+} // namespace CppRL

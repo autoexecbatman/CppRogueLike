@@ -35,6 +35,9 @@
 #include "src/ItemCreator.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 using json = nlohmann::json;
 
 namespace
@@ -112,3 +115,5 @@ TEST_F(InventoryPersistenceTest, AnEmptyInventoryRoundTrips)
 	EXPECT_EQ(restored.items.size(), 0u);
 	EXPECT_EQ(restored.capacity, PACK_CAPACITY);
 }
+
+} // namespace CppRL

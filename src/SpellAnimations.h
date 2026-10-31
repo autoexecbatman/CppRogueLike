@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 struct Vector2D;
 struct GameContext;
 
@@ -10,3 +13,5 @@ namespace SpellAnimations
 	void animate_creature_hit(Vector2D position, GameContext& ctx);
 	void animate_magic_missile(Vector2D from, Vector2D to, GameContext& ctx);
 } // namespace SpellAnimations
+
+} // namespace CppRL

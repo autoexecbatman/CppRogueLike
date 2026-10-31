@@ -9,6 +9,9 @@
 #include "ItemFactory.h"
 #include "MonsterFactory.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 
 class BalanceViewer : public BaseMenu
@@ -41,3 +44,5 @@ public:
 };
 
 // end of file: Tools/BalanceViewer.h
+
+} // namespace CppRL

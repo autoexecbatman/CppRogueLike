@@ -18,6 +18,9 @@
 #include "TileRef.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The colour of a refused save, in the info bar and the browser header
@@ -893,3 +896,5 @@ void DecorEditor::update_browser(const Renderer& renderer)
 		}
 	}
 }
+
+} // namespace CppRL

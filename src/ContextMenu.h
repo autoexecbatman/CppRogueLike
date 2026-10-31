@@ -6,6 +6,9 @@
 
 #include "BaseMenu.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 
 class ContextMenu : public BaseMenu
@@ -28,3 +31,5 @@ public:
 	// Called once per frame by MenuManager -- no blocking loop
 	void menu(GameContext& ctx) override;
 };
+
+} // namespace CppRL

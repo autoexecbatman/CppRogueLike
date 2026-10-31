@@ -56,6 +56,9 @@
 #include "tests/mocks/MockGameContext.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -716,3 +719,5 @@ TEST_F(RoomShapeTest, AnExitCellStepsAsideWhenTheCentreIsWalled)
 	EXPECT_EQ(map.get_tile_type(Vector2D{ chosen, room.row }), TileType::FLOOR)
 		<< "the exit column " << chosen << " is not floor";
 }
+
+} // namespace CppRL

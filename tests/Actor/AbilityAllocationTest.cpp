@@ -29,6 +29,9 @@
 #include "src/RandomDice.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr std::array<int, ABILITY_COUNT> NO_RACE{ 0, 0, 0, 0, 0, 0 };
@@ -301,3 +304,5 @@ TEST(AbilityAllocationTest, ADigitPastTheEndOfThePoolSpendsNothing)
 	EXPECT_FALSE(allocation.can_spend(Ability::STRENGTH, 2));
 	EXPECT_FALSE(allocation.can_spend(Ability::STRENGTH, 6));
 }
+
+} // namespace CppRL

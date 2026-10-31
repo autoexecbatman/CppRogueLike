@@ -25,6 +25,9 @@
 #include "src/RecordEditor.h"
 #include "tests/mocks/HiddenRenderer.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// A stand-in font: every character is 8 pixels wide.
@@ -245,3 +248,5 @@ TEST(EditorLayoutTest, TheRealInputMeasuresInTheGameFont)
 	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
 		<< "the child's check that failed is in its output above";
 }
+
+} // namespace CppRL

@@ -11,6 +11,9 @@
 #include "TileType.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 namespace SpawnUtils
 {
 
@@ -132,3 +135,5 @@ namespace SpawnUtils
 	}
 
 } // namespace SpawnUtils
+
+} // namespace CppRL

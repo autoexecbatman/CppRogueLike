@@ -17,6 +17,9 @@
 #include "RandomDice.h"
 #include "SavedEnum.h"
 
+namespace CppRL
+{
+
 using json = nlohmann::json;
 
 namespace
@@ -358,3 +361,5 @@ void HungerSystem::load(const json& source)
 			&hunger_state_from);
 	}
 }
+
+} // namespace CppRL

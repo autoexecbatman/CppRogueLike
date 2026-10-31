@@ -4,6 +4,9 @@
 #include "TileFeature.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 // file: SpellTile.h
 //
 // A tile effect a spell left behind: a web, and the walls and clouds that
@@ -33,3 +36,5 @@ public:
 	{
 	}
 };
+
+} // namespace CppRL

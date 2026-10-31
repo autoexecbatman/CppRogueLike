@@ -24,6 +24,9 @@
 
 #include "src/Renderer.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The zooms the renderer actually offers, smallest to largest.
@@ -101,3 +104,5 @@ TEST(PanelRowGeometryTest, RowsAreAPitchApartRegardlessOfZoom)
 			<< "row spacing moved with the tile size, at tile " << tileSize;
 	}
 }
+
+} // namespace CppRL

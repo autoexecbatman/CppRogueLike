@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 // file: DamageSource.h
 //
 // Who dealt a blow, at the grain the experience rule reads it. The DMG pays
@@ -24,3 +27,5 @@ enum class DamageSource
 };
 
 // end of file: DamageSource.h
+
+} // namespace CppRL

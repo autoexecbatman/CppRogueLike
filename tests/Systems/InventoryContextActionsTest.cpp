@@ -24,6 +24,9 @@
 
 #include "src/InventoryUI.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	bool offers(
@@ -107,3 +110,5 @@ TEST(InventoryContextActionsTest, AUsableIsUsedTheSameWayAsABackpackItem)
 		InventoryActions::labels_for_row(InventoryScreen::USABLES, true),
 		InventoryActions::labels_for_row(InventoryScreen::BACKPACK, true));
 }
+
+} // namespace CppRL

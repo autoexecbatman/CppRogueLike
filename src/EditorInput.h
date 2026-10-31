@@ -28,6 +28,9 @@
 
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 class Renderer;
 
 // A key or button an editor reacts to.
@@ -107,3 +110,5 @@ struct EditorInput
 //   read_editor_input(renderer).screenHeight;
 //   // -> renderer.get_screen_height()
 [[nodiscard]] EditorInput read_editor_input(const Renderer& renderer);
+
+} // namespace CppRL

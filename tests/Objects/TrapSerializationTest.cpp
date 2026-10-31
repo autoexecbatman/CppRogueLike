@@ -36,6 +36,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class TrapSerializationTest : public ::testing::Test
 {
 protected:
@@ -205,3 +208,5 @@ TEST_F(TrapSerializationTest, ADocumentWithoutATrapListIsRefused)
 }
 
 // end of file: TrapSerializationTest.cpp
+
+} // namespace CppRL

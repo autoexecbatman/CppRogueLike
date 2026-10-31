@@ -52,6 +52,9 @@
 #include "StrengthAttributes.h"
 #include "WisdomAttributes.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The row a score reads from an ability table ordered by score from 1. Past
@@ -403,3 +406,5 @@ std::vector<WisdomAttributes> DataManager::load_wisdom(
 }
 
 // end of file: Systems/DataManager.cpp
+
+} // namespace CppRL

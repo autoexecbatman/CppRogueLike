@@ -16,6 +16,9 @@
 #include "Renderer.h"
 #include "RenderingManager.h"
 
+namespace CppRL
+{
+
 ContextMenu::ContextMenu(
 	std::vector<std::string> options,
 	int anchor_col,
@@ -169,3 +172,5 @@ void ContextMenu::menu(GameContext& ctx)
 	}
 	draw_content();
 }
+
+} // namespace CppRL

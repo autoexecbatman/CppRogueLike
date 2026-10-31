@@ -25,6 +25,9 @@
 #include "TargetMode.h"
 #include "Weapons.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -430,3 +433,5 @@ std::span<const EnhancedItemSpawnRule> ItemRegistry::get_enhanced_rules() const
 {
 	return enhancedRules;
 }
+
+} // namespace CppRL

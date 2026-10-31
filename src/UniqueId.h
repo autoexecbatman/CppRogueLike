@@ -5,6 +5,9 @@
 
 #include <nlohmann/json_fwd.hpp>
 
+namespace CppRL
+{
+
 // - Unique ID system for game objects
 namespace UniqueId
 {
@@ -57,3 +60,5 @@ namespace UniqueId
 	void save(nlohmann::json& output);
 	void load(const nlohmann::json& source);
 } // namespace UniqueId
+
+} // namespace CppRL

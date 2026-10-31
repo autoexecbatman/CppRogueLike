@@ -13,6 +13,9 @@
 #include "EquipmentSlot.h"
 #include "Paths.h"
 
+namespace CppRL
+{
+
 void BodyPlanRegistry::load(std::string_view path)
 {
 	auto resolved = Paths::resolve(path);
@@ -52,3 +55,5 @@ const std::vector<EquipmentSlot>& BodyPlanRegistry::get(
 
 	return found->second;
 }
+
+} // namespace CppRL

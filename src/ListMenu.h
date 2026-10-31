@@ -17,6 +17,9 @@
 #include "BaseMenu.h"
 #include "MenuEntry.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 
 class ListMenu : public BaseMenu
@@ -42,3 +45,5 @@ public:
 	void on_key(GameContext& ctx) override;
 	void menu(GameContext& ctx) override;
 };
+
+} // namespace CppRL

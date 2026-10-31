@@ -35,6 +35,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// A row of open floor with the player standing on it, room to stumble
@@ -182,3 +185,5 @@ TEST_F(PlayerConfusionTest, AMimicRevealingItselfConfusesThePlayer)
 	EXPECT_TRUE(is_confused_now())
 		<< "the mimic's reveal left the player clear-headed";
 }
+
+} // namespace CppRL

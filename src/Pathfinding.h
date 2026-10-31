@@ -37,6 +37,9 @@
 #include "TileType.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 class Creature;
 class TileConfig;
 struct GameContext;
@@ -152,3 +155,5 @@ namespace Pathfinding
 	};
 
 } // namespace Pathfinding
+
+} // namespace CppRL

@@ -14,15 +14,18 @@
 #include "Player.h"
 #include "PlayerAttacker.h"
 
+namespace CppRL
+{
+
 PlayerAttacker::PlayerAttacker(Player& owner) :
 	Attacker(DamageInfo{}),
 	owner(owner)
 {
 }
 
-AttackResult::AttackResult PlayerAttacker::attack(
+AttackResult PlayerAttacker::attack(
 	Creature& target,
-	AttackKind::AttackKind kind,
+	AttackKind kind,
 	GameContext& ctx)
 {
 	const Player::DualWieldInfo dualWieldInfo = owner.get_dual_wield_info();
@@ -42,7 +45,7 @@ AttackResult::AttackResult PlayerAttacker::attack(
 		const std::string mainName =
 			mainWeapon ? mainWeapon->get_name() : "unarmed";
 
-		const AttackResult::AttackResult mainHand = perform_single_attack(
+		const AttackResult mainHand = perform_single_attack(
 			owner,
 			target,
 			mainDamage,
@@ -53,8 +56,7 @@ AttackResult::AttackResult PlayerAttacker::attack(
 
 		// The off hand swings only while the target is still up, so a main hand that
 		// killed outright reports for both.
-		AttackResult::AttackResult offHand =
-			AttackResult::AttackResult::PREVENTED;
+		AttackResult offHand = AttackResult::PREVENTED;
 		if (!target.is_dead())
 		{
 			const Item* offWeapon =
@@ -69,9 +71,8 @@ AttackResult::AttackResult PlayerAttacker::attack(
 				ctx);
 		}
 		const bool eitherLanded =
-			mainHand == AttackResult::AttackResult::LANDED ||
-			offHand == AttackResult::AttackResult::LANDED;
-		return eitherLanded ? AttackResult::AttackResult::LANDED : mainHand;
+			mainHand == AttackResult::LANDED || offHand == AttackResult::LANDED;
+		return eitherLanded ? AttackResult::LANDED : mainHand;
 	}
 
 	const Item* weapon = owner.get_equipped_item(weapon_slot_for(kind));
@@ -91,3 +92,5 @@ AttackResult::AttackResult PlayerAttacker::attack(
 void PlayerAttacker::load([[maybe_unused]] const json& source) {}
 
 void PlayerAttacker::save([[maybe_unused]] json& output) {}
+
+} // namespace CppRL

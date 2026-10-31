@@ -27,6 +27,9 @@
 #include "TurnSchedule.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 // Spider AI constants
 namespace
 {
@@ -345,12 +348,12 @@ void AiSpider::move_or_attack(
 
 void AiSpider::bite(Creature& owner, Creature& target, GameContext& ctx)
 {
-	const AttackResult::AttackResult result =
-		owner.attacker->attack(target, AttackKind::AttackKind::MELEE, ctx);
+	const AttackResult result =
+		owner.attacker->attack(target, AttackKind::MELEE, ctx);
 
 	// Poison "must be injected into the bloodstream by bite or sting" (DMG, PDF page 736),
 	// so a bite that never landed injects nothing.
-	if (result != AttackResult::AttackResult::LANDED)
+	if (result != AttackResult::LANDED)
 	{
 		return;
 	}
@@ -548,3 +551,5 @@ void AiSpider::save(json& output)
 	output["ambushEndTime"] = ambushEndTime;
 	output["isAmbushing"] = isAmbushing;
 }
+
+} // namespace CppRL

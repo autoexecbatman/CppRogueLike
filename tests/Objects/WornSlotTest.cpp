@@ -34,6 +34,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class WornSlotTest : public ::testing::Test
 {
 protected:
@@ -154,3 +157,5 @@ TEST_F(WornSlotTest, AWornItemIsNeverLostBetweenThePackAndTheSlot)
 	EXPECT_NE(wearer.get_equipped_item(EquipmentSlot::CLOAK), nullptr)
 		<< "it left the pack and reached no slot";
 }
+
+} // namespace CppRL

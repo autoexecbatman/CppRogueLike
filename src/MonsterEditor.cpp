@@ -30,6 +30,9 @@
 #include "Spellcasting.h"
 #include "TileRef.h"
 
+namespace CppRL
+{
+
 static_assert(
 	is_well_formed_table(MonsterEditorModel::FIELDS),
 	"MonsterEditorModel::FIELDS is out of order or misplaces a plain number");
@@ -781,3 +784,5 @@ void MonsterEditorModel::field_set_string(FieldId field, std::string newValue)
 }
 
 // end of file: MonsterEditor.cpp
+
+} // namespace CppRL

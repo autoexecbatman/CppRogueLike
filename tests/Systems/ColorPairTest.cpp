@@ -29,6 +29,9 @@
 #include "src/Colors.h"
 #include "src/Paths.h"
 
+namespace CppRL
+{
+
 // The renderer indexes its table by the pair itself, so every pair needs a slot and
 // the size has to be derived from the list rather than written down beside it.
 TEST(ColorPairTest, TheTableHasASlotForEveryPair)
@@ -76,3 +79,5 @@ TEST(ColorPairTest, EveryColourTheDataShipsNamesAPair)
 }
 
 // end of file: ColorPairTest.cpp
+
+} // namespace CppRL

@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 struct GameContext;
 
 class Minimap
@@ -11,3 +14,5 @@ public:
 	[[nodiscard]] bool is_visible() const noexcept;
 	void render(const GameContext& ctx) const;
 };
+
+} // namespace CppRL

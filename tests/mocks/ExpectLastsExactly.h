@@ -20,6 +20,9 @@
 #include "src/Creature.h"
 #include "src/TurnSchedule.h"
 
+namespace CppRL
+{
+
 inline void expect_lasts_exactly(
 	BuffSystem& buffs,
 	Creature& creature,
@@ -42,3 +45,5 @@ inline void expect_lasts_exactly(
 	EXPECT_FALSE(buffs.has_buff(creature, type))
 		<< "still in force after " << rounds << " rounds";
 }
+
+} // namespace CppRL

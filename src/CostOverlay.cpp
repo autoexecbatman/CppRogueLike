@@ -14,6 +14,9 @@
 #include "Renderer.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -167,3 +170,5 @@ void DebugUtils::CostOverlay::render(const GameContext& ctx) const
 		}
 	}
 }
+
+} // namespace CppRL

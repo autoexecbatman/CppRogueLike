@@ -68,6 +68,9 @@
 #include "TurnSchedule.h"
 #include "WeaponDamageRegistry.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The row a screen y falls in, for a panel filling the screen. Negative
@@ -1777,3 +1780,5 @@ Item* InventoryUI::get_selected_item() const
 
 	return nullptr;
 }
+
+} // namespace CppRL

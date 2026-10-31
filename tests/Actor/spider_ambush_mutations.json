@@ -33,8 +33,8 @@
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "\tconst AttackResult::AttackResult result =\n\t\towner.attacker->attack(target, AttackKind::AttackKind::MELEE, ctx);",
-      "mutated": "\tconst AttackResult::AttackResult result =AttackResult::AttackResult::LANDED;\n\ttarget.take_damage_and_check_death(ctx.dice->roll(1, 4), ctx, DamageType::PHYSICAL);",
+      "original": "\tconst AttackResult result =\n\t\towner.attacker->attack(target, AttackKind::MELEE, ctx);",
+      "mutated": "\tconst AttackResult result =AttackResult::LANDED;\n\ttarget.take_damage_and_check_death(ctx.dice->roll(1, 4), ctx, DamageType::PHYSICAL);",
       "catches": "a bite that lands without an attack roll against armour class"
     },
     {

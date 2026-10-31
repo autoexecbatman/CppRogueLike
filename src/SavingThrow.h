@@ -25,6 +25,9 @@
 
 #include "CreatureClass.h"
 
+namespace CppRL
+{
+
 class Creature;
 struct GameContext;
 
@@ -80,3 +83,5 @@ namespace SavingThrows
 		int modifier,
 		GameContext& ctx);
 } // namespace SavingThrows
+
+} // namespace CppRL

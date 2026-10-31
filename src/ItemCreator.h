@@ -5,6 +5,9 @@
 
 #include "ItemEnhancements.h"
 
+namespace CppRL
+{
+
 // file: ItemCreator.h
 //
 // Builds items from their parameters: gives each the behaviour its type names, its
@@ -54,3 +57,5 @@ namespace ItemCreator
 		GameContext& ctx,
 		int dungeonLevel);
 } // namespace ItemCreator
+
+} // namespace CppRL

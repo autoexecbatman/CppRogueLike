@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 // file: Pickup.h
 //
 // Taking things off the dungeon floor.
@@ -51,3 +54,5 @@ namespace Pickup
 	void from_floor(Creature& taker, GameContext& ctx);
 
 } // namespace Pickup
+
+} // namespace CppRL

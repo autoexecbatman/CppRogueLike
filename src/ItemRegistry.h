@@ -19,6 +19,9 @@
 #include "TurnSchedule.h"
 #include "Weapons.h"
 
+namespace CppRL
+{
+
 // file: ItemRegistry.h
 //
 // Every item the game knows, by key - the items items.json ships and the ones the item
@@ -231,3 +234,5 @@ public:
 	[[nodiscard]] std::span<const EnhancedItemSpawnRule> get_enhanced_rules()
 		const;
 };
+
+} // namespace CppRL

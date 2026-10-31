@@ -29,6 +29,9 @@
 #include "RecordEditor.h"
 #include "SpellRegistry.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 
 // What the spell editor knows about spells: the fields, how each is shown and
@@ -169,3 +172,5 @@ public:
 // The spell editor itself; its members are defined in RecordEditor.cpp.
 using SpellEditor = RecordEditor<SpellEditorModel>;
 extern template class RecordEditor<SpellEditorModel>;
+
+} // namespace CppRL

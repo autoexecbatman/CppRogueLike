@@ -11,6 +11,9 @@
 #include "GameContext.h"
 #include "MessageSystem.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -164,3 +167,5 @@ ShieldResult DamageResolver::apply_temp_hp_shield(int damage, int tempHp)
 
 	return { damageAfterShield, newTempHp };
 }
+
+} // namespace CppRL

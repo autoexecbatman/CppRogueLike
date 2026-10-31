@@ -14,6 +14,9 @@
 #include "NotificationMenu.h"
 #include "Renderer.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -94,3 +97,5 @@ void NotificationMenu::menu(GameContext& ctx)
 		}
 	}
 }
+
+} // namespace CppRL

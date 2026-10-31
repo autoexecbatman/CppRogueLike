@@ -9,6 +9,9 @@
 
 #include "MonsterRegistry.h"
 
+namespace CppRL
+{
+
 // Forward declarations
 class Creature;
 struct Vector2D;
@@ -31,3 +34,5 @@ namespace MonsterCreator
 		GameContext& ctx);
 
 } // namespace MonsterCreator
+
+} // namespace CppRL

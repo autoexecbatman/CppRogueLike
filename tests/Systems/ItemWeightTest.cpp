@@ -32,6 +32,9 @@
 #include "src/ItemRegistry.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	struct BookWeight
@@ -268,3 +271,5 @@ TEST_F(ItemWeightTest, ACreatedItemCarriesItsRecordsWeight)
 	EXPECT_EQ(plateMail->enhancement.weight, 50);
 	EXPECT_EQ(dagger->enhancement.weight, 1);
 }
+
+} // namespace CppRL

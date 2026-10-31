@@ -50,6 +50,9 @@
 #include "src/TurnSchedule.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 class SpiderAmbushTest : public ::testing::Test
 {
 protected:
@@ -310,3 +313,5 @@ TEST_F(SpiderAmbushTest, ASpiderTurnedAwayTakesNoSurpriseRound)
 	EXPECT_FALSE(was_told("caught off guard"))
 		<< "a surprise round against a player the spider ignores";
 }
+
+} // namespace CppRL

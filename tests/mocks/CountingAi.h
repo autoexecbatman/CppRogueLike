@@ -17,6 +17,9 @@
 #include "src/Ai.h"
 #include "src/Creature.h"
 
+namespace CppRL
+{
+
 class CountingAi : public Ai
 {
 public:
@@ -40,3 +43,5 @@ public:
 };
 
 // end of file: CountingAi.h
+
+} // namespace CppRL

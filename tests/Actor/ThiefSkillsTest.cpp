@@ -33,6 +33,9 @@
 #include "src/Paths.h"
 #include "src/ThiefSkills.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr std::array<int, THIEF_SKILL_COUNT>
@@ -574,3 +577,5 @@ TEST(ThiefSkillsTest, TheNamesAndTheCursorCoverAllEight)
 }
 
 // end of file: ThiefSkillsTest.cpp
+
+} // namespace CppRL

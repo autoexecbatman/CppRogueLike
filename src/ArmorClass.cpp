@@ -10,6 +10,9 @@
 #include "ItemIdentification.h"
 #include "Pickable.h"
 
+namespace CppRL
+{
+
 ArmorClass::ArmorClass(int baseAC) :
 	armorClass(baseAC),
 	baseArmorClass(baseAC)
@@ -152,3 +155,5 @@ int ArmorClass::without_dexterity_bonus(
 
 	return totalBonus;
 }
+
+} // namespace CppRL

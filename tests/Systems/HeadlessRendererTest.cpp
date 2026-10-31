@@ -34,6 +34,9 @@
 
 #include "tests/mocks/HiddenRenderer.h"
 
+namespace CppRL
+{
+
 TEST(HeadlessRendererTest, AHiddenWindowComesUpAndTheFontMeasuresText)
 {
 	const int childExitCode =
@@ -343,3 +346,5 @@ TEST(HeadlessRendererTest, AChildWhoseRerunFailsBeforeTheCallFailsWithItsText)
 }
 
 // end of file: HeadlessRendererTest.cpp
+
+} // namespace CppRL

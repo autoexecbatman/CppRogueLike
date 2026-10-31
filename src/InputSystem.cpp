@@ -7,6 +7,9 @@
 #include "InputSystem.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr double REPEAT_DELAY = 0.30; // seconds before repeat begins
@@ -738,3 +741,5 @@ Vector2D InputSystem::get_mouse_world_tile(
 }
 
 // end of file: InputSystem.cpp
+
+} // namespace CppRL

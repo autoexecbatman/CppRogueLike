@@ -27,6 +27,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr Vector2D THE_TILE{ 5, 5 };
@@ -94,3 +97,5 @@ TEST_F(DecorationLookupTest, ABrokenOneDoesNotHideAWholeOneOnTheSameTile)
 
 	EXPECT_EQ(map.find_decoration_at(THE_TILE, ctx), &whole);
 }
+
+} // namespace CppRL

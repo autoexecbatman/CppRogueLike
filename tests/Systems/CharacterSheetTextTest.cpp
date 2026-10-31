@@ -21,6 +21,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -78,3 +81,5 @@ TEST_F(
 		line_for(CreatureClass::WIZARD, 10),
 		"CON: 17  (+2 HP/level through level 10)");
 }
+
+} // namespace CppRL

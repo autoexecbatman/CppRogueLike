@@ -25,6 +25,9 @@
 #include "src/ShopKeeper.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class ShopStockLevelTest : public ::testing::Test
 {
 protected:
@@ -135,3 +138,5 @@ TEST_F(ShopStockLevelTest, ToldAtTheBoundaryStocksTheHigherCandidate)
 
 	EXPECT_EQ(stocked_keys(shop).front(), "splint_mail");
 }
+
+} // namespace CppRL

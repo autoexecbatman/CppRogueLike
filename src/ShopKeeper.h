@@ -6,6 +6,9 @@
 #include "InventoryData.h"
 #include "Persistent.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 
 enum class ShopType
@@ -138,3 +141,5 @@ public:
 
 	// Static utility function for creating random shopkeepers
 };
+
+} // namespace CppRL

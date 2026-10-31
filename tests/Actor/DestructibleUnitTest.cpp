@@ -2,6 +2,9 @@
 #include <gtest/gtest.h>
 #include <memory>
 
+namespace CppRL
+{
+
 // Pure unit tests for Destructible logic without Game dependencies
 // Destructible now only manages HealthPool and ConstitutionTracker
 
@@ -66,3 +69,5 @@ TEST(DestructibleUnitTest, TempHP_Storage)
 	EXPECT_EQ(d.get_temp_hp(), 20);
 	EXPECT_EQ(d.get_effective_hp(), 120);
 }
+
+} // namespace CppRL

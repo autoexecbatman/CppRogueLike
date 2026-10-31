@@ -29,6 +29,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class CarryWeightTest : public ::testing::Test
 {
 protected:
@@ -286,3 +289,5 @@ TEST_F(CarryWeightTest, ThePurseIsPartOfACharactersOneLoad)
 	// Five pounds of clothing, ten in the pack, three of coin.
 	EXPECT_EQ(InventoryOperations::get_total_weight(carrier), 18);
 }
+
+} // namespace CppRL

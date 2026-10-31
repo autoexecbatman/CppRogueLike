@@ -12,6 +12,9 @@
 #include "DamageInfo.h"
 #include "ItemIdentification.h"
 
+namespace CppRL
+{
+
 class RandomDice;
 
 // Whether a random draw may hand back one of the magical prefixes - FLAMING,
@@ -691,3 +694,5 @@ public:
 		MagicalPrefixes magicalPrefixes,
 		RandomDice& dice);
 };
+
+} // namespace CppRL

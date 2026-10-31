@@ -49,6 +49,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr std::string_view FIXTURE_NAME = "rubble of a fixture";
@@ -461,3 +464,5 @@ TEST_F(CorpseRecordTest, OnlyTheOddCorpsesAreInedible)
 }
 
 // end of file: CorpseRecordTest.cpp
+
+} // namespace CppRL

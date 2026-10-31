@@ -16,6 +16,9 @@
 
 #include "src/CostOverlay.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -81,3 +84,5 @@ TEST(CostOverlayTest, WithOnlyThePlayerTileReachedItIsNear)
 		DebugUtils::dijkstra_cost_tint(0, 0),
 		DebugUtils::COST_NEAR_TINT);
 }
+
+} // namespace CppRL

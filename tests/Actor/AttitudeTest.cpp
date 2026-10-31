@@ -12,6 +12,9 @@
 #include "src/TileRef.h"
 #include "src/Vector2D.h"
 
+namespace CppRL
+{
+
 class AttitudeTest : public ::testing::Test
 {
 protected:
@@ -61,3 +64,5 @@ TEST_F(AttitudeTest, DisplaceableDefaultsTrueAndIsSettable)
 
 	EXPECT_FALSE(creature.is_displaceable());
 }
+
+} // namespace CppRL

@@ -21,6 +21,9 @@
 #include "UniqueId.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 // Forward declarations
 class Creature;
 class DataManager;
@@ -366,3 +369,5 @@ namespace InventoryOperations
 	}
 
 } // namespace InventoryOperations
+
+} // namespace CppRL

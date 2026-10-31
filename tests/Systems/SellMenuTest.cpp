@@ -38,6 +38,9 @@
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Ten is the average 3d6, which lets a directly built player carry a
@@ -185,3 +188,5 @@ TEST(SellMenuTest, DownFromTheLastRowWrapsToTheFirst)
 }
 
 // end of file: SellMenuTest.cpp
+
+} // namespace CppRL

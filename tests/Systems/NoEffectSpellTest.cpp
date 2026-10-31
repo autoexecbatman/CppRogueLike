@@ -28,6 +28,9 @@
 #include "src/SpellSystem.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class NoEffectSpellTest : public ::testing::Test
 {
 protected:
@@ -92,3 +95,5 @@ TEST_F(NoEffectSpellTest, ASpellWithNoEffectSaysSoAndIsNotSpent)
 	EXPECT_TRUE(said_anything_about("Spell not implemented yet."))
 		<< "the caster was not told";
 }
+
+} // namespace CppRL

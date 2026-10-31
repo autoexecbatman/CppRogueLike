@@ -29,6 +29,9 @@
 #include "src/TurnSchedule.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 class PlayerActionCostTest : public ::testing::Test
 {
 protected:
@@ -99,3 +102,5 @@ TEST_F(PlayerActionCostTest, ASlowedPlayerPaysMoreForTheSameAction)
 
 	EXPECT_EQ(ctx.gameState->get_time(), TIME_UNITS_PER_ROUND * 2);
 }
+
+} // namespace CppRL

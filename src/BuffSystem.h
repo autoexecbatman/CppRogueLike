@@ -4,6 +4,9 @@
 
 #include "BuffType.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 enum class ActorState;
 class Creature;
@@ -107,3 +110,5 @@ public:
 	std::vector<BuffType> remove_buffs_broken_by_attacking(
 		Creature& creature) noexcept;
 };
+
+} // namespace CppRL

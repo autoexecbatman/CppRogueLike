@@ -15,6 +15,9 @@
 #include <gtest/gtest.h>
 #include <memory>
 
+namespace CppRL
+{
+
 // ============================================================================
 // PLAYER VIRTUAL INTERFACE TESTS
 // Guards the Creature* ctx.player() contract introduced when Player* was widened
@@ -130,3 +133,5 @@ TEST_F(PlayerVirtualInterfaceTest, OnKillReward_MultipleRewards_Accumulate)
 	EXPECT_EQ(player->get_xp(), xpBefore + 350);
 	EXPECT_EQ(player->get_kill_count(), 3);
 }
+
+} // namespace CppRL

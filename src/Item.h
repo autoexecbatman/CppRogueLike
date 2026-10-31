@@ -10,6 +10,9 @@
 #include "Pickable.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 class Item : public Actor
 {
 private:
@@ -189,3 +192,5 @@ public:
 		return ItemClassificationUtils::is_ranged_weapon(itemClass);
 	}
 };
+
+} // namespace CppRL

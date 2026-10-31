@@ -27,6 +27,9 @@
 #include "TileConfig.h"
 #include "TileRef.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -1678,3 +1681,5 @@ void RoomEditor::render_tile_picker(const Renderer& renderer) const
 		sheetLabel,
 		Color{ 160, 160, 220, 200 });
 }
+
+} // namespace CppRL

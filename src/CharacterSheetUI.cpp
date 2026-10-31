@@ -21,6 +21,9 @@
 #include "Renderer.h"
 #include "WeaponDamageRegistry.h"
 
+namespace CppRL
+{
+
 // ============================================================================
 // Private helpers - not visible outside this translation unit.
 // ============================================================================
@@ -60,7 +63,7 @@ namespace CharacterSheetText
 		const AttackStrength::Adjustment swing = AttackStrength::adjustment(
 			dataManager,
 			player,
-			AttackKind::AttackKind::MELEE,
+			AttackKind::MELEE,
 			nullptr);
 
 		return std::format(
@@ -247,7 +250,7 @@ namespace
 		const AttackStrength::Adjustment swing = AttackStrength::adjustment(
 			*ctx.dataManager,
 			player,
-			AttackKind::AttackKind::MELEE,
+			AttackKind::MELEE,
 			nullptr);
 		const int strDmgMod = swing.damage;
 
@@ -411,3 +414,5 @@ void CharacterSheetUI::menu(GameContext& ctx)
 	display_equipment_info(player_ref, ctx, row);
 	display_right_panel_info(player_ref, ctx, row);
 }
+
+} // namespace CppRL

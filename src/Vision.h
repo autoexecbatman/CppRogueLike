@@ -2,6 +2,9 @@
 
 #include <string_view>
 
+namespace CppRL
+{
+
 class Creature;
 
 namespace Vision
@@ -31,3 +34,5 @@ namespace Vision
 	[[nodiscard]] int sight_radius(const Creature& viewer) noexcept;
 
 } // namespace Vision
+
+} // namespace CppRL

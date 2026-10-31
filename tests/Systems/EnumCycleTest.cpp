@@ -41,6 +41,9 @@
 #include "src/TargetMode.h"
 #include "src/Weapons.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -155,3 +158,5 @@ TEST(EnumCycleTest, TheValuesTheStaleCountsCutOffAreReachable)
 	EXPECT_TRUE(buffs.contains(BuffType::SILENCE));
 	EXPECT_TRUE(buffs.contains(BuffType::WEBBED));
 }
+
+} // namespace CppRL

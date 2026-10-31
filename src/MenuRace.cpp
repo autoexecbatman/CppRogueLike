@@ -16,6 +16,9 @@
 #include "PlayerRaceState.h"
 #include "RandomDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Which key picks a race. The key is the menu's own business; a race's name
@@ -89,3 +92,5 @@ std::unique_ptr<BaseMenu> make_race_menu(GameContext& ctx)
 }
 
 // end of file: MenuRace.cpp
+
+} // namespace CppRL

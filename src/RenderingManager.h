@@ -5,6 +5,9 @@
 #include <memory>
 #include <span>
 
+namespace CppRL
+{
+
 // Forward declarations
 class Creature;
 class Item;
@@ -68,3 +71,5 @@ public:
 	void restore_game_display() const;
 	void restore_screen(GameContext& ctx) const;
 };
+
+} // namespace CppRL

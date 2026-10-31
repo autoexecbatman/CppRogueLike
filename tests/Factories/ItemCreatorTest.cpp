@@ -21,6 +21,9 @@
 #include <string>
 #include <variant>
 
+namespace CppRL
+{
+
 class ItemCreatorTest : public ::testing::Test
 {
 protected:
@@ -237,3 +240,5 @@ TEST_F(ItemCreatorTest, CarryWeightDoesNotChangeHowOftenAnItemIsDrawn)
 	EXPECT_EQ(drawn->itemKey, "invisibility_potion")
 		<< "the draw must weigh by baseWeight; reading carry weight lands on health_potion";
 }
+
+} // namespace CppRL

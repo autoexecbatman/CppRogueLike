@@ -8,6 +8,11 @@
 
 #include "BaseMenu.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 
 std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx);
+
+} // namespace CppRL

@@ -16,6 +16,9 @@
 
 #include "src/TurnSchedule.h"
 
+namespace CppRL
+{
+
 // A normal being pays what the action says and nothing is scaled away.
 TEST(TurnScheduleTest, ANormalSpeedPaysTheBaseCostUnchanged)
 {
@@ -241,3 +244,5 @@ TEST(TurnScheduleTest, ADurationInTurnsIsTenRoundsATurn)
 	EXPECT_EQ(rounds_in(3, DurationUnit::TURNS), 30);
 	EXPECT_EQ(rounds_in(0, DurationUnit::TURNS), 0);
 }
+
+} // namespace CppRL

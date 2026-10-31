@@ -17,6 +17,9 @@
 #include "src/CreatureSize.h"
 #include "src/MonsterAbilityTables.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	void expect_row(int roll, std::array<int, 6> printed)
@@ -68,3 +71,5 @@ TEST(MonsterConstitutionTableTest, TheHighestRowIsTheBooks)
 }
 
 // end of file: MonsterConstitutionTableTest.cpp
+
+} // namespace CppRL

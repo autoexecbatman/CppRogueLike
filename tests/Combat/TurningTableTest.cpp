@@ -22,6 +22,9 @@
 
 #include "src/TurningTable.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Table 61's columns as the book heads them: "1" through "9", then "10-11",
@@ -322,3 +325,5 @@ TEST(TurningTableTest, BeyondTheTableEdgesClamp)
 	EXPECT_EQ(look_up_turning(1, 0).outcome, TurningOutcome::BEYOND_POWER)
 		<< "level 0 can turn nothing";
 }
+
+} // namespace CppRL

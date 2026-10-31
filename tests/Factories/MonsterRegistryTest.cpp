@@ -17,6 +17,9 @@
 #include "src/MonsterRegistry.h"
 #include "src/Paths.h"
 
+namespace CppRL
+{
+
 // Lowering the goblin's THAC0 in one registry leaves another's at the file's value.
 TEST(MonsterRegistryTest, AnEditToOneRegistryDoesNotReachAnother)
 {
@@ -93,3 +96,5 @@ TEST(MonsterRegistryTest, ALoadReplacesTheCustomMonstersItHeld)
 	EXPECT_FALSE(std::ranges::contains(monsters.get_all_keys(), key))
 		<< "a custom monster survived a load";
 }
+
+} // namespace CppRL

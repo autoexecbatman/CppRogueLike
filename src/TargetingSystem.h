@@ -6,6 +6,9 @@
 #include "Item.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 
 struct TargetResult
@@ -54,3 +57,5 @@ public:
 		const Creature& attacker,
 		int range) const;
 };
+
+} // namespace CppRL

@@ -40,6 +40,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class SpellFailureTest : public ::testing::Test
 {
 protected:
@@ -207,3 +210,5 @@ TEST_F(SpellFailureTest, AnItemsSpellDoesNotFizzle)
 }
 
 // end of file: SpellFailureTest.cpp
+
+} // namespace CppRL

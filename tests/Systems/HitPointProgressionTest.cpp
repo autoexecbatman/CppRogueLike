@@ -38,6 +38,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 // Warriors roll through 9th and gain 3 a level after.
 TEST(HitPointProgressionTest, FighterMatchesTableFourteen)
 {
@@ -414,3 +417,5 @@ TEST_F(HitPointGainTest, AFlatGainIsNotRaised)
 
 	EXPECT_EQ(gain_at_level(10), 3);
 }
+
+} // namespace CppRL

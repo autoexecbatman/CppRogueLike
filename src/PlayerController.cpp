@@ -67,6 +67,9 @@
 #include "TurnUndead.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 // Context action -- label + deferred execute, used to build right-click menus
@@ -593,7 +596,7 @@ void PlayerController::strike(Creature& target, GameContext& ctx)
 	assert(playerOwner.attacker && "strike: the player swung with no attacker");
 
 	// One swing, priced by the rate, so a faster attacker comes round sooner (Table 58).
-	playerOwner.attacker->attack(target, AttackKind::AttackKind::MELEE, ctx);
+	playerOwner.attacker->attack(target, AttackKind::MELEE, ctx);
 	spend_player_action(
 		ctx,
 		AttackRate::attack_cost(playerOwner.get_attacks_per_round()));
@@ -1826,3 +1829,5 @@ Vector2D PlayerController::handle_direction_input(int dirKey, GameContext& ctx)
 }
 
 // end of file: PlayerController.cpp
+
+} // namespace CppRL

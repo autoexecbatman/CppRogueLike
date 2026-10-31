@@ -2,6 +2,9 @@
 
 #include <vector>
 
+namespace CppRL
+{
+
 class RandomDice;
 class Creature;
 struct GameContext;
@@ -93,3 +96,5 @@ namespace Turning
 		GameContext& ctx);
 
 } // namespace Turning
+
+} // namespace CppRL

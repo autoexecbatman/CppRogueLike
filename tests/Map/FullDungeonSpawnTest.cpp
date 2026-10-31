@@ -38,6 +38,9 @@
 #include "src/TileType.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr int ROOM_COL = 2;
@@ -131,3 +134,5 @@ TEST_F(FullDungeonSpawnTest, ADryRoomStillSpawns)
 		<< "a room of dry floor offered no tile at all";
 	EXPECT_FALSE(map.is_water(*position));
 }
+
+} // namespace CppRL

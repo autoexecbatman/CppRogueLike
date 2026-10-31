@@ -13,6 +13,9 @@
 #include "StrengthAttributes.h"
 #include "WisdomAttributes.h"
 
+namespace CppRL
+{
+
 class MessageSystem;
 
 // One row of a printed ability table, parsed from its JSON object. The loaders own
@@ -156,3 +159,5 @@ public:
 		int score,
 		CreatureClass creatureClass) const;
 };
+
+} // namespace CppRL

@@ -4,6 +4,9 @@
 #include "DiceExpr.h"
 #include "RandomDice.h"
 
+namespace CppRL
+{
+
 class Creature;
 class DataManager;
 struct GameContext;
@@ -143,3 +146,5 @@ namespace LevelUpSystem
 	//   thac0_improves_at(CreatureClass::WIZARD, 3);   // -> false, 20 at both
 	bool thac0_improves_at(CreatureClass creatureClass, int level);
 } // namespace LevelUpSystem
+
+} // namespace CppRL

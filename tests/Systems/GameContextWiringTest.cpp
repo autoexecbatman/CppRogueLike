@@ -14,6 +14,9 @@
 #include "../../src/Player.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -100,3 +103,5 @@ namespace
 	}
 
 } // namespace
+
+} // namespace CppRL

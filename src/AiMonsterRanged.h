@@ -5,6 +5,9 @@
 #include "GameContext.h"
 #include "Persistent.h"
 
+namespace CppRL
+{
+
 // Forward declarations
 struct Vector2D;
 
@@ -32,3 +35,5 @@ public:
 	void load(const json& source) override;
 	void save(json& output) override;
 };
+
+} // namespace CppRL

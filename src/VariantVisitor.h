@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 // Constructs a visitor from a set of per-type handler lambdas for use with std::visit.
 //
 // Example:
@@ -19,3 +22,5 @@ struct VariantVisitor : Handlers...
 
 template <typename... Handlers>
 VariantVisitor(Handlers...) -> VariantVisitor<Handlers...>;
+
+} // namespace CppRL

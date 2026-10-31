@@ -30,6 +30,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -217,3 +220,5 @@ TEST_F(ConstitutionRegenerationTest, TheFireAndAcidSurviveASave)
 
 	EXPECT_EQ(loaded->get_unregenerable_damage(), 6);
 }
+
+} // namespace CppRL

@@ -39,6 +39,9 @@
 #include "tests/mocks/MockGameContext.h"
 #include <memory>
 
+namespace CppRL
+{
+
 class HungerSystemTest : public ::testing::Test
 {
 protected:
@@ -385,3 +388,5 @@ INSTANTIATE_TEST_SUITE_P(
 	HungerSystemFieldTest,
 	::testing::Values("hungerValue", "hungerMax", "wellFedMessageShown"),
 	name_for_hunger_field);
+
+} // namespace CppRL

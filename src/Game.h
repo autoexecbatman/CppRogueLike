@@ -58,6 +58,9 @@
 #include "SpellEditor.h"
 #endif
 
+namespace CppRL
+{
+
 struct Game
 {
 	// The dice draw from diceSeed: main passes std::random_device, a test TEST_DICE_SEED.
@@ -162,3 +165,5 @@ struct Game
 	void load_item_tiles();
 	void shutdown();
 };
+
+} // namespace CppRL

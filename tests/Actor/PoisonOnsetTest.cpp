@@ -46,6 +46,9 @@
 #include "src/TileType.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 class PoisonOnsetTest : public ::testing::Test
 {
 protected:
@@ -316,3 +319,5 @@ TEST_F(PoisonOnsetTest, TwoShortOfTheTargetStillFails)
 	EXPECT_TRUE(player->get_pending_poison().has_value())
 		<< "a roll two under the target saved";
 }
+
+} // namespace CppRL

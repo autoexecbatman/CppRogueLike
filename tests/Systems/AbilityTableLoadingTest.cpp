@@ -39,6 +39,9 @@
 #include "src/StrengthAttributes.h"
 #include "src/WisdomAttributes.h"
 
+namespace CppRL
+{
+
 using json = nlohmann::json;
 
 namespace
@@ -360,3 +363,5 @@ TEST(AbilityTableLoadingTest, TheTablesLoadFromAnyDirectoryInsideTheRepository)
 	EXPECT_FALSE(dataManager.get_wisdom_attributes().empty())
 		<< "the Wisdom table came back empty";
 }
+
+} // namespace CppRL

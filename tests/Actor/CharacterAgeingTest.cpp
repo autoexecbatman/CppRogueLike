@@ -42,6 +42,9 @@
 #include "src/TurnSchedule.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// A year of the owner's calendar, in rounds, written out: 365 days of 24
@@ -363,3 +366,5 @@ TEST_F(CharacterAgeingTest, ANewGameRollsTheLifespanForTheChosenRace)
 }
 
 // end of file: CharacterAgeingTest.cpp
+
+} // namespace CppRL

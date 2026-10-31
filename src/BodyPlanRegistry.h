@@ -7,6 +7,9 @@
 
 #include "EquipmentSlot.h"
 
+namespace CppRL
+{
+
 // file: BodyPlanRegistry.h
 //
 // The body templates creatures are built on, loaded from
@@ -45,3 +48,5 @@ public:
 	[[nodiscard]] const std::vector<EquipmentSlot>& get(
 		std::string_view name) const;
 };
+
+} // namespace CppRL

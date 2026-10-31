@@ -17,6 +17,9 @@
 #include "src/AiMonsterRanged.h"
 #include "src/Persistent.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Not the defaults, so a load that ignored them could not pass by accident.
@@ -46,3 +49,5 @@ TEST(AiRangedRoundTripTest, ARangedMonsterLoadsAsTheSameAiItSaved)
 }
 
 // end of file: AiRangedRoundTripTest.cpp
+
+} // namespace CppRL

@@ -9,6 +9,9 @@
 #include <string_view>
 #include <vector>
 
+namespace CppRL
+{
+
 enum class HandRequirement
 {
 	ONE_HANDED, // Dagger, short sword, longsword, battle axe, war hammer, staff
@@ -176,3 +179,5 @@ inline WeaponSize parse_weapon_size(std::string_view name)
 
 	throw std::runtime_error(std::format("unknown weapon_size '{}'", name));
 }
+
+} // namespace CppRL

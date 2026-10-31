@@ -19,6 +19,9 @@
 #include "Paths.h"
 #include "StartupSteps.h"
 
+namespace CppRL
+{
+
 #ifdef __EMSCRIPTEN__
 struct LoopData
 {
@@ -39,6 +42,8 @@ void emscripten_loop(void* arg)
 }
 #endif
 
+} // namespace CppRL
+
 int main()
 {
 	// Debug logging
@@ -46,7 +51,7 @@ int main()
 	try
 	{
 		debugFile.exceptions(std::ofstream::failbit | std::ofstream::badbit);
-		debugFile.open(Paths::resolve(Paths::LOG));
+		debugFile.open(CppRL::Paths::resolve(CppRL::Paths::LOG));
 		std::clog.rdbuf(debugFile.rdbuf());
 	}
 	catch (const std::exception& error)
@@ -60,29 +65,29 @@ int main()
 
 	std::clog << "STARTUP: Creating Game\n" << std::flush;
 	// Game owns everything including Renderer and InputSystem
-	auto game = std::make_unique<Game>(std::random_device{}());
+	auto game = std::make_unique<CppRL::Game>(std::random_device{}());
 
 	const auto load_tile_config = [&game]()
 	{
-		game->tileConfig.load(Paths::TILE_CONFIG);
+		game->tileConfig.load(CppRL::Paths::TILE_CONFIG);
 	};
 	const auto load_body_plans = [&game]()
 	{
-		game->bodyPlanRegistry.load(Paths::BODY_PLANS);
+		game->bodyPlanRegistry.load(CppRL::Paths::BODY_PLANS);
 	};
 	const auto load_spells = [&game]()
 	{
-		game->spellRegistry.load(Paths::SPELLS);
+		game->spellRegistry.load(CppRL::Paths::SPELLS);
 	};
 	const auto load_monsters = [&game]()
 	{
-		game->monsterRegistry.load(Paths::MONSTERS);
+		game->monsterRegistry.load(CppRL::Paths::MONSTERS);
 		game->monsterRegistry.refuse_unknown_spells(game->spellRegistry);
 	};
 	const auto load_items = [&game]()
 	{
-		game->itemRegistry.load(Paths::ITEMS);
-		game->itemRegistry.load_enhanced_rules(Paths::ENHANCED_RULES);
+		game->itemRegistry.load(CppRL::Paths::ITEMS);
+		game->itemRegistry.load_enhanced_rules(CppRL::Paths::ENHANCED_RULES);
 	};
 	const auto load_item_tiles = [&game]()
 	{
@@ -99,24 +104,24 @@ int main()
 	};
 	const auto load_tileset = [&game]()
 	{
-		game->renderer.load_dawnlike(Paths::DAWNLIKE_DIR);
+		game->renderer.load_dawnlike(CppRL::Paths::DAWNLIKE_DIR);
 	};
 	// The font size sets every HUD width. Jersey10 is an outline face, sized for legibility against the
 	// 32 pixel row pitch rather than a bitmap multiple.
 	const auto load_font = [&game]()
 	{
-		game->renderer.load_font(Paths::DAWNLIKE_FONT, 30);
+		game->renderer.load_font(CppRL::Paths::DAWNLIKE_FONT, 30);
 	};
 	const auto load_palette = [&game]()
 	{
-		game->palette.load(Paths::TILE_CONFIG);
+		game->palette.load(CppRL::Paths::TILE_CONFIG);
 	};
 	const auto load_prefabs = [&game]()
 	{
-		game->prefabLibrary.load(Paths::PREFABS);
+		game->prefabLibrary.load(CppRL::Paths::PREFABS);
 	};
 
-	const std::vector<StartupStep> startupSteps{
+	const std::vector<CppRL::StartupStep> startupSteps{
 		{ "Loading tile config", load_tile_config },
 		{ "Loading body plans", load_body_plans },
 		{ "Loading spells", load_spells },
@@ -130,23 +135,23 @@ int main()
 		{ "Loading palette", load_palette },
 		{ "Loading prefabs", load_prefabs },
 	};
-	const std::optional<StartupRefusal> refusal =
-		run_startup_steps(startupSteps, std::clog);
+	const std::optional<CppRL::StartupRefusal> refusal =
+		CppRL::run_startup_steps(startupSteps, std::clog);
 	if (refusal)
 	{
-		report_startup_refusal(*refusal);
+		CppRL::report_startup_refusal(*refusal);
 		return 1;
 	}
 
 	auto ctx = game->context();
 
-	game->menus.push_back(make_main_menu(true, ctx));
+	game->menus.push_back(CppRL::make_main_menu(true, ctx));
 
 	int loopNum{ 0 };
 
 #ifdef __EMSCRIPTEN__
-	LoopData loopData{ game.get(), loopNum };
-	emscripten_set_main_loop_arg(emscripten_loop, &loopData, 0, 1);
+	CppRL::LoopData loopData{ game.get(), loopNum };
+	emscripten_set_main_loop_arg(CppRL::emscripten_loop, &loopData, 0, 1);
 #else
 	// Frame-based game loop
 	while (!WindowShouldClose() && game->gameState.get_run())

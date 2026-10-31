@@ -18,6 +18,9 @@
 #include "ShopkeeperFactory.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// One monster the table can draw, and the rule for its weight at a dungeon
@@ -270,3 +273,5 @@ std::vector<MonsterPercentage> MonsterFactory::get_current_distribution(
 
 	return distribution;
 }
+
+} // namespace CppRL

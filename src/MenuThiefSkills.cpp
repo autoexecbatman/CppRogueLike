@@ -17,6 +17,9 @@
 #include "Renderer.h"
 #include "ThiefSkills.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The box is sized to the viewport rather than fixed: a width in tiles that
@@ -284,3 +287,5 @@ void MenuThiefSkills::menu(GameContext& ctx)
 }
 
 // end of file: MenuThiefSkills.cpp
+
+} // namespace CppRL

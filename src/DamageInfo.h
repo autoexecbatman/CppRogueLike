@@ -9,6 +9,9 @@
 #include "DiceExpr.h"
 #include "RandomDice.h"
 
+namespace CppRL
+{
+
 // Damage type classification for resistance calculations
 enum class DamageType
 {
@@ -303,3 +306,5 @@ namespace DamageValues
 		return { "1d6", DamageType::PHYSICAL };
 	}
 } // namespace DamageValues
+
+} // namespace CppRL

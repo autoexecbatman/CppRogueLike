@@ -8,6 +8,9 @@
 #include "ListCursor.h"
 #include "TileRef.h"
 
+namespace CppRL
+{
+
 class ContentRegistry;
 class MonsterRegistry;
 class ItemRegistry;
@@ -92,3 +95,5 @@ public:
 
 	[[nodiscard]] bool is_active() const { return active; }
 };
+
+} // namespace CppRL

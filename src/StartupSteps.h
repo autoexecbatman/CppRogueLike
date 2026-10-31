@@ -6,6 +6,9 @@
 #include <span>
 #include <string>
 
+namespace CppRL
+{
+
 // The program's startup, as a list of named steps run in order. A step that throws
 // stops the startup, and what it threw is reported to the player by the step's name,
 // on the console and the log, and on the web page too.
@@ -66,3 +69,5 @@ struct StartupRefusal
 // Example:
 //   report_startup_refusal(refusal);   // stderr: "Could not start: Loading tile config failed: ..."
 void report_startup_refusal(const StartupRefusal& refusal);
+
+} // namespace CppRL

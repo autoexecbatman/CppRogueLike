@@ -5,6 +5,9 @@
 #include <random>
 #include <vector>
 
+namespace CppRL
+{
+
 // The game's one random number generator. Every construction names its seed: the game passes
 // std::random_device, a map its own seed, and a test a fixed one, so a test run draws the same
 // numbers every time.
@@ -105,3 +108,5 @@ public:
 
 	[[nodiscard]] std::mt19937& get_rng() noexcept { return generator; }
 };
+
+} // namespace CppRL

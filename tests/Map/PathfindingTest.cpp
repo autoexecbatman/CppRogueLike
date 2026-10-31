@@ -38,6 +38,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr int MAP_SIDE = 20;
@@ -527,3 +530,5 @@ TEST_F(PathfindingTest, CanEnterIsForStandingThereNow)
 }
 
 // end of file: PathfindingTest.cpp
+
+} // namespace CppRL

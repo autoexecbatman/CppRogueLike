@@ -7,6 +7,9 @@
 #include <filesystem>
 #include <string_view>
 
+namespace CppRL
+{
+
 namespace Paths
 {
 	inline constexpr std::string_view LOG = "clog.txt";
@@ -66,3 +69,5 @@ namespace Paths
 		return fs::current_path() / relative;
 	}
 } // namespace Paths
+
+} // namespace CppRL

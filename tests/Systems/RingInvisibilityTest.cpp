@@ -33,6 +33,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// An hour of rounds, from the book's round of about a minute (PHB, PDF page
@@ -180,3 +183,5 @@ TEST_F(RingInvisibilityTest, AttackingEndsTheRingsInvisibility)
 }
 
 // end of file: RingInvisibilityTest.cpp
+
+} // namespace CppRL

@@ -21,6 +21,9 @@
 #include "Stairs.h"
 #include "Trap.h"
 
+namespace CppRL
+{
+
 void RenderingManager::render(GameContext& ctx) const
 {
 	render_world(ctx);
@@ -323,3 +326,5 @@ void RenderingManager::render_mouse_path_overlay(const GameContext& ctx) const
 		}
 	}
 }
+
+} // namespace CppRL

@@ -3,6 +3,9 @@
 #include "SpellTile.h"
 #include "TileFeature.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 struct Vector2D;
 class Creature;
@@ -31,3 +34,5 @@ public:
 	// Destroy this web
 	void destroy();
 };
+
+} // namespace CppRL

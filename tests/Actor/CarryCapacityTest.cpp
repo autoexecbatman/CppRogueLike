@@ -25,6 +25,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class CarryCapacityTest : public ::testing::Test
 {
 protected:
@@ -87,3 +90,5 @@ TEST_F(CarryCapacityTest, GiantStrengthCarriesWhatTableOnePrints)
 	EXPECT_EQ(capacity_at(19), 640);
 	EXPECT_EQ(capacity_at(25), 1750);
 }
+
+} // namespace CppRL

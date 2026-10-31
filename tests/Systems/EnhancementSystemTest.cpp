@@ -11,6 +11,9 @@
 #include <iterator>
 #include <string_view>
 
+namespace CppRL
+{
+
 // ============================================================================
 // ENHANCEMENT SYSTEM TESTS
 // Tests item enhancement generation, application, naming, and edge cases
@@ -1018,3 +1021,5 @@ TEST_F(EnhancementSystemTest, ASuffixAppliedAfterItsPrefixOverridesWhatItSets)
 			<< static_cast<int>(golden.suffix);
 	}
 }
+
+} // namespace CppRL

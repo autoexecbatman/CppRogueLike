@@ -16,6 +16,9 @@
 #include "Player.h"
 #include "Renderer.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The box is sized to the viewport rather than fixed: a width in tiles that
@@ -267,3 +270,5 @@ void MenuAbilityScores::menu(GameContext& ctx)
 }
 
 // end of file: MenuAbilityScores.cpp
+
+} // namespace CppRL

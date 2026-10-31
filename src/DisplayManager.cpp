@@ -19,6 +19,9 @@
 #include "NotificationMenu.h"
 #include "Player.h"
 
+namespace CppRL
+{
+
 void DisplayManager::display_help(GameContext& ctx) const
 {
 	std::vector<std::string> lines;
@@ -79,3 +82,5 @@ void DisplayManager::display_balance_viewer(GameContext& ctx) const
 }
 
 // end of file: Systems/DisplayManager.cpp
+
+} // namespace CppRL

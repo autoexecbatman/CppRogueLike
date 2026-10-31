@@ -31,6 +31,9 @@
 #include "src/RandomDice.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr int SHALLOW = 1;
@@ -188,3 +191,5 @@ TEST_F(EncounterPlannerTest, LeftoverBudgetBuysMoreOfWhatIsAffordable)
 }
 
 // end of file: EncounterPlannerTest.cpp
+
+} // namespace CppRL

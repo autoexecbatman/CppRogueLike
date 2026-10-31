@@ -11,6 +11,9 @@
 #include "TileRef.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 class Renderer;
 
 // ---------------------------------------------------------------------------
@@ -147,3 +150,5 @@ public:
 
 	[[nodiscard]] bool is_active_map_empty() const;
 };
+
+} // namespace CppRL

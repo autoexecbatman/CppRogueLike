@@ -5,6 +5,9 @@
 #include "Map.h"
 #include "Vision.h"
 
+namespace CppRL
+{
+
 namespace Vision
 {
 
@@ -28,3 +31,5 @@ namespace Vision
 	}
 
 } // namespace Vision
+
+} // namespace CppRL

@@ -5,6 +5,9 @@
 
 #include "DungeonRoom.h"
 
+namespace CppRL
+{
+
 class MonsterRegistry;
 class RandomDice;
 struct GameContext;
@@ -46,3 +49,5 @@ std::vector<MonsterCandidate> encounter_candidates(
 // Uses 0/1 knapsack to maximize monster variety within budget.
 // Hard cap: MAX_ENCOUNTER_MONSTERS monsters per room.
 void plan_encounter(const DungeonRoom& room, GameContext& ctx);
+
+} // namespace CppRL

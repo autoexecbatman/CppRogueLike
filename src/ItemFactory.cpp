@@ -20,6 +20,9 @@
 #include "RandomDice.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// One entry the table can draw, and the rule for its weight at a dungeon
@@ -446,3 +449,5 @@ void ItemFactory::spawn_all_enhanced_items_debug(
 		"DEBUG: Spawned enhanced items",
 		MessageCompletion::FINISHED);
 }
+
+} // namespace CppRL

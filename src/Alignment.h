@@ -4,6 +4,9 @@
 #include <stdexcept>
 #include <string_view>
 
+namespace CppRL
+{
+
 // file: Alignment.h
 //
 // AD&D 2e alignment, as the two independent axes the rules actually use, plus
@@ -180,3 +183,5 @@ namespace Alignment
 
 	// TODO: shift_toward_lawful, shift_toward_good, shift_toward_evil
 } // namespace Alignment
+
+} // namespace CppRL

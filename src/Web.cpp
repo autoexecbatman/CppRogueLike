@@ -14,6 +14,9 @@
 #include "Vector2D.h"
 #include "Web.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Says one line about a creature entering a web, and only when isSeen is
@@ -148,3 +151,5 @@ void Web::destroy()
 {
 	mark_destroyed();
 }
+
+} // namespace CppRL

@@ -24,6 +24,9 @@
 #include "TurnSchedule.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 void TargetingSystem::draw_los(GameContext& ctx, Vector2D targetCursor) const
 {
 	assert(ctx.map && "TargetingSystem::draw_los: called without a map");
@@ -326,3 +329,5 @@ TargetResult TargetingSystem::target_auto_nearest(
 	}
 	return {};
 }
+
+} // namespace CppRL

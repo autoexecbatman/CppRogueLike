@@ -36,6 +36,9 @@
 #include "src/TurnSchedule.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr std::string_view FIRST_RUN_LINE{ "first run marker line" };
@@ -243,3 +246,5 @@ TEST_F(
 }
 
 // end of file: NewRunStateTest.cpp
+
+} // namespace CppRL

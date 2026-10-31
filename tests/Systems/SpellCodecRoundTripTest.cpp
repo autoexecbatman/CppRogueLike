@@ -28,6 +28,9 @@
 #include <map>
 #include <string>
 
+namespace CppRL
+{
+
 class SpellCodecRoundTripTest : public ::testing::Test
 {
 protected:
@@ -100,3 +103,5 @@ TEST_F(SpellCodecRoundTripTest, TheRestOfTheDefinitionSurvivesToo)
 			<< key << ".description";
 	}
 }
+
+} // namespace CppRL

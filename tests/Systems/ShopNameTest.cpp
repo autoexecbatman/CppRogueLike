@@ -22,6 +22,9 @@
 #include "src/ShopKeeper.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Eight names per list, so this is the last of them.
@@ -80,3 +83,5 @@ TEST_F(ShopNameTest, EachTypeDrawsFromItsOwnList)
 }
 
 // end of file: ShopNameTest.cpp
+
+} // namespace CppRL

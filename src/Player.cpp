@@ -76,6 +76,9 @@
 #include "Vector2D.h"
 #include "WeaponDamageRegistry.h"
 
+namespace CppRL
+{
+
 // XP table helpers - pure functions, no state
 namespace
 {
@@ -1343,3 +1346,5 @@ void Player::levelup_update(GameContext& ctx)
 		ctx.displayManager->display_levelup(*this, get_creature_level(), ctx);
 	}
 }
+
+} // namespace CppRL

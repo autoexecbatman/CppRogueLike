@@ -34,6 +34,9 @@
 #include "src/MonsterRegistry.h"
 #include "src/SpellEditor.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -485,3 +488,5 @@ TEST(EditorFieldDeathTest, AMisroutedFieldAbortsNamingItsLabelAndThePath)
 }
 
 // end of file: EditorFieldTest.cpp
+
+} // namespace CppRL

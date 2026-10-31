@@ -39,6 +39,9 @@
 #include "src/TurnSchedule.h"
 #include "src/Weapons.h"
 
+namespace CppRL
+{
+
 using json = nlohmann::json;
 
 namespace
@@ -368,3 +371,5 @@ TEST(BehaviorRecordTest, AStatBoostRecordNamesWhetherItSetsOrAdds)
 	EXPECT_EQ(savedSetting.at("application"), "set");
 	EXPECT_EQ(savedAdding.at("application"), "add");
 }
+
+} // namespace CppRL

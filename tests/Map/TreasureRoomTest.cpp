@@ -28,6 +28,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 // ============================================================================
 // Treasure Room Tests
 // Contract:
@@ -377,3 +380,5 @@ TEST(StairRoomNotLocked, StairsAreNeverAdjacentToLockedDoor)
 			<< ")";
 	}
 }
+
+} // namespace CppRL

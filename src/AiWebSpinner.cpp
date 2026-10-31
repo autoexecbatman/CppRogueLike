@@ -24,6 +24,9 @@
 #include "Vector2D.h"
 #include "Web.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Rounds between two webs from one spider; the book gives no rate.
@@ -591,3 +594,5 @@ void AiWebSpinner::save(json& output)
 
 	output["webReadyTime"] = webReadyTime;
 }
+
+} // namespace CppRL

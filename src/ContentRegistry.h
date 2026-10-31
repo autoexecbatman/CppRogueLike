@@ -7,6 +7,9 @@
 
 #include "TileRef.h"
 
+namespace CppRL
+{
+
 // ContentRegistry -- value-type source of truth for item-to-tile mappings.
 //
 // Owned by Game, threaded via GameContext.
@@ -31,3 +34,5 @@ public:
 };
 
 // end of file: ContentRegistry.h
+
+} // namespace CppRL

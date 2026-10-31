@@ -25,6 +25,9 @@
 
 #include "TileRef.h"
 
+namespace CppRL
+{
+
 class Palette;
 class PrefabLibrary;
 class Renderer;
@@ -283,3 +286,5 @@ public:
 		return statusMsg;
 	}
 };
+
+} // namespace CppRL

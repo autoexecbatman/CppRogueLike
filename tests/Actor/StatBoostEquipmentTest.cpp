@@ -49,6 +49,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 class StatBoostEquipmentTest : public ::testing::Test
 {
 protected:
@@ -476,3 +479,5 @@ TEST_F(StatBoostEquipmentTest, APotionOfGiantStrengthSetsStrength)
 
 	EXPECT_EQ(player->get_strength(), 19);
 }
+
+} // namespace CppRL

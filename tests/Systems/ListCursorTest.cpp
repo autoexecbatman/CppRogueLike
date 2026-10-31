@@ -18,6 +18,9 @@
 
 #include "src/ListCursor.h"
 
+namespace CppRL
+{
+
 // An empty list answers no on every move and keeps both positions at 0.
 TEST(ListCursorTest, AnEmptyListHasNoMovesAndStaysAtZero)
 {
@@ -259,3 +262,5 @@ TEST(StepWithinTest, TheExtremesOfIntAreClampedWithoutOverflow)
 	EXPECT_EQ(step_within(3, INT_MIN, 9), 0u);
 	EXPECT_EQ(step_within(3, INT_MAX, 9), 9u);
 }
+
+} // namespace CppRL

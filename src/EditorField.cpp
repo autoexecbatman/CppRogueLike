@@ -5,6 +5,9 @@
 
 #include "EditorField.h"
 
+namespace CppRL
+{
+
 void refuse_misrouted_field(std::string_view label, std::string_view path)
 {
 	std::cerr << path << " has no case for the field '" << label << "'\n";
@@ -12,3 +15,5 @@ void refuse_misrouted_field(std::string_view label, std::string_view path)
 }
 
 // end of file: EditorField.cpp
+
+} // namespace CppRL

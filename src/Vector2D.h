@@ -5,6 +5,9 @@
 #include <format>
 #include <iostream>
 
+namespace CppRL
+{
+
 // {x,y} position
 struct Vector2D
 {
@@ -137,3 +140,5 @@ inline constexpr Vector2D DIR_NE{ 1, -1 };
 inline constexpr Vector2D DIR_SE{ 1, 1 };
 inline constexpr Vector2D DIR_SW{ -1, 1 };
 inline constexpr Vector2D DIR_NW{ -1, -1 };
+
+} // namespace CppRL

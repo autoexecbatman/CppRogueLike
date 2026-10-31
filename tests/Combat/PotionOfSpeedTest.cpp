@@ -61,6 +61,9 @@
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// One ordinary action, and the hasted one: twice the actions is half the
@@ -352,3 +355,5 @@ TEST(PotionOfSpeedMenuTest, AHastedCastingCostsAFullRound)
 }
 
 // end of file: PotionOfSpeedTest.cpp
+
+} // namespace CppRL

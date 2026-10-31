@@ -9,6 +9,9 @@
 #include "UniqueId.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 
 struct ActorData
@@ -71,3 +74,5 @@ public:
 		return actorData.color;
 	}
 };
+
+} // namespace CppRL

@@ -11,6 +11,9 @@
 
 #include "src/Wording.h"
 
+namespace CppRL
+{
+
 TEST(WordingTest, OneTakesTheSingular)
 {
 	EXPECT_EQ(Wording::counted(1, "item", "items"), "1 item");
@@ -44,3 +47,5 @@ TEST(WordingTest, ADurationIsWordedInRounds)
 }
 
 // end of file: WordingTest.cpp
+
+} // namespace CppRL

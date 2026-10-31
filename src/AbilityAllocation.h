@@ -41,6 +41,9 @@
 
 #include "CreatureClass.h"
 
+namespace CppRL
+{
+
 class RandomDice;
 
 // The score every ability starts Method VI at.
@@ -181,3 +184,5 @@ public:
 };
 
 // end of file: AbilityAllocation.h
+
+} // namespace CppRL

@@ -31,6 +31,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// More rolls than building any of these makes, the shopkeeper's shop stock
@@ -156,3 +159,5 @@ TEST_F(
 }
 
 // end of file: MimicSpiderShopkeeperAbilityTest.cpp
+
+} // namespace CppRL

@@ -55,6 +55,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 struct MockGameContext
 {
 	RandomDice dice{ TEST_DICE_SEED };
@@ -207,3 +210,5 @@ struct MockGameContext
 		};
 	}
 };
+
+} // namespace CppRL

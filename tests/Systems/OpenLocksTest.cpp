@@ -41,6 +41,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// A row of floor with the thief on it and a locked door one step east.
@@ -264,3 +267,5 @@ TEST_F(OpenLocksTest, ARefusedPickOnAStrongThiefForcesInTheSameBump)
 }
 
 // end of file: OpenLocksTest.cpp
+
+} // namespace CppRL

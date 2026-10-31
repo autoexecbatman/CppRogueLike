@@ -40,6 +40,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The book's turn, in its rounds: "Ten combat rounds equal a turn" (PHB,
@@ -137,3 +140,5 @@ TEST_F(ScrollDurationTest, AScrollAuthoredInTurnsLastsTenRoundsATurn)
 }
 
 // end of file: ScrollDurationTest.cpp
+
+} // namespace CppRL

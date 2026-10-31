@@ -9,6 +9,9 @@
 
 #include "Persistent.h"
 
+namespace CppRL
+{
+
 class Creature; // for no circular dependency with Creature.h
 struct GameContext; // for dependency injection
 
@@ -198,3 +201,5 @@ public:
 	// The Ai a save describes: made by its kind, then loaded from the record.
 	[[nodiscard]] static std::unique_ptr<Ai> create(const json& source);
 };
+
+} // namespace CppRL

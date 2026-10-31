@@ -42,6 +42,9 @@
 #include "src/Paths.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	struct BookStrength
@@ -276,3 +279,5 @@ TEST_F(MonsterStrengthTest, The18_00And25AndAPlainScoreLoad)
 }
 
 // end of file: MonsterStrengthTest.cpp
+
+} // namespace CppRL

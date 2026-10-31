@@ -4,6 +4,9 @@
 
 #include "RandomDice.h"
 
+namespace CppRL
+{
+
 // Procedural name generation for named dungeon NPCs.
 // Each function takes a seeded RandomDice so names are deterministic per map seed.
 namespace DungeonNames
@@ -12,3 +15,5 @@ namespace DungeonNames
 	// 15 first names x 15 epithets = 225 distinct combinations.
 	std::string generate_warden_name(RandomDice& rng);
 } // namespace DungeonNames
+
+} // namespace CppRL

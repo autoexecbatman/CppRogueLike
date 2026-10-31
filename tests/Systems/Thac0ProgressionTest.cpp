@@ -14,6 +14,9 @@
 #include "src/CreatureClass.h"
 #include "src/LevelUpSystem.h"
 
+namespace CppRL
+{
+
 // A warrior starts at 20 and gains a point of it every level.
 TEST(Thac0ProgressionTest, FighterImprovesEveryLevel)
 {
@@ -109,3 +112,5 @@ TEST(Thac0ProgressionTest, FirstLevelIsNotAnImprovement)
 		EXPECT_FALSE(LevelUpSystem::thac0_improves_at(creatureClass, 1));
 	}
 }
+
+} // namespace CppRL

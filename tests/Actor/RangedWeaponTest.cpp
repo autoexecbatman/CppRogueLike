@@ -26,6 +26,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class RangedWeaponTest : public ::testing::Test
 {
 protected:
@@ -135,3 +138,5 @@ TEST_F(RangedWeaponTest, AMeleeWeaponWornInTheMissileSlotIsStillNotRanged)
 	EXPECT_FALSE(confused.has_ranged_weapon())
 		<< "the slot was read but what sits in it was not";
 }
+
+} // namespace CppRL

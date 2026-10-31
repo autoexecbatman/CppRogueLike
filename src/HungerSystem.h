@@ -7,6 +7,9 @@
 
 #include "Colors.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 
 // Hunger states in ascending order of hunger.
@@ -121,3 +124,5 @@ public:
 	void save(nlohmann::json& output) const;
 	void load(const nlohmann::json& source);
 };
+
+} // namespace CppRL

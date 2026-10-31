@@ -47,6 +47,9 @@
 #include "tests/mocks/ExpectLastsExactly.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class SanctuarySpellTest : public ::testing::Test
 {
 protected:
@@ -271,3 +274,5 @@ TEST_F(SanctuarySpellTest, AConfusionScrollAimedAtAnUnwardedCreatureIsRead)
 		ScrollReading::SPENT);
 	EXPECT_NE(orc->ai.get(), before) << "the orc was not confused";
 }
+
+} // namespace CppRL

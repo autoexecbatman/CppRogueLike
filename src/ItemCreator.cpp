@@ -21,6 +21,9 @@
 #include "TileRef.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -326,3 +329,5 @@ std::unique_ptr<Item> ItemCreator::create_random_of_category(
 
 	return create(candidates.back().key, pos, ctx);
 }
+
+} // namespace CppRL

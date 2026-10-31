@@ -36,6 +36,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 // ---------------------------------------------------------------------------
 // The table itself
 // ---------------------------------------------------------------------------
@@ -304,3 +307,5 @@ TEST_F(SavingThrowLevelUpTest, ARogueIsToldOnTheLevelsTheTableMovesOn)
 		<< "4 is inside the 1-4 row";
 	EXPECT_TRUE(announced_at(CreatureClass::ROGUE, 9));
 }
+
+} // namespace CppRL

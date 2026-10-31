@@ -13,6 +13,9 @@
 #include "TileType.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 // Forward declaration
 struct GameContext;
 class Creature;
@@ -318,3 +321,5 @@ public:
 
 	std::vector<Tile> tiles{};
 };
+
+} // namespace CppRL

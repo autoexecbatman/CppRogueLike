@@ -6,6 +6,9 @@
 #include <stdexcept>
 #include <string_view>
 
+namespace CppRL
+{
+
 // file: Attitude.h
 //
 // How a creature feels about the player. A monster's attitude is data, authored in
@@ -118,3 +121,5 @@ inline constexpr std::array<Attitude, 4> ALL_ATTITUDE = {
 }
 
 // end of file: Attitude.h
+
+} // namespace CppRL

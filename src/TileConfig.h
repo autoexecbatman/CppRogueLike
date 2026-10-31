@@ -9,6 +9,9 @@
 #include "TileRef.h"
 #include "TileType.h"
 
+namespace CppRL
+{
+
 // ---------------------------------------------------------------------------
 // Autotile groups (3x3 blocks, origin = top-left corner of the group)
 // ---------------------------------------------------------------------------
@@ -165,3 +168,5 @@ public:
 };
 
 // end of file: TileConfig.h
+
+} // namespace CppRL

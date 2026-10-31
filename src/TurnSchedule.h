@@ -39,6 +39,9 @@
 
 #include <cassert>
 
+namespace CppRL
+{
+
 // The time one ordinary action by an ordinary creature takes. A round is this long,
 // which makes a round a unit of the clock rather than a thing anyone counts.
 //
@@ -221,3 +224,5 @@ enum class DurationUnit
 
 	return currentTime + durationRounds * TIME_UNITS_PER_ROUND;
 }
+
+} // namespace CppRL

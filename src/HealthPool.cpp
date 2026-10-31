@@ -8,6 +8,9 @@
 #include "GameContext.h"
 #include "HealthPool.h"
 
+namespace CppRL
+{
+
 HealthPool::HealthPool(int hpMax) :
 	hpBase(hpMax),
 	hpMax(hpMax),
@@ -86,3 +89,5 @@ int HealthPool::regenerate(int points)
 }
 
 // end of file: HealthPool.cpp
+
+} // namespace CppRL

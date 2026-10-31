@@ -12,6 +12,9 @@
 #include "MenuRace.h"
 #include "RandomDice.h"
 
+namespace CppRL
+{
+
 std::unique_ptr<BaseMenu> make_gender_menu(GameContext& ctx)
 {
 	std::vector<MenuEntry> entries;
@@ -66,3 +69,5 @@ std::unique_ptr<BaseMenu> make_gender_menu(GameContext& ctx)
 }
 
 // end of file: MenuGender.cpp
+
+} // namespace CppRL

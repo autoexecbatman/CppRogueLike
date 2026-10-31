@@ -6,6 +6,9 @@
 
 #include "Wording.h"
 
+namespace CppRL
+{
+
 namespace Wording
 {
 
@@ -26,3 +29,5 @@ namespace Wording
 	}
 
 } // namespace Wording
+
+} // namespace CppRL

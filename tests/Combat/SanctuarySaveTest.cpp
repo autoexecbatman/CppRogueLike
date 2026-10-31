@@ -49,6 +49,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 class SanctuarySaveTest : public ::testing::Test
 {
 protected:
@@ -292,7 +295,7 @@ TEST_F(SanctuarySaveTest, AWardedPlayerTurnsAMonstersAttackAway)
 	cast_sanctuary(*player);
 	script({ 12, 20, 4 });
 
-	goblin.attacker->attack(*player, AttackKind::AttackKind::MELEE, ctx);
+	goblin.attacker->attack(*player, AttackKind::MELEE, ctx);
 
 	EXPECT_EQ(hp_lost(*player), 0) << "the goblin struck through a failed save";
 }
@@ -309,7 +312,7 @@ TEST_F(SanctuarySaveTest, AWardedPlayerTurnsAMonstersShotAway)
 	cast_sanctuary(*player);
 	script({ 12, 20, 4 });
 
-	goblin.attacker->attack(*player, AttackKind::AttackKind::RANGED, ctx);
+	goblin.attacker->attack(*player, AttackKind::RANGED, ctx);
 
 	EXPECT_EQ(hp_lost(*player), 0) << "the goblin shot through a failed save";
 }
@@ -321,7 +324,7 @@ TEST_F(SanctuarySaveTest, AttackingBreaksTheAttackersOwnSanctuary)
 	cast_sanctuary(*player);
 	script({ 20, 2 });
 
-	player->attacker->attack(goblin, AttackKind::AttackKind::MELEE, ctx);
+	player->attacker->attack(goblin, AttackKind::MELEE, ctx);
 
 	EXPECT_FALSE(ctx.buffSystem->has_buff(*player, BuffType::SANCTUARY))
 		<< "the player attacked and stayed warded";
@@ -333,7 +336,7 @@ TEST_F(SanctuarySaveTest, AWardedMonsterTurnsThePlayersAttackAway)
 	cast_sanctuary(goblin);
 	script({ 12, 20, 2 });
 
-	player->attacker->attack(goblin, AttackKind::AttackKind::MELEE, ctx);
+	player->attacker->attack(goblin, AttackKind::MELEE, ctx);
 
 	EXPECT_EQ(hp_lost(goblin), 0)
 		<< "the player struck a warded goblin through a failed save";
@@ -345,7 +348,7 @@ TEST_F(SanctuarySaveTest, AWardedMonsterTurnsAnotherMonstersAttackAway)
 	cast_sanctuary(goblin);
 	script({ 12, 20, 4 });
 
-	orc.attacker->attack(goblin, AttackKind::AttackKind::MELEE, ctx);
+	orc.attacker->attack(goblin, AttackKind::MELEE, ctx);
 
 	EXPECT_EQ(hp_lost(goblin), 0)
 		<< "the orc struck a warded goblin through a failed save";
@@ -357,7 +360,7 @@ TEST_F(SanctuarySaveTest, AnAttackerThatSavesStrikesAsUsual)
 	cast_sanctuary(goblin);
 	script({ 20, 20, 4 });
 
-	orc.attacker->attack(goblin, AttackKind::AttackKind::MELEE, ctx);
+	orc.attacker->attack(goblin, AttackKind::MELEE, ctx);
 
 	EXPECT_EQ(hp_lost(goblin), 4) << "1d4 at four after a made save";
 }
@@ -367,8 +370,10 @@ TEST_F(SanctuarySaveTest, AnUnwardedTargetCostsNoSave)
 {
 	script({ 20, 4 });
 
-	orc.attacker->attack(goblin, AttackKind::AttackKind::MELEE, ctx);
+	orc.attacker->attack(goblin, AttackKind::MELEE, ctx);
 
 	EXPECT_EQ(hp_lost(goblin), 4)
 		<< "a save was rolled against a target without sanctuary";
 }
+
+} // namespace CppRL

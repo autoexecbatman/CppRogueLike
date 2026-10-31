@@ -33,6 +33,9 @@
 #include "src/LevelManager.h"
 #include "src/TileRef.h"
 
+namespace CppRL
+{
+
 using json = nlohmann::json;
 
 TEST(SaveFieldNamesTest, ALevelManagerReadsBackWhatItWrote)
@@ -152,3 +155,5 @@ TEST(
 	EXPECT_ANY_THROW(InventoryOperations::load_inventory(loaded, saved))
 		<< "a broken item was dropped from the inventory without a word";
 }
+
+} // namespace CppRL

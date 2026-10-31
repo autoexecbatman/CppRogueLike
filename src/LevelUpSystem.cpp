@@ -20,6 +20,9 @@
 #include "ThiefSkills.h"
 #include "TurningTable.h"
 
+namespace CppRL
+{
+
 // ============================================================================
 // Private implementation - not visible outside this translation unit.
 // ============================================================================
@@ -721,3 +724,5 @@ bool LevelUpSystem::thac0_improves_at(CreatureClass creatureClass, int level)
 	return thac0_for_level(creatureClass, level) <
 		thac0_for_level(creatureClass, level - 1);
 }
+
+} // namespace CppRL

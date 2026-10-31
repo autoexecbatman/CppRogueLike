@@ -20,6 +20,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class AwarenessTest : public ::testing::Test
 {
 protected:
@@ -204,3 +207,5 @@ TEST_F(AwarenessTest, RegainsFullMemoryAfterLongAbsence)
 			<< "still tracking in round " << round;
 	}
 }
+
+} // namespace CppRL

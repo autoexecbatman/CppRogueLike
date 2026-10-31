@@ -6,6 +6,9 @@
 
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 class Renderer;
 
 struct FloatingEntry
@@ -46,3 +49,5 @@ public:
 
 	void update_and_render(const Renderer& renderer);
 };
+
+} // namespace CppRL

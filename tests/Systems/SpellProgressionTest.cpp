@@ -43,6 +43,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Table 21, one row per wizard level from 1 to 20, in slots per spell
@@ -517,3 +520,5 @@ TEST_F(PriestSpellsTest, AWizardTakesNoWisdomBonusAndNoWisdomGate)
 }
 
 // end of file: SpellProgressionTest.cpp
+
+} // namespace CppRL

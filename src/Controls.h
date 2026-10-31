@@ -3,6 +3,9 @@
 #include <array>
 #include <string_view>
 
+namespace CppRL
+{
+
 //==CONTROLS==
 // the enumeration for the controls of the player
 enum class Controls
@@ -101,3 +104,5 @@ inline constexpr std::array<NamedCommand, 4> NAMED_COMMANDS{ {
 {
 	return static_cast<char>(static_cast<int>(control));
 }
+
+} // namespace CppRL

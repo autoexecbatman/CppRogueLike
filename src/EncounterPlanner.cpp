@@ -17,6 +17,9 @@
 #include "RandomDice.h"
 #include "SpawnUtils.h"
 
+namespace CppRL
+{
+
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
@@ -218,3 +221,5 @@ void plan_encounter(const DungeonRoom& room, GameContext& ctx)
 			ctx);
 	}
 }
+
+} // namespace CppRL

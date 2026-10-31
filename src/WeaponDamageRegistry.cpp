@@ -8,6 +8,9 @@
 #include "ItemEnhancements.h"
 #include "WeaponDamageRegistry.h"
 
+namespace CppRL
+{
+
 const std::unordered_map<std::string, DamageInfo>
 	WeaponDamageRegistry::weaponDamageMap =
 		WeaponDamageRegistry::create_weapon_damage_map();
@@ -90,3 +93,5 @@ bool WeaponDamageRegistry::is_registered(std::string_view weaponKey) noexcept
 {
 	return weaponDamageMap.contains(std::string{ weaponKey });
 }
+
+} // namespace CppRL

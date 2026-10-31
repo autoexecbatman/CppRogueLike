@@ -53,6 +53,9 @@
 #include "src/TurnSchedule.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class HideInShadowsTest : public ::testing::Test
 {
 protected:
@@ -155,7 +158,7 @@ protected:
 		target.armorClass = std::make_unique<ArmorClass>(10);
 		// A test creature's Strength starts at zero, which no swing accepts.
 		thief->set_strength(10);
-		thief->attacker->attack(target, AttackKind::AttackKind::MELEE, ctx);
+		thief->attacker->attack(target, AttackKind::MELEE, ctx);
 	}
 
 	MockGameContext mock{};
@@ -488,3 +491,5 @@ TEST_F(HideInShadowsTest, AThiefSavedInTheOpenLoadsInTheOpen)
 }
 
 // end of file: HideInShadowsTest.cpp
+
+} // namespace CppRL

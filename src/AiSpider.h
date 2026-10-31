@@ -6,6 +6,9 @@
 #include "AiMonster.h"
 #include "Persistent.h"
 
+namespace CppRL
+{
+
 // Forward declarations
 class Creature;
 struct Vector2D;
@@ -67,3 +70,5 @@ public:
 
 	void set_web_laid(bool status) { webLaid = status; }
 };
+
+} // namespace CppRL

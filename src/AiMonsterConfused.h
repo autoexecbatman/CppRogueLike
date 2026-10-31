@@ -5,6 +5,9 @@
 #include "Ai.h"
 #include "Persistent.h"
 
+namespace CppRL
+{
+
 class Creature;
 struct GameContext;
 struct Vector2D;
@@ -44,3 +47,5 @@ public:
 	void load(const json& source) override;
 	void save(json& output) override;
 };
+
+} // namespace CppRL

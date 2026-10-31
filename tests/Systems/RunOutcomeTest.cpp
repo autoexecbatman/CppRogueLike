@@ -24,6 +24,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class RunOutcomeTest : public ::testing::Test
 {
 protected:
@@ -80,3 +83,5 @@ TEST_F(RunOutcomeTest, BeginningARunForgetsTheLastOutcome)
 }
 
 // end of file: RunOutcomeTest.cpp
+
+} // namespace CppRL

@@ -26,6 +26,9 @@
 #include <string>
 #include <utility>
 
+namespace CppRL
+{
+
 // ============================================================================
 // TEST FIXTURE: EquipmentStatBonusTest
 // ============================================================================
@@ -312,3 +315,5 @@ TEST_F(EquipmentStatBonusTest, LargeNegativeBonus_Applied)
 
 	EXPECT_EQ(player->get_strength(), original_str - 5);
 }
+
+} // namespace CppRL

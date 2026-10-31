@@ -40,6 +40,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr int STRONG_ENOUGH_TO_CARRY_ANYTHING = 18;
@@ -170,3 +173,5 @@ TEST_F(FloorStackPickupTest, AnIdOutlivesThePointerTheMenuCouldNotHold)
 		nullptr)
 		<< "the floor still answers for an item somebody already carried off";
 }
+
+} // namespace CppRL

@@ -41,6 +41,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr int MONSTER_XP = 45;
@@ -241,3 +244,5 @@ TEST_F(CreatureDeathTest, WhatItWoreFallsWhereItDied)
 }
 
 // end of file: CreatureDeathTest.cpp
+
+} // namespace CppRL

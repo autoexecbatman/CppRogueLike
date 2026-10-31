@@ -18,6 +18,9 @@
 #include "src/TileRef.h"
 #include "src/Vector2D.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// A long sword carrying a prefix and a suffix, its enhancement identified.
@@ -118,3 +121,5 @@ TEST(ItemNameTest, PrefixAndSuffixWrapTheName)
 
 	EXPECT_EQ(sword->get_name(), "Sharp long sword of the Bear");
 }
+
+} // namespace CppRL

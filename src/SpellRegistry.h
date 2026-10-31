@@ -8,6 +8,9 @@
 #include <string_view>
 #include <vector>
 
+namespace CppRL
+{
+
 // file: SpellRegistry.h
 //
 // Every spell the game knows: the builtins, whose effects are compiled in and whose
@@ -202,3 +205,5 @@ public:
 		CasterClass casterClass,
 		int maxSpellLevel) const;
 };
+
+} // namespace CppRL

@@ -12,6 +12,9 @@
 #include "InputSystem.h"
 #include "Renderer.h"
 
+namespace CppRL
+{
+
 void BaseMenu::menu_new(
 	size_t width,
 	size_t height,
@@ -197,3 +200,5 @@ bool BaseMenu::menu_right_clicked() const
 	return inputSystem != nullptr &&
 		inputSystem->get_key() == GameKey::MOUSE_RIGHT;
 }
+
+} // namespace CppRL

@@ -35,6 +35,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 using json = nlohmann::json;
 
 namespace
@@ -176,3 +179,5 @@ TEST_F(BootsAndCloaksTest, EveryClassEncodesToAKeyThatParsesBackToIt)
 }
 
 // end of file: BootsAndCloaksTest.cpp
+
+} // namespace CppRL

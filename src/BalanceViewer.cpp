@@ -13,6 +13,9 @@
 #include "MonsterFactory.h"
 #include "Renderer.h"
 
+namespace CppRL
+{
+
 BalanceViewer::BalanceViewer(int dungeonLevel, GameContext& ctx) :
 	dungeonLevel(dungeonLevel)
 {
@@ -152,3 +155,5 @@ void BalanceViewer::draw_item_column(
 }
 
 // end of file: Tools/BalanceViewer.cpp
+
+} // namespace CppRL

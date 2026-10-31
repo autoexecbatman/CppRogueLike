@@ -7,6 +7,9 @@
 
 #include "Item.h"
 
+namespace CppRL
+{
+
 // Error handling for inventory operations
 enum class InventoryError
 {
@@ -58,3 +61,5 @@ struct CreatureInventory
 	CreatureInventory(const CreatureInventory&) = delete;
 	CreatureInventory& operator=(const CreatureInventory&) = delete;
 };
+
+} // namespace CppRL

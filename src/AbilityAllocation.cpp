@@ -13,6 +13,9 @@
 #include "CreatureClass.h"
 #include "RandomDice.h"
 
+namespace CppRL
+{
+
 std::string_view ability_name(Ability ability)
 {
 	switch (ability)
@@ -191,3 +194,5 @@ std::array<int, ABILITY_COUNT> AbilityAllocation::allocated_scores() const
 }
 
 // end of file: AbilityAllocation.cpp
+
+} // namespace CppRL

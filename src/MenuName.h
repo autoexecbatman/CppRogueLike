@@ -4,6 +4,9 @@
 
 #include "BaseMenu.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 
 class MenuName : public BaseMenu
@@ -35,3 +38,5 @@ public:
 
 	void menu(GameContext& ctx) override;
 };
+
+} // namespace CppRL

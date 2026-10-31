@@ -7,6 +7,9 @@
 #include "DamageInfo.h"
 #include "Persistent.h"
 
+namespace CppRL
+{
+
 class Creature;
 class Item;
 struct GameContext;
@@ -31,13 +34,13 @@ protected:
 
 	// Shared combat resolution engine - called by both strategies.
 	// DamageInfo is supplied by the caller (subclass), not computed here.
-	AttackResult::AttackResult perform_single_attack(
+	AttackResult perform_single_attack(
 		Creature& owner,
 		Creature& target,
 		const DamageInfo& attackDamage,
 		int attackPenalty,
 		std::string_view handName,
-		AttackKind::AttackKind kind,
+		AttackKind kind,
 		GameContext& ctx);
 
 	BackstabInfo calculate_backstab_bonus(const Creature& owner) const noexcept;
@@ -77,7 +80,7 @@ protected:
 		int attackPenalty,
 		int strengthHit,
 		const BackstabInfo& backstab,
-		AttackKind::AttackKind kind,
+		AttackKind kind,
 		GameContext& ctx) const noexcept;
 
 	int calculate_damage_with_backstab(
@@ -114,9 +117,9 @@ public:
 	// kind says which way the attack is being made; it decides which weapon is
 	// used and whether the missile to-hit adjustment applies. What comes back is
 	// what the attack did, which a bite carrying poison reads before injecting it.
-	virtual AttackResult::AttackResult attack(
+	virtual AttackResult attack(
 		Creature& target,
-		AttackKind::AttackKind kind,
+		AttackKind kind,
 		GameContext& ctx) = 0;
 
 	// DamageInfo accessors - valid for MonsterAttacker; PlayerAttacker leaves this empty.
@@ -147,14 +150,13 @@ namespace RangedShot
 	// missile where none was loosed.
 	//
 	// Example:
-	//   RangedShot::impact_of(AttackResult::AttackResult::LANDED);
+	//   RangedShot::impact_of(AttackResult::LANDED);
 	//   // -> ShotImpact::MISSILE_AND_BLOOD
-	//   RangedShot::impact_of(AttackResult::AttackResult::MISSED);
+	//   RangedShot::impact_of(AttackResult::MISSED);
 	//   // -> ShotImpact::MISSILE
-	//   RangedShot::impact_of(AttackResult::AttackResult::PREVENTED);
+	//   RangedShot::impact_of(AttackResult::PREVENTED);
 	//   // -> ShotImpact::NOTHING
-	[[nodiscard]] ShotImpact impact_of(
-		AttackResult::AttackResult result) noexcept;
+	[[nodiscard]] ShotImpact impact_of(AttackResult result) noexcept;
 
 	// One ranged attack by `shooter` at `target`, for the player and the
 	// monsters alike. The attack resolves first, so its messages print as the
@@ -163,12 +165,11 @@ namespace RangedShot
 	//
 	// Example, an archer two squares from the player:
 	//   RangedShot::fire(archer, player, ctx);
-	//   // -> AttackResult::AttackResult::LANDED; a bolt, then blood
+	//   // -> AttackResult::LANDED; a bolt, then blood
 	//   RangedShot::fire(archer, corpse, ctx);
-	//   // -> AttackResult::AttackResult::PREVENTED; nothing drawn
-	AttackResult::AttackResult fire(
-		Creature& shooter,
-		Creature& target,
-		GameContext& ctx);
+	//   // -> AttackResult::PREVENTED; nothing drawn
+	AttackResult fire(Creature& shooter, Creature& target, GameContext& ctx);
 
 } // namespace RangedShot
+
+} // namespace CppRL

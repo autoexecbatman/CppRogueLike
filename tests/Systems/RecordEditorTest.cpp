@@ -43,6 +43,9 @@
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The height the tests give the window: tall enough that every row a test
@@ -955,3 +958,5 @@ TEST(RecordEditorSpellTest, TheArrowsLeaveTheClassAsItIs)
 }
 
 // end of file: RecordEditorTest.cpp
+
+} // namespace CppRL

@@ -31,6 +31,9 @@
 #include "src/TileType.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 // ============================================================================
 // MAP TESTS
 // Tests tile operations, walkability, door mechanics, serialization
@@ -531,3 +534,5 @@ TEST_F(MapTest, WaterIsCrossedByWhateverGrantsSwimming)
 	EXPECT_TRUE(Pathfinding::can_enter(wader, pool, ctx))
 		<< "the map asked the creature's own states and not what it wears";
 }
+
+} // namespace CppRL

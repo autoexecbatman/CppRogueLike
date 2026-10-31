@@ -24,6 +24,9 @@
 #include "src/Paths.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr int DUNGEON_LEVEL = 1;
@@ -141,3 +144,5 @@ TEST(MonsterSpawnTableTest, ASpawnDrawsFromTheRegistryInCtx)
 	EXPECT_EQ(spawn_with_only("wolf"), "wolf");
 	EXPECT_EQ(spawn_with_only("bat"), "bat");
 }
+
+} // namespace CppRL

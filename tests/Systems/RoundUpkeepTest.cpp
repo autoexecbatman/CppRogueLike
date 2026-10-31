@@ -55,6 +55,9 @@
 #include "tests/mocks/ExpectLastsExactly.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -445,3 +448,5 @@ TEST_F(RoundUpkeepTest, AVenomLandingInsideALongActionStartsInItsOwnRound)
 }
 
 // end of file: RoundUpkeepTest.cpp
+
+} // namespace CppRL

@@ -1,6 +1,9 @@
 #include "CloseButtonArea.h"
 #include "Renderer.h"
 
+namespace CppRL
+{
+
 CloseButtonArea::CloseButtonArea(Renderer& renderer, int vcols)
 {
 	int tileSize = renderer.get_tile_size();
@@ -11,3 +14,5 @@ CloseButtonArea::CloseButtonArea(Renderer& renderer, int vcols)
 	width = textW;
 	height = renderer.get_font_size();
 }
+
+} // namespace CppRL

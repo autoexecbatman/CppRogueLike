@@ -3,6 +3,9 @@
 #include <string>
 #include <vector>
 
+namespace CppRL
+{
+
 // file: ItemFactory.h
 //
 // Draws random items for a dungeon level, onto the floor. The table it draws from is
@@ -70,3 +73,5 @@ namespace ItemFactory
 	// position.
 	void spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx);
 } // namespace ItemFactory
+
+} // namespace CppRL

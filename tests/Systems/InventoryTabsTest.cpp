@@ -21,6 +21,9 @@
 #include "src/InventoryUI.h"
 #include "src/Renderer.h"
 
+namespace CppRL
+{
+
 class InventoryTabsTest : public ::testing::Test
 {
 protected:
@@ -99,3 +102,5 @@ TEST_F(InventoryTabsTest, TabStepsThroughEveryPaneAndComesBack)
 	screen = InventoryActions::next_screen(screen);
 	EXPECT_EQ(screen, InventoryScreen::EQUIPMENT);
 }
+
+} // namespace CppRL

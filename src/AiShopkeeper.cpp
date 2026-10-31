@@ -9,6 +9,9 @@
 #include "Persistent.h"
 #include "ShopkeeperFactory.h"
 
+namespace CppRL
+{
+
 void AiShopkeeper::update(Creature& owner, [[maybe_unused]] GameContext& ctx)
 {
 	assert(
@@ -40,3 +43,5 @@ void AiShopkeeper::save(json& output)
 {
 	output["type"] = encode_ai_type(get_ai_type());
 }
+
+} // namespace CppRL

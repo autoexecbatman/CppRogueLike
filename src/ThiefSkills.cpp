@@ -8,6 +8,9 @@
 
 #include "ThiefSkills.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Table 26, Thieving Skill Base Scores, in ALL_THIEF_SKILL order.
@@ -325,3 +328,5 @@ std::array<int, THIEF_SKILL_COUNT> ThiefSkillAllocation::total_points() const
 }
 
 // end of file: ThiefSkills.cpp
+
+} // namespace CppRL

@@ -9,6 +9,9 @@
 
 #include "src/UniqueId.h"
 
+namespace CppRL
+{
+
 // Test fixture for UniqueId tests
 class UniqueIdTest : public ::testing::Test
 {
@@ -164,3 +167,5 @@ TEST_F(UniqueIdTest, SettingTheCounterPutsItExactlyThere)
 	EXPECT_EQ(Generator::generate(), somewhereElse)
 		<< "the counter reported one value and issued another";
 }
+
+} // namespace CppRL

@@ -49,6 +49,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr Vector2D THE_PLAYERS_TILE{ 10, 10 };
@@ -203,3 +206,5 @@ TEST_F(PlayerRestTest, APeacefulCreatureStandingAdjacentDoesNotBlockTheRest)
 	EXPECT_TRUE(said_anything_about("too hungry"))
 		<< "the scan did not run to the end";
 }
+
+} // namespace CppRL

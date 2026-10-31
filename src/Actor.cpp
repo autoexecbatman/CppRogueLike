@@ -17,6 +17,9 @@
 #include "UniqueId.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The ActorState a saved integer names, or nullopt for one no state has.
@@ -160,3 +163,5 @@ bool Actor::is_visible(const GameContext& ctx) const noexcept
 		!has_state(ActorState::FOV_ONLY) && ctx.map->is_explored(position);
 	return isRemembered || ctx.map->is_in_fov(position);
 }
+
+} // namespace CppRL

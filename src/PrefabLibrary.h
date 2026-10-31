@@ -16,6 +16,9 @@
 #include <string_view>
 #include <vector>
 
+namespace CppRL
+{
+
 class DecorEditor;
 class Palette;
 class Map;
@@ -93,3 +96,5 @@ public:
 		DecorEditor& editor,
 		Map& map) const;
 };
+
+} // namespace CppRL

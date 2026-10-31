@@ -12,6 +12,9 @@
 #include "AiWebSpinner.h"
 #include "Persistent.h"
 
+namespace CppRL
+{
+
 //==AI==
 std::unique_ptr<Ai> Ai::create(const json& source)
 {
@@ -80,3 +83,5 @@ std::unique_ptr<Ai> Ai::make(AiType type)
 
 	return ai;
 }
+
+} // namespace CppRL

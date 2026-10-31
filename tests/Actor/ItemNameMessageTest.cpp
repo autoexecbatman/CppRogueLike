@@ -33,6 +33,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr int ORC_MAX_HP = 20;
@@ -169,3 +172,5 @@ TEST_F(ItemNameMessageTest, AnItemSetDownNamesItsWholeName)
 		last_message(),
 		"You cannot carry the Sharp long sword as well, and set it down.");
 }
+
+} // namespace CppRL

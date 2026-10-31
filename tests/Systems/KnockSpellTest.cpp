@@ -30,6 +30,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr Vector2D CASTER_TILE{ 5, 5 };
@@ -115,3 +118,5 @@ TEST_F(KnockSpellTest, AnotherSpellLeavesTheDoorLocked)
 	EXPECT_TRUE(map.is_door_locked(DOOR_TILE));
 	EXPECT_FALSE(map.is_open_door(DOOR_TILE));
 }
+
+} // namespace CppRL

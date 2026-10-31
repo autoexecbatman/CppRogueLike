@@ -15,6 +15,9 @@
 
 #include "src/BuffType.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	struct EncodingCase
@@ -86,3 +89,5 @@ TEST(BuffTypeEncodingTest, OnlyNoneEncodesToNone)
 			<< "an unhandled buff type is silently encoding as none";
 	}
 }
+
+} // namespace CppRL

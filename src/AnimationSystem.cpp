@@ -14,6 +14,9 @@
 #include "TileConfig.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 float AnimationSystem::random_range(float low, float high)
 {
 	std::uniform_real_distribution<float> dist(low, high);
@@ -570,3 +573,5 @@ void AnimationSystem::spawn_fireball_explosion(Vector2D center, int radius)
 			});
 	}
 }
+
+} // namespace CppRL

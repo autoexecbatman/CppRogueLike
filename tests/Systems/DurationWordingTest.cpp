@@ -46,6 +46,9 @@
 #include "src/TurnSchedule.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class DurationWordingTest : public ::testing::Test
 {
 protected:
@@ -237,3 +240,5 @@ TEST_F(DurationWordingTest, WebNamesItsRounds)
 
 	expect_rounds("2 rounds");
 }
+
+} // namespace CppRL

@@ -18,6 +18,9 @@
 #include "src/TileType.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class DescribeTileTest : public ::testing::Test
 {
 protected:
@@ -57,3 +60,5 @@ TEST_F(DescribeTileTest, OrdinaryGroundIsSilent)
 	EXPECT_EQ(message_after(TileType::CORRIDOR), "sentinel");
 	EXPECT_EQ(message_after(TileType::OPEN_DOOR), "sentinel");
 }
+
+} // namespace CppRL

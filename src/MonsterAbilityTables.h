@@ -10,6 +10,9 @@
 #include "IntelligenceRating.h"
 #include "MonsterStrength.h"
 
+namespace CppRL
+{
+
 class Creature;
 class RandomDice;
 
@@ -470,3 +473,5 @@ void roll_monster_ability_scores(
 	RandomDice& dice);
 
 // end of file: MonsterAbilityTables.h
+
+} // namespace CppRL

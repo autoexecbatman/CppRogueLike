@@ -25,6 +25,9 @@
 #include "src/StrengthAttributes.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// One printed row of Table 47: the score that reads it, the four boundaries
@@ -232,3 +235,5 @@ TEST_F(EncumbranceBandTest, TheBandAgreesWithTheCarryingRuleOnEveryScore)
 			<< "Strength " << score;
 	}
 }
+
+} // namespace CppRL

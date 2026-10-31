@@ -2,6 +2,9 @@
 
 #include <string>
 
+namespace CppRL
+{
+
 class Creature;
 struct GameContext;
 
@@ -79,3 +82,5 @@ public:
 		const Creature& owner,
 		GameContext& ctx) const;
 };
+
+} // namespace CppRL

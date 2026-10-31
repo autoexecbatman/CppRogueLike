@@ -8,6 +8,9 @@
 #include "SavingThrow.h"
 #include <cassert>
 
+namespace CppRL
+{
+
 // Table 51's Type A: 15 points on a failed save and none on a made one (Dungeon Master's
 // Guide, PDF page 737). The Monstrous Manual fixes the onset of this poison at 15 minutes
 // for the large spider, whose poison the huge spider shares (PDF pages 1878-1879), and a
@@ -58,3 +61,5 @@ void AiGiantSpider::inject_venom(
 			.damage = TYPE_A_DAMAGE,
 		});
 }
+
+} // namespace CppRL

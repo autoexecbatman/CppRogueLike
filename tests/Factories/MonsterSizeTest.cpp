@@ -21,6 +21,9 @@
 #include "src/MonsterRegistry.h"
 #include "src/Paths.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	struct BookSize
@@ -107,3 +110,5 @@ TEST(MonsterSizeTest, EveryMonsterCarriesTheSizeItsBookEntryPrints)
 }
 
 // end of file: MonsterSizeTest.cpp
+
+} // namespace CppRL

@@ -6,6 +6,9 @@
 
 #include "Persistent.h" // json
 
+namespace CppRL
+{
+
 // Forward declarations
 class Trap;
 struct Decoration;
@@ -136,3 +139,5 @@ public:
 	static bool save_file_exists();
 	static bool delete_save_file();
 };
+
+} // namespace CppRL

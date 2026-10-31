@@ -32,6 +32,9 @@
 #include <memory>
 #include <vector>
 
+namespace CppRL
+{
+
 // spawn_traps is protected: it is an implementation detail of level generation, not
 // something the game calls from outside. A derived class is how that is reached without
 // widening the real interface for a test's convenience.
@@ -157,3 +160,5 @@ TEST_F(TrapSpawnTest, ARoomThatRollsNoTrapsGetsNone)
 	EXPECT_TRUE(traps.empty());
 	EXPECT_TRUE(spellTiles.empty());
 }
+
+} // namespace CppRL

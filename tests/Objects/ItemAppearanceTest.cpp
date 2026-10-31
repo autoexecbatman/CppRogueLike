@@ -43,6 +43,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 using json = nlohmann::json;
 
 class ItemAppearanceTest : public ::testing::Test
@@ -283,3 +286,5 @@ TEST_F(ItemAppearanceTest, AFightersOwnFireballScrollIsKnownAndAFoundOneIsNot)
 }
 
 // end of file: ItemAppearanceTest.cpp
+
+} // namespace CppRL

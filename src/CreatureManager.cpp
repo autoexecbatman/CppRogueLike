@@ -15,6 +15,9 @@
 #include "TurnSchedule.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 void CreatureManager::add_creature(
 	std::unique_ptr<Creature> creature,
 	GameContext& ctx)
@@ -158,3 +161,5 @@ std::optional<Vector2D> CreatureManager::find_spawn_position(GameContext& ctx)
 
 	return std::nullopt;
 }
+
+} // namespace CppRL

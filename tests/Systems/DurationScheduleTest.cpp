@@ -38,6 +38,9 @@
 #include "tests/mocks/ExpectLastsExactly.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The blessing every buff case here uses, in rounds, as a priest's Bless
@@ -294,3 +297,5 @@ TEST_F(DurationScheduleTest, ALastingBuffKeepsLastingWhateverIsFoldedIntoIt)
 }
 
 // end of file: DurationScheduleTest.cpp
+
+} // namespace CppRL

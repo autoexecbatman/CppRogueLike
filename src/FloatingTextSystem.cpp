@@ -10,6 +10,9 @@
 #include "Renderer.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 // Shows a damage number rising off a tile.
 //
 // The colour is decided here rather than by the caller: red when the player is
@@ -102,3 +105,5 @@ void FloatingTextSystem::update_and_render(const Renderer& renderer)
 
 	std::erase_if(entries, is_expired);
 }
+
+} // namespace CppRL

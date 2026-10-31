@@ -15,6 +15,9 @@
 #include "ThiefSkills.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 class Item;
 struct GameContext;
 struct PlayerBlueprint;
@@ -262,3 +265,5 @@ inline constexpr std::array<CreatureClass, 4> ALL_PLAYER_CLASS{
 //   // -> { 0, 10, 15, 0, 0, 0, -10, -5 }, being Open Locks +10 and Climb Walls -10
 [[nodiscard]] std::array<int, THIEF_SKILL_COUNT> thief_skill_racial_adjustments(
 	PlayerRaceState race);
+
+} // namespace CppRL

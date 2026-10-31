@@ -15,6 +15,9 @@
 #include "PrefabLibrary.h"
 #include "RandomDice.h"
 
+namespace CppRL
+{
+
 // Cell dimensions: each grid cell is large enough to hold the largest room
 // plus a guaranteed corridor gap on every side so rooms never share a wall.
 // Defined here so both place_rooms and connect_all can reference them.
@@ -397,3 +400,5 @@ void DungeonGenerator::generate(
 	assert(ctx.rooms && "DungeonGenerator::generate: called without rooms");
 	*ctx.rooms = rooms;
 }
+
+} // namespace CppRL

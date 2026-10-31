@@ -75,6 +75,9 @@
 #include "WisdomAttributes.h"
 #include "Wording.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	void animate_heal(const Vector2D& pos, GameContext& ctx)
@@ -1800,3 +1803,5 @@ std::vector<SpellSystem::ItemGrantedSpell> SpellSystem::get_item_granted_spells(
 
 	return itemSpells;
 }
+
+} // namespace CppRL

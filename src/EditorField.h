@@ -36,6 +36,9 @@
 #include <string>
 #include <string_view>
 
+namespace CppRL
+{
+
 // How a field is edited.
 enum class FieldKind
 {
@@ -184,3 +187,5 @@ void adjust_plain(const PlainNumber<Record>& plain, Record& record, int delta)
 	std::string_view path);
 
 // end of file: EditorField.h
+
+} // namespace CppRL

@@ -20,6 +20,9 @@
 #include "Paths.h"
 #include "SpellRegistry.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Every builtin spell: one per effect, NONE excepted, under the effect's
@@ -369,3 +372,5 @@ std::vector<std::string> SpellRegistry::get_available_spells(
 
 	return available;
 }
+
+} // namespace CppRL

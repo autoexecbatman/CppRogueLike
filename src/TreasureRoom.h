@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 // file: TreasureRoom.h
 //
 // A locked room with treasure in it and a jailer outside holding the key.
@@ -65,3 +68,5 @@ namespace TreasureRoom
 	//   TreasureRoom::count_entrances(*ctx.map, room);   // -> 1
 	int count_entrances(const Map& map, const DungeonRoom& room);
 } // namespace TreasureRoom
+
+} // namespace CppRL

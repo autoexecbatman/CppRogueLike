@@ -15,7 +15,7 @@
   "mutations": [
     {
       "file": "src/CharacterSheetUI.cpp",
-      "original": "\t\tconst AttackStrength::Adjustment swing = AttackStrength::adjustment(\n\t\t\tdataManager,\n\t\t\tplayer,\n\t\t\tAttackKind::AttackKind::MELEE,\n\t\t\tnullptr);",
+      "original": "\t\tconst AttackStrength::Adjustment swing = AttackStrength::adjustment(\n\t\t\tdataManager,\n\t\t\tplayer,\n\t\t\tAttackKind::MELEE,\n\t\t\tnullptr);",
       "mutated": "\t\tconst AttackStrength::Adjustment swing = AttackStrength::Adjustment{ 0, 0 };",
       "catches": "the sheet no longer reading Table 1 at all, so every score prints as +0 and +0"
     },

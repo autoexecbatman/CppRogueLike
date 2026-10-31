@@ -43,6 +43,9 @@
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// A menu that stays open and does nothing, standing for the inventory
@@ -298,3 +301,5 @@ TEST(RunEndTest, TheDeathScreenIsNotTakenDownByItsOwnOutcome)
 }
 
 // end of file: RunEndTest.cpp
+
+} // namespace CppRL

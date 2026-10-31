@@ -31,6 +31,9 @@
 #include "TreasureRoom.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Whether `target` can be reached from `start` without crossing a locked
@@ -546,3 +549,5 @@ bool TreasureRoom::maybe_create(
 
 	return true;
 }
+
+} // namespace CppRL

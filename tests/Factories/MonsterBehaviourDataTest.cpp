@@ -43,6 +43,9 @@
 #include "src/RandomDice.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// More rolls than building a shopkeeper and stocking its shop makes.
@@ -192,3 +195,5 @@ TEST_F(MonsterBehaviourDataTest, TheShopkeeperIsNeverPlannedIntoAnEncounter)
 }
 
 // end of file: MonsterBehaviourDataTest.cpp
+
+} // namespace CppRL

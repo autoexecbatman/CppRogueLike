@@ -51,6 +51,9 @@
 #include "Vector2D.h"
 #include "Vision.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Single source of truth for how each tile type maps onto the FOV grid.
@@ -2512,3 +2515,5 @@ void Map::place_from_graph(
 }
 
 // end of file: Map.cpp
+
+} // namespace CppRL

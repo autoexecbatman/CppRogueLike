@@ -63,6 +63,9 @@
 #include "WeaponDamageRegistry.h"
 #include "Web.h"
 
+namespace CppRL
+{
+
 // An entry exists because something put an item in a slot, so one holding nothing is
 // a slot that lost what it was carrying. Asserted here, at the single site every
 // entry passes through - wear, equip_item, the put-back in unequip_item and the load
@@ -2215,3 +2218,5 @@ int Creature::calculate_effective_stat(
 	const bool takesBonuses = type != BuffType::STRENGTH || !wearsGiantStrength;
 	return effectiveBase + (takesBonuses ? bonuses : 0) + penalties;
 }
+
+} // namespace CppRL

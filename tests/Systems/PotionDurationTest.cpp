@@ -41,6 +41,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The book's turn, in its rounds: "Ten combat rounds equal a turn" (PHB,
@@ -168,3 +171,5 @@ TEST_F(PotionDurationTest, ASavedPotionKeepsItsDice)
 }
 
 // end of file: PotionDurationTest.cpp
+
+} // namespace CppRL

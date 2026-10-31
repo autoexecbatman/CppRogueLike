@@ -66,6 +66,9 @@
 #include "src/Renderer.h"
 #include "tests/mocks/FailedParts.h"
 
+namespace CppRL
+{
+
 // What a child reports. Distinct from 0 and 1, which a child's test runner
 // returns, and from 3, which an abort gives; so PASSED comes only from
 // finish_the_child.
@@ -273,3 +276,5 @@ inline int exit_code_in_child(void (*childBody)())
 }
 
 // end of file: HiddenRenderer.h
+
+} // namespace CppRL

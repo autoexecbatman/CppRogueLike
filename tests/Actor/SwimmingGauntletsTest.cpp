@@ -35,6 +35,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class SwimmingGauntletsTest : public ::testing::Test
 {
 protected:
@@ -146,3 +149,5 @@ TEST_F(SwimmingGauntletsTest, AnItemWithADifferentEffectGrantsNoSwimming)
 	EXPECT_FALSE(swimmer.wears_item_with(MagicalEffect::SWIMMING));
 	EXPECT_FALSE(swimmer.has_bypass(ActorState::CAN_SWIM));
 }
+
+} // namespace CppRL

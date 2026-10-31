@@ -30,6 +30,9 @@
 #include "src/ItemCreator.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Away from the origin and with x and y unequal, so a default or a swap
@@ -147,3 +150,5 @@ INSTANTIATE_TEST_SUITE_P(
 	ActorLoadKeyTest,
 	::testing::Values("position", "direction", "actorData", "states"),
 	name_for_actor_key);
+
+} // namespace CppRL

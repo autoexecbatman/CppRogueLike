@@ -27,6 +27,9 @@
 #include "src/TileType.h"
 #include "src/Vector2D.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr int DOOR_MAP_WIDTH = 12;
@@ -267,3 +270,5 @@ TEST_F(MapDoorPersistenceTest, EveryDoorStateBelowTheFirstRefusedOneRoundTrips)
 		}
 	}
 }
+
+} // namespace CppRL

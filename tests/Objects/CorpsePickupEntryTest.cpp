@@ -43,6 +43,9 @@
 #include "src/TileType.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Where an unopened window leaves the mouse: pixel 0,0, world tile 0,0 with
@@ -234,3 +237,5 @@ INSTANTIATE_TEST_SUITE_P(
 		::testing::Values(8, 10, 13, 16)));
 
 // end of file: CorpsePickupEntryTest.cpp
+
+} // namespace CppRL

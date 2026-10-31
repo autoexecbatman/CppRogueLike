@@ -15,6 +15,9 @@
 #include "MenuTrade.h"
 #include "Renderer.h"
 
+namespace CppRL
+{
+
 MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx)
 {
 	assert(ctx.renderer && "MenuTrade: renderer required before construction");
@@ -125,3 +128,5 @@ void open_trade(Creature& shopkeeper, Creature& player, GameContext& ctx)
 	ctx.menus->push_back(std::make_unique<MenuTrade>(shopkeeper, player, ctx));
 	ctx.menuManager->set_should_take_input(false);
 }
+
+} // namespace CppRL

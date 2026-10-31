@@ -8,6 +8,9 @@
 #include "Colors.h"
 #include "LogMessage.h"
 
+namespace CppRL
+{
+
 class Gui;
 
 // Whether a message stands on its own or is the opening of one built in parts.
@@ -98,3 +101,5 @@ public:
 		return run.attackMessagesWhole.at(index);
 	}
 };
+
+} // namespace CppRL

@@ -44,6 +44,9 @@
 
 #include "src/Paths.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -264,3 +267,5 @@ TEST(MutationPlanTest, EveryPlanRunsTheSuiteThroughRunSuite)
 			<< "with -Configuration Debug or Release and -Filter --gtest_filter=...";
 	}
 }
+
+} // namespace CppRL

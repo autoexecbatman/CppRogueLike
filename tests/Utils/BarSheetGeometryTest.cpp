@@ -19,6 +19,9 @@
 #include "src/Paths.h"
 #include "src/Renderer.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// One cell of the sheet, as which of its columns and rows paint anything.
@@ -204,3 +207,5 @@ TEST(
 	EXPECT_GT(clearInteriorRows, 0)
 		<< "the rim is opaque from rail to rail, so no fill can show";
 }
+
+} // namespace CppRL

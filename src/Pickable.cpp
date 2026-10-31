@@ -68,6 +68,9 @@
 #include "Weapons.h"
 #include "Wording.h"
 
+namespace CppRL
+{
+
 // ========== Internal helpers ==========
 
 namespace
@@ -1374,3 +1377,5 @@ ItemBehavior load_behavior(const json& source)
 	// Every enumerator has its arm above, so only a value none names is here.
 	throw std::logic_error("load_behavior: a PickableType no enumerator names");
 }
+
+} // namespace CppRL

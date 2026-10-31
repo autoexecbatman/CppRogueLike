@@ -10,6 +10,9 @@
 #include "ShopKeeper.h"
 #include "ShopkeeperFactory.h"
 
+namespace CppRL
+{
+
 bool ShopkeeperFactory::should_spawn_shopkeeper(
 	int dungeonLevel,
 	GameContext& ctx)
@@ -133,3 +136,5 @@ ShopQuality ShopkeeperFactory::select_shop_quality_for_level(
 		return ShopQuality::POOR;
 	}
 }
+
+} // namespace CppRL

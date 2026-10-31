@@ -11,6 +11,9 @@
 #include "Renderer.h"
 #include "RenderingManager.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The box is sized to the viewport. A fixed 32 tiles is 2048 pixels on a
@@ -153,3 +156,5 @@ void MenuName::menu(GameContext& ctx)
 		ctx.renderingManager->restore_game_display();
 	}
 }
+
+} // namespace CppRL

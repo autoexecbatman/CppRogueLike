@@ -3,6 +3,9 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
+namespace CppRL
+{
+
 using json = nlohmann::json;
 
 class Persistent
@@ -20,3 +23,5 @@ public:
 	virtual void load(const json& json) = 0;
 	virtual void save(json& json) = 0;
 };
+
+} // namespace CppRL

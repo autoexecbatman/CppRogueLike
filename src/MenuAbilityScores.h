@@ -28,6 +28,9 @@
 #include "AbilityAllocation.h"
 #include "BaseMenu.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 
 // The line the screen prints for one ability: the marker when the cursor is on it,
@@ -93,3 +96,5 @@ public:
 };
 
 // end of file: MenuAbilityScores.h
+
+} // namespace CppRL

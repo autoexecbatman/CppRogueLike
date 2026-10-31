@@ -19,6 +19,9 @@
 #include "TileRefJson.h"
 #include "TileType.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Tile types are authored by name so the file reads as the game does, and a
@@ -220,3 +223,5 @@ void TileConfig::load(std::string_view path)
 }
 
 // end of file: TileConfig.cpp
+
+} // namespace CppRL

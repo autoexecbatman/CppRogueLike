@@ -24,6 +24,9 @@
 #include "src/MonsterRegistry.h"
 #include "src/Paths.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	struct BookDamage
@@ -199,3 +202,5 @@ TEST_F(MonsterDamageBookTest, EveryRecordIsReadAgainstTheBook)
 			<< " has no row in BOOK_DAMAGE and is not a game-only monster";
 	}
 }
+
+} // namespace CppRL

@@ -21,6 +21,9 @@
 #include "TileRef.h"
 #include "TileRefJson.h"
 
+namespace CppRL
+{
+
 using json = nlohmann::json;
 
 namespace
@@ -391,3 +394,5 @@ std::string Palette::symbol_label(char symbol) const
 	const std::optional<size_t> holder = find_symbol(paletteEntries, symbol);
 	return holder ? paletteEntries[*holder].label : std::string(1, symbol);
 }
+
+} // namespace CppRL

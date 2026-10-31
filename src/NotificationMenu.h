@@ -13,6 +13,9 @@
 
 #include "BaseMenu.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 
 class NotificationMenu : public BaseMenu
@@ -36,3 +39,5 @@ public:
 	void set_on_close(std::function<void(GameContext&)> callback);
 	void menu(GameContext& ctx) override;
 };
+
+} // namespace CppRL

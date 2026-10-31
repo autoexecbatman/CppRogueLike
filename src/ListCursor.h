@@ -31,6 +31,9 @@
 #include <cstddef>
 #include <optional>
 
+namespace CppRL
+{
+
 // `value` moved by `steps` (negative steps move toward zero) and held to [0, highest],
 // with no wrap in either direction. A step of INT_MIN is safe: its magnitude is taken
 // without negating it. `value` must already be within its bound.
@@ -181,3 +184,5 @@ public:
 	//   reset(3);                  // -> current_row() 0, first_visible(3) 0, three rows
 	void reset(size_t rows);
 };
+
+} // namespace CppRL

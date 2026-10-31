@@ -24,6 +24,9 @@
 #include <cstddef>
 #include <vector>
 
+namespace CppRL
+{
+
 // One cell: what it lets through, and whether the last look saw it.
 struct FovCell
 {
@@ -138,3 +141,5 @@ public:
 	//   grid.is_in_fov(20, 20);   // -> false, the first view is gone
 	void compute_fov(int col, int row, int radius);
 };
+
+} // namespace CppRL

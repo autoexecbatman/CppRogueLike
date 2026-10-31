@@ -3,6 +3,9 @@
 #include "Actor.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 // file: TileFeature.h
 //
 // What every thing standing on a floor tile shares: a position, a lifetime,
@@ -92,3 +95,5 @@ public:
 		Creature& creature,
 		GameContext& ctx) = 0;
 };
+
+} // namespace CppRL

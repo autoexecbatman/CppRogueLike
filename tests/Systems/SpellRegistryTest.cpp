@@ -24,6 +24,9 @@
 #include "src/Paths.h"
 #include "src/SpellRegistry.h"
 
+namespace CppRL
+{
+
 // Raising bless in one registry leaves another's bless at the level the file gave it.
 TEST(SpellRegistryTest, AnEditToOneRegistryDoesNotReachAnother)
 {
@@ -166,3 +169,5 @@ TEST(SpellRegistryTest, ALoadReplacesTheCustomSpellsItHeld)
 	EXPECT_FALSE(std::ranges::contains(spells.get_all_keys(), key))
 		<< "a custom spell survived a load";
 }
+
+} // namespace CppRL

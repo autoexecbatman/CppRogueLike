@@ -36,6 +36,9 @@
 #include "src/Paths.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class MonsterAbilityScoresTest : public ::testing::Test
 {
 protected:
@@ -149,3 +152,5 @@ TEST_F(MonsterAbilityScoresTest, NoRecordCarriesAbilityDice)
 }
 
 // end of file: MonsterAbilityScoresTest.cpp
+
+} // namespace CppRL

@@ -29,6 +29,9 @@
 #include "RecordEditor.h"
 #include "TileRef.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 
 // What the monster editor knows about monsters: the fields, how each is shown
@@ -422,3 +425,5 @@ public:
 // The monster editor itself; its members are defined in RecordEditor.cpp.
 using MonsterEditor = RecordEditor<MonsterEditorModel>;
 extern template class RecordEditor<MonsterEditorModel>;
+
+} // namespace CppRL

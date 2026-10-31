@@ -19,6 +19,9 @@
 #include "src/ItemRegistry.h"
 #include "src/Paths.h"
 
+namespace CppRL
+{
+
 // Every shipped item has a sprite, and every sprite belongs to a shipped item.
 TEST(ItemTileAgreementTest, EveryShippedItemHasATileAndEveryTileAnItem)
 {
@@ -43,3 +46,5 @@ TEST(ItemTileAgreementTest, EveryShippedItemHasATileAndEveryTileAnItem)
 			<< "tile '" << key << "' belongs to no item";
 	}
 }
+
+} // namespace CppRL

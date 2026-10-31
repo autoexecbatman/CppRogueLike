@@ -15,6 +15,9 @@
 #include "src/TileRef.h"
 #include "src/Vector2D.h"
 
+namespace CppRL
+{
+
 class ProtectionFromEvilTest : public ::testing::Test
 {
 protected:
@@ -82,3 +85,5 @@ TEST_F(ProtectionFromEvilTest, PenaltyIgnoresTheEthicsAxis)
 	attacker.set_ethics(Alignment::Ethics::CHAOTIC);
 	EXPECT_EQ(buffs.calculate_ward_penalty(attacker, target), -2);
 }
+
+} // namespace CppRL

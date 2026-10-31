@@ -12,6 +12,9 @@
 #include "TileRef.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 namespace SpellAnimations
 {
 
@@ -90,3 +93,5 @@ namespace SpellAnimations
 	}
 
 } // namespace SpellAnimations
+
+} // namespace CppRL

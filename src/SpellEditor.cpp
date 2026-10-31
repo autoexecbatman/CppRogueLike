@@ -17,6 +17,9 @@
 #include "SpellEditor.h"
 #include "SpellRegistry.h"
 
+namespace CppRL
+{
+
 static_assert(
 	is_well_formed_table(SpellEditorModel::FIELDS),
 	"SpellEditorModel::FIELDS is out of order or misplaces a plain number");
@@ -311,3 +314,5 @@ void SpellEditorModel::field_set_string(FieldId field, std::string newValue)
 }
 
 // end of file: SpellEditor.cpp
+
+} // namespace CppRL

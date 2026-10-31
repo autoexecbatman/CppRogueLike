@@ -48,6 +48,9 @@
 #include "src/Web.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 // The test a spell tile passes when it is a standing web outside the columns
 // westmostCol to eastmostCol.
 //
@@ -387,3 +390,5 @@ TEST_F(WebSpinnerQuarryTest, UnwardedSpinnerAtItsWebLimitSpinsADefensiveWeb)
 	EXPECT_GT(ctx.spellTiles->size(), 5u)
 		<< "the 40% defensive web was not spun";
 }
+
+} // namespace CppRL

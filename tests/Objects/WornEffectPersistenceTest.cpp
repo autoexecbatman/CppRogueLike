@@ -40,6 +40,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 using json = nlohmann::json;
 
 namespace
@@ -153,3 +156,5 @@ TEST(WornEffectPersistenceTest, AReloadedWearerStillCrossesWater)
 	EXPECT_TRUE(wearer.has_bypass(ActorState::CAN_SWIM))
 		<< "the gauntlets of swimming stopped carrying their wearer across water after a save";
 }
+
+} // namespace CppRL

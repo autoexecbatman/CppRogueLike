@@ -26,6 +26,9 @@
 #include "TargetMode.h"
 #include "Weapons.h"
 
+namespace CppRL
+{
+
 static_assert(
 	is_well_formed_table(ItemEditorModel::FIELDS),
 	"ItemEditorModel::FIELDS is out of order or misplaces a plain number");
@@ -534,3 +537,5 @@ void ItemEditorModel::field_set_string(FieldId field, std::string newValue)
 }
 
 // end of file: ItemEditor.cpp
+
+} // namespace CppRL

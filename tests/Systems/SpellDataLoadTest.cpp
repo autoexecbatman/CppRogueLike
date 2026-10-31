@@ -24,6 +24,9 @@
 #include "src/Paths.h"
 #include "src/SpellRegistry.h"
 
+namespace CppRL
+{
+
 class SpellDataLoadTest : public ::testing::Test
 {
 protected:
@@ -116,3 +119,5 @@ TEST_F(SpellDataLoadTest, EveryKnownClassLoads)
 			<< "class '" << spellClass << "' was refused";
 	}
 }
+
+} // namespace CppRL

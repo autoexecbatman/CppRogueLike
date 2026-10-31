@@ -21,6 +21,9 @@
 #include "Renderer.h"
 #include "TileConfig.h"
 
+namespace CppRL
+{
+
 // Maximum log messages shown in the HUD
 constexpr int LOG_MAX_MESSAGES = 5;
 
@@ -712,3 +715,5 @@ void Gui::save([[maybe_unused]] json& savedState) {}
 void Gui::load([[maybe_unused]] const json& savedState) {}
 
 // end of file: Gui.cpp
+
+} // namespace CppRL

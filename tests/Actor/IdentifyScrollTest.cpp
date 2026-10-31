@@ -34,6 +34,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr Vector2D ON_THE_FLOOR{ 2, 2 };
@@ -197,3 +200,5 @@ TEST_F(IdentifyScrollTest, APackHoldingOnlyTheScrollStillSpendsIt)
 	EXPECT_TRUE(read_the_scroll())
 		<< "a scroll read over a pack holding only itself was not consumed";
 }
+
+} // namespace CppRL

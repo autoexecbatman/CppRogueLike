@@ -32,6 +32,9 @@
 #include "src/TurnSchedule.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// A day in rounds, from the book: 24 hours, and a round of about one
@@ -136,3 +139,5 @@ TEST_F(InvisibilitySpellTest, TheCastingDoesNotNameTheOldDuration)
 }
 
 // end of file: InvisibilitySpellTest.cpp
+
+} // namespace CppRL

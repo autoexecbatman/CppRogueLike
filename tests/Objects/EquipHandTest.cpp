@@ -29,6 +29,9 @@
 
 #include "src/ItemClassification.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Named here so each assertion reads as the claim it makes.
@@ -161,3 +164,5 @@ TEST(EquipHandTest, WhateverTheOffHandTakesTheMainHandTakesToo)
 }
 
 // end of file: EquipHandTest.cpp
+
+} // namespace CppRL

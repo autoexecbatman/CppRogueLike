@@ -29,6 +29,9 @@
 #include "src/TileRefJson.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The item tiles the game ships, by key, as tiles.json holds them.
@@ -74,3 +77,5 @@ TEST(ItemTileStartupTest, SavingTheLoadedTilesKeepsThemAll)
 
 	EXPECT_EQ(written, shipped);
 }
+
+} // namespace CppRL

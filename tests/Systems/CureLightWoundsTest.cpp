@@ -38,6 +38,9 @@
 #include "src/SpellSystem.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr int MAX_HP = 20;
@@ -178,3 +181,5 @@ TEST_F(CureLightWoundsTest, TheSpellRollsAnEightSidedDie)
 }
 
 // end of file: CureLightWoundsTest.cpp
+
+} // namespace CppRL

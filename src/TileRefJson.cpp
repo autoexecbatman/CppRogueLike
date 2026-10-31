@@ -9,6 +9,9 @@
 #include "TileRef.h"
 #include "TileRefJson.h"
 
+namespace CppRL
+{
+
 namespace TileRefJson
 {
 
@@ -45,3 +48,5 @@ namespace TileRefJson
 	}
 
 } // namespace TileRefJson
+
+} // namespace CppRL

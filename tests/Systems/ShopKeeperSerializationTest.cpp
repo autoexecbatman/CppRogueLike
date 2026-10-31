@@ -12,6 +12,9 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
+namespace CppRL
+{
+
 using json = nlohmann::json;
 using namespace InventoryOperations;
 
@@ -182,3 +185,5 @@ TEST_F(ShopKeeperSerializationTest, AShopRecordWithoutItsShelvesIsRefused)
 	EXPECT_ANY_THROW(ShopKeeper::create(saved))
 		<< "a shop with no shelves loaded quietly";
 }
+
+} // namespace CppRL

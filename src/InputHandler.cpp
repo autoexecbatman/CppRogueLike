@@ -2,6 +2,9 @@
 #include "InputSystem.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 void InputHandler::key_store() noexcept
 {
 	lastKey = keyPress;
@@ -151,3 +154,5 @@ Vector2D InputHandler::get_mouse_position_old() const noexcept
 {
 	return lastMousePos;
 }
+
+} // namespace CppRL

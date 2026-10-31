@@ -8,6 +8,9 @@
 #include <stdexcept>
 #include <string>
 
+namespace CppRL
+{
+
 // Single source of truth: build context from owned systems
 [[nodiscard]] GameContext Game::context() noexcept
 {
@@ -210,3 +213,5 @@ void Game::shutdown()
 		}
 	}
 }
+
+} // namespace CppRL

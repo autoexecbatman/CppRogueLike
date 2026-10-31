@@ -20,6 +20,9 @@
 #include "src/MenuThiefSkills.h"
 #include "src/ThiefSkills.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Table 27 for a human is a row of zeroes, and Dexterity 13 sits in Table
@@ -173,3 +176,5 @@ TEST(ThiefSkillKeyTest, AKeyTheScreenDoesNotUseChangesNothing)
 }
 
 // end of file: ThiefSkillKeyTest.cpp
+
+} // namespace CppRL

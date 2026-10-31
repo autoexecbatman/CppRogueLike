@@ -26,6 +26,9 @@
 #include "src/RandomDice.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// A human of the given ages, living to 100 so nothing here dies.
@@ -233,3 +236,5 @@ TEST(LifespanTest, ElvesAndDwarvesStartAtTheirOwnAges)
 }
 
 // end of file: LifespanTest.cpp
+
+} // namespace CppRL

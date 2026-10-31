@@ -24,6 +24,9 @@
 #include "Spellcasting.h"
 #include "TileRef.h"
 
+namespace CppRL
+{
+
 // file: MonsterRegistry.h
 //
 // Every monster the game knows, by key: the standard monsters, which the code names by
@@ -235,3 +238,5 @@ public:
 	// Whether a key names a standard monster.
 	[[nodiscard]] bool is_builtin(std::string_view key) const;
 };
+
+} // namespace CppRL

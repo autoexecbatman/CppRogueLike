@@ -23,6 +23,9 @@
 #include "Vector2D.h"
 #include "Weapons.h"
 
+namespace CppRL
+{
+
 class Item;
 class Creature;
 class Player;
@@ -889,3 +892,5 @@ int get_item_resistance_strength(
 // Serialization
 void save_behavior(const ItemBehavior& behavior, json& output);
 ItemBehavior load_behavior(const json& source);
+
+} // namespace CppRL

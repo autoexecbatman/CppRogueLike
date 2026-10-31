@@ -19,6 +19,9 @@
 
 #include <optional>
 
+namespace CppRL
+{
+
 // Example, every die at its highest, so each read is the table's 18 row:
 //   roll_monster_ability_scores(creature, CreatureSize::LARGE, IntelligenceRating::SEMI, std::nullopt, dice);
 //   creature.get_strength(); // -> 20
@@ -52,3 +55,5 @@ void roll_monster_ability_scores(
 }
 
 // end of file: MonsterAbilityTables.cpp
+
+} // namespace CppRL

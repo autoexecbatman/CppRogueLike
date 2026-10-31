@@ -50,6 +50,9 @@
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// A 3 by 3 room of floor, so a teleport has somewhere to land other than
@@ -615,3 +618,5 @@ TEST(InventoryCloseAfterUseTest, OnlyTheScrollsAimedAtATileHandOverToTargeting)
 }
 
 // end of file: InventoryCloseAfterUseTest.cpp
+
+} // namespace CppRL

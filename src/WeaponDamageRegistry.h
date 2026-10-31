@@ -6,6 +6,9 @@
 
 #include "DamageInfo.h"
 
+namespace CppRL
+{
+
 // Forward declarations
 struct ItemEnhancement;
 
@@ -40,3 +43,5 @@ public:
 
 	static std::string get_unarmed_damage() noexcept { return "1d2"; }
 };
+
+} // namespace CppRL

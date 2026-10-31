@@ -5,6 +5,9 @@
 #include "Attacker.h"
 #include "Persistent.h"
 
+namespace CppRL
+{
+
 class Player;
 class Creature;
 struct GameContext;
@@ -20,12 +23,14 @@ private:
 public:
 	explicit PlayerAttacker(Player& owner);
 
-	AttackResult::AttackResult attack(
+	AttackResult attack(
 		Creature& target,
-		AttackKind::AttackKind kind,
+		AttackKind kind,
 		GameContext& ctx) override;
 
 	// Player has no base DamageInfo to serialize.
 	void load(const json& source) override;
 	void save(json& output) override;
 };
+
+} // namespace CppRL

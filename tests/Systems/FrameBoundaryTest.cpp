@@ -32,6 +32,9 @@
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Raylib keeps AutomationEventType inside rcore.c; these are its values in
@@ -178,3 +181,5 @@ TEST(FrameBoundaryTest, AClickThatClosesAMenuIsSpentByTheTick)
 }
 
 // end of file: FrameBoundaryTest.cpp
+
+} // namespace CppRL

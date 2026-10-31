@@ -18,6 +18,9 @@
 #include "src/CreatureSize.h"
 #include "src/MonsterAbilityTables.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	void expect_row(int roll, std::array<int, 6> printed)
@@ -56,3 +59,5 @@ TEST(MonsterDexterityTableTest, EveryPrintedRowIsTheBooks)
 }
 
 // end of file: MonsterDexterityTableTest.cpp
+
+} // namespace CppRL

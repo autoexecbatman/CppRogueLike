@@ -25,6 +25,9 @@
 
 #include <raylib.h>
 
+namespace CppRL
+{
+
 struct GameContext;
 
 namespace DebugUtils
@@ -56,3 +59,5 @@ namespace DebugUtils
 		void render(const GameContext& ctx) const;
 	};
 } // namespace DebugUtils
+
+} // namespace CppRL

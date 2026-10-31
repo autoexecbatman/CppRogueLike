@@ -20,6 +20,9 @@
 #include "Player.h"
 #include "Renderer.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr int MAX_LOG_LINES = 8;
@@ -200,3 +203,5 @@ void DeathMenu::handle_input(GameContext& ctx)
 		ctx.menus->push_back(make_main_menu(true, ctx));
 	}
 }
+
+} // namespace CppRL

@@ -9,6 +9,9 @@
 #include <string>
 #include <vector>
 
+namespace CppRL
+{
+
 // ============================================================================
 // WEAPON DAMAGE REGISTRY TESTS
 // Validates damage lookup system - core combat mechanic
@@ -255,3 +258,5 @@ TEST_F(WeaponDamageRegistryTest, EveryRangedWeaponCarriesItsBasicAmmunition)
 			<< ranged.weapon << " does not do the damage of " << ranged.round;
 	}
 }
+
+} // namespace CppRL

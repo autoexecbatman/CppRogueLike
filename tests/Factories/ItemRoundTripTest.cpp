@@ -35,6 +35,9 @@
 #include <stdexcept>
 #include <string>
 
+namespace CppRL
+{
+
 class ItemRoundTripTest : public ::testing::Test
 {
 protected:
@@ -337,3 +340,5 @@ TEST_F(ItemRoundTripTest, ADurationWithoutAKnownUnitIsRefused)
 	ItemRegistry unknownUnit{};
 	EXPECT_ANY_THROW(unknownUnit.load(roundTrip.string()));
 }
+
+} // namespace CppRL

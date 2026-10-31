@@ -35,6 +35,9 @@
 
 #include "Persistent.h"
 
+namespace CppRL
+{
+
 // The enumerator one saved value names, or the refusal that says what it is
 // not, naming field as where the value was read.
 //
@@ -81,3 +84,5 @@ template <typename Enum>
 {
 	return saved_enum_value(record.at(field), loader, field, enumName, from);
 }
+
+} // namespace CppRL

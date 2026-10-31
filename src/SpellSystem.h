@@ -9,6 +9,9 @@
 #include "SpellRegistry.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 class Creature;
 class DataManager;
 class Player;
@@ -299,3 +302,5 @@ namespace SpellSystem
 	void show_casting_menu(Player& player, GameContext& ctx);
 
 } // namespace SpellSystem
+
+} // namespace CppRL

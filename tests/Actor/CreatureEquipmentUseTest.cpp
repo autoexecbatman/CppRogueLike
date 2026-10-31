@@ -38,6 +38,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr int ORC_MAX_HP = 20;
@@ -273,3 +276,5 @@ TEST_F(CreatureEquipmentUseTest, DroppingOntoACrowdedFloorStillLands)
 }
 
 // end of file: CreatureEquipmentUseTest.cpp
+
+} // namespace CppRL

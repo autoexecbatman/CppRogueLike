@@ -27,6 +27,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// A row of open floor with the player standing on it, room to step either
@@ -173,3 +176,5 @@ TEST_F(ScriptedInputTest, AFrameWithNoKeyLeavesTheGameWaiting)
 }
 
 // end of file: ScriptedInputTest.cpp
+
+} // namespace CppRL

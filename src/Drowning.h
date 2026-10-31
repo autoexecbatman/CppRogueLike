@@ -30,6 +30,9 @@
 
 #include <algorithm>
 
+namespace CppRL
+{
+
 // Rounds a creature can hold its breath, from its Constitution. "A character can hold
 // his breath up to 1/3 his Constitution score in rounds (rounded up)", and "all
 // characters are able to hold their breath for one round, regardless of circumstances"
@@ -61,3 +64,5 @@
 }
 
 // end of file: Drowning.h
+
+} // namespace CppRL

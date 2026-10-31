@@ -1,4 +1,7 @@
 #pragma once
+
+namespace CppRL
+{
 // file: TestDice.h
 // The one seed every test's dice start from, so a test draws the same numbers on every run
 // and a mutation sweep's verdict does not depend on which run it was.
@@ -16,3 +19,5 @@
 inline constexpr unsigned int TEST_DICE_SEED = 20261021;
 
 // end of file: TestDice.h
+
+} // namespace CppRL

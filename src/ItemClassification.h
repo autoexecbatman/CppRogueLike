@@ -8,6 +8,9 @@
 #include <stdexcept>
 #include <string_view>
 
+namespace CppRL
+{
+
 // CLASSIFICATION - Category/type of item (no specific variants)
 enum class ItemClass
 {
@@ -322,3 +325,5 @@ inline ItemClass parse_item_class(std::string_view name)
 	}
 	return found->itemClass;
 }
+
+} // namespace CppRL

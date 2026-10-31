@@ -12,6 +12,9 @@
 #include "SavedEnum.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The BlessingStatus a saved integer names, or nullopt for one no status
@@ -262,3 +265,5 @@ bool Item::is_enhanced() const noexcept
 	return enhancement.prefix != PrefixType::NONE ||
 		enhancement.suffix != SuffixType::NONE;
 }
+
+} // namespace CppRL

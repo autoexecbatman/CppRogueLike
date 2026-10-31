@@ -29,6 +29,9 @@
 #include "Trap.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The lowest d100 roll that sets a trap off on the thief working on it: the
@@ -538,3 +541,5 @@ void Trap::apply_state_appearance()
 		remove_state(ActorState::IS_INVISIBLE);
 	}
 }
+
+} // namespace CppRL

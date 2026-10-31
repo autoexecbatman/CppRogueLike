@@ -7,6 +7,9 @@
 #include "EditorInput.h"
 #include "Renderer.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// One raylib key and the editor key it stands for.
@@ -86,3 +89,5 @@ EditorInput read_editor_input(const Renderer& renderer)
 	input.measure = measure_in_game_font;
 	return input;
 }
+
+} // namespace CppRL

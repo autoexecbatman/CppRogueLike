@@ -36,6 +36,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class MonsterHitDiceTest : public ::testing::Test
 {
 protected:
@@ -294,3 +297,5 @@ TEST_F(MonsterHitDiceTest, AShopkeeperTakesItsConstitutionOnItsOneDie)
 	EXPECT_EQ(shopkeeper->get_max_hp(), 105);
 	EXPECT_TRUE(shopkeeper->get_last_constitution().has_value());
 }
+
+} // namespace CppRL

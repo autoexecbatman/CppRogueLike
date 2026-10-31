@@ -36,6 +36,9 @@
 #include "src/Player.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class WornResistanceTest : public ::testing::Test
 {
 protected:
@@ -253,3 +256,5 @@ TEST(ReduceDiceTest, OtherTypesAreSummedAsRolled)
 			.hit_points(),
 		18);
 }
+
+} // namespace CppRL

@@ -37,6 +37,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class RingEffectsTest : public ::testing::Test
 {
 protected:
@@ -191,3 +194,5 @@ TEST_F(RingEffectsTest, ARingOfInvisibilityGrantsTheSpell)
 	EXPECT_EQ(granted.front().key, "invisibility");
 	EXPECT_EQ(granted.front().source, "Ring");
 }
+
+} // namespace CppRL

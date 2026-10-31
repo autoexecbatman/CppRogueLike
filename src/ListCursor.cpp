@@ -9,6 +9,9 @@
 
 #include "ListCursor.h"
 
+namespace CppRL
+{
+
 size_t step_within(size_t value, int steps, size_t highest)
 {
 	assert(value <= highest && "step_within: value is above its own bound");
@@ -134,3 +137,5 @@ void ListCursor::reset(size_t rows)
 	current = 0;
 	firstVisible = 0;
 }
+
+} // namespace CppRL

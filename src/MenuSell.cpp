@@ -36,6 +36,9 @@
 #include "MessageSystem.h"
 #include "Renderer.h"
 
+namespace CppRL
+{
+
 // Builds the one line per item that this menu displays, each carrying the name and
 // what the shop would pay for it.
 //
@@ -243,3 +246,5 @@ void MenuSell::menu(GameContext& ctx)
 	draw();
 	on_key(ctx);
 }
+
+} // namespace CppRL

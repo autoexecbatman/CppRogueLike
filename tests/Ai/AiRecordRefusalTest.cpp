@@ -26,6 +26,9 @@
 #include "src/AiMonsterConfused.h"
 #include "src/Persistent.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -127,3 +130,5 @@ TEST(AiRecordRefusalTest, AMimicWithNoChangeBookedLoads)
 }
 
 // end of file: AiRecordRefusalTest.cpp
+
+} // namespace CppRL

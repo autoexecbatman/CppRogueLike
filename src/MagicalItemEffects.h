@@ -6,6 +6,9 @@
 #include <stdexcept>
 #include <string_view>
 
+namespace CppRL
+{
+
 // Authentic AD&D 2e magical item effects
 enum class MagicalEffect
 {
@@ -206,3 +209,5 @@ inline MagicalEffect parse_magical_effect(std::string_view name)
 
 	throw std::runtime_error(std::format("unknown magical_effect '{}'", name));
 }
+
+} // namespace CppRL

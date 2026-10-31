@@ -16,6 +16,9 @@
 #include "Renderer.h"
 #include "TileRef.h"
 
+namespace CppRL
+{
+
 // ---------------------------------------------------------------------------
 // Static monster table
 // ---------------------------------------------------------------------------
@@ -528,3 +531,5 @@ void ContentEditor::handle_keyboard(size_t visibleRows)
 		lastSaveTime = GetTime();
 	}
 }
+
+} // namespace CppRL

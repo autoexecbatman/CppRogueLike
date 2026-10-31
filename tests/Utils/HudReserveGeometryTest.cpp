@@ -23,6 +23,9 @@
 
 #include "src/Renderer.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The zooms the renderer actually offers, smallest to largest.
@@ -131,3 +134,5 @@ TEST(HudReserveGeometryTest, TheShippingZoomReservesFiveRowsForEightLinesOfText)
 	EXPECT_GT(wholeTileReserve, 5 * 64)
 		<< "a whole tile an edge still fits, so this test no longer measures anything";
 }
+
+} // namespace CppRL

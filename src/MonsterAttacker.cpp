@@ -10,19 +10,22 @@
 #include "Item.h"
 #include "MonsterAttacker.h"
 
+namespace CppRL
+{
+
 MonsterAttacker::MonsterAttacker(Creature& owner, const DamageInfo& damage) :
 	Attacker(damage),
 	owner(owner)
 {
 }
 
-AttackResult::AttackResult MonsterAttacker::attack(
+AttackResult MonsterAttacker::attack(
 	Creature& target,
-	AttackKind::AttackKind kind,
+	AttackKind kind,
 	GameContext& ctx)
 {
 	// A monster using a weapon does the weapon's damage (Monstrous Manual, PDF page 1083).
-	if (kind == AttackKind::AttackKind::RANGED)
+	if (kind == AttackKind::RANGED)
 	{
 		const Item* missileWeapon =
 			owner.get_equipped_item(weapon_slot_for(kind));
@@ -48,3 +51,5 @@ AttackResult::AttackResult MonsterAttacker::attack(
 		kind,
 		ctx);
 }
+
+} // namespace CppRL

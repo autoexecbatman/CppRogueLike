@@ -56,6 +56,9 @@
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr int GOBLIN_XP = 15;
@@ -200,7 +203,7 @@ TEST_F(KillCreditTest, AGoblinThePlayersBlowKillsPaysItsWorthAndOneKill)
 
 	player->attacker = std::make_unique<PlayerAttacker>(*player);
 
-	player->attacker->attack(goblin, AttackKind::AttackKind::MELEE, ctx);
+	player->attacker->attack(goblin, AttackKind::MELEE, ctx);
 
 	ASSERT_TRUE(goblin.is_dead()) << "the blow did not kill the goblin";
 	EXPECT_EQ(player->get_xp(), GOBLIN_XP);
@@ -519,3 +522,5 @@ TEST(KillCreditCursorTest, AGoblinThePlayersFireballSpellKillsPaysItsWorth)
 }
 
 // end of file: KillCreditTest.cpp
+
+} // namespace CppRL

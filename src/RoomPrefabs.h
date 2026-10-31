@@ -13,6 +13,9 @@
 #include <string>
 #include <vector>
 
+namespace CppRL
+{
+
 using RoomPrefab = std::vector<std::string>;
 
 inline const std::vector<RoomPrefab> ALL_PREFABS = {
@@ -123,3 +126,5 @@ inline const std::vector<RoomPrefab> ALL_PREFABS = {
 		"..............",
 	},
 };
+
+} // namespace CppRL

@@ -29,6 +29,9 @@
 #include "RecordEditor.h"
 #include "TileRef.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 
 // What the item editor knows about items: the fields, how each is shown and
@@ -443,3 +446,5 @@ public:
 // The item editor itself; its members are defined in RecordEditor.cpp.
 using ItemEditor = RecordEditor<ItemEditorModel>;
 extern template class RecordEditor<ItemEditorModel>;
+
+} // namespace CppRL

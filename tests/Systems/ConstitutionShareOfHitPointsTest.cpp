@@ -38,6 +38,9 @@
 #include "src/Player.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr int STARTING_HP = 10;
@@ -147,3 +150,5 @@ TEST_F(
 }
 
 // end of file: ConstitutionShareOfHitPointsTest.cpp
+
+} // namespace CppRL

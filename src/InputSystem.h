@@ -6,6 +6,9 @@
 
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 enum class GameKey
 {
 	NONE = 0,
@@ -162,3 +165,5 @@ public:
 
 	[[nodiscard]] bool window_resized() const { return resized; }
 };
+
+} // namespace CppRL

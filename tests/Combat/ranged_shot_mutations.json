@@ -15,20 +15,20 @@
   "mutations": [
     {
       "file": "src/Attacker.cpp",
-      "original": "\tcase AttackResult::AttackResult::LANDED:\n\t{\n\t\treturn ShotImpact::MISSILE_AND_BLOOD;",
-      "mutated": "\tcase AttackResult::AttackResult::LANDED:\n\t{\n\t\treturn ShotImpact::MISSILE;",
+      "original": "\tcase AttackResult::LANDED:\n\t{\n\t\treturn ShotImpact::MISSILE_AND_BLOOD;",
+      "mutated": "\tcase AttackResult::LANDED:\n\t{\n\t\treturn ShotImpact::MISSILE;",
       "catches": "a shot that landed drawing no blood"
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\tcase AttackResult::AttackResult::MISSED:\n\t{\n\t\treturn ShotImpact::MISSILE;",
-      "mutated": "\tcase AttackResult::AttackResult::MISSED:\n\t{\n\t\treturn ShotImpact::MISSILE_AND_BLOOD;",
+      "original": "\tcase AttackResult::MISSED:\n\t{\n\t\treturn ShotImpact::MISSILE;",
+      "mutated": "\tcase AttackResult::MISSED:\n\t{\n\t\treturn ShotImpact::MISSILE_AND_BLOOD;",
       "catches": "a miss drawing blood, the defect 0074 names"
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\tcase AttackResult::AttackResult::PREVENTED:\n\t{\n\t\treturn ShotImpact::NOTHING;",
-      "mutated": "\tcase AttackResult::AttackResult::PREVENTED:\n\t{\n\t\treturn ShotImpact::MISSILE;",
+      "original": "\tcase AttackResult::PREVENTED:\n\t{\n\t\treturn ShotImpact::NOTHING;",
+      "mutated": "\tcase AttackResult::PREVENTED:\n\t{\n\t\treturn ShotImpact::MISSILE;",
       "catches": "a shot never loosed drawing a missile"
     },
     {
@@ -39,8 +39,8 @@
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\tcase AttackResult::AttackResult::MISSED:\n\t{\n\t\treturn ShotImpact::MISSILE;",
-      "mutated": "\tcase AttackResult::AttackResult::MISSED:\n\t{\n\t\treturn ShotImpact::NOTHING;",
+      "original": "\tcase AttackResult::MISSED:\n\t{\n\t\treturn ShotImpact::MISSILE;",
+      "mutated": "\tcase AttackResult::MISSED:\n\t{\n\t\treturn ShotImpact::NOTHING;",
       "catches": "a missed shot drawing no missile at all"
     }
   ]

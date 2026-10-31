@@ -30,6 +30,9 @@
 #include "src/Paths.h"
 #include "src/PrefabLibrary.h"
 
+namespace CppRL
+{
+
 class PrefabLibraryLoadTest : public ::testing::Test
 {
 protected:
@@ -229,3 +232,5 @@ TEST_F(PrefabLibraryLoadTest, SavedPrefabsLoadBackTheSame)
 		EXPECT_EQ(reloaded.all()[index].rows, library.all()[index].rows);
 	}
 }
+
+} // namespace CppRL

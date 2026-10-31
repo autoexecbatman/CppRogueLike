@@ -30,6 +30,9 @@
 #include <stdexcept>
 #include <string_view>
 
+namespace CppRL
+{
+
 // A foreground and a background, named as the pair they make. The values are the
 // renderer table's indices and start at one.
 enum class ColorPairId
@@ -258,3 +261,5 @@ inline constexpr std::size_t COLOR_PAIR_TABLE_SIZE = ALL_COLOR_PAIR.size() + 1;
 }
 
 // end of file: Colors.h
+
+} // namespace CppRL

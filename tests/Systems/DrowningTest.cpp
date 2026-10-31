@@ -48,6 +48,9 @@
 #include "src/TurnSchedule.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 // A third of the score, and the book says rounded up rather than down.
 TEST(DrowningTest, BreathIsAThirdOfConstitutionRoundedUp)
 {
@@ -482,3 +485,5 @@ TEST_F(DrowningInWaterTest, EachRoundOfALongActionChecksAtItsOwnPenalty)
 }
 
 // end of file: DrowningTest.cpp
+
+} // namespace CppRL

@@ -32,6 +32,9 @@
 
 #include "TileRef.h"
 
+namespace CppRL
+{
+
 // One named tile. A symbol of 0 means the tile has no prefab character.
 struct PaletteEntry
 {
@@ -208,3 +211,5 @@ public:
 	//   palette.symbol_label('Q');   // -> "Q" when no entry has 'Q'
 	[[nodiscard]] std::string symbol_label(char symbol) const;
 };
+
+} // namespace CppRL

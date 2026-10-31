@@ -40,6 +40,9 @@
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr int CORRIDOR_ROW = 5;
@@ -144,3 +147,5 @@ TEST(SilenceSpellTest, WebAtTheSameCreatureLeavesItAbleToCast)
 	}
 	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED);
 }
+
+} // namespace CppRL

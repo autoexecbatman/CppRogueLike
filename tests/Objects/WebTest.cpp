@@ -19,6 +19,9 @@
 #include "src/Web.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class WebTest : public ::testing::Test
 {
 protected:
@@ -118,3 +121,5 @@ TEST_F(WebTest, BindingExpiresAfterItsDuration)
 	EXPECT_EQ(player->try_break_web(ctx), WebEscape::STRUGGLED_FREE);
 	EXPECT_FALSE(player->is_webbed());
 }
+
+} // namespace CppRL

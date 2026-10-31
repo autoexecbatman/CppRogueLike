@@ -36,6 +36,9 @@
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Writes a save the loaders refuse where the game keeps its save.
@@ -246,3 +249,5 @@ TEST_F(LoadRefusalTest, AMissingSaveIsReportedAndLeavesTheGameUninitialized)
 	EXPECT_FALSE(game.menuManager.is_game_initialized())
 		<< "a load with nothing to read left the game marked running";
 }
+
+} // namespace CppRL

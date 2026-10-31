@@ -13,6 +13,9 @@
 #include "RandomDice.h"
 #include "SavingThrow.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -145,3 +148,5 @@ bool SavingThrows::is_made(
 		category);
 	return ctx.dice->d20() + modifier >= needed;
 }
+
+} // namespace CppRL

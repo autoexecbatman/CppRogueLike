@@ -2,6 +2,9 @@
 
 #include <array>
 
+namespace CppRL
+{
+
 class CombatProgressionTables
 {
 private:
@@ -123,3 +126,5 @@ public:
 		return (level >= 1 && level <= 20) ? wizard_attack_roll[level] : 20;
 	}
 };
+
+} // namespace CppRL

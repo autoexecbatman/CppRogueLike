@@ -15,7 +15,7 @@
 //
 // Usage - one attack, charged for what it took:
 //
-//   player.attacker->attack(target, AttackKind::AttackKind::MELEE, ctx);
+//   player.attacker->attack(target, AttackKind::MELEE, ctx);
 //   spend_player_action(
 //       ctx,
 //       AttackRate::attack_cost(player.get_attacks_per_round()));
@@ -23,6 +23,9 @@
 #include <cassert>
 
 #include "TurnSchedule.h"
+
+namespace CppRL
+{
 
 namespace AttackRate
 {
@@ -49,3 +52,5 @@ namespace AttackRate
 		return cost >= 1 ? cost : 1;
 	}
 } // namespace AttackRate
+
+} // namespace CppRL

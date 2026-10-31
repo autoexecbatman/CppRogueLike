@@ -13,6 +13,9 @@
 #include "Renderer.h"
 #include "ShopKeeper.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// The shop a trading creature owns. Every way into the trade menu requires
@@ -203,3 +206,5 @@ void MenuBuy::handle_buy(GameContext& ctx)
 		populate_items();
 	}
 }
+
+} // namespace CppRL

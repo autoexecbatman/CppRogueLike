@@ -11,6 +11,9 @@
 #include "SavingThrow.h"
 #include "TurnSchedule.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -397,3 +400,5 @@ std::vector<BuffType> BuffSystem::remove_buffs_broken_by_attacking(
 
 	return buffs_to_remove;
 }
+
+} // namespace CppRL

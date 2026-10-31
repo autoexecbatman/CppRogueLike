@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 // Blessing status: Three-state enum per AD&D 2e model
 enum class BlessingStatus
 {
@@ -40,3 +43,5 @@ struct ItemIdentificationStatus
 		return identifiedType && identifiedEnhancement && identifiedBuc;
 	}
 };
+
+} // namespace CppRL

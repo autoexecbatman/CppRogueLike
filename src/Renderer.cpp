@@ -20,6 +20,9 @@
 #include "TileConfig.h"
 #include "TileRef.h"
 
+namespace CppRL
+{
+
 // Rendered tile sizes the player can step through. 64 matches the native cell
 // size of the regenerated sheets, so their art draws unscaled.
 constexpr std::array<int, 6> ZOOM_LEVELS{ 16, 24, 32, 48, 64, 96 };
@@ -1182,3 +1185,5 @@ void Renderer::init_color_pairs()
 }
 
 // end of file: Renderer.cpp
+
+} // namespace CppRL

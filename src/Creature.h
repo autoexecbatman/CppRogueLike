@@ -38,6 +38,9 @@
 #include "TurnSchedule.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 class DataManager;
 class Web;
 
@@ -887,3 +890,5 @@ public:
 	std::unique_ptr<ShopKeeper> shop; // shopkeeper component for trading
 	CreatureInventory inventoryData;
 };
+
+} // namespace CppRL

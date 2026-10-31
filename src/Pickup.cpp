@@ -19,6 +19,9 @@
 #include "Pickup.h"
 #include "UniqueId.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Entries are lettered from here, so the first reads 'a'. Twenty-six is
@@ -188,3 +191,5 @@ namespace Pickup
 	}
 
 } // namespace Pickup
+
+} // namespace CppRL

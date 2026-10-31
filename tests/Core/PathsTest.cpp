@@ -30,6 +30,9 @@
 
 #include "src/Paths.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// One constant as the header declares it.
@@ -147,3 +150,5 @@ TEST_F(PathsTest, TheSaveFileAndItsTemporaryAreBothCreatable)
 }
 
 // end of file: PathsTest.cpp
+
+} // namespace CppRL

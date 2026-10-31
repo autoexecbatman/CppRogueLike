@@ -24,6 +24,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class WaterMovementTest : public ::testing::Test
 {
 protected:
@@ -90,3 +93,5 @@ TEST_F(WaterMovementTest, RemovingSwimClosesTheWater)
 
 	EXPECT_FALSE(Pathfinding::can_enter(*player, waterTile, ctx));
 }
+
+} // namespace CppRL

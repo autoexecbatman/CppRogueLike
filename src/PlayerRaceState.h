@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 // file: PlayerRaceState.h
 //
 // The races a player character may be. It sits in its own header so that the
@@ -26,3 +29,5 @@ enum class PlayerRaceState
 };
 
 // end of file: PlayerRaceState.h
+
+} // namespace CppRL

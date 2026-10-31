@@ -24,6 +24,9 @@
 #include "src/Paths.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 // A monster either wields an item or fights with its body. The two are
 // separate fields because only one of them names something in items.json.
 class MonsterEquipmentTest : public ::testing::Test
@@ -319,3 +322,5 @@ TEST_F(MonsterEquipmentTest, ClawedMonsterHoldsNothingAndStrikesWithItsBody)
 	EXPECT_EQ(troll->get_equipped_item(EquipmentSlot::RIGHT_HAND), nullptr);
 	EXPECT_EQ(troll->get_attack_name(), "Claws");
 }
+
+} // namespace CppRL

@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 // CloseButtonArea -- hit-test region for a close button drawn in a UI panel.
 // Constructed from a Renderer and viewport column count; answers whether a
 // given pixel coordinate falls inside the button.
@@ -27,3 +30,5 @@ public:
 
 	int get_y() const { return pixelY; }
 };
+
+} // namespace CppRL

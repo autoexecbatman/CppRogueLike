@@ -38,6 +38,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// More than extra-healing's most, 27, so no heal is cut short by the
@@ -136,3 +139,5 @@ TEST_F(PotionHealingTest, GiantStrengthStillSetsItsScore)
 }
 
 // end of file: PotionHealingTest.cpp
+
+} // namespace CppRL

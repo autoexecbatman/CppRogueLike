@@ -34,6 +34,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// A large creature rolling 15 on Table 8 has Constitution 18, worth 4 a
@@ -162,3 +165,5 @@ TEST_F(MimicStatBlockTest, ItIsBuiltWearingADisguise)
 }
 
 // end of file: MimicStatBlockTest.cpp
+
+} // namespace CppRL

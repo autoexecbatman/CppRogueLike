@@ -31,6 +31,9 @@
 #include "src/TurnSchedule.h"
 #include "src/Vector2D.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -480,3 +483,5 @@ TEST_F(BuffStateTest, AStrongerCastingReplacesTheApplicationOfTheOneRunning)
 
 	EXPECT_EQ(creature.get_strength(), 19);
 }
+
+} // namespace CppRL

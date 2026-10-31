@@ -7,6 +7,9 @@
 #include "DungeonNames.h"
 #include "RandomDice.h"
 
+namespace CppRL
+{
+
 namespace DungeonNames
 {
 	std::string generate_warden_name(RandomDice& rng)
@@ -55,3 +58,5 @@ namespace DungeonNames
 		return std::format("{} {}", firstNames[nameIdx], epithets[epithetIdx]);
 	}
 } // namespace DungeonNames
+
+} // namespace CppRL

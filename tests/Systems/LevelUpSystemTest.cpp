@@ -12,6 +12,9 @@
 
 #include <memory>
 
+namespace CppRL
+{
+
 class LevelUpSystemTest : public ::testing::Test
 {
 protected:
@@ -288,3 +291,5 @@ TEST_F(LevelUpSystemTest, LevelupUpdateAtThreshold)
 	EXPECT_EQ(player->get_creature_level(), levelBefore + 1);
 	EXPECT_EQ(player->get_xp(), 0); // 2000 - 2000
 }
+
+} // namespace CppRL

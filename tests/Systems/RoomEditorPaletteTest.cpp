@@ -36,6 +36,9 @@
 #include "src/TileRef.h"
 #include "src/TileRefJson.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Windows marks a file read-only only once every write bit is gone.
@@ -229,3 +232,5 @@ TEST_F(RoomEditorPaletteTest, ARefusedEditSavesNothingAndSaysWhy)
 
 	EXPECT_EQ(scratch_bytes(), before);
 }
+
+} // namespace CppRL

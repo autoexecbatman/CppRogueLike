@@ -24,6 +24,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class AlignmentTest : public ::testing::Test
 {
 protected:
@@ -357,3 +360,5 @@ TEST(AlignmentShiftTest, RepeatedShiftsAccumulateOneStepEach)
 	ethics = Alignment::shift_toward_chaotic(ethics);
 	EXPECT_EQ(ethics, Alignment::Ethics::CHAOTIC);
 }
+
+} // namespace CppRL

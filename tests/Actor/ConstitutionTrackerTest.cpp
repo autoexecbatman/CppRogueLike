@@ -29,6 +29,9 @@
 #include "src/PlayerRaceState.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -231,3 +234,5 @@ TEST_F(ConstitutionTrackerTest, AHumanPaysNothing)
 	EXPECT_TRUE(player->pay_racial_adjustments().empty());
 	EXPECT_EQ(player->get_strength(), allocatedStrength);
 }
+
+} // namespace CppRL

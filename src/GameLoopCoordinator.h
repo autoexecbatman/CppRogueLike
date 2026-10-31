@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 class Gui;
 struct GameContext;
 
@@ -44,3 +47,5 @@ public:
 	//   apply_round_upkeep(ctx);   // -> nothing owed, nothing fed
 	void apply_round_upkeep(GameContext& ctx);
 };
+
+} // namespace CppRL

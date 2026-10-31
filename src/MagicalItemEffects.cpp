@@ -1,5 +1,8 @@
 #include "MagicalItemEffects.h"
 
+namespace CppRL
+{
+
 namespace MagicalEffectUtils
 {
 	const char* get_effect_description(MagicalEffect effect)
@@ -66,3 +69,5 @@ namespace MagicalEffectUtils
 		}
 	}
 } // namespace MagicalEffectUtils
+
+} // namespace CppRL

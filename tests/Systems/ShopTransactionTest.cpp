@@ -40,6 +40,9 @@
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class ShopTransactionTest : public ::testing::Test
 {
 protected:
@@ -278,3 +281,5 @@ TEST_F(ShopTransactionTest, ASaleTheOwnerCannotAffordMovesNothing)
 	EXPECT_EQ(shop.get_shop_inventory().items.size(), stockBefore);
 	EXPECT_EQ(player.get_gold(), sellerGoldBefore);
 }
+
+} // namespace CppRL

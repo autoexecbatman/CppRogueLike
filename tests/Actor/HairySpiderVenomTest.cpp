@@ -57,6 +57,9 @@
 #include "tests/mocks/ExpectLastsExactly.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 class HairySpiderVenomTest : public ::testing::Test
 {
 protected:
@@ -337,3 +340,5 @@ TEST_F(HairySpiderVenomTest, TheOnsetIsAnnouncedWhenItArrives)
 }
 
 // end of file: HairySpiderVenomTest.cpp
+
+} // namespace CppRL

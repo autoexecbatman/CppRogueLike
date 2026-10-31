@@ -14,6 +14,9 @@
 #include "SpellSystem.h"
 #include "Spellcasting.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -116,3 +119,5 @@ MonsterCast MonsterSpellcasting::try_cast_at(
 }
 
 // end of file: MonsterSpellcasting.cpp
+
+} // namespace CppRL

@@ -24,6 +24,9 @@
 #include "TileRef.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 using namespace EditorLayout;
 
 std::string EditorLayout::fitted_label(
@@ -1006,3 +1009,5 @@ int RecordEditor<Model>::list_width(
 template class RecordEditor<ItemEditorModel>;
 template class RecordEditor<MonsterEditorModel>;
 template class RecordEditor<SpellEditorModel>;
+
+} // namespace CppRL

@@ -2,6 +2,9 @@
 
 #include <nlohmann/json_fwd.hpp>
 
+namespace CppRL
+{
+
 // Forward declarations
 class Map;
 class Player;
@@ -41,3 +44,5 @@ public:
 	void save_to_json(nlohmann::json& output) const;
 	void load_from_json(const nlohmann::json& source);
 };
+
+} // namespace CppRL

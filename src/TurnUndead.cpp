@@ -11,6 +11,9 @@
 #include "TurnUndead.h"
 #include "TurningTable.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Only clerics channel a deity. Paladins turn in the book at two levels
@@ -128,3 +131,5 @@ namespace Turning
 	}
 
 } // namespace Turning
+
+} // namespace CppRL

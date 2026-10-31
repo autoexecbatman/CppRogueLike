@@ -28,6 +28,9 @@
 #include "src/RandomDice.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -116,3 +119,5 @@ TEST_F(StartingHitPointsTest, EachClassRollsItsOwnDieOnTopOfTwenty)
 			<< encode_creature_class(expected.creatureClass);
 	}
 }
+
+} // namespace CppRL

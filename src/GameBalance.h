@@ -5,6 +5,9 @@
 
 #pragma once
 
+namespace CppRL
+{
+
 namespace GameBalance
 {
 	// ========================================================================
@@ -180,3 +183,5 @@ namespace GameBalance
 
 #endif // GAME_BALANCE_H
 // end of file: Config/GameBalance.h
+
+} // namespace CppRL

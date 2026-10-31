@@ -42,6 +42,9 @@
 #include "UniqueId.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 using json = nlohmann::json;
 using namespace InventoryOperations;
 
@@ -650,3 +653,5 @@ bool GameStateManager::delete_save_file()
 	const bool removed = std::filesystem::remove(save_path, error);
 	return removed && !error;
 }
+
+} // namespace CppRL

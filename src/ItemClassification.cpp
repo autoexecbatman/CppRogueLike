@@ -1,6 +1,9 @@
 // ItemClassification.cpp
 #include "ItemClassification.h"
 
+namespace CppRL
+{
+
 namespace ItemClassificationUtils
 {
 
@@ -52,3 +55,5 @@ namespace ItemClassificationUtils
 	}
 
 } // namespace ItemClassificationUtils
+
+} // namespace CppRL

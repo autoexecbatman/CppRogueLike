@@ -40,6 +40,9 @@
 #include "src/Paths.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	struct BookSpider
@@ -167,3 +170,5 @@ TEST_F(
 }
 
 // end of file: SpiderStatBlockTest.cpp
+
+} // namespace CppRL

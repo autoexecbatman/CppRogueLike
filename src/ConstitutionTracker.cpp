@@ -6,6 +6,9 @@
 
 #include <optional>
 
+namespace CppRL
+{
+
 [[nodiscard]] ConstitutionTracker::ConstitutionChangeResult
 ConstitutionTracker::apply_constitution_changes(
 	Creature& owner,
@@ -44,3 +47,5 @@ ConstitutionTracker::apply_constitution_changes(
 
 	return result;
 }
+
+} // namespace CppRL

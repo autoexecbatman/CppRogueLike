@@ -40,6 +40,9 @@
 #include "src/Web.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr int CORRIDOR_ROW = 5;
@@ -286,3 +289,5 @@ TEST_F(MonsterFeatureEntryTest, AWebOutOfSightCatchesSilently)
 }
 
 // end of file: MonsterFeatureEntryTest.cpp
+
+} // namespace CppRL

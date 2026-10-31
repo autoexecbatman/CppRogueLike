@@ -3,6 +3,9 @@
 #include "Ai.h"
 #include "AiSpider.h"
 
+namespace CppRL
+{
+
 class Creature;
 struct GameContext;
 
@@ -23,3 +26,5 @@ public:
 		return AiType::GIANT_SPIDER;
 	}
 };
+
+} // namespace CppRL

@@ -29,6 +29,9 @@
 #include "src/Vision.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class TorchSightTest : public ::testing::Test
 {
 protected:
@@ -121,3 +124,5 @@ TEST_F(TorchSightTest, TheKeyNamesAnItemThatActuallyExists)
 	EXPECT_NO_THROW(look_up_the_torch())
 		<< "Vision::TORCH_ITEM_KEY names no item in data/content/items.json";
 }
+
+} // namespace CppRL

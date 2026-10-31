@@ -40,6 +40,9 @@
 #include "src/Paths.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 class MonsterHitDiceCountsTest : public ::testing::Test
 {
 protected:
@@ -351,3 +354,5 @@ TEST(MonsterHitDiceRangeTest, TheHighestCountStopsAtNinetyNine)
 }
 
 // end of file: MonsterHitDiceCountsTest.cpp
+
+} // namespace CppRL

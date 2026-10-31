@@ -51,6 +51,9 @@
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 
@@ -365,3 +368,5 @@ TEST(HelmRechargeMenuTest, TheRingIsOfferedAgainAfterItsCast)
 	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
 		<< "the child's check that failed is in its output above";
 }
+
+} // namespace CppRL

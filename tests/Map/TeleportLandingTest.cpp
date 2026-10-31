@@ -44,6 +44,9 @@
 #include "src/TileType.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr int ROOM_COL = 2;
@@ -258,3 +261,5 @@ TEST_F(
 }
 
 // end of file: TeleportLandingTest.cpp
+
+} // namespace CppRL

@@ -31,6 +31,9 @@
 #include <stdexcept>
 #include <string>
 
+namespace CppRL
+{
+
 class EnhancedRulesLoadTest : public ::testing::Test
 {
 protected:
@@ -149,3 +152,5 @@ TEST_F(EnhancedRulesLoadTest, AMissingItemFileIsRefused)
 			<< refusal.what();
 	}
 }
+
+} // namespace CppRL

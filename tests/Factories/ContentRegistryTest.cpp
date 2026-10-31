@@ -15,6 +15,9 @@
 #include "src/Renderer.h"
 #include "src/TileRef.h"
 
+namespace CppRL
+{
+
 // A removed sprite is no longer listed, and the key reads the null sentinel again.
 TEST(ContentRegistryTest, ARemovedTileIsGone)
 {
@@ -39,3 +42,5 @@ TEST(ContentRegistryTest, RemovingAnUnknownTileThrows)
 
 	EXPECT_THROW(tiles.remove_tile("no_such_item"), std::out_of_range);
 }
+
+} // namespace CppRL

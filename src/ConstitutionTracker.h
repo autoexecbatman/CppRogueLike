@@ -2,6 +2,9 @@
 
 #include <optional>
 
+namespace CppRL
+{
+
 class Creature;
 class DataManager;
 
@@ -50,3 +53,5 @@ public:
 		Creature& owner,
 		const DataManager& dataManager);
 };
+
+} // namespace CppRL

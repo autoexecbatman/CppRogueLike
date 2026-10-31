@@ -34,6 +34,9 @@
 #include "tests/mocks/MockGameContext.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 class SleepSpellTest : public ::testing::Test
 {
 protected:
@@ -240,3 +243,5 @@ TEST(SleepSpellDiceTest, TwoDiceReachBothEndsOfTheirRange)
 	EXPECT_EQ(highest, 8)
 		<< "the highest two four-sided dice can show is eight";
 }
+
+} // namespace CppRL

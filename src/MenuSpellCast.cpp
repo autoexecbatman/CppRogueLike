@@ -22,6 +22,9 @@
 #include "Spellcasting.h"
 #include "TurnSchedule.h"
 
+namespace CppRL
+{
+
 MenuSpellCast::MenuSpellCast(Player& player, GameContext& ctx) :
 	player(player)
 {
@@ -264,3 +267,5 @@ void MenuSpellCast::menu(GameContext& ctx)
 	draw(*ctx.spellRegistry);
 	on_key(ctx);
 }
+
+} // namespace CppRL

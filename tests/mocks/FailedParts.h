@@ -20,6 +20,9 @@
 
 #include <gtest/gtest.h>
 
+namespace CppRL
+{
+
 // Writes each failed part of one test's result and answers how many it wrote.
 // A part recorded without a location, as gtest records a crash, names
 // "(no file)".
@@ -76,3 +79,5 @@ inline int write_failed_parts_of_the_run()
 }
 
 // end of file: FailedParts.h
+
+} // namespace CppRL

@@ -2,6 +2,9 @@
 
 #include <vector>
 
+namespace CppRL
+{
+
 struct WisdomAttributes
 {
 	int Wis{};
@@ -13,3 +16,5 @@ struct WisdomAttributes
 	int ChanceOfSpellFailure{};
 	int SpellImmunity{};
 };
+
+} // namespace CppRL

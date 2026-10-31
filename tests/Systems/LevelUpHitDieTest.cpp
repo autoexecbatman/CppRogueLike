@@ -23,6 +23,9 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Level-ups measured per die. The chance that 200 real d12 rolls all land
@@ -97,3 +100,5 @@ TEST_F(LevelUpHitDieTest, ATwoSidedHitDieRollsTwoSided)
 	EXPECT_EQ(*rolled.rbegin(), 2)
 		<< "a roll outside 1 to 2 came from another die";
 }
+
+} // namespace CppRL

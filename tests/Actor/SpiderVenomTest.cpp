@@ -44,6 +44,9 @@
 #include "src/TileType.h"
 #include "tests/mocks/TestDice.h"
 
+namespace CppRL
+{
+
 class SpiderVenomTest : public ::testing::Test
 {
 protected:
@@ -194,3 +197,5 @@ TEST_F(SpiderVenomTest, TheSameRollWithoutTheAdjustmentFails)
 
 	EXPECT_TRUE(player->is_dead()) << "a roll under the target made the save";
 }
+
+} // namespace CppRL

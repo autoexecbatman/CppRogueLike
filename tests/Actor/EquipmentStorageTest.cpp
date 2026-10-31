@@ -12,6 +12,9 @@
 #include "src/Item.h"
 #include "src/TileRef.h"
 
+namespace CppRL
+{
+
 // Equipment lives on Creature, so any creature with a body plan can wear
 // something. These tests cover get_equipped_item, which had no caller in the
 // suite before the storage moved off Player.
@@ -117,3 +120,5 @@ TEST_F(EquipmentStorageTest, WornArmorDoesNotNameTheAttack)
 
 	EXPECT_EQ(creature->get_attack_name(), "Claws");
 }
+
+} // namespace CppRL

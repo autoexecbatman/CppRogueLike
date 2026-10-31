@@ -23,6 +23,9 @@
 #include "src/Paths.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	constexpr int DUNGEON_LEVEL = 1;
@@ -134,3 +137,5 @@ TEST(ItemSpawnTableTest, ASpawnDrawsFromTheRegistryInCtx)
 	EXPECT_EQ(spawn_with_only("health_potion"), "health_potion");
 	EXPECT_EQ(spawn_with_only("invisibility_potion"), "invisibility_potion");
 }
+
+} // namespace CppRL

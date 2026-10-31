@@ -32,6 +32,9 @@
 
 #include "RandomDice.h"
 
+namespace CppRL
+{
+
 struct DiceExpr
 {
 	int num{ 0 };
@@ -180,3 +183,5 @@ inline int roll_dice(RandomDice* dice, const DiceExpr& expr)
 	}
 	return total;
 }
+
+} // namespace CppRL

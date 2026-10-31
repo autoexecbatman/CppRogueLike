@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 struct ConstitutionAttributes
 {
 	int Con{};
@@ -12,3 +15,5 @@ struct ConstitutionAttributes
 	int PoisonSave{};
 	int Regeneration{};
 };
+
+} // namespace CppRL

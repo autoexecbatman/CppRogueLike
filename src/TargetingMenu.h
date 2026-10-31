@@ -9,6 +9,9 @@
 #include "BaseMenu.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 
 class TargetingMenu : public BaseMenu
@@ -40,3 +43,5 @@ public:
 };
 
 // end of file: Systems/TargetingMenu.h
+
+} // namespace CppRL

@@ -6,6 +6,9 @@
 #include "DamageInfo.h"
 #include "Persistent.h"
 
+namespace CppRL
+{
+
 class Creature;
 struct GameContext;
 
@@ -20,9 +23,9 @@ private:
 public:
 	MonsterAttacker(Creature& owner, const DamageInfo& damage);
 
-	AttackResult::AttackResult attack(
+	AttackResult attack(
 		Creature& target,
-		AttackKind::AttackKind kind,
+		AttackKind kind,
 		GameContext& ctx) override;
 
 	// load/save delegate to Attacker base (DamageInfo serialization).
@@ -30,3 +33,5 @@ public:
 
 	void save(json& output) override { Attacker::save(output); }
 };
+
+} // namespace CppRL

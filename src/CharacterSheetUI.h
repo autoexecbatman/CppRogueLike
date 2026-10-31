@@ -4,6 +4,9 @@
 
 #include "BaseMenu.h"
 
+namespace CppRL
+{
+
 class Creature;
 class DataManager;
 class Player;
@@ -58,3 +61,5 @@ public:
 
 	void menu(GameContext& ctx) override;
 };
+
+} // namespace CppRL

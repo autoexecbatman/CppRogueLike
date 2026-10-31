@@ -14,6 +14,9 @@
 #include "src/TileDefinition.h"
 #include "src/TileType.h"
 
+namespace CppRL
+{
+
 class TileDefinitionTest : public ::testing::Test
 {
 protected:
@@ -118,3 +121,5 @@ TEST_F(TileDefinitionTest, EveryTileHasMinimapColours)
 			<< definition.displayName << " is invisible from memory";
 	}
 }
+
+} // namespace CppRL

@@ -18,6 +18,9 @@
 #include "src/ItemRegistry.h"
 #include "src/Paths.h"
 
+namespace CppRL
+{
+
 // Raising the health potion's value in one registry leaves another's at the file's.
 TEST(ItemRegistryTest, AnEditToOneRegistryDoesNotReachAnother)
 {
@@ -141,3 +144,5 @@ TEST(ItemRegistryTest, SetParamsKeepsTheItemsOwnNameAndCategory)
 	EXPECT_EQ(items.get_params("health_potion").name, shipped.name);
 	EXPECT_EQ(items.get_params("health_potion").category, shipped.category);
 }
+
+} // namespace CppRL

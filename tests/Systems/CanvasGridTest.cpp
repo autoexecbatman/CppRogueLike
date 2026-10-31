@@ -16,6 +16,9 @@
 
 #include "src/RoomEditor.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	const CanvasGrid grid{ 140, 60, 32 };
@@ -62,3 +65,5 @@ TEST(CanvasGridTest, ThePixelsAboveRowZeroAreRowMinusOne)
 	EXPECT_EQ(pannedDown.row_at(139), -1);
 	EXPECT_EQ(pannedDown.row_at(110), -1);
 }
+
+} // namespace CppRL

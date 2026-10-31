@@ -25,6 +25,9 @@
 #include "GameContext.h"
 #include "Player.h"
 
+namespace CppRL
+{
+
 // The player as a creature, or null before one exists.
 //
 // Safe on a half-built context: a context whose playerOwner is unset, or whose
@@ -71,3 +74,5 @@ Player& GameContext::player_concrete() const
 		"GameContext: no player in context");
 	return **playerOwner;
 }
+
+} // namespace CppRL

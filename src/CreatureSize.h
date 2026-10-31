@@ -6,6 +6,9 @@
 #include <stdexcept>
 #include <string_view>
 
+namespace CppRL
+{
+
 // file: CreatureSize.h
 //
 // The six size categories every Monstrous Manual stat block prints on its Size line.
@@ -126,3 +129,5 @@ inline constexpr std::array<CreatureSize, 6> ALL_CREATURE_SIZE = {
 }
 
 // end of file: CreatureSize.h
+
+} // namespace CppRL

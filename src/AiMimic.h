@@ -11,6 +11,9 @@
 #include "Persistent.h"
 #include "TileRef.h"
 
+namespace CppRL
+{
+
 class ContentRegistry;
 class ItemRegistry;
 struct GameContext;
@@ -83,3 +86,5 @@ public:
 	void load(const json& source) override;
 	void save(json& output) override;
 };
+
+} // namespace CppRL

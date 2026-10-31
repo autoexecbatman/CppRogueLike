@@ -17,6 +17,9 @@
 #include "MenuEntry.h"
 #include "Renderer.h"
 
+namespace CppRL
+{
+
 ListMenu::ListMenu(
 	std::string title,
 	std::vector<MenuEntry> entries,
@@ -175,3 +178,5 @@ void ListMenu::menu(GameContext& ctx)
 }
 
 // end of file: ListMenu.cpp
+
+} // namespace CppRL

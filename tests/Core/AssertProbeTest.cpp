@@ -87,12 +87,15 @@
 #include "src/TileRef.h"
 #include "src/TileType.h"
 #include "src/TurnUndead.h"
-
-using namespace Turning;
 #include "src/WeaponDamageRegistry.h"
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"
 #include "tests/mocks/TestDice.h"
+
+namespace CppRL
+{
+
+using namespace Turning;
 
 // GoogleTest runs any suite whose name ends in DeathTest before the others, so
 // the abort happens before anything else has had a chance to start a thread.
@@ -221,7 +224,7 @@ TEST_F(AssertProbeDeathTest, AttackingWithNoStrengthAborts)
 	target->healthPool = std::make_unique<HealthPool>(10);
 
 	EXPECT_DEATH(
-		attacker->attacker->attack(*target, AttackKind::AttackKind::MELEE, ctx),
+		attacker->attacker->attack(*target, AttackKind::MELEE, ctx),
 		"attacked with no Strength");
 }
 
@@ -938,3 +941,5 @@ TEST_F(AssertProbeDeathTest, ABodyWithNoLineHeightAborts)
 		[[maybe_unused]] const int height = EditorLayout::body_height(900, 0),
 		"EditorLayout::body_height: no line height");
 }
+
+} // namespace CppRL

@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 struct DexterityAttributes
 {
 	int Dex{};
@@ -7,3 +10,5 @@ struct DexterityAttributes
 	int MissileAttackAdj{};
 	int DefensiveAdj{};
 };
+
+} // namespace CppRL

@@ -36,6 +36,9 @@
 #include "src/TurnSchedule.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	// Content chosen so a failure names itself in the diff rather than looking
@@ -164,3 +167,5 @@ TEST_F(PlayerDeathTest, DyingLeavesTheSaveFileAlone)
 	EXPECT_EQ(save_contents(), SENTINEL_SAVE)
 		<< "the save survived but its contents were rewritten";
 }
+
+} // namespace CppRL

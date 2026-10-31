@@ -36,6 +36,9 @@
 #include "src/TileRef.h"
 #include "src/Vector2D.h"
 
+namespace CppRL
+{
+
 class LevelLoadTest : public ::testing::Test
 {
 protected:
@@ -348,3 +351,5 @@ TEST_F(LevelLoadTest, LoadingDecorationsReplacesTheAbandonedLevels)
 }
 
 // end of file: LevelLoadTest.cpp
+
+} // namespace CppRL

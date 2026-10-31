@@ -7,6 +7,9 @@
 #include "LogMessage.h"
 #include "Persistent.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 
 class Gui : public Persistent
@@ -47,3 +50,5 @@ public:
 
 	ColorPairId get_message_color() const { return guiMessageColor; }
 };
+
+} // namespace CppRL

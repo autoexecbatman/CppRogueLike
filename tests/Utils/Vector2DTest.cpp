@@ -1,6 +1,9 @@
 #include "src/Vector2D.h"
 #include <gtest/gtest.h>
 
+namespace CppRL
+{
+
 class Vector2DTest : public ::testing::Test
 {
 };
@@ -110,3 +113,5 @@ TEST_F(Vector2DTest, StraightLineDistanceIsEuclidean)
 		<< "the three-four-five triangle";
 	EXPECT_FLOAT_EQ(origin.distance_to(origin), 0.0f);
 }
+
+} // namespace CppRL

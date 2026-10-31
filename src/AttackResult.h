@@ -1,5 +1,8 @@
 #pragma once
 
+namespace CppRL
+{
+
 // file: AttackResult.h
 //
 // What one attack did, told back to whoever made it. A bite that carries poison needs it:
@@ -8,20 +11,19 @@
 //
 // Usage:
 //
-//   const AttackResult::AttackResult result =
-//       owner.attacker->attack(target, AttackKind::AttackKind::MELEE, ctx);
+//   const AttackResult result =
+//       owner.attacker->attack(target, AttackKind::MELEE, ctx);
 //   // the blow connected; poison follows it
-//   if (result == AttackResult::AttackResult::LANDED) { ... }
-namespace AttackResult
+//   if (result == AttackResult::LANDED) { ... }
+enum class AttackResult
 {
-	enum class AttackResult
-	{
-		// the roll beat the target's armour class and the damage was applied
-		LANDED,
-		// the roll to hit fell short
-		MISSED,
-		// nothing was rolled: a trade, a dead target, a ward, a bow too heavy
-		// to draw
-		PREVENTED,
-	};
-} // namespace AttackResult
+	// the roll beat the target's armour class and the damage was applied
+	LANDED,
+	// the roll to hit fell short
+	MISSED,
+	// nothing was rolled: a trade, a dead target, a ward, a bow too heavy
+	// to draw
+	PREVENTED,
+};
+
+} // namespace CppRL

@@ -10,6 +10,9 @@
 #include "EquipmentSlot.h"
 #include "ItemClassification.h"
 
+namespace CppRL
+{
+
 class Creature;
 class Item;
 class Player;
@@ -260,3 +263,5 @@ public:
 
 	void menu(GameContext& ctx) override;
 };
+
+} // namespace CppRL

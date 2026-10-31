@@ -11,6 +11,9 @@
 #include "Player.h"
 #include "Renderer.h"
 
+namespace CppRL
+{
+
 // ============================================================================
 // Private helpers - not visible outside this translation unit.
 // ============================================================================
@@ -248,3 +251,5 @@ void LevelUpUI::menu(GameContext& ctx)
 		"Press [SPACE] to continue",
 		ColorPairId::CYAN_BLACK);
 }
+
+} // namespace CppRL

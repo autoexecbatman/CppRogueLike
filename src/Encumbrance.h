@@ -33,6 +33,9 @@
 
 #include "StrengthAttributes.h"
 
+namespace CppRL
+{
+
 enum class EncumbranceBand
 {
 	UNENCUMBERED,
@@ -80,3 +83,5 @@ inline constexpr std::array<EncumbranceBand, 6> ALL_ENCUMBRANCE_BAND{
 	const StrengthAttributes& row);
 
 // end of file: Encumbrance.h
+
+} // namespace CppRL

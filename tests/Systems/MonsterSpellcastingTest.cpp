@@ -53,6 +53,9 @@
 #include "src/TurnSchedule.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace CppRL
+{
+
 namespace
 {
 	using Keys = std::vector<std::string>;
@@ -412,3 +415,5 @@ TEST_F(MonsterSpellcastingTest, ThePlayersSpellsKeepThePlayersChoice)
 }
 
 // end of file: MonsterSpellcastingTest.cpp
+
+} // namespace CppRL

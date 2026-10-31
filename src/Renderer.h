@@ -11,6 +11,9 @@
 #include "TileRef.h"
 #include "Vector2D.h"
 
+namespace CppRL
+{
+
 class TileConfig;
 
 inline constexpr int SPRITE_SIZE = 16; // DawnLike native sprite pixel size
@@ -465,3 +468,5 @@ public:
 	[[nodiscard]] std::string_view get_sheet_name(TileSheet sheet) const;
 	[[nodiscard]] int get_loaded_sheet_count() const;
 };
+
+} // namespace CppRL

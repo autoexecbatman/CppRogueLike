@@ -55,6 +55,9 @@
 #include "ListCursor.h"
 #include "TileRef.h"
 
+namespace CppRL
+{
+
 struct GameContext;
 class Renderer;
 
@@ -397,3 +400,5 @@ public:
 		const GameContext& ctx,
 		size_t row) const;
 };
+
+} // namespace CppRL
