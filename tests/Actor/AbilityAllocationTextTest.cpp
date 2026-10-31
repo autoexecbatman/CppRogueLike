@@ -20,7 +20,6 @@
 #include <gtest/gtest.h>
 
 #include <array>
-#include <cstddef>
 #include <vector>
 
 #include "src/AbilityAllocation.h"

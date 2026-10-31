@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstddef>
 #include <expected>
 #include <memory>
 #include <vector>

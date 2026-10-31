@@ -22,7 +22,6 @@
 #include "src/EquipmentSlot.h"
 #include <algorithm>
 #include <array>
-#include <cstddef>
 #include <filesystem>
 #include <fstream>
 #include <set>

@@ -18,7 +18,6 @@
 //   cd build/bin/Debug && ./test_exe.exe --gtest_filter=HungerSystemTest.*
 
 #include <array>
-#include <cstddef>
 #include <exception>
 #include <format>
 #include <string>

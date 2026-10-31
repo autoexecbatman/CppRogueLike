@@ -17,7 +17,6 @@
 //   editor.record_model().field_value(Field::LEVEL);   // -> "1"
 
 #include <array>
-#include <cstddef>
 #include <optional>
 #include <string>
 #include <string_view>

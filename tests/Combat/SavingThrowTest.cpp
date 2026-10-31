@@ -16,7 +16,6 @@
 // improve nothing, and not on 5, 7, 11, 13 or 17, which do.
 
 #include <algorithm>
-#include <cstddef>
 #include <memory>
 #include <utility>
 #include <vector>

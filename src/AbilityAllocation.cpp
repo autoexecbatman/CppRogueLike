@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <cstddef>
 #include <numeric>
 #include <optional>
 #include <string_view>

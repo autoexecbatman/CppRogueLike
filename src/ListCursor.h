@@ -28,7 +28,6 @@
 // step_within is the one home for "a size_t moved by a signed step, clamped": the
 // cursor's wheel is written on it, and so is any editor wheel that has no cursor.
 
-#include <cstddef>
 #include <optional>
 
 namespace CppRL

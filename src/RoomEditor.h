@@ -17,7 +17,6 @@
 //   Del             -- delete selected prefab from library
 //   Esc             -- exit Room Editor, return to menu
 
-#include <cstddef>
 #include <optional>
 #include <string>
 #include <string_view>

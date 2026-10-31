@@ -1,7 +1,6 @@
 // file: DeathMenu.cpp
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <format>
 #include <string>
 #include <string_view>

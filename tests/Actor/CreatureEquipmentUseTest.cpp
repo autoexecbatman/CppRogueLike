@@ -18,7 +18,6 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
-#include <cstddef>
 #include <memory>
 #include <string_view>
 #include <utility>

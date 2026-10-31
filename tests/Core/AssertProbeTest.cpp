@@ -39,7 +39,6 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json_fwd.hpp>
 
-#include <cstddef>
 #include <memory>
 #include <string>
 #include <string_view>

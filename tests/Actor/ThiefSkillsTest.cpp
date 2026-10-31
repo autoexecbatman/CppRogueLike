@@ -22,7 +22,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cstddef>
 #include <fstream>
 #include <string>
 #include <string_view>

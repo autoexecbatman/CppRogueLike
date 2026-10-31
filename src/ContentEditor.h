@@ -1,7 +1,6 @@
 // file: ContentEditor.h
 #pragma once
 
-#include <cstddef>
 #include <string>
 #include <vector>
 

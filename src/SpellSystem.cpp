@@ -30,7 +30,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <cstdlib>
 #include <format>
 #include <functional>

@@ -22,7 +22,6 @@
 #include <vector>
 
 #include <cctype>
-#include <cstddef>
 #include <memory>
 #include <string>
 #include <string_view>

@@ -20,7 +20,6 @@
 
 #include <algorithm>
 #include <charconv>
-#include <cstddef>
 #include <filesystem>
 #include <optional>
 #include <set>

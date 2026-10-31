@@ -17,7 +17,6 @@
 
 #include <gtest/gtest.h>
 
-#include <cstddef>
 #include <memory>
 #include <string_view>
 #include <utility>

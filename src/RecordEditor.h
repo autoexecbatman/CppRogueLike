@@ -42,7 +42,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <functional>
 #include <string>
 #include <string_view>

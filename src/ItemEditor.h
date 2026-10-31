@@ -16,7 +16,6 @@
 //   editor.record_model().field_value(Field::VALUE);   // -> "200"
 
 #include <array>
-#include <cstddef>
 #include <optional>
 #include <string>
 #include <string_view>

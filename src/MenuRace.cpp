@@ -1,6 +1,5 @@
 // file: MenuRace.cpp
 #include <array>
-#include <cstddef>
 #include <functional>
 #include <memory>
 #include <string>

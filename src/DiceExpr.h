@@ -23,7 +23,6 @@
 
 #include <cassert>
 #include <charconv>
-#include <cstddef>
 #include <stdexcept>
 #include <string>
 #include <string_view>

@@ -19,7 +19,6 @@
 #include <nlohmann/json_fwd.hpp>
 
 #include <array>
-#include <cstddef>
 #include <exception>
 #include <filesystem>
 #include <format>

@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <optional>
 
 #include "ListCursor.h"

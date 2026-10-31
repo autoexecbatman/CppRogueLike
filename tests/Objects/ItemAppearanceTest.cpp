@@ -14,7 +14,6 @@
 #include <nlohmann/json_fwd.hpp>
 
 #include <cassert>
-#include <cstddef>
 #include <filesystem>
 #include <fstream>
 #include <memory>

@@ -29,7 +29,6 @@
 //   allocation.total_points();                       // what the character keeps
 
 #include <array>
-#include <cstddef>
 #include <optional>
 #include <string_view>
 

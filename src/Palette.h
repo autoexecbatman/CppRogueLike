@@ -23,7 +23,6 @@
 #pragma once
 
 #include <array>
-#include <cstddef>
 #include <nlohmann/json_fwd.hpp>
 #include <optional>
 #include <string>

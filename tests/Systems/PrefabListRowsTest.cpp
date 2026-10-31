@@ -12,7 +12,6 @@
 //     cmake --build build --config Debug --target test_exe
 //     cd build/bin/Debug && ./test_exe.exe --gtest_filter=PrefabListRowsTest.*
 
-#include <cstddef>
 #include <optional>
 
 #include <gtest/gtest.h>

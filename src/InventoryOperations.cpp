@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <cstdint>
 #include <expected>
 #include <memory>

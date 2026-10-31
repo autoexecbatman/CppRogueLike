@@ -1,7 +1,6 @@
 // file: AiMimic.cpp
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <format>
 #include <ranges>
 #include <string>

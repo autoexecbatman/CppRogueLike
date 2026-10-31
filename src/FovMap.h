@@ -21,7 +21,6 @@
 // A position off the grid is a legal question: is_walkable and is_in_fov answer false,
 // and set_properties ignores it, because callers ask about cells beyond a map's edge.
 
-#include <cstddef>
 #include <vector>
 
 namespace CppRL

@@ -4,7 +4,6 @@
 // hand and a bow on their back swings the sword when they walk into something,
 // and looses the bow only when they aim it.
 
-#include <cstddef>
 #include <gtest/gtest.h>
 #include <memory>
 #include <string>

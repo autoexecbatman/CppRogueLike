@@ -1,6 +1,5 @@
 // file: DecorEditor.cpp
 #include <algorithm>
-#include <cstddef>
 #include <cstdint>
 #include <format>
 #include <iostream>

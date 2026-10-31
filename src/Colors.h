@@ -25,7 +25,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cstddef>
 #include <format>
 #include <stdexcept>
 #include <string_view>

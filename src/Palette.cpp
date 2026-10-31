@@ -1,7 +1,6 @@
 // file: Palette.cpp
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <filesystem>
 #include <format>
 #include <fstream>

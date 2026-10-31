@@ -20,7 +20,6 @@
 
 #include <gtest/gtest.h>
 
-#include <cstddef>
 #include <deque>
 #include <memory>
 #include <string>

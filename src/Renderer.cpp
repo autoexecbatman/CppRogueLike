@@ -3,7 +3,6 @@
 #include <array>
 #include <cassert>
 #include <cmath>
-#include <cstddef>
 #include <format>
 #include <string>
 #include <string_view>

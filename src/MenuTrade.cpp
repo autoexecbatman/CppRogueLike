@@ -1,7 +1,6 @@
 // file: MenuTrade.cpp
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <memory>
 #include <optional>
 

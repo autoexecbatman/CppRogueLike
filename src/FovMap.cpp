@@ -5,7 +5,6 @@
 
 #include <array>
 #include <cassert>
-#include <cstddef>
 
 #include "FovMap.h"
 

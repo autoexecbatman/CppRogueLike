@@ -22,7 +22,6 @@
 
 #include <nlohmann/json.hpp>
 
-#include <cstddef>
 #include <exception>
 #include <filesystem>
 #include <fstream>

@@ -31,7 +31,6 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <cstddef>
 #include <optional>
 #include <string>
 #include <string_view>

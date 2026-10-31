@@ -20,7 +20,6 @@
 // shop that already opened.
 
 #include <cassert>
-#include <cstddef>
 #include <memory>
 #include <span>
 #include <string>

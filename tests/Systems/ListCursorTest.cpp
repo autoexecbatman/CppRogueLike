@@ -11,7 +11,6 @@
 //     cd build/bin/Debug && ./test_exe.exe --gtest_filter=ListCursorTest.*:StepWithinTest.*
 
 #include <climits>
-#include <cstddef>
 #include <optional>
 
 #include <gtest/gtest.h>

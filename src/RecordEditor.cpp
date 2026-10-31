@@ -1,7 +1,6 @@
 // file: RecordEditor.cpp
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <format>
 #include <functional>
 #include <optional>

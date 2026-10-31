@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <cassert>
 #include <charconv>
-#include <cstddef>
 #include <format>
 #include <iterator>
 #include <optional>

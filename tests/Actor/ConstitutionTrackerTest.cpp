@@ -13,7 +13,6 @@
 // creature ever had, so the first tick of every new character logged
 // "Constitution increased from 0 to 17!" - a change report with only one state.
 
-#include <cstddef>
 #include <memory>
 #include <vector>
 

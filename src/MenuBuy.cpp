@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <string>
 
 #include "Colors.h"

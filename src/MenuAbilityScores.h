@@ -21,7 +21,6 @@
 // backspace takes the last die back off it, and enter accepts once the class
 // minimum is met.
 
-#include <cstddef>
 #include <optional>
 #include <string>
 

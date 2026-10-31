@@ -1,7 +1,6 @@
 // RenderingManager.cpp - Handles all rendering and screen management
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <memory>
 #include <span>
 

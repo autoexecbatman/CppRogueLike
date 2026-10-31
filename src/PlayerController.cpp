@@ -2,7 +2,6 @@
 #include <array>
 #include <cassert>
 #include <climits>
-#include <cstddef>
 #include <cstdlib>
 #include <format>
 #include <functional>

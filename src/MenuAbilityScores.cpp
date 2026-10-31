@@ -1,7 +1,6 @@
 // file: MenuAbilityScores.cpp
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
 #include <format>
 #include <memory>
 #include <optional>

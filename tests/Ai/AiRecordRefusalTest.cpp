@@ -15,7 +15,6 @@
 #include <gtest/gtest.h>
 
 #include <cassert>
-#include <cstddef>
 #include <memory>
 #include <set>
 #include <string>

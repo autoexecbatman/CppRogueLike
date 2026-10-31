@@ -34,7 +34,6 @@
 // judges the lower number, because the race is paid before the character exists.
 
 #include <array>
-#include <cstddef>
 #include <optional>
 #include <string_view>
 #include <vector>

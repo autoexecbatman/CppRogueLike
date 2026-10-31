@@ -31,7 +31,6 @@
 #include <array>
 #include <cassert>
 #include <cctype>
-#include <cstddef>
 #include <cstdint>
 #include <format>
 #include <memory>

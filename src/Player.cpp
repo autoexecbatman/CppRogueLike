@@ -28,7 +28,6 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <cstddef>
 #include <format>
 #include <memory>
 #include <optional>
