@@ -261,7 +261,7 @@ TEST(AbilityAllocationTest, ThePoolIsSevenSixSidedDice)
 
 	const std::vector<int> pool = roll_method_six_pool(dice);
 
-	ASSERT_EQ(pool.size(), static_cast<std::size_t>(METHOD_SIX_DICE));
+	ASSERT_EQ(pool.size(), METHOD_SIX_DICE);
 #ifdef TESTING_MODE
 	EXPECT_EQ(pool, (std::vector<int>{ 4, 4, 2, 1, 6, 3, 5 }));
 #endif

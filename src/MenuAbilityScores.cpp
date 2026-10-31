@@ -84,11 +84,17 @@ std::optional<std::size_t> die_index_for_character(int charInput)
 	// '1' names the first die. Anything below it, including the zero the input system
 	// reports for no key at all, lands negative and names nothing.
 	const int dieNumber = charInput - FIRST_DIE_CHARACTER;
-	if (dieNumber < 0 || dieNumber >= METHOD_SIX_DICE)
+	if (dieNumber < 0)
 	{
 		return std::nullopt;
 	}
-	return static_cast<std::size_t>(dieNumber);
+	// A digit past the last die the method rolls names nothing either.
+	const std::size_t dieIndex = static_cast<std::size_t>(dieNumber);
+	if (dieIndex >= METHOD_SIX_DICE)
+	{
+		return std::nullopt;
+	}
+	return dieIndex;
 }
 
 std::string ability_row_line(

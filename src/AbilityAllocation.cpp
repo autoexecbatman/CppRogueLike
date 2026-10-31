@@ -104,8 +104,8 @@ std::optional<ClassMinimum> class_ability_minimum(CreatureClass creatureClass)
 std::vector<int> roll_method_six_pool(RandomDice& dice)
 {
 	std::vector<int> pool;
-	pool.reserve(static_cast<std::size_t>(METHOD_SIX_DICE));
-	for (int die = 0; die < METHOD_SIX_DICE; ++die)
+	pool.reserve(METHOD_SIX_DICE);
+	for (std::size_t die = 0; die < METHOD_SIX_DICE; ++die)
 	{
 		pool.push_back(dice.d6());
 	}

@@ -21,8 +21,8 @@
     },
     {
       "file": "src/AbilityAllocation.h",
-      "original": "inline constexpr int METHOD_SIX_DICE = 7;",
-      "mutated": "inline constexpr int METHOD_SIX_DICE = 6;",
+      "original": "inline constexpr std::size_t METHOD_SIX_DICE = 7;",
+      "mutated": "inline constexpr std::size_t METHOD_SIX_DICE = 6;",
       "catches": "a pool of the wrong size, which is the whole of what the method gives"
     },
     {

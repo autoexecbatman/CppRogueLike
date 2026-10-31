@@ -48,7 +48,7 @@ class RandomDice;
 // The score every ability starts Method VI at.
 inline constexpr int METHOD_SIX_STARTING_SCORE = 8;
 // How many dice the method rolls.
-inline constexpr int METHOD_SIX_DICE = 7;
+inline constexpr std::size_t METHOD_SIX_DICE = 7;
 // The score no ability may pass.
 inline constexpr int ABILITY_MAXIMUM = 18;
 

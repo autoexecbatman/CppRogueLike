@@ -195,11 +195,9 @@ TEST(AbilityAllocationTextTest, ADigitNamesADieOnlyInsideThePoolsRange)
 // cannot drift apart.
 TEST(AbilityAllocationTextTest, TheLastSpendableDigitIsTheLastDieRolled)
 {
-	const int lastDigit = '1' + METHOD_SIX_DICE - 1;
+	const int lastDigit = '1' + static_cast<int>(METHOD_SIX_DICE) - 1;
 
-	EXPECT_EQ(
-		die_index_for_character(lastDigit),
-		static_cast<std::size_t>(METHOD_SIX_DICE - 1));
+	EXPECT_EQ(die_index_for_character(lastDigit), METHOD_SIX_DICE - 1);
 	EXPECT_FALSE(die_index_for_character(lastDigit + 1).has_value());
 }
 

@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/MenuAbilityScores.cpp",
-      "original": "\tif (dieNumber < 0 || dieNumber >= METHOD_SIX_DICE)",
-      "mutated": "\tif (dieNumber < 0 || dieNumber > METHOD_SIX_DICE)",
+      "original": "\tif (dieIndex >= METHOD_SIX_DICE)",
+      "mutated": "\tif (dieIndex > METHOD_SIX_DICE)",
       "catches": "an eighth digit naming a die the method never rolled"
     },
     {
