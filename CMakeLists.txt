@@ -268,6 +268,7 @@ set(SOURCE_FILES # Add Source Files Here !
     # Items - Updated paths
     ${PROJECT_SOURCE_DIR}/ItemClassification.cpp
     ${PROJECT_SOURCE_DIR}/ItemClassification.h
+    ${PROJECT_SOURCE_DIR}/ArmorMaterial.h
     ${PROJECT_SOURCE_DIR}/Weapons.h
     ${PROJECT_SOURCE_DIR}/MagicalItemEffects.cpp
     ${PROJECT_SOURCE_DIR}/MagicalItemEffects.h

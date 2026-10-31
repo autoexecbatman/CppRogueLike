@@ -32,6 +32,8 @@ struct ArmorClassBreakdown
 	ArmorClassSource shield{};
 	ArmorClassSource ring{};
 	ArmorClassSource helm{};
+	// The worn cloak of protection, named only when its plus counts.
+	ArmorClassSource cloak{};
 };
 
 class ArmorClass

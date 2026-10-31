@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include "ArmorMaterial.h"
 #include "BuffType.h"
 #include "Colors.h"
 #include "ContentRegistry.h"
@@ -309,6 +310,10 @@ std::string ItemEditorModel::field_value(FieldId field) const
 	{
 		return std::string{ encode_duration_unit(params.durationUnit) };
 	}
+	case FieldId::ARMOR_MATERIAL:
+	{
+		return std::string{ encode_armor_material(params.armorMaterial) };
+	}
 	case FieldId::TARGET_MODE:
 	{
 		return std::string{ encode_target_mode(params.targetMode) };
@@ -460,6 +465,11 @@ void ItemEditorModel::field_toggle(FieldId field)
 	case FieldId::DURATION_UNIT:
 	{
 		params.durationUnit = next_duration_unit(params.durationUnit);
+		break;
+	}
+	case FieldId::ARMOR_MATERIAL:
+	{
+		params.armorMaterial = next_armor_material(params.armorMaterial);
 		break;
 	}
 	case FieldId::TARGET_MODE:

@@ -680,6 +680,7 @@ void Creature::update_armor_class(GameContext& ctx)
 		breakdown.shield,
 		breakdown.ring,
 		breakdown.helm,
+		breakdown.cloak,
 	};
 	for (const ArmorClassSource& source : sources)
 	{

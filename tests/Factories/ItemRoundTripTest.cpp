@@ -79,6 +79,8 @@ void expect_same_item(
 		<< key << ".duration";
 	EXPECT_EQ(before.durationUnit, after.durationUnit)
 		<< key << ".durationUnit";
+	EXPECT_EQ(before.armorMaterial, after.armorMaterial)
+		<< key << ".armorMaterial";
 
 	EXPECT_EQ(before.effect, after.effect) << key << ".effect";
 	EXPECT_EQ(before.effectBonus, after.effectBonus) << key << ".effectBonus";
@@ -338,6 +340,40 @@ TEST_F(ItemRoundTripTest, ADurationWithoutAKnownUnitIsRefused)
 	std::ofstream(roundTrip) << unknown.dump(4);
 	ItemRegistry unknownUnit{};
 	EXPECT_ANY_THROW(unknownUnit.load(roundTrip.string()));
+}
+
+// An item with no armour material, or one this build does not know, is
+// refused by name rather than read as none.
+TEST_F(ItemRoundTripTest, AnArmourMaterialMissingOrUnknownIsRefusedByName)
+{
+	std::ifstream source(Paths::resolve(Paths::ITEMS));
+	ASSERT_TRUE(source.is_open()) << "cannot read the real items file";
+	const nlohmann::json real = nlohmann::json::parse(source);
+	const auto refusal_of = [this](const nlohmann::json& damaged)
+	{
+		std::ofstream(roundTrip) << damaged.dump(4);
+		ItemRegistry loaded{};
+		try
+		{
+			loaded.load(roundTrip.string());
+		}
+		catch (const std::runtime_error& refusal)
+		{
+			return std::string{ refusal.what() };
+		}
+		return std::string{ "loaded without a refusal" };
+	};
+
+	nlohmann::json missing = real;
+	missing.at("leather_armor").erase("armorMaterial");
+	EXPECT_EQ(
+		refusal_of(missing),
+		"ItemRegistry::load -- item 'leather_armor' is missing required field "
+		"'armorMaterial'");
+
+	nlohmann::json unknown = real;
+	unknown.at("leather_armor")["armorMaterial"] = "bone";
+	EXPECT_EQ(refusal_of(unknown), "unknown armor_material 'bone'");
 }
 
 } // namespace CppRL

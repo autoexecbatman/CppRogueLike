@@ -10,6 +10,7 @@
 #include <type_traits>
 #include <variant>
 
+#include "ArmorMaterial.h"
 #include "BuffType.h"
 #include "CorpseEdibility.h"
 #include "DamageInfo.h"
@@ -357,6 +358,8 @@ struct CorpseFood
 struct Armor
 {
 	int armorClass{ 0 };
+	// What it is made of, which a cloak of protection's limit reads.
+	ArmorMaterial material{ ArmorMaterial::NONE };
 };
 
 struct MagicalHelm

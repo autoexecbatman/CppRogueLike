@@ -1,0 +1,185 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/run_suite.ps1",
+    "-Configuration",
+    "Debug",
+    "-Filter",
+    "--gtest_filter=CloakOfProtectionTest.*:ArmorMaterialTest.*:ItemRoundTripTest.*:EditorFieldTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/ArmorClass.cpp",
+      "original": "armor->material != ArmorMaterial::LEATHER ||",
+      "mutated": "armor->material == ArmorMaterial::METAL ||",
+      "catches": "a cloak working over padded armour, which is cloth"
+    },
+    {
+      "file": "src/ArmorClass.cpp",
+      "original": "if (armor == nullptr || armor->material != ArmorMaterial::LEATHER ||\n\t\t\t\tbody->get_enhancement().isMagical)",
+      "mutated": "if (armor == nullptr || body->get_enhancement().isMagical)",
+      "catches": "a cloak working over any armour at all"
+    },
+    {
+      "file": "src/ArmorClass.cpp",
+      "original": "\t\t\tbody->get_enhancement().isMagical)",
+      "mutated": "\t\t\tfalse)",
+      "catches": "a cloak working over magical leather"
+    },
+    {
+      "file": "src/ArmorClass.cpp",
+      "original": "\t\t}\n\n\t\tconst Item* held = wearer.get_equipped_item(EquipmentSlot::LEFT_HAND);",
+      "mutated": "\t\t}\n\t\telse\n\t\t{\n\t\t\treturn false;\n\t\t}\n\n\t\tconst Item* held = wearer.get_equipped_item(EquipmentSlot::LEFT_HAND);",
+      "catches": "a cloak worn over no armour giving nothing"
+    },
+    {
+      "file": "src/ArmorClass.cpp",
+      "original": "wearer.get_equipped_item(EquipmentSlot::LEFT_HAND);",
+      "mutated": "wearer.get_equipped_item(EquipmentSlot::RIGHT_HAND);",
+      "catches": "the shield looked for in the wrong hand"
+    },
+    {
+      "file": "src/ArmorClass.cpp",
+      "original": "\t\treturn held == nullptr || !held->behavior ||\n\t\t\t!std::holds_alternative<Shield>(*held->behavior);",
+      "mutated": "\t\treturn true;",
+      "catches": "a cloak working beside a shield"
+    },
+    {
+      "file": "src/ArmorClass.cpp",
+      "original": "return cloak.effect == MagicalEffect::PROTECTION ?\n\t\t\t\t\t\tcloak.bonus :\n\t\t\t\t\t\t0;",
+      "mutated": "return cloak.bonus;",
+      "catches": "a cloak's plus counting whatever its effect"
+    },
+    {
+      "file": "src/ArmorClass.cpp",
+      "original": "-protection_plus(*equippedCloak->behavior)",
+      "mutated": "protection_plus(*equippedCloak->behavior)",
+      "catches": "the cloak's plus counted as a worse armour class"
+    },
+    {
+      "file": "src/ArmorClass.cpp",
+      "original": "if (cloakBonus < 0 && can_cloak_protect(owner))",
+      "mutated": "if (cloakBonus <= 0 && can_cloak_protect(owner))",
+      "catches": "a cloak with no protection named in the breakdown"
+    },
+    {
+      "file": "src/ArmorClass.cpp",
+      "original": "if (cloakBonus < 0 && can_cloak_protect(owner))",
+      "mutated": "if (cloakBonus < 0)",
+      "catches": "a cloak working whatever is worn with it"
+    },
+    {
+      "file": "src/ArmorClass.cpp",
+      "original": "\t\ttotalBonus += cloakBonus;\n",
+      "mutated": "",
+      "catches": "the cloak named but its plus never applied"
+    },
+    {
+      "file": "src/ArmorClass.cpp",
+      "original": "\t\tbreakdown.cloak = { equippedCloak->get_name(), cloakBonus };\n",
+      "mutated": "",
+      "catches": "the breakdown and the log silent about the cloak"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tbreakdown.helm,\n\t\tbreakdown.cloak,\n",
+      "mutated": "\t\tbreakdown.helm,\n",
+      "catches": "the armour class log leaving the cloak out"
+    },
+    {
+      "file": "src/ArmorMaterial.h",
+      "original": "\t\t{ ArmorMaterial::LEATHER, \"leather\" },",
+      "mutated": "\t\t{ ArmorMaterial::LEATHER, \"lether\" },",
+      "catches": "the leather name not the one the data carries"
+    },
+    {
+      "file": "src/ArmorMaterial.h",
+      "original": "\tif (found == ARMOR_MATERIAL_TABLE.end())\n\t{\n\t\tthrow std::runtime_error(\n\t\t\tstd::format(\"unknown armor_material '{}'\", name));\n\t}",
+      "mutated": "\tif (found == ARMOR_MATERIAL_TABLE.end())\n\t{\n\t\treturn ArmorMaterial::NONE;\n\t}",
+      "catches": "an unknown material read as none"
+    },
+    {
+      "file": "src/ArmorMaterial.h",
+      "original": "static_cast<std::size_t>(material) + 1;",
+      "mutated": "static_cast<std::size_t>(material) + 2;",
+      "catches": "the editor's cycle skipping materials"
+    },
+    {
+      "file": "src/ArmorMaterial.h",
+      "original": "ARMOR_MATERIAL_TABLE.at(next % ARMOR_MATERIAL_COUNT)",
+      "mutated": "ARMOR_MATERIAL_TABLE.at(next)",
+      "catches": "the editor's cycle not wrapping"
+    },
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "record[\"armorMaterial\"] = encode_armor_material(params.armorMaterial);",
+      "mutated": "record[\"armorMaterial\"] = \"none\";",
+      "catches": "the registry saving no material"
+    },
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "params.armorMaterial = parse_armor_material(\n\t\t\trequired_field(record, key, \"armorMaterial\").get<std::string>());",
+      "mutated": "params.armorMaterial = ArmorMaterial::LEATHER;",
+      "catches": "the registry reading no material and refusing nothing"
+    },
+    {
+      "file": "src/ItemCreator.cpp",
+      "original": "return Armor{ params.acBonus, params.armorMaterial };",
+      "mutated": "return Armor{ params.acBonus, ArmorMaterial::NONE };",
+      "catches": "made armour losing its record's material"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "output[\"armorMaterial\"] = encode_armor_material(armor.material);",
+      "mutated": "output[\"armorMaterial\"] = \"none\";",
+      "catches": "a saved armour losing its material"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "armor.material =\n\t\t\tparse_armor_material(source.at(\"armorMaterial\").get<std::string>());",
+      "mutated": "armor.material = ArmorMaterial::NONE;",
+      "catches": "a loaded armour losing its material"
+    },
+    {
+      "file": "src/ItemEditor.cpp",
+      "original": "\t\treturn std::string{ encode_armor_material(params.armorMaterial) };",
+      "mutated": "\t\treturn std::string{ \"none\" };",
+      "catches": "the editor showing no material"
+    },
+    {
+      "file": "src/ItemEditor.cpp",
+      "original": "\t\tparams.armorMaterial = next_armor_material(params.armorMaterial);\n",
+      "mutated": "",
+      "catches": "the editor's toggle changing nothing"
+    },
+    {
+      "file": "data/content/items.json",
+      "original": "\"appearance\": \"leather armor\",\n        \"application\": \"add\",\n        \"armorMaterial\": \"leather\",",
+      "mutated": "\"appearance\": \"leather armor\",\n        \"application\": \"add\",\n        \"armorMaterial\": \"metal\",",
+      "catches": "leather armour shipped as metal"
+    },
+    {
+      "file": "data/content/items.json",
+      "original": "\"appearance\": \"studded leather\",\n        \"application\": \"add\",\n        \"armorMaterial\": \"leather\",",
+      "mutated": "\"appearance\": \"studded leather\",\n        \"application\": \"add\",\n        \"armorMaterial\": \"metal\",",
+      "catches": "studded leather shipped as metal"
+    },
+    {
+      "file": "data/content/items.json",
+      "original": "\"appearance\": \"hide armor\",\n        \"application\": \"add\",\n        \"armorMaterial\": \"leather\",",
+      "mutated": "\"appearance\": \"hide armor\",\n        \"application\": \"add\",\n        \"armorMaterial\": \"metal\",",
+      "catches": "hide shipped as metal"
+    },
+    {
+      "file": "data/content/items.json",
+      "original": "\"appearance\": \"padded armor\",\n        \"application\": \"add\",\n        \"armorMaterial\": \"cloth\",",
+      "mutated": "\"appearance\": \"padded armor\",\n        \"application\": \"add\",\n        \"armorMaterial\": \"leather\",",
+      "catches": "padded armour shipped as leather"
+    }
+  ]
+}

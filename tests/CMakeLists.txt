@@ -220,6 +220,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/SpiderAmbushTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/WebSpinnerSanctuaryTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/StatBoostEquipmentTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CloakOfProtectionTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CreatureEquipmentUseTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CreatureDeathTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/KillCreditTest.cpp

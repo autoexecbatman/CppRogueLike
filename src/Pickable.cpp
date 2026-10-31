@@ -31,6 +31,7 @@
 #include <variant>
 
 #include "Actor.h"
+#include "ArmorMaterial.h"
 #include "BuffSystem.h"
 #include "BuffType.h"
 #include "Colors.h"
@@ -1192,7 +1193,10 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 				output["edible"] = is_corpse_edible(corpseFood.edibility);
 			},
 			[&output](const Armor& armor)
-			{ output["armorClass"] = armor.armorClass; },
+			{
+				output["armorClass"] = armor.armorClass;
+				output["armorMaterial"] = encode_armor_material(armor.material);
+			},
 			[&output](const MagicalHelm& magicalHelm)
 			{
 				output["effect"] = encode_magical_effect(magicalHelm.effect);
@@ -1318,6 +1322,8 @@ ItemBehavior load_behavior(const json& source)
 	{
 		Armor armor;
 		armor.armorClass = source.at("armorClass").get<int>();
+		armor.material =
+			parse_armor_material(source.at("armorMaterial").get<std::string>());
 		return armor;
 	}
 

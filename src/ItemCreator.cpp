@@ -105,7 +105,7 @@ namespace
 
 		case PickableType::ARMOR:
 		{
-			return Armor{ params.acBonus };
+			return Armor{ params.acBonus, params.armorMaterial };
 		}
 
 		case PickableType::QUEST_ITEM:

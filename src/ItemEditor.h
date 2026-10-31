@@ -77,6 +77,7 @@ public:
 		WEAPON_SIZE,
 		STRENGTH_RATING,
 		AC_BONUS,
+		ARMOR_MATERIAL,
 		EFFECT,
 		EFFECT_BONUS,
 		STR_BONUS,
@@ -286,6 +287,12 @@ public:
 			FieldKind::ADJUST,
 			"AC Bonus",
 			Plain{ &ItemParams::acBonus, -10, 10 },
+		},
+		Descriptor{
+			FieldId::ARMOR_MATERIAL,
+			FieldKind::TOGGLE,
+			"Armor Material",
+			std::nullopt,
 		},
 		Descriptor{
 			FieldId::EFFECT,

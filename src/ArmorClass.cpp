@@ -1,17 +1,76 @@
 #include <algorithm>
+#include <variant>
 
 #include "ArmorClass.h"
+#include "ArmorMaterial.h"
 #include "BuffSystem.h"
 #include "Creature.h"
 #include "DataManager.h"
 #include "DexterityAttributes.h"
 #include "EquipmentSlot.h"
 #include "GameContext.h"
+#include "Item.h"
+#include "ItemEnhancements.h"
 #include "ItemIdentification.h"
+#include "MagicalItemEffects.h"
 #include "Pickable.h"
+#include "VariantVisitor.h"
 
 namespace CppRL
 {
+
+namespace
+{
+
+	// A worn cloak's plus when its effect is protection, and 0 for anything
+	// else. Every cloak record is made with the Gauntlets behaviour.
+	//
+	// Example:
+	//   protection_plus(*cloakOfProtection.behavior);   // -> 1
+	//   protection_plus(*cloakOfElvenkind.behavior);   // -> 0, no protection
+	int protection_plus(const ItemBehavior& behavior)
+	{
+		return std::visit(
+			VariantVisitor{
+				[](const Gauntlets& cloak) -> int
+				{
+					return cloak.effect == MagicalEffect::PROTECTION ?
+						cloak.bonus :
+						0;
+				},
+				[]([[maybe_unused]] const auto& otherBehavior) -> int
+				{ return 0; },
+			},
+			behavior);
+	}
+
+	// Whether a cloak of protection works over what its wearer has on: it
+	// "cannot function in conjunction with any sort of magical armor, normal
+	// armor not made of leather, or with a shield of any sort"
+	// (DMG, PDF page 952).
+	//
+	// Example:
+	//   can_cloak_protect(wearerInLeather);   // -> true
+	//   can_cloak_protect(wearerInChainMail);   // -> false, metal
+	bool can_cloak_protect(const Creature& wearer)
+	{
+		if (const Item* body = wearer.get_equipped_item(EquipmentSlot::BODY))
+		{
+			const Armor* armor =
+				body->behavior ? std::get_if<Armor>(&*body->behavior) : nullptr;
+			if (armor == nullptr || armor->material != ArmorMaterial::LEATHER ||
+				body->get_enhancement().isMagical)
+			{
+				return false;
+			}
+		}
+
+		const Item* held = wearer.get_equipped_item(EquipmentSlot::LEFT_HAND);
+		return held == nullptr || !held->behavior ||
+			!std::holds_alternative<Shield>(*held->behavior);
+	}
+
+} // namespace
 
 ArmorClass::ArmorClass(int baseAC) :
 	armorClass(baseAC),
@@ -150,6 +209,21 @@ int ArmorClass::without_dexterity_bonus(
 			totalBonus += helmBonus;
 
 			breakdown.helm = { equippedHelm->get_name(), helmBonus };
+		}
+	}
+
+	// A cloak of protection stacks with a ring of protection, which is
+	// "cumulative with all other magical items of protection" (DMG page 908).
+	if (Item* equippedCloak = owner.get_equipped_item(EquipmentSlot::CLOAK))
+	{
+		const int cloakBonus = equippedCloak->behavior ?
+			-protection_plus(*equippedCloak->behavior) :
+			0;
+		if (cloakBonus < 0 && can_cloak_protect(owner))
+		{
+			totalBonus += cloakBonus;
+
+			breakdown.cloak = { equippedCloak->get_name(), cloakBonus };
 		}
 	}
 

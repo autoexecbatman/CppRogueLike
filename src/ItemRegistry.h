@@ -8,6 +8,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "ArmorMaterial.h"
 #include "BuffType.h"
 #include "Colors.h"
 #include "DiceExpr.h"
@@ -108,6 +109,8 @@ struct ItemParams
 	int nutritionValue{ 0 };
 	// What armour takes off armour class.
 	int acBonus{ 0 };
+	// What body armour is made of, which a cloak of protection's limit reads.
+	ArmorMaterial armorMaterial{ ArmorMaterial::NONE };
 
 	// Whether a weapon fires from the missile slot.
 	bool ranged{ false };

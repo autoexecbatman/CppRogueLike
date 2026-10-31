@@ -13,6 +13,7 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
+#include "ArmorMaterial.h"
 #include "BuffType.h"
 #include "Colors.h"
 #include "DiceExpr.h"
@@ -119,6 +120,7 @@ namespace
 		record["exceptionalStrength"] = params.exceptionalStrength;
 		record["nutritionValue"] = params.nutritionValue;
 		record["acBonus"] = params.acBonus;
+		record["armorMaterial"] = encode_armor_material(params.armorMaterial);
 		record["ranged"] = params.ranged;
 		record["handRequirement"] =
 			encode_hand_requirement(params.handRequirement);
@@ -208,6 +210,8 @@ namespace
 			required_field(record, key, "exceptionalStrength");
 		params.nutritionValue = required_field(record, key, "nutritionValue");
 		params.acBonus = required_field(record, key, "acBonus");
+		params.armorMaterial = parse_armor_material(
+			required_field(record, key, "armorMaterial").get<std::string>());
 		params.ranged = required_field(record, key, "ranged");
 		params.handRequirement = parse_hand_requirement(
 			required_field(record, key, "handRequirement").get<std::string>());
