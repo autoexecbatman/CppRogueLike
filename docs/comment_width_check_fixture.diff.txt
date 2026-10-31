@@ -31,6 +31,24 @@ diff --git a/tests/Fixture.h b/tests/Fixture.h
 @@ -1 +1,1 @@
 -// The old opening line.
 +//  the comment runs on past where it should have stopped the comment runs on pas
+diff --git a/src/Stranded.cpp b/src/Stranded.cpp
+--- a/src/Stranded.cpp
++++ b/src/Stranded.cpp
+@@ -0,0 +1,10 @@
++			inline constexpr int STEALTH_IMPROVEMENT_INTERVAL =
++				2; // Every 2 levels
++			// Every 2 levels
++			inline constexpr int STEALTH_IMPROVEMENT_INTERVAL = 2;
++	const int total =
++		firstArgument + secondArgument;
++	const char* hint =
++		"press a; // to open";
++	const bool isSame = left ==
++		right; // the same tile
+@@ -20,0 +21,1 @@
++	const int far =
+@@ -30,0 +31,1 @@
++		3; // the next hunk, not its continuation
 diff --git a/docs/notes.md b/docs/notes.md
 --- a/docs/notes.md
 +++ b/docs/notes.md

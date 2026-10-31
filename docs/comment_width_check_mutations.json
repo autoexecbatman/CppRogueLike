@@ -113,6 +113,42 @@
       "original": "            new_left = int(header.group(3) or 1)",
       "mutated": "            new_left = int(header.group(3) or 0)",
       "catches": "a new side with no count read as 0: the last file's line is missed"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "    if not head.endswith(\"=\") or head[-2:-1] in (\"=\", \"!\", \"<\", \">\"):",
+      "mutated": "    if not head.endswith(\"=\"):",
+      "catches": "a comparison read as a break after =: the == control is refused"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "    return \"; //\" in blank_literals(following)",
+      "mutated": "    return \"; //\" in following",
+      "catches": "literals not blanked: the \"; //\" inside a string is refused"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "    return \"; //\" in blank_literals(following)",
+      "mutated": "    return True",
+      "catches": "any continuation refused: the break with no comment is refused"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "        is_continuation = previous[:2] == (path, line - 1)",
+      "mutated": "        is_continuation = True",
+      "catches": "adjacency not required: a line in the next hunk is read as the continuation"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "            found.append(Finding(path, line - 1, \"stranded\", width))",
+      "mutated": "            found.append(Finding(path, line, \"stranded\", width))",
+      "catches": "the finding placed on the continuation instead of the line that broke"
+    },
+    {
+      "file": "docs/comment_width_check.py",
+      "original": "        if is_continuation and is_stranded_comment(previous[2], text):",
+      "mutated": "        if False:",
+      "catches": "the pair rule never run: the stranded declaration is missed"
     }
   ]
 }

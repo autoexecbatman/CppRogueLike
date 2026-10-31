@@ -12,16 +12,22 @@ for their files to be edited.
 It exits 1 when it refuses a line, 0 when it refuses none, and 2 when git
 fails. Lines are read from .cpp and .h files under src/ and tests/.
 
-Three rules, each on an added line:
+Four rules, the first three on an added line and the last on two adjacent
+ones:
 
     comment   it holds a // comment and is wider than 80, a tab being 4
     padded    it is indented with spaces, after tabs or alone
     list      it ends in a comma inside a { it leaves open, the shape the
               formatter gives a wrapped braced list with no trailing comma
+    stranded  it breaks after "=" and the next added line carries "; //",
+              the shape the formatter gives a declaration whose trailing
+              comment no longer fits; reported at the line that breaks
 
 A code line with no comment is the formatter's business, so a long string
-literal passes. The list rule reads formatted lines; an unformatted file is
-for the formatter check to refuse first.
+literal passes. The list and stranded rules read formatted lines; an
+unformatted file is for the formatter check to refuse first. A stranded
+comment passes the comment rule, since each of its lines fits in 80, and
+clang no longer attaches it to its declaration.
 
 Example, over a range holding three planted lines and one clean one:
 
@@ -37,8 +43,9 @@ Example, over a range holding three planted lines and one clean one:
     fatal: ambiguous argument 'nosuchref..HEAD': unknown revision ...
 
 The functions, for a caller other than main: columns(text) measures a line,
-added_lines(diff_text) yields what a diff adds, is_wide_comment, is_padded
-and is_open_list are the rules, and findings(diff_text) applies them all.
+added_lines(diff_text) yields what a diff adds, is_wide_comment, is_padded,
+is_open_list and is_stranded_comment are the rules, and findings(diff_text)
+applies them all.
 
 WHERE IT RUNS. Before a commit, --staged. In CI, the added-lines job in
 ci-tests.yml checks out the whole history and passes --range: a push's
@@ -59,6 +66,18 @@ The CI job's script was run locally, as a stand-in for a CI run, over a
 planted range in a scratch clone, under the variables of a push, a new
 branch, a pull request and a manual run; the ranges holding the plants
 refused all three lines, and the clean ones passed.
+
+FALSIFIED, 2026-10-31, the stranded rule (issues/0388).
+- Red step: the fixture's src/Stranded.cpp section and its finding added
+  before the rule, and the self-test missed exactly that finding with both
+  endings.
+- Silent lines: the same declaration with its comment above, a break whose
+  continuation has no comment, a "; //" inside a string, a comparison broken
+  after "==", and a line ending in "=" whose next added line sits in another
+  hunk.
+- Against the tree: the namespace-indentation commit's diff before its
+  stranded comments were moved gave exactly its 7 sites, and 0 after.
+- The plan, with the rule's six mutants added to its 18: 24 of 24 caught.
 
 WHAT IT CANNOT SEE. The width of a /* */ block's lines; a list wrapped by
 hand in an unformatted file; a raw string literal spanning lines, whose
@@ -94,6 +113,7 @@ FIXTURE_FINDINGS = {
     ("src/Fixture.cpp", 58, "comment"),
     ("tests/Fixture.h", 1, "comment"),
     ("src/Last.cpp", 6, "padded"),
+    ("src/Stranded.cpp", 1, "stranded"),
 }
 
 
@@ -214,6 +234,25 @@ def is_open_list(text):
     return depth > 0
 
 
+def is_stranded_comment(text, following):
+    """Whether a line breaks after "=" and the next one carries "; //".
+
+    That is the shape the formatter gives a declaration whose trailing comment
+    no longer fits: the value and the comment move to the continuation, where
+    the comment no longer sits on its declaration's line. A comparison such as
+    "==" is not a break after "=". Literals and comments are blanked first.
+
+    Example:
+        is_stranded_comment("\\tint n =", "\\t\\t2; // two")         # -> True
+        is_stranded_comment("\\tint n =", "\\t\\t2;")                # -> False
+        is_stranded_comment("\\tbool same = a ==", "\\t\\tb; // x")  # -> False
+    """
+    head = blank(text).rstrip()
+    if not head.endswith("=") or head[-2:-1] in ("=", "!", "<", ">"):
+        return False
+    return "; //" in blank_literals(following)
+
+
 RULES = (("comment", is_wide_comment), ("padded", is_padded),
          ("list", is_open_list))
 
@@ -221,7 +260,9 @@ RULES = (("comment", is_wide_comment), ("padded", is_padded),
 def findings(diff_text):
     """Every refused line in the diff text, in the order the diff lists them.
 
-    A line breaking several rules is reported once per rule.
+    A line breaking several rules is reported once per rule. A stranded
+    comment is reported at the line that breaks after "=", and needs both of
+    its lines added and adjacent.
 
     Example:
         diff = "+++ b/src/A.cpp\\n@@ -0,0 +3,1 @@\\n+  value);\\n"
@@ -229,10 +270,17 @@ def findings(diff_text):
         # -> [Finding(path='src/A.cpp', line=3, rule='padded', columns=9)]
     """
     found = []
+    previous = (None, 0, "")
     for path, line, text in added_lines(diff_text):
+        # The pair rule closes the previous line before this one's own rules.
+        is_continuation = previous[:2] == (path, line - 1)
+        if is_continuation and is_stranded_comment(previous[2], text):
+            width = columns(previous[2])
+            found.append(Finding(path, line - 1, "stranded", width))
         for rule, is_refused in RULES:
             if is_refused(text):
                 found.append(Finding(path, line, rule, columns(text)))
+        previous = (path, line, text)
     return found
 
 
@@ -262,7 +310,7 @@ def self_test():
 
     Example:
         self_test()
-        # prints "self-test: 11 of 11 findings with LF and with CRLF, none
+        # prints "self-test: 12 of 12 findings with LF and with CRLF, none
         # missed, none extra" -> 0
     """
     text = FIXTURE.read_bytes().decode("utf-8").replace("\r\n", "\n")
