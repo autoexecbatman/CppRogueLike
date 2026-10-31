@@ -19,8 +19,11 @@ namespace
 	// fixed two pixels a tile made a 120x80 map a 240x160 postage stamp in
 	// which a single explored room was five pixels across.
 	constexpr int MAX_WIDTH_PERCENT = 40;
+	// The overlay's share of the window's height, beside the width's above.
 	constexpr int MAX_HEIGHT_PERCENT = 55;
+	// Pixels from the window's top and right edges to the map, frame included.
 	constexpr int PADDING = 8;
+	// Pixels the opaque frame extends past the map on every side.
 	constexpr int BORDER = 3;
 } // namespace
 

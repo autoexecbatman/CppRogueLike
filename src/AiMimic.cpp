@@ -29,15 +29,25 @@ namespace
 
 	// Configuration constants (NOT serialized - same for all mimics)
 	constexpr int DISGUISE_CHANGE_RATE = 200;
+	// Rounds, not 2e turns, between meals; the book's mimic eats no items.
 	constexpr int CONSUMPTION_COOLDOWN_TURNS = 3;
+	// Tiles from the mimic an item may lie and be eaten: its own and adjacent.
 	constexpr int CONSUMPTION_RADIUS = 1;
+	// Most rounds of confusion a reveal casts, however many scrolls were eaten.
 	constexpr int MAX_CONFUSION_DURATION = 5;
+	// Damage reduction at which eating gold stops raising it; no 2e rule.
 	constexpr int MAX_GOLD_DR_BONUS = 2;
+	// Largest die a weapon meal grows the bite to, a side a meal; no 2e rule.
 	constexpr int MAX_WEAPON_DAMAGE = 6;
+	// Damage reduction at which eating armor stops raising it; no 2e rule.
 	constexpr int MAX_ARMOR_DR_BONUS = 3;
+	// Meals after which it takes a greater mimic's name and look; no 2e rule.
 	constexpr int ITEMS_FOR_TRANSFORMATION = 5;
+	// Hit points, maximum and current, one potion or food meal adds.
 	constexpr int HEALTH_BONUS = 1;
+	// Damage reduction one gold or armor meal adds, up to that meal's cap.
 	constexpr int DR_BONUS = 1;
+	// Rounds a scroll meal adds to the reveal's confusion, up to the cap.
 	constexpr int CONFUSION_BONUS = 1;
 
 	// OCP-compliant: data-driven item bonus mapping

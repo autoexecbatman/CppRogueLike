@@ -244,17 +244,24 @@ namespace
 	// The rectangle log text is laid out in. Pixels across, rows down.
 	struct LogPanel
 	{
+		// Pixel column each row starts at, right of the second divider.
 		int leftEdge{ 0 };
+		// Pixel column no text passes, inside the frame's right edge.
 		int rightEdge{ 0 };
+		// Top of the HUD in pixels; rows count down from it.
 		int baseY{ 0 };
+		// Pixels per tile, which sets the frame rule the rows clear.
 		int tileSize{ 0 };
+		// Rows the panel holds; text stops at the last rather than spill.
 		int rowCount{ 0 };
 	};
 
 	// Where the next piece of log text goes.
 	struct LogCursor
 	{
+		// Pixel column the next part starts at.
 		int pixelX{ 0 };
+		// Row the next part goes on, from 0 at the top.
 		int row{ 0 };
 	};
 

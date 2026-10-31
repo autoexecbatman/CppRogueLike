@@ -15,7 +15,9 @@
 
 namespace
 {
+	// Lower end of each axis of a confused step: any neighbour, or none.
 	constexpr int MIN_DIRECTION = -1;
+	// Upper end of that roll; not the 2e Confusion table (PHB, PDF p. 321).
 	constexpr int MAX_DIRECTION = 1;
 } // namespace
 

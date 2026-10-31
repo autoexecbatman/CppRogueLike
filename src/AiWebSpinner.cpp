@@ -22,11 +22,15 @@
 
 namespace
 {
+	// Rounds between two webs from one spider; the book gives no rate.
 	constexpr int WEB_COOLDOWN = 8;
+	// Web radius in tiles with no quarry within 15; one more within 15.
 	constexpr int WEB_MIN_SIZE = 3;
 	// Maximum number of webs that can exist at once per spider
 	constexpr int MAX_WEBS = 5;
+	// Web radius in tiles with the quarry within 5; 4 or more reads as massive.
 	constexpr int WEB_MAX_SIZE = 5;
+	// Each web's hold in Web's catch and stuck rolls; no 2e number behind it.
 	constexpr int WEB_STRENGTH = 3;
 } // namespace
 

@@ -22,8 +22,11 @@ namespace
 
 	// Thresholds for different hunger states
 	constexpr int WELL_FED_THRESHOLD{ 200 };
+	// Highest counter read as SATIATED. It rises one a round; 2e has no clock.
 	constexpr int SATIATED_THRESHOLD{ 400 };
+	// Highest counter read as HUNGRY.
 	constexpr int HUNGRY_THRESHOLD{ 700 };
+	// Highest counter read as STARVING; above it, up to hungerMax, is DYING.
 	constexpr int STARVING_THRESHOLD{ 900 };
 
 	// The only place a counter becomes a state. Bounds ascend, so the first one

@@ -222,6 +222,7 @@ namespace
 		return "TILE_SLOT_" + name;
 	}
 
+	// Tile column the item menu opens at; a fixed number, not from the layout.
 	constexpr int CONTEXT_MENU_ANCHOR_COL = 6;
 
 	int row_at_y(int tileSize, int screenY)
