@@ -1,0 +1,77 @@
+{
+    "cwd": "E:/repo/C++RogueLike",
+    "test_command": [
+        "powershell",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tests/run_suite.ps1",
+        "-Configuration",
+        "Debug",
+        "-Filter",
+        "--gtest_filter=EnhancementSystemTest.*:EnumLoadRefusalTest.*:ItemNameTest.*"
+    ],
+    "mutations": [
+        {
+            "file": "src/ItemEnhancements.h",
+            "original": "\t\t\t.damage = 2,\n\t\t\t.value = 100,\n",
+            "mutated": "\t\t\t.damage = 3,\n\t\t\t.value = 100,\n",
+            "catches": "Keen's damage changed in its row"
+        },
+        {
+            "file": "src/ItemEnhancements.h",
+            "original": "\t\t\t.valueChange = ValueChange::SET,\n\t\t\t.value = 10,\n",
+            "mutated": "\t\t\t.value = 10,\n",
+            "catches": "Cursed adding to the value where it replaces it"
+        },
+        {
+            "file": "src/ItemEnhancements.h",
+            "original": "\t\t\t.mana = 20,\n",
+            "mutated": "\t\t\t.mana = 2,\n",
+            "catches": "of Magic's mana changed in its row"
+        },
+        {
+            "file": "src/ItemEnhancements.h",
+            "original": "\t\t\"of the Owl\",\n",
+            "mutated": "\t\t\"of the owl\",\n",
+            "catches": "a suffix's name changed in its row"
+        },
+        {
+            "file": "src/ItemEnhancements.cpp",
+            "original": "\tapply_effect(prefix_record(prefix).effect);\n\tapply_effect(suffix_record(suffix).effect);",
+            "mutated": "\tapply_effect(suffix_record(suffix).effect);\n\tapply_effect(prefix_record(prefix).effect);",
+            "catches": "the prefix applied after the suffix, so a prefix's set overrides its suffix"
+        },
+        {
+            "file": "src/ItemEnhancements.cpp",
+            "original": "\tdamageBonus += effect.damage;",
+            "mutated": "\tdamageBonus = effect.damage;",
+            "catches": "a suffix's damage replacing its prefix's rather than adding to it"
+        },
+        {
+            "file": "src/ItemEnhancements.cpp",
+            "original": "\t\tvalueModifier = effect.value;",
+            "mutated": "\t\tvalueModifier += effect.value;",
+            "catches": "a value that replaces added instead"
+        },
+        {
+            "file": "src/ItemEnhancements.cpp",
+            "original": "\tfireResistance = effect.fireResistance.value_or(fireResistance);",
+            "mutated": "",
+            "catches": "a fire resistance a row sets never set"
+        },
+        {
+            "file": "src/ItemEnhancements.cpp",
+            "original": "\tblessing = effect.blessing.value_or(blessing);",
+            "mutated": "",
+            "catches": "a blessing or a curse a row sets never set"
+        },
+        {
+            "file": "src/ItemEnhancements.cpp",
+            "original": "\t\tisMagical = true;",
+            "mutated": "",
+            "catches": "a magical row leaving its item mundane"
+        }
+    ]
+}

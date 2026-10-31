@@ -4,7 +4,10 @@
 #include "src/RandomDice.h"
 #include "src/WeaponDamageRegistry.h"
 #include "tests/mocks/TestDice.h"
+#include <array>
 #include <gtest/gtest.h>
+#include <iterator>
+#include <string_view>
 
 // ============================================================================
 // ENHANCEMENT SYSTEM TESTS
@@ -701,4 +704,315 @@ TEST_F(EnhancementSystemTest, WeaponDamageRegistry_NullEnhancement_ReturnsBase)
 
 	EXPECT_EQ(withNull.minDamage, baseDamage.minDamage);
 	EXPECT_EQ(withNull.maxDamage, baseDamage.maxDamage);
+}
+
+// What each prefix and suffix did at cead0414, before its effects moved into
+// PREFIX_TABLE and SUFFIX_TABLE. That commit's code printed every row below,
+// so the oracle is the code's own output, which fits only a change that
+// claims to alter nothing. These are the game's values as they stood, not
+// checked against the 2e book.
+//
+// Fields, in order: damage, to hit, AC, strength, dexterity, intelligence, HP,
+// mana, speed, stealth, fire, cold, lightning and poison resistance, blessing
+// (0 uncursed, 1 blessed, 2 cursed), magical (0 or 1), value percentage.
+namespace
+{
+	using EnhancementFields = std::array<int, 17>;
+
+	EnhancementFields fields_of(const ItemEnhancement& enhancement)
+	{
+		return {
+			enhancement.damageBonus,
+			enhancement.toHitBonus,
+			enhancement.acBonus,
+			enhancement.strengthBonus,
+			enhancement.dexterityBonus,
+			enhancement.intelligenceBonus,
+			enhancement.hpBonus,
+			enhancement.manaBonus,
+			enhancement.speedBonus,
+			enhancement.stealthBonus,
+			enhancement.fireResistance,
+			enhancement.coldResistance,
+			enhancement.lightningResistance,
+			enhancement.poisonResistance,
+			static_cast<int>(enhancement.blessing),
+			enhancement.isMagical ? 1 : 0,
+			enhancement.valueModifier,
+		};
+	}
+
+	struct GoldenPrefix
+	{
+		PrefixType prefix{ PrefixType::NONE };
+		std::string_view name{};
+		EnhancementFields fields{};
+	};
+
+	struct GoldenSuffix
+	{
+		SuffixType suffix{ SuffixType::NONE };
+		std::string_view name{};
+		EnhancementFields fields{};
+	};
+
+	struct GoldenPair
+	{
+		PrefixType prefix{ PrefixType::NONE };
+		SuffixType suffix{ SuffixType::NONE };
+		EnhancementFields fields{};
+	};
+
+	const GoldenPrefix GOLDEN_PREFIXES[] = {
+		{
+			PrefixType::NONE,
+			"",
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100 },
+		},
+		{
+			PrefixType::SHARP,
+			"Sharp",
+			{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 150 },
+		},
+		{
+			PrefixType::KEEN,
+			"Keen",
+			{ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 200 },
+		},
+		{
+			PrefixType::MASTERWORK,
+			"Masterwork",
+			{ 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 175 },
+		},
+		{
+			PrefixType::BLESSED,
+			"Blessed",
+			{ 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 250 },
+		},
+		{
+			PrefixType::FLAMING,
+			"Flaming",
+			{ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 0, 0, 0, 0, 1, 300 },
+		},
+		{
+			PrefixType::FROST,
+			"Frost",
+			{ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 0, 0, 0, 1, 300 },
+		},
+		{
+			PrefixType::SHOCK,
+			"Shock",
+			{ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 0, 0, 1, 300 },
+		},
+		{
+			PrefixType::REINFORCED,
+			"Reinforced",
+			{ 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 160 },
+		},
+		{
+			PrefixType::STUDDED,
+			"Studded",
+			{ 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 140 },
+		},
+		{
+			PrefixType::ELVEN,
+			"Elven",
+			{ 0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 400 },
+		},
+		{
+			PrefixType::DWARVEN,
+			"Dwarven",
+			{ 0, 0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 500 },
+		},
+		{
+			PrefixType::MAGICAL,
+			"Magical",
+			{ 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 350 },
+		},
+		{
+			PrefixType::CURSED,
+			"Cursed",
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 10 },
+		},
+		{
+			PrefixType::ANCIENT,
+			"Ancient",
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 600 },
+		},
+		{
+			PrefixType::RUSTED,
+			"Rusted",
+			{ -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30 },
+		},
+		{
+			PrefixType::CRACKED,
+			"Cracked",
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50 },
+		},
+	};
+
+	const GoldenSuffix GOLDEN_SUFFIXES[] = {
+		{
+			SuffixType::NONE,
+			"",
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100 },
+		},
+		{
+			SuffixType::OF_SLAYING,
+			"of Slaying",
+			{ 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 400 },
+		},
+		{
+			SuffixType::OF_ACCURACY,
+			"of Accuracy",
+			{ 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 300 },
+		},
+		{
+			SuffixType::OF_PROTECTION,
+			"of Protection",
+			{ 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 350 },
+		},
+		{
+			SuffixType::OF_POWER,
+			"of Power",
+			{ 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 500 },
+		},
+		{
+			SuffixType::OF_FIRE_RESISTANCE,
+			"of Fire Resistance",
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 250 },
+		},
+		{
+			SuffixType::OF_COLD_RESISTANCE,
+			"of Cold Resistance",
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 250 },
+		},
+		{
+			SuffixType::OF_LIGHTNING_RESISTANCE,
+			"of Lightning Resistance",
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 250 },
+		},
+		{
+			SuffixType::OF_POISON_RESISTANCE,
+			"of Poison Resistance",
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 250 },
+		},
+		{
+			SuffixType::OF_SPEED,
+			"of Speed",
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 300 },
+		},
+		{
+			SuffixType::OF_STEALTH,
+			"of Stealth",
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 275 },
+		},
+		{
+			SuffixType::OF_MAGIC,
+			"of Magic",
+			{ 0, 0, 0, 0, 0, 1, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 325 },
+		},
+		{
+			SuffixType::OF_HEALTH,
+			"of Health",
+			{ 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 300 },
+		},
+		{
+			SuffixType::OF_THE_EAGLE,
+			"of the Eagle",
+			{ 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 250 },
+		},
+		{
+			SuffixType::OF_THE_BEAR,
+			"of the Bear",
+			{ 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 250 },
+		},
+		{
+			SuffixType::OF_THE_OWL,
+			"of the Owl",
+			{ 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 250 },
+		},
+		{
+			SuffixType::OF_WEAKNESS,
+			"of Weakness",
+			{ 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 20 },
+		},
+		{
+			SuffixType::OF_SLOWNESS,
+			"of Slowness",
+			{ 0, 0, 0, 0, 0, 0, 0, 0, -2, 0, 0, 0, 0, 0, 2, 0, 15 },
+		},
+		{
+			SuffixType::OF_BRITTLENESS,
+			"of Brittleness",
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 25 },
+		},
+	};
+
+	// The pairs where a suffix's set overrides its prefix's.
+	const GoldenPair GOLDEN_PAIRS[] = {
+		{
+			PrefixType::FLAMING,
+			SuffixType::OF_FIRE_RESISTANCE,
+			{ 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 1, 450 },
+		},
+		{
+			PrefixType::CURSED,
+			SuffixType::OF_SLAYING,
+			{ 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 310 },
+		},
+		{
+			PrefixType::ANCIENT,
+			SuffixType::OF_WEAKNESS,
+			{ 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 20 },
+		},
+		{
+			PrefixType::RUSTED,
+			SuffixType::OF_BRITTLENESS,
+			{ -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 25 },
+		},
+	};
+} // namespace
+
+TEST_F(EnhancementSystemTest, EveryPrefixHasTheNameAndEffectItHad)
+{
+	ASSERT_EQ(std::size(GOLDEN_PREFIXES), PREFIX_COUNT);
+	for (const GoldenPrefix& golden : GOLDEN_PREFIXES)
+	{
+		ItemEnhancement enhancement{};
+		enhancement.prefix = golden.prefix;
+		enhancement.apply_enhancement_effects();
+
+		EXPECT_EQ(enhancement.get_prefix_name(), golden.name);
+		EXPECT_EQ(fields_of(enhancement), golden.fields) << golden.name;
+	}
+}
+
+TEST_F(EnhancementSystemTest, EverySuffixHasTheNameAndEffectItHad)
+{
+	ASSERT_EQ(std::size(GOLDEN_SUFFIXES), SUFFIX_COUNT);
+	for (const GoldenSuffix& golden : GOLDEN_SUFFIXES)
+	{
+		ItemEnhancement enhancement{};
+		enhancement.suffix = golden.suffix;
+		enhancement.apply_enhancement_effects();
+
+		EXPECT_EQ(enhancement.get_suffix_name(), golden.name);
+		EXPECT_EQ(fields_of(enhancement), golden.fields) << golden.name;
+	}
+}
+
+TEST_F(EnhancementSystemTest, ASuffixAppliedAfterItsPrefixOverridesWhatItSets)
+{
+	for (const GoldenPair& golden : GOLDEN_PAIRS)
+	{
+		ItemEnhancement enhancement{};
+		enhancement.prefix = golden.prefix;
+		enhancement.suffix = golden.suffix;
+		enhancement.apply_enhancement_effects();
+
+		EXPECT_EQ(fields_of(enhancement), golden.fields)
+			<< static_cast<int>(golden.prefix) << " with "
+			<< static_cast<int>(golden.suffix);
+	}
 }

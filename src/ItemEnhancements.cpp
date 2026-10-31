@@ -5,163 +5,14 @@
 #include "ItemEnhancements.h"
 #include "RandomDice.h"
 
-// Enhancement name getters
 std::string ItemEnhancement::get_prefix_name() const
 {
-	switch (prefix)
-	{
-	case PrefixType::SHARP:
-	{
-		return "Sharp";
-	}
-	case PrefixType::KEEN:
-	{
-		return "Keen";
-	}
-	case PrefixType::MASTERWORK:
-	{
-		return "Masterwork";
-	}
-	case PrefixType::BLESSED:
-	{
-		return "Blessed";
-	}
-	case PrefixType::FLAMING:
-	{
-		return "Flaming";
-	}
-	case PrefixType::FROST:
-	{
-		return "Frost";
-	}
-	case PrefixType::SHOCK:
-	{
-		return "Shock";
-	}
-	case PrefixType::REINFORCED:
-	{
-		return "Reinforced";
-	}
-	case PrefixType::STUDDED:
-	{
-		return "Studded";
-	}
-	case PrefixType::ELVEN:
-	{
-		return "Elven";
-	}
-	case PrefixType::DWARVEN:
-	{
-		return "Dwarven";
-	}
-	case PrefixType::MAGICAL:
-	{
-		return "Magical";
-	}
-	case PrefixType::CURSED:
-	{
-		return "Cursed";
-	}
-	case PrefixType::ANCIENT:
-	{
-		return "Ancient";
-	}
-	case PrefixType::RUSTED:
-	{
-		return "Rusted";
-	}
-	case PrefixType::CRACKED:
-	{
-		return "Cracked";
-	}
-	default:
-	{
-		return "";
-	}
-	}
+	return std::string{ prefix_record(prefix).name };
 }
 
 std::string ItemEnhancement::get_suffix_name() const
 {
-	switch (suffix)
-	{
-	case SuffixType::OF_SLAYING:
-	{
-		return "of Slaying";
-	}
-	case SuffixType::OF_ACCURACY:
-	{
-		return "of Accuracy";
-	}
-	case SuffixType::OF_PROTECTION:
-	{
-		return "of Protection";
-	}
-	case SuffixType::OF_POWER:
-	{
-		return "of Power";
-	}
-	case SuffixType::OF_FIRE_RESISTANCE:
-	{
-		return "of Fire Resistance";
-	}
-	case SuffixType::OF_COLD_RESISTANCE:
-	{
-		return "of Cold Resistance";
-	}
-	case SuffixType::OF_LIGHTNING_RESISTANCE:
-	{
-		return "of Lightning Resistance";
-	}
-	case SuffixType::OF_POISON_RESISTANCE:
-	{
-		return "of Poison Resistance";
-	}
-	case SuffixType::OF_SPEED:
-	{
-		return "of Speed";
-	}
-	case SuffixType::OF_STEALTH:
-	{
-		return "of Stealth";
-	}
-	case SuffixType::OF_MAGIC:
-	{
-		return "of Magic";
-	}
-	case SuffixType::OF_HEALTH:
-	{
-		return "of Health";
-	}
-	case SuffixType::OF_THE_EAGLE:
-	{
-		return "of the Eagle";
-	}
-	case SuffixType::OF_THE_BEAR:
-	{
-		return "of the Bear";
-	}
-	case SuffixType::OF_THE_OWL:
-	{
-		return "of the Owl";
-	}
-	case SuffixType::OF_WEAKNESS:
-	{
-		return "of Weakness";
-	}
-	case SuffixType::OF_SLOWNESS:
-	{
-		return "of Slowness";
-	}
-	case SuffixType::OF_BRITTLENESS:
-	{
-		return "of Brittleness";
-	}
-	default:
-	{
-		return "";
-	}
-	}
+	return std::string{ suffix_record(suffix).name };
 }
 
 int ItemEnhancement::resistance_strength(DamageType damageType) const noexcept
@@ -197,280 +48,43 @@ int ItemEnhancement::resistance_strength(DamageType damageType) const noexcept
 	std::unreachable();
 }
 
+void ItemEnhancement::apply_effect(const EnhancementEffect& effect)
+{
+	damageBonus += effect.damage;
+	toHitBonus += effect.toHit;
+	acBonus += effect.ac;
+	strengthBonus += effect.strength;
+	dexterityBonus += effect.dexterity;
+	intelligenceBonus += effect.intelligence;
+	hpBonus += effect.hp;
+	manaBonus += effect.mana;
+	speedBonus += effect.speed;
+	stealthBonus += effect.stealth;
+	fireResistance = effect.fireResistance.value_or(fireResistance);
+	coldResistance = effect.coldResistance.value_or(coldResistance);
+	lightningResistance =
+		effect.lightningResistance.value_or(lightningResistance);
+	poisonResistance = effect.poisonResistance.value_or(poisonResistance);
+	blessing = effect.blessing.value_or(blessing);
+	if (effect.magic == EnhancementMagic::MAGICAL)
+	{
+		isMagical = true;
+	}
+	if (effect.valueChange == ValueChange::SET)
+	{
+		valueModifier = effect.value;
+	}
+	else
+	{
+		valueModifier += effect.value;
+	}
+}
+
 void ItemEnhancement::apply_enhancement_effects()
 {
-	// Apply prefix effects
-	switch (prefix)
-	{
-
-	case PrefixType::SHARP:
-	{
-		damageBonus += 1;
-		valueModifier += 50;
-		break;
-	}
-
-	case PrefixType::KEEN:
-	{
-		damageBonus += 2;
-		valueModifier += 100;
-		break;
-	}
-
-	case PrefixType::MASTERWORK:
-	{
-		toHitBonus += 1;
-		valueModifier += 75;
-		break;
-	}
-
-	case PrefixType::BLESSED:
-	{
-		toHitBonus += 1;
-		damageBonus += 1;
-		blessing = BlessingStatus::BLESSED;
-		valueModifier += 150;
-		break;
-	}
-
-	case PrefixType::FLAMING:
-	{
-		damageBonus += 2;
-		fireResistance = 25;
-		isMagical = true;
-		valueModifier += 200;
-		break;
-	}
-
-	case PrefixType::FROST:
-	{
-		damageBonus += 2;
-		coldResistance = 25;
-		isMagical = true;
-		valueModifier += 200;
-		break;
-	}
-
-	case PrefixType::SHOCK:
-	{
-		damageBonus += 2;
-		lightningResistance = 25;
-		isMagical = true;
-		valueModifier += 200;
-		break;
-	}
-
-	case PrefixType::REINFORCED:
-	{
-		acBonus += 1;
-		valueModifier += 60;
-		break;
-	}
-
-	case PrefixType::STUDDED:
-	{
-		acBonus += 1;
-		valueModifier += 40;
-		break;
-	}
-
-	case PrefixType::ELVEN:
-	{
-		acBonus += 2;
-		dexterityBonus += 1;
-		valueModifier += 300;
-		break;
-	}
-
-	case PrefixType::DWARVEN:
-	{
-		acBonus += 3;
-		strengthBonus += 1;
-		valueModifier += 400;
-		break;
-	}
-
-	case PrefixType::MAGICAL:
-	{
-		acBonus += 1;
-		isMagical = true;
-		valueModifier += 250;
-		break;
-	}
-
-	case PrefixType::CURSED:
-	{
-		blessing = BlessingStatus::CURSED;
-		valueModifier = 10; // Drastically reduced value
-		break;
-	}
-
-	case PrefixType::ANCIENT:
-	{
-		valueModifier += 500;
-		break;
-	}
-
-	case PrefixType::RUSTED:
-	{
-		damageBonus -= 1;
-		acBonus -= 1;
-		valueModifier = 30;
-		break;
-	}
-
-	case PrefixType::CRACKED:
-	{
-		valueModifier = 50;
-		break;
-	}
-
-	default:
-	{
-		break;
-	}
-	}
-
-	// Apply suffix effects
-	switch (suffix)
-	{
-
-	case SuffixType::OF_SLAYING:
-	{
-		damageBonus += 3;
-		valueModifier += 300;
-		break;
-	}
-
-	case SuffixType::OF_ACCURACY:
-	{
-		toHitBonus += 2;
-		valueModifier += 200;
-		break;
-	}
-
-	case SuffixType::OF_PROTECTION:
-	{
-		acBonus += 2;
-		valueModifier += 250;
-		break;
-	}
-
-	case SuffixType::OF_POWER:
-	{
-		strengthBonus += 1;
-		dexterityBonus += 1;
-		intelligenceBonus += 1;
-		valueModifier += 400;
-		break;
-	}
-
-	case SuffixType::OF_FIRE_RESISTANCE:
-	{
-		fireResistance = 50;
-		valueModifier += 150;
-		break;
-	}
-
-	case SuffixType::OF_COLD_RESISTANCE:
-	{
-		coldResistance = 50;
-		valueModifier += 150;
-		break;
-	}
-
-	case SuffixType::OF_LIGHTNING_RESISTANCE:
-	{
-		lightningResistance = 50;
-		valueModifier += 150;
-		break;
-	}
-
-	case SuffixType::OF_POISON_RESISTANCE:
-	{
-		poisonResistance = 50;
-		valueModifier += 150;
-		break;
-	}
-
-	case SuffixType::OF_SPEED:
-	{
-		speedBonus += 2;
-		valueModifier += 200;
-		break;
-	}
-
-	case SuffixType::OF_STEALTH:
-	{
-		stealthBonus += 3;
-		valueModifier += 175;
-		break;
-	}
-
-	case SuffixType::OF_MAGIC:
-	{
-		manaBonus += 20;
-		intelligenceBonus += 1;
-		valueModifier += 225;
-		break;
-	}
-
-	case SuffixType::OF_HEALTH:
-	{
-		hpBonus += 15;
-		valueModifier += 200;
-		break;
-	}
-
-	case SuffixType::OF_THE_EAGLE:
-	{
-		dexterityBonus += 2;
-		valueModifier += 150;
-		break;
-	}
-
-	case SuffixType::OF_THE_BEAR:
-	{
-		strengthBonus += 2;
-		valueModifier += 150;
-		break;
-	}
-
-	case SuffixType::OF_THE_OWL:
-	{
-		intelligenceBonus += 2;
-		valueModifier += 150;
-		break;
-	}
-
-	case SuffixType::OF_WEAKNESS:
-	{
-		strengthBonus -= 1;
-		blessing = BlessingStatus::CURSED;
-		valueModifier = 20;
-		break;
-	}
-
-	case SuffixType::OF_SLOWNESS:
-	{
-		speedBonus -= 2;
-		blessing = BlessingStatus::CURSED;
-		valueModifier = 15;
-		break;
-	}
-
-	case SuffixType::OF_BRITTLENESS:
-	{
-		blessing = BlessingStatus::CURSED;
-		valueModifier = 25;
-		break;
-	}
-
-	default:
-	{
-		break;
-	}
-	}
+	// The suffix goes second, so what it sets overrides the prefix.
+	apply_effect(prefix_record(prefix).effect);
+	apply_effect(suffix_record(suffix).effect);
 }
 
 // Random generation methods
@@ -507,7 +121,7 @@ ItemEnhancement ItemEnhancement::generate_random_enhancement(
 	return enhancement;
 }
 
-// Clears the prefix when it is one of the four magical ones, leaving any suffix
+// Clears the prefix when its row makes the item magical, leaving any suffix
 // alone. Every generator calls this before apply_enhancement_effects, whose
 // bonuses accumulate, so a prefix cleared afterwards would leave its own behind.
 //
@@ -518,22 +132,9 @@ ItemEnhancement ItemEnhancement::generate_random_enhancement(
 //   enhancement.strip_magical_prefix();   // SHARP is mundane and stays
 void ItemEnhancement::strip_magical_prefix()
 {
-	switch (prefix)
-	{
-
-	case PrefixType::FLAMING:
-	case PrefixType::FROST:
-	case PrefixType::SHOCK:
-	case PrefixType::MAGICAL:
+	if (prefix_record(prefix).effect.magic == EnhancementMagic::MAGICAL)
 	{
 		prefix = PrefixType::NONE;
-		break;
-	}
-
-	default:
-	{
-		break;
-	}
 	}
 }
 

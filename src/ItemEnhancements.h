@@ -1,6 +1,9 @@
 #pragma once
 
+#include <array>
+#include <optional>
 #include <string>
+#include <string_view>
 
 #include "DamageInfo.h"
 #include "ItemIdentification.h"
@@ -20,52 +23,501 @@ enum class PrefixType
 {
 	NONE,
 	// Weapon prefixes
-	SHARP, // +1 damage
-	KEEN, // +2 damage
-	MASTERWORK, // +1 to hit
-	BLESSED, // +1 to hit and damage
-	FLAMING, // Fire damage
-	FROST, // Cold damage
-	SHOCK, // Lightning damage
+	SHARP,
+	KEEN,
+	MASTERWORK,
+	BLESSED,
+	FLAMING,
+	FROST,
+	SHOCK,
 	// Armor prefixes
-	REINFORCED, // +1 AC
-	STUDDED, // +1 AC
-	ELVEN, // +2 AC, lighter
-	DWARVEN, // +3 AC, heavier
-	MAGICAL, // +1 AC, magical
+	REINFORCED,
+	STUDDED,
+	ELVEN,
+	DWARVEN,
+	MAGICAL,
 	// Universal prefixes
-	CURSED, // Negative effects
-	ANCIENT, // Increased value
-	RUSTED, // Decreased effectiveness
-	CRACKED // Reduced durability
+	CURSED,
+	ANCIENT,
+	RUSTED,
+	CRACKED,
+	COUNT
 };
 
 enum class SuffixType
 {
 	NONE,
 	// Combat suffixes
-	OF_SLAYING, // +3 damage
-	OF_ACCURACY, // +2 to hit
-	OF_PROTECTION, // +2 AC
-	OF_POWER, // +1 all stats
+	OF_SLAYING,
+	OF_ACCURACY,
+	OF_PROTECTION,
+	OF_POWER,
 	// Resistance suffixes
 	OF_FIRE_RESISTANCE,
 	OF_COLD_RESISTANCE,
 	OF_LIGHTNING_RESISTANCE,
 	OF_POISON_RESISTANCE,
 	// Special suffixes
-	OF_SPEED, // Movement bonus
-	OF_STEALTH, // Stealth bonus
-	OF_MAGIC, // Mana bonus
-	OF_HEALTH, // HP bonus
-	OF_THE_EAGLE, // Dexterity bonus
-	OF_THE_BEAR, // Strength bonus
-	OF_THE_OWL, // Intelligence bonus
+	OF_SPEED,
+	OF_STEALTH,
+	OF_MAGIC,
+	OF_HEALTH,
+	OF_THE_EAGLE,
+	OF_THE_BEAR,
+	OF_THE_OWL,
 	// Negative suffixes
-	OF_WEAKNESS, // Stat penalty
-	OF_SLOWNESS, // Movement penalty
-	OF_BRITTLENESS // Durability penalty
+	OF_WEAKNESS,
+	OF_SLOWNESS,
+	OF_BRITTLENESS,
+	COUNT
 };
+
+// Whether an enhancement makes its item magical.
+enum class EnhancementMagic
+{
+	MUNDANE,
+	MAGICAL,
+};
+
+// How an enhancement changes an item's value percentage: adding to it, or
+// replacing it outright.
+enum class ValueChange
+{
+	ADD,
+	SET,
+};
+
+// What one prefix or suffix does to an enhancement. The bonuses add. A
+// resistance or a blessing is set only where the row gives one: nullopt
+// leaves the enhancement's own value, where a value replaces it. A
+// resistance is in percent, and any value above 0 counts as one ring's worth.
+// The prefix's row is applied before the suffix's, so a suffix that sets a
+// field overrides its prefix.
+struct EnhancementEffect
+{
+	// Flat points on the weapon's damage dice: 2 makes 1d8 into 1d8+2.
+	int damage{ 0 };
+	// Added to the attack roll; a cursed weapon takes -2 instead.
+	int toHit{ 0 };
+	// Shown in the item's stats; nothing adds it to armour class.
+	int ac{ 0 };
+	// Added to the wearer's Strength while the item is worn.
+	int strength{ 0 };
+	// Added to the wearer's Dexterity while the item is worn.
+	int dexterity{ 0 };
+	// Saved with the item; nothing applies it.
+	int intelligence{ 0 };
+	// Saved with the item; nothing applies it.
+	int hp{ 0 };
+	// Saved with the item; nothing applies it.
+	int mana{ 0 };
+	// Saved with the item; nothing applies it.
+	int speed{ 0 };
+	// Saved with the item; nothing applies it.
+	int stealth{ 0 };
+	// Resists fire damage.
+	std::optional<int> fireResistance{};
+	// Resists cold damage.
+	std::optional<int> coldResistance{};
+	// Resists lightning damage.
+	std::optional<int> lightningResistance{};
+	// Resists poison damage.
+	std::optional<int> poisonResistance{};
+	// CURSED binds the item to its wearer until Remove Curse breaks it.
+	std::optional<BlessingStatus> blessing{};
+	// MAGICAL marks the item magical and is what EXCLUDED strips.
+	EnhancementMagic magic{ EnhancementMagic::MUNDANE };
+	// ADD adds value to the price percentage, which starts at 100; SET sets it.
+	ValueChange valueChange{ ValueChange::ADD };
+	// Percentage points of the item's base price.
+	int value{ 0 };
+};
+
+// One prefix: the word an item's name starts with, and what it does.
+struct PrefixRecord
+{
+	// The prefix this row is for.
+	PrefixType type{ PrefixType::NONE };
+	// The word shown before an item's name; empty for NONE.
+	std::string_view name{};
+	// What the prefix does to an enhancement.
+	EnhancementEffect effect{};
+};
+
+// One suffix: the words an item's name ends with, and what it does.
+struct SuffixRecord
+{
+	// The suffix this row is for.
+	SuffixType type{ SuffixType::NONE };
+	// The words shown after an item's name; empty for NONE.
+	std::string_view name{};
+	// What the suffix does to an enhancement.
+	EnhancementEffect effect{};
+};
+
+// Rows in PREFIX_TABLE: one per PrefixType, NONE included.
+inline constexpr std::size_t PREFIX_COUNT =
+	static_cast<std::size_t>(PrefixType::COUNT);
+// Rows in SUFFIX_TABLE: one per SuffixType, NONE included.
+inline constexpr std::size_t SUFFIX_COUNT =
+	static_cast<std::size_t>(SuffixType::COUNT);
+
+// Every prefix, one row each, in enum order.
+inline constexpr std::array<PrefixRecord, PREFIX_COUNT> PREFIX_TABLE{ {
+	PrefixRecord{
+		PrefixType::NONE,
+		"",
+		EnhancementEffect{},
+	},
+	PrefixRecord{
+		PrefixType::SHARP,
+		"Sharp",
+		EnhancementEffect{
+			.damage = 1,
+			.value = 50,
+		},
+	},
+	PrefixRecord{
+		PrefixType::KEEN,
+		"Keen",
+		EnhancementEffect{
+			.damage = 2,
+			.value = 100,
+		},
+	},
+	PrefixRecord{
+		PrefixType::MASTERWORK,
+		"Masterwork",
+		EnhancementEffect{
+			.toHit = 1,
+			.value = 75,
+		},
+	},
+	PrefixRecord{
+		PrefixType::BLESSED,
+		"Blessed",
+		EnhancementEffect{
+			.damage = 1,
+			.toHit = 1,
+			.blessing = BlessingStatus::BLESSED,
+			.value = 150,
+		},
+	},
+	PrefixRecord{
+		PrefixType::FLAMING,
+		"Flaming",
+		EnhancementEffect{
+			.damage = 2,
+			.fireResistance = 25,
+			.magic = EnhancementMagic::MAGICAL,
+			.value = 200,
+		},
+	},
+	PrefixRecord{
+		PrefixType::FROST,
+		"Frost",
+		EnhancementEffect{
+			.damage = 2,
+			.coldResistance = 25,
+			.magic = EnhancementMagic::MAGICAL,
+			.value = 200,
+		},
+	},
+	PrefixRecord{
+		PrefixType::SHOCK,
+		"Shock",
+		EnhancementEffect{
+			.damage = 2,
+			.lightningResistance = 25,
+			.magic = EnhancementMagic::MAGICAL,
+			.value = 200,
+		},
+	},
+	PrefixRecord{
+		PrefixType::REINFORCED,
+		"Reinforced",
+		EnhancementEffect{
+			.ac = 1,
+			.value = 60,
+		},
+	},
+	PrefixRecord{
+		PrefixType::STUDDED,
+		"Studded",
+		EnhancementEffect{
+			.ac = 1,
+			.value = 40,
+		},
+	},
+	PrefixRecord{
+		PrefixType::ELVEN,
+		"Elven",
+		EnhancementEffect{
+			.ac = 2,
+			.dexterity = 1,
+			.value = 300,
+		},
+	},
+	PrefixRecord{
+		PrefixType::DWARVEN,
+		"Dwarven",
+		EnhancementEffect{
+			.ac = 3,
+			.strength = 1,
+			.value = 400,
+		},
+	},
+	PrefixRecord{
+		PrefixType::MAGICAL,
+		"Magical",
+		EnhancementEffect{
+			.ac = 1,
+			.magic = EnhancementMagic::MAGICAL,
+			.value = 250,
+		},
+	},
+	PrefixRecord{
+		PrefixType::CURSED,
+		"Cursed",
+		EnhancementEffect{
+			.blessing = BlessingStatus::CURSED,
+			.valueChange = ValueChange::SET,
+			.value = 10,
+		},
+	},
+	PrefixRecord{
+		PrefixType::ANCIENT,
+		"Ancient",
+		EnhancementEffect{
+			.value = 500,
+		},
+	},
+	PrefixRecord{
+		PrefixType::RUSTED,
+		"Rusted",
+		EnhancementEffect{
+			.damage = -1,
+			.ac = -1,
+			.valueChange = ValueChange::SET,
+			.value = 30,
+		},
+	},
+	PrefixRecord{
+		PrefixType::CRACKED,
+		"Cracked",
+		EnhancementEffect{
+			.valueChange = ValueChange::SET,
+			.value = 50,
+		},
+	},
+} };
+
+// Every suffix, one row each, in enum order.
+inline constexpr std::array<SuffixRecord, SUFFIX_COUNT> SUFFIX_TABLE{ {
+	SuffixRecord{
+		SuffixType::NONE,
+		"",
+		EnhancementEffect{},
+	},
+	SuffixRecord{
+		SuffixType::OF_SLAYING,
+		"of Slaying",
+		EnhancementEffect{
+			.damage = 3,
+			.value = 300,
+		},
+	},
+	SuffixRecord{
+		SuffixType::OF_ACCURACY,
+		"of Accuracy",
+		EnhancementEffect{
+			.toHit = 2,
+			.value = 200,
+		},
+	},
+	SuffixRecord{
+		SuffixType::OF_PROTECTION,
+		"of Protection",
+		EnhancementEffect{
+			.ac = 2,
+			.value = 250,
+		},
+	},
+	SuffixRecord{
+		SuffixType::OF_POWER,
+		"of Power",
+		EnhancementEffect{
+			.strength = 1,
+			.dexterity = 1,
+			.intelligence = 1,
+			.value = 400,
+		},
+	},
+	SuffixRecord{
+		SuffixType::OF_FIRE_RESISTANCE,
+		"of Fire Resistance",
+		EnhancementEffect{
+			.fireResistance = 50,
+			.value = 150,
+		},
+	},
+	SuffixRecord{
+		SuffixType::OF_COLD_RESISTANCE,
+		"of Cold Resistance",
+		EnhancementEffect{
+			.coldResistance = 50,
+			.value = 150,
+		},
+	},
+	SuffixRecord{
+		SuffixType::OF_LIGHTNING_RESISTANCE,
+		"of Lightning Resistance",
+		EnhancementEffect{
+			.lightningResistance = 50,
+			.value = 150,
+		},
+	},
+	SuffixRecord{
+		SuffixType::OF_POISON_RESISTANCE,
+		"of Poison Resistance",
+		EnhancementEffect{
+			.poisonResistance = 50,
+			.value = 150,
+		},
+	},
+	SuffixRecord{
+		SuffixType::OF_SPEED,
+		"of Speed",
+		EnhancementEffect{
+			.speed = 2,
+			.value = 200,
+		},
+	},
+	SuffixRecord{
+		SuffixType::OF_STEALTH,
+		"of Stealth",
+		EnhancementEffect{
+			.stealth = 3,
+			.value = 175,
+		},
+	},
+	SuffixRecord{
+		SuffixType::OF_MAGIC,
+		"of Magic",
+		EnhancementEffect{
+			.intelligence = 1,
+			.mana = 20,
+			.value = 225,
+		},
+	},
+	SuffixRecord{
+		SuffixType::OF_HEALTH,
+		"of Health",
+		EnhancementEffect{
+			.hp = 15,
+			.value = 200,
+		},
+	},
+	SuffixRecord{
+		SuffixType::OF_THE_EAGLE,
+		"of the Eagle",
+		EnhancementEffect{
+			.dexterity = 2,
+			.value = 150,
+		},
+	},
+	SuffixRecord{
+		SuffixType::OF_THE_BEAR,
+		"of the Bear",
+		EnhancementEffect{
+			.strength = 2,
+			.value = 150,
+		},
+	},
+	SuffixRecord{
+		SuffixType::OF_THE_OWL,
+		"of the Owl",
+		EnhancementEffect{
+			.intelligence = 2,
+			.value = 150,
+		},
+	},
+	SuffixRecord{
+		SuffixType::OF_WEAKNESS,
+		"of Weakness",
+		EnhancementEffect{
+			.strength = -1,
+			.blessing = BlessingStatus::CURSED,
+			.valueChange = ValueChange::SET,
+			.value = 20,
+		},
+	},
+	SuffixRecord{
+		SuffixType::OF_SLOWNESS,
+		"of Slowness",
+		EnhancementEffect{
+			.speed = -2,
+			.blessing = BlessingStatus::CURSED,
+			.valueChange = ValueChange::SET,
+			.value = 15,
+		},
+	},
+	SuffixRecord{
+		SuffixType::OF_BRITTLENESS,
+		"of Brittleness",
+		EnhancementEffect{
+			.blessing = BlessingStatus::CURSED,
+			.valueChange = ValueChange::SET,
+			.value = 25,
+		},
+	},
+} };
+
+// Whether a table has row i naming enumerator i, with a name on every row but
+// NONE's.
+//
+// Example:
+//   is_enhancement_table_in_enum_order(PREFIX_TABLE);   // -> true
+//   // two rows swapped -> false, and the static_assert fails
+template <typename Record, std::size_t Count>
+[[nodiscard]] consteval bool is_enhancement_table_in_enum_order(
+	const std::array<Record, Count>& table)
+{
+	using Type = decltype(Record::type);
+	for (std::size_t row = 0; row < Count; ++row)
+	{
+		const bool isInOrder = table[row].type == static_cast<Type>(row);
+		const bool isNamed = (row == 0) == table[row].name.empty();
+		if (!isInOrder || !isNamed)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+static_assert(
+	is_enhancement_table_in_enum_order(PREFIX_TABLE),
+	"PREFIX_TABLE needs one row per PrefixType, in enum order");
+static_assert(
+	is_enhancement_table_in_enum_order(SUFFIX_TABLE),
+	"SUFFIX_TABLE needs one row per SuffixType, in enum order");
+
+// The table's row for a prefix or a suffix. COUNT has no row.
+//
+// Example:
+//   prefix_record(PrefixType::KEEN).name;   // -> "Keen"
+//   suffix_record(SuffixType::OF_SPEED).effect.speed;   // -> 2
+[[nodiscard]] constexpr const PrefixRecord& prefix_record(PrefixType prefix)
+{
+	return PREFIX_TABLE.at(static_cast<std::size_t>(prefix));
+}
+
+// The suffix half of prefix_record above.
+[[nodiscard]] constexpr const SuffixRecord& suffix_record(SuffixType suffix)
+{
+	return SUFFIX_TABLE.at(static_cast<std::size_t>(suffix));
+}
 
 struct ItemEnhancement
 {
@@ -73,6 +525,10 @@ private:
 	// Clears a magical prefix, before the effects are applied - they accumulate,
 	// so a prefix cleared afterwards would leave its bonuses behind.
 	void strip_magical_prefix();
+
+	// Applies one row's effect: adds its bonuses, sets what it sets, and adds
+	// to or replaces the value.
+	void apply_effect(const EnhancementEffect& effect);
 
 	static PrefixType get_random_weapon_prefix(RandomDice& dice);
 	static PrefixType get_random_armor_prefix(RandomDice& dice);

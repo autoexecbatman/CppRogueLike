@@ -45,14 +45,14 @@
         },
         {
             "file": "src/Item.cpp",
-            "original": "\t\tcase PrefixType::CRACKED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
-            "mutated": "\t\tcase PrefixType::CRACKED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
+            "original": "\t\tif (saved < 0 || saved >= static_cast<int>(PREFIX_COUNT))\n\t\t{\n\t\t\treturn std::nullopt;\n\t\t}",
+            "mutated": "\t\tif (saved < 0 || saved >= static_cast<int>(PREFIX_COUNT))\n\t\t{\n\t\t\treturn static_cast<PrefixType>(saved);\n\t\t}",
             "catches": "a saved prefix no PrefixType has loads"
         },
         {
             "file": "src/Item.cpp",
-            "original": "\t\tcase SuffixType::OF_BRITTLENESS:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
-            "mutated": "\t\tcase SuffixType::OF_BRITTLENESS:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
+            "original": "\t\tif (saved < 0 || saved >= static_cast<int>(SUFFIX_COUNT))\n\t\t{\n\t\t\treturn std::nullopt;\n\t\t}",
+            "mutated": "\t\tif (saved < 0 || saved >= static_cast<int>(SUFFIX_COUNT))\n\t\t{\n\t\t\treturn static_cast<SuffixType>(saved);\n\t\t}",
             "catches": "a saved suffix no SuffixType has loads"
         },
         {

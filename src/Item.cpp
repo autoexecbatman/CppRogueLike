@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <optional>
 #include <string>
 
@@ -8,77 +9,31 @@
 namespace
 {
 	// The PrefixType a saved integer names, or nullopt for one no prefix has.
-	// The switch has no default, so a prefix added without a case here is a
-	// compile error (C4062, -Wswitch).
 	//
 	// Example:
 	//   prefix_type_from(1);     // -> PrefixType::SHARP
 	//   prefix_type_from(17);    // -> nullopt
 	std::optional<PrefixType> prefix_type_from(int saved)
 	{
-		const PrefixType candidate = static_cast<PrefixType>(saved);
-		switch (candidate)
+		if (saved < 0 || saved >= static_cast<int>(PREFIX_COUNT))
 		{
-		case PrefixType::NONE:
-		case PrefixType::SHARP:
-		case PrefixType::KEEN:
-		case PrefixType::MASTERWORK:
-		case PrefixType::BLESSED:
-		case PrefixType::FLAMING:
-		case PrefixType::FROST:
-		case PrefixType::SHOCK:
-		case PrefixType::REINFORCED:
-		case PrefixType::STUDDED:
-		case PrefixType::ELVEN:
-		case PrefixType::DWARVEN:
-		case PrefixType::MAGICAL:
-		case PrefixType::CURSED:
-		case PrefixType::ANCIENT:
-		case PrefixType::RUSTED:
-		case PrefixType::CRACKED:
-		{
-			return candidate;
+			return std::nullopt;
 		}
-		}
-		return std::nullopt;
+		return PREFIX_TABLE[static_cast<std::size_t>(saved)].type;
 	}
 
 	// The SuffixType a saved integer names, or nullopt for one no suffix has.
-	// The switch has no default, so a suffix added without a case here is a
-	// compile error (C4062, -Wswitch).
 	//
 	// Example:
 	//   suffix_type_from(1);     // -> SuffixType::OF_SLAYING
 	//   suffix_type_from(19);    // -> nullopt
 	std::optional<SuffixType> suffix_type_from(int saved)
 	{
-		const SuffixType candidate = static_cast<SuffixType>(saved);
-		switch (candidate)
+		if (saved < 0 || saved >= static_cast<int>(SUFFIX_COUNT))
 		{
-		case SuffixType::NONE:
-		case SuffixType::OF_SLAYING:
-		case SuffixType::OF_ACCURACY:
-		case SuffixType::OF_PROTECTION:
-		case SuffixType::OF_POWER:
-		case SuffixType::OF_FIRE_RESISTANCE:
-		case SuffixType::OF_COLD_RESISTANCE:
-		case SuffixType::OF_LIGHTNING_RESISTANCE:
-		case SuffixType::OF_POISON_RESISTANCE:
-		case SuffixType::OF_SPEED:
-		case SuffixType::OF_STEALTH:
-		case SuffixType::OF_MAGIC:
-		case SuffixType::OF_HEALTH:
-		case SuffixType::OF_THE_EAGLE:
-		case SuffixType::OF_THE_BEAR:
-		case SuffixType::OF_THE_OWL:
-		case SuffixType::OF_WEAKNESS:
-		case SuffixType::OF_SLOWNESS:
-		case SuffixType::OF_BRITTLENESS:
-		{
-			return candidate;
+			return std::nullopt;
 		}
-		}
-		return std::nullopt;
+		return SUFFIX_TABLE[static_cast<std::size_t>(saved)].type;
 	}
 
 	// The BlessingStatus a saved integer names, or nullopt for one no status
