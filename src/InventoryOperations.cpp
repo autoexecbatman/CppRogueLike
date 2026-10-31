@@ -9,7 +9,6 @@
 #include <utility>
 #include <vector>
 
-#include "Actor.h"
 #include "Creature.h"
 #include "CreatureClass.h"
 #include "DataManager.h"

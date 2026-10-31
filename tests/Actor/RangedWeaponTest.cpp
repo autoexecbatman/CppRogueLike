@@ -21,7 +21,6 @@
 #include "src/ExperienceReward.h"
 #include "src/HealthPool.h"
 #include "src/ItemCreator.h"
-#include "src/Paths.h"
 #include "src/Player.h"
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"

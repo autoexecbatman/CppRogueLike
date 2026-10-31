@@ -55,7 +55,6 @@
 #include "PlayerTurn.h"
 #include "Renderer.h"
 #include "SpellSystem.h"
-#include "SpellTile.h"
 #include "Stairs.h"
 #include "StrengthAttributes.h"
 #include "TargetingSystem.h"

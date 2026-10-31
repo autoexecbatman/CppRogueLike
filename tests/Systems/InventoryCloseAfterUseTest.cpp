@@ -29,7 +29,6 @@
 #include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/Colors.h"
-#include "src/Controls.h"
 #include "src/Creature.h"
 #include "src/ExperienceReward.h"
 #include "src/GameContext.h"

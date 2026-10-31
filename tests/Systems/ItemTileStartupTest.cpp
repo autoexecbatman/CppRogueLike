@@ -25,7 +25,6 @@
 #include "src/ContentRegistryIO.h"
 #include "src/Game.h"
 #include "src/Paths.h"
-#include "src/TileRef.h"
 #include "src/TileRefJson.h"
 #include "tests/mocks/TestDice.h"
 

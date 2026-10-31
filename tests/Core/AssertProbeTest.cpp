@@ -71,7 +71,6 @@
 #include "src/MenuSell.h"
 #include "src/MonsterAttacker.h"
 #include "src/MonsterCreator.h"
-#include "src/Paths.h"
 #include "src/Persistent.h"
 #include "src/Pickable.h"
 #include "src/Player.h"

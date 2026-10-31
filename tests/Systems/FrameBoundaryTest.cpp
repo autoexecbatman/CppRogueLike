@@ -16,7 +16,6 @@
 
 #include <gtest/gtest.h>
 
-#include <cstdlib>
 #include <memory>
 #include <string>
 #include <vector>

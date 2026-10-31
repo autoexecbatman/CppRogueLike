@@ -24,7 +24,6 @@
 #include <vector>
 
 #include "src/Actor.h"
-#include "src/Creature.h"
 #include "src/CreatureClass.h"
 #include "src/GameStateManager.h"
 #include "src/HealthPool.h"

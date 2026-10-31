@@ -25,7 +25,6 @@
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
 #include "src/Colors.h"
-#include "src/Controls.h"
 #include "src/Creature.h"
 #include "src/ExperienceReward.h"
 #include "src/GameContext.h"

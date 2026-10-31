@@ -17,7 +17,6 @@
 #include "ItemRegistry.h"
 #include "Pickable.h"
 #include "RandomDice.h"
-#include "Renderer.h"
 #include "TileRef.h"
 #include "Vector2D.h"
 

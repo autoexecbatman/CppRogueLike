@@ -15,8 +15,6 @@
 #include "src/HealthPool.h"
 #include "src/Item.h"
 #include "src/ItemClassification.h"
-#include "src/ItemIdentification.h"
-#include "src/MagicalItemEffects.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/Vector2D.h"

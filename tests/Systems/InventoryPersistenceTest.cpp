@@ -31,7 +31,6 @@
 
 #include "src/InventoryData.h"
 #include "src/InventoryOperations.h"
-#include "src/Item.h"
 #include "src/ItemCreator.h"
 #include "tests/mocks/MockGameContext.h"
 

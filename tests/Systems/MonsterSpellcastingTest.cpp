@@ -35,7 +35,6 @@
 #include "src/AiMonsterRanged.h"
 #include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
-#include "src/BuffType.h"
 #include "src/Colors.h"
 #include "src/CorpseEdibility.h"
 #include "src/Creature.h"

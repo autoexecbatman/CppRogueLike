@@ -1,5 +1,4 @@
 // file: MonsterCreator.cpp
-#include <algorithm>
 #include <cassert>
 #include <format>
 #include <memory>
@@ -13,7 +12,6 @@
 #include "ArmorClass.h"
 #include "BodyPlanRegistry.h"
 #include "Creature.h"
-#include "DamageInfo.h"
 #include "EquipmentSlot.h"
 #include "ExperienceReward.h"
 #include "GameContext.h"

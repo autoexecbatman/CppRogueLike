@@ -16,7 +16,6 @@
 #include <memory>
 #include <string>
 #include <utility>
-#include <variant>
 
 #include "src/Actor.h"
 #include "src/ArmorClass.h"
@@ -33,7 +32,6 @@
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/RandomDice.h"
-#include "src/TargetMode.h"
 #include "src/TileRef.h"
 #include "src/TileType.h"
 #include "src/TurnSchedule.h"

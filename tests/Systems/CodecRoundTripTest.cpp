@@ -48,7 +48,6 @@
 #include "src/MagicalItemEffects.h"
 #include "src/Paths.h"
 #include "src/Pickable.h"
-#include "src/Renderer.h"
 #include "src/TargetMode.h"
 #include "src/TileRef.h"
 #include "src/Weapons.h"

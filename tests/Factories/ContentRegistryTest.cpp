@@ -12,7 +12,6 @@
 #include <stdexcept>
 
 #include "src/ContentRegistry.h"
-#include "src/Renderer.h"
 #include "src/TileRef.h"
 
 namespace CppRL

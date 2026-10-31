@@ -31,7 +31,6 @@
 #include "src/MonsterCreator.h"
 #include "src/MonsterRegistry.h"
 #include "src/MonsterStrength.h"
-#include "src/Paths.h"
 #include "src/RandomDice.h"
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"

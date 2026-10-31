@@ -32,7 +32,6 @@
 #include "src/GameStateManager.h"
 #include "src/HealthPool.h"
 #include "src/Persistent.h"
-#include "src/Renderer.h"
 #include "src/TileRef.h"
 #include "src/Vector2D.h"
 

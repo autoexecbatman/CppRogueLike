@@ -54,7 +54,6 @@
 #include "src/TileType.h"
 #include "src/Trap.h"
 #include "tests/mocks/MockGameContext.h"
-#include "tests/mocks/TestDice.h"
 
 namespace CppRL
 {

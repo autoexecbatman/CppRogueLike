@@ -19,7 +19,6 @@
 
 #include <gtest/gtest.h>
 
-#include <array>
 #include <vector>
 
 #include <cctype>

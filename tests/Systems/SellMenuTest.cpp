@@ -23,7 +23,6 @@
 
 #include "src/Actor.h"
 #include "src/Colors.h"
-#include "src/Controls.h"
 #include "src/Creature.h"
 #include "src/GameContext.h"
 #include "src/InputSystem.h"

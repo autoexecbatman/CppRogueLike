@@ -20,7 +20,6 @@
 #include <memory>
 #include <string>
 #include <utility>
-#include <variant>
 
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>

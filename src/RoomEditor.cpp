@@ -16,7 +16,6 @@
 #include <raylib.h>
 
 #include "GameContext.h"
-#include "Item.h"
 #include "ListCursor.h"
 #include "Menu.h"
 #include "Palette.h"

@@ -21,7 +21,6 @@
 
 #include <gtest/gtest.h>
 
-#include <cstdlib>
 #include <memory>
 #include <string_view>
 #include <utility>
@@ -35,7 +34,6 @@
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
 #include "src/Colors.h"
-#include "src/Controls.h"
 #include "src/Creature.h"
 #include "src/DiceExpr.h"
 #include "src/EquipmentSlot.h"

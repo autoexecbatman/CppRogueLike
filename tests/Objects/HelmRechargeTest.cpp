@@ -17,20 +17,16 @@
 
 #include <gtest/gtest.h>
 
-#include <cstdlib>
 #include <exception>
 #include <memory>
-#include <stdexcept>
 #include <string_view>
 #include <utility>
-#include <variant>
 #include <vector>
 
 #include <nlohmann/json.hpp>
 
 #include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
-#include "src/Controls.h"
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
 #include "src/GameContext.h"

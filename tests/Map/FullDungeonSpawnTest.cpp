@@ -28,7 +28,6 @@
 #include <memory>
 #include <vector>
 
-#include "src/Colors.h"
 #include "src/CreatureManager.h"
 #include "src/DungeonRoom.h"
 #include "src/LevelManager.h"

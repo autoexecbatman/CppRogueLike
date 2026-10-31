@@ -4,7 +4,6 @@
 #include "src/ItemCreator.h"
 #include "src/MonsterHitDice.h"
 #include "src/MonsterRegistry.h"
-#include "src/Paths.h"
 #include "tests/mocks/MockGameContext.h"
 #include <gtest/gtest.h>
 #include <stdexcept>

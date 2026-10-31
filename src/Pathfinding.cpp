@@ -19,7 +19,6 @@
 #include "Pathfinding.h"
 #include "SpellTile.h"
 #include "TileConfig.h"
-#include "TileDefinition.h"
 #include "TileFeature.h"
 #include "TileType.h"
 #include "Trap.h"

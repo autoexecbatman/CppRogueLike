@@ -13,10 +13,8 @@
 
 #include <gtest/gtest.h>
 
-#include <cstdlib>
 #include <filesystem>
 #include <memory>
-#include <typeinfo>
 #include <utility>
 
 #include "src/Actor.h"
@@ -24,7 +22,6 @@
 #include "src/ArmorClass.h"
 #include "src/BaseMenu.h"
 #include "src/Colors.h"
-#include "src/Controls.h"
 #include "src/Creature.h"
 #include "src/CreatureClass.h"
 #include "src/DeathMenu.h"

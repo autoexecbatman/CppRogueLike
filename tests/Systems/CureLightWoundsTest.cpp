@@ -29,7 +29,6 @@
 #include <string>
 
 #include "src/ArmorClass.h"
-#include "src/Creature.h"
 #include "src/ExperienceReward.h"
 #include "src/HealthPool.h"
 #include "src/MessageSystem.h"

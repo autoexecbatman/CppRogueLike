@@ -5,9 +5,7 @@
 
 #include <format>
 #include <stdexcept>
-#include <string>
 #include <string_view>
-#include <vector>
 
 namespace CppRL
 {

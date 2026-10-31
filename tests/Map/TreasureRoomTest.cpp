@@ -16,7 +16,6 @@
 #include "src/LevelManager.h"
 #include "src/Map.h"
 #include "src/MessageSystem.h"
-#include "src/Paths.h"
 #include "src/Player.h"
 #include "src/RandomDice.h"
 #include "src/SpellTile.h"

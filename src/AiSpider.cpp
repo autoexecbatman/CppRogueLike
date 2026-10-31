@@ -15,7 +15,6 @@
 #include "BuffType.h"
 #include "Colors.h"
 #include "Creature.h"
-#include "DamageInfo.h"
 #include "DataManager.h"
 #include "DexterityAttributes.h"
 #include "GameContext.h"

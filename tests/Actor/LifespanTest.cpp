@@ -18,7 +18,6 @@
 #include <gtest/gtest.h>
 
 #include <array>
-#include <string_view>
 
 #include "src/AbilityAllocation.h"
 #include "src/Lifespan.h"

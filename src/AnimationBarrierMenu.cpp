@@ -5,7 +5,6 @@
 #include "AnimationSystem.h"
 #include "GameContext.h"
 #include "Gui.h"
-#include "Renderer.h"
 #include "RenderingManager.h"
 
 namespace CppRL

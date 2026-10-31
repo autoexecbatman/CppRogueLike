@@ -29,7 +29,6 @@
 #include "src/Attacker.h"
 #include "src/BuffSystem.h"
 #include "src/Colors.h"
-#include "src/Controls.h"
 #include "src/CorpseEdibility.h"
 #include "src/Creature.h"
 #include "src/CreatureClass.h"

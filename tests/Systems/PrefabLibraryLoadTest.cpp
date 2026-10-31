@@ -23,7 +23,6 @@
 #include <exception>
 #include <filesystem>
 #include <fstream>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 

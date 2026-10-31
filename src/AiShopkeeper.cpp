@@ -1,5 +1,4 @@
 #include <cassert>
-#include <memory>
 
 #include "Ai.h"
 #include "AiShopkeeper.h"

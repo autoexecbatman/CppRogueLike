@@ -14,16 +14,13 @@
 
 #include <gtest/gtest.h>
 
-#include <cstdlib>
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <ios>
 #include <string>
 #include <system_error>
-#include <typeinfo>
 
-#include "src/Controls.h"
 #include "src/Game.h"
 #include "src/GameContext.h"
 #include "src/GameStateManager.h"

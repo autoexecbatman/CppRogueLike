@@ -29,7 +29,6 @@
 #include "src/HealthPool.h"
 #include "src/Item.h"
 #include "src/ItemCreator.h"
-#include "src/Paths.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/SpellSystem.h"

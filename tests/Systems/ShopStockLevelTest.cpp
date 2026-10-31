@@ -20,7 +20,6 @@
 #include "src/Item.h"
 #include "src/ItemCreator.h"
 #include "src/LevelManager.h"
-#include "src/Paths.h"
 #include "src/RandomDice.h"
 #include "src/ShopKeeper.h"
 #include "tests/mocks/MockGameContext.h"

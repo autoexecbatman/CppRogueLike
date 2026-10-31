@@ -21,7 +21,6 @@
 #include "src/ItemFactory.h"
 #include "src/Map.h"
 #include "src/MessageSystem.h"
-#include "src/Paths.h"
 #include "src/Pickable.h"
 #include "tests/mocks/MockGameContext.h"
 #include <gtest/gtest.h>

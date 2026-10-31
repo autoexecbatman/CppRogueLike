@@ -22,7 +22,6 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <numeric>
 #include <string>
 #include <vector>
 

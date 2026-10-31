@@ -18,8 +18,6 @@
 
 #include <memory>
 
-#include "src/Colors.h"
-#include "src/Creature.h"
 #include "src/GameContext.h"
 #include "src/HealthPool.h"
 #include "src/Player.h"

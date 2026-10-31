@@ -28,7 +28,6 @@
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/PlayerController.h"
-#include "src/Renderer.h"
 #include "src/TileRef.h"
 #include "src/TileType.h"
 #include "src/TurnSchedule.h"

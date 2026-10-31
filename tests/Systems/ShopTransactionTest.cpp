@@ -34,7 +34,6 @@
 #include "src/InventoryOperations.h"
 #include "src/Item.h"
 #include "src/ItemCreator.h"
-#include "src/Paths.h"
 #include "src/Player.h"
 #include "src/ShopKeeper.h"
 #include "src/TileRef.h"

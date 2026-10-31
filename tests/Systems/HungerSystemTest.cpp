@@ -21,7 +21,6 @@
 #include <cstddef>
 #include <exception>
 #include <format>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 
