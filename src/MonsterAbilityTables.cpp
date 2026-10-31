@@ -10,7 +10,6 @@
 //   mimic.get_strength(); // -> a score from Table 6's large column
 
 #include "MonsterAbilityTables.h"
-
 #include "Creature.h"
 #include "RandomDice.h"
 

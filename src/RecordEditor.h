@@ -37,7 +37,6 @@
 // once per Model; a new editor adds its line there.
 
 #include <cstddef>
-#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>

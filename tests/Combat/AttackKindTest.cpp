@@ -131,7 +131,7 @@ TEST_F(AttackKindTest, WalkingIntoSomethingSwingsTheWeaponInHand)
 
 	game.dice.set_next_d20(20);
 	game.dice.set_next_roll(3);
-	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
+	player->attacker->attack(*monster, AttackKind::AttackKind::MELEE, ctx);
 
 	const std::string text = all_attack_text();
 	EXPECT_NE(text.find("long sword"), std::string::npos) << text;
@@ -144,7 +144,7 @@ TEST_F(AttackKindTest, AimingLoosesTheMissileWeapon)
 
 	game.dice.set_next_d20(20);
 	game.dice.set_next_roll(3);
-	player->attacker->attack(*monster, AttackKind::RANGED, ctx);
+	player->attacker->attack(*monster, AttackKind::AttackKind::RANGED, ctx);
 
 	const std::string text = all_attack_text();
 	EXPECT_NE(text.find("long bow"), std::string::npos) << text;
@@ -159,7 +159,7 @@ TEST_F(AttackKindTest, WalkingIntoAShopkeeperOpensTradeEvenCarryingABow)
 	const int hpBefore = monster->get_hp();
 	game.dice.set_next_d20(20);
 	game.dice.set_next_roll(3);
-	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
+	player->attacker->attack(*monster, AttackKind::AttackKind::MELEE, ctx);
 
 	// Trading is what a bump on a trader does, so nothing was struck.
 	EXPECT_EQ(monster->get_hp(), hpBefore);
@@ -174,7 +174,7 @@ TEST_F(AttackKindTest, ShootingAShopkeeperIsAnAttackRatherThanAnOffer)
 	const int hpBefore = monster->get_hp();
 	game.dice.set_next_d20(20);
 	game.dice.set_next_roll(3);
-	player->attacker->attack(*monster, AttackKind::RANGED, ctx);
+	player->attacker->attack(*monster, AttackKind::AttackKind::RANGED, ctx);
 
 	EXPECT_LT(monster->get_hp(), hpBefore);
 }

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Colors.h"
-
 #include <map>
 #include <span>
 #include <string>
@@ -10,6 +8,7 @@
 #include <vector>
 
 #include "BuffType.h"
+#include "Colors.h"
 #include "DiceExpr.h"
 #include "EquipmentSlot.h"
 #include "ItemClassification.h"
@@ -179,9 +178,6 @@ private:
 	std::vector<EnhancedItemSpawnRule> enhancedRules{};
 
 public:
-	// Holds no items and no rules until load and load_enhanced_rules.
-	ItemRegistry() = default;
-
 	// Reads every item, replacing all held, custom ones included. A record missing any
 	// field throws, naming the item and the field.
 	void load(std::string_view path);

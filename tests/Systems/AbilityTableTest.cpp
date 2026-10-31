@@ -332,7 +332,7 @@ TEST_F(AbilityTableTest, EighteenHundredStrikesWithTheBandsBonuses)
 	auto target = brute_with(10, 0);
 	script({ 7, 4 });
 
-	brute->attacker->attack(*target, AttackKind::MELEE, ctx);
+	brute->attacker->attack(*target, AttackKind::AttackKind::MELEE, ctx);
 
 	EXPECT_EQ(STARTING_HP - target->get_hp(), 10) << "18/00 hit and damage";
 }
@@ -344,7 +344,7 @@ TEST_F(AbilityTableTest, StrengthPastTheTableStillAttacks)
 	auto target = brute_with(10, 0);
 	script({ 20, 4 });
 
-	brute->attacker->attack(*target, AttackKind::MELEE, ctx);
+	brute->attacker->attack(*target, AttackKind::AttackKind::MELEE, ctx);
 
 	EXPECT_EQ(STARTING_HP - target->get_hp(), 18)
 		<< "an attacker past Strength 25 never swung";

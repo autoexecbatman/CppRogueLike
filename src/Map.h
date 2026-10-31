@@ -77,8 +77,6 @@ class Map : public Persistent
 private:
 	int mapWidth{};
 	int mapHeight{};
-	static constexpr std::array<Vector2D, 8>
-		DIRS = { DIR_N, DIR_NE, DIR_E, DIR_SE, DIR_S, DIR_SW, DIR_W, DIR_NW };
 
 	Vector2D get_map_size() const noexcept
 	{

@@ -25,6 +25,8 @@ struct FloorInventory
 {
 	std::vector<std::unique_ptr<Item>> items{};
 
+	// Copy is deleted here: a vector of unique_ptr reads as copyable to the
+	// type system.
 	FloorInventory() = default;
 	FloorInventory(FloorInventory&&) noexcept = default;
 	FloorInventory& operator=(FloorInventory&&) noexcept = default;
@@ -47,6 +49,8 @@ struct CreatureInventory
 		items.reserve(initialCapacity);
 	}
 
+	// Copy is deleted here: a vector of unique_ptr reads as copyable to the
+	// type system.
 	CreatureInventory(CreatureInventory&&) noexcept = default;
 	CreatureInventory& operator=(CreatureInventory&&) noexcept = default;
 	~CreatureInventory() = default;

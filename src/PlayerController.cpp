@@ -49,6 +49,7 @@
 #include "Renderer.h"
 #include "SpellSystem.h"
 #include "SpellTile.h"
+#include "Stairs.h"
 #include "TargetingSystem.h"
 #include "ThiefSkills.h"
 #include "TileConfig.h"
@@ -580,8 +581,8 @@ void PlayerController::strike(Creature& target, GameContext& ctx)
 	assert(playerOwner.attacker && "strike: the player swung with no attacker");
 
 	// One swing, priced by the rate, so a faster attacker comes round sooner (Table 58).
-	playerOwner.attacker->attack(target, AttackKind::MELEE, ctx);
-	spend_player_action(ctx, attack_cost(playerOwner.get_attacks_per_round()));
+	playerOwner.attacker->attack(target, AttackKind::AttackKind::MELEE, ctx);
+	spend_player_action(ctx, AttackRate::attack_cost(playerOwner.get_attacks_per_round()));
 	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
 }
 

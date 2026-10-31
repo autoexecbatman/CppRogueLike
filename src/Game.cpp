@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "Stairs.h"
 
 // Single source of truth: build context from owned systems
 [[nodiscard]] GameContext Game::context() noexcept

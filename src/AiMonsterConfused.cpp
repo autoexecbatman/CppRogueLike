@@ -13,8 +13,11 @@
 #include "RandomDice.h"
 #include "Vector2D.h"
 
-constexpr int MIN_DIRECTION = -1;
-constexpr int MAX_DIRECTION = 1;
+namespace
+{
+	constexpr int MIN_DIRECTION = -1;
+	constexpr int MAX_DIRECTION = 1;
+} // namespace
 
 //==ConfusedMonsterAi==
 AiMonsterConfused::AiMonsterConfused(
@@ -64,7 +67,7 @@ void AiMonsterConfused::attempt_move(
 	const auto& actor = ctx.map->get_actor(destination, ctx);
 	if (actor && owner.attacker)
 	{
-		owner.attacker->attack(*actor, AttackKind::MELEE, ctx);
+		owner.attacker->attack(*actor, AttackKind::AttackKind::MELEE, ctx);
 		return;
 	}
 

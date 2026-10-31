@@ -151,8 +151,8 @@ inline DamageType next_damage_type(DamageType damageType)
 // Result of applying temporary HP shield to damage
 struct ShieldResult
 {
-	int damageAfterShield;
-	int tempHpAfterShield;
+	int damageAfterShield{ 0 };
+	int tempHpAfterShield{ 0 };
 };
 
 // A damage roll: its dice, its type, and the range derived from the dice. The

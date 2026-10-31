@@ -1,10 +1,9 @@
 #pragma once
 
-#include "Colors.h"
-
 #include <string>
 #include <vector>
 
+#include "Colors.h"
 #include "LogMessage.h"
 
 class Gui;
@@ -39,6 +38,7 @@ private:
 	bool debugMode{ true };
 
 public:
+	// One log per game: a copy would collect messages nobody reads.
 	MessageSystem();
 	~MessageSystem() = default;
 	MessageSystem(const MessageSystem&) = delete;

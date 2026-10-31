@@ -8,13 +8,17 @@
 #include "AbilityAllocation.h"
 #include "InventoryData.h"
 #include "PlayerRaceState.h"
-#include "Stairs.h"
 
 // Forward declarations
 struct Game;
 class Map;
 class Minimap;
-class CostOverlay;
+
+namespace DebugUtils
+{
+	class CostOverlay;
+}
+
 struct Decoration;
 class TileConfig;
 class BodyPlanRegistry;
@@ -267,7 +271,7 @@ struct GameContext
 	AnimationSystem* animSystem{ nullptr };
 	ContentRegistry* contentRegistry{ nullptr };
 	Minimap* minimap{ nullptr };
-	CostOverlay* costOverlay{ nullptr };
+	DebugUtils::CostOverlay* costOverlay{ nullptr };
 	Pathfinding::Pathfinder* pathfinder{ nullptr };
 	Palette* palette{ nullptr };
 	DecorEditor* decorEditor{ nullptr };

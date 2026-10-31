@@ -33,39 +33,39 @@ protected:
 // Nothing is aligned until its data says so.
 TEST_F(AlignmentTest, DefaultsToTrueNeutral)
 {
-	EXPECT_EQ(creature.get_ethics(), Ethics::NEUTRAL);
-	EXPECT_EQ(creature.get_morality(), Morality::NEUTRAL);
+	EXPECT_EQ(creature.get_ethics(), Alignment::Ethics::NEUTRAL);
+	EXPECT_EQ(creature.get_morality(), Alignment::Morality::NEUTRAL);
 	EXPECT_FALSE(creature.is_evil());
 }
 
 // The axes are independent: setting one must not disturb the other.
 TEST_F(AlignmentTest, AxesAreIndependent)
 {
-	creature.set_ethics(Ethics::CHAOTIC);
+	creature.set_ethics(Alignment::Ethics::CHAOTIC);
 
-	EXPECT_EQ(creature.get_ethics(), Ethics::CHAOTIC);
-	EXPECT_EQ(creature.get_morality(), Morality::NEUTRAL)
+	EXPECT_EQ(creature.get_ethics(), Alignment::Ethics::CHAOTIC);
+	EXPECT_EQ(creature.get_morality(), Alignment::Morality::NEUTRAL)
 		<< "morality moved with ethics";
 
-	creature.set_morality(Morality::GOOD);
+	creature.set_morality(Alignment::Morality::GOOD);
 
-	EXPECT_EQ(creature.get_ethics(), Ethics::CHAOTIC)
+	EXPECT_EQ(creature.get_ethics(), Alignment::Ethics::CHAOTIC)
 		<< "ethics moved with morality";
-	EXPECT_EQ(creature.get_morality(), Morality::GOOD);
+	EXPECT_EQ(creature.get_morality(), Alignment::Morality::GOOD);
 }
 
 // is_evil reads only the morality axis, which is what alignment-keyed effects
 // such as Protection from Evil test.
 TEST_F(AlignmentTest, IsEvilReadsMoralityAlone)
 {
-	creature.set_ethics(Ethics::LAWFUL);
-	creature.set_morality(Morality::EVIL);
+	creature.set_ethics(Alignment::Ethics::LAWFUL);
+	creature.set_morality(Alignment::Morality::EVIL);
 	EXPECT_TRUE(creature.is_evil()) << "lawful evil is still evil";
 
-	creature.set_ethics(Ethics::CHAOTIC);
+	creature.set_ethics(Alignment::Ethics::CHAOTIC);
 	EXPECT_TRUE(creature.is_evil()) << "ethics must not affect is_evil";
 
-	creature.set_morality(Morality::NEUTRAL);
+	creature.set_morality(Alignment::Morality::NEUTRAL);
 	EXPECT_FALSE(creature.is_evil());
 }
 
@@ -79,38 +79,100 @@ TEST(AlignmentDataTest, EveryMonsterCarriesTheAlignmentItsEntryGives)
 	MonsterRegistry monsters{};
 	monsters.load("data/content/monsters.json");
 
-	const std::vector<std::tuple<std::string, Ethics, Morality>> fromTheBook{
-		{ "bat", Ethics::NEUTRAL, Morality::NEUTRAL },
-		{ "bugbear", Ethics::CHAOTIC, Morality::EVIL },
-		{ "chimera", Ethics::CHAOTIC, Morality::EVIL },
-		{ "gargoyle", Ethics::CHAOTIC, Morality::EVIL },
-		{ "ghoul", Ethics::CHAOTIC, Morality::EVIL },
-		{ "giant_centipede", Ethics::NEUTRAL, Morality::NEUTRAL },
-		{ "giant_rat", Ethics::NEUTRAL, Morality::NEUTRAL },
-		{ "giant_snake", Ethics::NEUTRAL, Morality::NEUTRAL },
-		{ "gnoll", Ethics::CHAOTIC, Morality::EVIL },
-		{ "goblin", Ethics::LAWFUL, Morality::EVIL },
-		{ "golem_stone", Ethics::NEUTRAL, Morality::NEUTRAL },
-		{ "harpy", Ethics::CHAOTIC, Morality::EVIL },
-		{ "hill_giant", Ethics::CHAOTIC, Morality::EVIL },
-		{ "hobgoblin", Ethics::LAWFUL, Morality::EVIL },
-		{ "kobold", Ethics::LAWFUL, Morality::EVIL },
-		{ "medusa", Ethics::LAWFUL, Morality::EVIL },
-		{ "ogre", Ethics::CHAOTIC, Morality::EVIL },
-		{ "orc", Ethics::LAWFUL, Morality::EVIL },
-		{ "pit_fiend", Ethics::LAWFUL, Morality::EVIL },
-		{ "rat", Ethics::NEUTRAL, Morality::NEUTRAL },
-		{ "shadow", Ethics::CHAOTIC, Morality::EVIL },
-		{ "skeleton", Ethics::NEUTRAL, Morality::NEUTRAL },
-		{ "troll", Ethics::CHAOTIC, Morality::EVIL },
-		{ "vampire", Ethics::CHAOTIC, Morality::EVIL },
-		{ "werewolf", Ethics::CHAOTIC, Morality::EVIL },
-		{ "wight", Ethics::LAWFUL, Morality::EVIL },
-		{ "wolf", Ethics::NEUTRAL, Morality::NEUTRAL },
-		{ "wraith", Ethics::LAWFUL, Morality::EVIL },
-		{ "wyvern", Ethics::NEUTRAL, Morality::EVIL },
-		{ "zombie", Ethics::NEUTRAL, Morality::NEUTRAL },
-	};
+	const std::vector<
+		std::tuple<std::string, Alignment::Ethics, Alignment::Morality>>
+		fromTheBook{
+			{ "bat", Alignment::Ethics::NEUTRAL, Alignment::Morality::NEUTRAL },
+			{
+				"bugbear",
+				Alignment::Ethics::CHAOTIC,
+				Alignment::Morality::EVIL,
+			},
+			{
+				"chimera",
+				Alignment::Ethics::CHAOTIC,
+				Alignment::Morality::EVIL,
+			},
+			{
+				"gargoyle",
+				Alignment::Ethics::CHAOTIC,
+				Alignment::Morality::EVIL,
+			},
+			{ "ghoul", Alignment::Ethics::CHAOTIC, Alignment::Morality::EVIL },
+			{
+				"giant_centipede",
+				Alignment::Ethics::NEUTRAL,
+				Alignment::Morality::NEUTRAL,
+			},
+			{
+				"giant_rat",
+				Alignment::Ethics::NEUTRAL,
+				Alignment::Morality::NEUTRAL,
+			},
+			{
+				"giant_snake",
+				Alignment::Ethics::NEUTRAL,
+				Alignment::Morality::NEUTRAL,
+			},
+			{ "gnoll", Alignment::Ethics::CHAOTIC, Alignment::Morality::EVIL },
+			{ "goblin", Alignment::Ethics::LAWFUL, Alignment::Morality::EVIL },
+			{
+				"golem_stone",
+				Alignment::Ethics::NEUTRAL,
+				Alignment::Morality::NEUTRAL,
+			},
+			{ "harpy", Alignment::Ethics::CHAOTIC, Alignment::Morality::EVIL },
+			{
+				"hill_giant",
+				Alignment::Ethics::CHAOTIC,
+				Alignment::Morality::EVIL,
+			},
+			{
+				"hobgoblin",
+				Alignment::Ethics::LAWFUL,
+				Alignment::Morality::EVIL,
+			},
+			{ "kobold", Alignment::Ethics::LAWFUL, Alignment::Morality::EVIL },
+			{ "medusa", Alignment::Ethics::LAWFUL, Alignment::Morality::EVIL },
+			{ "ogre", Alignment::Ethics::CHAOTIC, Alignment::Morality::EVIL },
+			{ "orc", Alignment::Ethics::LAWFUL, Alignment::Morality::EVIL },
+			{
+				"pit_fiend",
+				Alignment::Ethics::LAWFUL,
+				Alignment::Morality::EVIL,
+			},
+			{ "rat", Alignment::Ethics::NEUTRAL, Alignment::Morality::NEUTRAL },
+			{ "shadow", Alignment::Ethics::CHAOTIC, Alignment::Morality::EVIL },
+			{
+				"skeleton",
+				Alignment::Ethics::NEUTRAL,
+				Alignment::Morality::NEUTRAL,
+			},
+			{ "troll", Alignment::Ethics::CHAOTIC, Alignment::Morality::EVIL },
+			{
+				"vampire",
+				Alignment::Ethics::CHAOTIC,
+				Alignment::Morality::EVIL,
+			},
+			{
+				"werewolf",
+				Alignment::Ethics::CHAOTIC,
+				Alignment::Morality::EVIL,
+			},
+			{ "wight", Alignment::Ethics::LAWFUL, Alignment::Morality::EVIL },
+			{
+				"wolf",
+				Alignment::Ethics::NEUTRAL,
+				Alignment::Morality::NEUTRAL,
+			},
+			{ "wraith", Alignment::Ethics::LAWFUL, Alignment::Morality::EVIL },
+			{ "wyvern", Alignment::Ethics::NEUTRAL, Alignment::Morality::EVIL },
+			{
+				"zombie",
+				Alignment::Ethics::NEUTRAL,
+				Alignment::Morality::NEUTRAL,
+			},
+		};
 
 	for (const auto& [key, ethics, morality] : fromTheBook)
 	{
@@ -131,16 +193,24 @@ TEST(AlignmentDataTest, InventedMonstersTakeTheirClosestEntrysAlignment)
 	monsters.load("data/content/monsters.json");
 
 	// A wolf that breathes fire is the hell hound, which is lawful evil.
-	EXPECT_EQ(monsters.get_params("fire_wolf").ethics, Ethics::LAWFUL);
-	EXPECT_EQ(monsters.get_params("fire_wolf").morality, Morality::EVIL);
+	EXPECT_EQ(
+		monsters.get_params("fire_wolf").ethics,
+		Alignment::Ethics::LAWFUL);
+	EXPECT_EQ(
+		monsters.get_params("fire_wolf").morality,
+		Alignment::Morality::EVIL);
 
 	// A wolf that breathes cold is the winter wolf, the last column of the wolf entry.
-	EXPECT_EQ(monsters.get_params("ice_wolf").ethics, Ethics::NEUTRAL);
-	EXPECT_EQ(monsters.get_params("ice_wolf").morality, Morality::EVIL);
+	EXPECT_EQ(
+		monsters.get_params("ice_wolf").ethics,
+		Alignment::Ethics::NEUTRAL);
+	EXPECT_EQ(
+		monsters.get_params("ice_wolf").morality,
+		Alignment::Morality::EVIL);
 
 	// The lich entry says "any evil", so the axis the book leaves open is decided here
 	// and the one it fixes is not.
-	EXPECT_EQ(monsters.get_params("lich").morality, Morality::EVIL);
+	EXPECT_EQ(monsters.get_params("lich").morality, Alignment::Morality::EVIL);
 }
 
 // Every record the full parser reads carries both axes, so none of them is relying on a
@@ -177,7 +247,7 @@ TEST(AlignmentDataTest, TheDungeonHoldsMonstersProtectionFromEvilWardsAgainst)
 		const std::string& key :
 		{ "goblin", "orc", "kobold", "troll", "ogre", "vampire" })
 	{
-		if (monsters.get_params(key).morality == Morality::EVIL)
+		if (monsters.get_params(key).morality == Alignment::Morality::EVIL)
 		{
 			++evil;
 		}
@@ -203,29 +273,29 @@ TEST(AlignmentCodeBuiltTest, TheSpidersAndTheMimicCarryTheirEntrysAlignment)
 	};
 
 	const auto hairy = build("spider_small");
-	EXPECT_EQ(hairy->get_ethics(), Ethics::NEUTRAL);
-	EXPECT_EQ(hairy->get_morality(), Morality::EVIL)
+	EXPECT_EQ(hairy->get_ethics(), Alignment::Ethics::NEUTRAL);
+	EXPECT_EQ(hairy->get_morality(), Alignment::Morality::EVIL)
 		<< "the hairy spider is neutral evil";
 
 	const auto huge = build("spider_giant");
-	EXPECT_EQ(huge->get_ethics(), Ethics::NEUTRAL);
-	EXPECT_EQ(huge->get_morality(), Morality::NEUTRAL)
+	EXPECT_EQ(huge->get_ethics(), Alignment::Ethics::NEUTRAL);
+	EXPECT_EQ(huge->get_morality(), Alignment::Morality::NEUTRAL)
 		<< "the huge spider is neutral";
 
 	const auto giant = build("spider_weaver");
-	EXPECT_EQ(giant->get_ethics(), Ethics::CHAOTIC);
-	EXPECT_EQ(giant->get_morality(), Morality::EVIL)
+	EXPECT_EQ(giant->get_ethics(), Alignment::Ethics::CHAOTIC);
+	EXPECT_EQ(giant->get_morality(), Alignment::Morality::EVIL)
 		<< "the giant spider is chaotic evil";
 
 	const auto killer = build("mimic");
-	EXPECT_EQ(killer->get_ethics(), Ethics::NEUTRAL);
-	EXPECT_EQ(killer->get_morality(), Morality::EVIL)
+	EXPECT_EQ(killer->get_ethics(), Alignment::Ethics::NEUTRAL);
+	EXPECT_EQ(killer->get_morality(), Alignment::Morality::EVIL)
 		<< "the killer mimic is neutral (evil)";
 
 	const MonsterParams& shopkeeper =
 		mock.monsterRegistry.get_params("shopkeeper");
-	EXPECT_EQ(shopkeeper.ethics, Ethics::NEUTRAL);
-	EXPECT_EQ(shopkeeper.morality, Morality::NEUTRAL)
+	EXPECT_EQ(shopkeeper.ethics, Alignment::Ethics::NEUTRAL);
+	EXPECT_EQ(shopkeeper.morality, Alignment::Morality::NEUTRAL)
 		<< "the shopkeeper is true neutral";
 }
 
@@ -256,24 +326,31 @@ TEST(AlignmentDataTest, ARecordWithNoAlignmentIsRefused)
 // than citing the Player's Handbook, which gives no drift formula at all.
 TEST(AlignmentShiftTest, ShiftMovesOneStepTowardChaotic)
 {
-	EXPECT_EQ(shift_toward_chaotic(Ethics::LAWFUL), Ethics::NEUTRAL);
-	EXPECT_EQ(shift_toward_chaotic(Ethics::NEUTRAL), Ethics::CHAOTIC);
+	EXPECT_EQ(
+		Alignment::shift_toward_chaotic(Alignment::Ethics::LAWFUL),
+		Alignment::Ethics::NEUTRAL);
+	EXPECT_EQ(
+		Alignment::shift_toward_chaotic(Alignment::Ethics::NEUTRAL),
+		Alignment::Ethics::CHAOTIC);
 }
 
 // Chaotic is the floor: there is nothing further to fall to.
 TEST(AlignmentShiftTest, ShiftStopsAtChaotic)
 {
-	EXPECT_EQ(shift_toward_chaotic(Ethics::CHAOTIC), Ethics::CHAOTIC);
+	EXPECT_EQ(
+		Alignment::shift_toward_chaotic(Alignment::Ethics::CHAOTIC),
+		Alignment::Ethics::CHAOTIC);
 }
 
 // One betrayal is one step, so a lawful player needs two to reach chaotic.
 TEST(AlignmentShiftTest, RepeatedShiftsAccumulateOneStepEach)
 {
-	Ethics ethics = Ethics::LAWFUL;
+	Alignment::Ethics ethics = Alignment::Ethics::LAWFUL;
 
-	ethics = shift_toward_chaotic(ethics);
-	EXPECT_EQ(ethics, Ethics::NEUTRAL) << "one betrayal must not reach chaotic";
+	ethics = Alignment::shift_toward_chaotic(ethics);
+	EXPECT_EQ(ethics, Alignment::Ethics::NEUTRAL)
+		<< "one betrayal must not reach chaotic";
 
-	ethics = shift_toward_chaotic(ethics);
-	EXPECT_EQ(ethics, Ethics::CHAOTIC);
+	ethics = Alignment::shift_toward_chaotic(ethics);
+	EXPECT_EQ(ethics, Alignment::Ethics::CHAOTIC);
 }

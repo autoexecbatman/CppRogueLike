@@ -45,8 +45,8 @@
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": "\t\tconst bool isBypassed = definition.hasBypassState &&\n\t\t\tcreature.has_bypass(definition.bypassState);",
-      "mutated": "\t\tconst bool isBypassed = definition.hasBypassState &&\n\t\t\tcreature.has_state(definition.bypassState);",
+      "original": "\t\t\tconst bool isBypassed = definition.hasBypassState &&\n\t\t\t\tcreature.has_bypass(definition.bypassState);",
+      "mutated": "\t\t\tconst bool isBypassed = definition.hasBypassState &&\n\t\t\t\tcreature.has_state(definition.bypassState);",
       "catches": "the movement rule reading a creature's own flags and never what it wears"
     },
     {

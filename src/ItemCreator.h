@@ -4,7 +4,6 @@
 #include <string_view>
 
 #include "ItemEnhancements.h"
-#include "ItemRegistry.h"
 
 // file: ItemCreator.h
 //

@@ -42,9 +42,9 @@
 #include "RenderingManager.h"
 #include "SpellRegistry.h"
 #include "SpellTile.h"
+#include "Stairs.h"
 #include "TargetingSystem.h"
 #include "TileConfig.h"
-#include "TileFeature.h"
 #include "Trap.h"
 #include "Vector2D.h"
 
@@ -86,7 +86,7 @@ struct Game
 	Minimap minimap{};
 
 	// Debug view of the monsters' cost map
-	CostOverlay costOverlay{};
+	DebugUtils::CostOverlay costOverlay{};
 
 	// Rendering (raylib)
 	Renderer renderer{};

@@ -15,7 +15,7 @@
 class ProtectionFromEvilTest : public ::testing::Test
 {
 protected:
-	void SetUp() override { attacker.set_morality(Morality::EVIL); }
+	void SetUp() override { attacker.set_morality(Alignment::Morality::EVIL); }
 
 	// Wards the target for the given number of turns.
 	void ward_target(int duration)
@@ -58,11 +58,11 @@ TEST_F(ProtectionFromEvilTest, EvilAttackerSuffersTwoPointPenalty)
 TEST_F(ProtectionFromEvilTest, NonEvilAttackerIsUnaffected)
 {
 	ward_target(6);
-	attacker.set_morality(Morality::NEUTRAL);
+	attacker.set_morality(Alignment::Morality::NEUTRAL);
 
 	EXPECT_EQ(buffs.calculate_ward_penalty(attacker, target), 0);
 
-	attacker.set_morality(Morality::GOOD);
+	attacker.set_morality(Alignment::Morality::GOOD);
 
 	EXPECT_EQ(buffs.calculate_ward_penalty(attacker, target), 0);
 }
@@ -72,10 +72,10 @@ TEST_F(ProtectionFromEvilTest, PenaltyIgnoresTheEthicsAxis)
 {
 	ward_target(6);
 
-	attacker.set_ethics(Ethics::LAWFUL);
+	attacker.set_ethics(Alignment::Ethics::LAWFUL);
 	EXPECT_EQ(buffs.calculate_ward_penalty(attacker, target), -2)
 		<< "lawful evil is still evil";
 
-	attacker.set_ethics(Ethics::CHAOTIC);
+	attacker.set_ethics(Alignment::Ethics::CHAOTIC);
 	EXPECT_EQ(buffs.calculate_ward_penalty(attacker, target), -2);
 }

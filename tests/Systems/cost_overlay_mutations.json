@@ -27,8 +27,8 @@
     },
     {
       "file": "src/CostOverlay.cpp",
-      "original": "\tif (farthestCost == 0)\n\t{\n\t\treturn COST_NEAR_TINT;\n\t}",
-      "mutated": "\tif (farthestCost == 0)\n\t{\n\t\treturn COST_FAR_TINT;\n\t}",
+      "original": "\tif (farthestCost == 0)\n\t{\n\t\treturn DebugUtils::COST_NEAR_TINT;\n\t}",
+      "mutated": "\tif (farthestCost == 0)\n\t{\n\t\treturn DebugUtils::COST_FAR_TINT;\n\t}",
       "catches": "the player's own tile drawn as the far end when it is the only tile reached"
     },
     {

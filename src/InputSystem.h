@@ -122,6 +122,7 @@ private:
 #endif
 
 public:
+	// One input state per game: a copy would hold keys that poll() never sees.
 	InputSystem() = default;
 	~InputSystem() = default;
 

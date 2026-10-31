@@ -12,7 +12,7 @@
 AttackStrength::Adjustment AttackStrength::adjustment(
 	const DataManager& dataManager,
 	const Creature& attacker,
-	AttackKind kind,
+	AttackKind::AttackKind kind,
 	const Item* missileWeapon)
 {
 	const StrengthAttributes row = dataManager.strength_for(
@@ -32,7 +32,7 @@ AttackStrength::Adjustment AttackStrength::adjustment(
 		wholeRow.damage += hands.dmgAdj;
 	}
 
-	if (kind == AttackKind::MELEE || missileWeapon == nullptr)
+	if (kind == AttackKind::AttackKind::MELEE || missileWeapon == nullptr)
 	{
 		return wholeRow;
 	}

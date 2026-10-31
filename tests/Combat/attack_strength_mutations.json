@@ -45,13 +45,13 @@
     },
     {
       "file": "src/AttackStrength.cpp",
-      "original": "\tif (kind == AttackKind::MELEE || missileWeapon == nullptr)\n\t{\n\t\treturn wholeRow;\n\t}",
-      "mutated": "\tif (kind == AttackKind::MELEE)\n\t{\n\t\treturn wholeRow;\n\t}\n\tif (missileWeapon == nullptr)\n\t{\n\t\treturn Adjustment{};\n\t}",
+      "original": "\tif (kind == AttackKind::AttackKind::MELEE || missileWeapon == nullptr)\n\t{\n\t\treturn wholeRow;\n\t}",
+      "mutated": "\tif (kind == AttackKind::AttackKind::MELEE)\n\t{\n\t\treturn wholeRow;\n\t}\n\tif (missileWeapon == nullptr)\n\t{\n\t\treturn Adjustment{};\n\t}",
       "catches": "a natural or thrown missile losing the arm's strength"
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\tconst Item* missileWeapon = kind == AttackKind::RANGED ?\n\t\towner.get_equipped_item(EquipmentSlot::MISSILE_WEAPON) :\n\t\tnullptr;",
+      "original": "\tconst Item* missileWeapon = kind == AttackKind::AttackKind::RANGED ?\n\t\towner.get_equipped_item(EquipmentSlot::MISSILE_WEAPON) :\n\t\tnullptr;",
       "mutated": "\tconst Item* missileWeapon =nullptr;",
       "catches": "the attack never asking what it fires"
     },

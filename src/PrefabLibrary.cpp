@@ -16,82 +16,82 @@
 #include "Palette.h"
 #include "Paths.h"
 #include "PrefabLibrary.h"
-#include "Renderer.h"
 
 namespace
 {
-// Resolves prefab name to index. Returns nullopt if not found.
-std::optional<size_t> find_prefab_index(
-	const std::vector<Prefab>& prefabs,
-	const std::string& name)
-{
-	for (size_t index = 0; index < prefabs.size(); ++index)
+	// Resolves prefab name to index. Returns nullopt if not found.
+	std::optional<size_t> find_prefab_index(
+		const std::vector<Prefab>& prefabs,
+		const std::string& name)
 	{
-		if (prefabs[index].name == name)
+		for (size_t index = 0; index < prefabs.size(); ++index)
 		{
-			return index;
+			if (prefabs[index].name == name)
+			{
+				return index;
+			}
+		}
+		return std::nullopt;
+	}
+
+	void stamp_room(
+		const Prefab& prefab,
+		const DungeonRoom& room,
+		const Palette& palette,
+		DecorEditor& editor,
+		Map& map)
+	{
+		// Prefab [0,0] is the room's top-left wall corner; the room was sized
+		// so the '#' border is its wall ring.
+		const int baseX = room.left_wall();
+		const int baseY = room.top_wall();
+
+		for (size_t row = 0; row < prefab.rows.size(); ++row)
+		{
+			const std::string& rowStr = prefab.rows[row];
+			for (size_t col = 0; col < rowStr.size(); ++col)
+			{
+				char sym = rowStr[col];
+
+				const int worldX = baseX + static_cast<int>(col);
+				const int worldY = baseY + static_cast<int>(row);
+
+				// Clamp to floor area - border '#' characters sit in the wall
+				// ring and must never be processed as interior shape commands.
+				if (worldX < room.col || worldX > room.col_end())
+				{
+					continue;
+				}
+				if (worldY < room.row || worldY > room.row_end())
+				{
+					continue;
+				}
+				if (!map.is_in_bounds({ worldX, worldY }))
+				{
+					continue;
+				}
+
+				// Interior '#': wall this floor cell back to create room shape.
+				if (sym == '#')
+				{
+					map.set_tile(Vector2D{ worldX, worldY }, TileType::WALL);
+					continue;
+				}
+
+				const TileRef tile = palette.resolve_decor(sym);
+				if (!tile.is_valid())
+				{
+					continue;
+				}
+				if (map.get_tile_type({ worldX, worldY }) != TileType::FLOOR)
+				{
+					continue;
+				}
+
+				editor.place_tile(Vector2D{ worldX, worldY }, tile);
+			}
 		}
 	}
-	return std::nullopt;
-}
-
-void stamp_room(
-	const Prefab& prefab,
-	const DungeonRoom& room,
-	const Palette& palette,
-	DecorEditor& editor,
-	Map& map)
-{
-	// Prefab [0,0] is the room's top-left wall corner; the room was sized so the '#' border is its wall ring.
-	const int baseX = room.left_wall();
-	const int baseY = room.top_wall();
-
-	for (size_t row = 0; row < prefab.rows.size(); ++row)
-	{
-		const std::string& rowStr = prefab.rows[row];
-		for (size_t col = 0; col < rowStr.size(); ++col)
-		{
-			char sym = rowStr[col];
-
-			const int worldX = baseX + static_cast<int>(col);
-			const int worldY = baseY + static_cast<int>(row);
-
-			// Clamp to floor area - border '#' characters sit in the wall ring
-			// and must never be processed as interior shape commands.
-			if (worldX < room.col || worldX > room.col_end())
-			{
-				continue;
-			}
-			if (worldY < room.row || worldY > room.row_end())
-			{
-				continue;
-			}
-			if (!map.is_in_bounds({ worldX, worldY }))
-			{
-				continue;
-			}
-
-			// Interior '#': wall this floor cell back to create room shape.
-			if (sym == '#')
-			{
-				map.set_tile(Vector2D{ worldX, worldY }, TileType::WALL);
-				continue;
-			}
-
-			const TileRef tile = palette.resolve_decor(sym);
-			if (!tile.is_valid())
-			{
-				continue;
-			}
-			if (map.get_tile_type({ worldX, worldY }) != TileType::FLOOR)
-			{
-				continue;
-			}
-
-			editor.place_tile(Vector2D{ worldX, worldY }, tile);
-		}
-	}
-}
 } // namespace
 
 using json = nlohmann::json;

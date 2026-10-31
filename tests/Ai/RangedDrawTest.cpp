@@ -241,8 +241,8 @@ TEST_F(RangedDrawTest, ABowShotDoesTheBowsDamageUnderTheBowsName)
 	archer.set_strength(STRONG_ENOUGH_TO_DRAW);
 
 	ASSERT_EQ(
-		archer.attacker->attack(*player, AttackKind::RANGED, ctx),
-		AttackResult::LANDED);
+		archer.attacker->attack(*player, AttackKind::AttackKind::RANGED, ctx),
+		AttackResult::AttackResult::LANDED);
 
 	// The bow's 6, and its +2 for Strength 18.
 	EXPECT_EQ(player->get_hp(), STARTING_HP - 8)
@@ -256,8 +256,8 @@ TEST_F(RangedDrawTest, AStrikeInMeleeStillUsesTheArchersOwnAttack)
 	archer.set_strength(STRONG_ENOUGH_TO_DRAW);
 
 	ASSERT_EQ(
-		archer.attacker->attack(*player, AttackKind::MELEE, ctx),
-		AttackResult::LANDED);
+		archer.attacker->attack(*player, AttackKind::AttackKind::MELEE, ctx),
+		AttackResult::AttackResult::LANDED);
 
 	// The fist's 4, and its +2 for Strength 18.
 	EXPECT_EQ(player->get_hp(), STARTING_HP - 6)
@@ -270,13 +270,13 @@ TEST_F(RangedDrawTest, AStrikeInMeleeStillUsesTheArchersOwnAttack)
 TEST_F(RangedDrawTest, AnEnhancedBowLowersTheRollTheShotNeeds)
 {
 	archer.set_strength(STRONG_ENOUGH_TO_DRAW);
-	[[maybe_unused]] const AttackResult plain =
-		archer.attacker->attack(*player, AttackKind::RANGED, ctx);
+	[[maybe_unused]] const AttackResult::AttackResult plain =
+		archer.attacker->attack(*player, AttackKind::AttackKind::RANGED, ctx);
 	const int neededPlain = last_roll_needed();
 
 	bow().enhancement.toHitBonus = 2;
-	[[maybe_unused]] const AttackResult enhanced =
-		archer.attacker->attack(*player, AttackKind::RANGED, ctx);
+	[[maybe_unused]] const AttackResult::AttackResult enhanced =
+		archer.attacker->attack(*player, AttackKind::AttackKind::RANGED, ctx);
 
 	EXPECT_EQ(last_roll_needed(), neededPlain - 2)
 		<< "the bow's +2 to hit did not count";
@@ -290,8 +290,8 @@ TEST_F(RangedDrawTest, ASharpBowAddsItsDamageBonusToTheShot)
 	bow().enhancement.damageBonus = 1;
 
 	ASSERT_EQ(
-		archer.attacker->attack(*player, AttackKind::RANGED, ctx),
-		AttackResult::LANDED);
+		archer.attacker->attack(*player, AttackKind::AttackKind::RANGED, ctx),
+		AttackResult::AttackResult::LANDED);
 
 	// The bow's 6, its sharpness's 1, and its +2 for Strength 18.
 	EXPECT_EQ(player->get_hp(), STARTING_HP - 9)
@@ -302,15 +302,15 @@ TEST_F(RangedDrawTest, ASharpBowAddsItsDamageBonusToTheShot)
 TEST_F(RangedDrawTest, ACursedBowRaisesTheRollTheShotNeeds)
 {
 	archer.set_strength(STRONG_ENOUGH_TO_DRAW);
-	[[maybe_unused]] const AttackResult plain =
-		archer.attacker->attack(*player, AttackKind::RANGED, ctx);
+	[[maybe_unused]] const AttackResult::AttackResult plain =
+		archer.attacker->attack(*player, AttackKind::AttackKind::RANGED, ctx);
 	const int neededPlain = last_roll_needed();
 
 	// A curse outweighs whatever bonus the bow carries.
 	bow().enhancement.toHitBonus = 2;
 	bow().enhancement.blessing = BlessingStatus::CURSED;
-	[[maybe_unused]] const AttackResult cursed =
-		archer.attacker->attack(*player, AttackKind::RANGED, ctx);
+	[[maybe_unused]] const AttackResult::AttackResult cursed =
+		archer.attacker->attack(*player, AttackKind::AttackKind::RANGED, ctx);
 
 	EXPECT_EQ(last_roll_needed(), neededPlain + 2)
 		<< "the cursed bow's -2 to hit did not count";

@@ -2,8 +2,6 @@
 // Developer overlay: shows monster and item spawn distributions for the current dungeon level.
 #pragma once
 
-#include <string>
-#include <utility>
 #include <vector>
 
 #include "BaseMenu.h"

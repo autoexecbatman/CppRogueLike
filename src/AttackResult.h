@@ -8,11 +8,20 @@
 //
 // Usage:
 //
-//   const AttackResult result = owner.attacker->attack(target, AttackKind::MELEE, ctx);
-//   if (result == AttackResult::LANDED) { ... } // the blow connected; poison follows it
-enum class AttackResult
+//   const AttackResult::AttackResult result =
+//       owner.attacker->attack(target, AttackKind::AttackKind::MELEE, ctx);
+//   // the blow connected; poison follows it
+//   if (result == AttackResult::AttackResult::LANDED) { ... }
+namespace AttackResult
 {
-	LANDED, // the roll beat the target's armour class and the damage was applied
-	MISSED, // the roll to hit fell short
-	PREVENTED, // nothing was rolled: a trade, a dead target, a ward, a bow too heavy to draw
-};
+	enum class AttackResult
+	{
+		// the roll beat the target's armour class and the damage was applied
+		LANDED,
+		// the roll to hit fell short
+		MISSED,
+		// nothing was rolled: a trade, a dead target, a ward, a bow too heavy
+		// to draw
+		PREVENTED,
+	};
+} // namespace AttackResult

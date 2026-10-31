@@ -1,16 +1,13 @@
 #pragma once
 #include <array>
-#include <cstdint>
 #include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
-#include <utility>
 #include <vector>
 
 #include "AbilityAllocation.h"
 #include "Creature.h"
-#include "EquipmentSlot.h"
 #include "Persistent.h"
 #include "PlayerController.h"
 #include "PlayerRaceState.h"

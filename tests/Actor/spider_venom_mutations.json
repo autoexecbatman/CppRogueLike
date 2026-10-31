@@ -15,26 +15,26 @@
   "mutations": [
     {
       "file": "src/AiSpider.cpp",
-      "original": "\tif (result != AttackResult::LANDED)\n\t{\n\t\treturn;\n\t}",
+      "original": "\tif (result != AttackResult::AttackResult::LANDED)\n\t{\n\t\treturn;\n\t}",
       "mutated": "",
       "catches": "venom injected by a bite that never landed, as it was before the rule"
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "\tif (result != AttackResult::LANDED)\n\t{\n\t\treturn;\n\t}",
-      "mutated": "\tif (result == AttackResult::LANDED)\n\t{\n\t\treturn;\n\t}",
+      "original": "\tif (result != AttackResult::AttackResult::LANDED)\n\t{\n\t\treturn;\n\t}",
+      "mutated": "\tif (result == AttackResult::AttackResult::LANDED)\n\t{\n\t\treturn;\n\t}",
       "catches": "the rule read backwards, so only a miss injects"
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\treturn isHit ? AttackResult::LANDED : AttackResult::MISSED;",
-      "mutated": "\treturn AttackResult::LANDED;",
+      "original": "\treturn isHit ? AttackResult::AttackResult::LANDED : AttackResult::AttackResult::MISSED;",
+      "mutated": "\treturn AttackResult::AttackResult::LANDED;",
       "catches": "every attack reported as a hit, so a missed bite injects"
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\treturn isHit ? AttackResult::LANDED : AttackResult::MISSED;",
-      "mutated": "\treturn AttackResult::MISSED;",
+      "original": "\treturn isHit ? AttackResult::AttackResult::LANDED : AttackResult::AttackResult::MISSED;",
+      "mutated": "\treturn AttackResult::AttackResult::MISSED;",
       "catches": "every attack reported as a miss, so no bite ever injects"
     },
     {

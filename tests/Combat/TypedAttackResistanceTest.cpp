@@ -109,7 +109,7 @@ protected:
 
 	int hp_lost_after(Creature& monster)
 	{
-		monster.attacker->attack(*player, AttackKind::MELEE, ctx);
+		monster.attacker->attack(*player, AttackKind::AttackKind::MELEE, ctx);
 		return STARTING_HP - player->get_hp();
 	}
 

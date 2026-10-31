@@ -11,6 +11,7 @@
 #include <utility>
 #include <vector>
 
+#include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
 #include "Actor.h"
@@ -34,6 +35,7 @@
 #include "Renderer.h"
 #include "SavedEnum.h"
 #include "SpellTile.h"
+#include "Stairs.h"
 #include "TileConfig.h"
 #include "TileRefJson.h"
 #include "Trap.h"

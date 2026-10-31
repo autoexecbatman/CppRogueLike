@@ -20,12 +20,15 @@
 #include "Vector2D.h"
 #include "Web.h"
 
-constexpr int WEB_COOLDOWN = 8;
-constexpr int WEB_MIN_SIZE = 3;
-// Maximum number of webs that can exist at once per spider
-constexpr int MAX_WEBS = 5;
-constexpr int WEB_MAX_SIZE = 5;
-constexpr int WEB_STRENGTH = 3;
+namespace
+{
+	constexpr int WEB_COOLDOWN = 8;
+	constexpr int WEB_MIN_SIZE = 3;
+	// Maximum number of webs that can exist at once per spider
+	constexpr int MAX_WEBS = 5;
+	constexpr int WEB_MAX_SIZE = 5;
+	constexpr int WEB_STRENGTH = 3;
+} // namespace
 
 void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 {

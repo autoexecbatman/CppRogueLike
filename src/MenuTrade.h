@@ -33,10 +33,6 @@ private:
 
 public:
 	MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx);
-	MenuTrade(const MenuTrade&) = delete;
-	MenuTrade& operator=(const MenuTrade&) = delete;
-	MenuTrade(MenuTrade&&) = delete;
-	MenuTrade& operator=(MenuTrade&&) = delete;
 
 	void draw();
 	void on_key(GameContext& ctx) override;

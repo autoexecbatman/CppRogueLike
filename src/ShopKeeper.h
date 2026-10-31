@@ -32,6 +32,7 @@ class Item;
 class RandomDice;
 class Creature;
 
+// Move-only through shopInventory, so it declares no copy or move.
 class ShopKeeper : public Persistent
 {
 private:
@@ -68,12 +69,6 @@ private:
 public:
 	ShopKeeper(ShopType type, ShopQuality quality, RandomDice& dice);
 	ShopKeeper() = default;
-
-	~ShopKeeper() override = default;
-	ShopKeeper(const ShopKeeper&) = delete;
-	ShopKeeper& operator=(const ShopKeeper&) = delete;
-	ShopKeeper(ShopKeeper&&) = default;
-	ShopKeeper& operator=(ShopKeeper&&) = default;
 
 	// Serialization - required by Persistent interface
 	void load(const json& source) override;

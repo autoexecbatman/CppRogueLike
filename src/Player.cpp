@@ -59,7 +59,6 @@
 #include "PlayerAttacker.h"
 #include "PlayerTurn.h"
 #include "RandomDice.h"
-#include "Renderer.h"
 #include "RenderingManager.h"
 #include "SpellSystem.h"
 #include "Vector2D.h"

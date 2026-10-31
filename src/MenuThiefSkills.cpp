@@ -13,21 +13,22 @@
 
 namespace
 {
-// The box is sized to the viewport rather than fixed: a width in tiles that fits a
-// 1920 screen puts startX negative on a 1280 one and the left half is never drawn.
-constexpr int MENU_MARGIN_TILES = 2;
-constexpr int MENU_MAX_WIDTH_TILES = 22;
-constexpr int MENU_HEIGHT_TILES = 8;
+	// The box is sized to the viewport rather than fixed: a width in tiles that
+	// fits a 1920 screen puts startX negative on a 1280 one and the left half
+	// is never drawn.
+	constexpr int MENU_MARGIN_TILES = 2;
+	constexpr int MENU_MAX_WIDTH_TILES = 22;
+	constexpr int MENU_HEIGHT_TILES = 8;
 
-// Text rows are 32 pixels, not a whole 64-pixel tile: the font is 16.
-constexpr int TEXT_ROW_PITCH = 32;
-constexpr int TEXT_TOP_INSET = 6;
+	// Text rows are 32 pixels, not a whole 64-pixel tile: the font is 16.
+	constexpr int TEXT_ROW_PITCH = 32;
+	constexpr int TEXT_TOP_INSET = 6;
 
-// Rows, top to bottom: eight skills, the pool, the status, two hints.
-constexpr int FIRST_SKILL_ROW = 0;
-constexpr int POOL_ROW = 8;
-constexpr int STATUS_ROW = 9;
-constexpr int FIRST_HINT_ROW = 10;
+	// Rows, top to bottom: eight skills, the pool, the status, two hints.
+	constexpr int FIRST_SKILL_ROW = 0;
+	constexpr int POOL_ROW = 8;
+	constexpr int STATUS_ROW = 9;
+	constexpr int FIRST_HINT_ROW = 10;
 } // namespace
 
 ThiefSkillAllocation thief_skill_allocation_for(

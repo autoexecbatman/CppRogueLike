@@ -33,14 +33,14 @@
     },
     {
       "file": "src/Alignment.h",
-      "original": "\tif (name == \"chaotic\")\n\t{\n\t\treturn Ethics::CHAOTIC;\n\t}",
-      "mutated": "\tif (name == \"chaotic\")\n\t{\n\t\treturn Ethics::LAWFUL;\n\t}",
+      "original": "\t\tif (name == \"chaotic\")\n\t\t{\n\t\t\treturn Ethics::CHAOTIC;\n\t\t}",
+      "mutated": "\t\tif (name == \"chaotic\")\n\t\t{\n\t\t\treturn Ethics::LAWFUL;\n\t\t}",
       "catches": "an alignment parsed back as its opposite on the law/chaos axis"
     },
     {
       "file": "src/Alignment.h",
-      "original": "\tif (name == \"evil\")\n\t{\n\t\treturn Morality::EVIL;\n\t}",
-      "mutated": "\tif (name == \"evil\")\n\t{\n\t\treturn Morality::GOOD;\n\t}",
+      "original": "\t\tif (name == \"evil\")\n\t\t{\n\t\t\treturn Morality::EVIL;\n\t\t}",
+      "mutated": "\t\tif (name == \"evil\")\n\t\t{\n\t\t\treturn Morality::GOOD;\n\t\t}",
       "catches": "an alignment parsed back as its opposite on the good/evil axis"
     },
     {

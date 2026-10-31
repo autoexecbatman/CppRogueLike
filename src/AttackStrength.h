@@ -14,14 +14,26 @@
 //
 // Usage, for a fighter of 18/00 (+3 hit, +6 damage on Table 1) and a weakling of 3 (-3 and -1):
 //
-//   AttackStrength::adjustment(dataManager, fighter, AttackKind::MELEE, nullptr); // -> { 3, 6 }, a swing takes it all
-//   AttackStrength::adjustment(dataManager, fighter, AttackKind::RANGED, &longBow); // -> { 0, 0 }, no bonus for a bow
-//   AttackStrength::adjustment(dataManager, weakling, AttackKind::RANGED, &longBow); // -> { -3, -1 }, the penalty stays
-//   AttackStrength::adjustment(dataManager, weakling, AttackKind::RANGED, &crossbow); // -> { 0, 0 }, a machine draws it
-//   AttackStrength::adjustment(dataManager, fighter, AttackKind::RANGED, &composite); // -> { 1, 2 }, the row for 18
+//   AttackStrength::adjustment(
+//       dataManager, fighter, AttackKind::AttackKind::MELEE, nullptr);
+//   // -> { 3, 6 }, a swing takes it all
+//   AttackStrength::adjustment(
+//       dataManager, fighter, AttackKind::AttackKind::RANGED, &longBow);
+//   // -> { 0, 0 }, no bonus for a bow
+//   AttackStrength::adjustment(
+//       dataManager, weakling, AttackKind::AttackKind::RANGED, &longBow);
+//   // -> { -3, -1 }, the penalty stays
+//   AttackStrength::adjustment(
+//       dataManager, weakling, AttackKind::AttackKind::RANGED, &crossbow);
+//   // -> { 0, 0 }, a machine draws it
+//   AttackStrength::adjustment(
+//       dataManager, fighter, AttackKind::AttackKind::RANGED, &composite);
+//   // -> { 1, 2 }, the row for 18
 //
 //   // In a girdle of hill giant strength (19: +3, +7) and gauntlets of ogre power:
-//   AttackStrength::adjustment(dataManager, fighter, AttackKind::MELEE, nullptr); // -> { 6, 13 }
+//   AttackStrength::adjustment(
+//       dataManager, fighter, AttackKind::AttackKind::MELEE, nullptr);
+//   // -> { 6, 13 }
 
 #include "AttackKind.h"
 
@@ -45,12 +57,16 @@ struct Adjustment
 // natural or hurled and takes the whole row, as a swing does.
 //
 // Example, a Strength 3 archer:
-//   adjustment(dataManager, weakling, AttackKind::RANGED, &shortBow); // -> { -3, -1 }
-//   adjustment(dataManager, weakling, AttackKind::RANGED, &sling); // -> { 0, 0 }
+//   adjustment(
+//       dataManager, weakling, AttackKind::AttackKind::RANGED, &shortBow);
+//   // -> { -3, -1 }
+//   adjustment(
+//       dataManager, weakling, AttackKind::AttackKind::RANGED, &sling);
+//   // -> { 0, 0 }
 [[nodiscard]] Adjustment adjustment(
 	const DataManager& dataManager,
 	const Creature& attacker,
-	AttackKind kind,
+	AttackKind::AttackKind kind,
 	const Item* missileWeapon);
 
 } // namespace AttackStrength

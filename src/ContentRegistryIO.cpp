@@ -10,7 +10,6 @@
 #include "ContentRegistry.h"
 #include "ContentRegistryIO.h"
 #include "Paths.h"
-#include "Renderer.h"
 #include "TileRefJson.h"
 
 namespace ContentRegistryIO

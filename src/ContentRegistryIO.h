@@ -1,7 +1,7 @@
 // file: ContentRegistryIO.h
 #pragma once
 
-#include <string>
+#include <string_view>
 
 class ContentRegistry;
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Actor.h"
 #include "AiMonster.h"
 #include "GameContext.h"
 #include "Persistent.h"

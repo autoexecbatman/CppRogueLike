@@ -249,11 +249,6 @@ private:
 
 public:
 	InventoryUI(Player& player, InventoryScreen startScreen, GameContext& ctx);
-	~InventoryUI() = default;
-	InventoryUI(const InventoryUI&) = delete;
-	InventoryUI& operator=(const InventoryUI&) = delete;
-	InventoryUI(InventoryUI&&) = delete;
-	InventoryUI& operator=(InventoryUI&&) = delete;
 
 	void menu(GameContext& ctx) override;
 };

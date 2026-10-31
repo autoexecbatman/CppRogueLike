@@ -2,10 +2,10 @@
 //
 // ListCursor and step_within; the contract and a usage example are in ListCursor.h.
 
-#include "ListCursor.h"
-
 #include <algorithm>
 #include <cassert>
+
+#include "ListCursor.h"
 
 size_t step_within(size_t value, int steps, size_t highest)
 {

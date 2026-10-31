@@ -11,16 +11,19 @@
 #include "Renderer.h"
 #include "RenderingManager.h"
 
-// The box is sized to the viewport. A fixed 32 tiles is 2048 pixels on a 1280
-// pixel screen, which put startX at -6 tiles: the hint line was drawn from -320
-// and the screen showed only its tail, "sc] Skip".
-static constexpr int MENU_MARGIN_TILES = 2;
-static constexpr int MENU_MAX_W_TILES = 16;
-static constexpr int MENU_H_TILES = 4;
-// Text rows are 32 pixels, not a whole 64-pixel tile: the font is 16.
-static constexpr int TEXT_ROW_PITCH = 32;
-// Gap between the frame's top edge and the first row of text.
-static constexpr int TEXT_TOP_INSET = 6;
+namespace
+{
+	// The box is sized to the viewport. A fixed 32 tiles is 2048 pixels on a
+	// 1280 pixel screen, which put startX at -6 tiles: the hint line was drawn
+	// from -320 and the screen showed only its tail, "sc] Skip".
+	constexpr int MENU_MARGIN_TILES = 2;
+	constexpr int MENU_MAX_W_TILES = 16;
+	constexpr int MENU_H_TILES = 4;
+	// Text rows are 32 pixels, not a whole 64-pixel tile: the font is 16.
+	constexpr int TEXT_ROW_PITCH = 32;
+	// Gap between the frame's top edge and the first row of text.
+	constexpr int TEXT_TOP_INSET = 6;
+} // namespace
 
 MenuName::MenuName(GameContext& ctx)
 {

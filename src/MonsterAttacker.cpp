@@ -1,4 +1,3 @@
-#include "MonsterAttacker.h"
 
 #include <cassert>
 
@@ -6,6 +5,7 @@
 #include "Creature.h"
 #include "GameContext.h"
 #include "Item.h"
+#include "MonsterAttacker.h"
 
 MonsterAttacker::MonsterAttacker(Creature& owner, const DamageInfo& damage) :
 	Attacker(damage),
@@ -13,13 +13,13 @@ MonsterAttacker::MonsterAttacker(Creature& owner, const DamageInfo& damage) :
 {
 }
 
-AttackResult MonsterAttacker::attack(
+AttackResult::AttackResult MonsterAttacker::attack(
 	Creature& target,
-	AttackKind kind,
+	AttackKind::AttackKind kind,
 	GameContext& ctx)
 {
 	// A monster using a weapon does the weapon's damage (Monstrous Manual, PDF page 1083).
-	if (kind == AttackKind::RANGED)
+	if (kind == AttackKind::AttackKind::RANGED)
 	{
 		const Item* missileWeapon =
 			owner.get_equipped_item(weapon_slot_for(kind));

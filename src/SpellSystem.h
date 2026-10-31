@@ -5,8 +5,15 @@
 #include <string_view>
 #include <vector>
 
+#include "DamageSource.h"
+#include "SpellRegistry.h"
+#include "Vector2D.h"
+
+class Creature;
 class DataManager;
+class Player;
 class RandomDice;
+struct GameContext;
 
 // Where a casting comes from. A priest's own memorised spell is the one its Wisdom
 // can fail (Table 5); a spell a ring or a helm casts is the item's, not the priest's.
@@ -17,16 +24,6 @@ enum class SpellSource
 	// A monster's spell-like power, which nothing memorizes and Wisdom cannot fail.
 	INNATE,
 };
-
-#include "DamageSource.h"
-#include "SpellRegistry.h"
-#include "Vector2D.h"
-
-// Forward declarations
-class Player;
-class Creature;
-class RandomDice;
-struct GameContext;
 
 // The rules a spell is made of, kept apart from the casting in SpellSystem, so a test can
 // reach a rule without building a caster and a context around it.

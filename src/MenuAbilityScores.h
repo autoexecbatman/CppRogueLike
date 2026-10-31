@@ -88,10 +88,6 @@ private:
 
 public:
 	MenuAbilityScores(GameContext& ctx);
-	MenuAbilityScores(const MenuAbilityScores&) = delete;
-	MenuAbilityScores& operator=(const MenuAbilityScores&) = delete;
-	MenuAbilityScores(MenuAbilityScores&&) = delete;
-	MenuAbilityScores& operator=(MenuAbilityScores&&) = delete;
 
 	void menu(GameContext& ctx) override;
 };

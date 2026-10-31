@@ -338,12 +338,12 @@ void AiSpider::move_or_attack(
 
 void AiSpider::bite(Creature& owner, Creature& target, GameContext& ctx)
 {
-	const AttackResult result =
-		owner.attacker->attack(target, AttackKind::MELEE, ctx);
+	const AttackResult::AttackResult result =
+		owner.attacker->attack(target, AttackKind::AttackKind::MELEE, ctx);
 
 	// Poison "must be injected into the bloodstream by bite or sting" (DMG, PDF page 736),
 	// so a bite that never landed injects nothing.
-	if (result != AttackResult::LANDED)
+	if (result != AttackResult::AttackResult::LANDED)
 	{
 		return;
 	}

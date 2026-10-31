@@ -29,7 +29,8 @@ unsigned char blend_channel(
 
 } // namespace
 
-std::optional<std::string> dijkstra_cost_label(std::optional<int> cost)
+std::optional<std::string> DebugUtils::dijkstra_cost_label(
+	std::optional<int> cost)
 {
 	if (!cost)
 	{
@@ -38,7 +39,7 @@ std::optional<std::string> dijkstra_cost_label(std::optional<int> cost)
 	return std::to_string(*cost);
 }
 
-Color dijkstra_cost_tint(int cost, int farthestCost)
+Color DebugUtils::dijkstra_cost_tint(int cost, int farthestCost)
 {
 	assert(
 		cost >= 0 && cost <= farthestCost &&
@@ -47,27 +48,27 @@ Color dijkstra_cost_tint(int cost, int farthestCost)
 	// Only the player's tile was reached, so there is no far end to blend toward.
 	if (farthestCost == 0)
 	{
-		return COST_NEAR_TINT;
+		return DebugUtils::COST_NEAR_TINT;
 	}
 	return Color{
-		blend_channel(COST_NEAR_TINT.r, COST_FAR_TINT.r, cost, farthestCost),
-		blend_channel(COST_NEAR_TINT.g, COST_FAR_TINT.g, cost, farthestCost),
-		blend_channel(COST_NEAR_TINT.b, COST_FAR_TINT.b, cost, farthestCost),
-		blend_channel(COST_NEAR_TINT.a, COST_FAR_TINT.a, cost, farthestCost),
+		blend_channel(DebugUtils::COST_NEAR_TINT.r, DebugUtils::COST_FAR_TINT.r, cost, farthestCost),
+		blend_channel(DebugUtils::COST_NEAR_TINT.g, DebugUtils::COST_FAR_TINT.g, cost, farthestCost),
+		blend_channel(DebugUtils::COST_NEAR_TINT.b, DebugUtils::COST_FAR_TINT.b, cost, farthestCost),
+		blend_channel(DebugUtils::COST_NEAR_TINT.a, DebugUtils::COST_FAR_TINT.a, cost, farthestCost),
 	};
 }
 
-void CostOverlay::toggle() noexcept
+void DebugUtils::CostOverlay::toggle() noexcept
 {
 	visible = !visible;
 }
 
-bool CostOverlay::is_visible() const noexcept
+bool DebugUtils::CostOverlay::is_visible() const noexcept
 {
 	return visible;
 }
 
-void CostOverlay::render(const GameContext& ctx) const
+void DebugUtils::CostOverlay::render(const GameContext& ctx) const
 {
 	if (!visible)
 	{

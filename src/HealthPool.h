@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 class Creature;
 struct GameContext;
 enum class DamageType;

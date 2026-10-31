@@ -69,8 +69,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tethics = parse_ethics(source.at(\"ethics\").get<std::string>());",
-      "mutated": "\tethics = source.contains(\"ethics\") ? parse_ethics(source.at(\"ethics\").get<std::string>()) : Ethics::NEUTRAL;",
+      "original": "\tethics = Alignment::parse_ethics(source.at(\"ethics\").get<std::string>());",
+      "mutated": "\tethics = source.contains(\"ethics\") ? Alignment::parse_ethics(source.at(\"ethics\").get<std::string>()) : Alignment::Ethics::NEUTRAL;",
       "catches": "a record without an alignment loading as neutral rather than being refused"
     }
   ]

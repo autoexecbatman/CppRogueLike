@@ -15,6 +15,7 @@
 #include "Renderer.h"
 #include "RenderingManager.h"
 #include "SpellTile.h"
+#include "Stairs.h"
 #include "Trap.h"
 
 void RenderingManager::render(GameContext& ctx) const

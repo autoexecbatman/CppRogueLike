@@ -1,8 +1,9 @@
 #pragma once
 
-#include <nlohmann/json_fwd.hpp>
 #include <optional>
 #include <string>
+
+#include <nlohmann/json_fwd.hpp>
 
 #include "Colors.h"
 

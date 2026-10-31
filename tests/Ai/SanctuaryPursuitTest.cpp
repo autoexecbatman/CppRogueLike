@@ -147,12 +147,14 @@ protected:
 	// scripts its own rolls instead of sharing values that land on different dice.
 	// It answers what the attack did; the caller asserts PREVENTED, so a save
 	// that was skipped stops the test before its rolls reach another die.
-	[[nodiscard]] AttackResult fail_the_save_with(
+	[[nodiscard]] AttackResult::AttackResult fail_the_save_with(
 		std::initializer_list<int> rolls)
 	{
 		script(rolls);
-		const AttackResult result =
-			goblin.attacker->attack(*player, AttackKind::MELEE, ctx);
+		const AttackResult::AttackResult result = goblin.attacker->attack(
+			*player,
+			AttackKind::AttackKind::MELEE,
+			ctx);
 		EXPECT_EQ(player->get_hp(), STARTING_HP)
 			<< "the save was skipped and the blow landed";
 		return result;
@@ -184,7 +186,9 @@ TEST_F(SanctuaryPursuitTest, AMonsterThatFailedItsSaveStopsClosingIn)
 		10,
 		BuffApplication::ADD,
 		ctx.gameState->get_time());
-	ASSERT_EQ(fail_the_save_with({ 12, 20, 4 }), AttackResult::PREVENTED);
+	ASSERT_EQ(
+		fail_the_save_with({ 12, 20, 4 }),
+		AttackResult::AttackResult::PREVENTED);
 	const int distanceBefore = goblin_distance_to_player();
 
 	// Whatever the monster does instead of hunting reads dice. Idling rolls a d20 and
@@ -212,7 +216,7 @@ TEST_F(SanctuaryPursuitTest, AMonsterThatMadeItsSaveKeepsHunting)
 		BuffApplication::ADD,
 		ctx.gameState->get_time());
 	script({ 20, 20, 4 });
-	goblin.attacker->attack(*player, AttackKind::MELEE, ctx);
+	goblin.attacker->attack(*player, AttackKind::AttackKind::MELEE, ctx);
 	const int distanceBefore = goblin_distance_to_player();
 
 	script_idle_rolls(120);
@@ -261,7 +265,9 @@ TEST_F(SanctuaryPursuitTest, AMonsterThatLostTrackStopsAnnouncingItEveryRound)
 		10,
 		BuffApplication::ADD,
 		ctx.gameState->get_time());
-	ASSERT_EQ(fail_the_save_with({ 12, 20, 4 }), AttackResult::PREVENTED);
+	ASSERT_EQ(
+		fail_the_save_with({ 12, 20, 4 }),
+		AttackResult::AttackResult::PREVENTED);
 	const size_t messagesAfterTheOneRefusal =
 		game.messageSystem.get_stored_message_count();
 
@@ -289,7 +295,9 @@ TEST_F(SanctuaryPursuitTest, ARangedMonsterThatLostTrackStopsShootingToo)
 		10,
 		BuffApplication::ADD,
 		ctx.gameState->get_time());
-	ASSERT_EQ(fail_the_save_with({ 12, 20, 4 }), AttackResult::PREVENTED);
+	ASSERT_EQ(
+		fail_the_save_with({ 12, 20, 4 }),
+		AttackResult::AttackResult::PREVENTED);
 	const size_t messagesAfterTheOneRefusal =
 		game.messageSystem.get_stored_message_count();
 
@@ -321,7 +329,7 @@ TEST_F(SanctuaryPursuitTest, AWebSpinnerThatLostTrackStopsClosingIn)
 	// needs a tile this fixture does not load. The top of the die is over the chance.
 	ASSERT_EQ(
 		fail_the_save_with({ 12, RandomDice::HIGHEST }),
-		AttackResult::PREVENTED);
+		AttackResult::AttackResult::PREVENTED);
 	const int distanceBefore = goblin_distance_to_player();
 
 	script_idle_rolls(120);

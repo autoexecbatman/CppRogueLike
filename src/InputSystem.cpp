@@ -7,8 +7,11 @@
 #include "InputSystem.h"
 #include "Vector2D.h"
 
-constexpr double REPEAT_DELAY = 0.30; // seconds before repeat begins
-constexpr double REPEAT_INTERVAL = 0.10; // seconds between repeat fires
+namespace
+{
+	constexpr double REPEAT_DELAY = 0.30; // seconds before repeat begins
+	constexpr double REPEAT_INTERVAL = 0.10; // seconds between repeat fires
+} // namespace
 
 // The keys poll() reads, in priority order when two arrive in one frame. A case in its
 // switch whose key is missing here never fires.

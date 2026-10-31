@@ -6,10 +6,7 @@
 
 #include <format>
 #include <stdexcept>
-#include <string>
 #include <string_view>
-
-#include "Weapons.h" // For WeaponSize enum
 
 // CLASSIFICATION - Category/type of item (no specific variants)
 enum class ItemClass

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Attacker.h"
-#include "EquipmentSlot.h"
 
 class Player;
 class Creature;
@@ -18,9 +17,9 @@ private:
 public:
 	explicit PlayerAttacker(Player& owner);
 
-	AttackResult attack(
+	AttackResult::AttackResult attack(
 		Creature& target,
-		AttackKind kind,
+		AttackKind::AttackKind kind,
 		GameContext& ctx) override;
 
 	// Player has no base DamageInfo to serialize.

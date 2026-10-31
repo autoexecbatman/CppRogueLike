@@ -375,8 +375,8 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 	params.undead = entry.value("undead", false);
 	// Required: every record the Monstrous Manual names carries the alignment its entry
 	// gives, so a missing one is an unfinished record rather than a monster with no side.
-	params.ethics = parse_ethics(entry.at("ethics").get<std::string>());
-	params.morality = parse_morality(entry.at("morality").get<std::string>());
+	params.ethics = Alignment::parse_ethics(entry.at("ethics").get<std::string>());
+	params.morality = Alignment::parse_morality(entry.at("morality").get<std::string>());
 	params.corpseWeight = entry.at("corpse_weight").get<int>();
 	params.corpseNutrition = entry.at("corpse_nutrition").get<int>();
 	params.corpseTaste = entry.at("corpse_taste").get<std::string>();

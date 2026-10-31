@@ -16,29 +16,36 @@
 #include "Player.h"
 #include "Renderer.h"
 
-static constexpr int MAX_LOG_LINES = 8;
-// The panel is sized to the viewport rather than to a fixed tile count. At 52 by
-// 28 tiles it was 3328 by 1792 pixels on a 1280 by 896 canvas, so the centring
-// arithmetic produced a negative origin and every line but the two centred ones
-// was drawn off the left edge of the screen.
-static constexpr int PANEL_MARGIN_TILES = 2;
-static constexpr int PANEL_MAX_W_TILES = 16;
-static constexpr int PANEL_MAX_H_TILES = 11;
-// Text rows are 32 pixels, not a whole 64-pixel tile: the font is 16, so a tile
-// per line spent three quarters of the panel on nothing and needed a panel twice
-// the height of the screen to hold a dozen lines.
-static constexpr int TEXT_ROW_PITCH = 32;
-
-// How many tiles wide and tall the panel gets on this viewport.
-static int panel_width_tiles(int viewportCols)
+namespace
 {
-	return std::min(PANEL_MAX_W_TILES, viewportCols - PANEL_MARGIN_TILES * 2);
-}
+	constexpr int MAX_LOG_LINES = 8;
+	// The panel is sized to the viewport rather than to a fixed tile count. At
+	// 52 by 28 tiles it was 3328 by 1792 pixels on a 1280 by 896 canvas, so the
+	// centring arithmetic produced a negative origin and every line but the two
+	// centred ones was drawn off the left edge of the screen.
+	constexpr int PANEL_MARGIN_TILES = 2;
+	constexpr int PANEL_MAX_W_TILES = 16;
+	constexpr int PANEL_MAX_H_TILES = 11;
+	// Text rows are 32 pixels, not a whole 64-pixel tile: the font is 16, so a
+	// tile per line spent three quarters of the panel on nothing and needed a
+	// panel twice the height of the screen to hold a dozen lines.
+	constexpr int TEXT_ROW_PITCH = 32;
 
-static int panel_height_tiles(int viewportRows)
-{
-	return std::min(PANEL_MAX_H_TILES, viewportRows - PANEL_MARGIN_TILES * 2);
-}
+	// How many tiles wide and tall the panel gets on this viewport.
+	constexpr int panel_width_tiles(int viewportCols)
+	{
+		return std::min(
+			PANEL_MAX_W_TILES,
+			viewportCols - PANEL_MARGIN_TILES * 2);
+	}
+
+	constexpr int panel_height_tiles(int viewportRows)
+	{
+		return std::min(
+			PANEL_MAX_H_TILES,
+			viewportRows - PANEL_MARGIN_TILES * 2);
+	}
+} // namespace
 
 DeathMenu::DeathMenu(GameContext& ctx)
 {

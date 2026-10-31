@@ -4,7 +4,6 @@
 #include <string>
 
 #include "ContentRegistry.h"
-#include "Renderer.h"
 
 TileRef ContentRegistry::get_tile(std::string_view key) const
 {

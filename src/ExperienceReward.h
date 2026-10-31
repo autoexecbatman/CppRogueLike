@@ -2,8 +2,6 @@
 
 #include <nlohmann/json.hpp>
 
-using json = nlohmann::json;
-
 class ExperienceReward
 {
 private:
@@ -21,6 +19,6 @@ public:
 
 	void add_xp(int amount) noexcept { xp += amount; }
 
-	void load(const json& source);
-	void save(json& output) const;
+	void load(const nlohmann::json& source);
+	void save(nlohmann::json& output) const;
 };

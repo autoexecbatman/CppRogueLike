@@ -1,11 +1,11 @@
 #pragma once
 
+#include "CreatureClass.h"
+#include "DiceExpr.h"
+
 class Creature;
 class DataManager;
 struct GameContext;
-
-#include "CreatureClass.h"
-#include "DiceExpr.h"
 
 // Handles combat improvements on level up according to AD&D 2e rules.
 // Each function encapsulates one domain rule: THAC0 progression, HP gain,

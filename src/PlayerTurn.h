@@ -28,8 +28,6 @@
 //
 //   spend_player_spellcasting(ctx);   // a hasted player still pays a full round
 
-#include "TurnSchedule.h"
-
 struct GameContext;
 
 // Records that the player spent an action of this base cost, in time units, and opens

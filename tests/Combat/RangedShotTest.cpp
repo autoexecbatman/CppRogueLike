@@ -74,12 +74,14 @@ protected:
 TEST_F(RangedShotTest, OnlyALandedShotBleeds)
 {
 	EXPECT_EQ(
-		RangedShot::impact_of(AttackResult::LANDED),
+		RangedShot::impact_of(AttackResult::AttackResult::LANDED),
 		ShotImpact::MISSILE_AND_BLOOD);
-	EXPECT_EQ(RangedShot::impact_of(AttackResult::MISSED), ShotImpact::MISSILE)
+	EXPECT_EQ(
+		RangedShot::impact_of(AttackResult::AttackResult::MISSED),
+		ShotImpact::MISSILE)
 		<< "a miss drew blood";
 	EXPECT_EQ(
-		RangedShot::impact_of(AttackResult::PREVENTED),
+		RangedShot::impact_of(AttackResult::AttackResult::PREVENTED),
 		ShotImpact::NOTHING)
 		<< "a shot never loosed was drawn";
 }
@@ -92,7 +94,9 @@ TEST_F(RangedShotTest, ARolledShotLoosesAMissile)
 	// A natural 1 misses, and the damage die is rolled anyway.
 	mock.dice.set_next_roll(1);
 	mock.dice.set_next_roll(2);
-	EXPECT_EQ(RangedShot::fire(archer, target, ctx), AttackResult::MISSED);
+	EXPECT_EQ(
+		RangedShot::fire(archer, target, ctx),
+		AttackResult::AttackResult::MISSED);
 
 	EXPECT_TRUE(ctx.animSystem->has_active_entries())
 		<< "a missed shot drew no missile";
@@ -105,7 +109,9 @@ TEST_F(RangedShotTest, AShotNeverLoosedDrawsNothing)
 	ASSERT_TRUE(target.is_dead());
 	ASSERT_FALSE(ctx.animSystem->has_active_entries());
 
-	EXPECT_EQ(RangedShot::fire(archer, target, ctx), AttackResult::PREVENTED);
+	EXPECT_EQ(
+		RangedShot::fire(archer, target, ctx),
+		AttackResult::AttackResult::PREVENTED);
 
 	EXPECT_FALSE(ctx.animSystem->has_active_entries())
 		<< "a shot that was never loosed was drawn";

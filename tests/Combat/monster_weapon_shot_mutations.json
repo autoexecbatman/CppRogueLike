@@ -21,7 +21,7 @@
     },
     {
       "file": "src/MonsterAttacker.cpp",
-      "original": "\tif (kind == AttackKind::RANGED)\n\t{\n\t\tconst Item* missileWeapon",
+      "original": "\tif (kind == AttackKind::AttackKind::RANGED)\n\t{\n\t\tconst Item* missileWeapon",
       "mutated": "\tif (false)\n\t{\n\t\tconst Item* missileWeapon",
       "catches": "a monster's shot rolling its own dice again"
     },

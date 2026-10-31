@@ -247,8 +247,8 @@ TEST_F(CreatureSerializationTest, AnUnknownAiKindIsRefused)
 TEST_F(CreatureSerializationTest, TheAlignmentAndClassAreSavedByName)
 {
 	auto creature = create_test_creature();
-	creature->set_ethics(Ethics::LAWFUL);
-	creature->set_morality(Morality::EVIL);
+	creature->set_ethics(Alignment::Ethics::LAWFUL);
+	creature->set_morality(Alignment::Morality::EVIL);
 	creature->set_creature_class(CreatureClass::ROGUE);
 
 	json saved;
@@ -263,8 +263,8 @@ TEST_F(CreatureSerializationTest, TheAlignmentAndClassAreSavedByName)
 		ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
 	loaded->load(saved);
 
-	EXPECT_EQ(loaded->get_ethics(), Ethics::LAWFUL);
-	EXPECT_EQ(loaded->get_morality(), Morality::EVIL);
+	EXPECT_EQ(loaded->get_ethics(), Alignment::Ethics::LAWFUL);
+	EXPECT_EQ(loaded->get_morality(), Alignment::Morality::EVIL);
 	EXPECT_EQ(loaded->get_creature_class(), CreatureClass::ROGUE);
 }
 

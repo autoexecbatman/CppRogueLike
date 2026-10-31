@@ -32,10 +32,6 @@ class MenuBuy : public BaseMenu
 
 public:
 	MenuBuy(GameContext& ctx, Creature& buyer, Creature& owner);
-	MenuBuy(const MenuBuy&) = delete;
-	MenuBuy& operator=(const MenuBuy&) = delete;
-	MenuBuy(MenuBuy&&) = delete;
-	MenuBuy& operator=(MenuBuy&&) = delete;
 
 	void draw();
 	void on_key(GameContext& ctx) override;

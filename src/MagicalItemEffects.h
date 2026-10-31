@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <array>
-
 #include <format>
 #include <stdexcept>
 #include <string_view>

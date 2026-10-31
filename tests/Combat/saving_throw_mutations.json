@@ -27,8 +27,8 @@
     },
     {
       "file": "src/SavingThrow.cpp",
-      "original": "\tcase CreatureClass::FIGHTER:\n\tcase CreatureClass::MONSTER:\n\t{\n\t\treturn warriorRows;",
-      "mutated": "\tcase CreatureClass::FIGHTER:\n\t{\n\t\treturn warriorRows;\n\t}\n\n\tcase CreatureClass::MONSTER:\n\t{\n\t\treturn rogueRows;",
+      "original": "\t\tcase CreatureClass::FIGHTER:\n\t\tcase CreatureClass::MONSTER:\n\t\t{\n\t\t\treturn warriorRows;",
+      "mutated": "\t\tcase CreatureClass::FIGHTER:\n\t\t{\n\t\t\treturn warriorRows;\n\t\t}\n\n\t\tcase CreatureClass::MONSTER:\n\t\t{\n\t\t\treturn rogueRows;",
       "catches": "a monster falling off the warrior rows it shares"
     },
     {

@@ -94,8 +94,9 @@ private:
 	// how this creature feels about the player
 	Attitude attitude{ Attitude::HOSTILE };
 	// law/chaos axis; true neutral until data says otherwise
-	Ethics ethics{ Ethics::NEUTRAL };
-	Morality morality{ Morality::NEUTRAL }; // good/evil axis
+	Alignment::Ethics ethics{ Alignment::Ethics::NEUTRAL };
+	// good/evil axis
+	Alignment::Morality morality{ Alignment::Morality::NEUTRAL };
 	// the clock reading this creature stops remembering the player at
 	int awareUntilTime{ 0 };
 
@@ -656,23 +657,23 @@ public:
 	//   creature.is_aware(360);           // -> false, three rounds later
 	void update_awareness(const GameContext& ctx);
 
-	[[nodiscard]] Ethics get_ethics() const noexcept { return ethics; }
+	[[nodiscard]] Alignment::Ethics get_ethics() const noexcept { return ethics; }
 
-	void set_ethics(Ethics value) noexcept { ethics = value; }
+	void set_ethics(Alignment::Ethics value) noexcept { ethics = value; }
 
-	[[nodiscard]] Morality get_morality() const noexcept { return morality; }
+	[[nodiscard]] Alignment::Morality get_morality() const noexcept { return morality; }
 
-	void set_morality(Morality value) noexcept { morality = value; }
+	void set_morality(Alignment::Morality value) noexcept { morality = value; }
 
 	// True when this creature is evil, which is what alignment-keyed effects
 	// such as Protection from Evil test.
 	//
 	// Example:
-	//   goblin.set_morality(Morality::EVIL);
+	//   goblin.set_morality(Alignment::Morality::EVIL);
 	//   goblin.is_evil(); // -> true
 	[[nodiscard]] bool is_evil() const noexcept
 	{
-		return morality == Morality::EVIL;
+		return morality == Alignment::Morality::EVIL;
 	}
 
 	[[nodiscard]] Attitude get_attitude() const noexcept { return attitude; }

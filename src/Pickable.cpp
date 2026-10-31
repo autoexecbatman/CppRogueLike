@@ -28,18 +28,14 @@
 #include <string>
 #include <variant>
 
-#include "DamageInfo.h"
-#include "DiceExpr.h"
-#include "PlayerTurn.h"
-#include "SavingThrow.h"
-#include "VariantVisitor.h"
-
 #include "Actor.h"
 #include "BuffSystem.h"
 #include "BuffType.h"
 #include "Colors.h"
 #include "Creature.h"
 #include "CreatureManager.h"
+#include "DamageInfo.h"
+#include "DiceExpr.h"
 #include "EquipmentSlot.h"
 #include "FloatingTextSystem.h"
 #include "GameContext.h"
@@ -54,6 +50,8 @@
 #include "Persistent.h"
 #include "Pickable.h"
 #include "Player.h"
+#include "PlayerTurn.h"
+#include "SavingThrow.h"
 #include "SpawnUtils.h"
 #include "SpellAnimations.h"
 #include "SpellSystem.h"
@@ -61,6 +59,7 @@
 #include "TargetingMenu.h"
 #include "TargetingSystem.h"
 #include "TurnSchedule.h"
+#include "VariantVisitor.h"
 #include "Vector2D.h"
 #include "Weapons.h"
 #include "Wording.h"

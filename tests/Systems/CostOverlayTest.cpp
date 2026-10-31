@@ -29,7 +29,7 @@ void expect_tint(Color actual, Color expected)
 
 TEST(CostOverlayTest, StartsHiddenAndEachToggleFlipsIt)
 {
-	CostOverlay overlay{};
+	DebugUtils::CostOverlay overlay{};
 	EXPECT_FALSE(overlay.is_visible());
 
 	overlay.toggle();
@@ -41,29 +41,41 @@ TEST(CostOverlayTest, StartsHiddenAndEachToggleFlipsIt)
 
 TEST(CostOverlayTest, AReachedTileIsLabelledWithItsCost)
 {
-	EXPECT_EQ(dijkstra_cost_label(0), std::optional<std::string>{ "0" });
-	EXPECT_EQ(dijkstra_cost_label(17), std::optional<std::string>{ "17" });
+	EXPECT_EQ(
+		DebugUtils::dijkstra_cost_label(0),
+		std::optional<std::string>{ "0" });
+	EXPECT_EQ(
+		DebugUtils::dijkstra_cost_label(17),
+		std::optional<std::string>{ "17" });
 }
 
 TEST(CostOverlayTest, ATileTheFloodNeverReachedHasNoLabel)
 {
-	EXPECT_EQ(dijkstra_cost_label(std::nullopt), std::nullopt);
+	EXPECT_EQ(DebugUtils::dijkstra_cost_label(std::nullopt), std::nullopt);
 }
 
 TEST(CostOverlayTest, ThePlayerTileIsNearAndTheFarthestTileIsFar)
 {
-	expect_tint(dijkstra_cost_tint(0, 40), COST_NEAR_TINT);
-	expect_tint(dijkstra_cost_tint(40, 40), COST_FAR_TINT);
+	expect_tint(
+		DebugUtils::dijkstra_cost_tint(0, 40),
+		DebugUtils::COST_NEAR_TINT);
+	expect_tint(
+		DebugUtils::dijkstra_cost_tint(40, 40),
+		DebugUtils::COST_FAR_TINT);
 }
 
 // Halfway is the mean of the two ends on every channel: (230+40)/2, (70+110)/2, (40+230)/2.
 TEST(CostOverlayTest, AHalfwayTileIsTintedHalfwayBetween)
 {
-	expect_tint(dijkstra_cost_tint(20, 40), Color{ 135, 90, 135, 120 });
+	expect_tint(
+		DebugUtils::dijkstra_cost_tint(20, 40),
+		Color{ 135, 90, 135, 120 });
 }
 
 // Only the player's own tile reached: the far end is cost 0 too, and must not divide by it.
 TEST(CostOverlayTest, WithOnlyThePlayerTileReachedItIsNear)
 {
-	expect_tint(dijkstra_cost_tint(0, 0), COST_NEAR_TINT);
+	expect_tint(
+		DebugUtils::dijkstra_cost_tint(0, 0),
+		DebugUtils::COST_NEAR_TINT);
 }

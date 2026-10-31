@@ -1,5 +1,6 @@
 #include <cassert>
 #include <memory>
+#include <optional>
 #include <span>
 #include <vector>
 
@@ -11,7 +12,6 @@
 #include "SpawnUtils.h"
 #include "TurnSchedule.h"
 #include "Vector2D.h"
-#include <optional>
 
 void CreatureManager::add_creature(
 	std::unique_ptr<Creature> creature,

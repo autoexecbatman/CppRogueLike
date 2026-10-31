@@ -25,6 +25,7 @@
 #include "MonsterCreator.h"
 #include "MonsterRegistry.h"
 #include "RandomDice.h"
+#include "Stairs.h"
 #include "TileType.h"
 #include "TreasureRoom.h"
 #include "Vector2D.h"

@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/AiMonster.cpp",
-      "original": "\t\towner.attacker->attack(target, AttackKind::MELEE, ctx);",
-      "mutated": "\t\towner.attacker->attack(*ctx.player(), AttackKind::MELEE, ctx);",
+      "original": "\t\towner.attacker->attack(target, AttackKind::AttackKind::MELEE, ctx);",
+      "mutated": "\t\towner.attacker->attack(*ctx.player(), AttackKind::AttackKind::MELEE, ctx);",
       "catches": "a hunter striking the player whoever it was handed"
     },
     {

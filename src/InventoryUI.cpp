@@ -62,23 +62,28 @@
 #include "TileConfig.h"
 #include "WeaponDamageRegistry.h"
 
-// Where one text row sits, and where a glyph sits inside it. Drawing and mouse
-// hit-testing both go through these, so a click always lands on the row the
-// player can see.
-static int row_top_y(int tileSize, int row)
+namespace
 {
-	return panel_text_row_y(0, tileSize, row);
-}
+	// The row a screen y falls in, for a panel filling the screen. Negative
+	// above the first row, which the callers test for rather than clamping.
+	// Slack either side of a tab's text, so a click just past the last glyph
+	// still counts.
+	constexpr int TAB_HIT_PADDING = 4;
 
-static int row_text_y(int tileSize, int fontSize, int row)
-{
-	return row_top_y(tileSize, row) + (UI_TEXT_ROW_PITCH - fontSize) / 2;
-}
+	// Where one text row sits, and where a glyph sits inside it. Drawing and
+	// mouse hit-testing both go through these, so a click always lands on the
+	// row the player can see.
+	int row_top_y(int tileSize, int row)
+	{
+		return panel_text_row_y(0, tileSize, row);
+	}
 
-// The row a screen y falls in, for a panel filling the screen. Negative above the
-// first row, which the callers test for rather than clamping.
-// Slack either side of a tab's text, so a click just past the last glyph still counts.
-constexpr int TAB_HIT_PADDING = 4;
+	int row_text_y(int tileSize, int fontSize, int row)
+	{
+		return row_top_y(tileSize, row) + (UI_TEXT_ROW_PITCH - fontSize) / 2;
+	}
+} // namespace
+
 
 namespace InventoryActions
 {

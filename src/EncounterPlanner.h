@@ -6,6 +6,7 @@
 #include "DungeonRoom.h"
 
 class MonsterRegistry;
+class RandomDice;
 struct GameContext;
 
 // A monster candidate for the knapsack solver.
@@ -15,8 +16,6 @@ struct MonsterCandidate
 	std::string key;
 	int xpCost;
 };
-
-class RandomDice;
 
 // The experience a room of this type is worth spending at this depth. An entrance
 // is worth nothing, so nothing is placed there.

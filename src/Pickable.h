@@ -4,12 +4,10 @@
 #include <array>
 #include <cassert>
 #include <cstddef>
-
 #include <format>
 #include <stdexcept>
 #include <string>
 #include <string_view>
-
 #include <type_traits>
 #include <variant>
 

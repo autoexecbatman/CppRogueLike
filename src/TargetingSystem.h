@@ -2,8 +2,7 @@
 
 #include <vector>
 
-#include "Actor.h"
-#include "TargetMode.h"
+#include "Creature.h"
 #include "Vector2D.h"
 
 struct GameContext;

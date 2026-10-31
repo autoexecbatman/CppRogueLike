@@ -19,8 +19,6 @@ private:
 	std::unordered_map<std::string, TileRef> itemTiles;
 
 public:
-	ContentRegistry() = default;
-
 	[[nodiscard]] TileRef get_tile(std::string_view key) const;
 	void set_tile(std::string_view key, TileRef tile);
 

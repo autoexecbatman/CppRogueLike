@@ -39,6 +39,7 @@
 #include "Renderer.h"
 #include "SavedEnum.h"
 #include "SpellTile.h"
+#include "Stairs.h"
 #include "TileConfig.h"
 #include "Trap.h"
 #include "TreasureRoom.h"

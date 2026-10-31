@@ -392,23 +392,31 @@ TEST(CodecRoundTripTest, OnlyAConfusedAiIsNotAuthorable)
 TEST(CodecRoundTripTest, AlignmentSurvivesEncoding)
 {
 	constexpr std::array ethics = {
-		Ethics::LAWFUL,
-		Ethics::NEUTRAL,
-		Ethics::CHAOTIC,
+		Alignment::Ethics::LAWFUL,
+		Alignment::Ethics::NEUTRAL,
+		Alignment::Ethics::CHAOTIC,
 	};
 	for (const auto axis : ethics)
 	{
-		expect_round_trip(axis, encode_ethics, parse_ethics, "Ethics");
+		expect_round_trip(
+			axis,
+			Alignment::encode_ethics,
+			Alignment::parse_ethics,
+			"Ethics");
 	}
 
 	constexpr std::array moralities = {
-		Morality::GOOD,
-		Morality::NEUTRAL,
-		Morality::EVIL,
+		Alignment::Morality::GOOD,
+		Alignment::Morality::NEUTRAL,
+		Alignment::Morality::EVIL,
 	};
 	for (const auto axis : moralities)
 	{
-		expect_round_trip(axis, encode_morality, parse_morality, "Morality");
+		expect_round_trip(
+			axis,
+			Alignment::encode_morality,
+			Alignment::parse_morality,
+			"Morality");
 	}
 }
 
@@ -476,8 +484,12 @@ TEST(CodecRoundTripTest, UnknownStringsThrow)
 {
 	EXPECT_THROW((void)parse_color_pair("puce"), std::runtime_error);
 	EXPECT_THROW((void)parse_damage_type("sonic"), std::runtime_error);
-	EXPECT_THROW((void)parse_ethics("scrupulous"), std::runtime_error);
-	EXPECT_THROW((void)parse_morality("saintly"), std::runtime_error);
+	EXPECT_THROW(
+		(void)Alignment::parse_ethics("scrupulous"),
+		std::runtime_error);
+	EXPECT_THROW(
+		(void)Alignment::parse_morality("saintly"),
+		std::runtime_error);
 	EXPECT_THROW((void)parse_creature_class("bard"), std::runtime_error);
 	EXPECT_THROW((void)parse_target_mode("not_a_mode"), std::runtime_error);
 	EXPECT_THROW(

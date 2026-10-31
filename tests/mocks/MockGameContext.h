@@ -90,7 +90,7 @@ struct MockGameContext
 	GameLoopCoordinator gameLoopCoordinator{};
 	TargetingSystem targeting{};
 	HungerSystem hungerSystem{};
-	CostOverlay costOverlay{};
+	DebugUtils::CostOverlay costOverlay{};
 	Minimap minimap{};
 	Gui gui{};
 	PrefabLibrary prefabLibrary{};

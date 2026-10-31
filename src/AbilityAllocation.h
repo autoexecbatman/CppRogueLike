@@ -42,6 +42,13 @@
 
 class RandomDice;
 
+// The score every ability starts Method VI at.
+inline constexpr int METHOD_SIX_STARTING_SCORE = 8;
+// How many dice the method rolls.
+inline constexpr int METHOD_SIX_DICE = 7;
+// The score no ability may pass.
+inline constexpr int ABILITY_MAXIMUM = 18;
+
 // The six, in the order every sheet and screen prints them.
 enum class Ability
 {
@@ -109,15 +116,6 @@ struct ClassMinimum
 //   class_ability_minimum(CreatureClass::MONSTER);         // -> nullopt
 [[nodiscard]] std::optional<ClassMinimum> class_ability_minimum(
 	CreatureClass creatureClass);
-
-// The score every ability starts Method VI at.
-inline constexpr int METHOD_SIX_STARTING_SCORE = 8;
-
-// How many dice the method rolls.
-inline constexpr int METHOD_SIX_DICE = 7;
-
-// The score no ability may pass.
-inline constexpr int ABILITY_MAXIMUM = 18;
 
 // The seven six-sided dice Method VI rolls, in the order they came up.
 //

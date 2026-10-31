@@ -65,6 +65,7 @@
 #include "src/MonsterAttacker.h"
 #include "src/MonsterCreator.h"
 #include "src/Paths.h"
+#include "src/Persistent.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/PlayerController.h"
@@ -208,7 +209,7 @@ TEST_F(AssertProbeDeathTest, AttackingWithNoStrengthAborts)
 	target->healthPool = std::make_unique<HealthPool>(10);
 
 	EXPECT_DEATH(
-		attacker->attacker->attack(*target, AttackKind::MELEE, ctx),
+		attacker->attacker->attack(*target, AttackKind::AttackKind::MELEE, ctx),
 		"attacked with no Strength");
 }
 

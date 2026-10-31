@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Colors.h"
 #include <optional>
 #include <string>
 #include <vector>
 
 #include "AiMonster.h"
+#include "Colors.h"
 #include "Creature.h"
 #include "Persistent.h"
 
@@ -64,10 +64,6 @@ private:
 	void transform_to_greater_mimic(Creature& owner, GameContext& ctx);
 
 public:
-	// possibleDisguises filled by on_created, or lazily on first update after a
-	// load
-	AiMimic() = default;
-
 	void update(Creature& owner, GameContext& ctx) override;
 
 	// Gathers the appearances it may wear and puts one on at random, so a mimic first

@@ -250,8 +250,8 @@ void Creature::load(const json& source)
 	gold = source.at("gold").get<int>();
 	gender = source.at("gender").get<std::string>();
 	naturalAttack = source.at("naturalAttack").get<std::string>();
-	ethics = parse_ethics(source.at("ethics").get<std::string>());
-	morality = parse_morality(source.at("morality").get<std::string>());
+	ethics = Alignment::parse_ethics(source.at("ethics").get<std::string>());
+	morality = Alignment::parse_morality(source.at("morality").get<std::string>());
 	undead = source.at("undead").get<bool>();
 	awareUntilTime = source.at("awareUntilTime").get<int>();
 	attitude = parse_attitude(source.at("attitude").get<std::string>());

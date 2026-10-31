@@ -15,30 +15,37 @@
 //
 // Usage - one attack, charged for what it took:
 //
-//   player.attacker->attack(target, AttackKind::MELEE, ctx);
-//   spend_player_action(ctx, attack_cost(player.get_attacks_per_round()));
+//   player.attacker->attack(target, AttackKind::AttackKind::MELEE, ctx);
+//   spend_player_action(
+//       ctx,
+//       AttackRate::attack_cost(player.get_attacks_per_round()));
 
 #include <cassert>
 
 #include "TurnSchedule.h"
 
-// What one attack costs on the clock, in time units, for a character with this many
-// attacks per round. A whole round divided by the rate: one attack a round costs a
-// round, three-halves costs two thirds of one, two costs half of one.
-//
-// Floors at one time unit, because an attack that cost nothing would repeat forever.
-//
-// Example, the three rates Table 58 gives a character:
-//   attack_cost(1.0f);   // -> 120
-//   attack_cost(1.5f);   // -> 80
-//   attack_cost(2.0f);   // -> 60
-[[nodiscard]] constexpr int attack_cost(float attacksPerRound)
+namespace AttackRate
 {
-	assert(
-		attacksPerRound > 0.0f &&
-		"attack_cost: a creature that never attacks has no attack to cost");
+	// What one attack costs on the clock, in time units, for a character with
+	// this many attacks per round. A whole round divided by the rate: one
+	// attack a round costs a round, three-halves costs two thirds of one, two
+	// costs half of one.
+	//
+	// Floors at one time unit, because an attack that cost nothing would repeat
+	// forever.
+	//
+	// Example, the three rates Table 58 gives a character:
+	//   AttackRate::attack_cost(1.0f); // -> 120
+	//   AttackRate::attack_cost(1.5f); // -> 80
+	//   AttackRate::attack_cost(2.0f); // -> 60
+	[[nodiscard]] constexpr int attack_cost(float attacksPerRound)
+	{
+		assert(
+			attacksPerRound > 0.0f &&
+			"attack_cost: a creature that never attacks has no attack to cost");
 
-	const int cost = static_cast<int>(
-		static_cast<float>(TIME_UNITS_PER_ROUND) / attacksPerRound);
-	return cost >= 1 ? cost : 1;
-}
+		const int cost = static_cast<int>(
+			static_cast<float>(TIME_UNITS_PER_ROUND) / attacksPerRound);
+		return cost >= 1 ? cost : 1;
+	}
+} // namespace AttackRate

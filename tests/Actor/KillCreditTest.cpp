@@ -193,7 +193,7 @@ TEST_F(KillCreditTest, AGoblinThePlayersBlowKillsPaysItsWorthAndOneKill)
 
 	player->attacker = std::make_unique<PlayerAttacker>(*player);
 
-	player->attacker->attack(goblin, AttackKind::MELEE, ctx);
+	player->attacker->attack(goblin, AttackKind::AttackKind::MELEE, ctx);
 
 	ASSERT_TRUE(goblin.is_dead()) << "the blow did not kill the goblin";
 	EXPECT_EQ(player->get_xp(), GOBLIN_XP);

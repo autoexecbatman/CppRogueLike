@@ -15,7 +15,6 @@
 #include "CorpseEdibility.h"
 #include "CreatureSize.h"
 #include "DamageInfo.h"
-#include "DiceExpr.h"
 #include "EquipmentSlot.h"
 #include "IntelligenceRating.h"
 #include "MonsterHitDice.h"
@@ -93,9 +92,9 @@ struct MonsterParams
 	// Whether it is undead, and so can be turned.
 	bool undead{ false };
 	// Its alignment, law against chaos.
-	Ethics ethics{ Ethics::NEUTRAL };
+	Alignment::Ethics ethics{ Alignment::Ethics::NEUTRAL };
 	// Its alignment, good against evil.
-	Morality morality{ Morality::NEUTRAL };
+	Alignment::Morality morality{ Alignment::Morality::NEUTRAL };
 	// What its corpse weighs.
 	int corpseWeight{ 50 };
 	// How much eating its corpse feeds, whether it can be eaten at all, and the line printed

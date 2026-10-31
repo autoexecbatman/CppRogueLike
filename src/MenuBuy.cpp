@@ -2,7 +2,6 @@
 #include <cassert>
 #include <string>
 
-#include "Actor.h"
 #include "Colors.h"
 #include "Creature.h"
 #include "GameContext.h"

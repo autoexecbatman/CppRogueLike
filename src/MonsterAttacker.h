@@ -16,9 +16,9 @@ private:
 public:
 	MonsterAttacker(Creature& owner, const DamageInfo& damage);
 
-	AttackResult attack(
+	AttackResult::AttackResult attack(
 		Creature& target,
-		AttackKind kind,
+		AttackKind::AttackKind kind,
 		GameContext& ctx) override;
 
 	// load/save delegate to Attacker base (DamageInfo serialization).

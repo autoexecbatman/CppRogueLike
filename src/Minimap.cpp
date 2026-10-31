@@ -12,6 +12,18 @@
 #include "Stairs.h"
 #include "TileConfig.h"
 
+namespace
+{
+	// How much of the window the overlay may take across and down. The pixels
+	// per map tile are worked out from this and the map's own size, because a
+	// fixed two pixels a tile made a 120x80 map a 240x160 postage stamp in
+	// which a single explored room was five pixels across.
+	constexpr int MAX_WIDTH_PERCENT = 40;
+	constexpr int MAX_HEIGHT_PERCENT = 55;
+	constexpr int PADDING = 8;
+	constexpr int BORDER = 3;
+} // namespace
+
 void Minimap::toggle() noexcept
 {
 	visible = !visible;

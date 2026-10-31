@@ -42,10 +42,6 @@ std::string strength_text(const Player& player)
 	return std::format("18/{:02d}", exceptional % 100);
 }
 
-} // namespace
-
-namespace
-{
 // Defined with the other private helpers below.
 std::string strength_text(const Player& player);
 } // namespace
@@ -60,7 +56,7 @@ std::string strength_line(const Player& player, const DataManager& dataManager)
 	const AttackStrength::Adjustment swing = AttackStrength::adjustment(
 		dataManager,
 		player,
-		AttackKind::MELEE,
+		AttackKind::AttackKind::MELEE,
 		nullptr);
 
 	return std::format(
@@ -238,7 +234,7 @@ void display_equipment_info(const Player& player, GameContext& ctx, int& row)
 	const AttackStrength::Adjustment swing = AttackStrength::adjustment(
 		*ctx.dataManager,
 		player,
-		AttackKind::MELEE,
+		AttackKind::AttackKind::MELEE,
 		nullptr);
 	const int strDmgMod = swing.damage;
 

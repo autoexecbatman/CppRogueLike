@@ -1,10 +1,9 @@
 #pragma once
 
-#include "Colors.h"
-
 #include <string>
 #include <vector>
 
+#include "Colors.h"
 #include "LogMessage.h"
 #include "Persistent.h"
 

@@ -1,10 +1,9 @@
 #pragma once
 
-#include "Colors.h"
-
 #include <optional>
 #include <string>
 
+#include "Colors.h"
 #include "InputSystem.h"
 
 class Renderer;

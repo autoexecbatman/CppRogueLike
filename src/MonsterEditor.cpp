@@ -43,44 +43,44 @@ MonsterRegistry& monster_registry(const GameContext& ctx)
 // Alignment fields cycle through their axis rather than being typed, so each
 // press moves one step and wraps at the end. The names come from Alignment.h,
 // beside the enums, so the editor shows what a record carries.
-Ethics next_ethics(Ethics ethics)
+Alignment::Ethics next_ethics(Alignment::Ethics ethics)
 {
 	switch (ethics)
 	{
-	case Ethics::LAWFUL:
+	case Alignment::Ethics::LAWFUL:
 	{
-		return Ethics::NEUTRAL;
+		return Alignment::Ethics::NEUTRAL;
 	}
-	case Ethics::NEUTRAL:
+	case Alignment::Ethics::NEUTRAL:
 	{
-		return Ethics::CHAOTIC;
+		return Alignment::Ethics::CHAOTIC;
 	}
-	case Ethics::CHAOTIC:
+	case Alignment::Ethics::CHAOTIC:
 	{
-		return Ethics::LAWFUL;
+		return Alignment::Ethics::LAWFUL;
 	}
 	}
-	return Ethics::NEUTRAL;
+	return Alignment::Ethics::NEUTRAL;
 }
 
-Morality next_morality(Morality morality)
+Alignment::Morality next_morality(Alignment::Morality morality)
 {
 	switch (morality)
 	{
-	case Morality::GOOD:
+	case Alignment::Morality::GOOD:
 	{
-		return Morality::NEUTRAL;
+		return Alignment::Morality::NEUTRAL;
 	}
-	case Morality::NEUTRAL:
+	case Alignment::Morality::NEUTRAL:
 	{
-		return Morality::EVIL;
+		return Alignment::Morality::EVIL;
 	}
-	case Morality::EVIL:
+	case Alignment::Morality::EVIL:
 	{
-		return Morality::GOOD;
+		return Alignment::Morality::GOOD;
 	}
 	}
-	return Morality::NEUTRAL;
+	return Alignment::Morality::NEUTRAL;
 }
 
 std::string prettify_key(std::string_view key)

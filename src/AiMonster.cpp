@@ -1,3 +1,4 @@
+#include <array>
 #include <cassert>
 #include <optional>
 #include <vector>
@@ -18,7 +19,7 @@
 
 namespace
 {
-const std::vector<Vector2D>
+constexpr std::array<Vector2D, 8>
 	NEIGHBORS = { DIR_N, DIR_S, DIR_W, DIR_E, DIR_NW, DIR_NE, DIR_SW, DIR_SE };
 
 // AD&D 2e: Move away from player, up the cost map this creature would descend to reach it.
@@ -77,7 +78,7 @@ void flee(Creature& owner, GameContext& ctx)
 		if (owner.get_tile_distance(ctx.player()->position) <= 1)
 		{
 			owner.remove_state(ActorState::IS_FLEEING);
-			owner.attacker->attack(*ctx.player(), AttackKind::MELEE, ctx);
+			owner.attacker->attack(*ctx.player(), AttackKind::AttackKind::MELEE, ctx);
 		}
 		// else: hold position, keep IS_FLEEING - player has not cornered us yet
 	}
@@ -193,7 +194,7 @@ void AiMonster::move_or_attack(
 	int distanceToTarget = owner.get_tile_distance(target.position);
 	if (distanceToTarget <= 1)
 	{
-		owner.attacker->attack(target, AttackKind::MELEE, ctx);
+		owner.attacker->attack(target, AttackKind::AttackKind::MELEE, ctx);
 		return;
 	}
 
