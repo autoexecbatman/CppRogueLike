@@ -180,6 +180,12 @@
       "original": "\"appearance\": \"padded armor\",\n        \"application\": \"add\",\n        \"armorMaterial\": \"cloth\",",
       "mutated": "\"appearance\": \"padded armor\",\n        \"application\": \"add\",\n        \"armorMaterial\": \"leather\",",
       "catches": "padded armour shipped as leather"
+    },
+    {
+      "file": "data/content/items.json",
+      "original": "    \"hide_armor\": {\n        \"acBonus\": -4,",
+      "mutated": "    \"hide_armor\": {\n        \"acBonus\": -3,",
+      "catches": "hide armour at AC 7, where Table 46 gives 6"
     }
   ]
 }

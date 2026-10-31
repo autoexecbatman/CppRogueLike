@@ -62,6 +62,7 @@ namespace
 	constexpr int LEATHER_ARMOR_CLASS = 8;
 	constexpr int PADDED_ARMOR_CLASS = 8;
 	constexpr int STUDDED_LEATHER_ARMOR_CLASS = 7;
+	constexpr int HIDE_ARMOR_CLASS = 6;
 	constexpr int CHAIN_MAIL_ARMOR_CLASS = 5;
 	constexpr int LEATHER_AND_SHIELD_ARMOR_CLASS = 7;
 	// The shipped cloak and ring are each +1.
@@ -152,16 +153,19 @@ TEST_F(CloakOfProtectionTest, ACloakOverStuddedLeatherBettersItByItsPlus)
 	EXPECT_EQ(armor_class(), STUDDED_LEATHER_ARMOR_CLASS - CLOAK_PLUS);
 }
 
-// Relative to hide alone: Table 46 gives hide 6, and the shipped record gives
-// 7, a data defect of its own that this test does not decide.
+TEST_F(CloakOfProtectionTest, HideArmourAloneIsArmourClassSix)
+{
+	wear("hide_armor");
+
+	EXPECT_EQ(armor_class(), HIDE_ARMOR_CLASS);
+}
+
 TEST_F(CloakOfProtectionTest, ACloakOverHideBettersItByItsPlus)
 {
 	wear("hide_armor");
-	const int hideAlone = armor_class();
-
 	wear("cloak_of_protection");
 
-	EXPECT_EQ(armor_class(), hideAlone - CLOAK_PLUS);
+	EXPECT_EQ(armor_class(), HIDE_ARMOR_CLASS - CLOAK_PLUS);
 }
 
 TEST_F(CloakOfProtectionTest, ACloakOverPaddedArmourGivesNothing)

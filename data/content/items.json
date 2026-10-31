@@ -1978,7 +1978,7 @@
         "wisBonus": 0
     },
     "hide_armor": {
-        "acBonus": -3,
+        "acBonus": -4,
         "agesYears": 0,
         "appearance": "hide armor",
         "application": "add",
