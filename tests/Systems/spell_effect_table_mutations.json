@@ -1,0 +1,83 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/run_suite.ps1",
+    "-Configuration",
+    "Debug",
+    "-Filter",
+    "--gtest_filter=SpellEffectTableTest.*:SpellDataLoadTest.*:SpellCodecRoundTripTest.*:SpellRegistryTest.*:SpellcastingTest.*:KnockSpellTest.*:SilenceSpellTest.*:NoEffectSpellTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/SpellRegistry.h",
+      "original": "\t\t{ SpellEffectType::KNOCK, \"knock\", \"Knock\" },",
+      "mutated": "\t\t{ SpellEffectType::KNOCK, \"knock\", \"Knok\" },",
+      "catches": "one effect's name misspelt, so the editor shows it wrong"
+    },
+    {
+      "file": "src/SpellEditor.cpp",
+      "original": "\treturn std::string{ spell_effect_record(effectType).name };",
+      "mutated": "\treturn std::string{ spell_effect_record(effectType).key };",
+      "catches": "the editor showing an effect's key instead of its name"
+    },
+    {
+      "file": "src/SpellRegistry.cpp",
+      "original": "\treturn std::string{ spell_effect_record(effect).key };",
+      "mutated": "\treturn std::string{ spell_effect_record(effect).name };",
+      "catches": "a custom spell's effect saved under its name, which the load refuses"
+    },
+    {
+      "file": "src/SpellRegistry.cpp",
+      "original": "std::ranges::find(\n\t\t\tSPELL_EFFECT_TABLE,\n\t\t\ttext,\n\t\t\t&SpellEffectRecord::key);",
+      "mutated": "std::ranges::find(SPELL_EFFECT_TABLE, text, &SpellEffectRecord::name);",
+      "catches": "a saved effect looked up by name, so no key loads"
+    },
+    {
+      "file": "src/SpellRegistry.cpp",
+      "original": "std::span{ SPELL_EFFECT_TABLE }.first<SPELL_EFFECT_COUNT - 1>();",
+      "mutated": "std::span{ SPELL_EFFECT_TABLE }.first<SPELL_EFFECT_COUNT>();",
+      "catches": "NONE made a builtin spell"
+    },
+    {
+      "file": "src/SpellRegistry.cpp",
+      "original": "std::span{ SPELL_EFFECT_TABLE }.first<SPELL_EFFECT_COUNT - 1>();",
+      "mutated": "std::span{ SPELL_EFFECT_TABLE }.first<SPELL_EFFECT_COUNT - 2>();",
+      "catches": "the last effect's spell no longer a builtin"
+    },
+    {
+      "file": "src/SpellEditor.cpp",
+      "original": "\t\treturn SPELL_EFFECT_TABLE.front().effect;",
+      "mutated": "\t\treturn SPELL_EFFECT_TABLE[1].effect;",
+      "catches": "the effect field wrapping from NONE past the first effect"
+    },
+    {
+      "file": "src/SpellEditor.cpp",
+      "original": "\t\treturn SPELL_EFFECT_TABLE.back().effect;",
+      "mutated": "\t\treturn found->effect;",
+      "catches": "the effect field stuck at the first effect going back"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\tresult = cast_knock(caster, ctx);",
+      "mutated": "\t\tresult = cast_teleport(caster, ctx);",
+      "catches": "casting knock running another spell's effect"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\tcast_silence(caster, std::move(onSuccess), ctx);",
+      "mutated": "\t\tcast_web(caster, std::move(onSuccess), ctx);",
+      "catches": "the silence arm casting web"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\"Spell not implemented yet.\",\n\t\t\t\t\tMessageCompletion::FINISHED);\n\t\t\t\tbreak;",
+      "mutated": "\t\t\t\t\"Spell not implemented yet.\",\n\t\t\t\tMessageCompletion::FINISHED);\n\t\t\tresult = true;\n\t\t\tbreak;",
+      "catches": "a spell with no effect spending its casting"
+    }
+  ]
+}

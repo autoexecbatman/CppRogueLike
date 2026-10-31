@@ -238,6 +238,10 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/AbilityTableTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellDataLoadTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellRegistryTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellEffectTableTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/KnockSpellTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SilenceSpellTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/NoEffectSpellTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/InventoryPersistenceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/HungerSystemTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/LoadRefusalTest.cpp

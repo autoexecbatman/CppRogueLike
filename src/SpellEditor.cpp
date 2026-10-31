@@ -1,4 +1,5 @@
 // file: SpellEditor.cpp
+#include <algorithm>
 #include <cassert>
 #include <format>
 #include <optional>
@@ -45,85 +46,55 @@ namespace
 		return RowTag{ "W", Color{ 255, 160, 80, 255 } };
 	}
 
+	// The name the editor shows for an effect.
+	//
+	// Example:
+	//   effect_type_name(SpellEffectType::KNOCK);   // -> "Knock"
 	std::string effect_type_name(SpellEffectType effectType)
 	{
-		switch (effectType)
-		{
-		case SpellEffectType::CURE_LIGHT_WOUNDS:
-		{
-			return "Cure Light Wounds";
-		}
-		case SpellEffectType::BLESS:
-		{
-			return "Bless";
-		}
-		case SpellEffectType::SANCTUARY:
-		{
-			return "Sanctuary";
-		}
-		case SpellEffectType::HOLD_PERSON:
-		{
-			return "Hold Person";
-		}
-		case SpellEffectType::SILENCE:
-		{
-			return "Silence";
-		}
-		case SpellEffectType::MAGIC_MISSILE:
-		{
-			return "Magic Missile";
-		}
-		case SpellEffectType::SHIELD:
-		{
-			return "Shield";
-		}
-		case SpellEffectType::SLEEP:
-		{
-			return "Sleep";
-		}
-		case SpellEffectType::INVISIBILITY:
-		{
-			return "Invisibility";
-		}
-		case SpellEffectType::WEB:
-		{
-			return "Web";
-		}
-		case SpellEffectType::FIREBALL:
-		{
-			return "Fireball";
-		}
-		case SpellEffectType::TELEPORT:
-		{
-			return "Teleport";
-		}
-		default:
-		{
-			return "None";
-		}
-		}
+		return std::string{ spell_effect_record(effectType).name };
 	}
 
+	// The effect after this one in table order, wrapping from NONE to the
+	// first.
+	//
+	// Example:
+	//   effect_type_next(SpellEffectType::NONE);   // -> CURE_LIGHT_WOUNDS
 	SpellEffectType effect_type_next(SpellEffectType effectType)
 	{
-		int value = static_cast<int>(effectType) + 1;
-		constexpr int LAST = static_cast<int>(SpellEffectType::NONE);
-		if (value > LAST)
+		const auto found = std::ranges::find(
+			SPELL_EFFECT_TABLE,
+			effectType,
+			&SpellEffectRecord::effect);
+		assert(
+			found != SPELL_EFFECT_TABLE.end() &&
+			"SpellEditor::effect_type_next: an effect with no table row");
+		if (found + 1 == SPELL_EFFECT_TABLE.end())
 		{
-			value = 0;
+			return SPELL_EFFECT_TABLE.front().effect;
 		}
-		return static_cast<SpellEffectType>(value);
+		return (found + 1)->effect;
 	}
 
+	// The effect before this one in table order, wrapping from the first to
+	// NONE.
+	//
+	// Example:
+	//   effect_type_prev(SpellEffectType::CURE_LIGHT_WOUNDS);   // -> NONE
 	SpellEffectType effect_type_prev(SpellEffectType effectType)
 	{
-		int value = static_cast<int>(effectType) - 1;
-		constexpr int LAST = static_cast<int>(SpellEffectType::NONE);
-		if (value < 0)
+		const auto found = std::ranges::find(
+			SPELL_EFFECT_TABLE,
+			effectType,
+			&SpellEffectRecord::effect);
+		assert(
+			found != SPELL_EFFECT_TABLE.end() &&
+			"SpellEditor::effect_type_prev: an effect with no table row");
+		if (found == SPELL_EFFECT_TABLE.begin())
 		{
-			value = LAST;
+			return SPELL_EFFECT_TABLE.back().effect;
 		}
-		return static_cast<SpellEffectType>(value);
+		return (found - 1)->effect;
 	}
 
 } // namespace

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+#include <cstddef>
 #include <functional>
 #include <map>
 #include <string>
@@ -60,6 +62,81 @@ enum class SpellEffectType
 	KNOCK,
 	NONE
 };
+
+// One spell effect, a row of SPELL_EFFECT_TABLE.
+struct SpellEffectRecord
+{
+	// The effect this row is for.
+	SpellEffectType effect{ SpellEffectType::NONE };
+	// Its key in spells.json, and the key of the builtin spell that casts it.
+	std::string_view key{};
+	// What the spell editor shows for it.
+	std::string_view name{};
+};
+
+// How many effects there are, NONE included, as a size.
+inline constexpr std::size_t SPELL_EFFECT_COUNT =
+	static_cast<std::size_t>(SpellEffectType::NONE) + 1;
+
+// Every SpellEffectType, one row each in the order the enum declares them.
+// This is the only list of the effects; everything that names them reads it.
+inline constexpr std::array<SpellEffectRecord, SPELL_EFFECT_COUNT>
+	SPELL_EFFECT_TABLE{ {
+		{
+			SpellEffectType::CURE_LIGHT_WOUNDS,
+			"cure_light_wounds",
+			"Cure Light Wounds",
+		},
+		{ SpellEffectType::BLESS, "bless", "Bless" },
+		{ SpellEffectType::SANCTUARY, "sanctuary", "Sanctuary" },
+		{
+			SpellEffectType::PROTECTION_FROM_EVIL,
+			"protection_from_evil",
+			"Protection From Evil",
+		},
+		{ SpellEffectType::HOLD_PERSON, "hold_person", "Hold Person" },
+		{ SpellEffectType::SILENCE, "silence", "Silence" },
+		{ SpellEffectType::MAGIC_MISSILE, "magic_missile", "Magic Missile" },
+		{ SpellEffectType::SHIELD, "shield", "Shield" },
+		{ SpellEffectType::SLEEP, "sleep", "Sleep" },
+		{ SpellEffectType::INVISIBILITY, "invisibility", "Invisibility" },
+		{ SpellEffectType::WEB, "web", "Web" },
+		{ SpellEffectType::FIREBALL, "fireball", "Fireball" },
+		{ SpellEffectType::TELEPORT, "teleport", "Teleport" },
+		{ SpellEffectType::KNOCK, "knock", "Knock" },
+		{ SpellEffectType::NONE, "none", "None" },
+	} };
+
+// Whether row n of the table holds effect n with a key and a name. An effect
+// added to the enum without a row leaves a defaulted row, which fails this.
+[[nodiscard]] constexpr bool is_spell_effect_table_in_enum_order()
+{
+	for (std::size_t row = 0; row < SPELL_EFFECT_TABLE.size(); ++row)
+	{
+		if (SPELL_EFFECT_TABLE[row].effect !=
+				static_cast<SpellEffectType>(row) ||
+			SPELL_EFFECT_TABLE[row].key.empty() ||
+			SPELL_EFFECT_TABLE[row].name.empty())
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+static_assert(
+	is_spell_effect_table_in_enum_order(),
+	"SPELL_EFFECT_TABLE needs one row per SpellEffectType, in enum order");
+
+// The table's row for an effect.
+//
+// Example:
+//   spell_effect_record(SpellEffectType::KNOCK).name;   // -> "Knock"
+[[nodiscard]] constexpr const SpellEffectRecord& spell_effect_record(
+	SpellEffectType effect)
+{
+	return SPELL_EFFECT_TABLE.at(static_cast<std::size_t>(effect));
+}
 
 // One spell as the menus show it and casting dispatches it.
 struct SpellDefinition

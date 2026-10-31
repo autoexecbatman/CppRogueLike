@@ -344,8 +344,10 @@ namespace SpellSystem
 				return;
 			}
 
-			// Targeted spells: async via TargetingMenu - onSuccess is forwarded
-			// into the callback
+			// The targeted three open a targeting menu and pass onSuccess on;
+			// the rest cast at once. With no default, -Wswitch names an effect
+			// with no arm.
+			bool result = false;
 			switch (effect)
 			{
 
@@ -366,17 +368,6 @@ namespace SpellSystem
 				cast_fireball(caster, std::move(onSuccess), ctx);
 				return;
 			}
-
-			default:
-			{
-				break;
-			}
-			}
-
-			// Instant spells: cast synchronously, call onSuccess if successful
-			bool result = false;
-			switch (effect)
-			{
 
 			case SpellEffectType::CURE_LIGHT_WOUNDS:
 			{
@@ -449,7 +440,7 @@ namespace SpellSystem
 				break;
 			}
 
-			default:
+			case SpellEffectType::NONE:
 			{
 				ctx.messageSystem->message(
 					ColorPairId::WHITE_BLACK,

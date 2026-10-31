@@ -1,9 +1,11 @@
+#include <algorithm>
 #include <array>
 #include <cctype>
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <map>
+#include <span>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -17,37 +19,17 @@
 
 namespace
 {
-	// A builtin spell's key and the effect compiled in for it.
-	struct BuiltinSpell
-	{
-		std::string_view key{};
-		SpellEffectType effect{ SpellEffectType::NONE };
-	};
-
-	// Every builtin, in the order get_all_keys lists them.
-	constexpr auto BUILTIN_SPELLS = std::to_array<BuiltinSpell>({
-		{ "cure_light_wounds", SpellEffectType::CURE_LIGHT_WOUNDS },
-		{ "bless", SpellEffectType::BLESS },
-		{ "sanctuary", SpellEffectType::SANCTUARY },
-		{ "protection_from_evil", SpellEffectType::PROTECTION_FROM_EVIL },
-		{ "hold_person", SpellEffectType::HOLD_PERSON },
-		{ "silence", SpellEffectType::SILENCE },
-		{ "magic_missile", SpellEffectType::MAGIC_MISSILE },
-		{ "shield", SpellEffectType::SHIELD },
-		{ "sleep", SpellEffectType::SLEEP },
-		{ "invisibility", SpellEffectType::INVISIBILITY },
-		{ "web", SpellEffectType::WEB },
-		{ "fireball", SpellEffectType::FIREBALL },
-		{ "teleport", SpellEffectType::TELEPORT },
-		{ "knock", SpellEffectType::KNOCK },
-	});
+	// Every builtin spell: one per effect, NONE excepted, under the effect's
+	// key and in table order, which is the order get_all_keys lists them.
+	constexpr std::span<const SpellEffectRecord> BUILTIN_SPELLS =
+		std::span{ SPELL_EFFECT_TABLE }.first<SPELL_EFFECT_COUNT - 1>();
 
 	// Every builtin holding its effect and no data yet.
 	std::map<std::string, SpellDefinition, std::less<>>
 	builtin_spells_with_effects()
 	{
 		std::map<std::string, SpellDefinition, std::less<>> spells{};
-		for (const BuiltinSpell& builtin : BUILTIN_SPELLS)
+		for (const SpellEffectRecord& builtin : BUILTIN_SPELLS)
 		{
 			spells.emplace(
 				std::string{ builtin.key },
@@ -93,65 +75,13 @@ namespace
 
 	SpellEffectType parse_effect_type(std::string_view text)
 	{
-		if (text == "cure_light_wounds")
+		const auto found = std::ranges::find(
+			SPELL_EFFECT_TABLE,
+			text,
+			&SpellEffectRecord::key);
+		if (found != SPELL_EFFECT_TABLE.end())
 		{
-			return SpellEffectType::CURE_LIGHT_WOUNDS;
-		}
-		else if (text == "bless")
-		{
-			return SpellEffectType::BLESS;
-		}
-		else if (text == "protection_from_evil")
-		{
-			return SpellEffectType::PROTECTION_FROM_EVIL;
-		}
-		else if (text == "sanctuary")
-		{
-			return SpellEffectType::SANCTUARY;
-		}
-		else if (text == "hold_person")
-		{
-			return SpellEffectType::HOLD_PERSON;
-		}
-		else if (text == "silence")
-		{
-			return SpellEffectType::SILENCE;
-		}
-		else if (text == "magic_missile")
-		{
-			return SpellEffectType::MAGIC_MISSILE;
-		}
-		else if (text == "shield")
-		{
-			return SpellEffectType::SHIELD;
-		}
-		else if (text == "sleep")
-		{
-			return SpellEffectType::SLEEP;
-		}
-		else if (text == "invisibility")
-		{
-			return SpellEffectType::INVISIBILITY;
-		}
-		else if (text == "web")
-		{
-			return SpellEffectType::WEB;
-		}
-		else if (text == "fireball")
-		{
-			return SpellEffectType::FIREBALL;
-		}
-		else if (text == "teleport")
-		{
-			return SpellEffectType::TELEPORT;
-		}
-		else if (text == "knock")
-		{
-			return SpellEffectType::KNOCK;
-		}
-		else if (text == "none")
-		{
-			return SpellEffectType::NONE;
+			return found->effect;
 		}
 
 		throw std::runtime_error(
@@ -160,83 +90,7 @@ namespace
 
 	std::string encode_effect_type(SpellEffectType effect)
 	{
-		switch (effect)
-		{
-		case SpellEffectType::CURE_LIGHT_WOUNDS:
-		{
-			return "cure_light_wounds";
-		}
-
-		case SpellEffectType::BLESS:
-		{
-			return "bless";
-		}
-
-		case SpellEffectType::SANCTUARY:
-		{
-			return "sanctuary";
-		}
-
-		case SpellEffectType::PROTECTION_FROM_EVIL:
-		{
-			return "protection_from_evil";
-		}
-
-		case SpellEffectType::HOLD_PERSON:
-		{
-			return "hold_person";
-		}
-
-		case SpellEffectType::SILENCE:
-		{
-			return "silence";
-		}
-
-		case SpellEffectType::MAGIC_MISSILE:
-		{
-			return "magic_missile";
-		}
-
-		case SpellEffectType::SHIELD:
-		{
-			return "shield";
-		}
-
-		case SpellEffectType::SLEEP:
-		{
-			return "sleep";
-		}
-
-		case SpellEffectType::INVISIBILITY:
-		{
-			return "invisibility";
-		}
-
-		case SpellEffectType::WEB:
-		{
-			return "web";
-		}
-
-		case SpellEffectType::FIREBALL:
-		{
-			return "fireball";
-		}
-
-		case SpellEffectType::TELEPORT:
-		{
-			return "teleport";
-		}
-
-		case SpellEffectType::KNOCK:
-		{
-			return "knock";
-		}
-
-		default:
-		{
-			return "none";
-		}
-		}
+		return std::string{ spell_effect_record(effect).key };
 	}
 } // namespace
 
@@ -263,7 +117,7 @@ void SpellRegistry::load(std::string_view path)
 
 	// Every builtin's name, level, class and description are data, the table holding
 	// only its effect, so a file without one is refused.
-	for (const BuiltinSpell& builtin : BUILTIN_SPELLS)
+	for (const SpellEffectRecord& builtin : BUILTIN_SPELLS)
 	{
 		const std::string key{ builtin.key };
 		if (!root.contains(key))
@@ -313,7 +167,7 @@ void SpellRegistry::save(std::string_view path) const
 
 	nlohmann::json root = nlohmann::json::object();
 
-	for (const BuiltinSpell& builtin : BUILTIN_SPELLS)
+	for (const SpellEffectRecord& builtin : BUILTIN_SPELLS)
 	{
 		const std::string key{ builtin.key };
 		const SpellDefinition& definition = builtinSpells.at(key);
@@ -358,7 +212,7 @@ std::vector<std::string> SpellRegistry::get_all_keys() const
 {
 	std::vector<std::string> keys;
 	keys.reserve(BUILTIN_SPELLS.size() + customSpells.size());
-	for (const BuiltinSpell& builtin : BUILTIN_SPELLS)
+	for (const SpellEffectRecord& builtin : BUILTIN_SPELLS)
 	{
 		keys.push_back(std::string{ builtin.key });
 	}
@@ -488,7 +342,7 @@ std::vector<std::string> SpellRegistry::get_available_spells(
 	};
 
 	std::vector<std::string> available;
-	for (const BuiltinSpell& builtin : BUILTIN_SPELLS)
+	for (const SpellEffectRecord& builtin : BUILTIN_SPELLS)
 	{
 		if (is_available(builtinSpells.at(std::string{ builtin.key })))
 		{
