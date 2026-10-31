@@ -182,6 +182,7 @@ public:
 	[[nodiscard]] const SpellDefinition& get_by_key(std::string_view key) const;
 
 	// Replaces a builtin or custom spell. Throws std::out_of_range if key is unknown.
+	// A builtin keeps its effect: the definition must carry the one it has.
 	void set_by_key(std::string_view key, const SpellDefinition& definition);
 
 	// Adds a user-created spell under a key made from its name, numbered past any key

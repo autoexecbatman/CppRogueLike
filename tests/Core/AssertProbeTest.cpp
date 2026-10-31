@@ -72,6 +72,7 @@
 #include "src/RandomDice.h"
 #include "src/Renderer.h"
 #include "src/ShopKeeper.h"
+#include "src/SpellRegistry.h"
 #include "src/SpellSystem.h"
 #include "src/TargetingSystem.h"
 #include "src/TurnUndead.h"
@@ -894,4 +895,17 @@ TEST_F(AssertProbeDeathTest, ACanvasGridOfNoCellSizeAborts)
 	EXPECT_DEATH(
 		[[maybe_unused]] const CanvasGrid grid(0, 0, 0),
 		"CanvasGrid: a cell has no size");
+}
+
+// A builtin spell's effect is compiled in and is that spell's identity, so a
+// definition carrying another effect came past the editor's refusal.
+TEST_F(AssertProbeDeathTest, ChangingABuiltinSpellsEffectAborts)
+{
+	SpellRegistry spells{};
+	SpellDefinition changed = spells.get_by_key("knock");
+	changed.effect_type = SpellEffectType::TELEPORT;
+
+	EXPECT_DEATH(
+		spells.set_by_key("knock", changed),
+		"SpellRegistry::set_by_key: a builtin spell's effect is fixed");
 }

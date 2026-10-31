@@ -201,6 +201,11 @@ std::optional<RowTag> MonsterEditorModel::working_row_tag() const
 	return std::nullopt;
 }
 
+bool MonsterEditorModel::is_read_only([[maybe_unused]] FieldId field) const
+{
+	return false;
+}
+
 // ---------------------------------------------------------------------------
 // Fields
 // ---------------------------------------------------------------------------

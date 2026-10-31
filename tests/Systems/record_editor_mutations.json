@@ -270,6 +270,48 @@
             "original": "\tif (input.is_pressed(EditorKey::ESCAPE) ||\n\t\tinput.is_pressed(EditorKey::PICKER))",
             "mutated": "\tif (input.is_pressed(EditorKey::PICKER))",
             "catches": "Esc in the picker leaving the picker open"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\t// A field the record holds fixed takes no edit key.\n\tif (model.is_read_only(fieldId))\n\t{\n\t\treturn;\n\t}\n\n",
+            "mutated": "",
+            "catches": "a read-only field still taking every edit key"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\tif (model.is_read_only(fieldId))\n\t{\n\t\treturn;",
+            "mutated": "\tif (model.is_read_only(fieldId) && !input.is_pressed(EditorKey::ENTER))\n\t{\n\t\treturn;",
+            "catches": "Enter still stepping a read-only field"
+        },
+        {
+            "file": "src/SpellEditor.cpp",
+            "original": "\treturn isWorkingBuiltin && field == FieldId::EFFECT_TYPE;",
+            "mutated": "\treturn false;",
+            "catches": "a builtin spell's effect left editable"
+        },
+        {
+            "file": "src/SpellEditor.cpp",
+            "original": "\treturn isWorkingBuiltin && field == FieldId::EFFECT_TYPE;",
+            "mutated": "\treturn isWorkingBuiltin;",
+            "catches": "every field of a builtin spell made read-only"
+        },
+        {
+            "file": "src/SpellEditor.cpp",
+            "original": "\tisWorkingBuiltin = spell_registry(ctx).is_builtin_key(key);",
+            "mutated": "\tisWorkingBuiltin = true;",
+            "catches": "a custom spell's effect treated as a builtin's"
+        },
+        {
+            "file": "src/ItemEditor.cpp",
+            "original": "bool ItemEditorModel::is_read_only([[maybe_unused]] FieldId field) const\n{\n\treturn false;",
+            "mutated": "bool ItemEditorModel::is_read_only([[maybe_unused]] FieldId field) const\n{\n\treturn true;",
+            "catches": "every item field made read-only"
+        },
+        {
+            "file": "src/MonsterEditor.cpp",
+            "original": "bool MonsterEditorModel::is_read_only([[maybe_unused]] FieldId field) const\n{\n\treturn false;",
+            "mutated": "bool MonsterEditorModel::is_read_only([[maybe_unused]] FieldId field) const\n{\n\treturn true;",
+            "catches": "every monster field made read-only"
         }
     ]
 }

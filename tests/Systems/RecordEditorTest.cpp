@@ -4,8 +4,8 @@
 // cursors, Ctrl steps a number by ten, Enter types into a text field, A and
 // Delete add and remove a custom record, and Esc commits and leaves. While a
 // field is being typed into or the tile picker is open, Esc only cancels and
-// Tab and Ctrl+S do nothing. Every expected value is read from the Model's
-// own field table and bounds.
+// Tab and Ctrl+S do nothing. A builtin spell's effect ignores every edit key.
+// Every expected value is read from the Model's own field table and bounds.
 //
 // Saving writes the data files Paths::resolve finds. The one test that
 // presses Ctrl+S first moves its child into a probe folder with an empty
@@ -654,28 +654,109 @@ TEST(RecordEditorMonsterTest, ChoosingAnotherMonsterSelectsItsFirstHitDiceCount)
 	EXPECT_EQ(editor.record_model().field_value(Field::XP), "105");
 }
 
-// The Effect is cycled: Right and Enter step it forward, Left steps it back.
-TEST(RecordEditorSpellTest, TheArrowsAndEnterStepTheEffect)
+// A custom spell's Effect is cycled: Right and Enter step it forward, Left
+// steps it back. A new spell starts at no effect, and the first effect is
+// Cure Light Wounds.
+TEST(RecordEditorSpellTest, ACustomSpellsEffectStillCycles)
 {
 	using Field = SpellEditorModel::FieldId;
 	MockGameContext mock{};
 	GameContext ctx = mock.to_game_context();
 	SpellEditor editor{};
 	editor.enter(ctx);
+	editor.handle_input(frame({ EditorKey::ADD }, {}), ctx);
+	ASSERT_FALSE(editor.record_model().is_builtin(ctx, editor.current_key()));
 	editor.handle_input(
 		click_at(field_row(row_of<SpellEditorModel>(Field::EFFECT_TYPE))),
 		ctx);
-	const std::string first =
-		editor.record_model().field_value(Field::EFFECT_TYPE);
+	ASSERT_EQ(editor.record_model().field_value(Field::EFFECT_TYPE), "None");
 
 	editor.handle_input(frame({ EditorKey::RIGHT }, {}), ctx);
-	const std::string second =
-		editor.record_model().field_value(Field::EFFECT_TYPE);
-	EXPECT_NE(second, first);
+	EXPECT_EQ(
+		editor.record_model().field_value(Field::EFFECT_TYPE),
+		"Cure Light Wounds");
 	editor.handle_input(frame({ EditorKey::LEFT }, {}), ctx);
-	EXPECT_EQ(editor.record_model().field_value(Field::EFFECT_TYPE), first);
+	EXPECT_EQ(editor.record_model().field_value(Field::EFFECT_TYPE), "None");
 	editor.handle_input(frame({ EditorKey::ENTER }, {}), ctx);
-	EXPECT_EQ(editor.record_model().field_value(Field::EFFECT_TYPE), second);
+	EXPECT_EQ(
+		editor.record_model().field_value(Field::EFFECT_TYPE),
+		"Cure Light Wounds");
+}
+
+// A builtin spell's effect is compiled in and is the spell's identity, so no
+// key changes it, and committing the record leaves the registry's effect as
+// it was. "Knock" is the shipped spells.json name of the knock spell.
+TEST(RecordEditorSpellTest, ABuiltinSpellsEffectIgnoresEveryEditKey)
+{
+	using Field = SpellEditorModel::FieldId;
+	MockGameContext mock{};
+	GameContext ctx = mock.to_game_context();
+	SpellEditor editor{};
+	editor.enter(ctx);
+	const std::vector<std::string> keys = editor.record_model().keys(ctx);
+	const auto knock = std::ranges::find(keys, "knock");
+	ASSERT_NE(knock, keys.end()) << "the builtin spells have no knock";
+	editor.handle_input(
+		click_at(list_row(static_cast<size_t>(knock - keys.begin()))),
+		ctx);
+	ASSERT_EQ(editor.current_key(), "knock");
+	editor.handle_input(
+		click_at(field_row(row_of<SpellEditorModel>(Field::EFFECT_TYPE))),
+		ctx);
+
+	const std::vector<EditorInput> everyEditKey{
+		frame({ EditorKey::RIGHT }, {}),
+		frame({ EditorKey::LEFT }, {}),
+		frame({ EditorKey::RIGHT }, { EditorKey::CONTROL }),
+		frame({ EditorKey::ENTER }, {}),
+	};
+	for (const EditorInput& press : everyEditKey)
+	{
+		editor.handle_input(press, ctx);
+		EXPECT_EQ(
+			editor.record_model().field_value(Field::EFFECT_TYPE),
+			"Knock");
+	}
+	editor.handle_input(click_at(list_row(0)), ctx);
+	EXPECT_EQ(
+		ctx.spellRegistry->get_by_key("knock").effect_type,
+		SpellEffectType::KNOCK);
+}
+
+// Only a builtin spell's Effect is fixed: its other fields are edited as
+// any spell's are, and a custom spell's Effect is edited too.
+TEST(RecordEditorSpellTest, OnlyABuiltinSpellsEffectIsReadOnly)
+{
+	using Field = SpellEditorModel::FieldId;
+	MockGameContext mock{};
+	GameContext ctx = mock.to_game_context();
+	SpellEditorModel model{};
+
+	model.load(ctx, "knock");
+	EXPECT_TRUE(model.is_read_only(Field::EFFECT_TYPE));
+	EXPECT_FALSE(model.is_read_only(Field::NAME));
+	const std::string custom = model.add_record(ctx);
+	model.load(ctx, custom);
+	EXPECT_FALSE(model.is_read_only(Field::EFFECT_TYPE));
+}
+
+// Items and monsters save every field of every record, shipped or not, so
+// none of their fields is read-only.
+TYPED_TEST(RecordEditorTest, AnItemOrMonsterHasNoReadOnlyField)
+{
+	if constexpr (std::is_same_v<TypeParam, SpellEditorModel>)
+	{
+		GTEST_SKIP() << "a builtin spell's effect is read-only";
+	}
+	else
+	{
+		for (const auto& descriptor : TypeParam::FIELDS)
+		{
+			EXPECT_FALSE(
+				this->editor.record_model().is_read_only(descriptor.field))
+				<< descriptor.label;
+		}
+	}
 }
 
 // The Class is toggled by Enter alone; the arrows leave it as it is.

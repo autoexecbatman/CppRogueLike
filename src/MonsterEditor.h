@@ -410,6 +410,8 @@ public:
 
 	[[nodiscard]] std::string field_label(FieldId field) const;
 	[[nodiscard]] std::string field_value(FieldId field) const;
+	// Never: every field of every monster, shipped or not, is saved.
+	[[nodiscard]] bool is_read_only(FieldId field) const;
 	void field_adjust(FieldId field, int delta);
 	void field_toggle(FieldId field);
 	void field_set_string(FieldId field, std::string newValue);

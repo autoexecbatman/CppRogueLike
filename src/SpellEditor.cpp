@@ -111,6 +111,7 @@ std::vector<std::string> SpellEditorModel::keys(const GameContext& ctx) const
 void SpellEditorModel::load(const GameContext& ctx, std::string_view key)
 {
 	working = spell_registry(ctx).get_by_key(key);
+	isWorkingBuiltin = spell_registry(ctx).is_builtin_key(key);
 }
 
 void SpellEditorModel::commit(GameContext& ctx, std::string_view key) const
@@ -171,6 +172,11 @@ std::optional<RowTag> SpellEditorModel::row_tag(
 std::optional<RowTag> SpellEditorModel::working_row_tag() const
 {
 	return class_tag(working.spellClass);
+}
+
+bool SpellEditorModel::is_read_only(FieldId field) const
+{
+	return isWorkingBuiltin && field == FieldId::EFFECT_TYPE;
 }
 
 // ---------------------------------------------------------------------------

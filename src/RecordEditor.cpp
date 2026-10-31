@@ -303,6 +303,12 @@ void RecordEditor<Model>::handle_normal(
 		return;
 	}
 
+	// A field the record holds fixed takes no edit key.
+	if (model.is_read_only(fieldId))
+	{
+		return;
+	}
+
 	if (input.is_pressed(EditorKey::ENTER))
 	{
 		if (kind == FieldKind::TEXT)
@@ -672,10 +678,14 @@ void RecordEditor<Model>::render_fields(
 				model.field_value(fieldId);
 			const int valuePixelX =
 				screenWidth - renderer.measure_text(valueText) - 16;
+			// A fixed value is drawn in the label colour, so it reads as fixed.
+			const Color valueColor = model.is_read_only(fieldId) ?
+				look.labelPlain :
+				(isSelected ? look.valueSelected : look.valuePlain);
 			renderer.draw_text_color(
 				Vector2D{ valuePixelX, rowY + (FIELD_HEIGHT - 16) / 2 },
 				valueText,
-				isSelected ? look.valueSelected : look.valuePlain);
+				valueColor);
 		}
 	}
 }
@@ -792,6 +802,7 @@ void RecordEditor<Model>::render_hint(const Renderer& renderer) const
 	DrawRectangle(0, hintY, screenWidth, HINT_HEIGHT, look.hintBackground);
 
 	const bool isSaveRecent = (GetTime() - lastSaveTime) < 2.0;
+	std::string fixedFieldHint{};
 	std::string_view hintText{};
 	if (isSaveRecent)
 	{
@@ -809,6 +820,13 @@ void RecordEditor<Model>::render_hint(const Renderer& renderer) const
 	else if (focus == EditorFocus::LIST)
 	{
 		hintText = look.listHint;
+	}
+	else if (model.is_read_only(current_field()))
+	{
+		fixedFieldHint = std::format(
+			"[FIELDS] {} is fixed for this record  Up/Down:navigate  Tab:switch  Ctrl+S:save  Esc:exit",
+			model.field_label(current_field()));
+		hintText = fixedFieldHint;
 	}
 	else
 	{

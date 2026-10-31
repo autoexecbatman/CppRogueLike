@@ -34,7 +34,8 @@
 //   Esc              commit the record and leave
 //
 // While a field is being typed into or the picker is open, Esc only cancels
-// it, and Tab and Ctrl+S do nothing.
+// it, and Tab and Ctrl+S do nothing. A field the Model reports read-only for
+// the record, such as a builtin spell's Effect, ignores Enter and the arrows.
 //
 // The member definitions are in RecordEditor.cpp, which instantiates the frame
 // once per Model; a new editor adds its line there.

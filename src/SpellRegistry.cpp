@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cctype>
 #include <filesystem>
 #include <format>
@@ -244,6 +245,13 @@ void SpellRegistry::set_by_key(
 {
 	if (builtinSpells.contains(key))
 	{
+		// A builtin's effect is compiled in, and the editor refuses to edit it.
+		[[maybe_unused]] const bool isEffectKept =
+			builtinSpells.at(std::string{ key }).effect_type ==
+			definition.effect_type;
+		assert(
+			isEffectKept &&
+			"SpellRegistry::set_by_key: a builtin spell's effect is fixed");
 		builtinSpells.at(std::string{ key }) = definition;
 		return;
 	}

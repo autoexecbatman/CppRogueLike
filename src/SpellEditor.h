@@ -36,6 +36,8 @@ class SpellEditorModel
 private:
 	// The selected spell as it is being edited.
 	SpellDefinition working{};
+	// Whether the working spell is a builtin one, as load found it.
+	bool isWorkingBuiltin{ false };
 
 public:
 	enum class FieldId
@@ -149,6 +151,14 @@ public:
 
 	[[nodiscard]] std::string field_label(FieldId field) const;
 	[[nodiscard]] std::string field_value(FieldId field) const;
+	// Whether the working spell's field ignores every edit key: a builtin
+	// spell's Effect, which is compiled in and is that spell's identity.
+	//
+	// Example:
+	//   model.load(ctx, "knock");
+	//   model.is_read_only(FieldId::EFFECT_TYPE);   // -> true
+	//   model.is_read_only(FieldId::NAME);          // -> false
+	[[nodiscard]] bool is_read_only(FieldId field) const;
 	void field_adjust(FieldId field, int delta);
 	void field_toggle(FieldId field);
 	void field_set_string(FieldId field, std::string newValue);

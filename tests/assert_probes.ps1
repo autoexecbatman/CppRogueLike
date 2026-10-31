@@ -286,6 +286,11 @@ $probes = @(
         test   = "AssertProbeDeathTest.UpdatingAConstitutionBonusWithNoDataManagerAborts"
         file   = "src/Creature.cpp"
         anchor = 'assert(ctx.dataManager && "Creature::update_constitution_bonus: called without a dataManager");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.ChangingABuiltinSpellsEffectAborts"
+        file   = "src/SpellRegistry.cpp"
+        anchor = 'assert(isEffectKept && "SpellRegistry::set_by_key: a builtin spell''s effect is fixed");'
     }
 )
 
