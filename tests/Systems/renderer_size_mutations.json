@@ -1,0 +1,47 @@
+{
+    "cwd": "E:/repo/C++RogueLike",
+    "test_command": [
+        "powershell",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "tests/run_suite.ps1",
+        "-Configuration",
+        "Debug",
+        "-Filter",
+        "--gtest_filter=RendererSizeTest.*"
+    ],
+    "mutations": [
+        {
+            "file": "src/Renderer.h",
+            "original": "\t[[nodiscard]] int get_screen_width() const { return GetScreenWidth(); }",
+            "mutated": "\t[[nodiscard]] int get_screen_width() const { return GetMonitorWidth(GetCurrentMonitor()); }",
+            "catches": "the width asked of the monitor reported in place of the window's"
+        },
+        {
+            "file": "src/Renderer.h",
+            "original": "\t[[nodiscard]] int get_screen_height() const { return GetScreenHeight(); }",
+            "mutated": "\t[[nodiscard]] int get_screen_height() const { return GetMonitorHeight(GetCurrentMonitor()); }",
+            "catches": "the height asked of the monitor reported in place of the window's"
+        },
+        {
+            "file": "src/Renderer.h",
+            "original": "\t\treturn get_screen_width() / tileSize;",
+            "mutated": "\t\treturn get_screen_width() / DISPLAY_TILE_SIZE;",
+            "catches": "the columns counted at the default tile size, not following a zoom"
+        },
+        {
+            "file": "src/Renderer.h",
+            "original": "\t\treturn get_screen_height() / tileSize;",
+            "mutated": "\t\treturn get_screen_height() / DISPLAY_TILE_SIZE;",
+            "catches": "the rows counted at the default tile size, not following a zoom"
+        },
+        {
+            "file": "src/Renderer.h",
+            "original": "\t\treturn get_screen_width() / tileSize;",
+            "mutated": "\t\treturn get_screen_height() / tileSize;",
+            "catches": "the columns counted down the window instead of across it"
+        }
+    ]
+}

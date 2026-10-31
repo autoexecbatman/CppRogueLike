@@ -74,7 +74,6 @@ void GameLoopCoordinator::handle_gameloop(
 	if (ctx.inputHandler->was_resized())
 	{
 		ctx.inputHandler->clear_resize();
-		ctx.renderer->update_viewport();
 		ctx.map->compute_fov(ctx);
 
 		if (ctx.gui->guiInit)
@@ -385,7 +384,7 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 	int cam_y = ctx.renderer->get_camera_y();
 
 	// Correct world tile: combined division avoids split-integer rounding error
-	// when cam_x is not tile-aligned (odd viewportCols on web).
+	// when cam_x is not tile-aligned (an odd get_viewport_cols() on web).
 	Vector2D world_tile =
 		ctx.inputSystem->get_mouse_world_tile(cam_x, cam_y, tileSize);
 

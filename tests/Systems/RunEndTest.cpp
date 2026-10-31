@@ -135,7 +135,6 @@ namespace
 			HIDDEN_RENDERER_FONT_SIZE);
 		game.renderer.load_dawnlike(
 			Paths::resolve(Paths::DAWNLIKE_DIR).string());
-		game.renderer.update_viewport();
 	}
 
 	// The player dies inside a menu with another open beneath it: after the one

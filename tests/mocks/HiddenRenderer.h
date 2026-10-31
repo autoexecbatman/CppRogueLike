@@ -191,8 +191,6 @@ public:
 			Paths::resolve(Paths::DAWNLIKE_FONT).string(),
 			HIDDEN_RENDERER_FONT_SIZE);
 		renderer.load_dawnlike(Paths::resolve(Paths::DAWNLIKE_DIR).string());
-		// The viewport is read from the window, as Renderer::init does after opening its own.
-		renderer.update_viewport();
 
 		// measure_text falls back to raylib's default font when the game font did not
 		// load, so a measure equal to the default's means the game font is not in use.

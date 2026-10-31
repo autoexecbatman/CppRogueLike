@@ -240,10 +240,11 @@ void Renderer::init()
 	{
 		int rawWidth = EM_ASM_INT({ return window.innerWidth; });
 		int rawHeight = EM_ASM_INT({ return window.innerHeight; });
-		screenWidth = (rawWidth / tileSize) * tileSize;
-		screenHeight = (rawHeight / tileSize) * tileSize;
+		InitWindow(
+			(rawWidth / tileSize) * tileSize,
+			(rawHeight / tileSize) * tileSize,
+			"C++RogueLike");
 	}
-	InitWindow(screenWidth, screenHeight, "C++RogueLike");
 	// Browser rAF drives timing -- disable raylib's internal WaitTime/emscripten_sleep.
 	SetTargetFPS(0);
 #else
@@ -252,34 +253,19 @@ void Renderer::init()
 	SetTargetFPS(60);
 	SetExitKey(0);
 
+	// Ask for the monitor's size; the window raylib reports can be smaller.
 	int monitor = GetCurrentMonitor();
-	screenWidth = GetMonitorWidth(monitor);
-	screenHeight = GetMonitorHeight(monitor);
-
-	// Go fullscreen at monitor resolution
-	SetWindowSize(screenWidth, screenHeight);
+	SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
 	SetWindowPosition(0, 0);
 	// ToggleFullscreen();  // DISABLED FOR DEBUGGING
 #endif
 
-	// Viewport in tile units
-	viewportCols = screenWidth / tileSize;
-	viewportRows = screenHeight / tileSize;
-
 	init_color_pairs();
 
-	lightMask = LoadRenderTexture(screenWidth, screenHeight);
+	lightMask = LoadRenderTexture(get_screen_width(), get_screen_height());
 	lightMaskLoaded = (lightMask.id > 0);
 
 	initialized = true;
-}
-
-void Renderer::update_viewport()
-{
-	screenWidth = GetScreenWidth();
-	screenHeight = GetScreenHeight();
-	viewportCols = screenWidth / tileSize;
-	viewportRows = screenHeight / tileSize;
 }
 
 void Renderer::shutdown()
@@ -564,9 +550,9 @@ void Renderer::draw_tile(Vector2D gridPos, TileRef tile, Color tint) const
 	// Cull tiles outside the visible area
 	float tileSizeFloat = static_cast<float>(tileSize);
 	if (destX + tileSizeFloat < 0.0f ||
-		destX >= static_cast<float>(screenWidth) ||
+		destX >= static_cast<float>(get_screen_width()) ||
 		destY + tileSizeFloat < 0.0f ||
-		destY >= static_cast<float>(screenHeight))
+		destY >= static_cast<float>(get_screen_height()))
 	{
 		return;
 	}
@@ -617,9 +603,9 @@ void Renderer::draw_tile_offset(
 
 	float tileSizeFloat = static_cast<float>(tileSize);
 	if (destX + tileSizeFloat < 0.0f ||
-		destX >= static_cast<float>(screenWidth) ||
+		destX >= static_cast<float>(get_screen_width()) ||
 		destY + tileSizeFloat < 0.0f ||
-		destY >= static_cast<float>(screenHeight))
+		destY >= static_cast<float>(get_screen_height()))
 	{
 		return;
 	}
@@ -665,9 +651,9 @@ void Renderer::draw_tile_static(
 
 	float tileSizeFloat = static_cast<float>(tileSize);
 	if (destX + tileSizeFloat < 0.0f ||
-		destX >= static_cast<float>(screenWidth) ||
+		destX >= static_cast<float>(get_screen_width()) ||
 		destY + tileSizeFloat < 0.0f ||
-		destY >= static_cast<float>(screenHeight))
+		destY >= static_cast<float>(get_screen_height()))
 	{
 		return;
 	}
@@ -961,7 +947,6 @@ void Renderer::zoom_in()
 		if (tileSize == ZOOM_LEVELS[level])
 		{
 			tileSize = ZOOM_LEVELS[level + 1];
-			update_viewport();
 			return;
 		}
 	}
@@ -975,7 +960,6 @@ void Renderer::zoom_out()
 		if (tileSize == ZOOM_LEVELS[level])
 		{
 			tileSize = ZOOM_LEVELS[level - 1];
-			update_viewport();
 			return;
 		}
 	}
@@ -1110,8 +1094,8 @@ void Renderer::set_camera_center(
 	int map_w,
 	int map_h)
 {
-	int map_viewport_rows = viewportRows - get_gui_reserve_rows();
-	int viewport_px_w = viewportCols * tileSize;
+	int map_viewport_rows = get_viewport_rows() - get_gui_reserve_rows();
+	int viewport_px_w = get_viewport_cols() * tileSize;
 	int viewport_px_h = map_viewport_rows * tileSize;
 
 	camera.x = world_tile_x * tileSize - viewport_px_w / 2;
@@ -1135,11 +1119,11 @@ ScreenMetrics Renderer::metrics() const
 	return ScreenMetrics{
 		.tile_w = tileSize,
 		.tile_h = tileSize,
-		.map_cols = viewportCols,
-		.map_rows = viewportRows - get_gui_reserve_rows(),
+		.map_cols = get_viewport_cols(),
+		.map_rows = get_viewport_rows() - get_gui_reserve_rows(),
 		.gui_rows = get_gui_reserve_rows(),
-		.window_w = screenWidth,
-		.window_h = screenHeight,
+		.window_w = get_screen_width(),
+		.window_h = get_screen_height(),
 	};
 }
 

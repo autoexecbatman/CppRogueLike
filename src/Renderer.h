@@ -240,10 +240,6 @@ class Renderer
 	bool initialized{ false };
 
 	int tileSize{ DISPLAY_TILE_SIZE };
-	int viewportCols{ 0 };
-	int viewportRows{ 0 };
-	int screenWidth{ 0 };
-	int screenHeight{ 0 };
 
 	Vector2D camera{};
 
@@ -386,7 +382,6 @@ public:
 		int world_tile_y,
 		int map_w,
 		int map_h);
-	void update_viewport();
 	void zoom_in();
 	void zoom_out();
 
@@ -440,13 +435,21 @@ public:
 		return gui_reserve_rows(tileSize, fontSize);
 	}
 
-	[[nodiscard]] int get_viewport_cols() const { return viewportCols; }
+	// The window's size as raylib reports it, which can be smaller than the
+	// size asked for; the tile counts are the whole tiles that fit in it.
+	[[nodiscard]] int get_screen_width() const { return GetScreenWidth(); }
 
-	[[nodiscard]] int get_viewport_rows() const { return viewportRows; }
+	[[nodiscard]] int get_screen_height() const { return GetScreenHeight(); }
 
-	[[nodiscard]] int get_screen_width() const { return screenWidth; }
+	[[nodiscard]] int get_viewport_cols() const
+	{
+		return get_screen_width() / tileSize;
+	}
 
-	[[nodiscard]] int get_screen_height() const { return screenHeight; }
+	[[nodiscard]] int get_viewport_rows() const
+	{
+		return get_screen_height() / tileSize;
+	}
 
 	[[nodiscard]] int get_camera_x() const { return camera.x + shakeOffset.x; }
 
