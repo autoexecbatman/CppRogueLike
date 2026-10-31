@@ -26,7 +26,9 @@
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
+#include <cstddef>
 #include <format>
 #include <memory>
 #include <ranges>
@@ -48,6 +50,7 @@
 #include "src/Player.h"
 #include "src/PrefabLibrary.h"
 #include "src/Stairs.h"
+#include "src/TileRef.h"
 #include "src/TileType.h"
 #include "src/Trap.h"
 #include "tests/mocks/MockGameContext.h"

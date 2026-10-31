@@ -12,6 +12,7 @@
 
 #include <memory>
 
+#include "src/CreatureClass.h"
 #include "src/GameContext.h"
 #include "src/InputHandler.h"
 #include "src/InputSystem.h"
@@ -20,6 +21,7 @@
 #include "src/PlayerController.h"
 #include "src/PlayerRaceState.h"
 #include "src/ThiefSkills.h"
+#include "src/TileType.h"
 #include "src/Trap.h"
 #include "src/TurnSchedule.h"
 #include "src/Vector2D.h"

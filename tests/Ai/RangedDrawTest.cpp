@@ -15,13 +15,16 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <vector>
 
+#include "src/Actor.h"
 #include "src/AiMonsterRanged.h"
 #include "src/ArmorClass.h"
 #include "src/AttackKind.h"
+#include "src/AttackResult.h"
 #include "src/Attacker.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
@@ -43,6 +46,8 @@
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
 #include "src/RandomDice.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "tests/mocks/TestDice.h"
 
 namespace

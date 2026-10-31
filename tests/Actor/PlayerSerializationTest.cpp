@@ -1,12 +1,22 @@
+#include <memory>
+#include <utility>
+#include <vector>
+
+#include "src/ArmorClass.h"
+#include "src/CreatureClass.h"
+#include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
+#include "src/HealthPool.h"
 #include "src/ItemCreator.h"
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
 #include "src/PlayerController.h"
+#include "src/PlayerRaceState.h"
 #include "src/TurnSchedule.h"
 #include "tests/mocks/MockGameContext.h"
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 using json = nlohmann::json;
 

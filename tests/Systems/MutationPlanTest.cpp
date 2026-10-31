@@ -29,14 +29,18 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
+#include <ios>
+#include <iterator>
 #include <ranges>
 #include <set>
 #include <string>
 #include <vector>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "src/Paths.h"
 

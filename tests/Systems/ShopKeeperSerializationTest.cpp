@@ -1,3 +1,7 @@
+#include <cstddef>
+#include <memory>
+#include <vector>
+
 #include "src/Game.h"
 #include "src/GameContext.h"
 #include "src/InventoryOperations.h"
@@ -6,6 +10,7 @@
 #include "tests/mocks/TestDice.h"
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 using json = nlohmann::json;
 using namespace InventoryOperations;

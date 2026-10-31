@@ -18,6 +18,7 @@
 #include <vector>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "src/ArmorClass.h"
 #include "src/DataManager.h"
@@ -31,6 +32,7 @@
 #include "src/Map.h"
 #include "src/MessageSystem.h"
 #include "src/Player.h"
+#include "src/TileType.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace

@@ -6,15 +6,18 @@
 #include <fstream>
 #include <map>
 #include <set>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "src/BodyPlanRegistry.h"
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
+#include "src/Item.h"
 #include "src/ItemRegistry.h"
 #include "src/MonsterCreator.h"
 #include "src/MonsterRegistry.h"

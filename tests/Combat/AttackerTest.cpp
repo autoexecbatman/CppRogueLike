@@ -2,20 +2,25 @@
 #include <memory>
 
 #include "src/Actor.h"
+#include "src/ArmorClass.h"
 #include "src/AttackKind.h"
 #include "src/AttackResult.h"
 #include "src/Attacker.h"
 #include "src/Colors.h"
+#include "src/CorpseEdibility.h"
+#include "src/CreatureClass.h"
 #include "src/DamageInfo.h"
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
 #include "src/Game.h"
+#include "src/HealthPool.h"
 #include "src/ItemCreator.h"
 #include "src/MonsterAttacker.h"
 #include "src/Paths.h"
 #include "src/Persistent.h"
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
+#include "src/TileRef.h"
 #include "tests/mocks/TestDice.h"
 
 // ============================================================================

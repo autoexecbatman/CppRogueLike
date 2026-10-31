@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 
 #include <array>
+#include <cstddef>
 
 #include "src/IntelligenceRating.h"
 #include "src/MonsterAbilityTables.h"

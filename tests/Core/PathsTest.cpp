@@ -25,6 +25,7 @@
 #include <fstream>
 #include <regex>
 #include <string>
+#include <system_error>
 #include <vector>
 
 #include "src/Paths.h"

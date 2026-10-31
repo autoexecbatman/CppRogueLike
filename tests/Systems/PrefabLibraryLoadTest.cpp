@@ -17,11 +17,15 @@
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
+#include <cstddef>
+#include <exception>
 #include <filesystem>
 #include <fstream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 
 #include "src/Paths.h"
 #include "src/PrefabLibrary.h"

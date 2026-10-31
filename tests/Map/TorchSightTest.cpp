@@ -16,13 +16,16 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <string_view>
 
+#include "src/Actor.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/InventoryOperations.h"
 #include "src/Item.h"
 #include "src/ItemRegistry.h"
 #include "src/Map.h"
+#include "src/TileRef.h"
 #include "src/Vision.h"
 #include "tests/mocks/MockGameContext.h"
 

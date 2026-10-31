@@ -10,6 +10,7 @@
 
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include <algorithm>
 #include <array>
@@ -17,7 +18,9 @@
 #include <string>
 #include <string_view>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
+#include "src/Colors.h"
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
 #include "src/Game.h"
@@ -29,6 +32,7 @@
 #include "src/ItemRegistry.h"
 #include "src/Paths.h"
 #include "src/Player.h"
+#include "src/TileRef.h"
 #include "tests/mocks/TestDice.h"
 
 using json = nlohmann::json;

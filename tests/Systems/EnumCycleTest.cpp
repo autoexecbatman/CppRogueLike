@@ -25,6 +25,7 @@
 #include <gtest/gtest.h>
 
 #include <array>
+#include <cstddef>
 #include <set>
 #include <string_view>
 

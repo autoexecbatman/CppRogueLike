@@ -16,12 +16,17 @@
 
 #include <memory>
 
+#include "src/Actor.h"
 #include "src/BodyPlanRegistry.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
+#include "src/CreatureClass.h"
 #include "src/EquipmentSlot.h"
+#include "src/GameContext.h"
+#include "src/InventoryData.h"
 #include "src/InventoryOperations.h"
 #include "src/Item.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 class CarryWeightTest : public ::testing::Test

@@ -22,7 +22,9 @@
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
+#include <exception>
 #include <filesystem>
 #include <format>
 #include <fstream>

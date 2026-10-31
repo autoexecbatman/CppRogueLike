@@ -13,8 +13,11 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <utility>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
@@ -23,8 +26,11 @@
 #include "src/Item.h"
 #include "src/ItemCreator.h"
 #include "src/ItemEnhancements.h"
+#include "src/ItemIdentification.h"
+#include "src/LogMessage.h"
 #include "src/Pickable.h"
 #include "src/Pickup.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace

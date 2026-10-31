@@ -23,9 +23,12 @@
 
 #include <initializer_list>
 #include <memory>
+#include <utility>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/AttackKind.h"
 #include "src/BuffSystem.h"
@@ -43,6 +46,7 @@
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
 #include "src/SavingThrow.h"
+#include "src/TileRef.h"
 #include "tests/mocks/TestDice.h"
 
 class SanctuarySaveTest : public ::testing::Test

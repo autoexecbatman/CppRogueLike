@@ -21,8 +21,10 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <utility>
 #include <vector>
 
+#include "src/Actor.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/Decoration.h"
@@ -31,6 +33,8 @@
 #include "src/Map.h"
 #include "src/Player.h"
 #include "src/SpawnUtils.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace

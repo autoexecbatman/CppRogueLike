@@ -21,10 +21,12 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <initializer_list>
 #include <memory>
 #include <string>
 #include <string_view>
+#include <utility>
 
 #include "src/Actor.h"
 #include "src/AiSpider.h"
@@ -43,6 +45,8 @@
 #include "src/Player.h"
 #include "src/RandomDice.h"
 #include "src/SavingThrow.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "src/TurnSchedule.h"
 #include "tests/mocks/TestDice.h"
 

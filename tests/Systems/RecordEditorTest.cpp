@@ -39,6 +39,7 @@
 #include "src/RecordEditor.h"
 #include "src/SpellEditor.h"
 #include "src/SpellRegistry.h"
+#include "src/Vector2D.h"
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"
 

@@ -22,8 +22,11 @@
 
 #include <nlohmann/json.hpp>
 
+#include <cstddef>
+#include <exception>
 #include <filesystem>
 #include <fstream>
+#include <ios>
 #include <iterator>
 #include <optional>
 #include <stdexcept>
@@ -34,6 +37,7 @@
 #include "src/DecorEditor.h"
 #include "src/Palette.h"
 #include "src/Paths.h"
+#include "src/TileRef.h"
 #include "src/TileRefJson.h"
 
 // Windows marks a file read-only only once every write bit is gone.

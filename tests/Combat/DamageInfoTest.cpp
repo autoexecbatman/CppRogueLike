@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "src/DamageInfo.h"
+#include "src/DiceExpr.h"
 #include "src/RandomDice.h"
 #include "tests/mocks/TestDice.h"
 #include <set>

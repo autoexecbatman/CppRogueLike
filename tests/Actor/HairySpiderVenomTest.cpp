@@ -30,6 +30,7 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <initializer_list>
 #include <memory>
 
@@ -50,6 +51,8 @@
 #include "src/MonsterAttacker.h"
 #include "src/Player.h"
 #include "src/SavingThrow.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "src/TurnSchedule.h"
 #include "tests/mocks/ExpectLastsExactly.h"
 #include "tests/mocks/TestDice.h"

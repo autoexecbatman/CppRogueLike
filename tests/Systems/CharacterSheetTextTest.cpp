@@ -13,10 +13,12 @@
 
 #include <string>
 
+#include "src/Actor.h"
 #include "src/CharacterSheetUI.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/CreatureClass.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace

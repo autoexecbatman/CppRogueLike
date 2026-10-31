@@ -37,22 +37,29 @@
 // targeted assertion in turn, rebuilds, and confirms the matching probe fails.
 
 #include <gtest/gtest.h>
+#include <nlohmann/json_fwd.hpp>
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
 
+#include "src/Actor.h"
 #include "src/Ai.h"
 #include "src/ArmorClass.h"
 #include "src/AttackKind.h"
 #include "src/Colors.h"
+#include "src/CorpseEdibility.h"
 #include "src/Creature.h"
+#include "src/CreatureClass.h"
 #include "src/DamageInfo.h"
+#include "src/DamageSource.h"
 #include "src/Decoration.h"
 #include "src/DungeonRoom.h"
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
+#include "src/GameContext.h"
 #include "src/HealthPool.h"
 #include "src/InputSystem.h"
 #include "src/InventoryData.h"
@@ -72,10 +79,13 @@
 #include "src/RandomDice.h"
 #include "src/RecordEditor.h"
 #include "src/Renderer.h"
+#include "src/RoomEditor.h"
 #include "src/ShopKeeper.h"
 #include "src/SpellRegistry.h"
 #include "src/SpellSystem.h"
 #include "src/TargetingSystem.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "src/TurnUndead.h"
 
 using namespace Turning;

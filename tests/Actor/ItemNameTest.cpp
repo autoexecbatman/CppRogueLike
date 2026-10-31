@@ -14,6 +14,8 @@
 #include "src/Colors.h"
 #include "src/Item.h"
 #include "src/ItemEnhancements.h"
+#include "src/ItemIdentification.h"
+#include "src/TileRef.h"
 #include "src/Vector2D.h"
 
 namespace

@@ -18,9 +18,14 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <memory>
+#include <string_view>
+#include <utility>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
@@ -30,6 +35,7 @@
 #include "src/ItemCreator.h"
 #include "src/Pickable.h"
 #include "src/RandomDice.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace

@@ -28,6 +28,7 @@
 #include <string>
 #include <string_view>
 
+#include "src/Actor.h"
 #include "src/Ai.h"
 #include "src/Creature.h"
 #include "src/CreatureSize.h"

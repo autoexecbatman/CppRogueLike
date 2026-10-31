@@ -21,16 +21,24 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <string_view>
+#include <utility>
+#include <vector>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
+#include "src/AttackKind.h"
 #include "src/BuffSystem.h"
+#include "src/BuffType.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
+#include "src/CreatureClass.h"
 #include "src/ExperienceReward.h"
 #include "src/GameContext.h"
 #include "src/HealthPool.h"
@@ -38,7 +46,10 @@
 #include "src/Map.h"
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
+#include "src/PlayerRaceState.h"
 #include "src/ThiefSkills.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "src/TurnSchedule.h"
 #include "tests/mocks/MockGameContext.h"
 

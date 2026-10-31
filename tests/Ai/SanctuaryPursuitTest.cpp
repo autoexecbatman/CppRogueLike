@@ -18,9 +18,12 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <initializer_list>
 #include <memory>
+#include <vector>
 
+#include "src/Actor.h"
 #include "src/AiMonster.h"
 #include "src/AiMonsterRanged.h"
 #include "src/AiWebSpinner.h"
@@ -42,6 +45,8 @@
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
 #include "src/RandomDice.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "tests/mocks/TestDice.h"
 
 namespace

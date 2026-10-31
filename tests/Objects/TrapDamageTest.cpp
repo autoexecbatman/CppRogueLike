@@ -21,6 +21,7 @@
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/GameContext.h"
+#include "src/HealthPool.h"
 #include "src/Player.h"
 #include "src/PlayerRaceState.h"
 #include "src/TileFeature.h"

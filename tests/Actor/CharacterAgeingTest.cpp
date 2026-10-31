@@ -14,12 +14,16 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
@@ -34,6 +38,7 @@
 #include "src/MessageSystem.h"
 #include "src/Player.h"
 #include "src/PlayerRaceState.h"
+#include "src/TileRef.h"
 #include "src/TurnSchedule.h"
 #include "tests/mocks/MockGameContext.h"
 

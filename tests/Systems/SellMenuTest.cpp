@@ -19,7 +19,9 @@
 
 #include <cstdlib>
 #include <memory>
+#include <utility>
 
+#include "src/Actor.h"
 #include "src/Colors.h"
 #include "src/Controls.h"
 #include "src/Creature.h"
@@ -31,6 +33,7 @@
 #include "src/MenuSell.h"
 #include "src/Player.h"
 #include "src/ShopKeeper.h"
+#include "src/TileRef.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"

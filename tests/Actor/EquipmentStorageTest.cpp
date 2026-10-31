@@ -2,11 +2,15 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
+#include <utility>
 
+#include "src/Actor.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
 #include "src/Item.h"
+#include "src/TileRef.h"
 
 // Equipment lives on Creature, so any creature with a body plan can wear
 // something. These tests cover get_equipped_item, which had no caller in the

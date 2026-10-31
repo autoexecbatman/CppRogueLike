@@ -12,8 +12,13 @@
 // of what is worn and what was drunk, never a sum. It is read from the slots
 // when the hit lands; nothing is copied anywhere.
 
+#include <memory>
+#include <string_view>
+
 #include <gtest/gtest.h>
 
+#include "src/Actor.h"
+#include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
 #include "src/Creature.h"
@@ -22,7 +27,9 @@
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
 #include "src/GameContext.h"
+#include "src/HealthPool.h"
 #include "src/Item.h"
+#include "src/ItemClassification.h"
 #include "src/ItemCreator.h"
 #include "src/Paths.h"
 #include "src/Pickable.h"

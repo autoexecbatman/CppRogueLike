@@ -29,17 +29,24 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
+#include "src/Actor.h"
+#include "src/Attitude.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/HealthPool.h"
 #include "src/HungerSystem.h"
 #include "src/LogMessage.h"
 #include "src/MessageSystem.h"
 #include "src/Player.h"
+#include "src/TileRef.h"
+#include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace

@@ -19,11 +19,13 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <memory>
 #include <optional>
 #include <string>
 
 #include "src/Actor.h"
+#include "src/CreatureClass.h"
 #include "src/GameContext.h"
 #include "src/MessageSystem.h"
 #include "src/Player.h"

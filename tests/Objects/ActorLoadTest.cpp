@@ -14,6 +14,7 @@
 
 #include <gtest/gtest.h>
 
+#include <exception>
 #include <format>
 #include <memory>
 #include <stdexcept>
@@ -21,6 +22,7 @@
 #include <string_view>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "src/Actor.h"
 #include "src/GameContext.h"

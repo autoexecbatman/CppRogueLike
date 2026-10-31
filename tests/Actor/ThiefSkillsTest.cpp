@@ -22,11 +22,13 @@
 
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <fstream>
 #include <string>
 #include <string_view>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "src/Paths.h"
 #include "src/ThiefSkills.h"

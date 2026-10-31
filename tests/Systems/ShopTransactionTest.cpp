@@ -22,17 +22,22 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <memory>
+#include <utility>
 
+#include "src/Actor.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/GameContext.h"
+#include "src/InventoryData.h"
 #include "src/InventoryOperations.h"
 #include "src/Item.h"
 #include "src/ItemCreator.h"
 #include "src/Paths.h"
 #include "src/Player.h"
 #include "src/ShopKeeper.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 class ShopTransactionTest : public ::testing::Test

@@ -15,6 +15,7 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <utility>
 
 #include "src/ArmorClass.h"
 #include "src/BuffSystem.h"

@@ -14,12 +14,14 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <exception>
 #include <memory>
 #include <optional>
 #include <string>
 #include <vector>
 
+#include "src/Actor.h"
 #include "src/Ai.h"
 #include "src/ArmorClass.h"
 #include "src/Colors.h"
@@ -31,6 +33,7 @@
 #include "src/HealthPool.h"
 #include "src/Persistent.h"
 #include "src/Renderer.h"
+#include "src/TileRef.h"
 #include "src/Vector2D.h"
 
 class LevelLoadTest : public ::testing::Test

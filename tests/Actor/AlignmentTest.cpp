@@ -4,6 +4,7 @@
 
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include <filesystem>
 #include <fstream>
@@ -12,12 +13,14 @@
 #include <tuple>
 #include <vector>
 
+#include "src/Actor.h"
 #include "src/Alignment.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/MonsterCreator.h"
 #include "src/MonsterRegistry.h"
 #include "src/Paths.h"
+#include "src/TileRef.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 

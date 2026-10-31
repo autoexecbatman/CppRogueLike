@@ -25,12 +25,17 @@
 #include <gtest/gtest.h>
 
 #include <array>
+#include <memory>
 
+#include "src/Actor.h"
+#include "src/ArmorClass.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/CreatureClass.h"
 #include "src/ExperienceReward.h"
+#include "src/HealthPool.h"
 #include "src/LevelUpSystem.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 // Warriors roll through 9th and gain 3 a level after.

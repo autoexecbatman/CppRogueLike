@@ -18,6 +18,8 @@
 //   cd build/bin/Debug && ./test_exe.exe --gtest_filter=HungerSystemTest.*
 
 #include <array>
+#include <cstddef>
+#include <exception>
 #include <format>
 #include <stdexcept>
 #include <string>
@@ -26,6 +28,7 @@
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "src/ArmorClass.h"
 #include "src/ExperienceReward.h"

@@ -22,6 +22,7 @@
 #include <optional>
 #include <vector>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
@@ -31,6 +32,8 @@
 #include "src/Map.h"
 #include "src/Pathfinding.h"
 #include "src/SpellTile.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "src/Trap.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"

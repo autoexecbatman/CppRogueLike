@@ -10,6 +10,7 @@
 #include <gtest/gtest.h>
 
 #include <array>
+#include <cstddef>
 #include <string_view>
 
 #include "src/BuffType.h"

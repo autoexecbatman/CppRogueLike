@@ -22,6 +22,7 @@
 #include <memory>
 #include <vector>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/AttackKind.h"
 #include "src/Colors.h"
@@ -35,7 +36,9 @@
 #include "src/HealthPool.h"
 #include "src/MonsterAttacker.h"
 #include "src/Player.h"
+#include "src/PlayerRaceState.h"
 #include "src/StrengthAttributes.h"
+#include "src/TileRef.h"
 #include "tests/mocks/TestDice.h"
 
 namespace

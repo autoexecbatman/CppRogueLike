@@ -24,6 +24,7 @@
 #include <memory>
 #include <vector>
 
+#include "src/Actor.h"
 #include "src/AiMonster.h"
 #include "src/ArmorClass.h"
 #include "src/Colors.h"
@@ -38,6 +39,8 @@
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
 #include "src/RandomDice.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "tests/mocks/TestDice.h"
 
 namespace

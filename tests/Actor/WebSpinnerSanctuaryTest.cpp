@@ -43,6 +43,8 @@
 #include "src/RandomDice.h"
 #include "src/SavingThrow.h"
 #include "src/SpellTile.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "src/Web.h"
 #include "tests/mocks/TestDice.h"
 

@@ -23,6 +23,7 @@
 #include "src/DungeonRoom.h"
 #include "src/Map.h"
 #include "src/SpellTile.h"
+#include "src/TileType.h"
 #include "src/Trap.h"
 #include "tests/mocks/MockGameContext.h"
 #include <gtest/gtest.h>

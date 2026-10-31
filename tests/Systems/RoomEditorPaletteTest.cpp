@@ -23,6 +23,7 @@
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <ios>
 #include <iterator>
 #include <stdexcept>
 #include <string>
@@ -32,6 +33,7 @@
 #include "src/Paths.h"
 #include "src/PrefabLibrary.h"
 #include "src/RoomEditor.h"
+#include "src/TileRef.h"
 #include "src/TileRefJson.h"
 
 namespace

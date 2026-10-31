@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <string_view>
+#include <utility>
 
 #include "src/Actor.h"
 #include "src/ArmorClass.h"
@@ -33,6 +34,9 @@
 #include "src/Map.h"
 #include "src/Player.h"
 #include "src/SpellSystem.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
+#include "src/Vector2D.h"
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"
 

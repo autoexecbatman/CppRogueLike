@@ -15,8 +15,13 @@
 // chimera's 3d12 at 12, 12, 12 through the helm is 8 + 8 + 8; a fire
 // attack of 1d12+5 at 12 through a ring is 10 + 5.
 
+#include <initializer_list>
+#include <memory>
+
 #include <gtest/gtest.h>
 
+#include "src/Actor.h"
+#include "src/ArmorClass.h"
 #include "src/AttackKind.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
@@ -24,12 +29,14 @@
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
 #include "src/Game.h"
+#include "src/HealthPool.h"
 #include "src/Item.h"
 #include "src/ItemCreator.h"
 #include "src/MonsterAttacker.h"
 #include "src/Paths.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
+#include "src/TileRef.h"
 #include "tests/mocks/TestDice.h"
 
 class TypedAttackResistanceTest : public ::testing::Test

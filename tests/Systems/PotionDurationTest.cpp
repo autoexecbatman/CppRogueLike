@@ -19,12 +19,15 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <variant>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
+#include "src/BuffType.h"
 #include "src/ExperienceReward.h"
 #include "src/GameContext.h"
 #include "src/HealthPool.h"

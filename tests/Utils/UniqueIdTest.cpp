@@ -1,9 +1,11 @@
 #include <gtest/gtest.h>
 
 #include <atomic>
+#include <exception>
 #include <stdexcept>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "src/UniqueId.h"
 

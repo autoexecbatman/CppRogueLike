@@ -24,6 +24,7 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <memory>
 #include <vector>
 
@@ -34,6 +35,7 @@
 #include "src/Map.h"
 #include "src/Player.h"
 #include "src/SpawnUtils.h"
+#include "src/TileType.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace

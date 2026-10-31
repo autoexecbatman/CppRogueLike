@@ -4,22 +4,30 @@
 // hand and a bow on their back swings the sword when they walk into something,
 // and looses the bow only when they aim it.
 
+#include <cstddef>
 #include <gtest/gtest.h>
 #include <memory>
 #include <string>
 
 #include "src/Actor.h"
+#include "src/ArmorClass.h"
+#include "src/AttackKind.h"
 #include "src/Attacker.h"
 #include "src/Colors.h"
 #include "src/DamageInfo.h"
+#include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
 #include "src/Game.h"
+#include "src/HealthPool.h"
 #include "src/Item.h"
+#include "src/ItemClassification.h"
 #include "src/MonsterAttacker.h"
 #include "src/Paths.h"
+#include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
 #include "src/ShopKeeper.h"
+#include "src/TileRef.h"
 #include "tests/mocks/TestDice.h"
 
 class AttackKindTest : public ::testing::Test

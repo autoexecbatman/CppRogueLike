@@ -3,12 +3,19 @@
 // is never granted by an invisible player. Awareness replaced a tracking counter
 // that four Ai classes each maintained by hand, two of which ignored invisibility.
 
+#include <memory>
+
 #include <gtest/gtest.h>
 
+#include "src/Actor.h"
+#include "src/ArmorClass.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
+#include "src/HealthPool.h"
 #include "src/Map.h"
 #include "src/Player.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "src/TurnSchedule.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"

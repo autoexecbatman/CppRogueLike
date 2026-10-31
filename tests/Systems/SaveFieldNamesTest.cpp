@@ -18,14 +18,20 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=SaveFieldNamesTest.*
 
+#include <memory>
+
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
+#include "src/Actor.h"
+#include "src/Colors.h"
 #include "src/InventoryData.h"
 #include "src/InventoryOperations.h"
 #include "src/Item.h"
 #include "src/LevelManager.h"
+#include "src/TileRef.h"
 
 using json = nlohmann::json;
 

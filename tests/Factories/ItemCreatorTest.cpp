@@ -1,19 +1,25 @@
 #include "src/ItemCreator.h"
+#include "src/BuffType.h"
 #include "src/DiceExpr.h"
 #include "src/Item.h"
+#include "src/ItemClassification.h"
 #include "src/ItemRegistry.h"
 #include "src/Paths.h"
 #include "src/Pickable.h"
+#include "src/TargetMode.h"
+#include "src/TurnSchedule.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include <filesystem>
 #include <fstream>
 #include <stdexcept>
 #include <string>
+#include <variant>
 
 class ItemCreatorTest : public ::testing::Test
 {

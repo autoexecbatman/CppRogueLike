@@ -26,6 +26,8 @@
 #include "src/Map.h"
 #include "src/Player.h"
 #include "src/SpellSystem.h"
+#include "src/TileType.h"
+#include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace

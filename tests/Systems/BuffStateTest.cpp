@@ -27,6 +27,7 @@
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
 #include "src/Renderer.h"
+#include "src/TileRef.h"
 #include "src/TurnSchedule.h"
 #include "src/Vector2D.h"
 

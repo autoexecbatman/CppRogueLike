@@ -11,6 +11,7 @@
 
 #include "src/Actor.h"
 #include "src/TileConfig.h"
+#include "src/TileDefinition.h"
 #include "src/TileType.h"
 
 class TileDefinitionTest : public ::testing::Test

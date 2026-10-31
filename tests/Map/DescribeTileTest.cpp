@@ -8,9 +8,14 @@
 // corridor had empty bodies. Those two impossible cases are now asserts rather
 // than dead message branches.
 
+#include <string>
+
 #include <gtest/gtest.h>
 
+#include "src/Colors.h"
 #include "src/Map.h"
+#include "src/MessageSystem.h"
+#include "src/TileType.h"
 #include "tests/mocks/MockGameContext.h"
 
 class DescribeTileTest : public ::testing::Test

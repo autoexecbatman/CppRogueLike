@@ -17,6 +17,7 @@
 
 #include <memory>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/AttackResult.h"
 #include "src/Attacker.h"
@@ -29,6 +30,7 @@
 #include "src/HealthPool.h"
 #include "src/ItemCreator.h"
 #include "src/MonsterAttacker.h"
+#include "src/TileRef.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 

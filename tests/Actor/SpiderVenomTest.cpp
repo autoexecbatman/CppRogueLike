@@ -40,6 +40,8 @@
 #include "src/MonsterAttacker.h"
 #include "src/Player.h"
 #include "src/SavingThrow.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "tests/mocks/TestDice.h"
 
 class SpiderVenomTest : public ::testing::Test

@@ -22,9 +22,12 @@
 #include <algorithm>
 #include <memory>
 #include <string_view>
+#include <utility>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
@@ -38,10 +41,12 @@
 #include "src/InventoryOperations.h"
 #include "src/Item.h"
 #include "src/ItemCreator.h"
+#include "src/ItemIdentification.h"
 #include "src/Paths.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/StrengthAttributes.h"
+#include "src/TileRef.h"
 #include "tests/mocks/TestDice.h"
 
 class StatBoostEquipmentTest : public ::testing::Test

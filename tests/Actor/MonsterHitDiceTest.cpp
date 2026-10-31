@@ -15,20 +15,25 @@
 
 #include <gtest/gtest.h>
 
+#include <initializer_list>
 #include <memory>
 #include <string_view>
 
+#include "src/Actor.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/CreatureSize.h"
 #include "src/DataManager.h"
+#include "src/DiceExpr.h"
 #include "src/GameContext.h"
 #include "src/ItemCreator.h"
 #include "src/LevelManager.h"
 #include "src/MonsterCreator.h"
 #include "src/MonsterRegistry.h"
+#include "src/MonsterStrength.h"
 #include "src/Paths.h"
 #include "src/RandomDice.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 class MonsterHitDiceTest : public ::testing::Test

@@ -28,6 +28,7 @@
 #include <memory>
 #include <string>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
@@ -36,6 +37,7 @@
 #include "src/HealthPool.h"
 #include "src/MessageSystem.h"
 #include "src/SpellSystem.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 class SpellFailureTest : public ::testing::Test

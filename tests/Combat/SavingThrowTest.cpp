@@ -15,15 +15,25 @@
 // were told one level early every time; warriors were told on 6 and 12, which
 // improve nothing, and not on 5, 7, 11, 13 or 17, which do.
 
+#include <algorithm>
+#include <cstddef>
+#include <memory>
+#include <utility>
+#include <vector>
+
 #include <gtest/gtest.h>
 
+#include "src/Actor.h"
+#include "src/ArmorClass.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/CreatureClass.h"
 #include "src/DataManager.h"
 #include "src/ExperienceReward.h"
+#include "src/HealthPool.h"
 #include "src/LevelUpSystem.h"
 #include "src/SavingThrow.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 // ---------------------------------------------------------------------------

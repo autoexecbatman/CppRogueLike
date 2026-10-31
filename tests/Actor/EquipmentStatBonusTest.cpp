@@ -5,18 +5,26 @@
 // and behavior-based bonuses (JewelryAmulet, Gauntlets, Girdle).
 
 #include "src/Actor.h"
+#include "src/ArmorClass.h"
+#include "src/BuffType.h"
 #include "src/Creature.h"
 #include "src/DataManager.h"
+#include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
 #include "src/GameContext.h"
+#include "src/HealthPool.h"
 #include "src/Item.h"
+#include "src/ItemClassification.h"
 #include "src/ItemIdentification.h"
 #include "src/MagicalItemEffects.h"
+#include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 #include <gtest/gtest.h>
 #include <memory>
+#include <string>
+#include <utility>
 
 // ============================================================================
 // TEST FIXTURE: EquipmentStatBonusTest

@@ -18,6 +18,7 @@
 #include <array>
 #include <memory>
 
+#include "src/Actor.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/CreatureClass.h"
@@ -25,6 +26,8 @@
 #include "src/DamageResolver.h"
 #include "src/GameContext.h"
 #include "src/HealthPool.h"
+#include "src/Persistent.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace

@@ -23,18 +23,24 @@
 #include <vector>
 
 #include <cctype>
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <string_view>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
+#include "src/CreatureClass.h"
 #include "src/DataManager.h"
 #include "src/ExperienceReward.h"
 #include "src/HealthPool.h"
 #include "src/LevelUpSystem.h"
 #include "src/MessageSystem.h"
+#include "src/SpellRegistry.h"
 #include "src/SpellSystem.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace

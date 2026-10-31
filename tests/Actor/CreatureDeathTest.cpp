@@ -22,15 +22,23 @@
 #include <algorithm>
 #include <memory>
 #include <string>
+#include <string_view>
+#include <utility>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
+#include "src/Colors.h"
+#include "src/CorpseEdibility.h"
 #include "src/Creature.h"
+#include "src/CreatureClass.h"
+#include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
 #include "src/HealthPool.h"
 #include "src/InventoryOperations.h"
 #include "src/Item.h"
 #include "src/ItemCreator.h"
 #include "src/Player.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace

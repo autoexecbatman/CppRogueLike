@@ -18,15 +18,19 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <initializer_list>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include "src/Actor.h"
 #include "src/AiMonster.h"
 #include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/DiceExpr.h"
 #include "src/ExperienceReward.h"
@@ -37,6 +41,9 @@
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/SpellSystem.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
+#include "src/TurnSchedule.h"
 #include "tests/mocks/MockGameContext.h"
 
 class DurationWordingTest : public ::testing::Test

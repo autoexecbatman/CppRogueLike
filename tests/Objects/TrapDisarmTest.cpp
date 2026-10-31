@@ -24,18 +24,24 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <memory>
 #include <optional>
 #include <string>
+#include <utility>
+#include <vector>
 
+#include "src/CreatureClass.h"
 #include "src/GameContext.h"
 #include "src/GameStateManager.h"
 #include "src/HealthPool.h"
 #include "src/MessageSystem.h"
+#include "src/Persistent.h"
 #include "src/Player.h"
 #include "src/PlayerRaceState.h"
 #include "src/ThiefSkills.h"
 #include "src/TileFeature.h"
+#include "src/TileRef.h"
 #include "src/Trap.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"

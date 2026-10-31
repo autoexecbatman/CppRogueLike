@@ -15,11 +15,15 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <memory>
 #include <string_view>
 
 #include <string>
+#include <utility>
 
+#include "src/Actor.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/InventoryOperations.h"
 #include "src/Item.h"
@@ -27,6 +31,7 @@
 #include "src/LogMessage.h"
 #include "src/MessageSystem.h"
 #include "src/Pickable.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace

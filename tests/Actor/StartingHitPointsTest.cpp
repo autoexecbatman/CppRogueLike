@@ -24,6 +24,7 @@
 #include "src/CreatureClass.h"
 #include "src/GameContext.h"
 #include "src/Player.h"
+#include "src/PlayerRaceState.h"
 #include "src/RandomDice.h"
 #include "tests/mocks/MockGameContext.h"
 

@@ -13,6 +13,7 @@
 #include <gtest/gtest.h>
 
 #include <array>
+#include <cstddef>
 
 #include "src/CreatureSize.h"
 #include "src/MonsterAbilityTables.h"

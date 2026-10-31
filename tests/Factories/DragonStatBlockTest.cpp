@@ -32,6 +32,7 @@
 
 #include "src/CreatureSize.h"
 #include "src/DamageInfo.h"
+#include "src/MonsterHitDice.h"
 #include "src/MonsterRegistry.h"
 #include "src/Paths.h"
 

@@ -11,6 +11,7 @@
 #include <gtest/gtest.h>
 
 #include <stdexcept>
+#include <vector>
 
 #include "src/DiceExpr.h"
 #include "src/RandomDice.h"

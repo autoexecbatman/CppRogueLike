@@ -18,9 +18,11 @@
 
 #include <gtest/gtest.h>
 
+#include "src/Actor.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/InventoryOperations.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 class CarryCapacityTest : public ::testing::Test

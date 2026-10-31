@@ -2,13 +2,22 @@
 #include "src/Ai.h"
 #include "src/AiMonster.h"
 #include "src/AiWebSpinner.h"
+#include "src/Alignment.h"
+#include "src/ArmorClass.h"
+#include "src/BuffType.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
+#include "src/CreatureClass.h"
+#include "src/DamageInfo.h"
 #include "src/ExperienceReward.h"
+#include "src/HealthPool.h"
 #include "src/MonsterAttacker.h"
+#include "src/TileRef.h"
+#include "src/TurnSchedule.h"
 #include <gtest/gtest.h>
 #include <memory>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 #include <stdexcept>
 
 using json = nlohmann::json;

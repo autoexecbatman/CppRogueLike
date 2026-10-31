@@ -19,7 +19,10 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <string>
+#include <utility>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
@@ -28,6 +31,7 @@
 #include "src/ItemCreator.h"
 #include "src/ItemRegistry.h"
 #include "src/Pickable.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 class WornSlotTest : public ::testing::Test

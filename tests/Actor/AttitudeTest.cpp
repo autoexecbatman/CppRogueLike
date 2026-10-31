@@ -5,8 +5,11 @@
 
 #include <gtest/gtest.h>
 
+#include "src/Actor.h"
+#include "src/Attitude.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
+#include "src/TileRef.h"
 #include "src/Vector2D.h"
 
 class AttitudeTest : public ::testing::Test

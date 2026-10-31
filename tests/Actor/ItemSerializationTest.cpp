@@ -1,11 +1,21 @@
+#include <memory>
+#include <variant>
+#include <vector>
+
 #include "src/Actor.h"
 #include "src/Colors.h"
 #include "src/Item.h"
+#include "src/ItemClassification.h"
 #include "src/ItemCreator.h"
 #include "src/ItemEnhancements.h"
+#include "src/ItemIdentification.h"
 #include "src/Pickable.h"
+#include "src/TargetMode.h"
+#include "src/TileRef.h"
+#include "src/Weapons.h"
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 using json = nlohmann::json;
 

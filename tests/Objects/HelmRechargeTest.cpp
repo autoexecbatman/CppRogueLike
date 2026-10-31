@@ -18,9 +18,11 @@
 #include <gtest/gtest.h>
 
 #include <cstdlib>
+#include <exception>
 #include <memory>
 #include <stdexcept>
 #include <string_view>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -36,13 +38,16 @@
 #include "src/InputSystem.h"
 #include "src/Item.h"
 #include "src/ItemCreator.h"
+#include "src/MagicalItemEffects.h"
 #include "src/Map.h"
 #include "src/MenuManager.h"
 #include "src/MenuSpellCast.h"
+#include "src/Persistent.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/Renderer.h"
 #include "src/SpellSystem.h"
+#include "src/TileType.h"
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"
 

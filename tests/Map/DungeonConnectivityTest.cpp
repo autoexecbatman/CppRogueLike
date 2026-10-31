@@ -30,12 +30,14 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <cassert>
 #include <memory>
 #include <optional>
 #include <ranges>
 #include <vector>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
@@ -53,6 +55,7 @@
 #include "src/Player.h"
 #include "src/PrefabLibrary.h"
 #include "src/Stairs.h"
+#include "src/TileRef.h"
 #include "src/TileType.h"
 #include "src/Trap.h"
 #include "tests/mocks/MockGameContext.h"

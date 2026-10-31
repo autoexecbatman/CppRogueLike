@@ -18,7 +18,9 @@
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <ios>
 #include <string>
+#include <system_error>
 #include <typeinfo>
 
 #include "src/Controls.h"

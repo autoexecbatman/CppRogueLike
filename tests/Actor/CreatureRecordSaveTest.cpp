@@ -13,10 +13,12 @@
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include <memory>
 #include <string_view>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/Attitude.h"
 #include "src/Colors.h"
@@ -31,6 +33,7 @@
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
 #include "src/RandomDice.h"
+#include "src/TileRef.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 

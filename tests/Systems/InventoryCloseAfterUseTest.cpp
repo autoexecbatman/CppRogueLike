@@ -22,6 +22,7 @@
 
 #include <cstdlib>
 #include <memory>
+#include <utility>
 
 #include <raylib.h>
 
@@ -43,6 +44,8 @@
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/Renderer.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"

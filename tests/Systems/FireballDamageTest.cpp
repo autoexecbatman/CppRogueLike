@@ -10,20 +10,30 @@
 // which save on the warrior row and need 17 against a spell. Every number below
 // is derived from those rules, never from the code.
 
+#include <initializer_list>
+#include <memory>
+#include <utility>
+#include <vector>
+
 #include <gtest/gtest.h>
 
+#include "src/Actor.h"
+#include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
+#include "src/DamageSource.h"
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
+#include "src/HealthPool.h"
 #include "src/Item.h"
 #include "src/ItemCreator.h"
 #include "src/Paths.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/SpellSystem.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 class FireballDamageTest : public ::testing::Test

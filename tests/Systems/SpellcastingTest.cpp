@@ -22,6 +22,7 @@
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include <filesystem>
 #include <fstream>
@@ -30,7 +31,9 @@
 #include <string>
 #include <vector>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
+#include "src/Colors.h"
 #include "src/Controls.h"
 #include "src/Creature.h"
 #include "src/CreatureClass.h"
@@ -43,8 +46,10 @@
 #include "src/MonsterRegistry.h"
 #include "src/Paths.h"
 #include "src/Player.h"
+#include "src/SpellRegistry.h"
 #include "src/SpellSystem.h"
 #include "src/Spellcasting.h"
+#include "src/TileRef.h"
 #include "src/TurnSchedule.h"
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"

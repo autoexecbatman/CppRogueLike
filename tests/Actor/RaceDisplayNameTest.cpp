@@ -23,6 +23,7 @@
 #include <string_view>
 
 #include "src/Player.h"
+#include "src/PlayerRaceState.h"
 
 // Two races sharing a name would show the player two choices they cannot tell apart.
 TEST(RaceDisplayNameTest, NoTwoRacesShareAName)

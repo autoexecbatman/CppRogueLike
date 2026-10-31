@@ -15,12 +15,14 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <format>
 #include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
@@ -31,6 +33,9 @@
 #include "src/Pathfinding.h"
 #include "src/Player.h"
 #include "src/SpellTile.h"
+#include "src/TileFeature.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "src/Trap.h"
 #include "src/Web.h"
 #include "tests/mocks/MockGameContext.h"

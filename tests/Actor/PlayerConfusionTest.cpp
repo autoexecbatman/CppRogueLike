@@ -10,10 +10,12 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <string_view>
 
+#include "src/Actor.h"
 #include "src/AiMimic.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
@@ -27,6 +29,8 @@
 #include "src/Player.h"
 #include "src/PlayerController.h"
 #include "src/Renderer.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "src/TurnSchedule.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"

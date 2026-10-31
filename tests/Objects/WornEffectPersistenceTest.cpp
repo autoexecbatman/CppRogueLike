@@ -22,10 +22,14 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <optional>
+#include <utility>
 #include <variant>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
+#include "src/Actor.h"
 #include "src/BodyPlanRegistry.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
@@ -33,6 +37,7 @@
 #include "src/Item.h"
 #include "src/MagicalItemEffects.h"
 #include "src/Pickable.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 using json = nlohmann::json;

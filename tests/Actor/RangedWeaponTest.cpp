@@ -8,15 +8,22 @@
 // because can_equip already refuses anything but a ranged weapon in that slot.
 // What the flag cost was two copies of one fact and the code to reconcile them.
 
+#include <memory>
+#include <string_view>
+
 #include <gtest/gtest.h>
 
+#include "src/Actor.h"
+#include "src/ArmorClass.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
+#include "src/HealthPool.h"
 #include "src/ItemCreator.h"
 #include "src/Paths.h"
 #include "src/Player.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 class RangedWeaponTest : public ::testing::Test

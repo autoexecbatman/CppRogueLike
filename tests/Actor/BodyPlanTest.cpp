@@ -1,3 +1,4 @@
+#include "src/Actor.h"
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
 #include <gtest/gtest.h>

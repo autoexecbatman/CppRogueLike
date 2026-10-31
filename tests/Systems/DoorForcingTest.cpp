@@ -29,6 +29,7 @@
 #include "src/MessageSystem.h"
 #include "src/Player.h"
 #include "src/PlayerController.h"
+#include "src/TileType.h"
 #include "src/TurnSchedule.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"

@@ -3,12 +3,18 @@
 // with that state pass freely, and that a caught creature struggles for a turn
 // before it is released.
 
+#include <memory>
+
 #include <gtest/gtest.h>
 
+#include "src/Actor.h"
+#include "src/ArmorClass.h"
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
+#include "src/HealthPool.h"
 #include "src/ItemCreator.h"
 #include "src/Player.h"
+#include "src/TileFeature.h"
 #include "src/Vector2D.h"
 #include "src/Web.h"
 #include "tests/mocks/MockGameContext.h"

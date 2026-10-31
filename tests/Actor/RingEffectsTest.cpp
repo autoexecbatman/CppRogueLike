@@ -20,6 +20,7 @@
 #include <string_view>
 #include <vector>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
@@ -33,6 +34,7 @@
 #include "src/MagicalItemEffects.h"
 #include "src/Player.h"
 #include "src/SpellSystem.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 class RingEffectsTest : public ::testing::Test

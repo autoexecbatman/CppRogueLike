@@ -20,8 +20,10 @@
 #include <initializer_list>
 #include <memory>
 #include <string>
+#include <utility>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "src/ArmorClass.h"
 #include "src/ExperienceReward.h"

@@ -29,12 +29,14 @@
 #include <vector>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "src/BuffType.h"
 #include "src/DiceExpr.h"
 #include "src/MagicalItemEffects.h"
 #include "src/Pickable.h"
 #include "src/TargetMode.h"
+#include "src/TurnSchedule.h"
 #include "src/Weapons.h"
 
 using json = nlohmann::json;

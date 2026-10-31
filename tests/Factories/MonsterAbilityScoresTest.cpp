@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include <fstream>
 #include <initializer_list>

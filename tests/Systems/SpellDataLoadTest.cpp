@@ -13,10 +13,13 @@
 
 #include <filesystem>
 #include <fstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
+#include <system_error>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "src/Paths.h"
 #include "src/SpellRegistry.h"

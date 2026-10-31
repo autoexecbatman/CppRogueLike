@@ -20,6 +20,7 @@
 #include "src/DungeonRoom.h"
 #include "src/GameContext.h"
 #include "src/Map.h"
+#include "src/TileType.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 

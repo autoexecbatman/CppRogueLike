@@ -6,13 +6,21 @@
 // here for a year while every monster walked into pools, because the gate the AI used
 // was a different function that took no creature.
 
+#include <memory>
+#include <vector>
+
 #include <gtest/gtest.h>
 
+#include "src/Actor.h"
+#include "src/ArmorClass.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
+#include "src/HealthPool.h"
 #include "src/Map.h"
 #include "src/Pathfinding.h"
 #include "src/Player.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 

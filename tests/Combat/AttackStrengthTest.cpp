@@ -17,15 +17,20 @@
 #include <gtest/gtest.h>
 
 #include <array>
+#include <cstddef>
 #include <memory>
 #include <string_view>
 
+#include "src/Actor.h"
+#include "src/ArmorClass.h"
 #include "src/AttackKind.h"
 #include "src/AttackStrength.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
+#include "src/DamageInfo.h"
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
+#include "src/HealthPool.h"
 #include "src/Item.h"
 #include "src/ItemClassification.h"
 #include "src/ItemCreator.h"
@@ -34,6 +39,7 @@
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace

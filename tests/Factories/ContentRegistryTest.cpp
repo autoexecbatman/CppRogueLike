@@ -13,6 +13,7 @@
 
 #include "src/ContentRegistry.h"
 #include "src/Renderer.h"
+#include "src/TileRef.h"
 
 // A removed sprite is no longer listed, and the key reads the null sentinel again.
 TEST(ContentRegistryTest, ARemovedTileIsGone)

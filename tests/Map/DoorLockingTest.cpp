@@ -19,6 +19,7 @@
 #include <gtest/gtest.h>
 
 #include "src/Map.h"
+#include "src/TileType.h"
 #include "src/Vector2D.h"
 
 namespace

@@ -13,13 +13,20 @@
 // creature ever had, so the first tick of every new character logged
 // "Constitution increased from 0 to 17!" - a change report with only one state.
 
+#include <cstddef>
+#include <memory>
+#include <vector>
+
 #include <gtest/gtest.h>
 
+#include "src/AbilityAllocation.h"
 #include "src/Creature.h"
+#include "src/CreatureClass.h"
 #include "src/DataManager.h"
 #include "src/GameContext.h"
 #include "src/MessageSystem.h"
 #include "src/Player.h"
+#include "src/PlayerRaceState.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace

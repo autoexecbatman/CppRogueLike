@@ -17,8 +17,10 @@
 
 #include <initializer_list>
 #include <memory>
+#include <utility>
 #include <vector>
 
+#include "src/Actor.h"
 #include "src/AiMonster.h"
 #include "src/ArmorClass.h"
 #include "src/Colors.h"
@@ -32,6 +34,8 @@
 #include "src/Paths.h"
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "src/Trap.h"
 #include "tests/mocks/TestDice.h"
 

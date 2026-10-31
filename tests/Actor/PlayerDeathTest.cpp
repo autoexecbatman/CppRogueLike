@@ -23,8 +23,10 @@
 #include <fstream>
 #include <memory>
 #include <string>
+#include <system_error>
 
 #include "src/ArmorClass.h"
+#include "src/DamageSource.h"
 #include "src/GameContext.h"
 #include "src/HealthPool.h"
 #include "src/Paths.h"

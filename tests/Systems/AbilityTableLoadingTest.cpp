@@ -27,10 +27,17 @@
 #include <string>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
+#include "src/CharismaAttributes.h"
+#include "src/ConstitutionAttributes.h"
 #include "src/DataManager.h"
+#include "src/DexterityAttributes.h"
+#include "src/IntelligenceAttributes.h"
 #include "src/MessageSystem.h"
 #include "src/Paths.h"
+#include "src/StrengthAttributes.h"
+#include "src/WisdomAttributes.h"
 
 using json = nlohmann::json;
 

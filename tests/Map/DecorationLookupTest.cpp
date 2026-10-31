@@ -19,10 +19,12 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "src/Decoration.h"
 #include "src/Map.h"
+#include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace

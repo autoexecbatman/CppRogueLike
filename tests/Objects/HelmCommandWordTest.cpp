@@ -19,9 +19,11 @@
 #include <gtest/gtest.h>
 
 #include <cstdlib>
+#include <exception>
 #include <memory>
 #include <stdexcept>
 #include <string_view>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -40,8 +42,10 @@
 #include "src/InventoryOperations.h"
 #include "src/Item.h"
 #include "src/ItemCreator.h"
+#include "src/MagicalItemEffects.h"
 #include "src/MenuManager.h"
 #include "src/MenuSpellCast.h"
+#include "src/Persistent.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/Renderer.h"

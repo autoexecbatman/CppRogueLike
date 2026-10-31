@@ -28,13 +28,16 @@
 #include <variant>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
 #include "src/Colors.h"
 #include "src/Controls.h"
 #include "src/Creature.h"
+#include "src/DiceExpr.h"
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
 #include "src/GameContext.h"
@@ -52,6 +55,7 @@
 #include "src/PlayerTurn.h"
 #include "src/RandomDice.h"
 #include "src/Renderer.h"
+#include "src/TileRef.h"
 #include "src/TurnSchedule.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/HiddenRenderer.h"

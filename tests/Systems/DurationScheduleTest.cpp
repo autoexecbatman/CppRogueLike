@@ -19,16 +19,20 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <utility>
 #include <vector>
 
+#include "src/Actor.h"
 #include "src/Ai.h"
 #include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/CreatureManager.h"
 #include "src/ExperienceReward.h"
 #include "src/HealthPool.h"
+#include "src/TileRef.h"
 #include "src/TurnSchedule.h"
 #include "tests/mocks/CountingAi.h"
 #include "tests/mocks/ExpectLastsExactly.h"

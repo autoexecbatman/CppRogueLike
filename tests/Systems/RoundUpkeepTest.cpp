@@ -21,14 +21,20 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
+#include "src/BuffType.h"
 #include "src/Colors.h"
+#include "src/CorpseEdibility.h"
 #include "src/Creature.h"
+#include "src/CreatureClass.h"
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
 #include "src/GameContext.h"
@@ -38,9 +44,13 @@
 #include "src/Item.h"
 #include "src/ItemClassification.h"
 #include "src/ItemIdentification.h"
+#include "src/MagicalItemEffects.h"
 #include "src/Map.h"
 #include "src/MessageSystem.h"
+#include "src/Pickable.h"
 #include "src/Player.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "src/TurnSchedule.h"
 #include "tests/mocks/ExpectLastsExactly.h"
 #include "tests/mocks/MockGameContext.h"

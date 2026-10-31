@@ -23,13 +23,16 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <variant>
 
+#include "src/Actor.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
 #include "src/ItemCreator.h"
 #include "src/MagicalItemEffects.h"
 #include "src/Pickable.h"
+#include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
 class SwimmingGauntletsTest : public ::testing::Test

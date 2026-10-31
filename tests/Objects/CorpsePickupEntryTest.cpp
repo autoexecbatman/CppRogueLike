@@ -26,6 +26,7 @@
 
 #include "src/ArmorClass.h"
 #include "src/Creature.h"
+#include "src/CreatureClass.h"
 #include "src/ExperienceReward.h"
 #include "src/HealthPool.h"
 #include "src/InputHandler.h"
@@ -33,11 +34,13 @@
 #include "src/InventoryOperations.h"
 #include "src/Map.h"
 #include "src/MonsterCreator.h"
+#include "src/Pickable.h"
 #include "src/Pickup.h"
 #include "src/Player.h"
 #include "src/PlayerController.h"
 #include "src/PlayerRaceState.h"
 #include "src/Renderer.h"
+#include "src/TileType.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace

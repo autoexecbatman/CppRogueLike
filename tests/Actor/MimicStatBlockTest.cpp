@@ -23,6 +23,7 @@
 #include <string_view>
 #include <vector>
 
+#include "src/Actor.h"
 #include "src/Ai.h"
 #include "src/AiMimic.h"
 #include "src/Creature.h"

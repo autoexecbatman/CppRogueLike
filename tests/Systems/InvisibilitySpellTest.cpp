@@ -16,9 +16,11 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <string>
 #include <string_view>
 
+#include "src/Actor.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
 #include "src/Colors.h"
@@ -26,6 +28,7 @@
 #include "src/GameContext.h"
 #include "src/LogMessage.h"
 #include "src/SpellSystem.h"
+#include "src/TileRef.h"
 #include "src/TurnSchedule.h"
 #include "tests/mocks/MockGameContext.h"
 

@@ -19,14 +19,18 @@
 #include <initializer_list>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include "src/Actor.h"
 #include "src/AiMonster.h"
 #include "src/ArmorClass.h"
 #include "src/AttackKind.h"
 #include "src/Attacker.h"
 #include "src/BuffSystem.h"
+#include "src/Colors.h"
 #include "src/Controls.h"
+#include "src/CorpseEdibility.h"
 #include "src/Creature.h"
 #include "src/CreatureClass.h"
 #include "src/DamageSource.h"
@@ -42,8 +46,11 @@
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
 #include "src/Renderer.h"
+#include "src/SpellRegistry.h"
 #include "src/SpellSystem.h"
 #include "src/Spellcasting.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "src/Trap.h"
 #include "src/TurnUndead.h"
 #include "tests/mocks/HiddenRenderer.h"

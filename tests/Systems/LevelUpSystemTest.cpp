@@ -1,12 +1,16 @@
 #include "src/LevelUpSystem.h"
+#include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
 #include "src/CreatureClass.h"
 #include "src/ExperienceReward.h"
 #include "src/Game.h"
+#include "src/HealthPool.h"
 #include "src/Player.h"
 #include "tests/mocks/TestDice.h"
 #include <gtest/gtest.h>
+
+#include <memory>
 
 class LevelUpSystemTest : public ::testing::Test
 {

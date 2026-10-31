@@ -18,6 +18,7 @@
 
 #include "src/Actor.h"
 #include <algorithm>
+#include <utility>
 
 #include "src/ArmorClass.h"
 #include "src/EquipmentSlot.h"
@@ -28,6 +29,7 @@
 #include "src/Item.h"
 #include "src/ItemCreator.h"
 #include "src/ItemEnhancements.h"
+#include "src/ItemIdentification.h"
 #include "src/Paths.h"
 #include "src/Pickable.h"
 #include "src/Player.h"

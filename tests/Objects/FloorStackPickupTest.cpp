@@ -20,9 +20,13 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <deque>
 #include <memory>
+#include <string>
+#include <utility>
 
+#include "src/Actor.h"
 #include "src/BaseMenu.h"
 #include "src/Colors.h"
 #include "src/InputSystem.h"
@@ -31,6 +35,9 @@
 #include "src/Pickup.h"
 #include "src/Player.h"
 #include "src/Renderer.h"
+#include "src/TileRef.h"
+#include "src/UniqueId.h"
+#include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
 namespace

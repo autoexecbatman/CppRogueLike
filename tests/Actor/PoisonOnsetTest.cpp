@@ -24,6 +24,7 @@
 #include <memory>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "src/Actor.h"
 #include "src/AiGiantSpider.h"
@@ -41,6 +42,8 @@
 #include "src/MonsterAttacker.h"
 #include "src/Player.h"
 #include "src/SavingThrow.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "tests/mocks/TestDice.h"
 
 class PoisonOnsetTest : public ::testing::Test

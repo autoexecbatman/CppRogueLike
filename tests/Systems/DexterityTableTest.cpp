@@ -16,6 +16,7 @@
 #include <memory>
 #include <vector>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/Colors.h"
 #include "src/Creature.h"
@@ -23,6 +24,7 @@
 #include "src/ExperienceReward.h"
 #include "src/Game.h"
 #include "src/HealthPool.h"
+#include "src/TileRef.h"
 #include "tests/mocks/TestDice.h"
 
 namespace

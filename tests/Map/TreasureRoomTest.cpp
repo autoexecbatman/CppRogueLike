@@ -1,12 +1,17 @@
+#include <cstddef>
 #include <gtest/gtest.h>
+#include <memory>
 #include <set>
 #include <string>
+#include <vector>
 
+#include "src/ArmorClass.h"
 #include "src/DataManager.h"
 #include "src/DungeonNames.h"
 #include "src/DungeonRoom.h"
 #include "src/ExperienceReward.h"
 #include "src/GameContext.h"
+#include "src/HealthPool.h"
 #include "src/ItemCreator.h"
 #include "src/LevelManager.h"
 #include "src/Map.h"
@@ -17,8 +22,10 @@
 #include "src/SpellTile.h"
 #include "src/Stairs.h"
 #include "src/TileFeature.h"
+#include "src/TileType.h"
 #include "src/Trap.h"
 #include "src/TreasureRoom.h"
+#include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
 // ============================================================================

@@ -1,6 +1,8 @@
 #include "src/Actor.h"
+#include "src/DamageInfo.h"
 #include "src/ItemCreator.h"
 #include "src/ItemEnhancements.h"
+#include "src/ItemIdentification.h"
 #include "src/RandomDice.h"
 #include "src/WeaponDamageRegistry.h"
 #include "tests/mocks/TestDice.h"

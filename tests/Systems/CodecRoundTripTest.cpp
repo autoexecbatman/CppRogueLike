@@ -17,13 +17,16 @@
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "src/EquipmentSlot.h"
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
 #include <set>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -47,6 +50,7 @@
 #include "src/Pickable.h"
 #include "src/Renderer.h"
 #include "src/TargetMode.h"
+#include "src/TileRef.h"
 #include "src/Weapons.h"
 
 namespace

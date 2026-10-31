@@ -19,6 +19,7 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef>
 #include <memory>
 #include <optional>
 #include <string>
@@ -35,6 +36,7 @@
 #include "src/PlayerController.h"
 #include "src/PlayerRaceState.h"
 #include "src/ThiefSkills.h"
+#include "src/TileType.h"
 #include "src/TurnSchedule.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"

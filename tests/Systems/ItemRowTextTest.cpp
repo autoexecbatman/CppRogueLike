@@ -19,9 +19,11 @@
 
 #include <memory>
 
+#include "src/Actor.h"
 #include "src/Colors.h"
 #include "src/InventoryUI.h"
 #include "src/Item.h"
+#include "src/TileRef.h"
 
 namespace
 {

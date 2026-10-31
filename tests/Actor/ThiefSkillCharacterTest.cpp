@@ -16,10 +16,14 @@
 
 #include <memory>
 #include <string_view>
+#include <utility>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "src/ArmorClass.h"
+#include "src/CreatureClass.h"
+#include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
 #include "src/Game.h"
 #include "src/HealthPool.h"
@@ -30,6 +34,7 @@
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
+#include "src/PlayerRaceState.h"
 #include "src/ThiefSkills.h"
 #include "tests/mocks/TestDice.h"
 

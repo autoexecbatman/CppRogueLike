@@ -6,13 +6,22 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <memory>
+#include <utility>
+#include <vector>
 
+#include "src/Actor.h"
+#include "src/ArmorClass.h"
 #include "src/Colors.h"
+#include "src/CorpseEdibility.h"
 #include "src/Creature.h"
+#include "src/CreatureClass.h"
 #include "src/ExperienceReward.h"
+#include "src/HealthPool.h"
 #include "src/Map.h"
 #include "src/Player.h"
 #include "src/RandomDice.h"
+#include "src/TileRef.h"
 #include "src/TileType.h"
 #include "src/TurnUndead.h"
 

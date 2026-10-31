@@ -1,6 +1,12 @@
 #include <gtest/gtest.h>
 #include <limits>
+#include <memory>
+#include <stdexcept>
+#include <utility>
+#include <vector>
 
+#include "src/Actor.h"
+#include "src/ArmorClass.h"
 #include "src/Colors.h"
 #include "src/DataManager.h"
 #include "src/Decoration.h"
@@ -8,6 +14,7 @@
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
 #include "src/GameContext.h"
+#include "src/HealthPool.h"
 #include "src/InventoryData.h"
 #include "src/Item.h"
 #include "src/MagicalItemEffects.h"
@@ -15,10 +22,13 @@
 #include "src/MessageSystem.h"
 #include "src/Pathfinding.h"
 #include "src/Paths.h"
+#include "src/Persistent.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/RandomDice.h"
 #include "src/TileConfig.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "tests/mocks/TestDice.h"
 
 // ============================================================================

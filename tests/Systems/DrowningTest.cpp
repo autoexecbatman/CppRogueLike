@@ -20,10 +20,17 @@
 
 #include <memory>
 #include <optional>
+#include <utility>
+#include <vector>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
+#include "src/Colors.h"
+#include "src/CorpseEdibility.h"
 #include "src/Creature.h"
+#include "src/CreatureClass.h"
 #include "src/Drowning.h"
+#include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
 #include "src/GameLoopCoordinator.h"
 #include "src/HealthPool.h"
@@ -33,8 +40,11 @@
 #include "src/Map.h"
 #include "src/MonsterCreator.h"
 #include "src/MonsterRegistry.h"
+#include "src/Persistent.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "src/TurnSchedule.h"
 #include "tests/mocks/MockGameContext.h"
 

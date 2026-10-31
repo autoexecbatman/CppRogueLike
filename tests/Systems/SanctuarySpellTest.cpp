@@ -23,12 +23,16 @@
 
 #include <initializer_list>
 #include <memory>
+#include <utility>
 #include <vector>
 
+#include "src/Actor.h"
+#include "src/Ai.h"
 #include "src/AiMonster.h"
 #include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/ExperienceReward.h"
 #include "src/HealthPool.h"
@@ -38,6 +42,8 @@
 #include "src/SavingThrow.h"
 #include "src/SpellSystem.h"
 #include "src/TargetingSystem.h"
+#include "src/TileRef.h"
+#include "src/TileType.h"
 #include "tests/mocks/ExpectLastsExactly.h"
 #include "tests/mocks/MockGameContext.h"
 
