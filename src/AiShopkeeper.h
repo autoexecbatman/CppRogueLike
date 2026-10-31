@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Ai.h"
+#include "Persistent.h"
 
 class Creature;
 struct GameContext;

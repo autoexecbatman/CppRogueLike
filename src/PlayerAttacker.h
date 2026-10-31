@@ -1,6 +1,9 @@
 #pragma once
 
+#include "AttackKind.h"
+#include "AttackResult.h"
 #include "Attacker.h"
+#include "Persistent.h"
 
 class Player;
 class Creature;

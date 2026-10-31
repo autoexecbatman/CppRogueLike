@@ -1,6 +1,8 @@
 #pragma once
 
+#include "Actor.h"
 #include "TileFeature.h"
+#include "Vector2D.h"
 
 // file: SpellTile.h
 //

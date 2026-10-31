@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "Creature.h"
+#include "Item.h"
 #include "Vector2D.h"
 
 struct GameContext;

@@ -2,6 +2,7 @@
 
 #include <optional>
 
+#include "Ai.h"
 #include "AiMonster.h"
 #include "Persistent.h"
 

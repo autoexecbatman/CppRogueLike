@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Ai.h"
 #include "AiSpider.h"
 
 class Creature;

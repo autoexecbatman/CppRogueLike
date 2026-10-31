@@ -9,6 +9,7 @@
 // Navigation: UP/DOWN (or w/s). Selection: ENTER or matching hotkey. ESC
 // triggers the optional onEscape callback then closes the menu.
 
+#include <cstddef>
 #include <functional>
 #include <string>
 #include <vector>

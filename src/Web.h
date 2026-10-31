@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SpellTile.h"
+#include "TileFeature.h"
 
 struct GameContext;
 struct Vector2D;

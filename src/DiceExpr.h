@@ -23,9 +23,11 @@
 
 #include <cassert>
 #include <charconv>
+#include <cstddef>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <system_error>
 #include <vector>
 
 #include "RandomDice.h"

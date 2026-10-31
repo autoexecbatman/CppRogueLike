@@ -8,6 +8,7 @@
 
 #include "AbilityAllocation.h"
 #include "Creature.h"
+#include "CreatureClass.h"
 #include "Persistent.h"
 #include "PlayerController.h"
 #include "PlayerRaceState.h"

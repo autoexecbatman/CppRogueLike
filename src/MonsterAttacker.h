@@ -1,6 +1,10 @@
 #pragma once
 
+#include "AttackKind.h"
+#include "AttackResult.h"
 #include "Attacker.h"
+#include "DamageInfo.h"
+#include "Persistent.h"
 
 class Creature;
 struct GameContext;

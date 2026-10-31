@@ -2,6 +2,7 @@
 
 #include "CreatureClass.h"
 #include "DiceExpr.h"
+#include "RandomDice.h"
 
 class Creature;
 class DataManager;

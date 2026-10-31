@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <cstddef>
 #include <memory>
 #include <vector>
 
@@ -10,6 +11,7 @@
 #include "Persistent.h"
 #include "RandomDice.h"
 #include "TileType.h"
+#include "Vector2D.h"
 
 // Forward declaration
 struct GameContext;

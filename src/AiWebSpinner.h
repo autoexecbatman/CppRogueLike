@@ -2,7 +2,9 @@
 
 #include <optional>
 
+#include "Ai.h"
 #include "AiSpider.h"
+#include "Persistent.h"
 
 class Creature;
 struct GameContext;

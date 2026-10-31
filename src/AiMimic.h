@@ -4,10 +4,12 @@
 #include <string>
 #include <vector>
 
+#include "Ai.h"
 #include "AiMonster.h"
 #include "Colors.h"
 #include "Creature.h"
 #include "Persistent.h"
+#include "TileRef.h"
 
 class ContentRegistry;
 class ItemRegistry;

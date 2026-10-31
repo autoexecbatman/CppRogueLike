@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <span>
 #include <string>
@@ -7,6 +8,7 @@
 
 #include "BaseMenu.h"
 #include "GameContext.h"
+#include "Item.h"
 
 class Player;
 

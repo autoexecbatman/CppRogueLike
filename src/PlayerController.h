@@ -6,6 +6,7 @@
 #include <functional>
 #include <optional>
 
+#include "Actor.h"
 #include "GameContext.h"
 #include "Persistent.h"
 #include "TurnSchedule.h"

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <map>
 #include <span>
 #include <string>
@@ -15,6 +16,7 @@
 #include "MagicalItemEffects.h"
 #include "Pickable.h"
 #include "TargetMode.h"
+#include "TurnSchedule.h"
 #include "Weapons.h"
 
 // file: ItemRegistry.h

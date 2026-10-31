@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Actor.h"
+#include "Vector2D.h"
 
 // file: TileFeature.h
 //

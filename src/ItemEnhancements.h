@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <format>
 #include <optional>
 #include <stdexcept>

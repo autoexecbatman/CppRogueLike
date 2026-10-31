@@ -23,6 +23,8 @@
 #include <string_view>
 #include <vector>
 
+#include <raylib.h>
+
 #include "EditorField.h"
 #include "RecordEditor.h"
 #include "SpellRegistry.h"

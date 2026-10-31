@@ -3,6 +3,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -14,6 +15,7 @@
 #include "Attacker.h"
 #include "Attitude.h"
 #include "BuffType.h"
+#include "Colors.h"
 #include "ConstitutionTracker.h"
 #include "CorpseEdibility.h"
 #include "CreatureClass.h"
@@ -29,6 +31,7 @@
 #include "Lifespan.h"
 #include "MagicalItemEffects.h"
 #include "Persistent.h"
+#include "Pickable.h"
 #include "ShopKeeper.h"
 #include "Spellcasting.h"
 #include "TileRef.h"

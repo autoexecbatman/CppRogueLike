@@ -2,6 +2,7 @@
 
 #include "Colors.h"
 
+#include <functional>
 #include <map>
 #include <optional>
 #include <string>

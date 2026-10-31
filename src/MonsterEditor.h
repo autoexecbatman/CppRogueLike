@@ -22,6 +22,8 @@
 #include <string_view>
 #include <vector>
 
+#include <raylib.h>
+
 #include "EditorField.h"
 #include "MonsterRegistry.h"
 #include "RecordEditor.h"

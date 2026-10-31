@@ -1,11 +1,13 @@
 #pragma once
 
+#include <array>
 #include <deque>
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "AbilityAllocation.h"
+#include "CreatureClass.h"
 #include "InventoryData.h"
 #include "PlayerRaceState.h"
 
