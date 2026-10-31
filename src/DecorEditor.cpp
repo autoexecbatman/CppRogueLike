@@ -1,5 +1,6 @@
 // file: DecorEditor.cpp
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <format>
 #include <iostream>
@@ -12,7 +13,10 @@
 
 #include "DecorEditor.h"
 #include "ListCursor.h"
+#include "Palette.h"
 #include "Renderer.h"
+#include "TileRef.h"
+#include "Vector2D.h"
 
 namespace
 {

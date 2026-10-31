@@ -3,6 +3,7 @@
 #include <array>
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <format>
 #include <string>
 #include <string_view>
@@ -14,8 +15,10 @@
 #include <rlgl.h>
 #endif
 
+#include "Colors.h"
 #include "Renderer.h"
 #include "TileConfig.h"
+#include "TileRef.h"
 
 // Rendered tile sizes the player can step through. 64 matches the native cell
 // size of the regenerated sheets, so their art draws unscaled.

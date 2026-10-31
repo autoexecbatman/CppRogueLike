@@ -1,9 +1,16 @@
 // file: AbilityAllocation.cpp
 #include <algorithm>
+#include <array>
 #include <cassert>
+#include <cstddef>
 #include <numeric>
+#include <optional>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 #include "AbilityAllocation.h"
+#include "CreatureClass.h"
 #include "RandomDice.h"
 
 std::string_view ability_name(Ability ability)

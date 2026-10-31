@@ -2,8 +2,11 @@
 #include <format>
 #include <stdexcept>
 #include <string>
+#include <string_view>
+#include <unordered_map>
 
 #include "ContentRegistry.h"
+#include "TileRef.h"
 
 TileRef ContentRegistry::get_tile(std::string_view key) const
 {

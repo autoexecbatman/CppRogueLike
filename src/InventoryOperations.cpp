@@ -1,17 +1,24 @@
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <expected>
 #include <memory>
 #include <ranges>
+#include <string_view>
 #include <utility>
+#include <vector>
 
 #include "Actor.h"
 #include "Creature.h"
+#include "CreatureClass.h"
 #include "DataManager.h"
 #include "InventoryData.h"
 #include "InventoryOperations.h"
 #include "Item.h"
+#include "StrengthAttributes.h"
+#include "UniqueId.h"
+#include "Vector2D.h"
 
 namespace InventoryOperations
 {

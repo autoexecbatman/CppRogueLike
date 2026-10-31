@@ -38,6 +38,7 @@
 #include <vector>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 // Include only the struct definitions
 #include "CharismaAttributes.h"

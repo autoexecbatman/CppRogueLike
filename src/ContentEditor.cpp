@@ -1,5 +1,6 @@
 // file: ContentEditor.cpp
 #include <algorithm>
+#include <cstddef>
 #include <format>
 #include <string>
 
@@ -9,9 +10,11 @@
 #include "ContentRegistry.h"
 #include "ContentRegistryIO.h"
 #include "ItemRegistry.h"
+#include "ListCursor.h"
 #include "MonsterRegistry.h"
 #include "Paths.h"
 #include "Renderer.h"
+#include "TileRef.h"
 
 // ---------------------------------------------------------------------------
 // Static monster table

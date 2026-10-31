@@ -1,10 +1,13 @@
 // file: RecordEditor.cpp
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <format>
+#include <functional>
 #include <optional>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 
 #include <raylib.h>
 
@@ -12,12 +15,14 @@
 #include "EditorInput.h"
 #include "GameContext.h"
 #include "ItemEditor.h"
+#include "ListCursor.h"
 #include "Menu.h"
 #include "MonsterEditor.h"
 #include "RecordEditor.h"
 #include "Renderer.h"
 #include "SpellEditor.h"
 #include "TileRef.h"
+#include "Vector2D.h"
 
 using namespace EditorLayout;
 

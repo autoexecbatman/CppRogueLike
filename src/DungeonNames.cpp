@@ -1,9 +1,11 @@
 // file: DungeonNames.cpp
 #include <array>
 #include <format>
+#include <string>
 #include <string_view>
 
 #include "DungeonNames.h"
+#include "RandomDice.h"
 
 namespace DungeonNames
 {

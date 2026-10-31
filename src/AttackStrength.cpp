@@ -1,6 +1,7 @@
 // file: AttackStrength.cpp
 #include <algorithm>
 
+#include "AttackKind.h"
 #include "AttackStrength.h"
 #include "Creature.h"
 #include "DataManager.h"

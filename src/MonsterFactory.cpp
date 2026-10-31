@@ -1,6 +1,7 @@
 // file: MonsterFactory.cpp
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <functional>
 #include <string>
 #include <vector>

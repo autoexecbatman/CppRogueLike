@@ -2,6 +2,7 @@
 #include <string>
 #include <utility>
 
+#include "DamageInfo.h"
 #include "ItemEnhancements.h"
 #include "RandomDice.h"
 

@@ -28,11 +28,14 @@
 // transition already consumed.
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cctype>
+#include <cstddef>
 #include <cstdint>
 #include <format>
 #include <memory>
+#include <optional>
 #include <raylib.h>
 #include <string>
 #include <type_traits>
@@ -44,6 +47,7 @@
 #include "CloseButtonArea.h"
 #include "Colors.h"
 #include "ContextMenu.h"
+#include "Creature.h"
 #include "DamageInfo.h"
 #include "DataManager.h"
 #include "Encumbrance.h"
@@ -59,7 +63,9 @@
 #include "Player.h"
 #include "PlayerTurn.h"
 #include "Renderer.h"
+#include "StrengthAttributes.h"
 #include "TileConfig.h"
+#include "TurnSchedule.h"
 #include "WeaponDamageRegistry.h"
 
 namespace

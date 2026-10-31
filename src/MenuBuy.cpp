@@ -1,10 +1,12 @@
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <string>
 
 #include "Colors.h"
 #include "Creature.h"
 #include "GameContext.h"
+#include "InputSystem.h"
 #include "InventoryOperations.h"
 #include "MenuBuy.h"
 #include "MessageSystem.h"

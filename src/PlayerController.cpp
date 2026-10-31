@@ -1,6 +1,10 @@
 // file: PlayerController.cpp
 #include <array>
 #include <cassert>
+#include <climits>
+#include <cstddef>
+#include <cstdlib>
+#include <format>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -11,8 +15,10 @@
 #include <vector>
 
 #include "Actor.h"
+#include "Alignment.h"
 #include "AttackKind.h"
 #include "AttackRate.h"
+#include "Attitude.h"
 #include "Colors.h"
 #include "ContextMenu.h"
 #include "Controls.h"
@@ -26,6 +32,7 @@
 #include "GameContext.h"
 #include "InputHandler.h"
 #include "InputSystem.h"
+#include "InventoryData.h"
 #include "InventoryOperations.h"
 #include "InventoryUI.h"
 #include "Item.h"
@@ -50,10 +57,13 @@
 #include "SpellSystem.h"
 #include "SpellTile.h"
 #include "Stairs.h"
+#include "StrengthAttributes.h"
 #include "TargetingSystem.h"
 #include "ThiefSkills.h"
 #include "TileConfig.h"
+#include "TileType.h"
 #include "Trap.h"
+#include "TurnSchedule.h"
 #include "TurnUndead.h"
 #include "Vector2D.h"
 

@@ -1,11 +1,14 @@
 // file: MenuTrade.cpp
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <memory>
+#include <optional>
 
 #include "Colors.h"
 #include "Creature.h"
 #include "GameContext.h"
+#include "InputSystem.h"
 #include "MenuBuy.h"
 #include "MenuManager.h"
 #include "MenuSell.h"

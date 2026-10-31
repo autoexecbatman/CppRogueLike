@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <functional>
 #include <map>
 #include <span>
 #include <stdexcept>
@@ -14,6 +15,7 @@
 #include <vector>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "Paths.h"
 #include "SpellRegistry.h"

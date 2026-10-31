@@ -10,15 +10,19 @@
 #include <vector>
 
 #include "BuffType.h"
+#include "Colors.h"
 #include "ContentRegistry.h"
 #include "ContentRegistryIO.h"
 #include "DiceExpr.h"
+#include "EditorField.h"
 #include "GameContext.h"
 #include "ItemClassification.h"
 #include "ItemEditor.h"
 #include "ItemRegistry.h"
 #include "MagicalItemEffects.h"
 #include "Paths.h"
+#include "Pickable.h"
+#include "RecordEditor.h"
 #include "TargetMode.h"
 #include "Weapons.h"
 

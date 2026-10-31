@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cassert>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include <raylib.h>
@@ -20,6 +21,7 @@
 #include "Renderer.h"
 #include "TargetingMenu.h"
 #include "TargetingSystem.h"
+#include "TurnSchedule.h"
 #include "Vector2D.h"
 
 void TargetingSystem::draw_los(GameContext& ctx, Vector2D targetCursor) const

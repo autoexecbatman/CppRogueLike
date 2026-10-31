@@ -1,8 +1,11 @@
 // file: DeathMenu.cpp
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <format>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
 
 #include <raylib.h>
@@ -10,6 +13,7 @@
 #include "Creature.h"
 #include "DeathMenu.h"
 #include "GameContext.h"
+#include "InputSystem.h"
 #include "LevelManager.h"
 #include "Menu.h"
 #include "MessageSystem.h"

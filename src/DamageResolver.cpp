@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <format>
 #include <unordered_map>
+#include <vector>
 
 #include "BuffSystem.h"
 #include "BuffType.h"

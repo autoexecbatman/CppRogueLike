@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstddef>
 #include <optional>
 #include <vector>
 
@@ -7,6 +8,7 @@
 #include "Map.h"
 #include "RandomDice.h"
 #include "SpawnUtils.h"
+#include "TileType.h"
 #include "Vector2D.h"
 
 namespace SpawnUtils

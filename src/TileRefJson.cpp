@@ -6,6 +6,7 @@
 #include "Persistent.h"
 #include "Renderer.h"
 #include "SavedEnum.h"
+#include "TileRef.h"
 #include "TileRefJson.h"
 
 namespace TileRefJson

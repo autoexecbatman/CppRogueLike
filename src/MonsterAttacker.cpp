@@ -2,7 +2,10 @@
 #include <cassert>
 
 #include "AttackKind.h"
+#include "AttackResult.h"
+#include "Attacker.h"
 #include "Creature.h"
+#include "DamageInfo.h"
 #include "GameContext.h"
 #include "Item.h"
 #include "MonsterAttacker.h"

@@ -1,6 +1,7 @@
 // file: Palette.cpp
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <filesystem>
 #include <format>
 #include <fstream>
@@ -13,9 +14,11 @@
 #include <vector>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "Palette.h"
 #include "Paths.h"
+#include "TileRef.h"
 #include "TileRefJson.h"
 
 using json = nlohmann::json;

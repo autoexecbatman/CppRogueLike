@@ -1,14 +1,19 @@
 // file: MenuRace.cpp
 #include <array>
+#include <cstddef>
+#include <functional>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "GameContext.h"
 #include "ListMenu.h"
 #include "MenuClass.h"
+#include "MenuEntry.h"
 #include "MenuRace.h"
 #include "Player.h"
+#include "PlayerRaceState.h"
 #include "RandomDice.h"
 
 namespace

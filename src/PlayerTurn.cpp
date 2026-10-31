@@ -4,6 +4,7 @@
 #include "Creature.h"
 #include "GameContext.h"
 #include "PlayerTurn.h"
+#include "TurnSchedule.h"
 
 namespace
 {

@@ -1,9 +1,12 @@
 // file: GameLoopCoordinator.cpp
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <format>
 #include <iostream>
+#include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <raylib.h>

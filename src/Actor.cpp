@@ -7,6 +7,7 @@
 #include <raylib.h>
 
 #include "Actor.h"
+#include "Colors.h"
 #include "GameContext.h"
 #include "Map.h"
 #include "Persistent.h"

@@ -11,6 +11,7 @@
 #include "Renderer.h"
 #include "Stairs.h"
 #include "TileConfig.h"
+#include "TileDefinition.h"
 
 namespace
 {

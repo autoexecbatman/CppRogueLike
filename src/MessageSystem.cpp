@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
+#include <string_view>
 
+#include "Colors.h"
 #include "Gui.h"
 #include "LogMessage.h"
 #include "MessageSystem.h"

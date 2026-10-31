@@ -1,7 +1,12 @@
 #include "Game.h"
 #include "ContentRegistryIO.h"
+#include "GameContext.h"
 #include "Paths.h"
 #include "Stairs.h"
+
+#include <exception>
+#include <stdexcept>
+#include <string>
 
 // Single source of truth: build context from owned systems
 [[nodiscard]] GameContext Game::context() noexcept

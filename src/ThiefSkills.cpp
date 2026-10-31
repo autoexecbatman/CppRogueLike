@@ -1,6 +1,10 @@
 // file: ThiefSkills.cpp
 #include <algorithm>
+#include <array>
 #include <cassert>
+#include <cstddef>
+#include <optional>
+#include <string_view>
 
 #include "ThiefSkills.h"
 

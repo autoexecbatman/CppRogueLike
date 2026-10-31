@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cstddef>
+#include <functional>
 #include <iterator>
 #include <limits>
 #include <numbers>
@@ -19,7 +21,9 @@
 #include "TileConfig.h"
 #include "TileDefinition.h"
 #include "TileFeature.h"
+#include "TileType.h"
 #include "Trap.h"
+#include "Vector2D.h"
 
 namespace Pathfinding
 {

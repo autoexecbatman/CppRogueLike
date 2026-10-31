@@ -9,19 +9,25 @@
 #include <string>
 #include <utility>
 
+#include "Actor.h"
+#include "Colors.h"
 #include "Creature.h"
 #include "DamageInfo.h"
+#include "DamageSource.h"
 #include "DiceExpr.h"
 #include "GameContext.h"
 #include "Map.h"
 #include "MessageSystem.h"
+#include "Persistent.h"
 #include "Player.h"
 #include "PlayerRaceState.h"
 #include "RandomDice.h"
 #include "SavedEnum.h"
 #include "ThiefSkills.h"
 #include "TileConfig.h"
+#include "TileFeature.h"
 #include "Trap.h"
+#include "Vector2D.h"
 
 namespace
 {

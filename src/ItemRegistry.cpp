@@ -11,9 +11,12 @@
 #include <vector>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "BuffType.h"
+#include "Colors.h"
 #include "DiceExpr.h"
+#include "EquipmentSlot.h"
 #include "ItemClassification.h"
 #include "ItemRegistry.h"
 #include "MagicalItemEffects.h"

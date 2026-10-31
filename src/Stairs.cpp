@@ -1,6 +1,7 @@
 #include "Stairs.h"
 #include "Actor.h"
 #include "Colors.h"
+#include "TileRef.h"
 #include "Vector2D.h"
 
 Stairs::Stairs(Vector2D position) :

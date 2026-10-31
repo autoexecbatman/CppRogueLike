@@ -1,9 +1,12 @@
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <memory>
 #include <optional>
+#include <utility>
 #include <vector>
 
+#include "AiSpider.h"
 #include "AiWebSpinner.h"
 #include "BuffSystem.h"
 #include "Colors.h"
@@ -14,6 +17,7 @@
 #include "GameContext.h"
 #include "Map.h"
 #include "MessageSystem.h"
+#include "Persistent.h"
 #include "SavingThrow.h"
 #include "SpellTile.h"
 #include "TurnSchedule.h"

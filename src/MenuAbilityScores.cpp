@@ -1,11 +1,13 @@
 // file: MenuAbilityScores.cpp
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <format>
 #include <memory>
 #include <optional>
 #include <string>
 
+#include "AbilityAllocation.h"
 #include "Colors.h"
 #include "GameContext.h"
 #include "InputSystem.h"

@@ -20,6 +20,7 @@
 // shop that already opened.
 
 #include <cassert>
+#include <cstddef>
 #include <memory>
 #include <span>
 #include <string>
@@ -28,6 +29,7 @@
 #include "Colors.h"
 #include "Creature.h"
 #include "GameContext.h"
+#include "InputSystem.h"
 #include "InventoryOperations.h"
 #include "Item.h"
 #include "MenuSell.h"

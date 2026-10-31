@@ -1,6 +1,7 @@
 // file: TreasureRoom.cpp
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <format>
 #include <limits>
 #include <memory>

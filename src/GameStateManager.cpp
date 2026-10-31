@@ -36,6 +36,7 @@
 #include "SpellTile.h"
 #include "Stairs.h"
 #include "TileConfig.h"
+#include "TileRef.h"
 #include "TileRefJson.h"
 #include "Trap.h"
 #include "UniqueId.h"

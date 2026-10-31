@@ -4,6 +4,8 @@
 #include "DataManager.h"
 #include "LevelUpSystem.h"
 
+#include <optional>
+
 [[nodiscard]] ConstitutionTracker::ConstitutionChangeResult
 ConstitutionTracker::apply_constitution_changes(
 	Creature& owner,

@@ -1,12 +1,15 @@
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <format>
 #include <iterator>
 #include <string>
+#include <utility>
 
 #include "Colors.h"
 #include "EquipmentSlot.h"
 #include "GameContext.h"
+#include "InputSystem.h"
 #include "Item.h"
 #include "MenuSpellCast.h"
 #include "MessageSystem.h"
@@ -17,6 +20,7 @@
 #include "SpellRegistry.h"
 #include "SpellSystem.h"
 #include "Spellcasting.h"
+#include "TurnSchedule.h"
 
 MenuSpellCast::MenuSpellCast(Player& player, GameContext& ctx) :
 	player(player)

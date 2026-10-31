@@ -12,6 +12,7 @@
 #include "InventoryOperations.h"
 #include "Item.h"
 #include "ItemCreator.h"
+#include "ItemEnhancements.h"
 #include "MessageSystem.h"
 #include "Persistent.h"
 #include "Player.h"

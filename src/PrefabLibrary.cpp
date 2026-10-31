@@ -1,14 +1,19 @@
 // file: PrefabLibrary.cpp
 #include <algorithm>
+#include <cstddef>
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <optional>
+#include <ranges>
 #include <stdexcept>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "DecorEditor.h"
 #include "DungeonRoom.h"
@@ -16,6 +21,8 @@
 #include "Palette.h"
 #include "Paths.h"
 #include "PrefabLibrary.h"
+#include "TileRef.h"
+#include "TileType.h"
 
 namespace
 {

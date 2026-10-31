@@ -3,6 +3,7 @@
 #include <array>
 #include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <format>
 #include <limits>
@@ -15,6 +16,7 @@
 #include <utility>
 #include <vector>
 
+#include <nlohmann/json_fwd.hpp>
 #include <raylib.h>
 
 #include "Colors.h"
@@ -41,6 +43,9 @@
 #include "SpellTile.h"
 #include "Stairs.h"
 #include "TileConfig.h"
+#include "TileDefinition.h"
+#include "TileRef.h"
+#include "TileType.h"
 #include "Trap.h"
 #include "TreasureRoom.h"
 #include "Vector2D.h"

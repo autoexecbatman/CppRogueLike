@@ -1,6 +1,8 @@
 // file: Menu.cpp
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
+#include <functional>
 #include <iterator>
 #include <memory>
 #include <string>
@@ -22,6 +24,7 @@
 
 #ifndef __EMSCRIPTEN__
 #include "ItemEditor.h"
+#include "MenuEntry.h"
 #include "MonsterEditor.h"
 #include "RoomEditor.h"
 #include "SpellEditor.h"

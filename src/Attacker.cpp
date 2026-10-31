@@ -3,6 +3,7 @@
 #include <format>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -10,12 +11,15 @@
 #include "Actor.h"
 #include "AnimationSystem.h"
 #include "ArmorClass.h"
+#include "AttackKind.h"
+#include "AttackResult.h"
 #include "AttackStrength.h"
 #include "Attacker.h"
 #include "BuffSystem.h"
 #include "BuffType.h"
 #include "Colors.h"
 #include "Creature.h"
+#include "CreatureClass.h"
 #include "DamageInfo.h"
 #include "DamageResolver.h"
 #include "DataManager.h"

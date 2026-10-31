@@ -3,6 +3,7 @@
 #include <format>
 
 #include "Colors.h"
+#include "CreatureClass.h"
 #include "GameContext.h"
 #include "InputSystem.h"
 #include "LevelUpSystem.h"

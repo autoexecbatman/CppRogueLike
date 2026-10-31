@@ -1,8 +1,11 @@
 // RenderingManager.cpp - Handles all rendering and screen management
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <memory>
 #include <span>
+
+#include <raylib.h>
 
 #include "Actor.h"
 #include "CostOverlay.h"

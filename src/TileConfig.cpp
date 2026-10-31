@@ -1,16 +1,23 @@
 // file: TileConfig.cpp
+#include <cstdio>
 #include <format>
 #include <fstream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
+#include "Actor.h"
 #include "Paths.h"
 #include "Renderer.h"
 #include "SavedEnum.h"
 #include "TileConfig.h"
+#include "TileDefinition.h"
+#include "TileRef.h"
 #include "TileRefJson.h"
+#include "TileType.h"
 
 namespace
 {

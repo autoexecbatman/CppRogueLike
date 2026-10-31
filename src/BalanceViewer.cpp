@@ -2,6 +2,8 @@
 #include <cassert>
 #include <format>
 #include <string>
+#include <string_view>
+#include <vector>
 
 #include "BalanceViewer.h"
 #include "Colors.h"

@@ -23,18 +23,22 @@
 #include <algorithm>
 #include <cassert>
 #include <format>
+#include <memory>
 #include <optional>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <variant>
 
 #include "Actor.h"
 #include "BuffSystem.h"
 #include "BuffType.h"
 #include "Colors.h"
+#include "CorpseEdibility.h"
 #include "Creature.h"
 #include "CreatureManager.h"
 #include "DamageInfo.h"
+#include "DamageSource.h"
 #include "DiceExpr.h"
 #include "EquipmentSlot.h"
 #include "FloatingTextSystem.h"

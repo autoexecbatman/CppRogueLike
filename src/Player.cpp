@@ -26,7 +26,9 @@
 // Player::load is what keeps that from loading quietly.
 
 #include <algorithm>
+#include <array>
 #include <cassert>
+#include <cstddef>
 #include <format>
 #include <memory>
 #include <optional>
@@ -34,12 +36,17 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
+#include "AbilityAllocation.h"
 #include "Actor.h"
+#include "ArmorClass.h"
+#include "Attitude.h"
 #include "BuffSystem.h"
 #include "BuffType.h"
 #include "Colors.h"
 #include "CombatProgressionTables.h"
+#include "CreatureClass.h"
 #include "DisplayManager.h"
 #include "EquipmentSlot.h"
 #include "ExperienceReward.h"
@@ -57,10 +64,15 @@
 #include "Persistent.h"
 #include "Player.h"
 #include "PlayerAttacker.h"
+#include "PlayerController.h"
+#include "PlayerRaceState.h"
 #include "PlayerTurn.h"
 #include "RandomDice.h"
 #include "RenderingManager.h"
 #include "SpellSystem.h"
+#include "ThiefSkills.h"
+#include "TileRef.h"
+#include "TurnSchedule.h"
 #include "Vector2D.h"
 #include "WeaponDamageRegistry.h"
 

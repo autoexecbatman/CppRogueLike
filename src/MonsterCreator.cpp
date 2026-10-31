@@ -4,12 +4,17 @@
 #include <format>
 #include <memory>
 #include <stdexcept>
+#include <utility>
 
+#include "Actor.h"
+#include "Ai.h"
 #include "AiMonster.h"
 #include "AiMonsterRanged.h"
+#include "ArmorClass.h"
 #include "BodyPlanRegistry.h"
 #include "Creature.h"
 #include "DamageInfo.h"
+#include "EquipmentSlot.h"
 #include "ExperienceReward.h"
 #include "GameContext.h"
 #include "ItemCreator.h"

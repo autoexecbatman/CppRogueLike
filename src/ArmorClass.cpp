@@ -7,6 +7,7 @@
 #include "DexterityAttributes.h"
 #include "EquipmentSlot.h"
 #include "GameContext.h"
+#include "ItemIdentification.h"
 #include "Pickable.h"
 
 ArmorClass::ArmorClass(int baseAC) :

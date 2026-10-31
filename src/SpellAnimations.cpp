@@ -1,5 +1,7 @@
 // file: SpellAnimations.cpp
 #include <cassert>
+#include <memory>
+#include <utility>
 
 #include "AnimationBarrierMenu.h"
 #include "AnimationSystem.h"
@@ -7,6 +9,7 @@
 #include "Map.h"
 #include "Renderer.h"
 #include "SpellAnimations.h"
+#include "TileRef.h"
 #include "Vector2D.h"
 
 namespace SpellAnimations

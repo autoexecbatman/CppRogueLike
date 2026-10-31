@@ -1,7 +1,9 @@
 // file: MenuClass.cpp
 #include <cassert>
+#include <functional>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "CreatureClass.h"
@@ -9,6 +11,7 @@
 #include "ListMenu.h"
 #include "MenuAbilityScores.h"
 #include "MenuClass.h"
+#include "MenuEntry.h"
 #include "Player.h"
 #include "RandomDice.h"
 

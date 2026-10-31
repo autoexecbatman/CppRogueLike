@@ -30,12 +30,16 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
+#include <cstdlib>
 #include <format>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -44,9 +48,11 @@
 #include "BuffSystem.h"
 #include "BuffType.h"
 #include "Colors.h"
+#include "CreatureClass.h"
 #include "CreatureManager.h"
 #include "DamageInfo.h"
 #include "DamageResolver.h"
+#include "DamageSource.h"
 #include "DataManager.h"
 #include "EquipmentSlot.h"
 #include "GameContext.h"
@@ -66,6 +72,7 @@
 #include "TileConfig.h"
 #include "TurnSchedule.h"
 #include "Vector2D.h"
+#include "WisdomAttributes.h"
 #include "Wording.h"
 
 namespace

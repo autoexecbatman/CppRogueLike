@@ -1,9 +1,16 @@
 #include <optional>
 #include <string>
 
+#include "Actor.h"
 #include "Item.h"
 #include "ItemClassification.h"
+#include "ItemEnhancements.h"
+#include "ItemIdentification.h"
+#include "Persistent.h"
+#include "Pickable.h"
+#include "RandomDice.h"
 #include "SavedEnum.h"
+#include "Vector2D.h"
 
 namespace
 {

@@ -8,6 +8,7 @@
 
 #include "FloatingTextSystem.h"
 #include "Renderer.h"
+#include "Vector2D.h"
 
 // Shows a damage number rising off a tile.
 //

@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cassert>
 #include <charconv>
+#include <cstddef>
 #include <format>
 #include <iterator>
 #include <optional>
@@ -24,6 +25,7 @@
 #include "Renderer.h" // includes RaylibIncludes.h -> raylib.h + undefs
 #include "RoomEditor.h"
 #include "TileConfig.h"
+#include "TileRef.h"
 
 namespace
 {

@@ -1,7 +1,9 @@
 #include <cassert>
 #include <format>
+#include <functional>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "Colors.h"
@@ -9,11 +11,13 @@
 #include "GameContext.h"
 #include "InventoryOperations.h"
 #include "Item.h"
+#include "ItemClassification.h"
 #include "ListMenu.h"
 #include "MenuEntry.h"
 #include "MessageSystem.h"
 #include "Pickable.h"
 #include "Pickup.h"
+#include "UniqueId.h"
 
 namespace
 {

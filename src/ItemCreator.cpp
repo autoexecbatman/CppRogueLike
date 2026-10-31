@@ -7,6 +7,7 @@
 #include <string_view>
 #include <vector>
 
+#include "Actor.h"
 #include "ContentRegistry.h"
 #include "GameContext.h"
 #include "InventoryOperations.h"
@@ -17,6 +18,7 @@
 #include "Pickable.h"
 #include "RandomDice.h"
 #include "Renderer.h"
+#include "TileRef.h"
 #include "Vector2D.h"
 
 namespace

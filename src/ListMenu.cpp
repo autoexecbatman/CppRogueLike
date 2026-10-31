@@ -2,6 +2,11 @@
 #include <algorithm>
 #include <cassert>
 #include <cctype>
+#include <cstddef>
+#include <functional>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include <raylib.h>
 
@@ -9,6 +14,7 @@
 #include "GameContext.h"
 #include "InputSystem.h"
 #include "ListMenu.h"
+#include "MenuEntry.h"
 #include "Renderer.h"
 
 ListMenu::ListMenu(

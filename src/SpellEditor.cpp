@@ -8,8 +8,12 @@
 #include <utility>
 #include <vector>
 
+#include <raylib.h>
+
+#include "EditorField.h"
 #include "GameContext.h"
 #include "Paths.h"
+#include "RecordEditor.h"
 #include "SpellEditor.h"
 #include "SpellRegistry.h"
 

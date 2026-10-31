@@ -2,7 +2,10 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cstddef>
 #include <limits>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "DungeonGenerator.h"

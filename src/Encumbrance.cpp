@@ -1,5 +1,9 @@
 // file: Encumbrance.cpp
 #include "Encumbrance.h"
+#include "StrengthAttributes.h"
+
+#include <optional>
+#include <string_view>
 
 std::string_view encumbrance_band_name(EncumbranceBand band)
 {

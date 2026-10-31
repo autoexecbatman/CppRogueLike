@@ -11,15 +11,24 @@
 #include <vector>
 
 #include "Ai.h"
+#include "Alignment.h"
 #include "Attitude.h"
+#include "CorpseEdibility.h"
+#include "CreatureSize.h"
+#include "DamageInfo.h"
 #include "DiceExpr.h"
+#include "EditorField.h"
 #include "GameContext.h"
 #include "IntelligenceRating.h"
 #include "MonsterEditor.h"
+#include "MonsterHitDice.h"
 #include "MonsterRegistry.h"
 #include "MonsterStrength.h"
 #include "Paths.h"
+#include "RecordEditor.h"
+#include "SpellRegistry.h"
 #include "Spellcasting.h"
+#include "TileRef.h"
 
 static_assert(
 	is_well_formed_table(MonsterEditorModel::FIELDS),

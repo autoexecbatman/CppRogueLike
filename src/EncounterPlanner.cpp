@@ -12,6 +12,7 @@
 #include "GameContext.h"
 #include "LevelManager.h"
 #include "MonsterCreator.h"
+#include "MonsterHitDice.h"
 #include "MonsterRegistry.h"
 #include "RandomDice.h"
 #include "SpawnUtils.h"

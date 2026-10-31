@@ -5,9 +5,11 @@
 #include <utility>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "Colors.h"
 #include "DamageInfo.h"
+#include "DamageSource.h"
 #include "GameContext.h"
 #include "HungerSystem.h"
 #include "MessageSystem.h"

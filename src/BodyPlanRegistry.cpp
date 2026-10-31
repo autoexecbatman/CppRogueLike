@@ -1,11 +1,16 @@
 #include <format>
 #include <fstream>
 #include <stdexcept>
+#include <string>
+#include <string_view>
 #include <utility>
+#include <vector>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "BodyPlanRegistry.h"
+#include "EquipmentSlot.h"
 #include "Paths.h"
 
 void BodyPlanRegistry::load(std::string_view path)

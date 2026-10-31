@@ -1,10 +1,13 @@
 // file: MenuGender.cpp
 #include <cassert>
+#include <functional>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "GameContext.h"
 #include "ListMenu.h"
+#include "MenuEntry.h"
 #include "MenuGender.h"
 #include "MenuRace.h"
 #include "RandomDice.h"

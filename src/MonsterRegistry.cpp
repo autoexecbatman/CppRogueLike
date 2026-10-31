@@ -14,7 +14,15 @@
 #include <vector>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
+#include "Ai.h"
+#include "Alignment.h"
+#include "Attitude.h"
+#include "Colors.h"
+#include "CorpseEdibility.h"
+#include "CreatureSize.h"
+#include "DamageInfo.h"
 #include "EquipmentSlot.h"
 #include "IntelligenceRating.h"
 #include "MonsterHitDice.h"

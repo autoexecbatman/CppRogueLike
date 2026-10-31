@@ -1,9 +1,14 @@
 // file: SavingThrow.cpp
 #include <algorithm>
 #include <array>
+#include <cassert>
+#include <cstddef>
 #include <limits>
+#include <span>
+#include <utility>
 
 #include "Creature.h"
+#include "CreatureClass.h"
 #include "GameContext.h"
 #include "RandomDice.h"
 #include "SavingThrow.h"

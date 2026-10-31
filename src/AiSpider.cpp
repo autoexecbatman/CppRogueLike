@@ -12,6 +12,7 @@
 #include "AttackKind.h"
 #include "AttackResult.h"
 #include "BuffSystem.h"
+#include "BuffType.h"
 #include "Colors.h"
 #include "Creature.h"
 #include "DamageInfo.h"

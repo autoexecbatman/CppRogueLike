@@ -1,13 +1,16 @@
 // file: AiMimic.cpp
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <format>
 #include <ranges>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
 #include "Actor.h"
+#include "Ai.h"
 #include "AiMimic.h"
 #include "AiMonster.h"
 #include "Colors.h"

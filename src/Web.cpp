@@ -10,6 +10,7 @@
 #include "Map.h"
 #include "MessageSystem.h"
 #include "TileConfig.h" // for TileConfig type used in ctor
+#include "TileFeature.h"
 #include "Vector2D.h"
 #include "Web.h"
 

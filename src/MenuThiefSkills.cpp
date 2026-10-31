@@ -1,15 +1,21 @@
 // file: MenuThiefSkills.cpp
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <format>
+#include <functional>
+#include <memory>
+#include <string>
 #include <utility>
 
 #include "Colors.h"
+#include "CreatureClass.h"
 #include "GameContext.h"
 #include "InputSystem.h"
 #include "MenuThiefSkills.h"
 #include "Player.h"
 #include "Renderer.h"
+#include "ThiefSkills.h"
 
 namespace
 {

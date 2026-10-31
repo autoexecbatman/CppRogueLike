@@ -1,11 +1,16 @@
 #include <string>
 
+#include "AttackKind.h"
+#include "AttackResult.h"
+#include "Attacker.h"
 #include "Colors.h"
 #include "Creature.h"
 #include "DamageInfo.h"
+#include "EquipmentSlot.h"
 #include "GameContext.h"
 #include "Item.h"
 #include "MessageSystem.h"
+#include "Persistent.h"
 #include "Player.h"
 #include "PlayerAttacker.h"
 

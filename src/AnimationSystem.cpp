@@ -3,6 +3,8 @@
 #include <chrono>
 #include <cmath>
 #include <functional>
+#include <random>
+#include <utility>
 #include <vector>
 
 #include <raylib.h>

@@ -11,7 +11,13 @@
 
 #include "MonsterAbilityTables.h"
 #include "Creature.h"
+#include "CreatureSize.h"
+#include "DiceExpr.h"
+#include "IntelligenceRating.h"
+#include "MonsterStrength.h"
 #include "RandomDice.h"
+
+#include <optional>
 
 // Example, every die at its highest, so each read is the table's 18 row:
 //   roll_monster_ability_scores(creature, CreatureSize::LARGE, IntelligenceRating::SEMI, std::nullopt, dice);
