@@ -201,22 +201,24 @@ void RecordEditor<Model>::handle_normal(
 	const EditorInput& input,
 	GameContext& ctx)
 {
-	const int bodyHeight = body_height(input.screenHeight);
-	const size_t visibleListRows = whole_rows_within(bodyHeight, ITEM_HEIGHT);
-	const size_t visibleFields = whole_rows_within(bodyHeight, FIELD_HEIGHT);
+	const int bodyTop = header_height(input.lineHeight);
+	const int rowHeight = row_height(input.lineHeight);
+	const size_t visibleRows = whole_rows_within(
+		body_height(input.screenHeight, input.lineHeight),
+		rowHeight);
 	const Vector2D mouse = input.mouse;
 	const int listWidth = list_width(input, ctx);
 
 	// A click in the header is on neither panel.
-	if (input.is_pressed(EditorKey::CLICK) && mouse.y >= HEADER_HEIGHT)
+	if (input.is_pressed(EditorKey::CLICK) && mouse.y >= bodyTop)
 	{
-		const int pixelsBelowTop = mouse.y - HEADER_HEIGHT;
+		const int pixelsBelowTop = mouse.y - bodyTop;
 		if (mouse.x < listWidth)
 		{
 			focus = EditorFocus::LIST;
 			const std::optional<size_t> row = listCursor.row_under(
-				whole_rows_within(pixelsBelowTop, ITEM_HEIGHT),
-				visibleListRows);
+				whole_rows_within(pixelsBelowTop, rowHeight),
+				visibleRows);
 			if (row && *row != listCursor.current_row())
 			{
 				commit_working(ctx);
@@ -228,8 +230,8 @@ void RecordEditor<Model>::handle_normal(
 		{
 			focus = EditorFocus::FIELDS;
 			const std::optional<size_t> field = fieldCursor.row_under(
-				whole_rows_within(pixelsBelowTop, FIELD_HEIGHT),
-				visibleFields);
+				whole_rows_within(pixelsBelowTop, rowHeight),
+				visibleRows);
 			if (field)
 			{
 				fieldCursor.select(*field);
@@ -241,11 +243,11 @@ void RecordEditor<Model>::handle_normal(
 	{
 		if (mouse.x < listWidth)
 		{
-			listCursor.scroll_by(-input.wheel, visibleListRows);
+			listCursor.scroll_by(-input.wheel, visibleRows);
 		}
 		else
 		{
-			fieldCursor.scroll_by(-input.wheel, visibleFields);
+			fieldCursor.scroll_by(-input.wheel, visibleRows);
 		}
 	}
 
@@ -261,10 +263,10 @@ void RecordEditor<Model>::handle_normal(
 		// A screen too short for one row has nowhere to scroll the cursor to.
 		else if (
 			input.is_pressed(EditorKey::DOWN) && listCursor.can_move_down() &&
-			visibleListRows > 0)
+			visibleRows > 0)
 		{
 			commit_working(ctx);
-			listCursor.move_down(visibleListRows);
+			listCursor.move_down(visibleRows);
 			load_working(ctx);
 		}
 		else if (
@@ -307,9 +309,9 @@ void RecordEditor<Model>::handle_normal(
 	}
 	else if (
 		input.is_pressed(EditorKey::DOWN) && fieldCursor.can_move_down() &&
-		visibleFields > 0)
+		visibleRows > 0)
 	{
-		fieldCursor.move_down(visibleFields);
+		fieldCursor.move_down(visibleRows);
 	}
 
 	const FieldId fieldId = current_field();
@@ -435,7 +437,8 @@ void RecordEditor<Model>::handle_picker(
 			std::max(0, sheetRows - 1));
 	}
 
-	const int gridY = HEADER_HEIGHT + PICKER_SUB_HEADER_HEIGHT;
+	const int gridY =
+		header_height(input.lineHeight) + hint_height(input.lineHeight);
 
 	if (input.is_pressed(EditorKey::CLICK) && isMouseInPicker)
 	{
@@ -468,14 +471,18 @@ void RecordEditor<Model>::render(
 	const GameContext& ctx) const
 {
 	const Renderer& renderer = *ctx.renderer;
-	const int screenWidth = renderer.get_screen_width();
-	const int screenHeight = renderer.get_screen_height();
 
-	DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 0, 0, 0, 255 });
+	// Every size comes from the input snapshot that handle_input read.
+	DrawRectangle(
+		0,
+		0,
+		input.screenWidth,
+		input.screenHeight,
+		Color{ 0, 0, 0, 255 });
 
 	// One width serves the list and the panel beside it.
 	const int listWidth = list_width(input, ctx);
-	render_header(renderer);
+	render_header(input, renderer);
 	render_list(input, ctx, listWidth);
 
 	if (mode == EditorMode::TILE_PICKER)
@@ -487,18 +494,27 @@ void RecordEditor<Model>::render(
 		render_fields(input, renderer, listWidth);
 	}
 
-	render_hint(renderer);
+	render_hint(input, renderer);
 }
 
 template <typename Model>
-void RecordEditor<Model>::render_header(const Renderer& renderer) const
+void RecordEditor<Model>::render_header(
+	const EditorInput& input,
+	const Renderer& renderer) const
 {
 	const EditorLook& look = Model::LOOK;
-	const int screenWidth = renderer.get_screen_width();
-	DrawRectangle(0, 0, screenWidth, HEADER_HEIGHT, look.headerBackground);
-	renderer.draw_text_color(Vector2D{ 8, 6 }, look.title, look.titleText);
+	DrawRectangle(
+		0,
+		0,
+		input.screenWidth,
+		header_height(input.lineHeight),
+		look.headerBackground);
 	renderer.draw_text_color(
-		Vector2D{ 8, 26 },
+		Vector2D{ 8, header_line_top(0, input.lineHeight) },
+		look.title,
+		look.titleText);
+	renderer.draw_text_color(
+		Vector2D{ 8, header_line_top(1, input.lineHeight) },
 		look.headerHint,
 		look.headerHintText);
 }
@@ -511,8 +527,9 @@ void RecordEditor<Model>::render_list(
 {
 	const EditorLook& look = Model::LOOK;
 	const Renderer& renderer = *ctx.renderer;
-	const int bodyY = HEADER_HEIGHT;
-	const int bodyHeight = body_height(renderer.get_screen_height());
+	const int bodyY = header_height(input.lineHeight);
+	const int bodyHeight = body_height(input.screenHeight, input.lineHeight);
+	const int rowHeight = row_height(input.lineHeight);
 
 	DrawRectangle(0, bodyY, listWidth, bodyHeight, look.listBackground);
 	DrawLine(
@@ -522,7 +539,7 @@ void RecordEditor<Model>::render_list(
 		bodyY + bodyHeight,
 		look.panelDivider);
 
-	const size_t visibleCount = whole_rows_within(bodyHeight, ITEM_HEIGHT);
+	const size_t visibleCount = whole_rows_within(bodyHeight, rowHeight);
 	const int tagColumn = tag_column(widest_tag(input, ctx));
 	const size_t scroll = listCursor.first_visible(visibleCount);
 	const Vector2D mouse = input.mouse;
@@ -530,8 +547,8 @@ void RecordEditor<Model>::render_list(
 	for (size_t rowIndex = scroll; rowIndex < keys.size(); ++rowIndex)
 	{
 		const int rowY =
-			bodyY + static_cast<int>(rowIndex - scroll) * ITEM_HEIGHT;
-		if (rowY + ITEM_HEIGHT > bodyY + bodyHeight)
+			row_top(bodyY, static_cast<int>(rowIndex - scroll), rowHeight);
+		if (rowY + rowHeight > bodyY + bodyHeight)
 		{
 			break;
 		}
@@ -549,7 +566,7 @@ void RecordEditor<Model>::render_list(
 
 		const bool isSelected = (rowIndex == listCursor.current_row());
 		const bool hovered = mouse.x >= 0 && mouse.x < listWidth &&
-			mouse.y >= rowY && mouse.y < rowY + ITEM_HEIGHT;
+			mouse.y >= rowY && mouse.y < rowY + rowHeight;
 
 		Color background{ 0, 0, 0, 0 };
 		if (isSelected && focus == EditorFocus::LIST)
@@ -567,7 +584,7 @@ void RecordEditor<Model>::render_list(
 
 		if (background.a > 0)
 		{
-			DrawRectangle(0, rowY, listWidth, ITEM_HEIGHT, background);
+			DrawRectangle(0, rowY, listWidth, rowHeight, background);
 		}
 
 		const std::string& key = keys[rowIndex];
@@ -577,19 +594,23 @@ void RecordEditor<Model>::render_list(
 			const TileRef tile =
 				isSelected ? model.working_tile() : model.row_tile(ctx, key);
 			renderer.draw_tile_screen_sized(
-				Vector2D{ LIST_PAD, rowY + (ITEM_HEIGHT - LIST_TILE_SIZE) / 2 },
+				Vector2D{
+					LIST_PAD,
+					centred_text_top(rowY, rowHeight, LIST_TILE_SIZE),
+				},
 				tile,
 				LIST_TILE_SIZE);
 			labelX = LIST_PAD + LIST_TILE_COLUMN;
 		}
 
 		// Only a label past the cap is cut; it stops short of the tag.
+		const int textY = centred_text_top(rowY, rowHeight, input.lineHeight);
 		const std::string label = fitted_label(
 			row_label_as_drawn(ctx, rowIndex),
 			listWidth - labelX - tagColumn - LIST_PAD,
 			input.measure);
 		renderer.draw_text_color(
-			Vector2D{ labelX, rowY + (ITEM_HEIGHT - 16) / 2 },
+			Vector2D{ labelX, textY },
 			label,
 			isSelected ? look.listTextSelected : look.listTextPlain);
 
@@ -600,7 +621,7 @@ void RecordEditor<Model>::render_list(
 			renderer.draw_text_color(
 				Vector2D{
 					tag_left(listWidth, tagColumn),
-					rowY + (ITEM_HEIGHT - 16) / 2,
+					textY,
 				},
 				tag->text,
 				tag->colour);
@@ -615,11 +636,12 @@ void RecordEditor<Model>::render_fields(
 	int listWidth) const
 {
 	const EditorLook& look = Model::LOOK;
-	const int screenWidth = renderer.get_screen_width();
+	const int screenWidth = input.screenWidth;
 	const int panelX = listWidth;
-	const int panelY = HEADER_HEIGHT;
+	const int panelY = header_height(input.lineHeight);
 	const int fieldsWidth = screenWidth - listWidth;
-	const int fieldsHeight = body_height(renderer.get_screen_height());
+	const int fieldsHeight = body_height(input.screenHeight, input.lineHeight);
+	const int rowHeight = row_height(input.lineHeight);
 
 	DrawRectangle(
 		panelX,
@@ -628,7 +650,7 @@ void RecordEditor<Model>::render_fields(
 		fieldsHeight,
 		look.fieldsBackground);
 
-	const size_t visible = whole_rows_within(fieldsHeight, FIELD_HEIGHT);
+	const size_t visible = whole_rows_within(fieldsHeight, rowHeight);
 	const size_t scroll = fieldCursor.first_visible(visible);
 	const Vector2D mouse = input.mouse;
 
@@ -637,8 +659,8 @@ void RecordEditor<Model>::render_fields(
 		++fieldIndex)
 	{
 		const int rowY =
-			panelY + static_cast<int>(fieldIndex - scroll) * FIELD_HEIGHT;
-		if (rowY + FIELD_HEIGHT > panelY + fieldsHeight)
+			row_top(panelY, static_cast<int>(fieldIndex - scroll), rowHeight);
+		if (rowY + rowHeight > panelY + fieldsHeight)
 		{
 			break;
 		}
@@ -646,7 +668,7 @@ void RecordEditor<Model>::render_fields(
 		const FieldId fieldId = Model::FIELDS.at(fieldIndex).field;
 		const bool isSelected = (fieldIndex == fieldCursor.current_row());
 		const bool hovered = mouse.x >= panelX && mouse.x < screenWidth &&
-			mouse.y >= rowY && mouse.y < rowY + FIELD_HEIGHT;
+			mouse.y >= rowY && mouse.y < rowY + rowHeight;
 
 		Color background{ 0, 0, 0, 0 };
 		if (isSelected && focus == EditorFocus::FIELDS)
@@ -664,11 +686,12 @@ void RecordEditor<Model>::render_fields(
 
 		if (background.a > 0)
 		{
-			DrawRectangle(panelX, rowY, fieldsWidth, FIELD_HEIGHT, background);
+			DrawRectangle(panelX, rowY, fieldsWidth, rowHeight, background);
 		}
 
+		const int textY = centred_text_top(rowY, rowHeight, input.lineHeight);
 		renderer.draw_text_color(
-			Vector2D{ panelX + 12, rowY + (FIELD_HEIGHT - 16) / 2 },
+			Vector2D{ panelX + 12, textY },
 			model.field_label(fieldId),
 			isSelected ? look.labelSelected : look.labelPlain);
 
@@ -676,7 +699,7 @@ void RecordEditor<Model>::render_fields(
 		{
 			const Vector2D tileAt{
 				screenWidth - LIST_TILE_SIZE - 12,
-				rowY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2,
+				centred_text_top(rowY, rowHeight, LIST_TILE_SIZE),
 			};
 			renderer.draw_tile_screen_sized(
 				tileAt,
@@ -705,7 +728,7 @@ void RecordEditor<Model>::render_fields(
 				look.labelPlain :
 				(isSelected ? look.valueSelected : look.valuePlain);
 			renderer.draw_text_color(
-				Vector2D{ valuePixelX, rowY + (FIELD_HEIGHT - 16) / 2 },
+				Vector2D{ valuePixelX, textY },
 				valueText,
 				valueColor);
 		}
@@ -719,11 +742,11 @@ void RecordEditor<Model>::render_picker(
 	int listWidth) const
 {
 	const EditorLook& look = Model::LOOK;
-	const int screenWidth = renderer.get_screen_width();
 	const int panelX = listWidth;
-	const int panelWidth = screenWidth - listWidth;
-	const int bodyY = HEADER_HEIGHT;
-	const int bodyHeight = body_height(renderer.get_screen_height());
+	const int panelWidth = input.screenWidth - listWidth;
+	const int bodyY = header_height(input.lineHeight);
+	const int bodyHeight = body_height(input.screenHeight, input.lineHeight);
+	const int subHeaderHeight = hint_height(input.lineHeight);
 
 	DrawRectangle(panelX, bodyY, panelWidth, bodyHeight, look.pickerBackground);
 
@@ -731,7 +754,7 @@ void RecordEditor<Model>::render_picker(
 		panelX,
 		bodyY,
 		panelWidth,
-		PICKER_SUB_HEADER_HEIGHT,
+		subHeaderHeight,
 		look.pickerSubHeader);
 	const int totalSheets = renderer.get_loaded_sheet_count();
 	const std::string header = std::format(
@@ -740,12 +763,15 @@ void RecordEditor<Model>::render_picker(
 		pickerSheet + 1,
 		totalSheets);
 	renderer.draw_text_color(
-		Vector2D{ panelX + PICKER_PAD, bodyY + 6 },
+		Vector2D{
+			panelX + PICKER_PAD,
+			centred_text_top(bodyY, subHeaderHeight, input.lineHeight),
+		},
 		header,
 		look.pickerHeaderText);
 
-	const int gridY = bodyY + PICKER_SUB_HEADER_HEIGHT;
-	const int gridHeight = bodyHeight - PICKER_SUB_HEADER_HEIGHT;
+	const int gridY = bodyY + subHeaderHeight;
+	const int gridHeight = bodyHeight - subHeaderHeight;
 	const int sheetColumns =
 		renderer.get_sheet_cols(static_cast<TileSheet>(pickerSheet));
 	const int sheetRows =
@@ -816,13 +842,15 @@ void RecordEditor<Model>::render_picker(
 }
 
 template <typename Model>
-void RecordEditor<Model>::render_hint(const Renderer& renderer) const
+void RecordEditor<Model>::render_hint(
+	const EditorInput& input,
+	const Renderer& renderer) const
 {
 	const EditorLook& look = Model::LOOK;
-	const int screenWidth = renderer.get_screen_width();
-	const int hintY = renderer.get_screen_height() - HINT_HEIGHT;
+	const int hintHeight = hint_height(input.lineHeight);
+	const int hintY = input.screenHeight - hintHeight;
 
-	DrawRectangle(0, hintY, screenWidth, HINT_HEIGHT, look.hintBackground);
+	DrawRectangle(0, hintY, input.screenWidth, hintHeight, look.hintBackground);
 
 	const bool isSaveRecent = (GetTime() - lastSaveTime) < 2.0;
 	std::string fixedFieldHint{};
@@ -856,11 +884,10 @@ void RecordEditor<Model>::render_hint(const Renderer& renderer) const
 		hintText = look.fieldsHint;
 	}
 
-	// The font sets the line's height, so the line is centred on it.
 	renderer.draw_text_color(
 		Vector2D{
 			8,
-			centred_text_top(hintY, HINT_HEIGHT, renderer.get_font_size()),
+			centred_text_top(hintY, hintHeight, input.lineHeight),
 		},
 		hintText,
 		isSaveRecent ? look.savedHint : look.plainHint);

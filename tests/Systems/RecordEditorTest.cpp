@@ -48,6 +48,8 @@ namespace
 	// reaches is on screen.
 	constexpr int SCREEN_HEIGHT = 900;
 	constexpr int SCREEN_WIDTH = 1280;
+	// The stand-in font's line height: a row is then 26, the tile's floor.
+	constexpr int LINE_HEIGHT = 16;
 
 	// A stand-in font: every character is 8 pixels wide.
 	int eight_per_character(std::string_view text)
@@ -69,6 +71,7 @@ namespace
 		input.screenWidth = SCREEN_WIDTH;
 		input.screenHeight = SCREEN_HEIGHT;
 		input.measure = &eight_per_character;
+		input.lineHeight = LINE_HEIGHT;
 		return input;
 	}
 
@@ -85,9 +88,11 @@ namespace
 	{
 		return Vector2D{
 			EditorLayout::LIST_PAD,
-			EditorLayout::HEADER_HEIGHT +
-				static_cast<int>(row) * EditorLayout::ITEM_HEIGHT +
-				EditorLayout::ITEM_HEIGHT / 2,
+			EditorLayout::row_top(
+				EditorLayout::header_height(LINE_HEIGHT),
+				static_cast<int>(row),
+				EditorLayout::row_height(LINE_HEIGHT)) +
+				EditorLayout::row_height(LINE_HEIGHT) / 2,
 		};
 	}
 
@@ -97,9 +102,11 @@ namespace
 	{
 		return Vector2D{
 			SCREEN_WIDTH - 40,
-			EditorLayout::HEADER_HEIGHT +
-				static_cast<int>(row) * EditorLayout::FIELD_HEIGHT +
-				EditorLayout::FIELD_HEIGHT / 2,
+			EditorLayout::row_top(
+				EditorLayout::header_height(LINE_HEIGHT),
+				static_cast<int>(row),
+				EditorLayout::row_height(LINE_HEIGHT)) +
+				EditorLayout::row_height(LINE_HEIGHT) / 2,
 		};
 	}
 
@@ -859,6 +866,50 @@ TYPED_TEST(
 		this->ctx);
 	EXPECT_EQ(this->editor.editor_focus(), EditorFocus::FIELDS);
 	EXPECT_EQ(this->editor.current_key(), this->keys[2]);
+}
+
+// A list row ends where its derived height says: a click on its last pixel
+// selects it, and one pixel lower selects the row below.
+TYPED_TEST(
+	RecordEditorTest,
+	AClickOnAListRowsLastPixelSelectsItAndTheNextTheRowBelow)
+{
+	ASSERT_GE(this->keys.size(), 4u) << "too few records for a fourth row";
+	const int rowHeight = EditorLayout::row_height(LINE_HEIGHT);
+	const int bodyTop = EditorLayout::header_height(LINE_HEIGHT);
+	const int lastPixel =
+		EditorLayout::row_top(bodyTop, 2, rowHeight) + rowHeight - 1;
+
+	this->editor.handle_input(
+		click_at(Vector2D{ EditorLayout::LIST_PAD, lastPixel }),
+		this->ctx);
+	EXPECT_EQ(this->editor.current_key(), this->keys[2]);
+	this->editor.handle_input(
+		click_at(Vector2D{ EditorLayout::LIST_PAD, lastPixel + 1 }),
+		this->ctx);
+	EXPECT_EQ(this->editor.current_key(), this->keys[3]);
+}
+
+// A field row ends where its derived height says, as a list row does.
+TYPED_TEST(
+	RecordEditorTest,
+	AClickOnAFieldRowsLastPixelSelectsItAndTheNextTheRowBelow)
+{
+	ASSERT_GE(TypeParam::FIELDS.size(), 4u)
+		<< "too few fields for a fourth row";
+	const int rowHeight = EditorLayout::row_height(LINE_HEIGHT);
+	const int bodyTop = EditorLayout::header_height(LINE_HEIGHT);
+	const int lastPixel =
+		EditorLayout::row_top(bodyTop, 2, rowHeight) + rowHeight - 1;
+
+	this->editor.handle_input(
+		click_at(Vector2D{ SCREEN_WIDTH - 40, lastPixel }),
+		this->ctx);
+	EXPECT_EQ(this->editor.current_field(), TypeParam::FIELDS.at(2).field);
+	this->editor.handle_input(
+		click_at(Vector2D{ SCREEN_WIDTH - 40, lastPixel + 1 }),
+		this->ctx);
+	EXPECT_EQ(this->editor.current_field(), TypeParam::FIELDS.at(3).field);
 }
 
 // Items and monsters save every field of every record, shipped or not, so

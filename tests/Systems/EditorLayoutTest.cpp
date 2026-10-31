@@ -12,11 +12,16 @@
 
 #include <gtest/gtest.h>
 
+#include <format>
 #include <functional>
 #include <string>
 #include <string_view>
 
+#include <raylib.h>
+
 #include "src/EditorInput.h"
+#include "src/ListCursor.h"
+#include "src/Paths.h"
 #include "src/RecordEditor.h"
 #include "tests/mocks/HiddenRenderer.h"
 
@@ -49,6 +54,52 @@ namespace
 			"measure is not the renderer's measure_text");
 		finish_the_child();
 	}
+
+	// Reads a frame's input from a hidden window and checks it carries the
+	// renderer's font size as its line height.
+	//
+	// Example:
+	//   exit_code_in_child(&the_real_input_carries_the_font_size);
+	//   // -> 44, or 43 when the line height is not the font size
+	[[noreturn]] void the_real_input_carries_the_font_size()
+	{
+		HiddenRenderer hidden{};
+		const EditorInput input = read_editor_input(hidden.renderer);
+		exit_unless(
+			input.lineHeight == hidden.renderer.get_font_size(),
+			std::format(
+				"lineHeight {} is not the font size {}",
+				input.lineHeight,
+				hidden.renderer.get_font_size()));
+		finish_the_child();
+	}
+
+	// Loads the game font as Renderer::load_font does and checks that one
+	// line's box is as tall as the size it is drawn at, at the shipped size and
+	// another.
+	//
+	// Example:
+	//   exit_code_in_child(&a_line_is_as_tall_as_its_font_size);
+	//   // -> 44, or 43 naming the size whose box differs
+	[[noreturn]] void a_line_is_as_tall_as_its_font_size()
+	{
+		HiddenRenderer hidden{};
+		const std::string path = Paths::resolve(Paths::DAWNLIKE_FONT).string();
+		for (const int size : { HIDDEN_RENDERER_FONT_SIZE, 16 })
+		{
+			const Font font = LoadFontEx(path.c_str(), size, nullptr, 256);
+			const Vector2 box = MeasureTextEx(
+				font,
+				"[Ag] Up/Down",
+				static_cast<float>(size),
+				1.0f);
+			UnloadFont(font);
+			exit_unless(
+				static_cast<int>(box.y) == size,
+				std::format("a {}-pixel line's box is {} tall", size, box.y));
+		}
+		finish_the_child();
+	}
 } // namespace
 
 TEST(EditorLayoutTest, TheListIsItsPadsColumnsAndWidestLabel)
@@ -75,6 +126,44 @@ TEST(EditorLayoutTest, ListsWithoutTagsKeepNoTagColumn)
 TEST(EditorLayoutTest, ATagStartsAtTheTagColumnsLeftEdge)
 {
 	EXPECT_EQ(EditorLayout::tag_left(218, 14), 204);
+}
+
+TEST(EditorLayoutTest, ABandIsItsLinesAndTwoPads)
+{
+	EXPECT_EQ(EditorLayout::text_band_height(30, 1), 34);
+	EXPECT_EQ(EditorLayout::text_band_height(30, 2), 64);
+	EXPECT_EQ(EditorLayout::text_band_height(16, 1), 20);
+}
+
+TEST(EditorLayoutTest, TheHeaderHoldsTwoLinesAndTheHintOne)
+{
+	EXPECT_EQ(EditorLayout::header_height(30), 64);
+	EXPECT_EQ(EditorLayout::hint_height(30), 34);
+}
+
+TEST(EditorLayoutTest, ARowHoldsALineOrATileWhicheverIsTaller)
+{
+	EXPECT_EQ(EditorLayout::row_height(30), 34);
+	// A 16-pixel line needs 20; the 22-pixel tile and its pads need 26.
+	EXPECT_EQ(EditorLayout::row_height(16), 26);
+}
+
+TEST(EditorLayoutTest, TheBodyIsTheScreenLessHeaderAndHint)
+{
+	// 1061 - 64 - 34, which holds 28 rows of 34.
+	EXPECT_EQ(EditorLayout::body_height(1061, 30), 963);
+	EXPECT_EQ(whole_rows_within(963, EditorLayout::row_height(30)), 28u);
+}
+
+TEST(EditorLayoutTest, HeaderLinesStackBelowAPad)
+{
+	EXPECT_EQ(EditorLayout::header_line_top(0, 30), 2);
+	EXPECT_EQ(EditorLayout::header_line_top(1, 30), 32);
+}
+
+TEST(EditorLayoutTest, RowsStackDownFromThePanelsTop)
+{
+	EXPECT_EQ(EditorLayout::row_top(64, 3, 34), 166);
 }
 
 TEST(EditorLayoutTest, ALineIsCentredInItsBand)
@@ -111,6 +200,36 @@ TEST(EditorLayoutTest, NoLabelWhenNotEvenTheDotsFit)
 {
 	// "..." is 24 pixels.
 	EXPECT_EQ(EditorLayout::fitted_label("Bless", 23, MEASURE), "");
+}
+
+// The real frame's input carries the font's size, which every band is
+// sized from.
+TEST(EditorLayoutTest, TheRealInputCarriesTheFontSize)
+{
+	const int childExitCode =
+		exit_code_in_child(&the_real_input_carries_the_font_size);
+
+	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
+	{
+		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
+	}
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
+}
+
+// The editor's bands are sized from the font size, which holds only while a
+// line's box is exactly that tall.
+TEST(EditorLayoutTest, ALineIsAsTallAsItsFontSize)
+{
+	const int childExitCode =
+		exit_code_in_child(&a_line_is_as_tall_as_its_font_size);
+
+	if (childExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER)
+	{
+		GTEST_SKIP() << NO_OPENGL_DRIVER_REASON;
+	}
+	EXPECT_EQ(childExitCode, HIDDEN_RENDERER_PASSED)
+		<< "the child's check that failed is in its output above";
 }
 
 // The real frame's input measures text in the font the list draws with.

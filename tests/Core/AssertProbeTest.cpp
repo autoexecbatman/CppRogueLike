@@ -70,6 +70,7 @@
 #include "src/Player.h"
 #include "src/PlayerController.h"
 #include "src/RandomDice.h"
+#include "src/RecordEditor.h"
 #include "src/Renderer.h"
 #include "src/ShopKeeper.h"
 #include "src/SpellRegistry.h"
@@ -908,4 +909,22 @@ TEST_F(AssertProbeDeathTest, ChangingABuiltinSpellsEffectAborts)
 	EXPECT_DEATH(
 		spells.set_by_key("knock", changed),
 		"SpellRegistry::set_by_key: a builtin spell's effect is fixed");
+}
+
+// A row's height falls to the tile's when the line height is missing, so an
+// input that never carried one would lay out silently instead of failing.
+TEST_F(AssertProbeDeathTest, ARowWithNoLineHeightAborts)
+{
+	EXPECT_DEATH(
+		[[maybe_unused]] const int height = EditorLayout::row_height(0),
+		"EditorLayout::row_height: no line height");
+}
+
+// The body is the screen less two bands sized by the line height; with none,
+// it would be the whole screen less the pads.
+TEST_F(AssertProbeDeathTest, ABodyWithNoLineHeightAborts)
+{
+	EXPECT_DEATH(
+		[[maybe_unused]] const int height = EditorLayout::body_height(900, 0),
+		"EditorLayout::body_height: no line height");
 }

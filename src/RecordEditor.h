@@ -41,6 +41,7 @@
 // once per Model; a new editor adds its line there.
 
 #include <algorithm>
+#include <cassert>
 #include <cstddef>
 #include <functional>
 #include <string>
@@ -78,28 +79,90 @@ enum class EditorFocus
 // Where the frame draws, in pixels.
 namespace EditorLayout
 {
-	inline constexpr int HEADER_HEIGHT = 48;
-	inline constexpr int HINT_HEIGHT = 28;
-	inline constexpr int FIELD_HEIGHT = 26;
-	inline constexpr int ITEM_HEIGHT = 30;
 	inline constexpr int LIST_TILE_SIZE = 22;
 	// The width a list row's tile takes, with the gap before its label.
 	inline constexpr int LIST_TILE_COLUMN = LIST_TILE_SIZE + 4;
 	inline constexpr int LIST_PAD = 6;
 	inline constexpr int PICKER_PAD = 10;
-	inline constexpr int PICKER_SUB_HEADER_HEIGHT = 28;
 	// The drawn cell size the picker's grid aims for.
 	inline constexpr int PICKER_TILE_TARGET = 64;
+	// Pixels between a line's box and the edge of the band holding it.
+	inline constexpr int TEXT_PAD = 2;
+
+	// The height of a band holding lines of text, each lineHeight tall, with
+	// TEXT_PAD above and below.
+	//
+	// Example:
+	//   text_band_height(30, 1);   // -> 34
+	//   text_band_height(30, 2);   // -> 64
+	[[nodiscard]] constexpr int text_band_height(int lineHeight, int lines)
+	{
+		return lines * lineHeight + 2 * TEXT_PAD;
+	}
+
+	// The header's height: its title line and its key line.
+	//
+	// Example:
+	//   header_height(30);   // -> 64
+	[[nodiscard]] constexpr int header_height(int lineHeight)
+	{
+		return text_band_height(lineHeight, 2);
+	}
+
+	// The height of a one-line bar: the hint bar and the picker's sub-header.
+	//
+	// Example:
+	//   hint_height(30);   // -> 34
+	[[nodiscard]] constexpr int hint_height(int lineHeight)
+	{
+		return text_band_height(lineHeight, 1);
+	}
+
+	// A list or field row's height: one line, or a list tile when the tile is
+	// the taller.
+	//
+	// Example:
+	//   row_height(30);   // -> 34
+	//   row_height(16);   // -> 26, the tile's 22 and its pads
+	[[nodiscard]] constexpr int row_height(int lineHeight)
+	{
+		// The tile floor would hide a missing line height, so it is refused
+		// here.
+		assert(lineHeight > 0 && "EditorLayout::row_height: no line height");
+		return std::max(
+			text_band_height(lineHeight, 1),
+			LIST_TILE_SIZE + 2 * TEXT_PAD);
+	}
 
 	// The height of the panels between the header and the hint bar. Input and
 	// drawing both read it, so a click and the row drawn under it come from one
 	// row count.
 	//
 	// Example:
-	//   body_height(900);   // -> 824, after a 48 header and a 28 hint bar
-	[[nodiscard]] constexpr int body_height(int screenHeight)
+	//   body_height(1061, 30);   // -> 963, after a 64 header and a 34 hint bar
+	[[nodiscard]] constexpr int body_height(int screenHeight, int lineHeight)
 	{
-		return screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
+		assert(lineHeight > 0 && "EditorLayout::body_height: no line height");
+		return screenHeight - header_height(lineHeight) -
+			hint_height(lineHeight);
+	}
+
+	// The top of the header's line, counted from 0.
+	//
+	// Example:
+	//   header_line_top(1, 30);   // -> 32
+	[[nodiscard]] constexpr int header_line_top(int line, int lineHeight)
+	{
+		return TEXT_PAD + line * lineHeight;
+	}
+
+	// The top of a panel's row, counted from 0 at the panel's top.
+	//
+	// Example:
+	//   row_top(64, 3, 34);   // -> 166
+	[[nodiscard]] constexpr int row_top(int bodyTop, int row, int rowHeight)
+	{
+		return bodyTop + row * rowHeight;
 	}
 
 	// The list panel's width: a pad, the tile column, the widest label, the tag
@@ -257,7 +320,9 @@ private:
 		int listWidth);
 
 	void render(const EditorInput& input, const GameContext& ctx) const;
-	void render_header(const Renderer& renderer) const;
+	void render_header(
+		const EditorInput& input,
+		const Renderer& renderer) const;
 	void render_list(
 		const EditorInput& input,
 		const GameContext& ctx,
@@ -270,7 +335,7 @@ private:
 		const EditorInput& input,
 		const Renderer& renderer,
 		int listWidth) const;
-	void render_hint(const Renderer& renderer) const;
+	void render_hint(const EditorInput& input, const Renderer& renderer) const;
 
 	// Row's label as the list draws it: the working record's for the
 	// selected row, with " *" after a custom record.

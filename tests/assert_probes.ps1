@@ -292,6 +292,16 @@ $probes = @(
         file   = "src/SpellRegistry.cpp"
         anchor = 'assert(isEffectKept && "SpellRegistry::set_by_key: a builtin spell''s effect is fixed");'
     }
+    @{
+        test   = "AssertProbeDeathTest.ARowWithNoLineHeightAborts"
+        file   = "src/RecordEditor.h"
+        anchor = 'assert(lineHeight > 0 && "EditorLayout::row_height: no line height");'
+    }
+    @{
+        test   = "AssertProbeDeathTest.ABodyWithNoLineHeightAborts"
+        file   = "src/RecordEditor.h"
+        anchor = 'assert(lineHeight > 0 && "EditorLayout::body_height: no line height");'
+    }
 )
 
 function Get-BytesHash($bytes)

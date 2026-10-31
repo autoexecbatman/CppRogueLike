@@ -15,7 +15,7 @@
     "mutations": [
         {
             "file": "src/RecordEditor.cpp",
-            "original": "\tif (input.is_pressed(EditorKey::CLICK) && mouse.y >= HEADER_HEIGHT)",
+            "original": "\tif (input.is_pressed(EditorKey::CLICK) && mouse.y >= bodyTop)",
             "mutated": "\tif (input.is_pressed(EditorKey::CLICK))",
             "catches": "a click in the header picking the first list row"
         },
@@ -33,13 +33,13 @@
         },
         {
             "file": "src/RecordEditor.cpp",
-            "original": "\t\t\tlistCursor.move_down(visibleListRows);",
+            "original": "\t\t\tlistCursor.move_down(visibleRows);",
             "mutated": "",
             "catches": "Down in the list not moving to the next record"
         },
         {
             "file": "src/RecordEditor.cpp",
-            "original": "\t\tfieldCursor.move_down(visibleFields);",
+            "original": "\t\tfieldCursor.move_down(visibleRows);",
             "mutated": "",
             "catches": "Down in the fields not moving the field cursor"
         },

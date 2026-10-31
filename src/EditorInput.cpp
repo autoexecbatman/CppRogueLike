@@ -75,6 +75,7 @@ EditorInput read_editor_input(const Renderer& renderer)
 
 	input.screenWidth = renderer.get_screen_width();
 	input.screenHeight = renderer.get_screen_height();
+	input.lineHeight = renderer.get_font_size();
 
 	// The list sizes itself in the font it draws with; the renderer outlives
 	// the frame this input serves.

@@ -90,6 +90,54 @@
             "original": "\treturn bandTop + (bandHeight - lineHeight) / 2;",
             "mutated": "\treturn bandTop + 6;",
             "catches": "the hint drawn at the old fixed 6-pixel offset, whatever the font"
+        },
+        {
+            "file": "src/RecordEditor.h",
+            "original": "\treturn lines * lineHeight + 2 * TEXT_PAD;",
+            "mutated": "\treturn lines * lineHeight;",
+            "catches": "a band without its pads"
+        },
+        {
+            "file": "src/RecordEditor.h",
+            "original": "\t\treturn std::max(\n\t\t\ttext_band_height(lineHeight, 1),\n\t\t\tLIST_TILE_SIZE + 2 * TEXT_PAD);",
+            "mutated": "\t\treturn text_band_height(lineHeight, 1);",
+            "catches": "a row shorter than its tile when the line is"
+        },
+        {
+            "file": "src/RecordEditor.h",
+            "original": "\treturn text_band_height(lineHeight, 2);",
+            "mutated": "\treturn text_band_height(lineHeight, 1);",
+            "catches": "a header holding one line of its two"
+        },
+        {
+            "file": "src/RecordEditor.h",
+            "original": "return screenHeight - header_height(lineHeight) -\n\t\t\thint_height(lineHeight);",
+            "mutated": "\t\treturn screenHeight - header_height(lineHeight);",
+            "catches": "a body that runs under the hint bar"
+        },
+        {
+            "file": "src/RecordEditor.h",
+            "original": "\treturn bodyTop + row * rowHeight;",
+            "mutated": "\treturn bodyTop + (row + 1) * rowHeight;",
+            "catches": "rows drawn one row low"
+        },
+        {
+            "file": "src/RecordEditor.h",
+            "original": "\treturn TEXT_PAD + line * lineHeight;",
+            "mutated": "\treturn line * lineHeight;",
+            "catches": "header lines set against the header's edge"
+        },
+        {
+            "file": "src/RecordEditor.cpp",
+            "original": "\tconst int rowHeight = row_height(input.lineHeight);\n\tconst size_t visibleRows",
+            "mutated": "\tconst int rowHeight = 30;\n\tconst size_t visibleRows",
+            "catches": "a click hit-tested against a fixed 30-pixel row"
+        },
+        {
+            "file": "src/EditorInput.cpp",
+            "original": "\tinput.lineHeight = renderer.get_font_size();\n",
+            "mutated": "",
+            "catches": "the real input left without a line height"
         }
     ]
 }

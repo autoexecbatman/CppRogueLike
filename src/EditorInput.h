@@ -73,6 +73,9 @@ struct EditorInput
 	int screenWidth{ 0 };
 	// The window's height in pixels.
 	int screenHeight{ 0 };
+	// A line of text's height in pixels, in the font the editor draws with.
+	// Every band that holds text is sized from it.
+	int lineHeight{ 0 };
 	// A text's width in pixels, in the font the editor draws with. The list
 	// panel sizes itself with it.
 	std::function<int(std::string_view)> measure{};
