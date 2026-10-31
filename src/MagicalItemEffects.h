@@ -73,7 +73,6 @@ namespace MagicalEffectUtils
 {
 	const char* get_effect_description(MagicalEffect effect);
 	bool is_protection_effect(MagicalEffect effect);
-	int get_protection_bonus(MagicalEffect effect);
 	// Returns AC bonus for any effect (protection rings, helms, etc.)
 	int get_ac_bonus(MagicalEffect effect, int bonus);
 } // namespace MagicalEffectUtils

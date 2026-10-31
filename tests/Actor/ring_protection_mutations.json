@@ -1,0 +1,59 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/run_suite.ps1",
+    "-Configuration",
+    "Debug",
+    "-Filter",
+    "--gtest_filter=RingOfProtectionTest.*:CloakOfProtectionTest.*:RingEffectsTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\t\t\treturn MagicalEffectUtils::get_ac_bonus(\n\t\t\t\t\tmagicalRing.effect,\n\t\t\t\t\tmagicalRing.bonus);",
+      "mutated": "\t\t\t\treturn MagicalEffectUtils::get_ac_bonus(\n\t\t\t\t\tmagicalRing.effect,\n\t\t\t\t\t1);",
+      "catches": "every ring of protection worth +1 whatever its plus"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\t\t\treturn MagicalEffectUtils::get_ac_bonus(\n\t\t\t\t\tmagicalRing.effect,\n\t\t\t\t\tmagicalRing.bonus);",
+      "mutated": "\t\t\t\treturn MagicalEffectUtils::get_ac_bonus(\n\t\t\t\t\tMagicalEffect::PROTECTION,\n\t\t\t\t\tmagicalRing.bonus);",
+      "catches": "a ring of fire resistance's plus counted as armour class"
+    },
+    {
+      "file": "src/MagicalItemEffects.cpp",
+      "original": "\t\tcase MagicalEffect::BRILLIANCE:\n\t\tcase MagicalEffect::PROTECTION:\n",
+      "mutated": "\t\tcase MagicalEffect::BRILLIANCE:\n",
+      "catches": "a ring of protection giving no armour class at all"
+    },
+    {
+      "file": "src/ArmorClass.cpp",
+      "original": "\t\t\tif (ringBonus < bestRingBonus)",
+      "mutated": "\t\t\tif (ringBonus < 0)",
+      "catches": "the ring in the last slot counting, though weaker"
+    },
+    {
+      "file": "src/ArmorClass.cpp",
+      "original": "\t\t\tif (ringBonus < bestRingBonus)",
+      "mutated": "\t\t\tif (ringBonus < 0 && bestRing == nullptr)",
+      "catches": "the ring in the first slot counting, though weaker"
+    },
+    {
+      "file": "src/ArmorClass.cpp",
+      "original": "\t\t\tif (ringBonus < bestRingBonus)",
+      "mutated": "\t\t\tif (bestRingBonus < ringBonus)",
+      "catches": "the comparison's operands swapped, so no ring is ever chosen"
+    },
+    {
+      "file": "data/content/items.json",
+      "original": "\"effect\": \"protection\",\n        \"effectBonus\": 2,",
+      "mutated": "\"effect\": \"protection\",\n        \"effectBonus\": 1,",
+      "catches": "the +2 ring shipped as a +1"
+    }
+  ]
+}

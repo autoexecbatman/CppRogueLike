@@ -45,11 +45,6 @@ namespace MagicalEffectUtils
 		return effect == MagicalEffect::PROTECTION;
 	}
 
-	int get_protection_bonus(MagicalEffect effect)
-	{
-		return effect == MagicalEffect::PROTECTION ? -1 : 0;
-	}
-
 	int get_ac_bonus(MagicalEffect effect, int bonus)
 	{
 		switch (effect)

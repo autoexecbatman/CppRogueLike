@@ -99,10 +99,11 @@ TEST(PickableAcBonus, MagicalHelm_NoEffect_ReturnsZero)
 	EXPECT_EQ(get_item_ac_bonus(behavior), 0);
 }
 
-TEST(PickableAcBonus, MagicalRing_Protection_ReturnsMinusOne)
+// DMG page 908: a ring of protection's plus is its armour class bonus.
+TEST(PickableAcBonus, MagicalRing_Protection_ReturnsNegativePlus)
 {
-	const ItemBehavior behavior = MagicalRing{ MagicalEffect::PROTECTION, 0 };
-	EXPECT_EQ(get_item_ac_bonus(behavior), -1);
+	const ItemBehavior behavior = MagicalRing{ MagicalEffect::PROTECTION, 2 };
+	EXPECT_EQ(get_item_ac_bonus(behavior), -2);
 }
 
 TEST(PickableAcBonus, MagicalRing_NoEffect_ReturnsZero)

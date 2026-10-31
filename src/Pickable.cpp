@@ -1061,8 +1061,9 @@ int get_item_ac_bonus(const ItemBehavior& behavior) noexcept
 			},
 			[](const MagicalRing& magicalRing) -> int
 			{
-				return MagicalEffectUtils::get_protection_bonus(
-					magicalRing.effect);
+				return MagicalEffectUtils::get_ac_bonus(
+					magicalRing.effect,
+					magicalRing.bonus);
 			},
 			[]([[maybe_unused]] const auto& otherBehavior) -> int { return 0; },
 		},
