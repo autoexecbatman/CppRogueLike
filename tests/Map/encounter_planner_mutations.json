@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/EncounterPlanner.cpp",
-      "original": "\t\treturn 0;\n\t}\n\n\tcase RoomType::STANDARD:\n",
-      "mutated": "\t\treturn 1;\n\t}\n\n\tcase RoomType::STANDARD:\n",
+      "original": "\t\t\treturn 0;\n\t\t}\n\n\t\tcase RoomType::STANDARD:\n",
+      "mutated": "\t\t\treturn 1;\n\t\t}\n\n\t\tcase RoomType::STANDARD:\n",
       "catches": "an entrance worth spending on, so the player arrives into an ambush"
     },
     {
       "file": "src/EncounterPlanner.cpp",
-      "original": "\t\treturn static_cast<int>(\n\t\t\tdungeonLevel * BASE_XP_PER_LEVEL * DANGER_MULTIPLIER);\n",
-      "mutated": "\t\treturn static_cast<int>(\n\t\t\tdungeonLevel * BASE_XP_PER_LEVEL *STANDARD_MULTIPLIER);\n",
+      "original": "\t\t\treturn static_cast<int>(\n\t\t\t\tdungeonLevel * BASE_XP_PER_LEVEL * DANGER_MULTIPLIER);\n",
+      "mutated": "\t\t\treturn static_cast<int>(\n\t\t\t\tdungeonLevel * BASE_XP_PER_LEVEL *STANDARD_MULTIPLIER);\n",
       "catches": "a danger room worth no more than an ordinary one"
     },
     {
@@ -33,14 +33,14 @@
     },
     {
       "file": "src/EncounterPlanner.cpp",
-      "original": "\t\tif (static_cast<int>(selected.size()) >= cap)\n\t\t{\n\t\t\tbreak;\n\t\t}\n",
+      "original": "\t\t\tif (static_cast<int>(selected.size()) >= cap)\n\t\t\t{\n\t\t\t\tbreak;\n\t\t\t}\n",
       "mutated": "",
       "catches": "the cap ignored while taking one of each kind"
     },
     {
       "file": "src/EncounterPlanner.cpp",
-      "original": "\t\tif (candidate.xpCost <= remaining)\n\t\t{\n\t\t\tselected.push_back(candidate.key);\n",
-      "mutated": "\t\tif (true)\n\t\t{\n\t\t\tselected.push_back(candidate.key);\n",
+      "original": "\t\t\tif (candidate.xpCost <= remaining)\n\t\t\t{\n\t\t\t\tselected.push_back(candidate.key);\n",
+      "mutated": "\t\t\tif (true)\n\t\t\t{\n\t\t\t\tselected.push_back(candidate.key);\n",
       "catches": "a kind taken without the money for it"
     },
     {

@@ -51,20 +51,20 @@
     },
     {
       "file": "src/GameLoopCoordinator.cpp",
-      "original": "thisRound <= roundsFinished;\n\t\t++thisRound",
-      "mutated": "thisRound < roundsFinished;\n\t\t++thisRound",
+      "original": "\tthisRound <= roundsFinished;\n\t\t\t++thisRound",
+      "mutated": "\tthisRound < roundsFinished;\n\t\t\t++thisRound",
       "catches": "an action of several rounds paying one round short"
     },
     {
       "file": "src/GameLoopCoordinator.cpp",
-      "original": "thisRound <= roundsFinished;\n\t\t++thisRound",
-      "mutated": "thisRound <= roundsFinished + 1;\n\t\t++thisRound",
+      "original": "\tthisRound <= roundsFinished;\n\t\t\t++thisRound",
+      "mutated": "\tthisRound <= roundsFinished + 1;\n\t\t\t++thisRound",
       "catches": "every action paying one round more than it took"
     },
     {
       "file": "src/GameLoopCoordinator.cpp",
-      "original": "for (\n\t\tint thisRound = ctx.gameState->get_rounds_run() + 1;",
-      "mutated": "for (\n\t\tint thisRound = ctx.gameState->get_rounds_run() +2;",
+      "original": "\tfor (\n\t\t\tint thisRound = ctx.gameState->get_rounds_run() + 1;",
+      "mutated": "\tfor (\n\t\t\tint thisRound = ctx.gameState->get_rounds_run() +2;",
       "catches": "the first owed round skipped"
     },
     {
@@ -75,14 +75,14 @@
     },
     {
       "file": "src/GameLoopCoordinator.cpp",
-      "original": "\t\t// Erased at the end of the round they died in, so the dead are fed no later round.\n\t\tctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);\n",
+      "original": "\t\t\t// Erased at the end of the round they died in, so the dead are fed\n\t\t\t// no later round.\n\t\t\tctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);\n",
       "mutated": "",
       "catches": "a creature that died mid-action fed the rounds after its death"
     },
     {
       "file": "src/GameLoopCoordinator.cpp",
-      "original": "\t\tif (ctx.player()->is_dead())\n\t\t{\n\t\t\tbreak;",
-      "mutated": "\t\tif (false)\n\t\t{\n\t\t\tbreak;",
+      "original": "\t\t\tif (ctx.player()->is_dead())\n\t\t\t{\n\t\t\t\tbreak;",
+      "mutated": "\t\t\tif (false)\n\t\t\t{\n\t\t\t\tbreak;",
       "catches": "a dead player fed the rest of the action's rounds"
     },
     {

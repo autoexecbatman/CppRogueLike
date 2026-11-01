@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/Creature.cpp",
-      "original": "\t\t\t\texceptional = std::max(exceptional, boost.exceptionalStrength);",
-      "mutated": "\t\t\t\texceptional = boost.exceptionalStrength;",
+      "original": "\t\t\t\t\texceptional =\n\t\t\t\t\t\tstd::max(exceptional, boost.exceptionalStrength);",
+      "mutated": "\t\t\t\t\texceptional =boost.exceptionalStrength;",
       "catches": "a worn 18 without a percentile erasing the wearer's own"
     },
     {
@@ -39,8 +39,8 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "statBoost.exceptionalStrength =\n\t\t\tsource.at(\"exceptionalStrength\").get<int>();",
-      "mutated": "\t\tstatBoost.exceptionalStrength = 0;",
+      "original": "\tstatBoost.exceptionalStrength =\n\t\t\t\tsource.at(\"exceptionalStrength\").get<int>();",
+      "mutated": "\t\t\tstatBoost.exceptionalStrength = 0;",
       "catches": "worn 18/00 lost when a game is loaded"
     },
     {

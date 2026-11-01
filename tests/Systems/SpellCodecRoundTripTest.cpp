@@ -31,77 +31,79 @@
 namespace CppRL
 {
 
-class SpellCodecRoundTripTest : public ::testing::Test
-{
-protected:
-	std::filesystem::path roundTrip;
-	SpellRegistry spells{};
-
-	void SetUp() override
+	class SpellCodecRoundTripTest : public ::testing::Test
 	{
-		spells.load("data/content/spells.json");
-		roundTrip =
-			std::filesystem::temp_directory_path() / "spells_roundtrip.json";
-	}
+	protected:
+		std::filesystem::path roundTrip;
+		SpellRegistry spells{};
 
-	void TearDown() override { std::filesystem::remove(roundTrip); }
-};
+		void SetUp() override
+		{
+			spells.load("data/content/spells.json");
+			roundTrip = std::filesystem::temp_directory_path() /
+				"spells_roundtrip.json";
+		}
 
-// Every spell keeps its class and its effect across a save. A codec pair that disagrees
-// shows up either as a changed value or as a throw from the parser on the way back in.
-TEST_F(SpellCodecRoundTripTest, ClassAndEffectSurviveASave)
-{
-	struct Encoded
-	{
-		SpellClass spellClass{};
-		SpellEffectType effect{};
+		void TearDown() override { std::filesystem::remove(roundTrip); }
 	};
 
-	std::map<std::string, Encoded> before;
-	for (const std::string& key : spells.get_all_keys())
+	// Every spell keeps its class and its effect across a save. A codec pair
+	// that disagrees shows up either as a changed value or as a throw from the
+	// parser on the way back in.
+	TEST_F(SpellCodecRoundTripTest, ClassAndEffectSurviveASave)
 	{
-		const SpellDefinition& definition = spells.get_by_key(key);
-		before.emplace(
-			key,
-			Encoded{ definition.spellClass, definition.effect_type });
+		struct Encoded
+		{
+			SpellClass spellClass{};
+			SpellEffectType effect{};
+		};
+
+		std::map<std::string, Encoded> before;
+		for (const std::string& key : spells.get_all_keys())
+		{
+			const SpellDefinition& definition = spells.get_by_key(key);
+			before.emplace(
+				key,
+				Encoded{ definition.spellClass, definition.effect_type });
+		}
+		ASSERT_FALSE(before.empty())
+			<< "no spells loaded; the check would be vacuous";
+
+		spells.save(roundTrip.string());
+		spells.load(roundTrip.string());
+
+		for (const auto& [key, encoded] : before)
+		{
+			const SpellDefinition& reloaded = spells.get_by_key(key);
+			EXPECT_EQ(reloaded.spellClass, encoded.spellClass)
+				<< key << ".spellClass";
+			EXPECT_EQ(reloaded.effect_type, encoded.effect)
+				<< key << ".effect_type";
+		}
 	}
-	ASSERT_FALSE(before.empty())
-		<< "no spells loaded; the check would be vacuous";
 
-	spells.save(roundTrip.string());
-	spells.load(roundTrip.string());
-
-	for (const auto& [key, encoded] : before)
+	// Every spell keeps its name, level and description too - the fields the
+	// codecs do not touch, so that a failure above points at a codec rather
+	// than at the file.
+	TEST_F(SpellCodecRoundTripTest, TheRestOfTheDefinitionSurvivesToo)
 	{
-		const SpellDefinition& reloaded = spells.get_by_key(key);
-		EXPECT_EQ(reloaded.spellClass, encoded.spellClass)
-			<< key << ".spellClass";
-		EXPECT_EQ(reloaded.effect_type, encoded.effect)
-			<< key << ".effect_type";
-	}
-}
+		std::map<std::string, SpellDefinition> before;
+		for (const std::string& key : spells.get_all_keys())
+		{
+			before.emplace(key, spells.get_by_key(key));
+		}
 
-// Every spell keeps its name, level and description too - the fields the codecs do not
-// touch, so that a failure above points at a codec rather than at the file.
-TEST_F(SpellCodecRoundTripTest, TheRestOfTheDefinitionSurvivesToo)
-{
-	std::map<std::string, SpellDefinition> before;
-	for (const std::string& key : spells.get_all_keys())
-	{
-		before.emplace(key, spells.get_by_key(key));
-	}
+		spells.save(roundTrip.string());
+		spells.load(roundTrip.string());
 
-	spells.save(roundTrip.string());
-	spells.load(roundTrip.string());
-
-	for (const auto& [key, definition] : before)
-	{
-		const SpellDefinition& reloaded = spells.get_by_key(key);
-		EXPECT_EQ(reloaded.name, definition.name) << key << ".name";
-		EXPECT_EQ(reloaded.level, definition.level) << key << ".level";
-		EXPECT_EQ(reloaded.description, definition.description)
-			<< key << ".description";
+		for (const auto& [key, definition] : before)
+		{
+			const SpellDefinition& reloaded = spells.get_by_key(key);
+			EXPECT_EQ(reloaded.name, definition.name) << key << ".name";
+			EXPECT_EQ(reloaded.level, definition.level) << key << ".level";
+			EXPECT_EQ(reloaded.description, definition.description)
+				<< key << ".description";
+		}
 	}
-}
 
 } // namespace CppRL

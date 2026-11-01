@@ -39,26 +39,26 @@
     },
     {
       "file": "src/MenuAbilityScores.cpp",
-      "original": "\tif (modifier == 0)\n\t{\n\t\treturn std::format(\n\t\t\t\"{} {:<13}{:>3}\",\n\t\t\tmarker,\n\t\t\tability_name(ability),\n\t\t\tallocated);\n\t}\n",
+      "original": "\t\tif (modifier == 0)\n\t\t{\n\t\t\treturn std::format(\n\t\t\t\t\"{} {:<13}{:>3}\",\n\t\t\t\tmarker,\n\t\t\t\tability_name(ability),\n\t\t\t\tallocated);\n\t\t}\n",
       "mutated": "",
       "catches": "a human reading +0 = 8 on all six lines instead of staying quiet"
     },
     {
       "file": "src/MenuAbilityScores.cpp",
-      "original": "\t\tline += std::format(\" {}){}\", index + 1, allocation.pool().at(index));",
-      "mutated": "\t\tline += std::format(\" {}){}\", index, allocation.pool().at(index));",
+      "original": "\t\t\tline +=\n\t\t\t\tstd::format(\" {}){}\", index + 1, allocation.pool().at(index));",
+      "mutated": "\t\t\tline +=\n\t\t\t\tstd::format(\" {}){}\", index, allocation.pool().at(index));",
       "catches": "the pool numbered from zero while the digit that spends it counts from one"
     },
     {
       "file": "src/MenuAbilityScores.cpp",
-      "original": "\tif (allocation.pool().empty())\n\t{\n\t\treturn \"Dice: none left\";\n\t}\n",
+      "original": "\t\tif (allocation.pool().empty())\n\t\t{\n\t\t\treturn \"Dice: none left\";\n\t\t}\n",
       "mutated": "",
       "catches": "a finished allocation printing a bare label that reads as a drawing fault"
     },
     {
       "file": "src/MenuAbilityScores.cpp",
-      "original": "\treturn std::format(\n\t\t\"Needs {} {}\",\n\t\tability_name(shortfall->ability),\n\t\tshortfall->score);",
-      "mutated": "\treturn\"Ready.\";",
+      "original": "\t\treturn std::format(\n\t\t\t\"Needs {} {}\",\n\t\t\tability_name(shortfall->ability),\n\t\t\tshortfall->score);",
+      "mutated": "\t\treturn\"Ready.\";",
       "catches": "a screen that cannot be accepted telling the player it can"
     },
     {

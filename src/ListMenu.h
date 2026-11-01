@@ -19,30 +19,30 @@
 namespace CppRL
 {
 
-struct GameContext;
+	struct GameContext;
 
-class ListMenu : public BaseMenu
-{
-	std::string title{};
-	std::vector<MenuEntry> entries{};
-	size_t cursorIndex{ 0 };
-	std::function<void(GameContext&)> onEscape{}; // null = just close
-	// null = no-op; called each frame before input
-	std::function<void(GameContext&)> onFrame{};
+	class ListMenu : public BaseMenu
+	{
+		std::string title{};
+		std::vector<MenuEntry> entries{};
+		size_t cursorIndex{ 0 };
+		std::function<void(GameContext&)> onEscape{}; // null = just close
+		// null = no-op; called each frame before input
+		std::function<void(GameContext&)> onFrame{};
 
-	void draw_entries();
+		void draw_entries();
 
-public:
-	ListMenu(
-		std::string title,
-		std::vector<MenuEntry> entries,
-		std::function<void(GameContext&)> onEscape,
-		std::function<void(GameContext&)> onFrame,
-		GameContext& ctx);
+	public:
+		ListMenu(
+			std::string title,
+			std::vector<MenuEntry> entries,
+			std::function<void(GameContext&)> onEscape,
+			std::function<void(GameContext&)> onFrame,
+			GameContext& ctx);
 
-	void draw();
-	void on_key(GameContext& ctx) override;
-	void menu(GameContext& ctx) override;
-};
+		void draw();
+		void on_key(GameContext& ctx) override;
+		void menu(GameContext& ctx) override;
+	};
 
 } // namespace CppRL

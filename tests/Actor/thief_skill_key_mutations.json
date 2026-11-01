@@ -27,13 +27,13 @@
     },
     {
       "file": "src/MenuThiefSkills.cpp",
-      "original": "\t\tif (screen.allocation.can_assign(screen.cursor))\n\t\t{\n\t\t\tscreen.allocation.assign(screen.cursor);\n\t\t}\n",
+      "original": "\t\t\tif (screen.allocation.can_assign(screen.cursor))\n\t\t\t{\n\t\t\t\tscreen.allocation.assign(screen.cursor);\n\t\t\t}\n",
       "mutated": "",
       "catches": "right placing no point"
     },
     {
       "file": "src/MenuThiefSkills.cpp",
-      "original": "\t\tif (screen.allocation.can_take_back(screen.cursor))\n\t\t{\n\t\t\tscreen.allocation.take_back(screen.cursor);\n\t\t}\n",
+      "original": "\t\t\tif (screen.allocation.can_take_back(screen.cursor))\n\t\t\t{\n\t\t\t\tscreen.allocation.take_back(screen.cursor);\n\t\t\t}\n",
       "mutated": "",
       "catches": "left taking no point back"
     },
@@ -51,8 +51,8 @@
     },
     {
       "file": "src/MenuThiefSkills.cpp",
-      "original": "\tdefault:\n\t{\n\t\tbreak;\n\t}\n\t}\n\n\treturn screen;",
-      "mutated": "\tdefault:\n\t{\n\t\tscreen.cursor = next_thief_skill(screen.cursor);\n\t\tbreak;\n\t}\n\t}\n\n\treturn screen;",
+      "original": "\t\tdefault:\n\t\t{\n\t\t\tbreak;\n\t\t}\n\t\t}\n\n\t\treturn screen;",
+      "mutated": "\t\tdefault:\n\t\t{\n\t\t\tscreen.cursor = next_thief_skill(screen.cursor);\n\t\t\tbreak;\n\t\t}\n\t\t}\n\n\t\treturn screen;",
       "catches": "a key the screen does not use moving the cursor"
     }
   ]

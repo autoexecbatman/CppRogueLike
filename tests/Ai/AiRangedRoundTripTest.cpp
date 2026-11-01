@@ -20,34 +20,35 @@
 namespace CppRL
 {
 
-namespace
-{
-	// Not the defaults, so a load that ignored them could not pass by accident.
-	constexpr int MAX_RANGE = 7;
-	constexpr int OPTIMAL_DISTANCE = 4;
-} // namespace
+	namespace
+	{
+		// Not the defaults, so a load that ignored them could not pass by
+		// accident.
+		constexpr int MAX_RANGE = 7;
+		constexpr int OPTIMAL_DISTANCE = 4;
+	} // namespace
 
-TEST(AiRangedRoundTripTest, ARangedMonsterLoadsAsTheSameAiItSaved)
-{
-	AiMonsterRanged archer{};
-	archer.load(
-		json{
-			{ "maxRangeDistance", MAX_RANGE },
-			{ "optimalDistance", OPTIMAL_DISTANCE },
-		});
-	json saved;
-	archer.save(saved);
+	TEST(AiRangedRoundTripTest, ARangedMonsterLoadsAsTheSameAiItSaved)
+	{
+		AiMonsterRanged archer{};
+		archer.load(
+			json{
+				{ "maxRangeDistance", MAX_RANGE },
+				{ "optimalDistance", OPTIMAL_DISTANCE },
+			});
+		json saved;
+		archer.save(saved);
 
-	const std::unique_ptr<Ai> loaded = Ai::create(saved);
-	json resaved;
-	loaded->save(resaved);
+		const std::unique_ptr<Ai> loaded = Ai::create(saved);
+		json resaved;
+		loaded->save(resaved);
 
-	EXPECT_EQ(archer.get_ai_type(), AiType::RANGED_MONSTER);
-	EXPECT_EQ(loaded->get_ai_type(), archer.get_ai_type());
-	EXPECT_EQ(resaved, saved)
-		<< "the loaded Ai saved something else: " << resaved.dump();
-}
+		EXPECT_EQ(archer.get_ai_type(), AiType::RANGED_MONSTER);
+		EXPECT_EQ(loaded->get_ai_type(), archer.get_ai_type());
+		EXPECT_EQ(resaved, saved)
+			<< "the loaded Ai saved something else: " << resaved.dump();
+	}
 
-// end of file: AiRangedRoundTripTest.cpp
+	// end of file: AiRangedRoundTripTest.cpp
 
 } // namespace CppRL

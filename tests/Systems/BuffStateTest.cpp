@@ -33,454 +33,461 @@
 namespace CppRL
 {
 
-namespace
-{
-
-	// The clock reading `rounds` whole rounds after the start of the game.
-	constexpr int at_round(int rounds)
+	namespace
 	{
-		return rounds * TIME_UNITS_PER_ROUND;
+
+		// The clock reading `rounds` whole rounds after the start of the game.
+		constexpr int at_round(int rounds)
+		{
+			return rounds * TIME_UNITS_PER_ROUND;
+		}
+
+	} // namespace
+
+	class BuffStateTest : public ::testing::Test
+	{
+	protected:
+		BuffSystem buffs{};
+		Creature creature{
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK },
+		};
+	};
+
+	// The web runs out first; the hold still holds.
+	TEST_F(BuffStateTest, AHoldOutlastsAnExpiredWeb)
+	{
+		buffs.add_buff(
+			creature,
+			BuffType::HOLD_PERSON,
+			0,
+			10,
+			BuffApplication::ADD,
+			at_round(0));
+		buffs.add_buff(
+			creature,
+			BuffType::WEBBED,
+			0,
+			2,
+			BuffApplication::ADD,
+			at_round(0));
+
+		buffs.update_creature_buffs(creature, at_round(2));
+
+		EXPECT_FALSE(buffs.has_buff(creature, BuffType::WEBBED))
+			<< "the web should have run out";
+		EXPECT_TRUE(creature.has_state(ActorState::IS_HELD))
+			<< "the web ending freed a creature the hold still holds";
 	}
 
-} // namespace
+	// The hold runs out first; the web still holds.
+	TEST_F(BuffStateTest, AWebOutlastsAnExpiredHold)
+	{
+		buffs.add_buff(
+			creature,
+			BuffType::WEBBED,
+			0,
+			10,
+			BuffApplication::ADD,
+			at_round(0));
+		buffs.add_buff(
+			creature,
+			BuffType::HOLD_PERSON,
+			0,
+			2,
+			BuffApplication::ADD,
+			at_round(0));
 
-class BuffStateTest : public ::testing::Test
-{
-protected:
-	BuffSystem buffs{};
-	Creature creature{
-		Vector2D{ 0, 0 },
-		ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK },
-	};
-};
+		buffs.update_creature_buffs(creature, at_round(2));
 
-// The web runs out first; the hold still holds.
-TEST_F(BuffStateTest, AHoldOutlastsAnExpiredWeb)
-{
-	buffs.add_buff(
-		creature,
-		BuffType::HOLD_PERSON,
-		0,
-		10,
-		BuffApplication::ADD,
-		at_round(0));
-	buffs.add_buff(
-		creature,
-		BuffType::WEBBED,
-		0,
-		2,
-		BuffApplication::ADD,
-		at_round(0));
+		EXPECT_FALSE(buffs.has_buff(creature, BuffType::HOLD_PERSON))
+			<< "the hold should have run out";
+		EXPECT_TRUE(creature.has_state(ActorState::IS_HELD))
+			<< "the hold ending freed a creature the web still holds";
+	}
 
-	buffs.update_creature_buffs(creature, at_round(2));
+	// Tearing the web away leaves the hold in force.
+	TEST_F(BuffStateTest, RemovingTheWebLeavesAHeldCreatureHeld)
+	{
+		buffs.add_buff(
+			creature,
+			BuffType::HOLD_PERSON,
+			0,
+			10,
+			BuffApplication::ADD,
+			at_round(0));
+		buffs.add_buff(
+			creature,
+			BuffType::WEBBED,
+			0,
+			10,
+			BuffApplication::ADD,
+			at_round(0));
 
-	EXPECT_FALSE(buffs.has_buff(creature, BuffType::WEBBED))
-		<< "the web should have run out";
-	EXPECT_TRUE(creature.has_state(ActorState::IS_HELD))
-		<< "the web ending freed a creature the hold still holds";
-}
+		buffs.remove_buff(creature, BuffType::WEBBED);
 
-// The hold runs out first; the web still holds.
-TEST_F(BuffStateTest, AWebOutlastsAnExpiredHold)
-{
-	buffs.add_buff(
-		creature,
-		BuffType::WEBBED,
-		0,
-		10,
-		BuffApplication::ADD,
-		at_round(0));
-	buffs.add_buff(
-		creature,
-		BuffType::HOLD_PERSON,
-		0,
-		2,
-		BuffApplication::ADD,
-		at_round(0));
+		EXPECT_TRUE(creature.has_state(ActorState::IS_HELD))
+			<< "removing the web freed a creature the hold still holds";
+	}
 
-	buffs.update_creature_buffs(creature, at_round(2));
+	// When the last grant ends, the creature is free: with both, and with a web
+	// alone.
+	TEST_F(BuffStateTest, TheLastHoldEndingFreesTheCreature)
+	{
+		buffs.add_buff(
+			creature,
+			BuffType::HOLD_PERSON,
+			0,
+			10,
+			BuffApplication::ADD,
+			at_round(0));
+		buffs.add_buff(
+			creature,
+			BuffType::WEBBED,
+			0,
+			2,
+			BuffApplication::ADD,
+			at_round(0));
+		buffs.update_creature_buffs(creature, at_round(10));
+		EXPECT_FALSE(creature.has_state(ActorState::IS_HELD))
+			<< "held after both grants ran out";
 
-	EXPECT_FALSE(buffs.has_buff(creature, BuffType::HOLD_PERSON))
-		<< "the hold should have run out";
-	EXPECT_TRUE(creature.has_state(ActorState::IS_HELD))
-		<< "the hold ending freed a creature the web still holds";
-}
+		Creature webbed{
+			Vector2D{ 1, 0 },
+			ActorData{ TileRef{}, "kobold", ColorPairId::WHITE_BLACK },
+		};
+		buffs.add_buff(
+			webbed,
+			BuffType::WEBBED,
+			0,
+			2,
+			BuffApplication::ADD,
+			at_round(0));
+		EXPECT_TRUE(webbed.has_state(ActorState::IS_HELD))
+			<< "a web holds from the moment it is cast";
+		buffs.update_creature_buffs(webbed, at_round(2));
+		EXPECT_FALSE(webbed.has_state(ActorState::IS_HELD))
+			<< "held after the only web ran out";
+	}
 
-// Tearing the web away leaves the hold in force.
-TEST_F(BuffStateTest, RemovingTheWebLeavesAHeldCreatureHeld)
-{
-	buffs.add_buff(
-		creature,
-		BuffType::HOLD_PERSON,
-		0,
-		10,
-		BuffApplication::ADD,
-		at_round(0));
-	buffs.add_buff(
-		creature,
-		BuffType::WEBBED,
-		0,
-		10,
-		BuffApplication::ADD,
-		at_round(0));
+	// A buff written straight into activeBuffs, as a load does, imposes its
+	// state at the creature's first update.
+	TEST_F(BuffStateTest, ALoadedBuffImposesItsStateAtTheFirstUpdate)
+	{
+		Buff loaded{};
+		loaded.type = BuffType::HOLD_PERSON;
+		loaded.expiryTime = at_round(10);
+		creature.activeBuffs.push_back(loaded);
+		ASSERT_FALSE(creature.has_state(ActorState::IS_HELD));
 
-	buffs.remove_buff(creature, BuffType::WEBBED);
+		buffs.update_creature_buffs(creature, at_round(1));
 
-	EXPECT_TRUE(creature.has_state(ActorState::IS_HELD))
-		<< "removing the web freed a creature the hold still holds";
-}
+		EXPECT_TRUE(creature.has_state(ActorState::IS_HELD))
+			<< "a loaded hold was not imposed by the first update";
+	}
 
-// When the last grant ends, the creature is free: with both, and with a web alone.
-TEST_F(BuffStateTest, TheLastHoldEndingFreesTheCreature)
-{
-	buffs.add_buff(
-		creature,
-		BuffType::HOLD_PERSON,
-		0,
-		10,
-		BuffApplication::ADD,
-		at_round(0));
-	buffs.add_buff(
-		creature,
-		BuffType::WEBBED,
-		0,
-		2,
-		BuffApplication::ADD,
-		at_round(0));
-	buffs.update_creature_buffs(creature, at_round(10));
-	EXPECT_FALSE(creature.has_state(ActorState::IS_HELD))
-		<< "held after both grants ran out";
+	// A state is held once however many updates run, so a creature's list does
+	// not grow.
+	TEST_F(BuffStateTest, AStateIsHeldOnceAcrossUpdates)
+	{
+		buffs.add_buff(
+			creature,
+			BuffType::HOLD_PERSON,
+			0,
+			10,
+			BuffApplication::ADD,
+			at_round(0));
+		buffs.add_buff(
+			creature,
+			BuffType::WEBBED,
+			0,
+			10,
+			BuffApplication::ADD,
+			at_round(0));
 
-	Creature webbed{
-		Vector2D{ 1, 0 },
-		ActorData{ TileRef{}, "kobold", ColorPairId::WHITE_BLACK },
-	};
-	buffs.add_buff(
-		webbed,
-		BuffType::WEBBED,
-		0,
-		2,
-		BuffApplication::ADD,
-		at_round(0));
-	EXPECT_TRUE(webbed.has_state(ActorState::IS_HELD))
-		<< "a web holds from the moment it is cast";
-	buffs.update_creature_buffs(webbed, at_round(2));
-	EXPECT_FALSE(webbed.has_state(ActorState::IS_HELD))
-		<< "held after the only web ran out";
-}
+		buffs.update_creature_buffs(creature, at_round(1));
+		buffs.update_creature_buffs(creature, at_round(2));
+		buffs.update_creature_buffs(creature, at_round(3));
 
-// A buff written straight into activeBuffs, as a load does, imposes its state at the
-// creature's first update.
-TEST_F(BuffStateTest, ALoadedBuffImposesItsStateAtTheFirstUpdate)
-{
-	Buff loaded{};
-	loaded.type = BuffType::HOLD_PERSON;
-	loaded.expiryTime = at_round(10);
-	creature.activeBuffs.push_back(loaded);
-	ASSERT_FALSE(creature.has_state(ActorState::IS_HELD));
+		EXPECT_EQ(std::ranges::count(creature.states, ActorState::IS_HELD), 1);
+	}
 
-	buffs.update_creature_buffs(creature, at_round(1));
+	// Removing the only grant frees the creature at once, without waiting for
+	// an update.
+	TEST_F(BuffStateTest, RemovingTheOnlyWebFreesTheCreature)
+	{
+		buffs.add_buff(
+			creature,
+			BuffType::WEBBED,
+			0,
+			10,
+			BuffApplication::ADD,
+			at_round(0));
 
-	EXPECT_TRUE(creature.has_state(ActorState::IS_HELD))
-		<< "a loaded hold was not imposed by the first update";
-}
+		buffs.remove_buff(creature, BuffType::WEBBED);
 
-// A state is held once however many updates run, so a creature's list does not grow.
-TEST_F(BuffStateTest, AStateIsHeldOnceAcrossUpdates)
-{
-	buffs.add_buff(
-		creature,
-		BuffType::HOLD_PERSON,
-		0,
-		10,
-		BuffApplication::ADD,
-		at_round(0));
-	buffs.add_buff(
-		creature,
-		BuffType::WEBBED,
-		0,
-		10,
-		BuffApplication::ADD,
-		at_round(0));
+		EXPECT_FALSE(creature.has_state(ActorState::IS_HELD))
+			<< "held by a web that was removed";
+	}
 
-	buffs.update_creature_buffs(creature, at_round(1));
-	buffs.update_creature_buffs(creature, at_round(2));
-	buffs.update_creature_buffs(creature, at_round(3));
+	// A creature with the parts a save writes, so it can be saved and loaded.
+	static void give_save_parts(Creature& subject)
+	{
+		subject.experienceReward = std::make_unique<ExperienceReward>(0);
+		subject.armorClass = std::make_unique<ArmorClass>(10);
+		subject.healthPool = std::make_unique<HealthPool>(10);
+	}
 
-	EXPECT_EQ(std::ranges::count(creature.states, ActorState::IS_HELD), 1);
-}
+	// Whether a saved record's "states" array holds the given state.
+	static bool record_holds_state(const json& record, ActorState state)
+	{
+		const json& states = record.at("states");
+		return std::ranges::find(states, json(state)) != states.end();
+	}
 
-// Removing the only grant frees the creature at once, without waiting for an update.
-TEST_F(BuffStateTest, RemovingTheOnlyWebFreesTheCreature)
-{
-	buffs.add_buff(
-		creature,
-		BuffType::WEBBED,
-		0,
-		10,
-		BuffApplication::ADD,
-		at_round(0));
+	// The buffs are the input and the states are derived from them, so a save
+	// holds the buffs and no buff-imposed state.
+	TEST_F(BuffStateTest, ASaveHoldsTheBuffAndNotTheStateItImposes)
+	{
+		give_save_parts(creature);
+		buffs.add_buff(
+			creature,
+			BuffType::HOLD_PERSON,
+			0,
+			10,
+			BuffApplication::ADD,
+			at_round(0));
+		ASSERT_TRUE(creature.has_state(ActorState::IS_HELD));
 
-	buffs.remove_buff(creature, BuffType::WEBBED);
+		json record{};
+		creature.save(record);
 
-	EXPECT_FALSE(creature.has_state(ActorState::IS_HELD))
-		<< "held by a web that was removed";
-}
+		EXPECT_FALSE(record_holds_state(record, ActorState::IS_HELD))
+			<< "the save stores a state its own buffs determine";
+		EXPECT_EQ(record.at("activeBuffs").size(), 1u)
+			<< "the hold itself was not saved";
+	}
 
-// A creature with the parts a save writes, so it can be saved and loaded.
-static void give_save_parts(Creature& subject)
-{
-	subject.experienceReward = std::make_unique<ExperienceReward>(0);
-	subject.armorClass = std::make_unique<ArmorClass>(10);
-	subject.healthPool = std::make_unique<HealthPool>(10);
-}
+	// The load derives the state from the buff, so a creature saved while held
+	// is held the moment it is loaded - read here before any update or tick
+	// runs.
+	TEST_F(BuffStateTest, ACreatureSavedHeldIsHeldTheMomentItLoads)
+	{
+		give_save_parts(creature);
+		buffs.add_buff(
+			creature,
+			BuffType::HOLD_PERSON,
+			0,
+			10,
+			BuffApplication::ADD,
+			at_round(0));
+		json record{};
+		creature.save(record);
+		// A record whose states say nothing, so only the buff can make it held.
+		record["states"] = json::array();
 
-// Whether a saved record's "states" array holds the given state.
-static bool record_holds_state(const json& record, ActorState state)
-{
-	const json& states = record.at("states");
-	return std::ranges::find(states, json(state)) != states.end();
-}
+		Creature loaded{
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK },
+		};
+		loaded.load(record);
 
-// The buffs are the input and the states are derived from them, so a save holds the
-// buffs and no buff-imposed state.
-TEST_F(BuffStateTest, ASaveHoldsTheBuffAndNotTheStateItImposes)
-{
-	give_save_parts(creature);
-	buffs.add_buff(
-		creature,
-		BuffType::HOLD_PERSON,
-		0,
-		10,
-		BuffApplication::ADD,
-		at_round(0));
-	ASSERT_TRUE(creature.has_state(ActorState::IS_HELD));
+		EXPECT_TRUE(loaded.has_state(ActorState::IS_HELD))
+			<< "held only after an update, not at load";
+	}
 
-	json record{};
-	creature.save(record);
+	// The same for the player, through Player::load: a player saved invisible
+	// is invisible the moment the game is loaded.
+	TEST_F(BuffStateTest, APlayerSavedInvisibleIsInvisibleTheMomentItLoads)
+	{
+		Player saved{ Vector2D{ 0, 0 } };
+		give_save_parts(saved);
+		saved.attacker = std::make_unique<PlayerAttacker>(saved);
+		buffs.add_buff(
+			saved,
+			BuffType::INVISIBILITY,
+			0,
+			10,
+			BuffApplication::ADD,
+			at_round(0));
+		json record{};
+		saved.save(record);
+		record["states"] = json::array();
 
-	EXPECT_FALSE(record_holds_state(record, ActorState::IS_HELD))
-		<< "the save stores a state its own buffs determine";
-	EXPECT_EQ(record.at("activeBuffs").size(), 1u)
-		<< "the hold itself was not saved";
-}
+		Player loaded{ Vector2D{ 0, 0 } };
+		loaded.load(record);
 
-// The load derives the state from the buff, so a creature saved while held is held the
-// moment it is loaded - read here before any update or tick runs.
-TEST_F(BuffStateTest, ACreatureSavedHeldIsHeldTheMomentItLoads)
-{
-	give_save_parts(creature);
-	buffs.add_buff(
-		creature,
-		BuffType::HOLD_PERSON,
-		0,
-		10,
-		BuffApplication::ADD,
-		at_round(0));
-	json record{};
-	creature.save(record);
-	// A record whose states say nothing, so only the buff can make it held.
-	record["states"] = json::array();
+		EXPECT_TRUE(loaded.is_invisible())
+			<< "a player saved invisible loaded visible";
+	}
 
-	Creature loaded{
-		Vector2D{ 0, 0 },
-		ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK },
-	};
-	loaded.load(record);
+	// A state no buff imposes is the creature's own and is still saved: only
+	// buff-imposed states are dropped.
+	TEST_F(BuffStateTest, AStateNoBuffImposesIsStillSaved)
+	{
+		give_save_parts(creature);
+		creature.add_state(ActorState::IS_FLEEING);
+		json record{};
+		creature.save(record);
 
-	EXPECT_TRUE(loaded.has_state(ActorState::IS_HELD))
-		<< "held only after an update, not at load";
-}
+		Creature loaded{
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK },
+		};
+		loaded.load(record);
 
-// The same for the player, through Player::load: a player saved invisible is invisible
-// the moment the game is loaded.
-TEST_F(BuffStateTest, APlayerSavedInvisibleIsInvisibleTheMomentItLoads)
-{
-	Player saved{ Vector2D{ 0, 0 } };
-	give_save_parts(saved);
-	saved.attacker = std::make_unique<PlayerAttacker>(saved);
-	buffs.add_buff(
-		saved,
-		BuffType::INVISIBILITY,
-		0,
-		10,
-		BuffApplication::ADD,
-		at_round(0));
-	json record{};
-	saved.save(record);
-	record["states"] = json::array();
+		EXPECT_TRUE(loaded.has_state(ActorState::IS_FLEEING))
+			<< "a fleeing creature stopped fleeing across a save";
+	}
 
-	Player loaded{ Vector2D{ 0, 0 } };
-	loaded.load(record);
+	// Whether a buff sets the stat or adds to it is saved by name.
+	TEST_F(BuffStateTest, ABuffSavesWhetherItSetsOrAddsByName)
+	{
+		give_save_parts(creature);
+		buffs.add_buff(
+			creature,
+			BuffType::STRENGTH,
+			19,
+			10,
+			BuffApplication::SET,
+			at_round(0));
+		buffs.add_buff(
+			creature,
+			BuffType::DEXTERITY,
+			1,
+			10,
+			BuffApplication::ADD,
+			at_round(0));
+		json record{};
+		creature.save(record);
 
-	EXPECT_TRUE(loaded.is_invisible())
-		<< "a player saved invisible loaded visible";
-}
+		const json& saved = record.at("activeBuffs");
+		ASSERT_EQ(saved.size(), 2u);
+		ASSERT_TRUE(saved[0].contains("application"))
+			<< "the Strength buff saved no application";
+		ASSERT_TRUE(saved[1].contains("application"))
+			<< "the Dexterity buff saved no application";
+		EXPECT_EQ(saved[0]["application"], "set");
+		EXPECT_EQ(saved[1]["application"], "add");
+	}
 
-// A state no buff imposes is the creature's own and is still saved: only buff-imposed
-// states are dropped.
-TEST_F(BuffStateTest, AStateNoBuffImposesIsStillSaved)
-{
-	give_save_parts(creature);
-	creature.add_state(ActorState::IS_FLEEING);
-	json record{};
-	creature.save(record);
+	// A buff that sets Strength still sets it after a load: 19 over the
+	// creature's own 10, where an addition would make 29.
+	TEST_F(BuffStateTest, ABuffThatSetsStillSetsAfterALoad)
+	{
+		give_save_parts(creature);
+		creature.set_strength(10);
+		buffs.add_buff(
+			creature,
+			BuffType::STRENGTH,
+			19,
+			10,
+			BuffApplication::SET,
+			at_round(0));
+		json record{};
+		creature.save(record);
 
-	Creature loaded{
-		Vector2D{ 0, 0 },
-		ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK },
-	};
-	loaded.load(record);
+		Creature loaded{
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK },
+		};
+		loaded.load(record);
 
-	EXPECT_TRUE(loaded.has_state(ActorState::IS_FLEEING))
-		<< "a fleeing creature stopped fleeing across a save";
-}
+		EXPECT_EQ(loaded.get_strength(), 19);
+	}
 
-// Whether a buff sets the stat or adds to it is saved by name.
-TEST_F(BuffStateTest, ABuffSavesWhetherItSetsOrAddsByName)
-{
-	give_save_parts(creature);
-	buffs.add_buff(
-		creature,
-		BuffType::STRENGTH,
-		19,
-		10,
-		BuffApplication::SET,
-		at_round(0));
-	buffs.add_buff(
-		creature,
-		BuffType::DEXTERITY,
-		1,
-		10,
-		BuffApplication::ADD,
-		at_round(0));
-	json record{};
-	creature.save(record);
+	// And one that adds still adds: 10 and 1 is 11, where setting to 1 would
+	// leave 10.
+	TEST_F(BuffStateTest, ABuffThatAddsStillAddsAfterALoad)
+	{
+		give_save_parts(creature);
+		creature.set_strength(10);
+		buffs.add_buff(
+			creature,
+			BuffType::STRENGTH,
+			1,
+			10,
+			BuffApplication::ADD,
+			at_round(0));
+		json record{};
+		creature.save(record);
 
-	const json& saved = record.at("activeBuffs");
-	ASSERT_EQ(saved.size(), 2u);
-	ASSERT_TRUE(saved[0].contains("application"))
-		<< "the Strength buff saved no application";
-	ASSERT_TRUE(saved[1].contains("application"))
-		<< "the Dexterity buff saved no application";
-	EXPECT_EQ(saved[0]["application"], "set");
-	EXPECT_EQ(saved[1]["application"], "add");
-}
+		Creature loaded{
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK },
+		};
+		loaded.load(record);
 
-// A buff that sets Strength still sets it after a load: 19 over the creature's own 10,
-// where an addition would make 29.
-TEST_F(BuffStateTest, ABuffThatSetsStillSetsAfterALoad)
-{
-	give_save_parts(creature);
-	creature.set_strength(10);
-	buffs.add_buff(
-		creature,
-		BuffType::STRENGTH,
-		19,
-		10,
-		BuffApplication::SET,
-		at_round(0));
-	json record{};
-	creature.save(record);
+		EXPECT_EQ(loaded.get_strength(), 11);
+	}
 
-	Creature loaded{
-		Vector2D{ 0, 0 },
-		ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK },
-	};
-	loaded.load(record);
+	// A buff record that does not say how it applies is refused rather than
+	// defaulted.
+	TEST_F(BuffStateTest, ABuffRecordWithoutItsApplicationIsRefused)
+	{
+		give_save_parts(creature);
+		buffs.add_buff(
+			creature,
+			BuffType::STRENGTH,
+			19,
+			10,
+			BuffApplication::SET,
+			at_round(0));
+		json record{};
+		creature.save(record);
+		record.at("activeBuffs")[0].erase("application");
 
-	EXPECT_EQ(loaded.get_strength(), 19);
-}
+		Creature loaded{
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK },
+		};
+		EXPECT_ANY_THROW(loaded.load(record));
+	}
 
-// And one that adds still adds: 10 and 1 is 11, where setting to 1 would leave 10.
-TEST_F(BuffStateTest, ABuffThatAddsStillAddsAfterALoad)
-{
-	give_save_parts(creature);
-	creature.set_strength(10);
-	buffs.add_buff(
-		creature,
-		BuffType::STRENGTH,
-		1,
-		10,
-		BuffApplication::ADD,
-		at_round(0));
-	json record{};
-	creature.save(record);
+	// So is one naming an application this build does not know.
+	TEST_F(BuffStateTest, ABuffRecordWithAnUnknownApplicationIsRefused)
+	{
+		give_save_parts(creature);
+		buffs.add_buff(
+			creature,
+			BuffType::STRENGTH,
+			19,
+			10,
+			BuffApplication::SET,
+			at_round(0));
+		json record{};
+		creature.save(record);
+		record.at("activeBuffs")[0]["application"] = "sideways";
 
-	Creature loaded{
-		Vector2D{ 0, 0 },
-		ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK },
-	};
-	loaded.load(record);
+		Creature loaded{
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK },
+		};
+		EXPECT_ANY_THROW(loaded.load(record));
+	}
 
-	EXPECT_EQ(loaded.get_strength(), 11);
-}
+	// A stronger casting over a running one brings its own application: a set
+	// 19 over an added 1 sets Strength to 19, where keeping the addition would
+	// make 29.
+	TEST_F(BuffStateTest, AStrongerCastingReplacesTheApplicationOfTheOneRunning)
+	{
+		creature.set_strength(10);
+		buffs.add_buff(
+			creature,
+			BuffType::STRENGTH,
+			1,
+			10,
+			BuffApplication::ADD,
+			at_round(0));
+		buffs.add_buff(
+			creature,
+			BuffType::STRENGTH,
+			19,
+			10,
+			BuffApplication::SET,
+			at_round(0));
 
-// A buff record that does not say how it applies is refused rather than defaulted.
-TEST_F(BuffStateTest, ABuffRecordWithoutItsApplicationIsRefused)
-{
-	give_save_parts(creature);
-	buffs.add_buff(
-		creature,
-		BuffType::STRENGTH,
-		19,
-		10,
-		BuffApplication::SET,
-		at_round(0));
-	json record{};
-	creature.save(record);
-	record.at("activeBuffs")[0].erase("application");
-
-	Creature loaded{
-		Vector2D{ 0, 0 },
-		ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK },
-	};
-	EXPECT_ANY_THROW(loaded.load(record));
-}
-
-// So is one naming an application this build does not know.
-TEST_F(BuffStateTest, ABuffRecordWithAnUnknownApplicationIsRefused)
-{
-	give_save_parts(creature);
-	buffs.add_buff(
-		creature,
-		BuffType::STRENGTH,
-		19,
-		10,
-		BuffApplication::SET,
-		at_round(0));
-	json record{};
-	creature.save(record);
-	record.at("activeBuffs")[0]["application"] = "sideways";
-
-	Creature loaded{
-		Vector2D{ 0, 0 },
-		ActorData{ TileRef{}, "loaded", ColorPairId::WHITE_BLACK },
-	};
-	EXPECT_ANY_THROW(loaded.load(record));
-}
-
-// A stronger casting over a running one brings its own application: a set 19 over an
-// added 1 sets Strength to 19, where keeping the addition would make 29.
-TEST_F(BuffStateTest, AStrongerCastingReplacesTheApplicationOfTheOneRunning)
-{
-	creature.set_strength(10);
-	buffs.add_buff(
-		creature,
-		BuffType::STRENGTH,
-		1,
-		10,
-		BuffApplication::ADD,
-		at_round(0));
-	buffs.add_buff(
-		creature,
-		BuffType::STRENGTH,
-		19,
-		10,
-		BuffApplication::SET,
-		at_round(0));
-
-	EXPECT_EQ(creature.get_strength(), 19);
-}
+		EXPECT_EQ(creature.get_strength(), 19);
+	}
 
 } // namespace CppRL

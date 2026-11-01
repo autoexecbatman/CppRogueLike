@@ -38,174 +38,180 @@
 namespace CppRL
 {
 
-class TrapSerializationTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	class TrapSerializationTest : public ::testing::Test
 	{
-		ctx = mock.to_game_context();
-		finder.healthPool = std::make_unique<HealthPool>(20);
-		// A dwarf thief can find every kind of trap. Dexterity 13 leaves its Find/Remove
-		// Traps at the base, the race and the points.
-		finder.set_creature_class(CreatureClass::ROGUE);
-		finder.set_dexterity(13);
-		finder.lifespan->race = PlayerRaceState::DWARF;
-		finder.set_creature_level(1);
-		finder.thiefSkillPoints.at(
-			thief_skill_index(ThiefSkill::FIND_REMOVE_TRAPS)) = 40;
-	}
-
-	std::unique_ptr<Trap> built(Vector2D position, TrapType type)
-	{
-		return std::make_unique<Trap>(position, type, *ctx.tileConfig);
-	}
-
-	// Finds the trap the way the game does, rather than through a test-only setter: a
-	// search rolling 1, which finds a pit on 1d6 and a small trap on d100.
-	// It answers what the search said; the caller asserts FOUND, so a search
-	// that did not roll stops the test before its 1 reaches another die.
-	[[nodiscard]] TrapSearchResult find(Trap& trap)
-	{
-		mock.dice.set_next_roll(1);
-		return trap.search(finder, ctx);
-	}
-
-	MockGameContext mock{};
-	GameContext ctx{};
-	Player finder{ Vector2D{ 0, 0 } };
-};
-
-// The gap itself: every trap on the level comes back, at the tile it was on.
-TEST_F(TrapSerializationTest, EveryTrapComesBackWhereItWas)
-{
-	std::vector<std::unique_ptr<Trap>> traps;
-	traps.push_back(built(Vector2D{ 4, 3 }, TrapType::PIT));
-	traps.push_back(built(Vector2D{ 9, 7 }, TrapType::DART));
-
-	json level;
-	save_traps(traps, level);
-
-	std::vector<std::unique_ptr<Trap>> restored;
-	load_traps(level, restored, *ctx.tileConfig);
-
-	ASSERT_EQ(restored.size(), 2u)
-		<< "the level came back with a different number of traps";
-	EXPECT_EQ(restored.at(0)->position, (Vector2D{ 4, 3 }));
-	EXPECT_EQ(restored.at(1)->position, (Vector2D{ 9, 7 }));
-	EXPECT_EQ(restored.at(0)->get_type(), TrapType::PIT);
-	EXPECT_EQ(restored.at(1)->get_type(), TrapType::DART);
-}
-
-// What the player has learned survives: a trap they have spotted is still spotted, and
-// one they have not is still hidden. Reloading must not re-hide a found trap.
-TEST_F(TrapSerializationTest, WhatThePlayerHasFoundStaysFound)
-{
-	std::vector<std::unique_ptr<Trap>> traps;
-	traps.push_back(built(Vector2D{ 2, 2 }, TrapType::ARROW));
-	traps.push_back(built(Vector2D{ 5, 5 }, TrapType::PIT));
-	ASSERT_EQ(find(*traps.at(0)), TrapSearchResult::FOUND);
-
-	json level;
-	save_traps(traps, level);
-
-	std::vector<std::unique_ptr<Trap>> restored;
-	load_traps(level, restored, *ctx.tileConfig);
-
-	ASSERT_EQ(restored.size(), 2u);
-	EXPECT_EQ(restored.at(0)->get_state(), TrapState::DETECTED)
-		<< "a found trap was hidden again";
-	EXPECT_EQ(restored.at(1)->get_state(), TrapState::HIDDEN)
-		<< "an unfound trap was revealed";
-}
-
-// Visibility follows from the state rather than being stored, so a restored trap is
-// invisible exactly when it is still hidden. Storing it would be a second answer to a
-// question the state already settles.
-TEST_F(TrapSerializationTest, VisibilityIsDerivedFromTheStateOnLoad)
-{
-	std::vector<std::unique_ptr<Trap>> traps;
-	traps.push_back(built(Vector2D{ 2, 2 }, TrapType::ARROW));
-	traps.push_back(built(Vector2D{ 5, 5 }, TrapType::PIT));
-	ASSERT_EQ(find(*traps.at(0)), TrapSearchResult::FOUND);
-
-	json level;
-	save_traps(traps, level);
-
-	std::vector<std::unique_ptr<Trap>> restored;
-	load_traps(level, restored, *ctx.tileConfig);
-
-	ASSERT_EQ(restored.size(), 2u);
-	EXPECT_FALSE(restored.at(0)->has_state(ActorState::IS_INVISIBLE))
-		<< "a found trap came back invisible";
-	EXPECT_TRUE(restored.at(1)->has_state(ActorState::IS_INVISIBLE))
-		<< "a hidden trap came back visible";
-}
-
-// A search missed at this level is not handed back by reloading: the trap remembers the
-// level it was searched at, and a certain find after the load must not be reached.
-TEST_F(TrapSerializationTest, AMissedSearchIsNotHandedBackByReloading)
-{
-	std::vector<std::unique_ptr<Trap>> traps;
-	traps.push_back(built(Vector2D{ 2, 2 }, TrapType::DART));
-	mock.dice.set_next_roll(100);
-	ASSERT_EQ(traps.at(0)->search(finder, ctx), TrapSearchResult::MISSED);
-
-	json level;
-	save_traps(traps, level);
-	std::vector<std::unique_ptr<Trap>> restored;
-	load_traps(level, restored, *ctx.tileConfig);
-
-	ASSERT_EQ(restored.size(), 1u);
-	mock.dice.set_next_roll(1);
-	EXPECT_EQ(
-		restored.at(0)->search(finder, ctx),
-		TrapSearchResult::ALREADY_SEARCHED);
-	EXPECT_EQ(restored.at(0)->get_state(), TrapState::HIDDEN);
-}
-
-// A mid-session load must not leave the abandoned level's traps on the new map, which
-// is the half of the gap a round trip on an empty container cannot see.
-TEST_F(TrapSerializationTest, LoadingReplacesTheTrapsAlreadyThere)
-{
-	json emptyLevel;
-	save_traps({}, emptyLevel);
-
-	std::vector<std::unique_ptr<Trap>> stale;
-	stale.push_back(built(Vector2D{ 1, 1 }, TrapType::PIT));
-
-	load_traps(emptyLevel, stale, *ctx.tileConfig);
-
-	EXPECT_TRUE(stale.empty())
-		<< "the previous level's traps survived the load";
-}
-
-// save_traps always writes "traps" as an array, so a document without it, or with
-// something else there, is refused rather than loaded as a level with no traps.
-TEST_F(TrapSerializationTest, ADocumentWithoutATrapListIsRefused)
-{
-	std::vector<std::unique_ptr<Trap>> level;
-	const auto refusal_of = [&](const json& record)
-	{
-		try
+	protected:
+		void SetUp() override
 		{
-			load_traps(record, level, *ctx.tileConfig);
+			ctx = mock.to_game_context();
+			finder.healthPool = std::make_unique<HealthPool>(20);
+			// A dwarf thief can find every kind of trap. Dexterity 13 leaves
+			// its Find/Remove Traps at the base, the race and the points.
+			finder.set_creature_class(CreatureClass::ROGUE);
+			finder.set_dexterity(13);
+			finder.lifespan->race = PlayerRaceState::DWARF;
+			finder.set_creature_level(1);
+			finder.thiefSkillPoints.at(
+				thief_skill_index(ThiefSkill::FIND_REMOVE_TRAPS)) = 40;
 		}
-		catch (const std::exception& refusal)
+
+		std::unique_ptr<Trap> built(Vector2D position, TrapType type)
 		{
-			return std::string(refusal.what());
+			return std::make_unique<Trap>(position, type, *ctx.tileConfig);
 		}
-		ADD_FAILURE() << "the traps were not refused";
-		return std::string{};
+
+		// Finds the trap the way the game does, rather than through a test-only
+		// setter: a search rolling 1, which finds a pit on 1d6 and a small trap
+		// on d100. It answers what the search said; the caller asserts FOUND,
+		// so a search that did not roll stops the test before its 1 reaches
+		// another die.
+		[[nodiscard]] TrapSearchResult find(Trap& trap)
+		{
+			mock.dice.set_next_roll(1);
+			return trap.search(finder, ctx);
+		}
+
+		MockGameContext mock{};
+		GameContext ctx{};
+		Player finder{ Vector2D{ 0, 0 } };
 	};
 
-	const std::string missing = refusal_of(json::object());
-	EXPECT_NE(missing.find("traps"), std::string::npos) << missing;
+	// The gap itself: every trap on the level comes back, at the tile it was
+	// on.
+	TEST_F(TrapSerializationTest, EveryTrapComesBackWhereItWas)
+	{
+		std::vector<std::unique_ptr<Trap>> traps;
+		traps.push_back(built(Vector2D{ 4, 3 }, TrapType::PIT));
+		traps.push_back(built(Vector2D{ 9, 7 }, TrapType::DART));
 
-	const std::string notAList =
-		refusal_of(json{ { "traps", json::object() } });
-	EXPECT_NE(notAList.find("traps"), std::string::npos) << notAList;
-}
+		json level;
+		save_traps(traps, level);
 
-// end of file: TrapSerializationTest.cpp
+		std::vector<std::unique_ptr<Trap>> restored;
+		load_traps(level, restored, *ctx.tileConfig);
+
+		ASSERT_EQ(restored.size(), 2u)
+			<< "the level came back with a different number of traps";
+		EXPECT_EQ(restored.at(0)->position, (Vector2D{ 4, 3 }));
+		EXPECT_EQ(restored.at(1)->position, (Vector2D{ 9, 7 }));
+		EXPECT_EQ(restored.at(0)->get_type(), TrapType::PIT);
+		EXPECT_EQ(restored.at(1)->get_type(), TrapType::DART);
+	}
+
+	// What the player has learned survives: a trap they have spotted is still
+	// spotted, and one they have not is still hidden. Reloading must not
+	// re-hide a found trap.
+	TEST_F(TrapSerializationTest, WhatThePlayerHasFoundStaysFound)
+	{
+		std::vector<std::unique_ptr<Trap>> traps;
+		traps.push_back(built(Vector2D{ 2, 2 }, TrapType::ARROW));
+		traps.push_back(built(Vector2D{ 5, 5 }, TrapType::PIT));
+		ASSERT_EQ(find(*traps.at(0)), TrapSearchResult::FOUND);
+
+		json level;
+		save_traps(traps, level);
+
+		std::vector<std::unique_ptr<Trap>> restored;
+		load_traps(level, restored, *ctx.tileConfig);
+
+		ASSERT_EQ(restored.size(), 2u);
+		EXPECT_EQ(restored.at(0)->get_state(), TrapState::DETECTED)
+			<< "a found trap was hidden again";
+		EXPECT_EQ(restored.at(1)->get_state(), TrapState::HIDDEN)
+			<< "an unfound trap was revealed";
+	}
+
+	// Visibility follows from the state rather than being stored, so a restored
+	// trap is invisible exactly when it is still hidden. Storing it would be a
+	// second answer to a question the state already settles.
+	TEST_F(TrapSerializationTest, VisibilityIsDerivedFromTheStateOnLoad)
+	{
+		std::vector<std::unique_ptr<Trap>> traps;
+		traps.push_back(built(Vector2D{ 2, 2 }, TrapType::ARROW));
+		traps.push_back(built(Vector2D{ 5, 5 }, TrapType::PIT));
+		ASSERT_EQ(find(*traps.at(0)), TrapSearchResult::FOUND);
+
+		json level;
+		save_traps(traps, level);
+
+		std::vector<std::unique_ptr<Trap>> restored;
+		load_traps(level, restored, *ctx.tileConfig);
+
+		ASSERT_EQ(restored.size(), 2u);
+		EXPECT_FALSE(restored.at(0)->has_state(ActorState::IS_INVISIBLE))
+			<< "a found trap came back invisible";
+		EXPECT_TRUE(restored.at(1)->has_state(ActorState::IS_INVISIBLE))
+			<< "a hidden trap came back visible";
+	}
+
+	// A search missed at this level is not handed back by reloading: the trap
+	// remembers the level it was searched at, and a certain find after the load
+	// must not be reached.
+	TEST_F(TrapSerializationTest, AMissedSearchIsNotHandedBackByReloading)
+	{
+		std::vector<std::unique_ptr<Trap>> traps;
+		traps.push_back(built(Vector2D{ 2, 2 }, TrapType::DART));
+		mock.dice.set_next_roll(100);
+		ASSERT_EQ(traps.at(0)->search(finder, ctx), TrapSearchResult::MISSED);
+
+		json level;
+		save_traps(traps, level);
+		std::vector<std::unique_ptr<Trap>> restored;
+		load_traps(level, restored, *ctx.tileConfig);
+
+		ASSERT_EQ(restored.size(), 1u);
+		mock.dice.set_next_roll(1);
+		EXPECT_EQ(
+			restored.at(0)->search(finder, ctx),
+			TrapSearchResult::ALREADY_SEARCHED);
+		EXPECT_EQ(restored.at(0)->get_state(), TrapState::HIDDEN);
+	}
+
+	// A mid-session load must not leave the abandoned level's traps on the new
+	// map, which is the half of the gap a round trip on an empty container
+	// cannot see.
+	TEST_F(TrapSerializationTest, LoadingReplacesTheTrapsAlreadyThere)
+	{
+		json emptyLevel;
+		save_traps({}, emptyLevel);
+
+		std::vector<std::unique_ptr<Trap>> stale;
+		stale.push_back(built(Vector2D{ 1, 1 }, TrapType::PIT));
+
+		load_traps(emptyLevel, stale, *ctx.tileConfig);
+
+		EXPECT_TRUE(stale.empty())
+			<< "the previous level's traps survived the load";
+	}
+
+	// save_traps always writes "traps" as an array, so a document without it,
+	// or with something else there, is refused rather than loaded as a level
+	// with no traps.
+	TEST_F(TrapSerializationTest, ADocumentWithoutATrapListIsRefused)
+	{
+		std::vector<std::unique_ptr<Trap>> level;
+		const auto refusal_of = [&](const json& record)
+		{
+			try
+			{
+				load_traps(record, level, *ctx.tileConfig);
+			}
+			catch (const std::exception& refusal)
+			{
+				return std::string(refusal.what());
+			}
+			ADD_FAILURE() << "the traps were not refused";
+			return std::string{};
+		};
+
+		const std::string missing = refusal_of(json::object());
+		EXPECT_NE(missing.find("traps"), std::string::npos) << missing;
+
+		const std::string notAList =
+			refusal_of(json{ { "traps", json::object() } });
+		EXPECT_NE(notAList.find("traps"), std::string::npos) << notAList;
+	}
+
+	// end of file: TrapSerializationTest.cpp
 
 } // namespace CppRL

@@ -72,155 +72,407 @@
 namespace CppRL
 {
 
-// ========== Internal helpers ==========
+	// ========== Internal helpers ==========
 
-namespace
-{
-
-	bool consume_item(Item& owner, Creature& wearer)
+	namespace
 	{
-		auto result =
-			InventoryOperations::remove_item(wearer.inventoryData, owner);
-		return result.has_value();
-	}
 
-	// Shared save for stat-boost equipment (Gauntlets, Girdle, JewelryAmulet)
-	template <typename StatBoost>
-	void save_stat_boost(const StatBoost& statBoost, json& output)
-	{
-		output["strBonus"] = statBoost.strBonus;
-		output["dexBonus"] = statBoost.dexBonus;
-		output["conBonus"] = statBoost.conBonus;
-		output["intBonus"] = statBoost.intBonus;
-		output["wisBonus"] = statBoost.wisBonus;
-		output["chaBonus"] = statBoost.chaBonus;
-		output["application"] = encode_buff_application(statBoost.application);
-		output["exceptionalStrength"] = statBoost.exceptionalStrength;
-		// Creature::wears_item_with reads this off any behaviour that has one.
-		output["effect"] = encode_magical_effect(statBoost.effect);
-		output["bonus"] = statBoost.bonus;
-	}
-
-	template <typename StatBoost>
-	void load_stat_boost(StatBoost& statBoost, const json& source)
-	{
-		statBoost.strBonus = source.at("strBonus").get<int>();
-		statBoost.dexBonus = source.at("dexBonus").get<int>();
-		statBoost.conBonus = source.at("conBonus").get<int>();
-		statBoost.intBonus = source.at("intBonus").get<int>();
-		statBoost.wisBonus = source.at("wisBonus").get<int>();
-		statBoost.chaBonus = source.at("chaBonus").get<int>();
-		statBoost.application =
-			parse_buff_application(source.at("application").get<std::string>());
-		statBoost.exceptionalStrength =
-			source.at("exceptionalStrength").get<int>();
-		statBoost.effect =
-			parse_magical_effect(source.at("effect").get<std::string>());
-		statBoost.bonus = source.at("bonus").get<int>();
-	}
-
-	// Shared use() for stat-boost equipment (Gauntlets, Girdle, JewelryAmulet):
-	// puts the item on, or takes it off. What it does to an ability is read
-	// from what is worn (Creature::calculate_effective_stat), never written
-	// here. An item that could not be put on or taken off - a cursed one that
-	// will not come off - uses no turn.
-	//
-	// Example:
-	//   use_stat_boost(EquipmentSlot::GIRDLE, girdle, player, ctx);
-	//   // -> true, worn: Strength 19
-	//   use_stat_boost(EquipmentSlot::GIRDLE, girdle, player, ctx);
-	//   // -> true, removed: Strength as before
-	bool use_stat_boost(
-		EquipmentSlot slot,
-		Item& item,
-		Creature& wearer,
-		GameContext& ctx)
-	{
-		const bool wasEquipped = wearer.is_item_equipped(item.uniqueId);
-		if (!wearer.toggle_equipment(item.uniqueId, slot, ctx))
+		bool consume_item(Item& owner, Creature& wearer)
 		{
+			auto result =
+				InventoryOperations::remove_item(wearer.inventoryData, owner);
+			return result.has_value();
+		}
+
+		// Shared save for stat-boost equipment (Gauntlets, Girdle,
+		// JewelryAmulet)
+		template <typename StatBoost>
+		void save_stat_boost(const StatBoost& statBoost, json& output)
+		{
+			output["strBonus"] = statBoost.strBonus;
+			output["dexBonus"] = statBoost.dexBonus;
+			output["conBonus"] = statBoost.conBonus;
+			output["intBonus"] = statBoost.intBonus;
+			output["wisBonus"] = statBoost.wisBonus;
+			output["chaBonus"] = statBoost.chaBonus;
+			output["application"] =
+				encode_buff_application(statBoost.application);
+			output["exceptionalStrength"] = statBoost.exceptionalStrength;
+			// Creature::wears_item_with reads this off any behaviour that has
+			// one.
+			output["effect"] = encode_magical_effect(statBoost.effect);
+			output["bonus"] = statBoost.bonus;
+		}
+
+		template <typename StatBoost>
+		void load_stat_boost(StatBoost& statBoost, const json& source)
+		{
+			statBoost.strBonus = source.at("strBonus").get<int>();
+			statBoost.dexBonus = source.at("dexBonus").get<int>();
+			statBoost.conBonus = source.at("conBonus").get<int>();
+			statBoost.intBonus = source.at("intBonus").get<int>();
+			statBoost.wisBonus = source.at("wisBonus").get<int>();
+			statBoost.chaBonus = source.at("chaBonus").get<int>();
+			statBoost.application = parse_buff_application(
+				source.at("application").get<std::string>());
+			statBoost.exceptionalStrength =
+				source.at("exceptionalStrength").get<int>();
+			statBoost.effect =
+				parse_magical_effect(source.at("effect").get<std::string>());
+			statBoost.bonus = source.at("bonus").get<int>();
+		}
+
+		// Shared use() for stat-boost equipment (Gauntlets, Girdle,
+		// JewelryAmulet): puts the item on, or takes it off. What it does to an
+		// ability is read from what is worn
+		// (Creature::calculate_effective_stat), never written here. An item
+		// that could not be put on or taken off - a cursed one that will not
+		// come off - uses no turn.
+		//
+		// Example:
+		//   use_stat_boost(EquipmentSlot::GIRDLE, girdle, player, ctx);
+		//   // -> true, worn: Strength 19
+		//   use_stat_boost(EquipmentSlot::GIRDLE, girdle, player, ctx);
+		//   // -> true, removed: Strength as before
+		bool use_stat_boost(
+			EquipmentSlot slot,
+			Item& item,
+			Creature& wearer,
+			GameContext& ctx)
+		{
+			const bool wasEquipped = wearer.is_item_equipped(item.uniqueId);
+			if (!wearer.toggle_equipment(item.uniqueId, slot, ctx))
+			{
+				return false;
+			}
+
+			wearer.update_armor_class(ctx);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				std::format(
+					"You {} the {}.",
+					wasEquipped ? "remove" : "put on",
+					item.get_name()),
+				MessageCompletion::FINISHED);
+			return true;
+		}
+
+		// Shared use() for magical equipment (MagicalHelm, MagicalRing)
+		bool use_magical_equip(
+			MagicalEffect effect,
+			EquipmentSlot slot,
+			Item& item,
+			Creature& wearer,
+			GameContext& ctx)
+		{
+			const bool wasEquipped = wearer.is_item_equipped(item.uniqueId);
+			EquipmentSlot targetSlot = slot;
+
+			// Rings: auto-choose open slot
+			if (slot == EquipmentSlot::RIGHT_RING && !wasEquipped)
+			{
+				if (wearer.is_slot_occupied(EquipmentSlot::RIGHT_RING))
+				{
+					targetSlot = EquipmentSlot::LEFT_RING;
+				}
+			}
+
+			const bool success =
+				wearer.toggle_equipment(item.uniqueId, targetSlot, ctx);
+			if (success)
+			{
+				if (wasEquipped)
+				{
+					// The ring ends only its own invisibility, and not while
+					// another such ring is worn.
+					if (effect == MagicalEffect::INVISIBILITY &&
+						ctx.buffSystem->has_buff(
+							wearer,
+							BuffType::ITEM_INVISIBILITY) &&
+						!wearer.wears_ring_of(MagicalEffect::INVISIBILITY))
+					{
+						ctx.buffSystem->remove_buff(
+							wearer,
+							BuffType::ITEM_INVISIBILITY);
+						ctx.messageSystem->message(
+							ColorPairId::CYAN_BLACK,
+							"Your invisibility fades.",
+							MessageCompletion::FINISHED);
+					}
+					ctx.messageSystem->message(
+						ColorPairId::WHITE_BLACK,
+						"You remove the " + item.get_name() + ".",
+						MessageCompletion::FINISHED);
+				}
+				else
+				{
+					if (effect == MagicalEffect::INVISIBILITY)
+					{
+						ctx.messageSystem->message(
+							ColorPairId::CYAN_BLACK,
+							"The ring pulses with arcane power. Press Shift+C to cast.",
+							MessageCompletion::FINISHED);
+					}
+					ctx.messageSystem->message(
+						ColorPairId::WHITE_BLACK,
+						"You put on the " + item.get_name() + ".",
+						MessageCompletion::FINISHED);
+				}
+
+				if (MagicalEffectUtils::is_protection_effect(effect) ||
+					effect == MagicalEffect::BRILLIANCE)
+				{
+					wearer.update_armor_class(ctx);
+				}
+
+				return true;
+			}
+
+			// Could not be put on or taken off - a cursed item that will not
+			// come off: no turn.
 			return false;
 		}
 
-		wearer.update_armor_class(ctx);
-		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			std::format(
-				"You {} the {}.",
-				wasEquipped ? "remove" : "put on",
-				item.get_name()),
-			MessageCompletion::FINISHED);
-		return true;
+	} // namespace
+
+	// ========== Weapon struct methods ==========
+
+	bool Weapon::validate_dual_wield(
+		const Item* mainHand,
+		const Item* offHand) const
+	{
+		if (!mainHand || !offHand)
+		{
+			return false;
+		}
+		return mainHand->is_weapon() && offHand->is_weapon();
 	}
 
-	// Shared use() for magical equipment (MagicalHelm, MagicalRing)
-	bool use_magical_equip(
-		MagicalEffect effect,
-		EquipmentSlot slot,
-		Item& item,
-		Creature& wearer,
-		GameContext& ctx)
+	EquipmentSlot Weapon::get_preferred_slot(const Creature* wearer) const
 	{
-		const bool wasEquipped = wearer.is_item_equipped(item.uniqueId);
-		EquipmentSlot targetSlot = slot;
+		// The early returns answer a ranged or two-handed weapon even with a
+		// null wearer; anything else reaches through it, which is the
+		// intermittent kind of fault the assert stops.
+		assert(
+			wearer &&
+			"get_preferred_slot: asked which hand a weapon prefers, with nobody to wear it");
 
-		// Rings: auto-choose open slot
-		if (slot == EquipmentSlot::RIGHT_RING && !wasEquipped)
+		if (ranged)
 		{
-			if (wearer.is_slot_occupied(EquipmentSlot::RIGHT_RING))
+			return EquipmentSlot::MISSILE_WEAPON;
+		}
+
+		if (!can_be_off_hand())
+		{
+			return EquipmentSlot::RIGHT_HAND;
+		}
+
+		Item* mainHand = wearer->get_equipped_item(EquipmentSlot::RIGHT_HAND);
+		Item* offHand = wearer->get_equipped_item(EquipmentSlot::LEFT_HAND);
+
+		if (!mainHand || offHand)
+		{
+			return EquipmentSlot::RIGHT_HAND;
+		}
+
+		if (mainHand->is_weapon())
+		{
+			if (const Weapon* mainWeapon =
+					std::get_if<Weapon>(&*mainHand->behavior))
 			{
-				targetSlot = EquipmentSlot::LEFT_RING;
+				if (mainWeapon->get_weapon_size() > weaponSize)
+				{
+					return EquipmentSlot::LEFT_HAND;
+				}
 			}
 		}
 
-		const bool success =
-			wearer.toggle_equipment(item.uniqueId, targetSlot, ctx);
-		if (success)
+		return EquipmentSlot::RIGHT_HAND;
+	}
+
+	// ========== use() implementations ==========
+
+	bool use(
+		Consumable& consumable,
+		Item& owner,
+		Creature& wearer,
+		GameContext& ctx)
+	{
+		switch (consumable.effect)
 		{
-			if (wasEquipped)
+
+		case ConsumableEffect::HEAL:
+		{
+			if (wearer.get_hp() >= wearer.get_max_hp())
 			{
-				// The ring ends only its own invisibility, and not while
-				// another such ring is worn.
-				if (effect == MagicalEffect::INVISIBILITY &&
-					ctx.buffSystem->has_buff(
-						wearer,
-						BuffType::ITEM_INVISIBILITY) &&
-					!wearer.wears_ring_of(MagicalEffect::INVISIBILITY))
-				{
-					ctx.buffSystem->remove_buff(
-						wearer,
-						BuffType::ITEM_INVISIBILITY);
-					ctx.messageSystem->message(
-						ColorPairId::CYAN_BLACK,
-						"Your invisibility fades.",
-						MessageCompletion::FINISHED);
-				}
 				ctx.messageSystem->message(
 					ColorPairId::WHITE_BLACK,
-					"You remove the " + item.get_name() + ".",
+					"You are already at full health.",
+					MessageCompletion::FINISHED);
+				return false;
+			}
+			const int healed =
+				wearer.heal(roll_dice(ctx.dice, consumable.amount));
+			ctx.messageSystem->message(
+				ColorPairId::GREEN_BLACK,
+				std::format("You feel better! (+{} HP)", healed),
+				MessageCompletion::FINISHED);
+			break;
+		}
+
+		case ConsumableEffect::ADD_BUFF:
+		{
+			// Rolled once, at the drink, in the unit the book prints it in.
+			const int durationRounds = rounds_in(
+				roll_dice(ctx.dice, consumable.duration),
+				consumable.durationUnit);
+			const int value = roll_dice(ctx.dice, consumable.amount);
+			ctx.buffSystem->add_buff(
+				wearer,
+				consumable.buffType,
+				value,
+				durationRounds,
+				consumable.application,
+				ctx.gameState->get_time());
+			ctx.messageSystem->message(
+				ColorPairId::CYAN_BLACK,
+				std::format(
+					"You feel the effect of the {} for {}.",
+					owner.get_name(),
+					Wording::rounds(durationRounds)),
+				MessageCompletion::FINISHED);
+			break;
+		}
+
+		case ConsumableEffect::NONE:
+		{
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				std::format("You use the {}.", owner.get_name()),
+				MessageCompletion::FINISHED);
+			break;
+		}
+
+		case ConsumableEffect::FAIL:
+		{
+			ctx.messageSystem->message(
+				ColorPairId::RED_BLACK,
+				std::format("Nothing happens with the {}.", owner.get_name()),
+				MessageCompletion::FINISHED);
+			return false;
+		}
+		}
+
+		// The year a potion of speed costs comes with drinking it, whatever
+		// else it did.
+		if (consumable.agesYears != 0)
+		{
+			wearer.add_magical_years(consumable.agesYears, ctx);
+		}
+		return consume_item(owner, wearer);
+	}
+
+	int strength_rating_of(const Item& item)
+	{
+		// Only a weapon is made for an arm.
+		const Weapon* weapon =
+			item.behavior ? std::get_if<Weapon>(&*item.behavior) : nullptr;
+		return weapon ? weapon->strengthRating : 0;
+	}
+
+	bool can_draw(const Creature& wielder, const Item& weapon)
+	{
+		return wielder.get_strength() >= strength_rating_of(weapon);
+	}
+
+	bool is_awaiting_command_word(const Item& item)
+	{
+		const MagicalHelm* helm =
+			item.behavior ? std::get_if<MagicalHelm>(&*item.behavior) : nullptr;
+		return helm && helm->effect == MagicalEffect::BRILLIANCE &&
+			item.is_type_identified() && helm->command == HelmCommand::DORMANT;
+	}
+
+	void speak_command_word(Item& helm, Creature& wearer, GameContext& ctx)
+	{
+		assert(
+			wearer.get_equipped_item(EquipmentSlot::HEAD) == &helm &&
+			"speak_command_word: the helm is not on the wearer's head");
+		assert(
+			is_awaiting_command_word(helm) &&
+			"speak_command_word: the helm is not awaiting its word");
+
+		std::get<MagicalHelm>(*helm.behavior).command = HelmCommand::EMPOWERED;
+		wearer.update_armor_class(ctx);
+		// "When so empowered the true nature of the helm is visible to all."
+		ctx.messageSystem->message(
+			ColorPairId::CYAN_BLACK,
+			std::format(
+				"You speak the command word, and the {} blazes with light.",
+				helm.get_name()),
+			MessageCompletion::FINISHED);
+	}
+
+	void make_dormant(Item& item) noexcept
+	{
+		if (MagicalHelm* helm = item.behavior ?
+				std::get_if<MagicalHelm>(&*item.behavior) :
+				nullptr)
+		{
+			helm->command = HelmCommand::DORMANT;
+		}
+	}
+
+	bool is_helm_ready(const Item& helm, int now)
+	{
+		const MagicalHelm* magicalHelm =
+			helm.behavior ? std::get_if<MagicalHelm>(&*helm.behavior) : nullptr;
+		return magicalHelm &&
+			magicalHelm->effect == MagicalEffect::TELEPORTATION &&
+			magicalHelm->rechargedAt <= now;
+	}
+
+	void record_helm_use(Item& helm, int now)
+	{
+		MagicalHelm* magicalHelm =
+			helm.behavior ? std::get_if<MagicalHelm>(&*helm.behavior) : nullptr;
+		assert(
+			magicalHelm &&
+			magicalHelm->effect == MagicalEffect::TELEPORTATION &&
+			"record_helm_use: not a helm of teleportation");
+
+		magicalHelm->rechargedAt = now + ROUNDS_PER_DAY * TIME_UNITS_PER_ROUND;
+	}
+
+	bool use(Weapon& weapon, Item& owner, Creature& wearer, GameContext& ctx)
+	{
+		const EquipmentSlot preferred = weapon.get_preferred_slot(&wearer);
+		const bool success =
+			wearer.toggle_weapon(owner.uniqueId, preferred, ctx);
+
+		if (success)
+		{
+			Item* equipped = wearer.get_equipped_item(preferred);
+			if (equipped && equipped->uniqueId == owner.uniqueId)
+			{
+				const bool isOffHand = preferred == EquipmentSlot::LEFT_HAND;
+				const std::string slotName =
+					isOffHand ? "off-hand" : "main hand";
+				ctx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					std::format(
+						"You equip the {} in your {}.",
+						owner.get_name(),
+						slotName),
 					MessageCompletion::FINISHED);
 			}
 			else
 			{
-				if (effect == MagicalEffect::INVISIBILITY)
-				{
-					ctx.messageSystem->message(
-						ColorPairId::CYAN_BLACK,
-						"The ring pulses with arcane power. Press Shift+C to cast.",
-						MessageCompletion::FINISHED);
-				}
 				ctx.messageSystem->message(
 					ColorPairId::WHITE_BLACK,
-					"You put on the " + item.get_name() + ".",
+					std::format("You unequip the {}.", owner.get_name()),
 					MessageCompletion::FINISHED);
 			}
-
-			if (MagicalEffectUtils::is_protection_effect(effect) ||
-				effect == MagicalEffect::BRILLIANCE)
-			{
-				wearer.update_armor_class(ctx);
-			}
-
 			return true;
 		}
 
@@ -229,1160 +481,974 @@ namespace
 		return false;
 	}
 
-} // namespace
-
-// ========== Weapon struct methods ==========
-
-bool Weapon::validate_dual_wield(
-	const Item* mainHand,
-	const Item* offHand) const
-{
-	if (!mainHand || !offHand)
-	{
-		return false;
-	}
-	return mainHand->is_weapon() && offHand->is_weapon();
-}
-
-EquipmentSlot Weapon::get_preferred_slot(const Creature* wearer) const
-{
-	// The early returns answer a ranged or two-handed weapon even with a null wearer; anything else
-	// reaches through it, which is the intermittent kind of fault the assert stops.
-	assert(
-		wearer &&
-		"get_preferred_slot: asked which hand a weapon prefers, with nobody to wear it");
-
-	if (ranged)
-	{
-		return EquipmentSlot::MISSILE_WEAPON;
-	}
-
-	if (!can_be_off_hand())
-	{
-		return EquipmentSlot::RIGHT_HAND;
-	}
-
-	Item* mainHand = wearer->get_equipped_item(EquipmentSlot::RIGHT_HAND);
-	Item* offHand = wearer->get_equipped_item(EquipmentSlot::LEFT_HAND);
-
-	if (!mainHand || offHand)
-	{
-		return EquipmentSlot::RIGHT_HAND;
-	}
-
-	if (mainHand->is_weapon())
-	{
-		if (const Weapon* mainWeapon =
-				std::get_if<Weapon>(&*mainHand->behavior))
-		{
-			if (mainWeapon->get_weapon_size() > weaponSize)
-			{
-				return EquipmentSlot::LEFT_HAND;
-			}
-		}
-	}
-
-	return EquipmentSlot::RIGHT_HAND;
-}
-
-// ========== use() implementations ==========
-
-bool use(
-	Consumable& consumable,
-	Item& owner,
-	Creature& wearer,
-	GameContext& ctx)
-{
-	switch (consumable.effect)
-	{
-
-	case ConsumableEffect::HEAL:
-	{
-		if (wearer.get_hp() >= wearer.get_max_hp())
-		{
-			ctx.messageSystem->message(
-				ColorPairId::WHITE_BLACK,
-				"You are already at full health.",
-				MessageCompletion::FINISHED);
-			return false;
-		}
-		const int healed = wearer.heal(roll_dice(ctx.dice, consumable.amount));
-		ctx.messageSystem->message(
-			ColorPairId::GREEN_BLACK,
-			std::format("You feel better! (+{} HP)", healed),
-			MessageCompletion::FINISHED);
-		break;
-	}
-
-	case ConsumableEffect::ADD_BUFF:
-	{
-		// Rolled once, at the drink, in the unit the book prints it in.
-		const int durationRounds = rounds_in(
-			roll_dice(ctx.dice, consumable.duration),
-			consumable.durationUnit);
-		const int value = roll_dice(ctx.dice, consumable.amount);
-		ctx.buffSystem->add_buff(
-			wearer,
-			consumable.buffType,
-			value,
-			durationRounds,
-			consumable.application,
-			ctx.gameState->get_time());
-		ctx.messageSystem->message(
-			ColorPairId::CYAN_BLACK,
-			std::format(
-				"You feel the effect of the {} for {}.",
-				owner.get_name(),
-				Wording::rounds(durationRounds)),
-			MessageCompletion::FINISHED);
-		break;
-	}
-
-	case ConsumableEffect::NONE:
-	{
-		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			std::format("You use the {}.", owner.get_name()),
-			MessageCompletion::FINISHED);
-		break;
-	}
-
-	case ConsumableEffect::FAIL:
-	{
-		ctx.messageSystem->message(
-			ColorPairId::RED_BLACK,
-			std::format("Nothing happens with the {}.", owner.get_name()),
-			MessageCompletion::FINISHED);
-		return false;
-	}
-	}
-
-	// The year a potion of speed costs comes with drinking it, whatever else it did.
-	if (consumable.agesYears != 0)
-	{
-		wearer.add_magical_years(consumable.agesYears, ctx);
-	}
-	return consume_item(owner, wearer);
-}
-
-int strength_rating_of(const Item& item)
-{
-	// Only a weapon is made for an arm.
-	const Weapon* weapon =
-		item.behavior ? std::get_if<Weapon>(&*item.behavior) : nullptr;
-	return weapon ? weapon->strengthRating : 0;
-}
-
-bool can_draw(const Creature& wielder, const Item& weapon)
-{
-	return wielder.get_strength() >= strength_rating_of(weapon);
-}
-
-bool is_awaiting_command_word(const Item& item)
-{
-	const MagicalHelm* helm =
-		item.behavior ? std::get_if<MagicalHelm>(&*item.behavior) : nullptr;
-	return helm && helm->effect == MagicalEffect::BRILLIANCE &&
-		item.is_type_identified() && helm->command == HelmCommand::DORMANT;
-}
-
-void speak_command_word(Item& helm, Creature& wearer, GameContext& ctx)
-{
-	assert(
-		wearer.get_equipped_item(EquipmentSlot::HEAD) == &helm &&
-		"speak_command_word: the helm is not on the wearer's head");
-	assert(
-		is_awaiting_command_word(helm) &&
-		"speak_command_word: the helm is not awaiting its word");
-
-	std::get<MagicalHelm>(*helm.behavior).command = HelmCommand::EMPOWERED;
-	wearer.update_armor_class(ctx);
-	// "When so empowered the true nature of the helm is visible to all."
-	ctx.messageSystem->message(
-		ColorPairId::CYAN_BLACK,
-		std::format(
-			"You speak the command word, and the {} blazes with light.",
-			helm.get_name()),
-		MessageCompletion::FINISHED);
-}
-
-void make_dormant(Item& item) noexcept
-{
-	if (MagicalHelm* helm =
-			item.behavior ? std::get_if<MagicalHelm>(&*item.behavior) : nullptr)
-	{
-		helm->command = HelmCommand::DORMANT;
-	}
-}
-
-bool is_helm_ready(const Item& helm, int now)
-{
-	const MagicalHelm* magicalHelm =
-		helm.behavior ? std::get_if<MagicalHelm>(&*helm.behavior) : nullptr;
-	return magicalHelm && magicalHelm->effect == MagicalEffect::TELEPORTATION &&
-		magicalHelm->rechargedAt <= now;
-}
-
-void record_helm_use(Item& helm, int now)
-{
-	MagicalHelm* magicalHelm =
-		helm.behavior ? std::get_if<MagicalHelm>(&*helm.behavior) : nullptr;
-	assert(
-		magicalHelm && magicalHelm->effect == MagicalEffect::TELEPORTATION &&
-		"record_helm_use: not a helm of teleportation");
-
-	magicalHelm->rechargedAt = now + ROUNDS_PER_DAY * TIME_UNITS_PER_ROUND;
-}
-
-bool use(Weapon& weapon, Item& owner, Creature& wearer, GameContext& ctx)
-{
-	const EquipmentSlot preferred = weapon.get_preferred_slot(&wearer);
-	const bool success = wearer.toggle_weapon(owner.uniqueId, preferred, ctx);
-
-	if (success)
-	{
-		Item* equipped = wearer.get_equipped_item(preferred);
-		if (equipped && equipped->uniqueId == owner.uniqueId)
-		{
-			const bool isOffHand = preferred == EquipmentSlot::LEFT_HAND;
-			const std::string slotName = isOffHand ? "off-hand" : "main hand";
-			ctx.messageSystem->message(
-				ColorPairId::WHITE_BLACK,
-				std::format(
-					"You equip the {} in your {}.",
-					owner.get_name(),
-					slotName),
-				MessageCompletion::FINISHED);
-		}
-		else
-		{
-			ctx.messageSystem->message(
-				ColorPairId::WHITE_BLACK,
-				std::format("You unequip the {}.", owner.get_name()),
-				MessageCompletion::FINISHED);
-		}
-		return true;
-	}
-
-	// Could not be put on or taken off - a cursed item that will not come off: no turn.
-	return false;
-}
-
-bool use(
-	TargetedScroll& targetScroll,
-	Item& owner,
-	Creature& wearer,
-	GameContext& ctx)
-{
-	assert(ctx.targeting && "use(TargetedScroll): called without a targeting");
-	assert(
-		ctx.creatureManager &&
-		"use(TargetedScroll): called without a creatureManager");
-	assert(ctx.creatures && "use(TargetedScroll): called without creatures");
-	assert(ctx.map && "use(TargetedScroll): called without a map");
-
-	// FOV_BUFF and AUTO_NEAREST are synchronous - no targeting cursor needed
-	if (targetScroll.targetMode == TargetMode::FOV_BUFF)
-	{
-		// Rolled once for the reading, so every creature it reaches keeps it as long.
-		const int durationRounds = rounds_in(
-			roll_dice(ctx.dice, targetScroll.duration),
-			targetScroll.durationUnit);
-		int affected = 0;
-		for (const auto& creature : *ctx.creatures)
-		{
-			assert(
-				creature &&
-				"use(TargetedScroll): creatures holds a null entry");
-			if (creature->is_dead())
-			{
-				continue;
-			}
-
-			if (!ctx.map->is_in_fov(creature->position))
-			{
-				continue;
-			}
-
-			// A scroll's effect is a spell: the target saves against it or takes it.
-			if (!SavingThrows::is_made(*creature, SavingThrow::SPELL, 0, ctx))
-			{
-				ctx.buffSystem->add_buff(
-					*creature,
-					targetScroll.buffType,
-					0,
-					durationRounds,
-					BuffApplication::ADD,
-					ctx.gameState->get_time());
-				++affected;
-			}
-		}
-
-		if (affected > 0)
-		{
-			ctx.messageSystem->append_message_part(
-				ColorPairId::CYAN_BLACK,
-				std::format("{}! ", owner.get_name()));
-			ctx.messageSystem->append_message_part(
-				ColorPairId::WHITE_BLACK,
-				std::format(
-					"{} affected.",
-					Wording::counted(affected, "creature", "creatures")));
-			ctx.messageSystem->finalize_message();
-		}
-		else
-		{
-			ctx.messageSystem->message(
-				ColorPairId::WHITE_BLACK,
-				std::format("The {} has no effect.", owner.get_name()),
-				MessageCompletion::FINISHED);
-		}
-
-		return consume_item(owner, wearer);
-	}
-
-	if (targetScroll.targetMode == TargetMode::AUTO_NEAREST)
-	{
-		TargetResult result =
-			ctx.targeting->acquire_nearest(ctx, wearer, targetScroll.range);
-		if (!result.success || result.creatures.empty())
-		{
-			return false;
-		}
-		auto* target = result.creatures[0];
-		ctx.messageSystem->append_message_part(
-			ColorPairId::WHITE_BLACK,
-			"A lightning bolt strikes the ");
-		ctx.messageSystem->append_message_part(
-			ColorPairId::WHITE_BLUE,
-			target->actorData.name);
-		ctx.messageSystem->append_message_part(
-			ColorPairId::WHITE_BLACK,
-			" with a loud thunder!");
-		ctx.messageSystem->finalize_message();
-		SpellAnimations::animate_lightning(
-			wearer.position,
-			target->position,
-			ctx);
-		ctx.messageSystem->message(
-			ColorPairId::WHITE_RED,
-			std::format("The damage is {} hit points.", targetScroll.damage),
-			MessageCompletion::FINISHED);
-		target->take_damage_and_check_death(
-			targetScroll.damage,
-			ctx,
-			DamageType::LIGHTNING,
-			wearer.as_damage_source());
-		ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
-		return consume_item(owner, wearer);
-	}
-
-	// PICK_TILE_SINGLE and PICK_TILE_AOE - async via TargetingMenu
-	int aoeRadius = (targetScroll.targetMode == TargetMode::PICK_TILE_AOE) ?
-		targetScroll.range :
-		0;
-	int scrollRange = targetScroll.range;
-	int confuseTurns = targetScroll.confuseTurns;
-	TargetMode mode = targetScroll.targetMode;
-	// Copied for the burst's credit, which is decided when the cursor confirms.
-	const DamageSource source = wearer.as_damage_source();
-
-	auto onTarget =
-		[mode, aoeRadius, scrollRange, confuseTurns, source, &owner, &wearer](
-			bool confirmed,
-			Vector2D targetPos,
-			GameContext& innerCtx) mutable
-	{
-		if (!confirmed)
-		{
-			return;
-		}
-
-		if (mode == TargetMode::PICK_TILE_AOE)
-		{
-			innerCtx.messageSystem->append_message_part(
-				ColorPairId::WHITE_BLACK,
-				std::format(
-					"The fireball explodes, burning everything within {} tiles!",
-					scrollRange));
-			innerCtx.messageSystem->finalize_message();
-			// The scroll casts the spell itself, at the level the book reads it at.
-			const SpellSystem::FireballBurst burst =
-				SpellSystem::burst_fireball(
-					targetPos,
-					SpellSystem::SCROLL_FIREBALL_CASTER_LEVEL,
-					aoeRadius,
-					source,
-					innerCtx);
-			innerCtx.messageSystem->message(
-				ColorPairId::WHITE_BLACK,
-				std::format(
-					"{}d6 = {} fire, {} struck.",
-					burst.diceCount,
-					burst.totalDamage,
-					burst.struck),
-				MessageCompletion::FINISHED);
-
-			if (burst.playerReach == SpellSystem::PlayerReach::STRUCK)
-			{
-				SpellAnimations::animate_creature_hit(
-					innerCtx.player()->position,
-					innerCtx);
-			}
-			innerCtx.creatureManager->cleanup_dead_creatures(
-				*innerCtx.creatures);
-		}
-		else // PICK_TILE_SINGLE
-		{
-			// A scroll the reader could not bring themselves to read costs the turn, not the scroll.
-			if (read_confusion_at(wearer, targetPos, confuseTurns, innerCtx) ==
-				ScrollReading::KEPT)
-			{
-				spend_player_action(innerCtx, TIME_UNITS_PER_ROUND);
-				return;
-			}
-		}
-
-		consume_item(owner, wearer);
-		spend_player_action(innerCtx, TIME_UNITS_PER_ROUND);
-	};
-
-	ctx.menus->push_back(
-		std::make_unique<TargetingMenu>(
-			scrollRange,
-			aoeRadius,
-			std::move(onTarget),
-			ctx));
-	return false; // turn and item consumption handled in callback
-}
-
-ScrollReading read_confusion_at(
-	const Creature& reader,
-	Vector2D tile,
-	int turns,
-	GameContext& ctx)
-{
-	assert(ctx.map && "read_confusion_at: called without a map");
-
-	Creature* target = ctx.map->get_actor(tile, ctx);
-
-	// The reader ignores a creature whose Sanctuary turns them away, and reads at nothing.
-	if (target &&
-		ctx.buffSystem->is_turned_away_by_sanctuary(reader, *target, ctx))
-	{
-		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			std::format(
-				"You cannot bring yourself to read the scroll at the {}.",
-				target->actorData.name),
-			MessageCompletion::FINISHED);
-		return ScrollReading::KEPT;
-	}
-
-	if (target)
-	{
-		target->apply_confusion(turns, ctx.gameState->get_time());
-		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			std::format(
-				"The eyes of the {} look vacant, as he starts to stumble around!",
-				target->actorData.name),
-			MessageCompletion::FINISHED);
-	}
-	return ScrollReading::SPENT;
-}
-
-bool use(Gold& gold, Item& owner, Creature& wearer, GameContext& ctx)
-{
-	wearer.adjust_gold(gold.amount);
-	ctx.messageSystem->append_message_part(
-		ColorPairId::YELLOW_BLACK,
-		"You gained ");
-	ctx.messageSystem->append_message_part(
-		ColorPairId::YELLOW_BLACK,
-		std::to_string(gold.amount));
-	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, " gold.");
-	ctx.messageSystem->finalize_message();
-	return consume_item(owner, wearer);
-}
-
-bool use(Food& food, Item& owner, Creature& wearer, GameContext& ctx)
-{
-	assert(ctx.hungerSystem && "use(Food): called without a hungerSystem");
-
-	ctx.hungerSystem->decrease_hunger(ctx, food.nutritionValue);
-	ctx.messageSystem->append_message_part(
-		ColorPairId::WHITE_BLACK,
-		"You eat the ");
-	ctx.messageSystem->append_message_part(
-		ColorPairId::YELLOW_BLACK,
-		owner.get_name());
-	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ".");
-	ctx.messageSystem->finalize_message();
-	return consume_item(owner, wearer);
-}
-
-bool use(
-	CorpseFood& corpseFood,
-	Item& owner,
-	Creature& wearer,
-	GameContext& ctx)
-{
-	assert(
-		ctx.hungerSystem && "use(CorpseFood): called without a hungerSystem");
-	assert(ctx.dice && "use(CorpseFood): called without dice");
-
-	// An inedible corpse says why and stays where it is; nothing was done, so no time passes.
-	if (corpseFood.edibility == CorpseEdibility::INEDIBLE)
-	{
-		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			corpseFood.taste,
-			MessageCompletion::FINISHED);
-		return false;
-	}
-
-	int actual = corpseFood.nutritionValue + ctx.dice->roll(-10, 10);
-	actual = std::max(10, actual);
-
-	ctx.hungerSystem->decrease_hunger(ctx, actual);
-
-	ctx.messageSystem->append_message_part(
-		ColorPairId::WHITE_BLACK,
-		"You eat the ");
-	ctx.messageSystem->append_message_part(
-		ColorPairId::RED_BLACK,
-		owner.get_name());
-	ctx.messageSystem->append_message_part(
-		ColorPairId::WHITE_BLACK,
-		". " + corpseFood.taste);
-	ctx.messageSystem->finalize_message();
-	return consume_item(owner, wearer);
-}
-
-bool use(
-	[[maybe_unused]] Armor& armor,
-	Item& item,
-	Creature& wearer,
-	GameContext& ctx)
-{
-	const bool was_equipped = wearer.is_item_equipped(item.uniqueId);
-	const bool success = wearer.toggle_armor(item.uniqueId, ctx);
-
-	if (success)
-	{
-		const std::string removedLine =
-			"You remove the " + item.get_name() + ".";
-		const std::string putOnLine = "You put on the " + item.get_name() + ".";
-		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			was_equipped ? removedLine : putOnLine,
-			MessageCompletion::FINISHED);
-	}
-
-	return success;
-}
-
-bool use(
-	MagicalHelm& magicalHelm,
-	Item& owner,
-	Creature& wearer,
-	GameContext& ctx)
-{
-	return use_magical_equip(
-		magicalHelm.effect,
-		EquipmentSlot::HEAD,
-		owner,
-		wearer,
-		ctx);
-}
-
-bool use(
-	MagicalRing& magicalRing,
-	Item& owner,
-	Creature& wearer,
-	GameContext& ctx)
-{
-	return use_magical_equip(
-		magicalRing.effect,
-		EquipmentSlot::RIGHT_RING,
-		owner,
-		wearer,
-		ctx);
-}
-
-// Where the data says this item is worn.
-//
-// The one statement of the slot. The behaviour granting the bonuses does not decide,
-// because there are three such behaviours for more worn kinds than three, and
-// "gauntlets" was standing in for all of them - which put every cloak and every pair
-// of boots onto the hands.
-EquipmentSlot worn_slot(const Item& item, const GameContext& ctx)
-{
-	assert(
-		ctx.itemRegistry &&
-		"worn_slot: asked where an item is worn with no registry to ask");
-
-	const EquipmentSlot slot =
-		ctx.itemRegistry->get_params(item.itemKey).equipmentSlot;
-	assert(
-		slot != EquipmentSlot::NONE &&
-		"worn_slot: a worn item whose data names no slot");
-	return slot;
-}
-
-bool use(
-	[[maybe_unused]] JewelryAmulet& jewelryAmulet,
-	Item& owner,
-	Creature& wearer,
-	GameContext& ctx)
-{
-	return use_stat_boost(worn_slot(owner, ctx), owner, wearer, ctx);
-}
-
-bool use(
-	[[maybe_unused]] Gauntlets& gauntlets,
-	Item& owner,
-	Creature& wearer,
-	GameContext& ctx)
-{
-	return use_stat_boost(worn_slot(owner, ctx), owner, wearer, ctx);
-}
-
-bool use(
-	[[maybe_unused]] Girdle& girdle,
-	Item& owner,
-	Creature& wearer,
-	GameContext& ctx)
-{
-	return use_stat_boost(worn_slot(owner, ctx), owner, wearer, ctx);
-}
-
-bool use(
-	[[maybe_unused]] Shield& shield,
-	Item& owner,
-	Creature& wearer,
-	GameContext& ctx)
-{
-	const bool success = wearer.toggle_shield(owner.uniqueId, ctx);
-	if (success)
-	{
-		Item* equipped = wearer.get_equipped_item(EquipmentSlot::LEFT_HAND);
-		if (equipped && equipped->uniqueId == owner.uniqueId)
-		{
-			ctx.messageSystem->message(
-				ColorPairId::WHITE_BLACK,
-				std::format("You raise the {}.", owner.get_name()),
-				MessageCompletion::FINISHED);
-		}
-		else
-		{
-			ctx.messageSystem->message(
-				ColorPairId::WHITE_BLACK,
-				std::format("You lower the {}.", owner.get_name()),
-				MessageCompletion::FINISHED);
-		}
-		return true;
-	}
-
-	// Could not be put on or taken off - a cursed item that will not come off: no turn.
-	return false;
-}
-
-bool use(
-	[[maybe_unused]] Teleporter& teleporter,
-	Item& owner,
-	Creature& wearer,
-	GameContext& ctx)
-{
-	assert(ctx.map && "use(Teleporter): called without a map");
-
-	// Reading the scroll is the cost, so it is spent whether or not there is anywhere to go.
-	const std::optional<Vector2D> landing =
-		SpawnUtils::find_random_floor_tile(ctx);
-	if (!landing)
-	{
-		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			"The magic finds nowhere to take you.",
-			MessageCompletion::FINISHED);
-		return consume_item(owner, wearer);
-	}
-
-	wearer.position = *landing;
-	ctx.map->compute_fov(ctx);
-	ctx.messageSystem->message(
-		ColorPairId::BLUE_BLACK,
-		"You feel disoriented as the world shifts around you!",
-		MessageCompletion::FINISHED);
-	ctx.messageSystem->message(
-		ColorPairId::WHITE_BLACK,
-		"You have been teleported to a new location.",
-		MessageCompletion::FINISHED);
-	return consume_item(owner, wearer);
-}
-
-// Identifies every other item in the wearer's pack that is not already fully identified,
-// and says how many that was. The scroll never counts itself: it is consumed by the
-// reading, so what it would learn about itself is never seen. It is consumed either way,
-// and a pack that was already identified still burns it.
-//
-// Example, a pack holding the scroll, two unknown potions and one known sword:
-//   use(scroll, scrollItem, player, ctx);   // -> true, "2 items identified!"
-//   // a pack holding the scroll alone:
-//   use(scroll, scrollItem, player, ctx);   // -> true, "All items were already identified."
-bool use(
-	[[maybe_unused]] IdentifyScroll& identifyScroll,
-	Item& owner,
-	Creature& wearer,
-	GameContext& ctx)
-{
-	int identifiedCount = 0;
-	for (auto& item : wearer.inventoryData.items)
+	bool use(
+		TargetedScroll& targetScroll,
+		Item& owner,
+		Creature& wearer,
+		GameContext& ctx)
 	{
 		assert(
-			item &&
-			"identify scroll: the pack holds a null where an item should be");
+			ctx.targeting && "use(TargetedScroll): called without a targeting");
+		assert(
+			ctx.creatureManager &&
+			"use(TargetedScroll): called without a creatureManager");
+		assert(
+			ctx.creatures && "use(TargetedScroll): called without creatures");
+		assert(ctx.map && "use(TargetedScroll): called without a map");
 
-		if (item.get() != &owner && !item->is_fully_identified())
+		// FOV_BUFF and AUTO_NEAREST are synchronous - no targeting cursor
+		// needed
+		if (targetScroll.targetMode == TargetMode::FOV_BUFF)
 		{
-			item->identify_all();
-			++identifiedCount;
-			assert(
-				ctx.floatingText &&
-				"use(IdentifyScroll): an item was identified with no floating text to show it");
-			ctx.floatingText->spawn_text(
+			// Rolled once for the reading, so every creature it reaches keeps
+			// it as long.
+			const int durationRounds = rounds_in(
+				roll_dice(ctx.dice, targetScroll.duration),
+				targetScroll.durationUnit);
+			int affected = 0;
+			for (const auto& creature : *ctx.creatures)
+			{
+				assert(
+					creature &&
+					"use(TargetedScroll): creatures holds a null entry");
+				if (creature->is_dead())
+				{
+					continue;
+				}
+
+				if (!ctx.map->is_in_fov(creature->position))
+				{
+					continue;
+				}
+
+				// A scroll's effect is a spell: the target saves against it or
+				// takes it.
+				if (!SavingThrows::is_made(
+						*creature,
+						SavingThrow::SPELL,
+						0,
+						ctx))
+				{
+					ctx.buffSystem->add_buff(
+						*creature,
+						targetScroll.buffType,
+						0,
+						durationRounds,
+						BuffApplication::ADD,
+						ctx.gameState->get_time());
+					++affected;
+				}
+			}
+
+			if (affected > 0)
+			{
+				ctx.messageSystem->append_message_part(
+					ColorPairId::CYAN_BLACK,
+					std::format("{}! ", owner.get_name()));
+				ctx.messageSystem->append_message_part(
+					ColorPairId::WHITE_BLACK,
+					std::format(
+						"{} affected.",
+						Wording::counted(affected, "creature", "creatures")));
+				ctx.messageSystem->finalize_message();
+			}
+			else
+			{
+				ctx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					std::format("The {} has no effect.", owner.get_name()),
+					MessageCompletion::FINISHED);
+			}
+
+			return consume_item(owner, wearer);
+		}
+
+		if (targetScroll.targetMode == TargetMode::AUTO_NEAREST)
+		{
+			TargetResult result =
+				ctx.targeting->acquire_nearest(ctx, wearer, targetScroll.range);
+			if (!result.success || result.creatures.empty())
+			{
+				return false;
+			}
+			auto* target = result.creatures[0];
+			ctx.messageSystem->append_message_part(
+				ColorPairId::WHITE_BLACK,
+				"A lightning bolt strikes the ");
+			ctx.messageSystem->append_message_part(
+				ColorPairId::WHITE_BLUE,
+				target->actorData.name);
+			ctx.messageSystem->append_message_part(
+				ColorPairId::WHITE_BLACK,
+				" with a loud thunder!");
+			ctx.messageSystem->finalize_message();
+			SpellAnimations::animate_lightning(
 				wearer.position,
-				std::string(item->get_name()) + " identified!",
-				0,
-				255,
-				255,
-				2.0f);
+				target->position,
+				ctx);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_RED,
+				std::format(
+					"The damage is {} hit points.",
+					targetScroll.damage),
+				MessageCompletion::FINISHED);
+			target->take_damage_and_check_death(
+				targetScroll.damage,
+				ctx,
+				DamageType::LIGHTNING,
+				wearer.as_damage_source());
+			ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
+			return consume_item(owner, wearer);
 		}
+
+		// PICK_TILE_SINGLE and PICK_TILE_AOE - async via TargetingMenu
+		int aoeRadius = (targetScroll.targetMode == TargetMode::PICK_TILE_AOE) ?
+			targetScroll.range :
+			0;
+		int scrollRange = targetScroll.range;
+		int confuseTurns = targetScroll.confuseTurns;
+		TargetMode mode = targetScroll.targetMode;
+		// Copied for the burst's credit, which is decided when the cursor
+		// confirms.
+		const DamageSource source = wearer.as_damage_source();
+
+		auto onTarget = [mode,
+							aoeRadius,
+							scrollRange,
+							confuseTurns,
+							source,
+							&owner,
+							&wearer](
+							bool confirmed,
+							Vector2D targetPos,
+							GameContext& innerCtx) mutable
+		{
+			if (!confirmed)
+			{
+				return;
+			}
+
+			if (mode == TargetMode::PICK_TILE_AOE)
+			{
+				innerCtx.messageSystem->append_message_part(
+					ColorPairId::WHITE_BLACK,
+					std::format(
+						"The fireball explodes, burning everything within {} tiles!",
+						scrollRange));
+				innerCtx.messageSystem->finalize_message();
+				// The scroll casts the spell itself, at the level the book
+				// reads it at.
+				const SpellSystem::FireballBurst burst =
+					SpellSystem::burst_fireball(
+						targetPos,
+						SpellSystem::SCROLL_FIREBALL_CASTER_LEVEL,
+						aoeRadius,
+						source,
+						innerCtx);
+				innerCtx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					std::format(
+						"{}d6 = {} fire, {} struck.",
+						burst.diceCount,
+						burst.totalDamage,
+						burst.struck),
+					MessageCompletion::FINISHED);
+
+				if (burst.playerReach == SpellSystem::PlayerReach::STRUCK)
+				{
+					SpellAnimations::animate_creature_hit(
+						innerCtx.player()->position,
+						innerCtx);
+				}
+				innerCtx.creatureManager->cleanup_dead_creatures(
+					*innerCtx.creatures);
+			}
+			else // PICK_TILE_SINGLE
+			{
+				// A scroll the reader could not bring themselves to read costs
+				// the turn, not the scroll.
+				if (read_confusion_at(
+						wearer,
+						targetPos,
+						confuseTurns,
+						innerCtx) == ScrollReading::KEPT)
+				{
+					spend_player_action(innerCtx, TIME_UNITS_PER_ROUND);
+					return;
+				}
+			}
+
+			consume_item(owner, wearer);
+			spend_player_action(innerCtx, TIME_UNITS_PER_ROUND);
+		};
+
+		ctx.menus->push_back(
+			std::make_unique<TargetingMenu>(
+				scrollRange,
+				aoeRadius,
+				std::move(onTarget),
+				ctx));
+		return false; // turn and item consumption handled in callback
 	}
-	ctx.messageSystem->message(
-		ColorPairId::CYAN_BLACK,
-		identifiedCount > 0 ?
-			std::format(
-				"You use the {}. {} identified!",
-				owner.get_name(),
-				Wording::counted(identifiedCount, "item", "items")) :
-			std::format(
-				"You use the {}. All items were already identified.",
-				owner.get_name()),
-		MessageCompletion::FINISHED);
-	return consume_item(owner, wearer);
-}
 
-bool use(
-	[[maybe_unused]] Amulet& amulet,
-	[[maybe_unused]] Item& owner,
-	[[maybe_unused]] Creature& wearer,
-	GameContext& ctx)
-{
-	ctx.messageSystem->message(
-		ColorPairId::WHITE_BLACK,
-		"The Amulet of Yendor glows brightly in your hands!",
-		MessageCompletion::FINISHED);
-	ctx.messageSystem->message(
-		ColorPairId::WHITE_BLACK,
-		"You feel a powerful magic enveloping you...",
-		MessageCompletion::FINISHED);
-	ctx.gameState->set_run_outcome(RunOutcome::VICTORY);
-	return false;
-}
+	ScrollReading read_confusion_at(
+		const Creature& reader,
+		Vector2D tile,
+		int turns,
+		GameContext& ctx)
+	{
+		assert(ctx.map && "read_confusion_at: called without a map");
 
-bool use(
-	[[maybe_unused]] DungeonKey& key,
-	[[maybe_unused]] Item& owner,
-	[[maybe_unused]] Creature& wearer,
-	GameContext& ctx)
-{
-	ctx.messageSystem->message(
-		ColorPairId::WHITE_BLACK,
-		"Bump into a locked door to use this key.",
-		MessageCompletion::FINISHED);
-	return false;
-}
+		Creature* target = ctx.map->get_actor(tile, ctx);
 
-// ========== Variant-level dispatchers ==========
+		// The reader ignores a creature whose Sanctuary turns them away, and
+		// reads at nothing.
+		if (target &&
+			ctx.buffSystem->is_turned_away_by_sanctuary(reader, *target, ctx))
+		{
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				std::format(
+					"You cannot bring yourself to read the scroll at the {}.",
+					target->actorData.name),
+				MessageCompletion::FINISHED);
+			return ScrollReading::KEPT;
+		}
 
-namespace
-{
+		if (target)
+		{
+			target->apply_confusion(turns, ctx.gameState->get_time());
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				std::format(
+					"The eyes of the {} look vacant, as he starts to stumble around!",
+					target->actorData.name),
+				MessageCompletion::FINISHED);
+		}
+		return ScrollReading::SPENT;
+	}
 
-	// Whether a worn helm's powers count: a helm of brilliance's only once its
-	// word is spoken, every other helm's as soon as it is on.
+	bool use(Gold& gold, Item& owner, Creature& wearer, GameContext& ctx)
+	{
+		wearer.adjust_gold(gold.amount);
+		ctx.messageSystem->append_message_part(
+			ColorPairId::YELLOW_BLACK,
+			"You gained ");
+		ctx.messageSystem->append_message_part(
+			ColorPairId::YELLOW_BLACK,
+			std::to_string(gold.amount));
+		ctx.messageSystem->append_message_part(
+			ColorPairId::YELLOW_BLACK,
+			" gold.");
+		ctx.messageSystem->finalize_message();
+		return consume_item(owner, wearer);
+	}
+
+	bool use(Food& food, Item& owner, Creature& wearer, GameContext& ctx)
+	{
+		assert(ctx.hungerSystem && "use(Food): called without a hungerSystem");
+
+		ctx.hungerSystem->decrease_hunger(ctx, food.nutritionValue);
+		ctx.messageSystem->append_message_part(
+			ColorPairId::WHITE_BLACK,
+			"You eat the ");
+		ctx.messageSystem->append_message_part(
+			ColorPairId::YELLOW_BLACK,
+			owner.get_name());
+		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ".");
+		ctx.messageSystem->finalize_message();
+		return consume_item(owner, wearer);
+	}
+
+	bool use(
+		CorpseFood& corpseFood,
+		Item& owner,
+		Creature& wearer,
+		GameContext& ctx)
+	{
+		assert(
+			ctx.hungerSystem &&
+			"use(CorpseFood): called without a hungerSystem");
+		assert(ctx.dice && "use(CorpseFood): called without dice");
+
+		// An inedible corpse says why and stays where it is; nothing was done,
+		// so no time passes.
+		if (corpseFood.edibility == CorpseEdibility::INEDIBLE)
+		{
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				corpseFood.taste,
+				MessageCompletion::FINISHED);
+			return false;
+		}
+
+		int actual = corpseFood.nutritionValue + ctx.dice->roll(-10, 10);
+		actual = std::max(10, actual);
+
+		ctx.hungerSystem->decrease_hunger(ctx, actual);
+
+		ctx.messageSystem->append_message_part(
+			ColorPairId::WHITE_BLACK,
+			"You eat the ");
+		ctx.messageSystem->append_message_part(
+			ColorPairId::RED_BLACK,
+			owner.get_name());
+		ctx.messageSystem->append_message_part(
+			ColorPairId::WHITE_BLACK,
+			". " + corpseFood.taste);
+		ctx.messageSystem->finalize_message();
+		return consume_item(owner, wearer);
+	}
+
+	bool use(
+		[[maybe_unused]] Armor& armor,
+		Item& item,
+		Creature& wearer,
+		GameContext& ctx)
+	{
+		const bool was_equipped = wearer.is_item_equipped(item.uniqueId);
+		const bool success = wearer.toggle_armor(item.uniqueId, ctx);
+
+		if (success)
+		{
+			const std::string removedLine =
+				"You remove the " + item.get_name() + ".";
+			const std::string putOnLine =
+				"You put on the " + item.get_name() + ".";
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				was_equipped ? removedLine : putOnLine,
+				MessageCompletion::FINISHED);
+		}
+
+		return success;
+	}
+
+	bool use(
+		MagicalHelm& magicalHelm,
+		Item& owner,
+		Creature& wearer,
+		GameContext& ctx)
+	{
+		return use_magical_equip(
+			magicalHelm.effect,
+			EquipmentSlot::HEAD,
+			owner,
+			wearer,
+			ctx);
+	}
+
+	bool use(
+		MagicalRing& magicalRing,
+		Item& owner,
+		Creature& wearer,
+		GameContext& ctx)
+	{
+		return use_magical_equip(
+			magicalRing.effect,
+			EquipmentSlot::RIGHT_RING,
+			owner,
+			wearer,
+			ctx);
+	}
+
+	// Where the data says this item is worn.
 	//
-	// Example:
-	//   is_helm_working(
-	//       MagicalHelm{ MagicalEffect::BRILLIANCE, 2, HelmCommand::DORMANT });
-	//   // -> false
-	//   is_helm_working(
-	//       MagicalHelm{
-	//           MagicalEffect::BRILLIANCE, 2, HelmCommand::EMPOWERED });
-	//   // -> true
-	//   is_helm_working(
-	//       MagicalHelm{ MagicalEffect::PROTECTION, 3, HelmCommand::DORMANT });
-	//   // -> true
-	bool is_helm_working(const MagicalHelm& helm) noexcept
+	// The one statement of the slot. The behaviour granting the bonuses does
+	// not decide, because there are three such behaviours for more worn kinds
+	// than three, and "gauntlets" was standing in for all of them - which put
+	// every cloak and every pair of boots onto the hands.
+	EquipmentSlot worn_slot(const Item& item, const GameContext& ctx)
 	{
-		return helm.effect != MagicalEffect::BRILLIANCE ||
-			helm.command == HelmCommand::EMPOWERED;
+		assert(
+			ctx.itemRegistry &&
+			"worn_slot: asked where an item is worn with no registry to ask");
+
+		const EquipmentSlot slot =
+			ctx.itemRegistry->get_params(item.itemKey).equipmentSlot;
+		assert(
+			slot != EquipmentSlot::NONE &&
+			"worn_slot: a worn item whose data names no slot");
+		return slot;
 	}
 
-} // namespace
-
-bool use_item(
-	ItemBehavior& behavior,
-	Item& owner,
-	Creature& wearer,
-	GameContext& ctx)
-{
-	return std::visit(
-		[&owner, &wearer, &ctx](auto& behavior) -> bool
-		{ return use(behavior, owner, wearer, ctx); },
-		behavior);
-}
-
-int get_item_ac_bonus(const ItemBehavior& behavior) noexcept
-{
-	return std::visit(
-		VariantVisitor{
-			[](const Armor& armor) -> int { return armor.armorClass; },
-			[]([[maybe_unused]] const Shield& shield) -> int
-			{ return -1; }, // +1 AC in AD&D terms
-			[](const MagicalHelm& magicalHelm) -> int
-			{
-				return is_helm_working(magicalHelm) ?
-					MagicalEffectUtils::get_ac_bonus(
-						magicalHelm.effect,
-						magicalHelm.bonus) :
-					0;
-			},
-			[](const MagicalRing& magicalRing) -> int
-			{
-				return MagicalEffectUtils::get_ac_bonus(
-					magicalRing.effect,
-					magicalRing.bonus);
-			},
-			[]([[maybe_unused]] const auto& otherBehavior) -> int { return 0; },
-		},
-		behavior);
-}
-
-bool moves_its_user(const ItemBehavior& behavior) noexcept
-{
-	return std::holds_alternative<Teleporter>(behavior);
-}
-
-bool targets_creatures(const ItemBehavior& behavior) noexcept
-{
-	return std::holds_alternative<TargetedScroll>(behavior);
-}
-
-bool hands_over_to_targeting(const ItemBehavior& behavior) noexcept
-{
-	const TargetedScroll* scroll = std::get_if<TargetedScroll>(&behavior);
-	return scroll != nullptr &&
-		(scroll->targetMode == TargetMode::PICK_TILE_SINGLE ||
-			scroll->targetMode == TargetMode::PICK_TILE_AOE);
-}
-
-namespace
-{
-
-	// The damage type a resistance effect answers for; empty for an effect that
-	// resists nothing.
-	std::optional<DamageType> resisted_type(MagicalEffect effect) noexcept
+	bool use(
+		[[maybe_unused]] JewelryAmulet& jewelryAmulet,
+		Item& owner,
+		Creature& wearer,
+		GameContext& ctx)
 	{
-		switch (effect)
+		return use_stat_boost(worn_slot(owner, ctx), owner, wearer, ctx);
+	}
+
+	bool use(
+		[[maybe_unused]] Gauntlets& gauntlets,
+		Item& owner,
+		Creature& wearer,
+		GameContext& ctx)
+	{
+		return use_stat_boost(worn_slot(owner, ctx), owner, wearer, ctx);
+	}
+
+	bool use(
+		[[maybe_unused]] Girdle& girdle,
+		Item& owner,
+		Creature& wearer,
+		GameContext& ctx)
+	{
+		return use_stat_boost(worn_slot(owner, ctx), owner, wearer, ctx);
+	}
+
+	bool use(
+		[[maybe_unused]] Shield& shield,
+		Item& owner,
+		Creature& wearer,
+		GameContext& ctx)
+	{
+		const bool success = wearer.toggle_shield(owner.uniqueId, ctx);
+		if (success)
 		{
-		case MagicalEffect::FIRE_RESISTANCE:
-		case MagicalEffect::BRILLIANCE:
+			Item* equipped = wearer.get_equipped_item(EquipmentSlot::LEFT_HAND);
+			if (equipped && equipped->uniqueId == owner.uniqueId)
+			{
+				ctx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					std::format("You raise the {}.", owner.get_name()),
+					MessageCompletion::FINISHED);
+			}
+			else
+			{
+				ctx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					std::format("You lower the {}.", owner.get_name()),
+					MessageCompletion::FINISHED);
+			}
+			return true;
+		}
+
+		// Could not be put on or taken off - a cursed item that will not come
+		// off: no turn.
+		return false;
+	}
+
+	bool use(
+		[[maybe_unused]] Teleporter& teleporter,
+		Item& owner,
+		Creature& wearer,
+		GameContext& ctx)
+	{
+		assert(ctx.map && "use(Teleporter): called without a map");
+
+		// Reading the scroll is the cost, so it is spent whether or not there
+		// is anywhere to go.
+		const std::optional<Vector2D> landing =
+			SpawnUtils::find_random_floor_tile(ctx);
+		if (!landing)
 		{
-			return DamageType::FIRE;
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"The magic finds nowhere to take you.",
+				MessageCompletion::FINISHED);
+			return consume_item(owner, wearer);
 		}
-		case MagicalEffect::COLD_RESISTANCE:
+
+		wearer.position = *landing;
+		ctx.map->compute_fov(ctx);
+		ctx.messageSystem->message(
+			ColorPairId::BLUE_BLACK,
+			"You feel disoriented as the world shifts around you!",
+			MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"You have been teleported to a new location.",
+			MessageCompletion::FINISHED);
+		return consume_item(owner, wearer);
+	}
+
+	// Identifies every other item in the wearer's pack that is not already
+	// fully identified, and says how many that was. The scroll never counts
+	// itself: it is consumed by the reading, so what it would learn about
+	// itself is never seen. It is consumed either way, and a pack that was
+	// already identified still burns it.
+	//
+	// Example, a pack holding the scroll, two unknown potions and one known
+	// sword:
+	//   use(scroll, scrollItem, player, ctx);
+	//   // -> true, "2 items identified!"
+	//   // a pack holding the scroll alone:
+	//   use(scroll, scrollItem, player, ctx);
+	//   // -> true, "All items were already identified."
+	bool use(
+		[[maybe_unused]] IdentifyScroll& identifyScroll,
+		Item& owner,
+		Creature& wearer,
+		GameContext& ctx)
+	{
+		int identifiedCount = 0;
+		for (auto& item : wearer.inventoryData.items)
 		{
-			return DamageType::COLD;
+			assert(
+				item &&
+				"identify scroll: the pack holds a null where an item should be");
+
+			if (item.get() != &owner && !item->is_fully_identified())
+			{
+				item->identify_all();
+				++identifiedCount;
+				assert(
+					ctx.floatingText &&
+					"use(IdentifyScroll): an item was identified with no floating text to show it");
+				ctx.floatingText->spawn_text(
+					wearer.position,
+					std::string(item->get_name()) + " identified!",
+					0,
+					255,
+					255,
+					2.0f);
+			}
 		}
-		default:
+		ctx.messageSystem->message(
+			ColorPairId::CYAN_BLACK,
+			identifiedCount > 0 ?
+				std::format(
+					"You use the {}. {} identified!",
+					owner.get_name(),
+					Wording::counted(identifiedCount, "item", "items")) :
+				std::format(
+					"You use the {}. All items were already identified.",
+					owner.get_name()),
+			MessageCompletion::FINISHED);
+		return consume_item(owner, wearer);
+	}
+
+	bool use(
+		[[maybe_unused]] Amulet& amulet,
+		[[maybe_unused]] Item& owner,
+		[[maybe_unused]] Creature& wearer,
+		GameContext& ctx)
+	{
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"The Amulet of Yendor glows brightly in your hands!",
+			MessageCompletion::FINISHED);
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"You feel a powerful magic enveloping you...",
+			MessageCompletion::FINISHED);
+		ctx.gameState->set_run_outcome(RunOutcome::VICTORY);
+		return false;
+	}
+
+	bool use(
+		[[maybe_unused]] DungeonKey& key,
+		[[maybe_unused]] Item& owner,
+		[[maybe_unused]] Creature& wearer,
+		GameContext& ctx)
+	{
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			"Bump into a locked door to use this key.",
+			MessageCompletion::FINISHED);
+		return false;
+	}
+
+	// ========== Variant-level dispatchers ==========
+
+	namespace
+	{
+
+		// Whether a worn helm's powers count: a helm of brilliance's only once
+		// its word is spoken, every other helm's as soon as it is on.
+		//
+		// Example:
+		//   is_helm_working(
+		//       MagicalHelm{
+		//           MagicalEffect::BRILLIANCE,
+		//           2,
+		//           HelmCommand::DORMANT });
+		//   // -> false
+		//   is_helm_working(
+		//       MagicalHelm{
+		//           MagicalEffect::BRILLIANCE, 2, HelmCommand::EMPOWERED });
+		//   // -> true
+		//   is_helm_working(
+		//       MagicalHelm{
+		//           MagicalEffect::PROTECTION,
+		//           3,
+		//           HelmCommand::DORMANT });
+		//   // -> true
+		bool is_helm_working(const MagicalHelm& helm) noexcept
 		{
-			return std::nullopt;
+			return helm.effect != MagicalEffect::BRILLIANCE ||
+				helm.command == HelmCommand::EMPOWERED;
+		}
+
+	} // namespace
+
+	bool use_item(
+		ItemBehavior& behavior,
+		Item& owner,
+		Creature& wearer,
+		GameContext& ctx)
+	{
+		return std::visit(
+			[&owner, &wearer, &ctx](auto& behavior) -> bool
+			{ return use(behavior, owner, wearer, ctx); },
+			behavior);
+	}
+
+	int get_item_ac_bonus(const ItemBehavior& behavior) noexcept
+	{
+		return std::visit(
+			VariantVisitor{
+				[](const Armor& armor) -> int { return armor.armorClass; },
+				[]([[maybe_unused]] const Shield& shield) -> int
+				{ return -1; }, // +1 AC in AD&D terms
+				[](const MagicalHelm& magicalHelm) -> int
+				{
+					return is_helm_working(magicalHelm) ?
+						MagicalEffectUtils::get_ac_bonus(
+							magicalHelm.effect,
+							magicalHelm.bonus) :
+						0;
+				},
+				[](const MagicalRing& magicalRing) -> int
+				{
+					return MagicalEffectUtils::get_ac_bonus(
+						magicalRing.effect,
+						magicalRing.bonus);
+				},
+				[]([[maybe_unused]] const auto& otherBehavior) -> int
+				{ return 0; },
+			},
+			behavior);
+	}
+
+	bool moves_its_user(const ItemBehavior& behavior) noexcept
+	{
+		return std::holds_alternative<Teleporter>(behavior);
+	}
+
+	bool targets_creatures(const ItemBehavior& behavior) noexcept
+	{
+		return std::holds_alternative<TargetedScroll>(behavior);
+	}
+
+	bool hands_over_to_targeting(const ItemBehavior& behavior) noexcept
+	{
+		const TargetedScroll* scroll = std::get_if<TargetedScroll>(&behavior);
+		return scroll != nullptr &&
+			(scroll->targetMode == TargetMode::PICK_TILE_SINGLE ||
+				scroll->targetMode == TargetMode::PICK_TILE_AOE);
+	}
+
+	namespace
+	{
+
+		// The damage type a resistance effect answers for; empty for an effect
+		// that resists nothing.
+		std::optional<DamageType> resisted_type(MagicalEffect effect) noexcept
+		{
+			switch (effect)
+			{
+			case MagicalEffect::FIRE_RESISTANCE:
+			case MagicalEffect::BRILLIANCE:
+			{
+				return DamageType::FIRE;
+			}
+			case MagicalEffect::COLD_RESISTANCE:
+			{
+				return DamageType::COLD;
+			}
+			default:
+			{
+				return std::nullopt;
+			}
+			}
+		}
+
+	} // namespace
+
+	int get_item_resistance_strength(
+		const ItemBehavior& behavior,
+		DamageType damageType) noexcept
+	{
+		// A ring or helm resists one type at its bonus; nothing else worn
+		// resists at all.
+		const auto percent_if =
+			[damageType](MagicalEffect effect, int bonus) -> int
+		{
+			const std::optional<DamageType> resisted = resisted_type(effect);
+			return resisted.has_value() && *resisted == damageType ? bonus : 0;
+		};
+		return std::visit(
+			VariantVisitor{
+				[&percent_if](const MagicalRing& ring) -> int
+				{ return percent_if(ring.effect, ring.bonus); },
+				[&percent_if](const MagicalHelm& helm) -> int
+				{
+					return is_helm_working(helm) ?
+						percent_if(helm.effect, helm.bonus) :
+						0;
+				},
+				[]([[maybe_unused]] const auto& otherBehavior) -> int
+				{ return 0; },
+			},
+			behavior);
+	}
+
+	// ========== Serialization ==========
+
+	void save_behavior(const ItemBehavior& behavior, json& output)
+	{
+		output["type"] = encode_pickable_type(pickable_type_of(behavior));
+		std::visit(
+			VariantVisitor{
+				[&output](const Consumable& consumable)
+				{
+					output["effect"] =
+						encode_consumable_effect(consumable.effect);
+					output["amount"] = to_text(consumable.amount);
+					output["duration"] = to_text(consumable.duration);
+					output["durationUnit"] =
+						encode_duration_unit(consumable.durationUnit);
+					output["buffType"] = encode_buff_type(consumable.buffType);
+					output["application"] =
+						encode_buff_application(consumable.application);
+					output["agesYears"] = consumable.agesYears;
+				},
+				[&output](const Weapon& weapon)
+				{
+					output["ranged"] = weapon.ranged;
+					output["handRequirement"] =
+						encode_hand_requirement(weapon.handRequirement);
+					output["weaponSize"] =
+						encode_weapon_size(weapon.weaponSize);
+					output["strengthRating"] = weapon.strengthRating;
+				},
+				[]([[maybe_unused]] const Shield& shield) {},
+				[&output](const TargetedScroll& targetedScroll)
+				{
+					output["targetMode"] =
+						encode_target_mode(targetedScroll.targetMode);
+					output["scrollAnimation"] =
+						encode_scroll_animation(targetedScroll.scrollAnimation);
+					output["range"] = targetedScroll.range;
+					output["damage"] = targetedScroll.damage;
+					output["confuseTurns"] = targetedScroll.confuseTurns;
+					output["buffType"] =
+						encode_buff_type(targetedScroll.buffType);
+					output["duration"] = to_text(targetedScroll.duration);
+					output["durationUnit"] =
+						encode_duration_unit(targetedScroll.durationUnit);
+				},
+				[]([[maybe_unused]] const Teleporter& teleporter) {},
+				[]([[maybe_unused]] const IdentifyScroll& identifyScroll) {},
+				[&output](const Gold& gold) { output["amount"] = gold.amount; },
+				[&output](const Food& food)
+				{ output["nutritionValue"] = food.nutritionValue; },
+				[&output](const CorpseFood& corpseFood)
+				{
+					output["nutritionValue"] = corpseFood.nutritionValue;
+					output["taste"] = corpseFood.taste;
+					output["edible"] = is_corpse_edible(corpseFood.edibility);
+				},
+				[&output](const Armor& armor)
+				{
+					output["armorClass"] = armor.armorClass;
+					output["armorMaterial"] =
+						encode_armor_material(armor.material);
+				},
+				[&output](const MagicalHelm& magicalHelm)
+				{
+					output["effect"] =
+						encode_magical_effect(magicalHelm.effect);
+					output["bonus"] = magicalHelm.bonus;
+					output["command"] =
+						encode_helm_command(magicalHelm.command);
+					output["rechargedAt"] = magicalHelm.rechargedAt;
+				},
+				[&output](const MagicalRing& magicalRing)
+				{
+					output["effect"] =
+						encode_magical_effect(magicalRing.effect);
+					output["bonus"] = magicalRing.bonus;
+				},
+				[&output](const JewelryAmulet& jewelryAmulet)
+				{ save_stat_boost(jewelryAmulet, output); },
+				[&output](const Gauntlets& gauntlets)
+				{ save_stat_boost(gauntlets, output); },
+				[&output](const Girdle& girdle)
+				{ save_stat_boost(girdle, output); },
+				[]([[maybe_unused]] const Amulet& amulet) {},
+				[]([[maybe_unused]] const DungeonKey& dungeonKey) {},
+			},
+			behavior);
+	}
+
+	ItemBehavior load_behavior(const json& source)
+	{
+		const PickableType type =
+			parse_pickable_type(source.at("type").get<std::string>());
+
+		switch (type)
+		{
+
+		case PickableType::CONSUMABLE:
+		{
+			Consumable consumable;
+			consumable.effect =
+				parse_consumable_effect(source.at("effect").get<std::string>());
+			consumable.amount =
+				parse_dice_expression(source.at("amount").get<std::string>());
+			consumable.duration =
+				parse_dice_expression(source.at("duration").get<std::string>());
+			consumable.durationUnit = parse_duration_unit(
+				source.at("durationUnit").get<std::string>());
+			consumable.buffType =
+				parse_buff_type(source.at("buffType").get<std::string>());
+			consumable.application = parse_buff_application(
+				source.at("application").get<std::string>());
+			consumable.agesYears = source.at("agesYears").get<int>();
+			return consumable;
+		}
+
+		case PickableType::WEAPON:
+		{
+			Weapon weapon;
+			weapon.ranged = source.at("ranged").get<bool>();
+			weapon.handRequirement = parse_hand_requirement(
+				source.at("handRequirement").get<std::string>());
+			weapon.weaponSize =
+				parse_weapon_size(source.at("weaponSize").get<std::string>());
+			weapon.strengthRating = source.at("strengthRating").get<int>();
+			return weapon;
+		}
+
+		case PickableType::SHIELD:
+		{
+			return Shield{};
+		}
+
+		case PickableType::TARGETED_SCROLL:
+		{
+			TargetedScroll targetedScroll;
+			targetedScroll.targetMode =
+				parse_target_mode(source.at("targetMode").get<std::string>());
+			targetedScroll.scrollAnimation = parse_scroll_animation(
+				source.at("scrollAnimation").get<std::string>());
+			targetedScroll.range = source.at("range").get<int>();
+			targetedScroll.damage = source.at("damage").get<int>();
+			targetedScroll.confuseTurns = source.at("confuseTurns").get<int>();
+			targetedScroll.buffType =
+				parse_buff_type(source.at("buffType").get<std::string>());
+			targetedScroll.duration =
+				parse_dice_expression(source.at("duration").get<std::string>());
+			targetedScroll.durationUnit = parse_duration_unit(
+				source.at("durationUnit").get<std::string>());
+			return targetedScroll;
+		}
+
+		case PickableType::TELEPORTER:
+		{
+			return Teleporter{};
+		}
+
+		case PickableType::IDENTIFY_SCROLL:
+		{
+			return IdentifyScroll{};
+		}
+
+		case PickableType::GOLD_COIN:
+		{
+			Gold gold;
+			gold.amount = source.at("amount").get<int>();
+			return gold;
+		}
+
+		case PickableType::FOOD:
+		{
+			Food food;
+			food.nutritionValue = source.at("nutritionValue").get<int>();
+			return food;
+		}
+
+		case PickableType::CORPSE_FOOD:
+		{
+			CorpseFood corpseFood;
+			corpseFood.nutritionValue = source.at("nutritionValue").get<int>();
+			corpseFood.taste = source.at("taste").get<std::string>();
+			corpseFood.edibility =
+				corpse_edibility_from_record(source.at("edible").get<bool>());
+			return corpseFood;
+		}
+
+		case PickableType::ARMOR:
+		{
+			Armor armor;
+			armor.armorClass = source.at("armorClass").get<int>();
+			armor.material = parse_armor_material(
+				source.at("armorMaterial").get<std::string>());
+			return armor;
+		}
+
+		case PickableType::MAGICAL_HELM:
+		{
+			MagicalHelm magicalHelm;
+			magicalHelm.effect =
+				parse_magical_effect(source.at("effect").get<std::string>());
+			magicalHelm.bonus = source.at("bonus").get<int>();
+			magicalHelm.command =
+				parse_helm_command(source.at("command").get<std::string>());
+			magicalHelm.rechargedAt = source.at("rechargedAt").get<int>();
+			return magicalHelm;
+		}
+
+		case PickableType::MAGICAL_RING:
+		{
+			MagicalRing magicalRing;
+			magicalRing.effect =
+				parse_magical_effect(source.at("effect").get<std::string>());
+			magicalRing.bonus = source.at("bonus").get<int>();
+			return magicalRing;
+		}
+
+		case PickableType::JEWELRY_AMULET:
+		{
+			JewelryAmulet jewelryAmulet;
+			load_stat_boost(jewelryAmulet, source);
+			return jewelryAmulet;
+		}
+
+		case PickableType::GAUNTLETS:
+		{
+			Gauntlets gauntlets;
+			load_stat_boost(gauntlets, source);
+			return gauntlets;
+		}
+
+		case PickableType::GIRDLE:
+		{
+			Girdle girdle;
+			load_stat_boost(girdle, source);
+			return girdle;
+		}
+
+		case PickableType::QUEST_ITEM:
+		{
+			return Amulet{};
+		}
+
+		case PickableType::DUNGEON_KEY:
+		{
+			return DungeonKey{};
 		}
 		}
+
+		// Every enumerator has its arm above, so only a value none names is
+		// here.
+		throw std::logic_error(
+			"load_behavior: a PickableType no enumerator names");
 	}
-
-} // namespace
-
-int get_item_resistance_strength(
-	const ItemBehavior& behavior,
-	DamageType damageType) noexcept
-{
-	// A ring or helm resists one type at its bonus; nothing else worn resists at all.
-	const auto percent_if = [damageType](MagicalEffect effect, int bonus) -> int
-	{
-		const std::optional<DamageType> resisted = resisted_type(effect);
-		return resisted.has_value() && *resisted == damageType ? bonus : 0;
-	};
-	return std::visit(
-		VariantVisitor{
-			[&percent_if](const MagicalRing& ring) -> int
-			{ return percent_if(ring.effect, ring.bonus); },
-			[&percent_if](const MagicalHelm& helm) -> int
-			{
-				return is_helm_working(helm) ?
-					percent_if(helm.effect, helm.bonus) :
-					0;
-			},
-			[]([[maybe_unused]] const auto& otherBehavior) -> int { return 0; },
-		},
-		behavior);
-}
-
-// ========== Serialization ==========
-
-void save_behavior(const ItemBehavior& behavior, json& output)
-{
-	output["type"] = encode_pickable_type(pickable_type_of(behavior));
-	std::visit(
-		VariantVisitor{
-			[&output](const Consumable& consumable)
-			{
-				output["effect"] = encode_consumable_effect(consumable.effect);
-				output["amount"] = to_text(consumable.amount);
-				output["duration"] = to_text(consumable.duration);
-				output["durationUnit"] =
-					encode_duration_unit(consumable.durationUnit);
-				output["buffType"] = encode_buff_type(consumable.buffType);
-				output["application"] =
-					encode_buff_application(consumable.application);
-				output["agesYears"] = consumable.agesYears;
-			},
-			[&output](const Weapon& weapon)
-			{
-				output["ranged"] = weapon.ranged;
-				output["handRequirement"] =
-					encode_hand_requirement(weapon.handRequirement);
-				output["weaponSize"] = encode_weapon_size(weapon.weaponSize);
-				output["strengthRating"] = weapon.strengthRating;
-			},
-			[]([[maybe_unused]] const Shield& shield) {},
-			[&output](const TargetedScroll& targetedScroll)
-			{
-				output["targetMode"] =
-					encode_target_mode(targetedScroll.targetMode);
-				output["scrollAnimation"] =
-					encode_scroll_animation(targetedScroll.scrollAnimation);
-				output["range"] = targetedScroll.range;
-				output["damage"] = targetedScroll.damage;
-				output["confuseTurns"] = targetedScroll.confuseTurns;
-				output["buffType"] = encode_buff_type(targetedScroll.buffType);
-				output["duration"] = to_text(targetedScroll.duration);
-				output["durationUnit"] =
-					encode_duration_unit(targetedScroll.durationUnit);
-			},
-			[]([[maybe_unused]] const Teleporter& teleporter) {},
-			[]([[maybe_unused]] const IdentifyScroll& identifyScroll) {},
-			[&output](const Gold& gold) { output["amount"] = gold.amount; },
-			[&output](const Food& food)
-			{ output["nutritionValue"] = food.nutritionValue; },
-			[&output](const CorpseFood& corpseFood)
-			{
-				output["nutritionValue"] = corpseFood.nutritionValue;
-				output["taste"] = corpseFood.taste;
-				output["edible"] = is_corpse_edible(corpseFood.edibility);
-			},
-			[&output](const Armor& armor)
-			{
-				output["armorClass"] = armor.armorClass;
-				output["armorMaterial"] = encode_armor_material(armor.material);
-			},
-			[&output](const MagicalHelm& magicalHelm)
-			{
-				output["effect"] = encode_magical_effect(magicalHelm.effect);
-				output["bonus"] = magicalHelm.bonus;
-				output["command"] = encode_helm_command(magicalHelm.command);
-				output["rechargedAt"] = magicalHelm.rechargedAt;
-			},
-			[&output](const MagicalRing& magicalRing)
-			{
-				output["effect"] = encode_magical_effect(magicalRing.effect);
-				output["bonus"] = magicalRing.bonus;
-			},
-			[&output](const JewelryAmulet& jewelryAmulet)
-			{ save_stat_boost(jewelryAmulet, output); },
-			[&output](const Gauntlets& gauntlets)
-			{ save_stat_boost(gauntlets, output); },
-			[&output](const Girdle& girdle)
-			{ save_stat_boost(girdle, output); },
-			[]([[maybe_unused]] const Amulet& amulet) {},
-			[]([[maybe_unused]] const DungeonKey& dungeonKey) {},
-		},
-		behavior);
-}
-
-ItemBehavior load_behavior(const json& source)
-{
-	const PickableType type =
-		parse_pickable_type(source.at("type").get<std::string>());
-
-	switch (type)
-	{
-
-	case PickableType::CONSUMABLE:
-	{
-		Consumable consumable;
-		consumable.effect =
-			parse_consumable_effect(source.at("effect").get<std::string>());
-		consumable.amount =
-			parse_dice_expression(source.at("amount").get<std::string>());
-		consumable.duration =
-			parse_dice_expression(source.at("duration").get<std::string>());
-		consumable.durationUnit =
-			parse_duration_unit(source.at("durationUnit").get<std::string>());
-		consumable.buffType =
-			parse_buff_type(source.at("buffType").get<std::string>());
-		consumable.application =
-			parse_buff_application(source.at("application").get<std::string>());
-		consumable.agesYears = source.at("agesYears").get<int>();
-		return consumable;
-	}
-
-	case PickableType::WEAPON:
-	{
-		Weapon weapon;
-		weapon.ranged = source.at("ranged").get<bool>();
-		weapon.handRequirement = parse_hand_requirement(
-			source.at("handRequirement").get<std::string>());
-		weapon.weaponSize =
-			parse_weapon_size(source.at("weaponSize").get<std::string>());
-		weapon.strengthRating = source.at("strengthRating").get<int>();
-		return weapon;
-	}
-
-	case PickableType::SHIELD:
-	{
-		return Shield{};
-	}
-
-	case PickableType::TARGETED_SCROLL:
-	{
-		TargetedScroll targetedScroll;
-		targetedScroll.targetMode =
-			parse_target_mode(source.at("targetMode").get<std::string>());
-		targetedScroll.scrollAnimation = parse_scroll_animation(
-			source.at("scrollAnimation").get<std::string>());
-		targetedScroll.range = source.at("range").get<int>();
-		targetedScroll.damage = source.at("damage").get<int>();
-		targetedScroll.confuseTurns = source.at("confuseTurns").get<int>();
-		targetedScroll.buffType =
-			parse_buff_type(source.at("buffType").get<std::string>());
-		targetedScroll.duration =
-			parse_dice_expression(source.at("duration").get<std::string>());
-		targetedScroll.durationUnit =
-			parse_duration_unit(source.at("durationUnit").get<std::string>());
-		return targetedScroll;
-	}
-
-	case PickableType::TELEPORTER:
-	{
-		return Teleporter{};
-	}
-
-	case PickableType::IDENTIFY_SCROLL:
-	{
-		return IdentifyScroll{};
-	}
-
-	case PickableType::GOLD_COIN:
-	{
-		Gold gold;
-		gold.amount = source.at("amount").get<int>();
-		return gold;
-	}
-
-	case PickableType::FOOD:
-	{
-		Food food;
-		food.nutritionValue = source.at("nutritionValue").get<int>();
-		return food;
-	}
-
-	case PickableType::CORPSE_FOOD:
-	{
-		CorpseFood corpseFood;
-		corpseFood.nutritionValue = source.at("nutritionValue").get<int>();
-		corpseFood.taste = source.at("taste").get<std::string>();
-		corpseFood.edibility =
-			corpse_edibility_from_record(source.at("edible").get<bool>());
-		return corpseFood;
-	}
-
-	case PickableType::ARMOR:
-	{
-		Armor armor;
-		armor.armorClass = source.at("armorClass").get<int>();
-		armor.material =
-			parse_armor_material(source.at("armorMaterial").get<std::string>());
-		return armor;
-	}
-
-	case PickableType::MAGICAL_HELM:
-	{
-		MagicalHelm magicalHelm;
-		magicalHelm.effect =
-			parse_magical_effect(source.at("effect").get<std::string>());
-		magicalHelm.bonus = source.at("bonus").get<int>();
-		magicalHelm.command =
-			parse_helm_command(source.at("command").get<std::string>());
-		magicalHelm.rechargedAt = source.at("rechargedAt").get<int>();
-		return magicalHelm;
-	}
-
-	case PickableType::MAGICAL_RING:
-	{
-		MagicalRing magicalRing;
-		magicalRing.effect =
-			parse_magical_effect(source.at("effect").get<std::string>());
-		magicalRing.bonus = source.at("bonus").get<int>();
-		return magicalRing;
-	}
-
-	case PickableType::JEWELRY_AMULET:
-	{
-		JewelryAmulet jewelryAmulet;
-		load_stat_boost(jewelryAmulet, source);
-		return jewelryAmulet;
-	}
-
-	case PickableType::GAUNTLETS:
-	{
-		Gauntlets gauntlets;
-		load_stat_boost(gauntlets, source);
-		return gauntlets;
-	}
-
-	case PickableType::GIRDLE:
-	{
-		Girdle girdle;
-		load_stat_boost(girdle, source);
-		return girdle;
-	}
-
-	case PickableType::QUEST_ITEM:
-	{
-		return Amulet{};
-	}
-
-	case PickableType::DUNGEON_KEY:
-	{
-		return DungeonKey{};
-	}
-	}
-
-	// Every enumerator has its arm above, so only a value none names is here.
-	throw std::logic_error("load_behavior: a PickableType no enumerator names");
-}
 
 } // namespace CppRL

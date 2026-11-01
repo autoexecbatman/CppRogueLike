@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/TreasureRoom.cpp",
-      "original": "\tint count = 0;\n\tfor (int row = room.top_wall(); row <= room.bottom_wall(); ++row)",
-      "mutated": "\tint count = 1;\n\tfor (int row = room.top_wall(); row <= room.bottom_wall(); ++row)",
+      "original": "\t\tint count = 0;\n\t\tfor (int row = room.top_wall(); row <= room.bottom_wall(); ++row)",
+      "mutated": "\t\tint count = 1;\n\t\tfor (int row = room.top_wall(); row <= room.bottom_wall(); ++row)",
       "catches": "the counter starting off by one, which proves the tests link this translation unit rather than a stale copy"
     },
     {
       "file": "src/TreasureRoom.cpp",
-      "original": "\t\t\tif (ctx.map->get_tile_type(Vector2D{ col, row }) == TileType::WATER)",
-      "mutated": "\t\t\tif (ctx.map->get_tile_type(Vector2D{ col, row }) != TileType::WALL)",
+      "original": "\t\t\t\tif (ctx.map->get_tile_type(Vector2D{ col, row }) ==\n\t\t\t\t\tTileType::WATER)",
+      "mutated": "\t\t\t\tif (ctx.map->get_tile_type(Vector2D{ col, row }) != TileType::WALL)",
       "catches": "the vault clearing every cell of its box that is not wall, so a corridor clipping a corner becomes a pocket of room floor"
     },
     {
@@ -39,14 +39,14 @@
     },
     {
       "file": "src/TreasureRoom.cpp",
-      "original": "\t\t\t\tif (room.contains((pos + dir).x, (pos + dir).y))\n\t\t\t\t{\n\t\t\t\t\t++count;",
-      "mutated": "\t\t\t\tif (room.contains((pos + dir).x, (pos + dir).y))\n\t\t\t\t{\n\t\t\t\t\tcount += 2;",
+      "original": "\t\t\t\t\tif (room.contains((pos + dir).x, (pos + dir).y))\n\t\t\t\t\t{\n\t\t\t\t\t\t++count;",
+      "mutated": "\t\t\t\t\tif (room.contains((pos + dir).x, (pos + dir).y))\n\t\t\t\t\t{\n\t\t\t\t\t\tcount += 2;",
       "catches": "each entrance counted twice"
     },
     {
       "file": "src/TreasureRoom.cpp",
-      "original": "\t\t\tfor (Vector2D dir : { DIR_N, DIR_S, DIR_E, DIR_W })\n\t\t\t{\n\t\t\t\tif (room.contains((pos + dir).x, (pos + dir).y))",
-      "mutated": "\t\t\tfor (Vector2D dir : { DIR_N, DIR_S })\n\t\t\t{\n\t\t\t\tif (room.contains((pos + dir).x, (pos + dir).y))",
+      "original": "\t\t\t\tfor (Vector2D dir : { DIR_N, DIR_S, DIR_E, DIR_W })\n\t\t\t\t{\n\t\t\t\t\tif (room.contains((pos + dir).x, (pos + dir).y))",
+      "mutated": "\t\t\t\tfor (Vector2D dir : { DIR_N, DIR_S })\n\t\t\t\t{\n\t\t\t\t\tif (room.contains((pos + dir).x, (pos + dir).y))",
       "catches": "a door in a side wall no longer recognised as an entrance"
     },
     {
@@ -63,8 +63,8 @@
     },
     {
       "file": "src/TreasureRoom.cpp",
-      "original": "\tif (candidates.empty())\n\t{\n\t\tunlock_all_room_entrances();\n\t\treturn;",
-      "mutated": "\tif (candidates.empty())\n\t{\n\t\treturn;",
+      "original": "\t\tif (candidates.empty())\n\t\t{\n\t\t\tunlock_all_room_entrances();\n\t\t\treturn;",
+      "mutated": "\t\tif (candidates.empty())\n\t\t{\n\t\t\treturn;",
       "catches": "the no-spawn path returning without rolling the locks back"
     }
   ]

@@ -8,31 +8,31 @@
 namespace CppRL
 {
 
-struct GameContext;
+	struct GameContext;
 
-class DeathMenu : public BaseMenu
-{
-private:
-	void render(GameContext& ctx) const;
-	void handle_input(GameContext& ctx);
+	class DeathMenu : public BaseMenu
+	{
+	private:
+		void render(GameContext& ctx) const;
+		void handle_input(GameContext& ctx);
 
-	int dungeonLevel{};
-	int playerLevel{};
-	int playerXp{};
-	int killCount{};
-	std::string playerClass{};
-	std::string playerRace{};
-	std::vector<std::string> recentMessages{};
+		int dungeonLevel{};
+		int playerLevel{};
+		int playerXp{};
+		int killCount{};
+		std::string playerClass{};
+		std::string playerRace{};
+		std::vector<std::string> recentMessages{};
 
-public:
-	DeathMenu(GameContext& ctx);
-	~DeathMenu() override = default;
-	DeathMenu(const DeathMenu&) = delete;
-	DeathMenu& operator=(const DeathMenu&) = delete;
-	DeathMenu(DeathMenu&&) = delete;
-	DeathMenu& operator=(DeathMenu&&) = delete;
+	public:
+		DeathMenu(GameContext& ctx);
+		~DeathMenu() override = default;
+		DeathMenu(const DeathMenu&) = delete;
+		DeathMenu& operator=(const DeathMenu&) = delete;
+		DeathMenu(DeathMenu&&) = delete;
+		DeathMenu& operator=(DeathMenu&&) = delete;
 
-	void menu(GameContext& ctx) override;
-};
+		void menu(GameContext& ctx) override;
+	};
 
 } // namespace CppRL

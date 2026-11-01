@@ -27,25 +27,25 @@
     },
     {
       "file": "src/PlayerController.h",
-      "original": "return confusionEndTime.has_value() && currentTime < *confusionEndTime;",
-      "mutated": "return confusionEndTime.has_value() && currentTime <= *confusionEndTime;",
+      "original": "return confusionEndTime.has_value() &&\n\t\t\t\tcurrentTime < *confusionEndTime;",
+      "mutated": "return confusionEndTime.has_value() &&\n\t\t\t\tcurrentTime <= *confusionEndTime;",
       "catches": "a confusion lasting into the reading it ends at"
     },
     {
       "file": "src/PlayerController.h",
-      "original": "return confusionEndTime.has_value() && currentTime < *confusionEndTime;",
+      "original": "return confusionEndTime.has_value() &&\n\t\t\t\tcurrentTime < *confusionEndTime;",
       "mutated": "return confusionEndTime.has_value();",
       "catches": "a confusion that never ends by the clock"
     },
     {
       "file": "src/PlayerController.cpp",
-      "original": "\tconfusionEndTime = endTime.is_null() ?\n\t\tstd::nullopt :\n\t\tstd::optional<int>{ endTime.get<int>() };",
-      "mutated": "\tconfusionEndTime =std::optional<int>{ endTime.get<int>() };",
+      "original": "\t\tconfusionEndTime = endTime.is_null() ?\n\t\t\tstd::nullopt :\n\t\t\tstd::optional<int>{ endTime.get<int>() };",
+      "mutated": "\t\tconfusionEndTime =std::optional<int>{ endTime.get<int>() };",
       "catches": "a load that cannot read a player with no confusion pending"
     },
     {
       "file": "src/AiMimic.cpp",
-      "original": "\t\t\tctx.player()->apply_confusion(\n\t\t\t\tconfusionDuration,\n\t\t\t\tctx.gameState->get_time());\n",
+      "original": "\t\t\t\tctx.player()->apply_confusion(\n\t\t\t\t\tconfusionDuration,\n\t\t\t\t\tctx.gameState->get_time());\n",
       "mutated": "",
       "catches": "a mimic's reveal that confuses nobody"
     }

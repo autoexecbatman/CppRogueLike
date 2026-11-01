@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/CostOverlay.cpp",
-      "original": "\tif (!cost)\n\t{\n\t\treturn std::nullopt;\n\t}",
-      "mutated": "\tif (false)\n\t{\n\t\treturn std::nullopt;\n\t}",
+      "original": "\t\tif (!cost)\n\t\t{\n\t\t\treturn std::nullopt;\n\t\t}",
+      "mutated": "\t\tif (false)\n\t\t{\n\t\t\treturn std::nullopt;\n\t\t}",
       "catches": "a tile the flood never reached given a label, reading a cost that is not there"
     },
     {
@@ -27,8 +27,8 @@
     },
     {
       "file": "src/CostOverlay.cpp",
-      "original": "\tif (farthestCost == 0)\n\t{\n\t\treturn DebugUtils::COST_NEAR_TINT;\n\t}",
-      "mutated": "\tif (farthestCost == 0)\n\t{\n\t\treturn DebugUtils::COST_FAR_TINT;\n\t}",
+      "original": "\t\tif (farthestCost == 0)\n\t\t{\n\t\t\treturn DebugUtils::COST_NEAR_TINT;\n\t\t}",
+      "mutated": "\t\tif (farthestCost == 0)\n\t\t{\n\t\t\treturn DebugUtils::COST_FAR_TINT;\n\t\t}",
       "catches": "the player's own tile drawn as the far end when it is the only tile reached"
     },
     {

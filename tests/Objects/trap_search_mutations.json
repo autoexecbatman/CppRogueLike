@@ -51,8 +51,8 @@
     },
     {
       "file": "src/Trap.cpp",
-      "original": "trap->position.chebyshev_distance_to(searcher.position) !=\n\t\t\t\tSEARCH_REACH",
-      "mutated": "trap->position.chebyshev_distance_to(searcher.position)> SEARCH_REACH + 1",
+      "original": "\ttrap->position.chebyshev_distance_to(searcher.position) !=\n\t\t\t\t\tSEARCH_REACH",
+      "mutated": "\ttrap->position.chebyshev_distance_to(searcher.position)> SEARCH_REACH + 1",
       "catches": "a search reaching two tiles"
     },
     {
@@ -75,8 +75,8 @@
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\tstate = TrapState::DETECTED;\n\tremove_state(ActorState::IS_INVISIBLE);\n\treturn TrapSearchResult::FOUND;",
-      "mutated": "\tstate = TrapState::DETECTED;\n\treturn TrapSearchResult::FOUND;",
+      "original": "\t\tstate = TrapState::DETECTED;\n\t\tremove_state(ActorState::IS_INVISIBLE);\n\t\treturn TrapSearchResult::FOUND;",
+      "mutated": "\t\tstate = TrapState::DETECTED;\n\t\treturn TrapSearchResult::FOUND;",
       "catches": "a found trap that stays invisible"
     },
     {

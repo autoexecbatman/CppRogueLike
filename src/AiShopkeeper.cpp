@@ -11,36 +11,39 @@
 namespace CppRL
 {
 
-void AiShopkeeper::update(Creature& owner, [[maybe_unused]] GameContext& ctx)
-{
-	assert(
-		owner.ai != nullptr &&
-		"AiShopkeeper::update called on creature with null ai");
-
-	if (owner.is_dead())
+	void AiShopkeeper::update(
+		Creature& owner,
+		[[maybe_unused]] GameContext& ctx)
 	{
-		return;
+		assert(
+			owner.ai != nullptr &&
+			"AiShopkeeper::update called on creature with null ai");
+
+		if (owner.is_dead())
+		{
+			return;
+		}
+
+		// TODO: implement shopkeeper idle behavior (tend shop, wander near
+		// spawn point)
 	}
 
-	// TODO: implement shopkeeper idle behavior (tend shop, wander near spawn point)
-}
+	void AiShopkeeper::on_created(Creature& owner, GameContext& ctx)
+	{
+		assert(
+			ctx.levelManager &&
+			"AiShopkeeper::on_created: called without a levelManager");
+		ShopkeeperFactory::open_shop(
+			owner,
+			ctx.levelManager->get_dungeon_level(),
+			ctx);
+	}
 
-void AiShopkeeper::on_created(Creature& owner, GameContext& ctx)
-{
-	assert(
-		ctx.levelManager &&
-		"AiShopkeeper::on_created: called without a levelManager");
-	ShopkeeperFactory::open_shop(
-		owner,
-		ctx.levelManager->get_dungeon_level(),
-		ctx);
-}
+	void AiShopkeeper::load([[maybe_unused]] const json& source) {}
 
-void AiShopkeeper::load([[maybe_unused]] const json& source) {}
-
-void AiShopkeeper::save(json& output)
-{
-	output["type"] = encode_ai_type(get_ai_type());
-}
+	void AiShopkeeper::save(json& output)
+	{
+		output["type"] = encode_ai_type(get_ai_type());
+	}
 
 } // namespace CppRL

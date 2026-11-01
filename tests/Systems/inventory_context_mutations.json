@@ -16,7 +16,7 @@
     {
       "file": "src/InventoryUI.cpp",
       "original": "\t\treturn { \"Unequip\", \"Drop\", \"Cancel\" };",
-      "mutated": "\t\treturn { \"Use\", \"Drop\", \"Cancel\" };",
+      "mutated": "\t\t\treturn { \"Use\", \"Drop\", \"Cancel\" };",
       "catches": "a worn item offered Use, which puts it on again rather than taking it off"
     },
     {
@@ -27,7 +27,7 @@
     },
     {
       "file": "src/InventoryUI.cpp",
-      "original": "\t\tif (!rowHoldsItem)\n\t\t{\n\t\t\treturn {};\n\t\t}\n\t\treturn { \"Use\", \"Drop\", \"Cancel\" };",
+      "original": "\t\t\tif (!rowHoldsItem)\n\t\t\t{\n\t\t\t\treturn {};\n\t\t\t}\n\t\t\treturn { \"Use\", \"Drop\", \"Cancel\" };",
       "mutated": "\t\treturn { \"Use\", \"Drop\", \"Cancel\" };",
       "catches": "a category heading offered item actions, so a menu opens on a row that is not an item"
     },

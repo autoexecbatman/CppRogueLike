@@ -29,526 +29,551 @@
 namespace CppRL
 {
 
-// Spider AI constants
-namespace
-{
-	// How long spiders stay in ambush mode
-	constexpr int AMBUSH_DURATION = 5;
-	// % chance to enter ambush mode when not seen
-	constexpr int AMBUSH_CHANCE = 30;
-	// The venom lands a round after the bite, as the spider's entry says.
-	constexpr int HAIRY_SPIDER_VENOM_ONSET_ROUNDS = 1;
-	// "Victims receive a +2 bonus to saving throws vs. the hairy spiders' weak
-	// poison."
-	constexpr int HAIRY_SPIDER_SAVE_BONUS = 2;
-	// PHB: surprised on a 1, 2 or 3 of 1d10
-	constexpr int SURPRISED_AT_OR_BELOW = 3;
-
-	// Rolls the surprise check an ambush's victim makes (PHB, The Surprise
-	// Roll): 1d10 plus the Dexterity reaction adjustment, surprised at 3 or
-	// less. The roll is the answer, so every call spends a die.
-	//
-	// Example, Dexterity 17, reaction adjustment +2:
-	//   is_surprised(player, ctx);
-	//   // -> true on a 1, false on a 2 (2 + 2 is 4)
-	bool is_surprised(const Creature& creature, GameContext& ctx)
+	// Spider AI constants
+	namespace
 	{
-		assert(ctx.dataManager && "is_surprised: called without a dataManager");
-		assert(ctx.dice && "is_surprised: called without dice");
+		// How long spiders stay in ambush mode
+		constexpr int AMBUSH_DURATION = 5;
+		// % chance to enter ambush mode when not seen
+		constexpr int AMBUSH_CHANCE = 30;
+		// The venom lands a round after the bite, as the spider's entry says.
+		constexpr int HAIRY_SPIDER_VENOM_ONSET_ROUNDS = 1;
+		// "Victims receive a +2 bonus to saving throws vs. the hairy spiders'
+		// weak poison."
+		constexpr int HAIRY_SPIDER_SAVE_BONUS = 2;
+		// PHB: surprised on a 1, 2 or 3 of 1d10
+		constexpr int SURPRISED_AT_OR_BELOW = 3;
 
-		const int reactionAdjustment =
-			ctx.dataManager->dexterity_for(creature.get_dexterity())
-				.ReactionAdj;
-		return ctx.dice->roll(1, 10) + reactionAdjustment <=
-			SURPRISED_AT_OR_BELOW;
-	}
-} // namespace
-
-//=============================================================================
-// AiSpider Implementation
-//=============================================================================
-
-void AiSpider::update(Creature& owner, GameContext& ctx)
-{
-	assert(ctx.map && "AiSpider::update: called without a map");
-	assert(ctx.dice && "AiSpider::update: called without dice");
-
-	// Skip if spider is dead
-	if (owner.is_dead())
-	{
-		return;
-	}
-
-	// Whether this turn is the one the ambush was discovered in, close enough to strike.
-	bool ambushSprung = false;
-
-	// Handle ambush behavior - this was missing in the previous fix
-	if (isAmbushing)
-	{
-		// If player spots us while ambushing, or ambush time is up, stop ambushing
-		if (ctx.map->is_in_fov(owner.position) ||
-			ctx.gameState->get_time() >= ambushEndTime)
+		// Rolls the surprise check an ambush's victim makes (PHB, The Surprise
+		// Roll): 1d10 plus the Dexterity reaction adjustment, surprised at 3 or
+		// less. The roll is the answer, so every call spends a die.
+		//
+		// Example, Dexterity 17, reaction adjustment +2:
+		//   is_surprised(player, ctx);
+		//   // -> true on a 1, false on a 2 (2 + 2 is 4)
+		bool is_surprised(const Creature& creature, GameContext& ctx)
 		{
-			isAmbushing = false;
+			assert(
+				ctx.dataManager &&
+				"is_surprised: called without a dataManager");
+			assert(ctx.dice && "is_surprised: called without dice");
 
-			// Discovered close by, it springs. Beside the player, the ambush is its
-			// ordinary bite below, after the sanctuary check.
-			const int distanceToPlayer =
+			const int reactionAdjustment =
+				ctx.dataManager->dexterity_for(creature.get_dexterity())
+					.ReactionAdj;
+			return ctx.dice->roll(1, 10) + reactionAdjustment <=
+				SURPRISED_AT_OR_BELOW;
+		}
+	} // namespace
+
+	//==========================================================================
+	// AiSpider Implementation
+	//==========================================================================
+
+	void AiSpider::update(Creature& owner, GameContext& ctx)
+	{
+		assert(ctx.map && "AiSpider::update: called without a map");
+		assert(ctx.dice && "AiSpider::update: called without dice");
+
+		// Skip if spider is dead
+		if (owner.is_dead())
+		{
+			return;
+		}
+
+		// Whether this turn is the one the ambush was discovered in, close
+		// enough to strike.
+		bool ambushSprung = false;
+
+		// Handle ambush behavior - this was missing in the previous fix
+		if (isAmbushing)
+		{
+			// If player spots us while ambushing, or ambush time is up, stop
+			// ambushing
+			if (ctx.map->is_in_fov(owner.position) ||
+				ctx.gameState->get_time() >= ambushEndTime)
+			{
+				isAmbushing = false;
+
+				// Discovered close by, it springs. Beside the player, the
+				// ambush is its ordinary bite below, after the sanctuary check.
+				const int distanceToPlayer =
+					owner.get_tile_distance(ctx.player()->position);
+				if (ctx.map->is_in_fov(owner.position) && distanceToPlayer <= 3)
+				{
+					ctx.messageSystem->message(
+						owner.actorData.color,
+						owner.actorData.name,
+						MessageCompletion::CONTINUED);
+					ctx.messageSystem->message(
+						ColorPairId::WHITE_BLACK,
+						" ambushes you from hiding!",
+						MessageCompletion::FINISHED);
+					ambushSprung = true;
+				}
+			}
+			else
+			{
+				// Stay still while ambushing - don't reveal position
+				return;
+			}
+		}
+		else if (!ctx.map->is_in_fov(owner.position))
+		{
+			// Not in player's FOV, consider setting an ambush
+			// Higher chance when player is near but doesn't see the spider
+			int playerDistance =
 				owner.get_tile_distance(ctx.player()->position);
-			if (ctx.map->is_in_fov(owner.position) && distanceToPlayer <= 3)
+			int ambushChance = AMBUSH_CHANCE;
+
+			// Increase chance when player is nearby but doesn't see us
+			if (playerDistance <= 10)
+			{
+				ambushChance += 20; // Higher ambush chance when player is close
+			}
+
+			if (ctx.dice->d100() <= ambushChance)
+			{
+				// Find a good ambush position
+				std::optional<Vector2D> ambushPos =
+					find_ambush_position(owner, ctx.player()->position, ctx);
+
+				if (ambushPos)
+				{
+					// A leap to the ambush spot rather than a step, so nothing
+					// between here and there - a door, a trap - has a say.
+					owner.position = *ambushPos;
+					isAmbushing = true;
+					ambushEndTime =
+						expiry_time(ctx.gameState->get_time(), AMBUSH_DURATION);
+
+					ctx.messageSystem->log(
+						std::format(
+							"Spider setting ambush at {},{}",
+							ambushPos->x,
+							ambushPos->y));
+
+					return;
+				}
+			}
+		}
+
+		// Special check for being adjacent to player - DIRECT ATTACK CODE
+		int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
+		if (distanceToPlayer <= 1 && ctx.map->is_in_fov(owner.position))
+		{
+			// Directly trigger attack
+			ctx.messageSystem->log("Spider attempting attack with poison");
+			bite(owner, *ctx.player(), ctx);
+
+			// PHB: the ambushed victim rolls for surprise after the bite; a
+			// spider Sanctuary turned away gets no round. The surprise roll
+			// comes last because it spends a die, and only a round that can
+			// happen should.
+			if (ambushSprung && !ctx.player()->is_dead() &&
+				!ctx.buffSystem
+					->is_turned_away_by_sanctuary(owner, *ctx.player(), ctx) &&
+				is_surprised(*ctx.player(), ctx))
 			{
 				ctx.messageSystem->message(
-					owner.actorData.color,
-					owner.actorData.name,
-					MessageCompletion::CONTINUED);
-				ctx.messageSystem->message(
 					ColorPairId::WHITE_BLACK,
-					" ambushes you from hiding!",
+					"You are caught off guard!",
 					MessageCompletion::FINISHED);
-				ambushSprung = true;
+				ctx.player()->add_state(ActorState::IS_SURPRISED);
+				bite(owner, *ctx.player(), ctx);
+				ctx.player()->remove_state(ActorState::IS_SURPRISED);
 			}
+
+			return;
+		}
+
+		owner.update_awareness(ctx);
+
+		// Movement logic
+		if (owner.is_aware(ctx.gameState->get_time()))
+		{
+			// Move toward player
+			move_toward_player(owner, ctx);
 		}
 		else
 		{
-			// Stay still while ambushing - don't reveal position
-			return;
+			// Occasional random movement
+			if (ctx.dice->d20() == 1)
+			{
+				random_move(owner, ctx);
+			}
 		}
 	}
-	else if (!ctx.map->is_in_fov(owner.position))
+
+	void AiSpider::move_toward_player(Creature& owner, GameContext& ctx)
 	{
-		// Not in player's FOV, consider setting an ambush
-		// Higher chance when player is near but doesn't see the spider
-		int playerDistance = owner.get_tile_distance(ctx.player()->position);
-		int ambushChance = AMBUSH_CHANCE;
+		// Get direction to player
+		Vector2D dirToPlayer = ctx.player()->position - owner.position;
+		int stepCol = (dirToPlayer.x != 0) ? (dirToPlayer.x > 0 ? 1 : -1) : 0;
+		int stepRow = (dirToPlayer.y != 0) ? (dirToPlayer.y > 0 ? 1 : -1) : 0;
 
-		// Increase chance when player is nearby but doesn't see us
-		if (playerDistance <= 10)
+		// Straight at the player, then along each axis alone; the first step
+		// that is not refused is the turn. An axis the player shares with the
+		// spider is no step at all.
+		for (
+			const Vector2D& direction : {
+				Vector2D{ stepCol, stepRow },
+				Vector2D{ stepCol, 0 },
+				Vector2D{ 0, stepRow },
+			})
 		{
-			ambushChance += 20; // Higher ambush chance when player is close
-		}
-
-		if (ctx.dice->d100() <= ambushChance)
-		{
-			// Find a good ambush position
-			std::optional<Vector2D> ambushPos =
-				find_ambush_position(owner, ctx.player()->position, ctx);
-
-			if (ambushPos)
+			if (direction == Vector2D{ 0, 0 })
 			{
-				// A leap to the ambush spot rather than a step, so nothing between here and
-				// there - a door, a trap - has a say.
-				owner.position = *ambushPos;
-				isAmbushing = true;
-				ambushEndTime =
-					expiry_time(ctx.gameState->get_time(), AMBUSH_DURATION);
-
-				ctx.messageSystem->log(
-					std::format(
-						"Spider setting ambush at {},{}",
-						ambushPos->x,
-						ambushPos->y));
-
+				continue;
+			}
+			if (Pathfinding::step(owner, owner.position + direction, ctx) !=
+				Pathfinding::StepResult::REFUSED)
+			{
 				return;
 			}
 		}
 	}
 
-	// Special check for being adjacent to player - DIRECT ATTACK CODE
-	int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
-	if (distanceToPlayer <= 1 && ctx.map->is_in_fov(owner.position))
+	void AiSpider::random_move(Creature& owner, GameContext& ctx)
 	{
-		// Directly trigger attack
-		ctx.messageSystem->log("Spider attempting attack with poison");
-		bite(owner, *ctx.player(), ctx);
+		assert(ctx.dice && "AiSpider::random_move: called without dice");
 
-		// PHB: the ambushed victim rolls for surprise after the bite; a spider Sanctuary turned away gets no round.
-		// The surprise roll comes last because it spends a die, and only a round that can happen should.
-		if (ambushSprung && !ctx.player()->is_dead() &&
-			!ctx.buffSystem
-				->is_turned_away_by_sanctuary(owner, *ctx.player(), ctx) &&
-			is_surprised(*ctx.player(), ctx))
+		int deltaCol = ctx.dice->roll(-1, 1);
+		int deltaRow = ctx.dice->roll(-1, 1);
+
+		if (deltaCol != 0 || deltaRow != 0)
 		{
-			ctx.messageSystem->message(
-				ColorPairId::WHITE_BLACK,
-				"You are caught off guard!",
-				MessageCompletion::FINISHED);
-			ctx.player()->add_state(ActorState::IS_SURPRISED);
-			bite(owner, *ctx.player(), ctx);
-			ctx.player()->remove_state(ActorState::IS_SURPRISED);
-		}
-
-		return;
-	}
-
-	owner.update_awareness(ctx);
-
-	// Movement logic
-	if (owner.is_aware(ctx.gameState->get_time()))
-	{
-		// Move toward player
-		move_toward_player(owner, ctx);
-	}
-	else
-	{
-		// Occasional random movement
-		if (ctx.dice->d20() == 1)
-		{
-			random_move(owner, ctx);
+			Pathfinding::step(
+				owner,
+				owner.position + Vector2D{ deltaCol, deltaRow },
+				ctx);
 		}
 	}
-}
 
-void AiSpider::move_toward_player(Creature& owner, GameContext& ctx)
-{
-	// Get direction to player
-	Vector2D dirToPlayer = ctx.player()->position - owner.position;
-	int stepCol = (dirToPlayer.x != 0) ? (dirToPlayer.x > 0 ? 1 : -1) : 0;
-	int stepRow = (dirToPlayer.y != 0) ? (dirToPlayer.y > 0 ? 1 : -1) : 0;
-
-	// Straight at the player, then along each axis alone; the first step that is not
-	// refused is the turn. An axis the player shares with the spider is no step at all.
-	for (
-		const Vector2D& direction : {
-			Vector2D{ stepCol, stepRow },
-			Vector2D{ stepCol, 0 },
-			Vector2D{ 0, stepRow },
-		})
+	void AiSpider::move_or_attack(
+		Creature& owner,
+		Creature& target,
+		GameContext& ctx)
 	{
-		if (direction == Vector2D{ 0, 0 })
+		assert(ctx.map && "AiSpider::move_or_attack: called without a map");
+
+		// Get distance to target
+		int distanceToTarget = owner.get_tile_distance(target.position);
+
+		// If adjacent to target, attack
+		if (distanceToTarget <= 1)
 		{
-			continue;
-		}
-		if (Pathfinding::step(owner, owner.position + direction, ctx) !=
-			Pathfinding::StepResult::REFUSED)
-		{
+			bite(owner, target, ctx);
 			return;
 		}
-	}
-}
 
-void AiSpider::random_move(Creature& owner, GameContext& ctx)
-{
-	assert(ctx.dice && "AiSpider::random_move: called without dice");
+		// Spider prefers to move along walls if possible
+		std::vector<Vector2D> possibleMoves;
 
-	int deltaCol = ctx.dice->roll(-1, 1);
-	int deltaRow = ctx.dice->roll(-1, 1);
-
-	if (deltaCol != 0 || deltaRow != 0)
-	{
-		Pathfinding::step(
-			owner,
-			owner.position + Vector2D{ deltaCol, deltaRow },
-			ctx);
-	}
-}
-
-void AiSpider::move_or_attack(
-	Creature& owner,
-	Creature& target,
-	GameContext& ctx)
-{
-	assert(ctx.map && "AiSpider::move_or_attack: called without a map");
-
-	// Get distance to target
-	int distanceToTarget = owner.get_tile_distance(target.position);
-
-	// If adjacent to target, attack
-	if (distanceToTarget <= 1)
-	{
-		bite(owner, target, ctx);
-		return;
-	}
-
-	// Spider prefers to move along walls if possible
-	std::vector<Vector2D> possibleMoves;
-
-	// Get possible moves (all adjacent tiles)
-	for (int deltaRow = -1; deltaRow <= 1; deltaRow++)
-	{
-		for (int deltaCol = -1; deltaCol <= 1; deltaCol++)
+		// Get possible moves (all adjacent tiles)
+		for (int deltaRow = -1; deltaRow <= 1; deltaRow++)
 		{
-			if (deltaCol == 0 && deltaRow == 0)
+			for (int deltaCol = -1; deltaCol <= 1; deltaCol++)
 			{
-				continue; // Skip current position
-			}
-
-			Vector2D newPos = owner.position + Vector2D{ deltaCol, deltaRow };
-
-			// Check if position is walkable and not occupied
-			if (Pathfinding::can_enter(owner, newPos, ctx))
-			{
-				// Check if this position is adjacent to a wall
-				bool adjacentToWall = false;
-				for (int wallDeltaRow = -1; wallDeltaRow <= 1; wallDeltaRow++)
+				if (deltaCol == 0 && deltaRow == 0)
 				{
-					for (
-						int wallDeltaCol = -1; wallDeltaCol <= 1;
-						wallDeltaCol++)
-					{
-						if (wallDeltaCol == 0 && wallDeltaRow == 0)
-						{
-							continue;
-						}
+					continue; // Skip current position
+				}
 
-						Vector2D wallCheck =
-							newPos + Vector2D{ wallDeltaCol, wallDeltaRow };
-						if (ctx.map->is_wall(wallCheck))
+				Vector2D newPos =
+					owner.position + Vector2D{ deltaCol, deltaRow };
+
+				// Check if position is walkable and not occupied
+				if (Pathfinding::can_enter(owner, newPos, ctx))
+				{
+					// Check if this position is adjacent to a wall
+					bool adjacentToWall = false;
+					for (
+						int wallDeltaRow = -1; wallDeltaRow <= 1;
+						wallDeltaRow++)
+					{
+						for (
+							int wallDeltaCol = -1; wallDeltaCol <= 1;
+							wallDeltaCol++)
 						{
-							adjacentToWall = true;
+							if (wallDeltaCol == 0 && wallDeltaRow == 0)
+							{
+								continue;
+							}
+
+							Vector2D wallCheck =
+								newPos + Vector2D{ wallDeltaCol, wallDeltaRow };
+							if (ctx.map->is_wall(wallCheck))
+							{
+								adjacentToWall = true;
+								break;
+							}
+						}
+						if (adjacentToWall)
+						{
 							break;
 						}
 					}
+
+					// If adjacent to wall, add to list (higher priority)
 					if (adjacentToWall)
 					{
-						break;
+						possibleMoves.insert(possibleMoves.begin(), newPos);
 					}
-				}
-
-				// If adjacent to wall, add to list (higher priority)
-				if (adjacentToWall)
-				{
-					possibleMoves.insert(possibleMoves.begin(), newPos);
-				}
-				else
-				{
-					possibleMoves.push_back(newPos);
+					else
+					{
+						possibleMoves.push_back(newPos);
+					}
 				}
 			}
 		}
-	}
 
-	// If we have no moves, use default pathfinding
-	if (possibleMoves.empty())
-	{
-		AiMonster::move_or_attack(owner, target, ctx);
-		return;
-	}
-
-	// Find best move toward target
-	Vector2D bestMove = owner.position;
-	int bestDistance = std::numeric_limits<int>::max();
-
-	for (const auto& move : possibleMoves)
-	{
-		int distance = move.manhattan_distance_to(target.position);
-		if (distance < bestDistance)
+		// If we have no moves, use default pathfinding
+		if (possibleMoves.empty())
 		{
-			bestDistance = distance;
-			bestMove = move;
+			AiMonster::move_or_attack(owner, target, ctx);
+			return;
+		}
+
+		// Find best move toward target
+		Vector2D bestMove = owner.position;
+		int bestDistance = std::numeric_limits<int>::max();
+
+		for (const auto& move : possibleMoves)
+		{
+			int distance = move.manhattan_distance_to(target.position);
+			if (distance < bestDistance)
+			{
+				bestDistance = distance;
+				bestMove = move;
+			}
+		}
+
+		// Move to best position; the step refuses a tile another creature has
+		// taken.
+		if (bestMove != owner.position)
+		{
+			Pathfinding::step(owner, bestMove, ctx);
 		}
 	}
 
-	// Move to best position; the step refuses a tile another creature has taken.
-	if (bestMove != owner.position)
+	void AiSpider::bite(Creature& owner, Creature& target, GameContext& ctx)
 	{
-		Pathfinding::step(owner, bestMove, ctx);
-	}
-}
+		const AttackResult result =
+			owner.attacker->attack(target, AttackKind::MELEE, ctx);
 
-void AiSpider::bite(Creature& owner, Creature& target, GameContext& ctx)
-{
-	const AttackResult result =
-		owner.attacker->attack(target, AttackKind::MELEE, ctx);
+		// Poison "must be injected into the bloodstream by bite or sting" (DMG,
+		// PDF page 736), so a bite that never landed injects nothing.
+		if (result != AttackResult::LANDED)
+		{
+			return;
+		}
 
-	// Poison "must be injected into the bloodstream by bite or sting" (DMG, PDF page 736),
-	// so a bite that never landed injects nothing.
-	if (result != AttackResult::LANDED)
-	{
-		return;
+		inject_venom(owner, target, ctx);
 	}
 
-	inject_venom(owner, target, ctx);
-}
-
-void AiSpider::inject_venom(Creature& owner, Creature& target, GameContext& ctx)
-{
-	assert(
-		ctx.dataManager &&
-		"AiSpider::inject_venom: called without a dataManager");
-	assert(ctx.dice && "AiSpider::inject_venom: called without dice");
-
-	// Monstrous Manual hairy spider: +2 to save; on a failure -1 AC and attack after one round, for 1d4+1 rounds.
-	// Its Dexterity-check penalty is left out: the game has no check separate from the score.
-	const int constitutionAdjustment =
-		ctx.dataManager->constitution_for(target.get_constitution()).PoisonSave;
-	if (SavingThrows::is_made(
-			target,
-			SavingThrow::PARALYZATION_POISON_DEATH,
-			HAIRY_SPIDER_SAVE_BONUS + constitutionAdjustment,
-			ctx))
+	void AiSpider::inject_venom(
+		Creature& owner,
+		Creature& target,
+		GameContext& ctx)
 	{
+		assert(
+			ctx.dataManager &&
+			"AiSpider::inject_venom: called without a dataManager");
+		assert(ctx.dice && "AiSpider::inject_venom: called without dice");
+
+		// Monstrous Manual hairy spider: +2 to save; on a failure -1 AC and
+		// attack after one round, for 1d4+1 rounds. Its Dexterity-check penalty
+		// is left out: the game has no check separate from the score.
+		const int constitutionAdjustment =
+			ctx.dataManager->constitution_for(target.get_constitution())
+				.PoisonSave;
+		if (SavingThrows::is_made(
+				target,
+				SavingThrow::PARALYZATION_POISON_DEATH,
+				HAIRY_SPIDER_SAVE_BONUS + constitutionAdjustment,
+				ctx))
+		{
+			ctx.messageSystem->message(
+				owner.actorData.color,
+				owner.actorData.name,
+				MessageCompletion::CONTINUED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				" injects a weak poison, and it does not take hold.",
+				MessageCompletion::FINISHED);
+			return;
+		}
+
 		ctx.messageSystem->message(
 			owner.actorData.color,
 			owner.actorData.name,
 			MessageCompletion::CONTINUED);
 		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			" injects a weak poison, and it does not take hold.",
+			ColorPairId::WHITE_RED,
+			" injects a weak poison that will take hold!",
 			MessageCompletion::FINISHED);
-		return;
+
+		// Weak poison: it takes no hit points, only the point off everything it
+		// touches.
+		target.take_poison(
+			PendingPoison{
+				.roundsUntilOnset = HAIRY_SPIDER_VENOM_ONSET_ROUNDS,
+				.damage = 0,
+				.effect = BuffType::HAIRY_SPIDER_VENOM,
+				.effectValue = -HAIRY_SPIDER_VENOM_PENALTY,
+				.effectRounds = ctx.dice->d4() + 1,
+			});
 	}
 
-	ctx.messageSystem->message(
-		owner.actorData.color,
-		owner.actorData.name,
-		MessageCompletion::CONTINUED);
-	ctx.messageSystem->message(
-		ColorPairId::WHITE_RED,
-		" injects a weak poison that will take hold!",
-		MessageCompletion::FINISHED);
-
-	// Weak poison: it takes no hit points, only the point off everything it touches.
-	target.take_poison(
-		PendingPoison{
-			.roundsUntilOnset = HAIRY_SPIDER_VENOM_ONSET_ROUNDS,
-			.damage = 0,
-			.effect = BuffType::HAIRY_SPIDER_VENOM,
-			.effectValue = -HAIRY_SPIDER_VENOM_PENALTY,
-			.effectRounds = ctx.dice->d4() + 1,
-		});
-}
-
-std::optional<Vector2D> AiSpider::find_ambush_position(
-	Creature& owner,
-	Vector2D targetPosition,
-	GameContext& ctx)
-{
-	assert(ctx.map && "AiSpider::find_ambush_position: called without a map");
-	assert(ctx.dice && "AiSpider::find_ambush_position: called without dice");
-
-	auto is_in_bounds = [&](Vector2D pos) -> bool
+	std::optional<Vector2D> AiSpider::find_ambush_position(
+		Creature& owner,
+		Vector2D targetPosition,
+		GameContext& ctx)
 	{
-		return pos.x >= 0 && pos.x < ctx.map->get_width() && pos.y >= 0 &&
-			pos.y < ctx.map->get_height();
-	};
+		assert(
+			ctx.map && "AiSpider::find_ambush_position: called without a map");
+		assert(
+			ctx.dice && "AiSpider::find_ambush_position: called without dice");
 
-	auto is_valid_ambush = [&](Vector2D pos) -> bool
-	{
-		return Pathfinding::can_enter(owner, pos, ctx) &&
-			is_good_ambush_spot(pos, ctx);
-	};
-
-	auto is_in_ambush_range = [&](Vector2D pos) -> bool
-	{
-		int dist = pos.manhattan_distance_to(targetPosition);
-		return dist >= 3 && dist <= 12;
-	};
-
-	// Scan the 17x17 box centred on the spider for tiles passing every predicate.
-	std::vector<Vector2D> candidates;
-	for (int offsetRow = -8; offsetRow <= 8; ++offsetRow)
-	{
-		for (int offsetCol = -8; offsetCol <= 8; ++offsetCol)
+		auto is_in_bounds = [&](Vector2D pos) -> bool
 		{
-			const Vector2D candidate =
-				owner.position + Vector2D{ offsetCol, offsetRow };
-			if (!is_in_bounds(candidate))
+			return pos.x >= 0 && pos.x < ctx.map->get_width() && pos.y >= 0 &&
+				pos.y < ctx.map->get_height();
+		};
+
+		auto is_valid_ambush = [&](Vector2D pos) -> bool
+		{
+			return Pathfinding::can_enter(owner, pos, ctx) &&
+				is_good_ambush_spot(pos, ctx);
+		};
+
+		auto is_in_ambush_range = [&](Vector2D pos) -> bool
+		{
+			int dist = pos.manhattan_distance_to(targetPosition);
+			return dist >= 3 && dist <= 12;
+		};
+
+		// Scan the 17x17 box centred on the spider for tiles passing every
+		// predicate.
+		std::vector<Vector2D> candidates;
+		for (int offsetRow = -8; offsetRow <= 8; ++offsetRow)
+		{
+			for (int offsetCol = -8; offsetCol <= 8; ++offsetCol)
 			{
-				continue;
+				const Vector2D candidate =
+					owner.position + Vector2D{ offsetCol, offsetRow };
+				if (!is_in_bounds(candidate))
+				{
+					continue;
+				}
+				if (!is_valid_ambush(candidate))
+				{
+					continue;
+				}
+				if (!is_in_ambush_range(candidate))
+				{
+					continue;
+				}
+				candidates.push_back(candidate);
 			}
-			if (!is_valid_ambush(candidate))
-			{
-				continue;
-			}
-			if (!is_in_ambush_range(candidate))
-			{
-				continue;
-			}
-			candidates.push_back(candidate);
 		}
+
+		if (candidates.empty())
+		{
+			return std::nullopt;
+		}
+
+		int index = ctx.dice->roll(0, static_cast<int>(candidates.size()) - 1);
+		return candidates.at(index);
 	}
 
-	if (candidates.empty())
+	bool AiSpider::is_good_ambush_spot(Vector2D position, GameContext& ctx)
 	{
-		return std::nullopt;
-	}
+		assert(
+			ctx.map && "AiSpider::is_good_ambush_spot: called without a map");
+		assert(
+			!ctx.map->is_wall(position) &&
+			"AiSpider::is_good_ambush_spot: called with a wall for a position");
 
-	int index = ctx.dice->roll(0, static_cast<int>(candidates.size()) - 1);
-	return candidates.at(index);
-}
+		struct AmbushMetrics
+		{
+			int wallCount{ 0 };
+			bool hasCorner{ false };
+		};
 
-bool AiSpider::is_good_ambush_spot(Vector2D position, GameContext& ctx)
-{
-	assert(ctx.map && "AiSpider::is_good_ambush_spot: called without a map");
-	assert(
-		!ctx.map->is_wall(position) &&
-		"AiSpider::is_good_ambush_spot: called with a wall for a position");
+		auto is_wall_tile = [&](Vector2D adj) -> bool
+		{
+			return ctx.map->is_wall(adj);
+		};
 
-	struct AmbushMetrics
-	{
-		int wallCount{ 0 };
-		bool hasCorner{ false };
-	};
+		auto count_corner_walls = [&](Vector2D adjacent) -> int
+		{
+			int cornerWalls = 0;
+			for (int offsetRow = -1; offsetRow <= 1; ++offsetRow)
+			{
+				for (int offsetCol = -1; offsetCol <= 1; ++offsetCol)
+				{
+					// The centre tile is the neighbour itself, not one of its
+					// neighbours.
+					if (offsetRow == 0 && offsetCol == 0)
+					{
+						continue;
+					}
+					if (is_wall_tile(
+							adjacent + Vector2D{ offsetCol, offsetRow }))
+					{
+						++cornerWalls;
+					}
+				}
+			}
+			return cornerWalls;
+		};
 
-	auto is_wall_tile = [&](Vector2D adj) -> bool
-	{
-		return ctx.map->is_wall(adj);
-	};
-
-	auto count_corner_walls = [&](Vector2D adjacent) -> int
-	{
-		int cornerWalls = 0;
+		// Walk the eight neighbours, counting walls and flagging corner
+		// pockets.
+		AmbushMetrics metrics{};
 		for (int offsetRow = -1; offsetRow <= 1; ++offsetRow)
 		{
 			for (int offsetCol = -1; offsetCol <= 1; ++offsetCol)
 			{
-				// The centre tile is the neighbour itself, not one of its neighbours.
 				if (offsetRow == 0 && offsetCol == 0)
 				{
 					continue;
 				}
-				if (is_wall_tile(adjacent + Vector2D{ offsetCol, offsetRow }))
+				const Vector2D adjacent =
+					position + Vector2D{ offsetCol, offsetRow };
+				if (!ctx.map->is_wall(adjacent))
 				{
-					++cornerWalls;
+					continue;
+				}
+				metrics.wallCount++;
+				if (count_corner_walls(adjacent) >= 3)
+				{
+					metrics.hasCorner = true;
 				}
 			}
 		}
-		return cornerWalls;
-	};
 
-	// Walk the eight neighbours, counting walls and flagging corner pockets.
-	AmbushMetrics metrics{};
-	for (int offsetRow = -1; offsetRow <= 1; ++offsetRow)
-	{
-		for (int offsetCol = -1; offsetCol <= 1; ++offsetCol)
-		{
-			if (offsetRow == 0 && offsetCol == 0)
-			{
-				continue;
-			}
-			const Vector2D adjacent =
-				position + Vector2D{ offsetCol, offsetRow };
-			if (!ctx.map->is_wall(adjacent))
-			{
-				continue;
-			}
-			metrics.wallCount++;
-			if (count_corner_walls(adjacent) >= 3)
-			{
-				metrics.hasCorner = true;
-			}
-		}
+		return metrics.wallCount >= 2 || metrics.hasCorner;
 	}
 
-	return metrics.wallCount >= 2 || metrics.hasCorner;
-}
+	void AiSpider::load(const json& source)
+	{
+		AiMonster::load(source);
 
-void AiSpider::load(const json& source)
-{
-	AiMonster::load(source);
+		// Load AiSpider specific data
+		ambushEndTime = source.at("ambushEndTime").get<int>();
+		isAmbushing = source.at("isAmbushing").get<bool>();
+	}
 
-	// Load AiSpider specific data
-	ambushEndTime = source.at("ambushEndTime").get<int>();
-	isAmbushing = source.at("isAmbushing").get<bool>();
-}
+	void AiSpider::save(json& output)
+	{
+		AiMonster::save(output);
+		output["type"] = encode_ai_type(get_ai_type());
 
-void AiSpider::save(json& output)
-{
-	AiMonster::save(output);
-	output["type"] = encode_ai_type(get_ai_type());
-
-	output["ambushEndTime"] = ambushEndTime;
-	output["isAmbushing"] = isAmbushing;
-}
+		output["ambushEndTime"] = ambushEndTime;
+		output["isAmbushing"] = isAmbushing;
+	}
 
 } // namespace CppRL

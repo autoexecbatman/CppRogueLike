@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/InventoryOperations.cpp",
-      "original": "\t\treturn get_total_weight(owner) + item.enhancement.weight <=\n\t\t\tget_max_weight(owner, dataManager);",
-      "mutated": "\t\treturn get_total_weight(owner) + item.enhancement.weight <\n\t\t\tget_max_weight(owner, dataManager);",
+      "original": "\t\t\treturn get_total_weight(owner) + item.enhancement.weight <=\n\t\t\t\tget_max_weight(owner, dataManager);",
+      "mutated": "\t\t\treturn get_total_weight(owner) + item.enhancement.weight <\n\t\t\t\tget_max_weight(owner, dataManager);",
       "catches": "an item that fits exactly being refused"
     },
     {
       "file": "src/InventoryOperations.cpp",
-      "original": "\t\treturn get_total_weight(owner) + item.enhancement.weight <=\n\t\t\tget_max_weight(owner, dataManager);",
-      "mutated": "\t\treturn item.enhancement.weight <=\n\t\t\tget_max_weight(owner, dataManager);",
+      "original": "\t\t\treturn get_total_weight(owner) + item.enhancement.weight <=\n\t\t\t\tget_max_weight(owner, dataManager);",
+      "mutated": "\t\t\treturn item.enhancement.weight <=\n\t\t\t\tget_max_weight(owner, dataManager);",
       "catches": "the pack's own weight ignored, so a full pack keeps accepting"
     },
     {
@@ -33,8 +33,8 @@
     },
     {
       "file": "src/ShopKeeper.cpp",
-      "original": "\tif (!is_within_weight_limit(item, buyer, *ctx.dataManager))\n\t{",
-      "mutated": "\tif (false)\n\t{",
+      "original": "\t\tif (!is_within_weight_limit(item, buyer, *ctx.dataManager))\n\t\t{",
+      "mutated": "\t\tif (false)\n\t\t{",
       "catches": "a shop selling what the buyer cannot lift, as before"
     }
   ]

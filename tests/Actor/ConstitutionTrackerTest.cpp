@@ -31,207 +31,219 @@
 namespace CppRL
 {
 
-namespace
-{
-
-	constexpr int BASE_HP = 24;
-	constexpr int BONUS_AT_15 = 1;
-	constexpr int BONUS_AT_17 = 3;
-	constexpr int BONUS_AT_18 = 4;
-	constexpr int NON_WARRIOR_CAP = 2;
-
-	// The last level each class rolls a hit die, and so takes the bonus:
-	// Player's Handbook Tables 14 and 20.
-	constexpr int FIGHTER_LAST_ROLLED_LEVEL = 9;
-	constexpr int WIZARD_LAST_ROLLED_LEVEL = 10;
-
-} // namespace
-
-class ConstitutionTrackerTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	namespace
 	{
-		dataManager.load_all_data(mock.messages);
-		ctx = mock.to_game_context();
-		ctx.dataManager = &dataManager;
 
-		// The only die a character rolls now is the class die of starting hit
-		// points; the six scores are allocated and arrive on the blueprint.
-		mock.dice.set_next_roll(4);
-	}
+		constexpr int BASE_HP = 24;
+		constexpr int BONUS_AT_15 = 1;
+		constexpr int BONUS_AT_17 = 3;
+		constexpr int BONUS_AT_18 = 4;
+		constexpr int NON_WARRIOR_CAP = 2;
 
-	// Rolls a character of the given class with the forced scores above. The
-	// class decides the cap: warriors keep the whole table, every other class
-	// stops at +2 (Player's Handbook, Table 3).
-	void make_player(CreatureClass creatureClass, int constitution)
+		// The last level each class rolls a hit die, and so takes the bonus:
+		// Player's Handbook Tables 14 and 20.
+		constexpr int FIGHTER_LAST_ROLLED_LEVEL = 9;
+		constexpr int WIZARD_LAST_ROLLED_LEVEL = 10;
+
+	} // namespace
+
+	class ConstitutionTrackerTest : public ::testing::Test
 	{
-		PlayerBlueprint blueprint{};
-		blueprint.name = "Tester";
-		blueprint.creatureClass = creatureClass;
-		blueprint.playerRaceState = PlayerRaceState::HUMAN;
-
-		// Every other score is an unremarkable 9.
-		blueprint.abilityScores.fill(9);
-		blueprint.abilityScores.at(ability_index(Ability::CONSTITUTION)) =
-			constitution;
-		player = std::make_unique<Player>(Vector2D{ 0, 0 }, blueprint, ctx);
-		ctx.playerOwner = &player;
-	}
-
-	// Every message the player would have seen that mentions Constitution.
-	std::vector<std::string> constitution_messages() const
-	{
-		std::vector<std::string> found;
-		for (
-			size_t index = 0; index < mock.messages.get_stored_message_count();
-			++index)
+	protected:
+		void SetUp() override
 		{
-			for (const auto& part : mock.messages.get_attack_message_at(index))
+			dataManager.load_all_data(mock.messages);
+			ctx = mock.to_game_context();
+			ctx.dataManager = &dataManager;
+
+			// The only die a character rolls now is the class die of starting
+			// hit points; the six scores are allocated and arrive on the
+			// blueprint.
+			mock.dice.set_next_roll(4);
+		}
+
+		// Rolls a character of the given class with the forced scores above.
+		// The class decides the cap: warriors keep the whole table, every other
+		// class stops at +2 (Player's Handbook, Table 3).
+		void make_player(CreatureClass creatureClass, int constitution)
+		{
+			PlayerBlueprint blueprint{};
+			blueprint.name = "Tester";
+			blueprint.creatureClass = creatureClass;
+			blueprint.playerRaceState = PlayerRaceState::HUMAN;
+
+			// Every other score is an unremarkable 9.
+			blueprint.abilityScores.fill(9);
+			blueprint.abilityScores.at(ability_index(Ability::CONSTITUTION)) =
+				constitution;
+			player = std::make_unique<Player>(Vector2D{ 0, 0 }, blueprint, ctx);
+			ctx.playerOwner = &player;
+		}
+
+		// Every message the player would have seen that mentions Constitution.
+		std::vector<std::string> constitution_messages() const
+		{
+			std::vector<std::string> found;
+			for (
+				size_t index = 0;
+				index < mock.messages.get_stored_message_count();
+				++index)
 			{
-				if (part.text.find("Constitution") != std::string::npos)
+				for (
+					const auto& part :
+					mock.messages.get_attack_message_at(index))
 				{
-					found.push_back(part.text);
+					if (part.text.find("Constitution") != std::string::npos)
+					{
+						found.push_back(part.text);
+					}
 				}
 			}
+			return found;
 		}
-		return found;
+
+		MockGameContext mock{};
+		GameContext ctx{};
+		DataManager dataManager{};
+		std::unique_ptr<Player> player{};
+	};
+
+	// The bonus is applied on the first tick, silently: nothing changed,
+	// something was accounted for.
+	TEST_F(
+		ConstitutionTrackerTest,
+		FirstTickAppliesTheBonusWithoutReportingAChange)
+	{
+		make_player(CreatureClass::FIGHTER, 17);
+		ASSERT_EQ(player->get_constitution(), 17);
+		ASSERT_EQ(player->get_max_hp(), BASE_HP);
+
+		player->update_constitution_bonus(ctx);
+
+		EXPECT_EQ(player->get_max_hp(), BASE_HP + BONUS_AT_17);
+		EXPECT_TRUE(constitution_messages().empty())
+			<< "reported a change from a score the character never had: "
+			<< constitution_messages().front();
 	}
 
-	MockGameContext mock{};
-	GameContext ctx{};
-	DataManager dataManager{};
-	std::unique_ptr<Player> player{};
-};
+	// A second tick with nothing moved changes nothing and says nothing.
+	TEST_F(ConstitutionTrackerTest, ASteadyScoreIsSilent)
+	{
+		make_player(CreatureClass::FIGHTER, 17);
+		player->update_constitution_bonus(ctx);
+		player->update_constitution_bonus(ctx);
 
-// The bonus is applied on the first tick, silently: nothing changed, something
-// was accounted for.
-TEST_F(ConstitutionTrackerTest, FirstTickAppliesTheBonusWithoutReportingAChange)
-{
-	make_player(CreatureClass::FIGHTER, 17);
-	ASSERT_EQ(player->get_constitution(), 17);
-	ASSERT_EQ(player->get_max_hp(), BASE_HP);
+		EXPECT_EQ(player->get_max_hp(), BASE_HP + BONUS_AT_17);
+		EXPECT_TRUE(constitution_messages().empty());
+	}
 
-	player->update_constitution_bonus(ctx);
+	// A real change is reported between the two scores the character held.
+	TEST_F(ConstitutionTrackerTest, ARealChangeIsReportedBetweenItsTwoScores)
+	{
+		make_player(CreatureClass::FIGHTER, 17);
+		player->update_constitution_bonus(ctx);
+		player->adjust_constitution(1);
 
-	EXPECT_EQ(player->get_max_hp(), BASE_HP + BONUS_AT_17);
-	EXPECT_TRUE(constitution_messages().empty())
-		<< "reported a change from a score the character never had: "
-		<< constitution_messages().front();
-}
+		player->update_constitution_bonus(ctx);
 
-// A second tick with nothing moved changes nothing and says nothing.
-TEST_F(ConstitutionTrackerTest, ASteadyScoreIsSilent)
-{
-	make_player(CreatureClass::FIGHTER, 17);
-	player->update_constitution_bonus(ctx);
-	player->update_constitution_bonus(ctx);
+		EXPECT_EQ(player->get_max_hp(), BASE_HP + BONUS_AT_18);
+		ASSERT_EQ(constitution_messages().size(), 1u);
+		EXPECT_NE(
+			constitution_messages().front().find("from 17 to 18"),
+			std::string::npos)
+			<< constitution_messages().front();
+	}
 
-	EXPECT_EQ(player->get_max_hp(), BASE_HP + BONUS_AT_17);
-	EXPECT_TRUE(constitution_messages().empty());
-}
+	// Table 3 gives 17 a +3 and 18 a +4 for warriors only; everyone else stops
+	// at +2.
+	TEST_F(ConstitutionTrackerTest, ANonWarriorStopsAtPlusTwo)
+	{
+		make_player(CreatureClass::WIZARD, 17);
 
-// A real change is reported between the two scores the character held.
-TEST_F(ConstitutionTrackerTest, ARealChangeIsReportedBetweenItsTwoScores)
-{
-	make_player(CreatureClass::FIGHTER, 17);
-	player->update_constitution_bonus(ctx);
-	player->adjust_constitution(1);
+		player->update_constitution_bonus(ctx);
 
-	player->update_constitution_bonus(ctx);
+		EXPECT_EQ(player->get_max_hp(), BASE_HP + NON_WARRIOR_CAP)
+			<< "a wizard with Con 17 was handed the warrior bonus";
+	}
 
-	EXPECT_EQ(player->get_max_hp(), BASE_HP + BONUS_AT_18);
-	ASSERT_EQ(constitution_messages().size(), 1u);
-	EXPECT_NE(
-		constitution_messages().front().find("from 17 to 18"),
-		std::string::npos)
-		<< constitution_messages().front();
-}
+	// The cap is on the bonus, never on the penalty: a low score hurts every
+	// class alike.
+	TEST_F(ConstitutionTrackerTest, ThePenaltyIsNotCapped)
+	{
+		make_player(CreatureClass::WIZARD, 3);
+		ASSERT_EQ(player->get_constitution(), 3);
 
-// Table 3 gives 17 a +3 and 18 a +4 for warriors only; everyone else stops at +2.
-TEST_F(ConstitutionTrackerTest, ANonWarriorStopsAtPlusTwo)
-{
-	make_player(CreatureClass::WIZARD, 17);
+		player->update_constitution_bonus(ctx);
 
-	player->update_constitution_bonus(ctx);
+		EXPECT_EQ(player->get_max_hp(), BASE_HP - 2);
+	}
 
-	EXPECT_EQ(player->get_max_hp(), BASE_HP + NON_WARRIOR_CAP)
-		<< "a wizard with Con 17 was handed the warrior bonus";
-}
+	// A change is multiplied by the levels that took the bonus (page 32). A
+	// 12th-level fighter's ended at 9th, so a point from 17 to 18 is worth 9
+	// hit points, not 12.
+	TEST_F(
+		ConstitutionTrackerTest,
+		AFightersChangeCountsOnlyTheLevelsThatRolled)
+	{
+		make_player(CreatureClass::FIGHTER, 17);
+		player->set_creature_level(12);
+		player->update_constitution_bonus(ctx);
+		const int before = player->get_max_hp();
+		player->adjust_constitution(1);
 
-// The cap is on the bonus, never on the penalty: a low score hurts every class alike.
-TEST_F(ConstitutionTrackerTest, ThePenaltyIsNotCapped)
-{
-	make_player(CreatureClass::WIZARD, 3);
-	ASSERT_EQ(player->get_constitution(), 3);
+		player->update_constitution_bonus(ctx);
 
-	player->update_constitution_bonus(ctx);
+		EXPECT_EQ(
+			player->get_max_hp() - before,
+			(BONUS_AT_18 - BONUS_AT_17) * FIGHTER_LAST_ROLLED_LEVEL);
+	}
 
-	EXPECT_EQ(player->get_max_hp(), BASE_HP - 2);
-}
+	// A wizard's ended at 10th: 17 to 15 moves the capped +2 to +1, one hit
+	// point off each of ten levels.
+	TEST_F(ConstitutionTrackerTest, AWizardsChangeCountsOnlyTheLevelsThatRolled)
+	{
+		make_player(CreatureClass::WIZARD, 17);
+		player->set_creature_level(12);
+		player->update_constitution_bonus(ctx);
+		const int before = player->get_max_hp();
+		player->adjust_constitution(-2);
 
-// A change is multiplied by the levels that took the bonus (page 32). A 12th-level
-// fighter's ended at 9th, so a point from 17 to 18 is worth 9 hit points, not 12.
-TEST_F(ConstitutionTrackerTest, AFightersChangeCountsOnlyTheLevelsThatRolled)
-{
-	make_player(CreatureClass::FIGHTER, 17);
-	player->set_creature_level(12);
-	player->update_constitution_bonus(ctx);
-	const int before = player->get_max_hp();
-	player->adjust_constitution(1);
+		player->update_constitution_bonus(ctx);
 
-	player->update_constitution_bonus(ctx);
+		EXPECT_EQ(
+			player->get_max_hp() - before,
+			(BONUS_AT_15 - NON_WARRIOR_CAP) * WIZARD_LAST_ROLLED_LEVEL);
+	}
 
-	EXPECT_EQ(
-		player->get_max_hp() - before,
-		(BONUS_AT_18 - BONUS_AT_17) * FIGHTER_LAST_ROLLED_LEVEL);
-}
+	// The race is paid onto the character, not merely announced. A halfling
+	// trades a point of Strength for a point of Dexterity (Player's Handbook
+	// racial adjustments), and the paying half runs without a window so it can
+	// be checked here.
+	TEST_F(ConstitutionTrackerTest, AHalflingPaysItsRacialAdjustment)
+	{
+		make_player(CreatureClass::FIGHTER, 17);
+		player->lifespan->race = PlayerRaceState::HALFLING;
+		const int allocatedStrength = player->get_strength();
+		const int allocatedDexterity = player->get_dexterity();
 
-// A wizard's ended at 10th: 17 to 15 moves the capped +2 to +1, one hit point off
-// each of ten levels.
-TEST_F(ConstitutionTrackerTest, AWizardsChangeCountsOnlyTheLevelsThatRolled)
-{
-	make_player(CreatureClass::WIZARD, 17);
-	player->set_creature_level(12);
-	player->update_constitution_bonus(ctx);
-	const int before = player->get_max_hp();
-	player->adjust_constitution(-2);
+		const std::vector<std::string> shown = player->pay_racial_adjustments();
 
-	player->update_constitution_bonus(ctx);
+		EXPECT_EQ(player->get_strength(), allocatedStrength - 1);
+		EXPECT_EQ(player->get_dexterity(), allocatedDexterity + 1);
+		EXPECT_EQ(
+			shown,
+			(std::vector<std::string>{ "-1 Strength", "+1 Dexterity" }));
+	}
 
-	EXPECT_EQ(
-		player->get_max_hp() - before,
-		(BONUS_AT_15 - NON_WARRIOR_CAP) * WIZARD_LAST_ROLLED_LEVEL);
-}
+	// A human modifies nothing, so there is nothing to pay and nothing to show.
+	TEST_F(ConstitutionTrackerTest, AHumanPaysNothing)
+	{
+		make_player(CreatureClass::FIGHTER, 17);
+		player->lifespan->race = PlayerRaceState::HUMAN;
+		const int allocatedStrength = player->get_strength();
 
-// The race is paid onto the character, not merely announced. A halfling trades a
-// point of Strength for a point of Dexterity (Player's Handbook racial adjustments),
-// and the paying half runs without a window so it can be checked here.
-TEST_F(ConstitutionTrackerTest, AHalflingPaysItsRacialAdjustment)
-{
-	make_player(CreatureClass::FIGHTER, 17);
-	player->lifespan->race = PlayerRaceState::HALFLING;
-	const int allocatedStrength = player->get_strength();
-	const int allocatedDexterity = player->get_dexterity();
-
-	const std::vector<std::string> shown = player->pay_racial_adjustments();
-
-	EXPECT_EQ(player->get_strength(), allocatedStrength - 1);
-	EXPECT_EQ(player->get_dexterity(), allocatedDexterity + 1);
-	EXPECT_EQ(
-		shown,
-		(std::vector<std::string>{ "-1 Strength", "+1 Dexterity" }));
-}
-
-// A human modifies nothing, so there is nothing to pay and nothing to show.
-TEST_F(ConstitutionTrackerTest, AHumanPaysNothing)
-{
-	make_player(CreatureClass::FIGHTER, 17);
-	player->lifespan->race = PlayerRaceState::HUMAN;
-	const int allocatedStrength = player->get_strength();
-
-	EXPECT_TRUE(player->pay_racial_adjustments().empty());
-	EXPECT_EQ(player->get_strength(), allocatedStrength);
-}
+		EXPECT_TRUE(player->pay_racial_adjustments().empty());
+		EXPECT_EQ(player->get_strength(), allocatedStrength);
+	}
 
 } // namespace CppRL

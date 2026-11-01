@@ -38,128 +38,132 @@
 namespace CppRL
 {
 
-class EquipmentUseTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	class EquipmentUseTest : public ::testing::Test
 	{
-		game.dataManager.load_all_data(game.messageSystem);
-		game.tileConfig.load(Paths::TILE_CONFIG);
-		game.itemRegistry.load(Paths::ITEMS);
-
-		player->experienceReward = std::make_unique<ExperienceReward>(0);
-		player->healthPool = std::make_unique<HealthPool>(20);
-		player->armorClass = std::make_unique<ArmorClass>(10);
-		player->set_strength(16);
-		player->set_dexterity(10);
-
-		ctx = game.context();
-		ctx.playerOwner = &player;
-	}
-
-	// Puts an item from the data on through the inventory screen's path, then curses it.
-	Item& wear_cursed(std::string_view key, EquipmentSlot slot)
-	{
-		auto item = ItemCreator::create(key, player->position, ctx);
-		Item* carried = item.get();
-		[[maybe_unused]] const auto added =
-			InventoryOperations::add_item_to_inventory(
-				player->inventoryData,
-				std::move(item),
-				*player,
-				*ctx.dataManager);
-		use_item(*carried->behavior, *carried, *player, ctx);
-		Item* worn = player->get_equipped_item(slot);
-		EXPECT_EQ(worn, carried) << key << " was not put on";
-		carried->enhancement.blessing = BlessingStatus::CURSED;
-		return *carried;
-	}
-
-	// Puts an item from the data on through the inventory screen's path.
-	Item& wear(std::string_view key, EquipmentSlot slot)
-	{
-		auto item = ItemCreator::create(key, player->position, ctx);
-		Item* carried = item.get();
-		[[maybe_unused]] const auto added =
-			InventoryOperations::add_item_to_inventory(
-				player->inventoryData,
-				std::move(item),
-				*player,
-				*ctx.dataManager);
-		use_item(*carried->behavior, *carried, *player, ctx);
-		EXPECT_EQ(player->get_equipped_item(slot), carried)
-			<< key << " was not put on";
-		return *carried;
-	}
-
-	// Whether the pack holds this item.
-	bool pack_holds(const Item& item) const
-	{
-		auto is_the_item = [&item](const std::unique_ptr<Item>& packed)
+	protected:
+		void SetUp() override
 		{
-			return packed.get() == &item;
-		};
-		return std::ranges::any_of(player->inventoryData.items, is_the_item);
-	}
+			game.dataManager.load_all_data(game.messageSystem);
+			game.tileConfig.load(Paths::TILE_CONFIG);
+			game.itemRegistry.load(Paths::ITEMS);
 
-	// Uses a worn cursed item again and checks that nothing happened.
-	void expect_nothing_happens(Item& item, EquipmentSlot slot)
+			player->experienceReward = std::make_unique<ExperienceReward>(0);
+			player->healthPool = std::make_unique<HealthPool>(20);
+			player->armorClass = std::make_unique<ArmorClass>(10);
+			player->set_strength(16);
+			player->set_dexterity(10);
+
+			ctx = game.context();
+			ctx.playerOwner = &player;
+		}
+
+		// Puts an item from the data on through the inventory screen's path,
+		// then curses it.
+		Item& wear_cursed(std::string_view key, EquipmentSlot slot)
+		{
+			auto item = ItemCreator::create(key, player->position, ctx);
+			Item* carried = item.get();
+			[[maybe_unused]] const auto added =
+				InventoryOperations::add_item_to_inventory(
+					player->inventoryData,
+					std::move(item),
+					*player,
+					*ctx.dataManager);
+			use_item(*carried->behavior, *carried, *player, ctx);
+			Item* worn = player->get_equipped_item(slot);
+			EXPECT_EQ(worn, carried) << key << " was not put on";
+			carried->enhancement.blessing = BlessingStatus::CURSED;
+			return *carried;
+		}
+
+		// Puts an item from the data on through the inventory screen's path.
+		Item& wear(std::string_view key, EquipmentSlot slot)
+		{
+			auto item = ItemCreator::create(key, player->position, ctx);
+			Item* carried = item.get();
+			[[maybe_unused]] const auto added =
+				InventoryOperations::add_item_to_inventory(
+					player->inventoryData,
+					std::move(item),
+					*player,
+					*ctx.dataManager);
+			use_item(*carried->behavior, *carried, *player, ctx);
+			EXPECT_EQ(player->get_equipped_item(slot), carried)
+				<< key << " was not put on";
+			return *carried;
+		}
+
+		// Whether the pack holds this item.
+		bool pack_holds(const Item& item) const
+		{
+			auto is_the_item = [&item](const std::unique_ptr<Item>& packed)
+			{
+				return packed.get() == &item;
+			};
+			return std::ranges::any_of(
+				player->inventoryData.items,
+				is_the_item);
+		}
+
+		// Uses a worn cursed item again and checks that nothing happened.
+		void expect_nothing_happens(Item& item, EquipmentSlot slot)
+		{
+			EXPECT_FALSE(use_item(*item.behavior, item, *player, ctx))
+				<< item.actorData.name << ": a failed removal spent a turn";
+			EXPECT_EQ(player->get_equipped_item(slot), &item)
+				<< item.actorData.name << " came off";
+		}
+
+		Game game{ TEST_DICE_SEED };
+		GameContext ctx;
+		std::unique_ptr<Player> player{ std::make_unique<Player>(
+			Vector2D{ 0, 0 }) };
+	};
+
+	TEST_F(EquipmentUseTest, ACursedRingThatWillNotComeOffCostsNothing)
 	{
-		EXPECT_FALSE(use_item(*item.behavior, item, *player, ctx))
-			<< item.actorData.name << ": a failed removal spent a turn";
-		EXPECT_EQ(player->get_equipped_item(slot), &item)
-			<< item.actorData.name << " came off";
+		Item& ring =
+			wear_cursed("ring_of_protection_plus_1", EquipmentSlot::RIGHT_RING);
+
+		expect_nothing_happens(ring, EquipmentSlot::RIGHT_RING);
 	}
 
-	Game game{ TEST_DICE_SEED };
-	GameContext ctx;
-	std::unique_ptr<Player> player{ std::make_unique<Player>(
-		Vector2D{ 0, 0 }) };
-};
+	TEST_F(EquipmentUseTest, ACursedHelmThatWillNotComeOffCostsNothing)
+	{
+		Item& helm = wear_cursed("helm_of_telepathy", EquipmentSlot::HEAD);
 
-TEST_F(EquipmentUseTest, ACursedRingThatWillNotComeOffCostsNothing)
-{
-	Item& ring =
-		wear_cursed("ring_of_protection_plus_1", EquipmentSlot::RIGHT_RING);
+		expect_nothing_happens(helm, EquipmentSlot::HEAD);
+	}
 
-	expect_nothing_happens(ring, EquipmentSlot::RIGHT_RING);
-}
+	TEST_F(EquipmentUseTest, ACursedWeaponThatWillNotComeOffCostsNothing)
+	{
+		Item& club = wear_cursed("club", EquipmentSlot::RIGHT_HAND);
 
-TEST_F(EquipmentUseTest, ACursedHelmThatWillNotComeOffCostsNothing)
-{
-	Item& helm = wear_cursed("helm_of_telepathy", EquipmentSlot::HEAD);
+		expect_nothing_happens(club, EquipmentSlot::RIGHT_HAND);
+	}
 
-	expect_nothing_happens(helm, EquipmentSlot::HEAD);
-}
+	TEST_F(EquipmentUseTest, ACursedShieldThatWillNotComeOffCostsNothing)
+	{
+		Item& shield = wear_cursed("small_shield", EquipmentSlot::LEFT_HAND);
 
-TEST_F(EquipmentUseTest, ACursedWeaponThatWillNotComeOffCostsNothing)
-{
-	Item& club = wear_cursed("club", EquipmentSlot::RIGHT_HAND);
+		expect_nothing_happens(shield, EquipmentSlot::LEFT_HAND);
+	}
 
-	expect_nothing_happens(club, EquipmentSlot::RIGHT_HAND);
-}
+	// An item taken off goes back to the pack and leaves its slot empty;
+	// whether it is worn is the wearer's slot, so nothing on the item has to be
+	// cleared.
+	TEST_F(EquipmentUseTest, AnItemTakenOffGoesBackToThePackAndLeavesItsSlot)
+	{
+		Item& armor = wear("leather_armor", EquipmentSlot::BODY);
 
-TEST_F(EquipmentUseTest, ACursedShieldThatWillNotComeOffCostsNothing)
-{
-	Item& shield = wear_cursed("small_shield", EquipmentSlot::LEFT_HAND);
+		ASSERT_FALSE(pack_holds(armor))
+			<< "a worn item is owned by its slot, not by the pack";
 
-	expect_nothing_happens(shield, EquipmentSlot::LEFT_HAND);
-}
+		ASSERT_TRUE(player->unequip_item(EquipmentSlot::BODY, ctx));
 
-// An item taken off goes back to the pack and leaves its slot empty; whether it is worn
-// is the wearer's slot, so nothing on the item has to be cleared.
-TEST_F(EquipmentUseTest, AnItemTakenOffGoesBackToThePackAndLeavesItsSlot)
-{
-	Item& armor = wear("leather_armor", EquipmentSlot::BODY);
-
-	ASSERT_FALSE(pack_holds(armor))
-		<< "a worn item is owned by its slot, not by the pack";
-
-	ASSERT_TRUE(player->unequip_item(EquipmentSlot::BODY, ctx));
-
-	EXPECT_TRUE(pack_holds(armor)) << "it did not come back to the pack";
-	EXPECT_EQ(player->get_equipped_item(EquipmentSlot::BODY), nullptr)
-		<< "the slot still holds what was taken off";
-}
+		EXPECT_TRUE(pack_holds(armor)) << "it did not come back to the pack";
+		EXPECT_EQ(player->get_equipped_item(EquipmentSlot::BODY), nullptr)
+			<< "the slot still holds what was taken off";
+	}
 
 } // namespace CppRL

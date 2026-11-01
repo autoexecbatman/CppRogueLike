@@ -21,8 +21,8 @@
         },
         {
             "file": "src/Renderer.h",
-            "original": "\t[[nodiscard]] int get_screen_height() const { return GetScreenHeight(); }",
-            "mutated": "\t[[nodiscard]] int get_screen_height() const { return GetMonitorHeight(GetCurrentMonitor()); }",
+            "original": "\t\t[[nodiscard]] int get_screen_height() const\n\t\t{\n\t\t\treturn GetScreenHeight();\n\t\t}",
+            "mutated": "\t\t[[nodiscard]] int get_screen_height() const\n\t\t{\n\t\t\treturn GetMonitorHeight(GetCurrentMonitor());\n\t\t}",
             "catches": "the height asked of the monitor reported in place of the window's"
         },
         {

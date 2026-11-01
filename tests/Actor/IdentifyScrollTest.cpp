@@ -36,168 +36,171 @@
 namespace CppRL
 {
 
-namespace
-{
-	constexpr Vector2D ON_THE_FLOOR{ 2, 2 };
-} // namespace
-
-class IdentifyScrollTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	namespace
 	{
-		ctx = mock.to_game_context();
+		constexpr Vector2D ON_THE_FLOOR{ 2, 2 };
+	} // namespace
 
-		reader = std::make_unique<Creature>(
-			ON_THE_FLOOR,
-			ActorData{ TileRef{}, "reader", ColorPairId::WHITE_BLACK });
-		// A creature built in a test has no Strength, and the pack is weight-gated by
-		// it, so without this nothing can be carried.
-		reader->set_strength(18);
-
-		// The scroll has to be in the pack: use() ends by consuming it, and consuming
-		// means removing it from the wearer's inventory. A scroll held nowhere cannot
-		// be spent, which is what the return value reports.
-		scrollItem = &carried("identify_scroll");
-	}
-
-	// Puts an item in the reader's pack and hands it back, so a test can ask about it
-	// after the scroll has run.
-	Item& carried(std::string_view key)
+	class IdentifyScrollTest : public ::testing::Test
 	{
-		auto item = ItemCreator::create(key, ON_THE_FLOOR, ctx);
-		Item* held = item.get();
-		[[maybe_unused]] const auto added = InventoryOperations::add_item(
-			reader->inventoryData,
-			std::move(item));
-		return *held;
-	}
-
-	bool read_the_scroll()
-	{
-		IdentifyScroll behavior{};
-		return use(behavior, *scrollItem, *reader, ctx);
-	}
-
-	// Whether any stored message holds the given text. The system keeps each message as
-	// a vector of coloured runs, so the words have to be joined before searching.
-	bool said_anything_about(std::string_view wanted) const
-	{
-		for (
-			size_t index = 0;
-			index < ctx.messageSystem->get_stored_message_count();
-			++index)
+	protected:
+		void SetUp() override
 		{
-			std::string whole;
-			for (
-				const LogMessage& run :
-				ctx.messageSystem->get_attack_message_at(index))
-			{
-				whole += run.text;
-			}
-			if (whole.find(wanted) != std::string::npos)
-			{
-				return true;
-			}
+			ctx = mock.to_game_context();
+
+			reader = std::make_unique<Creature>(
+				ON_THE_FLOOR,
+				ActorData{ TileRef{}, "reader", ColorPairId::WHITE_BLACK });
+			// A creature built in a test has no Strength, and the pack is
+			// weight-gated by it, so without this nothing can be carried.
+			reader->set_strength(18);
+
+			// The scroll has to be in the pack: use() ends by consuming it, and
+			// consuming means removing it from the wearer's inventory. A scroll
+			// held nowhere cannot be spent, which is what the return value
+			// reports.
+			scrollItem = &carried("identify_scroll");
 		}
-		return false;
+
+		// Puts an item in the reader's pack and hands it back, so a test can
+		// ask about it after the scroll has run.
+		Item& carried(std::string_view key)
+		{
+			auto item = ItemCreator::create(key, ON_THE_FLOOR, ctx);
+			Item* held = item.get();
+			[[maybe_unused]] const auto added = InventoryOperations::add_item(
+				reader->inventoryData,
+				std::move(item));
+			return *held;
+		}
+
+		bool read_the_scroll()
+		{
+			IdentifyScroll behavior{};
+			return use(behavior, *scrollItem, *reader, ctx);
+		}
+
+		// Whether any stored message holds the given text. The system keeps
+		// each message as a vector of coloured runs, so the words have to be
+		// joined before searching.
+		bool said_anything_about(std::string_view wanted) const
+		{
+			for (
+				size_t index = 0;
+				index < ctx.messageSystem->get_stored_message_count();
+				++index)
+			{
+				std::string whole;
+				for (
+					const LogMessage& run :
+					ctx.messageSystem->get_attack_message_at(index))
+				{
+					whole += run.text;
+				}
+				if (whole.find(wanted) != std::string::npos)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		MockGameContext mock{};
+		GameContext ctx{};
+		std::unique_ptr<Creature> reader;
+		Item* scrollItem{ nullptr };
+	};
+
+	// The thing the scroll is for.
+	TEST_F(IdentifyScrollTest, AnUnknownItemBecomesKnown)
+	{
+		Item& unknown = carried("health_potion");
+		ASSERT_FALSE(unknown.is_fully_identified())
+			<< "the fixture handed out an item that was already identified";
+
+		read_the_scroll();
+
+		EXPECT_TRUE(unknown.is_fully_identified())
+			<< "the scroll was read and the potion is still unknown";
 	}
 
-	MockGameContext mock{};
-	GameContext ctx{};
-	std::unique_ptr<Creature> reader;
-	Item* scrollItem{ nullptr };
-};
+	// Every unknown item, not the first one it meets.
+	TEST_F(IdentifyScrollTest, EveryUnknownItemInThePackBecomesKnown)
+	{
+		Item& first = carried("health_potion");
+		Item& second = carried("mana_potion");
 
-// The thing the scroll is for.
-TEST_F(IdentifyScrollTest, AnUnknownItemBecomesKnown)
-{
-	Item& unknown = carried("health_potion");
-	ASSERT_FALSE(unknown.is_fully_identified())
-		<< "the fixture handed out an item that was already identified";
+		read_the_scroll();
 
-	read_the_scroll();
+		EXPECT_TRUE(first.is_fully_identified());
+		EXPECT_TRUE(second.is_fully_identified())
+			<< "the scroll stopped before the end of the pack";
+	}
 
-	EXPECT_TRUE(unknown.is_fully_identified())
-		<< "the scroll was read and the potion is still unknown";
-}
+	// The branch nothing covered: reading it over a pack that is already known.
+	// The scroll is still spent, because reading it is the cost.
+	TEST_F(IdentifyScrollTest, APackAlreadyKnownStillSpendsTheScroll)
+	{
+		Item& known = carried("health_potion");
+		known.identify_all();
 
-// Every unknown item, not the first one it meets.
-TEST_F(IdentifyScrollTest, EveryUnknownItemInThePackBecomesKnown)
-{
-	Item& first = carried("health_potion");
-	Item& second = carried("mana_potion");
+		const bool spent = read_the_scroll();
 
-	read_the_scroll();
+		EXPECT_TRUE(spent)
+			<< "a scroll read over an already-identified pack was not consumed";
+		EXPECT_TRUE(said_anything_about("already identified"))
+			<< "the pack was fully identified and the scroll did not say so";
+	}
 
-	EXPECT_TRUE(first.is_fully_identified());
-	EXPECT_TRUE(second.is_fully_identified())
-		<< "the scroll stopped before the end of the pack";
-}
+	// One unknown potion beside the unknown scroll: the potion is the one item
+	// identified, said in the singular.
+	TEST_F(IdentifyScrollTest, OneItemIdentifiedIsSaidInTheSingular)
+	{
+		carried("health_potion");
 
-// The branch nothing covered: reading it over a pack that is already known. The scroll
-// is still spent, because reading it is the cost.
-TEST_F(IdentifyScrollTest, APackAlreadyKnownStillSpendsTheScroll)
-{
-	Item& known = carried("health_potion");
-	known.identify_all();
+		read_the_scroll();
 
-	const bool spent = read_the_scroll();
+		EXPECT_TRUE(said_anything_about("1 item identified!"))
+			<< "the scroll counted itself beside the potion, or one item was not counted as one";
+		EXPECT_FALSE(said_anything_about("1 items"))
+			<< "one item was counted in the plural";
+	}
 
-	EXPECT_TRUE(spent)
-		<< "a scroll read over an already-identified pack was not consumed";
-	EXPECT_TRUE(said_anything_about("already identified"))
-		<< "the pack was fully identified and the scroll did not say so";
-}
+	// The scroll alone in the pack has nothing else to identify, so it says the
+	// pack was already known rather than counting itself.
+	TEST_F(IdentifyScrollTest, TheScrollAloneIdentifiesNothing)
+	{
+		ASSERT_EQ(reader->inventoryData.items.size(), 1u)
+			<< "the fixture put something else in the pack";
+		ASSERT_FALSE(scrollItem->is_fully_identified())
+			<< "the scroll starts identified, so this cannot see it count itself";
 
-// One unknown potion beside the unknown scroll: the potion is the one item identified,
-// said in the singular.
-TEST_F(IdentifyScrollTest, OneItemIdentifiedIsSaidInTheSingular)
-{
-	carried("health_potion");
+		read_the_scroll();
 
-	read_the_scroll();
+		EXPECT_TRUE(said_anything_about("already identified"))
+			<< "the scroll counted itself as an item it identified";
+	}
 
-	EXPECT_TRUE(said_anything_about("1 item identified!"))
-		<< "the scroll counted itself beside the potion, or one item was not counted as one";
-	EXPECT_FALSE(said_anything_about("1 items"))
-		<< "one item was counted in the plural";
-}
+	// Two unknown potions beside the unknown scroll: the count is two, in the
+	// plural.
+	TEST_F(IdentifyScrollTest, TwoItemsIdentifiedAreSaidInThePlural)
+	{
+		carried("health_potion");
+		carried("mana_potion");
 
-// The scroll alone in the pack has nothing else to identify, so it says the pack was
-// already known rather than counting itself.
-TEST_F(IdentifyScrollTest, TheScrollAloneIdentifiesNothing)
-{
-	ASSERT_EQ(reader->inventoryData.items.size(), 1u)
-		<< "the fixture put something else in the pack";
-	ASSERT_FALSE(scrollItem->is_fully_identified())
-		<< "the scroll starts identified, so this cannot see it count itself";
+		read_the_scroll();
 
-	read_the_scroll();
+		EXPECT_TRUE(said_anything_about("2 items identified!"));
+	}
 
-	EXPECT_TRUE(said_anything_about("already identified"))
-		<< "the scroll counted itself as an item it identified";
-}
+	// A pack holding nothing but the scroll is a legal thing to read it over.
+	TEST_F(IdentifyScrollTest, APackHoldingOnlyTheScrollStillSpendsIt)
+	{
+		ASSERT_EQ(reader->inventoryData.items.size(), 1u)
+			<< "the fixture put something else in the pack";
 
-// Two unknown potions beside the unknown scroll: the count is two, in the plural.
-TEST_F(IdentifyScrollTest, TwoItemsIdentifiedAreSaidInThePlural)
-{
-	carried("health_potion");
-	carried("mana_potion");
-
-	read_the_scroll();
-
-	EXPECT_TRUE(said_anything_about("2 items identified!"));
-}
-
-// A pack holding nothing but the scroll is a legal thing to read it over.
-TEST_F(IdentifyScrollTest, APackHoldingOnlyTheScrollStillSpendsIt)
-{
-	ASSERT_EQ(reader->inventoryData.items.size(), 1u)
-		<< "the fixture put something else in the pack";
-
-	EXPECT_TRUE(read_the_scroll())
-		<< "a scroll read over a pack holding only itself was not consumed";
-}
+		EXPECT_TRUE(read_the_scroll())
+			<< "a scroll read over a pack holding only itself was not consumed";
+	}
 
 } // namespace CppRL

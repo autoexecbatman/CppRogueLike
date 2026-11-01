@@ -21,8 +21,8 @@
     },
     {
       "file": "src/MonsterRegistry.cpp",
-      "original": "\t\tcounts.push_back({ { \"count\", entry.count }, { \"xp\", entry.xp } });\n",
-      "mutated": "\t\tcounts.push_back({ { \"count\", entry.count }, { \"xp\", 0 } });\n",
+      "original": "\t\t\t\tcounts.push_back(\n\t\t\t\t\t{ { \"count\", entry.count }, { \"xp\", entry.xp } });\n",
+      "mutated": "\t\t\t\tcounts.push_back(\n\t\t\t\t\t{ { \"count\", entry.count }, { \"xp\", 0 } });\n",
       "catches": "a save that drops every count's experience"
     },
     {
@@ -69,14 +69,14 @@
     },
     {
       "file": "src/MonsterHitDice.h",
-      "original": "\t\tconst HitDiceCount below{\n\t\t\thitDice.counts.front().count - 1,\n\t\t\thitDice.counts.front().xp,\n\t\t};\n",
-      "mutated": "\t\tconst HitDiceCount below{\n\t\t\thitDice.counts.front().count - 1,0,\n\t\t};\n",
+      "original": "\t\t\tconst HitDiceCount below{\n\t\t\t\thitDice.counts.front().count - 1,\n\t\t\t\thitDice.counts.front().xp,\n\t\t\t};\n",
+      "mutated": "\t\t\tconst HitDiceCount below{\n\t\t\t\thitDice.counts.front().count - 1,0,\n\t\t\t};\n",
       "catches": "a count the editor adds at the bottom worth nothing"
     },
     {
       "file": "src/MonsterHitDice.h",
-      "original": "\tconst int target = std::clamp(\n\t\tlowest,\n\t\tMONSTER_HIT_DICE_LOWEST_COUNT,\n\t\thighest_count(hitDice).count);\n",
-      "mutated": "\tconst int target = std::clamp(\n\t\tlowest,0,\n\t\thighest_count(hitDice).count);\n",
+      "original": "\t\tconst int target = std::clamp(\n\t\t\tlowest,\n\t\t\tMONSTER_HIT_DICE_LOWEST_COUNT,\n\t\t\thighest_count(hitDice).count);\n",
+      "mutated": "\t\tconst int target = std::clamp(\n\t\t\tlowest,0,\n\t\t\thighest_count(hitDice).count);\n",
       "catches": "the editor lowering a range to count 0"
     },
     {
@@ -93,8 +93,8 @@
     },
     {
       "file": "src/MonsterCreator.cpp",
-      "original": "\t\tlowest.count :\n\t\tctx.dice->roll(lowest.count, highest_count(params.hitDice).count);\n",
-      "mutated": "\t\tlowest.count :lowest.count;\n",
+      "original": "\t\t\tlowest.count :\n\t\t\tctx.dice->roll(lowest.count, highest_count(params.hitDice).count);\n",
+      "mutated": "\t\t\tlowest.count :lowest.count;\n",
       "catches": "a range that always takes its lowest count"
     },
     {

@@ -33,32 +33,32 @@
     },
     {
       "file": "src/ItemEnhancements.cpp",
-      "original": "\t\tenhancement.prefix = get_random_universal_prefix(dice);\n\t\tenhancement.suffix = get_random_special_suffix(dice);\n\t}\n\t// 40% chance for no enhancement",
-      "mutated": "\t\tenhancement.suffix = get_random_special_suffix(dice);\n\t\tenhancement.prefix = get_random_universal_prefix(dice);\n\t}\n\t// 40% chance for no enhancement",
+      "original": "\t\t\tenhancement.prefix = get_random_universal_prefix(dice);\n\t\t\tenhancement.suffix = get_random_special_suffix(dice);\n\t\t}\n\t\t// 40% chance for no enhancement",
+      "mutated": "\t\t\tenhancement.suffix = get_random_special_suffix(dice);\n\t\t\tenhancement.prefix = get_random_universal_prefix(dice);\n\t\t}\n\t\t// 40% chance for no enhancement",
       "catches": "the both band drawing the suffix before the prefix"
     },
     {
       "file": "src/ItemEnhancements.cpp",
-      "original": "\t\tPrefixType::BLESSED,\n\t\tPrefixType::CURSED,\n\t\tPrefixType::ANCIENT,\n\t\tPrefixType::MAGICAL,\n\t\tPrefixType::RUSTED,\n\t\tPrefixType::CRACKED",
-      "mutated": "\t\tPrefixType::CURSED, PrefixType::BLESSED,\n\t\tPrefixType::ANCIENT,\n\t\tPrefixType::MAGICAL,\n\t\tPrefixType::RUSTED,\n\t\tPrefixType::CRACKED",
+      "original": "\t\t\tPrefixType::BLESSED,\n\t\t\tPrefixType::CURSED,\n\t\t\tPrefixType::ANCIENT,\n\t\t\tPrefixType::MAGICAL,\n\t\t\tPrefixType::RUSTED,\n\t\t\tPrefixType::CRACKED",
+      "mutated": "\t\t\tPrefixType::CURSED, PrefixType::BLESSED,\n\t\t\tPrefixType::ANCIENT,\n\t\t\tPrefixType::MAGICAL,\n\t\t\tPrefixType::RUSTED,\n\t\t\tPrefixType::CRACKED",
       "catches": "the universal pool's first two entries swapped"
     },
     {
       "file": "src/ItemEnhancements.cpp",
-      "original": "\t// 40% chance for no enhancement\n\n\tif (magicalPrefixes == MagicalPrefixes::EXCLUDED)\n\t{\n\t\tenhancement.strip_magical_prefix();",
-      "mutated": "\t// 40% chance for no enhancement\n\n\tif (magicalPrefixes == MagicalPrefixes::EXCLUDED)\n\t{\n\t\t;",
+      "original": "\t\t// 40% chance for no enhancement\n\n\t\tif (magicalPrefixes == MagicalPrefixes::EXCLUDED)\n\t\t{\n\t\t\tenhancement.strip_magical_prefix();",
+      "mutated": "\t\t// 40% chance for no enhancement\n\n\t\tif (magicalPrefixes == MagicalPrefixes::EXCLUDED)\n\t\t{\n\t\t\t;",
       "catches": "the general generator keeping MAGICAL when the shop excludes magic"
     },
     {
       "file": "src/ItemEnhancements.cpp",
-      "original": "\treturn special_suffixes[dice\n\t\t\t.roll(0, static_cast<int>(std::size(special_suffixes)) - 1)];",
-      "mutated": "\treturn special_suffixes[dice\n\t\t\t.roll(0, static_cast<int>(std::size(special_suffixes)) -2)];",
+      "original": "\t\treturn special_suffixes[dice\n\t\t\t\t.roll(0, static_cast<int>(std::size(special_suffixes)) - 1)];",
+      "mutated": "\t\treturn special_suffixes[dice\n\t\t\t\t.roll(0, static_cast<int>(std::size(special_suffixes)) -2)];",
       "catches": "the special-suffix range one short, so OF_BRITTLENESS is never drawn"
     },
     {
       "file": "src/ItemEnhancements.cpp",
-      "original": "\treturn universal_prefixes[dice\n\t\t\t.roll(0, static_cast<int>(std::size(universal_prefixes)) - 1)];",
-      "mutated": "\treturn universal_prefixes[dice\n\t\t\t.roll(0, static_cast<int>(std::size(universal_prefixes)) -2)];",
+      "original": "\t\treturn universal_prefixes[dice\n\t\t\t\t.roll(0, static_cast<int>(std::size(universal_prefixes)) - 1)];",
+      "mutated": "\t\treturn universal_prefixes[dice\n\t\t\t\t.roll(0, static_cast<int>(std::size(universal_prefixes)) -2)];",
       "catches": "the universal range one short, so CRACKED is never drawn"
     }
   ]

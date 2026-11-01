@@ -13,184 +13,190 @@
 namespace CppRL
 {
 
-class Item : public Actor
-{
-private:
-	// base price set at creation; get_value() applies enhancement modifier
-	int baseValue{ 1 };
-
-public:
-	Item(Vector2D position, ActorData data);
-
-	void load(const json& source) override;
-	void save(json& output) override;
-
-	// The name the player sees: its appearance until its type is identified;
-	// identified enhancement parts by name, unknown ones as "?".
-	[[nodiscard]] std::string get_name() const;
-
-	const std::string& get_base_name() const noexcept { return actorData.name; }
-
-	// Enhancement system
-	void apply_enhancement(const ItemEnhancement& newEnhancement);
-	void generate_random_enhancement(
-		MagicalPrefixes magicalPrefixes,
-		RandomDice& dice);
-
-	const ItemEnhancement& get_enhancement() const noexcept
+	class Item : public Actor
 	{
-		return enhancement;
-	}
+	private:
+		// base price set at creation; get_value() applies enhancement modifier
+		int baseValue{ 1 };
 
-	bool is_enhanced() const noexcept;
+	public:
+		Item(Vector2D position, ActorData data);
 
-	// Identification system
-	void identify_type() noexcept { identification.identifiedType = true; }
+		void load(const json& source) override;
+		void save(json& output) override;
 
-	void identify_enhancement() noexcept
-	{
-		identification.identifiedEnhancement = true;
-	}
+		// The name the player sees: its appearance until its type is
+		// identified; identified enhancement parts by name, unknown ones as
+		// "?".
+		[[nodiscard]] std::string get_name() const;
 
-	void identify_buc() noexcept { identification.identifiedBuc = true; }
+		const std::string& get_base_name() const noexcept
+		{
+			return actorData.name;
+		}
 
-	void identify_all() noexcept { identification.identify_all(); }
+		// Enhancement system
+		void apply_enhancement(const ItemEnhancement& newEnhancement);
+		void generate_random_enhancement(
+			MagicalPrefixes magicalPrefixes,
+			RandomDice& dice);
 
-	void reset_identification() noexcept { identification.reset(); }
+		const ItemEnhancement& get_enhancement() const noexcept
+		{
+			return enhancement;
+		}
 
-	[[nodiscard]] bool is_fully_identified() const noexcept
-	{
-		return identification.is_fully_identified();
-	}
+		bool is_enhanced() const noexcept;
 
-	[[nodiscard]] bool is_type_identified() const noexcept
-	{
-		return identification.identifiedType;
-	}
+		// Identification system
+		void identify_type() noexcept { identification.identifiedType = true; }
 
-	[[nodiscard]] bool is_enhancement_identified() const noexcept
-	{
-		return identification.identifiedEnhancement;
-	}
+		void identify_enhancement() noexcept
+		{
+			identification.identifiedEnhancement = true;
+		}
 
-	[[nodiscard]] bool is_buc_identified() const noexcept
-	{
-		return identification.identifiedBuc;
-	}
+		void identify_buc() noexcept { identification.identifiedBuc = true; }
 
-	// Value: baseValue * enhancement.valueModifier / 100  (modifier defaults to 100)
-	int get_value() const noexcept
-	{
-		return (baseValue * enhancement.valueModifier) / 100;
-	}
+		void identify_all() noexcept { identification.identify_all(); }
 
-	void set_value(int newValue) noexcept { baseValue = newValue; }
+		void reset_identification() noexcept { identification.reset(); }
 
-	std::string itemKey; // JSON registry key
-	// What the item is called until its type is identified.
-	std::string appearance{};
-	ItemClass itemClass{ ItemClass::UNKNOWN }; // Item category classification
-	ItemEnhancement enhancement; // Enhancement data
-	ItemIdentificationStatus identification; // Identification tracking
+		[[nodiscard]] bool is_fully_identified() const noexcept
+		{
+			return identification.is_fully_identified();
+		}
 
-	// item behavior (replaces pickable hierarchy)
-	std::optional<ItemBehavior> behavior;
+		[[nodiscard]] bool is_type_identified() const noexcept
+		{
+			return identification.identifiedType;
+		}
 
-	// Item classification utility functions
-	ItemCategory get_category() const noexcept
-	{
-		return ItemClassificationUtils::get_category(itemClass);
-	}
+		[[nodiscard]] bool is_enhancement_identified() const noexcept
+		{
+			return identification.identifiedEnhancement;
+		}
 
-	bool is_weapon() const noexcept
-	{
-		return ItemClassificationUtils::is_weapon(itemClass);
-	}
+		[[nodiscard]] bool is_buc_identified() const noexcept
+		{
+			return identification.identifiedBuc;
+		}
 
-	bool is_armor() const noexcept
-	{
-		return ItemClassificationUtils::is_armor(itemClass);
-	}
+		// Value: baseValue * enhancement.valueModifier / 100
+		// (modifier defaults to 100)
+		int get_value() const noexcept
+		{
+			return (baseValue * enhancement.valueModifier) / 100;
+		}
 
-	bool is_helmet() const noexcept
-	{
-		return ItemClassificationUtils::is_helmet(itemClass);
-	}
+		void set_value(int newValue) noexcept { baseValue = newValue; }
 
-	bool is_shield() const noexcept
-	{
-		return ItemClassificationUtils::is_shield(itemClass);
-	}
+		std::string itemKey; // JSON registry key
+		// What the item is called until its type is identified.
+		std::string appearance{};
+		// Item category classification
+		ItemClass itemClass{ ItemClass::UNKNOWN };
+		ItemEnhancement enhancement; // Enhancement data
+		ItemIdentificationStatus identification; // Identification tracking
 
-	bool is_gauntlets() const noexcept
-	{
-		return ItemClassificationUtils::is_gauntlets(itemClass);
-	}
+		// item behavior (replaces pickable hierarchy)
+		std::optional<ItemBehavior> behavior;
 
-	bool is_boots() const noexcept
-	{
-		return ItemClassificationUtils::is_boots(itemClass);
-	}
+		// Item classification utility functions
+		ItemCategory get_category() const noexcept
+		{
+			return ItemClassificationUtils::get_category(itemClass);
+		}
 
-	bool is_cloak() const noexcept
-	{
-		return ItemClassificationUtils::is_cloak(itemClass);
-	}
+		bool is_weapon() const noexcept
+		{
+			return ItemClassificationUtils::is_weapon(itemClass);
+		}
 
-	bool is_girdle() const noexcept
-	{
-		return ItemClassificationUtils::is_girdle(itemClass);
-	}
+		bool is_armor() const noexcept
+		{
+			return ItemClassificationUtils::is_armor(itemClass);
+		}
 
-	bool is_consumable() const noexcept
-	{
-		return ItemClassificationUtils::is_consumable(itemClass);
-	}
+		bool is_helmet() const noexcept
+		{
+			return ItemClassificationUtils::is_helmet(itemClass);
+		}
 
-	bool is_jewelry() const noexcept
-	{
-		return ItemClassificationUtils::is_jewelry(itemClass);
-	}
+		bool is_shield() const noexcept
+		{
+			return ItemClassificationUtils::is_shield(itemClass);
+		}
 
-	bool is_amulet() const noexcept
-	{
-		return ItemClassificationUtils::is_amulet(itemClass);
-	}
+		bool is_gauntlets() const noexcept
+		{
+			return ItemClassificationUtils::is_gauntlets(itemClass);
+		}
 
-	bool is_ring() const noexcept
-	{
-		return ItemClassificationUtils::is_ring(itemClass);
-	}
+		bool is_boots() const noexcept
+		{
+			return ItemClassificationUtils::is_boots(itemClass);
+		}
 
-	bool is_tool() const noexcept
-	{
-		return ItemClassificationUtils::is_tool(itemClass);
-	}
+		bool is_cloak() const noexcept
+		{
+			return ItemClassificationUtils::is_cloak(itemClass);
+		}
 
-	bool can_equip_to_right_hand() const noexcept
-	{
-		return ItemClassificationUtils::can_equip_to_right_hand(itemClass);
-	}
+		bool is_girdle() const noexcept
+		{
+			return ItemClassificationUtils::is_girdle(itemClass);
+		}
 
-	bool can_equip_to_left_hand() const noexcept
-	{
-		return ItemClassificationUtils::can_equip_to_left_hand(itemClass);
-	}
+		bool is_consumable() const noexcept
+		{
+			return ItemClassificationUtils::is_consumable(itemClass);
+		}
 
-	bool can_equip_to_body() const noexcept
-	{
-		return ItemClassificationUtils::can_equip_to_body(itemClass);
-	}
+		bool is_jewelry() const noexcept
+		{
+			return ItemClassificationUtils::is_jewelry(itemClass);
+		}
 
-	bool is_two_handed_weapon() const noexcept
-	{
-		return ItemClassificationUtils::is_two_handed_weapon(itemClass);
-	}
+		bool is_amulet() const noexcept
+		{
+			return ItemClassificationUtils::is_amulet(itemClass);
+		}
 
-	bool is_ranged_weapon() const noexcept
-	{
-		return ItemClassificationUtils::is_ranged_weapon(itemClass);
-	}
-};
+		bool is_ring() const noexcept
+		{
+			return ItemClassificationUtils::is_ring(itemClass);
+		}
+
+		bool is_tool() const noexcept
+		{
+			return ItemClassificationUtils::is_tool(itemClass);
+		}
+
+		bool can_equip_to_right_hand() const noexcept
+		{
+			return ItemClassificationUtils::can_equip_to_right_hand(itemClass);
+		}
+
+		bool can_equip_to_left_hand() const noexcept
+		{
+			return ItemClassificationUtils::can_equip_to_left_hand(itemClass);
+		}
+
+		bool can_equip_to_body() const noexcept
+		{
+			return ItemClassificationUtils::can_equip_to_body(itemClass);
+		}
+
+		bool is_two_handed_weapon() const noexcept
+		{
+			return ItemClassificationUtils::is_two_handed_weapon(itemClass);
+		}
+
+		bool is_ranged_weapon() const noexcept
+		{
+			return ItemClassificationUtils::is_ranged_weapon(itemClass);
+		}
+	};
 
 } // namespace CppRL

@@ -21,8 +21,8 @@
     },
     {
       "file": "src/ArmorClass.cpp",
-      "original": "if (armor == nullptr || armor->material != ArmorMaterial::LEATHER ||\n\t\t\t\tbody->get_enhancement().isMagical)",
-      "mutated": "if (armor == nullptr || body->get_enhancement().isMagical)",
+      "original": "if (armor == nullptr ||\n\t\t\t\t\tarmor->material != ArmorMaterial::LEATHER ||\n\t\t\t\t\tbody->get_enhancement().isMagical)",
+      "mutated": "if (armor == nullptr ||body->get_enhancement().isMagical)",
       "catches": "a cloak working over any armour at all"
     },
     {
@@ -33,8 +33,8 @@
     },
     {
       "file": "src/ArmorClass.cpp",
-      "original": "\t\t}\n\n\t\tconst Item* held = wearer.get_equipped_item(EquipmentSlot::LEFT_HAND);",
-      "mutated": "\t\t}\n\t\telse\n\t\t{\n\t\t\treturn false;\n\t\t}\n\n\t\tconst Item* held = wearer.get_equipped_item(EquipmentSlot::LEFT_HAND);",
+      "original": "\t\t\t}\n\n\t\t\tconst Item* held =\n\t\t\t\twearer.get_equipped_item(EquipmentSlot::LEFT_HAND);",
+      "mutated": "\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\treturn false;\n\t\t\t}\n\n\t\t\tconst Item* held =\n\t\t\t\twearer.get_equipped_item(EquipmentSlot::LEFT_HAND);",
       "catches": "a cloak worn over no armour giving nothing"
     },
     {
@@ -45,14 +45,14 @@
     },
     {
       "file": "src/ArmorClass.cpp",
-      "original": "\t\treturn held == nullptr || !held->behavior ||\n\t\t\t!std::holds_alternative<Shield>(*held->behavior);",
-      "mutated": "\t\treturn true;",
+      "original": "\t\t\treturn held == nullptr || !held->behavior ||\n\t\t\t\t!std::holds_alternative<Shield>(*held->behavior);",
+      "mutated": "\t\t\treturn true;",
       "catches": "a cloak working beside a shield"
     },
     {
       "file": "src/ArmorClass.cpp",
-      "original": "return cloak.effect == MagicalEffect::PROTECTION ?\n\t\t\t\t\t\tcloak.bonus :\n\t\t\t\t\t\t0;",
-      "mutated": "return cloak.bonus;",
+      "original": "\treturn cloak.effect == MagicalEffect::PROTECTION ?\n\t\t\t\t\t\t\tcloak.bonus :\n\t\t\t\t\t\t\t0;",
+      "mutated": "\treturn cloak.bonus;",
       "catches": "a cloak's plus counting whatever its effect"
     },
     {
@@ -87,8 +87,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tbreakdown.helm,\n\t\tbreakdown.cloak,\n",
-      "mutated": "\t\tbreakdown.helm,\n",
+      "original": "\t\t\tbreakdown.helm,\n\t\t\tbreakdown.cloak,\n",
+      "mutated": "\t\t\tbreakdown.helm,\n",
       "catches": "the armour class log leaving the cloak out"
     },
     {
@@ -99,8 +99,8 @@
     },
     {
       "file": "src/ArmorMaterial.h",
-      "original": "\tif (found == ARMOR_MATERIAL_TABLE.end())\n\t{\n\t\tthrow std::runtime_error(\n\t\t\tstd::format(\"unknown armor_material '{}'\", name));\n\t}",
-      "mutated": "\tif (found == ARMOR_MATERIAL_TABLE.end())\n\t{\n\t\treturn ArmorMaterial::NONE;\n\t}",
+      "original": "\t\tif (found == ARMOR_MATERIAL_TABLE.end())\n\t\t{\n\t\t\tthrow std::runtime_error(\n\t\t\t\tstd::format(\"unknown armor_material '{}'\", name));\n\t\t}",
+      "mutated": "\t\tif (found == ARMOR_MATERIAL_TABLE.end())\n\t\t{\n\t\t\treturn ArmorMaterial::NONE;\n\t\t}",
       "catches": "an unknown material read as none"
     },
     {
@@ -117,13 +117,13 @@
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "record[\"armorMaterial\"] = encode_armor_material(params.armorMaterial);",
-      "mutated": "record[\"armorMaterial\"] = \"none\";",
+      "original": "record[\"armorMaterial\"] =\n\t\t\t\tencode_armor_material(params.armorMaterial);",
+      "mutated": "record[\"armorMaterial\"] =\"none\";",
       "catches": "the registry saving no material"
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "params.armorMaterial = parse_armor_material(\n\t\t\trequired_field(record, key, \"armorMaterial\").get<std::string>());",
+      "original": "params.armorMaterial = parse_armor_material(\n\t\t\t\trequired_field(record, key, \"armorMaterial\")\n\t\t\t\t\t.get<std::string>());",
       "mutated": "params.armorMaterial = ArmorMaterial::LEATHER;",
       "catches": "the registry reading no material and refusing nothing"
     },
@@ -135,13 +135,13 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "output[\"armorMaterial\"] = encode_armor_material(armor.material);",
-      "mutated": "output[\"armorMaterial\"] = \"none\";",
+      "original": "output[\"armorMaterial\"] =\n\t\t\t\t\t\tencode_armor_material(armor.material);",
+      "mutated": "output[\"armorMaterial\"] =\"none\";",
       "catches": "a saved armour losing its material"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "armor.material =\n\t\t\tparse_armor_material(source.at(\"armorMaterial\").get<std::string>());",
+      "original": "armor.material = parse_armor_material(\n\t\t\t\tsource.at(\"armorMaterial\").get<std::string>());",
       "mutated": "armor.material = ArmorMaterial::NONE;",
       "catches": "a loaded armour losing its material"
     },

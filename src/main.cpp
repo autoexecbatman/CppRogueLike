@@ -23,23 +23,23 @@ namespace CppRL
 {
 
 #ifdef __EMSCRIPTEN__
-struct LoopData
-{
-	Game* game{};
-	int loopNum{};
-};
-
-void emscripten_loop(void* arg)
-{
-	auto* data = static_cast<LoopData*>(arg);
-	if (WindowShouldClose() || !data->game->gameState.get_run())
+	struct LoopData
 	{
-		emscripten_cancel_main_loop();
-		return;
-	}
+		Game* game{};
+		int loopNum{};
+	};
 
-	data->game->tick(data->loopNum);
-}
+	void emscripten_loop(void* arg)
+	{
+		auto* data = static_cast<LoopData*>(arg);
+		if (WindowShouldClose() || !data->game->gameState.get_run())
+		{
+			emscripten_cancel_main_loop();
+			return;
+		}
+
+		data->game->tick(data->loopNum);
+	}
 #endif
 
 } // namespace CppRL

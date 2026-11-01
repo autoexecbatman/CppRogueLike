@@ -15,8 +15,8 @@
     "mutations": [
         {
             "file": "src/Game.cpp",
-            "original": "void Game::load_item_tiles()\n{\n\tContentRegistryIO::load(contentRegistry, Paths::CONTENT_TILES);\n}",
-            "mutated": "void Game::load_item_tiles()\n{\n}",
+            "original": "\tvoid Game::load_item_tiles()\n\t{\n\t\tContentRegistryIO::load(contentRegistry, Paths::CONTENT_TILES);\n\t}",
+            "mutated": "\tvoid Game::load_item_tiles()\n\t{\n\t}",
             "catches": "startup loading no item tiles, so the editor saves an empty registry"
         },
         {

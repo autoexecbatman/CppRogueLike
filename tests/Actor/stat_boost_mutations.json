@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tconst WornAbilityEffect effect = worn_ability_effect(*worn.item, type);\n\t\thighestSet = std::max(highestSet, effect.setTo);\n\t\tcount_addition(effect.add);",
-      "mutated": "\t\tstatic_cast<void>(worn);",
+      "original": "\t\t\tconst WornAbilityEffect effect =\n\t\t\t\tworn_ability_effect(*worn.item, type);\n\t\t\thighestSet = std::max(highestSet, effect.setTo);\n\t\t\tcount_addition(effect.add);",
+      "mutated": "\t\t\tstatic_cast<void>(worn);",
       "catches": "worn items counting for nothing, as a monster's always did"
     },
     {
@@ -45,14 +45,14 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tif (!wearer.toggle_equipment(item.uniqueId, slot, ctx))\n\t\t{\n\t\t\treturn false;\n\t\t}",
-      "mutated": "\t\tif (!wearer.toggle_equipment(item.uniqueId, slot, ctx))\n\t\t{\n\t\t\treturn true;\n\t\t}",
+      "original": "\t\t\tif (!wearer.toggle_equipment(item.uniqueId, slot, ctx))\n\t\t\t{\n\t\t\t\treturn false;\n\t\t\t}",
+      "mutated": "\t\t\tif (!wearer.toggle_equipment(item.uniqueId, slot, ctx))\n\t\t\t{\n\t\t\t\treturn true;\n\t\t\t}",
       "catches": "a failed removal using a turn"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tstd::unique_ptr<Item> removed = std::move(found->item);\n\t\tequippedItems.erase(found);\n",
-      "mutated": "\t\tstd::unique_ptr<Item> removed = std::move(found->item);\n",
+      "original": "\t\t\tstd::unique_ptr<Item> removed = std::move(found->item);\n\t\t\tequippedItems.erase(found);\n",
+      "mutated": "\t\t\tstd::unique_ptr<Item> removed = std::move(found->item);\n",
       "catches": "the slot list read while it holds an emptied slot"
     }
   ]

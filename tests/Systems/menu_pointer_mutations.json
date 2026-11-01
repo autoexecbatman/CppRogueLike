@@ -15,7 +15,7 @@
   "mutations": [
     {
       "file": "src/BaseMenu.cpp",
-      "original": "\tif (pixelX < leftEdge || pixelX >= rightEdge)\n\t{\n\t\treturn std::nullopt;\n\t}",
+      "original": "\t\tif (pixelX < leftEdge || pixelX >= rightEdge)\n\t\t{\n\t\t\treturn std::nullopt;\n\t\t}",
       "mutated": "",
       "catches": "the horizontal bound gone, which is the defect lifted out of ListMenu: a click level with a row but far beside the panel fires it"
     },
@@ -33,8 +33,8 @@
     },
     {
       "file": "src/BaseMenu.cpp",
-      "original": "\tconst int row = panel_text_row_at_y(\n\t\tstatic_cast<int>(menuStartY) * tileSize,\n\t\ttileSize,\n\t\tpixelY);",
-      "mutated": "\tconst int row = panel_text_row_at_y(0,\n\t\ttileSize,\n\t\tpixelY);",
+      "original": "\t\tconst int row = panel_text_row_at_y(\n\t\t\tstatic_cast<int>(menuStartY) * tileSize,\n\t\t\ttileSize,\n\t\t\tpixelY);",
+      "mutated": "\t\tconst int row = panel_text_row_at_y(0,\n\t\t\ttileSize,\n\t\t\tpixelY);",
       "catches": "the panel's own top forgotten, so every row answers as if the menu began at the top of the screen"
     }
   ]

@@ -43,172 +43,180 @@
 namespace CppRL
 {
 
-class SpellFailureTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	class SpellFailureTest : public ::testing::Test
 	{
-		ctx = mock.to_game_context();
-		ctx.dataManager = &dataManager;
-		dataManager.load_all_data(messages);
+	protected:
+		void SetUp() override
+		{
+			ctx = mock.to_game_context();
+			ctx.dataManager = &dataManager;
+			dataManager.load_all_data(messages);
 
-		priest.healthPool = std::make_unique<HealthPool>(20);
-		priest.armorClass = std::make_unique<ArmorClass>(10);
-		priest.set_creature_class(CreatureClass::CLERIC);
+			priest.healthPool = std::make_unique<HealthPool>(20);
+			priest.armorClass = std::make_unique<ArmorClass>(10);
+			priest.set_creature_class(CreatureClass::CLERIC);
+			priest.set_wisdom(9);
+		}
+
+		MockGameContext mock{};
+		GameContext ctx{};
+		DataManager dataManager{};
+		MessageSystem messages{};
+		Creature priest{
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "priest", ColorPairId::WHITE_BLACK },
+		};
+	};
+
+	// Table 5's column, read straight down the rows a priest can have.
+	TEST_F(SpellFailureTest, TheChanceIsTableFivesColumn)
+	{
 		priest.set_wisdom(9);
+		EXPECT_EQ(SpellSystem::spell_failure_chance(priest, dataManager), 20);
+		priest.set_wisdom(10);
+		EXPECT_EQ(SpellSystem::spell_failure_chance(priest, dataManager), 15);
+		priest.set_wisdom(11);
+		EXPECT_EQ(SpellSystem::spell_failure_chance(priest, dataManager), 10);
+		priest.set_wisdom(12);
+		EXPECT_EQ(SpellSystem::spell_failure_chance(priest, dataManager), 5);
 	}
 
-	MockGameContext mock{};
-	GameContext ctx{};
-	DataManager dataManager{};
-	MessageSystem messages{};
-	Creature priest{
-		Vector2D{ 0, 0 },
-		ActorData{ TileRef{}, "priest", ColorPairId::WHITE_BLACK },
-	};
-};
-
-// Table 5's column, read straight down the rows a priest can have.
-TEST_F(SpellFailureTest, TheChanceIsTableFivesColumn)
-{
-	priest.set_wisdom(9);
-	EXPECT_EQ(SpellSystem::spell_failure_chance(priest, dataManager), 20);
-	priest.set_wisdom(10);
-	EXPECT_EQ(SpellSystem::spell_failure_chance(priest, dataManager), 15);
-	priest.set_wisdom(11);
-	EXPECT_EQ(SpellSystem::spell_failure_chance(priest, dataManager), 10);
-	priest.set_wisdom(12);
-	EXPECT_EQ(SpellSystem::spell_failure_chance(priest, dataManager), 5);
-}
-
-// "priests with Wisdom scores of 13 or higher don't need to worry".
-TEST_F(SpellFailureTest, WisdomThirteenAndAboveNeverFizzles)
-{
-	for (const int wisdom : { 13, 14, 16, 18 })
+	// "priests with Wisdom scores of 13 or higher don't need to worry".
+	TEST_F(SpellFailureTest, WisdomThirteenAndAboveNeverFizzles)
 	{
-		priest.set_wisdom(wisdom);
-		EXPECT_EQ(SpellSystem::spell_failure_chance(priest, dataManager), 0)
-			<< "Wisdom " << wisdom;
+		for (const int wisdom : { 13, 14, 16, 18 })
+		{
+			priest.set_wisdom(wisdom);
+			EXPECT_EQ(SpellSystem::spell_failure_chance(priest, dataManager), 0)
+				<< "Wisdom " << wisdom;
+		}
 	}
-}
 
-// The column is Wisdom's, and Wisdom is the priest's prime requisite. A wizard casts
-// on Intelligence and the book gives it no failure chance at all.
-TEST_F(SpellFailureTest, OnlyAPriestFizzles)
-{
-	priest.set_creature_class(CreatureClass::WIZARD);
-	priest.set_wisdom(9);
-
-	EXPECT_EQ(SpellSystem::spell_failure_chance(priest, dataManager), 0);
-}
-
-// "if the number rolled is less than or equal to the listed chance" - so at a chance
-// of 20 a roll of 20 fizzles and a roll of 21 does not.
-TEST_F(SpellFailureTest, TheRollIsAtOrUnderTheChance)
-{
-	priest.set_wisdom(9);
-
-	mock.dice.set_next_roll(20);
-	EXPECT_TRUE(SpellSystem::spell_fizzles(priest, dataManager, *ctx.dice));
-
-	mock.dice.set_next_roll(21);
-	EXPECT_FALSE(SpellSystem::spell_fizzles(priest, dataManager, *ctx.dice));
-}
-
-// A priest who cannot fizzle is not made to roll: an unscripted roll would be a real
-// one, so the queued 1 still being there is what says the dice were never asked.
-TEST_F(SpellFailureTest, ACasterWhoCannotFizzleDoesNotRoll)
-{
-	priest.set_wisdom(13);
-
-	mock.dice.set_next_roll(1);
-	EXPECT_FALSE(SpellSystem::spell_fizzles(priest, dataManager, *ctx.dice));
-
-	// The 1 is still queued, so this Wisdom 9 priest spends it and fizzles.
-	priest.set_wisdom(9);
-	EXPECT_TRUE(SpellSystem::spell_fizzles(priest, dataManager, *ctx.dice));
-}
-
-// "the spell is expended with absolutely no effect whatsoever": the casting is over
-// and the spell is gone, which is a different thing from the casting not happening.
-TEST_F(SpellFailureTest, AFizzledSpellIsSpentAndDoesNothing)
-{
-	priest.set_wisdom(9);
-	priest.set_hp(10);
-
-	bool spent = false;
-	const auto onCastComplete = [&spent](GameContext& completedCtx)
+	// The column is Wisdom's, and Wisdom is the priest's prime requisite. A
+	// wizard casts on Intelligence and the book gives it no failure chance at
+	// all.
+	TEST_F(SpellFailureTest, OnlyAPriestFizzles)
 	{
-		spent = true;
-	};
+		priest.set_creature_class(CreatureClass::WIZARD);
+		priest.set_wisdom(9);
 
-	// 20 is at the chance, so it fizzles; cure light wounds would otherwise heal 1d8
-	// and its die is left unscripted, so a spell that landed would roll a real one.
-	mock.dice.set_next_roll(20);
-	SpellSystem::cast_spell_by_key(
-		"cure_light_wounds",
-		priest,
-		SpellSource::MEMORIZED,
-		onCastComplete,
-		ctx);
+		EXPECT_EQ(SpellSystem::spell_failure_chance(priest, dataManager), 0);
+	}
 
-	EXPECT_TRUE(spent) << "the spell is expended even though it did nothing";
-	EXPECT_EQ(priest.get_hp(), 10) << "and it healed nothing";
-}
-
-// The same priest, one point of Wisdom higher on the roll, is healed.
-TEST_F(SpellFailureTest, ASpellThatDoesNotFizzleLands)
-{
-	priest.set_wisdom(9);
-	priest.set_hp(10);
-
-	bool spent = false;
-	const auto onCastComplete = [&spent](GameContext& completedCtx)
+	// "if the number rolled is less than or equal to the listed chance" - so at
+	// a chance of 20 a roll of 20 fizzles and a roll of 21 does not.
+	TEST_F(SpellFailureTest, TheRollIsAtOrUnderTheChance)
 	{
-		spent = true;
-	};
+		priest.set_wisdom(9);
 
-	// 21 is past the chance, then the healing die.
-	mock.dice.set_next_roll(21);
-	mock.dice.set_next_roll(5);
-	SpellSystem::cast_spell_by_key(
-		"cure_light_wounds",
-		priest,
-		SpellSource::MEMORIZED,
-		onCastComplete,
-		ctx);
+		mock.dice.set_next_roll(20);
+		EXPECT_TRUE(SpellSystem::spell_fizzles(priest, dataManager, *ctx.dice));
 
-	EXPECT_TRUE(spent);
-	EXPECT_EQ(priest.get_hp(), 15) << "1d8 showing five";
-}
+		mock.dice.set_next_roll(21);
+		EXPECT_FALSE(
+			SpellSystem::spell_fizzles(priest, dataManager, *ctx.dice));
+	}
 
-// A spell a ring or a helm casts is not the priest's own, so its Wisdom does not
-// decide whether it works.
-TEST_F(SpellFailureTest, AnItemsSpellDoesNotFizzle)
-{
-	priest.set_wisdom(9);
-	priest.set_hp(10);
-
-	bool spent = false;
-	const auto onCastComplete = [&spent](GameContext& completedCtx)
+	// A priest who cannot fizzle is not made to roll: an unscripted roll would
+	// be a real one, so the queued 1 still being there is what says the dice
+	// were never asked.
+	TEST_F(SpellFailureTest, ACasterWhoCannotFizzleDoesNotRoll)
 	{
-		spent = true;
-	};
+		priest.set_wisdom(13);
 
-	// A 1 would fizzle any memorised casting; here it is the healing die instead,
-	// because the item's spell never asks whether the priest's Wisdom failed it.
-	mock.dice.set_next_roll(1);
-	SpellSystem::cast_spell_by_key(
-		"cure_light_wounds",
-		priest,
-		SpellSource::ITEM,
-		onCastComplete,
-		ctx);
+		mock.dice.set_next_roll(1);
+		EXPECT_FALSE(
+			SpellSystem::spell_fizzles(priest, dataManager, *ctx.dice));
 
-	EXPECT_TRUE(spent);
-	EXPECT_EQ(priest.get_hp(), 11) << "1d8 showing one";
-}
+		// The 1 is still queued, so this Wisdom 9 priest spends it and fizzles.
+		priest.set_wisdom(9);
+		EXPECT_TRUE(SpellSystem::spell_fizzles(priest, dataManager, *ctx.dice));
+	}
 
-// end of file: SpellFailureTest.cpp
+	// "the spell is expended with absolutely no effect whatsoever": the casting
+	// is over and the spell is gone, which is a different thing from the
+	// casting not happening.
+	TEST_F(SpellFailureTest, AFizzledSpellIsSpentAndDoesNothing)
+	{
+		priest.set_wisdom(9);
+		priest.set_hp(10);
+
+		bool spent = false;
+		const auto onCastComplete = [&spent](GameContext& completedCtx)
+		{
+			spent = true;
+		};
+
+		// 20 is at the chance, so it fizzles; cure light wounds would otherwise
+		// heal 1d8 and its die is left unscripted, so a spell that landed would
+		// roll a real one.
+		mock.dice.set_next_roll(20);
+		SpellSystem::cast_spell_by_key(
+			"cure_light_wounds",
+			priest,
+			SpellSource::MEMORIZED,
+			onCastComplete,
+			ctx);
+
+		EXPECT_TRUE(spent)
+			<< "the spell is expended even though it did nothing";
+		EXPECT_EQ(priest.get_hp(), 10) << "and it healed nothing";
+	}
+
+	// The same priest, one point of Wisdom higher on the roll, is healed.
+	TEST_F(SpellFailureTest, ASpellThatDoesNotFizzleLands)
+	{
+		priest.set_wisdom(9);
+		priest.set_hp(10);
+
+		bool spent = false;
+		const auto onCastComplete = [&spent](GameContext& completedCtx)
+		{
+			spent = true;
+		};
+
+		// 21 is past the chance, then the healing die.
+		mock.dice.set_next_roll(21);
+		mock.dice.set_next_roll(5);
+		SpellSystem::cast_spell_by_key(
+			"cure_light_wounds",
+			priest,
+			SpellSource::MEMORIZED,
+			onCastComplete,
+			ctx);
+
+		EXPECT_TRUE(spent);
+		EXPECT_EQ(priest.get_hp(), 15) << "1d8 showing five";
+	}
+
+	// A spell a ring or a helm casts is not the priest's own, so its Wisdom
+	// does not decide whether it works.
+	TEST_F(SpellFailureTest, AnItemsSpellDoesNotFizzle)
+	{
+		priest.set_wisdom(9);
+		priest.set_hp(10);
+
+		bool spent = false;
+		const auto onCastComplete = [&spent](GameContext& completedCtx)
+		{
+			spent = true;
+		};
+
+		// A 1 would fizzle any memorised casting; here it is the healing die
+		// instead, because the item's spell never asks whether the priest's
+		// Wisdom failed it.
+		mock.dice.set_next_roll(1);
+		SpellSystem::cast_spell_by_key(
+			"cure_light_wounds",
+			priest,
+			SpellSource::ITEM,
+			onCastComplete,
+			ctx);
+
+		EXPECT_TRUE(spent);
+		EXPECT_EQ(priest.get_hp(), 11) << "1d8 showing one";
+	}
+
+	// end of file: SpellFailureTest.cpp
 
 } // namespace CppRL

@@ -39,77 +39,79 @@
 namespace CppRL
 {
 
-namespace
-{
-	// The dragon's record as the monster editor reads it from the data file.
-	MonsterParams dragon_from_data()
+	namespace
 	{
-		MonsterRegistry monsters{};
-		monsters.load(Paths::MONSTERS);
-		return monsters.get_params("dragon");
+		// The dragon's record as the monster editor reads it from the data
+		// file.
+		MonsterParams dragon_from_data()
+		{
+			MonsterRegistry monsters{};
+			monsters.load(Paths::MONSTERS);
+			return monsters.get_params("dragon");
+		}
+	} // namespace
+
+	// 15 Hit Dice of eight sides, with nothing added: a juvenile's modifier is
+	// Nil.
+	TEST(DragonStatBlockTest, AJuvenileHasFifteenEightSidedHitDice)
+	{
+		const MonsterParams dragon = dragon_from_data();
+
+		ASSERT_EQ(dragon.hitDice.counts.size(), 1u);
+		EXPECT_EQ(dragon.hitDice.counts.front().count, 15);
+		EXPECT_EQ(dragon.hitDice.sides, 8);
+		EXPECT_EQ(dragon.hitDice.bonus, 0);
 	}
-} // namespace
 
-// 15 Hit Dice of eight sides, with nothing added: a juvenile's modifier is Nil.
-TEST(DragonStatBlockTest, AJuvenileHasFifteenEightSidedHitDice)
-{
-	const MonsterParams dragon = dragon_from_data();
+	// Table 39 at 15 Hit Dice, not the entry's "7 (at 9 HD)".
+	TEST(DragonStatBlockTest, ItsThac0IsTableThirtyNineAtFifteenHitDice)
+	{
+		EXPECT_EQ(dragon_from_data().thaco, 5);
+	}
 
-	ASSERT_EQ(dragon.hitDice.counts.size(), 1u);
-	EXPECT_EQ(dragon.hitDice.counts.front().count, 15);
-	EXPECT_EQ(dragon.hitDice.sides, 8);
-	EXPECT_EQ(dragon.hitDice.bonus, 0);
-}
+	TEST(DragonStatBlockTest, AJuvenileHasArmorClassMinusThree)
+	{
+		EXPECT_EQ(dragon_from_data().ac, -3);
+	}
 
-// Table 39 at 15 Hit Dice, not the entry's "7 (at 9 HD)".
-TEST(DragonStatBlockTest, ItsThac0IsTableThirtyNineAtFifteenHitDice)
-{
-	EXPECT_EQ(dragon_from_data().thaco, 5);
-}
+	TEST(DragonStatBlockTest, AJuvenileIsWorthTwelveThousandExperience)
+	{
+		EXPECT_EQ(highest_count(dragon_from_data().hitDice).xp, 12000);
+	}
 
-TEST(DragonStatBlockTest, AJuvenileHasArmorClassMinusThree)
-{
-	EXPECT_EQ(dragon_from_data().ac, -3);
-}
+	// Fanatic is 17-18.
+	TEST(DragonStatBlockTest, ItsMoraleIsFanatic)
+	{
+		EXPECT_EQ(dragon_from_data().morale, 18);
+	}
 
-TEST(DragonStatBlockTest, AJuvenileIsWorthTwelveThousandExperience)
-{
-	EXPECT_EQ(highest_count(dragon_from_data().hitDice).xp, 12000);
-}
+	TEST(DragonStatBlockTest, ItIsGargantuan)
+	{
+		EXPECT_EQ(dragon_from_data().size, CreatureSize::GARGANTUAN);
+	}
 
-// Fanatic is 17-18.
-TEST(DragonStatBlockTest, ItsMoraleIsFanatic)
-{
-	EXPECT_EQ(dragon_from_data().morale, 18);
-}
+	// First drawn on the ninth level, and on every level below it.
+	TEST(DragonStatBlockTest, ItIsFirstMetOnTheNinthLevel)
+	{
+		const MonsterParams dragon = dragon_from_data();
 
-TEST(DragonStatBlockTest, ItIsGargantuan)
-{
-	EXPECT_EQ(dragon_from_data().size, CreatureSize::GARGANTUAN);
-}
+		EXPECT_EQ(dragon.levelMinimum, 9);
+		EXPECT_EQ(dragon.levelMaximum, 0);
+	}
 
-// First drawn on the ninth level, and on every level below it.
-TEST(DragonStatBlockTest, ItIsFirstMetOnTheNinthLevel)
-{
-	const MonsterParams dragon = dragon_from_data();
+	// One attack, the bite: 3d10 plus the juvenile's +4, physical. The breath
+	// is not a melee hit and is not this attack.
+	TEST(DragonStatBlockTest, ItsOneAttackIsAPhysicalBite)
+	{
+		const MonsterParams dragon = dragon_from_data();
 
-	EXPECT_EQ(dragon.levelMinimum, 9);
-	EXPECT_EQ(dragon.levelMaximum, 0);
-}
+		EXPECT_EQ(dragon.naturalAttack, "bite");
+		EXPECT_EQ(dragon.damage.dice.num, 3);
+		EXPECT_EQ(dragon.damage.dice.sides, 10);
+		EXPECT_EQ(dragon.damage.dice.bonus, 4);
+		EXPECT_EQ(dragon.damage.damageType, DamageType::PHYSICAL);
+	}
 
-// One attack, the bite: 3d10 plus the juvenile's +4, physical. The breath is not a
-// melee hit and is not this attack.
-TEST(DragonStatBlockTest, ItsOneAttackIsAPhysicalBite)
-{
-	const MonsterParams dragon = dragon_from_data();
-
-	EXPECT_EQ(dragon.naturalAttack, "bite");
-	EXPECT_EQ(dragon.damage.dice.num, 3);
-	EXPECT_EQ(dragon.damage.dice.sides, 10);
-	EXPECT_EQ(dragon.damage.dice.bonus, 4);
-	EXPECT_EQ(dragon.damage.damageType, DamageType::PHYSICAL);
-}
-
-// end of file: DragonStatBlockTest.cpp
+	// end of file: DragonStatBlockTest.cpp
 
 } // namespace CppRL

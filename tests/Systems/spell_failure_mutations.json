@@ -27,7 +27,7 @@
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\tif (chance <= 0)\n\t{\n\t\treturn false;\n\t}",
+      "original": "\t\tif (chance <= 0)\n\t\t{\n\t\t\treturn false;\n\t\t}",
       "mutated": "",
       "catches": "a caster who cannot fail still spending a roll, which moves every later one"
     },
@@ -39,14 +39,14 @@
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "if (source == SpellSource::MEMORIZED &&\n\t\t\t\tspell_fizzles(caster, *ctx.dataManager, *ctx.dice))",
-      "mutated": "\t\tif (spell_fizzles(caster, *ctx.dataManager, *ctx.dice))",
+      "original": "\tif (source == SpellSource::MEMORIZED &&\n\t\t\t\t\tspell_fizzles(caster, *ctx.dataManager, *ctx.dice))",
+      "mutated": "\t\t\tif (spell_fizzles(caster, *ctx.dataManager, *ctx.dice))",
       "catches": "a ring's spell failed by the priest's Wisdom, when it is not the priest's spell"
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "onCastComplete(ctx);\n\t\t\t\treturn;",
-      "mutated": "\t\t\treturn;",
+      "original": "\tonCastComplete(ctx);\n\t\t\t\t\treturn;",
+      "mutated": "\t\t\t\treturn;",
       "catches": "a fizzle costing nothing, where the book expends the spell regardless"
     },
     {

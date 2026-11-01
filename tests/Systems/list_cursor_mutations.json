@@ -75,14 +75,14 @@
     },
     {
       "file": "src/ListCursor.cpp",
-      "original": "firstVisible = first_visible(visibleRows);\n\t++current;",
-      "mutated": "++current;",
+      "original": "\tfirstVisible = first_visible(visibleRows);\n\t\t++current;",
+      "mutated": "\t++current;",
       "catches": "a step down keeps a scroll position a shrink left above the drawn screen, so the list draws from row 1 once it grows again"
     },
     {
       "file": "src/ListCursor.cpp",
-      "original": "firstVisible = step_within(\n\t\tfirst_visible(visibleRows),\n\t\tsteps,\n\t\tmax_first_visible(visibleRows));",
-      "mutated": "firstVisible = step_within(\n\t\tfirstVisible,\n\t\tsteps,\n\t\tmax_first_visible(visibleRows));",
+      "original": "\tfirstVisible = step_within(\n\t\t\tfirst_visible(visibleRows),\n\t\t\tsteps,\n\t\t\tmax_first_visible(visibleRows));",
+      "mutated": "\tfirstVisible = step_within(\n\t\t\tfirstVisible,\n\t\t\tsteps,\n\t\t\tmax_first_visible(visibleRows));",
       "catches": "the wheel starts from the stale stored scroll after a shrink, so a notch back moves nothing (Release) or aborts on step_within's bound (Debug)"
     },
     {
@@ -99,14 +99,14 @@
     },
     {
       "file": "src/ListCursor.cpp",
-      "original": "\tcurrent = 0;\n\tfirstVisible = 0;",
-      "mutated": "\tfirstVisible = 0;",
+      "original": "\t\tcurrent = 0;\n\t\tfirstVisible = 0;",
+      "mutated": "\t\tfirstVisible = 0;",
       "catches": "a reset keeps the old current row"
     },
     {
       "file": "src/ListCursor.cpp",
-      "original": "\tcurrent = 0;\n\tfirstVisible = 0;",
-      "mutated": "\tcurrent = 0;",
+      "original": "\t\tcurrent = 0;\n\t\tfirstVisible = 0;",
+      "mutated": "\t\tcurrent = 0;",
       "catches": "a reset keeps the old scroll position"
     },
     {

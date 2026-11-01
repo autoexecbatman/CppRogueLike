@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/Creature.cpp",
-      "original": "std::format(\n\t\t\t\t\t\"The {} is cursed and cannot be removed!\",\n\t\t\t\t\tfound->item->get_name()),",
-      "mutated": "std::format(\n\t\t\t\t\t\"The {} is cursed and cannot be removed!\",\n\t\t\t\t\tfound->item->actorData.name),",
+      "original": "\tstd::format(\n\t\t\t\t\t\t\"The {} is cursed and cannot be removed!\",\n\t\t\t\t\t\tfound->item->get_name()),",
+      "mutated": "\tstd::format(\n\t\t\t\t\t\t\"The {} is cursed and cannot be removed!\",\n\t\t\t\t\t\tfound->item->actorData.name),",
       "catches": "the cursed message naming the bare base name"
     },
     {
@@ -27,14 +27,14 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\tctx.messageSystem->message(\n\t\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\t\"You put on the \" + item.get_name() + \".\",\n\t\t\t\t\tMessageCompletion::FINISHED);",
-      "mutated": "\tctx.messageSystem->message(\n\t\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\t\"You put on the \" + item.actorData.name + \".\",\n\t\t\t\t\tMessageCompletion::FINISHED);",
+      "original": "\t\tctx.messageSystem->message(\n\t\t\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\t\t\"You put on the \" + item.get_name() + \".\",\n\t\t\t\t\t\tMessageCompletion::FINISHED);",
+      "mutated": "\t\tctx.messageSystem->message(\n\t\t\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\t\t\"You put on the \" + item.actorData.name + \".\",\n\t\t\t\t\t\tMessageCompletion::FINISHED);",
       "catches": "the ring's put-on message naming the bare base name"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "std::format(\n\t\t\t\t\t\"You cannot carry the {} as well, and set it down.\",\n\t\t\t\t\tremoved->get_name()),",
-      "mutated": "std::format(\n\t\t\t\t\t\"You cannot carry the {} as well, and set it down.\",\n\t\t\t\t\tremoved->actorData.name),",
+      "original": "\tstd::format(\n\t\t\t\t\t\t\"You cannot carry the {} as well, and set it down.\",\n\t\t\t\t\t\tremoved->get_name()),",
+      "mutated": "\tstd::format(\n\t\t\t\t\t\t\"You cannot carry the {} as well, and set it down.\",\n\t\t\t\t\t\tremoved->actorData.name),",
       "catches": "the set-down message naming the bare base name"
     }
   ]

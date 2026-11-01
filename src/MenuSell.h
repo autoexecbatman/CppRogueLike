@@ -12,33 +12,36 @@
 namespace CppRL
 {
 
-class Player;
+	class Player;
 
-class MenuSell : public BaseMenu
-{
-	size_t currentState{ 0 };
-	Creature& player;
-	Creature& shopkeeper;
-	std::vector<std::string> menuItems;
+	class MenuSell : public BaseMenu
+	{
+		size_t currentState{ 0 };
+		Creature& player;
+		Creature& shopkeeper;
+		std::vector<std::string> menuItems;
 
-	void populate_items(std::span<std::unique_ptr<Item>> items);
-	void menu_print_state(size_t state);
+		void populate_items(std::span<std::unique_ptr<Item>> items);
+		void menu_print_state(size_t state);
 
-	std::string menu_get_string(size_t state) { return menuItems.at(state); }
+		std::string menu_get_string(size_t state)
+		{
+			return menuItems.at(state);
+		}
 
-	void handle_sell(Creature& seller, GameContext& ctx);
-	void draw_content() override;
+		void handle_sell(Creature& seller, GameContext& ctx);
+		void draw_content() override;
 
-public:
-	MenuSell(Creature& shopkeeper, Creature& player, GameContext& ctx);
-	MenuSell(const MenuSell&) = delete;
-	MenuSell& operator=(const MenuSell&) = delete;
-	MenuSell(MenuSell&&) = delete;
-	MenuSell& operator=(MenuSell&&) = delete;
+	public:
+		MenuSell(Creature& shopkeeper, Creature& player, GameContext& ctx);
+		MenuSell(const MenuSell&) = delete;
+		MenuSell& operator=(const MenuSell&) = delete;
+		MenuSell(MenuSell&&) = delete;
+		MenuSell& operator=(MenuSell&&) = delete;
 
-	void draw();
-	void on_key(GameContext& ctx) override;
-	void menu(GameContext& ctx) override;
-};
+		void draw();
+		void on_key(GameContext& ctx) override;
+		void menu(GameContext& ctx) override;
+	};
 
 } // namespace CppRL

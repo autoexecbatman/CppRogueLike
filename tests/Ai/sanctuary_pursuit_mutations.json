@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/AiMonster.cpp",
-      "original": "\tif (owner.is_aware(ctx.gameState->get_time()) &&\n\t\t!ctx.player()->is_invisible() && !hasLostTrackOfPlayer)",
-      "mutated": "\tif (owner.is_aware(ctx.gameState->get_time()) &&\n\t\t!ctx.player()->is_invisible())",
+      "original": "\t\tif (owner.is_aware(ctx.gameState->get_time()) &&\n\t\t\t!ctx.player()->is_invisible() && !hasLostTrackOfPlayer)",
+      "mutated": "\t\tif (owner.is_aware(ctx.gameState->get_time()) &&\n\t\t\t!ctx.player()->is_invisible())",
       "catches": "a monster hunting a creature it has lost track of, as it did before"
     },
     {
       "file": "src/AiMonsterRanged.cpp",
-      "original": "\tif (owner.is_aware(ctx.gameState->get_time()) &&\n\t\t!ctx.buffSystem->ignores_warded_creature(owner, *ctx.player()))",
-      "mutated": "\tif (owner.is_aware(ctx.gameState->get_time()))",
+      "original": "\t\tif (owner.is_aware(ctx.gameState->get_time()) &&\n\t\t\t!ctx.buffSystem->ignores_warded_creature(owner, *ctx.player()))",
+      "mutated": "\t\tif (owner.is_aware(ctx.gameState->get_time()))",
       "catches": "an archer loosing arrows at a creature it has lost track of"
     },
     {
@@ -33,8 +33,8 @@
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\treturn std::ranges::any_of(\n\t\tcasting->opponentSaves,\n\t\tis_this_attacker_failing);",
-      "mutated": "\treturn false;",
+      "original": "\t\treturn std::ranges::any_of(\n\t\t\tcasting->opponentSaves,\n\t\t\tis_this_attacker_failing);",
+      "mutated": "\t\treturn false;",
       "catches": "the record never read, so a failed save changes nothing about hunting"
     },
     {
@@ -45,8 +45,8 @@
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\t\t\t\" cannot bring itself to attack \");\n\t\tctx.messageSystem->append_message_part(\n\t\t\ttarget.actorData.color,\n\t\t\ttarget.actorData.name);\n\t\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \".\");\n\t\tctx.messageSystem->finalize_message();\n\t\treturn AttackResult::PREVENTED;",
-      "mutated": "\t\t\t\" cannot bring itself to attack \");\n\t\tctx.messageSystem->append_message_part(\n\t\t\ttarget.actorData.color,\n\t\t\ttarget.actorData.name);\n\t\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \".\");\n\t\tctx.messageSystem->finalize_message();\n\t\treturn AttackResult::MISSED;",
+      "original": "\t\t\t\t\" cannot bring itself to attack \");\n\t\t\tctx.messageSystem->append_message_part(\n\t\t\t\ttarget.actorData.color,\n\t\t\t\ttarget.actorData.name);\n\t\t\tctx.messageSystem->append_message_part(\n\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\".\");\n\t\t\tctx.messageSystem->finalize_message();\n\t\t\treturn AttackResult::PREVENTED;",
+      "mutated": "\t\t\t\t\" cannot bring itself to attack \");\n\t\t\tctx.messageSystem->append_message_part(\n\t\t\t\ttarget.actorData.color,\n\t\t\t\ttarget.actorData.name);\n\t\t\tctx.messageSystem->append_message_part(\n\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\".\");\n\t\t\tctx.messageSystem->finalize_message();\n\t\t\treturn AttackResult::MISSED;",
       "catches": "a ward that turns the attacker away reporting the swing as a miss, which the hit points alone cannot tell from a refusal"
     }
   ]

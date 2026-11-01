@@ -38,51 +38,57 @@
 namespace CppRL
 {
 
-// The enumerator one saved value names, or the refusal that says what it is
-// not, naming field as where the value was read.
-//
-// Example:
-//   saved_enum_value(json(1), "Trap::load", "state", "TrapState",
-//       &trap_state_from);   // -> TrapState::DETECTED
-//   // json(4) there throws "Trap::load: state 4 is not a valid TrapState"
-template <typename Enum>
-[[nodiscard]] Enum saved_enum_value(
-	const json& saved,
-	std::string_view loader,
-	std::string_view field,
-	std::string_view enumName,
-	std::optional<Enum> (*from)(int))
-{
-	const int number = saved.get<int>();
-	const std::optional<Enum> enumerator = from(number);
-	if (!enumerator)
+	// The enumerator one saved value names, or the refusal that says what it is
+	// not, naming field as where the value was read.
+	//
+	// Example:
+	//   saved_enum_value(json(1), "Trap::load", "state", "TrapState",
+	//       &trap_state_from);   // -> TrapState::DETECTED
+	//   // json(4) there throws "Trap::load: state 4 is not a valid TrapState"
+	template <typename Enum>
+	[[nodiscard]] Enum saved_enum_value(
+		const json& saved,
+		std::string_view loader,
+		std::string_view field,
+		std::string_view enumName,
+		std::optional<Enum> (*from)(int))
 	{
-		throw std::runtime_error(
-			std::format(
-				"{}: {} {} is not a valid {}",
-				loader,
-				field,
-				number,
-				enumName));
+		const int number = saved.get<int>();
+		const std::optional<Enum> enumerator = from(number);
+		if (!enumerator)
+		{
+			throw std::runtime_error(
+				std::format(
+					"{}: {} {} is not a valid {}",
+					loader,
+					field,
+					number,
+					enumName));
+		}
+		return *enumerator;
 	}
-	return *enumerator;
-}
 
-// The enumerator record[field] names, or the refusal that says what it is not.
-//
-// Example:
-//   saved_enum_field(source, "Trap::load", "state", "TrapState",
-//       &trap_state_from);   // -> TrapState::DETECTED for a saved 1
-//   // a saved 4 throws "Trap::load: state 4 is not a valid TrapState"
-template <typename Enum>
-[[nodiscard]] Enum saved_enum_field(
-	const json& record,
-	std::string_view loader,
-	const char* field,
-	std::string_view enumName,
-	std::optional<Enum> (*from)(int))
-{
-	return saved_enum_value(record.at(field), loader, field, enumName, from);
-}
+	// The enumerator record[field] names, or the refusal that says what it is
+	// not.
+	//
+	// Example:
+	//   saved_enum_field(source, "Trap::load", "state", "TrapState",
+	//       &trap_state_from);   // -> TrapState::DETECTED for a saved 1
+	//   // a saved 4 throws "Trap::load: state 4 is not a valid TrapState"
+	template <typename Enum>
+	[[nodiscard]] Enum saved_enum_field(
+		const json& record,
+		std::string_view loader,
+		const char* field,
+		std::string_view enumName,
+		std::optional<Enum> (*from)(int))
+	{
+		return saved_enum_value(
+			record.at(field),
+			loader,
+			field,
+			enumName,
+			from);
+	}
 
 } // namespace CppRL

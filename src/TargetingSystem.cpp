@@ -27,307 +27,315 @@
 namespace CppRL
 {
 
-void TargetingSystem::draw_los(GameContext& ctx, Vector2D targetCursor) const
-{
-	assert(ctx.map && "TargetingSystem::draw_los: called without a map");
-	if (!ctx.renderer || !ctx.player())
+	void TargetingSystem::draw_los(
+		GameContext& ctx,
+		Vector2D targetCursor) const
 	{
-		return;
-	}
-
-	auto path = Map::bresenham_line(ctx.player()->position, targetCursor);
-	int tileSize = ctx.renderer->get_tile_size();
-	int cameraOffsetX = ctx.renderer->get_camera_x();
-	int cameraOffsetY = ctx.renderer->get_camera_y();
-
-	bool hasLineOfSight =
-		ctx.map->has_los(ctx.player()->position, targetCursor);
-
-	for (const auto& pos : path)
-	{
-		if (pos == ctx.player()->position)
+		assert(ctx.map && "TargetingSystem::draw_los: called without a map");
+		if (!ctx.renderer || !ctx.player())
 		{
-			continue;
+			return;
 		}
 
-		int screenX = pos.x * tileSize - cameraOffsetX;
-		int screenY = pos.y * tileSize - cameraOffsetY;
-		constexpr Color CLEAR_TINT{ 50, 220, 100, 50 };
-		constexpr Color BLOCKED_TINT{ 220, 50, 50, 50 };
-		Color tint = hasLineOfSight ? CLEAR_TINT : BLOCKED_TINT;
-		DrawRectangle(screenX, screenY, tileSize, tileSize, tint);
-	}
-}
+		auto path = Map::bresenham_line(ctx.player()->position, targetCursor);
+		int tileSize = ctx.renderer->get_tile_size();
+		int cameraOffsetX = ctx.renderer->get_camera_x();
+		int cameraOffsetY = ctx.renderer->get_camera_y();
 
-void TargetingSystem::draw_range_indicator(
-	GameContext& ctx,
-	Vector2D center,
-	int range) const
-{
-	assert(
-		ctx.map &&
-		"TargetingSystem::draw_range_indicator: called without a map");
-	if (!ctx.renderer || range <= 0)
-	{
-		return;
-	}
+		bool hasLineOfSight =
+			ctx.map->has_los(ctx.player()->position, targetCursor);
 
-	int tileSize = ctx.renderer->get_tile_size();
-	int cameraOffsetX = ctx.renderer->get_camera_x();
-	int cameraOffsetY = ctx.renderer->get_camera_y();
-
-	for (int deltaRow = -range; deltaRow <= range; ++deltaRow)
-	{
-		for (int deltaCol = -range; deltaCol <= range; ++deltaCol)
+		for (const auto& pos : path)
 		{
-			Vector2D pos{ center.x + deltaCol, center.y + deltaRow };
-			if (!ctx.map->is_in_bounds(pos))
-			{
-				continue;
-			}
-
-			double distanceToCenter = pos.distance_to(center);
-			if (distanceToCenter < static_cast<double>(range) - 0.5)
-			{
-				continue;
-			}
-			if (distanceToCenter > static_cast<double>(range) + 0.5)
+			if (pos == ctx.player()->position)
 			{
 				continue;
 			}
 
 			int screenX = pos.x * tileSize - cameraOffsetX;
 			int screenY = pos.y * tileSize - cameraOffsetY;
-			DrawRectangle(
-				screenX,
-				screenY,
-				tileSize,
-				tileSize,
-				Color{ 100, 200, 255, 35 });
+			constexpr Color CLEAR_TINT{ 50, 220, 100, 50 };
+			constexpr Color BLOCKED_TINT{ 220, 50, 50, 50 };
+			Color tint = hasLineOfSight ? CLEAR_TINT : BLOCKED_TINT;
+			DrawRectangle(screenX, screenY, tileSize, tileSize, tint);
 		}
 	}
-}
 
-bool TargetingSystem::is_valid_target(
-	GameContext& ctx,
-	Vector2D from,
-	Vector2D to,
-	int maxRange) const
-{
-	assert(ctx.map && "TargetingSystem::is_valid_target: called without a map");
-
-	if (from.distance_to(to) > maxRange)
+	void TargetingSystem::draw_range_indicator(
+		GameContext& ctx,
+		Vector2D center,
+		int range) const
 	{
-		return false;
-	}
-
-	if (!ctx.map->has_los(from, to))
-	{
-		return false;
-	}
-
-	auto entity = ctx.map->get_actor(to, ctx);
-	if (!entity)
-	{
-		return false;
-	}
-
-	if (entity->is_player())
-	{
-		return false;
-	}
-
-	return true;
-}
-
-void TargetingSystem::draw_aoe_preview(
-	GameContext& ctx,
-	Vector2D center,
-	int radius) const
-{
-	assert(
-		ctx.map && "TargetingSystem::draw_aoe_preview: called without a map");
-	if (!ctx.renderer || radius <= 0)
-	{
-		return;
-	}
-
-	int tileSize = ctx.renderer->get_tile_size();
-	int cameraOffsetX = ctx.renderer->get_camera_x();
-	int cameraOffsetY = ctx.renderer->get_camera_y();
-
-	for (int deltaRow = -radius; deltaRow <= radius; ++deltaRow)
-	{
-		for (int deltaCol = -radius; deltaCol <= radius; ++deltaCol)
-		{
-			Vector2D pos{ center.x + deltaCol, center.y + deltaRow };
-			if (!ctx.map->is_in_bounds(pos))
-			{
-				continue;
-			}
-			if (pos.distance_to(center) > static_cast<double>(radius))
-			{
-				continue;
-			}
-
-			int screenX = pos.x * tileSize - cameraOffsetX;
-			int screenY = pos.y * tileSize - cameraOffsetY;
-			DrawRectangle(
-				screenX,
-				screenY,
-				tileSize,
-				tileSize,
-				Color{ 255, 140, 0, 50 });
-		}
-	}
-}
-
-void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
-{
-	if (!ctx.player()->has_ranged_weapon())
-	{
-		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			"You need a ranged weapon to attack at a distance!",
-			MessageCompletion::FINISHED);
-		return;
-	}
-
-	Item* missileWeapon =
-		ctx.player()->get_equipped_item(EquipmentSlot::MISSILE_WEAPON);
-	const int weaponRange = get_weapon_range(missileWeapon);
-
-	auto onTarget =
-		[](bool confirmed, Vector2D targetPos, GameContext& innerCtx)
-	{
-		if (!confirmed)
-		{
-			return;
-		}
-
-		Creature* target = innerCtx.map->get_actor(targetPos, innerCtx);
-		if (!target || target == innerCtx.player())
-		{
-			innerCtx.messageSystem->message(
-				ColorPairId::WHITE_BLACK,
-				"No valid target there.",
-				MessageCompletion::FINISHED);
-			return;
-		}
-
-		if (!innerCtx.map->has_los(innerCtx.player()->position, targetPos))
-		{
-			innerCtx.messageSystem->message(
-				ColorPairId::WHITE_BLACK,
-				"No clear line of sight.",
-				MessageCompletion::FINISHED);
-			return;
-		}
-
 		assert(
-			innerCtx.creatureManager &&
-			"ranged attack fired with no creature manager");
-		RangedShot::fire(*innerCtx.player(), *target, innerCtx);
-		innerCtx.creatureManager->cleanup_dead_creatures(*innerCtx.creatures);
-		spend_player_action(innerCtx, TIME_UNITS_PER_ROUND);
-	};
+			ctx.map &&
+			"TargetingSystem::draw_range_indicator: called without a map");
+		if (!ctx.renderer || range <= 0)
+		{
+			return;
+		}
 
-	ctx.menus->push_back(
-		std::make_unique<TargetingMenu>(
-			weaponRange,
-			0,
-			std::move(onTarget),
-			ctx));
-}
+		int tileSize = ctx.renderer->get_tile_size();
+		int cameraOffsetX = ctx.renderer->get_camera_x();
+		int cameraOffsetY = ctx.renderer->get_camera_y();
 
-TargetResult TargetingSystem::acquire_nearest(
-	GameContext& ctx,
-	const Creature& attacker,
-	int range) const
-{
-	return target_auto_nearest(ctx, attacker, range);
-}
+		for (int deltaRow = -range; deltaRow <= range; ++deltaRow)
+		{
+			for (int deltaCol = -range; deltaCol <= range; ++deltaCol)
+			{
+				Vector2D pos{ center.x + deltaCol, center.y + deltaRow };
+				if (!ctx.map->is_in_bounds(pos))
+				{
+					continue;
+				}
 
-int TargetingSystem::get_weapon_range(const Item* weapon)
-{
-	if (!weapon)
-	{
-		return 4;
+				double distanceToCenter = pos.distance_to(center);
+				if (distanceToCenter < static_cast<double>(range) - 0.5)
+				{
+					continue;
+				}
+				if (distanceToCenter > static_cast<double>(range) + 0.5)
+				{
+					continue;
+				}
+
+				int screenX = pos.x * tileSize - cameraOffsetX;
+				int screenY = pos.y * tileSize - cameraOffsetY;
+				DrawRectangle(
+					screenX,
+					screenY,
+					tileSize,
+					tileSize,
+					Color{ 100, 200, 255, 35 });
+			}
+		}
 	}
 
-	switch (weapon->itemClass)
+	bool TargetingSystem::is_valid_target(
+		GameContext& ctx,
+		Vector2D from,
+		Vector2D to,
+		int maxRange) const
 	{
+		assert(
+			ctx.map &&
+			"TargetingSystem::is_valid_target: called without a map");
 
-	case ItemClass::BOW:
-	{
-		if (weapon->itemKey == "long_bow")
+		if (from.distance_to(to) > maxRange)
 		{
-			return 7;
+			return false;
 		}
-		else
+
+		if (!ctx.map->has_los(from, to))
+		{
+			return false;
+		}
+
+		auto entity = ctx.map->get_actor(to, ctx);
+		if (!entity)
+		{
+			return false;
+		}
+
+		if (entity->is_player())
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	void TargetingSystem::draw_aoe_preview(
+		GameContext& ctx,
+		Vector2D center,
+		int radius) const
+	{
+		assert(
+			ctx.map &&
+			"TargetingSystem::draw_aoe_preview: called without a map");
+		if (!ctx.renderer || radius <= 0)
+		{
+			return;
+		}
+
+		int tileSize = ctx.renderer->get_tile_size();
+		int cameraOffsetX = ctx.renderer->get_camera_x();
+		int cameraOffsetY = ctx.renderer->get_camera_y();
+
+		for (int deltaRow = -radius; deltaRow <= radius; ++deltaRow)
+		{
+			for (int deltaCol = -radius; deltaCol <= radius; ++deltaCol)
+			{
+				Vector2D pos{ center.x + deltaCol, center.y + deltaRow };
+				if (!ctx.map->is_in_bounds(pos))
+				{
+					continue;
+				}
+				if (pos.distance_to(center) > static_cast<double>(radius))
+				{
+					continue;
+				}
+
+				int screenX = pos.x * tileSize - cameraOffsetX;
+				int screenY = pos.y * tileSize - cameraOffsetY;
+				DrawRectangle(
+					screenX,
+					screenY,
+					tileSize,
+					tileSize,
+					Color{ 255, 140, 0, 50 });
+			}
+		}
+	}
+
+	void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
+	{
+		if (!ctx.player()->has_ranged_weapon())
+		{
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"You need a ranged weapon to attack at a distance!",
+				MessageCompletion::FINISHED);
+			return;
+		}
+
+		Item* missileWeapon =
+			ctx.player()->get_equipped_item(EquipmentSlot::MISSILE_WEAPON);
+		const int weaponRange = get_weapon_range(missileWeapon);
+
+		auto onTarget =
+			[](bool confirmed, Vector2D targetPos, GameContext& innerCtx)
+		{
+			if (!confirmed)
+			{
+				return;
+			}
+
+			Creature* target = innerCtx.map->get_actor(targetPos, innerCtx);
+			if (!target || target == innerCtx.player())
+			{
+				innerCtx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					"No valid target there.",
+					MessageCompletion::FINISHED);
+				return;
+			}
+
+			if (!innerCtx.map->has_los(innerCtx.player()->position, targetPos))
+			{
+				innerCtx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					"No clear line of sight.",
+					MessageCompletion::FINISHED);
+				return;
+			}
+
+			assert(
+				innerCtx.creatureManager &&
+				"ranged attack fired with no creature manager");
+			RangedShot::fire(*innerCtx.player(), *target, innerCtx);
+			innerCtx.creatureManager->cleanup_dead_creatures(
+				*innerCtx.creatures);
+			spend_player_action(innerCtx, TIME_UNITS_PER_ROUND);
+		};
+
+		ctx.menus->push_back(
+			std::make_unique<TargetingMenu>(
+				weaponRange,
+				0,
+				std::move(onTarget),
+				ctx));
+	}
+
+	TargetResult TargetingSystem::acquire_nearest(
+		GameContext& ctx,
+		const Creature& attacker,
+		int range) const
+	{
+		return target_auto_nearest(ctx, attacker, range);
+	}
+
+	int TargetingSystem::get_weapon_range(const Item* weapon)
+	{
+		if (!weapon)
+		{
+			return 4;
+		}
+
+		switch (weapon->itemClass)
+		{
+
+		case ItemClass::BOW:
+		{
+			if (weapon->itemKey == "long_bow")
+			{
+				return 7;
+			}
+			else
+			{
+				return 5;
+			}
+		}
+
+		case ItemClass::CROSSBOW:
+		{
+			return 6;
+		}
+
+		// The reach a sling had while it was classed as a bow.
+		case ItemClass::SLING:
 		{
 			return 5;
 		}
+
+		default:
+		{
+			return 4;
+		}
+		}
 	}
 
-	case ItemClass::CROSSBOW:
-	{
-		return 6;
-	}
-
-	// The reach a sling had while it was classed as a bow.
-	case ItemClass::SLING:
-	{
-		return 5;
-	}
-
-	default:
-	{
-		return 4;
-	}
-	}
-}
-
-TargetResult TargetingSystem::target_auto_nearest(
-	GameContext& ctx,
-	const Creature& attacker,
-	int range) const
-{
-	assert(
-		ctx.creatures &&
-		"TargetingSystem::target_auto_nearest: called without creatures");
-
-	// Living creatures within range - none set means any distance - nearest first, a tie
-	// keeping its order in the list.
-	std::vector<Creature*> candidates;
-	for (const auto& creature : *ctx.creatures)
+	TargetResult TargetingSystem::target_auto_nearest(
+		GameContext& ctx,
+		const Creature& attacker,
+		int range) const
 	{
 		assert(
-			creature &&
-			"target_auto_nearest: creatures list holds a null entry");
-		const int distance = creature->get_tile_distance(attacker.position);
-		if (!creature->is_dead() && (distance <= range || range == 0))
-		{
-			candidates.push_back(creature.get());
-		}
-	}
-	auto is_nearer = [&attacker](const Creature* left, const Creature* right)
-	{
-		return left->get_tile_distance(attacker.position) <
-			right->get_tile_distance(attacker.position);
-	};
-	std::ranges::stable_sort(candidates, is_nearer);
+			ctx.creatures &&
+			"TargetingSystem::target_auto_nearest: called without creatures");
 
-	// One whose Sanctuary turns the attacker away is ignored, and the next nearest taken.
-	for (Creature* candidate : candidates)
-	{
-		if (!ctx.buffSystem
-				->is_turned_away_by_sanctuary(attacker, *candidate, ctx))
+		// Living creatures within range - none set means any distance - nearest
+		// first, a tie keeping its order in the list.
+		std::vector<Creature*> candidates;
+		for (const auto& creature : *ctx.creatures)
 		{
-			return { true, { candidate } };
+			assert(
+				creature &&
+				"target_auto_nearest: creatures list holds a null entry");
+			const int distance = creature->get_tile_distance(attacker.position);
+			if (!creature->is_dead() && (distance <= range || range == 0))
+			{
+				candidates.push_back(creature.get());
+			}
 		}
+		auto is_nearer =
+			[&attacker](const Creature* left, const Creature* right)
+		{
+			return left->get_tile_distance(attacker.position) <
+				right->get_tile_distance(attacker.position);
+		};
+		std::ranges::stable_sort(candidates, is_nearer);
+
+		// One whose Sanctuary turns the attacker away is ignored, and the next
+		// nearest taken.
+		for (Creature* candidate : candidates)
+		{
+			if (!ctx.buffSystem
+					->is_turned_away_by_sanctuary(attacker, *candidate, ctx))
+			{
+				return { true, { candidate } };
+			}
+		}
+		return {};
 	}
-	return {};
-}
 
 } // namespace CppRL

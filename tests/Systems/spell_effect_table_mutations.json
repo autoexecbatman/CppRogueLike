@@ -33,7 +33,7 @@
     },
     {
       "file": "src/SpellRegistry.cpp",
-      "original": "std::ranges::find(\n\t\t\tSPELL_EFFECT_TABLE,\n\t\t\ttext,\n\t\t\t&SpellEffectRecord::key);",
+      "original": "std::ranges::find(\n\t\t\t\tSPELL_EFFECT_TABLE,\n\t\t\t\ttext,\n\t\t\t\t&SpellEffectRecord::key);",
       "mutated": "std::ranges::find(SPELL_EFFECT_TABLE, text, &SpellEffectRecord::name);",
       "catches": "a saved effect looked up by name, so no key loads"
     },
@@ -75,8 +75,8 @@
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\"Spell not implemented yet.\",\n\t\t\t\t\tMessageCompletion::FINISHED);\n\t\t\t\tbreak;",
-      "mutated": "\t\t\t\t\"Spell not implemented yet.\",\n\t\t\t\tMessageCompletion::FINISHED);\n\t\t\tresult = true;\n\t\t\tbreak;",
+      "original": "\t\"Spell not implemented yet.\",\n\t\t\t\t\t\tMessageCompletion::FINISHED);\n\t\t\t\t\tbreak;",
+      "mutated": "\t\t\t\t\t\"Spell not implemented yet.\",\n\t\t\t\t\tMessageCompletion::FINISHED);\n\t\t\t\tresult = true;\n\t\t\t\tbreak;",
       "catches": "a spell with no effect spending its casting"
     }
   ]

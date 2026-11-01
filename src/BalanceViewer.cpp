@@ -16,144 +16,147 @@
 namespace CppRL
 {
 
-BalanceViewer::BalanceViewer(int dungeonLevel, GameContext& ctx) :
-	dungeonLevel(dungeonLevel)
-{
-	assert(
-		ctx.itemRegistry &&
-		"BalanceViewer::BalanceViewer: called without an itemRegistry");
-	assert(
-		ctx.monsterRegistry &&
-		"BalanceViewer::BalanceViewer: called without a monsterRegistry");
-
-	monsterDist = MonsterFactory::get_current_distribution(
-		dungeonLevel,
-		*ctx.monsterRegistry);
-	itemDist =
-		ItemFactory::get_current_distribution(dungeonLevel, *ctx.itemRegistry);
-}
-
-void BalanceViewer::menu(GameContext& ctx)
-{
-	assert(
-		ctx.inputSystem &&
-		"BalanceViewer::menu: called without an inputSystem");
-	assert(
-		ctx.tileConfig && "BalanceViewer::menu: called without a tileConfig");
-
-	ctx.inputSystem->poll();
-	GameKey key = ctx.inputSystem->get_key();
-	if (key == GameKey::ESCAPE || key == GameKey::SPACE)
+	BalanceViewer::BalanceViewer(int dungeonLevel, GameContext& ctx) :
+		dungeonLevel(dungeonLevel)
 	{
-		menu_set_run_false();
-		return;
+		assert(
+			ctx.itemRegistry &&
+			"BalanceViewer::BalanceViewer: called without an itemRegistry");
+		assert(
+			ctx.monsterRegistry &&
+			"BalanceViewer::BalanceViewer: called without a monsterRegistry");
+
+		monsterDist = MonsterFactory::get_current_distribution(
+			dungeonLevel,
+			*ctx.monsterRegistry);
+		itemDist = ItemFactory::get_current_distribution(
+			dungeonLevel,
+			*ctx.itemRegistry);
 	}
 
-	int tileSize = ctx.renderer->get_tile_size();
-	int fontOff = (tileSize - ctx.renderer->get_font_size()) / 2;
-	int vcols = ctx.renderer->get_viewport_cols();
-	int vrows = ctx.renderer->get_viewport_rows();
-
-	ctx.renderer->draw_frame(Vector2D{ 0, 0 }, vcols, vrows, *ctx.tileConfig);
-
-	std::string title =
-		std::format("BALANCE VIEWER  --  Dungeon Level {}", dungeonLevel);
-	int titleW = ctx.renderer->measure_text(title);
-	int titleX = (vcols * tileSize - titleW) / 2;
-	ctx.renderer->draw_text(
-		Vector2D{ titleX, fontOff },
-		title,
-		ColorPairId::YELLOW_BLACK);
-
-	std::string_view hint = "[ESC] or [SPACE] to close";
-	int hintW = ctx.renderer->measure_text(hint);
-	int hintX = (vcols * tileSize - hintW) / 2;
-	ctx.renderer->draw_text(
-		Vector2D{ hintX, (vrows - 1) * tileSize + fontOff },
-		hint,
-		ColorPairId::CYAN_BLACK);
-
-	// Left column: monsters. Right column: items.
-	const int halfCols = vcols / 2;
-	draw_column("MONSTERS", monsterDist, 0, ctx);
-	draw_item_column("ITEMS", itemDist, halfCols, ctx);
-}
-
-void BalanceViewer::draw_column(
-	std::string_view header,
-	const std::vector<MonsterPercentage>& dist,
-	int startCol,
-	GameContext& ctx)
-{
-	int tileSize = ctx.renderer->get_tile_size();
-	int fontOff = (tileSize - ctx.renderer->get_font_size()) / 2;
-	int vrows = ctx.renderer->get_viewport_rows();
-
-	int pixelX = startCol * tileSize + tileSize;
-	int row = 2;
-
-	ctx.renderer->draw_text(
-		Vector2D{ pixelX, row * tileSize + fontOff },
-		header,
-		ColorPairId::GREEN_BLACK);
-	++row;
-
-	for (const auto& entry : dist)
+	void BalanceViewer::menu(GameContext& ctx)
 	{
-		if (row >= vrows - 1)
+		assert(
+			ctx.inputSystem &&
+			"BalanceViewer::menu: called without an inputSystem");
+		assert(
+			ctx.tileConfig &&
+			"BalanceViewer::menu: called without a tileConfig");
+
+		ctx.inputSystem->poll();
+		GameKey key = ctx.inputSystem->get_key();
+		if (key == GameKey::ESCAPE || key == GameKey::SPACE)
 		{
-			break;
+			menu_set_run_false();
+			return;
 		}
 
-		std::string line =
-			std::format("{}  {:.1f}%", entry.name, entry.percentage);
+		int tileSize = ctx.renderer->get_tile_size();
+		int fontOff = (tileSize - ctx.renderer->get_font_size()) / 2;
+		int vcols = ctx.renderer->get_viewport_cols();
+		int vrows = ctx.renderer->get_viewport_rows();
+
+		ctx.renderer
+			->draw_frame(Vector2D{ 0, 0 }, vcols, vrows, *ctx.tileConfig);
+
+		std::string title =
+			std::format("BALANCE VIEWER  --  Dungeon Level {}", dungeonLevel);
+		int titleW = ctx.renderer->measure_text(title);
+		int titleX = (vcols * tileSize - titleW) / 2;
 		ctx.renderer->draw_text(
-			Vector2D{ pixelX, row * tileSize + fontOff },
-			line,
-			ColorPairId::WHITE_BLACK);
-		++row;
+			Vector2D{ titleX, fontOff },
+			title,
+			ColorPairId::YELLOW_BLACK);
+
+		std::string_view hint = "[ESC] or [SPACE] to close";
+		int hintW = ctx.renderer->measure_text(hint);
+		int hintX = (vcols * tileSize - hintW) / 2;
+		ctx.renderer->draw_text(
+			Vector2D{ hintX, (vrows - 1) * tileSize + fontOff },
+			hint,
+			ColorPairId::CYAN_BLACK);
+
+		// Left column: monsters. Right column: items.
+		const int halfCols = vcols / 2;
+		draw_column("MONSTERS", monsterDist, 0, ctx);
+		draw_item_column("ITEMS", itemDist, halfCols, ctx);
 	}
-}
 
-void BalanceViewer::draw_item_column(
-	std::string_view header,
-	const std::vector<ItemPercentage>& dist,
-	int startCol,
-	GameContext& ctx)
-{
-	int tileSize = ctx.renderer->get_tile_size();
-	int fontOff = (tileSize - ctx.renderer->get_font_size()) / 2;
-	int vrows = ctx.renderer->get_viewport_rows();
-
-	int pixelX = startCol * tileSize + tileSize;
-	int row = 2;
-
-	ctx.renderer->draw_text(
-		Vector2D{ pixelX, row * tileSize + fontOff },
-		header,
-		ColorPairId::GREEN_BLACK);
-	++row;
-
-	for (const auto& entry : dist)
+	void BalanceViewer::draw_column(
+		std::string_view header,
+		const std::vector<MonsterPercentage>& dist,
+		int startCol,
+		GameContext& ctx)
 	{
-		if (row >= vrows - 1)
-		{
-			break;
-		}
+		int tileSize = ctx.renderer->get_tile_size();
+		int fontOff = (tileSize - ctx.renderer->get_font_size()) / 2;
+		int vrows = ctx.renderer->get_viewport_rows();
 
-		std::string line = std::format(
-			"{:<24} {:5.1f}%  {}",
-			entry.name,
-			entry.percentage,
-			entry.category);
+		int pixelX = startCol * tileSize + tileSize;
+		int row = 2;
+
 		ctx.renderer->draw_text(
 			Vector2D{ pixelX, row * tileSize + fontOff },
-			line,
-			ColorPairId::WHITE_BLACK);
+			header,
+			ColorPairId::GREEN_BLACK);
 		++row;
-	}
-}
 
-// end of file: Tools/BalanceViewer.cpp
+		for (const auto& entry : dist)
+		{
+			if (row >= vrows - 1)
+			{
+				break;
+			}
+
+			std::string line =
+				std::format("{}  {:.1f}%", entry.name, entry.percentage);
+			ctx.renderer->draw_text(
+				Vector2D{ pixelX, row * tileSize + fontOff },
+				line,
+				ColorPairId::WHITE_BLACK);
+			++row;
+		}
+	}
+
+	void BalanceViewer::draw_item_column(
+		std::string_view header,
+		const std::vector<ItemPercentage>& dist,
+		int startCol,
+		GameContext& ctx)
+	{
+		int tileSize = ctx.renderer->get_tile_size();
+		int fontOff = (tileSize - ctx.renderer->get_font_size()) / 2;
+		int vrows = ctx.renderer->get_viewport_rows();
+
+		int pixelX = startCol * tileSize + tileSize;
+		int row = 2;
+
+		ctx.renderer->draw_text(
+			Vector2D{ pixelX, row * tileSize + fontOff },
+			header,
+			ColorPairId::GREEN_BLACK);
+		++row;
+
+		for (const auto& entry : dist)
+		{
+			if (row >= vrows - 1)
+			{
+				break;
+			}
+
+			std::string line = std::format(
+				"{:<24} {:5.1f}%  {}",
+				entry.name,
+				entry.percentage,
+				entry.category);
+			ctx.renderer->draw_text(
+				Vector2D{ pixelX, row * tileSize + fontOff },
+				line,
+				ColorPairId::WHITE_BLACK);
+			++row;
+		}
+	}
+
+	// end of file: Tools/BalanceViewer.cpp
 
 } // namespace CppRL

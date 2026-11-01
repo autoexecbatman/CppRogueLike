@@ -15,8 +15,8 @@
     "mutations": [
         {
             "file": "src/RecordEditor.h",
-            "original": "\t\treturn std::min(\n\t\t\tLIST_PAD + tileColumn + widestLabel + tagColumn + LIST_PAD,\n\t\t\tscreenWidth / 2);",
-            "mutated": "\t\treturn std::max(\n\t\t\tLIST_PAD + tileColumn + widestLabel + tagColumn + LIST_PAD,\n\t\t\tscreenWidth / 2);",
+            "original": "\t\t\treturn std::min(\n\t\t\t\tLIST_PAD + tileColumn + widestLabel + tagColumn + LIST_PAD,\n\t\t\t\tscreenWidth / 2);",
+            "mutated": "\t\t\treturn std::max(\n\t\t\t\tLIST_PAD + tileColumn + widestLabel + tagColumn + LIST_PAD,\n\t\t\t\tscreenWidth / 2);",
             "catches": "the list no longer capped at half the screen"
         },
         {
@@ -39,26 +39,26 @@
         },
         {
             "file": "src/RecordEditor.cpp",
-            "original": "\t\tif (measure(cut) <= maxWidth)\n\t\t{\n\t\t\treturn cut;\n\t\t}",
-            "mutated": "\t\tif (measure(cut) <= maxWidth)\n\t\t{\n\t\t\treturn std::string{ label.substr(0, length) } + \"...\";\n\t\t}",
+            "original": "\t\t\tif (measure(cut) <= maxWidth)\n\t\t\t{\n\t\t\t\treturn cut;\n\t\t\t}",
+            "mutated": "\t\t\tif (measure(cut) <= maxWidth)\n\t\t\t{\n\t\t\t\treturn std::string{ label.substr(0, length) } + \"...\";\n\t\t\t}",
             "catches": "fitted_label cutting one character too few"
         },
         {
             "file": "src/RecordEditor.cpp",
-            "original": "\tif (measure(label) <= maxWidth)\n\t{\n\t\treturn std::string{ label };\n\t}",
-            "mutated": "\tif (measure(label) < maxWidth)\n\t{\n\t\treturn std::string{ label };\n\t}",
+            "original": "\t\tif (measure(label) <= maxWidth)\n\t\t{\n\t\t\treturn std::string{ label };\n\t\t}",
+            "mutated": "\t\tif (measure(label) < maxWidth)\n\t\t{\n\t\t\treturn std::string{ label };\n\t\t}",
             "catches": "a label of exactly the room cut instead of kept"
         },
         {
             "file": "src/RecordEditor.cpp",
-            "original": "\t\t\treturn cut;\n\t\t}\n\t}\n\treturn \"\";\n}",
-            "mutated": "\t\t\treturn cut;\n\t\t}\n\t}\n\treturn \"...\";\n}",
+            "original": "\t\t\t\treturn cut;\n\t\t\t}\n\t\t}\n\t\treturn \"\";\n\t}",
+            "mutated": "\t\t\t\treturn cut;\n\t\t\t}\n\t\t}\n\t\treturn \"...\";\n\t}",
             "catches": "the dots drawn where not even they fit"
         },
         {
             "file": "src/RecordEditor.cpp",
-            "original": "\t\tif (mouse.x < listWidth)\n\t\t{\n\t\t\tfocus = EditorFocus::LIST;",
-            "mutated": "\t\tif (mouse.x < 220)\n\t\t{\n\t\t\tfocus = EditorFocus::LIST;",
+            "original": "\t\t\tif (mouse.x < listWidth)\n\t\t\t{\n\t\t\t\tfocus = EditorFocus::LIST;",
+            "mutated": "\t\t\tif (mouse.x < 220)\n\t\t\t{\n\t\t\t\tfocus = EditorFocus::LIST;",
             "catches": "a click hit-tested against the old fixed width of 220"
         },
         {
@@ -69,8 +69,8 @@
         },
         {
             "file": "src/RecordEditor.cpp",
-            "original": "\t\tlabel += \" *\";\n\t}\n\treturn label;",
-            "mutated": "\t}\n\treturn label;",
+            "original": "\t\t\tlabel += \" *\";\n\t\t}\n\t\treturn label;",
+            "mutated": "\t\t}\n\t\treturn label;",
             "catches": "a custom record's label measured without its \" *\""
         },
         {
@@ -99,8 +99,8 @@
         },
         {
             "file": "src/RecordEditor.h",
-            "original": "\t\treturn std::max(\n\t\t\ttext_band_height(lineHeight, 1),\n\t\t\tLIST_TILE_SIZE + 2 * TEXT_PAD);",
-            "mutated": "\t\treturn text_band_height(lineHeight, 1);",
+            "original": "\t\t\treturn std::max(\n\t\t\t\ttext_band_height(lineHeight, 1),\n\t\t\t\tLIST_TILE_SIZE + 2 * TEXT_PAD);",
+            "mutated": "\t\t\treturn text_band_height(lineHeight, 1);",
             "catches": "a row shorter than its tile when the line is"
         },
         {
@@ -111,8 +111,8 @@
         },
         {
             "file": "src/RecordEditor.h",
-            "original": "return screenHeight - header_height(lineHeight) -\n\t\t\thint_height(lineHeight);",
-            "mutated": "\t\treturn screenHeight - header_height(lineHeight);",
+            "original": "\treturn screenHeight - header_height(lineHeight) -\n\t\t\t\thint_height(lineHeight);",
+            "mutated": "\t\t\treturn screenHeight - header_height(lineHeight);",
             "catches": "a body that runs under the hint bar"
         },
         {
@@ -129,8 +129,8 @@
         },
         {
             "file": "src/RecordEditor.cpp",
-            "original": "\tconst int rowHeight = row_height(input.lineHeight);\n\tconst size_t visibleRows",
-            "mutated": "\tconst int rowHeight = 30;\n\tconst size_t visibleRows",
+            "original": "\t\tconst int rowHeight = row_height(input.lineHeight);\n\t\tconst size_t visibleRows",
+            "mutated": "\t\tconst int rowHeight = 30;\n\t\tconst size_t visibleRows",
             "catches": "a click hit-tested against a fixed 30-pixel row"
         },
         {

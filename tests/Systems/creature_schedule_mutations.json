@@ -27,8 +27,8 @@
     },
     {
       "file": "src/CreatureManager.cpp",
-      "original": "\t\t\tcreature->set_next_action_time(\n\t\t\t\tcreature->get_next_action_time() + cost);",
-      "mutated": "\t\t\tcreature->set_next_action_time(\n\t\t\t\tcreature->get_next_action_time());",
+      "original": "\t\t\t\tcreature->set_next_action_time(\n\t\t\t\t\tcreature->get_next_action_time() + cost);",
+      "mutated": "\t\t\t\tcreature->set_next_action_time(\n\t\t\t\t\tcreature->get_next_action_time());",
       "catches": "a creature never advancing on the clock, so it stays due and acts every window for the rest of the game"
     },
     {
@@ -39,8 +39,8 @@
     },
     {
       "file": "src/Creature.h",
-      "original": "\t\treturn actions_before(nextActionTime, get_action_delay(), clockLimit);",
-      "mutated": "\t\treturn actions_before(0, get_action_delay(), clockLimit);",
+      "original": "\t\t\treturn actions_before(\n\t\t\t\tnextActionTime,\n\t\t\t\tget_action_delay(),\n\t\t\t\tclockLimit);",
+      "mutated": "\t\t\treturn actions_before(0,\n\t\t\t\tget_action_delay(),\n\t\t\t\tclockLimit);",
       "catches": "where the creature stands on the clock ignored, so it is owed every action since the game began"
     }
   ]

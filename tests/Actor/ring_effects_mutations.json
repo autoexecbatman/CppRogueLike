@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/Creature.cpp",
-      "original": "\tif (roundsElapsed % GameBalance::Time::ROUNDS_PER_TURN == 0)\n\t{\n\t\t[[maybe_unused]] const int healed = healthPool->heal(1);",
-      "mutated": "\tif (roundsElapsed % 1 == 0)\n\t{\n\t\t[[maybe_unused]] const int healed = healthPool->heal(1);",
+      "original": "\t\tif (roundsElapsed % GameBalance::Time::ROUNDS_PER_TURN == 0)\n\t\t{\n\t\t\t[[maybe_unused]] const int healed = healthPool->heal(1);",
+      "mutated": "\t\tif (roundsElapsed % 1 == 0)\n\t\t{\n\t\t\t[[maybe_unused]] const int healed = healthPool->heal(1);",
       "catches": "a point every round where the book gives one a turn"
     },
     {
@@ -39,8 +39,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\treturn holds_ring_of_effect(EquipmentSlot::RIGHT_RING) ||\n\t\tholds_ring_of_effect(EquipmentSlot::LEFT_RING);",
-      "mutated": "\treturn holds_ring_of_effect(EquipmentSlot::RIGHT_RING);",
+      "original": "\t\treturn holds_ring_of_effect(EquipmentSlot::RIGHT_RING) ||\n\t\t\tholds_ring_of_effect(EquipmentSlot::LEFT_RING);",
+      "mutated": "\t\treturn holds_ring_of_effect(EquipmentSlot::RIGHT_RING);",
       "catches": "a ring on the left hand doing nothing"
     },
     {

@@ -14,190 +14,207 @@
 namespace CppRL
 {
 
-void BaseMenu::menu_new(
-	size_t width,
-	size_t height,
-	size_t startX,
-	size_t startY,
-	GameContext& ctx)
-{
-	menuWidth = width;
-	menuHeight = height;
-	menuStartX = startX;
-	menuStartY = startY;
-	assert(ctx.renderer && "BaseMenu::menu_new called without a renderer");
-	assert(
-		ctx.inputSystem && "BaseMenu::menu_new called without an inputSystem");
-	assert(ctx.tileConfig && "BaseMenu::menu_new called without a tileConfig");
-	renderer = ctx.renderer;
-	inputSystem = ctx.inputSystem;
-	tileConfig = ctx.tileConfig;
-}
-
-void BaseMenu::menu_print(int col, int row, const std::string& text)
-{
-	assert(renderer && "BaseMenu::menu_print called without a renderer");
-
-	int tileSize = renderer->get_tile_size();
-	int pixelX = (static_cast<int>(menuStartX) + col) * tileSize;
-	menu_draw_row(pixelX, row, text);
-}
-
-void BaseMenu::menu_print_centered(int row, const std::string& text)
-{
-	assert(
-		renderer && "BaseMenu::menu_print_centered called without a renderer");
-
-	int tileSize = renderer->get_tile_size();
-	int interiorLeft = (static_cast<int>(menuStartX) + 1) * tileSize;
-	int interiorWidth = (static_cast<int>(menuWidth) - 2) * tileSize;
-	// Text wider than the menu starts at the left edge rather than outside it.
-	int pixelX = std::max(
-		interiorLeft,
-		interiorLeft + (interiorWidth - renderer->measure_text(text)) / 2);
-	menu_draw_row(pixelX, row, text);
-}
-
-void BaseMenu::menu_print_header()
-{
-	assert(renderer && "BaseMenu::menu_print_header called without a renderer");
-
-	int tileSize = renderer->get_tile_size();
-	int fontSize = renderer->get_font_size();
-	int pixelX = (static_cast<int>(menuStartX) + 1) * tileSize;
-	int rowTop =
-		panel_text_row_y(static_cast<int>(menuStartY) * tileSize, tileSize, 0);
-	renderer->draw_text(
-		Vector2D{ pixelX, rowTop + (UI_TEXT_ROW_PITCH - fontSize) / 2 },
-		"Item                       Price",
-		ColorPairId::CYAN_BLACK);
-}
-
-void BaseMenu::menu_draw_row(int pixelX, int row, const std::string& text)
-{
-	int tileSize = renderer->get_tile_size();
-	int fontSize = renderer->get_font_size();
-	int rowTop = panel_text_row_y(
-		static_cast<int>(menuStartY) * tileSize,
-		tileSize,
-		row);
-	int glyphY = rowTop + (UI_TEXT_ROW_PITCH - fontSize) / 2;
-
-	if (isHighlighted)
+	void BaseMenu::menu_new(
+		size_t width,
+		size_t height,
+		size_t startX,
+		size_t startY,
+		GameContext& ctx)
 	{
-		int bar_x = (static_cast<int>(menuStartX) + 1) * tileSize;
-		int bar_w = (static_cast<int>(menuWidth) - 2) * tileSize;
-		ColorPair pair = renderer->get_color_pair(ColorPairId::BLACK_WHITE);
-		DrawRectangle(bar_x, rowTop, bar_w, UI_TEXT_ROW_PITCH, pair.background);
+		menuWidth = width;
+		menuHeight = height;
+		menuStartX = startX;
+		menuStartY = startY;
+		assert(ctx.renderer && "BaseMenu::menu_new called without a renderer");
+		assert(
+			ctx.inputSystem &&
+			"BaseMenu::menu_new called without an inputSystem");
+		assert(
+			ctx.tileConfig && "BaseMenu::menu_new called without a tileConfig");
+		renderer = ctx.renderer;
+		inputSystem = ctx.inputSystem;
+		tileConfig = ctx.tileConfig;
+	}
+
+	void BaseMenu::menu_print(int col, int row, const std::string& text)
+	{
+		assert(renderer && "BaseMenu::menu_print called without a renderer");
+
+		int tileSize = renderer->get_tile_size();
+		int pixelX = (static_cast<int>(menuStartX) + col) * tileSize;
+		menu_draw_row(pixelX, row, text);
+	}
+
+	void BaseMenu::menu_print_centered(int row, const std::string& text)
+	{
+		assert(
+			renderer &&
+			"BaseMenu::menu_print_centered called without a renderer");
+
+		int tileSize = renderer->get_tile_size();
+		int interiorLeft = (static_cast<int>(menuStartX) + 1) * tileSize;
+		int interiorWidth = (static_cast<int>(menuWidth) - 2) * tileSize;
+		// Text wider than the menu starts at the left edge rather than outside
+		// it.
+		int pixelX = std::max(
+			interiorLeft,
+			interiorLeft + (interiorWidth - renderer->measure_text(text)) / 2);
+		menu_draw_row(pixelX, row, text);
+	}
+
+	void BaseMenu::menu_print_header()
+	{
+		assert(
+			renderer &&
+			"BaseMenu::menu_print_header called without a renderer");
+
+		int tileSize = renderer->get_tile_size();
+		int fontSize = renderer->get_font_size();
+		int pixelX = (static_cast<int>(menuStartX) + 1) * tileSize;
+		int rowTop = panel_text_row_y(
+			static_cast<int>(menuStartY) * tileSize,
+			tileSize,
+			0);
 		renderer->draw_text(
-			Vector2D{ pixelX, glyphY },
-			text,
-			ColorPairId::BLACK_WHITE);
+			Vector2D{ pixelX, rowTop + (UI_TEXT_ROW_PITCH - fontSize) / 2 },
+			"Item                       Price",
+			ColorPairId::CYAN_BLACK);
 	}
-	else
+
+	void BaseMenu::menu_draw_row(int pixelX, int row, const std::string& text)
 	{
-		renderer->draw_text(
-			Vector2D{ pixelX, glyphY },
-			text,
-			ColorPairId::WHITE_BLACK);
+		int tileSize = renderer->get_tile_size();
+		int fontSize = renderer->get_font_size();
+		int rowTop = panel_text_row_y(
+			static_cast<int>(menuStartY) * tileSize,
+			tileSize,
+			row);
+		int glyphY = rowTop + (UI_TEXT_ROW_PITCH - fontSize) / 2;
+
+		if (isHighlighted)
+		{
+			int bar_x = (static_cast<int>(menuStartX) + 1) * tileSize;
+			int bar_w = (static_cast<int>(menuWidth) - 2) * tileSize;
+			ColorPair pair = renderer->get_color_pair(ColorPairId::BLACK_WHITE);
+			DrawRectangle(
+				bar_x,
+				rowTop,
+				bar_w,
+				UI_TEXT_ROW_PITCH,
+				pair.background);
+			renderer->draw_text(
+				Vector2D{ pixelX, glyphY },
+				text,
+				ColorPairId::BLACK_WHITE);
+		}
+		else
+		{
+			renderer->draw_text(
+				Vector2D{ pixelX, glyphY },
+				text,
+				ColorPairId::WHITE_BLACK);
+		}
 	}
-}
 
-void BaseMenu::menu_key_listen()
-{
-	assert(
-		inputSystem &&
-		"BaseMenu::menu_key_listen called without an inputSystem");
-
-	inputSystem->poll();
-
-	// Both channels come from the same poll. A letter arrives as a character and
-	// as its GameKey, so a menu may test whichever it needs.
-	lastChar = inputSystem->get_char_input();
-	lastKey = inputSystem->get_key();
-}
-
-void BaseMenu::menu_draw_box()
-{
-	assert(renderer && "BaseMenu::menu_draw_box called without a renderer");
-
-	int tileSize = renderer->get_tile_size();
-	int pixelX = static_cast<int>(menuStartX) * tileSize;
-	int pixelY = static_cast<int>(menuStartY) * tileSize;
-
-	renderer->draw_frame(
-		Vector2D{ pixelX, pixelY },
-		static_cast<int>(menuWidth),
-		static_cast<int>(menuHeight),
-		*tileConfig);
-}
-
-void BaseMenu::menu_draw_title(std::string_view title, ColorPairId colorPair)
-{
-	assert(renderer && "BaseMenu::menu_draw_title called without a renderer");
-
-	int tileSize = renderer->get_tile_size();
-	int fontOff = (tileSize - renderer->get_font_size()) / 2;
-	int interiorWidth = (static_cast<int>(menuWidth) - 2) * tileSize;
-	int textWidth = renderer->measure_text(title);
-	int pixelX = (static_cast<int>(menuStartX) + 1) * tileSize +
-		(interiorWidth - textWidth) / 2;
-	int pixelY = static_cast<int>(menuStartY) * tileSize + fontOff;
-	renderer->draw_text(Vector2D{ pixelX, pixelY }, title, colorPair);
-}
-
-// A menu that consumes no keys of its own. The polled key and character are
-// lastKey and lastChar, so an override takes only the context.
-void BaseMenu::on_key([[maybe_unused]] GameContext& ctx) {}
-
-std::optional<size_t> BaseMenu::menu_row_at(
-	int pixelX,
-	int pixelY,
-	size_t rowCount) const
-{
-	if (renderer == nullptr)
+	void BaseMenu::menu_key_listen()
 	{
-		return std::nullopt;
+		assert(
+			inputSystem &&
+			"BaseMenu::menu_key_listen called without an inputSystem");
+
+		inputSystem->poll();
+
+		// Both channels come from the same poll. A letter arrives as a
+		// character and as its GameKey, so a menu may test whichever it needs.
+		lastChar = inputSystem->get_char_input();
+		lastKey = inputSystem->get_key();
 	}
 
-	const int tileSize = renderer->get_tile_size();
-
-	// Across first. A text row's line runs the full width of the window, so a test on
-	// the vertical alone answers a row for a pointer that is nowhere near the menu.
-	const int leftEdge = static_cast<int>(menuStartX) * tileSize;
-	const int rightEdge = leftEdge + static_cast<int>(menuWidth) * tileSize;
-	if (pixelX < leftEdge || pixelX >= rightEdge)
+	void BaseMenu::menu_draw_box()
 	{
-		return std::nullopt;
+		assert(renderer && "BaseMenu::menu_draw_box called without a renderer");
+
+		int tileSize = renderer->get_tile_size();
+		int pixelX = static_cast<int>(menuStartX) * tileSize;
+		int pixelY = static_cast<int>(menuStartY) * tileSize;
+
+		renderer->draw_frame(
+			Vector2D{ pixelX, pixelY },
+			static_cast<int>(menuWidth),
+			static_cast<int>(menuHeight),
+			*tileConfig);
 	}
 
-	const int row = panel_text_row_at_y(
-		static_cast<int>(menuStartY) * tileSize,
-		tileSize,
-		pixelY);
-	if (row < 0 || static_cast<size_t>(row) >= rowCount)
+	void BaseMenu::menu_draw_title(
+		std::string_view title,
+		ColorPairId colorPair)
 	{
-		return std::nullopt;
+		assert(
+			renderer && "BaseMenu::menu_draw_title called without a renderer");
+
+		int tileSize = renderer->get_tile_size();
+		int fontOff = (tileSize - renderer->get_font_size()) / 2;
+		int interiorWidth = (static_cast<int>(menuWidth) - 2) * tileSize;
+		int textWidth = renderer->measure_text(title);
+		int pixelX = (static_cast<int>(menuStartX) + 1) * tileSize +
+			(interiorWidth - textWidth) / 2;
+		int pixelY = static_cast<int>(menuStartY) * tileSize + fontOff;
+		renderer->draw_text(Vector2D{ pixelX, pixelY }, title, colorPair);
 	}
-	return static_cast<size_t>(row);
-}
 
-bool BaseMenu::menu_pointer_moved() const
-{
-	const ::Vector2 delta = GetMouseDelta();
-	return delta.x != 0.0f || delta.y != 0.0f;
-}
+	// A menu that consumes no keys of its own. The polled key and character are
+	// lastKey and lastChar, so an override takes only the context.
+	void BaseMenu::on_key([[maybe_unused]] GameContext& ctx) {}
 
-bool BaseMenu::menu_left_clicked() const
-{
-	return inputSystem != nullptr &&
-		inputSystem->get_key() == GameKey::MOUSE_LEFT;
-}
+	std::optional<size_t> BaseMenu::menu_row_at(
+		int pixelX,
+		int pixelY,
+		size_t rowCount) const
+	{
+		if (renderer == nullptr)
+		{
+			return std::nullopt;
+		}
 
-bool BaseMenu::menu_right_clicked() const
-{
-	return inputSystem != nullptr &&
-		inputSystem->get_key() == GameKey::MOUSE_RIGHT;
-}
+		const int tileSize = renderer->get_tile_size();
+
+		// Across first. A text row's line runs the full width of the window, so
+		// a test on the vertical alone answers a row for a pointer that is
+		// nowhere near the menu.
+		const int leftEdge = static_cast<int>(menuStartX) * tileSize;
+		const int rightEdge = leftEdge + static_cast<int>(menuWidth) * tileSize;
+		if (pixelX < leftEdge || pixelX >= rightEdge)
+		{
+			return std::nullopt;
+		}
+
+		const int row = panel_text_row_at_y(
+			static_cast<int>(menuStartY) * tileSize,
+			tileSize,
+			pixelY);
+		if (row < 0 || static_cast<size_t>(row) >= rowCount)
+		{
+			return std::nullopt;
+		}
+		return static_cast<size_t>(row);
+	}
+
+	bool BaseMenu::menu_pointer_moved() const
+	{
+		const ::Vector2 delta = GetMouseDelta();
+		return delta.x != 0.0f || delta.y != 0.0f;
+	}
+
+	bool BaseMenu::menu_left_clicked() const
+	{
+		return inputSystem != nullptr &&
+			inputSystem->get_key() == GameKey::MOUSE_LEFT;
+	}
+
+	bool BaseMenu::menu_right_clicked() const
+	{
+		return inputSystem != nullptr &&
+			inputSystem->get_key() == GameKey::MOUSE_RIGHT;
+	}
 
 } // namespace CppRL

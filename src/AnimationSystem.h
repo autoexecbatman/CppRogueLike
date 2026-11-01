@@ -11,129 +11,130 @@
 namespace CppRL
 {
 
-class Renderer;
-class TileConfig;
+	class Renderer;
+	class TileConfig;
 
-enum class ParticleShape
-{
-	CIRCLE, // Raylib filled circle - blood, sparks
-	TILE, // DawnLike sprite - named effects
-	PIXEL, // Single DrawPixel - fire, embers
-};
-
-struct AnimEntry
-{
-	float pixelX{ 0.0f }; // world-space pixel position
-	float pixelY{ 0.0f };
-	float velocityX{ 0.0f }; // world-space pixels per second
-	float velocityY{ 0.0f };
-	// upward buoyancy - negative = rises; zero = drag only
-	float accelerationY{ 0.0f };
-	// perpendicular swirl per frame; 0 = straight arcs
-	float turbulence{ 0.0f };
-	float radius{ 4.0f }; // pixels, for CIRCLE shape
-	TileRef tile{}; // used only for TILE shape
-	unsigned char red{ 0 };
-	unsigned char green{ 0 };
-	unsigned char blue{ 0 };
-	// color at end of lifetime - interpolated over duration
-	unsigned char redEnd{ 0 };
-	unsigned char greenEnd{ 0 }; // default 0,0,0 = cool to black
-	unsigned char blueEnd{ 0 };
-	float spawnTime{ 0.0f };
-	float duration{ 0.0f };
-	ParticleShape shape{ ParticleShape::CIRCLE };
-	bool additive{ false };
-};
-
-struct ProjectileEntry
-{
-	float pixelX{ 0.0f };
-	float pixelY{ 0.0f };
-	float targetPixelX{ 0.0f };
-	float targetPixelY{ 0.0f };
-	float speed{ 0.0f };
-	float wobbleStrength{ 0.0f };
-	float initialDistance{ 0.0f };
-	float lastTrailTime{ 0.0f };
-	TileRef tile{};
-	unsigned char red{ 255 };
-	unsigned char green{ 255 };
-	unsigned char blue{ 255 };
-	float spawnTime{ 0.0f };
-	float maxDuration{ 0.0f };
-	std::function<void()> onArrive{};
-};
-
-class AnimationSystem
-{
-private:
-	std::vector<AnimEntry> entries;
-	std::vector<ProjectileEntry> projectiles;
-	TileRef bloodTile{};
-	TileRef sparkTile{};
-	TileRef missileTile{};
-	int tileSize{ 32 };
-	std::mt19937 generator;
-
-	float random_range(float low, float high);
-
-public:
-	void init(const TileConfig& tileConfig, int tile_size);
-
-	// Particle bursts
-	void spawn_melee_hit(Vector2D worldPosition);
-	void spawn_death(Vector2D worldPosition);
-	void spawn_blood_burst(Vector2D worldPosition, int count);
-	void spawn_spark_burst(
-		Vector2D worldPosition,
-		int count,
-		unsigned char red,
-		unsigned char green,
-		unsigned char blue);
-
-	// Multi-phase fire explosion: radial wavefront, color gradient, rising embers
-	void spawn_fireball_explosion(Vector2D center, int radius);
-
-	// Lightning: flash tiles along a bresenham path
-	void spawn_lightning_path(
-		const std::vector<Vector2D>& path,
-		unsigned char red,
-		unsigned char green,
-		unsigned char blue);
-
-	[[nodiscard]] TileRef get_missile_tile() const noexcept
+	enum class ParticleShape
 	{
-		return missileTile;
-	}
+		CIRCLE, // Raylib filled circle - blood, sparks
+		TILE, // DawnLike sprite - named effects
+		PIXEL, // Single DrawPixel - fire, embers
+	};
 
-	// Seeking projectile with chaotic wobble motion
-	void spawn_projectile(
-		Vector2D from,
-		Vector2D to,
-		TileRef tile,
-		unsigned char red,
-		unsigned char green,
-		unsigned char blue,
-		float speed,
-		float wobbleStrength,
-		std::function<void()> onArrive);
-
-	// Generic single effect
-	void spawn_effect(
-		Vector2D worldPosition,
-		TileRef tile,
-		unsigned char red,
-		unsigned char green,
-		unsigned char blue,
-		float duration);
-
-	void update_and_render(const Renderer& renderer);
-
-	[[nodiscard]] bool has_active_entries() const noexcept
+	struct AnimEntry
 	{
-		return !entries.empty() || !projectiles.empty();
-	}
-};
+		float pixelX{ 0.0f }; // world-space pixel position
+		float pixelY{ 0.0f };
+		float velocityX{ 0.0f }; // world-space pixels per second
+		float velocityY{ 0.0f };
+		// upward buoyancy - negative = rises; zero = drag only
+		float accelerationY{ 0.0f };
+		// perpendicular swirl per frame; 0 = straight arcs
+		float turbulence{ 0.0f };
+		float radius{ 4.0f }; // pixels, for CIRCLE shape
+		TileRef tile{}; // used only for TILE shape
+		unsigned char red{ 0 };
+		unsigned char green{ 0 };
+		unsigned char blue{ 0 };
+		// color at end of lifetime - interpolated over duration
+		unsigned char redEnd{ 0 };
+		unsigned char greenEnd{ 0 }; // default 0,0,0 = cool to black
+		unsigned char blueEnd{ 0 };
+		float spawnTime{ 0.0f };
+		float duration{ 0.0f };
+		ParticleShape shape{ ParticleShape::CIRCLE };
+		bool additive{ false };
+	};
+
+	struct ProjectileEntry
+	{
+		float pixelX{ 0.0f };
+		float pixelY{ 0.0f };
+		float targetPixelX{ 0.0f };
+		float targetPixelY{ 0.0f };
+		float speed{ 0.0f };
+		float wobbleStrength{ 0.0f };
+		float initialDistance{ 0.0f };
+		float lastTrailTime{ 0.0f };
+		TileRef tile{};
+		unsigned char red{ 255 };
+		unsigned char green{ 255 };
+		unsigned char blue{ 255 };
+		float spawnTime{ 0.0f };
+		float maxDuration{ 0.0f };
+		std::function<void()> onArrive{};
+	};
+
+	class AnimationSystem
+	{
+	private:
+		std::vector<AnimEntry> entries;
+		std::vector<ProjectileEntry> projectiles;
+		TileRef bloodTile{};
+		TileRef sparkTile{};
+		TileRef missileTile{};
+		int tileSize{ 32 };
+		std::mt19937 generator;
+
+		float random_range(float low, float high);
+
+	public:
+		void init(const TileConfig& tileConfig, int tile_size);
+
+		// Particle bursts
+		void spawn_melee_hit(Vector2D worldPosition);
+		void spawn_death(Vector2D worldPosition);
+		void spawn_blood_burst(Vector2D worldPosition, int count);
+		void spawn_spark_burst(
+			Vector2D worldPosition,
+			int count,
+			unsigned char red,
+			unsigned char green,
+			unsigned char blue);
+
+		// Multi-phase fire explosion: radial wavefront, color gradient, rising
+		// embers
+		void spawn_fireball_explosion(Vector2D center, int radius);
+
+		// Lightning: flash tiles along a bresenham path
+		void spawn_lightning_path(
+			const std::vector<Vector2D>& path,
+			unsigned char red,
+			unsigned char green,
+			unsigned char blue);
+
+		[[nodiscard]] TileRef get_missile_tile() const noexcept
+		{
+			return missileTile;
+		}
+
+		// Seeking projectile with chaotic wobble motion
+		void spawn_projectile(
+			Vector2D from,
+			Vector2D to,
+			TileRef tile,
+			unsigned char red,
+			unsigned char green,
+			unsigned char blue,
+			float speed,
+			float wobbleStrength,
+			std::function<void()> onArrive);
+
+		// Generic single effect
+		void spawn_effect(
+			Vector2D worldPosition,
+			TileRef tile,
+			unsigned char red,
+			unsigned char green,
+			unsigned char blue,
+			float duration);
+
+		void update_and_render(const Renderer& renderer);
+
+		[[nodiscard]] bool has_active_entries() const noexcept
+		{
+			return !entries.empty() || !projectiles.empty();
+		}
+	};
 
 } // namespace CppRL

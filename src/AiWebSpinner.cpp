@@ -27,481 +27,392 @@
 namespace CppRL
 {
 
-namespace
-{
-	// Rounds between two webs from one spider; the book gives no rate.
-	constexpr int WEB_COOLDOWN = 8;
-	// Web radius in tiles with no quarry within 15; one more within 15.
-	constexpr int WEB_MIN_SIZE = 3;
-	// Maximum number of webs that can exist at once per spider
-	constexpr int MAX_WEBS = 5;
-	// Web radius in tiles with the quarry within 5; 4 or more reads as massive.
-	constexpr int WEB_MAX_SIZE = 5;
-	// Each web's hold in Web's catch and stuck rolls; no 2e number behind it.
-	constexpr int WEB_STRENGTH = 3;
-} // namespace
-
-void AiWebSpinner::update(Creature& owner, GameContext& ctx)
-{
-	assert(ctx.map && "AiWebSpinner::update: called without a map");
-	assert(ctx.dice && "AiWebSpinner::update: called without dice");
-	assert(
-		ctx.buffSystem && "AiWebSpinner::update: called without a buffSystem");
-
-	// A failed save against the player's Sanctuary loses track of the player for the
-	// whole turn - biting, spinning and walking alike (PHB page 436).
-	const bool hasLostTrack =
-		ctx.buffSystem->ignores_warded_creature(owner, *ctx.player());
-	const std::optional<Vector2D> quarry = hasLostTrack ?
-		std::nullopt :
-		std::optional<Vector2D>{ ctx.player()->position };
-
-	// DIRECT ATTACK CODE - Check if player is adjacent
-	if (quarry && owner.get_tile_distance(*quarry) <= 1 &&
-		ctx.map->is_in_fov(owner.position))
+	namespace
 	{
-		ctx.messageSystem->log("Web spinner attempting attack with poison");
-		bite(owner, *ctx.player(), ctx);
+		// Rounds between two webs from one spider; the book gives no rate.
+		constexpr int WEB_COOLDOWN = 8;
+		// Web radius in tiles with no quarry within 15; one more within 15.
+		constexpr int WEB_MIN_SIZE = 3;
+		// Maximum number of webs that can exist at once per spider
+		constexpr int MAX_WEBS = 5;
+		// Web radius in tiles with the quarry within 5; 4 or more reads as
+		// massive.
+		constexpr int WEB_MAX_SIZE = 5;
+		// Each web's hold in Web's catch and stuck rolls; no 2e number behind
+		// it.
+		constexpr int WEB_STRENGTH = 3;
+	} // namespace
 
-		// Skip web spinning and other behaviors if we're attacking
-		return;
+	void AiWebSpinner::update(Creature& owner, GameContext& ctx)
+	{
+		assert(ctx.map && "AiWebSpinner::update: called without a map");
+		assert(ctx.dice && "AiWebSpinner::update: called without dice");
+		assert(
+			ctx.buffSystem &&
+			"AiWebSpinner::update: called without a buffSystem");
+
+		// A failed save against the player's Sanctuary loses track of the
+		// player for the whole turn - biting, spinning and walking alike (PHB
+		// page 436).
+		const bool hasLostTrack =
+			ctx.buffSystem->ignores_warded_creature(owner, *ctx.player());
+		const std::optional<Vector2D> quarry = hasLostTrack ?
+			std::nullopt :
+			std::optional<Vector2D>{ ctx.player()->position };
+
+		// DIRECT ATTACK CODE - Check if player is adjacent
+		if (quarry && owner.get_tile_distance(*quarry) <= 1 &&
+			ctx.map->is_in_fov(owner.position))
+		{
+			ctx.messageSystem->log("Web spinner attempting attack with poison");
+			bite(owner, *ctx.player(), ctx);
+
+			// Skip web spinning and other behaviors if we're attacking
+			return;
+		}
+
+		// Web spinning logic - only if not attacking
+		if (ctx.gameState->get_time() >= webReadyTime &&
+			should_create_web(owner, quarry, ctx))
+		{
+			if (try_create_web(owner, quarry, ctx))
+			{
+				webReadyTime =
+					expiry_time(ctx.gameState->get_time(), WEB_COOLDOWN);
+
+				// Show message about web spinning
+				ctx.messageSystem->message(
+					owner.actorData.color,
+					owner.actorData.name,
+					MessageCompletion::CONTINUED);
+				ctx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					" spins a sticky web!",
+					MessageCompletion::FINISHED);
+
+				return;
+			}
+		}
+
+		// Fall back to standard movement behavior
+		owner.update_awareness(ctx);
+
+		// With no quarry to walk toward, it drifts like any spider.
+		if (owner.is_aware(ctx.gameState->get_time()) && quarry)
+		{
+			move_toward_player(owner, ctx);
+		}
+		else
+		{
+			// Occasional random movement
+			if (ctx.dice->d20() == 1)
+			{
+				random_move(owner, ctx);
+			}
+		}
 	}
 
-	// Web spinning logic - only if not attacking
-	if (ctx.gameState->get_time() >= webReadyTime &&
-		should_create_web(owner, quarry, ctx))
+	// The Monstrous Manual's giant spider, whose numbers this weaver carries -
+	// a web-spinner with a 1-8 bite, THAC0 17 and armour class 4 (PDF page
+	// 1879): "Their poison is Type F, which causes immediate death if the
+	// victim fails the saving throw." Table 51 prints Type F as Death/0 (DMG,
+	// PDF page 737), so a made save takes nothing at all. The victim's
+	// Constitution adjusts the roll, as its own table says.
+	void AiWebSpinner::inject_venom(
+		Creature& owner,
+		Creature& target,
+		GameContext& ctx)
 	{
-		if (try_create_web(owner, quarry, ctx))
-		{
-			webReadyTime = expiry_time(ctx.gameState->get_time(), WEB_COOLDOWN);
+		assert(
+			ctx.dataManager &&
+			"AiWebSpinner::inject_venom: called without a dataManager");
 
-			// Show message about web spinning
+		const int constitutionAdjustment =
+			ctx.dataManager->constitution_for(target.get_constitution())
+				.PoisonSave;
+		if (SavingThrows::is_made(
+				target,
+				SavingThrow::PARALYZATION_POISON_DEATH,
+				constitutionAdjustment,
+				ctx))
+		{
 			ctx.messageSystem->message(
 				owner.actorData.color,
 				owner.actorData.name,
 				MessageCompletion::CONTINUED);
 			ctx.messageSystem->message(
 				ColorPairId::WHITE_BLACK,
-				" spins a sticky web!",
+				" injects venom, and it does not take hold.",
 				MessageCompletion::FINISHED);
-
 			return;
 		}
-	}
 
-	// Fall back to standard movement behavior
-	owner.update_awareness(ctx);
-
-	// With no quarry to walk toward, it drifts like any spider.
-	if (owner.is_aware(ctx.gameState->get_time()) && quarry)
-	{
-		move_toward_player(owner, ctx);
-	}
-	else
-	{
-		// Occasional random movement
-		if (ctx.dice->d20() == 1)
-		{
-			random_move(owner, ctx);
-		}
-	}
-}
-
-// The Monstrous Manual's giant spider, whose numbers this weaver carries - a web-spinner
-// with a 1-8 bite, THAC0 17 and armour class 4 (PDF page 1879): "Their poison is Type F,
-// which causes immediate death if the victim fails the saving throw." Table 51 prints
-// Type F as Death/0 (DMG, PDF page 737), so a made save takes nothing at all. The
-// victim's Constitution adjusts the roll, as its own table says.
-void AiWebSpinner::inject_venom(
-	Creature& owner,
-	Creature& target,
-	GameContext& ctx)
-{
-	assert(
-		ctx.dataManager &&
-		"AiWebSpinner::inject_venom: called without a dataManager");
-
-	const int constitutionAdjustment =
-		ctx.dataManager->constitution_for(target.get_constitution()).PoisonSave;
-	if (SavingThrows::is_made(
-			target,
-			SavingThrow::PARALYZATION_POISON_DEATH,
-			constitutionAdjustment,
-			ctx))
-	{
 		ctx.messageSystem->message(
 			owner.actorData.color,
 			owner.actorData.name,
 			MessageCompletion::CONTINUED);
 		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			" injects venom, and it does not take hold.",
+			ColorPairId::WHITE_RED,
+			" injects a deadly venom!",
 			MessageCompletion::FINISHED);
-		return;
+
+		// "Where death is listed, all hit points are immediately lost."
+		target.take_damage_and_check_death(
+			target.get_hp(),
+			ctx,
+			DamageType::POISON,
+			owner.as_damage_source());
 	}
 
-	ctx.messageSystem->message(
-		owner.actorData.color,
-		owner.actorData.name,
-		MessageCompletion::CONTINUED);
-	ctx.messageSystem->message(
-		ColorPairId::WHITE_RED,
-		" injects a deadly venom!",
-		MessageCompletion::FINISHED);
-
-	// "Where death is listed, all hit points are immediately lost."
-	target.take_damage_and_check_death(
-		target.get_hp(),
-		ctx,
-		DamageType::POISON,
-		owner.as_damage_source());
-}
-
-bool AiWebSpinner::should_create_web(
-	Creature& owner,
-	std::optional<Vector2D> quarry,
-	GameContext& ctx)
-{
-	assert(
-		ctx.spellTiles &&
-		"AiWebSpinner::should_create_web: called without spellTiles");
-	assert(ctx.dice && "AiWebSpinner::should_create_web: called without dice");
-
-	// Only a quarry draws a defensive web, or a bite in place of one
-	if (quarry)
+	bool AiWebSpinner::should_create_web(
+		Creature& owner,
+		std::optional<Vector2D> quarry,
+		GameContext& ctx)
 	{
-		const int distToPlayer = owner.get_tile_distance(*quarry);
+		assert(
+			ctx.spellTiles &&
+			"AiWebSpinner::should_create_web: called without spellTiles");
+		assert(
+			ctx.dice && "AiWebSpinner::should_create_web: called without dice");
 
-		// If player is directly adjacent, don't create web (attack instead)
-		if (distToPlayer <= 1)
+		// Only a quarry draws a defensive web, or a bite in place of one
+		if (quarry)
 		{
-			return false;
+			const int distToPlayer = owner.get_tile_distance(*quarry);
+
+			// If player is directly adjacent, don't create web (attack instead)
+			if (distToPlayer <= 1)
+			{
+				return false;
+			}
+
+			// If spider has already laid a web recently, reduce chance of
+			// creating another
+			if (has_laid_web())
+			{
+				// Reduced chance if already laid a web (20% instead of 40%)
+				if (distToPlayer <= 10 && ctx.dice->d100() < 20)
+				{
+					return true;
+				}
+			}
+			else
+			{
+				// Higher chance if hasn't laid a web yet
+				// If player is nearby, moderate chance to create defensive web
+				if (distToPlayer <= 10 && ctx.dice->d100() < 40)
+				{
+					return true;
+				}
+			}
 		}
 
-		// If spider has already laid a web recently, reduce chance of creating another
-		if (has_laid_web())
+		// Even if player is far, occasional web creation for traps (10% chance)
+		if (ctx.dice->d100() < 10)
 		{
-			// Reduced chance if already laid a web (20% instead of 40%)
-			if (distToPlayer <= 10 && ctx.dice->d100() < 20)
+			return true;
+		}
+
+		// Count the spell tiles still standing. Nothing else lives in this
+		// container, so no kind has to be asked for.
+		int webCount = 0;
+		for (const auto& spellTile : *ctx.spellTiles)
+		{
+			assert(
+				spellTile &&
+				"should_create_web: spellTiles holds a null entry");
+			if (!spellTile->is_destroyed())
 			{
-				return true;
+				webCount++;
 			}
+		}
+
+		// Allow up to MAX_WEBS per spider (default is 5)
+		return webCount < MAX_WEBS;
+	}
+
+	bool AiWebSpinner::try_create_web(
+		Creature& owner,
+		std::optional<Vector2D> quarry,
+		GameContext& ctx)
+	{
+		assert(ctx.map && "AiWebSpinner::try_create_web: called without a map");
+
+		// With no quarry, or one far off or out of sight, a minimum size trap
+		// web on the spider
+		int webSize = WEB_MIN_SIZE;
+		Vector2D webCenter = owner.position;
+
+		if (quarry)
+		{
+			// Determine the web size - bigger webs when player is closer
+			const int distToPlayer = owner.get_tile_distance(*quarry);
+			if (distToPlayer < 5)
+			{
+				// Maximum size defensive web
+				webSize = WEB_MAX_SIZE;
+			}
+			else if (distToPlayer < 15)
+			{
+				// Medium size web
+				webSize = WEB_MIN_SIZE + 1;
+			}
+
+			if (ctx.map->is_in_fov(owner.position) && distToPlayer < 10)
+			{
+				// If player can see spider, create web between spider and
+				// player
+				int deltaCol = quarry->x - owner.position.x;
+				int deltaRow = quarry->y - owner.position.y;
+
+				if (deltaCol != 0)
+				{
+					deltaCol = deltaCol / std::abs(deltaCol);
+				}
+				if (deltaRow != 0)
+				{
+					deltaRow = deltaRow / std::abs(deltaRow);
+				}
+
+				// Position web to block player's path
+				webCenter =
+					owner.position + Vector2D{ deltaCol * 2, deltaRow * 2 };
+
+				// Make sure center is in bounds
+				webCenter.x = std::max(
+					0,
+					std::min(webCenter.x, ctx.map->get_width() - 1));
+				webCenter.y = std::max(
+					0,
+					std::min(webCenter.y, ctx.map->get_height() - 1));
+			}
+		}
+
+		// Generate the web pattern - now creating actual Web entities
+		generate_web_entities(webCenter, webSize, ctx);
+
+		// Dramatic message about web creation
+		ctx.messageSystem->message(
+			ColorPairId::RED_YELLOW,
+			owner.actorData.name,
+			MessageCompletion::CONTINUED);
+		if (webSize >= WEB_MAX_SIZE - 1)
+		{
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				" creates a massive web network!",
+				MessageCompletion::FINISHED);
 		}
 		else
 		{
-			// Higher chance if hasn't laid a web yet
-			// If player is nearby, moderate chance to create defensive web
-			if (distToPlayer <= 10 && ctx.dice->d100() < 40)
-			{
-				return true;
-			}
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				" spins a complex web structure!",
+				MessageCompletion::FINISHED);
 		}
-	}
 
-	// Even if player is far, occasional web creation for traps (10% chance)
-	if (ctx.dice->d100() < 10)
-	{
+		// Mark this spider as having laid a web - now using our own method
+		set_web_laid(true);
+
 		return true;
 	}
 
-	// Count the spell tiles still standing. Nothing else lives in this
-	// container, so no kind has to be asked for.
-	int webCount = 0;
-	for (const auto& spellTile : *ctx.spellTiles)
-	{
-		assert(spellTile && "should_create_web: spellTiles holds a null entry");
-		if (!spellTile->is_destroyed())
-		{
-			webCount++;
-		}
-	}
-
-	// Allow up to MAX_WEBS per spider (default is 5)
-	return webCount < MAX_WEBS;
-}
-
-bool AiWebSpinner::try_create_web(
-	Creature& owner,
-	std::optional<Vector2D> quarry,
-	GameContext& ctx)
-{
-	assert(ctx.map && "AiWebSpinner::try_create_web: called without a map");
-
-	// With no quarry, or one far off or out of sight, a minimum size trap web on the spider
-	int webSize = WEB_MIN_SIZE;
-	Vector2D webCenter = owner.position;
-
-	if (quarry)
-	{
-		// Determine the web size - bigger webs when player is closer
-		const int distToPlayer = owner.get_tile_distance(*quarry);
-		if (distToPlayer < 5)
-		{
-			// Maximum size defensive web
-			webSize = WEB_MAX_SIZE;
-		}
-		else if (distToPlayer < 15)
-		{
-			// Medium size web
-			webSize = WEB_MIN_SIZE + 1;
-		}
-
-		if (ctx.map->is_in_fov(owner.position) && distToPlayer < 10)
-		{
-			// If player can see spider, create web between spider and player
-			int deltaCol = quarry->x - owner.position.x;
-			int deltaRow = quarry->y - owner.position.y;
-
-			if (deltaCol != 0)
-			{
-				deltaCol = deltaCol / std::abs(deltaCol);
-			}
-			if (deltaRow != 0)
-			{
-				deltaRow = deltaRow / std::abs(deltaRow);
-			}
-
-			// Position web to block player's path
-			webCenter = owner.position + Vector2D{ deltaCol * 2, deltaRow * 2 };
-
-			// Make sure center is in bounds
-			webCenter.x =
-				std::max(0, std::min(webCenter.x, ctx.map->get_width() - 1));
-			webCenter.y =
-				std::max(0, std::min(webCenter.y, ctx.map->get_height() - 1));
-		}
-	}
-
-	// Generate the web pattern - now creating actual Web entities
-	generate_web_entities(webCenter, webSize, ctx);
-
-	// Dramatic message about web creation
-	ctx.messageSystem->message(
-		ColorPairId::RED_YELLOW,
-		owner.actorData.name,
-		MessageCompletion::CONTINUED);
-	if (webSize >= WEB_MAX_SIZE - 1)
-	{
-		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			" creates a massive web network!",
-			MessageCompletion::FINISHED);
-	}
-	else
-	{
-		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			" spins a complex web structure!",
-			MessageCompletion::FINISHED);
-	}
-
-	// Mark this spider as having laid a web - now using our own method
-	set_web_laid(true);
-
-	return true;
-}
-
-// Helper method to check if a position is valid for placing a web
-bool AiWebSpinner::is_valid_web_position(Vector2D pos, GameContext& ctx)
-{
-	assert(
-		ctx.spellTiles &&
-		"AiWebSpinner::is_valid_web_position: called without spellTiles");
-	assert(
-		ctx.map && "AiWebSpinner::is_valid_web_position: called without a map");
-
-	// Check bounds
-	if (pos.y < 0 || pos.y >= ctx.map->get_height() || pos.x < 0 ||
-		pos.x >= ctx.map->get_width())
-	{
-		return false;
-	}
-
-	// Check if the position is walkable
-	if (!ctx.map->is_unobstructed(pos, ctx))
-	{
-		return false;
-	}
-
-	// Don't place webs on occupied tiles
-	if (ctx.map->get_actor(pos, ctx) != nullptr)
-	{
-		return false;
-	}
-
-	// Check if there's already a spell tile at this position
-	for (const auto& spellTile : *ctx.spellTiles)
+	// Helper method to check if a position is valid for placing a web
+	bool AiWebSpinner::is_valid_web_position(Vector2D pos, GameContext& ctx)
 	{
 		assert(
-			spellTile &&
-			"is_valid_web_position: spellTiles holds a null entry");
-		if (!spellTile->is_destroyed() && spellTile->position == pos)
+			ctx.spellTiles &&
+			"AiWebSpinner::is_valid_web_position: called without spellTiles");
+		assert(
+			ctx.map &&
+			"AiWebSpinner::is_valid_web_position: called without a map");
+
+		// Check bounds
+		if (pos.y < 0 || pos.y >= ctx.map->get_height() || pos.x < 0 ||
+			pos.x >= ctx.map->get_width())
 		{
 			return false;
 		}
+
+		// Check if the position is walkable
+		if (!ctx.map->is_unobstructed(pos, ctx))
+		{
+			return false;
+		}
+
+		// Don't place webs on occupied tiles
+		if (ctx.map->get_actor(pos, ctx) != nullptr)
+		{
+			return false;
+		}
+
+		// Check if there's already a spell tile at this position
+		for (const auto& spellTile : *ctx.spellTiles)
+		{
+			assert(
+				spellTile &&
+				"is_valid_web_position: spellTiles holds a null entry");
+			if (!spellTile->is_destroyed() && spellTile->position == pos)
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
-	return true;
-}
-
-void AiWebSpinner::generate_web_entities(
-	Vector2D center,
-	int size,
-	GameContext& ctx)
-{
-	assert(
-		ctx.spellTiles &&
-		"AiWebSpinner::generate_web_entities: called without spellTiles");
-	assert(
-		ctx.tileConfig &&
-		"AiWebSpinner::generate_web_entities: called without a tileConfig");
-	assert(
-		ctx.dice && "AiWebSpinner::generate_web_entities: called without dice");
-
-	// Create a complex web pattern centered at the given position
-	// with size determining the radius/complexity
-
-	// Different web patterns
-	enum class WebPattern
+	void AiWebSpinner::generate_web_entities(
+		Vector2D center,
+		int size,
+		GameContext& ctx)
 	{
-		CIRCULAR,
-		SPIRAL,
-		RADIAL,
-		CHAOTIC
-	};
+		assert(
+			ctx.spellTiles &&
+			"AiWebSpinner::generate_web_entities: called without spellTiles");
+		assert(
+			ctx.tileConfig &&
+			"AiWebSpinner::generate_web_entities: called without a tileConfig");
+		assert(
+			ctx.dice &&
+			"AiWebSpinner::generate_web_entities: called without dice");
 
-	// Choose a random pattern
-	WebPattern pattern = static_cast<WebPattern>(ctx.dice->roll(0, 3));
+		// Create a complex web pattern centered at the given position
+		// with size determining the radius/complexity
 
-	// Track positions where we want to create webs
-	std::vector<Vector2D> webPositions;
-
-	switch (pattern)
-	{
-	case WebPattern::CIRCULAR:
-	{
-		// Create a circular/oval web
-		for (int offsetRow = -size; offsetRow <= size; offsetRow++)
+		// Different web patterns
+		enum class WebPattern
 		{
-			for (int offsetCol = -size; offsetCol <= size; offsetCol++)
-			{
+			CIRCULAR,
+			SPIRAL,
+			RADIAL,
+			CHAOTIC
+		};
 
-				float normalizedDist =
-					((float)(offsetCol * offsetCol) / (size * size)) +
-					((float)(offsetRow * offsetRow) / (size * size));
+		// Choose a random pattern
+		WebPattern pattern = static_cast<WebPattern>(ctx.dice->roll(0, 3));
 
-				// Create web with higher density near the edges
-				if (normalizedDist <= 1.0f &&
-					(normalizedDist >= 0.7f || ctx.dice->d100() < 40))
-				{
+		// Track positions where we want to create webs
+		std::vector<Vector2D> webPositions;
 
-					Vector2D pos = center + Vector2D{ offsetCol, offsetRow };
-					if (is_valid_web_position(pos, ctx))
-					{
-						webPositions.push_back(pos);
-					}
-				}
-			}
-		}
-		break;
-	}
-
-	case WebPattern::SPIRAL:
-		// Create a spiral pattern
+		switch (pattern)
 		{
-			float angle = 0.0f;
-			float radiusStep = (float)size / 20.0f;
-
-			for (int spiralStep = 0; spiralStep < 20 * size; spiralStep++)
-			{
-				float radius = radiusStep * spiralStep;
-				if (radius > size)
-				{
-					break;
-				}
-
-				int col = center.x + (int)(radius * cos(angle));
-				int row = center.y + (int)(radius * sin(angle));
-
-				Vector2D pos{ col, row };
-				if (is_valid_web_position(pos, ctx))
-				{
-					webPositions.push_back(pos);
-				}
-
-				angle += 0.5f;
-
-				// Add some random offshoots from the spiral
-				if (ctx.dice->d100() < 30)
-				{
-					for (int offshoot = 1; offshoot <= 3; offshoot++)
-					{
-						int offX = col + ctx.dice->roll(-1, 1);
-						int offY = row + ctx.dice->roll(-1, 1);
-
-						Vector2D offPos{ offX, offY };
-						if (is_valid_web_position(offPos, ctx))
-						{
-							webPositions.push_back(offPos);
-						}
-					}
-				}
-			}
-		}
-		break;
-
-	case WebPattern::RADIAL:
-		// Create a radial web with spokes and connecting threads
+		case WebPattern::CIRCULAR:
 		{
-			// First create the spokes
-			int numSpokes = 6 + ctx.dice->roll(0, 4); // 6-10 spokes
-
-			for (int spokeIndex = 0; spokeIndex < numSpokes; spokeIndex++)
+			// Create a circular/oval web
+			for (int offsetRow = -size; offsetRow <= size; offsetRow++)
 			{
-				float angle = static_cast<float>(spokeIndex) *
-					(2.0f * 3.14159f / numSpokes);
-
-				for (int dist = 1; dist <= size; dist++)
+				for (int offsetCol = -size; offsetCol <= size; offsetCol++)
 				{
-					int col = center.x + (int)(dist * cos(angle));
-					int row = center.y + (int)(dist * sin(angle));
 
-					Vector2D pos{ col, row };
-					if (is_valid_web_position(pos, ctx))
+					float normalizedDist =
+						((float)(offsetCol * offsetCol) / (size * size)) +
+						((float)(offsetRow * offsetRow) / (size * size));
+
+					// Create web with higher density near the edges
+					if (normalizedDist <= 1.0f &&
+						(normalizedDist >= 0.7f || ctx.dice->d100() < 40))
 					{
-						webPositions.push_back(pos);
-					}
-				}
-			}
 
-			// Now create concentric circles connecting the spokes
-			for (int radius = 1; radius <= size; radius += 1 + (size / 5))
-			{
-				for (float angle = 0; angle < 2.0f * 3.14159f; angle += 0.2f)
-				{
-					int col = center.x + (int)(radius * cos(angle));
-					int row = center.y + (int)(radius * sin(angle));
-
-					Vector2D pos{ col, row };
-					if (is_valid_web_position(pos, ctx))
-					{
-						webPositions.push_back(pos);
-					}
-				}
-			}
-		}
-		break;
-
-	case WebPattern::CHAOTIC:
-		// Create a chaotic, asymmetric web
-		{
-			// Start with a dense center
-			for (int offsetRow = -2; offsetRow <= 2; offsetRow++)
-			{
-				for (int offsetCol = -2; offsetCol <= 2; offsetCol++)
-				{
-					if (abs(offsetCol) + abs(offsetRow) <= 3)
-					{
 						Vector2D pos =
 							center + Vector2D{ offsetCol, offsetRow };
 						if (is_valid_web_position(pos, ctx))
@@ -511,88 +422,199 @@ void AiWebSpinner::generate_web_entities(
 					}
 				}
 			}
+			break;
+		}
 
-			// Then create random strands extending outward
-			for (int strand = 0; strand < 8 + ctx.dice->roll(0, 7); strand++)
+		case WebPattern::SPIRAL:
+			// Create a spiral pattern
 			{
-				Vector2D strandPos = center;
-				int strandLength = ctx.dice->roll(3, size);
+				float angle = 0.0f;
+				float radiusStep = (float)size / 20.0f;
 
-				for (int step = 0; step < strandLength; step++)
+				for (int spiralStep = 0; spiralStep < 20 * size; spiralStep++)
 				{
-					// Random direction but with bias toward continuing current direction
-					int deltaCol = ctx.dice->roll(-1, 1);
-					int deltaRow = ctx.dice->roll(-1, 1);
-
-					strandPos.x += deltaCol;
-					strandPos.y += deltaRow;
-
-					if (is_valid_web_position(strandPos, ctx))
+					float radius = radiusStep * spiralStep;
+					if (radius > size)
 					{
-						webPositions.push_back(strandPos);
-					}
-					else
-					{
-						break; // Hit a wall or invalid position
+						break;
 					}
 
-					// Occasionally branch the strand
+					int col = center.x + (int)(radius * cos(angle));
+					int row = center.y + (int)(radius * sin(angle));
+
+					Vector2D pos{ col, row };
+					if (is_valid_web_position(pos, ctx))
+					{
+						webPositions.push_back(pos);
+					}
+
+					angle += 0.5f;
+
+					// Add some random offshoots from the spiral
 					if (ctx.dice->d100() < 30)
 					{
-						Vector2D branchPos = strandPos;
-						int branchLength = ctx.dice->roll(2, 4);
-
-						for (int bStep = 0; bStep < branchLength; bStep++)
+						for (int offshoot = 1; offshoot <= 3; offshoot++)
 						{
-							branchPos.x += ctx.dice->roll(-1, 1);
-							branchPos.y += ctx.dice->roll(-1, 1);
+							int offX = col + ctx.dice->roll(-1, 1);
+							int offY = row + ctx.dice->roll(-1, 1);
 
-							if (is_valid_web_position(branchPos, ctx))
+							Vector2D offPos{ offX, offY };
+							if (is_valid_web_position(offPos, ctx))
 							{
-								webPositions.push_back(branchPos);
-							}
-							else
-							{
-								break;
+								webPositions.push_back(offPos);
 							}
 						}
 					}
 				}
 			}
-		}
-		break;
-	}
+			break;
 
-	// Create Web entities at these positions
-	for (const auto& pos : webPositions)
-	{
-		// Set variable web strength
-		int webStrength = WEB_STRENGTH;
-		if (ctx.dice->d100() < 25)
+		case WebPattern::RADIAL:
+			// Create a radial web with spokes and connecting threads
+			{
+				// First create the spokes
+				int numSpokes = 6 + ctx.dice->roll(0, 4); // 6-10 spokes
+
+				for (int spokeIndex = 0; spokeIndex < numSpokes; spokeIndex++)
+				{
+					float angle = static_cast<float>(spokeIndex) *
+						(2.0f * 3.14159f / numSpokes);
+
+					for (int dist = 1; dist <= size; dist++)
+					{
+						int col = center.x + (int)(dist * cos(angle));
+						int row = center.y + (int)(dist * sin(angle));
+
+						Vector2D pos{ col, row };
+						if (is_valid_web_position(pos, ctx))
+						{
+							webPositions.push_back(pos);
+						}
+					}
+				}
+
+				// Now create concentric circles connecting the spokes
+				for (int radius = 1; radius <= size; radius += 1 + (size / 5))
+				{
+					for (
+						float angle = 0; angle < 2.0f * 3.14159f; angle += 0.2f)
+					{
+						int col = center.x + (int)(radius * cos(angle));
+						int row = center.y + (int)(radius * sin(angle));
+
+						Vector2D pos{ col, row };
+						if (is_valid_web_position(pos, ctx))
+						{
+							webPositions.push_back(pos);
+						}
+					}
+				}
+			}
+			break;
+
+		case WebPattern::CHAOTIC:
+			// Create a chaotic, asymmetric web
+			{
+				// Start with a dense center
+				for (int offsetRow = -2; offsetRow <= 2; offsetRow++)
+				{
+					for (int offsetCol = -2; offsetCol <= 2; offsetCol++)
+					{
+						if (abs(offsetCol) + abs(offsetRow) <= 3)
+						{
+							Vector2D pos =
+								center + Vector2D{ offsetCol, offsetRow };
+							if (is_valid_web_position(pos, ctx))
+							{
+								webPositions.push_back(pos);
+							}
+						}
+					}
+				}
+
+				// Then create random strands extending outward
+				for (
+					int strand = 0; strand < 8 + ctx.dice->roll(0, 7); strand++)
+				{
+					Vector2D strandPos = center;
+					int strandLength = ctx.dice->roll(3, size);
+
+					for (int step = 0; step < strandLength; step++)
+					{
+						// Random direction but with bias toward continuing
+						// current direction
+						int deltaCol = ctx.dice->roll(-1, 1);
+						int deltaRow = ctx.dice->roll(-1, 1);
+
+						strandPos.x += deltaCol;
+						strandPos.y += deltaRow;
+
+						if (is_valid_web_position(strandPos, ctx))
+						{
+							webPositions.push_back(strandPos);
+						}
+						else
+						{
+							break; // Hit a wall or invalid position
+						}
+
+						// Occasionally branch the strand
+						if (ctx.dice->d100() < 30)
+						{
+							Vector2D branchPos = strandPos;
+							int branchLength = ctx.dice->roll(2, 4);
+
+							for (int bStep = 0; bStep < branchLength; bStep++)
+							{
+								branchPos.x += ctx.dice->roll(-1, 1);
+								branchPos.y += ctx.dice->roll(-1, 1);
+
+								if (is_valid_web_position(branchPos, ctx))
+								{
+									webPositions.push_back(branchPos);
+								}
+								else
+								{
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+			break;
+		}
+
+		// Create Web entities at these positions
+		for (const auto& pos : webPositions)
 		{
-			// Some webs are stronger or weaker
-			webStrength += ctx.dice->roll(-1, 2);
+			// Set variable web strength
+			int webStrength = WEB_STRENGTH;
+			if (ctx.dice->d100() < 25)
+			{
+				// Some webs are stronger or weaker
+				webStrength += ctx.dice->roll(-1, 2);
+			}
+
+			// Create a new Web entity
+			auto web = std::make_unique<Web>(pos, webStrength, *ctx.tileConfig);
+			ctx.spellTiles->emplace_back(std::move(web));
 		}
-
-		// Create a new Web entity
-		auto web = std::make_unique<Web>(pos, webStrength, *ctx.tileConfig);
-		ctx.spellTiles->emplace_back(std::move(web));
 	}
-}
 
-void AiWebSpinner::load(const json& source)
-{
-	AiSpider::load(source);
+	void AiWebSpinner::load(const json& source)
+	{
+		AiSpider::load(source);
 
-	// Load AiWebSpinner specific data
-	webReadyTime = source.at("webReadyTime").get<int>();
-}
+		// Load AiWebSpinner specific data
+		webReadyTime = source.at("webReadyTime").get<int>();
+	}
 
-void AiWebSpinner::save(json& output)
-{
-	AiSpider::save(output);
+	void AiWebSpinner::save(json& output)
+	{
+		AiSpider::save(output);
 
-	output["webReadyTime"] = webReadyTime;
-}
+		output["webReadyTime"] = webReadyTime;
+	}
 
 } // namespace CppRL

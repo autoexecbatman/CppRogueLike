@@ -27,291 +27,314 @@
 namespace CppRL
 {
 
-// ============================================================================
-// TEST FIXTURE: EquipmentStatBonusTest
-// ============================================================================
+	// =========================================================================
+	// TEST FIXTURE: EquipmentStatBonusTest
+	// =========================================================================
 
-class EquipmentStatBonusTest : public ::testing::Test
-{
-protected:
-	MockGameContext mock;
-	GameContext ctx;
-	DataManager data_manager;
-	std::unique_ptr<Player> player;
-
-	void SetUp() override
+	class EquipmentStatBonusTest : public ::testing::Test
 	{
-		data_manager.load_all_data(mock.messages);
+	protected:
+		MockGameContext mock;
+		GameContext ctx;
+		DataManager data_manager;
+		std::unique_ptr<Player> player;
 
-		player = std::make_unique<Player>(Vector2D{ 0, 0 });
-		player->experienceReward = std::make_unique<ExperienceReward>(0);
-		player->set_dr(5);
-		player->set_thaco(20);
-		player->armorClass = std::make_unique<ArmorClass>(10);
-		player->healthPool = std::make_unique<HealthPool>(100);
+		void SetUp() override
+		{
+			data_manager.load_all_data(mock.messages);
 
-		ctx = mock.to_game_context();
-		ctx.playerOwner = &player;
+			player = std::make_unique<Player>(Vector2D{ 0, 0 });
+			player->experienceReward = std::make_unique<ExperienceReward>(0);
+			player->set_dr(5);
+			player->set_thaco(20);
+			player->armorClass = std::make_unique<ArmorClass>(10);
+			player->healthPool = std::make_unique<HealthPool>(100);
+
+			ctx = mock.to_game_context();
+			ctx.playerOwner = &player;
+		}
+
+		std::unique_ptr<Item> create_item_with_strength_bonus(int bonus)
+		{
+			auto item = std::make_unique<Item>(Vector2D{}, ActorData{});
+			item->actorData.name =
+				"Test Item +" + std::to_string(bonus) + " STR";
+			item->actorData.tile = TileRef{};
+			item->enhancement.strengthBonus = bonus;
+			// A key the damage table has a row for: a weapon built without one
+			// looks armed and does a fist's damage, which no case here would
+			// notice.
+			item->itemKey = "long_sword";
+			item->itemClass = ItemClass::SWORD;
+			item->behavior = Weapon{};
+			return item;
+		}
+
+		std::unique_ptr<Item> create_item_with_dexterity_bonus(int bonus)
+		{
+			auto item = std::make_unique<Item>(Vector2D{}, ActorData{});
+			item->actorData.name =
+				"Test Item +" + std::to_string(bonus) + " DEX";
+			item->actorData.tile = TileRef{};
+			item->enhancement.dexterityBonus = bonus;
+			// A key the damage table has a row for: a weapon built without one
+			// looks armed and does a fist's damage, which no case here would
+			// notice.
+			item->itemKey = "long_sword";
+			item->itemClass = ItemClass::SWORD;
+			item->behavior = Weapon{};
+			return item;
+		}
+
+		std::unique_ptr<Item> create_item_with_both_bonuses(
+			int str_bonus,
+			int dex_bonus)
+		{
+			auto item = std::make_unique<Item>(Vector2D{}, ActorData{});
+			item->actorData.name = "Test Item +" + std::to_string(str_bonus) +
+				" STR +" + std::to_string(dex_bonus) + " DEX";
+			item->actorData.tile = TileRef{};
+			item->enhancement.strengthBonus = str_bonus;
+			item->enhancement.dexterityBonus = dex_bonus;
+			// A key the damage table has a row for: a weapon built without one
+			// looks armed and does a fist's damage, which no case here would
+			// notice.
+			item->itemKey = "long_sword";
+			item->itemClass = ItemClass::SWORD;
+			item->behavior = Weapon{};
+			return item;
+		}
+
+		std::unique_ptr<Item> create_amulet_with_bonus(
+			int str_bonus,
+			int dex_bonus)
+		{
+			auto item = std::make_unique<Item>(Vector2D{}, ActorData{});
+			item->actorData.name = "Test Amulet";
+			item->actorData.tile = TileRef{};
+			item->itemClass = ItemClass::AMULET;
+			JewelryAmulet amulet;
+			amulet.strBonus = str_bonus;
+			amulet.dexBonus = dex_bonus;
+			amulet.application = BuffApplication::ADD;
+			item->behavior = amulet;
+			return item;
+		}
+	};
+
+	// =========================================================================
+	// ItemEnhancement Stat Bonuses (from items.json)
+	// =========================================================================
+
+	TEST_F(
+		EquipmentStatBonusTest,
+		EquipItem_WithStrengthBonus_IncreasesStrength)
+	{
+		int original_str = player->get_strength();
+		auto item = create_item_with_strength_bonus(2);
+
+		player->equip_item(std::move(item), EquipmentSlot::RIGHT_HAND, ctx);
+
+		EXPECT_EQ(player->get_strength(), original_str + 2);
 	}
 
-	std::unique_ptr<Item> create_item_with_strength_bonus(int bonus)
+	TEST_F(
+		EquipmentStatBonusTest,
+		UnequipItem_WithStrengthBonus_DecreasesStrength)
 	{
-		auto item = std::make_unique<Item>(Vector2D{}, ActorData{});
-		item->actorData.name = "Test Item +" + std::to_string(bonus) + " STR";
-		item->actorData.tile = TileRef{};
-		item->enhancement.strengthBonus = bonus;
-		// A key the damage table has a row for: a weapon built without one looks armed
-		// and does a fist's damage, which no case here would notice.
-		item->itemKey = "long_sword";
-		item->itemClass = ItemClass::SWORD;
-		item->behavior = Weapon{};
-		return item;
+		int original_str = player->get_strength();
+		auto item = create_item_with_strength_bonus(3);
+
+		player->equip_item(std::move(item), EquipmentSlot::RIGHT_HAND, ctx);
+		int boosted_str = player->get_strength();
+		EXPECT_EQ(boosted_str, original_str + 3);
+
+		player->unequip_item(EquipmentSlot::RIGHT_HAND, ctx);
+
+		EXPECT_EQ(player->get_strength(), original_str);
 	}
 
-	std::unique_ptr<Item> create_item_with_dexterity_bonus(int bonus)
+	TEST_F(
+		EquipmentStatBonusTest,
+		EquipItem_WithDexterityBonus_IncreaseDexterity)
 	{
-		auto item = std::make_unique<Item>(Vector2D{}, ActorData{});
-		item->actorData.name = "Test Item +" + std::to_string(bonus) + " DEX";
-		item->actorData.tile = TileRef{};
-		item->enhancement.dexterityBonus = bonus;
-		// A key the damage table has a row for: a weapon built without one looks armed
-		// and does a fist's damage, which no case here would notice.
-		item->itemKey = "long_sword";
-		item->itemClass = ItemClass::SWORD;
-		item->behavior = Weapon{};
-		return item;
+		int original_dex = player->get_dexterity();
+		auto item = create_item_with_dexterity_bonus(2);
+
+		player->equip_item(std::move(item), EquipmentSlot::RIGHT_HAND, ctx);
+
+		EXPECT_EQ(player->get_dexterity(), original_dex + 2);
 	}
 
-	std::unique_ptr<Item> create_item_with_both_bonuses(
-		int str_bonus,
-		int dex_bonus)
+	TEST_F(
+		EquipmentStatBonusTest,
+		UnequipItem_WithDexterityBonus_DecreaseDexterity)
 	{
-		auto item = std::make_unique<Item>(Vector2D{}, ActorData{});
-		item->actorData.name = "Test Item +" + std::to_string(str_bonus) +
-			" STR +" + std::to_string(dex_bonus) + " DEX";
-		item->actorData.tile = TileRef{};
-		item->enhancement.strengthBonus = str_bonus;
-		item->enhancement.dexterityBonus = dex_bonus;
-		// A key the damage table has a row for: a weapon built without one looks armed
-		// and does a fist's damage, which no case here would notice.
-		item->itemKey = "long_sword";
-		item->itemClass = ItemClass::SWORD;
-		item->behavior = Weapon{};
-		return item;
+		int original_dex = player->get_dexterity();
+		auto item = create_item_with_dexterity_bonus(2);
+
+		player->equip_item(std::move(item), EquipmentSlot::RIGHT_HAND, ctx);
+		int boosted_dex = player->get_dexterity();
+		EXPECT_EQ(boosted_dex, original_dex + 2);
+
+		player->unequip_item(EquipmentSlot::RIGHT_HAND, ctx);
+
+		EXPECT_EQ(player->get_dexterity(), original_dex);
 	}
 
-	std::unique_ptr<Item> create_amulet_with_bonus(int str_bonus, int dex_bonus)
+	TEST_F(EquipmentStatBonusTest, EquipItem_WithBothBonuses_AppliesBoth)
 	{
-		auto item = std::make_unique<Item>(Vector2D{}, ActorData{});
-		item->actorData.name = "Test Amulet";
-		item->actorData.tile = TileRef{};
-		item->itemClass = ItemClass::AMULET;
-		JewelryAmulet amulet;
-		amulet.strBonus = str_bonus;
-		amulet.dexBonus = dex_bonus;
-		amulet.application = BuffApplication::ADD;
-		item->behavior = amulet;
-		return item;
+		int original_str = player->get_strength();
+		int original_dex = player->get_dexterity();
+		auto item = create_item_with_both_bonuses(2, 1);
+
+		player->equip_item(std::move(item), EquipmentSlot::RIGHT_HAND, ctx);
+
+		EXPECT_EQ(player->get_strength(), original_str + 2);
+		EXPECT_EQ(player->get_dexterity(), original_dex + 1);
 	}
-};
 
-// ============================================================================
-// ItemEnhancement Stat Bonuses (from items.json)
-// ============================================================================
+	TEST_F(
+		EquipmentStatBonusTest,
+		EquipItem_WithNegativeBonus_DecreasesAttribute)
+	{
+		int original_str = player->get_strength();
+		auto item = create_item_with_strength_bonus(-1); // Cursed item
 
-TEST_F(EquipmentStatBonusTest, EquipItem_WithStrengthBonus_IncreasesStrength)
-{
-	int original_str = player->get_strength();
-	auto item = create_item_with_strength_bonus(2);
+		player->equip_item(std::move(item), EquipmentSlot::RIGHT_HAND, ctx);
 
-	player->equip_item(std::move(item), EquipmentSlot::RIGHT_HAND, ctx);
+		EXPECT_EQ(player->get_strength(), original_str - 1);
+	}
 
-	EXPECT_EQ(player->get_strength(), original_str + 2);
-}
+	TEST_F(EquipmentStatBonusTest, EquipAndUnequip_RestoredToOriginal)
+	{
+		int original_str = player->get_strength();
+		int original_dex = player->get_dexterity();
+		auto item = create_item_with_both_bonuses(3, 2);
 
-TEST_F(EquipmentStatBonusTest, UnequipItem_WithStrengthBonus_DecreasesStrength)
-{
-	int original_str = player->get_strength();
-	auto item = create_item_with_strength_bonus(3);
+		player->equip_item(std::move(item), EquipmentSlot::RIGHT_HAND, ctx);
+		EXPECT_EQ(player->get_strength(), original_str + 3);
+		EXPECT_EQ(player->get_dexterity(), original_dex + 2);
 
-	player->equip_item(std::move(item), EquipmentSlot::RIGHT_HAND, ctx);
-	int boosted_str = player->get_strength();
-	EXPECT_EQ(boosted_str, original_str + 3);
+		player->unequip_item(EquipmentSlot::RIGHT_HAND, ctx);
 
-	player->unequip_item(EquipmentSlot::RIGHT_HAND, ctx);
+		EXPECT_EQ(player->get_strength(), original_str);
+		EXPECT_EQ(player->get_dexterity(), original_dex);
+	}
 
-	EXPECT_EQ(player->get_strength(), original_str);
-}
+	// =========================================================================
+	// Behavior-based Stat Bonuses (JewelryAmulet, Gauntlets, Girdle)
+	// =========================================================================
 
-TEST_F(EquipmentStatBonusTest, EquipItem_WithDexterityBonus_IncreaseDexterity)
-{
-	int original_dex = player->get_dexterity();
-	auto item = create_item_with_dexterity_bonus(2);
+	TEST_F(
+		EquipmentStatBonusTest,
+		EquipAmulet_WithStrengthBonus_IncreasesStrength)
+	{
+		int original_str = player->get_strength();
+		auto item = create_amulet_with_bonus(2, 0);
 
-	player->equip_item(std::move(item), EquipmentSlot::RIGHT_HAND, ctx);
+		player->equip_item(std::move(item), EquipmentSlot::NECK, ctx);
 
-	EXPECT_EQ(player->get_dexterity(), original_dex + 2);
-}
+		EXPECT_EQ(player->get_strength(), original_str + 2);
+	}
 
-TEST_F(EquipmentStatBonusTest, UnequipItem_WithDexterityBonus_DecreaseDexterity)
-{
-	int original_dex = player->get_dexterity();
-	auto item = create_item_with_dexterity_bonus(2);
+	TEST_F(
+		EquipmentStatBonusTest,
+		EquipAmulet_WithDexterityBonus_IncreaseDexterity)
+	{
+		int original_dex = player->get_dexterity();
+		auto item = create_amulet_with_bonus(0, 1);
 
-	player->equip_item(std::move(item), EquipmentSlot::RIGHT_HAND, ctx);
-	int boosted_dex = player->get_dexterity();
-	EXPECT_EQ(boosted_dex, original_dex + 2);
+		player->equip_item(std::move(item), EquipmentSlot::NECK, ctx);
 
-	player->unequip_item(EquipmentSlot::RIGHT_HAND, ctx);
+		EXPECT_EQ(player->get_dexterity(), original_dex + 1);
+	}
 
-	EXPECT_EQ(player->get_dexterity(), original_dex);
-}
+	TEST_F(EquipmentStatBonusTest, EquipAmulet_WithBothBonuses_AppliesBoth)
+	{
+		int original_str = player->get_strength();
+		int original_dex = player->get_dexterity();
+		auto item = create_amulet_with_bonus(1, 2);
 
-TEST_F(EquipmentStatBonusTest, EquipItem_WithBothBonuses_AppliesBoth)
-{
-	int original_str = player->get_strength();
-	int original_dex = player->get_dexterity();
-	auto item = create_item_with_both_bonuses(2, 1);
+		player->equip_item(std::move(item), EquipmentSlot::NECK, ctx);
 
-	player->equip_item(std::move(item), EquipmentSlot::RIGHT_HAND, ctx);
+		EXPECT_EQ(player->get_strength(), original_str + 1);
+		EXPECT_EQ(player->get_dexterity(), original_dex + 2);
+	}
 
-	EXPECT_EQ(player->get_strength(), original_str + 2);
-	EXPECT_EQ(player->get_dexterity(), original_dex + 1);
-}
+	TEST_F(
+		EquipmentStatBonusTest,
+		UnequipAmulet_WithBonus_RestoresOriginalStats)
+	{
+		int original_str = player->get_strength();
+		auto item = create_amulet_with_bonus(3, 0);
 
-TEST_F(EquipmentStatBonusTest, EquipItem_WithNegativeBonus_DecreasesAttribute)
-{
-	int original_str = player->get_strength();
-	auto item = create_item_with_strength_bonus(-1); // Cursed item
+		player->equip_item(std::move(item), EquipmentSlot::NECK, ctx);
+		EXPECT_EQ(player->get_strength(), original_str + 3);
 
-	player->equip_item(std::move(item), EquipmentSlot::RIGHT_HAND, ctx);
+		player->unequip_item(EquipmentSlot::NECK, ctx);
 
-	EXPECT_EQ(player->get_strength(), original_str - 1);
-}
+		EXPECT_EQ(player->get_strength(), original_str);
+	}
 
-TEST_F(EquipmentStatBonusTest, EquipAndUnequip_RestoredToOriginal)
-{
-	int original_str = player->get_strength();
-	int original_dex = player->get_dexterity();
-	auto item = create_item_with_both_bonuses(3, 2);
+	// =========================================================================
+	// Edge Cases
+	// =========================================================================
 
-	player->equip_item(std::move(item), EquipmentSlot::RIGHT_HAND, ctx);
-	EXPECT_EQ(player->get_strength(), original_str + 3);
-	EXPECT_EQ(player->get_dexterity(), original_dex + 2);
+	TEST_F(EquipmentStatBonusTest, EquipItem_WithZeroBonus_NoChange)
+	{
+		int original_str = player->get_strength();
+		auto item = create_item_with_strength_bonus(0);
 
-	player->unequip_item(EquipmentSlot::RIGHT_HAND, ctx);
+		player->equip_item(std::move(item), EquipmentSlot::RIGHT_HAND, ctx);
 
-	EXPECT_EQ(player->get_strength(), original_str);
-	EXPECT_EQ(player->get_dexterity(), original_dex);
-}
+		EXPECT_EQ(player->get_strength(), original_str);
+	}
 
-// ============================================================================
-// Behavior-based Stat Bonuses (JewelryAmulet, Gauntlets, Girdle)
-// ============================================================================
+	TEST_F(EquipmentStatBonusTest, EquipMultipleItems_BonusesStack)
+	{
+		int original_str = player->get_strength();
+		auto item1 = create_item_with_strength_bonus(2);
+		auto item2 = create_item_with_strength_bonus(1);
 
-TEST_F(EquipmentStatBonusTest, EquipAmulet_WithStrengthBonus_IncreasesStrength)
-{
-	int original_str = player->get_strength();
-	auto item = create_amulet_with_bonus(2, 0);
+		player->equip_item(std::move(item1), EquipmentSlot::RIGHT_HAND, ctx);
+		player->equip_item(std::move(item2), EquipmentSlot::LEFT_HAND, ctx);
 
-	player->equip_item(std::move(item), EquipmentSlot::NECK, ctx);
+		EXPECT_EQ(player->get_strength(), original_str + 3);
+	}
 
-	EXPECT_EQ(player->get_strength(), original_str + 2);
-}
+	TEST_F(EquipmentStatBonusTest, UnequipOneOfTwoItems_RemovesOnlyOne)
+	{
+		int original_str = player->get_strength();
+		auto item1 = create_item_with_strength_bonus(2);
+		auto item2 = create_item_with_strength_bonus(1);
 
-TEST_F(EquipmentStatBonusTest, EquipAmulet_WithDexterityBonus_IncreaseDexterity)
-{
-	int original_dex = player->get_dexterity();
-	auto item = create_amulet_with_bonus(0, 1);
+		player->equip_item(std::move(item1), EquipmentSlot::RIGHT_HAND, ctx);
+		player->equip_item(std::move(item2), EquipmentSlot::LEFT_HAND, ctx);
 
-	player->equip_item(std::move(item), EquipmentSlot::NECK, ctx);
+		player->unequip_item(EquipmentSlot::RIGHT_HAND, ctx);
 
-	EXPECT_EQ(player->get_dexterity(), original_dex + 1);
-}
+		EXPECT_EQ(player->get_strength(), original_str + 1);
+	}
 
-TEST_F(EquipmentStatBonusTest, EquipAmulet_WithBothBonuses_AppliesBoth)
-{
-	int original_str = player->get_strength();
-	int original_dex = player->get_dexterity();
-	auto item = create_amulet_with_bonus(1, 2);
+	TEST_F(EquipmentStatBonusTest, LargePositiveBonus_Applied)
+	{
+		int original_str = player->get_strength();
+		auto item = create_item_with_strength_bonus(10);
 
-	player->equip_item(std::move(item), EquipmentSlot::NECK, ctx);
+		player->equip_item(std::move(item), EquipmentSlot::RIGHT_HAND, ctx);
 
-	EXPECT_EQ(player->get_strength(), original_str + 1);
-	EXPECT_EQ(player->get_dexterity(), original_dex + 2);
-}
+		EXPECT_EQ(player->get_strength(), original_str + 10);
+	}
 
-TEST_F(EquipmentStatBonusTest, UnequipAmulet_WithBonus_RestoresOriginalStats)
-{
-	int original_str = player->get_strength();
-	auto item = create_amulet_with_bonus(3, 0);
+	TEST_F(EquipmentStatBonusTest, LargeNegativeBonus_Applied)
+	{
+		int original_str = player->get_strength();
+		auto item = create_item_with_strength_bonus(-5);
 
-	player->equip_item(std::move(item), EquipmentSlot::NECK, ctx);
-	EXPECT_EQ(player->get_strength(), original_str + 3);
+		player->equip_item(std::move(item), EquipmentSlot::RIGHT_HAND, ctx);
 
-	player->unequip_item(EquipmentSlot::NECK, ctx);
-
-	EXPECT_EQ(player->get_strength(), original_str);
-}
-
-// ============================================================================
-// Edge Cases
-// ============================================================================
-
-TEST_F(EquipmentStatBonusTest, EquipItem_WithZeroBonus_NoChange)
-{
-	int original_str = player->get_strength();
-	auto item = create_item_with_strength_bonus(0);
-
-	player->equip_item(std::move(item), EquipmentSlot::RIGHT_HAND, ctx);
-
-	EXPECT_EQ(player->get_strength(), original_str);
-}
-
-TEST_F(EquipmentStatBonusTest, EquipMultipleItems_BonusesStack)
-{
-	int original_str = player->get_strength();
-	auto item1 = create_item_with_strength_bonus(2);
-	auto item2 = create_item_with_strength_bonus(1);
-
-	player->equip_item(std::move(item1), EquipmentSlot::RIGHT_HAND, ctx);
-	player->equip_item(std::move(item2), EquipmentSlot::LEFT_HAND, ctx);
-
-	EXPECT_EQ(player->get_strength(), original_str + 3);
-}
-
-TEST_F(EquipmentStatBonusTest, UnequipOneOfTwoItems_RemovesOnlyOne)
-{
-	int original_str = player->get_strength();
-	auto item1 = create_item_with_strength_bonus(2);
-	auto item2 = create_item_with_strength_bonus(1);
-
-	player->equip_item(std::move(item1), EquipmentSlot::RIGHT_HAND, ctx);
-	player->equip_item(std::move(item2), EquipmentSlot::LEFT_HAND, ctx);
-
-	player->unequip_item(EquipmentSlot::RIGHT_HAND, ctx);
-
-	EXPECT_EQ(player->get_strength(), original_str + 1);
-}
-
-TEST_F(EquipmentStatBonusTest, LargePositiveBonus_Applied)
-{
-	int original_str = player->get_strength();
-	auto item = create_item_with_strength_bonus(10);
-
-	player->equip_item(std::move(item), EquipmentSlot::RIGHT_HAND, ctx);
-
-	EXPECT_EQ(player->get_strength(), original_str + 10);
-}
-
-TEST_F(EquipmentStatBonusTest, LargeNegativeBonus_Applied)
-{
-	int original_str = player->get_strength();
-	auto item = create_item_with_strength_bonus(-5);
-
-	player->equip_item(std::move(item), EquipmentSlot::RIGHT_HAND, ctx);
-
-	EXPECT_EQ(player->get_strength(), original_str - 5);
-}
+		EXPECT_EQ(player->get_strength(), original_str - 5);
+	}
 
 } // namespace CppRL

@@ -27,8 +27,8 @@
         },
         {
             "file": "src/Pickable.h",
-            "original": "\t\tthrow std::runtime_error(\n\t\t\tstd::format(\"unknown pickable_type '{}'\", name));",
-            "mutated": "\t\treturn PickableType::WEAPON;",
+            "original": "\t\t\tthrow std::runtime_error(\n\t\t\t\tstd::format(\"unknown pickable_type '{}'\", name));",
+            "mutated": "\t\t\treturn PickableType::WEAPON;",
             "catches": "an unknown type read as a weapon in silence"
         },
         {
@@ -45,8 +45,8 @@
         },
         {
             "file": "src/ItemCreator.cpp",
-            "original": "\t\tcase PickableType::CORPSE_FOOD:\n\t\t{\n\t\t\tthrow std::runtime_error(\n\t\t\t\tstd::format(\n\t\t\t\t\t\"ItemCreator: unhandled pickable_type {}\",\n\t\t\t\t\tencode_pickable_type(params.pickableType)));\n\t\t}",
-            "mutated": "\t\tcase PickableType::CORPSE_FOOD:\n\t\t{\n\t\t\treturn CorpseFood{};\n\t\t}",
+            "original": "\t\t\tcase PickableType::CORPSE_FOOD:\n\t\t\t{\n\t\t\t\tthrow std::runtime_error(\n\t\t\t\t\tstd::format(\n\t\t\t\t\t\t\"ItemCreator: unhandled pickable_type {}\",\n\t\t\t\t\t\tencode_pickable_type(params.pickableType)));\n\t\t\t}",
+            "mutated": "\t\t\tcase PickableType::CORPSE_FOOD:\n\t\t\t{\n\t\t\t\treturn CorpseFood{};\n\t\t\t}",
             "catches": "an item record naming a corpse built instead of refused"
         }
     ]

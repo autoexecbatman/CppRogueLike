@@ -27,115 +27,138 @@
 namespace CppRL
 {
 
-class ShopStockLevelTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	class ShopStockLevelTest : public ::testing::Test
 	{
-		ctx = mock.to_game_context();
-		ctx.levelManager = &levelManager;
-	}
-
-	// Three items, each the last armour candidate, none enhanced: the count roll,
-	// then per item a draw past any total weight and an enhancement roll of 100.
-	void force_three_last_candidates()
-	{
-		mock.dice.set_next_roll(3);
-		for (int item = 0; item < 3; ++item)
+	protected:
+		void SetUp() override
 		{
-			// The weighted draw's range is the running weight total, which differs per
-			// item, so the draw asks for the top of it by name rather than guessing a
-			// number above every total.
-			mock.dice.set_next_roll(RandomDice::HIGHEST);
-			mock.dice.set_next_roll(100);
+			ctx = mock.to_game_context();
+			ctx.levelManager = &levelManager;
 		}
-	}
 
-	std::vector<std::string> stocked_keys(const ShopKeeper& shop) const
-	{
-		std::vector<std::string> keys;
-		for (const auto& item : shop.get_shop_inventory().items)
+		// Three items, each the last armour candidate, none enhanced: the count
+		// roll, then per item a draw past any total weight and an enhancement
+		// roll of 100.
+		void force_three_last_candidates()
 		{
-			keys.push_back(item->itemKey);
+			mock.dice.set_next_roll(3);
+			for (int item = 0; item < 3; ++item)
+			{
+				// The weighted draw's range is the running weight total, which
+				// differs per item, so the draw asks for the top of it by name
+				// rather than guessing a number above every total.
+				mock.dice.set_next_roll(RandomDice::HIGHEST);
+				mock.dice.set_next_roll(100);
+			}
 		}
-		return keys;
+
+		std::vector<std::string> stocked_keys(const ShopKeeper& shop) const
+		{
+			std::vector<std::string> keys;
+			for (const auto& item : shop.get_shop_inventory().items)
+			{
+				keys.push_back(item->itemKey);
+			}
+			return keys;
+		}
+
+		MockGameContext mock{};
+		GameContext ctx{};
+		LevelManager levelManager{};
+	};
+
+	// Told level 20 while the context's manager still says 1, the shop stocks
+	// for 20.
+	TEST_F(ShopStockLevelTest, StocksForTheLevelItIsTold)
+	{
+		ASSERT_EQ(levelManager.get_dungeon_level(), 1)
+			<< "the manager must disagree with the level the shop is told";
+		ShopKeeper shop{
+			ShopType::ARMOR_SHOP,
+			ShopQuality::AVERAGE,
+			mock.dice,
+		};
+		force_three_last_candidates();
+
+		shop.generate_initial_inventory(20, ctx);
+
+		EXPECT_EQ(
+			stocked_keys(shop),
+			(std::vector<std::string>{
+				"splint_mail",
+				"splint_mail",
+				"splint_mail",
+			}))
+			<< "the stock was drawn at the manager's level, not the one the shop was told";
 	}
 
-	MockGameContext mock{};
-	GameContext ctx{};
-	LevelManager levelManager{};
-};
+	// Told level 1, it stocks for 1, whatever else the context holds.
+	TEST_F(ShopStockLevelTest, StocksForLevelOneWhenToldOne)
+	{
+		ShopKeeper shop{
+			ShopType::ARMOR_SHOP,
+			ShopQuality::AVERAGE,
+			mock.dice,
+		};
+		force_three_last_candidates();
 
-// Told level 20 while the context's manager still says 1, the shop stocks for 20.
-TEST_F(ShopStockLevelTest, StocksForTheLevelItIsTold)
-{
-	ASSERT_EQ(levelManager.get_dungeon_level(), 1)
-		<< "the manager must disagree with the level the shop is told";
-	ShopKeeper shop{ ShopType::ARMOR_SHOP, ShopQuality::AVERAGE, mock.dice };
-	force_three_last_candidates();
+		shop.generate_initial_inventory(1, ctx);
 
-	shop.generate_initial_inventory(20, ctx);
+		EXPECT_EQ(
+			stocked_keys(shop),
+			(std::vector<std::string>{
+				"studded_leather",
+				"studded_leather",
+				"studded_leather",
+			}));
+	}
 
-	EXPECT_EQ(
-		stocked_keys(shop),
-		(std::vector<std::string>{
-			"splint_mail",
-			"splint_mail",
-			"splint_mail",
-		}))
-		<< "the stock was drawn at the manager's level, not the one the shop was told";
-}
+	// Being told the level is the whole of it: no level manager is consulted.
+	TEST_F(ShopStockLevelTest, NeedsNoLevelManager)
+	{
+		ctx.levelManager = nullptr;
+		ShopKeeper shop{
+			ShopType::ARMOR_SHOP,
+			ShopQuality::AVERAGE,
+			mock.dice,
+		};
+		force_three_last_candidates();
 
-// Told level 1, it stocks for 1, whatever else the context holds.
-TEST_F(ShopStockLevelTest, StocksForLevelOneWhenToldOne)
-{
-	ShopKeeper shop{ ShopType::ARMOR_SHOP, ShopQuality::AVERAGE, mock.dice };
-	force_three_last_candidates();
+		shop.generate_initial_inventory(20, ctx);
 
-	shop.generate_initial_inventory(1, ctx);
+		EXPECT_EQ(stocked_keys(shop).size(), 3u);
+	}
 
-	EXPECT_EQ(
-		stocked_keys(shop),
-		(std::vector<std::string>{
-			"studded_leather",
-			"studded_leather",
-			"studded_leather",
-		}));
-}
+	// The level is used exactly, not nearly. Computed from the data: the last
+	// armour candidate is studded_leather when told 5 and splint_mail when told
+	// 6, so an off-by-one in either direction lands on the other side of that
+	// line.
+	TEST_F(ShopStockLevelTest, ToldBelowTheBoundaryStocksTheLowerCandidate)
+	{
+		ShopKeeper shop{
+			ShopType::ARMOR_SHOP,
+			ShopQuality::AVERAGE,
+			mock.dice,
+		};
+		force_three_last_candidates();
 
-// Being told the level is the whole of it: no level manager is consulted.
-TEST_F(ShopStockLevelTest, NeedsNoLevelManager)
-{
-	ctx.levelManager = nullptr;
-	ShopKeeper shop{ ShopType::ARMOR_SHOP, ShopQuality::AVERAGE, mock.dice };
-	force_three_last_candidates();
+		shop.generate_initial_inventory(5, ctx);
 
-	shop.generate_initial_inventory(20, ctx);
+		EXPECT_EQ(stocked_keys(shop).front(), "studded_leather");
+	}
 
-	EXPECT_EQ(stocked_keys(shop).size(), 3u);
-}
+	TEST_F(ShopStockLevelTest, ToldAtTheBoundaryStocksTheHigherCandidate)
+	{
+		ShopKeeper shop{
+			ShopType::ARMOR_SHOP,
+			ShopQuality::AVERAGE,
+			mock.dice,
+		};
+		force_three_last_candidates();
 
-// The level is used exactly, not nearly. Computed from the data: the last armour
-// candidate is studded_leather when told 5 and splint_mail when told 6, so an
-// off-by-one in either direction lands on the other side of that line.
-TEST_F(ShopStockLevelTest, ToldBelowTheBoundaryStocksTheLowerCandidate)
-{
-	ShopKeeper shop{ ShopType::ARMOR_SHOP, ShopQuality::AVERAGE, mock.dice };
-	force_three_last_candidates();
+		shop.generate_initial_inventory(6, ctx);
 
-	shop.generate_initial_inventory(5, ctx);
-
-	EXPECT_EQ(stocked_keys(shop).front(), "studded_leather");
-}
-
-TEST_F(ShopStockLevelTest, ToldAtTheBoundaryStocksTheHigherCandidate)
-{
-	ShopKeeper shop{ ShopType::ARMOR_SHOP, ShopQuality::AVERAGE, mock.dice };
-	force_three_last_candidates();
-
-	shop.generate_initial_inventory(6, ctx);
-
-	EXPECT_EQ(stocked_keys(shop).front(), "splint_mail");
-}
+		EXPECT_EQ(stocked_keys(shop).front(), "splint_mail");
+	}
 
 } // namespace CppRL

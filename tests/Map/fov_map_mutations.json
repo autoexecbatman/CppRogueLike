@@ -15,26 +15,26 @@
   "mutations": [
     {
       "file": "src/FovMap.cpp",
-      "original": "\tfor (auto& cell : cells)\n\t{\n\t\tcell.visible = false;\n\t}\n",
+      "original": "\t\tfor (auto& cell : cells)\n\t\t{\n\t\t\tcell.visible = false;\n\t\t}\n",
       "mutated": "",
       "catches": "a view that adds to the last one, so a creature keeps seeing rooms it walked out of"
     },
     {
       "file": "src/FovMap.cpp",
-      "original": "\tcells[cell_index(col, row)].visible = true;\n\n\t// The eight octants",
-      "mutated": "\t// The eight octants",
+      "original": "\t\tcells[cell_index(col, row)].visible = true;\n\n\t\t// The eight octants",
+      "mutated": "\t\t// The eight octants",
       "catches": "the cell underfoot unlit, so a creature cannot see where it stands"
     },
     {
       "file": "src/FovMap.cpp",
-      "original": "\t\t\tif (in_bounds(col, row) &&\n\t\t\t\tcolOffset * colOffset + rowOffset * rowOffset <=\n\t\t\t\t\tradius * radius)\n",
-      "mutated": "\t\t\tif (in_bounds(col, row) &&\n\t\t\t\tcolOffset * colOffset + rowOffset * rowOffset <=\n\t\t\t\t\tradius * radius * 2)\n",
+      "original": "\t\t\t\tif (in_bounds(col, row) &&\n\t\t\t\t\tcolOffset * colOffset + rowOffset * rowOffset <=\n\t\t\t\t\t\tradius * radius)\n",
+      "mutated": "\t\t\t\tif (in_bounds(col, row) &&\n\t\t\t\t\tcolOffset * colOffset + rowOffset * rowOffset <=\n\t\t\t\t\t\tradius * radius * 2)\n",
       "catches": "sight reaching in a square rather than a circle, lighting the corners"
     },
     {
       "file": "src/FovMap.cpp",
-      "original": "\t\t\telse if (\n\t\t\t\t!in_bounds(col, row) ||\n\t\t\t\t!cells[cell_index(col, row)].transparent)\n\t\t\t{\n\t\t\t\tblocked = true;\n",
-      "mutated": "\t\t\telse if (false)\n\t\t\t{\n\t\t\t\tblocked = true;\n",
+      "original": "\t\t\t\telse if (\n\t\t\t\t\t!in_bounds(col, row) ||\n\t\t\t\t\t!cells[cell_index(col, row)].transparent)\n\t\t\t\t{\n\t\t\t\t\tblocked = true;\n",
+      "mutated": "\t\t\t\telse if (false)\n\t\t\t\t{\n\t\t\t\t\tblocked = true;\n",
       "catches": "nothing ever casting a shadow, so a wall is seen through"
     },
     {

@@ -11,8 +11,8 @@
 namespace CppRL
 {
 
-struct GameContext;
+	struct GameContext;
 
-std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx);
+	std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx);
 
 } // namespace CppRL

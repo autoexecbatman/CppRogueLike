@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "return thac0_for_level(creatureClass, level) <\n\t\tthac0_for_level(creatureClass, level - 1);",
-      "mutated": "return thac0_for_level(creatureClass, level) <=\n\t\tthac0_for_level(creatureClass, level - 1);",
+      "original": "\treturn thac0_for_level(creatureClass, level) <\n\t\t\tthac0_for_level(creatureClass, level - 1);",
+      "mutated": "\treturn thac0_for_level(creatureClass, level) <=\n\t\t\tthac0_for_level(creatureClass, level - 1);",
       "catches": "a level the table does not move on reported as an improvement"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "return thac0_for_level(creatureClass, level) <\n\t\tthac0_for_level(creatureClass, level - 1);",
-      "mutated": "return thac0_for_level(creatureClass, level) <\n\t\tthac0_for_level(creatureClass, level);",
+      "original": "\treturn thac0_for_level(creatureClass, level) <\n\t\t\tthac0_for_level(creatureClass, level - 1);",
+      "mutated": "\treturn thac0_for_level(creatureClass, level) <\n\t\t\tthac0_for_level(creatureClass, level);",
       "catches": "an improvement compared against its own level, so no level ever improves"
     },
     {
@@ -39,8 +39,8 @@
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "\tcase CreatureClass::FIGHTER:\n\tcase CreatureClass::MONSTER:\n\t{\n\t\treturn combatTables.get_fighter(level);\n\t}",
-      "mutated": "\tcase CreatureClass::FIGHTER:\n\t{\n        return combatTables.get_fighter(level);\n    }\n\n    case CreatureClass::MONSTER:\n    {\n        return combatTables.get_cleric(level);\n\t}",
+      "original": "\t\tcase CreatureClass::FIGHTER:\n\t\tcase CreatureClass::MONSTER:\n\t\t{\n\t\t\treturn combatTables.get_fighter(level);\n\t\t}",
+      "mutated": "\t\tcase CreatureClass::FIGHTER:\n\t\t{\n\t        return combatTables.get_fighter(level);\n\t    }\n\n\t    case CreatureClass::MONSTER:\n\t    {\n\t        return combatTables.get_cleric(level);\n\t\t}",
       "catches": "a monster falling off the warrior table it is meant to share"
     }
   ]

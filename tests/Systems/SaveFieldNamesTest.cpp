@@ -36,124 +36,137 @@
 namespace CppRL
 {
 
-using json = nlohmann::json;
+	using json = nlohmann::json;
 
-TEST(SaveFieldNamesTest, ALevelManagerReadsBackWhatItWrote)
-{
-	LevelManager written;
-	json saved;
-	written.save_to_json(saved);
-
-	LevelManager read;
-	read.load_from_json(saved);
-
-	EXPECT_EQ(read.get_dungeon_level(), written.get_dungeon_level());
-	EXPECT_EQ(read.get_shopkeepers_count(), written.get_shopkeepers_count());
-}
-
-TEST(SaveFieldNamesTest, ALevelManagerReadsTheNamesItsSaveUses)
-{
-	// Written out by hand, so the key names themselves are the claim: if either is
-	// renamed on one side only, this is what notices.
-	const json saved = {
-		{
-			"level_manager",
-			{ { "dungeonLevel", 7 }, { "shopkeepersOnCurrentLevel", 2 } },
-		},
-	};
-
-	LevelManager read;
-	read.load_from_json(saved);
-
-	EXPECT_EQ(read.get_dungeon_level(), 7);
-	EXPECT_EQ(read.get_shopkeepers_count(), 2);
-}
-
-TEST(SaveFieldNamesTest, ALevelManagerRefusesTheOldFlatSave)
-{
-	// The exact shape the deleted fallback accepted: both fields at the top level, no
-	// block. It has to be a complete old save, or the refusal could come from the field
-	// that happens to be missing rather than from the shape being gone.
-	const json saved = {
-		{ "dungeonLevel", 7 },
-		{ "shopkeepersOnCurrentLevel", 2 },
-	};
-
-	LevelManager read;
-	EXPECT_THROW(read.load_from_json(saved), json::exception);
-}
-
-TEST(SaveFieldNamesTest, ALevelManagerRefusesASaveMissingOnlyTheLevel)
-{
-	// Everything present but the dungeon level, so nothing else can raise instead: a
-	// loader that defaulted this would put the character on level one and say nothing.
-	const json saved = {
-		{
-			"level_manager",
-			{ { "shopkeepersOnCurrentLevel", 2 } },
-		},
-	};
-
-	LevelManager read;
-	EXPECT_THROW(read.load_from_json(saved), json::exception);
-}
-
-TEST(SaveFieldNamesTest, ALevelManagerRefusesASaveMissingOnlyTheShopkeeperCount)
-{
-	const json saved = { { "level_manager", { { "dungeonLevel", 7 } } } };
-
-	LevelManager read;
-	EXPECT_THROW(read.load_from_json(saved), json::exception);
-}
-
-namespace
-{
-
-	// A saved pack holding two items, as save_inventory writes it. A pack,
-	// because only a pack has a capacity to record; a floor has no limit.
-	json saved_pack_of_two_items()
+	TEST(SaveFieldNamesTest, ALevelManagerReadsBackWhatItWrote)
 	{
-		CreatureInventory pack{ 10 };
-		for (const char* name : { "first stone", "second stone" })
-		{
-			[[maybe_unused]] const auto added = InventoryOperations::add_item(
-				pack,
-				std::make_unique<Item>(
-					Vector2D{ 0, 0 },
-					ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK }));
-		}
+		LevelManager written;
 		json saved;
-		InventoryOperations::save_inventory(pack, saved);
-		return saved;
+		written.save_to_json(saved);
+
+		LevelManager read;
+		read.load_from_json(saved);
+
+		EXPECT_EQ(read.get_dungeon_level(), written.get_dungeon_level());
+		EXPECT_EQ(
+			read.get_shopkeepers_count(),
+			written.get_shopkeepers_count());
 	}
 
-} // namespace
-
-TEST(SaveFieldNamesTest, AnInventoryRefusesARecordMissingItsCapacityOrItems)
-{
-	for (const char* key : { "capacity", "inventory" })
+	TEST(SaveFieldNamesTest, ALevelManagerReadsTheNamesItsSaveUses)
 	{
-		json missingOne = saved_pack_of_two_items();
-		missingOne.erase(key);
-		CreatureInventory loaded{ 1 };
-		EXPECT_ANY_THROW(
-			InventoryOperations::load_inventory(loaded, missingOne))
-			<< "an inventory record without \"" << key << "\" loaded quietly";
+		// Written out by hand, so the key names themselves are the claim: if
+		// either is renamed on one side only, this is what notices.
+		const json saved = {
+			{
+				"level_manager",
+				{ { "dungeonLevel", 7 }, { "shopkeepersOnCurrentLevel", 2 } },
+			},
+		};
+
+		LevelManager read;
+		read.load_from_json(saved);
+
+		EXPECT_EQ(read.get_dungeon_level(), 7);
+		EXPECT_EQ(read.get_shopkeepers_count(), 2);
 	}
-}
 
-TEST(
-	SaveFieldNamesTest,
-	ABrokenItemStopsTheInventoryLoadingRatherThanShorteningIt)
-{
-	// The second item's record loses a field Item::save always writes. A loader that
-	// caught the error would hand back a pack holding one stone and say nothing.
-	json saved = saved_pack_of_two_items();
-	saved.at("inventory").at(1).erase("itemKey");
+	TEST(SaveFieldNamesTest, ALevelManagerRefusesTheOldFlatSave)
+	{
+		// The exact shape the deleted fallback accepted: both fields at the top
+		// level, no block. It has to be a complete old save, or the refusal
+		// could come from the field that happens to be missing rather than from
+		// the shape being gone.
+		const json saved = {
+			{ "dungeonLevel", 7 },
+			{ "shopkeepersOnCurrentLevel", 2 },
+		};
 
-	CreatureInventory loaded{ 1 };
-	EXPECT_ANY_THROW(InventoryOperations::load_inventory(loaded, saved))
-		<< "a broken item was dropped from the inventory without a word";
-}
+		LevelManager read;
+		EXPECT_THROW(read.load_from_json(saved), json::exception);
+	}
+
+	TEST(SaveFieldNamesTest, ALevelManagerRefusesASaveMissingOnlyTheLevel)
+	{
+		// Everything present but the dungeon level, so nothing else can raise
+		// instead: a loader that defaulted this would put the character on
+		// level one and say nothing.
+		const json saved = {
+			{
+				"level_manager",
+				{ { "shopkeepersOnCurrentLevel", 2 } },
+			},
+		};
+
+		LevelManager read;
+		EXPECT_THROW(read.load_from_json(saved), json::exception);
+	}
+
+	TEST(
+		SaveFieldNamesTest,
+		ALevelManagerRefusesASaveMissingOnlyTheShopkeeperCount)
+	{
+		const json saved = { { "level_manager", { { "dungeonLevel", 7 } } } };
+
+		LevelManager read;
+		EXPECT_THROW(read.load_from_json(saved), json::exception);
+	}
+
+	namespace
+	{
+
+		// A saved pack holding two items, as save_inventory writes it. A pack,
+		// because only a pack has a capacity to record; a floor has no limit.
+		json saved_pack_of_two_items()
+		{
+			CreatureInventory pack{ 10 };
+			for (const char* name : { "first stone", "second stone" })
+			{
+				[[maybe_unused]] const auto added =
+					InventoryOperations::add_item(
+						pack,
+						std::make_unique<Item>(
+							Vector2D{ 0, 0 },
+							ActorData{
+								TileRef{},
+								name,
+								ColorPairId::WHITE_BLACK,
+							}));
+			}
+			json saved;
+			InventoryOperations::save_inventory(pack, saved);
+			return saved;
+		}
+
+	} // namespace
+
+	TEST(SaveFieldNamesTest, AnInventoryRefusesARecordMissingItsCapacityOrItems)
+	{
+		for (const char* key : { "capacity", "inventory" })
+		{
+			json missingOne = saved_pack_of_two_items();
+			missingOne.erase(key);
+			CreatureInventory loaded{ 1 };
+			EXPECT_ANY_THROW(
+				InventoryOperations::load_inventory(loaded, missingOne))
+				<< "an inventory record without \"" << key
+				<< "\" loaded quietly";
+		}
+	}
+
+	TEST(
+		SaveFieldNamesTest,
+		ABrokenItemStopsTheInventoryLoadingRatherThanShorteningIt)
+	{
+		// The second item's record loses a field Item::save always writes. A
+		// loader that caught the error would hand back a pack holding one stone
+		// and say nothing.
+		json saved = saved_pack_of_two_items();
+		saved.at("inventory").at(1).erase("itemKey");
+
+		CreatureInventory loaded{ 1 };
+		EXPECT_ANY_THROW(InventoryOperations::load_inventory(loaded, saved))
+			<< "a broken item was dropped from the inventory without a word";
+	}
 
 } // namespace CppRL

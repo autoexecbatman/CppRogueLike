@@ -6,33 +6,34 @@
 namespace CppRL
 {
 
-struct GameContext;
-struct Vector2D;
-class Creature;
-class TileConfig;
+	struct GameContext;
+	struct Vector2D;
+	class Creature;
+	class TileConfig;
 
-// Web class - represents a spider web that can trap players
-class Web : public SpellTile
-{
-private:
-	int webStrength{ 2 }; // How strong the web is (affects escape difficulty)
+	// Web class - represents a spider web that can trap players
+	class Web : public SpellTile
+	{
+	private:
+		// How strong the web is (affects escape difficulty)
+		int webStrength{ 2 };
 
-public:
-	Web(Vector2D position, int strength, const TileConfig& tileConfig);
+	public:
+		Web(Vector2D position, int strength, const TileConfig& tileConfig);
 
-	// Web properties
-	int get_strength() const { return webStrength; }
+		// Web properties
+		int get_strength() const { return webStrength; }
 
-	void set_strength(int strength) { webStrength = strength; }
+		void set_strength(int strength) { webStrength = strength; }
 
-	// Apply web effect to a creature trying to pass through
+		// Apply web effect to a creature trying to pass through
 
-	EntryResult on_creature_enter(
-		Creature& creature,
-		GameContext& ctx) override;
+		EntryResult on_creature_enter(
+			Creature& creature,
+			GameContext& ctx) override;
 
-	// Destroy this web
-	void destroy();
-};
+		// Destroy this web
+		void destroy();
+	};
 
 } // namespace CppRL

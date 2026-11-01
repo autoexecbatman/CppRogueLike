@@ -10,119 +10,130 @@
 namespace CppRL
 {
 
-struct GameContext;
+	struct GameContext;
 
-// Hunger states in ascending order of hunger.
-//
-// The comments say what each state does, which is less than the names suggest: only
-// the last two reach the player at all, and they do it with damage. Bonuses for being
-// well fed and penalties short of damage are not implemented, and the enum used to
-// promise both - see the issues directory for the design question of whether they
-// should be.
-enum class HungerState
-{
-	WELL_FED, // Says so once; no bonus
-	SATIATED, // Nothing
-	HUNGRY, // A flavour line on one turn in ten; no penalty
-	STARVING, // A flavour line on one turn in six, and 1 damage on one in twenty
-	DYING // A line and 1 damage every turn
-};
-
-class HungerSystem
-{
-private:
-	// Everything a run owns, replaced whole by begin_run, so a field added here starts each
-	// run fresh without being listed. hungerMax is here because only a load changes it, and a
-	// new game must not keep a loaded game's value.
-	struct RunState
+	// Hunger states in ascending order of hunger.
+	//
+	// The comments say what each state does, which is less than the names
+	// suggest: only the last two reach the player at all, and they do it with
+	// damage. Bonuses for being well fed and penalties short of damage are not
+	// implemented, and the enum used to promise both - see the issues directory
+	// for the design question of whether they should be.
+	enum class HungerState
 	{
-		int hungerValue{ 0 }; // Internal hunger counter
-		int hungerMax{ 1000 }; // Maximum hunger value
-		bool wellFedMessageShown{ false }; // Prevents spam of well-fed message
-
-		// What the player was last told they were, empty until the first message.
-		// Held only so a transition has something to compare against; the current
-		// state comes from get_hunger_state().
-		std::optional<HungerState> lastNotifiedState{};
+		WELL_FED, // Says so once; no bonus
+		SATIATED, // Nothing
+		HUNGRY, // A flavour line on one turn in ten; no penalty
+		// A flavour line on one turn in six, and 1 damage on one in twenty
+		STARVING,
+		DYING // A line and 1 damage every turn
 	};
 
-	RunState run{};
+	class HungerSystem
+	{
+	private:
+		// Everything a run owns, replaced whole by begin_run, so a field added
+		// here starts each run fresh without being listed. hungerMax is here
+		// because only a load changes it, and a new game must not keep a loaded
+		// game's value.
+		struct RunState
+		{
+			int hungerValue{ 0 }; // Internal hunger counter
+			int hungerMax{ 1000 }; // Maximum hunger value
+			// Prevents spam of well-fed message
+			bool wellFedMessageShown{ false };
 
-	// Announces a move to a different state, and records what was announced.
-	void notify_state_change(GameContext& ctx);
+			// What the player was last told they were, empty until the first
+			// message. Held only so a transition has something to compare
+			// against; the current state comes from get_hunger_state().
+			std::optional<HungerState> lastNotifiedState{};
+		};
 
-public:
-	HungerSystem() = default;
-	~HungerSystem() = default;
-	HungerSystem(const HungerSystem&) = delete;
-	HungerSystem& operator=(const HungerSystem&) = delete;
-	HungerSystem(HungerSystem&&) = delete;
-	HungerSystem& operator=(HungerSystem&&) = delete;
+		RunState run{};
 
-	// Puts hunger back where a new game starts it: the counter, its maximum, and what the
-	// player was last told, so the new run's first state is recorded rather than announced.
-	//
-	// Example, after a run that ended starving:
-	//   hunger.begin_run();
-	//   hunger.get_hunger_value();   // -> 0
-	void begin_run();
+		// Announces a move to a different state, and records what was
+		// announced.
+		void notify_state_change(GameContext& ctx);
 
-	// Increases hunger by the specified amount
-	void increase_hunger(GameContext& ctx, int amount);
+	public:
+		HungerSystem() = default;
+		~HungerSystem() = default;
+		HungerSystem(const HungerSystem&) = delete;
+		HungerSystem& operator=(const HungerSystem&) = delete;
+		HungerSystem(HungerSystem&&) = delete;
+		HungerSystem& operator=(HungerSystem&&) = delete;
 
-	// Decreases hunger by the specified amount
-	void decrease_hunger(GameContext& ctx, int amount);
+		// Puts hunger back where a new game starts it: the counter, its
+		// maximum, and what the player was last told, so the new run's first
+		// state is recorded rather than announced.
+		//
+		// Example, after a run that ended starving:
+		//   hunger.begin_run();
+		//   hunger.get_hunger_value();   // -> 0
+		void begin_run();
 
-	// The state the counter is in, derived on every call from hungerValue against
-	// the threshold table. There is no stored copy of this to fall out of step
-	// with the counter, so it is right before anything has ticked.
-	//
-	// Example (values from HungerSystemTest):
-	//
-	//   HungerSystem hunger{};                    // nothing eaten, counter at 0
-	//   hunger.get_hunger_state();                // -> HungerState::WELL_FED
-	//
-	//   hunger.increase_hunger(ctx, 700);         // counter at 700
-	//   hunger.get_hunger_state();                // -> HungerState::HUNGRY
-	[[nodiscard]] HungerState get_hunger_state() const;
+		// Increases hunger by the specified amount
+		void increase_hunger(GameContext& ctx, int amount);
 
-	// Returns string representation of the current hunger state
-	std::string get_hunger_state_string() const;
+		// Decreases hunger by the specified amount
+		void decrease_hunger(GameContext& ctx, int amount);
 
-	// Returns hunger value
-	int get_hunger_value() const;
+		// The state the counter is in, derived on every call from hungerValue
+		// against the threshold table. There is no stored copy of this to fall
+		// out of step with the counter, so it is right before anything has
+		// ticked.
+		//
+		// Example (values from HungerSystemTest):
+		//
+		//   HungerSystem hunger{};
+		//   // nothing eaten, counter at 0
+		//   hunger.get_hunger_state();
+		//   // -> HungerState::WELL_FED
+		//
+		//   hunger.increase_hunger(ctx, 700);         // counter at 700
+		//   hunger.get_hunger_state();                // -> HungerState::HUNGRY
+		[[nodiscard]] HungerState get_hunger_state() const;
 
-	// Returns maximum hunger value
-	int get_hunger_max() const;
+		// Returns string representation of the current hunger state
+		std::string get_hunger_state_string() const;
 
-	// How full the creature is: 1.0 just after eating, 0.0 at starvation.
-	// hungerValue counts up toward starving, so a meter drawn straight from it
-	// empties as the creature fills. This is the complement, and it is what the
-	// HUD draws, because it sits beside a health bar that fills when healthy.
-	//
-	// Example (values from HungerSystemTest, which pins all three):
-	//
-	//   HungerSystem hunger{};                              // nothing eaten yet
-	//   hunger.get_fullness_ratio();                        // -> 1.0
-	//
-	//   hunger.increase_hunger(ctx, hunger.get_hunger_max() / 4);
-	//   hunger.get_fullness_ratio();                        // -> 0.75
-	//
-	//   hunger.increase_hunger(ctx, hunger.get_hunger_max() * 2);
-	//   hunger.get_fullness_ratio();                        // -> 0.0, never below
-	[[nodiscard]] float get_fullness_ratio() const;
+		// Returns hunger value
+		int get_hunger_value() const;
 
-	// Returns numerical hunger display (e.g., "150/1000")
+		// Returns maximum hunger value
+		int get_hunger_max() const;
 
-	// Returns color code for hunger UI display
-	ColorPairId get_hunger_color() const;
+		// How full the creature is: 1.0 just after eating, 0.0 at starvation.
+		// hungerValue counts up toward starving, so a meter drawn straight from
+		// it empties as the creature fills. This is the complement, and it is
+		// what the HUD draws, because it sits beside a health bar that fills
+		// when healthy.
+		//
+		// Example (values from HungerSystemTest, which pins all three):
+		//
+		//   HungerSystem hunger{};
+		//   // nothing eaten yet
+		//   hunger.get_fullness_ratio();                        // -> 1.0
+		//
+		//   hunger.increase_hunger(ctx, hunger.get_hunger_max() / 4);
+		//   hunger.get_fullness_ratio();                        // -> 0.75
+		//
+		//   hunger.increase_hunger(ctx, hunger.get_hunger_max() * 2);
+		//   hunger.get_fullness_ratio();
+		//   // -> 0.0, never below
+		[[nodiscard]] float get_fullness_ratio() const;
 
-	// Apply hunger effects to player stats
-	void apply_hunger_effects(GameContext& ctx);
+		// Returns numerical hunger display (e.g., "150/1000")
 
-	// Save/Load methods for game persistence
-	void save(nlohmann::json& output) const;
-	void load(const nlohmann::json& source);
-};
+		// Returns color code for hunger UI display
+		ColorPairId get_hunger_color() const;
+
+		// Apply hunger effects to player stats
+		void apply_hunger_effects(GameContext& ctx);
+
+		// Save/Load methods for game persistence
+		void save(nlohmann::json& output) const;
+		void load(const nlohmann::json& source);
+	};
 
 } // namespace CppRL

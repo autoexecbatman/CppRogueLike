@@ -27,8 +27,8 @@
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "\t\tbite(owner, target, ctx);\n\t\treturn;",
-      "mutated": "\t\tbite(owner, *ctx.player(), ctx);\n\t\treturn;",
+      "original": "\t\t\tbite(owner, target, ctx);\n\t\t\treturn;",
+      "mutated": "\t\t\tbite(owner, *ctx.player(), ctx);\n\t\t\treturn;",
       "catches": "a spider biting the player whoever it was handed"
     }
   ]

@@ -39,19 +39,19 @@
     },
     {
       "file": "src/PlayerController.cpp",
-      "original": "\t\t\tconst int rounds = ctx.dice->d10();\n\t\t\tif (ctx.dice->d100() <= openLocksChance)\n",
-      "mutated": "\t\t\tconst int percentile = ctx.dice->d100();\n\t\t\tconst int rounds = ctx.dice->d10();\n\t\t\tif (percentile <= openLocksChance)\n",
+      "original": "\t\t\t\tconst int rounds = ctx.dice->d10();\n\t\t\t\tif (ctx.dice->d100() <= openLocksChance)\n",
+      "mutated": "\t\t\t\tconst int percentile = ctx.dice->d100();\n\t\t\t\tconst int rounds = ctx.dice->d10();\n\t\t\t\tif (percentile <= openLocksChance)\n",
       "catches": "the d100 read before the d10"
     },
     {
       "file": "src/PlayerController.cpp",
-      "original": "\t\t\treturn true;\n\t\t}\n\n\t\t// Refused without a roll or a round, and the bump goes on to forcing.\n",
-      "mutated": "\t\t\treturn true;\n\t\t}\n\n\t\t// Refused without a roll or a round, and the bump goes on to forcing.\n\t\treturn false;\n",
+      "original": "\t\t\t\treturn true;\n\t\t\t}\n\n\t\t\t// Refused without a roll or a round, and the bump goes on to\n\t\t\t// forcing.\n",
+      "mutated": "\t\t\t\treturn true;\n\t\t\t}\n\n\t\t\t// Refused without a roll or a round, and the bump goes on to\n\t\t\t// forcing.\n\t\t\treturn false;\n",
       "catches": "a refused pick ending the bump before forcing"
     },
     {
       "file": "src/PlayerController.cpp",
-      "original": "\t\tctx.messageSystem->message(\n\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\"This lock is too difficult for you until you have learned more.\",\n\t\t\tMessageCompletion::FINISHED);\n",
+      "original": "\t\t\tctx.messageSystem->message(\n\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\"This lock is too difficult for you until you have learned more.\",\n\t\t\t\tMessageCompletion::FINISHED);\n",
       "mutated": "",
       "catches": "a refused pick saying nothing"
     },
@@ -75,14 +75,14 @@
     },
     {
       "file": "src/Map.cpp",
-      "original": "\t\ttiles.back().lockPickFailedAtLevel =\n\t\t\ttileJson.at(\"lockPickFailedAtLevel\").get<int>();\n",
+      "original": "\t\t\ttiles.back().lockPickFailedAtLevel =\n\t\t\t\ttileJson.at(\"lockPickFailedAtLevel\").get<int>();\n",
       "mutated": "",
       "catches": "a failed pick dropped on load"
     },
     {
       "file": "src/Map.cpp",
-      "original": "\t\ttiles.back().lockPickFailedAtLevel =\n\t\t\ttileJson.at(\"lockPickFailedAtLevel\").get<int>();\n",
-      "mutated": "\t\ttiles.back().lockPickFailedAtLevel =\n\t\t\ttileJson.value(\"lockPickFailedAtLevel\", 0);\n",
+      "original": "\t\t\ttiles.back().lockPickFailedAtLevel =\n\t\t\t\ttileJson.at(\"lockPickFailedAtLevel\").get<int>();\n",
+      "mutated": "\t\t\ttiles.back().lockPickFailedAtLevel =\n\t\t\t\ttileJson.value(\"lockPickFailedAtLevel\", 0);\n",
       "catches": "a tile without its failed-pick level loaded as never instead of refused"
     }
   ]

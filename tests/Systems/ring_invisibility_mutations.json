@@ -15,26 +15,26 @@
   "mutations": [
     {
       "file": "src/SpellSystem.cpp",
-      "original": "const BuffType granted = source == SpellSource::ITEM ?\n\t\t\t\t\tBuffType::ITEM_INVISIBILITY :\n\t\t\t\t\tBuffType::INVISIBILITY;",
-      "mutated": "\t\t\tconst BuffType granted = source!= SpellSource::ITEM ?\n\t\t\t\tBuffType::ITEM_INVISIBILITY :\n\t\t\t\tBuffType::INVISIBILITY;\n",
+      "original": "\tconst BuffType granted = source == SpellSource::ITEM ?\n\t\t\t\t\t\tBuffType::ITEM_INVISIBILITY :\n\t\t\t\t\t\tBuffType::INVISIBILITY;",
+      "mutated": "\t\t\t\tconst BuffType granted = source!= SpellSource::ITEM ?\n\t\t\t\t\tBuffType::ITEM_INVISIBILITY :\n\t\t\t\t\tBuffType::INVISIBILITY;\n",
       "catches": "a casting through the ring granting the spell's buff, so the ring cannot tell its own invisibility apart"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\t\t\t\tctx.buffSystem->remove_buff(\n\t\t\t\t\t\twearer,\n\t\t\t\t\t\tBuffType::ITEM_INVISIBILITY);\n",
-      "mutated": "\t\t\t\t\tctx.buffSystem->remove_buff(\n\t\t\t\t\t\twearer,\n\t\t\t\t\t\tBuffType::INVISIBILITY);\n",
+      "original": "\t\t\t\t\t\tctx.buffSystem->remove_buff(\n\t\t\t\t\t\t\twearer,\n\t\t\t\t\t\t\tBuffType::ITEM_INVISIBILITY);\n",
+      "mutated": "\t\t\t\t\t\tctx.buffSystem->remove_buff(\n\t\t\t\t\t\t\twearer,\n\t\t\t\t\t\t\tBuffType::INVISIBILITY);\n",
       "catches": "taking the ring off ending the spell's invisibility instead of its own"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "&&\n\t\t\t\t\t!wearer.wears_ring_of(MagicalEffect::INVISIBILITY))\n",
+      "original": "&&\n\t\t\t\t\t\t!wearer.wears_ring_of(MagicalEffect::INVISIBILITY))\n",
       "mutated": ")\n",
       "catches": "one ring coming off ending the invisibility a second worn ring still grants"
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\t\tBuffType::SANCTUARY,\n\t\tBuffType::HIDDEN_IN_SHADOWS,\n\t\tBuffType::ITEM_INVISIBILITY,\n\t};\n",
-      "mutated": "\t\tBuffType::SANCTUARY,\n\t\tBuffType::HIDDEN_IN_SHADOWS,\n\t};\n",
+      "original": "\t\t\tBuffType::SANCTUARY,\n\t\t\tBuffType::HIDDEN_IN_SHADOWS,\n\t\t\tBuffType::ITEM_INVISIBILITY,\n\t\t};\n",
+      "mutated": "\t\t\tBuffType::SANCTUARY,\n\t\t\tBuffType::HIDDEN_IN_SHADOWS,\n\t\t};\n",
       "catches": "the ring's invisibility surviving an attack, which the spell's does not"
     },
     {

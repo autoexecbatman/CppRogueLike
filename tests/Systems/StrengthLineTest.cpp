@@ -25,88 +25,91 @@
 namespace CppRL
 {
 
-class StrengthLineTest : public ::testing::Test
-{
-protected:
-	void SetUp() override { ctx = mock.to_game_context(); }
-
-	// A player at a given Strength, and an exceptional percentile where the score is 18.
-	std::unique_ptr<Player> at_strength(int score, int exceptional)
+	class StrengthLineTest : public ::testing::Test
 	{
-		auto player = std::make_unique<Player>(Vector2D{ 0, 0 });
-		player->set_strength(score);
-		player->set_exceptional_strength(exceptional);
-		return player;
+	protected:
+		void SetUp() override { ctx = mock.to_game_context(); }
+
+		// A player at a given Strength, and an exceptional percentile where the
+		// score is 18.
+		std::unique_ptr<Player> at_strength(int score, int exceptional)
+		{
+			auto player = std::make_unique<Player>(Vector2D{ 0, 0 });
+			player->set_strength(score);
+			player->set_exceptional_strength(exceptional);
+			return player;
+		}
+
+		MockGameContext mock{};
+		GameContext ctx{};
+	};
+
+	// An ordinary score prints as itself, with the row's hit and damage. Table
+	// 1 gives 17 a +1 to hit and +1 to damage.
+	TEST_F(StrengthLineTest, AnOrdinaryScorePrintsItsOwnRow)
+	{
+		const auto player = at_strength(17, 0);
+
+		EXPECT_EQ(
+			CharacterSheetText::strength_line(*player, mock.data_manager),
+			"STR: 17  (+1 hit, +1 dmg)");
 	}
 
-	MockGameContext mock{};
-	GameContext ctx{};
-};
+	// Eighteen without a percentile is its own row, and is not the same as
+	// 18/01-50.
+	TEST_F(StrengthLineTest, EighteenWithoutAPercentileIsItsOwnRow)
+	{
+		const auto player = at_strength(18, 0);
 
-// An ordinary score prints as itself, with the row's hit and damage. Table 1 gives 17
-// a +1 to hit and +1 to damage.
-TEST_F(StrengthLineTest, AnOrdinaryScorePrintsItsOwnRow)
-{
-	const auto player = at_strength(17, 0);
+		EXPECT_EQ(
+			CharacterSheetText::strength_line(*player, mock.data_manager),
+			"STR: 18  (+1 hit, +2 dmg)");
+	}
 
-	EXPECT_EQ(
-		CharacterSheetText::strength_line(*player, mock.data_manager),
-		"STR: 17  (+1 hit, +1 dmg)");
-}
+	// Exceptional Strength prints the way the book writes it, and takes the
+	// band's row: 18/76-90 is +2 to hit and +4 to damage.
+	TEST_F(StrengthLineTest, ExceptionalStrengthPrintsAsTheBookWritesIt)
+	{
+		const auto player = at_strength(18, 76);
 
-// Eighteen without a percentile is its own row, and is not the same as 18/01-50.
-TEST_F(StrengthLineTest, EighteenWithoutAPercentileIsItsOwnRow)
-{
-	const auto player = at_strength(18, 0);
+		EXPECT_EQ(
+			CharacterSheetText::strength_line(*player, mock.data_manager),
+			"STR: 18/76  (+2 hit, +4 dmg)");
+	}
 
-	EXPECT_EQ(
-		CharacterSheetText::strength_line(*player, mock.data_manager),
-		"STR: 18  (+1 hit, +2 dmg)");
-}
+	// A percentile of 100 is written 18/00 rather than 18/100, and is the top
+	// row.
+	TEST_F(StrengthLineTest, APercentileOfAHundredIsWrittenAsZeroZero)
+	{
+		const auto player = at_strength(18, 100);
 
-// Exceptional Strength prints the way the book writes it, and takes the band's row:
-// 18/76-90 is +2 to hit and +4 to damage.
-TEST_F(StrengthLineTest, ExceptionalStrengthPrintsAsTheBookWritesIt)
-{
-	const auto player = at_strength(18, 76);
+		EXPECT_EQ(
+			CharacterSheetText::strength_line(*player, mock.data_manager),
+			"STR: 18/00  (+3 hit, +6 dmg)");
+	}
 
-	EXPECT_EQ(
-		CharacterSheetText::strength_line(*player, mock.data_manager),
-		"STR: 18/76  (+2 hit, +4 dmg)");
-}
+	// A single-digit score is padded to the width the column reserves, so the
+	// bracket that follows lines up with every other row of the panel.
+	TEST_F(StrengthLineTest, ASingleDigitScoreIsPaddedToTheColumnWidth)
+	{
+		const auto player = at_strength(9, 0);
 
-// A percentile of 100 is written 18/00 rather than 18/100, and is the top row.
-TEST_F(StrengthLineTest, APercentileOfAHundredIsWrittenAsZeroZero)
-{
-	const auto player = at_strength(18, 100);
+		EXPECT_EQ(
+			CharacterSheetText::strength_line(*player, mock.data_manager),
+			"STR:  9  (+0 hit, +0 dmg)");
+	}
 
-	EXPECT_EQ(
-		CharacterSheetText::strength_line(*player, mock.data_manager),
-		"STR: 18/00  (+3 hit, +6 dmg)");
-}
+	// The weakest score the book prints carries penalties rather than bonuses,
+	// and the signs have to show.
+	TEST_F(StrengthLineTest, APenaltyShowsItsSign)
+	{
+		const auto player = at_strength(3, 0);
 
-// A single-digit score is padded to the width the column reserves, so the bracket that
-// follows lines up with every other row of the panel.
-TEST_F(StrengthLineTest, ASingleDigitScoreIsPaddedToTheColumnWidth)
-{
-	const auto player = at_strength(9, 0);
+		EXPECT_EQ(
+			CharacterSheetText::strength_line(*player, mock.data_manager),
+			"STR:  3  (-3 hit, -1 dmg)");
+	}
 
-	EXPECT_EQ(
-		CharacterSheetText::strength_line(*player, mock.data_manager),
-		"STR:  9  (+0 hit, +0 dmg)");
-}
-
-// The weakest score the book prints carries penalties rather than bonuses, and the
-// signs have to show.
-TEST_F(StrengthLineTest, APenaltyShowsItsSign)
-{
-	const auto player = at_strength(3, 0);
-
-	EXPECT_EQ(
-		CharacterSheetText::strength_line(*player, mock.data_manager),
-		"STR:  3  (-3 hit, -1 dmg)");
-}
-
-// end of file: StrengthLineTest.cpp
+	// end of file: StrengthLineTest.cpp
 
 } // namespace CppRL

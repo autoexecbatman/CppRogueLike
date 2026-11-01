@@ -35,130 +35,134 @@
 namespace CppRL
 {
 
-// spawn_traps is protected: it is an implementation detail of level generation, not
-// something the game calls from outside. A derived class is how that is reached without
-// widening the real interface for a test's convenience.
-class TestableMap : public Map
-{
-public:
-	using Map::Map;
-	using Map::spawn_traps;
-};
-
-class TrapSpawnTest : public ::testing::Test
-{
-protected:
-	MockGameContext mock;
-	std::unique_ptr<TestableMap> map;
-	std::vector<std::unique_ptr<Trap>> traps;
-	std::vector<std::unique_ptr<SpellTile>> spellTiles;
-	GameContext ctx;
-	DungeonRoom room{};
-
-	// A room of floor at a known place, big enough that a trap has somewhere to go.
-	static constexpr int ROOM_COL = 5;
-	static constexpr int ROOM_ROW = 5;
-	static constexpr int ROOM_SIZE = 6;
-
-	void SetUp() override
+	// spawn_traps is protected: it is an implementation detail of level
+	// generation, not something the game calls from outside. A derived class is
+	// how that is reached without widening the real interface for a test's
+	// convenience.
+	class TestableMap : public Map
 	{
-		map = std::make_unique<TestableMap>(40, 30);
-		map->init_tiles();
+	public:
+		using Map::Map;
+		using Map::spawn_traps;
+	};
 
-		ctx = mock.to_game_context();
-		ctx.map = map.get();
-		ctx.traps = &traps;
-		ctx.spellTiles = &spellTiles;
+	class TrapSpawnTest : public ::testing::Test
+	{
+	protected:
+		MockGameContext mock;
+		std::unique_ptr<TestableMap> map;
+		std::vector<std::unique_ptr<Trap>> traps;
+		std::vector<std::unique_ptr<SpellTile>> spellTiles;
+		GameContext ctx;
+		DungeonRoom room{};
 
-		room.col = ROOM_COL;
-		room.row = ROOM_ROW;
-		room.width = ROOM_SIZE;
-		room.height = ROOM_SIZE;
+		// A room of floor at a known place, big enough that a trap has
+		// somewhere to go.
+		static constexpr int ROOM_COL = 5;
+		static constexpr int ROOM_ROW = 5;
+		static constexpr int ROOM_SIZE = 6;
 
-		for (int row = room.row; row <= room.row_end(); ++row)
+		void SetUp() override
 		{
-			for (int col = room.col; col <= room.col_end(); ++col)
+			map = std::make_unique<TestableMap>(40, 30);
+			map->init_tiles();
+
+			ctx = mock.to_game_context();
+			ctx.map = map.get();
+			ctx.traps = &traps;
+			ctx.spellTiles = &spellTiles;
+
+			room.col = ROOM_COL;
+			room.row = ROOM_ROW;
+			room.width = ROOM_SIZE;
+			room.height = ROOM_SIZE;
+
+			for (int row = room.row; row <= room.row_end(); ++row)
 			{
-				map->set_tile(Vector2D{ col, row }, TileType::FLOOR);
+				for (int col = room.col; col <= room.col_end(); ++col)
+				{
+					map->set_tile(Vector2D{ col, row }, TileType::FLOOR);
+				}
 			}
+
+			mock.dice.set_test_mode(true);
 		}
 
-		mock.dice.set_test_mode(true);
-	}
-
-	void TearDown() override
-	{
-		mock.dice.set_test_mode(false);
-		mock.dice.clear_fixed_rolls();
-	}
-};
-
-// The room check passes, one trap is asked for, and it lands in ctx.traps.
-TEST_F(TrapSpawnTest, ASpawnedTrapLandsInTheTrapContainer)
-{
-	// d10 <= 3 so the room gets traps; then one trap, at room offset 2,2, of type PIT.
-	for (int roll : { 1, 1, 2, 2, 1 })
-	{
-		mock.dice.set_next_roll(roll);
-	}
-
-	map->spawn_traps(room, ctx);
-
-	ASSERT_EQ(traps.size(), 1u)
-		<< "the trap never reached the container the game reads";
-	EXPECT_EQ(traps[0]->position.x, ROOM_COL + 2);
-	EXPECT_EQ(traps[0]->position.y, ROOM_ROW + 2);
-	EXPECT_EQ(traps[0]->get_type(), TrapType::PIT);
-}
-
-// The type roll is a d3 and each face names one trap: 1 a pit, 2 darts, 3 arrows.
-TEST_F(TrapSpawnTest, EachTypeRollNamesItsTrap)
-{
-	constexpr std::array expected{
-		TrapType::PIT,
-		TrapType::DART,
-		TrapType::ARROW,
+		void TearDown() override
+		{
+			mock.dice.set_test_mode(false);
+			mock.dice.clear_fixed_rolls();
+		}
 	};
-	for (int face = 1; face <= static_cast<int>(expected.size()); ++face)
+
+	// The room check passes, one trap is asked for, and it lands in ctx.traps.
+	TEST_F(TrapSpawnTest, ASpawnedTrapLandsInTheTrapContainer)
 	{
-		traps.clear();
-		for (int roll : { 1, 1, 2, 2, face })
+		// d10 <= 3 so the room gets traps; then one trap, at room offset 2,2,
+		// of type PIT.
+		for (int roll : { 1, 1, 2, 2, 1 })
 		{
 			mock.dice.set_next_roll(roll);
 		}
 
 		map->spawn_traps(room, ctx);
 
-		ASSERT_EQ(traps.size(), 1u);
-		EXPECT_EQ(traps[0]->get_type(), expected[face - 1])
-			<< "type roll " << face;
+		ASSERT_EQ(traps.size(), 1u)
+			<< "the trap never reached the container the game reads";
+		EXPECT_EQ(traps[0]->position.x, ROOM_COL + 2);
+		EXPECT_EQ(traps[0]->position.y, ROOM_ROW + 2);
+		EXPECT_EQ(traps[0]->get_type(), TrapType::PIT);
 	}
-}
 
-// A trap is not a spell tile. Nothing may leak into the other container.
-TEST_F(TrapSpawnTest, SpawningATrapLeavesTheSpellTilesAlone)
-{
-	for (int roll : { 1, 1, 2, 2, 1 })
+	// The type roll is a d3 and each face names one trap: 1 a pit, 2 darts, 3
+	// arrows.
+	TEST_F(TrapSpawnTest, EachTypeRollNamesItsTrap)
 	{
-		mock.dice.set_next_roll(roll);
+		constexpr std::array expected{
+			TrapType::PIT,
+			TrapType::DART,
+			TrapType::ARROW,
+		};
+		for (int face = 1; face <= static_cast<int>(expected.size()); ++face)
+		{
+			traps.clear();
+			for (int roll : { 1, 1, 2, 2, face })
+			{
+				mock.dice.set_next_roll(roll);
+			}
+
+			map->spawn_traps(room, ctx);
+
+			ASSERT_EQ(traps.size(), 1u);
+			EXPECT_EQ(traps[0]->get_type(), expected[face - 1])
+				<< "type roll " << face;
+		}
 	}
 
-	map->spawn_traps(room, ctx);
+	// A trap is not a spell tile. Nothing may leak into the other container.
+	TEST_F(TrapSpawnTest, SpawningATrapLeavesTheSpellTilesAlone)
+	{
+		for (int roll : { 1, 1, 2, 2, 1 })
+		{
+			mock.dice.set_next_roll(roll);
+		}
 
-	EXPECT_TRUE(spellTiles.empty())
-		<< "a trap was put in the spell tile container";
-}
+		map->spawn_traps(room, ctx);
 
-// Seven rooms in ten carry no traps at all, and that path must leave the container empty
-// rather than pushing something inert.
-TEST_F(TrapSpawnTest, ARoomThatRollsNoTrapsGetsNone)
-{
-	mock.dice.set_next_roll(10); // d10 above 3: this room has no traps
+		EXPECT_TRUE(spellTiles.empty())
+			<< "a trap was put in the spell tile container";
+	}
 
-	map->spawn_traps(room, ctx);
+	// Seven rooms in ten carry no traps at all, and that path must leave the
+	// container empty rather than pushing something inert.
+	TEST_F(TrapSpawnTest, ARoomThatRollsNoTrapsGetsNone)
+	{
+		mock.dice.set_next_roll(10); // d10 above 3: this room has no traps
 
-	EXPECT_TRUE(traps.empty());
-	EXPECT_TRUE(spellTiles.empty());
-}
+		map->spawn_traps(room, ctx);
+
+		EXPECT_TRUE(traps.empty());
+		EXPECT_TRUE(spellTiles.empty());
+	}
 
 } // namespace CppRL

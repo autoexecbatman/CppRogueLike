@@ -42,334 +42,341 @@
 namespace CppRL
 {
 
-using json = nlohmann::json;
+	using json = nlohmann::json;
 
-namespace
-{
-
-	struct NamedBehavior
+	namespace
 	{
-		std::string name{};
-		ItemBehavior behavior{};
-	};
 
-	// A stat-boost item whose every field differs from its default.
-	template <typename StatBoost>
-	StatBoost unusual_stat_boost()
-	{
-		StatBoost statBoost{};
-		statBoost.strBonus = 2;
-		statBoost.dexBonus = 1;
-		statBoost.conBonus = 3;
-		statBoost.intBonus = 1;
-		statBoost.wisBonus = 2;
-		statBoost.chaBonus = 1;
-		statBoost.application = BuffApplication::SET;
-		statBoost.exceptionalStrength = 50;
-		return statBoost;
-	}
-
-	// One of every behaviour that saves fields, each away from its defaults.
-	std::vector<NamedBehavior> every_behavior_with_fields()
-	{
-		return {
-			{
-				"consumable",
-				Consumable{
-					ConsumableEffect::ADD_BUFF,
-					DiceExpr{ 0, 0, 7 },
-					DiceExpr{ 0, 0, 3 },
-					DurationUnit::TURNS,
-					BuffType::SANCTUARY,
-					BuffApplication::SET,
-					2,
-				},
-			},
-			{
-				"weapon",
-				Weapon{
-					true,
-					HandRequirement::TWO_HANDED,
-					WeaponSize::LARGE,
-					18,
-				},
-			},
-			{
-				"targeted scroll",
-				TargetedScroll{
-					TargetMode::PICK_TILE_AOE,
-					ScrollAnimation::LIGHTNING,
-					5,
-					9,
-					2,
-					BuffType::SANCTUARY,
-					DiceExpr{ 1, 4, 2 },
-					DurationUnit::TURNS,
-				},
-			},
-			{ "gold", Gold{ 12 } },
-			{ "food", Food{ 30 } },
-			{ "corpse", CorpseFood{ 40 } },
-			{ "armor", Armor{ 4 } },
-			{
-				"magical helm",
-				MagicalHelm{
-					MagicalEffect::BRILLIANCE,
-					2,
-					HelmCommand::EMPOWERED,
-				},
-			},
-			{ "magical ring", MagicalRing{ MagicalEffect::PROTECTION, 1 } },
-			{ "gauntlets", unusual_stat_boost<Gauntlets>() },
-			{ "girdle", unusual_stat_boost<Girdle>() },
-			{ "jewelry amulet", unusual_stat_boost<JewelryAmulet>() },
+		struct NamedBehavior
+		{
+			std::string name{};
+			ItemBehavior behavior{};
 		};
-	}
 
-	// The fields of a behaviour record that carry an enum.
-	constexpr std::array<std::string_view, 8> ENUM_FIELDS = {
-		"type",
-		"effect",
-		"buffType",
-		"application",
-		"handRequirement",
-		"weaponSize",
-		"targetMode",
-		"scrollAnimation",
-	};
-
-	// Whether a record's key is one of those. The array is a file-scope
-	// constant and this takes no capture: MSVC 14.51 gives a lambda that
-	// captures a function-local constexpr array its own copy, so ranges::find
-	// returns an iterator into one object while end() names another, and the
-	// debug iterator check aborts the process on the mismatch.
-	bool is_enum_field(std::string_view key)
-	{
-		return std::ranges::find(ENUM_FIELDS, key) != ENUM_FIELDS.end();
-	}
-
-} // namespace
-
-// The record names what it holds, and every enum in it, so what a record means does not
-// depend on the order of an enum nobody consults when editing it.
-TEST(BehaviorRecordTest, EveryEnumInTheRecordIsANameNotANumber)
-{
-	for (const NamedBehavior& named : every_behavior_with_fields())
-	{
-		json saved;
-		save_behavior(named.behavior, saved);
-
-		for (const auto& [key, value] : saved.items())
+		// A stat-boost item whose every field differs from its default.
+		template <typename StatBoost>
+		StatBoost unusual_stat_boost()
 		{
-			if (is_enum_field(key))
+			StatBoost statBoost{};
+			statBoost.strBonus = 2;
+			statBoost.dexBonus = 1;
+			statBoost.conBonus = 3;
+			statBoost.intBonus = 1;
+			statBoost.wisBonus = 2;
+			statBoost.chaBonus = 1;
+			statBoost.application = BuffApplication::SET;
+			statBoost.exceptionalStrength = 50;
+			return statBoost;
+		}
+
+		// One of every behaviour that saves fields, each away from its
+		// defaults.
+		std::vector<NamedBehavior> every_behavior_with_fields()
+		{
+			return {
+				{
+					"consumable",
+					Consumable{
+						ConsumableEffect::ADD_BUFF,
+						DiceExpr{ 0, 0, 7 },
+						DiceExpr{ 0, 0, 3 },
+						DurationUnit::TURNS,
+						BuffType::SANCTUARY,
+						BuffApplication::SET,
+						2,
+					},
+				},
+				{
+					"weapon",
+					Weapon{
+						true,
+						HandRequirement::TWO_HANDED,
+						WeaponSize::LARGE,
+						18,
+					},
+				},
+				{
+					"targeted scroll",
+					TargetedScroll{
+						TargetMode::PICK_TILE_AOE,
+						ScrollAnimation::LIGHTNING,
+						5,
+						9,
+						2,
+						BuffType::SANCTUARY,
+						DiceExpr{ 1, 4, 2 },
+						DurationUnit::TURNS,
+					},
+				},
+				{ "gold", Gold{ 12 } },
+				{ "food", Food{ 30 } },
+				{ "corpse", CorpseFood{ 40 } },
+				{ "armor", Armor{ 4 } },
+				{
+					"magical helm",
+					MagicalHelm{
+						MagicalEffect::BRILLIANCE,
+						2,
+						HelmCommand::EMPOWERED,
+					},
+				},
+				{ "magical ring", MagicalRing{ MagicalEffect::PROTECTION, 1 } },
+				{ "gauntlets", unusual_stat_boost<Gauntlets>() },
+				{ "girdle", unusual_stat_boost<Girdle>() },
+				{ "jewelry amulet", unusual_stat_boost<JewelryAmulet>() },
+			};
+		}
+
+		// The fields of a behaviour record that carry an enum.
+		constexpr std::array<std::string_view, 8> ENUM_FIELDS = {
+			"type",
+			"effect",
+			"buffType",
+			"application",
+			"handRequirement",
+			"weaponSize",
+			"targetMode",
+			"scrollAnimation",
+		};
+
+		// Whether a record's key is one of those. The array is a file-scope
+		// constant and this takes no capture: MSVC 14.51 gives a lambda that
+		// captures a function-local constexpr array its own copy, so
+		// ranges::find returns an iterator into one object while end() names
+		// another, and the debug iterator check aborts the process on the
+		// mismatch.
+		bool is_enum_field(std::string_view key)
+		{
+			return std::ranges::find(ENUM_FIELDS, key) != ENUM_FIELDS.end();
+		}
+
+	} // namespace
+
+	// The record names what it holds, and every enum in it, so what a record
+	// means does not depend on the order of an enum nobody consults when
+	// editing it.
+	TEST(BehaviorRecordTest, EveryEnumInTheRecordIsANameNotANumber)
+	{
+		for (const NamedBehavior& named : every_behavior_with_fields())
+		{
+			json saved;
+			save_behavior(named.behavior, saved);
+
+			for (const auto& [key, value] : saved.items())
 			{
-				EXPECT_TRUE(value.is_string())
-					<< "a " << named.name << " saved \"" << key
-					<< "\" as a number";
+				if (is_enum_field(key))
+				{
+					EXPECT_TRUE(value.is_string())
+						<< "a " << named.name << " saved \"" << key
+						<< "\" as a number";
+				}
 			}
 		}
 	}
-}
 
-// A behaviour this build cannot place is refused, rather than becoming whichever one
-// the number happens to land on.
-TEST(BehaviorRecordTest, AnUnknownBehaviourNameIsRefused)
-{
-	EXPECT_THROW(
-		(void)load_behavior(json{ { "type", "wand_of_wonder" } }),
-		std::runtime_error);
-}
-
-// And one with no name at all, by the field read itself.
-TEST(BehaviorRecordTest, ARecordWithNoBehaviourNameIsRefused)
-{
-	EXPECT_ANY_THROW((void)load_behavior(json::object()));
-}
-
-TEST(BehaviorRecordTest, EveryFieldASaveWritesIsRequiredToLoad)
-{
-	for (const NamedBehavior& named : every_behavior_with_fields())
+	// A behaviour this build cannot place is refused, rather than becoming
+	// whichever one the number happens to land on.
+	TEST(BehaviorRecordTest, AnUnknownBehaviourNameIsRefused)
 	{
-		json saved;
-		save_behavior(named.behavior, saved);
+		EXPECT_THROW(
+			(void)load_behavior(json{ { "type", "wand_of_wonder" } }),
+			std::runtime_error);
+	}
 
-		for (const auto& [key, value] : saved.items())
+	// And one with no name at all, by the field read itself.
+	TEST(BehaviorRecordTest, ARecordWithNoBehaviourNameIsRefused)
+	{
+		EXPECT_ANY_THROW((void)load_behavior(json::object()));
+	}
+
+	TEST(BehaviorRecordTest, EveryFieldASaveWritesIsRequiredToLoad)
+	{
+		for (const NamedBehavior& named : every_behavior_with_fields())
 		{
-			// The type is what picks the loader; the loader's own check refuses its absence.
-			if (key == "type")
+			json saved;
+			save_behavior(named.behavior, saved);
+
+			for (const auto& [key, value] : saved.items())
 			{
-				continue;
+				// The type is what picks the loader; the loader's own check
+				// refuses its absence.
+				if (key == "type")
+				{
+					continue;
+				}
+				json missingOne = saved;
+				missingOne.erase(key);
+				EXPECT_ANY_THROW(load_behavior(missingOne))
+					<< "a " << named.name << " record without \"" << key
+					<< "\" loaded quietly";
 			}
-			json missingOne = saved;
-			missingOne.erase(key);
-			EXPECT_ANY_THROW(load_behavior(missingOne))
-				<< "a " << named.name << " record without \"" << key
-				<< "\" loaded quietly";
 		}
 	}
-}
 
-// A save, a load and a save again compares the saver against itself: one that writes the
-// wrong name writes it both times and the comparison passes. These two ask what the
-// record says and what came back, which is what catches a saver.
-TEST(BehaviorRecordTest, EveryBehaviourComesBackAsItsOwnKind)
-{
-	for (const NamedBehavior& named : every_behavior_with_fields())
+	// A save, a load and a save again compares the saver against itself: one
+	// that writes the wrong name writes it both times and the comparison
+	// passes. These two ask what the record says and what came back, which is
+	// what catches a saver.
+	TEST(BehaviorRecordTest, EveryBehaviourComesBackAsItsOwnKind)
+	{
+		for (const NamedBehavior& named : every_behavior_with_fields())
+		{
+			json saved;
+			save_behavior(named.behavior, saved);
+
+			const ItemBehavior loaded = load_behavior(saved);
+
+			EXPECT_EQ(loaded.index(), named.behavior.index())
+				<< "a " << named.name << " came back as a different behaviour";
+		}
+	}
+
+	TEST(BehaviorRecordTest, APotionsRecordNamesItsEffectAndItsBuff)
 	{
 		json saved;
-		save_behavior(named.behavior, saved);
+		save_behavior(
+			Consumable{
+				ConsumableEffect::ADD_BUFF,
+				DiceExpr{ 0, 0, 7 },
+				DiceExpr{ 0, 0, 3 },
+				DurationUnit::TURNS,
+				BuffType::SANCTUARY,
+				BuffApplication::SET,
+			},
+			saved);
 
-		const ItemBehavior loaded = load_behavior(saved);
-
-		EXPECT_EQ(loaded.index(), named.behavior.index())
-			<< "a " << named.name << " came back as a different behaviour";
+		EXPECT_EQ(saved.at("type"), "consumable");
+		EXPECT_EQ(saved.at("effect"), "add_buff");
+		EXPECT_EQ(saved.at("buffType"), "sanctuary");
 	}
-}
 
-TEST(BehaviorRecordTest, APotionsRecordNamesItsEffectAndItsBuff)
-{
-	json saved;
-	save_behavior(
-		Consumable{
-			ConsumableEffect::ADD_BUFF,
-			DiceExpr{ 0, 0, 7 },
-			DiceExpr{ 0, 0, 3 },
-			DurationUnit::TURNS,
-			BuffType::SANCTUARY,
-			BuffApplication::SET,
-		},
-		saved);
+	TEST(BehaviorRecordTest, EveryFieldSurvivesARoundTrip)
+	{
+		for (const NamedBehavior& named : every_behavior_with_fields())
+		{
+			json saved;
+			save_behavior(named.behavior, saved);
 
-	EXPECT_EQ(saved.at("type"), "consumable");
-	EXPECT_EQ(saved.at("effect"), "add_buff");
-	EXPECT_EQ(saved.at("buffType"), "sanctuary");
-}
+			json savedAgain;
+			save_behavior(load_behavior(saved), savedAgain);
 
-TEST(BehaviorRecordTest, EveryFieldSurvivesARoundTrip)
-{
-	for (const NamedBehavior& named : every_behavior_with_fields())
+			EXPECT_EQ(savedAgain, saved)
+				<< "a " << named.name
+				<< " came back different: a field was read under another name, or not at all";
+		}
+	}
+
+	// Whether a potion sets the stat or adds to it is in its record by name.
+	TEST(BehaviorRecordTest, APotionsRecordNamesWhetherItSetsOrAdds)
+	{
+		json setting;
+		save_behavior(
+			Consumable{
+				ConsumableEffect::ADD_BUFF,
+				DiceExpr{ 0, 0, 19 },
+				DiceExpr{ 0, 0, 3 },
+				DurationUnit::TURNS,
+				BuffType::STRENGTH,
+				BuffApplication::SET,
+			},
+			setting);
+		json adding;
+		save_behavior(
+			Consumable{
+				ConsumableEffect::ADD_BUFF,
+				DiceExpr{ 0, 0, 1 },
+				DiceExpr{ 0, 0, 3 },
+				DurationUnit::TURNS,
+				BuffType::STRENGTH,
+				BuffApplication::ADD,
+			},
+			adding);
+
+		ASSERT_TRUE(setting.contains("application"))
+			<< "a setting potion saved no application";
+		ASSERT_TRUE(adding.contains("application"))
+			<< "an adding potion saved no application";
+		EXPECT_EQ(setting.at("application"), "set");
+		EXPECT_EQ(adding.at("application"), "add");
+	}
+
+	// A potion naming an application this build does not know is refused.
+	TEST(BehaviorRecordTest, APotionWithAnUnknownApplicationIsRefused)
 	{
 		json saved;
-		save_behavior(named.behavior, saved);
+		save_behavior(
+			Consumable{
+				ConsumableEffect::ADD_BUFF,
+				DiceExpr{ 0, 0, 19 },
+				DiceExpr{ 0, 0, 3 },
+				DurationUnit::TURNS,
+				BuffType::STRENGTH,
+				BuffApplication::SET,
+			},
+			saved);
+		saved["application"] = "sideways";
 
-		json savedAgain;
-		save_behavior(load_behavior(saved), savedAgain);
-
-		EXPECT_EQ(savedAgain, saved)
-			<< "a " << named.name
-			<< " came back different: a field was read under another name, or not at all";
+		EXPECT_ANY_THROW((void)load_behavior(saved));
 	}
-}
 
-// Whether a potion sets the stat or adds to it is in its record by name.
-TEST(BehaviorRecordTest, APotionsRecordNamesWhetherItSetsOrAdds)
-{
-	json setting;
-	save_behavior(
-		Consumable{
-			ConsumableEffect::ADD_BUFF,
-			DiceExpr{ 0, 0, 19 },
-			DiceExpr{ 0, 0, 3 },
-			DurationUnit::TURNS,
-			BuffType::STRENGTH,
-			BuffApplication::SET,
-		},
-		setting);
-	json adding;
-	save_behavior(
-		Consumable{
-			ConsumableEffect::ADD_BUFF,
-			DiceExpr{ 0, 0, 1 },
-			DiceExpr{ 0, 0, 3 },
-			DurationUnit::TURNS,
-			BuffType::STRENGTH,
-			BuffApplication::ADD,
-		},
-		adding);
+	// A duration's unit is in the record by name, and a name this build does
+	// not know is refused.
+	TEST(BehaviorRecordTest, ADurationsUnitIsNamedAndAnUnknownOneIsRefused)
+	{
+		json potion;
+		save_behavior(
+			Consumable{
+				ConsumableEffect::ADD_BUFF,
+				DiceExpr{ 0, 0, 1 },
+				DiceExpr{ 1, 4, 2 },
+				DurationUnit::TURNS,
+				BuffType::INVISIBILITY,
+				BuffApplication::ADD,
+			},
+			potion);
+		json scroll;
+		save_behavior(
+			TargetedScroll{
+				TargetMode::FOV_BUFF,
+				ScrollAnimation::NONE,
+				0,
+				0,
+				0,
+				BuffType::SLEEP,
+				DiceExpr{ 0, 0, 5 },
+				DurationUnit::ROUNDS,
+			},
+			scroll);
 
-	ASSERT_TRUE(setting.contains("application"))
-		<< "a setting potion saved no application";
-	ASSERT_TRUE(adding.contains("application"))
-		<< "an adding potion saved no application";
-	EXPECT_EQ(setting.at("application"), "set");
-	EXPECT_EQ(adding.at("application"), "add");
-}
+		EXPECT_EQ(potion.at("durationUnit"), "turns");
+		EXPECT_EQ(scroll.at("durationUnit"), "rounds");
 
-// A potion naming an application this build does not know is refused.
-TEST(BehaviorRecordTest, APotionWithAnUnknownApplicationIsRefused)
-{
-	json saved;
-	save_behavior(
-		Consumable{
-			ConsumableEffect::ADD_BUFF,
-			DiceExpr{ 0, 0, 19 },
-			DiceExpr{ 0, 0, 3 },
-			DurationUnit::TURNS,
-			BuffType::STRENGTH,
-			BuffApplication::SET,
-		},
-		saved);
-	saved["application"] = "sideways";
+		potion["durationUnit"] = "hours";
+		scroll["durationUnit"] = "hours";
+		EXPECT_ANY_THROW((void)load_behavior(potion));
+		EXPECT_ANY_THROW((void)load_behavior(scroll));
+	}
 
-	EXPECT_ANY_THROW((void)load_behavior(saved));
-}
+	// Whether a worn item sets the score or adds to it is in its record by
+	// name.
+	TEST(BehaviorRecordTest, AStatBoostRecordNamesWhetherItSetsOrAdds)
+	{
+		Girdle setting{};
+		setting.strBonus = 19;
+		setting.application = BuffApplication::SET;
+		Gauntlets adding{};
+		adding.strBonus = 2;
+		json savedSetting;
+		save_behavior(setting, savedSetting);
+		json savedAdding;
+		save_behavior(adding, savedAdding);
 
-// A duration's unit is in the record by name, and a name this build does not know is refused.
-TEST(BehaviorRecordTest, ADurationsUnitIsNamedAndAnUnknownOneIsRefused)
-{
-	json potion;
-	save_behavior(
-		Consumable{
-			ConsumableEffect::ADD_BUFF,
-			DiceExpr{ 0, 0, 1 },
-			DiceExpr{ 1, 4, 2 },
-			DurationUnit::TURNS,
-			BuffType::INVISIBILITY,
-			BuffApplication::ADD,
-		},
-		potion);
-	json scroll;
-	save_behavior(
-		TargetedScroll{
-			TargetMode::FOV_BUFF,
-			ScrollAnimation::NONE,
-			0,
-			0,
-			0,
-			BuffType::SLEEP,
-			DiceExpr{ 0, 0, 5 },
-			DurationUnit::ROUNDS,
-		},
-		scroll);
-
-	EXPECT_EQ(potion.at("durationUnit"), "turns");
-	EXPECT_EQ(scroll.at("durationUnit"), "rounds");
-
-	potion["durationUnit"] = "hours";
-	scroll["durationUnit"] = "hours";
-	EXPECT_ANY_THROW((void)load_behavior(potion));
-	EXPECT_ANY_THROW((void)load_behavior(scroll));
-}
-
-// Whether a worn item sets the score or adds to it is in its record by name.
-TEST(BehaviorRecordTest, AStatBoostRecordNamesWhetherItSetsOrAdds)
-{
-	Girdle setting{};
-	setting.strBonus = 19;
-	setting.application = BuffApplication::SET;
-	Gauntlets adding{};
-	adding.strBonus = 2;
-	json savedSetting;
-	save_behavior(setting, savedSetting);
-	json savedAdding;
-	save_behavior(adding, savedAdding);
-
-	ASSERT_TRUE(savedSetting.contains("application"))
-		<< "a setting girdle saved no application";
-	ASSERT_TRUE(savedAdding.contains("application"))
-		<< "adding gauntlets saved no application";
-	EXPECT_EQ(savedSetting.at("application"), "set");
-	EXPECT_EQ(savedAdding.at("application"), "add");
-}
+		ASSERT_TRUE(savedSetting.contains("application"))
+			<< "a setting girdle saved no application";
+		ASSERT_TRUE(savedAdding.contains("application"))
+			<< "adding gauntlets saved no application";
+		EXPECT_EQ(savedSetting.at("application"), "set");
+		EXPECT_EQ(savedAdding.at("application"), "add");
+	}
 
 } // namespace CppRL

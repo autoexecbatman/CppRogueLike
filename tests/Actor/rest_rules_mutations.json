@@ -27,8 +27,8 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": "\t\tif (creature->is_dead())\n\t\t{\n\t\t\tcontinue;\n\t\t}\n",
-      "mutated": "\t\tif (false)\n\t\t{\n\t\t\tcontinue;\n\t\t}\n",
+      "original": "\t\t\tif (creature->is_dead())\n\t\t\t{\n\t\t\t\tcontinue;\n\t\t\t}\n",
+      "mutated": "\t\t\tif (false)\n\t\t\t{\n\t\t\t\tcontinue;\n\t\t\t}\n",
       "catches": "a corpse lying nearby counted as a living threat"
     },
     {

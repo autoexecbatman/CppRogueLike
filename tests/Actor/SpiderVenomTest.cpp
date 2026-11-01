@@ -47,155 +47,160 @@
 namespace CppRL
 {
 
-class SpiderVenomTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	class SpiderVenomTest : public ::testing::Test
 	{
-		game.dataManager.load_all_data(game.messageSystem);
-
-		player->experienceReward = std::make_unique<ExperienceReward>(0);
-		player->healthPool = std::make_unique<HealthPool>(STARTING_HP);
-		player->armorClass = std::make_unique<ArmorClass>(10);
-		player->set_dr(0);
-		player->set_strength(10);
-		player->set_dexterity(10);
-		player->set_constitution(10);
-
-		ctx = game.context();
-		ctx.playerOwner = &player;
-		ctx.map = &map;
-		game.dice.set_test_mode(true);
-
-		// An open corridor, so the spinner beside the player is in view.
-		map.init_tiles();
-		for (int col = 1; col < 19; ++col)
+	protected:
+		void SetUp() override
 		{
-			map.set_tile(Vector2D{ col, 5 }, TileType::FLOOR);
+			game.dataManager.load_all_data(game.messageSystem);
+
+			player->experienceReward = std::make_unique<ExperienceReward>(0);
+			player->healthPool = std::make_unique<HealthPool>(STARTING_HP);
+			player->armorClass = std::make_unique<ArmorClass>(10);
+			player->set_dr(0);
+			player->set_strength(10);
+			player->set_dexterity(10);
+			player->set_constitution(10);
+
+			ctx = game.context();
+			ctx.playerOwner = &player;
+			ctx.map = &map;
+			game.dice.set_test_mode(true);
+
+			// An open corridor, so the spinner beside the player is in view.
+			map.init_tiles();
+			for (int col = 1; col < 19; ++col)
+			{
+				map.set_tile(Vector2D{ col, 5 }, TileType::FLOOR);
+			}
+			map.compute_fov(ctx);
+
+			// A 1d4 bite from THAC0 20, which needs a 10 against armour class
+			// 10.
+			spinner.experienceReward = std::make_unique<ExperienceReward>(0);
+			spinner.healthPool = std::make_unique<HealthPool>(10);
+			spinner.armorClass = std::make_unique<ArmorClass>(5);
+			spinner.attacker = std::make_unique<MonsterAttacker>(
+				spinner,
+				DamageInfo{ "1d4", DamageType::PHYSICAL });
+			spinner.set_dr(0);
+			spinner.set_thaco(20);
+			spinner.set_strength(8);
+			spinner.set_dexterity(10);
+			spinner.set_natural_attack("fangs");
+			spinner.ai = std::make_unique<AiWebSpinner>();
 		}
-		map.compute_fov(ctx);
 
-		// A 1d4 bite from THAC0 20, which needs a 10 against armour class 10.
-		spinner.experienceReward = std::make_unique<ExperienceReward>(0);
-		spinner.healthPool = std::make_unique<HealthPool>(10);
-		spinner.armorClass = std::make_unique<ArmorClass>(5);
-		spinner.attacker = std::make_unique<MonsterAttacker>(
-			spinner,
-			DamageInfo{ "1d4", DamageType::PHYSICAL });
-		spinner.set_dr(0);
-		spinner.set_thaco(20);
-		spinner.set_strength(8);
-		spinner.set_dexterity(10);
-		spinner.set_natural_attack("fangs");
-		spinner.ai = std::make_unique<AiWebSpinner>();
-	}
-
-	void TearDown() override
-	{
-		game.dice.set_test_mode(false);
-		game.dice.clear_fixed_rolls();
-	}
-
-	// Queues rolls in the order the game asks for them.
-	void script(std::initializer_list<int> rolls)
-	{
-		for (const int roll : rolls)
+		void TearDown() override
 		{
-			game.dice.set_next_roll(roll);
+			game.dice.set_test_mode(false);
+			game.dice.clear_fixed_rolls();
 		}
-	}
 
-	// The roll this player needs against the venom, with its Constitution adjustment.
-	int venom_save_target()
-	{
-		const int constitutionBonus =
-			game.dataManager.constitution_for(player->get_constitution())
-				.PoisonSave;
-		const int baseTarget = SavingThrows::target(
-			player->get_creature_class(),
-			player->get_creature_level(),
-			SavingThrow::PARALYZATION_POISON_DEATH);
-		return baseTarget - constitutionBonus;
-	}
+		// Queues rolls in the order the game asks for them.
+		void script(std::initializer_list<int> rolls)
+		{
+			for (const int roll : rolls)
+			{
+				game.dice.set_next_roll(roll);
+			}
+		}
 
-	void one_turn() { spinner.ai->update(spinner, ctx); }
+		// The roll this player needs against the venom, with its Constitution
+		// adjustment.
+		int venom_save_target()
+		{
+			const int constitutionBonus =
+				game.dataManager.constitution_for(player->get_constitution())
+					.PoisonSave;
+			const int baseTarget = SavingThrows::target(
+				player->get_creature_class(),
+				player->get_creature_level(),
+				SavingThrow::PARALYZATION_POISON_DEATH);
+			return baseTarget - constitutionBonus;
+		}
 
-	static constexpr int STARTING_HP = 100;
-	static constexpr int BITE_DIE = 4;
+		void one_turn() { spinner.ai->update(spinner, ctx); }
 
-	Game game{ TEST_DICE_SEED };
-	GameContext ctx;
-	Map map{ 20, 20 };
-	std::unique_ptr<Player> player{ std::make_unique<Player>(
-		Vector2D{ 4, 5 }) };
-	Creature spinner{
-		Vector2D{ 5, 5 },
-		ActorData{ TileRef{}, "web weaver", ColorPairId::WHITE_BLACK },
+		static constexpr int STARTING_HP = 100;
+		static constexpr int BITE_DIE = 4;
+
+		Game game{ TEST_DICE_SEED };
+		GameContext ctx;
+		Map map{ 20, 20 };
+		std::unique_ptr<Player> player{ std::make_unique<Player>(
+			Vector2D{ 4, 5 }) };
+		Creature spinner{
+			Vector2D{ 5, 5 },
+			ActorData{ TileRef{}, "web weaver", ColorPairId::WHITE_BLACK },
+		};
 	};
-};
 
-// "Death/0": a failed save takes every hit point, however many were left.
-TEST_F(SpiderVenomTest, AFailedSaveAgainstTheVenomKills)
-{
-	script({ 20, BITE_DIE, 1 });
+	// "Death/0": a failed save takes every hit point, however many were left.
+	TEST_F(SpiderVenomTest, AFailedSaveAgainstTheVenomKills)
+	{
+		script({ 20, BITE_DIE, 1 });
 
-	one_turn();
+		one_turn();
 
-	EXPECT_TRUE(player->is_dead())
-		<< "the venom of a Type F poison did not kill";
-	EXPECT_EQ(player->get_hp(), 0);
-}
+		EXPECT_TRUE(player->is_dead())
+			<< "the venom of a Type F poison did not kill";
+		EXPECT_EQ(player->get_hp(), 0);
+	}
 
-// "Death/0": a made save takes nothing at all, so only the bite is felt.
-TEST_F(SpiderVenomTest, AMadeSaveAgainstTheVenomTakesNothing)
-{
-	script({ 20, BITE_DIE, 20 });
+	// "Death/0": a made save takes nothing at all, so only the bite is felt.
+	TEST_F(SpiderVenomTest, AMadeSaveAgainstTheVenomTakesNothing)
+	{
+		script({ 20, BITE_DIE, 20 });
 
-	one_turn();
+		one_turn();
 
-	EXPECT_FALSE(player->is_dead());
-	EXPECT_EQ(STARTING_HP - player->get_hp(), BITE_DIE)
-		<< "the venom was felt through a made save";
-}
+		EXPECT_FALSE(player->is_dead());
+		EXPECT_EQ(STARTING_HP - player->get_hp(), BITE_DIE)
+			<< "the venom was felt through a made save";
+	}
 
-// Injected by the bite: one that misses injects nothing, so the 1 queued for a save that
-// would kill is never read.
-TEST_F(SpiderVenomTest, ABiteThatMissesInjectsNothing)
-{
-	script({ 1, BITE_DIE, 1 });
+	// Injected by the bite: one that misses injects nothing, so the 1 queued
+	// for a save that would kill is never read.
+	TEST_F(SpiderVenomTest, ABiteThatMissesInjectsNothing)
+	{
+		script({ 1, BITE_DIE, 1 });
 
-	one_turn();
+		one_turn();
 
-	EXPECT_FALSE(player->is_dead()) << "venom from a bite that never landed";
-	EXPECT_EQ(player->get_hp(), STARTING_HP);
-}
+		EXPECT_FALSE(player->is_dead())
+			<< "venom from a bite that never landed";
+		EXPECT_EQ(player->get_hp(), STARTING_HP);
+	}
 
-// The Constitution table's poison adjustment counts: 25 gives +4, so a roll four short of
-// the bare target still makes the save.
-TEST_F(SpiderVenomTest, TheVenomSaveTakesTheConstitutionAdjustment)
-{
-	player->set_constitution(25);
-	ASSERT_EQ(game.dataManager.constitution_for(25).PoisonSave, 4);
-	const int needed = venom_save_target();
-	ASSERT_GT(needed, 1);
-	script({ 20, BITE_DIE, needed });
+	// The Constitution table's poison adjustment counts: 25 gives +4, so a roll
+	// four short of the bare target still makes the save.
+	TEST_F(SpiderVenomTest, TheVenomSaveTakesTheConstitutionAdjustment)
+	{
+		player->set_constitution(25);
+		ASSERT_EQ(game.dataManager.constitution_for(25).PoisonSave, 4);
+		const int needed = venom_save_target();
+		ASSERT_GT(needed, 1);
+		script({ 20, BITE_DIE, needed });
 
-	one_turn();
+		one_turn();
 
-	EXPECT_FALSE(player->is_dead())
-		<< "the Constitution adjustment was left out of the save";
-}
+		EXPECT_FALSE(player->is_dead())
+			<< "the Constitution adjustment was left out of the save";
+	}
 
-// The same roll from a Constitution 10 victim, which gets no adjustment, is a failure.
-TEST_F(SpiderVenomTest, TheSameRollWithoutTheAdjustmentFails)
-{
-	const int needed = venom_save_target();
-	ASSERT_EQ(game.dataManager.constitution_for(10).PoisonSave, 0);
-	script({ 20, BITE_DIE, needed - 1 });
+	// The same roll from a Constitution 10 victim, which gets no adjustment, is
+	// a failure.
+	TEST_F(SpiderVenomTest, TheSameRollWithoutTheAdjustmentFails)
+	{
+		const int needed = venom_save_target();
+		ASSERT_EQ(game.dataManager.constitution_for(10).PoisonSave, 0);
+		script({ 20, BITE_DIE, needed - 1 });
 
-	one_turn();
+		one_turn();
 
-	EXPECT_TRUE(player->is_dead()) << "a roll under the target made the save";
-}
+		EXPECT_TRUE(player->is_dead())
+			<< "a roll under the target made the save";
+	}
 
 } // namespace CppRL

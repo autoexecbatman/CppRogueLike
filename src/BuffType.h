@@ -15,382 +15,389 @@
 namespace CppRL
 {
 
-// Unified buff system - single source of truth for all timed effects
-// AD&D 2e, Player's Handbook page 277: "all attacks made by evil (or evilly
-// enchanted) creatures against the protected creature suffer -2 penalties to
-// attack rolls".
-inline constexpr int PROTECTION_FROM_EVIL_PENALTY = -2;
+	// Unified buff system - single source of truth for all timed effects AD&D
+	// 2e, Player's Handbook page 277: "all attacks made by evil (or evilly
+	// enchanted) creatures against the protected creature suffer -2 penalties
+	// to attack rolls".
+	inline constexpr int PROTECTION_FROM_EVIL_PENALTY = -2;
 
-enum class BuffType
-{
-	NONE,
-	INVISIBILITY,
-	BLESS,
-	SHIELD,
-	STRENGTH,
-	DEXTERITY,
-	CONSTITUTION,
-	INTELLIGENCE,
-	WISDOM,
-	CHARISMA,
-	SPEED,
-	FIRE_RESISTANCE,
-	COLD_RESISTANCE,
-	LIGHTNING_RESISTANCE,
-	POISON_RESISTANCE,
-	SLEEP,
-	HOLD_PERSON,
-	SANCTUARY,
-	PROTECTION_FROM_EVIL,
-	SILENCE,
-	WEBBED,
-	HAIRY_SPIDER_VENOM,
-	HIDDEN_IN_SHADOWS,
-	// Invisibility a worn item grants, apart from the spell's so taking the item off ends only it.
-	ITEM_INVISIBILITY,
-};
-
-// The hairy spider's weak poison: "the victim's AC and attack rolls are penalized by
-// 1" (Monstrous Manual). One number for both halves, so the AC path and the to-hit
-// table read the same constant.
-inline constexpr int HAIRY_SPIDER_VENOM_PENALTY = 1;
-
-// Every BuffType, in the order the enum declares them, so a cycle through the
-// editor's field reaches all of them and adding one is a single edit here.
-inline constexpr std::array<BuffType, 24> ALL_BUFF_TYPE = {
-	BuffType::NONE,
-	BuffType::INVISIBILITY,
-	BuffType::BLESS,
-	BuffType::SHIELD,
-	BuffType::STRENGTH,
-	BuffType::DEXTERITY,
-	BuffType::CONSTITUTION,
-	BuffType::INTELLIGENCE,
-	BuffType::WISDOM,
-	BuffType::CHARISMA,
-	BuffType::SPEED,
-	BuffType::FIRE_RESISTANCE,
-	BuffType::COLD_RESISTANCE,
-	BuffType::LIGHTNING_RESISTANCE,
-	BuffType::POISON_RESISTANCE,
-	BuffType::SLEEP,
-	BuffType::HOLD_PERSON,
-	BuffType::SANCTUARY,
-	BuffType::PROTECTION_FROM_EVIL,
-	BuffType::SILENCE,
-	BuffType::WEBBED,
-	BuffType::HAIRY_SPIDER_VENOM,
-	BuffType::HIDDEN_IN_SHADOWS,
-	BuffType::ITEM_INVISIBILITY,
-};
-
-// The next BuffType in that order, wrapping at the end.
-//
-// Example:
-//   next_buff_type(BuffType::NONE);   // -> BuffType::INVISIBILITY
-[[nodiscard]] inline BuffType next_buff_type(BuffType value)
-{
-	const auto found = std::ranges::find(ALL_BUFF_TYPE, value);
-	if (found == ALL_BUFF_TYPE.end() || found + 1 == ALL_BUFF_TYPE.end())
+	enum class BuffType
 	{
-		return ALL_BUFF_TYPE.front();
+		NONE,
+		INVISIBILITY,
+		BLESS,
+		SHIELD,
+		STRENGTH,
+		DEXTERITY,
+		CONSTITUTION,
+		INTELLIGENCE,
+		WISDOM,
+		CHARISMA,
+		SPEED,
+		FIRE_RESISTANCE,
+		COLD_RESISTANCE,
+		LIGHTNING_RESISTANCE,
+		POISON_RESISTANCE,
+		SLEEP,
+		HOLD_PERSON,
+		SANCTUARY,
+		PROTECTION_FROM_EVIL,
+		SILENCE,
+		WEBBED,
+		HAIRY_SPIDER_VENOM,
+		HIDDEN_IN_SHADOWS,
+		// Invisibility a worn item grants, apart from the spell's so taking the
+		// item off ends only it.
+		ITEM_INVISIBILITY,
+	};
+
+	// The hairy spider's weak poison: "the victim's AC and attack rolls are
+	// penalized by 1" (Monstrous Manual). One number for both halves, so the AC
+	// path and the to-hit table read the same constant.
+	inline constexpr int HAIRY_SPIDER_VENOM_PENALTY = 1;
+
+	// Every BuffType, in the order the enum declares them, so a cycle through
+	// the editor's field reaches all of them and adding one is a single edit
+	// here.
+	inline constexpr std::array<BuffType, 24> ALL_BUFF_TYPE = {
+		BuffType::NONE,
+		BuffType::INVISIBILITY,
+		BuffType::BLESS,
+		BuffType::SHIELD,
+		BuffType::STRENGTH,
+		BuffType::DEXTERITY,
+		BuffType::CONSTITUTION,
+		BuffType::INTELLIGENCE,
+		BuffType::WISDOM,
+		BuffType::CHARISMA,
+		BuffType::SPEED,
+		BuffType::FIRE_RESISTANCE,
+		BuffType::COLD_RESISTANCE,
+		BuffType::LIGHTNING_RESISTANCE,
+		BuffType::POISON_RESISTANCE,
+		BuffType::SLEEP,
+		BuffType::HOLD_PERSON,
+		BuffType::SANCTUARY,
+		BuffType::PROTECTION_FROM_EVIL,
+		BuffType::SILENCE,
+		BuffType::WEBBED,
+		BuffType::HAIRY_SPIDER_VENOM,
+		BuffType::HIDDEN_IN_SHADOWS,
+		BuffType::ITEM_INVISIBILITY,
+	};
+
+	// The next BuffType in that order, wrapping at the end.
+	//
+	// Example:
+	//   next_buff_type(BuffType::NONE);   // -> BuffType::INVISIBILITY
+	[[nodiscard]] inline BuffType next_buff_type(BuffType value)
+	{
+		const auto found = std::ranges::find(ALL_BUFF_TYPE, value);
+		if (found == ALL_BUFF_TYPE.end() || found + 1 == ALL_BUFF_TYPE.end())
+		{
+			return ALL_BUFF_TYPE.front();
+		}
+		return *(found + 1);
 	}
-	return *(found + 1);
-}
 
-// Maps a buff type to the string used in items.json and shown in the editor.
-//
-// Deliberately without a default case, so adding a BuffType warns here and in every
-// other switch over the enum under -Wswitch - which is how PROTECTION_FROM_EVIL was
-// caught silently encoding as "none". No build passes -Werror, so it warns rather
-// than refusing; ALL_BUFF_TYPE below is what the editor and the tests read.
-//
-// Example:
-//   encode_buff_type(BuffType::BLESS);     // -> "bless"
-//   encode_buff_type(BuffType::WEBBED);    // -> "webbed"
-inline constexpr std::string_view encode_buff_type(BuffType buffType)
-{
-	switch (buffType)
+	// Maps a buff type to the string used in items.json and shown in the
+	// editor.
+	//
+	// Deliberately without a default case, so adding a BuffType warns here and
+	// in every other switch over the enum under -Wswitch - which is how
+	// PROTECTION_FROM_EVIL was caught silently encoding as "none". No build
+	// passes -Werror, so it warns rather than refusing; ALL_BUFF_TYPE below is
+	// what the editor and the tests read.
+	//
+	// Example:
+	//   encode_buff_type(BuffType::BLESS);     // -> "bless"
+	//   encode_buff_type(BuffType::WEBBED);    // -> "webbed"
+	inline constexpr std::string_view encode_buff_type(BuffType buffType)
 	{
-	case BuffType::NONE:
-	{
+		switch (buffType)
+		{
+		case BuffType::NONE:
+		{
+			return "none";
+		}
+		case BuffType::INVISIBILITY:
+		{
+			return "invisibility";
+		}
+		case BuffType::BLESS:
+		{
+			return "bless";
+		}
+		case BuffType::SHIELD:
+		{
+			return "shield";
+		}
+		case BuffType::STRENGTH:
+		{
+			return "strength";
+		}
+		case BuffType::DEXTERITY:
+		{
+			return "dexterity";
+		}
+		case BuffType::CONSTITUTION:
+		{
+			return "constitution";
+		}
+		case BuffType::INTELLIGENCE:
+		{
+			return "intelligence";
+		}
+		case BuffType::WISDOM:
+		{
+			return "wisdom";
+		}
+		case BuffType::CHARISMA:
+		{
+			return "charisma";
+		}
+		case BuffType::SPEED:
+		{
+			return "speed";
+		}
+		case BuffType::FIRE_RESISTANCE:
+		{
+			return "fire_resistance";
+		}
+		case BuffType::COLD_RESISTANCE:
+		{
+			return "cold_resistance";
+		}
+		case BuffType::LIGHTNING_RESISTANCE:
+		{
+			return "lightning_resistance";
+		}
+		case BuffType::POISON_RESISTANCE:
+		{
+			return "poison_resistance";
+		}
+		case BuffType::SLEEP:
+		{
+			return "sleep";
+		}
+		case BuffType::HOLD_PERSON:
+		{
+			return "hold_person";
+		}
+		case BuffType::SANCTUARY:
+		{
+			return "sanctuary";
+		}
+		case BuffType::PROTECTION_FROM_EVIL:
+		{
+			return "protection_from_evil";
+		}
+		case BuffType::SILENCE:
+		{
+			return "silence";
+		}
+		case BuffType::WEBBED:
+		{
+			return "webbed";
+		}
+		case BuffType::HAIRY_SPIDER_VENOM:
+		{
+			return "hairy_spider_venom";
+		}
+		case BuffType::HIDDEN_IN_SHADOWS:
+		{
+			return "hidden_in_shadows";
+		}
+		case BuffType::ITEM_INVISIBILITY:
+		{
+			return "item_invisibility";
+		}
+		}
+
 		return "none";
 	}
-	case BuffType::INVISIBILITY:
+
+	// How a buff's value meets the stat it touches. A spell or a worn item adds
+	// to the score; a potion of giant strength sets it, and the higher of the
+	// set value and the creature's own is what counts.
+	enum class BuffApplication
 	{
-		return "invisibility";
-	}
-	case BuffType::BLESS:
+		ADD,
+		SET
+	};
+
+	// The name a save writes for an application.
+	//
+	// Example:
+	//   encode_buff_application(BuffApplication::SET);   // -> "set"
+	inline constexpr std::string_view encode_buff_application(
+		BuffApplication application)
 	{
-		return "bless";
-	}
-	case BuffType::SHIELD:
-	{
-		return "shield";
-	}
-	case BuffType::STRENGTH:
-	{
-		return "strength";
-	}
-	case BuffType::DEXTERITY:
-	{
-		return "dexterity";
-	}
-	case BuffType::CONSTITUTION:
-	{
-		return "constitution";
-	}
-	case BuffType::INTELLIGENCE:
-	{
-		return "intelligence";
-	}
-	case BuffType::WISDOM:
-	{
-		return "wisdom";
-	}
-	case BuffType::CHARISMA:
-	{
-		return "charisma";
-	}
-	case BuffType::SPEED:
-	{
-		return "speed";
-	}
-	case BuffType::FIRE_RESISTANCE:
-	{
-		return "fire_resistance";
-	}
-	case BuffType::COLD_RESISTANCE:
-	{
-		return "cold_resistance";
-	}
-	case BuffType::LIGHTNING_RESISTANCE:
-	{
-		return "lightning_resistance";
-	}
-	case BuffType::POISON_RESISTANCE:
-	{
-		return "poison_resistance";
-	}
-	case BuffType::SLEEP:
-	{
-		return "sleep";
-	}
-	case BuffType::HOLD_PERSON:
-	{
-		return "hold_person";
-	}
-	case BuffType::SANCTUARY:
-	{
-		return "sanctuary";
-	}
-	case BuffType::PROTECTION_FROM_EVIL:
-	{
-		return "protection_from_evil";
-	}
-	case BuffType::SILENCE:
-	{
-		return "silence";
-	}
-	case BuffType::WEBBED:
-	{
-		return "webbed";
-	}
-	case BuffType::HAIRY_SPIDER_VENOM:
-	{
-		return "hairy_spider_venom";
-	}
-	case BuffType::HIDDEN_IN_SHADOWS:
-	{
-		return "hidden_in_shadows";
-	}
-	case BuffType::ITEM_INVISIBILITY:
-	{
-		return "item_invisibility";
-	}
+		switch (application)
+		{
+		case BuffApplication::ADD:
+		{
+			return "add";
+		}
+		case BuffApplication::SET:
+		{
+			return "set";
+		}
+		}
+
+		std::unreachable();
 	}
 
-	return "none";
-}
+	// The application a save names, refusing a name this build does not know.
+	//
+	// Example:
+	//   parse_buff_application("add");        // -> BuffApplication::ADD
+	//   parse_buff_application("sideways");   // throws std::runtime_error
+	inline BuffApplication parse_buff_application(std::string_view name)
+	{
+		if (name == "add")
+		{
+			return BuffApplication::ADD;
+		}
+		if (name == "set")
+		{
+			return BuffApplication::SET;
+		}
 
-// How a buff's value meets the stat it touches. A spell or a worn item adds to the score;
-// a potion of giant strength sets it, and the higher of the set value and the creature's
-// own is what counts.
-enum class BuffApplication
-{
-	ADD,
-	SET
-};
-
-// The name a save writes for an application.
-//
-// Example:
-//   encode_buff_application(BuffApplication::SET);   // -> "set"
-inline constexpr std::string_view encode_buff_application(
-	BuffApplication application)
-{
-	switch (application)
-	{
-	case BuffApplication::ADD:
-	{
-		return "add";
-	}
-	case BuffApplication::SET:
-	{
-		return "set";
-	}
+		throw std::runtime_error(
+			std::format("unknown buff application '{}'", name));
 	}
 
-	std::unreachable();
-}
+	// One opponent's saving throw against a casting, kept so it is rolled once.
+	struct OpponentSave
+	{
+		UniqueId::IdType opponent{};
+		bool isMade{ false };
+	};
 
-// The application a save names, refusing a name this build does not know.
-//
-// Example:
-//   parse_buff_application("add");        // -> BuffApplication::ADD
-//   parse_buff_application("sideways");   // throws std::runtime_error
-inline BuffApplication parse_buff_application(std::string_view name)
-{
-	if (name == "add")
+	struct Buff
 	{
-		return BuffApplication::ADD;
-	}
-	if (name == "set")
-	{
-		return BuffApplication::SET;
-	}
+		BuffType type{ BuffType::INVISIBILITY };
+		int value{ 0 }; // Bonus amount (0 for binary buffs like invisibility)
 
-	throw std::runtime_error(
-		std::format("unknown buff application '{}'", name));
-}
+		// The clock reading this casting runs out at, in time units, rather
+		// than a count of rounds left. A creature acts once per action and a
+		// count would fall by one each time, so a hasted creature would run its
+		// own Haste out in half the rounds it bought. Set through expiry_time
+		// in TurnSchedule.h; nothing decrements it. None is a buff that lasts
+		// until something breaks it, as a hide does (PHB page 87).
+		std::optional<int> expiryTime{};
+		BuffApplication application{ BuffApplication::ADD };
+		// Note: Modifier stack pattern - no originalStat needed, effective
+		// values calculated on the fly
 
-// One opponent's saving throw against a casting, kept so it is rolled once.
-struct OpponentSave
-{
-	UniqueId::IdType opponent{};
-	bool isMade{ false };
-};
+		// The saves opponents have rolled against this casting. Sanctuary is
+		// the one that asks: each opponent saves once and the result holds
+		// while the casting lasts, so the record lives and ends with it (PHB
+		// page 436).
+		std::vector<OpponentSave> opponentSaves{};
+	};
 
-struct Buff
-{
-	BuffType type{ BuffType::INVISIBILITY };
-	int value{ 0 }; // Bonus amount (0 for binary buffs like invisibility)
+	inline BuffType parse_buff_type(std::string_view name)
+	{
+		if (name == "none")
+		{
+			return BuffType::NONE;
+		}
+		if (name == "invisibility")
+		{
+			return BuffType::INVISIBILITY;
+		}
+		if (name == "bless")
+		{
+			return BuffType::BLESS;
+		}
+		if (name == "shield")
+		{
+			return BuffType::SHIELD;
+		}
+		if (name == "strength")
+		{
+			return BuffType::STRENGTH;
+		}
+		if (name == "dexterity")
+		{
+			return BuffType::DEXTERITY;
+		}
+		if (name == "constitution")
+		{
+			return BuffType::CONSTITUTION;
+		}
+		if (name == "intelligence")
+		{
+			return BuffType::INTELLIGENCE;
+		}
+		if (name == "wisdom")
+		{
+			return BuffType::WISDOM;
+		}
+		if (name == "charisma")
+		{
+			return BuffType::CHARISMA;
+		}
+		if (name == "speed")
+		{
+			return BuffType::SPEED;
+		}
+		if (name == "fire_resistance")
+		{
+			return BuffType::FIRE_RESISTANCE;
+		}
+		if (name == "cold_resistance")
+		{
+			return BuffType::COLD_RESISTANCE;
+		}
+		if (name == "lightning_resistance")
+		{
+			return BuffType::LIGHTNING_RESISTANCE;
+		}
+		if (name == "poison_resistance")
+		{
+			return BuffType::POISON_RESISTANCE;
+		}
+		if (name == "sleep")
+		{
+			return BuffType::SLEEP;
+		}
+		if (name == "hold_person")
+		{
+			return BuffType::HOLD_PERSON;
+		}
+		if (name == "sanctuary")
+		{
+			return BuffType::SANCTUARY;
+		}
+		if (name == "protection_from_evil")
+		{
+			return BuffType::PROTECTION_FROM_EVIL;
+		}
+		if (name == "silence")
+		{
+			return BuffType::SILENCE;
+		}
+		if (name == "webbed")
+		{
+			return BuffType::WEBBED;
+		}
+		if (name == "hairy_spider_venom")
+		{
+			return BuffType::HAIRY_SPIDER_VENOM;
+		}
+		if (name == "hidden_in_shadows")
+		{
+			return BuffType::HIDDEN_IN_SHADOWS;
+		}
+		if (name == "item_invisibility")
+		{
+			return BuffType::ITEM_INVISIBILITY;
+		}
 
-	// The clock reading this casting runs out at, in time units, rather than a count of
-	// rounds left. A creature acts once per action and a count would fall by one each
-	// time, so a hasted creature would run its own Haste out in half the rounds it
-	// bought. Set through expiry_time in TurnSchedule.h; nothing decrements it. None is a
-	// buff that lasts until something breaks it, as a hide does (PHB page 87).
-	std::optional<int> expiryTime{};
-	BuffApplication application{ BuffApplication::ADD };
-	// Note: Modifier stack pattern - no originalStat needed, effective values calculated on the fly
-
-	// The saves opponents have rolled against this casting. Sanctuary is the one that
-	// asks: each opponent saves once and the result holds while the casting lasts, so
-	// the record lives and ends with it (PHB page 436).
-	std::vector<OpponentSave> opponentSaves{};
-};
-
-inline BuffType parse_buff_type(std::string_view name)
-{
-	if (name == "none")
-	{
-		return BuffType::NONE;
+		throw std::runtime_error(std::format("unknown buff_type '{}'", name));
 	}
-	if (name == "invisibility")
-	{
-		return BuffType::INVISIBILITY;
-	}
-	if (name == "bless")
-	{
-		return BuffType::BLESS;
-	}
-	if (name == "shield")
-	{
-		return BuffType::SHIELD;
-	}
-	if (name == "strength")
-	{
-		return BuffType::STRENGTH;
-	}
-	if (name == "dexterity")
-	{
-		return BuffType::DEXTERITY;
-	}
-	if (name == "constitution")
-	{
-		return BuffType::CONSTITUTION;
-	}
-	if (name == "intelligence")
-	{
-		return BuffType::INTELLIGENCE;
-	}
-	if (name == "wisdom")
-	{
-		return BuffType::WISDOM;
-	}
-	if (name == "charisma")
-	{
-		return BuffType::CHARISMA;
-	}
-	if (name == "speed")
-	{
-		return BuffType::SPEED;
-	}
-	if (name == "fire_resistance")
-	{
-		return BuffType::FIRE_RESISTANCE;
-	}
-	if (name == "cold_resistance")
-	{
-		return BuffType::COLD_RESISTANCE;
-	}
-	if (name == "lightning_resistance")
-	{
-		return BuffType::LIGHTNING_RESISTANCE;
-	}
-	if (name == "poison_resistance")
-	{
-		return BuffType::POISON_RESISTANCE;
-	}
-	if (name == "sleep")
-	{
-		return BuffType::SLEEP;
-	}
-	if (name == "hold_person")
-	{
-		return BuffType::HOLD_PERSON;
-	}
-	if (name == "sanctuary")
-	{
-		return BuffType::SANCTUARY;
-	}
-	if (name == "protection_from_evil")
-	{
-		return BuffType::PROTECTION_FROM_EVIL;
-	}
-	if (name == "silence")
-	{
-		return BuffType::SILENCE;
-	}
-	if (name == "webbed")
-	{
-		return BuffType::WEBBED;
-	}
-	if (name == "hairy_spider_venom")
-	{
-		return BuffType::HAIRY_SPIDER_VENOM;
-	}
-	if (name == "hidden_in_shadows")
-	{
-		return BuffType::HIDDEN_IN_SHADOWS;
-	}
-	if (name == "item_invisibility")
-	{
-		return BuffType::ITEM_INVISIBILITY;
-	}
-
-	throw std::runtime_error(std::format("unknown buff_type '{}'", name));
-}
 
 } // namespace CppRL

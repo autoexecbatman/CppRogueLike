@@ -27,8 +27,8 @@
     },
     {
       "file": "src/Actor.cpp",
-      "original": "\tposition.x = source.at(\"position\").at(\"x\").get<int>();\n\tposition.y = source.at(\"position\").at(\"y\").get<int>();",
-      "mutated": "\tposition.x = source.value(\"position\", nlohmann::json{ { \"x\", 0 }, { \"y\", 0 } }).at(\"x\").get<int>();\n\tposition.y = source.value(\"position\", nlohmann::json{ { \"x\", 0 }, { \"y\", 0 } }).at(\"y\").get<int>();",
+      "original": "\t\tposition.x = source.at(\"position\").at(\"x\").get<int>();\n\t\tposition.y = source.at(\"position\").at(\"y\").get<int>();",
+      "mutated": "\t\tposition.x = source.value(\"position\", nlohmann::json{ { \"x\", 0 }, { \"y\", 0 } }).at(\"x\").get<int>();\n\t\tposition.y = source.value(\"position\", nlohmann::json{ { \"x\", 0 }, { \"y\", 0 } }).at(\"y\").get<int>();",
       "catches": "a record without its position loading at a default; both lines, since each reads the key and either one alone still throws"
     },
     {
@@ -39,14 +39,14 @@
     },
     {
       "file": "src/Actor.cpp",
-      "original": "\tdirection.x = source.at(\"direction\").at(\"x\").get<int>();\n\tdirection.y = source.at(\"direction\").at(\"y\").get<int>();",
-      "mutated": "\tdirection.x = source.value(\"direction\", nlohmann::json{ { \"x\", 0 }, { \"y\", 0 } }).at(\"x\").get<int>();\n\tdirection.y = source.value(\"direction\", nlohmann::json{ { \"x\", 0 }, { \"y\", 0 } }).at(\"y\").get<int>();",
+      "original": "\t\tdirection.x = source.at(\"direction\").at(\"x\").get<int>();\n\t\tdirection.y = source.at(\"direction\").at(\"y\").get<int>();",
+      "mutated": "\t\tdirection.x = source.value(\"direction\", nlohmann::json{ { \"x\", 0 }, { \"y\", 0 } }).at(\"x\").get<int>();\n\t\tdirection.y = source.value(\"direction\", nlohmann::json{ { \"x\", 0 }, { \"y\", 0 } }).at(\"y\").get<int>();",
       "catches": "a record without its direction loading at a default; both lines, for the same reason"
     },
     {
       "file": "src/Actor.cpp",
-      "original": "\tactorData.tile = TileRefJson::parse_tile(source.at(\"actorData\").at(\"tile\"));",
-      "mutated": "\tif (!source.contains(\"actorData\")) { return; } actorData.tile = TileRefJson::parse_tile(source.at(\"actorData\").at(\"tile\"));",
+      "original": "\t\tactorData.tile =\n\t\t\tTileRefJson::parse_tile(source.at(\"actorData\").at(\"tile\"));",
+      "mutated": "\t\tif (!source.contains(\"actorData\")) { return; } actorData.tile =\n\t\t\tTileRefJson::parse_tile(source.at(\"actorData\").at(\"tile\"));",
       "catches": "a record without its actor data loading with the defaults"
     },
     {
@@ -63,8 +63,8 @@
     },
     {
       "file": "src/Actor.cpp",
-      "original": "\t\tstates.push_back(saved_enum_value(\n\t\t\tstate,\n\t\t\t\"Actor::load\",\n\t\t\t\"states\",\n\t\t\t\"ActorState\",\n\t\t\t&actor_state_from));",
-      "mutated": "\t\tstates.push_back(ActorState::FOV_ONLY);",
+      "original": "\t\t\tstates.push_back(saved_enum_value(\n\t\t\t\tstate,\n\t\t\t\t\"Actor::load\",\n\t\t\t\t\"states\",\n\t\t\t\t\"ActorState\",\n\t\t\t\t&actor_state_from));",
+      "mutated": "\t\t\tstates.push_back(ActorState::FOV_ONLY);",
       "catches": "the saved states replaced on load"
     }
   ]

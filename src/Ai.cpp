@@ -15,73 +15,73 @@
 namespace CppRL
 {
 
-//==AI==
-std::unique_ptr<Ai> Ai::create(const json& source)
-{
-	std::unique_ptr<Ai> ai =
-		make(parse_ai_type(source.at("type").get<std::string>()));
-	ai->load(source);
-	return ai;
-}
-
-std::unique_ptr<Ai> Ai::make(AiType type)
-{
-	std::unique_ptr<Ai> ai;
-
-	switch (type)
+	//==AI==
+	std::unique_ptr<Ai> Ai::create(const json& source)
 	{
-
-	case AiType::MONSTER:
-	{
-		ai = std::make_unique<AiMonster>();
-		break;
+		std::unique_ptr<Ai> ai =
+			make(parse_ai_type(source.at("type").get<std::string>()));
+		ai->load(source);
+		return ai;
 	}
 
-	case AiType::RANGED_MONSTER:
+	std::unique_ptr<Ai> Ai::make(AiType type)
 	{
-		ai = std::make_unique<AiMonsterRanged>();
-		break;
+		std::unique_ptr<Ai> ai;
+
+		switch (type)
+		{
+
+		case AiType::MONSTER:
+		{
+			ai = std::make_unique<AiMonster>();
+			break;
+		}
+
+		case AiType::RANGED_MONSTER:
+		{
+			ai = std::make_unique<AiMonsterRanged>();
+			break;
+		}
+
+		case AiType::CONFUSED_MONSTER:
+		{
+			ai = std::make_unique<AiMonsterConfused>(0, nullptr);
+			break;
+		}
+
+		case AiType::SHOPKEEPER:
+		{
+			ai = std::make_unique<AiShopkeeper>();
+			break;
+		}
+
+		case AiType::MIMIC:
+		{
+			ai = std::make_unique<AiMimic>();
+			break;
+		}
+
+		case AiType::SPIDER:
+		{
+			ai = std::make_unique<AiSpider>();
+			break;
+		}
+
+		case AiType::WEB_SPINNER:
+		{
+			ai = std::make_unique<AiWebSpinner>();
+			break;
+		}
+
+		case AiType::GIANT_SPIDER:
+		{
+			ai = std::make_unique<AiGiantSpider>();
+			break;
+		}
+
+		} // end of switch (type)
+
+		return ai;
 	}
-
-	case AiType::CONFUSED_MONSTER:
-	{
-		ai = std::make_unique<AiMonsterConfused>(0, nullptr);
-		break;
-	}
-
-	case AiType::SHOPKEEPER:
-	{
-		ai = std::make_unique<AiShopkeeper>();
-		break;
-	}
-
-	case AiType::MIMIC:
-	{
-		ai = std::make_unique<AiMimic>();
-		break;
-	}
-
-	case AiType::SPIDER:
-	{
-		ai = std::make_unique<AiSpider>();
-		break;
-	}
-
-	case AiType::WEB_SPINNER:
-	{
-		ai = std::make_unique<AiWebSpinner>();
-		break;
-	}
-
-	case AiType::GIANT_SPIDER:
-	{
-		ai = std::make_unique<AiGiantSpider>();
-		break;
-	}
-
-	} // end of switch (type)
-
-	return ai;
-}
 
 } // namespace CppRL

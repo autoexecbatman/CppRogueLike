@@ -44,205 +44,214 @@
 namespace CppRL
 {
 
-namespace
-{
-	constexpr int MONSTER_XP = 45;
-	constexpr Vector2D WHERE_IT_FELL{ 7, 9 };
-	constexpr Vector2D PICKED_UP_OVER_THERE{ 2, 2 };
-} // namespace
-
-class CreatureDeathTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	namespace
 	{
-		ctx = mock.to_game_context();
-		ctx.playerOwner = &player;
+		constexpr int MONSTER_XP = 45;
+		constexpr Vector2D WHERE_IT_FELL{ 7, 9 };
+		constexpr Vector2D PICKED_UP_OVER_THERE{ 2, 2 };
+	} // namespace
 
-		player->experienceReward = std::make_unique<ExperienceReward>(0);
-		player->healthPool = std::make_unique<HealthPool>(20);
-		player->armorClass = std::make_unique<ArmorClass>(10);
-		// A player always has a class, and its experience table is read when a kill pays it.
-		player->set_creature_class(CreatureClass::FIGHTER);
-		player->set_strength(14);
-
-		monster = std::make_unique<Creature>(
-			WHERE_IT_FELL,
-			ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK });
-		monster->experienceReward =
-			std::make_unique<ExperienceReward>(MONSTER_XP);
-		monster->healthPool = std::make_unique<HealthPool>(8);
-		monster->armorClass = std::make_unique<ArmorClass>(6);
-		monster->set_strength(14);
-		monster->set_corpse(
-			"dead orc",
-			80,
-			"It's tough and stringy.",
-			CorpseEdibility::EDIBLE);
-	}
-
-	// Puts an item in the monster's pack, as loot it was carrying rather than
-	// wearing. It is made somewhere else on purpose: a creature carries what it
-	// picked up elsewhere, so the drop has to move it to where the body lands.
-	Item& carried(std::string_view key)
+	class CreatureDeathTest : public ::testing::Test
 	{
-		auto item = ItemCreator::create(key, PICKED_UP_OVER_THERE, ctx);
-		Item* held = item.get();
-		[[maybe_unused]] const auto added = InventoryOperations::add_item(
-			monster->inventoryData,
-			std::move(item));
-		return *held;
-	}
-
-	// The path combat takes: take_damage_and_check_death calls die() the moment
-	// the pool empties, so this is the same entry point a killing blow uses.
-	void kill_it() { monster->die(ctx); }
-
-	bool floor_holds(const Item& item) const
-	{
-		auto is_the_item = [&item](const std::unique_ptr<Item>& dropped)
+	protected:
+		void SetUp() override
 		{
-			return dropped.get() == &item;
-		};
-		return std::ranges::any_of(ctx.floorInventory->items, is_the_item);
-	}
+			ctx = mock.to_game_context();
+			ctx.playerOwner = &player;
 
-	const Item* corpse_on_the_floor() const
-	{
-		auto is_a_corpse = [](const std::unique_ptr<Item>& dropped)
-		{
-			return dropped && dropped->actorData.name.starts_with("dead ");
-		};
-		const auto found =
-			std::ranges::find_if(ctx.floorInventory->items, is_a_corpse);
-		if (found == ctx.floorInventory->items.end())
-		{
-			return nullptr;
+			player->experienceReward = std::make_unique<ExperienceReward>(0);
+			player->healthPool = std::make_unique<HealthPool>(20);
+			player->armorClass = std::make_unique<ArmorClass>(10);
+			// A player always has a class, and its experience table is read
+			// when a kill pays it.
+			player->set_creature_class(CreatureClass::FIGHTER);
+			player->set_strength(14);
+
+			monster = std::make_unique<Creature>(
+				WHERE_IT_FELL,
+				ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK });
+			monster->experienceReward =
+				std::make_unique<ExperienceReward>(MONSTER_XP);
+			monster->healthPool = std::make_unique<HealthPool>(8);
+			monster->armorClass = std::make_unique<ArmorClass>(6);
+			monster->set_strength(14);
+			monster->set_corpse(
+				"dead orc",
+				80,
+				"It's tough and stringy.",
+				CorpseEdibility::EDIBLE);
 		}
-		return found->get();
-	}
 
-	MockGameContext mock{};
-	GameContext ctx{};
-	std::unique_ptr<Player> player{ std::make_unique<Player>(
-		Vector2D{ 1, 1 }) };
-	std::unique_ptr<Creature> monster;
-};
+		// Puts an item in the monster's pack, as loot it was carrying rather
+		// than wearing. It is made somewhere else on purpose: a creature
+		// carries what it picked up elsewhere, so the drop has to move it to
+		// where the body lands.
+		Item& carried(std::string_view key)
+		{
+			auto item = ItemCreator::create(key, PICKED_UP_OVER_THERE, ctx);
+			Item* held = item.get();
+			[[maybe_unused]] const auto added = InventoryOperations::add_item(
+				monster->inventoryData,
+				std::move(item));
+			return *held;
+		}
 
-// Dying pays nobody: who dealt the death decides the credit, and die() does
-// not know. KillCreditTest pins who is paid.
-TEST_F(CreatureDeathTest, DyingItselfPaysNobody)
-{
-	const int xpBefore = player->get_xp();
-	const int killsBefore = player->get_kill_count();
+		// The path combat takes: take_damage_and_check_death calls die() the
+		// moment the pool empties, so this is the same entry point a killing
+		// blow uses.
+		void kill_it() { monster->die(ctx); }
 
-	kill_it();
+		bool floor_holds(const Item& item) const
+		{
+			auto is_the_item = [&item](const std::unique_ptr<Item>& dropped)
+			{
+				return dropped.get() == &item;
+			};
+			return std::ranges::any_of(ctx.floorInventory->items, is_the_item);
+		}
 
-	EXPECT_EQ(player->get_xp(), xpBefore) << "die() paid the player itself";
-	EXPECT_EQ(player->get_kill_count(), killsBefore);
-}
+		const Item* corpse_on_the_floor() const
+		{
+			auto is_a_corpse = [](const std::unique_ptr<Item>& dropped)
+			{
+				return dropped && dropped->actorData.name.starts_with("dead ");
+			};
+			const auto found =
+				std::ranges::find_if(ctx.floorInventory->items, is_a_corpse);
+			if (found == ctx.floorInventory->items.end())
+			{
+				return nullptr;
+			}
+			return found->get();
+		}
 
-// What it carried falls where it fell, so it can be picked up.
-TEST_F(CreatureDeathTest, WhatItCarriedFallsWhereItDied)
-{
-	Item& loot = carried("health_potion");
+		MockGameContext mock{};
+		GameContext ctx{};
+		std::unique_ptr<Player> player{ std::make_unique<Player>(
+			Vector2D{ 1, 1 }) };
+		std::unique_ptr<Creature> monster;
+	};
 
-	kill_it();
-
-	EXPECT_TRUE(floor_holds(loot))
-		<< "the pack was destroyed with the creature";
-	EXPECT_EQ(loot.position, WHERE_IT_FELL)
-		<< "the loot did not land where the creature fell";
-	EXPECT_TRUE(monster->inventoryData.items.empty())
-		<< "the corpse still holds its pack";
-}
-
-// A body is left in its place, named for what it was.
-TEST_F(CreatureDeathTest, ACorpseIsLeftBehindNamedForTheCreature)
-{
-	kill_it();
-
-	const Item* corpse = corpse_on_the_floor();
-	ASSERT_NE(corpse, nullptr) << "nothing was left where the creature stood";
-	EXPECT_EQ(corpse->actorData.name, "dead orc");
-	EXPECT_EQ(corpse->position, WHERE_IT_FELL);
-}
-
-// A corpse weighs what the creature's body weighs, which is what makes carrying
-// one a decision rather than free food.
-TEST_F(CreatureDeathTest, ACorpseWeighsWhatTheBodyWeighed)
-{
-	const int bodyWeight = monster->get_corpse_weight();
-	ASSERT_GT(bodyWeight, 0)
-		<< "this creature's body weighs nothing, so the test below proves nothing";
-
-	kill_it();
-
-	const Item* corpse = corpse_on_the_floor();
-	ASSERT_NE(corpse, nullptr);
-	EXPECT_EQ(corpse->enhancement.weight, bodyWeight);
-}
-
-// Everything it carried goes, not merely the first thing.
-TEST_F(CreatureDeathTest, EveryCarriedItemFalls)
-{
-	Item& first = carried("health_potion");
-	Item& second = carried("bread");
-
-	kill_it();
-
-	EXPECT_TRUE(floor_holds(first));
-	EXPECT_TRUE(floor_holds(second)) << "only part of the pack was dropped";
-}
-
-// The floor has no cap: a level already holding a thousand items still takes everything
-// the dead carried, and the corpse beside it.
-TEST_F(CreatureDeathTest, ACrowdedFloorStillTakesEverythingTheDeadCarried)
-{
-	constexpr int ITEMS_ALREADY_THERE = 1000;
-	for (int already = 0; already < ITEMS_ALREADY_THERE; ++already)
+	// Dying pays nobody: who dealt the death decides the credit, and die() does
+	// not know. KillCreditTest pins who is paid.
+	TEST_F(CreatureDeathTest, DyingItselfPaysNobody)
 	{
-		ctx.floorInventory->items.push_back(
-			std::make_unique<Item>(
-				PICKED_UP_OVER_THERE,
-				ActorData{ TileRef{}, "pebble", ColorPairId::WHITE_BLACK }));
+		const int xpBefore = player->get_xp();
+		const int killsBefore = player->get_kill_count();
+
+		kill_it();
+
+		EXPECT_EQ(player->get_xp(), xpBefore) << "die() paid the player itself";
+		EXPECT_EQ(player->get_kill_count(), killsBefore);
 	}
-	Item& first = carried("health_potion");
-	Item& second = carried("bread");
 
-	kill_it();
+	// What it carried falls where it fell, so it can be picked up.
+	TEST_F(CreatureDeathTest, WhatItCarriedFallsWhereItDied)
+	{
+		Item& loot = carried("health_potion");
 
-	EXPECT_TRUE(floor_holds(first)) << "a crowded floor destroyed the pack";
-	EXPECT_TRUE(floor_holds(second));
-	EXPECT_NE(corpse_on_the_floor(), nullptr)
-		<< "a crowded floor destroyed the corpse";
-}
+		kill_it();
 
-// What it wore falls with it: the sword in its hand and the armour on its back land where
-// it fell, no longer worn, and the body keeps nothing.
-TEST_F(CreatureDeathTest, WhatItWoreFallsWhereItDied)
-{
-	monster->set_body_plan(mock.body_plans.get("humanoid"));
-	auto sword = ItemCreator::create("long_sword", PICKED_UP_OVER_THERE, ctx);
-	auto armour =
-		ItemCreator::create("leather_armor", PICKED_UP_OVER_THERE, ctx);
-	const Item& wielded = *sword;
-	const Item& worn = *armour;
-	monster->wear(std::move(sword), EquipmentSlot::RIGHT_HAND);
-	monster->wear(std::move(armour), EquipmentSlot::BODY);
+		EXPECT_TRUE(floor_holds(loot))
+			<< "the pack was destroyed with the creature";
+		EXPECT_EQ(loot.position, WHERE_IT_FELL)
+			<< "the loot did not land where the creature fell";
+		EXPECT_TRUE(monster->inventoryData.items.empty())
+			<< "the corpse still holds its pack";
+	}
 
-	kill_it();
+	// A body is left in its place, named for what it was.
+	TEST_F(CreatureDeathTest, ACorpseIsLeftBehindNamedForTheCreature)
+	{
+		kill_it();
 
-	EXPECT_TRUE(floor_holds(wielded))
-		<< "the sword it was wielding was destroyed with it";
-	EXPECT_TRUE(floor_holds(worn))
-		<< "the armour it was wearing was destroyed with it";
-	EXPECT_EQ(wielded.position, WHERE_IT_FELL);
-	EXPECT_EQ(worn.position, WHERE_IT_FELL);
-	EXPECT_TRUE(monster->equippedItems.empty())
-		<< "the corpse still wears its gear";
-}
+		const Item* corpse = corpse_on_the_floor();
+		ASSERT_NE(corpse, nullptr)
+			<< "nothing was left where the creature stood";
+		EXPECT_EQ(corpse->actorData.name, "dead orc");
+		EXPECT_EQ(corpse->position, WHERE_IT_FELL);
+	}
 
-// end of file: CreatureDeathTest.cpp
+	// A corpse weighs what the creature's body weighs, which is what makes
+	// carrying one a decision rather than free food.
+	TEST_F(CreatureDeathTest, ACorpseWeighsWhatTheBodyWeighed)
+	{
+		const int bodyWeight = monster->get_corpse_weight();
+		ASSERT_GT(bodyWeight, 0)
+			<< "this creature's body weighs nothing, so the test below proves nothing";
+
+		kill_it();
+
+		const Item* corpse = corpse_on_the_floor();
+		ASSERT_NE(corpse, nullptr);
+		EXPECT_EQ(corpse->enhancement.weight, bodyWeight);
+	}
+
+	// Everything it carried goes, not merely the first thing.
+	TEST_F(CreatureDeathTest, EveryCarriedItemFalls)
+	{
+		Item& first = carried("health_potion");
+		Item& second = carried("bread");
+
+		kill_it();
+
+		EXPECT_TRUE(floor_holds(first));
+		EXPECT_TRUE(floor_holds(second)) << "only part of the pack was dropped";
+	}
+
+	// The floor has no cap: a level already holding a thousand items still
+	// takes everything the dead carried, and the corpse beside it.
+	TEST_F(CreatureDeathTest, ACrowdedFloorStillTakesEverythingTheDeadCarried)
+	{
+		constexpr int ITEMS_ALREADY_THERE = 1000;
+		for (int already = 0; already < ITEMS_ALREADY_THERE; ++already)
+		{
+			ctx.floorInventory->items.push_back(
+				std::make_unique<Item>(
+					PICKED_UP_OVER_THERE,
+					ActorData{
+						TileRef{},
+						"pebble",
+						ColorPairId::WHITE_BLACK,
+					}));
+		}
+		Item& first = carried("health_potion");
+		Item& second = carried("bread");
+
+		kill_it();
+
+		EXPECT_TRUE(floor_holds(first)) << "a crowded floor destroyed the pack";
+		EXPECT_TRUE(floor_holds(second));
+		EXPECT_NE(corpse_on_the_floor(), nullptr)
+			<< "a crowded floor destroyed the corpse";
+	}
+
+	// What it wore falls with it: the sword in its hand and the armour on its
+	// back land where it fell, no longer worn, and the body keeps nothing.
+	TEST_F(CreatureDeathTest, WhatItWoreFallsWhereItDied)
+	{
+		monster->set_body_plan(mock.body_plans.get("humanoid"));
+		auto sword =
+			ItemCreator::create("long_sword", PICKED_UP_OVER_THERE, ctx);
+		auto armour =
+			ItemCreator::create("leather_armor", PICKED_UP_OVER_THERE, ctx);
+		const Item& wielded = *sword;
+		const Item& worn = *armour;
+		monster->wear(std::move(sword), EquipmentSlot::RIGHT_HAND);
+		monster->wear(std::move(armour), EquipmentSlot::BODY);
+
+		kill_it();
+
+		EXPECT_TRUE(floor_holds(wielded))
+			<< "the sword it was wielding was destroyed with it";
+		EXPECT_TRUE(floor_holds(worn))
+			<< "the armour it was wearing was destroyed with it";
+		EXPECT_EQ(wielded.position, WHERE_IT_FELL);
+		EXPECT_EQ(worn.position, WHERE_IT_FELL);
+		EXPECT_TRUE(monster->equippedItems.empty())
+			<< "the corpse still wears its gear";
+	}
+
+	// end of file: CreatureDeathTest.cpp
 
 } // namespace CppRL

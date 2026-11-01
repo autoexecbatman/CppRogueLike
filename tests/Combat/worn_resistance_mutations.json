@@ -39,19 +39,19 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tcase MagicalEffect::FIRE_RESISTANCE:\n\t\tcase MagicalEffect::BRILLIANCE:\n",
-      "mutated": "\t\tcase MagicalEffect::FIRE_RESISTANCE:\n",
+      "original": "\t\t\tcase MagicalEffect::FIRE_RESISTANCE:\n\t\t\tcase MagicalEffect::BRILLIANCE:\n",
+      "mutated": "\t\t\tcase MagicalEffect::FIRE_RESISTANCE:\n",
       "catches": "the helm of brilliance no longer resisting fire"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tcase MagicalEffect::COLD_RESISTANCE:\n\t\t{\n\t\t\treturn DamageType::COLD;",
-      "mutated": "\t\tcase MagicalEffect::COLD_RESISTANCE:\n\t\t{\n\t\t\treturn DamageType::FIRE;",
+      "original": "\t\t\tcase MagicalEffect::COLD_RESISTANCE:\n\t\t\t{\n\t\t\t\treturn DamageType::COLD;",
+      "mutated": "\t\t\tcase MagicalEffect::COLD_RESISTANCE:\n\t\t\t{\n\t\t\t\treturn DamageType::FIRE;",
       "catches": "the ring of warmth answering for fire"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tgreatest = std::max(\n\t\t\tgreatest,\n\t\t\titem.get_enhancement().resistance_strength(damageType));\n",
+      "original": "\t\t\tgreatest = std::max(\n\t\t\t\tgreatest,\n\t\t\t\titem.get_enhancement().resistance_strength(damageType));\n",
       "mutated": "",
       "catches": "a worn enhancement ignored"
     }

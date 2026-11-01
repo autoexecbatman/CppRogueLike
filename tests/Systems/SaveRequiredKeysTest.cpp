@@ -48,244 +48,261 @@
 namespace CppRL
 {
 
-namespace
-{
-	// Enough rounds that a clock loaded at its default cannot pass for the
-	// saved one.
-	constexpr int ROUNDS_BEFORE_SAVING = 5;
-} // namespace
-
-// A game with its registries loaded, ready to start a run and save it.
-class SaveRequiredKeysFixture : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	namespace
 	{
-		// A real save is never overwritten to prove anything about saves.
-		if (std::filesystem::exists(Paths::resolve(Paths::SAVE_FILE)))
-		{
-			GTEST_SKIP() << std::format(
-				"a save already exists at {}; refusing to overwrite it to run this test",
-				Paths::resolve(Paths::SAVE_FILE).string());
-		}
-		game.tileConfig.load(Paths::TILE_CONFIG);
-		game.bodyPlanRegistry.load(Paths::BODY_PLANS);
-		game.spellRegistry.load(Paths::SPELLS);
-		game.monsterRegistry.load(Paths::MONSTERS);
-		game.itemRegistry.load(Paths::ITEMS);
-		game.itemRegistry.load_enhanced_rules(Paths::ENHANCED_RULES);
-		game.init_world();
-		game.palette.load(Paths::TILE_CONFIG);
-		game.prefabLibrary.load(Paths::PREFABS);
-	}
+		// Enough rounds that a clock loaded at its default cannot pass for the
+		// saved one.
+		constexpr int ROUNDS_BEFORE_SAVING = 5;
+	} // namespace
 
-	void TearDown() override
+	// A game with its registries loaded, ready to start a run and save it.
+	class SaveRequiredKeysFixture : public ::testing::Test
 	{
-		// Only ever removes a file this fixture wrote, and only if a test left it behind.
-		if (wroteSave)
+	protected:
+		void SetUp() override
 		{
-			std::error_code ignored;
-			std::filesystem::remove(Paths::resolve(Paths::SAVE_FILE), ignored);
-		}
-	}
-
-	// New Game as a fighter, a few rounds on, saved through the game's own writer.
-	void save_a_game_in_progress()
-	{
-		game.playerBlueprint.creatureClass = CreatureClass::FIGHTER;
-		game.playerBlueprint.playerRaceState = PlayerRaceState::HUMAN;
-		game.stateManager.init_new_game(ctx);
-		ctx.gameState->advance_clock(
-			ROUNDS_BEFORE_SAVING * TIME_UNITS_PER_ROUND);
-		savedTime = ctx.gameState->get_time();
-		game.stateManager.save_game(ctx);
-		wroteSave = save_exists();
-	}
-
-	// Rewrites the save on disk without one top-level key.
-	static void erase_from_the_save(std::string_view key)
-	{
-		const std::filesystem::path savePath = Paths::resolve(Paths::SAVE_FILE);
-		nlohmann::json saveDocument;
-		{
-			std::ifstream in{ savePath };
-			in >> saveDocument;
-		}
-		ASSERT_TRUE(saveDocument.contains(std::string{ key }))
-			<< "the writer did not write \"" << key
-			<< "\", so erasing it proves nothing";
-		saveDocument.erase(std::string{ key });
-		std::ofstream out{ savePath };
-		out << saveDocument.dump(4);
-	}
-
-	// Rewrites the save on disk with the player's record missing its position.
-	static void erase_the_players_position()
-	{
-		const std::filesystem::path savePath = Paths::resolve(Paths::SAVE_FILE);
-		nlohmann::json saveDocument;
-		{
-			std::ifstream in{ savePath };
-			in >> saveDocument;
-		}
-		ASSERT_TRUE(saveDocument.at("player").contains("position"))
-			<< "the player was saved without a position, so erasing it proves nothing";
-		saveDocument.at("player").erase("position");
-		std::ofstream out{ savePath };
-		out << saveDocument.dump(4);
-	}
-
-	// Rewrites the save's id counter to the id its player holds, as though it had fallen behind.
-	static void set_the_saved_counter_to_the_players_id()
-	{
-		const std::filesystem::path savePath = Paths::resolve(Paths::SAVE_FILE);
-		nlohmann::json saveDocument;
-		{
-			std::ifstream in{ savePath };
-			in >> saveDocument;
-		}
-		saveDocument.at("nextUniqueId") =
-			saveDocument.at("player").at("uniqueId");
-		std::ofstream out{ savePath };
-		out << saveDocument.dump(4);
-	}
-
-	// Every id an object of the loaded game holds: the player, the creatures, and what each carries or lies on the floor.
-	std::unordered_set<UniqueId::IdType> held_ids()
-	{
-		std::unordered_set<UniqueId::IdType> ids{ ctx.player()->uniqueId };
-		for (const auto& item : ctx.player()->inventoryData.items)
-		{
-			assert(item && "held_ids: the player's pack holds a null entry");
-			ids.insert(item->uniqueId);
-		}
-		for (const auto& creature : *ctx.creatures)
-		{
-			assert(
-				creature && "held_ids: the creature list holds a null entry");
-			ids.insert(creature->uniqueId);
-			for (const auto& item : creature->inventoryData.items)
+			// A real save is never overwritten to prove anything about saves.
+			if (std::filesystem::exists(Paths::resolve(Paths::SAVE_FILE)))
 			{
-				assert(
-					item && "held_ids: a creature's pack holds a null entry");
-				ids.insert(item->uniqueId);
+				GTEST_SKIP() << std::format(
+					"a save already exists at {}; refusing to overwrite it to run this test",
+					Paths::resolve(Paths::SAVE_FILE).string());
+			}
+			game.tileConfig.load(Paths::TILE_CONFIG);
+			game.bodyPlanRegistry.load(Paths::BODY_PLANS);
+			game.spellRegistry.load(Paths::SPELLS);
+			game.monsterRegistry.load(Paths::MONSTERS);
+			game.itemRegistry.load(Paths::ITEMS);
+			game.itemRegistry.load_enhanced_rules(Paths::ENHANCED_RULES);
+			game.init_world();
+			game.palette.load(Paths::TILE_CONFIG);
+			game.prefabLibrary.load(Paths::PREFABS);
+		}
+
+		void TearDown() override
+		{
+			// Only ever removes a file this fixture wrote, and only if a test
+			// left it behind.
+			if (wroteSave)
+			{
+				std::error_code ignored;
+				std::filesystem::remove(
+					Paths::resolve(Paths::SAVE_FILE),
+					ignored);
 			}
 		}
-		for (const auto& item : ctx.floorInventory->items)
+
+		// New Game as a fighter, a few rounds on, saved through the game's own
+		// writer.
+		void save_a_game_in_progress()
 		{
-			assert(item && "held_ids: the floor holds a null entry");
-			ids.insert(item->uniqueId);
+			game.playerBlueprint.creatureClass = CreatureClass::FIGHTER;
+			game.playerBlueprint.playerRaceState = PlayerRaceState::HUMAN;
+			game.stateManager.init_new_game(ctx);
+			ctx.gameState->advance_clock(
+				ROUNDS_BEFORE_SAVING * TIME_UNITS_PER_ROUND);
+			savedTime = ctx.gameState->get_time();
+			game.stateManager.save_game(ctx);
+			wroteSave = save_exists();
 		}
-		return ids;
-	}
 
-	static bool save_exists()
+		// Rewrites the save on disk without one top-level key.
+		static void erase_from_the_save(std::string_view key)
+		{
+			const std::filesystem::path savePath =
+				Paths::resolve(Paths::SAVE_FILE);
+			nlohmann::json saveDocument;
+			{
+				std::ifstream in{ savePath };
+				in >> saveDocument;
+			}
+			ASSERT_TRUE(saveDocument.contains(std::string{ key }))
+				<< "the writer did not write \"" << key
+				<< "\", so erasing it proves nothing";
+			saveDocument.erase(std::string{ key });
+			std::ofstream out{ savePath };
+			out << saveDocument.dump(4);
+		}
+
+		// Rewrites the save on disk with the player's record missing its
+		// position.
+		static void erase_the_players_position()
+		{
+			const std::filesystem::path savePath =
+				Paths::resolve(Paths::SAVE_FILE);
+			nlohmann::json saveDocument;
+			{
+				std::ifstream in{ savePath };
+				in >> saveDocument;
+			}
+			ASSERT_TRUE(saveDocument.at("player").contains("position"))
+				<< "the player was saved without a position, so erasing it proves nothing";
+			saveDocument.at("player").erase("position");
+			std::ofstream out{ savePath };
+			out << saveDocument.dump(4);
+		}
+
+		// Rewrites the save's id counter to the id its player holds, as though
+		// it had fallen behind.
+		static void set_the_saved_counter_to_the_players_id()
+		{
+			const std::filesystem::path savePath =
+				Paths::resolve(Paths::SAVE_FILE);
+			nlohmann::json saveDocument;
+			{
+				std::ifstream in{ savePath };
+				in >> saveDocument;
+			}
+			saveDocument.at("nextUniqueId") =
+				saveDocument.at("player").at("uniqueId");
+			std::ofstream out{ savePath };
+			out << saveDocument.dump(4);
+		}
+
+		// Every id an object of the loaded game holds: the player, the
+		// creatures, and what each carries or lies on the floor.
+		std::unordered_set<UniqueId::IdType> held_ids()
+		{
+			std::unordered_set<UniqueId::IdType> ids{ ctx.player()->uniqueId };
+			for (const auto& item : ctx.player()->inventoryData.items)
+			{
+				assert(
+					item && "held_ids: the player's pack holds a null entry");
+				ids.insert(item->uniqueId);
+			}
+			for (const auto& creature : *ctx.creatures)
+			{
+				assert(
+					creature &&
+					"held_ids: the creature list holds a null entry");
+				ids.insert(creature->uniqueId);
+				for (const auto& item : creature->inventoryData.items)
+				{
+					assert(
+						item &&
+						"held_ids: a creature's pack holds a null entry");
+					ids.insert(item->uniqueId);
+				}
+			}
+			for (const auto& item : ctx.floorInventory->items)
+			{
+				assert(item && "held_ids: the floor holds a null entry");
+				ids.insert(item->uniqueId);
+			}
+			return ids;
+		}
+
+		static bool save_exists()
+		{
+			return std::filesystem::exists(Paths::resolve(Paths::SAVE_FILE));
+		}
+
+		Game game{ TEST_DICE_SEED };
+		GameContext ctx{ game.context() };
+		int savedTime{ 0 };
+		bool wroteSave{ false };
+	};
+
+	// The same game, once per key the writer always writes.
+	class SaveRequiredKeysTest :
+		public SaveRequiredKeysFixture,
+		public ::testing::WithParamInterface<std::string_view>
 	{
-		return std::filesystem::exists(Paths::resolve(Paths::SAVE_FILE));
+	};
+
+	// The control: the fixture's save loads whole, so a refusal below comes
+	// from the erased key.
+	TEST_F(SaveRequiredKeysFixture, AnUntouchedSaveLoadsWithItsClock)
+	{
+		save_a_game_in_progress();
+		ASSERT_TRUE(wroteSave)
+			<< "the game could not be saved, so nothing here is being measured";
+
+		const LoadOutcome outcome = game.stateManager.load_all(ctx);
+
+		EXPECT_EQ(outcome.kind, LoadOutcomeKind::LOADED) << outcome.reason;
+		EXPECT_EQ(ctx.gameState->get_time(), savedTime)
+			<< "the loaded game did not keep its saved clock";
 	}
 
-	Game game{ TEST_DICE_SEED };
-	GameContext ctx{ game.context() };
-	int savedTime{ 0 };
-	bool wroteSave{ false };
-};
+	// One level down: Actor::load's keys are required too, and the whole load
+	// refuses.
+	TEST_F(SaveRequiredKeysFixture, ASaveWhosePlayerHasNoPositionIsRefused)
+	{
+		save_a_game_in_progress();
+		ASSERT_TRUE(wroteSave)
+			<< "the game could not be saved, so nothing here is being measured";
+		erase_the_players_position();
 
-// The same game, once per key the writer always writes.
-class SaveRequiredKeysTest :
-	public SaveRequiredKeysFixture,
-	public ::testing::WithParamInterface<std::string_view>
-{
-};
+		const LoadOutcome outcome = game.stateManager.load_all(ctx);
 
-// The control: the fixture's save loads whole, so a refusal below comes from the erased key.
-TEST_F(SaveRequiredKeysFixture, AnUntouchedSaveLoadsWithItsClock)
-{
-	save_a_game_in_progress();
-	ASSERT_TRUE(wroteSave)
-		<< "the game could not be saved, so nothing here is being measured";
+		EXPECT_EQ(outcome.kind, LoadOutcomeKind::REFUSED)
+			<< "a player without a position was not refused";
+		EXPECT_NE(outcome.reason.find("position"), std::string::npos)
+			<< "the reason does not name the missing key: " << outcome.reason;
+		EXPECT_FALSE(save_exists())
+			<< "the refused save was kept; the owner's ruling is to delete it";
+	}
 
-	const LoadOutcome outcome = game.stateManager.load_all(ctx);
+	// A saved counter behind an id the save holds is not trusted: the load
+	// issued ids of its own while building the actors, and the counter resumes
+	// past those.
+	TEST_F(
+		SaveRequiredKeysFixture,
+		AnObjectMadeAfterLoadingASaveWithAStaleCounterTakesAnUnheldId)
+	{
+		save_a_game_in_progress();
+		ASSERT_TRUE(wroteSave)
+			<< "the game could not be saved, so nothing here is being measured";
+		set_the_saved_counter_to_the_players_id();
 
-	EXPECT_EQ(outcome.kind, LoadOutcomeKind::LOADED) << outcome.reason;
-	EXPECT_EQ(ctx.gameState->get_time(), savedTime)
-		<< "the loaded game did not keep its saved clock";
-}
+		const LoadOutcome outcome = game.stateManager.load_all(ctx);
+		ASSERT_EQ(outcome.kind, LoadOutcomeKind::LOADED) << outcome.reason;
+		const std::unordered_set<UniqueId::IdType> held = held_ids();
+		const auto made = ItemCreator::create("dagger", Vector2D{ 0, 0 }, ctx);
 
-// One level down: Actor::load's keys are required too, and the whole load refuses.
-TEST_F(SaveRequiredKeysFixture, ASaveWhosePlayerHasNoPositionIsRefused)
-{
-	save_a_game_in_progress();
-	ASSERT_TRUE(wroteSave)
-		<< "the game could not be saved, so nothing here is being measured";
-	erase_the_players_position();
+		EXPECT_FALSE(held.contains(made->uniqueId))
+			<< "an object made after the load took id " << made->uniqueId
+			<< ", which a loaded object already holds";
+	}
 
-	const LoadOutcome outcome = game.stateManager.load_all(ctx);
+	TEST_P(SaveRequiredKeysTest, ASaveMissingTheKeyIsRefusedNamingItAndDeleted)
+	{
+		const std::string_view key = GetParam();
+		save_a_game_in_progress();
+		ASSERT_TRUE(wroteSave)
+			<< "the game could not be saved, so nothing here is being measured";
+		erase_from_the_save(key);
 
-	EXPECT_EQ(outcome.kind, LoadOutcomeKind::REFUSED)
-		<< "a player without a position was not refused";
-	EXPECT_NE(outcome.reason.find("position"), std::string::npos)
-		<< "the reason does not name the missing key: " << outcome.reason;
-	EXPECT_FALSE(save_exists())
-		<< "the refused save was kept; the owner's ruling is to delete it";
-}
+		const LoadOutcome outcome = game.stateManager.load_all(ctx);
 
-// A saved counter behind an id the save holds is not trusted: the load issued ids of its own
-// while building the actors, and the counter resumes past those.
-TEST_F(
-	SaveRequiredKeysFixture,
-	AnObjectMadeAfterLoadingASaveWithAStaleCounterTakesAnUnheldId)
-{
-	save_a_game_in_progress();
-	ASSERT_TRUE(wroteSave)
-		<< "the game could not be saved, so nothing here is being measured";
-	set_the_saved_counter_to_the_players_id();
+		EXPECT_EQ(outcome.kind, LoadOutcomeKind::REFUSED)
+			<< "a save without \"" << key << "\" was not refused";
+		EXPECT_NE(outcome.reason.find(key), std::string::npos)
+			<< "the reason does not name the missing key: " << outcome.reason;
+		EXPECT_FALSE(save_exists())
+			<< "the refused save was kept; the owner's ruling is to delete it";
+	}
 
-	const LoadOutcome outcome = game.stateManager.load_all(ctx);
-	ASSERT_EQ(outcome.kind, LoadOutcomeKind::LOADED) << outcome.reason;
-	const std::unordered_set<UniqueId::IdType> held = held_ids();
-	const auto made = ItemCreator::create("dagger", Vector2D{ 0, 0 }, ctx);
+	// Each case is named for its key, so a failure says which one without
+	// reading the output.
+	const auto name_for_key =
+		[](const ::testing::TestParamInfo<std::string_view>& info)
+	{
+		return std::string{ info.param };
+	};
 
-	EXPECT_FALSE(held.contains(made->uniqueId))
-		<< "an object made after the load took id " << made->uniqueId
-		<< ", which a loaded object already holds";
-}
-
-TEST_P(SaveRequiredKeysTest, ASaveMissingTheKeyIsRefusedNamingItAndDeleted)
-{
-	const std::string_view key = GetParam();
-	save_a_game_in_progress();
-	ASSERT_TRUE(wroteSave)
-		<< "the game could not be saved, so nothing here is being measured";
-	erase_from_the_save(key);
-
-	const LoadOutcome outcome = game.stateManager.load_all(ctx);
-
-	EXPECT_EQ(outcome.kind, LoadOutcomeKind::REFUSED)
-		<< "a save without \"" << key << "\" was not refused";
-	EXPECT_NE(outcome.reason.find(key), std::string::npos)
-		<< "the reason does not name the missing key: " << outcome.reason;
-	EXPECT_FALSE(save_exists())
-		<< "the refused save was kept; the owner's ruling is to delete it";
-}
-
-// Each case is named for its key, so a failure says which one without reading the output.
-const auto name_for_key =
-	[](const ::testing::TestParamInfo<std::string_view>& info)
-{
-	return std::string{ info.param };
-};
-
-INSTANTIATE_TEST_SUITE_P(
-	EveryKeyTheWriterAlwaysWrites,
-	SaveRequiredKeysTest,
-	::testing::Values(
-		"player",
-		"stairs",
-		"gui",
-		"hunger_system",
-		"time",
-		"roundsRun",
-		"nextUniqueId"),
-	name_for_key);
+	INSTANTIATE_TEST_SUITE_P(
+		EveryKeyTheWriterAlwaysWrites,
+		SaveRequiredKeysTest,
+		::testing::Values(
+			"player",
+			"stairs",
+			"gui",
+			"hunger_system",
+			"time",
+			"roundsRun",
+			"nextUniqueId"),
+		name_for_key);
 
 } // namespace CppRL

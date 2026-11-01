@@ -75,14 +75,14 @@
         },
         {
             "file": "src/RecordEditor.cpp",
-            "original": "\t\texit(ctx);\n\t\treturn;",
-            "mutated": "\t\treturn;",
+            "original": "\t\t\texit(ctx);\n\t\t\treturn;",
+            "mutated": "\t\t\treturn;",
             "catches": "Esc not leaving the editor"
         },
         {
             "file": "src/RecordEditor.cpp",
-            "original": "\tcommit_working(ctx);\n\tactive = false;",
-            "mutated": "\tactive = false;",
+            "original": "\t\tcommit_working(ctx);\n\t\tactive = false;",
+            "mutated": "\t\tactive = false;",
             "catches": "leaving without committing the record"
         },
         {
@@ -93,8 +93,8 @@
         },
         {
             "file": "src/RecordEditor.cpp",
-            "original": "\t\t\tload_working(ctx);\n\t\t\tfocus = EditorFocus::FIELDS;\n\t\t}\n\t\telse if (input.is_pressed(EditorKey::REMOVE))",
-            "mutated": "\t\t\tload_working(ctx);\n\t\t}\n\t\telse if (input.is_pressed(EditorKey::REMOVE))",
+            "original": "\t\t\t\tload_working(ctx);\n\t\t\t\tfocus = EditorFocus::FIELDS;\n\t\t\t}\n\t\t\telse if (input.is_pressed(EditorKey::REMOVE))",
+            "mutated": "\t\t\t\tload_working(ctx);\n\t\t\t}\n\t\t\telse if (input.is_pressed(EditorKey::REMOVE))",
             "catches": "adding a record leaving focus on the list"
         },
         {
@@ -153,8 +153,8 @@
         },
         {
             "file": "src/MonsterEditor.cpp",
-            "original": "\tselectedXpCount = 0;\n\tselectedPower = 0;",
-            "mutated": "\tselectedPower = 0;",
+            "original": "\t\tselectedXpCount = 0;\n\t\tselectedPower = 0;",
+            "mutated": "\t\tselectedPower = 0;",
             "catches": "another monster keeping the last one's hit dice count"
         },
         {
@@ -237,50 +237,50 @@
         },
         {
             "file": "src/RecordEditor.cpp",
-            "original": "\tif (mode == EditorMode::EDIT_STRING)\n\t{\n\t\thandle_edit_string(input);\n\t\treturn;",
-            "mutated": "\tif (mode == EditorMode::EDIT_STRING && !input.is_pressed(EditorKey::ESCAPE))\n\t{\n\t\thandle_edit_string(input);\n\t\treturn;",
+            "original": "\t\tif (mode == EditorMode::EDIT_STRING)\n\t\t{\n\t\t\thandle_edit_string(input);\n\t\t\treturn;",
+            "mutated": "\t\tif (mode == EditorMode::EDIT_STRING && !input.is_pressed(EditorKey::ESCAPE))\n\t\t{\n\t\t\thandle_edit_string(input);\n\t\t\treturn;",
             "catches": "Esc while typing reaching the global keys and leaving"
         },
         {
             "file": "src/RecordEditor.cpp",
-            "original": "\tif (mode == EditorMode::EDIT_STRING)\n\t{\n\t\thandle_edit_string(input);\n\t\treturn;",
-            "mutated": "\tif (mode == EditorMode::EDIT_STRING && !input.is_pressed(EditorKey::TAB))\n\t{\n\t\thandle_edit_string(input);\n\t\treturn;",
+            "original": "\t\tif (mode == EditorMode::EDIT_STRING)\n\t\t{\n\t\t\thandle_edit_string(input);\n\t\t\treturn;",
+            "mutated": "\t\tif (mode == EditorMode::EDIT_STRING && !input.is_pressed(EditorKey::TAB))\n\t\t{\n\t\t\thandle_edit_string(input);\n\t\t\treturn;",
             "catches": "Tab while typing moving focus to the list"
         },
         {
             "file": "src/RecordEditor.cpp",
-            "original": "\tif (mode == EditorMode::EDIT_STRING)\n\t{\n\t\thandle_edit_string(input);\n\t\treturn;",
-            "mutated": "\tif (mode == EditorMode::EDIT_STRING && !input.is_pressed(EditorKey::SAVE))\n\t{\n\t\thandle_edit_string(input);\n\t\treturn;",
+            "original": "\t\tif (mode == EditorMode::EDIT_STRING)\n\t\t{\n\t\t\thandle_edit_string(input);\n\t\t\treturn;",
+            "mutated": "\t\tif (mode == EditorMode::EDIT_STRING && !input.is_pressed(EditorKey::SAVE))\n\t\t{\n\t\t\thandle_edit_string(input);\n\t\t\treturn;",
             "catches": "Ctrl+S while typing saving the record"
         },
         {
             "file": "src/RecordEditor.cpp",
-            "original": "\tif (input.is_pressed(EditorKey::ESCAPE))\n\t{\n\t\tmode = EditorMode::NORMAL;\n\t}\n}\n\ntemplate <typename Model>\nvoid RecordEditor<Model>::handle_picker(",
-            "mutated": "\tif (input.is_pressed(EditorKey::ESCAPE))\n\t{\n\t\tmode = EditorMode::EDIT_STRING;\n\t}\n}\n\ntemplate <typename Model>\nvoid RecordEditor<Model>::handle_picker(",
+            "original": "\t\tif (input.is_pressed(EditorKey::ESCAPE))\n\t\t{\n\t\t\tmode = EditorMode::NORMAL;\n\t\t}\n\t}\n\n\ttemplate <typename Model>\n\tvoid RecordEditor<Model>::handle_picker(",
+            "mutated": "\t\tif (input.is_pressed(EditorKey::ESCAPE))\n\t\t{\n\t\t\tmode = EditorMode::EDIT_STRING;\n\t\t}\n\t}\n\n\ttemplate <typename Model>\n\tvoid RecordEditor<Model>::handle_picker(",
             "catches": "Esc while typing leaving the typing open"
         },
         {
             "file": "src/RecordEditor.cpp",
-            "original": "\tif (input.is_pressed(EditorKey::ESCAPE))\n\t{\n\t\tmode = EditorMode::NORMAL;\n\t}\n}\n\ntemplate <typename Model>\nvoid RecordEditor<Model>::handle_picker(",
-            "mutated": "\tif (input.is_pressed(EditorKey::ESCAPE))\n\t{\n\t\tmodel.field_set_string(current_field(), editBuffer);\n\t\tmode = EditorMode::NORMAL;\n\t}\n}\n\ntemplate <typename Model>\nvoid RecordEditor<Model>::handle_picker(",
+            "original": "\t\tif (input.is_pressed(EditorKey::ESCAPE))\n\t\t{\n\t\t\tmode = EditorMode::NORMAL;\n\t\t}\n\t}\n\n\ttemplate <typename Model>\n\tvoid RecordEditor<Model>::handle_picker(",
+            "mutated": "\t\tif (input.is_pressed(EditorKey::ESCAPE))\n\t\t{\n\t\t\tmodel.field_set_string(current_field(), editBuffer);\n\t\t\tmode = EditorMode::NORMAL;\n\t\t}\n\t}\n\n\ttemplate <typename Model>\n\tvoid RecordEditor<Model>::handle_picker(",
             "catches": "Esc while typing writing the typed text into the field"
         },
         {
             "file": "src/RecordEditor.cpp",
-            "original": "\tif (input.is_pressed(EditorKey::ESCAPE) ||\n\t\tinput.is_pressed(EditorKey::PICKER))",
-            "mutated": "\tif (input.is_pressed(EditorKey::PICKER))",
+            "original": "\t\tif (input.is_pressed(EditorKey::ESCAPE) ||\n\t\t\tinput.is_pressed(EditorKey::PICKER))",
+            "mutated": "\t\tif (input.is_pressed(EditorKey::PICKER))",
             "catches": "Esc in the picker leaving the picker open"
         },
         {
             "file": "src/RecordEditor.cpp",
-            "original": "\t// A field the record holds fixed takes no edit key.\n\tif (model.is_read_only(fieldId))\n\t{\n\t\treturn;\n\t}\n\n",
+            "original": "\t\t// A field the record holds fixed takes no edit key.\n\t\tif (model.is_read_only(fieldId))\n\t\t{\n\t\t\treturn;\n\t\t}\n\n",
             "mutated": "",
             "catches": "a read-only field still taking every edit key"
         },
         {
             "file": "src/RecordEditor.cpp",
-            "original": "\tif (model.is_read_only(fieldId))\n\t{\n\t\treturn;",
-            "mutated": "\tif (model.is_read_only(fieldId) && !input.is_pressed(EditorKey::ENTER))\n\t{\n\t\treturn;",
+            "original": "\t\tif (model.is_read_only(fieldId))\n\t\t{\n\t\t\treturn;",
+            "mutated": "\t\tif (model.is_read_only(fieldId) && !input.is_pressed(EditorKey::ENTER))\n\t\t{\n\t\t\treturn;",
             "catches": "Enter still stepping a read-only field"
         },
         {
@@ -303,14 +303,14 @@
         },
         {
             "file": "src/ItemEditor.cpp",
-            "original": "bool ItemEditorModel::is_read_only([[maybe_unused]] FieldId field) const\n{\n\treturn false;",
-            "mutated": "bool ItemEditorModel::is_read_only([[maybe_unused]] FieldId field) const\n{\n\treturn true;",
+            "original": "\tbool ItemEditorModel::is_read_only([[maybe_unused]] FieldId field) const\n\t{\n\t\treturn false;",
+            "mutated": "\tbool ItemEditorModel::is_read_only([[maybe_unused]] FieldId field) const\n\t{\n\t\treturn true;",
             "catches": "every item field made read-only"
         },
         {
             "file": "src/MonsterEditor.cpp",
-            "original": "bool MonsterEditorModel::is_read_only([[maybe_unused]] FieldId field) const\n{\n\treturn false;",
-            "mutated": "bool MonsterEditorModel::is_read_only([[maybe_unused]] FieldId field) const\n{\n\treturn true;",
+            "original": "\tbool MonsterEditorModel::is_read_only([[maybe_unused]] FieldId field) const\n\t{\n\t\treturn false;",
+            "mutated": "\tbool MonsterEditorModel::is_read_only([[maybe_unused]] FieldId field) const\n\t{\n\t\treturn true;",
             "catches": "every monster field made read-only"
         }
     ]

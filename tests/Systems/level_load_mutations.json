@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/GameStateManager.cpp",
-      "original": "\trooms.clear();\n\n\tconst json& roomRecords = source.at(\"rooms\");",
-      "mutated": "\n\tconst json& roomRecords = source.at(\"rooms\");",
+      "original": "\t\trooms.clear();\n\n\t\tconst json& roomRecords = source.at(\"rooms\");",
+      "mutated": "\n\t\tconst json& roomRecords = source.at(\"rooms\");",
       "catches": "a load stacking the saved rooms on the abandoned level's"
     },
     {
@@ -33,8 +33,8 @@
     },
     {
       "file": "src/GameStateManager.cpp",
-      "original": "\t\tdecoration->position = Vector2D{\n\t\t\trecord.at(\"position\").at(\"x\").get<int>(),\n\t\t\trecord.at(\"position\").at(\"y\").get<int>(),\n\t\t};",
-      "mutated": "\t\tdecoration->position = Vector2D{\n\t\t\trecord.at(\"position\").at(\"y\").get<int>(), record.at(\"position\").at(\"x\").get<int>(),\n\t\t};",
+      "original": "\t\t\tdecoration->position = Vector2D{\n\t\t\t\trecord.at(\"position\").at(\"x\").get<int>(),\n\t\t\t\trecord.at(\"position\").at(\"y\").get<int>(),\n\t\t\t};",
+      "mutated": "\t\t\tdecoration->position = Vector2D{\n\t\t\t\trecord.at(\"position\").at(\"y\").get<int>(), record.at(\"position\").at(\"x\").get<int>(),\n\t\t\t};",
       "catches": "a decoration loaded at its coordinates swapped"
     },
     {
@@ -57,7 +57,7 @@
     },
     {
       "file": "src/GameStateManager.cpp",
-      "original": "\t\tdecoration->lootTableKey = record.at(\"lootTableKey\").get<std::string>();",
+      "original": "\t\t\tdecoration->lootTableKey =\n\t\t\t\trecord.at(\"lootTableKey\").get<std::string>();",
       "mutated": "",
       "catches": "a barrel that drops nothing after a load"
     },
@@ -69,20 +69,20 @@
     },
     {
       "file": "src/TileRefJson.cpp",
-      "original": "\t\t\trecord.at(\"col\").get<int>(),\n\t\t\trecord.at(\"row\").get<int>()",
-      "mutated": "\t\t\trecord.at(\"row\").get<int>(),\n\t\t\trecord.at(\"col\").get<int>()",
+      "original": "\t\t\t\trecord.at(\"col\").get<int>(),\n\t\t\t\trecord.at(\"row\").get<int>()",
+      "mutated": "\t\t\t\trecord.at(\"row\").get<int>(),\n\t\t\t\trecord.at(\"col\").get<int>()",
       "catches": "a tile read with its column and row swapped"
     },
     {
       "file": "src/GameStateManager.cpp",
-      "original": "}\n\t\treturn std::nullopt;\n\t}\n} // namespace\n\nvoid load_rooms(",
-      "mutated": "\t\t}\n\t\treturn RoomType::STANDARD;\n\t}\n\t} // namespace\n\n\tvoid load_rooms(",
+      "original": "\t}\n\t\t\treturn std::nullopt;\n\t\t}\n\t} // namespace\n\n\tvoid load_rooms(",
+      "mutated": "\t\t\t}\n\t\t\treturn RoomType::STANDARD;\n\t\t}\n\t\t} // namespace\n\n\t\tvoid load_rooms(",
       "catches": "a saved value no RoomType has loaded as a standard room instead of refused"
     },
     {
       "file": "src/GameStateManager.cpp",
-      "original": "\t\tcase RoomType::DANGER:\n\t\tcase RoomType::TREASURE:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n",
-      "mutated": "\t\tcase RoomType::DANGER:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\tcase RoomType::TREASURE:\n\t\t{\n\t\t\treturn RoomType::STANDARD;\n\t\t}\n",
+      "original": "\t\t\tcase RoomType::DANGER:\n\t\t\tcase RoomType::TREASURE:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n",
+      "mutated": "\t\t\tcase RoomType::DANGER:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n\t\t\tcase RoomType::TREASURE:\n\t\t\t{\n\t\t\t\treturn RoomType::STANDARD;\n\t\t\t}\n",
       "catches": "a saved treasure room read back as a standard one"
     },
     {
@@ -93,8 +93,8 @@
     },
     {
       "file": "src/GameStateManager.cpp",
-      "original": "\t\t\tthrow std::runtime_error(\n\t\t\t\tstd::format(\n\t\t\t\t\t\"load_rooms: room type {} is not a RoomType\",\n\t\t\t\t\tsavedType));\n",
-      "mutated": "\t\t\tcontinue;\n",
+      "original": "\t\t\t\tthrow std::runtime_error(\n\t\t\t\t\tstd::format(\n\t\t\t\t\t\t\"load_rooms: room type {} is not a RoomType\",\n\t\t\t\t\t\tsavedType));\n",
+      "mutated": "\t\t\t\tcontinue;\n",
       "catches": "a room no RoomType names skipped instead of refused"
     },
     {

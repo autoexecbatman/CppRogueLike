@@ -41,102 +41,109 @@
 namespace CppRL
 {
 
-namespace
-{
-	// The book's turn, in its rounds: "Ten combat rounds equal a turn" (PHB,
-	// PDF page 184).
-	constexpr int ROUNDS_IN_A_TURN = 10;
-	// The d20 that fails any saving throw, so every creature in view takes the
-	// effect.
-	constexpr int FAILED_SAVE = 1;
-} // namespace
-
-class ScrollDurationTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	namespace
 	{
-		mock.player = std::make_unique<Player>(Vector2D{ 4, 5 });
-		mock.player->experienceReward = std::make_unique<ExperienceReward>(0);
-		mock.player->healthPool = std::make_unique<HealthPool>(10);
-		mock.player->armorClass = std::make_unique<ArmorClass>(10);
+		// The book's turn, in its rounds: "Ten combat rounds equal a turn"
+		// (PHB, PDF page 184).
+		constexpr int ROUNDS_IN_A_TURN = 10;
+		// The d20 that fails any saving throw, so every creature in view takes
+		// the effect.
+		constexpr int FAILED_SAVE = 1;
+	} // namespace
 
-		// An open corridor, so the goblin beside the reader is in view.
-		mock.map.init_tiles();
-		for (int column = 1; column < 19; ++column)
+	class ScrollDurationTest : public ::testing::Test
+	{
+	protected:
+		void SetUp() override
 		{
-			mock.map.set_tile(Vector2D{ column, 5 }, TileType::FLOOR);
+			mock.player = std::make_unique<Player>(Vector2D{ 4, 5 });
+			mock.player->experienceReward =
+				std::make_unique<ExperienceReward>(0);
+			mock.player->healthPool = std::make_unique<HealthPool>(10);
+			mock.player->armorClass = std::make_unique<ArmorClass>(10);
+
+			// An open corridor, so the goblin beside the reader is in view.
+			mock.map.init_tiles();
+			for (int column = 1; column < 19; ++column)
+			{
+				mock.map.set_tile(Vector2D{ column, 5 }, TileType::FLOOR);
+			}
+
+			auto goblin = std::make_unique<Creature>(
+				Vector2D{ 5, 5 },
+				ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
+			goblin->healthPool = std::make_unique<HealthPool>(10);
+			goblin->armorClass = std::make_unique<ArmorClass>(10);
+			target = goblin.get();
+			mock.creatures.push_back(std::move(goblin));
+
+			mock.map.compute_fov(ctx);
+			ASSERT_TRUE(mock.map.is_in_fov(target->position))
+				<< "the goblin is not in view of the reader";
 		}
 
-		auto goblin = std::make_unique<Creature>(
-			Vector2D{ 5, 5 },
-			ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
-		goblin->healthPool = std::make_unique<HealthPool>(10);
-		goblin->armorClass = std::make_unique<ArmorClass>(10);
-		target = goblin.get();
-		mock.creatures.push_back(std::move(goblin));
+		// Reads the scroll with the goblin's save failed, and returns the
+		// effect it grants.
+		BuffType read(Item& scroll)
+		{
+			const BuffType granted =
+				std::get<TargetedScroll>(*scroll.behavior).buffType;
+			mock.dice.set_next_roll(FAILED_SAVE);
+			use_item(*scroll.behavior, scroll, *mock.player, ctx);
+			return granted;
+		}
 
-		mock.map.compute_fov(ctx);
-		ASSERT_TRUE(mock.map.is_in_fov(target->position))
-			<< "the goblin is not in view of the reader";
-	}
+		// Whether the goblin still has the effect once the clock reads `rounds`
+		// after the reading.
+		bool lasts_to(BuffType granted, int rounds)
+		{
+			ctx.buffSystem->update_creature_buffs(
+				*target,
+				expiry_time(0, rounds));
+			return ctx.buffSystem->has_buff(*target, granted);
+		}
 
-	// Reads the scroll with the goblin's save failed, and returns the effect it grants.
-	BuffType read(Item& scroll)
+		MockGameContext mock{};
+		GameContext ctx{ mock.to_game_context() };
+		Creature* target{ nullptr };
+	};
+
+	TEST_F(ScrollDurationTest, SleepLastsItsFiveRounds)
 	{
-		const BuffType granted =
-			std::get<TargetedScroll>(*scroll.behavior).buffType;
-		mock.dice.set_next_roll(FAILED_SAVE);
-		use_item(*scroll.behavior, scroll, *mock.player, ctx);
-		return granted;
+		auto scroll =
+			ItemCreator::create("scroll_sleep", mock.player->position, ctx);
+		const BuffType granted = read(*scroll);
+
+		EXPECT_TRUE(lasts_to(granted, 4));
+		EXPECT_FALSE(lasts_to(granted, 5));
 	}
 
-	// Whether the goblin still has the effect once the clock reads `rounds` after the reading.
-	bool lasts_to(BuffType granted, int rounds)
+	TEST_F(ScrollDurationTest, HoldPersonLastsItsEightRounds)
 	{
-		ctx.buffSystem->update_creature_buffs(*target, expiry_time(0, rounds));
-		return ctx.buffSystem->has_buff(*target, granted);
+		auto scroll = ItemCreator::create(
+			"scroll_hold_person",
+			mock.player->position,
+			ctx);
+		const BuffType granted = read(*scroll);
+
+		EXPECT_TRUE(lasts_to(granted, 7));
+		EXPECT_FALSE(lasts_to(granted, 8));
 	}
 
-	MockGameContext mock{};
-	GameContext ctx{ mock.to_game_context() };
-	Creature* target{ nullptr };
-};
+	// The same scroll authored in turns: two turns are twenty rounds, not two.
+	TEST_F(ScrollDurationTest, AScrollAuthoredInTurnsLastsTenRoundsATurn)
+	{
+		auto scroll =
+			ItemCreator::create("scroll_sleep", mock.player->position, ctx);
+		TargetedScroll& sleep = std::get<TargetedScroll>(*scroll->behavior);
+		sleep.duration = DiceExpr{ 0, 0, 2 };
+		sleep.durationUnit = DurationUnit::TURNS;
+		const BuffType granted = read(*scroll);
 
-TEST_F(ScrollDurationTest, SleepLastsItsFiveRounds)
-{
-	auto scroll =
-		ItemCreator::create("scroll_sleep", mock.player->position, ctx);
-	const BuffType granted = read(*scroll);
+		EXPECT_TRUE(lasts_to(granted, 2 * ROUNDS_IN_A_TURN - 1));
+		EXPECT_FALSE(lasts_to(granted, 2 * ROUNDS_IN_A_TURN));
+	}
 
-	EXPECT_TRUE(lasts_to(granted, 4));
-	EXPECT_FALSE(lasts_to(granted, 5));
-}
-
-TEST_F(ScrollDurationTest, HoldPersonLastsItsEightRounds)
-{
-	auto scroll =
-		ItemCreator::create("scroll_hold_person", mock.player->position, ctx);
-	const BuffType granted = read(*scroll);
-
-	EXPECT_TRUE(lasts_to(granted, 7));
-	EXPECT_FALSE(lasts_to(granted, 8));
-}
-
-// The same scroll authored in turns: two turns are twenty rounds, not two.
-TEST_F(ScrollDurationTest, AScrollAuthoredInTurnsLastsTenRoundsATurn)
-{
-	auto scroll =
-		ItemCreator::create("scroll_sleep", mock.player->position, ctx);
-	TargetedScroll& sleep = std::get<TargetedScroll>(*scroll->behavior);
-	sleep.duration = DiceExpr{ 0, 0, 2 };
-	sleep.durationUnit = DurationUnit::TURNS;
-	const BuffType granted = read(*scroll);
-
-	EXPECT_TRUE(lasts_to(granted, 2 * ROUNDS_IN_A_TURN - 1));
-	EXPECT_FALSE(lasts_to(granted, 2 * ROUNDS_IN_A_TURN));
-}
-
-// end of file: ScrollDurationTest.cpp
+	// end of file: ScrollDurationTest.cpp
 
 } // namespace CppRL

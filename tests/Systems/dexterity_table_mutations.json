@@ -39,8 +39,8 @@
     },
     {
       "file": "src/DataManager.cpp",
-      "original": "\t\tif (score < 1)\n\t\t{\n\t\t\treturn Row{};\n\t\t}",
-      "mutated": "\t\tif (score < 1)\n\t\t{\n\t\t\treturn table.front();\n\t\t}",
+      "original": "\t\t\tif (score < 1)\n\t\t\t{\n\t\t\t\treturn Row{};\n\t\t\t}",
+      "mutated": "\t\t\tif (score < 1)\n\t\t\t{\n\t\t\t\treturn table.front();\n\t\t\t}",
       "catches": "a score never set read as Dexterity 1"
     },
     {
@@ -51,8 +51,8 @@
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "ctx.dataManager->dexterity_for(creature.get_dexterity())\n\t\t\t\t.ReactionAdj",
-      "mutated": "ctx.dataManager->get_dexterity_attributes().at(creature.get_dexterity() - 1).ReactionAdj",
+      "original": "\tctx.dataManager->dexterity_for(creature.get_dexterity())\n\t\t\t\t\t.ReactionAdj",
+      "mutated": "\tctx.dataManager->get_dexterity_attributes().at(creature.get_dexterity() - 1).ReactionAdj",
       "catches": "the surprise roll indexing the table itself again"
     }
   ]

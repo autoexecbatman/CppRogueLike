@@ -41,261 +41,282 @@
 namespace CppRL
 {
 
-namespace
-{
-	// The blessing every buff case here uses, in rounds, as a priest's Bless
-	// prints it.
-	constexpr int BLESS_ROUNDS = 3;
-
-	// How long the confusion case confuses for, in rounds.
-	constexpr int CONFUSION_ROUNDS = 3;
-} // namespace
-
-class DurationScheduleTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	namespace
 	{
-		ctx = mock.to_game_context();
-		ctx.creatures = &creatures;
-		ctx.creatureManager = &manager;
-	}
+		// The blessing every buff case here uses, in rounds, as a priest's
+		// Bless prints it.
+		constexpr int BLESS_ROUNDS = 3;
 
-	// A creature with the three parts Creature::update reaches through, and a mind
-	// that counts rather than one that needs a map to walk on.
-	Creature& placed(int actionDelay)
+		// How long the confusion case confuses for, in rounds.
+		constexpr int CONFUSION_ROUNDS = 3;
+	} // namespace
+
+	class DurationScheduleTest : public ::testing::Test
 	{
-		auto creature = std::make_unique<Creature>(
-			Vector2D{ 5, 5 },
-			ActorData{ TileRef{}, "subject", ColorPairId::WHITE_BLACK });
-		creature->experienceReward = std::make_unique<ExperienceReward>(0);
-		creature->armorClass = std::make_unique<ArmorClass>(10);
-		creature->healthPool = std::make_unique<HealthPool>(10);
-		creature->set_action_delay(actionDelay);
-		creature->ai = std::make_unique<CountingAi>();
-
-		creatures.push_back(std::move(creature));
-		return *creatures.back();
-	}
-
-	// Queue rolls that read as standing still, so a confused creature needs no map.
-	void script_still_directions(int count)
-	{
-		for (int roll = 0; roll < count; ++roll)
+	protected:
+		void SetUp() override
 		{
-			mock.dice.set_next_roll(0);
+			ctx = mock.to_game_context();
+			ctx.creatures = &creatures;
+			ctx.creatureManager = &manager;
+		}
+
+		// A creature with the three parts Creature::update reaches through, and
+		// a mind that counts rather than one that needs a map to walk on.
+		Creature& placed(int actionDelay)
+		{
+			auto creature = std::make_unique<Creature>(
+				Vector2D{ 5, 5 },
+				ActorData{ TileRef{}, "subject", ColorPairId::WHITE_BLACK });
+			creature->experienceReward = std::make_unique<ExperienceReward>(0);
+			creature->armorClass = std::make_unique<ArmorClass>(10);
+			creature->healthPool = std::make_unique<HealthPool>(10);
+			creature->set_action_delay(actionDelay);
+			creature->ai = std::make_unique<CountingAi>();
+
+			creatures.push_back(std::move(creature));
+			return *creatures.back();
+		}
+
+		// Queue rolls that read as standing still, so a confused creature needs
+		// no map.
+		void script_still_directions(int count)
+		{
+			for (int roll = 0; roll < count; ++roll)
+			{
+				mock.dice.set_next_roll(0);
+			}
+		}
+
+		// Drive every creature through the window that ends one round further
+		// on.
+		void run_round(int round)
+		{
+			ctx.gameState->set_time(TIME_UNITS_PER_ROUND * round);
+			manager.update_creatures(creatures, ctx);
+		}
+
+		MockGameContext mock{};
+		GameContext ctx{};
+		CreatureManager manager{};
+		BuffSystem buffs{};
+		std::vector<std::unique_ptr<Creature>> creatures{};
+	};
+
+	// The defect, stated as the property it breaks. Two creatures are blessed
+	// for the same three rounds and driven through the same windows; the
+	// quickling acts twice in each. Its blessing has to outlast the second
+	// round exactly as the ordinary creature's does.
+	TEST_F(DurationScheduleTest, SpeedDoesNotChangeHowLongABuffLasts)
+	{
+		Creature& ordinary = placed(TIME_UNITS_PER_ROUND);
+		Creature& quickling = placed(TIME_UNITS_PER_ROUND / 2);
+
+		buffs.add_buff(
+			ordinary,
+			BuffType::BLESS,
+			0,
+			BLESS_ROUNDS,
+			BuffApplication::ADD,
+			ctx.gameState->get_time());
+		buffs.add_buff(
+			quickling,
+			BuffType::BLESS,
+			0,
+			BLESS_ROUNDS,
+			BuffApplication::ADD,
+			ctx.gameState->get_time());
+
+		for (int round = 1; round < BLESS_ROUNDS; ++round)
+		{
+			run_round(round);
+
+			EXPECT_TRUE(buffs.has_buff(ordinary, BuffType::BLESS))
+				<< "round " << round;
+			EXPECT_TRUE(buffs.has_buff(quickling, BuffType::BLESS))
+				<< "the quickling's blessing ran out in round " << round
+				<< " of " << BLESS_ROUNDS;
+		}
+
+		run_round(BLESS_ROUNDS);
+
+		EXPECT_FALSE(buffs.has_buff(ordinary, BuffType::BLESS));
+		EXPECT_FALSE(buffs.has_buff(quickling, BuffType::BLESS))
+			<< "the quickling's blessing outstayed its rounds";
+	}
+
+	// The quickling really did act twice in each window, which is what makes
+	// the case above a measurement rather than two creatures being treated
+	// identically by accident.
+	TEST_F(DurationScheduleTest, TheQuicklingUnderTestActsTwicePerRound)
+	{
+		Creature& ordinary = placed(TIME_UNITS_PER_ROUND);
+		Creature& quickling = placed(TIME_UNITS_PER_ROUND / 2);
+
+		run_round(1);
+
+		EXPECT_EQ(static_cast<CountingAi*>(ordinary.ai.get())->updates, 1);
+		EXPECT_EQ(static_cast<CountingAi*>(quickling.ai.get())->updates, 2);
+	}
+
+	// A buff granted part-way through a game runs from the reading it was
+	// granted at. An expiry worked out from the start of the game instead would
+	// hand a creature blessed on round nine a blessing that ended six rounds
+	// before it was cast.
+	TEST_F(DurationScheduleTest, ABuffRunsFromTheReadingItWasGrantedAt)
+	{
+		Creature& subject = placed(TIME_UNITS_PER_ROUND);
+
+		const int granted = 9;
+		ctx.gameState->set_time(TIME_UNITS_PER_ROUND * granted);
+		buffs.add_buff(
+			subject,
+			BuffType::BLESS,
+			0,
+			BLESS_ROUNDS,
+			BuffApplication::ADD,
+			ctx.gameState->get_time());
+
+		for (int round = granted + 1; round < granted + BLESS_ROUNDS; ++round)
+		{
+			run_round(round);
+			EXPECT_TRUE(buffs.has_buff(subject, BuffType::BLESS))
+				<< "round " << round;
+		}
+
+		run_round(granted + BLESS_ROUNDS);
+		EXPECT_FALSE(buffs.has_buff(subject, BuffType::BLESS));
+	}
+
+	// AD&D 2e stacking: a second casting of the same spell takes the better
+	// value and the later ending. A weaker one cast over a blessing with longer
+	// to run must not cut it short - the creature already has the better deal
+	// and keeps it.
+	TEST_F(
+		DurationScheduleTest,
+		AWeakerSecondCastingCanOnlyLengthenTheOneRunning)
+	{
+		Creature& subject = placed(TIME_UNITS_PER_ROUND);
+
+		buffs.add_buff(
+			subject,
+			BuffType::SHIELD,
+			4,
+			10,
+			BuffApplication::ADD,
+			0);
+		buffs
+			.add_buff(subject, BuffType::SHIELD, 1, 2, BuffApplication::ADD, 0);
+
+		EXPECT_EQ(buffs.get_buff_value(subject, BuffType::SHIELD), 4)
+			<< "the weaker casting lowered the bonus";
+		// The shorter casting must not cut the longer one short.
+		expect_lasts_exactly(buffs, subject, BuffType::SHIELD, 0, 10);
+	}
+
+	// A creature acting twice a round does not wear a buff out early: it is in
+	// force at every half round of its duration. A quickling is the creature
+	// that produces part-rounds.
+	TEST_F(DurationScheduleTest, AFastCreatureKeepsItsBuffForEveryRoundOfIt)
+	{
+		Creature& quickling = placed(TIME_UNITS_PER_ROUND / 2);
+
+		buffs.add_buff(
+			quickling,
+			BuffType::BLESS,
+			0,
+			BLESS_ROUNDS,
+			BuffApplication::ADD,
+			0);
+
+		for (int halfRound = 1; halfRound < BLESS_ROUNDS * 2; ++halfRound)
+		{
+			const int currentTime = (TIME_UNITS_PER_ROUND / 2) * halfRound;
+			ctx.gameState->set_time(currentTime);
+			manager.update_creatures(creatures, ctx);
+
+			ASSERT_TRUE(buffs.has_buff(quickling, BuffType::BLESS))
+				<< "gone at " << currentTime;
 		}
 	}
 
-	// Drive every creature through the window that ends one round further on.
-	void run_round(int round)
+	// The same property for a spell that replaces the creature's mind rather
+	// than adding to its buffs. A confused creature's own update is what ends
+	// the confusion, so a creature acting twice in a round used to shake it off
+	// in half the rounds the scroll named.
+	TEST_F(DurationScheduleTest, SpeedDoesNotChangeHowLongConfusionLasts)
 	{
-		ctx.gameState->set_time(TIME_UNITS_PER_ROUND * round);
-		manager.update_creatures(creatures, ctx);
+		Creature& ordinary = placed(TIME_UNITS_PER_ROUND);
+		Creature& quickling = placed(TIME_UNITS_PER_ROUND / 2);
+
+		ordinary.apply_confusion(CONFUSION_ROUNDS, 0);
+		quickling.apply_confusion(CONFUSION_ROUNDS, 0);
+
+		// A confused creature rolls two dice for a direction and walks it. Zero
+		// on both is the one direction that stays put, so it never asks the map
+		// anything - and the map is the whole reason a confused creature would
+		// otherwise need a dungeon to be in. Nine updates over the three
+		// rounds, two rolls each, and a margin: if the queue runs dry the dice
+		// turn real and the walk reaches a map that is not there.
+		script_still_directions(40);
+
+		for (int round = 1; round < CONFUSION_ROUNDS; ++round)
+		{
+			run_round(round);
+
+			EXPECT_EQ(ordinary.ai->get_ai_type(), AiType::CONFUSED_MONSTER)
+				<< "round " << round;
+			EXPECT_EQ(quickling.ai->get_ai_type(), AiType::CONFUSED_MONSTER)
+				<< "the quickling's head cleared in round " << round << " of "
+				<< CONFUSION_ROUNDS;
+		}
+
+		run_round(CONFUSION_ROUNDS);
+
+		EXPECT_EQ(ordinary.ai->get_ai_type(), AiType::MONSTER)
+			<< "the confusion outstayed its rounds";
+		EXPECT_EQ(quickling.ai->get_ai_type(), AiType::MONSTER)
+			<< "the confusion outstayed its rounds";
 	}
 
-	MockGameContext mock{};
-	GameContext ctx{};
-	CreatureManager manager{};
-	BuffSystem buffs{};
-	std::vector<std::unique_ptr<Creature>> creatures{};
-};
-
-// The defect, stated as the property it breaks. Two creatures are blessed for the same
-// three rounds and driven through the same windows; the quickling acts twice in each.
-// Its blessing has to outlast the second round exactly as the ordinary creature's does.
-TEST_F(DurationScheduleTest, SpeedDoesNotChangeHowLongABuffLasts)
-{
-	Creature& ordinary = placed(TIME_UNITS_PER_ROUND);
-	Creature& quickling = placed(TIME_UNITS_PER_ROUND / 2);
-
-	buffs.add_buff(
-		ordinary,
-		BuffType::BLESS,
-		0,
-		BLESS_ROUNDS,
-		BuffApplication::ADD,
-		ctx.gameState->get_time());
-	buffs.add_buff(
-		quickling,
-		BuffType::BLESS,
-		0,
-		BLESS_ROUNDS,
-		BuffApplication::ADD,
-		ctx.gameState->get_time());
-
-	for (int round = 1; round < BLESS_ROUNDS; ++round)
+	// A buff lasting until broken has no ending for a timed casting folded into
+	// it to move earlier, whichever of the two came first. Far past both
+	// rounds, both are still there.
+	TEST_F(DurationScheduleTest, ALastingBuffKeepsLastingWhateverIsFoldedIntoIt)
 	{
-		run_round(round);
+		Creature& lastingFirst = placed(TIME_UNITS_PER_ROUND);
+		Creature& timedFirst = placed(TIME_UNITS_PER_ROUND);
 
-		EXPECT_TRUE(buffs.has_buff(ordinary, BuffType::BLESS))
-			<< "round " << round;
-		EXPECT_TRUE(buffs.has_buff(quickling, BuffType::BLESS))
-			<< "the quickling's blessing ran out in round " << round << " of "
-			<< BLESS_ROUNDS;
+		buffs.add_buff_until_broken(lastingFirst, BuffType::BLESS);
+		buffs.add_buff(
+			lastingFirst,
+			BuffType::BLESS,
+			0,
+			BLESS_ROUNDS,
+			BuffApplication::ADD,
+			0);
+		buffs.add_buff(
+			timedFirst,
+			BuffType::BLESS,
+			0,
+			BLESS_ROUNDS,
+			BuffApplication::ADD,
+			0);
+		buffs.add_buff_until_broken(timedFirst, BuffType::BLESS);
+
+		buffs.update_creature_buffs(
+			lastingFirst,
+			expiry_time(0, BLESS_ROUNDS * 100));
+		buffs.update_creature_buffs(
+			timedFirst,
+			expiry_time(0, BLESS_ROUNDS * 100));
+
+		EXPECT_TRUE(buffs.has_buff(lastingFirst, BuffType::BLESS))
+			<< "a timed casting gave the lasting one an ending";
+		EXPECT_TRUE(buffs.has_buff(timedFirst, BuffType::BLESS))
+			<< "the lasting grant kept the timed casting's ending";
 	}
 
-	run_round(BLESS_ROUNDS);
-
-	EXPECT_FALSE(buffs.has_buff(ordinary, BuffType::BLESS));
-	EXPECT_FALSE(buffs.has_buff(quickling, BuffType::BLESS))
-		<< "the quickling's blessing outstayed its rounds";
-}
-
-// The quickling really did act twice in each window, which is what makes the case above
-// a measurement rather than two creatures being treated identically by accident.
-TEST_F(DurationScheduleTest, TheQuicklingUnderTestActsTwicePerRound)
-{
-	Creature& ordinary = placed(TIME_UNITS_PER_ROUND);
-	Creature& quickling = placed(TIME_UNITS_PER_ROUND / 2);
-
-	run_round(1);
-
-	EXPECT_EQ(static_cast<CountingAi*>(ordinary.ai.get())->updates, 1);
-	EXPECT_EQ(static_cast<CountingAi*>(quickling.ai.get())->updates, 2);
-}
-
-// A buff granted part-way through a game runs from the reading it was granted at. An
-// expiry worked out from the start of the game instead would hand a creature blessed on
-// round nine a blessing that ended six rounds before it was cast.
-TEST_F(DurationScheduleTest, ABuffRunsFromTheReadingItWasGrantedAt)
-{
-	Creature& subject = placed(TIME_UNITS_PER_ROUND);
-
-	const int granted = 9;
-	ctx.gameState->set_time(TIME_UNITS_PER_ROUND * granted);
-	buffs.add_buff(
-		subject,
-		BuffType::BLESS,
-		0,
-		BLESS_ROUNDS,
-		BuffApplication::ADD,
-		ctx.gameState->get_time());
-
-	for (int round = granted + 1; round < granted + BLESS_ROUNDS; ++round)
-	{
-		run_round(round);
-		EXPECT_TRUE(buffs.has_buff(subject, BuffType::BLESS))
-			<< "round " << round;
-	}
-
-	run_round(granted + BLESS_ROUNDS);
-	EXPECT_FALSE(buffs.has_buff(subject, BuffType::BLESS));
-}
-
-// AD&D 2e stacking: a second casting of the same spell takes the better value and the
-// later ending. A weaker one cast over a blessing with longer to run must not cut it
-// short - the creature already has the better deal and keeps it.
-TEST_F(DurationScheduleTest, AWeakerSecondCastingCanOnlyLengthenTheOneRunning)
-{
-	Creature& subject = placed(TIME_UNITS_PER_ROUND);
-
-	buffs.add_buff(subject, BuffType::SHIELD, 4, 10, BuffApplication::ADD, 0);
-	buffs.add_buff(subject, BuffType::SHIELD, 1, 2, BuffApplication::ADD, 0);
-
-	EXPECT_EQ(buffs.get_buff_value(subject, BuffType::SHIELD), 4)
-		<< "the weaker casting lowered the bonus";
-	// The shorter casting must not cut the longer one short.
-	expect_lasts_exactly(buffs, subject, BuffType::SHIELD, 0, 10);
-}
-
-// A creature acting twice a round does not wear a buff out early: it is in force at every
-// half round of its duration. A quickling is the creature that produces part-rounds.
-TEST_F(DurationScheduleTest, AFastCreatureKeepsItsBuffForEveryRoundOfIt)
-{
-	Creature& quickling = placed(TIME_UNITS_PER_ROUND / 2);
-
-	buffs.add_buff(
-		quickling,
-		BuffType::BLESS,
-		0,
-		BLESS_ROUNDS,
-		BuffApplication::ADD,
-		0);
-
-	for (int halfRound = 1; halfRound < BLESS_ROUNDS * 2; ++halfRound)
-	{
-		const int currentTime = (TIME_UNITS_PER_ROUND / 2) * halfRound;
-		ctx.gameState->set_time(currentTime);
-		manager.update_creatures(creatures, ctx);
-
-		ASSERT_TRUE(buffs.has_buff(quickling, BuffType::BLESS))
-			<< "gone at " << currentTime;
-	}
-}
-
-// The same property for a spell that replaces the creature's mind rather than adding to
-// its buffs. A confused creature's own update is what ends the confusion, so a creature
-// acting twice in a round used to shake it off in half the rounds the scroll named.
-TEST_F(DurationScheduleTest, SpeedDoesNotChangeHowLongConfusionLasts)
-{
-	Creature& ordinary = placed(TIME_UNITS_PER_ROUND);
-	Creature& quickling = placed(TIME_UNITS_PER_ROUND / 2);
-
-	ordinary.apply_confusion(CONFUSION_ROUNDS, 0);
-	quickling.apply_confusion(CONFUSION_ROUNDS, 0);
-
-	// A confused creature rolls two dice for a direction and walks it. Zero on both is
-	// the one direction that stays put, so it never asks the map anything - and the map
-	// is the whole reason a confused creature would otherwise need a dungeon to be in.
-	// Nine updates over the three rounds, two rolls each, and a margin: if the queue runs
-	// dry the dice turn real and the walk reaches a map that is not there.
-	script_still_directions(40);
-
-	for (int round = 1; round < CONFUSION_ROUNDS; ++round)
-	{
-		run_round(round);
-
-		EXPECT_EQ(ordinary.ai->get_ai_type(), AiType::CONFUSED_MONSTER)
-			<< "round " << round;
-		EXPECT_EQ(quickling.ai->get_ai_type(), AiType::CONFUSED_MONSTER)
-			<< "the quickling's head cleared in round " << round << " of "
-			<< CONFUSION_ROUNDS;
-	}
-
-	run_round(CONFUSION_ROUNDS);
-
-	EXPECT_EQ(ordinary.ai->get_ai_type(), AiType::MONSTER)
-		<< "the confusion outstayed its rounds";
-	EXPECT_EQ(quickling.ai->get_ai_type(), AiType::MONSTER)
-		<< "the confusion outstayed its rounds";
-}
-
-// A buff lasting until broken has no ending for a timed casting folded into it to move
-// earlier, whichever of the two came first. Far past both rounds, both are still there.
-TEST_F(DurationScheduleTest, ALastingBuffKeepsLastingWhateverIsFoldedIntoIt)
-{
-	Creature& lastingFirst = placed(TIME_UNITS_PER_ROUND);
-	Creature& timedFirst = placed(TIME_UNITS_PER_ROUND);
-
-	buffs.add_buff_until_broken(lastingFirst, BuffType::BLESS);
-	buffs.add_buff(
-		lastingFirst,
-		BuffType::BLESS,
-		0,
-		BLESS_ROUNDS,
-		BuffApplication::ADD,
-		0);
-	buffs.add_buff(
-		timedFirst,
-		BuffType::BLESS,
-		0,
-		BLESS_ROUNDS,
-		BuffApplication::ADD,
-		0);
-	buffs.add_buff_until_broken(timedFirst, BuffType::BLESS);
-
-	buffs.update_creature_buffs(
-		lastingFirst,
-		expiry_time(0, BLESS_ROUNDS * 100));
-	buffs.update_creature_buffs(timedFirst, expiry_time(0, BLESS_ROUNDS * 100));
-
-	EXPECT_TRUE(buffs.has_buff(lastingFirst, BuffType::BLESS))
-		<< "a timed casting gave the lasting one an ending";
-	EXPECT_TRUE(buffs.has_buff(timedFirst, BuffType::BLESS))
-		<< "the lasting grant kept the timed casting's ending";
-}
-
-// end of file: DurationScheduleTest.cpp
+	// end of file: DurationScheduleTest.cpp
 
 } // namespace CppRL

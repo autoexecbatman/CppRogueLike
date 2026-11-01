@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/Map.cpp",
-      "original": "\t\t\t\tif (get_tile_type(waterPos) != TileType::FLOOR)\n\t\t\t\t{\n\t\t\t\t\tcontinue;\n\t\t\t\t}",
-      "mutated": "\t\t\t\tif (false)\n\t\t\t\t{\n\t\t\t\t\tcontinue;\n\t\t\t\t}",
+      "original": "\t\t\t\t\tif (get_tile_type(waterPos) != TileType::FLOOR)\n\t\t\t\t\t{\n\t\t\t\t\t\tcontinue;\n\t\t\t\t\t}",
+      "mutated": "\t\t\t\t\tif (false)\n\t\t\t\t\t{\n\t\t\t\t\t\tcontinue;\n\t\t\t\t\t}",
       "catches": "water painted over a shaped room's walled-back cells again, sealing pools in rock"
     },
     {
@@ -27,14 +27,14 @@
     },
     {
       "file": "src/Map.cpp",
-      "original": "\tif (!in_bounds(start) || !is_open(start))\n\t{\n\t\treturn -1;\n\t}",
-      "mutated": "\tif (!in_bounds(start) || !is_open(start))\n\t{\n\t\treturn 0;\n\t}",
+      "original": "\t\tif (!in_bounds(start) || !is_open(start))\n\t\t{\n\t\t\treturn -1;\n\t\t}",
+      "mutated": "\t\tif (!in_bounds(start) || !is_open(start))\n\t\t{\n\t\t\treturn 0;\n\t\t}",
       "catches": "a start off the map answered as a sound dungeon rather than refused"
     },
     {
       "file": "src/Map.cpp",
-      "original": "\t\tif (tile.type != TileType::WALL && !reached[get_index(tile.position)])",
-      "mutated": "\t\tif (tile.type != TileType::WALL && reached[get_index(tile.position)])",
+      "original": "\t\t\tif (tile.type != TileType::WALL &&\n\t\t\t\t!reached[get_index(tile.position)])",
+      "mutated": "\t\t\tif (tile.type != TileType::WALL &&reached[get_index(tile.position)])",
       "catches": "the count reporting what it reached instead of what it could not"
     },
     {
@@ -45,8 +45,8 @@
     },
     {
       "file": "src/Map.cpp",
-      "original": "\tfor (int row = 0; row < mapHeight; ++row)\n\t{\n\t\tif (get_tile_type(Vector2D{ 0, row })",
-      "mutated": "\tfor (int row = 0; row < 0; ++row)\n\t{\n\t\tif (get_tile_type(Vector2D{ 0, row })",
+      "original": "\t\tfor (int row = 0; row < mapHeight; ++row)\n\t\t{\n\t\t\tif (get_tile_type(Vector2D{ 0, row })",
+      "mutated": "\t\tfor (int row = 0; row < 0; ++row)\n\t\t{\n\t\t\tif (get_tile_type(Vector2D{ 0, row })",
       "catches": "the ring check skipping the left and right edges"
     },
     {
@@ -57,8 +57,8 @@
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": "\t\t\tconst std::optional<int> price = step_cost(next, mobility, ctx);",
-      "mutated": "\t\t\tconst std::optional<int> price = map.get_tile_type(next) == TileType::WALL ? std::nullopt : std::optional<int>{ 1 };",
+      "original": "\t\t\t\t\tconst std::optional<int> price =\n\t\t\t\t\t\tstep_cost(next, mobility, ctx);",
+      "mutated": "\t\t\t\t\tconst std::optional<int> price =map.get_tile_type(next) == TileType::WALL ? std::nullopt : std::optional<int>{ 1 };",
       "catches": "the flood ignoring the mover, as the old one did, so it promises water and shut doors the step refuses"
     },
     {
@@ -81,8 +81,8 @@
     },
     {
       "file": "src/Map.cpp",
-      "original": "\twhile (playerTries < MAX_PLAYER_TRIES && !can_place_at(pos, ctx))\n\t{\n\t\tpos.x = ctx.dice->roll",
-      "mutated": "\twhile (playerTries < MAX_PLAYER_TRIES && !is_unobstructed(pos, ctx))\n\t{\n\t\tpos.x = ctx.dice->roll",
+      "original": "\t\twhile (playerTries < MAX_PLAYER_TRIES && !can_place_at(pos, ctx))\n\t\t{\n\t\t\tpos.x = ctx.dice->roll",
+      "mutated": "\t\twhile (playerTries < MAX_PLAYER_TRIES && !is_unobstructed(pos, ctx))\n\t\t{\n\t\t\tpos.x = ctx.dice->roll",
       "catches": "the player started standing in water"
     }
   ]

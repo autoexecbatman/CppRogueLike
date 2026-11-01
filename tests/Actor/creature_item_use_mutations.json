@@ -15,38 +15,38 @@
   "mutations": [
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tconst int healed = wearer.heal(roll_dice(ctx.dice, consumable.amount));\n",
-      "mutated": "\t\tconst int healed = wearer.heal(1);\n",
+      "original": "\t\t\tconst int healed =\n\t\t\t\twearer.heal(roll_dice(ctx.dice, consumable.amount));\n",
+      "mutated": "\t\t\tconst int healed =\n\t\t\t\twearer.heal(1);\n",
       "catches": "a potion pouring one point instead of what it holds, which an is-it-greater assertion could not see"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\twearer.add_magical_years(consumable.agesYears, ctx);\n\t}\n\treturn consume_item(owner, wearer);\n",
-      "mutated": "\t\twearer.add_magical_years(consumable.agesYears, ctx);\n\t}\n\treturn true;\n",
+      "original": "\t\t\twearer.add_magical_years(consumable.agesYears, ctx);\n\t\t}\n\t\treturn consume_item(owner, wearer);\n",
+      "mutated": "\t\t\twearer.add_magical_years(consumable.agesYears, ctx);\n\t\t}\n\t\treturn true;\n",
       "catches": "a draught drunk and still in the pack, so one potion heals forever"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t// Add equipped item\n\tequippedItems.emplace_back(std::move(item), slot);\n",
-      "mutated": "\t// Add equipped item\n\tequippedItems.emplace_back(std::move(item), EquipmentSlot::BODY);\n",
+      "original": "\t\t// Add equipped item\n\t\tequippedItems.emplace_back(std::move(item), slot);\n",
+      "mutated": "\t\t// Add equipped item\n\t\tequippedItems.emplace_back(std::move(item), EquipmentSlot::BODY);\n",
       "catches": "an item put in whichever slot, not the one asked for"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "an id the pack does not hold equips nothing.\n\t\tauto result =\n\t\t\tInventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);\n\t\tif (result.has_value())\n",
-      "mutated": "an id the pack does not hold equips nothing.\n\t\tauto result =\n\t\t\tInventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);\n\t\tif (true)\n",
+      "original": "an id the pack does not hold\n\t\t\t// equips nothing.\n\t\t\tauto result = InventoryOperations::remove_item_by_id(\n\t\t\t\tinventoryData,\n\t\t\t\titemUniqueId);\n\t\t\tif (result.has_value())\n",
+      "mutated": "an id the pack does not hold\n\t\t\t// equips nothing.\n\t\t\tauto result = InventoryOperations::remove_item_by_id(\n\t\t\t\tinventoryData,\n\t\t\t\titemUniqueId);\n\t\t\tif (true)\n",
       "catches": "an id the pack does not hold dereferenced as though it were found, the case the deleted find used to guard"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\t\t\t\titemToEquip->itemClass) ?\n\t\t\t\tEquipmentSlot::MISSILE_WEAPON :\n\t\t\t\tpreferredSlot;",
-      "mutated": "\t\t\t\t\titemToEquip->itemClass) ?preferredSlot :\n\t\t\t\tpreferredSlot;",
+      "original": "\t\t\t\t\t\titemToEquip->itemClass) ?\n\t\t\t\t\tEquipmentSlot::MISSILE_WEAPON :\n\t\t\t\t\tpreferredSlot;",
+      "mutated": "\t\t\t\t\t\titemToEquip->itemClass) ?preferredSlot :\n\t\t\t\t\tpreferredSlot;",
       "catches": "a bow put in the hand asked for instead of the missile slot"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\t\t\t\titemToEquip->itemClass) ?\n\t\t\t\tEquipmentSlot::MISSILE_WEAPON :\n\t\t\t\tpreferredSlot;",
-      "mutated": "\t\t\t\t\titemToEquip->itemClass) ?\n\t\t\t\tEquipmentSlot::MISSILE_WEAPON :EquipmentSlot::MISSILE_WEAPON;",
+      "original": "\t\t\t\t\t\titemToEquip->itemClass) ?\n\t\t\t\t\tEquipmentSlot::MISSILE_WEAPON :\n\t\t\t\t\tpreferredSlot;",
+      "mutated": "\t\t\t\t\t\titemToEquip->itemClass) ?\n\t\t\t\t\tEquipmentSlot::MISSILE_WEAPON :EquipmentSlot::MISSILE_WEAPON;",
       "catches": "a sword put in the missile slot instead of the hand asked for"
     }
   ]

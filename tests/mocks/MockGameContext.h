@@ -58,157 +58,163 @@
 namespace CppRL
 {
 
-struct MockGameContext
-{
-	RandomDice dice{ TEST_DICE_SEED };
-	MessageSystem messages{};
-	CreatureManager creature_mgr{};
-	DataManager data_manager{};
-	ContentRegistry content_registry{};
-	FloorInventory inventory{};
-	GameState game_state{};
-
-	// Stateless, and every creature update reaches through it: Creature::update
-	// asks it to retire whatever the clock has passed before the creature acts.
-	BuffSystem buffs{};
-	TileConfig tile_config{};
-	BodyPlanRegistry body_plans{};
-	SpellRegistry spellRegistry{};
-	MonsterRegistry monsterRegistry{};
-	ItemRegistry itemRegistry{};
-	Pathfinding::Pathfinder pathfinder{};
-	FloatingTextSystem floatingText{};
-	// Built as Game builds it, at the tile size the renderer opens with; it needs no window.
-	AnimationSystem animSystem{};
-
-	// Every member the game's own context wires, so a test reaches the same objects play does.
-	Map map{ get_map_width(), get_map_height() };
-	std::unique_ptr<Player> player{};
-	PlayerBlueprint playerBlueprint{};
-	LevelManager levelManager{};
-	GameStateManager stateManager{};
-	RenderingManager renderingManager{};
-	MenuManager menuManager{};
-	DisplayManager displayManager{};
-	GameLoopCoordinator gameLoopCoordinator{};
-	TargetingSystem targeting{};
-	HungerSystem hungerSystem{};
-	DebugUtils::CostOverlay costOverlay{};
-	Minimap minimap{};
-	Gui gui{};
-	PrefabLibrary prefabLibrary{};
-	Stairs stairs{ Vector2D{ 0, 0 } };
-	std::vector<std::unique_ptr<Trap>> traps{};
-	std::vector<std::unique_ptr<SpellTile>> spellTiles{};
-	std::vector<std::unique_ptr<Decoration>> decorations{};
-	std::vector<std::unique_ptr<Creature>> creatures{};
-	std::vector<DungeonRoom> rooms{};
-	std::deque<std::unique_ptr<BaseMenu>> menus{};
-	std::vector<Vector2D> mousePathOverlay{};
-	// Declared before the editor, which holds a reference to it.
-	Palette palette{};
-	DecorEditor decorEditor{ palette };
-	ContentEditor contentEditor{};
-	RoomEditor roomEditor{ prefabLibrary, palette };
-	ItemEditor itemEditor{};
-	MonsterEditor monsterEditor{};
-	SpellEditor spellEditor{};
-
-	// The input path a key takes in play: poll() fills inputSystem, and inputHandler
-	// translates it into the key the controllers read. A test queues keys on inputSystem.
-	InputSystem inputSystem{};
-	InputHandler inputHandler{};
-
-	MockGameContext()
+	struct MockGameContext
 	{
+		RandomDice dice{ TEST_DICE_SEED };
+		MessageSystem messages{};
+		CreatureManager creature_mgr{};
+		DataManager data_manager{};
+		ContentRegistry content_registry{};
+		FloorInventory inventory{};
+		GameState game_state{};
+
+		// Stateless, and every creature update reaches through it:
+		// Creature::update asks it to retire whatever the clock has passed
+		// before the creature acts.
+		BuffSystem buffs{};
+		TileConfig tile_config{};
+		BodyPlanRegistry body_plans{};
+		SpellRegistry spellRegistry{};
+		MonsterRegistry monsterRegistry{};
+		ItemRegistry itemRegistry{};
+		Pathfinding::Pathfinder pathfinder{};
+		FloatingTextSystem floatingText{};
+		// Built as Game builds it, at the tile size the renderer opens with; it
+		// needs no window.
+		AnimationSystem animSystem{};
+
+		// Every member the game's own context wires, so a test reaches the same
+		// objects play does.
+		Map map{ get_map_width(), get_map_height() };
+		std::unique_ptr<Player> player{};
+		PlayerBlueprint playerBlueprint{};
+		LevelManager levelManager{};
+		GameStateManager stateManager{};
+		RenderingManager renderingManager{};
+		MenuManager menuManager{};
+		DisplayManager displayManager{};
+		GameLoopCoordinator gameLoopCoordinator{};
+		TargetingSystem targeting{};
+		HungerSystem hungerSystem{};
+		DebugUtils::CostOverlay costOverlay{};
+		Minimap minimap{};
+		Gui gui{};
+		PrefabLibrary prefabLibrary{};
+		Stairs stairs{ Vector2D{ 0, 0 } };
+		std::vector<std::unique_ptr<Trap>> traps{};
+		std::vector<std::unique_ptr<SpellTile>> spellTiles{};
+		std::vector<std::unique_ptr<Decoration>> decorations{};
+		std::vector<std::unique_ptr<Creature>> creatures{};
+		std::vector<DungeonRoom> rooms{};
+		std::deque<std::unique_ptr<BaseMenu>> menus{};
+		std::vector<Vector2D> mousePathOverlay{};
+		// Declared before the editor, which holds a reference to it.
+		Palette palette{};
+		DecorEditor decorEditor{ palette };
+		ContentEditor contentEditor{};
+		RoomEditor roomEditor{ prefabLibrary, palette };
+		ItemEditor itemEditor{};
+		MonsterEditor monsterEditor{};
+		SpellEditor spellEditor{};
+
+		// The input path a key takes in play: poll() fills inputSystem, and
+		// inputHandler translates it into the key the controllers read. A test
+		// queues keys on inputSystem.
+		InputSystem inputSystem{};
+		InputHandler inputHandler{};
+
+		MockGameContext()
+		{
 #ifdef TESTING_MODE
-		dice.set_test_mode(true);
+			dice.set_test_mode(true);
 #endif
-		try
-		{
-			tile_config.load(Paths::TILE_CONFIG);
+			try
+			{
+				tile_config.load(Paths::TILE_CONFIG);
+			}
+			catch (...)
+			{
+			}
+
+			// Loaded loudly: a monster built without a body plan is a broken
+			// test, not a test that quietly checks something else.
+			body_plans.load(Paths::BODY_PLANS);
+			animSystem.init(tile_config, DISPLAY_TILE_SIZE);
+
+			// Armour class, missile and surprise rolls read the ability tables,
+			// as every context the game builds can.
+			data_manager.load_all_data(messages);
+
+			// Casting, the spell menus, creating and spawning monsters and
+			// items read their data through ctx, as the game's context does.
+			spellRegistry.load(Paths::SPELLS);
+			monsterRegistry.load(Paths::MONSTERS);
+			itemRegistry.load(Paths::ITEMS);
+			itemRegistry.load_enhanced_rules(Paths::ENHANCED_RULES);
+
+			// Loaded as main.cpp loads it. An empty library lets generation
+			// pass in a fixture while the game aborts on its first map, and a
+			// loader that opens nothing returns quietly.
+			palette.load(Paths::TILE_CONFIG);
+			prefabLibrary.load(Paths::PREFABS);
+			assert(
+				prefabLibrary.count() > 0 &&
+				"MockGameContext: no prefabs loaded");
 		}
-		catch (...)
+
+		GameContext to_game_context()
 		{
+			return GameContext{
+				.map = &map,
+				.gui = &gui,
+				.playerOwner = &player,
+				.playerBlueprint = &playerBlueprint,
+				.messageSystem = &messages,
+				.dice = &dice,
+				.creatureManager = &creature_mgr,
+				.levelManager = &levelManager,
+				.renderingManager = &renderingManager,
+				.inputHandler = &inputHandler,
+				.stateManager = &stateManager,
+				.menuManager = &menuManager,
+				.displayManager = &displayManager,
+				.gameLoopCoordinator = &gameLoopCoordinator,
+				.dataManager = &data_manager,
+				.inputSystem = &inputSystem,
+				.targeting = &targeting,
+				.hungerSystem = &hungerSystem,
+				.buffSystem = &buffs,
+				.floatingText = &floatingText,
+				.animSystem = &animSystem,
+				.contentRegistry = &content_registry,
+				.minimap = &minimap,
+				.costOverlay = &costOverlay,
+				.pathfinder = &pathfinder,
+				.palette = &palette,
+				.decorEditor = &decorEditor,
+				.prefabLibrary = &prefabLibrary,
+				.contentEditor = &contentEditor,
+				.roomEditor = &roomEditor,
+				.itemEditor = &itemEditor,
+				.monsterEditor = &monsterEditor,
+				.spellEditor = &spellEditor,
+				.tileConfig = &tile_config,
+				.bodyPlanRegistry = &body_plans,
+				.spellRegistry = &spellRegistry,
+				.monsterRegistry = &monsterRegistry,
+				.itemRegistry = &itemRegistry,
+				.stairs = &stairs,
+				.traps = &traps,
+				.spellTiles = &spellTiles,
+				.decorations = &decorations,
+				.floorInventory = &inventory,
+				.creatures = &creatures,
+				.rooms = &rooms,
+				.menus = &menus,
+				.mousePathOverlay = &mousePathOverlay,
+				.gameState = &game_state,
+			};
 		}
-
-		// Loaded loudly: a monster built without a body plan is a broken test,
-		// not a test that quietly checks something else.
-		body_plans.load(Paths::BODY_PLANS);
-		animSystem.init(tile_config, DISPLAY_TILE_SIZE);
-
-		// Armour class, missile and surprise rolls read the ability tables, as every
-		// context the game builds can.
-		data_manager.load_all_data(messages);
-
-		// Casting, the spell menus, creating and spawning monsters and items read their
-		// data through ctx, as the game's context does.
-		spellRegistry.load(Paths::SPELLS);
-		monsterRegistry.load(Paths::MONSTERS);
-		itemRegistry.load(Paths::ITEMS);
-		itemRegistry.load_enhanced_rules(Paths::ENHANCED_RULES);
-
-		// Loaded as main.cpp loads it. An empty library lets generation pass in a fixture while
-		// the game aborts on its first map, and a loader that opens nothing returns quietly.
-		palette.load(Paths::TILE_CONFIG);
-		prefabLibrary.load(Paths::PREFABS);
-		assert(
-			prefabLibrary.count() > 0 && "MockGameContext: no prefabs loaded");
-	}
-
-	GameContext to_game_context()
-	{
-		return GameContext{
-			.map = &map,
-			.gui = &gui,
-			.playerOwner = &player,
-			.playerBlueprint = &playerBlueprint,
-			.messageSystem = &messages,
-			.dice = &dice,
-			.creatureManager = &creature_mgr,
-			.levelManager = &levelManager,
-			.renderingManager = &renderingManager,
-			.inputHandler = &inputHandler,
-			.stateManager = &stateManager,
-			.menuManager = &menuManager,
-			.displayManager = &displayManager,
-			.gameLoopCoordinator = &gameLoopCoordinator,
-			.dataManager = &data_manager,
-			.inputSystem = &inputSystem,
-			.targeting = &targeting,
-			.hungerSystem = &hungerSystem,
-			.buffSystem = &buffs,
-			.floatingText = &floatingText,
-			.animSystem = &animSystem,
-			.contentRegistry = &content_registry,
-			.minimap = &minimap,
-			.costOverlay = &costOverlay,
-			.pathfinder = &pathfinder,
-			.palette = &palette,
-			.decorEditor = &decorEditor,
-			.prefabLibrary = &prefabLibrary,
-			.contentEditor = &contentEditor,
-			.roomEditor = &roomEditor,
-			.itemEditor = &itemEditor,
-			.monsterEditor = &monsterEditor,
-			.spellEditor = &spellEditor,
-			.tileConfig = &tile_config,
-			.bodyPlanRegistry = &body_plans,
-			.spellRegistry = &spellRegistry,
-			.monsterRegistry = &monsterRegistry,
-			.itemRegistry = &itemRegistry,
-			.stairs = &stairs,
-			.traps = &traps,
-			.spellTiles = &spellTiles,
-			.decorations = &decorations,
-			.floorInventory = &inventory,
-			.creatures = &creatures,
-			.rooms = &rooms,
-			.menus = &menus,
-			.mousePathOverlay = &mousePathOverlay,
-			.gameState = &game_state,
-		};
-	}
-};
+	};
 
 } // namespace CppRL

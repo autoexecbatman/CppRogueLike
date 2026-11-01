@@ -33,36 +33,38 @@
 namespace CppRL
 {
 
-// Rounds a creature can hold its breath, from its Constitution. "A character can hold
-// his breath up to 1/3 his Constitution score in rounds (rounded up)", and "all
-// characters are able to hold their breath for one round, regardless of circumstances"
-// - so the floor is one however feeble the creature.
-//
-// Example:
-//   breath_rounds(18);   // -> 6
-//   breath_rounds(14);   // -> 5, rounded up from 4.67
-//   breath_rounds(3);    // -> 1, the floor rather than 1/3 of 3
-//   breath_rounds(0);    // -> 1, the floor again
-[[nodiscard]] constexpr int breath_rounds(int constitution)
-{
-	// Rounded up, which is the book's word, so integer division adds two first.
-	const int third = (constitution + 2) / 3;
-	return std::max(1, third);
-}
+	// Rounds a creature can hold its breath, from its Constitution. "A
+	// character can hold his breath up to 1/3 his Constitution score in rounds
+	// (rounded up)", and "all characters are able to hold their breath for one
+	// round, regardless of circumstances"
+	// - so the floor is one however feeble the creature.
+	//
+	// Example:
+	//   breath_rounds(18);   // -> 6
+	//   breath_rounds(14);   // -> 5, rounded up from 4.67
+	//   breath_rounds(3);    // -> 1, the floor rather than 1/3 of 3
+	//   breath_rounds(0);    // -> 1, the floor again
+	[[nodiscard]] constexpr int breath_rounds(int constitution)
+	{
+		// Rounded up, which is the book's word, so integer division adds two
+		// first.
+		const int third = (constitution + 2) / 3;
+		return std::max(1, third);
+	}
 
-// What a Constitution check suffers on the nth round past the allowance, counting the
-// first such round as zero. "The first check has no modifiers, but each subsequent
-// check suffers a -2 cumulative penalty."
-//
-// Example:
-//   breath_check_penalty(0);   // ->  0
-//   breath_check_penalty(1);   // -> -2
-//   breath_check_penalty(5);   // -> -10
-[[nodiscard]] constexpr int breath_check_penalty(int roundsPastAllowance)
-{
-	return -2 * std::max(0, roundsPastAllowance);
-}
+	// What a Constitution check suffers on the nth round past the allowance,
+	// counting the first such round as zero. "The first check has no modifiers,
+	// but each subsequent check suffers a -2 cumulative penalty."
+	//
+	// Example:
+	//   breath_check_penalty(0);   // ->  0
+	//   breath_check_penalty(1);   // -> -2
+	//   breath_check_penalty(5);   // -> -10
+	[[nodiscard]] constexpr int breath_check_penalty(int roundsPastAllowance)
+	{
+		return -2 * std::max(0, roundsPastAllowance);
+	}
 
-// end of file: Drowning.h
+	// end of file: Drowning.h
 
 } // namespace CppRL

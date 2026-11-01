@@ -5,44 +5,44 @@
 namespace CppRL
 {
 
-// Forward declarations
-class Map;
-class Player;
-class MessageSystem;
-struct GameContext;
+	// Forward declarations
+	class Map;
+	class Player;
+	class MessageSystem;
+	struct GameContext;
 
-// - Handles dungeon level progression and level-specific state
-class LevelManager
-{
-private:
-	int dungeon_level{ 1 };
-	int shopkeepers_on_current_level{ 0 };
-
-	// Helper methods
-	void display_level_messages(MessageSystem& message_system) const;
-	void heal_player_between_levels(GameContext& ctx) const;
-
-public:
-	// Level state
-	int get_dungeon_level() const noexcept { return dungeon_level; }
-
-	int get_shopkeepers_count() const noexcept
+	// - Handles dungeon level progression and level-specific state
+	class LevelManager
 	{
-		return shopkeepers_on_current_level;
-	}
+	private:
+		int dungeon_level{ 1 };
+		int shopkeepers_on_current_level{ 0 };
 
-	// Level management
-	void advance_to_next_level(GameContext& ctx);
-	void reset_to_first_level();
+		// Helper methods
+		void display_level_messages(MessageSystem& message_system) const;
+		void heal_player_between_levels(GameContext& ctx) const;
 
-	// Shopkeeper management
-	void increment_shopkeeper_count() { shopkeepers_on_current_level++; }
+	public:
+		// Level state
+		int get_dungeon_level() const noexcept { return dungeon_level; }
 
-	bool can_spawn_shopkeeper(int max_shopkeepers = 3) const noexcept;
+		int get_shopkeepers_count() const noexcept
+		{
+			return shopkeepers_on_current_level;
+		}
 
-	// Save/Load
-	void save_to_json(nlohmann::json& output) const;
-	void load_from_json(const nlohmann::json& source);
-};
+		// Level management
+		void advance_to_next_level(GameContext& ctx);
+		void reset_to_first_level();
+
+		// Shopkeeper management
+		void increment_shopkeeper_count() { shopkeepers_on_current_level++; }
+
+		bool can_spawn_shopkeeper(int max_shopkeepers = 3) const noexcept;
+
+		// Save/Load
+		void save_to_json(nlohmann::json& output) const;
+		void load_from_json(const nlohmann::json& source);
+	};
 
 } // namespace CppRL

@@ -15,8 +15,8 @@
     "mutations": [
         {
             "file": "tests/mocks/HiddenRenderer.h",
-            "original": "inline constexpr int HIDDEN_RENDERER_PASSED = 44;\nstatic_assert(\n\tHIDDEN_RENDERER_PASSED != 0 && HIDDEN_RENDERER_PASSED != 1 &&\n\t\tHIDDEN_RENDERER_PASSED != 3,\n\t\"a pass must be a code no runner exit or abort can give\");",
-            "mutated": "inline constexpr int HIDDEN_RENDERER_PASSED = 0;",
+            "original": "\tinline constexpr int HIDDEN_RENDERER_PASSED = 44;\n\tstatic_assert(\n\t\tHIDDEN_RENDERER_PASSED != 0 && HIDDEN_RENDERER_PASSED != 1 &&\n\t\t\tHIDDEN_RENDERER_PASSED != 3,\n\t\t\"a pass must be a code no runner exit or abort can give\");",
+            "mutated": "\tinline constexpr int HIDDEN_RENDERER_PASSED = 0;",
             "catches": "a pass read back as the 0 a child gives when its re-run skips before the body"
         },
         {
@@ -33,8 +33,8 @@
         },
         {
             "file": "tests/mocks/HiddenRenderer.h",
-            "original": "\t\t\tchildExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER ||\n\t\t\tchildExitCode == 0;",
-            "mutated": "\t\t\tchildExitCode == 0;",
+            "original": "\t\t\t\tchildExitCode == HIDDEN_RENDERER_NO_OPENGL_DRIVER ||\n\t\t\t\tchildExitCode == 0;",
+            "mutated": "\t\t\t\tchildExitCode == 0;",
             "catches": "the missing-driver code read as a failure, which would fail every renderer test on CI instead of skipping it"
         },
         {
@@ -51,8 +51,8 @@
         },
         {
             "file": "tests/mocks/HiddenRenderer.h",
-            "original": "\tif (failedParts > 0)\n\t{\n\t\tstd::_Exit(HIDDEN_RENDERER_EXPECTATION_FAILED);\n\t}\n\tstd::_Exit(HIDDEN_RENDERER_PASSED);",
-            "mutated": "\tstd::_Exit(HIDDEN_RENDERER_PASSED);",
+            "original": "\t\tif (failedParts > 0)\n\t\t{\n\t\t\tstd::_Exit(HIDDEN_RENDERER_EXPECTATION_FAILED);\n\t\t}\n\t\tstd::_Exit(HIDDEN_RENDERER_PASSED);",
+            "mutated": "\t\tstd::_Exit(HIDDEN_RENDERER_PASSED);",
             "catches": "a child whose own expectation failed reported as a pass"
         },
         {
@@ -63,8 +63,8 @@
         },
         {
             "file": "tests/mocks/HiddenRenderer.h",
-            "original": "\t\t\tstderr,\n\t\t\t\"child check failed: %.*s\\n\",",
-            "mutated": "\t\t\tstdout,\n\t\t\t\"child check failed: %.*s\\n\",",
+            "original": "\t\t\t\tstderr,\n\t\t\t\t\"child check failed: %.*s\\n\",",
+            "mutated": "\t\t\t\tstdout,\n\t\t\t\t\"child check failed: %.*s\\n\",",
             "catches": "an exit_unless message written where the parent's failure does not carry it"
         },
         {

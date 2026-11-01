@@ -27,61 +27,62 @@
 namespace CppRL
 {
 
-class RunOutcomeTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	class RunOutcomeTest : public ::testing::Test
 	{
-		ctx = mock.to_game_context();
-		ctx.playerOwner = &player;
+	protected:
+		void SetUp() override
+		{
+			ctx = mock.to_game_context();
+			ctx.playerOwner = &player;
 
-		player->healthPool = std::make_unique<HealthPool>(20);
-		player->armorClass = std::make_unique<ArmorClass>(10);
+			player->healthPool = std::make_unique<HealthPool>(20);
+			player->armorClass = std::make_unique<ArmorClass>(10);
+		}
+
+		MockGameContext mock{};
+		GameContext ctx{};
+		std::unique_ptr<Player> player{ std::make_unique<Player>(
+			Vector2D{ 1, 1 }) };
+	};
+
+	// Using the Amulet of Yendor is the win.
+	TEST_F(RunOutcomeTest, UsingTheAmuletOfYendorWinsTheRun)
+	{
+		auto amulet =
+			ItemCreator::create("amulet_of_yendor", Vector2D{ 1, 1 }, ctx);
+		[[maybe_unused]] const bool spent =
+			use_item(*amulet->behavior, *amulet, *player, ctx);
+
+		EXPECT_EQ(ctx.gameState->get_run_outcome(), RunOutcome::VICTORY)
+			<< "the amulet was used and the run was not won";
 	}
 
-	MockGameContext mock{};
-	GameContext ctx{};
-	std::unique_ptr<Player> player{ std::make_unique<Player>(
-		Vector2D{ 1, 1 }) };
-};
+	// A won run is as final as a lost one: an action spent after the win does
+	// not undo it.
+	TEST_F(RunOutcomeTest, SpendingAnActionAfterTheWinKeepsTheVictory)
+	{
+		ctx.gameState->set_run_outcome(RunOutcome::VICTORY);
+		spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 
-// Using the Amulet of Yendor is the win.
-TEST_F(RunOutcomeTest, UsingTheAmuletOfYendorWinsTheRun)
-{
-	auto amulet =
-		ItemCreator::create("amulet_of_yendor", Vector2D{ 1, 1 }, ctx);
-	[[maybe_unused]] const bool spent =
-		use_item(*amulet->behavior, *amulet, *player, ctx);
+		EXPECT_EQ(ctx.gameState->get_run_outcome(), RunOutcome::VICTORY)
+			<< "spending an action erased the victory, so no victory screen opens";
+	}
 
-	EXPECT_EQ(ctx.gameState->get_run_outcome(), RunOutcome::VICTORY)
-		<< "the amulet was used and the run was not won";
-}
+	// A new run, started or loaded, forgets how the last one ended and starts
+	// its turn from the beginning.
+	TEST_F(RunOutcomeTest, BeginningARunForgetsTheLastOutcome)
+	{
+		ctx.gameState->set_run_outcome(RunOutcome::DEFEAT);
+		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 
-// A won run is as final as a lost one: an action spent after the win does not undo it.
-TEST_F(RunOutcomeTest, SpendingAnActionAfterTheWinKeepsTheVictory)
-{
-	ctx.gameState->set_run_outcome(RunOutcome::VICTORY);
-	spend_player_action(ctx, TIME_UNITS_PER_ROUND);
+		ctx.gameState->begin_run();
 
-	EXPECT_EQ(ctx.gameState->get_run_outcome(), RunOutcome::VICTORY)
-		<< "spending an action erased the victory, so no victory screen opens";
-}
+		EXPECT_EQ(ctx.gameState->get_run_outcome(), RunOutcome::UNDECIDED)
+			<< "a new run still carries the last run's defeat, so it opens on the death screen";
+		EXPECT_EQ(ctx.gameState->get_game_status(), GameStatus::STARTUP)
+			<< "a new run did not start its turn from the beginning";
+	}
 
-// A new run, started or loaded, forgets how the last one ended and starts its turn
-// from the beginning.
-TEST_F(RunOutcomeTest, BeginningARunForgetsTheLastOutcome)
-{
-	ctx.gameState->set_run_outcome(RunOutcome::DEFEAT);
-	ctx.gameState->set_game_status(GameStatus::NEW_TURN);
-
-	ctx.gameState->begin_run();
-
-	EXPECT_EQ(ctx.gameState->get_run_outcome(), RunOutcome::UNDECIDED)
-		<< "a new run still carries the last run's defeat, so it opens on the death screen";
-	EXPECT_EQ(ctx.gameState->get_game_status(), GameStatus::STARTUP)
-		<< "a new run did not start its turn from the beginning";
-}
-
-// end of file: RunOutcomeTest.cpp
+	// end of file: RunOutcomeTest.cpp
 
 } // namespace CppRL

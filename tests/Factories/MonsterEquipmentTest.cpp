@@ -27,300 +27,307 @@
 namespace CppRL
 {
 
-// A monster either wields an item or fights with its body. The two are
-// separate fields because only one of them names something in items.json.
-class MonsterEquipmentTest : public ::testing::Test
-{
-protected:
-	BodyPlanRegistry bodyPlans;
-	MonsterRegistry monsters{};
-	ItemRegistry items{};
-
-	void SetUp() override
+	// A monster either wields an item or fights with its body. The two are
+	// separate fields because only one of them names something in items.json.
+	class MonsterEquipmentTest : public ::testing::Test
 	{
-		monsters.load("data/content/monsters.json");
-		items.load("data/content/items.json");
-		bodyPlans.load("data/content/body_plans.json");
-	}
+	protected:
+		BodyPlanRegistry bodyPlans;
+		MonsterRegistry monsters{};
+		ItemRegistry items{};
 
-	static const MonsterParams::StartingItem* find_slot(
-		const MonsterParams& params,
-		EquipmentSlot slot)
-	{
-		auto match = std::ranges::find_if(
-			params.equipment,
-			[slot](const MonsterParams::StartingItem& entry)
-			{ return entry.slot == slot; });
-		return match == params.equipment.end() ? nullptr : &*match;
-	}
-};
-
-// The orc's Long Sword is a real item, so it names the items.json key rather
-// than a display string.
-TEST_F(MonsterEquipmentTest, WieldingMonsterCarriesAnItemKey)
-{
-	const MonsterParams& orc = monsters.get_params("orc");
-
-	const MonsterParams::StartingItem* mainHand =
-		find_slot(orc, EquipmentSlot::RIGHT_HAND);
-	ASSERT_NE(mainHand, nullptr);
-	EXPECT_EQ(mainHand->itemKey, "long_sword");
-	EXPECT_TRUE(orc.naturalAttack.empty());
-}
-
-// A troll's claws are part of it. Nothing in items.json corresponds, so no
-// slot is filled.
-TEST_F(MonsterEquipmentTest, ClawedMonsterCarriesNothing)
-{
-	const MonsterParams& troll = monsters.get_params("troll");
-
-	EXPECT_TRUE(troll.equipment.empty());
-	EXPECT_EQ(troll.naturalAttack, "Claws");
-}
-
-// The archer's Longbow and the warden's Longsword were misspelled against
-// items.json, which is why neither resolved.
-TEST_F(MonsterEquipmentTest, MisspelledWeaponsResolveToRealKeys)
-{
-	const MonsterParams::StartingItem* bow =
-		find_slot(monsters.get_params("archer"), EquipmentSlot::MISSILE_WEAPON);
-	ASSERT_NE(bow, nullptr);
-	EXPECT_EQ(bow->itemKey, "long_bow");
-
-	const MonsterParams::StartingItem* blade = find_slot(
-		monsters.get_params("dungeon_warden"),
-		EquipmentSlot::RIGHT_HAND);
-	ASSERT_NE(blade, nullptr);
-	EXPECT_EQ(blade->itemKey, "long_sword");
-}
-
-// Every key a monster carries must exist in items.json. This is the guard the
-// display-name field never had.
-TEST_F(MonsterEquipmentTest, EveryStartingItemKeyIsKnown)
-{
-	const std::vector<std::string> allItemKeys = items.get_all_keys();
-	const std::set<std::string> knownItemKeys(
-		allItemKeys.begin(),
-		allItemKeys.end());
-
-	for (const std::string& key : monsters.get_all_keys())
-	{
-		const MonsterParams& params = monsters.get_params(key);
-		for (const MonsterParams::StartingItem& entry : params.equipment)
+		void SetUp() override
 		{
-			EXPECT_TRUE(knownItemKeys.contains(entry.itemKey))
-				<< key << " carries unknown item key " << entry.itemKey;
-			EXPECT_NE(entry.slot, EquipmentSlot::NONE)
-				<< key << " carries " << entry.itemKey << " in no slot";
+			monsters.load("data/content/monsters.json");
+			items.load("data/content/items.json");
+			bodyPlans.load("data/content/body_plans.json");
+		}
+
+		static const MonsterParams::StartingItem* find_slot(
+			const MonsterParams& params,
+			EquipmentSlot slot)
+		{
+			auto match = std::ranges::find_if(
+				params.equipment,
+				[slot](const MonsterParams::StartingItem& entry)
+				{ return entry.slot == slot; });
+			return match == params.equipment.end() ? nullptr : &*match;
+		}
+	};
+
+	// The orc's Long Sword is a real item, so it names the items.json key
+	// rather than a display string.
+	TEST_F(MonsterEquipmentTest, WieldingMonsterCarriesAnItemKey)
+	{
+		const MonsterParams& orc = monsters.get_params("orc");
+
+		const MonsterParams::StartingItem* mainHand =
+			find_slot(orc, EquipmentSlot::RIGHT_HAND);
+		ASSERT_NE(mainHand, nullptr);
+		EXPECT_EQ(mainHand->itemKey, "long_sword");
+		EXPECT_TRUE(orc.naturalAttack.empty());
+	}
+
+	// A troll's claws are part of it. Nothing in items.json corresponds, so no
+	// slot is filled.
+	TEST_F(MonsterEquipmentTest, ClawedMonsterCarriesNothing)
+	{
+		const MonsterParams& troll = monsters.get_params("troll");
+
+		EXPECT_TRUE(troll.equipment.empty());
+		EXPECT_EQ(troll.naturalAttack, "Claws");
+	}
+
+	// The archer's Longbow and the warden's Longsword were misspelled against
+	// items.json, which is why neither resolved.
+	TEST_F(MonsterEquipmentTest, MisspelledWeaponsResolveToRealKeys)
+	{
+		const MonsterParams::StartingItem* bow = find_slot(
+			monsters.get_params("archer"),
+			EquipmentSlot::MISSILE_WEAPON);
+		ASSERT_NE(bow, nullptr);
+		EXPECT_EQ(bow->itemKey, "long_bow");
+
+		const MonsterParams::StartingItem* blade = find_slot(
+			monsters.get_params("dungeon_warden"),
+			EquipmentSlot::RIGHT_HAND);
+		ASSERT_NE(blade, nullptr);
+		EXPECT_EQ(blade->itemKey, "long_sword");
+	}
+
+	// Every key a monster carries must exist in items.json. This is the guard
+	// the display-name field never had.
+	TEST_F(MonsterEquipmentTest, EveryStartingItemKeyIsKnown)
+	{
+		const std::vector<std::string> allItemKeys = items.get_all_keys();
+		const std::set<std::string> knownItemKeys(
+			allItemKeys.begin(),
+			allItemKeys.end());
+
+		for (const std::string& key : monsters.get_all_keys())
+		{
+			const MonsterParams& params = monsters.get_params(key);
+			for (const MonsterParams::StartingItem& entry : params.equipment)
+			{
+				EXPECT_TRUE(knownItemKeys.contains(entry.itemKey))
+					<< key << " carries unknown item key " << entry.itemKey;
+				EXPECT_NE(entry.slot, EquipmentSlot::NONE)
+					<< key << " carries " << entry.itemKey << " in no slot";
+			}
 		}
 	}
-}
 
-// A creature that carries gear has somewhere to put it; one that fights with
-// its body has no slots at all.
-TEST_F(MonsterEquipmentTest, BodyPlanCoversEveryCarriedSlot)
-{
-	for (const std::string& key : monsters.get_all_keys())
+	// A creature that carries gear has somewhere to put it; one that fights
+	// with its body has no slots at all.
+	TEST_F(MonsterEquipmentTest, BodyPlanCoversEveryCarriedSlot)
 	{
-		const MonsterParams& params = monsters.get_params(key);
-		const std::vector<EquipmentSlot>& plan =
-			bodyPlans.get(params.bodyPlanName);
-		for (const MonsterParams::StartingItem& carried : params.equipment)
+		for (const std::string& key : monsters.get_all_keys())
 		{
-			const bool planned =
-				std::ranges::find(plan, carried.slot) != plan.end();
-			EXPECT_TRUE(planned) << std::format(
-				"{} carries {} in a slot its body does not have",
-				key,
-				carried.itemKey);
+			const MonsterParams& params = monsters.get_params(key);
+			const std::vector<EquipmentSlot>& plan =
+				bodyPlans.get(params.bodyPlanName);
+			for (const MonsterParams::StartingItem& carried : params.equipment)
+			{
+				const bool planned =
+					std::ranges::find(plan, carried.slot) != plan.end();
+				EXPECT_TRUE(planned) << std::format(
+					"{} carries {} in a slot its body does not have",
+					key,
+					carried.itemKey);
+			}
 		}
 	}
-}
 
-// The wolf wears nothing, and nothing in the data pretends otherwise.
-TEST_F(MonsterEquipmentTest, BeastHasNoSlots)
-{
-	EXPECT_TRUE(
-		bodyPlans.get(monsters.get_params("wolf").bodyPlanName).empty());
-	EXPECT_FALSE(
-		bodyPlans.get(monsters.get_params("orc").bodyPlanName).empty());
-}
-
-// Eleven monsters share one humanoid body rather than eleven copies of the
-// same fifteen slot names.
-TEST_F(MonsterEquipmentTest, WieldersShareOneBodyTemplate)
-{
-	EXPECT_EQ(monsters.get_params("orc").bodyPlanName, "humanoid");
-	EXPECT_EQ(monsters.get_params("kobold").bodyPlanName, "humanoid");
-	EXPECT_EQ(monsters.get_params("wolf").bodyPlanName, "beast");
-}
-
-// Every monster says what body it has. Hands open doors, so a record that names no body
-// would leave a troll pawing at a door it can open.
-TEST_F(MonsterEquipmentTest, EveryMonsterNamesABody)
-{
-	for (const std::string& key : monsters.get_all_keys())
-	{
-		EXPECT_FALSE(monsters.get_params(key).bodyPlanName.empty())
-			<< key << " names no body";
-	}
-}
-
-// A record with no body is unfinished, and loading it fails rather than building a
-// creature whose hands nobody decided on.
-TEST_F(MonsterEquipmentTest, AMonsterWithNoBodyIsRefused)
-{
-	std::ifstream source(Paths::resolve("data/content/monsters.json"));
-	nlohmann::json root = nlohmann::json::parse(source);
-	root.at("orc").at("body") = "";
-
-	const std::filesystem::path bodiless =
-		std::filesystem::temp_directory_path() / "monsters_bodiless.json";
-	{
-		std::ofstream out(bodiless);
-		out << root.dump();
-	}
-
-	EXPECT_THROW(monsters.load(bodiless.string()), std::runtime_error);
-
-	std::filesystem::remove(bodiless);
-}
-
-// The claw-and-fist creatures of the Monstrous Manual have hands and wear nothing; the
-// animals have neither.
-TEST_F(MonsterEquipmentTest, ClawedCreaturesHaveHandsAndBeastsDoNot)
-{
-	for (
-		const std::string_view handed : {
-			"troll",
-			"ghoul",
-			"wight",
-			"shadow",
-			"wraith",
-			"gargoyle",
-			"pit_fiend",
-			"golem_stone",
-		})
-	{
-		const std::vector<EquipmentSlot>& plan =
-			bodyPlans.get(monsters.get_params(handed).bodyPlanName);
-		EXPECT_NE(
-			std::ranges::find(plan, EquipmentSlot::RIGHT_HAND),
-			plan.end())
-			<< handed << " has no hands";
-		EXPECT_EQ(std::ranges::find(plan, EquipmentSlot::BODY), plan.end())
-			<< handed << " has a wardrobe";
-	}
-	for (
-		const std::string_view beast :
-		{ "wolf", "rat", "giant_snake", "bat", "dragon" })
+	// The wolf wears nothing, and nothing in the data pretends otherwise.
+	TEST_F(MonsterEquipmentTest, BeastHasNoSlots)
 	{
 		EXPECT_TRUE(
-			bodyPlans.get(monsters.get_params(beast).bodyPlanName).empty())
-			<< beast << " has slots";
+			bodyPlans.get(monsters.get_params("wolf").bodyPlanName).empty());
+		EXPECT_FALSE(
+			bodyPlans.get(monsters.get_params("orc").bodyPlanName).empty());
 	}
-}
 
-// A misspelled template is a data error and must not read as a creature that
-// simply wears nothing.
-TEST_F(MonsterEquipmentTest, UnknownBodyTemplateIsRefused)
-{
-	EXPECT_THROW(
-		[[maybe_unused]] const auto& misspelled = bodyPlans.get("humaniod"),
-		std::runtime_error);
-	EXPECT_THROW(
-		[[maybe_unused]] const auto& unnamed = bodyPlans.get(""),
-		std::runtime_error);
-}
-
-// The saver rebuilds the file from scratch, so anything it does not write is
-// destroyed by the first save from the editor. Every creature's body name
-// survives the trip.
-TEST_F(MonsterEquipmentTest, SavePreservesEveryBodyName)
-{
-	const std::filesystem::path roundTrip =
-		std::filesystem::temp_directory_path() / "monsters_roundtrip.json";
-
-	std::map<std::string, std::string> before;
-	for (const std::string& key : monsters.get_all_keys())
+	// Eleven monsters share one humanoid body rather than eleven copies of the
+	// same fifteen slot names.
+	TEST_F(MonsterEquipmentTest, WieldersShareOneBodyTemplate)
 	{
-		before.emplace(key, monsters.get_params(key).bodyPlanName);
+		EXPECT_EQ(monsters.get_params("orc").bodyPlanName, "humanoid");
+		EXPECT_EQ(monsters.get_params("kobold").bodyPlanName, "humanoid");
+		EXPECT_EQ(monsters.get_params("wolf").bodyPlanName, "beast");
 	}
 
-	monsters.save(roundTrip.string());
-	monsters.load(roundTrip.string());
-
-	for (const auto& [key, bodyPlanName] : before)
+	// Every monster says what body it has. Hands open doors, so a record that
+	// names no body would leave a troll pawing at a door it can open.
+	TEST_F(MonsterEquipmentTest, EveryMonsterNamesABody)
 	{
-		EXPECT_EQ(monsters.get_params(key).bodyPlanName, bodyPlanName)
-			<< key << " lost its body across a save";
+		for (const std::string& key : monsters.get_all_keys())
+		{
+			EXPECT_FALSE(monsters.get_params(key).bodyPlanName.empty())
+				<< key << " names no body";
+		}
 	}
-	EXPECT_EQ(before.at("orc"), "humanoid");
 
-	std::filesystem::remove(roundTrip);
-}
+	// A record with no body is unfinished, and loading it fails rather than
+	// building a creature whose hands nobody decided on.
+	TEST_F(MonsterEquipmentTest, AMonsterWithNoBodyIsRefused)
+	{
+		std::ifstream source(Paths::resolve("data/content/monsters.json"));
+		nlohmann::json root = nlohmann::json::parse(source);
+		root.at("orc").at("body") = "";
 
-// Body composition follows the Monstrous Manual rather than a single humanoid
-// default. A medusa's snakes leave no room for a helmet.
-TEST_F(MonsterEquipmentTest, MedusaHasNoHeadSlot)
-{
-	const std::vector<EquipmentSlot>& plan =
-		bodyPlans.get(monsters.get_params("medusa").bodyPlanName);
+		const std::filesystem::path bodiless =
+			std::filesystem::temp_directory_path() / "monsters_bodiless.json";
+		{
+			std::ofstream out(bodiless);
+			out << root.dump();
+		}
 
-	EXPECT_EQ(std::ranges::find(plan, EquipmentSlot::HEAD), plan.end());
-	EXPECT_NE(std::ranges::find(plan, EquipmentSlot::BODY), plan.end());
-}
+		EXPECT_THROW(monsters.load(bodiless.string()), std::runtime_error);
 
-// The stone golem entry says it is weaponless and wears nothing. It is still man-shaped,
-// so it has hands and no wardrobe.
-TEST_F(MonsterEquipmentTest, StoneGolemHasHandsAndWearsNothing)
-{
-	const std::vector<EquipmentSlot>& plan =
-		bodyPlans.get(monsters.get_params("golem_stone").bodyPlanName);
+		std::filesystem::remove(bodiless);
+	}
 
-	EXPECT_EQ(plan.size(), 2u);
-	EXPECT_NE(std::ranges::find(plan, EquipmentSlot::LEFT_HAND), plan.end());
-	EXPECT_EQ(std::ranges::find(plan, EquipmentSlot::BODY), plan.end());
-}
+	// The claw-and-fist creatures of the Monstrous Manual have hands and wear
+	// nothing; the animals have neither.
+	TEST_F(MonsterEquipmentTest, ClawedCreaturesHaveHandsAndBeastsDoNot)
+	{
+		for (
+			const std::string_view handed : {
+				"troll",
+				"ghoul",
+				"wight",
+				"shadow",
+				"wraith",
+				"gargoyle",
+				"pit_fiend",
+				"golem_stone",
+			})
+		{
+			const std::vector<EquipmentSlot>& plan =
+				bodyPlans.get(monsters.get_params(handed).bodyPlanName);
+			EXPECT_NE(
+				std::ranges::find(plan, EquipmentSlot::RIGHT_HAND),
+				plan.end())
+				<< handed << " has no hands";
+			EXPECT_EQ(std::ranges::find(plan, EquipmentSlot::BODY), plan.end())
+				<< handed << " has a wardrobe";
+		}
+		for (
+			const std::string_view beast :
+			{ "wolf", "rat", "giant_snake", "bat", "dragon" })
+		{
+			EXPECT_TRUE(
+				bodyPlans.get(monsters.get_params(beast).bodyPlanName).empty())
+				<< beast << " has slots";
+		}
+	}
 
-// A harpy uses a club and wears nothing, so it has hands and no wardrobe.
-TEST_F(MonsterEquipmentTest, HarpyHasHandsAndNothingElse)
-{
-	const std::vector<EquipmentSlot>& plan =
-		bodyPlans.get(monsters.get_params("harpy").bodyPlanName);
+	// A misspelled template is a data error and must not read as a creature
+	// that simply wears nothing.
+	TEST_F(MonsterEquipmentTest, UnknownBodyTemplateIsRefused)
+	{
+		EXPECT_THROW(
+			[[maybe_unused]] const auto& misspelled = bodyPlans.get("humaniod"),
+			std::runtime_error);
+		EXPECT_THROW(
+			[[maybe_unused]] const auto& unnamed = bodyPlans.get(""),
+			std::runtime_error);
+	}
 
-	EXPECT_EQ(plan.size(), 2u);
-	EXPECT_NE(std::ranges::find(plan, EquipmentSlot::RIGHT_HAND), plan.end());
-	EXPECT_EQ(std::ranges::find(plan, EquipmentSlot::BODY), plan.end());
-}
+	// The saver rebuilds the file from scratch, so anything it does not write
+	// is destroyed by the first save from the editor. Every creature's body
+	// name survives the trip.
+	TEST_F(MonsterEquipmentTest, SavePreservesEveryBodyName)
+	{
+		const std::filesystem::path roundTrip =
+			std::filesystem::temp_directory_path() / "monsters_roundtrip.json";
 
-// A carried item key becomes a real item in a real slot at creation, and the
-// creature's attack takes its name from it.
-TEST_F(MonsterEquipmentTest, WieldingMonsterHoldsARealItem)
-{
-	MockGameContext mock;
-	GameContext ctx = mock.to_game_context();
+		std::map<std::string, std::string> before;
+		for (const std::string& key : monsters.get_all_keys())
+		{
+			before.emplace(key, monsters.get_params(key).bodyPlanName);
+		}
 
-	auto orc = MonsterCreator::create(Vector2D(0, 0), MonsterId::ORC, ctx);
-	ASSERT_NE(orc, nullptr);
+		monsters.save(roundTrip.string());
+		monsters.load(roundTrip.string());
 
-	Item* mainHand = orc->get_equipped_item(EquipmentSlot::RIGHT_HAND);
-	ASSERT_NE(mainHand, nullptr) << "the orc's long sword never became an item";
-	EXPECT_EQ(orc->get_attack_name(), mainHand->get_name());
-}
+		for (const auto& [key, bodyPlanName] : before)
+		{
+			EXPECT_EQ(monsters.get_params(key).bodyPlanName, bodyPlanName)
+				<< key << " lost its body across a save";
+		}
+		EXPECT_EQ(before.at("orc"), "humanoid");
 
-// A creature that fights with its body holds nothing, and its attack comes
-// from the body instead.
-TEST_F(MonsterEquipmentTest, ClawedMonsterHoldsNothingAndStrikesWithItsBody)
-{
-	MockGameContext mock;
-	GameContext ctx = mock.to_game_context();
+		std::filesystem::remove(roundTrip);
+	}
 
-	auto troll = MonsterCreator::create(Vector2D(0, 0), MonsterId::TROLL, ctx);
-	ASSERT_NE(troll, nullptr);
+	// Body composition follows the Monstrous Manual rather than a single
+	// humanoid default. A medusa's snakes leave no room for a helmet.
+	TEST_F(MonsterEquipmentTest, MedusaHasNoHeadSlot)
+	{
+		const std::vector<EquipmentSlot>& plan =
+			bodyPlans.get(monsters.get_params("medusa").bodyPlanName);
 
-	EXPECT_EQ(troll->get_equipped_item(EquipmentSlot::RIGHT_HAND), nullptr);
-	EXPECT_EQ(troll->get_attack_name(), "Claws");
-}
+		EXPECT_EQ(std::ranges::find(plan, EquipmentSlot::HEAD), plan.end());
+		EXPECT_NE(std::ranges::find(plan, EquipmentSlot::BODY), plan.end());
+	}
+
+	// The stone golem entry says it is weaponless and wears nothing. It is
+	// still man-shaped, so it has hands and no wardrobe.
+	TEST_F(MonsterEquipmentTest, StoneGolemHasHandsAndWearsNothing)
+	{
+		const std::vector<EquipmentSlot>& plan =
+			bodyPlans.get(monsters.get_params("golem_stone").bodyPlanName);
+
+		EXPECT_EQ(plan.size(), 2u);
+		EXPECT_NE(
+			std::ranges::find(plan, EquipmentSlot::LEFT_HAND),
+			plan.end());
+		EXPECT_EQ(std::ranges::find(plan, EquipmentSlot::BODY), plan.end());
+	}
+
+	// A harpy uses a club and wears nothing, so it has hands and no wardrobe.
+	TEST_F(MonsterEquipmentTest, HarpyHasHandsAndNothingElse)
+	{
+		const std::vector<EquipmentSlot>& plan =
+			bodyPlans.get(monsters.get_params("harpy").bodyPlanName);
+
+		EXPECT_EQ(plan.size(), 2u);
+		EXPECT_NE(
+			std::ranges::find(plan, EquipmentSlot::RIGHT_HAND),
+			plan.end());
+		EXPECT_EQ(std::ranges::find(plan, EquipmentSlot::BODY), plan.end());
+	}
+
+	// A carried item key becomes a real item in a real slot at creation, and
+	// the creature's attack takes its name from it.
+	TEST_F(MonsterEquipmentTest, WieldingMonsterHoldsARealItem)
+	{
+		MockGameContext mock;
+		GameContext ctx = mock.to_game_context();
+
+		auto orc = MonsterCreator::create(Vector2D(0, 0), MonsterId::ORC, ctx);
+		ASSERT_NE(orc, nullptr);
+
+		Item* mainHand = orc->get_equipped_item(EquipmentSlot::RIGHT_HAND);
+		ASSERT_NE(mainHand, nullptr)
+			<< "the orc's long sword never became an item";
+		EXPECT_EQ(orc->get_attack_name(), mainHand->get_name());
+	}
+
+	// A creature that fights with its body holds nothing, and its attack comes
+	// from the body instead.
+	TEST_F(MonsterEquipmentTest, ClawedMonsterHoldsNothingAndStrikesWithItsBody)
+	{
+		MockGameContext mock;
+		GameContext ctx = mock.to_game_context();
+
+		auto troll =
+			MonsterCreator::create(Vector2D(0, 0), MonsterId::TROLL, ctx);
+		ASSERT_NE(troll, nullptr);
+
+		EXPECT_EQ(troll->get_equipped_item(EquipmentSlot::RIGHT_HAND), nullptr);
+		EXPECT_EQ(troll->get_attack_name(), "Claws");
+	}
 
 } // namespace CppRL

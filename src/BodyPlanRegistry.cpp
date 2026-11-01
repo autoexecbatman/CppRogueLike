@@ -16,44 +16,46 @@
 namespace CppRL
 {
 
-void BodyPlanRegistry::load(std::string_view path)
-{
-	auto resolved = Paths::resolve(path);
-	std::ifstream file(resolved);
-	if (!file.is_open())
+	void BodyPlanRegistry::load(std::string_view path)
 	{
-		throw std::runtime_error(
-			std::format(
-				"BodyPlanRegistry::load -- cannot open '{}'",
-				resolved.string()));
-	}
-
-	nlohmann::json root = nlohmann::json::parse(file);
-
-	plans.clear();
-
-	for (const auto& [templateName, slotNames] : root.items())
-	{
-		std::vector<EquipmentSlot> slots;
-		slots.reserve(slotNames.size());
-		for (const nlohmann::json& slotName : slotNames)
+		auto resolved = Paths::resolve(path);
+		std::ifstream file(resolved);
+		if (!file.is_open())
 		{
-			slots.push_back(parse_equipment_slot(slotName.get<std::string>()));
+			throw std::runtime_error(
+				std::format(
+					"BodyPlanRegistry::load -- cannot open '{}'",
+					resolved.string()));
 		}
-		plans.emplace(templateName, std::move(slots));
-	}
-}
 
-const std::vector<EquipmentSlot>& BodyPlanRegistry::get(
-	std::string_view name) const
-{
-	auto found = plans.find(std::string{ name });
-	if (found == plans.end())
+		nlohmann::json root = nlohmann::json::parse(file);
+
+		plans.clear();
+
+		for (const auto& [templateName, slotNames] : root.items())
+		{
+			std::vector<EquipmentSlot> slots;
+			slots.reserve(slotNames.size());
+			for (const nlohmann::json& slotName : slotNames)
+			{
+				slots.push_back(
+					parse_equipment_slot(slotName.get<std::string>()));
+			}
+			plans.emplace(templateName, std::move(slots));
+		}
+	}
+
+	const std::vector<EquipmentSlot>& BodyPlanRegistry::get(
+		std::string_view name) const
 	{
-		throw std::runtime_error(std::format("unknown body plan '{}'", name));
-	}
+		auto found = plans.find(std::string{ name });
+		if (found == plans.end())
+		{
+			throw std::runtime_error(
+				std::format("unknown body plan '{}'", name));
+		}
 
-	return found->second;
-}
+		return found->second;
+	}
 
 } // namespace CppRL

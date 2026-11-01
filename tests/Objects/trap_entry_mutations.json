@@ -15,26 +15,26 @@
   "mutations": [
     {
       "file": "src/Trap.cpp",
-      "original": "\t// Hidden, found, or left armed by a failed disarm: it springs. Nothing notices a\n\t// trap underfoot; only a search finds one.\n",
-      "mutated": "\t// Hidden, found, or left armed by a failed disarm: it springs. Nothing notices a\n\t// trap underfoot; only a search finds one.\n\tif (state == TrapState::HIDDEN && creature.is_player() && ctx.dice->d20() >= 15)\n\t{\n\t\tstate = TrapState::DETECTED;\n\t\treturn EntryResult::BLOCKED;\n\t}\n",
+      "original": "\t\t// Hidden, found, or left armed by a failed disarm: it springs. Nothing\n\t\t// notices a trap underfoot; only a search finds one.\n",
+      "mutated": "\t\t// Hidden, found, or left armed by a failed disarm: it springs. Nothing\n\t\t// notices a trap underfoot; only a search finds one.\n\t\tif (state == TrapState::HIDDEN && creature.is_player() && ctx.dice->d20() >= 15)\n\t\t{\n\t\t\tstate = TrapState::DETECTED;\n\t\t\treturn EntryResult::BLOCKED;\n\t\t}\n",
       "catches": "the passive notice restored: a hidden trap takes a roll before it springs on the player"
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\t// Hidden, found, or left armed by a failed disarm: it springs. Nothing notices a\n\t// trap underfoot; only a search finds one.\n",
-      "mutated": "\t// Hidden, found, or left armed by a failed disarm: it springs. Nothing notices a\n\t// trap underfoot; only a search finds one.\n\tif (state == TrapState::HIDDEN && creature.is_player())\n\t{\n\t\treturn EntryResult::BLOCKED;\n\t}\n",
+      "original": "\t\t// Hidden, found, or left armed by a failed disarm: it springs. Nothing\n\t\t// notices a trap underfoot; only a search finds one.\n",
+      "mutated": "\t\t// Hidden, found, or left armed by a failed disarm: it springs. Nothing\n\t\t// notices a trap underfoot; only a search finds one.\n\t\tif (state == TrapState::HIDDEN && creature.is_player())\n\t\t{\n\t\t\treturn EntryResult::BLOCKED;\n\t\t}\n",
       "catches": "a hidden trap that stops the player short instead of springing"
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\t// A disarmed trap is walked over.\n\tif (state == TrapState::DISARMED)",
-      "mutated": "\t// A disarmed trap is walked over.\n\tif (false)",
+      "original": "\t\t// A disarmed trap is walked over.\n\t\tif (state == TrapState::DISARMED)",
+      "mutated": "\t\t// A disarmed trap is walked over.\n\t\tif (false)",
       "catches": "a disarmed trap springing"
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\t// A disarmed trap is walked over.\n\tif (state == TrapState::DISARMED)",
-      "mutated": "\t// A disarmed trap is walked over.\n\tif (state == TrapState::DISARMED || state == TrapState::TRIGGERED)",
+      "original": "\t\t// A disarmed trap is walked over.\n\t\tif (state == TrapState::DISARMED)",
+      "mutated": "\t\t// A disarmed trap is walked over.\n\t\tif (state == TrapState::DISARMED || state == TrapState::TRIGGERED)",
       "catches": "a trap that has gone off before read as spent, so the accident on 96 costs nothing"
     }
   ]

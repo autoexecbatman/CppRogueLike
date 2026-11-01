@@ -43,132 +43,134 @@
 namespace CppRL
 {
 
-namespace
-{
-	struct BookSpider
+	namespace
 	{
-		std::string_view key{};
-		int armorClass{ 0 };
-		int hitDiceCount{ 0 };
-		int hitDiceBonus{ 0 };
-		int thaco{ 0 };
-		std::string_view damage{};
-		int morale{ 0 };
-		int xp{ 0 };
-		CreatureSize size{ CreatureSize::MEDIUM };
-		IntelligenceRating rating{ IntelligenceRating::AVERAGE };
-		AiType ai{ AiType::SPIDER };
+		struct BookSpider
+		{
+			std::string_view key{};
+			int armorClass{ 0 };
+			int hitDiceCount{ 0 };
+			int hitDiceBonus{ 0 };
+			int thaco{ 0 };
+			std::string_view damage{};
+			int morale{ 0 };
+			int xp{ 0 };
+			CreatureSize size{ CreatureSize::MEDIUM };
+			IntelligenceRating rating{ IntelligenceRating::AVERAGE };
+			AiType ai{ AiType::SPIDER };
+		};
+
+		constexpr BookSpider BOOK_SPIDERS[] = {
+			{
+				"spider_small",
+				8,
+				1,
+				-1,
+				20,
+				"1",
+				10,
+				65,
+				CreatureSize::TINY,
+				IntelligenceRating::LOW,
+				AiType::SPIDER,
+			},
+			{
+				"spider_giant",
+				6,
+				2,
+				2,
+				19,
+				"1d6",
+				8,
+				270,
+				CreatureSize::MEDIUM,
+				IntelligenceRating::ANIMAL,
+				AiType::GIANT_SPIDER,
+			},
+			{
+				"spider_weaver",
+				4,
+				3,
+				3,
+				17,
+				"1d8",
+				13,
+				420,
+				CreatureSize::LARGE,
+				IntelligenceRating::LOW,
+				AiType::WEB_SPINNER,
+			},
+		};
+	} // namespace
+
+	class SpiderStatBlockTest : public ::testing::Test
+	{
+	protected:
+		void SetUp() override
+		{
+			monsters.load(Paths::MONSTERS);
+			ctx = mock.to_game_context();
+		}
+
+		MonsterRegistry monsters{};
+		MockGameContext mock{};
+		GameContext ctx{};
 	};
 
-	constexpr BookSpider BOOK_SPIDERS[] = {
-		{
-			"spider_small",
-			8,
-			1,
-			-1,
-			20,
-			"1",
-			10,
-			65,
-			CreatureSize::TINY,
-			IntelligenceRating::LOW,
-			AiType::SPIDER,
-		},
-		{
-			"spider_giant",
-			6,
-			2,
-			2,
-			19,
-			"1d6",
-			8,
-			270,
-			CreatureSize::MEDIUM,
-			IntelligenceRating::ANIMAL,
-			AiType::GIANT_SPIDER,
-		},
-		{
-			"spider_weaver",
-			4,
-			3,
-			3,
-			17,
-			"1d8",
-			13,
-			420,
-			CreatureSize::LARGE,
-			IntelligenceRating::LOW,
-			AiType::WEB_SPINNER,
-		},
-	};
-} // namespace
-
-class SpiderStatBlockTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	TEST_F(SpiderStatBlockTest, EachSpiderCarriesItsColumnOfTheBook)
 	{
-		monsters.load(Paths::MONSTERS);
-		ctx = mock.to_game_context();
+		for (const BookSpider& book : BOOK_SPIDERS)
+		{
+			const MonsterParams& spider =
+				monsters.get_params(std::string{ book.key });
+			EXPECT_EQ(spider.ac, book.armorClass) << book.key;
+			ASSERT_EQ(spider.hitDice.counts.size(), 1u) << book.key;
+			EXPECT_EQ(spider.hitDice.sides, 8) << book.key;
+			EXPECT_EQ(spider.hitDice.counts.front().count, book.hitDiceCount)
+				<< book.key;
+			EXPECT_EQ(spider.hitDice.bonus, book.hitDiceBonus) << book.key;
+			EXPECT_EQ(spider.thaco, book.thaco) << book.key;
+			EXPECT_EQ(spider.damage.displayRoll, book.damage) << book.key;
+			EXPECT_EQ(spider.morale, book.morale) << book.key;
+			EXPECT_EQ(spider.hitDice.counts.front().xp, book.xp) << book.key;
+			EXPECT_EQ(spider.size, book.size) << book.key;
+			EXPECT_EQ(spider.intelligence, book.rating) << book.key;
+		}
 	}
 
-	MonsterRegistry monsters{};
-	MockGameContext mock{};
-	GameContext ctx{};
-};
-
-TEST_F(SpiderStatBlockTest, EachSpiderCarriesItsColumnOfTheBook)
-{
-	for (const BookSpider& book : BOOK_SPIDERS)
+	// The hairy spider's "Damage/Attack: 1" is a fixed point, not dice: no die
+	// is rolled and the bite is worth exactly 1 before Strength and damage
+	// reduction.
+	TEST_F(SpiderStatBlockTest, TheHairySpidersBiteIsExactlyOne)
 	{
-		const MonsterParams& spider =
-			monsters.get_params(std::string{ book.key });
-		EXPECT_EQ(spider.ac, book.armorClass) << book.key;
-		ASSERT_EQ(spider.hitDice.counts.size(), 1u) << book.key;
-		EXPECT_EQ(spider.hitDice.sides, 8) << book.key;
-		EXPECT_EQ(spider.hitDice.counts.front().count, book.hitDiceCount)
-			<< book.key;
-		EXPECT_EQ(spider.hitDice.bonus, book.hitDiceBonus) << book.key;
-		EXPECT_EQ(spider.thaco, book.thaco) << book.key;
-		EXPECT_EQ(spider.damage.displayRoll, book.damage) << book.key;
-		EXPECT_EQ(spider.morale, book.morale) << book.key;
-		EXPECT_EQ(spider.hitDice.counts.front().xp, book.xp) << book.key;
-		EXPECT_EQ(spider.size, book.size) << book.key;
-		EXPECT_EQ(spider.intelligence, book.rating) << book.key;
+		const DamageInfo& bite = monsters.get_params("spider_small").damage;
+
+		EXPECT_EQ(bite.dice.num, 0) << "the bite rolls a die";
+		EXPECT_EQ(bite.minDamage, 1);
+		EXPECT_EQ(bite.maxDamage, 1);
 	}
-}
 
-// The hairy spider's "Damage/Attack: 1" is a fixed point, not dice: no die is rolled
-// and the bite is worth exactly 1 before Strength and damage reduction.
-TEST_F(SpiderStatBlockTest, TheHairySpidersBiteIsExactlyOne)
-{
-	const DamageInfo& bite = monsters.get_params("spider_small").damage;
-
-	EXPECT_EQ(bite.dice.num, 0) << "the bite rolls a die";
-	EXPECT_EQ(bite.minDamage, 1);
-	EXPECT_EQ(bite.maxDamage, 1);
-}
-
-// Spiders walk on water and cross webs, theirs or another's, and each kind is built with
-// the Ai that carries its poison.
-TEST_F(
-	SpiderStatBlockTest,
-	ASpiderBuiltFromDataWalksWebsSwimsAndCarriesItsPoison)
-{
-	for (const BookSpider& book : BOOK_SPIDERS)
+	// Spiders walk on water and cross webs, theirs or another's, and each kind
+	// is built with the Ai that carries its poison.
+	TEST_F(
+		SpiderStatBlockTest,
+		ASpiderBuiltFromDataWalksWebsSwimsAndCarriesItsPoison)
 	{
-		const auto spider = MonsterCreator::create_from_params(
-			Vector2D{ 0, 0 },
-			monsters.get_params(std::string{ book.key }),
-			ctx);
+		for (const BookSpider& book : BOOK_SPIDERS)
+		{
+			const auto spider = MonsterCreator::create_from_params(
+				Vector2D{ 0, 0 },
+				monsters.get_params(std::string{ book.key }),
+				ctx);
 
-		EXPECT_TRUE(spider->has_state(ActorState::CAN_WALK_WEBS)) << book.key;
-		EXPECT_TRUE(spider->has_state(ActorState::CAN_SWIM)) << book.key;
-		ASSERT_TRUE(spider->ai) << book.key;
-		EXPECT_EQ(spider->ai->get_ai_type(), book.ai) << book.key;
+			EXPECT_TRUE(spider->has_state(ActorState::CAN_WALK_WEBS))
+				<< book.key;
+			EXPECT_TRUE(spider->has_state(ActorState::CAN_SWIM)) << book.key;
+			ASSERT_TRUE(spider->ai) << book.key;
+			EXPECT_EQ(spider->ai->get_ai_type(), book.ai) << book.key;
+		}
 	}
-}
 
-// end of file: SpiderStatBlockTest.cpp
+	// end of file: SpiderStatBlockTest.cpp
 
 } // namespace CppRL

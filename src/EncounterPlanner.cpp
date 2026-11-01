@@ -20,108 +20,91 @@
 namespace CppRL
 {
 
-// ---------------------------------------------------------------------------
-// Constants
-// ---------------------------------------------------------------------------
-namespace
-{
-	constexpr int BASE_XP_PER_LEVEL = 120;
-	constexpr int MAX_ENCOUNTER_MONSTERS = 10;
-
-	constexpr float STANDARD_MULTIPLIER = 1.0f;
-	constexpr float DANGER_MULTIPLIER = 2.5f;
-	constexpr float TREASURE_MULTIPLIER = 1.5f;
-} // namespace
-
-// ---------------------------------------------------------------------------
-// Budget calculation
-// ---------------------------------------------------------------------------
-
-int encounter_budget(RoomType type, int dungeonLevel)
-{
-	switch (type)
+	// -------------------------------------------------------------------------
+	// Constants
+	// -------------------------------------------------------------------------
+	namespace
 	{
+		constexpr int BASE_XP_PER_LEVEL = 120;
+		constexpr int MAX_ENCOUNTER_MONSTERS = 10;
 
-	case RoomType::ENTRANCE:
+		constexpr float STANDARD_MULTIPLIER = 1.0f;
+		constexpr float DANGER_MULTIPLIER = 2.5f;
+		constexpr float TREASURE_MULTIPLIER = 1.5f;
+	} // namespace
+
+	// -------------------------------------------------------------------------
+	// Budget calculation
+	// -------------------------------------------------------------------------
+
+	int encounter_budget(RoomType type, int dungeonLevel)
 	{
-		return 0;
-	}
-
-	case RoomType::STANDARD:
-	{
-		return static_cast<int>(
-			dungeonLevel * BASE_XP_PER_LEVEL * STANDARD_MULTIPLIER);
-	}
-
-	case RoomType::DANGER:
-	{
-		return static_cast<int>(
-			dungeonLevel * BASE_XP_PER_LEVEL * DANGER_MULTIPLIER);
-	}
-
-	case RoomType::TREASURE:
-	{
-		return static_cast<int>(
-			dungeonLevel * BASE_XP_PER_LEVEL * TREASURE_MULTIPLIER);
-	}
-	}
-
-	std::unreachable();
-}
-
-// ---------------------------------------------------------------------------
-// Two-phase encounter selection:
-// Phase 1 - variety: pick one of each affordable candidate in random order
-//           until budget exhausted or monster cap hit.
-// Phase 2 - fill: spend remaining budget on random duplicates.
-//
-// Standard DP breaks for diminishing-return variety functions (CLRS Ch16).
-// Two-phase approximation produces good variety without DP complexity.
-// ---------------------------------------------------------------------------
-
-std::vector<std::string> select_encounter(
-	const std::vector<MonsterCandidate>& candidates,
-	int budget,
-	int cap,
-	RandomDice& rng)
-{
-	std::vector<std::string> selected;
-
-	// Phase 1: one of each type, random order (candidates already shuffled)
-	int remaining = budget;
-	for (const auto& candidate : candidates)
-	{
-		if (static_cast<int>(selected.size()) >= cap)
+		switch (type)
 		{
-			break;
-		}
-		if (candidate.xpCost <= remaining)
+
+		case RoomType::ENTRANCE:
 		{
-			selected.push_back(candidate.key);
-			remaining -= candidate.xpCost;
+			return 0;
 		}
+
+		case RoomType::STANDARD:
+		{
+			return static_cast<int>(
+				dungeonLevel * BASE_XP_PER_LEVEL * STANDARD_MULTIPLIER);
+		}
+
+		case RoomType::DANGER:
+		{
+			return static_cast<int>(
+				dungeonLevel * BASE_XP_PER_LEVEL * DANGER_MULTIPLIER);
+		}
+
+		case RoomType::TREASURE:
+		{
+			return static_cast<int>(
+				dungeonLevel * BASE_XP_PER_LEVEL * TREASURE_MULTIPLIER);
+		}
+		}
+
+		std::unreachable();
 	}
 
-	// Phase 2: fill remaining budget with random duplicates
-	// Build affordable subset for fill phase
-	std::vector<const MonsterCandidate*> affordable;
-	for (const auto& candidate : candidates)
+	// -------------------------------------------------------------------------
+	// Two-phase encounter selection:
+	// Phase 1 - variety: pick one of each affordable candidate in random order
+	//           until budget exhausted or monster cap hit.
+	// Phase 2 - fill: spend remaining budget on random duplicates.
+	//
+	// Standard DP breaks for diminishing-return variety functions (CLRS Ch16).
+	// Two-phase approximation produces good variety without DP complexity.
+	// -------------------------------------------------------------------------
+
+	std::vector<std::string> select_encounter(
+		const std::vector<MonsterCandidate>& candidates,
+		int budget,
+		int cap,
+		RandomDice& rng)
 	{
-		if (candidate.xpCost <= remaining)
+		std::vector<std::string> selected;
+
+		// Phase 1: one of each type, random order (candidates already shuffled)
+		int remaining = budget;
+		for (const auto& candidate : candidates)
 		{
-			affordable.push_back(&candidate);
+			if (static_cast<int>(selected.size()) >= cap)
+			{
+				break;
+			}
+			if (candidate.xpCost <= remaining)
+			{
+				selected.push_back(candidate.key);
+				remaining -= candidate.xpCost;
+			}
 		}
-	}
 
-	while (!affordable.empty() && static_cast<int>(selected.size()) < cap)
-	{
-		const int idx = rng.roll(0, static_cast<int>(affordable.size()) - 1);
-		const MonsterCandidate& pick = *affordable[idx];
-		selected.push_back(pick.key);
-		remaining -= pick.xpCost;
-
-		// Rebuild affordable list with updated remaining budget
-		affordable.clear();
+		// Phase 2: fill remaining budget with random duplicates
+		// Build affordable subset for fill phase
+		std::vector<const MonsterCandidate*> affordable;
 		for (const auto& candidate : candidates)
 		{
 			if (candidate.xpCost <= remaining)
@@ -129,97 +112,121 @@ std::vector<std::string> select_encounter(
 				affordable.push_back(&candidate);
 			}
 		}
-	}
 
-	return selected;
-}
-
-// ---------------------------------------------------------------------------
-// Public interface
-// ---------------------------------------------------------------------------
-
-std::vector<MonsterCandidate> encounter_candidates(
-	const MonsterRegistry& monsters,
-	int dungeonLevel)
-{
-	std::vector<MonsterCandidate> candidates;
-	for (const auto& key : monsters.get_all_keys())
-	{
-		// A monster worth nothing, such as the shopkeeper, is never planned.
-		const MonsterParams& params = monsters.get_params(key);
-		const int worstCaseXp = highest_count(params.hitDice).xp;
-		if (worstCaseXp <= 0)
+		while (!affordable.empty() && static_cast<int>(selected.size()) < cap)
 		{
-			continue;
+			const int idx =
+				rng.roll(0, static_cast<int>(affordable.size()) - 1);
+			const MonsterCandidate& pick = *affordable[idx];
+			selected.push_back(pick.key);
+			remaining -= pick.xpCost;
+
+			// Rebuild affordable list with updated remaining budget
+			affordable.clear();
+			for (const auto& candidate : candidates)
+			{
+				if (candidate.xpCost <= remaining)
+				{
+					affordable.push_back(&candidate);
+				}
+			}
 		}
-		// Only monsters whose depth range holds this level.
-		if (params.levelMinimum > dungeonLevel)
-		{
-			continue;
-		}
-		if (params.levelMaximum > 0 && params.levelMaximum < dungeonLevel)
-		{
-			continue;
-		}
-		candidates.push_back({ key, worstCaseXp });
+
+		return selected;
 	}
-	return candidates;
-}
 
-void plan_encounter(const DungeonRoom& room, GameContext& ctx)
-{
-	assert(
-		ctx.creatureManager &&
-		"plan_encounter: called without a creatureManager");
-	assert(
-		ctx.monsterRegistry &&
-		"plan_encounter: called without a monsterRegistry");
-	assert(ctx.levelManager && "plan_encounter: called without a levelManager");
-	assert(ctx.dice && "plan_encounter: called without dice");
-	assert(ctx.map && "plan_encounter: called without a map");
-	assert(ctx.creatures && "plan_encounter: called without creatures");
+	// -------------------------------------------------------------------------
+	// Public interface
+	// -------------------------------------------------------------------------
 
-	const int dungeonLevel = ctx.levelManager->get_dungeon_level();
-	const int baseBudget = encounter_budget(room.type, dungeonLevel);
-	const int roll = ctx.dice->roll(60, 100);
-	const int budget = baseBudget * roll / 100;
-
-	if (budget <= 0)
+	std::vector<MonsterCandidate> encounter_candidates(
+		const MonsterRegistry& monsters,
+		int dungeonLevel)
 	{
-		return;
-	}
-
-	// Build candidate list: monsters eligible for this dungeon level
-	std::vector<MonsterCandidate> candidates =
-		encounter_candidates(*ctx.monsterRegistry, dungeonLevel);
-
-	if (candidates.empty())
-	{
-		return;
-	}
-
-	// Shuffle candidates for variety in phase 1 selection order
-	std::ranges::shuffle(candidates, ctx.dice->get_rng());
-
-	// Two-phase selection: variety first, fill second
-	std::vector<std::string> selected =
-		select_encounter(candidates, budget, MAX_ENCOUNTER_MONSTERS, *ctx.dice);
-
-	// Spawn each selected monster at a random walkable position
-	for (const auto& key : selected)
-	{
-		auto pos = SpawnUtils::find_random_room_position(room, ctx);
-		if (!pos)
+		std::vector<MonsterCandidate> candidates;
+		for (const auto& key : monsters.get_all_keys())
 		{
-			break; // no more walkable positions
+			// A monster worth nothing, such as the shopkeeper, is never
+			// planned.
+			const MonsterParams& params = monsters.get_params(key);
+			const int worstCaseXp = highest_count(params.hitDice).xp;
+			if (worstCaseXp <= 0)
+			{
+				continue;
+			}
+			// Only monsters whose depth range holds this level.
+			if (params.levelMinimum > dungeonLevel)
+			{
+				continue;
+			}
+			if (params.levelMaximum > 0 && params.levelMaximum < dungeonLevel)
+			{
+				continue;
+			}
+			candidates.push_back({ key, worstCaseXp });
 		}
-		ctx.creatureManager->add_creature(
-			MonsterCreator::create_from_params(
-				*pos,
-				ctx.monsterRegistry->get_params(key),
-				ctx),
-			ctx);
+		return candidates;
 	}
-}
+
+	void plan_encounter(const DungeonRoom& room, GameContext& ctx)
+	{
+		assert(
+			ctx.creatureManager &&
+			"plan_encounter: called without a creatureManager");
+		assert(
+			ctx.monsterRegistry &&
+			"plan_encounter: called without a monsterRegistry");
+		assert(
+			ctx.levelManager &&
+			"plan_encounter: called without a levelManager");
+		assert(ctx.dice && "plan_encounter: called without dice");
+		assert(ctx.map && "plan_encounter: called without a map");
+		assert(ctx.creatures && "plan_encounter: called without creatures");
+
+		const int dungeonLevel = ctx.levelManager->get_dungeon_level();
+		const int baseBudget = encounter_budget(room.type, dungeonLevel);
+		const int roll = ctx.dice->roll(60, 100);
+		const int budget = baseBudget * roll / 100;
+
+		if (budget <= 0)
+		{
+			return;
+		}
+
+		// Build candidate list: monsters eligible for this dungeon level
+		std::vector<MonsterCandidate> candidates =
+			encounter_candidates(*ctx.monsterRegistry, dungeonLevel);
+
+		if (candidates.empty())
+		{
+			return;
+		}
+
+		// Shuffle candidates for variety in phase 1 selection order
+		std::ranges::shuffle(candidates, ctx.dice->get_rng());
+
+		// Two-phase selection: variety first, fill second
+		std::vector<std::string> selected = select_encounter(
+			candidates,
+			budget,
+			MAX_ENCOUNTER_MONSTERS,
+			*ctx.dice);
+
+		// Spawn each selected monster at a random walkable position
+		for (const auto& key : selected)
+		{
+			auto pos = SpawnUtils::find_random_room_position(room, ctx);
+			if (!pos)
+			{
+				break; // no more walkable positions
+			}
+			ctx.creatureManager->add_creature(
+				MonsterCreator::create_from_params(
+					*pos,
+					ctx.monsterRegistry->get_params(key),
+					ctx),
+				ctx);
+		}
+	}
 
 } // namespace CppRL

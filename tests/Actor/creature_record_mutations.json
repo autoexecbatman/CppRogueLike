@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/Creature.cpp",
-      "original": "\t\thealthPool =\n\t\t\tstd::make_unique<HealthPool>(healthJson.at(\"hpMax\").get<int>());",
-      "mutated": "\t\tif (!healthPool) { return; }\n\t\thealthPool->set_max_hp(healthJson.at(\"hpMax\").get<int>());",
+      "original": "\t\t\thealthPool =\n\t\t\t\tstd::make_unique<HealthPool>(healthJson.at(\"hpMax\").get<int>());",
+      "mutated": "\t\t\tif (!healthPool) { return; }\n\t\t\thealthPool->set_max_hp(healthJson.at(\"hpMax\").get<int>());",
       "catches": "a saved pool filled in only if the object already had one, so a loaded monster has none"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tcreatureClass =\n\t\tparse_creature_class(source.at(\"creatureClass\").get<std::string>());",
-      "mutated": "\tcreatureClass =source.contains(\"creatureClass\") ? parse_creature_class(source.at(\"creatureClass\").get<std::string>()) : CreatureClass::MONSTER;",
+      "original": "\t\tcreatureClass =\n\t\t\tparse_creature_class(source.at(\"creatureClass\").get<std::string>());",
+      "mutated": "\t\tcreatureClass =source.contains(\"creatureClass\") ? parse_creature_class(source.at(\"creatureClass\").get<std::string>()) : CreatureClass::MONSTER;",
       "catches": "a record without its class loading as a monster, with a monster's hit dice and THAC0"
     },
     {
@@ -33,8 +33,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tInventoryOperations::load_inventory(\n\t\tinventoryData,\n\t\tsource.at(\"inventoryData\"));",
-      "mutated": "\tif (source.contains(\"inventoryData\")) { InventoryOperations::load_inventory(inventoryData, source.at(\"inventoryData\")); }",
+      "original": "\t\tInventoryOperations::load_inventory(\n\t\t\tinventoryData,\n\t\t\tsource.at(\"inventoryData\"));",
+      "mutated": "\t\tif (source.contains(\"inventoryData\")) { InventoryOperations::load_inventory(inventoryData, source.at(\"inventoryData\")); }",
       "catches": "a record without its inventory loading as an empty pack"
     },
     {
@@ -69,8 +69,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tethics = Alignment::parse_ethics(source.at(\"ethics\").get<std::string>());",
-      "mutated": "\tethics = source.contains(\"ethics\") ? Alignment::parse_ethics(source.at(\"ethics\").get<std::string>()) : Alignment::Ethics::NEUTRAL;",
+      "original": "\t\tethics =\n\t\t\tAlignment::parse_ethics(source.at(\"ethics\").get<std::string>());",
+      "mutated": "\t\tethics =source.contains(\"ethics\") ? Alignment::parse_ethics(source.at(\"ethics\").get<std::string>()) : Alignment::Ethics::NEUTRAL;",
       "catches": "a record without an alignment loading as neutral rather than being refused"
     }
   ]

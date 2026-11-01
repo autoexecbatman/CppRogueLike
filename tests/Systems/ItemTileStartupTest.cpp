@@ -31,50 +31,51 @@
 namespace CppRL
 {
 
-namespace
-{
-	// The item tiles the game ships, by key, as tiles.json holds them.
-	nlohmann::json shipped_item_tiles()
+	namespace
 	{
-		std::ifstream in(Paths::resolve(Paths::CONTENT_TILES));
-		return nlohmann::json::parse(in).at("items");
-	}
-} // namespace
+		// The item tiles the game ships, by key, as tiles.json holds them.
+		nlohmann::json shipped_item_tiles()
+		{
+			std::ifstream in(Paths::resolve(Paths::CONTENT_TILES));
+			return nlohmann::json::parse(in).at("items");
+		}
+	} // namespace
 
-TEST(ItemTileStartupTest, StartupLoadsEveryShippedItemTile)
-{
-	const nlohmann::json shipped = shipped_item_tiles();
-	ASSERT_FALSE(shipped.empty()) << "tiles.json ships no item tiles";
-	Game game{ TEST_DICE_SEED };
-
-	game.load_item_tiles();
-
-	EXPECT_EQ(game.contentRegistry.all_tiles().size(), shipped.size());
-	for (const auto& [key, record] : shipped.items())
+	TEST(ItemTileStartupTest, StartupLoadsEveryShippedItemTile)
 	{
-		EXPECT_EQ(
-			game.contentRegistry.get_tile(key),
-			TileRefJson::parse_tile(record))
-			<< key;
+		const nlohmann::json shipped = shipped_item_tiles();
+		ASSERT_FALSE(shipped.empty()) << "tiles.json ships no item tiles";
+		Game game{ TEST_DICE_SEED };
+
+		game.load_item_tiles();
+
+		EXPECT_EQ(game.contentRegistry.all_tiles().size(), shipped.size());
+		for (const auto& [key, record] : shipped.items())
+		{
+			EXPECT_EQ(
+				game.contentRegistry.get_tile(key),
+				TileRefJson::parse_tile(record))
+				<< key;
+		}
 	}
-}
 
-TEST(ItemTileStartupTest, SavingTheLoadedTilesKeepsThemAll)
-{
-	const nlohmann::json shipped = shipped_item_tiles();
-	Game game{ TEST_DICE_SEED };
-	game.load_item_tiles();
-	const std::filesystem::path saved =
-		std::filesystem::temp_directory_path() / "rogue_item_tiles_test.json";
+	TEST(ItemTileStartupTest, SavingTheLoadedTilesKeepsThemAll)
+	{
+		const nlohmann::json shipped = shipped_item_tiles();
+		Game game{ TEST_DICE_SEED };
+		game.load_item_tiles();
+		const std::filesystem::path saved =
+			std::filesystem::temp_directory_path() /
+			"rogue_item_tiles_test.json";
 
-	ContentRegistryIO::save(game.contentRegistry, saved.string());
-	std::ifstream in(saved);
-	const nlohmann::json written = nlohmann::json::parse(in).at("items");
-	in.close();
-	std::error_code ignored;
-	std::filesystem::remove(saved, ignored);
+		ContentRegistryIO::save(game.contentRegistry, saved.string());
+		std::ifstream in(saved);
+		const nlohmann::json written = nlohmann::json::parse(in).at("items");
+		in.close();
+		std::error_code ignored;
+		std::filesystem::remove(saved, ignored);
 
-	EXPECT_EQ(written, shipped);
-}
+		EXPECT_EQ(written, shipped);
+	}
 
 } // namespace CppRL

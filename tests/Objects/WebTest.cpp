@@ -22,104 +22,107 @@
 namespace CppRL
 {
 
-class WebTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	class WebTest : public ::testing::Test
 	{
-		ctx = mock.to_game_context();
-		ctx.playerOwner = &player;
-		player->healthPool = std::make_unique<HealthPool>(20);
-		player->armorClass = std::make_unique<ArmorClass>(10);
-		player->set_dexterity(10);
-		player->set_strength(10);
+	protected:
+		void SetUp() override
+		{
+			ctx = mock.to_game_context();
+			ctx.playerOwner = &player;
+			player->healthPool = std::make_unique<HealthPool>(20);
+			player->armorClass = std::make_unique<ArmorClass>(10);
+			player->set_dexterity(10);
+			player->set_strength(10);
+		}
+
+		// Rolls are consumed in order by RandomDice's fixed-roll queue, so each
+		// test states exactly the rolls the code under test will draw.
+		void force_next_roll(int value) { mock.dice.set_next_roll(value); }
+
+		MockGameContext mock{};
+		GameContext ctx{};
+		std::unique_ptr<Player> player{ std::make_unique<Player>(
+			Vector2D{ 5, 5 }) };
+		Web web{ Vector2D{ 5, 5 }, 2, mock.tile_config };
+	};
+
+	// A creature that cannot walk webs is caught and its move is stopped.
+	TEST_F(WebTest, CatchesCreatureWithoutWebWalking)
+	{
+		force_next_roll(1); // caught
+		force_next_roll(1); // stuck-turn roll
+
+		EXPECT_EQ(web.on_creature_enter(*player, ctx), EntryResult::BLOCKED);
+		EXPECT_TRUE(player->is_webbed());
 	}
 
-	// Rolls are consumed in order by RandomDice's fixed-roll queue, so each
-	// test states exactly the rolls the code under test will draw.
-	void force_next_roll(int value) { mock.dice.set_next_roll(value); }
+	// A spider walks its own webs: nothing happens and the web is untouched.
+	TEST_F(WebTest, CreatureThatWalksWebsIsUnaffected)
+	{
+		player->add_state(ActorState::CAN_WALK_WEBS);
 
-	MockGameContext mock{};
-	GameContext ctx{};
-	std::unique_ptr<Player> player{ std::make_unique<Player>(
-		Vector2D{ 5, 5 }) };
-	Web web{ Vector2D{ 5, 5 }, 2, mock.tile_config };
-};
+		EXPECT_EQ(web.on_creature_enter(*player, ctx), EntryResult::UNAFFECTED);
+		EXPECT_FALSE(player->is_webbed());
+		EXPECT_FALSE(web.is_destroyed());
+	}
 
-// A creature that cannot walk webs is caught and its move is stopped.
-TEST_F(WebTest, CatchesCreatureWithoutWebWalking)
-{
-	force_next_roll(1); // caught
-	force_next_roll(1); // stuck-turn roll
+	// A ring of free action tears the web: the wearer passes, unbound, and the
+	// web is gone.
+	TEST_F(WebTest, ARingOfFreeActionTearsTheWeb)
+	{
+		ASSERT_TRUE(player->equip_item(
+			ItemCreator::create("ring_of_free_action", player->position, ctx),
+			EquipmentSlot::LEFT_RING,
+			ctx));
 
-	EXPECT_EQ(web.on_creature_enter(*player, ctx), EntryResult::BLOCKED);
-	EXPECT_TRUE(player->is_webbed());
-}
+		EXPECT_EQ(web.on_creature_enter(*player, ctx), EntryResult::AFFECTED);
+		EXPECT_FALSE(player->is_webbed());
+		EXPECT_TRUE(web.is_destroyed());
+	}
 
-// A spider walks its own webs: nothing happens and the web is untouched.
-TEST_F(WebTest, CreatureThatWalksWebsIsUnaffected)
-{
-	player->add_state(ActorState::CAN_WALK_WEBS);
+	// A failed catch roll still counts as an effect, and never binds the
+	// creature.
+	TEST_F(WebTest, FailedCatchLeavesCreatureFree)
+	{
+		force_next_roll(100); // escapes the catch
+		force_next_roll(2); // web survives the tear roll
 
-	EXPECT_EQ(web.on_creature_enter(*player, ctx), EntryResult::UNAFFECTED);
-	EXPECT_FALSE(player->is_webbed());
-	EXPECT_FALSE(web.is_destroyed());
-}
+		EXPECT_EQ(web.on_creature_enter(*player, ctx), EntryResult::AFFECTED);
+		EXPECT_FALSE(player->is_webbed());
+	}
 
-// A ring of free action tears the web: the wearer passes, unbound, and the web is gone.
-TEST_F(WebTest, ARingOfFreeActionTearsTheWeb)
-{
-	ASSERT_TRUE(player->equip_item(
-		ItemCreator::create("ring_of_free_action", player->position, ctx),
-		EquipmentSlot::LEFT_RING,
-		ctx));
+	// A held creature that fails its break roll stays stuck and spends the
+	// turn.
+	TEST_F(WebTest, FailedBreakKeepsCreatureStuck)
+	{
+		player->apply_web_effect(3, 2, nullptr);
 
-	EXPECT_EQ(web.on_creature_enter(*player, ctx), EntryResult::AFFECTED);
-	EXPECT_FALSE(player->is_webbed());
-	EXPECT_TRUE(web.is_destroyed());
-}
+		force_next_roll(100); // fails to break free
 
-// A failed catch roll still counts as an effect, and never binds the creature.
-TEST_F(WebTest, FailedCatchLeavesCreatureFree)
-{
-	force_next_roll(100); // escapes the catch
-	force_next_roll(2); // web survives the tear roll
+		EXPECT_EQ(player->try_break_web(ctx), WebEscape::STILL_STUCK);
+		EXPECT_TRUE(player->is_webbed());
+	}
 
-	EXPECT_EQ(web.on_creature_enter(*player, ctx), EntryResult::AFFECTED);
-	EXPECT_FALSE(player->is_webbed());
-}
+	// A successful break roll frees the creature immediately.
+	TEST_F(WebTest, SuccessfulBreakFreesCreature)
+	{
+		player->apply_web_effect(3, 2, nullptr);
 
-// A held creature that fails its break roll stays stuck and spends the turn.
-TEST_F(WebTest, FailedBreakKeepsCreatureStuck)
-{
-	player->apply_web_effect(3, 2, nullptr);
+		force_next_roll(1); // breaks free
 
-	force_next_roll(100); // fails to break free
+		EXPECT_EQ(player->try_break_web(ctx), WebEscape::BROKE_FREE);
+		EXPECT_FALSE(player->is_webbed());
+	}
 
-	EXPECT_EQ(player->try_break_web(ctx), WebEscape::STILL_STUCK);
-	EXPECT_TRUE(player->is_webbed());
-}
+	// The binding expires on its own even when every break roll fails.
+	TEST_F(WebTest, BindingExpiresAfterItsDuration)
+	{
+		player->apply_web_effect(1, 2, nullptr);
 
-// A successful break roll frees the creature immediately.
-TEST_F(WebTest, SuccessfulBreakFreesCreature)
-{
-	player->apply_web_effect(3, 2, nullptr);
+		force_next_roll(100); // fails to break, but the last turn runs out
 
-	force_next_roll(1); // breaks free
-
-	EXPECT_EQ(player->try_break_web(ctx), WebEscape::BROKE_FREE);
-	EXPECT_FALSE(player->is_webbed());
-}
-
-// The binding expires on its own even when every break roll fails.
-TEST_F(WebTest, BindingExpiresAfterItsDuration)
-{
-	player->apply_web_effect(1, 2, nullptr);
-
-	force_next_roll(100); // fails to break, but the last turn runs out
-
-	EXPECT_EQ(player->try_break_web(ctx), WebEscape::STRUGGLED_FREE);
-	EXPECT_FALSE(player->is_webbed());
-}
+		EXPECT_EQ(player->try_break_web(ctx), WebEscape::STRUGGLED_FREE);
+		EXPECT_FALSE(player->is_webbed());
+	}
 
 } // namespace CppRL

@@ -15,26 +15,26 @@
   "mutations": [
     {
       "file": "src/Creature.cpp",
-      "original": "\tconst int turnsBetweenPoints =\n\t\tdataManager.constitution_for(get_constitution()).Regeneration;",
-      "mutated": "\tif (creatureClass == CreatureClass::MONSTER)\n\t{\n\t\treturn;\n\t}\n\tconst int turnsBetweenPoints =\n\t\tdataManager.constitution_for(get_constitution()).Regeneration;",
+      "original": "\t\tconst int turnsBetweenPoints =\n\t\t\tdataManager.constitution_for(get_constitution()).Regeneration;",
+      "mutated": "\t\tif (creatureClass == CreatureClass::MONSTER)\n\t\t{\n\t\t\treturn;\n\t\t}\n\t\tconst int turnsBetweenPoints =\n\t\t\tdataManager.constitution_for(get_constitution()).Regeneration;",
       "catches": "a monster shut out of the regeneration column again, which is a different column from the hit point one that does exclude it"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tconst int turnsBetweenPoints =\n\t\tdataManager.constitution_for(get_constitution()).Regeneration;",
-      "mutated": "\tconst int turnsBetweenPoints =\n\t\tdataManager.constitution_for(get_constitution()).hitDieMinimum;",
+      "original": "\t\tconst int turnsBetweenPoints =\n\t\t\tdataManager.constitution_for(get_constitution()).Regeneration;",
+      "mutated": "\t\tconst int turnsBetweenPoints =\n\t\t\tdataManager.constitution_for(get_constitution()).hitDieMinimum;",
       "catches": "the interval read from a column that is not Nil below 20"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tif (roundsElapsed %\n\t\t\t(turnsBetweenPoints * GameBalance::Time::ROUNDS_PER_TURN) ==\n\t\t0)",
-      "mutated": "\tif (roundsElapsed %turnsBetweenPoints ==\n\t\t0)",
+      "original": "\t\tif (roundsElapsed %\n\t\t\t\t(turnsBetweenPoints * GameBalance::Time::ROUNDS_PER_TURN) ==\n\t\t\t0)",
+      "mutated": "\t\tif (roundsElapsed %turnsBetweenPoints ==\n\t\t\t0)",
       "catches": "the listed turns read as rounds"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tif (roundsElapsed %\n\t\t\t(turnsBetweenPoints * GameBalance::Time::ROUNDS_PER_TURN) ==\n\t\t0)",
-      "mutated": "\tif (roundsElapsed %\n\t\t\t(turnsBetweenPoints * GameBalance::Time::ROUNDS_PER_TURN)!=\n\t\t0)",
+      "original": "\t\tif (roundsElapsed %\n\t\t\t\t(turnsBetweenPoints * GameBalance::Time::ROUNDS_PER_TURN) ==\n\t\t\t0)",
+      "mutated": "\t\tif (roundsElapsed %\n\t\t\t\t(turnsBetweenPoints * GameBalance::Time::ROUNDS_PER_TURN)!=\n\t\t\t0)",
       "catches": "healing on every round but the listed one"
     },
     {
@@ -75,20 +75,20 @@
     },
     {
       "file": "src/HealthPool.cpp",
-      "original": "\tif (hp <= 0)\n\t{\n\t\treturn 0;\n\t}\n\tassert(",
-      "mutated": "\tassert(",
+      "original": "\t\tif (hp <= 0)\n\t\t{\n\t\t\treturn 0;\n\t\t}\n\t\tassert(",
+      "mutated": "\t\tassert(",
       "catches": "regeneration raising the dead"
     },
     {
       "file": "src/HealthPool.cpp",
-      "original": "\t\tunregenerableDamage =\n\t\t\tstd::min(unregenerableDamage + actualDamage, hpMax - hp);",
-      "mutated": "\t\tunregenerableDamage =unregenerableDamage + actualDamage;",
+      "original": "\t\t\tunregenerableDamage =\n\t\t\t\tstd::min(unregenerableDamage + actualDamage, hpMax - hp);",
+      "mutated": "\t\t\tunregenerableDamage =unregenerableDamage + actualDamage;",
       "catches": "more fire and acid kept than the damage the pool shows"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\thealthPool->set_unregenerable_damage(\n\t\t\thealthJson.at(\"unregenerableDamage\").get<int>());",
-      "mutated": "\t\thealthPool->set_unregenerable_damage(\n\t\t\thealthJson.at(\"tempHp\").get<int>());",
+      "original": "\t\t\thealthPool->set_unregenerable_damage(\n\t\t\t\thealthJson.at(\"unregenerableDamage\").get<int>());",
+      "mutated": "\t\t\thealthPool->set_unregenerable_damage(\n\t\t\t\thealthJson.at(\"tempHp\").get<int>());",
       "catches": "the fire and acid lost across a save"
     }
   ]

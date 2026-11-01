@@ -15,20 +15,20 @@
   "mutations": [
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\t\treturn buff.expiryTime.has_value() && currentTime >= *buff.expiryTime;",
-      "mutated": "\t\treturn buff.expiryTime.has_value() && currentTime > *buff.expiryTime;",
+      "original": "\t\t\treturn buff.expiryTime.has_value() &&\n\t\t\t\tcurrentTime >= *buff.expiryTime;",
+      "mutated": "\t\t\treturn buff.expiryTime.has_value() &&\n\t\t\t\tcurrentTime > *buff.expiryTime;",
       "catches": "a buff living one reading past the time it ends at, so every duration is a round long"
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\t\treturn buff.expiryTime.has_value() && currentTime >= *buff.expiryTime;",
-      "mutated": "\t\treturn buff.expiryTime.has_value() && currentTime > *buff.expiryTime + TIME_UNITS_PER_ROUND;",
+      "original": "\t\t\treturn buff.expiryTime.has_value() &&\n\t\t\t\tcurrentTime >= *buff.expiryTime;",
+      "mutated": "\t\t\treturn buff.expiryTime.has_value() &&\n\t\t\t\tcurrentTime > *buff.expiryTime + TIME_UNITS_PER_ROUND;",
       "catches": "a buff outstaying its duration by a whole round"
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\tgrant_buff(\n\t\tcreature,\n\t\ttype,\n\t\tvalue,\n\t\texpiry_time(currentTime, durationRounds),\n\t\tapplication);",
-      "mutated": "\tgrant_buff(\n\t\tcreature,\n\t\ttype,\n\t\tvalue,\n\t\texpiry_time(0, durationRounds),\n\t\tapplication);",
+      "original": "\t\tgrant_buff(\n\t\t\tcreature,\n\t\t\ttype,\n\t\t\tvalue,\n\t\t\texpiry_time(currentTime, durationRounds),\n\t\t\tapplication);",
+      "mutated": "\t\tgrant_buff(\n\t\t\tcreature,\n\t\t\ttype,\n\t\t\tvalue,\n\t\t\texpiry_time(0, durationRounds),\n\t\t\tapplication);",
       "catches": "a spell cast mid-game expiring relative to the start of it, so it lands already over"
     },
     {
@@ -51,14 +51,14 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tai = std::make_unique<AiMonsterConfused>(\n\t\texpiry_time(currentTime, durationRounds),\n\t\tstd::move(ai));",
-      "mutated": "\tai = std::make_unique<AiMonsterConfused>(\n\t\texpiry_time(currentTime, durationRounds * 2),\n\t\tstd::move(ai));",
+      "original": "\t\tai = std::make_unique<AiMonsterConfused>(\n\t\t\texpiry_time(currentTime, durationRounds),\n\t\t\tstd::move(ai));",
+      "mutated": "\t\tai = std::make_unique<AiMonsterConfused>(\n\t\t\texpiry_time(currentTime, durationRounds * 2),\n\t\t\tstd::move(ai));",
       "catches": "a confusion lasting twice the rounds it was given"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tconst int currentTime = ctx.gameState->get_time();\n\tctx.buffSystem->update_creature_buffs(*this, currentTime);",
-      "mutated": "\tconst int currentTime = ctx.gameState->get_time();",
+      "original": "\t\tconst int currentTime = ctx.gameState->get_time();\n\t\tctx.buffSystem->update_creature_buffs(*this, currentTime);",
+      "mutated": "\t\tconst int currentTime = ctx.gameState->get_time();",
       "catches": "nothing retiring a buff the clock has passed, so every buff is permanent"
     },
     {

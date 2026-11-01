@@ -21,14 +21,14 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\t\tbuff.application = parse_buff_application(\n\t\t\t\tbuffJson.at(\"application\").get<std::string>());\n",
-      "mutated": "\t\t\tbuff.application = parse_buff_application(\n\t\t\t\tbuffJson.value(\"application\", std::string{ \"add\" }));\n",
+      "original": "\t\t\t\tbuff.application = parse_buff_application(\n\t\t\t\t\tbuffJson.at(\"application\").get<std::string>());\n",
+      "mutated": "\t\t\t\tbuff.application = parse_buff_application(\n\t\t\t\t\tbuffJson.value(\"application\", std::string{ \"add\" }));\n",
       "catches": "a buff record without its application defaulted instead of refused"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\t\tbuff.application = parse_buff_application(\n\t\t\t\tbuffJson.at(\"application\").get<std::string>());\n",
-      "mutated": "\t\t\tbuff.application =BuffApplication::ADD;\n",
+      "original": "\t\t\t\tbuff.application = parse_buff_application(\n\t\t\t\t\tbuffJson.at(\"application\").get<std::string>());\n",
+      "mutated": "\t\t\t\tbuff.application =BuffApplication::ADD;\n",
       "catches": "a loaded buff losing whether it sets"
     },
     {
@@ -51,26 +51,26 @@
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\tgrant_buff(\n\t\tcreature,\n\t\ttype,\n\t\tvalue,\n\t\texpiry_time(currentTime, durationRounds),\n\t\tapplication);",
-      "mutated": "\tgrant_buff(\n\t\tcreature,\n\t\ttype,\n\t\tvalue,\n\t\texpiry_time(currentTime, durationRounds),BuffApplication::ADD);",
+      "original": "\t\tgrant_buff(\n\t\t\tcreature,\n\t\t\ttype,\n\t\t\tvalue,\n\t\t\texpiry_time(currentTime, durationRounds),\n\t\t\tapplication);",
+      "mutated": "\t\tgrant_buff(\n\t\t\tcreature,\n\t\t\ttype,\n\t\t\tvalue,\n\t\t\texpiry_time(currentTime, durationRounds),BuffApplication::ADD);",
       "catches": "add_buff dropping the application it was given"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "durationRounds,\n\t\t\tconsumable.application,\n\t\t\tctx.gameState->get_time());",
-      "mutated": "durationRounds,BuffApplication::ADD,\n\t\t\tctx.gameState->get_time());",
+      "original": "\tdurationRounds,\n\t\t\t\tconsumable.application,\n\t\t\t\tctx.gameState->get_time());",
+      "mutated": "\tdurationRounds,BuffApplication::ADD,\n\t\t\t\tctx.gameState->get_time());",
       "catches": "a potion of giant strength adding to Strength instead of setting it"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\t\t\toutput[\"application\"] =\n\t\t\t\t\tencode_buff_application(consumable.application);\n",
-      "mutated": "\t\t\t\toutput[\"application\"] =\"add\";\n",
+      "original": "\t\t\t\t\toutput[\"application\"] =\n\t\t\t\t\t\tencode_buff_application(consumable.application);\n",
+      "mutated": "\t\t\t\t\toutput[\"application\"] =\"add\";\n",
       "catches": "a potion record written as adding whatever it does"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tconsumable.application =\n\t\t\tparse_buff_application(source.at(\"application\").get<std::string>());\n",
-      "mutated": "\t\tconsumable.application =BuffApplication::ADD;\n",
+      "original": "\t\t\tconsumable.application = parse_buff_application(\n\t\t\t\tsource.at(\"application\").get<std::string>());\n",
+      "mutated": "\t\t\tconsumable.application =BuffApplication::ADD;\n",
       "catches": "a loaded potion losing whether it sets, and an unknown name accepted"
     },
     {
@@ -81,8 +81,8 @@
     },
     {
       "file": "src/BuffType.h",
-      "original": "\tif (name == \"set\")\n\t{\n\t\treturn BuffApplication::SET;\n",
-      "mutated": "\tif (name == \"set\")\n\t{\n\t\treturn BuffApplication::ADD;\n",
+      "original": "\t\tif (name == \"set\")\n\t\t{\n\t\t\treturn BuffApplication::SET;\n",
+      "mutated": "\t\tif (name == \"set\")\n\t\t{\n\t\t\treturn BuffApplication::ADD;\n",
       "catches": "a saved set read back as add"
     },
     {

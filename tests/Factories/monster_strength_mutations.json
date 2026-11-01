@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/MonsterAbilityTables.cpp",
-      "original": "\tconst MonsterStrength strength = printedStrength.has_value() ?\n\t\t*printedStrength",
-      "mutated": "\tconst MonsterStrength strength = printedStrength.has_value() ?MonsterStrength{ printedStrength->score, 0 }",
+      "original": "\t\tconst MonsterStrength strength = printedStrength.has_value() ?\n\t\t\t*printedStrength",
+      "mutated": "\t\tconst MonsterStrength strength = printedStrength.has_value() ?MonsterStrength{ printedStrength->score, 0 }",
       "catches": "a printed 18/00 built as a plain 18"
     },
     {
@@ -27,8 +27,8 @@
     },
     {
       "file": "src/MonsterAbilityTables.cpp",
-      "original": "\t\t*printedStrength :\n\t\tmonster_strength_score(roll_dice(&dice, MONSTER_ABILITY_DICE), size);\n",
-      "mutated": "\t\t*printedStrength :\n\t\tmonster_strength_score(roll_dice(&dice, MONSTER_ABILITY_DICE),CreatureSize::MEDIUM);\n",
+      "original": "\t\t\t*printedStrength :\n\t\t\tmonster_strength_score(\n\t\t\t\troll_dice(&dice, MONSTER_ABILITY_DICE),\n\t\t\t\tsize);\n",
+      "mutated": "\t\t\t*printedStrength :\n\t\t\tmonster_strength_score(\n\t\t\t\troll_dice(&dice, MONSTER_ABILITY_DICE),CreatureSize::MEDIUM);\n",
       "catches": "Table 6 read from the man-sized column whatever the monster's size"
     },
     {
@@ -45,8 +45,8 @@
     },
     {
       "file": "src/MonsterRegistry.cpp",
-      "original": "\t\treturn strength;\n\t}\n",
-      "mutated": "\t\treturn std::nullopt;\n\t}\n",
+      "original": "\t\t\treturn strength;\n\t\t}\n",
+      "mutated": "\t\t\treturn std::nullopt;\n\t\t}\n",
       "catches": "every printed Strength read as none"
     },
     {
@@ -57,8 +57,8 @@
     },
     {
       "file": "src/MonsterRegistry.cpp",
-      "original": "\t\tif (!strength.has_value())\n\t\t{\n\t\t\treturn nullptr;\n",
-      "mutated": "\t\tif (!strength.has_value())\n\t\t{\n\t\t\treturn nlohmann::json{ { \"score\", 10 }, { \"exceptional\", 0 } };\n",
+      "original": "\t\t\tif (!strength.has_value())\n\t\t\t{\n\t\t\t\treturn nullptr;\n",
+      "mutated": "\t\t\tif (!strength.has_value())\n\t\t\t{\n\t\t\t\treturn nlohmann::json{ { \"score\", 10 }, { \"exceptional\", 0 } };\n",
       "catches": "a save that writes a Strength for a monster that rolls Table 6"
     },
     {

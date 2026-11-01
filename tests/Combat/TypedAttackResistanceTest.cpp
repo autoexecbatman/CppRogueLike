@@ -42,153 +42,158 @@
 namespace CppRL
 {
 
-class TypedAttackResistanceTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	class TypedAttackResistanceTest : public ::testing::Test
 	{
-		game.dataManager.load_all_data(game.messageSystem);
-		game.tileConfig.load(Paths::TILE_CONFIG);
-		game.itemRegistry.load(Paths::ITEMS);
-
-		player = std::make_unique<Player>(Vector2D{ 0, 0 });
-		player->experienceReward = std::make_unique<ExperienceReward>(0);
-		player->set_dr(0);
-		player->set_thaco(20);
-		player->armorClass = std::make_unique<ArmorClass>(10);
-		player->healthPool = std::make_unique<HealthPool>(STARTING_HP);
-		player->set_strength(10);
-		player->set_dexterity(10);
-
-		ctx = game.context();
-		ctx.playerOwner = &player;
-		game.dice.set_test_mode(true);
-	}
-
-	void TearDown() override
-	{
-		game.dice.set_test_mode(false);
-		game.dice.clear_fixed_rolls();
-	}
-
-	// A monster whose natural attack is the given damage, strong enough to hit.
-	std::unique_ptr<Creature> monster_with(DamageInfo attack)
-	{
-		auto monster = std::make_unique<Creature>(
-			Vector2D{ 0, 1 },
-			ActorData{ TileRef{}, "beast", ColorPairId::WHITE_BLACK });
-		monster->experienceReward = std::make_unique<ExperienceReward>(0);
-		monster->set_dr(0);
-		monster->set_thaco(19);
-		monster->armorClass = std::make_unique<ArmorClass>(6);
-		monster->healthPool = std::make_unique<HealthPool>(10);
-		monster->attacker = std::make_unique<MonsterAttacker>(*monster, attack);
-		// Strength 8 carries no damage adjustment, so the dice are all that lands.
-		monster->set_strength(8);
-		monster->set_dexterity(10);
-		monster->set_natural_attack("bite");
-		return monster;
-	}
-
-	void wear(std::string_view key, EquipmentSlot slot)
-	{
-		player->equip_item(
-			ItemCreator::create(key, Vector2D{ 0, 0 }, ctx),
-			slot,
-			ctx);
-	}
-
-	// The helm of brilliance on the head, identified and spoken to: only then does it protect.
-	void wear_spoken_helm_of_brilliance()
-	{
-		wear("helm_of_brilliance", EquipmentSlot::HEAD);
-		Item& helm = *player->get_equipped_item(EquipmentSlot::HEAD);
-		helm.identify_type();
-		speak_command_word(helm, *player, ctx);
-	}
-
-	// The attack roll first, always a hit, then the damage dice in order.
-	void force_hit_then_dice(std::initializer_list<int> dice)
-	{
-		game.dice.set_next_roll(20);
-		for (const int die : dice)
+	protected:
+		void SetUp() override
 		{
-			game.dice.set_next_roll(die);
+			game.dataManager.load_all_data(game.messageSystem);
+			game.tileConfig.load(Paths::TILE_CONFIG);
+			game.itemRegistry.load(Paths::ITEMS);
+
+			player = std::make_unique<Player>(Vector2D{ 0, 0 });
+			player->experienceReward = std::make_unique<ExperienceReward>(0);
+			player->set_dr(0);
+			player->set_thaco(20);
+			player->armorClass = std::make_unique<ArmorClass>(10);
+			player->healthPool = std::make_unique<HealthPool>(STARTING_HP);
+			player->set_strength(10);
+			player->set_dexterity(10);
+
+			ctx = game.context();
+			ctx.playerOwner = &player;
+			game.dice.set_test_mode(true);
 		}
-	}
 
-	int hp_lost_after(Creature& monster)
+		void TearDown() override
+		{
+			game.dice.set_test_mode(false);
+			game.dice.clear_fixed_rolls();
+		}
+
+		// A monster whose natural attack is the given damage, strong enough to
+		// hit.
+		std::unique_ptr<Creature> monster_with(DamageInfo attack)
+		{
+			auto monster = std::make_unique<Creature>(
+				Vector2D{ 0, 1 },
+				ActorData{ TileRef{}, "beast", ColorPairId::WHITE_BLACK });
+			monster->experienceReward = std::make_unique<ExperienceReward>(0);
+			monster->set_dr(0);
+			monster->set_thaco(19);
+			monster->armorClass = std::make_unique<ArmorClass>(6);
+			monster->healthPool = std::make_unique<HealthPool>(10);
+			monster->attacker =
+				std::make_unique<MonsterAttacker>(*monster, attack);
+			// Strength 8 carries no damage adjustment, so the dice are all that
+			// lands.
+			monster->set_strength(8);
+			monster->set_dexterity(10);
+			monster->set_natural_attack("bite");
+			return monster;
+		}
+
+		void wear(std::string_view key, EquipmentSlot slot)
+		{
+			player->equip_item(
+				ItemCreator::create(key, Vector2D{ 0, 0 }, ctx),
+				slot,
+				ctx);
+		}
+
+		// The helm of brilliance on the head, identified and spoken to: only
+		// then does it protect.
+		void wear_spoken_helm_of_brilliance()
+		{
+			wear("helm_of_brilliance", EquipmentSlot::HEAD);
+			Item& helm = *player->get_equipped_item(EquipmentSlot::HEAD);
+			helm.identify_type();
+			speak_command_word(helm, *player, ctx);
+		}
+
+		// The attack roll first, always a hit, then the damage dice in order.
+		void force_hit_then_dice(std::initializer_list<int> dice)
+		{
+			game.dice.set_next_roll(20);
+			for (const int die : dice)
+			{
+				game.dice.set_next_roll(die);
+			}
+		}
+
+		int hp_lost_after(Creature& monster)
+		{
+			monster.attacker->attack(*player, AttackKind::MELEE, ctx);
+			return STARTING_HP - player->get_hp();
+		}
+
+		static constexpr int STARTING_HP = 100;
+
+		Game game{ TEST_DICE_SEED };
+		GameContext ctx;
+		std::unique_ptr<Player> player;
+	};
+
+	// A fire wolf's bite through a ring of fire resistance: 6 becomes 4.
+	TEST_F(TypedAttackResistanceTest, ARingTakesTwoOffAFireBite)
 	{
-		monster.attacker->attack(*player, AttackKind::MELEE, ctx);
-		return STARTING_HP - player->get_hp();
+		wear("ring_of_fire_resistance", EquipmentSlot::RIGHT_RING);
+		auto wolf = monster_with(DamageInfo{ "1d6", DamageType::FIRE });
+		force_hit_then_dice({ 6 });
+
+		EXPECT_EQ(hp_lost_after(*wolf), 4)
+			<< "the ring was worn and the bite landed whole";
 	}
 
-	static constexpr int STARTING_HP = 100;
+	// An ice wolf's bite through a ring of warmth: 6 becomes 5.
+	TEST_F(TypedAttackResistanceTest, ARingOfWarmthTakesOneOffAColdBite)
+	{
+		wear("ring_of_cold_resistance", EquipmentSlot::LEFT_RING);
+		auto wolf = monster_with(DamageInfo{ "1d6", DamageType::COLD });
+		force_hit_then_dice({ 6 });
 
-	Game game{ TEST_DICE_SEED };
-	GameContext ctx;
-	std::unique_ptr<Player> player;
-};
+		EXPECT_EQ(hp_lost_after(*wolf), 5);
+	}
 
-// A fire wolf's bite through a ring of fire resistance: 6 becomes 4.
-TEST_F(TypedAttackResistanceTest, ARingTakesTwoOffAFireBite)
-{
-	wear("ring_of_fire_resistance", EquipmentSlot::RIGHT_RING);
-	auto wolf = monster_with(DamageInfo{ "1d6", DamageType::FIRE });
-	force_hit_then_dice({ 6 });
+	// A chimera's 3d12 through the helm: every die loses four.
+	TEST_F(TypedAttackResistanceTest, TheHelmTakesFourOffEveryDieOfAChimera)
+	{
+		wear_spoken_helm_of_brilliance();
+		auto chimera = monster_with(DamageInfo{ "3d12", DamageType::FIRE });
+		force_hit_then_dice({ 12, 12, 12 });
 
-	EXPECT_EQ(hp_lost_after(*wolf), 4)
-		<< "the ring was worn and the bite landed whole";
-}
+		EXPECT_EQ(hp_lost_after(*chimera), 24);
+	}
 
-// An ice wolf's bite through a ring of warmth: 6 becomes 5.
-TEST_F(TypedAttackResistanceTest, ARingOfWarmthTakesOneOffAColdBite)
-{
-	wear("ring_of_cold_resistance", EquipmentSlot::LEFT_RING);
-	auto wolf = monster_with(DamageInfo{ "1d6", DamageType::COLD });
-	force_hit_then_dice({ 6 });
+	// A fire attack of 1d12+5, which no monster in the data carries: the die is
+	// reduced, the +5 is not a die.
+	TEST_F(TypedAttackResistanceTest, ABonusOnTheRollIsNotADie)
+	{
+		wear("ring_of_fire_resistance", EquipmentSlot::RIGHT_RING);
+		auto fireAttacker =
+			monster_with(DamageInfo{ "1d12+5", DamageType::FIRE });
+		force_hit_then_dice({ 12 });
 
-	EXPECT_EQ(hp_lost_after(*wolf), 5);
-}
+		EXPECT_EQ(hp_lost_after(*fireAttacker), 15);
+	}
 
-// A chimera's 3d12 through the helm: every die loses four.
-TEST_F(TypedAttackResistanceTest, TheHelmTakesFourOffEveryDieOfAChimera)
-{
-	wear_spoken_helm_of_brilliance();
-	auto chimera = monster_with(DamageInfo{ "3d12", DamageType::FIRE });
-	force_hit_then_dice({ 12, 12, 12 });
+	// A physical bite is untouched by a ring of fire resistance.
+	TEST_F(TypedAttackResistanceTest, APhysicalBiteIgnoresTheRing)
+	{
+		wear("ring_of_fire_resistance", EquipmentSlot::RIGHT_RING);
+		auto wolf = monster_with(DamageInfo{ "1d6", DamageType::PHYSICAL });
+		force_hit_then_dice({ 6 });
 
-	EXPECT_EQ(hp_lost_after(*chimera), 24);
-}
+		EXPECT_EQ(hp_lost_after(*wolf), 6);
+	}
 
-// A fire attack of 1d12+5, which no monster in the data carries: the die is
-// reduced, the +5 is not a die.
-TEST_F(TypedAttackResistanceTest, ABonusOnTheRollIsNotADie)
-{
-	wear("ring_of_fire_resistance", EquipmentSlot::RIGHT_RING);
-	auto fireAttacker = monster_with(DamageInfo{ "1d12+5", DamageType::FIRE });
-	force_hit_then_dice({ 12 });
+	// Bare, a fire bite lands whole: three ones stay three.
+	TEST_F(TypedAttackResistanceTest, WithoutResistanceTheDiceLandAsRolled)
+	{
+		auto chimera = monster_with(DamageInfo{ "3d12", DamageType::FIRE });
+		force_hit_then_dice({ 1, 1, 1 });
 
-	EXPECT_EQ(hp_lost_after(*fireAttacker), 15);
-}
-
-// A physical bite is untouched by a ring of fire resistance.
-TEST_F(TypedAttackResistanceTest, APhysicalBiteIgnoresTheRing)
-{
-	wear("ring_of_fire_resistance", EquipmentSlot::RIGHT_RING);
-	auto wolf = monster_with(DamageInfo{ "1d6", DamageType::PHYSICAL });
-	force_hit_then_dice({ 6 });
-
-	EXPECT_EQ(hp_lost_after(*wolf), 6);
-}
-
-// Bare, a fire bite lands whole: three ones stay three.
-TEST_F(TypedAttackResistanceTest, WithoutResistanceTheDiceLandAsRolled)
-{
-	auto chimera = monster_with(DamageInfo{ "3d12", DamageType::FIRE });
-	force_hit_then_dice({ 1, 1, 1 });
-
-	EXPECT_EQ(hp_lost_after(*chimera), 3);
-}
+		EXPECT_EQ(hp_lost_after(*chimera), 3);
+	}
 
 } // namespace CppRL

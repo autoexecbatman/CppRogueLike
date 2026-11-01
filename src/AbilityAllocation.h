@@ -43,145 +43,151 @@
 namespace CppRL
 {
 
-class RandomDice;
+	class RandomDice;
 
-// The score every ability starts Method VI at.
-inline constexpr int METHOD_SIX_STARTING_SCORE = 8;
-// How many dice the method rolls.
-inline constexpr std::size_t METHOD_SIX_DICE = 7;
-// The score no ability may pass.
-inline constexpr int ABILITY_MAXIMUM = 18;
+	// The score every ability starts Method VI at.
+	inline constexpr int METHOD_SIX_STARTING_SCORE = 8;
+	// How many dice the method rolls.
+	inline constexpr std::size_t METHOD_SIX_DICE = 7;
+	// The score no ability may pass.
+	inline constexpr int ABILITY_MAXIMUM = 18;
 
-// The six, in the order every sheet and screen prints them.
-enum class Ability
-{
-	STRENGTH,
-	DEXTERITY,
-	CONSTITUTION,
-	INTELLIGENCE,
-	WISDOM,
-	CHARISMA
-};
-
-inline constexpr std::array<Ability, 6> ALL_ABILITY{
-	Ability::STRENGTH,
-	Ability::DEXTERITY,
-	Ability::CONSTITUTION,
-	Ability::INTELLIGENCE,
-	Ability::WISDOM,
-	Ability::CHARISMA,
-};
-
-// How many the six are, for anything that holds one value per ability.
-inline constexpr std::size_t ABILITY_COUNT = ALL_ABILITY.size();
-
-// Where an ability sits in a six-element array.
-//
-// Example:
-//   ability_index(Ability::CONSTITUTION);   // -> 2
-[[nodiscard]] constexpr std::size_t ability_index(Ability ability)
-{
-	return static_cast<std::size_t>(ability);
-}
-
-// The name a screen prints.
-//
-// Example:
-//   ability_name(Ability::INTELLIGENCE);   // -> "Intelligence"
-[[nodiscard]] std::string_view ability_name(Ability ability);
-
-// The next of the six, wrapping at the end, for a cursor walking the list.
-//
-// Example:
-//   next_ability(Ability::STRENGTH);   // -> Ability::DEXTERITY
-//   next_ability(Ability::CHARISMA);   // -> Ability::STRENGTH
-[[nodiscard]] Ability next_ability(Ability ability);
-
-// The previous of the six, wrapping at the start.
-//
-// Example:
-//   previous_ability(Ability::STRENGTH);   // -> Ability::CHARISMA
-[[nodiscard]] Ability previous_ability(Ability ability);
-
-// One row of Player's Handbook Table 13, Class Ability Minimums (PDF page 53).
-struct ClassMinimum
-{
-	Ability ability{ Ability::STRENGTH };
-	int score{ 0 };
-};
-
-// What a class cannot be played without. Table 13 gives Fighter 9 Strength, Thief 9
-// Dexterity, Cleric 9 Wisdom and Mage 9 Intelligence; the optional classes it also
-// lists are not in this game, and a monster has no row.
-//
-// Example:
-//   class_ability_minimum(CreatureClass::CLERIC)->score;   // -> 9
-//   class_ability_minimum(CreatureClass::MONSTER);         // -> nullopt
-[[nodiscard]] std::optional<ClassMinimum> class_ability_minimum(
-	CreatureClass creatureClass);
-
-// The seven six-sided dice Method VI rolls, in the order they came up.
-//
-// Example, dice forced to 4, 4, 2, 1, 6, 3, 5:
-//   roll_method_six_pool(dice);   // -> { 4, 4, 2, 1, 6, 3, 5 }
-[[nodiscard]] std::vector<int> roll_method_six_pool(RandomDice& dice);
-
-class AbilityAllocation
-{
-private:
-	// Which dice went onto each ability, kept as rolled so one can be taken back
-	// as itself. What an ability has taken is their sum rather than a second count.
-	std::array<std::vector<int>, ABILITY_COUNT> placed{};
-
-	// The dice not yet placed, in the order they were rolled.
-	std::vector<int> unplaced{};
-
-	// What the character's race will do to each score once it exists. Shown beside
-	// the allocation and judged with it, never added to it.
-	std::array<int, ABILITY_COUNT> racialModifier{};
-
-	CreatureClass creatureClass{ CreatureClass::MONSTER };
-
-public:
-	AbilityAllocation(
-		std::vector<int> rolledPool,
-		CreatureClass forClass,
-		std::array<int, ABILITY_COUNT> raceModifier);
-
-	// What the character is built with: the starting 8 plus every die put here.
-	[[nodiscard]] int allocated(Ability ability) const;
-
-	// What the player reads: the allocation once the race has been paid.
-	[[nodiscard]] int score(Ability ability) const;
-
-	// The dice still to be placed.
-	[[nodiscard]] const std::vector<int>& pool() const noexcept
+	// The six, in the order every sheet and screen prints them.
+	enum class Ability
 	{
-		return unplaced;
+		STRENGTH,
+		DEXTERITY,
+		CONSTITUTION,
+		INTELLIGENCE,
+		WISDOM,
+		CHARISMA
+	};
+
+	inline constexpr std::array<Ability, 6> ALL_ABILITY{
+		Ability::STRENGTH,
+		Ability::DEXTERITY,
+		Ability::CONSTITUTION,
+		Ability::INTELLIGENCE,
+		Ability::WISDOM,
+		Ability::CHARISMA,
+	};
+
+	// How many the six are, for anything that holds one value per ability.
+	inline constexpr std::size_t ABILITY_COUNT = ALL_ABILITY.size();
+
+	// Where an ability sits in a six-element array.
+	//
+	// Example:
+	//   ability_index(Ability::CONSTITUTION);   // -> 2
+	[[nodiscard]] constexpr std::size_t ability_index(Ability ability)
+	{
+		return static_cast<std::size_t>(ability);
 	}
 
-	// Whether that die may go on that ability: the index must name a die still in
-	// the pool, and a whole die that would carry the allocation past 18 cannot be
-	// split, so it cannot be placed at all.
-	[[nodiscard]] bool can_spend(Ability ability, std::size_t dieIndex) const;
+	// The name a screen prints.
+	//
+	// Example:
+	//   ability_name(Ability::INTELLIGENCE);   // -> "Intelligence"
+	[[nodiscard]] std::string_view ability_name(Ability ability);
 
-	// Moves that die out of the pool and onto that ability. Asks can_spend first.
-	void spend(Ability ability, std::size_t dieIndex);
+	// The next of the six, wrapping at the end, for a cursor walking the list.
+	//
+	// Example:
+	//   next_ability(Ability::STRENGTH);   // -> Ability::DEXTERITY
+	//   next_ability(Ability::CHARISMA);   // -> Ability::STRENGTH
+	[[nodiscard]] Ability next_ability(Ability ability);
 
-	// Whether any die sits on that ability to be taken back.
-	[[nodiscard]] bool has_placed(Ability ability) const;
+	// The previous of the six, wrapping at the start.
+	//
+	// Example:
+	//   previous_ability(Ability::STRENGTH);   // -> Ability::CHARISMA
+	[[nodiscard]] Ability previous_ability(Ability ability);
 
-	// Returns the last die placed on that ability to the end of the pool.
-	void take_back(Ability ability);
+	// One row of Player's Handbook Table 13, Class Ability Minimums (PDF page
+	// 53).
+	struct ClassMinimum
+	{
+		Ability ability{ Ability::STRENGTH };
+		int score{ 0 };
+	};
 
-	// The class row this allocation does not yet satisfy, judged on `score`, or
-	// nullopt when the character may be accepted.
-	[[nodiscard]] std::optional<ClassMinimum> unmet_minimum() const;
+	// What a class cannot be played without. Table 13 gives Fighter 9 Strength,
+	// Thief 9 Dexterity, Cleric 9 Wisdom and Mage 9 Intelligence; the optional
+	// classes it also lists are not in this game, and a monster has no row.
+	//
+	// Example:
+	//   class_ability_minimum(CreatureClass::CLERIC)->score;   // -> 9
+	//   class_ability_minimum(CreatureClass::MONSTER);         // -> nullopt
+	[[nodiscard]] std::optional<ClassMinimum> class_ability_minimum(
+		CreatureClass creatureClass);
 
-	// The six as the character is built with them, for the blueprint.
-	[[nodiscard]] std::array<int, ABILITY_COUNT> allocated_scores() const;
-};
+	// The seven six-sided dice Method VI rolls, in the order they came up.
+	//
+	// Example, dice forced to 4, 4, 2, 1, 6, 3, 5:
+	//   roll_method_six_pool(dice);   // -> { 4, 4, 2, 1, 6, 3, 5 }
+	[[nodiscard]] std::vector<int> roll_method_six_pool(RandomDice& dice);
 
-// end of file: AbilityAllocation.h
+	class AbilityAllocation
+	{
+	private:
+		// Which dice went onto each ability, kept as rolled so one can be taken
+		// back as itself. What an ability has taken is their sum rather than a
+		// second count.
+		std::array<std::vector<int>, ABILITY_COUNT> placed{};
+
+		// The dice not yet placed, in the order they were rolled.
+		std::vector<int> unplaced{};
+
+		// What the character's race will do to each score once it exists. Shown
+		// beside the allocation and judged with it, never added to it.
+		std::array<int, ABILITY_COUNT> racialModifier{};
+
+		CreatureClass creatureClass{ CreatureClass::MONSTER };
+
+	public:
+		AbilityAllocation(
+			std::vector<int> rolledPool,
+			CreatureClass forClass,
+			std::array<int, ABILITY_COUNT> raceModifier);
+
+		// What the character is built with: the starting 8 plus every die put
+		// here.
+		[[nodiscard]] int allocated(Ability ability) const;
+
+		// What the player reads: the allocation once the race has been paid.
+		[[nodiscard]] int score(Ability ability) const;
+
+		// The dice still to be placed.
+		[[nodiscard]] const std::vector<int>& pool() const noexcept
+		{
+			return unplaced;
+		}
+
+		// Whether that die may go on that ability: the index must name a die
+		// still in the pool, and a whole die that would carry the allocation
+		// past 18 cannot be split, so it cannot be placed at all.
+		[[nodiscard]] bool can_spend(
+			Ability ability,
+			std::size_t dieIndex) const;
+
+		// Moves that die out of the pool and onto that ability. Asks can_spend
+		// first.
+		void spend(Ability ability, std::size_t dieIndex);
+
+		// Whether any die sits on that ability to be taken back.
+		[[nodiscard]] bool has_placed(Ability ability) const;
+
+		// Returns the last die placed on that ability to the end of the pool.
+		void take_back(Ability ability);
+
+		// The class row this allocation does not yet satisfy, judged on
+		// `score`, or nullopt when the character may be accepted.
+		[[nodiscard]] std::optional<ClassMinimum> unmet_minimum() const;
+
+		// The six as the character is built with them, for the blueprint.
+		[[nodiscard]] std::array<int, ABILITY_COUNT> allocated_scores() const;
+	};
+
+	// end of file: AbilityAllocation.h
 
 } // namespace CppRL

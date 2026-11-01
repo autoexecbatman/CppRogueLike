@@ -15,26 +15,26 @@
     "mutations": [
         {
             "file": "src/Creature.cpp",
-            "original": "\t\tcase PlayerRaceState::HALFELF:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
-            "mutated": "\t\tcase PlayerRaceState::HALFELF:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
+            "original": "\t\t\tcase PlayerRaceState::HALFELF:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n\t\t\t}\n\t\t\treturn std::nullopt;",
+            "mutated": "\t\t\tcase PlayerRaceState::HALFELF:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n\t\t\t}\n\t\t\treturn candidate;",
             "catches": "a saved race no PlayerRaceState has loads"
         },
         {
             "file": "src/GameStateManager.cpp",
-            "original": "\t\tcase TrapType::ARROW:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
-            "mutated": "\t\tcase TrapType::ARROW:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
+            "original": "\t\t\tcase TrapType::ARROW:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n\t\t\t}\n\t\t\treturn std::nullopt;",
+            "mutated": "\t\t\tcase TrapType::ARROW:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n\t\t\t}\n\t\t\treturn candidate;",
             "catches": "a saved trap type no TrapType has loads"
         },
         {
             "file": "src/Trap.cpp",
-            "original": "\t\tcase TrapState::DISARMED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
-            "mutated": "\t\tcase TrapState::DISARMED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
+            "original": "\t\t\tcase TrapState::DISARMED:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n\t\t\t}\n\t\t\treturn std::nullopt;",
+            "mutated": "\t\t\tcase TrapState::DISARMED:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n\t\t\t}\n\t\t\treturn candidate;",
             "catches": "a saved trap state no TrapState has loads"
         },
         {
             "file": "src/HungerSystem.cpp",
-            "original": "\t\tcase HungerState::DYING:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
-            "mutated": "\t\tcase HungerState::DYING:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
+            "original": "\t\t\tcase HungerState::DYING:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n\t\t\t}\n\t\t\treturn std::nullopt;",
+            "mutated": "\t\t\tcase HungerState::DYING:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n\t\t\t}\n\t\t\treturn candidate;",
             "catches": "a saved lastNotifiedState no HungerState has loads"
         },
         {
@@ -45,32 +45,32 @@
         },
         {
             "file": "src/Item.cpp",
-            "original": "\t\tcase BlessingStatus::CURSED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
-            "mutated": "\t\tcase BlessingStatus::CURSED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
+            "original": "\t\t\tcase BlessingStatus::CURSED:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n\t\t\t}\n\t\t\treturn std::nullopt;",
+            "mutated": "\t\t\tcase BlessingStatus::CURSED:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n\t\t\t}\n\t\t\treturn candidate;",
             "catches": "a saved blessing no BlessingStatus has loads"
         },
         {
             "file": "src/Map.cpp",
-            "original": "\t\tcase TileType::CORRIDOR:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
-            "mutated": "\t\tcase TileType::CORRIDOR:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
+            "original": "\t\t\tcase TileType::CORRIDOR:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n\t\t\t}\n\t\t\treturn std::nullopt;",
+            "mutated": "\t\t\tcase TileType::CORRIDOR:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n\t\t\t}\n\t\t\treturn candidate;",
             "catches": "a saved tile type no TileType has loads"
         },
         {
             "file": "src/ShopKeeper.cpp",
-            "original": "\t\tcase ShopType::ADVENTURING_GEAR:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
-            "mutated": "\t\tcase ShopType::ADVENTURING_GEAR:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
+            "original": "\t\t\tcase ShopType::ADVENTURING_GEAR:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n\t\t\t}\n\t\t\treturn std::nullopt;",
+            "mutated": "\t\t\tcase ShopType::ADVENTURING_GEAR:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n\t\t\t}\n\t\t\treturn candidate;",
             "catches": "a saved shop_type no ShopType has loads"
         },
         {
             "file": "src/ShopKeeper.cpp",
-            "original": "\t\tcase ShopQuality::EXCELLENT:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
-            "mutated": "\t\tcase ShopQuality::EXCELLENT:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
+            "original": "\t\t\tcase ShopQuality::EXCELLENT:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n\t\t\t}\n\t\t\treturn std::nullopt;",
+            "mutated": "\t\t\tcase ShopQuality::EXCELLENT:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n\t\t\t}\n\t\t\treturn candidate;",
             "catches": "a saved shop_quality no ShopQuality has loads"
         },
         {
             "file": "src/Actor.cpp",
-            "original": "\t\tcase ActorState::IS_SURPRISED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn std::nullopt;",
-            "mutated": "\t\tcase ActorState::IS_SURPRISED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\t}\n\t\treturn candidate;",
+            "original": "\t\t\tcase ActorState::IS_SURPRISED:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n\t\t\t}\n\t\t\treturn std::nullopt;",
+            "mutated": "\t\t\tcase ActorState::IS_SURPRISED:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n\t\t\t}\n\t\t\treturn candidate;",
             "catches": "a saved state no ActorState has loads"
         },
         {
@@ -81,20 +81,20 @@
         },
         {
             "file": "src/TileRefJson.cpp",
-            "original": "\t\t\t\t\"TileRefJson::parse_tile\",\n\t\t\t\t\"sheet\",\n\t\t\t\t\"TileSheet\",\n\t\t\t\t&tile_sheet_from),",
-            "mutated": "\t\t\t\t\"TileRefJson::parse_tile\",\n\t\t\t\t\"sheet\",\n\t\t\t\t\"TileSheet\",\n\t\t\t\t+[](int saved) { return std::optional<TileSheet>(static_cast<TileSheet>(saved)); }),",
+            "original": "\t\t\t\t\t\"TileRefJson::parse_tile\",\n\t\t\t\t\t\"sheet\",\n\t\t\t\t\t\"TileSheet\",\n\t\t\t\t\t&tile_sheet_from),",
+            "mutated": "\t\t\t\t\t\"TileRefJson::parse_tile\",\n\t\t\t\t\t\"sheet\",\n\t\t\t\t\t\"TileSheet\",\n\t\t\t\t\t+[](int saved) { return std::optional<TileSheet>(static_cast<TileSheet>(saved)); }),",
             "catches": "parse_tile loads a sheet no TileSheet has, though the range check stands"
         },
         {
             "file": "src/TileConfig.cpp",
-            "original": "\t\t\t\tstd::format(\"TileConfig::load: autotile group {}\", key),\n\t\t\t\t\"sheet\",\n\t\t\t\t\"TileSheet\",\n\t\t\t\t&TileRefJson::tile_sheet_from),",
-            "mutated": "\t\t\t\tstd::format(\"TileConfig::load: autotile group {}\", key),\n\t\t\t\t\"sheet\",\n\t\t\t\t\"TileSheet\",\n\t\t\t\t+[](int saved) { return std::optional<TileSheet>(static_cast<TileSheet>(saved)); }),",
+            "original": "\t\t\t\t\tstd::format(\"TileConfig::load: autotile group {}\", key),\n\t\t\t\t\t\"sheet\",\n\t\t\t\t\t\"TileSheet\",\n\t\t\t\t\t&TileRefJson::tile_sheet_from),",
+            "mutated": "\t\t\t\t\tstd::format(\"TileConfig::load: autotile group {}\", key),\n\t\t\t\t\t\"sheet\",\n\t\t\t\t\t\"TileSheet\",\n\t\t\t\t\t+[](int saved) { return std::optional<TileSheet>(static_cast<TileSheet>(saved)); }),",
             "catches": "an autotile group loads a sheet no TileSheet has, though the range check stands"
         },
         {
             "file": "src/TileConfig.cpp",
-            "original": "\t\t\t\tstd::format(\"TileConfig::load: wall autotile group {}\", key),\n\t\t\t\t\"sheet\",\n\t\t\t\t\"TileSheet\",\n\t\t\t\t&TileRefJson::tile_sheet_from),",
-            "mutated": "\t\t\t\tstd::format(\"TileConfig::load: wall autotile group {}\", key),\n\t\t\t\t\"sheet\",\n\t\t\t\t\"TileSheet\",\n\t\t\t\t+[](int saved) { return std::optional<TileSheet>(static_cast<TileSheet>(saved)); }),",
+            "original": "\t\t\t\t\tstd::format(\n\t\t\t\t\t\t\"TileConfig::load: wall autotile group {}\",\n\t\t\t\t\t\tkey),\n\t\t\t\t\t\"sheet\",\n\t\t\t\t\t\"TileSheet\",\n\t\t\t\t\t&TileRefJson::tile_sheet_from),",
+            "mutated": "\t\t\t\t\tstd::format(\n\t\t\t\t\t\t\"TileConfig::load: wall autotile group {}\",\n\t\t\t\t\t\tkey),\n\t\t\t\t\t\"sheet\",\n\t\t\t\t\t\"TileSheet\",\n\t\t\t\t\t+[](int saved) { return std::optional<TileSheet>(static_cast<TileSheet>(saved)); }),",
             "catches": "a wall autotile group loads a sheet no TileSheet has, though the range check stands"
         },
         {

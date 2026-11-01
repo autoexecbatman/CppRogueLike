@@ -24,62 +24,67 @@
 namespace CppRL
 {
 
-namespace
-{
-
-	constexpr int CONSTITUTION = 17;
-
-} // namespace
-
-class CharacterSheetTextTest : public ::testing::Test
-{
-protected:
-	// The line the sheet draws for a character of this class and level at Constitution 17.
-	std::string line_for(CreatureClass creatureClass, int level)
+	namespace
 	{
-		Creature character{
-			Vector2D{ 0, 0 },
-			ActorData{ TileRef{}, "character", ColorPairId::WHITE_BLACK },
-		};
-		character.set_creature_class(creatureClass);
-		character.set_creature_level(level);
-		character.set_constitution(CONSTITUTION);
-		return CharacterSheetText::constitution_line(
-			character,
-			mock.data_manager);
+
+		constexpr int CONSTITUTION = 17;
+
+	} // namespace
+
+	class CharacterSheetTextTest : public ::testing::Test
+	{
+	protected:
+		// The line the sheet draws for a character of this class and level at
+		// Constitution 17.
+		std::string line_for(CreatureClass creatureClass, int level)
+		{
+			Creature character{
+				Vector2D{ 0, 0 },
+				ActorData{ TileRef{}, "character", ColorPairId::WHITE_BLACK },
+			};
+			character.set_creature_class(creatureClass);
+			character.set_creature_level(level);
+			character.set_constitution(CONSTITUTION);
+			return CharacterSheetText::constitution_line(
+				character,
+				mock.data_manager);
+		}
+
+		MockGameContext mock{};
+	};
+
+	// While the next level still rolls a die, the bonus is still a gain per
+	// level.
+	TEST_F(CharacterSheetTextTest, BeforeTheDiceStopTheBonusIsPerLevel)
+	{
+		EXPECT_EQ(
+			line_for(CreatureClass::FIGHTER, 8),
+			"CON: 17  (+3 HP/level)");
+		EXPECT_EQ(line_for(CreatureClass::WIZARD, 3), "CON: 17  (+2 HP/level)");
+		EXPECT_EQ(line_for(CreatureClass::WIZARD, 9), "CON: 17  (+2 HP/level)");
 	}
 
-	MockGameContext mock{};
-};
-
-// While the next level still rolls a die, the bonus is still a gain per level.
-TEST_F(CharacterSheetTextTest, BeforeTheDiceStopTheBonusIsPerLevel)
-{
-	EXPECT_EQ(line_for(CreatureClass::FIGHTER, 8), "CON: 17  (+3 HP/level)");
-	EXPECT_EQ(line_for(CreatureClass::WIZARD, 3), "CON: 17  (+2 HP/level)");
-	EXPECT_EQ(line_for(CreatureClass::WIZARD, 9), "CON: 17  (+2 HP/level)");
-}
-
-// Once the next level rolls none, the line names the last level that took the bonus.
-TEST_F(
-	CharacterSheetTextTest,
-	OnceTheDiceStopTheLineNamesTheLastLevelThatTookIt)
-{
-	EXPECT_EQ(
-		line_for(CreatureClass::FIGHTER, 9),
-		"CON: 17  (+3 HP/level through level 9)");
-	EXPECT_EQ(
-		line_for(CreatureClass::FIGHTER, 12),
-		"CON: 17  (+3 HP/level through level 9)");
-	EXPECT_EQ(
-		line_for(CreatureClass::CLERIC, 12),
-		"CON: 17  (+2 HP/level through level 9)");
-	EXPECT_EQ(
-		line_for(CreatureClass::ROGUE, 12),
-		"CON: 17  (+2 HP/level through level 10)");
-	EXPECT_EQ(
-		line_for(CreatureClass::WIZARD, 10),
-		"CON: 17  (+2 HP/level through level 10)");
-}
+	// Once the next level rolls none, the line names the last level that took
+	// the bonus.
+	TEST_F(
+		CharacterSheetTextTest,
+		OnceTheDiceStopTheLineNamesTheLastLevelThatTookIt)
+	{
+		EXPECT_EQ(
+			line_for(CreatureClass::FIGHTER, 9),
+			"CON: 17  (+3 HP/level through level 9)");
+		EXPECT_EQ(
+			line_for(CreatureClass::FIGHTER, 12),
+			"CON: 17  (+3 HP/level through level 9)");
+		EXPECT_EQ(
+			line_for(CreatureClass::CLERIC, 12),
+			"CON: 17  (+2 HP/level through level 9)");
+		EXPECT_EQ(
+			line_for(CreatureClass::ROGUE, 12),
+			"CON: 17  (+2 HP/level through level 10)");
+		EXPECT_EQ(
+			line_for(CreatureClass::WIZARD, 10),
+			"CON: 17  (+2 HP/level through level 10)");
+	}
 
 } // namespace CppRL

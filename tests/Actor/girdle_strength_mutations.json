@@ -15,20 +15,20 @@
   "mutations": [
     {
       "file": "src/Creature.cpp",
-      "original": "\tconst bool takesBonuses = type != BuffType::STRENGTH || !wearsGiantStrength;",
-      "mutated": "\tconst bool takesBonuses = true;",
+      "original": "\t\tconst bool takesBonuses =\n\t\t\ttype != BuffType::STRENGTH || !wearsGiantStrength;",
+      "mutated": "\t\tconst bool takesBonuses =\n\t\t\ttrue;",
       "catches": "every bonus added on top of a girdle of giant strength, as before the rule"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tconst bool takesBonuses = type != BuffType::STRENGTH || !wearsGiantStrength;",
-      "mutated": "\tconst bool takesBonuses = !wearsGiantStrength;",
+      "original": "\t\tconst bool takesBonuses =\n\t\t\ttype != BuffType::STRENGTH || !wearsGiantStrength;",
+      "mutated": "\t\tconst bool takesBonuses =!wearsGiantStrength;",
       "catches": "the girdle stripping the bonuses of every ability, not Strength alone"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tconst bool takesBonuses = type != BuffType::STRENGTH || !wearsGiantStrength;",
-      "mutated": "\tconst bool takesBonuses = type != BuffType::STRENGTH || highestSet == 0;",
+      "original": "\t\tconst bool takesBonuses =\n\t\t\ttype != BuffType::STRENGTH || !wearsGiantStrength;",
+      "mutated": "\t\tconst bool takesBonuses =\n\t\t\ttype != BuffType::STRENGTH || highestSet == 0;",
       "catches": "any set Strength refusing bonuses, where the book says it of the girdle alone"
     },
     {
@@ -39,19 +39,19 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tif (amount > 0)\n\t\t{\n\t\t\tbonuses += amount;",
-      "mutated": "\t\tif (amount < 0)\n\t\t{\n\t\t\tbonuses += amount;",
+      "original": "\t\t\tif (amount > 0)\n\t\t\t{\n\t\t\t\tbonuses += amount;",
+      "mutated": "\t\t\tif (amount < 0)\n\t\t\t{\n\t\t\t\tbonuses += amount;",
       "catches": "bonuses and penalties filed under each other's names"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tcount_addition(effect.add);\n\t\twearsGiantStrength =\n\t\t\twearsGiantStrength || is_giant_strength_girdle(*worn.item);",
-      "mutated": "\t\tcount_addition(effect.add);\n\t\twearsGiantStrength =is_giant_strength_girdle(*worn.item);",
+      "original": "\t\t\tcount_addition(effect.add);\n\t\t\twearsGiantStrength =\n\t\t\t\twearsGiantStrength || is_giant_strength_girdle(*worn.item);",
+      "mutated": "\t\t\tcount_addition(effect.add);\n\t\t\twearsGiantStrength =is_giant_strength_girdle(*worn.item);",
       "catches": "only the last worn item asked, so gauntlets put on after the girdle hide it"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "return girdle != nullptr &&\n\t\t\tgirdle->application == BuffApplication::SET && girdle->strBonus > 0;",
+      "original": "return girdle != nullptr &&\n\t\t\t\tgirdle->application == BuffApplication::SET &&\n\t\t\t\tgirdle->strBonus > 0;",
       "mutated": "\t\treturn girdle != nullptr;",
       "catches": "any girdle read as giant strength, a girdle of dwarvenkind included"
     }

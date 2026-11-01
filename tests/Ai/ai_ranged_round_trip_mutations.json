@@ -21,8 +21,8 @@
     },
     {
       "file": "src/AiMonsterRanged.h",
-      "original": "{\n\t\treturn AiType::RANGED_MONSTER;\n\t}",
-      "mutated": "{\n\t\treturn AiType::MONSTER;\n\t}",
+      "original": "\t{\n\t\t\treturn AiType::RANGED_MONSTER;\n\t\t}",
+      "mutated": "\t{\n\t\t\treturn AiType::MONSTER;\n\t\t}",
       "catches": "a ranged Ai saving under the melee name"
     }
   ]

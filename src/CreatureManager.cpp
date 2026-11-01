@@ -17,148 +17,160 @@
 namespace CppRL
 {
 
-void CreatureManager::add_creature(
-	std::unique_ptr<Creature> creature,
-	GameContext& ctx)
-{
-	assert(creature && "add_creature: nothing to add");
-	assert(
-		ctx.creatures &&
-		"add_creature: a creature arrived with no level to arrive on");
-	assert(
-		ctx.gameState &&
-		"add_creature: a creature arrived with no clock to stand on");
+	void CreatureManager::add_creature(
+		std::unique_ptr<Creature> creature,
+		GameContext& ctx)
+	{
+		assert(creature && "add_creature: nothing to add");
+		assert(
+			ctx.creatures &&
+			"add_creature: a creature arrived with no level to arrive on");
+		assert(
+			ctx.gameState &&
+			"add_creature: a creature arrived with no clock to stand on");
 
-	// Arriving now means standing where the clock stands: due at this moment, which
-	// is what every creature already on the level is.
-	creature->set_next_action_time(ctx.gameState->get_time());
-	ctx.creatures->push_back(std::move(creature));
-}
+		// Arriving now means standing where the clock stands: due at this
+		// moment, which is what every creature already on the level is.
+		creature->set_next_action_time(ctx.gameState->get_time());
+		ctx.creatures->push_back(std::move(creature));
+	}
 
-void CreatureManager::update_creatures(
-	std::span<std::unique_ptr<Creature>> creatures,
-	GameContext& ctx)
-{
-	assert(
-		ctx.gameState && "update_creatures: the creatures acted with no clock");
-
-	// The clock is where the player stands, so each creature takes the actions it is due before then.
-	const int clockLimit = ctx.gameState->get_time();
-
-	for (const auto& creature : creatures)
+	void CreatureManager::update_creatures(
+		std::span<std::unique_ptr<Creature>> creatures,
+		GameContext& ctx)
 	{
 		assert(
-			creature &&
-			"update_creatures: the creature list holds a null entry");
+			ctx.gameState &&
+			"update_creatures: the creatures acted with no clock");
 
-		const int cost = creature->get_action_delay();
-		const int due = creature->scheduled_actions_before(clockLimit);
+		// The clock is where the player stands, so each creature takes the
+		// actions it is due before then.
+		const int clockLimit = ctx.gameState->get_time();
 
-		for (int action = 0; action < due; ++action)
+		for (const auto& creature : creatures)
 		{
-			creature->update(ctx);
-			creature->set_next_action_time(
-				creature->get_next_action_time() + cost);
+			assert(
+				creature &&
+				"update_creatures: the creature list holds a null entry");
 
-			// A creature killed by what it just did takes no further action, and the
-			// sweep after this loop removes it.
-			if (creature->is_dead())
+			const int cost = creature->get_action_delay();
+			const int due = creature->scheduled_actions_before(clockLimit);
+
+			for (int action = 0; action < due; ++action)
 			{
-				break;
+				creature->update(ctx);
+				creature->set_next_action_time(
+					creature->get_next_action_time() + cost);
+
+				// A creature killed by what it just did takes no further
+				// action, and the sweep after this loop removes it.
+				if (creature->is_dead())
+				{
+					break;
+				}
 			}
 		}
 	}
-}
 
-void CreatureManager::cleanup_dead_creatures(
-	std::vector<std::unique_ptr<Creature>>& creatures)
-{
-	// Remove dead creatures from the game
-	// This is called at safe points to avoid dangling references during combat
-	std::erase_if(
-		creatures,
-		[](const auto& creature) { return creature && creature->is_dead(); });
-}
-
-void CreatureManager::spawn_creatures(GameContext& ctx)
-{
-	assert(
-		ctx.creatures &&
-		"CreatureManager::spawn_creatures: called without creatures");
-	assert(ctx.map && "CreatureManager::spawn_creatures: called without a map");
-
-	// One new monster every spawnRate rounds, read as rounds: the clock moves about a hundred units an action.
-	if (rounds_completed_at(ctx.gameState->get_time()) % spawnRate == 0)
+	void CreatureManager::cleanup_dead_creatures(
+		std::vector<std::unique_ptr<Creature>>& creatures)
 	{
-		if (can_spawn_creature(*ctx.creatures, maxCreatures))
+		// Remove dead creatures from the game This is called at safe points to
+		// avoid dangling references during combat
+		std::erase_if(
+			creatures,
+			[](const auto& creature)
+			{ return creature && creature->is_dead(); });
+	}
+
+	void CreatureManager::spawn_creatures(GameContext& ctx)
+	{
+		assert(
+			ctx.creatures &&
+			"CreatureManager::spawn_creatures: called without creatures");
+		assert(
+			ctx.map &&
+			"CreatureManager::spawn_creatures: called without a map");
+
+		// One new monster every spawnRate rounds, read as rounds: the clock
+		// moves about a hundred units an action.
+		if (rounds_completed_at(ctx.gameState->get_time()) % spawnRate == 0)
 		{
-			// Nowhere to put one is a legal outcome: the round passes without a monster.
-			const std::optional<Vector2D> spawnPos = find_spawn_position(ctx);
-			if (spawnPos)
+			if (can_spawn_creature(*ctx.creatures, maxCreatures))
 			{
-				ctx.map->add_monster(*spawnPos, ctx);
+				// Nowhere to put one is a legal outcome: the round passes
+				// without a monster.
+				const std::optional<Vector2D> spawnPos =
+					find_spawn_position(ctx);
+				if (spawnPos)
+				{
+					ctx.map->add_monster(*spawnPos, ctx);
+				}
 			}
 		}
 	}
-}
 
-Creature* CreatureManager::get_actor_at_position(
-	std::span<const std::unique_ptr<Creature>> creatures,
-	Vector2D pos) const noexcept
-{
-	for (const auto& actor : creatures)
+	Creature* CreatureManager::get_actor_at_position(
+		std::span<const std::unique_ptr<Creature>> creatures,
+		Vector2D pos) const noexcept
+	{
+		for (const auto& actor : creatures)
+		{
+			assert(
+				actor &&
+				"CreatureManager::get_actor_at_position: creatures holds a null entry");
+			if (actor->position == pos)
+			{
+				return actor.get();
+			}
+		}
+		return nullptr;
+	}
+
+	bool CreatureManager::can_spawn_creature(
+		std::span<const std::unique_ptr<Creature>> creatures,
+		int max_creatures) const noexcept
+	{
+		return creatures.size() < static_cast<size_t>(max_creatures);
+	}
+
+	std::optional<Vector2D> CreatureManager::find_spawn_position(
+		GameContext& ctx)
 	{
 		assert(
-			actor &&
-			"CreatureManager::get_actor_at_position: creatures holds a null entry");
-		if (actor->position == pos)
+			ctx.dice &&
+			"CreatureManager::find_spawn_position: called without dice");
+
+		// A level with no rooms was never built. That is an invariant rather
+		// than a state to branch on, and the empty walk below answers nullopt
+		// if it is ever compiled out.
+		assert(
+			ctx.rooms && !ctx.rooms->empty() &&
+			"find_spawn_position: a level with no rooms");
+
+		const size_t roomCount = ctx.rooms->size();
+		if (roomCount == 0)
 		{
-			return actor.get();
+			return std::nullopt;
 		}
-	}
-	return nullptr;
-}
 
-bool CreatureManager::can_spawn_creature(
-	std::span<const std::unique_ptr<Creature>> creatures,
-	int max_creatures) const noexcept
-{
-	return creatures.size() < static_cast<size_t>(max_creatures);
-}
+		// A random start, then once round every room, so a full dungeon is told
+		// from bad luck and the loop ends.
+		const size_t start = static_cast<size_t>(
+			ctx.dice->roll(0, static_cast<int>(roomCount) - 1));
+		for (size_t offset = 0; offset < roomCount; ++offset)
+		{
+			const DungeonRoom& room =
+				ctx.rooms->at((start + offset) % roomCount);
+			const std::optional<Vector2D> pos =
+				SpawnUtils::find_random_room_position(room, ctx);
+			if (pos)
+			{
+				return pos;
+			}
+		}
 
-std::optional<Vector2D> CreatureManager::find_spawn_position(GameContext& ctx)
-{
-	assert(
-		ctx.dice &&
-		"CreatureManager::find_spawn_position: called without dice");
-
-	// A level with no rooms was never built. That is an invariant rather than a state to
-	// branch on, and the empty walk below answers nullopt if it is ever compiled out.
-	assert(
-		ctx.rooms && !ctx.rooms->empty() &&
-		"find_spawn_position: a level with no rooms");
-
-	const size_t roomCount = ctx.rooms->size();
-	if (roomCount == 0)
-	{
 		return std::nullopt;
 	}
-
-	// A random start, then once round every room, so a full dungeon is told from bad luck and the loop ends.
-	const size_t start =
-		static_cast<size_t>(ctx.dice->roll(0, static_cast<int>(roomCount) - 1));
-	for (size_t offset = 0; offset < roomCount; ++offset)
-	{
-		const DungeonRoom& room = ctx.rooms->at((start + offset) % roomCount);
-		const std::optional<Vector2D> pos =
-			SpawnUtils::find_random_room_position(room, ctx);
-		if (pos)
-		{
-			return pos;
-		}
-	}
-
-	return std::nullopt;
-}
 
 } // namespace CppRL

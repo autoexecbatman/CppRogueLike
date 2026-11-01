@@ -13,459 +13,491 @@
 namespace CppRL
 {
 
-class TileConfig;
+	class TileConfig;
 
-inline constexpr int SPRITE_SIZE = 16; // DawnLike native sprite pixel size
-// Default rendered tile size in pixels
-inline constexpr int DISPLAY_TILE_SIZE = 64;
-// The HUD's outer geometry, here rather than in Gui.cpp because two modules need
-// it: the renderer reserves room for the HUD, and the Gui fills it.
-//
-// Its rows run on a pitch of their own rather than on the map's tile grid. A tile
-// is as tall as the zoom makes it and a row of text is not, so a pitch measured in
-// tiles puts most of a row on nothing at one zoom and overlaps at the next.
-// Pixels between the tops of two rows of UI text
-inline constexpr int UI_TEXT_ROW_PITCH = 32;
-// Gap below the frame's rule before the first row
-inline constexpr int GUI_TEXT_TOP_INSET = 2;
-inline constexpr int GUI_TEXT_ROWS = 8; // Text rows the HUD lays out
+	inline constexpr int SPRITE_SIZE = 16; // DawnLike native sprite pixel size
+	// Default rendered tile size in pixels
+	inline constexpr int DISPLAY_TILE_SIZE = 64;
+	// The HUD's outer geometry, here rather than in Gui.cpp because two modules
+	// need it: the renderer reserves room for the HUD, and the Gui fills it.
+	//
+	// Its rows run on a pitch of their own rather than on the map's tile grid.
+	// A tile is as tall as the zoom makes it and a row of text is not, so a
+	// pitch measured in tiles puts most of a row on nothing at one zoom and
+	// overlaps at the next. Pixels between the tops of two rows of UI text
+	inline constexpr int UI_TEXT_ROW_PITCH = 32;
+	// Gap below the frame's rule before the first row
+	inline constexpr int GUI_TEXT_TOP_INSET = 2;
+	inline constexpr int GUI_TEXT_ROWS = 8; // Text rows the HUD lays out
 
-// The bar sheet's cell. A bar is one text row tall, so a cell of this size is drawn
-// at its own resolution however the zoom moves, and only its width is stretched.
-// The sheet is loaded at this size, which is what keeps the two equal.
-inline constexpr int GUI_BARS_CELL_SIZE = UI_TEXT_ROW_PITCH;
+	// The bar sheet's cell. A bar is one text row tall, so a cell of this size
+	// is drawn at its own resolution however the zoom moves, and only its width
+	// is stretched. The sheet is loaded at this size, which is what keeps the
+	// two equal.
+	inline constexpr int GUI_BARS_CELL_SIZE = UI_TEXT_ROW_PITCH;
 
-// Opaque width of a bar's end plate, which is what its cell paints and the rest of
-// that cell leaves clear. A bar's trough runs between the two plates, so this is the
-// inset its contents take at each end. BarSheetGeometryTest reads it back off the
-// sheet, so art that changes the plate fails rather than hiding a sliver of fill.
-inline constexpr int GUI_BAR_PLATE_WIDTH = 13;
+	// Opaque width of a bar's end plate, which is what its cell paints and the
+	// rest of that cell leaves clear. A bar's trough runs between the two
+	// plates, so this is the inset its contents take at each end.
+	// BarSheetGeometryTest reads it back off the sheet, so art that changes the
+	// plate fails rather than hiding a sliver of fill.
+	inline constexpr int GUI_BAR_PLATE_WIDTH = 13;
 
-// A frame edge paints a rule across part of its tile and leaves the rest transparent,
-// so a panel's interior begins where the rule ends and not where the tile does.
-// Measured off DawnLike/GUI/Frame.png at its native cell: the top edge paints rows
-// 1 to 28, the bottom edge rows 33 to 60, the left edge columns 1 to 29, and the
-// divider columns 17 to 46.
-inline constexpr int GUI_FRAME_NATIVE_CELL = 64;
-inline constexpr int GUI_FRAME_TOP_RULE_DEPTH = 29;
-inline constexpr int GUI_FRAME_BOTTOM_RULE_DEPTH = 31;
-inline constexpr int GUI_FRAME_RULE_WIDTH_DEPTH = 30;
+	// A frame edge paints a rule across part of its tile and leaves the rest
+	// transparent, so a panel's interior begins where the rule ends and not
+	// where the tile does. Measured off DawnLike/GUI/Frame.png at its native
+	// cell: the top edge paints rows 1 to 28, the bottom edge rows 33 to 60,
+	// the left edge columns 1 to 29, and the divider columns 17 to 46.
+	inline constexpr int GUI_FRAME_NATIVE_CELL = 64;
+	inline constexpr int GUI_FRAME_TOP_RULE_DEPTH = 29;
+	inline constexpr int GUI_FRAME_BOTTOM_RULE_DEPTH = 31;
+	inline constexpr int GUI_FRAME_RULE_WIDTH_DEPTH = 30;
 
-// Pixels a frame edge paints into its own tile. The remainder of the tile is
-// transparent and a panel's text may sit on it.
-//
-// Example:
-//
-//   gui_frame_top_rule(64);      // -> 29
-//   gui_frame_bottom_rule(64);   // -> 31
-//   gui_frame_top_rule(16);      // -> 7, the art scales with the tile
-[[nodiscard]] inline constexpr int gui_frame_top_rule(int tileSize)
-{
-	return tileSize * GUI_FRAME_TOP_RULE_DEPTH / GUI_FRAME_NATIVE_CELL;
-}
-
-[[nodiscard]] inline constexpr int gui_frame_bottom_rule(int tileSize)
-{
-	return tileSize * GUI_FRAME_BOTTOM_RULE_DEPTH / GUI_FRAME_NATIVE_CELL;
-}
-
-// Pixels a vertical rule paints across. The left edge paints its tile's first 30
-// columns, the right edge its last 30, and a divider paints 30 from the point it is
-// aimed at, so one number answers for all three. Anything that has to clear a rule
-// clears this and not the tile.
-//
-// Example:
-//
-//   gui_frame_rule_width(64);   // -> 30
-//   gui_frame_rule_width(32);   // -> 15
-[[nodiscard]] inline constexpr int gui_frame_rule_width(int tileSize)
-{
-	return tileSize * GUI_FRAME_RULE_WIDTH_DEPTH / GUI_FRAME_NATIVE_CELL;
-}
-
-// Top of one text row inside a panel whose frame begins at panelTopY. Row 0 sits
-// directly below the frame's top edge, which is one tile tall.
-//
-// Every full-screen panel uses this rather than multiplying a row index by the
-// tile size. A tile grows with the zoom and a row of text does not, so a row
-// index on the tile grid walks off the bottom of the screen at a large tile and
-// bunches up at a small one.
-//
-// Example, at a 64-pixel tile:
-//
-//   panel_text_row_y(0, 64, 0);    // -> 64,  first row under the top edge
-//   panel_text_row_y(0, 64, 10);   // -> 384, still on a 896-pixel screen
-[[nodiscard]] inline constexpr int panel_text_row_y(
-	int panelTopY,
-	int tileSize,
-	int row)
-{
-	return panelTopY + tileSize + row * UI_TEXT_ROW_PITCH;
-}
-
-// The row a screen y falls in: the inverse of panel_text_row_y, and what every
-// mouse hit test in a panel or menu asks.
-//
-// It answers negative above the first row rather than clamping, so a caller can
-// tell "the pointer is on the frame" from "the pointer is on the first entry".
-// Division is floored for that reason - truncation rounds toward zero and would
-// report row 0 for a pixel sitting above row 0.
-//
-// Use this rather than dividing the pointer's y by the tile size. Rows are a pitch
-// apart and a tile is not, so a hit test on the tile grid drifts further from the
-// row under the pointer the further down the panel it goes, by a factor that
-// changes with every zoom.
-//
-// Example, at a 64-pixel tile and a panel at the top of the screen:
-//
-//   panel_text_row_y(0, 64, 3);        // -> 160, the top of row 3
-//   panel_text_row_at_y(0, 64, 160);   // -> 3
-//   panel_text_row_at_y(0, 64, 191);   // -> 3,  still inside row 3
-//   panel_text_row_at_y(0, 64, 63);    // -> -1, on the frame, not in a row
-[[nodiscard]] inline constexpr int panel_text_row_at_y(
-	int panelTopY,
-	int tileSize,
-	int screenY)
-{
-	const int offsetFromFirstRow = screenY - panelTopY - tileSize;
-	if (offsetFromFirstRow < 0)
-	{
-		return (offsetFromFirstRow - (UI_TEXT_ROW_PITCH - 1)) /
-			UI_TEXT_ROW_PITCH;
-	}
-	return offsetFromFirstRow / UI_TEXT_ROW_PITCH;
-}
-
-// How many text rows fit between a panel's top and bottom frame edges. Callers
-// that can overflow ask this rather than assuming their content fits.
-//
-// Example:
-//
-//   panel_text_rows_that_fit(896, 64, 14);  // -> 24
-[[nodiscard]] inline constexpr int panel_text_rows_that_fit(
-	int panelHeightPixels,
-	int tileSize,
-	int fontSize)
-{
-	const int usablePixels = panelHeightPixels - 2 * tileSize - fontSize;
-	return usablePixels < 0 ? 0 : usablePixels / UI_TEXT_ROW_PITCH + 1;
-}
-
-// Tiles tall enough to frame a given number of text rows: a border tile top and
-// bottom, with the rows between them. A menu asks this instead of counting one
-// tile per line, which made an eleven-line help screen fourteen tiles - the whole
-// height of the window.
-//
-// Example:
-//
-//   panel_tiles_for_text_rows(11, 64, 14);   // -> 8
-[[nodiscard]] inline constexpr int panel_tiles_for_text_rows(
-	int rows,
-	int tileSize,
-	int fontSize)
-{
-	const int neededPixels =
-		2 * tileSize + (rows - 1) * UI_TEXT_ROW_PITCH + fontSize;
-	return (neededPixels + tileSize - 1) / tileSize;
-}
-
-// Tiles wide enough to hold a measured run of text between two border tiles. The
-// argument is pixels from measure_text, never a character count: a count of
-// characters used as a count of tiles made a 33-character line 37 tiles wide,
-// which is 2368 pixels on a 1280-pixel screen.
-//
-// Example:
-//
-//   panel_tiles_for_text_width(487, 64);     // -> 10
-[[nodiscard]] inline constexpr int panel_tiles_for_text_width(
-	int textWidthPixels,
-	int tileSize)
-{
-	const int neededPixels = 2 * tileSize + textWidthPixels;
-	return (neededPixels + tileSize - 1) / tileSize;
-}
-
-// Map-tile rows reserved at the bottom for the HUD.
-//
-// Derived rather than fixed. The HUD holds a constant amount of text, so the
-// pixels it needs do not change with zoom; the number of tile rows covering them
-// therefore must. A fixed count is right at one tile size and wrong at every other:
-// at a smaller tile the rows it fails to cover draw off the bottom of the screen, and
-// at a larger one it takes map rows the text has no use for.
-//
-// Example:
-//
-//   gui_reserve_rows(64, 30);   // -> 5, the size the game ships at
-//   gui_reserve_rows(16, 16);   // -> 16
-//   gui_reserve_rows(96, 16);   // -> 4
-[[nodiscard]] inline constexpr int gui_reserve_rows(int tileSize, int fontSize)
-{
-	// The frame's two rules, then the rows between them; the last row needs only the font's height.
-	// The rules are reserved as drawn, since a whole tile at each end wastes two rows at 64px.
-	const int neededPixels = gui_frame_top_rule(tileSize) + GUI_TEXT_TOP_INSET +
-		(GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH + fontSize +
-		gui_frame_bottom_rule(tileSize);
-	return (neededPixels + tileSize - 1) / tileSize;
-}
-
-struct ScreenMetrics
-{
-	int tile_w{};
-	int tile_h{};
-	int map_cols{};
-	int map_rows{};
-	int gui_rows{};
-	int window_w{};
-	int window_h{};
-};
-
-struct ColorPair
-{
-	Color foreground{};
-	Color background{};
-};
-
-// Holds one DawnLike sprite sheet (optionally two frames for animation).
-struct SpriteSheet
-{
-	Texture2D frame0{};
-	Texture2D frame1{};
-	int cellSize{ SPRITE_SIZE }; // source pixel size of one cell in this sheet
-	int tilesPerRow{ 0 };
-	int tilesPerCol{ 0 };
-	bool animated{ false };
-	bool loaded{ false };
-	std::string_view name{};
-};
-
-class Renderer
-{
-	bool initialized{ false };
-
-	int tileSize{ DISPLAY_TILE_SIZE };
-
-	Vector2D camera{};
-
-	float shakeTrauma{ 0.0f };
-	Vector2D shakeOffset{};
-
-	RenderTexture2D lightMask{};
-	bool lightMaskLoaded{ false };
-
-	std::array<SpriteSheet, static_cast<std::size_t>(TileSheet::COUNT)>
-		sheets{};
-	bool sheetsLoaded{ false };
-
-	Font gameFont{};
-	bool fontLoaded{ false };
-	int fontSize{ 0 };
-
-	int currentAnimFrame{ 0 };
-	double lastAnimToggle{ 0.0 };
-
-	// Between begin_frame and end_frame. Game::tick is the one caller of both.
-	bool frameOpen{ false };
-
-	std::array<ColorPair, COLOR_PAIR_TABLE_SIZE> colorPairs{};
-
-	void init_color_pairs();
-	void load_sheet(
-		TileSheet id,
-		std::string_view name,
-		std::string_view path0,
-		std::string_view path1,
-		int cellSize);
-	void load_sheet_static(
-		TileSheet id,
-		std::string_view name,
-		std::string_view path,
-		int cellSize);
-
-public:
-	Renderer() = default;
-	~Renderer() = default;
-
-	Renderer(const Renderer&) = delete;
-	Renderer& operator=(const Renderer&) = delete;
-	Renderer(Renderer&&) = delete;
-	Renderer& operator=(Renderer&&) = delete;
-
-	void init();
-	void shutdown();
-
-	void load_dawnlike(std::string_view basePath);
-	void load_font(std::string_view fontPath, int size);
-
-	// Opens the one frame of a game tick: everything drawn until end_frame lands on it.
-	// Game::tick owns the pair, so a menu or a view only draws. Refuses, by assertion, a
-	// frame opened while one is already open.
+	// Pixels a frame edge paints into its own tile. The remainder of the tile
+	// is transparent and a panel's text may sit on it.
 	//
 	// Example:
-	//   renderer.begin_frame(); // the screen is cleared to black
-	//   renderer.begin_frame(); // aborts: "begin_frame: a frame is already open"
-	void begin_frame();
+	//
+	//   gui_frame_top_rule(64);      // -> 29
+	//   gui_frame_bottom_rule(64);   // -> 31
+	//   gui_frame_top_rule(16);      // -> 7, the art scales with the tile
+	[[nodiscard]] inline constexpr int gui_frame_top_rule(int tileSize)
+	{
+		return tileSize * GUI_FRAME_TOP_RULE_DEPTH / GUI_FRAME_NATIVE_CELL;
+	}
 
-	// Closes the frame and moves input on, so a press read during it is past for the next
-	// tick's reader. Refuses, by assertion, a close with no frame open.
+	[[nodiscard]] inline constexpr int gui_frame_bottom_rule(int tileSize)
+	{
+		return tileSize * GUI_FRAME_BOTTOM_RULE_DEPTH / GUI_FRAME_NATIVE_CELL;
+	}
+
+	// Pixels a vertical rule paints across. The left edge paints its tile's
+	// first 30 columns, the right edge its last 30, and a divider paints 30
+	// from the point it is aimed at, so one number answers for all three.
+	// Anything that has to clear a rule clears this and not the tile.
 	//
 	// Example:
-	//   renderer.begin_frame();
-	//   renderer.end_frame(); // drawn, shown, and IsKeyPressed is false for a held key
-	//   renderer.end_frame(); // aborts: "end_frame: no frame is open"
-	void end_frame();
-
-	// World-space tile drawing (camera offset applied)
-	void draw_tile(Vector2D gridPos, TileRef tile, Color tint) const;
-	// World-space tile drawing with a sub-tile pixel offset (e.g. open doors pushed to side)
-	void draw_tile_offset(
-		Vector2D gridPos,
-		int pixelOffsetX,
-		int pixelOffsetY,
-		TileRef tile,
-		Color tint) const;
-	// World-space, always frame0 (no animation)
-	void draw_tile_static(Vector2D gridPos, TileRef tile, Color tint) const;
-
-	// Screen-space drawing (no camera offset)
-	void draw_tile_screen(Vector2D screenPos, TileRef tile) const;
-	void draw_tile_screen_color(
-		Vector2D screenPos,
-		TileRef tile,
-		Color tint) const;
-	void draw_tile_screen_color_sized(
-		Vector2D screenPos,
-		int size,
-		TileRef tile,
-		Color tint) const;
-	// One tile stretched to fill a rectangle, in a tint. The HUD's bars use it: their
-	// height is a text row and their width is whatever the panel leaves, so a bar's art
-	// is drawn at its own height and stretched across.
-	void draw_tile_screen_color_rect(
-		Vector2D screenPos,
-		int width,
-		int height,
-		TileRef tile,
-		Color tint) const;
-
-	// Screen-space drawing at an explicit pixel size (used by tile picker).
-	void draw_tile_screen_sized(
-		Vector2D screenPos,
-		TileRef tile,
-		int displaySize) const;
-	void draw_text(
-		Vector2D screenPos,
-		std::string_view text,
-		ColorPairId colorPair) const;
-	void draw_text_color(
-		Vector2D screenPos,
-		std::string_view text,
-		Color color) const;
-
-	// Draw a DawnLike-tiled frame with dark background fill.
-	// screenPos = top-left in pixels; wTiles/hTiles = dimensions in tiles.
-	void draw_frame(
-		Vector2D screenPos,
-		int wTiles,
-		int hTiles,
-		const TileConfig& tileConfig) const;
-
-	// The same frame fitted to a pixel rectangle rather than a whole number of
-	// tiles. The four border tiles are set against the edges and the runs between
-	// them are tiled, so the frame closes on any rectangle. Whole tiles rarely fill
-	// the screen - at a 96-pixel tile they stop 32 pixels short of 1280x896 - and a
-	// frame counted in tiles then leaves an unpainted strip along two edges.
-	void draw_frame_pixels(
-		Vector2D screenPos,
-		int widthPixels,
-		int heightPixels,
-		const TileConfig& tileConfig) const;
-
-	void set_camera_center(
-		int world_tile_x,
-		int world_tile_y,
-		int map_w,
-		int map_h);
-	void zoom_in();
-	void zoom_out();
-
-	// Screen shake: add trauma [0..1]. Decays automatically each frame.
-	void add_trauma(float amount);
-
-	// Dynamic lighting: fill darkness then punch light cones, multiply onto screen.
-	void begin_light_mask();
-	void add_light_quad(int screenX, int screenY, Color tileColor);
-	void apply_light_mask();
-
-	[[nodiscard]] ColorPair get_color_pair(ColorPairId pair) const;
-	[[nodiscard]] ScreenMetrics metrics() const;
-	[[nodiscard]] int measure_text(std::string_view text) const;
-	// The longest prefix of text that fits in maxWidth pixels, cut at a space when
-	// there is one so a word is not split across a boundary. Text that already fits
-	// comes back unchanged, trailing space included, because that space separates it
-	// from whatever is drawn beside it.
 	//
-	// Example at a width of 300 pixels. A round number on purpose: a real panel's width
-	// quoted here is wrong as soon as that panel moves.
-	//
-	//   fit_text_to_width("You are now Well Fed.", 300);
-	//   // -> "You are now Well Fed."          // fits, so it is returned whole
-	//
-	//   fit_text_to_width("mail, long sword, shield, long bow, fireball scroll.", 300);
-	//   // -> "mail, long sword, shield, long" // cut at a space, never mid-word
-	//
-	// How many characters that is depends on the font loaded in main.cpp, so the cut
-	// above is illustrative rather than measured. The log panel wraps rather than
-	// truncating - see draw_log_part in Gui.cpp - so a long message there runs onto
-	// the next row instead of losing its tail.
-	//
-	// The cut lands on a space, so a caller that needs the tail of a string rather
-	// than its head - an input field showing what was just typed - wants to limit
-	// what it accepts instead of truncating what it draws.
-	[[nodiscard]] std::string fit_text_to_width(
-		std::string_view text,
-		int maxWidth) const;
-
-	[[nodiscard]] bool is_initialized() const { return initialized; }
-
-	[[nodiscard]] int get_tile_size() const { return tileSize; }
-
-	[[nodiscard]] int get_font_size() const { return fontSize; }
-
-	// Tile rows the HUD needs at the current zoom. Everything that splits the
-	// screen between map and HUD asks this rather than assuming a number.
-	[[nodiscard]] int get_gui_reserve_rows() const
+	//   gui_frame_rule_width(64);   // -> 30
+	//   gui_frame_rule_width(32);   // -> 15
+	[[nodiscard]] inline constexpr int gui_frame_rule_width(int tileSize)
 	{
-		return gui_reserve_rows(tileSize, fontSize);
+		return tileSize * GUI_FRAME_RULE_WIDTH_DEPTH / GUI_FRAME_NATIVE_CELL;
 	}
 
-	// The window's size as raylib reports it, which can be smaller than the
-	// size asked for; the tile counts are the whole tiles that fit in it.
-	[[nodiscard]] int get_screen_width() const { return GetScreenWidth(); }
-
-	[[nodiscard]] int get_screen_height() const { return GetScreenHeight(); }
-
-	[[nodiscard]] int get_viewport_cols() const
+	// Top of one text row inside a panel whose frame begins at panelTopY. Row 0
+	// sits directly below the frame's top edge, which is one tile tall.
+	//
+	// Every full-screen panel uses this rather than multiplying a row index by
+	// the tile size. A tile grows with the zoom and a row of text does not, so
+	// a row index on the tile grid walks off the bottom of the screen at a
+	// large tile and bunches up at a small one.
+	//
+	// Example, at a 64-pixel tile:
+	//
+	//   panel_text_row_y(0, 64, 0);    // -> 64,  first row under the top edge
+	//   panel_text_row_y(0, 64, 10);   // -> 384, still on a 896-pixel screen
+	[[nodiscard]] inline constexpr int panel_text_row_y(
+		int panelTopY,
+		int tileSize,
+		int row)
 	{
-		return get_screen_width() / tileSize;
+		return panelTopY + tileSize + row * UI_TEXT_ROW_PITCH;
 	}
 
-	[[nodiscard]] int get_viewport_rows() const
+	// The row a screen y falls in: the inverse of panel_text_row_y, and what
+	// every mouse hit test in a panel or menu asks.
+	//
+	// It answers negative above the first row rather than clamping, so a caller
+	// can tell "the pointer is on the frame" from "the pointer is on the first
+	// entry". Division is floored for that reason - truncation rounds toward
+	// zero and would report row 0 for a pixel sitting above row 0.
+	//
+	// Use this rather than dividing the pointer's y by the tile size. Rows are
+	// a pitch apart and a tile is not, so a hit test on the tile grid drifts
+	// further from the row under the pointer the further down the panel it
+	// goes, by a factor that changes with every zoom.
+	//
+	// Example, at a 64-pixel tile and a panel at the top of the screen:
+	//
+	//   panel_text_row_y(0, 64, 3);        // -> 160, the top of row 3
+	//   panel_text_row_at_y(0, 64, 160);   // -> 3
+	//   panel_text_row_at_y(0, 64, 191);   // -> 3,  still inside row 3
+	//   panel_text_row_at_y(0, 64, 63);    // -> -1, on the frame, not in a row
+	[[nodiscard]] inline constexpr int panel_text_row_at_y(
+		int panelTopY,
+		int tileSize,
+		int screenY)
 	{
-		return get_screen_height() / tileSize;
+		const int offsetFromFirstRow = screenY - panelTopY - tileSize;
+		if (offsetFromFirstRow < 0)
+		{
+			return (offsetFromFirstRow - (UI_TEXT_ROW_PITCH - 1)) /
+				UI_TEXT_ROW_PITCH;
+		}
+		return offsetFromFirstRow / UI_TEXT_ROW_PITCH;
 	}
 
-	[[nodiscard]] int get_camera_x() const { return camera.x + shakeOffset.x; }
+	// How many text rows fit between a panel's top and bottom frame edges.
+	// Callers that can overflow ask this rather than assuming their content
+	// fits.
+	//
+	// Example:
+	//
+	//   panel_text_rows_that_fit(896, 64, 14);  // -> 24
+	[[nodiscard]] inline constexpr int panel_text_rows_that_fit(
+		int panelHeightPixels,
+		int tileSize,
+		int fontSize)
+	{
+		const int usablePixels = panelHeightPixels - 2 * tileSize - fontSize;
+		return usablePixels < 0 ? 0 : usablePixels / UI_TEXT_ROW_PITCH + 1;
+	}
 
-	[[nodiscard]] int get_camera_y() const { return camera.y + shakeOffset.y; }
+	// Tiles tall enough to frame a given number of text rows: a border tile top
+	// and bottom, with the rows between them. A menu asks this instead of
+	// counting one tile per line, which made an eleven-line help screen
+	// fourteen tiles - the whole height of the window.
+	//
+	// Example:
+	//
+	//   panel_tiles_for_text_rows(11, 64, 14);   // -> 8
+	[[nodiscard]] inline constexpr int panel_tiles_for_text_rows(
+		int rows,
+		int tileSize,
+		int fontSize)
+	{
+		const int neededPixels =
+			2 * tileSize + (rows - 1) * UI_TEXT_ROW_PITCH + fontSize;
+		return (neededPixels + tileSize - 1) / tileSize;
+	}
 
-	[[nodiscard]] int get_sheet_cols(TileSheet sheet) const;
-	[[nodiscard]] int get_sheet_rows(TileSheet sheet) const;
-	// Source pixel size of one cell in this sheet: 16 for DawnLike, 64 for the
-	// regenerated sheets. Editors use it to draw tiles at an integer scale.
-	[[nodiscard]] int get_sheet_cell_size(TileSheet sheet) const;
-	[[nodiscard]] bool sheet_is_loaded(TileSheet sheet) const;
-	[[nodiscard]] std::string_view get_sheet_name(TileSheet sheet) const;
-	[[nodiscard]] int get_loaded_sheet_count() const;
-};
+	// Tiles wide enough to hold a measured run of text between two border
+	// tiles. The argument is pixels from measure_text, never a character count:
+	// a count of characters used as a count of tiles made a 33-character line
+	// 37 tiles wide, which is 2368 pixels on a 1280-pixel screen.
+	//
+	// Example:
+	//
+	//   panel_tiles_for_text_width(487, 64);     // -> 10
+	[[nodiscard]] inline constexpr int panel_tiles_for_text_width(
+		int textWidthPixels,
+		int tileSize)
+	{
+		const int neededPixels = 2 * tileSize + textWidthPixels;
+		return (neededPixels + tileSize - 1) / tileSize;
+	}
+
+	// Map-tile rows reserved at the bottom for the HUD.
+	//
+	// Derived rather than fixed. The HUD holds a constant amount of text, so
+	// the pixels it needs do not change with zoom; the number of tile rows
+	// covering them therefore must. A fixed count is right at one tile size and
+	// wrong at every other: at a smaller tile the rows it fails to cover draw
+	// off the bottom of the screen, and at a larger one it takes map rows the
+	// text has no use for.
+	//
+	// Example:
+	//
+	//   gui_reserve_rows(64, 30);   // -> 5, the size the game ships at
+	//   gui_reserve_rows(16, 16);   // -> 16
+	//   gui_reserve_rows(96, 16);   // -> 4
+	[[nodiscard]] inline constexpr int gui_reserve_rows(
+		int tileSize,
+		int fontSize)
+	{
+		// The frame's two rules, then the rows between them; the last row needs
+		// only the font's height. The rules are reserved as drawn, since a
+		// whole tile at each end wastes two rows at 64px.
+		const int neededPixels = gui_frame_top_rule(tileSize) +
+			GUI_TEXT_TOP_INSET + (GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH +
+			fontSize + gui_frame_bottom_rule(tileSize);
+		return (neededPixels + tileSize - 1) / tileSize;
+	}
+
+	struct ScreenMetrics
+	{
+		int tile_w{};
+		int tile_h{};
+		int map_cols{};
+		int map_rows{};
+		int gui_rows{};
+		int window_w{};
+		int window_h{};
+	};
+
+	struct ColorPair
+	{
+		Color foreground{};
+		Color background{};
+	};
+
+	// Holds one DawnLike sprite sheet (optionally two frames for animation).
+	struct SpriteSheet
+	{
+		Texture2D frame0{};
+		Texture2D frame1{};
+		// source pixel size of one cell in this sheet
+		int cellSize{ SPRITE_SIZE };
+		int tilesPerRow{ 0 };
+		int tilesPerCol{ 0 };
+		bool animated{ false };
+		bool loaded{ false };
+		std::string_view name{};
+	};
+
+	class Renderer
+	{
+		bool initialized{ false };
+
+		int tileSize{ DISPLAY_TILE_SIZE };
+
+		Vector2D camera{};
+
+		float shakeTrauma{ 0.0f };
+		Vector2D shakeOffset{};
+
+		RenderTexture2D lightMask{};
+		bool lightMaskLoaded{ false };
+
+		std::array<SpriteSheet, static_cast<std::size_t>(TileSheet::COUNT)>
+			sheets{};
+		bool sheetsLoaded{ false };
+
+		Font gameFont{};
+		bool fontLoaded{ false };
+		int fontSize{ 0 };
+
+		int currentAnimFrame{ 0 };
+		double lastAnimToggle{ 0.0 };
+
+		// Between begin_frame and end_frame. Game::tick is the one caller of
+		// both.
+		bool frameOpen{ false };
+
+		std::array<ColorPair, COLOR_PAIR_TABLE_SIZE> colorPairs{};
+
+		void init_color_pairs();
+		void load_sheet(
+			TileSheet id,
+			std::string_view name,
+			std::string_view path0,
+			std::string_view path1,
+			int cellSize);
+		void load_sheet_static(
+			TileSheet id,
+			std::string_view name,
+			std::string_view path,
+			int cellSize);
+
+	public:
+		Renderer() = default;
+		~Renderer() = default;
+
+		Renderer(const Renderer&) = delete;
+		Renderer& operator=(const Renderer&) = delete;
+		Renderer(Renderer&&) = delete;
+		Renderer& operator=(Renderer&&) = delete;
+
+		void init();
+		void shutdown();
+
+		void load_dawnlike(std::string_view basePath);
+		void load_font(std::string_view fontPath, int size);
+
+		// Opens the one frame of a game tick: everything drawn until end_frame
+		// lands on it. Game::tick owns the pair, so a menu or a view only
+		// draws. Refuses, by assertion, a frame opened while one is already
+		// open.
+		//
+		// Example:
+		//   renderer.begin_frame(); // the screen is cleared to black
+		//   renderer.begin_frame();
+		//   // aborts: "begin_frame: a frame is already open"
+		void begin_frame();
+
+		// Closes the frame and moves input on, so a press read during it is
+		// past for the next tick's reader. Refuses, by assertion, a close with
+		// no frame open.
+		//
+		// Example:
+		//   renderer.begin_frame();
+		//   renderer.end_frame();
+		//   // drawn, shown, and IsKeyPressed is false for a held key
+		//   renderer.end_frame(); // aborts: "end_frame: no frame is open"
+		void end_frame();
+
+		// World-space tile drawing (camera offset applied)
+		void draw_tile(Vector2D gridPos, TileRef tile, Color tint) const;
+		// World-space tile drawing with a sub-tile pixel offset (e.g. open
+		// doors pushed to side)
+		void draw_tile_offset(
+			Vector2D gridPos,
+			int pixelOffsetX,
+			int pixelOffsetY,
+			TileRef tile,
+			Color tint) const;
+		// World-space, always frame0 (no animation)
+		void draw_tile_static(Vector2D gridPos, TileRef tile, Color tint) const;
+
+		// Screen-space drawing (no camera offset)
+		void draw_tile_screen(Vector2D screenPos, TileRef tile) const;
+		void draw_tile_screen_color(
+			Vector2D screenPos,
+			TileRef tile,
+			Color tint) const;
+		void draw_tile_screen_color_sized(
+			Vector2D screenPos,
+			int size,
+			TileRef tile,
+			Color tint) const;
+		// One tile stretched to fill a rectangle, in a tint. The HUD's bars use
+		// it: their height is a text row and their width is whatever the panel
+		// leaves, so a bar's art is drawn at its own height and stretched
+		// across.
+		void draw_tile_screen_color_rect(
+			Vector2D screenPos,
+			int width,
+			int height,
+			TileRef tile,
+			Color tint) const;
+
+		// Screen-space drawing at an explicit pixel size (used by tile picker).
+		void draw_tile_screen_sized(
+			Vector2D screenPos,
+			TileRef tile,
+			int displaySize) const;
+		void draw_text(
+			Vector2D screenPos,
+			std::string_view text,
+			ColorPairId colorPair) const;
+		void draw_text_color(
+			Vector2D screenPos,
+			std::string_view text,
+			Color color) const;
+
+		// Draw a DawnLike-tiled frame with dark background fill.
+		// screenPos = top-left in pixels; wTiles/hTiles = dimensions in tiles.
+		void draw_frame(
+			Vector2D screenPos,
+			int wTiles,
+			int hTiles,
+			const TileConfig& tileConfig) const;
+
+		// The same frame fitted to a pixel rectangle rather than a whole number
+		// of tiles. The four border tiles are set against the edges and the
+		// runs between them are tiled, so the frame closes on any rectangle.
+		// Whole tiles rarely fill the screen - at a 96-pixel tile they stop 32
+		// pixels short of 1280x896 - and a frame counted in tiles then leaves
+		// an unpainted strip along two edges.
+		void draw_frame_pixels(
+			Vector2D screenPos,
+			int widthPixels,
+			int heightPixels,
+			const TileConfig& tileConfig) const;
+
+		void set_camera_center(
+			int world_tile_x,
+			int world_tile_y,
+			int map_w,
+			int map_h);
+		void zoom_in();
+		void zoom_out();
+
+		// Screen shake: add trauma [0..1]. Decays automatically each frame.
+		void add_trauma(float amount);
+
+		// Dynamic lighting: fill darkness then punch light cones, multiply onto
+		// screen.
+		void begin_light_mask();
+		void add_light_quad(int screenX, int screenY, Color tileColor);
+		void apply_light_mask();
+
+		[[nodiscard]] ColorPair get_color_pair(ColorPairId pair) const;
+		[[nodiscard]] ScreenMetrics metrics() const;
+		[[nodiscard]] int measure_text(std::string_view text) const;
+		// The longest prefix of text that fits in maxWidth pixels, cut at a
+		// space when there is one so a word is not split across a boundary.
+		// Text that already fits comes back unchanged, trailing space included,
+		// because that space separates it from whatever is drawn beside it.
+		//
+		// Example at a width of 300 pixels. A round number on purpose: a real
+		// panel's width quoted here is wrong as soon as that panel moves.
+		//
+		//   fit_text_to_width("You are now Well Fed.", 300);
+		//   // -> "You are now Well Fed."
+		//   // fits, so it is returned whole
+		//
+		//   fit_text_to_width(
+		//       "mail, long sword, shield, long bow, fireball scroll.",
+		//       300);
+		//   // -> "mail, long sword, shield, long"
+		//   // cut at a space, never mid-word
+		//
+		// How many characters that is depends on the font loaded in main.cpp,
+		// so the cut above is illustrative rather than measured. The log panel
+		// wraps rather than truncating - see draw_log_part in Gui.cpp - so a
+		// long message there runs onto the next row instead of losing its tail.
+		//
+		// The cut lands on a space, so a caller that needs the tail of a string
+		// rather than its head - an input field showing what was just typed -
+		// wants to limit what it accepts instead of truncating what it draws.
+		[[nodiscard]] std::string fit_text_to_width(
+			std::string_view text,
+			int maxWidth) const;
+
+		[[nodiscard]] bool is_initialized() const { return initialized; }
+
+		[[nodiscard]] int get_tile_size() const { return tileSize; }
+
+		[[nodiscard]] int get_font_size() const { return fontSize; }
+
+		// Tile rows the HUD needs at the current zoom. Everything that splits
+		// the screen between map and HUD asks this rather than assuming a
+		// number.
+		[[nodiscard]] int get_gui_reserve_rows() const
+		{
+			return gui_reserve_rows(tileSize, fontSize);
+		}
+
+		// The window's size as raylib reports it, which can be smaller than the
+		// size asked for; the tile counts are the whole tiles that fit in it.
+		[[nodiscard]] int get_screen_width() const { return GetScreenWidth(); }
+
+		[[nodiscard]] int get_screen_height() const
+		{
+			return GetScreenHeight();
+		}
+
+		[[nodiscard]] int get_viewport_cols() const
+		{
+			return get_screen_width() / tileSize;
+		}
+
+		[[nodiscard]] int get_viewport_rows() const
+		{
+			return get_screen_height() / tileSize;
+		}
+
+		[[nodiscard]] int get_camera_x() const
+		{
+			return camera.x + shakeOffset.x;
+		}
+
+		[[nodiscard]] int get_camera_y() const
+		{
+			return camera.y + shakeOffset.y;
+		}
+
+		[[nodiscard]] int get_sheet_cols(TileSheet sheet) const;
+		[[nodiscard]] int get_sheet_rows(TileSheet sheet) const;
+		// Source pixel size of one cell in this sheet: 16 for DawnLike, 64 for
+		// the regenerated sheets. Editors use it to draw tiles at an integer
+		// scale.
+		[[nodiscard]] int get_sheet_cell_size(TileSheet sheet) const;
+		[[nodiscard]] bool sheet_is_loaded(TileSheet sheet) const;
+		[[nodiscard]] std::string_view get_sheet_name(TileSheet sheet) const;
+		[[nodiscard]] int get_loaded_sheet_count() const;
+	};
 
 } // namespace CppRL

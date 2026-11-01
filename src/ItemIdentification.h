@@ -3,45 +3,45 @@
 namespace CppRL
 {
 
-// Blessing status: Three-state enum per AD&D 2e model
-enum class BlessingStatus
-{
-	UNCURSED, // Default, normal item
-	BLESSED, // Divine favor, bonuses
-	CURSED // Malevolent, penalties or entrapment
-};
-
-// Item identification status: tracks what the player has learned
-struct ItemIdentificationStatus
-{
-	// Identification flags: what has the player discovered?
-	// Do we know the base item type? (sword vs dagger)
-	bool identifiedType{ false };
-	// Do we know the enhancement level/prefix/suffix?
-	bool identifiedEnhancement{ false };
-	bool identifiedBuc{ false }; // Do we know the blessing status?
-
-	// Reset identification to unknown
-	void reset() noexcept
+	// Blessing status: Three-state enum per AD&D 2e model
+	enum class BlessingStatus
 	{
-		identifiedType = false;
-		identifiedEnhancement = false;
-		identifiedBuc = false;
-	}
+		UNCURSED, // Default, normal item
+		BLESSED, // Divine favor, bonuses
+		CURSED // Malevolent, penalties or entrapment
+	};
 
-	// Mark as fully identified
-	void identify_all() noexcept
+	// Item identification status: tracks what the player has learned
+	struct ItemIdentificationStatus
 	{
-		identifiedType = true;
-		identifiedEnhancement = true;
-		identifiedBuc = true;
-	}
+		// Identification flags: what has the player discovered?
+		// Do we know the base item type? (sword vs dagger)
+		bool identifiedType{ false };
+		// Do we know the enhancement level/prefix/suffix?
+		bool identifiedEnhancement{ false };
+		bool identifiedBuc{ false }; // Do we know the blessing status?
 
-	// Check if fully identified
-	[[nodiscard]] bool is_fully_identified() const noexcept
-	{
-		return identifiedType && identifiedEnhancement && identifiedBuc;
-	}
-};
+		// Reset identification to unknown
+		void reset() noexcept
+		{
+			identifiedType = false;
+			identifiedEnhancement = false;
+			identifiedBuc = false;
+		}
+
+		// Mark as fully identified
+		void identify_all() noexcept
+		{
+			identifiedType = true;
+			identifiedEnhancement = true;
+			identifiedBuc = true;
+		}
+
+		// Check if fully identified
+		[[nodiscard]] bool is_fully_identified() const noexcept
+		{
+			return identifiedType && identifiedEnhancement && identifiedBuc;
+		}
+	};
 
 } // namespace CppRL

@@ -23,27 +23,27 @@
 namespace CppRL
 {
 
-inline void expect_lasts_exactly(
-	BuffSystem& buffs,
-	Creature& creature,
-	BuffType type,
-	int currentTime,
-	int rounds)
-{
-	ASSERT_GT(rounds, 0) << "a buff lasting no rounds is already over";
+	inline void expect_lasts_exactly(
+		BuffSystem& buffs,
+		Creature& creature,
+		BuffType type,
+		int currentTime,
+		int rounds)
+	{
+		ASSERT_GT(rounds, 0) << "a buff lasting no rounds is already over";
 
-	// The last round it covers, part of a round included.
-	const int lastRoundCovered =
-		currentTime + (rounds - 1) * TIME_UNITS_PER_ROUND;
-	buffs.update_creature_buffs(creature, lastRoundCovered);
-	EXPECT_TRUE(buffs.has_buff(creature, type))
-		<< "gone before " << rounds << " rounds had run";
+		// The last round it covers, part of a round included.
+		const int lastRoundCovered =
+			currentTime + (rounds - 1) * TIME_UNITS_PER_ROUND;
+		buffs.update_creature_buffs(creature, lastRoundCovered);
+		EXPECT_TRUE(buffs.has_buff(creature, type))
+			<< "gone before " << rounds << " rounds had run";
 
-	// One round further is past its end.
-	const int pastTheEnd = currentTime + rounds * TIME_UNITS_PER_ROUND;
-	buffs.update_creature_buffs(creature, pastTheEnd);
-	EXPECT_FALSE(buffs.has_buff(creature, type))
-		<< "still in force after " << rounds << " rounds";
-}
+		// One round further is past its end.
+		const int pastTheEnd = currentTime + rounds * TIME_UNITS_PER_ROUND;
+		buffs.update_creature_buffs(creature, pastTheEnd);
+		EXPECT_FALSE(buffs.has_buff(creature, type))
+			<< "still in force after " << rounds << " rounds";
+	}
 
 } // namespace CppRL

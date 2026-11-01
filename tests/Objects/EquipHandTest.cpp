@@ -32,137 +32,138 @@
 namespace CppRL
 {
 
-namespace
-{
-	// Named here so each assertion reads as the claim it makes.
-	bool right_hand_takes(ItemClass itemClass)
+	namespace
 	{
-		return ItemClassificationUtils::can_equip_to_right_hand(itemClass);
-	}
-
-	bool left_hand_takes(ItemClass itemClass)
-	{
-		return ItemClassificationUtils::can_equip_to_left_hand(itemClass);
-	}
-
-	// AXE is here because Table 44 gives a battle axe Size M at 7 lb: the book
-	// marks a two-handed weapon with a "Two-handed" sub-row or Size L, and
-	// neither axe has one.
-	constexpr std::array ONE_HANDED_WEAPONS{
-		ItemClass::DAGGER,
-		ItemClass::SWORD,
-		ItemClass::HAMMER,
-		ItemClass::MACE,
-		ItemClass::SLING,
-		ItemClass::AXE,
-	};
-
-	constexpr std::array TWO_HANDED_WEAPONS{
-		ItemClass::GREAT_SWORD,
-		ItemClass::STAFF,
-		ItemClass::BOW,
-		ItemClass::CROSSBOW,
-	};
-
-	constexpr std::array SHIELDS{ ItemClass::SHIELD };
-
-	constexpr std::array NOT_HELD_IN_A_HAND{
-		ItemClass::UNKNOWN,
-		ItemClass::ARMOR,
-		ItemClass::HELMET,
-		ItemClass::RING,
-		ItemClass::AMULET,
-		ItemClass::GAUNTLETS,
-		ItemClass::BOOTS,
-		ItemClass::CLOAK,
-		ItemClass::GIRDLE,
-		ItemClass::POTION,
-		ItemClass::SCROLL,
-		ItemClass::FOOD,
-		ItemClass::GOLD_COIN,
-		ItemClass::GEM,
-		ItemClass::TOOL,
-		ItemClass::QUEST_ITEM,
-	};
-} // namespace
-
-TEST(EquipHandTest, TheFourGroupsAreTheWholeEnum)
-{
-	std::vector<ItemClass> grouped;
-	grouped.insert(
-		grouped.end(),
-		ONE_HANDED_WEAPONS.begin(),
-		ONE_HANDED_WEAPONS.end());
-	grouped.insert(
-		grouped.end(),
-		TWO_HANDED_WEAPONS.begin(),
-		TWO_HANDED_WEAPONS.end());
-	grouped.insert(grouped.end(), SHIELDS.begin(), SHIELDS.end());
-	grouped.insert(
-		grouped.end(),
-		NOT_HELD_IN_A_HAND.begin(),
-		NOT_HELD_IN_A_HAND.end());
-
-	ASSERT_EQ(grouped.size(), ALL_ITEM_CLASS.size())
-		<< "an item class was added and no hand rule was decided for it";
-
-	for (const ItemClass itemClass : ALL_ITEM_CLASS)
-	{
-		EXPECT_NE(std::ranges::find(grouped, itemClass), grouped.end())
-			<< "an item class of the enum appears in none of the four groups";
-	}
-}
-
-TEST(EquipHandTest, AOneHandedWeaponGoesInEitherHand)
-{
-	for (const ItemClass weapon : ONE_HANDED_WEAPONS)
-	{
-		EXPECT_TRUE(right_hand_takes(weapon));
-		EXPECT_TRUE(left_hand_takes(weapon));
-	}
-}
-
-TEST(EquipHandTest, ATwoHandedWeaponGoesInTheMainHandOnly)
-{
-	for (const ItemClass weapon : TWO_HANDED_WEAPONS)
-	{
-		EXPECT_TRUE(right_hand_takes(weapon));
-		EXPECT_FALSE(left_hand_takes(weapon))
-			<< "a two-handed weapon was allowed in the off-hand";
-	}
-}
-
-TEST(EquipHandTest, AShieldGoesInEitherHand)
-{
-	for (const ItemClass shield : SHIELDS)
-	{
-		EXPECT_TRUE(right_hand_takes(shield));
-		EXPECT_TRUE(left_hand_takes(shield));
-	}
-}
-
-TEST(EquipHandTest, WhatIsNotAWeaponOrAShieldGoesInNeitherHand)
-{
-	for (const ItemClass itemClass : NOT_HELD_IN_A_HAND)
-	{
-		EXPECT_FALSE(right_hand_takes(itemClass));
-		EXPECT_FALSE(left_hand_takes(itemClass));
-	}
-}
-
-// The off-hand's rule is the main hand's plus a restriction, never a different set.
-TEST(EquipHandTest, WhateverTheOffHandTakesTheMainHandTakesToo)
-{
-	for (const ItemClass itemClass : ALL_ITEM_CLASS)
-	{
-		if (left_hand_takes(itemClass))
+		// Named here so each assertion reads as the claim it makes.
+		bool right_hand_takes(ItemClass itemClass)
 		{
-			EXPECT_TRUE(right_hand_takes(itemClass))
-				<< "the off-hand accepts something the main hand refuses";
+			return ItemClassificationUtils::can_equip_to_right_hand(itemClass);
+		}
+
+		bool left_hand_takes(ItemClass itemClass)
+		{
+			return ItemClassificationUtils::can_equip_to_left_hand(itemClass);
+		}
+
+		// AXE is here because Table 44 gives a battle axe Size M at 7 lb: the
+		// book marks a two-handed weapon with a "Two-handed" sub-row or Size L,
+		// and neither axe has one.
+		constexpr std::array ONE_HANDED_WEAPONS{
+			ItemClass::DAGGER,
+			ItemClass::SWORD,
+			ItemClass::HAMMER,
+			ItemClass::MACE,
+			ItemClass::SLING,
+			ItemClass::AXE,
+		};
+
+		constexpr std::array TWO_HANDED_WEAPONS{
+			ItemClass::GREAT_SWORD,
+			ItemClass::STAFF,
+			ItemClass::BOW,
+			ItemClass::CROSSBOW,
+		};
+
+		constexpr std::array SHIELDS{ ItemClass::SHIELD };
+
+		constexpr std::array NOT_HELD_IN_A_HAND{
+			ItemClass::UNKNOWN,
+			ItemClass::ARMOR,
+			ItemClass::HELMET,
+			ItemClass::RING,
+			ItemClass::AMULET,
+			ItemClass::GAUNTLETS,
+			ItemClass::BOOTS,
+			ItemClass::CLOAK,
+			ItemClass::GIRDLE,
+			ItemClass::POTION,
+			ItemClass::SCROLL,
+			ItemClass::FOOD,
+			ItemClass::GOLD_COIN,
+			ItemClass::GEM,
+			ItemClass::TOOL,
+			ItemClass::QUEST_ITEM,
+		};
+	} // namespace
+
+	TEST(EquipHandTest, TheFourGroupsAreTheWholeEnum)
+	{
+		std::vector<ItemClass> grouped;
+		grouped.insert(
+			grouped.end(),
+			ONE_HANDED_WEAPONS.begin(),
+			ONE_HANDED_WEAPONS.end());
+		grouped.insert(
+			grouped.end(),
+			TWO_HANDED_WEAPONS.begin(),
+			TWO_HANDED_WEAPONS.end());
+		grouped.insert(grouped.end(), SHIELDS.begin(), SHIELDS.end());
+		grouped.insert(
+			grouped.end(),
+			NOT_HELD_IN_A_HAND.begin(),
+			NOT_HELD_IN_A_HAND.end());
+
+		ASSERT_EQ(grouped.size(), ALL_ITEM_CLASS.size())
+			<< "an item class was added and no hand rule was decided for it";
+
+		for (const ItemClass itemClass : ALL_ITEM_CLASS)
+		{
+			EXPECT_NE(std::ranges::find(grouped, itemClass), grouped.end())
+				<< "an item class of the enum appears in none of the four groups";
 		}
 	}
-}
 
-// end of file: EquipHandTest.cpp
+	TEST(EquipHandTest, AOneHandedWeaponGoesInEitherHand)
+	{
+		for (const ItemClass weapon : ONE_HANDED_WEAPONS)
+		{
+			EXPECT_TRUE(right_hand_takes(weapon));
+			EXPECT_TRUE(left_hand_takes(weapon));
+		}
+	}
+
+	TEST(EquipHandTest, ATwoHandedWeaponGoesInTheMainHandOnly)
+	{
+		for (const ItemClass weapon : TWO_HANDED_WEAPONS)
+		{
+			EXPECT_TRUE(right_hand_takes(weapon));
+			EXPECT_FALSE(left_hand_takes(weapon))
+				<< "a two-handed weapon was allowed in the off-hand";
+		}
+	}
+
+	TEST(EquipHandTest, AShieldGoesInEitherHand)
+	{
+		for (const ItemClass shield : SHIELDS)
+		{
+			EXPECT_TRUE(right_hand_takes(shield));
+			EXPECT_TRUE(left_hand_takes(shield));
+		}
+	}
+
+	TEST(EquipHandTest, WhatIsNotAWeaponOrAShieldGoesInNeitherHand)
+	{
+		for (const ItemClass itemClass : NOT_HELD_IN_A_HAND)
+		{
+			EXPECT_FALSE(right_hand_takes(itemClass));
+			EXPECT_FALSE(left_hand_takes(itemClass));
+		}
+	}
+
+	// The off-hand's rule is the main hand's plus a restriction, never a
+	// different set.
+	TEST(EquipHandTest, WhateverTheOffHandTakesTheMainHandTakesToo)
+	{
+		for (const ItemClass itemClass : ALL_ITEM_CLASS)
+		{
+			if (left_hand_takes(itemClass))
+			{
+				EXPECT_TRUE(right_hand_takes(itemClass))
+					<< "the off-hand accepts something the main hand refuses";
+			}
+		}
+	}
+
+	// end of file: EquipHandTest.cpp
 
 } // namespace CppRL

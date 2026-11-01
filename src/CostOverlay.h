@@ -28,36 +28,36 @@
 namespace CppRL
 {
 
-struct GameContext;
+	struct GameContext;
 
-namespace DebugUtils
-{
-	inline constexpr Color COST_NEAR_TINT{ 230, 70, 40, 120 };
-	inline constexpr Color COST_FAR_TINT{ 40, 110, 230, 120 };
-
-	// The text a tile shows for its cost, or nothing for a tile the flood never
-	// reached.
-	std::optional<std::string> dijkstra_cost_label(std::optional<int> cost);
-
-	// The tint for a reached tile, a straight blend from COST_NEAR_TINT at cost
-	// 0 to COST_FAR_TINT at farthestCost. Requires 0 <= cost <= farthestCost;
-	// when the player's own tile is the only one reached, farthestCost is 0 and
-	// the tint is COST_NEAR_TINT.
-	Color dijkstra_cost_tint(int cost, int farthestCost);
-
-	class CostOverlay
+	namespace DebugUtils
 	{
-	private:
-		bool visible{ false };
+		inline constexpr Color COST_NEAR_TINT{ 230, 70, 40, 120 };
+		inline constexpr Color COST_FAR_TINT{ 40, 110, 230, 120 };
 
-	public:
-		void toggle() noexcept;
-		[[nodiscard]] bool is_visible() const noexcept;
+		// The text a tile shows for its cost, or nothing for a tile the flood
+		// never reached.
+		std::optional<std::string> dijkstra_cost_label(std::optional<int> cost);
 
-		// Draws every on-screen reached tile's cost over the lit map. Does
-		// nothing while hidden.
-		void render(const GameContext& ctx) const;
-	};
-} // namespace DebugUtils
+		// The tint for a reached tile, a straight blend from COST_NEAR_TINT at
+		// cost 0 to COST_FAR_TINT at farthestCost. Requires 0 <= cost <=
+		// farthestCost; when the player's own tile is the only one reached,
+		// farthestCost is 0 and the tint is COST_NEAR_TINT.
+		Color dijkstra_cost_tint(int cost, int farthestCost);
+
+		class CostOverlay
+		{
+		private:
+			bool visible{ false };
+
+		public:
+			void toggle() noexcept;
+			[[nodiscard]] bool is_visible() const noexcept;
+
+			// Draws every on-screen reached tile's cost over the lit map. Does
+			// nothing while hidden.
+			void render(const GameContext& ctx) const;
+		};
+	} // namespace DebugUtils
 
 } // namespace CppRL

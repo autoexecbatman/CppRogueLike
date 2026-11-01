@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/AttackStrength.cpp",
-      "original": "\t\tif (const int rating = strength_rating_of(*missileWeapon); rating > 0)",
-      "mutated": "\t\tif (const int rating = strength_rating_of(*missileWeapon); rating > 100)",
+      "original": "\t\t\tif (const int rating = strength_rating_of(*missileWeapon);\n\t\t\t\trating > 0)",
+      "mutated": "\t\t\tif (const int rating = strength_rating_of(*missileWeapon);\n\t\t\t\trating > 100)",
       "catches": "a bow made for an arm treated as an ordinary bow"
     },
     {
       "file": "src/AttackStrength.cpp",
-      "original": "\t\t\tconst StrengthAttributes madeFor =\n\t\t\t\tdataManager.strength_for(rating, 0);",
-      "mutated": "\t\t\tconst StrengthAttributes madeFor =\n\t\t\t\tdataManager.strength_for(attacker.get_strength(), attacker.get_exceptional_strength());",
+      "original": "\t\t\t\tconst StrengthAttributes madeFor =\n\t\t\t\t\tdataManager.strength_for(rating, 0);",
+      "mutated": "\t\t\t\tconst StrengthAttributes madeFor =\n\t\t\t\t\tdataManager.strength_for(attacker.get_strength(), attacker.get_exceptional_strength());",
       "catches": "a made bow giving the wielder's row rather than the row it is made for"
     },
     {
@@ -39,7 +39,7 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tctx.messageSystem->message(\n\t\t\tColorPairId::WHITE_BLACK,\n\t\t\tstd::format(\n\t\t\t\t\"You are not strong enough to draw the {}.\",\n\t\t\t\titem->get_name()),\n\t\t\tMessageCompletion::FINISHED);\n",
+      "original": "\t\t\tctx.messageSystem->message(\n\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\tstd::format(\n\t\t\t\t\t\"You are not strong enough to draw the {}.\",\n\t\t\t\t\titem->get_name()),\n\t\t\t\tMessageCompletion::FINISHED);\n",
       "mutated": "",
       "catches": "a silent refusal"
     },
@@ -51,14 +51,14 @@
     },
     {
       "file": "src/ItemCreator.cpp",
-      "original": "\t\t\treturn Weapon{\n\t\t\t\tparams.ranged,\n\t\t\t\tparams.handRequirement,\n\t\t\t\tparams.weaponSize,\n\t\t\t\tparams.strengthRating,\n\t\t\t};",
-      "mutated": "\t\t\treturn Weapon{\n\t\t\t\tparams.ranged,\n\t\t\t\tparams.handRequirement,\n\t\t\t\tparams.weaponSize,0,\n\t\t\t};",
+      "original": "\t\t\t\treturn Weapon{\n\t\t\t\t\tparams.ranged,\n\t\t\t\t\tparams.handRequirement,\n\t\t\t\t\tparams.weaponSize,\n\t\t\t\t\tparams.strengthRating,\n\t\t\t\t};",
+      "mutated": "\t\t\t\treturn Weapon{\n\t\t\t\t\tparams.ranged,\n\t\t\t\t\tparams.handRequirement,\n\t\t\t\t\tparams.weaponSize,0,\n\t\t\t\t};",
       "catches": "a made bow built as an ordinary one"
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\tparams.strengthRating = required_field(record, key, \"strengthRating\");",
-      "mutated": "\tparams.strengthRating = required_field(record, key, \"strBonus\");",
+      "original": "\t\t\tparams.strengthRating =\n\t\t\t\trequired_field(record, key, \"strengthRating\");",
+      "mutated": "\t\t\tparams.strengthRating =\n\t\t\t\trequired_field(record, key, \"strBonus\");",
       "catches": "the rating read from another field"
     },
     {

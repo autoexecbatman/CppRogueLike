@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/ThiefSkills.cpp",
-      "original": "\tconstexpr std::array<int, THIEF_SKILL_COUNT>\n\t\tBASE_SCORE{ 15, 10, 5, 10, 5, 15, 60, 0 };",
-      "mutated": "\tconstexpr std::array<int, THIEF_SKILL_COUNT>\n\t\tBASE_SCORE{ 15, 10, 5, 10, 5, 15,50, 0 };",
+      "original": "\t\tconstexpr std::array<int, THIEF_SKILL_COUNT>\n\t\t\tBASE_SCORE{ 15, 10, 5, 10, 5, 15, 60, 0 };",
+      "mutated": "\t\tconstexpr std::array<int, THIEF_SKILL_COUNT>\n\t\t\tBASE_SCORE{ 15, 10, 5, 10, 5, 15,50, 0 };",
       "catches": "Table 26 mistranscribed, the one row nothing else would notice"
     },
     {

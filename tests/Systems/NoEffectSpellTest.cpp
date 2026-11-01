@@ -30,69 +30,70 @@
 namespace CppRL
 {
 
-class NoEffectSpellTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	class NoEffectSpellTest : public ::testing::Test
 	{
-		mock.player = std::make_unique<Player>(Vector2D{ 3, 3 });
-		mock.player->healthPool = std::make_unique<HealthPool>(20);
-		mock.player->armorClass = std::make_unique<ArmorClass>(10);
-		mock.player->experienceReward = std::make_unique<ExperienceReward>(0);
-		mock.player->set_creature_level(3);
-	}
-
-	// Whether any stored message holds the given text, its coloured runs
-	// joined.
-	bool said_anything_about(std::string_view wanted) const
-	{
-		for (
-			std::size_t index = 0;
-			index < ctx.messageSystem->get_stored_message_count();
-			++index)
+	protected:
+		void SetUp() override
 		{
-			std::string whole;
-			for (
-				const LogMessage& run :
-				ctx.messageSystem->get_attack_message_at(index))
-			{
-				whole += run.text;
-			}
-			if (whole.find(wanted) != std::string::npos)
-			{
-				return true;
-			}
+			mock.player = std::make_unique<Player>(Vector2D{ 3, 3 });
+			mock.player->healthPool = std::make_unique<HealthPool>(20);
+			mock.player->armorClass = std::make_unique<ArmorClass>(10);
+			mock.player->experienceReward =
+				std::make_unique<ExperienceReward>(0);
+			mock.player->set_creature_level(3);
 		}
-		return false;
-	}
 
-	MockGameContext mock{};
-	GameContext ctx{ mock.to_game_context() };
-};
+		// Whether any stored message holds the given text, its coloured runs
+		// joined.
+		bool said_anything_about(std::string_view wanted) const
+		{
+			for (
+				std::size_t index = 0;
+				index < ctx.messageSystem->get_stored_message_count();
+				++index)
+			{
+				std::string whole;
+				for (
+					const LogMessage& run :
+					ctx.messageSystem->get_attack_message_at(index))
+				{
+					whole += run.text;
+				}
+				if (whole.find(wanted) != std::string::npos)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
 
-TEST_F(NoEffectSpellTest, ASpellWithNoEffectSaysSoAndIsNotSpent)
-{
-	const std::string key =
-		ctx.spellRegistry->add_custom(SpellDefinition{ .name = "Blank Page" });
-	ASSERT_EQ(
-		ctx.spellRegistry->get_by_key(key).effect_type,
-		SpellEffectType::NONE);
-	int castingsSpent = 0;
-	const auto count_the_casting = [&castingsSpent](GameContext& completedCtx)
-	{
-		++castingsSpent;
+		MockGameContext mock{};
+		GameContext ctx{ mock.to_game_context() };
 	};
 
-	SpellSystem::cast_spell_by_key(
-		key,
-		*mock.player,
-		SpellSource::MEMORIZED,
-		count_the_casting,
-		ctx);
+	TEST_F(NoEffectSpellTest, ASpellWithNoEffectSaysSoAndIsNotSpent)
+	{
+		const std::string key = ctx.spellRegistry->add_custom(
+			SpellDefinition{ .name = "Blank Page" });
+		ASSERT_EQ(
+			ctx.spellRegistry->get_by_key(key).effect_type,
+			SpellEffectType::NONE);
+		int castingsSpent = 0;
+		const auto count_casting = [&castingsSpent](GameContext& completedCtx)
+		{
+			++castingsSpent;
+		};
 
-	EXPECT_EQ(castingsSpent, 0) << "a spell that did nothing was spent";
-	EXPECT_TRUE(said_anything_about("Spell not implemented yet."))
-		<< "the caster was not told";
-}
+		SpellSystem::cast_spell_by_key(
+			key,
+			*mock.player,
+			SpellSource::MEMORIZED,
+			count_casting,
+			ctx);
+
+		EXPECT_EQ(castingsSpent, 0) << "a spell that did nothing was spent";
+		EXPECT_TRUE(said_anything_about("Spell not implemented yet."))
+			<< "the caster was not told";
+	}
 
 } // namespace CppRL

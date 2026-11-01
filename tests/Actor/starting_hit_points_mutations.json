@@ -15,26 +15,26 @@
   "mutations": [
     {
       "file": "src/Player.cpp",
-      "original": "GameBalance::Leveling::HitPoints::STARTING_CUSHION +\n\t\tctx.dice->roll(1, get_hit_die());",
-      "mutated": "GameBalance::Leveling::HitPoints::STARTING_CUSHION +\n\t\tctx.dice->d10();",
+      "original": "\tGameBalance::Leveling::HitPoints::STARTING_CUSHION +\n\t\t\tctx.dice->roll(1, get_hit_die());",
+      "mutated": "\tGameBalance::Leveling::HitPoints::STARTING_CUSHION +\n\t\t\tctx.dice->d10();",
       "catches": "every class rolling the fighter's d10 again"
     },
     {
       "file": "src/Player.cpp",
-      "original": "GameBalance::Leveling::HitPoints::STARTING_CUSHION +\n\t\tctx.dice->roll(1, get_hit_die());",
-      "mutated": "GameBalance::Leveling::HitPoints::STARTING_CUSHION +get_hit_die();",
+      "original": "\tGameBalance::Leveling::HitPoints::STARTING_CUSHION +\n\t\t\tctx.dice->roll(1, get_hit_die());",
+      "mutated": "\tGameBalance::Leveling::HitPoints::STARTING_CUSHION +get_hit_die();",
       "catches": "the die's maximum taken in place of a roll, the reading the owner rejected"
     },
     {
       "file": "src/Player.cpp",
-      "original": "GameBalance::Leveling::HitPoints::STARTING_CUSHION +\n\t\tctx.dice->roll(1, get_hit_die());",
-      "mutated": "GameBalance::Leveling::HitPoints::STARTING_CUSHION +\n\t\tctx.dice->roll(1, get_hit_die() - 1);",
+      "original": "\tGameBalance::Leveling::HitPoints::STARTING_CUSHION +\n\t\t\tctx.dice->roll(1, get_hit_die());",
+      "mutated": "\tGameBalance::Leveling::HitPoints::STARTING_CUSHION +\n\t\t\tctx.dice->roll(1, get_hit_die() - 1);",
       "catches": "a die one face short"
     },
     {
       "file": "src/Player.cpp",
-      "original": "GameBalance::Leveling::HitPoints::STARTING_CUSHION +\n\t\tctx.dice->roll(1, get_hit_die());",
-      "mutated": "ctx.dice->roll(1, get_hit_die());",
+      "original": "\tGameBalance::Leveling::HitPoints::STARTING_CUSHION +\n\t\t\tctx.dice->roll(1, get_hit_die());",
+      "mutated": "\tctx.dice->roll(1, get_hit_die());",
       "catches": "the cushion lost, the book's 1st level alone"
     },
     {

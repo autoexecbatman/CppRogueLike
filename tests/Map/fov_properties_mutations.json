@@ -33,14 +33,14 @@
     },
     {
       "file": "src/Map.cpp",
-      "original": "\t\tfovMap->set_properties(\n\t\t\ttile.position.x,\n\t\t\ttile.position.y,\n\t\t\tfov_properties_for(tile.type));\n",
-      "mutated": "\t\tfovMap->set_properties(\n\t\t\ttile.position.x,\n\t\t\ttile.position.y,FovProperties{ .walkable = true, .transparent = true });\n",
+      "original": "\t\t\tfovMap->set_properties(\n\t\t\t\ttile.position.x,\n\t\t\t\ttile.position.y,\n\t\t\t\tfov_properties_for(tile.type));\n",
+      "mutated": "\t\t\tfovMap->set_properties(\n\t\t\t\ttile.position.x,\n\t\t\t\ttile.position.y,FovProperties{ .walkable = true, .transparent = true });\n",
       "catches": "a loaded level's walls walkable in the grid"
     },
     {
       "file": "src/Map.cpp",
-      "original": "\t\tcase TileType::OPEN_DOOR:\n\t\tcase TileType::WATER:\n",
-      "mutated": "\t\tcase TileType::OPEN_DOOR:\n",
+      "original": "\t\t\tcase TileType::OPEN_DOOR:\n\t\t\tcase TileType::WATER:\n",
+      "mutated": "\t\t\tcase TileType::OPEN_DOOR:\n",
       "catches": "water a wall in the grid"
     },
     {

@@ -36,130 +36,139 @@
 namespace CppRL
 {
 
-namespace
-{
-	// PHB Table 46: no armour.
-	constexpr int BARE_ARMOR_CLASS = 10;
-	// DMG page 908: a ring +1 betters AC by 1, a ring +2 by 2.
-	constexpr int PLUS_ONE_ARMOR_CLASS = 9;
-	constexpr int PLUS_TWO_ARMOR_CLASS = 8;
-	// A creature built in a test has no Strength, and the pack is weight-gated
-	// by it.
-	constexpr int CARRIER_STRENGTH = 18;
-	// Dexterity with no armour class adjustment (PHB Table 2).
-	constexpr int NEUTRAL_DEXTERITY = 10;
-} // namespace
-
-class RingOfProtectionTest : public ::testing::Test
-{
-protected:
-	MockGameContext mock{};
-	GameContext ctx{};
-	BuffSystem buffs{};
-
-	void SetUp() override
+	namespace
 	{
-		ctx = mock.to_game_context();
-		ctx.buffSystem = &buffs;
-		mock.player = std::make_unique<Player>(Vector2D{ 0, 0 });
-		Player& wearer = *mock.player;
-		wearer.experienceReward = std::make_unique<ExperienceReward>(0);
-		wearer.armorClass = std::make_unique<ArmorClass>(BARE_ARMOR_CLASS);
-		wearer.healthPool = std::make_unique<HealthPool>(20);
-		wearer.set_strength(CARRIER_STRENGTH);
-		wearer.set_dexterity(NEUTRAL_DEXTERITY);
-		ctx.playerOwner = &mock.player;
+		// PHB Table 46: no armour.
+		constexpr int BARE_ARMOR_CLASS = 10;
+		// DMG page 908: a ring +1 betters AC by 1, a ring +2 by 2.
+		constexpr int PLUS_ONE_ARMOR_CLASS = 9;
+		constexpr int PLUS_TWO_ARMOR_CLASS = 8;
+		// A creature built in a test has no Strength, and the pack is
+		// weight-gated by it.
+		constexpr int CARRIER_STRENGTH = 18;
+		// Dexterity with no armour class adjustment (PHB Table 2).
+		constexpr int NEUTRAL_DEXTERITY = 10;
+	} // namespace
+
+	class RingOfProtectionTest : public ::testing::Test
+	{
+	protected:
+		MockGameContext mock{};
+		GameContext ctx{};
+		BuffSystem buffs{};
+
+		void SetUp() override
+		{
+			ctx = mock.to_game_context();
+			ctx.buffSystem = &buffs;
+			mock.player = std::make_unique<Player>(Vector2D{ 0, 0 });
+			Player& wearer = *mock.player;
+			wearer.experienceReward = std::make_unique<ExperienceReward>(0);
+			wearer.armorClass = std::make_unique<ArmorClass>(BARE_ARMOR_CLASS);
+			wearer.healthPool = std::make_unique<HealthPool>(20);
+			wearer.set_strength(CARRIER_STRENGTH);
+			wearer.set_dexterity(NEUTRAL_DEXTERITY);
+			ctx.playerOwner = &mock.player;
+		}
+
+		Player& player() { return *mock.player; }
+
+		// Makes the item from its record, type identified, carries it and puts
+		// it on the way the inventory's use does.
+		Item& wear(std::string_view key)
+		{
+			auto made = ItemCreator::create(key, player().position, ctx);
+			made->identify_type();
+			Item* carried = made.get();
+			[[maybe_unused]] const auto added = InventoryOperations::add_item(
+				player().inventoryData,
+				std::move(made));
+			[[maybe_unused]] const bool used =
+				use_item(*carried->behavior, *carried, player(), ctx);
+			return *carried;
+		}
+
+		int armor_class() { return player().get_armor_class(); }
+
+		// Whether both ring slots hold a ring, so a pair test measures a pair.
+		bool is_ringed_on_both_hands()
+		{
+			return player().get_equipped_item(EquipmentSlot::RIGHT_RING) !=
+				nullptr &&
+				player().get_equipped_item(EquipmentSlot::LEFT_RING) != nullptr;
+		}
+	};
+
+	TEST_F(RingOfProtectionTest, APlusOneRingBettersArmourClassByOne)
+	{
+		wear("ring_of_protection_plus_1");
+
+		EXPECT_EQ(armor_class(), PLUS_ONE_ARMOR_CLASS);
 	}
 
-	Player& player() { return *mock.player; }
-
-	// Makes the item from its record, type identified, carries it and puts it
-	// on the way the inventory's use does.
-	Item& wear(std::string_view key)
+	TEST_F(RingOfProtectionTest, APlusTwoRingBettersArmourClassByTwo)
 	{
-		auto made = ItemCreator::create(key, player().position, ctx);
-		made->identify_type();
-		Item* carried = made.get();
-		[[maybe_unused]] const auto added = InventoryOperations::add_item(
-			player().inventoryData,
-			std::move(made));
-		[[maybe_unused]] const bool used =
-			use_item(*carried->behavior, *carried, player(), ctx);
-		return *carried;
+		wear("ring_of_protection_plus_2");
+
+		EXPECT_EQ(armor_class(), PLUS_TWO_ARMOR_CLASS);
 	}
 
-	int armor_class() { return player().get_armor_class(); }
-
-	// Whether both ring slots hold a ring, so a pair test measures a pair.
-	bool is_ringed_on_both_hands()
+	// Worn second, the weaker ring must not displace the stronger.
+	TEST_F(
+		RingOfProtectionTest,
+		OfTwoRingsOnlyTheStrongerCountsWhenItIsWornFirst)
 	{
-		return player().get_equipped_item(EquipmentSlot::RIGHT_RING) !=
-			nullptr &&
-			player().get_equipped_item(EquipmentSlot::LEFT_RING) != nullptr;
+		const Item& strong = wear("ring_of_protection_plus_2");
+		wear("ring_of_protection_plus_1");
+		ASSERT_TRUE(is_ringed_on_both_hands());
+
+		const ArmorClassBreakdown breakdown =
+			player().armorClass->update(player(), ctx);
+
+		EXPECT_EQ(armor_class(), PLUS_TWO_ARMOR_CLASS);
+		EXPECT_EQ(breakdown.ring.name, strong.get_name());
+		EXPECT_EQ(
+			breakdown.ring.bonus,
+			PLUS_TWO_ARMOR_CLASS - BARE_ARMOR_CLASS);
 	}
-};
 
-TEST_F(RingOfProtectionTest, APlusOneRingBettersArmourClassByOne)
-{
-	wear("ring_of_protection_plus_1");
+	// Worn first, the weaker ring must not keep its place once the stronger is
+	// on.
+	TEST_F(
+		RingOfProtectionTest,
+		OfTwoRingsOnlyTheStrongerCountsWhenItIsWornSecond)
+	{
+		wear("ring_of_protection_plus_1");
+		const Item& strong = wear("ring_of_protection_plus_2");
+		ASSERT_TRUE(is_ringed_on_both_hands());
 
-	EXPECT_EQ(armor_class(), PLUS_ONE_ARMOR_CLASS);
-}
+		const ArmorClassBreakdown breakdown =
+			player().armorClass->update(player(), ctx);
 
-TEST_F(RingOfProtectionTest, APlusTwoRingBettersArmourClassByTwo)
-{
-	wear("ring_of_protection_plus_2");
+		EXPECT_EQ(armor_class(), PLUS_TWO_ARMOR_CLASS);
+		EXPECT_EQ(breakdown.ring.name, strong.get_name());
+		EXPECT_EQ(
+			breakdown.ring.bonus,
+			PLUS_TWO_ARMOR_CLASS - BARE_ARMOR_CLASS);
+	}
 
-	EXPECT_EQ(armor_class(), PLUS_TWO_ARMOR_CLASS);
-}
+	// A ring's plus counts only when its effect is protection: fire resistance
+	// +1 leaves armour class alone. Putting it on does not recompute armour
+	// class, so the test recomputes it, as the next item put on would.
+	TEST_F(RingOfProtectionTest, ARingThatIsNotProtectionLeavesArmourClassAlone)
+	{
+		wear("ring_of_fire_resistance");
+		ASSERT_TRUE(
+			player().get_equipped_item(EquipmentSlot::RIGHT_RING) != nullptr ||
+			player().get_equipped_item(EquipmentSlot::LEFT_RING) != nullptr)
+			<< "the ring of fire resistance did not go on";
 
-// Worn second, the weaker ring must not displace the stronger.
-TEST_F(RingOfProtectionTest, OfTwoRingsOnlyTheStrongerCountsWhenItIsWornFirst)
-{
-	const Item& strong = wear("ring_of_protection_plus_2");
-	wear("ring_of_protection_plus_1");
-	ASSERT_TRUE(is_ringed_on_both_hands());
+		const ArmorClassBreakdown breakdown =
+			player().armorClass->update(player(), ctx);
 
-	const ArmorClassBreakdown breakdown =
-		player().armorClass->update(player(), ctx);
-
-	EXPECT_EQ(armor_class(), PLUS_TWO_ARMOR_CLASS);
-	EXPECT_EQ(breakdown.ring.name, strong.get_name());
-	EXPECT_EQ(breakdown.ring.bonus, PLUS_TWO_ARMOR_CLASS - BARE_ARMOR_CLASS);
-}
-
-// Worn first, the weaker ring must not keep its place once the stronger is on.
-TEST_F(RingOfProtectionTest, OfTwoRingsOnlyTheStrongerCountsWhenItIsWornSecond)
-{
-	wear("ring_of_protection_plus_1");
-	const Item& strong = wear("ring_of_protection_plus_2");
-	ASSERT_TRUE(is_ringed_on_both_hands());
-
-	const ArmorClassBreakdown breakdown =
-		player().armorClass->update(player(), ctx);
-
-	EXPECT_EQ(armor_class(), PLUS_TWO_ARMOR_CLASS);
-	EXPECT_EQ(breakdown.ring.name, strong.get_name());
-	EXPECT_EQ(breakdown.ring.bonus, PLUS_TWO_ARMOR_CLASS - BARE_ARMOR_CLASS);
-}
-
-// A ring's plus counts only when its effect is protection: fire resistance +1
-// leaves armour class alone. Putting it on does not recompute armour class, so
-// the test recomputes it, as the next item put on would.
-TEST_F(RingOfProtectionTest, ARingThatIsNotProtectionLeavesArmourClassAlone)
-{
-	wear("ring_of_fire_resistance");
-	ASSERT_TRUE(
-		player().get_equipped_item(EquipmentSlot::RIGHT_RING) != nullptr ||
-		player().get_equipped_item(EquipmentSlot::LEFT_RING) != nullptr)
-		<< "the ring of fire resistance did not go on";
-
-	const ArmorClassBreakdown breakdown =
-		player().armorClass->update(player(), ctx);
-
-	EXPECT_EQ(armor_class(), BARE_ARMOR_CLASS);
-	EXPECT_TRUE(breakdown.ring.name.empty())
-		<< "a ring that is not protection was named as counting";
-}
+		EXPECT_EQ(armor_class(), BARE_ARMOR_CLASS);
+		EXPECT_TRUE(breakdown.ring.name.empty())
+			<< "a ring that is not protection was named as counting";
+	}
 
 } // namespace CppRL

@@ -27,8 +27,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "bool Creature::has_ranged_weapon() const noexcept\n{\n\tconst Item* missile = get_equipped_item(EquipmentSlot::MISSILE_WEAPON);\n\treturn missile != nullptr && missile->is_ranged_weapon();\n}",
-      "mutated": "bool Creature::has_ranged_weapon() const noexcept\n{\n\treturn false;\n}",
+      "original": "\tbool Creature::has_ranged_weapon() const noexcept\n\t{\n\t\tconst Item* missile = get_equipped_item(EquipmentSlot::MISSILE_WEAPON);\n\t\treturn missile != nullptr && missile->is_ranged_weapon();\n\t}",
+      "mutated": "\tbool Creature::has_ranged_weapon() const noexcept\n\t{\n\t\treturn false;\n\t}",
       "catches": "a bow-wielder unable to shoot at all"
     }
   ]

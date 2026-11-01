@@ -6,32 +6,32 @@
 namespace CppRL
 {
 
-class Creature;
-struct GameContext;
-struct Vector2D;
+	class Creature;
+	struct GameContext;
+	struct Vector2D;
 
-class AiMonster : public Ai
-{
-private:
-	void update_tracking(Creature& owner, const GameContext& ctx);
-	void decide_action(Creature& owner, GameContext& ctx);
-
-protected:
-	virtual void move_or_attack(
-		Creature& owner,
-		Creature& target,
-		GameContext& ctx);
-
-public:
-	void update(Creature& owner, GameContext& ctx) override;
-
-	[[nodiscard]] AiType get_ai_type() const noexcept override
+	class AiMonster : public Ai
 	{
-		return AiType::MONSTER;
-	}
+	private:
+		void update_tracking(Creature& owner, const GameContext& ctx);
+		void decide_action(Creature& owner, GameContext& ctx);
 
-	void load(const json& source) override;
-	void save(json& output) override;
-};
+	protected:
+		virtual void move_or_attack(
+			Creature& owner,
+			Creature& target,
+			GameContext& ctx);
+
+	public:
+		void update(Creature& owner, GameContext& ctx) override;
+
+		[[nodiscard]] AiType get_ai_type() const noexcept override
+		{
+			return AiType::MONSTER;
+		}
+
+		void load(const json& source) override;
+		void save(json& output) override;
+	};
 
 } // namespace CppRL

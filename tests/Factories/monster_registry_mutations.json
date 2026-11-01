@@ -27,7 +27,7 @@
     },
     {
       "file": "src/MonsterRegistry.cpp",
-      "original": "key_to_standard_id(key).has_value() ||\n\t\t\tcustomMonsters.contains(key)",
+      "original": "key_to_standard_id(key).has_value() ||\n\t\t\t\tcustomMonsters.contains(key)",
       "mutated": "customMonsters.contains(key)",
       "catches": "a standard monster's key handed to a custom monster"
     },
@@ -51,8 +51,8 @@
     },
     {
       "file": "src/MonsterFactory.cpp",
-      "original": "\tconst std::vector<MonsterType> table = spawn_table(*ctx.monsterRegistry);\n",
-      "mutated": "\tstatic const std::vector<MonsterType> table = spawn_table(*ctx.monsterRegistry);\n",
+      "original": "\t\tconst std::vector<MonsterType> table =\n\t\t\tspawn_table(*ctx.monsterRegistry);\n",
+      "mutated": "\t\tstatic const std::vector<MonsterType> table =\n\t\t\tspawn_table(*ctx.monsterRegistry);\n",
       "catches": "spawns drawn from a table kept since the first spawn"
     },
     {

@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/Player.cpp",
-      "original": "\tcase CreatureClass::ROGUE:\n\t{\n\t\treturn \"Rogue\";\n\t}",
-      "mutated": "\tcase CreatureClass::ROGUE:\n\t{\n\t\treturn \"Fighter\";\n\t}",
+      "original": "\t\tcase CreatureClass::ROGUE:\n\t\t{\n\t\t\treturn \"Rogue\";\n\t\t}",
+      "mutated": "\t\tcase CreatureClass::ROGUE:\n\t\t{\n\t\t\treturn \"Fighter\";\n\t\t}",
       "catches": "two classes sharing a name in the table"
     },
     {
       "file": "src/Player.cpp",
-      "original": "\tcase CreatureClass::WIZARD:\n\t{\n\t\treturn \"Wizard\";\n\t}",
-      "mutated": "\tcase CreatureClass::WIZARD:\n\t{\n\t\treturn \"\";\n\t}",
+      "original": "\t\tcase CreatureClass::WIZARD:\n\t\t{\n\t\t\treturn \"Wizard\";\n\t\t}",
+      "mutated": "\t\tcase CreatureClass::WIZARD:\n\t\t{\n\t\t\treturn \"\";\n\t\t}",
       "catches": "a class with no name to show"
     },
     {
@@ -45,14 +45,14 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": "\tcase CreatureClass::ROGUE:\n\t{\n\t\tset_hit_die(6);",
-      "mutated": "\tcase CreatureClass::ROGUE:\n\t{\n\t\tset_hit_die(8);",
+      "original": "\t\tcase CreatureClass::ROGUE:\n\t\t{\n\t\t\tset_hit_die(6);",
+      "mutated": "\t\tcase CreatureClass::ROGUE:\n\t\t{\n\t\t\tset_hit_die(8);",
       "catches": "a rogue rolling a priest's hit die"
     },
     {
       "file": "src/Player.cpp",
-      "original": "\tcase CreatureClass::WIZARD:\n\t{\n\t\tset_hit_die(4);",
-      "mutated": "\tcase CreatureClass::WIZARD:\n\t{\n\t\tset_hit_die(6);",
+      "original": "\t\tcase CreatureClass::WIZARD:\n\t\t{\n\t\t\tset_hit_die(4);",
+      "mutated": "\t\tcase CreatureClass::WIZARD:\n\t\t{\n\t\t\tset_hit_die(6);",
       "catches": "a wizard rolling a rogue's hit die"
     }
   ]

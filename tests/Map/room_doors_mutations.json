@@ -15,13 +15,13 @@
   "mutations": [
     {
       "file": "src/Map.cpp",
-      "original": "\t\tif (!belongsToRoom)\n\t\t{\n\t\t\tcontinue;\n\t\t}\n",
+      "original": "\t\t\tif (!belongsToRoom)\n\t\t\t{\n\t\t\t\tcontinue;\n\t\t\t}\n",
       "mutated": "",
       "catches": "every room's doors opened, not only the room the key was used on"
     },
     {
       "file": "src/Map.cpp",
-      "original": "\t// Fallback: no room found, open only this door.\n\tunlock_door(doorPos);\n\topen_door(doorPos, ctx);\n",
+      "original": "\t\t// Fallback: no room found, open only this door.\n\t\tunlock_door(doorPos);\n\t\topen_door(doorPos, ctx);\n",
       "mutated": "",
       "catches": "a door of no room left shut when its key is used"
     }

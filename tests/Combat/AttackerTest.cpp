@@ -26,405 +26,414 @@
 namespace CppRL
 {
 
-// ============================================================================
-// ATTACKER TESTS
-// Tests combat calculations, hit/miss logic, damage application
-// ============================================================================
+	// =========================================================================
+	// ATTACKER TESTS Tests combat calculations, hit/miss logic, damage
+	// application
+	// =========================================================================
 
-class AttackerTest : public ::testing::Test
-{
-protected:
-	Game game{ TEST_DICE_SEED };
-	GameContext ctx;
-	std::unique_ptr<Player> player;
-	std::unique_ptr<Creature> monster;
-
-	void SetUp() override
+	class AttackerTest : public ::testing::Test
 	{
-		try
+	protected:
+		Game game{ TEST_DICE_SEED };
+		GameContext ctx;
+		std::unique_ptr<Player> player;
+		std::unique_ptr<Creature> monster;
+
+		void SetUp() override
 		{
-			game.dataManager.load_all_data(game.messageSystem);
+			try
+			{
+				game.dataManager.load_all_data(game.messageSystem);
+			}
+			catch (...)
+			{
+			}
+
+			game.tileConfig.load(Paths::TILE_CONFIG);
+
+			player = std::make_unique<Player>(Vector2D{ 0, 0 });
+			// A player always has a class, and its experience table is read
+			// when a kill pays it.
+			player->set_creature_class(CreatureClass::FIGHTER);
+			player->experienceReward = std::make_unique<ExperienceReward>(0);
+			player->set_dr(0);
+			player->set_thaco(20);
+			player->armorClass = std::make_unique<ArmorClass>(10);
+			player->healthPool = std::make_unique<HealthPool>(20);
+			player->attacker = std::make_unique<PlayerAttacker>(*player);
+			player->set_strength(10);
+			player->set_dexterity(10);
+
+			monster = std::make_unique<Creature>(
+				Vector2D{ 0, 1 },
+				ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
+			monster->set_corpse(
+				"test remains",
+				0,
+				"It is test remains.",
+				CorpseEdibility::EDIBLE);
+			monster->experienceReward = std::make_unique<ExperienceReward>(50);
+			monster->set_dr(0);
+			monster->set_thaco(19);
+			monster->armorClass = std::make_unique<ArmorClass>(6);
+			monster->healthPool = std::make_unique<HealthPool>(10);
+			monster->attacker = std::make_unique<MonsterAttacker>(
+				*monster,
+				DamageInfo{ "1d6", DamageType::PHYSICAL });
+			monster->set_strength(8);
+			monster->set_dexterity(10);
+			monster->set_natural_attack("claws");
+
+			ctx = game.context();
+			// The context borrows the handle that owns the player, so the
+			// fixture must point it at one it owns for the lifetime of the
+			// test.
+			ctx.playerOwner = &player;
+
+			// Every damage value these cases script is 3 to 6, which is what a
+			// weapon rolls. The fixture armed nobody, so each one landed on an
+			// unarmed 1d2 and passed only because a scripted roll was returned
+			// whatever range was asked for. A plain long sword is 1d8, so the
+			// same numbers are now rolls the die can make and the damage dealt
+			// is unchanged.
+			game.itemRegistry.load(Paths::ITEMS);
+			player->equip_item(
+				ItemCreator::create("long_sword", player->position, ctx),
+				EquipmentSlot::RIGHT_HAND,
+				ctx);
+
+			game.dice.set_test_mode(true);
 		}
-		catch (...)
+
+		void TearDown() override
 		{
+			game.dice.set_test_mode(false);
+			game.dice.clear_fixed_rolls();
 		}
+	};
 
-		game.tileConfig.load(Paths::TILE_CONFIG);
+	// -------------------------------------------------------------------------
+	// MonsterAttacker Serialization Tests
+	// -------------------------------------------------------------------------
 
-		player = std::make_unique<Player>(Vector2D{ 0, 0 });
-		// A player always has a class, and its experience table is read when a kill pays it.
-		player->set_creature_class(CreatureClass::FIGHTER);
-		player->experienceReward = std::make_unique<ExperienceReward>(0);
-		player->set_dr(0);
-		player->set_thaco(20);
-		player->armorClass = std::make_unique<ArmorClass>(10);
-		player->healthPool = std::make_unique<HealthPool>(20);
-		player->attacker = std::make_unique<PlayerAttacker>(*player);
-		player->set_strength(10);
-		player->set_dexterity(10);
+	TEST_F(AttackerTest, Serialization_RoundTrip)
+	{
+		Creature dummy(
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "dummy", ColorPairId::WHITE_BLACK });
+		MonsterAttacker original(dummy, DamageInfo{ "2d4", DamageType::FIRE });
 
-		monster = std::make_unique<Creature>(
-			Vector2D{ 0, 1 },
-			ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
-		monster->set_corpse(
-			"test remains",
-			0,
-			"It is test remains.",
-			CorpseEdibility::EDIBLE);
-		monster->experienceReward = std::make_unique<ExperienceReward>(50);
-		monster->set_dr(0);
-		monster->set_thaco(19);
-		monster->armorClass = std::make_unique<ArmorClass>(6);
-		monster->healthPool = std::make_unique<HealthPool>(10);
-		monster->attacker = std::make_unique<MonsterAttacker>(
-			*monster,
-			DamageInfo{ "1d6", DamageType::PHYSICAL });
-		monster->set_strength(8);
-		monster->set_dexterity(10);
-		monster->set_natural_attack("claws");
+		json j;
+		original.save(j);
 
-		ctx = game.context();
-		// The context borrows the handle that owns the player, so the fixture
-		// must point it at one it owns for the lifetime of the test.
-		ctx.playerOwner = &player;
+		MonsterAttacker loaded(dummy, DamageValues::Unarmed());
+		loaded.load(j);
 
-		// Every damage value these cases script is 3 to 6, which is what a weapon
-		// rolls. The fixture armed nobody, so each one landed on an unarmed 1d2 and
-		// passed only because a scripted roll was returned whatever range was asked
-		// for. A plain long sword is 1d8, so the same numbers are now rolls the die
-		// can make and the damage dealt is unchanged.
-		game.itemRegistry.load(Paths::ITEMS);
-		player->equip_item(
-			ItemCreator::create("long_sword", player->position, ctx),
-			EquipmentSlot::RIGHT_HAND,
-			ctx);
-
-		game.dice.set_test_mode(true);
+		EXPECT_EQ(loaded.get_damage_info().minDamage, 2);
+		EXPECT_EQ(loaded.get_damage_info().maxDamage, 8);
+		EXPECT_EQ(loaded.get_damage_info().displayRoll, "2d4");
+		EXPECT_EQ(loaded.get_damage_info().damageType, DamageType::FIRE);
 	}
 
-	void TearDown() override
+	// -------------------------------------------------------------------------
+	// THAC0 Combat Calculation Tests
+	// -------------------------------------------------------------------------
+
+	TEST_F(AttackerTest, THAC0_RollNeeded_Calculation)
 	{
-		game.dice.set_test_mode(false);
-		game.dice.clear_fixed_rolls();
-	}
-};
+		// Player THAC0 20, Monster AC 6
+		// Roll needed = THAC0 - AC = 20 - 6 = 14
+		monster->set_armor_class(6);
 
-// ----------------------------------------------------------------------------
-// MonsterAttacker Serialization Tests
-// ----------------------------------------------------------------------------
+		game.dice.set_next_d20(14);
+		game.dice.set_next_roll(3);
 
-TEST_F(AttackerTest, Serialization_RoundTrip)
-{
-	Creature dummy(
-		Vector2D{ 0, 0 },
-		ActorData{ TileRef{}, "dummy", ColorPairId::WHITE_BLACK });
-	MonsterAttacker original(dummy, DamageInfo{ "2d4", DamageType::FIRE });
-
-	json j;
-	original.save(j);
-
-	MonsterAttacker loaded(dummy, DamageValues::Unarmed());
-	loaded.load(j);
-
-	EXPECT_EQ(loaded.get_damage_info().minDamage, 2);
-	EXPECT_EQ(loaded.get_damage_info().maxDamage, 8);
-	EXPECT_EQ(loaded.get_damage_info().displayRoll, "2d4");
-	EXPECT_EQ(loaded.get_damage_info().damageType, DamageType::FIRE);
-}
-
-// ----------------------------------------------------------------------------
-// THAC0 Combat Calculation Tests
-// ----------------------------------------------------------------------------
-
-TEST_F(AttackerTest, THAC0_RollNeeded_Calculation)
-{
-	// Player THAC0 20, Monster AC 6
-	// Roll needed = THAC0 - AC = 20 - 6 = 14
-	monster->set_armor_class(6);
-
-	game.dice.set_next_d20(14);
-	game.dice.set_next_roll(3);
-
-	int hpBefore = monster->get_hp();
-	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
-
-	// Should hit with roll of exactly 14
-	EXPECT_LT(monster->get_hp(), hpBefore);
-}
-
-TEST_F(AttackerTest, THAC0_RollBelowNeeded_Misses)
-{
-	monster->set_armor_class(6);
-
-	game.dice.set_next_d20(13);
-	game.dice.set_next_roll(3);
-
-	int hpBefore = monster->get_hp();
-	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
-
-	// Should miss with roll of 13
-	EXPECT_EQ(monster->get_hp(), hpBefore);
-}
-
-TEST_F(AttackerTest, THAC0_LowAC_EasierToHit)
-{
-	// AC 0 means roll needed = 20 - 0 = 20
-	monster->set_armor_class(0);
-
-	game.dice.set_next_d20(20);
-	game.dice.set_next_roll(5);
-
-	int hpBefore = monster->get_hp();
-	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
-
-	EXPECT_LT(monster->get_hp(), hpBefore);
-}
-
-TEST_F(AttackerTest, THAC0_HighAC_EasierToHit)
-{
-	// AC 10 means roll needed = 20 - 10 = 10
-	monster->set_armor_class(10);
-
-	game.dice.set_next_d20(10);
-	game.dice.set_next_roll(4);
-
-	int hpBefore = monster->get_hp();
-	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
-
-	EXPECT_LT(monster->get_hp(), hpBefore);
-}
-
-// ----------------------------------------------------------------------------
-// Damage Reduction Tests
-// ----------------------------------------------------------------------------
-
-TEST_F(AttackerTest, DamageReduction_ReducesDamage)
-{
-	monster->set_armor_class(20);
-	monster->set_dr(3);
-
-	game.dice.set_next_d20(20);
-	game.dice.set_next_roll(5);
-
-	int hpBefore = monster->get_hp();
-	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
-
-	// 5 damage - 3 DR = 2 actual damage
-	EXPECT_EQ(monster->get_hp(), hpBefore - 2);
-}
-
-// "Regardless of subtractions, a successful attack roll can never cause less than 1 point
-// of damage" - Player's Handbook, PDF page 29 of the 2e archive, and said again of
-// monsters on page 211: "no successful attack can result in less than 1 point of damage".
-TEST_F(AttackerTest, DamageReduction_StillLeavesOnePointOnAHit)
-{
-	monster->set_armor_class(20);
-	monster->set_dr(10);
-
-	game.dice.set_next_d20(20);
-	game.dice.set_next_roll(5);
-
-	const int hpBefore = monster->get_hp();
-	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
-
-	// Five rolled against ten of reduction, and the blow still tells.
-	EXPECT_EQ(monster->get_hp(), hpBefore - 1);
-}
-
-TEST_F(AttackerTest, AStrengthPenaltyStillLeavesOnePointOnAHit)
-{
-	// Strength 3 subtracts one from damage (Table 1), and a roll of one would take the
-	// blow to nothing without the floor. Damage reduction plays no part here.
-	player->set_strength(3);
-	monster->set_armor_class(20);
-	monster->set_dr(0);
-
-	game.dice.set_next_d20(20);
-	game.dice.set_next_roll(1);
-
-	const int hpBefore = monster->get_hp();
-	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
-
-	EXPECT_EQ(monster->get_hp(), hpBefore - 1);
-}
-
-TEST_F(AttackerTest, AMissStillCostsNothing)
-{
-	// The floor belongs to a successful attack roll only: a miss must stay a miss, or
-	// "never less than 1" would quietly mean "always at least 1".
-	monster->set_armor_class(-10);
-	monster->set_dr(0);
-
-	game.dice.set_next_d20(1);
-	game.dice.set_next_roll(6);
-
-	const int hpBefore = monster->get_hp();
-	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
-
-	EXPECT_EQ(monster->get_hp(), hpBefore);
-}
-
-// ----------------------------------------------------------------------------
-// Monster Attack Tests
-// ----------------------------------------------------------------------------
-
-TEST_F(AttackerTest, MonsterAttack_UsesStoredWeaponName)
-{
-	monster->set_natural_attack("sharp claws");
-	player->set_armor_class(10);
-
-	game.dice.set_next_d20(20);
-	game.dice.set_next_roll(4);
-
-	// Attack should complete without errors using stored weapon name
-	monster->attacker->attack(*player, AttackKind::MELEE, ctx);
-
-	EXPECT_TRUE(true);
-}
-
-TEST_F(AttackerTest, MonsterAttack_DealsCorrectDamage)
-{
-	player->set_armor_class(20);
-	player->set_dr(0);
-
-	game.dice.set_next_d20(20);
-	game.dice.set_next_roll(6);
-
-	int hpBefore = player->get_hp();
-	monster->attacker->attack(*player, AttackKind::MELEE, ctx);
-
-	EXPECT_EQ(player->get_hp(), hpBefore - 6);
-}
-
-// ----------------------------------------------------------------------------
-// Combat Result Tests
-// ----------------------------------------------------------------------------
-
-TEST_F(AttackerTest, Attack_CanKillTarget)
-{
-	monster->set_hp(1);
-	monster->set_armor_class(20);
-	monster->set_dr(0);
-
-	game.dice.set_next_d20(20);
-	game.dice.set_next_roll(5);
-
-	ASSERT_FALSE(monster->is_dead());
-	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
-
-	EXPECT_TRUE(monster->is_dead());
-}
-
-// Two creatures can swing at one victim in a round, so the second finds it already
-// dead. That is a real outcome rather than a fault: the swing is refused, and nothing
-// is rolled for it.
-TEST_F(AttackerTest, AttackingAnAlreadyDeadTargetIsRefused)
-{
-	monster->set_hp(0);
-	ASSERT_TRUE(monster->is_dead());
-
-	// A certain hit is queued behind the refusal, so a guard that never fired would
-	// land it and be visible here rather than passing as nothing happening.
-	game.dice.set_next_d20(20);
-	game.dice.set_next_roll(6);
-
-	const AttackResult result =
+		int hpBefore = monster->get_hp();
 		player->attacker->attack(*monster, AttackKind::MELEE, ctx);
 
-	EXPECT_EQ(result, AttackResult::PREVENTED);
-	EXPECT_EQ(monster->get_hp(), 0) << "a refused swing still rolled damage";
-}
+		// Should hit with roll of exactly 14
+		EXPECT_LT(monster->get_hp(), hpBefore);
+	}
 
-TEST_F(AttackerTest, Attack_MonsterDeathAwardsXP)
-{
-	monster->set_hp(1);
-	monster->set_armor_class(20);
-	monster->set_dr(0);
+	TEST_F(AttackerTest, THAC0_RollBelowNeeded_Misses)
+	{
+		monster->set_armor_class(6);
 
-	game.dice.set_next_d20(20);
-	game.dice.set_next_roll(5);
+		game.dice.set_next_d20(13);
+		game.dice.set_next_roll(3);
 
-	int xpBefore = player->get_xp();
-	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
+		int hpBefore = monster->get_hp();
+		player->attacker->attack(*monster, AttackKind::MELEE, ctx);
 
-	// Monster was worth 50 XP
-	EXPECT_GT(player->get_xp(), xpBefore);
-}
+		// Should miss with roll of 13
+		EXPECT_EQ(monster->get_hp(), hpBefore);
+	}
 
-// ----------------------------------------------------------------------------
-// Backstab Tests
-// AD&D 2e: invisibility grants backstab - +4 to hit for all, x2+ damage for ROGUE only.
-// These tests cover the code path changed from dynamic_cast<Player*> to
-// get_creature_class() == CreatureClass::ROGUE.
-// ----------------------------------------------------------------------------
+	TEST_F(AttackerTest, THAC0_LowAC_EasierToHit)
+	{
+		// AC 0 means roll needed = 20 - 0 = 20
+		monster->set_armor_class(0);
 
-TEST_F(AttackerTest, Backstab_InvisibleRogue_GetsDamageMultiplier)
-{
-	// Arrange: level 1 ROGUE + invisible -> +4 hit, x2 damage multiplier
-	player->set_creature_class(CreatureClass::ROGUE);
-	player->add_state(ActorState::IS_INVISIBLE);
-	monster->set_armor_class(10);
-	monster->set_dr(0);
+		game.dice.set_next_d20(20);
+		game.dice.set_next_roll(5);
 
-	// THAC0=20, AC=10, backstab hitBonus=+4: rollNeeded = 20 - 10 - 4 = 6
-	// damageRoll=3, strength 10 (dmgAdj=0), multiplier=2: finalDamage = (3+0)*2 = 6
-	game.dice.set_next_d20(6);
-	game.dice.set_next_roll(3);
+		int hpBefore = monster->get_hp();
+		player->attacker->attack(*monster, AttackKind::MELEE, ctx);
 
-	const int hpBefore = monster->get_hp();
-	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
+		EXPECT_LT(monster->get_hp(), hpBefore);
+	}
 
-	EXPECT_EQ(monster->get_hp(), hpBefore - 6);
-}
+	TEST_F(AttackerTest, THAC0_HighAC_EasierToHit)
+	{
+		// AC 10 means roll needed = 20 - 10 = 10
+		monster->set_armor_class(10);
 
-TEST_F(AttackerTest, Backstab_InvisibleNonRogue_GetsHitBonusOnly)
-{
-	// Arrange: invisible FIGHTER - +4 to hit, multiplier stays at 1
-	// Default creatureClass is MONSTER, not ROGUE - no multiplier.
-	player->add_state(ActorState::IS_INVISIBLE);
-	monster->set_armor_class(10);
-	monster->set_dr(0);
+		game.dice.set_next_d20(10);
+		game.dice.set_next_roll(4);
 
-	// THAC0=20, AC=10: rollNeeded without backstab = 10
-	// With +4 backstab hitBonus: rollNeeded = 6
-	// Roll 6 -> would miss at 6 < 10 without the bonus, hits with it.
-	// damageRoll=3, multiplier=1: finalDamage = 3
-	game.dice.set_next_d20(6);
-	game.dice.set_next_roll(3);
+		int hpBefore = monster->get_hp();
+		player->attacker->attack(*monster, AttackKind::MELEE, ctx);
 
-	const int hpBefore = monster->get_hp();
-	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
+		EXPECT_LT(monster->get_hp(), hpBefore);
+	}
 
-	// Asserts both that the +4 hit bonus landed AND that no multiplier was applied
-	EXPECT_EQ(monster->get_hp(), hpBefore - 3);
-}
+	// -------------------------------------------------------------------------
+	// Damage Reduction Tests
+	// -------------------------------------------------------------------------
 
-// ----------------------------------------------------------------------------
-// Post-Load Functionality Test
-// Covers the Player::load path that installs PlayerAttacker, not MonsterAttacker.
-// ----------------------------------------------------------------------------
+	TEST_F(AttackerTest, DamageReduction_ReducesDamage)
+	{
+		monster->set_armor_class(20);
+		monster->set_dr(3);
 
-TEST_F(AttackerTest, PlayerAttacker_FunctionalAfterSaveLoad)
-{
-	// Arrange: save and reload the player
-	json j;
-	player->save(j);
+		game.dice.set_next_d20(20);
+		game.dice.set_next_roll(5);
 
-	auto loadedPlayer = std::make_unique<Player>(Vector2D{ 0, 0 });
-	loadedPlayer->load(j);
-	ctx.playerOwner = &loadedPlayer;
+		int hpBefore = monster->get_hp();
+		player->attacker->attack(*monster, AttackKind::MELEE, ctx);
 
-	// AC=20 -> rollNeeded = THAC0(20) - AC(20) = 0; any d20 roll hits
-	monster->set_armor_class(20);
-	monster->set_dr(0);
-	game.dice.set_next_d20(1);
-	game.dice.set_next_roll(4);
+		// 5 damage - 3 DR = 2 actual damage
+		EXPECT_EQ(monster->get_hp(), hpBefore - 2);
+	}
 
-	const int hpBefore = monster->get_hp();
-	loadedPlayer->attacker->attack(*monster, AttackKind::MELEE, ctx);
+	// "Regardless of subtractions, a successful attack roll can never cause
+	// less than 1 point of damage" - Player's Handbook, PDF page 29 of the 2e
+	// archive, and said again of monsters on page 211: "no successful attack
+	// can result in less than 1 point of damage".
+	TEST_F(AttackerTest, DamageReduction_StillLeavesOnePointOnAHit)
+	{
+		monster->set_armor_class(20);
+		monster->set_dr(10);
 
-	// PlayerAttacker is wired correctly post-load and deals damage
-	EXPECT_LT(monster->get_hp(), hpBefore);
-}
+		game.dice.set_next_d20(20);
+		game.dice.set_next_roll(5);
+
+		const int hpBefore = monster->get_hp();
+		player->attacker->attack(*monster, AttackKind::MELEE, ctx);
+
+		// Five rolled against ten of reduction, and the blow still tells.
+		EXPECT_EQ(monster->get_hp(), hpBefore - 1);
+	}
+
+	TEST_F(AttackerTest, AStrengthPenaltyStillLeavesOnePointOnAHit)
+	{
+		// Strength 3 subtracts one from damage (Table 1), and a roll of one
+		// would take the blow to nothing without the floor. Damage reduction
+		// plays no part here.
+		player->set_strength(3);
+		monster->set_armor_class(20);
+		monster->set_dr(0);
+
+		game.dice.set_next_d20(20);
+		game.dice.set_next_roll(1);
+
+		const int hpBefore = monster->get_hp();
+		player->attacker->attack(*monster, AttackKind::MELEE, ctx);
+
+		EXPECT_EQ(monster->get_hp(), hpBefore - 1);
+	}
+
+	TEST_F(AttackerTest, AMissStillCostsNothing)
+	{
+		// The floor belongs to a successful attack roll only: a miss must stay
+		// a miss, or "never less than 1" would quietly mean "always at least
+		// 1".
+		monster->set_armor_class(-10);
+		monster->set_dr(0);
+
+		game.dice.set_next_d20(1);
+		game.dice.set_next_roll(6);
+
+		const int hpBefore = monster->get_hp();
+		player->attacker->attack(*monster, AttackKind::MELEE, ctx);
+
+		EXPECT_EQ(monster->get_hp(), hpBefore);
+	}
+
+	// -------------------------------------------------------------------------
+	// Monster Attack Tests
+	// -------------------------------------------------------------------------
+
+	TEST_F(AttackerTest, MonsterAttack_UsesStoredWeaponName)
+	{
+		monster->set_natural_attack("sharp claws");
+		player->set_armor_class(10);
+
+		game.dice.set_next_d20(20);
+		game.dice.set_next_roll(4);
+
+		// Attack should complete without errors using stored weapon name
+		monster->attacker->attack(*player, AttackKind::MELEE, ctx);
+
+		EXPECT_TRUE(true);
+	}
+
+	TEST_F(AttackerTest, MonsterAttack_DealsCorrectDamage)
+	{
+		player->set_armor_class(20);
+		player->set_dr(0);
+
+		game.dice.set_next_d20(20);
+		game.dice.set_next_roll(6);
+
+		int hpBefore = player->get_hp();
+		monster->attacker->attack(*player, AttackKind::MELEE, ctx);
+
+		EXPECT_EQ(player->get_hp(), hpBefore - 6);
+	}
+
+	// -------------------------------------------------------------------------
+	// Combat Result Tests
+	// -------------------------------------------------------------------------
+
+	TEST_F(AttackerTest, Attack_CanKillTarget)
+	{
+		monster->set_hp(1);
+		monster->set_armor_class(20);
+		monster->set_dr(0);
+
+		game.dice.set_next_d20(20);
+		game.dice.set_next_roll(5);
+
+		ASSERT_FALSE(monster->is_dead());
+		player->attacker->attack(*monster, AttackKind::MELEE, ctx);
+
+		EXPECT_TRUE(monster->is_dead());
+	}
+
+	// Two creatures can swing at one victim in a round, so the second finds it
+	// already dead. That is a real outcome rather than a fault: the swing is
+	// refused, and nothing is rolled for it.
+	TEST_F(AttackerTest, AttackingAnAlreadyDeadTargetIsRefused)
+	{
+		monster->set_hp(0);
+		ASSERT_TRUE(monster->is_dead());
+
+		// A certain hit is queued behind the refusal, so a guard that never
+		// fired would land it and be visible here rather than passing as
+		// nothing happening.
+		game.dice.set_next_d20(20);
+		game.dice.set_next_roll(6);
+
+		const AttackResult result =
+			player->attacker->attack(*monster, AttackKind::MELEE, ctx);
+
+		EXPECT_EQ(result, AttackResult::PREVENTED);
+		EXPECT_EQ(monster->get_hp(), 0)
+			<< "a refused swing still rolled damage";
+	}
+
+	TEST_F(AttackerTest, Attack_MonsterDeathAwardsXP)
+	{
+		monster->set_hp(1);
+		monster->set_armor_class(20);
+		monster->set_dr(0);
+
+		game.dice.set_next_d20(20);
+		game.dice.set_next_roll(5);
+
+		int xpBefore = player->get_xp();
+		player->attacker->attack(*monster, AttackKind::MELEE, ctx);
+
+		// Monster was worth 50 XP
+		EXPECT_GT(player->get_xp(), xpBefore);
+	}
+
+	// -------------------------------------------------------------------------
+	// Backstab Tests AD&D 2e: invisibility grants backstab - +4 to hit for all,
+	// x2+ damage for ROGUE only. These tests cover the code path changed from
+	// dynamic_cast<Player*> to get_creature_class() == CreatureClass::ROGUE.
+	// -------------------------------------------------------------------------
+
+	TEST_F(AttackerTest, Backstab_InvisibleRogue_GetsDamageMultiplier)
+	{
+		// Arrange: level 1 ROGUE + invisible -> +4 hit, x2 damage multiplier
+		player->set_creature_class(CreatureClass::ROGUE);
+		player->add_state(ActorState::IS_INVISIBLE);
+		monster->set_armor_class(10);
+		monster->set_dr(0);
+
+		// THAC0=20, AC=10, backstab hitBonus=+4: rollNeeded = 20 - 10 - 4 = 6
+		// damageRoll=3, strength 10 (dmgAdj=0), multiplier=2: finalDamage =
+		// (3+0)*2 = 6
+		game.dice.set_next_d20(6);
+		game.dice.set_next_roll(3);
+
+		const int hpBefore = monster->get_hp();
+		player->attacker->attack(*monster, AttackKind::MELEE, ctx);
+
+		EXPECT_EQ(monster->get_hp(), hpBefore - 6);
+	}
+
+	TEST_F(AttackerTest, Backstab_InvisibleNonRogue_GetsHitBonusOnly)
+	{
+		// Arrange: invisible FIGHTER - +4 to hit, multiplier stays at 1
+		// Default creatureClass is MONSTER, not ROGUE - no multiplier.
+		player->add_state(ActorState::IS_INVISIBLE);
+		monster->set_armor_class(10);
+		monster->set_dr(0);
+
+		// THAC0=20, AC=10: rollNeeded without backstab = 10
+		// With +4 backstab hitBonus: rollNeeded = 6
+		// Roll 6 -> would miss at 6 < 10 without the bonus, hits with it.
+		// damageRoll=3, multiplier=1: finalDamage = 3
+		game.dice.set_next_d20(6);
+		game.dice.set_next_roll(3);
+
+		const int hpBefore = monster->get_hp();
+		player->attacker->attack(*monster, AttackKind::MELEE, ctx);
+
+		// Asserts both that the +4 hit bonus landed AND that no multiplier was
+		// applied
+		EXPECT_EQ(monster->get_hp(), hpBefore - 3);
+	}
+
+	// -------------------------------------------------------------------------
+	// Post-Load Functionality Test Covers the Player::load path that installs
+	// PlayerAttacker, not MonsterAttacker.
+	// -------------------------------------------------------------------------
+
+	TEST_F(AttackerTest, PlayerAttacker_FunctionalAfterSaveLoad)
+	{
+		// Arrange: save and reload the player
+		json j;
+		player->save(j);
+
+		auto loadedPlayer = std::make_unique<Player>(Vector2D{ 0, 0 });
+		loadedPlayer->load(j);
+		ctx.playerOwner = &loadedPlayer;
+
+		// AC=20 -> rollNeeded = THAC0(20) - AC(20) = 0; any d20 roll hits
+		monster->set_armor_class(20);
+		monster->set_dr(0);
+		game.dice.set_next_d20(1);
+		game.dice.set_next_roll(4);
+
+		const int hpBefore = monster->get_hp();
+		loadedPlayer->attacker->attack(*monster, AttackKind::MELEE, ctx);
+
+		// PlayerAttacker is wired correctly post-load and deals damage
+		EXPECT_LT(monster->get_hp(), hpBefore);
+	}
 
 } // namespace CppRL

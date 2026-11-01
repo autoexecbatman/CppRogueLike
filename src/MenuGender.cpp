@@ -15,59 +15,61 @@
 namespace CppRL
 {
 
-std::unique_ptr<BaseMenu> make_gender_menu(GameContext& ctx)
-{
-	std::vector<MenuEntry> entries;
-
-	auto maleCommand = [](GameContext& ctx)
+	std::unique_ptr<BaseMenu> make_gender_menu(GameContext& ctx)
 	{
-		assert(
-			ctx.playerBlueprint &&
-			"make_gender_menu maleCommand: called without a playerBlueprint");
+		std::vector<MenuEntry> entries;
 
-		ctx.playerBlueprint->gender = "Male";
-		ctx.menus->push_back(make_race_menu(ctx));
-	};
-	entries.push_back({ "Male", 'm', maleCommand });
+		auto maleCommand = [](GameContext& ctx)
+		{
+			assert(
+				ctx.playerBlueprint &&
+				"make_gender_menu maleCommand: called without a playerBlueprint");
 
-	auto femaleCommand = [](GameContext& ctx)
-	{
-		assert(
-			ctx.playerBlueprint &&
-			"make_gender_menu femaleCommand: called without a playerBlueprint");
+			ctx.playerBlueprint->gender = "Male";
+			ctx.menus->push_back(make_race_menu(ctx));
+		};
+		entries.push_back({ "Male", 'm', maleCommand });
 
-		ctx.playerBlueprint->gender = "Female";
-		ctx.menus->push_back(make_race_menu(ctx));
-	};
-	entries.push_back({ "Female", 'f', femaleCommand });
+		auto femaleCommand = [](GameContext& ctx)
+		{
+			assert(
+				ctx.playerBlueprint &&
+				"make_gender_menu femaleCommand: called without a playerBlueprint");
 
-	auto randomCommand = [](GameContext& ctx)
-	{
-		assert(
-			ctx.playerBlueprint &&
-			"make_gender_menu randomCommand: called without a playerBlueprint");
-		assert(
-			ctx.dice && "make_gender_menu randomCommand: called without dice");
+			ctx.playerBlueprint->gender = "Female";
+			ctx.menus->push_back(make_race_menu(ctx));
+		};
+		entries.push_back({ "Female", 'f', femaleCommand });
 
-		ctx.playerBlueprint->gender = ctx.dice->d2() == 1 ? "Male" : "Female";
-		ctx.menus->push_back(make_race_menu(ctx));
-	};
-	entries.push_back({ "Random", 'r', randomCommand });
+		auto randomCommand = [](GameContext& ctx)
+		{
+			assert(
+				ctx.playerBlueprint &&
+				"make_gender_menu randomCommand: called without a playerBlueprint");
+			assert(
+				ctx.dice &&
+				"make_gender_menu randomCommand: called without dice");
 
-	auto backCommand = [](GameContext& ctx)
-	{
-		ctx.menus->back()->back = true;
-	};
-	entries.push_back({ "Back", 'b', backCommand });
+			ctx.playerBlueprint->gender =
+				ctx.dice->d2() == 1 ? "Male" : "Female";
+			ctx.menus->push_back(make_race_menu(ctx));
+		};
+		entries.push_back({ "Random", 'r', randomCommand });
 
-	return std::make_unique<ListMenu>(
-		"SELECT GENDER",
-		std::move(entries),
-		std::function<void(GameContext&)>{},
-		std::function<void(GameContext&)>{},
-		ctx);
-}
+		auto backCommand = [](GameContext& ctx)
+		{
+			ctx.menus->back()->back = true;
+		};
+		entries.push_back({ "Back", 'b', backCommand });
 
-// end of file: MenuGender.cpp
+		return std::make_unique<ListMenu>(
+			"SELECT GENDER",
+			std::move(entries),
+			std::function<void(GameContext&)>{},
+			std::function<void(GameContext&)>{},
+			ctx);
+	}
+
+	// end of file: MenuGender.cpp
 
 } // namespace CppRL

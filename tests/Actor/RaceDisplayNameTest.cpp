@@ -28,45 +28,48 @@
 namespace CppRL
 {
 
-// Two races sharing a name would show the player two choices they cannot tell apart.
-TEST(RaceDisplayNameTest, NoTwoRacesShareAName)
-{
-	std::set<std::string> seen;
-	for (const PlayerRaceState race : ALL_PLAYER_RACE)
+	// Two races sharing a name would show the player two choices they cannot
+	// tell apart.
+	TEST(RaceDisplayNameTest, NoTwoRacesShareAName)
 	{
-		const std::string name{ race_display_name(race) };
-		EXPECT_TRUE(seen.insert(name).second)
-			<< "'" << name << "' names more than one race";
+		std::set<std::string> seen;
+		for (const PlayerRaceState race : ALL_PLAYER_RACE)
+		{
+			const std::string name{ race_display_name(race) };
+			EXPECT_TRUE(seen.insert(name).second)
+				<< "'" << name << "' names more than one race";
+		}
 	}
-}
 
-// A race is never nameless: the menu would offer an empty line.
-TEST(RaceDisplayNameTest, NoRaceIsNameless)
-{
-	for (const PlayerRaceState race : ALL_PLAYER_RACE)
+	// A race is never nameless: the menu would offer an empty line.
+	TEST(RaceDisplayNameTest, NoRaceIsNameless)
 	{
-		EXPECT_FALSE(race_display_name(race).empty())
-			<< "a race the menu offers has no name to offer";
+		for (const PlayerRaceState race : ALL_PLAYER_RACE)
+		{
+			EXPECT_FALSE(race_display_name(race).empty())
+				<< "a race the menu offers has no name to offer";
+		}
 	}
-}
 
-// The state before a race is chosen is not a race, and it prints as what it is.
-TEST(RaceDisplayNameTest, TheUnchosenStateNamesItself)
-{
-	EXPECT_EQ(race_display_name(PlayerRaceState::NONE), "None");
-}
-
-// The choices list is what the menu offers and what a random roll picks from, so the
-// unchosen state must not be on it. This is the case a dropped entry fails: the list
-// is a fixed-size array, so an initializer left out value-initialises its tail to
-// NONE, and the name checks above cannot see that because NONE has a name of its own.
-TEST(RaceDisplayNameTest, TheUnchosenStateIsNotOneOfTheChoices)
-{
-	for (const PlayerRaceState race : ALL_PLAYER_RACE)
+	// The state before a race is chosen is not a race, and it prints as what it
+	// is.
+	TEST(RaceDisplayNameTest, TheUnchosenStateNamesItself)
 	{
-		EXPECT_NE(race, PlayerRaceState::NONE)
-			<< "the race menu offers the unchosen state as though it were a race";
+		EXPECT_EQ(race_display_name(PlayerRaceState::NONE), "None");
 	}
-}
+
+	// The choices list is what the menu offers and what a random roll picks
+	// from, so the unchosen state must not be on it. This is the case a dropped
+	// entry fails: the list is a fixed-size array, so an initializer left out
+	// value-initialises its tail to NONE, and the name checks above cannot see
+	// that because NONE has a name of its own.
+	TEST(RaceDisplayNameTest, TheUnchosenStateIsNotOneOfTheChoices)
+	{
+		for (const PlayerRaceState race : ALL_PLAYER_RACE)
+		{
+			EXPECT_NE(race, PlayerRaceState::NONE)
+				<< "the race menu offers the unchosen state as though it were a race";
+		}
+	}
 
 } // namespace CppRL

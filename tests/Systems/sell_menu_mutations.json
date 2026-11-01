@@ -27,14 +27,14 @@
     },
     {
       "file": "src/MenuSell.cpp",
-      "original": "\tif (shopkeeper.shop->process_player_sale(ctx, *item, seller, shopkeeper)",
-      "mutated": "\tif (false",
+      "original": "\t\tif (shopkeeper.shop\n\t\t\t\t->process_player_sale(ctx, *item, seller, shopkeeper)",
+      "mutated": "\t\tif (false",
       "catches": "the menu never asking the shop to make the sale"
     },
     {
       "file": "src/MenuSell.cpp",
-      "original": "\tmenu_key_listen();\n\tdraw();\n\ton_key(ctx);",
-      "mutated": "\tmenu_key_listen();\n\tdraw();",
+      "original": "\t\tmenu_key_listen();\n\t\tdraw();\n\t\ton_key(ctx);",
+      "mutated": "\t\tmenu_key_listen();\n\t\tdraw();",
       "catches": "a frame that reads its key and never acts on it"
     }
   ]

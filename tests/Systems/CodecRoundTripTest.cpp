@@ -54,549 +54,574 @@
 namespace CppRL
 {
 
-namespace
-{
-	// Encodes to a string and parses it back; the value must survive the trip.
-	template <typename EnumType, typename Encode, typename Parse>
-	void expect_round_trip(
-		EnumType value,
-		Encode encode,
-		Parse parse,
-		const char* label)
+	namespace
 	{
-		const std::string_view encoded = encode(value);
-
-		EXPECT_NE(encoded, "") << label << ": encoded to an empty string";
-		EXPECT_EQ(parse(encoded), value)
-			<< label << ": '" << encoded << "' did not parse back";
-	}
-} // namespace
-
-TEST(CodecRoundTripTest, TargetModeSurvivesEncoding)
-{
-	constexpr auto& modes = ALL_TARGET_MODE;
-
-	for (const auto mode : modes)
-	{
-		expect_round_trip(
-			mode,
-			encode_target_mode,
-			parse_target_mode,
-			"TargetMode");
-	}
-}
-
-TEST(CodecRoundTripTest, ScrollAnimationSurvivesEncoding)
-{
-	constexpr auto& animations = ALL_SCROLL_ANIMATION;
-
-	for (const auto animation : animations)
-	{
-		expect_round_trip(
-			animation,
-			encode_scroll_animation,
-			parse_scroll_animation,
-			"ScrollAnimation");
-	}
-}
-
-TEST(CodecRoundTripTest, HandRequirementSurvivesEncoding)
-{
-	constexpr auto& requirements = ALL_HAND_REQUIREMENT;
-
-	for (const auto requirement : requirements)
-	{
-		expect_round_trip(
-			requirement,
-			encode_hand_requirement,
-			parse_hand_requirement,
-			"HandRequirement");
-	}
-}
-
-TEST(CodecRoundTripTest, WeaponSizeSurvivesEncoding)
-{
-	constexpr auto& sizes = ALL_WEAPON_SIZE;
-
-	for (const auto size : sizes)
-	{
-		expect_round_trip(
-			size,
-			encode_weapon_size,
-			parse_weapon_size,
-			"WeaponSize");
-	}
-}
-
-TEST(CodecRoundTripTest, CreatureSizeSurvivesEncoding)
-{
-	for (const auto size : ALL_CREATURE_SIZE)
-	{
-		expect_round_trip(
-			size,
-			encode_creature_size,
-			parse_creature_size,
-			"CreatureSize");
-	}
-}
-
-TEST(CodecRoundTripTest, IntelligenceRatingSurvivesEncoding)
-{
-	for (const auto rating : ALL_INTELLIGENCE_RATING)
-	{
-		expect_round_trip(
-			rating,
-			encode_intelligence_rating,
-			parse_intelligence_rating,
-			"IntelligenceRating");
-	}
-}
-
-TEST(CodecRoundTripTest, BuffTypeSurvivesEncoding)
-{
-	constexpr auto& buffs = ALL_BUFF_TYPE;
-
-	for (const auto buff : buffs)
-	{
-		expect_round_trip(buff, encode_buff_type, parse_buff_type, "BuffType");
-	}
-}
-
-TEST(CodecRoundTripTest, ItemClassSurvivesEncoding)
-{
-	constexpr auto& values = ALL_ITEM_CLASS;
-
-	for (const auto value : values)
-	{
-		expect_round_trip(
-			value,
-			encode_item_class,
-			parse_item_class,
-			"ItemClass");
-	}
-}
-
-TEST(CodecRoundTripTest, PickableTypeSurvivesEncoding)
-{
-	constexpr auto& values = ALL_PICKABLE_TYPE;
-
-	for (const auto value : values)
-	{
-		expect_round_trip(
-			value,
-			encode_pickable_type,
-			parse_pickable_type,
-			"PickableType");
-	}
-}
-
-// The names items.json and saves carry, in PickableType order. They are the
-// file format, so they are written out here rather than read from the table.
-constexpr std::array<std::string_view, 17> PICKABLE_TYPE_KEYS = {
-	"targeted_scroll",
-	"teleporter",
-	"weapon",
-	"shield",
-	"consumable",
-	"gold_coin",
-	"food",
-	"corpse_food",
-	"armor",
-	"magical_helm",
-	"magical_ring",
-	"jewelry_amulet",
-	"gauntlets",
-	"girdle",
-	"quest_item",
-	"identify_scroll",
-	"dungeon_key",
-};
-
-TEST(CodecRoundTripTest, EveryPickableTypeIsWrittenAsItsRecordName)
-{
-	ASSERT_EQ(ALL_PICKABLE_TYPE.size(), PICKABLE_TYPE_KEYS.size());
-	for (std::size_t row = 0; row < PICKABLE_TYPE_KEYS.size(); ++row)
-	{
-		EXPECT_EQ(
-			encode_pickable_type(ALL_PICKABLE_TYPE[row]),
-			PICKABLE_TYPE_KEYS[row])
-			<< "row " << row;
-	}
-}
-
-// Every type an item record names has a row, and the only row no record uses
-// is the corpse, which Creature::die makes rather than items.json.
-TEST(CodecRoundTripTest, TheShippedItemsNameOnlyKnownPickableTypes)
-{
-	std::ifstream file(Paths::resolve(Paths::ITEMS));
-	ASSERT_TRUE(file.is_open()) << "items.json did not open";
-	nlohmann::json items;
-	file >> items;
-
-	std::set<std::string> named{};
-	for (const auto& [key, record] : items.items())
-	{
-		const std::string type = record.at("pickableType").get<std::string>();
-		EXPECT_NO_THROW((void)parse_pickable_type(type)) << key;
-		named.insert(type);
-	}
-	std::set<std::string> unnamed{};
-	for (const std::string_view key : PICKABLE_TYPE_KEYS)
-	{
-		if (!named.contains(std::string{ key }))
+		// Encodes to a string and parses it back; the value must survive the
+		// trip.
+		template <typename EnumType, typename Encode, typename Parse>
+		void expect_round_trip(
+			EnumType value,
+			Encode encode,
+			Parse parse,
+			const char* label)
 		{
-			unnamed.insert(std::string{ key });
+			const std::string_view encoded = encode(value);
+
+			EXPECT_NE(encoded, "") << label << ": encoded to an empty string";
+			EXPECT_EQ(parse(encoded), value)
+				<< label << ": '" << encoded << "' did not parse back";
+		}
+	} // namespace
+
+	TEST(CodecRoundTripTest, TargetModeSurvivesEncoding)
+	{
+		constexpr auto& modes = ALL_TARGET_MODE;
+
+		for (const auto mode : modes)
+		{
+			expect_round_trip(
+				mode,
+				encode_target_mode,
+				parse_target_mode,
+				"TargetMode");
 		}
 	}
-	EXPECT_EQ(unnamed, std::set<std::string>{ "corpse_food" });
-}
 
-// The name each ItemBehavior alternative is saved under, in the variant's
-// order.
-constexpr std::array<std::string_view, 17> SAVED_NAME_BY_ALTERNATIVE = {
-	"consumable",
-	"weapon",
-	"shield",
-	"targeted_scroll",
-	"teleporter",
-	"identify_scroll",
-	"gold_coin",
-	"food",
-	"corpse_food",
-	"armor",
-	"magical_helm",
-	"magical_ring",
-	"jewelry_amulet",
-	"gauntlets",
-	"girdle",
-	"quest_item",
-	"dungeon_key",
-};
-
-// One default behaviour of every alternative, in the variant's order.
-template <std::size_t... Index>
-std::vector<ItemBehavior> one_of_each_alternative(std::index_sequence<Index...>)
-{
-	return { ItemBehavior{ std::in_place_index<Index> }... };
-}
-
-// Every alternative knows its type, is saved under that type's name and loads
-// back as the same alternative.
-TEST(CodecRoundTripTest, EveryBehaviourIsSavedUnderItsOwnType)
-{
-	constexpr std::size_t count = std::variant_size_v<ItemBehavior>;
-	ASSERT_EQ(count, SAVED_NAME_BY_ALTERNATIVE.size());
-	const std::vector<ItemBehavior> behaviors =
-		one_of_each_alternative(std::make_index_sequence<count>{});
-	for (const ItemBehavior& behavior : behaviors)
+	TEST(CodecRoundTripTest, ScrollAnimationSurvivesEncoding)
 	{
-		const std::string_view expected =
-			SAVED_NAME_BY_ALTERNATIVE[behavior.index()];
-		EXPECT_EQ(pickable_type_of(behavior), parse_pickable_type(expected))
-			<< expected;
+		constexpr auto& animations = ALL_SCROLL_ANIMATION;
 
-		nlohmann::json saved;
-		save_behavior(behavior, saved);
-		EXPECT_EQ(saved.at("type").get<std::string>(), expected);
-		EXPECT_EQ(load_behavior(saved).index(), behavior.index()) << expected;
+		for (const auto animation : animations)
+		{
+			expect_round_trip(
+				animation,
+				encode_scroll_animation,
+				parse_scroll_animation,
+				"ScrollAnimation");
+		}
 	}
-}
 
-TEST(CodecRoundTripTest, MagicalEffectSurvivesEncoding)
-{
-	constexpr auto& values = ALL_MAGICAL_EFFECT;
-
-	for (const auto value : values)
+	TEST(CodecRoundTripTest, HandRequirementSurvivesEncoding)
 	{
-		expect_round_trip(
-			value,
-			encode_magical_effect,
-			parse_magical_effect,
-			"MagicalEffect");
+		constexpr auto& requirements = ALL_HAND_REQUIREMENT;
+
+		for (const auto requirement : requirements)
+		{
+			expect_round_trip(
+				requirement,
+				encode_hand_requirement,
+				parse_hand_requirement,
+				"HandRequirement");
+		}
 	}
-}
 
-TEST(CodecRoundTripTest, HelmCommandSurvivesEncoding)
-{
-	constexpr auto& values = ALL_HELM_COMMAND;
-
-	for (const auto value : values)
+	TEST(CodecRoundTripTest, WeaponSizeSurvivesEncoding)
 	{
-		expect_round_trip(
-			value,
-			encode_helm_command,
-			parse_helm_command,
-			"HelmCommand");
+		constexpr auto& sizes = ALL_WEAPON_SIZE;
+
+		for (const auto size : sizes)
+		{
+			expect_round_trip(
+				size,
+				encode_weapon_size,
+				parse_weapon_size,
+				"WeaponSize");
+		}
 	}
-}
 
-// A string no encoder produces must be refused rather than silently defaulted.
-TEST(CodecRoundTripTest, ConsumableEffectSurvivesEncoding)
-{
-	constexpr auto& effects = ALL_CONSUMABLE_EFFECT;
-
-	for (const auto effect : effects)
+	TEST(CodecRoundTripTest, CreatureSizeSurvivesEncoding)
 	{
-		expect_round_trip(
-			effect,
-			encode_consumable_effect,
-			parse_consumable_effect,
-			"ConsumableEffect");
+		for (const auto size : ALL_CREATURE_SIZE)
+		{
+			expect_round_trip(
+				size,
+				encode_creature_size,
+				parse_creature_size,
+				"CreatureSize");
+		}
 	}
-}
 
-// Which Ai a saved creature carries: a name in the save, so what it means does not
-// depend on the order of an enum nobody reads when editing it.
-TEST(CodecRoundTripTest, AiTypeSurvivesEncoding)
-{
-	constexpr std::array kinds = {
-		AiType::MONSTER,
-		AiType::RANGED_MONSTER,
-		AiType::CONFUSED_MONSTER,
-		AiType::SHOPKEEPER,
-		AiType::MIMIC,
-		AiType::SPIDER,
-		AiType::WEB_SPINNER,
-		AiType::GIANT_SPIDER,
+	TEST(CodecRoundTripTest, IntelligenceRatingSurvivesEncoding)
+	{
+		for (const auto rating : ALL_INTELLIGENCE_RATING)
+		{
+			expect_round_trip(
+				rating,
+				encode_intelligence_rating,
+				parse_intelligence_rating,
+				"IntelligenceRating");
+		}
+	}
+
+	TEST(CodecRoundTripTest, BuffTypeSurvivesEncoding)
+	{
+		constexpr auto& buffs = ALL_BUFF_TYPE;
+
+		for (const auto buff : buffs)
+		{
+			expect_round_trip(
+				buff,
+				encode_buff_type,
+				parse_buff_type,
+				"BuffType");
+		}
+	}
+
+	TEST(CodecRoundTripTest, ItemClassSurvivesEncoding)
+	{
+		constexpr auto& values = ALL_ITEM_CLASS;
+
+		for (const auto value : values)
+		{
+			expect_round_trip(
+				value,
+				encode_item_class,
+				parse_item_class,
+				"ItemClass");
+		}
+	}
+
+	TEST(CodecRoundTripTest, PickableTypeSurvivesEncoding)
+	{
+		constexpr auto& values = ALL_PICKABLE_TYPE;
+
+		for (const auto value : values)
+		{
+			expect_round_trip(
+				value,
+				encode_pickable_type,
+				parse_pickable_type,
+				"PickableType");
+		}
+	}
+
+	// The names items.json and saves carry, in PickableType order. They are the
+	// file format, so they are written out here rather than read from the
+	// table.
+	constexpr std::array<std::string_view, 17> PICKABLE_TYPE_KEYS = {
+		"targeted_scroll",
+		"teleporter",
+		"weapon",
+		"shield",
+		"consumable",
+		"gold_coin",
+		"food",
+		"corpse_food",
+		"armor",
+		"magical_helm",
+		"magical_ring",
+		"jewelry_amulet",
+		"gauntlets",
+		"girdle",
+		"quest_item",
+		"identify_scroll",
+		"dungeon_key",
 	};
 
-	for (const auto kind : kinds)
+	TEST(CodecRoundTripTest, EveryPickableTypeIsWrittenAsItsRecordName)
 	{
-		expect_round_trip(kind, encode_ai_type, parse_ai_type, "AiType");
-	}
-}
-
-// How a monster's record says it feels about the player.
-TEST(CodecRoundTripTest, AttitudeSurvivesEncoding)
-{
-	for (const auto attitude : ALL_ATTITUDE)
-	{
-		expect_round_trip(
-			attitude,
-			encode_attitude,
-			parse_attitude,
-			"Attitude");
-	}
-}
-
-// A record names its Ai from these, and the one that wraps another is not among them.
-TEST(CodecRoundTripTest, OnlyAConfusedAiIsNotAuthorable)
-{
-	EXPECT_FALSE(is_authorable_ai_type(AiType::CONFUSED_MONSTER));
-	for (const auto kind : AUTHORABLE_AI_TYPES)
-	{
-		EXPECT_TRUE(is_authorable_ai_type(kind)) << encode_ai_type(kind);
-		EXPECT_NE(kind, AiType::CONFUSED_MONSTER);
-	}
-	EXPECT_EQ(AUTHORABLE_AI_TYPES.size(), 7u)
-		<< "every AiType but CONFUSED_MONSTER";
-}
-
-// Where a creature stands on the law/chaos axis, and on the good/evil one. Two axes
-// rather than nine labels, so each one round-trips on its own.
-TEST(CodecRoundTripTest, AlignmentSurvivesEncoding)
-{
-	constexpr std::array ethics = {
-		Alignment::Ethics::LAWFUL,
-		Alignment::Ethics::NEUTRAL,
-		Alignment::Ethics::CHAOTIC,
-	};
-	for (const auto axis : ethics)
-	{
-		expect_round_trip(
-			axis,
-			Alignment::encode_ethics,
-			Alignment::parse_ethics,
-			"Ethics");
+		ASSERT_EQ(ALL_PICKABLE_TYPE.size(), PICKABLE_TYPE_KEYS.size());
+		for (std::size_t row = 0; row < PICKABLE_TYPE_KEYS.size(); ++row)
+		{
+			EXPECT_EQ(
+				encode_pickable_type(ALL_PICKABLE_TYPE[row]),
+				PICKABLE_TYPE_KEYS[row])
+				<< "row " << row;
+		}
 	}
 
-	constexpr std::array moralities = {
-		Alignment::Morality::GOOD,
-		Alignment::Morality::NEUTRAL,
-		Alignment::Morality::EVIL,
-	};
-	for (const auto axis : moralities)
+	// Every type an item record names has a row, and the only row no record
+	// uses is the corpse, which Creature::die makes rather than items.json.
+	TEST(CodecRoundTripTest, TheShippedItemsNameOnlyKnownPickableTypes)
 	{
-		expect_round_trip(
-			axis,
-			Alignment::encode_morality,
-			Alignment::parse_morality,
-			"Morality");
-	}
-}
+		std::ifstream file(Paths::resolve(Paths::ITEMS));
+		ASSERT_TRUE(file.is_open()) << "items.json did not open";
+		nlohmann::json items;
+		file >> items;
 
-// Which class a saved creature belongs to, MONSTER included - it is what everything that
-// is not a player character carries, so a save that loses it loses the most common value.
-TEST(CodecRoundTripTest, CreatureClassSurvivesEncoding)
-{
-	constexpr std::array classes = {
-		CreatureClass::FIGHTER,
-		CreatureClass::ROGUE,
-		CreatureClass::CLERIC,
-		CreatureClass::WIZARD,
-		CreatureClass::MONSTER,
+		std::set<std::string> named{};
+		for (const auto& [key, record] : items.items())
+		{
+			const std::string type =
+				record.at("pickableType").get<std::string>();
+			EXPECT_NO_THROW((void)parse_pickable_type(type)) << key;
+			named.insert(type);
+		}
+		std::set<std::string> unnamed{};
+		for (const std::string_view key : PICKABLE_TYPE_KEYS)
+		{
+			if (!named.contains(std::string{ key }))
+			{
+				unnamed.insert(std::string{ key });
+			}
+		}
+		EXPECT_EQ(unnamed, std::set<std::string>{ "corpse_food" });
+	}
+
+	// The name each ItemBehavior alternative is saved under, in the variant's
+	// order.
+	constexpr std::array<std::string_view, 17> SAVED_NAME_BY_ALTERNATIVE = {
+		"consumable",
+		"weapon",
+		"shield",
+		"targeted_scroll",
+		"teleporter",
+		"identify_scroll",
+		"gold_coin",
+		"food",
+		"corpse_food",
+		"armor",
+		"magical_helm",
+		"magical_ring",
+		"jewelry_amulet",
+		"gauntlets",
+		"girdle",
+		"quest_item",
+		"dungeon_key",
 	};
 
-	for (const auto creatureClass : classes)
+	// One default behaviour of every alternative, in the variant's order.
+	template <std::size_t... Index>
+	std::vector<ItemBehavior> one_of_each_alternative(
+		std::index_sequence<Index...>)
 	{
-		expect_round_trip(
-			creatureClass,
-			encode_creature_class,
-			parse_creature_class,
-			"CreatureClass");
+		return { ItemBehavior{ std::in_place_index<Index> }... };
 	}
-}
 
-// What an attacker's damage is, in a save and on the screen alike: damage_type_name is
-// the only table, so this round trip also pins the label the resolver's log prints.
-TEST(CodecRoundTripTest, DamageTypeSurvivesEncoding)
-{
-	constexpr std::array types = {
-		DamageType::PHYSICAL,
-		DamageType::FIRE,
-		DamageType::COLD,
-		DamageType::LIGHTNING,
-		DamageType::POISON,
-		DamageType::ACID,
-		DamageType::MAGIC,
-	};
-
-	for (const auto type : types)
+	// Every alternative knows its type, is saved under that type's name and
+	// loads back as the same alternative.
+	TEST(CodecRoundTripTest, EveryBehaviourIsSavedUnderItsOwnType)
 	{
-		expect_round_trip(
-			type,
-			damage_type_name,
-			parse_damage_type,
-			"DamageType");
-	}
-}
+		constexpr std::size_t count = std::variant_size_v<ItemBehavior>;
+		ASSERT_EQ(count, SAVED_NAME_BY_ALTERNATIVE.size());
+		const std::vector<ItemBehavior> behaviors =
+			one_of_each_alternative(std::make_index_sequence<count>{});
+		for (const ItemBehavior& behavior : behaviors)
+		{
+			const std::string_view expected =
+				SAVED_NAME_BY_ALTERNATIVE[behavior.index()];
+			EXPECT_EQ(pickable_type_of(behavior), parse_pickable_type(expected))
+				<< expected;
 
-// Every colour pair a record can carry.
-TEST(CodecRoundTripTest, ColorPairSurvivesEncoding)
-{
-	for (const ColorPairId pair : ALL_COLOR_PAIR)
+			nlohmann::json saved;
+			save_behavior(behavior, saved);
+			EXPECT_EQ(saved.at("type").get<std::string>(), expected);
+			EXPECT_EQ(load_behavior(saved).index(), behavior.index())
+				<< expected;
+		}
+	}
+
+	TEST(CodecRoundTripTest, MagicalEffectSurvivesEncoding)
 	{
-		expect_round_trip(
-			pair,
-			color_pair_name,
-			parse_color_pair,
-			"ColorPairId");
+		constexpr auto& values = ALL_MAGICAL_EFFECT;
+
+		for (const auto value : values)
+		{
+			expect_round_trip(
+				value,
+				encode_magical_effect,
+				parse_magical_effect,
+				"MagicalEffect");
+		}
 	}
-}
 
-// The parser is the only schema this data has.
-TEST(CodecRoundTripTest, UnknownStringsThrow)
-{
-	EXPECT_THROW((void)parse_color_pair("puce"), std::runtime_error);
-	EXPECT_THROW((void)parse_damage_type("sonic"), std::runtime_error);
-	EXPECT_THROW(
-		(void)Alignment::parse_ethics("scrupulous"),
-		std::runtime_error);
-	EXPECT_THROW(
-		(void)Alignment::parse_morality("saintly"),
-		std::runtime_error);
-	EXPECT_THROW((void)parse_creature_class("bard"), std::runtime_error);
-	EXPECT_THROW((void)parse_target_mode("not_a_mode"), std::runtime_error);
-	EXPECT_THROW(
-		(void)parse_scroll_animation("not_an_animation"),
-		std::runtime_error);
-	EXPECT_THROW(
-		(void)parse_hand_requirement("not_a_requirement"),
-		std::runtime_error);
-	EXPECT_THROW((void)parse_weapon_size("not_a_size"), std::runtime_error);
-	EXPECT_THROW((void)parse_creature_size("enormous"), std::runtime_error);
-	EXPECT_THROW(
-		(void)parse_intelligence_rating("brilliant"),
-		std::runtime_error);
-	EXPECT_THROW((void)parse_buff_type("not_a_buff"), std::runtime_error);
-	EXPECT_THROW((void)parse_helm_command("awake"), std::runtime_error);
-	EXPECT_THROW((void)parse_item_class("not_a_class"), std::runtime_error);
-	EXPECT_THROW((void)parse_pickable_type("not_a_type"), std::runtime_error);
-	EXPECT_THROW(
-		(void)parse_magical_effect("not_an_effect"),
-		std::runtime_error);
-	EXPECT_THROW((void)parse_ai_type("not_an_ai"), std::runtime_error);
-	EXPECT_THROW((void)parse_attitude("grumpy"), std::runtime_error);
-	EXPECT_THROW(
-		(void)parse_consumable_effect("not_an_effect"),
-		std::runtime_error);
-}
-
-// Added 2026-10-01, after docs/pair_symmetry.py reported equipment_slot as the one
-// encode/parse pair in src/ that no test reached. parse_equipment and encode_equipment
-// cannot be reached: they sit in MonsterRegistry.cpp's anonymous namespace.
-TEST(CodecRoundTripTest, EveryEquipmentSlotRoundTrips)
-{
-	for (int index = 0; index <= static_cast<int>(EquipmentSlot::NONE); ++index)
+	TEST(CodecRoundTripTest, HelmCommandSurvivesEncoding)
 	{
-		const EquipmentSlot slot = static_cast<EquipmentSlot>(index);
+		constexpr auto& values = ALL_HELM_COMMAND;
 
-		EXPECT_EQ(parse_equipment_slot(encode_equipment_slot(slot)), slot)
-			<< "slot " << index
-			<< " did not survive a round trip through its JSON spelling";
+		for (const auto value : values)
+		{
+			expect_round_trip(
+				value,
+				encode_helm_command,
+				parse_helm_command,
+				"HelmCommand");
+		}
 	}
-}
 
-// The property the round trip above cannot see. parse_equipment_slot is implemented
-// by scanning for the slot whose encoding matches, so two slots sharing a spelling
-// would make the second parse back as the first - every creature wearing it would
-// load with the item in the wrong place, and the round trip would still pass for the
-// first of the two.
-TEST(CodecRoundTripTest, NoTwoEquipmentSlotsShareASpelling)
-{
-	std::vector<std::string_view> spellings;
-	for (int index = 0; index <= static_cast<int>(EquipmentSlot::NONE); ++index)
+	// A string no encoder produces must be refused rather than silently
+	// defaulted.
+	TEST(CodecRoundTripTest, ConsumableEffectSurvivesEncoding)
 	{
-		spellings.push_back(
-			encode_equipment_slot(static_cast<EquipmentSlot>(index)));
+		constexpr auto& effects = ALL_CONSUMABLE_EFFECT;
+
+		for (const auto effect : effects)
+		{
+			expect_round_trip(
+				effect,
+				encode_consumable_effect,
+				parse_consumable_effect,
+				"ConsumableEffect");
+		}
 	}
-	const size_t written = spellings.size();
 
-	std::ranges::sort(spellings);
-	const auto duplicates = std::ranges::unique(spellings);
-	spellings.erase(duplicates.begin(), duplicates.end());
-
-	EXPECT_EQ(spellings.size(), written)
-		<< "two equipment slots encode to the same string";
-}
-
-// Every item sprite in the shipped content file survives a save and a load through the
-// tile codec: same keys, same sheet, column and row.
-TEST(CodecRoundTripTest, EveryItemSpriteSurvivesASaveAndALoad)
-{
-	const std::filesystem::path scratch =
-		std::filesystem::temp_directory_path() /
-		"codec_round_trip_item_tiles.json";
-	ContentRegistry shipped{};
-	ContentRegistryIO::load(shipped, Paths::CONTENT_TILES);
-	ASSERT_FALSE(shipped.all_tiles().empty());
-
-	ContentRegistryIO::save(shipped, scratch.string());
-	ContentRegistry reloaded{};
-	ContentRegistryIO::load(reloaded, scratch.string());
-	std::filesystem::remove(scratch);
-
-	EXPECT_EQ(reloaded.all_tiles(), shipped.all_tiles());
-
-	// Both sides went through one reader, so they are also checked against the file's own records.
-	std::ifstream shippedFile(Paths::resolve(Paths::CONTENT_TILES));
-	const nlohmann::json records =
-		nlohmann::json::parse(shippedFile).at("items");
-	ASSERT_EQ(records.size(), shipped.all_tiles().size());
-	for (const auto& [key, record] : records.items())
+	// Which Ai a saved creature carries: a name in the save, so what it means
+	// does not depend on the order of an enum nobody reads when editing it.
+	TEST(CodecRoundTripTest, AiTypeSurvivesEncoding)
 	{
-		const TileRef tile = shipped.get_tile(key);
-		EXPECT_EQ(static_cast<int>(tile.sheet), record.at("sheet").get<int>())
-			<< key;
-		EXPECT_EQ(tile.col, record.at("col").get<int>()) << key;
-		EXPECT_EQ(tile.row, record.at("row").get<int>()) << key;
-	}
-}
+		constexpr std::array kinds = {
+			AiType::MONSTER,
+			AiType::RANGED_MONSTER,
+			AiType::CONFUSED_MONSTER,
+			AiType::SHOPKEEPER,
+			AiType::MIMIC,
+			AiType::SPIDER,
+			AiType::WEB_SPINNER,
+			AiType::GIANT_SPIDER,
+		};
 
-// A misspelled slot in a data file fails at load rather than going nowhere.
-TEST(CodecRoundTripTest, AnUnknownEquipmentSlotThrows)
-{
-	EXPECT_THROW((void)parse_equipment_slot("third_hand"), std::runtime_error);
-}
+		for (const auto kind : kinds)
+		{
+			expect_round_trip(kind, encode_ai_type, parse_ai_type, "AiType");
+		}
+	}
+
+	// How a monster's record says it feels about the player.
+	TEST(CodecRoundTripTest, AttitudeSurvivesEncoding)
+	{
+		for (const auto attitude : ALL_ATTITUDE)
+		{
+			expect_round_trip(
+				attitude,
+				encode_attitude,
+				parse_attitude,
+				"Attitude");
+		}
+	}
+
+	// A record names its Ai from these, and the one that wraps another is not
+	// among them.
+	TEST(CodecRoundTripTest, OnlyAConfusedAiIsNotAuthorable)
+	{
+		EXPECT_FALSE(is_authorable_ai_type(AiType::CONFUSED_MONSTER));
+		for (const auto kind : AUTHORABLE_AI_TYPES)
+		{
+			EXPECT_TRUE(is_authorable_ai_type(kind)) << encode_ai_type(kind);
+			EXPECT_NE(kind, AiType::CONFUSED_MONSTER);
+		}
+		EXPECT_EQ(AUTHORABLE_AI_TYPES.size(), 7u)
+			<< "every AiType but CONFUSED_MONSTER";
+	}
+
+	// Where a creature stands on the law/chaos axis, and on the good/evil one.
+	// Two axes rather than nine labels, so each one round-trips on its own.
+	TEST(CodecRoundTripTest, AlignmentSurvivesEncoding)
+	{
+		constexpr std::array ethics = {
+			Alignment::Ethics::LAWFUL,
+			Alignment::Ethics::NEUTRAL,
+			Alignment::Ethics::CHAOTIC,
+		};
+		for (const auto axis : ethics)
+		{
+			expect_round_trip(
+				axis,
+				Alignment::encode_ethics,
+				Alignment::parse_ethics,
+				"Ethics");
+		}
+
+		constexpr std::array moralities = {
+			Alignment::Morality::GOOD,
+			Alignment::Morality::NEUTRAL,
+			Alignment::Morality::EVIL,
+		};
+		for (const auto axis : moralities)
+		{
+			expect_round_trip(
+				axis,
+				Alignment::encode_morality,
+				Alignment::parse_morality,
+				"Morality");
+		}
+	}
+
+	// Which class a saved creature belongs to, MONSTER included - it is what
+	// everything that is not a player character carries, so a save that loses
+	// it loses the most common value.
+	TEST(CodecRoundTripTest, CreatureClassSurvivesEncoding)
+	{
+		constexpr std::array classes = {
+			CreatureClass::FIGHTER,
+			CreatureClass::ROGUE,
+			CreatureClass::CLERIC,
+			CreatureClass::WIZARD,
+			CreatureClass::MONSTER,
+		};
+
+		for (const auto creatureClass : classes)
+		{
+			expect_round_trip(
+				creatureClass,
+				encode_creature_class,
+				parse_creature_class,
+				"CreatureClass");
+		}
+	}
+
+	// What an attacker's damage is, in a save and on the screen alike:
+	// damage_type_name is the only table, so this round trip also pins the
+	// label the resolver's log prints.
+	TEST(CodecRoundTripTest, DamageTypeSurvivesEncoding)
+	{
+		constexpr std::array types = {
+			DamageType::PHYSICAL,
+			DamageType::FIRE,
+			DamageType::COLD,
+			DamageType::LIGHTNING,
+			DamageType::POISON,
+			DamageType::ACID,
+			DamageType::MAGIC,
+		};
+
+		for (const auto type : types)
+		{
+			expect_round_trip(
+				type,
+				damage_type_name,
+				parse_damage_type,
+				"DamageType");
+		}
+	}
+
+	// Every colour pair a record can carry.
+	TEST(CodecRoundTripTest, ColorPairSurvivesEncoding)
+	{
+		for (const ColorPairId pair : ALL_COLOR_PAIR)
+		{
+			expect_round_trip(
+				pair,
+				color_pair_name,
+				parse_color_pair,
+				"ColorPairId");
+		}
+	}
+
+	// The parser is the only schema this data has.
+	TEST(CodecRoundTripTest, UnknownStringsThrow)
+	{
+		EXPECT_THROW((void)parse_color_pair("puce"), std::runtime_error);
+		EXPECT_THROW((void)parse_damage_type("sonic"), std::runtime_error);
+		EXPECT_THROW(
+			(void)Alignment::parse_ethics("scrupulous"),
+			std::runtime_error);
+		EXPECT_THROW(
+			(void)Alignment::parse_morality("saintly"),
+			std::runtime_error);
+		EXPECT_THROW((void)parse_creature_class("bard"), std::runtime_error);
+		EXPECT_THROW((void)parse_target_mode("not_a_mode"), std::runtime_error);
+		EXPECT_THROW(
+			(void)parse_scroll_animation("not_an_animation"),
+			std::runtime_error);
+		EXPECT_THROW(
+			(void)parse_hand_requirement("not_a_requirement"),
+			std::runtime_error);
+		EXPECT_THROW((void)parse_weapon_size("not_a_size"), std::runtime_error);
+		EXPECT_THROW((void)parse_creature_size("enormous"), std::runtime_error);
+		EXPECT_THROW(
+			(void)parse_intelligence_rating("brilliant"),
+			std::runtime_error);
+		EXPECT_THROW((void)parse_buff_type("not_a_buff"), std::runtime_error);
+		EXPECT_THROW((void)parse_helm_command("awake"), std::runtime_error);
+		EXPECT_THROW((void)parse_item_class("not_a_class"), std::runtime_error);
+		EXPECT_THROW(
+			(void)parse_pickable_type("not_a_type"),
+			std::runtime_error);
+		EXPECT_THROW(
+			(void)parse_magical_effect("not_an_effect"),
+			std::runtime_error);
+		EXPECT_THROW((void)parse_ai_type("not_an_ai"), std::runtime_error);
+		EXPECT_THROW((void)parse_attitude("grumpy"), std::runtime_error);
+		EXPECT_THROW(
+			(void)parse_consumable_effect("not_an_effect"),
+			std::runtime_error);
+	}
+
+	// Added 2026-10-01, after docs/pair_symmetry.py reported equipment_slot as
+	// the one encode/parse pair in src/ that no test reached. parse_equipment
+	// and encode_equipment cannot be reached: they sit in MonsterRegistry.cpp's
+	// anonymous namespace.
+	TEST(CodecRoundTripTest, EveryEquipmentSlotRoundTrips)
+	{
+		for (
+			int index = 0; index <= static_cast<int>(EquipmentSlot::NONE);
+			++index)
+		{
+			const EquipmentSlot slot = static_cast<EquipmentSlot>(index);
+
+			EXPECT_EQ(parse_equipment_slot(encode_equipment_slot(slot)), slot)
+				<< "slot " << index
+				<< " did not survive a round trip through its JSON spelling";
+		}
+	}
+
+	// The property the round trip above cannot see. parse_equipment_slot is
+	// implemented by scanning for the slot whose encoding matches, so two slots
+	// sharing a spelling would make the second parse back as the first - every
+	// creature wearing it would load with the item in the wrong place, and the
+	// round trip would still pass for the first of the two.
+	TEST(CodecRoundTripTest, NoTwoEquipmentSlotsShareASpelling)
+	{
+		std::vector<std::string_view> spellings;
+		for (
+			int index = 0; index <= static_cast<int>(EquipmentSlot::NONE);
+			++index)
+		{
+			spellings.push_back(
+				encode_equipment_slot(static_cast<EquipmentSlot>(index)));
+		}
+		const size_t written = spellings.size();
+
+		std::ranges::sort(spellings);
+		const auto duplicates = std::ranges::unique(spellings);
+		spellings.erase(duplicates.begin(), duplicates.end());
+
+		EXPECT_EQ(spellings.size(), written)
+			<< "two equipment slots encode to the same string";
+	}
+
+	// Every item sprite in the shipped content file survives a save and a load
+	// through the tile codec: same keys, same sheet, column and row.
+	TEST(CodecRoundTripTest, EveryItemSpriteSurvivesASaveAndALoad)
+	{
+		const std::filesystem::path scratch =
+			std::filesystem::temp_directory_path() /
+			"codec_round_trip_item_tiles.json";
+		ContentRegistry shipped{};
+		ContentRegistryIO::load(shipped, Paths::CONTENT_TILES);
+		ASSERT_FALSE(shipped.all_tiles().empty());
+
+		ContentRegistryIO::save(shipped, scratch.string());
+		ContentRegistry reloaded{};
+		ContentRegistryIO::load(reloaded, scratch.string());
+		std::filesystem::remove(scratch);
+
+		EXPECT_EQ(reloaded.all_tiles(), shipped.all_tiles());
+
+		// Both sides went through one reader, so they are also checked against
+		// the file's own records.
+		std::ifstream shippedFile(Paths::resolve(Paths::CONTENT_TILES));
+		const nlohmann::json records =
+			nlohmann::json::parse(shippedFile).at("items");
+		ASSERT_EQ(records.size(), shipped.all_tiles().size());
+		for (const auto& [key, record] : records.items())
+		{
+			const TileRef tile = shipped.get_tile(key);
+			EXPECT_EQ(
+				static_cast<int>(tile.sheet),
+				record.at("sheet").get<int>())
+				<< key;
+			EXPECT_EQ(tile.col, record.at("col").get<int>()) << key;
+			EXPECT_EQ(tile.row, record.at("row").get<int>()) << key;
+		}
+	}
+
+	// A misspelled slot in a data file fails at load rather than going nowhere.
+	TEST(CodecRoundTripTest, AnUnknownEquipmentSlotThrows)
+	{
+		EXPECT_THROW(
+			(void)parse_equipment_slot("third_hand"),
+			std::runtime_error);
+	}
 
 } // namespace CppRL

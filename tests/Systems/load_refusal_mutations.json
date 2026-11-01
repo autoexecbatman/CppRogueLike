@@ -27,8 +27,8 @@
     },
     {
       "file": "src/GameStateManager.cpp",
-      "original": "\tctx.menuManager->set_game_initialized(false);\n\tctx.dataManager->load_all_data",
-      "mutated": "\tctx.menuManager->set_game_initialized(true);\n\tctx.dataManager->load_all_data",
+      "original": "\t\tctx.menuManager->set_game_initialized(false);\n\t\tctx.dataManager->load_all_data",
+      "mutated": "\t\tctx.menuManager->set_game_initialized(true);\n\t\tctx.dataManager->load_all_data",
       "catches": "a load that fails left marked as a running game"
     },
     {

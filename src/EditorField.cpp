@@ -8,12 +8,12 @@
 namespace CppRL
 {
 
-void refuse_misrouted_field(std::string_view label, std::string_view path)
-{
-	std::cerr << path << " has no case for the field '" << label << "'\n";
-	std::abort();
-}
+	void refuse_misrouted_field(std::string_view label, std::string_view path)
+	{
+		std::cerr << path << " has no case for the field '" << label << "'\n";
+		std::abort();
+	}
 
-// end of file: EditorField.cpp
+	// end of file: EditorField.cpp
 
 } // namespace CppRL

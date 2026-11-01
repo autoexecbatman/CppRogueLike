@@ -39,14 +39,14 @@
     },
     {
       "file": "src/AbilityAllocation.cpp",
-      "original": "\tif (dieIndex >= unplaced.size())\n\t{\n\t\treturn false;\n\t}\n",
+      "original": "\t\tif (dieIndex >= unplaced.size())\n\t\t{\n\t\t\treturn false;\n\t\t}\n",
       "mutated": "",
       "catches": "a die index nobody rolled read off the end of the pool"
     },
     {
       "file": "src/AbilityAllocation.cpp",
-      "original": "\tunplaced.push_back(dice.back());\n\tdice.pop_back();",
-      "mutated": "\tunplaced.push_back(dice.front());\n\tdice.erase(dice.begin());",
+      "original": "\t\tunplaced.push_back(dice.back());\n\t\tdice.pop_back();",
+      "mutated": "\t\tunplaced.push_back(dice.front());\n\t\tdice.erase(dice.begin());",
       "catches": "the first die placed coming back instead of the last one"
     },
     {
@@ -57,8 +57,8 @@
     },
     {
       "file": "src/AbilityAllocation.cpp",
-      "original": "\tif (!required.has_value() || score(required->ability) >= required->score)",
-      "mutated": "\tif (!required.has_value() || allocated(required->ability) >= required->score)",
+      "original": "\t\tif (!required.has_value() ||\n\t\t\tscore(required->ability) >= required->score)",
+      "mutated": "\t\tif (!required.has_value() ||allocated(required->ability) >= required->score)",
       "catches": "Table 13 judged before the race is paid, so a halfling fighter passes at 8"
     },
     {
@@ -81,7 +81,7 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": "\t\tset_ability(\n\t\t\tability,\n\t\t\tblueprint.abilityScores.at(ability_index(ability)));",
+      "original": "\t\t\tset_ability(\n\t\t\t\tability,\n\t\t\t\tblueprint.abilityScores.at(ability_index(ability)));",
       "mutated": "",
       "catches": "the allocated scores never reaching the character that was built from them"
     }

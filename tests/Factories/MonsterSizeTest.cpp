@@ -24,91 +24,117 @@
 namespace CppRL
 {
 
-namespace
-{
-	struct BookSize
+	namespace
 	{
-		std::string_view key{};
-		CreatureSize size{ CreatureSize::MEDIUM };
-	};
+		struct BookSize
+		{
+			std::string_view key{};
+			CreatureSize size{ CreatureSize::MEDIUM };
+		};
 
-	// Monstrous Manual, by PDF page in the local archive.
-	constexpr BookSize BOOK_SIZES[] = {
-		{ "archer", CreatureSize::MEDIUM }, // no entry; a human
-		{ "bat", CreatureSize::TINY }, // Bat p1110, Common column
-		{ "bugbear", CreatureSize::LARGE }, // Bugbear p1148
-		{ "chimera", CreatureSize::LARGE }, // Chimera p1176, Chimera column
-		{
-			"dragon",
-			CreatureSize::GARGANTUAN,
-		}, // Dragon, Chromatic Red Dragon p1240
-		{ "dungeon_jailer", CreatureSize::MEDIUM }, // no entry; a human
-		{ "dungeon_warden", CreatureSize::MEDIUM }, // no entry; a human
-		{ "fire_wolf", CreatureSize::MEDIUM }, // Hell Hound p1544
-		{ "gargoyle", CreatureSize::MEDIUM }, // Gargoyle p1393, Gargoyle column
-		{ "ghoul", CreatureSize::MEDIUM }, // Ghoul p1406, Ghoul column
-		{
-			"giant_centipede",
-			CreatureSize::TINY,
-		}, // Centipede p1173, Giant column
-		{ "giant_rat", CreatureSize::TINY }, // Rat p1812, Rat (Giant) column
-		{
-			"giant_snake",
-			CreatureSize::MEDIUM,
-		}, // Snake p1862, Poisonous (Giant): closest, AC 5 and HD 4+2
-		{ "gnoll", CreatureSize::LARGE }, // Gnoll p1472, Gnoll column
-		{ "goblin", CreatureSize::SMALL }, // Goblin p1483
-		{
-			"golem_stone",
-			CreatureSize::LARGE,
-		}, // Golem, Greater p1491, Stone column
-		{ "harpy", CreatureSize::MEDIUM }, // Harpy p1537
-		{ "hill_giant", CreatureSize::HUGE_SIZE }, // Giant, Hill p1431
-		{ "hobgoblin", CreatureSize::MEDIUM }, // Hobgoblin p1553
-		{ "ice_wolf", CreatureSize::LARGE }, // Wolf p1961, Winter column
-		{ "kobold", CreatureSize::SMALL }, // Kobold p1614, Kobold column
-		{ "lich", CreatureSize::MEDIUM }, // Lich p1634, Lich column
-		{ "mage", CreatureSize::MEDIUM }, // no entry; a human
-		{ "medusa", CreatureSize::MEDIUM }, // Medusa p1693, Medusa column
-		{ "mimic", CreatureSize::LARGE }, // Mimic p1700, Killer column
-		{ "ogre", CreatureSize::LARGE }, // Ogre p1750, Ogre column
-		{ "orc", CreatureSize::MEDIUM }, // Orc p1769, Orc column
-		{ "pit_fiend", CreatureSize::LARGE }, // Baatezu p1101, Pit Fiend column
-		{
-			"rat",
-			CreatureSize::TINY,
-		}, // Rat p1812: closest, the giant rat's column
-		{ "shadow", CreatureSize::MEDIUM }, // Shadow p1841
-		{ "shopkeeper", CreatureSize::MEDIUM }, // no entry: a human, man-sized
-		{ "skeleton", CreatureSize::MEDIUM }, // Skeleton p1849, Skeleton column
-		{ "spider_giant", CreatureSize::MEDIUM }, // Spider p1876, Huge column
-		{ "spider_small", CreatureSize::TINY }, // Spider p1876, Hairy column
-		{ "spider_weaver", CreatureSize::LARGE }, // Spider p1876, Giant column
-		{ "troll", CreatureSize::LARGE }, // Troll p1930, Troll column
-		{ "vampire", CreatureSize::MEDIUM }, // Vampire p1945
-		{ "werewolf", CreatureSize::MEDIUM }, // Lycanthrope, Werewolf p1677
-		{ "wight", CreatureSize::MEDIUM }, // Wight p1957
-		{ "wolf", CreatureSize::SMALL }, // Wolf p1961, Wolf column
-		{ "wraith", CreatureSize::MEDIUM }, // Wraith p1969
-		{ "wyvern", CreatureSize::GARGANTUAN }, // Wyvern p1971
-		{ "zombie", CreatureSize::MEDIUM }, // Zombie p1989, Common column
-	};
-} // namespace
+		// Monstrous Manual, by PDF page in the local archive.
+		constexpr BookSize BOOK_SIZES[] = {
+			{ "archer", CreatureSize::MEDIUM }, // no entry; a human
+			{ "bat", CreatureSize::TINY }, // Bat p1110, Common column
+			{ "bugbear", CreatureSize::LARGE }, // Bugbear p1148
+			{ "chimera", CreatureSize::LARGE }, // Chimera p1176, Chimera column
+			{
+				"dragon",
+				CreatureSize::GARGANTUAN,
+			}, // Dragon, Chromatic Red Dragon p1240
+			{ "dungeon_jailer", CreatureSize::MEDIUM }, // no entry; a human
+			{ "dungeon_warden", CreatureSize::MEDIUM }, // no entry; a human
+			{ "fire_wolf", CreatureSize::MEDIUM }, // Hell Hound p1544
+			{
+				"gargoyle",
+				CreatureSize::MEDIUM,
+			}, // Gargoyle p1393, Gargoyle column
+			{ "ghoul", CreatureSize::MEDIUM }, // Ghoul p1406, Ghoul column
+			{
+				"giant_centipede",
+				CreatureSize::TINY,
+			}, // Centipede p1173, Giant column
+			{
+				"giant_rat",
+				CreatureSize::TINY,
+			}, // Rat p1812, Rat (Giant) column
+			{
+				"giant_snake",
+				CreatureSize::MEDIUM,
+			}, // Snake p1862, Poisonous (Giant): closest, AC 5 and HD 4+2
+			{ "gnoll", CreatureSize::LARGE }, // Gnoll p1472, Gnoll column
+			{ "goblin", CreatureSize::SMALL }, // Goblin p1483
+			{
+				"golem_stone",
+				CreatureSize::LARGE,
+			}, // Golem, Greater p1491, Stone column
+			{ "harpy", CreatureSize::MEDIUM }, // Harpy p1537
+			{ "hill_giant", CreatureSize::HUGE_SIZE }, // Giant, Hill p1431
+			{ "hobgoblin", CreatureSize::MEDIUM }, // Hobgoblin p1553
+			{ "ice_wolf", CreatureSize::LARGE }, // Wolf p1961, Winter column
+			{ "kobold", CreatureSize::SMALL }, // Kobold p1614, Kobold column
+			{ "lich", CreatureSize::MEDIUM }, // Lich p1634, Lich column
+			{ "mage", CreatureSize::MEDIUM }, // no entry; a human
+			{ "medusa", CreatureSize::MEDIUM }, // Medusa p1693, Medusa column
+			{ "mimic", CreatureSize::LARGE }, // Mimic p1700, Killer column
+			{ "ogre", CreatureSize::LARGE }, // Ogre p1750, Ogre column
+			{ "orc", CreatureSize::MEDIUM }, // Orc p1769, Orc column
+			{
+				"pit_fiend",
+				CreatureSize::LARGE,
+			}, // Baatezu p1101, Pit Fiend column
+			{
+				"rat",
+				CreatureSize::TINY,
+			}, // Rat p1812: closest, the giant rat's column
+			{ "shadow", CreatureSize::MEDIUM }, // Shadow p1841
+			{
+				"shopkeeper",
+				CreatureSize::MEDIUM,
+			}, // no entry: a human, man-sized
+			{
+				"skeleton",
+				CreatureSize::MEDIUM,
+			}, // Skeleton p1849, Skeleton column
+			{
+				"spider_giant",
+				CreatureSize::MEDIUM,
+			}, // Spider p1876, Huge column
+			{
+				"spider_small",
+				CreatureSize::TINY,
+			}, // Spider p1876, Hairy column
+			{
+				"spider_weaver",
+				CreatureSize::LARGE,
+			}, // Spider p1876, Giant column
+			{ "troll", CreatureSize::LARGE }, // Troll p1930, Troll column
+			{ "vampire", CreatureSize::MEDIUM }, // Vampire p1945
+			{ "werewolf", CreatureSize::MEDIUM }, // Lycanthrope, Werewolf p1677
+			{ "wight", CreatureSize::MEDIUM }, // Wight p1957
+			{ "wolf", CreatureSize::SMALL }, // Wolf p1961, Wolf column
+			{ "wraith", CreatureSize::MEDIUM }, // Wraith p1969
+			{ "wyvern", CreatureSize::GARGANTUAN }, // Wyvern p1971
+			{ "zombie", CreatureSize::MEDIUM }, // Zombie p1989, Common column
+		};
+	} // namespace
 
-TEST(MonsterSizeTest, EveryMonsterCarriesTheSizeItsBookEntryPrints)
-{
-	MonsterRegistry monsters{};
-	monsters.load(Paths::MONSTERS);
-
-	for (const BookSize& book : BOOK_SIZES)
+	TEST(MonsterSizeTest, EveryMonsterCarriesTheSizeItsBookEntryPrints)
 	{
-		EXPECT_EQ(monsters.get_params(std::string{ book.key }).size, book.size)
-			<< book.key;
+		MonsterRegistry monsters{};
+		monsters.load(Paths::MONSTERS);
+
+		for (const BookSize& book : BOOK_SIZES)
+		{
+			EXPECT_EQ(
+				monsters.get_params(std::string{ book.key }).size,
+				book.size)
+				<< book.key;
+		}
+		EXPECT_EQ(std::size(BOOK_SIZES), monsters.get_all_keys().size())
+			<< "a monster in the data is missing from the book's table";
 	}
-	EXPECT_EQ(std::size(BOOK_SIZES), monsters.get_all_keys().size())
-		<< "a monster in the data is missing from the book's table";
-}
 
-// end of file: MonsterSizeTest.cpp
+	// end of file: MonsterSizeTest.cpp
 
 } // namespace CppRL

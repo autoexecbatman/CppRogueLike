@@ -33,26 +33,26 @@
     },
     {
       "file": "src/Map.cpp",
-      "original": "\t\t\t{ \"explored\", tile.explored },\n\t\t\t{ \"doorState\", static_cast<int>(tile.doorState) },\n",
-      "mutated": "\t\t\t{ \"explored\", tile.explored },\n\t\t\t{ \"doorState\", 0 },\n",
+      "original": "\t\t\t\t{ \"explored\", tile.explored },\n\t\t\t\t{ \"doorState\", static_cast<int>(tile.doorState) },\n",
+      "mutated": "\t\t\t\t{ \"explored\", tile.explored },\n\t\t\t\t{ \"doorState\", 0 },\n",
       "catches": "every door saved as open, so a lock is lost on the way out"
     },
     {
       "file": "src/Map.cpp",
-      "original": "\t\tfovMap->set_properties(\n\t\t\ttile.position.x,\n\t\t\ttile.position.y,\n\t\t\tfov_properties_for(tile.type));\n\t}\n\n\t// Note: Logging",
-      "mutated": "\t\tfovMap->set_properties(\n\t\t\ttile.position.x,\n\t\t\ttile.position.y,\n\t\t\tfov_properties_for(tile.type));\n\t}\n\tpost_process_doors();\n\t// Note: Logging",
+      "original": "\t\t\tfovMap->set_properties(\n\t\t\t\ttile.position.x,\n\t\t\t\ttile.position.y,\n\t\t\t\tfov_properties_for(tile.type));\n\t\t}\n\n\t\t// Note: Logging",
+      "mutated": "\t\t\tfovMap->set_properties(\n\t\t\t\ttile.position.x,\n\t\t\t\ttile.position.y,\n\t\t\t\tfov_properties_for(tile.type));\n\t\t}\n\t\tpost_process_doors();\n\t\t// Note: Logging",
       "catches": "doors placed again on load, adding a door where a later pass left corridor"
     },
     {
       "file": "src/Map.cpp",
-      "original": "}\n\t\treturn std::nullopt;\n\t}\n} // namespace",
-      "mutated": "\t\t}\n\t\treturn candidate;\n\t}\n\t} // namespace",
+      "original": "\t}\n\t\t\treturn std::nullopt;\n\t\t}\n\t} // namespace",
+      "mutated": "\t\t\t}\n\t\t\treturn candidate;\n\t\t}\n\t\t} // namespace",
       "catches": "a corrupt saved door state loaded as a state nothing handles"
     },
     {
       "file": "src/Map.cpp",
-      "original": "\t\tcase DoorState::CLOSED_LOCKED:\n\t\tcase DoorState::CLOSED_LOCKED_FORCE_FAILED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n",
-      "mutated": "\t\tcase DoorState::CLOSED_LOCKED:\n\t\t{\n\t\t\treturn candidate;\n\t\t}\n\t\tcase DoorState::CLOSED_LOCKED_FORCE_FAILED:\n\t\t{\n\t\t\treturn DoorState::CLOSED_LOCKED;\n\t\t}\n",
+      "original": "\t\t\tcase DoorState::CLOSED_LOCKED:\n\t\t\tcase DoorState::CLOSED_LOCKED_FORCE_FAILED:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n",
+      "mutated": "\t\t\tcase DoorState::CLOSED_LOCKED:\n\t\t\t{\n\t\t\t\treturn candidate;\n\t\t\t}\n\t\t\tcase DoorState::CLOSED_LOCKED_FORCE_FAILED:\n\t\t\t{\n\t\t\t\treturn DoorState::CLOSED_LOCKED;\n\t\t\t}\n",
       "catches": "a door that resisted forcing read back as only locked"
     }
   ]

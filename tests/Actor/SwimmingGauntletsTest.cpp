@@ -38,116 +38,125 @@
 namespace CppRL
 {
 
-class SwimmingGauntletsTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	class SwimmingGauntletsTest : public ::testing::Test
 	{
-		ctx = mock.to_game_context();
-		swimmer.set_body_plan(mock.body_plans.get("humanoid"));
-		swimmer.set_strength(12);
-	}
+	protected:
+		void SetUp() override
+		{
+			ctx = mock.to_game_context();
+			swimmer.set_body_plan(mock.body_plans.get("humanoid"));
+			swimmer.set_strength(12);
+		}
 
-	std::unique_ptr<Item> the_gauntlets()
-	{
-		return ItemCreator::create(
-			"gauntlets_of_swimming_and_climbing",
+		std::unique_ptr<Item> the_gauntlets()
+		{
+			return ItemCreator::create(
+				"gauntlets_of_swimming_and_climbing",
+				Vector2D{ 0, 0 },
+				ctx);
+		}
+
+		MockGameContext mock{};
+		GameContext ctx{};
+		Creature swimmer{
 			Vector2D{ 0, 0 },
-			ctx);
+			ActorData{ TileRef{}, "swimmer", ColorPairId::WHITE_BLACK },
+		};
+	};
+
+	// The book's entry grants no Strength, so neither does the item.
+	TEST_F(SwimmingGauntletsTest, TheyGrantNoStrength)
+	{
+		const auto gauntlets = the_gauntlets();
+		ASSERT_TRUE(gauntlets->behavior.has_value());
+		const Gauntlets* worn = std::get_if<Gauntlets>(&*gauntlets->behavior);
+		ASSERT_NE(worn, nullptr);
+
+		EXPECT_EQ(worn->strBonus, 0)
+			<< "the book's entry says nothing about Strength";
+		EXPECT_EQ(worn->dexBonus, 0);
+		EXPECT_EQ(worn->conBonus, 0);
 	}
 
-	MockGameContext mock{};
-	GameContext ctx{};
-	Creature swimmer{
-		Vector2D{ 0, 0 },
-		ActorData{ TileRef{}, "swimmer", ColorPairId::WHITE_BLACK },
-	};
-};
+	// Putting them on does not move the wearer's Strength either, which is the
+	// number the old bonus reached: the attack roll, the damage and the
+	// carrying capacity all read it.
+	TEST_F(SwimmingGauntletsTest, WearingThemLeavesTheWearersStrengthAlone)
+	{
+		const int before = swimmer.get_strength();
 
-// The book's entry grants no Strength, so neither does the item.
-TEST_F(SwimmingGauntletsTest, TheyGrantNoStrength)
-{
-	const auto gauntlets = the_gauntlets();
-	ASSERT_TRUE(gauntlets->behavior.has_value());
-	const Gauntlets* worn = std::get_if<Gauntlets>(&*gauntlets->behavior);
-	ASSERT_NE(worn, nullptr);
+		swimmer.wear(the_gauntlets(), EquipmentSlot::GAUNTLETS);
 
-	EXPECT_EQ(worn->strBonus, 0)
-		<< "the book's entry says nothing about Strength";
-	EXPECT_EQ(worn->dexBonus, 0);
-	EXPECT_EQ(worn->conBonus, 0);
-}
+		EXPECT_EQ(swimmer.get_strength(), before);
+	}
 
-// Putting them on does not move the wearer's Strength either, which is the number the
-// old bonus reached: the attack roll, the damage and the carrying capacity all read it.
-TEST_F(SwimmingGauntletsTest, WearingThemLeavesTheWearersStrengthAlone)
-{
-	const int before = swimmer.get_strength();
+	// What they do grant: the effect the game reads when a creature meets
+	// water.
+	TEST_F(SwimmingGauntletsTest, TheyCarryTheSwimmingEffect)
+	{
+		const auto gauntlets = the_gauntlets();
+		const Gauntlets* worn = std::get_if<Gauntlets>(&*gauntlets->behavior);
+		ASSERT_NE(worn, nullptr);
 
-	swimmer.wear(the_gauntlets(), EquipmentSlot::GAUNTLETS);
+		EXPECT_EQ(worn->effect, MagicalEffect::SWIMMING);
+	}
 
-	EXPECT_EQ(swimmer.get_strength(), before);
-}
+	// A creature that cannot swim of its own can swim while wearing them, and
+	// stops when they come off. Nothing is copied onto the creature, so there
+	// is nothing to undo.
+	TEST_F(SwimmingGauntletsTest, TheWearerCrossesWaterAndStopsWhenTheyComeOff)
+	{
+		ASSERT_FALSE(swimmer.has_state(ActorState::CAN_SWIM));
+		EXPECT_FALSE(swimmer.has_bypass(ActorState::CAN_SWIM));
 
-// What they do grant: the effect the game reads when a creature meets water.
-TEST_F(SwimmingGauntletsTest, TheyCarryTheSwimmingEffect)
-{
-	const auto gauntlets = the_gauntlets();
-	const Gauntlets* worn = std::get_if<Gauntlets>(&*gauntlets->behavior);
-	ASSERT_NE(worn, nullptr);
+		swimmer.wear(the_gauntlets(), EquipmentSlot::GAUNTLETS);
 
-	EXPECT_EQ(worn->effect, MagicalEffect::SWIMMING);
-}
+		EXPECT_TRUE(swimmer.has_bypass(ActorState::CAN_SWIM));
+		EXPECT_FALSE(swimmer.has_state(ActorState::CAN_SWIM))
+			<< "a worn source is asked, never copied";
 
-// A creature that cannot swim of its own can swim while wearing them, and stops when
-// they come off. Nothing is copied onto the creature, so there is nothing to undo.
-TEST_F(SwimmingGauntletsTest, TheWearerCrossesWaterAndStopsWhenTheyComeOff)
-{
-	ASSERT_FALSE(swimmer.has_state(ActorState::CAN_SWIM));
-	EXPECT_FALSE(swimmer.has_bypass(ActorState::CAN_SWIM));
+		// Taking them off is removing the entry, which is what
+		// Player::unequip_item does. Creature::unequip only clears a flag and
+		// has no caller in src.
+		swimmer.equippedItems.clear();
 
-	swimmer.wear(the_gauntlets(), EquipmentSlot::GAUNTLETS);
+		EXPECT_FALSE(swimmer.has_bypass(ActorState::CAN_SWIM));
+	}
 
-	EXPECT_TRUE(swimmer.has_bypass(ActorState::CAN_SWIM));
-	EXPECT_FALSE(swimmer.has_state(ActorState::CAN_SWIM))
-		<< "a worn source is asked, never copied";
+	// A creature that swims of its own needs no gauntlets, and the gauntlets
+	// grant nothing else: they are not a skeleton key for every tile a state
+	// guards.
+	TEST_F(SwimmingGauntletsTest, TheyGrantSwimmingAndNothingElse)
+	{
+		swimmer.wear(the_gauntlets(), EquipmentSlot::GAUNTLETS);
 
-	// Taking them off is removing the entry, which is what Player::unequip_item does.
-	// Creature::unequip only clears a flag and has no caller in src.
-	swimmer.equippedItems.clear();
+		EXPECT_TRUE(swimmer.has_bypass(ActorState::CAN_SWIM));
+		EXPECT_FALSE(swimmer.has_bypass(ActorState::CAN_WALK_WEBS));
 
-	EXPECT_FALSE(swimmer.has_bypass(ActorState::CAN_SWIM));
-}
+		Creature spider{
+			Vector2D{ 0, 0 },
+			ActorData{ TileRef{}, "spider", ColorPairId::WHITE_BLACK },
+		};
+		spider.add_state(ActorState::CAN_SWIM);
 
-// A creature that swims of its own needs no gauntlets, and the gauntlets grant nothing
-// else: they are not a skeleton key for every tile a state guards.
-TEST_F(SwimmingGauntletsTest, TheyGrantSwimmingAndNothingElse)
-{
-	swimmer.wear(the_gauntlets(), EquipmentSlot::GAUNTLETS);
+		EXPECT_TRUE(spider.has_bypass(ActorState::CAN_SWIM))
+			<< "a creature's own state still answers";
+	}
 
-	EXPECT_TRUE(swimmer.has_bypass(ActorState::CAN_SWIM));
-	EXPECT_FALSE(swimmer.has_bypass(ActorState::CAN_WALK_WEBS));
+	// Another effect-bearing item worn in the same slot grants no swimming: the
+	// effect is compared, not merely found. Gauntlets of ogre power set
+	// Strength and nothing else.
+	TEST_F(SwimmingGauntletsTest, AnItemWithADifferentEffectGrantsNoSwimming)
+	{
+		swimmer.wear(
+			ItemCreator::create(
+				"gauntlets_of_ogre_power",
+				Vector2D{ 0, 0 },
+				ctx),
+			EquipmentSlot::GAUNTLETS);
 
-	Creature spider{
-		Vector2D{ 0, 0 },
-		ActorData{ TileRef{}, "spider", ColorPairId::WHITE_BLACK },
-	};
-	spider.add_state(ActorState::CAN_SWIM);
-
-	EXPECT_TRUE(spider.has_bypass(ActorState::CAN_SWIM))
-		<< "a creature's own state still answers";
-}
-
-// Another effect-bearing item worn in the same slot grants no swimming: the effect is
-// compared, not merely found. Gauntlets of ogre power set Strength and nothing else.
-TEST_F(SwimmingGauntletsTest, AnItemWithADifferentEffectGrantsNoSwimming)
-{
-	swimmer.wear(
-		ItemCreator::create("gauntlets_of_ogre_power", Vector2D{ 0, 0 }, ctx),
-		EquipmentSlot::GAUNTLETS);
-
-	EXPECT_FALSE(swimmer.wears_item_with(MagicalEffect::SWIMMING));
-	EXPECT_FALSE(swimmer.has_bypass(ActorState::CAN_SWIM));
-}
+		EXPECT_FALSE(swimmer.wears_item_with(MagicalEffect::SWIMMING));
+		EXPECT_FALSE(swimmer.has_bypass(ActorState::CAN_SWIM));
+	}
 
 } // namespace CppRL

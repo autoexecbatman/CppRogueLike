@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/Trap.cpp",
-      "original": "\tconst std::optional<int> skill =\n\t\tcreature.thief_skill(ThiefSkill::FIND_REMOVE_TRAPS);",
-      "mutated": "\tconst std::optional<int> skill =\n\t\tcreature.thief_skill(ThiefSkill::OPEN_LOCKS);",
+      "original": "\t\tconst std::optional<int> skill =\n\t\t\tcreature.thief_skill(ThiefSkill::FIND_REMOVE_TRAPS);",
+      "mutated": "\t\tconst std::optional<int> skill =\n\t\t\tcreature.thief_skill(ThiefSkill::OPEN_LOCKS);",
       "catches": "a trap rolled against the wrong one of the eight thief skills"
     },
     {
@@ -57,8 +57,8 @@
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\t// \"the trap is beyond the thief's current skill\" - so it is left as it was.\n\treturn DisarmResult::BEYOND_SKILL;",
-      "mutated": "\tstate = TrapState::TRIGGERED;\n\ton_creature_enter(creature, ctx);\n\treturn DisarmResult::TRIGGERED;",
+      "original": "\t\t// \"the trap is beyond the thief's current skill\" - so it is left as it\n\t\t// was.\n\t\treturn DisarmResult::BEYOND_SKILL;",
+      "mutated": "\t\tstate = TrapState::TRIGGERED;\n\t\ton_creature_enter(creature, ctx);\n\t\treturn DisarmResult::TRIGGERED;",
       "catches": "every failure springing the trap, which is the rule this replaced"
     },
     {
@@ -81,20 +81,20 @@
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\tstate = saved_enum_field(\n\t\tsource,\n\t\t\"Trap::load\",\n\t\t\"state\",\n\t\t\"TrapState\",\n\t\t&trap_state_from);",
-      "mutated": "\tstate = TrapState::HIDDEN;",
+      "original": "\t\tstate = saved_enum_field(\n\t\t\tsource,\n\t\t\t\"Trap::load\",\n\t\t\t\"state\",\n\t\t\t\"TrapState\",\n\t\t\t&trap_state_from);",
+      "mutated": "\t\tstate = TrapState::HIDDEN;",
       "catches": "every trap hidden again on load, so a level the player has cleared is unknown"
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\tconst bool spent =\n\t\t(state == TrapState::TRIGGERED || state == TrapState::DISARMED);",
-      "mutated": "\tconst bool spent =\n\t\t(state == TrapState::TRIGGERED);",
+      "original": "\t\tconst bool spent =\n\t\t\t(state == TrapState::TRIGGERED || state == TrapState::DISARMED);",
+      "mutated": "\t\tconst bool spent =\n\t\t\t(state == TrapState::TRIGGERED);",
       "catches": "a defused trap drawn as though it were still armed"
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\tif (state == TrapState::HIDDEN)\n\t{\n\t\tadd_state(ActorState::IS_INVISIBLE);\n\t}\n\telse\n\t{\n\t\tremove_state(ActorState::IS_INVISIBLE);\n\t}",
-      "mutated": "\tremove_state(ActorState::IS_INVISIBLE);",
+      "original": "\t\tif (state == TrapState::HIDDEN)\n\t\t{\n\t\t\tadd_state(ActorState::IS_INVISIBLE);\n\t\t}\n\t\telse\n\t\t{\n\t\t\tremove_state(ActorState::IS_INVISIBLE);\n\t\t}",
+      "mutated": "\t\tremove_state(ActorState::IS_INVISIBLE);",
       "catches": "every hidden trap drawn on the map after a load, which gives the level away"
     },
     {

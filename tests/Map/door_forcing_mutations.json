@@ -39,44 +39,44 @@
     },
     {
       "file": "src/PlayerController.cpp",
-      "original": "\tif (ctx.map->has_resisted_forcing(doorPos))\n\t{\n\t\tctx.messageSystem->message(\n\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\"You have already failed to force this door.\",\n\t\t\tMessageCompletion::FINISHED);\n\t\treturn false;\n\t}\n",
+      "original": "\t\tif (ctx.map->has_resisted_forcing(doorPos))\n\t\t{\n\t\t\tctx.messageSystem->message(\n\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\"You have already failed to force this door.\",\n\t\t\t\tMessageCompletion::FINISHED);\n\t\t\treturn false;\n\t\t}\n",
       "mutated": "",
       "catches": "a door that resisted rolled for again"
     },
     {
       "file": "src/PlayerController.cpp",
-      "original": "\t\t\tctx.map->open_door(doorPos, ctx);\n\t\t\tctx.messageSystem->message(\n\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\"You force the door open! The crash echoes down the corridor.\"",
-      "mutated": "\t\t\tctx.messageSystem->message(\n\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\"You force the door open! The crash echoes down the corridor.\"",
+      "original": "\t\t\t\tctx.map->open_door(doorPos, ctx);\n\t\t\t\tctx.messageSystem->message(\n\t\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\t\"You force the door open! The crash echoes down the corridor.\"",
+      "mutated": "\t\t\t\tctx.messageSystem->message(\n\t\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\t\"You force the door open! The crash echoes down the corridor.\"",
       "catches": "a forced door unlocked but left shut"
     },
     {
       "file": "src/PlayerController.cpp",
-      "original": "\t\t\tctx.messageSystem->message(\n\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\"You slam into the door but it holds.\",\n\t\t\t\tMessageCompletion::FINISHED);\n\t\t}\n\t\tspend_player_action(ctx, TIME_UNITS_PER_ROUND);\n",
-      "mutated": "\t\t\tctx.messageSystem->message(\n\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\"You slam into the door but it holds.\",\n\t\t\t\tMessageCompletion::FINISHED);\n\t\t}\n",
+      "original": "\t\t\t\tctx.messageSystem->message(\n\t\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\t\"You slam into the door but it holds.\",\n\t\t\t\t\tMessageCompletion::FINISHED);\n\t\t\t}\n\t\t\tspend_player_action(ctx, TIME_UNITS_PER_ROUND);\n",
+      "mutated": "\t\t\t\tctx.messageSystem->message(\n\t\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\t\"You slam into the door but it holds.\",\n\t\t\t\t\tMessageCompletion::FINISHED);\n\t\t\t}\n",
       "catches": "an attempt at forcing that costs no time"
     },
     {
       "file": "src/PlayerController.cpp",
-      "original": "strength_for(\n\t\tplayerOwner.get_strength(),\n\t\tplayerOwner.get_exceptional_strength());",
-      "mutated": "strength_for(\n\t\tplayerOwner.get_strength(),0);",
+      "original": "strength_for(\n\t\t\tplayerOwner.get_strength(),\n\t\t\tplayerOwner.get_exceptional_strength());",
+      "mutated": "strength_for(\n\t\t\tplayerOwner.get_strength(),0);",
       "catches": "exceptional Strength ignored, so no 18/xx may force a door"
     },
     {
       "file": "src/Map.cpp",
-      "original": "\treturn tiles[tileIndex].doorState == DoorState::CLOSED_LOCKED ||\n\t\ttiles[tileIndex].doorState == DoorState::CLOSED_LOCKED_FORCE_FAILED;\n",
-      "mutated": "\treturn tiles[tileIndex].doorState == DoorState::CLOSED_LOCKED;\n",
+      "original": "\t\treturn tiles[tileIndex].doorState == DoorState::CLOSED_LOCKED ||\n\t\t\ttiles[tileIndex].doorState == DoorState::CLOSED_LOCKED_FORCE_FAILED;\n",
+      "mutated": "\t\treturn tiles[tileIndex].doorState == DoorState::CLOSED_LOCKED;\n",
       "catches": "a door that resisted forcing read as unlocked"
     },
     {
       "file": "src/Map.cpp",
-      "original": "\t// A door that resisted forcing still turns to a key.\n\tif (!is_door_locked(pos))\n",
-      "mutated": "\t// A door that resisted forcing still turns to a key.\n\tif (tiles[tileIndex].doorState != DoorState::CLOSED_LOCKED)\n",
+      "original": "\t\t// A door that resisted forcing still turns to a key.\n\t\tif (!is_door_locked(pos))\n",
+      "mutated": "\t\t// A door that resisted forcing still turns to a key.\n\t\tif (tiles[tileIndex].doorState != DoorState::CLOSED_LOCKED)\n",
       "catches": "a key refused by a door that resisted forcing"
     },
     {
       "file": "src/Map.cpp",
-      "original": "\treturn tiles[tileIndex].doorState == DoorState::CLOSED_LOCKED_FORCE_FAILED;\n",
-      "mutated": "\treturn false;\n",
+      "original": "\t\treturn tiles[tileIndex].doorState ==\n\t\t\tDoorState::CLOSED_LOCKED_FORCE_FAILED;\n",
+      "mutated": "\t\treturn false;\n",
       "catches": "no door ever reported as having resisted"
     },
     {

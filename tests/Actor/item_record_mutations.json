@@ -36,8 +36,8 @@
     },
     {
       "file": "src/Item.cpp",
-      "original": "\tif (source.contains(\"pickable\"))\n\t{\n\t\tbehavior = load_behavior(source[\"pickable\"]);\n\t}",
-      "mutated": "\tbehavior = load_behavior(source.at(\"pickable\"));",
+      "original": "\t\tif (source.contains(\"pickable\"))\n\t\t{\n\t\t\tbehavior = load_behavior(source[\"pickable\"]);\n\t\t}",
+      "mutated": "\t\tbehavior = load_behavior(source.at(\"pickable\"));",
       "catches": "an item with no behaviour refused, the one block that is legitimately absent"
     }
   ]

@@ -6,25 +6,25 @@
 namespace CppRL
 {
 
-class ExperienceReward
-{
-private:
-	int xp{};
-
-public:
-	explicit ExperienceReward(int xpValue) noexcept :
-		xp(xpValue)
+	class ExperienceReward
 	{
-	}
+	private:
+		int xp{};
 
-	[[nodiscard]] int get_xp() const noexcept { return xp; }
+	public:
+		explicit ExperienceReward(int xpValue) noexcept :
+			xp(xpValue)
+		{
+		}
 
-	void set_xp(int value) noexcept { xp = value; }
+		[[nodiscard]] int get_xp() const noexcept { return xp; }
 
-	void add_xp(int amount) noexcept { xp += amount; }
+		void set_xp(int value) noexcept { xp = value; }
 
-	void load(const nlohmann::json& source);
-	void save(nlohmann::json& output) const;
-};
+		void add_xp(int amount) noexcept { xp += amount; }
+
+		void load(const nlohmann::json& source);
+		void save(nlohmann::json& output) const;
+	};
 
 } // namespace CppRL

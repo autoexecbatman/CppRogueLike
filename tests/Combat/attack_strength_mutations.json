@@ -15,44 +15,44 @@
   "mutations": [
     {
       "file": "src/AttackStrength.cpp",
-      "original": "\t\treturn Adjustment{ std::min(row.hitProb, 0), std::min(row.dmgAdj, 0) };",
-      "mutated": "\t\treturn Adjustment{ row.hitProb, std::min(row.dmgAdj, 0) };",
+      "original": "\t\t\treturn Adjustment{\n\t\t\t\tstd::min(row.hitProb, 0),\n\t\t\t\tstd::min(row.dmgAdj, 0),\n\t\t\t};",
+      "mutated": "\t\t\treturn Adjustment{\n\t\t\t\trow.hitProb,\n\t\t\t\tstd::min(row.dmgAdj, 0),\n\t\t\t};",
       "catches": "a bow taking a strong arm's hit bonus"
     },
     {
       "file": "src/AttackStrength.cpp",
-      "original": "\t\treturn Adjustment{ std::min(row.hitProb, 0), std::min(row.dmgAdj, 0) };",
-      "mutated": "\t\treturn Adjustment{ std::min(row.hitProb, 0), row.dmgAdj };",
+      "original": "\t\t\treturn Adjustment{\n\t\t\t\tstd::min(row.hitProb, 0),\n\t\t\t\tstd::min(row.dmgAdj, 0),\n\t\t\t};",
+      "mutated": "\t\t\treturn Adjustment{\n\t\t\t\tstd::min(row.hitProb, 0),\n\t\t\t\trow.dmgAdj,\n\t\t\t};",
       "catches": "a bow taking a strong arm's damage bonus"
     },
     {
       "file": "src/AttackStrength.cpp",
-      "original": "\t\treturn Adjustment{ std::min(row.hitProb, 0), std::min(row.dmgAdj, 0) };",
-      "mutated": "\t\treturn Adjustment{};",
+      "original": "\t\t\treturn Adjustment{\n\t\t\t\tstd::min(row.hitProb, 0),\n\t\t\t\tstd::min(row.dmgAdj, 0),\n\t\t\t};",
+      "mutated": "\t\t\treturn Adjustment{};",
       "catches": "a weak arm drawing a bow as well as any other"
     },
     {
       "file": "src/AttackStrength.cpp",
-      "original": "\tcase ItemClass::CROSSBOW:\n\tcase ItemClass::SLING:\n",
-      "mutated": "\tcase ItemClass::SLING:\n",
+      "original": "\t\tcase ItemClass::CROSSBOW:\n\t\tcase ItemClass::SLING:\n",
+      "mutated": "\t\tcase ItemClass::SLING:\n",
       "catches": "a crossbow taking the arm's strength"
     },
     {
       "file": "src/AttackStrength.cpp",
-      "original": "\tcase ItemClass::CROSSBOW:\n\tcase ItemClass::SLING:\n",
-      "mutated": "\tcase ItemClass::CROSSBOW:\n",
+      "original": "\t\tcase ItemClass::CROSSBOW:\n\t\tcase ItemClass::SLING:\n",
+      "mutated": "\t\tcase ItemClass::CROSSBOW:\n",
       "catches": "a sling taking the arm's strength"
     },
     {
       "file": "src/AttackStrength.cpp",
-      "original": "\tif (kind == AttackKind::MELEE || missileWeapon == nullptr)\n\t{\n\t\treturn wholeRow;\n\t}",
-      "mutated": "\tif (kind == AttackKind::MELEE)\n\t{\n\t\treturn wholeRow;\n\t}\n\tif (missileWeapon == nullptr)\n\t{\n\t\treturn Adjustment{};\n\t}",
+      "original": "\t\tif (kind == AttackKind::MELEE || missileWeapon == nullptr)\n\t\t{\n\t\t\treturn wholeRow;\n\t\t}",
+      "mutated": "\t\tif (kind == AttackKind::MELEE)\n\t\t{\n\t\t\treturn wholeRow;\n\t\t}\n\t\tif (missileWeapon == nullptr)\n\t\t{\n\t\t\treturn Adjustment{};\n\t\t}",
       "catches": "a natural or thrown missile losing the arm's strength"
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\tconst Item* missileWeapon = kind == AttackKind::RANGED ?\n\t\towner.get_equipped_item(EquipmentSlot::MISSILE_WEAPON) :\n\t\tnullptr;",
-      "mutated": "\tconst Item* missileWeapon =nullptr;",
+      "original": "\t\tconst Item* missileWeapon = kind == AttackKind::RANGED ?\n\t\t\towner.get_equipped_item(EquipmentSlot::MISSILE_WEAPON) :\n\t\t\tnullptr;",
+      "mutated": "\t\tconst Item* missileWeapon =nullptr;",
       "catches": "the attack never asking what it fires"
     },
     {
@@ -63,13 +63,13 @@
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\t\tconst int baseDamage = calculate_damage_with_backstab(\n\t\t\tdamageRoll,\n\t\t\tstrengthOnAttack.damage,\n\t\t\tbackstab,\n\t\t\tctx);",
-      "mutated": "\t\tconst int baseDamage = calculate_damage_with_backstab(\n\t\t\tdamageRoll,0,\n\t\t\tbackstab,\n\t\t\tctx);",
+      "original": "\t\t\tconst int baseDamage = calculate_damage_with_backstab(\n\t\t\t\tdamageRoll,\n\t\t\t\tstrengthOnAttack.damage,\n\t\t\t\tbackstab,\n\t\t\t\tctx);",
+      "mutated": "\t\t\tconst int baseDamage = calculate_damage_with_backstab(\n\t\t\t\tdamageRoll,0,\n\t\t\t\tbackstab,\n\t\t\t\tctx);",
       "catches": "Strength dropped from damage"
     },
     {
       "file": "src/ItemClassification.h",
-      "original": "return itemClass == ItemClass::BOW ||\n\t\t\titemClass == ItemClass::CROSSBOW || itemClass == ItemClass::SLING;",
+      "original": "return itemClass == ItemClass::BOW ||\n\t\t\t\titemClass == ItemClass::CROSSBOW ||\n\t\t\t\titemClass == ItemClass::SLING;",
       "mutated": "\t\treturn itemClass == ItemClass::BOW || itemClass == ItemClass::CROSSBOW;",
       "catches": "a sling that cannot be fired"
     },

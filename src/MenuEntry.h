@@ -11,13 +11,13 @@
 namespace CppRL
 {
 
-struct GameContext;
+	struct GameContext;
 
-struct MenuEntry
-{
-	std::string label{};
-	char hotkey{ 0 };
-	std::optional<std::function<void(GameContext&)>> command{};
-};
+	struct MenuEntry
+	{
+		std::string label{};
+		char hotkey{ 0 };
+		std::optional<std::function<void(GameContext&)>> command{};
+	};
 
 } // namespace CppRL

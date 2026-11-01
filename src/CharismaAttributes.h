@@ -3,12 +3,12 @@
 namespace CppRL
 {
 
-struct CharismaAttributes
-{
-	int Cha{};
-	int MaxHencmen{};
-	int Loyalty{};
-	int ReactionAdj{};
-};
+	struct CharismaAttributes
+	{
+		int Cha{};
+		int MaxHencmen{};
+		int Loyalty{};
+		int ReactionAdj{};
+	};
 
 } // namespace CppRL

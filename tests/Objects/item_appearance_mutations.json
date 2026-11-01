@@ -21,8 +21,8 @@
         },
         {
             "file": "src/Item.cpp",
-            "original": "\tActor(position, data),\n\tappearance(data.name)",
-            "mutated": "\tActor(position, data),\n\tappearance()",
+            "original": "\t\tActor(position, data),\n\t\tappearance(data.name)",
+            "mutated": "\t\tActor(position, data),\n\t\tappearance()",
             "catches": "an item built without a record called nothing"
         },
         {
@@ -39,8 +39,8 @@
         },
         {
             "file": "src/ItemCreator.cpp",
-            "original": "\t\titem->itemKey = std::string{ key };\n\t\titem->appearance = params.appearance;",
-            "mutated": "\t\titem->itemKey = std::string{ key };",
+            "original": "\t\t\titem->itemKey = std::string{ key };\n\t\t\titem->appearance = params.appearance;",
+            "mutated": "\t\t\titem->itemKey = std::string{ key };",
             "catches": "an item made from the data that ignores its record's appearance"
         },
         {
@@ -51,7 +51,7 @@
         },
         {
             "file": "src/ItemRegistry.cpp",
-            "original": "\t\tparams.appearance =\n\t\t\trequired_field(record, key, \"appearance\").get<std::string>();\n",
+            "original": "\t\t\tparams.appearance =\n\t\t\t\trequired_field(record, key, \"appearance\").get<std::string>();\n",
             "mutated": "",
             "catches": "a record's appearance never read"
         },
@@ -69,8 +69,8 @@
         },
         {
             "file": "src/Player.cpp",
-            "original": "\t\titem->identify_all();\n\t\treturn item;\n",
-            "mutated": "\t\treturn item;\n",
+            "original": "\t\t\titem->identify_all();\n\t\t\treturn item;\n",
+            "mutated": "\t\t\treturn item;\n",
             "catches": "a starting kit's scroll shown by its appearance to the character who packed it"
         }
     ]

@@ -29,87 +29,92 @@
 namespace CppRL
 {
 
-class TrapDamageTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	class TrapDamageTest : public ::testing::Test
 	{
-		ctx = mock.to_game_context();
-		victim.healthPool = std::make_unique<HealthPool>(40);
-		victim.set_creature_level(1);
+	protected:
+		void SetUp() override
+		{
+			ctx = mock.to_game_context();
+			victim.healthPool = std::make_unique<HealthPool>(40);
+			victim.set_creature_level(1);
+		}
+
+		// Finds the pit the way the game does, with a dwarf's search rolling a
+		// 1 on 1d6, so the trap is known and unsprung when the test proper
+		// begins. It answers what the search said; the caller asserts FOUND, so
+		// a search that did not roll stops the test before its 1 reaches
+		// another die.
+		[[nodiscard]] TrapSearchResult find(Trap& pit)
+		{
+			victim.lifespan->race = PlayerRaceState::DWARF;
+			mock.dice.set_next_roll(1);
+			return pit.search(victim, ctx);
+		}
+
+		MockGameContext mock{};
+		GameContext ctx{};
+		// The player, since a trap the player walks onto is the case a notice
+		// roll was for.
+		Player victim{ Vector2D{ 5, 5 } };
+	};
+
+	TEST_F(TrapDamageTest, APitDealsTwoSixSidedDice)
+	{
+		Trap pit{ Vector2D{ 5, 5 }, TrapType::PIT, mock.tile_config };
+		ASSERT_EQ(pit.get_damage_dice_count(), 2);
+		ASSERT_EQ(pit.get_damage_dice_size(), 6);
+
+		// The two dice are six and six; the destruction coin shows two, so the
+		// trap stays.
+		mock.dice.set_next_roll(6);
+		mock.dice.set_next_roll(6);
+		mock.dice.set_next_roll(2);
+		const int before = victim.get_hp();
+
+		pit.on_creature_enter(victim, ctx);
+
+		EXPECT_EQ(before - victim.get_hp(), 12)
+			<< "2d6 at six and six is twelve";
 	}
 
-	// Finds the pit the way the game does, with a dwarf's search rolling a 1 on 1d6, so
-	// the trap is known and unsprung when the test proper begins.
-	// It answers what the search said; the caller asserts FOUND, so a search
-	// that did not roll stops the test before its 1 reaches another die.
-	[[nodiscard]] TrapSearchResult find(Trap& pit)
+	TEST_F(TrapDamageTest, AHiddenTrapSpringsOnThePlayerWithNoRollToNoticeIt)
 	{
-		victim.lifespan->race = PlayerRaceState::DWARF;
-		mock.dice.set_next_roll(1);
-		return pit.search(victim, ctx);
+		Trap pit{ Vector2D{ 5, 5 }, TrapType::PIT, mock.tile_config };
+
+		// The dice are six and six; the coin keeps the trap. A roll to notice
+		// it would take the first six, and the damage would not be twelve.
+		mock.dice.set_next_roll(6);
+		mock.dice.set_next_roll(6);
+		mock.dice.set_next_roll(2);
+		const int before = victim.get_hp();
+
+		const EntryResult entered = pit.on_creature_enter(victim, ctx);
+
+		EXPECT_EQ(entered, EntryResult::BLOCKED)
+			<< "the victim is in the pit, not past it";
+		EXPECT_EQ(pit.get_state(), TrapState::TRIGGERED);
+		EXPECT_EQ(before - victim.get_hp(), 12)
+			<< "a hidden pit springs: 2d6 at six and six";
 	}
 
-	MockGameContext mock{};
-	GameContext ctx{};
-	// The player, since a trap the player walks onto is the case a notice roll was for.
-	Player victim{ Vector2D{ 5, 5 } };
-};
+	TEST_F(TrapDamageTest, AKnownTrapSpringsWithoutARollToNoticeIt)
+	{
+		Trap pit{ Vector2D{ 5, 5 }, TrapType::PIT, mock.tile_config };
+		ASSERT_EQ(find(pit), TrapSearchResult::FOUND);
 
-TEST_F(TrapDamageTest, APitDealsTwoSixSidedDice)
-{
-	Trap pit{ Vector2D{ 5, 5 }, TrapType::PIT, mock.tile_config };
-	ASSERT_EQ(pit.get_damage_dice_count(), 2);
-	ASSERT_EQ(pit.get_damage_dice_size(), 6);
+		// Stepping onto the known pit: the dice are six and six and the coin
+		// keeps it. A roll to notice it here would take the first six and the
+		// damage would not be twelve.
+		mock.dice.set_next_roll(6);
+		mock.dice.set_next_roll(6);
+		mock.dice.set_next_roll(2);
+		const int before = victim.get_hp();
 
-	// The two dice are six and six; the destruction coin shows two, so the trap stays.
-	mock.dice.set_next_roll(6);
-	mock.dice.set_next_roll(6);
-	mock.dice.set_next_roll(2);
-	const int before = victim.get_hp();
+		const EntryResult entered = pit.on_creature_enter(victim, ctx);
 
-	pit.on_creature_enter(victim, ctx);
-
-	EXPECT_EQ(before - victim.get_hp(), 12) << "2d6 at six and six is twelve";
-}
-
-TEST_F(TrapDamageTest, AHiddenTrapSpringsOnThePlayerWithNoRollToNoticeIt)
-{
-	Trap pit{ Vector2D{ 5, 5 }, TrapType::PIT, mock.tile_config };
-
-	// The dice are six and six; the coin keeps the trap. A roll to notice it would take
-	// the first six, and the damage would not be twelve.
-	mock.dice.set_next_roll(6);
-	mock.dice.set_next_roll(6);
-	mock.dice.set_next_roll(2);
-	const int before = victim.get_hp();
-
-	const EntryResult entered = pit.on_creature_enter(victim, ctx);
-
-	EXPECT_EQ(entered, EntryResult::BLOCKED)
-		<< "the victim is in the pit, not past it";
-	EXPECT_EQ(pit.get_state(), TrapState::TRIGGERED);
-	EXPECT_EQ(before - victim.get_hp(), 12)
-		<< "a hidden pit springs: 2d6 at six and six";
-}
-
-TEST_F(TrapDamageTest, AKnownTrapSpringsWithoutARollToNoticeIt)
-{
-	Trap pit{ Vector2D{ 5, 5 }, TrapType::PIT, mock.tile_config };
-	ASSERT_EQ(find(pit), TrapSearchResult::FOUND);
-
-	// Stepping onto the known pit: the dice are six and six and the coin keeps it. A
-	// roll to notice it here would take the first six and the damage would not be twelve.
-	mock.dice.set_next_roll(6);
-	mock.dice.set_next_roll(6);
-	mock.dice.set_next_roll(2);
-	const int before = victim.get_hp();
-
-	const EntryResult entered = pit.on_creature_enter(victim, ctx);
-
-	EXPECT_EQ(entered, EntryResult::BLOCKED);
-	EXPECT_EQ(before - victim.get_hp(), 12)
-		<< "walking onto a known trap sets it off";
-}
+		EXPECT_EQ(entered, EntryResult::BLOCKED);
+		EXPECT_EQ(before - victim.get_hp(), 12)
+			<< "walking onto a known trap sets it off";
+	}
 
 } // namespace CppRL

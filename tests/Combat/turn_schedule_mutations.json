@@ -69,14 +69,14 @@
     },
     {
       "file": "src/TurnSchedule.h",
-      "original": "\treturn timeUnits / TIME_UNITS_PER_ROUND;\n}",
-      "mutated": "\treturn timeUnits / TIME_UNITS_PER_ROUND + 1;\n}",
+      "original": "\t\treturn timeUnits / TIME_UNITS_PER_ROUND;\n\t}",
+      "mutated": "\t\treturn timeUnits / TIME_UNITS_PER_ROUND + 1;\n\t}",
       "catches": "a round counted as finished while it is still being played, so every upkeep runs a round early"
     },
     {
       "file": "src/TurnSchedule.h",
-      "original": "\tconst int remaining = clockLimit - nextActionTime;\n\tif (remaining <= 0)\n\t{\n\t\treturn 0;\n\t}\n",
-      "mutated": "\tconst int remaining = clockLimit - nextActionTime;\n",
+      "original": "\t\tconst int remaining = clockLimit - nextActionTime;\n\t\tif (remaining <= 0)\n\t\t{\n\t\t\treturn 0;\n\t\t}\n",
+      "mutated": "\t\tconst int remaining = clockLimit - nextActionTime;\n",
       "catches": "a deeply overshot being coming back a negative number of actions, which the ceiling arithmetic does on its own against a cheap cost"
     },
     {

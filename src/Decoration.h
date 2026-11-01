@@ -13,14 +13,14 @@
 namespace CppRL
 {
 
-struct Decoration
-{
-	Vector2D position{};
-	TileRef tile{};
-	std::string name{};
-	int hp{ 1 };
-	std::string lootTableKey{}; // "" = drops nothing on break
-	bool isBroken{ false };
-};
+	struct Decoration
+	{
+		Vector2D position{};
+		TileRef tile{};
+		std::string name{};
+		int hp{ 1 };
+		std::string lootTableKey{}; // "" = drops nothing on break
+		bool isBroken{ false };
+	};
 
 } // namespace CppRL

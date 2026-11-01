@@ -20,32 +20,34 @@
 namespace CppRL
 {
 
-// A whole number reads as itself, including the bounds the prompts clamp to.
-TEST(TypedSizeTest, AWholeNumberReadsAsItself)
-{
-	EXPECT_EQ(parse_typed_size("12"), std::optional<int>{ 12 });
-	EXPECT_EQ(parse_typed_size("3"), std::optional<int>{ 3 });
-	EXPECT_EQ(parse_typed_size("060"), std::optional<int>{ 60 });
-}
+	// A whole number reads as itself, including the bounds the prompts clamp
+	// to.
+	TEST(TypedSizeTest, AWholeNumberReadsAsItself)
+	{
+		EXPECT_EQ(parse_typed_size("12"), std::optional<int>{ 12 });
+		EXPECT_EQ(parse_typed_size("3"), std::optional<int>{ 3 });
+		EXPECT_EQ(parse_typed_size("060"), std::optional<int>{ 60 });
+	}
 
-// Nothing typed is not a size, so the prompt keeps the one it has.
-TEST(TypedSizeTest, NothingTypedReadsAsNothing)
-{
-	EXPECT_EQ(parse_typed_size(""), std::nullopt);
-}
+	// Nothing typed is not a size, so the prompt keeps the one it has.
+	TEST(TypedSizeTest, NothingTypedReadsAsNothing)
+	{
+		EXPECT_EQ(parse_typed_size(""), std::nullopt);
+	}
 
-// A number with anything after or before it is refused whole, never read as its prefix.
-TEST(TypedSizeTest, APartialNumberReadsAsNothing)
-{
-	EXPECT_EQ(parse_typed_size("12x"), std::nullopt);
-	EXPECT_EQ(parse_typed_size("x12"), std::nullopt);
-	EXPECT_EQ(parse_typed_size("1 2"), std::nullopt);
-}
+	// A number with anything after or before it is refused whole, never read as
+	// its prefix.
+	TEST(TypedSizeTest, APartialNumberReadsAsNothing)
+	{
+		EXPECT_EQ(parse_typed_size("12x"), std::nullopt);
+		EXPECT_EQ(parse_typed_size("x12"), std::nullopt);
+		EXPECT_EQ(parse_typed_size("1 2"), std::nullopt);
+	}
 
-// A number too large for an int is refused rather than wrapped or thrown.
-TEST(TypedSizeTest, ANumberPastAnIntReadsAsNothing)
-{
-	EXPECT_EQ(parse_typed_size("99999999999"), std::nullopt);
-}
+	// A number too large for an int is refused rather than wrapped or thrown.
+	TEST(TypedSizeTest, ANumberPastAnIntReadsAsNothing)
+	{
+		EXPECT_EQ(parse_typed_size("99999999999"), std::nullopt);
+	}
 
 } // namespace CppRL

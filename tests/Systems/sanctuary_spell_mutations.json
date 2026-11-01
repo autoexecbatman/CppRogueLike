@@ -15,32 +15,32 @@
   "mutations": [
     {
       "file": "src/SpellSystem.cpp",
-      "original": "if (!candidate->is_dead() &&\n\t\t\t\t\t\t!ctx.buffSystem->is_turned_away_by_sanctuary(\n\t\t\t\t\t\t\tcaster,\n\t\t\t\t\t\t\t*candidate,\n\t\t\t\t\t\t\tctx))",
-      "mutated": "\t\t\t\tif (!candidate->is_dead())",
+      "original": "\tif (!candidate->is_dead() &&\n\t\t\t\t\t\t\t!ctx.buffSystem->is_turned_away_by_sanctuary(\n\t\t\t\t\t\t\t\tcaster,\n\t\t\t\t\t\t\t\t*candidate,\n\t\t\t\t\t\t\t\tctx))",
+      "mutated": "\t\t\t\t\tif (!candidate->is_dead())",
       "catches": "a missile that never asks its target's Sanctuary"
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "if (!candidate->is_dead() &&\n\t\t\t\t\t\t!ctx.buffSystem->is_turned_away_by_sanctuary(\n\t\t\t\t\t\t\tcaster,\n\t\t\t\t\t\t\t*candidate,\n\t\t\t\t\t\t\tctx))",
-      "mutated": "\t\t\t\tif (!candidate->is_dead() &&(ctx.buffSystem->is_turned_away_by_sanctuary(caster, *candidate, ctx) || true))",
+      "original": "\tif (!candidate->is_dead() &&\n\t\t\t\t\t\t\t!ctx.buffSystem->is_turned_away_by_sanctuary(\n\t\t\t\t\t\t\t\tcaster,\n\t\t\t\t\t\t\t\t*candidate,\n\t\t\t\t\t\t\t\tctx))",
+      "mutated": "\t\t\t\t\tif (!candidate->is_dead() &&(ctx.buffSystem->is_turned_away_by_sanctuary(caster, *candidate, ctx) || true))",
       "catches": "a missile that asks and strikes anyway"
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "if (ctx.buffSystem\n\t\t\t\t\t\t->is_turned_away_by_sanctuary(caster, *creature, ctx))\n\t\t\t\t{\n\t\t\t\t\tcontinue;\n\t\t\t\t}",
-      "mutated": "\t\t\tif (false)\n\t\t\t{\n\t\t\t\tcontinue;\n\t\t\t}",
+      "original": "if (ctx.buffSystem->is_turned_away_by_sanctuary(\n\t\t\t\t\t\t\tcaster,\n\t\t\t\t\t\t\t*creature,\n\t\t\t\t\t\t\tctx))\n\t\t\t\t\t{\n\t\t\t\t\t\tcontinue;\n\t\t\t\t\t}",
+      "mutated": "\t\t\tif (false)\n\t\t\t{\n\t\t\t\tcontinue;\n\t\t\t\t\t}",
       "catches": "Hold Person selecting without asking"
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "if (ctx.buffSystem\n\t\t\t\t\t\t->is_turned_away_by_sanctuary(caster, *creature, ctx))\n\t\t\t\t{\n\t\t\t\t\tcontinue;\n\t\t\t\t}",
-      "mutated": "\t\t\tif (ctx.buffSystem->is_turned_away_by_sanctuary(caster, *creature, ctx))\n\t\t\t{\n\t\t\t}",
+      "original": "if (ctx.buffSystem->is_turned_away_by_sanctuary(\n\t\t\t\t\t\t\tcaster,\n\t\t\t\t\t\t\t*creature,\n\t\t\t\t\t\t\tctx))\n\t\t\t\t\t{\n\t\t\t\t\t\tcontinue;\n\t\t\t\t\t}",
+      "mutated": "\t\t\tif (ctx.buffSystem->is_turned_away_by_sanctuary(caster, *creature, ctx))\n\t\t\t{\n\t\t\t\t\t}",
       "catches": "Hold Person asking and holding anyway"
     },
     {
       "file": "src/TargetingSystem.cpp",
-      "original": "\t\tif (!ctx.buffSystem\n\t\t\t\t->is_turned_away_by_sanctuary(attacker, *candidate, ctx))",
-      "mutated": "\t\tif (true)",
+      "original": "\t\t\tif (!ctx.buffSystem\n\t\t\t\t\t->is_turned_away_by_sanctuary(attacker, *candidate, ctx))",
+      "mutated": "\t\t\tif (true)",
       "catches": "the nearest target taken whatever its Sanctuary"
     },
     {
@@ -51,8 +51,8 @@
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\tif (target &&\n\t\tctx.buffSystem->is_turned_away_by_sanctuary(reader, *target, ctx))",
-      "mutated": "\tif (false)",
+      "original": "\t\tif (target &&\n\t\t\tctx.buffSystem->is_turned_away_by_sanctuary(reader, *target, ctx))",
+      "mutated": "\t\tif (false)",
       "catches": "a confusion scroll read at a warded creature without asking"
     },
     {

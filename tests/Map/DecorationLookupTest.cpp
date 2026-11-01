@@ -30,72 +30,75 @@
 namespace CppRL
 {
 
-namespace
-{
-	constexpr Vector2D THE_TILE{ 5, 5 };
-	constexpr Vector2D ANOTHER_TILE{ 9, 9 };
-} // namespace
-
-class DecorationLookupTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	namespace
 	{
-		ctx = mock.to_game_context();
-		ctx.decorations = &decorations;
+		constexpr Vector2D THE_TILE{ 5, 5 };
+		constexpr Vector2D ANOTHER_TILE{ 9, 9 };
+	} // namespace
+
+	class DecorationLookupTest : public ::testing::Test
+	{
+	protected:
+		void SetUp() override
+		{
+			ctx = mock.to_game_context();
+			ctx.decorations = &decorations;
+		}
+
+		// Puts a decoration on a tile and hands it back, so a test can break
+		// it.
+		Decoration& standing_at(Vector2D where)
+		{
+			auto decoration = std::make_unique<Decoration>();
+			decoration->position = where;
+			decoration->name = "barrel";
+			Decoration* placed = decoration.get();
+			decorations.push_back(std::move(decoration));
+			return *placed;
+		}
+
+		MockGameContext mock{};
+		GameContext ctx{};
+		std::vector<std::unique_ptr<Decoration>> decorations{};
+		Map map{ 20, 20 };
+	};
+
+	TEST_F(DecorationLookupTest, ADecorationOnTheTileIsFound)
+	{
+		Decoration& barrel = standing_at(THE_TILE);
+
+		EXPECT_EQ(map.find_decoration_at(THE_TILE, ctx), &barrel);
 	}
 
-	// Puts a decoration on a tile and hands it back, so a test can break it.
-	Decoration& standing_at(Vector2D where)
+	TEST_F(DecorationLookupTest, ADecorationOnAnotherTileIsNotFound)
 	{
-		auto decoration = std::make_unique<Decoration>();
-		decoration->position = where;
-		decoration->name = "barrel";
-		Decoration* placed = decoration.get();
-		decorations.push_back(std::move(decoration));
-		return *placed;
+		standing_at(ANOTHER_TILE);
+
+		EXPECT_EQ(map.find_decoration_at(THE_TILE, ctx), nullptr)
+			<< "a decoration was found on a tile it is not on";
 	}
 
-	MockGameContext mock{};
-	GameContext ctx{};
-	std::vector<std::unique_ptr<Decoration>> decorations{};
-	Map map{ 20, 20 };
-};
+	// A broken decoration stays in the list until the loop sweeps it, so the
+	// lookup has to skip it rather than report a barrel that is no longer
+	// there.
+	TEST_F(DecorationLookupTest, ABrokenDecorationIsNotFound)
+	{
+		Decoration& barrel = standing_at(THE_TILE);
+		barrel.isBroken = true;
 
-TEST_F(DecorationLookupTest, ADecorationOnTheTileIsFound)
-{
-	Decoration& barrel = standing_at(THE_TILE);
+		EXPECT_EQ(map.find_decoration_at(THE_TILE, ctx), nullptr)
+			<< "a broken decoration was reported as standing";
+	}
 
-	EXPECT_EQ(map.find_decoration_at(THE_TILE, ctx), &barrel);
-}
+	// The first unbroken one wins, so a broken barrel does not hide a whole one
+	// beneath it.
+	TEST_F(DecorationLookupTest, ABrokenOneDoesNotHideAWholeOneOnTheSameTile)
+	{
+		Decoration& broken = standing_at(THE_TILE);
+		broken.isBroken = true;
+		Decoration& whole = standing_at(THE_TILE);
 
-TEST_F(DecorationLookupTest, ADecorationOnAnotherTileIsNotFound)
-{
-	standing_at(ANOTHER_TILE);
-
-	EXPECT_EQ(map.find_decoration_at(THE_TILE, ctx), nullptr)
-		<< "a decoration was found on a tile it is not on";
-}
-
-// A broken decoration stays in the list until the loop sweeps it, so the lookup has
-// to skip it rather than report a barrel that is no longer there.
-TEST_F(DecorationLookupTest, ABrokenDecorationIsNotFound)
-{
-	Decoration& barrel = standing_at(THE_TILE);
-	barrel.isBroken = true;
-
-	EXPECT_EQ(map.find_decoration_at(THE_TILE, ctx), nullptr)
-		<< "a broken decoration was reported as standing";
-}
-
-// The first unbroken one wins, so a broken barrel does not hide a whole one beneath it.
-TEST_F(DecorationLookupTest, ABrokenOneDoesNotHideAWholeOneOnTheSameTile)
-{
-	Decoration& broken = standing_at(THE_TILE);
-	broken.isBroken = true;
-	Decoration& whole = standing_at(THE_TILE);
-
-	EXPECT_EQ(map.find_decoration_at(THE_TILE, ctx), &whole);
-}
+		EXPECT_EQ(map.find_decoration_at(THE_TILE, ctx), &whole);
+	}
 
 } // namespace CppRL

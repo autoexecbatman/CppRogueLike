@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/InventoryOperations.h",
-      "original": "\t\tfor (const auto& itemJson : source.at(\"inventory\"))\n\t\t{\n\t\t\tauto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});\n\t\t\titem->load(itemJson);\n\t\t\tinventory.items.push_back(std::move(item));\n\t\t}",
-      "mutated": "\t\tfor (const auto& itemJson : source.at(\"inventory\"))\n\t\t{\n\t\t\tauto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});\n\t\t\ttry { item->load(itemJson); } catch (const std::exception&) { break; }\n\t\t\tinventory.items.push_back(std::move(item));\n\t\t}",
+      "original": "\t\t\tfor (const auto& itemJson : source.at(\"inventory\"))\n\t\t\t{\n\t\t\t\tauto item =\n\t\t\t\t\tstd::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});\n\t\t\t\titem->load(itemJson);\n\t\t\t\tinventory.items.push_back(std::move(item));\n\t\t\t}",
+      "mutated": "\t\t\tfor (const auto& itemJson : source.at(\"inventory\"))\n\t\t\t{\n\t\t\t\tauto item =\n\t\t\t\t\tstd::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});\n\t\t\t\ttry { item->load(itemJson); } catch (const std::exception&) { break; }\n\t\t\t\tinventory.items.push_back(std::move(item));\n\t\t\t}",
       "catches": "a broken item swallowed again, the inventory silently cut short at it"
     },
     {

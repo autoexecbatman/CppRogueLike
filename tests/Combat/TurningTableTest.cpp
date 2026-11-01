@@ -24,305 +24,313 @@
 namespace CppRL
 {
 
-namespace
-{
-	// Table 61's columns as the book heads them: "1" through "9", then "10-11",
-	// "12-13" and "14+".
-	constexpr int PRINTED_COLUMNS = 12;
-
-	// The priest levels one printed column covers. The three that cover two
-	// levels are the reason this exists.
-	struct ColumnSpan
+	namespace
 	{
-		int firstLevel{ 0 };
-		int lastLevel{ 0 };
-	};
+		// Table 61's columns as the book heads them: "1" through "9", then
+		// "10-11", "12-13" and "14+".
+		constexpr int PRINTED_COLUMNS = 12;
 
-	constexpr std::array<ColumnSpan, PRINTED_COLUMNS> COLUMN_SPANS = { {
-		{ 1, 1 },
-		{ 2, 2 },
-		{ 3, 3 },
-		{ 4, 4 },
-		{ 5, 5 },
-		{ 6, 6 },
-		{ 7, 7 },
-		{ 8, 8 },
-		{ 9, 9 },
-		{ 10, 11 },
-		{ 12, 13 },
-		{ 14, 14 },
-	} };
-
-	struct PrintedRow
-	{
-		int hitDice{ 0 };
-		std::array<std::string_view, PRINTED_COLUMNS> cells{};
-	};
-
-	// One printed row's twelve cells from its two halves, levels 1 to 7 and 8
-	// to 14+, in the order the page prints them.
-	constexpr std::array<std::string_view, PRINTED_COLUMNS> cells_of(
-		const std::array<std::string_view, 7>& levelsOneToSeven,
-		const std::array<std::string_view, 5>& levelsEightUp)
-	{
-		std::array<std::string_view, PRINTED_COLUMNS> cells{};
-		// The first seven columns, then the five after them.
-		std::ranges::copy(levelsOneToSeven, cells.begin());
-		std::ranges::copy(levelsEightUp, cells.begin() + 7);
-		return cells;
-	}
-
-	// Transcribed from the page. The book's "D*" turns an extra 2d4 creatures
-	// of the type, which the lookup does not distinguish, so it is written here
-	// as the "D" it is read as. Its "Zombie", "Ghast" and "Special" rows name a
-	// creature rather than a number and have no place in a table indexed by hit
-	// dice.
-	constexpr std::array<PrintedRow, 11> PRINTED_TABLE = { {
-		// Each row: hit dice, the cells for priest levels 1 to 7, then the
-		// cells for 8, 9, 10-11, 12-13 and 14+.
+		// The priest levels one printed column covers. The three that cover two
+		// levels are the reason this exists.
+		struct ColumnSpan
 		{
-			1,
-			cells_of(
-				{ "10", "7", "4", "T", "T", "D", "D" },
-				{ "D", "D", "D", "D", "D" }),
-		},
-		{
-			2,
-			cells_of(
-				{ "16", "13", "10", "7", "4", "T", "T" },
-				{ "D", "D", "D", "D", "D" }),
-		},
-		{
-			3,
-			cells_of(
-				{ "19", "16", "13", "10", "7", "4", "T" },
-				{ "T", "D", "D", "D", "D" }),
-		},
-		{
-			4,
-			cells_of(
-				{ "19", "16", "13", "10", "7", "4", "T" },
-				{ "T", "D", "D", "D", "D" }),
-		},
-		{
-			5,
-			cells_of(
-				{ "20", "19", "16", "13", "10", "7", "4" },
-				{ "T", "T", "D", "D", "D" }),
-		},
-		{
-			6,
-			cells_of(
-				{ "--", "--", "20", "19", "16", "13", "10" },
-				{ "7", "4", "T", "T", "D" }),
-		},
-		{
-			7,
-			cells_of(
-				{ "--", "--", "--", "20", "19", "16", "13" },
-				{ "10", "7", "4", "T", "T" }),
-		},
-		{
-			8,
-			cells_of(
-				{ "--", "--", "--", "--", "20", "19", "16" },
-				{ "13", "10", "7", "4", "T" }),
-		},
-		{
-			9,
-			cells_of(
-				{ "--", "--", "--", "--", "--", "20", "19" },
-				{ "16", "13", "10", "7", "4" }),
-		},
-		{
-			10,
-			cells_of(
-				{ "--", "--", "--", "--", "--", "--", "20" },
-				{ "19", "16", "13", "10", "7" }),
-		},
-		{
-			11,
-			cells_of(
-				{ "--", "--", "--", "--", "--", "--", "--" },
-				{ "20", "19", "16", "13", "10" }),
-		},
-	} };
-
-	// Reads one printed cell - a dash, a letter or a d20 target - into what the
-	// lookup owes for it.
-	TurningResult expected_from_printed(std::string_view printed)
-	{
-		if (printed == "--")
-		{
-			return TurningResult{ TurningOutcome::BEYOND_POWER, 0 };
-		}
-		if (printed == "T")
-		{
-			return TurningResult{ TurningOutcome::ALWAYS_TURNED, 0 };
-		}
-		if (printed == "D")
-		{
-			return TurningResult{ TurningOutcome::DESTROYED, 0 };
-		}
-		return TurningResult{
-			TurningOutcome::ROLL_REQUIRED,
-			std::stoi(std::string(printed)),
+			int firstLevel{ 0 };
+			int lastLevel{ 0 };
 		};
-	}
-} // namespace
 
-// Every cell of the page, against every priest level the cell's column covers.
-// The worked example below checks one column; this checks all twelve, and it is
-// the only test that can see a column heading being read as a single level.
-TEST(TurningTableTest, EveryCellMatchesThePrintedTable)
-{
-	for (const PrintedRow& row : PRINTED_TABLE)
-	{
-		for (size_t column = 0; column < PRINTED_COLUMNS; ++column)
+		constexpr std::array<ColumnSpan, PRINTED_COLUMNS> COLUMN_SPANS = { {
+			{ 1, 1 },
+			{ 2, 2 },
+			{ 3, 3 },
+			{ 4, 4 },
+			{ 5, 5 },
+			{ 6, 6 },
+			{ 7, 7 },
+			{ 8, 8 },
+			{ 9, 9 },
+			{ 10, 11 },
+			{ 12, 13 },
+			{ 14, 14 },
+		} };
+
+		struct PrintedRow
 		{
-			const ColumnSpan span = COLUMN_SPANS[column];
-			const std::string_view printed = row.cells[column];
-			const TurningResult expected = expected_from_printed(printed);
+			int hitDice{ 0 };
+			std::array<std::string_view, PRINTED_COLUMNS> cells{};
+		};
 
-			for (int level = span.firstLevel; level <= span.lastLevel; ++level)
+		// One printed row's twelve cells from its two halves, levels 1 to 7 and
+		// 8 to 14+, in the order the page prints them.
+		constexpr std::array<std::string_view, PRINTED_COLUMNS> cells_of(
+			const std::array<std::string_view, 7>& levelsOneToSeven,
+			const std::array<std::string_view, 5>& levelsEightUp)
+		{
+			std::array<std::string_view, PRINTED_COLUMNS> cells{};
+			// The first seven columns, then the five after them.
+			std::ranges::copy(levelsOneToSeven, cells.begin());
+			std::ranges::copy(levelsEightUp, cells.begin() + 7);
+			return cells;
+		}
+
+		// Transcribed from the page. The book's "D*" turns an extra 2d4
+		// creatures of the type, which the lookup does not distinguish, so it
+		// is written here as the "D" it is read as. Its "Zombie", "Ghast" and
+		// "Special" rows name a creature rather than a number and have no place
+		// in a table indexed by hit dice.
+		constexpr std::array<PrintedRow, 11> PRINTED_TABLE = { {
+			// Each row: hit dice, the cells for priest levels 1 to 7, then the
+			// cells for 8, 9, 10-11, 12-13 and 14+.
 			{
-				const TurningResult actual =
-					look_up_turning(row.hitDice, level);
+				1,
+				cells_of(
+					{ "10", "7", "4", "T", "T", "D", "D" },
+					{ "D", "D", "D", "D", "D" }),
+			},
+			{
+				2,
+				cells_of(
+					{ "16", "13", "10", "7", "4", "T", "T" },
+					{ "D", "D", "D", "D", "D" }),
+			},
+			{
+				3,
+				cells_of(
+					{ "19", "16", "13", "10", "7", "4", "T" },
+					{ "T", "D", "D", "D", "D" }),
+			},
+			{
+				4,
+				cells_of(
+					{ "19", "16", "13", "10", "7", "4", "T" },
+					{ "T", "D", "D", "D", "D" }),
+			},
+			{
+				5,
+				cells_of(
+					{ "20", "19", "16", "13", "10", "7", "4" },
+					{ "T", "T", "D", "D", "D" }),
+			},
+			{
+				6,
+				cells_of(
+					{ "--", "--", "20", "19", "16", "13", "10" },
+					{ "7", "4", "T", "T", "D" }),
+			},
+			{
+				7,
+				cells_of(
+					{ "--", "--", "--", "20", "19", "16", "13" },
+					{ "10", "7", "4", "T", "T" }),
+			},
+			{
+				8,
+				cells_of(
+					{ "--", "--", "--", "--", "20", "19", "16" },
+					{ "13", "10", "7", "4", "T" }),
+			},
+			{
+				9,
+				cells_of(
+					{ "--", "--", "--", "--", "--", "20", "19" },
+					{ "16", "13", "10", "7", "4" }),
+			},
+			{
+				10,
+				cells_of(
+					{ "--", "--", "--", "--", "--", "--", "20" },
+					{ "19", "16", "13", "10", "7" }),
+			},
+			{
+				11,
+				cells_of(
+					{ "--", "--", "--", "--", "--", "--", "--" },
+					{ "20", "19", "16", "13", "10" }),
+			},
+		} };
 
-				EXPECT_EQ(actual.outcome, expected.outcome)
-					<< row.hitDice << " HD against a level " << level
-					<< " priest: the book prints " << printed;
-				EXPECT_EQ(actual.rollNeeded, expected.rollNeeded)
-					<< row.hitDice << " HD against a level " << level
-					<< " priest: the book prints " << printed;
+		// Reads one printed cell - a dash, a letter or a d20 target - into what
+		// the lookup owes for it.
+		TurningResult expected_from_printed(std::string_view printed)
+		{
+			if (printed == "--")
+			{
+				return TurningResult{ TurningOutcome::BEYOND_POWER, 0 };
+			}
+			if (printed == "T")
+			{
+				return TurningResult{ TurningOutcome::ALWAYS_TURNED, 0 };
+			}
+			if (printed == "D")
+			{
+				return TurningResult{ TurningOutcome::DESTROYED, 0 };
+			}
+			return TurningResult{
+				TurningOutcome::ROLL_REQUIRED,
+				std::stoi(std::string(printed)),
+			};
+		}
+	} // namespace
+
+	// Every cell of the page, against every priest level the cell's column
+	// covers. The worked example below checks one column; this checks all
+	// twelve, and it is the only test that can see a column heading being read
+	// as a single level.
+	TEST(TurningTableTest, EveryCellMatchesThePrintedTable)
+	{
+		for (const PrintedRow& row : PRINTED_TABLE)
+		{
+			for (size_t column = 0; column < PRINTED_COLUMNS; ++column)
+			{
+				const ColumnSpan span = COLUMN_SPANS[column];
+				const std::string_view printed = row.cells[column];
+				const TurningResult expected = expected_from_printed(printed);
+
+				for (
+					int level = span.firstLevel; level <= span.lastLevel;
+					++level)
+				{
+					const TurningResult actual =
+						look_up_turning(row.hitDice, level);
+
+					EXPECT_EQ(actual.outcome, expected.outcome)
+						<< row.hitDice << " HD against a level " << level
+						<< " priest: the book prints " << printed;
+					EXPECT_EQ(actual.rollNeeded, expected.rollNeeded)
+						<< row.hitDice << " HD against a level " << level
+						<< " priest: the book prints " << printed;
+				}
 			}
 		}
 	}
-}
 
-// The book's own example: Gorus, a 7th-level priest, rolls 12 against two
-// skeletons led by a wight and a spectre. "The skeletons are destroyed... The
-// wight is turned (a 4 or better was needed) and flees. The spectre, however,
-// continues forward undaunted (since a 16 was needed)."
-TEST(TurningTableTest, ReproducesTheBooksWorkedExample)
-{
-	constexpr int gorusLevel = 7;
-	constexpr int roll = 12;
-
-	const TurningResult skeleton = look_up_turning(1, gorusLevel);
-	EXPECT_EQ(skeleton.outcome, TurningOutcome::DESTROYED)
-		<< "skeletons are destroyed";
-
-	const TurningResult wight = look_up_turning(5, gorusLevel);
-	EXPECT_EQ(wight.outcome, TurningOutcome::ROLL_REQUIRED);
-	EXPECT_EQ(wight.rollNeeded, 4) << "the book says a 4 or better was needed";
-	EXPECT_GE(roll, wight.rollNeeded) << "so Gorus turns the wight";
-
-	const TurningResult spectre = look_up_turning(8, gorusLevel);
-	EXPECT_EQ(spectre.outcome, TurningOutcome::ROLL_REQUIRED);
-	EXPECT_EQ(spectre.rollNeeded, 16) << "the book says a 16 was needed";
-	EXPECT_LT(roll, spectre.rollNeeded) << "so the spectre is undaunted";
-}
-
-// A first-level priest against the weakest undead: the table's top-left corner.
-TEST(TurningTableTest, NovicePriestNeedsTenAgainstASkeleton)
-{
-	const TurningResult result = look_up_turning(1, 1);
-
-	EXPECT_EQ(result.outcome, TurningOutcome::ROLL_REQUIRED);
-	EXPECT_EQ(result.rollNeeded, 10);
-}
-
-// A dash in the book means the attempt is not possible at all.
-TEST(TurningTableTest, WeakPriestCannotTouchPowerfulUndead)
-{
-	EXPECT_EQ(look_up_turning(11, 1).outcome, TurningOutcome::BEYOND_POWER)
-		<< "lich vs level 1";
-	EXPECT_EQ(look_up_turning(6, 2).outcome, TurningOutcome::BEYOND_POWER)
-		<< "6 HD vs level 2";
-}
-
-// Turning improves monotonically with level: a priest never does worse against
-// the same undead by gaining a level.
-TEST(TurningTableTest, TurningNeverWorsensWithLevel)
-{
-	// Ordered from least to most effective, so a later column never ranks lower.
-	const auto rank = [](TurningResult result)
+	// The book's own example: Gorus, a 7th-level priest, rolls 12 against two
+	// skeletons led by a wight and a spectre. "The skeletons are destroyed...
+	// The wight is turned (a 4 or better was needed) and flees. The spectre,
+	// however, continues forward undaunted (since a 16 was needed)."
+	TEST(TurningTableTest, ReproducesTheBooksWorkedExample)
 	{
-		switch (result.outcome)
-		{
-		case TurningOutcome::BEYOND_POWER:
-		{
-			return 0;
-		}
-		case TurningOutcome::ROLL_REQUIRED:
-		{
-			// A lower target is better, so rank rises as the target falls.
-			return 21 - result.rollNeeded;
-		}
-		case TurningOutcome::ALWAYS_TURNED:
-		{
-			return 100;
-		}
-		case TurningOutcome::DESTROYED:
-		{
-			return 200;
-		}
-		}
-		return 0;
-	};
+		constexpr int gorusLevel = 7;
+		constexpr int roll = 12;
 
-	for (
-		int hitDice = TURNING_MIN_HIT_DICE; hitDice <= TURNING_MAX_HIT_DICE;
-		++hitDice)
-	{
-		for (int level = 1; level < TURNING_MAX_PRIEST_LEVEL; ++level)
-		{
-			EXPECT_LE(
-				rank(look_up_turning(hitDice, level)),
-				rank(look_up_turning(hitDice, level + 1)))
-				<< "got worse at " << hitDice << " HD going from level "
-				<< level << " to " << level + 1;
-		}
+		const TurningResult skeleton = look_up_turning(1, gorusLevel);
+		EXPECT_EQ(skeleton.outcome, TurningOutcome::DESTROYED)
+			<< "skeletons are destroyed";
+
+		const TurningResult wight = look_up_turning(5, gorusLevel);
+		EXPECT_EQ(wight.outcome, TurningOutcome::ROLL_REQUIRED);
+		EXPECT_EQ(wight.rollNeeded, 4)
+			<< "the book says a 4 or better was needed";
+		EXPECT_GE(roll, wight.rollNeeded) << "so Gorus turns the wight";
+
+		const TurningResult spectre = look_up_turning(8, gorusLevel);
+		EXPECT_EQ(spectre.outcome, TurningOutcome::ROLL_REQUIRED);
+		EXPECT_EQ(spectre.rollNeeded, 16) << "the book says a 16 was needed";
+		EXPECT_LT(roll, spectre.rollNeeded) << "so the spectre is undaunted";
 	}
-}
 
-// Tougher undead are never easier to turn at a fixed priest level.
-TEST(TurningTableTest, TougherUndeadAreNeverEasier)
-{
-	for (int level = 1; level <= TURNING_MAX_PRIEST_LEVEL; ++level)
+	// A first-level priest against the weakest undead: the table's top-left
+	// corner.
+	TEST(TurningTableTest, NovicePriestNeedsTenAgainstASkeleton)
 	{
+		const TurningResult result = look_up_turning(1, 1);
+
+		EXPECT_EQ(result.outcome, TurningOutcome::ROLL_REQUIRED);
+		EXPECT_EQ(result.rollNeeded, 10);
+	}
+
+	// A dash in the book means the attempt is not possible at all.
+	TEST(TurningTableTest, WeakPriestCannotTouchPowerfulUndead)
+	{
+		EXPECT_EQ(look_up_turning(11, 1).outcome, TurningOutcome::BEYOND_POWER)
+			<< "lich vs level 1";
+		EXPECT_EQ(look_up_turning(6, 2).outcome, TurningOutcome::BEYOND_POWER)
+			<< "6 HD vs level 2";
+	}
+
+	// Turning improves monotonically with level: a priest never does worse
+	// against the same undead by gaining a level.
+	TEST(TurningTableTest, TurningNeverWorsensWithLevel)
+	{
+		// Ordered from least to most effective, so a later column never ranks
+		// lower.
+		const auto rank = [](TurningResult result)
+		{
+			switch (result.outcome)
+			{
+			case TurningOutcome::BEYOND_POWER:
+			{
+				return 0;
+			}
+			case TurningOutcome::ROLL_REQUIRED:
+			{
+				// A lower target is better, so rank rises as the target falls.
+				return 21 - result.rollNeeded;
+			}
+			case TurningOutcome::ALWAYS_TURNED:
+			{
+				return 100;
+			}
+			case TurningOutcome::DESTROYED:
+			{
+				return 200;
+			}
+			}
+			return 0;
+		};
+
 		for (
-			int hitDice = TURNING_MIN_HIT_DICE; hitDice < TURNING_MAX_HIT_DICE;
+			int hitDice = TURNING_MIN_HIT_DICE; hitDice <= TURNING_MAX_HIT_DICE;
 			++hitDice)
 		{
-			const TurningResult easier = look_up_turning(hitDice, level);
-			const TurningResult harder = look_up_turning(hitDice + 1, level);
-
-			if (easier.outcome == TurningOutcome::ROLL_REQUIRED &&
-				harder.outcome == TurningOutcome::ROLL_REQUIRED)
+			for (int level = 1; level < TURNING_MAX_PRIEST_LEVEL; ++level)
 			{
-				EXPECT_LE(easier.rollNeeded, harder.rollNeeded)
-					<< hitDice + 1 << " HD was easier than " << hitDice
-					<< " at level " << level;
+				EXPECT_LE(
+					rank(look_up_turning(hitDice, level)),
+					rank(look_up_turning(hitDice, level + 1)))
+					<< "got worse at " << hitDice << " HD going from level "
+					<< level << " to " << level + 1;
 			}
 		}
 	}
-}
 
-// Beyond the table's edges the book's "11+ HD" and "14+" columns take over.
-TEST(TurningTableTest, BeyondTheTableEdgesClamp)
-{
-	EXPECT_EQ(
-		look_up_turning(40, 14).rollNeeded,
-		look_up_turning(11, 14).rollNeeded)
-		<< "a 40 HD undead turns as the hardest row";
-	EXPECT_EQ(
-		look_up_turning(11, 99).rollNeeded,
-		look_up_turning(11, 14).rollNeeded)
-		<< "a level 99 priest turns as the last column";
-	EXPECT_EQ(look_up_turning(1, 0).outcome, TurningOutcome::BEYOND_POWER)
-		<< "level 0 can turn nothing";
-}
+	// Tougher undead are never easier to turn at a fixed priest level.
+	TEST(TurningTableTest, TougherUndeadAreNeverEasier)
+	{
+		for (int level = 1; level <= TURNING_MAX_PRIEST_LEVEL; ++level)
+		{
+			for (
+				int hitDice = TURNING_MIN_HIT_DICE;
+				hitDice < TURNING_MAX_HIT_DICE;
+				++hitDice)
+			{
+				const TurningResult easier = look_up_turning(hitDice, level);
+				const TurningResult harder =
+					look_up_turning(hitDice + 1, level);
+
+				if (easier.outcome == TurningOutcome::ROLL_REQUIRED &&
+					harder.outcome == TurningOutcome::ROLL_REQUIRED)
+				{
+					EXPECT_LE(easier.rollNeeded, harder.rollNeeded)
+						<< hitDice + 1 << " HD was easier than " << hitDice
+						<< " at level " << level;
+				}
+			}
+		}
+	}
+
+	// Beyond the table's edges the book's "11+ HD" and "14+" columns take over.
+	TEST(TurningTableTest, BeyondTheTableEdgesClamp)
+	{
+		EXPECT_EQ(
+			look_up_turning(40, 14).rollNeeded,
+			look_up_turning(11, 14).rollNeeded)
+			<< "a 40 HD undead turns as the hardest row";
+		EXPECT_EQ(
+			look_up_turning(11, 99).rollNeeded,
+			look_up_turning(11, 14).rollNeeded)
+			<< "a level 99 priest turns as the last column";
+		EXPECT_EQ(look_up_turning(1, 0).outcome, TurningOutcome::BEYOND_POWER)
+			<< "level 0 can turn nothing";
+	}
 
 } // namespace CppRL

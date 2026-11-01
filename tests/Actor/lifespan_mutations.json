@@ -33,8 +33,8 @@
     },
     {
       "file": "src/Lifespan.cpp",
-      "original": "DiceExpr{ 3, 20, 0 },\n\t\t\t62,\n\t\t\t83,\n\t\t\t125,\n\t\t};",
-      "mutated": "DiceExpr{ 3, 20, 0 },\n\t\t\t63,\n\t\t\t83,\n\t\t\t125,\n\t\t};",
+      "original": "\tDiceExpr{ 3, 20, 0 },\n\t\t\t\t62,\n\t\t\t\t83,\n\t\t\t\t125,\n\t\t\t};",
+      "mutated": "\tDiceExpr{ 3, 20, 0 },\n\t\t\t\t63,\n\t\t\t\t83,\n\t\t\t\t125,\n\t\t\t};",
       "catches": "the half-elf's middle age as the fraction rounded up instead of the printed 62"
     },
     {
@@ -51,20 +51,20 @@
     },
     {
       "file": "src/Lifespan.cpp",
-      "original": "\tconst int startingAge =\n\t\trow->startingBase + roll_dice(&dice, row->startingVariable);",
-      "mutated": "\tconst int startingAge =\n\t\trow->startingBase;",
+      "original": "\t\tconst int startingAge =\n\t\t\trow->startingBase + roll_dice(&dice, row->startingVariable);",
+      "mutated": "\t\tconst int startingAge =\n\t\t\trow->startingBase;",
       "catches": "the starting age's die never rolled"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\t\tcount_addition(\n\t\t\t\tageing_change(*lifespan, *ability, exceptionalStrength));",
+      "original": "\t\t\t\tcount_addition(\n\t\t\t\t\tageing_change(*lifespan, *ability, exceptionalStrength));",
       "mutated": "",
       "catches": "the ability scores never reading the age"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tint exceptional = lifespan ?\n\t\taged_exceptional_strength(*lifespan, exceptionalStrength) :\n\t\texceptionalStrength;",
-      "mutated": "\tint exceptional =exceptionalStrength;",
+      "original": "\t\tint exceptional = lifespan ?\n\t\t\taged_exceptional_strength(*lifespan, exceptionalStrength) :\n\t\t\texceptionalStrength;",
+      "mutated": "\t\tint exceptional =exceptionalStrength;",
       "catches": "the exceptional percentile never reading the age"
     },
     {
@@ -75,8 +75,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tctx.messageSystem->message(\n\t\t\tColorPairId::RED_BLACK,\n\t\t\t\"You die of old age.\",\n\t\t\tMessageCompletion::FINISHED);\n\t\tdie(ctx);\n",
-      "mutated": "\t\tctx.messageSystem->message(\n\t\t\tColorPairId::RED_BLACK,\n\t\t\t\"You die of old age.\",\n\t\t\tMessageCompletion::FINISHED);\n",
+      "original": "\t\t\tctx.messageSystem->message(\n\t\t\t\tColorPairId::RED_BLACK,\n\t\t\t\t\"You die of old age.\",\n\t\t\t\tMessageCompletion::FINISHED);\n\t\t\tdie(ctx);\n",
+      "mutated": "\t\t\tctx.messageSystem->message(\n\t\t\t\tColorPairId::RED_BLACK,\n\t\t\t\t\"You die of old age.\",\n\t\t\t\tMessageCompletion::FINISHED);\n",
       "catches": "reaching the maximum age and living on"
     },
     {
@@ -105,7 +105,7 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": "\t\tthrow std::runtime_error(\n\t\t\t\"Player::load: a player record with no lifespan\");",
+      "original": "\t\t\tthrow std::runtime_error(\n\t\t\t\t\"Player::load: a player record with no lifespan\");",
       "mutated": "",
       "catches": "a player loaded with no lifespan, which every race read then trips on"
     },

@@ -19,163 +19,170 @@
 namespace CppRL
 {
 
-ListMenu::ListMenu(
-	std::string title,
-	std::vector<MenuEntry> entries,
-	std::function<void(GameContext&)> onEscape,
-	std::function<void(GameContext&)> onFrame,
-	GameContext& ctx) :
-	title{ std::move(title) },
-	entries{ std::move(entries) },
-	onEscape{ std::move(onEscape) },
-	onFrame{ std::move(onFrame) }
-{
-	assert(ctx.renderer && "ListMenu: renderer required before construction");
-	const int tileSize = ctx.renderer->get_tile_size();
-	const int fontSize = ctx.renderer->get_font_size();
-
-	// Sized from what the text measures, never from how many characters it has.
-	// A character count handed to menu_new is read as a count of 64-pixel tiles.
-	int widestText = ctx.renderer->measure_text(this->title);
-	for (const auto& entry : this->entries)
+	ListMenu::ListMenu(
+		std::string title,
+		std::vector<MenuEntry> entries,
+		std::function<void(GameContext&)> onEscape,
+		std::function<void(GameContext&)> onFrame,
+		GameContext& ctx) :
+		title{ std::move(title) },
+		entries{ std::move(entries) },
+		onEscape{ std::move(onEscape) },
+		onFrame{ std::move(onFrame) }
 	{
-		widestText =
-			std::max(widestText, ctx.renderer->measure_text(entry.label));
-	}
+		assert(
+			ctx.renderer && "ListMenu: renderer required before construction");
+		const int tileSize = ctx.renderer->get_tile_size();
+		const int fontSize = ctx.renderer->get_font_size();
 
-	menuWidth =
-		static_cast<size_t>(panel_tiles_for_text_width(widestText, tileSize));
-	menuHeight = static_cast<size_t>(panel_tiles_for_text_rows(
-		static_cast<int>(this->entries.size()),
-		tileSize,
-		fontSize));
-
-	int vcols = ctx.renderer->get_viewport_cols();
-	int vrows = ctx.renderer->get_viewport_rows();
-	int startX = (vcols - static_cast<int>(menuWidth)) / 2;
-	int startY = (vrows - static_cast<int>(menuHeight)) / 2;
-	menuStartX = static_cast<size_t>(startX < 0 ? 0 : startX);
-	menuStartY = static_cast<size_t>(startY < 0 ? 0 : startY);
-	menu_new(menuWidth, menuHeight, menuStartX, menuStartY, ctx);
-}
-
-void ListMenu::draw_entries()
-{
-	for (size_t entryIndex = 0; entryIndex < entries.size(); ++entryIndex)
-	{
-		if (cursorIndex == entryIndex)
+		// Sized from what the text measures, never from how many characters it
+		// has. A character count handed to menu_new is read as a count of
+		// 64-pixel tiles.
+		int widestText = ctx.renderer->measure_text(this->title);
+		for (const auto& entry : this->entries)
 		{
-			menu_highlight_on();
+			widestText =
+				std::max(widestText, ctx.renderer->measure_text(entry.label));
 		}
-		menu_print(1, static_cast<int>(entryIndex), entries[entryIndex].label);
-		if (cursorIndex == entryIndex)
-		{
-			menu_highlight_off();
-		}
-	}
-}
 
-void ListMenu::draw()
-{
-	menu_draw_box();
-	menu_draw_title(title, ColorPairId::YELLOW_BLACK);
-	draw_entries();
-}
+		menuWidth = static_cast<size_t>(
+			panel_tiles_for_text_width(widestText, tileSize));
+		menuHeight = static_cast<size_t>(panel_tiles_for_text_rows(
+			static_cast<int>(this->entries.size()),
+			tileSize,
+			fontSize));
 
-void ListMenu::on_key(GameContext& ctx)
-{
-	if (lastKey == GameKey::UP || lastKey == GameKey::W)
-	{
-		cursorIndex = (cursorIndex + entries.size() - 1) % entries.size();
+		int vcols = ctx.renderer->get_viewport_cols();
+		int vrows = ctx.renderer->get_viewport_rows();
+		int startX = (vcols - static_cast<int>(menuWidth)) / 2;
+		int startY = (vrows - static_cast<int>(menuHeight)) / 2;
+		menuStartX = static_cast<size_t>(startX < 0 ? 0 : startX);
+		menuStartY = static_cast<size_t>(startY < 0 ? 0 : startY);
+		menu_new(menuWidth, menuHeight, menuStartX, menuStartY, ctx);
 	}
-	else if (lastKey == GameKey::DOWN || lastKey == GameKey::S)
+
+	void ListMenu::draw_entries()
 	{
-		cursorIndex = (cursorIndex + 1) % entries.size();
-	}
-	else if (lastKey == GameKey::ENTER)
-	{
-		menu_set_run_false();
-		if (entries[cursorIndex].command)
+		for (size_t entryIndex = 0; entryIndex < entries.size(); ++entryIndex)
 		{
-			(*entries[cursorIndex].command)(ctx);
-		}
-	}
-	else if (lastKey == GameKey::ESCAPE)
-	{
-		menu_set_run_false();
-		if (onEscape)
-		{
-			onEscape(ctx);
-		}
-	}
-	else
-	{
-		// Hotkey match, case-insensitive so 'M' and 'm' both work.
-		for (auto& entry : entries)
-		{
-			if (entry.hotkey != 0 &&
-				std::tolower(lastChar) == std::tolower(entry.hotkey))
+			if (cursorIndex == entryIndex)
 			{
-				menu_set_run_false();
-				if (entry.command)
-				{
-					(*entry.command)(ctx);
-				}
-				return;
+				menu_highlight_on();
+			}
+			menu_print(
+				1,
+				static_cast<int>(entryIndex),
+				entries[entryIndex].label);
+			if (cursorIndex == entryIndex)
+			{
+				menu_highlight_off();
 			}
 		}
 	}
-}
 
-void ListMenu::menu(GameContext& ctx)
-{
-	if (onFrame)
+	void ListMenu::draw()
 	{
-		onFrame(ctx);
+		menu_draw_box();
+		menu_draw_title(title, ColorPairId::YELLOW_BLACK);
+		draw_entries();
 	}
-	menu_key_listen();
 
-	// Hover follows the pointer, and only on a frame it moved: a stationary pointer
-	// inside the panel would re-seat the cursor every frame and hide the arrow keys.
-	if (menu_pointer_moved())
+	void ListMenu::on_key(GameContext& ctx)
 	{
-		const ::Vector2 pointer = GetMousePosition();
-		const auto hovered = menu_row_at(
-			static_cast<int>(pointer.x),
-			static_cast<int>(pointer.y),
-			entries.size());
-		if (hovered)
+		if (lastKey == GameKey::UP || lastKey == GameKey::W)
 		{
-			cursorIndex = *hovered;
+			cursorIndex = (cursorIndex + entries.size() - 1) % entries.size();
 		}
-	}
-
-	draw();
-
-	if (menu_left_clicked())
-	{
-		const ::Vector2 pointer = GetMousePosition();
-		const auto clicked = menu_row_at(
-			static_cast<int>(pointer.x),
-			static_cast<int>(pointer.y),
-			entries.size());
-		if (clicked)
+		else if (lastKey == GameKey::DOWN || lastKey == GameKey::S)
+		{
+			cursorIndex = (cursorIndex + 1) % entries.size();
+		}
+		else if (lastKey == GameKey::ENTER)
 		{
 			menu_set_run_false();
-			if (entries[*clicked].command)
+			if (entries[cursorIndex].command)
 			{
-				(*entries[*clicked].command)(ctx);
+				(*entries[cursorIndex].command)(ctx);
+			}
+		}
+		else if (lastKey == GameKey::ESCAPE)
+		{
+			menu_set_run_false();
+			if (onEscape)
+			{
+				onEscape(ctx);
+			}
+		}
+		else
+		{
+			// Hotkey match, case-insensitive so 'M' and 'm' both work.
+			for (auto& entry : entries)
+			{
+				if (entry.hotkey != 0 &&
+					std::tolower(lastChar) == std::tolower(entry.hotkey))
+				{
+					menu_set_run_false();
+					if (entry.command)
+					{
+						(*entry.command)(ctx);
+					}
+					return;
+				}
+			}
+		}
+	}
+
+	void ListMenu::menu(GameContext& ctx)
+	{
+		if (onFrame)
+		{
+			onFrame(ctx);
+		}
+		menu_key_listen();
+
+		// Hover follows the pointer, and only on a frame it moved: a stationary
+		// pointer inside the panel would re-seat the cursor every frame and
+		// hide the arrow keys.
+		if (menu_pointer_moved())
+		{
+			const ::Vector2 pointer = GetMousePosition();
+			const auto hovered = menu_row_at(
+				static_cast<int>(pointer.x),
+				static_cast<int>(pointer.y),
+				entries.size());
+			if (hovered)
+			{
+				cursorIndex = *hovered;
 			}
 		}
 
-		// A click beside the panel is ignored rather than treated as a cancel. onEscape
-		// belongs to the ESC key; a misclick must never close or quit.
-		return;
+		draw();
+
+		if (menu_left_clicked())
+		{
+			const ::Vector2 pointer = GetMousePosition();
+			const auto clicked = menu_row_at(
+				static_cast<int>(pointer.x),
+				static_cast<int>(pointer.y),
+				entries.size());
+			if (clicked)
+			{
+				menu_set_run_false();
+				if (entries[*clicked].command)
+				{
+					(*entries[*clicked].command)(ctx);
+				}
+			}
+
+			// A click beside the panel is ignored rather than treated as a
+			// cancel. onEscape belongs to the ESC key; a misclick must never
+			// close or quit.
+			return;
+		}
+
+		on_key(ctx);
 	}
 
-	on_key(ctx);
-}
-
-// end of file: ListMenu.cpp
+	// end of file: ListMenu.cpp
 
 } // namespace CppRL

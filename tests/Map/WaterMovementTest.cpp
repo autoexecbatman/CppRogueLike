@@ -27,71 +27,71 @@
 namespace CppRL
 {
 
-class WaterMovementTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	class WaterMovementTest : public ::testing::Test
 	{
-		ctx = mock.to_game_context();
-		ctx.creatures = &creatures;
-		ctx.playerOwner = &player;
-		ctx.map = &map;
+	protected:
+		void SetUp() override
+		{
+			ctx = mock.to_game_context();
+			ctx.creatures = &creatures;
+			ctx.playerOwner = &player;
+			ctx.map = &map;
 
-		player->healthPool = std::make_unique<HealthPool>(20);
-		player->armorClass = std::make_unique<ArmorClass>(10);
+			player->healthPool = std::make_unique<HealthPool>(20);
+			player->armorClass = std::make_unique<ArmorClass>(10);
 
-		map.init_tiles();
-		map.set_tile(waterTile, TileType::WATER);
-		map.set_tile(floorTile, TileType::FLOOR);
+			map.init_tiles();
+			map.set_tile(waterTile, TileType::WATER);
+			map.set_tile(floorTile, TileType::FLOOR);
+		}
+
+		MockGameContext mock{};
+		GameContext ctx{};
+		Map map{ 20, 20 };
+		std::unique_ptr<Player> player{ std::make_unique<Player>(
+			Vector2D{ 1, 1 }) };
+		std::vector<std::unique_ptr<Creature>> creatures{};
+		Creature swimmer{
+			Vector2D{ 2, 2 },
+			ActorData{ TileRef{}, "spider", ColorPairId::WHITE_BLACK },
+		};
+		Vector2D waterTile{ 5, 5 };
+		Vector2D floorTile{ 6, 5 };
+	};
+
+	// A creature with no swim ability cannot enter water.
+	TEST_F(WaterMovementTest, WaterBlocksACreatureThatCannotSwim)
+	{
+		EXPECT_FALSE(Pathfinding::can_enter(*player, waterTile, ctx));
 	}
 
-	MockGameContext mock{};
-	GameContext ctx{};
-	Map map{ 20, 20 };
-	std::unique_ptr<Player> player{ std::make_unique<Player>(
-		Vector2D{ 1, 1 }) };
-	std::vector<std::unique_ptr<Creature>> creatures{};
-	Creature swimmer{
-		Vector2D{ 2, 2 },
-		ActorData{ TileRef{}, "spider", ColorPairId::WHITE_BLACK },
-	};
-	Vector2D waterTile{ 5, 5 };
-	Vector2D floorTile{ 6, 5 };
-};
+	// CAN_SWIM is what lets a creature cross; spiders set it at construction.
+	TEST_F(WaterMovementTest, WaterAdmitsACreatureThatCanSwim)
+	{
+		swimmer.add_state(ActorState::CAN_SWIM);
 
-// A creature with no swim ability cannot enter water.
-TEST_F(WaterMovementTest, WaterBlocksACreatureThatCannotSwim)
-{
-	EXPECT_FALSE(Pathfinding::can_enter(*player, waterTile, ctx));
-}
+		EXPECT_TRUE(Pathfinding::can_enter(swimmer, waterTile, ctx));
+	}
 
-// CAN_SWIM is what lets a creature cross; spiders set it at construction.
-TEST_F(WaterMovementTest, WaterAdmitsACreatureThatCanSwim)
-{
-	swimmer.add_state(ActorState::CAN_SWIM);
+	// Dry land is unaffected either way, so the rule is about water alone.
+	TEST_F(WaterMovementTest, FloorIsPassableRegardlessOfSwimming)
+	{
+		EXPECT_TRUE(Pathfinding::can_enter(*player, floorTile, ctx));
 
-	EXPECT_TRUE(Pathfinding::can_enter(swimmer, waterTile, ctx));
-}
+		player->add_state(ActorState::CAN_SWIM);
 
-// Dry land is unaffected either way, so the rule is about water alone.
-TEST_F(WaterMovementTest, FloorIsPassableRegardlessOfSwimming)
-{
-	EXPECT_TRUE(Pathfinding::can_enter(*player, floorTile, ctx));
+		EXPECT_TRUE(Pathfinding::can_enter(*player, floorTile, ctx));
+	}
 
-	player->add_state(ActorState::CAN_SWIM);
+	// Losing the ability closes the water again.
+	TEST_F(WaterMovementTest, RemovingSwimClosesTheWater)
+	{
+		player->add_state(ActorState::CAN_SWIM);
+		ASSERT_TRUE(Pathfinding::can_enter(*player, waterTile, ctx));
 
-	EXPECT_TRUE(Pathfinding::can_enter(*player, floorTile, ctx));
-}
+		player->remove_state(ActorState::CAN_SWIM);
 
-// Losing the ability closes the water again.
-TEST_F(WaterMovementTest, RemovingSwimClosesTheWater)
-{
-	player->add_state(ActorState::CAN_SWIM);
-	ASSERT_TRUE(Pathfinding::can_enter(*player, waterTile, ctx));
-
-	player->remove_state(ActorState::CAN_SWIM);
-
-	EXPECT_FALSE(Pathfinding::can_enter(*player, waterTile, ctx));
-}
+		EXPECT_FALSE(Pathfinding::can_enter(*player, waterTile, ctx));
+	}
 
 } // namespace CppRL

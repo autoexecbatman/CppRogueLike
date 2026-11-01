@@ -45,7 +45,7 @@
     },
     {
       "file": "src/MenuThiefSkills.cpp",
-      "original": "\tif (character.get_creature_class() != CreatureClass::ROGUE)\n\t{\n\t\treturn;\n\t}\n",
+      "original": "\t\tif (character.get_creature_class() != CreatureClass::ROGUE)\n\t\t{\n\t\t\treturn;\n\t\t}\n",
       "mutated": "",
       "catches": "the screen opening for a class the book gives no thief skills to"
     }

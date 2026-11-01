@@ -39,8 +39,8 @@
     },
     {
       "file": "src/MonsterRegistry.cpp",
-      "original": "params.attitude =\n\t\t\tparse_attitude(entry.at(\"attitude\").get<std::string>());",
-      "mutated": "\t\tparams.attitude = Attitude::HOSTILE;\n",
+      "original": "\tparams.attitude =\n\t\t\t\tparse_attitude(entry.at(\"attitude\").get<std::string>());",
+      "mutated": "\t\t\tparams.attitude = Attitude::HOSTILE;\n",
       "catches": "attitude never read, so the shopkeeper is hostile"
     },
     {
@@ -100,31 +100,31 @@
     {
       "file": "src/MonsterCreator.cpp",
       "original": "\tcreature->ai->on_created(*creature, ctx);\n",
-      "mutated": "\t;\n",
+      "mutated": "\t\t;\n",
       "catches": "the Ai's birth hook never called: no disguise, no shop"
     },
     {
       "file": "src/AiMimic.cpp",
-      "original": "\t// A new mimic is disguised, so this dresses it in its first appearance.\n\tchange_disguise(owner, ctx);\n",
-      "mutated": "\t// A new mimic is disguised, so this dresses it in its first appearance.\n",
+      "original": "\t\t// A new mimic is disguised, so this dresses it in its first appearance.\n\t\tchange_disguise(owner, ctx);\n",
+      "mutated": "\t\t// A new mimic is disguised, so this dresses it in its first appearance.\n",
       "catches": "a new mimic standing undisguised and blocking"
     },
     {
       "file": "src/AiShopkeeper.cpp",
-      "original": "\tShopkeeperFactory::open_shop(\n\t\towner,\n\t\tctx.levelManager->get_dungeon_level(),\n\t\tctx);\n",
+      "original": "\t\tShopkeeperFactory::open_shop(\n\t\t\towner,\n\t\t\tctx.levelManager->get_dungeon_level(),\n\t\t\tctx);\n",
       "mutated": "\t;\n",
       "catches": "a shopkeeper built with no shop"
     },
     {
       "file": "src/Ai.h",
-      "original": "\treturn std::ranges::find(AUTHORABLE_AI_TYPES, type) !=\n\t\tAUTHORABLE_AI_TYPES.end();\n",
-      "mutated": "\treturn true;\n",
+      "original": "\t\treturn std::ranges::find(AUTHORABLE_AI_TYPES, type) !=\n\t\t\tAUTHORABLE_AI_TYPES.end();\n",
+      "mutated": "\t\treturn true;\n",
       "catches": "the Confused Ai counted as authorable"
     },
     {
       "file": "src/Ai.h",
-      "original": "\t\treturn AUTHORABLE_AI_TYPES.front();\n\t}\n\treturn *(found + 1);\n",
-      "mutated": "\t\treturn AiType::CONFUSED_MONSTER;\n\t}\n\treturn *(found + 1);\n",
+      "original": "\t\t\treturn AUTHORABLE_AI_TYPES.front();\n\t\t}\n\t\treturn *(found + 1);\n",
+      "mutated": "\t\t\treturn AiType::CONFUSED_MONSTER;\n\t\t}\n\t\treturn *(found + 1);\n",
       "catches": "the editor's Ai cycle wrapping onto the Confused Ai"
     },
     {
@@ -141,14 +141,14 @@
     },
     {
       "file": "src/Attitude.h",
-      "original": "\t\tthrow std::runtime_error(std::format(\"unknown attitude '{}'\", name));\n",
-      "mutated": "\t\treturn Attitude::HOSTILE;\n",
+      "original": "\t\t\tthrow std::runtime_error(\n\t\t\t\tstd::format(\"unknown attitude '{}'\", name));\n",
+      "mutated": "\t\t\treturn Attitude::HOSTILE;\n",
       "catches": "an unknown attitude read as hostile in silence"
     },
     {
       "file": "src/Attitude.h",
-      "original": "\tAttitude::PEACEFUL,\n\tAttitude::FRIENDLY,\n",
-      "mutated": "\tAttitude::FRIENDLY,\n\tAttitude::PEACEFUL,\n",
+      "original": "\t\tAttitude::PEACEFUL,\n\t\tAttitude::FRIENDLY,\n",
+      "mutated": "\t\tAttitude::FRIENDLY,\n\t\tAttitude::PEACEFUL,\n",
       "catches": "the attitude list out of the enum's order"
     },
     {

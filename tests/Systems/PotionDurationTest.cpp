@@ -43,132 +43,139 @@
 namespace CppRL
 {
 
-namespace
-{
-	// The book's turn, in its rounds: "Ten combat rounds equal a turn" (PHB,
-	// PDF page 184).
-	constexpr int ROUNDS_IN_A_TURN = 10;
-} // namespace
-
-class PotionDurationTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	namespace
 	{
-		mock.player = std::make_unique<Player>(Vector2D{ 2, 2 });
-		mock.player->experienceReward = std::make_unique<ExperienceReward>(0);
-		mock.player->healthPool = std::make_unique<HealthPool>(10);
-		mock.player->armorClass = std::make_unique<ArmorClass>(10);
+		// The book's turn, in its rounds: "Ten combat rounds equal a turn"
+		// (PHB, PDF page 184).
+		constexpr int ROUNDS_IN_A_TURN = 10;
+	} // namespace
+
+	class PotionDurationTest : public ::testing::Test
+	{
+	protected:
+		void SetUp() override
+		{
+			mock.player = std::make_unique<Player>(Vector2D{ 2, 2 });
+			mock.player->experienceReward =
+				std::make_unique<ExperienceReward>(0);
+			mock.player->healthPool = std::make_unique<HealthPool>(10);
+			mock.player->armorClass = std::make_unique<ArmorClass>(10);
+		}
+
+		// Drinks the named potion from the pack, with its duration die scripted
+		// to `rolled`. Returns the buff it grants, read from the potion, so the
+		// test follows the data.
+		BuffType drink(const std::string& key, int rolled)
+		{
+			auto created = ItemCreator::create(key, drinker().position, ctx);
+			Item& potion = *created;
+			// Placed as starting gear is, past the weight gate a fixture's
+			// Strength 0 would shut.
+			[[maybe_unused]] const auto added = InventoryOperations::add_item(
+				drinker().inventoryData,
+				std::move(created));
+			EXPECT_TRUE(added.has_value())
+				<< "the potion did not fit in the pack";
+			const BuffType granted =
+				std::get<Consumable>(*potion.behavior).buffType;
+
+			mock.dice.set_next_roll(rolled);
+			use_item(*potion.behavior, potion, drinker(), ctx);
+			return granted;
+		}
+
+		// Whether the buff is still on the drinker once the clock reads
+		// `rounds` after drinking.
+		bool lasts_to(BuffType granted, int rounds)
+		{
+			ctx.buffSystem->update_creature_buffs(
+				drinker(),
+				expiry_time(0, rounds));
+			return ctx.buffSystem->has_buff(drinker(), granted);
+		}
+
+		Player& drinker() { return ctx.player_concrete(); }
+
+		MockGameContext mock{};
+		GameContext ctx{ mock.to_game_context() };
+	};
+
+	// The least of "3-6 turns": in force through its last round, over at its
+	// end.
+	TEST_F(PotionDurationTest, InvisibilityRolledLowLastsThreeTurns)
+	{
+		const BuffType granted = drink("invisibility_potion", 1);
+
+		EXPECT_TRUE(lasts_to(granted, 3 * ROUNDS_IN_A_TURN - 1));
+		EXPECT_FALSE(lasts_to(granted, 3 * ROUNDS_IN_A_TURN));
 	}
 
-	// Drinks the named potion from the pack, with its duration die scripted to `rolled`.
-	// Returns the buff it grants, read from the potion, so the test follows the data.
-	BuffType drink(const std::string& key, int rolled)
+	// The most of "3-6 turns".
+	TEST_F(PotionDurationTest, InvisibilityRolledHighLastsSixTurns)
 	{
-		auto created = ItemCreator::create(key, drinker().position, ctx);
-		Item& potion = *created;
-		// Placed as starting gear is, past the weight gate a fixture's Strength 0 would shut.
-		[[maybe_unused]] const auto added = InventoryOperations::add_item(
-			drinker().inventoryData,
-			std::move(created));
-		EXPECT_TRUE(added.has_value()) << "the potion did not fit in the pack";
-		const BuffType granted =
-			std::get<Consumable>(*potion.behavior).buffType;
+		const BuffType granted = drink("invisibility_potion", 4);
 
-		mock.dice.set_next_roll(rolled);
-		use_item(*potion.behavior, potion, drinker(), ctx);
-		return granted;
+		EXPECT_TRUE(lasts_to(granted, 6 * ROUNDS_IN_A_TURN - 1))
+			<< "gone before six turns";
+		EXPECT_FALSE(lasts_to(granted, 6 * ROUNDS_IN_A_TURN));
 	}
 
-	// Whether the buff is still on the drinker once the clock reads `rounds` after drinking.
-	bool lasts_to(BuffType granted, int rounds)
+	// "4+d4" turns with the die at its least: five turns.
+	TEST_F(PotionDurationTest, GiantStrengthRolledLowLastsFiveTurns)
 	{
-		ctx.buffSystem->update_creature_buffs(
-			drinker(),
-			expiry_time(0, rounds));
-		return ctx.buffSystem->has_buff(drinker(), granted);
+		const BuffType granted = drink("potion_of_giant_strength", 1);
+
+		EXPECT_TRUE(lasts_to(granted, 5 * ROUNDS_IN_A_TURN - 1));
+		EXPECT_FALSE(lasts_to(granted, 5 * ROUNDS_IN_A_TURN));
 	}
 
-	Player& drinker() { return ctx.player_concrete(); }
+	// "4+d4" turns with the die at its most: eight turns.
+	TEST_F(PotionDurationTest, GiantStrengthRolledHighLastsEightTurns)
+	{
+		const BuffType granted = drink("potion_of_giant_strength", 4);
 
-	MockGameContext mock{};
-	GameContext ctx{ mock.to_game_context() };
-};
+		EXPECT_TRUE(lasts_to(granted, 8 * ROUNDS_IN_A_TURN - 1))
+			<< "gone before eight turns";
+		EXPECT_FALSE(lasts_to(granted, 8 * ROUNDS_IN_A_TURN));
+	}
 
-// The least of "3-6 turns": in force through its last round, over at its end.
-TEST_F(PotionDurationTest, InvisibilityRolledLowLastsThreeTurns)
-{
-	const BuffType granted = drink("invisibility_potion", 1);
+	// "The potion lasts one turn", whatever the dice would have said.
+	TEST_F(PotionDurationTest, FireResistanceLastsOneTurn)
+	{
+		const BuffType granted = drink("potion_of_fire_resistance", 4);
 
-	EXPECT_TRUE(lasts_to(granted, 3 * ROUNDS_IN_A_TURN - 1));
-	EXPECT_FALSE(lasts_to(granted, 3 * ROUNDS_IN_A_TURN));
-}
+		EXPECT_TRUE(lasts_to(granted, ROUNDS_IN_A_TURN - 1));
+		EXPECT_FALSE(lasts_to(granted, ROUNDS_IN_A_TURN))
+			<< "still resisting fire after the book's one turn";
+	}
 
-// The most of "3-6 turns".
-TEST_F(PotionDurationTest, InvisibilityRolledHighLastsSixTurns)
-{
-	const BuffType granted = drink("invisibility_potion", 4);
+	// Not in the book, so the game's own five turns stand.
+	TEST_F(PotionDurationTest, ColdResistanceKeepsItsFiveTurns)
+	{
+		const BuffType granted = drink("potion_of_cold_resistance", 4);
 
-	EXPECT_TRUE(lasts_to(granted, 6 * ROUNDS_IN_A_TURN - 1))
-		<< "gone before six turns";
-	EXPECT_FALSE(lasts_to(granted, 6 * ROUNDS_IN_A_TURN));
-}
+		EXPECT_TRUE(lasts_to(granted, 5 * ROUNDS_IN_A_TURN - 1));
+		EXPECT_FALSE(lasts_to(granted, 5 * ROUNDS_IN_A_TURN));
+	}
 
-// "4+d4" turns with the die at its least: five turns.
-TEST_F(PotionDurationTest, GiantStrengthRolledLowLastsFiveTurns)
-{
-	const BuffType granted = drink("potion_of_giant_strength", 1);
+	// A potion carried across a save keeps the dice it was authored with, not a
+	// roll.
+	TEST_F(PotionDurationTest, ASavedPotionKeepsItsDice)
+	{
+		auto potion =
+			ItemCreator::create("invisibility_potion", drinker().position, ctx);
+		nlohmann::json saved;
+		save_behavior(*potion->behavior, saved);
+		ASSERT_EQ(saved["duration"], "1d4+2");
+		ASSERT_EQ(saved["durationUnit"], "turns");
 
-	EXPECT_TRUE(lasts_to(granted, 5 * ROUNDS_IN_A_TURN - 1));
-	EXPECT_FALSE(lasts_to(granted, 5 * ROUNDS_IN_A_TURN));
-}
+		nlohmann::json resaved;
+		save_behavior(load_behavior(saved), resaved);
 
-// "4+d4" turns with the die at its most: eight turns.
-TEST_F(PotionDurationTest, GiantStrengthRolledHighLastsEightTurns)
-{
-	const BuffType granted = drink("potion_of_giant_strength", 4);
+		EXPECT_EQ(resaved["duration"], "1d4+2");
+		EXPECT_EQ(resaved["durationUnit"], "turns");
+	}
 
-	EXPECT_TRUE(lasts_to(granted, 8 * ROUNDS_IN_A_TURN - 1))
-		<< "gone before eight turns";
-	EXPECT_FALSE(lasts_to(granted, 8 * ROUNDS_IN_A_TURN));
-}
-
-// "The potion lasts one turn", whatever the dice would have said.
-TEST_F(PotionDurationTest, FireResistanceLastsOneTurn)
-{
-	const BuffType granted = drink("potion_of_fire_resistance", 4);
-
-	EXPECT_TRUE(lasts_to(granted, ROUNDS_IN_A_TURN - 1));
-	EXPECT_FALSE(lasts_to(granted, ROUNDS_IN_A_TURN))
-		<< "still resisting fire after the book's one turn";
-}
-
-// Not in the book, so the game's own five turns stand.
-TEST_F(PotionDurationTest, ColdResistanceKeepsItsFiveTurns)
-{
-	const BuffType granted = drink("potion_of_cold_resistance", 4);
-
-	EXPECT_TRUE(lasts_to(granted, 5 * ROUNDS_IN_A_TURN - 1));
-	EXPECT_FALSE(lasts_to(granted, 5 * ROUNDS_IN_A_TURN));
-}
-
-// A potion carried across a save keeps the dice it was authored with, not a roll.
-TEST_F(PotionDurationTest, ASavedPotionKeepsItsDice)
-{
-	auto potion =
-		ItemCreator::create("invisibility_potion", drinker().position, ctx);
-	nlohmann::json saved;
-	save_behavior(*potion->behavior, saved);
-	ASSERT_EQ(saved["duration"], "1d4+2");
-	ASSERT_EQ(saved["durationUnit"], "turns");
-
-	nlohmann::json resaved;
-	save_behavior(load_behavior(saved), resaved);
-
-	EXPECT_EQ(resaved["duration"], "1d4+2");
-	EXPECT_EQ(resaved["durationUnit"], "turns");
-}
-
-// end of file: PotionDurationTest.cpp
+	// end of file: PotionDurationTest.cpp
 
 } // namespace CppRL

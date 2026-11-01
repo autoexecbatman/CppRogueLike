@@ -36,52 +36,52 @@
 namespace CppRL
 {
 
-enum class EncumbranceBand
-{
-	UNENCUMBERED,
-	LIGHT,
-	MODERATE,
-	HEAVY,
-	SEVERE,
-	OVERLOADED
-};
+	enum class EncumbranceBand
+	{
+		UNENCUMBERED,
+		LIGHT,
+		MODERATE,
+		HEAVY,
+		SEVERE,
+		OVERLOADED
+	};
 
-inline constexpr std::array<EncumbranceBand, 6> ALL_ENCUMBRANCE_BAND{
-	EncumbranceBand::UNENCUMBERED,
-	EncumbranceBand::LIGHT,
-	EncumbranceBand::MODERATE,
-	EncumbranceBand::HEAVY,
-	EncumbranceBand::SEVERE,
-	EncumbranceBand::OVERLOADED
-};
+	inline constexpr std::array<EncumbranceBand, 6> ALL_ENCUMBRANCE_BAND{
+		EncumbranceBand::UNENCUMBERED,
+		EncumbranceBand::LIGHT,
+		EncumbranceBand::MODERATE,
+		EncumbranceBand::HEAVY,
+		EncumbranceBand::SEVERE,
+		EncumbranceBand::OVERLOADED
+	};
 
-// The name Table 47 prints, or, past the table's last column, what carrying more
-// than the maximum is.
-//
-// Example:
-//   encumbrance_band_name(EncumbranceBand::SEVERE);   // -> "Severe"
-[[nodiscard]] std::string_view encumbrance_band_name(EncumbranceBand band);
+	// The name Table 47 prints, or, past the table's last column, what carrying
+	// more than the maximum is.
+	//
+	// Example:
+	//   encumbrance_band_name(EncumbranceBand::SEVERE);   // -> "Severe"
+	[[nodiscard]] std::string_view encumbrance_band_name(EncumbranceBand band);
 
-// The band this load falls in on this Strength row. The five graded bands come from
-// columns the book leaves blank at Strength 1 and at 19 and up, so those scores
-// answer nullopt rather than a band the game made up. OVERLOADED comes from the Max.
-// Carried Weight column instead, which every row prints, so a load past the maximum
-// is named at every score - the same column is_overloaded reads, and the two cannot
-// disagree.
-//
-// Example, the Strength 10-11 row:
-//   encumbrance_band(0, row);     // -> UNENCUMBERED
-//   encumbrance_band(97, row);    // -> SEVERE
-//   encumbrance_band(110, row);   // -> SEVERE, the last pound it can carry
-//   encumbrance_band(111, row);   // -> OVERLOADED
-//
-// Example, Strength 1, whose bands are blank and whose maximum is 3:
-//   encumbrance_band(2, weakest); // -> nullopt, a load with no name
-//   encumbrance_band(4, weakest); // -> OVERLOADED
-[[nodiscard]] std::optional<EncumbranceBand> encumbrance_band(
-	int carriedPounds,
-	const StrengthAttributes& row);
+	// The band this load falls in on this Strength row. The five graded bands
+	// come from columns the book leaves blank at Strength 1 and at 19 and up,
+	// so those scores answer nullopt rather than a band the game made up.
+	// OVERLOADED comes from the Max. Carried Weight column instead, which every
+	// row prints, so a load past the maximum is named at every score - the same
+	// column is_overloaded reads, and the two cannot disagree.
+	//
+	// Example, the Strength 10-11 row:
+	//   encumbrance_band(0, row);     // -> UNENCUMBERED
+	//   encumbrance_band(97, row);    // -> SEVERE
+	//   encumbrance_band(110, row);   // -> SEVERE, the last pound it can carry
+	//   encumbrance_band(111, row);   // -> OVERLOADED
+	//
+	// Example, Strength 1, whose bands are blank and whose maximum is 3:
+	//   encumbrance_band(2, weakest); // -> nullopt, a load with no name
+	//   encumbrance_band(4, weakest); // -> OVERLOADED
+	[[nodiscard]] std::optional<EncumbranceBand> encumbrance_band(
+		int carriedPounds,
+		const StrengthAttributes& row);
 
-// end of file: Encumbrance.h
+	// end of file: Encumbrance.h
 
 } // namespace CppRL

@@ -15,26 +15,26 @@
   "mutations": [
     {
       "file": "src/SpellRegistry.cpp",
-      "original": "\t\t\tthrow std::runtime_error(\n\t\t\t\tstd::format(\n\t\t\t\t\t\"SpellRegistry::load -- '{}' has no record for builtin spell '{}'\",\n\t\t\t\t\tresolved.string(),\n\t\t\t\t\tkey));",
-      "mutated": "\t\t\tcontinue;",
+      "original": "\t\t\t\tthrow std::runtime_error(\n\t\t\t\t\tstd::format(\n\t\t\t\t\t\t\"SpellRegistry::load -- '{}' has no record for builtin spell '{}'\",\n\t\t\t\t\t\tresolved.string(),\n\t\t\t\t\t\tkey));",
+      "mutated": "\t\t\t\tcontinue;",
       "catches": "a data file missing a builtin spell loaded silently"
     },
     {
       "file": "src/SpellRegistry.cpp",
-      "original": "\t\tthrow std::runtime_error(\n\t\t\tstd::format(\"SpellRegistry: unknown spell class '{}'\", text));",
-      "mutated": "\t\treturn SpellClass::BOTH;",
+      "original": "\t\t\tthrow std::runtime_error(\n\t\t\t\tstd::format(\"SpellRegistry: unknown spell class '{}'\", text));",
+      "mutated": "\t\t\treturn SpellClass::BOTH;",
       "catches": "an unknown spell class turned into a default"
     },
     {
       "file": "src/SpellRegistry.cpp",
-      "original": "\t\tthrow std::runtime_error(\n\t\t\tstd::format(\"SpellRegistry: unknown spell effect '{}'\", text));",
-      "mutated": "\t\treturn SpellEffectType::NONE;",
+      "original": "\t\t\tthrow std::runtime_error(\n\t\t\t\tstd::format(\"SpellRegistry: unknown spell effect '{}'\", text));",
+      "mutated": "\t\t\treturn SpellEffectType::NONE;",
       "catches": "an unknown spell effect turned into a default"
     },
     {
       "file": "src/SpellRegistry.cpp",
-      "original": "\t\t\tspells.emplace(\n\t\t\t\tstd::string{ builtin.key },\n\t\t\t\tSpellDefinition{ .effect_type = builtin.effect });",
-      "mutated": "\t\t\tspells.emplace(\n\t\t\t\tstd::string{ builtin.key },\n\t\t\t\tSpellDefinition{});",
+      "original": "\t\t\t\tspells.emplace(\n\t\t\t\t\tstd::string{ builtin.key },\n\t\t\t\t\tSpellDefinition{ .effect_type = builtin.effect });",
+      "mutated": "\t\t\t\tspells.emplace(\n\t\t\t\t\tstd::string{ builtin.key },\n\t\t\t\t\tSpellDefinition{});",
       "catches": "a registry built without the builtins' compiled-in effects"
     },
     {
@@ -57,7 +57,7 @@
     },
     {
       "file": "src/SpellRegistry.cpp",
-      "original": "definition.spellClass == targetClass ||\n\t\t\tdefinition.spellClass == SpellClass::BOTH;",
+      "original": "definition.spellClass == targetClass ||\n\t\t\t\tdefinition.spellClass == SpellClass::BOTH;",
       "mutated": "definition.spellClass == targetClass;",
       "catches": "a spell of both classes offered to neither"
     },

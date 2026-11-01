@@ -23,706 +23,738 @@
 namespace CppRL
 {
 
-// ============================================================================
-// Private implementation - not visible outside this translation unit.
-// ============================================================================
+	// =========================================================================
+	// Private implementation - not visible outside this translation unit.
+	// =========================================================================
 
-namespace
-{
-
-	void apply_thac0_improvement(
-		Creature& owner,
-		int newLevel,
-		GameContext& ctx)
+	namespace
 	{
-		const int newTHAC0 = LevelUpSystem::thac0_for_level(
-			owner.get_creature_class(),
-			newLevel);
 
-		if (newTHAC0 < owner.get_thaco())
+		void apply_thac0_improvement(
+			Creature& owner,
+			int newLevel,
+			GameContext& ctx)
 		{
-			int oldTHAC0 = owner.get_thaco();
-			owner.set_thaco(newTHAC0);
+			const int newTHAC0 = LevelUpSystem::thac0_for_level(
+				owner.get_creature_class(),
+				newLevel);
+
+			if (newTHAC0 < owner.get_thaco())
+			{
+				int oldTHAC0 = owner.get_thaco();
+				owner.set_thaco(newTHAC0);
+				assert(
+					ctx.messageSystem &&
+					"apply_thac0_improvement: called without a messageSystem");
+
+				if (owner.get_creature_class() != CreatureClass::MONSTER)
+				{
+					ctx.messageSystem->append_message_part(
+						ColorPairId::GREEN_BLACK,
+						"THAC0 improved");
+					ctx.messageSystem->append_message_part(
+						ColorPairId::WHITE_BLACK,
+						std::format(" from {} to {}!", oldTHAC0, newTHAC0));
+					ctx.messageSystem->finalize_message();
+				}
+
+				ctx.messageSystem->log(
+					std::format(
+						"THAC0 improved: {} -> {}",
+						oldTHAC0,
+						newTHAC0));
+			}
+		}
+
+		int apply_hit_point_gain(
+			Creature& owner,
+			int newLevel,
+			GameContext& ctx)
+		{
+			assert(
+				owner.get_hit_die() >= 1 &&
+				"apply_hit_point_gain: a hit die needs at least one face to roll");
+
+			// The die the creature carries, so the roll and the message name
+			// the same one.
+			auto roll_hit_die = [&]() -> int
+			{
+				// Runs only on a rolled level, which also reads the
+				// constitution table.
+				assert(
+					ctx.dice && "apply_hit_point_gain: called without a dice");
+				assert(
+					ctx.dataManager &&
+					"apply_hit_point_gain: called without a dataManager");
+				return ctx.dice->roll(1, owner.get_hit_die());
+			};
+
+			// AD&D 2e: a character rolls hit dice only up to a class-dependent
+			// level, and past it the book grants a flat number of hit points
+			// per level.
+			const LevelUpSystem::HitPointProgression progression =
+				LevelUpSystem::hit_point_progression(
+					owner.get_creature_class());
+
+			// One question, because the adjustment rides on a rolled die: the
+			// level that stops rolling is the level that stops taking it.
+			const bool stillRollsDice =
+				LevelUpSystem::takes_constitution_adjustment_at(
+					owner.get_creature_class(),
+					newLevel);
+
+			// Past the last rolled level the book hands out a flat number, and
+			// a number handed out has no die for the score to ride on.
+			const LevelUpSystem::HitDieValue gained = stillRollsDice ?
+				LevelUpSystem::hit_die_value(
+					roll_hit_die(),
+					owner.get_creature_class(),
+					owner.get_constitution(),
+					*ctx.dataManager) :
+				LevelUpSystem::HitDieValue{
+					progression.flatGain,
+					0,
+					progression.flatGain,
+				};
+
+			const std::string diceType = stillRollsDice ?
+				std::format("d{}", owner.get_hit_die()) :
+				std::string{ "fixed" };
+
+			const int hitDiceRoll = gained.dieValue;
+			const int conBonus = gained.adjustment;
+			const int totalHPGain = gained.total;
+
+			owner.set_hp_base(owner.get_hp_base() + hitDiceRoll);
+			owner.set_max_hp(owner.get_max_hp() + totalHPGain);
+			owner.set_hp(owner.get_hp() + totalHPGain);
 			assert(
 				ctx.messageSystem &&
-				"apply_thac0_improvement: called without a messageSystem");
+				"apply_hit_point_gain: called without a messageSystem");
 
 			if (owner.get_creature_class() != CreatureClass::MONSTER)
 			{
 				ctx.messageSystem->append_message_part(
 					ColorPairId::GREEN_BLACK,
-					"THAC0 improved");
+					"Hit Points increased");
 				ctx.messageSystem->append_message_part(
 					ColorPairId::WHITE_BLACK,
-					std::format(" from {} to {}!", oldTHAC0, newTHAC0));
-				ctx.messageSystem->finalize_message();
-			}
-
-			ctx.messageSystem->log(
-				std::format("THAC0 improved: {} -> {}", oldTHAC0, newTHAC0));
-		}
-	}
-
-	int apply_hit_point_gain(Creature& owner, int newLevel, GameContext& ctx)
-	{
-		assert(
-			owner.get_hit_die() >= 1 &&
-			"apply_hit_point_gain: a hit die needs at least one face to roll");
-
-		// The die the creature carries, so the roll and the message name the
-		// same one.
-		auto roll_hit_die = [&]() -> int
-		{
-			// Runs only on a rolled level, which also reads the constitution
-			// table.
-			assert(ctx.dice && "apply_hit_point_gain: called without a dice");
-			assert(
-				ctx.dataManager &&
-				"apply_hit_point_gain: called without a dataManager");
-			return ctx.dice->roll(1, owner.get_hit_die());
-		};
-
-		// AD&D 2e: a character rolls hit dice only up to a class-dependent
-		// level, and past it the book grants a flat number of hit points per
-		// level.
-		const LevelUpSystem::HitPointProgression progression =
-			LevelUpSystem::hit_point_progression(owner.get_creature_class());
-
-		// One question, because the adjustment rides on a rolled die: the level
-		// that stops rolling is the level that stops taking it.
-		const bool stillRollsDice =
-			LevelUpSystem::takes_constitution_adjustment_at(
-				owner.get_creature_class(),
-				newLevel);
-
-		// Past the last rolled level the book hands out a flat number, and a
-		// number handed out has no die for the score to ride on.
-		const LevelUpSystem::HitDieValue gained = stillRollsDice ?
-			LevelUpSystem::hit_die_value(
-				roll_hit_die(),
-				owner.get_creature_class(),
-				owner.get_constitution(),
-				*ctx.dataManager) :
-			LevelUpSystem::HitDieValue{
-				progression.flatGain,
-				0,
-				progression.flatGain,
-			};
-
-		const std::string diceType = stillRollsDice ?
-			std::format("d{}", owner.get_hit_die()) :
-			std::string{ "fixed" };
-
-		const int hitDiceRoll = gained.dieValue;
-		const int conBonus = gained.adjustment;
-		const int totalHPGain = gained.total;
-
-		owner.set_hp_base(owner.get_hp_base() + hitDiceRoll);
-		owner.set_max_hp(owner.get_max_hp() + totalHPGain);
-		owner.set_hp(owner.get_hp() + totalHPGain);
-		assert(
-			ctx.messageSystem &&
-			"apply_hit_point_gain: called without a messageSystem");
-
-		if (owner.get_creature_class() != CreatureClass::MONSTER)
-		{
-			ctx.messageSystem->append_message_part(
-				ColorPairId::GREEN_BLACK,
-				"Hit Points increased");
-			ctx.messageSystem->append_message_part(
-				ColorPairId::WHITE_BLACK,
-				" by ");
-			ctx.messageSystem->append_message_part(
-				ColorPairId::GREEN_BLACK,
-				std::to_string(totalHPGain));
-			ctx.messageSystem->append_message_part(
-				ColorPairId::WHITE_BLACK,
-				" (");
-			ctx.messageSystem->append_message_part(
-				ColorPairId::WHITE_BLACK,
-				diceType);
-			ctx.messageSystem->append_message_part(
-				ColorPairId::WHITE_BLACK,
-				": ");
-			ctx.messageSystem->append_message_part(
-				ColorPairId::YELLOW_BLACK,
-				std::to_string(hitDiceRoll));
-			if (conBonus != 0)
-			{
-				ctx.messageSystem->append_message_part(
-					ColorPairId::WHITE_BLACK,
-					" + ");
-				ctx.messageSystem->append_message_part(
-					ColorPairId::YELLOW_BLACK,
-					std::to_string(conBonus));
-				ctx.messageSystem->append_message_part(
-					ColorPairId::WHITE_BLACK,
-					" CON");
-			}
-			ctx.messageSystem->append_message_part(
-				ColorPairId::WHITE_BLACK,
-				")");
-			ctx.messageSystem->finalize_message();
-		}
-
-		ctx.messageSystem->log(
-			std::format(
-				"HP increased by {} ({} rolled + {} CON bonus). Max HP now: {}",
-				totalHPGain,
-				hitDiceRoll,
-				conBonus,
-				owner.get_max_hp()));
-
-		return totalHPGain;
-	}
-
-	void apply_fighter_improvements(
-		Creature& owner,
-		int newLevel,
-		GameContext& ctx)
-	{
-		if (newLevel >= 13)
-		{
-			if (owner.get_attacks_per_round() < 2.0f)
-			{
-				owner.set_attacks_per_round(2.0f);
-				assert(
-					ctx.messageSystem &&
-					"apply_fighter_improvements: called without a messageSystem to announce the 13th-level gain");
-				ctx.messageSystem->append_message_part(
-					ColorPairId::YELLOW_BLACK,
-					"Special: ");
+					" by ");
 				ctx.messageSystem->append_message_part(
 					ColorPairId::GREEN_BLACK,
-					"Extra Attack!");
+					std::to_string(totalHPGain));
 				ctx.messageSystem->append_message_part(
 					ColorPairId::WHITE_BLACK,
-					" You can now attack 2 times per round.");
-				ctx.messageSystem->finalize_message();
-				ctx.messageSystem->log(
-					"Fighter gained extra attack (2 attacks per round)");
-			}
-		}
-		else if (newLevel >= 7)
-		{
-			if (owner.get_attacks_per_round() < 1.5f)
-			{
-				owner.set_attacks_per_round(1.5f);
-				assert(
-					ctx.messageSystem &&
-					"apply_fighter_improvements: called without a messageSystem to announce the 7th-level gain");
+					" (");
+				ctx.messageSystem->append_message_part(
+					ColorPairId::WHITE_BLACK,
+					diceType);
+				ctx.messageSystem->append_message_part(
+					ColorPairId::WHITE_BLACK,
+					": ");
 				ctx.messageSystem->append_message_part(
 					ColorPairId::YELLOW_BLACK,
-					"Special: ");
-				ctx.messageSystem->append_message_part(
-					ColorPairId::GREEN_BLACK,
-					"Extra Attack!");
+					std::to_string(hitDiceRoll));
+				if (conBonus != 0)
+				{
+					ctx.messageSystem->append_message_part(
+						ColorPairId::WHITE_BLACK,
+						" + ");
+					ctx.messageSystem->append_message_part(
+						ColorPairId::YELLOW_BLACK,
+						std::to_string(conBonus));
+					ctx.messageSystem->append_message_part(
+						ColorPairId::WHITE_BLACK,
+						" CON");
+				}
 				ctx.messageSystem->append_message_part(
 					ColorPairId::WHITE_BLACK,
-					" You can now attack 3/2 times per round.");
+					")");
 				ctx.messageSystem->finalize_message();
-				ctx.messageSystem->log(
-					"Fighter gained extra attack (3/2 attacks per round)");
 			}
-		}
-	}
 
-	void apply_rogue_improvements(int newLevel, GameContext& ctx)
-	{
-		assert(
-			ctx.messageSystem &&
-			"apply_rogue_improvements: called without a messageSystem");
-		int backstabMultiplier =
-			LevelUpSystem::calculate_backstab_multiplier(newLevel);
-		if (backstabMultiplier >
-			LevelUpSystem::calculate_backstab_multiplier(newLevel - 1))
-		{
-			ctx.messageSystem->append_message_part(
-				ColorPairId::YELLOW_BLACK,
-				"Special: ");
-			ctx.messageSystem->append_message_part(
-				ColorPairId::GREEN_BLACK,
-				"Backstab improved!");
-			ctx.messageSystem->append_message_part(
-				ColorPairId::WHITE_BLACK,
-				" Damage multiplier: x");
-			ctx.messageSystem->append_message_part(
-				ColorPairId::GREEN_BLACK,
-				std::to_string(backstabMultiplier));
-			ctx.messageSystem->finalize_message();
 			ctx.messageSystem->log(
 				std::format(
-					"Rogue backstab multiplier increased to x{}",
-					backstabMultiplier));
+					"HP increased by {} ({} rolled + {} CON bonus). Max HP now: {}",
+					totalHPGain,
+					hitDiceRoll,
+					conBonus,
+					owner.get_max_hp()));
+
+			return totalHPGain;
 		}
 
-		// "The player receives another 30 points to distribute" each thief
-		// level (PHB page 84); DisplayManager opens the screen that spends
-		// them.
-		ctx.messageSystem->append_message_part(
-			ColorPairId::YELLOW_BLACK,
-			"Thief skills: ");
-		ctx.messageSystem->append_message_part(
-			ColorPairId::GREEN_BLACK,
-			std::to_string(thief_skill_grant_at_level(newLevel).points));
-		ctx.messageSystem->append_message_part(
-			ColorPairId::WHITE_BLACK,
-			" points to spend.");
-		ctx.messageSystem->finalize_message();
-	}
-
-	// Says so when a level opens a spell level that was out of reach before.
-	// The number comes from the progression table rather than from a formula
-	// beside it, so the two cannot disagree.
-	void announce_new_spell_level(
-		CasterClass casterClass,
-		const Creature& owner,
-		int newLevel,
-		GameContext& ctx)
-	{
-		assert(
-			ctx.dataManager &&
-			"announce_new_spell_level: no context to read the progression table from");
-
-		const int wisdom = owner.get_wisdom();
-		const int reachNow = SpellSystem::highest_spell_level(
-			casterClass,
-			newLevel,
-			wisdom,
-			*ctx.dataManager);
-		if (reachNow <= SpellSystem::highest_spell_level(
-							casterClass,
-							newLevel - 1,
-							wisdom,
-							*ctx.dataManager))
+		void apply_fighter_improvements(
+			Creature& owner,
+			int newLevel,
+			GameContext& ctx)
 		{
-			return;
+			if (newLevel >= 13)
+			{
+				if (owner.get_attacks_per_round() < 2.0f)
+				{
+					owner.set_attacks_per_round(2.0f);
+					assert(
+						ctx.messageSystem &&
+						"apply_fighter_improvements: called without a messageSystem to announce the 13th-level gain");
+					ctx.messageSystem->append_message_part(
+						ColorPairId::YELLOW_BLACK,
+						"Special: ");
+					ctx.messageSystem->append_message_part(
+						ColorPairId::GREEN_BLACK,
+						"Extra Attack!");
+					ctx.messageSystem->append_message_part(
+						ColorPairId::WHITE_BLACK,
+						" You can now attack 2 times per round.");
+					ctx.messageSystem->finalize_message();
+					ctx.messageSystem->log(
+						"Fighter gained extra attack (2 attacks per round)");
+				}
+			}
+			else if (newLevel >= 7)
+			{
+				if (owner.get_attacks_per_round() < 1.5f)
+				{
+					owner.set_attacks_per_round(1.5f);
+					assert(
+						ctx.messageSystem &&
+						"apply_fighter_improvements: called without a messageSystem to announce the 7th-level gain");
+					ctx.messageSystem->append_message_part(
+						ColorPairId::YELLOW_BLACK,
+						"Special: ");
+					ctx.messageSystem->append_message_part(
+						ColorPairId::GREEN_BLACK,
+						"Extra Attack!");
+					ctx.messageSystem->append_message_part(
+						ColorPairId::WHITE_BLACK,
+						" You can now attack 3/2 times per round.");
+					ctx.messageSystem->finalize_message();
+					ctx.messageSystem->log(
+						"Fighter gained extra attack (3/2 attacks per round)");
+				}
+			}
 		}
 
-		assert(
-			ctx.messageSystem &&
-			"announce_new_spell_level: called without a messageSystem");
-		ctx.messageSystem->append_message_part(
-			ColorPairId::YELLOW_BLACK,
-			"Special: ");
-		ctx.messageSystem->append_message_part(
-			ColorPairId::GREEN_BLACK,
-			"New spell level!");
-		ctx.messageSystem->append_message_part(
-			ColorPairId::WHITE_BLACK,
-			" You can now cast level ");
-		ctx.messageSystem->append_message_part(
-			ColorPairId::GREEN_BLACK,
-			std::to_string(reachNow));
-		ctx.messageSystem->append_message_part(
-			ColorPairId::WHITE_BLACK,
-			" spells.");
-		ctx.messageSystem->finalize_message();
-		ctx.messageSystem->log(
-			std::format(
-				"Spell reach rose to level {} at experience level {}",
-				reachNow,
-				newLevel));
-	}
-
-	void apply_cleric_improvements(
-		const Creature& owner,
-		int newLevel,
-		GameContext& ctx)
-	{
-		// Announce only a tougher class of undead coming into reach; the target
-		// numbers improve almost every level.
-		const int reachNow = highest_turnable_hit_dice(newLevel);
-		if (reachNow > highest_turnable_hit_dice(newLevel - 1))
+		void apply_rogue_improvements(int newLevel, GameContext& ctx)
 		{
 			assert(
 				ctx.messageSystem &&
-				"apply_cleric_improvements: called without a messageSystem");
+				"apply_rogue_improvements: called without a messageSystem");
+			int backstabMultiplier =
+				LevelUpSystem::calculate_backstab_multiplier(newLevel);
+			if (backstabMultiplier >
+				LevelUpSystem::calculate_backstab_multiplier(newLevel - 1))
+			{
+				ctx.messageSystem->append_message_part(
+					ColorPairId::YELLOW_BLACK,
+					"Special: ");
+				ctx.messageSystem->append_message_part(
+					ColorPairId::GREEN_BLACK,
+					"Backstab improved!");
+				ctx.messageSystem->append_message_part(
+					ColorPairId::WHITE_BLACK,
+					" Damage multiplier: x");
+				ctx.messageSystem->append_message_part(
+					ColorPairId::GREEN_BLACK,
+					std::to_string(backstabMultiplier));
+				ctx.messageSystem->finalize_message();
+				ctx.messageSystem->log(
+					std::format(
+						"Rogue backstab multiplier increased to x{}",
+						backstabMultiplier));
+			}
+
+			// "The player receives another 30 points to distribute" each thief
+			// level (PHB page 84); DisplayManager opens the screen that spends
+			// them.
+			ctx.messageSystem->append_message_part(
+				ColorPairId::YELLOW_BLACK,
+				"Thief skills: ");
+			ctx.messageSystem->append_message_part(
+				ColorPairId::GREEN_BLACK,
+				std::to_string(thief_skill_grant_at_level(newLevel).points));
+			ctx.messageSystem->append_message_part(
+				ColorPairId::WHITE_BLACK,
+				" points to spend.");
+			ctx.messageSystem->finalize_message();
+		}
+
+		// Says so when a level opens a spell level that was out of reach
+		// before. The number comes from the progression table rather than from
+		// a formula beside it, so the two cannot disagree.
+		void announce_new_spell_level(
+			CasterClass casterClass,
+			const Creature& owner,
+			int newLevel,
+			GameContext& ctx)
+		{
+			assert(
+				ctx.dataManager &&
+				"announce_new_spell_level: no context to read the progression table from");
+
+			const int wisdom = owner.get_wisdom();
+			const int reachNow = SpellSystem::highest_spell_level(
+				casterClass,
+				newLevel,
+				wisdom,
+				*ctx.dataManager);
+			if (reachNow <= SpellSystem::highest_spell_level(
+								casterClass,
+								newLevel - 1,
+								wisdom,
+								*ctx.dataManager))
+			{
+				return;
+			}
+
+			assert(
+				ctx.messageSystem &&
+				"announce_new_spell_level: called without a messageSystem");
 			ctx.messageSystem->append_message_part(
 				ColorPairId::YELLOW_BLACK,
 				"Special: ");
 			ctx.messageSystem->append_message_part(
 				ColorPairId::GREEN_BLACK,
-				"Turn Undead improved!");
+				"New spell level!");
 			ctx.messageSystem->append_message_part(
 				ColorPairId::WHITE_BLACK,
-				" You can now turn undead of up to ");
+				" You can now cast level ");
 			ctx.messageSystem->append_message_part(
 				ColorPairId::GREEN_BLACK,
 				std::to_string(reachNow));
 			ctx.messageSystem->append_message_part(
 				ColorPairId::WHITE_BLACK,
-				" hit dice.");
+				" spells.");
 			ctx.messageSystem->finalize_message();
 			ctx.messageSystem->log(
 				std::format(
-					"Cleric turning reach rose to {} HD at level {}",
+					"Spell reach rose to level {} at experience level {}",
 					reachNow,
 					newLevel));
 		}
 
-		announce_new_spell_level(CasterClass::CLERIC, owner, newLevel, ctx);
-	}
-
-	void apply_wizard_improvements(
-		const Creature& owner,
-		int newLevel,
-		GameContext& ctx)
-	{
-		announce_new_spell_level(CasterClass::WIZARD, owner, newLevel, ctx);
-	}
-
-	void apply_class_specific_improvements(
-		Creature& owner,
-		int newLevel,
-		GameContext& ctx)
-	{
-		switch (owner.get_creature_class())
+		void apply_cleric_improvements(
+			const Creature& owner,
+			int newLevel,
+			GameContext& ctx)
 		{
-		case CreatureClass::FIGHTER:
-		{
-			apply_fighter_improvements(owner, newLevel, ctx);
-			break;
+			// Announce only a tougher class of undead coming into reach; the
+			// target numbers improve almost every level.
+			const int reachNow = highest_turnable_hit_dice(newLevel);
+			if (reachNow > highest_turnable_hit_dice(newLevel - 1))
+			{
+				assert(
+					ctx.messageSystem &&
+					"apply_cleric_improvements: called without a messageSystem");
+				ctx.messageSystem->append_message_part(
+					ColorPairId::YELLOW_BLACK,
+					"Special: ");
+				ctx.messageSystem->append_message_part(
+					ColorPairId::GREEN_BLACK,
+					"Turn Undead improved!");
+				ctx.messageSystem->append_message_part(
+					ColorPairId::WHITE_BLACK,
+					" You can now turn undead of up to ");
+				ctx.messageSystem->append_message_part(
+					ColorPairId::GREEN_BLACK,
+					std::to_string(reachNow));
+				ctx.messageSystem->append_message_part(
+					ColorPairId::WHITE_BLACK,
+					" hit dice.");
+				ctx.messageSystem->finalize_message();
+				ctx.messageSystem->log(
+					std::format(
+						"Cleric turning reach rose to {} HD at level {}",
+						reachNow,
+						newLevel));
+			}
+
+			announce_new_spell_level(CasterClass::CLERIC, owner, newLevel, ctx);
 		}
 
+		void apply_wizard_improvements(
+			const Creature& owner,
+			int newLevel,
+			GameContext& ctx)
+		{
+			announce_new_spell_level(CasterClass::WIZARD, owner, newLevel, ctx);
+		}
+
+		void apply_class_specific_improvements(
+			Creature& owner,
+			int newLevel,
+			GameContext& ctx)
+		{
+			switch (owner.get_creature_class())
+			{
+			case CreatureClass::FIGHTER:
+			{
+				apply_fighter_improvements(owner, newLevel, ctx);
+				break;
+			}
+
+			case CreatureClass::ROGUE:
+			{
+				apply_rogue_improvements(newLevel, ctx);
+				break;
+			}
+
+			case CreatureClass::CLERIC:
+			{
+				apply_cleric_improvements(owner, newLevel, ctx);
+				break;
+			}
+
+			case CreatureClass::WIZARD:
+			{
+				apply_wizard_improvements(owner, newLevel, ctx);
+				break;
+			}
+
+			case CreatureClass::MONSTER:
+			{
+				break; // No class-specific improvements for monsters currently
+			}
+			}
+		}
+
+		void apply_saving_throw_improvements(
+			Creature& owner,
+			int newLevel,
+			GameContext& ctx)
+		{
+			// Table 60 is banded, and a level improves the save when it lands
+			// on a row the level below did not. Asking the table means this
+			// cannot drift from it.
+			const bool improved =
+				SavingThrows::improves_at(owner.get_creature_class(), newLevel);
+
+			if (improved)
+			{
+				assert(
+					ctx.messageSystem &&
+					"apply_saving_throw_improvements: called without a messageSystem");
+				if (owner.get_creature_class() != CreatureClass::MONSTER)
+				{
+					ctx.messageSystem->append_message_part(
+						ColorPairId::WHITE_BLACK,
+						"Saving throws improved!");
+					ctx.messageSystem->finalize_message();
+				}
+				ctx.messageSystem->log(
+					std::format(
+						"Saving throws improved at level {}",
+						newLevel));
+			}
+		}
+
+	} // anonymous namespace
+
+	// =========================================================================
+	// Public interface
+	// =========================================================================
+
+	namespace LevelUpSystem
+	{
+
+		void apply_level_up_benefits(
+			Creature& owner,
+			int newLevel,
+			GameContext& ctx)
+		{
+			int oldTHAC0 = owner.get_thaco();
+
+			apply_thac0_improvement(owner, newLevel, ctx);
+			int hpGained = apply_hit_point_gain(owner, newLevel, ctx);
+			apply_class_specific_improvements(owner, newLevel, ctx);
+
+			apply_saving_throw_improvements(owner, newLevel, ctx);
+
+			bool thac0_improved = (oldTHAC0 != owner.get_thaco());
+			assert(
+				ctx.messageSystem &&
+				"apply_level_up_benefits: called without a messageSystem");
+
+			if (owner.get_creature_class() != CreatureClass::MONSTER)
+			{
+				ctx.messageSystem->append_message_part(
+					ColorPairId::YELLOW_BLACK,
+					"LEVEL UP! ");
+				ctx.messageSystem->append_message_part(
+					ColorPairId::WHITE_BLACK,
+					std::format("You are now level {}. ", newLevel));
+				ctx.messageSystem->append_message_part(
+					ColorPairId::GREEN_BLACK,
+					std::format("+{} HP, ", hpGained));
+				if (thac0_improved)
+				{
+					ctx.messageSystem->append_message_part(
+						ColorPairId::GREEN_BLACK,
+						std::format(
+							"THAC0 {}->{}",
+							oldTHAC0,
+							owner.get_thaco()));
+				}
+				ctx.messageSystem->finalize_message();
+				ctx.messageSystem->log(
+					std::format(
+						"Level {} reached! Combat abilities improved.",
+						newLevel));
+			}
+			else
+			{
+				ctx.messageSystem->log(
+					std::format(
+						"{} reaches level {}.",
+						owner.actorData.name,
+						newLevel));
+			}
+		}
+
+		int calculate_backstab_multiplier(int level)
+		{
+			if (level >= 13)
+			{
+				return 5;
+			}
+			if (level >= 9)
+			{
+				return 4;
+			}
+			if (level >= 5)
+			{
+				return 3;
+			}
+			if (level >= 1)
+			{
+				return 2;
+			}
+			return 1;
+		}
+
+	} // namespace LevelUpSystem
+
+	// Which level a class stops rolling hit dice at, and what it gains per
+	// level after that. AD&D 2e Player's Handbook Tables 14, 20, 23 and 25.
+	//
+	// Monsters do not advance by these tables; they take the warrior
+	// progression so the function has a defined answer for every class.
+	//
+	// Example:
+	//   hit_point_progression(CreatureClass::WIZARD).lastRolledLevel; // -> 10
+	//   hit_point_progression(CreatureClass::WIZARD).flatGain;        // -> 1
+	LevelUpSystem::HitPointProgression LevelUpSystem::hit_point_progression(
+		CreatureClass creatureClass)
+	{
+		using namespace GameBalance::Leveling::HitPoints;
+
+		switch (creatureClass)
+		{
 		case CreatureClass::ROGUE:
 		{
-			apply_rogue_improvements(newLevel, ctx);
-			break;
+			return LevelUpSystem::HitPointProgression{
+				ROGUE_LAST_ROLLED_LEVEL,
+				ROGUE_FLAT_GAIN,
+			};
 		}
 
 		case CreatureClass::CLERIC:
 		{
-			apply_cleric_improvements(owner, newLevel, ctx);
-			break;
+			return LevelUpSystem::HitPointProgression{
+				CLERIC_LAST_ROLLED_LEVEL,
+				CLERIC_FLAT_GAIN,
+			};
 		}
 
 		case CreatureClass::WIZARD:
 		{
-			apply_wizard_improvements(owner, newLevel, ctx);
-			break;
+			return LevelUpSystem::HitPointProgression{
+				WIZARD_LAST_ROLLED_LEVEL,
+				WIZARD_FLAT_GAIN,
+			};
 		}
 
+		case CreatureClass::FIGHTER:
 		case CreatureClass::MONSTER:
 		{
-			break; // No class-specific improvements for monsters currently
+			return LevelUpSystem::HitPointProgression{
+				FIGHTER_LAST_ROLLED_LEVEL,
+				FIGHTER_FLAT_GAIN,
+			};
 		}
 		}
-	}
 
-	void apply_saving_throw_improvements(
-		Creature& owner,
-		int newLevel,
-		GameContext& ctx)
-	{
-		// Table 60 is banded, and a level improves the save when it lands on a
-		// row the level below did not. Asking the table means this cannot drift
-		// from it.
-		const bool improved =
-			SavingThrows::improves_at(owner.get_creature_class(), newLevel);
-
-		if (improved)
-		{
-			assert(
-				ctx.messageSystem &&
-				"apply_saving_throw_improvements: called without a messageSystem");
-			if (owner.get_creature_class() != CreatureClass::MONSTER)
-			{
-				ctx.messageSystem->append_message_part(
-					ColorPairId::WHITE_BLACK,
-					"Saving throws improved!");
-				ctx.messageSystem->finalize_message();
-			}
-			ctx.messageSystem->log(
-				std::format("Saving throws improved at level {}", newLevel));
-		}
-	}
-
-} // anonymous namespace
-
-// ============================================================================
-// Public interface
-// ============================================================================
-
-namespace LevelUpSystem
-{
-
-	void apply_level_up_benefits(
-		Creature& owner,
-		int newLevel,
-		GameContext& ctx)
-	{
-		int oldTHAC0 = owner.get_thaco();
-
-		apply_thac0_improvement(owner, newLevel, ctx);
-		int hpGained = apply_hit_point_gain(owner, newLevel, ctx);
-		apply_class_specific_improvements(owner, newLevel, ctx);
-
-		apply_saving_throw_improvements(owner, newLevel, ctx);
-
-		bool thac0_improved = (oldTHAC0 != owner.get_thaco());
-		assert(
-			ctx.messageSystem &&
-			"apply_level_up_benefits: called without a messageSystem");
-
-		if (owner.get_creature_class() != CreatureClass::MONSTER)
-		{
-			ctx.messageSystem->append_message_part(
-				ColorPairId::YELLOW_BLACK,
-				"LEVEL UP! ");
-			ctx.messageSystem->append_message_part(
-				ColorPairId::WHITE_BLACK,
-				std::format("You are now level {}. ", newLevel));
-			ctx.messageSystem->append_message_part(
-				ColorPairId::GREEN_BLACK,
-				std::format("+{} HP, ", hpGained));
-			if (thac0_improved)
-			{
-				ctx.messageSystem->append_message_part(
-					ColorPairId::GREEN_BLACK,
-					std::format("THAC0 {}->{}", oldTHAC0, owner.get_thaco()));
-			}
-			ctx.messageSystem->finalize_message();
-			ctx.messageSystem->log(
-				std::format(
-					"Level {} reached! Combat abilities improved.",
-					newLevel));
-		}
-		else
-		{
-			ctx.messageSystem->log(
-				std::format(
-					"{} reaches level {}.",
-					owner.actorData.name,
-					newLevel));
-		}
-	}
-
-	int calculate_backstab_multiplier(int level)
-	{
-		if (level >= 13)
-		{
-			return 5;
-		}
-		if (level >= 9)
-		{
-			return 4;
-		}
-		if (level >= 5)
-		{
-			return 3;
-		}
-		if (level >= 1)
-		{
-			return 2;
-		}
-		return 1;
-	}
-
-} // namespace LevelUpSystem
-
-// Which level a class stops rolling hit dice at, and what it gains per level
-// after that. AD&D 2e Player's Handbook Tables 14, 20, 23 and 25.
-//
-// Monsters do not advance by these tables; they take the warrior progression so
-// the function has a defined answer for every class.
-//
-// Example:
-//   hit_point_progression(CreatureClass::WIZARD).lastRolledLevel; // -> 10
-//   hit_point_progression(CreatureClass::WIZARD).flatGain;        // -> 1
-LevelUpSystem::HitPointProgression LevelUpSystem::hit_point_progression(
-	CreatureClass creatureClass)
-{
-	using namespace GameBalance::Leveling::HitPoints;
-
-	switch (creatureClass)
-	{
-	case CreatureClass::ROGUE:
-	{
-		return LevelUpSystem::HitPointProgression{
-			ROGUE_LAST_ROLLED_LEVEL,
-			ROGUE_FLAT_GAIN,
-		};
-	}
-
-	case CreatureClass::CLERIC:
-	{
-		return LevelUpSystem::HitPointProgression{
-			CLERIC_LAST_ROLLED_LEVEL,
-			CLERIC_FLAT_GAIN,
-		};
-	}
-
-	case CreatureClass::WIZARD:
-	{
-		return LevelUpSystem::HitPointProgression{
-			WIZARD_LAST_ROLLED_LEVEL,
-			WIZARD_FLAT_GAIN,
-		};
-	}
-
-	case CreatureClass::FIGHTER:
-	case CreatureClass::MONSTER:
-	{
 		return LevelUpSystem::HitPointProgression{
 			FIGHTER_LAST_ROLLED_LEVEL,
 			FIGHTER_FLAT_GAIN,
 		};
 	}
-	}
 
-	return LevelUpSystem::HitPointProgression{
-		FIGHTER_LAST_ROLLED_LEVEL,
-		FIGHTER_FLAT_GAIN,
-	};
-}
-
-// Whether this level adds the Constitution hit point adjustment.
-//
-// Example:
-//   takes_constitution_adjustment_at(CreatureClass::WIZARD, 10);  // -> true
-//   takes_constitution_adjustment_at(CreatureClass::WIZARD, 11);  // -> false
-bool LevelUpSystem::takes_constitution_adjustment_at(
-	CreatureClass creatureClass,
-	int level)
-{
-	// A monster's levels are its hit dice and it rolls every one of them, so the
-	// adjustment never runs out the way a character's table runs out of dice.
-	if (creatureClass == CreatureClass::MONSTER)
+	// Whether this level adds the Constitution hit point adjustment.
+	//
+	// Example:
+	//   takes_constitution_adjustment_at(CreatureClass::WIZARD, 10);
+	//   // -> true
+	//   takes_constitution_adjustment_at(CreatureClass::WIZARD, 11);
+	//   // -> false
+	bool LevelUpSystem::takes_constitution_adjustment_at(
+		CreatureClass creatureClass,
+		int level)
 	{
-		return true;
-	}
-
-	// A character's adjustment rides on the die, so it ends where the dice do.
-	return level <=
-		LevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;
-}
-
-// One hit die under the Constitution rules.
-//
-// Example:
-//   hit_die_value(5, CreatureClass::MONSTER, 18, dataManager).total;  // -> 9
-LevelUpSystem::HitDieValue LevelUpSystem::hit_die_value(
-	int rolledDie,
-	CreatureClass creatureClass,
-	int constitution,
-	const DataManager& dataManager)
-{
-	// Table 3's footnotes: from a score of 20 a low roll counts as more.
-	const int dieValue = std::max(
-		rolledDie,
-		dataManager.constitution_for(constitution).hitDieMinimum);
-	const int adjustment = dataManager.constitution_hit_point_adjustment(
-		constitution,
-		creatureClass);
-
-	// "No Hit Die ever yields less than 1 hit point, regardless of modifications."
-	return LevelUpSystem::HitDieValue{
-		dieValue,
-		adjustment,
-		std::max(1, dieValue + adjustment),
-	};
-}
-
-// A whole hit dice expression rolled and adjusted.
-//
-// Example, dice forced to 5 and 5:
-//   roll_hit_points({ 2, 8, 4 }, CreatureClass::MONSTER, 18, dataManager, dice);  // -> 22
-int LevelUpSystem::roll_hit_points(
-	const DiceExpr& hitDice,
-	CreatureClass creatureClass,
-	int constitution,
-	const DataManager& dataManager,
-	RandomDice& dice)
-{
-	// The bonus belongs to the creature rather than to a die, so no adjustment
-	// rides on it and the per-die floor does not reach it.
-	int total = hitDice.bonus;
-	for (const int rolled : roll_each_die(&dice, hitDice))
-	{
-		const HitDieValue dieValue = LevelUpSystem::hit_die_value(
-			rolled,
-			creatureClass,
-			constitution,
-			dataManager);
-		total += dieValue.total;
-	}
-
-	// A negative bonus on a small expression can still spend the whole roll.
-	return std::max(1, total);
-}
-
-// How many levels, 1st through this one, took the adjustment.
-//
-// Example:
-//   levels_taking_constitution_adjustment(CreatureClass::CLERIC, 12);  // -> 9
-//   levels_taking_constitution_adjustment(CreatureClass::MONSTER, 5);  // -> 5
-int LevelUpSystem::levels_taking_constitution_adjustment(
-	CreatureClass creatureClass,
-	int level)
-{
-	// Counted from the per-level rule rather than restated, so the two cannot disagree.
-	int levels = 0;
-	for (int eachLevel = 1; eachLevel <= level; ++eachLevel)
-	{
-		if (LevelUpSystem::takes_constitution_adjustment_at(
-				creatureClass,
-				eachLevel))
+		// A monster's levels are its hit dice and it rolls every one of them,
+		// so the adjustment never runs out the way a character's table runs out
+		// of dice.
+		if (creatureClass == CreatureClass::MONSTER)
 		{
-			++levels;
+			return true;
 		}
-	}
-	return levels;
-}
 
-// The THAC0 a class attacks at on a given level. AD&D 2e Player's Handbook
-// attack tables, one per class, with monsters on the warrior's.
-//
-// Example:
-//   thac0_for_level(CreatureClass::WIZARD, 3);   // -> 20
-//   thac0_for_level(CreatureClass::WIZARD, 4);   // -> 19
-int LevelUpSystem::thac0_for_level(CreatureClass creatureClass, int level)
-{
-	static constexpr CombatProgressionTables combatTables;
-
-	switch (creatureClass)
-	{
-	case CreatureClass::ROGUE:
-	{
-		return combatTables.get_rogue(level);
+		// A character's adjustment rides on the die, so it ends where the dice
+		// do.
+		return level <=
+			LevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;
 	}
 
-	case CreatureClass::CLERIC:
+	// One hit die under the Constitution rules.
+	//
+	// Example:
+	//   hit_die_value(5, CreatureClass::MONSTER, 18, dataManager).total;
+	//   // -> 9
+	LevelUpSystem::HitDieValue LevelUpSystem::hit_die_value(
+		int rolledDie,
+		CreatureClass creatureClass,
+		int constitution,
+		const DataManager& dataManager)
 	{
-		return combatTables.get_cleric(level);
+		// Table 3's footnotes: from a score of 20 a low roll counts as more.
+		const int dieValue = std::max(
+			rolledDie,
+			dataManager.constitution_for(constitution).hitDieMinimum);
+		const int adjustment = dataManager.constitution_hit_point_adjustment(
+			constitution,
+			creatureClass);
+
+		// "No Hit Die ever yields less than 1 hit point, regardless of
+		// modifications."
+		return LevelUpSystem::HitDieValue{
+			dieValue,
+			adjustment,
+			std::max(1, dieValue + adjustment),
+		};
 	}
 
-	case CreatureClass::WIZARD:
+	// A whole hit dice expression rolled and adjusted.
+	//
+	// Example, dice forced to 5 and 5:
+	//   roll_hit_points(
+	//       { 2, 8, 4 },
+	//       CreatureClass::MONSTER,
+	//       18,
+	//       dataManager,
+	//       dice);
+	//   // -> 22
+	int LevelUpSystem::roll_hit_points(
+		const DiceExpr& hitDice,
+		CreatureClass creatureClass,
+		int constitution,
+		const DataManager& dataManager,
+		RandomDice& dice)
 	{
-		return combatTables.get_wizard(level);
+		// The bonus belongs to the creature rather than to a die, so no
+		// adjustment rides on it and the per-die floor does not reach it.
+		int total = hitDice.bonus;
+		for (const int rolled : roll_each_die(&dice, hitDice))
+		{
+			const HitDieValue dieValue = LevelUpSystem::hit_die_value(
+				rolled,
+				creatureClass,
+				constitution,
+				dataManager);
+			total += dieValue.total;
+		}
+
+		// A negative bonus on a small expression can still spend the whole
+		// roll.
+		return std::max(1, total);
 	}
 
-	case CreatureClass::FIGHTER:
-	case CreatureClass::MONSTER:
+	// How many levels, 1st through this one, took the adjustment.
+	//
+	// Example:
+	//   levels_taking_constitution_adjustment(CreatureClass::CLERIC, 12);
+	//   // -> 9
+	//   levels_taking_constitution_adjustment(CreatureClass::MONSTER, 5);
+	//   // -> 5
+	int LevelUpSystem::levels_taking_constitution_adjustment(
+		CreatureClass creatureClass,
+		int level)
 	{
+		// Counted from the per-level rule rather than restated, so the two
+		// cannot disagree.
+		int levels = 0;
+		for (int eachLevel = 1; eachLevel <= level; ++eachLevel)
+		{
+			if (LevelUpSystem::takes_constitution_adjustment_at(
+					creatureClass,
+					eachLevel))
+			{
+				++levels;
+			}
+		}
+		return levels;
+	}
+
+	// The THAC0 a class attacks at on a given level. AD&D 2e Player's Handbook
+	// attack tables, one per class, with monsters on the warrior's.
+	//
+	// Example:
+	//   thac0_for_level(CreatureClass::WIZARD, 3);   // -> 20
+	//   thac0_for_level(CreatureClass::WIZARD, 4);   // -> 19
+	int LevelUpSystem::thac0_for_level(CreatureClass creatureClass, int level)
+	{
+		static constexpr CombatProgressionTables combatTables;
+
+		switch (creatureClass)
+		{
+		case CreatureClass::ROGUE:
+		{
+			return combatTables.get_rogue(level);
+		}
+
+		case CreatureClass::CLERIC:
+		{
+			return combatTables.get_cleric(level);
+		}
+
+		case CreatureClass::WIZARD:
+		{
+			return combatTables.get_wizard(level);
+		}
+
+		case CreatureClass::FIGHTER:
+		case CreatureClass::MONSTER:
+		{
+			return combatTables.get_fighter(level);
+		}
+		}
+
 		return combatTables.get_fighter(level);
 	}
+
+	// Whether reaching this level moves the class down its attack table.
+	//
+	// Example:
+	//   thac0_improves_at(CreatureClass::FIGHTER, 3);  // -> true
+	//   thac0_improves_at(CreatureClass::WIZARD, 3);   // -> false, 20 at both
+	bool LevelUpSystem::thac0_improves_at(
+		CreatureClass creatureClass,
+		int level)
+	{
+		// Level 1 has no level below it to improve from; the table answers 20
+		// there, which is what a class starts at, so the comparison already
+		// says no.
+		return thac0_for_level(creatureClass, level) <
+			thac0_for_level(creatureClass, level - 1);
 	}
-
-	return combatTables.get_fighter(level);
-}
-
-// Whether reaching this level moves the class down its attack table.
-//
-// Example:
-//   thac0_improves_at(CreatureClass::FIGHTER, 3);  // -> true
-//   thac0_improves_at(CreatureClass::WIZARD, 3);   // -> false, 20 at both
-bool LevelUpSystem::thac0_improves_at(CreatureClass creatureClass, int level)
-{
-	// Level 1 has no level below it to improve from; the table answers 20 there,
-	// which is what a class starts at, so the comparison already says no.
-	return thac0_for_level(creatureClass, level) <
-		thac0_for_level(creatureClass, level - 1);
-}
 
 } // namespace CppRL

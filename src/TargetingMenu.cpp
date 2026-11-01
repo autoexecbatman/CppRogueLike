@@ -19,166 +19,170 @@
 namespace CppRL
 {
 
-TargetingMenu::TargetingMenu(
-	int maxRange,
-	int aoeRadius,
-	Callback onComplete,
-	GameContext& ctx) :
-	cursor(ctx.player()->position),
-	maxRange(maxRange),
-	aoeRadius(aoeRadius),
-	onComplete(std::move(onComplete))
-{
-}
-
-void TargetingMenu::menu(GameContext& ctx)
-{
-	assert(ctx.targeting && "TargetingMenu::menu: called without a targeting");
-	assert(
-		ctx.renderingManager &&
-		"TargetingMenu::menu: called without a renderingManager");
-	assert(
-		ctx.inputSystem &&
-		"TargetingMenu::menu: called without an inputSystem");
-	assert(ctx.map && "TargetingMenu::menu: called without a map");
-
-	ctx.inputSystem->poll();
-	GameKey key = ctx.inputSystem->get_key();
-
-	Vector2D move{ 0, 0 };
-	switch (key)
+	TargetingMenu::TargetingMenu(
+		int maxRange,
+		int aoeRadius,
+		Callback onComplete,
+		GameContext& ctx) :
+		cursor(ctx.player()->position),
+		maxRange(maxRange),
+		aoeRadius(aoeRadius),
+		onComplete(std::move(onComplete))
 	{
-
-	case GameKey::UP:
-	case GameKey::W:
-	{
-		move = DIR_N;
-		break;
 	}
 
-	case GameKey::DOWN:
-	case GameKey::S:
+	void TargetingMenu::menu(GameContext& ctx)
 	{
-		move = DIR_S;
-		break;
-	}
+		assert(
+			ctx.targeting && "TargetingMenu::menu: called without a targeting");
+		assert(
+			ctx.renderingManager &&
+			"TargetingMenu::menu: called without a renderingManager");
+		assert(
+			ctx.inputSystem &&
+			"TargetingMenu::menu: called without an inputSystem");
+		assert(ctx.map && "TargetingMenu::menu: called without a map");
 
-	case GameKey::LEFT:
-	case GameKey::A:
-	{
-		move = DIR_W;
-		break;
-	}
+		ctx.inputSystem->poll();
+		GameKey key = ctx.inputSystem->get_key();
 
-	case GameKey::RIGHT:
-	case GameKey::D:
-	{
-		move = DIR_E;
-		break;
-	}
-
-	case GameKey::Q:
-	{
-		move = DIR_NW;
-		break;
-	}
-
-	case GameKey::E:
-	{
-		move = DIR_NE;
-		break;
-	}
-
-	case GameKey::Z:
-	{
-		move = DIR_SW;
-		break;
-	}
-
-	case GameKey::C:
-	{
-		move = DIR_SE;
-		break;
-	}
-
-	case GameKey::ENTER:
-	{
-		menu_set_run_false();
-		onComplete(ctx.map->is_in_bounds(cursor), cursor, ctx);
-		return;
-	}
-
-	case GameKey::ESCAPE:
-	{
-		menu_set_run_false();
-		onComplete(false, cursor, ctx);
-		return;
-	}
-
-	default:
-	{
-		break;
-	}
-	}
-
-	if (move.x != 0 || move.y != 0)
-	{
-		Vector2D next = cursor + move;
-		bool inBounds = ctx.map->is_in_bounds(next);
-		bool inRange = maxRange <= 0 ||
-			next.distance_to(ctx.player()->position) <=
-				static_cast<double>(maxRange);
-		if (inBounds && inRange)
+		Vector2D move{ 0, 0 };
+		switch (key)
 		{
-			cursor = next;
+
+		case GameKey::UP:
+		case GameKey::W:
+		{
+			move = DIR_N;
+			break;
 		}
+
+		case GameKey::DOWN:
+		case GameKey::S:
+		{
+			move = DIR_S;
+			break;
+		}
+
+		case GameKey::LEFT:
+		case GameKey::A:
+		{
+			move = DIR_W;
+			break;
+		}
+
+		case GameKey::RIGHT:
+		case GameKey::D:
+		{
+			move = DIR_E;
+			break;
+		}
+
+		case GameKey::Q:
+		{
+			move = DIR_NW;
+			break;
+		}
+
+		case GameKey::E:
+		{
+			move = DIR_NE;
+			break;
+		}
+
+		case GameKey::Z:
+		{
+			move = DIR_SW;
+			break;
+		}
+
+		case GameKey::C:
+		{
+			move = DIR_SE;
+			break;
+		}
+
+		case GameKey::ENTER:
+		{
+			menu_set_run_false();
+			onComplete(ctx.map->is_in_bounds(cursor), cursor, ctx);
+			return;
+		}
+
+		case GameKey::ESCAPE:
+		{
+			menu_set_run_false();
+			onComplete(false, cursor, ctx);
+			return;
+		}
+
+		default:
+		{
+			break;
+		}
+		}
+
+		if (move.x != 0 || move.y != 0)
+		{
+			Vector2D next = cursor + move;
+			bool inBounds = ctx.map->is_in_bounds(next);
+			bool inRange = maxRange <= 0 ||
+				next.distance_to(ctx.player()->position) <=
+					static_cast<double>(maxRange);
+			if (inBounds && inRange)
+			{
+				cursor = next;
+			}
+		}
+
+		ctx.renderingManager->render(ctx);
+
+		ctx.targeting->draw_range_indicator(
+			ctx,
+			ctx.player()->position,
+			maxRange);
+		ctx.targeting->draw_los(ctx, cursor);
+		if (aoeRadius > 0)
+		{
+			ctx.targeting->draw_aoe_preview(ctx, cursor, aoeRadius);
+		}
+
+		draw_cursor(ctx);
+
+		ctx.renderer->draw_text(
+			Vector2D{ 4, 4 },
+			"Select target -- arrows/WASD: move  Enter: confirm  Esc: cancel",
+			ColorPairId::WHITE_BLACK);
 	}
 
-	ctx.renderingManager->render(ctx);
-
-	ctx.targeting->draw_range_indicator(ctx, ctx.player()->position, maxRange);
-	ctx.targeting->draw_los(ctx, cursor);
-	if (aoeRadius > 0)
+	void TargetingMenu::draw_cursor(GameContext& ctx) const
 	{
-		ctx.targeting->draw_aoe_preview(ctx, cursor, aoeRadius);
+		int tileSize = ctx.renderer->get_tile_size();
+		int screenPixelX = cursor.x * tileSize - ctx.renderer->get_camera_x();
+		int screenPixelY = cursor.y * tileSize - ctx.renderer->get_camera_y();
+		float pulse =
+			(std::sin(static_cast<float>(GetTime()) * 6.28318f * 4.0f) + 1.0f) *
+			0.5f;
+		auto fillAlpha = static_cast<unsigned char>(40.0f + 30.0f * pulse);
+		auto ringAlpha = static_cast<unsigned char>(120.0f + 100.0f * pulse);
+
+		DrawRectangle(
+			screenPixelX,
+			screenPixelY,
+			tileSize,
+			tileSize,
+			Color{ 255, 255, 50, fillAlpha });
+		DrawRectangleLinesEx(
+			Rectangle{
+				static_cast<float>(screenPixelX),
+				static_cast<float>(screenPixelY),
+				static_cast<float>(tileSize),
+				static_cast<float>(tileSize),
+			},
+			2.0f,
+			Color{ 255, 255, 50, ringAlpha });
 	}
 
-	draw_cursor(ctx);
-
-	ctx.renderer->draw_text(
-		Vector2D{ 4, 4 },
-		"Select target -- arrows/WASD: move  Enter: confirm  Esc: cancel",
-		ColorPairId::WHITE_BLACK);
-}
-
-void TargetingMenu::draw_cursor(GameContext& ctx) const
-{
-	int tileSize = ctx.renderer->get_tile_size();
-	int screenPixelX = cursor.x * tileSize - ctx.renderer->get_camera_x();
-	int screenPixelY = cursor.y * tileSize - ctx.renderer->get_camera_y();
-	float pulse =
-		(std::sin(static_cast<float>(GetTime()) * 6.28318f * 4.0f) + 1.0f) *
-		0.5f;
-	auto fillAlpha = static_cast<unsigned char>(40.0f + 30.0f * pulse);
-	auto ringAlpha = static_cast<unsigned char>(120.0f + 100.0f * pulse);
-
-	DrawRectangle(
-		screenPixelX,
-		screenPixelY,
-		tileSize,
-		tileSize,
-		Color{ 255, 255, 50, fillAlpha });
-	DrawRectangleLinesEx(
-		Rectangle{
-			static_cast<float>(screenPixelX),
-			static_cast<float>(screenPixelY),
-			static_cast<float>(tileSize),
-			static_cast<float>(tileSize),
-		},
-		2.0f,
-		Color{ 255, 255, 50, ringAlpha });
-}
-
-// end of file: Systems/TargetingMenu.cpp
+	// end of file: Systems/TargetingMenu.cpp
 
 } // namespace CppRL

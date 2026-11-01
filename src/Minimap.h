@@ -3,16 +3,16 @@
 namespace CppRL
 {
 
-struct GameContext;
+	struct GameContext;
 
-class Minimap
-{
-	bool visible{ false };
+	class Minimap
+	{
+		bool visible{ false };
 
-public:
-	void toggle() noexcept;
-	[[nodiscard]] bool is_visible() const noexcept;
-	void render(const GameContext& ctx) const;
-};
+	public:
+		void toggle() noexcept;
+		[[nodiscard]] bool is_visible() const noexcept;
+		void render(const GameContext& ctx) const;
+	};
 
 } // namespace CppRL

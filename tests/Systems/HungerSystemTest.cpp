@@ -40,351 +40,364 @@
 namespace CppRL
 {
 
-class HungerSystemTest : public ::testing::Test
-{
-protected:
-	MockGameContext mock{};
-	GameContext ctx{};
-	HungerSystem hunger{};
-
-	void SetUp() override
+	class HungerSystemTest : public ::testing::Test
 	{
-		ctx = mock.to_game_context();
-		ctx.hungerSystem = &hunger;
-	}
-};
+	protected:
+		MockGameContext mock{};
+		GameContext ctx{};
+		HungerSystem hunger{};
 
-// A creature that has just eaten is full, so the meter is full.
-TEST_F(HungerSystemTest, AFedCreatureIsCompletelyFull)
-{
-	EXPECT_FLOAT_EQ(hunger.get_fullness_ratio(), 1.0f);
-}
-
-// Hunger rising empties the meter rather than filling it. This is the direction
-// the HUD had backwards.
-TEST_F(HungerSystemTest, RisingHungerEmptiesTheMeter)
-{
-	const float wellFed = hunger.get_fullness_ratio();
-	hunger.increase_hunger(ctx, hunger.get_hunger_max() / 4);
-
-	EXPECT_LT(hunger.get_fullness_ratio(), wellFed);
-	EXPECT_FLOAT_EQ(hunger.get_fullness_ratio(), 0.75f);
-}
-
-// Starvation is an empty meter, not a negative one.
-TEST_F(HungerSystemTest, StarvationIsEmptyAndStopsThere)
-{
-	const int hungerMax = hunger.get_hunger_max();
-	hunger.increase_hunger(ctx, hungerMax * 2);
-
-	// The counter itself stops, which the ratio alone cannot show: get_fullness_ratio
-	// clamps on its own, so it reads 0.0 for a counter that ran past the maximum.
-	EXPECT_EQ(hunger.get_hunger_value(), hungerMax);
-	EXPECT_FLOAT_EQ(hunger.get_fullness_ratio(), 0.0f);
-}
-
-// Eating more than you are hungry for leaves a full stomach rather than a
-// negative one. The same blind spot as the ceiling, at the other end.
-TEST_F(HungerSystemTest, EatingPastFullStopsAtZero)
-{
-	hunger.increase_hunger(ctx, 100);
-	ASSERT_EQ(hunger.get_hunger_value(), 100);
-
-	hunger.decrease_hunger(ctx, 500);
-
-	EXPECT_EQ(hunger.get_hunger_value(), 0);
-	EXPECT_FLOAT_EQ(hunger.get_fullness_ratio(), 1.0f);
-}
-
-// A new game has not moved between states, so turn one has nothing to announce.
-// The stored state cache made oldState disagree with the counter, and every new
-// game logged "You are now Well Fed." with the counter at 1.
-TEST_F(HungerSystemTest, TheFirstTickAnnouncesNothing)
-{
-	ASSERT_EQ(mock.messages.get_stored_message_count(), 0u);
-
-	hunger.increase_hunger(ctx, 1);
-
-	EXPECT_EQ(mock.messages.get_stored_message_count(), 0u);
-}
-
-// The other half of that claim: silence on turn one must not come from a notifier
-// that never speaks. Crossing a threshold is a real transition and still reaches
-// the player.
-TEST_F(HungerSystemTest, CrossingAThresholdAnnouncesTheNewState)
-{
-	// One ordinary turn, which establishes the baseline without a message.
-	hunger.increase_hunger(ctx, 1);
-	ASSERT_EQ(mock.messages.get_stored_message_count(), 0u);
-
-	// Past WELL_FED_THRESHOLD at 200, so the counter lands in SATIATED.
-	hunger.increase_hunger(ctx, 200);
-
-	ASSERT_EQ(hunger.get_hunger_state(), HungerState::SATIATED);
-	EXPECT_EQ(mock.messages.get_stored_message_count(), 1u);
-}
-
-// The threshold table calls a counter of 0 WELL_FED, so that is what a system
-// nobody has ticked yet has to report. It said "Satiated" over a full bar.
-TEST_F(HungerSystemTest, AFreshSystemReportsTheStateItsCounterImplies)
-{
-	EXPECT_EQ(hunger.get_hunger_value(), 0);
-	EXPECT_EQ(hunger.get_hunger_state(), HungerState::WELL_FED);
-	EXPECT_EQ(hunger.get_hunger_state_string(), "Well Fed");
-}
-
-// The threshold table, restated from the contract rather than from the code: the
-// state is whatever the counter says it is, at the boundary and one past it.
-TEST_F(HungerSystemTest, StateFollowsTheCounterAcrossEveryThreshold)
-{
-	struct Boundary
-	{
-		int hungerValue;
-		HungerState expected;
+		void SetUp() override
+		{
+			ctx = mock.to_game_context();
+			ctx.hungerSystem = &hunger;
+		}
 	};
 
-	const std::array<Boundary, 10> boundaries{ {
-		{ 200, HungerState::WELL_FED },
-		{ 201, HungerState::SATIATED },
-		{ 400, HungerState::SATIATED },
-		{ 401, HungerState::HUNGRY },
-		{ 700, HungerState::HUNGRY },
-		{ 701, HungerState::STARVING },
-		{ 900, HungerState::STARVING },
-		{ 901, HungerState::DYING },
-		{ 1000, HungerState::DYING },
-		{ 0, HungerState::WELL_FED },
-	} };
-
-	for (const Boundary& boundary : boundaries)
+	// A creature that has just eaten is full, so the meter is full.
+	TEST_F(HungerSystemTest, AFedCreatureIsCompletelyFull)
 	{
-		// Drive the counter to the exact value from wherever it currently sits.
-		const int current = hunger.get_hunger_value();
-		if (boundary.hungerValue >= current)
+		EXPECT_FLOAT_EQ(hunger.get_fullness_ratio(), 1.0f);
+	}
+
+	// Hunger rising empties the meter rather than filling it. This is the
+	// direction the HUD had backwards.
+	TEST_F(HungerSystemTest, RisingHungerEmptiesTheMeter)
+	{
+		const float wellFed = hunger.get_fullness_ratio();
+		hunger.increase_hunger(ctx, hunger.get_hunger_max() / 4);
+
+		EXPECT_LT(hunger.get_fullness_ratio(), wellFed);
+		EXPECT_FLOAT_EQ(hunger.get_fullness_ratio(), 0.75f);
+	}
+
+	// Starvation is an empty meter, not a negative one.
+	TEST_F(HungerSystemTest, StarvationIsEmptyAndStopsThere)
+	{
+		const int hungerMax = hunger.get_hunger_max();
+		hunger.increase_hunger(ctx, hungerMax * 2);
+
+		// The counter itself stops, which the ratio alone cannot show:
+		// get_fullness_ratio clamps on its own, so it reads 0.0 for a counter
+		// that ran past the maximum.
+		EXPECT_EQ(hunger.get_hunger_value(), hungerMax);
+		EXPECT_FLOAT_EQ(hunger.get_fullness_ratio(), 0.0f);
+	}
+
+	// Eating more than you are hungry for leaves a full stomach rather than a
+	// negative one. The same blind spot as the ceiling, at the other end.
+	TEST_F(HungerSystemTest, EatingPastFullStopsAtZero)
+	{
+		hunger.increase_hunger(ctx, 100);
+		ASSERT_EQ(hunger.get_hunger_value(), 100);
+
+		hunger.decrease_hunger(ctx, 500);
+
+		EXPECT_EQ(hunger.get_hunger_value(), 0);
+		EXPECT_FLOAT_EQ(hunger.get_fullness_ratio(), 1.0f);
+	}
+
+	// A new game has not moved between states, so turn one has nothing to
+	// announce. The stored state cache made oldState disagree with the counter,
+	// and every new game logged "You are now Well Fed." with the counter at 1.
+	TEST_F(HungerSystemTest, TheFirstTickAnnouncesNothing)
+	{
+		ASSERT_EQ(mock.messages.get_stored_message_count(), 0u);
+
+		hunger.increase_hunger(ctx, 1);
+
+		EXPECT_EQ(mock.messages.get_stored_message_count(), 0u);
+	}
+
+	// The other half of that claim: silence on turn one must not come from a
+	// notifier that never speaks. Crossing a threshold is a real transition and
+	// still reaches the player.
+	TEST_F(HungerSystemTest, CrossingAThresholdAnnouncesTheNewState)
+	{
+		// One ordinary turn, which establishes the baseline without a message.
+		hunger.increase_hunger(ctx, 1);
+		ASSERT_EQ(mock.messages.get_stored_message_count(), 0u);
+
+		// Past WELL_FED_THRESHOLD at 200, so the counter lands in SATIATED.
+		hunger.increase_hunger(ctx, 200);
+
+		ASSERT_EQ(hunger.get_hunger_state(), HungerState::SATIATED);
+		EXPECT_EQ(mock.messages.get_stored_message_count(), 1u);
+	}
+
+	// The threshold table calls a counter of 0 WELL_FED, so that is what a
+	// system nobody has ticked yet has to report. It said "Satiated" over a
+	// full bar.
+	TEST_F(HungerSystemTest, AFreshSystemReportsTheStateItsCounterImplies)
+	{
+		EXPECT_EQ(hunger.get_hunger_value(), 0);
+		EXPECT_EQ(hunger.get_hunger_state(), HungerState::WELL_FED);
+		EXPECT_EQ(hunger.get_hunger_state_string(), "Well Fed");
+	}
+
+	// The threshold table, restated from the contract rather than from the
+	// code: the state is whatever the counter says it is, at the boundary and
+	// one past it.
+	TEST_F(HungerSystemTest, StateFollowsTheCounterAcrossEveryThreshold)
+	{
+		struct Boundary
 		{
-			hunger.increase_hunger(ctx, boundary.hungerValue - current);
-		}
-		else
+			int hungerValue;
+			HungerState expected;
+		};
+
+		const std::array<Boundary, 10> boundaries{ {
+			{ 200, HungerState::WELL_FED },
+			{ 201, HungerState::SATIATED },
+			{ 400, HungerState::SATIATED },
+			{ 401, HungerState::HUNGRY },
+			{ 700, HungerState::HUNGRY },
+			{ 701, HungerState::STARVING },
+			{ 900, HungerState::STARVING },
+			{ 901, HungerState::DYING },
+			{ 1000, HungerState::DYING },
+			{ 0, HungerState::WELL_FED },
+		} };
+
+		for (const Boundary& boundary : boundaries)
 		{
-			hunger.decrease_hunger(ctx, current - boundary.hungerValue);
+			// Drive the counter to the exact value from wherever it currently
+			// sits.
+			const int current = hunger.get_hunger_value();
+			if (boundary.hungerValue >= current)
+			{
+				hunger.increase_hunger(ctx, boundary.hungerValue - current);
+			}
+			else
+			{
+				hunger.decrease_hunger(ctx, current - boundary.hungerValue);
+			}
+
+			EXPECT_EQ(hunger.get_hunger_value(), boundary.hungerValue);
+			EXPECT_EQ(hunger.get_hunger_state(), boundary.expected)
+				<< "hungerValue " << boundary.hungerValue;
+		}
+	}
+
+	// What the counter is, and what the player was last told, both survive a
+	// save. The second is the one worth pinning: it is the only thing stopping
+	// a load announcing a state change the player has already been told about.
+	TEST_F(HungerSystemTest, ACounterAndWhatWasAnnouncedBothSurviveASave)
+	{
+		hunger.increase_hunger(ctx, 1);
+
+		// One call from WELL_FED to HUNGRY passes SATIATED without stopping,
+		// and the player is told what they are now rather than everything they
+		// went through.
+		hunger.increase_hunger(ctx, 500);
+		ASSERT_EQ(hunger.get_hunger_state(), HungerState::HUNGRY);
+		ASSERT_EQ(mock.messages.get_stored_message_count(), 1u);
+
+		nlohmann::json saved;
+		hunger.save(saved);
+
+		HungerSystem loaded{};
+		loaded.load(saved);
+
+		EXPECT_EQ(loaded.get_hunger_value(), hunger.get_hunger_value());
+		EXPECT_EQ(loaded.get_hunger_state(), hunger.get_hunger_state());
+
+		// The load restored what was announced, so an unchanged state says
+		// nothing more.
+		const size_t before = mock.messages.get_stored_message_count();
+		loaded.increase_hunger(ctx, 1);
+		EXPECT_EQ(mock.messages.get_stored_message_count(), before)
+			<< "the loaded system re-announced a state the player already knew";
+	}
+
+	// A load that forgets what was announced is silent exactly once, and it is
+	// the once that matters: the first threshold the player crosses afterwards.
+	// An ordinary tick after loading cannot show this, because an empty record
+	// and a matching record are both silent.
+	TEST_F(HungerSystemTest, AThresholdCrossedRightAfterLoadingIsStillAnnounced)
+	{
+		hunger.increase_hunger(ctx, 1);
+		hunger.increase_hunger(ctx, 500); // into HUNGRY, announced
+		ASSERT_EQ(hunger.get_hunger_state(), HungerState::HUNGRY);
+
+		nlohmann::json saved;
+		hunger.save(saved);
+
+		HungerSystem loaded{};
+		loaded.load(saved);
+
+		const size_t before = mock.messages.get_stored_message_count();
+
+		// The first thing that happens after the load crosses into STARVING.
+		loaded.increase_hunger(ctx, 250);
+
+		ASSERT_EQ(loaded.get_hunger_state(), HungerState::STARVING);
+		EXPECT_EQ(mock.messages.get_stored_message_count(), before + 1)
+			<< "the load lost what was announced, so the first crossing after it went unsaid";
+	}
+
+	// What hunger actually costs the player, which until 2026-10-01 nothing
+	// tested.
+	//
+	// apply_hunger_effects is the only place hunger reaches the player, and the
+	// only thing it does to them is damage: one point on one turn in twenty
+	// while STARVING, and one point every turn while DYING. The states above
+	// those two produce a line of text and nothing else, which is what the enum
+	// now says and used to deny - it promised bonuses for being well fed and
+	// penalties for being hungry, and neither is implemented. These tests pin
+	// what is there, deliberately without pinning what is not: a test asserting
+	// WELL_FED does nothing would make that permanent.
+	class HungerDamageTest : public ::testing::Test
+	{
+	protected:
+		void SetUp() override
+		{
+			ctx = mock.to_game_context();
+			ctx.hungerSystem = &hunger;
+			ctx.playerOwner = &player;
+
+			player->healthPool = std::make_unique<HealthPool>(20);
+			player->armorClass = std::make_unique<ArmorClass>(10);
+			player->experienceReward = std::make_unique<ExperienceReward>(0);
 		}
 
-		EXPECT_EQ(hunger.get_hunger_value(), boundary.hungerValue);
-		EXPECT_EQ(hunger.get_hunger_state(), boundary.expected)
-			<< "hungerValue " << boundary.hungerValue;
-	}
-}
+		void force_next_roll(int value) { mock.dice.set_next_roll(value); }
 
-// What the counter is, and what the player was last told, both survive a save. The
-// second is the one worth pinning: it is the only thing stopping a load announcing
-// a state change the player has already been told about.
-TEST_F(HungerSystemTest, ACounterAndWhatWasAnnouncedBothSurviveASave)
-{
-	hunger.increase_hunger(ctx, 1);
+		// Drives the counter into a state without going through
+		// increase_hunger, which would announce every threshold it crossed on
+		// the way.
+		void starve_to(int hungerValue)
+		{
+			hunger.increase_hunger(ctx, hungerValue);
+		}
 
-	// One call from WELL_FED to HUNGRY passes SATIATED without stopping, and the
-	// player is told what they are now rather than everything they went through.
-	hunger.increase_hunger(ctx, 500);
-	ASSERT_EQ(hunger.get_hunger_state(), HungerState::HUNGRY);
-	ASSERT_EQ(mock.messages.get_stored_message_count(), 1u);
+		MockGameContext mock{};
+		GameContext ctx{};
+		HungerSystem hunger{};
+		std::unique_ptr<Player> player{ std::make_unique<Player>(
+			Vector2D{ 5, 5 }) };
+	};
 
-	nlohmann::json saved;
-	hunger.save(saved);
-
-	HungerSystem loaded{};
-	loaded.load(saved);
-
-	EXPECT_EQ(loaded.get_hunger_value(), hunger.get_hunger_value());
-	EXPECT_EQ(loaded.get_hunger_state(), hunger.get_hunger_state());
-
-	// The load restored what was announced, so an unchanged state says nothing more.
-	const size_t before = mock.messages.get_stored_message_count();
-	loaded.increase_hunger(ctx, 1);
-	EXPECT_EQ(mock.messages.get_stored_message_count(), before)
-		<< "the loaded system re-announced a state the player already knew";
-}
-
-// A load that forgets what was announced is silent exactly once, and it is the
-// once that matters: the first threshold the player crosses afterwards. An
-// ordinary tick after loading cannot show this, because an empty record and a
-// matching record are both silent.
-TEST_F(HungerSystemTest, AThresholdCrossedRightAfterLoadingIsStillAnnounced)
-{
-	hunger.increase_hunger(ctx, 1);
-	hunger.increase_hunger(ctx, 500); // into HUNGRY, announced
-	ASSERT_EQ(hunger.get_hunger_state(), HungerState::HUNGRY);
-
-	nlohmann::json saved;
-	hunger.save(saved);
-
-	HungerSystem loaded{};
-	loaded.load(saved);
-
-	const size_t before = mock.messages.get_stored_message_count();
-
-	// The first thing that happens after the load crosses into STARVING.
-	loaded.increase_hunger(ctx, 250);
-
-	ASSERT_EQ(loaded.get_hunger_state(), HungerState::STARVING);
-	EXPECT_EQ(mock.messages.get_stored_message_count(), before + 1)
-		<< "the load lost what was announced, so the first crossing after it went unsaid";
-}
-
-// What hunger actually costs the player, which until 2026-10-01 nothing tested.
-//
-// apply_hunger_effects is the only place hunger reaches the player, and the only
-// thing it does to them is damage: one point on one turn in twenty while STARVING,
-// and one point every turn while DYING. The states above those two produce a line of
-// text and nothing else, which is what the enum now says and used to deny - it
-// promised bonuses for being well fed and penalties for being hungry, and neither is
-// implemented. These tests pin what is there, deliberately without pinning what is
-// not: a test asserting WELL_FED does nothing would make that permanent.
-class HungerDamageTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	// The first thing hunger costs: one point, on the roll that calls for it.
+	//
+	// Starving rolls twice and the order matters: a d6 for the flavour line,
+	// then the d20 that decides the damage. The scripted queue falls through to
+	// real dice once it empties, so forcing only one value leaves the d20
+	// random and the test tells you nothing - both of these were written that
+	// way first and one of them passed anyway.
+	TEST_F(HungerDamageTest, StarvingTakesAPointOnTheTurnTheRollCallsForIt)
 	{
-		ctx = mock.to_game_context();
-		ctx.hungerSystem = &hunger;
-		ctx.playerOwner = &player;
+		starve_to(850);
+		ASSERT_EQ(hunger.get_hunger_state(), HungerState::STARVING)
+			<< "the fixture did not reach STARVING";
+		const int before = player->get_hp();
+		force_next_roll(6); // the d6: no flavour line
+		force_next_roll(1); // the d20: the point of damage
 
-		player->healthPool = std::make_unique<HealthPool>(20);
-		player->armorClass = std::make_unique<ArmorClass>(10);
-		player->experienceReward = std::make_unique<ExperienceReward>(0);
+		hunger.apply_hunger_effects(ctx);
+
+		EXPECT_EQ(player->get_hp(), before - 1)
+			<< "starving did not cost the point it rolls for";
 	}
 
-	void force_next_roll(int value) { mock.dice.set_next_roll(value); }
-
-	// Drives the counter into a state without going through increase_hunger, which
-	// would announce every threshold it crossed on the way.
-	void starve_to(int hungerValue)
+	// And costs nothing on the turns it does not.
+	TEST_F(HungerDamageTest, StarvingCostsNothingOnATurnTheRollSpares)
 	{
-		hunger.increase_hunger(ctx, hungerValue);
+		starve_to(850);
+		ASSERT_EQ(hunger.get_hunger_state(), HungerState::STARVING)
+			<< "the fixture did not reach STARVING";
+		const int before = player->get_hp();
+		force_next_roll(6); // the d6: no flavour line
+		force_next_roll(2); // the d20: spared
+
+		hunger.apply_hunger_effects(ctx);
+
+		EXPECT_EQ(player->get_hp(), before)
+			<< "starving took damage on a turn its roll spared";
 	}
 
-	MockGameContext mock{};
-	GameContext ctx{};
-	HungerSystem hunger{};
-	std::unique_ptr<Player> player{ std::make_unique<Player>(
-		Vector2D{ 5, 5 }) };
-};
+	// Dying has no roll to survive.
+	TEST_F(HungerDamageTest, DyingTakesAPointEveryTurn)
+	{
+		starve_to(1000);
+		ASSERT_EQ(hunger.get_hunger_state(), HungerState::DYING)
+			<< "the fixture did not reach DYING";
+		const int before = player->get_hp();
 
-// The first thing hunger costs: one point, on the roll that calls for it.
-//
-// Starving rolls twice and the order matters: a d6 for the flavour line, then the
-// d20 that decides the damage. The scripted queue falls through to real dice once it
-// empties, so forcing only one value leaves the d20 random and the test tells you
-// nothing - both of these were written that way first and one of them passed anyway.
-TEST_F(HungerDamageTest, StarvingTakesAPointOnTheTurnTheRollCallsForIt)
-{
-	starve_to(850);
-	ASSERT_EQ(hunger.get_hunger_state(), HungerState::STARVING)
-		<< "the fixture did not reach STARVING";
-	const int before = player->get_hp();
-	force_next_roll(6); // the d6: no flavour line
-	force_next_roll(1); // the d20: the point of damage
+		hunger.apply_hunger_effects(ctx);
+		hunger.apply_hunger_effects(ctx);
 
-	hunger.apply_hunger_effects(ctx);
+		EXPECT_EQ(player->get_hp(), before - 2)
+			<< "dying skipped a turn, so it has a roll it should not have";
+	}
 
-	EXPECT_EQ(player->get_hp(), before - 1)
-		<< "starving did not cost the point it rolls for";
-}
+	// The states above STARVING reach the player's text and never their hit
+	// points.
+	TEST_F(HungerDamageTest, BeingMerelyHungryCostsNoHitPoints)
+	{
+		starve_to(650);
+		ASSERT_EQ(hunger.get_hunger_state(), HungerState::HUNGRY)
+			<< "the fixture did not reach HUNGRY";
+		const int before = player->get_hp();
+		force_next_roll(1);
 
-// And costs nothing on the turns it does not.
-TEST_F(HungerDamageTest, StarvingCostsNothingOnATurnTheRollSpares)
-{
-	starve_to(850);
-	ASSERT_EQ(hunger.get_hunger_state(), HungerState::STARVING)
-		<< "the fixture did not reach STARVING";
-	const int before = player->get_hp();
-	force_next_roll(6); // the d6: no flavour line
-	force_next_roll(2); // the d20: spared
+		hunger.apply_hunger_effects(ctx);
 
-	hunger.apply_hunger_effects(ctx);
+		EXPECT_EQ(player->get_hp(), before)
+			<< "hunger short of starvation took hit points";
+	}
 
-	EXPECT_EQ(player->get_hp(), before)
-		<< "starving took damage on a turn its roll spared";
-}
+	// A system that never announced a state saves no lastNotifiedState, and
+	// that record loads.
+	TEST_F(HungerSystemTest, ARecordWithNothingAnnouncedLoads)
+	{
+		nlohmann::json saved;
+		hunger.save(saved);
+		ASSERT_FALSE(saved.contains("lastNotifiedState"))
+			<< "the writer saved an announcement, so this pin pins nothing";
 
-// Dying has no roll to survive.
-TEST_F(HungerDamageTest, DyingTakesAPointEveryTurn)
-{
-	starve_to(1000);
-	ASSERT_EQ(hunger.get_hunger_state(), HungerState::DYING)
-		<< "the fixture did not reach DYING";
-	const int before = player->get_hp();
+		HungerSystem loaded{};
+		loaded.load(saved);
 
-	hunger.apply_hunger_effects(ctx);
-	hunger.apply_hunger_effects(ctx);
+		EXPECT_EQ(loaded.get_hunger_value(), hunger.get_hunger_value());
+	}
 
-	EXPECT_EQ(player->get_hp(), before - 2)
-		<< "dying skipped a turn, so it has a roll it should not have";
-}
+	// The same system, once per field HungerSystem::save always writes.
+	class HungerSystemFieldTest :
+		public HungerSystemTest,
+		public ::testing::WithParamInterface<std::string_view>
+	{
+	};
 
-// The states above STARVING reach the player's text and never their hit points.
-TEST_F(HungerDamageTest, BeingMerelyHungryCostsNoHitPoints)
-{
-	starve_to(650);
-	ASSERT_EQ(hunger.get_hunger_state(), HungerState::HUNGRY)
-		<< "the fixture did not reach HUNGRY";
-	const int before = player->get_hp();
-	force_next_roll(1);
+	TEST_P(HungerSystemFieldTest, ARecordMissingTheFieldIsRefused)
+	{
+		const std::string field{ GetParam() };
+		hunger.increase_hunger(ctx, 1);
+		nlohmann::json saved;
+		hunger.save(saved);
+		ASSERT_TRUE(saved.contains(field)) << std::format(
+			"the writer did not write \"{}\", so erasing it proves nothing",
+			field);
+		saved.erase(field);
 
-	hunger.apply_hunger_effects(ctx);
+		HungerSystem loaded{};
 
-	EXPECT_EQ(player->get_hp(), before)
-		<< "hunger short of starvation took hit points";
-}
+		EXPECT_THROW(loaded.load(saved), std::exception)
+			<< "a record without \"" << field << "\" loaded";
+	}
 
-// A system that never announced a state saves no lastNotifiedState, and that record loads.
-TEST_F(HungerSystemTest, ARecordWithNothingAnnouncedLoads)
-{
-	nlohmann::json saved;
-	hunger.save(saved);
-	ASSERT_FALSE(saved.contains("lastNotifiedState"))
-		<< "the writer saved an announcement, so this pin pins nothing";
+	// Each case is named for its field, so a failure says which one without
+	// reading the output.
+	const auto name_for_hunger_field =
+		[](const ::testing::TestParamInfo<std::string_view>& info)
+	{
+		return std::string{ info.param };
+	};
 
-	HungerSystem loaded{};
-	loaded.load(saved);
-
-	EXPECT_EQ(loaded.get_hunger_value(), hunger.get_hunger_value());
-}
-
-// The same system, once per field HungerSystem::save always writes.
-class HungerSystemFieldTest :
-	public HungerSystemTest,
-	public ::testing::WithParamInterface<std::string_view>
-{
-};
-
-TEST_P(HungerSystemFieldTest, ARecordMissingTheFieldIsRefused)
-{
-	const std::string field{ GetParam() };
-	hunger.increase_hunger(ctx, 1);
-	nlohmann::json saved;
-	hunger.save(saved);
-	ASSERT_TRUE(saved.contains(field)) << std::format(
-		"the writer did not write \"{}\", so erasing it proves nothing",
-		field);
-	saved.erase(field);
-
-	HungerSystem loaded{};
-
-	EXPECT_THROW(loaded.load(saved), std::exception)
-		<< "a record without \"" << field << "\" loaded";
-}
-
-// Each case is named for its field, so a failure says which one without reading the output.
-const auto name_for_hunger_field =
-	[](const ::testing::TestParamInfo<std::string_view>& info)
-{
-	return std::string{ info.param };
-};
-
-INSTANTIATE_TEST_SUITE_P(
-	EveryFieldHungerSaveWrites,
-	HungerSystemFieldTest,
-	::testing::Values("hungerValue", "hungerMax", "wellFedMessageShown"),
-	name_for_hunger_field);
+	INSTANTIATE_TEST_SUITE_P(
+		EveryFieldHungerSaveWrites,
+		HungerSystemFieldTest,
+		::testing::Values("hungerValue", "hungerMax", "wellFedMessageShown"),
+		name_for_hunger_field);
 
 } // namespace CppRL

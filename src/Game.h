@@ -61,109 +61,113 @@
 namespace CppRL
 {
 
-struct Game
-{
-	// The dice draw from diceSeed: main passes std::random_device, a test TEST_DICE_SEED.
-	//
-	// Example:
-	//   Game game{ std::random_device{}() };   // a different game every run
-	//   Game game{ TEST_DICE_SEED };            // the same rolls every run
-	explicit Game(unsigned int diceSeed) :
-		dice(diceSeed)
+	struct Game
 	{
-	}
+		// The dice draw from diceSeed: main passes std::random_device, a test
+		// TEST_DICE_SEED.
+		//
+		// Example:
+		//   Game game{ std::random_device{}() };
+		//   // a different game every run
+		//   Game game{ TEST_DICE_SEED };            // the same rolls every run
+		explicit Game(unsigned int diceSeed) :
+			dice(diceSeed)
+		{
+		}
 
-	// Game state
-	GameState gameState{};
+		// Game state
+		GameState gameState{};
 
-	// Tile configuration (must be loaded before init_world)
-	TileConfig tileConfig{};
-	BodyPlanRegistry bodyPlanRegistry{};
+		// Tile configuration (must be loaded before init_world)
+		TileConfig tileConfig{};
+		BodyPlanRegistry bodyPlanRegistry{};
 
-	// Every spell, monster and item the game knows, loaded before init_world
-	SpellRegistry spellRegistry{};
-	MonsterRegistry monsterRegistry{};
-	ItemRegistry itemRegistry{};
+		// Every spell, monster and item the game knows, loaded before
+		// init_world
+		SpellRegistry spellRegistry{};
+		MonsterRegistry monsterRegistry{};
+		ItemRegistry itemRegistry{};
 
-	// Minimap overlay
-	Minimap minimap{};
+		// Minimap overlay
+		Minimap minimap{};
 
-	// Debug view of the monsters' cost map
-	DebugUtils::CostOverlay costOverlay{};
+		// Debug view of the monsters' cost map
+		DebugUtils::CostOverlay costOverlay{};
 
-	// Rendering (raylib)
-	Renderer renderer{};
-	InputSystem inputSystem{};
+		// Rendering (raylib)
+		Renderer renderer{};
+		InputSystem inputSystem{};
 
-	// Core systems
-	RandomDice dice;
-	MessageSystem messageSystem{};
-	RenderingManager renderingManager{};
-	InputHandler inputHandler{};
-	GameStateManager stateManager{};
-	LevelManager levelManager{};
-	CreatureManager creatureManager{};
-	MenuManager menuManager{};
-	DisplayManager displayManager{};
-	GameLoopCoordinator gameLoopCoordinator{};
-	DataManager dataManager{};
-	TargetingSystem targeting{};
-	HungerSystem hungerSystem{};
-	BuffSystem buffSystem{};
-	FloatingTextSystem floatingText{};
-	AnimationSystem animSystem{};
-	ContentRegistry contentRegistry{};
-	Pathfinding::Pathfinder pathfinder{};
-	// Declared before both editors, which hold references to it.
-	Palette palette{};
-	DecorEditor decorEditor{ palette };
-	PrefabLibrary prefabLibrary{};
+		// Core systems
+		RandomDice dice;
+		MessageSystem messageSystem{};
+		RenderingManager renderingManager{};
+		InputHandler inputHandler{};
+		GameStateManager stateManager{};
+		LevelManager levelManager{};
+		CreatureManager creatureManager{};
+		MenuManager menuManager{};
+		DisplayManager displayManager{};
+		GameLoopCoordinator gameLoopCoordinator{};
+		DataManager dataManager{};
+		TargetingSystem targeting{};
+		HungerSystem hungerSystem{};
+		BuffSystem buffSystem{};
+		FloatingTextSystem floatingText{};
+		AnimationSystem animSystem{};
+		ContentRegistry contentRegistry{};
+		Pathfinding::Pathfinder pathfinder{};
+		// Declared before both editors, which hold references to it.
+		Palette palette{};
+		DecorEditor decorEditor{ palette };
+		PrefabLibrary prefabLibrary{};
 #ifndef __EMSCRIPTEN__
-	ContentEditor contentEditor{};
-	RoomEditor roomEditor{ prefabLibrary, palette };
-	ItemEditor itemEditor{};
-	MonsterEditor monsterEditor{};
-	SpellEditor spellEditor{};
+		ContentEditor contentEditor{};
+		RoomEditor roomEditor{ prefabLibrary, palette };
+		ItemEditor itemEditor{};
+		MonsterEditor monsterEditor{};
+		SpellEditor spellEditor{};
 #endif
 
-	// Game world
-	Map map{ get_map_width(), get_map_height() };
-	Gui gui{};
-	std::unique_ptr<Stairs> stairs{ std::make_unique<Stairs>(
-		Vector2D{ 0, 0 }) };
-	std::unique_ptr<Player> player{ nullptr };
+		// Game world
+		Map map{ get_map_width(), get_map_height() };
+		Gui gui{};
+		std::unique_ptr<Stairs> stairs{ std::make_unique<Stairs>(
+			Vector2D{ 0, 0 }) };
+		std::unique_ptr<Player> player{ nullptr };
 
-	std::vector<DungeonRoom> rooms{};
-	std::vector<std::unique_ptr<Creature>> creatures{};
-	std::vector<std::unique_ptr<Trap>> traps{};
-	std::vector<std::unique_ptr<SpellTile>> spellTiles{};
-	std::vector<std::unique_ptr<Decoration>> decorations{};
-	FloorInventory floorInventory{};
+		std::vector<DungeonRoom> rooms{};
+		std::vector<std::unique_ptr<Creature>> creatures{};
+		std::vector<std::unique_ptr<Trap>> traps{};
+		std::vector<std::unique_ptr<SpellTile>> spellTiles{};
+		std::vector<std::unique_ptr<Decoration>> decorations{};
+		FloorInventory floorInventory{};
 
-	// Character creation blueprint - persists across ticks
-	PlayerBlueprint playerBlueprint{};
+		// Character creation blueprint - persists across ticks
+		PlayerBlueprint playerBlueprint{};
 
-	// Menu system
-	std::deque<std::unique_ptr<BaseMenu>> menus{};
+		// Menu system
+		std::deque<std::unique_ptr<BaseMenu>> menus{};
 
-	// Mouse path overlay - persistent across frames, owned here
-	std::vector<Vector2D> mousePathOverlay{};
+		// Mouse path overlay - persistent across frames, owned here
+		std::vector<Vector2D> mousePathOverlay{};
 
-	[[nodiscard]] GameContext context() noexcept;
-	bool tick(int& loopNum);
-	void init_world();
-	// Loads the shipped item tiles into contentRegistry. Startup calls it with
-	// the other registries, before the main menu, so an editor opened from the
-	// menu sees every tile and its save writes them back.
-	//
-	// Example:
-	//     Game game{ TEST_DICE_SEED };
-	//     game.load_item_tiles();
-	//     game.contentRegistry.all_tiles().size();  // 97, all of tiles.json
-	//
-	// Throws std::runtime_error when tiles.json cannot be opened.
-	void load_item_tiles();
-	void shutdown();
-};
+		[[nodiscard]] GameContext context() noexcept;
+		bool tick(int& loopNum);
+		void init_world();
+		// Loads the shipped item tiles into contentRegistry. Startup calls it
+		// with the other registries, before the main menu, so an editor opened
+		// from the menu sees every tile and its save writes them back.
+		//
+		// Example:
+		//     Game game{ TEST_DICE_SEED };
+		//     game.load_item_tiles();
+		//     game.contentRegistry.all_tiles().size();
+		//     // 97, all of tiles.json
+		//
+		// Throws std::runtime_error when tiles.json cannot be opened.
+		void load_item_tiles();
+		void shutdown();
+	};
 
 } // namespace CppRL

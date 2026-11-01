@@ -15,26 +15,26 @@
   "mutations": [
     {
       "file": "src/Pickable.h",
-      "original": "\tfor (std::size_t row = 0; row < PICKABLE_TYPE_TABLE.size(); ++row)\n\t{\n\t\ttypes[row] = PICKABLE_TYPE_TABLE[row].type;",
-      "mutated": "\tfor (std::size_t row = 0; row < PICKABLE_TYPE_TABLE.size() - 2; ++row)\n\t{\n\t\ttypes[row] = PICKABLE_TYPE_TABLE[row].type;",
+      "original": "\t\tfor (std::size_t row = 0; row < PICKABLE_TYPE_TABLE.size(); ++row)\n\t\t{\n\t\t\ttypes[row] = PICKABLE_TYPE_TABLE[row].type;",
+      "mutated": "\t\tfor (std::size_t row = 0; row < PICKABLE_TYPE_TABLE.size() - 2; ++row)\n\t\t{\n\t\t\ttypes[row] = PICKABLE_TYPE_TABLE[row].type;",
       "catches": "the two pickable types the stale count cut off dropping out of the list again"
     },
     {
       "file": "src/BuffType.h",
-      "original": "\tBuffType::SANCTUARY,\n\tBuffType::PROTECTION_FROM_EVIL,\n\tBuffType::SILENCE,\n\tBuffType::WEBBED,",
-      "mutated": "\tBuffType::SANCTUARY,",
+      "original": "\t\tBuffType::SANCTUARY,\n\t\tBuffType::PROTECTION_FROM_EVIL,\n\t\tBuffType::SILENCE,\n\t\tBuffType::WEBBED,",
+      "mutated": "\t\tBuffType::SANCTUARY,",
       "catches": "the buffs added since the editor was written falling off the end of the list"
     },
     {
       "file": "src/Weapons.h",
-      "original": "\tconst auto found = std::ranges::find(ALL_WEAPON_SIZE, value);\n\tif (found == ALL_WEAPON_SIZE.end() || found + 1 == ALL_WEAPON_SIZE.end())",
-      "mutated": "\tconst auto found = std::ranges::find(ALL_WEAPON_SIZE, value);\n\tif (found == ALL_WEAPON_SIZE.end())",
+      "original": "\t\tconst auto found = std::ranges::find(ALL_WEAPON_SIZE, value);\n\t\tif (found == ALL_WEAPON_SIZE.end() ||\n\t\t\tfound + 1 == ALL_WEAPON_SIZE.end())",
+      "mutated": "\t\tconst auto found = std::ranges::find(ALL_WEAPON_SIZE, value);\n\t\tif (found == ALL_WEAPON_SIZE.end())",
       "catches": "the cycle running off the end of the list instead of wrapping"
     },
     {
       "file": "src/TargetMode.h",
-      "original": "\treturn *(found + 1);\n}\n\nenum class ScrollAnimation : int",
-      "mutated": "\treturn *found;\n}\n\nenum class ScrollAnimation : int",
+      "original": "\t\treturn *(found + 1);\n\t}\n\n\tenum class ScrollAnimation : int",
+      "mutated": "\t\treturn *found;\n\t}\n\n\tenum class ScrollAnimation : int",
       "catches": "a cycle that never advances, so the editor's field cannot be changed at all"
     }
   ]

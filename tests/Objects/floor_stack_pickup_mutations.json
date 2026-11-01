@@ -21,8 +21,8 @@
     },
     {
       "file": "src/Pickup.cpp",
-      "original": "\t\t\ttake_floor_item(taker, *standing.front(), ctx);\n\t\t\treturn;",
-      "mutated": "\t\t\treturn;",
+      "original": "\t\t\t\ttake_floor_item(taker, *standing.front(), ctx);\n\t\t\t\treturn;",
+      "mutated": "\t\t\t\treturn;",
       "catches": "a lone item on the floor that cannot be picked up at all"
     },
     {
@@ -33,8 +33,8 @@
     },
     {
       "file": "src/InventoryOperations.cpp",
-      "original": "auto found = std::ranges::find_if(inventory.items, has_id);\n\t\treturn found != inventory.items.end() ? found->get() : nullptr;\n\t}\n\n\tItem* find_item_by_id(\n\t\tCreatureInventory& inventory,\n\t\tuint64_t uniqueId) noexcept",
-      "mutated": "\t\tauto found = std::ranges::find_if(inventory.items, has_id);\n\t\treturn nullptr;\n\t}\n\n\tItem* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept",
+      "original": "\tauto found = std::ranges::find_if(inventory.items, has_id);\n\t\t\treturn found != inventory.items.end() ? found->get() : nullptr;\n\t\t}\n\n\t\tItem* find_item_by_id(\n\t\t\tCreatureInventory& inventory,\n\t\t\tuint64_t uniqueId) noexcept",
+      "mutated": "\t\t\tauto found = std::ranges::find_if(inventory.items, has_id);\n\t\t\treturn nullptr;\n\t\t}\n\n\t\tItem* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept",
       "catches": "the floor never answering for an item it holds, so every menu choice reports the item gone"
     }
   ]

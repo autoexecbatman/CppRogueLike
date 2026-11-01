@@ -15,50 +15,50 @@
   "mutations": [
     {
       "file": "src/AiSpider.cpp",
-      "original": "\t\t\t\tambushSprung = true;\n\t\t\t}",
-      "mutated": "\t\t\t\tambushSprung = true;\n\t\t\t\tif (distanceToPlayer <= 1)\n\t\t\t\t{\n\t\t\t\t\towner.attacker->attack(*ctx.player(), AttackKind::MELEE, ctx);\n\t\t\t\t}\n\t\t\t}",
+      "original": "\t\t\t\t\tambushSprung = true;\n\t\t\t\t}",
+      "mutated": "\t\t\t\t\tambushSprung = true;\n\t\t\t\t\tif (distanceToPlayer <= 1)\n\t\t\t\t\t{\n\t\t\t\t\t\towner.attacker->attack(*ctx.player(), AttackKind::MELEE, ctx);\n\t\t\t\t\t}\n\t\t\t\t}",
       "catches": "a second strike on discovery"
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "\t\t\t\tambushSprung = true;\n\t\t\t}",
-      "mutated": "\t\t\t\tambushSprung = true;\n\t\t\t\treturn;\n\t\t\t}",
+      "original": "\t\t\t\t\tambushSprung = true;\n\t\t\t\t}",
+      "mutated": "\t\t\t\t\tambushSprung = true;\n\t\t\t\t\treturn;\n\t\t\t\t}",
       "catches": "an ambush that announces itself and never bites"
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "&&\n\t\t\t!ctx.buffSystem\n\t\t\t\t->is_turned_away_by_sanctuary(owner, *ctx.player(), ctx)",
+      "original": "&&\n\t\t\t\t!ctx.buffSystem\n\t\t\t\t\t->is_turned_away_by_sanctuary(owner, *ctx.player(), ctx)",
       "mutated": "",
       "catches": "a surprise round against a player the spider ignores"
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "\tconst AttackResult result =\n\t\towner.attacker->attack(target, AttackKind::MELEE, ctx);",
-      "mutated": "\tconst AttackResult result =AttackResult::LANDED;\n\ttarget.take_damage_and_check_death(ctx.dice->roll(1, 4), ctx, DamageType::PHYSICAL);",
+      "original": "\t\tconst AttackResult result =\n\t\t\towner.attacker->attack(target, AttackKind::MELEE, ctx);",
+      "mutated": "\t\tconst AttackResult result =AttackResult::LANDED;\n\t\ttarget.take_damage_and_check_death(ctx.dice->roll(1, 4), ctx, DamageType::PHYSICAL);",
       "catches": "a bite that lands without an attack roll against armour class"
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "return ctx.dice->roll(1, 10) + reactionAdjustment <=\n\t\t\tSURPRISED_AT_OR_BELOW;",
-      "mutated": "\t\treturn true;",
+      "original": "\treturn ctx.dice->roll(1, 10) + reactionAdjustment <=\n\t\t\t\tSURPRISED_AT_OR_BELOW;",
+      "mutated": "\t\t\treturn true;",
       "catches": "an ambush that always surprises"
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "return ctx.dice->roll(1, 10) + reactionAdjustment <=\n\t\t\tSURPRISED_AT_OR_BELOW;",
-      "mutated": "\t\treturn false;",
+      "original": "\treturn ctx.dice->roll(1, 10) + reactionAdjustment <=\n\t\t\t\tSURPRISED_AT_OR_BELOW;",
+      "mutated": "\t\t\treturn false;",
       "catches": "an ambush that never surprises"
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "return ctx.dice->roll(1, 10) + reactionAdjustment <=\n\t\t\tSURPRISED_AT_OR_BELOW;",
-      "mutated": "\t\treturn ctx.dice->roll(1, 10) <= SURPRISED_AT_OR_BELOW;",
+      "original": "\treturn ctx.dice->roll(1, 10) + reactionAdjustment <=\n\t\t\t\tSURPRISED_AT_OR_BELOW;",
+      "mutated": "\t\t\treturn ctx.dice->roll(1, 10) <= SURPRISED_AT_OR_BELOW;",
       "catches": "Dexterity ignored by the surprise roll"
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "return ctx.dice->roll(1, 10) + reactionAdjustment <=\n\t\t\tSURPRISED_AT_OR_BELOW;",
-      "mutated": "\t\treturn ctx.dice->roll(1, 10) - reactionAdjustment <= SURPRISED_AT_OR_BELOW;",
+      "original": "\treturn ctx.dice->roll(1, 10) + reactionAdjustment <=\n\t\t\t\tSURPRISED_AT_OR_BELOW;",
+      "mutated": "\t\t\treturn ctx.dice->roll(1, 10) - reactionAdjustment <= SURPRISED_AT_OR_BELOW;",
       "catches": "the reaction adjustment applied the wrong way round"
     },
     {
@@ -87,8 +87,8 @@
     },
     {
       "file": "src/ArmorClass.cpp",
-      "original": "\treturn armorClass - std::min(0, calculate_dexterity_ac_bonus(owner, ctx));",
-      "mutated": "\treturn armorClass - calculate_dexterity_ac_bonus(owner, ctx);",
+      "original": "\t\treturn armorClass -\n\t\t\tstd::min(0, calculate_dexterity_ac_bonus(owner, ctx));",
+      "mutated": "\t\treturn armorClass -calculate_dexterity_ac_bonus(owner, ctx);",
       "catches": "surprise lifting a low-Dexterity penalty too"
     }
   ]

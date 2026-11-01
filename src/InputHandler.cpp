@@ -5,154 +5,154 @@
 namespace CppRL
 {
 
-void InputHandler::key_store() noexcept
-{
-	lastKey = keyPress;
-}
-
-void InputHandler::key_listen(InputSystem& input) noexcept
-{
-	// Check for window resize
-	if (input.window_resized())
+	void InputHandler::key_store() noexcept
 	{
-		screenResized = true;
-		keyPress = -1;
+		lastKey = keyPress;
+	}
+
+	void InputHandler::key_listen(InputSystem& input) noexcept
+	{
+		// Check for window resize
+		if (input.window_resized())
+		{
+			screenResized = true;
+			keyPress = -1;
+			logicFrame = true;
+			return;
+		}
+
+		// Character keys first (ASCII values match Controls enum)
+		int character = input.get_char_input();
+		if (character != 0)
+		{
+			keyPress = character;
+			logicFrame = true;
+			return;
+		}
+
+		// Special keys mapped to legacy keycodes
+		GameKey key = input.get_key();
+		switch (key)
+		{
+
+		case GameKey::UP:
+		{
+			keyPress = 0x103;
+			break;
+		}
+
+		case GameKey::DOWN:
+		{
+			keyPress = 0x102;
+			break;
+		}
+
+		case GameKey::LEFT:
+		{
+			keyPress = 0x104;
+			break;
+		}
+
+		case GameKey::RIGHT:
+		{
+			keyPress = 0x105;
+			break;
+		}
+
+		case GameKey::ENTER:
+		{
+			keyPress = 10;
+			break;
+		}
+
+		case GameKey::ESCAPE:
+		{
+			keyPress = 27;
+			break;
+		}
+		case GameKey::TAB:
+		{
+			keyPress = 9;
+			break;
+		}
+		case GameKey::SPACE:
+		{
+			keyPress = ' ';
+			break;
+		}
+
+		case GameKey::MOUSE_LEFT:
+		{
+			keyPress = 0x199;
+			break;
+		}
+
+		case GameKey::MOUSE_RIGHT:
+		{
+			keyPress = 0x19A;
+			break;
+		}
+
+		case GameKey::KP_NW:
+		{
+			keyPress = 0x110;
+			break;
+		}
+
+		case GameKey::KP_NE:
+		{
+			keyPress = 0x111;
+			break;
+		}
+
+		case GameKey::KP_SW:
+		{
+			keyPress = 0x112;
+			break;
+		}
+
+		case GameKey::KP_SE:
+		{
+			keyPress = 0x113;
+			break;
+		}
+
+		case GameKey::WAIT:
+		{
+			keyPress = 0x106;
+			break;
+		}
+
+		default:
+		{
+			keyPress = -1;
+			logicFrame = false;
+			return;
+		}
+		}
+
 		logicFrame = true;
-		return;
 	}
 
-	// Character keys first (ASCII values match Controls enum)
-	int character = input.get_char_input();
-	if (character != 0)
+	bool InputHandler::mouse_moved() const noexcept
 	{
-		keyPress = character;
-		logicFrame = true;
-		return;
+		return lastMousePos.x != currentMousePos.x ||
+			lastMousePos.y != currentMousePos.y;
 	}
 
-	// Special keys mapped to legacy keycodes
-	GameKey key = input.get_key();
-	switch (key)
+	Vector2D InputHandler::get_mouse_position(
+		InputSystem& input,
+		int tile_size) noexcept
 	{
+		lastMousePos = currentMousePos;
+		currentMousePos = input.get_mouse_tile(tile_size);
 
-	case GameKey::UP:
+		return currentMousePos;
+	}
+
+	Vector2D InputHandler::get_mouse_position_old() const noexcept
 	{
-		keyPress = 0x103;
-		break;
+		return lastMousePos;
 	}
-
-	case GameKey::DOWN:
-	{
-		keyPress = 0x102;
-		break;
-	}
-
-	case GameKey::LEFT:
-	{
-		keyPress = 0x104;
-		break;
-	}
-
-	case GameKey::RIGHT:
-	{
-		keyPress = 0x105;
-		break;
-	}
-
-	case GameKey::ENTER:
-	{
-		keyPress = 10;
-		break;
-	}
-
-	case GameKey::ESCAPE:
-	{
-		keyPress = 27;
-		break;
-	}
-	case GameKey::TAB:
-	{
-		keyPress = 9;
-		break;
-	}
-	case GameKey::SPACE:
-	{
-		keyPress = ' ';
-		break;
-	}
-
-	case GameKey::MOUSE_LEFT:
-	{
-		keyPress = 0x199;
-		break;
-	}
-
-	case GameKey::MOUSE_RIGHT:
-	{
-		keyPress = 0x19A;
-		break;
-	}
-
-	case GameKey::KP_NW:
-	{
-		keyPress = 0x110;
-		break;
-	}
-
-	case GameKey::KP_NE:
-	{
-		keyPress = 0x111;
-		break;
-	}
-
-	case GameKey::KP_SW:
-	{
-		keyPress = 0x112;
-		break;
-	}
-
-	case GameKey::KP_SE:
-	{
-		keyPress = 0x113;
-		break;
-	}
-
-	case GameKey::WAIT:
-	{
-		keyPress = 0x106;
-		break;
-	}
-
-	default:
-	{
-		keyPress = -1;
-		logicFrame = false;
-		return;
-	}
-	}
-
-	logicFrame = true;
-}
-
-bool InputHandler::mouse_moved() const noexcept
-{
-	return lastMousePos.x != currentMousePos.x ||
-		lastMousePos.y != currentMousePos.y;
-}
-
-Vector2D InputHandler::get_mouse_position(
-	InputSystem& input,
-	int tile_size) noexcept
-{
-	lastMousePos = currentMousePos;
-	currentMousePos = input.get_mouse_tile(tile_size);
-
-	return currentMousePos;
-}
-
-Vector2D InputHandler::get_mouse_position_old() const noexcept
-{
-	return lastMousePos;
-}
 
 } // namespace CppRL

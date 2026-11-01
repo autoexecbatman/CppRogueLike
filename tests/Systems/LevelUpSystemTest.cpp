@@ -15,281 +15,283 @@
 namespace CppRL
 {
 
-class LevelUpSystemTest : public ::testing::Test
-{
-protected:
-	Game game{ TEST_DICE_SEED };
-	GameContext ctx;
-	std::unique_ptr<Player> player;
-
-	void SetUp() override
+	class LevelUpSystemTest : public ::testing::Test
 	{
-		try
+	protected:
+		Game game{ TEST_DICE_SEED };
+		GameContext ctx;
+		std::unique_ptr<Player> player;
+
+		void SetUp() override
 		{
-			game.dataManager.load_all_data(game.messageSystem);
+			try
+			{
+				game.dataManager.load_all_data(game.messageSystem);
+			}
+			catch (...)
+			{
+			}
+
+			player = std::make_unique<Player>(Vector2D{ 0, 0 });
+			player->experienceReward = std::make_unique<ExperienceReward>(0);
+			player->set_dr(0);
+			player->set_thaco(0);
+			player->armorClass = std::make_unique<ArmorClass>(10);
+			player->healthPool = std::make_unique<HealthPool>(10);
+
+			ctx = game.context();
+			ctx.playerOwner = &player;
+
+			game.dice.set_test_mode(true);
 		}
-		catch (...)
+
+		void TearDown() override
 		{
+			game.dice.set_test_mode(false);
+			game.dice.clear_fixed_rolls();
 		}
-
-		player = std::make_unique<Player>(Vector2D{ 0, 0 });
-		player->experienceReward = std::make_unique<ExperienceReward>(0);
-		player->set_dr(0);
-		player->set_thaco(0);
-		player->armorClass = std::make_unique<ArmorClass>(10);
-		player->healthPool = std::make_unique<HealthPool>(10);
-
-		ctx = game.context();
-		ctx.playerOwner = &player;
-
-		game.dice.set_test_mode(true);
-	}
-
-	void TearDown() override
-	{
-		game.dice.set_test_mode(false);
-		game.dice.clear_fixed_rolls();
-	}
-};
-
-TEST_F(LevelUpSystemTest, CalculateBackstabMultiplier)
-{
-	EXPECT_EQ(LevelUpSystem::calculate_backstab_multiplier(1), 2);
-	EXPECT_EQ(LevelUpSystem::calculate_backstab_multiplier(4), 2);
-	EXPECT_EQ(LevelUpSystem::calculate_backstab_multiplier(5), 3);
-	EXPECT_EQ(LevelUpSystem::calculate_backstab_multiplier(8), 3);
-	EXPECT_EQ(LevelUpSystem::calculate_backstab_multiplier(9), 4);
-	EXPECT_EQ(LevelUpSystem::calculate_backstab_multiplier(12), 4);
-	EXPECT_EQ(LevelUpSystem::calculate_backstab_multiplier(13), 5);
-	EXPECT_EQ(LevelUpSystem::calculate_backstab_multiplier(20), 5);
-}
-
-TEST_F(LevelUpSystemTest, FighterLevelUpHPGain)
-{
-	player->set_creature_class(CreatureClass::FIGHTER);
-	player->set_hit_die(10);
-	player->set_constitution(10);
-
-	player->set_hp_base(10);
-	player->set_max_hp(10);
-	player->set_hp(10);
-
-	game.dice.set_next_d20(8);
-
-	LevelUpSystem::apply_level_up_benefits(*player, 2, ctx);
-
-	EXPECT_EQ(player->get_hp_base(), 18);
-	EXPECT_EQ(player->get_max_hp(), 18);
-	EXPECT_EQ(player->get_hp(), 18);
-}
-
-TEST_F(LevelUpSystemTest, WizardLevelUpHPGainWithConBonus)
-{
-	player->set_creature_class(CreatureClass::WIZARD);
-	player->set_hit_die(4);
-	player->set_constitution(16);
-
-	int expectedBonus = 0;
-	if (!game.dataManager.get_constitution_attributes().empty())
-	{
-		if (player->get_constitution() <=
-			static_cast<int>(
-				game.dataManager.get_constitution_attributes().size()))
-		{
-			expectedBonus = game.dataManager
-								.get_constitution_attributes()
-									[player->get_constitution() - 1]
-								.HPAdj;
-		}
-	}
-
-	player->set_hp_base(4);
-	player->set_max_hp(4 + expectedBonus);
-	player->set_hp(4 + expectedBonus);
-
-	int oldMaxHP = player->get_max_hp();
-
-	game.dice.set_next_d20(3);
-
-	LevelUpSystem::apply_level_up_benefits(*player, 2, ctx);
-
-	int gained = 3 + expectedBonus;
-	EXPECT_EQ(player->get_max_hp(), oldMaxHP + gained);
-}
-
-TEST_F(LevelUpSystemTest, FighterExtraAttackAtLevel7)
-{
-	player->set_creature_class(CreatureClass::FIGHTER);
-	player->set_hit_die(10);
-	player->set_attacks_per_round(1.0f);
-
-	LevelUpSystem::apply_level_up_benefits(*player, 7, ctx);
-
-	EXPECT_FLOAT_EQ(player->get_attacks_per_round(), 1.5f);
-}
-
-TEST_F(LevelUpSystemTest, FighterExtraAttackAtLevel13)
-{
-	player->set_creature_class(CreatureClass::FIGHTER);
-	player->set_hit_die(10);
-	player->set_attacks_per_round(1.5f);
-
-	LevelUpSystem::apply_level_up_benefits(*player, 13, ctx);
-
-	EXPECT_FLOAT_EQ(player->get_attacks_per_round(), 2.0f);
-}
-
-// A level raises no ability score: in 2e they rise by wishes, "magical items (manuals,
-// books, etc.) and the intervention of greater powers" (Dungeon Master's Guide, PDF page
-// 605 of the 2e archive). Each class's prime requisite is still 15 at 4th, 8th and 12th.
-TEST_F(LevelUpSystemTest, ALevelRaisesNoAbilityScore)
-{
-	const CreatureClass classes[] = {
-		CreatureClass::FIGHTER,
-		CreatureClass::ROGUE,
-		CreatureClass::CLERIC,
-		CreatureClass::WIZARD,
 	};
-	for (const CreatureClass creatureClass : classes)
-	{
-		player->set_creature_class(creatureClass);
-		player->set_strength(15);
-		player->set_dexterity(15);
-		player->set_wisdom(15);
-		player->set_intelligence(15);
 
-		for (const int level : { 4, 8, 12 })
+	TEST_F(LevelUpSystemTest, CalculateBackstabMultiplier)
+	{
+		EXPECT_EQ(LevelUpSystem::calculate_backstab_multiplier(1), 2);
+		EXPECT_EQ(LevelUpSystem::calculate_backstab_multiplier(4), 2);
+		EXPECT_EQ(LevelUpSystem::calculate_backstab_multiplier(5), 3);
+		EXPECT_EQ(LevelUpSystem::calculate_backstab_multiplier(8), 3);
+		EXPECT_EQ(LevelUpSystem::calculate_backstab_multiplier(9), 4);
+		EXPECT_EQ(LevelUpSystem::calculate_backstab_multiplier(12), 4);
+		EXPECT_EQ(LevelUpSystem::calculate_backstab_multiplier(13), 5);
+		EXPECT_EQ(LevelUpSystem::calculate_backstab_multiplier(20), 5);
+	}
+
+	TEST_F(LevelUpSystemTest, FighterLevelUpHPGain)
+	{
+		player->set_creature_class(CreatureClass::FIGHTER);
+		player->set_hit_die(10);
+		player->set_constitution(10);
+
+		player->set_hp_base(10);
+		player->set_max_hp(10);
+		player->set_hp(10);
+
+		game.dice.set_next_d20(8);
+
+		LevelUpSystem::apply_level_up_benefits(*player, 2, ctx);
+
+		EXPECT_EQ(player->get_hp_base(), 18);
+		EXPECT_EQ(player->get_max_hp(), 18);
+		EXPECT_EQ(player->get_hp(), 18);
+	}
+
+	TEST_F(LevelUpSystemTest, WizardLevelUpHPGainWithConBonus)
+	{
+		player->set_creature_class(CreatureClass::WIZARD);
+		player->set_hit_die(4);
+		player->set_constitution(16);
+
+		int expectedBonus = 0;
+		if (!game.dataManager.get_constitution_attributes().empty())
 		{
-			LevelUpSystem::apply_level_up_benefits(*player, level, ctx);
+			if (player->get_constitution() <=
+				static_cast<int>(
+					game.dataManager.get_constitution_attributes().size()))
+			{
+				expectedBonus = game.dataManager
+									.get_constitution_attributes()
+										[player->get_constitution() - 1]
+									.HPAdj;
+			}
 		}
+
+		player->set_hp_base(4);
+		player->set_max_hp(4 + expectedBonus);
+		player->set_hp(4 + expectedBonus);
+
+		int oldMaxHP = player->get_max_hp();
+
+		game.dice.set_next_d20(3);
+
+		LevelUpSystem::apply_level_up_benefits(*player, 2, ctx);
+
+		int gained = 3 + expectedBonus;
+		EXPECT_EQ(player->get_max_hp(), oldMaxHP + gained);
+	}
+
+	TEST_F(LevelUpSystemTest, FighterExtraAttackAtLevel7)
+	{
+		player->set_creature_class(CreatureClass::FIGHTER);
+		player->set_hit_die(10);
+		player->set_attacks_per_round(1.0f);
+
+		LevelUpSystem::apply_level_up_benefits(*player, 7, ctx);
+
+		EXPECT_FLOAT_EQ(player->get_attacks_per_round(), 1.5f);
+	}
+
+	TEST_F(LevelUpSystemTest, FighterExtraAttackAtLevel13)
+	{
+		player->set_creature_class(CreatureClass::FIGHTER);
+		player->set_hit_die(10);
+		player->set_attacks_per_round(1.5f);
+
+		LevelUpSystem::apply_level_up_benefits(*player, 13, ctx);
+
+		EXPECT_FLOAT_EQ(player->get_attacks_per_round(), 2.0f);
+	}
+
+	// A level raises no ability score: in 2e they rise by wishes, "magical
+	// items (manuals, books, etc.) and the intervention of greater powers"
+	// (Dungeon Master's Guide, PDF page 605 of the 2e archive). Each class's
+	// prime requisite is still 15 at 4th, 8th and 12th.
+	TEST_F(LevelUpSystemTest, ALevelRaisesNoAbilityScore)
+	{
+		const CreatureClass classes[] = {
+			CreatureClass::FIGHTER,
+			CreatureClass::ROGUE,
+			CreatureClass::CLERIC,
+			CreatureClass::WIZARD,
+		};
+		for (const CreatureClass creatureClass : classes)
+		{
+			player->set_creature_class(creatureClass);
+			player->set_strength(15);
+			player->set_dexterity(15);
+			player->set_wisdom(15);
+			player->set_intelligence(15);
+
+			for (const int level : { 4, 8, 12 })
+			{
+				LevelUpSystem::apply_level_up_benefits(*player, level, ctx);
+			}
+
+			EXPECT_EQ(player->get_strength(), 15)
+				<< "class " << static_cast<int>(creatureClass);
+			EXPECT_EQ(player->get_dexterity(), 15)
+				<< "class " << static_cast<int>(creatureClass);
+			EXPECT_EQ(player->get_wisdom(), 15)
+				<< "class " << static_cast<int>(creatureClass);
+			EXPECT_EQ(player->get_intelligence(), 15)
+				<< "class " << static_cast<int>(creatureClass);
+		}
+	}
+
+	// A potion of giant strength drunk before 4th level leaves nothing behind
+	// once it ends.
+	TEST_F(LevelUpSystemTest, AStrengthBuffIsNotKeptByALevel)
+	{
+		player->set_creature_class(CreatureClass::FIGHTER);
+		player->set_hit_die(10);
+		player->set_strength(15);
+		ctx.buffSystem->add_buff(
+			*player,
+			BuffType::STRENGTH,
+			19,
+			10,
+			BuffApplication::SET,
+			ctx.gameState->get_time());
+
+		LevelUpSystem::apply_level_up_benefits(*player, 4, ctx);
+		ctx.buffSystem->remove_buff(*player, BuffType::STRENGTH);
 
 		EXPECT_EQ(player->get_strength(), 15)
-			<< "class " << static_cast<int>(creatureClass);
-		EXPECT_EQ(player->get_dexterity(), 15)
-			<< "class " << static_cast<int>(creatureClass);
-		EXPECT_EQ(player->get_wisdom(), 15)
-			<< "class " << static_cast<int>(creatureClass);
-		EXPECT_EQ(player->get_intelligence(), 15)
-			<< "class " << static_cast<int>(creatureClass);
+			<< "the level kept the potion's Strength";
 	}
-}
 
-// A potion of giant strength drunk before 4th level leaves nothing behind once it ends.
-TEST_F(LevelUpSystemTest, AStrengthBuffIsNotKeptByALevel)
-{
-	player->set_creature_class(CreatureClass::FIGHTER);
-	player->set_hit_die(10);
-	player->set_strength(15);
-	ctx.buffSystem->add_buff(
-		*player,
-		BuffType::STRENGTH,
-		19,
-		10,
-		BuffApplication::SET,
-		ctx.gameState->get_time());
+	TEST_F(LevelUpSystemTest, FighterTHAC0Improvement)
+	{
+		player->set_creature_class(CreatureClass::FIGHTER);
+		player->set_hit_die(10);
+		player->set_thaco(20);
 
-	LevelUpSystem::apply_level_up_benefits(*player, 4, ctx);
-	ctx.buffSystem->remove_buff(*player, BuffType::STRENGTH);
+		game.dice.set_next_d20(5);
 
-	EXPECT_EQ(player->get_strength(), 15)
-		<< "the level kept the potion's Strength";
-}
+		LevelUpSystem::apply_level_up_benefits(*player, 2, ctx);
 
-TEST_F(LevelUpSystemTest, FighterTHAC0Improvement)
-{
-	player->set_creature_class(CreatureClass::FIGHTER);
-	player->set_hit_die(10);
-	player->set_thaco(20);
+		EXPECT_EQ(player->get_thaco(), 19);
+	}
 
-	game.dice.set_next_d20(5);
+	TEST_F(LevelUpSystemTest, FighterExtraAttackSkippedLevel)
+	{
+		player->set_creature_class(CreatureClass::FIGHTER);
+		player->set_hit_die(10);
+		player->set_attacks_per_round(1.0f);
 
-	LevelUpSystem::apply_level_up_benefits(*player, 2, ctx);
+		game.dice.set_next_d20(5);
 
-	EXPECT_EQ(player->get_thaco(), 19);
-}
+		LevelUpSystem::apply_level_up_benefits(*player, 8, ctx);
 
-TEST_F(LevelUpSystemTest, FighterExtraAttackSkippedLevel)
-{
-	player->set_creature_class(CreatureClass::FIGHTER);
-	player->set_hit_die(10);
-	player->set_attacks_per_round(1.0f);
+		EXPECT_FLOAT_EQ(player->get_attacks_per_round(), 1.5f);
+	}
 
-	game.dice.set_next_d20(5);
+	// AD&D 2e XP table compliance - get_next_level_xp now lives on Player
+	TEST_F(LevelUpSystemTest, XpTableFighterLevel1)
+	{
+		player->set_creature_class(CreatureClass::FIGHTER);
+		player->set_creature_level(1);
+		EXPECT_EQ(player->get_next_level_xp(), 2000);
+	}
 
-	LevelUpSystem::apply_level_up_benefits(*player, 8, ctx);
+	TEST_F(LevelUpSystemTest, XpTableFighterLevel5)
+	{
+		player->set_creature_class(CreatureClass::FIGHTER);
+		player->set_creature_level(5);
+		EXPECT_EQ(player->get_next_level_xp(), 32000);
+	}
 
-	EXPECT_FLOAT_EQ(player->get_attacks_per_round(), 1.5f);
-}
+	TEST_F(LevelUpSystemTest, XpTableFighterLinearExtrapolation)
+	{
+		// Level 11 = last table entry (750000) + 1 * 250000 = 1,000,000
+		player->set_creature_class(CreatureClass::FIGHTER);
+		player->set_creature_level(11);
+		EXPECT_EQ(player->get_next_level_xp(), 1000000);
+	}
 
-// AD&D 2e XP table compliance - get_next_level_xp now lives on Player
-TEST_F(LevelUpSystemTest, XpTableFighterLevel1)
-{
-	player->set_creature_class(CreatureClass::FIGHTER);
-	player->set_creature_level(1);
-	EXPECT_EQ(player->get_next_level_xp(), 2000);
-}
+	TEST_F(LevelUpSystemTest, XpTableRogueLevel1)
+	{
+		player->set_creature_class(CreatureClass::ROGUE);
+		player->set_creature_level(1);
+		EXPECT_EQ(player->get_next_level_xp(), 1250);
+	}
 
-TEST_F(LevelUpSystemTest, XpTableFighterLevel5)
-{
-	player->set_creature_class(CreatureClass::FIGHTER);
-	player->set_creature_level(5);
-	EXPECT_EQ(player->get_next_level_xp(), 32000);
-}
+	TEST_F(LevelUpSystemTest, XpTableClericLevel1)
+	{
+		player->set_creature_class(CreatureClass::CLERIC);
+		player->set_creature_level(1);
+		EXPECT_EQ(player->get_next_level_xp(), 1500);
+	}
 
-TEST_F(LevelUpSystemTest, XpTableFighterLinearExtrapolation)
-{
-	// Level 11 = last table entry (750000) + 1 * 250000 = 1,000,000
-	player->set_creature_class(CreatureClass::FIGHTER);
-	player->set_creature_level(11);
-	EXPECT_EQ(player->get_next_level_xp(), 1000000);
-}
+	TEST_F(LevelUpSystemTest, XpTableWizardLevel1)
+	{
+		player->set_creature_class(CreatureClass::WIZARD);
+		player->set_creature_level(1);
+		EXPECT_EQ(player->get_next_level_xp(), 2500);
+	}
 
-TEST_F(LevelUpSystemTest, XpTableRogueLevel1)
-{
-	player->set_creature_class(CreatureClass::ROGUE);
-	player->set_creature_level(1);
-	EXPECT_EQ(player->get_next_level_xp(), 1250);
-}
+	// levelup_update behavior
+	TEST_F(LevelUpSystemTest, LevelupUpdateBelowThreshold)
+	{
+		player->set_creature_class(CreatureClass::FIGHTER);
+		player->set_creature_level(1);
+		player->set_xp(1999); // one short
 
-TEST_F(LevelUpSystemTest, XpTableClericLevel1)
-{
-	player->set_creature_class(CreatureClass::CLERIC);
-	player->set_creature_level(1);
-	EXPECT_EQ(player->get_next_level_xp(), 1500);
-}
+		int levelBefore = player->get_creature_level();
+		player->levelup_update(ctx);
 
-TEST_F(LevelUpSystemTest, XpTableWizardLevel1)
-{
-	player->set_creature_class(CreatureClass::WIZARD);
-	player->set_creature_level(1);
-	EXPECT_EQ(player->get_next_level_xp(), 2500);
-}
+		EXPECT_EQ(player->get_creature_level(), levelBefore);
+		EXPECT_EQ(player->get_xp(), 1999);
+	}
 
-// levelup_update behavior
-TEST_F(LevelUpSystemTest, LevelupUpdateBelowThreshold)
-{
-	player->set_creature_class(CreatureClass::FIGHTER);
-	player->set_creature_level(1);
-	player->set_xp(1999); // one short
+	TEST_F(LevelUpSystemTest, LevelupUpdateAtThreshold)
+	{
+		player->set_creature_class(CreatureClass::FIGHTER);
+		player->set_creature_level(1);
+		player->set_xp(2000); // exactly at threshold
 
-	int levelBefore = player->get_creature_level();
-	player->levelup_update(ctx);
+		int levelBefore = player->get_creature_level();
+		player->levelup_update(ctx);
 
-	EXPECT_EQ(player->get_creature_level(), levelBefore);
-	EXPECT_EQ(player->get_xp(), 1999);
-}
-
-TEST_F(LevelUpSystemTest, LevelupUpdateAtThreshold)
-{
-	player->set_creature_class(CreatureClass::FIGHTER);
-	player->set_creature_level(1);
-	player->set_xp(2000); // exactly at threshold
-
-	int levelBefore = player->get_creature_level();
-	player->levelup_update(ctx);
-
-	EXPECT_EQ(player->get_creature_level(), levelBefore + 1);
-	EXPECT_EQ(player->get_xp(), 0); // 2000 - 2000
-}
+		EXPECT_EQ(player->get_creature_level(), levelBefore + 1);
+		EXPECT_EQ(player->get_xp(), 0); // 2000 - 2000
+	}
 
 } // namespace CppRL

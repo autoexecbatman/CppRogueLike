@@ -27,8 +27,8 @@
     },
     {
       "file": "src/InventoryOperations.cpp",
-      "original": "\t\tconst StrengthAttributes row = dataManager.strength_for(\n\t\t\towner.get_strength(),\n\t\t\towner.get_exceptional_strength());",
-      "mutated": "\t\tconst StrengthAttributes row = dataManager.strength_for(\n\t\t\towner.get_strength(),0);",
+      "original": "\t\t\tconst StrengthAttributes row = dataManager.strength_for(\n\t\t\t\towner.get_strength(),\n\t\t\t\towner.get_exceptional_strength());",
+      "mutated": "\t\t\tconst StrengthAttributes row = dataManager.strength_for(\n\t\t\t\towner.get_strength(),0);",
       "catches": "exceptional Strength ignored, so an 18/00 fighter carries a plain 18's load"
     },
     {

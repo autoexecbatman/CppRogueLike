@@ -52,290 +52,299 @@
 namespace CppRL
 {
 
-namespace
-{
-
-	constexpr int STARTING_HP = 100;
-	constexpr int TOO_WEAK_TO_DRAW = 12;
-	constexpr int STRONG_ENOUGH_TO_DRAW = 18;
-
-	// Within the player's field of view and inside the archer's range of 2 to
-	// 5, so the ranged branch is the one deciding; adjacent is the melee
-	// branch's distance.
-	constexpr int PLAYER_COLUMN = 4;
-	constexpr int IN_RANGE_COLUMN = 7;
-	constexpr int ADJACENT_COLUMN = 5;
-	constexpr int CORRIDOR_ROW = 5;
-
-} // namespace
-
-class RangedDrawTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	namespace
 	{
-		game.dataManager.load_all_data(game.messageSystem);
-		game.tileConfig.load(Paths::TILE_CONFIG);
-		game.itemRegistry.load(Paths::ITEMS);
 
-		player->experienceReward = std::make_unique<ExperienceReward>(0);
-		player->healthPool = std::make_unique<HealthPool>(STARTING_HP);
-		player->armorClass = std::make_unique<ArmorClass>(10);
-		player->attacker = std::make_unique<PlayerAttacker>(*player);
-		player->set_dr(0);
-		player->set_thaco(20);
-		player->set_strength(10);
-		player->set_dexterity(10);
+		constexpr int STARTING_HP = 100;
+		constexpr int TOO_WEAK_TO_DRAW = 12;
+		constexpr int STRONG_ENOUGH_TO_DRAW = 18;
 
-		archer.experienceReward = std::make_unique<ExperienceReward>(0);
-		archer.healthPool = std::make_unique<HealthPool>(STARTING_HP);
-		archer.armorClass = std::make_unique<ArmorClass>(10);
-		archer.attacker = std::make_unique<MonsterAttacker>(
-			archer,
-			DamageInfo{ "1d4", DamageType::PHYSICAL });
-		archer.set_dr(0);
-		archer.set_thaco(20);
-		archer.set_dexterity(10);
-		archer.set_natural_attack("fist");
-		archer.set_body_plan(
-			{ EquipmentSlot::RIGHT_HAND, EquipmentSlot::MISSILE_WEAPON });
-		archer.ai = std::make_unique<AiMonsterRanged>();
+		// Within the player's field of view and inside the archer's range of 2
+		// to 5, so the ranged branch is the one deciding; adjacent is the melee
+		// branch's distance.
+		constexpr int PLAYER_COLUMN = 4;
+		constexpr int IN_RANGE_COLUMN = 7;
+		constexpr int ADJACENT_COLUMN = 5;
+		constexpr int CORRIDOR_ROW = 5;
 
-		ctx = game.context();
-		ctx.playerOwner = &player;
-		ctx.map = &map;
-		ctx.creatures = &creatures;
+	} // namespace
 
-		// Worn the way MonsterCreator puts authored gear on, which asks no Strength.
-		archer.wear(
-			ItemCreator::create("composite_bow", archer.position, ctx),
-			EquipmentSlot::MISSILE_WEAPON);
-
-		// One open corridor, so any change in the archer's column is it closing or backing.
-		map.init_tiles();
-		for (int column = 1; column < 19; ++column)
+	class RangedDrawTest : public ::testing::Test
+	{
+	protected:
+		void SetUp() override
 		{
-			map.set_tile(Vector2D{ column, CORRIDOR_ROW }, TileType::FLOOR);
-		}
-		map.compute_fov(ctx);
+			game.dataManager.load_all_data(game.messageSystem);
+			game.tileConfig.load(Paths::TILE_CONFIG);
+			game.itemRegistry.load(Paths::ITEMS);
 
-		// The top of every die: no idle round starts, the morale check holds, every blow lands.
-		game.dice.set_test_mode(true);
-		for (int queued = 0; queued < 60; ++queued)
+			player->experienceReward = std::make_unique<ExperienceReward>(0);
+			player->healthPool = std::make_unique<HealthPool>(STARTING_HP);
+			player->armorClass = std::make_unique<ArmorClass>(10);
+			player->attacker = std::make_unique<PlayerAttacker>(*player);
+			player->set_dr(0);
+			player->set_thaco(20);
+			player->set_strength(10);
+			player->set_dexterity(10);
+
+			archer.experienceReward = std::make_unique<ExperienceReward>(0);
+			archer.healthPool = std::make_unique<HealthPool>(STARTING_HP);
+			archer.armorClass = std::make_unique<ArmorClass>(10);
+			archer.attacker = std::make_unique<MonsterAttacker>(
+				archer,
+				DamageInfo{ "1d4", DamageType::PHYSICAL });
+			archer.set_dr(0);
+			archer.set_thaco(20);
+			archer.set_dexterity(10);
+			archer.set_natural_attack("fist");
+			archer.set_body_plan(
+				{ EquipmentSlot::RIGHT_HAND, EquipmentSlot::MISSILE_WEAPON });
+			archer.ai = std::make_unique<AiMonsterRanged>();
+
+			ctx = game.context();
+			ctx.playerOwner = &player;
+			ctx.map = &map;
+			ctx.creatures = &creatures;
+
+			// Worn the way MonsterCreator puts authored gear on, which asks no
+			// Strength.
+			archer.wear(
+				ItemCreator::create("composite_bow", archer.position, ctx),
+				EquipmentSlot::MISSILE_WEAPON);
+
+			// One open corridor, so any change in the archer's column is it
+			// closing or backing.
+			map.init_tiles();
+			for (int column = 1; column < 19; ++column)
+			{
+				map.set_tile(Vector2D{ column, CORRIDOR_ROW }, TileType::FLOOR);
+			}
+			map.compute_fov(ctx);
+
+			// The top of every die: no idle round starts, the morale check
+			// holds, every blow lands.
+			game.dice.set_test_mode(true);
+			for (int queued = 0; queued < 60; ++queued)
+			{
+				game.dice.set_next_roll(RandomDice::HIGHEST);
+			}
+		}
+
+		void TearDown() override
 		{
-			game.dice.set_next_roll(RandomDice::HIGHEST);
+			game.dice.set_test_mode(false);
+			game.dice.clear_fixed_rolls();
 		}
-	}
 
-	void TearDown() override
-	{
-		game.dice.set_test_mode(false);
-		game.dice.clear_fixed_rolls();
-	}
-
-	bool any_message_says(const std::string& phrase) const
-	{
-		for (
-			size_t index = 0;
-			index < game.messageSystem.get_stored_message_count();
-			++index)
+		bool any_message_says(const std::string& phrase) const
 		{
 			for (
-				const LogMessage& part :
-				game.messageSystem.get_attack_message_at(index))
+				size_t index = 0;
+				index < game.messageSystem.get_stored_message_count();
+				++index)
 			{
-				if (part.text.find(phrase) != std::string::npos)
+				for (
+					const LogMessage& part :
+					game.messageSystem.get_attack_message_at(index))
 				{
-					return true;
+					if (part.text.find(phrase) != std::string::npos)
+					{
+						return true;
+					}
 				}
 			}
+			return false;
 		}
-		return false;
-	}
 
-	// The roll the last attack needed, read from its message: " vs 9" is 9.
-	int last_roll_needed() const
-	{
-		const std::string marker = " vs ";
-		const std::vector<LogMessage>& parts =
-			game.messageSystem.get_attack_message_at(
-				game.messageSystem.get_stored_message_count() - 1);
-		for (const LogMessage& part : parts)
+		// The roll the last attack needed, read from its message: " vs 9" is 9.
+		int last_roll_needed() const
 		{
-			if (part.text.starts_with(marker))
+			const std::string marker = " vs ";
+			const std::vector<LogMessage>& parts =
+				game.messageSystem.get_attack_message_at(
+					game.messageSystem.get_stored_message_count() - 1);
+			for (const LogMessage& part : parts)
 			{
-				return std::stoi(part.text.substr(marker.size()));
+				if (part.text.starts_with(marker))
+				{
+					return std::stoi(part.text.substr(marker.size()));
+				}
 			}
+			ADD_FAILURE() << "the last message names no roll needed";
+			return 0;
 		}
-		ADD_FAILURE() << "the last message names no roll needed";
-		return 0;
-	}
 
-	Item& bow()
-	{
-		return *archer.get_equipped_item(EquipmentSlot::MISSILE_WEAPON);
-	}
+		Item& bow()
+		{
+			return *archer.get_equipped_item(EquipmentSlot::MISSILE_WEAPON);
+		}
 
-	Game game{ TEST_DICE_SEED };
-	GameContext ctx;
-	Map map{ 20, 20 };
-	std::vector<std::unique_ptr<Creature>> creatures{};
-	std::unique_ptr<Player> player{ std::make_unique<Player>(
-		Vector2D{ PLAYER_COLUMN, CORRIDOR_ROW }) };
-	Creature archer{
-		Vector2D{ IN_RANGE_COLUMN, CORRIDOR_ROW },
-		ActorData{ TileRef{}, "archer", ColorPairId::WHITE_BLACK },
+		Game game{ TEST_DICE_SEED };
+		GameContext ctx;
+		Map map{ 20, 20 };
+		std::vector<std::unique_ptr<Creature>> creatures{};
+		std::unique_ptr<Player> player{ std::make_unique<Player>(
+			Vector2D{ PLAYER_COLUMN, CORRIDOR_ROW }) };
+		Creature archer{
+			Vector2D{ IN_RANGE_COLUMN, CORRIDOR_ROW },
+			ActorData{ TileRef{}, "archer", ColorPairId::WHITE_BLACK },
+		};
 	};
-};
 
-TEST_F(RangedDrawTest, AnArcherTooWeakForItsBowClosesInInsteadOfShooting)
-{
-	archer.set_strength(TOO_WEAK_TO_DRAW);
-	ASSERT_FALSE(can_draw(
-		archer,
-		*archer.get_equipped_item(EquipmentSlot::MISSILE_WEAPON)))
-		<< "the bow can be drawn, so nothing here is too weak";
+	TEST_F(RangedDrawTest, AnArcherTooWeakForItsBowClosesInInsteadOfShooting)
+	{
+		archer.set_strength(TOO_WEAK_TO_DRAW);
+		ASSERT_FALSE(can_draw(
+			archer,
+			*archer.get_equipped_item(EquipmentSlot::MISSILE_WEAPON)))
+			<< "the bow can be drawn, so nothing here is too weak";
 
-	archer.ai->update(archer, ctx);
+		archer.ai->update(archer, ctx);
 
-	EXPECT_FALSE(any_message_says("not strong enough to draw"))
-		<< "the archer chose a shot it cannot draw";
-	EXPECT_EQ(archer.position.x, IN_RANGE_COLUMN - 1)
-		<< "the archer stood its ground instead of closing in";
-}
+		EXPECT_FALSE(any_message_says("not strong enough to draw"))
+			<< "the archer chose a shot it cannot draw";
+		EXPECT_EQ(archer.position.x, IN_RANGE_COLUMN - 1)
+			<< "the archer stood its ground instead of closing in";
+	}
 
-TEST_F(RangedDrawTest, AnArcherTooWeakForItsBowFightsInMeleeWhenAdjacent)
-{
-	archer.set_strength(TOO_WEAK_TO_DRAW);
-	archer.position = Vector2D{ ADJACENT_COLUMN, CORRIDOR_ROW };
+	TEST_F(RangedDrawTest, AnArcherTooWeakForItsBowFightsInMeleeWhenAdjacent)
+	{
+		archer.set_strength(TOO_WEAK_TO_DRAW);
+		archer.position = Vector2D{ ADJACENT_COLUMN, CORRIDOR_ROW };
 
-	archer.ai->update(archer, ctx);
+		archer.ai->update(archer, ctx);
 
-	EXPECT_EQ(archer.position.x, ADJACENT_COLUMN)
-		<< "the archer backed away to make room for a shot it cannot draw";
-	EXPECT_LT(player->get_hp(), STARTING_HP)
-		<< "the archer did not strike the creature beside it";
-}
+		EXPECT_EQ(archer.position.x, ADJACENT_COLUMN)
+			<< "the archer backed away to make room for a shot it cannot draw";
+		EXPECT_LT(player->get_hp(), STARTING_HP)
+			<< "the archer did not strike the creature beside it";
+	}
 
-TEST_F(RangedDrawTest, AnArcherStrongEnoughForItsBowShootsFromRange)
-{
-	archer.set_strength(STRONG_ENOUGH_TO_DRAW);
+	TEST_F(RangedDrawTest, AnArcherStrongEnoughForItsBowShootsFromRange)
+	{
+		archer.set_strength(STRONG_ENOUGH_TO_DRAW);
 
-	archer.ai->update(archer, ctx);
+		archer.ai->update(archer, ctx);
 
-	EXPECT_EQ(archer.position.x, IN_RANGE_COLUMN)
-		<< "an archer that can draw its bow walked in instead of shooting";
-	EXPECT_LT(player->get_hp(), STARTING_HP)
-		<< "an archer that can draw its bow did not hit with it";
-}
+		EXPECT_EQ(archer.position.x, IN_RANGE_COLUMN)
+			<< "an archer that can draw its bow walked in instead of shooting";
+		EXPECT_LT(player->get_hp(), STARTING_HP)
+			<< "an archer that can draw its bow did not hit with it";
+	}
 
-TEST_F(RangedDrawTest, AnArcherWithNoBowClosesIn)
-{
-	archer.set_strength(STRONG_ENOUGH_TO_DRAW);
-	ASSERT_TRUE(archer.unequip_item(EquipmentSlot::MISSILE_WEAPON, ctx));
-	ASSERT_EQ(archer.get_equipped_item(EquipmentSlot::MISSILE_WEAPON), nullptr)
-		<< "the bow is still worn, so nothing here lacks one";
+	TEST_F(RangedDrawTest, AnArcherWithNoBowClosesIn)
+	{
+		archer.set_strength(STRONG_ENOUGH_TO_DRAW);
+		ASSERT_TRUE(archer.unequip_item(EquipmentSlot::MISSILE_WEAPON, ctx));
+		ASSERT_EQ(
+			archer.get_equipped_item(EquipmentSlot::MISSILE_WEAPON),
+			nullptr)
+			<< "the bow is still worn, so nothing here lacks one";
 
-	archer.ai->update(archer, ctx);
+		archer.ai->update(archer, ctx);
 
-	EXPECT_EQ(archer.position.x, IN_RANGE_COLUMN - 1)
-		<< "an archer with no bow stood off to shoot one";
-}
+		EXPECT_EQ(archer.position.x, IN_RANGE_COLUMN - 1)
+			<< "an archer with no bow stood off to shoot one";
+	}
 
-// The Monstrous Manual (PDF page 1083): a monster using a weapon does the weapon's damage.
-// The composite bow is 1d6 and the archer's own fist 1d4, so the top of the die tells them apart.
-TEST_F(RangedDrawTest, ABowShotDoesTheBowsDamageUnderTheBowsName)
-{
-	archer.set_strength(STRONG_ENOUGH_TO_DRAW);
+	// The Monstrous Manual (PDF page 1083): a monster using a weapon does the
+	// weapon's damage. The composite bow is 1d6 and the archer's own fist 1d4,
+	// so the top of the die tells them apart.
+	TEST_F(RangedDrawTest, ABowShotDoesTheBowsDamageUnderTheBowsName)
+	{
+		archer.set_strength(STRONG_ENOUGH_TO_DRAW);
 
-	ASSERT_EQ(
-		archer.attacker->attack(*player, AttackKind::RANGED, ctx),
-		AttackResult::LANDED);
+		ASSERT_EQ(
+			archer.attacker->attack(*player, AttackKind::RANGED, ctx),
+			AttackResult::LANDED);
 
-	// The bow's 6, and its +2 for Strength 18.
-	EXPECT_EQ(player->get_hp(), STARTING_HP - 8)
-		<< "the shot did not roll the bow's dice";
-	EXPECT_TRUE(any_message_says("(composite bow)"))
-		<< "the shot is not named for the bow";
-}
+		// The bow's 6, and its +2 for Strength 18.
+		EXPECT_EQ(player->get_hp(), STARTING_HP - 8)
+			<< "the shot did not roll the bow's dice";
+		EXPECT_TRUE(any_message_says("(composite bow)"))
+			<< "the shot is not named for the bow";
+	}
 
-TEST_F(RangedDrawTest, AStrikeInMeleeStillUsesTheArchersOwnAttack)
-{
-	archer.set_strength(STRONG_ENOUGH_TO_DRAW);
+	TEST_F(RangedDrawTest, AStrikeInMeleeStillUsesTheArchersOwnAttack)
+	{
+		archer.set_strength(STRONG_ENOUGH_TO_DRAW);
 
-	ASSERT_EQ(
-		archer.attacker->attack(*player, AttackKind::MELEE, ctx),
-		AttackResult::LANDED);
+		ASSERT_EQ(
+			archer.attacker->attack(*player, AttackKind::MELEE, ctx),
+			AttackResult::LANDED);
 
-	// The fist's 4, and its +2 for Strength 18.
-	EXPECT_EQ(player->get_hp(), STARTING_HP - 6)
-		<< "the strike did not roll the archer's own dice";
-	EXPECT_TRUE(any_message_says("(fist)"))
-		<< "the strike is not named for the archer's own attack";
-}
+		// The fist's 4, and its +2 for Strength 18.
+		EXPECT_EQ(player->get_hp(), STARTING_HP - 6)
+			<< "the strike did not roll the archer's own dice";
+		EXPECT_TRUE(any_message_says("(fist)"))
+			<< "the strike is not named for the archer's own attack";
+	}
 
-// A bow's enhancement to hit counts for a monster's shot as it does for the player's.
-TEST_F(RangedDrawTest, AnEnhancedBowLowersTheRollTheShotNeeds)
-{
-	archer.set_strength(STRONG_ENOUGH_TO_DRAW);
-	[[maybe_unused]] const AttackResult plain =
-		archer.attacker->attack(*player, AttackKind::RANGED, ctx);
-	const int neededPlain = last_roll_needed();
+	// A bow's enhancement to hit counts for a monster's shot as it does for the
+	// player's.
+	TEST_F(RangedDrawTest, AnEnhancedBowLowersTheRollTheShotNeeds)
+	{
+		archer.set_strength(STRONG_ENOUGH_TO_DRAW);
+		[[maybe_unused]] const AttackResult plain =
+			archer.attacker->attack(*player, AttackKind::RANGED, ctx);
+		const int neededPlain = last_roll_needed();
 
-	bow().enhancement.toHitBonus = 2;
-	[[maybe_unused]] const AttackResult enhanced =
-		archer.attacker->attack(*player, AttackKind::RANGED, ctx);
+		bow().enhancement.toHitBonus = 2;
+		[[maybe_unused]] const AttackResult enhanced =
+			archer.attacker->attack(*player, AttackKind::RANGED, ctx);
 
-	EXPECT_EQ(last_roll_needed(), neededPlain - 2)
-		<< "the bow's +2 to hit did not count";
-}
+		EXPECT_EQ(last_roll_needed(), neededPlain - 2)
+			<< "the bow's +2 to hit did not count";
+	}
 
-// A sharp bow's +1 damage counts for a monster's shot as it does for the player's.
-TEST_F(RangedDrawTest, ASharpBowAddsItsDamageBonusToTheShot)
-{
-	archer.set_strength(STRONG_ENOUGH_TO_DRAW);
-	bow().enhancement.prefix = PrefixType::SHARP;
-	bow().enhancement.damageBonus = 1;
+	// A sharp bow's +1 damage counts for a monster's shot as it does for the
+	// player's.
+	TEST_F(RangedDrawTest, ASharpBowAddsItsDamageBonusToTheShot)
+	{
+		archer.set_strength(STRONG_ENOUGH_TO_DRAW);
+		bow().enhancement.prefix = PrefixType::SHARP;
+		bow().enhancement.damageBonus = 1;
 
-	ASSERT_EQ(
-		archer.attacker->attack(*player, AttackKind::RANGED, ctx),
-		AttackResult::LANDED);
+		ASSERT_EQ(
+			archer.attacker->attack(*player, AttackKind::RANGED, ctx),
+			AttackResult::LANDED);
 
-	// The bow's 6, its sharpness's 1, and its +2 for Strength 18.
-	EXPECT_EQ(player->get_hp(), STARTING_HP - 9)
-		<< "the sharp bow's damage bonus did not count";
-}
+		// The bow's 6, its sharpness's 1, and its +2 for Strength 18.
+		EXPECT_EQ(player->get_hp(), STARTING_HP - 9)
+			<< "the sharp bow's damage bonus did not count";
+	}
 
-// A cursed weapon is -2 to hit (PHB p.88), for a monster's bow as for the player's.
-TEST_F(RangedDrawTest, ACursedBowRaisesTheRollTheShotNeeds)
-{
-	archer.set_strength(STRONG_ENOUGH_TO_DRAW);
-	[[maybe_unused]] const AttackResult plain =
-		archer.attacker->attack(*player, AttackKind::RANGED, ctx);
-	const int neededPlain = last_roll_needed();
+	// A cursed weapon is -2 to hit (PHB p.88), for a monster's bow as for the
+	// player's.
+	TEST_F(RangedDrawTest, ACursedBowRaisesTheRollTheShotNeeds)
+	{
+		archer.set_strength(STRONG_ENOUGH_TO_DRAW);
+		[[maybe_unused]] const AttackResult plain =
+			archer.attacker->attack(*player, AttackKind::RANGED, ctx);
+		const int neededPlain = last_roll_needed();
 
-	// A curse outweighs whatever bonus the bow carries.
-	bow().enhancement.toHitBonus = 2;
-	bow().enhancement.blessing = BlessingStatus::CURSED;
-	[[maybe_unused]] const AttackResult cursed =
-		archer.attacker->attack(*player, AttackKind::RANGED, ctx);
+		// A curse outweighs whatever bonus the bow carries.
+		bow().enhancement.toHitBonus = 2;
+		bow().enhancement.blessing = BlessingStatus::CURSED;
+		[[maybe_unused]] const AttackResult cursed =
+			archer.attacker->attack(*player, AttackKind::RANGED, ctx);
 
-	EXPECT_EQ(last_roll_needed(), neededPlain + 2)
-		<< "the cursed bow's -2 to hit did not count";
-}
+		EXPECT_EQ(last_roll_needed(), neededPlain + 2)
+			<< "the cursed bow's -2 to hit did not count";
+	}
 
-TEST_F(RangedDrawTest, StrengthLostBetweenTurnsIsReadOnTheNextTurn)
-{
-	archer.set_strength(STRONG_ENOUGH_TO_DRAW);
-	archer.ai->update(archer, ctx);
-	ASSERT_EQ(archer.position.x, IN_RANGE_COLUMN)
-		<< "the first turn did not shoot, so the change is never seen";
+	TEST_F(RangedDrawTest, StrengthLostBetweenTurnsIsReadOnTheNextTurn)
+	{
+		archer.set_strength(STRONG_ENOUGH_TO_DRAW);
+		archer.ai->update(archer, ctx);
+		ASSERT_EQ(archer.position.x, IN_RANGE_COLUMN)
+			<< "the first turn did not shoot, so the change is never seen";
 
-	archer.set_strength(TOO_WEAK_TO_DRAW);
-	archer.ai->update(archer, ctx);
+		archer.set_strength(TOO_WEAK_TO_DRAW);
+		archer.ai->update(archer, ctx);
 
-	EXPECT_EQ(archer.position.x, IN_RANGE_COLUMN - 1)
-		<< "the archer kept the answer from a Strength it no longer has";
-}
+		EXPECT_EQ(archer.position.x, IN_RANGE_COLUMN - 1)
+			<< "the archer kept the answer from a Strength it no longer has";
+	}
 
 } // namespace CppRL

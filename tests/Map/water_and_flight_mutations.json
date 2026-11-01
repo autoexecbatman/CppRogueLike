@@ -21,13 +21,13 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tif (!ctx.map->is_water(position) || is_flying() || !needs_air_underwater())",
-      "mutated": "\tif (!ctx.map->is_water(position) || !needs_air_underwater())",
+      "original": "\t\tif (!ctx.map->is_water(position) || is_flying() ||\n\t\t\t!needs_air_underwater())",
+      "mutated": "\t\tif (!ctx.map->is_water(position) || !needs_air_underwater())",
       "catches": "flight ignored by the breath clock, so a bat over water holds a breath and drowns"
     },
     {
       "file": "src/MonsterCreator.cpp",
-      "original": "\tif (params.canFly)\n\t{\n\t\tcreature->add_state(ActorState::CAN_FLY);\n\t}",
+      "original": "\t\tif (params.canFly)\n\t\t{\n\t\t\tcreature->add_state(ActorState::CAN_FLY);\n\t\t}",
       "mutated": "",
       "catches": "the data read and the state never granted, so no monster in the game flies"
     },
@@ -39,8 +39,8 @@
     },
     {
       "file": "src/Creature.h",
-      "original": "\t[[nodiscard]] bool is_flying() const noexcept\n\t{\n\t\treturn has_state(ActorState::CAN_FLY);\n\t}",
-      "mutated": "\t[[nodiscard]] bool is_flying() const noexcept\n\t{\n\t\treturn has_state(ActorState::CAN_SWIM);\n\t}",
+      "original": "\t\t[[nodiscard]] bool is_flying() const noexcept\n\t\t{\n\t\t\treturn has_state(ActorState::CAN_FLY);\n\t\t}",
+      "mutated": "\t\t[[nodiscard]] bool is_flying() const noexcept\n\t\t{\n\t\t\treturn has_state(ActorState::CAN_SWIM);\n\t\t}",
       "catches": "flight answered by the swimming state, so the two abilities stop being separate"
     }
   ]

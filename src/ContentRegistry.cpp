@@ -11,35 +11,35 @@
 namespace CppRL
 {
 
-TileRef ContentRegistry::get_tile(std::string_view key) const
-{
-	return itemTiles.contains(std::string{ key }) ?
-		itemTiles.at(std::string{ key }) :
-		TileRef{};
-}
-
-void ContentRegistry::set_tile(std::string_view key, TileRef tile)
-{
-	itemTiles[std::string{ key }] = tile;
-}
-
-void ContentRegistry::remove_tile(std::string_view key)
-{
-	if (itemTiles.erase(std::string{ key }) == 0)
+	TileRef ContentRegistry::get_tile(std::string_view key) const
 	{
-		throw std::out_of_range(
-			std::format(
-				"ContentRegistry::remove_tile -- no tile for '{}'",
-				key));
+		return itemTiles.contains(std::string{ key }) ?
+			itemTiles.at(std::string{ key }) :
+			TileRef{};
 	}
-}
 
-const std::unordered_map<std::string, TileRef>& ContentRegistry::all_tiles()
-	const
-{
-	return itemTiles;
-}
+	void ContentRegistry::set_tile(std::string_view key, TileRef tile)
+	{
+		itemTiles[std::string{ key }] = tile;
+	}
 
-// end of file: ContentRegistry.cpp
+	void ContentRegistry::remove_tile(std::string_view key)
+	{
+		if (itemTiles.erase(std::string{ key }) == 0)
+		{
+			throw std::out_of_range(
+				std::format(
+					"ContentRegistry::remove_tile -- no tile for '{}'",
+					key));
+		}
+	}
+
+	const std::unordered_map<std::string, TileRef>& ContentRegistry::all_tiles()
+		const
+	{
+		return itemTiles;
+	}
+
+	// end of file: ContentRegistry.cpp
 
 } // namespace CppRL

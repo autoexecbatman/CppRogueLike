@@ -31,84 +31,85 @@
 namespace CppRL
 {
 
-class Renderer;
+	class Renderer;
 
-// A key or button an editor reacts to.
-enum class EditorKey
-{
-	ESCAPE,
-	TAB,
-	ENTER,
-	UP,
-	DOWN,
-	LEFT,
-	RIGHT,
-	// F2, which opens the tile picker.
-	PICKER,
-	// A, which adds a record.
-	ADD,
-	// S, which saves when Control is held.
-	SAVE,
-	// Delete, which removes a custom record.
-	REMOVE,
-	BACKSPACE,
-	// Either Control key; only ever held.
-	CONTROL,
-	// The left mouse button.
-	CLICK
-};
+	// A key or button an editor reacts to.
+	enum class EditorKey
+	{
+		ESCAPE,
+		TAB,
+		ENTER,
+		UP,
+		DOWN,
+		LEFT,
+		RIGHT,
+		// F2, which opens the tile picker.
+		PICKER,
+		// A, which adds a record.
+		ADD,
+		// S, which saves when Control is held.
+		SAVE,
+		// Delete, which removes a custom record.
+		REMOVE,
+		BACKSPACE,
+		// Either Control key; only ever held.
+		CONTROL,
+		// The left mouse button.
+		CLICK
+	};
 
-// One frame's input, as the editor sees it.
-struct EditorInput
-{
-	// The keys and buttons that went down this frame.
-	std::set<EditorKey> pressed{};
-	// The keys held down this frame, whether or not they went down in it.
-	std::set<EditorKey> held{};
-	// Where the mouse is, in screen pixels.
-	Vector2D mouse{};
-	// How far the wheel turned this frame, in notches; positive is away from
-	// the user.
-	int wheel{ 0 };
-	// The printable characters typed this frame, in order.
-	std::string typed{};
-	// The window's width in pixels.
-	int screenWidth{ 0 };
-	// The window's height in pixels.
-	int screenHeight{ 0 };
-	// A line of text's height in pixels, in the font the editor draws with.
-	// Every band that holds text is sized from it.
-	int lineHeight{ 0 };
-	// A text's width in pixels, in the font the editor draws with. The list
-	// panel sizes itself with it.
-	std::function<int(std::string_view)> measure{};
+	// One frame's input, as the editor sees it.
+	struct EditorInput
+	{
+		// The keys and buttons that went down this frame.
+		std::set<EditorKey> pressed{};
+		// The keys held down this frame, whether or not they went down in it.
+		std::set<EditorKey> held{};
+		// Where the mouse is, in screen pixels.
+		Vector2D mouse{};
+		// How far the wheel turned this frame, in notches; positive is away
+		// from the user.
+		int wheel{ 0 };
+		// The printable characters typed this frame, in order.
+		std::string typed{};
+		// The window's width in pixels.
+		int screenWidth{ 0 };
+		// The window's height in pixels.
+		int screenHeight{ 0 };
+		// A line of text's height in pixels, in the font the editor draws with.
+		// Every band that holds text is sized from it.
+		int lineHeight{ 0 };
+		// A text's width in pixels, in the font the editor draws with. The list
+		// panel sizes itself with it.
+		std::function<int(std::string_view)> measure{};
 
-	// Whether the key went down this frame.
+		// Whether the key went down this frame.
+		//
+		// Example:
+		//   const EditorInput tab{ .pressed = { EditorKey::TAB } };
+		//   tab.is_pressed(EditorKey::TAB);   // -> true
+		[[nodiscard]] bool is_pressed(EditorKey key) const
+		{
+			return pressed.contains(key);
+		}
+
+		// Whether the key is held down this frame.
+		//
+		// Example:
+		//   EditorInput{}.is_held(EditorKey::CONTROL);   // -> false
+		[[nodiscard]] bool is_held(EditorKey key) const
+		{
+			return held.contains(key);
+		}
+	};
+
+	// This frame's real input, read from raylib, with the screen size the
+	// renderer reports. Call it once per frame: raylib hands each typed
+	// character out once.
 	//
 	// Example:
-	//   const EditorInput tab{ .pressed = { EditorKey::TAB } };
-	//   tab.is_pressed(EditorKey::TAB);   // -> true
-	[[nodiscard]] bool is_pressed(EditorKey key) const
-	{
-		return pressed.contains(key);
-	}
-
-	// Whether the key is held down this frame.
-	//
-	// Example:
-	//   EditorInput{}.is_held(EditorKey::CONTROL);   // -> false
-	[[nodiscard]] bool is_held(EditorKey key) const
-	{
-		return held.contains(key);
-	}
-};
-
-// This frame's real input, read from raylib, with the screen size the renderer
-// reports. Call it once per frame: raylib hands each typed character out once.
-//
-// Example:
-//   read_editor_input(renderer).screenHeight;
-//   // -> renderer.get_screen_height()
-[[nodiscard]] EditorInput read_editor_input(const Renderer& renderer);
+	//   read_editor_input(renderer).screenHeight;
+	//   // -> renderer.get_screen_height()
+	[[nodiscard]] EditorInput read_editor_input(const Renderer& renderer);
 
 } // namespace CppRL

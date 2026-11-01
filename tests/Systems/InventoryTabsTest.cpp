@@ -24,83 +24,85 @@
 namespace CppRL
 {
 
-class InventoryTabsTest : public ::testing::Test
-{
-protected:
-	// The vertical middle of the tab row, as the drawing computes its top.
-	int tab_row_y() const
+	class InventoryTabsTest : public ::testing::Test
 	{
-		return panel_text_row_y(0, renderer.get_tile_size(), TAB_ROW) + 2;
+	protected:
+		// The vertical middle of the tab row, as the drawing computes its top.
+		int tab_row_y() const
+		{
+			return panel_text_row_y(0, renderer.get_tile_size(), TAB_ROW) + 2;
+		}
+
+		int middle_of(const InventoryActions::TabBox& box) const
+		{
+			return box.pixelX + box.width / 2;
+		}
+
+		Renderer renderer{};
+	};
+
+	TEST_F(InventoryTabsTest, TheThreeTabsRunLeftToRightWithoutOverlapping)
+	{
+		const auto boxes = InventoryActions::tab_boxes(renderer);
+
+		EXPECT_EQ(boxes[0].screen, InventoryScreen::EQUIPMENT);
+		EXPECT_EQ(boxes[1].screen, InventoryScreen::BACKPACK);
+		EXPECT_EQ(boxes[2].screen, InventoryScreen::USABLES);
+		EXPECT_LT(boxes[0].pixelX, boxes[1].pixelX);
+		EXPECT_LT(boxes[1].pixelX, boxes[2].pixelX);
 	}
 
-	int middle_of(const InventoryActions::TabBox& box) const
+	TEST_F(InventoryTabsTest, EveryTabIsReachableByPointer)
 	{
-		return box.pixelX + box.width / 2;
+		// The defect: this passed for Equipment by accident and failed for the
+		// other two, because no tab was reachable and the screen already starts
+		// on Equipment.
+		for (const auto& box : InventoryActions::tab_boxes(renderer))
+		{
+			const auto hit =
+				InventoryActions::tab_at(middle_of(box), tab_row_y(), renderer);
+
+			ASSERT_TRUE(hit.has_value())
+				<< "a tab could not be clicked at its own middle";
+			EXPECT_EQ(*hit, box.screen);
+		}
 	}
 
-	Renderer renderer{};
-};
-
-TEST_F(InventoryTabsTest, TheThreeTabsRunLeftToRightWithoutOverlapping)
-{
-	const auto boxes = InventoryActions::tab_boxes(renderer);
-
-	EXPECT_EQ(boxes[0].screen, InventoryScreen::EQUIPMENT);
-	EXPECT_EQ(boxes[1].screen, InventoryScreen::BACKPACK);
-	EXPECT_EQ(boxes[2].screen, InventoryScreen::USABLES);
-	EXPECT_LT(boxes[0].pixelX, boxes[1].pixelX);
-	EXPECT_LT(boxes[1].pixelX, boxes[2].pixelX);
-}
-
-TEST_F(InventoryTabsTest, EveryTabIsReachableByPointer)
-{
-	// The defect: this passed for Equipment by accident and failed for the other two,
-	// because no tab was reachable and the screen already starts on Equipment.
-	for (const auto& box : InventoryActions::tab_boxes(renderer))
+	TEST_F(InventoryTabsTest, APointerOffTheTabRowHitsNoTab)
 	{
-		const auto hit =
-			InventoryActions::tab_at(middle_of(box), tab_row_y(), renderer);
+		const auto boxes = InventoryActions::tab_boxes(renderer);
+		const int contentRowY =
+			panel_text_row_y(0, renderer.get_tile_size(), FIRST_CONTENT_ROW) +
+			2;
 
-		ASSERT_TRUE(hit.has_value())
-			<< "a tab could not be clicked at its own middle";
-		EXPECT_EQ(*hit, box.screen);
+		EXPECT_FALSE(
+			InventoryActions::tab_at(middle_of(boxes[1]), contentRowY, renderer)
+				.has_value())
+			<< "a click on a slot row switched panes";
 	}
-}
 
-TEST_F(InventoryTabsTest, APointerOffTheTabRowHitsNoTab)
-{
-	const auto boxes = InventoryActions::tab_boxes(renderer);
-	const int contentRowY =
-		panel_text_row_y(0, renderer.get_tile_size(), FIRST_CONTENT_ROW) + 2;
+	TEST_F(InventoryTabsTest, APointerPastTheLastTabHitsNoTab)
+	{
+		const auto boxes = InventoryActions::tab_boxes(renderer);
+		const int pastTheEnd = boxes[2].pixelX + boxes[2].width + 200;
 
-	EXPECT_FALSE(
-		InventoryActions::tab_at(middle_of(boxes[1]), contentRowY, renderer)
-			.has_value())
-		<< "a click on a slot row switched panes";
-}
+		EXPECT_FALSE(
+			InventoryActions::tab_at(pastTheEnd, tab_row_y(), renderer)
+				.has_value());
+	}
 
-TEST_F(InventoryTabsTest, APointerPastTheLastTabHitsNoTab)
-{
-	const auto boxes = InventoryActions::tab_boxes(renderer);
-	const int pastTheEnd = boxes[2].pixelX + boxes[2].width + 200;
+	TEST_F(InventoryTabsTest, TabStepsThroughEveryPaneAndComesBack)
+	{
+		// The keyboard route. Three steps return to where they started, so no
+		// pane is skipped and none is a dead end.
+		InventoryScreen screen = InventoryScreen::EQUIPMENT;
 
-	EXPECT_FALSE(
-		InventoryActions::tab_at(pastTheEnd, tab_row_y(), renderer)
-			.has_value());
-}
-
-TEST_F(InventoryTabsTest, TabStepsThroughEveryPaneAndComesBack)
-{
-	// The keyboard route. Three steps return to where they started, so no pane is
-	// skipped and none is a dead end.
-	InventoryScreen screen = InventoryScreen::EQUIPMENT;
-
-	screen = InventoryActions::next_screen(screen);
-	EXPECT_EQ(screen, InventoryScreen::BACKPACK);
-	screen = InventoryActions::next_screen(screen);
-	EXPECT_EQ(screen, InventoryScreen::USABLES);
-	screen = InventoryActions::next_screen(screen);
-	EXPECT_EQ(screen, InventoryScreen::EQUIPMENT);
-}
+		screen = InventoryActions::next_screen(screen);
+		EXPECT_EQ(screen, InventoryScreen::BACKPACK);
+		screen = InventoryActions::next_screen(screen);
+		EXPECT_EQ(screen, InventoryScreen::USABLES);
+		screen = InventoryActions::next_screen(screen);
+		EXPECT_EQ(screen, InventoryScreen::EQUIPMENT);
+	}
 
 } // namespace CppRL

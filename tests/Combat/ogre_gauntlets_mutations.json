@@ -33,8 +33,8 @@
     },
     {
       "file": "src/AttackStrength.cpp",
-      "original": "dataManager.strength_for(\n\t\t\tgauntlets->strBonus,\n\t\t\tgauntlets->exceptionalStrength);",
-      "mutated": "dataManager.strength_for(\n\t\t\tgauntlets->strBonus,0);",
+      "original": "dataManager.strength_for(\n\t\t\t\tgauntlets->strBonus,\n\t\t\t\tgauntlets->exceptionalStrength);",
+      "mutated": "dataManager.strength_for(\n\t\t\t\tgauntlets->strBonus,0);",
       "catches": "the gauntlets read as a plain 18, +1 and +2, without their percentile"
     },
     {
@@ -45,14 +45,14 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\twearsGiantStrength =\n\t\t\twearsGiantStrength || is_giant_strength_girdle(*worn.item);\n\t\tif (const Gauntlets* gauntlets = strength_setting_gauntlets(*worn.item))",
-      "mutated": "\t\twearsGiantStrength =is_giant_strength_girdle(*worn.item);\n\t\tif (const Gauntlets* gauntlets = strength_setting_gauntlets(*worn.item))",
+      "original": "\t\t\twearsGiantStrength =\n\t\t\t\twearsGiantStrength || is_giant_strength_girdle(*worn.item);\n\t\t\tif (const Gauntlets* gauntlets =\n\t\t\t\t\tstrength_setting_gauntlets(*worn.item))",
+      "mutated": "\t\t\twearsGiantStrength =is_giant_strength_girdle(*worn.item);\n\t\t\tif (const Gauntlets* gauntlets =\n\t\t\t\t\tstrength_setting_gauntlets(*worn.item))",
       "catches": "only the last worn item asked about the girdle, so gauntlets put on after it hide it"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\treturn gauntlets != nullptr &&\n\t\t\t\tgauntlets->application == BuffApplication::SET &&\n\t\t\t\tgauntlets->strBonus > 0 ?\n\t\t\tgauntlets :\n\t\t\tnullptr;",
-      "mutated": "\t\treturn gauntlets;",
+      "original": "\t\t\treturn gauntlets != nullptr &&\n\t\t\t\t\tgauntlets->application == BuffApplication::SET &&\n\t\t\t\t\tgauntlets->strBonus > 0 ?\n\t\t\t\tgauntlets :\n\t\t\t\tnullptr;",
+      "mutated": "\t\t\treturn gauntlets;",
       "catches": "any gauntlets counted beside the girdle, swimming and climbing included"
     }
   ]

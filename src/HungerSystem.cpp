@@ -20,346 +20,360 @@
 namespace CppRL
 {
 
-using json = nlohmann::json;
+	using json = nlohmann::json;
 
-namespace
-{
-
-	// Thresholds for different hunger states
-	constexpr int WELL_FED_THRESHOLD{ 200 };
-	// Highest counter read as SATIATED. It rises one a round; 2e has no clock.
-	constexpr int SATIATED_THRESHOLD{ 400 };
-	// Highest counter read as HUNGRY.
-	constexpr int HUNGRY_THRESHOLD{ 700 };
-	// Highest counter read as STARVING; above it, up to hungerMax, is DYING.
-	constexpr int STARVING_THRESHOLD{ 900 };
-
-	// The only place a counter becomes a state. Bounds ascend, so the first one
-	// that holds is the answer.
-	HungerState hunger_state_for(int hungerValue)
+	namespace
 	{
-		if (hungerValue <= WELL_FED_THRESHOLD)
+
+		// Thresholds for different hunger states
+		constexpr int WELL_FED_THRESHOLD{ 200 };
+		// Highest counter read as SATIATED. It rises one a round; 2e has no
+		// clock.
+		constexpr int SATIATED_THRESHOLD{ 400 };
+		// Highest counter read as HUNGRY.
+		constexpr int HUNGRY_THRESHOLD{ 700 };
+		// Highest counter read as STARVING; above it, up to hungerMax, is
+		// DYING.
+		constexpr int STARVING_THRESHOLD{ 900 };
+
+		// The only place a counter becomes a state. Bounds ascend, so the first
+		// one that holds is the answer.
+		HungerState hunger_state_for(int hungerValue)
 		{
-			return HungerState::WELL_FED;
+			if (hungerValue <= WELL_FED_THRESHOLD)
+			{
+				return HungerState::WELL_FED;
+			}
+
+			if (hungerValue <= SATIATED_THRESHOLD)
+			{
+				return HungerState::SATIATED;
+			}
+
+			if (hungerValue <= HUNGRY_THRESHOLD)
+			{
+				return HungerState::HUNGRY;
+			}
+
+			if (hungerValue <= STARVING_THRESHOLD)
+			{
+				return HungerState::STARVING;
+			}
+
+			return HungerState::DYING;
 		}
 
-		if (hungerValue <= SATIATED_THRESHOLD)
+	} // namespace
+
+	void HungerSystem::begin_run()
+	{
+		run = RunState{};
+	}
+
+	void HungerSystem::increase_hunger(GameContext& ctx, int amount)
+	{
+		run.hungerValue = std::min(run.hungerValue + amount, run.hungerMax);
+		notify_state_change(ctx);
+	}
+
+	void HungerSystem::decrease_hunger(GameContext& ctx, int amount)
+	{
+		run.hungerValue = std::max(run.hungerValue - amount, 0);
+		notify_state_change(ctx);
+	}
+
+	HungerState HungerSystem::get_hunger_state() const
+	{
+		return hunger_state_for(run.hungerValue);
+	}
+
+	std::string HungerSystem::get_hunger_state_string() const
+	{
+		switch (get_hunger_state())
 		{
-			return HungerState::SATIATED;
+
+		case HungerState::WELL_FED:
+		{
+			return "Well Fed";
 		}
 
-		if (hungerValue <= HUNGRY_THRESHOLD)
+		case HungerState::SATIATED:
 		{
-			return HungerState::HUNGRY;
+			return "Satiated";
 		}
 
-		if (hungerValue <= STARVING_THRESHOLD)
+		case HungerState::HUNGRY:
 		{
-			return HungerState::STARVING;
+			return "Hungry";
 		}
 
-		return HungerState::DYING;
+		case HungerState::STARVING:
+		{
+			return "Starving";
+		}
+
+		case HungerState::DYING:
+		{
+			return "Dying";
+		}
+		}
+		// Every state returns above; a new one warns under -Wswitch rather than
+		// taking a name that belongs to nothing.
+		std::unreachable();
 	}
 
-} // namespace
-
-void HungerSystem::begin_run()
-{
-	run = RunState{};
-}
-
-void HungerSystem::increase_hunger(GameContext& ctx, int amount)
-{
-	run.hungerValue = std::min(run.hungerValue + amount, run.hungerMax);
-	notify_state_change(ctx);
-}
-
-void HungerSystem::decrease_hunger(GameContext& ctx, int amount)
-{
-	run.hungerValue = std::max(run.hungerValue - amount, 0);
-	notify_state_change(ctx);
-}
-
-HungerState HungerSystem::get_hunger_state() const
-{
-	return hunger_state_for(run.hungerValue);
-}
-
-std::string HungerSystem::get_hunger_state_string() const
-{
-	switch (get_hunger_state())
+	int HungerSystem::get_hunger_value() const
 	{
-
-	case HungerState::WELL_FED:
-	{
-		return "Well Fed";
+		return run.hungerValue;
 	}
 
-	case HungerState::SATIATED:
+	int HungerSystem::get_hunger_max() const
 	{
-		return "Satiated";
+		return run.hungerMax;
 	}
 
-	case HungerState::HUNGRY:
+	float HungerSystem::get_fullness_ratio() const
 	{
-		return "Hungry";
+		if (run.hungerMax <= 0)
+		{
+			return 0.0f;
+		}
+		return std::clamp(
+			1.0f -
+				static_cast<float>(run.hungerValue) /
+					static_cast<float>(run.hungerMax),
+			0.0f,
+			1.0f);
 	}
 
-	case HungerState::STARVING:
+	ColorPairId HungerSystem::get_hunger_color() const
 	{
-		return "Starving";
+		switch (get_hunger_state())
+		{
+
+		case HungerState::WELL_FED:
+		{
+			return ColorPairId::WHITE_GREEN; // Green
+		}
+
+		case HungerState::SATIATED:
+		{
+			return ColorPairId::WHITE_BLACK; // White
+		}
+
+		case HungerState::HUNGRY:
+		{
+			return ColorPairId::GREEN_BLACK;
+		}
+
+		case HungerState::STARVING:
+		{
+			return ColorPairId::RED_BLACK;
+		}
+
+		case HungerState::DYING:
+		{
+			return ColorPairId::WHITE_RED; // Red
+		}
+		}
+		// Every state returns above; a new one warns under -Wswitch rather than
+		// taking a colour that belongs to nothing.
+		std::unreachable();
 	}
 
-	case HungerState::DYING:
+	void HungerSystem::apply_hunger_effects(GameContext& ctx)
 	{
-		return "Dying";
-	}
-	}
-	// Every state returns above; a new one warns under -Wswitch rather than taking
-	// a name that belongs to nothing.
-	std::unreachable();
-}
+		assert(
+			ctx.dice &&
+			"HungerSystem::apply_hunger_effects: called without dice");
 
-int HungerSystem::get_hunger_value() const
-{
-	return run.hungerValue;
-}
+		// The round upkeep is the only caller and it runs on a live game, so a
+		// missing player is a wiring fault rather than a state the game passes
+		// through.
+		assert(ctx.player() && "apply_hunger_effects ran without a player");
 
-int HungerSystem::get_hunger_max() const
-{
-	return run.hungerMax;
-}
+		switch (get_hunger_state())
+		{
 
-float HungerSystem::get_fullness_ratio() const
-{
-	if (run.hungerMax <= 0)
-	{
-		return 0.0f;
-	}
-	return std::clamp(
-		1.0f -
-			static_cast<float>(run.hungerValue) /
-				static_cast<float>(run.hungerMax),
-		0.0f,
-		1.0f);
-}
+		case HungerState::SATIATED:
+		{
+			break;
+		}
 
-ColorPairId HungerSystem::get_hunger_color() const
-{
-	switch (get_hunger_state())
-	{
+		case HungerState::WELL_FED:
+		{
+			// Said once per spell of being well fed, and reset when the state
+			// is left.
+			if (!run.wellFedMessageShown)
+			{
+				ctx.messageSystem->append_message_part(
+					get_hunger_color(),
+					"You feel strong and energetic!");
+				ctx.messageSystem->finalize_message();
+				run.wellFedMessageShown = true;
+			}
+			break;
+		}
 
-	case HungerState::WELL_FED:
-	{
-		return ColorPairId::WHITE_GREEN; // Green
-	}
+		case HungerState::HUNGRY:
+		{
+			// Flavour only. Hunger costs the player nothing until STARVING.
+			if (ctx.dice->d10() == 1)
+			{ // 10% chance each turn
+				ctx.messageSystem->append_message_part(
+					get_hunger_color(),
+					"Your stomach growls.");
+				ctx.messageSystem->finalize_message();
+			}
+			break;
+		}
 
-	case HungerState::SATIATED:
-	{
-		return ColorPairId::WHITE_BLACK; // White
-	}
+		case HungerState::STARVING:
+		{
+			// Still flavour; the damage below is the first thing hunger
+			// actually costs.
+			if (ctx.dice->d6() == 1)
+			{ // ~17% chance each turn
+				ctx.messageSystem->append_message_part(
+					get_hunger_color(),
+					"You are weakened by hunger.");
+				ctx.messageSystem->finalize_message();
+			}
+			// One point on one turn in twenty, so starving is survivable for a
+			// while.
+			if (ctx.dice->d20() == 1)
+			{ // 5% chance each turn
+				ctx.player()->take_damage_and_check_death(
+					1,
+					ctx,
+					DamageType::PHYSICAL,
+					DamageSource::NO_ATTACKER);
+				ctx.messageSystem->append_message_part(
+					get_hunger_color(),
+					"You're starving!");
+				ctx.messageSystem->finalize_message();
+			}
+			break;
+		}
 
-	case HungerState::HUNGRY:
-	{
-		return ColorPairId::GREEN_BLACK;
-	}
-
-	case HungerState::STARVING:
-	{
-		return ColorPairId::RED_BLACK;
-	}
-
-	case HungerState::DYING:
-	{
-		return ColorPairId::WHITE_RED; // Red
-	}
-	}
-	// Every state returns above; a new one warns under -Wswitch rather than taking
-	// a colour that belongs to nothing.
-	std::unreachable();
-}
-
-void HungerSystem::apply_hunger_effects(GameContext& ctx)
-{
-	assert(
-		ctx.dice && "HungerSystem::apply_hunger_effects: called without dice");
-
-	// The round upkeep is the only caller and it runs on a live game, so a missing
-	// player is a wiring fault rather than a state the game passes through.
-	assert(ctx.player() && "apply_hunger_effects ran without a player");
-
-	switch (get_hunger_state())
-	{
-
-	case HungerState::SATIATED:
-	{
-		break;
-	}
-
-	case HungerState::WELL_FED:
-	{
-		// Said once per spell of being well fed, and reset when the state is left.
-		if (!run.wellFedMessageShown)
+		case HungerState::DYING:
 		{
 			ctx.messageSystem->append_message_part(
 				get_hunger_color(),
-				"You feel strong and energetic!");
+				"You are dying from starvation!");
 			ctx.messageSystem->finalize_message();
-			run.wellFedMessageShown = true;
-		}
-		break;
-	}
-
-	case HungerState::HUNGRY:
-	{
-		// Flavour only. Hunger costs the player nothing until STARVING.
-		if (ctx.dice->d10() == 1)
-		{ // 10% chance each turn
-			ctx.messageSystem->append_message_part(
-				get_hunger_color(),
-				"Your stomach growls.");
-			ctx.messageSystem->finalize_message();
-		}
-		break;
-	}
-
-	case HungerState::STARVING:
-	{
-		// Still flavour; the damage below is the first thing hunger actually costs.
-		if (ctx.dice->d6() == 1)
-		{ // ~17% chance each turn
-			ctx.messageSystem->append_message_part(
-				get_hunger_color(),
-				"You are weakened by hunger.");
-			ctx.messageSystem->finalize_message();
-		}
-		// One point on one turn in twenty, so starving is survivable for a while.
-		if (ctx.dice->d20() == 1)
-		{ // 5% chance each turn
+			// Every turn now, with no roll to survive.
 			ctx.player()->take_damage_and_check_death(
 				1,
 				ctx,
 				DamageType::PHYSICAL,
 				DamageSource::NO_ATTACKER);
-			ctx.messageSystem->append_message_part(
-				get_hunger_color(),
-				"You're starving!");
-			ctx.messageSystem->finalize_message();
+			break;
 		}
-		break;
+		}
 	}
 
-	case HungerState::DYING:
+	void HungerSystem::notify_state_change(GameContext& ctx)
 	{
+		const HungerState current = get_hunger_state();
+
+		// The first call establishes what the player is; there is no move to
+		// report.
+		if (!run.lastNotifiedState.has_value())
+		{
+			run.lastNotifiedState = current;
+			return;
+		}
+
+		// Most ticks move the counter without crossing a threshold.
+		if (*run.lastNotifiedState == current)
+		{
+			return;
+		}
+
+		const HungerState previous = *run.lastNotifiedState;
+
+		// Say it before recording it: recording first and then throwing would
+		// silence this threshold forever.
 		ctx.messageSystem->append_message_part(
 			get_hunger_color(),
-			"You are dying from starvation!");
+			"You are now " + get_hunger_state_string() + ".");
 		ctx.messageSystem->finalize_message();
-		// Every turn now, with no roll to survive.
-		ctx.player()->take_damage_and_check_death(
-			1,
-			ctx,
-			DamageType::PHYSICAL,
-			DamageSource::NO_ATTACKER);
-		break;
-	}
-	}
-}
 
-void HungerSystem::notify_state_change(GameContext& ctx)
-{
-	const HungerState current = get_hunger_state();
-
-	// The first call establishes what the player is; there is no move to report.
-	if (!run.lastNotifiedState.has_value())
-	{
 		run.lastNotifiedState = current;
-		return;
-	}
 
-	// Most ticks move the counter without crossing a threshold.
-	if (*run.lastNotifiedState == current)
-	{
-		return;
-	}
-
-	const HungerState previous = *run.lastNotifiedState;
-
-	// Say it before recording it: recording first and then throwing would silence this threshold forever.
-	ctx.messageSystem->append_message_part(
-		get_hunger_color(),
-		"You are now " + get_hunger_state_string() + ".");
-	ctx.messageSystem->finalize_message();
-
-	run.lastNotifiedState = current;
-
-	// Leaving well fed re-arms the message that fires on the way back into it.
-	// The equality guard above already establishes that current is something else.
-	if (previous == HungerState::WELL_FED)
-	{
-		run.wellFedMessageShown = false;
-	}
-}
-
-void HungerSystem::save(json& output) const
-{
-	output["hungerValue"] = run.hungerValue;
-	output["hungerMax"] = run.hungerMax;
-	output["wellFedMessageShown"] = run.wellFedMessageShown;
-
-	// Only what the player was told. The state itself is derived from hungerValue,
-	// so storing it would be a second copy free to disagree with the counter.
-	if (run.lastNotifiedState.has_value())
-	{
-		output["lastNotifiedState"] = static_cast<int>(*run.lastNotifiedState);
-	}
-}
-
-namespace
-{
-	// The HungerState a saved integer names, or nullopt for one no state has.
-	// The switch has no default, so a state added without a case here is a
-	// compile error (C4062, -Wswitch).
-	//
-	// Example:
-	//   hunger_state_from(2);    // -> HungerState::HUNGRY
-	//   hunger_state_from(5);    // -> nullopt
-	std::optional<HungerState> hunger_state_from(int saved)
-	{
-		const HungerState candidate = static_cast<HungerState>(saved);
-		switch (candidate)
+		// Leaving well fed re-arms the message that fires on the way back into
+		// it. The equality guard above already establishes that current is
+		// something else.
+		if (previous == HungerState::WELL_FED)
 		{
-		case HungerState::WELL_FED:
-		case HungerState::SATIATED:
-		case HungerState::HUNGRY:
-		case HungerState::STARVING:
-		case HungerState::DYING:
-		{
-			return candidate;
+			run.wellFedMessageShown = false;
 		}
-		}
-		return std::nullopt;
 	}
-} // namespace
 
-void HungerSystem::load(const json& source)
-{
-	// save writes these three every time, so a record without one is refused.
-	run.hungerValue = source.at("hungerValue").get<int>();
-	run.hungerMax = source.at("hungerMax").get<int>();
-	run.wellFedMessageShown = source.at("wellFedMessageShown").get<bool>();
-
-	// save omits this until a state has been announced; left empty, the first tick
-	// after the load sets the baseline without announcing anything.
-	if (source.contains("lastNotifiedState"))
+	void HungerSystem::save(json& output) const
 	{
-		run.lastNotifiedState = saved_enum_field(
-			source,
-			"HungerSystem::load",
-			"lastNotifiedState",
-			"HungerState",
-			&hunger_state_from);
+		output["hungerValue"] = run.hungerValue;
+		output["hungerMax"] = run.hungerMax;
+		output["wellFedMessageShown"] = run.wellFedMessageShown;
+
+		// Only what the player was told. The state itself is derived from
+		// hungerValue, so storing it would be a second copy free to disagree
+		// with the counter.
+		if (run.lastNotifiedState.has_value())
+		{
+			output["lastNotifiedState"] =
+				static_cast<int>(*run.lastNotifiedState);
+		}
 	}
-}
+
+	namespace
+	{
+		// The HungerState a saved integer names, or nullopt for one no state
+		// has. The switch has no default, so a state added without a case here
+		// is a compile error (C4062, -Wswitch).
+		//
+		// Example:
+		//   hunger_state_from(2);    // -> HungerState::HUNGRY
+		//   hunger_state_from(5);    // -> nullopt
+		std::optional<HungerState> hunger_state_from(int saved)
+		{
+			const HungerState candidate = static_cast<HungerState>(saved);
+			switch (candidate)
+			{
+			case HungerState::WELL_FED:
+			case HungerState::SATIATED:
+			case HungerState::HUNGRY:
+			case HungerState::STARVING:
+			case HungerState::DYING:
+			{
+				return candidate;
+			}
+			}
+			return std::nullopt;
+		}
+	} // namespace
+
+	void HungerSystem::load(const json& source)
+	{
+		// save writes these three every time, so a record without one is
+		// refused.
+		run.hungerValue = source.at("hungerValue").get<int>();
+		run.hungerMax = source.at("hungerMax").get<int>();
+		run.wellFedMessageShown = source.at("wellFedMessageShown").get<bool>();
+
+		// save omits this until a state has been announced; left empty, the
+		// first tick after the load sets the baseline without announcing
+		// anything.
+		if (source.contains("lastNotifiedState"))
+		{
+			run.lastNotifiedState = saved_enum_field(
+				source,
+				"HungerSystem::load",
+				"lastNotifiedState",
+				"HungerState",
+				&hunger_state_from);
+		}
+	}
 
 } // namespace CppRL

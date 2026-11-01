@@ -21,38 +21,38 @@
     },
     {
       "file": "src/MonsterAttacker.cpp",
-      "original": "\tif (kind == AttackKind::RANGED)\n\t{\n\t\tconst Item* missileWeapon",
-      "mutated": "\tif (false)\n\t{\n\t\tconst Item* missileWeapon",
+      "original": "\t\tif (kind == AttackKind::RANGED)\n\t\t{\n\t\t\tconst Item* missileWeapon",
+      "mutated": "\t\tif (false)\n\t\t{\n\t\t\tconst Item* missileWeapon",
       "catches": "a monster's shot rolling its own dice again"
     },
     {
       "file": "src/MonsterAttacker.cpp",
-      "original": "weapon_hit_modifier(missileWeapon),\n\t\t\tmissileWeapon->get_name(),\n\t\t\tkind,\n\t\t\tctx);",
-      "mutated": "weapon_hit_modifier(missileWeapon),owner.get_attack_name(),\n\t\t\tkind,\n\t\t\tctx);",
+      "original": "\tweapon_hit_modifier(missileWeapon),\n\t\t\t\tmissileWeapon->get_name(),\n\t\t\t\tkind,\n\t\t\t\tctx);",
+      "mutated": "\tweapon_hit_modifier(missileWeapon),owner.get_attack_name(),\n\t\t\t\tkind,\n\t\t\t\tctx);",
       "catches": "a monster's shot named for its fist"
     },
     {
       "file": "src/MonsterAttacker.cpp",
-      "original": "\treturn perform_single_attack(\n\t\towner,\n\t\ttarget,\n\t\tget_damage_info(),\n\t\t0,\n\t\towner.get_attack_name(),\n\t\tkind,\n\t\tctx);",
-      "mutated": "\treturn perform_single_attack(\n\t\towner,\n\t\ttarget,weapon_damage(owner.get_equipped_item(EquipmentSlot::RIGHT_HAND)),\n\t\t0,\n\t\towner.get_attack_name(),\n\t\tkind,\n\t\tctx);",
+      "original": "\t\treturn perform_single_attack(\n\t\t\towner,\n\t\t\ttarget,\n\t\t\tget_damage_info(),\n\t\t\t0,\n\t\t\towner.get_attack_name(),\n\t\t\tkind,\n\t\t\tctx);",
+      "mutated": "\t\treturn perform_single_attack(\n\t\t\towner,\n\t\t\ttarget,weapon_damage(owner.get_equipped_item(EquipmentSlot::RIGHT_HAND)),\n\t\t\t0,\n\t\t\towner.get_attack_name(),\n\t\t\tkind,\n\t\t\tctx);",
       "catches": "a monster's melee strike changed to its weapon's dice, which is 0318's question"
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\t\tconst ItemEnhancement* enhancement =\n\t\t\tweapon->is_enhanced() ? &weapon->get_enhancement() : nullptr;\n\t\treturn WeaponDamageRegistry::get_enhanced_damage_info(\n\t\t\tweapon->itemKey,\n\t\t\tenhancement);",
-      "mutated": "\t\treturn WeaponDamageRegistry::get_damage_info(weapon->itemKey);",
+      "original": "\t\t\tconst ItemEnhancement* enhancement =\n\t\t\t\tweapon->is_enhanced() ? &weapon->get_enhancement() : nullptr;\n\t\t\treturn WeaponDamageRegistry::get_enhanced_damage_info(\n\t\t\t\tweapon->itemKey,\n\t\t\t\tenhancement);",
+      "mutated": "\t\t\treturn WeaponDamageRegistry::get_damage_info(weapon->itemKey);",
       "catches": "an enhanced weapon's damage bonus dropped"
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\treturn enhancement.toHitBonus;\n}",
-      "mutated": "\treturn 0;\n}",
+      "original": "\t\treturn enhancement.toHitBonus;\n\t}",
+      "mutated": "\t\treturn 0;\n\t}",
       "catches": "an enhanced weapon's to-hit bonus dropped"
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\tif (enhancement.blessing == BlessingStatus::CURSED)\n\t{\n\t\treturn -2;\n\t}\n\treturn enhancement.toHitBonus;",
-      "mutated": "\treturn enhancement.toHitBonus;",
+      "original": "\t\tif (enhancement.blessing == BlessingStatus::CURSED)\n\t\t{\n\t\t\treturn -2;\n\t\t}\n\t\treturn enhancement.toHitBonus;",
+      "mutated": "\t\treturn enhancement.toHitBonus;",
       "catches": "a cursed weapon striking at its bonus rather than -2"
     }
   ]

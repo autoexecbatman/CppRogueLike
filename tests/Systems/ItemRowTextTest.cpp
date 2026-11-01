@@ -28,49 +28,51 @@
 namespace CppRL
 {
 
-namespace
-{
-	std::unique_ptr<Item> an_item(int value, int weight)
+	namespace
 	{
-		auto item = std::make_unique<Item>(
-			Vector2D{ 0, 0 },
-			ActorData{ TileRef{}, "thing", ColorPairId::WHITE_BLACK });
-		item->set_value(value);
-		item->enhancement.weight = weight;
-		return item;
+		std::unique_ptr<Item> an_item(int value, int weight)
+		{
+			auto item = std::make_unique<Item>(
+				Vector2D{ 0, 0 },
+				ActorData{ TileRef{}, "thing", ColorPairId::WHITE_BLACK });
+			item->set_value(value);
+			item->enhancement.weight = weight;
+			return item;
+		}
+	} // namespace
+
+	TEST(ItemRowTextTest, SomethingWorthBuyingShowsBothNumbers)
+	{
+		EXPECT_EQ(
+			InventoryActions::value_and_weight(*an_item(5, 15)),
+			" (5 gp, 15 lb)");
 	}
-} // namespace
 
-TEST(ItemRowTextTest, SomethingWorthBuyingShowsBothNumbers)
-{
-	EXPECT_EQ(
-		InventoryActions::value_and_weight(*an_item(5, 15)),
-		" (5 gp, 15 lb)");
-}
+	TEST(ItemRowTextTest, SomethingWorthlessStillShowsItsWeight)
+	{
+		// A corpse is worth nothing and weighs a great deal, and it is exactly
+		// the thing a player needs the weight of.
+		EXPECT_EQ(
+			InventoryActions::value_and_weight(*an_item(0, 8)),
+			" (8 lb)");
+	}
 
-TEST(ItemRowTextTest, SomethingWorthlessStillShowsItsWeight)
-{
-	// A corpse is worth nothing and weighs a great deal, and it is exactly the thing a
-	// player needs the weight of.
-	EXPECT_EQ(InventoryActions::value_and_weight(*an_item(0, 8)), " (8 lb)");
-}
+	TEST(ItemRowTextTest, SomethingWeightlessStillSaysSo)
+	{
+		// Zero is an answer. A blank reads as a row that failed to say.
+		EXPECT_EQ(
+			InventoryActions::value_and_weight(*an_item(2, 0)),
+			" (2 gp, 0 lb)");
+	}
 
-TEST(ItemRowTextTest, SomethingWeightlessStillSaysSo)
-{
-	// Zero is an answer. A blank reads as a row that failed to say.
-	EXPECT_EQ(
-		InventoryActions::value_and_weight(*an_item(2, 0)),
-		" (2 gp, 0 lb)");
-}
+	TEST(ItemRowTextTest, TheTextBeginsWithASpaceSoItAppends)
+	{
+		// Callers append it to a line they have already built; without the
+		// leading space it runs into the item's name.
+		const auto text = InventoryActions::value_and_weight(*an_item(1, 1));
 
-TEST(ItemRowTextTest, TheTextBeginsWithASpaceSoItAppends)
-{
-	// Callers append it to a line they have already built; without the leading space it
-	// runs into the item's name.
-	const auto text = InventoryActions::value_and_weight(*an_item(1, 1));
-
-	ASSERT_FALSE(text.empty());
-	EXPECT_EQ(text.front(), ' ');
-}
+		ASSERT_FALSE(text.empty());
+		EXPECT_EQ(text.front(), ' ');
+	}
 
 } // namespace CppRL

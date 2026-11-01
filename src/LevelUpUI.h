@@ -5,19 +5,19 @@
 namespace CppRL
 {
 
-class Player;
-struct GameContext;
+	class Player;
+	struct GameContext;
 
-class LevelUpUI : public BaseMenu
-{
-private:
-	Player& playerRef;
-	int level{};
+	class LevelUpUI : public BaseMenu
+	{
+	private:
+		Player& playerRef;
+		int level{};
 
-public:
-	LevelUpUI(Player& player, int newLevel);
+	public:
+		LevelUpUI(Player& player, int newLevel);
 
-	void menu(GameContext& ctx) override;
-};
+		void menu(GameContext& ctx) override;
+	};
 
 } // namespace CppRL

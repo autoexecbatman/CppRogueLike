@@ -20,43 +20,44 @@
 namespace CppRL
 {
 
-namespace
-{
-	void expect_row(int roll, std::array<int, 6> printed)
+	namespace
 	{
-		for (
-			std::size_t column = 0; column < ALL_CREATURE_SIZE.size(); ++column)
+		void expect_row(int roll, std::array<int, 6> printed)
 		{
-			const auto read =
-				monster_dexterity_score(roll, ALL_CREATURE_SIZE.at(column));
-			EXPECT_EQ(read, printed.at(column))
-				<< "roll " << roll << ", "
-				<< encode_creature_size(ALL_CREATURE_SIZE.at(column));
+			for (
+				std::size_t column = 0; column < ALL_CREATURE_SIZE.size();
+				++column)
+			{
+				const auto read =
+					monster_dexterity_score(roll, ALL_CREATURE_SIZE.at(column));
+				EXPECT_EQ(read, printed.at(column))
+					<< "roll " << roll << ", "
+					<< encode_creature_size(ALL_CREATURE_SIZE.at(column));
+			}
 		}
-	}
-} // namespace
+	} // namespace
 
-// Every row the book prints, 3 to 18, with 9 to 12 as one row.
-TEST(MonsterDexterityTableTest, EveryPrintedRowIsTheBooks)
-{
-	expect_row(3, { { 13, 11, 9, 7, 5, 3 } });
-	expect_row(4, { { 14, 12, 10, 8, 6, 4 } });
-	expect_row(5, { { 15, 13, 11, 9, 7, 5 } });
-	expect_row(6, { { 16, 14, 12, 10, 8, 6 } });
-	expect_row(7, { { 17, 15, 13, 11, 9, 7 } });
-	expect_row(8, { { 18, 16, 14, 12, 10, 8 } });
-	for (int roll = 9; roll <= 12; ++roll)
+	// Every row the book prints, 3 to 18, with 9 to 12 as one row.
+	TEST(MonsterDexterityTableTest, EveryPrintedRowIsTheBooks)
 	{
-		expect_row(roll, { { 19, 17, 15, 13, 11, 9 } });
+		expect_row(3, { { 13, 11, 9, 7, 5, 3 } });
+		expect_row(4, { { 14, 12, 10, 8, 6, 4 } });
+		expect_row(5, { { 15, 13, 11, 9, 7, 5 } });
+		expect_row(6, { { 16, 14, 12, 10, 8, 6 } });
+		expect_row(7, { { 17, 15, 13, 11, 9, 7 } });
+		expect_row(8, { { 18, 16, 14, 12, 10, 8 } });
+		for (int roll = 9; roll <= 12; ++roll)
+		{
+			expect_row(roll, { { 19, 17, 15, 13, 11, 9 } });
+		}
+		expect_row(13, { { 20, 18, 16, 14, 12, 10 } });
+		expect_row(14, { { 21, 19, 17, 15, 13, 11 } });
+		expect_row(15, { { 22, 20, 18, 16, 14, 12 } });
+		expect_row(16, { { 23, 21, 19, 17, 15, 13 } });
+		expect_row(17, { { 24, 22, 20, 18, 16, 14 } });
+		expect_row(18, { { 25, 23, 21, 19, 17, 15 } });
 	}
-	expect_row(13, { { 20, 18, 16, 14, 12, 10 } });
-	expect_row(14, { { 21, 19, 17, 15, 13, 11 } });
-	expect_row(15, { { 22, 20, 18, 16, 14, 12 } });
-	expect_row(16, { { 23, 21, 19, 17, 15, 13 } });
-	expect_row(17, { { 24, 22, 20, 18, 16, 14 } });
-	expect_row(18, { { 25, 23, 21, 19, 17, 15 } });
-}
 
-// end of file: MonsterDexterityTableTest.cpp
+	// end of file: MonsterDexterityTableTest.cpp
 
 } // namespace CppRL

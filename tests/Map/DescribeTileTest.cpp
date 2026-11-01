@@ -21,44 +21,46 @@
 namespace CppRL
 {
 
-class DescribeTileTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	class DescribeTileTest : public ::testing::Test
 	{
-		ctx = mock.to_game_context();
-		map.init_tiles();
+	protected:
+		void SetUp() override
+		{
+			ctx = mock.to_game_context();
+			map.init_tiles();
+		}
+
+		// The message system keeps only the latest message, so a silent call
+		// leaves whatever was there before.
+		std::string message_after(TileType tileType)
+		{
+			mock.messages.message(
+				ColorPairId::WHITE_BLACK,
+				"sentinel",
+				MessageCompletion::FINISHED);
+			map.describe_tile(tileType, ctx);
+			return mock.messages.get_current_message();
+		}
+
+		MockGameContext mock{};
+		GameContext ctx{};
+		Map map{ 20, 20 };
+	};
+
+	// Water is the one tile worth remarking on.
+	TEST_F(DescribeTileTest, WaterIsAnnounced)
+	{
+		EXPECT_NE(
+			message_after(TileType::WATER).find("water"),
+			std::string::npos);
 	}
 
-	// The message system keeps only the latest message, so a silent call leaves
-	// whatever was there before.
-	std::string message_after(TileType tileType)
+	// Ordinary ground says nothing, so walking does not spam the log.
+	TEST_F(DescribeTileTest, OrdinaryGroundIsSilent)
 	{
-		mock.messages.message(
-			ColorPairId::WHITE_BLACK,
-			"sentinel",
-			MessageCompletion::FINISHED);
-		map.describe_tile(tileType, ctx);
-		return mock.messages.get_current_message();
+		EXPECT_EQ(message_after(TileType::FLOOR), "sentinel");
+		EXPECT_EQ(message_after(TileType::CORRIDOR), "sentinel");
+		EXPECT_EQ(message_after(TileType::OPEN_DOOR), "sentinel");
 	}
-
-	MockGameContext mock{};
-	GameContext ctx{};
-	Map map{ 20, 20 };
-};
-
-// Water is the one tile worth remarking on.
-TEST_F(DescribeTileTest, WaterIsAnnounced)
-{
-	EXPECT_NE(message_after(TileType::WATER).find("water"), std::string::npos);
-}
-
-// Ordinary ground says nothing, so walking does not spam the log.
-TEST_F(DescribeTileTest, OrdinaryGroundIsSilent)
-{
-	EXPECT_EQ(message_after(TileType::FLOOR), "sentinel");
-	EXPECT_EQ(message_after(TileType::CORRIDOR), "sentinel");
-	EXPECT_EQ(message_after(TileType::OPEN_DOOR), "sentinel");
-}
 
 } // namespace CppRL

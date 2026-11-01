@@ -5,12 +5,12 @@
 namespace CppRL
 {
 
-struct Vector2D;
+	struct Vector2D;
 
-class Stairs : public Actor
-{
-public:
-	Stairs(Vector2D position);
-};
+	class Stairs : public Actor
+	{
+	public:
+		Stairs(Vector2D position);
+	};
 
 } // namespace CppRL

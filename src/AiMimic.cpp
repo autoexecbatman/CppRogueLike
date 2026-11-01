@@ -29,503 +29,523 @@
 namespace CppRL
 {
 
-namespace
-{
-
-	// Configuration constants (NOT serialized - same for all mimics)
-	constexpr int DISGUISE_CHANGE_RATE = 200;
-	// Rounds, not 2e turns, between meals; the book's mimic eats no items.
-	constexpr int CONSUMPTION_COOLDOWN_TURNS = 3;
-	// Tiles from the mimic an item may lie and be eaten: its own and adjacent.
-	constexpr int CONSUMPTION_RADIUS = 1;
-	// Most rounds of confusion a reveal casts, however many scrolls were eaten.
-	constexpr int MAX_CONFUSION_DURATION = 5;
-	// Damage reduction at which eating gold stops raising it; no 2e rule.
-	constexpr int MAX_GOLD_DR_BONUS = 2;
-	// Largest die a weapon meal grows the bite to, a side a meal; no 2e rule.
-	constexpr int MAX_WEAPON_DAMAGE = 6;
-	// Damage reduction at which eating armor stops raising it; no 2e rule.
-	constexpr int MAX_ARMOR_DR_BONUS = 3;
-	// Meals after which it takes a greater mimic's name and look; no 2e rule.
-	constexpr int ITEMS_FOR_TRANSFORMATION = 5;
-	// Hit points, maximum and current, one potion or food meal adds.
-	constexpr int HEALTH_BONUS = 1;
-	// Damage reduction one gold or armor meal adds, up to that meal's cap.
-	constexpr int DR_BONUS = 1;
-	// Rounds a scroll meal adds to the reveal's confusion, up to the cap.
-	constexpr int CONFUSION_BONUS = 1;
-
-	// OCP-compliant: data-driven item bonus mapping
-	enum class MimicBonusType
+	namespace
 	{
-		HEALTH,
-		CONFUSION,
-		ATTACK,
-		DEFENSE_GOLD,
-		DEFENSE_ARMOR,
-		NONE
-	};
 
-	const std::unordered_map<ItemClass, MimicBonusType> item_bonus_map = {
-		{ ItemClass::POTION, MimicBonusType::HEALTH },
-		{ ItemClass::FOOD, MimicBonusType::HEALTH },
-		{ ItemClass::SCROLL, MimicBonusType::CONFUSION },
-		{ ItemClass::GOLD_COIN, MimicBonusType::DEFENSE_GOLD },
-		{ ItemClass::ARMOR, MimicBonusType::DEFENSE_ARMOR },
-		{ ItemClass::DAGGER, MimicBonusType::ATTACK },
-		{ ItemClass::SWORD, MimicBonusType::ATTACK },
-		{ ItemClass::GREAT_SWORD, MimicBonusType::ATTACK },
-		{ ItemClass::AXE, MimicBonusType::ATTACK },
-		{ ItemClass::HAMMER, MimicBonusType::ATTACK },
-		{ ItemClass::MACE, MimicBonusType::ATTACK },
-		{ ItemClass::STAFF, MimicBonusType::ATTACK },
-		{ ItemClass::BOW, MimicBonusType::ATTACK },
-		{ ItemClass::CROSSBOW, MimicBonusType::ATTACK },
-		{ ItemClass::SLING, MimicBonusType::ATTACK },
-	};
+		// Configuration constants (NOT serialized - same for all mimics)
+		constexpr int DISGUISE_CHANGE_RATE = 200;
+		// Rounds, not 2e turns, between meals; the book's mimic eats no items.
+		constexpr int CONSUMPTION_COOLDOWN_TURNS = 3;
+		// Tiles from the mimic an item may lie and be eaten: its own and
+		// adjacent.
+		constexpr int CONSUMPTION_RADIUS = 1;
+		// Most rounds of confusion a reveal casts, however many scrolls were
+		// eaten.
+		constexpr int MAX_CONFUSION_DURATION = 5;
+		// Damage reduction at which eating gold stops raising it; no 2e rule.
+		constexpr int MAX_GOLD_DR_BONUS = 2;
+		// Largest die a weapon meal grows the bite to, a side a meal; no 2e
+		// rule.
+		constexpr int MAX_WEAPON_DAMAGE = 6;
+		// Damage reduction at which eating armor stops raising it; no 2e rule.
+		constexpr int MAX_ARMOR_DR_BONUS = 3;
+		// Meals after which it takes a greater mimic's name and look; no 2e
+		// rule.
+		constexpr int ITEMS_FOR_TRANSFORMATION = 5;
+		// Hit points, maximum and current, one potion or food meal adds.
+		constexpr int HEALTH_BONUS = 1;
+		// Damage reduction one gold or armor meal adds, up to that meal's cap.
+		constexpr int DR_BONUS = 1;
+		// Rounds a scroll meal adds to the reveal's confusion, up to the cap.
+		constexpr int CONFUSION_BONUS = 1;
 
-} // namespace
+		// OCP-compliant: data-driven item bonus mapping
+		enum class MimicBonusType
+		{
+			HEALTH,
+			CONFUSION,
+			ATTACK,
+			DEFENSE_GOLD,
+			DEFENSE_ARMOR,
+			NONE
+		};
 
-// Single source of truth: which item appearances a mimic can adopt.
-// Called by on_created when a mimic is built, and as lazy init after load.
-std::vector<Disguise> Appearance::build_mimic_list(
-	ContentRegistry& tiles,
-	const ItemRegistry& items)
-{
-	auto from_item = [&tiles, &items](std::string_view key) -> Disguise
+		const std::unordered_map<ItemClass, MimicBonusType> item_bonus_map = {
+			{ ItemClass::POTION, MimicBonusType::HEALTH },
+			{ ItemClass::FOOD, MimicBonusType::HEALTH },
+			{ ItemClass::SCROLL, MimicBonusType::CONFUSION },
+			{ ItemClass::GOLD_COIN, MimicBonusType::DEFENSE_GOLD },
+			{ ItemClass::ARMOR, MimicBonusType::DEFENSE_ARMOR },
+			{ ItemClass::DAGGER, MimicBonusType::ATTACK },
+			{ ItemClass::SWORD, MimicBonusType::ATTACK },
+			{ ItemClass::GREAT_SWORD, MimicBonusType::ATTACK },
+			{ ItemClass::AXE, MimicBonusType::ATTACK },
+			{ ItemClass::HAMMER, MimicBonusType::ATTACK },
+			{ ItemClass::MACE, MimicBonusType::ATTACK },
+			{ ItemClass::STAFF, MimicBonusType::ATTACK },
+			{ ItemClass::BOW, MimicBonusType::ATTACK },
+			{ ItemClass::CROSSBOW, MimicBonusType::ATTACK },
+			{ ItemClass::SLING, MimicBonusType::ATTACK },
+		};
+
+	} // namespace
+
+	// Single source of truth: which item appearances a mimic can adopt.
+	// Called by on_created when a mimic is built, and as lazy init after load.
+	std::vector<Disguise> Appearance::build_mimic_list(
+		ContentRegistry& tiles,
+		const ItemRegistry& items)
 	{
-		const ItemParams& params = items.get_params(key);
-		return { tiles.get_tile(key), std::string(params.name), params.color };
-	};
+		auto from_item = [&tiles, &items](std::string_view key) -> Disguise
+		{
+			const ItemParams& params = items.get_params(key);
+			return {
+				tiles.get_tile(key),
+				std::string(params.name),
+				params.color,
+			};
+		};
 
-	return {
-		from_item("gold_coin"),
-		from_item("health_potion"),
-		from_item("scroll_lightning"),
-		from_item("short_sword"),
-		from_item("food_ration"),
-	};
-}
+		return {
+			from_item("gold_coin"),
+			from_item("health_potion"),
+			from_item("scroll_lightning"),
+			from_item("short_sword"),
+			from_item("food_ration"),
+		};
+	}
 
-void AiMimic::on_created(Creature& owner, GameContext& ctx)
-{
-	assert(
-		ctx.contentRegistry &&
-		"AiMimic::on_created: called without a contentRegistry");
-	assert(
-		ctx.itemRegistry &&
-		"AiMimic::on_created: called without an itemRegistry");
-
-	possibleDisguises =
-		Appearance::build_mimic_list(*ctx.contentRegistry, *ctx.itemRegistry);
-	assert(
-		!possibleDisguises.empty() &&
-		"AiMimic: a mimic was built with no appearance to wear");
-
-	// A new mimic is disguised, so this dresses it in its first appearance.
-	change_disguise(owner, ctx);
-}
-
-void AiMimic::update(Creature& owner, GameContext& ctx)
-{
-	assert(
-		ctx.contentRegistry &&
-		"AiMimic::update: called without a contentRegistry");
-	assert(
-		ctx.itemRegistry && "AiMimic::update: called without an itemRegistry");
-
-	// Lazy init after load: possibleDisguises is empty when created via Ai::create().
-	if (possibleDisguises.empty())
+	void AiMimic::on_created(Creature& owner, GameContext& ctx)
 	{
+		assert(
+			ctx.contentRegistry &&
+			"AiMimic::on_created: called without a contentRegistry");
+		assert(
+			ctx.itemRegistry &&
+			"AiMimic::on_created: called without an itemRegistry");
+
 		possibleDisguises = Appearance::build_mimic_list(
 			*ctx.contentRegistry,
 			*ctx.itemRegistry);
 		assert(
 			!possibleDisguises.empty() &&
-			"AiMimic::update: the loaded mimic was given no appearance to wear");
+			"AiMimic: a mimic was built with no appearance to wear");
+
+		// A new mimic is disguised, so this dresses it in its first appearance.
+		change_disguise(owner, ctx);
 	}
 
-	if (owner.is_dead())
+	void AiMimic::update(Creature& owner, GameContext& ctx)
 	{
-		return;
-	}
+		assert(
+			ctx.contentRegistry &&
+			"AiMimic::update: called without a contentRegistry");
+		assert(
+			ctx.itemRegistry &&
+			"AiMimic::update: called without an itemRegistry");
 
-	if (isDisguised)
-	{
-		const int currentTime = ctx.gameState->get_time();
-
-		// A mimic taking its first turn books a change a full rate away and keeps the
-		// appearance it was built with until then.
-		if (!disguiseChangeTime.has_value())
+		// Lazy init after load: possibleDisguises is empty when created via
+		// Ai::create().
+		if (possibleDisguises.empty())
 		{
-			disguiseChangeTime = expiry_time(currentTime, DISGUISE_CHANGE_RATE);
-		}
-		else if (currentTime >= *disguiseChangeTime)
-		{
-			change_disguise(owner, ctx);
-			disguiseChangeTime = expiry_time(currentTime, DISGUISE_CHANGE_RATE);
-			ctx.messageSystem->log("Mimic changed disguise");
-		}
-
-		check_revealing(owner, ctx);
-	}
-	else
-	{
-		const bool itemConsumed = consume_nearby_items(owner, ctx);
-
-		if (!itemConsumed)
-		{
-			AiMonster::update(owner, ctx);
-		}
-	}
-}
-
-[[nodiscard]] bool AiMimic::consume_nearby_items(
-	Creature& owner,
-	GameContext& ctx)
-{
-	if (isDisguised || owner.is_dead())
-	{
-		return false;
-	}
-
-	if (ctx.gameState->get_time() < consumptionReadyTime)
-	{
-		return false;
-	}
-	consumptionReadyTime =
-		expiry_time(ctx.gameState->get_time(), CONSUMPTION_COOLDOWN_TURNS);
-
-	if (ctx.floorInventory->items.empty())
-	{
-		return false;
-	}
-
-	ctx.messageSystem->log(
-		std::format(
-			"Checking for items. Inventory size: {}",
-			ctx.floorInventory->items.size()));
-
-	std::vector<size_t> itemsToRemove;
-	bool itemConsumed = false;
-
-	for (
-		size_t itemIndex = 0; itemIndex < ctx.floorInventory->items.size();
-		++itemIndex)
-	{
-		const auto& item = ctx.floorInventory->items[itemIndex];
-		if (!item)
-		{
-			continue;
-		}
-
-		const int itemDistance = owner.get_tile_distance(item->position);
-		ctx.messageSystem->log(
-			std::format(
-				"Item at distance {}: {}",
-				itemDistance,
-				item->get_name()));
-
-		if (itemDistance <= CONSUMPTION_RADIUS)
-		{
-			if (!item->behavior)
-			{
-				ctx.messageSystem->log(
-					std::format(
-						"Mimic found non-pickable item, skipping: {}",
-						item->get_name()));
-				continue;
-			}
-
-			ctx.messageSystem->append_message_part(
-				ColorPairId::RED_YELLOW,
-				"The mimic ");
-			ctx.messageSystem->append_message_part(
-				ColorPairId::WHITE_BLACK,
-				"consumes the ");
-			ctx.messageSystem->append_message_part(
-				item->actorData.color,
-				item->get_name());
-			ctx.messageSystem->append_message_part(
-				ColorPairId::WHITE_BLACK,
-				"!");
-			ctx.messageSystem->finalize_message();
-
-			ctx.messageSystem->log(
-				std::format("Mimic consuming item: {}", item->get_name()));
-
-			++itemsConsumed;
-			apply_item_bonus(owner, item->itemClass, ctx);
-
-			if (itemsConsumed >= ITEMS_FOR_TRANSFORMATION)
-			{
-				transform_to_greater_mimic(owner, ctx);
-			}
-
-			itemsToRemove.push_back(itemIndex);
-			itemConsumed = true;
-			break;
-		}
-	}
-
-	for (size_t index : std::views::reverse(itemsToRemove))
-	{
-		ctx.messageSystem->log(
-			std::format("Removing consumed item at index {}", index));
-
-		if (index < ctx.floorInventory->items.size() &&
-			ctx.floorInventory->items[index])
-		{
-			[[maybe_unused]] const auto removeLureResult =
-				InventoryOperations::remove_item_at(*ctx.floorInventory, index);
+			possibleDisguises = Appearance::build_mimic_list(
+				*ctx.contentRegistry,
+				*ctx.itemRegistry);
 			assert(
-				removeLureResult.has_value() &&
-				"AiMimic::update: the lure checked on the floor could not be taken from it");
+				!possibleDisguises.empty() &&
+				"AiMimic::update: the loaded mimic was given no appearance to wear");
 		}
-	}
 
-	return itemConsumed;
-}
-
-void AiMimic::apply_item_bonus(
-	Creature& owner,
-	ItemClass itemClass,
-	GameContext& ctx)
-{
-	if (!item_bonus_map.contains(itemClass))
-	{
-		return;
-	}
-
-	const MimicBonusType bonusType = item_bonus_map.at(itemClass);
-
-	switch (bonusType)
-	{
-
-	case MimicBonusType::HEALTH:
-	{
-		boost_health(owner, HEALTH_BONUS, ctx);
-		ctx.messageSystem->log(std::format("Mimic gained {} HP", HEALTH_BONUS));
-		break;
-	}
-
-	case MimicBonusType::CONFUSION:
-	{
-		boost_confusion_power(ctx);
-		break;
-	}
-
-	case MimicBonusType::DEFENSE_GOLD:
-	{
-		boost_defense(owner, DR_BONUS, MAX_GOLD_DR_BONUS);
-		if (owner.get_dr() <= MAX_GOLD_DR_BONUS)
+		if (owner.is_dead())
 		{
-			ctx.messageSystem->log(
-				std::format("Mimic gained {} DR from gold", DR_BONUS));
+			return;
 		}
-		break;
-	}
 
-	case MimicBonusType::DEFENSE_ARMOR:
-	{
-		boost_defense(owner, DR_BONUS, MAX_ARMOR_DR_BONUS);
-		if (owner.get_dr() <= MAX_ARMOR_DR_BONUS)
+		if (isDisguised)
 		{
-			ctx.messageSystem->log(
-				std::format("Mimic gained {} DR from armor", DR_BONUS));
-		}
-		break;
-	}
+			const int currentTime = ctx.gameState->get_time();
 
-	case MimicBonusType::ATTACK:
-	{
-		boost_attack(owner, ctx);
-		break;
-	}
+			// A mimic taking its first turn books a change a full rate away and
+			// keeps the appearance it was built with until then.
+			if (!disguiseChangeTime.has_value())
+			{
+				disguiseChangeTime =
+					expiry_time(currentTime, DISGUISE_CHANGE_RATE);
+			}
+			else if (currentTime >= *disguiseChangeTime)
+			{
+				change_disguise(owner, ctx);
+				disguiseChangeTime =
+					expiry_time(currentTime, DISGUISE_CHANGE_RATE);
+				ctx.messageSystem->log("Mimic changed disguise");
+			}
 
-	case MimicBonusType::NONE:
-	{
-		break;
-	}
-	}
-}
-
-void AiMimic::boost_health(Creature& owner, int amount, GameContext& ctx)
-{
-	owner.set_max_hp(owner.get_max_hp() + amount);
-	const int newCurrentHp =
-		std::min(owner.get_hp() + amount, owner.get_max_hp());
-	owner.set_hp(newCurrentHp);
-	ctx.messageSystem->log(
-		std::format("Mimic gained {} health from food", amount));
-}
-
-void AiMimic::boost_defense(Creature& owner, int amount, int maxDR)
-{
-	const int currentDR = owner.get_dr();
-	if (currentDR < maxDR)
-	{
-		owner.set_dr(currentDR + amount);
-	}
-}
-
-void AiMimic::boost_attack(Creature& owner, GameContext& ctx)
-{
-	const auto& currentDamage = owner.attacker->get_damage_info();
-	if (currentDamage.maxDamage < MAX_WEAPON_DAMAGE)
-	{
-		const int newMaxDamage =
-			std::min(currentDamage.maxDamage + 1, MAX_WEAPON_DAMAGE);
-		// One die, a side larger; the type it deals is kept.
-		const DamageInfo improvedDamage(
-			std::format("1d{}", newMaxDamage),
-			currentDamage.damageType);
-		owner.attacker->set_damage_info(improvedDamage);
-		ctx.messageSystem->log(
-			std::format(
-				"Mimic improved attack to {}",
-				improvedDamage.displayRoll));
-	}
-}
-
-void AiMimic::boost_confusion_power(GameContext& ctx)
-{
-	confusionDuration =
-		std::min(confusionDuration + CONFUSION_BONUS, MAX_CONFUSION_DURATION);
-	ctx.messageSystem->log(
-		std::format(
-			"Mimic increased confusion duration to {}",
-			Wording::rounds(confusionDuration)));
-}
-
-void AiMimic::transform_to_greater_mimic(Creature& owner, GameContext& ctx)
-{
-	assert(
-		ctx.monsterRegistry &&
-		"AiMimic::transform_to_greater_mimic: called without a monsterRegistry");
-
-	owner.actorData.tile = ctx.monsterRegistry->get_tile(MonsterId::MIMIC);
-	owner.actorData.color = ColorPairId::RED_YELLOW;
-	owner.actorData.name = "greater mimic";
-	ctx.messageSystem->log("Mimic transformed into greater mimic");
-}
-
-void AiMimic::check_revealing(Creature& owner, GameContext& ctx)
-{
-	assert(
-		ctx.monsterRegistry &&
-		"AiMimic::check_revealing: called without a monsterRegistry");
-	assert(ctx.dice && "AiMimic::check_revealing: called without dice");
-
-	int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
-	ctx.messageSystem->log(
-		"Mimic distance to player: " + std::to_string(distanceToPlayer));
-
-	if (distanceToPlayer <= revealDistance)
-	{
-		isDisguised = false;
-
-		// The first meal is a cooldown away from the reveal, which is the first moment a
-		// mimic can eat at all.
-		consumptionReadyTime =
-			expiry_time(ctx.gameState->get_time(), CONSUMPTION_COOLDOWN_TURNS);
-
-		owner.actorData.tile = ctx.monsterRegistry->get_tile(MonsterId::MIMIC);
-		owner.actorData.name = "mimic";
-		owner.actorData.color = ColorPairId::RED_YELLOW;
-		owner.add_state(ActorState::BLOCKS);
-
-		ctx.messageSystem->log("Mimic revealed itself!");
-
-		if (ctx.dice->d20() > ctx.player()->get_wisdom())
-		{
-			ctx.messageSystem->append_message_part(
-				ColorPairId::WHITE_GREEN,
-				"The ");
-			ctx.messageSystem->append_message_part(
-				ColorPairId::RED_YELLOW,
-				"mimic");
-			ctx.messageSystem->append_message_part(
-				ColorPairId::WHITE_GREEN,
-				" reveals itself and confuses you!");
-			ctx.messageSystem->finalize_message();
-
-			ctx.player()->apply_confusion(
-				confusionDuration,
-				ctx.gameState->get_time());
-			ctx.messageSystem->log(
-				std::format(
-					"Applied confusion to player for {}",
-					Wording::rounds(confusionDuration)));
+			check_revealing(owner, ctx);
 		}
 		else
 		{
-			ctx.messageSystem->append_message_part(
-				ColorPairId::RED_YELLOW,
-				"A mimic");
-			ctx.messageSystem->append_message_part(
-				ColorPairId::WHITE_BLACK,
-				" reveals itself but you resist its confusion!");
-			ctx.messageSystem->finalize_message();
-			ctx.messageSystem->log("Player resisted mimic confusion");
+			const bool itemConsumed = consume_nearby_items(owner, ctx);
+
+			if (!itemConsumed)
+			{
+				AiMonster::update(owner, ctx);
+			}
 		}
 	}
-}
 
-void AiMimic::change_disguise(Creature& owner, GameContext& ctx)
-{
-	assert(ctx.dice && "AiMimic::change_disguise: called without dice");
-
-	if (!isDisguised)
+	[[nodiscard]] bool AiMimic::consume_nearby_items(
+		Creature& owner,
+		GameContext& ctx)
 	{
-		return;
+		if (isDisguised || owner.is_dead())
+		{
+			return false;
+		}
+
+		if (ctx.gameState->get_time() < consumptionReadyTime)
+		{
+			return false;
+		}
+		consumptionReadyTime =
+			expiry_time(ctx.gameState->get_time(), CONSUMPTION_COOLDOWN_TURNS);
+
+		if (ctx.floorInventory->items.empty())
+		{
+			return false;
+		}
+
+		ctx.messageSystem->log(
+			std::format(
+				"Checking for items. Inventory size: {}",
+				ctx.floorInventory->items.size()));
+
+		std::vector<size_t> itemsToRemove;
+		bool itemConsumed = false;
+
+		for (
+			size_t itemIndex = 0; itemIndex < ctx.floorInventory->items.size();
+			++itemIndex)
+		{
+			const auto& item = ctx.floorInventory->items[itemIndex];
+			if (!item)
+			{
+				continue;
+			}
+
+			const int itemDistance = owner.get_tile_distance(item->position);
+			ctx.messageSystem->log(
+				std::format(
+					"Item at distance {}: {}",
+					itemDistance,
+					item->get_name()));
+
+			if (itemDistance <= CONSUMPTION_RADIUS)
+			{
+				if (!item->behavior)
+				{
+					ctx.messageSystem->log(
+						std::format(
+							"Mimic found non-pickable item, skipping: {}",
+							item->get_name()));
+					continue;
+				}
+
+				ctx.messageSystem->append_message_part(
+					ColorPairId::RED_YELLOW,
+					"The mimic ");
+				ctx.messageSystem->append_message_part(
+					ColorPairId::WHITE_BLACK,
+					"consumes the ");
+				ctx.messageSystem->append_message_part(
+					item->actorData.color,
+					item->get_name());
+				ctx.messageSystem->append_message_part(
+					ColorPairId::WHITE_BLACK,
+					"!");
+				ctx.messageSystem->finalize_message();
+
+				ctx.messageSystem->log(
+					std::format("Mimic consuming item: {}", item->get_name()));
+
+				++itemsConsumed;
+				apply_item_bonus(owner, item->itemClass, ctx);
+
+				if (itemsConsumed >= ITEMS_FOR_TRANSFORMATION)
+				{
+					transform_to_greater_mimic(owner, ctx);
+				}
+
+				itemsToRemove.push_back(itemIndex);
+				itemConsumed = true;
+				break;
+			}
+		}
+
+		for (size_t index : std::views::reverse(itemsToRemove))
+		{
+			ctx.messageSystem->log(
+				std::format("Removing consumed item at index {}", index));
+
+			if (index < ctx.floorInventory->items.size() &&
+				ctx.floorInventory->items[index])
+			{
+				[[maybe_unused]] const auto removeLureResult =
+					InventoryOperations::remove_item_at(
+						*ctx.floorInventory,
+						index);
+				assert(
+					removeLureResult.has_value() &&
+					"AiMimic::update: the lure checked on the floor could not be taken from it");
+			}
+		}
+
+		return itemConsumed;
 	}
 
-	// update rebuilt the list before calling, and neither builder leaves it empty.
-	const size_t index =
-		ctx.dice->roll(0, static_cast<int>(possibleDisguises.size()) - 1);
-	const auto& chosen = possibleDisguises.at(index);
-	owner.actorData.tile = chosen.tile;
-	owner.actorData.name = chosen.name;
-	owner.actorData.color = chosen.color;
-
-	owner.remove_state(ActorState::BLOCKS);
-}
-
-void AiMimic::load(const json& source)
-{
-	AiMonster::load(source);
-
-	if (source.contains("disguiseChangeTime"))
+	void AiMimic::apply_item_bonus(
+		Creature& owner,
+		ItemClass itemClass,
+		GameContext& ctx)
 	{
-		disguiseChangeTime = source.at("disguiseChangeTime").get<int>();
+		if (!item_bonus_map.contains(itemClass))
+		{
+			return;
+		}
+
+		const MimicBonusType bonusType = item_bonus_map.at(itemClass);
+
+		switch (bonusType)
+		{
+
+		case MimicBonusType::HEALTH:
+		{
+			boost_health(owner, HEALTH_BONUS, ctx);
+			ctx.messageSystem->log(
+				std::format("Mimic gained {} HP", HEALTH_BONUS));
+			break;
+		}
+
+		case MimicBonusType::CONFUSION:
+		{
+			boost_confusion_power(ctx);
+			break;
+		}
+
+		case MimicBonusType::DEFENSE_GOLD:
+		{
+			boost_defense(owner, DR_BONUS, MAX_GOLD_DR_BONUS);
+			if (owner.get_dr() <= MAX_GOLD_DR_BONUS)
+			{
+				ctx.messageSystem->log(
+					std::format("Mimic gained {} DR from gold", DR_BONUS));
+			}
+			break;
+		}
+
+		case MimicBonusType::DEFENSE_ARMOR:
+		{
+			boost_defense(owner, DR_BONUS, MAX_ARMOR_DR_BONUS);
+			if (owner.get_dr() <= MAX_ARMOR_DR_BONUS)
+			{
+				ctx.messageSystem->log(
+					std::format("Mimic gained {} DR from armor", DR_BONUS));
+			}
+			break;
+		}
+
+		case MimicBonusType::ATTACK:
+		{
+			boost_attack(owner, ctx);
+			break;
+		}
+
+		case MimicBonusType::NONE:
+		{
+			break;
+		}
+		}
 	}
 
-	consumptionReadyTime = source.at("consumptionReadyTime").get<int>();
-	isDisguised = source.at("isDisguised").get<bool>();
-	revealDistance = source.at("revealDistance").get<int>();
-	confusionDuration = source.at("confusionDuration").get<int>();
-	itemsConsumed = source.at("itemsConsumed").get<int>();
-}
-
-void AiMimic::save(json& output)
-{
-	AiMonster::save(output);
-
-	// Override the MONSTER type written by AiMonster::save - we are MIMIC.
-	output["type"] = encode_ai_type(get_ai_type());
-
-	// A mimic with no change booked yet saves nothing for it, so the load path leaves the
-	// optional empty and the next turn books one.
-	if (disguiseChangeTime.has_value())
+	void AiMimic::boost_health(Creature& owner, int amount, GameContext& ctx)
 	{
-		output["disguiseChangeTime"] = *disguiseChangeTime;
+		owner.set_max_hp(owner.get_max_hp() + amount);
+		const int newCurrentHp =
+			std::min(owner.get_hp() + amount, owner.get_max_hp());
+		owner.set_hp(newCurrentHp);
+		ctx.messageSystem->log(
+			std::format("Mimic gained {} health from food", amount));
 	}
-	output["consumptionReadyTime"] = consumptionReadyTime;
-	output["isDisguised"] = isDisguised;
-	output["revealDistance"] = revealDistance;
-	output["confusionDuration"] = confusionDuration;
-	output["itemsConsumed"] = itemsConsumed;
-}
+
+	void AiMimic::boost_defense(Creature& owner, int amount, int maxDR)
+	{
+		const int currentDR = owner.get_dr();
+		if (currentDR < maxDR)
+		{
+			owner.set_dr(currentDR + amount);
+		}
+	}
+
+	void AiMimic::boost_attack(Creature& owner, GameContext& ctx)
+	{
+		const auto& currentDamage = owner.attacker->get_damage_info();
+		if (currentDamage.maxDamage < MAX_WEAPON_DAMAGE)
+		{
+			const int newMaxDamage =
+				std::min(currentDamage.maxDamage + 1, MAX_WEAPON_DAMAGE);
+			// One die, a side larger; the type it deals is kept.
+			const DamageInfo improvedDamage(
+				std::format("1d{}", newMaxDamage),
+				currentDamage.damageType);
+			owner.attacker->set_damage_info(improvedDamage);
+			ctx.messageSystem->log(
+				std::format(
+					"Mimic improved attack to {}",
+					improvedDamage.displayRoll));
+		}
+	}
+
+	void AiMimic::boost_confusion_power(GameContext& ctx)
+	{
+		confusionDuration = std::min(
+			confusionDuration + CONFUSION_BONUS,
+			MAX_CONFUSION_DURATION);
+		ctx.messageSystem->log(
+			std::format(
+				"Mimic increased confusion duration to {}",
+				Wording::rounds(confusionDuration)));
+	}
+
+	void AiMimic::transform_to_greater_mimic(Creature& owner, GameContext& ctx)
+	{
+		assert(
+			ctx.monsterRegistry &&
+			"AiMimic::transform_to_greater_mimic: called without a monsterRegistry");
+
+		owner.actorData.tile = ctx.monsterRegistry->get_tile(MonsterId::MIMIC);
+		owner.actorData.color = ColorPairId::RED_YELLOW;
+		owner.actorData.name = "greater mimic";
+		ctx.messageSystem->log("Mimic transformed into greater mimic");
+	}
+
+	void AiMimic::check_revealing(Creature& owner, GameContext& ctx)
+	{
+		assert(
+			ctx.monsterRegistry &&
+			"AiMimic::check_revealing: called without a monsterRegistry");
+		assert(ctx.dice && "AiMimic::check_revealing: called without dice");
+
+		int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
+		ctx.messageSystem->log(
+			"Mimic distance to player: " + std::to_string(distanceToPlayer));
+
+		if (distanceToPlayer <= revealDistance)
+		{
+			isDisguised = false;
+
+			// The first meal is a cooldown away from the reveal, which is the
+			// first moment a mimic can eat at all.
+			consumptionReadyTime = expiry_time(
+				ctx.gameState->get_time(),
+				CONSUMPTION_COOLDOWN_TURNS);
+
+			owner.actorData.tile =
+				ctx.monsterRegistry->get_tile(MonsterId::MIMIC);
+			owner.actorData.name = "mimic";
+			owner.actorData.color = ColorPairId::RED_YELLOW;
+			owner.add_state(ActorState::BLOCKS);
+
+			ctx.messageSystem->log("Mimic revealed itself!");
+
+			if (ctx.dice->d20() > ctx.player()->get_wisdom())
+			{
+				ctx.messageSystem->append_message_part(
+					ColorPairId::WHITE_GREEN,
+					"The ");
+				ctx.messageSystem->append_message_part(
+					ColorPairId::RED_YELLOW,
+					"mimic");
+				ctx.messageSystem->append_message_part(
+					ColorPairId::WHITE_GREEN,
+					" reveals itself and confuses you!");
+				ctx.messageSystem->finalize_message();
+
+				ctx.player()->apply_confusion(
+					confusionDuration,
+					ctx.gameState->get_time());
+				ctx.messageSystem->log(
+					std::format(
+						"Applied confusion to player for {}",
+						Wording::rounds(confusionDuration)));
+			}
+			else
+			{
+				ctx.messageSystem->append_message_part(
+					ColorPairId::RED_YELLOW,
+					"A mimic");
+				ctx.messageSystem->append_message_part(
+					ColorPairId::WHITE_BLACK,
+					" reveals itself but you resist its confusion!");
+				ctx.messageSystem->finalize_message();
+				ctx.messageSystem->log("Player resisted mimic confusion");
+			}
+		}
+	}
+
+	void AiMimic::change_disguise(Creature& owner, GameContext& ctx)
+	{
+		assert(ctx.dice && "AiMimic::change_disguise: called without dice");
+
+		if (!isDisguised)
+		{
+			return;
+		}
+
+		// update rebuilt the list before calling, and neither builder leaves it
+		// empty.
+		const size_t index =
+			ctx.dice->roll(0, static_cast<int>(possibleDisguises.size()) - 1);
+		const auto& chosen = possibleDisguises.at(index);
+		owner.actorData.tile = chosen.tile;
+		owner.actorData.name = chosen.name;
+		owner.actorData.color = chosen.color;
+
+		owner.remove_state(ActorState::BLOCKS);
+	}
+
+	void AiMimic::load(const json& source)
+	{
+		AiMonster::load(source);
+
+		if (source.contains("disguiseChangeTime"))
+		{
+			disguiseChangeTime = source.at("disguiseChangeTime").get<int>();
+		}
+
+		consumptionReadyTime = source.at("consumptionReadyTime").get<int>();
+		isDisguised = source.at("isDisguised").get<bool>();
+		revealDistance = source.at("revealDistance").get<int>();
+		confusionDuration = source.at("confusionDuration").get<int>();
+		itemsConsumed = source.at("itemsConsumed").get<int>();
+	}
+
+	void AiMimic::save(json& output)
+	{
+		AiMonster::save(output);
+
+		// Override the MONSTER type written by AiMonster::save - we are MIMIC.
+		output["type"] = encode_ai_type(get_ai_type());
+
+		// A mimic with no change booked yet saves nothing for it, so the load
+		// path leaves the optional empty and the next turn books one.
+		if (disguiseChangeTime.has_value())
+		{
+			output["disguiseChangeTime"] = *disguiseChangeTime;
+		}
+		output["consumptionReadyTime"] = consumptionReadyTime;
+		output["isDisguised"] = isDisguised;
+		output["revealDistance"] = revealDistance;
+		output["confusionDuration"] = confusionDuration;
+		output["itemsConsumed"] = itemsConsumed;
+	}
 
 } // namespace CppRL

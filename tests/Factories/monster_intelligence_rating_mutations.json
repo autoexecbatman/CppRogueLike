@@ -45,13 +45,13 @@
     },
     {
       "file": "src/MonsterRegistry.cpp",
-      "original": "params.intelligence = parse_intelligence_rating(\n\t\t\tentry.at(\"intelligence\").get<std::string>());",
-      "mutated": "\t\tparams.intelligence =IntelligenceRating::AVERAGE;",
+      "original": "\tparams.intelligence = parse_intelligence_rating(\n\t\t\t\tentry.at(\"intelligence\").get<std::string>());",
+      "mutated": "\t\t\tparams.intelligence =IntelligenceRating::AVERAGE;",
       "catches": "the rating never read from the record, every monster Average"
     },
     {
       "file": "src/MonsterRegistry.cpp",
-      "original": "\t\t{ \"intelligence\", encode_intelligence_rating(params.intelligence) },\n",
+      "original": "\t\t\t\t{\n\t\t\t\t\t\"intelligence\",\n\t\t\t\t\tencode_intelligence_rating(params.intelligence),\n\t\t\t\t},\n",
       "mutated": "",
       "catches": "the rating not written back, so a saved monster cannot load"
     },

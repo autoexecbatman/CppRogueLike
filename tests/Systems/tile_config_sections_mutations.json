@@ -27,8 +27,8 @@
     },
     {
       "file": "src/TileConfig.cpp",
-      "original": "\tfor (const auto& [key, record] : root.at(\"wall_autotile_groups\").items())",
-      "mutated": "\tfor (const auto& [key, record] : root.value(\"wall_autotile_groups\", json::object()).items())",
+      "original": "\t\tfor (\n\t\t\tconst auto& [key, record] : root.at(\"wall_autotile_groups\").items())",
+      "mutated": "\t\tfor (\n\t\t\tconst auto& [key, record] : root.value(\"wall_autotile_groups\", json::object()).items())",
       "catches": "a config without its wall autotile groups loading with that table empty"
     },
     {

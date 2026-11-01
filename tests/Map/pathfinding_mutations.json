@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/Pathfinding.cpp",
-      "original": "\t\tif (!cameFrom[index_of(goal, width)])\n\t\t{\n\t\t\treturn {};\n\t\t}\n",
-      "mutated": "\t\tif (false)\n\t\t{\n\t\t\treturn {};\n\t\t}\n",
+      "original": "\t\t\tif (!cameFrom[index_of(goal, width)])\n\t\t\t{\n\t\t\t\treturn {};\n\t\t\t}\n",
+      "mutated": "\t\t\tif (false)\n\t\t\t{\n\t\t\t\treturn {};\n\t\t\t}\n",
       "catches": "an unreachable goal handed back a route instead of nothing"
     },
     {
@@ -27,19 +27,19 @@
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": "\t\tif (!mobility.contains(tileType))\n\t\t{\n\t\t\treturn std::nullopt;\n\t\t}",
-      "mutated": "\t\tif (false)\n\t\t{\n\t\t\treturn std::nullopt;\n\t\t}",
+      "original": "\t\t\tif (!mobility.contains(tileType))\n\t\t\t{\n\t\t\t\treturn std::nullopt;\n\t\t\t}",
+      "mutated": "\t\t\tif (false)\n\t\t\t{\n\t\t\t\treturn std::nullopt;\n\t\t\t}",
       "catches": "the price ignoring the mover, so water and shut doors open to everyone"
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": "\tif (tileType == TileType::CLOSED_DOOR && map.is_door_locked(position))",
-      "mutated": "\tif (false)",
+      "original": "\t\t\tif (tileType == TileType::CLOSED_DOOR &&\n\t\t\t\tmap.is_door_locked(position))",
+      "mutated": "\t\t\t\tif (false)",
       "catches": "a lock that hands open"
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": "\t\tif (map.find_decoration_at(position, ctx) != nullptr)\n\t\t{\n\t\t\treturn std::nullopt;\n\t\t}",
+      "original": "\t\t\tif (map.find_decoration_at(position, ctx) != nullptr)\n\t\t\t{\n\t\t\t\treturn std::nullopt;\n\t\t\t}",
       "mutated": "",
       "catches": "a barrel walked through"
     },
@@ -51,14 +51,14 @@
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": "\t\tif (creature.has_slot(EquipmentSlot::RIGHT_HAND) ||\n\t\t\tcreature.has_slot(EquipmentSlot::LEFT_HAND))",
-      "mutated": "\t\tif (true)",
+      "original": "\t\t\tif (creature.has_slot(EquipmentSlot::RIGHT_HAND) ||\n\t\t\t\tcreature.has_slot(EquipmentSlot::LEFT_HAND))",
+      "mutated": "\t\t\tif (true)",
       "catches": "a wolf opening doors"
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": "\t\t\tconst bool isBypassed = definition.hasBypassState &&\n\t\t\t\tcreature.has_bypass(definition.bypassState);",
-      "mutated": "\t\t\tconst bool isBypassed = definition.hasBypassState;",
+      "original": "\t\t\t\tconst bool isBypassed = definition.hasBypassState &&\n\t\t\t\t\tcreature.has_bypass(definition.bypassState);",
+      "mutated": "\t\t\t\tconst bool isBypassed = definition.hasBypassState;",
       "catches": "every creature swimming"
     },
     {
@@ -69,31 +69,31 @@
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": "\t\treturn ctx.map->get_tile_type(position) != TileType::CLOSED_DOOR &&\n\t\t\tctx.map->get_actor(position, ctx) == nullptr;",
-      "mutated": "\t\treturn ctx.map->get_actor(position, ctx) == nullptr;",
+      "original": "\t\t\treturn ctx.map->get_tile_type(position) != TileType::CLOSED_DOOR &&\n\t\t\t\tctx.map->get_actor(position, ctx) == nullptr;",
+      "mutated": "\t\t\treturn ctx.map->get_actor(position, ctx) == nullptr;",
       "catches": "a shut door reported as somewhere to stand"
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": "\t\tif (ctx.map->get_tile_type(destination) == TileType::CLOSED_DOOR)\n\t\t{",
-      "mutated": "\t\tif (false)\n\t\t{",
+      "original": "\t\t\tif (ctx.map->get_tile_type(destination) == TileType::CLOSED_DOOR)\n\t\t\t{",
+      "mutated": "\t\t\tif (false)\n\t\t\t{",
       "catches": "a step onto a shut door walking into the door instead of opening it"
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": "||\n\t\t\tctx.map->get_actor(destination, ctx) != nullptr)\n\t\t{\n\t\t\treturn StepResult::REFUSED;",
-      "mutated": ")\n\t\t{\n\t\t\treturn StepResult::REFUSED;",
+      "original": "||\n\t\t\t\tctx.map->get_actor(destination, ctx) != nullptr)\n\t\t\t{\n\t\t\t\treturn StepResult::REFUSED;",
+      "mutated": ")\n\t\t\t{\n\t\t\t\treturn StepResult::REFUSED;",
       "catches": "a step onto a tile another creature stands on"
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": "\tif (enter_features(creature, destination, ctx) == EntryResult::BLOCKED)",
-      "mutated": "\tif (false)",
+      "original": "\t\t\tif (enter_features(creature, destination, ctx) ==\n\t\t\t\tEntryResult::BLOCKED)",
+      "mutated": "\t\t\tif (false)",
       "catches": "a trap that springs and lets the step go on"
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": "&&\n\t\t\tfound->clock == clock",
+      "original": "&&\n\t\t\t\tfound->clock == clock",
       "mutated": "",
       "catches": "a cost map kept after the clock moved, so a door opened last window stays shut in it"
     },
@@ -111,13 +111,13 @@
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": "\t\t\tif (map.get_actor(position, ctx) != nullptr)\n\t\t\t{\n\t\t\t\treturn std::nullopt;\n\t\t\t}",
+      "original": "\t\t\t\tif (map.get_actor(position, ctx) != nullptr)\n\t\t\t\t{\n\t\t\t\t\treturn std::nullopt;\n\t\t\t\t}",
       "mutated": "",
       "catches": "a route that runs straight through a creature"
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": "\t\t\t\tif (map.find_decoration_at(goal, ctx) != nullptr &&\n\t\t\t\t\tmobility.contains(map.get_tile_type(goal)))",
+      "original": "\t\t\t\t\tif (map.find_decoration_at(goal, ctx) != nullptr &&\n\t\t\t\t\t\tmobility.contains(map.get_tile_type(goal)))",
       "mutated": "\t\t\tif (false)",
       "catches": "the walk to a barrel refused, so a click can never break one"
     }

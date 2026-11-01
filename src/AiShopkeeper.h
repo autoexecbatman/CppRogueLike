@@ -6,28 +6,29 @@
 namespace CppRL
 {
 
-class Creature;
-struct GameContext;
+	class Creature;
+	struct GameContext;
 
-class AiShopkeeper : public Ai
-{
-private:
-	void update(Creature& owner, GameContext& ctx) override;
-
-	[[nodiscard]] AiType get_ai_type() const noexcept override
+	class AiShopkeeper : public Ai
 	{
-		return AiType::SHOPKEEPER;
-	}
+	private:
+		void update(Creature& owner, GameContext& ctx) override;
 
-	// Opens its shop, of a kind and quality chosen for the current dungeon level, and
-	// stocks it.
-	//
-	// Example:
-	//   shopkeeper.ai->on_created(shopkeeper, ctx); // shopkeeper.shop is now set
-	void on_created(Creature& owner, GameContext& ctx) override;
+		[[nodiscard]] AiType get_ai_type() const noexcept override
+		{
+			return AiType::SHOPKEEPER;
+		}
 
-	void load(const json& source) override;
-	void save(json& output) override;
-};
+		// Opens its shop, of a kind and quality chosen for the current dungeon
+		// level, and stocks it.
+		//
+		// Example:
+		//   shopkeeper.ai->on_created(shopkeeper, ctx);
+		//   // shopkeeper.shop is now set
+		void on_created(Creature& owner, GameContext& ctx) override;
+
+		void load(const json& source) override;
+		void save(json& output) override;
+	};
 
 } // namespace CppRL

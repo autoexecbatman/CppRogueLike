@@ -39,8 +39,8 @@
         },
         {
             "file": "src/Creature.cpp",
-            "original": "\t\tDamageType::POISON,\n\t\tDamageSource::NO_ATTACKER);",
-            "mutated": "\t\tDamageType::POISON,\n\t\tDamageSource::PLAYER);",
+            "original": "\t\t\tDamageType::POISON,\n\t\t\tDamageSource::NO_ATTACKER);",
+            "mutated": "\t\t\tDamageType::POISON,\n\t\t\tDamageSource::PLAYER);",
             "catches": "a poisoned death paid to the player"
         },
         {
@@ -75,7 +75,7 @@
         },
         {
             "file": "src/SpellSystem.cpp",
-            "original": "burst_fireball(\n\t\t\t\tcenter,\n\t\t\t\tcasterLevel,\n\t\t\t\tFIREBALL_RADIUS,\n\t\t\t\tsource,\n\t\t\t\tctx);",
+            "original": "burst_fireball(\n\t\t\t\t\tcenter,\n\t\t\t\t\tcasterLevel,\n\t\t\t\t\tFIREBALL_RADIUS,\n\t\t\t\t\tsource,\n\t\t\t\t\tctx);",
             "mutated": "\t\t\tburst_fireball(center, casterLevel, FIREBALL_RADIUS, DamageSource::PLAYER, ctx);",
             "catches": "the resolved fireball's source dropped on the way to the burst"
         },
@@ -99,8 +99,8 @@
         },
         {
             "file": "src/Trap.cpp",
-            "original": "\t\tDamageType::PHYSICAL,\n\t\tDamageSource::NO_ATTACKER);",
-            "mutated": "\t\tDamageType::PHYSICAL,\n\t\tDamageSource::PLAYER);",
+            "original": "\t\t\tDamageType::PHYSICAL,\n\t\t\tDamageSource::NO_ATTACKER);",
+            "mutated": "\t\t\tDamageType::PHYSICAL,\n\t\t\tDamageSource::PLAYER);",
             "catches": "a dungeon trap's kill paid to the player"
         },
         {

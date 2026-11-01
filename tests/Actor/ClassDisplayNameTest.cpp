@@ -23,38 +23,41 @@
 namespace CppRL
 {
 
-// Two classes sharing a name would show the player two choices they cannot tell apart.
-TEST(ClassDisplayNameTest, NoTwoClassesShareAName)
-{
-	std::set<std::string> seen;
-	for (const CreatureClass creatureClass : ALL_PLAYER_CLASS)
+	// Two classes sharing a name would show the player two choices they cannot
+	// tell apart.
+	TEST(ClassDisplayNameTest, NoTwoClassesShareAName)
 	{
-		const std::string name{ class_display_name(creatureClass) };
-		EXPECT_TRUE(seen.insert(name).second)
-			<< "'" << name << "' names more than one class";
+		std::set<std::string> seen;
+		for (const CreatureClass creatureClass : ALL_PLAYER_CLASS)
+		{
+			const std::string name{ class_display_name(creatureClass) };
+			EXPECT_TRUE(seen.insert(name).second)
+				<< "'" << name << "' names more than one class";
+		}
 	}
-}
 
-// A class is never nameless: the menu would offer an empty line.
-TEST(ClassDisplayNameTest, NoClassIsNameless)
-{
-	for (const CreatureClass creatureClass : ALL_PLAYER_CLASS)
+	// A class is never nameless: the menu would offer an empty line.
+	TEST(ClassDisplayNameTest, NoClassIsNameless)
 	{
-		EXPECT_FALSE(class_display_name(creatureClass).empty())
-			<< encode_creature_class(creatureClass) << " has no name to offer";
+		for (const CreatureClass creatureClass : ALL_PLAYER_CLASS)
+		{
+			EXPECT_FALSE(class_display_name(creatureClass).empty())
+				<< encode_creature_class(creatureClass)
+				<< " has no name to offer";
+		}
 	}
-}
 
-// The choices are what the menu offers, so a monster's class must not be on the list.
-TEST(ClassDisplayNameTest, AMonsterIsNotOneOfTheChoices)
-{
-	for (const CreatureClass creatureClass : ALL_PLAYER_CLASS)
+	// The choices are what the menu offers, so a monster's class must not be on
+	// the list.
+	TEST(ClassDisplayNameTest, AMonsterIsNotOneOfTheChoices)
 	{
-		EXPECT_NE(creatureClass, CreatureClass::MONSTER)
-			<< "the class menu offers the monster's class";
+		for (const CreatureClass creatureClass : ALL_PLAYER_CLASS)
+		{
+			EXPECT_NE(creatureClass, CreatureClass::MONSTER)
+				<< "the class menu offers the monster's class";
+		}
 	}
-}
 
-// end of file: ClassDisplayNameTest.cpp
+	// end of file: ClassDisplayNameTest.cpp
 
 } // namespace CppRL

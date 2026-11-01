@@ -6,22 +6,22 @@
 namespace CppRL
 {
 
-using json = nlohmann::json;
+	using json = nlohmann::json;
 
-class Persistent
-{
-protected:
-	Persistent() = default;
-	Persistent(const Persistent&) = default;
-	Persistent& operator=(const Persistent&) = default;
-	Persistent(Persistent&&) = default;
-	Persistent& operator=(Persistent&&) = default;
+	class Persistent
+	{
+	protected:
+		Persistent() = default;
+		Persistent(const Persistent&) = default;
+		Persistent& operator=(const Persistent&) = default;
+		Persistent(Persistent&&) = default;
+		Persistent& operator=(Persistent&&) = default;
 
-public:
-	virtual ~Persistent() = default;
+	public:
+		virtual ~Persistent() = default;
 
-	virtual void load(const json& json) = 0;
-	virtual void save(json& json) = 0;
-};
+		virtual void load(const json& json) = 0;
+		virtual void save(json& json) = 0;
+	};
 
 } // namespace CppRL

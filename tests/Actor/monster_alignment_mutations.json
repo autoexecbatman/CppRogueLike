@@ -15,13 +15,13 @@
   "mutations": [
     {
       "file": "src/MonsterRegistry.cpp",
-      "original": "params.ethics =\n\t\t\tAlignment::parse_ethics(entry.at(\"ethics\").get<std::string>());",
-      "mutated": "\t\tparams.ethics = Alignment::parse_ethics(entry.value(\"ethics\", std::string{ \"neutral\" }));",
+      "original": "\tparams.ethics =\n\t\t\t\tAlignment::parse_ethics(entry.at(\"ethics\").get<std::string>());",
+      "mutated": "\t\t\tparams.ethics = Alignment::parse_ethics(entry.value(\"ethics\", std::string{ \"neutral\" }));",
       "catches": "an unfinished record handed the old true-neutral default instead of being refused"
     },
     {
       "file": "src/MonsterRegistry.cpp",
-      "original": "params.morality =\n\t\t\tAlignment::parse_morality(entry.at(\"morality\").get<std::string>());",
+      "original": "params.morality = Alignment::parse_morality(\n\t\t\t\tentry.at(\"morality\").get<std::string>());",
       "mutated": "\t\tparams.morality = Alignment::parse_morality(std::string{ \"neutral\" });",
       "catches": "every monster loading as neutral whatever its record says, which leaves Protection from Evil warding against nothing"
     },

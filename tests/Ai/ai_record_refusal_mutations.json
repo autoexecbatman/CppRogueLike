@@ -81,8 +81,8 @@
     },
     {
       "file": "src/AiMimic.cpp",
-      "original": "\tif (source.contains(\"disguiseChangeTime\"))\n\t{\n\t\tdisguiseChangeTime = source.at(\"disguiseChangeTime\").get<int>();\n\t}",
-      "mutated": "\tdisguiseChangeTime = source.at(\"disguiseChangeTime\").get<int>();",
+      "original": "\t\tif (source.contains(\"disguiseChangeTime\"))\n\t\t{\n\t\t\tdisguiseChangeTime = source.at(\"disguiseChangeTime\").get<int>();\n\t\t}",
+      "mutated": "\t\tdisguiseChangeTime = source.at(\"disguiseChangeTime\").get<int>();",
       "catches": "a mimic that has booked no disguise change refused on load"
     }
   ]

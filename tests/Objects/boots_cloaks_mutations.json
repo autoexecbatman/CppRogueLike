@@ -69,14 +69,14 @@
         },
         {
             "file": "src/InventoryUI.h",
-            "original": "\tItemCategory::GAUNTLETS,\n\tItemCategory::BOOTS,\n",
-            "mutated": "\tItemCategory::GAUNTLETS,\n",
+            "original": "\t\tItemCategory::GAUNTLETS,\n\t\tItemCategory::BOOTS,\n",
+            "mutated": "\t\tItemCategory::GAUNTLETS,\n",
             "catches": "boots given no place in the backpack's order"
         },
         {
             "file": "src/InventoryUI.h",
-            "original": "\tItemCategory::BOOTS,\n\tItemCategory::CLOAK,\n",
-            "mutated": "\tItemCategory::BOOTS,\n",
+            "original": "\t\tItemCategory::BOOTS,\n\t\tItemCategory::CLOAK,\n",
+            "mutated": "\t\tItemCategory::BOOTS,\n",
             "catches": "cloaks given no place in the backpack's order"
         },
         {

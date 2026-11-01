@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/SpellSystem.cpp",
-      "original": "inline constexpr int INVISIBILITY_SPELL_ROUNDS = 24 * ROUNDS_PER_HOUR;",
-      "mutated": "inline constexpr int INVISIBILITY_SPELL_ROUNDS = 20;",
+      "original": "inline constexpr int INVISIBILITY_SPELL_ROUNDS =\n\t\t\t\t24 * ROUNDS_PER_HOUR;",
+      "mutated": "inline constexpr int INVISIBILITY_SPELL_ROUNDS =\n\t\t\t\t20;",
       "catches": "the game's old twenty rounds back in place of the book's day"
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "inline constexpr int INVISIBILITY_SPELL_ROUNDS = 24 * ROUNDS_PER_HOUR;",
-      "mutated": "inline constexpr int INVISIBILITY_SPELL_ROUNDS = 24 * ROUNDS_PER_HOUR + 1;",
+      "original": "inline constexpr int INVISIBILITY_SPELL_ROUNDS =\n\t\t\t\t24 * ROUNDS_PER_HOUR;",
+      "mutated": "inline constexpr int INVISIBILITY_SPELL_ROUNDS =\n\t\t\t\t24 * ROUNDS_PER_HOUR + 1;",
       "catches": "the spell outstaying the day by a round"
     },
     {
@@ -33,14 +33,14 @@
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "ctx.messageSystem->append_message_part(\n\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\"You fade from view.\");",
-      "mutated": "\t\tctx.messageSystem->append_message_part(\n\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\"You fade from view for 20 turns.\");",
+      "original": "\tctx.messageSystem->append_message_part(\n\t\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\t\"You fade from view.\");",
+      "mutated": "\t\t\tctx.messageSystem->append_message_part(\n\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\"You fade from view for 20 turns.\");",
       "catches": "the casting still promising the old twenty"
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "const BuffType granted = source == SpellSource::ITEM ?\n\t\t\t\t\tBuffType::ITEM_INVISIBILITY :\n\t\t\t\t\tBuffType::INVISIBILITY;",
-      "mutated": "\t\t\tconst BuffType granted = source == SpellSource::ITEM ?\n\t\t\t\tBuffType::ITEM_INVISIBILITY :\n\t\t\t\tBuffType::ITEM_INVISIBILITY;\n",
+      "original": "\tconst BuffType granted = source == SpellSource::ITEM ?\n\t\t\t\t\t\tBuffType::ITEM_INVISIBILITY :\n\t\t\t\t\t\tBuffType::INVISIBILITY;",
+      "mutated": "\t\t\t\tconst BuffType granted = source == SpellSource::ITEM ?\n\t\t\t\t\tBuffType::ITEM_INVISIBILITY :\n\t\t\t\t\tBuffType::ITEM_INVISIBILITY;\n",
       "catches": "the wizard's casting from memory granted as an item's, which a ring's removal would end"
     }
   ]

@@ -15,20 +15,20 @@
   "mutations": [
     {
       "file": "src/DamageInfo.h",
-      "original": "\t\treturn DamageInfo{\n\t\t\tDiceExpr{ dice.num, dice.sides, dice.bonus + damage_bonus },\n\t\t\tdamageType\n\t\t};",
-      "mutated": "\t\treturn DamageInfo{\n\t\t\tDiceExpr{ dice.num, dice.sides, damage_bonus },\n\t\t\tdamageType\n\t\t};",
+      "original": "\t\t\treturn DamageInfo{\n\t\t\t\tDiceExpr{ dice.num, dice.sides, dice.bonus + damage_bonus },\n\t\t\t\tdamageType\n\t\t\t};",
+      "mutated": "\t\t\treturn DamageInfo{\n\t\t\t\tDiceExpr{ dice.num, dice.sides, damage_bonus },\n\t\t\t\tdamageType\n\t\t\t};",
       "catches": "a second bonus replacing the first instead of adding to it"
     },
     {
       "file": "src/DamageInfo.h",
-      "original": "\t\treturn DamageInfo{\n\t\t\tDiceExpr{ dice.num, dice.sides, dice.bonus + damage_bonus },\n\t\t\tdamageType\n\t\t};",
-      "mutated": "\t\treturn DamageInfo{\n\t\t\tDiceExpr{ dice.num, dice.sides, dice.bonus- damage_bonus },\n\t\t\tdamageType\n\t\t};",
+      "original": "\t\t\treturn DamageInfo{\n\t\t\t\tDiceExpr{ dice.num, dice.sides, dice.bonus + damage_bonus },\n\t\t\t\tdamageType\n\t\t\t};",
+      "mutated": "\t\t\treturn DamageInfo{\n\t\t\t\tDiceExpr{ dice.num, dice.sides, dice.bonus- damage_bonus },\n\t\t\t\tdamageType\n\t\t\t};",
       "catches": "a bonus applied with the wrong sign"
     },
     {
       "file": "src/DamageInfo.h",
-      "original": "\t\treturn DamageInfo{\n\t\t\tDiceExpr{ dice.num, dice.sides, dice.bonus + damage_bonus },\n\t\t\tdamageType\n\t\t};",
-      "mutated": "\t\treturn DamageInfo{\n\t\t\tDiceExpr{ dice.num, dice.sides, dice.bonus + damage_bonus },DamageType::PHYSICAL\n\t\t};",
+      "original": "\t\t\treturn DamageInfo{\n\t\t\t\tDiceExpr{ dice.num, dice.sides, dice.bonus + damage_bonus },\n\t\t\t\tdamageType\n\t\t\t};",
+      "mutated": "\t\t\treturn DamageInfo{\n\t\t\t\tDiceExpr{ dice.num, dice.sides, dice.bonus + damage_bonus },DamageType::PHYSICAL\n\t\t\t};",
       "catches": "an enhanced fire weapon losing its damage type"
     }
   ]

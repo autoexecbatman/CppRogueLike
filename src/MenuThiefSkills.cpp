@@ -20,272 +20,291 @@
 namespace CppRL
 {
 
-namespace
-{
-	// The box is sized to the viewport rather than fixed: a width in tiles that
-	// fits a 1920 screen puts startX negative on a 1280 one and the left half
-	// is never drawn.
-	constexpr int MENU_MARGIN_TILES = 2;
-	constexpr int MENU_MAX_WIDTH_TILES = 22;
-	constexpr int MENU_HEIGHT_TILES = 8;
-
-	// Text rows are 32 pixels, not a whole 64-pixel tile: the font is 16.
-	constexpr int TEXT_ROW_PITCH = 32;
-	constexpr int TEXT_TOP_INSET = 6;
-
-	// Rows, top to bottom: eight skills, the pool, the status, two hints.
-	constexpr int FIRST_SKILL_ROW = 0;
-	constexpr int POOL_ROW = 8;
-	constexpr int STATUS_ROW = 9;
-	constexpr int FIRST_HINT_ROW = 10;
-} // namespace
-
-ThiefSkillAllocation thief_skill_allocation_for(
-	const Player& character,
-	int level)
-{
-	return ThiefSkillAllocation{
-		character.thiefSkillPoints,
-		thief_skill_grant_at_level(level),
-		thief_skill_racial_adjustments(character.get_race()),
-		character.get_dexterity(),
-		// Armour Table 29 prints no column for adjusts nothing the table can name,
-		// so the points are judged unarmoured rather than being stranded.
-		character.thief_armor().value_or(ThiefArmor::NONE),
-	};
-}
-
-void push_thief_skill_allocation(Player& character, int level, GameContext& ctx)
-{
-	// Only the one class the book gives thief skills to has anything to spend.
-	if (character.get_creature_class() != CreatureClass::ROGUE)
+	namespace
 	{
-		return;
+		// The box is sized to the viewport rather than fixed: a width in tiles
+		// that fits a 1920 screen puts startX negative on a 1280 one and the
+		// left half is never drawn.
+		constexpr int MENU_MARGIN_TILES = 2;
+		constexpr int MENU_MAX_WIDTH_TILES = 22;
+		constexpr int MENU_HEIGHT_TILES = 8;
+
+		// Text rows are 32 pixels, not a whole 64-pixel tile: the font is 16.
+		constexpr int TEXT_ROW_PITCH = 32;
+		constexpr int TEXT_TOP_INSET = 6;
+
+		// Rows, top to bottom: eight skills, the pool, the status, two hints.
+		constexpr int FIRST_SKILL_ROW = 0;
+		constexpr int POOL_ROW = 8;
+		constexpr int STATUS_ROW = 9;
+		constexpr int FIRST_HINT_ROW = 10;
+	} // namespace
+
+	ThiefSkillAllocation thief_skill_allocation_for(
+		const Player& character,
+		int level)
+	{
+		return ThiefSkillAllocation{
+			character.thiefSkillPoints,
+			thief_skill_grant_at_level(level),
+			thief_skill_racial_adjustments(character.get_race()),
+			character.get_dexterity(),
+			// Armour Table 29 prints no column for adjusts nothing the table
+			// can name, so the points are judged unarmoured rather than being
+			// stranded.
+			character.thief_armor().value_or(ThiefArmor::NONE),
+		};
 	}
 
-	// Read now, so the screen shows what the character is wearing at this moment.
-	ThiefSkillAllocation allocation =
-		thief_skill_allocation_for(character, level);
-
-	// Reached through the context's own handle rather than captured, so a screen
-	// still open when the player is replaced writes to whoever the player is then.
-	const auto keep_the_points =
-		[](std::array<int, THIEF_SKILL_COUNT> points, GameContext& context)
+	void push_thief_skill_allocation(
+		Player& character,
+		int level,
+		GameContext& ctx)
 	{
-		context.player_concrete().thiefSkillPoints = points;
-	};
-
-	ctx.menus->push_back(
-		std::make_unique<MenuThiefSkills>(
-			ctx,
-			std::move(allocation),
-			keep_the_points));
-}
-
-ThiefSkillScreenState after_thief_skill_key(
-	GameKey key,
-	ThiefSkillScreenState screen)
-{
-	switch (key)
-	{
-
-	case GameKey::UP:
-	{
-		screen.cursor = previous_thief_skill(screen.cursor);
-		break;
-	}
-
-	case GameKey::DOWN:
-	{
-		screen.cursor = next_thief_skill(screen.cursor);
-		break;
-	}
-
-	case GameKey::RIGHT:
-	{
-		if (screen.allocation.can_assign(screen.cursor))
+		// Only the one class the book gives thief skills to has anything to
+		// spend.
+		if (character.get_creature_class() != CreatureClass::ROGUE)
 		{
-			screen.allocation.assign(screen.cursor);
+			return;
 		}
-		break;
-	}
 
-	case GameKey::LEFT:
-	{
-		if (screen.allocation.can_take_back(screen.cursor))
+		// Read now, so the screen shows what the character is wearing at this
+		// moment.
+		ThiefSkillAllocation allocation =
+			thief_skill_allocation_for(character, level);
+
+		// Reached through the context's own handle rather than captured, so a
+		// screen still open when the player is replaced writes to whoever the
+		// player is then.
+		const auto keep_the_points =
+			[](std::array<int, THIEF_SKILL_COUNT> points, GameContext& context)
 		{
-			screen.allocation.take_back(screen.cursor);
-		}
-		break;
+			context.player_concrete().thiefSkillPoints = points;
+		};
+
+		ctx.menus->push_back(
+			std::make_unique<MenuThiefSkills>(
+				ctx,
+				std::move(allocation),
+				keep_the_points));
 	}
 
-	case GameKey::SPACE:
+	ThiefSkillScreenState after_thief_skill_key(
+		GameKey key,
+		ThiefSkillScreenState screen)
 	{
-		// Sixty points one keypress at a time is sixty keypresses, so one key puts
-		// on as many as the grant, the per-skill limit and the 95 ceiling allow.
-		while (screen.allocation.can_assign(screen.cursor))
+		switch (key)
 		{
-			screen.allocation.assign(screen.cursor);
+
+		case GameKey::UP:
+		{
+			screen.cursor = previous_thief_skill(screen.cursor);
+			break;
 		}
-		break;
+
+		case GameKey::DOWN:
+		{
+			screen.cursor = next_thief_skill(screen.cursor);
+			break;
+		}
+
+		case GameKey::RIGHT:
+		{
+			if (screen.allocation.can_assign(screen.cursor))
+			{
+				screen.allocation.assign(screen.cursor);
+			}
+			break;
+		}
+
+		case GameKey::LEFT:
+		{
+			if (screen.allocation.can_take_back(screen.cursor))
+			{
+				screen.allocation.take_back(screen.cursor);
+			}
+			break;
+		}
+
+		case GameKey::SPACE:
+		{
+			// Sixty points one keypress at a time is sixty keypresses, so one
+			// key puts on as many as the grant, the per-skill limit and the 95
+			// ceiling allow.
+			while (screen.allocation.can_assign(screen.cursor))
+			{
+				screen.allocation.assign(screen.cursor);
+			}
+			break;
+		}
+
+		default:
+		{
+			break;
+		}
+		}
+
+		return screen;
 	}
 
-	default:
+	MenuThiefSkills::MenuThiefSkills(
+		GameContext& ctx,
+		ThiefSkillAllocation startingAllocation,
+		std::function<void(std::array<int, THIEF_SKILL_COUNT>, GameContext&)>
+			acceptCallback) :
+		screen{
+			.cursor = ThiefSkill::PICK_POCKETS,
+			.allocation = std::move(startingAllocation),
+		},
+		onAccept{ std::move(acceptCallback) }
 	{
-		break;
+		assert(
+			ctx.renderer &&
+			"MenuThiefSkills requires a renderer to size its box");
+		assert(
+			onAccept && "MenuThiefSkills requires somewhere to put the result");
+
+		const int viewportCols = ctx.renderer->get_viewport_cols();
+		const int viewportRows = ctx.renderer->get_viewport_rows();
+
+		const int width = std::min(
+			MENU_MAX_WIDTH_TILES,
+			viewportCols - MENU_MARGIN_TILES * 2);
+		assert(
+			width > 0 &&
+			"MenuThiefSkills: viewport is too narrow to hold the box");
+
+		menu_new(
+			width,
+			MENU_HEIGHT_TILES,
+			(viewportCols - width) / 2,
+			(viewportRows - MENU_HEIGHT_TILES) / 2,
+			ctx);
 	}
-	}
 
-	return screen;
-}
-
-MenuThiefSkills::MenuThiefSkills(
-	GameContext& ctx,
-	ThiefSkillAllocation startingAllocation,
-	std::function<void(std::array<int, THIEF_SKILL_COUNT>, GameContext&)>
-		acceptCallback) :
-	screen{
-		.cursor = ThiefSkill::PICK_POCKETS,
-		.allocation = std::move(startingAllocation),
-	},
-	onAccept{ std::move(acceptCallback) }
-{
-	assert(
-		ctx.renderer && "MenuThiefSkills requires a renderer to size its box");
-	assert(onAccept && "MenuThiefSkills requires somewhere to put the result");
-
-	const int viewportCols = ctx.renderer->get_viewport_cols();
-	const int viewportRows = ctx.renderer->get_viewport_rows();
-
-	const int width =
-		std::min(MENU_MAX_WIDTH_TILES, viewportCols - MENU_MARGIN_TILES * 2);
-	assert(
-		width > 0 && "MenuThiefSkills: viewport is too narrow to hold the box");
-
-	menu_new(
-		width,
-		MENU_HEIGHT_TILES,
-		(viewportCols - width) / 2,
-		(viewportRows - MENU_HEIGHT_TILES) / 2,
-		ctx);
-}
-
-int MenuThiefSkills::interior_width() const
-{
-	return (static_cast<int>(menuWidth) - 2) * renderer->get_tile_size();
-}
-
-std::string MenuThiefSkills::row_for(ThiefSkill skill) const
-{
-	const std::string marker = (screen.cursor == skill) ? ">" : " ";
-	const int assigned = screen.allocation.assigned_to(skill);
-
-	// What this grant put here is shown only where it put something, so a screen
-	// nobody has touched yet is eight plain numbers.
-	if (assigned == 0)
+	int MenuThiefSkills::interior_width() const
 	{
+		return (static_cast<int>(menuWidth) - 2) * renderer->get_tile_size();
+	}
+
+	std::string MenuThiefSkills::row_for(ThiefSkill skill) const
+	{
+		const std::string marker = (screen.cursor == skill) ? ">" : " ";
+		const int assigned = screen.allocation.assigned_to(skill);
+
+		// What this grant put here is shown only where it put something, so a
+		// screen nobody has touched yet is eight plain numbers.
+		if (assigned == 0)
+		{
+			return std::format(
+				"{} {:<15}{:>3}%",
+				marker,
+				thief_skill_name(skill),
+				screen.allocation.score(skill));
+		}
 		return std::format(
-			"{} {:<15}{:>3}%",
+			"{} {:<15}{:>3}% +{}",
 			marker,
 			thief_skill_name(skill),
-			screen.allocation.score(skill));
+			screen.allocation.score(skill),
+			assigned);
 	}
-	return std::format(
-		"{} {:<15}{:>3}% +{}",
-		marker,
-		thief_skill_name(skill),
-		screen.allocation.score(skill),
-		assigned);
-}
 
-std::string MenuThiefSkills::pool_line() const
-{
-	return std::format("Points left: {}", screen.allocation.remaining_points());
-}
-
-std::string MenuThiefSkills::status_line() const
-{
-	if (screen.allocation.remaining_points() == 0)
+	std::string MenuThiefSkills::pool_line() const
 	{
-		return "All spent.";
+		return std::format(
+			"Points left: {}",
+			screen.allocation.remaining_points());
 	}
-	return "Unspent points are lost.";
-}
 
-void MenuThiefSkills::draw_allocation_screen()
-{
-	menu_draw_box();
-	menu_draw_title("THIEF SKILLS", ColorPairId::YELLOW_BLACK);
-
-	assert(
-		renderer &&
-		"MenuThiefSkills::draw_allocation_screen called before menu_new");
-	const int tileSize = renderer->get_tile_size();
-	const int textX = (static_cast<int>(menuStartX) + 1) * tileSize;
-	const int firstRowY =
-		static_cast<int>(menuStartY) * tileSize + tileSize + TEXT_TOP_INSET;
-
-	const auto draw_row =
-		[this,
-			textX,
-			firstRowY](int row, const std::string& text, ColorPairId colorPair)
+	std::string MenuThiefSkills::status_line() const
 	{
+		if (screen.allocation.remaining_points() == 0)
+		{
+			return "All spent.";
+		}
+		return "Unspent points are lost.";
+	}
+
+	void MenuThiefSkills::draw_text_row(
+		int row,
+		const std::string& text,
+		ColorPairId colorPair)
+	{
+		assert(
+			renderer &&
+			"MenuThiefSkills::draw_text_row called before menu_new");
+		// The text column starts one tile inside the frame's left border.
+		const int tileSize = renderer->get_tile_size();
+		const int textX = (static_cast<int>(menuStartX) + 1) * tileSize;
+		// Row 0 sits under the title row, inset from the tile's top edge.
+		const int firstRowY =
+			static_cast<int>(menuStartY) * tileSize + tileSize + TEXT_TOP_INSET;
 		renderer->draw_text(
 			Vector2D{ textX, firstRowY + row * TEXT_ROW_PITCH },
 			renderer->fit_text_to_width(text, interior_width()),
 			colorPair);
-	};
-
-	int row = FIRST_SKILL_ROW;
-	for (const ThiefSkill skill : ALL_THIEF_SKILL)
-	{
-		const ColorPairId colorPair = (skill == screen.cursor) ?
-			ColorPairId::YELLOW_BLACK :
-			ColorPairId::WHITE_BLACK;
-		draw_row(row, row_for(skill), colorPair);
-		++row;
 	}
 
-	draw_row(POOL_ROW, pool_line(), ColorPairId::WHITE_BLACK);
-
-	const bool allSpent = screen.allocation.remaining_points() == 0;
-	draw_row(
-		STATUS_ROW,
-		status_line(),
-		allSpent ? ColorPairId::GREEN_BLACK : ColorPairId::RED_BLACK);
-	draw_row(
-		FIRST_HINT_ROW,
-		"[up/down] skill   [left/right] one point",
-		ColorPairId::CYAN_BLACK);
-	draw_row(
-		FIRST_HINT_ROW + 1,
-		"[space] fill it   [Enter] done",
-		ColorPairId::CYAN_BLACK);
-}
-
-void MenuThiefSkills::menu(GameContext& ctx)
-{
-	assert(inputSystem && "MenuThiefSkills::menu called before menu_new");
-	inputSystem->poll();
-	const GameKey key = inputSystem->get_key();
-
-	// Accepting hands the result on, which only the menu can do; every other key is
-	// the screen's own.
-	if (key == GameKey::ENTER)
+	void MenuThiefSkills::draw_allocation_screen()
 	{
-		// The book leaves the distribution entirely to the player, so nothing here
-		// refuses an acceptance - the status row says what is being left behind.
-		menu_set_run_false();
-		onAccept(screen.allocation.total_points(), ctx);
-	}
-	else
-	{
-		screen = after_thief_skill_key(key, screen);
+		menu_draw_box();
+		menu_draw_title("THIEF SKILLS", ColorPairId::YELLOW_BLACK);
+
+		assert(
+			renderer &&
+			"MenuThiefSkills::draw_allocation_screen called before menu_new");
+		int row = FIRST_SKILL_ROW;
+		for (const ThiefSkill skill : ALL_THIEF_SKILL)
+		{
+			const ColorPairId colorPair = (skill == screen.cursor) ?
+				ColorPairId::YELLOW_BLACK :
+				ColorPairId::WHITE_BLACK;
+			draw_text_row(row, row_for(skill), colorPair);
+			++row;
+		}
+
+		draw_text_row(POOL_ROW, pool_line(), ColorPairId::WHITE_BLACK);
+
+		const bool allSpent = screen.allocation.remaining_points() == 0;
+		draw_text_row(
+			STATUS_ROW,
+			status_line(),
+			allSpent ? ColorPairId::GREEN_BLACK : ColorPairId::RED_BLACK);
+		draw_text_row(
+			FIRST_HINT_ROW,
+			"[up/down] skill   [left/right] one point",
+			ColorPairId::CYAN_BLACK);
+		draw_text_row(
+			FIRST_HINT_ROW + 1,
+			"[space] fill it   [Enter] done",
+			ColorPairId::CYAN_BLACK);
 	}
 
-	draw_allocation_screen();
-}
+	void MenuThiefSkills::menu(GameContext& ctx)
+	{
+		assert(inputSystem && "MenuThiefSkills::menu called before menu_new");
+		inputSystem->poll();
+		const GameKey key = inputSystem->get_key();
 
-// end of file: MenuThiefSkills.cpp
+		// Accepting hands the result on, which only the menu can do; every
+		// other key is the screen's own.
+		if (key == GameKey::ENTER)
+		{
+			// The book leaves the distribution entirely to the player, so
+			// nothing here refuses an acceptance - the status row says what is
+			// being left behind.
+			menu_set_run_false();
+			onAccept(screen.allocation.total_points(), ctx);
+		}
+		else
+		{
+			screen = after_thief_skill_key(key, screen);
+		}
+
+		draw_allocation_screen();
+	}
+
+	// end of file: MenuThiefSkills.cpp
 
 } // namespace CppRL

@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/Ai.h",
-      "original": "\tcase AiType::WEB_SPINNER:\n\t{\n\t\treturn \"web_spinner\";\n\t}",
-      "mutated": "\tcase AiType::WEB_SPINNER:\n\t{\n\t\treturn \"spider\";\n\t}",
+      "original": "\t\tcase AiType::WEB_SPINNER:\n\t\t{\n\t\t\treturn \"web_spinner\";\n\t\t}",
+      "mutated": "\t\tcase AiType::WEB_SPINNER:\n\t\t{\n\t\t\treturn \"spider\";\n\t\t}",
       "catches": "two Ai kinds sharing one name, so one of them loads as the other"
     },
     {
       "file": "src/Ai.h",
-      "original": "\tif (name == \"giant_spider\")\n\t{\n\t\treturn AiType::GIANT_SPIDER;\n\t}",
-      "mutated": "\tif (name == \"giant_spider\")\n\t{\n\t\treturn AiType::SPIDER;\n\t}",
+      "original": "\t\tif (name == \"giant_spider\")\n\t\t{\n\t\t\treturn AiType::GIANT_SPIDER;\n\t\t}",
+      "mutated": "\t\tif (name == \"giant_spider\")\n\t\t{\n\t\t\treturn AiType::SPIDER;\n\t\t}",
       "catches": "a name parsed back as the wrong Ai"
     },
     {
@@ -33,20 +33,20 @@
     },
     {
       "file": "src/Ai.cpp",
-      "original": "\tstd::unique_ptr<Ai> ai =\n\t\tmake(parse_ai_type(source.at(\"type\").get<std::string>()));",
-      "mutated": "\tstd::unique_ptr<Ai> ai =\n\t\tmake(AiType::MONSTER);",
+      "original": "\t\tstd::unique_ptr<Ai> ai =\n\t\t\tmake(parse_ai_type(source.at(\"type\").get<std::string>()));",
+      "mutated": "\t\tstd::unique_ptr<Ai> ai =\n\t\t\tmake(AiType::MONSTER);",
       "catches": "the saved name never read, so every creature loads as a plain monster"
     },
     {
       "file": "src/AiWebSpinner.h",
-      "original": "\t[[nodiscard]] AiType get_ai_type() const noexcept override\n\t{\n\t\treturn AiType::WEB_SPINNER;\n\t}",
-      "mutated": "\t[[nodiscard]] AiType get_ai_type() const noexcept override\n\t{\n\t\treturn AiType::SPIDER;\n\t}",
+      "original": "\t\t[[nodiscard]] AiType get_ai_type() const noexcept override\n\t\t{\n\t\t\treturn AiType::WEB_SPINNER;\n\t\t}",
+      "mutated": "\t\t[[nodiscard]] AiType get_ai_type() const noexcept override\n\t\t{\n\t\t\treturn AiType::SPIDER;\n\t\t}",
       "catches": "a web spinner calling itself a plain spider, which its save would then write"
     },
     {
       "file": "src/AiMimic.h",
-      "original": "\t[[nodiscard]] AiType get_ai_type() const noexcept override\n\t{\n\t\treturn AiType::MIMIC;\n\t}",
-      "mutated": "\t[[nodiscard]] AiType get_ai_type() const noexcept override\n\t{\n\t\treturn AiType::MONSTER;\n\t}",
+      "original": "\t\t[[nodiscard]] AiType get_ai_type() const noexcept override\n\t\t{\n\t\t\treturn AiType::MIMIC;\n\t\t}",
+      "mutated": "\t\t[[nodiscard]] AiType get_ai_type() const noexcept override\n\t\t{\n\t\t\treturn AiType::MONSTER;\n\t\t}",
       "catches": "a mimic saved as a plain monster, which is what this file was written for"
     }
   ]

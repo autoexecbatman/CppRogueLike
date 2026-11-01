@@ -33,122 +33,122 @@
 namespace CppRL
 {
 
-namespace
-{
-	// One constant as the header declares it.
-	struct DeclaredPath
+	namespace
 	{
-		std::string name{};
-		std::string value{};
-	};
-
-	// Reads Paths.h and returns every string_view constant it declares.
-	std::vector<DeclaredPath> declared_paths()
-	{
-		std::vector<DeclaredPath> found;
-		std::ifstream header(Paths::resolve("src/Paths.h"));
-		// A custom delimiter, because the pattern itself contains the )" that
-		// would otherwise close the raw string.
-		const std::regex declaration{
-			R"REGEX(inline\s+constexpr\s+std::string_view\s+(\w+)\s*=\s*"([^"]*)")REGEX"
+		// One constant as the header declares it.
+		struct DeclaredPath
+		{
+			std::string name{};
+			std::string value{};
 		};
 
-		std::string line;
-		while (std::getline(header, line))
+		// Reads Paths.h and returns every string_view constant it declares.
+		std::vector<DeclaredPath> declared_paths()
 		{
-			std::smatch matched;
-			if (std::regex_search(line, matched, declaration))
+			std::vector<DeclaredPath> found;
+			std::ifstream header(Paths::resolve("src/Paths.h"));
+			// A custom delimiter, because the pattern itself contains the )"
+			// that would otherwise close the raw string.
+			const std::regex declaration{
+				R"REGEX(inline\s+constexpr\s+std::string_view\s+(\w+)\s*=\s*"([^"]*)")REGEX"
+			};
+
+			std::string line;
+			while (std::getline(header, line))
 			{
-				found.push_back({ matched[1].str(), matched[2].str() });
+				std::smatch matched;
+				if (std::regex_search(line, matched, declaration))
+				{
+					found.push_back({ matched[1].str(), matched[2].str() });
+				}
 			}
+			return found;
 		}
-		return found;
-	}
 
-	// Creates the name under a directory of its own and reports whether the
-	// filesystem took it. Asking the platform beats listing the characters it
-	// reserves, because the list differs per platform and this has to hold on
-	// the one the game ships from.
-	bool is_creatable(
-		const std::string& relative,
-		const std::filesystem::path& sandbox)
-	{
-		const std::filesystem::path target = sandbox / relative;
-		std::error_code problem;
-		std::filesystem::create_directories(target.parent_path(), problem);
-		if (problem)
+		// Creates the name under a directory of its own and reports whether the
+		// filesystem took it. Asking the platform beats listing the characters
+		// it reserves, because the list differs per platform and this has to
+		// hold on the one the game ships from.
+		bool is_creatable(
+			const std::string& relative,
+			const std::filesystem::path& sandbox)
 		{
-			return false;
+			const std::filesystem::path target = sandbox / relative;
+			std::error_code problem;
+			std::filesystem::create_directories(target.parent_path(), problem);
+			if (problem)
+			{
+				return false;
+			}
+
+			std::ofstream probe(target);
+			const bool opened = probe.is_open();
+			probe.close();
+			std::filesystem::remove(target, problem);
+			return opened;
+		}
+	} // namespace
+
+	class PathsTest : public ::testing::Test
+	{
+	protected:
+		void SetUp() override
+		{
+			sandbox =
+				std::filesystem::temp_directory_path() / "cpprogue_paths_test";
+			std::filesystem::remove_all(sandbox);
+			std::filesystem::create_directories(sandbox);
 		}
 
-		std::ofstream probe(target);
-		const bool opened = probe.is_open();
-		probe.close();
-		std::filesystem::remove(target, problem);
-		return opened;
-	}
-} // namespace
+		void TearDown() override
+		{
+			std::error_code ignored;
+			std::filesystem::remove_all(sandbox, ignored);
+		}
 
-class PathsTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+		std::filesystem::path sandbox{};
+	};
+
+	// The header is the source of the list, so an empty read means this case is
+	// measuring nothing rather than passing.
+	TEST_F(PathsTest, TheHeaderDeclaresPathsToCheck)
 	{
-		sandbox =
-			std::filesystem::temp_directory_path() / "cpprogue_paths_test";
-		std::filesystem::remove_all(sandbox);
-		std::filesystem::create_directories(sandbox);
+		const std::vector<DeclaredPath> paths = declared_paths();
+
+		ASSERT_FALSE(paths.empty())
+			<< "no constants were read out of src/Paths.h, so every case below is vacuous";
+		EXPECT_GT(paths.size(), 5u)
+			<< "far fewer constants than Paths.h declares; the pattern stopped matching";
 	}
 
-	void TearDown() override
+	// A name the platform refuses is a file the game can never write.
+	TEST_F(PathsTest, EveryDeclaredPathIsANameTheFilesystemAccepts)
 	{
-		std::error_code ignored;
-		std::filesystem::remove_all(sandbox, ignored);
+		for (const DeclaredPath& path : declared_paths())
+		{
+			EXPECT_TRUE(is_creatable(path.value, sandbox))
+				<< "Paths::" << path.name << " is \"" << path.value
+				<< "\", which this filesystem will not create";
+		}
 	}
 
-	std::filesystem::path sandbox{};
-};
-
-// The header is the source of the list, so an empty read means this case is
-// measuring nothing rather than passing.
-TEST_F(PathsTest, TheHeaderDeclaresPathsToCheck)
-{
-	const std::vector<DeclaredPath> paths = declared_paths();
-
-	ASSERT_FALSE(paths.empty())
-		<< "no constants were read out of src/Paths.h, so every case below is vacuous";
-	EXPECT_GT(paths.size(), 5u)
-		<< "far fewer constants than Paths.h declares; the pattern stopped matching";
-}
-
-// A name the platform refuses is a file the game can never write.
-TEST_F(PathsTest, EveryDeclaredPathIsANameTheFilesystemAccepts)
-{
-	for (const DeclaredPath& path : declared_paths())
+	// The save is the one path the game writes rather than reads, and it writes
+	// it twice: save_game opens a temporary beside it first. A name with no
+	// extension makes replace_extension append instead of replace, so the
+	// temporary inherits whatever is wrong with the name.
+	TEST_F(PathsTest, TheSaveFileAndItsTemporaryAreBothCreatable)
 	{
-		EXPECT_TRUE(is_creatable(path.value, sandbox))
-			<< "Paths::" << path.name << " is \"" << path.value
-			<< "\", which this filesystem will not create";
+		const std::filesystem::path save{ std::string(Paths::SAVE_FILE) };
+
+		EXPECT_TRUE(is_creatable(std::string(Paths::SAVE_FILE), sandbox))
+			<< "the game cannot write its save file";
+
+		std::filesystem::path temporary = save;
+		temporary.replace_extension(".tmp");
+		EXPECT_TRUE(is_creatable(temporary.generic_string(), sandbox))
+			<< "the game cannot write the temporary it saves through";
 	}
-}
 
-// The save is the one path the game writes rather than reads, and it writes it
-// twice: save_game opens a temporary beside it first. A name with no extension
-// makes replace_extension append instead of replace, so the temporary inherits
-// whatever is wrong with the name.
-TEST_F(PathsTest, TheSaveFileAndItsTemporaryAreBothCreatable)
-{
-	const std::filesystem::path save{ std::string(Paths::SAVE_FILE) };
-
-	EXPECT_TRUE(is_creatable(std::string(Paths::SAVE_FILE), sandbox))
-		<< "the game cannot write its save file";
-
-	std::filesystem::path temporary = save;
-	temporary.replace_extension(".tmp");
-	EXPECT_TRUE(is_creatable(temporary.generic_string(), sandbox))
-		<< "the game cannot write the temporary it saves through";
-}
-
-// end of file: PathsTest.cpp
+	// end of file: PathsTest.cpp
 
 } // namespace CppRL

@@ -39,13 +39,13 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tbodyPlan.push_back(parse_equipment_slot(slotName.get<std::string>()));\n",
+      "original": "\t\t\tbodyPlan.push_back(\n\t\t\t\tparse_equipment_slot(slotName.get<std::string>()));\n",
       "mutated": "",
       "catches": "a loaded creature left with no slots"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tequippedItems.emplace_back(std::move(item), slot);\n",
+      "original": "\t\t\tequippedItems.emplace_back(std::move(item), slot);\n",
       "mutated": "",
       "catches": "a loaded creature's equipment thrown away"
     }

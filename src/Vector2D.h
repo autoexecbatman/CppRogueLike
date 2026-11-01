@@ -8,137 +8,137 @@
 namespace CppRL
 {
 
-// {x,y} position
-struct Vector2D
-{
-	int x{ 0 };
-	int y{ 0 };
-
-	// C++ Core Guidelines C.21: Rule of Five compliance
-	// Default all special member functions for trivial type
-	Vector2D() = default;
-	Vector2D(const Vector2D&) = default;
-	Vector2D& operator=(const Vector2D&) = default;
-	Vector2D(Vector2D&&) = default;
-	Vector2D& operator=(Vector2D&&) = default;
-	~Vector2D() = default;
-
-	// Custom constructor for convenience
-	constexpr Vector2D(int x_val, int y_val) noexcept :
-		x(x_val),
-		y(y_val)
+	// {x,y} position
+	struct Vector2D
 	{
-	}
+		int x{ 0 };
+		int y{ 0 };
 
-	// operator overloads
+		// C++ Core Guidelines C.21: Rule of Five compliance
+		// Default all special member functions for trivial type
+		Vector2D() = default;
+		Vector2D(const Vector2D&) = default;
+		Vector2D& operator=(const Vector2D&) = default;
+		Vector2D(Vector2D&&) = default;
+		Vector2D& operator=(Vector2D&&) = default;
+		~Vector2D() = default;
 
-	// add two vectors
-	Vector2D operator+(const Vector2D& rhs) const noexcept
-	{
-		return { x + rhs.x, y + rhs.y };
-	}
+		// Custom constructor for convenience
+		constexpr Vector2D(int x_val, int y_val) noexcept :
+			x(x_val),
+			y(y_val)
+		{
+		}
 
-	// add two vectors
-	Vector2D operator+=(const Vector2D& rhs) noexcept
-	{
-		y += rhs.y;
-		x += rhs.x;
-		return *this;
-	}
+		// operator overloads
 
-	// subtract two vectors
-	Vector2D operator-(const Vector2D& rhs) const noexcept
-	{
-		return { x - rhs.x, y - rhs.y };
-	}
+		// add two vectors
+		Vector2D operator+(const Vector2D& rhs) const noexcept
+		{
+			return { x + rhs.x, y + rhs.y };
+		}
 
-	// scalar multiplication
-	Vector2D operator*(int scalar) const noexcept
-	{
-		return { x * scalar, y * scalar };
-	}
+		// add two vectors
+		Vector2D operator+=(const Vector2D& rhs) noexcept
+		{
+			y += rhs.y;
+			x += rhs.x;
+			return *this;
+		}
 
-	// compare two vectors
-	bool operator==(const Vector2D& rhs) const noexcept
-	{
-		return y == rhs.y && x == rhs.x;
-	}
+		// subtract two vectors
+		Vector2D operator-(const Vector2D& rhs) const noexcept
+		{
+			return { x - rhs.x, y - rhs.y };
+		}
 
-	// compare two vectors
-	bool operator!=(const Vector2D& rhs) const noexcept
-	{
-		return !(*this == rhs);
-	}
+		// scalar multiplication
+		Vector2D operator*(int scalar) const noexcept
+		{
+			return { x * scalar, y * scalar };
+		}
 
-	// compare two vectors
-	bool operator<(const Vector2D& rhs) const noexcept
-	{
-		return y < rhs.y || (y == rhs.y && x < rhs.x);
-	}
+		// compare two vectors
+		bool operator==(const Vector2D& rhs) const noexcept
+		{
+			return y == rhs.y && x == rhs.x;
+		}
 
-	// compare two vectors
-	bool operator>(const Vector2D& rhs) const noexcept
-	{
-		return y > rhs.y || (y == rhs.y && x > rhs.x);
-	}
+		// compare two vectors
+		bool operator!=(const Vector2D& rhs) const noexcept
+		{
+			return !(*this == rhs);
+		}
 
-	// compare two vectors
-	bool operator<=(const Vector2D& rhs) const noexcept
-	{
-		return *this < rhs || *this == rhs;
-	}
+		// compare two vectors
+		bool operator<(const Vector2D& rhs) const noexcept
+		{
+			return y < rhs.y || (y == rhs.y && x < rhs.x);
+		}
 
-	// compare two vectors
-	bool operator>=(const Vector2D& rhs) const noexcept
-	{
-		return *this > rhs || *this == rhs;
-	}
+		// compare two vectors
+		bool operator>(const Vector2D& rhs) const noexcept
+		{
+			return y > rhs.y || (y == rhs.y && x > rhs.x);
+		}
 
-	// for bool conversion
-	explicit operator bool() const noexcept { return y != 0 || x != 0; }
+		// compare two vectors
+		bool operator<=(const Vector2D& rhs) const noexcept
+		{
+			return *this < rhs || *this == rhs;
+		}
 
-	// for std::cout
-	friend std::ostream& operator<<(
-		std::ostream& stream,
-		const Vector2D& position)
-	{
-		stream << std::format(
-			"Vector2D: {{y: {}, x: {}}}",
-			position.y,
-			position.x);
-		return stream;
-	}
+		// compare two vectors
+		bool operator>=(const Vector2D& rhs) const noexcept
+		{
+			return *this > rhs || *this == rhs;
+		}
 
-	// Get distance to another position
-	float distance_to(Vector2D other) const
-	{
-		float deltaX = static_cast<float>(x - other.x);
-		float deltaY = static_cast<float>(y - other.y);
-		return std::sqrt(deltaX * deltaX + deltaY * deltaY);
-	}
+		// for bool conversion
+		explicit operator bool() const noexcept { return y != 0 || x != 0; }
 
-	// Manhattan distance (noexcept alternative)
-	int manhattan_distance_to(Vector2D other) const noexcept
-	{
-		return std::abs(x - other.x) + std::abs(y - other.y);
-	}
+		// for std::cout
+		friend std::ostream& operator<<(
+			std::ostream& stream,
+			const Vector2D& position)
+		{
+			stream << std::format(
+				"Vector2D: {{y: {}, x: {}}}",
+				position.y,
+				position.x);
+			return stream;
+		}
 
-	// Steps apart on an eight-way grid where a diagonal costs what a cardinal
-	// costs, which is how everything in this game moves.
-	int chebyshev_distance_to(Vector2D other) const noexcept
-	{
-		return std::max(std::abs(x - other.x), std::abs(y - other.y));
-	}
-};
+		// Get distance to another position
+		float distance_to(Vector2D other) const
+		{
+			float deltaX = static_cast<float>(x - other.x);
+			float deltaY = static_cast<float>(y - other.y);
+			return std::sqrt(deltaX * deltaX + deltaY * deltaY);
+		}
 
-// Cardinal and diagonal direction constants (x,y)
-inline constexpr Vector2D DIR_N{ 0, -1 };
-inline constexpr Vector2D DIR_S{ 0, 1 };
-inline constexpr Vector2D DIR_E{ 1, 0 };
-inline constexpr Vector2D DIR_W{ -1, 0 };
-inline constexpr Vector2D DIR_NE{ 1, -1 };
-inline constexpr Vector2D DIR_SE{ 1, 1 };
-inline constexpr Vector2D DIR_SW{ -1, 1 };
-inline constexpr Vector2D DIR_NW{ -1, -1 };
+		// Manhattan distance (noexcept alternative)
+		int manhattan_distance_to(Vector2D other) const noexcept
+		{
+			return std::abs(x - other.x) + std::abs(y - other.y);
+		}
+
+		// Steps apart on an eight-way grid where a diagonal costs what a
+		// cardinal costs, which is how everything in this game moves.
+		int chebyshev_distance_to(Vector2D other) const noexcept
+		{
+			return std::max(std::abs(x - other.x), std::abs(y - other.y));
+		}
+	};
+
+	// Cardinal and diagonal direction constants (x,y)
+	inline constexpr Vector2D DIR_N{ 0, -1 };
+	inline constexpr Vector2D DIR_S{ 0, 1 };
+	inline constexpr Vector2D DIR_E{ 1, 0 };
+	inline constexpr Vector2D DIR_W{ -1, 0 };
+	inline constexpr Vector2D DIR_NE{ 1, -1 };
+	inline constexpr Vector2D DIR_SE{ 1, 1 };
+	inline constexpr Vector2D DIR_SW{ -1, 1 };
+	inline constexpr Vector2D DIR_NW{ -1, -1 };
 
 } // namespace CppRL

@@ -33,8 +33,8 @@
     },
     {
       "file": "src/Renderer.h",
-      "original": "\tconst int neededPixels = gui_frame_top_rule(tileSize) + GUI_TEXT_TOP_INSET +\n\t\t(GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH + fontSize +\n\t\tgui_frame_bottom_rule(tileSize);\n",
-      "mutated": "\tconst int neededPixels = gui_frame_top_rule(tileSize) + GUI_TEXT_TOP_INSET +\n\t\t(GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH + fontSize +tileSize;\n",
+      "original": "\t\tconst int neededPixels = gui_frame_top_rule(tileSize) +\n\t\t\tGUI_TEXT_TOP_INSET + (GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH +\n\t\t\tfontSize + gui_frame_bottom_rule(tileSize);\n",
+      "mutated": "\t\tconst int neededPixels = gui_frame_top_rule(tileSize) +\n\t\t\tGUI_TEXT_TOP_INSET + (GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH +\n\t\t\tfontSize +tileSize;\n",
       "catches": "a whole tile reserved for the bottom rule again, which wastes a tile row the panel does not need"
     },
     {

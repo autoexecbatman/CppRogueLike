@@ -27,20 +27,20 @@
     },
     {
       "file": "src/ItemClassification.cpp",
-      "original": "\t\tif (!is_weapon(itemClass))\n\t\t{\n\t\t\treturn false;\n\t\t}\n",
+      "original": "\t\t\tif (!is_weapon(itemClass))\n\t\t\t{\n\t\t\t\treturn false;\n\t\t\t}\n",
       "mutated": "",
       "catches": "a potion or a ring accepted into the off-hand"
     },
     {
       "file": "src/ItemClassification.cpp",
-      "original": "\t\tcase ItemClass::STAFF:\n\t\t{\n\t\t\treturn true;\n",
-      "mutated": "\t\t{\n\t\t\treturn true;\n",
+      "original": "\t\t\tcase ItemClass::STAFF:\n\t\t\t{\n\t\t\t\treturn true;\n",
+      "mutated": "\t\t\t{\n\t\t\t\treturn true;\n",
       "catches": "a staff read as one-handed, so it fits the off-hand"
     },
     {
       "file": "src/ItemClassification.cpp",
-      "original": "\t\tcase ItemClass::GREAT_SWORD:\n\t\tcase ItemClass::BOW:\n",
-      "mutated": "\t\tcase ItemClass::GREAT_SWORD:\n\t\tcase ItemClass::AXE:\n\t\tcase ItemClass::BOW:\n",
+      "original": "\t\t\tcase ItemClass::GREAT_SWORD:\n\t\t\tcase ItemClass::BOW:\n",
+      "mutated": "\t\t\tcase ItemClass::GREAT_SWORD:\n\t\t\tcase ItemClass::AXE:\n\t\t\tcase ItemClass::BOW:\n",
       "catches": "an axe put back among the two-handed weapons, where the book's Size M battle axe does not belong"
     }
   ]

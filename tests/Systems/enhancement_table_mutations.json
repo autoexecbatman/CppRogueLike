@@ -15,14 +15,14 @@
     "mutations": [
         {
             "file": "src/ItemEnhancements.h",
-            "original": "\t\t\t.damage = 2,\n\t\t\t.value = 100,\n",
-            "mutated": "\t\t\t.damage = 3,\n\t\t\t.value = 100,\n",
+            "original": "\t\t\t\t.damage = 2,\n\t\t\t\t.value = 100,\n",
+            "mutated": "\t\t\t\t.damage = 3,\n\t\t\t\t.value = 100,\n",
             "catches": "Keen's damage changed in its row"
         },
         {
             "file": "src/ItemEnhancements.h",
-            "original": "\t\t\t.valueChange = ValueChange::SET,\n\t\t\t.value = 10,\n",
-            "mutated": "\t\t\t.value = 10,\n",
+            "original": "\t\t\t\t.valueChange = ValueChange::SET,\n\t\t\t\t.value = 10,\n",
+            "mutated": "\t\t\t\t.value = 10,\n",
             "catches": "Cursed adding to the value where it replaces it"
         },
         {
@@ -39,8 +39,8 @@
         },
         {
             "file": "src/ItemEnhancements.cpp",
-            "original": "\tapply_effect(prefix_record(prefix).effect);\n\tapply_effect(suffix_record(suffix).effect);",
-            "mutated": "\tapply_effect(suffix_record(suffix).effect);\n\tapply_effect(prefix_record(prefix).effect);",
+            "original": "\t\tapply_effect(prefix_record(prefix).effect);\n\t\tapply_effect(suffix_record(suffix).effect);",
+            "mutated": "\t\tapply_effect(suffix_record(suffix).effect);\n\t\tapply_effect(prefix_record(prefix).effect);",
             "catches": "the prefix applied after the suffix, so a prefix's set overrides its suffix"
         },
         {

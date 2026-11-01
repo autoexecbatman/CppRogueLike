@@ -8,57 +8,59 @@
 namespace CppRL
 {
 
-// - Unique ID system for game objects
-namespace UniqueId
-{
-	using IdType = uint64_t;
-
-	// Thread-safe unique ID generator
-	class Generator
+	// - Unique ID system for game objects
+	namespace UniqueId
 	{
-	private:
-		static std::atomic<IdType> nextId;
+		using IdType = uint64_t;
 
-	public:
-		static IdType generate()
+		// Thread-safe unique ID generator
+		class Generator
 		{
-			return nextId.fetch_add(1, std::memory_order_relaxed);
-		}
+		private:
+			static std::atomic<IdType> nextId;
 
-		// For save/load - set the next ID to resume from
-		static void set_next_id(IdType id)
-		{
-			nextId.store(id, std::memory_order_release);
-		}
+		public:
+			static IdType generate()
+			{
+				return nextId.fetch_add(1, std::memory_order_relaxed);
+			}
 
-		static IdType peek_next_id()
-		{
-			return nextId.load(std::memory_order_acquire);
-		}
-	};
+			// For save/load - set the next ID to resume from
+			static void set_next_id(IdType id)
+			{
+				nextId.store(id, std::memory_order_release);
+			}
 
-	// Invalid/null ID constant
-	constexpr IdType INVALID_ID = 0;
+			static IdType peek_next_id()
+			{
+				return nextId.load(std::memory_order_acquire);
+			}
+		};
 
-	// Writes the counter into a save, and reads it back out.
-	//
-	// A load builds every actor before overwriting its id from the file, so it
-	// burns one id per surviving actor and throws them away. That leaves the
-	// counter below the ids the save restored, because anything destroyed
-	// during play issued an id that no longer belongs to anybody. Without this
-	// the next object created after a load takes an id some live actor already
-	// holds.
-	//
-	// Example:
-	//
-	//   nlohmann::json saved;
-	//   UniqueId::save(saved);              // stores where the counter stands
-	//   // ... process restarts, counter is back at 1 ...
-	//   UniqueId::load(saved);              // resumes from the stored value
-	//   UniqueId::Generator::generate();
-	//   // -> higher than any id the save holds
-	void save(nlohmann::json& output);
-	void load(const nlohmann::json& source);
-} // namespace UniqueId
+		// Invalid/null ID constant
+		constexpr IdType INVALID_ID = 0;
+
+		// Writes the counter into a save, and reads it back out.
+		//
+		// A load builds every actor before overwriting its id from the file, so
+		// it burns one id per surviving actor and throws them away. That leaves
+		// the counter below the ids the save restored, because anything
+		// destroyed during play issued an id that no longer belongs to anybody.
+		// Without this the next object created after a load takes an id some
+		// live actor already holds.
+		//
+		// Example:
+		//
+		//   nlohmann::json saved;
+		//   UniqueId::save(saved);
+		//   // stores where the counter stands
+		//   // ... process restarts, counter is back at 1 ...
+		//   UniqueId::load(saved);
+		//   // resumes from the stored value
+		//   UniqueId::Generator::generate();
+		//   // -> higher than any id the save holds
+		void save(nlohmann::json& output);
+		void load(const nlohmann::json& source);
+	} // namespace UniqueId
 
 } // namespace CppRL

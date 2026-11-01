@@ -11,55 +11,57 @@
 namespace CppRL
 {
 
-// Table 51's Type A: 15 points on a failed save and none on a made one (Dungeon Master's
-// Guide, PDF page 737). The Monstrous Manual fixes the onset of this poison at 15 minutes
-// for the large spider, whose poison the huge spider shares (PDF pages 1878-1879), and a
-// round is a minute. Its victims save at +1.
-constexpr int TYPE_A_DAMAGE = 15;
-constexpr int TYPE_A_ONSET_ROUNDS = 15;
-constexpr int HUGE_SPIDER_SAVE_BONUS = 1;
+	// Table 51's Type A: 15 points on a failed save and none on a made one
+	// (Dungeon Master's Guide, PDF page 737). The Monstrous Manual fixes the
+	// onset of this poison at 15 minutes for the large spider, whose poison the
+	// huge spider shares (PDF pages 1878-1879), and a round is a minute. Its
+	// victims save at +1.
+	constexpr int TYPE_A_DAMAGE = 15;
+	constexpr int TYPE_A_ONSET_ROUNDS = 15;
+	constexpr int HUGE_SPIDER_SAVE_BONUS = 1;
 
-void AiGiantSpider::inject_venom(
-	Creature& owner,
-	Creature& target,
-	GameContext& ctx)
-{
-	assert(
-		ctx.dataManager &&
-		"AiGiantSpider::inject_venom: called without a dataManager");
-
-	const int constitutionAdjustment =
-		ctx.dataManager->constitution_for(target.get_constitution()).PoisonSave;
-	if (SavingThrows::is_made(
-			target,
-			SavingThrow::PARALYZATION_POISON_DEATH,
-			HUGE_SPIDER_SAVE_BONUS + constitutionAdjustment,
-			ctx))
+	void AiGiantSpider::inject_venom(
+		Creature& owner,
+		Creature& target,
+		GameContext& ctx)
 	{
+		assert(
+			ctx.dataManager &&
+			"AiGiantSpider::inject_venom: called without a dataManager");
+
+		const int constitutionAdjustment =
+			ctx.dataManager->constitution_for(target.get_constitution())
+				.PoisonSave;
+		if (SavingThrows::is_made(
+				target,
+				SavingThrow::PARALYZATION_POISON_DEATH,
+				HUGE_SPIDER_SAVE_BONUS + constitutionAdjustment,
+				ctx))
+		{
+			ctx.messageSystem->message(
+				owner.actorData.color,
+				owner.actorData.name,
+				MessageCompletion::CONTINUED);
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				" injects venom, and it does not take hold.",
+				MessageCompletion::FINISHED);
+			return;
+		}
+
 		ctx.messageSystem->message(
 			owner.actorData.color,
 			owner.actorData.name,
 			MessageCompletion::CONTINUED);
 		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			" injects venom, and it does not take hold.",
+			ColorPairId::WHITE_RED,
+			" injects a venom that will take hold!",
 			MessageCompletion::FINISHED);
-		return;
+		target.take_poison(
+			PendingPoison{
+				.roundsUntilOnset = TYPE_A_ONSET_ROUNDS,
+				.damage = TYPE_A_DAMAGE,
+			});
 	}
-
-	ctx.messageSystem->message(
-		owner.actorData.color,
-		owner.actorData.name,
-		MessageCompletion::CONTINUED);
-	ctx.messageSystem->message(
-		ColorPairId::WHITE_RED,
-		" injects a venom that will take hold!",
-		MessageCompletion::FINISHED);
-	target.take_poison(
-		PendingPoison{
-			.roundsUntilOnset = TYPE_A_ONSET_ROUNDS,
-			.damage = TYPE_A_DAMAGE,
-		});
-}
 
 } // namespace CppRL

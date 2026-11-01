@@ -8,68 +8,70 @@
 namespace CppRL
 {
 
-// Forward declarations
-class Creature;
-class Item;
-class TileFeature;
-struct Decoration;
-struct GameContext;
+	// Forward declarations
+	class Creature;
+	class Item;
+	class TileFeature;
+	struct Decoration;
+	struct GameContext;
 
-// - Handles all rendering and screen management
-class RenderingManager
-{
-private:
-	// Helper methods
-	// Draws whatever is standing on the floor. Templated on the element type so
-	// one body serves the trap container and the spell tile container, both of
-	// which hold something derived from TileFeature.
-	template <typename Feature>
-	void render_tile_features(
-		const std::vector<std::unique_ptr<Feature>>& features,
-		const GameContext& ctx) const
+	// - Handles all rendering and screen management
+	class RenderingManager
 	{
-		for (const auto& feature : features)
+	private:
+		// Helper methods Draws whatever is standing on the floor. Templated on
+		// the element type so one body serves the trap container and the spell
+		// tile container, both of which hold something derived from
+		// TileFeature.
+		template <typename Feature>
+		void render_tile_features(
+			const std::vector<std::unique_ptr<Feature>>& features,
+			const GameContext& ctx) const
 		{
-			assert(
-				feature &&
-				"render_tile_features: a floor container holds a null entry");
-			if (!feature->is_destroyed())
+			for (const auto& feature : features)
 			{
-				feature->render(ctx);
+				assert(
+					feature &&
+					"render_tile_features: a floor container holds a null entry");
+				if (!feature->is_destroyed())
+				{
+					feature->render(ctx);
+				}
 			}
 		}
-	}
 
-	// Draws every unbroken decoration that is currently in view. Broken ones are skipped
-	// rather than drawn as wreckage, and the span is taken rather than read from the
-	// context so a caller can draw a subset. Does nothing at all without a renderer or a
-	// map, since both are needed to decide what is visible.
-	//
-	// Example:
-	//   render_decorations(*ctx.decorations, ctx);   // draws what the player can see
-	void render_decorations(
-		std::span<const std::unique_ptr<Decoration>> decorations,
-		const GameContext& ctx) const;
-	void apply_lighting(const GameContext& ctx) const;
-	void render_mouse_path_overlay(const GameContext& ctx) const;
-	void render_world(const GameContext& ctx) const;
+		// Draws every unbroken decoration that is currently in view. Broken
+		// ones are skipped rather than drawn as wreckage, and the span is taken
+		// rather than read from the context so a caller can draw a subset. Does
+		// nothing at all without a renderer or a map, since both are needed to
+		// decide what is visible.
+		//
+		// Example:
+		//   render_decorations(*ctx.decorations, ctx);
+		//   // draws what the player can see
+		void render_decorations(
+			std::span<const std::unique_ptr<Decoration>> decorations,
+			const GameContext& ctx) const;
+		void apply_lighting(const GameContext& ctx) const;
+		void render_mouse_path_overlay(const GameContext& ctx) const;
+		void render_world(const GameContext& ctx) const;
 
-public:
-	// Core rendering methods
-	void render(GameContext& ctx) const;
+	public:
+		// Core rendering methods
+		void render(GameContext& ctx) const;
 
-	void render_creatures(
-		std::span<const std::unique_ptr<Creature>> creatures,
-		const GameContext& ctx) const;
-	void render_items(
-		std::span<const std::unique_ptr<Item>> items,
-		const GameContext& ctx) const;
+		void render_creatures(
+			std::span<const std::unique_ptr<Creature>> creatures,
+			const GameContext& ctx) const;
+		void render_items(
+			std::span<const std::unique_ptr<Item>> items,
+			const GameContext& ctx) const;
 
-	// Screen management
-	void safe_screen_clear();
-	void force_screen_refresh() const;
-	void restore_game_display() const;
-	void restore_screen(GameContext& ctx) const;
-};
+		// Screen management
+		void safe_screen_clear();
+		void force_screen_refresh() const;
+		void restore_game_display() const;
+		void restore_screen(GameContext& ctx) const;
+	};
 
 } // namespace CppRL

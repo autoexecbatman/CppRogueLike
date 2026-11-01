@@ -87,8 +87,8 @@
     },
     {
       "file": "src/ItemEditor.h",
-      "original": "FieldId::COLOR, FieldKind::TOGGLE, \"Color\"",
-      "mutated": "FieldId::COLOR, FieldKind::ADJUST, \"Color\"",
+      "original": "FieldId::COLOR,\n\t\t\t\tFieldKind::TOGGLE,\n\t\t\t\t\"Color\"",
+      "mutated": "FieldId::COLOR,\n\t\t\t\tFieldKind::ADJUST,\n\t\t\t\t\"Color\"",
       "catches": "a toggle field marked as stepped by the arrows"
     },
     {
@@ -99,8 +99,8 @@
     },
     {
       "file": "src/MonsterEditor.h",
-      "original": "\"HD Sides\",\n\t\t\tstd::nullopt",
-      "mutated": "\"HD Sides\",\n\t\t\tPlain{ &MonsterParams::thaco, 1, 20 }",
+      "original": "\t\"HD Sides\",\n\t\t\t\tstd::nullopt",
+      "mutated": "\t\"HD Sides\",\n\t\t\t\tPlain{ &MonsterParams::thaco, 1, 20 }",
       "catches": "a field with its own case given a plain number"
     },
     {

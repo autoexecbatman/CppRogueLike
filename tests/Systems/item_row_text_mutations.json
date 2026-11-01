@@ -21,8 +21,8 @@
     },
     {
       "file": "src/InventoryUI.cpp",
-      "original": "\t\t\treturn std::format(\n\t\t\t\t\" ({} gp, {} lb)\",\n\t\t\t\titem.get_value(),\n\t\t\t\titem.enhancement.weight);",
-      "mutated": "\t\t\treturn std::format(\n\t\t\t\t\" ({} gp)\", item.get_value());",
+      "original": "\t\t\t\treturn std::format(\n\t\t\t\t\t\" ({} gp, {} lb)\",\n\t\t\t\t\titem.get_value(),\n\t\t\t\t\titem.enhancement.weight);",
+      "mutated": "\t\t\t\treturn std::format(\n\t\t\t\t\t\" ({} gp)\", item.get_value());",
       "catches": "the weight dropped wherever an item is worth something, which is how the backpack read before this"
     },
     {

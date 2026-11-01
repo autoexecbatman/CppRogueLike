@@ -17,91 +17,92 @@
 namespace CppRL
 {
 
-namespace
-{
-
-	// Before a game starts Game owns no Player, and the creature view says so
-	// rather than dereferencing an empty owner.
-	TEST(GameContextWiring, ContextFromFreshGame_HasNoPlayer)
+	namespace
 	{
-		Game game{ TEST_DICE_SEED };
 
-		const GameContext ctx = game.context();
+		// Before a game starts Game owns no Player, and the creature view says
+		// so rather than dereferencing an empty owner.
+		TEST(GameContextWiring, ContextFromFreshGame_HasNoPlayer)
+		{
+			Game game{ TEST_DICE_SEED };
 
-		EXPECT_NE(ctx.playerOwner, nullptr);
-		EXPECT_EQ(ctx.player(), nullptr);
-	}
+			const GameContext ctx = game.context();
 
-	// The spells the game casts are the registry Game owns, the one main loads.
-	TEST(GameContextWiring, ContextCarriesTheGamesSpellRegistry)
-	{
-		Game game{ TEST_DICE_SEED };
+			EXPECT_NE(ctx.playerOwner, nullptr);
+			EXPECT_EQ(ctx.player(), nullptr);
+		}
 
-		const GameContext ctx = game.context();
+		// The spells the game casts are the registry Game owns, the one main
+		// loads.
+		TEST(GameContextWiring, ContextCarriesTheGamesSpellRegistry)
+		{
+			Game game{ TEST_DICE_SEED };
 
-		EXPECT_EQ(ctx.spellRegistry, &game.spellRegistry);
-	}
+			const GameContext ctx = game.context();
 
-	// The monsters the game builds and spawns are the registry Game owns, the
-	// one main loads.
-	TEST(GameContextWiring, ContextCarriesTheGamesMonsterRegistry)
-	{
-		Game game{ TEST_DICE_SEED };
+			EXPECT_EQ(ctx.spellRegistry, &game.spellRegistry);
+		}
 
-		const GameContext ctx = game.context();
+		// The monsters the game builds and spawns are the registry Game owns,
+		// the one main loads.
+		TEST(GameContextWiring, ContextCarriesTheGamesMonsterRegistry)
+		{
+			Game game{ TEST_DICE_SEED };
 
-		EXPECT_EQ(ctx.monsterRegistry, &game.monsterRegistry);
-	}
+			const GameContext ctx = game.context();
 
-	// The items the game builds and spawns are the registry Game owns, the one
-	// main loads.
-	TEST(GameContextWiring, ContextCarriesTheGamesItemRegistry)
-	{
-		Game game{ TEST_DICE_SEED };
+			EXPECT_EQ(ctx.monsterRegistry, &game.monsterRegistry);
+		}
 
-		const GameContext ctx = game.context();
+		// The items the game builds and spawns are the registry Game owns, the
+		// one main loads.
+		TEST(GameContextWiring, ContextCarriesTheGamesItemRegistry)
+		{
+			Game game{ TEST_DICE_SEED };
 
-		EXPECT_EQ(ctx.itemRegistry, &game.itemRegistry);
-	}
+			const GameContext ctx = game.context();
 
-	// The cost overlay the debug key toggles is the one Game owns, the one the
-	// renderer draws.
-	TEST(GameContextWiring, ContextCarriesTheGamesCostOverlay)
-	{
-		Game game{ TEST_DICE_SEED };
+			EXPECT_EQ(ctx.itemRegistry, &game.itemRegistry);
+		}
 
-		const GameContext ctx = game.context();
+		// The cost overlay the debug key toggles is the one Game owns, the one
+		// the renderer draws.
+		TEST(GameContextWiring, ContextCarriesTheGamesCostOverlay)
+		{
+			Game game{ TEST_DICE_SEED };
 
-		EXPECT_EQ(ctx.costOverlay, &game.costOverlay);
-	}
+			const GameContext ctx = game.context();
 
-	// With a Player owned, both views name that object.
-	TEST(GameContextWiring, ContextWithPlayer_BothViewsNameIt)
-	{
-		Game game{ TEST_DICE_SEED };
-		game.player = std::make_unique<Player>(Vector2D{ 0, 0 });
+			EXPECT_EQ(ctx.costOverlay, &game.costOverlay);
+		}
 
-		const GameContext ctx = game.context();
+		// With a Player owned, both views name that object.
+		TEST(GameContextWiring, ContextWithPlayer_BothViewsNameIt)
+		{
+			Game game{ TEST_DICE_SEED };
+			game.player = std::make_unique<Player>(Vector2D{ 0, 0 });
 
-		EXPECT_EQ(ctx.player(), game.player.get());
-		EXPECT_EQ(&ctx.player_concrete(), game.player.get());
-	}
+			const GameContext ctx = game.context();
 
-	// The case the old two-handle design got wrong: replacing the player
-	// through the owner is visible immediately, because no copy of the pointer
-	// is stored.
-	TEST(GameContextWiring, ReplacingThePlayer_NeedsNoRefresh)
-	{
-		Game game{ TEST_DICE_SEED };
-		game.player = std::make_unique<Player>(Vector2D{ 0, 0 });
-		const GameContext ctx = game.context();
+			EXPECT_EQ(ctx.player(), game.player.get());
+			EXPECT_EQ(&ctx.player_concrete(), game.player.get());
+		}
 
-		*ctx.playerOwner = std::make_unique<Player>(Vector2D{ 1, 1 });
+		// The case the old two-handle design got wrong: replacing the player
+		// through the owner is visible immediately, because no copy of the
+		// pointer is stored.
+		TEST(GameContextWiring, ReplacingThePlayer_NeedsNoRefresh)
+		{
+			Game game{ TEST_DICE_SEED };
+			game.player = std::make_unique<Player>(Vector2D{ 0, 0 });
+			const GameContext ctx = game.context();
 
-		EXPECT_EQ(ctx.player(), game.player.get());
-		EXPECT_EQ(ctx.player()->position.x, 1);
-	}
+			*ctx.playerOwner = std::make_unique<Player>(Vector2D{ 1, 1 });
 
-} // namespace
+			EXPECT_EQ(ctx.player(), game.player.get());
+			EXPECT_EQ(ctx.player()->position.x, 1);
+		}
+
+	} // namespace
 
 } // namespace CppRL

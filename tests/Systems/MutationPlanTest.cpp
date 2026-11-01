@@ -46,225 +46,236 @@
 namespace CppRL
 {
 
-namespace
-{
-
-	using json = nlohmann::json;
-
-	// Every plan under tests/, found rather than listed, so a new one is
-	// covered by being written.
-	std::vector<std::filesystem::path> every_plan()
+	namespace
 	{
-		std::vector<std::filesystem::path> plans;
-		const std::filesystem::path root = Paths::resolve("tests");
-		if (!std::filesystem::is_directory(root))
+
+		using json = nlohmann::json;
+
+		// Every plan under tests/, found rather than listed, so a new one is
+		// covered by being written.
+		std::vector<std::filesystem::path> every_plan()
 		{
+			std::vector<std::filesystem::path> plans;
+			const std::filesystem::path root = Paths::resolve("tests");
+			if (!std::filesystem::is_directory(root))
+			{
+				return plans;
+			}
+			for (
+				const auto& entry :
+				std::filesystem::recursive_directory_iterator(root))
+			{
+				const std::string name = entry.path().filename().string();
+				if (entry.is_regular_file() && name.contains("mutations") &&
+					entry.path().extension() == ".json")
+				{
+					plans.push_back(entry.path());
+				}
+			}
 			return plans;
 		}
-		for (
-			const auto& entry :
-			std::filesystem::recursive_directory_iterator(root))
+
+		// The file as mutate.py reads it: carriage returns folded away, so an
+		// anchor written with plain newlines matches a file the working tree
+		// keeps in CRLF.
+		std::string source_as_the_tool_reads_it(
+			const std::filesystem::path& path)
 		{
-			const std::string name = entry.path().filename().string();
-			if (entry.is_regular_file() && name.contains("mutations") &&
-				entry.path().extension() == ".json")
+			std::ifstream file(path, std::ios::binary);
+			const std::string raw{
+				std::istreambuf_iterator<char>(file),
+				std::istreambuf_iterator<char>(),
+			};
+			std::string folded;
+			folded.reserve(raw.size());
+			for (size_t index = 0; index < raw.size(); ++index)
 			{
-				plans.push_back(entry.path());
+				if (raw[index] == '\r' && index + 1 < raw.size() &&
+					raw[index + 1] == '\n')
+				{
+					continue;
+				}
+				folded += raw[index];
 			}
+			return folded;
 		}
-		return plans;
-	}
 
-	// The file as mutate.py reads it: carriage returns folded away, so an
-	// anchor written with plain newlines matches a file the working tree keeps
-	// in CRLF.
-	std::string source_as_the_tool_reads_it(const std::filesystem::path& path)
-	{
-		std::ifstream file(path, std::ios::binary);
-		const std::string raw{
-			std::istreambuf_iterator<char>(file),
-			std::istreambuf_iterator<char>(),
-		};
-		std::string folded;
-		folded.reserve(raw.size());
-		for (size_t index = 0; index < raw.size(); ++index)
+		// The suite names this binary actually registers.
+		std::set<std::string> registered_suites()
 		{
-			if (raw[index] == '\r' && index + 1 < raw.size() &&
-				raw[index + 1] == '\n')
-			{
-				continue;
-			}
-			folded += raw[index];
-		}
-		return folded;
-	}
-
-	// The suite names this binary actually registers.
-	std::set<std::string> registered_suites()
-	{
-		std::set<std::string> names;
-		const ::testing::UnitTest& unitTest =
-			*::testing::UnitTest::GetInstance();
-		for (int index = 0; index < unitTest.total_test_suite_count(); ++index)
-		{
-			names.insert(unitTest.GetTestSuite(index)->name());
-		}
-		return names;
-	}
-
-	// The test a registered suite name passes when it begins with suite, so a
-	// pattern naming a fixture's prefix still finds its suites.
-	//
-	// Example, with suite holding "DoorForcing":
-	//   naming_a_prefix_of(suite)("DoorForcingTest"); // -> true
-	auto naming_a_prefix_of(const std::string& suite)
-	{
-		return [&suite](const std::string& registered)
-		{
-			return registered.starts_with(suite);
-		};
-	}
-
-} // namespace
-
-// A fragment that is no longer in its file is a mutation that never runs, and mutate.py
-// reports that as a skip while still exiting 0.
-TEST(MutationPlanTest, EveryAnchorAppearsExactlyOnceInItsFile)
-{
-	const std::vector<std::filesystem::path> plans = every_plan();
-	ASSERT_FALSE(plans.empty()) << "no plans found; the case measures nothing";
-
-	for (const std::filesystem::path& planPath : plans)
-	{
-		std::ifstream planFile(planPath);
-		ASSERT_TRUE(planFile.is_open()) << planPath.string();
-		json plan;
-		planFile >> plan;
-
-		for (const auto& mutation : plan.at("mutations"))
-		{
-			const std::string file = mutation.at("file").get<std::string>();
-			const std::string anchor =
-				mutation.at("original").get<std::string>();
-			const std::string source =
-				source_as_the_tool_reads_it(Paths::resolve(file));
-
-			size_t occurrences = 0;
+			std::set<std::string> names;
+			const ::testing::UnitTest& unitTest =
+				*::testing::UnitTest::GetInstance();
 			for (
-				size_t at = source.find(anchor); at != std::string::npos;
-				at = source.find(anchor, at + 1))
+				int index = 0; index < unitTest.total_test_suite_count();
+				++index)
 			{
-				++occurrences;
+				names.insert(unitTest.GetTestSuite(index)->name());
 			}
-			EXPECT_EQ(occurrences, 1u)
-				<< planPath.filename().string() << " -> " << file
-				<< ": the fragment starting \"" << anchor.substr(0, 60)
-				<< "\" appears " << occurrences << " times";
+			return names;
+		}
+
+		// The test a registered suite name passes when it begins with suite, so
+		// a pattern naming a fixture's prefix still finds its suites.
+		//
+		// Example, with suite holding "DoorForcing":
+		//   naming_a_prefix_of(suite)("DoorForcingTest"); // -> true
+		auto naming_a_prefix_of(const std::string& suite)
+		{
+			return [&suite](const std::string& registered)
+			{
+				return registered.starts_with(suite);
+			};
+		}
+
+	} // namespace
+
+	// A fragment that is no longer in its file is a mutation that never runs,
+	// and mutate.py reports that as a skip while still exiting 0.
+	TEST(MutationPlanTest, EveryAnchorAppearsExactlyOnceInItsFile)
+	{
+		const std::vector<std::filesystem::path> plans = every_plan();
+		ASSERT_FALSE(plans.empty())
+			<< "no plans found; the case measures nothing";
+
+		for (const std::filesystem::path& planPath : plans)
+		{
+			std::ifstream planFile(planPath);
+			ASSERT_TRUE(planFile.is_open()) << planPath.string();
+			json plan;
+			planFile >> plan;
+
+			for (const auto& mutation : plan.at("mutations"))
+			{
+				const std::string file = mutation.at("file").get<std::string>();
+				const std::string anchor =
+					mutation.at("original").get<std::string>();
+				const std::string source =
+					source_as_the_tool_reads_it(Paths::resolve(file));
+
+				size_t occurrences = 0;
+				for (
+					size_t at = source.find(anchor); at != std::string::npos;
+					at = source.find(anchor, at + 1))
+				{
+					++occurrences;
+				}
+				EXPECT_EQ(occurrences, 1u)
+					<< planPath.filename().string() << " -> " << file
+					<< ": the fragment starting \"" << anchor.substr(0, 60)
+					<< "\" appears " << occurrences << " times";
+			}
 		}
 	}
-}
 
-// A filter naming a suite that does not exist runs nothing and says nothing.
-TEST(MutationPlanTest, EveryFilterNamesASuiteThatExists)
-{
-	const std::set<std::string> suites = registered_suites();
-	ASSERT_FALSE(suites.empty());
-
-	for (const std::filesystem::path& planPath : every_plan())
+	// A filter naming a suite that does not exist runs nothing and says
+	// nothing.
+	TEST(MutationPlanTest, EveryFilterNamesASuiteThatExists)
 	{
-		std::ifstream planFile(planPath);
-		ASSERT_TRUE(planFile.is_open()) << planPath.string();
-		json plan;
-		planFile >> plan;
+		const std::set<std::string> suites = registered_suites();
+		ASSERT_FALSE(suites.empty());
 
-		const std::string command =
-			plan.at("test_command").back().get<std::string>();
-		const std::string flag = "--gtest_filter=";
-		const size_t at = command.find(flag);
-		if (at == std::string::npos)
+		for (const std::filesystem::path& planPath : every_plan())
 		{
-			continue;
-		}
+			std::ifstream planFile(planPath);
+			ASSERT_TRUE(planFile.is_open()) << planPath.string();
+			json plan;
+			planFile >> plan;
 
-		std::string filter = command.substr(at + flag.size());
-		filter = filter.substr(0, filter.find_first_of(" \t"));
-
-		size_t start = 0;
-		while (start <= filter.size())
-		{
-			const size_t stop = filter.find(':', start);
-			const std::string pattern = filter.substr(
-				start,
-				stop == std::string::npos ? std::string::npos : stop - start);
-			start = stop == std::string::npos ? filter.size() + 1 : stop + 1;
-
-			if (pattern.empty() || pattern.front() == '-')
+			const std::string command =
+				plan.at("test_command").back().get<std::string>();
+			const std::string flag = "--gtest_filter=";
+			const size_t at = command.find(flag);
+			if (at == std::string::npos)
 			{
 				continue;
 			}
-			std::string suite = pattern.substr(0, pattern.find('.'));
-			while (!suite.empty() && suite.back() == '*')
-			{
-				suite.pop_back();
-			}
-			if (suite.empty())
-			{
-				continue;
-			}
 
-			// A pattern may name a fixture's prefix rather than the whole suite.
-			const auto names_this_suite = naming_a_prefix_of(suite);
-			const bool known = suites.contains(suite) ||
-				std::ranges::any_of(suites, names_this_suite);
-			EXPECT_TRUE(known)
-				<< planPath.filename().string() << ": the filter names '"
-				<< pattern << "', which matches no test suite in this binary";
+			std::string filter = command.substr(at + flag.size());
+			filter = filter.substr(0, filter.find_first_of(" \t"));
+
+			size_t start = 0;
+			while (start <= filter.size())
+			{
+				const size_t stop = filter.find(':', start);
+				const std::string pattern = filter.substr(
+					start,
+					stop == std::string::npos ? std::string::npos :
+												stop - start);
+				start =
+					stop == std::string::npos ? filter.size() + 1 : stop + 1;
+
+				if (pattern.empty() || pattern.front() == '-')
+				{
+					continue;
+				}
+				std::string suite = pattern.substr(0, pattern.find('.'));
+				while (!suite.empty() && suite.back() == '*')
+				{
+					suite.pop_back();
+				}
+				if (suite.empty())
+				{
+					continue;
+				}
+
+				// A pattern may name a fixture's prefix rather than the whole
+				// suite.
+				const auto names_this_suite = naming_a_prefix_of(suite);
+				const bool known = suites.contains(suite) ||
+					std::ranges::any_of(suites, names_this_suite);
+				EXPECT_TRUE(known)
+					<< planPath.filename().string() << ": the filter names '"
+					<< pattern
+					<< "', which matches no test suite in this binary";
+			}
 		}
 	}
-}
 
-// tests/run_suite.ps1 is the one definition of how a plan builds and runs the suite, so
-// every plan calls it, naming only a configuration and a filter. The filter is passed
-// by name: given by position, "--gtest_filter=..." is read as a parameter name, the call
-// fails before the build, so mutate.py's baseline fails and every sweep is refused.
-// Falsified 2026-10-21: with fov_map_mutations.json put back to its old -Command string,
-// this names that plan.
-TEST(MutationPlanTest, EveryPlanRunsTheSuiteThroughRunSuite)
-{
-	const std::vector<std::filesystem::path> plans = every_plan();
-	ASSERT_FALSE(plans.empty()) << "no plans found; the case measures nothing";
-
-	const std::vector<std::string> prefix{
-		"powershell",
-		"-NoProfile",
-		"-ExecutionPolicy",
-		"Bypass",
-		"-File",
-		"tests/run_suite.ps1",
-		"-Configuration",
-	};
-	for (const std::filesystem::path& planPath : plans)
+	// tests/run_suite.ps1 is the one definition of how a plan builds and runs
+	// the suite, so every plan calls it, naming only a configuration and a
+	// filter. The filter is passed by name: given by position,
+	// "--gtest_filter=..." is read as a parameter name, the call fails before
+	// the build, so mutate.py's baseline fails and every sweep is refused.
+	// Falsified 2026-10-21: with fov_map_mutations.json put back to its old
+	// -Command string, this names that plan.
+	TEST(MutationPlanTest, EveryPlanRunsTheSuiteThroughRunSuite)
 	{
-		std::ifstream planFile(planPath);
-		ASSERT_TRUE(planFile.is_open()) << planPath.string();
-		json plan;
-		planFile >> plan;
+		const std::vector<std::filesystem::path> plans = every_plan();
+		ASSERT_FALSE(plans.empty())
+			<< "no plans found; the case measures nothing";
 
-		const std::vector<std::string> command =
-			plan.at("test_command").get<std::vector<std::string>>();
-		const bool isCall = command.size() == prefix.size() + 3 &&
-			std::ranges::equal(
-				command | std::views::take(prefix.size()),
-				prefix) &&
-			(command.at(prefix.size()) == "Debug" ||
-				command.at(prefix.size()) == "Release") &&
-			command.at(prefix.size() + 1) == "-Filter" &&
-			command.back().starts_with("--gtest_filter=");
-		EXPECT_TRUE(isCall)
-			<< planPath.filename().string()
-			<< ": the test_command is not a call to tests/run_suite.ps1 "
-			<< "with -Configuration Debug or Release and -Filter --gtest_filter=...";
+		const std::vector<std::string> prefix{
+			"powershell",
+			"-NoProfile",
+			"-ExecutionPolicy",
+			"Bypass",
+			"-File",
+			"tests/run_suite.ps1",
+			"-Configuration",
+		};
+		for (const std::filesystem::path& planPath : plans)
+		{
+			std::ifstream planFile(planPath);
+			ASSERT_TRUE(planFile.is_open()) << planPath.string();
+			json plan;
+			planFile >> plan;
+
+			const std::vector<std::string> command =
+				plan.at("test_command").get<std::vector<std::string>>();
+			const bool isCall = command.size() == prefix.size() + 3 &&
+				std::ranges::equal(
+					command | std::views::take(prefix.size()),
+					prefix) &&
+				(command.at(prefix.size()) == "Debug" ||
+					command.at(prefix.size()) == "Release") &&
+				command.at(prefix.size() + 1) == "-Filter" &&
+				command.back().starts_with("--gtest_filter=");
+			EXPECT_TRUE(isCall)
+				<< planPath.filename().string()
+				<< ": the test_command is not a call to tests/run_suite.ps1 "
+				<< "with -Configuration Debug or Release and -Filter --gtest_filter=...";
+		}
 	}
-}
 
 } // namespace CppRL

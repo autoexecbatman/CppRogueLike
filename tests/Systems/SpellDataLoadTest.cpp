@@ -27,97 +27,101 @@
 namespace CppRL
 {
 
-class SpellDataLoadTest : public ::testing::Test
-{
-protected:
-	void TearDown() override
+	class SpellDataLoadTest : public ::testing::Test
 	{
-		std::error_code ignored;
-		std::filesystem::remove(scratchFile, ignored);
+	protected:
+		void TearDown() override
+		{
+			std::error_code ignored;
+			std::filesystem::remove(scratchFile, ignored);
+		}
+
+		// Writes the shipped spells plus one more, and returns the path it was
+		// written to. The shipped records are kept so that the added spell is
+		// the only thing wrong.
+		//
+		// The key is deliberately not a builtin's: a builtin spell's effect is
+		// compiled in rather than read from data, so only a custom key
+		// exercises parse_effect_type at all.
+		std::string write_spell(
+			std::string_view spellClass,
+			std::string_view effect)
+		{
+			nlohmann::json root = shipped_spells();
+			root["test_only_spell"] = {
+				{ "name", "Test" },
+				{ "level", 1 },
+				{ "class", spellClass },
+				{ "effect", effect },
+				{ "description", "test" },
+			};
+			return write(root);
+		}
+
+		static nlohmann::json shipped_spells()
+		{
+			std::ifstream in(Paths::resolve(Paths::SPELLS));
+			return nlohmann::json::parse(in);
+		}
+
+		std::string write(const nlohmann::json& root)
+		{
+			std::ofstream out(scratchFile);
+			out << root.dump();
+			return scratchFile.string();
+		}
+
+		std::filesystem::path scratchFile{
+			std::filesystem::temp_directory_path() /
+			"rogue_spell_load_test.json"
+		};
+		SpellRegistry spells{};
+	};
+
+	// The spells the game ships with must all be readable.
+	TEST_F(SpellDataLoadTest, ShippedSpellDataLoads)
+	{
+		EXPECT_NO_THROW(spells.load("data/content/spells.json"));
 	}
 
-	// Writes the shipped spells plus one more, and returns the path it was written to.
-	// The shipped records are kept so that the added spell is the only thing wrong.
-	//
-	// The key is deliberately not a builtin's: a builtin spell's effect is
-	// compiled in rather than read from data, so only a custom key exercises
-	// parse_effect_type at all.
-	std::string write_spell(
-		std::string_view spellClass,
-		std::string_view effect)
+	// A built-in spell's name, level, class and description are data, so a file
+	// without one is refused rather than leaving the spell with text the code
+	// happens to hold.
+	TEST_F(SpellDataLoadTest, AFileWithoutABuiltinSpellIsRefused)
 	{
 		nlohmann::json root = shipped_spells();
-		root["test_only_spell"] = {
-			{ "name", "Test" },
-			{ "level", 1 },
-			{ "class", spellClass },
-			{ "effect", effect },
-			{ "description", "test" },
-		};
-		return write(root);
+		ASSERT_EQ(root.erase("bless"), 1U)
+			<< "the shipped file no longer has bless to remove";
+
+		EXPECT_THROW(spells.load(write(root)), std::runtime_error);
 	}
 
-	static nlohmann::json shipped_spells()
+	// A class the game does not know is a typo, not a request for a default.
+	TEST_F(SpellDataLoadTest, UnknownSpellClassIsRefused)
 	{
-		std::ifstream in(Paths::resolve(Paths::SPELLS));
-		return nlohmann::json::parse(in);
+		const std::string path = write_spell("clric", "bless");
+
+		EXPECT_THROW(spells.load(path), std::runtime_error);
 	}
 
-	std::string write(const nlohmann::json& root)
+	// Same for the effect, which used to become SpellEffectType::NONE.
+	TEST_F(SpellDataLoadTest, UnknownSpellEffectIsRefused)
 	{
-		std::ofstream out(scratchFile);
-		out << root.dump();
-		return scratchFile.string();
+		const std::string path = write_spell("cleric", "firebal");
+
+		EXPECT_THROW(spells.load(path), std::runtime_error);
 	}
 
-	std::filesystem::path scratchFile{ std::filesystem::temp_directory_path() /
-		"rogue_spell_load_test.json" };
-	SpellRegistry spells{};
-};
-
-// The spells the game ships with must all be readable.
-TEST_F(SpellDataLoadTest, ShippedSpellDataLoads)
-{
-	EXPECT_NO_THROW(spells.load("data/content/spells.json"));
-}
-
-// A built-in spell's name, level, class and description are data, so a file without
-// one is refused rather than leaving the spell with text the code happens to hold.
-TEST_F(SpellDataLoadTest, AFileWithoutABuiltinSpellIsRefused)
-{
-	nlohmann::json root = shipped_spells();
-	ASSERT_EQ(root.erase("bless"), 1U)
-		<< "the shipped file no longer has bless to remove";
-
-	EXPECT_THROW(spells.load(write(root)), std::runtime_error);
-}
-
-// A class the game does not know is a typo, not a request for a default.
-TEST_F(SpellDataLoadTest, UnknownSpellClassIsRefused)
-{
-	const std::string path = write_spell("clric", "bless");
-
-	EXPECT_THROW(spells.load(path), std::runtime_error);
-}
-
-// Same for the effect, which used to become SpellEffectType::NONE.
-TEST_F(SpellDataLoadTest, UnknownSpellEffectIsRefused)
-{
-	const std::string path = write_spell("cleric", "firebal");
-
-	EXPECT_THROW(spells.load(path), std::runtime_error);
-}
-
-// The three real class values still load.
-TEST_F(SpellDataLoadTest, EveryKnownClassLoads)
-{
-	for (const auto* spellClass : { "cleric", "wizard", "both" })
+	// The three real class values still load.
+	TEST_F(SpellDataLoadTest, EveryKnownClassLoads)
 	{
-		const std::string path = write_spell(spellClass, "bless");
+		for (const auto* spellClass : { "cleric", "wizard", "both" })
+		{
+			const std::string path = write_spell(spellClass, "bless");
 
-		EXPECT_NO_THROW(spells.load(path))
-			<< "class '" << spellClass << "' was refused";
+			EXPECT_NO_THROW(spells.load(path))
+				<< "class '" << spellClass << "' was refused";
+		}
 	}
-}
 
 } // namespace CppRL

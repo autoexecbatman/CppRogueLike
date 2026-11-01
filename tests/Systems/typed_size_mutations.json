@@ -27,8 +27,8 @@
     },
     {
       "file": "src/RoomEditor.cpp",
-      "original": "\treturn value;\n}",
-      "mutated": "\treturn value + 1;\n}",
+      "original": "\t\treturn value;\n\t}",
+      "mutated": "\t\treturn value + 1;\n\t}",
       "catches": "a typed size read as some other number"
     }
   ]

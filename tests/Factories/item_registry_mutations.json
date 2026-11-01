@@ -69,8 +69,8 @@
     },
     {
       "file": "src/ItemFactory.cpp",
-      "original": "\tconst std::vector<ItemType> table = spawn_table(*ctx.itemRegistry);\n\n\tstd::vector<const ItemType*> candidates;\n\tfor (const ItemType& item : table)\n\t{\n\t\tif (item.category == category)",
-      "mutated": "\tstatic const std::vector<ItemType> table = spawn_table(*ctx.itemRegistry);\n\n\tstd::vector<const ItemType*> candidates;\n\tfor (const ItemType& item : table)\n\t{\n\t\tif (item.category == category)",
+      "original": "\t\tconst std::vector<ItemType> table = spawn_table(*ctx.itemRegistry);\n\n\t\tstd::vector<const ItemType*> candidates;\n\t\tfor (const ItemType& item : table)\n\t\t{\n\t\t\tif (item.category == category)",
+      "mutated": "\t\tstatic const std::vector<ItemType> table = spawn_table(*ctx.itemRegistry);\n\n\t\tstd::vector<const ItemType*> candidates;\n\t\tfor (const ItemType& item : table)\n\t\t{\n\t\t\tif (item.category == category)",
       "catches": "spawns drawn from a table kept since the first spawn"
     },
     {

@@ -42,326 +42,348 @@
 namespace CppRL
 {
 
-using json = nlohmann::json;
+	using json = nlohmann::json;
 
-namespace
-{
-	// Strength 17, straight out of src/json/strength.json.
-	json strength_seventeen()
+	namespace
 	{
-		return json{
-			{ "Str", 17 },
-			{ "Hit", 1 },
-			{ "Dmg", 1 },
-			{ "Wgt", 85 },
-			{ "MaxPress", 220 },
-			{ "maxCarried", 220 },
-			{ "OpenDoors", 10 },
-			{ "LockedDoors", 0 },
-			{ "BB_LG", 13 },
-			{ "Notes", "" },
-			{
-				"encumbrance",
-				{
-					{ "unencumberedTo", 85 },
-					{ "lightTo", 121 },
-					{ "moderateTo", 157 },
-					{ "heavyTo", 193 },
-				},
-			},
-		};
-	}
-
-	json dexterity_seventeen()
-	{
-		return json{
-			{ "Dex", 17 },
-			{ "ReactionAdj", 2 },
-			{ "MissileAttackAdj", 2 },
-			{ "DefensiveAdj", -3 },
-		};
-	}
-
-	json constitution_seventeen()
-	{
-		return json{
-			{ "Con", 17 },
-			{ "HPAdj", 3 },
-			{ "hitDieMinimum", 1 },
-			{ "SystemShock", 97 },
-			{ "ResurrectionSurvival", 98 },
-			{ "PoisonSave", 0 },
-			{ "Regeneration", 0 },
-		};
-	}
-
-	json charisma_seventeen()
-	{
-		return json{
-			{ "Cha", 17 },
-			{ "MaxHencmen", 10 },
-			{ "Loyalty", 6 },
-			{ "ReactionAdj", 6 },
-		};
-	}
-
-	json intelligence_seventeen()
-	{
-		return json{
-			{ "Int", 17 },
-			{ "NumberOfLanguages", 6 },
-			{ "SpellLevel", 8 },
-			{ "ChanceToLearnSpell", 75 },
-			{ "MaxNumberOfSpells", 14 },
-			{ "IllusionImmunity", 0 },
-		};
-	}
-
-	json wisdom_seventeen()
-	{
-		return json{
-			{ "Wis", 17 },
-			{ "MagicalDefenseAdj", 3 },
-			{ "ChanceOfSpellFailure", 0 },
-			{ "SpellImmunity", 0 },
-			{ "bonusSpells", json::array({ 3 }) },
-		};
-	}
-} // namespace
-
-// The happy path, one per table: a complete row comes back as the table prints it.
-TEST(AbilityTableLoadingTest, ACompleteStrengthRowParses)
-{
-	const StrengthAttributes row = strength_row_from(strength_seventeen());
-
-	EXPECT_EQ(row.Str, 17);
-	EXPECT_EQ(row.hitProb, 1);
-	EXPECT_EQ(row.dmgAdj, 1);
-	EXPECT_EQ(row.maxPress, 220);
-	EXPECT_EQ(row.openDoors, 10);
-	// A plain score carries no percentile band.
-	EXPECT_EQ(row.exceptionalFrom, 0);
-}
-
-TEST(AbilityTableLoadingTest, ACompleteDexterityRowParses)
-{
-	const DexterityAttributes row = dexterity_row_from(dexterity_seventeen());
-
-	EXPECT_EQ(row.Dex, 17);
-	EXPECT_EQ(row.ReactionAdj, 2);
-	EXPECT_EQ(row.MissileAttackAdj, 2);
-	EXPECT_EQ(row.DefensiveAdj, -3);
-}
-
-TEST(AbilityTableLoadingTest, ACompleteConstitutionRowParses)
-{
-	const ConstitutionAttributes row =
-		constitution_row_from(constitution_seventeen());
-
-	EXPECT_EQ(row.Con, 17);
-	EXPECT_EQ(row.HPAdj, 3);
-	EXPECT_EQ(row.SystemShock, 97);
-	EXPECT_EQ(row.ResurrectionSurvival, 98);
-}
-
-TEST(AbilityTableLoadingTest, ACompleteCharismaRowParses)
-{
-	const CharismaAttributes row = charisma_row_from(charisma_seventeen());
-
-	EXPECT_EQ(row.Cha, 17);
-	EXPECT_EQ(row.MaxHencmen, 10);
-	EXPECT_EQ(row.Loyalty, 6);
-	EXPECT_EQ(row.ReactionAdj, 6);
-}
-
-TEST(AbilityTableLoadingTest, ACompleteIntelligenceRowParses)
-{
-	const IntelligenceAttributes row =
-		intelligence_row_from(intelligence_seventeen());
-
-	EXPECT_EQ(row.Int, 17);
-	EXPECT_EQ(row.NumberOfLanguages, 6);
-	EXPECT_EQ(row.ChanceToLearnSpell, 75);
-	EXPECT_EQ(row.MaxNumberOfSpells, 14);
-}
-
-TEST(AbilityTableLoadingTest, ACompleteWisdomRowParses)
-{
-	const WisdomAttributes row = wisdom_row_from(wisdom_seventeen());
-
-	EXPECT_EQ(row.Wis, 17);
-	EXPECT_EQ(row.MagicalDefenseAdj, 3);
-	ASSERT_EQ(row.bonusSpells.size(), 1u);
-	EXPECT_EQ(row.bonusSpells.at(0), 3);
-}
-
-// And the half that was missing: a dropped column is a broken table and says so.
-// Each of these silently produced a zero before 2026-10-01.
-TEST(AbilityTableLoadingTest, AStrengthRowMissingItsHitBonusIsRefused)
-{
-	json row = strength_seventeen();
-	row.erase("Hit");
-
-	EXPECT_THROW(
-		[[maybe_unused]] const auto parsed = strength_row_from(row),
-		nlohmann::json::out_of_range)
-		<< "a Strength row with no hit bonus loaded as a zero instead of being refused";
-}
-
-// Most rows print no locked-door chance, so a zero read from a missing key would look right;
-// only the key's presence says the row was written for this column.
-TEST(AbilityTableLoadingTest, AStrengthRowMissingItsLockedDoorChanceIsRefused)
-{
-	json row = strength_seventeen();
-	row.erase("LockedDoors");
-
-	try
-	{
-		[[maybe_unused]] const auto parsed = strength_row_from(row);
-		ADD_FAILURE()
-			<< "a Strength row with no locked-door chance loaded as a zero instead of being refused";
-	}
-	catch (const nlohmann::json::out_of_range& refusal)
-	{
-		EXPECT_NE(
-			std::string(refusal.what()).find("LockedDoors"),
-			std::string::npos)
-			<< refusal.what();
-	}
-}
-
-TEST(
-	AbilityTableLoadingTest,
-	ADexterityRowMissingItsDefensiveAdjustmentIsRefused)
-{
-	json row = dexterity_seventeen();
-	row.erase("DefensiveAdj");
-
-	EXPECT_THROW(
-		[[maybe_unused]] const auto parsed = dexterity_row_from(row),
-		nlohmann::json::out_of_range)
-		<< "a Dexterity row with no defensive adjustment loaded as a zero, which reads as armour class 0";
-}
-
-TEST(
-	AbilityTableLoadingTest,
-	AConstitutionRowMissingItsHitPointAdjustmentIsRefused)
-{
-	json row = constitution_seventeen();
-	row.erase("HPAdj");
-
-	EXPECT_THROW(
-		[[maybe_unused]] const auto parsed = constitution_row_from(row),
-		nlohmann::json::out_of_range)
-		<< "a Constitution row with no hit point adjustment loaded as a zero";
-}
-
-TEST(AbilityTableLoadingTest, ACharismaRowMissingItsLoyaltyIsRefused)
-{
-	json row = charisma_seventeen();
-	row.erase("Loyalty");
-
-	EXPECT_THROW(
-		[[maybe_unused]] const auto parsed = charisma_row_from(row),
-		nlohmann::json::out_of_range)
-		<< "a Charisma row with no loyalty base loaded as a zero";
-}
-
-TEST(
-	AbilityTableLoadingTest,
-	AnIntelligenceRowMissingItsSpellLearningChanceIsRefused)
-{
-	json row = intelligence_seventeen();
-	row.erase("ChanceToLearnSpell");
-
-	EXPECT_THROW(
-		[[maybe_unused]] const auto parsed = intelligence_row_from(row),
-		nlohmann::json::out_of_range)
-		<< "an Intelligence row with no chance to learn a spell loaded as a zero, so every spell fails";
-}
-
-TEST(AbilityTableLoadingTest, AWisdomRowMissingItsSpellFailureChanceIsRefused)
-{
-	json row = wisdom_seventeen();
-	row.erase("ChanceOfSpellFailure");
-
-	EXPECT_THROW(
-		[[maybe_unused]] const auto parsed = wisdom_row_from(row),
-		nlohmann::json::out_of_range)
-		<< "a Wisdom row with no spell failure chance loaded as a zero, which is the best possible roll";
-}
-
-// The one column that is genuinely optional, and stays that way: only the 18/xx band
-// rows carry a percentile range, so a plain score's row must still parse without one.
-TEST(AbilityTableLoadingTest, APlainStrengthRowWithNoPercentileBandStillParses)
-{
-	const StrengthAttributes row = strength_row_from(strength_seventeen());
-
-	EXPECT_EQ(row.exceptionalFrom, 0);
-	EXPECT_EQ(row.exceptionalTo, 0);
-}
-
-namespace
-{
-	// Moves the working directory for one test and puts it back however the
-	// test ends, so a failed assertion cannot leave the rest of the suite
-	// reading from the wrong place.
-	class WorkingDirectoryScope
-	{
-	private:
-		std::filesystem::path previous{};
-
-	public:
-		explicit WorkingDirectoryScope(const std::filesystem::path& target) :
-			previous(std::filesystem::current_path())
+		// Strength 17, straight out of src/json/strength.json.
+		json strength_seventeen()
 		{
-			std::filesystem::current_path(target);
+			return json{
+				{ "Str", 17 },
+				{ "Hit", 1 },
+				{ "Dmg", 1 },
+				{ "Wgt", 85 },
+				{ "MaxPress", 220 },
+				{ "maxCarried", 220 },
+				{ "OpenDoors", 10 },
+				{ "LockedDoors", 0 },
+				{ "BB_LG", 13 },
+				{ "Notes", "" },
+				{
+					"encumbrance",
+					{
+						{ "unencumberedTo", 85 },
+						{ "lightTo", 121 },
+						{ "moderateTo", 157 },
+						{ "heavyTo", 193 },
+					},
+				},
+			};
 		}
 
-		~WorkingDirectoryScope() { std::filesystem::current_path(previous); }
+		json dexterity_seventeen()
+		{
+			return json{
+				{ "Dex", 17 },
+				{ "ReactionAdj", 2 },
+				{ "MissileAttackAdj", 2 },
+				{ "DefensiveAdj", -3 },
+			};
+		}
 
-		WorkingDirectoryScope(const WorkingDirectoryScope&) = delete;
-		WorkingDirectoryScope& operator=(const WorkingDirectoryScope&) = delete;
-		WorkingDirectoryScope(WorkingDirectoryScope&&) = delete;
-		WorkingDirectoryScope& operator=(WorkingDirectoryScope&&) = delete;
-	};
-} // namespace
+		json constitution_seventeen()
+		{
+			return json{
+				{ "Con", 17 },
+				{ "HPAdj", 3 },
+				{ "hitDieMinimum", 1 },
+				{ "SystemShock", 97 },
+				{ "ResurrectionSurvival", 98 },
+				{ "PoisonSave", 0 },
+				{ "Regeneration", 0 },
+			};
+		}
 
-// Run from a directory holding none of the six tables, the load refuses outright rather
-// than handing back empty tables for the first ability lookup to trip over.
-TEST(AbilityTableLoadingTest, AMissingTableFileStopsTheLoad)
-{
-	const std::filesystem::path emptyDirectory =
-		std::filesystem::temp_directory_path() / "roguelike_no_ability_tables";
-	std::filesystem::create_directories(emptyDirectory);
-	DataManager dataManager{};
-	MessageSystem messages{};
+		json charisma_seventeen()
+		{
+			return json{
+				{ "Cha", 17 },
+				{ "MaxHencmen", 10 },
+				{ "Loyalty", 6 },
+				{ "ReactionAdj", 6 },
+			};
+		}
 
+		json intelligence_seventeen()
+		{
+			return json{
+				{ "Int", 17 },
+				{ "NumberOfLanguages", 6 },
+				{ "SpellLevel", 8 },
+				{ "ChanceToLearnSpell", 75 },
+				{ "MaxNumberOfSpells", 14 },
+				{ "IllusionImmunity", 0 },
+			};
+		}
+
+		json wisdom_seventeen()
+		{
+			return json{
+				{ "Wis", 17 },
+				{ "MagicalDefenseAdj", 3 },
+				{ "ChanceOfSpellFailure", 0 },
+				{ "SpellImmunity", 0 },
+				{ "bonusSpells", json::array({ 3 }) },
+			};
+		}
+	} // namespace
+
+	// The happy path, one per table: a complete row comes back as the table
+	// prints it.
+	TEST(AbilityTableLoadingTest, ACompleteStrengthRowParses)
 	{
-		const WorkingDirectoryScope inEmptyDirectory{ emptyDirectory };
-		EXPECT_THROW(dataManager.load_all_data(messages), std::runtime_error);
+		const StrengthAttributes row = strength_row_from(strength_seventeen());
+
+		EXPECT_EQ(row.Str, 17);
+		EXPECT_EQ(row.hitProb, 1);
+		EXPECT_EQ(row.dmgAdj, 1);
+		EXPECT_EQ(row.maxPress, 220);
+		EXPECT_EQ(row.openDoors, 10);
+		// A plain score carries no percentile band.
+		EXPECT_EQ(row.exceptionalFrom, 0);
 	}
 
-	std::filesystem::remove(emptyDirectory);
-}
-
-// The tables are found by walking up to the repository root, so a working directory two
-// levels inside it - where none of the old fixed guesses pointed - still loads all six.
-TEST(AbilityTableLoadingTest, TheTablesLoadFromAnyDirectoryInsideTheRepository)
-{
-	const std::filesystem::path deepInside = Paths::resolve("tests/Map");
-	ASSERT_TRUE(std::filesystem::is_directory(deepInside))
-		<< deepInside.string();
-	DataManager dataManager{};
-	MessageSystem messages{};
-
+	TEST(AbilityTableLoadingTest, ACompleteDexterityRowParses)
 	{
-		const WorkingDirectoryScope inTests{ deepInside };
-		EXPECT_NO_THROW(dataManager.load_all_data(messages));
+		const DexterityAttributes row =
+			dexterity_row_from(dexterity_seventeen());
+
+		EXPECT_EQ(row.Dex, 17);
+		EXPECT_EQ(row.ReactionAdj, 2);
+		EXPECT_EQ(row.MissileAttackAdj, 2);
+		EXPECT_EQ(row.DefensiveAdj, -3);
 	}
 
-	EXPECT_FALSE(dataManager.get_wisdom_attributes().empty())
-		<< "the Wisdom table came back empty";
-}
+	TEST(AbilityTableLoadingTest, ACompleteConstitutionRowParses)
+	{
+		const ConstitutionAttributes row =
+			constitution_row_from(constitution_seventeen());
+
+		EXPECT_EQ(row.Con, 17);
+		EXPECT_EQ(row.HPAdj, 3);
+		EXPECT_EQ(row.SystemShock, 97);
+		EXPECT_EQ(row.ResurrectionSurvival, 98);
+	}
+
+	TEST(AbilityTableLoadingTest, ACompleteCharismaRowParses)
+	{
+		const CharismaAttributes row = charisma_row_from(charisma_seventeen());
+
+		EXPECT_EQ(row.Cha, 17);
+		EXPECT_EQ(row.MaxHencmen, 10);
+		EXPECT_EQ(row.Loyalty, 6);
+		EXPECT_EQ(row.ReactionAdj, 6);
+	}
+
+	TEST(AbilityTableLoadingTest, ACompleteIntelligenceRowParses)
+	{
+		const IntelligenceAttributes row =
+			intelligence_row_from(intelligence_seventeen());
+
+		EXPECT_EQ(row.Int, 17);
+		EXPECT_EQ(row.NumberOfLanguages, 6);
+		EXPECT_EQ(row.ChanceToLearnSpell, 75);
+		EXPECT_EQ(row.MaxNumberOfSpells, 14);
+	}
+
+	TEST(AbilityTableLoadingTest, ACompleteWisdomRowParses)
+	{
+		const WisdomAttributes row = wisdom_row_from(wisdom_seventeen());
+
+		EXPECT_EQ(row.Wis, 17);
+		EXPECT_EQ(row.MagicalDefenseAdj, 3);
+		ASSERT_EQ(row.bonusSpells.size(), 1u);
+		EXPECT_EQ(row.bonusSpells.at(0), 3);
+	}
+
+	// And the half that was missing: a dropped column is a broken table and
+	// says so. Each of these silently produced a zero before 2026-10-01.
+	TEST(AbilityTableLoadingTest, AStrengthRowMissingItsHitBonusIsRefused)
+	{
+		json row = strength_seventeen();
+		row.erase("Hit");
+
+		EXPECT_THROW(
+			[[maybe_unused]] const auto parsed = strength_row_from(row),
+			nlohmann::json::out_of_range)
+			<< "a Strength row with no hit bonus loaded as a zero instead of being refused";
+	}
+
+	// Most rows print no locked-door chance, so a zero read from a missing key
+	// would look right; only the key's presence says the row was written for
+	// this column.
+	TEST(
+		AbilityTableLoadingTest,
+		AStrengthRowMissingItsLockedDoorChanceIsRefused)
+	{
+		json row = strength_seventeen();
+		row.erase("LockedDoors");
+
+		try
+		{
+			[[maybe_unused]] const auto parsed = strength_row_from(row);
+			ADD_FAILURE()
+				<< "a Strength row with no locked-door chance loaded as a zero instead of being refused";
+		}
+		catch (const nlohmann::json::out_of_range& refusal)
+		{
+			EXPECT_NE(
+				std::string(refusal.what()).find("LockedDoors"),
+				std::string::npos)
+				<< refusal.what();
+		}
+	}
+
+	TEST(
+		AbilityTableLoadingTest,
+		ADexterityRowMissingItsDefensiveAdjustmentIsRefused)
+	{
+		json row = dexterity_seventeen();
+		row.erase("DefensiveAdj");
+
+		EXPECT_THROW(
+			[[maybe_unused]] const auto parsed = dexterity_row_from(row),
+			nlohmann::json::out_of_range)
+			<< "a Dexterity row with no defensive adjustment loaded as a zero, which reads as armour class 0";
+	}
+
+	TEST(
+		AbilityTableLoadingTest,
+		AConstitutionRowMissingItsHitPointAdjustmentIsRefused)
+	{
+		json row = constitution_seventeen();
+		row.erase("HPAdj");
+
+		EXPECT_THROW(
+			[[maybe_unused]] const auto parsed = constitution_row_from(row),
+			nlohmann::json::out_of_range)
+			<< "a Constitution row with no hit point adjustment loaded as a zero";
+	}
+
+	TEST(AbilityTableLoadingTest, ACharismaRowMissingItsLoyaltyIsRefused)
+	{
+		json row = charisma_seventeen();
+		row.erase("Loyalty");
+
+		EXPECT_THROW(
+			[[maybe_unused]] const auto parsed = charisma_row_from(row),
+			nlohmann::json::out_of_range)
+			<< "a Charisma row with no loyalty base loaded as a zero";
+	}
+
+	TEST(
+		AbilityTableLoadingTest,
+		AnIntelligenceRowMissingItsSpellLearningChanceIsRefused)
+	{
+		json row = intelligence_seventeen();
+		row.erase("ChanceToLearnSpell");
+
+		EXPECT_THROW(
+			[[maybe_unused]] const auto parsed = intelligence_row_from(row),
+			nlohmann::json::out_of_range)
+			<< "an Intelligence row with no chance to learn a spell loaded as a zero, so every spell fails";
+	}
+
+	TEST(
+		AbilityTableLoadingTest,
+		AWisdomRowMissingItsSpellFailureChanceIsRefused)
+	{
+		json row = wisdom_seventeen();
+		row.erase("ChanceOfSpellFailure");
+
+		EXPECT_THROW(
+			[[maybe_unused]] const auto parsed = wisdom_row_from(row),
+			nlohmann::json::out_of_range)
+			<< "a Wisdom row with no spell failure chance loaded as a zero, which is the best possible roll";
+	}
+
+	// The one column that is genuinely optional, and stays that way: only the
+	// 18/xx band rows carry a percentile range, so a plain score's row must
+	// still parse without one.
+	TEST(
+		AbilityTableLoadingTest,
+		APlainStrengthRowWithNoPercentileBandStillParses)
+	{
+		const StrengthAttributes row = strength_row_from(strength_seventeen());
+
+		EXPECT_EQ(row.exceptionalFrom, 0);
+		EXPECT_EQ(row.exceptionalTo, 0);
+	}
+
+	namespace
+	{
+		// Moves the working directory for one test and puts it back however the
+		// test ends, so a failed assertion cannot leave the rest of the suite
+		// reading from the wrong place.
+		class WorkingDirectoryScope
+		{
+		private:
+			std::filesystem::path previous{};
+
+		public:
+			explicit WorkingDirectoryScope(
+				const std::filesystem::path& target) :
+				previous(std::filesystem::current_path())
+			{
+				std::filesystem::current_path(target);
+			}
+
+			~WorkingDirectoryScope()
+			{
+				std::filesystem::current_path(previous);
+			}
+
+			WorkingDirectoryScope(const WorkingDirectoryScope&) = delete;
+			WorkingDirectoryScope& operator=(
+				const WorkingDirectoryScope&) = delete;
+			WorkingDirectoryScope(WorkingDirectoryScope&&) = delete;
+			WorkingDirectoryScope& operator=(WorkingDirectoryScope&&) = delete;
+		};
+	} // namespace
+
+	// Run from a directory holding none of the six tables, the load refuses
+	// outright rather than handing back empty tables for the first ability
+	// lookup to trip over.
+	TEST(AbilityTableLoadingTest, AMissingTableFileStopsTheLoad)
+	{
+		const std::filesystem::path emptyDirectory =
+			std::filesystem::temp_directory_path() /
+			"roguelike_no_ability_tables";
+		std::filesystem::create_directories(emptyDirectory);
+		DataManager dataManager{};
+		MessageSystem messages{};
+
+		{
+			const WorkingDirectoryScope inEmptyDirectory{ emptyDirectory };
+			EXPECT_THROW(
+				dataManager.load_all_data(messages),
+				std::runtime_error);
+		}
+
+		std::filesystem::remove(emptyDirectory);
+	}
+
+	// The tables are found by walking up to the repository root, so a working
+	// directory two levels inside it - where none of the old fixed guesses
+	// pointed - still loads all six.
+	TEST(
+		AbilityTableLoadingTest,
+		TheTablesLoadFromAnyDirectoryInsideTheRepository)
+	{
+		const std::filesystem::path deepInside = Paths::resolve("tests/Map");
+		ASSERT_TRUE(std::filesystem::is_directory(deepInside))
+			<< deepInside.string();
+		DataManager dataManager{};
+		MessageSystem messages{};
+
+		{
+			const WorkingDirectoryScope inTests{ deepInside };
+			EXPECT_NO_THROW(dataManager.load_all_data(messages));
+		}
+
+		EXPECT_FALSE(dataManager.get_wisdom_attributes().empty())
+			<< "the Wisdom table came back empty";
+	}
 
 } // namespace CppRL

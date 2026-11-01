@@ -15,20 +15,20 @@
   "mutations": [
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\t\t\treturn MagicalEffectUtils::get_ac_bonus(\n\t\t\t\t\tmagicalRing.effect,\n\t\t\t\t\tmagicalRing.bonus);",
-      "mutated": "\t\t\t\treturn MagicalEffectUtils::get_ac_bonus(\n\t\t\t\t\tmagicalRing.effect,\n\t\t\t\t\t1);",
+      "original": "\t\t\t\t\treturn MagicalEffectUtils::get_ac_bonus(\n\t\t\t\t\t\tmagicalRing.effect,\n\t\t\t\t\t\tmagicalRing.bonus);",
+      "mutated": "\t\t\t\t\treturn MagicalEffectUtils::get_ac_bonus(\n\t\t\t\t\t\tmagicalRing.effect,\n\t\t\t\t\t\t1);",
       "catches": "every ring of protection worth +1 whatever its plus"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\t\t\treturn MagicalEffectUtils::get_ac_bonus(\n\t\t\t\t\tmagicalRing.effect,\n\t\t\t\t\tmagicalRing.bonus);",
-      "mutated": "\t\t\t\treturn MagicalEffectUtils::get_ac_bonus(\n\t\t\t\t\tMagicalEffect::PROTECTION,\n\t\t\t\t\tmagicalRing.bonus);",
+      "original": "\t\t\t\t\treturn MagicalEffectUtils::get_ac_bonus(\n\t\t\t\t\t\tmagicalRing.effect,\n\t\t\t\t\t\tmagicalRing.bonus);",
+      "mutated": "\t\t\t\t\treturn MagicalEffectUtils::get_ac_bonus(\n\t\t\t\t\t\tMagicalEffect::PROTECTION,\n\t\t\t\t\t\tmagicalRing.bonus);",
       "catches": "a ring of fire resistance's plus counted as armour class"
     },
     {
       "file": "src/MagicalItemEffects.cpp",
-      "original": "\t\tcase MagicalEffect::BRILLIANCE:\n\t\tcase MagicalEffect::PROTECTION:\n",
-      "mutated": "\t\tcase MagicalEffect::BRILLIANCE:\n",
+      "original": "\t\t\tcase MagicalEffect::BRILLIANCE:\n\t\t\tcase MagicalEffect::PROTECTION:\n",
+      "mutated": "\t\t\tcase MagicalEffect::BRILLIANCE:\n",
       "catches": "a ring of protection giving no armour class at all"
     },
     {

@@ -15,13 +15,13 @@
   "mutations": [
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\tif (recorded != casting->opponentSaves.end())\n\t{\n\t\treturn !recorded->isMade;\n\t}",
+      "original": "\t\tif (recorded != casting->opponentSaves.end())\n\t\t{\n\t\t\treturn !recorded->isMade;\n\t\t}",
       "mutated": "",
       "catches": "a monster rolling again against a casting it has already saved against"
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\tcasting->opponentSaves.push_back(OpponentSave{ attacker.uniqueId, isMade });",
+      "original": "\t\tcasting->opponentSaves.push_back(\n\t\t\tOpponentSave{ attacker.uniqueId, isMade });",
       "mutated": "",
       "catches": "a save never recorded on the casting"
     },
@@ -39,8 +39,8 @@
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\tconst auto casting = std::ranges::find_if(warded.activeBuffs, is_sanctuary);\n\tif (casting == warded.activeBuffs.end())\n\t{\n\t\treturn false;\n\t}\n\n\t// Already rolled against this casting: the result stands.",
-      "mutated": "\tconst auto casting = std::ranges::find_if(warded.activeBuffs, is_sanctuary);\n\tif (casting == warded.activeBuffs.end())\n\t{\n\t\treturn true;\n\t}\n\n\t// Already rolled against this casting: the result stands.",
+      "original": "\t\tconst auto casting =\n\t\t\tstd::ranges::find_if(warded.activeBuffs, is_sanctuary);\n\t\tif (casting == warded.activeBuffs.end())\n\t\t{\n\t\t\treturn false;\n\t\t}\n\n\t\t// Already rolled against this casting: the result stands.",
+      "mutated": "\t\tconst auto casting =\n\t\t\tstd::ranges::find_if(warded.activeBuffs, is_sanctuary);\n\t\tif (casting == warded.activeBuffs.end())\n\t\t{\n\t\t\treturn true;\n\t\t}\n\n\t\t// Already rolled against this casting: the result stands.",
       "catches": "a monster turned away by a Sanctuary that is not there"
     },
     {
@@ -51,8 +51,8 @@
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\t\tauto found = std::ranges::find_if(creature.activeBuffs, matches_type);\n\n\t\tif (found != creature.activeBuffs.end())",
-      "mutated": "\t\tauto found = std::ranges::find_if(creature.activeBuffs, matches_type);\n\t\tfor (Buff& anyBuff : creature.activeBuffs)\n\t\t{\n\t\t\tanyBuff.opponentSaves.clear();\n\t\t}\n\n\t\tif (found != creature.activeBuffs.end())",
+      "original": "\t\t\tauto found =\n\t\t\t\tstd::ranges::find_if(creature.activeBuffs, matches_type);\n\n\t\t\tif (found != creature.activeBuffs.end())",
+      "mutated": "\t\t\tauto found =\n\t\t\t\tstd::ranges::find_if(creature.activeBuffs, matches_type);\n\t\t\tfor (Buff& anyBuff : creature.activeBuffs)\n\t\t\t{\n\t\t\t\tanyBuff.opponentSaves.clear();\n\t\t\t}\n\n\t\t\tif (found != creature.activeBuffs.end())",
       "catches": "any other spell clearing the sanctuary's saves, not a new casting of it",
       "introduces": [
         "anyBuff"
@@ -66,32 +66,32 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\t\t\tbuff.opponentSaves.push_back(\n\t\t\t\t\tOpponentSave{",
-      "mutated": "\t\t\t\tstatic_cast<void>(\n\t\t\t\t\tOpponentSave{",
+      "original": "\t\t\t\t\tbuff.opponentSaves.push_back(\n\t\t\t\t\t\tOpponentSave{",
+      "mutated": "\t\t\t\t\tstatic_cast<void>(\n\t\t\t\t\t\tOpponentSave{",
       "catches": "the record read from the saved game and dropped"
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\tif (ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))\n\t{\n\t\tctx.messageSystem->append_message_part(\n\t\t\towner.actorData.color,\n\t\t\towner.actorData.name);",
-      "mutated": "\tif (false)\n\t{\n\t\tctx.messageSystem->append_message_part(\n\t\t\towner.actorData.color,\n\t\t\towner.actorData.name);",
+      "original": "\t\tif (ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))\n\t\t{\n\t\t\tctx.messageSystem->append_message_part(\n\t\t\t\towner.actorData.color,\n\t\t\t\towner.actorData.name);",
+      "mutated": "\t\tif (false)\n\t\t{\n\t\t\tctx.messageSystem->append_message_part(\n\t\t\t\towner.actorData.color,\n\t\t\t\towner.actorData.name);",
       "catches": "an attack that never asks the target's Sanctuary"
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\t\tctx.messageSystem->append_message_part(\n\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\" cannot bring itself to attack \");\n\t\tctx.messageSystem->append_message_part(\n\t\t\ttarget.actorData.color,\n\t\t\ttarget.actorData.name);\n\t\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \".\");\n\t\tctx.messageSystem->finalize_message();\n\t\treturn AttackResult::PREVENTED;",
-      "mutated": "\t\tctx.messageSystem->append_message_part(\n\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\" cannot bring itself to attack \");\n\t\tctx.messageSystem->append_message_part(\n\t\t\ttarget.actorData.color,\n\t\t\ttarget.actorData.name);\n\t\tctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \".\");\n\t\tctx.messageSystem->finalize_message();static_cast<void>(kind);",
+      "original": "\t\t\tctx.messageSystem->append_message_part(\n\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\" cannot bring itself to attack \");\n\t\t\tctx.messageSystem->append_message_part(\n\t\t\t\ttarget.actorData.color,\n\t\t\t\ttarget.actorData.name);\n\t\t\tctx.messageSystem->append_message_part(\n\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\".\");\n\t\t\tctx.messageSystem->finalize_message();\n\t\t\treturn AttackResult::PREVENTED;",
+      "mutated": "\t\t\tctx.messageSystem->append_message_part(\n\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\" cannot bring itself to attack \");\n\t\t\tctx.messageSystem->append_message_part(\n\t\t\t\ttarget.actorData.color,\n\t\t\t\ttarget.actorData.name);\n\t\t\tctx.messageSystem->append_message_part(\n\t\t\t\tColorPairId::WHITE_BLACK,\n\t\t\t\t\".\");\n\t\t\tctx.messageSystem->finalize_message();static_cast<void>(kind);",
       "catches": "an attack turned away by Sanctuary that lands anyway"
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\tif (ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))\n\t{\n\t\tctx.messageSystem->append_message_part(\n\t\t\towner.actorData.color,\n\t\t\towner.actorData.name);",
-      "mutated": "\tif (kind == AttackKind::MELEE && ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))\n\t{\n\t\tctx.messageSystem->append_message_part(\n\t\t\towner.actorData.color,\n\t\t\towner.actorData.name);",
+      "original": "\t\tif (ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))\n\t\t{\n\t\t\tctx.messageSystem->append_message_part(\n\t\t\t\towner.actorData.color,\n\t\t\t\towner.actorData.name);",
+      "mutated": "\t\tif (kind == AttackKind::MELEE && ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))\n\t\t{\n\t\t\tctx.messageSystem->append_message_part(\n\t\t\t\towner.actorData.color,\n\t\t\t\towner.actorData.name);",
       "catches": "only a melee attack asking the target's Sanctuary"
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\tconst auto broken_buffs =\n\t\tctx.buffSystem->remove_buffs_broken_by_attacking(owner);",
-      "mutated": "\tconst std::vector<BuffType> broken_buffs{};",
+      "original": "\t\tconst auto broken_buffs =\n\t\t\tctx.buffSystem->remove_buffs_broken_by_attacking(owner);",
+      "mutated": "\t\tconst std::vector<BuffType> broken_buffs{};",
       "catches": "an attacker keeping its own Sanctuary after it attacks"
     }
   ]

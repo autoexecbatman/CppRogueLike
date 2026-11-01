@@ -39,14 +39,14 @@
     },
     {
       "file": "src/HungerSystem.cpp",
-      "original": "\treturn std::clamp(\n\t\t1.0f -\n\t\t\tstatic_cast<float>(run.hungerValue) /\n\t\t\t\tstatic_cast<float>(run.hungerMax),\n\t\t0.0f,\n\t\t1.0f);\n",
-      "mutated": "\treturn std::clamp(static_cast<float>(run.hungerValue) /\n\t\t\t\tstatic_cast<float>(run.hungerMax),\n\t\t0.0f,\n\t\t1.0f);\n",
+      "original": "\t\treturn std::clamp(\n\t\t\t1.0f -\n\t\t\t\tstatic_cast<float>(run.hungerValue) /\n\t\t\t\t\tstatic_cast<float>(run.hungerMax),\n\t\t\t0.0f,\n\t\t\t1.0f);\n",
+      "mutated": "\t\treturn std::clamp(static_cast<float>(run.hungerValue) /\n\t\t\t\t\tstatic_cast<float>(run.hungerMax),\n\t\t\t0.0f,\n\t\t\t1.0f);\n",
       "catches": "the meter reading hunger where it should read fullness, which is the defect the HUD shipped"
     },
     {
       "file": "src/HungerSystem.cpp",
-      "original": "\t\trun.lastNotifiedState = current;\n\t\treturn;\n",
-      "mutated": "\t\treturn;\n",
+      "original": "\t\t\trun.lastNotifiedState = current;\n\t\t\treturn;\n",
+      "mutated": "\t\t\treturn;\n",
       "catches": "a baseline never recorded, so no crossing is ever announced"
     },
     {
@@ -57,7 +57,7 @@
     },
     {
       "file": "src/HungerSystem.cpp",
-      "original": "\t\toutput[\"lastNotifiedState\"] = static_cast<int>(*run.lastNotifiedState);\n",
+      "original": "\t\t\toutput[\"lastNotifiedState\"] =\n\t\t\t\tstatic_cast<int>(*run.lastNotifiedState);\n",
       "mutated": "",
       "catches": "a load that re-announces a state the player was already told"
     },
@@ -75,8 +75,8 @@
     },
     {
       "file": "src/HungerSystem.cpp",
-      "original": "\t\tctx.player()->take_damage_and_check_death(\n\t\t\t1,\n\t\t\tctx,\n\t\t\tDamageType::PHYSICAL,\n\t\t\tDamageSource::NO_ATTACKER);\n\t\tbreak;\n",
-      "mutated": "\t\tbreak;\n",
+      "original": "\t\t\tctx.player()->take_damage_and_check_death(\n\t\t\t\t1,\n\t\t\t\tctx,\n\t\t\t\tDamageType::PHYSICAL,\n\t\t\t\tDamageSource::NO_ATTACKER);\n\t\t\tbreak;\n",
+      "mutated": "\t\t\tbreak;\n",
       "catches": "dying stopping short of killing, so starvation never finishes"
     }
   ]

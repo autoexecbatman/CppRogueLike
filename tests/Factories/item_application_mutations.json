@@ -21,32 +21,32 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "girdle != nullptr &&\n\t\t\tgirdle->application == BuffApplication::SET && girdle->strBonus > 0;",
+      "original": "girdle != nullptr &&\n\t\t\t\tgirdle->application == BuffApplication::SET &&\n\t\t\t\tgirdle->strBonus > 0;",
       "mutated": "girdle != nullptr && girdle->application!= BuffApplication::SET &&\n\t\t\tgirdle->strBonus > 0;",
       "catches": "an adding girdle taken for a girdle of giant strength"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "gauntlets != nullptr &&\n\t\t\t\tgauntlets->application == BuffApplication::SET &&\n\t\t\t\tgauntlets->strBonus > 0 ?\n\t\t\tgauntlets :\n\t\t\tnullptr;",
-      "mutated": "gauntlets != nullptr &&\n\t\t\t\tgauntlets->application!= BuffApplication::SET &&\n\t\t\t\tgauntlets->strBonus > 0 ?\n\t\t\tgauntlets :\n\t\t\tnullptr;",
+      "original": "gauntlets != nullptr &&\n\t\t\t\t\tgauntlets->application == BuffApplication::SET &&\n\t\t\t\t\tgauntlets->strBonus > 0 ?\n\t\t\t\tgauntlets :\n\t\t\t\tnullptr;",
+      "mutated": "gauntlets != nullptr &&\n\t\t\t\t\tgauntlets->application!= BuffApplication::SET &&\n\t\t\t\t\tgauntlets->strBonus > 0 ?\n\t\t\t\tgauntlets :\n\t\t\t\tnullptr;",
       "catches": "adding gauntlets taken for gauntlets of ogre power"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\t\tif (boost.application == BuffApplication::SET &&\n\t\t\t\tboost.strBonus == 18)\n",
-      "mutated": "\t\t\tif (boost.application!= BuffApplication::SET &&\n\t\t\t\tboost.strBonus == 18)\n",
+      "original": "\t\t\t\tif (boost.application == BuffApplication::SET &&\n\t\t\t\t\tboost.strBonus == 18)\n",
+      "mutated": "\t\t\t\tif (boost.application!= BuffApplication::SET &&\n\t\t\t\t\tboost.strBonus == 18)\n",
       "catches": "a setting item's 18/00 percentile ignored"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\toutput[\"application\"] = encode_buff_application(statBoost.application);\n",
-      "mutated": "\toutput[\"application\"] = \"add\";\n",
+      "original": "\t\t\toutput[\"application\"] =\n\t\t\t\tencode_buff_application(statBoost.application);\n",
+      "mutated": "\t\t\toutput[\"application\"] =\"add\";\n",
       "catches": "a worn item's record written as adding whatever it does"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tstatBoost.application =\n\t\t\tparse_buff_application(source.at(\"application\").get<std::string>());\n",
-      "mutated": "\t\tstatBoost.application =BuffApplication::ADD;\n",
+      "original": "\t\t\tstatBoost.application = parse_buff_application(\n\t\t\t\tsource.at(\"application\").get<std::string>());\n",
+      "mutated": "\t\t\tstatBoost.application =BuffApplication::ADD;\n",
       "catches": "a loaded worn item losing whether it sets"
     },
     {
@@ -57,8 +57,8 @@
     },
     {
       "file": "src/ItemRegistry.cpp",
-      "original": "\t\tparams.application = parse_buff_application(\n\t\t\trequired_field(record, key, \"application\").get<std::string>());\n",
-      "mutated": "\t\tparams.application =BuffApplication::ADD;\n",
+      "original": "\t\t\tparams.application = parse_buff_application(\n\t\t\t\trequired_field(record, key, \"application\").get<std::string>());\n",
+      "mutated": "\t\t\tparams.application =BuffApplication::ADD;\n",
       "catches": "the data's setting items loaded as adding, and an unknown name accepted"
     },
     {

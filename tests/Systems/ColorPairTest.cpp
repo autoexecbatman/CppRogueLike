@@ -32,52 +32,55 @@
 namespace CppRL
 {
 
-// The renderer indexes its table by the pair itself, so every pair needs a slot and
-// the size has to be derived from the list rather than written down beside it.
-TEST(ColorPairTest, TheTableHasASlotForEveryPair)
-{
-	for (const ColorPairId pair : ALL_COLOR_PAIR)
+	// The renderer indexes its table by the pair itself, so every pair needs a
+	// slot and the size has to be derived from the list rather than written
+	// down beside it.
+	TEST(ColorPairTest, TheTableHasASlotForEveryPair)
 	{
-		EXPECT_LT(color_pair_index(pair), COLOR_PAIR_TABLE_SIZE)
-			<< color_pair_name(pair);
-	}
-
-	// Slot zero belongs to no pair, which is the one place the offset shows.
-	EXPECT_EQ(color_pair_index(ALL_COLOR_PAIR.front()), 1u);
-	EXPECT_EQ(COLOR_PAIR_TABLE_SIZE, ALL_COLOR_PAIR.size() + 1);
-}
-
-// Every record the game ships names a pair that exists. The loaders throw on one
-// that does not, so this is what says the shipped data is loadable at all - the
-// integers these fields used to hold could name anything.
-TEST(ColorPairTest, EveryColourTheDataShipsNamesAPair)
-{
-	for (const std::string_view file : { Paths::ITEMS, Paths::MONSTERS })
-	{
-		std::ifstream stream(Paths::resolve(file));
-		ASSERT_TRUE(stream.is_open()) << file << " did not open";
-
-		nlohmann::json records;
-		stream >> records;
-
-		int checked = 0;
-		for (const auto& [key, record] : records.items())
+		for (const ColorPairId pair : ALL_COLOR_PAIR)
 		{
-			if (!record.contains("color"))
-			{
-				continue;
-			}
-			const std::string named = record.at("color").get<std::string>();
-			EXPECT_NO_THROW((void)parse_color_pair(named))
-				<< key << " carries '" << named << "'";
-			++checked;
+			EXPECT_LT(color_pair_index(pair), COLOR_PAIR_TABLE_SIZE)
+				<< color_pair_name(pair);
 		}
 
-		EXPECT_GT(checked, 0)
-			<< file << " carried no colours at all, so this checked nothing";
+		// Slot zero belongs to no pair, which is the one place the offset
+		// shows.
+		EXPECT_EQ(color_pair_index(ALL_COLOR_PAIR.front()), 1u);
+		EXPECT_EQ(COLOR_PAIR_TABLE_SIZE, ALL_COLOR_PAIR.size() + 1);
 	}
-}
 
-// end of file: ColorPairTest.cpp
+	// Every record the game ships names a pair that exists. The loaders throw
+	// on one that does not, so this is what says the shipped data is loadable
+	// at all - the integers these fields used to hold could name anything.
+	TEST(ColorPairTest, EveryColourTheDataShipsNamesAPair)
+	{
+		for (const std::string_view file : { Paths::ITEMS, Paths::MONSTERS })
+		{
+			std::ifstream stream(Paths::resolve(file));
+			ASSERT_TRUE(stream.is_open()) << file << " did not open";
+
+			nlohmann::json records;
+			stream >> records;
+
+			int checked = 0;
+			for (const auto& [key, record] : records.items())
+			{
+				if (!record.contains("color"))
+				{
+					continue;
+				}
+				const std::string named = record.at("color").get<std::string>();
+				EXPECT_NO_THROW((void)parse_color_pair(named))
+					<< key << " carries '" << named << "'";
+				++checked;
+			}
+
+			EXPECT_GT(checked, 0)
+				<< file
+				<< " carried no colours at all, so this checked nothing";
+		}
+	}
+
+	// end of file: ColorPairTest.cpp
 
 } // namespace CppRL

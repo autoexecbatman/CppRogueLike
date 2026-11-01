@@ -15,19 +15,19 @@
   "mutations": [
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "\treturn level <=\n\t\tLevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
-      "mutated": "\treturn level <\n\t\tLevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
+      "original": "\t\treturn level <=\n\t\t\tLevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
+      "mutated": "\t\treturn level <\n\t\t\tLevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
       "catches": "the adjustment ending a level before the last rolled die"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "\treturn level <=\n\t\tLevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
-      "mutated": "\treturn level <=\n\t\tLevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel + 1;",
+      "original": "\t\treturn level <=\n\t\t\tLevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
+      "mutated": "\t\treturn level <=\n\t\t\tLevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel + 1;",
       "catches": "the adjustment running a level past the last rolled die"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "\tif (creatureClass == CreatureClass::MONSTER)\n\t{\n\t\treturn true;\n\t}\n",
+      "original": "\t\tif (creatureClass == CreatureClass::MONSTER)\n\t\t{\n\t\t\treturn true;\n\t\t}\n",
       "mutated": "",
       "catches": "a monster's hit dice read as a character's levels, so the ones past the ninth take nothing"
     },
@@ -45,8 +45,8 @@
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "const bool stillRollsDice =\n\t\t\tLevelUpSystem::takes_constitution_adjustment_at(\n\t\t\t\towner.get_creature_class(),\n\t\t\t\tnewLevel);",
-      "mutated": "\t\tconst bool stillRollsDice = LevelUpSystem::takes_constitution_adjustment_at(\n\t\t\towner.get_creature_class(),\n\t\t\tnewLevel - 1);",
+      "original": "\tconst bool stillRollsDice =\n\t\t\t\tLevelUpSystem::takes_constitution_adjustment_at(\n\t\t\t\t\towner.get_creature_class(),\n\t\t\t\t\tnewLevel);",
+      "mutated": "\t\t\tconst bool stillRollsDice = LevelUpSystem::takes_constitution_adjustment_at(\n\t\t\t\towner.get_creature_class(),\n\t\t\t\tnewLevel - 1);",
       "catches": "level-up asking about the level it is leaving"
     },
     {
@@ -57,8 +57,8 @@
     },
     {
       "file": "src/ConstitutionTracker.cpp",
-      "original": "LevelUpSystem::levels_taking_constitution_adjustment(\n\t\towner.get_creature_class(),\n\t\towner.get_creature_level());",
-      "mutated": "LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::FIGHTER,\n\t\towner.get_creature_level());",
+      "original": "LevelUpSystem::levels_taking_constitution_adjustment(\n\t\t\towner.get_creature_class(),\n\t\t\towner.get_creature_level());",
+      "mutated": "LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::FIGHTER,\n\t\t\towner.get_creature_level());",
       "catches": "the tracker asking about a class other than the owner's"
     }
   ]

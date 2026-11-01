@@ -17,42 +17,42 @@
 namespace CppRL
 {
 
-class Map;
-class PrefabLibrary;
-class RandomDice;
-struct GameContext;
+	class Map;
+	class PrefabLibrary;
+	class RandomDice;
+	struct GameContext;
 
-class DungeonGenerator
-{
-private:
-	std::vector<DungeonRoom> place_rooms(
-		int mapWidth,
-		int mapHeight,
-		RandomDice& rng,
-		const PrefabLibrary* prefabs) const;
+	class DungeonGenerator
+	{
+	private:
+		std::vector<DungeonRoom> place_rooms(
+			int mapWidth,
+			int mapHeight,
+			RandomDice& rng,
+			const PrefabLibrary* prefabs) const;
 
-	// Phase 1: Prim's MST - guarantees full connectivity, no cycles.
-	// Room types must be assigned after this and before add_extra_corridors.
-	void connect_spanning_tree(std::vector<DungeonRoom>& rooms) const;
+		// Phase 1: Prim's MST - guarantees full connectivity, no cycles. Room
+		// types must be assigned after this and before add_extra_corridors.
+		void connect_spanning_tree(std::vector<DungeonRoom>& rooms) const;
 
-	// Phase 2: extra short-range corridors to create loop paths.
-	// Does not affect leaf detection - run after room type assignment.
-	void add_extra_corridors(
-		std::vector<DungeonRoom>& rooms,
-		RandomDice& rng) const;
+		// Phase 2: extra short-range corridors to create loop paths.
+		// Does not affect leaf detection - run after room type assignment.
+		void add_extra_corridors(
+			std::vector<DungeonRoom>& rooms,
+			RandomDice& rng) const;
 
-	void connect_pair(
-		std::vector<DungeonRoom>& rooms,
-		int indexA,
-		int indexB) const;
+		void connect_pair(
+			std::vector<DungeonRoom>& rooms,
+			int indexA,
+			int indexB) const;
 
-public:
-	void generate(
-		int mapWidth,
-		int mapHeight,
-		RandomDice& rng,
-		GameContext& ctx,
-		Map& map) const;
-};
+	public:
+		void generate(
+			int mapWidth,
+			int mapHeight,
+			RandomDice& rng,
+			GameContext& ctx,
+			Map& map) const;
+	};
 
 } // namespace CppRL

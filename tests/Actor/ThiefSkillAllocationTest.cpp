@@ -42,130 +42,139 @@
 namespace CppRL
 {
 
-class ThiefSkillAllocationTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	class ThiefSkillAllocationTest : public ::testing::Test
 	{
-		game.dataManager.load_all_data(game.messageSystem);
-		game.tileConfig.load(Paths::TILE_CONFIG);
-		game.itemRegistry.load(Paths::ITEMS);
+	protected:
+		void SetUp() override
+		{
+			game.dataManager.load_all_data(game.messageSystem);
+			game.tileConfig.load(Paths::TILE_CONFIG);
+			game.itemRegistry.load(Paths::ITEMS);
 
-		player->experienceReward = std::make_unique<ExperienceReward>(0);
-		player->healthPool = std::make_unique<HealthPool>(20);
-		player->armorClass = std::make_unique<ArmorClass>(10);
-		player->attacker = std::make_unique<PlayerAttacker>(*player);
-		player->set_strength(12);
-		player->set_dexterity(17);
-		player->set_constitution(10);
-		player->set_intelligence(10);
-		player->set_wisdom(10);
-		player->set_charisma(10);
+			player->experienceReward = std::make_unique<ExperienceReward>(0);
+			player->healthPool = std::make_unique<HealthPool>(20);
+			player->armorClass = std::make_unique<ArmorClass>(10);
+			player->attacker = std::make_unique<PlayerAttacker>(*player);
+			player->set_strength(12);
+			player->set_dexterity(17);
+			player->set_constitution(10);
+			player->set_intelligence(10);
+			player->set_wisdom(10);
+			player->set_charisma(10);
 
-		player->set_creature_class(CreatureClass::ROGUE);
-		player->lifespan->race = PlayerRaceState::DWARF;
+			player->set_creature_class(CreatureClass::ROGUE);
+			player->lifespan->race = PlayerRaceState::DWARF;
 
-		ctx = game.context();
-		ctx.playerOwner = &player;
+			ctx = game.context();
+			ctx.playerOwner = &player;
+		}
+
+		// Puts a suit of armour on the way the inventory screen does.
+		void wear(std::string_view key)
+		{
+			auto item = ItemCreator::create(key, player->position, ctx);
+			Item* carried = item.get();
+			[[maybe_unused]] const auto added =
+				InventoryOperations::add_item_to_inventory(
+					player->inventoryData,
+					std::move(item),
+					*player,
+					*ctx.dataManager);
+			ASSERT_TRUE(added.has_value()) << key << " did not fit in the pack";
+			use_item(*carried->behavior, *carried, *player, ctx);
+			ASSERT_NE(player->get_equipped_item(EquipmentSlot::BODY), nullptr)
+				<< key << " was not put on";
+		}
+
+		Game game{ TEST_DICE_SEED };
+		GameContext ctx;
+		std::unique_ptr<Player> player{ std::make_unique<Player>(
+			Vector2D{ 0, 0 }) };
+	};
+
+	// The ordering Player::on_new_game_start states: the kit goes on, then the
+	// screen is asked. Asked first, it answers Table 29's "No Armor" column for
+	// a character that is about to be standing in leather.
+	TEST_F(
+		ThiefSkillAllocationTest,
+		TheAllocationReadsTheArmourOnTheBodyWhenItIsAsked)
+	{
+		// Move Silently: base 10, dwarf 0, Dexterity 17 +5, no armour +10.
+		const ThiefSkillAllocation beforeDressing =
+			thief_skill_allocation_for(*player, 1);
+		EXPECT_EQ(beforeDressing.score(ThiefSkill::MOVE_SILENTLY), 25);
+
+		wear("leather_armor");
+
+		// The same character, now in leather, which Table 29 gives no bonus at
+		// all.
+		const ThiefSkillAllocation afterDressing =
+			thief_skill_allocation_for(*player, 1);
+		EXPECT_EQ(afterDressing.score(ThiefSkill::MOVE_SILENTLY), 15);
 	}
 
-	// Puts a suit of armour on the way the inventory screen does.
-	void wear(std::string_view key)
+	// Chain mail is the last column Table 29 prints, and it is the heaviest
+	// penalty a character can hand the screen.
+	TEST_F(
+		ThiefSkillAllocationTest,
+		TheArmourPenaltyReachesTheAllocationAtFullWeight)
 	{
-		auto item = ItemCreator::create(key, player->position, ctx);
-		Item* carried = item.get();
-		[[maybe_unused]] const auto added =
-			InventoryOperations::add_item_to_inventory(
-				player->inventoryData,
-				std::move(item),
-				*player,
-				*ctx.dataManager);
-		ASSERT_TRUE(added.has_value()) << key << " did not fit in the pack";
-		use_item(*carried->behavior, *carried, *player, ctx);
-		ASSERT_NE(player->get_equipped_item(EquipmentSlot::BODY), nullptr)
-			<< key << " was not put on";
+		wear("chain_mail");
+
+		const ThiefSkillAllocation allocation =
+			thief_skill_allocation_for(*player, 1);
+
+		// Open Locks: base 10, dwarf +10, Dexterity 17 +10, chain mail -10.
+		EXPECT_EQ(allocation.score(ThiefSkill::OPEN_LOCKS), 20);
+		// Move Silently: base 10, dwarf 0, Dexterity 17 +5, chain mail -15.
+		EXPECT_EQ(allocation.score(ThiefSkill::MOVE_SILENTLY), 0);
 	}
 
-	Game game{ TEST_DICE_SEED };
-	GameContext ctx;
-	std::unique_ptr<Player> player{ std::make_unique<Player>(
-		Vector2D{ 0, 0 }) };
-};
+	// Armour heavier than Table 29 prints leaves the character with no skill at
+	// all, and the screen must not inherit that as a silent zero: the
+	// allocation is built unarmoured rather than stranding the points.
+	TEST_F(
+		ThiefSkillAllocationTest,
+		ArmourOffTheTableIsJudgedUnarmouredRatherThanStranded)
+	{
+		wear("plate_mail");
+		ASSERT_FALSE(player->thief_armor().has_value());
 
-// The ordering Player::on_new_game_start states: the kit goes on, then the screen
-// is asked. Asked first, it answers Table 29's "No Armor" column for a character
-// that is about to be standing in leather.
-TEST_F(
-	ThiefSkillAllocationTest,
-	TheAllocationReadsTheArmourOnTheBodyWhenItIsAsked)
-{
-	// Move Silently: base 10, dwarf 0, Dexterity 17 +5, no armour +10.
-	const ThiefSkillAllocation beforeDressing =
-		thief_skill_allocation_for(*player, 1);
-	EXPECT_EQ(beforeDressing.score(ThiefSkill::MOVE_SILENTLY), 25);
+		const ThiefSkillAllocation allocation =
+			thief_skill_allocation_for(*player, 1);
 
-	wear("leather_armor");
+		// The No Armor column, the same answer an empty body slot gives.
+		EXPECT_EQ(allocation.score(ThiefSkill::MOVE_SILENTLY), 25);
+	}
 
-	// The same character, now in leather, which Table 29 gives no bonus at all.
-	const ThiefSkillAllocation afterDressing =
-		thief_skill_allocation_for(*player, 1);
-	EXPECT_EQ(afterDressing.score(ThiefSkill::MOVE_SILENTLY), 15);
-}
+	// What a level hands a thief: sixty points at first level, thirty at every
+	// one after it (Player's Handbook, PDF page 84).
+	TEST_F(ThiefSkillAllocationTest, TheGrantIsSixtyAtFirstLevelAndThirtyAfter)
+	{
+		EXPECT_EQ(
+			thief_skill_allocation_for(*player, 1).remaining_points(),
+			60);
+		EXPECT_EQ(
+			thief_skill_allocation_for(*player, 2).remaining_points(),
+			30);
+		EXPECT_EQ(
+			thief_skill_allocation_for(*player, 9).remaining_points(),
+			30);
+	}
 
-// Chain mail is the last column Table 29 prints, and it is the heaviest penalty a
-// character can hand the screen.
-TEST_F(
-	ThiefSkillAllocationTest,
-	TheArmourPenaltyReachesTheAllocationAtFullWeight)
-{
-	wear("chain_mail");
+	// The reader answers for whoever is asked; deciding that only a rogue is
+	// asked at all belongs to the caller that opens the screen.
+	TEST_F(
+		ThiefSkillAllocationTest,
+		NoScreenOpensForACharacterWithNoThiefSkills)
+	{
+		player->set_creature_class(CreatureClass::FIGHTER);
 
-	const ThiefSkillAllocation allocation =
-		thief_skill_allocation_for(*player, 1);
+		const size_t before = ctx.menus->size();
+		push_thief_skill_allocation(*player, 1, ctx);
 
-	// Open Locks: base 10, dwarf +10, Dexterity 17 +10, chain mail -10.
-	EXPECT_EQ(allocation.score(ThiefSkill::OPEN_LOCKS), 20);
-	// Move Silently: base 10, dwarf 0, Dexterity 17 +5, chain mail -15.
-	EXPECT_EQ(allocation.score(ThiefSkill::MOVE_SILENTLY), 0);
-}
-
-// Armour heavier than Table 29 prints leaves the character with no skill at all,
-// and the screen must not inherit that as a silent zero: the allocation is built
-// unarmoured rather than stranding the points.
-TEST_F(
-	ThiefSkillAllocationTest,
-	ArmourOffTheTableIsJudgedUnarmouredRatherThanStranded)
-{
-	wear("plate_mail");
-	ASSERT_FALSE(player->thief_armor().has_value());
-
-	const ThiefSkillAllocation allocation =
-		thief_skill_allocation_for(*player, 1);
-
-	// The No Armor column, the same answer an empty body slot gives.
-	EXPECT_EQ(allocation.score(ThiefSkill::MOVE_SILENTLY), 25);
-}
-
-// What a level hands a thief: sixty points at first level, thirty at every one
-// after it (Player's Handbook, PDF page 84).
-TEST_F(ThiefSkillAllocationTest, TheGrantIsSixtyAtFirstLevelAndThirtyAfter)
-{
-	EXPECT_EQ(thief_skill_allocation_for(*player, 1).remaining_points(), 60);
-	EXPECT_EQ(thief_skill_allocation_for(*player, 2).remaining_points(), 30);
-	EXPECT_EQ(thief_skill_allocation_for(*player, 9).remaining_points(), 30);
-}
-
-// The reader answers for whoever is asked; deciding that only a rogue is asked at
-// all belongs to the caller that opens the screen.
-TEST_F(ThiefSkillAllocationTest, NoScreenOpensForACharacterWithNoThiefSkills)
-{
-	player->set_creature_class(CreatureClass::FIGHTER);
-
-	const size_t before = ctx.menus->size();
-	push_thief_skill_allocation(*player, 1, ctx);
-
-	EXPECT_EQ(ctx.menus->size(), before)
-		<< "a fighter was offered thief skill points";
-}
+		EXPECT_EQ(ctx.menus->size(), before)
+			<< "a fighter was offered thief skill points";
+	}
 
 } // namespace CppRL

@@ -20,28 +20,28 @@
 namespace CppRL
 {
 
-class CountingAi : public Ai
-{
-public:
-	int updates{ 0 };
-
-	void update(Creature& owner, GameContext& ctx) override
+	class CountingAi : public Ai
 	{
-		(void)owner;
-		(void)ctx;
-		++updates;
-	}
+	public:
+		int updates{ 0 };
 
-	[[nodiscard]] AiType get_ai_type() const noexcept override
-	{
-		return AiType::MONSTER;
-	}
+		void update(Creature& owner, GameContext& ctx) override
+		{
+			(void)owner;
+			(void)ctx;
+			++updates;
+		}
 
-	void load(const json& j) override { (void)j; }
+		[[nodiscard]] AiType get_ai_type() const noexcept override
+		{
+			return AiType::MONSTER;
+		}
 
-	void save(json& j) override { (void)j; }
-};
+		void load(const json& j) override { (void)j; }
 
-// end of file: CountingAi.h
+		void save(json& j) override { (void)j; }
+	};
+
+	// end of file: CountingAi.h
 
 } // namespace CppRL

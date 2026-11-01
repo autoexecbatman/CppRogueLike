@@ -15,26 +15,26 @@
   "mutations": [
     {
       "file": "src/Pickable.cpp",
-      "original": "\treturn magicalHelm && magicalHelm->effect == MagicalEffect::TELEPORTATION &&\n\t\tmagicalHelm->rechargedAt <= now;",
-      "mutated": "\treturn magicalHelm && magicalHelm->effect == MagicalEffect::TELEPORTATION;",
+      "original": "\t\treturn magicalHelm &&\n\t\t\tmagicalHelm->effect == MagicalEffect::TELEPORTATION &&\n\t\t\tmagicalHelm->rechargedAt <= now;",
+      "mutated": "\t\treturn magicalHelm &&\n\t\t\tmagicalHelm->effect == MagicalEffect::TELEPORTATION;",
       "catches": "a helm that never runs out"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\treturn magicalHelm && magicalHelm->effect == MagicalEffect::TELEPORTATION &&\n\t\tmagicalHelm->rechargedAt <= now;",
-      "mutated": "\treturn magicalHelm && magicalHelm->effect == MagicalEffect::TELEPORTATION &&\n\t\tmagicalHelm->rechargedAt < now;",
+      "original": "\t\treturn magicalHelm &&\n\t\t\tmagicalHelm->effect == MagicalEffect::TELEPORTATION &&\n\t\t\tmagicalHelm->rechargedAt <= now;",
+      "mutated": "\t\treturn magicalHelm &&\n\t\t\tmagicalHelm->effect == MagicalEffect::TELEPORTATION &&\n\t\t\tmagicalHelm->rechargedAt < now;",
       "catches": "a helm a time unit late at the end of its day"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\treturn magicalHelm && magicalHelm->effect == MagicalEffect::TELEPORTATION &&\n\t\tmagicalHelm->rechargedAt <= now;",
-      "mutated": "\treturn magicalHelm && magicalHelm->rechargedAt <= now;",
+      "original": "\t\treturn magicalHelm &&\n\t\t\tmagicalHelm->effect == MagicalEffect::TELEPORTATION &&\n\t\t\tmagicalHelm->rechargedAt <= now;",
+      "mutated": "\t\treturn magicalHelm &&\n\t\t\tmagicalHelm->rechargedAt <= now;",
       "catches": "every helm answering as though it had a daily teleport"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\treturn magicalHelm && magicalHelm->effect == MagicalEffect::TELEPORTATION &&\n\t\tmagicalHelm->rechargedAt <= now;",
-      "mutated": "\treturn false;",
+      "original": "\t\treturn magicalHelm &&\n\t\t\tmagicalHelm->effect == MagicalEffect::TELEPORTATION &&\n\t\t\tmagicalHelm->rechargedAt <= now;",
+      "mutated": "\t\treturn false;",
       "catches": "a helm that is never ready"
     },
     {
@@ -75,14 +75,14 @@
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\t\t\titemSpells.push_back(\n\t\t\t\t{ \"teleport\", \"Helm\", ItemPower::CAST_SPELL_ONCE_A_DAY });",
-      "mutated": "\t\t\titemSpells.push_back(\n\t\t\t\t{ \"teleport\", \"Helm\", ItemPower::CAST_SPELL });",
+      "original": "\t\t\t\titemSpells.push_back(\n\t\t\t\t\t{ \"teleport\", \"Helm\", ItemPower::CAST_SPELL_ONCE_A_DAY });",
+      "mutated": "\t\t\t\titemSpells.push_back(\n\t\t\t\t\t{ \"teleport\", \"Helm\", ItemPower::CAST_SPELL });",
       "catches": "the helm's teleport cast as a free spell that spends nothing"
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\t\titemSpells.push_back({ \"invisibility\", \"Ring\", ItemPower::CAST_SPELL });",
-      "mutated": "\t\titemSpells.push_back({ \"invisibility\", \"Ring\", ItemPower::CAST_SPELL_ONCE_A_DAY });",
+      "original": "\t\t\titemSpells.push_back(\n\t\t\t\t{ \"invisibility\", \"Ring\", ItemPower::CAST_SPELL });",
+      "mutated": "\t\t\titemSpells.push_back(\n\t\t\t\t{ \"invisibility\", \"Ring\", ItemPower::CAST_SPELL_ONCE_A_DAY });",
       "catches": "the ring treated as a daily power"
     },
     {
@@ -99,8 +99,8 @@
     },
     {
       "file": "src/MenuSpellCast.cpp",
-      "original": "\tconst bool spendsTheHelm =\n\t\tentry.power == SpellSystem::ItemPower::CAST_SPELL_ONCE_A_DAY;",
-      "mutated": "\tconst bool spendsTheHelm =false;",
+      "original": "\t\tconst bool spendsTheHelm =\n\t\t\tentry.power == SpellSystem::ItemPower::CAST_SPELL_ONCE_A_DAY;",
+      "mutated": "\t\tconst bool spendsTheHelm =false;",
       "catches": "casting from the helm spending nothing"
     }
   ]

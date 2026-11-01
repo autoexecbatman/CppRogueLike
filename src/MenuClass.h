@@ -9,8 +9,8 @@
 namespace CppRL
 {
 
-struct GameContext;
+	struct GameContext;
 
-std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx);
+	std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx);
 
 } // namespace CppRL

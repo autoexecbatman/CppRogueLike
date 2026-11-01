@@ -27,88 +27,89 @@
 namespace CppRL
 {
 
-namespace
-{
-	bool offers(
-		const std::vector<std::string>& labels,
-		const std::string& wanted)
+	namespace
 	{
-		return std::ranges::find(labels, wanted) != labels.end();
-	}
-} // namespace
-
-TEST(InventoryContextActionsTest, ABackpackItemCanBeUsedOrDropped)
-{
-	const auto labels =
-		InventoryActions::labels_for_row(InventoryScreen::BACKPACK, true);
-
-	EXPECT_TRUE(offers(labels, "Use"));
-	EXPECT_TRUE(offers(labels, "Drop"));
-}
-
-TEST(InventoryContextActionsTest, AWornItemCanBeTakenOffOrDropped)
-{
-	const auto labels =
-		InventoryActions::labels_for_row(InventoryScreen::EQUIPMENT, true);
-
-	EXPECT_TRUE(offers(labels, "Unequip"));
-	EXPECT_TRUE(offers(labels, "Drop"));
-	EXPECT_FALSE(offers(labels, "Use"))
-		<< "a worn item was offered Use, which equips it again";
-}
-
-TEST(InventoryContextActionsTest, AnEmptySlotOffersToBrowseWhatFitsIt)
-{
-	const auto labels =
-		InventoryActions::labels_for_row(InventoryScreen::EQUIPMENT, false);
-
-	EXPECT_TRUE(offers(labels, "Browse"));
-	EXPECT_FALSE(offers(labels, "Drop"))
-		<< "an empty slot offered to drop what it does not hold";
-	EXPECT_FALSE(offers(labels, "Unequip"));
-}
-
-TEST(InventoryContextActionsTest, ARowHoldingNothingOffersNothingAtAll)
-{
-	// A category heading in the backpack list. The map's context menu skips opening when
-	// there is nothing actionable, and this follows it: empty means no menu.
-	EXPECT_TRUE(
-		InventoryActions::labels_for_row(InventoryScreen::BACKPACK, false)
-			.empty());
-	EXPECT_TRUE(
-		InventoryActions::labels_for_row(InventoryScreen::USABLES, false)
-			.empty());
-}
-
-TEST(InventoryContextActionsTest, EveryMenuOfferedCanBeDismissed)
-{
-	// Without Cancel the only way out of an opened menu is ESC, which a player who
-	// reached it with the mouse has no reason to look for.
-	for (
-		const auto screen : {
-			InventoryScreen::EQUIPMENT,
-			InventoryScreen::BACKPACK,
-			InventoryScreen::USABLES,
-		})
-	{
-		for (const bool holdsItem : { true, false })
+		bool offers(
+			const std::vector<std::string>& labels,
+			const std::string& wanted)
 		{
-			const auto labels =
-				InventoryActions::labels_for_row(screen, holdsItem);
-			if (!labels.empty())
+			return std::ranges::find(labels, wanted) != labels.end();
+		}
+	} // namespace
+
+	TEST(InventoryContextActionsTest, ABackpackItemCanBeUsedOrDropped)
+	{
+		const auto labels =
+			InventoryActions::labels_for_row(InventoryScreen::BACKPACK, true);
+
+		EXPECT_TRUE(offers(labels, "Use"));
+		EXPECT_TRUE(offers(labels, "Drop"));
+	}
+
+	TEST(InventoryContextActionsTest, AWornItemCanBeTakenOffOrDropped)
+	{
+		const auto labels =
+			InventoryActions::labels_for_row(InventoryScreen::EQUIPMENT, true);
+
+		EXPECT_TRUE(offers(labels, "Unequip"));
+		EXPECT_TRUE(offers(labels, "Drop"));
+		EXPECT_FALSE(offers(labels, "Use"))
+			<< "a worn item was offered Use, which equips it again";
+	}
+
+	TEST(InventoryContextActionsTest, AnEmptySlotOffersToBrowseWhatFitsIt)
+	{
+		const auto labels =
+			InventoryActions::labels_for_row(InventoryScreen::EQUIPMENT, false);
+
+		EXPECT_TRUE(offers(labels, "Browse"));
+		EXPECT_FALSE(offers(labels, "Drop"))
+			<< "an empty slot offered to drop what it does not hold";
+		EXPECT_FALSE(offers(labels, "Unequip"));
+	}
+
+	TEST(InventoryContextActionsTest, ARowHoldingNothingOffersNothingAtAll)
+	{
+		// A category heading in the backpack list. The map's context menu skips
+		// opening when there is nothing actionable, and this follows it: empty
+		// means no menu.
+		EXPECT_TRUE(
+			InventoryActions::labels_for_row(InventoryScreen::BACKPACK, false)
+				.empty());
+		EXPECT_TRUE(
+			InventoryActions::labels_for_row(InventoryScreen::USABLES, false)
+				.empty());
+	}
+
+	TEST(InventoryContextActionsTest, EveryMenuOfferedCanBeDismissed)
+	{
+		// Without Cancel the only way out of an opened menu is ESC, which a
+		// player who reached it with the mouse has no reason to look for.
+		for (
+			const auto screen : {
+				InventoryScreen::EQUIPMENT,
+				InventoryScreen::BACKPACK,
+				InventoryScreen::USABLES,
+			})
+		{
+			for (const bool holdsItem : { true, false })
 			{
-				EXPECT_EQ(labels.back(), "Cancel")
-					<< "a menu was offered with no way to dismiss it";
+				const auto labels =
+					InventoryActions::labels_for_row(screen, holdsItem);
+				if (!labels.empty())
+				{
+					EXPECT_EQ(labels.back(), "Cancel")
+						<< "a menu was offered with no way to dismiss it";
+				}
 			}
 		}
 	}
-}
 
-TEST(InventoryContextActionsTest, AUsableIsUsedTheSameWayAsABackpackItem)
-{
-	EXPECT_EQ(
-		InventoryActions::labels_for_row(InventoryScreen::USABLES, true),
-		InventoryActions::labels_for_row(InventoryScreen::BACKPACK, true));
-}
+	TEST(InventoryContextActionsTest, AUsableIsUsedTheSameWayAsABackpackItem)
+	{
+		EXPECT_EQ(
+			InventoryActions::labels_for_row(InventoryScreen::USABLES, true),
+			InventoryActions::labels_for_row(InventoryScreen::BACKPACK, true));
+	}
 
 } // namespace CppRL

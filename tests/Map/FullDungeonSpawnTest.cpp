@@ -39,98 +39,101 @@
 namespace CppRL
 {
 
-namespace
-{
-	constexpr int ROOM_COL = 2;
-	constexpr int ROOM_ROW = 2;
-	constexpr int ROOM_SIZE = 3;
-} // namespace
-
-class FullDungeonSpawnTest : public ::testing::Test
-{
-protected:
-	void SetUp() override
+	namespace
 	{
-		ctx = mock.to_game_context();
-		ctx.playerOwner = &player;
-		ctx.creatures = &creatures;
-		ctx.map = &map;
-		ctx.rooms = &rooms;
-		ctx.creatureManager = &manager;
-		// add_monster only builds anything when a levelManager is wired, so without this
-		// the spawn is inert and a test of "nothing was spawned" passes for the wrong
-		// reason. A mutation that spawned on the empty path survived until this was here.
-		ctx.levelManager = &levels;
+		constexpr int ROOM_COL = 2;
+		constexpr int ROOM_ROW = 2;
+		constexpr int ROOM_SIZE = 3;
+	} // namespace
 
-		map.init_tiles();
-		carve(TileType::FLOOR);
-		rooms.push_back(
-			DungeonRoom{ ROOM_COL, ROOM_ROW, ROOM_SIZE, ROOM_SIZE });
-	}
-
-	void carve(TileType type)
+	class FullDungeonSpawnTest : public ::testing::Test
 	{
-		for (int column = ROOM_COL; column < ROOM_COL + ROOM_SIZE; ++column)
+	protected:
+		void SetUp() override
 		{
-			for (int row = ROOM_ROW; row < ROOM_ROW + ROOM_SIZE; ++row)
+			ctx = mock.to_game_context();
+			ctx.playerOwner = &player;
+			ctx.creatures = &creatures;
+			ctx.map = &map;
+			ctx.rooms = &rooms;
+			ctx.creatureManager = &manager;
+			// add_monster only builds anything when a levelManager is wired, so
+			// without this the spawn is inert and a test of "nothing was
+			// spawned" passes for the wrong reason. A mutation that spawned on
+			// the empty path survived until this was here.
+			ctx.levelManager = &levels;
+
+			map.init_tiles();
+			carve(TileType::FLOOR);
+			rooms.push_back(
+				DungeonRoom{ ROOM_COL, ROOM_ROW, ROOM_SIZE, ROOM_SIZE });
+		}
+
+		void carve(TileType type)
+		{
+			for (int column = ROOM_COL; column < ROOM_COL + ROOM_SIZE; ++column)
 			{
-				map.set_tile(Vector2D{ column, row }, type);
+				for (int row = ROOM_ROW; row < ROOM_ROW + ROOM_SIZE; ++row)
+				{
+					map.set_tile(Vector2D{ column, row }, type);
+				}
 			}
 		}
+
+		MockGameContext mock{};
+		GameContext ctx{};
+		Map map{ 20, 20 };
+		CreatureManager manager{};
+		LevelManager levels{};
+		std::vector<DungeonRoom> rooms{};
+		std::vector<std::unique_ptr<Creature>> creatures{};
+		std::unique_ptr<Player> player{};
+	};
+
+	TEST_F(FullDungeonSpawnTest, ARoomOfWaterOffersNoTile)
+	{
+		carve(TileType::WATER);
+
+		EXPECT_FALSE(
+			SpawnUtils::find_random_room_position(rooms.front(), ctx)
+				.has_value())
+			<< "a room with nothing but water offered a tile to stand on";
 	}
 
-	MockGameContext mock{};
-	GameContext ctx{};
-	Map map{ 20, 20 };
-	CreatureManager manager{};
-	LevelManager levels{};
-	std::vector<DungeonRoom> rooms{};
-	std::vector<std::unique_ptr<Creature>> creatures{};
-	std::unique_ptr<Player> player{};
-};
+	TEST_F(FullDungeonSpawnTest, AFullDungeonSpawnsNothingAndReturns)
+	{
+		// The whole point: this must come back. Before the fix it never did.
+		carve(TileType::WATER);
+		const size_t before = creatures.size();
 
-TEST_F(FullDungeonSpawnTest, ARoomOfWaterOffersNoTile)
-{
-	carve(TileType::WATER);
+		manager.spawn_creatures(ctx);
 
-	EXPECT_FALSE(
-		SpawnUtils::find_random_room_position(rooms.front(), ctx).has_value())
-		<< "a room with nothing but water offered a tile to stand on";
-}
+		EXPECT_EQ(creatures.size(), before)
+			<< "a monster was put somewhere there was no room";
+	}
 
-TEST_F(FullDungeonSpawnTest, AFullDungeonSpawnsNothingAndReturns)
-{
-	// The whole point: this must come back. Before the fix it never did.
-	carve(TileType::WATER);
-	const size_t before = creatures.size();
+	TEST_F(FullDungeonSpawnTest, ARoomWithSpaceDoesSpawn)
+	{
+		// The guard in spawn_creatures has to be readable both ways: with
+		// somewhere to put a monster, one appears. Without this the fix could
+		// be "never spawn" and pass.
+		const size_t before = creatures.size();
 
-	manager.spawn_creatures(ctx);
+		manager.spawn_creatures(ctx);
 
-	EXPECT_EQ(creatures.size(), before)
-		<< "a monster was put somewhere there was no room";
-}
+		EXPECT_GT(creatures.size(), before)
+			<< "a dry room with space produced no monster";
+	}
 
-TEST_F(FullDungeonSpawnTest, ARoomWithSpaceDoesSpawn)
-{
-	// The guard in spawn_creatures has to be readable both ways: with somewhere to put a
-	// monster, one appears. Without this the fix could be "never spawn" and pass.
-	const size_t before = creatures.size();
+	TEST_F(FullDungeonSpawnTest, ADryRoomStillSpawns)
+	{
+		// The other half: the give-up path must not swallow the ordinary case.
+		const auto position =
+			SpawnUtils::find_random_room_position(rooms.front(), ctx);
 
-	manager.spawn_creatures(ctx);
-
-	EXPECT_GT(creatures.size(), before)
-		<< "a dry room with space produced no monster";
-}
-
-TEST_F(FullDungeonSpawnTest, ADryRoomStillSpawns)
-{
-	// The other half: the give-up path must not swallow the ordinary case.
-	const auto position =
-		SpawnUtils::find_random_room_position(rooms.front(), ctx);
-
-	ASSERT_TRUE(position.has_value())
-		<< "a room of dry floor offered no tile at all";
-	EXPECT_FALSE(map.is_water(*position));
-}
+		ASSERT_TRUE(position.has_value())
+			<< "a room of dry floor offered no tile at all";
+		EXPECT_FALSE(map.is_water(*position));
+	}
 
 } // namespace CppRL

@@ -15,14 +15,14 @@
   "mutations": [
     {
       "file": "src/Creature.cpp",
-      "original": "\tconstitutionTracker->set_last_constitution(get_constitution());\n}",
-      "mutated": "}",
+      "original": "\t\tconstitutionTracker->set_last_constitution(get_constitution());\n\t}",
+      "mutated": "\t}",
       "catches": "hit dice given without the score recorded, so the first tick applies it twice"
     },
     {
       "file": "src/CreatureClass.h",
-      "original": "\treturn creatureClass == CreatureClass::FIGHTER ||\n\t\tcreatureClass == CreatureClass::MONSTER;",
-      "mutated": "\treturn creatureClass == CreatureClass::FIGHTER;",
+      "original": "\t\treturn creatureClass == CreatureClass::FIGHTER ||\n\t\t\tcreatureClass == CreatureClass::MONSTER;",
+      "mutated": "\t\treturn creatureClass == CreatureClass::FIGHTER;",
       "catches": "a monster capped at the non-warrior +2 instead of reading the warrior column"
     },
     {

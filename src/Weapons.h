@@ -10,172 +10,179 @@
 namespace CppRL
 {
 
-enum class HandRequirement
-{
-	ONE_HANDED, // Dagger, short sword, longsword, battle axe, war hammer, staff
-	TWO_HANDED, // Greatsword, great axe, longbow
-	OFF_HAND_ONLY // Shield, buckler
-};
-
-// Every HandRequirement, in the order the enum declares them, so a cycle through the
-// editor's field reaches all of them and adding one is a single edit here.
-inline constexpr std::array<HandRequirement, 3> ALL_HAND_REQUIREMENT = {
-	HandRequirement::ONE_HANDED,
-	HandRequirement::TWO_HANDED,
-	HandRequirement::OFF_HAND_ONLY,
-};
-
-// The next HandRequirement in that order, wrapping at the end.
-//
-// Example:
-//   next_hand_requirement(HandRequirement::ONE_HANDED);   // -> HandRequirement::TWO_HANDED
-[[nodiscard]] inline HandRequirement next_hand_requirement(
-	HandRequirement value)
-{
-	const auto found = std::ranges::find(ALL_HAND_REQUIREMENT, value);
-	if (found == ALL_HAND_REQUIREMENT.end() ||
-		found + 1 == ALL_HAND_REQUIREMENT.end())
+	enum class HandRequirement
 	{
-		return ALL_HAND_REQUIREMENT.front();
+		// Dagger, short sword, longsword, battle axe, war hammer, staff
+		ONE_HANDED,
+		TWO_HANDED, // Greatsword, great axe, longbow
+		OFF_HAND_ONLY // Shield, buckler
+	};
+
+	// Every HandRequirement, in the order the enum declares them, so a cycle
+	// through the editor's field reaches all of them and adding one is a single
+	// edit here.
+	inline constexpr std::array<HandRequirement, 3> ALL_HAND_REQUIREMENT = {
+		HandRequirement::ONE_HANDED,
+		HandRequirement::TWO_HANDED,
+		HandRequirement::OFF_HAND_ONLY,
+	};
+
+	// The next HandRequirement in that order, wrapping at the end.
+	//
+	// Example:
+	//   next_hand_requirement(HandRequirement::ONE_HANDED);
+	//   // -> HandRequirement::TWO_HANDED
+	[[nodiscard]] inline HandRequirement next_hand_requirement(
+		HandRequirement value)
+	{
+		const auto found = std::ranges::find(ALL_HAND_REQUIREMENT, value);
+		if (found == ALL_HAND_REQUIREMENT.end() ||
+			found + 1 == ALL_HAND_REQUIREMENT.end())
+		{
+			return ALL_HAND_REQUIREMENT.front();
+		}
+		return *(found + 1);
 	}
-	return *(found + 1);
-}
 
-// AD&D 2e Weapon Size Categories for Two-Weapon Fighting
-enum class WeaponSize
-{
-	TINY, // Dagger, dart - can always be off-hand
-	SMALL, // Short sword, hand axe, club - can be off-hand vs MEDIUM+ main hand
-	MEDIUM, // Long sword, battle axe, mace - main hand weapon
-	LARGE, // Two-handed sword, halberd - cannot dual wield
-	GIANT // Giant weapons - cannot dual wield
-};
-
-// Every WeaponSize, in the order the enum declares them, so a cycle through the
-// editor's field reaches all of them and adding one is a single edit here.
-inline constexpr std::array<WeaponSize, 5> ALL_WEAPON_SIZE = {
-	WeaponSize::TINY,
-	WeaponSize::SMALL,
-	WeaponSize::MEDIUM,
-	WeaponSize::LARGE,
-	WeaponSize::GIANT,
-};
-
-// The next WeaponSize in that order, wrapping at the end.
-//
-// Example:
-//   next_weapon_size(WeaponSize::TINY);   // -> WeaponSize::SMALL
-[[nodiscard]] inline WeaponSize next_weapon_size(WeaponSize value)
-{
-	const auto found = std::ranges::find(ALL_WEAPON_SIZE, value);
-	if (found == ALL_WEAPON_SIZE.end() || found + 1 == ALL_WEAPON_SIZE.end())
+	// AD&D 2e Weapon Size Categories for Two-Weapon Fighting
+	enum class WeaponSize
 	{
-		return ALL_WEAPON_SIZE.front();
+		TINY, // Dagger, dart - can always be off-hand
+		// Short sword, hand axe, club - can be off-hand vs MEDIUM+ main hand
+		SMALL,
+		MEDIUM, // Long sword, battle axe, mace - main hand weapon
+		LARGE, // Two-handed sword, halberd - cannot dual wield
+		GIANT // Giant weapons - cannot dual wield
+	};
+
+	// Every WeaponSize, in the order the enum declares them, so a cycle through
+	// the editor's field reaches all of them and adding one is a single edit
+	// here.
+	inline constexpr std::array<WeaponSize, 5> ALL_WEAPON_SIZE = {
+		WeaponSize::TINY,
+		WeaponSize::SMALL,
+		WeaponSize::MEDIUM,
+		WeaponSize::LARGE,
+		WeaponSize::GIANT,
+	};
+
+	// The next WeaponSize in that order, wrapping at the end.
+	//
+	// Example:
+	//   next_weapon_size(WeaponSize::TINY);   // -> WeaponSize::SMALL
+	[[nodiscard]] inline WeaponSize next_weapon_size(WeaponSize value)
+	{
+		const auto found = std::ranges::find(ALL_WEAPON_SIZE, value);
+		if (found == ALL_WEAPON_SIZE.end() ||
+			found + 1 == ALL_WEAPON_SIZE.end())
+		{
+			return ALL_WEAPON_SIZE.front();
+		}
+		return *(found + 1);
 	}
-	return *(found + 1);
-}
 
-inline std::string_view encode_hand_requirement(HandRequirement handRequirement)
-{
-	switch (handRequirement)
+	inline std::string_view encode_hand_requirement(
+		HandRequirement handRequirement)
 	{
+		switch (handRequirement)
+		{
 
-	case HandRequirement::ONE_HANDED:
-	{
+		case HandRequirement::ONE_HANDED:
+		{
+			return "one_handed";
+		}
+
+		case HandRequirement::TWO_HANDED:
+		{
+			return "two_handed";
+		}
+
+		case HandRequirement::OFF_HAND_ONLY:
+		{
+			return "off_hand_only";
+		}
+		}
+
 		return "one_handed";
 	}
 
-	case HandRequirement::TWO_HANDED:
+	inline HandRequirement parse_hand_requirement(std::string_view name)
 	{
-		return "two_handed";
+		if (name == "one_handed")
+		{
+			return HandRequirement::ONE_HANDED;
+		}
+		if (name == "two_handed")
+		{
+			return HandRequirement::TWO_HANDED;
+		}
+		if (name == "off_hand_only")
+		{
+			return HandRequirement::OFF_HAND_ONLY;
+		}
+
+		throw std::runtime_error(
+			std::format("unknown hand_requirement '{}'", name));
 	}
 
-	case HandRequirement::OFF_HAND_ONLY:
+	inline std::string_view encode_weapon_size(WeaponSize weaponSize)
 	{
-		return "off_hand_only";
-	}
-	}
+		switch (weaponSize)
+		{
 
-	return "one_handed";
-}
+		case WeaponSize::TINY:
+		{
+			return "tiny";
+		}
 
-inline HandRequirement parse_hand_requirement(std::string_view name)
-{
-	if (name == "one_handed")
-	{
-		return HandRequirement::ONE_HANDED;
-	}
-	if (name == "two_handed")
-	{
-		return HandRequirement::TWO_HANDED;
-	}
-	if (name == "off_hand_only")
-	{
-		return HandRequirement::OFF_HAND_ONLY;
-	}
+		case WeaponSize::SMALL:
+		{
+			return "small";
+		}
 
-	throw std::runtime_error(
-		std::format("unknown hand_requirement '{}'", name));
-}
+		case WeaponSize::MEDIUM:
+		{
+			return "medium";
+		}
 
-inline std::string_view encode_weapon_size(WeaponSize weaponSize)
-{
-	switch (weaponSize)
-	{
+		case WeaponSize::LARGE:
+		{
+			return "large";
+		}
 
-	case WeaponSize::TINY:
-	{
-		return "tiny";
-	}
+		case WeaponSize::GIANT:
+		{
+			return "giant";
+		}
+		}
 
-	case WeaponSize::SMALL:
-	{
-		return "small";
-	}
-
-	case WeaponSize::MEDIUM:
-	{
 		return "medium";
 	}
 
-	case WeaponSize::LARGE:
+	inline WeaponSize parse_weapon_size(std::string_view name)
 	{
-		return "large";
-	}
+		if (name == "tiny")
+		{
+			return WeaponSize::TINY;
+		}
+		if (name == "small")
+		{
+			return WeaponSize::SMALL;
+		}
+		if (name == "medium")
+		{
+			return WeaponSize::MEDIUM;
+		}
+		if (name == "large")
+		{
+			return WeaponSize::LARGE;
+		}
+		if (name == "giant")
+		{
+			return WeaponSize::GIANT;
+		}
 
-	case WeaponSize::GIANT:
-	{
-		return "giant";
+		throw std::runtime_error(std::format("unknown weapon_size '{}'", name));
 	}
-	}
-
-	return "medium";
-}
-
-inline WeaponSize parse_weapon_size(std::string_view name)
-{
-	if (name == "tiny")
-	{
-		return WeaponSize::TINY;
-	}
-	if (name == "small")
-	{
-		return WeaponSize::SMALL;
-	}
-	if (name == "medium")
-	{
-		return WeaponSize::MEDIUM;
-	}
-	if (name == "large")
-	{
-		return WeaponSize::LARGE;
-	}
-	if (name == "giant")
-	{
-		return WeaponSize::GIANT;
-	}
-
-	throw std::runtime_error(std::format("unknown weapon_size '{}'", name));
-}
 
 } // namespace CppRL

@@ -15,26 +15,26 @@
   "mutations": [
     {
       "file": "src/ItemEnhancements.cpp",
-      "original": "\tif (prefix_record(prefix).effect.magic == EnhancementMagic::MAGICAL)\n\t{\n\t\tprefix = PrefixType::NONE;\n\t}",
-      "mutated": "\tif (prefix_record(prefix).effect.magic == EnhancementMagic::MAGICAL)\n\t{\n\t}",
+      "original": "\t\tif (prefix_record(prefix).effect.magic == EnhancementMagic::MAGICAL)\n\t\t{\n\t\t\tprefix = PrefixType::NONE;\n\t\t}",
+      "mutated": "\t\tif (prefix_record(prefix).effect.magic == EnhancementMagic::MAGICAL)\n\t\t{\n\t\t}",
       "catches": "a strip that inspects the prefix and leaves it, so excluding magical prefixes excludes nothing"
     },
     {
       "file": "src/ItemEnhancements.cpp",
-      "original": "\t\tenhancement.suffix = get_random_combat_suffix(dice);\n\t}\n\n\tif (magicalPrefixes == MagicalPrefixes::EXCLUDED)\n\t{\n\t\tenhancement.strip_magical_prefix();\n\t}",
-      "mutated": "\t\tenhancement.suffix = get_random_combat_suffix(dice);\n\t}",
+      "original": "\t\t\tenhancement.suffix = get_random_combat_suffix(dice);\n\t\t}\n\n\t\tif (magicalPrefixes == MagicalPrefixes::EXCLUDED)\n\t\t{\n\t\t\tenhancement.strip_magical_prefix();\n\t\t}",
+      "mutated": "\t\t\tenhancement.suffix = get_random_combat_suffix(dice);\n\t\t}",
       "catches": "the weapon generator ignoring the choice, which is the defect this replaced"
     },
     {
       "file": "src/ItemEnhancements.cpp",
-      "original": "\t\tenhancement.suffix = get_random_resistance_suffix(dice);\n\t}\n\n\tif (magicalPrefixes == MagicalPrefixes::EXCLUDED)\n\t{\n\t\tenhancement.strip_magical_prefix();\n\t}",
-      "mutated": "\t\tenhancement.suffix = get_random_resistance_suffix(dice);\n\t}",
+      "original": "\t\t\tenhancement.suffix = get_random_resistance_suffix(dice);\n\t\t}\n\n\t\tif (magicalPrefixes == MagicalPrefixes::EXCLUDED)\n\t\t{\n\t\t\tenhancement.strip_magical_prefix();\n\t\t}",
+      "mutated": "\t\t\tenhancement.suffix = get_random_resistance_suffix(dice);\n\t\t}",
       "catches": "the armour generator ignoring the choice, so MAGICAL survives an exclusion"
     },
     {
       "file": "src/ItemEnhancements.h",
-      "original": "\t\t\t.fireResistance = 25,\n\t\t\t.magic = EnhancementMagic::MAGICAL,\n",
-      "mutated": "\t\t\t.fireResistance = 25,\n",
+      "original": "\t\t\t\t.fireResistance = 25,\n\t\t\t\t.magic = EnhancementMagic::MAGICAL,\n",
+      "mutated": "\t\t\t\t.fireResistance = 25,\n",
       "catches": "FLAMING's row losing its magic, so the strip leaves it and the item is not magical"
     }
   ]

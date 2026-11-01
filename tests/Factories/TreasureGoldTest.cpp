@@ -30,85 +30,85 @@
 namespace CppRL
 {
 
-class TreasureGoldTest : public ::testing::Test
-{
-protected:
-	MockGameContext mock;
-	Map map{ 40, 25 };
-	MessageSystem messageSystem;
-	GameContext ctx;
-
-	void SetUp() override
+	class TreasureGoldTest : public ::testing::Test
 	{
-		ctx = mock.to_game_context();
-		ctx.map = &map;
-		ctx.messageSystem = &messageSystem;
-		map.init_tiles();
-	}
+	protected:
+		MockGameContext mock;
+		Map map{ 40, 25 };
+		MessageSystem messageSystem;
+		GameContext ctx;
 
-	// The one item on the floor carrying a Gold behaviour.
-	const Item* find_gold() const
-	{
-		for (const auto& item : ctx.floorInventory->items)
+		void SetUp() override
 		{
-			if (item && item->behavior &&
-				std::holds_alternative<Gold>(*item->behavior))
-			{
-				return item.get();
-			}
+			ctx = mock.to_game_context();
+			ctx.map = &map;
+			ctx.messageSystem = &messageSystem;
+			map.init_tiles();
 		}
-		return nullptr;
+
+		// The one item on the floor carrying a Gold behaviour.
+		const Item* find_gold() const
+		{
+			for (const auto& item : ctx.floorInventory->items)
+			{
+				if (item && item->behavior &&
+					std::holds_alternative<Gold>(*item->behavior))
+				{
+					return item.get();
+				}
+			}
+			return nullptr;
+		}
+	};
+
+	TEST_F(TreasureGoldTest, ATreasurePileIsWorthWhatItPaysOut)
+	{
+		ItemFactory::generate_treasure(Vector2D{ 10, 10 }, 1, 1, ctx);
+
+		const Item* gold = find_gold();
+		ASSERT_NE(gold, nullptr) << "generate_treasure always places gold";
+		const int paidOut = std::get<Gold>(*gold->behavior).amount;
+		ASSERT_GT(paidOut, 1)
+			<< "the rolled amount must exceed the default value for this to discriminate";
+
+		EXPECT_EQ(gold->get_value(), paidOut)
+			<< "the pile pays out " << paidOut << " but is valued at "
+			<< gold->get_value();
 	}
-};
 
-TEST_F(TreasureGoldTest, ATreasurePileIsWorthWhatItPaysOut)
-{
-	ItemFactory::generate_treasure(Vector2D{ 10, 10 }, 1, 1, ctx);
+	TEST_F(TreasureGoldTest, ATreasurePileIsTheSameItemAsAFloorPile)
+	{
+		ItemFactory::generate_treasure(Vector2D{ 10, 10 }, 1, 1, ctx);
 
-	const Item* gold = find_gold();
-	ASSERT_NE(gold, nullptr) << "generate_treasure always places gold";
-	const int paidOut = std::get<Gold>(*gold->behavior).amount;
-	ASSERT_GT(paidOut, 1)
-		<< "the rolled amount must exceed the default value for this to discriminate";
+		const Item* gold = find_gold();
+		ASSERT_NE(gold, nullptr);
 
-	EXPECT_EQ(gold->get_value(), paidOut)
-		<< "the pile pays out " << paidOut << " but is valued at "
-		<< gold->get_value();
-}
+		// A hand-built item has none of these, so each one says the pile came
+		// through the registry rather than being assembled at the call site.
+		EXPECT_EQ(gold->itemKey, "gold_coin")
+			<< "a pile with no key cannot be identified on load";
+		EXPECT_EQ(
+			gold->itemClass,
+			mock.itemRegistry.get_params("gold_coin").itemClass);
+		EXPECT_EQ(
+			gold->actorData.name,
+			std::string(mock.itemRegistry.get_params("gold_coin").name));
+	}
 
-TEST_F(TreasureGoldTest, ATreasurePileIsTheSameItemAsAFloorPile)
-{
-	ItemFactory::generate_treasure(Vector2D{ 10, 10 }, 1, 1, ctx);
+	// A pile weighs what its coins weigh, at the owner's thousand to the pound.
+	// The record's own weight is a constant and cannot answer for a pile, so
+	// this is the one item whose weight is a function of what it holds.
+	TEST_F(TreasureGoldTest, APileWeighsWhatItsCoinsWeigh)
+	{
+		const auto light =
+			ItemCreator::create_with_gold_amount(Vector2D{ 10, 10 }, 999, ctx);
+		EXPECT_EQ(light->enhancement.weight, 0)
+			<< "a purse under a thousand is pocket change";
 
-	const Item* gold = find_gold();
-	ASSERT_NE(gold, nullptr);
-
-	// A hand-built item has none of these, so each one says the pile came through the
-	// registry rather than being assembled at the call site.
-	EXPECT_EQ(gold->itemKey, "gold_coin")
-		<< "a pile with no key cannot be identified on load";
-	EXPECT_EQ(
-		gold->itemClass,
-		mock.itemRegistry.get_params("gold_coin").itemClass);
-	EXPECT_EQ(
-		gold->actorData.name,
-		std::string(mock.itemRegistry.get_params("gold_coin").name));
-}
-
-// A pile weighs what its coins weigh, at the owner's thousand to the pound. The
-// record's own weight is a constant and cannot answer for a pile, so this is the one
-// item whose weight is a function of what it holds.
-TEST_F(TreasureGoldTest, APileWeighsWhatItsCoinsWeigh)
-{
-	const auto light =
-		ItemCreator::create_with_gold_amount(Vector2D{ 10, 10 }, 999, ctx);
-	EXPECT_EQ(light->enhancement.weight, 0)
-		<< "a purse under a thousand is pocket change";
-
-	const auto heavy =
-		ItemCreator::create_with_gold_amount(Vector2D{ 10, 10 }, 7500, ctx);
-	EXPECT_EQ(heavy->enhancement.weight, 7)
-		<< "the part-thousand must not round up";
-}
+		const auto heavy =
+			ItemCreator::create_with_gold_amount(Vector2D{ 10, 10 }, 7500, ctx);
+		EXPECT_EQ(heavy->enhancement.weight, 7)
+			<< "the part-thousand must not round up";
+	}
 
 } // namespace CppRL

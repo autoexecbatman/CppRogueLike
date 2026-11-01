@@ -27,8 +27,8 @@
     },
     {
       "file": "src/SavingThrow.cpp",
-      "original": "\t\tcase CreatureClass::FIGHTER:\n\t\tcase CreatureClass::MONSTER:\n\t\t{\n\t\t\treturn warriorRows;",
-      "mutated": "\t\tcase CreatureClass::FIGHTER:\n\t\t{\n\t\t\treturn warriorRows;\n\t\t}\n\n\t\tcase CreatureClass::MONSTER:\n\t\t{\n\t\t\treturn rogueRows;",
+      "original": "\t\t\tcase CreatureClass::FIGHTER:\n\t\t\tcase CreatureClass::MONSTER:\n\t\t\t{\n\t\t\t\treturn warriorRows;",
+      "mutated": "\t\t\tcase CreatureClass::FIGHTER:\n\t\t\t{\n\t\t\t\treturn warriorRows;\n\t\t\t}\n\n\t\t\tcase CreatureClass::MONSTER:\n\t\t\t{\n\t\t\t\treturn rogueRows;",
       "catches": "a monster falling off the warrior rows it shares"
     },
     {
@@ -39,8 +39,8 @@
     },
     {
       "file": "src/SavingThrow.cpp",
-      "original": "\treturn &row_at(creatureClass, level) != &row_at(creatureClass, level - 1);",
-      "mutated": "\treturn &row_at(creatureClass, level) != &row_at(creatureClass, level);",
+      "original": "\t\treturn &row_at(creatureClass, level) !=\n\t\t\t&row_at(creatureClass, level - 1);",
+      "mutated": "\t\treturn &row_at(creatureClass, level) !=\n\t\t\t&row_at(creatureClass, level);",
       "catches": "no level ever improving the save"
     },
     {

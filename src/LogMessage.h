@@ -26,12 +26,12 @@
 namespace CppRL
 {
 
-struct LogMessage
-{
-	ColorPairId color{ ColorPairId::WHITE_BLACK };
-	std::string text{};
-};
+	struct LogMessage
+	{
+		ColorPairId color{ ColorPairId::WHITE_BLACK };
+		std::string text{};
+	};
 
-// end of file: LogMessage.h
+	// end of file: LogMessage.h
 
 } // namespace CppRL

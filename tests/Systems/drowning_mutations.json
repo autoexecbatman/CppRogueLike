@@ -39,8 +39,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tairUntilTime =\n\t\t\texpiry_time(roundEndTime, breath_rounds(get_constitution()));",
-      "mutated": "\t\tairUntilTime =\n\t\t\texpiry_time(roundEndTime, breath_rounds(get_constitution()) * 2);",
+      "original": "\t\t\tairUntilTime =\n\t\t\t\texpiry_time(roundEndTime, breath_rounds(get_constitution()));",
+      "mutated": "\t\t\tairUntilTime =\n\t\t\t\texpiry_time(roundEndTime, breath_rounds(get_constitution()) * 2);",
       "catches": "twice the air the Constitution buys"
     },
     {
@@ -51,14 +51,14 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tconst int roundsPast = rounds_completed_at(roundEndTime - *airUntilTime);",
-      "mutated": "\tconst int roundsPast = 0;",
+      "original": "\t\tconst int roundsPast =\n\t\t\trounds_completed_at(roundEndTime - *airUntilTime);",
+      "mutated": "\t\tconst int roundsPast =0;",
       "catches": "every check unmodified however long the creature holds out, so the penalty never accumulates"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tif (has_state(ActorState::CAN_SWIM))\n\t{\n\t\treturn false;\n\t}",
-      "mutated": "\tif (false)\n\t{\n\t\treturn false;\n\t}",
+      "original": "\t\tif (has_state(ActorState::CAN_SWIM))\n\t\t{\n\t\t\treturn false;\n\t\t}",
+      "mutated": "\t\tif (false)\n\t\t{\n\t\t\treturn false;\n\t\t}",
       "catches": "a creature that lives in water drowning in its own element"
     },
     {
@@ -69,8 +69,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tairUntilTime.reset();\n\t\treturn;",
-      "mutated": "\t\treturn;",
+      "original": "\t\t\tairUntilTime.reset();\n\t\t\treturn;",
+      "mutated": "\t\t\treturn;",
       "catches": "a breath that is never let go, so surfacing and diving again continues the old one"
     }
   ]

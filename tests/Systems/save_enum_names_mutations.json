@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/DamageInfo.h",
-      "original": "\tif (name == \"acid\")\n\t{\n\t\treturn DamageType::ACID;\n\t}",
-      "mutated": "\tif (name == \"acid\")\n\t{\n\t\treturn DamageType::POISON;\n\t}",
+      "original": "\t\tif (name == \"acid\")\n\t\t{\n\t\t\treturn DamageType::ACID;\n\t\t}",
+      "mutated": "\t\tif (name == \"acid\")\n\t\t{\n\t\t\treturn DamageType::POISON;\n\t\t}",
       "catches": "a damage type parsed back as the wrong one, so a saved acid attack comes back as poison"
     },
     {
@@ -33,26 +33,26 @@
     },
     {
       "file": "src/Alignment.h",
-      "original": "\t\tif (name == \"chaotic\")\n\t\t{\n\t\t\treturn Ethics::CHAOTIC;\n\t\t}",
-      "mutated": "\t\tif (name == \"chaotic\")\n\t\t{\n\t\t\treturn Ethics::LAWFUL;\n\t\t}",
+      "original": "\t\t\tif (name == \"chaotic\")\n\t\t\t{\n\t\t\t\treturn Ethics::CHAOTIC;\n\t\t\t}",
+      "mutated": "\t\t\tif (name == \"chaotic\")\n\t\t\t{\n\t\t\t\treturn Ethics::LAWFUL;\n\t\t\t}",
       "catches": "an alignment parsed back as its opposite on the law/chaos axis"
     },
     {
       "file": "src/Alignment.h",
-      "original": "\t\tif (name == \"evil\")\n\t\t{\n\t\t\treturn Morality::EVIL;\n\t\t}",
-      "mutated": "\t\tif (name == \"evil\")\n\t\t{\n\t\t\treturn Morality::GOOD;\n\t\t}",
+      "original": "\t\t\tif (name == \"evil\")\n\t\t\t{\n\t\t\t\treturn Morality::EVIL;\n\t\t\t}",
+      "mutated": "\t\t\tif (name == \"evil\")\n\t\t\t{\n\t\t\t\treturn Morality::GOOD;\n\t\t\t}",
       "catches": "an alignment parsed back as its opposite on the good/evil axis"
     },
     {
       "file": "src/CreatureClass.h",
-      "original": "\tif (name == \"monster\")\n\t{\n\t\treturn CreatureClass::MONSTER;\n\t}",
-      "mutated": "\tif (name == \"monster\")\n\t{\n\t\treturn CreatureClass::FIGHTER;\n\t}",
+      "original": "\t\tif (name == \"monster\")\n\t\t{\n\t\t\treturn CreatureClass::MONSTER;\n\t\t}",
+      "mutated": "\t\tif (name == \"monster\")\n\t\t{\n\t\t\treturn CreatureClass::FIGHTER;\n\t\t}",
       "catches": "every monster loading as a fighter, with a fighter's tables"
     },
     {
       "file": "src/CreatureClass.h",
-      "original": "\tcase CreatureClass::CLERIC:\n\t{\n\t\treturn \"cleric\";\n\t}",
-      "mutated": "\tcase CreatureClass::CLERIC:\n\t{\n\t\treturn \"wizard\";\n\t}",
+      "original": "\t\tcase CreatureClass::CLERIC:\n\t\t{\n\t\t\treturn \"cleric\";\n\t\t}",
+      "mutated": "\t\tcase CreatureClass::CLERIC:\n\t\t{\n\t\t\treturn \"wizard\";\n\t\t}",
       "catches": "two classes sharing one name, so a cleric is saved as a wizard"
     },
     {

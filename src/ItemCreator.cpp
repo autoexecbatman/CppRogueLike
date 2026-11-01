@@ -23,310 +23,311 @@
 namespace CppRL
 {
 
-namespace
-{
+	namespace
+	{
+
+		// ---------------------------------------------------------------------
+		// Behavior construction
+		// ---------------------------------------------------------------------
+		template <typename Behavior>
+		Behavior create_stat_behavior(const ItemParams& params)
+		{
+			Behavior item;
+			item.strBonus = params.strBonus;
+			item.dexBonus = params.dexBonus;
+			item.conBonus = params.conBonus;
+			item.intBonus = params.intBonus;
+			item.wisBonus = params.wisBonus;
+			item.chaBonus = params.chaBonus;
+			item.effect = params.effect;
+			item.bonus = params.effectBonus;
+			item.application = params.application;
+			item.exceptionalStrength = params.exceptionalStrength;
+			return item;
+		}
+
+		ItemBehavior create_behavior(const ItemParams& params)
+		{
+			switch (params.pickableType)
+			{
+
+			case PickableType::CONSUMABLE:
+			{
+				return Consumable{
+					params.consumableEffect,
+					params.consumableAmount,
+					params.duration,
+					params.durationUnit,
+					params.consumableBuffType,
+					params.application,
+					params.agesYears,
+				};
+			}
+
+			case PickableType::TARGETED_SCROLL:
+			{
+				return TargetedScroll{
+					params.targetMode,
+					params.scrollAnimation,
+					params.range,
+					params.damage,
+					params.confuseTurns,
+					params.consumableBuffType,
+					params.duration,
+					params.durationUnit,
+				};
+			}
+
+			case PickableType::TELEPORTER:
+			{
+				return Teleporter{};
+			}
+
+			case PickableType::IDENTIFY_SCROLL:
+			{
+				return IdentifyScroll{};
+			}
+
+			case PickableType::WEAPON:
+			{
+				return Weapon{
+					params.ranged,
+					params.handRequirement,
+					params.weaponSize,
+					params.strengthRating,
+				};
+			}
+
+			case PickableType::SHIELD:
+			{
+				return Shield{};
+			}
+
+			case PickableType::ARMOR:
+			{
+				return Armor{ params.acBonus, params.armorMaterial };
+			}
+
+			case PickableType::QUEST_ITEM:
+			{
+				return Amulet{};
+			}
+
+			case PickableType::MAGICAL_HELM:
+			{
+				return MagicalHelm{
+					params.effect,
+					params.effectBonus,
+					HelmCommand::DORMANT,
+				};
+			}
+
+			case PickableType::MAGICAL_RING:
+			{
+				return MagicalRing{ params.effect, params.effectBonus };
+			}
+
+			case PickableType::JEWELRY_AMULET:
+			{
+				return create_stat_behavior<JewelryAmulet>(params);
+			}
+
+			case PickableType::GAUNTLETS:
+			{
+				return create_stat_behavior<Gauntlets>(params);
+			}
+
+			case PickableType::GIRDLE:
+			{
+				return create_stat_behavior<Girdle>(params);
+			}
+
+			case PickableType::FOOD:
+			{
+				return Food{ params.nutritionValue };
+			}
+
+			case PickableType::GOLD_COIN:
+			{
+				// A gold item is worth what it is authored to be worth. A
+				// rolled pile is the exception and sets its own amount
+				// afterwards, in create_with_gold_amount.
+				return Gold{ params.value };
+			}
+
+			case PickableType::DUNGEON_KEY:
+			{
+				return DungeonKey{};
+			}
+
+			// Corpses are made by Creature::die, not from an item record.
+			case PickableType::CORPSE_FOOD:
+			{
+				throw std::runtime_error(
+					std::format(
+						"ItemCreator: unhandled pickable_type {}",
+						encode_pickable_type(params.pickableType)));
+			}
+			}
+
+			// Every enumerator has its arm above, so only a value none names is
+			// here.
+			throw std::logic_error(
+				"create_behavior: a PickableType no enumerator names");
+		}
+
+		// An item built from params: its behaviour, key, class, value, carry
+		// weight and the tile the content registry holds for its key.
+		std::unique_ptr<Item> make_item(
+			std::string_view key,
+			const ItemParams& params,
+			Vector2D pos,
+			ContentRegistry& tiles)
+		{
+			TileRef tile = tiles.get_tile(key);
+			auto item = std::make_unique<Item>(
+				pos,
+				ActorData{ tile, std::string{ params.name }, params.color });
+			item->behavior = create_behavior(params);
+			item->itemKey = std::string{ key };
+			item->appearance = params.appearance;
+			item->itemClass = params.itemClass;
+			item->set_value(params.value);
+			// What it costs to carry, which is a different question from how
+			// often it appears.
+			item->enhancement.weight = params.weight;
+			return item;
+		}
+
+	} // namespace
 
 	// -------------------------------------------------------------------------
-	// Behavior construction
+	// Public API
 	// -------------------------------------------------------------------------
-	template <typename Behavior>
-	Behavior create_stat_behavior(const ItemParams& params)
-	{
-		Behavior item;
-		item.strBonus = params.strBonus;
-		item.dexBonus = params.dexBonus;
-		item.conBonus = params.conBonus;
-		item.intBonus = params.intBonus;
-		item.wisBonus = params.wisBonus;
-		item.chaBonus = params.chaBonus;
-		item.effect = params.effect;
-		item.bonus = params.effectBonus;
-		item.application = params.application;
-		item.exceptionalStrength = params.exceptionalStrength;
-		return item;
-	}
 
-	ItemBehavior create_behavior(const ItemParams& params)
-	{
-		switch (params.pickableType)
-		{
-
-		case PickableType::CONSUMABLE:
-		{
-			return Consumable{
-				params.consumableEffect,
-				params.consumableAmount,
-				params.duration,
-				params.durationUnit,
-				params.consumableBuffType,
-				params.application,
-				params.agesYears,
-			};
-		}
-
-		case PickableType::TARGETED_SCROLL:
-		{
-			return TargetedScroll{
-				params.targetMode,
-				params.scrollAnimation,
-				params.range,
-				params.damage,
-				params.confuseTurns,
-				params.consumableBuffType,
-				params.duration,
-				params.durationUnit,
-			};
-		}
-
-		case PickableType::TELEPORTER:
-		{
-			return Teleporter{};
-		}
-
-		case PickableType::IDENTIFY_SCROLL:
-		{
-			return IdentifyScroll{};
-		}
-
-		case PickableType::WEAPON:
-		{
-			return Weapon{
-				params.ranged,
-				params.handRequirement,
-				params.weaponSize,
-				params.strengthRating,
-			};
-		}
-
-		case PickableType::SHIELD:
-		{
-			return Shield{};
-		}
-
-		case PickableType::ARMOR:
-		{
-			return Armor{ params.acBonus, params.armorMaterial };
-		}
-
-		case PickableType::QUEST_ITEM:
-		{
-			return Amulet{};
-		}
-
-		case PickableType::MAGICAL_HELM:
-		{
-			return MagicalHelm{
-				params.effect,
-				params.effectBonus,
-				HelmCommand::DORMANT,
-			};
-		}
-
-		case PickableType::MAGICAL_RING:
-		{
-			return MagicalRing{ params.effect, params.effectBonus };
-		}
-
-		case PickableType::JEWELRY_AMULET:
-		{
-			return create_stat_behavior<JewelryAmulet>(params);
-		}
-
-		case PickableType::GAUNTLETS:
-		{
-			return create_stat_behavior<Gauntlets>(params);
-		}
-
-		case PickableType::GIRDLE:
-		{
-			return create_stat_behavior<Girdle>(params);
-		}
-
-		case PickableType::FOOD:
-		{
-			return Food{ params.nutritionValue };
-		}
-
-		case PickableType::GOLD_COIN:
-		{
-			// A gold item is worth what it is authored to be worth. A rolled
-			// pile is the exception and sets its own amount afterwards, in
-			// create_with_gold_amount.
-			return Gold{ params.value };
-		}
-
-		case PickableType::DUNGEON_KEY:
-		{
-			return DungeonKey{};
-		}
-
-		// Corpses are made by Creature::die, not from an item record.
-		case PickableType::CORPSE_FOOD:
-		{
-			throw std::runtime_error(
-				std::format(
-					"ItemCreator: unhandled pickable_type {}",
-					encode_pickable_type(params.pickableType)));
-		}
-		}
-
-		// Every enumerator has its arm above, so only a value none names is
-		// here.
-		throw std::logic_error(
-			"create_behavior: a PickableType no enumerator names");
-	}
-
-	// An item built from params: its behaviour, key, class, value, carry weight
-	// and the tile the content registry holds for its key.
-	std::unique_ptr<Item> make_item(
+	std::unique_ptr<Item> ItemCreator::create(
 		std::string_view key,
-		const ItemParams& params,
 		Vector2D pos,
-		ContentRegistry& tiles)
+		GameContext& ctx)
 	{
-		TileRef tile = tiles.get_tile(key);
+		assert(
+			ctx.contentRegistry &&
+			"ItemCreator::create: called without a contentRegistry");
+		assert(
+			ctx.itemRegistry &&
+			"ItemCreator::create: called without an itemRegistry");
+
+		return make_item(
+			key,
+			ctx.itemRegistry->get_params(key),
+			pos,
+			*ctx.contentRegistry);
+	}
+
+	std::unique_ptr<Item> ItemCreator::create_with_gold_amount(
+		Vector2D pos,
+		int goldAmount,
+		GameContext& ctx)
+	{
+		assert(
+			ctx.contentRegistry &&
+			"ItemCreator::create_with_gold_amount: called without a contentRegistry");
+		assert(
+			ctx.itemRegistry &&
+			"ItemCreator::create_with_gold_amount: called without an itemRegistry");
+
+		const ItemParams& params = ctx.itemRegistry->get_params("gold_coin");
+		TileRef tile = ctx.contentRegistry->get_tile("gold_coin");
 		auto item = std::make_unique<Item>(
 			pos,
 			ActorData{ tile, std::string{ params.name }, params.color });
-		item->behavior = create_behavior(params);
-		item->itemKey = std::string{ key };
+		item->behavior = Gold{ goldAmount };
+		item->itemKey = "gold_coin";
 		item->appearance = params.appearance;
 		item->itemClass = params.itemClass;
-		item->set_value(params.value);
-		// What it costs to carry, which is a different question from how often
-		// it appears.
-		item->enhancement.weight = params.weight;
+		item->set_value(goldAmount);
+		// A pile weighs what its coins weigh, by the purse's own rule, so a
+		// hoard reads the same on the floor as in hand.
+		item->enhancement.weight = InventoryOperations::coin_weight(goldAmount);
 		return item;
 	}
 
-} // namespace
-
-// ---------------------------------------------------------------------------
-// Public API
-// ---------------------------------------------------------------------------
-
-std::unique_ptr<Item> ItemCreator::create(
-	std::string_view key,
-	Vector2D pos,
-	GameContext& ctx)
-{
-	assert(
-		ctx.contentRegistry &&
-		"ItemCreator::create: called without a contentRegistry");
-	assert(
-		ctx.itemRegistry &&
-		"ItemCreator::create: called without an itemRegistry");
-
-	return make_item(
-		key,
-		ctx.itemRegistry->get_params(key),
-		pos,
-		*ctx.contentRegistry);
-}
-
-std::unique_ptr<Item> ItemCreator::create_with_gold_amount(
-	Vector2D pos,
-	int goldAmount,
-	GameContext& ctx)
-{
-	assert(
-		ctx.contentRegistry &&
-		"ItemCreator::create_with_gold_amount: called without a contentRegistry");
-	assert(
-		ctx.itemRegistry &&
-		"ItemCreator::create_with_gold_amount: called without an itemRegistry");
-
-	const ItemParams& params = ctx.itemRegistry->get_params("gold_coin");
-	TileRef tile = ctx.contentRegistry->get_tile("gold_coin");
-	auto item = std::make_unique<Item>(
-		pos,
-		ActorData{ tile, std::string{ params.name }, params.color });
-	item->behavior = Gold{ goldAmount };
-	item->itemKey = "gold_coin";
-	item->appearance = params.appearance;
-	item->itemClass = params.itemClass;
-	item->set_value(goldAmount);
-	// A pile weighs what its coins weigh, by the purse's own rule, so a hoard reads the same on the floor as in hand.
-	item->enhancement.weight = InventoryOperations::coin_weight(goldAmount);
-	return item;
-}
-
-std::unique_ptr<Item> ItemCreator::create_with_enhancement(
-	std::string_view key,
-	Vector2D pos,
-	PrefixType prefix,
-	SuffixType suffix,
-	GameContext& ctx)
-{
-	auto item = create(key, pos, ctx);
-	item->apply_enhancement(ItemEnhancement(prefix, suffix));
-
-	return item;
-}
-
-std::unique_ptr<Item> ItemCreator::create_random_of_category(
-	std::string_view category,
-	Vector2D pos,
-	GameContext& ctx,
-	int dungeonLevel)
-{
-	assert(
-		ctx.itemRegistry &&
-		"ItemCreator::create_random_of_category: called without an itemRegistry");
-	assert(
-		ctx.dice &&
-		"ItemCreator::create_random_of_category: called without dice");
-
-	struct Candidate
+	std::unique_ptr<Item> ItemCreator::create_with_enhancement(
+		std::string_view key,
+		Vector2D pos,
+		PrefixType prefix,
+		SuffixType suffix,
+		GameContext& ctx)
 	{
-		std::string key;
-		int weight;
-	};
+		auto item = create(key, pos, ctx);
+		item->apply_enhancement(ItemEnhancement(prefix, suffix));
 
-	std::vector<Candidate> candidates;
-	int totalWeight = 0;
-
-	const ItemRegistry& items = *ctx.itemRegistry;
-	for (const std::string& key : items.get_all_keys())
-	{
-		const ItemParams& params = items.get_params(key);
-		if (params.category != category || params.baseWeight <= 0)
-		{
-			continue;
-		}
-		if (dungeonLevel < params.levelMin)
-		{
-			continue;
-		}
-		if (params.levelMax > 0 && dungeonLevel > params.levelMax)
-		{
-			continue;
-		}
-
-		const float levelFactor =
-			1.0f + (params.levelScaling * static_cast<float>(dungeonLevel - 1));
-		const int weight =
-			std::max(1, static_cast<int>(params.baseWeight * levelFactor));
-		candidates.push_back({ key, weight });
-		totalWeight += weight;
+		return item;
 	}
 
-	if (candidates.empty())
+	std::unique_ptr<Item> ItemCreator::create_random_of_category(
+		std::string_view category,
+		Vector2D pos,
+		GameContext& ctx,
+		int dungeonLevel)
 	{
-		return nullptr;
-	}
+		assert(
+			ctx.itemRegistry &&
+			"ItemCreator::create_random_of_category: called without an itemRegistry");
+		assert(
+			ctx.dice &&
+			"ItemCreator::create_random_of_category: called without dice");
 
-	int roll = ctx.dice->roll(1, totalWeight);
-	for (const auto& [key, weight] : candidates)
-	{
-		roll -= weight;
-		if (roll <= 0)
+		struct Candidate
 		{
-			return create(key, pos, ctx);
-		}
-	}
+			std::string key;
+			int weight;
+		};
 
-	return create(candidates.back().key, pos, ctx);
-}
+		std::vector<Candidate> candidates;
+		int totalWeight = 0;
+
+		const ItemRegistry& items = *ctx.itemRegistry;
+		for (const std::string& key : items.get_all_keys())
+		{
+			const ItemParams& params = items.get_params(key);
+			if (params.category != category || params.baseWeight <= 0)
+			{
+				continue;
+			}
+			if (dungeonLevel < params.levelMin)
+			{
+				continue;
+			}
+			if (params.levelMax > 0 && dungeonLevel > params.levelMax)
+			{
+				continue;
+			}
+
+			const float levelFactor = 1.0f +
+				(params.levelScaling * static_cast<float>(dungeonLevel - 1));
+			const int weight =
+				std::max(1, static_cast<int>(params.baseWeight * levelFactor));
+			candidates.push_back({ key, weight });
+			totalWeight += weight;
+		}
+
+		if (candidates.empty())
+		{
+			return nullptr;
+		}
+
+		int roll = ctx.dice->roll(1, totalWeight);
+		for (const auto& [key, weight] : candidates)
+		{
+			roll -= weight;
+			if (roll <= 0)
+			{
+				return create(key, pos, ctx);
+			}
+		}
+
+		return create(candidates.back().key, pos, ctx);
+	}
 
 } // namespace CppRL

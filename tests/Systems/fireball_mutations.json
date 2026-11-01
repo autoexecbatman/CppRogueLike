@@ -15,20 +15,20 @@
   "mutations": [
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\tconst DamageResolver::ResistedDamage dealt =\n\t\tsaved ? reduced.at(reduced.hit_points() / 2) : reduced;",
-      "mutated": "\tconst DamageResolver::ResistedDamage dealt =reduced;",
+      "original": "\t\tconst DamageResolver::ResistedDamage dealt =\n\t\t\tsaved ? reduced.at(reduced.hit_points() / 2) : reduced;",
+      "mutated": "\t\tconst DamageResolver::ResistedDamage dealt =reduced;",
       "catches": "a made save no longer halving the burn"
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\t\tDamageResolver::save_bonus_against(DamageType::FIRE, target, ctx),\n\t\tctx);",
-      "mutated": "\t\t0,\n\t\tctx);",
+      "original": "\t\t\tDamageResolver::save_bonus_against(DamageType::FIRE, target, ctx),\n\t\t\tctx);",
+      "mutated": "\t\t\t0,\n\t\t\tctx);",
       "catches": "the fireball's save made without the ring's bonus"
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "if (creature->get_tile_distance(center) > static_cast<double>(radius))",
-      "mutated": "if (creature->get_tile_distance(center) > static_cast<double>(radius) + 1.0)",
+      "original": "if (creature->get_tile_distance(center) >\n\t\t\t\tstatic_cast<double>(radius))",
+      "mutated": "if (creature->get_tile_distance(center) >\n\t\t\t\tstatic_cast<double>(radius) + 1.0)",
       "catches": "the burst reaching one tile past its radius"
     },
     {
@@ -51,8 +51,8 @@
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\t\tassert(creature && \"burst_fireball: creatures list holds a null entry\");\n\n\t\tif (creature->is_dead())\n",
-      "mutated": "\t\tassert(creature && \"burst_fireball: creatures list holds a null entry\");\n\n\t\tif (!creature->is_dead())\n",
+      "original": "\t\t\tassert(\n\t\t\t\tcreature &&\n\t\t\t\t\"burst_fireball: creatures list holds a null entry\");\n\n\t\t\tif (creature->is_dead())\n",
+      "mutated": "\t\t\tassert(\n\t\t\t\tcreature &&\n\t\t\t\t\"burst_fireball: creatures list holds a null entry\");\n\n\t\t\tif (!creature->is_dead())\n",
       "catches": "the burst passing over the living and burning only the dead"
     },
     {
@@ -69,26 +69,26 @@
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "if (!player->is_dead() &&\n\t\tplayer->get_tile_distance(center) <= static_cast<double>(radius))",
-      "mutated": "if (false)",
+      "original": "\tif (!player->is_dead() &&\n\t\t\tplayer->get_tile_distance(center) <= static_cast<double>(radius))",
+      "mutated": "\tif (false)",
       "catches": "the burst passing over the player inside its radius"
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "if (!player->is_dead() &&\n\t\tplayer->get_tile_distance(center) <= static_cast<double>(radius))",
-      "mutated": "if (!player->is_dead() &&\n\t\tplayer->get_tile_distance(center) <= static_cast<double>(radius) + 1.0)",
+      "original": "\tif (!player->is_dead() &&\n\t\t\tplayer->get_tile_distance(center) <= static_cast<double>(radius))",
+      "mutated": "\tif (!player->is_dead() &&\n\t\t\tplayer->get_tile_distance(center) <= static_cast<double>(radius) + 1.0)",
       "catches": "the burst reaching the player one tile past its radius"
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "if (!player->is_dead() &&\n\t\tplayer->get_tile_distance(center) <= static_cast<double>(radius))",
-      "mutated": "if (player->get_tile_distance(center) <= static_cast<double>(radius))",
+      "original": "\tif (!player->is_dead() &&\n\t\t\tplayer->get_tile_distance(center) <= static_cast<double>(radius))",
+      "mutated": "\tif (player->get_tile_distance(center) <= static_cast<double>(radius))",
       "catches": "the burst burning and counting a dead player"
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\t\t++burst.struck;\n\t\tburst.playerReach = PlayerReach::STRUCK;",
-      "mutated": "\t\tburst.playerReach = PlayerReach::STRUCK;",
+      "original": "\t\t\t++burst.struck;\n\t\t\tburst.playerReach = PlayerReach::STRUCK;",
+      "mutated": "\t\t\tburst.playerReach = PlayerReach::STRUCK;",
       "catches": "the player burned and left out of the count"
     },
     {

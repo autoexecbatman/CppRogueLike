@@ -15,195 +15,201 @@
 namespace CppRL
 {
 
-namespace
-{
-	// The shop a trading creature owns. Every way into the trade menu requires
-	// one.
-	ShopKeeper& shop_of(Creature& owner)
+	namespace
 	{
-		assert(owner.shop && "MenuBuy opened on a creature with no shop");
-		return *owner.shop;
-	}
-} // namespace
-
-void MenuBuy::populate_items()
-{
-	menuItems.clear();
-
-	if (InventoryOperations::is_inventory_empty(
-			shopkeeper.get_shop_inventory()))
-	{
-		menuItems.push_back("No items for sale");
-		return;
-	}
-
-	[[maybe_unused]] auto is_null = [](const auto& entry)
-	{
-		return !entry;
-	};
-	assert(
-		std::ranges::none_of(shopkeeper.get_shop_inventory().items, is_null) &&
-		"MenuBuy::populate_items: the shop's stock holds a null item");
-	for (const auto& item : shopkeeper.get_shop_inventory().items)
-	{
-		std::string itemName = item->get_name();
-		int price = shopkeeper.get_buy_price(*item);
-		std::string goldText = "(" + std::to_string(price) + "g)";
-
-		size_t totalWidth = 28;
-		size_t padding = totalWidth > (itemName.length() + goldText.length()) ?
-			totalWidth - itemName.length() - goldText.length() :
-			1;
-
-		std::string itemDisplay =
-			itemName + std::string(padding, ' ') + goldText;
-		menuItems.push_back(itemDisplay);
-	}
-}
-
-MenuBuy::MenuBuy(GameContext& ctx, Creature& buyer, Creature& owner) :
-	buyer{ buyer },
-	owner{ owner },
-	shopkeeper{ shop_of(owner) }
-{
-	assert(ctx.renderer && "MenuBuy: renderer required before construction");
-	menuHeight = static_cast<size_t>(
-		ctx.renderer->get_viewport_rows() -
-		ctx.renderer->get_gui_reserve_rows());
-	menuWidth = static_cast<size_t>(ctx.renderer->get_viewport_cols());
-
-	populate_items();
-	menu_new(menuWidth, menuHeight, menuStartX, menuStartY, ctx);
-}
-
-void MenuBuy::menu_print_state(size_t state)
-{
-	if (state >= menuItems.size())
-	{
-		return;
-	}
-
-	if (currentState == state)
-	{
-		menu_highlight_on();
-	}
-	menu_print(1, static_cast<int>(state) + 1, menu_get_string(state));
-	if (currentState == state)
-	{
-		menu_highlight_off();
-	}
-}
-
-void MenuBuy::draw_content()
-{
-	populate_items();
-	for (size_t itemIndex{ 0 }; itemIndex < menuItems.size(); ++itemIndex)
-	{
-		menu_print_state(itemIndex);
-	}
-}
-
-void MenuBuy::draw()
-{
-	menu_draw_box();
-	menu_draw_title("BUY ITEMS", ColorPairId::YELLOW_BLACK);
-
-	menu_print_header();
-
-	populate_items();
-	for (size_t itemIndex{ 0 }; itemIndex < menuItems.size(); ++itemIndex)
-	{
-		menu_print_state(itemIndex);
-	}
-}
-
-void MenuBuy::on_key(GameContext& ctx)
-{
-	if (lastKey == GameKey::UP || lastKey == GameKey::W)
-	{
-		if (menuItems.empty())
+		// The shop a trading creature owns. Every way into the trade menu
+		// requires one.
+		ShopKeeper& shop_of(Creature& owner)
 		{
-			return;
+			assert(owner.shop && "MenuBuy opened on a creature with no shop");
+			return *owner.shop;
 		}
-		currentState = (currentState + menuItems.size() - 1) % menuItems.size();
-	}
-	else if (lastKey == GameKey::DOWN || lastKey == GameKey::S)
+	} // namespace
+
+	void MenuBuy::populate_items()
 	{
-		if (menuItems.empty())
-		{
-			return;
-		}
-		currentState = (currentState + 1) % menuItems.size();
-	}
-	else if (lastKey == GameKey::ESCAPE)
-	{
-		menu_set_run_false();
-	}
-	else if (lastKey == GameKey::ENTER)
-	{
-		if (!InventoryOperations::is_inventory_empty(
+		menuItems.clear();
+
+		if (InventoryOperations::is_inventory_empty(
 				shopkeeper.get_shop_inventory()))
 		{
-			handle_buy(ctx);
+			menuItems.push_back("No items for sale");
+			return;
 		}
-		else
+
+		[[maybe_unused]] auto is_null = [](const auto& entry)
+		{
+			return !entry;
+		};
+		assert(
+			std::ranges::none_of(
+				shopkeeper.get_shop_inventory().items,
+				is_null) &&
+			"MenuBuy::populate_items: the shop's stock holds a null item");
+		for (const auto& item : shopkeeper.get_shop_inventory().items)
+		{
+			std::string itemName = item->get_name();
+			int price = shopkeeper.get_buy_price(*item);
+			std::string goldText = "(" + std::to_string(price) + "g)";
+
+			size_t totalWidth = 28;
+			size_t padding =
+				totalWidth > (itemName.length() + goldText.length()) ?
+				totalWidth - itemName.length() - goldText.length() :
+				1;
+
+			std::string itemDisplay =
+				itemName + std::string(padding, ' ') + goldText;
+			menuItems.push_back(itemDisplay);
+		}
+	}
+
+	MenuBuy::MenuBuy(GameContext& ctx, Creature& buyer, Creature& owner) :
+		buyer{ buyer },
+		owner{ owner },
+		shopkeeper{ shop_of(owner) }
+	{
+		assert(
+			ctx.renderer && "MenuBuy: renderer required before construction");
+		menuHeight = static_cast<size_t>(
+			ctx.renderer->get_viewport_rows() -
+			ctx.renderer->get_gui_reserve_rows());
+		menuWidth = static_cast<size_t>(ctx.renderer->get_viewport_cols());
+
+		populate_items();
+		menu_new(menuWidth, menuHeight, menuStartX, menuStartY, ctx);
+	}
+
+	void MenuBuy::menu_print_state(size_t state)
+	{
+		if (state >= menuItems.size())
+		{
+			return;
+		}
+
+		if (currentState == state)
+		{
+			menu_highlight_on();
+		}
+		menu_print(1, static_cast<int>(state) + 1, menu_get_string(state));
+		if (currentState == state)
+		{
+			menu_highlight_off();
+		}
+	}
+
+	void MenuBuy::draw_content()
+	{
+		populate_items();
+		for (size_t itemIndex{ 0 }; itemIndex < menuItems.size(); ++itemIndex)
+		{
+			menu_print_state(itemIndex);
+		}
+	}
+
+	void MenuBuy::draw()
+	{
+		menu_draw_box();
+		menu_draw_title("BUY ITEMS", ColorPairId::YELLOW_BLACK);
+
+		menu_print_header();
+
+		populate_items();
+		for (size_t itemIndex{ 0 }; itemIndex < menuItems.size(); ++itemIndex)
+		{
+			menu_print_state(itemIndex);
+		}
+	}
+
+	void MenuBuy::on_key(GameContext& ctx)
+	{
+		if (lastKey == GameKey::UP || lastKey == GameKey::W)
+		{
+			if (menuItems.empty())
+			{
+				return;
+			}
+			currentState =
+				(currentState + menuItems.size() - 1) % menuItems.size();
+		}
+		else if (lastKey == GameKey::DOWN || lastKey == GameKey::S)
+		{
+			if (menuItems.empty())
+			{
+				return;
+			}
+			currentState = (currentState + 1) % menuItems.size();
+		}
+		else if (lastKey == GameKey::ESCAPE)
+		{
+			menu_set_run_false();
+		}
+		else if (lastKey == GameKey::ENTER)
+		{
+			if (!InventoryOperations::is_inventory_empty(
+					shopkeeper.get_shop_inventory()))
+			{
+				handle_buy(ctx);
+			}
+			else
+			{
+				ctx.messageSystem->message(
+					ColorPairId::WHITE_BLACK,
+					"No items for sale.",
+					MessageCompletion::FINISHED);
+			}
+		}
+	}
+
+	void MenuBuy::menu(GameContext& ctx)
+	{
+		menu_key_listen();
+		draw();
+		on_key(ctx);
+	}
+
+	void MenuBuy::handle_buy(GameContext& ctx)
+	{
+		if (InventoryOperations::is_inventory_empty(
+				shopkeeper.get_shop_inventory()) ||
+			currentState >= InventoryOperations::get_item_count(
+								shopkeeper.get_shop_inventory()))
 		{
 			ctx.messageSystem->message(
 				ColorPairId::WHITE_BLACK,
-				"No items for sale.",
+				"Invalid selection.",
 				MessageCompletion::FINISHED);
+			return;
 		}
-	}
-}
 
-void MenuBuy::menu(GameContext& ctx)
-{
-	menu_key_listen();
-	draw();
-	on_key(ctx);
-}
-
-void MenuBuy::handle_buy(GameContext& ctx)
-{
-	if (InventoryOperations::is_inventory_empty(
-			shopkeeper.get_shop_inventory()) ||
-		currentState >= InventoryOperations::get_item_count(
-							shopkeeper.get_shop_inventory()))
-	{
-		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			"Invalid selection.",
-			MessageCompletion::FINISHED);
-		return;
-	}
-
-	Item* item = InventoryOperations::get_item_at(
-		shopkeeper.get_shop_inventory(),
-		currentState);
-	if (!item)
-	{
-		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			"Invalid selection.",
-			MessageCompletion::FINISHED);
-		return;
-	}
-
-	// The shop moves the item off its shelves; this menu only keeps its cursor in range.
-	if (shopkeeper.process_player_purchase(ctx, *item, buyer, owner))
-	{
-		if (currentState >= InventoryOperations::get_item_count(
-								shopkeeper.get_shop_inventory()) &&
-			!InventoryOperations::is_inventory_empty(
-				shopkeeper.get_shop_inventory()))
+		Item* item = InventoryOperations::get_item_at(
+			shopkeeper.get_shop_inventory(),
+			currentState);
+		if (!item)
 		{
-			const size_t itemCount = InventoryOperations::get_item_count(
-				shopkeeper.get_shop_inventory());
-			currentState = itemCount - 1;
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				"Invalid selection.",
+				MessageCompletion::FINISHED);
+			return;
 		}
 
-		populate_items();
+		// The shop moves the item off its shelves; this menu only keeps its
+		// cursor in range.
+		if (shopkeeper.process_player_purchase(ctx, *item, buyer, owner))
+		{
+			if (currentState >= InventoryOperations::get_item_count(
+									shopkeeper.get_shop_inventory()) &&
+				!InventoryOperations::is_inventory_empty(
+					shopkeeper.get_shop_inventory()))
+			{
+				const size_t itemCount = InventoryOperations::get_item_count(
+					shopkeeper.get_shop_inventory());
+				currentState = itemCount - 1;
+			}
+
+			populate_items();
+		}
 	}
-}
 
 } // namespace CppRL

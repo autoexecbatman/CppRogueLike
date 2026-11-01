@@ -34,153 +34,157 @@
 namespace CppRL
 {
 
-struct DiceExpr
-{
-	int num{ 0 };
-	int sides{ 0 };
-	int bonus{ 0 };
-
-	// The least and the most the expression can roll.
-	[[nodiscard]] constexpr int min_total() const noexcept
+	struct DiceExpr
 	{
-		return num + bonus;
-	}
+		int num{ 0 };
+		int sides{ 0 };
+		int bonus{ 0 };
 
-	[[nodiscard]] constexpr int max_total() const noexcept
-	{
-		return num * sides + bonus;
-	}
-};
+		// The least and the most the expression can roll.
+		[[nodiscard]] constexpr int min_total() const noexcept
+		{
+			return num + bonus;
+		}
 
-// Reads "<count>d<sides>", optionally followed by "+<bonus>" or "-<bonus>", or
-// a bare integer as a fixed value.
-//
-// Example:
-//   parse_dice_expression("1d8");      // -> { 1, 8, 0 }
-//   parse_dice_expression("1d12+5");   // -> { 1, 12, 5 }
-//   parse_dice_expression("5");        // -> { 0, 0, 5 }, no dice
-//   parse_dice_expression("d8");       // throws std::invalid_argument
-inline DiceExpr parse_dice_expression(std::string_view text)
-{
-	const auto fail = [text]()
-	{
-		throw std::invalid_argument(
-			"not a dice expression: " + std::string(text));
+		[[nodiscard]] constexpr int max_total() const noexcept
+		{
+			return num * sides + bonus;
+		}
 	};
 
-	DiceExpr expr{};
-	const char* cursor = text.data();
-	const char* const end = text.data() + text.size();
-
-	// The count, then the letter d - or the whole text is one fixed value.
-	auto result = std::from_chars(cursor, end, expr.num);
-	if (result.ec == std::errc{} && result.ptr == end)
+	// Reads "<count>d<sides>", optionally followed by "+<bonus>" or "-<bonus>",
+	// or a bare integer as a fixed value.
+	//
+	// Example:
+	//   parse_dice_expression("1d8");      // -> { 1, 8, 0 }
+	//   parse_dice_expression("1d12+5");   // -> { 1, 12, 5 }
+	//   parse_dice_expression("5");        // -> { 0, 0, 5 }, no dice
+	//   parse_dice_expression("d8");       // throws std::invalid_argument
+	inline DiceExpr parse_dice_expression(std::string_view text)
 	{
-		if (expr.num < 0)
+		const auto fail = [text]()
+		{
+			throw std::invalid_argument(
+				"not a dice expression: " + std::string(text));
+		};
+
+		DiceExpr expr{};
+		const char* cursor = text.data();
+		const char* const end = text.data() + text.size();
+
+		// The count, then the letter d - or the whole text is one fixed value.
+		auto result = std::from_chars(cursor, end, expr.num);
+		if (result.ec == std::errc{} && result.ptr == end)
+		{
+			if (expr.num < 0)
+			{
+				fail();
+			}
+			return DiceExpr{ 0, 0, expr.num };
+		}
+		if (result.ec != std::errc{} || result.ptr == end ||
+			*result.ptr != 'd' || expr.num <= 0)
 		{
 			fail();
 		}
-		return DiceExpr{ 0, 0, expr.num };
-	}
-	if (result.ec != std::errc{} || result.ptr == end || *result.ptr != 'd' ||
-		expr.num <= 0)
-	{
-		fail();
-	}
-	cursor = result.ptr + 1;
+		cursor = result.ptr + 1;
 
-	// The sides.
-	result = std::from_chars(cursor, end, expr.sides);
-	if (result.ec != std::errc{} || expr.sides <= 0)
-	{
-		fail();
-	}
-	cursor = result.ptr;
-
-	// An optional signed bonus, and nothing after it. from_chars reads a minus
-	// sign itself and refuses a plus, so the plus is stepped over here.
-	if (cursor != end)
-	{
-		if (*cursor != '+' && *cursor != '-')
+		// The sides.
+		result = std::from_chars(cursor, end, expr.sides);
+		if (result.ec != std::errc{} || expr.sides <= 0)
 		{
 			fail();
 		}
-		if (*cursor == '+')
+		cursor = result.ptr;
+
+		// An optional signed bonus, and nothing after it. from_chars reads a
+		// minus sign itself and refuses a plus, so the plus is stepped over
+		// here.
+		if (cursor != end)
 		{
-			++cursor;
-			if (cursor == end)
+			if (*cursor != '+' && *cursor != '-')
+			{
+				fail();
+			}
+			if (*cursor == '+')
+			{
+				++cursor;
+				if (cursor == end)
+				{
+					fail();
+				}
+			}
+			result = std::from_chars(cursor, end, expr.bonus);
+			if (result.ec != std::errc{} || result.ptr != end)
 			{
 				fail();
 			}
 		}
-		result = std::from_chars(cursor, end, expr.bonus);
-		if (result.ec != std::errc{} || result.ptr != end)
+		return expr;
+	}
+
+	// The expression as the data writes it, and the inverse of
+	// parse_dice_expression: parsing what this returns gives the same dice
+	// back. A fixed value, having no dice, is written as its number alone.
+	//
+	// Example:
+	//   to_text(DiceExpr{ 1, 12, 5 });   // -> "1d12+5"
+	//   to_text(DiceExpr{ 2, 6, -1 });   // -> "2d6-1"
+	//   to_text(DiceExpr{ 0, 0, 5 });    // -> "5"
+	inline std::string to_text(const DiceExpr& expr)
+	{
+		if (expr.num == 0)
 		{
-			fail();
+			return std::to_string(expr.bonus);
 		}
+		std::string text =
+			std::to_string(expr.num) + "d" + std::to_string(expr.sides);
+		if (expr.bonus > 0)
+		{
+			text += "+" + std::to_string(expr.bonus);
+		}
+		else if (expr.bonus < 0)
+		{
+			// to_string writes the minus sign itself.
+			text += std::to_string(expr.bonus);
+		}
+		return text;
 	}
-	return expr;
-}
 
-// The expression as the data writes it, and the inverse of
-// parse_dice_expression: parsing what this returns gives the same dice back.
-// A fixed value, having no dice, is written as its number alone.
-//
-// Example:
-//   to_text(DiceExpr{ 1, 12, 5 });   // -> "1d12+5"
-//   to_text(DiceExpr{ 2, 6, -1 });   // -> "2d6-1"
-//   to_text(DiceExpr{ 0, 0, 5 });    // -> "5"
-inline std::string to_text(const DiceExpr& expr)
-{
-	if (expr.num == 0)
+	// Rolls every die of the expression and returns each value; the bonus is
+	// the caller's to add, because rules that act per die must see the dice
+	// alone.
+	//
+	// Example, dice forced to 3 and 4:
+	//   roll_each_die(&dice, { 2, 6, 1 });   // -> { 3, 4 }
+	inline std::vector<int> roll_each_die(
+		RandomDice* dice,
+		const DiceExpr& expr)
 	{
-		return std::to_string(expr.bonus);
+		assert(dice && "roll_each_die called without dice");
+		std::vector<int> rolled;
+		rolled.reserve(static_cast<size_t>(expr.num));
+		for (int die = 0; die < expr.num; ++die)
+		{
+			rolled.push_back(dice->roll(1, expr.sides));
+		}
+		return rolled;
 	}
-	std::string text =
-		std::to_string(expr.num) + "d" + std::to_string(expr.sides);
-	if (expr.bonus > 0)
-	{
-		text += "+" + std::to_string(expr.bonus);
-	}
-	else if (expr.bonus < 0)
-	{
-		// to_string writes the minus sign itself.
-		text += std::to_string(expr.bonus);
-	}
-	return text;
-}
 
-// Rolls every die of the expression and returns each value; the bonus is the
-// caller's to add, because rules that act per die must see the dice alone.
-//
-// Example, dice forced to 3 and 4:
-//   roll_each_die(&dice, { 2, 6, 1 });   // -> { 3, 4 }
-inline std::vector<int> roll_each_die(RandomDice* dice, const DiceExpr& expr)
-{
-	assert(dice && "roll_each_die called without dice");
-	std::vector<int> rolled;
-	rolled.reserve(static_cast<size_t>(expr.num));
-	for (int die = 0; die < expr.num; ++die)
+	// The whole roll: every die plus the bonus. A fixed value, having no dice,
+	// is its bonus.
+	//
+	// Example, dice forced to 3 and 4:
+	//   roll_dice(&dice, { 2, 6, 1 });   // -> 8
+	//   roll_dice(&dice, { 0, 0, 5 });   // -> 5
+	inline int roll_dice(RandomDice* dice, const DiceExpr& expr)
 	{
-		rolled.push_back(dice->roll(1, expr.sides));
+		int total = expr.bonus;
+		for (const int die : roll_each_die(dice, expr))
+		{
+			total += die;
+		}
+		return total;
 	}
-	return rolled;
-}
-
-// The whole roll: every die plus the bonus. A fixed value, having no dice, is
-// its bonus.
-//
-// Example, dice forced to 3 and 4:
-//   roll_dice(&dice, { 2, 6, 1 });   // -> 8
-//   roll_dice(&dice, { 0, 0, 5 });   // -> 5
-inline int roll_dice(RandomDice* dice, const DiceExpr& expr)
-{
-	int total = expr.bonus;
-	for (const int die : roll_each_die(dice, expr))
-	{
-		total += die;
-	}
-	return total;
-}
 
 } // namespace CppRL
