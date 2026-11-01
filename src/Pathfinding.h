@@ -34,6 +34,7 @@
 #include <set>
 #include <vector>
 
+#include "Dijkstra.h"
 #include "TileType.h"
 #include "Vector2D.h"
 
@@ -123,11 +124,24 @@ namespace CppRL
 			};
 
 			std::vector<CostMap> costMaps{};
+			// The one search both the floods and the routes run, sized for the
+			// level it last searched.
+			std::optional<Dijkstra> search{};
+			int searchWidth{ 0 };
+			int searchHeight{ 0 };
 
 			const CostMap& cost_map(
 				Vector2D goal,
 				const Mobility& mobility,
 				const GameContext& ctx);
+
+			// The search, made again when the level is not the size it was
+			// built for, so its work vectors cover every tile.
+			//
+			// Example:
+			//   search_sized_for(120, 70); // a 120 by 70 search, kept
+			//   search_sized_for(120, 70); // -> the same one
+			Dijkstra& search_sized_for(int width, int height);
 
 		public:
 			// The cost of the cheapest way from a tile to the goal for that
@@ -154,7 +168,7 @@ namespace CppRL
 				Vector2D start,
 				Vector2D goal,
 				const Mobility& mobility,
-				const GameContext& ctx) const;
+				const GameContext& ctx);
 		};
 
 	} // namespace Pathfinding

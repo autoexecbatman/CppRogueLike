@@ -10,18 +10,18 @@
     "-Configuration",
     "Debug",
     "-Filter",
-    "--gtest_filter=PathfindingTest.*:MonsterWaterAvoidanceTest.*:MonsterWaterDetourTest.*:SanctuaryPursuitTest.*:MonsterMovementTest.*"
+    "--gtest_filter=PathfindingTest.*:MonsterWaterAvoidanceTest.*:MonsterWaterDetourTest.*:SanctuaryPursuitTest.*:MonsterMovementTest.*:DijkstraTest.*"
   ],
   "mutations": [
     {
-      "file": "src/Pathfinding.cpp",
-      "original": "\t\t\tif (!cameFrom[index_of(goal, width)])\n\t\t\t{\n\t\t\t\treturn {};\n\t\t\t}\n",
-      "mutated": "\t\t\tif (false)\n\t\t\t{\n\t\t\t\treturn {};\n\t\t\t}\n",
+      "file": "src/Dijkstra.cpp",
+      "original": "\t\tif (!cameFrom.at(goalIndex))\n\t\t{\n\t\t\treturn path;\n\t\t}\n",
+      "mutated": "\t\tif (false)\n\t\t{\n\t\t\treturn path;\n\t\t}\n",
       "catches": "an unreachable goal handed back a route instead of nothing"
     },
     {
-      "file": "src/Pathfinding.cpp",
-      "original": "\tstd::ranges::reverse(route);\n",
+      "file": "src/Dijkstra.cpp",
+      "original": "\t\tstd::ranges::reverse(path);\n",
       "mutated": "",
       "catches": "a route handed back from goal to start, which walks the player backwards"
     },
@@ -120,6 +120,22 @@
       "original": "\t\t\t\t\tif (map.find_decoration_at(goal, ctx) != nullptr &&\n\t\t\t\t\t\tmobility.contains(map.get_tile_type(goal)))",
       "mutated": "\t\t\tif (false)",
       "catches": "the walk to a barrel refused, so a click can never break one"
+    }
+  ],
+  "equivalent": [
+    {
+      "file": "src/Dijkstra.cpp",
+      "original": "\t\t\t\t\t\tconst double priority =\n\t\t\t\t\t\t\tnewCost + heuristic(next, *goal);\n",
+      "mutated": "\t\t\t\t\t\tconst double priority = newCost;\n",
+      "catches": "A* ordered by the cost alone, as Dijkstra is, which breaks a tie between equal routes another way",
+      "why": "Equivalent on results where measured: over all 10,000 start and goal pairs in an open 10 by 10 room, eight-way with diagonals at sqrt 2, A* and cost-only ordering returned identical routes (a DijkstraTest experiment, 2026-11-01). No test was found that tells them apart; the switch changes how many tiles are expanded."
+    },
+    {
+      "file": "src/Dijkstra.cpp",
+      "original": "\t\t\tif (goal && current == *goal)\n\t\t\t{\n\t\t\t\tbreak;\n\t\t\t}\n",
+      "mutated": "",
+      "catches": "a search that runs on past its goal",
+      "why": "Equivalent on results: the heuristic is consistent (Chebyshev, and every step costs at least 1), so the goal is popped at its final cost and every tile on its path was popped before it and is never improved again. Running on past the goal cannot change the path, only the work."
     }
   ]
 }

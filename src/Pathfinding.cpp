@@ -1,17 +1,16 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <functional>
 #include <iterator>
 #include <limits>
 #include <numbers>
 #include <optional>
-#include <queue>
 #include <set>
 #include <utility>
 #include <vector>
 
 #include "Creature.h"
+#include "Dijkstra.h"
 #include "EquipmentSlot.h"
 #include "GameContext.h"
 #include "Map.h"
@@ -49,24 +48,6 @@ namespace CppRL
 			// A shut door takes one turn to open and one to pass.
 			constexpr int SHUT_DOOR_COST = 2;
 			constexpr int UNREACHED = std::numeric_limits<int>::max();
-
-			// A frontier entry for the Dijkstra floods and the A* route search,
-			// cheapest first.
-			struct Frontier
-			{
-				double priority{ 0.0 };
-				Vector2D position{};
-
-				bool operator>(const Frontier& other) const noexcept
-				{
-					return priority > other.priority;
-				}
-			};
-
-			using FrontierQueue = std::priority_queue<
-				Frontier,
-				std::vector<Frontier>,
-				std::greater<Frontier>>;
 
 			// Where a tile sits in a grid stored row after row.
 			//
@@ -318,41 +299,58 @@ namespace CppRL
 				return costMap;
 			}
 
-			// Dijkstra outward from the goal until the frontier is empty; a
-			// tile costs what entering it does.
-			FrontierQueue frontier;
-			costMap.costs[index_of(goal, costMap.width)] = 0;
-			frontier.push(Frontier{ 0.0, goal });
-
-			while (!frontier.empty())
+			// Dijkstra outward from the goal with no target, so it prices every
+			// tile; a tile costs what entering it does.
+			const auto priced_neighbours = [&mobility, &ctx](Vector2D current)
 			{
-				const Frontier top = frontier.top();
-				frontier.pop();
-
-				const int reached =
-					costMap.costs[index_of(top.position, costMap.width)];
-				if (static_cast<double>(reached) < top.priority)
-				{
-					continue;
-				}
-
+				std::vector<Vector2D> priced{};
 				for (const Vector2D& delta : NEIGHBOURS)
 				{
-					const Vector2D next = top.position + delta;
-					const std::optional<int> price =
-						step_cost(next, mobility, ctx);
-					if (!price)
+					const Vector2D next = current + delta;
+					if (step_cost(next, mobility, ctx))
 					{
-						continue;
+						priced.push_back(next);
 					}
+				}
+				return priced;
+			};
+			const auto entry_price =
+				[&mobility,
+					&ctx]([[maybe_unused]] Vector2D current, Vector2D next)
+			{
+				assert(
+					current.chebyshev_distance_to(next) == 1 &&
+					"cost_map: a step priced between tiles that do not touch");
+				const std::optional<int> price = step_cost(next, mobility, ctx);
+				assert(price && "cost_map: a neighbour listed with no price");
+				return static_cast<double>(*price);
+			};
+			Dijkstra& dijkstra =
+				search_sized_for(map.get_width(), map.get_height());
+			[[maybe_unused]] const std::vector<Vector2D> noPath =
+				dijkstra.a_star_search(
+					SearchGraph{
+						.neighbours = priced_neighbours,
+						.cost = entry_price,
+					},
+					goal,
+					std::nullopt,
+					SearchOrder::DIJKSTRA);
+			assert(
+				noPath.empty() && "cost_map: a flood with no goal drew a path");
 
-					const size_t nextIndex = index_of(next, costMap.width);
-					const int nextCost = reached + *price;
-					if (nextCost < costMap.costs[nextIndex])
+			// Every cost is a sum of whole step prices, so the double is exact.
+			for (int row = 0; row < map.get_height(); ++row)
+			{
+				for (int col = 0; col < map.get_width(); ++col)
+				{
+					const Vector2D tile{ col, row };
+					const std::optional<double> cost =
+						dijkstra.cost_so_far(tile);
+					if (cost)
 					{
-						costMap.costs[nextIndex] = nextCost;
-						frontier.push(
-							Frontier{ static_cast<double>(nextCost), next });
+						costMap.costs[index_of(tile, costMap.width)] =
+							static_cast<int>(*cost);
 					}
 				}
 			}
@@ -387,7 +385,7 @@ namespace CppRL
 			Vector2D start,
 			Vector2D goal,
 			const Mobility& mobility,
-			const GameContext& ctx) const
+			const GameContext& ctx)
 		{
 			assert(ctx.map && "find_route: a route was asked for with no map");
 			const Map& map = *ctx.map;
@@ -399,15 +397,6 @@ namespace CppRL
 			{
 				return {};
 			}
-
-			const int width = map.get_width();
-			const size_t cellCount = static_cast<size_t>(width) *
-				static_cast<size_t>(map.get_height());
-			constexpr double UNSEEN = std::numeric_limits<double>::infinity();
-			std::vector<double> costSoFar(cellCount, UNSEEN);
-			std::vector<std::optional<Vector2D>> cameFrom(
-				cellCount,
-				std::nullopt);
 
 			// The goal is let in where the rule alone refuses it: a creature
 			// may stand there, a shut door is somewhere to walk up to, and a
@@ -449,66 +438,50 @@ namespace CppRL
 
 			// A*: the frontier is ordered by cost so far plus the heuristic,
 			// and stops at the goal.
-			FrontierQueue frontier;
-			costSoFar[index_of(start, width)] = 0.0;
-			cameFrom[index_of(start, width)] = start;
-			frontier.push(Frontier{ 0.0, start });
-
-			while (!frontier.empty())
+			const auto open_neighbours = [&map, &price_of](Vector2D current)
 			{
-				const Vector2D current = frontier.top().position;
-				frontier.pop();
-
-				if (current == goal)
-				{
-					break;
-				}
-
+				std::vector<Vector2D> open{};
 				for (const Vector2D& delta : NEIGHBOURS)
 				{
 					const Vector2D next = current + delta;
-					if (!map.is_in_bounds(next))
+					if (map.is_in_bounds(next) && price_of(next))
 					{
-						continue;
-					}
-					const std::optional<double> price = price_of(next);
-					if (!price)
-					{
-						continue;
-					}
-
-					// A diagonal is weighted by its length so the route drawn
-					// on screen runs straight; the step count is the same
-					// either way.
-					const bool isDiagonal = delta.x != 0 && delta.y != 0;
-					const double stepPrice =
-						isDiagonal ? *price * std::numbers::sqrt2 : *price;
-					const double newCost =
-						costSoFar[index_of(current, width)] + stepPrice;
-					const size_t nextIndex = index_of(next, width);
-					if (newCost < costSoFar[nextIndex])
-					{
-						costSoFar[nextIndex] = newCost;
-						cameFrom[nextIndex] = current;
-						const double heuristic = static_cast<double>(
-							next.chebyshev_distance_to(goal));
-						frontier.push(Frontier{ newCost + heuristic, next });
+						open.push_back(next);
 					}
 				}
-			}
-
-			if (!cameFrom[index_of(goal, width)])
+				return open;
+			};
+			const auto step_price = [&price_of](Vector2D current, Vector2D next)
 			{
-				return {};
-			}
+				const std::optional<double> price = price_of(next);
+				assert(price && "find_route: a neighbour listed with no price");
+				// A diagonal is weighted by its length so the route drawn on
+				// screen runs straight; the step count is the same either way.
+				const Vector2D delta = next - current;
+				const bool isDiagonal = delta.x != 0 && delta.y != 0;
+				return isDiagonal ? *price * std::numbers::sqrt2 : *price;
+			};
+			Dijkstra& dijkstra =
+				search_sized_for(map.get_width(), map.get_height());
+			return dijkstra.a_star_search(
+				SearchGraph{
+					.neighbours = open_neighbours,
+					.cost = step_price,
+				},
+				start,
+				goal,
+				SearchOrder::A_STAR);
+		}
 
-			std::vector<Vector2D> route{ goal };
-			while (route.back() != start)
+		Dijkstra& Pathfinder::search_sized_for(int width, int height)
+		{
+			if (!search || searchWidth != width || searchHeight != height)
 			{
-				route.push_back(*cameFrom[index_of(route.back(), width)]);
+				search.emplace(width, height);
+				searchWidth = width;
+				searchHeight = height;
 			}
-			std::ranges::reverse(route);
-			return route;
+			return *search;
 		}
 
 	} // namespace Pathfinding

@@ -57,8 +57,8 @@
     },
     {
       "file": "src/Pathfinding.cpp",
-      "original": "\t\t\t\t\tconst std::optional<int> price =\n\t\t\t\t\t\tstep_cost(next, mobility, ctx);",
-      "mutated": "\t\t\t\t\tconst std::optional<int> price =map.get_tile_type(next) == TileType::WALL ? std::nullopt : std::optional<int>{ 1 };",
+      "original": "\t\t\t\t\tif (step_cost(next, mobility, ctx))\n\t\t\t\t\t{\n\t\t\t\t\t\tpriced.push_back(next);\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\treturn priced;\n\t\t\t};\n\t\t\tconst auto entry_price =\n\t\t\t\t[&mobility,\n\t\t\t\t\t&ctx]([[maybe_unused]] Vector2D current, Vector2D next)\n\t\t\t{\n\t\t\t\tassert(\n\t\t\t\t\tcurrent.chebyshev_distance_to(next) == 1 &&\n\t\t\t\t\t\"cost_map: a step priced between tiles that do not touch\");\n\t\t\t\tconst std::optional<int> price = step_cost(next, mobility, ctx);",
+      "mutated": "\t\t\t\t\tif (ctx.map->get_tile_type(next) != TileType::WALL)\n\t\t\t\t\t{\n\t\t\t\t\t\tpriced.push_back(next);\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\treturn priced;\n\t\t\t};\n\t\t\tconst auto entry_price =\n\t\t\t\t[&mobility,\n\t\t\t\t\t&ctx]([[maybe_unused]] Vector2D current, Vector2D next)\n\t\t\t{\n\t\t\t\tassert(\n\t\t\t\t\tcurrent.chebyshev_distance_to(next) == 1 &&\n\t\t\t\t\t\"cost_map: a step priced between tiles that do not touch\");\n\t\t\t\tconst std::optional<int> price = ctx.map->get_tile_type(next) == TileType::WALL ? std::nullopt : std::optional<int>{ 1 };",
       "catches": "the flood ignoring the mover, as the old one did, so it promises water and shut doors the step refuses"
     },
     {
