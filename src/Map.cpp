@@ -426,8 +426,8 @@ namespace CppRL
 	{
 		if (!in_bounds(pos))
 		{
-			return TileType::
-				WALL; // Out of bounds positions are treated as walls
+			// Out of bounds positions are treated as walls.
+			return TileType::WALL;
 		}
 		return tiles.at(get_index(pos)).type;
 	}

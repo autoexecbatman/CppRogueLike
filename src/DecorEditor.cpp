@@ -556,11 +556,11 @@ namespace CppRL
 			Color textColor;
 			if (isSelected && editing)
 			{
-				// Show what the user is currently typing, with cursor.
+				// Show what the user is typing: in brackets when it is all
+				// selected, otherwise followed by the typing cursor.
 				std::string live = isLabelAllSelected ?
-					std::format("[{}]", labelBuffer) // selected-all state
-					:
-					std::format("{}|", labelBuffer); // normal typing cursor
+					std::format("[{}]", labelBuffer) :
+					std::format("{}|", labelBuffer);
 				if (symbolBuffer)
 				{
 					live += std::format(" ({})", symbolBuffer);
@@ -818,11 +818,9 @@ namespace CppRL
 			constexpr Color EDITING_FIELD{ 255, 255, 100, 255 };
 			constexpr Color IDLE_FIELD{ 160, 160, 80, 255 };
 			Color labelColor = !isEditingSymbol ? EDITING_FIELD : IDLE_FIELD;
+			// Brackets mark the label as all selected.
 			std::string labelDisplay = isLabelAllSelected ?
-				std::format(
-					"Label: [{}]",
-					labelBuffer) // brackets = all selected
-				:
+				std::format("Label: [{}]", labelBuffer) :
 				std::format(
 					"Label: {}{}",
 					labelBuffer,

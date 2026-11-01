@@ -151,9 +151,8 @@ namespace CppRL
 	{
 		Creature& strong = add_creature(4, 4, false);
 		Creature& weak = add_creature(1, 6, false);
-		script_budget(
-			1,
-			1); // a budget of two: the 1 HD creature and nothing else
+		// A budget of two: the 1 HD creature and nothing else.
+		script_budget(1, 1);
 
 		cast_sleep();
 
