@@ -219,12 +219,9 @@ namespace CppRL
 						MessageCompletion::FINISHED);
 				}
 
-				if (MagicalEffectUtils::is_protection_effect(effect) ||
-					effect == MagicalEffect::BRILLIANCE)
-				{
-					wearer.update_armor_class(ctx);
-				}
-
+				// Whatever its effect, armour class is worked out again; it is
+				// logged only if it changed.
+				wearer.update_armor_class(ctx);
 				return true;
 			}
 

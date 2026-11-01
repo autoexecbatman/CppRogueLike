@@ -40,11 +40,6 @@ namespace CppRL
 			}
 		}
 
-		bool is_protection_effect(MagicalEffect effect)
-		{
-			return effect == MagicalEffect::PROTECTION;
-		}
-
 		int get_ac_bonus(MagicalEffect effect, int bonus)
 		{
 			switch (effect)

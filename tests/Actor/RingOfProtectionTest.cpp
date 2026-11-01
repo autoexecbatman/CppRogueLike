@@ -153,8 +153,7 @@ namespace CppRL
 	}
 
 	// A ring's plus counts only when its effect is protection: fire resistance
-	// +1 leaves armour class alone. Putting it on does not recompute armour
-	// class, so the test recomputes it, as the next item put on would.
+	// +1 leaves armour class alone, as putting it on recomputes it.
 	TEST_F(RingOfProtectionTest, ARingThatIsNotProtectionLeavesArmourClassAlone)
 	{
 		wear("ring_of_fire_resistance");
@@ -163,10 +162,17 @@ namespace CppRL
 			player().get_equipped_item(EquipmentSlot::LEFT_RING) != nullptr)
 			<< "the ring of fire resistance did not go on";
 
+		EXPECT_EQ(armor_class(), BARE_ARMOR_CLASS);
+	}
+
+	// The breakdown names only the items that counted, so it leaves out a ring
+	// of fire resistance.
+	TEST_F(RingOfProtectionTest, ARingThatIsNotProtectionIsNotNamedAsCounting)
+	{
+		wear("ring_of_fire_resistance");
+
 		const ArmorClassBreakdown breakdown =
 			player().armorClass->update(player(), ctx);
-
-		EXPECT_EQ(armor_class(), BARE_ARMOR_CLASS);
 		EXPECT_TRUE(breakdown.ring.name.empty())
 			<< "a ring that is not protection was named as counting";
 	}

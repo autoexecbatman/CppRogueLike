@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\t\t\t\twearer.update_armor_class(ctx);\n\t\t\t\t}\n\n\t\t\t\treturn true;\n\t\t\t}\n\n\t\t\t// Could not be put on or taken off - a cursed item that will not\n\t\t\t// come off: no turn.\n\t\t\treturn false;",
-      "mutated": "\t\t\t\t\twearer.update_armor_class(ctx);\n\t\t\t\t}\n\n\t\t\t\treturn true;\n\t\t\t}\n\n\t\t\t// Could not be put on or taken off - a cursed item that will not\n\t\t\t// come off: no turn.\n\t\t\treturn true;",
+      "original": "\t\t\t\twearer.update_armor_class(ctx);\n\t\t\t\treturn true;\n\t\t\t}\n\n\t\t\t// Could not be put on or taken off - a cursed item that will not\n\t\t\t// come off: no turn.\n\t\t\treturn false;",
+      "mutated": "\t\t\t\twearer.update_armor_class(ctx);\n\t\t\t\treturn true;\n\t\t\t}\n\n\t\t\t// Could not be put on or taken off - a cursed item that will not\n\t\t\t// come off: no turn.\n\t\t\treturn true;",
       "catches": "a failed toggle of rings and helms spending a turn"
     },
     {
