@@ -128,17 +128,6 @@ namespace CppRL
 		} // namespace Leveling
 
 		// =====================================================================
-		// TIME
-		// =====================================================================
-		namespace Time
-		{
-			// "Ten combat rounds equal one turn" (Player's Handbook, PDF page
-			// 24). A game turn is one round, so a rule written in turns runs
-			// ten game turns each.
-			inline constexpr int ROUNDS_PER_TURN = 10;
-		} // namespace Time
-
-		// =====================================================================
 		// COMBAT (AD&D 2e Mechanics)
 		// =====================================================================
 		namespace Combat

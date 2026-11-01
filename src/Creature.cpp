@@ -36,7 +36,6 @@
 #include "EquipmentSlot.h"
 #include "ExperienceReward.h"
 #include "FloatingTextSystem.h"
-#include "GameBalance.h"
 #include "GameContext.h"
 #include "HealthPool.h"
 #include "InventoryData.h"
@@ -890,9 +889,7 @@ namespace CppRL
 
 		// A point each time the listed number of turns has run, reckoned in
 		// rounds.
-		if (roundsElapsed %
-				(turnsBetweenPoints * GameBalance::Time::ROUNDS_PER_TURN) ==
-			0)
+		if (roundsElapsed % (turnsBetweenPoints * ROUNDS_PER_TURN) == 0)
 		{
 			[[maybe_unused]] const int healed = healthPool->regenerate(1);
 		}
@@ -982,7 +979,7 @@ namespace CppRL
 
 		// A point each turn, reckoned in rounds; heal reaches fire and acid,
 		// which the ring mends.
-		if (roundsElapsed % GameBalance::Time::ROUNDS_PER_TURN == 0)
+		if (roundsElapsed % ROUNDS_PER_TURN == 0)
 		{
 			[[maybe_unused]] const int healed = healthPool->heal(1);
 		}

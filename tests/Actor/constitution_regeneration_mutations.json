@@ -27,14 +27,14 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tif (roundsElapsed %\n\t\t\t\t(turnsBetweenPoints * GameBalance::Time::ROUNDS_PER_TURN) ==\n\t\t\t0)",
-      "mutated": "\t\tif (roundsElapsed %turnsBetweenPoints ==\n\t\t\t0)",
+      "original": "\t\tif (roundsElapsed % (turnsBetweenPoints * ROUNDS_PER_TURN) == 0)",
+      "mutated": "\t\tif (roundsElapsed % turnsBetweenPoints == 0)",
       "catches": "the listed turns read as rounds"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tif (roundsElapsed %\n\t\t\t\t(turnsBetweenPoints * GameBalance::Time::ROUNDS_PER_TURN) ==\n\t\t\t0)",
-      "mutated": "\t\tif (roundsElapsed %\n\t\t\t\t(turnsBetweenPoints * GameBalance::Time::ROUNDS_PER_TURN)!=\n\t\t\t0)",
+      "original": "\t\tif (roundsElapsed % (turnsBetweenPoints * ROUNDS_PER_TURN) == 0)",
+      "mutated": "\t\tif (roundsElapsed % (turnsBetweenPoints * ROUNDS_PER_TURN) != 0)",
       "catches": "healing on every round but the listed one"
     },
     {
@@ -44,7 +44,7 @@
       "catches": "more than the book's 1 point"
     },
     {
-      "file": "src/GameBalance.h",
+      "file": "src/TurnSchedule.h",
       "original": "inline constexpr int ROUNDS_PER_TURN = 10;",
       "mutated": "inline constexpr int ROUNDS_PER_TURN = 6;",
       "catches": "a turn other than the book's ten rounds"
