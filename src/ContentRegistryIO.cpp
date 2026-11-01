@@ -10,6 +10,7 @@
 
 #include "ContentRegistry.h"
 #include "ContentRegistryIO.h"
+#include "DataFileText.h"
 #include "Paths.h"
 #include "TileRefJson.h"
 
@@ -64,7 +65,7 @@ namespace CppRL
 						"ContentRegistryIO::save -- cannot open '{}' for writing",
 						resolved.string()));
 			}
-			tilesFile << root.dump(4);
+			tilesFile << data_file_text(root, 4);
 			if (tilesFile.fail())
 			{
 				throw std::runtime_error(

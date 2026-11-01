@@ -16,6 +16,7 @@
 #include "ArmorMaterial.h"
 #include "BuffType.h"
 #include "Colors.h"
+#include "DataFileText.h"
 #include "DiceExpr.h"
 #include "EquipmentSlot.h"
 #include "ItemClassification.h"
@@ -288,7 +289,7 @@ namespace CppRL
 					"ItemRegistry::save -- cannot open '{}' for writing",
 					resolved.string()));
 		}
-		file << root.dump(4);
+		file << data_file_text(root, 4);
 		if (file.fail())
 		{
 			throw std::runtime_error(

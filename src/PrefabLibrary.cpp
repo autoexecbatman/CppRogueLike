@@ -13,6 +13,7 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
+#include "DataFileText.h"
 #include "DecorEditor.h"
 #include "DungeonRoom.h"
 #include "Map.h"
@@ -178,7 +179,7 @@ namespace CppRL
 					"PrefabLibrary::save -- cannot write '{}'",
 					resolved.string()));
 		}
-		out << prefabsDocument.dump(2);
+		out << data_file_text(prefabsDocument, 2);
 		out.flush();
 		if (!out)
 		{

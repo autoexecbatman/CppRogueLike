@@ -23,6 +23,7 @@
 #include "CorpseEdibility.h"
 #include "CreatureSize.h"
 #include "DamageInfo.h"
+#include "DataFileText.h"
 #include "EquipmentSlot.h"
 #include "IntelligenceRating.h"
 #include "MonsterHitDice.h"
@@ -699,7 +700,7 @@ namespace CppRL
 					"MonsterRegistry::save -- cannot open '{}' for writing",
 					resolved.string()));
 		}
-		file << root.dump(4);
+		file << data_file_text(root, 2);
 		if (file.fail())
 		{
 			throw std::runtime_error(

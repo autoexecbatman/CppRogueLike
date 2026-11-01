@@ -155,6 +155,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/WornSlotTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/BuffTypeEncodingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CodecRoundTripTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/DataFileRoundTripTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EnumCycleTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ListCursorTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/PrefabListRowsTest.cpp
@@ -380,6 +381,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/RecordEditor.cpp
     ${PARENT_SOURCE_DIR}/RoomEditor.cpp
     ${PARENT_SOURCE_DIR}/SpellEditor.cpp
+    ${PARENT_SOURCE_DIR}/DataFileText.cpp
     ${PARENT_SOURCE_DIR}/DataManager.cpp
     ${PARENT_SOURCE_DIR}/ShopKeeper.cpp
     ${PARENT_SOURCE_DIR}/ShopkeeperFactory.cpp

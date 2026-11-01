@@ -17,6 +17,7 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
+#include "DataFileText.h"
 #include "Paths.h"
 #include "SpellRegistry.h"
 
@@ -207,7 +208,7 @@ namespace CppRL
 					"SpellRegistry::save -- cannot open '{}' for writing",
 					resolved.string()));
 		}
-		file << root.dump(4);
+		file << data_file_text(root, 2);
 		if (file.fail())
 		{
 			throw std::runtime_error(

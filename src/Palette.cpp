@@ -15,6 +15,7 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
+#include "DataFileText.h"
 #include "Palette.h"
 #include "Paths.h"
 #include "TileRef.h"
@@ -268,7 +269,7 @@ namespace CppRL
 					"Palette::save -- cannot open '{}' for writing",
 					resolved.string()));
 		}
-		out << document.dump(4);
+		out << data_file_text(document, 2);
 		out.flush();
 		if (out.fail())
 		{
