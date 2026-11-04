@@ -30,6 +30,8 @@
 #include <utility>
 #include <variant>
 
+#include <nlohmann/json.hpp>
+
 #include "Actor.h"
 #include "ArmorMaterial.h"
 #include "BuffSystem.h"
@@ -52,7 +54,6 @@
 #include "MagicalItemEffects.h"
 #include "Map.h"
 #include "MessageSystem.h"
-#include "Persistent.h"
 #include "Pickable.h"
 #include "Player.h"
 #include "PlayerTurn.h"
@@ -87,7 +88,7 @@ namespace CppRL
 		// Shared save for stat-boost equipment (Gauntlets, Girdle,
 		// JewelryAmulet)
 		template <typename StatBoost>
-		void save_stat_boost(const StatBoost& statBoost, json& output)
+		void save_stat_boost(const StatBoost& statBoost, nlohmann::json& output)
 		{
 			output["strBonus"] = statBoost.strBonus;
 			output["dexBonus"] = statBoost.dexBonus;
@@ -105,7 +106,7 @@ namespace CppRL
 		}
 
 		template <typename StatBoost>
-		void load_stat_boost(StatBoost& statBoost, const json& source)
+		void load_stat_boost(StatBoost& statBoost, const nlohmann::json& source)
 		{
 			statBoost.strBonus = source.at("strBonus").get<int>();
 			statBoost.dexBonus = source.at("dexBonus").get<int>();
@@ -1196,7 +1197,7 @@ namespace CppRL
 
 	// ========== Serialization ==========
 
-	void save_behavior(const ItemBehavior& behavior, json& output)
+	void save_behavior(const ItemBehavior& behavior, nlohmann::json& output)
 	{
 		output["type"] = encode_pickable_type(pickable_type_of(behavior));
 		std::visit(
@@ -1283,7 +1284,7 @@ namespace CppRL
 			behavior);
 	}
 
-	ItemBehavior load_behavior(const json& source)
+	ItemBehavior load_behavior(const nlohmann::json& source)
 	{
 		const PickableType type =
 			parse_pickable_type(source.at("type").get<std::string>());

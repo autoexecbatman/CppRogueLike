@@ -17,6 +17,8 @@
 #include <memory>
 #include <utility>
 
+#include <nlohmann/json.hpp>
+
 #include "src/Actor.h"
 #include "src/Ai.h"
 #include "src/ArmorClass.h"
@@ -32,7 +34,6 @@
 #include "src/InputSystem.h"
 #include "src/NotificationMenu.h"
 #include "src/Paths.h"
-#include "src/Persistent.h"
 #include "src/Player.h"
 #include "src/PlayerRaceState.h"
 #include "src/TileRef.h"
@@ -94,9 +95,9 @@ namespace CppRL
 				return AiType::MONSTER;
 			}
 
-			void load([[maybe_unused]] const json& j) override {}
+			void load([[maybe_unused]] const nlohmann::json& source) override {}
 
-			void save([[maybe_unused]] json& j) override {}
+			void save([[maybe_unused]] nlohmann::json& output) const override {}
 		};
 
 		// Loads what main does before a game can start, then starts one with a

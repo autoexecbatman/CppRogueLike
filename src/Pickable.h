@@ -10,6 +10,8 @@
 #include <type_traits>
 #include <variant>
 
+#include <nlohmann/json_fwd.hpp>
+
 #include "ArmorMaterial.h"
 #include "BuffType.h"
 #include "CorpseEdibility.h"
@@ -17,7 +19,6 @@
 #include "DiceExpr.h"
 #include "EquipmentSlot.h"
 #include "MagicalItemEffects.h"
-#include "Persistent.h"
 #include "TargetMode.h"
 #include "TurnSchedule.h"
 #include "Vector2D.h"
@@ -946,7 +947,7 @@ namespace CppRL
 		DamageType damageType) noexcept;
 
 	// Serialization
-	void save_behavior(const ItemBehavior& behavior, json& output);
-	ItemBehavior load_behavior(const json& source);
+	void save_behavior(const ItemBehavior& behavior, nlohmann::json& output);
+	ItemBehavior load_behavior(const nlohmann::json& source);
 
 } // namespace CppRL

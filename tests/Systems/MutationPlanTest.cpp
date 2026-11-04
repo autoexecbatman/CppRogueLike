@@ -48,8 +48,6 @@ namespace CppRL
 	namespace
 	{
 
-		using json = nlohmann::json;
-
 		// Every plan under tests/, found rather than listed, so a new one is
 		// covered by being written.
 		std::vector<std::filesystem::path> every_plan()
@@ -141,7 +139,7 @@ namespace CppRL
 		{
 			std::ifstream planFile(planPath);
 			ASSERT_TRUE(planFile.is_open()) << planPath.string();
-			json plan;
+			nlohmann::json plan;
 			planFile >> plan;
 
 			for (const auto& mutation : plan.at("mutations"))
@@ -178,7 +176,7 @@ namespace CppRL
 		{
 			std::ifstream planFile(planPath);
 			ASSERT_TRUE(planFile.is_open()) << planPath.string();
-			json plan;
+			nlohmann::json plan;
 			planFile >> plan;
 
 			const std::string command =
@@ -257,7 +255,7 @@ namespace CppRL
 		{
 			std::ifstream planFile(planPath);
 			ASSERT_TRUE(planFile.is_open()) << planPath.string();
-			json plan;
+			nlohmann::json plan;
 			planFile >> plan;
 
 			const std::vector<std::string> command =

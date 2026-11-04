@@ -16,25 +16,25 @@
     {
       "file": "src/TileConfig.cpp",
       "original": "\tfor (const auto& [key, record] : root.at(\"tiles\").items())",
-      "mutated": "\tfor (const auto& [key, record] : root.value(\"tiles\", json::object()).items())",
+      "mutated": "\tfor (const auto& [key, record] : root.value(\"tiles\", nlohmann::json::object()).items())",
       "catches": "a config without its tiles loading with that table empty"
     },
     {
       "file": "src/TileConfig.cpp",
       "original": "\tfor (const auto& [key, record] : root.at(\"autotile_groups\").items())",
-      "mutated": "\tfor (const auto& [key, record] : root.value(\"autotile_groups\", json::object()).items())",
+      "mutated": "\tfor (const auto& [key, record] : root.value(\"autotile_groups\", nlohmann::json::object()).items())",
       "catches": "a config without its autotile groups loading with that table empty"
     },
     {
       "file": "src/TileConfig.cpp",
       "original": "\t\tfor (\n\t\t\tconst auto& [key, record] : root.at(\"wall_autotile_groups\").items())",
-      "mutated": "\t\tfor (\n\t\t\tconst auto& [key, record] : root.value(\"wall_autotile_groups\", json::object()).items())",
+      "mutated": "\t\tfor (\n\t\t\tconst auto& [key, record] : root.value(\"wall_autotile_groups\", nlohmann::json::object()).items())",
       "catches": "a config without its wall autotile groups loading with that table empty"
     },
     {
       "file": "src/TileConfig.cpp",
       "original": "\tfor (const auto& [key, record] : root.at(\"tile_types\").items())",
-      "mutated": "\tfor (const auto& [key, record] : root.value(\"tile_types\", json::object()).items())",
+      "mutated": "\tfor (const auto& [key, record] : root.value(\"tile_types\", nlohmann::json::object()).items())",
       "catches": "a config without its tile types loading with that table empty"
     },
     {

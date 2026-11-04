@@ -35,8 +35,6 @@
 namespace CppRL
 {
 
-	using json = nlohmann::json;
-
 	namespace
 	{
 		constexpr size_t PACK_CAPACITY = 50;
@@ -70,7 +68,7 @@ namespace CppRL
 		ASSERT_TRUE(stock(pack, "health_potion"));
 		ASSERT_TRUE(stock(pack, "scroll_lightning"));
 
-		json record;
+		nlohmann::json record;
 		InventoryOperations::save_inventory(pack, record);
 
 		EXPECT_EQ(record["inventory"].size(), pack.items.size())
@@ -87,7 +85,7 @@ namespace CppRL
 		ASSERT_TRUE(stock(original, "scroll_lightning"));
 		const size_t saved = original.items.size();
 
-		json record;
+		nlohmann::json record;
 		InventoryOperations::save_inventory(original, record);
 
 		CreatureInventory restored{ 1 };
@@ -106,7 +104,7 @@ namespace CppRL
 	{
 		CreatureInventory empty{ PACK_CAPACITY };
 
-		json record;
+		nlohmann::json record;
 		InventoryOperations::save_inventory(empty, record);
 
 		CreatureInventory restored{ 1 };

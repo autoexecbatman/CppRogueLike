@@ -20,7 +20,6 @@
 #include "GameContext.h"
 #include "Map.h"
 #include "MessageSystem.h"
-#include "Persistent.h"
 #include "Player.h"
 #include "PlayerRaceState.h"
 #include "RandomDice.h"
@@ -514,7 +513,7 @@ namespace CppRL
 		mark_destroyed();
 	}
 
-	void Trap::save(json& output)
+	void Trap::save(nlohmann::json& output) const
 	{
 		Actor::save(output); // Call base class save
 
@@ -524,7 +523,7 @@ namespace CppRL
 		output["searchedAtLevel"] = searchedAtLevel;
 	}
 
-	void Trap::load(const json& source)
+	void Trap::load(const nlohmann::json& source)
 	{
 		Actor::load(source); // Call base class load
 

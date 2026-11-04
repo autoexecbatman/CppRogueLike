@@ -46,8 +46,6 @@
 namespace CppRL
 {
 
-	using json = nlohmann::json;
-
 	class ItemAppearanceTest : public ::testing::Test
 	{
 	protected:
@@ -151,7 +149,7 @@ namespace CppRL
 	{
 		auto helm =
 			ItemCreator::create("helm_of_brilliance", Vector2D{ 0, 0 }, ctx);
-		json saved;
+		nlohmann::json saved;
 		helm->save(saved);
 
 		Item loaded{
@@ -167,7 +165,7 @@ namespace CppRL
 	{
 		std::ifstream shipped(Paths::resolve(Paths::ITEMS));
 		ASSERT_TRUE(shipped.is_open()) << "cannot read " << Paths::ITEMS;
-		json document = json::parse(shipped);
+		nlohmann::json document = nlohmann::json::parse(shipped);
 		document.at("dagger").erase("appearance");
 		const std::filesystem::path scratch = temp_test_path("items.json");
 		{

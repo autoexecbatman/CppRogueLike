@@ -5,7 +5,6 @@
 
 #include <nlohmann/json.hpp>
 
-#include "Persistent.h"
 #include "SavedEnum.h"
 #include "TileRef.h"
 #include "TileRefJson.h"
@@ -25,7 +24,7 @@ namespace CppRL
 			return std::nullopt;
 		}
 
-		TileRef parse_tile(const json& record)
+		TileRef parse_tile(const nlohmann::json& record)
 		{
 			return TileRef{
 				saved_enum_field(
@@ -39,9 +38,9 @@ namespace CppRL
 			};
 		}
 
-		json encode_tile(TileRef tile)
+		nlohmann::json encode_tile(TileRef tile)
 		{
-			return json{
+			return nlohmann::json{
 				{ "sheet", static_cast<int>(tile.sheet) },
 				{ "col", tile.col },
 				{ "row", tile.row },

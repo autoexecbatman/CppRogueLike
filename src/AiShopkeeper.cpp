@@ -7,7 +7,6 @@
 #include "Creature.h"
 #include "GameContext.h"
 #include "LevelManager.h"
-#include "Persistent.h"
 #include "ShopkeeperFactory.h"
 
 namespace CppRL
@@ -41,9 +40,9 @@ namespace CppRL
 			ctx);
 	}
 
-	void AiShopkeeper::load([[maybe_unused]] const json& source) {}
+	void AiShopkeeper::load([[maybe_unused]] const nlohmann::json& source) {}
 
-	void AiShopkeeper::save(json& output)
+	void AiShopkeeper::save(nlohmann::json& output) const
 	{
 		output["type"] = encode_ai_type(get_ai_type());
 	}

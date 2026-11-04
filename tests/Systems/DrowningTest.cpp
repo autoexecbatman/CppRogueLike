@@ -42,7 +42,6 @@
 #include "src/Map.h"
 #include "src/MonsterCreator.h"
 #include "src/MonsterRegistry.h"
-#include "src/Persistent.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/TileRef.h"
@@ -363,7 +362,7 @@ namespace CppRL
 		const auto heldUntil = diver.get_air_until_time();
 		ASSERT_TRUE(heldUntil.has_value());
 
-		json saved;
+		nlohmann::json saved;
 		diver.save(saved);
 
 		Creature restored{
@@ -384,7 +383,7 @@ namespace CppRL
 		walker.position = Vector2D{ 2, 2 };
 		round_passes();
 
-		json saved;
+		nlohmann::json saved;
 		walker.save(saved);
 
 		EXPECT_FALSE(saved.contains("airUntilTime"));

@@ -6,10 +6,11 @@
 #include <string_view>
 #include <vector>
 
+#include <nlohmann/json_fwd.hpp>
+
 #include "AbilityAllocation.h"
 #include "Creature.h"
 #include "CreatureClass.h"
-#include "Persistent.h"
 #include "PlayerController.h"
 #include "PlayerRaceState.h"
 #include "ThiefSkills.h"
@@ -66,8 +67,8 @@ namespace CppRL
 		[[nodiscard]] std::string_view sprite_tile_key() const noexcept;
 
 		// Serialization - overrides Creature
-		void load(const json& source) override;
-		void save(json& output) override;
+		void load(const nlohmann::json& source) override;
+		void save(nlohmann::json& output) const override;
 
 		// NOTE: coordinates are being set in the function create_room() in
 		// Map.cpp

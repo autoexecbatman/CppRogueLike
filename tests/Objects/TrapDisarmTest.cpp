@@ -37,7 +37,6 @@
 #include "src/GameStateManager.h"
 #include "src/HealthPool.h"
 #include "src/MessageSystem.h"
-#include "src/Persistent.h"
 #include "src/Player.h"
 #include "src/PlayerRaceState.h"
 #include "src/ThiefSkills.h"
@@ -206,7 +205,7 @@ namespace CppRL
 
 		std::vector<std::unique_ptr<Trap>> level;
 		level.push_back(std::move(pit));
-		json saved;
+		nlohmann::json saved;
 		save_traps(level, saved);
 		load_traps(saved, level, mock.tile_config);
 
@@ -240,7 +239,7 @@ namespace CppRL
 
 		std::vector<std::unique_ptr<Trap>> level;
 		level.push_back(std::move(pit));
-		json saved;
+		nlohmann::json saved;
 		save_traps(level, saved);
 		load_traps(saved, level, mock.tile_config);
 

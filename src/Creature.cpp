@@ -12,6 +12,8 @@
 #include <variant>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "AbilityAllocation.h"
 #include "Actor.h"
 #include "Ai.h"
@@ -48,7 +50,6 @@
 #include "Map.h"
 #include "MessageSystem.h"
 #include "MonsterAttacker.h"
-#include "Persistent.h"
 #include "Pickable.h"
 #include "Player.h"
 #include "PlayerRaceState.h"
@@ -270,7 +271,7 @@ namespace CppRL
 	} // namespace
 
 	//==Creature==
-	void Creature::load(const json& source)
+	void Creature::load(const nlohmann::json& source)
 	{
 		Actor::load(source); // Call base class load
 		baseStrength = source.at("strength").get<int>();
@@ -325,7 +326,7 @@ namespace CppRL
 		actionDelay = source.at("actionDelay").get<int>();
 		// Null for a monster, which has no age; every field of a character's is
 		// required.
-		const json& lifespanRecord = source.at("lifespan");
+		const nlohmann::json& lifespanRecord = source.at("lifespan");
 		lifespan.reset();
 		if (!lifespanRecord.is_null())
 		{
@@ -428,7 +429,7 @@ namespace CppRL
 				buff.type =
 					parse_buff_type(buffJson.at("type").get<std::string>());
 				buff.value = buffJson.at("value").get<int>();
-				const json& expiry = buffJson.at("expiryTime");
+				const nlohmann::json& expiry = buffJson.at("expiryTime");
 				buff.expiryTime = expiry.is_null() ?
 					std::nullopt :
 					std::optional<int>{ expiry.get<int>() };
@@ -462,13 +463,13 @@ namespace CppRL
 		}
 	}
 
-	void Creature::save(json& output)
+	void Creature::save(nlohmann::json& output) const
 	{
 		Actor::save(output); // Call base class save
 		// A buff-imposed state is derived from the buffs saved below, so the
 		// save holds only the buffs.
-		json ownStates = json::array();
-		for (const json& state : output.at("states"))
+		nlohmann::json ownStates = nlohmann::json::array();
+		for (const nlohmann::json& state : output.at("states"))
 		{
 			if (!BuffSystem::is_buff_imposed(state.get<ActorState>()))
 			{
@@ -499,7 +500,7 @@ namespace CppRL
 		output["corpseNutrition"] = corpseNutrition;
 		output["corpseTaste"] = corpseTaste;
 		output["corpseEdible"] = is_corpse_edible(corpseEdibility);
-		json slotNames = json::array();
+		nlohmann::json slotNames = nlohmann::json::array();
 		for (const EquipmentSlot slot : bodyPlan)
 		{
 			slotNames.push_back(encode_equipment_slot(slot));
@@ -516,21 +517,21 @@ namespace CppRL
 		output["attacksPerRound"] = attacksPerRound;
 		output["actionDelay"] = actionDelay;
 		output["lifespan"] = lifespan.has_value() ?
-			json{
+			nlohmann::json{
 				{ "race", static_cast<int>(lifespan->race) },
 				{ "startingAge", lifespan->startingAge },
 				{ "maximumAge", lifespan->maximumAge },
 				{ "yearsLived", lifespan->yearsLived },
 				{ "magicalYears", lifespan->magicalYears },
 			} :
-			json(nullptr);
+			nlohmann::json(nullptr);
 		output["spellcasting"] = encode_spellcasting(spellcasting);
 		output["nextActionTime"] = nextActionTime;
 		output["dr"] = damageResistance;
 		output["thaco"] = thaco;
 		if (pendingPoison.has_value())
 		{
-			json poisonJson;
+			nlohmann::json poisonJson;
 			poisonJson["roundsUntilOnset"] = pendingPoison->roundsUntilOnset;
 			poisonJson["damage"] = pendingPoison->damage;
 			poisonJson["effect"] = encode_buff_type(pendingPoison->effect);
@@ -540,7 +541,7 @@ namespace CppRL
 		}
 		if (attacker)
 		{
-			json attackerJson;
+			nlohmann::json attackerJson;
 			attacker->save(attackerJson);
 			// Only write the key if the strategy produced content.
 			// PlayerAttacker::save() is a no-op - no damageInfo to persist.
@@ -552,7 +553,7 @@ namespace CppRL
 		// Save health pool data
 		if (healthPool)
 		{
-			json healthJson;
+			nlohmann::json healthJson;
 			healthJson["hpMax"] = healthPool->get_max_hp();
 			healthJson["hp"] = healthPool->get_hp();
 			healthJson["hpBase"] = healthPool->get_hp_base();
@@ -562,7 +563,7 @@ namespace CppRL
 			output["healthPool"] = healthJson;
 		}
 		// Save constitution tracker state
-		json constJson;
+		nlohmann::json constJson;
 		if (const auto lastConstitution = get_last_constitution();
 			lastConstitution.has_value())
 		{
@@ -572,51 +573,51 @@ namespace CppRL
 		// Save experience reward
 		if (experienceReward)
 		{
-			json expJson;
+			nlohmann::json expJson;
 			experienceReward->save(expJson);
 			output["experienceReward"] = expJson;
 		}
 		// Save armor class
 		if (armorClass)
 		{
-			json acJson;
+			nlohmann::json acJson;
 			acJson["armorClass"] = armorClass->get_armor_class();
 			acJson["baseArmorClass"] = armorClass->get_base_armor_class();
 			output["armorClass"] = acJson;
 		}
 		if (ai)
 		{
-			json aiJson;
+			nlohmann::json aiJson;
 			ai->save(aiJson);
 			output["ai"] = aiJson;
 		}
 		// Always save inventory data since it always exists
-		json inventoryJson;
+		nlohmann::json inventoryJson;
 		InventoryOperations::save_inventory(inventoryData, inventoryJson);
 		output["inventoryData"] = inventoryJson;
 		if (shop)
 		{
-			json shopJson;
+			nlohmann::json shopJson;
 			shop->save(shopJson);
 			output["shop"] = shopJson;
 		}
 
 		// Save unified buff system
-		json buffsJson = json::array();
+		nlohmann::json buffsJson = nlohmann::json::array();
 		for (const auto& buff : activeBuffs)
 		{
-			json buffJson;
+			nlohmann::json buffJson;
 			buffJson["type"] = encode_buff_type(buff.type);
 			buffJson["value"] = buff.value;
 			buffJson["expiryTime"] = buff.expiryTime.has_value() ?
-				json(*buff.expiryTime) :
-				json(nullptr);
+				nlohmann::json(*buff.expiryTime) :
+				nlohmann::json(nullptr);
 			buffJson["application"] = encode_buff_application(buff.application);
-			json savesJson = json::array();
+			nlohmann::json savesJson = nlohmann::json::array();
 			for (const OpponentSave& save : buff.opponentSaves)
 			{
 				savesJson.push_back(
-					json{
+					nlohmann::json{
 						{ "opponent", save.opponent },
 						{ "isMade", save.isMade },
 					});
@@ -626,16 +627,16 @@ namespace CppRL
 		}
 		output["activeBuffs"] = buffsJson;
 
-		json equippedJson = json::array();
+		nlohmann::json equippedJson = nlohmann::json::array();
 		for (const EquippedItem& equipped : equippedItems)
 		{
 			assert(
 				equipped.item &&
 				"Creature::save: an equipment entry holds no item");
-			json itemJson;
+			nlohmann::json itemJson;
 			equipped.item->save(itemJson);
 			equippedJson.push_back(
-				json{
+				nlohmann::json{
 					{ "slot", encode_equipment_slot(equipped.slot) },
 					{ "item", itemJson },
 				});

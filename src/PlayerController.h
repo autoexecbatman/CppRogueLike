@@ -6,9 +6,10 @@
 #include <functional>
 #include <optional>
 
+#include <nlohmann/json_fwd.hpp>
+
 #include "Actor.h"
 #include "GameContext.h"
-#include "Persistent.h"
 #include "TurnSchedule.h"
 
 namespace CppRL
@@ -28,7 +29,7 @@ namespace CppRL
 		DISARM
 	};
 
-	class PlayerController final : public Persistent
+	class PlayerController final
 	{
 	private:
 		Player& playerOwner;
@@ -160,8 +161,8 @@ namespace CppRL
 		explicit PlayerController(Player& owner);
 
 		void update(GameContext& ctx);
-		void load(const json& savedState) override;
-		void save(json& savedState) override;
+		void load(const nlohmann::json& savedState);
+		void save(nlohmann::json& savedState) const;
 		void display_inventory(GameContext& ctx);
 
 		void apply_confusion(int durationRounds, int currentTime)

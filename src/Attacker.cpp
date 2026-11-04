@@ -35,7 +35,6 @@
 #include "LevelUpSystem.h"
 #include "MenuTrade.h"
 #include "MessageSystem.h"
-#include "Persistent.h"
 #include "Pickable.h"
 #include "Player.h"
 #include "TileConfig.h"
@@ -544,17 +543,17 @@ namespace CppRL
 		return target.get_armor_class();
 	}
 
-	void Attacker::load(const json& source)
+	void Attacker::load(const nlohmann::json& source)
 	{
 		// The dice are the record; the range is derived from them.
-		const json& damageJson = source.at("damageInfo");
+		const nlohmann::json& damageJson = source.at("damageInfo");
 		damageInfo = DamageInfo{
 			damageJson.at("display").get<std::string>(),
 			parse_damage_type(damageJson.at("type").get<std::string>()),
 		};
 	}
 
-	void Attacker::save(json& output)
+	void Attacker::save(nlohmann::json& output) const
 	{
 		output["damageInfo"]["display"] = damageInfo.displayRoll;
 		output["damageInfo"]["type"] = damage_type_name(damageInfo.damageType);

@@ -8,7 +8,6 @@
 #include "ItemClassification.h"
 #include "ItemEnhancements.h"
 #include "ItemIdentification.h"
-#include "Persistent.h"
 #include "Pickable.h"
 #include "RandomDice.h"
 #include "SavedEnum.h"
@@ -50,7 +49,7 @@ namespace CppRL
 	{
 	}
 
-	void Item::load(const json& source)
+	void Item::load(const nlohmann::json& source)
 	{
 		Actor::load(source); // Call base class load
 		baseValue = source.at("baseValue").get<int>();
@@ -111,7 +110,7 @@ namespace CppRL
 		}
 	}
 
-	void Item::save(json& output)
+	void Item::save(nlohmann::json& output) const
 	{
 		Actor::save(output); // Call base class save
 		output["baseValue"] = baseValue;
@@ -120,7 +119,7 @@ namespace CppRL
 		output["itemClass"] = std::string{ encode_item_class(itemClass) };
 
 		// Save enhancement data
-		json enh;
+		nlohmann::json enh;
 		enh["prefix"] = std::string{ encode_prefix(enhancement.prefix) };
 		enh["suffix"] = std::string{ encode_suffix(enhancement.suffix) };
 		enh["damageBonus"] = enhancement.damageBonus;
@@ -144,7 +143,7 @@ namespace CppRL
 		output["enhancement"] = enh;
 
 		// Save identification status
-		json id;
+		nlohmann::json id;
 		id["identifiedType"] = identification.identifiedType;
 		id["identifiedEnhancement"] = identification.identifiedEnhancement;
 		id["identifiedBuc"] = identification.identifiedBuc;
@@ -152,7 +151,7 @@ namespace CppRL
 
 		if (behavior)
 		{
-			json pickableJson;
+			nlohmann::json pickableJson;
 			save_behavior(*behavior, pickableJson);
 			output["pickable"] = pickableJson;
 		}

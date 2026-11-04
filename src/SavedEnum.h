@@ -35,8 +35,6 @@
 
 #include <nlohmann/json.hpp>
 
-#include "Persistent.h"
-
 namespace CppRL
 {
 
@@ -49,7 +47,7 @@ namespace CppRL
 	//   // json(4) there throws "Trap::load: state 4 is not a valid TrapState"
 	template <typename Enum>
 	[[nodiscard]] Enum saved_enum_value(
-		const json& saved,
+		const nlohmann::json& saved,
 		std::string_view loader,
 		std::string_view field,
 		std::string_view enumName,
@@ -79,7 +77,7 @@ namespace CppRL
 	//   // a saved 4 throws "Trap::load: state 4 is not a valid TrapState"
 	template <typename Enum>
 	[[nodiscard]] Enum saved_enum_field(
-		const json& record,
+		const nlohmann::json& record,
 		std::string_view loader,
 		const char* field,
 		std::string_view enumName,

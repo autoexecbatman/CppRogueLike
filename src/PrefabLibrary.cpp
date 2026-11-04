@@ -107,8 +107,6 @@ namespace CppRL
 		}
 	} // namespace
 
-	using json = nlohmann::json;
-
 	// -------------------------------------------------------------------------
 	// Persistence
 	// -------------------------------------------------------------------------
@@ -125,7 +123,8 @@ namespace CppRL
 					resolved.string()));
 		}
 
-		const json prefabsDocument = json::parse(prefabsFile);
+		const nlohmann::json prefabsDocument =
+			nlohmann::json::parse(prefabsFile);
 
 		// Read into a local, so a record that is refused leaves the library as
 		// it was.
@@ -153,11 +152,11 @@ namespace CppRL
 
 	void PrefabLibrary::save(std::string_view path) const
 	{
-		json prefabsDocument;
-		json arr = json::array();
+		nlohmann::json prefabsDocument;
+		nlohmann::json arr = nlohmann::json::array();
 		for (const auto& prefab : prefabs)
 		{
-			json entry;
+			nlohmann::json entry;
 			entry["name"] = prefab.name;
 			entry["depth_min"] = prefab.depthMin;
 			entry["depth_max"] = prefab.depthMax;

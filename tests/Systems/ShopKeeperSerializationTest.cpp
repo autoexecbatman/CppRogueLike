@@ -16,7 +16,6 @@
 namespace CppRL
 {
 
-	using json = nlohmann::json;
 	using namespace InventoryOperations;
 
 	// =========================================================================
@@ -54,7 +53,7 @@ namespace CppRL
 			ShopQuality::EXCELLENT,
 			game.dice);
 
-		json j;
+		nlohmann::json j;
 		original.save(j);
 
 		auto loaded = ShopKeeper::create(j);
@@ -82,7 +81,7 @@ namespace CppRL
 		ASSERT_GE(original_count, 3) << "Shop should generate at least 3 items";
 		ASSERT_LE(original_count, 7) << "Shop should generate at most 7 items";
 
-		json j;
+		nlohmann::json j;
 		original.save(j);
 
 		auto loaded = ShopKeeper::create(j);
@@ -107,7 +106,7 @@ namespace CppRL
 			ShopKeeper original(type, ShopQuality::AVERAGE, game.dice);
 			original.generate_initial_inventory(1, ctx);
 
-			json j;
+			nlohmann::json j;
 			original.save(j);
 
 			auto loaded = ShopKeeper::create(j);
@@ -132,7 +131,7 @@ namespace CppRL
 			ShopKeeper original(ShopType::GENERAL_STORE, quality, game.dice);
 			original.generate_initial_inventory(1, ctx);
 
-			json j;
+			nlohmann::json j;
 			original.save(j);
 
 			auto loaded = ShopKeeper::create(j);
@@ -152,7 +151,7 @@ namespace CppRL
 
 		original.get_shop_inventory().items.clear();
 
-		json j;
+		nlohmann::json j;
 		original.save(j);
 
 		auto loaded = ShopKeeper::create(j);
@@ -170,7 +169,7 @@ namespace CppRL
 		original.set_markup_percent(200);
 		original.set_sellback_percent(30);
 
-		json j;
+		nlohmann::json j;
 		original.save(j);
 
 		auto loaded = ShopKeeper::create(j);
@@ -186,7 +185,7 @@ namespace CppRL
 	TEST_F(ShopKeeperSerializationTest, AShopRecordWithoutItsShelvesIsRefused)
 	{
 		auto original = create_test_shop();
-		json saved;
+		nlohmann::json saved;
 		original->save(saved);
 		ASSERT_TRUE(saved.contains("shop_inventory"))
 			<< "the saver no longer writes the shelves";

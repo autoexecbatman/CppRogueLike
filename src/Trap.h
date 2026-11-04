@@ -12,7 +12,8 @@
 
 #include <optional>
 
-#include "Persistent.h" // json
+#include <nlohmann/json_fwd.hpp>
+
 #include "TileFeature.h"
 #include "TileRef.h" // TileRef, held by value below
 #include "Vector2D.h"
@@ -157,13 +158,13 @@ namespace CppRL
 		// Writes what cannot be rebuilt from the type: where it is, which kind
 		// it is, what state it is in, and the experience levels its last disarm
 		// attempt and its last search were made at.
-		void save(json& output) override;
+		void save(nlohmann::json& output) const override;
 
 		// Restores those five and nothing else. The damage dice, the name, both
 		// tiles and the colour come from the constructor, so a save can never
 		// disagree with the type table; visibility follows from the state
 		// rather than being stored.
-		void load(const json& source) override;
+		void load(const nlohmann::json& source) override;
 	};
 
 	namespace TrapSearch

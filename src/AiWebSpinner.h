@@ -2,9 +2,10 @@
 
 #include <optional>
 
+#include <nlohmann/json_fwd.hpp>
+
 #include "Ai.h"
 #include "AiSpider.h"
-#include "Persistent.h"
 
 namespace CppRL
 {
@@ -57,8 +58,8 @@ namespace CppRL
 			return AiType::WEB_SPINNER;
 		}
 
-		void load(const json& source) override;
-		void save(json& output) override;
+		void load(const nlohmann::json& source) override;
+		void save(nlohmann::json& output) const override;
 	};
 
 } // namespace CppRL

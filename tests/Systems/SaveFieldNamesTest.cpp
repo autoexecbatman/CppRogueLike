@@ -35,12 +35,10 @@
 namespace CppRL
 {
 
-	using json = nlohmann::json;
-
 	TEST(SaveFieldNamesTest, ALevelManagerReadsBackWhatItWrote)
 	{
 		LevelManager written;
-		json saved;
+		nlohmann::json saved;
 		written.save_to_json(saved);
 
 		LevelManager read;
@@ -56,7 +54,7 @@ namespace CppRL
 	{
 		// Written out by hand, so the key names themselves are the claim: if
 		// either is renamed on one side only, this is what notices.
-		const json saved = {
+		const nlohmann::json saved = {
 			{
 				"level_manager",
 				{ { "dungeonLevel", 7 }, { "shopkeepersOnCurrentLevel", 2 } },
@@ -76,13 +74,13 @@ namespace CppRL
 		// level, no block. It has to be a complete old save, or the refusal
 		// could come from the field that happens to be missing rather than from
 		// the shape being gone.
-		const json saved = {
+		const nlohmann::json saved = {
 			{ "dungeonLevel", 7 },
 			{ "shopkeepersOnCurrentLevel", 2 },
 		};
 
 		LevelManager read;
-		EXPECT_THROW(read.load_from_json(saved), json::exception);
+		EXPECT_THROW(read.load_from_json(saved), nlohmann::json::exception);
 	}
 
 	TEST(SaveFieldNamesTest, ALevelManagerRefusesASaveMissingOnlyTheLevel)
@@ -90,7 +88,7 @@ namespace CppRL
 		// Everything present but the dungeon level, so nothing else can raise
 		// instead: a loader that defaulted this would put the character on
 		// level one and say nothing.
-		const json saved = {
+		const nlohmann::json saved = {
 			{
 				"level_manager",
 				{ { "shopkeepersOnCurrentLevel", 2 } },
@@ -98,17 +96,19 @@ namespace CppRL
 		};
 
 		LevelManager read;
-		EXPECT_THROW(read.load_from_json(saved), json::exception);
+		EXPECT_THROW(read.load_from_json(saved), nlohmann::json::exception);
 	}
 
 	TEST(
 		SaveFieldNamesTest,
 		ALevelManagerRefusesASaveMissingOnlyTheShopkeeperCount)
 	{
-		const json saved = { { "level_manager", { { "dungeonLevel", 7 } } } };
+		const nlohmann::json saved = {
+			{ "level_manager", { { "dungeonLevel", 7 } } },
+		};
 
 		LevelManager read;
-		EXPECT_THROW(read.load_from_json(saved), json::exception);
+		EXPECT_THROW(read.load_from_json(saved), nlohmann::json::exception);
 	}
 
 	namespace
@@ -116,7 +116,7 @@ namespace CppRL
 
 		// A saved pack holding two items, as save_inventory writes it. A pack,
 		// because only a pack has a capacity to record; a floor has no limit.
-		json saved_pack_of_two_items()
+		nlohmann::json saved_pack_of_two_items()
 		{
 			CreatureInventory pack{ 10 };
 			for (const char* name : { "first stone", "second stone" })
@@ -132,7 +132,7 @@ namespace CppRL
 								ColorPairId::WHITE_BLACK,
 							}));
 			}
-			json saved;
+			nlohmann::json saved;
 			InventoryOperations::save_inventory(pack, saved);
 			return saved;
 		}
@@ -143,7 +143,7 @@ namespace CppRL
 	{
 		for (const char* key : { "capacity", "inventory" })
 		{
-			json missingOne = saved_pack_of_two_items();
+			nlohmann::json missingOne = saved_pack_of_two_items();
 			missingOne.erase(key);
 			CreatureInventory loaded{ 1 };
 			EXPECT_ANY_THROW(
@@ -160,7 +160,7 @@ namespace CppRL
 		// The second item's record loses a field Item::save always writes. A
 		// loader that caught the error would hand back a pack holding one stone
 		// and say nothing.
-		json saved = saved_pack_of_two_items();
+		nlohmann::json saved = saved_pack_of_two_items();
 		saved.at("inventory").at(1).erase("itemKey");
 
 		CreatureInventory loaded{ 1 };

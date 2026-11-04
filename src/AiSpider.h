@@ -2,9 +2,10 @@
 
 #include <optional>
 
+#include <nlohmann/json_fwd.hpp>
+
 #include "Ai.h"
 #include "AiMonster.h"
-#include "Persistent.h"
 
 namespace CppRL
 {
@@ -68,8 +69,8 @@ namespace CppRL
 
 		void move_toward_player(Creature& owner, GameContext& ctx);
 		void random_move(Creature& owner, GameContext& ctx);
-		void load(const json& source) override;
-		void save(json& output) override;
+		void load(const nlohmann::json& source) override;
+		void save(nlohmann::json& output) const override;
 
 		bool has_laid_web() const { return webLaid; }
 

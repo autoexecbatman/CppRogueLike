@@ -4,11 +4,12 @@
 #include <string>
 #include <vector>
 
+#include <nlohmann/json_fwd.hpp>
+
 #include "Ai.h"
 #include "AiMonster.h"
 #include "Colors.h"
 #include "Creature.h"
-#include "Persistent.h"
 #include "TileRef.h"
 
 namespace CppRL
@@ -88,8 +89,8 @@ namespace CppRL
 			return AiType::MIMIC;
 		}
 
-		void load(const json& source) override;
-		void save(json& output) override;
+		void load(const nlohmann::json& source) override;
+		void save(nlohmann::json& output) const override;
 	};
 
 } // namespace CppRL

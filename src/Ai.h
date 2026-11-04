@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <string_view>
 
-#include "Persistent.h"
+#include <nlohmann/json_fwd.hpp>
 
 namespace CppRL
 {
@@ -165,7 +165,7 @@ namespace CppRL
 	}
 
 	//==AI==
-	class Ai : public Persistent
+	class Ai
 	{
 	protected:
 		// Protected default constructor - only derived classes can use
@@ -182,6 +182,13 @@ namespace CppRL
 
 		// What this Ai is, which its save writes and Ai::create reads back.
 		[[nodiscard]] virtual AiType get_ai_type() const noexcept = 0;
+
+		// Restores this Ai's own fields from the record save wrote.
+		// Ai::create calls it on a fresh Ai of the record's kind.
+		virtual void load(const nlohmann::json& source) = 0;
+
+		// Writes "type" and this Ai's own fields, in the shape load reads.
+		virtual void save(nlohmann::json& output) const = 0;
 
 		// What this Ai does once to the creature it was built into, after the
 		// creature is otherwise whole. Most Ai do nothing at birth.
@@ -205,7 +212,8 @@ namespace CppRL
 
 		// The Ai a save describes: made by its kind, then loaded from the
 		// record.
-		[[nodiscard]] static std::unique_ptr<Ai> create(const json& source);
+		[[nodiscard]] static std::unique_ptr<Ai> create(
+			const nlohmann::json& source);
 	};
 
 } // namespace CppRL

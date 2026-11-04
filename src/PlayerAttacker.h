@@ -1,9 +1,10 @@
 #pragma once
 
+#include <nlohmann/json_fwd.hpp>
+
 #include "AttackKind.h"
 #include "AttackResult.h"
 #include "Attacker.h"
-#include "Persistent.h"
 
 namespace CppRL
 {
@@ -29,8 +30,8 @@ namespace CppRL
 			GameContext& ctx) override;
 
 		// Player has no base DamageInfo to serialize.
-		void load(const json& source) override;
-		void save(json& output) override;
+		void load(const nlohmann::json& source) override;
+		void save(nlohmann::json& output) const override;
 	};
 
 } // namespace CppRL

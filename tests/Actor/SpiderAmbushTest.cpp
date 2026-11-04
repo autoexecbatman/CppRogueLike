@@ -97,7 +97,7 @@ namespace CppRL
 			// Lying in wait, with ten rounds of the ambush left.
 			auto ambusher = std::make_unique<AiSpider>();
 			ambusher->load(
-				json{
+				nlohmann::json{
 					{ "isAmbushing", true },
 					{ "ambushEndTime", expiry_time(0, 10) },
 				});
@@ -251,7 +251,7 @@ namespace CppRL
 	TEST_F(SpiderAmbushTest, AnOrdinaryBiteBringsNoSurpriseRoll)
 	{
 		spider.ai->load(
-			json{ { "isAmbushing", false }, { "ambushEndTime", 0 } });
+			nlohmann::json{ { "isAmbushing", false }, { "ambushEndTime", 0 } });
 		script({ 20, 4, RandomDice::HIGHEST, 1, 20, 3, RandomDice::HIGHEST });
 
 		EXPECT_EQ(hp_lost_to_the_ambush(), 4)

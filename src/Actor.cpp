@@ -12,7 +12,6 @@
 #include "Colors.h"
 #include "GameContext.h"
 #include "Map.h"
-#include "Persistent.h"
 #include "Renderer.h"
 #include "SavedEnum.h"
 #include "TileRefJson.h"
@@ -79,7 +78,7 @@ namespace CppRL
 			[state](ActorState existing) { return existing == state; });
 	}
 
-	void Actor::load(const json& source)
+	void Actor::load(const nlohmann::json& source)
 	{
 		// Actor::save writes every key read here, so each is required: a
 		// missing one throws.
@@ -110,7 +109,7 @@ namespace CppRL
 		}
 	}
 
-	void Actor::save(json& output)
+	void Actor::save(nlohmann::json& output) const
 	{
 		output["position"] = { { "y", position.y }, { "x", position.x } };
 		output["direction"] = { { "y", direction.y }, { "x", direction.x } };
@@ -125,7 +124,7 @@ namespace CppRL
 		output["uniqueId"] = uniqueId;
 
 		// Serialize vector of states
-		json statesJson;
+		nlohmann::json statesJson;
 		for (const auto& state : states)
 		{
 			statesJson.push_back(state);

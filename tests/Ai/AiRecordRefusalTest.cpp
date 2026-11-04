@@ -25,7 +25,6 @@
 #include "src/Ai.h"
 #include "src/AiMonster.h"
 #include "src/AiMonsterConfused.h"
-#include "src/Persistent.h"
 
 namespace CppRL
 {
@@ -56,9 +55,9 @@ namespace CppRL
 			return kinds;
 		}
 
-		json saved_record(Ai& ai)
+		nlohmann::json saved_record(Ai& ai)
 		{
-			json record;
+			nlohmann::json record;
 			ai.save(record);
 			return record;
 		}
@@ -74,7 +73,7 @@ namespace CppRL
 		for (const std::unique_ptr<Ai>& ai : one_of_each_saving_kind())
 		{
 			assert(ai && "one_of_each_saving_kind: built a null Ai");
-			const json record = saved_record(*ai);
+			const nlohmann::json record = saved_record(*ai);
 			const std::string kind = record.at("type").get<std::string>();
 			for (const auto& [key, value] : record.items())
 			{
@@ -83,14 +82,14 @@ namespace CppRL
 					continue;
 				}
 				++rows;
-				json missing = record;
+				nlohmann::json missing = record;
 				missing.erase(key);
 				try
 				{
 					(void)Ai::create(missing);
 					ADD_FAILURE() << kind << " loaded without its " << key;
 				}
-				catch (const json::exception& refusal)
+				catch (const nlohmann::json::exception& refusal)
 				{
 					EXPECT_NE(
 						std::string(refusal.what()).find(key),
@@ -110,7 +109,7 @@ namespace CppRL
 		for (const std::unique_ptr<Ai>& ai : one_of_each_saving_kind())
 		{
 			assert(ai && "one_of_each_saving_kind: built a null Ai");
-			const json record = saved_record(*ai);
+			const nlohmann::json record = saved_record(*ai);
 			const std::unique_ptr<Ai> loaded = Ai::create(record);
 			EXPECT_EQ(saved_record(*loaded), record)
 				<< record.at("type").get<std::string>()
@@ -122,7 +121,7 @@ namespace CppRL
 	// and loads back still without one.
 	TEST(AiRecordRefusalTest, AMimicWithNoChangeBookedLoads)
 	{
-		const json record = saved_record(*Ai::make(AiType::MIMIC));
+		const nlohmann::json record = saved_record(*Ai::make(AiType::MIMIC));
 		ASSERT_FALSE(record.contains("disguiseChangeTime"))
 			<< "a fresh mimic already booked a change";
 

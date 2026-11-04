@@ -23,8 +23,6 @@
 namespace CppRL
 {
 
-	using json = nlohmann::json;
-
 	namespace
 	{
 		// Whether `symbol` is one of the five structural symbols, which no
@@ -113,7 +111,7 @@ namespace CppRL
 		}
 	} // namespace
 
-	void to_json(json& output, const PaletteEntry& entry)
+	void to_json(nlohmann::json& output, const PaletteEntry& entry)
 	{
 		output = TileRefJson::encode_tile(entry.tile);
 		output["label"] = entry.label;
@@ -121,7 +119,7 @@ namespace CppRL
 			entry.symbol ? std::string(1, entry.symbol) : std::string{};
 	}
 
-	void from_json(const json& source, PaletteEntry& entry)
+	void from_json(const nlohmann::json& source, PaletteEntry& entry)
 	{
 		entry.tile = TileRefJson::parse_tile(source);
 		entry.label = source.at("label").get<std::string>();
@@ -184,7 +182,7 @@ namespace CppRL
 
 		// Read into a local, so a refused file leaves the palette that was
 		// loaded before it.
-		const json document = json::parse(paletteFile);
+		const nlohmann::json document = nlohmann::json::parse(paletteFile);
 		const std::vector<PaletteEntry> loaded =
 			document.at("palette").get<std::vector<PaletteEntry>>();
 
@@ -243,12 +241,12 @@ namespace CppRL
 					"Palette::save -- cannot open '{}' to keep its other sections",
 					resolved.string()));
 		}
-		json document;
+		nlohmann::json document;
 		try
 		{
-			document = json::parse(existingFile);
+			document = nlohmann::json::parse(existingFile);
 		}
-		catch (const json::parse_error& error)
+		catch (const nlohmann::json::parse_error& error)
 		{
 			throw std::runtime_error(
 				std::format(

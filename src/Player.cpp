@@ -37,6 +37,8 @@
 #include <utility>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "AbilityAllocation.h"
 #include "Actor.h"
 #include "ArmorClass.h"
@@ -60,7 +62,6 @@
 #include "MenuThiefSkills.h"
 #include "MessageSystem.h"
 #include "NotificationMenu.h"
-#include "Persistent.h"
 #include "Player.h"
 #include "PlayerAttacker.h"
 #include "PlayerController.h"
@@ -1235,14 +1236,14 @@ namespace CppRL
 	//   player->save(record);
 	//   record["killCount"];              // -> 7
 	//   record["equippedItems"].size();   // -> 2
-	void Player::save(json& output)
+	void Player::save(nlohmann::json& output) const
 	{
 		Creature::save(output); // Call base class save
 
 		// The controller owns the confusion timer, so it writes its own section
 		// rather than the player reaching in for one field.
 		assert(controller && "Player::save called with null controller");
-		json controllerJson;
+		nlohmann::json controllerJson;
 		controller->save(controllerJson);
 		output["controller"] = controllerJson;
 
@@ -1250,8 +1251,8 @@ namespace CppRL
 		output["killCount"] = killCount;
 		output["thiefSkillPoints"] = thiefSkillPoints;
 		output["hidingSpot"] = hidingSpot.has_value() ?
-			json{ { "x", hidingSpot->x }, { "y", hidingSpot->y } } :
-			json(nullptr);
+			nlohmann::json{ { "x", hidingSpot->x }, { "y", hidingSpot->y } } :
+			nlohmann::json(nullptr);
 	}
 
 	// Rebuilds the character from j, and refuses a record that is missing
@@ -1277,7 +1278,7 @@ namespace CppRL
 	//   record.erase("killCount");
 	//   loaded->load(record);
 	//   // throws: no field this saver writes is optional
-	void Player::load(const json& source)
+	void Player::load(const nlohmann::json& source)
 	{
 		Creature::load(source); // Call base class load
 		// Creature::load constructs MonsterAttacker when attacker data is
@@ -1298,10 +1299,10 @@ namespace CppRL
 				"Player::load: a player record with no lifespan");
 		}
 		killCount = source.at("killCount").get<int>();
-		const json& skillPoints = source.at("thiefSkillPoints");
+		const nlohmann::json& skillPoints = source.at("thiefSkillPoints");
 		thiefSkillPoints =
 			skillPoints.get<std::array<int, THIEF_SKILL_COUNT>>();
-		const json& spot = source.at("hidingSpot");
+		const nlohmann::json& spot = source.at("hidingSpot");
 		if (spot.is_null())
 		{
 			hidingSpot = std::nullopt;

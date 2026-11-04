@@ -70,7 +70,7 @@ namespace CppRL
 				std::format("TileConfig: unknown bypass state '{}'", name));
 		}
 
-		TileColor parse_color(const json& value)
+		TileColor parse_color(const nlohmann::json& value)
 		{
 			return TileColor{
 				value.at("r").get<int>(),
@@ -80,7 +80,7 @@ namespace CppRL
 			};
 		}
 
-		TileDefinition parse_tile_definition(const json& value)
+		TileDefinition parse_tile_definition(const nlohmann::json& value)
 		{
 			TileDefinition definition{};
 
@@ -115,8 +115,6 @@ namespace CppRL
 			return definition;
 		}
 	} // namespace
-
-	using json = nlohmann::json;
 
 	TileRef TileConfig::get(std::string_view key) const
 	{
@@ -185,7 +183,7 @@ namespace CppRL
 					resolved.string()));
 		}
 
-		const json root = json::parse(configFile);
+		const nlohmann::json root = nlohmann::json::parse(configFile);
 
 		// All four sections are required: a missing one throws here, naming
 		// itself.

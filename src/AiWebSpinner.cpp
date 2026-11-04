@@ -19,7 +19,6 @@
 #include "GameContext.h"
 #include "Map.h"
 #include "MessageSystem.h"
-#include "Persistent.h"
 #include "SavingThrow.h"
 #include "SpellTile.h"
 #include "TurnSchedule.h"
@@ -604,7 +603,7 @@ namespace CppRL
 		}
 	}
 
-	void AiWebSpinner::load(const json& source)
+	void AiWebSpinner::load(const nlohmann::json& source)
 	{
 		AiSpider::load(source);
 
@@ -612,7 +611,7 @@ namespace CppRL
 		webReadyTime = source.at("webReadyTime").get<int>();
 	}
 
-	void AiWebSpinner::save(json& output)
+	void AiWebSpinner::save(nlohmann::json& output) const
 	{
 		AiSpider::save(output);
 

@@ -3,8 +3,9 @@
 #include <memory>
 #include <string>
 
+#include <nlohmann/json_fwd.hpp>
+
 #include "InventoryData.h"
-#include "Persistent.h"
 
 namespace CppRL
 {
@@ -36,7 +37,7 @@ namespace CppRL
 	class Creature;
 
 	// Move-only through shopInventory, so it declares no copy or move.
-	class ShopKeeper : public Persistent
+	class ShopKeeper
 	{
 	private:
 		ShopType shopType{ ShopType::GENERAL_STORE };
@@ -74,12 +75,11 @@ namespace CppRL
 		ShopKeeper(ShopType type, ShopQuality quality, RandomDice& dice);
 		ShopKeeper() = default;
 
-		// Serialization - required by Persistent interface
-		void load(const json& source) override;
-		void save(json& output) override;
+		void load(const nlohmann::json& source);
+		void save(nlohmann::json& output) const;
 
 		// Factory method for deserialization
-		static std::unique_ptr<ShopKeeper> create(const json& source);
+		static std::unique_ptr<ShopKeeper> create(const nlohmann::json& source);
 
 		// Accessors
 		ShopType get_shop_type() const noexcept { return shopType; }

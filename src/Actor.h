@@ -3,8 +3,9 @@
 #include <string>
 #include <vector>
 
+#include <nlohmann/json_fwd.hpp>
+
 #include "Colors.h"
-#include "Persistent.h"
 #include "TileRef.h"
 #include "UniqueId.h"
 #include "Vector2D.h"
@@ -39,7 +40,7 @@ namespace CppRL
 	//==Actor==
 	// a class for the actors in the game
 	// (player, monsters, items, etc.)
-	class Actor : public Persistent
+	class Actor
 	{
 	public:
 		Vector2D position{ 0, 0 };
@@ -60,8 +61,11 @@ namespace CppRL
 		void add_state(ActorState state) noexcept;
 		void remove_state(ActorState state) noexcept;
 
-		void load(const json& source) override;
-		void save(json& output) override;
+		// Restores what save wrote. Every key is required, so a missing one
+		// throws. Creature, Item and Trap call it before reading their own.
+		virtual void load(const nlohmann::json& source);
+		// Writes position, direction, tile, name, color, id and states.
+		virtual void save(nlohmann::json& output) const;
 
 		int get_tile_distance(Vector2D tilePosition) const noexcept;
 		void render(const GameContext& ctx) const noexcept;

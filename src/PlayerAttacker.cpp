@@ -1,5 +1,7 @@
 #include <string>
 
+#include <nlohmann/json_fwd.hpp>
+
 #include "AttackKind.h"
 #include "AttackResult.h"
 #include "Attacker.h"
@@ -10,7 +12,6 @@
 #include "GameContext.h"
 #include "Item.h"
 #include "MessageSystem.h"
-#include "Persistent.h"
 #include "Player.h"
 #include "PlayerAttacker.h"
 
@@ -90,8 +91,8 @@ namespace CppRL
 
 	// A player's damage comes from the weapon in hand, which the item itself
 	// serializes, so there is nothing here to write or read back.
-	void PlayerAttacker::load([[maybe_unused]] const json& source) {}
+	void PlayerAttacker::load([[maybe_unused]] const nlohmann::json& source) {}
 
-	void PlayerAttacker::save([[maybe_unused]] json& output) {}
+	void PlayerAttacker::save([[maybe_unused]] nlohmann::json& output) const {}
 
 } // namespace CppRL

@@ -13,6 +13,8 @@
 #include <utility>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "Actor.h"
 #include "Alignment.h"
 #include "AttackKind.h"
@@ -47,7 +49,6 @@
 #include "MonsterCreator.h"
 #include "MonsterRegistry.h"
 #include "Pathfinding.h"
-#include "Persistent.h"
 #include "Pickup.h"
 #include "Player.h"
 #include "PlayerController.h"
@@ -254,19 +255,19 @@ namespace CppRL
 	// at the moment a game is saved. The confusion is the exception: it is a
 	// reading on the shared clock, and a spell still running when the player
 	// saves is still running when they come back.
-	void PlayerController::load(const json& savedState)
+	void PlayerController::load(const nlohmann::json& savedState)
 	{
-		const json& endTime = savedState.at("confusionEndTime");
+		const nlohmann::json& endTime = savedState.at("confusionEndTime");
 		confusionEndTime = endTime.is_null() ?
 			std::nullopt :
 			std::optional<int>{ endTime.get<int>() };
 	}
 
-	void PlayerController::save(json& savedState)
+	void PlayerController::save(nlohmann::json& savedState) const
 	{
 		savedState["confusionEndTime"] = confusionEndTime.has_value() ?
-			json(*confusionEndTime) :
-			json(nullptr);
+			nlohmann::json(*confusionEndTime) :
+			nlohmann::json(nullptr);
 	}
 
 	void PlayerController::move(Vector2D target)

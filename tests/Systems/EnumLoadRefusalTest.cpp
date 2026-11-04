@@ -56,8 +56,6 @@
 namespace CppRL
 {
 
-	using json = nlohmann::json;
-
 	namespace
 	{
 		// What a load threw, or empty when it loaded. Any std::exception is
@@ -147,7 +145,7 @@ namespace CppRL
 		void TearDown() override { std::filesystem::remove(scratch); }
 
 		// A saved character of the race given.
-		json saved_player_of(PlayerRaceState race)
+		nlohmann::json saved_player_of(PlayerRaceState race)
 		{
 			Player player{ Vector2D{ 1, 1 } };
 			player.experienceReward = std::make_unique<ExperienceReward>(0);
@@ -155,38 +153,38 @@ namespace CppRL
 			player.healthPool = std::make_unique<HealthPool>(20);
 			player.set_creature_class(CreatureClass::FIGHTER);
 			player.lifespan = Lifespan{ race, 20, 90, 0, 0 };
-			json saved;
+			nlohmann::json saved;
 			player.save(saved);
 			return saved;
 		}
 
 		// A saved plain item.
-		json saved_item()
+		nlohmann::json saved_item()
 		{
 			Item item{
 				Vector2D{ 0, 0 },
 				ActorData{ TileRef{}, "test", ColorPairId::WHITE_BLACK },
 			};
-			json saved;
+			nlohmann::json saved;
 			item.save(saved);
 			return saved;
 		}
 
 		// What a saved item record loads as, saved again.
-		json item_reloaded(const json& saved)
+		nlohmann::json item_reloaded(const nlohmann::json& saved)
 		{
 			Item loaded{
 				Vector2D{ 0, 0 },
 				ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK },
 			};
 			loaded.load(saved);
-			json again;
+			nlohmann::json again;
 			loaded.save(again);
 			return again;
 		}
 
 		// A saved level holding one trap of the type given.
-		json saved_level_with_a(TrapType type)
+		nlohmann::json saved_level_with_a(TrapType type)
 		{
 			std::vector<std::unique_ptr<Trap>> traps{};
 			traps.push_back(
@@ -194,17 +192,17 @@ namespace CppRL
 					Vector2D{ 3, 3 },
 					type,
 					mock.tile_config));
-			json level;
+			nlohmann::json level;
 			save_traps(traps, level);
 			return level;
 		}
 
 		// A saved map of floor.
-		json saved_map()
+		nlohmann::json saved_map()
 		{
 			Map map{ 4, 4 };
 			map.init_tiles();
-			json saved;
+			nlohmann::json saved;
 			map.save(saved);
 			return saved;
 		}
@@ -216,7 +214,7 @@ namespace CppRL
 			std::ifstream source(Paths::resolve(Paths::TILE_CONFIG));
 			ASSERT_TRUE(source.is_open())
 				<< "cannot read " << Paths::TILE_CONFIG;
-			json document = json::parse(source);
+			nlohmann::json document = nlohmann::json::parse(source);
 			ASSERT_FALSE(document.at(section).empty())
 				<< "the shipped config has no " << section
 				<< " record to damage";
@@ -234,7 +232,7 @@ namespace CppRL
 
 	TEST_F(EnumLoadRefusalTest, ARaceNoPlayerRaceStateNamesIsRefused)
 	{
-		json saved = saved_player_of(PlayerRaceState::HUMAN);
+		nlohmann::json saved = saved_player_of(PlayerRaceState::HUMAN);
 		const int bad = one_past(PlayerRaceState::HALFELF);
 		saved.at("lifespan").at("race") = bad;
 		const auto load_it = [&saved]()
@@ -252,7 +250,7 @@ namespace CppRL
 
 	TEST_F(EnumLoadRefusalTest, TheLastPlayerRaceStateStillLoads)
 	{
-		const json saved = saved_player_of(PlayerRaceState::HALFELF);
+		const nlohmann::json saved = saved_player_of(PlayerRaceState::HALFELF);
 		Player loaded{ Vector2D{ 0, 0 } };
 
 		loaded.load(saved);
@@ -263,7 +261,7 @@ namespace CppRL
 
 	TEST_F(EnumLoadRefusalTest, ATrapTypeNoTrapTypeNamesIsRefused)
 	{
-		json level = saved_level_with_a(TrapType::PIT);
+		nlohmann::json level = saved_level_with_a(TrapType::PIT);
 		const int bad = one_past(TrapType::ARROW);
 		level.at("traps").at(0).at("type") = bad;
 		const auto load_it = [this, &level]()
@@ -279,7 +277,7 @@ namespace CppRL
 
 	TEST_F(EnumLoadRefusalTest, TheLastTrapTypeStillLoads)
 	{
-		const json level = saved_level_with_a(TrapType::ARROW);
+		const nlohmann::json level = saved_level_with_a(TrapType::ARROW);
 		std::vector<std::unique_ptr<Trap>> restored{};
 
 		load_traps(level, restored, *ctx.tileConfig);
@@ -290,7 +288,7 @@ namespace CppRL
 
 	TEST_F(EnumLoadRefusalTest, ATrapStateNoTrapStateNamesIsRefused)
 	{
-		json level = saved_level_with_a(TrapType::PIT);
+		nlohmann::json level = saved_level_with_a(TrapType::PIT);
 		const int bad = one_past(TrapState::DISARMED);
 		level.at("traps").at(0).at("state") = bad;
 		const auto load_it = [this, &level]()
@@ -306,7 +304,7 @@ namespace CppRL
 
 	TEST_F(EnumLoadRefusalTest, TheLastTrapStateStillLoads)
 	{
-		json level = saved_level_with_a(TrapType::PIT);
+		nlohmann::json level = saved_level_with_a(TrapType::PIT);
 		level.at("traps").at(0).at("state") =
 			static_cast<int>(TrapState::DISARMED);
 		std::vector<std::unique_ptr<Trap>> restored{};
@@ -319,7 +317,7 @@ namespace CppRL
 
 	TEST_F(EnumLoadRefusalTest, AHungerStateNoHungerStateNamesIsRefused)
 	{
-		json saved;
+		nlohmann::json saved;
 		HungerSystem{}.save(saved);
 		const int bad = one_past(HungerState::DYING);
 		saved["lastNotifiedState"] = bad;
@@ -338,14 +336,14 @@ namespace CppRL
 
 	TEST_F(EnumLoadRefusalTest, TheLastHungerStateStillLoads)
 	{
-		json saved;
+		nlohmann::json saved;
 		HungerSystem{}.save(saved);
 		saved["lastNotifiedState"] = static_cast<int>(HungerState::DYING);
 		HungerSystem loaded{};
 
 		loaded.load(saved);
 
-		json again;
+		nlohmann::json again;
 		loaded.save(again);
 		EXPECT_EQ(
 			again.at("lastNotifiedState"),
@@ -355,11 +353,11 @@ namespace CppRL
 	// An item's class is saved by its key, so the refusal names the key.
 	TEST_F(EnumLoadRefusalTest, AnItemClassNoItemClassNamesIsRefused)
 	{
-		json saved = saved_item();
+		nlohmann::json saved = saved_item();
 		saved.at("itemClass") = "sandals";
 		const auto load_it = [this, &saved]()
 		{
-			[[maybe_unused]] const json again = item_reloaded(saved);
+			[[maybe_unused]] const nlohmann::json again = item_reloaded(saved);
 		};
 
 		EXPECT_EQ(what_loading_threw(load_it), "unknown item_class 'sandals'");
@@ -369,11 +367,11 @@ namespace CppRL
 	// key.
 	TEST_F(EnumLoadRefusalTest, APrefixNoPrefixTypeNamesIsRefused)
 	{
-		json saved = saved_item();
+		nlohmann::json saved = saved_item();
 		saved.at("enhancement").at("prefix") = "blunt";
 		const auto load_it = [this, &saved]()
 		{
-			[[maybe_unused]] const json again = item_reloaded(saved);
+			[[maybe_unused]] const nlohmann::json again = item_reloaded(saved);
 		};
 
 		EXPECT_EQ(what_loading_threw(load_it), "unknown prefix 'blunt'");
@@ -381,11 +379,11 @@ namespace CppRL
 
 	TEST_F(EnumLoadRefusalTest, ASuffixNoSuffixTypeNamesIsRefused)
 	{
-		json saved = saved_item();
+		nlohmann::json saved = saved_item();
 		saved.at("enhancement").at("suffix") = "of_sandals";
 		const auto load_it = [this, &saved]()
 		{
-			[[maybe_unused]] const json again = item_reloaded(saved);
+			[[maybe_unused]] const nlohmann::json again = item_reloaded(saved);
 		};
 
 		EXPECT_EQ(what_loading_threw(load_it), "unknown suffix 'of_sandals'");
@@ -401,13 +399,13 @@ namespace CppRL
 				ActorData{ TileRef{}, "test", ColorPairId::WHITE_BLACK },
 			};
 			item.enhancement.prefix = PREFIX_TABLE[row].type;
-			json saved;
+			nlohmann::json saved;
 
 			item.save(saved);
 
 			EXPECT_EQ(
 				saved.at("enhancement").at("prefix"),
-				json(PREFIX_KEYS[row]))
+				nlohmann::json(PREFIX_KEYS[row]))
 				<< "row " << row;
 		}
 	}
@@ -422,13 +420,13 @@ namespace CppRL
 				ActorData{ TileRef{}, "test", ColorPairId::WHITE_BLACK },
 			};
 			item.enhancement.suffix = SUFFIX_TABLE[row].type;
-			json saved;
+			nlohmann::json saved;
 
 			item.save(saved);
 
 			EXPECT_EQ(
 				saved.at("enhancement").at("suffix"),
-				json(SUFFIX_KEYS[row]))
+				nlohmann::json(SUFFIX_KEYS[row]))
 				<< "row " << row;
 		}
 	}
@@ -438,7 +436,7 @@ namespace CppRL
 	{
 		for (std::size_t row = 0; row < PREFIX_TABLE.size(); ++row)
 		{
-			json saved = saved_item();
+			nlohmann::json saved = saved_item();
 			saved.at("enhancement").at("prefix") = PREFIX_KEYS[row];
 			Item loaded{
 				Vector2D{ 0, 0 },
@@ -452,7 +450,7 @@ namespace CppRL
 		}
 		for (std::size_t row = 0; row < SUFFIX_TABLE.size(); ++row)
 		{
-			json saved = saved_item();
+			nlohmann::json saved = saved_item();
 			saved.at("enhancement").at("suffix") = SUFFIX_KEYS[row];
 			Item loaded{
 				Vector2D{ 0, 0 },
@@ -468,12 +466,12 @@ namespace CppRL
 
 	TEST_F(EnumLoadRefusalTest, ABlessingNoBlessingStatusNamesIsRefused)
 	{
-		json saved = saved_item();
+		nlohmann::json saved = saved_item();
 		const int bad = one_past(BlessingStatus::CURSED);
 		saved.at("enhancement").at("blessing") = bad;
 		const auto load_it = [this, &saved]()
 		{
-			[[maybe_unused]] const json again = item_reloaded(saved);
+			[[maybe_unused]] const nlohmann::json again = item_reloaded(saved);
 		};
 
 		EXPECT_EQ(
@@ -485,14 +483,14 @@ namespace CppRL
 
 	TEST_F(EnumLoadRefusalTest, TheLastOfEachItemEnumStillLoads)
 	{
-		json saved = saved_item();
+		nlohmann::json saved = saved_item();
 		saved.at("itemClass") = "quest_item";
 		saved.at("enhancement").at("prefix") = "cracked";
 		saved.at("enhancement").at("suffix") = "of_brittleness";
 		saved.at("enhancement").at("blessing") =
 			static_cast<int>(BlessingStatus::CURSED);
 
-		const json again = item_reloaded(saved);
+		const nlohmann::json again = item_reloaded(saved);
 
 		EXPECT_EQ(again.at("itemClass"), saved.at("itemClass"));
 		EXPECT_EQ(
@@ -508,7 +506,7 @@ namespace CppRL
 
 	TEST_F(EnumLoadRefusalTest, ATileTypeNoTileTypeNamesIsRefused)
 	{
-		json saved = saved_map();
+		nlohmann::json saved = saved_map();
 		const int bad = one_past(TileType::CORRIDOR);
 		saved.at("tiles").at(0).at("type") = bad;
 		const auto load_it = [&saved]()
@@ -524,14 +522,14 @@ namespace CppRL
 
 	TEST_F(EnumLoadRefusalTest, TheLastTileTypeStillLoads)
 	{
-		json saved = saved_map();
+		nlohmann::json saved = saved_map();
 		saved.at("tiles").at(0).at("type") =
 			static_cast<int>(TileType::CORRIDOR);
 		Map loaded{ 4, 4 };
 
 		loaded.load(saved);
 
-		json again;
+		nlohmann::json again;
 		loaded.save(again);
 		EXPECT_EQ(
 			again.at("tiles").at(0).at("type"),
@@ -540,7 +538,7 @@ namespace CppRL
 
 	TEST_F(EnumLoadRefusalTest, AShopTypeNoShopTypeNamesIsRefused)
 	{
-		json saved;
+		nlohmann::json saved;
 		ShopKeeper{ ShopType::GENERAL_STORE, ShopQuality::AVERAGE, mock.dice }
 			.save(saved);
 		const int bad = one_past(ShopType::ADVENTURING_GEAR);
@@ -560,7 +558,7 @@ namespace CppRL
 
 	TEST_F(EnumLoadRefusalTest, AShopQualityNoShopQualityNamesIsRefused)
 	{
-		json saved;
+		nlohmann::json saved;
 		ShopKeeper{ ShopType::GENERAL_STORE, ShopQuality::AVERAGE, mock.dice }
 			.save(saved);
 		const int bad = one_past(ShopQuality::EXCELLENT);
@@ -580,7 +578,7 @@ namespace CppRL
 
 	TEST_F(EnumLoadRefusalTest, TheLastShopTypeAndQualityStillLoad)
 	{
-		json saved;
+		nlohmann::json saved;
 		ShopKeeper{
 			ShopType::ADVENTURING_GEAR,
 			ShopQuality::EXCELLENT,
@@ -591,7 +589,7 @@ namespace CppRL
 
 		loaded.load(saved);
 
-		json again;
+		nlohmann::json again;
 		loaded.save(again);
 		EXPECT_EQ(
 			again.at("shop_type"),
@@ -652,7 +650,11 @@ namespace CppRL
 	TEST_F(EnumLoadRefusalTest, ATileSheetNoTileSheetNamesIsRefused)
 	{
 		const int bad = static_cast<int>(TileSheet::COUNT);
-		const json record{ { "sheet", bad }, { "col", 0 }, { "row", 0 } };
+		const nlohmann::json record{
+			{ "sheet", bad },
+			{ "col", 0 },
+			{ "row", 0 },
+		};
 		const auto load_it = [&record]()
 		{
 			[[maybe_unused]] const TileRef tile =
@@ -668,7 +670,7 @@ namespace CppRL
 
 	TEST_F(EnumLoadRefusalTest, TheLastTileSheetStillLoads)
 	{
-		const json record{
+		const nlohmann::json record{
 			{ "sheet", static_cast<int>(TileSheet::SHEET_BARS) },
 			{ "col", 0 },
 			{ "row", 0 },
@@ -679,12 +681,12 @@ namespace CppRL
 
 	TEST_F(EnumLoadRefusalTest, AnActorStateNoActorStateNamesIsRefused)
 	{
-		json saved = saved_item();
+		nlohmann::json saved = saved_item();
 		const int bad = one_past(ActorState::IS_SURPRISED);
-		saved.at("states") = json::array({ bad });
+		saved.at("states") = nlohmann::json::array({ bad });
 		const auto load_it = [this, &saved]()
 		{
-			[[maybe_unused]] const json again = item_reloaded(saved);
+			[[maybe_unused]] const nlohmann::json again = item_reloaded(saved);
 		};
 
 		EXPECT_EQ(
@@ -696,15 +698,16 @@ namespace CppRL
 
 	TEST_F(EnumLoadRefusalTest, TheLastActorStateStillLoads)
 	{
-		json saved = saved_item();
-		saved.at("states") =
-			json::array({ static_cast<int>(ActorState::IS_SURPRISED) });
+		nlohmann::json saved = saved_item();
+		saved.at("states") = nlohmann::json::array(
+			{ static_cast<int>(ActorState::IS_SURPRISED) });
 
-		const json again = item_reloaded(saved);
+		const nlohmann::json again = item_reloaded(saved);
 
 		EXPECT_EQ(
 			again.at("states"),
-			json::array({ static_cast<int>(ActorState::IS_SURPRISED) }));
+			nlohmann::json::array(
+				{ static_cast<int>(ActorState::IS_SURPRISED) }));
 	}
 
 	// end of file: EnumLoadRefusalTest.cpp

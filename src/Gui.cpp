@@ -7,6 +7,8 @@
 
 #include <raylib.h>
 
+#include <nlohmann/json_fwd.hpp>
+
 #include "Actor.h"
 #include "Colors.h"
 #include "Creature.h"
@@ -15,7 +17,6 @@
 #include "HungerSystem.h"
 #include "LogMessage.h"
 #include "MessageSystem.h"
-#include "Persistent.h"
 #include "Player.h"
 #include "PlayerController.h"
 #include "Renderer.h"
@@ -749,9 +750,9 @@ namespace CppRL
 
 	// The interface is redrawn from game state every frame, so it holds nothing
 	// of its own to persist.
-	void Gui::save([[maybe_unused]] json& savedState) {}
+	void Gui::save([[maybe_unused]] nlohmann::json& savedState) const {}
 
-	void Gui::load([[maybe_unused]] const json& savedState) {}
+	void Gui::load([[maybe_unused]] const nlohmann::json& savedState) {}
 
 	// end of file: Gui.cpp
 

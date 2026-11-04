@@ -105,8 +105,8 @@
     },
     {
       "file": "src/GameStateManager.cpp",
-      "original": "const json& trapRecords = source.at(\"traps\");",
-      "mutated": "const json& trapRecords = source.value(\"traps\", json::array());",
+      "original": "const nlohmann::json& trapRecords = source.at(\"traps\");",
+      "mutated": "const nlohmann::json& trapRecords = source.value(\"traps\", nlohmann::json::array());",
       "catches": "a save with no trap list loaded as a level with no traps, the quiet return 0292 removed"
     },
     {

@@ -71,7 +71,6 @@
 #include "src/MenuSell.h"
 #include "src/MonsterAttacker.h"
 #include "src/MonsterCreator.h"
-#include "src/Persistent.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/PlayerController.h"
@@ -461,7 +460,7 @@ namespace CppRL
 		saved->armorClass = std::make_unique<ArmorClass>(10);
 		saved->experienceReward = std::make_unique<ExperienceReward>(0);
 
-		json record;
+		nlohmann::json record;
 		saved->save(record);
 		record.erase("healthPool");
 

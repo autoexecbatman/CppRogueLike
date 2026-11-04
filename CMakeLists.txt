@@ -152,9 +152,6 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Stairs.cpp
     ${PROJECT_SOURCE_DIR}/Stairs.h
 
-    # Persistent
-    ${PROJECT_SOURCE_DIR}/Persistent.h
-
     # Ai - Updated paths
     ${PROJECT_SOURCE_DIR}/Ai.cpp
     ${PROJECT_SOURCE_DIR}/Ai.h

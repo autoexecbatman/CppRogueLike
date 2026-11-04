@@ -24,7 +24,6 @@
 #include "src/MessageSystem.h"
 #include "src/Pathfinding.h"
 #include "src/Paths.h"
-#include "src/Persistent.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/RandomDice.h"
@@ -364,7 +363,7 @@ namespace CppRL
 
 	TEST_F(MapTest, Serialization_DimensionsPreserved)
 	{
-		json j;
+		nlohmann::json j;
 		map->save(j);
 
 		// Verify dimensions are saved
@@ -378,7 +377,7 @@ namespace CppRL
 		Vector2D testPos{ 5, 5 };
 		map->set_tile(testPos, TileType::WATER);
 
-		json j;
+		nlohmann::json j;
 		map->save(j);
 
 		// Create new map and load
@@ -404,7 +403,7 @@ namespace CppRL
 		const Vector2D floor{ 6, 5 };
 		const Vector2D wall{ 7, 5 };
 		map->set_tile(floor, TileType::FLOOR);
-		json j;
+		nlohmann::json j;
 		map->save(j);
 
 		auto loadedMap = std::make_unique<Map>(TEST_MAP_WIDTH, TEST_MAP_HEIGHT);

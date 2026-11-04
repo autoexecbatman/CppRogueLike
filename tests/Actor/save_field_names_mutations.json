@@ -45,8 +45,8 @@
     },
     {
       "file": "src/PlayerController.cpp",
-      "original": "\t\tsavedState[\"confusionEndTime\"] = confusionEndTime.has_value() ?\n\t\t\tjson(*confusionEndTime) :\n\t\t\tjson(nullptr);",
-      "mutated": "\t\tsavedState[\"confusionEndTime\"] =json(nullptr);",
+      "original": "\t\tsavedState[\"confusionEndTime\"] = confusionEndTime.has_value() ?\n\t\t\tnlohmann::json(*confusionEndTime) :\n\t\t\tnlohmann::json(nullptr);",
+      "mutated": "\t\tsavedState[\"confusionEndTime\"] =nlohmann::json(nullptr);",
       "catches": "a save that drops the confusion, so reloading frees a confused player on the next action"
     },
     {
@@ -58,7 +58,7 @@
     {
       "file": "src/Player.cpp",
       "original": "\toutput[\"controller\"] = controllerJson;",
-      "mutated": "\toutput[\"controller\"] = json::object();",
+      "mutated": "\toutput[\"controller\"] = nlohmann::json::object();",
       "catches": "the controller's section written empty, so the load finds no reading to restore"
     },
     {

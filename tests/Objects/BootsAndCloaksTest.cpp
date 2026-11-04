@@ -38,8 +38,6 @@
 namespace CppRL
 {
 
-	using json = nlohmann::json;
-
 	namespace
 	{
 		// The records items.json ships for each kind.
@@ -158,7 +156,7 @@ namespace CppRL
 	TEST_F(BootsAndCloaksTest, ASavedBootIsWrittenByNameAndLoadsAsABoot)
 	{
 		const auto boots = make("boots_of_speed");
-		json saved;
+		nlohmann::json saved;
 		boots->save(saved);
 
 		Item loaded{

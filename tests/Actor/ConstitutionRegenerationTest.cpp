@@ -28,7 +28,6 @@
 #include "src/DamageResolver.h"
 #include "src/GameContext.h"
 #include "src/HealthPool.h"
-#include "src/Persistent.h"
 #include "src/TileRef.h"
 #include "tests/mocks/MockGameContext.h"
 
@@ -226,7 +225,7 @@ namespace CppRL
 	{
 		auto character = make_creature(CreatureClass::FIGHTER, 25, 20, 20);
 		character->take_damage(6, ctx, DamageType::ACID);
-		json saved;
+		nlohmann::json saved;
 		character->save(saved);
 
 		auto loaded = make_creature(CreatureClass::FIGHTER, 25, 1, 1);

@@ -3,16 +3,17 @@
 #include <string>
 #include <vector>
 
+#include <nlohmann/json_fwd.hpp>
+
 #include "Colors.h"
 #include "LogMessage.h"
-#include "Persistent.h"
 
 namespace CppRL
 {
 
 	struct GameContext;
 
-	class Gui : public Persistent
+	class Gui
 	{
 	private:
 		ColorPairId guiMessageColor{ ColorPairId::WHITE_BLACK };
@@ -36,8 +37,8 @@ namespace CppRL
 		void gui_print_stats(const GameContext& ctx) noexcept;
 		void gui_print_log(const GameContext& ctx);
 
-		void load(const json& savedState) override;
-		void save(json& savedState) override;
+		void load(const nlohmann::json& savedState);
+		void save(nlohmann::json& savedState) const;
 
 		void add_display_message(const std::vector<LogMessage>& message);
 		void render_messages() noexcept;

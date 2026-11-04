@@ -7,6 +7,8 @@
 #include <utility>
 #include <vector>
 
+#include <nlohmann/json_fwd.hpp>
+
 #include "AbilityAllocation.h"
 #include "Actor.h"
 #include "Ai.h"
@@ -30,7 +32,6 @@
 #include "Item.h"
 #include "Lifespan.h"
 #include "MagicalItemEffects.h"
-#include "Persistent.h"
 #include "Pickable.h"
 #include "ShopKeeper.h"
 #include "Spellcasting.h"
@@ -240,8 +241,8 @@ namespace CppRL
 		// question from whether anything is in it.
 		[[nodiscard]] bool has_slot(EquipmentSlot slot) const noexcept;
 
-		void load(const json& source) override;
-		void save(json& output) override;
+		void load(const nlohmann::json& source) override;
+		void save(nlohmann::json& output) const override;
 
 		virtual void update(GameContext& ctx);
 

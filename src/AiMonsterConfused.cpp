@@ -11,7 +11,6 @@
 #include "GameContext.h"
 #include "Map.h"
 #include "Pathfinding.h"
-#include "Persistent.h"
 #include "RandomDice.h"
 #include "Vector2D.h"
 
@@ -94,14 +93,14 @@ namespace CppRL
 		owner.ai = std::move(oldAi);
 	}
 
-	void AiMonsterConfused::load(const json& source)
+	void AiMonsterConfused::load(const nlohmann::json& source)
 	{
 		confusionEndTime = source.at("confusionEndTime").get<int>();
 
 		oldAi = Ai::create(source.at("oldAi"));
 	}
 
-	void AiMonsterConfused::save(json& output)
+	void AiMonsterConfused::save(nlohmann::json& output) const
 	{
 		output["type"] = encode_ai_type(get_ai_type());
 		output["confusionEndTime"] = confusionEndTime;
@@ -109,7 +108,7 @@ namespace CppRL
 		assert(
 			oldAi &&
 			"AiMonsterConfused::save: a confused mind wraps no mind to return to");
-		json oldAiJson;
+		nlohmann::json oldAiJson;
 		oldAi->save(oldAiJson);
 		output["oldAi"] = oldAiJson;
 	}

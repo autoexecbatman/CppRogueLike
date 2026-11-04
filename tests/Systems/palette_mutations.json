@@ -39,8 +39,8 @@
     },
     {
       "file": "src/Palette.cpp",
-      "original": "catch (const json::parse_error& error)",
-      "mutated": "catch (const json::type_error& error)",
+      "original": "catch (const nlohmann::json::parse_error& error)",
+      "mutated": "catch (const nlohmann::json::type_error& error)",
       "catches": "a parse failure escaping unwrapped, without the path and past save_palette_reporting's catch",
       "introduces": [
         "type_error"
@@ -55,7 +55,7 @@
     {
       "file": "src/Palette.cpp",
       "original": "document.at(\"palette\").get<std::vector<PaletteEntry>>()",
-      "mutated": "document.value(\"palette\", json::array()).get<std::vector<PaletteEntry>>()",
+      "mutated": "document.value(\"palette\", nlohmann::json::array()).get<std::vector<PaletteEntry>>()",
       "catches": "a file with no palette read as an empty one, the lenient read 0246 removed"
     },
     {

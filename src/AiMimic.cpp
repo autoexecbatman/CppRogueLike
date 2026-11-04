@@ -8,6 +8,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "Actor.h"
 #include "Ai.h"
 #include "AiMimic.h"
@@ -22,7 +24,6 @@
 #include "ItemRegistry.h"
 #include "MessageSystem.h"
 #include "MonsterRegistry.h"
-#include "Persistent.h"
 #include "TurnSchedule.h"
 #include "Wording.h"
 
@@ -512,7 +513,7 @@ namespace CppRL
 		owner.remove_state(ActorState::BLOCKS);
 	}
 
-	void AiMimic::load(const json& source)
+	void AiMimic::load(const nlohmann::json& source)
 	{
 		AiMonster::load(source);
 
@@ -528,7 +529,7 @@ namespace CppRL
 		itemsConsumed = source.at("itemsConsumed").get<int>();
 	}
 
-	void AiMimic::save(json& output)
+	void AiMimic::save(nlohmann::json& output) const
 	{
 		AiMonster::save(output);
 

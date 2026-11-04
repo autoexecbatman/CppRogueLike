@@ -2,10 +2,11 @@
 
 #include <string_view>
 
+#include <nlohmann/json_fwd.hpp>
+
 #include "AttackKind.h"
 #include "AttackResult.h"
 #include "DamageInfo.h"
-#include "Persistent.h"
 
 namespace CppRL
 {
@@ -24,7 +25,7 @@ namespace CppRL
 	// Abstract base - combat resolution engine shared by MonsterAttacker and
 	// PlayerAttacker. Subclasses supply the attacker identity (stored owner
 	// reference) and implement attack().
-	class Attacker : public Persistent
+	class Attacker
 	{
 	private:
 		// Used by MonsterAttacker. PlayerAttacker ignores it.
@@ -119,6 +120,12 @@ namespace CppRL
 			GameContext& ctx) const noexcept;
 
 	public:
+		virtual ~Attacker() = default;
+		Attacker(const Attacker&) = delete;
+		Attacker& operator=(const Attacker&) = delete;
+		Attacker(Attacker&&) = delete;
+		Attacker& operator=(Attacker&&) = delete;
+
 		// Subclasses implement attack() with their owner reference and damage
 		// source. kind says which way the attack is being made; it decides
 		// which weapon is used and whether the missile to-hit adjustment
@@ -141,10 +148,11 @@ namespace CppRL
 			damageInfo = damage;
 		}
 
-		// Serializes damageInfo - used by MonsterAttacker. PlayerAttacker
-		// overrides with no-ops.
-		void load(const json& source) override;
-		void save(json& output) override;
+		// Reads damageInfo, which MonsterAttacker saves. PlayerAttacker
+		// overrides both with no-ops.
+		virtual void load(const nlohmann::json& source);
+		// Writes damageInfo's dice and damage type.
+		virtual void save(nlohmann::json& output) const;
 	};
 
 	// What a fired missile shows, decided by how its attack came out.

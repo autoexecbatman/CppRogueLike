@@ -41,7 +41,6 @@
 #include "src/MagicalItemEffects.h"
 #include "src/MenuManager.h"
 #include "src/MenuSpellCast.h"
-#include "src/Persistent.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/Renderer.h"
@@ -288,7 +287,7 @@ namespace CppRL
 	{
 		const ItemBehavior empowered =
 			MagicalHelm{ MagicalEffect::BRILLIANCE, 2, HelmCommand::EMPOWERED };
-		json record;
+		nlohmann::json record;
 		save_behavior(empowered, record);
 
 		const ItemBehavior loaded = load_behavior(record);
@@ -299,7 +298,7 @@ namespace CppRL
 
 	TEST_F(HelmCommandWordTest, AHelmRecordWithoutItsCommandIsRefused)
 	{
-		json record;
+		nlohmann::json record;
 		save_behavior(
 			MagicalHelm{ MagicalEffect::BRILLIANCE, 2, HelmCommand::DORMANT },
 			record);

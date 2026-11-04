@@ -6,6 +6,8 @@
 #include <utility>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "Colors.h"
 #include "GameContext.h"
 #include "InventoryData.h"
@@ -14,7 +16,6 @@
 #include "ItemCreator.h"
 #include "ItemEnhancements.h"
 #include "MessageSystem.h"
-#include "Persistent.h"
 #include "Player.h"
 #include "RandomDice.h"
 #include "SavedEnum.h"
@@ -545,7 +546,7 @@ namespace CppRL
 		}
 	}
 
-	void ShopKeeper::save(json& output)
+	void ShopKeeper::save(nlohmann::json& output) const
 	{
 		output["shop_type"] = static_cast<int>(shopType);
 		output["shop_quality"] = static_cast<int>(shopQuality);
@@ -554,7 +555,7 @@ namespace CppRL
 		output["sellback_percent"] = sellbackPercent;
 
 		// Save shop inventory
-		json inventoryJson;
+		nlohmann::json inventoryJson;
 		save_inventory(shopInventory, inventoryJson);
 		output["shop_inventory"] = inventoryJson;
 	}
@@ -610,7 +611,7 @@ namespace CppRL
 		}
 	} // namespace
 
-	void ShopKeeper::load(const json& source)
+	void ShopKeeper::load(const nlohmann::json& source)
 	{
 		shopType = saved_enum_field(
 			source,
@@ -633,7 +634,7 @@ namespace CppRL
 		load_inventory(shopInventory, source.at("shop_inventory"));
 	}
 
-	std::unique_ptr<ShopKeeper> ShopKeeper::create(const json& source)
+	std::unique_ptr<ShopKeeper> ShopKeeper::create(const nlohmann::json& source)
 	{
 		auto shopkeeper = std::make_unique<ShopKeeper>();
 		shopkeeper->load(source);

@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "Persistent.h" // json
+#include <nlohmann/json_fwd.hpp>
 
 namespace CppRL
 {
@@ -35,7 +35,7 @@ namespace CppRL
 	//   // level["traps"] is an array of two
 	void save_traps(
 		const std::vector<std::unique_ptr<Trap>>& traps,
-		json& output);
+		nlohmann::json& output);
 
 	// Reads every trap in j["traps"] into the level, replacing whatever it
 	// held, so a load during play leaves none of the abandoned level's traps
@@ -49,7 +49,7 @@ namespace CppRL
 	//   load_traps(json::object(), traps, tiles);
 	//   // throws: key 'traps' not found
 	void load_traps(
-		const json& source,
+		const nlohmann::json& source,
 		std::vector<std::unique_ptr<Trap>>& traps,
 		const TileConfig& tileConfig);
 
@@ -64,7 +64,7 @@ namespace CppRL
 	//   load_creatures(json::object(), creatures);
 	//   // throws: key 'creatures' not found
 	void load_creatures(
-		const json& source,
+		const nlohmann::json& source,
 		std::vector<std::unique_ptr<Creature>>& creatures);
 
 	// Writes every room on the level into j["rooms"]: an array even when there
@@ -72,7 +72,9 @@ namespace CppRL
 	//
 	// Example:
 	//   save_rooms(threeRooms, saved);   // saved["rooms"] is an array of three
-	void save_rooms(const std::vector<DungeonRoom>& rooms, json& output);
+	void save_rooms(
+		const std::vector<DungeonRoom>& rooms,
+		nlohmann::json& output);
 
 	// Reads every room in j["rooms"] into the level, replacing whatever it
 	// held. Everything save_rooms writes is required: a missing key throws
@@ -82,7 +84,9 @@ namespace CppRL
 	// Example, a level of five rooms abandoned for a save of three:
 	//   load_rooms(saved, rooms);            // rooms.size() -> 3
 	//   load_rooms(json::object(), rooms);   // throws: key 'rooms' not found
-	void load_rooms(const json& source, std::vector<DungeonRoom>& rooms);
+	void load_rooms(
+		const nlohmann::json& source,
+		std::vector<DungeonRoom>& rooms);
 
 	// Writes every decoration on the level into j["decorations"], and reads
 	// them back, replacing whatever the level held. Every field is saved: a
@@ -96,9 +100,9 @@ namespace CppRL
 	//   // both back, the barrel still at 1
 	void save_decorations(
 		const std::vector<std::unique_ptr<Decoration>>& decorations,
-		json& output);
+		nlohmann::json& output);
 	void load_decorations(
-		const json& source,
+		const nlohmann::json& source,
 		std::vector<std::unique_ptr<Decoration>>& decorations);
 
 	// What became of a Load Game: the game is running, there was no save to

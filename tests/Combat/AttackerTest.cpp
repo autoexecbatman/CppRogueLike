@@ -20,7 +20,6 @@
 #include "src/ItemCreator.h"
 #include "src/MonsterAttacker.h"
 #include "src/Paths.h"
-#include "src/Persistent.h"
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
 #include "src/TileRef.h"
@@ -126,7 +125,7 @@ namespace CppRL
 			ActorData{ TileRef{}, "dummy", ColorPairId::WHITE_BLACK });
 		MonsterAttacker original(dummy, DamageInfo{ "2d4", DamageType::FIRE });
 
-		json j;
+		nlohmann::json j;
 		original.save(j);
 
 		MonsterAttacker loaded(dummy, DamageValues::Unarmed());
@@ -419,7 +418,7 @@ namespace CppRL
 	TEST_F(AttackerTest, PlayerAttacker_FunctionalAfterSaveLoad)
 	{
 		// Arrange: save and reload the player
-		json j;
+		nlohmann::json j;
 		player->save(j);
 
 		auto loadedPlayer = std::make_unique<Player>(Vector2D{ 0, 0 });

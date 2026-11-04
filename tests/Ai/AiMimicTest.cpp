@@ -14,12 +14,10 @@
 namespace CppRL
 {
 
-	using json = nlohmann::json;
-
 	TEST(AiMimicTest, Save_WritesMimicType_NotMonsterType)
 	{
 		AiMimic mimic;
-		json j;
+		nlohmann::json j;
 		mimic.save(j);
 
 		ASSERT_TRUE(j.contains("type")) << "save() must write a type field";
@@ -31,7 +29,7 @@ namespace CppRL
 	TEST(AiMimicTest, Save_PreservesIsDisguisedState)
 	{
 		AiMimic mimic;
-		json j;
+		nlohmann::json j;
 		mimic.save(j);
 
 		ASSERT_TRUE(j.contains("isDisguised"));
@@ -42,7 +40,7 @@ namespace CppRL
 	TEST(AiMimicTest, SaveLoad_RoundTrip_PreservesType)
 	{
 		AiMimic original;
-		json j;
+		nlohmann::json j;
 		original.save(j);
 
 		// Reconstruct via Ai::create -- must yield AiMimic, not AiMonster.
@@ -50,7 +48,7 @@ namespace CppRL
 		ASSERT_NE(loaded, nullptr);
 
 		// Verify the round-trip preserves type by saving again and checking.
-		json j2;
+		nlohmann::json j2;
 		loaded->save(j2);
 		EXPECT_EQ(j2["type"], "mimic") << "loaded AI must still be a mimic";
 	}

@@ -15,8 +15,8 @@
   "mutations": [
     {
       "file": "src/GameStateManager.cpp",
-      "original": "\t\trooms.clear();\n\n\t\tconst json& roomRecords = source.at(\"rooms\");",
-      "mutated": "\n\t\tconst json& roomRecords = source.at(\"rooms\");",
+      "original": "\t\trooms.clear();\n\n\t\tconst nlohmann::json& roomRecords = source.at(\"rooms\");",
+      "mutated": "\n\t\tconst nlohmann::json& roomRecords = source.at(\"rooms\");",
       "catches": "a load stacking the saved rooms on the abandoned level's"
     },
     {
@@ -111,8 +111,8 @@
     },
     {
       "file": "src/GameStateManager.cpp",
-      "original": "const json& creatureRecords = source.at(\"creatures\");",
-      "mutated": "const json& creatureRecords = source.value(\"creatures\", json::array());",
+      "original": "const nlohmann::json& creatureRecords = source.at(\"creatures\");",
+      "mutated": "const nlohmann::json& creatureRecords = source.value(\"creatures\", nlohmann::json::array());",
       "catches": "a save with no creature list loaded as a level with no monsters, the quiet return 0292 removed"
     },
     {

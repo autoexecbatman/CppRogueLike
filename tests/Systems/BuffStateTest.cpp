@@ -23,7 +23,6 @@
 #include "src/Creature.h"
 #include "src/ExperienceReward.h"
 #include "src/HealthPool.h"
-#include "src/Persistent.h"
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
 #include "src/TileRef.h"
@@ -239,10 +238,12 @@ namespace CppRL
 	}
 
 	// Whether a saved record's "states" array holds the given state.
-	static bool record_holds_state(const json& record, ActorState state)
+	static bool record_holds_state(
+		const nlohmann::json& record,
+		ActorState state)
 	{
-		const json& states = record.at("states");
-		return std::ranges::find(states, json(state)) != states.end();
+		const nlohmann::json& states = record.at("states");
+		return std::ranges::find(states, nlohmann::json(state)) != states.end();
 	}
 
 	// The buffs are the input and the states are derived from them, so a save
@@ -259,7 +260,7 @@ namespace CppRL
 			at_round(0));
 		ASSERT_TRUE(creature.has_state(ActorState::IS_HELD));
 
-		json record{};
+		nlohmann::json record{};
 		creature.save(record);
 
 		EXPECT_FALSE(record_holds_state(record, ActorState::IS_HELD))
@@ -281,10 +282,10 @@ namespace CppRL
 			10,
 			BuffApplication::ADD,
 			at_round(0));
-		json record{};
+		nlohmann::json record{};
 		creature.save(record);
 		// A record whose states say nothing, so only the buff can make it held.
-		record["states"] = json::array();
+		record["states"] = nlohmann::json::array();
 
 		Creature loaded{
 			Vector2D{ 0, 0 },
@@ -310,9 +311,9 @@ namespace CppRL
 			10,
 			BuffApplication::ADD,
 			at_round(0));
-		json record{};
+		nlohmann::json record{};
 		saved.save(record);
-		record["states"] = json::array();
+		record["states"] = nlohmann::json::array();
 
 		Player loaded{ Vector2D{ 0, 0 } };
 		loaded.load(record);
@@ -327,7 +328,7 @@ namespace CppRL
 	{
 		give_save_parts(creature);
 		creature.add_state(ActorState::IS_FLEEING);
-		json record{};
+		nlohmann::json record{};
 		creature.save(record);
 
 		Creature loaded{
@@ -358,10 +359,10 @@ namespace CppRL
 			10,
 			BuffApplication::ADD,
 			at_round(0));
-		json record{};
+		nlohmann::json record{};
 		creature.save(record);
 
-		const json& saved = record.at("activeBuffs");
+		const nlohmann::json& saved = record.at("activeBuffs");
 		ASSERT_EQ(saved.size(), 2u);
 		ASSERT_TRUE(saved[0].contains("application"))
 			<< "the Strength buff saved no application";
@@ -384,7 +385,7 @@ namespace CppRL
 			10,
 			BuffApplication::SET,
 			at_round(0));
-		json record{};
+		nlohmann::json record{};
 		creature.save(record);
 
 		Creature loaded{
@@ -409,7 +410,7 @@ namespace CppRL
 			10,
 			BuffApplication::ADD,
 			at_round(0));
-		json record{};
+		nlohmann::json record{};
 		creature.save(record);
 
 		Creature loaded{
@@ -433,7 +434,7 @@ namespace CppRL
 			10,
 			BuffApplication::SET,
 			at_round(0));
-		json record{};
+		nlohmann::json record{};
 		creature.save(record);
 		record.at("activeBuffs")[0].erase("application");
 
@@ -455,7 +456,7 @@ namespace CppRL
 			10,
 			BuffApplication::SET,
 			at_round(0));
-		json record{};
+		nlohmann::json record{};
 		creature.save(record);
 		record.at("activeBuffs")[0]["application"] = "sideways";
 

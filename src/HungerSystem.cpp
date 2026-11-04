@@ -19,8 +19,6 @@
 namespace CppRL
 {
 
-	using json = nlohmann::json;
-
 	namespace
 	{
 
@@ -310,7 +308,7 @@ namespace CppRL
 		}
 	}
 
-	void HungerSystem::save(json& output) const
+	void HungerSystem::save(nlohmann::json& output) const
 	{
 		output["hungerValue"] = run.hungerValue;
 		output["hungerMax"] = run.hungerMax;
@@ -353,7 +351,7 @@ namespace CppRL
 		}
 	} // namespace
 
-	void HungerSystem::load(const json& source)
+	void HungerSystem::load(const nlohmann::json& source)
 	{
 		// save writes these three every time, so a record without one is
 		// refused.

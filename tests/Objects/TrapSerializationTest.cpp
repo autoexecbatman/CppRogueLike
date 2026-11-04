@@ -29,7 +29,6 @@
 #include "src/CreatureClass.h"
 #include "src/GameStateManager.h"
 #include "src/HealthPool.h"
-#include "src/Persistent.h"
 #include "src/Player.h"
 #include "src/PlayerRaceState.h"
 #include "src/ThiefSkills.h"
@@ -86,7 +85,7 @@ namespace CppRL
 		traps.push_back(built(Vector2D{ 4, 3 }, TrapType::PIT));
 		traps.push_back(built(Vector2D{ 9, 7 }, TrapType::DART));
 
-		json level;
+		nlohmann::json level;
 		save_traps(traps, level);
 
 		std::vector<std::unique_ptr<Trap>> restored;
@@ -110,7 +109,7 @@ namespace CppRL
 		traps.push_back(built(Vector2D{ 5, 5 }, TrapType::PIT));
 		ASSERT_EQ(find(*traps.at(0)), TrapSearchResult::FOUND);
 
-		json level;
+		nlohmann::json level;
 		save_traps(traps, level);
 
 		std::vector<std::unique_ptr<Trap>> restored;
@@ -133,7 +132,7 @@ namespace CppRL
 		traps.push_back(built(Vector2D{ 5, 5 }, TrapType::PIT));
 		ASSERT_EQ(find(*traps.at(0)), TrapSearchResult::FOUND);
 
-		json level;
+		nlohmann::json level;
 		save_traps(traps, level);
 
 		std::vector<std::unique_ptr<Trap>> restored;
@@ -156,7 +155,7 @@ namespace CppRL
 		mock.dice.set_next_roll(100);
 		ASSERT_EQ(traps.at(0)->search(finder, ctx), TrapSearchResult::MISSED);
 
-		json level;
+		nlohmann::json level;
 		save_traps(traps, level);
 		std::vector<std::unique_ptr<Trap>> restored;
 		load_traps(level, restored, *ctx.tileConfig);
@@ -174,7 +173,7 @@ namespace CppRL
 	// cannot see.
 	TEST_F(TrapSerializationTest, LoadingReplacesTheTrapsAlreadyThere)
 	{
-		json emptyLevel;
+		nlohmann::json emptyLevel;
 		save_traps({}, emptyLevel);
 
 		std::vector<std::unique_ptr<Trap>> stale;
@@ -192,7 +191,7 @@ namespace CppRL
 	TEST_F(TrapSerializationTest, ADocumentWithoutATrapListIsRefused)
 	{
 		std::vector<std::unique_ptr<Trap>> level;
-		const auto refusal_of = [&](const json& record)
+		const auto refusal_of = [&](const nlohmann::json& record)
 		{
 			try
 			{
@@ -206,11 +205,11 @@ namespace CppRL
 			return std::string{};
 		};
 
-		const std::string missing = refusal_of(json::object());
+		const std::string missing = refusal_of(nlohmann::json::object());
 		EXPECT_NE(missing.find("traps"), std::string::npos) << missing;
 
 		const std::string notAList =
-			refusal_of(json{ { "traps", json::object() } });
+			refusal_of(nlohmann::json{ { "traps", nlohmann::json::object() } });
 		EXPECT_NE(notAList.find("traps"), std::string::npos) << notAList;
 	}
 

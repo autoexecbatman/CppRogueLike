@@ -25,8 +25,6 @@
 namespace CppRL
 {
 
-	using json = nlohmann::json;
-
 	// =========================================================================
 	// CREATURE SERIALIZATION TESTS Ensures creatures save/load with all
 	// components intact
@@ -68,7 +66,7 @@ namespace CppRL
 		auto original = create_test_creature();
 
 		// Save
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		// Load into new creature
@@ -103,7 +101,7 @@ namespace CppRL
 		auto original = create_test_creature();
 		original->set_hp(15); // HP: 20 -> 15
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Creature>(
@@ -122,7 +120,7 @@ namespace CppRL
 		original->set_strength(18);
 		original->set_exceptional_strength(76);
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Creature>(
@@ -140,7 +138,7 @@ namespace CppRL
 
 		ASSERT_TRUE(original->is_dead());
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Creature>(
@@ -159,7 +157,7 @@ namespace CppRL
 			ActorData{ TileRef{}, "mystery", ColorPairId::WHITE_BLACK });
 		// Don't add healthPool
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		// Verify no healthPool key when not initialized
@@ -180,7 +178,7 @@ namespace CppRL
 	{
 		auto original = create_test_creature();
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Creature>(
@@ -208,7 +206,7 @@ namespace CppRL
 		original->healthPool->set_hp(7);
 		original->healthPool->set_temp_hp(3);
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Creature>(
@@ -232,13 +230,13 @@ namespace CppRL
 	// hand it a different one.
 	TEST_F(CreatureSerializationTest, TheAiKindIsSavedByName)
 	{
-		json saved;
+		nlohmann::json saved;
 		AiWebSpinner{}.save(saved);
 
 		EXPECT_EQ(saved.at("type"), "web_spinner");
 
 		const std::unique_ptr<Ai> loaded = Ai::create(saved);
-		json savedAgain;
+		nlohmann::json savedAgain;
 		loaded->save(savedAgain);
 		EXPECT_EQ(savedAgain.at("type"), "web_spinner")
 			<< "the Ai came back as something else";
@@ -247,14 +245,17 @@ namespace CppRL
 	// A record with no Ai name at all is refused too, by the field read itself.
 	TEST_F(CreatureSerializationTest, ARecordWithNoAiKindIsRefused)
 	{
-		EXPECT_THROW((void)Ai::create(json::object()), json::out_of_range);
+		EXPECT_THROW(
+			(void)Ai::create(nlohmann::json::object()),
+			nlohmann::json::out_of_range);
 	}
 
 	// An Ai this build does not know is refused, rather than becoming whichever
 	// one the number happens to land on.
 	TEST_F(CreatureSerializationTest, AnUnknownAiKindIsRefused)
 	{
-		const json saved = json{ { "type", "sorcerer_of_the_ninth_circle" } };
+		const nlohmann::json saved =
+			nlohmann::json{ { "type", "sorcerer_of_the_ninth_circle" } };
 
 		EXPECT_THROW((void)Ai::create(saved), std::runtime_error);
 	}
@@ -269,7 +270,7 @@ namespace CppRL
 		creature->set_morality(Alignment::Morality::EVIL);
 		creature->set_creature_class(CreatureClass::ROGUE);
 
-		json saved;
+		nlohmann::json saved;
 		creature->save(saved);
 
 		EXPECT_EQ(saved.at("ethics"), "lawful");
@@ -293,7 +294,7 @@ namespace CppRL
 		creature->activeBuffs.push_back(
 			Buff{ BuffType::BLESS, 1, 30, BuffApplication::ADD, {} });
 
-		json saved;
+		nlohmann::json saved;
 		creature->save(saved);
 
 		EXPECT_EQ(saved.at("activeBuffs").at(0).at("type"), "bless");
@@ -317,7 +318,7 @@ namespace CppRL
 			*creature,
 			DamageInfo{ "2d4", DamageType::ACID });
 
-		json saved;
+		nlohmann::json saved;
 		creature->save(saved);
 
 		EXPECT_EQ(saved.at("attacker").at("damageInfo").at("type"), "acid");
@@ -338,17 +339,17 @@ namespace CppRL
 	TEST_F(CreatureSerializationTest, AnUnknownDamageTypeIsRefused)
 	{
 		auto creature = create_test_creature();
-		json saved;
+		nlohmann::json saved;
 		creature->save(saved);
 
-		json withUnknownName = saved;
+		nlohmann::json withUnknownName = saved;
 		withUnknownName["attacker"]["damageInfo"]["type"] = "sonic";
 		auto loaded = std::make_unique<Creature>(
 			Vector2D{ 0, 0 },
 			ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
 		EXPECT_THROW(loaded->load(withUnknownName), std::runtime_error);
 
-		json withNumber = saved;
+		nlohmann::json withNumber = saved;
 		withNumber["attacker"]["damageInfo"]["type"] = 3;
 		auto second = std::make_unique<Creature>(
 			Vector2D{ 0, 0 },
@@ -363,7 +364,7 @@ namespace CppRL
 		AnAlignmentNameThisBuildDoesNotKnowIsRefused)
 	{
 		auto creature = create_test_creature();
-		json saved;
+		nlohmann::json saved;
 		creature->save(saved);
 		saved["ethics"] = "scrupulous";
 
@@ -379,7 +380,7 @@ namespace CppRL
 	TEST_F(CreatureSerializationTest, ARecordNumberingItsEnumsIsRefused)
 	{
 		auto creature = create_test_creature();
-		json saved;
+		nlohmann::json saved;
 		creature->save(saved);
 		saved["creatureClass"] = 1;
 
@@ -397,14 +398,14 @@ namespace CppRL
 			Vector2D{ 5, 5 },
 			ActorData{ TileRef{}, "bare", ColorPairId::WHITE_BLACK },
 		};
-		json bareRecord;
+		nlohmann::json bareRecord;
 		bare.save(bareRecord);
 
 		Actor plainActor{
 			Vector2D{ 5, 5 },
 			ActorData{ TileRef{}, "bare", ColorPairId::WHITE_BLACK },
 		};
-		json actorRecord;
+		nlohmann::json actorRecord;
 		plainActor.save(actorRecord);
 
 		for (const auto& [key, value] : bareRecord.items())
@@ -413,7 +414,7 @@ namespace CppRL
 			{
 				continue;
 			}
-			json missingOne = bareRecord;
+			nlohmann::json missingOne = bareRecord;
 			missingOne.erase(key);
 			auto loaded = std::make_unique<Creature>(
 				Vector2D{ 0, 0 },
@@ -433,7 +434,7 @@ namespace CppRL
 		auto original = create_test_creature();
 		ASSERT_EQ(original->actorData.color, ColorPairId::BROWN_BLACK);
 
-		json saved;
+		nlohmann::json saved;
 		original->save(saved);
 		EXPECT_EQ(saved["actorData"]["color"], "brown_black")
 			<< "the save carries the name";
@@ -460,7 +461,7 @@ namespace CppRL
 		original->set_action_delay(TIME_UNITS_PER_ROUND * 2 / 3);
 		original->set_next_action_time(437);
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Creature>(

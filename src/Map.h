@@ -3,10 +3,11 @@
 #include <memory>
 #include <vector>
 
+#include <nlohmann/json_fwd.hpp>
+
 #include "Decoration.h"
 #include "DungeonRoom.h"
 #include "FovMap.h"
-#include "Persistent.h"
 #include "RandomDice.h"
 #include "TileType.h"
 #include "Vector2D.h"
@@ -77,7 +78,7 @@ namespace CppRL
 	//==Map==
 	// a class for the game map
 	// the map is a 2d array of tiles
-	class Map : public Persistent
+	class Map
 	{
 	private:
 		int mapWidth{};
@@ -144,7 +145,7 @@ namespace CppRL
 		//   fresh.is_door_locked(treasureDoor);     // -> true
 		//   fresh.load(savedWithoutDoorState);
 		//   // throws "... key 'doorState' not found"
-		void load(const json& source) override;
+		void load(const nlohmann::json& source);
 		// Writes the size, seed and every tile - type, seen, door state, failed
 		// pick - in the shape load reads.
 		//
@@ -152,7 +153,7 @@ namespace CppRL
 		//   map.save(saved);
 		//   // saved["tiles"][0] -> { "position", "type", "explored",
 		//   //     "doorState", "lockPickFailedAtLevel" }
-		void save(json& output) override;
+		void save(nlohmann::json& output) const;
 
 		// Initialize the tile grid to all-walls. No dungeon generation.
 		// Useful as a test seam when unit tests need a blank map.

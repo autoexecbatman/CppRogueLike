@@ -22,8 +22,6 @@
 namespace CppRL
 {
 
-	using json = nlohmann::json;
-
 	// =========================================================================
 	// PLAYER SERIALIZATION TESTS Ensures player state persists correctly
 	// including equipment and class/race
@@ -70,7 +68,7 @@ namespace CppRL
 	{
 		auto original = create_test_player();
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
@@ -89,7 +87,7 @@ namespace CppRL
 	{
 		auto original = create_test_player();
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
@@ -109,7 +107,7 @@ namespace CppRL
 	{
 		auto original = create_test_player();
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		EXPECT_TRUE(j.contains("lifespan"));
@@ -124,7 +122,7 @@ namespace CppRL
 	{
 		auto original = create_test_player();
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		EXPECT_TRUE(j.contains("creatureClass"));
@@ -138,7 +136,7 @@ namespace CppRL
 	{
 		auto original = create_test_player();
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
@@ -153,7 +151,7 @@ namespace CppRL
 		original->apply_web_effect(5, 10, nullptr);
 		EXPECT_TRUE(original->is_webbed());
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
@@ -180,7 +178,7 @@ namespace CppRL
 			std::move(armor),
 			EquipmentSlot::BODY);
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
@@ -203,7 +201,7 @@ namespace CppRL
 		auto original = create_test_player();
 		// Don't add any equipped items
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
@@ -228,7 +226,7 @@ namespace CppRL
 			auto player = create_test_player();
 			player->lifespan->race = race;
 
-			json j;
+			nlohmann::json j;
 			player->save(j);
 
 			auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
@@ -246,7 +244,7 @@ namespace CppRL
 			auto player = create_test_player();
 			player->set_creature_class(creatureClass);
 
-			json j;
+			nlohmann::json j;
 			player->save(j);
 
 			auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
@@ -267,7 +265,7 @@ namespace CppRL
 	{
 		auto original = create_test_player();
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
@@ -289,10 +287,10 @@ namespace CppRL
 		APlayerRecordMissingAFieldItsSaverAlwaysWritesIsRefused)
 	{
 		auto original = create_test_player();
-		json playerRecord;
+		nlohmann::json playerRecord;
 		original->save(playerRecord);
 
-		json creatureRecord;
+		nlohmann::json creatureRecord;
 		original->Creature::save(creatureRecord);
 
 		for (const auto& [key, value] : playerRecord.items())
@@ -301,7 +299,7 @@ namespace CppRL
 			{
 				continue;
 			}
-			json missingOne = playerRecord;
+			nlohmann::json missingOne = playerRecord;
 			missingOne.erase(key);
 			auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
 			EXPECT_ANY_THROW(loaded->load(missingOne))
@@ -320,7 +318,7 @@ namespace CppRL
 		EveryComponentTheGameReadsSurvivesARoundTrip)
 	{
 		auto original = create_test_player();
-		json record;
+		nlohmann::json record;
 		original->save(record);
 
 		auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
@@ -344,7 +342,7 @@ namespace CppRL
 		auto original = create_test_player();
 		original->apply_confusion(3, 0);
 
-		json saved;
+		nlohmann::json saved;
 		original->save(saved);
 
 		auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
@@ -353,7 +351,7 @@ namespace CppRL
 		// The controller is private, so the round trip is read back out the way
 		// it went in: saving the restored player again must produce the same
 		// reading. A load that dropped it would write a zero here.
-		json resaved;
+		nlohmann::json resaved;
 		loaded->save(resaved);
 
 		ASSERT_TRUE(saved.contains("controller"))
@@ -370,7 +368,7 @@ namespace CppRL
 		PlayerController original{ *owner };
 		original.apply_confusion(3, 0);
 
-		json saved;
+		nlohmann::json saved;
 		original.save(saved);
 
 		PlayerController restored{ *owner };

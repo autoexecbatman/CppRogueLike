@@ -34,7 +34,6 @@
 #include "Map.h"
 #include "MessageSystem.h"
 #include "MonsterFactory.h"
-#include "Persistent.h"
 #include "PrefabLibrary.h"
 #include "RandomDice.h"
 #include "Renderer.h"
@@ -217,7 +216,7 @@ namespace CppRL
 		place_stairs(ctx);
 	}
 
-	void Map::load(const json& source)
+	void Map::load(const nlohmann::json& source)
 	{
 		mapWidth = source.at("map_width").get<int>();
 		mapHeight = source.at("map_height").get<int>();
@@ -276,13 +275,13 @@ namespace CppRL
 		// Note: Logging requires GameContext access - moved to caller
 	}
 
-	void Map::save(json& output)
+	void Map::save(nlohmann::json& output) const
 	{
 		output["map_width"] = mapWidth;
 		output["map_height"] = mapHeight;
 		output["seed"] = seed;
 
-		output["tiles"] = json::array();
+		output["tiles"] = nlohmann::json::array();
 		for (const auto& tile : tiles)
 		{
 			const nlohmann::json position{

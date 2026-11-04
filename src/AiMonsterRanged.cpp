@@ -16,7 +16,6 @@
 #include "Map.h"
 #include "MonsterSpellcasting.h"
 #include "Pathfinding.h"
-#include "Persistent.h"
 #include "Pickable.h"
 #include "Vector2D.h"
 
@@ -152,14 +151,14 @@ namespace CppRL
 		return true;
 	}
 
-	void AiMonsterRanged::load(const json& source)
+	void AiMonsterRanged::load(const nlohmann::json& source)
 	{
 		AiMonster::load(source);
 		maxRangeDistance = source.at("maxRangeDistance").get<int>();
 		optimalDistance = source.at("optimalDistance").get<int>();
 	}
 
-	void AiMonsterRanged::save(json& output)
+	void AiMonsterRanged::save(nlohmann::json& output) const
 	{
 		AiMonster::save(output);
 		// Additional ranged AI properties

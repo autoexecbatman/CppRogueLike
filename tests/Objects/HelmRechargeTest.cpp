@@ -38,7 +38,6 @@
 #include "src/Map.h"
 #include "src/MenuManager.h"
 #include "src/MenuSpellCast.h"
-#include "src/Persistent.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/Renderer.h"
@@ -196,7 +195,7 @@ namespace CppRL
 		Item& helm =
 			wear("helm_of_teleportation", EquipmentSlot::HEAD, player(), ctx);
 		record_helm_use(helm, TIME_OF_USE);
-		json record;
+		nlohmann::json record;
 		save_behavior(*helm.behavior, record);
 
 		const ItemBehavior loaded = load_behavior(record);
@@ -209,7 +208,7 @@ namespace CppRL
 
 	TEST_F(HelmRechargeTest, AHelmRecordWithoutItsRechargeIsRefused)
 	{
-		json record;
+		nlohmann::json record;
 		save_behavior(
 			MagicalHelm{
 				MagicalEffect::TELEPORTATION,

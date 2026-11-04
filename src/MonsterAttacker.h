@@ -1,10 +1,11 @@
 #pragma once
 
+#include <nlohmann/json_fwd.hpp>
+
 #include "AttackKind.h"
 #include "AttackResult.h"
 #include "Attacker.h"
 #include "DamageInfo.h"
-#include "Persistent.h"
 
 namespace CppRL
 {
@@ -29,9 +30,15 @@ namespace CppRL
 			GameContext& ctx) override;
 
 		// load/save delegate to Attacker base (DamageInfo serialization).
-		void load(const json& source) override { Attacker::load(source); }
+		void load(const nlohmann::json& source) override
+		{
+			Attacker::load(source);
+		}
 
-		void save(json& output) override { Attacker::save(output); }
+		void save(nlohmann::json& output) const override
+		{
+			Attacker::save(output);
+		}
 	};
 
 } // namespace CppRL

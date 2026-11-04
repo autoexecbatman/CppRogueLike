@@ -32,7 +32,6 @@
 #include "src/ExperienceReward.h"
 #include "src/GameStateManager.h"
 #include "src/HealthPool.h"
-#include "src/Persistent.h"
 #include "src/TileRef.h"
 #include "src/Vector2D.h"
 
@@ -58,7 +57,7 @@ namespace CppRL
 
 		// What load_rooms threw for `record`, or a failure if it threw nothing.
 		static std::string refusal_of_rooms(
-			const json& record,
+			const nlohmann::json& record,
 			std::vector<DungeonRoom>& level)
 		{
 			try
@@ -76,7 +75,7 @@ namespace CppRL
 		// What load_creatures threw for `record`, or a failure if it threw
 		// nothing.
 		static std::string refusal_of_creatures(
-			const json& record,
+			const nlohmann::json& record,
 			std::vector<std::unique_ptr<Creature>>& level)
 		{
 			try
@@ -125,11 +124,11 @@ namespace CppRL
 		std::vector<std::unique_ptr<Creature>> saved{};
 		saved.push_back(creature_named("orc"));
 		saved.push_back(creature_named("kobold"));
-		json record{};
-		record["creatures"] = json::array();
+		nlohmann::json record{};
+		record["creatures"] = nlohmann::json::array();
 		for (const auto& creature : saved)
 		{
-			json creatureJson{};
+			nlohmann::json creatureJson{};
 			creature->save(creatureJson);
 			record["creatures"].push_back(creatureJson);
 		}
@@ -148,8 +147,8 @@ namespace CppRL
 	// none.
 	TEST_F(LevelLoadTest, AnEmptyCreatureListLoadsAsNoCreatures)
 	{
-		json record{};
-		record["creatures"] = json::array();
+		nlohmann::json record{};
+		record["creatures"] = nlohmann::json::array();
 
 		std::vector<std::unique_ptr<Creature>> level{};
 		level.push_back(creature_named("goblin"));
@@ -165,11 +164,12 @@ namespace CppRL
 	{
 		std::vector<std::unique_ptr<Creature>> level{};
 
-		const std::string missing = refusal_of_creatures(json::object(), level);
+		const std::string missing =
+			refusal_of_creatures(nlohmann::json::object(), level);
 		EXPECT_NE(missing.find("creatures"), std::string::npos) << missing;
 
 		const std::string notAList = refusal_of_creatures(
-			json{ { "creatures", json::object() } },
+			nlohmann::json{ { "creatures", nlohmann::json::object() } },
 			level);
 		EXPECT_NE(notAList.find("creatures"), std::string::npos) << notAList;
 	}
@@ -178,8 +178,8 @@ namespace CppRL
 	// one.
 	TEST_F(LevelLoadTest, LoadingRoomsReplacesTheAbandonedLevels)
 	{
-		json record{};
-		record["rooms"] = json::array();
+		nlohmann::json record{};
+		record["rooms"] = nlohmann::json::array();
 		record["rooms"].push_back(
 			{
 				{ "col", 20 },
@@ -204,7 +204,7 @@ namespace CppRL
 		DungeonRoom treasure = room_at(20);
 		treasure.type = RoomType::TREASURE;
 		const std::vector<DungeonRoom> saved{ room_at(1), treasure };
-		json record{};
+		nlohmann::json record{};
 		save_rooms(saved, record);
 
 		std::vector<DungeonRoom> level{};
@@ -230,7 +230,7 @@ namespace CppRL
 	// rooms.
 	TEST_F(LevelLoadTest, AnEmptyRoomListLoadsAsNoRooms)
 	{
-		json record{};
+		nlohmann::json record{};
 		save_rooms({}, record);
 
 		std::vector<DungeonRoom> level{ room_at(1) };
@@ -246,7 +246,7 @@ namespace CppRL
 	{
 		for (const char* field : { "col", "row", "width", "height", "type" })
 		{
-			json record{};
+			nlohmann::json record{};
 			save_rooms({ room_at(1) }, record);
 			record.at("rooms").at(0).erase(field);
 
@@ -267,7 +267,7 @@ namespace CppRL
 		std::optional<int> firstRefused{};
 		for (int type = 0; type < SEARCH_CEILING; ++type)
 		{
-			json record{};
+			nlohmann::json record{};
 			save_rooms({ room_at(1) }, record);
 			record.at("rooms").at(0)["type"] = type;
 			std::vector<DungeonRoom> level{};
@@ -285,7 +285,7 @@ namespace CppRL
 				break;
 			}
 
-			json savedAgain{};
+			nlohmann::json savedAgain{};
 			save_rooms(level, savedAgain);
 			EXPECT_EQ(savedAgain.at("rooms").at(0).at("type"), type)
 				<< "room type " << type << " loaded as another";
@@ -294,7 +294,7 @@ namespace CppRL
 			<< "no room type below " << SEARCH_CEILING << " was refused";
 		EXPECT_GT(*firstRefused, 0) << "not even the first room type loaded";
 
-		json record{};
+		nlohmann::json record{};
 		save_rooms({ room_at(1) }, record);
 		record.at("rooms").at(0)["type"] = -1;
 		std::vector<DungeonRoom> level{};
@@ -309,11 +309,13 @@ namespace CppRL
 	{
 		std::vector<DungeonRoom> level{};
 
-		const std::string missing = refusal_of_rooms(json::object(), level);
+		const std::string missing =
+			refusal_of_rooms(nlohmann::json::object(), level);
 		EXPECT_NE(missing.find("rooms"), std::string::npos) << missing;
 
-		const std::string notAList =
-			refusal_of_rooms(json{ { "rooms", json::object() } }, level);
+		const std::string notAList = refusal_of_rooms(
+			nlohmann::json{ { "rooms", nlohmann::json::object() } },
+			level);
 		EXPECT_NE(notAList.find("rooms"), std::string::npos) << notAList;
 	}
 
@@ -326,7 +328,7 @@ namespace CppRL
 		// An editor decoration of 3 hit points, struck once. Not 1, which is
 		// the field's default.
 		saved.push_back(barrel_at(Vector2D{ 5, 7 }, 2));
-		json record{};
+		nlohmann::json record{};
 		save_decorations(saved, record);
 
 		std::vector<std::unique_ptr<Decoration>> level{};
@@ -350,7 +352,7 @@ namespace CppRL
 	{
 		std::vector<std::unique_ptr<Decoration>> saved{};
 		saved.push_back(barrel_at(Vector2D{ 5, 7 }, 2));
-		json record{};
+		nlohmann::json record{};
 		save_decorations(saved, record);
 
 		std::vector<std::unique_ptr<Decoration>> level{};

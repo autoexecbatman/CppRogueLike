@@ -61,7 +61,7 @@
     {
       "file": "src/Creature.cpp",
       "original": "\t\tbuffJson[\"opponentSaves\"] = savesJson;",
-      "mutated": "\t\tbuffJson[\"opponentSaves\"] = json::array();",
+      "mutated": "\t\tbuffJson[\"opponentSaves\"] = nlohmann::json::array();",
       "catches": "the record left out of the saved game"
     },
     {

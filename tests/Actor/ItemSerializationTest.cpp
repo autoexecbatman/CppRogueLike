@@ -21,8 +21,6 @@
 namespace CppRL
 {
 
-	using json = nlohmann::json;
-
 	// =========================================================================
 	// ITEM SERIALIZATION TESTS Ensures items save/load with all fields
 	// including enhancements
@@ -52,7 +50,7 @@ namespace CppRL
 	{
 		auto original = create_test_item();
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Item>(
@@ -80,7 +78,7 @@ namespace CppRL
 		original->enhancement.enhancementLevel = 3;
 		original->enhancement.valueModifier = 150;
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Item>(
@@ -107,7 +105,7 @@ namespace CppRL
 		original->enhancement.lightningResistance = 15;
 		original->enhancement.poisonResistance = 50;
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Item>(
@@ -127,7 +125,7 @@ namespace CppRL
 
 		original->enhancement.blessing = BlessingStatus::CURSED;
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Item>(
@@ -142,7 +140,7 @@ namespace CppRL
 	{
 		auto original = create_test_item();
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Item>(
@@ -159,7 +157,7 @@ namespace CppRL
 		auto original = create_test_item();
 		// Don't set any enhancement - should use defaults
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Item>(
@@ -195,7 +193,7 @@ namespace CppRL
 			item->itemClass = itemClass;
 			item->set_value(40);
 
-			json j;
+			nlohmann::json j;
 			item->save(j);
 
 			auto loaded = std::make_unique<Item>(
@@ -217,7 +215,7 @@ namespace CppRL
 		auto original = create_test_item();
 		original->add_state(ActorState::FOV_ONLY);
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Item>(
@@ -233,7 +231,7 @@ namespace CppRL
 		auto original = create_test_item();
 		// Don't add FOV_ONLY
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Item>(
@@ -250,7 +248,7 @@ namespace CppRL
 		auto original = create_test_item();
 		// Original has no FOV_ONLY
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		// Create item and give it a state BEFORE loading
@@ -274,7 +272,7 @@ namespace CppRL
 		original->add_state(ActorState::FOV_ONLY);
 		original->add_state(ActorState::BLOCKS);
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Item>(
@@ -296,7 +294,7 @@ namespace CppRL
 		original->behavior =
 			Weapon{ false, HandRequirement::TWO_HANDED, WeaponSize::LARGE, 0 };
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Item>(
@@ -323,7 +321,7 @@ namespace CppRL
 		original->behavior =
 			Weapon{ false, HandRequirement::TWO_HANDED, WeaponSize::LARGE, 0 };
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 		j["pickable"].erase("handRequirement");
 
@@ -345,7 +343,7 @@ namespace CppRL
 		scroll.targetMode = TargetMode::AUTO_NEAREST;
 		original->behavior = scroll;
 
-		json j;
+		nlohmann::json j;
 		original->save(j);
 
 		auto loaded = std::make_unique<Item>(
@@ -372,14 +370,14 @@ namespace CppRL
 		AnItemRecordMissingABlockItsSaverWritesIsRefused)
 	{
 		auto original = create_test_item();
-		json itemRecord;
+		nlohmann::json itemRecord;
 		original->save(itemRecord);
 
 		Actor plainActor{
 			Vector2D{ 5, 10 },
 			ActorData{ TileRef{}, "Test Sword", ColorPairId::WHITE_BLACK },
 		};
-		json actorRecord;
+		nlohmann::json actorRecord;
 		plainActor.save(actorRecord);
 
 		for (const auto& [key, value] : itemRecord.items())
@@ -390,7 +388,7 @@ namespace CppRL
 			{
 				continue;
 			}
-			json missingOne = itemRecord;
+			nlohmann::json missingOne = itemRecord;
 			missingOne.erase(key);
 			auto loaded = std::make_unique<Item>(
 				Vector2D{ 0, 0 },
@@ -406,7 +404,7 @@ namespace CppRL
 	{
 		auto original = create_test_item();
 		original->behavior.reset();
-		json itemRecord;
+		nlohmann::json itemRecord;
 		original->save(itemRecord);
 		ASSERT_FALSE(itemRecord.contains("pickable"))
 			<< "a behaviourless item saved a behaviour";

@@ -42,15 +42,13 @@
 namespace CppRL
 {
 
-	using json = nlohmann::json;
-
 	namespace
 	{
 		// A behaviour written out and read back, the way Item::save and
 		// Item::load do it.
 		ItemBehavior round_trip(const ItemBehavior& behavior)
 		{
-			json record;
+			nlohmann::json record;
 			save_behavior(behavior, record);
 			const std::optional<ItemBehavior> loaded = load_behavior(record);
 			EXPECT_TRUE(loaded.has_value())

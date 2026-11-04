@@ -2,11 +2,12 @@
 #include <optional>
 #include <string>
 
+#include <nlohmann/json_fwd.hpp>
+
 #include "Actor.h"
 #include "ItemClassification.h"
 #include "ItemEnhancements.h"
 #include "ItemIdentification.h"
-#include "Persistent.h"
 #include "Pickable.h"
 #include "Vector2D.h"
 
@@ -22,8 +23,8 @@ namespace CppRL
 	public:
 		Item(Vector2D position, ActorData data);
 
-		void load(const json& source) override;
-		void save(json& output) override;
+		void load(const nlohmann::json& source) override;
+		void save(nlohmann::json& output) const override;
 
 		// The name the player sees: its appearance until its type is
 		// identified; identified enhancement parts by name, unknown ones as

@@ -41,8 +41,6 @@
 namespace CppRL
 {
 
-	using json = nlohmann::json;
-
 	namespace
 	{
 
@@ -158,7 +156,7 @@ namespace CppRL
 	{
 		for (const NamedBehavior& named : every_behavior_with_fields())
 		{
-			json saved;
+			nlohmann::json saved;
 			save_behavior(named.behavior, saved);
 
 			for (const auto& [key, value] : saved.items())
@@ -178,21 +176,21 @@ namespace CppRL
 	TEST(BehaviorRecordTest, AnUnknownBehaviourNameIsRefused)
 	{
 		EXPECT_THROW(
-			(void)load_behavior(json{ { "type", "wand_of_wonder" } }),
+			(void)load_behavior(nlohmann::json{ { "type", "wand_of_wonder" } }),
 			std::runtime_error);
 	}
 
 	// And one with no name at all, by the field read itself.
 	TEST(BehaviorRecordTest, ARecordWithNoBehaviourNameIsRefused)
 	{
-		EXPECT_ANY_THROW((void)load_behavior(json::object()));
+		EXPECT_ANY_THROW((void)load_behavior(nlohmann::json::object()));
 	}
 
 	TEST(BehaviorRecordTest, EveryFieldASaveWritesIsRequiredToLoad)
 	{
 		for (const NamedBehavior& named : every_behavior_with_fields())
 		{
-			json saved;
+			nlohmann::json saved;
 			save_behavior(named.behavior, saved);
 
 			for (const auto& [key, value] : saved.items())
@@ -203,7 +201,7 @@ namespace CppRL
 				{
 					continue;
 				}
-				json missingOne = saved;
+				nlohmann::json missingOne = saved;
 				missingOne.erase(key);
 				EXPECT_ANY_THROW(load_behavior(missingOne))
 					<< "a " << named.name << " record without \"" << key
@@ -220,7 +218,7 @@ namespace CppRL
 	{
 		for (const NamedBehavior& named : every_behavior_with_fields())
 		{
-			json saved;
+			nlohmann::json saved;
 			save_behavior(named.behavior, saved);
 
 			const ItemBehavior loaded = load_behavior(saved);
@@ -232,7 +230,7 @@ namespace CppRL
 
 	TEST(BehaviorRecordTest, APotionsRecordNamesItsEffectAndItsBuff)
 	{
-		json saved;
+		nlohmann::json saved;
 		save_behavior(
 			Consumable{
 				ConsumableEffect::ADD_BUFF,
@@ -253,10 +251,10 @@ namespace CppRL
 	{
 		for (const NamedBehavior& named : every_behavior_with_fields())
 		{
-			json saved;
+			nlohmann::json saved;
 			save_behavior(named.behavior, saved);
 
-			json savedAgain;
+			nlohmann::json savedAgain;
 			save_behavior(load_behavior(saved), savedAgain);
 
 			EXPECT_EQ(savedAgain, saved)
@@ -268,7 +266,7 @@ namespace CppRL
 	// Whether a potion sets the stat or adds to it is in its record by name.
 	TEST(BehaviorRecordTest, APotionsRecordNamesWhetherItSetsOrAdds)
 	{
-		json setting;
+		nlohmann::json setting;
 		save_behavior(
 			Consumable{
 				ConsumableEffect::ADD_BUFF,
@@ -279,7 +277,7 @@ namespace CppRL
 				BuffApplication::SET,
 			},
 			setting);
-		json adding;
+		nlohmann::json adding;
 		save_behavior(
 			Consumable{
 				ConsumableEffect::ADD_BUFF,
@@ -302,7 +300,7 @@ namespace CppRL
 	// A potion naming an application this build does not know is refused.
 	TEST(BehaviorRecordTest, APotionWithAnUnknownApplicationIsRefused)
 	{
-		json saved;
+		nlohmann::json saved;
 		save_behavior(
 			Consumable{
 				ConsumableEffect::ADD_BUFF,
@@ -322,7 +320,7 @@ namespace CppRL
 	// not know is refused.
 	TEST(BehaviorRecordTest, ADurationsUnitIsNamedAndAnUnknownOneIsRefused)
 	{
-		json potion;
+		nlohmann::json potion;
 		save_behavior(
 			Consumable{
 				ConsumableEffect::ADD_BUFF,
@@ -333,7 +331,7 @@ namespace CppRL
 				BuffApplication::ADD,
 			},
 			potion);
-		json scroll;
+		nlohmann::json scroll;
 		save_behavior(
 			TargetedScroll{
 				TargetMode::FOV_BUFF,
@@ -365,9 +363,9 @@ namespace CppRL
 		setting.application = BuffApplication::SET;
 		Gauntlets adding{};
 		adding.strBonus = 2;
-		json savedSetting;
+		nlohmann::json savedSetting;
 		save_behavior(setting, savedSetting);
-		json savedAdding;
+		nlohmann::json savedAdding;
 		save_behavior(adding, savedAdding);
 
 		ASSERT_TRUE(savedSetting.contains("application"))

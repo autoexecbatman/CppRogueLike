@@ -23,7 +23,6 @@
 #include "Map.h"
 #include "MessageSystem.h"
 #include "Pathfinding.h"
-#include "Persistent.h"
 #include "SavingThrow.h"
 #include "TurnSchedule.h"
 #include "Vector2D.h"
@@ -560,7 +559,7 @@ namespace CppRL
 		return metrics.wallCount >= 2 || metrics.hasCorner;
 	}
 
-	void AiSpider::load(const json& source)
+	void AiSpider::load(const nlohmann::json& source)
 	{
 		AiMonster::load(source);
 
@@ -569,7 +568,7 @@ namespace CppRL
 		isAmbushing = source.at("isAmbushing").get<bool>();
 	}
 
-	void AiSpider::save(json& output)
+	void AiSpider::save(nlohmann::json& output) const
 	{
 		AiMonster::save(output);
 		output["type"] = encode_ai_type(get_ai_type());

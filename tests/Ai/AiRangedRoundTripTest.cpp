@@ -17,7 +17,6 @@
 
 #include "src/Ai.h"
 #include "src/AiMonsterRanged.h"
-#include "src/Persistent.h"
 
 namespace CppRL
 {
@@ -34,15 +33,15 @@ namespace CppRL
 	{
 		AiMonsterRanged archer{};
 		archer.load(
-			json{
+			nlohmann::json{
 				{ "maxRangeDistance", MAX_RANGE },
 				{ "optimalDistance", OPTIMAL_DISTANCE },
 			});
-		json saved;
+		nlohmann::json saved;
 		archer.save(saved);
 
 		const std::unique_ptr<Ai> loaded = Ai::create(saved);
-		json resaved;
+		nlohmann::json resaved;
 		loaded->save(resaved);
 
 		EXPECT_EQ(archer.get_ai_type(), AiType::RANGED_MONSTER);

@@ -16,7 +16,6 @@
 #include "Map.h"
 #include "MonsterSpellcasting.h"
 #include "Pathfinding.h"
-#include "Persistent.h"
 #include "Vector2D.h"
 
 namespace CppRL
@@ -390,9 +389,9 @@ namespace CppRL
 		decide_action(owner, ctx);
 	}
 
-	void AiMonster::load([[maybe_unused]] const json& source) {}
+	void AiMonster::load([[maybe_unused]] const nlohmann::json& source) {}
 
-	void AiMonster::save(json& output)
+	void AiMonster::save(nlohmann::json& output) const
 	{
 		output["type"] = encode_ai_type(get_ai_type());
 	}

@@ -14,6 +14,8 @@
 //   manager.update_creatures(creatures, ctx);
 //   EXPECT_EQ(mind->updates, 1);     // driven once in the window
 
+#include <nlohmann/json_fwd.hpp>
+
 #include "src/Ai.h"
 #include "src/Creature.h"
 
@@ -37,9 +39,9 @@ namespace CppRL
 			return AiType::MONSTER;
 		}
 
-		void load(const json& j) override { (void)j; }
+		void load([[maybe_unused]] const nlohmann::json& source) override {}
 
-		void save(json& j) override { (void)j; }
+		void save([[maybe_unused]] nlohmann::json& output) const override {}
 	};
 
 	// end of file: CountingAi.h

@@ -1,9 +1,10 @@
 #pragma once
 
+#include <nlohmann/json_fwd.hpp>
+
 #include "Ai.h"
 #include "AiMonster.h"
 #include "GameContext.h"
-#include "Persistent.h"
 
 namespace CppRL
 {
@@ -36,8 +37,8 @@ namespace CppRL
 			return AiType::RANGED_MONSTER;
 		}
 
-		void load(const json& source) override;
-		void save(json& output) override;
+		void load(const nlohmann::json& source) override;
+		void save(nlohmann::json& output) const override;
 	};
 
 } // namespace CppRL

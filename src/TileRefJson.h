@@ -12,7 +12,8 @@
 
 #include <optional>
 
-#include "Persistent.h"
+#include <nlohmann/json_fwd.hpp>
+
 #include "TileRef.h"
 
 namespace CppRL
@@ -39,7 +40,7 @@ namespace CppRL
 		//   TileRefJson::parse_tile(
 		//       json{ { "sheet", 0 }, { "col", 2 }, { "row", 5 } });
 		//   // -> sheet 0, col 2, row 5
-		[[nodiscard]] TileRef parse_tile(const json& record);
+		[[nodiscard]] TileRef parse_tile(const nlohmann::json& record);
 
 		// Writes a tile as its three fields, the shape parse_tile reads.
 		//
@@ -47,7 +48,7 @@ namespace CppRL
 		//   TileRefJson::encode_tile(
 		//       TileRef{ TileSheet::SHEET_DECOR0, 3, 7 })["col"];
 		//   // -> 3
-		[[nodiscard]] json encode_tile(TileRef tile);
+		[[nodiscard]] nlohmann::json encode_tile(TileRef tile);
 
 	} // namespace TileRefJson
 

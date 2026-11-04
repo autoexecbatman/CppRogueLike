@@ -44,12 +44,13 @@
 namespace CppRL
 {
 
-	using json = nlohmann::json;
 	using namespace InventoryOperations;
 
-	void save_rooms(const std::vector<DungeonRoom>& rooms, json& output)
+	void save_rooms(
+		const std::vector<DungeonRoom>& rooms,
+		nlohmann::json& output)
 	{
-		output["rooms"] = json::array();
+		output["rooms"] = nlohmann::json::array();
 		for (const auto& room : rooms)
 		{
 			output["rooms"].push_back(
@@ -111,13 +112,15 @@ namespace CppRL
 		}
 	} // namespace
 
-	void load_rooms(const json& source, std::vector<DungeonRoom>& rooms)
+	void load_rooms(
+		const nlohmann::json& source,
+		std::vector<DungeonRoom>& rooms)
 	{
 		// Replace rather than append, as every loader of a level container
 		// does.
 		rooms.clear();
 
-		const json& roomRecords = source.at("rooms");
+		const nlohmann::json& roomRecords = source.at("rooms");
 		if (!roomRecords.is_array())
 		{
 			throw std::runtime_error(
@@ -169,16 +172,16 @@ namespace CppRL
 		//   level["creatures"].size();          // -> 0
 		void save_creatures(
 			const std::vector<std::unique_ptr<Creature>>& creatures,
-			json& output)
+			nlohmann::json& output)
 		{
-			output["creatures"] = json::array();
+			output["creatures"] = nlohmann::json::array();
 			for (const auto& creature : creatures)
 			{
 				assert(
 					creature &&
 					"save_creatures: creatures list holds a null entry");
 
-				json creatureJson;
+				nlohmann::json creatureJson;
 				creature->save(creatureJson);
 				output["creatures"].push_back(creatureJson);
 			}
@@ -217,14 +220,14 @@ namespace CppRL
 	} // namespace
 
 	void load_creatures(
-		const json& source,
+		const nlohmann::json& source,
 		std::vector<std::unique_ptr<Creature>>& creatures)
 	{
 		// Replace rather than append, as every loader of a level container
 		// does.
 		creatures.clear();
 
-		const json& creatureRecords = source.at("creatures");
+		const nlohmann::json& creatureRecords = source.at("creatures");
 		if (!creatureRecords.is_array())
 		{
 			throw std::runtime_error(
@@ -245,9 +248,9 @@ namespace CppRL
 
 	void save_decorations(
 		const std::vector<std::unique_ptr<Decoration>>& decorations,
-		json& output)
+		nlohmann::json& output)
 	{
-		output["decorations"] = json::array();
+		output["decorations"] = nlohmann::json::array();
 		for (const auto& decoration : decorations)
 		{
 			assert(
@@ -270,7 +273,7 @@ namespace CppRL
 	}
 
 	void load_decorations(
-		const json& source,
+		const nlohmann::json& source,
 		std::vector<std::unique_ptr<Decoration>>& decorations)
 	{
 		// Replace rather than append, as every loader of a level container
@@ -296,20 +299,20 @@ namespace CppRL
 
 	void save_traps(
 		const std::vector<std::unique_ptr<Trap>>& traps,
-		json& output)
+		nlohmann::json& output)
 	{
-		output["traps"] = json::array();
+		output["traps"] = nlohmann::json::array();
 		for (const auto& trap : traps)
 		{
 			assert(trap && "save_traps: the trap list holds a null entry");
-			json trapJson;
+			nlohmann::json trapJson;
 			trap->save(trapJson);
 			output["traps"].push_back(trapJson);
 		}
 	}
 
 	void load_traps(
-		const json& source,
+		const nlohmann::json& source,
 		std::vector<std::unique_ptr<Trap>>& traps,
 		const TileConfig& tileConfig)
 	{
@@ -318,7 +321,7 @@ namespace CppRL
 		// there.
 		traps.clear();
 
-		const json& trapRecords = source.at("traps");
+		const nlohmann::json& trapRecords = source.at("traps");
 		if (!trapRecords.is_array())
 		{
 			throw std::runtime_error(
@@ -523,7 +526,7 @@ namespace CppRL
 					"Error occurred while saving the game.");
 			}
 
-			json saveDocument;
+			nlohmann::json saveDocument;
 
 			ctx.map->save(saveDocument);
 			save_rooms(*ctx.rooms, saveDocument);
@@ -537,22 +540,22 @@ namespace CppRL
 				"save_game: the level was saved with no decoration container");
 			save_decorations(*ctx.decorations, saveDocument);
 
-			json playerJson;
+			nlohmann::json playerJson;
 			ctx.player()->save(playerJson);
 			saveDocument["player"] = playerJson;
 
-			json stairsJson;
+			nlohmann::json stairsJson;
 			ctx.stairs->save(stairsJson);
 			saveDocument["stairs"] = stairsJson;
 
 			save_creatures(*ctx.creatures, saveDocument);
 			save_inventory(*ctx.floorInventory, saveDocument);
 
-			json guiJson;
+			nlohmann::json guiJson;
 			ctx.gui->save(guiJson);
 			saveDocument["gui"] = guiJson;
 
-			json hungerJson;
+			nlohmann::json hungerJson;
 			ctx.hungerSystem->save(hungerJson);
 			saveDocument["hunger_system"] = hungerJson;
 
@@ -608,7 +611,7 @@ namespace CppRL
 			return false;
 		}
 
-		json saveDocument;
+		nlohmann::json saveDocument;
 		file >> saveDocument;
 
 		ctx.map->load(saveDocument);

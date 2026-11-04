@@ -36,7 +36,6 @@
 #include "src/ItemClassification.h"
 #include "src/ItemCreator.h"
 #include "src/MonsterAttacker.h"
-#include "src/Persistent.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/PlayerAttacker.h"
@@ -500,7 +499,7 @@ namespace CppRL
 	// A saved bow keeps what it was made for.
 	TEST_F(AttackStrengthTest, TheRatingSurvivesASave)
 	{
-		json saved;
+		nlohmann::json saved;
 		weapon("composite_bow")->save(saved);
 
 		Item loaded{

@@ -42,14 +42,12 @@
 namespace CppRL
 {
 
-	using json = nlohmann::json;
-
 	namespace
 	{
 		// Strength 17, straight out of src/json/strength.json.
-		json strength_seventeen()
+		nlohmann::json strength_seventeen()
 		{
-			return json{
+			return nlohmann::json{
 				{ "Str", 17 },
 				{ "Hit", 1 },
 				{ "Dmg", 1 },
@@ -72,9 +70,9 @@ namespace CppRL
 			};
 		}
 
-		json dexterity_seventeen()
+		nlohmann::json dexterity_seventeen()
 		{
-			return json{
+			return nlohmann::json{
 				{ "Dex", 17 },
 				{ "ReactionAdj", 2 },
 				{ "MissileAttackAdj", 2 },
@@ -82,9 +80,9 @@ namespace CppRL
 			};
 		}
 
-		json constitution_seventeen()
+		nlohmann::json constitution_seventeen()
 		{
-			return json{
+			return nlohmann::json{
 				{ "Con", 17 },
 				{ "HPAdj", 3 },
 				{ "hitDieMinimum", 1 },
@@ -95,9 +93,9 @@ namespace CppRL
 			};
 		}
 
-		json charisma_seventeen()
+		nlohmann::json charisma_seventeen()
 		{
-			return json{
+			return nlohmann::json{
 				{ "Cha", 17 },
 				{ "MaxHencmen", 10 },
 				{ "Loyalty", 6 },
@@ -105,9 +103,9 @@ namespace CppRL
 			};
 		}
 
-		json intelligence_seventeen()
+		nlohmann::json intelligence_seventeen()
 		{
-			return json{
+			return nlohmann::json{
 				{ "Int", 17 },
 				{ "NumberOfLanguages", 6 },
 				{ "SpellLevel", 8 },
@@ -117,14 +115,14 @@ namespace CppRL
 			};
 		}
 
-		json wisdom_seventeen()
+		nlohmann::json wisdom_seventeen()
 		{
-			return json{
+			return nlohmann::json{
 				{ "Wis", 17 },
 				{ "MagicalDefenseAdj", 3 },
 				{ "ChanceOfSpellFailure", 0 },
 				{ "SpellImmunity", 0 },
-				{ "bonusSpells", json::array({ 3 }) },
+				{ "bonusSpells", nlohmann::json::array({ 3 }) },
 			};
 		}
 	} // namespace
@@ -201,7 +199,7 @@ namespace CppRL
 	// says so. Each of these silently produced a zero before 2026-10-01.
 	TEST(AbilityTableLoadingTest, AStrengthRowMissingItsHitBonusIsRefused)
 	{
-		json row = strength_seventeen();
+		nlohmann::json row = strength_seventeen();
 		row.erase("Hit");
 
 		EXPECT_THROW(
@@ -217,7 +215,7 @@ namespace CppRL
 		AbilityTableLoadingTest,
 		AStrengthRowMissingItsLockedDoorChanceIsRefused)
 	{
-		json row = strength_seventeen();
+		nlohmann::json row = strength_seventeen();
 		row.erase("LockedDoors");
 
 		try
@@ -239,7 +237,7 @@ namespace CppRL
 		AbilityTableLoadingTest,
 		ADexterityRowMissingItsDefensiveAdjustmentIsRefused)
 	{
-		json row = dexterity_seventeen();
+		nlohmann::json row = dexterity_seventeen();
 		row.erase("DefensiveAdj");
 
 		EXPECT_THROW(
@@ -252,7 +250,7 @@ namespace CppRL
 		AbilityTableLoadingTest,
 		AConstitutionRowMissingItsHitPointAdjustmentIsRefused)
 	{
-		json row = constitution_seventeen();
+		nlohmann::json row = constitution_seventeen();
 		row.erase("HPAdj");
 
 		EXPECT_THROW(
@@ -263,7 +261,7 @@ namespace CppRL
 
 	TEST(AbilityTableLoadingTest, ACharismaRowMissingItsLoyaltyIsRefused)
 	{
-		json row = charisma_seventeen();
+		nlohmann::json row = charisma_seventeen();
 		row.erase("Loyalty");
 
 		EXPECT_THROW(
@@ -276,7 +274,7 @@ namespace CppRL
 		AbilityTableLoadingTest,
 		AnIntelligenceRowMissingItsSpellLearningChanceIsRefused)
 	{
-		json row = intelligence_seventeen();
+		nlohmann::json row = intelligence_seventeen();
 		row.erase("ChanceToLearnSpell");
 
 		EXPECT_THROW(
@@ -289,7 +287,7 @@ namespace CppRL
 		AbilityTableLoadingTest,
 		AWisdomRowMissingItsSpellFailureChanceIsRefused)
 	{
-		json row = wisdom_seventeen();
+		nlohmann::json row = wisdom_seventeen();
 		row.erase("ChanceOfSpellFailure");
 
 		EXPECT_THROW(
