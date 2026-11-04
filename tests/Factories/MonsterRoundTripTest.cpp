@@ -46,7 +46,7 @@ namespace CppRL
 
 		void SetUp() override
 		{
-			monsters.load("data/content/monsters.json");
+			monsters.load(Paths::MONSTERS);
 			roundTrip = temp_test_path("monsters.json");
 		}
 

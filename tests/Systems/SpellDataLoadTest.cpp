@@ -79,7 +79,7 @@ namespace CppRL
 	// The spells the game ships with must all be readable.
 	TEST_F(SpellDataLoadTest, ShippedSpellDataLoads)
 	{
-		EXPECT_NO_THROW(spells.load("data/content/spells.json"));
+		EXPECT_NO_THROW(spells.load(Paths::SPELLS));
 	}
 
 	// A built-in spell's name, level, class and description are data, so a file

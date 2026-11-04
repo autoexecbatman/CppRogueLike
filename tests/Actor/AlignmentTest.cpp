@@ -85,7 +85,7 @@ namespace CppRL
 	TEST(AlignmentDataTest, EveryMonsterCarriesTheAlignmentItsEntryGives)
 	{
 		MonsterRegistry monsters{};
-		monsters.load("data/content/monsters.json");
+		monsters.load(Paths::MONSTERS);
 
 		const std::vector<
 			std::tuple<std::string, Alignment::Ethics, Alignment::Morality>>
@@ -254,7 +254,7 @@ namespace CppRL
 	TEST(AlignmentDataTest, InventedMonstersTakeTheirClosestEntrysAlignment)
 	{
 		MonsterRegistry monsters{};
-		monsters.load("data/content/monsters.json");
+		monsters.load(Paths::MONSTERS);
 
 		// A wolf that breathes fire is the hell hound, which is lawful evil.
 		EXPECT_EQ(
@@ -312,7 +312,7 @@ namespace CppRL
 		TheDungeonHoldsMonstersProtectionFromEvilWardsAgainst)
 	{
 		MonsterRegistry monsters{};
-		monsters.load("data/content/monsters.json");
+		monsters.load(Paths::MONSTERS);
 
 		int evil = 0;
 		for (

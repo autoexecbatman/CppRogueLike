@@ -39,9 +39,9 @@ namespace CppRL
 
 		void SetUp() override
 		{
-			monsters.load("data/content/monsters.json");
-			items.load("data/content/items.json");
-			bodyPlans.load("data/content/body_plans.json");
+			monsters.load(Paths::MONSTERS);
+			items.load(Paths::ITEMS);
+			bodyPlans.load(Paths::BODY_PLANS);
 		}
 
 		static const MonsterParams::StartingItem* find_slot(
@@ -172,7 +172,7 @@ namespace CppRL
 	// building a creature whose hands nobody decided on.
 	TEST_F(MonsterEquipmentTest, AMonsterWithNoBodyIsRefused)
 	{
-		std::ifstream source(Paths::resolve("data/content/monsters.json"));
+		std::ifstream source(Paths::resolve(Paths::MONSTERS));
 		nlohmann::json root = nlohmann::json::parse(source);
 		root.at("orc").at("body") = "";
 

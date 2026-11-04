@@ -5,6 +5,7 @@
 #include "src/GameContext.h"
 #include "src/InventoryOperations.h"
 #include "src/ItemCreator.h"
+#include "src/Paths.h"
 #include "src/ShopKeeper.h"
 #include "tests/mocks/TestDice.h"
 #include <gtest/gtest.h>
@@ -30,7 +31,7 @@ namespace CppRL
 
 		void SetUp() override
 		{
-			game.itemRegistry.load("data/content/items.json");
+			game.itemRegistry.load(Paths::ITEMS);
 			ctx = game.context();
 		}
 

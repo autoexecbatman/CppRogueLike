@@ -46,8 +46,8 @@ namespace CppRL
 
 		void SetUp() override
 		{
-			items.load("data/content/items.json");
-			items.load_enhanced_rules("data/content/enhanced_rules.json");
+			items.load(Paths::ITEMS);
+			items.load_enhanced_rules(Paths::ENHANCED_RULES);
 			roundTrip = temp_test_path("items.json");
 		}
 
@@ -231,7 +231,7 @@ namespace CppRL
 	// than about the file, or they would pass while rejecting everything.
 	TEST_F(ItemRoundTripTest, TheRealFileLoadsWithoutThrowing)
 	{
-		EXPECT_NO_THROW(items.load("data/content/items.json"));
+		EXPECT_NO_THROW(items.load(Paths::ITEMS));
 		EXPECT_FALSE(items.get_all_keys().empty());
 	}
 

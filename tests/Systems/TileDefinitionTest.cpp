@@ -10,6 +10,7 @@
 #include <gtest/gtest.h>
 
 #include "src/Actor.h"
+#include "src/Paths.h"
 #include "src/TileConfig.h"
 #include "src/TileDefinition.h"
 #include "src/TileType.h"
@@ -20,7 +21,7 @@ namespace CppRL
 	class TileDefinitionTest : public ::testing::Test
 	{
 	protected:
-		void SetUp() override { config.load("data/tiles/tile_config.json"); }
+		void SetUp() override { config.load(Paths::TILE_CONFIG); }
 
 		TileConfig config{};
 	};

@@ -21,6 +21,7 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=SpellCodecRoundTripTest.*
 
+#include "src/Paths.h"
 #include "src/SpellRegistry.h"
 #include "tests/mocks/TempTestPath.h"
 #include <gtest/gtest.h>
@@ -40,7 +41,7 @@ namespace CppRL
 
 		void SetUp() override
 		{
-			spells.load("data/content/spells.json");
+			spells.load(Paths::SPELLS);
 			roundTrip = temp_test_path("spells.json");
 		}
 
