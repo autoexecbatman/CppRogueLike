@@ -10,7 +10,6 @@
 //     build\bin\Debug\test_exe.exe --gtest_filter=ItemAppearanceTest.*
 
 #include <gtest/gtest.h>
-#include <nlohmann/json.hpp>
 
 #include <cassert>
 #include <filesystem>
@@ -21,6 +20,8 @@
 #include <string>
 #include <string_view>
 #include <utility>
+
+#include <nlohmann/json.hpp>
 
 #include "src/Actor.h"
 #include "src/ArmorClass.h"

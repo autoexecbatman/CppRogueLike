@@ -17,12 +17,7 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=EnhancedRulesLoadTest.*
 
-#include "src/ItemRegistry.h"
-#include "src/Paths.h"
-#include "tests/mocks/TempTestPath.h"
 #include <gtest/gtest.h>
-
-#include <nlohmann/json.hpp>
 
 #include <exception>
 #include <filesystem>
@@ -30,6 +25,12 @@
 #include <fstream>
 #include <stdexcept>
 #include <string>
+
+#include <nlohmann/json.hpp>
+
+#include "src/ItemRegistry.h"
+#include "src/Paths.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {

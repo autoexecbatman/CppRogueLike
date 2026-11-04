@@ -3,7 +3,6 @@
 // before alignment existed load as true neutral rather than failing.
 
 #include <gtest/gtest.h>
-#include <nlohmann/json.hpp>
 
 #include <filesystem>
 #include <fstream>
@@ -11,6 +10,8 @@
 #include <string_view>
 #include <tuple>
 #include <vector>
+
+#include <nlohmann/json.hpp>
 
 #include "src/Actor.h"
 #include "src/Alignment.h"

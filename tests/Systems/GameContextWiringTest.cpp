@@ -5,13 +5,13 @@
 // through the context without anything being refreshed. The two-handle version
 // this replaced needed a second assignment after every replacement, and a site
 // that forgot it crashed inside Creature::die.
-#include <memory>
-
 #include <gtest/gtest.h>
 
-#include "../../src/Game.h"
-#include "../../src/GameContext.h"
-#include "../../src/Player.h"
+#include <memory>
+
+#include "src/Game.h"
+#include "src/GameContext.h"
+#include "src/Player.h"
 #include "tests/mocks/TestDice.h"
 
 namespace CppRL

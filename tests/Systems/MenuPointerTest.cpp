@@ -17,9 +17,9 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=MenuPointerTest.*
 
-#include <optional>
-
 #include <gtest/gtest.h>
+
+#include <optional>
 
 #include "src/BaseMenu.h"
 #include "src/InputSystem.h"

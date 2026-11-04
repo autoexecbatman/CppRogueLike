@@ -17,8 +17,6 @@
 
 #include <gtest/gtest.h>
 
-#include <nlohmann/json.hpp>
-
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
@@ -28,6 +26,8 @@
 #include <string>
 #include <string_view>
 #include <vector>
+
+#include <nlohmann/json.hpp>
 
 #include "src/Ai.h"
 #include "src/Attitude.h"

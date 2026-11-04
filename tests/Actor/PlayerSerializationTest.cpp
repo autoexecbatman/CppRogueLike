@@ -1,6 +1,10 @@
+#include <gtest/gtest.h>
+
 #include <memory>
 #include <utility>
 #include <vector>
+
+#include <nlohmann/json.hpp>
 
 #include "src/ArmorClass.h"
 #include "src/CreatureClass.h"
@@ -14,8 +18,6 @@
 #include "src/PlayerRaceState.h"
 #include "src/TurnSchedule.h"
 #include "tests/mocks/MockGameContext.h"
-#include <gtest/gtest.h>
-#include <nlohmann/json.hpp>
 
 namespace CppRL
 {

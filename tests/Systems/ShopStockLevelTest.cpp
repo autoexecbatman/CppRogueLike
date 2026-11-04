@@ -11,10 +11,10 @@
 // draw deterministic: splint_mail (floor 5) at level 20, studded_leather
 // (floor 1) at level 1. Expected keys come from that data, not from the code.
 
+#include <gtest/gtest.h>
+
 #include <string>
 #include <vector>
-
-#include <gtest/gtest.h>
 
 #include "src/GameContext.h"
 #include "src/Item.h"

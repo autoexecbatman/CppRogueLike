@@ -8,10 +8,10 @@
 // because can_equip already refuses anything but a ranged weapon in that slot.
 // What the flag cost was two copies of one fact and the code to reconcile them.
 
+#include <gtest/gtest.h>
+
 #include <memory>
 #include <string_view>
-
-#include <gtest/gtest.h>
 
 #include "src/Actor.h"
 #include "src/ArmorClass.h"

@@ -19,13 +19,7 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=ItemRoundTripTest.*
 
-#include "src/DiceExpr.h"
-#include "src/ItemRegistry.h"
-#include "src/Paths.h"
-#include "tests/mocks/TempTestPath.h"
 #include <gtest/gtest.h>
-
-#include <nlohmann/json.hpp>
 
 #include <filesystem>
 #include <fstream>
@@ -33,6 +27,13 @@
 #include <set>
 #include <stdexcept>
 #include <string>
+
+#include <nlohmann/json.hpp>
+
+#include "src/DiceExpr.h"
+#include "src/ItemRegistry.h"
+#include "src/Paths.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {

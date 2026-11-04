@@ -9,13 +9,14 @@
 //     build\bin\Debug\test_exe.exe --gtest_filter=BootsAndCloaksTest.*
 
 #include <gtest/gtest.h>
-#include <nlohmann/json.hpp>
 
 #include <algorithm>
 #include <array>
 #include <memory>
 #include <string>
 #include <string_view>
+
+#include <nlohmann/json.hpp>
 
 #include "src/Actor.h"
 #include "src/ArmorClass.h"

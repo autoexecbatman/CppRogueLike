@@ -12,10 +12,10 @@
 
 #include <gtest/gtest.h>
 
-#include <nlohmann/json.hpp>
-
 #include <memory>
 #include <string_view>
+
+#include <nlohmann/json.hpp>
 
 #include "src/Actor.h"
 #include "src/ArmorClass.h"

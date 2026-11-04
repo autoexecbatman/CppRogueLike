@@ -12,10 +12,10 @@
 // of what is worn and what was drunk, never a sum. It is read from the slots
 // when the hit lands; nothing is copied anywhere.
 
+#include <gtest/gtest.h>
+
 #include <memory>
 #include <string_view>
-
-#include <gtest/gtest.h>
 
 #include "src/Actor.h"
 #include "src/ArmorClass.h"

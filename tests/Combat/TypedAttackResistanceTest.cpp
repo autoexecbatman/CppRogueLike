@@ -15,10 +15,10 @@
 // chimera's 3d12 at 12, 12, 12 through the helm is 8 + 8 + 8; a fire
 // attack of 1d12+5 at 12 through a ring is 10 + 5.
 
+#include <gtest/gtest.h>
+
 #include <initializer_list>
 #include <memory>
-
-#include <gtest/gtest.h>
 
 #include "src/Actor.h"
 #include "src/ArmorClass.h"

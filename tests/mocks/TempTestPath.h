@@ -15,15 +15,16 @@
 //   temp_test_path("probe") / "data";
 //   // -> a directory tree of the test's own; the test creates and removes it
 
+#include <gtest/gtest.h>
+
 #include <algorithm>
 #include <cassert>
 #include <filesystem>
 #include <format>
-#include <process.h>
 #include <string>
 #include <string_view>
 
-#include <gtest/gtest.h>
+#include <process.h>
 
 namespace CppRL
 {

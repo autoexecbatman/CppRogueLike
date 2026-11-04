@@ -21,14 +21,15 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=SpellCodecRoundTripTest.*
 
-#include "src/Paths.h"
-#include "src/SpellRegistry.h"
-#include "tests/mocks/TempTestPath.h"
 #include <gtest/gtest.h>
 
 #include <filesystem>
 #include <map>
 #include <string>
+
+#include "src/Paths.h"
+#include "src/SpellRegistry.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {

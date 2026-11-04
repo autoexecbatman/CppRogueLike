@@ -8,9 +8,9 @@
 // corridor had empty bodies. Those two impossible cases are now asserts rather
 // than dead message branches.
 
-#include <string>
-
 #include <gtest/gtest.h>
+
+#include <string>
 
 #include "src/Colors.h"
 #include "src/Map.h"

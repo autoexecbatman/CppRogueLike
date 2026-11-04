@@ -19,12 +19,11 @@
 
 #include <gtest/gtest.h>
 
-#include <vector>
-
 #include <cctype>
 #include <memory>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include "src/Actor.h"
 #include "src/ArmorClass.h"

@@ -20,8 +20,6 @@
 
 #include <gtest/gtest.h>
 
-#include <nlohmann/json.hpp>
-
 #include <exception>
 #include <filesystem>
 #include <fstream>
@@ -31,6 +29,8 @@
 #include <string>
 #include <string_view>
 #include <vector>
+
+#include <nlohmann/json.hpp>
 
 #include "src/DecorEditor.h"
 #include "src/Palette.h"

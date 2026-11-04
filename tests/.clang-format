@@ -1,0 +1,26 @@
+BasedOnStyle: InheritParentConfig
+
+# clang-format 22 drops these five on inheritance and falls back to Microsoft's
+# values, so they repeat the root's. Compare --dump-config on a test file with
+# one on a src file after changing either config: only include keys may differ.
+AlignAfterOpenBracket: false
+BreakAfterOpenBracketFunction: true
+BreakAfterOpenBracketIf: true
+BreakAfterOpenBracketLoop: true
+BreakAfterOpenBracketSwitch: true
+
+# The owner, 2026-11-04: gtest first, then the standard library, then external
+# libraries, then project headers, a blank line between each block.
+SortIncludes: CaseSensitive
+IncludeBlocks: Regroup
+# Never matches, so "src/Foo.h" is not lifted above gtest in FooTest.cpp.
+IncludeIsMainRegex: 'NEVER_MATCHES_A_STEM$'
+IncludeCategories:
+  - Regex: '^<gtest/'
+    Priority: 1
+  - Regex: '^<[a-z_0-9]+>$'
+    Priority: 2
+  - Regex: '^<'
+    Priority: 3
+  - Regex: '^"'
+    Priority: 4

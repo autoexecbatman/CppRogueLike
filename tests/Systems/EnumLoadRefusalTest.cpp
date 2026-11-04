@@ -15,7 +15,6 @@
 //     cd build/bin/Debug && ./test_exe.exe --gtest_filter=EnumLoadRefusal*
 
 #include <gtest/gtest.h>
-#include <nlohmann/json.hpp>
 
 #include <array>
 #include <exception>
@@ -26,6 +25,8 @@
 #include <string>
 #include <string_view>
 #include <vector>
+
+#include <nlohmann/json.hpp>
 
 #include "src/Actor.h"
 #include "src/ArmorClass.h"

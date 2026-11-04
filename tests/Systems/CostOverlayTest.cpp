@@ -8,9 +8,9 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=CostOverlayTest.*
 
-#include <optional>
-
 #include <gtest/gtest.h>
+
+#include <optional>
 
 #include <raylib.h>
 

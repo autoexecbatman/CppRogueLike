@@ -1,12 +1,14 @@
-#include "src/MonsterCreator.h"
+#include <gtest/gtest.h>
+
+#include <stdexcept>
+
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
 #include "src/ItemCreator.h"
+#include "src/MonsterCreator.h"
 #include "src/MonsterHitDice.h"
 #include "src/MonsterRegistry.h"
 #include "tests/mocks/MockGameContext.h"
-#include <gtest/gtest.h>
-#include <stdexcept>
 
 namespace CppRL
 {

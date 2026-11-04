@@ -1,3 +1,10 @@
+#include <gtest/gtest.h>
+
+#include <memory>
+#include <stdexcept>
+
+#include <nlohmann/json.hpp>
+
 #include "src/Actor.h"
 #include "src/Ai.h"
 #include "src/AiMonster.h"
@@ -14,10 +21,6 @@
 #include "src/MonsterAttacker.h"
 #include "src/TileRef.h"
 #include "src/TurnSchedule.h"
-#include <gtest/gtest.h>
-#include <memory>
-#include <nlohmann/json.hpp>
-#include <stdexcept>
 
 namespace CppRL
 {

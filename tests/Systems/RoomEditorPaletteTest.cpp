@@ -18,8 +18,6 @@
 
 #include <gtest/gtest.h>
 
-#include <nlohmann/json.hpp>
-
 #include <filesystem>
 #include <format>
 #include <fstream>
@@ -28,6 +26,8 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+
+#include <nlohmann/json.hpp>
 
 #include "src/Palette.h"
 #include "src/Paths.h"

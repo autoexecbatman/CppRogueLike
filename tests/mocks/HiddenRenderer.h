@@ -53,13 +53,14 @@
 // opens a full-screen window of its own - so text draws in the empty pair. Nothing a
 // test checks reads a colour.
 
+#include <gtest/gtest.h>
+
 #include <cassert>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
 #include <string_view>
 
-#include <gtest/gtest.h>
 #include <raylib.h>
 
 #include "src/Paths.h"

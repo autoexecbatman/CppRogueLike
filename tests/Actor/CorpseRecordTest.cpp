@@ -11,8 +11,6 @@
 
 #include <gtest/gtest.h>
 
-#include <nlohmann/json.hpp>
-
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
@@ -22,6 +20,8 @@
 #include <string_view>
 #include <utility>
 #include <variant>
+
+#include <nlohmann/json.hpp>
 
 #include "src/Actor.h"
 #include "src/ArmorClass.h"

@@ -3,9 +3,9 @@
 // with that state pass freely, and that a caught creature struggles for a turn
 // before it is released.
 
-#include <memory>
-
 #include <gtest/gtest.h>
+
+#include <memory>
 
 #include "src/Actor.h"
 #include "src/ArmorClass.h"

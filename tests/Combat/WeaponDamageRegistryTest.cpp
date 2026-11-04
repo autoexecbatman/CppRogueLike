@@ -1,13 +1,15 @@
-#include "src/WeaponDamageRegistry.h"
+#include <gtest/gtest.h>
+
+#include <algorithm>
+#include <chrono>
+#include <string>
+#include <vector>
+
 #include "src/DamageInfo.h"
 #include "src/ItemRegistry.h"
 #include "src/Paths.h"
 #include "src/Pickable.h"
-#include <algorithm>
-#include <chrono>
-#include <gtest/gtest.h>
-#include <string>
-#include <vector>
+#include "src/WeaponDamageRegistry.h"
 
 namespace CppRL
 {

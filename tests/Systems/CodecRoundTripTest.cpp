@@ -16,9 +16,6 @@
 
 #include <gtest/gtest.h>
 
-#include <nlohmann/json.hpp>
-
-#include "src/EquipmentSlot.h"
 #include <algorithm>
 #include <array>
 #include <filesystem>
@@ -31,6 +28,8 @@
 #include <variant>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "src/Ai.h"
 #include "src/Alignment.h"
 #include "src/Attitude.h"
@@ -41,6 +40,7 @@
 #include "src/CreatureClass.h"
 #include "src/CreatureSize.h"
 #include "src/DamageInfo.h"
+#include "src/EquipmentSlot.h"
 #include "src/IntelligenceRating.h"
 #include "src/ItemClassification.h"
 #include "src/MagicalItemEffects.h"

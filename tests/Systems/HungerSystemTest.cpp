@@ -17,13 +17,14 @@
 //   cmake --build build --config Debug --target test_exe
 //   cd build/bin/Debug && ./test_exe.exe --gtest_filter=HungerSystemTest.*
 
+#include <gtest/gtest.h>
+
 #include <array>
 #include <exception>
 #include <format>
+#include <memory>
 #include <string>
 #include <string_view>
-
-#include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
 
@@ -34,7 +35,6 @@
 #include "src/HungerSystem.h"
 #include "src/Player.h"
 #include "tests/mocks/MockGameContext.h"
-#include <memory>
 
 namespace CppRL
 {

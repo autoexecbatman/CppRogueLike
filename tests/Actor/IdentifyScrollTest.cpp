@@ -16,9 +16,8 @@
 #include <gtest/gtest.h>
 
 #include <memory>
-#include <string_view>
-
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include "src/Actor.h"

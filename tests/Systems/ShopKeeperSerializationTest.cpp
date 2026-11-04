@@ -1,5 +1,9 @@
+#include <gtest/gtest.h>
+
 #include <memory>
 #include <vector>
+
+#include <nlohmann/json.hpp>
 
 #include "src/Game.h"
 #include "src/GameContext.h"
@@ -8,8 +12,6 @@
 #include "src/Paths.h"
 #include "src/ShopKeeper.h"
 #include "tests/mocks/TestDice.h"
-#include <gtest/gtest.h>
-#include <nlohmann/json.hpp>
 
 namespace CppRL
 {

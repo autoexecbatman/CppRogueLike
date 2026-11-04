@@ -1,6 +1,10 @@
+#include <gtest/gtest.h>
+
 #include <memory>
 #include <variant>
 #include <vector>
+
+#include <nlohmann/json.hpp>
 
 #include "src/Actor.h"
 #include "src/Colors.h"
@@ -13,8 +17,6 @@
 #include "src/TargetMode.h"
 #include "src/TileRef.h"
 #include "src/Weapons.h"
-#include <gtest/gtest.h>
-#include <nlohmann/json.hpp>
 
 namespace CppRL
 {

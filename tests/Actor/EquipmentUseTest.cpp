@@ -13,13 +13,12 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <memory>
 #include <string_view>
-
-#include "src/Actor.h"
-#include <algorithm>
 #include <utility>
 
+#include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"

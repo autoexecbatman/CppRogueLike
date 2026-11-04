@@ -8,13 +8,14 @@
 // the rim is clear the fill has to paint, or a bar shows a hole through itself.
 
 #include <gtest/gtest.h>
-#include <raylib.h>
 
 #include <algorithm>
 #include <format>
 #include <iterator>
 #include <string>
 #include <vector>
+
+#include <raylib.h>
 
 #include "src/Paths.h"
 #include "src/Renderer.h"

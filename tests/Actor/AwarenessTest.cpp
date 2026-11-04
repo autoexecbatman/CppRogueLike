@@ -3,9 +3,9 @@
 // is never granted by an invisible player. Awareness replaced a tracking counter
 // that four Ai classes each maintained by hand, two of which ignored invisibility.
 
-#include <memory>
-
 #include <gtest/gtest.h>
+
+#include <memory>
 
 #include "src/Actor.h"
 #include "src/ArmorClass.h"

@@ -4,6 +4,12 @@
 // Tests both ItemEnhancement stat bonuses (strength_bonus, dexterity_bonus)
 // and behavior-based bonuses (JewelryAmulet, Gauntlets, Girdle).
 
+#include <gtest/gtest.h>
+
+#include <memory>
+#include <string>
+#include <utility>
+
 #include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/BuffType.h"
@@ -19,10 +25,6 @@
 #include "src/Player.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
-#include <gtest/gtest.h>
-#include <memory>
-#include <string>
-#include <utility>
 
 namespace CppRL
 {

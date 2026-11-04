@@ -10,12 +10,12 @@
 // which save on the warrior row and need 17 against a spell. Every number below
 // is derived from those rules, never from the code.
 
+#include <gtest/gtest.h>
+
 #include <initializer_list>
 #include <memory>
 #include <utility>
 #include <vector>
-
-#include <gtest/gtest.h>
 
 #include "src/Actor.h"
 #include "src/ArmorClass.h"

@@ -5,6 +5,7 @@
 // and looses the bow only when they aim it.
 
 #include <gtest/gtest.h>
+
 #include <memory>
 #include <string>
 

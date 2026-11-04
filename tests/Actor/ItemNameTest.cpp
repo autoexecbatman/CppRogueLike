@@ -4,11 +4,11 @@
 // two names held at once can differ. The expected words are get_prefix_name's
 // and get_suffix_name's tables: SHARP is "Sharp", OF_SLAYING is "of Slaying".
 
+#include <gtest/gtest.h>
+
 #include <format>
 #include <memory>
 #include <string>
-
-#include <gtest/gtest.h>
 
 #include "src/Actor.h"
 #include "src/Colors.h"

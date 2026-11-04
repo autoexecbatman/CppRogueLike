@@ -20,19 +20,20 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=MonsterRoundTripTest.*
 
-#include "src/DamageInfo.h"
-#include "src/MonsterRegistry.h"
-#include "src/Paths.h"
-#include "tests/mocks/TempTestPath.h"
 #include <gtest/gtest.h>
-
-#include <nlohmann/json.hpp>
 
 #include <filesystem>
 #include <fstream>
 #include <map>
 #include <stdexcept>
 #include <string>
+
+#include <nlohmann/json.hpp>
+
+#include "src/DamageInfo.h"
+#include "src/MonsterRegistry.h"
+#include "src/Paths.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {

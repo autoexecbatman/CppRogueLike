@@ -18,9 +18,9 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=SaveFieldNamesTest.*
 
-#include <memory>
-
 #include <gtest/gtest.h>
+
+#include <memory>
 
 #include <nlohmann/json.hpp>
 

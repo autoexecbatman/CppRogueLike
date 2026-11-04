@@ -13,6 +13,7 @@
 #include <gtest/gtest.h>
 
 #include <format>
+
 #include <process.h>
 
 #include "tests/mocks/TempTestPath.h"

@@ -1,13 +1,15 @@
+#include <gtest/gtest.h>
+
+#include <array>
+#include <iterator>
+#include <string_view>
+
 #include "src/DamageInfo.h"
 #include "src/ItemEnhancements.h"
 #include "src/ItemIdentification.h"
 #include "src/RandomDice.h"
 #include "src/WeaponDamageRegistry.h"
 #include "tests/mocks/TestDice.h"
-#include <array>
-#include <gtest/gtest.h>
-#include <iterator>
-#include <string_view>
 
 namespace CppRL
 {

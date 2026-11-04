@@ -15,7 +15,6 @@
 //     build\bin\Debug\test_exe.exe --gtest_filter=DataFileRoundTripTest.*
 
 #include <gtest/gtest.h>
-#include <nlohmann/json.hpp>
 
 #include <filesystem>
 #include <format>
@@ -24,6 +23,8 @@
 #include <iterator>
 #include <string>
 #include <string_view>
+
+#include <nlohmann/json.hpp>
 
 #include "src/ContentRegistry.h"
 #include "src/ContentRegistryIO.h"

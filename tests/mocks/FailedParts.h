@@ -16,9 +16,9 @@
 //
 // Neither flushes; a caller about to leave flushes stderr itself.
 
-#include <cstdio>
-
 #include <gtest/gtest.h>
+
+#include <cstdio>
 
 namespace CppRL
 {

@@ -15,12 +15,12 @@
 // were told one level early every time; warriors were told on 6 and 12, which
 // improve nothing, and not on 5, 7, 11, 13 or 17, which do.
 
+#include <gtest/gtest.h>
+
 #include <algorithm>
 #include <memory>
 #include <utility>
 #include <vector>
-
-#include <gtest/gtest.h>
 
 #include "src/Actor.h"
 #include "src/ArmorClass.h"

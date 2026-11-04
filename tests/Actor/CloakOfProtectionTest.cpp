@@ -24,13 +24,14 @@
 
 #include <iostream>
 #include <memory>
-#include <nlohmann/json.hpp>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
 #include <variant>
+
+#include <nlohmann/json.hpp>
 
 #include "src/ArmorClass.h"
 #include "src/ArmorMaterial.h"

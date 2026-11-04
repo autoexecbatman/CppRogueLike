@@ -37,12 +37,13 @@
 // targeted assertion in turn, rebuilds, and confirms the matching probe fails.
 
 #include <gtest/gtest.h>
-#include <nlohmann/json_fwd.hpp>
 
 #include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
+
+#include <nlohmann/json_fwd.hpp>
 
 #include "src/Actor.h"
 #include "src/Ai.h"

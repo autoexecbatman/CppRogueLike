@@ -16,13 +16,13 @@
 
 #include <gtest/gtest.h>
 
-#include <nlohmann/json.hpp>
-
 #include <exception>
 #include <filesystem>
 #include <fstream>
 #include <string>
 #include <string_view>
+
+#include <nlohmann/json.hpp>
 
 #include "src/Paths.h"
 #include "src/PrefabLibrary.h"

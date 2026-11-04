@@ -16,8 +16,6 @@
 
 #include <gtest/gtest.h>
 
-#include <nlohmann/json.hpp>
-
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
@@ -25,6 +23,8 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+
+#include <nlohmann/json.hpp>
 
 #include "src/Creature.h"
 #include "src/CreatureSize.h"

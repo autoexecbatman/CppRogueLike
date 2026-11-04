@@ -15,12 +15,12 @@
 
 #include <gtest/gtest.h>
 
-#include <nlohmann/json.hpp>
-
 #include <format>
 #include <optional>
 #include <stdexcept>
 #include <string>
+
+#include <nlohmann/json.hpp>
 
 #include "src/Map.h"
 #include "src/TileType.h"

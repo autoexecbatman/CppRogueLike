@@ -1,6 +1,8 @@
-#include "src/Actor/Destructible.h"
 #include <gtest/gtest.h>
+
 #include <memory>
+
+#include "src/Actor/Destructible.h"
 
 namespace CppRL
 {

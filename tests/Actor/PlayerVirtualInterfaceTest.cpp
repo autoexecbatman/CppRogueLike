@@ -1,3 +1,7 @@
+#include <gtest/gtest.h>
+
+#include <memory>
+
 #include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/Colors.h"
@@ -12,8 +16,6 @@
 #include "src/TileRef.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
-#include <gtest/gtest.h>
-#include <memory>
 
 namespace CppRL
 {

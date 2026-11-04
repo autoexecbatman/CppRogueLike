@@ -3,7 +3,9 @@
 // Previously AiMimic::save() wrote AiType::MONSTER (0) via AiMonster::save(),
 // causing loaded mimics to reconstruct as plain AiMonster and lose all state.
 #include <gtest/gtest.h>
+
 #include <memory>
+
 #include <nlohmann/json.hpp>
 
 #include "src/Ai.h"

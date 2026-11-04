@@ -6,10 +6,10 @@
 // here for a year while every monster walked into pools, because the gate the AI used
 // was a different function that took no creature.
 
+#include <gtest/gtest.h>
+
 #include <memory>
 #include <vector>
-
-#include <gtest/gtest.h>
 
 #include "src/Actor.h"
 #include "src/ArmorClass.h"

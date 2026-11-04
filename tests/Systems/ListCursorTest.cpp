@@ -10,10 +10,10 @@
 //     cmake --build build --config Debug --target test_exe
 //     cd build/bin/Debug && ./test_exe.exe --gtest_filter=ListCursorTest.*:StepWithinTest.*
 
+#include <gtest/gtest.h>
+
 #include <climits>
 #include <optional>
-
-#include <gtest/gtest.h>
 
 #include "src/ListCursor.h"
 

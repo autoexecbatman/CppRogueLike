@@ -1,9 +1,10 @@
-#include "src/Actor.h"
-#include "src/Creature.h"
-#include "src/EquipmentSlot.h"
 #include <gtest/gtest.h>
 
 #include <vector>
+
+#include "src/Actor.h"
+#include "src/Creature.h"
+#include "src/EquipmentSlot.h"
 
 namespace CppRL
 {

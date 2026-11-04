@@ -1,5 +1,6 @@
-#include "src/Vector2D.h"
 #include <gtest/gtest.h>
+
+#include "src/Vector2D.h"
 
 namespace CppRL
 {

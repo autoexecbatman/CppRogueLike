@@ -1,8 +1,18 @@
-#include "src/ItemCreator.h"
+#include <gtest/gtest.h>
+
+#include <filesystem>
+#include <fstream>
+#include <stdexcept>
+#include <string>
+#include <variant>
+
+#include <nlohmann/json.hpp>
+
 #include "src/BuffType.h"
 #include "src/DiceExpr.h"
 #include "src/Item.h"
 #include "src/ItemClassification.h"
+#include "src/ItemCreator.h"
 #include "src/ItemRegistry.h"
 #include "src/Paths.h"
 #include "src/Pickable.h"
@@ -11,15 +21,6 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 #include "tests/mocks/TempTestPath.h"
-#include <gtest/gtest.h>
-
-#include <nlohmann/json.hpp>
-
-#include <filesystem>
-#include <fstream>
-#include <stdexcept>
-#include <string>
-#include <variant>
 
 namespace CppRL
 {

@@ -25,13 +25,13 @@
 
 #include <gtest/gtest.h>
 
-#include <nlohmann/json.hpp>
-
 #include <format>
 #include <memory>
 #include <ranges>
 #include <string>
 #include <vector>
+
+#include <nlohmann/json.hpp>
 
 #include "src/ArmorClass.h"
 #include "src/Creature.h"

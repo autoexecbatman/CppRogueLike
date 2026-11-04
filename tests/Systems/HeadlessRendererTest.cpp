@@ -21,6 +21,9 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=HeadlessRendererTest.*
 
+#include <gtest/gtest-spi.h>
+#include <gtest/gtest.h>
+
 #include <cassert>
 #include <cstdlib>
 #include <filesystem>
@@ -28,9 +31,6 @@
 #include <fstream>
 #include <iterator>
 #include <string>
-
-#include <gtest/gtest-spi.h>
-#include <gtest/gtest.h>
 
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/TempTestPath.h"
