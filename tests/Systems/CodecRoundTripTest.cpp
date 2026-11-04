@@ -50,6 +50,7 @@
 #include "src/TargetMode.h"
 #include "src/TileRef.h"
 #include "src/Weapons.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {
@@ -584,9 +585,7 @@ namespace CppRL
 	// through the tile codec: same keys, same sheet, column and row.
 	TEST(CodecRoundTripTest, EveryItemSpriteSurvivesASaveAndALoad)
 	{
-		const std::filesystem::path scratch =
-			std::filesystem::temp_directory_path() /
-			"codec_round_trip_item_tiles.json";
+		const std::filesystem::path scratch = temp_test_path("item_tiles.json");
 		ContentRegistry shipped{};
 		ContentRegistryIO::load(shipped, Paths::CONTENT_TILES);
 		ASSERT_FALSE(shipped.all_tiles().empty());

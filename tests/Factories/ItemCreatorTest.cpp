@@ -10,6 +10,7 @@
 #include "src/TurnSchedule.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
+#include "tests/mocks/TempTestPath.h"
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
@@ -175,8 +176,7 @@ namespace CppRL
 	// where they differ.
 	TEST_F(ItemCreatorTest, AnItemWeighsItsWeightRatherThanItsSpawnRate)
 	{
-		const std::filesystem::path apart =
-			std::filesystem::temp_directory_path() / "items_weight_apart.json";
+		const std::filesystem::path apart = temp_test_path("items.json");
 
 		std::ifstream source(Paths::resolve(Paths::ITEMS));
 		ASSERT_TRUE(source.is_open());
@@ -211,8 +211,7 @@ namespace CppRL
 	// would stop on the first.
 	TEST_F(ItemCreatorTest, CarryWeightDoesNotChangeHowOftenAnItemIsDrawn)
 	{
-		const std::filesystem::path apart =
-			std::filesystem::temp_directory_path() / "items_draw_apart.json";
+		const std::filesystem::path apart = temp_test_path("items.json");
 
 		std::ifstream source(Paths::resolve(Paths::ITEMS));
 		ASSERT_TRUE(source.is_open());

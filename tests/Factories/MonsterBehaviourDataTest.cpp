@@ -42,6 +42,7 @@
 #include "src/Paths.h"
 #include "src/RandomDice.h"
 #include "tests/mocks/MockGameContext.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {
@@ -86,8 +87,7 @@ namespace CppRL
 		GameContext ctx{};
 		DataManager dataManager{};
 		LevelManager levelManager{};
-		std::filesystem::path edited{ std::filesystem::temp_directory_path() /
-			"monsters_behaviour.json" };
+		std::filesystem::path edited{ temp_test_path("monsters.json") };
 	};
 
 	// Each monster is built with the Ai its record names.

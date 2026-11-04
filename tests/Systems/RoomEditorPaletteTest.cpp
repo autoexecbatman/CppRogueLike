@@ -35,6 +35,7 @@
 #include "src/RoomEditor.h"
 #include "src/TileRef.h"
 #include "src/TileRefJson.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {
@@ -53,10 +54,7 @@ namespace CppRL
 	protected:
 		void SetUp() override
 		{
-			const std::string testName =
-				::testing::UnitTest::GetInstance()->current_test_info()->name();
-			scratch = std::filesystem::temp_directory_path() /
-				("room_editor_palette_" + testName + ".json");
+			scratch = temp_test_path("tile_config.json");
 
 			std::ifstream source(Paths::resolve(Paths::TILE_CONFIG));
 			ASSERT_TRUE(source.is_open());

@@ -22,6 +22,7 @@
 #include "src/DiceExpr.h"
 #include "src/ItemRegistry.h"
 #include "src/Paths.h"
+#include "tests/mocks/TempTestPath.h"
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
@@ -47,8 +48,7 @@ namespace CppRL
 		{
 			items.load("data/content/items.json");
 			items.load_enhanced_rules("data/content/enhanced_rules.json");
-			roundTrip =
-				std::filesystem::temp_directory_path() / "items_roundtrip.json";
+			roundTrip = temp_test_path("items.json");
 		}
 
 		void TearDown() override { std::filesystem::remove(roundTrip); }

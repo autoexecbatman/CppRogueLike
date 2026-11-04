@@ -23,6 +23,7 @@
 #include "src/TileRef.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {
@@ -382,9 +383,7 @@ namespace CppRL
 		file >> content;
 		content.at("goblin").erase("ethics");
 
-		const std::filesystem::path damaged =
-			std::filesystem::temp_directory_path() /
-			"monsters_no_alignment.json";
+		const std::filesystem::path damaged = temp_test_path("monsters.json");
 		std::ofstream out(damaged);
 		out << content.dump(2);
 		out.close();

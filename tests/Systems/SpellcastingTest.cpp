@@ -52,6 +52,7 @@
 #include "src/TurnSchedule.h"
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {
@@ -93,8 +94,7 @@ namespace CppRL
 
 		MockGameContext mock{};
 		GameContext ctx{};
-		std::filesystem::path edited{ std::filesystem::temp_directory_path() /
-			"monsters_spellcasting.json" };
+		std::filesystem::path edited{ temp_test_path("monsters.json") };
 	};
 
 	TEST_F(

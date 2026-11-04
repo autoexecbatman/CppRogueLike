@@ -40,6 +40,7 @@
 #include "src/Pickable.h"
 #include "src/Player.h"
 #include "src/TileRef.h"
+#include "tests/mocks/TempTestPath.h"
 #include "tests/mocks/TestDice.h"
 
 namespace CppRL
@@ -168,9 +169,7 @@ namespace CppRL
 		ASSERT_TRUE(shipped.is_open()) << "cannot read " << Paths::ITEMS;
 		json document = json::parse(shipped);
 		document.at("dagger").erase("appearance");
-		const std::filesystem::path scratch =
-			std::filesystem::temp_directory_path() /
-			"ItemAppearanceTest_items.json";
+		const std::filesystem::path scratch = temp_test_path("items.json");
 		{
 			std::ofstream out(scratch);
 			out << document.dump(4);
@@ -196,9 +195,7 @@ namespace CppRL
 	// dropped would make the next load refuse the whole file.
 	TEST_F(ItemAppearanceTest, TheRegistrysOwnSaveKeepsEveryAppearance)
 	{
-		const std::filesystem::path scratch =
-			std::filesystem::temp_directory_path() /
-			"ItemAppearanceTest_saved_items.json";
+		const std::filesystem::path scratch = temp_test_path("items.json");
 		ctx.itemRegistry->save(scratch.string());
 
 		ItemRegistry reloaded;
@@ -248,9 +245,7 @@ namespace CppRL
 		ItemParams edited = ctx.itemRegistry->get_params("helm_of_brilliance");
 		edited.appearance = "dented helm";
 		ctx.itemRegistry->set_params("helm_of_brilliance", edited);
-		const std::filesystem::path scratch =
-			std::filesystem::temp_directory_path() /
-			"ItemAppearanceTest_edited_items.json";
+		const std::filesystem::path scratch = temp_test_path("items.json");
 		ctx.itemRegistry->save(scratch.string());
 
 		ItemRegistry reloaded;

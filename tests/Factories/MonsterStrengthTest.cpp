@@ -41,6 +41,7 @@
 #include "src/MonsterStrength.h"
 #include "src/Paths.h"
 #include "tests/mocks/MockGameContext.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {
@@ -149,8 +150,7 @@ namespace CppRL
 		GameContext ctx{};
 		DataManager dataManager{};
 		LevelManager levelManager{};
-		std::filesystem::path edited{ std::filesystem::temp_directory_path() /
-			"monsters_strength.json" };
+		std::filesystem::path edited{ temp_test_path("monsters.json") };
 	};
 
 	TEST_F(MonsterStrengthTest, EachMonsterWhoseEntryPrintsAStrengthCarriesIt)

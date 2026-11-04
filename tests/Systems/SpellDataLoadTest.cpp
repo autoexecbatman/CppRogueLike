@@ -23,6 +23,7 @@
 
 #include "src/Paths.h"
 #include "src/SpellRegistry.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {
@@ -71,10 +72,7 @@ namespace CppRL
 			return scratchFile.string();
 		}
 
-		std::filesystem::path scratchFile{
-			std::filesystem::temp_directory_path() /
-			"rogue_spell_load_test.json"
-		};
+		std::filesystem::path scratchFile{ temp_test_path("spells.json") };
 		SpellRegistry spells{};
 	};
 

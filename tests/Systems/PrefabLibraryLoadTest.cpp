@@ -27,6 +27,7 @@
 
 #include "src/Paths.h"
 #include "src/PrefabLibrary.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {
@@ -34,13 +35,7 @@ namespace CppRL
 	class PrefabLibraryLoadTest : public ::testing::Test
 	{
 	protected:
-		void SetUp() override
-		{
-			const std::string testName =
-				::testing::UnitTest::GetInstance()->current_test_info()->name();
-			scratch = std::filesystem::temp_directory_path() /
-				("prefab_library_" + testName + ".json");
-		}
+		void SetUp() override { scratch = temp_test_path("prefabs.json"); }
 
 		void TearDown() override { std::filesystem::remove(scratch); }
 
@@ -196,14 +191,16 @@ namespace CppRL
 	TEST_F(PrefabLibraryLoadTest, ASaveThatCannotBeWrittenIsRefused)
 	{
 		library.load(Paths::PREFABS);
-		const std::filesystem::path directory =
-			std::filesystem::temp_directory_path();
+		// A directory of the test's own, so the save has one to be refused by.
+		const std::filesystem::path directory = temp_test_path("directory");
+		std::filesystem::create_directories(directory);
 		const auto save_to_directory = [&]()
 		{
 			library.save(directory.string());
 		};
 
 		const std::string refusal = refusal_of(save_to_directory);
+		std::filesystem::remove_all(directory);
 
 		EXPECT_NE(refusal.find("cannot write"), std::string::npos) << refusal;
 	}

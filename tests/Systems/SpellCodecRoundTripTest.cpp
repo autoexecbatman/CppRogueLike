@@ -22,6 +22,7 @@
 //     build\bin\Debug\test_exe.exe --gtest_filter=SpellCodecRoundTripTest.*
 
 #include "src/SpellRegistry.h"
+#include "tests/mocks/TempTestPath.h"
 #include <gtest/gtest.h>
 
 #include <filesystem>
@@ -40,8 +41,7 @@ namespace CppRL
 		void SetUp() override
 		{
 			spells.load("data/content/spells.json");
-			roundTrip = std::filesystem::temp_directory_path() /
-				"spells_roundtrip.json";
+			roundTrip = temp_test_path("spells.json");
 		}
 
 		void TearDown() override { std::filesystem::remove(roundTrip); }

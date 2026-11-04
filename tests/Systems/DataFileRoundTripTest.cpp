@@ -17,7 +17,6 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
 
-#include <chrono>
 #include <filesystem>
 #include <format>
 #include <fstream>
@@ -31,6 +30,7 @@
 #include "src/DataFileText.h"
 #include "src/Paths.h"
 #include "src/PrefabLibrary.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {
@@ -120,15 +120,6 @@ namespace CppRL
 			}
 		}
 
-		// A scratch file of this test's own, so two runs never share one.
-		std::filesystem::path scratch_path(std::string_view name)
-		{
-			const auto stamp =
-				std::chrono::steady_clock::now().time_since_epoch().count();
-			return std::filesystem::temp_directory_path() /
-				std::format("data_file_round_trip_{}_{}.json", name, stamp);
-		}
-
 	} // namespace
 
 	// The document at the indent asked for, and one line break after it.
@@ -141,7 +132,7 @@ namespace CppRL
 
 	TEST(DataFileRoundTripTest, TilesComeBackAsShipped)
 	{
-		const std::filesystem::path scratch = scratch_path("tiles");
+		const std::filesystem::path scratch = temp_test_path("tiles.json");
 		ContentRegistry tiles{};
 		ContentRegistryIO::load(tiles, Paths::CONTENT_TILES);
 
@@ -157,7 +148,7 @@ namespace CppRL
 
 	TEST(DataFileRoundTripTest, PrefabsComeBackAsShipped)
 	{
-		const std::filesystem::path scratch = scratch_path("prefabs");
+		const std::filesystem::path scratch = temp_test_path("prefabs.json");
 		PrefabLibrary prefabs{};
 		prefabs.load(Paths::PREFABS);
 

@@ -23,9 +23,7 @@
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
-#include <algorithm>
 #include <exception>
 #include <filesystem>
 #include <fstream>
@@ -34,6 +32,7 @@
 
 #include "src/Paths.h"
 #include "src/TileConfig.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {
@@ -41,16 +40,7 @@ namespace CppRL
 	class TileConfigLoadTest : public ::testing::Test
 	{
 	protected:
-		void SetUp() override
-		{
-			// A parameterised case's name holds a slash, which would make the
-			// file a path.
-			std::string testName =
-				::testing::UnitTest::GetInstance()->current_test_info()->name();
-			std::ranges::replace(testName, '/', '_');
-			scratch = std::filesystem::temp_directory_path() /
-				("tile_config_" + testName + ".json");
-		}
+		void SetUp() override { scratch = temp_test_path("tile_config.json"); }
 
 		void TearDown() override { std::filesystem::remove(scratch); }
 

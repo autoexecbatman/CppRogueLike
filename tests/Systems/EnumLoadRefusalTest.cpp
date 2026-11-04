@@ -51,6 +51,7 @@
 #include "src/TileType.h"
 #include "src/Trap.h"
 #include "tests/mocks/MockGameContext.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {
@@ -140,10 +141,7 @@ namespace CppRL
 		void SetUp() override
 		{
 			ctx = mock.to_game_context();
-			std::string testName =
-				::testing::UnitTest::GetInstance()->current_test_info()->name();
-			scratch = std::filesystem::temp_directory_path() /
-				("enum_load_" + testName + ".json");
+			scratch = temp_test_path("record.json");
 		}
 
 		void TearDown() override { std::filesystem::remove(scratch); }

@@ -37,6 +37,7 @@
 #include "src/Paths.h"
 #include "src/TileRef.h"
 #include "src/TileRefJson.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {
@@ -52,10 +53,7 @@ namespace CppRL
 	protected:
 		void SetUp() override
 		{
-			const std::string testName =
-				::testing::UnitTest::GetInstance()->current_test_info()->name();
-			scratch = std::filesystem::temp_directory_path() /
-				("palette_" + testName + ".json");
+			scratch = temp_test_path("tile_config.json");
 			real = read_json(Paths::TILE_CONFIG);
 		}
 

@@ -33,6 +33,7 @@
 #include <gtest/gtest.h>
 
 #include "tests/mocks/HiddenRenderer.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {
@@ -329,8 +330,7 @@ namespace CppRL
 	TEST(HeadlessRendererTest, AFailingPlainRunWritesNoChildLine)
 	{
 		const std::filesystem::path outputFile =
-			std::filesystem::temp_directory_path() /
-			"HeadlessRendererTest_plain_run.log";
+			temp_test_path("plain_run.log");
 		const std::string output = output_of_a_plain_run(
 			"HeadlessRendererTest.APlainRunThatFails",
 			outputFile);

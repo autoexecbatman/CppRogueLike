@@ -23,6 +23,7 @@
 #include "src/DamageInfo.h"
 #include "src/MonsterRegistry.h"
 #include "src/Paths.h"
+#include "tests/mocks/TempTestPath.h"
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
@@ -46,8 +47,7 @@ namespace CppRL
 		void SetUp() override
 		{
 			monsters.load("data/content/monsters.json");
-			roundTrip = std::filesystem::temp_directory_path() /
-				"monsters_roundtrip_fields.json";
+			roundTrip = temp_test_path("monsters.json");
 		}
 
 		void TearDown() override { std::filesystem::remove(roundTrip); }

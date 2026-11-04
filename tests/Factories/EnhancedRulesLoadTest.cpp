@@ -19,6 +19,7 @@
 
 #include "src/ItemRegistry.h"
 #include "src/Paths.h"
+#include "tests/mocks/TempTestPath.h"
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
@@ -42,8 +43,7 @@ namespace CppRL
 
 		void SetUp() override
 		{
-			damaged = std::filesystem::temp_directory_path() /
-				"enhanced_rules_damaged.json";
+			damaged = temp_test_path("enhanced_rules.json");
 		}
 
 		void TearDown() override { std::filesystem::remove(damaged); }

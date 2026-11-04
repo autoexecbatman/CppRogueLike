@@ -26,6 +26,7 @@
 #include "src/Game.h"
 #include "src/Paths.h"
 #include "src/TileRefJson.h"
+#include "tests/mocks/TempTestPath.h"
 #include "tests/mocks/TestDice.h"
 
 namespace CppRL
@@ -64,9 +65,7 @@ namespace CppRL
 		const nlohmann::json shipped = shipped_item_tiles();
 		Game game{ TEST_DICE_SEED };
 		game.load_item_tiles();
-		const std::filesystem::path saved =
-			std::filesystem::temp_directory_path() /
-			"rogue_item_tiles_test.json";
+		const std::filesystem::path saved = temp_test_path("item_tiles.json");
 
 		ContentRegistryIO::save(game.contentRegistry, saved.string());
 		std::ifstream in(saved);

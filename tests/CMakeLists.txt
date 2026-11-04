@@ -23,6 +23,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/AssertProbeTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/PathsTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/StartupStepsTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Core/TempTestPathTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Utils/UniqueIdTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Utils/PanelRowGeometryTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Utils/HudReserveGeometryTest.cpp

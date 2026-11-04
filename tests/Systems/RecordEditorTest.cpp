@@ -41,6 +41,7 @@
 #include "src/Vector2D.h"
 #include "tests/mocks/HiddenRenderer.h"
 #include "tests/mocks/MockGameContext.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {
@@ -313,9 +314,7 @@ namespace CppRL
 			ctx.renderer = &hidden.renderer;
 			RecordEditor<Model> editor{};
 			editor.enter(ctx);
-			const std::filesystem::path probe =
-				std::filesystem::temp_directory_path() /
-				"record_editor_save_probe";
+			const std::filesystem::path probe = temp_test_path("probe");
 			const std::filesystem::path content = probe / "data" / "content";
 			std::filesystem::remove_all(probe);
 			std::filesystem::create_directories(content);
@@ -344,6 +343,10 @@ namespace CppRL
 			exit_unless(
 				std::filesystem::is_empty(content),
 				"Ctrl+S while typing saved");
+			// The probe is named for this child's process, so no later run
+			// clears it; step out of it so Windows lets it go, then remove it.
+			std::filesystem::current_path(probe.parent_path());
+			std::filesystem::remove_all(probe);
 			finish_the_child();
 		}
 	} // namespace

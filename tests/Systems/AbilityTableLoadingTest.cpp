@@ -38,6 +38,7 @@
 #include "src/Paths.h"
 #include "src/StrengthAttributes.h"
 #include "src/WisdomAttributes.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {
@@ -348,8 +349,7 @@ namespace CppRL
 	TEST(AbilityTableLoadingTest, AMissingTableFileStopsTheLoad)
 	{
 		const std::filesystem::path emptyDirectory =
-			std::filesystem::temp_directory_path() /
-			"roguelike_no_ability_tables";
+			temp_test_path("empty_directory");
 		std::filesystem::create_directories(emptyDirectory);
 		DataManager dataManager{};
 		MessageSystem messages{};

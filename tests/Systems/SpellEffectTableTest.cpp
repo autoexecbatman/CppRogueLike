@@ -29,6 +29,7 @@
 #include "src/SpellEditor.h"
 #include "src/SpellRegistry.h"
 #include "tests/mocks/MockGameContext.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {
@@ -92,10 +93,7 @@ namespace CppRL
 		MockGameContext mock{};
 		GameContext ctx = mock.to_game_context();
 		SpellEditorModel model{};
-		std::filesystem::path scratchFile{
-			std::filesystem::temp_directory_path() /
-			"rogue_spell_effect_table_test.json"
-		};
+		std::filesystem::path scratchFile{ temp_test_path("spells.json") };
 	};
 
 	TEST_F(

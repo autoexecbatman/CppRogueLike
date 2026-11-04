@@ -47,6 +47,7 @@
 #include "src/TileRef.h"
 #include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {
@@ -193,8 +194,7 @@ namespace CppRL
 		GameContext ctx{};
 		std::unique_ptr<Player> player{ std::make_unique<Player>(
 			Vector2D{ 1, 1 }) };
-		std::filesystem::path edited{ std::filesystem::temp_directory_path() /
-			"monsters_corpse.json" };
+		std::filesystem::path edited{ temp_test_path("monsters.json") };
 	};
 
 	TEST_F(CorpseRecordTest, ARecordWithoutCorpseNutritionRefusesToLoad)

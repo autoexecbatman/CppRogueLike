@@ -29,6 +29,7 @@
 #include <vector>
 
 #include "src/Paths.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {
@@ -94,8 +95,7 @@ namespace CppRL
 	protected:
 		void SetUp() override
 		{
-			sandbox =
-				std::filesystem::temp_directory_path() / "cpprogue_paths_test";
+			sandbox = temp_test_path("sandbox");
 			std::filesystem::remove_all(sandbox);
 			std::filesystem::create_directories(sandbox);
 		}

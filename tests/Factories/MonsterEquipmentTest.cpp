@@ -23,6 +23,7 @@
 #include "src/MonsterRegistry.h"
 #include "src/Paths.h"
 #include "tests/mocks/MockGameContext.h"
+#include "tests/mocks/TempTestPath.h"
 
 namespace CppRL
 {
@@ -175,8 +176,7 @@ namespace CppRL
 		nlohmann::json root = nlohmann::json::parse(source);
 		root.at("orc").at("body") = "";
 
-		const std::filesystem::path bodiless =
-			std::filesystem::temp_directory_path() / "monsters_bodiless.json";
+		const std::filesystem::path bodiless = temp_test_path("monsters.json");
 		{
 			std::ofstream out(bodiless);
 			out << root.dump();
@@ -239,8 +239,7 @@ namespace CppRL
 	// name survives the trip.
 	TEST_F(MonsterEquipmentTest, SavePreservesEveryBodyName)
 	{
-		const std::filesystem::path roundTrip =
-			std::filesystem::temp_directory_path() / "monsters_roundtrip.json";
+		const std::filesystem::path roundTrip = temp_test_path("monsters.json");
 
 		std::map<std::string, std::string> before;
 		for (const std::string& key : monsters.get_all_keys())
