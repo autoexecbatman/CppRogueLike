@@ -17,7 +17,6 @@
 #include <gtest/gtest.h>
 #include <memory>
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 #include <stdexcept>
 
 namespace CppRL

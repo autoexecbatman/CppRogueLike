@@ -9,7 +9,6 @@
 #include <vector>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 #include "SpellRegistry.h"
 #include "Spellcasting.h"

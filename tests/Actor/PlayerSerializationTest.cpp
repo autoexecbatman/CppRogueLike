@@ -16,7 +16,6 @@
 #include "tests/mocks/MockGameContext.h"
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 namespace CppRL
 {

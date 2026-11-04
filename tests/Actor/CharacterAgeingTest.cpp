@@ -20,7 +20,6 @@
 #include <vector>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 #include "src/Actor.h"
 #include "src/ArmorClass.h"

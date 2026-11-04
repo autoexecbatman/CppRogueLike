@@ -30,6 +30,8 @@
 #include <utility>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "src/CreatureClass.h"
 #include "src/GameContext.h"
 #include "src/GameStateManager.h"

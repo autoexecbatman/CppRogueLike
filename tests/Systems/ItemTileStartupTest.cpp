@@ -20,7 +20,6 @@
 #include <system_error>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 #include "src/ContentRegistryIO.h"
 #include "src/Game.h"

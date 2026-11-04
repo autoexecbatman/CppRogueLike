@@ -3,6 +3,8 @@
 #include <optional>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "Actor.h"
 #include "Ai.h"
 #include "AiMonster.h"

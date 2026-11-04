@@ -2,7 +2,6 @@
 // The shipped data file layout. Usage is in DataFileText.h.
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 #include <string>
 
 #include "DataFileText.h"

@@ -2,6 +2,8 @@
 #include <memory>
 #include <utility>
 
+#include <nlohmann/json.hpp>
+
 #include "Ai.h"
 #include "AiMonsterConfused.h"
 #include "AttackKind.h"

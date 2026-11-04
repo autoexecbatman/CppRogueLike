@@ -24,7 +24,6 @@
 #include <string_view>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 #include "src/Colors.h"
 #include "src/Paths.h"

@@ -3,6 +3,8 @@
 
 #include <optional>
 
+#include <nlohmann/json.hpp>
+
 #include "Persistent.h"
 #include "SavedEnum.h"
 #include "TileRef.h"

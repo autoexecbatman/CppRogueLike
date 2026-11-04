@@ -6,6 +6,8 @@
 #include <utility>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "AiSpider.h"
 #include "AiWebSpinner.h"
 #include "BuffSystem.h"

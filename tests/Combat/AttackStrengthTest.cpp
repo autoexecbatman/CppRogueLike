@@ -20,6 +20,8 @@
 #include <memory>
 #include <string_view>
 
+#include <nlohmann/json.hpp>
+
 #include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/AttackKind.h"

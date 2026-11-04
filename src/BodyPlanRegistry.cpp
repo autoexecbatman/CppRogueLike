@@ -7,7 +7,6 @@
 #include <vector>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 #include "BodyPlanRegistry.h"
 #include "EquipmentSlot.h"

@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include <memory>
 
+#include <nlohmann/json.hpp>
+
 #include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/AttackKind.h"

@@ -13,7 +13,6 @@
 #include <vector>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 #include "DataFileText.h"
 #include "Palette.h"

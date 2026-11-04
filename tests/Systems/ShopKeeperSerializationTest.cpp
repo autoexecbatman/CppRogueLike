@@ -10,7 +10,6 @@
 #include "tests/mocks/TestDice.h"
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 namespace CppRL
 {

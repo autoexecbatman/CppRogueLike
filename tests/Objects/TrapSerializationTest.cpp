@@ -23,6 +23,8 @@
 #include <string>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "src/Actor.h"
 #include "src/CreatureClass.h"
 #include "src/GameStateManager.h"

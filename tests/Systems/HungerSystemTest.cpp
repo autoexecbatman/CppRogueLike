@@ -26,7 +26,6 @@
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 #include "src/ArmorClass.h"
 #include "src/ExperienceReward.h"

@@ -2,6 +2,8 @@
 #include <cassert>
 #include <cmath>
 
+#include <nlohmann/json.hpp>
+
 #include "Actor.h"
 #include "AiMonster.h"
 #include "AiMonsterRanged.h"

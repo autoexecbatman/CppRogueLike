@@ -23,6 +23,8 @@
 #include <utility>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "src/Actor.h"
 #include "src/ArmorClass.h"
 #include "src/Colors.h"

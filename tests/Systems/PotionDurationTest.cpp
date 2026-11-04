@@ -22,7 +22,6 @@
 #include <utility>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 #include "src/ArmorClass.h"
 #include "src/BuffSystem.h"

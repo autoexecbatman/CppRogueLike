@@ -7,7 +7,6 @@
 #include <string_view>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 #include "Actor.h"
 #include "Paths.h"

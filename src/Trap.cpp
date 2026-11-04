@@ -9,6 +9,8 @@
 #include <string>
 #include <utility>
 
+#include <nlohmann/json.hpp>
+
 #include "Actor.h"
 #include "Colors.h"
 #include "Creature.h"

@@ -1,6 +1,8 @@
 #include <optional>
 #include <string>
 
+#include <nlohmann/json.hpp>
+
 #include "Actor.h"
 #include "Item.h"
 #include "ItemClassification.h"

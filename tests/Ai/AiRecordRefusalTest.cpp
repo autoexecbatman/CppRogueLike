@@ -20,6 +20,8 @@
 #include <string>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "src/Ai.h"
 #include "src/AiMonster.h"
 #include "src/AiMonsterConfused.h"

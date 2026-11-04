@@ -6,6 +6,8 @@
 
 #include <raylib.h>
 
+#include <nlohmann/json.hpp>
+
 #include "Actor.h"
 #include "Colors.h"
 #include "GameContext.h"

@@ -1,6 +1,8 @@
 #include <memory>
 #include <string>
 
+#include <nlohmann/json.hpp>
+
 #include "Ai.h"
 #include "AiGiantSpider.h"
 #include "AiMimic.h"

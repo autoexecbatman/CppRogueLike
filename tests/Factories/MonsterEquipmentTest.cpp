@@ -12,7 +12,6 @@
 #include <vector>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 #include "src/BodyPlanRegistry.h"
 #include "src/Creature.h"

@@ -3,7 +3,6 @@
 #include <exception>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 #include "src/UniqueId.h"
 

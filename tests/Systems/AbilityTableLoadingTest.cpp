@@ -27,7 +27,6 @@
 #include <string>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 #include "src/CharismaAttributes.h"
 #include "src/ConstitutionAttributes.h"

@@ -7,7 +7,6 @@
 #include <fstream>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 #include "src/MagicalItemEffects.h"
 #include "src/Paths.h"

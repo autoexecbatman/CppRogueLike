@@ -8,6 +8,8 @@
 #include <utility>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "Actor.h"
 #include "AnimationSystem.h"
 #include "ArmorClass.h"

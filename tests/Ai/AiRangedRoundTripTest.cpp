@@ -13,6 +13,8 @@
 
 #include <memory>
 
+#include <nlohmann/json.hpp>
+
 #include "src/Ai.h"
 #include "src/AiMonsterRanged.h"
 #include "src/Persistent.h"

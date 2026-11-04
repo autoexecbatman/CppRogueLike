@@ -27,6 +27,8 @@
 #include <string_view>
 #include <utility>
 
+#include <nlohmann/json.hpp>
+
 #include "src/Actor.h"
 #include "src/AiSpider.h"
 #include "src/ArmorClass.h"

@@ -23,7 +23,6 @@
 #include <vector>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 #include "src/Paths.h"
 #include "src/SpellEditor.h"

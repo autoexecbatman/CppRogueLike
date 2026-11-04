@@ -18,6 +18,8 @@
 #include <array>
 #include <memory>
 
+#include <nlohmann/json.hpp>
+
 #include "src/Actor.h"
 #include "src/Colors.h"
 #include "src/Creature.h"

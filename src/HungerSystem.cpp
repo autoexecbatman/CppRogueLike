@@ -5,7 +5,6 @@
 #include <utility>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 #include "Colors.h"
 #include "DamageInfo.h"

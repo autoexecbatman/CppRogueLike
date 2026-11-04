@@ -3,7 +3,6 @@
 #include <atomic>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 #include "UniqueId.h"
 

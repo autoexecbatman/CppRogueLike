@@ -33,6 +33,8 @@
 #include <stdexcept>
 #include <string_view>
 
+#include <nlohmann/json.hpp>
+
 #include "Persistent.h"
 
 namespace CppRL

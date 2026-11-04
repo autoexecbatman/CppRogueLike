@@ -28,7 +28,6 @@
 #include <unordered_set>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 #include "src/Creature.h"
 #include "src/CreatureClass.h"

@@ -1,5 +1,7 @@
 #include <cassert>
 
+#include <nlohmann/json.hpp>
+
 #include "Ai.h"
 #include "AiShopkeeper.h"
 #include "Creature.h"

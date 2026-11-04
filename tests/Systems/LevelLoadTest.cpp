@@ -20,6 +20,8 @@
 #include <string>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "src/Actor.h"
 #include "src/Ai.h"
 #include "src/ArmorClass.h"

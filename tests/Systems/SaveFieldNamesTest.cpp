@@ -23,7 +23,6 @@
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 #include "src/Actor.h"
 #include "src/Colors.h"
