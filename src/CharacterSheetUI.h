@@ -1,3 +1,19 @@
+// file: CharacterSheetUI.h
+//
+// The character sheet: a full-screen menu showing the player's basic
+// information, experience, attributes, combat figures and equipment.
+//
+// Usage:
+//
+//   ctx.menus->push_back(std::make_unique<CharacterSheetUI>(player));
+//   // MenuManager draws it each frame; Escape or Space closes it
+//
+// The '@' key and the menu on the player's own tile open it through
+// DisplayManager::display_character_sheet.
+//
+// CharacterSheetText::strength_line and constitution_line return two of the
+// sheet's attribute lines as strings, so a test reads them without drawing.
+
 #pragma once
 
 #include <string>
@@ -49,10 +65,12 @@ namespace CppRL
 	class CharacterSheetUI : public BaseMenu
 	{
 	private:
-		const Player& player_ref;
+		const Player& player;
 
 	public:
-		CharacterSheetUI(const Player& player);
+		// The sheet reads viewedPlayer through a reference, so the player
+		// must outlive the sheet.
+		explicit CharacterSheetUI(const Player& viewedPlayer);
 		~CharacterSheetUI() = default;
 		CharacterSheetUI(const CharacterSheetUI&) = delete;
 		CharacterSheetUI& operator=(const CharacterSheetUI&) = delete;

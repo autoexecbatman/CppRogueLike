@@ -370,8 +370,8 @@ namespace CppRL
 	// CharacterSheetUI
 	// =========================================================================
 
-	CharacterSheetUI::CharacterSheetUI(const Player& player) :
-		player_ref(player)
+	CharacterSheetUI::CharacterSheetUI(const Player& viewedPlayer) :
+		player(viewedPlayer)
 	{
 	}
 
@@ -422,12 +422,12 @@ namespace CppRL
 			ColorPairId::CYAN_BLACK);
 
 		int row = 0;
-		display_basic_info(player_ref, ctx, row);
-		display_experience_info(player_ref, ctx, row);
-		display_attributes(player_ref, ctx, row);
-		display_combat_stats(player_ref, ctx, row);
-		display_equipment_info(player_ref, ctx, row);
-		display_right_panel_info(player_ref, ctx, row);
+		display_basic_info(player, ctx, row);
+		display_experience_info(player, ctx, row);
+		display_attributes(player, ctx, row);
+		display_combat_stats(player, ctx, row);
+		display_equipment_info(player, ctx, row);
+		display_right_panel_info(player, ctx, row);
 	}
 
 } // namespace CppRL
