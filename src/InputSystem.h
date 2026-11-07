@@ -58,6 +58,7 @@ namespace CppRL
 		REST,
 		HELP,
 		HIDE,
+		PICK_POCKETS,
 		CAST,
 		USE,
 		QUIT,

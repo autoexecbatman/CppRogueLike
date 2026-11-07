@@ -1,0 +1,83 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "tests/run_suite.ps1",
+    "-Configuration",
+    "Debug",
+    "-Filter",
+    "--gtest_filter=PickPocketTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/PickPocket.cpp",
+      "original": "\t\treturn 100 - 3 * victimLevel;",
+      "mutated": "\t\treturn 100 - 2 * victimLevel;",
+      "catches": "the level counted twice instead of three times, so a level 5 victim notices only from 90"
+    },
+    {
+      "file": "src/PickPocket.cpp",
+      "original": "\t\t\troll >= pick_pocket_notice_roll(victim.get_creature_level());",
+      "mutated": "\t\t\troll > pick_pocket_notice_roll(victim.get_creature_level());",
+      "catches": "the notice roll itself goes unnoticed, so the book's 97 for a level 1 victim is safe"
+    },
+    {
+      "file": "src/PickPocket.cpp",
+      "original": "\t\tif (roll <= score.value())",
+      "mutated": "\t\tif (roll < score.value())",
+      "catches": "a roll exactly at the score fails, one point short of the thief's percentage"
+    },
+    {
+      "file": "src/PickPocket.cpp",
+      "original": "\t\t\tvictim.set_attitude(Attitude::HOSTILE);",
+      "mutated": "",
+      "catches": "a caught thief costs nothing: the victim stays peaceful and the tries never end"
+    },
+    {
+      "file": "src/PickPocket.cpp",
+      "original": "\t\t\tif (InventoryOperations::is_within_weight_limit(\n\t\t\t\t\tchosen,\n\t\t\t\t\tthief,\n\t\t\t\t\t*ctx.dataManager))",
+      "mutated": "\t\t\tif (true)",
+      "catches": "a stolen item skips the weight rule every other way into the pack obeys"
+    },
+    {
+      "file": "src/PickPocket.cpp",
+      "original": "\t\t\tif (holder.shop)",
+      "mutated": "\t\t\tif (false)",
+      "catches": "a shopkeeper robbed of its empty pack instead of its shelves"
+    },
+    {
+      "file": "src/PickPocket.cpp",
+      "original": "\t\tif (InventoryOperations::is_inventory_full(thief.inventoryData))",
+      "mutated": "\t\tif (false)",
+      "catches": "a full pack rolls anyway and the stowing assertion fires"
+    },
+    {
+      "file": "src/PickPocket.cpp",
+      "original": "\t\t\tif (!score.has_value() || score.value() <= 0)",
+      "mutated": "\t\t\tif (!score.has_value())",
+      "catches": "a rogue whose score the adjustments leave at zero still tries"
+    },
+    {
+      "file": "src/PickPocket.cpp",
+      "original": "\t\t\tif (isBeside && !creature->is_dead() &&",
+      "mutated": "\t\t\tif (isBeside &&",
+      "catches": "a corpse's pockets offered as a victim"
+    },
+    {
+      "file": "src/PickPocket.cpp",
+      "original": "\t\tif (victims.size() == 1)",
+      "mutated": "\t\tif (!victims.empty())",
+      "catches": "the first of several victims robbed without asking the player"
+    },
+    {
+      "file": "src/PickPocket.cpp",
+      "original": "\t\t\tif (attempt == PickPocketAttempt::TOOK_NOTHING ||",
+      "mutated": "\t\t\tif (attempt == PickPocketAttempt::NOT_A_THIEF ||",
+      "catches": "a try that took nothing is free, so failing costs no time"
+    }
+  ]
+}

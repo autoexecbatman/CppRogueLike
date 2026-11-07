@@ -214,6 +214,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ThiefSkillsTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ThiefSkillCharacterTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/HideInShadowsTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PickPocketTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/TrapDisarmTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/TrapSearchTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/SwimmingGauntletsTest.cpp
@@ -298,6 +299,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/AiMonsterConfused.cpp
     ${PARENT_SOURCE_DIR}/PlayerController.cpp
     ${PARENT_SOURCE_DIR}/PlayerTurn.cpp
+    ${PARENT_SOURCE_DIR}/PickPocket.cpp
     ${PARENT_SOURCE_DIR}/AiShopkeeper.cpp
     ${PARENT_SOURCE_DIR}/AiMimic.cpp
     ${PARENT_SOURCE_DIR}/AiMonsterRanged.cpp

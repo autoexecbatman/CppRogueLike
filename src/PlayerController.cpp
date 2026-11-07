@@ -49,6 +49,7 @@
 #include "MonsterCreator.h"
 #include "MonsterRegistry.h"
 #include "Pathfinding.h"
+#include "PickPocket.h"
 #include "Pickup.h"
 #include "Player.h"
 #include "PlayerController.h"
@@ -1720,6 +1721,12 @@ namespace CppRL
 			{
 				spend_player_action(ctx, TIME_UNITS_PER_ROUND);
 			}
+			break;
+		}
+
+		case Controls::PICK_POCKETS:
+		{
+			pick_pocket(ctx);
 			break;
 		}
 

@@ -469,7 +469,14 @@ namespace CppRL
 		// Action keys
 		case KEY_P:
 		{
-			register_key(KEY_P, GameKey::PICK, shift ? 'P' : 'p', false);
+			if (shift)
+			{
+				register_key(KEY_P, GameKey::PICK_POCKETS, 'P', false);
+			}
+			else
+			{
+				register_key(KEY_P, GameKey::PICK, 'p', false);
+			}
 			return;
 		}
 

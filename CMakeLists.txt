@@ -162,6 +162,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/PlayerController.cpp
     ${PROJECT_SOURCE_DIR}/PlayerTurn.cpp
     ${PROJECT_SOURCE_DIR}/PlayerTurn.h
+    ${PROJECT_SOURCE_DIR}/PickPocket.cpp
+    ${PROJECT_SOURCE_DIR}/PickPocket.h
     ${PROJECT_SOURCE_DIR}/PlayerController.h
     ${PROJECT_SOURCE_DIR}/AiShopkeeper.cpp
     ${PROJECT_SOURCE_DIR}/AiShopkeeper.h
